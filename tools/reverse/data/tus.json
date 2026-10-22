@@ -1,6 +1,5 @@
 {
  "queue": [
-  "mag/magscenerender.cpp",
   "unassigned@0021fb50",
   "unassigned@00216ad0",
   "spr/sprtexture.cpp",
@@ -94,7 +93,7 @@
    "why": "Every function from 0x137330 to 0x139308 that has a source string names mag/magscene2.cpp; magscene.cpp strings end at 0x135f44 and magscenerender.cpp starts at 0x139664. 0x137300 and 0x137318 are helpers only 0x137330 calls. The ctor/dtor 0x1360a0/0x136d14 and setPC..initRender (0x1316b8..) lie in magscene.cpp's span, not here."
   },
   "mag/magscenerender.cpp": {
-   "notes": "Left: MagScene::makeActorShadow 0x139b4c (stub; the shadow light layer at 700 + 10 n from the directional light at scene +0x2040 / +0x2044 or the light pool's nearest point light 0x1129cc, the STQ projection into +0x2aa90, the shadow words +0x2000..+0x2034). Screen black: every layer goes into stubbed i3d (i3dCtxCreateView, i3dCtxCreateLight, the layer setters, i3dLayerBeginSet) and DogLightPool::createLight returns NULL, so the lightstatus asserts fire every frame until it is written. Next for any picture: the draw-group / layer module unassigned@0021fb50 (queue B.3). Decisions: Dog vtable slots called here are plain members on the known class (open-items Decisions); the MagScene constructor stub clears the strip records like the ROM loop at 0x136ab4; drawStrips caps the path buffer (bss 0x6646f0) at 64 records; magscene2 load now copies mapparam word 10 as a float (m_mirror_plane). MagTenkyu m_c_rec renamed m_path_data (the assert text).",
+   "notes": "All 20 functions written; verify because nothing on screen can show it: no boot actor has the 0x60 shadow flags and all i3d layer / view / light functions are stubs (screen black). The first session whose screenshot shows projected shadows marks it done. Open points in open-items.md (Projected shadow open points): the up vector at data 0x298cf0 reads (1, -1, 1, 0); the constructor's +0x2040 value (likely -1, the host stub leaves 0); the light-set mask layout in DogLightPool. Next for any picture is unchanged: the draw-group / layer module unassigned@0021fb50 (queue B.3), then i3dCtxCreateView, i3dCtxCreateLight, DogLightPool::createLight.",
    "ranges": [
     [
      "00139540",
@@ -106,9 +105,14 @@
      "date": "2026-10-22 15:15",
      "status": "partial",
      "summary": "Pinned mag/magscenerender.cpp 0x139540..0x13c328 and wrote 19 of its 20 functions: MagScene::draw (eight light-set render stages, view and fog, actors collected / sorted / mirrored, strip records, sky dome and models, life objects, blob and projected shadows or the focus close-up, S2dMovie, the 900 overlay), its helpers and the texture wrappers. New dog/dogcamera.h (the scene camera, lens angle +0x140) and dog/doglightpool.h; Dog draw slots as plain members; 66 names (MagScene render helpers, Dog draw slots, i3d layer / packet / math helpers)."
+    },
+    {
+     "date": "2026-10-22 15:24",
+     "status": "verify",
+     "summary": "Wrote MagScene::makeActorShadow 0x139b4c, the last function of the TU: the shadow texture layer at 700 + 10 n (256 x 256 target, clear, drawShadow under an ambient-only light, black border lines in a post packet), the light from the directional light (mode 1) or the actor's nearest point light with a 30 + 30 frame fade, the STQ projection into the scene's STQ map and the scene's shadow light record +0x2000. New: MagShadowLight and m_shadow_mode / m_shadow_src / m_22a0 in MagScene, DogActor shadow-light words +0x160..+0x168, DogLightPool kind arrays and getPointLight, names for findNearestPointLight, i3dLayerBegin/EndPostPacket, i3dPktLine, MagScene::setShadowLight."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "Anchored by mag/magscenerender.cpp asserts from 0x139664 to MagScene::draw 0x13bcc0; starts where mag/magscene2.cpp's pin ends (0x139540: the tex-info wrappers and the draw-env/render-mode helpers draw calls) and ends before MagScene::parseOption 0x13c328 (mag/magsceneoption.cpp string); postDraw / setCameraTarget already live here."
   },
   "mag/magsystem.cpp": {

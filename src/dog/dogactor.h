@@ -84,7 +84,11 @@ struct DogActor : DogModel
     void clearRotYAAR() { m_rot_y_aar = 0.0f; }                          // ROR 0x0028128c
     void clearRotOfsY() { m_rot_ofs_y = 0.0f; }                          // ROR 0x00281294
 
-    u_char        _148[0x1a0 - 0x148];
+    u_char        _148[0x160 - 0x148];
+    int           m_shadow_light;       // ROR 0x160: the point light its projected shadow comes from (MagScene::makeActorShadow)
+    int           m_shadow_light_prev;  // ROR 0x164: the one before, faded out over the first 30 frames of a change
+    int           m_shadow_fade;        // ROR 0x168: frames since the light changed (0..59 fade out then in; 60 and up, or negative, steady)
+    u_char        _16c[0x1a0 - 0x16c];
     int           m_id;                 // ROR 0x1a0: setId / getId (the character id it was loaded as)
     u_char        _1a4[0x3c0 - 0x1a4];
     sceVu0FVECTOR m_base_rotate;        // ROR 0x3c0: getBaseRotateY reads y
@@ -96,6 +100,8 @@ struct DogActor : DogModel
     float         m_rot_ofs_y;          // ROR 0x424: clearRotOfsY / getRotOfsYSave
     u_char        _428[0x4d0 - 0x428];
 };
+static_assert(offsetof(DogActor, m_shadow_light) >= 0x160, "m_shadow_light");
+static_assert(offsetof(DogActor, m_shadow_fade) >= 0x168, "m_shadow_fade");
 static_assert(offsetof(DogActor, m_id) >= 0x1a0, "m_id");
 static_assert(offsetof(DogActor, m_base_rotate) >= 0x3c0, "m_base_rotate");
 static_assert(offsetof(DogActor, m_rot_y_aar) >= 0x3d0, "m_rot_y_aar");

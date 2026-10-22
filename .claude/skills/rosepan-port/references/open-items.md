@@ -185,12 +185,11 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    spr/sprtexture.cpp are the next step for any 2D picture** (the now-loading screen too uses
    loading.tm2 via S2dMovie).
 
-15. (2026-10-22, the magscenerender session) **`mag/magscenerender.cpp` is pinned
-   (0x139540..0x13c328) and `partial`**: 19 of 20 functions written (draw and its helpers; see
-   architecture.md "The scene's frame"). Left: `MagScene::makeActorShadow` 0x139b4c (0x600 bytes:
-   the shadow light layer at 700 + 10 n, the light pool's nearest point light 0x1129cc or the
-   directional light at scene +0x2040 / +0x2044, the STQ projection into +0x2aa90 and the shadow
-   words +0x2000..+0x2034). The screen stays black: every layer goes into stubbed i3d functions --
+15. (2026-10-22, the magscenerender sessions) **`mag/magscenerender.cpp` is pinned
+   (0x139540..0x13c328) and `verify`**: all 20 functions written (draw, its helpers and
+   makeActorShadow; see architecture.md "The scene's frame" and "Projected shadows"). Nothing on
+   screen can show it yet: no actor in the boot has the 0x60 shadow flags, and every layer goes into
+   stubbed i3d functions. The screen stays black: every layer goes into stubbed i3d functions --
    **the next step for any picture is unchanged: the draw-group / layer module (unassigned@0021fb50,
    queue item B.3)**, then i3dCtxCreateView 0x226c58, i3dCtxCreateLight 0x21b148,
    DogLightPool::createLight (its asserts fire every frame while it returns NULL). PC stand-ins this
@@ -320,6 +319,14 @@ to adapt when a TU reaches them:
   on them; splitTail's double shift is kept as written. Revisit if a caller passing flags 0x100 shows
   misaligned blocks. Also: the host header is 56 bytes (EE 0x20), so the heap holds slightly less;
   utlMemInit's probe size may need raising once host objects (bigger than EE ones) fill it.
+
+- **Projected shadow open points** (2026-10-22, makeActorShadow): the shadow view's up vector at
+  data 0x298cf0 reads (1, -1, 1, 0) -- odd for an up vector; check i3dMatLookDir's use of it when
+  that module is written. The MagScene constructor's value for +0x2040 (m_shadow_mode) comes from a
+  loop register (s8, li 3 then decremented; most likely -1) -- confirm when the constructor is
+  written; the host stub leaves it 0 (mode 0 = the point-light path), harmless while no actor has
+  the 0x60 flags. The light-set mask layout in DogLightPool (+0x50, 0x18 per set; which word is
+  POINT) is unverified: settle it with the doglightpool TU (0x1125xx..0x1129cc).
 
 - **main.cpp open points** (2026-10-22): `mainInitGame` passes bss 0x7812ac to `seqSetLanguage` (role
   unknown; kept as `g_bss_7812ac`), and sets bss 0x7a3d48 / 0x7a3d4c = 1 and data 0x296198 = 2 after the

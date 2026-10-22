@@ -95,3 +95,9 @@ void DogActor::getNodeWorldPos(float *out, int n)
 {
     ROSEPAN_STUB("DogActor::getNodeWorldPos", 0x0010eb28);
 }
+
+// stub of ROR 0x0010e534
+void DogActor::drawShadow(I3dLayer *layer)
+{
+    ROSEPAN_STUB("DogActor::drawShadow", 0x0010e534);
+}

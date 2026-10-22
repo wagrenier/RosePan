@@ -140,6 +140,22 @@ static_assert(offsetof(MagViewParam, m_zmax) == 0x18, "m_zmax");
 static_assert(offsetof(MagViewParam, m_offy) == 0x34, "m_offy");
 static_assert(sizeof(MagViewParam) == 0x38, "MagViewParam is 0x38 bytes on the EE");
 
+/* The i3d light record the projected shadows are lit by (scene +0x2000;
+ * setShadowLight 0x13fbe4 hangs it in m_shadow_light as its one
+ * directional light for mode 1, its one spot light for modes 2 and 3).
+ * makeActorShadow fills it each shadow. EE 0x40, plain floats. */
+struct MagShadowLight
+{
+    sceVu0FVECTOR m_00;         // ROR 0x00: directional: the direction; spot: the position
+    sceVu0FVECTOR m_10;         // ROR 0x10: directional: the colour (w = intensity); spot: the direction
+    sceVu0FVECTOR m_color;      // ROR 0x20: spot: the colour (w = intensity)
+    float         m_cone_inner; // ROR 0x30: spot: tan of the half angle - 0.1, at least 0
+    float         m_cone_outer; // ROR 0x34: spot: tan of the half angle, at most 0.7
+    float         _38[2];
+};
+static_assert(offsetof(MagShadowLight, m_cone_outer) == 0x34, "m_cone_outer");
+static_assert(sizeof(MagShadowLight) == 0x40, "MagShadowLight is 0x40 bytes on the EE");
+
 /* EE 0x85500. layout: host -- holds the actors and controllers (pointers,
  * vptrs); EE offsets in the comments. */
 struct MagScene
@@ -221,7 +237,7 @@ struct MagScene
     void drawCloseUp(i3dContext *ctx, DogActor *actor, DogEntity *src);  // ROR 0x00139664
     void drawTenkyuRotated(i3dContext *ctx, I3dLight *light, const float *trans,
                            const float *rot);                            // ROR 0x00139920
-    void makeActorShadow(int count, i3dContext *ctx, DogActor *actor,
+    void makeActorShadow(int theCount, i3dContext *ctx, DogActor *actor,
                          I3rStqMapEntity *stq);                          // ROR 0x00139b4c
     void drawFocusActor(i3dContext *ctx, sceGsDBuff *dbuff, int frame);  // ROR 0x0013a464
     void drawBlobShadows(I3dLayer *layer);                               // ROR 0x0013a57c
@@ -244,10 +260,14 @@ struct MagScene
     void drawSkyDome(i3dContext *ctx);                                   // ROR 0x001406b8
     void drawFocus(i3dContext *ctx, int frame);                          // ROR 0x00140e88
 
+    MagShadowLight m_shadow_lightrec;   // ROR 0x2000: the shadow layers' light record
+    int            m_shadow_mode;       // ROR 0x2040: setShadowLight's mode: < 0 no projected shadows (the constructor's value), 1 directional, 2 point, 3 spot (2 and 3: the actor's nearest point light)
+    const float   *m_shadow_src;        // ROR 0x2044: mode 1: the pool's directional light (its direction first); else that kind's light or NULL
     DogLightPool   m_light_pool;        // ROR 0x2050: the render stages' light sets
     MagCharaLoader m_chara_loader;      // ROR 0x215c: data/ch/CHARA.RPK
     MagMapLoader   m_map_loader;        // ROR 0x224c: data/bg/mapunit.bin
     int            m_229c;              // ROR 0x229c: initRender zeroes it; role unknown
+    float          m_22a0;              // ROR 0x22a0: scales the shadow light's intensity (with m_2a9cc); role unverified
     float          m_22a4;              // ROR 0x22a4: scales the second view's depth range
     float          m_22a8;              // ROR 0x22a8: the ambient scale of render stages 1 and 2 (others 1.0); role unverified
     int            m_pc_mode;           // ROR 0x22ac: setPC's mode
@@ -306,6 +326,7 @@ struct MagScene
     int            m_854a4;             // ROR 0x854a4: mapparam.bbb word 8; role unknown
 };
 static_assert(offsetof(MagScene, m_actors) > offsetof(MagScene, m_life_man), "EE order");
+static_assert(offsetof(MagScene, m_light_pool) > offsetof(MagScene, m_shadow_src), "EE order");
 static_assert(offsetof(MagScene, m_pc) > offsetof(MagScene, m_camera_at), "EE order");
 static_assert(offsetof(MagScene, m_actors) > offsetof(MagScene, m_premiere), "EE order");
 static_assert(offsetof(MagScene, m_view) > offsetof(MagScene, m_2a9cc), "EE order");
