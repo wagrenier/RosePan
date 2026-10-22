@@ -1319,6 +1319,162 @@
   "was": "FUN_00224d88",
   "why": "fills a GIF A+D packet of 5 registers (TEX0 6, TEX1 0x14, TEX2 0x16, MIPTBP1 0x34, MIPTBP2 0x36) with zeros"
  },
+ "00227a98": {
+  "name": "i3dVramUnlink",
+  "tag": "ror-inferred",
+  "was": "FUN_00227a98",
+  "why": "unlinks a 0x44 block from list k (links at k*8), leaves it pointing at itself"
+ },
+ "00227ac8": {
+  "name": "i3dVramLinkAfter",
+  "tag": "ror-inferred",
+  "was": "FUN_00227ac8",
+  "why": "inserts a block on list k after a given node"
+ },
+ "00227af0": {
+  "name": "i3dVramMoveAfter",
+  "tag": "ror-inferred",
+  "was": "FUN_00227af0",
+  "why": "unlink from list k then insert after a node: move to the front"
+ },
+ "00227b38": {
+  "name": "i3dVramBlockSetOwner",
+  "tag": "ror-inferred",
+  "was": "FUN_00227b38",
+  "why": "block +0x40 = handle, flags free->owned, handle +8 = block"
+ },
+ "00227b70": {
+  "name": "i3dVramBlockRelease",
+  "tag": "ror-inferred",
+  "was": "FUN_00227b70",
+  "why": "flags owned->free, clears the owner handle's block and the owner"
+ },
+ "00227bc0": {
+  "name": "i3dVramBlockInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00227bc0",
+  "why": "six self-linked lists, flags 1 (free), zero owner / addr / size / old addr"
+ },
+ "00227c08": {
+  "name": "i3dVramBlockUnlinkAll",
+  "tag": "ror-inferred",
+  "was": "FUN_00227c08",
+  "why": "i3dVramUnlink on lists 0..5"
+ },
+ "00227c58": {
+  "name": "i3dVramHandleSetBlock",
+  "tag": "ror-inferred",
+  "was": "FUN_00227c58",
+  "why": "handle +8 = block"
+ },
+ "00227c60": {
+  "name": "i3dVramHandleRelease",
+  "tag": "ror-inferred",
+  "was": "FUN_00227c60",
+  "why": "releases the handle's block if it holds one; called by the texture / CLUT release in the i3d library"
+ },
+ "00227c90": {
+  "name": "i3dVramHandleInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00227c90",
+  "why": "zeroes the handle's first four words; called by the texture / CLUT init after memset 0x130"
+ },
+ "00227ca8": {
+  "name": "i3dVramHandleTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_00227ca8",
+  "why": "calls i3dVramHandleRelease; no callers"
+ },
+ "00227cc8": {
+  "name": "i3dVramNewBlock",
+  "tag": "ror-inferred",
+  "was": "FUN_00227cc8",
+  "why": "pops the free-node stack, inits a free block of a size on the address list after a node and at the LRU tail"
+ },
+ "00227d58": {
+  "name": "i3dVramFreeBlock",
+  "tag": "ror-inferred",
+  "was": "FUN_00227d58",
+  "why": "release, unlink from every list, push on the free-node stack"
+ },
+ "00227db8": {
+  "name": "i3dVramAddEvict",
+  "tag": "ror-inferred",
+  "was": "FUN_00227db8",
+  "why": "flag 0x1000 and list 3 after the sentinel"
+ },
+ "00227de8": {
+  "name": "i3dVramLock",
+  "tag": "ror-inferred",
+  "was": "FUN_00227de8",
+  "why": "flag 0x100, list 2 after the sentinel, heap +8 += size"
+ },
+ "00227e40": {
+  "name": "i3dVramClearEvict",
+  "tag": "ror-inferred",
+  "was": "FUN_00227e40",
+  "why": "empties list 3 clearing flag 0x1000"
+ },
+ "00227ea8": {
+  "name": "i3dVramClearLock",
+  "tag": "ror-inferred",
+  "was": "FUN_00227ea8",
+  "why": "empties list 2 clearing flag 0x100, heap +8 -= size"
+ },
+ "00227f30": {
+  "name": "i3dVramClearNew",
+  "tag": "ror-inferred",
+  "was": "FUN_00227f30",
+  "why": "empties list 4 clearing flag 0x10000"
+ },
+ "00227f98": {
+  "name": "i3dVramClearMove",
+  "tag": "ror-inferred",
+  "was": "FUN_00227f98",
+  "why": "empties list 5 clearing flag 0x100000"
+ },
+ "00228000": {
+  "name": "i3dVramAssign",
+  "tag": "ror-inferred",
+  "was": "FUN_00228000",
+  "why": "splits the rest of a block off, gives it to the handle, puts it on the new list; 0xf when too small"
+ },
+ "002280a8": {
+  "name": "i3dVramMergeRun",
+  "tag": "ror-inferred",
+  "was": "FUN_002280a8",
+  "why": "frees the address-order blocks after first up to end into first, releases first, LRU tail"
+ },
+ "00228138": {
+  "name": "i3dVramFreeEvicted",
+  "tag": "ror-inferred",
+  "was": "FUN_00228138",
+  "why": "frees every block on the evict list and makes one free block of their total size"
+ },
+ "002281c0": {
+  "name": "i3dVramEvictLru",
+  "tag": "ror-inferred",
+  "was": "FUN_002281c0",
+  "why": "walks LRU oldest first, evicting unlocked free blocks then unlocked owned ones until the size is reached"
+ },
+ "00228320": {
+  "name": "i3dVramEvictRunFits",
+  "tag": "ror-inferred",
+  "was": "FUN_00228320",
+  "why": "1 when the run of evict-flagged address neighbours around a block reaches a size; no callers"
+ },
+ "002283e8": {
+  "name": "i3dVramEvictBestWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_002283e8",
+  "why": "in a run of evict-flagged blocks, the window reaching a size with the fewest owned units; no callers"
+ },
+ "00228528": {
+  "name": "i3dVramAlloc",
+  "tag": "ror-inferred",
+  "was": "FUN_00228528",
+  "why": "first contiguous unlocked run from the LRU tail in address order, else evict by LRU; coalesce and assign to the handle"
+ },
  "00228618": {
   "name": "i3dVramEndFrame",
   "tag": "ror-inferred",
@@ -1336,6 +1492,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00228820",
   "why": "reassigns block addresses in address order from the heap base; owned blocks that moved go on the moved list (head when moving down, tail when up) for a GS-to-GS copy"
+ },
+ "00228920": {
+  "name": "i3dVramNewFreeAll",
+  "tag": "ror-inferred",
+  "was": "FUN_00228920",
+  "why": "i3dVramNewBlock of the heap's whole size after the sentinel"
  },
  "00228940": {
   "name": "i3dVramSetBase",
@@ -1355,6 +1517,12 @@
   "was": "FUN_00228970",
   "why": "frees every block and makes one free block of the whole size"
  },
+ "002289e0": {
+  "name": "i3dVramClearStats",
+  "tag": "ror-inferred",
+  "was": "FUN_002289e0",
+  "why": "zeroes heap +0x64 / +0x68 / +0x6c; no callers"
+ },
  "002289f8": {
   "name": "i3dVramInit",
   "tag": "ror-inferred",
@@ -1366,6 +1534,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00228ae0",
   "why": "unlinks every node and the sentinel; i3dCtxTerm calls it for both heaps"
+ },
+ "00228b50": {
+  "name": "i3dVramCoalesce",
+  "tag": "ror-inferred",
+  "was": "FUN_00228b50",
+  "why": "absorbs free address-order neighbours on both sides into a block"
  },
  "0022b3d8": {
   "name": "i3rGetNodeIndexByName",

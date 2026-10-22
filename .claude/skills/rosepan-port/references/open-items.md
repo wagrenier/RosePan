@@ -97,6 +97,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    (0x2239b8..0x224d88: i3dGroupInit, i3dCtxRunGroup, i3dCtxCloseFrame, i3dLayerInit,
    i3dGroupAddLayer, i3dSortList, i3dBatchAppend, i3dTexRegsSet*) and before `MagScene::draw`.
 
+11. (2026-10-22, the i3dvram session) **`i3d/i3dvram.cpp` is written (`verify`)**: all 37 functions
+   (29 named i3dVram* in Ghidra, batch i3dvram_001); a host test of init / reserve / evict / compact /
+   end frame / reset kept every node accounted for and the sizes summing to the heap. The heaps now
+   get real sentinels, so `i3dCtxMakeVramTransfer` can walk them. Nothing on screen shows it yet: the
+   next reached stubs in run order are the draw-group module (0x2239b8..0x224d88: `i3dGroupInit`,
+   `i3dCtxCloseFrame`, ...) and `MagScene::draw` / `postDraw`; the texture objects at 0x219a98..
+   (unassigned@00216ad0) call i3dVramHandleInit / Release.
+
 ## Decisions
 
 - One TU per session, run by the user (`/rosepan-port next`, the routine, or autopilot.py); sessions run
