@@ -1,6 +1,6 @@
 {
  "queue": [
-  "unassigned@00216ad0",
+  "i3d/i3dtim2.cpp",
   "spr/sprtexture.cpp",
   "dog/dogtexinfo.cpp",
   "spr/sprman.cpp"
@@ -107,6 +107,24 @@
    ],
    "status": "verify",
    "why": "the GS packet writers of the i3d library: draw-set list helpers 0x21b220 (after i3dCtxCreateLight ends 0x21b21c), DMA / GIF tags, register writes, the float (VU0 ftoi) and packed-REGLIST primitive writers, ending with the packers i3dPackXYZ 0x21c940; 0x21c960.. starts the VU1 strip uploaders (VIF UNPACK codes), a different module"
+  },
+  "i3d/i3dtex.cpp": {
+   "notes": "Screen still black: nothing creates a texture yet (DogTexInfo is stubbed) and no host draw module consumes i3d packets, hence verify. Next: i3d/i3dtim2.cpp (queued first, header i3d/i3dtim2.h written, I3dTim2Picture is the EE-layout picture header): its four helpers are stubs returning NULL/0 and i3dTexSetTim2 / i3dClutSetTim2 dereference the picture, so it must be written before DogTexInfo::addData runs. Then spr/sprtexture.cpp, dog/dogtexinfo.cpp, spr/sprman.cpp. unassigned@00216ad0 is now only debug menu and utility code 0x216ad0..0x2184c0 (DBGFLAG.BIN strings; 0x218470 is an empty varargs debug print called from game code), dropped from the queue. For a host draw module: read I3dTexture levels (m_data, TRXREG width/height, PSM from TEX2) and I3dClut (m_data, m_colors, m_psm) directly instead of the upload packets; REF tags carry only i3dDmaAddr low bits.",
+   "ranges": [
+    [
+     "002184c0",
+     "0021a120"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 17:05",
+     "status": "verify",
+     "summary": "Pinned i3d/i3dtex.cpp 0x2184c0..0x21a120 out of unassigned@00216ad0 and wrote all 33 functions (4 hidden TEX1 setters created in Ghidra): texture and CLUT objects (init, term, release, SetTim2, SetDesc, TEX0/TEX1 field setters), the VRAM cache transfers i3dTexMakeUpload / ClutMakeUpload / TexMakeMove / ClutMakeMove, the GS transfer packet writers, the PSM tables (i3dPsmTexelBits, i3dPsmBits, i3dPsmBlockEnd, checked against the ROM in mipsemu over every psm and w/h grid) and the unreferenced PSMT8/PSMT4 to PSMCT32 swizzle. Four stubs and the i3dPsmBits bridge removed; I3dTexObject replaced by I3dTexture / I3dClut; I3dVramHandle m_10 is m_kind."
+    }
+   ],
+   "status": "verify",
+   "why": "texture / CLUT objects and their GS transfers: i3dTexMakeUpload family, PSM tables, TIM2 setup for DogTexInfo, PSMT8/PSMT4 to CT32 swizzle helpers (0x2184c0.. nibble get/set used only by the swizzlers); before it 0x21838c strncpy-like / 0x218450 angle wrap / 0x218470 empty varargs are utility code, after it i3dFogInit (i3denv.cpp)"
   },
   "i3d/i3dtim2.cpp": {
    "ranges": [

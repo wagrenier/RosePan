@@ -145,20 +145,6 @@ int i3rGetNodeIndexByName(I3rRoot *root, const char *name)
     return {};
 }
 
-// stub of ROR 0x00219d68
-u_long * i3dClutMakeMove(void *clut, u_long *pkt, u_int src, u_int dst)
-{
-    ROSEPAN_STUB("i3dClutMakeMove", 0x00219d68);
-    return {};
-}
-
-// stub of ROR 0x00219d10
-u_long * i3dClutMakeUpload(void *clut, u_long *pkt, u_int dst)
-{
-    ROSEPAN_STUB("i3dClutMakeUpload", 0x00219d10);
-    return {};
-}
-
 // stub of ROR 0x00237cc8
 int i3dFlushCache(void)
 {
@@ -170,20 +156,6 @@ int i3dFlushCache(void)
 void i3dSysInit(void)
 {
     ROSEPAN_STUB("i3dSysInit", 0x00237178);
-}
-
-// stub of ROR 0x00219d40
-u_long * i3dTexMakeMove(void *tex, u_long *pkt, u_int src, u_int dst)
-{
-    ROSEPAN_STUB("i3dTexMakeMove", 0x00219d40);
-    return {};
-}
-
-// stub of ROR 0x00219c88
-u_long * i3dTexMakeUpload(void *tex, u_long *pkt, u_int dst)
-{
-    ROSEPAN_STUB("i3dTexMakeUpload", 0x00219c88);
-    return {};
 }
 
 // stub of ROR 0x00176afc
@@ -615,22 +587,8 @@ void i3dVecScale(float s, float *out, const float *in)
 }
 
 // ---- i3d bridges the layer TU needs (i3d/i3dlayer.cpp, 2026-10-22) ----
-// The ROM's code for small helpers of the texture objects (unassigned@00216ad0)
-// and the vector module, until their TUs replace them.
-
-// bridge of ROR 0x00218db8: bits per pixel by GS pixel format.
-int i3dPsmBits(int psm)
-{
-    ROSEPAN_BRIDGE("i3dPsmBits", 0x00218db8);
-    switch (psm)
-    {
-    case 0x00: case 0x01: case 0x1b: case 0x24: case 0x2c: return 0x20;
-    case 0x02: case 0x0a: return 0x10;
-    case 0x13: return 8;
-    case 0x14: return 4;
-    }
-    return 0;
-}
+// The ROM's code for small helpers of the vector module, until its TU
+// replaces them (i3dPsmBits: i3d/i3dtex.cpp).
 
 // bridge of ROR 0x00236980
 void i3dVecCopyW(float *out, const float *in)

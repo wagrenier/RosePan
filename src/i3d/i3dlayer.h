@@ -176,21 +176,8 @@ struct I3dTexSetDesc
 };
 static_assert(offsetof(I3dTexSetDesc, m_depth) == 0, "I3dTexSetDesc::m_depth");
 
-/* A texture or CLUT object (EE 0x130; made at 0x219e58, the texture
- * objects of unassigned@00216ad0): the VRAM handle, then the GS registers
- * i3dTexRegsSet copies before adding the VRAM addresses. In a CLUT object
- * +0x18 / +0x20 are or-ed into TEX0 / TEX2. layout: host -- partial (the
- * rest of the 0x130 bytes belongs to the texture TU). */
-struct I3dTexObject
-{
-    I3dVramHandle m_handle;     // ROR 0x00
-    u_long        m_tex0;       // ROR 0x18: TEX0 without TBP0 (a CLUT's: CBP / CPSM bits)
-    u_long        m_tex1;       // ROR 0x20: TEX1 (a CLUT's: TEX2 bits)
-    u_long        m_tex2;       // ROR 0x28: TEX2 (PSM bits 20..25, CPSM 51..54)
-    u_long        m_miptbp1;    // ROR 0x30
-    u_long        m_miptbp2;    // ROR 0x38
-};
-static_assert(offsetof(I3dTexObject, m_handle) == 0, "the handle starts the object");
+/* The texture and CLUT objects i3dTexRegsSet reads (I3dTexture, I3dClut)
+ * are in i3d/i3dtex.h. */
 
 /* A model material as i3dLayerFindMaterialDrawSet reads it (the model code
  * at 0x228f50 passes it). Roles from that one reader; unverified.

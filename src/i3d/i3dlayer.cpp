@@ -14,6 +14,7 @@
  *  scratchpad (0x70000000) in the ROM and in static buffers here.
  * ======================================================================== */
 #include "i3d/i3dlayer.h"
+#include "i3d/i3dtex.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -1373,7 +1374,7 @@ void i3dTexRegsSet(u_long *regs, I3dVramHandle *tex, I3dVramHandle *clut, u_int 
     }
     else
     {
-        I3dTexObject *t = (I3dTexObject *)tex;
+        I3dTexture *t = (I3dTexture *)tex;
         regs[2] = t->m_tex0;
         regs[4] = t->m_tex1;
         regs[6] = t->m_tex2;
@@ -1385,9 +1386,9 @@ void i3dTexRegsSet(u_long *regs, I3dVramHandle *tex, I3dVramHandle *clut, u_int 
 
     if (clut != NULL)
     {
-        I3dTexObject *c = (I3dTexObject *)clut;
+        I3dClut *c = (I3dClut *)clut;
         regs[2] |= c->m_tex0;
-        regs[6] |= c->m_tex1;
+        regs[6] |= c->m_tex2;
         u_long tex2 = regs[6];
         if (clut->m_static == 0 && clut->m_block != NULL)
             cbp = (u_long)(clut->m_block->m_addr << 2);

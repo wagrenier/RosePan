@@ -73,7 +73,7 @@ struct I3dVramHandle
     u_int         m_size;       // ROR 0x04: heap units wanted
     I3dVramBlock *m_block;      // ROR 0x08: the block held, NULL when none
     int           m_stamp;      // ROR 0x0c: the heap's m_stamp when last counted
-    int           m_10;         // ROR 0x10: unverified
+    int           m_kind;       // ROR 0x10: 1 texture, 2 CLUT (i3d/i3dtex.cpp's setters)
     int           m_static;     // ROR 0x14: non-zero = placed by hand, not cached (i3dCtxReserveTextures)
 };
 static_assert(offsetof(I3dVramHandle, m_image) == 0, "I3dVramHandle::m_image");
