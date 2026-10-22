@@ -139,7 +139,7 @@ Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
 
 ## The rx thread layer (`rx/rxthread.cpp`, 0x249b88..0x24b490, 2026-10-22)
 
-A scheduler over the EE kernel's priority threads (all 61 functions written, `verify`):
+A scheduler over the EE kernel's priority threads (all 53 functions written, `verify`):
 - **Priorities**: base = the main thread's current priority at `rxThInit` 0x249ea0 (sdata 0x2dc264);
   offsets `s_prioIndex` sdata 0x2dc278 = {0, 2, 4} for main / worker / rx threads + idle
   (`rxThSetPrioIndex` 0x24b048 keeps them increasing).
