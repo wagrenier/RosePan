@@ -77,3 +77,21 @@ int DogActor::shareModel(DogActor *src)
     ROSEPAN_STUB("DogActor::shareModel", 0x0010cffc);
     return {};
 }
+
+// stub of ROR 0x0010e5c0
+void DogActor::draw(I3dLayer *layer, const float *cam_rotate, const float *cam_trans)
+{
+    ROSEPAN_STUB("DogActor::draw", 0x0010e5c0);
+}
+
+// stub of ROR 0x0010e3ac
+void DogActor::drawModel(I3dLayer *layer, int nodes, DogEntity *src)
+{
+    ROSEPAN_STUB("DogActor::drawModel", 0x0010e3ac);
+}
+
+// stub of ROR 0x0010eb28
+void DogActor::getNodeWorldPos(float *out, int n)
+{
+    ROSEPAN_STUB("DogActor::getNodeWorldPos", 0x0010eb28);
+}

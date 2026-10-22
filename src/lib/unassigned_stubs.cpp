@@ -3,6 +3,8 @@
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
 #include "mag/magscene.h"
+#include "dog/dogcamera.h"
+#include "dog/doglightpool.h"
 
 #include "common/rosepan_stub.h"
 #include "game/gamman.h"
@@ -491,5 +493,269 @@ int i3dLayerSetView(I3dLayer *layer, I3dView *view)
 u_long * i3dPktSetReg(u_long *pkt, u_long reg, u_long value)
 {
     ROSEPAN_STUB("i3dPktSetReg", 0x0021b550);
+    return {};
+}
+
+// stub of ROR 0x0010fac0
+float DogCamera::getLensFov()
+{
+    ROSEPAN_STUB("DogCamera::getLensFov", 0x0010fac0);
+    return {};
+}
+
+// stub of ROR 0x0011262c
+I3dLight * DogLightPool::createLight(i3dContext *ctx, int set, int arg, float scale)
+{
+    ROSEPAN_STUB("DogLightPool::createLight", 0x0011262c);
+    return {};
+}
+
+// stub of ROR 0x00177830
+void FUN_00177830(Obj176a3c *obj, i3dContext *ctx)
+{
+    ROSEPAN_STUB("FUN_00177830", 0x00177830);
+}
+
+// stub of ROR 0x00222f88
+int FUN_00222f88(I3dLayer *layer, void *a, void *b, void *rec)
+{
+    ROSEPAN_STUB("FUN_00222f88", 0x00222f88);
+    return {};
+}
+
+// stub of ROR 0x00223050
+int FUN_00223050(void *a, I3dLayer *layer, void *b, const float *c)
+{
+    ROSEPAN_STUB("FUN_00223050", 0x00223050);
+    return {};
+}
+
+// stub of ROR 0x002230e8
+int FUN_002230e8(I3dLayer *layer, void *a, const float *b, void *c, void *rec)
+{
+    ROSEPAN_STUB("FUN_002230e8", 0x002230e8);
+    return {};
+}
+
+// stub of ROR 0x00133454
+float MagScene::castRay(MagSceneRayHit *hit, const float *pos, const float *dir, int tenkyu)
+{
+    ROSEPAN_STUB("MagScene::castRay", 0x00133454);
+    return {};
+}
+
+// stub of ROR 0x00134698
+void MagScene::clearStrip(int no)
+{
+    ROSEPAN_STUB("MagScene::clearStrip", 0x00134698);
+}
+
+// stub of ROR 0x00140e88
+void MagScene::drawFocus(i3dContext *ctx, int frame)
+{
+    ROSEPAN_STUB("MagScene::drawFocus", 0x00140e88);
+}
+
+// stub of ROR 0x001406b8
+void MagScene::drawSkyDome(i3dContext *ctx)
+{
+    ROSEPAN_STUB("MagScene::drawSkyDome", 0x001406b8);
+}
+
+// stub of ROR 0x0021b148
+I3dLight * i3dCtxCreateLight(i3dContext *ctx, const I3dLightDesc *desc)
+{
+    ROSEPAN_STUB("i3dCtxCreateLight", 0x0021b148);
+    return {};
+}
+
+// stub of ROR 0x0021a158
+void     * i3dCtxSetFog(i3dContext *ctx, const I3dFog *fog)
+{
+    ROSEPAN_STUB("i3dCtxSetFog", 0x0021a158);
+    return {};
+}
+
+// stub of ROR 0x0021b260
+u_long   * i3dDrawSetUseTex(I3dDrawSet *set, int n)
+{
+    ROSEPAN_STUB("i3dDrawSetUseTex", 0x0021b260);
+    return {};
+}
+
+// stub of ROR 0x00223298
+u_long   * i3dLayerBeginSet(I3dLayer *layer, float key)
+{
+    ROSEPAN_STUB("i3dLayerBeginSet", 0x00223298);
+    return {};
+}
+
+// stub of ROR 0x002232f0
+void i3dLayerEndSet(I3dLayer *layer, u_long *end)
+{
+    ROSEPAN_STUB("i3dLayerEndSet", 0x002232f0);
+}
+
+// stub of ROR 0x00223558
+I3dDrawSet * i3dLayerFindDrawSet(I3dLayer *layer, const I3dTexSetDesc *desc)
+{
+    ROSEPAN_STUB("i3dLayerFindDrawSet", 0x00223558);
+    return {};
+}
+
+// stub of ROR 0x00223270
+I3dDrawSet * i3dLayerGetDrawSet(I3dLayer *layer)
+{
+    ROSEPAN_STUB("i3dLayerGetDrawSet", 0x00223270);
+    return {};
+}
+
+// stub of ROR 0x00223228
+int i3dLayerSetDrawSet(I3dLayer *layer, I3dDrawSet *set)
+{
+    ROSEPAN_STUB("i3dLayerSetDrawSet", 0x00223228);
+    return {};
+}
+
+// stub of ROR 0x00223250
+int i3dLayerSetFog(I3dLayer *layer, void *fog)
+{
+    ROSEPAN_STUB("i3dLayerSetFog", 0x00223250);
+    return {};
+}
+
+// stub of ROR 0x0021ac80
+void i3dLightDescInit(I3dLightDesc *desc)
+{
+    ROSEPAN_STUB("i3dLightDescInit", 0x0021ac80);
+}
+
+// stub of ROR 0x00237678
+void i3dMatInverse(sceVu0FVECTOR *out, sceVu0FVECTOR *in)
+{
+    ROSEPAN_STUB("i3dMatInverse", 0x00237678);
+}
+
+// stub of ROR 0x00237ba0
+void i3dMatLookDir(sceVu0FVECTOR *out, const float *eye, const float *dir,
+                    const float *up)
+{
+    ROSEPAN_STUB("i3dMatLookDir", 0x00237ba0);
+}
+
+// stub of ROR 0x00237818
+void i3dMatRotX(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in)
+{
+    ROSEPAN_STUB("i3dMatRotX", 0x00237818);
+}
+
+// stub of ROR 0x00237830
+void i3dMatRotY(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in)
+{
+    ROSEPAN_STUB("i3dMatRotY", 0x00237830);
+}
+
+// stub of ROR 0x00237848
+void i3dMatRotZ(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in)
+{
+    ROSEPAN_STUB("i3dMatRotZ", 0x00237848);
+}
+
+// stub of ROR 0x00237640
+void i3dMatTranslate(sceVu0FVECTOR *out, sceVu0FVECTOR *in, const float *v)
+{
+    ROSEPAN_STUB("i3dMatTranslate", 0x00237640);
+}
+
+// stub of ROR 0x00237340
+void i3dMatUnit(sceVu0FVECTOR *m)
+{
+    ROSEPAN_STUB("i3dMatUnit", 0x00237340);
+}
+
+// stub of ROR 0x0021c8c8
+u_long i3dPackRGBAQ(float q, u_int r, u_int g, u_int b, u_int a)
+{
+    ROSEPAN_STUB("i3dPackRGBAQ", 0x0021c8c8);
+    return {};
+}
+
+// stub of ROR 0x0021c940
+u_long i3dPackXYZ(u_int x, u_int y, u_int z)
+{
+    ROSEPAN_STUB("i3dPackXYZ", 0x0021c940);
+    return {};
+}
+
+// stub of ROR 0x0021b490
+u_long   * i3dPktDmaTag(u_long *pkt, u_int qwc, u_int id, const void *addr,
+                       u_int vif0, u_int vif1)
+{
+    ROSEPAN_STUB("i3dPktDmaTag", 0x0021b490);
+    return {};
+}
+
+// stub of ROR 0x0021e1d8
+u_long   * i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
+                              const void *color, const void *xyz, int flags)
+{
+    ROSEPAN_STUB("i3dPktDrawLineStrip", 0x0021e1d8);
+    return {};
+}
+
+// stub of ROR 0x0021db18
+u_long   * i3dPktDrawStrip(u_long *pkt, sceVu0FVECTOR *matrix, int count, const void *stq,
+                          const void *colors, const void *xyz, int flags)
+{
+    ROSEPAN_STUB("i3dPktDrawStrip", 0x0021db18);
+    return {};
+}
+
+// stub of ROR 0x0021dd10
+u_long   * i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
+                             const void *stq, const void *colors, const void *xyz,
+                             int flags)
+{
+    ROSEPAN_STUB("i3dPktDrawStripCtx", 0x0021dd10);
+    return {};
+}
+
+// stub of ROR 0x0021b4f8
+u_long   * i3dPktRefTexRegs(u_long *pkt, u_long *regs)
+{
+    ROSEPAN_STUB("i3dPktRefTexRegs", 0x0021b4f8);
+    return {};
+}
+
+// stub of ROR 0x0021c140
+u_long   * i3dPktSprite(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq)
+{
+    ROSEPAN_STUB("i3dPktSprite", 0x0021c140);
+    return {};
+}
+
+// stub of ROR 0x002372d0
+void i3dVecCopy(float *out, const float *in)
+{
+    ROSEPAN_STUB("i3dVecCopy", 0x002372d0);
+}
+
+// stub of ROR 0x00237408
+void i3dVecSub(float *out, const float *a, const float *b)
+{
+    ROSEPAN_STUB("i3dVecSub", 0x00237408);
+}
+
+// stub of ROR 0x0021a8e0
+int i3rUpdateTexAnim(I3rRoot *root)
+{
+    ROSEPAN_STUB("i3rUpdateTexAnim", 0x0021a8e0);
+    return {};
+}
+
+// stub of ROR 0x00106e70
+float utlVecDist(const float *a, const float *b)
+{
+    ROSEPAN_STUB("utlVecDist", 0x00106e70);
     return {};
 }

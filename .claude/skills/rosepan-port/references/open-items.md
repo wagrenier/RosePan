@@ -185,6 +185,19 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    spr/sprtexture.cpp are the next step for any 2D picture** (the now-loading screen too uses
    loading.tm2 via S2dMovie).
 
+15. (2026-10-22, the magscenerender session) **`mag/magscenerender.cpp` is pinned
+   (0x139540..0x13c328) and `partial`**: 19 of 20 functions written (draw and its helpers; see
+   architecture.md "The scene's frame"). Left: `MagScene::makeActorShadow` 0x139b4c (0x600 bytes:
+   the shadow light layer at 700 + 10 n, the light pool's nearest point light 0x1129cc or the
+   directional light at scene +0x2040 / +0x2044, the STQ projection into +0x2aa90 and the shadow
+   words +0x2000..+0x2034). The screen stays black: every layer goes into stubbed i3d functions --
+   **the next step for any picture is unchanged: the draw-group / layer module (unassigned@0021fb50,
+   queue item B.3)**, then i3dCtxCreateView 0x226c58, i3dCtxCreateLight 0x21b148,
+   DogLightPool::createLight (its asserts fire every frame while it returns NULL). PC stand-ins this
+   session: the MagScene constructor stub clears the 0x2000 strip records as the ROM's loop at
+   0x136ab4 does; drawStrips' path buffer (bss 0x6646f0) holds 64 records (unbounded in the ROM).
+   magscene2.cpp's load now copies mapparam word 10 as a float (it is lwc1 / swc1 in the ROM).
+
 ## Decisions
 
 - One TU per session, run by the user (`/rosepan-port next`, the routine, or autopilot.py); sessions run
@@ -221,6 +234,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
   the game heap's bookkeeping (BedMemory::check, the debug tags).
 - **Asserts**: `ROR_ASSERT(expr)` in `src/common/ror_assert.h` prints the ROM handler's line and
   continues (2026-10-22).
+
+- **Dog vtable slots before the classes are polymorphic** (2026-10-22, the magscenerender
+  session; decided in-session): MagScene's draw calls ten DogEntity / DogModel / DogActor slots.
+  They are plain members (declared on the class that defines the slot, with the slot number in the
+  comment) and are called on the object's known class: actors as DogActor, sky models as DogModel,
+  the camera as DogCamera, a parent or root entity as DogModel. Making the classes polymorphic
+  stays with the first dog/ TU that writes these methods (it then drops the `_ee_vptr` padding and
+  the exact DogEntity offset asserts, see item 9).
 
 ## Platform bootstrap (FF3 pieces dropped or still to adapt, 2026-10-22)
 

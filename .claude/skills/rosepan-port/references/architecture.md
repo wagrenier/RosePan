@@ -292,6 +292,30 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   (0x17c0f0), `MagSceneIFMap` / `MagSceneIFChara` at +0x854e0 / +0x854e8, Brown / PC actor
   numbers +0x853b4 / +0x853b8. Every MagLife has `m_scene` at +0x20 and the vptr at +0x14;
   MagLifeControlChara's bound actor is +0x58 (`m_actor`).
+- **The scene's frame** (`mag/magscenerender.cpp`, pinned 0x139540..0x13c328, 2026-10-22;
+  `partial`: all but makeActorShadow 0x139b4c). `MagScene::draw(ctx, dbuff, frame)` 0x13bcc0:
+  setTexTable when DogTexInfo +0x10 (dirty) is set; rebuilds both view records' frustum from the
+  camera's lens angle (DogCamera +0x140 -> getLensFov 0x10fac0, a 13-point curve; tan(fov / 2) x
+  -0.5 x near, height x 0.75) when it differs from +0x2aa80; one view (camera matrix) and the fog
+  (+0x2aa84 / fog record 0); then **eight render stages** at depth 500, one per light set
+  (`DogLightPool::createLight` 0x11262c on the pool at +0x2050; sets 1 and 2 scaled by +0x22a8),
+  each with FBA 0, ALPHA 0, TEST 0x5001d, TEXA 0x80, PABE 0. getDrawFlags 0x13963c (sub mode word
+  +0x22d0: 8 -> nothing, 7 -> 0x200, else 0x101): bits 0xff00 = actors (collectActors 0x13b2ac:
+  alive, shown, flag bit 3 == bit 9; key 0x10000 parented + 65535 - camera distance, PC 0;
+  sortActors ascending; drawActors into the stage of each actor's light id, mirror pass first);
+  bit 0 = the world (strip records +0x437e0 x 0x2000 of 0x20 bytes, the sky dome 0x1406b8 at 490,
+  the sky models' first model, MagLifeMan::draw groups 0 / 0x4000, the blob shadows at 800 when
+  +0x2a9c8 bit 1, then the projected shadows (actors with flags & 0x60 == 0x60, layers 700 / 705 +
+  10 n, at most 10, the STQ map +0x2aa90 on the sky's second models) or, when +0x2a9c4 >= 0, that
+  actor's close-up at 1000 (a 256-wide target, FRAME fbp 0x118), and 0x177830 on +0x837e0). Always:
+  S2dMovie::drawMovie, a layer at 900 (light set 6, TEST 0x5000d) for MagLifeMan group 0x8000, the
+  focus effect 0x140e88, S2dMovie::draw. The mirror: mapparam.bbb words 9 / 10 at +0x85494 (axis
+  mode 1 z, 2 y floor, 3 x) / +0x85498 (the plane, a float); drawActorMirror reflects the root
+  entity when the camera is on the actor's side. The camera at +0x2ab70 is a `DogCamera`
+  (dog/dogcamera.h; vtable 0x2e1fb8, view matrix +0xf0, angle +0x140); actors are drawn with its
+  m_rotate (+0x2abc0) and m_trans (+0x2abb0). Dog vtable slots seen here: DogModel 2 transform,
+  4 getParent, 8 / 9 setHide / isHide, 11 cull 0x114e38, 12 draw (0x1151f4; DogActor 0x10e5c0),
+  13 drawUnitMatrix 0x1152a8; DogActor 18 getNodeWorldPos, 19 drawModel, 20 drawShadow.
 - **The scene's loaders** (`mag/magscene2.cpp`, pinned 0x137300..0x139540, 2026-10-22; `verify`):
   - `MagScene::loadSystemData` 0x137330 (start's first call): data/options.txt -> `parseOption`
     (magsceneoption.cpp, buckets at +0x4371c); data/PREMIERE.RPK's 2048-byte header, then the font

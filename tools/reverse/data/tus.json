@@ -93,6 +93,24 @@
    "status": "verify",
    "why": "Every function from 0x137330 to 0x139308 that has a source string names mag/magscene2.cpp; magscene.cpp strings end at 0x135f44 and magscenerender.cpp starts at 0x139664. 0x137300 and 0x137318 are helpers only 0x137330 calls. The ctor/dtor 0x1360a0/0x136d14 and setPC..initRender (0x1316b8..) lie in magscene.cpp's span, not here."
   },
+  "mag/magscenerender.cpp": {
+   "notes": "Left: MagScene::makeActorShadow 0x139b4c (stub; the shadow light layer at 700 + 10 n from the directional light at scene +0x2040 / +0x2044 or the light pool's nearest point light 0x1129cc, the STQ projection into +0x2aa90, the shadow words +0x2000..+0x2034). Screen black: every layer goes into stubbed i3d (i3dCtxCreateView, i3dCtxCreateLight, the layer setters, i3dLayerBeginSet) and DogLightPool::createLight returns NULL, so the lightstatus asserts fire every frame until it is written. Next for any picture: the draw-group / layer module unassigned@0021fb50 (queue B.3). Decisions: Dog vtable slots called here are plain members on the known class (open-items Decisions); the MagScene constructor stub clears the strip records like the ROM loop at 0x136ab4; drawStrips caps the path buffer (bss 0x6646f0) at 64 records; magscene2 load now copies mapparam word 10 as a float (m_mirror_plane). MagTenkyu m_c_rec renamed m_path_data (the assert text).",
+   "ranges": [
+    [
+     "00139540",
+     "0013c328"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 15:15",
+     "status": "partial",
+     "summary": "Pinned mag/magscenerender.cpp 0x139540..0x13c328 and wrote 19 of its 20 functions: MagScene::draw (eight light-set render stages, view and fog, actors collected / sorted / mirrored, strip records, sky dome and models, life objects, blob and projected shadows or the focus close-up, S2dMovie, the 900 overlay), its helpers and the texture wrappers. New dog/dogcamera.h (the scene camera, lens angle +0x140) and dog/doglightpool.h; Dog draw slots as plain members; 66 names (MagScene render helpers, Dog draw slots, i3d layer / packet / math helpers)."
+    }
+   ],
+   "status": "partial",
+   "why": "Anchored by mag/magscenerender.cpp asserts from 0x139664 to MagScene::draw 0x13bcc0; starts where mag/magscene2.cpp's pin ends (0x139540: the tex-info wrappers and the draw-env/render-mode helpers draw calls) and ends before MagScene::parseOption 0x13c328 (mag/magsceneoption.cpp string); postDraw / setCameraTarget already live here."
+  },
   "mag/magsystem.cpp": {
    "notes": "All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes are NOT polymorphic on the host: the EE vptr word at +0x94 is kept as padding (_ee_vptr) and setAttachNode (slot 10) / getNodeWorldMatrix (slot 17) are plain members; the first dog/ TU needing a virtual makes them virtual in the slot order listed in the header comments. DogEntity::setRotate / normalizeRotate sit in unassigned@0010f944 (stubs in lib/unassigned_stubs.cpp) but are dog code: define that range when a dog TU starts. Next reached stubs: MagScene ctor/init/start/initRender/update/draw, i3d (unassigned@00216ad0), BedPad, SndMan::update.",
    "ranges": [

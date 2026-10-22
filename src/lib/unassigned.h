@@ -251,6 +251,86 @@ int   I3rRoot__CheckIdString(const I3rRoot *root);                       // ROR 
 /* The model's clip sphere: centre (w = 1) and radius. */
 int   i3rCopyClipSphere(I3rRoot *root, float *center, float *radius);    // ROR 0x0021a828
 int   i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity);    // ROR 0x0021a938
+/* Steps the frame counter of every animated texture of the root; I3D_OK. */
+int   i3rUpdateTexAnim(I3rRoot *root);                                   // ROR 0x0021a8e0
+
+/* An i3d light description (i3dCtxCreateLight's input; MagScene keeps the
+ * shadow light's at +0x2a9d0): an ambient colour, then five (list, count)
+ * pairs of light kinds. EE 0x40. layout: host -- pointers. */
+struct I3dLightDesc
+{
+    sceVu0FVECTOR m_ambient;    // ROR 0x00
+    struct
+    {
+        void *m_list;           // ROR 0x10 + 8 k: the kind's lights
+        int   m_count;          // ROR 0x14 + 8 k: 0 = the kind is not used
+    } m_kind[5];
+    int           _38[2];       // ROR 0x38
+};
+static_assert(offsetof(I3dLightDesc, m_ambient) == 0, "m_ambient");
+
+void      i3dLightDescInit(I3dLightDesc *desc);                          // ROR 0x0021ac80
+I3dLight *i3dCtxCreateLight(i3dContext *ctx, const I3dLightDesc *desc);  // ROR 0x0021b148
+/* The fog state of a frame from a fog record; NULL on failure. */
+void     *i3dCtxSetFog(i3dContext *ctx, const I3dFog *fog);              // ROR 0x0021a158
+
+/* A layer's draw sets: the default one, the current one, one found (or
+ * made) for a texture-set description (EE 0x18; i3dLayerFindDrawSet hashes
+ * every word). layout: host -- a pointer. */
+struct I3dTexSetDesc
+{
+    float  m_00;                // ROR 0x00: 1.0 (the run's depth key)
+    int   *m_tex_no;            // ROR 0x04: the texture numbers
+    u_int  m_tex_count;         // ROR 0x08
+    u_int  m_0c;                // ROR 0x0c: unverified
+    u_int  m_10;                // ROR 0x10: unverified
+    u_int  m_14;                // ROR 0x14: unverified
+};
+static_assert(offsetof(I3dTexSetDesc, m_tex_count) >= 0x08, "m_tex_count");
+I3dDrawSet *i3dLayerGetDrawSet(I3dLayer *layer);                         // ROR 0x00223270
+int       i3dLayerSetDrawSet(I3dLayer *layer, I3dDrawSet *set);          // ROR 0x00223228
+I3dDrawSet *i3dLayerFindDrawSet(I3dLayer *layer, const I3dTexSetDesc *desc); // ROR 0x00223558
+/* Opens a packet node with a sort key in the current set; its packet. */
+u_long   *i3dLayerBeginSet(I3dLayer *layer, float key);                  // ROR 0x00223298
+void      i3dLayerEndSet(I3dLayer *layer, u_long *end);                  // ROR 0x002232f0
+/* Counts a use of texture slot n; its GS register packet. */
+u_long   *i3dDrawSetUseTex(I3dDrawSet *set, int n);                      // ROR 0x0021b260
+u_long   *i3dPktRefTexRegs(u_long *pkt, u_long *regs);                   // ROR 0x0021b4f8
+u_long   *i3dPktDmaTag(u_long *pkt, u_int qwc, u_int id, const void *addr,
+                       u_int vif0, u_int vif1);                          // ROR 0x0021b490
+u_long    i3dPackXYZ(u_int x, u_int y, u_int z);                         // ROR 0x0021c940
+u_long    i3dPackRGBAQ(float q, u_int r, u_int g, u_int b, u_int a);     // ROR 0x0021c8c8
+/* A blended sprite (PRIM 0x46) from two XYZ2 corners and an RGBAQ. */
+u_long   *i3dPktSprite(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq); // ROR 0x0021c140
+/* Strips of count vertices with an optional matrix, STQ, colours and
+ * positions (EE vectors); primitives unverified. */
+u_long   *i3dPktDrawStrip(u_long *pkt, sceVu0FVECTOR *matrix, int count, const void *stq,
+                          const void *colors, const void *xyz, int flags); // ROR 0x0021db18
+u_long   *i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
+                             const void *stq, const void *colors, const void *xyz,
+                             int flags);                                 // ROR 0x0021dd10
+u_long   *i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
+                              const void *color, const void *xyz, int flags); // ROR 0x0021e1d8
+/* MagScene::drawStrips' record types 4, 3 and 5; roles unknown. */
+int       FUN_00222f88(I3dLayer *layer, void *a, void *b, void *rec);    // ROR 0x00222f88
+int       FUN_00223050(void *a, I3dLayer *layer, void *b, const float *c); // ROR 0x00223050
+int       FUN_002230e8(I3dLayer *layer, void *a, const float *b, void *c, void *rec); // ROR 0x002230e8
+
+/* i3d's vector / matrix helpers (VU0 macro code; the angle comes first in f12). */
+void  i3dVecCopy(float *out, const float *in);                           // ROR 0x002372d0
+void  i3dVecCopy2(float *out, const float *in);                          // ROR 0x002372e0
+void  i3dVecSub(float *out, const float *a, const float *b);             // ROR 0x00237408
+void  i3dMatUnit(sceVu0FVECTOR *m);                                      // ROR 0x00237340
+void  i3dMatTranslate(sceVu0FVECTOR *out, sceVu0FVECTOR *in, const float *v); // ROR 0x00237640
+void  i3dMatInverse(sceVu0FVECTOR *out, sceVu0FVECTOR *in);              // ROR 0x00237678
+void  i3dMatRotX(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in);    // ROR 0x00237818
+void  i3dMatRotY(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in);    // ROR 0x00237830
+void  i3dMatRotZ(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in);    // ROR 0x00237848
+/* A view matrix from an eye, a view direction and an up vector. */
+void  i3dMatLookDir(sceVu0FVECTOR *out, const float *eye, const float *dir,
+                    const float *up);                                    // ROR 0x00237ba0
+/* The distance of two points (sqrt of 0x106e14). */
+float utlVecDist(const float *a, const float *b);                        // ROR 0x00106e70
 
 /* bss 0x7812ac, just below GamMan: mainInitGame passes it to
  * seqSetLanguage (which ignores it). Role not known yet. */
@@ -284,6 +364,7 @@ struct Obj17c0f0                /* scene +0x8542c, constructor 0x17c0f0: a flag 
 static_assert(sizeof(Obj176a3c) >= 4 && sizeof(Obj17c0f0) >= 4, "placeholders");
 
 int   FUN_00176afc(Obj176a3c *obj, i3dContext *ctx, MagScene *scene);    // ROR 0x00176afc
+void  FUN_00177830(Obj176a3c *obj, i3dContext *ctx);  /* MagScene::draw's world pass */ // ROR 0x00177830
 void  FUN_0017c2c0(Obj17c0f0 *obj);  /* frees the buffer and the records */ // ROR 0x0017c2c0
 /* Takes a sky pack's sector.sec (copied to the game heap when copy is
  * set); non-zero on success. */

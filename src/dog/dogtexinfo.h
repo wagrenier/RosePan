@@ -33,15 +33,21 @@ struct DogTexInfo
     /* Trims m_num_tex past the last used record and hands the table to the
      * i3d context (i3dCtxSetTexTable). */
     void setTexTable(i3dContext *p);                                     // ROR 0x0011756c
+    /* Drops a reference to texture theNo; the last one frees it. */
+    void release(int theNo);                                             // ROR 0x00116618
+    /* Makes texture dst use src's picture (both by name). */
+    void copy(const char *dst, const char *src);                         // ROR 0x001173d4
 
     int   m_max_tex;            // ROR 0x00: theMax
     int   m_num_tex;            // ROR 0x04: records in use (assert m_num_tex <= m_max_tex)
     void *m_tex_info;           // ROR 0x08: theMax 16-byte records, a name pointer first
     void *m_tex_data;           // ROR 0x0c: theMax 0x198-byte texture records, 8-aligned
-    unsigned char _10[0x20 - 0x10];
+    int   m_dirty;              // ROR 0x10: release / copy set it; MagScene::draw then calls setTexTable
+    unsigned char _14[0x20 - 0x14];
 };
 static_assert(offsetof(DogTexInfo, m_num_tex) == 0x04, "m_num_tex");
 static_assert(offsetof(DogTexInfo, m_tex_info) == 0x08, "m_tex_info");
 static_assert(offsetof(DogTexInfo, m_tex_data) >= 0x0c, "m_tex_data");
+static_assert(offsetof(DogTexInfo, m_dirty) >= 0x10, "m_dirty");
 
 #endif /* _DOG_DOGTEXINFO_H */

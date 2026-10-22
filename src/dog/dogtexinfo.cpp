@@ -51,3 +51,15 @@ void DogTexInfo::setTexTable(i3dContext *p)
 {
     ROSEPAN_STUB("DogTexInfo::setTexTable", 0x0011756c);
 }
+
+// stub of ROR 0x001173d4
+void DogTexInfo::copy(const char *dst, const char *src)
+{
+    ROSEPAN_STUB("DogTexInfo::copy", 0x001173d4);
+}
+
+// stub of ROR 0x00116618
+void DogTexInfo::release(int theNo)
+{
+    ROSEPAN_STUB("DogTexInfo::release", 0x00116618);
+}

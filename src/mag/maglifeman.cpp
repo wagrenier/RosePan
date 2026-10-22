@@ -18,3 +18,9 @@ void MagLifeMan::init()
 {
     ROSEPAN_STUB("MagLifeMan::init", 0x00119630);
 }
+
+// stub of ROR 0x00119a38
+void MagLifeMan::draw(I3dLayer *layer, u_int group)
+{
+    ROSEPAN_STUB("MagLifeMan::draw", 0x00119a38);
+}

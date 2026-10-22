@@ -17,3 +17,9 @@ void DogEntity::reset()
 {
     ROSEPAN_STUB("DogEntity::reset", 0x0011023c);
 }
+
+// stub of ROR 0x0011034c
+void DogEntityEx::transform()
+{
+    ROSEPAN_STUB("DogEntityEx::transform", 0x0011034c);
+}
