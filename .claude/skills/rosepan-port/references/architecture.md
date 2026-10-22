@@ -247,18 +247,26 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   0x21fb50..0x222f50 (unassigned@0021fb50: per material a state packet node, i3dGroupBegin*Packet),
   the texture objects (i3dtex.cpp, below), the fog state 0x21a120..0x21a3e8, i3r model helpers 0x21a3e8..0x21ac80, lights
   0x21ac80..0x21b220, the packet writers (i3dpacket.cpp), TIM2 helpers from 0x224de0 (an unreferenced TIM2 / CLT header
-  check, picture lookup 0x224e70, size 0x224ed0), the view (below), the i3d system calls
-  0x237178..0x237cc8 (i3dFlushCache, i3dPrintf).
-  - **Two copies of the vector / matrix module**: 0x236960..0x236dxx (i3dVecZero, i3dVecCopyW,
-    i3dMatCopy 0x236990, i3dVu0VecNeg 0x236a68, i3dVecCross 0x236af0, i3dVecNormalize 0x236b38,
-    i3dVu0MatInverse 0x236bd8, i3dVu0MatMul 0x236d30) and a byte-identical one 0x2372d0..0x237814
-    (i3dVecCopy, i3dVecNeg 0x237468, i3dMatInverse 0x237678, i3dMatMul 0x2377d0 ...). The view uses
-    the first; DogEntity / DogActor the second. Row-vector convention: i3dMatMul(out, a, b) runs VU0
-    micro 0 (out row i = sum_j b[i][j] * a[j]), so p * out = (p * b) * a. The first copy is bridged in
-    lib/unassigned_stubs.cpp (unassigned@00228c08); of the second, i3dVecCopy, i3dVecAdd 0x2373d8,
-    i3dVecMul 0x237438 / i3dVecMul2 0x237450, i3dVecFtoi0 0x237600, i3dVecFtoi4 0x237610 are bridged
-    (i3dpacket.cpp's float writers), the rest still stubs. The second copy has duplicates inside it too
-    (0x2373d8 = 0x2373f0 add, 0x237408 = 0x237420 sub, 0x237438 = 0x237450 mul).
+  check, picture lookup 0x224e70, size 0x224ed0), the view (below), the vector module with the i3d
+  system calls at its ends (below).
+  - **The vector / matrix module** (`i3d/i3dmath.cpp`, 0x236960..0x237ce8, 95 functions incl. 35
+    hidden ones created in Ghidra, written 2026-10-22, verify; conventions in i3dmath.h). Two copies,
+    **not** byte-identical: the first 0x236960..0x237178 (i3dVu0* names, plus the older plain names
+    i3dVecZero / i3dVecCopyW / i3dMatCopy / i3dVecCross / i3dVecNormalize) builds rotations from
+    cosf / sinf (i3dVu0MatRotX / Y / Z, one order RotZYX) and ends with i3dVu0RotTransPers 0x236fd0,
+    i3dVu0MatLookDir 0x2370b0, i3dMatGetUnit (rodata 0x303c10), i3dSysInit; the second
+    0x237180..0x237c58 wraps sceVu0RotMatrixX / Y / Z (i3dMatRotX 0x237818 ...), has all six rotation
+    orders (i3dMatRotZYX 0x237860 .. i3dMatRotYZX 0x2379f0, named in applied order), clear / set /
+    bitwise-compare helpers 0x237180..0x2372cc, i3dVecToRgba32 0x237530, i3dVecLength 0x2375a8, and
+    byte-copy twins inside it (i3dVecAdd / Add2, Sub / Sub2, Mul / Mul2, Scale / Scale2, Interp,
+    Clamp, Set, Clear, Equal, i3dMatGetUnit2 0x237c58 -> 0x303c60). The view uses the first copy;
+    DogEntity / DogActor / MagScene the second. Row-vector convention: i3dMatMul(out, a, b) runs VU0
+    micro 0 (out row i = sum_j b[i][j] * a[j]), so p * out = (p * b) * a; a rotation (angle, out, in)
+    is out = in * R, which matches the platform's sceVu0RotMatrixX (row 1 = (0, c, s, 0)). Float
+    arguments come first (f12). RotTransPers: p = v * m, xyz / w (1.0 at 0x303c00 / 0x303c50), x y
+    in 12.4 (16.0 at 0x303c04 / 0x303c54), mode 0 z w in 12.4, mode 1 z w truncated. i3dPrintf
+    0x237c68 is vsprintf into 1 KB + rxSysPrintf + fflush(stdout). i3dMatGetScaleTrans 0x228c38 (just
+    before, still in unassigned@00228c08) stays a bridge.
   - **Texture and CLUT objects** (`i3d/i3dtex.cpp`, 0x2184c0..0x21a120, written 2026-10-22, verify;
     33 functions incl. 4 hidden TEX1 setters 0x219dd0..0x219e30). Both start with their
     I3dVramHandle (+0 m_image = the object, +4 size: texture pages / CLUT 4-block units, +0x10 kind

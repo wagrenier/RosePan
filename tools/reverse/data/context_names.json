@@ -4685,6 +4685,12 @@
   "was": "FUN_00236960",
   "why": "sq zero to the vector: clears 16 bytes"
  },
+ "00236968": {
+  "name": "i3dVu0MatZero",
+  "tag": "ror-inferred",
+  "was": "FUN_00236968",
+  "why": "sq zero x4: clears a matrix (first copy of the vector module)"
+ },
  "00236980": {
   "name": "i3dVecCopyW",
   "tag": "ror-inferred",
@@ -4697,11 +4703,65 @@
   "was": "FUN_00236990",
   "why": "lq / sq of four qwords"
  },
+ "002369b8": {
+  "name": "i3dVu0MatUnit",
+  "tag": "ror-inferred",
+  "was": "FUN_002369b8",
+  "why": "vmr32 of vf0 three times, rows stored 3..0: the unit matrix"
+ },
+ "002369d8": {
+  "name": "i3dVu0VecScale",
+  "tag": "ror-inferred",
+  "was": "FUN_002369d8",
+  "why": "vmulx.xyzw by f12: out = in * s"
+ },
+ "002369f0": {
+  "name": "i3dVu0VecScaleXYZ",
+  "tag": "ror-inferred",
+  "was": "FUN_002369f0",
+  "why": "vmulx.xyz by f12, w kept from in"
+ },
+ "00236a08": {
+  "name": "i3dVu0MatApply",
+  "tag": "ror-inferred",
+  "was": "FUN_00236a08",
+  "why": "vmulax / vmadday / vmaddaz / vmaddw: out = v.x*m0 + v.y*m1 + v.z*m2 + v.w*m3"
+ },
+ "00236a38": {
+  "name": "i3dVu0VecAdd",
+  "tag": "ror-inferred",
+  "was": "FUN_00236a38",
+  "why": "vadd.xyzw"
+ },
+ "00236a50": {
+  "name": "i3dVu0VecSub",
+  "tag": "ror-inferred",
+  "was": "FUN_00236a50",
+  "why": "vsub.xyzw: a - b"
+ },
  "00236a68": {
   "name": "i3dVu0VecNeg",
   "tag": "lib-context",
   "was": "FUN_00236a68",
   "why": "vsub vf0 - vf0 - v, all four fields; byte-identical to i3dVecNeg 0x237468 (the ROM has two copies of the vector module), hence the prefix"
+ },
+ "00236a80": {
+  "name": "i3dVu0VecMul",
+  "tag": "ror-inferred",
+  "was": "FUN_00236a80",
+  "why": "vmul.xyzw: per-component product"
+ },
+ "00236a98": {
+  "name": "i3dVu0VecInterp",
+  "tag": "ror-inferred",
+  "was": "FUN_00236a98",
+  "why": "out = a*t + b*(1 - t), all four (sceVu0InterVector weighting)"
+ },
+ "00236ac8": {
+  "name": "i3dVu0VecClamp",
+  "tag": "ror-inferred",
+  "was": "FUN_00236ac8",
+  "why": "vmaxx f12 then vminibcx f13: clamps all four components"
  },
  "00236af0": {
   "name": "i3dVecCross",
@@ -4709,11 +4769,47 @@
   "was": "FUN_00236af0",
   "why": "vopmula / vopmsub: cross(a, b), w = 0"
  },
+ "00236b10": {
+  "name": "i3dVu0VecDot",
+  "tag": "ror-inferred",
+  "was": "FUN_00236b10",
+  "why": "xyz dot product returned in f0"
+ },
  "00236b38": {
   "name": "i3dVecNormalize",
   "tag": "lib-context",
   "was": "FUN_00236b38",
   "why": "xyz times vrsqrt of the squared length, w = 0"
+ },
+ "00236b60": {
+  "name": "i3dVu0VecFtoi0",
+  "tag": "ror-inferred",
+  "was": "FUN_00236b60",
+  "why": "vftoi0.xyzw"
+ },
+ "00236b70": {
+  "name": "i3dVu0VecFtoi4",
+  "tag": "ror-inferred",
+  "was": "FUN_00236b70",
+  "why": "vftoi4.xyzw (12.4 fixed point)"
+ },
+ "00236b80": {
+  "name": "i3dVu0VecItof0",
+  "tag": "ror-inferred",
+  "was": "FUN_00236b80",
+  "why": "vitof0.xyzw"
+ },
+ "00236b90": {
+  "name": "i3dVu0VecItof4",
+  "tag": "ror-inferred",
+  "was": "FUN_00236b90",
+  "why": "vitof4.xyzw"
+ },
+ "00236ba0": {
+  "name": "i3dVu0MatTranslate",
+  "tag": "ror-inferred",
+  "was": "FUN_00236ba0",
+  "why": "copies rows 0..2 unless out == in, then out[3].xyz = in[3].xyz + v.xyz; i3dVu0MatLookDir calls it"
  },
  "00236bd8": {
   "name": "i3dVu0MatInverse",
@@ -4721,11 +4817,71 @@
   "was": "FUN_00236bd8",
   "why": "affine inverse: the 3x3 adjugate over the determinant, translation -t x R^-1; the first copy of i3dMatInverse 0x237678"
  },
+ "00236c78": {
+  "name": "i3dVu0MatInverseOrtho",
+  "tag": "ror-inferred",
+  "was": "FUN_00236c78",
+  "why": "transposes the 3x3 part (pextlw / pcpyld) and sets row 3 to -t * R^T, w 1: inverse of a rigid matrix"
+ },
+ "00236ce8": {
+  "name": "i3dVu0MatTranspose",
+  "tag": "ror-inferred",
+  "was": "FUN_00236ce8",
+  "why": "4x4 transpose with pextlw / pextuw / pcpyld / pcpyud"
+ },
  "00236d30": {
   "name": "i3dVu0MatMul",
   "tag": "lib-context",
   "was": "FUN_00236d30",
   "why": "VU0 micro 0: out row i = sum_j b[i][j] * a[j] (a = a1, b = a2); byte-identical to i3dMatMul 0x2377d0"
+ },
+ "00236d78": {
+  "name": "i3dVu0MatRotX",
+  "tag": "ror-inferred",
+  "was": "FUN_00236d78",
+  "why": "unit matrix with m11 m22 cosf, m12 sinf, m21 -sinf, then i3dVu0MatMul(out, rot, in)"
+ },
+ "00236e00": {
+  "name": "i3dVu0MatRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_00236e00",
+  "why": "unit matrix with m00 m22 cosf, m20 sinf, m02 -sinf, then i3dVu0MatMul(out, rot, in)"
+ },
+ "00236e88": {
+  "name": "i3dVu0MatRotZ",
+  "tag": "ror-inferred",
+  "was": "FUN_00236e88",
+  "why": "unit matrix with m00 m11 cosf, m01 sinf, m10 -sinf, then i3dVu0MatMul(out, rot, in)"
+ },
+ "00236f10": {
+  "name": "i3dVu0MatRotZYX",
+  "tag": "ror-inferred",
+  "was": "FUN_00236f10",
+  "why": "RotZ(rot.z) of in, then RotY(rot.y), then RotX(rot.x) in place"
+ },
+ "00236f60": {
+  "name": "i3dVu0MatScale",
+  "tag": "ror-inferred",
+  "was": "FUN_00236f60",
+  "why": "row i scaled by v[i], all four rows"
+ },
+ "00236f98": {
+  "name": "i3dVu0MatScaleXYZ",
+  "tag": "ror-inferred",
+  "was": "FUN_00236f98",
+  "why": "rows 0..2 scaled by v.x / y / z, row 3 copied"
+ },
+ "00236fd0": {
+  "name": "i3dVu0RotTransPers",
+  "tag": "ror-inferred",
+  "was": "FUN_00236fd0",
+  "why": "i3dVu0MatApply, x y z times 1/w (rodata 0x303c00), x y to 12.4 ints (16.0 at 0x303c04); mode 0 also z and w in 12.4, mode 1 z and w truncated: sceVu0RotTransPers-like"
+ },
+ "002370b0": {
+  "name": "i3dVu0MatLookDir",
+  "tag": "ror-inferred",
+  "was": "FUN_002370b0",
+  "why": "unit, x = norm(up x dir), z = norm(dir), y = z x x, translate by eye, i3dVu0MatInverse: the first copy of i3dMatLookDir (sceVu0CameraMatrix-like)"
  },
  "00237168": {
   "name": "i3dMatGetUnit",
@@ -4739,6 +4895,60 @@
   "was": "FUN_00237178",
   "why": "empty; the first call of i3dInitHardware"
  },
+ "00237180": {
+  "name": "i3dVecClear",
+  "tag": "ror-inferred",
+  "was": "FUN_00237180",
+  "why": "sq zero: clears a vector (second copy of the vector module starts here)"
+ },
+ "00237188": {
+  "name": "i3dVecClear2",
+  "tag": "ror-inferred",
+  "was": "FUN_00237188",
+  "why": "byte copy of i3dVecClear"
+ },
+ "00237190": {
+  "name": "i3dVecSetOrigin",
+  "tag": "ror-inferred",
+  "was": "FUN_00237190",
+  "why": "sqc2 vf0: (0, 0, 0, 1)"
+ },
+ "00237198": {
+  "name": "i3dVecSet",
+  "tag": "ror-inferred",
+  "was": "FUN_00237198",
+  "why": "stores f12..f15 as x y z w"
+ },
+ "002371b0": {
+  "name": "i3dVecSet2",
+  "tag": "ror-inferred",
+  "was": "FUN_002371b0",
+  "why": "byte copy of i3dVecSet"
+ },
+ "002371c8": {
+  "name": "i3dMatZero",
+  "tag": "ror-inferred",
+  "was": "FUN_002371c8",
+  "why": "sq zero x4: clears a matrix"
+ },
+ "002371e0": {
+  "name": "i3dVecEqual",
+  "tag": "ror-inferred",
+  "was": "FUN_002371e0",
+  "why": "compares two 16-byte vectors bitwise as two doublewords, returns 1 when equal"
+ },
+ "00237210": {
+  "name": "i3dVecEqual2",
+  "tag": "ror-inferred",
+  "was": "FUN_00237210",
+  "why": "byte copy of i3dVecEqual"
+ },
+ "00237240": {
+  "name": "i3dMatEqual",
+  "tag": "ror-inferred",
+  "was": "FUN_00237240",
+  "why": "compares two matrices bitwise (each quad low then high doubleword), returns 1 when equal"
+ },
  "002372d0": {
   "name": "i3dVecCopy",
   "tag": "lib-context",
@@ -4750,6 +4960,18 @@
   "tag": "lib-context",
   "was": "FUN_002372e0",
   "why": "copies four words (a second copy of i3dVecCopy, used for colours)"
+ },
+ "002372f0": {
+  "name": "i3dMatCopy2",
+  "tag": "ror-inferred",
+  "was": "FUN_002372f0",
+  "why": "lq / sq of four rows: the second copy of i3dMatCopy"
+ },
+ "00237318": {
+  "name": "i3dMatSetRows",
+  "tag": "ror-inferred",
+  "was": "FUN_00237318",
+  "why": "out rows = four vectors (a1, a2, a3, t0)"
  },
  "00237340": {
   "name": "i3dMatUnit",
@@ -4763,6 +4985,18 @@
   "was": "FUN_00237360",
   "why": "out = in * f12"
  },
+ "00237378": {
+  "name": "i3dVecScale2",
+  "tag": "ror-inferred",
+  "was": "FUN_00237378",
+  "why": "byte copy of i3dVecScale"
+ },
+ "00237390": {
+  "name": "i3dVecScaleXYZ",
+  "tag": "ror-inferred",
+  "was": "FUN_00237390",
+  "why": "vmulx.xyz by f12, w kept from in"
+ },
  "002373a8": {
   "name": "i3dMatApply",
   "tag": "lib-context",
@@ -4775,11 +5009,23 @@
   "was": "FUN_002373d8",
   "why": "lqc2 / vadd.xyzw / sqc2: out = a + b (the vector module's second copy)"
  },
+ "002373f0": {
+  "name": "i3dVecAdd2",
+  "tag": "ror-inferred",
+  "was": "FUN_002373f0",
+  "why": "byte copy of i3dVecAdd"
+ },
  "00237408": {
   "name": "i3dVecSub",
   "tag": "lib-context",
   "was": "FUN_00237408",
   "why": "out = a - b"
+ },
+ "00237420": {
+  "name": "i3dVecSub2",
+  "tag": "ror-inferred",
+  "was": "FUN_00237420",
+  "why": "byte copy of i3dVecSub"
  },
  "00237438": {
   "name": "i3dVecMul",
@@ -4799,11 +5045,53 @@
   "was": "FUN_00237468",
   "why": "out = 0 - in"
  },
+ "00237480": {
+  "name": "i3dVecInterp",
+  "tag": "ror-inferred",
+  "was": "FUN_00237480",
+  "why": "out = a*t + b*(1 - t), all four"
+ },
+ "002374b0": {
+  "name": "i3dVecInterp2",
+  "tag": "ror-inferred",
+  "was": "FUN_002374b0",
+  "why": "byte copy of i3dVecInterp"
+ },
+ "002374e0": {
+  "name": "i3dVecClamp",
+  "tag": "ror-inferred",
+  "was": "FUN_002374e0",
+  "why": "vmaxx f12 then vminibcx f13: clamps all four components"
+ },
+ "00237508": {
+  "name": "i3dVecClamp2",
+  "tag": "ror-inferred",
+  "was": "FUN_00237508",
+  "why": "byte copy of i3dVecClamp"
+ },
+ "00237530": {
+  "name": "i3dVecToRgba32",
+  "tag": "ror-inferred",
+  "was": "FUN_00237530",
+  "why": "clamps to 0..1, times 255.0, vftoi0, ppach / ppacb: packs r g b a bytes into one word"
+ },
+ "00237560": {
+  "name": "i3dVecCross2",
+  "tag": "ror-inferred",
+  "was": "FUN_00237560",
+  "why": "vopmula / vopmsub, w 0: the second copy of i3dVecCross; i3dMatLookDir calls it"
+ },
  "00237580": {
   "name": "i3dVecDot",
   "tag": "lib-context",
   "was": "FUN_00237580",
   "why": "x*x + y*y + z*z of a*b"
+ },
+ "002375a8": {
+  "name": "i3dVecLength",
+  "tag": "ror-inferred",
+  "was": "FUN_002375a8",
+  "why": "vsqrt of the xyz dot product"
  },
  "002375d8": {
   "name": "i3dVecNormalize2",
@@ -4823,6 +5111,18 @@
   "was": "FUN_00237610",
   "why": "vftoi4.xyzw: float to 12.4 fixed point"
  },
+ "00237620": {
+  "name": "i3dVecItof0",
+  "tag": "ror-inferred",
+  "was": "FUN_00237620",
+  "why": "vitof0.xyzw"
+ },
+ "00237630": {
+  "name": "i3dVecItof4",
+  "tag": "ror-inferred",
+  "was": "FUN_00237630",
+  "why": "vitof4.xyzw"
+ },
  "00237640": {
   "name": "i3dMatTranslate",
   "tag": "lib-context",
@@ -4834,6 +5134,18 @@
   "tag": "lib-context",
   "was": "FUN_00237678",
   "why": "cofactor inverse with vdiv (general 4x3 inverse)"
+ },
+ "00237718": {
+  "name": "i3dMatInverseOrtho",
+  "tag": "ror-inferred",
+  "was": "FUN_00237718",
+  "why": "the second copy of i3dVu0MatInverseOrtho"
+ },
+ "00237788": {
+  "name": "i3dMatTranspose",
+  "tag": "ror-inferred",
+  "was": "FUN_00237788",
+  "why": "the second copy of i3dVu0MatTranspose"
  },
  "002377d0": {
   "name": "i3dMatMul",
@@ -4859,11 +5171,71 @@
   "was": "FUN_00237848",
   "why": "tail call to sceVu0RotMatrixZ"
  },
+ "00237860": {
+  "name": "i3dMatRotZYX",
+  "tag": "ror-inferred",
+  "was": "FUN_00237860",
+  "why": "i3dMatRotZ(rot.z) of in, then RotY, then RotX in place"
+ },
+ "002378b0": {
+  "name": "i3dMatRotZXY",
+  "tag": "ror-inferred",
+  "was": "FUN_002378b0",
+  "why": "i3dMatRotZ(rot.z) of in, then RotX(rot.x), then RotY(rot.y)"
+ },
+ "00237900": {
+  "name": "i3dMatRotXYZ",
+  "tag": "ror-inferred",
+  "was": "FUN_00237900",
+  "why": "i3dMatRotX(rot.x) of in, then RotY, then RotZ"
+ },
+ "00237950": {
+  "name": "i3dMatRotXZY",
+  "tag": "ror-inferred",
+  "was": "FUN_00237950",
+  "why": "i3dMatRotX(rot.x) of in, then RotZ, then RotY"
+ },
+ "002379a0": {
+  "name": "i3dMatRotYXZ",
+  "tag": "ror-inferred",
+  "was": "FUN_002379a0",
+  "why": "i3dMatRotY(rot.y) of in, then RotX, then RotZ"
+ },
+ "002379f0": {
+  "name": "i3dMatRotYZX",
+  "tag": "ror-inferred",
+  "was": "FUN_002379f0",
+  "why": "i3dMatRotY(rot.y) of in, then RotZ, then RotX"
+ },
+ "00237a40": {
+  "name": "i3dMatScale",
+  "tag": "ror-inferred",
+  "was": "FUN_00237a40",
+  "why": "row i scaled by v[i], all four rows"
+ },
+ "00237a78": {
+  "name": "i3dMatScaleXYZ",
+  "tag": "ror-inferred",
+  "was": "FUN_00237a78",
+  "why": "rows 0..2 scaled by v.x / y / z, row 3 copied"
+ },
+ "00237ab0": {
+  "name": "i3dRotTransPers",
+  "tag": "ror-inferred",
+  "was": "FUN_00237ab0",
+  "why": "the second copy of i3dVu0RotTransPers (constants 0x303c50 / 0x303c54, i3dVecScaleXYZ for the divide)"
+ },
  "00237ba0": {
   "name": "i3dMatLookDir",
   "tag": "lib-context",
   "was": "FUN_00237ba0",
   "why": "a view matrix from an eye, a direction and an up vector (cross product 0x237560 of up and dir)"
+ },
+ "00237c58": {
+  "name": "i3dMatGetUnit2",
+  "tag": "ror-inferred",
+  "was": "FUN_00237c58",
+  "why": "returns the second unit matrix, rodata 0x303c60"
  },
  "00237c68": {
   "name": "i3dPrintf",

@@ -5350,66 +5350,111 @@
 /* 002365f8 0000007c */ FUN_002365f8(){}
 /* 00236678 00000128 */ FUN_00236678(){}
 /* 002367a0 000001bc */ FUN_002367a0(){}
-/* 00236960 0000001c */ i3dVecZero(){}  // ror
+
+// *****************************************************************************
+// FILE -- i3d/i3dmath.cpp
+// *****************************************************************************
+
+/* 00236960 00000008 */ i3dVecZero(){}  // ror
+/* 00236968 00000014 */ i3dVu0MatZero(){}  // ror
 /* 00236980 0000000c */ i3dVecCopyW(){}  // ror
 /* 00236990 00000024 */ i3dMatCopy(){}  // lib-ctx
-/* 002369b8 00000020 */ FUN_002369b8(){}
-/* 002369d8 00000030 */ FUN_002369d8(){}
-/* 00236a08 0000002c */ FUN_00236a08(){}
-/* 00236a38 00000014 */ FUN_00236a38(){}
-/* 00236a50 00000014 */ FUN_00236a50(){}
+/* 002369b8 00000020 */ i3dVu0MatUnit(){}  // ror
+/* 002369d8 00000018 */ i3dVu0VecScale(){}  // ror
+/* 002369f0 00000018 */ i3dVu0VecScaleXYZ(){}  // ror
+/* 00236a08 0000002c */ i3dVu0MatApply(){}  // ror
+/* 00236a38 00000014 */ i3dVu0VecAdd(){}  // ror
+/* 00236a50 00000014 */ i3dVu0VecSub(){}  // ror
 /* 00236a68 00000014 */ i3dVu0VecNeg(){}  // lib-ctx
-/* 00236a80 00000014 */ FUN_00236a80(){}
-/* 00236a98 00000054 */ FUN_00236a98(){}
+/* 00236a80 00000014 */ i3dVu0VecMul(){}  // ror
+/* 00236a98 0000002c */ i3dVu0VecInterp(){}  // ror
+/* 00236ac8 00000024 */ i3dVu0VecClamp(){}  // ror
 /* 00236af0 0000001c */ i3dVecCross(){}  // lib-ctx
-/* 00236b10 00000020 */ FUN_00236b10(){}
-/* 00236b38 0000009c */ i3dVecNormalize(){}  // lib-ctx
-/* 00236bd8 00000110 */ i3dVu0MatInverse(){}  // lib-ctx
-/* 00236ce8 00000044 */ FUN_00236ce8(){}
+/* 00236b10 00000020 */ i3dVu0VecDot(){}  // ror
+/* 00236b38 00000028 */ i3dVecNormalize(){}  // lib-ctx
+/* 00236b60 00000010 */ i3dVu0VecFtoi0(){}  // ror
+/* 00236b70 00000010 */ i3dVu0VecFtoi4(){}  // ror
+/* 00236b80 00000010 */ i3dVu0VecItof0(){}  // ror
+/* 00236b90 00000010 */ i3dVu0VecItof4(){}  // ror
+/* 00236ba0 00000034 */ i3dVu0MatTranslate(){}  // ror
+/* 00236bd8 0000009c */ i3dVu0MatInverse(){}  // lib-ctx
+/* 00236c78 00000070 */ i3dVu0MatInverseOrtho(){}  // ror
+/* 00236ce8 00000044 */ i3dVu0MatTranspose(){}  // ror
 /* 00236d30 00000044 */ i3dVu0MatMul(){}  // lib-ctx
-/* 00236d78 00000084 */ FUN_00236d78(){}
-/* 00236e00 00000084 */ FUN_00236e00(){}
-/* 00236e88 00000084 */ FUN_00236e88(){}
-/* 00236f10 000000bc */ FUN_00236f10(){}
-/* 00236fd0 00000198 */ FUN_00236fd0(){}
+/* 00236d78 00000084 */ i3dVu0MatRotX(){}  // ror
+/* 00236e00 00000084 */ i3dVu0MatRotY(){}  // ror
+/* 00236e88 00000084 */ i3dVu0MatRotZ(){}  // ror
+/* 00236f10 00000050 */ i3dVu0MatRotZYX(){}  // ror
+/* 00236f60 00000038 */ i3dVu0MatScale(){}  // ror
+/* 00236f98 00000034 */ i3dVu0MatScaleXYZ(){}  // ror
+/* 00236fd0 000000e0 */ i3dVu0RotTransPers(){}  // ror
+/* 002370b0 000000b8 */ i3dVu0MatLookDir(){}  // ror
 /* 00237168 0000000c */ i3dMatGetUnit(){}  // ror
 /* 00237178 00000004 */ i3dSysInit(){}  // ror
-/* 00237180 0000014c */ FUN_00237180(){}
+/* 00237180 00000008 */ i3dVecClear(){}  // ror
+/* 00237188 00000008 */ i3dVecClear2(){}  // ror
+/* 00237190 00000008 */ i3dVecSetOrigin(){}  // ror
+/* 00237198 00000014 */ i3dVecSet(){}  // ror
+/* 002371b0 00000014 */ i3dVecSet2(){}  // ror
+/* 002371c8 00000014 */ i3dMatZero(){}  // ror
+/* 002371e0 0000002c */ i3dVecEqual(){}  // ror
+/* 00237210 0000002c */ i3dVecEqual2(){}  // ror
+/* 00237240 0000008c */ i3dMatEqual(){}  // ror
 /* 002372d0 0000000c */ i3dVecCopy(){}  // lib-ctx
 /* 002372e0 0000000c */ i3dVecCopy2(){}  // lib-ctx
-/* 002372f0 0000004c */ FUN_002372f0(){}
+/* 002372f0 00000024 */ i3dMatCopy2(){}  // ror
+/* 00237318 00000024 */ i3dMatSetRows(){}  // ror
 /* 00237340 00000020 */ i3dMatUnit(){}  // lib-ctx
-/* 00237360 00000030 */ i3dVecScale(){}  // lib-ctx
-/* 00237390 00000018 */ FUN_00237390(){}
+/* 00237360 00000018 */ i3dVecScale(){}  // lib-ctx
+/* 00237378 00000018 */ i3dVecScale2(){}  // ror
+/* 00237390 00000018 */ i3dVecScaleXYZ(){}  // ror
 /* 002373a8 0000002c */ i3dMatApply(){}  // lib-ctx
-/* 002373d8 0000002c */ i3dVecAdd(){}  // ror
-/* 00237408 0000002c */ i3dVecSub(){}  // lib-ctx
+/* 002373d8 00000014 */ i3dVecAdd(){}  // ror
+/* 002373f0 00000014 */ i3dVecAdd2(){}  // ror
+/* 00237408 00000014 */ i3dVecSub(){}  // lib-ctx
+/* 00237420 00000014 */ i3dVecSub2(){}  // ror
 /* 00237438 00000014 */ i3dVecMul(){}  // ror
 /* 00237450 00000014 */ i3dVecMul2(){}  // ror
-/* 00237468 000000f4 */ i3dVecNeg(){}  // lib-ctx
-/* 00237560 0000001c */ FUN_00237560(){}
+/* 00237468 00000014 */ i3dVecNeg(){}  // lib-ctx
+/* 00237480 0000002c */ i3dVecInterp(){}  // ror
+/* 002374b0 0000002c */ i3dVecInterp2(){}  // ror
+/* 002374e0 00000024 */ i3dVecClamp(){}  // ror
+/* 00237508 00000024 */ i3dVecClamp2(){}  // ror
+/* 00237530 0000002c */ i3dVecToRgba32(){}  // ror
+/* 00237560 0000001c */ i3dVecCross2(){}  // ror
 /* 00237580 00000020 */ i3dVecDot(){}  // lib-ctx
-/* 002375a8 00000028 */ FUN_002375a8(){}
+/* 002375a8 00000028 */ i3dVecLength(){}  // ror
 /* 002375d8 00000028 */ i3dVecNormalize2(){}  // ror
 /* 00237600 00000010 */ i3dVecFtoi0(){}  // ror
-/* 00237610 00000030 */ i3dVecFtoi4(){}  // ror
+/* 00237610 00000010 */ i3dVecFtoi4(){}  // ror
+/* 00237620 00000010 */ i3dVecItof0(){}  // ror
+/* 00237630 00000010 */ i3dVecItof4(){}  // ror
 /* 00237640 00000034 */ i3dMatTranslate(){}  // lib-ctx
-/* 00237678 00000154 */ i3dMatInverse(){}  // lib-ctx
+/* 00237678 0000009c */ i3dMatInverse(){}  // lib-ctx
+/* 00237718 00000070 */ i3dMatInverseOrtho(){}  // ror
+/* 00237788 00000044 */ i3dMatTranspose(){}  // ror
 /* 002377d0 00000044 */ i3dMatMul(){}  // lib-ctx
 /* 00237818 00000014 */ i3dMatRotX(){}  // lib-ctx
 /* 00237830 00000014 */ i3dMatRotY(){}  // lib-ctx
-/* 00237848 00000068 */ i3dMatRotZ(){}  // lib-ctx
-/* 002378b0 00000050 */ FUN_002378b0(){}
-/* 00237900 00000050 */ FUN_00237900(){}
-/* 00237950 00000050 */ FUN_00237950(){}
-/* 002379a0 00000050 */ FUN_002379a0(){}
-/* 002379f0 00000050 */ FUN_002379f0(){}
-/* 00237a40 00000038 */ FUN_00237a40(){}
-/* 00237a78 00000034 */ FUN_00237a78(){}
-/* 00237ab0 000000ec */ FUN_00237ab0(){}
-/* 00237ba0 000000c4 */ i3dMatLookDir(){}  // lib-ctx
+/* 00237848 00000014 */ i3dMatRotZ(){}  // lib-ctx
+/* 00237860 00000050 */ i3dMatRotZYX(){}  // ror
+/* 002378b0 00000050 */ i3dMatRotZXY(){}  // ror
+/* 00237900 00000050 */ i3dMatRotXYZ(){}  // ror
+/* 00237950 00000050 */ i3dMatRotXZY(){}  // ror
+/* 002379a0 00000050 */ i3dMatRotYXZ(){}  // ror
+/* 002379f0 00000050 */ i3dMatRotYZX(){}  // ror
+/* 00237a40 00000038 */ i3dMatScale(){}  // ror
+/* 00237a78 00000034 */ i3dMatScaleXYZ(){}  // ror
+/* 00237ab0 000000ec */ i3dRotTransPers(){}  // ror
+/* 00237ba0 000000b8 */ i3dMatLookDir(){}  // lib-ctx
+/* 00237c58 0000000c */ i3dMatGetUnit2(){}  // ror
 /* 00237c68 0000005c */ i3dPrintf(){}  // lib-ctx
 /* 00237cc8 00000020 */ i3dFlushCache(){}  // ror
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 00237ce8 00000098 */ FUN_00237ce8(){}
 /* 00237d80 00000030 */ rxSndInit(){}  // ror
 /* 00237db0 00000020 */ FUN_00237db0(){}
