@@ -2153,6 +2153,42 @@
   "was": "FUN_00204ca4",
   "why": "restores the handlers mainSetExceptionHandlers saved; no callers"
  },
+ "00204d38": {
+  "name": "SysNowLoading::loadImage",
+  "tag": "ror-inferred",
+  "was": "FUN_00204d38",
+  "why": "init's last call: reads cdrom0: DATA/CMNTEX/LOADING.BIN (0x20000 bytes) into the 1 MB image at this+0x290 and uploads its CLUT (image+0x10000, 16x16 CT32) to dbp 8000"
+ },
+ "00204e68": {
+  "name": "SysNowLoading::setST",
+  "tag": "ror-inferred",
+  "was": "FUN_00204e68",
+  "why": "writes S (f12), T (f13), Q 1.0 and 0 into a qword of the sprite packet; called twice by makePacket with the sprite's corner texture coordinates, a0 = this"
+ },
+ "00204e98": {
+  "name": "SysNowLoading::makePacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00204e98",
+  "why": "builds the DMA packet at this+0x294: TEXFLUSH, TEX0 (dbp 0x1a40 PSMT8, cbp 8000), TEX1, CLAMP, then one textured SPRITE whose T range is frame n / 4 .. (n+1) / 4 of the 256x256 LOADING image"
+ },
+ "00205078": {
+  "name": "SysNowLoading::uploadImage",
+  "tag": "ror-inferred",
+  "was": "FUN_00205078",
+  "why": "LoadImage of the image at this+0x290 to dbp 0x1a40, 256x256 PSMT8 (the TEX0 makePacket uses); draw calls it every frame"
+ },
+ "002050e8": {
+  "name": "SysNowLoading::clearVram",
+  "tag": "ror-inferred",
+  "was": "FUN_002050e8",
+  "why": "allocates a zeroed 1 MB buffer and LoadImages it to dbp n*0x400 for n 0..15 (256x256 CT32 each: all 4 MB of GS memory), then frees it; init and term call it"
+ },
+ "002051cc": {
+  "name": "SysNowLoading::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_002051cc",
+  "why": "the per-frame draw while loading: uploadImage, VSync, half offset, swap the double buffer at this+0, DMA the packet, frame++ and every 8 frames makePacket((frame/8) % 4); the pfh loader 0x1be564 calls it with the global now-loading object"
+ },
  "002052ac": {
   "name": "SysNowLoading::init",
   "tag": "ror-inferred",

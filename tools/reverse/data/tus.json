@@ -1,6 +1,5 @@
 {
  "queue": [
-  "system/sysnowloading.cpp",
   "mag/magscenerender.cpp",
   "unassigned@0021fb50",
   "unassigned@00216ad0",
@@ -240,6 +239,24 @@
    ],
    "status": "verify",
    "why": "the four S2d 2D layers between spr/sprtexture.cpp and mnuBase (0x192ac0): S2dCineSco 0x190a78, S2dBg 0x190f6c, S2dMes 0x191494, the movie / loading layer S2dMovie 0x19226c; all built on the spr sprite manager (SprMan, spr/sprman.cpp) and loading data/mnurpk/s2d*.rpk; RoR names no file here, spr/ from the link order and the sprite layer"
+  },
+  "system/sysnowloading.cpp": {
+   "notes": "Code complete, nothing on the boot path shows it yet: draw 0x2051cc is called only by the pfh loader 0x1be564 (GamMan load path, unassigned@001bde58), a stub, so the smoke screenshot is black. A forced local draw (130 calls from init, reverted) showed the right picture: the LOADING.BIN frames at the bottom-right, stepping every 8 frames, see progress/20261022-1448_system_sysnowloading.cpp_forced_draw.png. When 0x1be564 is written it reads main's object at sdata 0x2d8ffc: make main.cpp s_nowLoading an extern global then; the first real screenshot of the loading screen marks this TU done. Decisions: the LoadImage uploads (CLUT, per-frame pixels, the 4 MB VRAM clear) and the DMA packet are not reconstructed (PC comments, callcheck lines); clearVram keeps its 1 MB alloc/free for heap parity; the ROM's 64 KB self-copy in loadImage is a no-op and not written; the host texture is cached for the session (no release API yet). RoR's 512-wide frame buffer is stretched to the renderer's 640x448 in rosepan_draw2d.",
+   "ranges": [
+    [
+     "00204d38",
+     "002053f4"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 14:49",
+     "status": "verify",
+     "summary": "SysNowLoading complete: pinned 0x204d38..0x2053f4, all 8 functions (init, term, loadImage, setST, makePacket, uploadImage, clearVram, draw) named and written; new native 2D module rosepan_draw2d (PSMT8+CLUT decode to a GPU texture, sprite draw) and renderer entry points CreateImageTexture / DrawImageQuad; no GS on the path"
+    }
+   ],
+   "status": "verify",
+   "why": "the source string system/sysnowloading.cpp in init and clearVram; 0x204d38..0x2050e8 are SysNowLoading helpers called only from init / term / draw (this in a0, members +0x230..+0x29c); main.cpp ends at mainResetExceptionHandlers 0x204ca4, unassigned@002053f4 follows"
   },
   "unassigned@001056f8": {},
   "unassigned@00190a78": {},

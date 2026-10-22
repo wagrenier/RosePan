@@ -469,6 +469,13 @@ Paths the ELF names (the disc dump has not been looked at yet: `ROSEPAN_DATA`):
   uploaded to dbp 0x1a40) then a 16x16 CT32 palette (CSM1 order; dbp 8000), then 0xe0 zero bytes. The
   picture holds four 256x64 "Now Loading" frames with a girl icon; 0x204e98 picks frame n by V = n / 4.
   Reference PNG: decode it as above into work/ref/LOADING/ (the 2026-10-22 main session did it inline).
+  `SysNowLoading` (system/sysnowloading.cpp 0x204d38..0x2053f4): init 0x2052ac allocates the image
+  (line 304) and packet (305), GIF channel, `sceGsSetDefDBuff(this, CT32, 512, 448, GEQUAL, Z16S,
+  clear)` with clear Q 1.0, makePacket(0), clearVram 0x2050e8 (sixteen 256 KB CT32 uploads of zeros:
+  all 4 MB of GS memory), loadImage 0x204d38, RCNT0 mode 0x83. draw 0x2051cc (per V-blank, from
+  0x1be564 only): uploadImage 0x205078, SyncV, half offset, swap, DMA the packet, frame++, every 8
+  frames makePacket((frame / 8) % 4). The sprite: GS (0x8200, 0x8980)..(0x8e00, 0x8c80) = frame
+  (288, 376)..(480, 424) of the 512x448 buffer, ST (0, n/4)..(1, (n+1)/4), DECAL, bilinear, ABE 0.
 - Textures are TIM2 (`utl/utltm2.cpp`; names such as loading.tm2, option.tm2, texmoji.tm2, map01_tcc.tm2,
   `%s_%02d.tm2`): `tm2png.py` converts them, `--scan` carves them out of archives.
 
@@ -521,6 +528,14 @@ throughout (identifiers, env variables, files, shader macros):
     / `DrawFontQuad` (2D), `BeginMeshStream` / `AppendMeshTriangle` / `CommitMeshStream` and the
     resident meshes (3D, MioPan's "Renderer architecture": decode a model once, draw slices). Extend
     them (sprite batches, per-layer queues, texture handles instead of `sceGsTex0`) as RoR needs.
+  - **`src/rosepan/rendering/rosepan_draw2d.*`** (2026-10-22, first user SysNowLoading): the 2D
+    module. `RosePan_Draw2dMakeT8Texture` decodes PSMT8 + CT32 CLUT (CSM1 swizzle, `opaque` for ABE 0)
+    into a GPU texture through the renderer's `RosePan_RendererCreateImageTexture` (content-hashed,
+    salted, in the texture cache for the session; no release yet); `RosePan_Draw2dSprite` draws a
+    `RosePanSprite2d` (frame-buffer pixels + normalised ST, as RoR decided them) through
+    `RosePan_RendererDrawImageQuad`, stretching RoR's 512-wide frame buffer to the renderer's 640x448
+    frame (the PS2 display stretches 512 to the full width). A draw outside `mainLoop` (the loading
+    screen inside the loads) brackets itself with `RosePan_RendererBeginFrame` / `EndFrame`.
   - The emulated GS path remains only as a fallback for something not bridged yet; anything that
     lands there is a known performance debt to list in open-items.md.
 - Data root: the disc's root copied file by file (the folder holding `DATA/`); `LooksLikeDataRoot`

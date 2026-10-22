@@ -744,6 +744,23 @@ void RosePan_RendererDrawFontQuad(const float *xy,
                                  unsigned char g,
                                  unsigned char b,
                                  unsigned char a);
+/* The native draw path's textures (architecture.md "PC platform layer"): an
+ * image RoR decoded on the host, RGBA8 with alpha on the 0..255 scale, made a
+ * GPU texture without passing through GS memory.  Cached by content for the
+ * session; the handle stays valid.  NULL on failure. */
+const void *RosePan_RendererCreateImageTexture(const unsigned char *rgba,
+                                              int width, int height);
+/* A screen-space quad from such a handle: four corners (top-left, top-right,
+ * bottom-left, bottom-right) in 640x448 frame coordinates, uv normalised
+ * 0..1, colour on the PS2 scale (0x80 = 1.0), bilinear when `linear`. */
+void RosePan_RendererDrawImageQuad(const void *texture,
+                                  const float *xy,
+                                  const float *uv,
+                                  unsigned char r,
+                                  unsigned char g,
+                                  unsigned char b,
+                                  unsigned char a,
+                                  int linear);
 void RosePan_RendererDrawSolidQuad(const float *xy, const unsigned char *rgba);
 void RosePan_RendererDrawSolidTriangles2D(const float *xy,
                                          const unsigned char *rgba,
