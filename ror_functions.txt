@@ -5490,50 +5490,58 @@
 /* 00243680 00000020 */ rxSysGetFileDir(){}  // ror
 /* 002436a0 0000002c */ rxSysSetFileSearchDir(){}  // ror
 /* 002436d0 00000020 */ rxSysGetFileSearchDir(){}  // ror
-/* 002436f0 00000020 */ FUN_002436f0(){}
-/* 00243710 00000020 */ FUN_00243710(){}
-/* 00243730 00000020 */ FUN_00243730(){}
-/* 00243750 00000034 */ FUN_00243750(){}
-/* 00243788 00000020 */ FUN_00243788(){}
-/* 002437a8 00000030 */ FUN_002437a8(){}
-/* 002437d8 00000020 */ FUN_002437d8(){}
+/* 002436f0 00000020 */ rxSysPushSearchDir(){}  // ror
+/* 00243710 00000020 */ rxSysPopSearchDir(){}  // ror
+/* 00243730 00000020 */ rxSysGetLastName(){}  // ror
+/* 00243750 00000034 */ rxSysSetDeviceParam(){}  // ror
+/* 00243788 00000020 */ rxSysStreamOpen(){}  // ror
+/* 002437a8 00000030 */ rxSysStreamOpenRing(){}  // ror
+/* 002437d8 00000020 */ rxSysStreamOpenPath(){}  // ror
 
 // *****************************************************************************
 // FILE -- rx/rxfile.cpp
 // *****************************************************************************
 
-/* 002437f8 0000013c */ FUN_002437f8(){}
-/* 00243938 000001bc */ FUN_00243938(){}
-/* 00243af8 00000144 */ FUN_00243af8(){}
-/* 00243c40 00000094 */ FUN_00243c40(){}
-/* 00243cd8 000000cc */ FUN_00243cd8(){}
-/* 00243da8 000000b4 */ FUN_00243da8(){}
-/* 00243e60 00000074 */ FUN_00243e60(){}
-/* 00243ed8 00000050 */ FUN_00243ed8(){}
-/* 00243f28 00000048 */ FUN_00243f28(){}
-/* 00243f70 00000048 */ FUN_00243f70(){}
-/* 00243fb8 00000070 */ FUN_00243fb8(){}
-/* 00244028 000002c0 */ FUN_00244028(){}
-/* 002442e8 00000128 */ FUN_002442e8(){}
-/* 00244410 000003e4 */ FUN_00244410(){}
-/* 002447f8 0000006c */ FUN_002447f8(){}
-/* 00244868 0000008c */ FUN_00244868(){}
-/* 002448f8 000000c4 */ FUN_002448f8(){}
-/* 002449c0 00000078 */ FUN_002449c0(){}
-/* 00244a38 0000002c */ FUN_00244a38(){}
-/* 00244a68 000000d8 */ FUN_00244a68(){}
-/* 00244b40 00000230 */ FUN_00244b40(){}
-/* 00244d70 000001b0 */ FUN_00244d70(){}
-/* 00244f20 000000e0 */ FUN_00244f20(){}
-/* 00245000 00000078 */ FUN_00245000(){}
-/* 00245078 000001c8 */ FUN_00245078(){}
-/* 00245240 00000038 */ FUN_00245240(){}
-/* 00245280 000000c8 */ FUN_00245280(){}
-/* 00245348 0000011c */ FUN_00245348(){}
-/* 00245468 000000b8 */ FUN_00245468(){}
-/* 00245520 000000dc */ FUN_00245520(){}
-/* 00245600 000001a8 */ FUN_00245600(){}
-/* 002457a8 00000104 */ FUN_002457a8(){}
+/* 002437f8 0000005c */ rxFileClose(){}  // ror
+/* 00243858 0000005c */ rxFileAbort(){}  // ror
+/* 002438b8 0000007c */ rxFileGetState(){}  // ror
+/* 00243938 000001bc */ rxFileRead(){}  // ror
+/* 00243af8 00000144 */ rxFileWrite(){}  // ror
+/* 00243c40 00000094 */ rxFileSeek(){}  // ror
+/* 00243cd8 000000cc */ rxFileSync(){}  // ror
+/* 00243da8 00000060 */ rxFileSetMarkers(){}  // ror
+/* 00243e08 00000054 */ rxFileEnableMarker(){}  // ror
+/* 00243e60 00000074 */ rxFilePause(){}  // ror
+/* 00243ed8 00000050 */ rxFileGetRingData(){}  // ror
+/* 00243f28 00000048 */ rxFileGetRingReadPos(){}  // ror
+/* 00243f70 00000048 */ rxFileGetRingSize(){}  // ror
+/* 00243fb8 00000070 */ rxFileGetRingFilled(){}  // ror
+/* 00244028 00000150 */ rxFileRingConsume(){}  // ror
+/* 00244178 00000058 */ rxFileGetRingFilePos(){}  // ror
+/* 002441d0 00000060 */ rxFileSetTags(){}  // ror
+/* 00244230 00000054 */ rxFileEnableTag(){}  // ror
+/* 00244288 00000060 */ rxFileGetRingTags(){}  // ror
+/* 002442e8 00000128 */ rxFileOpenEx(){}  // ror
+/* 00244410 000003e4 */ rxFileOpenSlot(){}  // ror
+/* 002447f8 0000006c */ rxFileOnCreate(){}  // ror
+/* 00244868 0000008c */ rxFileOnGetSize(){}  // ror
+/* 002448f8 000000c4 */ rxFileSlotClose(){}  // ror
+/* 002449c0 00000078 */ rxFileSlotKick(){}  // ror
+/* 00244a38 0000002c */ rxFileSlotTransfer(){}  // ror
+/* 00244a68 000000d8 */ rxFileSlotRefill(){}  // ror
+/* 00244b40 00000230 */ rxFileSlotRequest(){}  // ror
+/* 00244d70 000001b0 */ rxFileSlotRequestChunked(){}  // ror
+/* 00244f20 000000e0 */ rxFileSlotPost(){}  // ror
+/* 00245000 00000078 */ rxFileOnTransfer(){}  // ror
+/* 00245078 000001c8 */ rxFileSlotSetMarkers(){}  // ror
+/* 00245240 00000038 */ rxFileSlotEnableMarker(){}  // ror
+/* 00245280 000000c8 */ rxFileSlotAddSegment(){}  // ror
+/* 00245348 0000011c */ rxFileSlotDropSegments(){}  // ror
+/* 00245468 000000b8 */ rxFileSlotFreeSegments(){}  // ror
+/* 00245520 000000dc */ rxFileSlotSegmentPos(){}  // ror
+/* 00245600 000001a8 */ rxFileSlotSetTags(){}  // ror
+/* 002457a8 00000038 */ rxFileSlotEnableTag(){}  // ror
+/* 002457e8 000000c4 */ rxFileSlotGetTags(){}  // ror
 /* 002458b0 00000050 */ rxFileCallDevice(){}  // ror
 /* 00245900 00000048 */ rxFileGetDeviceRoot(){}  // ror
 /* 00245948 0000003c */ rxFileCallLoadHook(){}  // ror
@@ -5564,12 +5572,12 @@
 /* 002467a0 00000048 */ rxFileHostJoinRoot(){}  // ror
 /* 002467e8 0000000c */ rxFileHostGetRoot(){}  // ror
 /* 002467f8 00000044 */ rxFileHostSetRoot(){}  // ror
-/* 00246840 0000004c */ FUN_00246840(){}
-/* 00246890 00000030 */ FUN_00246890(){}
+/* 00246840 0000004c */ rxFileCdWait(){}  // ror
+/* 00246890 00000030 */ rxFileCdSyncWait(){}  // ror
 /* 002468c0 0000008c */ rxFileCdInit(){}  // ror
 /* 00246950 00000004 */ rxFileCdTerm(){}  // ror
-/* 00246958 00000030 */ FUN_00246958(){}
-/* 00246988 0000001c */ FUN_00246988(){}
+/* 00246958 00000030 */ rxFileCdStatusWait(){}  // ror
+/* 00246988 0000001c */ rxFileCdTray(){}  // ror
 /* 002469a8 000002c4 */ rxFileCdProcess(){}  // ror
 /* 00246c70 00000048 */ rxFileCdMakePath(){}  // ror
 /* 00246cb8 000000c8 */ rxFileCdControl(){}  // ror
@@ -5578,24 +5586,27 @@
 /* 00246e78 00000008 */ rxFileCdCreate(){}  // ror
 /* 00246e80 000000e8 */ rxFileCdRead(){}  // ror
 /* 00246f68 00000008 */ rxFileCdWrite(){}  // ror
-/* 00246f70 000000d8 */ FUN_00246f70(){}
-/* 00247048 00000034 */ FUN_00247048(){}
-/* 00247080 00000288 */ FUN_00247080(){}
-/* 00247308 000000c0 */ FUN_00247308(){}
-/* 002473c8 00000240 */ FUN_002473c8(){}
+/* 00246f70 000000d8 */ rxFileCdIsoName(){}  // ror
+/* 00247048 00000034 */ rxFileCdMapSector(){}  // ror
+/* 00247080 00000288 */ rxFileCdReadBytes(){}  // ror
+/* 00247308 000000c0 */ rxFileCdReadAt(){}  // ror
+/* 002473c8 00000240 */ rxFileCdReadSectors(){}  // ror
 /* 00247608 00000060 */ rxFileCdInitCache(){}  // ror
 /* 00247668 00000064 */ rxFileCdFlushCache(){}  // ror
-/* 002476d0 0000013c */ FUN_002476d0(){}
-/* 00247810 000001d0 */ FUN_00247810(){}
-/* 002479e0 000001cc */ FUN_002479e0(){}
-/* 00247bb0 0000005c */ FUN_00247bb0(){}
-/* 00247c10 0000004c */ FUN_00247c10(){}
-/* 00247c60 00000228 */ FUN_00247c60(){}
+/* 002476d0 0000013c */ rxFileCdFind(){}  // ror
+/* 00247810 000001d0 */ rxFileCdFindDir(){}  // ror
+/* 002479e0 000001cc */ rxFileCdFindInDir(){}  // ror
+/* 00247bb0 0000005c */ rxFileCdPathElem(){}  // ror
+/* 00247c10 0000004c */ rxFileCdIsLastElem(){}  // ror
+/* 00247c60 00000228 */ rxFileCdReadCached(){}  // ror
 /* 00247e88 0000000c */ rxFileCdGetRoot(){}  // ror
-/* 00247e98 0000001c */ rxFileCdSetRoot(){}  // ror
-/* 00247eb8 00000044 */ FUN_00247eb8(){}
-/* 00247f00 0000000c */ FUN_00247f00(){}
-/* 00247f10 00000104 */ FUN_00247f10(){}
+/* 00247e98 00000004 */ rxFileCdSetRoot(){}  // ror
+/* 00247ea0 00000014 */ rxFileCdSetFindFunc(){}  // ror
+/* 00247eb8 00000044 */ rxFileCdSetClockRead(){}  // ror
+/* 00247f00 0000000c */ rxFileCdGetClockRead(){}  // ror
+/* 00247f10 000000bc */ rxFileCdGetClock(){}  // ror
+/* 00247fd0 00000034 */ rxFileCdSetLayerMode(){}  // ror
+/* 00248008 0000000c */ rxFileCdGetLayerMode(){}  // ror
 /* 00248018 00000088 */ rxFileHddInit(){}  // ror
 /* 002480a0 00000004 */ rxFileHddTerm(){}  // ror
 /* 002480a8 000000ac */ rxFileHddOnError(){}  // ror
@@ -5636,26 +5647,29 @@
 /* 00248f00 00000084 */ rxFilePathUp(){}  // ror
 /* 00248f88 00000050 */ rxFilePathCountDots(){}  // ror
 /* 00248fd8 00000024 */ rxFileStartThread(){}  // ror
-/* 00249000 00000094 */ FUN_00249000(){}
-/* 00249098 00000048 */ FUN_00249098(){}
-/* 002490e0 000000dc */ FUN_002490e0(){}
-/* 002491c0 0000041c */ rxFileCreateThread(){}  // ror
+/* 00249000 00000094 */ rxFileStopThread(){}  // ror
+/* 00249098 00000048 */ rxFilePostRequest(){}  // ror
+/* 002490e0 000000dc */ rxFileCancelRequests(){}  // ror
+/* 002491c0 000000ec */ rxFileCreateThread(){}  // ror
+/* 002492b0 0000032c */ rxFileThreadMain(){}  // ror
 /* 002495e0 00000014 */ rxFileThreadProc(){}  // ror
-/* 002495f8 00000004 */ FUN_002495f8(){}
-/* 00249600 00000004 */ FUN_00249600(){}
-/* 00249608 0000000c */ FUN_00249608(){}
-/* 00249618 0000015c */ FUN_00249618(){}
-/* 00249778 00000048 */ FUN_00249778(){}
-/* 002497c0 00000054 */ FUN_002497c0(){}
-/* 00249818 0000001c */ FUN_00249818(){}
-/* 00249838 0000002c */ FUN_00249838(){}
-/* 00249868 0000014c */ FUN_00249868(){}
+/* 002495f8 00000004 */ rxFileNop0(){}  // ror
+/* 00249600 00000004 */ rxFileNop1(){}  // ror
+/* 00249608 0000000c */ rxFileQueueInit(){}  // ror
+/* 00249618 0000015c */ rxFileQueuePush(){}  // ror
+/* 00249778 00000048 */ rxFileQueueFront(){}  // ror
+/* 002497c0 00000054 */ rxFileQueuePop(){}  // ror
+/* 00249818 0000001c */ rxFileQueueCount(){}  // ror
+/* 00249838 0000002c */ rxFileQueueSpace(){}  // ror
+/* 00249868 0000014c */ rxFileQueueCancel(){}  // ror
 /* 002499b8 000000b0 */ rxFileSetDeviceMap(){}  // ror
-/* 00249a68 0000007c */ rxFileGetDeviceMap(){}  // ror
-/* 00249ae8 00000024 */ rxFileGetFallbackDevice(){}  // ror
+/* 00249a68 00000068 */ rxFileGetDeviceMap(){}  // ror
+/* 00249ad0 00000014 */ rxFileSetFallbackDevice(){}  // ror
+/* 00249ae8 00000014 */ rxFileGetFallbackDevice(){}  // ror
+/* 00249b00 0000000c */ rxFileSetErrorHook(){}  // ror
 /* 00249b10 0000000c */ rxFileGetErrorHook(){}  // ror
-/* 00249b20 00000058 */ FUN_00249b20(){}
-/* 00249b78 00000010 */ FUN_00249b78(){}
+/* 00249b20 00000058 */ rxFileSetThreadPriority(){}  // ror
+/* 00249b78 00000010 */ rxFileGetThreadPriority(){}  // ror
 
 // *****************************************************************************
 // FILE -- rx/rxthread.cpp
@@ -5682,12 +5696,12 @@
 /* 0024a678 00000250 */ FUN_0024a678(){}
 /* 0024a8c8 0000008c */ rxThDisableDispatch(){}  // ror
 /* 0024a958 00000184 */ rxThEnableDispatch(){}  // ror
-/* 0024aae0 0000005c */ FUN_0024aae0(){}
-/* 0024ab40 000000e4 */ FUN_0024ab40(){}
-/* 0024ac28 0000003c */ FUN_0024ac28(){}
-/* 0024ac68 0000005c */ FUN_0024ac68(){}
-/* 0024acc8 00000018 */ FUN_0024acc8(){}
-/* 0024ace8 00000174 */ FUN_0024ace8(){}
+/* 0024aae0 0000005c */ rxThGetIndex(){}  // ror
+/* 0024ab40 000000e4 */ rxThDelete(){}  // ror
+/* 0024ac28 0000003c */ rxThSetPriority(){}  // ror
+/* 0024ac68 0000005c */ rxThGetParam(){}  // ror
+/* 0024acc8 00000018 */ rxThSetState(){}  // ror
+/* 0024ace8 00000174 */ rxThCreate(){}  // ror
 /* 0024ae60 00000104 */ rxThRequest(){}  // ror
 /* 0024af68 00000034 */ FUN_0024af68(){}
 /* 0024afa0 00000054 */ FUN_0024afa0(){}
@@ -5702,7 +5716,7 @@
 /* 0024b300 0000005c */ FUN_0024b300(){}
 /* 0024b360 00000038 */ FUN_0024b360(){}
 /* 0024b398 0000005c */ FUN_0024b398(){}
-/* 0024b3f8 00000094 */ FUN_0024b3f8(){}
+/* 0024b3f8 00000094 */ rxThSync(){}  // ror
 
 // *****************************************************************************
 // FILE -- (library) eecdvd.c
@@ -5783,13 +5797,13 @@
 /* 0024c2c0 000002e8 */ sceCdInit(){}  // lib
 /* 0024c5a8 00000218 */ sceCdDiskReady_old(){}  // lib
 /* 0024c7c0 00000220 */ sceCdDiskReady(){}  // lib
-/* 0024c9e0 000001e0 */ FUN_0024c9e0(){}
+/* 0024c9e0 000001e0 */ sceCdRead(){}  // lib-ctx
 /* 0024cbc0 00000098 */ FUN_0024cbc0(){}
 /* 0024cc58 00000024 */ sceCdGetDiskType(){}  // lib-ctx
-/* 0024cc80 00000098 */ FUN_0024cc80(){}
-/* 0024cd18 000000b8 */ FUN_0024cd18(){}
+/* 0024cc80 00000098 */ sceCdGetError(){}  // lib-ctx
+/* 0024cd18 000000b8 */ sceCdStatus(){}  // lib-ctx
 /* 0024cdd0 000000d4 */ FUN_0024cdd0(){}
-/* 0024cea8 000000d0 */ FUN_0024cea8(){}
+/* 0024cea8 000000d0 */ sceCdReadDvdDualInfo(){}  // lib-ctx
 
 // *****************************************************************************
 // FILE -- (library) eecdvd.c
@@ -5802,8 +5816,8 @@
 // *****************************************************************************
 
 /* 0024d048 00000024 */ FUN_0024d048(){}
-/* 0024d070 000000bc */ FUN_0024d070(){}
-/* 0024d130 000000ec */ FUN_0024d130(){}
+/* 0024d070 000000bc */ sceCdReadClock(){}  // lib-ctx
+/* 0024d130 000000ec */ sceCdTrayReq(){}  // lib-ctx
 /* 0024d220 00000228 */ sceMcInit(){}  // lib
 /* 0024d448 00000124 */ sceMcChangeThreadPriority(){}  // lib
 /* 0024d570 000000c0 */ sceMcGetSlotMax(){}  // lib

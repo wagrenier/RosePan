@@ -112,6 +112,13 @@ entries are marked **RoR** with the date.
   `LAB_` addresses: two-instruction slot functions (`jr ra; li v0,-2`, a getter) were never made
   functions, and one thread entry (0x2495e0) sat inside the previous body. Every `LAB_` stored into a
   table in a decompile is a function: `ghidra.py mkfunc` it before naming the table's slots.
+- **Tiny wrappers folded into the function before them** (rxfile, 2026-10-22: 13 entries such as
+  0x243858 close-with-abort, 0x2438b8 state, 0x243e08 / 0x244178 / 0x2441d0 / 0x244230 / 0x244288
+  slot-check wrappers, 0x2457e8, 0x247ea0, 0x247fd0, 0x248008, 0x249ad0, 0x249b00). rx writes many
+  `if (fd valid) return f(slot, ...)` wrappers reached only from other modules' code Ghidra had not
+  linked; the decompile of the body before them is short and its size is not. `python hidden.py <lo>
+  <hi>` over the TU's range lists them; mkfunc every one before naming. Ghidra also typed some of their
+  targets `void f(void)` and dropped the arguments (0x243da8 -> 0x245078): read the asm.
 - **A ROM read of the byte after a copy** (`rxFilePathNextElem` 0x248e98 tests `*out == '.'` after
   copying, i.e. the uninitialised next byte): keep the quirk with a comment, it only fires on stale
   buffer contents.

@@ -396,6 +396,38 @@ int sceCdStStart(u_int lbn, sceCdRMode *mode)
     return cd_stream_file != 0;
 }
 
+/* The host has no tray: the drive always reads as paused (never shell open,
+ * which would make Rule of Rose's cdrom driver flush its cache). */
+int sceCdStatus(void)
+{
+    return SCECdStatPause;
+}
+
+/* Tray open / close / check: nothing moves; the tray never changed. */
+int sceCdTrayReq(int param, u_int *traychk)
+{
+    (void)param;
+    if (traychk != 0)
+    {
+        *traychk = 0;
+    }
+    return 1;
+}
+
+/* One layer. */
+int sceCdReadDvdDualInfo(int *on_dual, u_int *layer1_start)
+{
+    if (on_dual != 0)
+    {
+        *on_dual = 0;
+    }
+    if (layer1_start != 0)
+    {
+        *layer1_start = 0;
+    }
+    return 1;
+}
+
 /* --------------------------------------------------------------------------
  *  IOP side (system/iop)
  * ------------------------------------------------------------------------ */

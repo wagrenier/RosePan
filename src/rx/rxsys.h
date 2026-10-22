@@ -104,5 +104,13 @@ void        rxSysSetFileDir(const char *dir);                   // ROR 0x0024365
 char       *rxSysGetFileDir(void);                              // ROR 0x00243680
 void        rxSysSetFileSearchDir(const char *dir);             // ROR 0x002436a0
 char       *rxSysGetFileSearchDir(void);                        // ROR 0x002436d0
+void        rxSysPushSearchDir(void);                           // ROR 0x002436f0
+void        rxSysPopSearchDir(void);                            // ROR 0x00243710
+char       *rxSysGetLastName(void);                             // ROR 0x00243730
+int         rxSysSetDeviceParam(int value);                     // ROR 0x00243750
+int         rxSysStreamOpen(const char *name, int flags);       // ROR 0x00243788
+int         rxSysStreamOpenRing(const char *name, void *ring, int ringSize, int threshold); // ROR 0x002437a8
+int         rxSysStreamOpenPath(int device, const char *path, int flags, void *ring,
+                                int ringSize, int threshold);   // ROR 0x002437d8
 
 #endif /* _RX_RXSYS_H */

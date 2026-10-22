@@ -89,7 +89,7 @@ Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
 - **Drivers** (bss 0x7df9c0, 9 code pointers each, indexed by RX_SYS_DEVICE): makePath, getStatus,
   control, getSize, create, read(name, buf, offset, size), write(name, offset, buf, size), setRoot,
   getRoot. HOST 0x7df9c0 (root bss 0x7dfa50, default "host0:"), CDROM 0x7df9e4 (root fixed
-  "cdrom0:"; "\" and ";1" sit next to it at 0x2dc1c4 / 0x2dc1c8, probably the ISO name form -- unverified;
+  "cdrom0:"; "\" and ";1" sit next to it at 0x2dc1c4 / 0x2dc1c8: the ISO name form, rxFileCdIsoName;
   create / write return -2), HDD 0x7dfa2c (a host0: copy whose
   errors -5 / -6 / -19 / -65531 remap HDD to its fallback device, data 0x2dc238 = {0,1,2,-1}, and call
   the error hook 0x2dc248). MCARD has no driver. `rxFileCallDevice` = the driver's setRoot (rxsys passes
@@ -102,10 +102,37 @@ Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
   dir + search dir + name ("/" makes either absolute) behind the driver's root.
 - `rxFileLoad` / `rxFileLoadModule` / `rxFileRebootIop` open through rxsys's print-locked sce*
   wrappers (`rxSysOpen` 0x242528 .. `rxSysLseek` 0x242660). `rxFileLoad` reads size + 0x80 bytes.
-- The file thread: `rxFileStartThread` -> `rxFileCreateThread(0, 2, rxFileThreadProc)`; the proc
-  (0x2495e0, folded into 0x2491c0's body before 2026-10-22) tail-calls the cdrom reader 0x2469a8.
-- The cdrom sector cache: 32 nodes {prev, next, buf, sector} at 0x7dfb80 with 0x800-byte buffers at
-  0x7dfdc0, free list 0x7dfd90, circular used list through the sentinel 0x7dfd80.
+- **Async file slots** (bss 0x7dabb0, 64 x 0xd0, fd 1..63; pools for markers 0x7de3b4, ring segments
+  0x7de9b8 and tags 0x7ddfb0, threaded by rxSysInitModules): `rxSysStreamOpen(name, flags)` 0x243788 ->
+  `rxFileOpenEx` 0x2442e8 -> `rxFileOpenSlot` 0x244410, which posts a create (SCE_CREAT, then never
+  sized) or size request and waits unless flag 0x8000 (RX_FILE_NOWAIT). Flag 0x10000 (RX_FILE_RING):
+  the file thread keeps the slot's ring buffer filled in whole sectors while filled <= threshold;
+  `rxFileGetRingData / RingConsume / GetRingFilled` read it, segments map ring bytes to file positions.
+  A slot opens *paused* (`rxFilePause(fd, 0)` starts the refill). Markers {pos, active, id, count, max,
+  jumpPos, callback, user} split reads and jump the position (stream loops); tags {pos, active, id,
+  value} are reported per ring window (`rxFileGetRingTags`). The default load / size / save hooks
+  (0x245ae8 / 0x245a48 / 0x245be0) are open + seek(0, 2) + read / write + close on a slot. Users
+  outside rx: snd (sndman, rxmpeg) and the code at 0x17fd58..0x182c08 and 0x1be36c..0x1be8a8.
+- **The file thread** (bss 0x7f6910, one; `rxFileCreateThread(0, 2, rxFileThreadProc)` via rxThCreate
+  with a 64 KB stack): two 64-entry queues of 0x2c-byte requests {state, device, path, op 0 create /
+  1 size / 2 read / 3 write, offset, buf, size, retryMissing, busy, callback, owner} -- queue 0 for
+  opens and ring refills, queue 1 for rxFileRead / rxFileWrite (split into the device param's chunk
+  size). Device -> thread table 0x2dc250 (all 0); requests go through the device map 0x2dc228 to the
+  driver. A failed request stays queued and is retried after the next proc call (a -2 "not found"
+  only when retryMissing: async opens wait for the file to appear). Before every request the thread
+  runs `rxFileThreadProc(priority + 1)` -> `rxFileCdProcess`. Stop: `rxFileStopThread` 0x249000.
+- **The cdrom driver reads ISO 9660 itself**: `rxFileCdFind` (pointer 0x2dc1dc, replaceable by
+  `rxFileCdSetFindFunc`) reads the primary volume descriptor at 0x8000 (path table 0x808c / 0x8084),
+  walks the path table by parent number, scans the last dir's records for "NAME;1" (`rxFileCdIsoName`:
+  "\" + upper case + ";1"). Reads go through a 32-sector LRU cache (nodes {prev, next, buf, sector} at
+  0x7dfb80, buffers 0x7dfdc0, free list 0x7dfd90, used list sentinel 0x7dfd80) and `rxFileCdReadBytes`
+  (64-byte-aligned sector reads plus a 4-sector tail buffer 0x7efdc0). The first read waits for the
+  disc, sets sceCdMmode (DVD for 0x14 / 0xfe) and reads the dual-layer info (layer 1 start added to
+  every LSN when layer 1 is selected, `rxFileCdSetLayerMode`). A repeated read at the same offset first
+  reads 32 sectors earlier (forced seek). Once a lookup read the disc, the thread polls sceCdStatus every
+  0x400 steps (shell open: cache dropped, status 0 set); `rxFileCdControl(0, open)` queues tray
+  requests; `rxFileCdSetClockRead(1)` makes it read the drive clock every 30 ticks
+  (`rxFileCdGetClock`). **On the host this needs an ISO image behind sceCdRead** (open-items.md).
 - `s_verbose` data 0x2dc1b0 = 1: the retail build prints every rxfile message.
 
 ## Modules (RoR's own source files)

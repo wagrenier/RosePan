@@ -1101,28 +1101,8 @@ void rxSysInitUser(void)
 {
 }
 
-/* Four pools rxSysInitModules threads into free lists (bss 0x7dabb0 ..
- * 0x7df9b8). Their users are in the rest of rx; the element layouts are
- * not known yet beyond the flag / link word each init touches.
- * layout: host -- B, C and D hold their link pointers (8 bytes on the
- * host); the EE sizes are in the comments, A keeps its EE size. */
-struct RxSysPoolA { u_char _00[4]; u_char m_used; u_char _05[0xcb]; };  /* EE 0xd0, 64 */
-static_assert(sizeof(RxSysPoolA) == 0xd0, "RxSysPoolA");
-static_assert(offsetof(RxSysPoolA, m_used) == 0x4, "RxSysPoolA::m_used");
-struct RxSysPoolB { RxSysPoolB *m_next; u_char _04[0x14]; };            /* EE 0x18, 64 */
-static_assert(offsetof(RxSysPoolB, m_next) == 0x0, "RxSysPoolB::m_next");
-struct RxSysPoolC { u_char _00[4]; RxSysPoolC *m_next; u_char _08[8]; }; /* EE 0x10, 256; m_next at EE +4 */
-static_assert(offsetof(RxSysPoolC, m_next) >= 0x4, "RxSysPoolC::m_next");
-struct RxSysPoolD { RxSysPoolD *m_next; u_char _04[0xc]; };             /* EE 0x10, 64 */
-static_assert(offsetof(RxSysPoolD, m_next) == 0x0, "RxSysPoolD::m_next");
-
-static RxSysPoolA  s_poolA[64];                 /* bss 0x7dabb0 */
-static RxSysPoolD  s_poolD[64];                 /* bss 0x7ddfb0 */
-static RxSysPoolD *s_poolDFree;                 /* bss 0x7de3b0 */
-static RxSysPoolB  s_poolB[64];                 /* bss 0x7de3b4 */
-static RxSysPoolB *s_poolBFree;                 /* bss 0x7de9b4 */
-static RxSysPoolC  s_poolC[256];                /* bss 0x7de9b8 */
-static RxSysPoolC *s_poolCFree;                 /* bss 0x7df9b8 */
+/* The four pools it threads into free lists (bss 0x7dabb0 .. 0x7df9b8) are
+ * rxfile's: its file slots, markers, ring segments and tags (rxfile.h). */
 
 // ──────────────────────────────────────────────────────────────────────
 // Reset the rx pools, start the file layer and its thread, and register
@@ -1132,24 +1112,24 @@ static RxSysPoolC *s_poolCFree;                 /* bss 0x7df9b8 */
 void rxSysInitModules(void)
 {
     for (int i = 0; i < 64; i++)
-        s_poolA[i].m_used = 0;
-    s_poolBFree = 0;
+        rxFileSlots[i].used = 0;
+    rxFileMarkerFree = 0;
     for (int i = 0; i < 64; i++)
     {
-        s_poolB[i].m_next = s_poolBFree;
-        s_poolBFree = &s_poolB[i];
+        rxFileMarkerPool[i].next = rxFileMarkerFree;
+        rxFileMarkerFree = &rxFileMarkerPool[i];
     }
-    s_poolCFree = 0;
+    rxFileSegmentFree = 0;
     for (int i = 0; i < 256; i++)
     {
-        s_poolC[i].m_next = s_poolCFree;
-        s_poolCFree = &s_poolC[i];
+        rxFileSegmentPool[i].next = rxFileSegmentFree;
+        rxFileSegmentFree = &rxFileSegmentPool[i];
     }
-    s_poolDFree = 0;
+    rxFileTagFree = 0;
     for (int i = 0; i < 64; i++)
     {
-        s_poolD[i].m_next = s_poolDFree;
-        s_poolDFree = &s_poolD[i];
+        rxFileTagPool[i].next = rxFileTagFree;
+        rxFileTagFree = &rxFileTagPool[i];
     }
     rxFileInit();
     rxFileStartThread();
@@ -1203,6 +1183,66 @@ void rxSysSetFileSearchDir(const char *dir)
 char *rxSysGetFileSearchDir(void)
 {
     return rxFileGetSearchDir(rxFileGetCurrent());
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x002436f0
+
+void rxSysPushSearchDir(void)
+{
+    rxFilePushSearchDir(rxFileGetCurrent());
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00243710
+
+void rxSysPopSearchDir(void)
+{
+    rxFilePopSearchDir(rxFileGetCurrent());
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00243730
+
+char *rxSysGetLastName(void)
+{
+    return rxFileGetLastName(rxFileGetCurrent());
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00243750
+
+int rxSysSetDeviceParam(int value)
+{
+    return rxFileSetDeviceParam(rxFileGetCurrent(), value);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Open an rxfile slot on the current device (returns the fd, -1).
+// ROR 0x00243788
+
+int rxSysStreamOpen(const char *name, int flags)
+{
+    return rxFileOpenEx(name, flags, 0, 0, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Open a slot that streams into a ring buffer, refilled while it holds
+// threshold bytes or fewer.
+// ROR 0x002437a8
+
+int rxSysStreamOpenRing(const char *name, void *ring, int ringSize, int threshold)
+{
+    return rxFileOpenEx(name, SCE_RDONLY | RX_FILE_NOWAIT | RX_FILE_RING, ring, ringSize, threshold);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x002437d8
+
+int rxSysStreamOpenPath(int device, const char *path, int flags, void *ring, int ringSize,
+                        int threshold)
+{
+    return rxFileOpenSlot(device, path, flags, ring, ringSize, threshold);
 }
 
 // ---- stubs (tools/reverse/stubgen.py) ----
