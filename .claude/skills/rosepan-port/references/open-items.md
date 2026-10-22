@@ -33,11 +33,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    M1 step really is `main`. Then **`rx/rxthread.cpp`** (pinned 0x249b88..0x24b490, todo; its rxTh*
    functions are stubs in src/rx/rxthread.cpp today): ~~done 2026-10-22, see Done~~ -- the file thread
    now gets created and dispatched; DIntr / EIntr exist in src/sdk (a recursive mutex).
-6. (2026-10-22) **The cdrom driver reads ISO 9660 sectors itself** (architecture.md "The rx file
-   layer"), so a CDROM boot needs sceCdRead to serve a disc *image*: src/sdk/libcdvd.cpp still reads
-   FF3's IMG_BD.BIN. Decide (the user's call: platform): point sceCdRead at an `.iso` named by
-   `ROSEPAN_DATA`, or boot from host0: (the HOST driver reads loose files through sceOpen) and leave
-   the cdrom driver for real-disc parity only.
+6. (2026-10-22, decided by the user) **Boot from host0: on the loose disc files** -- see Decisions.
+   When `main` is reconstructed, its boot path must make rxSys pick HOST: pass a `host0:` path to
+   `rxSysSetBootPath` (e.g. "host0:SLUS_214.48": BootDev "" and BootDir "" -> the data root), not the
+   PS2's `cdrom0:\SLUS_214.48;1`; with no boot path `rxSysDetectDevice` picks CDROM because the
+   host reports 32 MB. Check on the first run that `host0:` opens of `IOPCONF.CNF`, `SYSTEM.INI`,
+   `modules/ioprp300.img` and `DATA/...` resolve through `RosePan_PathResolveData` into the data
+   root (lower-case names from the game, upper-case on the disc: fine on Windows, not on a
+   case-sensitive host).
 
 ## Decisions
 
@@ -51,6 +54,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
   TU's commit with `git push origin HEAD` after `tus.py finish`. Never force-push, rewrite history,
   delete branches or tags; a failed push is reported, not retried with other flags.
 - Ghidra names are the C++ names (`Class::method`), kept with `::` in flat names (2026-10-22).
+- **The game data is the user's extracted disc, as loose files, and the port boots from `host0:`**
+  (the user, 2026-10-22). The folder is `C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan`
+  (DATA/, MODULES/, MOVIE/, IOPCONF.CNF, SYSTEM.CNF, SYSTEM.INI and the same ELF; not an .iso), set
+  as `settings.data_dir` in tools/reverse/data/tus.json: `rosepan.GAME_DATA` falls back to it when
+  `$ROSEPAN_DATA` is unset, and build.py passes it to the smoke run as `ROSEPAN_DATA_DIR`. RoR's
+  HOST driver reads files by name through sceOpen; the cdrom driver (which walks ISO 9660 sectors
+  itself) stays written for parity but is not on the host's boot path, and libcdvd is not taught to
+  build an image.
 
 ## Platform bootstrap (FF3 pieces dropped or still to adapt, 2026-10-22)
 
@@ -68,13 +79,14 @@ to adapt when a TU reaches them:
 - The renderer's 3D path (`RosePan_Renderer*Mesh*`, VU1 lighting shaders) is shaped for FF2/FF3's
   SGD models; RoR's model format is its own (M4).
 - `RosePan_DebugLightCone*` and other FF3 debug flags in `rosepan_debug.h` remain, unused.
-- The data folder: no RoR disc dump was found near the exe; the smoke run starts with the fallback
-  root. Set `ROSEPAN_DATA` (build.py passes it as `ROSEPAN_DATA_DIR`) to the disc root with `DATA/`.
+- The data folder: the user's extracted disc (Decisions, 2026-10-22), from `settings.data_dir`
+  or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
 
-- **The disc data**: where is the dump (`ROSEPAN_DATA`), and what are RoR's archive formats? The ELF
-  reads `cdrom0:\DATA\...` and `data/...` paths (architecture.md "Disc and data files"). Needed by M1.
+- **The disc data**: found (Decisions, 2026-10-22). Still open: RoR's archive formats (`.RPK`, the
+  DATA/ subfolders); the ELF reads `cdrom0:\DATA\...` and `data/...` paths (architecture.md "Disc
+  and data files").
 - **The rx middleware** (rxfile, rxThread, snd/rxmpeg.cpp's partner): whose library is it, where does it
   start below 0x24b490, and which files does it split into? No symbols, no reference: reconstruct like
   game code, under `rx/`.
@@ -98,7 +110,7 @@ to adapt when a TU reaches them:
   thread (gate them on rxThYield) if a race shows up -- today they run concurrently.
 
 - **rxfile details left open**: what the device record's first word (`rxFileSetDeviceParam`, -1 at init)
-  means; whether the cdrom driver turns names into ISO form with "\" and ";1"; who sets the HDD error
+  means; who sets the HDD error
   hook 0x2dc248 (no setter found in rxfile's range); how the platform's sceOpen resolves `cdrom0:`
   paths (`RosePan_PathResolveData`; check once main runs).
 

@@ -33,8 +33,20 @@ REFERENCES = (
     ('ff2', MIOPAN / 'SLES_523.84', MIOPAN / 'functions.txt', 'ee-gcc 2.96 runtime, newlib, SDK 2.8 (debug symbols)'),
 )
 
-# The game's disc files (unpacked), for data tools (tm2png.py --scan, rawfile-style readers).
-GAME_DATA = Path(os.environ['ROSEPAN_DATA']) if os.environ.get('ROSEPAN_DATA') else None
+# The game's disc files (unpacked), for data tools (tm2png.py --scan, rawfile-style readers) and the
+# smoke run's data root: $ROSEPAN_DATA, else settings.data_dir in data/tus.json (the user's copy of the
+# extracted disc; the game boots from host0: on these loose files, open-items.md Decisions).
+def _game_data():
+    if os.environ.get('ROSEPAN_DATA'):
+        return Path(os.environ['ROSEPAN_DATA'])
+    try:
+        d = json.loads((TOOLS / 'data' / 'tus.json').read_text(encoding='utf-8'))['settings'].get('data_dir')
+    except (OSError, ValueError, KeyError):
+        d = None
+    return Path(d) if d and Path(d).is_dir() else None
+
+
+GAME_DATA = _game_data()
 SRC = REPO / 'src'
 PLATFORM_DIRS = ('rosepan', 'sdk')        # the PC platform layer: not RoR game code
 SKILL_DIR = REPO / '.claude' / 'skills' / 'rosepan-port'
