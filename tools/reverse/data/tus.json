@@ -210,7 +210,26 @@
    "status": "done",
    "task": "Create the PC project (no RoR functions to write). The platform layer comes from ReiPan (../ReiPan, read-only), which took it from MioPan (FF2) and adapted it to FF3: src/sdk emulates the PS2 SDK (libgraph, libdma, libvif, libvu0, libpad, libmc, libcdvd, sif / IOP host, libmpeg + FFmpeg, eekernel threads), src/reipan draws the GS through SDL3 GPU and holds the host thread, log, paths, config and the ImGui debug UI. Steps: (1) copy ../ReiPan/src/reipan to src/rosepan and ../ReiPan/src/sdk to src/sdk; rename ReiPan_ / REIPAN_ / reipan_ identifiers, env variables and file names to RosePan_ / ROSEPAN_ / rosepan_, keeping the tool contract in tools/reverse/README.md 'Platform contract' (ROSEPAN_SHOT_DIR / ROSEPAN_SHOT_EVERY screenshots of the presented frame, ROSEPAN_AUTOPAD scripted pad in sdk/libpad.cpp, ROSEPAN_DATA_DIR, the RosePanGame thread name, the stub log line). (2) Write src/common/rosepan_stub.h from ../ReiPan/src/common/reipan_stub.h: ROSEPAN_STUB / ROSEPAN_BRIDGE printing '[stub] Name (ROR 0x%08x) reached'. (3) Drop or neutralise FF3-only pieces and list each in open-items.md 'Platform bootstrap': reipan/debug/reipan_warp.* (FF3 chapter warps and snapshots), FF3 game hooks in rendering/reipan_graph3d.cpp and reipan_ui, FF3 file names in io/reipan_paths (IMG_BD.BIN, ZERO3.FHD: RoR reads 'cdrom0:\\\\DATA\\\\...' and data/... paths, decide the data folder layout from the ELF), the FF3 IOP services in sdk/iop_* (RoR loads only Sony modules: sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv, fileio, sifcmd, usbd, plus ioprp300.img; its sound goes through rxmpeg / the rx middleware). (4) CMakeLists.txt, CMakePresets.json, cmake/*.cmake and resources/ (shaders) from ReiPan with ReiPan renamed RosePan: target RosePan, output cmake-build-*/RosePan/RosePan.exe, the sibling extern fallback pointed at ../ReiPan/extern then ../MioPan/extern (FFmpeg, shadercross), -fno-strict-aliasing and the src/sdk/pc_prefix.h force-include kept, every .c/.cpp compiled as C++. (5) A placeholder src/main.cpp whose main() initialises the platform, opens the window and presents cleared frames until RoR's main (0x002045a8) is reconstructed. (6) python build.py green; python build.py --run 15 writes work/shots/last.png (look at it); python layoutcheck.py runs clean. Keep platform edits minimal and list them in the summary; record the layer's shape in architecture.md 'PC platform layer' and anything that burned time in hazards.md. Finish --status done (the screenshot of an empty window is the expected picture)."
   },
+  "spr/s2d.cpp": {
+   "notes": "Left in spr/s2d.cpp (stubs or not declared): S2dMes::drawMapName 0x191938 (name the scene text-view functions 0x134730, 0x13555c, 0x135594, 0x1351b0, 0x135088, 0x13511c, 0x1348b0 in magscene.cpp and 0x17ea44 + its table object 0x298ee0 first); S2dMovie 0x19241c, 0x1924e0, 0x1925f0 (i3d layer setup over 0x223240, 0x223260, 0x223378, 0x223398, 0x21b550, 0x226c58, 0x10fa6c; called by MagScene::draw) and the RxMpeg wrappers 0x192834..0x192920. Decisions: file name spr/s2d.cpp is a guess (one file for four classes); S2d layers are host structs, not polymorphic (slots 1 / 2 / 6 are plain members, as MagLife); pattern tables stay EE word images with _EE base constants, SprDispDef::m_anim_ee is an EE address -- the SprMan TU picks the host format. S2dMes::m_map_name is 0x100 on the host (EE length unknown, at most 0x200). ROM quirk kept: backupSprite / restoreSprite use std x for both std words. Screen still black: SprMan (spr/sprman.cpp, all stubs incl. hand-written ctor / dtor) and MagScene::draw are the next step for any 2D picture; reference textures in work/ref/S2DMAN (wait2.tm2 is the icon / button / frame sheet). Calling S2dCineSco::fadeIn or the S2dMes setters before SprMan::init is real dereferences a NULL sprite table.",
+   "ranges": [
+    [
+     "00190a78",
+     "00192ac0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 14:23",
+     "status": "partial",
+     "summary": "Pinned spr/s2d.cpp (0x190a78..0x192ac0, the scene's 2D layers). Wrote S2dCineSco (cinemascope bars), S2dBg (s2dgen.rpk pictures, inline s2dBg requests), S2dMes (icons and buttons from s2dman.rpk, the 14-item sprite API, map-name wait) and S2dMovie's lifecycle and phase machine, with their .data tables (texture lists typed, pattern tables as EE word images). New minimal spr/sprman.h (SprMan, SprSprite, SprDispDef, fade colours) and spr/sprtexture.h (SprTexture, SprTexFile); SprTexture::update is a bridge returning 1 so the S2d load loops end. MagScene holds S2dMovie at +0x84aa8; MagLife gains its +4 / +8 / +0x24 words. 86 names (batch s2d_001). datadump.py --words added."
+    }
+   ],
+   "status": "partial",
+   "why": "the four S2d 2D layers between spr/sprtexture.cpp and mnuBase (0x192ac0): S2dCineSco 0x190a78, S2dBg 0x190f6c, S2dMes 0x191494, the movie / loading layer S2dMovie 0x19226c; all built on the spr sprite manager (SprMan, spr/sprman.cpp) and loading data/mnurpk/s2d*.rpk; RoR names no file here, spr/ from the link order and the sprite layer"
+  },
   "unassigned@001056f8": {},
+  "unassigned@00190a78": {},
   "unassigned@0020eda4": {},
   "unassigned@00216ad0": {},
   "unassigned@002437f8": {},

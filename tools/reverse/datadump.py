@@ -7,7 +7,11 @@ python datadump.py 2e3a40 12 "i:id,f:speed,P:func,h:flags,h:pad"     # 12 rows {
   b/B s8/u8   h/H s16/u16   i/I s32/u32   q/Q s64/u64   f float   P pointer (printed as the symbol it
   points at: a function name, a vtable / data address, or nullptr)   S pointer to a C string (printed as
   the literal)   xN N raw bytes (an array, printed as {..})
---stride overrides the row size (padding between rows). The output is a C++ initializer list, one row per
+--stride overrides the row size (padding between rows).
+
+python datadump.py --words <lo> <hi> [--var NAME]
+  the words of [lo, hi) as a raw EE image, `const u_int NAME[] = {..}`, 8 per line with their addresses
+  (for tables whose reader is not written yet: pointers inside stay EE addresses, marked in a comment). The output is a C++ initializer list, one row per
 line with its EE address, for a host table in src/ (the pattern ReiPan used for FF3's nested enemy,
 character and ghost tables: rebuild pointer arrays with host pointers, copy the rest as values). Pointers
 into .data that are themselves tables need their own dump; the comment shows where they point.
@@ -24,7 +28,33 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 SIZES = {'b': 1, 'B': 1, 'h': 2, 'H': 2, 'i': 4, 'I': 4, 'q': 8, 'Q': 8, 'f': 4, 'P': 4, 'S': 4}
 
 
+def dump_words(argv):
+    vname = 'table'
+    if '--var' in argv:
+        i = argv.index('--var')
+        vname = argv[i + 1]
+        del argv[i:i + 2]
+    lo, hi = int(argv[0], 16), int(argv[1], 16)
+    elf = Elf(str(rosepan.ELF))
+    raw = elf.read(lo, hi - lo)
+    if raw is None or len(raw) < hi - lo:
+        raise SystemExit(f'0x{lo:08x}..0x{hi:08x} is outside the loaded image')
+    words = struct.unpack(f'<{(hi - lo) // 4}I', raw[:(hi - lo) // 4 * 4])
+    ptrs = [f'0x{lo + 4 * i:08x}' for i, w in enumerate(words) if lo <= w < hi]
+    print(f'// {len(words)} words at 0x{lo:08x}..0x{hi:08x} (datadump.py --words)')
+    if ptrs:
+        print(f'// EE pointers into the table at: {", ".join(ptrs)}')
+    print(f'const u_int {vname}[{len(words)}] = {{')
+    for r in range(0, len(words), 8):
+        row = ', '.join(f'0x{w:08x}' for w in words[r:r + 8])
+        print(f'    {row},  // 0x{lo + 4 * r:08x}')
+    print('};')
+    return 0
+
+
 def main(argv):
+    if argv and argv[0] == '--words':
+        return dump_words(argv[1:])
     if len(argv) < 3:
         print(__doc__)
         return 2

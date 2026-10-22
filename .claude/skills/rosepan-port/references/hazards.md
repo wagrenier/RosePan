@@ -204,6 +204,11 @@ entries are marked **RoR** with the date.
 
 ## callcheck / stubgen
 
+- **A load loop spins on a stub.** The S2d inits (`S2dMes::loadTexture`, `S2dMovie::loadTexture`)
+  `while (!SprTexture::update())`: a generated stub's 0 would hang MagScene::initRender for ever.
+  spr/sprtexture.cpp has a hand-written `ROSEPAN_BRIDGE` returning 1 until the loader is written
+  (2026-10-22).
+
 - **A call the optimiser proves dead gets no stub.** `rxSysPrintf` calls `rxThIsDispatchDisabled` only
   when the static tty fd 0x2dba34 is >= 0; nothing in the build wrote it yet (its writer `rxSysOpenTty`
   is a stub), so GCC folded the branch and no undefined reference -- hence no stub -- appeared. It shows
@@ -214,6 +219,9 @@ entries are marked **RoR** with the date.
 - **`// callcheck:` syntax**: names first, separated by commas, one parenthesis last, all on the line
   (`// callcheck: A, B (why A; why B)`); `::`, `(` or `;` end the list; a wrapped line needs its own
   `// callcheck:`.
+- **A member destructor is named `~Class` in a callcheck comment**, not `Class::~Class` (`::` ends
+  the list, so the destructor reads as an extra `Class` call): `// callcheck: ~SprMan, operator_delete
+  (member destructor, deleting variant)` (2026-10-22, the s2d session).
 - **ALL-CAPS callees read as macros** and are skipped: explain a real call to one.
 - **A goto label in column 0 breaks the definition parser**: indent labels.
 - **A constructor with an initializer list parses as a function named after the base class**: its

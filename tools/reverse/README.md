@@ -64,7 +64,7 @@ python refresh.py          # all of the above that is not a one-time write, in o
 | `mipsdis.py` | Offline R5900 disassembler over the ELF, annotated with cached names; for code Ghidra has no function for. |
 | `mipsemu.py` | A tiny EE integer interpreter: run a leaf function over every input to check a C rewrite of a switch-table function; `Emu` with load / call hooks for non-leaf ones. |
 | `sinit.py` | Run a static initializer's straight-line stores symbolically and dump the table it fills. |
-| `datadump.py` | `python datadump.py <addr> <count> "<fields>"` -- a `.data` / `.rodata` table as host C++ initializers (pointers printed as the symbols they point at). |
+| `datadump.py` | `python datadump.py <addr> <count> "<fields>"` -- a `.data` / `.rodata` table as host C++ initializers (pointers printed as the symbols they point at). `--words <lo> <hi> --var NAME`: the range as a raw EE word image (`const u_int NAME[]`, 8 per line, the words that point into the range listed) for tables whose reader is not written yet. |
 | `tm2png.py` | TIM2 -> PNG (4/8-bit indexed with CSM1 CLUTs, 16/24/32-bit, PS2 alpha scaled): files, or `--scan` to carve every embedded TIM2 out of an archive. The reference a drawn screen is checked against. |
 | `restore_names.py` | `--snapshot` every name before bulk writes; restore from a snapshot. |
 | `build.py` | Build (MinGW + ninja, configures on first use, reuses ReiPan's / MioPan's fetched deps), `--run N [--pad S] [--shot-every F] [--env K=V]` smoke run with screenshots and stub hits. Needs the bootstrapped PC project. |

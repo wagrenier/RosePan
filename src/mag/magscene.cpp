@@ -137,7 +137,7 @@ int MagScene::initRender(i3dContext *ctx)
     m_life_man.add(&m_mes, 0x800a);
 
     FUN_00176afc(&m_837e0, ctx, this);
-    FUN_00192318(&m_84aa8, ctx, this);
+    m_movie.init(ctx, this);
     m_22d4 = -1;
     m_22d0 = 0;
     m_43700 = -1;

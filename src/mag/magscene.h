@@ -28,6 +28,7 @@
 #include "mag/maglifeman.h"
 #include "mag/maglifepc.h"
 #include "sdk/sce_gs.h"
+#include "spr/s2d.h"
 
 /* A record of a sky pack's <name>_c.bin (MagScene::load initialises the
  * words below; the rest is file data). EE size at least 0x30; roles
@@ -198,7 +199,7 @@ struct MagScene
     S2dMes         m_mes;               // ROR 0x42bb0
     int            m_43700;             // ROR 0x43700: -1 after initRender; role unknown
     Obj176a3c      m_837e0;             // ROR 0x837e0
-    Obj19226c      m_84aa8;             // ROR 0x84aa8
+    S2dMovie       m_movie;             // ROR 0x84aa8
     int            m_bwn_no;            // ROR 0x853b4: setBwn's actor number, -1 = none
     int            m_pc_no;             // ROR 0x853b8: setPC's actor number, -1 = none
     Obj17c0f0      m_8542c;             // ROR 0x8542c: reset by releaseTenkyu, sector.sec by load
