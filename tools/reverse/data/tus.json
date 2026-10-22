@@ -1,6 +1,5 @@
 {
  "queue": [
-  "unassigned@0011262c",
   "mag/magscene.cpp",
   "game/gamfile.cpp"
  ],
@@ -48,6 +47,24 @@
    ],
    "status": "verify",
    "why": "the four BedPfh methods between BedMemory (0x101718 clears 7 words, not BedPfh's 5) and BedPad::~BedPad 0x101aec; bed/bedpfh.cpp / bedpfh.h assert strings in the ctor and getFileName"
+  },
+  "dog/doglightpool.cpp": {
+   "notes": "Left: the pool setup, 26 functions 0x1103dc..0x1123b0 (load / alloc / set-mask edits, mostly called from mag/magscenelight.cpp; spot-light builders 0x111584 / 0x111b5c). Facts: kinds AMBIENT 0 (0x10 stride), DIRECT 1, POINT 2 (0x20), SPOT 3 (0x40); m_set_mask[8][6] at +0x48; +0x30 (6 words) and +0x108 unknown. The flag MagScene +0x22cc turns light colours grey (dogLightToGray). findNearestPointLight starts from 0x7fffffff (PS2 max float, NaN on host): FLT_MAX in the port. Boot screenshot still black: GamMan::loadStage is a stub so the pool holds no lights and nothing draws, but the per-frame lightstatus asserts are gone. 0x112b08..0x112bc8 (three small functions on a light-desc object, called from dog/doglight.cpp 0x112d60) left as unassigned@00112b08 for dog/doglight.cpp. Removed unassigned@0011262c from the pinned queue; next is mag/magscene.cpp.",
+   "ranges": [
+    [
+     "001103dc",
+     "00112b08"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 19:36",
+     "status": "partial",
+     "summary": "Pinned dog/doglightpool.cpp 0x1103dc..0x112b08 (was unassigned@0011262c); reconstructed DogLightPool::createLight 0x11262c, findNearestPointLight 0x1129cc and dogLightToGray 0x110bb8; light kinds and the per-set mask table settled"
+    }
+   ],
+   "status": "partial",
+   "why": "doglightpool.cpp source strings from 0x1103dc (after DogEntityEx::setParent / dogentity.cpp at 0x1102b4..0x1103dc) through 0x1123b0, DogLightPool::createLight / findNearestPointLight use the doglightpool.h inline getters; 0x112b08.. works on a light-desc object freed/cleared from dog/doglight.cpp 0x112d60, so the file ends there"
   },
   "dog/dogtexinfo.cpp": {
    "notes": "Pinned 0x1161e4..0x11764c, all 16 functions written. Smoke run: MagScene::init's init / add run without asserts; screen still black (SprMan::draw and the scene layers draw nothing yet). addData / setTexTable are not reached: SprTexture's lists end in error because fileGetSize 0x1be768 is a stub returning 0 and BedPfh::BedPfh / getFileIndex (bed/bedpfh.cpp) are stubs -- write those (and FileReader::read 0x1be524 / 0x1be564) next to see textures arrive. PC guards: release stops when the record's picture is NULL, copy and setTexFlag return on a bad index (the ROM writes on after the assert). term frees m_tex_data before terming the textures in it, as the ROM does (the heap keeps the bytes). The shadow01 rodata at 0x2ed500 is an I3dTexDesc: 256x256 CT32 at block 0x2300. Next on the queue: spr/sprman.cpp.",
@@ -547,6 +564,7 @@
    "why": "the source string system/sysnowloading.cpp in init and clearVram; 0x204d38..0x2050e8 are SysNowLoading helpers called only from init / term / draw (this in a0, members +0x230..+0x29c); main.cpp ends at mainResetExceptionHandlers 0x204ca4, unassigned@002053f4 follows"
   },
   "unassigned@001056f8": {},
+  "unassigned@0011262c": {},
   "unassigned@00164fc0": {},
   "unassigned@00190a78": {},
   "unassigned@001bde58": {},

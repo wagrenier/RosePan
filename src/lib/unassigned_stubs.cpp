@@ -311,13 +311,6 @@ float DogCamera::getLensFov()
     return {};
 }
 
-// stub of ROR 0x0011262c
-I3dLight * DogLightPool::createLight(i3dContext *ctx, int set, int arg, float scale)
-{
-    ROSEPAN_STUB("DogLightPool::createLight", 0x0011262c);
-    return {};
-}
-
 // stub of ROR 0x00177830
 void FUN_00177830(Obj176a3c *obj, i3dContext *ctx)
 {
@@ -388,13 +381,6 @@ int i3rUpdateTexAnim(I3rRoot *root)
 float utlVecDist(const float *a, const float *b)
 {
     ROSEPAN_STUB("utlVecDist", 0x00106e70);
-    return {};
-}
-
-// stub of ROR 0x001129cc
-int DogLightPool::findNearestPointLight(int set, const float *pos)
-{
-    ROSEPAN_STUB("DogLightPool::findNearestPointLight", 0x001129cc);
     return {};
 }
 

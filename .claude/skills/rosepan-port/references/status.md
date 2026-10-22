@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-22 19:29 at commit `6d0722f` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-22 19:36 at commit `081e402` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-22 19:29 at commit `6d0722f` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6498**, named **2742** (42%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 114, ror-inferred 1260
-- context-name ledger: 1374 entries; overrides of wrong library matches: 5
-- placed in a source file: 2710/6498 in 89 files
+- game functions: **6498**, named **2743** (42%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 114, ror-inferred 1261
+- context-name ledger: 1375 entries; overrides of wrong library matches: 5
+- placed in a source file: 2712/6498 in 89 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **1073**; stubs: **184**
+- reconstructed RoR functions: **1076**; stubs: **182**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -39,6 +39,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/bed/bedpfh.cpp` | 4 | 0 |
 | `src/dog/dogactor.cpp` | 0 | 15 |
 | `src/dog/dogentity.cpp` | 0 | 3 |
+| `src/dog/doglightpool.cpp` | 3 | 0 |
 | `src/dog/dogmodel.cpp` | 0 | 8 |
 | `src/dog/dogtexinfo.cpp` | 16 | 0 |
 | `src/game/gamfile.cpp` | 18 | 0 |
@@ -53,7 +54,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dtim2.cpp` | 7 | 0 |
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 0 | 97 |
+| `src/lib/unassigned_stubs.cpp` | 0 | 95 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 1 |
 | `src/mag/maglifeman.cpp` | 0 | 3 |
@@ -86,9 +87,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 164 TUs: todo 138, partial 6, verify 27, done 2
-- next: **unassigned@0011262c** (pinned in the queue)
-- pinned queue: unassigned@0011262c, mag/magscene.cpp, game/gamfile.cpp
+- 164 TUs: todo 138, partial 7, verify 27, done 2
+- next: **mag/magscene.cpp** (pinned in the queue)
+- pinned queue: mag/magscene.cpp, game/gamfile.cpp
+- partial: `dog/doglightpool.cpp` 3/29 -- Left: the pool setup, 26 functions 0x1103dc..0x1123b0 (load / alloc / set-mask edits, mostly called from mag/magscenelight.cpp; spot-light builders 0x111584 / 0
 - partial: `rx/rxsnd.cpp` 0/185 -- Nothing written yet; all rxSnd entry points are still stubs in lib/unassigned_stubs.cpp. Start from architecture.md row 0x237ce8 (transport and command families
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -120,6 +122,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-22 19:36 `dog/doglightpool.cpp` partial: Pinned dog/doglightpool.cpp 0x1103dc..0x112b08 (was unassigned@0011262c); reconstructed DogLightPool::createLight 0x11262c, findNearestPointLight 0x1129cc and d
 - 2026-10-22 19:29 `rx/rxsnd.cpp` partial: Pinned rx/rxsnd.cpp 0x237ce8..0x23ff58 (was unassigned@00237ce8) and named 73 functions of the rx sound library (transport, queue, config, heaps, BGM/SE/PCM/ADP
 - 2026-10-22 19:21 `snd/sndman.cpp` verify: SndMan, the sound manager: all 52 functions of 0x17f0d0..0x1810f4 (ctor, init/term/update, master-volume fade, 48 slots with stream and SE state machines, id ma
 - 2026-10-22 18:50 `bed/bedpfh.cpp` verify: BedPfh, the RTPK pack view: constructor (tables by header flags: sizes, offsets, attribute rows, names), clear, getFileName, getFileIndex; header inlines getFla
@@ -127,7 +130,6 @@ Recent sessions:
 - 2026-10-22 18:35 `i3d/i3dmath.cpp` verify: i3d vector / matrix module pinned 0x236960..0x237ce8 and complete: all 95 functions (35 hidden ones created in Ghidra, batch i3dmath_001), both copies of the VU
 - 2026-10-22 18:24 `spr/sprman.cpp` verify: SprMan complete: all 53 functions of 0x18bb8c..0x18f5b0 (init, draw, the motion / anim / fade / CLUT steppers, drawSprite to i3dPktSprite / TexSpriteUV, text in
 - 2026-10-22 17:51 `dog/dogtexinfo.cpp` verify: DogTexInfo written whole: init / term / clear, find / findFree, add (VRAM desc), addData (TIM2 with refcount and heap copy), addPfh (pack or i3r-named textures,
-- 2026-10-22 17:41 `setup/i3d_draw_module.cpp` verify: Native i3d draw module rosepan_i3d: the 2D packet writers record host primitives by packet address, the DMA-chain walk replays them in the ROM order; i3dTexRegs
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -136,13 +138,13 @@ Recent sessions:
 | `unassigned@001810f4` | todo | 0/10/28 | 2.8 | 25 | 3 |
 | `mag/maglifeman.cpp` | todo | 0/3/10 | 1.5 | 24 | 3 |
 | `unassigned@00228c08` | todo | 0/5/222 | 54.9 | 24 | 1 |
-| `unassigned@0020ff34` | todo | 0/3/53 | 23.7 | 20 | 0 |
 | `mag/magscene.cpp` | todo | 0/10/44 | 11.3 | 20 | 2 |
+| `unassigned@0020ff34` | todo | 0/3/53 | 23.7 | 20 | 0 |
 | `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
 | `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 19 | 2 |
-| `unassigned@0010f944` | todo | 0/4/12 | 2.2 | 18 | 2 |
-| `unassigned@001e46b8` | todo | 0/4/253 | 78.3 | 18 | 2 |
 | `unassigned@001fd424` | todo | 0/3/75 | 27.9 | 18 | 3 |
+| `unassigned@001e46b8` | todo | 0/4/253 | 78.3 | 18 | 2 |
+| `unassigned@0010f944` | todo | 0/4/12 | 2.2 | 18 | 2 |
 
 ## Frontier (called by reconstructed code, not written yet)
 

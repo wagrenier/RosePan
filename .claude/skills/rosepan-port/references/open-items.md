@@ -7,8 +7,9 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
 **TOP PRIORITY (the user, 2026-10-22, live during the rx sound run): get something to render first.**
-Queued at the top of tus.json in this order: (1) `unassigned@0011262c` -- DogLightPool::createLight
-0x11262c (dog/doglightpool.cpp; the `lightstatus[i] != NULL` asserts each frame), (2)
+Queued at the top of tus.json in this order: (1) DONE 2026-10-22: DogLightPool::createLight
+0x11262c (now `dog/doglightpool.cpp`, `partial`: the pool's setup code is left; the
+`lightstatus[i] != NULL` asserts are gone from the boot), (2)
 `mag/magscene.cpp` -- MagScene::update 0x1327dc (starts S2dMovie / S2dMes / S2dBg), (3)
 `game/gamfile.cpp` -- fileGetSize 0x1be768 (the .rpk reads 0 bytes, so every SprTexture list
 ends in error). The rx sound library (unassigned@00237ce8) is parked `partial` with names only
@@ -469,8 +470,10 @@ to adapt when a TU reaches them:
   that module is written. The MagScene constructor's value for +0x2040 (m_shadow_mode) comes from a
   loop register (s8, li 3 then decremented; most likely -1) -- confirm when the constructor is
   written; the host stub leaves it 0 (mode 0 = the point-light path), harmless while no actor has
-  the 0x60 flags. The light-set mask layout in DogLightPool (+0x50, 0x18 per set; which word is
-  POINT) is unverified: settle it with the doglightpool TU (0x1125xx..0x1129cc).
+  the 0x60 flags. The light-set mask layout is settled (2026-10-22, dog/doglightpool.cpp): masks at
+  +0x48, one word per kind, 0x18 per set; +0x50 is the POINT word. Still open in DogLightPool: the
+  six words at +0x30 and the word at +0x108; doglightpool.h has two point-light getters (lines 131
+  and 142) -- which inline is which is a guess (getPointLight / getPointLightAt).
 
 - **main.cpp open points** (2026-10-22): `mainInitGame` passes bss 0x7812ac to `seqSetLanguage` (role
   unknown; kept as `g_bss_7812ac`), and sets bss 0x7a3d48 / 0x7a3d4c = 1 and data 0x296198 = 2 after the
