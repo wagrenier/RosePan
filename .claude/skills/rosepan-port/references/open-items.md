@@ -56,9 +56,9 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
         that now returns the unit matrix (the ROM runs the entity's transform slot and returns the
         i3dMatInverse 0x237678 it writes at +0xf0, a member of the camera class past DogEntity --
         write it with the camera class). The next asserts each frame: `lightstatus[i] != NULL`
-        (magscenerender.cpp:982, DogLightPool::createLight 0x11262c is a stub). The first copy of
-        the vector module (0x2369xx) is bridged; its second copy (0x2372xx: i3dMatMul,
-        i3dMatInverse, i3dVecNeg ...) is still no-op stubs that DogActor / DogEntity code calls.
+        (magscenerender.cpp:982, DogLightPool::createLight 0x11262c is a stub). Both copies of
+        the vector module are real since 2026-10-22 (`i3d/i3dmath.cpp`, `verify`: every i3dVec* /
+        i3dMat* bridge and stub is gone).
         `i3d/i3dtim2.cpp` 0x224de0..0x225018 is pinned (todo, not queued).
         **No picture comes from the i3d path until a host draw module consumes it** (Decisions: no
         GS emulation): decide with B.4 / B.7 where `rosepan_i3d` hooks in -- the natural point is
@@ -369,6 +369,14 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- (2026-10-22, the i3dmath session) **Naming of the vector module's two copies**: the older
+  sessions gave five first-copy functions the plain names (i3dVecZero, i3dVecCopyW, i3dMatCopy,
+  i3dVecCross, i3dVecNormalize) while the second copy has i3dVecCopy / i3dVecCross2 /
+  i3dVecNormalize2 ...; the rest of the first copy is i3dVu0*. Kept as is (renaming touches i3denv /
+  i3dlayer / i3dview / i3dpacket); a later cleanup could rename the five to i3dVu0* in Ghidra and src.
+  Also unchecked against the ROM: the VU0 micro 0 product order (taken from the old bridge) -- the
+  first 3D picture will show it.
 
 - **The platform's libgraph.h swaps two macro pairs** (2026-10-22, the magsystem session):
   `SCE_GS_INTERLACE` 0 / `SCE_GS_NOINTERLACE` 1 and `SCE_GS_FIELD` 0 / `SCE_GS_FRAME` 1, where the

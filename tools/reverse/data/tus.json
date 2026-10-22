@@ -103,6 +103,24 @@
    "status": "verify",
    "why": "the i3d layer / draw-group / sort module: layer setters and packet begin/end 0x222f50..0x2239b8 (all take an I3dLayer), the group node list, the radix / cocktail sort and the group run 0x2239b8..0x224b28, the texture register packets 0x224b28..0x224de0; model packet code before it (0x21fb50..) and the TIM2 module after it (0x224de0: the unreferenced TIM2 / CLUT header check, then picture and size helpers) are other files"
   },
+  "i3d/i3dmath.cpp": {
+   "notes": "Nothing on screen can show it yet (boot still black; the i3d path has no host draw consumer, and the per-frame lightstatus asserts wait on DogLightPool::createLight 0x11262c). The two copies are NOT byte-identical: the first builds rotations from cosf / sinf, the second wraps sceVu0RotMatrixX/Y/Z; conventions in src/i3d/i3dmath.h, facts in architecture.md. The VU0 micro 0 product order is taken from the old bridge and unverified until a 3D picture shows. Naming doubt (five first-copy functions kept their plain names) is in open-items.md Open questions. unassigned@00228c08 now holds 0x228c08..0x236960 (i3dMatGetScaleTrans bridge 0x228c38, i3r helpers 0x22b1b0.., more i3d code): its reached stubs are I3rRoot__CheckIdString, i3rGetNodeIndexByName, i3rGetNumTex / GetTexName. Next on the draw path per open-items: DogLightPool::createLight, MagScene::update, fileGetSize / BedPfh.",
+   "ranges": [
+    [
+     "00236960",
+     "00237ce8"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 18:35",
+     "status": "verify",
+     "summary": "i3d vector / matrix module pinned 0x236960..0x237ce8 and complete: all 95 functions (35 hidden ones created in Ghidra, batch i3dmath_001), both copies of the VU0 vector set incl. six rotation orders, RotTransPers, LookDir, clear / set / compare / RGBA32 helpers, i3dPrintf, i3dFlushCache; every i3dVec / i3dMat bridge and stub in lib/unassigned_stubs.cpp is gone"
+    }
+   ],
+   "status": "verify",
+   "why": "the i3d vector / matrix module: VU0 macro helpers from i3dVecZero 0x236960 to i3dFlushCache 0x237cc8 (two copies of the vector set, the rotation orders, i3dMatLookDir, i3dPrintf); 0x2367a0 before it calls i3dVecCopyW from other code, 0x237ce8 after it is rxsndut"
+  },
   "i3d/i3dpacket.cpp": {
    "notes": "All packet-module bridges are gone. Black screen: nothing on the host consumes i3d packets (no GS emulation); the user still has to choose the host draw hook (open-items B.3 / B.4). Left in unassigned@00216ad0 (still first in the queue): debug code 0x216ad0..~0x218470 (DBGFLAG.BIN strings, a debug/ file), texture objects and GS transfers 0x218470..0x21a120, fog 0x21a120..0x21a3e8 (I3dFogState lives in i3dpacket.h until then; i3dFogInit is a reached stub), i3r helpers 0x21a3e8..0x21ac80, lights 0x21ac80..0x21b220 (i3dCtxCreateLight), and the VU1 strip uploaders 0x21c960..0x21eb28 (VIF UNPACK codes). Start the next session by defining one of those files; the fog and light files are small and reached.",
    "ranges": [
@@ -458,6 +476,7 @@
   "unassigned@00216ad0": {},
   "unassigned@0021fb50": {},
   "unassigned@00224de0": {},
+  "unassigned@00228c08": {},
   "unassigned@002437f8": {},
   "utl/utlmisc.cpp": {
    "notes": "Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and installs utlMemAlloc twice, utlMemRealloc and utlMemFree as rxSysSetMemFunc0..3 hooks; bed/bedmemory.cpp (0x100354..) is only stubs (alloc returns NULL), so reconstruct BedMemory right after main, before anything allocates. Decided without the user: the ROM's operator new/delete are written as utlOperatorNew/utlOperatorDelete(+Array, +Debug) and do NOT replace the host's global operator new (open-items Decisions). BedMemory field names (m_top, m_last, m_buffer, m_size, m_id, m_owner) are from create/format/destroy and partly guessed; check them against the assert texts (m_size, m_buffer, m_next, m_chunk_size, m_header_size, m_flag, m_filename) when bedmemory is read. utlParseParam leaves the record type unchanged for a value that is not a quote, dollar or digit, as the ROM does. Hazard recorded: stubgen copies an access label (public:) into the next stub.",

@@ -43,7 +43,6 @@ const char *g_versionNumber = "1.01";   /* data 0x2d9e18 -> 0x301720 */
 
 // ---- stubs (tools/reverse/stubgen.py) ----
 
-
 // stub of ROR 0x001e71fc
 int CmnTaskMan::addTask(int group, int start, int prio, int frames, CmnITask *task, int arg,
                  int *id, int user)
@@ -108,14 +107,6 @@ void SndMan::update()
     ROSEPAN_STUB("SndMan::update", 0x0017f200);
 }
 
-
-// stub of ROR 0x00237c68
-int i3dPrintf(const char *fmt)
-{
-    ROSEPAN_STUB("i3dPrintf", 0x00237c68);
-    return {};
-}
-
 // stub of ROR 0x0010421c
 void utlRandReset(void)
 {
@@ -145,19 +136,6 @@ int i3rGetNodeIndexByName(I3rRoot *root, const char *name)
 {
     ROSEPAN_STUB("i3rGetNodeIndexByName", 0x0022b3d8);
     return {};
-}
-
-// stub of ROR 0x00237cc8
-int i3dFlushCache(void)
-{
-    ROSEPAN_STUB("i3dFlushCache", 0x00237cc8);
-    return {};
-}
-
-// stub of ROR 0x00237178
-void i3dSysInit(void)
-{
-    ROSEPAN_STUB("i3dSysInit", 0x00237178);
 }
 
 // stub of ROR 0x00176afc
@@ -462,49 +440,6 @@ void MagScene::drawSkyDome(i3dContext *ctx)
     ROSEPAN_STUB("MagScene::drawSkyDome", 0x001406b8);
 }
 
-// stub of ROR 0x00237678
-void i3dMatInverse(sceVu0FVECTOR *out, sceVu0FVECTOR *in)
-{
-    ROSEPAN_STUB("i3dMatInverse", 0x00237678);
-}
-
-// stub of ROR 0x00237ba0
-void i3dMatLookDir(sceVu0FVECTOR *out, const float *eye, const float *dir,
-                    const float *up)
-{
-    ROSEPAN_STUB("i3dMatLookDir", 0x00237ba0);
-}
-
-// stub of ROR 0x00237818
-void i3dMatRotX(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in)
-{
-    ROSEPAN_STUB("i3dMatRotX", 0x00237818);
-}
-
-// stub of ROR 0x00237830
-void i3dMatRotY(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in)
-{
-    ROSEPAN_STUB("i3dMatRotY", 0x00237830);
-}
-
-// stub of ROR 0x00237848
-void i3dMatRotZ(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in)
-{
-    ROSEPAN_STUB("i3dMatRotZ", 0x00237848);
-}
-
-// stub of ROR 0x00237640
-void i3dMatTranslate(sceVu0FVECTOR *out, sceVu0FVECTOR *in, const float *v)
-{
-    ROSEPAN_STUB("i3dMatTranslate", 0x00237640);
-}
-
-// stub of ROR 0x00237340
-void i3dMatUnit(sceVu0FVECTOR *m)
-{
-    ROSEPAN_STUB("i3dMatUnit", 0x00237340);
-}
-
 // stub of ROR 0x0021e1d8
 u_long   * i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
                               const void *color, const void *xyz, int flags)
@@ -533,62 +468,6 @@ u_long   * i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matri
     return pkt;
 }
 
-// ---- the vector module's second copy (unassigned@00228c08): bridges of
-// the ROM's VU0 macro code for i3d/i3dpacket.cpp's float writers ----
-
-// bridge of ROR 0x002372d0: lq / sq.
-void i3dVecCopy(float *out, const float *in)
-{
-    ROSEPAN_BRIDGE("i3dVecCopy", 0x002372d0);
-    memmove(out, in, 4 * sizeof(float));
-}
-
-// bridge of ROR 0x002373d8: vadd.xyzw.
-void i3dVecAdd(float *out, const float *a, const float *b)
-{
-    ROSEPAN_BRIDGE("i3dVecAdd", 0x002373d8);
-    for (int i = 0; i < 4; i++)
-        out[i] = a[i] + b[i];
-}
-
-// bridge of ROR 0x00237438: vmul.xyzw.
-void i3dVecMul(float *out, const float *a, const float *b)
-{
-    ROSEPAN_BRIDGE("i3dVecMul", 0x00237438);
-    for (int i = 0; i < 4; i++)
-        out[i] = a[i] * b[i];
-}
-
-// bridge of ROR 0x00237450: a byte copy of i3dVecMul.
-void i3dVecMul2(float *out, const float *a, const float *b)
-{
-    ROSEPAN_BRIDGE("i3dVecMul2", 0x00237450);
-    for (int i = 0; i < 4; i++)
-        out[i] = a[i] * b[i];
-}
-
-// bridge of ROR 0x00237600: vftoi0.xyzw (truncates).
-void i3dVecFtoi0(int *out, const float *in)
-{
-    ROSEPAN_BRIDGE("i3dVecFtoi0", 0x00237600);
-    for (int i = 0; i < 4; i++)
-        out[i] = (int)in[i];
-}
-
-// bridge of ROR 0x00237610: vftoi4.xyzw (12.4 fixed point, truncates).
-void i3dVecFtoi4(int *out, const float *in)
-{
-    ROSEPAN_BRIDGE("i3dVecFtoi4", 0x00237610);
-    for (int i = 0; i < 4; i++)
-        out[i] = (int)(in[i] * 16.0f);
-}
-
-// stub of ROR 0x00237408
-void i3dVecSub(float *out, const float *a, const float *b)
-{
-    ROSEPAN_STUB("i3dVecSub", 0x00237408);
-}
-
 // stub of ROR 0x0021a8e0
 int i3rUpdateTexAnim(I3rRoot *root)
 {
@@ -610,148 +489,6 @@ int DogLightPool::findNearestPointLight(int set, const float *pos)
     return {};
 }
 
-// stub of ROR 0x002373a8
-void i3dMatApply(float *out, sceVu0FVECTOR *m, const float *v)
-{
-    ROSEPAN_STUB("i3dMatApply", 0x002373a8);
-}
-
-// stub of ROR 0x002377d0
-void i3dMatMul(sceVu0FVECTOR *out, sceVu0FVECTOR *a, sceVu0FVECTOR *b)
-{
-    ROSEPAN_STUB("i3dMatMul", 0x002377d0);
-}
-
-// stub of ROR 0x002372e0
-void i3dVecCopy2(float *out, const float *in)
-{
-    ROSEPAN_STUB("i3dVecCopy2", 0x002372e0);
-}
-
-// stub of ROR 0x00237580
-float i3dVecDot(const float *a, const float *b)
-{
-    ROSEPAN_STUB("i3dVecDot", 0x00237580);
-    return {};
-}
-
-// stub of ROR 0x00237468
-void i3dVecNeg(float *out, const float *in)
-{
-    ROSEPAN_STUB("i3dVecNeg", 0x00237468);
-}
-
-// stub of ROR 0x00237360
-void i3dVecScale(float s, float *out, const float *in)
-{
-    ROSEPAN_STUB("i3dVecScale", 0x00237360);
-}
-
-// ---- i3d bridges the layer TU needs (i3d/i3dlayer.cpp, 2026-10-22) ----
-// The ROM's code for small helpers of the vector module, until its TU
-// replaces them (i3dPsmBits: i3d/i3dtex.cpp).
-
-// bridge of ROR 0x00236980
-void i3dVecCopyW(float *out, const float *in)
-{
-    ROSEPAN_BRIDGE("i3dVecCopyW", 0x00236980);
-    out[0] = in[0];
-    out[1] = in[1];
-    out[2] = in[2];
-    out[3] = in[3];
-}
-
-// bridge of ROR 0x00236960
-void i3dVecZero(float *v)
-{
-    ROSEPAN_BRIDGE("i3dVecZero", 0x00236960);
-    v[0] = v[1] = v[2] = v[3] = 0.0f;
-}
-
-// bridge of ROR 0x00236990
-void i3dMatCopy(sceVu0FVECTOR *out, sceVu0FVECTOR *in)
-{
-    ROSEPAN_BRIDGE("i3dMatCopy", 0x00236990);
-    memmove(out, in, sizeof(sceVu0FMATRIX));
-}
-
-// bridge of ROR 0x00236a68: vf0 - vf0 - v.
-void i3dVu0VecNeg(float *out, const float *in)
-{
-    ROSEPAN_BRIDGE("i3dVu0VecNeg", 0x00236a68);
-    for (int k = 0; k < 4; k++)
-        out[k] = 0.0f - in[k];
-}
-
-// bridge of ROR 0x00236af0: vopmula / vopmsub, w 0.
-void i3dVecCross(float *out, const float *a, const float *b)
-{
-    ROSEPAN_BRIDGE("i3dVecCross", 0x00236af0);
-    float x = a[1] * b[2] - b[1] * a[2];
-    float y = a[2] * b[0] - b[2] * a[0];
-    float z = a[0] * b[1] - b[0] * a[1];
-    out[0] = x;
-    out[1] = y;
-    out[2] = z;
-    out[3] = 0.0f;
-}
-
-// bridge of ROR 0x00236b38: xyz times vrsqrt of the squared length, w 0.
-void i3dVecNormalize(float *out, const float *in)
-{
-    ROSEPAN_BRIDGE("i3dVecNormalize", 0x00236b38);
-    float q = 1.0f / sqrtf(in[0] * in[0] + in[1] * in[1] + in[2] * in[2]);
-    out[0] = in[0] * q;
-    out[1] = in[1] * q;
-    out[2] = in[2] * q;
-    out[3] = 0.0f;
-}
-
-// bridge of ROR 0x002375d8: the second copy of i3dVecNormalize.
-void i3dVecNormalize2(float *out, const float *in)
-{
-    ROSEPAN_BRIDGE("i3dVecNormalize2", 0x002375d8);
-    float q = 1.0f / sqrtf(in[0] * in[0] + in[1] * in[1] + in[2] * in[2]);
-    out[0] = in[0] * q;
-    out[1] = in[1] * q;
-    out[2] = in[2] * q;
-    out[3] = 0.0f;
-}
-
-// bridge of ROR 0x00236bd8: the adjugate rows (cross products) over the
-// determinant, transposed; translation -t * R^-1; column w 0, 0, 0, 1.
-void i3dVu0MatInverse(sceVu0FVECTOR *out, sceVu0FVECTOR *in)
-{
-    ROSEPAN_BRIDGE("i3dVu0MatInverse", 0x00236bd8);
-    sceVu0FVECTOR c5, c6, c7;
-    float t[3] = { -in[3][0], -in[3][1], -in[3][2] };
-    i3dVecCross(c5, in[1], in[2]);
-    i3dVecCross(c6, in[2], in[0]);
-    i3dVecCross(c7, in[0], in[1]);
-    float q = 1.0f / (c7[0] * in[2][0] + c7[1] * in[2][1] + c7[2] * in[2][2]);
-    for (int i = 0; i < 3; i++)
-    {
-        out[i][0] = q * c5[i];
-        out[i][1] = q * c6[i];
-        out[i][2] = q * c7[i];
-        out[i][3] = 0.0f;
-    }
-    for (int k = 0; k < 3; k++)
-        out[3][k] = out[0][k] * t[0] + out[1][k] * t[1] + out[2][k] * t[2];
-    out[3][3] = 1.0f;
-}
-
-// bridge of ROR 0x00236d30: VU0 micro 0 (vf4..7 = a, vf8..11 = b).
-void i3dVu0MatMul(sceVu0FVECTOR *out, sceVu0FVECTOR *a, sceVu0FVECTOR *b)
-{
-    ROSEPAN_BRIDGE("i3dVu0MatMul", 0x00236d30);
-    sceVu0FMATRIX r;
-    for (int i = 0; i < 4; i++)
-        for (int k = 0; k < 4; k++)
-            r[i][k] = a[0][k] * b[i][0] + a[1][k] * b[i][1] + a[2][k] * b[i][2] + a[3][k] * b[i][3];
-    memcpy(out, r, sizeof(r));
-}
-
 // bridge of ROR 0x00228c38
 void i3dMatGetScaleTrans(sceVu0FVECTOR *out, sceVu0FVECTOR *m)
 {
@@ -761,17 +498,6 @@ void i3dMatGetScaleTrans(sceVu0FVECTOR *out, sceVu0FVECTOR *m)
     out[0][1] = m[1][1];
     out[0][2] = m[2][2];
     i3dVecCopyW(out[1], m[3]);
-}
-
-// bridge of ROR 0x00237168: data 0x303c10.
-sceVu0FVECTOR *i3dMatGetUnit(void)
-{
-    ROSEPAN_BRIDGE("i3dMatGetUnit", 0x00237168);
-    static sceVu0FMATRIX s_unit = {
-        { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f },
-        { 0.0f, 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 1.0f },
-    };
-    return s_unit;
 }
 
 // stub of ROR 0x0021e8f8

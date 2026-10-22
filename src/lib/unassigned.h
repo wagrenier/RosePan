@@ -225,9 +225,9 @@ void utlRandReset(void);                                                 // ROR 
 #include "i3d/i3dctx.h"
 #include "i3d/i3dlayer.h"
 
-int   i3dPrintf(const char *fmt);  /* printf-like in the ROM */          // ROR 0x00237c68
-void  i3dSysInit(void);            /* empty in the ROM */                // ROR 0x00237178
-int   i3dFlushCache(void);         /* FlushCache(0) */                   // ROR 0x00237cc8
+/* The vector / matrix module (and i3dSysInit / i3dPrintf / i3dFlushCache)
+ * has its own file. */
+#include "i3d/i3dmath.h"
 
 /* The texture / CLUT objects and their GS transfers (i3dTexMakeUpload ...,
  * i3dPsmBits) have their own file. */
@@ -237,26 +237,8 @@ int   i3dFlushCache(void);         /* FlushCache(0) */                   // ROR 
  * own file. */
 #include "i3d/i3dpacket.h"
 
-/* Copies four words (no alignment needed). */
-void  i3dVecCopyW(float *out, const float *in);                          // ROR 0x00236980
-/* The i3d vector / matrix module (unassigned@00228c08; bridges of the
- * ROM's VU0 macro code until it is reconstructed). Matrices are row-vector:
- * p * i3dVu0MatMul(a, b) = (p * b) * a. Outputs may alias inputs. The ROM
- * has a second, byte-identical copy at 0x2372d0..0x237814 (i3dMatMul,
- * i3dMatInverse, i3dVecNeg ...), hence the Vu0 names here. */
-void  i3dVecZero(float *v);                                              // ROR 0x00236960
-void  i3dMatCopy(sceVu0FVECTOR *out, sceVu0FVECTOR *in);                 // ROR 0x00236990
-void  i3dVu0VecNeg(float *out, const float *in);        /* all four */   // ROR 0x00236a68
-void  i3dVecCross(float *out, const float *a, const float *b); /* w 0 */  // ROR 0x00236af0
-void  i3dVecNormalize(float *out, const float *in);     /* xyz, w 0 */   // ROR 0x00236b38
-/* The inverse of an affine matrix (3x3 part and translation). */
-void  i3dVu0MatInverse(sceVu0FVECTOR *out, sceVu0FVECTOR *in);           // ROR 0x00236bd8
-/* out row i = sum over j of b[i][j] * a[j] (VU0 micro 0). */
-void  i3dVu0MatMul(sceVu0FVECTOR *out, sceVu0FVECTOR *a, sceVu0FVECTOR *b); // ROR 0x00236d30
 /* out[0] = (m00, m11, m22, 0), out[1] = m[3]. */
 void  i3dMatGetScaleTrans(sceVu0FVECTOR *out, sceVu0FVECTOR *m);         // ROR 0x00228c38
-/* The unit matrix (data 0x303c10). */
-sceVu0FVECTOR *i3dMatGetUnit(void);                                      // ROR 0x00237168
 
 /* A layer's light set, fog and view (EE layer +0x82c / +0x830 / +0x834).
  * Opaque: built by 0x11262c over the scene light pool, i3dCtxSetFog and
@@ -328,33 +310,6 @@ u_long   *i3dPktDrawWireBox(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
                             const float *center, const void *extent, const void *color); // ROR 0x0021e8f8
 u_long   *i3dPktDrawWireShape(u_long *pkt, I3dLayer *layer, void *a, void *b, void *c); // ROR 0x0021e9f8
 
-/* i3d's vector / matrix helpers (VU0 macro code; the angle comes first in f12). */
-void  i3dVecCopy(float *out, const float *in);                           // ROR 0x002372d0
-void  i3dVecCopy2(float *out, const float *in);                          // ROR 0x002372e0
-/* The second copy of i3dVecNormalize: xyz normalized, w 0. */
-void  i3dVecNormalize2(float *out, const float *in);                     // ROR 0x002375d8
-void  i3dVecAdd(float *out, const float *a, const float *b);             // ROR 0x002373d8
-void  i3dVecMul(float *out, const float *a, const float *b);             // ROR 0x00237438
-void  i3dVecMul2(float *out, const float *a, const float *b);  /* = Mul */ // ROR 0x00237450
-void  i3dVecFtoi0(int *out, const float *in);                            // ROR 0x00237600
-void  i3dVecFtoi4(int *out, const float *in);  /* 12.4 fixed */          // ROR 0x00237610
-void  i3dVecSub(float *out, const float *a, const float *b);             // ROR 0x00237408
-void  i3dVecScale(float s, float *out, const float *in);                // ROR 0x00237360
-/* out = m x v (an sceVu0 row-vector product, w included). */
-void  i3dMatApply(float *out, sceVu0FVECTOR *m, const float *v);        // ROR 0x002373a8
-/* out = -in, all four components. */
-void  i3dVecNeg(float *out, const float *in);                           // ROR 0x00237468
-float i3dVecDot(const float *a, const float *b);                        // ROR 0x00237580
-void  i3dMatMul(sceVu0FVECTOR *out, sceVu0FVECTOR *a, sceVu0FVECTOR *b); // ROR 0x002377d0
-void  i3dMatUnit(sceVu0FVECTOR *m);                                      // ROR 0x00237340
-void  i3dMatTranslate(sceVu0FVECTOR *out, sceVu0FVECTOR *in, const float *v); // ROR 0x00237640
-void  i3dMatInverse(sceVu0FVECTOR *out, sceVu0FVECTOR *in);              // ROR 0x00237678
-void  i3dMatRotX(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in);    // ROR 0x00237818
-void  i3dMatRotY(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in);    // ROR 0x00237830
-void  i3dMatRotZ(float angle, sceVu0FVECTOR *out, sceVu0FVECTOR *in);    // ROR 0x00237848
-/* A view matrix from an eye, a view direction and an up vector. */
-void  i3dMatLookDir(sceVu0FVECTOR *out, const float *eye, const float *dir,
-                    const float *up);                                    // ROR 0x00237ba0
 /* The distance of two points (sqrt of 0x106e14). */
 float utlVecDist(const float *a, const float *b);                        // ROR 0x00106e70
 
