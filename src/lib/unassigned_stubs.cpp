@@ -211,12 +211,6 @@ void MagLifeBwn::renderPostProcess()
     ROSEPAN_STUB("MagLifeBwn::renderPostProcess", 0x001259e8);
 }
 
-// stub of ROR 0x0021a120
-void i3dFogInit(I3dFog *fog)
-{
-    ROSEPAN_STUB("i3dFogInit", 0x0021a120);
-}
-
 // stub of ROR 0x0017c1f4
 int FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy)
 {
@@ -433,26 +427,6 @@ void MagScene::drawFocus(i3dContext *ctx, int frame)
 void MagScene::drawSkyDome(i3dContext *ctx)
 {
     ROSEPAN_STUB("MagScene::drawSkyDome", 0x001406b8);
-}
-
-// stub of ROR 0x0021b148
-I3dLight * i3dCtxCreateLight(i3dContext *ctx, const I3dLightDesc *desc)
-{
-    ROSEPAN_STUB("i3dCtxCreateLight", 0x0021b148);
-    return {};
-}
-
-// stub of ROR 0x0021a158
-void     * i3dCtxSetFog(i3dContext *ctx, const I3dFog *fog)
-{
-    ROSEPAN_STUB("i3dCtxSetFog", 0x0021a158);
-    return {};
-}
-
-// stub of ROR 0x0021ac80
-void i3dLightDescInit(I3dLightDesc *desc)
-{
-    ROSEPAN_STUB("i3dLightDescInit", 0x0021ac80);
 }
 
 // stub of ROR 0x00237678
@@ -707,6 +681,17 @@ void i3dVecCross(float *out, const float *a, const float *b)
 void i3dVecNormalize(float *out, const float *in)
 {
     ROSEPAN_BRIDGE("i3dVecNormalize", 0x00236b38);
+    float q = 1.0f / sqrtf(in[0] * in[0] + in[1] * in[1] + in[2] * in[2]);
+    out[0] = in[0] * q;
+    out[1] = in[1] * q;
+    out[2] = in[2] * q;
+    out[3] = 0.0f;
+}
+
+// bridge of ROR 0x002375d8: the second copy of i3dVecNormalize.
+void i3dVecNormalize2(float *out, const float *in)
+{
+    ROSEPAN_BRIDGE("i3dVecNormalize2", 0x002375d8);
     float q = 1.0f / sqrtf(in[0] * in[0] + in[1] * in[1] + in[2] * in[2]);
     out[0] = in[0] * q;
     out[1] = in[1] * q;

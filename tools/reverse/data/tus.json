@@ -50,6 +50,28 @@
    "status": "verify",
    "why": "i3d draw context module: i3dInitHardware..i3dCtxInit and the per-frame texture batching (0x21f4d8, 0x21f9c8) all work on the 0x12168-byte i3dContext; bounded by the camera/matrix helpers before 0x21eb28 (calls into 0x21e1d8) and the texture-object helpers from 0x21fb30 (clear of a 0x18 struct, 0x21fb50 calls 0x225460). No source string in i3d; file named after its i3dCtx* API."
   },
+  "i3d/i3denv.cpp": {
+   "notes": "Pinned 0x21a120..0x21a3e8 + 0x21ac80..0x21b220 as one file (a guess: the i3r helpers 0x21a3e8..0x21ac80 sit between; split into i3dfog / i3dlight if evidence appears). All 12 functions written; black screen because no host draw consumer exists, so verify. The lightstatus asserts in magscenerender.cpp:982 now come only from the DogLightPool::createLight 0x11262c stub (dog/doglightpool.cpp). Open: spot cone units (radians here, tangents in MagShadowLight's comment), roles of light kinds 1 / 3 / 4 (open-items). The fog packet's VU1 buffer commands 0x11 / 0x190 / 0x0a are read from their use, not from the microcode. Rest of unassigned@00216ad0 (debug menu, texture objects and GS transfers, i3r helpers) stays queued.",
+   "ranges": [
+    [
+     "0021a120",
+     "0021a3e8"
+    ],
+    [
+     "0021ac80",
+     "0021b220"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 16:32",
+     "status": "verify",
+     "summary": "i3d fog and lights: i3dFogInit, i3dCtxSetFog with its fog ramp and FOGCOL, the VU1 fog packet i3dPktMakeFog, i3dLightDescInit, i3dCtxCreateLight and its five kind builders (parallel, point, spot with cone cosines, dir2, vec3); I3dFog / I3dFogState / I3dLightDesc / I3dLight moved into i3d/i3denv.h with the desc pairs fixed to (count, list); i3dVecNormalize2 0x2375d8 bridged"
+    }
+   ],
+   "status": "verify",
+   "why": "the frame environment records i3d hangs on layers (+0x82c light, +0x830 fog): i3dFogInit / i3dCtxSetFog / the fog VU1 packet 0x21a270, and the light descriptions and i3dCtxCreateLight with its five kind builders; both build packet-tail records. One file for both is a guess: the i3r helpers 0x21a3e8..0x21ac80 sit between them"
+  },
   "i3d/i3dlayer.cpp": {
    "notes": "Every frame now builds real groups, layers and a sorted DMA chain; the smoke run is stable and still black: nothing on the i3d path reaches a host draw module (no GS emulation by decision), SprMan and i3dCtxCreateView are stubs. Next (queued): unassigned@00224de0 holds i3dCtxCreateView 0x226c58 and its view maths 0x226278..0x227a98 after the TIM2 helpers from 0x224de0; pin the view file (i3d/i3dview.cpp?) and the TIM2 one first. Then unassigned@00216ad0 (B.4): it must replace the bridges in lib/unassigned_stubs.cpp marked unassigned@00216ad0. The old key unassigned@0021fb50 now names only the model packet builders 0x21fb50..0x222f50 (removed from the queue). Unverified: I3rMaterial layout read by i3dLayerFindMaterialDrawSet (only reader 0x228f50), the base argument there (a draw set? it adds +0x20), the layer +0x414 table and +0x838 user pairs (no readers). Untested paths: the radix sort (32+ nodes per group) and the state nodes (only the model builders add them). Where a host i3d renderer can hook in is open (open-items B.3 note).",
    "ranges": [

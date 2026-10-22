@@ -41,23 +41,6 @@
 #define I3D_VIF_FLUSHA 0x11000000u
 #define I3D_VIF_DIRECT 0x50000000u
 
-/* A frame's fog state (2 qwords from the packet tail; i3dCtxSetFog 0x21a158,
- * the fog file in unassigned@00216ad0: move it there when that is written).
- * Only words, so the EE layout holds on the host. */
-struct I3dFogState
-{
-    u_int  m_00;                // ROR 0x00: 0
-    u_int  m_04;                // ROR 0x04: 0
-    float  m_ramp_base;         // ROR 0x08: of the fog ramp; roles unverified
-    float  m_ramp_scale;        // ROR 0x0c
-    u_long m_fogcol;            // ROR 0x10: FOGCOL (r | g << 8 | b << 16)
-    u_int  m_packet;            // ROR 0x18: DMA address of the fog packet (i3dPktCallFog)
-    u_int  _1c;
-};
-static_assert(offsetof(I3dFogState, m_fogcol) == 0x10, "m_fogcol");
-static_assert(offsetof(I3dFogState, m_packet) == 0x18, "m_packet");
-static_assert(sizeof(I3dFogState) == 0x20, "I3dFogState is 2 qwords on the EE");
-
 /* ---- draw sets ---- */
 
 void      i3dDrawSetInsertAfter(I3dDrawSet *set, I3dDrawSet *at);       // ROR 0x0021b220

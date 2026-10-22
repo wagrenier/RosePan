@@ -70,6 +70,12 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
         **The host draw hook** is still undecided (the user's call): the REGLIST / *F writers
         here are the natural place for a 2D host consumer (each one is one GS primitive with its
         PRIM word); the strips need a VU1 replacement or a hook above the packets.
+        **Fog and lights written 2026-10-22 (`verify`)** as `i3d/i3denv.cpp` (pinned
+        0x21a120..0x21a3e8 + 0x21ac80..0x21b220, 12 functions; one file for both is a guess, the i3r
+        helpers sit between). i3dFogInit is no longer a stub; i3dCtxCreateLight is real, so the
+        `lightstatus[i] != NULL` asserts now wait only on DogLightPool::createLight 0x11262c
+        (dog/doglightpool.cpp). Left in unassigned@00216ad0: the debug menu, the texture objects /
+        GS transfers, the i3r helpers.
      5. `spr/sprtexture.cpp`: SprTexture (setList / update; replace the update bridge).
      6. `dog/dogtexinfo.cpp`: the texture table SprTexture loads into (DogTexInfo::init / add are
         reached).
@@ -312,6 +318,12 @@ to adapt when a TU reaches them:
   next to snd/rxmpeg.cpp) and `SndMan::update` are names from use, unverified; the MagScene method
   names come from what MagSystem passes them (ror-inferred, low confidence for load / draw / view).
 
+- **Spot cone units** (2026-10-22, the i3denv session): i3dLightSetSpot 0x21af50 reads the cone at
+  +0x30 / +0x34 as half angles in radians (cosf / sinf of them), while mag/magscene.h's
+  MagShadowLight comment calls them tangents (tan - 0.1, at most 0.7). Check makeActorShadow's
+  values when the spot shadow path runs; one of the two comments is wrong. Light kinds 1, 3, 4
+  (point, "dir2", "vec3") have roles unverified: read the VU1 lighting microcode or a caller
+  (DogLightPool::createLight) to name their fields.
 - **The i3d packets on the host** (2026-10-22, the i3dctx session; decided in-session, unconfirmed with
   the user): i3d builds EE DMA chains (VIF / GIF codes, REFs of the ROM's VU microprograms at data
   0x2912b0 / 0x2949f0). The context keeps host pointers and the tags' address words are the low 28
