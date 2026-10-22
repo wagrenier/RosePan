@@ -172,25 +172,10 @@ u_long *i3dClutMakeUpload(void *clut, u_long *pkt, u_int dst);           // ROR 
 u_long *i3dTexMakeMove(void *tex, u_long *pkt, u_int src, u_int dst);    // ROR 0x00219d40
 u_long *i3dClutMakeMove(void *clut, u_long *pkt, u_int src, u_int dst);  // ROR 0x00219d68
 
-/* One GS register write (a DMA cnt tag, an A+D GIF tag, value / reg);
- * returns the position after it (pkt + 3 qwords). */
-u_long *i3dPktSetReg(u_long *pkt, u_long reg, u_long value);             // ROR 0x0021b550
-/* The packet's first tags (0x21b600 / 0x21b550); returns the chain cursor. */
-u_long *i3dPktOpenChain(u_char *pkt);                                    // ROR 0x0021b698
-/* Writes the no-texture registers into each used slot of a draw set. */
-int   i3dBatchClearTextures(I3dDrawSet *set);                            // ROR 0x0021b288
-/* ALPHA_1 from a blend mode (0 writes nothing). */
-u_long *i3dPktSetAlphaMode(u_long *pkt, int mode);                       // ROR 0x0021b600
-/* CALL tags to the layer view's / fog's packet, when the layer has one. */
-u_long *i3dPktCallView(u_long *pkt, I3dLayer *layer);                    // ROR 0x0021b5a0
-u_long *i3dPktCallFog(u_long *pkt, I3dLayer *layer);                     // ROR 0x0021b5d0
+/* The draw sets, tags, register writes and primitive writers have their
+ * own file. */
+#include "i3d/i3dpacket.h"
 
-/* Draw sets (the packet module before the strip builders). */
-void  i3dDrawSetInsertAfter(I3dDrawSet *set, I3dDrawSet *at);            // ROR 0x0021b220
-void  i3dDrawSetMoveAfter(I3dDrawSet *set, I3dDrawSet *at);              // ROR 0x0021b238
-void  i3dTexSetDescInit(I3dTexSetDesc *desc);                            // ROR 0x0021b300
-int   i3dDrawSetInit(I3dDrawSet *set, I3dLayer *layer, const I3dTexSetDesc *desc,
-                     u_int hash);                                        // ROR 0x0021b320
 /* Bits per pixel of a GS pixel format (0 past the table). */
 int   i3dPsmBits(int psm);                                               // ROR 0x00218db8
 /* Copies four words (no alignment needed). */
@@ -292,17 +277,6 @@ I3dLight *i3dCtxCreateLight(i3dContext *ctx, const I3dLightDesc *desc);  // ROR 
 /* The fog state of a frame from a fog record; NULL on failure. */
 void     *i3dCtxSetFog(i3dContext *ctx, const I3dFog *fog);              // ROR 0x0021a158
 
-/* Counts a use of texture slot n; its GS register packet. */
-u_long   *i3dDrawSetUseTex(I3dDrawSet *set, int n);                      // ROR 0x0021b260
-u_long   *i3dPktRefTexRegs(u_long *pkt, u_long *regs);                   // ROR 0x0021b4f8
-u_long   *i3dPktDmaTag(u_long *pkt, u_int qwc, u_int id, const void *addr,
-                       u_int vif0, u_int vif1);                          // ROR 0x0021b490
-u_long    i3dPackXYZ(u_int x, u_int y, u_int z);                         // ROR 0x0021c940
-u_long    i3dPackRGBAQ(float q, u_int r, u_int g, u_int b, u_int a);     // ROR 0x0021c8c8
-/* A blended sprite (PRIM 0x46) from two XYZ2 corners and an RGBAQ. */
-u_long   *i3dPktSprite(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq); // ROR 0x0021c140
-/* A blended line (PRIM 0x41) from two XYZ2 ends and an RGBAQ. */
-u_long   *i3dPktLine(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq); // ROR 0x0021c538
 /* Strips of count vertices with an optional matrix, STQ, colours and
  * positions (EE vectors); primitives unverified. */
 u_long   *i3dPktDrawStrip(u_long *pkt, sceVu0FVECTOR *matrix, int count, const void *stq,
@@ -323,6 +297,11 @@ u_long   *i3dPktDrawWireShape(u_long *pkt, I3dLayer *layer, void *a, void *b, vo
 /* i3d's vector / matrix helpers (VU0 macro code; the angle comes first in f12). */
 void  i3dVecCopy(float *out, const float *in);                           // ROR 0x002372d0
 void  i3dVecCopy2(float *out, const float *in);                          // ROR 0x002372e0
+void  i3dVecAdd(float *out, const float *a, const float *b);             // ROR 0x002373d8
+void  i3dVecMul(float *out, const float *a, const float *b);             // ROR 0x00237438
+void  i3dVecMul2(float *out, const float *a, const float *b);  /* = Mul */ // ROR 0x00237450
+void  i3dVecFtoi0(int *out, const float *in);                            // ROR 0x00237600
+void  i3dVecFtoi4(int *out, const float *in);  /* 12.4 fixed */          // ROR 0x00237610
 void  i3dVecSub(float *out, const float *a, const float *b);             // ROR 0x00237408
 void  i3dVecScale(float s, float *out, const float *in);                // ROR 0x00237360
 /* out = m x v (an sceVu0 row-vector product, w included). */

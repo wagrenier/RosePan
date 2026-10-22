@@ -2567,11 +2567,23 @@
   "was": "FUN_0021b490",
   "why": "writes a DMA tag (qwc, id, addr) and two VIF codes; returns the next qword"
  },
+ "0021b4d0": {
+  "name": "i3dPktDirectTag",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b4d0",
+  "why": "DMA tag via i3dPktDmaTag with VIF FLUSHA 0x11000000 and DIRECT qwc (0x50000000 | qwc): the GIF data that follows"
+ },
  "0021b4f8": {
   "name": "i3dPktRefTexRegs",
   "tag": "lib-context",
   "was": "FUN_0021b4f8",
   "why": "a DMA ref tag (0x21b4d0, 6 qwords, id 3) to a texture register packet"
+ },
+ "0021b518": {
+  "name": "i3dPktUseTexRegs",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b518",
+  "why": "i3dDrawSetUseTex(set, n) then i3dPktRefTexRegs of its register packet"
  },
  "0021b550": {
   "name": "i3dPktSetReg",
@@ -2603,11 +2615,161 @@
   "was": "FUN_0021b698",
   "why": "writes the packet first tags (0x21b600 then 0x21b550 with 0x47 / 0x5000d) and returns the chain cursor"
  },
+ "0021b6c8": {
+  "name": "i3dPktClearZ",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b6c8",
+  "why": "TEST_1 0x32001 (alpha test never, fail = Z only, Z test greater), a REGLIST sprite 0,0..0xffff,0xffff, then TEST_1 0x5000d: rewrites the Z buffer; created in Ghidra (folded after i3dPktOpenChain)"
+ },
+ "0021b740": {
+  "name": "i3dPktConvXYZ",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b740",
+  "why": "xyz * screen scale (data 0x2db340) + screen offset (0x2db330), vftoi4: a PACKED XYZ2 qword"
+ },
+ "0021b790": {
+  "name": "i3dPktConvRGBA",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b790",
+  "why": "rgba * scale (data 0x3026b0 = 128s or 0x3026c0 = 255,255,255,128), vftoi0: a PACKED RGBAQ qword"
+ },
+ "0021b7c8": {
+  "name": "i3dPktFlatSpriteF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b7c8",
+  "why": "GIF PACKED PRIM 0x46 (sprite, ABE) regs RGBAQ XYZ2 XYZ2 from float vectors; created in Ghidra"
+ },
+ "0021b860": {
+  "name": "i3dPktTexSpriteF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b860",
+  "why": "GIF tag 0x302850: PRIM 0x156 (sprite TME ABE FST), RGBAQ UV XYZ2 UV XYZ2 from float vectors"
+ },
+ "0021b928": {
+  "name": "i3dPktFlatTriangleF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b928",
+  "why": "GIF tag 0x302858: PRIM 0x43 (triangle ABE), RGBAQ XYZ2 x3 from float vectors; created in Ghidra"
+ },
+ "0021b9d0": {
+  "name": "i3dPktTexTriangleF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b9d0",
+  "why": "GIF tag 0x302860: PRIM 0x153, RGBAQ then UV / XYZ2 x3 from float vectors"
+ },
+ "0021bac8": {
+  "name": "i3dPktGouraudTriangleF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021bac8",
+  "why": "GIF tag 0x302868: PRIM 0x4b (triangle IIP ABE), RGBAQ / XYZ2 x3 from float vectors"
+ },
+ "0021bbb8": {
+  "name": "i3dPktGouraudTexTriangleF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021bbb8",
+  "why": "GIF tag 0x302870 regs 0x513513513: PRIM 0x15b, UV / RGBAQ / XYZ2 x3 from float vectors"
+ },
+ "0021bce0": {
+  "name": "i3dPktFlatLineF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021bce0",
+  "why": "GIF PACKED PRIM 0x41 (line ABE) RGBAQ XYZ2 XYZ2 from float vectors; created in Ghidra"
+ },
+ "0021bd78": {
+  "name": "i3dPktTexLineF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021bd78",
+  "why": "GIF tag 0x302880: PRIM 0x151 (line TME ABE FST), RGBAQ UV XYZ2 UV XYZ2 from float vectors"
+ },
+ "0021be40": {
+  "name": "i3dPktGouraudLineF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021be40",
+  "why": "GIF tag 0x302888: PRIM 0x49, RGBAQ / XYZ2 x2 from float vectors; created in Ghidra"
+ },
+ "0021bef8": {
+  "name": "i3dPktGouraudTexLineF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021bef8",
+  "why": "GIF tag 0x302890: PRIM 0x159, UV / RGBAQ / XYZ2 x2 from float vectors"
+ },
+ "0021bfe8": {
+  "name": "i3dPktFlatPointF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021bfe8",
+  "why": "GIF PACKED PRIM 0x40 (point ABE) RGBAQ XYZ2 from float vectors; created in Ghidra"
+ },
+ "0021c068": {
+  "name": "i3dPktTexPointF",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c068",
+  "why": "GIF PACKED PRIM 0x150 (point TME ABE FST): UV copied as is, RGBAQ, XYZ2 from float vectors; created in Ghidra"
+ },
+ "0021c100": {
+  "name": "i3dPktSetScreenOffset",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c100",
+  "why": "copies a vector to data 0x2db330, the offset i3dPktConvXYZ adds"
+ },
+ "0021c120": {
+  "name": "i3dPktSetScreenScale",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c120",
+  "why": "copies a vector to data 0x2db340, the scale i3dPktConvXYZ multiplies by"
+ },
  "0021c140": {
   "name": "i3dPktSprite",
   "tag": "lib-context",
   "was": "FUN_0021c140",
   "why": "a GIF tag with PRIM 0x46 (blended sprite) and RGBAQ, XYZ2, XYZ2 from the three words, behind a DMA tag; returns the packet after it"
+ },
+ "0021c1a0": {
+  "name": "i3dPktTexSpriteUV",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c1a0",
+  "why": "GIF REGLIST PRIM 0x156 (sprite TME ABE FST): RGBAQ UV XYZ2 UV XYZ2 from packed words"
+ },
+ "0021c208": {
+  "name": "i3dPktTexSpriteST",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c208",
+  "why": "GIF REGLIST PRIM 0x56 (sprite TME ABE, STQ): RGBAQ ST XYZ2 ST XYZ2; created in Ghidra"
+ },
+ "0021c270": {
+  "name": "i3dPktTriangle",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c270",
+  "why": "GIF REGLIST PRIM 0x43 (triangle ABE): RGBAQ XYZ2 x3; created in Ghidra"
+ },
+ "0021c2d8": {
+  "name": "i3dPktTexTriangleUV",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c2d8",
+  "why": "GIF REGLIST PRIM 0x153: RGBAQ, UV / XYZ2 x3; created in Ghidra"
+ },
+ "0021c348": {
+  "name": "i3dPktTexTriangleST",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c348",
+  "why": "GIF REGLIST PRIM 0x53: RGBAQ, ST / XYZ2 x3; created in Ghidra"
+ },
+ "0021c3b8": {
+  "name": "i3dPktGouraudTriangle",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c3b8",
+  "why": "GIF REGLIST PRIM 0x4b: RGBAQ / XYZ2 x3; created in Ghidra"
+ },
+ "0021c428": {
+  "name": "i3dPktGouraudTexTriangleUV",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c428",
+  "why": "GIF REGLIST PRIM 0x15b: UV / RGBAQ / XYZ2 x3; created in Ghidra"
+ },
+ "0021c4b0": {
+  "name": "i3dPktGouraudTexTriangleST",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c4b0",
+  "why": "GIF REGLIST PRIM 0x5b: ST / RGBAQ / XYZ2 x3; created in Ghidra"
  },
  "0021c538": {
   "name": "i3dPktLine",
@@ -2615,11 +2777,71 @@
   "was": "FUN_0021c538",
   "why": "GIF tag NLOOP 1 PRIM, regs 0x5510 (PRIM RGBAQ XYZ2 XYZ2), PRIM 0x41 (line, alpha blend), from two XYZ2 and an RGBAQ; the line twin of i3dPktSprite"
  },
+ "0021c598": {
+  "name": "i3dPktTexLineUV",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c598",
+  "why": "GIF REGLIST PRIM 0x151: RGBAQ UV XYZ2 UV XYZ2; created in Ghidra"
+ },
+ "0021c600": {
+  "name": "i3dPktTexLineST",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c600",
+  "why": "GIF REGLIST PRIM 0x51: RGBAQ ST XYZ2 ST XYZ2; created in Ghidra"
+ },
+ "0021c668": {
+  "name": "i3dPktGouraudLine",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c668",
+  "why": "GIF REGLIST PRIM 0x49: RGBAQ / XYZ2 x2"
+ },
+ "0021c6d0": {
+  "name": "i3dPktGouraudTexLineUV",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c6d0",
+  "why": "GIF REGLIST PRIM 0x159: UV / RGBAQ / XYZ2 x2; created in Ghidra"
+ },
+ "0021c740": {
+  "name": "i3dPktGouraudTexLineST",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c740",
+  "why": "GIF REGLIST PRIM 0x59: ST / RGBAQ / XYZ2 x2"
+ },
+ "0021c7b0": {
+  "name": "i3dPktPoint",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c7b0",
+  "why": "GIF REGLIST PRIM 0x40: RGBAQ XYZ2; created in Ghidra"
+ },
+ "0021c808": {
+  "name": "i3dPktTexPointUV",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c808",
+  "why": "GIF REGLIST PRIM 0x150: UV RGBAQ XYZ2; created in Ghidra"
+ },
+ "0021c868": {
+  "name": "i3dPktTexPointST",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c868",
+  "why": "GIF REGLIST PRIM 0x50: ST RGBAQ XYZ2; created in Ghidra"
+ },
  "0021c8c8": {
   "name": "i3dPackRGBAQ",
   "tag": "lib-context",
   "was": "FUN_0021c8c8",
   "why": "r | g << 8 | b << 16 | a << 24 | q (f12 bits) << 32"
+ },
+ "0021c900": {
+  "name": "i3dPackST",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c900",
+  "why": "the bits of two floats: s | t << 32 (a GS ST value)"
+ },
+ "0021c928": {
+  "name": "i3dPackUV",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c928",
+  "why": "u | v << 16 (a GS UV value)"
  },
  "0021c940": {
   "name": "i3dPackXYZ",
@@ -3773,11 +3995,29 @@
   "was": "FUN_002373a8",
   "why": "out = mat x vec (vmula / vmadda chain)"
  },
+ "002373d8": {
+  "name": "i3dVecAdd",
+  "tag": "ror-inferred",
+  "was": "FUN_002373d8",
+  "why": "lqc2 / vadd.xyzw / sqc2: out = a + b (the vector module's second copy)"
+ },
  "00237408": {
   "name": "i3dVecSub",
   "tag": "lib-context",
   "was": "FUN_00237408",
   "why": "out = a - b"
+ },
+ "00237438": {
+  "name": "i3dVecMul",
+  "tag": "ror-inferred",
+  "was": "FUN_00237438",
+  "why": "vmul.xyzw: out = a * b per component"
+ },
+ "00237450": {
+  "name": "i3dVecMul2",
+  "tag": "ror-inferred",
+  "was": "FUN_00237450",
+  "why": "vmul.xyzw, a byte copy of i3dVecMul at 0x237438"
  },
  "00237468": {
   "name": "i3dVecNeg",
@@ -3790,6 +4030,18 @@
   "tag": "lib-context",
   "was": "FUN_00237580",
   "why": "x*x + y*y + z*z of a*b"
+ },
+ "00237600": {
+  "name": "i3dVecFtoi0",
+  "tag": "ror-inferred",
+  "was": "FUN_00237600",
+  "why": "vftoi0.xyzw: float to int"
+ },
+ "00237610": {
+  "name": "i3dVecFtoi4",
+  "tag": "ror-inferred",
+  "was": "FUN_00237610",
+  "why": "vftoi4.xyzw: float to 12.4 fixed point"
  },
  "00237640": {
   "name": "i3dMatTranslate",
