@@ -99,7 +99,7 @@ struct i3dContext
     I3dDrawSet   *m_reserved;               // ROR 0x1211c: sets reserved since the last flush
     I3dEndFunc    m_end_func;               // ROR 0x12120
     void         *m_end_arg;                // ROR 0x12124
-    float         m_float_param;            // ROR 0x12128: 0.35; reader not found
+    float         m_float_param;            // ROR 0x12128: 0.35; how far i3dCtxCreateView's draw frustum goes from the screen rectangle to the guard band
     int           m_vram_overflow;          // ROR 0x1212c: a set's textures never fit; EndFrame returns 9
     int           m_frame_stat[4];          // ROR 0x12130: cleared by i3dCtxEndFrame (unverified)
     u_char        _12140[0x14];             // ROR 0x12140..0x12153: unknown

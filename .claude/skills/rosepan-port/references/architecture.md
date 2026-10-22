@@ -232,16 +232,51 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   the packet / draw library under the scene. initGraph compares the game's copy of its 36 struct sizes
   (rodata 0x2e90a8) with `i3dGetStructSize` 0x21f1a8 (data 0x302ba0) and hangs on a mismatch.
   Files pinned so far (2026-10-22): **`i3d/i3dctx.cpp`** 0x21eb28..0x21fb30 (written, verify),
-  **`i3d/i3dlayer.cpp`** 0x222f50..0x224de0 (written, verify) and **`i3d/i3dvram.cpp`**
-  0x227a98..0x228c08 (written, verify). Modules seen around them: the wire-shape strip builders
+  **`i3d/i3dlayer.cpp`** 0x222f50..0x224de0 (written, verify), **`i3d/i3dtim2.cpp`**
+  0x224de0..0x225018 (todo), **`i3d/i3dview.cpp`** 0x226278..0x227a98 (written, verify) and
+  **`i3d/i3dvram.cpp`** 0x227a98..0x228c08 (written, verify). Between tim2 and view,
+  0x225018..0x226278 (unassigned): animation curve sampling (0x225018 binary search over key times,
+  0x225080 / 0x225148 scalar / vector segment eval) and vertex morph blending (0x225460..0x2261b8),
+  called from the model packet builders. Modules seen around them: the wire-shape strip builders
   0x21e6f8 / 0x21e8f8 / 0x21e9f8 before 0x21eb28 (0x21e1d8 the line strip), model packet builders
   0x21fb50..0x222f50 (unassigned@0021fb50: per material a state packet node, i3dGroupBegin*Packet),
   GS transfer builders 0x218fa8 / 0x2190c8 / 0x2192c8 and 0x219c88..0x219d68, texture objects
   0x219a98.., packet heads 0x21b220..0x21b698 (draw-set list / init, i3dPktDmaTag, SetReg, the view /
   fog CALLs, ALPHA modes, OpenChain), TIM2 helpers from 0x224de0 (an unreferenced TIM2 / CLT header
-  check, picture lookup 0x224e70, size 0x224ed0), view maths 0x226278..0x227a98 (i3dCtxCreateView
-  0x226c58: a 0x400-byte view in the tail, its packet at +0x3f8), the i3d system calls
+  check, picture lookup 0x224e70, size 0x224ed0), the view (below), the i3d system calls
   0x237178..0x237cc8 (i3dFlushCache, i3dPrintf).
+  - **Two copies of the vector / matrix module**: 0x236960..0x236dxx (i3dVecZero, i3dVecCopyW,
+    i3dMatCopy 0x236990, i3dVu0VecNeg 0x236a68, i3dVecCross 0x236af0, i3dVecNormalize 0x236b38,
+    i3dVu0MatInverse 0x236bd8, i3dVu0MatMul 0x236d30) and a byte-identical one 0x2372d0..0x237814
+    (i3dVecCopy, i3dVecNeg 0x237468, i3dMatInverse 0x237678, i3dMatMul 0x2377d0 ...). The view uses
+    the first; DogEntity / DogActor the second. Row-vector convention: i3dMatMul(out, a, b) runs VU0
+    micro 0 (out row i = sum_j b[i][j] * a[j]), so p * out = (p * b) * a. The first copy is bridged in
+    lib/unassigned_stubs.cpp (unassigned@00228c08); the second is still stubs.
+  - **VU0 microprogram** (data 0x2949f0, `python vudis.py 2949f0 9c <addr>`): 0 the 4x4 multiply
+    (vf4..7 = a, vf8..11 = b, result in vf8..11); 0xc8 a subroutine: vf12..15 = box rows (vf8..11)
+    x matrix (vf4..7); 0x96 box culling (corners = vf15 +- vf12 +- vf13 +- vf14, CLIP each, vi2 =
+    AND of the 6-bit outcodes: non-zero = all outside one plane); 0x69 the same with vi2 = OR (any
+    corner outside).
+  - **The view** (`i3d/i3dview.cpp`, I3dView 0x400 bytes from the tail): i3dCtxCreateView(ctx,
+    MagViewParam, camera matrix) copies the record's frustum (near, far, l, r, b, t) and screen part
+    (zmax / 16, zmin / 16, x0, x1, y0, y1, offx, offy), widens degenerate ranges (0x226410 to 0.5
+    pixel, 0x226498 to near / 10000), and builds three perspective frusta onto the NDC box
+    +-(w / (w + 2)) x +-(h / (h + 2)) x +-1: the guard band (l / r / b / t extended so the screen
+    rectangle's offset x / y map to 64 .. 4031.94; +0x160 proj, +0x1a0 camera * proj, +0x1e0
+    viewport), the screen rectangle (+0x220 / +0x260 / +0x2a0) and the draw frustum between them at
+    ctx +0x12128 (0.35) of the way to the guard band (+0x120 proj, +0x40 camera * proj, +0xa0
+    viewport, +0x0 world -> screen, +0x80 / +0x90 the viewport's scale / offset). Viewports map the
+    NDC box to screen x / y and z zmax / 16 (near) .. zmin / 16 (far), the z range widened by 1/4096.
+    +0x2e0 / +0x320 side-plane matrices (inward normals of the rectangle's / guard band's frustum
+    through the eye), +0x360 depth matrix (z - n, f - z, (z - n) / (f - n), 1), +0x3a0 the inverse
+    camera, +0x3e0 -normalize(inverse row 2), +0x3f0 SCISSOR_1 from the record's unwidened
+    rectangle, +0x3f8 the packet address. The packet: REF of the view's first 10 qwords (UNPACK to
+    VU1 6 + TOPS), RET with 6 qwords to 0 + TOPS (0x11 / 2 header, A+D SCISSOR_1, rows 400 / 0x3fa /
+    0x3f9 and 400 / 0x3ec / 0x3e2 round the eye direction), UNPACK S-32 (10, 0) to 0x10, MSCAL 1.
+    Tests: i3dViewTestBox 0x2268b0 (0 out / 1 inside the guard band / 2 clip), i3dViewTestBoneBox
+    0x226920 (bone boxes' AABB), i3dViewTestSphere 0x226ad8 (hidden, no caller), i3dViewGetDepth
+    0x226c18. i3dCtxCreateOrthoView 0x2273d8 (no caller) is the same body with i3dMatMapBox
+    projections and no plane matrices.
   - **Groups and nodes** (`i3d/i3dlayer.cpp`): a group (0x30: list head key / first / 0 / last,
     +0x10 ctx, +0x14 sort function index into data 0x3031f0 {none, i3dSortList, i3dSortList, NULL},
     +0x18 order 1 asc / 2 desc, +0x1c param, +0x20 the open node, +0x24 count, +0x28 packet bytes).

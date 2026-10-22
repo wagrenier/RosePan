@@ -163,6 +163,19 @@ entries are marked **RoR** with the date.
   copies it out unaligned -- an `I3dMatrixF4x4 *` (4-aligned struct; DogModel's symbols overload on
   both). Declare both overloads, not two invented names (MagSystem::getActorNodeMatrix, 2026-10-22).
 
+- **Ghidra drops VU0 macro details** (bc fields, dest masks, vcallms bodies): `_vmulabc(a, b)` hides
+  which field and which register. Read the asm (`ghidra.py asm`) for any function with lqc2 / vcallms,
+  and the microprogram with `vudis.py` (2026-10-22, the view: micro 0 is a matrix multiply, 0x69 /
+  0x96 box clip tests).
+- **A newly written function dereferences what a stub returns**: the smoke run died in i3dMatCopy the
+  moment i3dCtxCreateView stopped being a stub, because `DogEntity::getMatrix` (stub) returned NULL.
+  When a reached stub's result now flows into real code, give the stub a valid PC placeholder (a unit
+  matrix, an empty object) with a comment, or write it.
+- **Two byte-identical copies of a library module carry the same names**: the i3d vector / matrix code
+  exists at 0x2369xx and 0x2372xx; the second copy had the names (i3dMatMul ...), so the first got
+  `i3dVu0*` for the collisions. Check `ror_functions.txt` for an existing name before naming a math
+  helper.
+
 ## Reconstruction bookkeeping
 
 - **A stub that tolerated null becomes a member that does not.** When stubs turn into real members,

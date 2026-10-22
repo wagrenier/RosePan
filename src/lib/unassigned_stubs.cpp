@@ -1,5 +1,8 @@
 // lib/unassigned_stubs.cpp -- Rule of Rose module (file from the inference in ror_functions.txt).
 // Functions below are stubs until reconstructed; see tools/reverse/stage.py.
+#include <math.h>
+#include <string.h>
+
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
 #include "mag/magscene.h"
@@ -320,7 +323,9 @@ int i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity)
 sceVu0FVECTOR * DogEntity::getMatrix()
 {
     ROSEPAN_STUB("DogEntity::getMatrix", 0x0010fa6c);
-    return {};
+    // PC: the unit matrix until the camera class that holds the +0xf0
+    // matrix is written; i3dCtxCreateView copies what this returns.
+    return i3dMatGetUnit();
 }
 
 // stub of ROR 0x0013555c
@@ -392,13 +397,6 @@ int RxMpeg::stop()
 WrdEntry * WrdTable::get(int n)
 {
     ROSEPAN_STUB("WrdTable::get", 0x0017ea44);
-    return {};
-}
-
-// stub of ROR 0x00226c58
-I3dView * i3dCtxCreateView(i3dContext *ctx, MagViewParam *param, sceVu0FVECTOR *matrix)
-{
-    ROSEPAN_STUB("i3dCtxCreateView", 0x00226c58);
     return {};
 }
 
@@ -709,13 +707,16 @@ u_long *i3dPktOpenChain(u_char *pkt)
     return i3dPktSetReg(i3dPktSetAlphaMode((u_long *)pkt, 0x10), 0x47, 0x5000d);
 }
 
-// stub of ROR 0x0021b5a0
+// bridge of ROR 0x0021b5a0 (the ROM's code; unassigned@00216ad0 replaces it):
+// a CALL of the layer view's packet (view +0x3f8), when it has a view.
 u_long *i3dPktCallView(u_long *pkt, I3dLayer *layer)
 {
-    ROSEPAN_STUB("i3dPktCallView", 0x0021b5a0);
-    // PC: a CALL of view +0x3f8 when the layer has a view; i3dCtxCreateView
-    // is a stub (NULL), so there is none yet.
-    return pkt;
+    ROSEPAN_BRIDGE("i3dPktCallView", 0x0021b5a0);
+    if (layer->m_view == NULL)
+        return pkt;
+    pkt[1] = 0;
+    pkt[0] = ((u_long)layer->m_view->m_packet << 32) | I3D_DMA_CALL;
+    return pkt + 2;
 }
 
 // stub of ROR 0x0021b5d0
@@ -822,6 +823,97 @@ void i3dVecCopyW(float *out, const float *in)
     out[1] = in[1];
     out[2] = in[2];
     out[3] = in[3];
+}
+
+// bridge of ROR 0x00236960
+void i3dVecZero(float *v)
+{
+    ROSEPAN_BRIDGE("i3dVecZero", 0x00236960);
+    v[0] = v[1] = v[2] = v[3] = 0.0f;
+}
+
+// bridge of ROR 0x00236990
+void i3dMatCopy(sceVu0FVECTOR *out, sceVu0FVECTOR *in)
+{
+    ROSEPAN_BRIDGE("i3dMatCopy", 0x00236990);
+    memmove(out, in, sizeof(sceVu0FMATRIX));
+}
+
+// bridge of ROR 0x00236a68: vf0 - vf0 - v.
+void i3dVu0VecNeg(float *out, const float *in)
+{
+    ROSEPAN_BRIDGE("i3dVu0VecNeg", 0x00236a68);
+    for (int k = 0; k < 4; k++)
+        out[k] = 0.0f - in[k];
+}
+
+// bridge of ROR 0x00236af0: vopmula / vopmsub, w 0.
+void i3dVecCross(float *out, const float *a, const float *b)
+{
+    ROSEPAN_BRIDGE("i3dVecCross", 0x00236af0);
+    float x = a[1] * b[2] - b[1] * a[2];
+    float y = a[2] * b[0] - b[2] * a[0];
+    float z = a[0] * b[1] - b[0] * a[1];
+    out[0] = x;
+    out[1] = y;
+    out[2] = z;
+    out[3] = 0.0f;
+}
+
+// bridge of ROR 0x00236b38: xyz times vrsqrt of the squared length, w 0.
+void i3dVecNormalize(float *out, const float *in)
+{
+    ROSEPAN_BRIDGE("i3dVecNormalize", 0x00236b38);
+    float q = 1.0f / sqrtf(in[0] * in[0] + in[1] * in[1] + in[2] * in[2]);
+    out[0] = in[0] * q;
+    out[1] = in[1] * q;
+    out[2] = in[2] * q;
+    out[3] = 0.0f;
+}
+
+// bridge of ROR 0x00236bd8: the adjugate rows (cross products) over the
+// determinant, transposed; translation -t * R^-1; column w 0, 0, 0, 1.
+void i3dVu0MatInverse(sceVu0FVECTOR *out, sceVu0FVECTOR *in)
+{
+    ROSEPAN_BRIDGE("i3dVu0MatInverse", 0x00236bd8);
+    sceVu0FVECTOR c5, c6, c7;
+    float t[3] = { -in[3][0], -in[3][1], -in[3][2] };
+    i3dVecCross(c5, in[1], in[2]);
+    i3dVecCross(c6, in[2], in[0]);
+    i3dVecCross(c7, in[0], in[1]);
+    float q = 1.0f / (c7[0] * in[2][0] + c7[1] * in[2][1] + c7[2] * in[2][2]);
+    for (int i = 0; i < 3; i++)
+    {
+        out[i][0] = q * c5[i];
+        out[i][1] = q * c6[i];
+        out[i][2] = q * c7[i];
+        out[i][3] = 0.0f;
+    }
+    for (int k = 0; k < 3; k++)
+        out[3][k] = out[0][k] * t[0] + out[1][k] * t[1] + out[2][k] * t[2];
+    out[3][3] = 1.0f;
+}
+
+// bridge of ROR 0x00236d30: VU0 micro 0 (vf4..7 = a, vf8..11 = b).
+void i3dVu0MatMul(sceVu0FVECTOR *out, sceVu0FVECTOR *a, sceVu0FVECTOR *b)
+{
+    ROSEPAN_BRIDGE("i3dVu0MatMul", 0x00236d30);
+    sceVu0FMATRIX r;
+    for (int i = 0; i < 4; i++)
+        for (int k = 0; k < 4; k++)
+            r[i][k] = a[0][k] * b[i][0] + a[1][k] * b[i][1] + a[2][k] * b[i][2] + a[3][k] * b[i][3];
+    memcpy(out, r, sizeof(r));
+}
+
+// bridge of ROR 0x00228c38
+void i3dMatGetScaleTrans(sceVu0FVECTOR *out, sceVu0FVECTOR *m)
+{
+    ROSEPAN_BRIDGE("i3dMatGetScaleTrans", 0x00228c38);
+    out[0][3] = 0.0f;
+    out[0][0] = m[0][0];
+    out[0][1] = m[1][1];
+    out[0][2] = m[2][2];
+    i3dVecCopyW(out[1], m[3]);
 }
 
 // bridge of ROR 0x00237168: data 0x303c10.

@@ -1,6 +1,5 @@
 {
  "queue": [
-  "unassigned@00224de0",
   "unassigned@00216ad0",
   "spr/sprtexture.cpp",
   "dog/dogtexinfo.cpp",
@@ -68,6 +67,33 @@
    ],
    "status": "verify",
    "why": "the i3d layer / draw-group / sort module: layer setters and packet begin/end 0x222f50..0x2239b8 (all take an I3dLayer), the group node list, the radix / cocktail sort and the group run 0x2239b8..0x224b28, the texture register packets 0x224b28..0x224de0; model packet code before it (0x21fb50..) and the TIM2 module after it (0x224de0: the unreferenced TIM2 / CLUT header check, then picture and size helpers) are other files"
+  },
+  "i3d/i3dtim2.cpp": {
+   "ranges": [
+    [
+     "00224de0",
+     "00225018"
+    ]
+   ],
+   "why": "TIM2 file helpers after i3dlayer.cpp: header check (TIM2 / CLT2 magic, version 3/4), picture n, image size at a mip level, mip level data, CLUT data; called from the texture objects 0x2193f0 / 0x219ab0"
+  },
+  "i3d/i3dview.cpp": {
+   "notes": "Status verify: views are built every frame (host test: screen centre 2047.5, frustum corner on the rectangle corner, depth 4094.6..1.06, scissor 0..511 x 0..447; culling answers as expected) but the screen stays black because no host draw module consumes the i3d path. The pViewStatus asserts are gone; next per-frame asserts are lightstatus[i] != NULL (DogLightPool::createLight 0x11262c stub). PC placeholders: DogEntity::getMatrix stub returns the unit matrix (ROM: transform slot, then i3dMatInverse 0x237678 into +0xf0 of the camera class; write with that class). The second copy of the vector module (0x2372d0..0x237814: i3dMatMul 0x2377d0, i3dMatInverse 0x237678, i3dVecNeg 0x237468) is still no-op stubs; the bridges for the first copy show the exact semantics (row vectors, out row i = sum b[i][j] * a[j]). Unverified: the view packet's VU1 constants (400, 0x3fa, 0x3f9, 0x3ec, 0x3e2) and the bone-box struct (+0x4 boxes, +0xe count) until the model builders 0x21fb50.. are written. 0x225018..0x226278 (anim curves, morph) stays unassigned. Next in the queue: unassigned@00216ad0 (B.4 packets and texture uploads).",
+   "ranges": [
+    [
+     "00226278",
+     "00227a98"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 16:10",
+     "status": "verify",
+     "summary": "i3d view: pinned i3d/i3dview.cpp 0x226278..0x227a98 (and i3d/i3dtim2.cpp 0x224de0..0x225018, todo) and wrote all 19 functions: i3dCtxCreateView and its ortho twin (guard band, screen rectangle and draw frusta, viewports, side-plane, depth and inverse matrices, scissor, the VU1 view packet), the perspective / ortho / box-map builders, accessors, and the box / bone-box / sphere culling tests (VU0 micros 0x69 / 0x96 decoded; hidden 0x226ad8 created). Bridged the first copy of the vector module (i3dMatCopy, i3dVecCross, i3dVecNormalize, i3dVu0MatMul / MatInverse / VecNeg, i3dVecZero, i3dMatGetScaleTrans) and i3dPktCallView; new tool vudis.py."
+    }
+   ],
+   "status": "verify",
+   "why": "i3d view: i3dCtxCreateView 0x226c58 and its ortho twin 0x2273d8, the frustum / viewport matrix builders 0x226278..0x226538, the view accessors 0x226370..0x2263a0 (view +0xe0 / +0x220 / +0x2a0 / +0x3a0) and the view clip / depth tests 0x2268b0..0x226c18 (view +0x1a0 / +0x260 / +0x360); i3dvram.cpp starts at 0x227a98"
   },
   "i3d/i3dvram.cpp": {
    "notes": "Complete; nothing on screen shows it yet (screen black: the draw path is stubbed). A host test (init, reserve x3 frames with eviction, compact, end frame, reset) kept every node accounted for and block sizes summing to the heap. One PC deviation: i3dVramReserve skips locking a NULL i3dVramAlloc result (the ROM would fault). Next reached stubs in run order: the draw-group module 0x2239b8..0x224d88 (i3dGroupInit, i3dCtxCloseFrame), MagScene::draw / postDraw; the texture objects at 0x219a98.. call i3dVramHandleInit / Release. The first session whose screenshot shows a textured layer marks this done.",
@@ -303,6 +329,7 @@
   "unassigned@0020eda4": {},
   "unassigned@00216ad0": {},
   "unassigned@0021fb50": {},
+  "unassigned@00224de0": {},
   "unassigned@002437f8": {},
   "utl/utlmisc.cpp": {
    "notes": "Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and installs utlMemAlloc twice, utlMemRealloc and utlMemFree as rxSysSetMemFunc0..3 hooks; bed/bedmemory.cpp (0x100354..) is only stubs (alloc returns NULL), so reconstruct BedMemory right after main, before anything allocates. Decided without the user: the ROM's operator new/delete are written as utlOperatorNew/utlOperatorDelete(+Array, +Debug) and do NOT replace the host's global operator new (open-items Decisions). BedMemory field names (m_top, m_last, m_buffer, m_size, m_id, m_owner) are from create/format/destroy and partly guessed; check them against the assert texts (m_size, m_buffer, m_next, m_chunk_size, m_header_size, m_flag, m_filename) when bedmemory is read. utlParseParam leaves the record type unchanged for a value that is not a quote, dollar or digit, as the ROM does. Hazard recorded: stubgen copies an access label (public:) into the next stub.",
