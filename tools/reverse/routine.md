@@ -18,7 +18,7 @@ Repository: E:\Programming\Git\Github\RosePan (Rule of Rose PS2 -> PC port). Wor
 
 3. Look at the screen -- the visual test decides, not the logs. Every smoke run saves screenshots to tools/reverse/work/shots/ (shot_<frame>.png every 60 frames, last.png); open them with the Read tool. Reference pictures: `python tm2png.py --scan <archive>` or `python tm2png.py <file.tm2>` (from tools/reverse) writes the game's own textures as PNGs to work/ref/. Log lines, stub hits and callcheck only show that code ran. A TU on the drawing path is done only when the screenshot shows what the reference shows; a wrong picture, or code still to write, means --status partial with the difference in the notes. Complete code that nothing on screen can show yet finishes with --status verify. `tus.py finish` commits the last screenshot to progress/.
 
-4. Push. After `tus.py finish` has committed, run `git push origin HEAD` -- only once the user has added a remote and approved pushing for this repository (open-items.md says so under "Decisions"); otherwise skip the push and say so in the report. Never force-push, rewrite history, delete branches or tags.
+4. Push. After `tus.py finish` has committed, run `git push origin HEAD`. The user has approved pushing every run's commit (2026-10-22; open-items.md "Decisions"). Never force-push, rewrite history, delete branches or tags. If the push fails, say so in the report; do not retry with other flags.
 
 5. Report in 3-5 lines: the TU, its status, the commit hash and whether it was pushed, what the screenshot shows compared with the reference (and its progress/ file), and the next blocker.
 
