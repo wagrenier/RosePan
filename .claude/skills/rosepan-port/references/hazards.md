@@ -264,6 +264,9 @@ public:
 
 ## Shell and Python on Windows
 
+- A batch JSON for name_ctx.py with a PS2 path in a `why` (`cdrom0:\DATA\...`) fails to parse: a
+  quoted heredoc keeps one backslash, and `\D` is not a JSON escape. Write paths with `/` in `why`.
+
 - **Heredocs mangle backslashes** (`\n` in C strings, regexes, `\\` in Python paths) and an apostrophe
   in a quoted heredoc breaks the Bash tool. Write code, JSON batches and scripts with the Write tool.
 - **A NUL byte makes git treat a reference file as binary** and its line endings flip on every rewrite:

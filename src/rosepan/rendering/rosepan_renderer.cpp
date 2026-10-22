@@ -11901,6 +11901,64 @@ void RosePan_RendererDrawFontQuad(const float *xy,
               true, false, true, false);
 }
 
+const void *RosePan_RendererCreateImageTexture(const unsigned char *rgba,
+                                              int width, int height)
+{
+    if (rgba == nullptr || width <= 0 || height <= 0 || !EnsureRenderer())
+    {
+        return nullptr;
+    }
+
+    /* Keyed by content in the same cache the GS decoder fills, salted so a
+     * host image never answers a TEX0 lookup.  FNV-1a over the size and the
+     * texels. */
+    const size_t byte_count = (size_t)width * (size_t)height * 4u;
+    uint64_t hash = 0xcbf29ce484222325ull ^ 0x524f5345494d4731ull;
+    hash = (hash ^ (uint64_t)(uint32_t)width) * 0x100000001b3ull;
+    hash = (hash ^ (uint64_t)(uint32_t)height) * 0x100000001b3ull;
+    for (size_t i = 0; i < byte_count; i++)
+    {
+        hash = (hash ^ rgba[i]) * 0x100000001b3ull;
+    }
+    if (hash == 0)
+    {
+        hash = 1;
+    }
+
+    auto cached = g_texture_cache.find(hash);
+    if (cached != g_texture_cache.end())
+    {
+        return &cached->second;
+    }
+    std::vector<unsigned char> pixels(rgba, rgba + byte_count);
+    return CreatePendingTexture(hash, width, height, std::move(pixels));
+}
+
+void RosePan_RendererDrawImageQuad(const void *texture,
+                                  const float *xy,
+                                  const float *uv,
+                                  unsigned char r,
+                                  unsigned char g,
+                                  unsigned char b,
+                                  unsigned char a,
+                                  int linear)
+{
+    SpriteVertex vertices[4];
+    const TextureEntry *entry = static_cast<const TextureEntry *>(texture);
+
+    if (entry == nullptr || entry->texture == nullptr || xy == nullptr ||
+        uv == nullptr || !g_frame_active)
+    {
+        return;
+    }
+
+    BuildQuadVertices(vertices, xy, uv, 1.0f, 1.0f, Ps2ColorToFloat(r),
+                      Ps2ColorToFloat(g), Ps2ColorToFloat(b),
+                      Ps2AlphaToFloat(a));
+    QueueQuad(entry->texture, entry->width, entry->height, vertices,
+              true, false, linear != 0, linear != 0);
+}
+
 /*
  * Is this TEX0 pointing at one of the two GS display buffers?
  *

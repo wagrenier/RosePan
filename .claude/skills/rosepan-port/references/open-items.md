@@ -16,6 +16,13 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
         0x2050e8, the draw 0x2051cc that rxSys's IOP wait loop and the file reader call). Settle the
         boundary (unassigned@00204d38 may belong to it) and get LOADING.BIN onto the screen: the
         first frame that proves the GS path end to end.
+        **Written 2026-10-22 (`verify`)**: pinned 0x204d38..0x2053f4, all 8 functions, drawn through
+        the new native module `rosepan_draw2d` (no GS). A forced draw proved it
+        (progress/20261022-1448_system_sysnowloading.cpp_forced_draw.png: the picture's frames in the
+        bottom-right corner, stepping every 8 frames, as LOADING.BIN shows). The boot screenshot is
+        still black: draw's only caller is the pfh loader **0x1be564** (GamMan's load path,
+        unassigned@001bde58), a stub. Reconstruct it with GamMan's loads; it reads main's object, so
+        main.cpp's `static SysNowLoading *s_nowLoading` (sdata 0x2d8ffc) becomes an extern global then.
    - **B. The scene's 2D layers through i3d** (the S2dMovie loading.tm2 / S2dMes sprites; s2d.cpp
      is written and waiting):
      2. `mag/magscenerender.cpp`: MagScene::draw 0x13bcc0 (its layers, light sets, view, calls

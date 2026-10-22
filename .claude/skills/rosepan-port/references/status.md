@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-22 14:38 at commit `c88f12f` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-22 14:49 at commit `df77790` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-22 14:38 at commit `c88f12f` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6412**, named **2171** (34%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 51, ror-inferred 752
-- context-name ledger: 803 entries; overrides of wrong library matches: 5
-- placed in a source file: 2035/6412 in 80 files
+- game functions: **6412**, named **2177** (34%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 51, ror-inferred 758
+- context-name ledger: 809 entries; overrides of wrong library matches: 5
+- placed in a source file: 2039/6412 in 80 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **583**; stubs: **171**
+- reconstructed RoR functions: **591**; stubs: **169**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -67,7 +67,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/spr/s2d.cpp` | 86 | 0 |
 | `src/spr/sprman.cpp` | 0 | 13 |
 | `src/spr/sprtexture.cpp` | 0 | 3 |
-| `src/system/sysnowloading.cpp` | 0 | 2 |
+| `src/system/sysnowloading.cpp` | 8 | 0 |
 | `src/utl/utlfile.cpp` | 0 | 2 |
 | `src/utl/utlfind.cpp` | 0 | 1 |
 | `src/utl/utlgame.cpp` | 0 | 1 |
@@ -75,9 +75,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 152 TUs: todo 139, partial 5, verify 11, done 3
-- next: **system/sysnowloading.cpp** (pinned in the queue)
-- pinned queue: system/sysnowloading.cpp, mag/magscenerender.cpp, unassigned@0021fb50, unassigned@00216ad0, spr/sprtexture.cpp, dog/dogtexinfo.cpp, spr/sprman.cpp
+- 151 TUs: todo 137, partial 5, verify 12, done 3
+- next: **mag/magscenerender.cpp** (pinned in the queue)
+- pinned queue: mag/magscenerender.cpp, unassigned@0021fb50, unassigned@00216ad0, spr/sprtexture.cpp, dog/dogtexinfo.cpp, spr/sprman.cpp
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `i3d/i3dctx.cpp` 31/31 -- Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the pa
 - verify: `i3d/i3dvram.cpp` 37/37 -- Complete; nothing on screen shows it yet (screen black: the draw path is stubbed). A host test (init, reserve x3 frames with eviction, compact, end frame, reset
@@ -88,10 +88,12 @@ Least-named game-code regions (64 KB blocks):
 - verify: `rx/rxsys.cpp` 74/119 -- Status verify: nothing calls rxSysInit yet - main 0x2045a8 is still the placeholder in src/main.cpp, so the screenshot is the black placeholder frame. Next: mai
 - verify: `rx/rxthread.cpp` 53/53 -- Complete; verify because main (unassigned@001fd424) is still the placeholder, so nothing calls rxThInit in the smoke run (black frame as before). A temporary ca
 - verify: `spr/s2d.cpp` 86/86 -- All 86 functions written; nothing on screen can show them yet (MagScene::draw is a stub), so verify: the first session whose screenshot shows S2d sprites marks 
+- verify: `system/sysnowloading.cpp` 8/8 -- Code complete, nothing on the boot path shows it yet: draw 0x2051cc is called only by the pfh loader 0x1be564 (GamMan load path, unassigned@001bde58), a stub, s
 - verify: `utl/utlmisc.cpp` 24/24 -- Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and i
 
 Recent sessions:
 
+- 2026-10-22 14:49 `system/sysnowloading.cpp` verify: SysNowLoading complete: pinned 0x204d38..0x2053f4, all 8 functions (init, term, loadImage, setST, makePacket, uploadImage, clearVram, draw) named and written; n
 - 2026-10-22 14:38 `spr/s2d.cpp` verify: Completed spr/s2d.cpp: S2dMes::drawMapName (word-table map name in a scene text window with its frame sprite fading), S2dMovie drawMovie / draw / createLayer (i
 - 2026-10-22 14:23 `spr/s2d.cpp` partial: Pinned spr/s2d.cpp (0x190a78..0x192ac0, the scene's 2D layers). Wrote S2dCineSco (cinemascope bars), S2dBg (s2dgen.rpk pictures, inline s2dBg requests), S2dMes 
 - 2026-10-22 14:04 `mag/magscene2.cpp` verify: Pinned mag/magscene2.cpp to 0x137300..0x139540 and wrote all 19 functions: loadSystemData (options.txt, the PREMIERE.RPK font and common textures), load (a map 
@@ -99,7 +101,6 @@ Recent sessions:
 - 2026-10-22 13:24 `i3d/i3dvram.cpp` verify: i3d VRAM cache: all 37 functions written (block lists, alloc first-fit from the LRU tail, LRU eviction, coalesce, compact, end frame, reset, init, term, handle 
 - 2026-10-22 13:15 `i3d/i3dctx.cpp` verify: i3d draw context: pinned i3d/i3dctx.cpp 0x21eb28-0x21fb30 and wrote all 32 functions (7 hidden ones created in Ghidra: default end hook, SetEndFunc, GetRestFrom
 - 2026-10-22 12:55 `mag/magsystem.cpp` verify: MagSystem complete: the 12 actor methods (setActorLightID, setActorParent, getActorNodeMatrix x2 and ByName x2, getActorMotionMove, addActorTrans, releaseActorM
-- 2026-10-22 12:41 `mag/magsystem.cpp` partial: MagSystem: 40 of 52 functions written - ctor/dtor, V-blank callbacks, initGraph (pads, VIF1, GS reset, 512x448 double buffer, i3d version check, i3d context on 
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -107,14 +108,14 @@ Recent sessions:
 | `unassigned@0021fb50` | todo | 0/14/118 | 31.5 | 33 | 2 |
 | `unassigned@001bde58` | todo | 0/4/56 | 9.8 | 26 | 0 |
 | `game/gamman.cpp` | todo | 0/4/288 | 44.9 | 24 | 4 |
-| `unassigned@00164fc0` | todo | 0/6/433 | 108.5 | 21 | 3 |
 | `unassigned@00228c08` | todo | 0/5/465 | 91.8 | 21 | 2 |
-| `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
+| `unassigned@00164fc0` | todo | 0/6/433 | 108.5 | 21 | 3 |
 | `mag/magscene.cpp` | todo | 0/10/58 | 15.7 | 20 | 2 |
+| `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
 | `dog/dogtexinfo.cpp` | todo | 0/7/16 | 5.1 | 20 | 2 |
 | `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 19 | 2 |
 | `bed/bedpfh.cpp` | todo | 0/3/4 | 0.9 | 19 | 0 |
-| `unassigned@00216ad0` | todo | 0/9/125 | 31.9 | 18 | 1 |
+| `unassigned@001fd424` | todo | 0/3/75 | 27.9 | 18 | 3 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
