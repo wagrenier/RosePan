@@ -58,7 +58,46 @@ extern int g_emyManagerTaskId;  /* bss 0x7b45c0: addTask's id for EmyManager (re
  * known yet. */
 extern int g_bss_7a3d48;        /* bss 0x7a3d48: main sets 1 */
 extern int g_bss_7a3d4c;        /* bss 0x7a3d4c: main sets 1 */
-extern int g_data_296198;       /* data 0x296198: main sets 2 */
+
+/* The object at bss 0x7b40c0 (constructor 0x1810f4: sizes 0x200 / 0x180 /
+ * 0xe00, between snd/sndman.cpp and snd/rxmpeg.cpp): a movie player, class
+ * name unverified. layout: host -- only the words MagSystem uses. */
+struct RxMpeg
+{
+    void setFrameParity(int parity);                                     // ROR 0x00181204
+
+    int m_active;               // ROR 0x00: cleared by the constructor; MagSystem::waitVSync runs rxThVSync while set
+};
+
+extern RxMpeg g_rxMpeg;         /* bss 0x7b40c0 */
+
+/* ---- the utl range after utl/utlgame.cpp (unassigned@00103edc) ---- */
+
+void utlRandReset(void);                                                 // ROR 0x0010421c
+
+/* ---- the i3d library (unassigned@00216ad0 .. 0x237d80; its version string
+ * "i3d_package_version 050121-stable-050826") ---- */
+
+/* An i3d draw context: two packet lists over a caller's buffer (EE 0x12168,
+ * entries 26 / 27 of the library's size table). Opaque until the library
+ * is reconstructed. */
+struct i3dContext
+{
+    unsigned int m_data[0x12168 / 4];
+};
+static_assert(sizeof(i3dContext) == 0x12168, "i3dContext is 0x12168 bytes on the EE");
+
+int   i3dInitHardware(void);                                             // ROR 0x0021eb28
+int   i3dCtxSetup(i3dContext *ctx, int a, int b);                        // ROR 0x0021ed10
+int   i3dGetStructSize(unsigned int i);                                  // ROR 0x0021f1a8
+void *i3dCtxGetPacket(i3dContext *ctx);                                  // ROR 0x0021f1f8
+int   i3dCtxGetRest(i3dContext *ctx);                                    // ROR 0x0021f200
+int   i3dCtxGetOverrun(i3dContext *ctx);                                 // ROR 0x0021f250
+int   i3dCtxBeginFrame(i3dContext *ctx);                                 // ROR 0x0021f6a0
+int   i3dCtxEndFrame(i3dContext *ctx);                                   // ROR 0x0021f760
+int   i3dCtxTerm(i3dContext *ctx);                                       // ROR 0x0021f8c8
+int   i3dCtxInit(i3dContext *ctx, void *buf, int size, int count);       // ROR 0x0021f900
+int   i3dPrintf(const char *fmt);  /* printf-like in the ROM */          // ROR 0x00237c68
 
 /* bss 0x7812ac, just below GamMan: mainInitGame passes it to
  * seqSetLanguage (which ignores it). Role not known yet. */

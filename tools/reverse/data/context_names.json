@@ -107,6 +107,60 @@
   "was": "FUN_001015fc",
   "why": "walks the blocks (asserts p != p->m_next), returns the largest free chunk, the free total and m_size in a 3-int record; called from mag/magsystem.cpp and others"
  },
+ "00101aec": {
+  "name": "BedPad::~BedPad",
+  "tag": "ror-inferred",
+  "was": "FUN_00101aec",
+  "why": "GCC 2 destructor (flags & 1 deletes): BedPad::term when the port +0x24 is set"
+ },
+ "00101b50": {
+  "name": "BedPad::setVibration",
+  "tag": "ror-inferred",
+  "was": "FUN_00101b50",
+  "why": "(small motor bit, big motor 0..255; < 0 = leave) into a libpad2 actuator call on the socket +0x20"
+ },
+ "00101bcc": {
+  "name": "BedPad::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00101bcc",
+  "why": "bed/bedpad.cpp assert thePortNo >= 0 && thePortNo < 2; creates the libpad2 socket into +0x20"
+ },
+ "00101c7c": {
+  "name": "BedPad::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00101c7c",
+  "why": "bed/bedpad.cpp assert m_socket>=0; deletes the socket, m_socket = -1"
+ },
+ "00101ccc": {
+  "name": "BedPad::update",
+  "tag": "ror-inferred",
+  "was": "FUN_00101ccc",
+  "why": "called on both pads at the start of every MagSystem::update"
+ },
+ "00103484": {
+  "name": "utlIsVibrationOn",
+  "tag": "ror-inferred",
+  "was": "FUN_00103484",
+  "why": "asks GamMan 0x1c6ccc for option 0x12 and returns it != 0; MagSystem::setPlayer stores it as the switch that gates BedPad::setVibration"
+ },
+ "001041c4": {
+  "name": "utlRandStep",
+  "tag": "ror-inferred",
+  "was": "FUN_001041c4",
+  "why": "seed = seed * 0x769 + 0x7cf9 on bss 0x308484"
+ },
+ "001041e4": {
+  "name": "utlRand",
+  "tag": "ror-inferred",
+  "was": "FUN_001041e4",
+  "why": "utlRandStep, then (seed * n) >> 32: a number below n"
+ },
+ "0010421c": {
+  "name": "utlRandReset",
+  "tag": "ror-inferred",
+  "was": "FUN_0010421c",
+  "why": "stores the seed 0xc45330af into bss 0x308484, the state 0x1041c4 steps (x * 0x769 + 0x7cf9) and 0x1041e4 scales; MagSystem's constructor calls it"
+ },
  "00105650": {
   "name": "utlIsTccName",
   "tag": "ror-inferred",
@@ -251,11 +305,47 @@
   "was": "FUN_00105e2c",
   "why": "BedMemory::check(heap 0x6e9800, 0); no callers"
  },
+ "00117654": {
+  "name": "MagSystem::vSyncCallback",
+  "tag": "ror-inferred",
+  "was": "FUN_00117654",
+  "why": "installed by MagSystem::start with sceGsSyncVCallback; counts V-blanks (sdata 0x296194), passes the count to 0x182118, signals m_v_sema every m_v_interval (0x296198) V-blanks"
+ },
+ "001176bc": {
+  "name": "MagSystem::vSyncCallbackEach",
+  "tag": "ror-inferred",
+  "was": "FUN_001176bc",
+  "why": "twin of the V-blank callback that signals m_v_sema on every V-blank; nothing installs it"
+ },
+ "001176fc": {
+  "name": "MagSystem::MagSystem",
+  "tag": "ror-inferred",
+  "was": "FUN_001176fc",
+  "why": "static initializer 0x2041f8 calls it on bss 0x6e9840; inlined BedPad ctors x2, MagScene ctor 0x1360a0 at +0x12540, assert m_current_system == __null then m_current_system = this"
+ },
+ "00117808": {
+  "name": "MagSystem::~MagSystem",
+  "tag": "ror-inferred",
+  "was": "FUN_00117808",
+  "why": "GCC 2 destructor (flags & 1 deletes): clears m_current_system, ~MagScene, BedPad destructors over the array in reverse"
+ },
  "001178b8": {
   "name": "MagSystem::setLanguage",
   "tag": "ror-inferred",
   "was": "FUN_001178b8",
   "why": "mag/magsystem.cpp, object 0x6e9840: when +0x97a70 is set, seqSetLanguage(lang, 1), stores lang at +0x97a6c, clears the flag; mainParseArgs passes 1..4 for fre/ger/spa/ita"
+ },
+ "00117924": {
+  "name": "MagSystem::startVibration",
+  "tag": "ror-inferred",
+  "was": "FUN_00117924",
+  "why": "when vibration is on (+0x8, the GamMan option 0x12) starts pad 0's big motor at 0xff and sets the frame count +0x4 that update counts down"
+ },
+ "00117990": {
+  "name": "MagSystem::initGraph",
+  "tag": "ror-inferred",
+  "was": "FUN_00117990",
+  "why": "MagSystem::init's first call: two BedPad::init, VIF1 channel, DMA / VIF0 / GS resets, the 512x448 double buffer, the i3d struct-size check against the library, i3dInitHardware and the i3d context on the static packet buffer 0x308580"
  },
  "00117c58": {
   "name": "MagSystem::resetDBuff",
@@ -263,17 +353,35 @@
   "was": "FUN_00117c58",
   "why": "sceGsSetDefDBuff(+0x170, 0, 512, 448, 2, 0x3a, 1) and fixes the draw offsets; mainInitGame calls it twice after the boot load"
  },
+ "00117d14": {
+  "name": "MagSystem::resetDBuff384",
+  "tag": "ror-inferred",
+  "was": "FUN_00117d14",
+  "why": "resetDBuff with height 0x180 and frame pages 0x60; called by the game mode 0x1ab04c"
+ },
  "00117dc8": {
   "name": "MagSystem::init",
   "tag": "ror-inferred",
   "was": "FUN_00117dc8",
   "why": "mag/magsystem.cpp: 0x117990 then the scene member at +0x12540 (0x131840); mainInitGame's first MagSystem call"
  },
+ "00117dfc": {
+  "name": "MagSystem::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_00117dfc",
+  "why": "only calls MagSystem::init; no callers"
+ },
  "00117e18": {
   "name": "MagSystem::start",
   "tag": "ror-inferred",
   "was": "FUN_00117e18",
   "why": "mag/magsystem.cpp line 0x247 assert m_v_sema >= 0: creates the V-blank semaphore, sceGsSyncVCallback(0x117654), heap check, links the scene to +0x3a0"
+ },
+ "00117ec0": {
+  "name": "MagSystem::clearScene22cc",
+  "tag": "ror-inferred",
+  "was": "FUN_00117ec0",
+  "why": "zeroes the scene word +0x22cc (MagSystem +0x1480c); GamMan::loadStage calls it; role unknown"
  },
  "00117ed0": {
   "name": "MagSystem::term",
@@ -287,11 +395,293 @@
   "was": "FUN_00117f80",
   "why": "packs its first three int arguments and three zeros into a record for the scene member +0x12540 (0x13f528); mainInitGame passes 1,1,1,1,1,1,0; meaning unverified"
  },
+ "00117fc4": {
+  "name": "MagSystem::addLight",
+  "tag": "ror-inferred",
+  "was": "FUN_00117fc4",
+  "why": "MagScene::addLight(type, mask) then two setLightParam calls (which 2, then 1 for type 1 / 0 for type 2), assert 0 for other types"
+ },
+ "001180ec": {
+  "name": "MagSystem::setPC",
+  "tag": "ror-inferred",
+  "was": "FUN_001180ec",
+  "why": "binds actor no to the scene's MagLifePC (scene +0x2adc0, rtti: MagLifePC vptr +0x14, ctor 0x11bf0c); stores the number (+0x97a60 / +0x97a68), maps a mode code NORM / JNFC / PC02 / PC05 / 0..3 to 0..3; re-reads the vibration option"
+ },
+ "0011825c": {
+  "name": "MagSystem::setBwn",
+  "tag": "ror-inferred",
+  "was": "FUN_0011825c",
+  "why": "stores +0x97a64 and calls MagScene::setBwn, which binds actor no to the scene's MagLifeBwn (scene +0x2afe0, mag/maglifebwn.cpp 0x1256d4)"
+ },
+ "0011828c": {
+  "name": "MagSystem::flushFrame",
+  "tag": "ror-inferred",
+  "was": "FUN_0011828c",
+  "why": "update without the scene: pads, begin / end packet, V-blank wait, kick; no callers"
+ },
  "001182dc": {
   "name": "MagSystem::update",
   "tag": "ror-inferred",
   "was": "FUN_001182dc",
   "why": "mag/magsystem.cpp: the per-frame system update (pads, scene, sound 0x7b2580, draw, RCNT0 timing), ends with utlIncFrameCount; mainLoop calls it every frame"
+ },
+ "00118440": {
+  "name": "MagSystem::beginPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00118440",
+  "why": "i3dCtxBeginFrame on the context at +0x3a0"
+ },
+ "0011845c": {
+  "name": "MagSystem::storeImage",
+  "tag": "ror-inferred",
+  "was": "FUN_0011845c",
+  "why": "assert m_store_image_filename; writes the 512x448 frame buffer as a 24-bit BMP through sceGsExecStoreImage line by line"
+ },
+ "00118640": {
+  "name": "MagSystem::endPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00118640",
+  "why": "records the packet rest / overrun (assert m_info.m_trash_overrun == 0) and the heap info, i3dCtxEndFrame, then a requested storeImage"
+ },
+ "001186f0": {
+  "name": "MagSystem::checkPacketRest",
+  "tag": "ror-inferred",
+  "was": "FUN_001186f0",
+  "why": "reads i3dCtxGetRest and divides by the packet size 0x1ae000 (result unused); no callers"
+ },
+ "0011871c": {
+  "name": "MagSystem::setDispCircuit2",
+  "tag": "ror-inferred",
+  "was": "FUN_0011871c",
+  "why": "sets PMODE EN2 in both display envs and writes disp[0].pmode to GS PMODE 0x12000000; no callers; folded after 0x1186f0, created 2026-10-22"
+ },
+ "00118754": {
+  "name": "MagSystem::waitVSync",
+  "tag": "ror-inferred",
+  "was": "FUN_00118754",
+  "why": "rxThVSync, then WaitSema m_v_sema (drained with PollSema), waits for the VIF1 DMA, swaps the double buffer"
+ },
+ "00118840": {
+  "name": "MagSystem::kickPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00118840",
+  "why": "sceDmaSend of the i3d packet chain on VIF1"
+ },
+ "00118880": {
+  "name": "MagSystem::setCameraMode",
+  "tag": "ror-inferred",
+  "was": "FUN_00118880",
+  "why": "forwards to MagScene::setCameraMode"
+ },
+ "001188a8": {
+  "name": "MagSystem::setLightColor",
+  "tag": "ror-inferred",
+  "was": "FUN_001188a8",
+  "why": "four float args f12..f15 into a vector for MagScene::setLightParam(type, idx, which, v, -1)"
+ },
+ "001188e4": {
+  "name": "MagSystem::getLightColor",
+  "tag": "ror-inferred",
+  "was": "FUN_001188e4",
+  "why": "MagScene::getLightParam(type, idx, which, v, -1) and the four floats out through t0..t3; no callers"
+ },
+ "00118960": {
+  "name": "MagSystem::getCameraMode",
+  "tag": "ror-inferred",
+  "was": "FUN_00118960",
+  "why": "tail-jumps to MagScene::getCameraMode"
+ },
+ "00118980": {
+  "name": "MagSystem::setViewParam",
+  "tag": "ror-inferred",
+  "was": "FUN_00118980",
+  "why": "five int args into an array for MagScene::setViewParam(no, v); 11 callers"
+ },
+ "001189bc": {
+  "name": "MagSystem::drawView",
+  "tag": "ror-inferred",
+  "was": "FUN_001189bc",
+  "why": "forwards to MagScene::drawView"
+ },
+ "001189e4": {
+  "name": "MagSystem::loadScene",
+  "tag": "ror-inferred",
+  "was": "FUN_001189e4",
+  "why": "MagScene::load(scene, i3d context, a, b, c)"
+ },
+ "00118ed8": {
+  "name": "MagSystem::setActorAnim",
+  "tag": "ror-inferred",
+  "was": "FUN_00118ed8",
+  "why": "MagScene::setActorAnim(no, b, a): the last two args swapped"
+ },
+ "00118f04": {
+  "name": "MagSystem::loadActorAnim",
+  "tag": "ror-inferred",
+  "was": "FUN_00118f04",
+  "why": "MagScene::loadActorAnim(no, b, a): the last two args swapped; no callers"
+ },
+ "00118f64": {
+  "name": "MagSystem::setCameraTarget",
+  "tag": "ror-inferred",
+  "was": "FUN_00118f64",
+  "why": "copies two 4-float vectors and calls MagScene::setCameraTarget; no callers"
+ },
+ "00118fdc": {
+  "name": "MagSystem::getPCWordE4",
+  "tag": "ror-inferred",
+  "was": "FUN_00118fdc",
+  "why": "returns the scene MagLifePC's word +0xe4 (MagSystem +0x3d3e4); role unknown"
+ },
+ "00118fec": {
+  "name": "MagSystem::getPCStateClass",
+  "tag": "ror-inferred",
+  "was": "FUN_00118fec",
+  "why": "switch over the scene MagLifePC's first word (its state) to a class 1..12; states 1..4 ask MagLifePC::getSubStateClass; 44 callers"
+ },
+ "00119090": {
+  "name": "MagSystem::getBwnState",
+  "tag": "ror-inferred",
+  "was": "FUN_00119090",
+  "why": "returns the scene MagLifeBwn's word +0xd40 (scene +0x2bd20) when 0..13, else -1"
+ },
+ "00119138": {
+  "name": "MagSystem::loadModel",
+  "tag": "ror-inferred",
+  "was": "FUN_00119138",
+  "why": "MagScene::loadModel with the chapter's RPK name (data/ch/NN/CHAPNN.RPK, sdata 0x2961a8); ids 0x20xx / 0x24xx get actor flags 0x60"
+ },
+ "001191e0": {
+  "name": "MagSystem::loadModelByName",
+  "tag": "ror-inferred",
+  "was": "FUN_001191e0",
+  "why": "MagScene::loadModelByName with the chapter's RPK name; folded after 0x119138, created 2026-10-22"
+ },
+ "0011948c": {
+  "name": "MagSystem::clearPC",
+  "tag": "ror-inferred",
+  "was": "FUN_0011948c",
+  "why": "forwards to MagScene::clearPC"
+ },
+ "0011e080": {
+  "name": "MagLifePC::getSubStateClass",
+  "tag": "ror-inferred",
+  "was": "FUN_0011e080",
+  "why": "on the MagLifePC (MagSystem::getPCStateClass passes scene +0x2adc0): +0xec 1 -> 6, 2 -> 7, else 5"
+ },
+ "001316b8": {
+  "name": "MagScene::setPC",
+  "tag": "ror-inferred",
+  "was": "FUN_001316b8",
+  "why": "(no, mode): binds actor no to the MagLifePC at +0x2adc0 through its virtual slot 10 (0x11bd4c), actor flags |= 0x60"
+ },
+ "00131790": {
+  "name": "MagScene::setBwn",
+  "tag": "ror-inferred",
+  "was": "FUN_00131790",
+  "why": "(no, arg): binds actor no to the MagLifeBwn at +0x2afe0 (0x1256d4), or detaches it for no < 0"
+ },
+ "00131840": {
+  "name": "MagScene::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00131840",
+  "why": "MagSystem::init's second call on +0x12540"
+ },
+ "00131a28": {
+  "name": "MagScene::start",
+  "tag": "ror-inferred",
+  "was": "FUN_00131a28",
+  "why": "MagSystem::start's first call"
+ },
+ "00131b90": {
+  "name": "MagScene::initRender",
+  "tag": "ror-inferred",
+  "was": "FUN_00131b90",
+  "why": "MagSystem::start's last call with the i3d context; sets the render parameters and the sub-objects, returns 1"
+ },
+ "001327dc": {
+  "name": "MagScene::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001327dc",
+  "why": "MagSystem::update passes the two pads"
+ },
+ "00134944": {
+  "name": "MagScene::setViewParam",
+  "tag": "ror-inferred",
+  "was": "FUN_00134944",
+  "why": "(no <= 3, int v[5]): three ints as floats and two ints into the view object +0x2734[no]"
+ },
+ "00135234": {
+  "name": "MagScene::drawView",
+  "tag": "ror-inferred",
+  "was": "FUN_00135234",
+  "why": "(no <= 3, ...): draws through the view object +0x2734[no]"
+ },
+ "0013604c": {
+  "name": "MagScene::clearPC",
+  "tag": "ror-inferred",
+  "was": "FUN_0013604c",
+  "why": "zeroes +0x2bd98 and resets +0x2bd68 and the MagLifePC at +0x2adc0 (0x11c418)"
+ },
+ "001360a0": {
+  "name": "MagScene::MagScene",
+  "tag": "ror-inferred",
+  "was": "FUN_001360a0",
+  "why": "MagSystem's ctor calls it on +0x12540; stores the MagSceneIFChara / MagSceneIFMap vptrs of its members"
+ },
+ "00136d14": {
+  "name": "MagScene::~MagScene",
+  "tag": "ror-inferred",
+  "was": "FUN_00136d14",
+  "why": "MagSystem's dtor calls it with flags 2; re-installs the MagSceneIF vptrs"
+ },
+ "001377f0": {
+  "name": "MagScene::load",
+  "tag": "ror-inferred",
+  "was": "FUN_001377f0",
+  "why": "MagSystem::loadScene passes the i3d context and three args"
+ },
+ "00138bc4": {
+  "name": "MagScene::loadModelByName",
+  "tag": "ror-inferred",
+  "was": "FUN_00138bc4",
+  "why": "(i3d context, name != 0, ..., rpk name)"
+ },
+ "00138ed0": {
+  "name": "MagScene::loadModel",
+  "tag": "ror-inferred",
+  "was": "FUN_00138ed0",
+  "why": "(i3d context, id >= 0, rpk name): returns the actor number"
+ },
+ "001390d4": {
+  "name": "MagScene::setActorAnim",
+  "tag": "ror-inferred",
+  "was": "FUN_001390d4",
+  "why": "(no, a, b): forwards to the actor no's 0x10c17c"
+ },
+ "0013910c": {
+  "name": "MagScene::loadActorAnim",
+  "tag": "ror-inferred",
+  "was": "FUN_0013910c",
+  "why": "(no, a, name): loads through 0x1be768"
+ },
+ "0013bcc0": {
+  "name": "MagScene::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_0013bcc0",
+  "why": "MagSystem::update passes the i3d context, the double buffer and the frame count"
+ },
+ "0013c29c": {
+  "name": "MagScene::postDraw",
+  "tag": "ror-inferred",
+  "was": "FUN_0013c29c",
+  "why": "MagSystem::update calls it after draw"
+ },
+ "0013c2ec": {
+  "name": "MagScene::setCameraTarget",
+  "tag": "ror-inferred",
+  "was": "FUN_0013c2ec",
+  "why": "stores two 4-float vectors at +0x2ada0 / +0x2adb0 and sets +0x2ad9c"
  },
  "0013c928": {
   "name": "MagScene::initCamera",
@@ -299,11 +689,65 @@
   "was": "FUN_0013c928",
   "why": "empty, in mag/magscenecamera.cpp; mainInitGame calls it on 0x6fbd80 = MagSystem 0x6e9840 + 0x12540, the member 0x131840 / 0x13f528 (magscene) take; class name unverified"
  },
+ "0013caf0": {
+  "name": "MagScene::setCameraMode",
+  "tag": "ror-inferred",
+  "was": "FUN_0013caf0",
+  "why": "stores the mode +0x2ad50 and dispatches modes 0..5 through a jump table"
+ },
+ "0013d5ac": {
+  "name": "MagScene::getCameraMode",
+  "tag": "ror-inferred",
+  "was": "FUN_0013d5ac",
+  "why": "returns +0x2ad50; copies it and +0x2ad58 to the out array when given"
+ },
+ "0013f528": {
+  "name": "MagScene::setLightFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f528",
+  "why": "MagSystem::setSceneFlags passes a 6-int array and a number <= 7 (asserts); stores them into the light set +0x2050"
+ },
+ "0013f980": {
+  "name": "MagScene::setLightParam",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f980",
+  "why": "(type, idx, which, v, no <= 7): forwards to the light set +0x2050 (no < 0 = all)"
+ },
+ "0013fa50": {
+  "name": "MagScene::getLightParam",
+  "tag": "ror-inferred",
+  "was": "FUN_0013fa50",
+  "why": "(type, idx, which, v != 0, no <= 7): reads from the light set +0x2050"
+ },
+ "0013fe64": {
+  "name": "MagScene::addLight",
+  "tag": "ror-inferred",
+  "was": "FUN_0013fe64",
+  "why": "(type, mask): allocates a light in the set +0x2050 and applies the mask bits 0..8; returns the index or < 0"
+ },
  "0017f164": {
   "name": "SndMan::init",
   "tag": "ror-inferred",
   "was": "FUN_0017f164",
   "why": "object 0x7b2580 (constructed by 0x17f0d0 in the static initializer 0x2041f8): sets word 0 = 1, +0x1af8 = 0, calls rxSndInit; between the static-init pair 0x17f090 and snd/sndman.cpp's anchor 0x180230; class name from the file, unverified"
+ },
+ "0017f200": {
+  "name": "SndMan::update",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f200",
+  "why": "on g_sndMan (bss 0x7b2580) once m_state == 1: the sound and movie steps (0x17f6b8, 0x18120c, 0x237eb0, 0x181494, 0x17f3b8); MagSystem::update calls it every frame"
+ },
+ "00181204": {
+  "name": "RxMpeg::setFrameParity",
+  "tag": "ror-inferred",
+  "was": "FUN_00181204",
+  "why": "stores the arg at +0x3c of the object at bss 0x7b40c0 (constructor 0x1810f4: 0x200 / 0x180 / 0xe00 sizes, a movie player next to snd/rxmpeg.cpp); MagSystem::update passes frame & 1; class name unverified"
+ },
+ "00182118": {
+  "name": "rxMpegSetVCount",
+  "tag": "ror-inferred",
+  "was": "FUN_00182118",
+  "why": "snd/rxmpeg.cpp; stores its argument into data 0x298fd0; MagSystem::vSyncCallback passes the V-blank count every V-blank"
  },
  "001c0d70": {
   "name": "GamMan::init",
@@ -478,6 +922,72 @@
   "tag": "ror-inferred",
   "was": "FUN_002155a0",
   "why": "empty function in the debug range before debug/mimu_debug.cpp; mainExceptionHandler calls it first"
+ },
+ "0021eb28": {
+  "name": "i3dInitHardware",
+  "tag": "lib-context",
+  "was": "FUN_0021eb28",
+  "why": "i3d library (i3d_package_version 050121-stable-050826): DMAC CTRL, VIF1 / VIF0 setup packets, scratchpad DMA; returns 0"
+ },
+ "0021ed10": {
+  "name": "i3dCtxSetup",
+  "tag": "lib-context",
+  "was": "FUN_0021ed10",
+  "why": "(ctx, a, b): splits b into two list sizes and sets both lists"
+ },
+ "0021f1a8": {
+  "name": "i3dGetStructSize",
+  "tag": "lib-context",
+  "was": "FUN_0021f1a8",
+  "why": "returns the library's own table 0x302ba0[i] for i < 0x24, else -1; MagSystem::initGraph compares it with the game's copy (the version check)"
+ },
+ "0021f1f8": {
+  "name": "i3dCtxGetPacket",
+  "tag": "lib-context",
+  "was": "FUN_0021f1f8",
+  "why": "returns +0x118, the chain MagSystem::kickPacket sends on VIF1"
+ },
+ "0021f200": {
+  "name": "i3dCtxGetRest",
+  "tag": "lib-context",
+  "was": "FUN_0021f200",
+  "why": "end - current of the packet buffer, >= 0"
+ },
+ "0021f250": {
+  "name": "i3dCtxGetOverrun",
+  "tag": "lib-context",
+  "was": "FUN_0021f250",
+  "why": "current - end of the packet buffer when past the end, else 0 (MagSystem asserts m_trash_overrun == 0)"
+ },
+ "0021f6a0": {
+  "name": "i3dCtxBeginFrame",
+  "tag": "lib-context",
+  "was": "FUN_0021f6a0",
+  "why": "advances the packet buffer slot (+0xe8 of +0xe4) and opens the frame's chain"
+ },
+ "0021f760": {
+  "name": "i3dCtxEndFrame",
+  "tag": "lib-context",
+  "was": "FUN_0021f760",
+  "why": "closes the frame's chain; returns 9 on an error flag"
+ },
+ "0021f8c8": {
+  "name": "i3dCtxTerm",
+  "tag": "lib-context",
+  "was": "FUN_0021f8c8",
+  "why": "releases both packet lists; MagSystem::term"
+ },
+ "0021f900": {
+  "name": "i3dCtxInit",
+  "tag": "lib-context",
+  "was": "FUN_0021f900",
+  "why": "(ctx, buf, size, count): clears the 0x12168-byte context and sets its two packet lists"
+ },
+ "00237c68": {
+  "name": "i3dPrintf",
+  "tag": "lib-context",
+  "was": "FUN_00237c68",
+  "why": "vsprintf into 1 KB then rxSysPrintf and fflush(stdout); prints the i3d version error"
  },
  "00237d80": {
   "name": "rxSndInit",
@@ -2344,6 +2854,18 @@
   "tag": "lib-context",
   "was": "FUN_00259108",
   "why": "libgraph: returns the address of the GParam block 0x2de090; rxThVBlankHandler reads its first short (sceGsInterMode)"
+ },
+ "002599e8": {
+  "name": "sceGsSwapDBuff",
+  "tag": "lib-context",
+  "was": "FUN_002599e8",
+  "why": "libgraph: sceGsPutDispEnv(&db->disp[id & 1]) and sceGsPutDrawEnv(giftag0 or giftag1)"
+ },
+ "0025c340": {
+  "name": "vif0ResetVu0",
+  "tag": "lib-context",
+  "was": "FUN_0025c340",
+  "why": "resets VIF0 (MARK, ERR, FBRST) and VU0 (VPU-STAT bit 1), pushes two qwords 0x2de130 into the VIF0 FIFO; not the FF2 / FF3 sceDevVif0Reset (0x24 bytes)"
  },
  "0025c8f0": {
   "name": "sceDevVu1Reset",

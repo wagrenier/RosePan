@@ -189,7 +189,7 @@ void mainInitGame(int stage)
         g_bss_7a3d48 = 1;
         s_nowLoading = NULL;
         g_magSystem.resetDBuff();
-        g_data_296198 = 2;
+        MagSystem::m_v_interval = 2;
         g_magSystem.resetDBuff();
     }
 }
@@ -226,11 +226,6 @@ void mainLoop(void)
         g_taskMan.exec();
         g_magSystem.update();
         g_gamMan.postUpdate();
-        // PC: MagSystem::update waits for the V-blank in the ROM (its
-        // semaphore, posted by the callback MagSystem::start installs); until
-        // it is reconstructed this wait keeps the loop at the V-blank rate.
-        // Delete it with the magsystem TU.
-        sceGsSyncV(0);
         RosePan_RendererEndFrame();
     }
 }

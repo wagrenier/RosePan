@@ -209,6 +209,38 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   block leaves next->m_prev at h, splitTail applies alignBlock's shift twice (-1 included). The host
   mends the first two (`// PC:`), keeps the third.
 
+## The system object (`mag/magsystem.cpp`, 0x117654..0x1194b4, 2026-10-22)
+
+- `MagSystem` (bss 0x6e9840, EE 0x97a80): +0 frame count (bit 0 = draw buffer), +4 motor frames,
+  +8 vibration option (`utlIsVibrationOn` 0x103484 = GamMan option 0x12), +0xc `m_info` (0x28: heap
+  largest / total free, packet size / rest / overrun "m_trash_*", RCNT0 times), +0x34
+  `m_store_image_filename` / +0x38 request (endPacket dumps the frame as a 512x448 BMP), +0x40 two
+  `BedPad` (0x90 each; bed/bedpad.cpp, libpad2 socket +0x20, port +0x24), +0x160 VIF1 `sceDmaChan`,
+  +0x170 `sceGsDBuff` (512x448, PSMCT32, Z PSMZ16S, frame pages 0x70 / 0, Z at 0xe0), +0x3a0 the i3d
+  context (0x12168), +0x12508 the packet buffer (static bss 0x308580, 0x35c000 = two frames of
+  0x1ae000), +0x12540 `MagScene` (0x85500), +0x97a40 two pad slots, +0x97a60 PC actor, +0x97a64 Bwn
+  actor, +0x97a68 last PC actor, +0x97a6c language / +0x97a70 language still free.
+- Statics: sdata 0x296190 `m_current_system`, 0x296194 V-blank count, data 0x296198 V-blanks per frame
+  (2; main sets 2 again), 0x29619c `m_v_sema` (-1). The callback 0x117654 counts V-blanks, passes the
+  count to `rxMpegSetVCount`, and signals the semaphore every 2nd one: **the game runs at 30 fps**.
+- The frame (`update` 0x1182dc): motor countdown, `BedPad::update` x2, `RxMpeg::setFrameParity`,
+  `MagScene::update(pad0, pad1)`, `SndMan::update`, `i3dCtxBeginFrame`, `MagScene::draw(ctx, dbuff,
+  frame)`, `postDraw`, assert rest != 0, endPacket (rest / overrun / heap info, `i3dCtxEndFrame`),
+  waitVSync (rxThVSync while a movie plays, WaitSema + PollSema drain, VIF1 DMA sync, `sceGsSwapDBuff`
+  0x2599e8), kickPacket (`sceDmaSend(VIF1, i3dCtxGetPacket)`), frame++, `utlIncFrameCount`.
+- **i3d** (unassigned@00216ad0 up to rxSnd 0x237d80; "i3d_package_version 050121-stable-050826"):
+  the packet / draw library under the scene. initGraph compares the game's copy of its 36 struct sizes
+  (rodata 0x2e90a8) with `i3dGetStructSize` 0x21f1a8 (data 0x302ba0) and hangs on a mismatch.
+  Context calls named: i3dInitHardware 0x21eb28, i3dCtxInit 0x21f900, i3dCtxSetup 0x21ed10,
+  BeginFrame 0x21f6a0, GetRest 0x21f200, GetOverrun 0x21f250, EndFrame 0x21f760, GetPacket 0x21f1f8,
+  Term 0x21f8c8, i3dPrintf 0x237c68.
+- The scene (`MagScene`, +0x12540): 128 actors of 0x4d0 at +0x2920 (vptr +0x94), actor flags at
+  +0x29120, light set +0x2050, view objects +0x2734[4], camera mode +0x2ad50, `MagLifePC` at
+  +0x2adc0 (the player; vptr +0x14), `MagLifeBwn` at +0x2afe0 (Brown). Chapter archives
+  `data/ch/NN/CHAPNN.RPK` (sdata 0x2961a8) feed `MagSystem::loadModel`.
+- 0x7b40c0: a movie-player object (`RxMpeg`, ctor 0x1810f4; class name unverified); its first word
+  set = a movie is playing.
+
 ## Modules (RoR's own source files)
 
 73 `.cpp` paths survive in assert / error strings (export.py anchors on them), plus headers whose inline
@@ -313,8 +345,8 @@ throughout (identifiers, env variables, files, shader macros):
   "cdrom0:\SLUS_214.48;1" plus the host's own arguments (so `-m N` picks the boot stage) and calls
   `mainGame` (the ROM's main). PC deviations there: boot path "host0:" and file device -1 (the boot
   device, HOST) instead of "cdrom0:" / 1; `mainLoop` brackets each frame with
-  `RosePan_RendererBeginFrame` / `EndFrame` and, until `MagSystem::update` is written, a
-  `sceGsSyncV(0)` for pacing. The renderer opens the window lazily on the first BeginFrame; a frame
+  `RosePan_RendererBeginFrame` / `EndFrame`; MagSystem::update paces the loop on its V-blank
+  semaphore (30 fps). The renderer opens the window lazily on the first BeginFrame; a frame
   with no draws presents black.
 - Data root: the disc's root copied file by file (the folder holding `DATA/`); `LooksLikeDataRoot`
   checks `DATA/CMNTEX`. `RosePan_PathResolveData` still carries FF3's "../bin/data" spellings; the RoR

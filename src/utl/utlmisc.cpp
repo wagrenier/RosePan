@@ -21,7 +21,7 @@
 /* ---- data ------------------------------------------------------------- */
 
 static int s_frameCount;                        /* data 0x295f00 */
-static BedMemory s_utlMemory;                   /* bss 0x6e9800: the game heap */
+BedMemory g_utlMemory;                          /* bss 0x6e9800: the game heap */
 
 /* utlMemInit's first probe: (0x01ffeff0 - (0x828e94 + 0x81000)) & ~0xff,
  * the RAM between the end of the ELF's bss (0x828e94) plus 0x81000 and
@@ -275,19 +275,19 @@ void utlMemInit(void)
     }
     free(block);
 
-    s_utlMemory.create(size, 0);
+    g_utlMemory.create(size, 0);
 }
 
 /* ROR 0x00105c80 */
 void utlMemTerm(void)
 {
-    s_utlMemory.destroy();
+    g_utlMemory.destroy();
 }
 
 /* ROR 0x00105ca0 */
 void *utlMemAlloc(int size)
 {
-    return s_utlMemory.alloc(size, -1);
+    return g_utlMemory.alloc(size, -1);
 }
 
 /* ROR 0x00105cc4
@@ -307,35 +307,35 @@ int utlMemAlignIndex(int align)
 /* ROR 0x00105d08 */
 void *utlMemAllocAlign(int size, int align)
 {
-    return s_utlMemory.alloc(size, utlMemAlignIndex(align));
+    return g_utlMemory.alloc(size, utlMemAlignIndex(align));
 }
 
 /* ROR 0x00105d40 */
 void *utlMemAllocDebug(int size, const char *filename, int line, int id)
 {
-    return s_utlMemory.allocDebug(size, filename, line, id, -1);
+    return g_utlMemory.allocDebug(size, filename, line, id, -1);
 }
 
 /* ROR 0x00105d78 */
 void *utlMemAllocAlignDebug(int size, int align, const char *filename, int line, int id)
 {
-    return s_utlMemory.allocDebug(size, filename, line, id, utlMemAlignIndex(align));
+    return g_utlMemory.allocDebug(size, filename, line, id, utlMemAlignIndex(align));
 }
 
 /* ROR 0x00105de0 */
 void *utlMemRealloc(void *ptr, int size)
 {
-    return s_utlMemory.realloc(ptr, size);
+    return g_utlMemory.realloc(ptr, size);
 }
 
 /* ROR 0x00105e08 */
 void utlMemFree(void *ptr)
 {
-    s_utlMemory.free(ptr);
+    g_utlMemory.free(ptr);
 }
 
 /* ROR 0x00105e2c */
 void utlMemCheck(void)
 {
-    s_utlMemory.check(0);
+    g_utlMemory.check(0);
 }

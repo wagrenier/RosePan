@@ -810,6 +810,10 @@ int RosePan_sceDevVif0Reset(void)
     return 0;
 }
 
+void vif0ResetVu0(void)
+{
+}
+
 int RosePan_sceDevVu0Reset(void)
 {
     return 0;

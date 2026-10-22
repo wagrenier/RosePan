@@ -11,3 +11,9 @@ void MagScene::initCamera()
 {
     ROSEPAN_STUB("MagScene::initCamera", 0x0013c928);
 }
+
+// stub of ROR 0x0013caf0
+void MagScene::setCameraMode(int mode)
+{
+    ROSEPAN_STUB("MagScene::setCameraMode", 0x0013caf0);
+}
