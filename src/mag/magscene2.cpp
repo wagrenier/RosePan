@@ -1,159 +1,366 @@
 /* ==========================================================================
  *  mag/magscene2.cpp
  *
- *  The scene's set-up half (RoR's "mag/magscene2.cpp", 0x1316b8..): init
- *  and initRender (fog, texture table, the 2D layers registered with the
- *  life manager, the view records), binding the PC and Brown to their
- *  actors, the sky slots' release, the camera target. The constructor,
- *  destructor and loaders are still stubs below.
+ *  The scene's loaders (RoR's "mag/magscene2.cpp", 0x137300..0x139540):
+ *  the system data at start (options.txt, the font and the common
+ *  textures of PREMIERE.RPK), map units into the four sky slots (a model,
+ *  a second model with the STQ map, a collision model, mapparam.bbb's
+ *  view / fog values, the _c.bin records, the _l.bin light, sector.sec),
+ *  characters into the 128 actors (shared when an actor already holds the
+ *  same id or name), motion packs and single textures.
  * ======================================================================== */
 #include "mag/magscene.h"
 
-#include "common/rosepan_stub.h"
+#include <stdint.h>
+
+#include "bed/bedpfh.h"
 #include "sdk/libgraph.h"
-#include "utl/utlfind.h"
+#include "utl/utlfile.h"
 #include "utl/utlmisc.h"
 
-/* rodata 0x2ed500: the shadow01 image DogTexInfo::add builds the scene's
- * first texture from (0x20 bytes; format not decoded yet). */
-static const u_char s_shadow01_image[0x20] = {
-    0x00, 0x01, 0x00, 0x01, 0x01, 0x00, 0x00, 0x23, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-};
+static const char s_file[] = "mag/magscene2.cpp";
 
-// ──────────────────────────────────────────────────────────────────────
-// Binds the player's controller to actor no (no < 0 unbinds it) and marks
-// the actor as bound.
-// ROR 0x001316b8
+/* data 0x298b80: the font file in PREMIERE.RPK (a pointer variable; only
+ * loadSystemData reads it). */
+static const char *s_font_file = "fnt/fnt16US.bin";
 
-void MagScene::setPC(int no, int mode)
+#define SIZE_HEADER 0x2000      /* mapunit.bin's header read (the assert's name) */
+
+/* Rounds a file size up to whole 2048-byte sectors (the ROM's signed
+ * (x + 0x7ff) >> 11 << 11). */
+static inline int roundSector(int size)
 {
-    m_pc_no = no;
-    m_pc_mode = mode;
-    if (no < 0)
-    {
-        m_pc.setActor(NULL, no, mode);
-        m_22d4 = -1;
-        m_22d0 = 0;
-    }
-    else
-    {
-        m_pc.setActor(&m_actors[no], no, mode);
-        m_actor_flags[no] |= 0x60;
-        m_pc.initMotion();
-        m_22d0 = 1;
-        m_22d4 = -1;
-    }
+    return (size + 0x7ff) / 0x800 * 0x800;
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Binds Brown's controller to actor no (no < 0 unbinds it); Brown's
-// command layer gets both controllers while he is bound.
-// ROR 0x00131790
+// ROR 0x00137300
 
-void MagScene::setBwn(int no, int arg)
+void MagScene::initCharaLoader()
 {
-    m_bwn_no = no;
-    if (no < 0)
-    {
-        m_bwn.setActor(NULL, -1, 0);
-        m_bwn_ctrl.m_pc = NULL;
-        m_bwn_ctrl.m_bwn = NULL;
-    }
-    else
-    {
-        m_bwn.setActor(&m_actors[no], no, arg);
-        m_bwn_ctrl.m_bwn = &m_bwn;
-        m_bwn_ctrl.m_pc = &m_pc;
-    }
+    m_chara_loader.init();
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Once at boot (MagSystem::init): the fog records, the light number, the
-// life manager, the texture table with shadow01, the sky slots.
-// ROR 0x00131840
+// ROR 0x00137318
 
-void MagScene::init()
+void MagScene::initMapLoader()
 {
-    i3dFogInit(&m_fog[0]);
-    m_fog[3] = m_fog[0];
-    m_fog[2] = m_fog[3];
-    m_fog[1] = m_fog[2];
-    m_fog_2ab64 = 0;
-    m_fog_2ab60 = 0;
-    setLightNo(-1);
-    m_life_man.init();
-    m_tex_info.init(0x100);
-    m_tex_info.add(s_shadow01_image, "shadow01");
-    m_2aad1 = 3;
-    m_2aad0 = 1;
+    m_map_loader.init();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// MagScene::start's first step: the options file when there is one, the
+// font file and the common textures (file 0) of PREMIERE.RPK, the
+// texture numbers of r_shadow / noise and the four bit8 font pages, then
+// the map and character lists. Returns 0.
+// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, FUN_00215a30 (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
+// ROR 0x00137330
+
+int MagScene::loadSystemData()
+{
+    static const char *common_tex[2] = { "r_shadow", "noise" };
+    /* bit8e is in the ROM's table too, but only four pages are taken. */
+    static const char *font_tex[5] = { "bit8a", "bit8b", "bit8c", "bit8d", "bit8e" };
+
+    FileReader reader;
+    alignas(64) u_char head[0x800];     /* the ROM aligns a 0x840-byte stack buffer to 64 */
+
+    memset(head, 0, sizeof(head));
+    if (fileExists("data/options.txt"))
+    {
+        FileReadReq req;
+        req.m_name = "data/options.txt";
+        req.m_size = 0x800;
+        req.m_close = 1;
+        req.m_08 = 1;
+        req.m_buf = head;
+        if (reader.read(&req, 0) >= 0)
+            parseOption((char *)head);
+    }
+
+    FileReadReq req;
+    req.m_buf = head;
+    req.m_size = 0x800;
+    req.m_name = "data/PREMIERE.RPK";
+    reader.read(&req, 0);
+
+    BedPfh pfh_head(head);
+    ROR_ASSERT(pfh_head.getFileOffset(0) == (2048)); /* 283 */
+
+    int filePackIdx = pfh_head.getFileIndex(s_font_file);
+    ROR_ASSERT(filePackIdx != -1); /* 302 */
+    int filelen = pfh_head.getFileSize(filePackIdx);
+    ROR_ASSERT(filelen > 0); /* 312 */
+    int size = roundSector(filelen);
+    m_font_data = g_utlMemory.allocDebug(size, s_file, 315, 0, 1);
+    ROR_ASSERT(m_font_data != NULL); /* 316 */
+    req.m_offset = pfh_head.getFileOffset(filePackIdx);
+    req.m_buf = m_font_data;
+    req.m_whence = 0;
+    req.m_size = size;
+    reader.read(&req, 0);
+
+    filelen = pfh_head.getFileSize(0);
+    ROR_ASSERT(filelen > 0); /* 330 */
+    size = roundSector(filelen);
+    m_premiere = g_utlMemory.allocDebug(size, s_file, 333, 0, 1);
+    ROR_ASSERT(m_font_data != NULL); /* 334: the ROM tests m_font_data again */
+    req.m_offset = pfh_head.getFileOffset(0);
+    req.m_buf = m_premiere;
+    req.m_close = 1;
+    req.m_whence = 0;
+    req.m_size = size;
+    reader.read(&req, 0);
+
+    BedPfh pfh(m_premiere);
+    m_tex_info.addPfh(&pfh, 0, 0, 0);
+    for (int i = 0; i < 2; i++)
+    {
+        m_common_tex_no[i] = m_tex_info.find(common_tex[i]);
+        ROR_ASSERT(m_common_tex_no[i] >= 0); /* 363 */
+        m_tex_info.setTexFlag(m_common_tex_no[i], 1);
+    }
     for (int i = 0; i < 4; i++)
     {
-        MagSceneTenkyu *t = &m_tenkyu[i];
-        t->m_id = -1;
-        t->m_4fc = 0;
-        t->m_4f4 = 0;
-        t->m_4f8 = 0;
+        m_font_tex_no[i] = m_tex_info.find(font_tex[i]);
+        ROR_ASSERT(m_font_tex_no[i] >= 0); /* 381 */
+        m_tex_info.setTexFlag(m_font_tex_no[i], 1);
     }
+
+    initMapLoader();
+    initCharaLoader();
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Before the first frame (MagSystem::start): the two view records, the
-// controllers' scene links, the 2D layers on the life manager, the
-// render objects, the 1 MB 2D packet buffer. Returns 1.
-// ROR 0x00131b90
+// Takes a map unit pack into the first free sky slot (slot 4 when all
+// are taken: the ROM does not check): copies it to the game heap when
+// copy is set, loads the pack's model (file 0, named <name>.xxx), its
+// second model with the STQ map (file 2), mapparam.bbb (view far, fog,
+// three scene words, a 0..1 factor), the collision model, the _c.bin
+// records and the _l.bin light, the sky textures (with a context) and
+// sector.sec. Returns the slot, -5 / -7 when a model does not load.
+// callcheck: dbgTraceVector4 x3 (traces of the clip spheres; the retail build prints nothing)
+// callcheck: i3rCopyClipSphere, i3rReplaceStqMapEntity, FUN_00215a30 (inside the inline DogModel::copyClipSphere / replaceStqMapEntity; the assert handler)
+// ROR 0x001377f0
 
-int MagScene::initRender(i3dContext *ctx)
+int MagScene::load(i3dContext *ctx, int id, void *data, int copy)
 {
-    static const MagViewParam view = {
-        5.0f, 2000.0f, -5.12f, 5.12f, -0x1.1eb85p+2f, 0x1.1eb85p+2f, /* +-4.48: 0x408f5c28 in the ROM */
-        65530.0f, 1.0f, 0.0f, 511.0f, 0.0f, 447.0f, 1792.0f, 1824.0f,
-    };
+    int n = 0;
+    if (m_tenkyu[0].m_id >= 0)
+    {
+        for (n = 1; n < 4 && m_tenkyu[n].m_id >= 0; n++)
+            ;
+    }
+    MagSceneTenkyu *t = &m_tenkyu[n];
 
-    m_view[0] = view;
-    m_view[1] = view;
-    m_2aa80 = -1.0f;
-    m_view[1].m_zmin = m_22a4 * 1.0f;
-    m_view[1].m_zmax = m_22a4 * 65530.0f;
-    setLightNo(-1);
-    m_pc.m_scene = this;
-    m_bwn_ctrl.m_130 = -1;
-    m_bwn_ctrl.m_138 = -1;
-    m_bwn.m_scene = this;
-    m_bwn_ctrl.m_scene = this;
+    BedPfh pfh(data);
+    void *p = data;
+    if (copy)
+    {
+        int size = pfh.getTotalSize();
+        p = g_utlMemory.allocDebug(size, s_file, 424, 0, 1);
+        ROR_ASSERT(p); /* 425 */
+        memcpy(p, data, size);
+    }
 
-    m_bg.init(&m_tex_info);
-    m_bg.m_level = 7;
-    m_life_man.add(&m_bg, 0x8000);
-    m_life_418f0.m_34 = m_2910;
-    m_life_man.add(&m_life_418f0, 0x8004);
-    m_cine_sco.init(&m_tex_info);
-    m_cine_sco.m_level = 7;
-    m_life_man.add(&m_cine_sco, 0x8006);
-    m_life_man.add(&m_life_41850, 0x8008);
-    m_mes.init(&m_tex_info);
-    m_mes.m_level = 7;
-    m_life_man.add(&m_mes, 0x800a);
+    BedPfh pfh_head(p);
+    void *model_file = pfh_head.getFile(0);
+    BedPfh pfh_model(model_file);
 
-    FUN_00176afc(&m_837e0, ctx, this);
-    FUN_00192318(&m_84aa8, ctx, this);
-    m_22d4 = -1;
-    m_22d0 = 0;
-    m_43700 = -1;
-    FUN_001944d0();
-    m_229c = 0;
-    return 1;
+    char name[0x100];
+    utlStrCopy(name, 0x100, pfh_head.getFileName(0));
+    for (int i = 0; i < 0x100 && name[i] != '\0'; i++)
+    {
+        if (name[i] == '.')
+        {
+            name[i] = '\0';
+            break;
+        }
+    }
+
+    float center[4];
+    float radius;
+    if (t->m_model[0].loadPack(&m_tex_info, BedPfh(model_file), m_22cc, 0) != 0)
+    {
+        ROR_ASSERT(0); /* 456 */
+        return -5;
+    }
+    t->m_model[0].setupNodeFlags();
+    t->m_model[0].copyClipSphere(center, &radius);
+    dbgTraceVector4(center);
+
+    if (pfh_model.getNumFile() > 2)
+    {
+        if (t->m_model[1].loadData(&m_tex_info, pfh_model.getFile(2), NULL) != 0)
+        {
+            ROR_ASSERT(0); /* 497 */
+            return -7;
+        }
+        int r = t->m_model[1].replaceStqMapEntity(&m_stq_map);
+        ROR_ASSERT(r == I3D_OK); /* 505 */
+    }
+    // PC: the ROM reads the clip sphere of the second model even when the
+    // pack has none (a NULL root reads low memory on the PS2).
+    if (t->m_model[1].m_i3r_root)
+        t->m_model[1].copyClipSphere(center, &radius);
+    dbgTraceVector4(center);
+    t->m_id = id;
+
+    char file[0x100];
+    utlStrCopy2(file, 0x100, name, "_c.bin");
+    int idx = pfh_head.getFileIndex(file);
+    if (idx >= 0)
+    {
+        u_int *c = (u_int *)pfh_head.getFile(idx);
+        u_int head = c[0];
+        t->m_c_data = c;
+        t->m_c_num = head & 0xffff;
+        // PC: the ROM writes the record pointers over the offsets after the
+        // head word (4-byte pointers); the host keeps them in a game-heap
+        // array, freed by releaseTenkyu.
+        t->m_c_rec = (MagSceneCRec **)g_utlMemory.alloc(t->m_c_num * (int)sizeof(MagSceneCRec *) + 1, 1);
+        for (int i = 0; i < t->m_c_num; i++)
+        {
+            MagSceneCRec *rec = (MagSceneCRec *)((u_char *)c + c[1 + i]);
+            t->m_c_rec[i] = rec;
+            rec->m_2c = 0;
+            rec->m_02 = (u_char)(head >> 16);
+            rec->m_03 = 0;
+            rec->m_20 = rec->m_00 >> 1;
+            rec->m_24 = 0;
+            rec->m_28 = 0;
+        }
+    }
+
+    m_2a9cc = 1.0f;
+    idx = pfh_head.getFileIndex("mapparam.bbb");
+    if (idx >= 0)
+    {
+        int *mp = (int *)pfh_head.getFile(idx);
+        if ((u_int)(mp[0] - 1) < 0xffff)
+        {
+            setViewFar((float)mp[0]);
+            m_fog[1].m_color[0] = (float)mp[1] / 255.0f;
+            m_fog[1].m_color[1] = (float)mp[2] / 255.0f;
+            m_fog[1].m_color[3] = 0.0f;
+            m_fog[1].m_color[2] = (float)mp[3] / 255.0f;
+            m_fog[1].m_param[0] = (float)mp[4];
+            m_fog[1].m_param[1] = (float)mp[5] / 100.0f;
+            m_fog[1].m_param[2] = (float)mp[6];
+            m_fog[1].m_param[3] = (float)mp[7] / 100.0f;
+            setFog(&m_fog[1], 0);
+            m_2aa84 = 1;
+            if (pfh_head.getFileSize(idx) > 0x20)
+            {
+                m_854a4 = mp[8];
+                m_85494 = mp[9];
+                m_85498 = mp[10];
+            }
+            float f = (float)mp[11] / 100.0f;
+            m_2a9cc = f;
+            if (f == 0.0f)
+                m_2a9cc = 1.0f;
+            else if (f < 0.0f)
+                m_2a9cc = 0.0f;
+            else if (f > 1.0f)
+                m_2a9cc = 1.0f;
+        }
+    }
+
+    utlStrCopy2(file, 0x100, name, "_col.i3s.i3r");
+    idx = pfh_head.getFileIndex(file);
+    if (idx >= 0)
+        t->m_model[2].loadData(&m_tex_info, pfh_head.getFile(idx), pfh_head.getFile(idx + 1));
+
+    utlStrCopy2(file, 0x100, name, "_l.bin");
+    idx = pfh_head.getFileIndex(file);
+    if (idx < 0 || pfh_head.getFileSize(idx) < 1)
+        t->m_light_data = NULL;
+    else
+        t->m_light_data = pfh_head.getFile(idx);
+
+    if (ctx)
+    {
+        m_tex_info.setTexTable(ctx);
+        loadTenkyuTex(n, &pfh, ctx);
+    }
+
+    idx = pfh.getFileIndex("sector.sec");
+    if (idx >= 0 && pfh.getFileSize(idx) > 0)
+    {
+        int i = FUN_0017c1f4(&m_8542c, pfh.getFile(idx), copy != 0);
+        ROR_ASSERT(i != 0); /* 651 */
+    }
+
+    // PC: as above for the collision model.
+    if (t->m_model[2].m_i3r_root)
+        t->m_model[2].copyClipSphere(center, &radius);
+    dbgTraceVector4(center);
+
+    t->m_buf = copy ? p : NULL;
+    if (t->m_light_data)
+        loadLight(t->m_light_data);
+    setDefaultLight();
+    resetEntities();
+    return n;
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Unbinds the PC from Brown's command layer and ends the PC's world.
-// ROR 0x0013604c
+// Reads map unit theNo of data/bg/mapunit.bin (the 0x2000-byte header
+// first) into the game heap and loads it. Nothing calls it.
+// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, FUN_00215a30 (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
+// ROR 0x0013836c
 
-void MagScene::clearPC()
+int MagScene::loadMapUnit(i3dContext *ctx, int theNo)
 {
-    m_bwn_ctrl.m_78 = 0;
-    utlFindClear(&m_bwn_ctrl.m_find);
-    m_pc.termWorld();
+    ROR_ASSERT(theNo >= 0); /* 705 */
+
+    FileReader reader;
+    FileReadReq req;
+    alignas(64) u_char head[SIZE_HEADER];
+    req.m_name = "data/bg/mapunit.bin";
+    req.m_08 = 1;
+    req.m_buf = head;
+    req.m_size = SIZE_HEADER;
+    reader.read(&req, 0);
+
+    BedPfh pfh1(head);
+    ROR_ASSERT(pfh1.getFileOffset(0) <= SIZE_HEADER); /* 726 */
+    ROR_ASSERT(theNo < pfh1.getNumFile()); /* 728 */
+    int size = pfh1.getFileSize(theNo);
+    if (size < 1)
+    {
+        ROR_ASSERT(0); /* 734 */
+        return -6;
+    }
+    size = roundSector(size);
+    void *p = g_utlMemory.allocDebug(size, s_file, 739, 0, 1);
+    ROR_ASSERT(p != NULL); /* 740 */
+    ROR_ASSERT((((int)(intptr_t)p)%64)==0); /* 741 */
+    req.m_offset = pfh1.getFileOffset(theNo);
+    req.m_buf = p;
+    req.m_close = 1;
+    req.m_whence = 0;
+    req.m_size = size;
+    reader.read(&req, 0);
+    return load(ctx, theNo, p, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Loads the map unit named theName (id 9999); the sky slot keeps the
+// buffer.
+// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00138610
+
+void MagScene::loadMapByName(i3dContext *ctx, const char *theName)
+{
+    ROR_ASSERT(theName); /* 763 */
+    void *p = m_map_loader.loadByName(theName);
+    ROR_ASSERT(p); /* 768 */
+    int n = load(ctx, 9999, p, 0);
+    m_tenkyu[n].m_buf = p;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -171,10 +378,13 @@ void MagScene::releaseTenkyu(int no)
     t->m_model[0].release(0);
     t->m_model[1].release(0);
     t->m_model[2].release(0);
-    t->m_4f4 = 0;
-    t->m_4f8 = 0;
-    t->m_4fc = 0;
-    t->m_500 = 0;
+    t->m_c_data = NULL;
+    t->m_c_num = 0;
+    // PC: the host's record table (see load).
+    if (t->m_c_rec)
+        g_utlMemory.free(t->m_c_rec);
+    t->m_c_rec = NULL;
+    t->m_light_data = NULL;
     if (t->m_buf)
     {
         g_utlMemory.free(t->m_buf);
@@ -195,6 +405,196 @@ void MagScene::releaseTenkyuAll()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The first actor without a model, -1 when all 128 hold one.
+// callcheck: I3rRoot__CheckIdString, FUN_00215a30 (inside the inline DogModel::isAlive; the assert handler)
+// ROR 0x0013884c
+
+int MagScene::findFreeActor()
+{
+    int i;
+    for (i = 0; i < 128; i++)
+    {
+        if (!m_actors[i].isAlive())
+            break;
+    }
+    return i < 128 ? i : -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: I3rRoot__CheckIdString, FUN_00215a30 (inside the inline DogModel::isAlive; the assert handler)
+// ROR 0x001388e8
+
+int MagScene::findActorById(int theID)
+{
+    if (theID < 0)
+    {
+        ROR_ASSERT(theID >= 0); /* 867 */
+        return -1;
+    }
+    for (int i = 0; i < 128; i++)
+    {
+        if (m_actors[i].isAlive() && m_actors[i].getId() == theID)
+            return i;
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: I3rRoot__CheckIdString, FUN_00215a30 (inside the inline DogModel::isAlive; the assert handler)
+// ROR 0x001389c4
+
+int MagScene::findActorByName(const char *theName)
+{
+    if (!theName)
+    {
+        ROR_ASSERT(theName); /* 891 */
+        return -1;
+    }
+    for (int i = 0; i < 128; i++)
+    {
+        if (m_actors[i].isAlive() && m_actors[i].checkName(theName))
+            return i;
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A free actor showing actor theActorNo's model. Returns it, -100 when
+// none is free, -200 when sharing fails.
+// callcheck: DogEntity::reset (EE virtual slot 1, called through the vtable)
+// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00138ac8
+
+int MagScene::shareActor(u_int theActorNo)
+{
+    if (theActorNo >= 128)
+    {
+        ROR_ASSERT(theActorNo >= 0 && theActorNo < 128); /* 965 */
+        return -300;
+    }
+    int n = findFreeActor();
+    if (n < 0)
+        return -100;
+    DogActor *a = &m_actors[n];
+    a->reset();
+    m_actor_flags[n] = 0;
+    m_actor_flags2[n] = 0;
+    if (a->shareModel(&m_actors[theActorNo]) != 0)
+        return -200;
+    return n;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A character by name: shares an actor that already shows it, else reads
+// it from CHARA.RPK.
+// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00138bc4
+
+int MagScene::loadModelByName(i3dContext *ctx, const char *theCharaName, int arg,
+                              const char *rpk)
+{
+    (void)arg;
+    (void)rpk;
+    ROR_ASSERT(theCharaName); /* 993 */
+    int n = findActorByName(theCharaName);
+    if (n >= 0)
+        return shareActor(n);
+
+    int k = m_chara_loader.m_index.find(theCharaName);
+    ROR_ASSERT(k >= 0); /* 1019 */
+    void *p = m_chara_loader.load(k);
+    ROR_ASSERT(p); /* 1021 */
+    return loadActor(ctx, m_chara_loader.getId(k), p, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Puts character theID into a free actor: shares an actor already
+// holding the id (freeing thePtr unless keep), else loads the pack
+// thePtr. Returns the actor, -1 when none is free, -2 / -4 on failure.
+// callcheck: DogEntity::reset (EE virtual slot 1, called through the vtable)
+// callcheck: BedPfh, FUN_00215a30 (the local pack view constructor; the assert handler)
+// ROR 0x00138ce8
+
+int MagScene::loadActor(i3dContext *ctx, int theID, void *thePtr, int keep)
+{
+    int n = findFreeActor();
+    if (n < 0)
+        return -1;
+    DogActor *a = &m_actors[n];
+    a->reset();
+    m_actor_flags[n] = 0;
+    m_actor_flags2[n] = 0;
+
+    if (theID >= 0)
+    {
+        int src = findActorById(theID);
+        if (src >= 0)
+        {
+            if (a->shareModel(&m_actors[src]) != 0)
+                return -2;
+            if (!keep && thePtr)
+                g_utlMemory.free(thePtr);
+            return n;
+        }
+    }
+
+    ROR_ASSERT(thePtr); /* 1222 */
+    BedPfh pfh(thePtr);
+    if (a->load(pfh, &m_tex_info, keep ? 2 : 1, m_22cc) != 0)
+        return -4;
+    m_actor_flags[n] = 0;
+    m_actor_flags2[n] = 0;
+    a->setId(theID);
+    a->setParam1d8(5);
+    a->ready();
+    if (ctx)
+        m_tex_info.setTexTable(ctx);
+    return n;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A character by id: shares an actor that already shows it, else reads
+// it from CHARA.RPK. Returns the actor, -999 for a negative id.
+// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00138ed0
+
+int MagScene::loadModel(i3dContext *ctx, int theID, const char *rpk)
+{
+    (void)rpk;
+    if (theID < 0)
+    {
+        ROR_ASSERT(theID >= 0); /* 1281 */
+        return -999;
+    }
+    int n = findActorById(theID);
+    if (n >= 0)
+        return shareActor(n);
+
+    int k = m_chara_loader.getIndex(theID);
+    ROR_ASSERT(k >= 0); /* 1302 */
+    void *p = m_chara_loader.load(k);
+    ROR_ASSERT(p); /* 1304 */
+    return loadActor(ctx, theID, p, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Empties actor theN (after the GS has drawn it); unbinds the PC when it
+// was the PC's actor.
+// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00139010
+
+void MagScene::releaseActor(u_int theN)
+{
+    sceGsSyncPath(0, 0);
+    ROR_ASSERT(theN >= 0 && theN < 128); /* 1383 */
+    m_actors[theN].releaseModel(&m_tex_info);
+    m_actor_flags[theN] = 0;
+    m_actor_flags2[theN] = 0;
+    if (theN == (u_int)m_pc_no)
+        setPC(-1, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Loads actor no's motion pack from the PC's pack file (the ROM passes
 // b before a).
 // ROR 0x001390d4
@@ -205,101 +605,78 @@ void MagScene::setActorAnim(int no, int a, int b)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// After the frame's draw: the PC's and Brown's motion sequences.
-// callcheck: updateMotionSeq (inlined MagLifeControlChara::renderPostProcess calls it)
-// ROR 0x0013c29c
+// Reads the motion pack name whole into the game heap (the actor keeps
+// it) and loads its motions into actor no. Returns -1 without a name, -2
+// when the file is missing or empty.
+// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, FUN_00215a30 (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
+// ROR 0x0013910c
 
-void MagScene::postDraw()
-{
-    m_pc.renderPostProcess();
-    m_bwn.renderPostProcess();
-}
-
-// ──────────────────────────────────────────────────────────────────────
-// ROR 0x0013c2ec
-
-void MagScene::setCameraTarget(const float *pos, const float *at)
-{
-    m_camera_pos[0] = pos[0];
-    m_camera_pos[1] = pos[1];
-    m_camera_pos[2] = pos[2];
-    m_camera_pos[3] = pos[3];
-    m_camera_at[0] = at[0];
-    m_camera_at[1] = at[1];
-    m_camera_at[2] = at[2];
-    m_camera_at[3] = at[3];
-    m_camera_target_set = 1;
-}
-
-// ──────────────────────────────────────────────────────────────────────
-// Empty in the ROM (mainInitGame calls it).
-// ROR 0x0013c928
-
-void MagScene::initCamera()
-{
-}
-
-// ──────────────────────────────────────────────────────────────────────
-// ROR 0x0013d5ac
-
-int MagScene::getCameraMode(int *out)
-{
-    if (out)
-    {
-        out[0] = m_camera_mode;
-        out[1] = m_camera_2ad58;
-    }
-    return m_camera_mode;
-}
-
-// ---- stubs (hand-written: constructors and destructors are not stubbed by stubgen) ----
-
-// stub of ROR 0x001360a0
-// PC: runs before main (g_magSystem's member); the stub only logs.
-MagScene::MagScene()
-{
-    ROSEPAN_STUB("MagScene::MagScene", 0x001360a0);
-}
-
-// stub of ROR 0x00136d14
-MagScene::~MagScene()
-{
-    ROSEPAN_STUB("MagScene::~MagScene", 0x00136d14);
-}
-
-// ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x0013fe64
-int MagScene::addLight(int type, unsigned int mask)
-{
-    ROSEPAN_STUB("MagScene::addLight", 0x0013fe64);
-    return {};
-}
-
-// stub of ROR 0x001377f0
-int MagScene::load(i3dContext *ctx, int a, int b, int c)
-{
-    ROSEPAN_STUB("MagScene::load", 0x001377f0);
-    return {};
-}
-
-// stub of ROR 0x0013910c
 int MagScene::loadActorAnim(int no, int arg, const char *name)
 {
-    ROSEPAN_STUB("MagScene::loadActorAnim", 0x0013910c);
-    return {};
+    if (!name)
+        return -1;
+    if (fileGetSize(name) < 1)
+        return -2;
+
+    FileReader reader;
+    FileReadReq req;
+    alignas(64) u_char head[0x800];
+    req.m_buf = head;
+    req.m_name = name;
+    req.m_size = 0x800;
+    req.m_08 = 1;
+    reader.read(&req, 0);
+
+    BedPfh pfh_head(head);
+    int size = roundSector(pfh_head.getTotalSize());
+    void *p = g_utlMemory.allocDebug(size, s_file, 1484, 0, 1);
+    ROR_ASSERT(p != NULL); /* 1485 */
+    ROR_ASSERT((((int)(intptr_t)p)%64)==0); /* 1486 */
+    req.m_buf = p;
+    req.m_close = 1;
+    req.m_offset = 0;
+    req.m_whence = 0;
+    req.m_size = size;
+    reader.read(&req, 0);
+
+    BedPfh pfh(p);
+    return m_actors[no].loadMotion(pfh, arg);
 }
 
-// stub of ROR 0x00138ed0
-int MagScene::loadModel(i3dContext *ctx, int id, const char *rpk)
-{
-    ROSEPAN_STUB("MagScene::loadModel", 0x00138ed0);
-    return {};
-}
+// ──────────────────────────────────────────────────────────────────────
+// Reads entry theName of the pack theFile into a temporary buffer and
+// adds it to the scene's textures; returns the texture index.
+// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, FUN_00215a30 (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
+// ROR 0x00139308
 
-// stub of ROR 0x00138bc4
-void MagScene::loadModelByName(i3dContext *ctx, const char *name, int arg,
-                         const char *rpk)
+int MagScene::loadTexture(const char *theFile, const char *theName)
 {
-    ROSEPAN_STUB("MagScene::loadModelByName", 0x00138bc4);
+    alignas(64) u_char head[0x800];
+    memset(head, 0, sizeof(head));
+
+    FileReader reader;
+    FileReadReq req;
+    req.m_buf = head;
+    req.m_size = 0x800;
+    req.m_name = theFile;
+    reader.read(&req, 0);
+
+    BedPfh pfh_head(head);
+    ROR_ASSERT(pfh_head.getFileOffset(0) == (2048)); /* 1548 */
+    int n = pfh_head.getFileIndex(theName);
+    ROR_ASSERT(n >= 0); /* 1553 */
+    int filelen = pfh_head.getFileSize(n);
+    ROR_ASSERT(filelen > 0); /* 1557 */
+    int size = roundSector(filelen);
+    void *p = g_utlMemory.alloc(size, 1);
+    ROR_ASSERT(p != NULL); /* 1563 */
+    req.m_offset = pfh_head.getFileOffset(n);
+    req.m_buf = p;
+    req.m_whence = 0;
+    req.m_size = size;
+    reader.read(&req, 0);
+
+    int no = m_tex_info.addData(theName, p, 1, -1);
+    g_utlMemory.free(p);
+    return no;
 }

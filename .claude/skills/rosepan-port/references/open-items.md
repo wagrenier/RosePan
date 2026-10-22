@@ -119,6 +119,24 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    Next reached stubs in run order: MagLifeMan::init / add, DogTexInfo::init / add, the S2d inits,
    then `MagScene::draw` / `update` and the i3d draw-group module.
 
+13. (2026-10-22, the second magscene2 session) **`mag/magscene2.cpp` is pinned
+   (0x137300..0x139540) and complete (`verify`)**: all 19 functions (loadSystemData, load, the map
+   unit loaders, the actor finders, shareActor / loadActor / loadModel / loadModelByName,
+   releaseActor, loadActorAnim, loadTexture, releaseTenkyu / All, setActorAnim). The functions the
+   first session wrote outside that range moved to the files that own their addresses:
+   setPC / setBwn / init / initRender / clearPC and the constructor / destructor stubs to
+   `mag/magscene.cpp`, postDraw / setCameraTarget to magscenerender.cpp, initCamera /
+   getCameraMode to magscenecamera.cpp, the addLight stub to magscenelight.cpp. **magscene.cpp is
+   not pinned yet**: its asserts span 0x131a28..0x135f44; taking 0x1316b8..0x137300 (incl. the
+   constructor 0x1360a0 and destructor 0x136d14, no strings) is a guess -- pin it when its TU
+   starts. Nothing on screen shows the loaders until `MagScene::start` (magscene.cpp) and
+   GamMan's loads run; their stubs now include BedPfh (ctor, getFileName, getFileIndex: tiny,
+   bed/bedpfh.cpp), FileReader::read / close (unassigned@001bde58), utlStrCopy / utlStrCopy2
+   (utl/utlfile.cpp), the MagCharaLoader / MagMapLoader methods (mag/magloader.cpp) and the
+   DogModel / DogActor / DogTexInfo load methods. PC deviations in load: the _c.bin record
+   pointers live in a game-heap array (freed by releaseTenkyu), and the clip-sphere reads of the
+   second / collision models are skipped when they have no root.
+
 ## Decisions
 
 - One TU per session, run by the user (`/rosepan-port next`, the routine, or autopilot.py); sessions run

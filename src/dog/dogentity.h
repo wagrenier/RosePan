@@ -30,6 +30,9 @@
  * while the class is not polymorphic. */
 struct DogEntity
 {
+    /* EE slot 1 (+0x08): zero rotation / offset / translation (w 1), scale
+     * 1, dirty, no parent. */
+    void reset();                                                        // ROR 0x0011023c
     void setRotate(float x, float y, float z);                          // ROR 0x0010fc7c
     void normalizeRotate();                                              // ROR 0x0010ff74
 

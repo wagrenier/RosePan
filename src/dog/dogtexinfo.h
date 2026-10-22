@@ -11,6 +11,9 @@
 
 #include <stddef.h>
 
+struct BedPfh;
+struct i3dContext;
+
 /* EE 0x20 (the scene's sky slots follow at +0x20). layout: host --
  * pointers. */
 struct DogTexInfo
@@ -19,6 +22,17 @@ struct DogTexInfo
     /* Finds the texture by name or takes a free record and builds it from
      * the image; returns its index, -1 when full. */
     int  add(const void *image, const char *name);                      // ROR 0x00116b5c
+    /* The record named theName, -1 when none. */
+    int  find(const char *theName) const;                                // ROR 0x001163dc
+    /* Adds a texture from a loaded image under a name; returns its index. */
+    int  addData(const char *theName, void *data, int a, int b);         // ROR 0x00116d14
+    /* Adds every texture of a pack. */
+    int  addPfh(const BedPfh *pfh, int a, int b, int c);                 // ROR 0x001170b8
+    /* Passes record theNo's picture and the flag to 0x219d80. */
+    void setTexFlag(int theNo, int flag);                                // ROR 0x001174c4
+    /* Trims m_num_tex past the last used record and hands the table to the
+     * i3d context (i3dCtxSetTexTable). */
+    void setTexTable(i3dContext *p);                                     // ROR 0x0011756c
 
     int   m_max_tex;            // ROR 0x00: theMax
     int   m_num_tex;            // ROR 0x04: records in use (assert m_num_tex <= m_max_tex)

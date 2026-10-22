@@ -29,3 +29,16 @@ void MagScene::setLightNo(int theNo)
 {
     ROSEPAN_STUB("MagScene::setLightNo", 0x0013f4d0);
 }
+
+// stub of ROR 0x0013fe64
+int MagScene::addLight(int type, unsigned int mask)
+{
+    ROSEPAN_STUB("MagScene::addLight", 0x0013fe64);
+    return {};
+}
+
+// stub of ROR 0x0013f658
+void MagScene::loadLight(const void *theData)
+{
+    ROSEPAN_STUB("MagScene::loadLight", 0x0013f658);
+}

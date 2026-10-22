@@ -2,6 +2,7 @@
 // Functions below are stubs until reconstructed; see tools/reverse/stage.py.
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
+#include "mag/magscene.h"
 
 #include "common/rosepan_stub.h"
 #include "game/gamman.h"
@@ -302,4 +303,96 @@ int S2dMes::init(DogTexInfo *tex)
 void i3dFogInit(I3dFog *fog)
 {
     ROSEPAN_STUB("i3dFogInit", 0x0021a120);
+}
+
+// stub of ROR 0x0017c1f4
+int FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy)
+{
+    ROSEPAN_STUB("FUN_0017c1f4", 0x0017c1f4);
+    return {};
+}
+
+// stub of ROR 0x001be414
+int FileReader::close()
+{
+    ROSEPAN_STUB("FileReader::close", 0x001be414);
+    return {};
+}
+
+// stub of ROR 0x001be524
+int FileReader::read(FileReadReq *req, int async)
+{
+    ROSEPAN_STUB("FileReader::read", 0x001be524);
+    return {};
+}
+
+// stub of ROR 0x0022b228
+int I3rRoot__CheckIdString(const I3rRoot *root)
+{
+    ROSEPAN_STUB("I3rRoot__CheckIdString", 0x0022b228);
+    return {};
+}
+
+// stub of ROR 0x00140030
+void MagScene::loadTenkyuTex(int no, const BedPfh *pfh, i3dContext *ctx)
+{
+    ROSEPAN_STUB("MagScene::loadTenkyuTex", 0x00140030);
+}
+
+// stub of ROR 0x00135fa4
+void MagScene::resetEntities()
+{
+    ROSEPAN_STUB("MagScene::resetEntities", 0x00135fa4);
+}
+
+// stub of ROR 0x0013f8e4
+void MagScene::setDefaultLight()
+{
+    ROSEPAN_STUB("MagScene::setDefaultLight", 0x0013f8e4);
+}
+
+// stub of ROR 0x00143d7c
+void MagScene::setFog(const I3dFog *fog, int frames)
+{
+    ROSEPAN_STUB("MagScene::setFog", 0x00143d7c);
+}
+
+// stub of ROR 0x00131618
+void MagScene::setViewFar(float far)
+{
+    ROSEPAN_STUB("MagScene::setViewFar", 0x00131618);
+}
+
+// stub of ROR 0x00215bb4
+void dbgTraceVector4(const float *v)
+{
+    ROSEPAN_STUB("dbgTraceVector4", 0x00215bb4);
+}
+
+// stub of ROR 0x001be84c
+int fileExists(const char *theName)
+{
+    ROSEPAN_STUB("fileExists", 0x001be84c);
+    return {};
+}
+
+// stub of ROR 0x001be768
+int fileGetSize(const char *theName)
+{
+    ROSEPAN_STUB("fileGetSize", 0x001be768);
+    return {};
+}
+
+// stub of ROR 0x0021a828
+int i3rCopyClipSphere(I3rRoot *root, float *center, float *radius)
+{
+    ROSEPAN_STUB("i3rCopyClipSphere", 0x0021a828);
+    return {};
+}
+
+// stub of ROR 0x0021a938
+int i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity)
+{
+    ROSEPAN_STUB("i3rReplaceStqMapEntity", 0x0021a938);
+    return {};
 }

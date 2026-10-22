@@ -10,6 +10,7 @@
 #define _LIB_UNASSIGNED_H
 
 #include <stddef.h>
+#include <string.h>
 
 #include "sdk/vu0_intrin.h"
 
@@ -74,6 +75,61 @@ struct RxMpeg
 };
 
 extern RxMpeg g_rxMpeg;         /* bss 0x7b40c0 */
+
+/* ---- the file reader (unassigned@001bde58: 0x1be2cc..0x1be880) ---- */
+
+/* One read request: open the name, seek, read, close -- each step only
+ * when its field asks for it (the reader clears the field once done).
+ * EE 0x24. layout: host -- the name and buffer are pointers. */
+struct FileReadReq
+{
+    // ROR 0x001be734 (memset 0x24 bytes, fd -1)
+    FileReadReq()
+    {
+        memset(this, 0, sizeof(*this));
+        m_fd = -1;
+    }
+
+    int         m_fd;           // ROR 0x00: the open file, -1 before the open step
+    int         m_step;         // ROR 0x04: (step << 1) | waiting; FileReader::read resets it
+    int         m_08;           // ROR 0x08: some callers set 1; the reader never reads it
+    const char *m_name;         // ROR 0x0c: opened when set (rxSysStreamOpen, 0x8001)
+    int         m_offset;       // ROR 0x10: the seek position
+    int         m_whence;       // ROR 0x14: -1 = no seek, 0 / 1 / 2 = set / current / end
+    void       *m_buf;          // ROR 0x18: read target
+    int         m_size;         // ROR 0x1c: bytes to read, 0 = no read
+    int         m_close;        // ROR 0x20: close the file after the read
+};
+static_assert(offsetof(FileReadReq, m_step) == 0x04, "m_step");
+static_assert(offsetof(FileReadReq, m_name) >= 0x0c, "m_name");
+
+/* Runs FileReadReqs (the pack loaders build one on the stack). EE 0x08.
+ * layout: host -- holds a pointer. */
+struct FileReader
+{
+    // ROR 0x001be2cc
+    FileReader() : m_req(NULL), m_fd(-1) {}
+    // ROR 0x001be2dc (GCC 2 destructor; the ROM's callers pass 2, no delete)
+    ~FileReader()
+    {
+        if (m_fd >= 0)
+            close();
+    }
+
+    /* Starts the request and, unless async, waits for it (drawing the
+     * now-loading screen while it waits); returns the state machine's
+     * result (1 = done). */
+    int  read(FileReadReq *req, int async);                              // ROR 0x001be524
+    int  close();                                                        // ROR 0x001be414
+
+    FileReadReq *m_req;         // ROR 0x00: the request being run
+    int          m_fd;          // ROR 0x04: the file this reader opened, -1 = none
+};
+
+/* The size of the file (rxSysStreamOpen, seek to the end), < 0 when it
+ * does not open. */
+int  fileGetSize(const char *theName);                                   // ROR 0x001be768
+int  fileExists(const char *theName);                                    // ROR 0x001be84c
 
 /* ---- the utl range after utl/utlgame.cpp (unassigned@00103edc) ---- */
 
@@ -140,6 +196,24 @@ static_assert(sizeof(I3dMatrixF4x4) == 0x40, "I3dMatrixF4x4 is 0x40 bytes on the
 /* The node index of the named node, -1 when the model has none. */
 int   i3rGetNodeIndexByName(I3rRoot *root, const char *name);            // ROR 0x0022b3d8
 
+#define I3D_OK 0
+
+/* An i3d STQ map entity (tag_I3rStqMapEntity_s in DogModel's symbols).
+ * The scene keeps one at +0x2aa90 (less than 0x40 bytes before +0x2aad0).
+ * layout: host -- placeholder, fields not known. */
+struct I3rStqMapEntity
+{
+    u_char _00[0x40];
+};
+static_assert(sizeof(I3rStqMapEntity) >= 0x40, "placeholder");
+
+/* I3D_OK when the root carries the i3r id string and version 0x52, 3
+ * otherwise (the name is in dogmodel.h's assert text). */
+int   I3rRoot__CheckIdString(const I3rRoot *root);                       // ROR 0x0022b228
+/* The model's clip sphere: centre (w = 1) and radius. */
+int   i3rCopyClipSphere(I3rRoot *root, float *center, float *radius);    // ROR 0x0021a828
+int   i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity);    // ROR 0x0021a938
+
 /* bss 0x7812ac, just below GamMan: mainInitGame passes it to
  * seqSetLanguage (which ignores it). Role not known yet. */
 extern int g_bss_7812ac;
@@ -200,6 +274,9 @@ static_assert(sizeof(Obj176a3c) >= 4 && sizeof(Obj19226c) >= 4 && sizeof(Obj17c0
 int   FUN_00176afc(Obj176a3c *obj, i3dContext *ctx, MagScene *scene);    // ROR 0x00176afc
 void  FUN_00192318(Obj19226c *obj, i3dContext *ctx, MagScene *scene);    // ROR 0x00192318
 void  FUN_0017c2c0(Obj17c0f0 *obj);  /* frees the buffer and the records */ // ROR 0x0017c2c0
+/* Takes a sky pack's sector.sec (copied to the game heap when copy is
+ * set); non-zero on success. */
+int   FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy);               // ROR 0x0017c1f4
 /* Allocates the 1 MB 2D packet buffer (data 0x29bfb4); mnuBase::initSystem
  * calls it too. */
 void  FUN_001944d0(void);                                                // ROR 0x001944d0
@@ -213,5 +290,7 @@ void debugNop(void);                                                     // ROR 
 /* Formats the three floats (3 digits) and prints nothing: a trace whose
  * output the retail build compiled out. */
 void dbgTraceVector3(float x, float y, float z);                         // ROR 0x00215b5c
+/* The same for four floats. */
+void dbgTraceVector4(const float *v);                                    // ROR 0x00215bb4
 
 #endif /* _LIB_UNASSIGNED_H */

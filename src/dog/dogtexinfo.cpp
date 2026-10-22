@@ -18,3 +18,36 @@ void DogTexInfo::init(int theMax)
 {
     ROSEPAN_STUB("DogTexInfo::init", 0x001162ac);
 }
+
+// stub of ROR 0x00116d14
+int DogTexInfo::addData(const char *theName, void *data, int a, int b)
+{
+    ROSEPAN_STUB("DogTexInfo::addData", 0x00116d14);
+    return {};
+}
+
+// stub of ROR 0x001170b8
+int DogTexInfo::addPfh(const BedPfh *pfh, int a, int b, int c)
+{
+    ROSEPAN_STUB("DogTexInfo::addPfh", 0x001170b8);
+    return {};
+}
+
+// stub of ROR 0x001163dc
+int DogTexInfo::find(const char *theName) const
+{
+    ROSEPAN_STUB("DogTexInfo::find", 0x001163dc);
+    return {};
+}
+
+// stub of ROR 0x001174c4
+void DogTexInfo::setTexFlag(int theNo, int flag)
+{
+    ROSEPAN_STUB("DogTexInfo::setTexFlag", 0x001174c4);
+}
+
+// stub of ROR 0x0011756c
+void DogTexInfo::setTexTable(i3dContext *p)
+{
+    ROSEPAN_STUB("DogTexInfo::setTexTable", 0x0011756c);
+}
