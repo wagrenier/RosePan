@@ -316,3 +316,11 @@ entries are marked **RoR** with the date.
   the game's own camera matrices.
 - **Timing-driven pad scripts drift**: pad reads count frames, load times move the game's frames; pad
   generously and confirm with a shot before blaming the code.
+
+## Tools
+
+- **stubgen takes an access label as part of the next declaration.** Symptom: a generated stub starts
+  with `public:` and the build fails ("expected unqualified-id before 'public'"). Cause: stubgen copies
+  the text from the previous member up to the declaration, and `public:` sits in between. Fix: in a
+  minimal header for another TU, declare the class as a `struct` (no labels), or put the label on the
+  line after a member, and keep each declaration on one line (2026-10-22, bed/bedmemory.h).

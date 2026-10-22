@@ -1,8 +1,8 @@
 {
  "queue": [],
  "settings": {
-  "slice_bytes": 10240,
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
+  "slice_bytes": 10240,
   "smoke_pad": ""
  },
  "tus": {
@@ -89,7 +89,26 @@
    "status": "done",
    "task": "Create the PC project (no RoR functions to write). The platform layer comes from ReiPan (../ReiPan, read-only), which took it from MioPan (FF2) and adapted it to FF3: src/sdk emulates the PS2 SDK (libgraph, libdma, libvif, libvu0, libpad, libmc, libcdvd, sif / IOP host, libmpeg + FFmpeg, eekernel threads), src/reipan draws the GS through SDL3 GPU and holds the host thread, log, paths, config and the ImGui debug UI. Steps: (1) copy ../ReiPan/src/reipan to src/rosepan and ../ReiPan/src/sdk to src/sdk; rename ReiPan_ / REIPAN_ / reipan_ identifiers, env variables and file names to RosePan_ / ROSEPAN_ / rosepan_, keeping the tool contract in tools/reverse/README.md 'Platform contract' (ROSEPAN_SHOT_DIR / ROSEPAN_SHOT_EVERY screenshots of the presented frame, ROSEPAN_AUTOPAD scripted pad in sdk/libpad.cpp, ROSEPAN_DATA_DIR, the RosePanGame thread name, the stub log line). (2) Write src/common/rosepan_stub.h from ../ReiPan/src/common/reipan_stub.h: ROSEPAN_STUB / ROSEPAN_BRIDGE printing '[stub] Name (ROR 0x%08x) reached'. (3) Drop or neutralise FF3-only pieces and list each in open-items.md 'Platform bootstrap': reipan/debug/reipan_warp.* (FF3 chapter warps and snapshots), FF3 game hooks in rendering/reipan_graph3d.cpp and reipan_ui, FF3 file names in io/reipan_paths (IMG_BD.BIN, ZERO3.FHD: RoR reads 'cdrom0:\\\\DATA\\\\...' and data/... paths, decide the data folder layout from the ELF), the FF3 IOP services in sdk/iop_* (RoR loads only Sony modules: sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv, fileio, sifcmd, usbd, plus ioprp300.img; its sound goes through rxmpeg / the rx middleware). (4) CMakeLists.txt, CMakePresets.json, cmake/*.cmake and resources/ (shaders) from ReiPan with ReiPan renamed RosePan: target RosePan, output cmake-build-*/RosePan/RosePan.exe, the sibling extern fallback pointed at ../ReiPan/extern then ../MioPan/extern (FFmpeg, shadercross), -fno-strict-aliasing and the src/sdk/pc_prefix.h force-include kept, every .c/.cpp compiled as C++. (5) A placeholder src/main.cpp whose main() initialises the platform, opens the window and presents cleared frames until RoR's main (0x002045a8) is reconstructed. (6) python build.py green; python build.py --run 15 writes work/shots/last.png (look at it); python layoutcheck.py runs clean. Keep platform edits minimal and list them in the summary; record the layer's shape in architecture.md 'PC platform layer' and anything that burned time in hazards.md. Finish --status done (the screenshot of an empty window is the expected picture)."
   },
+  "unassigned@001056f8": {},
   "unassigned@00216ad0": {},
-  "unassigned@002437f8": {}
+  "unassigned@002437f8": {},
+  "utl/utlmisc.cpp": {
+   "notes": "Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and installs utlMemAlloc twice, utlMemRealloc and utlMemFree as rxSysSetMemFunc0..3 hooks; bed/bedmemory.cpp (0x100354..) is only stubs (alloc returns NULL), so reconstruct BedMemory right after main, before anything allocates. Decided without the user: the ROM's operator new/delete are written as utlOperatorNew/utlOperatorDelete(+Array, +Debug) and do NOT replace the host's global operator new (open-items Decisions). BedMemory field names (m_top, m_last, m_buffer, m_size, m_id, m_owner) are from create/format/destroy and partly guessed; check them against the assert texts (m_size, m_buffer, m_next, m_chunk_size, m_header_size, m_flag, m_filename) when bedmemory is read. utlParseParam leaves the record type unchanged for a value that is not a quote, dollar or digit, as the ROM does. Hazard recorded: stubgen copies an access label (public:) into the next stub.",
+   "ranges": [
+    [
+     "00105650",
+     "00105e50"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 11:43",
+     "status": "verify",
+     "summary": "utl/utlmisc.cpp pinned at 0x105650..0x105e50 (assert line 22 at 0x105650) and all 24 functions written: utlIsTccName, utlFtoi15, the name/value text parser utlParseParam and its skip helpers, utlIncFrameCount, the ROM's operator new/delete wrappers, and the game heap (utlMemInit probes malloc and creates a BedMemory at bss 0x6e9800; alloc/align/debug/realloc/free/check wrappers). New ROR_ASSERT macro (common/ror_assert.h) and a minimal bed/bedmemory.h with 7 BedMemory stubs."
+    }
+   ],
+   "status": "verify",
+   "why": "0x105650 asserts with utl/utlmisc.cpp line 22 (the file's first function, right after utltm2's last assert at 0x10559c); the run up to utlfile.cpp's first assert at 0x105e50 has no source string and is taken as the rest of utlmisc: text helpers, a param parser, the frame counter, operator new/delete and the game heap wrappers over BedMemory"
+  }
  }
 }

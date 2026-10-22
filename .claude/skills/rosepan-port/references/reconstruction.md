@@ -95,7 +95,7 @@ DogActor::DogActor(...)
   them), never for game logic.
 - **Assert macros**: an assert compiles to `if (!(expr)) assert_handler(__FILE__, __LINE__, "expr")`
   (handler 0x215a30: prints "Assertion Failed: %s(%d)   %s" and hangs). Write it back as the project's
-  assert macro with the ROM's expression text -- the expression names the members (`m_max_motion`,
+  assert macro (`ROR_ASSERT`, src/common/ror_assert.h; explain the handler call with `// callcheck: FUN_00215a30 (...)`) with the ROM's expression text -- the expression names the members (`m_max_motion`,
   `m_top->m_num_file`) the code uses, which is how fields get their names. Keep the condition exactly;
   the host macro reports and continues (a hung assert helps nobody on PC; say so once in the macro).
 - **Classes are real.** Every class with a vtable has its real name in the ELF; its virtuals are slots
