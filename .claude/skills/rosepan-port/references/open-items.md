@@ -115,6 +115,13 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
         utlTm2ToSepia, i3rGetNumTex / i3rGetTexName are stubs (nothing passes sepia or an i3r yet).
         I3dTexEntry's first two fields are now pszTexName / pPicture (the ROM's names).
      7. `spr/sprman.cpp`: SprMan (init / update / draw, the pattern-table host format).
+        **Written 2026-10-22 (`verify`)**, pinned 0x18bb8c..0x18f5b0, all 53 functions (architecture.md
+        "The sprite manager"). Still black: S2dMovie / S2dMes / S2dBg only start from MagScene::update
+        0x1327dc (a stub), and their textures never load (fileGetSize 0x1be768, BedPfh::BedPfh /
+        getFileIndex are stubs). A forced run (MagScene::update stepping m_movie, sprite 1 forced on;
+        not committed) showed the loading anim right: loading.tm2's four 256 x 64 bands (v 0 / 64 / 128
+        / 192), 6 frames each, looping, at (32, 370) px -- and getTexRecord NULL, so no packet. Next for
+        a picture: MagScene::update (or the S2d step calls in it) plus fileGetSize / BedPfh.
    After A, compare the screenshot with LOADING.BIN's picture; after B, with work/ref/S2DMAN.
    Then re-assess (the M1..M5 list below).
 1. ~~`setup/ghidra_seed.cpp`~~ (done 2026-10-22: see Done).
@@ -276,6 +283,13 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
    magscene2.cpp's load now copies mapparam word 10 as a float (it is lwc1 / swc1 in the ROM).
 
 ## Decisions
+
+- **SprMan's table host format** (2026-10-22, the sprman session, decided unattended): the owner's
+  pattern / anim / frame / move / key tables stay one writable EE word image (datadump.py --words);
+  SprMan::m_pattern is its host copy and the host-only m_pattern_ee its EE base, and SprMan::eePtr
+  resolves every EE pointer inside it (setDispList's m_anim_ee, the anims' frames, the moves' keys).
+  A future owner whose tables span several .data images needs another resolver -- revisit then.
+  The sprite record keeps EE offsets up to +0x134 and holds host pointers from +0x138.
 
 - One TU per session, run by the user (`/rosepan-port next`, the routine, or autopilot.py); sessions run
   the protocol without check-ins and never start other sessions (user's rule, carried from ReiPan).

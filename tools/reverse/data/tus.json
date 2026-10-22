@@ -1,7 +1,5 @@
 {
- "queue": [
-  "spr/sprman.cpp"
- ],
+ "queue": [],
  "settings": {
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
   "frontier_ignore": [
@@ -399,6 +397,24 @@
    ],
    "status": "verify",
    "why": "the four S2d 2D layers between spr/sprtexture.cpp and mnuBase (0x192ac0): S2dCineSco 0x190a78, S2dBg 0x190f6c, S2dMes 0x191494, the movie / loading layer S2dMovie 0x19226c; all built on the spr sprite manager (SprMan, spr/sprman.cpp) and loading data/mnurpk/s2d*.rpk; RoR names no file here, spr/ from the link order and the sprite layer"
+  },
+  "spr/sprman.cpp": {
+   "notes": "Verify: nothing calls SprMan::draw with m_active set yet. S2dMovie / S2dMes / S2dBg start only from MagScene::update 0x1327dc (stub), and textures never load (fileGetSize 0x1be768, BedPfh::BedPfh / getFileIndex stubs). A forced run (not committed: MagScene::update opening and stepping m_movie, sprite 1 forced to state 1) showed the loading anim stepping loading.tm2 bands v 0/64/128/192 every 6 frames, looping, at 32,370 px; getTexRecord NULL so no packet yet. First boot screenshot showing an S2d sprite marks this done. Decided unattended (open-items Decisions): tables stay one writable EE word image per owner, SprMan::m_pattern_ee is its EE base, eePtr resolves EE pointers. ROM quirks kept and marked: updateMove's halt flag is never cleared; the -2 repeat key reads keys[m_frame + 1]; drawSprite always takes textures from draw set 0; drawText passes the code to getGlyphWidth for fixed fonts. GamFont (0x1beb70..) is named and declared in lib/unassigned.h with ctor / dtor inline; its other methods are stubs (text sprites draw nothing). GamMan gained m_saved_volume (+0x22214); the host global starts at 0, the ROM ctor probably sets -1. Next for a picture: MagScene::update, then fileGetSize / BedPfh.",
+   "ranges": [
+    [
+     "0018bb8c",
+     "0018f5b0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 18:24",
+     "status": "verify",
+     "summary": "SprMan complete: all 53 functions of 0x18bb8c..0x18f5b0 (init, draw, the motion / anim / fade / CLUT steppers, drawSprite to i3dPktSprite / TexSpriteUV, text into textures, fades, volume wrappers); sprite record and table types in sprman.h; GamFont declared (ctor inline, rest stubs); GamMan::switchVolume stub; s2d pattern tables writable with their EE base in m_pattern_ee"
+    }
+   ],
+   "status": "verify",
+   "why": "SprMan ctor at 0x18bb8c opens it (unassigned@0018ad0c before has no SprMan); the spr/sprman.cpp assert string sits inside; SprTexture::SprTexture 0x18f5b0 starts sprtexture.cpp (pinned)"
   },
   "spr/sprtexture.cpp": {
    "notes": "Pinned 0x18f5b0..0x190a78. The code is complete; the smoke run reaches it (S2dMes / S2dMovie loadTexture) but every list ends in the error state because fileGetSize 0x1be768 is a stub returning 0 (the rpk reads 0 bytes) and BedPfh::BedPfh / getFileIndex are stubs; update then returns -1 and the callers move on (no hang). FileReader async helpers 0x1be338..0x1be4c8, FileReader::close and BedPfh::clear are ROM-code bridges in lib/unassigned_stubs.cpp and bed/bedpfh.cpp; as stubs isReady would never report ready and loadTexture would spin. DogTexInfo::getTexInfo 0x1161e4 is a new stub in dog/dogtexinfo.cpp. Screen black: SprMan::draw is a stub. Next: bed/bedpfh.cpp (ctor, getFileIndex) and fileGetSize plus FileReader::read together (a real fileGetSize wakes MagScene::loadActorAnim, whose FileReader::read is a stub), then DogTexInfo. Mark done when a screenshot shows S2dMes / S2dMovie sprites.",

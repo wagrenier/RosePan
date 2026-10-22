@@ -542,8 +542,36 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   (name -> RxMpeg +0x44, open, play), isMovieEnd 0x1928b8, stopMovie 0x1928d4 (pushSubMode + stop),
   getMovieStatus 0x192904, closeMovie 0x192920 (close, popSubMode). 0x192978..0x192ac0 are four item
   setters (one item -> sprite 1, data 0x29bfb0) with no caller. Fade colours: data 0x2999b0 (grey, alpha 0) -> 0x299990 (alpha 0x80). The pattern
-  tables are nested records with EE pointers inside; they are kept as EE word images until SprMan
-  is written (datadump.py --words).
+  tables are nested records with EE pointers inside, kept as writable EE word images
+  (datadump.py --words) with their EE base in SprMan::m_pattern_ee (see "The sprite manager").
+
+- **The sprite manager** (`spr/sprman.cpp`, pinned 0x18bb8c..0x18f5b0, 2026-10-22, `verify`; 53
+  functions, all written): `SprMan` (EE 0x8ec; +0x440 a `GamFont`, +0x4c4 grey 0x80, +0x4c8 saved
+  volume flag, +0x4d8 the open packet, +0x4dc the draw sets, +0x4e4 the font file, +0x8e8 font from
+  the pack). Each sprite record (EE 0x154, spr/sprman.h has every field) runs on the owner's table
+  image: **patterns** (0x14: texture id or -98 plain colour / -99 frame buffer, u, v, w, h in 1/16
+  texels), **anims** (0xc: id, frame count (< 0: counted and written back), frames pointer; id -1
+  ends), **frames** (0x1c: time | flags << 16 (0x10000 size from the frame, 0x20000 / 0x40000 flip
+  U / V), pattern, x y z, w h (0x3e70 keep, -16 the pattern's); the word after the last frame holds
+  the end code in its top byte: 1 stop, 2 hold, 3 loop, 4 jump to the anim in its word 2), **moves**
+  (0xc like anims) and **keys** (0x20: type 0 ease / 1 ease from here / 2 linear / 3 linear from here
+  / 5 halt, time, from[3], to[3] floats in pixels; -1 ends, -2 repeats). `draw` 0x18bd94 steps per
+  sprite motion (updateMove 0x18d1e8: modes 1 ease, 2 speed capped at 8, 5 key table), anim
+  (updateAnim 0x18d640), colour fade (setFade 0x18d7ec / updateFade 0x18dafc: modes 1..5, 0x100 |
+  mode ping-pongs), then drawSprite 0x18e05c: position = parent's (m_parent > 0, drawn after the
+  top level) + std + off + frame, the waits of states 2 / 3 / 4, and one GS sprite through
+  i3dPktSprite / TexSpriteUV at XYZ + (0x7000, 0x7200); text sprites render m_text into their
+  texture image with the GamFont (drawText 0x18ed44, Shift-JIS, "#0" = newline) and i3dTexRelease it
+  for re-upload. drawFrameCopy 0x18bef8 puts the other frame buffer (TBP 0 / 0xe00 by
+  MagSystem::m_frame & 1) over the screen on layer 1. `update` only steps the CLUT animations.
+  volumeOn / volumeOff / saveVolume / restoreVolume 0x18f024..0x18f0b4 wrap
+  `GamMan::switchVolume` 0x1d3ac8 (GamMan +0x22214 the saved volume, -1 none; setVolume 0x1d3a38).
+- **GamFont** (0x1beb70..~0x1c0534, unassigned@001bde58, class named in the sprman session): a
+  0x6c-byte software font rasterizer -- setFont 0x1bebec (font file: cell w / h bytes +0xe / +0xf,
+  glyph bits +0x10, first code +0xc, flags +0xb), setTarget 0x1bedc0 (pixels, w, h, 4 / 8 bits),
+  fillRect 0x1bef24, drawChar 0x1bf024, setColor 0x1bff64, getGlyph 0x1bffcc (bsearch / Shift-JIS
+  walk), getGlyphLeft / getGlyphWidth 0x1c020c / 0x1c0254. Declared in lib/unassigned.h; constructor
+  and destructor are written inline there, the rest are stubs.
 
 - **The sprite texture loader** (`spr/sprtexture.cpp`, pinned 0x18f5b0..0x190a78, 2026-10-22,
   `verify`): `SprTexture` (EE 0x438) loads a list of `SprTexFile` (EE 0x18: id 0..59, file name,

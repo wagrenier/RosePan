@@ -198,6 +198,14 @@ entries are marked **RoR** with the date.
   one asks a library stub that answers 0. Check what callers poll before replacing a stub.
 - **A file-scope object whose constructor is a stub runs that stub before main**: write the small
   constructor for real.
+- **ROM data the code writes back must not be `const` on the host** (sprman session): SprMan's
+  countAnims / countMoves store computed counts into the owner's tables, which s2d.cpp had declared
+  `static const u_int` (a write into .rdata faults). Before keeping a .data image const, grep its
+  readers for stores.
+- **A flag Ghidra shows as "set once, tested at the loop end" may really never be cleared** (sprman,
+  updateMove 0x18d1e8: the halt key's flag is set inside a do-while whose head is after the clear, so
+  one halt key runs the loop through every later key): read the asm for where the loop branches back
+  before "fixing" it; keep the ROM's behaviour and mark it `ROM:`.
 - **A zero placeholder table becomes a crash far from its cause** the moment code that reads it runs:
   extract tables from the ELF (`datadump.py`), never leave zero-filled stand-ins.
 - **Callers' local prototypes of a stub disagree with the real signature**: everything builds as C++,
