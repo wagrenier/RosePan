@@ -166,18 +166,14 @@ int   i3dPrintf(const char *fmt);  /* printf-like in the ROM */          // ROR 
 void  i3dSysInit(void);            /* empty in the ROM */                // ROR 0x00237178
 int   i3dFlushCache(void);         /* FlushCache(0) */                   // ROR 0x00237cc8
 
-/* GS transfer packets for the VRAM cache (block addresses: 64-word units). */
-u_long *i3dTexMakeUpload(void *tex, u_long *pkt, u_int dst);             // ROR 0x00219c88
-u_long *i3dClutMakeUpload(void *clut, u_long *pkt, u_int dst);           // ROR 0x00219d10
-u_long *i3dTexMakeMove(void *tex, u_long *pkt, u_int src, u_int dst);    // ROR 0x00219d40
-u_long *i3dClutMakeMove(void *clut, u_long *pkt, u_int src, u_int dst);  // ROR 0x00219d68
+/* The texture / CLUT objects and their GS transfers (i3dTexMakeUpload ...,
+ * i3dPsmBits) have their own file. */
+#include "i3d/i3dtex.h"
 
 /* The draw sets, tags, register writes and primitive writers have their
  * own file. */
 #include "i3d/i3dpacket.h"
 
-/* Bits per pixel of a GS pixel format (0 past the table). */
-int   i3dPsmBits(int psm);                                               // ROR 0x00218db8
 /* Copies four words (no alignment needed). */
 void  i3dVecCopyW(float *out, const float *in);                          // ROR 0x00236980
 /* The i3d vector / matrix module (unassigned@00228c08; bridges of the

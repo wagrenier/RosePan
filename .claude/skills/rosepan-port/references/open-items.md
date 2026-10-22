@@ -76,6 +76,16 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
         `lightstatus[i] != NULL` asserts now wait only on DogLightPool::createLight 0x11262c
         (dog/doglightpool.cpp). Left in unassigned@00216ad0: the debug menu, the texture objects /
         GS transfers, the i3r helpers.
+        **Texture objects written 2026-10-22 (`verify`)** as `i3d/i3dtex.cpp` (pinned
+        0x2184c0..0x21a120, 33 functions): i3dTexMakeUpload / ClutMakeUpload / TexMakeMove /
+        ClutMakeMove are real (the four stubs and the i3dPsmBits bridge are gone), and the setters
+        DogTexInfo calls (i3dTexInit / SetTim2 / SetDesc / SetTcc, i3dClutInit / SetTim2, Term)
+        exist. I3dTexObject (i3dlayer.h) became I3dTexture / I3dClut (i3dtex.h);
+        I3dVramHandle::m_10 is m_kind. unassigned@00216ad0 now holds only the debug menu and
+        utility code 0x216ad0..0x2184c0 (not on the draw path): dropped from the queue.
+        **Queued first now: `i3d/i3dtim2.cpp`** (0x224de0..0x225018, five small TIM2 helpers;
+        header i3dtim2.h written): its stubs return NULL, and i3dTexSetTim2 / i3dClutSetTim2
+        dereference the picture, so write it before DogTexInfo::addData runs.
      5. `spr/sprtexture.cpp`: SprTexture (setList / update; replace the update bridge).
      6. `dog/dogtexinfo.cpp`: the texture table SprTexture loads into (DogTexInfo::init / add are
         reached).

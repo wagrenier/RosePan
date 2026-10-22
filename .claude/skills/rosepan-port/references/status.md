@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-22 16:32 at commit `c09b1f6` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-22 17:05 at commit `3bac475` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-22 16:32 at commit `c09b1f6` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6455**, named **2396** (37%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 90, ror-inferred 938
-- context-name ledger: 1028 entries; overrides of wrong library matches: 5
-- placed in a source file: 2196/6455 in 85 files
+- game functions: **6459**, named **2428** (38%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 90, ror-inferred 970
+- context-name ledger: 1060 entries; overrides of wrong library matches: 5
+- placed in a source file: 2229/6459 in 86 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **774**; stubs: **211**
+- reconstructed RoR functions: **807**; stubs: **210**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -46,9 +46,11 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3denv.cpp` | 12 | 0 |
 | `src/i3d/i3dlayer.cpp` | 80 | 0 |
 | `src/i3d/i3dpacket.cpp` | 54 | 0 |
+| `src/i3d/i3dtex.cpp` | 33 | 0 |
+| `src/i3d/i3dtim2.cpp` | 0 | 4 |
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 0 | 100 |
+| `src/lib/unassigned_stubs.cpp` | 0 | 95 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 1 |
 | `src/mag/maglifeman.cpp` | 0 | 3 |
@@ -79,14 +81,15 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 160 TUs: todo 143, partial 5, verify 17, done 2
-- next: **unassigned@00216ad0** (pinned in the queue)
-- pinned queue: unassigned@00216ad0, spr/sprtexture.cpp, dog/dogtexinfo.cpp, spr/sprman.cpp
+- 161 TUs: todo 143, partial 5, verify 18, done 2
+- next: **i3d/i3dtim2.cpp** (pinned in the queue)
+- pinned queue: i3d/i3dtim2.cpp, spr/sprtexture.cpp, dog/dogtexinfo.cpp, spr/sprman.cpp
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `i3d/i3dctx.cpp` 31/31 -- Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the pa
 - verify: `i3d/i3denv.cpp` 12/12 -- Pinned 0x21a120..0x21a3e8 + 0x21ac80..0x21b220 as one file (a guess: the i3r helpers 0x21a3e8..0x21ac80 sit between; split into i3dfog / i3dlight if evidence ap
 - verify: `i3d/i3dlayer.cpp` 80/80 -- Every frame now builds real groups, layers and a sorted DMA chain; the smoke run is stable and still black: nothing on the i3d path reaches a host draw module (
 - verify: `i3d/i3dpacket.cpp` 54/54 -- All packet-module bridges are gone. Black screen: nothing on the host consumes i3d packets (no GS emulation); the user still has to choose the host draw hook (o
+- verify: `i3d/i3dtex.cpp` 33/33 -- Screen still black: nothing creates a texture yet (DogTexInfo is stubbed) and no host draw module consumes i3d packets, hence verify. Next: i3d/i3dtim2.cpp (que
 - verify: `i3d/i3dview.cpp` 19/19 -- Status verify: views are built every frame (host test: screen centre 2047.5, frustum corner on the rectangle corner, depth 4094.6..1.06, scissor 0..511 x 0..447
 - verify: `i3d/i3dvram.cpp` 37/37 -- Complete; nothing on screen shows it yet (screen black: the draw path is stubbed). A host test (init, reserve x3 frames with eviction, compact, end frame, reset
 - verify: `mag/magscene2.cpp` 19/19 -- Complete but unseen: MagScene::start (magscene.cpp) and the GamMan loads are stubs, so no loader runs and the screen stays black (MagScene::draw is a stub too).
@@ -102,6 +105,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-22 17:05 `i3d/i3dtex.cpp` verify: Pinned i3d/i3dtex.cpp 0x2184c0..0x21a120 out of unassigned@00216ad0 and wrote all 33 functions (4 hidden TEX1 setters created in Ghidra): texture and CLUT objec
 - 2026-10-22 16:32 `i3d/i3denv.cpp` verify: i3d fog and lights: i3dFogInit, i3dCtxSetFog with its fog ramp and FOGCOL, the VU1 fog packet i3dPktMakeFog, i3dLightDescInit, i3dCtxCreateLight and its five ki
 - 2026-10-22 16:23 `i3d/i3dpacket.cpp` verify: i3d packet writers pinned 0x21b220..0x21c960 and written: draw-set helpers, DMA / DIRECT tags, SetReg, alpha modes, OpenChain, ClearZ, the float PACKED and REGL
 - 2026-10-22 16:10 `i3d/i3dview.cpp` verify: i3d view: pinned i3d/i3dview.cpp 0x226278..0x227a98 (and i3d/i3dtim2.cpp 0x224de0..0x225018, todo) and wrote all 19 functions: i3dCtxCreateView and its ortho tw
@@ -109,7 +113,6 @@ Recent sessions:
 - 2026-10-22 15:24 `mag/magscenerender.cpp` verify: Wrote MagScene::makeActorShadow 0x139b4c, the last function of the TU: the shadow texture layer at 700 + 10 n (256 x 256 target, clear, drawShadow under an ambi
 - 2026-10-22 15:15 `mag/magscenerender.cpp` partial: Pinned mag/magscenerender.cpp 0x139540..0x13c328 and wrote 19 of its 20 functions: MagScene::draw (eight light-set render stages, view and fog, actors collected
 - 2026-10-22 14:49 `system/sysnowloading.cpp` verify: SysNowLoading complete: pinned 0x204d38..0x2053f4, all 8 functions (init, term, loadImage, setST, makePacket, uploadImage, clearVram, draw) named and written; n
-- 2026-10-22 14:38 `spr/s2d.cpp` verify: Completed spr/s2d.cpp: S2dMes::drawMapName (word-table map name in a scene text window with its frame sprite fading), S2dMovie drawMovie / draw / createLayer (i
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -122,8 +125,8 @@ Recent sessions:
 | `dog/dogtexinfo.cpp` | todo | 0/9/16 | 5.1 | 23 | 2 |
 | `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
 | `mag/magscene.cpp` | todo | 0/10/44 | 11.3 | 20 | 2 |
-| `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 19 | 2 |
 | `bed/bedpfh.cpp` | todo | 0/3/4 | 0.9 | 19 | 0 |
+| `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 19 | 2 |
 | `unassigned@001fd424` | todo | 0/3/75 | 27.9 | 18 | 3 |
 
 ## Frontier (called by reconstructed code, not written yet)
@@ -159,8 +162,8 @@ Recent sessions:
 | `00237cc8` | i3dFlushCache | 4 | ror | stub | - |
 | `0010ff74` | DogEntity::normalizeRotate | 3 | ror | stub | - |
 | `00101b50` | BedPad::setVibration | 3 | ror | stub | bed/bedpad.cpp |
-| `0010fa6c` | DogEntity::getMatrix | 3 | ror | stub | - |
 | `00237340` | i3dMatUnit | 3 | lib-ctx | stub | - |
+| `0010fa6c` | DogEntity::getMatrix | 3 | ror | stub | - |
 | `00236b38` | i3dVecNormalize | 3 | lib-ctx | stub | - |
 | `0018febc` | SprTexture::update | 3 | ror | stub | spr/sprtexture.cpp |
 | `002372e0` | i3dVecCopy2 | 3 | lib-ctx | stub | - |

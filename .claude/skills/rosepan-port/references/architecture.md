@@ -232,8 +232,9 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   the packet / draw library under the scene. initGraph compares the game's copy of its 36 struct sizes
   (rodata 0x2e90a8) with `i3dGetStructSize` 0x21f1a8 (data 0x302ba0) and hangs on a mismatch.
   Files pinned so far (2026-10-22): **`i3d/i3dctx.cpp`** 0x21eb28..0x21fb30 (written, verify),
-  **`i3d/i3dlayer.cpp`** 0x222f50..0x224de0 (written, verify), **`i3d/i3dtim2.cpp`**
-  0x224de0..0x225018 (todo), **`i3d/i3dview.cpp`** 0x226278..0x227a98 (written, verify) and
+  **`i3d/i3dlayer.cpp`** 0x222f50..0x224de0 (written, verify), **`i3d/i3dtex.cpp`**
+  0x2184c0..0x21a120 (written, verify), **`i3d/i3dtim2.cpp`** 0x224de0..0x225018 (todo, queued:
+  header written, its four helpers are stubs that return NULL / 0), **`i3d/i3dview.cpp`** 0x226278..0x227a98 (written, verify) and
   **`i3d/i3dvram.cpp`** 0x227a98..0x228c08 (written, verify), **`i3d/i3dpacket.cpp`**
   0x21b220..0x21c960 (written, verify; below). Between tim2 and view,
   0x225018..0x226278 (unassigned): animation curve sampling (0x225018 binary search over key times,
@@ -241,8 +242,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   called from the model packet builders. Modules seen around them: the wire-shape strip builders
   0x21e6f8 / 0x21e8f8 / 0x21e9f8 before 0x21eb28 (0x21e1d8 the line strip), model packet builders
   0x21fb50..0x222f50 (unassigned@0021fb50: per material a state packet node, i3dGroupBegin*Packet),
-  GS transfer builders 0x218fa8 / 0x2190c8 / 0x2192c8 and 0x219c88..0x219d68, texture objects
-  0x219a98.., the fog state 0x21a120..0x21a3e8, i3r model helpers 0x21a3e8..0x21ac80, lights
+  the texture objects (i3dtex.cpp, below), the fog state 0x21a120..0x21a3e8, i3r model helpers 0x21a3e8..0x21ac80, lights
   0x21ac80..0x21b220, the packet writers (i3dpacket.cpp), TIM2 helpers from 0x224de0 (an unreferenced TIM2 / CLT header
   check, picture lookup 0x224e70, size 0x224ed0), the view (below), the i3d system calls
   0x237178..0x237cc8 (i3dFlushCache, i3dPrintf).
@@ -256,6 +256,24 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     i3dVecMul 0x237438 / i3dVecMul2 0x237450, i3dVecFtoi0 0x237600, i3dVecFtoi4 0x237610 are bridged
     (i3dpacket.cpp's float writers), the rest still stubs. The second copy has duplicates inside it too
     (0x2373d8 = 0x2373f0 add, 0x237408 = 0x237420 sub, 0x237438 = 0x237450 mul).
+  - **Texture and CLUT objects** (`i3d/i3dtex.cpp`, 0x2184c0..0x21a120, written 2026-10-22, verify;
+    33 functions incl. 4 hidden TEX1 setters 0x219dd0..0x219e30). Both start with their
+    I3dVramHandle (+0 m_image = the object, +4 size: texture pages / CLUT 4-block units, +0x10 kind
+    1 texture / 2 CLUT, +0x14 static). A texture (0x130): +0x18 TEX0 (no TBP0 base, no PSM), +0x20
+    TEX1, +0x28 TEX2 (PSM << 20), +0x30 / +0x38 MIPTBP1 / 2, +0x40 seven 0x20-byte levels {BITBLTBUF
+    (SBP = DBP = block offset), TRXREG, data, qwc, block offset, buffer width}, +0x120 levels, +0x124
+    width, +0x128 height. A CLUT (0x38): +0x18 TEX0 bits (CPSM << 51 | CLD 4 | 0x13 << 20), +0x20 TEX2
+    bits (CPSM), +0x28 palettes, +0x2c colours, +0x30 upload PSM (24-bit colours: CT24 into a CT32
+    CLUT), +0x34 data. Made by DogTexInfo: i3dTexSetTim2 0x2193f0 / i3dClutSetTim2 0x219ab0 from a
+    TIM2 picture (levels laid out with i3dPsmBlockEnd 0x218e10, the GS page block tables 0x302220..),
+    i3dTexSetDesc 0x2197c8 for an image already in VRAM (static, no upload). Transfers: host -> VRAM
+    0x218fa8 (A+D BITBLTBUF / TRXPOS / TRXREG / TRXDIR, IMAGE GIF + REF tags of <= 0x7fff qwords),
+    CLUT 0x2190c8 (16-wide, 256 colours per image), page moves 0x2192c8 (TRXDIR 2); a moved CLUT is
+    uploaded again. PSM tables: i3dPsmTexelBits 0x218d58 (data bits) vs i3dPsmBits 0x218db8
+    (storage bits). An unreferenced PSMT8 / PSMT4 -> PSMCT32 in-place converter i3dTexSwizzle
+    0x218778 with its block / page helpers (tables 0x301e78..0x3020b8). Before 0x2184c0: utility code
+    (0x21838c a strncpy that pads, 0x218450 an angle wrap by pi, 0x218470 an empty varargs function
+    called from game code -- a disabled debug print), then the debug menu (DBGFLAG.BIN) from 0x216ad0.
   - **The frame environment** (`i3d/i3denv.cpp`, 0x21a120..0x21a3e8 fog and 0x21ac80..0x21b220
     lights, written 2026-10-22, verify). Fog: `I3dFog` = colour (clamped 0..1) + near distance, fog
     amount at near (0..1), far distance, amount at far; i3dCtxSetFog 0x21a158 takes 2 tail qwords

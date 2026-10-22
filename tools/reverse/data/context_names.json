@@ -2453,11 +2453,107 @@
   "was": "FUN_00215bb4",
   "why": "formats four floats (3 digits) into stack buffers and prints nothing, the four-float twin of dbgTraceVector3 0x215b5c"
  },
+ "002184c0": {
+  "name": "i3dNibbleSet",
+  "tag": "ror-inferred",
+  "was": "FUN_002184c0",
+  "why": "writes the low 4 bits of a value into nibble i of a byte array (even = low nibble); only the PSMT4 swizzlers call it"
+ },
+ "00218500": {
+  "name": "i3dNibbleGet",
+  "tag": "ror-inferred",
+  "was": "FUN_00218500",
+  "why": "reads nibble i of a byte array (even = low nibble); only the PSMT4 swizzlers call it"
+ },
+ "00218528": {
+  "name": "i3dSwizzleT4Block",
+  "tag": "ror-inferred",
+  "was": "FUN_00218528",
+  "why": "permutes the nibbles of a 32x16 PSMT4 block in four 128-nibble column groups by tables 0x301eb8 / 0x301f38 (even / odd column): the GS PSMT4 -> PSMCT32 column order"
+ },
+ "00218638": {
+  "name": "i3dSwizzleT8Page",
+  "tag": "ror-inferred",
+  "was": "FUN_00218638",
+  "why": "a 128x64 PSMT8 page: 32 16x16 blocks taken in table 0x302078 order, each column-permuted by 0x219f18 and stored as an 8x8-word PSMCT32 block at table 0x301e78"
+ },
+ "00218778": {
+  "name": "i3dTexSwizzle",
+  "tag": "ror-inferred",
+  "was": "FUN_00218778",
+  "why": "rewrites a texture's PSMT8 (w%128, h%64) / PSMT4 (w%128, h%128) levels in place as PSMCT32 images (rows interleaved, then page by page through 0x218638 / 0x219fb8) and patches each level's BITBLTBUF / TRXREG; no callers in the ROM"
+ },
+ "00218d40": {
+  "name": "i3dLog2",
+  "tag": "ror-inferred",
+  "was": "FUN_00218d40",
+  "why": "31 - plzcw(n - 1): ceil(log2 n), the TEX0 TW / TH of a width / height"
+ },
+ "00218d58": {
+  "name": "i3dPsmTexelBits",
+  "tag": "ror-inferred",
+  "was": "FUN_00218d58",
+  "why": "jump table 0x3020b8: bits per texel of a GS PSM as data (CT32 32, CT24 24, CT16/16S 16, T8/T8H 8, T4/4HL/4HH 4); i3dPsmBits is the storage size"
+ },
  "00218db8": {
   "name": "i3dPsmBits",
   "tag": "ror-inferred",
   "was": "FUN_00218db8",
   "why": "jump table by GS pixel format (< 0x2d): bits per pixel (0x20 / 0x10 / 8 / 4 read by i3dTexRegsSet)"
+ },
+ "00218e10": {
+  "name": "i3dPsmBlockEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00218e10",
+  "why": "(block, w, h, psm) -> block + the GS blocks a w x h image takes: within one page the highest block of the page layout tables 0x302220.. + 1, else whole pages * 32; used to lay out mip levels"
+ },
+ "00218fa8": {
+  "name": "i3dPktImageUpload",
+  "tag": "ror-inferred",
+  "was": "FUN_00218fa8",
+  "why": "CNT + DIRECT GIF A+D BITBLTBUF / TRXPOS / TRXREG / TRXDIR 0 (host to local), then IMAGE GIF tags with REF tags of the data in 0x7fff-qword chunks"
+ },
+ "002190c8": {
+  "name": "i3dPktClutUpload",
+  "tag": "ror-inferred",
+  "was": "FUN_002190c8",
+  "why": "uploads a CLUT as 16-wide images of up to 256 colours each (BITBLTBUF DBW 1, TRXREG 16 x rows, REF of the data)"
+ },
+ "002192c8": {
+  "name": "i3dPktVramMove",
+  "tag": "ror-inferred",
+  "was": "FUN_002192c8",
+  "why": "n pages copied inside VRAM (TRXDIR 2, PSMCT32 64x32 each), ascending or descending so that overlapping moves do not overwrite; i3dTexMakeMove"
+ },
+ "002193f0": {
+  "name": "i3dTexSetTim2",
+  "tag": "ror-inferred",
+  "was": "FUN_002193f0",
+  "why": "DogTexInfo::addData: fills a texture object from TIM2 picture n (psm from the image type, 16-bit -> CT16S when the flag is set), each mip level's BITBLTBUF / TRXREG / data / qwc / block offset / width, TEX0 / TEX1 / TEX2 / MIPTBP1 / MIPTBP2, size in pages"
+ },
+ "002197c8": {
+  "name": "i3dTexSetDesc",
+  "tag": "ror-inferred",
+  "was": "FUN_002197c8",
+  "why": "DogTexInfo::add: a texture already in VRAM from a 0x1e-byte description (w, h, levels, block offsets, psm, TCC, TFX, TEX1 fields); no upload, marked static"
+ },
+ "00219a98": {
+  "name": "i3dTexRelease",
+  "tag": "ror-inferred",
+  "was": "FUN_00219a98",
+  "why": "i3dVramHandleRelease of the texture's handle; called first by the setters and by i3dTexTerm"
+ },
+ "00219ab0": {
+  "name": "i3dClutSetTim2",
+  "tag": "ror-inferred",
+  "was": "FUN_00219ab0",
+  "why": "DogTexInfo::addData: a CLUT object from TIM2 picture n (CSM1 colours, 24-bit uploaded as CT24 into CT32); returns 0xb when the picture has no CLUT"
+ },
+ "00219c70": {
+  "name": "i3dClutRelease",
+  "tag": "ror-inferred",
+  "was": "FUN_00219c70",
+  "why": "i3dVramHandleRelease of the CLUT's handle"
  },
  "00219c88": {
   "name": "i3dTexMakeUpload",
@@ -2482,6 +2578,78 @@
   "tag": "ror-inferred",
   "was": "FUN_00219d68",
   "why": "a CLUT move re-uploads it at the new address (calls i3dClutMakeUpload)"
+ },
+ "00219d80": {
+  "name": "i3dTexSetTcc",
+  "tag": "ror-inferred",
+  "was": "FUN_00219d80",
+  "why": "sets TEX0 bit 34 (TCC) of a texture object; DogTexInfo::setTexFlag"
+ },
+ "00219da8": {
+  "name": "i3dTexSetTfx",
+  "tag": "ror-inferred",
+  "was": "FUN_00219da8",
+  "why": "sets TEX0 bits 35..36 (TFX) of a texture object"
+ },
+ "00219dd0": {
+  "name": "i3dTexSetMmag",
+  "tag": "ror-inferred",
+  "was": "FUN_00219dd0",
+  "why": "hidden (created in Ghidra): sets TEX1 bit 5 (MMAG); no callers"
+ },
+ "00219df0": {
+  "name": "i3dTexSetMmin",
+  "tag": "ror-inferred",
+  "was": "FUN_00219df0",
+  "why": "hidden: sets TEX1 bits 6..8 (MMIN); no callers"
+ },
+ "00219e10": {
+  "name": "i3dTexSetL",
+  "tag": "ror-inferred",
+  "was": "FUN_00219e10",
+  "why": "hidden: sets TEX1 bits 19..20 (L); no callers"
+ },
+ "00219e30": {
+  "name": "i3dTexSetK",
+  "tag": "ror-inferred",
+  "was": "FUN_00219e30",
+  "why": "hidden: sets TEX1 bits 32..43 (K); no callers"
+ },
+ "00219e58": {
+  "name": "i3dTexInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00219e58",
+  "why": "memset 0x130, i3dVramHandleInit, kind / static words 0"
+ },
+ "00219e98": {
+  "name": "i3dTexTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_00219e98",
+  "why": "i3dTexRelease; DogTexInfo::release"
+ },
+ "00219eb8": {
+  "name": "i3dClutInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00219eb8",
+  "why": "memset 0x38, i3dVramHandleInit, kind / static words 0"
+ },
+ "00219ef8": {
+  "name": "i3dClutTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_00219ef8",
+  "why": "i3dClutRelease; DogTexInfo::release"
+ },
+ "00219f18": {
+  "name": "i3dSwizzleT8Block",
+  "tag": "ror-inferred",
+  "was": "FUN_00219f18",
+  "why": "permutes the bytes of a 16x16 PSMT8 block in four 64-byte column groups by tables 0x301fb8 / 0x301ff8"
+ },
+ "00219fb8": {
+  "name": "i3dSwizzleT4Page",
+  "tag": "ror-inferred",
+  "was": "FUN_00219fb8",
+  "why": "a 128x128 PSMT4 page: 32 32x16 blocks in table 0x302038 order through i3dSwizzleT4Block, stored as 8x8-word blocks at table 0x301e78"
  },
  "0021a120": {
   "name": "i3dFogInit",
@@ -3598,6 +3766,30 @@
   "tag": "ror-inferred",
   "was": "FUN_00224d88",
   "why": "fills a GIF A+D packet of 5 registers (TEX0 6, TEX1 0x14, TEX2 0x16, MIPTBP1 0x34, MIPTBP2 0x36) with zeros"
+ },
+ "00224e70": {
+  "name": "i3dTim2GetPicture",
+  "tag": "ror-inferred",
+  "was": "FUN_00224e70",
+  "why": "TIM2 file -> picture header n (headers chained by their total size; first at +0x10 or +0x80 by the alignment byte +5); NULL past the picture count +6"
+ },
+ "00224ed0": {
+  "name": "i3dTim2GetMipSize",
+  "tag": "ror-inferred",
+  "was": "FUN_00224ed0",
+  "why": "(picture, level, &w, &h): the level's size, returns its image bytes rounded to 16"
+ },
+ "00224f58": {
+  "name": "i3dTim2GetImage",
+  "tag": "ror-inferred",
+  "was": "FUN_00224f58",
+  "why": "(picture, level): the level's image data (header size +0xc, then the MIPTBP sizes at +0x40)"
+ },
+ "00224ff0": {
+  "name": "i3dTim2GetClut",
+  "tag": "ror-inferred",
+  "was": "FUN_00224ff0",
+  "why": "picture + header size + image size: the CLUT data, NULL when ClutColors is 0"
  },
  "00226278": {
   "name": "i3dViewMakePlanes",
