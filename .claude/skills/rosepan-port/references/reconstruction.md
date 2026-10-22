@@ -114,7 +114,10 @@ DogActor::DogActor(...)
   `SND_FUNC_NO`, `MSG_MODE`) are real names: use them.
 - EE addresses in game code (load targets, packet buffers, scratchpad 0x70000000) go through the platform
   layer's host-pointer translation at the point of use. Hardware goes through the SDK replacements
-  (`sceGs*`, `sceDma*`, `sceSif*`, libvu0) -- never talk to SDL from game code. Where a PS2 behaviour has
+  (`sceGs*`, `sceDma*`, `sceSif*`, libvu0) -- never talk to SDL from game code. **Drawing is the
+  exception to "through the SDK":** do not route RoR's draws through GIF packets into the emulated GS
+  (too slow); the function that would write the packet calls the host draw module for its subsystem
+  instead (architecture.md "PC platform layer", "The draw path is native"). Where a PS2 behaviour has
   to be emulated in game code, mark it `// PC:` with the reason.
 - `printf` goes to the log; keep the game's messages (they are often the best names).
 

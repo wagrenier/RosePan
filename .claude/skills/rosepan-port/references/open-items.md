@@ -174,6 +174,13 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
   itself) stays written for parity but is not on the host's boot path, and libcdvd is not taught to
   build an image.
 
+- **No GS emulation on the draw path** (the user, 2026-10-22): the emulated GS's packet path performs
+  badly, so RoR's drawing goes to native host draw modules built as the draw TUs come (SprMan, the
+  now-loading screen, fonts, the i3d layers and meshes); textures become GPU textures owned by RoR's
+  texture records. Design in architecture.md "PC platform layer". The first draw TU (likely
+  `system/sysnowloading.cpp` or `spr/sprman.cpp`) creates `src/rosepan/rendering/rosepan_draw2d.*`;
+  the i3d draw-group module (0x2239b8..0x224d88) creates the layer queue. Anything that still has to
+  go through the emulated GS is listed here as performance debt.
 - **The ROM's global operator new / delete are not the host's** (decided in the utlmisc session,
   2026-10-22, unconfirmed with the user): 0x105b54 / 0x105b7c / 0x105ba4 / 0x105bc4 are written as
   `utlOperatorNew*` / `utlOperatorDelete*` in utl/utlmisc.cpp and do not replace `::operator new`.

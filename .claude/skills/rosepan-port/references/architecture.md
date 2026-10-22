@@ -465,6 +465,33 @@ throughout (identifiers, env variables, files, shader macros):
   `RosePan_RendererBeginFrame` / `EndFrame`; MagSystem::update paces the loop on its V-blank
   semaphore (30 fps). The renderer opens the window lazily on the first BeginFrame; a frame
   with no draws presents black.
+- **The draw path is native, not GS emulation** (the user's rule, 2026-10-22). Feeding the game's GIF /
+  DMA packets to the emulated GS (`rosepan/gs/`, the 2D GS-primitive path) costs too much per frame, so
+  RoR's drawing is built so it never needs it. The design, grown TU by TU on the draw path:
+  - **Keep RoR's decisions, replace its output.** The game code that decides what is drawn (which
+    sprites / models / layers, positions, colours, fades, sort keys, blend and test modes, texture
+    choice) is reconstructed as the ROM has it. The last step -- writing GIF tags and GS registers
+    into a packet -- becomes a call into a host draw module under `src/rosepan/rendering/` (one per
+    RoR subsystem: e.g. `rosepan_draw2d.*` for SprMan / the now-loading sprites / fonts,
+    `rosepan_i3d.*` for the i3d layers and meshes), marked `// PC:` with the ROM function it
+    replaces. Prefer batches (one call per layer / sprite list / mesh), not one per primitive.
+  - **Layers and order stay RoR's.** The i3d context's layers, groups and sort lists decide the
+    order; the host module records draws per layer and submits them in that order at the frame end,
+    so priorities and transparency sort as on the PS2.
+  - **Textures live on the GPU, keyed by their owner.** A texture becomes a GPU texture when RoR
+    loads or registers it (DogTexInfo / i3d texture records, SprTexture), cached by that record and
+    released with it -- not uploaded into emulated GS VRAM and decoded back per draw. The i3d VRAM
+    allocator (`i3d/i3dvram.cpp`) stays written for parity and bookkeeping; its transfers become
+    no-ops or cache updates on the host.
+  - **Packet builders that only feed the GS** are written only as far as they carry decisions;
+    pure packet assembly (GIF tags, register pairs, DMA chaining) is not reconstructed for the
+    host path -- say so in a `// PC:` comment with the ROM address, and callcheck explanation.
+  - The renderer's existing direct entry points are the starting set: `RosePan_RendererDrawTexturedQuad*`
+    / `DrawFontQuad` (2D), `BeginMeshStream` / `AppendMeshTriangle` / `CommitMeshStream` and the
+    resident meshes (3D, MioPan's "Renderer architecture": decode a model once, draw slices). Extend
+    them (sprite batches, per-layer queues, texture handles instead of `sceGsTex0`) as RoR needs.
+  - The emulated GS path remains only as a fallback for something not bridged yet; anything that
+    lands there is a known performance debt to list in open-items.md.
 - Data root: the disc's root copied file by file (the folder holding `DATA/`); `LooksLikeDataRoot`
   checks `DATA/CMNTEX`. `RosePan_PathResolveData` still carries FF3's "../bin/data" spellings; the RoR
   file TU decides how `cdrom0:\DATA\...` and relative `data/...` names map onto it.

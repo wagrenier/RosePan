@@ -101,6 +101,8 @@ regular work: use the tools below, still finish with a commit.
    not picked again, and the first session whose screenshot shows its output marks it `done`. When a run
    needs more than the boot, extend `settings.smoke_pad` (the pad syntax is in build.py) and say how far
    it now gets in open-items.md.
+   **Drawing never goes through the emulated GS** (the user's rule): a draw TU calls the native host
+   draw module for its subsystem and grows it (architecture.md "PC platform layer").
 7. **Record.** Facts -> `architecture.md`; traps -> `hazards.md`; cross-TU questions / decisions ->
    `open-items.md`; better ways of working -> this file / `reconstruction.md` / the tools README. If
    writes under `.claude/` are denied (autopilot), put the text in `--notes` after "For the
