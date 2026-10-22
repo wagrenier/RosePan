@@ -11,6 +11,18 @@
   "was": "Exit",
   "why": "crt0 thunk j Exit (FF2 symbol _exit at the same address); the FF3 reference called the thunk Exit"
  },
+ "00100258": {
+  "name": "BedSubMode::push",
+  "tag": "ror-inferred",
+  "was": "FUN_00100258",
+  "why": "bed/bedsubmode.cpp assert m_depth < MAX_STACK: copies the current qword (+0) to stack[m_depth] (+0x10) and counts m_depth (+0x50)"
+ },
+ "001002c0": {
+  "name": "BedSubMode::pop",
+  "tag": "ror-inferred",
+  "was": "FUN_001002c0",
+  "why": "bed/bedsubmode.cpp assert m_depth > 0: drops m_depth (+0x50), restoring the pushed qword"
+ },
  "00100354": {
   "name": "BedMemory::create",
   "tag": "ror-inferred",
@@ -412,6 +424,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010f2dc",
   "why": "dog/dogactor.cpp asserts theName; true when the actor's model name matches (MagScene::findActorByName)"
+ },
+ "0010fa6c": {
+  "name": "DogEntity::getMatrix",
+  "tag": "ror-inferred",
+  "was": "FUN_0010fa6c",
+  "why": "vtable slot 2 (DogEntity::transform, vptr +0x94) then 0x237678(this + 0xf0, this); returns this + 0xf0; called on the scene camera (+0x2ab70)"
  },
  "0010fc7c": {
   "name": "DogEntity::setRotate",
@@ -917,11 +935,35 @@
   "was": "FUN_00131b90",
   "why": "MagSystem::start's last call with the i3d context; sets the render parameters and the sub-objects, returns 1"
  },
+ "00132744": {
+  "name": "MagScene::pushSubMode",
+  "tag": "ror-inferred",
+  "was": "FUN_00132744",
+  "why": "BedSubMode::push on +0x22d0 then sub mode 8 with +0x22d4 = -1; S2dMovie::stopMovie calls it"
+ },
+ "00132784": {
+  "name": "MagScene::popSubMode",
+  "tag": "ror-inferred",
+  "was": "FUN_00132784",
+  "why": "BedSubMode::pop on +0x22d0; S2dMovie::closeMovie calls it"
+ },
  "001327dc": {
   "name": "MagScene::update",
   "tag": "ror-inferred",
   "was": "FUN_001327dc",
   "why": "MagSystem::update passes the two pads"
+ },
+ "00134730": {
+  "name": "MagScene::openWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_00134730",
+  "why": "mag/magscene.cpp assert m_window[ n ]: takes the first free of 4 window slots (+0x2734), new 0xe0-byte window (0x1308bc), size (a1, a2), font record +0x2744 + n*0x6c over the font +0x2908, life (t0) and adds it to the life manager; returns the slot"
+ },
+ "001348b0": {
+  "name": "MagScene::closeWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_001348b0",
+  "why": "assert winNo < MAX_WINDOW; removes window n from the life manager (0x119810), calls its deleting destructor (slot 1, flags 3), clears the slot"
  },
  "00134944": {
   "name": "MagScene::setViewParam",
@@ -929,11 +971,41 @@
   "was": "FUN_00134944",
   "why": "(no <= 3, int v[5]): three ints as floats and two ints into the view object +0x2734[no]"
  },
+ "00135088": {
+  "name": "MagScene::fadeInWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_00135088",
+  "why": "assert theN < MAX_WINDOW; 0x12fe68 on window n with (time, from, to); S2dMes::drawMapName passes (fade time, 0, 0x80) alongside SprMan::fadeIn"
+ },
+ "0013511c": {
+  "name": "MagScene::fadeOutWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_0013511c",
+  "why": "assert theN < MAX_WINDOW; 0x12fef8 on window n with (time, 0, 0x80); S2dMes::drawMapName pairs it with SprMan::fadeOut"
+ },
+ "001351b0": {
+  "name": "MagScene::setWindowShow",
+  "tag": "ror-inferred",
+  "was": "FUN_001351b0",
+  "why": "assert winNo < MAX_WINDOW; calls window n's vtable slot 7 with (on != 0)"
+ },
  "00135234": {
   "name": "MagScene::drawView",
   "tag": "ror-inferred",
   "was": "FUN_00135234",
   "why": "(no <= 3, ...): draws through the view object +0x2734[no]"
+ },
+ "0013555c": {
+  "name": "MagScene::getWindowTextWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_0013555c",
+  "why": "0x1c047c on window n's font record (+0x2744 + n*0x6c) with a string; S2dMes::drawMapName centres the caption with it (0x100 - w / 2)"
+ },
+ "00135594": {
+  "name": "MagScene::updateWindowFont",
+  "tag": "ror-inferred",
+  "was": "FUN_00135594",
+  "why": "assert winNo >= 0 && winNo < MAX_WINDOW; 0x1beeb4 on window n's font record and 0x219a98 on the VRAM handle of its font texture (m_font_tex_no[n] in the texture table)"
  },
  "00135fa4": {
   "name": "MagScene::resetEntities",
@@ -1217,6 +1289,12 @@
   "was": "FUN_00143d7c",
   "why": "copies the current fog record (+0x2aae0) and the new one into a fade at +0x2ab20 / +0x2ab40 with a frame count (+0x2ab64) when frames > 0; MagScene::load passes m_fog[1] and 0"
  },
+ "0017ea44": {
+  "name": "WrdTable::get",
+  "tag": "ror-inferred",
+  "was": "FUN_0017ea44",
+  "why": "returns entry n (< count at data +8) of a loaded table (+4 data, +8 entries); its object 0x298ee0 is loaded from data/wrd/WRD.BIN by 0x17e5c0 (GamMan::loadStage); entry +0x10 is the map-name text S2dMes::drawMapName copies; class name invented from the file"
+ },
  "0017f164": {
   "name": "SndMan::init",
   "tag": "ror-inferred",
@@ -1229,11 +1307,53 @@
   "was": "FUN_0017f200",
   "why": "on g_sndMan (bss 0x7b2580) once m_state == 1: the sound and movie steps (0x17f6b8, 0x18120c, 0x237eb0, 0x181494, 0x17f3b8); MagSystem::update calls it every frame"
  },
+ "00181150": {
+  "name": "RxMpeg::open",
+  "tag": "ror-inferred",
+  "was": "FUN_00181150",
+  "why": "g_rxMpeg: sets +0 = 1, +0x28 = 0xe00, clears +4 / +8 / +0x10 / +0x24 / +0x34 and resets the rxmpeg library state (0x1828c4, 0x182fdc / fc8 / f3c with 0)"
+ },
  "00181204": {
   "name": "RxMpeg::setFrameParity",
   "tag": "ror-inferred",
   "was": "FUN_00181204",
   "why": "stores the arg at +0x3c of the object at bss 0x7b40c0 (constructor 0x1810f4: 0x200 / 0x180 / 0xe00 sizes, a movie player next to snd/rxmpeg.cpp); MagSystem::update passes frame & 1; class name unverified"
+ },
+ "001812a8": {
+  "name": "RxMpeg::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001812a8",
+  "why": "takes an I3dLayer, opens its packet (i3dLayerBeginPacket), writes the decoded frame's upload and sprites (i3dPktSetReg, 0x21b4d0) and closes it; S2dMovie::drawMovie calls it"
+ },
+ "0018154c": {
+  "name": "RxMpeg::play",
+  "tag": "ror-inferred",
+  "was": "FUN_0018154c",
+  "why": "stores w (+0x2c) and h (+0x30) and tail calls 0x18156c with the name; S2dMovie::playMovie passes the name copied to +0x44 and 0x200 x 0x180"
+ },
+ "00181644": {
+  "name": "RxMpeg::stop",
+  "tag": "ror-inferred",
+  "was": "FUN_00181644",
+  "why": "when +4 == 1 asks the rxmpeg library to stop (0x182b7c sets its stop flag), with a MagSystem call 0x131184 when 0x7b2060's word +4 has bit 0x8000000; -1 when not playing"
+ },
+ "001816b0": {
+  "name": "RxMpeg::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001816b0",
+  "why": "when getStatus >= 0: clears +0 / +4, ends the library (0x182bb4), GamMan 0x1c9c1c(0, +0xc4), resets w / h to 0x200 / 0x180; -1 otherwise"
+ },
+ "0018173c": {
+  "name": "RxMpeg::getStatus",
+  "tag": "ror-inferred",
+  "was": "FUN_0018173c",
+  "why": "when +0 == 1 returns the rxmpeg library's status word (0x1830f0), else -1"
+ },
+ "0018176c": {
+  "name": "RxMpeg::isEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_0018176c",
+  "why": "tail call 0x182bfc: the rxmpeg library's end flag"
  },
  "00182118": {
   "name": "rxMpegSetVCount",
@@ -1733,6 +1853,24 @@
   "was": "FUN_00192408",
   "why": "MagScene::update calls it: the phase step 0x1926c0"
  },
+ "0019241c": {
+  "name": "S2dMovie::drawMovie",
+  "tag": "ror-inferred",
+  "was": "FUN_0019241c",
+  "why": "MagScene::draw passes the scene's S2dMovie (+0x84aa8), the context, light set 0 and the view; while g_rxMpeg+4 == 1 makes a layer at key 890 (S2dMovie::createLayer), sets its light / view, a TEST_1 register packet, and hands it to RxMpeg::draw"
+ },
+ "001924e0": {
+  "name": "S2dMovie::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001924e0",
+  "why": "MagScene::draw's last call: two layers at keys 900 / 1000 with light / view / TEST_1 like drawMovie, stored in the SprMan's +0x4d0 / +0x4d4 layer pair, then SprMan::draw"
+ },
+ "001925f0": {
+  "name": "S2dMovie::createLayer",
+  "tag": "ror-inferred",
+  "was": "FUN_001925f0",
+  "why": "i3dCtxCreateLayer(ctx, key f12) then i3dCtxCreateView(ctx, scene view 0 +0x2aa10, the camera +0x2ab70 matrix) set as the layer's view; returns the layer; only drawMovie / draw call it"
+ },
  "00192670": {
   "name": "S2dMovie::open",
   "tag": "ror-inferred",
@@ -1774,6 +1912,66 @@
   "tag": "ror-inferred",
   "was": "FUN_0019280c",
   "why": "+0x10 0 -> 3"
+ },
+ "00192834": {
+  "name": "S2dMovie::playMovie(char_const*)",
+  "tag": "ror-inferred",
+  "was": "FUN_00192834",
+  "why": "tail call to playMovie(name, 0x200, 0x180); FUN_001aabb4 passes the scene S2dMovie (MagSystem +0x96fe8) and a movie name string"
+ },
+ "00192850": {
+  "name": "S2dMovie::playMovie(char_const*,int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_00192850",
+  "why": "strcpy into g_rxMpeg +0x44 (name buffer), RxMpeg::open, RxMpeg::play(name, w, h)"
+ },
+ "001928b8": {
+  "name": "S2dMovie::isMovieEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001928b8",
+  "why": "tail call RxMpeg::isEnd(&g_rxMpeg)"
+ },
+ "001928d4": {
+  "name": "S2dMovie::stopMovie",
+  "tag": "ror-inferred",
+  "was": "FUN_001928d4",
+  "why": "MagScene::pushSubMode on the system's scene then RxMpeg::stop; FUN_001aabb4 calls it on a button press while getMovieStatus is 0 (playing)"
+ },
+ "00192904": {
+  "name": "S2dMovie::getMovieStatus",
+  "tag": "ror-inferred",
+  "was": "FUN_00192904",
+  "why": "tail call RxMpeg::getStatus; callers treat -1 as idle (start a movie), 0 playing, 1 finished (close)"
+ },
+ "00192920": {
+  "name": "S2dMovie::closeMovie",
+  "tag": "ror-inferred",
+  "was": "FUN_00192920",
+  "why": "RxMpeg::close; when >= 0 MagScene::popSubMode on the system's scene (pairs with stopMovie's push); callers run it when getMovieStatus is 1"
+ },
+ "00192978": {
+  "name": "S2dMovie::setSpriteStdPoint",
+  "tag": "ror-inferred",
+  "was": "FUN_00192978",
+  "why": "same body as S2dMes::setSpriteStdPoint(no,x,y) over S2dMovie's one-item map (data 0x29bfb0 = {1}); no caller found (folded into 0x192920 until this session)"
+ },
+ "001929cc": {
+  "name": "S2dMovie::setSpriteOffPoint",
+  "tag": "ror-inferred",
+  "was": "FUN_001929cc",
+  "why": "as S2dMes::setSpriteOffPoint(no,x,y): sprite +0x64 / +0x68, item map 0x29bfb0; no caller found"
+ },
+ "00192a20": {
+  "name": "S2dMovie::setSpriteState",
+  "tag": "ror-inferred",
+  "was": "FUN_00192a20",
+  "why": "as S2dMes::setSpriteState: sprite +0x10 = (on == 1), item map 0x29bfb0; no caller found"
+ },
+ "00192a70": {
+  "name": "S2dMovie::setSpriteDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_00192a70",
+  "why": "as S2dMes::setSpriteDisp: sprite +0x0c = (on == 1), item map 0x29bfb0; no caller found"
  },
  "001be2cc": {
   "name": "FileReader::FileReader",
@@ -2057,6 +2255,12 @@
   "was": "FUN_0021b288",
   "why": "writes the no-texture register packet (0x224d88) into each enabled texture slot of a batch"
  },
+ "0021b550": {
+  "name": "i3dPktSetReg",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b550",
+  "why": "writes a DMA tag (0x21b4d0, qwc 2), a GIF tag NLOOP 1 EOP NREG 1 A+D, then value / register; returns the position after it (pkt + 0x30); called with TEST_1 (0x47) 0x5000d"
+ },
  "0021b698": {
   "name": "i3dPktOpenChain",
   "tag": "ror-inferred",
@@ -2249,6 +2453,36 @@
   "was": "FUN_0021f9c8",
   "why": "collects a batch non-static textures and CLUTs (up to 0x200 each) from the texture table and reserves them in the two VRAM heaps (0x228650); returns 0xf when they do not fit, else queues the batch on ctx+0x1211c"
  },
+ "00223240": {
+  "name": "i3dLayerSetLight",
+  "tag": "ror-inferred",
+  "was": "FUN_00223240",
+  "why": "stores a1 at layer +0x82c; MagScene::draw passes the light sets 0x11262c builds over the scene light pool"
+ },
+ "00223250": {
+  "name": "i3dLayerSetFog",
+  "tag": "ror-inferred",
+  "was": "FUN_00223250",
+  "why": "stores a1 at layer +0x830; MagScene::draw passes i3dCtxSetFog's result"
+ },
+ "00223260": {
+  "name": "i3dLayerSetView",
+  "tag": "ror-inferred",
+  "was": "FUN_00223260",
+  "why": "stores a1 at layer +0x834; MagScene::draw and S2dMovie::createLayer pass i3dCtxCreateView's result"
+ },
+ "00223378": {
+  "name": "i3dLayerBeginPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00223378",
+  "why": "0x223c10(layer group +0x81c, 0, 0): the group's packet cursor; callers write register packets there (i3dPktSetReg) and close with i3dLayerEndPacket"
+ },
+ "00223398": {
+  "name": "i3dLayerEndPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00223398",
+  "why": "0x223c78(layer group +0x81c, end): ends the packet opened by i3dLayerBeginPacket"
+ },
  "00223878": {
   "name": "i3dLayerInit",
   "tag": "ror-inferred",
@@ -2302,6 +2536,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00224d88",
   "why": "fills a GIF A+D packet of 5 registers (TEX0 6, TEX1 0x14, TEX2 0x16, MIPTBP1 0x34, MIPTBP2 0x36) with zeros"
+ },
+ "00226c58": {
+  "name": "i3dCtxCreateView",
+  "tag": "ror-inferred",
+  "was": "FUN_00226c58",
+  "why": "allocates from the context tail and builds a view from a MagViewParam (frustum, depth, screen) and a camera matrix; MagScene::draw / S2dMovie::createLayer give it to i3dLayerSetView"
  },
  "00227a98": {
   "name": "i3dVramUnlink",

@@ -66,13 +66,32 @@ extern int g_bss_7a3d4c;        /* bss 0x7a3d4c: main sets 1 */
 
 /* The object at bss 0x7b40c0 (constructor 0x1810f4: sizes 0x200 / 0x180 /
  * 0xe00, between snd/sndman.cpp and snd/rxmpeg.cpp): a movie player, class
- * name unverified. layout: host -- only the words MagSystem uses. */
+ * name unverified. The words are ints, so the EE offsets hold on the host.
+ * layout: host -- only the words MagSystem and S2dMovie use. */
+struct I3dLayer;
+
 struct RxMpeg
 {
+    void open();                                                         // ROR 0x00181150
     void setFrameParity(int parity);                                     // ROR 0x00181204
+    /* Draws the decoded frame into layer's packet. */
+    void draw(I3dLayer *layer);                                          // ROR 0x001812a8
+    /* Starts the movie name at w x h. */
+    void play(const char *name, int w, int h);                           // ROR 0x0018154c
+    /* Asks the library to stop; -1 when nothing plays. */
+    int  stop();                                                         // ROR 0x00181644
+    int  close();                                                        // ROR 0x001816b0
+    /* The library's status word, -1 when not open (callers: 0 playing, 1 finished). */
+    int  getStatus();                                                    // ROR 0x0018173c
+    int  isEnd();                                                        // ROR 0x0018176c
 
-    int m_active;               // ROR 0x00: cleared by the constructor; MagSystem::waitVSync runs rxThVSync while set
+    int  m_active;              // ROR 0x00: open sets it, close / the constructor clear it; MagSystem::waitVSync runs rxThVSync while set
+    int  m_04;                  // ROR 0x04: 1 = S2dMovie::drawMovie draws a frame; RxMpeg::stop tests it
+    int  _08[(0x44 - 0x08) / 4];
+    char m_name[0x80];          // ROR 0x44: S2dMovie::playMovie copies the name here (0xc4 is the next word close reads)
 };
+static_assert(offsetof(RxMpeg, m_04) == 0x04, "m_04");
+static_assert(offsetof(RxMpeg, m_name) == 0x44, "m_name");
 
 extern RxMpeg g_rxMpeg;         /* bss 0x7b40c0 */
 
@@ -152,10 +171,29 @@ u_long *i3dClutMakeUpload(void *clut, u_long *pkt, u_int dst);           // ROR 
 u_long *i3dTexMakeMove(void *tex, u_long *pkt, u_int src, u_int dst);    // ROR 0x00219d40
 u_long *i3dClutMakeMove(void *clut, u_long *pkt, u_int src, u_int dst);  // ROR 0x00219d68
 
+/* One GS register write (a DMA cnt tag, an A+D GIF tag, value / reg);
+ * returns the position after it (pkt + 3 qwords). */
+u_long *i3dPktSetReg(u_long *pkt, u_long reg, u_long value);             // ROR 0x0021b550
 /* The packet's first tags (0x21b600 / 0x21b550); returns the chain cursor. */
 u_long *i3dPktOpenChain(u_char *pkt);                                    // ROR 0x0021b698
 /* Writes the no-texture registers into each used slot of a draw set. */
 int   i3dBatchClearTextures(I3dDrawSet *set);                            // ROR 0x0021b288
+
+/* A layer's light set, fog and view (EE layer +0x82c / +0x830 / +0x834).
+ * Opaque: built by 0x11262c over the scene light pool, i3dCtxSetFog and
+ * i3dCtxCreateView. */
+struct I3dLight;
+struct I3dView;
+struct MagViewParam;
+
+int   i3dLayerSetLight(I3dLayer *layer, I3dLight *light);                // ROR 0x00223240
+int   i3dLayerSetFog(I3dLayer *layer, void *fog);                        // ROR 0x00223250
+int   i3dLayerSetView(I3dLayer *layer, I3dView *view);                   // ROR 0x00223260
+/* The layer group's packet cursor, and its end once the caller wrote it. */
+u_long *i3dLayerBeginPacket(I3dLayer *layer);                            // ROR 0x00223378
+int   i3dLayerEndPacket(I3dLayer *layer, u_long *end);                   // ROR 0x00223398
+/* A view from a view record and a camera matrix, in the context's tail. */
+I3dView *i3dCtxCreateView(i3dContext *ctx, MagViewParam *param, sceVu0FVECTOR *matrix); // ROR 0x00226c58
 
 /* The draw groups and layers (0x2239b8..0x224d88). */
 int   i3dLayerInit(I3dLayer *layer, i3dContext *ctx);                    // ROR 0x00223878
@@ -253,6 +291,27 @@ int   FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy);               // ROR 0
 /* Allocates the 1 MB 2D packet buffer (data 0x29bfb4); mnuBase::initSystem
  * calls it too. */
 void  FUN_001944d0(void);                                                // ROR 0x001944d0
+
+/* ---- the word table (unassigned@00164fc0: 0x17e0a8..0x17eff4) ---- */
+
+/* A word-table record: the text at +0x10. layout: host -- the text is a
+ * pointer; the file format is not read yet. */
+struct WrdEntry
+{
+    int         _00[4];
+    const char *m_text;         // ROR 0x10: S2dMes::drawMapName's caption
+};
+
+/* data/wrd/WRD.BIN once loaded (0x17e5c0, from GamMan::loadStage): +4 the
+ * file (count at its +8), +8 the record pointers. Class name from the
+ * file, invented. layout: host -- no members reconstructed. */
+struct WrdTable
+{
+    /* Record n, NULL when none is loaded or n is out of range. */
+    WrdEntry *get(int n);                                                // ROR 0x0017ea44
+};
+
+extern WrdTable g_wrdTable;     /* data 0x298ee0 */
 
 /* ---- the debug range before debug/mimu_debug.cpp (unassigned@0020eda4) ---- */
 

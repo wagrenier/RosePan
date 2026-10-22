@@ -33,6 +33,10 @@ struct DogEntity
     /* EE slot 1 (+0x08): zero rotation / offset / translation (w 1), scale
      * 1, dirty, no parent. */
     void reset();                                                        // ROR 0x0011023c
+    /* Runs slot 2 (transform) and returns the matrix 0x237678 makes at
+     * +0xf0 -- past DogEntity: the derived camera class holds it (the
+     * scene calls it on its camera, +0x2ab70). */
+    sceVu0FVECTOR *getMatrix();                                          // ROR 0x0010fa6c
     void setRotate(float x, float y, float z);                          // ROR 0x0010fc7c
     void normalizeRotate();                                              // ROR 0x0010ff74
 
