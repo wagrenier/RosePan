@@ -117,6 +117,16 @@ int  RosePan_sceDevVu1Reset(void);
  * Rule of Rose's rx layer reads as "boot from host0:"). */
 int  RosePan_GetMemorySize(void);
 
+/* Interrupt disable / enable.  PORT: EE threads are host threads here, so the
+ * sections the rx layer guards with DIntr ... EIntr (against its file thread
+ * and alarm handlers) take one process-wide recursive mutex instead; the ROM
+ * always pairs the two, so they nest. */
+int  RosePan_DIntr(void);
+int  RosePan_EIntr(void);
+
+/* Run another ELF in place of this one.  The host cannot: it logs and exits. */
+void RosePan_LoadExecPS2(const char *name, int argc, char **argv);
+
 /* EE COP0 pipeline sync + interrupt enable (asm intrinsics on the target). */
 #ifndef SYNC
 #define SYNC(t) ((void)0)
@@ -169,6 +179,9 @@ u_long RosePan_sceGsPutIMR(u_long imr);
 #define sceDevVif1Reset        RosePan_sceDevVif1Reset
 #define sceDevVu1Reset         RosePan_sceDevVu1Reset
 #define GetMemorySize          RosePan_GetMemorySize
+#define DIntr                  RosePan_DIntr
+#define EIntr                  RosePan_EIntr
+#define LoadExecPS2            RosePan_LoadExecPS2
 #define sceGsGetIMR            RosePan_sceGsGetIMR
 #define sceGsPutIMR            RosePan_sceGsPutIMR
 #endif

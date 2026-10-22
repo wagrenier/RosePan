@@ -46,9 +46,19 @@
 #define SCECdDVDV           0xfe
 #define SCECdIllgalMedia    0xff
 
-/* sceCdGetError() results -- only the two MyCdRead() tests. */
+/* sceCdGetError() results -- the ones MyCdRead() and Rule of Rose's
+ * rxFileCdReadSectors() test. */
 #define SCECdErNO           0x00
+#define SCECdErOPENS        0x11
+#define SCECdErNODISC       0x12
+#define SCECdErNORDY        0x13
 #define SCECdErIPI          0x20
+#define SCECdErTRMOPN       0x31
+
+/* sceCdStatus() results. */
+#define SCECdStatStop       0x00
+#define SCECdStatShellOpen  0x01
+#define SCECdStatPause      0x0a
 
 /* sceCdCallback() reasons: the completed command's function code. */
 #define SCECdFuncRead       1
@@ -105,6 +115,9 @@ int sceCdDiskReady(int mode);
 int sceCdStInit(u_int bufmax, u_int bankmax, u_int iop_bufaddr);
 int sceCdSearchFile(sceCdlFILE *fp, const char *name);
 int sceCdStStart(u_int lbn, sceCdRMode *mode);
+int sceCdStatus(void);
+int sceCdTrayReq(int param, u_int *traychk);
+int sceCdReadDvdDualInfo(int *on_dual, u_int *layer1_start);
 
 /* ---- IOP side ---------------------------------------------------------- */
 typedef void (*sceCdCBFunc)(int reason);

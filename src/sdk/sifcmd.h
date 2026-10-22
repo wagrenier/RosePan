@@ -70,6 +70,7 @@ typedef struct
 } sceSifCmdData;
 
 void   sceSifInitCmd(void);
+void   sceSifExitCmd(void);
 void   sceSifSetCmdBuffer(sceSifCmdData *db, int size);
 u_int  sceSifSendCmd(u_int fno, void *pkt, int psize, void *src, void *dst, int size);
 

@@ -443,6 +443,288 @@
   "was": "rxSysGetFileSearchDir",
   "why": "rxFileGetSearchDir(rxFileGetCurrent()) (body was folded into rxSysSetFileSearchDir)"
  },
+ "002436f0": {
+  "name": "rxSysPushSearchDir",
+  "tag": "ror-inferred",
+  "was": "FUN_002436f0",
+  "why": "rxFilePushSearchDir(rxFileGetCurrent()), next to rxSysPopSearchDir 0x243710"
+ },
+ "00243710": {
+  "name": "rxSysPopSearchDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00243710",
+  "why": "rxFilePopSearchDir(rxFileGetCurrent())"
+ },
+ "00243730": {
+  "name": "rxSysGetLastName",
+  "tag": "ror-inferred",
+  "was": "FUN_00243730",
+  "why": "rxFileGetLastName(rxFileGetCurrent())"
+ },
+ "00243750": {
+  "name": "rxSysSetDeviceParam",
+  "tag": "ror-inferred",
+  "was": "FUN_00243750",
+  "why": "rxFileSetDeviceParam(rxFileGetCurrent(), v)"
+ },
+ "00243788": {
+  "name": "rxSysStreamOpen",
+  "tag": "ror-inferred",
+  "was": "FUN_00243788",
+  "why": "rxFileOpenEx(name, flags, 0, 0, 0): the default hooks open with it (flags 1 read, 0x602 write+create+trunc)"
+ },
+ "002437a8": {
+  "name": "rxSysStreamOpenRing",
+  "tag": "ror-inferred",
+  "was": "FUN_002437a8",
+  "why": "rxFileOpenEx(name, 0x18001, buf, size, threshold): read + nowait + ring buffer"
+ },
+ "002437d8": {
+  "name": "rxSysStreamOpenPath",
+  "tag": "ror-inferred",
+  "was": "FUN_002437d8",
+  "why": "tail call of rxFileOpenSlot with the caller's args (device, path already built)"
+ },
+ "002437f8": {
+  "name": "rxFileClose",
+  "tag": "ror-inferred",
+  "was": "FUN_002437f8",
+  "why": "slot 1..63 in use -> rxFileSlotClose(slot, 0); called after every open in the default hooks"
+ },
+ "00243858": {
+  "name": "rxFileAbort",
+  "tag": "ror-inferred",
+  "was": "FUN_00243858",
+  "why": "as rxFileClose with abort 1 (hidden entry folded into 0x2437f8)"
+ },
+ "002438b8": {
+  "name": "rxFileGetState",
+  "tag": "ror-inferred",
+  "was": "FUN_002438b8",
+  "why": "bits: 1 open, 4 requests pending, 8 at end (pos >= size), 2 paused (hidden entry)"
+ },
+ "00243938": {
+  "name": "rxFileRead",
+  "tag": "ror-inferred",
+  "was": "FUN_00243938",
+  "why": "needs open flag 1, waits for size known (bit 2), clamps to size - pos, posts op 2 reads, waits unless flag 0x8000; the default load hook reads with it"
+ },
+ "00243af8": {
+  "name": "rxFileWrite",
+  "tag": "ror-inferred",
+  "was": "FUN_00243af8",
+  "why": "needs open flag 2, posts op 3 writes, waits unless 0x8000, grows size; the default save hook writes with it"
+ },
+ "00243c40": {
+  "name": "rxFileSeek",
+  "tag": "ror-inferred",
+  "was": "FUN_00243c40",
+  "why": "whence 0 set, 1 cur, 2 size - off; returns pos (+0x8c); the size hook seeks (0, 2)"
+ },
+ "00243cd8": {
+  "name": "rxFileSync",
+  "tag": "ror-inferred",
+  "was": "FUN_00243cd8",
+  "why": "spins while pending requests (+0xcc) > 0 unless noWait; returns busy"
+ },
+ "00243da8": {
+  "name": "rxFileSetMarkers",
+  "tag": "ror-inferred",
+  "was": "FUN_00243da8",
+  "why": "slot check then rxFileSlotSetMarkers(slot, defs, count, arg)"
+ },
+ "00243e08": {
+  "name": "rxFileEnableMarker",
+  "tag": "ror-inferred",
+  "was": "FUN_00243e08",
+  "why": "slot check then rxFileSlotEnableMarker (hidden entry)"
+ },
+ "00243e60": {
+  "name": "rxFilePause",
+  "tag": "ror-inferred",
+  "was": "FUN_00243e60",
+  "why": "sets byte +5 (refill paused), returns the old value, kicks the refill when cleared"
+ },
+ "00243ed8": {
+  "name": "rxFileGetRingData",
+  "tag": "ror-inferred",
+  "was": "FUN_00243ed8",
+  "why": "ring buffer + read offset (+0x94 + +0xa4)"
+ },
+ "00243f28": {
+  "name": "rxFileGetRingReadPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00243f28",
+  "why": "ring read offset +0xa4, -1 when closed"
+ },
+ "00243f70": {
+  "name": "rxFileGetRingSize",
+  "tag": "ror-inferred",
+  "was": "FUN_00243f70",
+  "why": "ring size +0x98"
+ },
+ "00243fb8": {
+  "name": "rxFileGetRingFilled",
+  "tag": "ror-inferred",
+  "was": "FUN_00243fb8",
+  "why": "bytes in the ring +0xa8; kicks the refill"
+ },
+ "00244028": {
+  "name": "rxFileRingConsume",
+  "tag": "ror-inferred",
+  "was": "FUN_00244028",
+  "why": "clamps n to filled, advances the read offset modulo the size, drops n bytes of segments, kicks the refill"
+ },
+ "00244178": {
+  "name": "rxFileGetRingFilePos",
+  "tag": "ror-inferred",
+  "was": "FUN_00244178",
+  "why": "slot check then rxFileSlotSegmentPos (hidden entry)"
+ },
+ "002441d0": {
+  "name": "rxFileSetTags",
+  "tag": "ror-inferred",
+  "was": "FUN_002441d0",
+  "why": "slot check then rxFileSlotSetTags (hidden entry)"
+ },
+ "00244230": {
+  "name": "rxFileEnableTag",
+  "tag": "ror-inferred",
+  "was": "FUN_00244230",
+  "why": "slot check then rxFileSlotEnableTag (hidden entry)"
+ },
+ "00244288": {
+  "name": "rxFileGetRingTags",
+  "tag": "ror-inferred",
+  "was": "FUN_00244288",
+  "why": "slot check then rxFileSlotGetTags (hidden entry)"
+ },
+ "002442e8": {
+  "name": "rxFileOpenEx",
+  "tag": "ror-inferred",
+  "was": "FUN_002442e8",
+  "why": "joins the current device's dir, search dir and name like rxFileMakePath, records the last name, rxFileOpenSlot"
+ },
+ "00244410": {
+  "name": "rxFileOpenSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_00244410",
+  "why": "takes a free slot of 63 under DI ('rxfile : failed to alloc slot'), posts create (0x200) and size requests to the file thread, waits unless 0x8000"
+ },
+ "002447f8": {
+  "name": "rxFileOnCreate",
+  "tag": "ror-inferred",
+  "was": "FUN_002447f8",
+  "why": "request callback: state |= 1, pending--, error bit 4 + 'failed to open file' when result < 1"
+ },
+ "00244868": {
+  "name": "rxFileOnGetSize",
+  "tag": "ror-inferred",
+  "was": "FUN_00244868",
+  "why": "request callback: size = result, state |= 2, pending--, kicks the refill, error when < 1"
+ },
+ "002448f8": {
+  "name": "rxFileSlotClose",
+  "tag": "ror-inferred",
+  "was": "FUN_002448f8",
+  "why": "cancels the slot's requests, waits for pending, frees segments, markers and tags, clears in-use"
+ },
+ "002449c0": {
+  "name": "rxFileSlotKick",
+  "tag": "ror-inferred",
+  "was": "FUN_002449c0",
+  "why": "refills the ring when not paused, pos < size, nothing pending, size known and filled <= threshold"
+ },
+ "00244a38": {
+  "name": "rxFileSlotTransfer",
+  "tag": "ror-inferred",
+  "was": "FUN_00244a38",
+  "why": "rxFileSlotRequest on queue 1 (the reader's queue; the refill uses 0)"
+ },
+ "00244a68": {
+  "name": "rxFileSlotRefill",
+  "tag": "ror-inferred",
+  "was": "FUN_00244a68",
+  "why": "posts reads of (ringSize - filled) & ~0x7ff bytes at the ring write offset, wrapping"
+ },
+ "00244b40": {
+  "name": "rxFileSlotRequest",
+  "tag": "ror-inferred",
+  "was": "FUN_00244b40",
+  "why": "splits a transfer at enabled markers whose callback accepts (or none), counts marker passes and jumps pos to the marker's target"
+ },
+ "00244d70": {
+  "name": "rxFileSlotRequestChunked",
+  "tag": "ror-inferred",
+  "was": "FUN_00244d70",
+  "why": "clamps reads to size; queue 1 reads split into the device param's chunk size"
+ },
+ "00244f20": {
+  "name": "rxFileSlotPost",
+  "tag": "ror-inferred",
+  "was": "FUN_00244f20",
+  "why": "posts one request with callback rxFileOnTransfer, pos += size, pending++ under DI"
+ },
+ "00245000": {
+  "name": "rxFileOnTransfer",
+  "tag": "ror-inferred",
+  "was": "FUN_00245000",
+  "why": "request callback: ring mode adds the bytes to filled / write offset and a segment; pending--"
+ },
+ "00245078": {
+  "name": "rxFileSlotSetMarkers",
+  "tag": "ror-inferred",
+  "was": "FUN_00245078",
+  "why": "frees the marker list, inserts count 20-byte defs sorted by pos from the pool at 0x7de9b4; stores the callback arg"
+ },
+ "00245240": {
+  "name": "rxFileSlotEnableMarker",
+  "tag": "ror-inferred",
+  "was": "FUN_00245240",
+  "why": "sets the active byte of every marker with id"
+ },
+ "00245280": {
+  "name": "rxFileSlotAddSegment",
+  "tag": "ror-inferred",
+  "was": "FUN_00245280",
+  "why": "appends {file pos, size} from pool 0x7df9b8 to the slot's circular segment list"
+ },
+ "00245348": {
+  "name": "rxFileSlotDropSegments",
+  "tag": "ror-inferred",
+  "was": "FUN_00245348",
+  "why": "removes n bytes from the head of the segment list"
+ },
+ "00245468": {
+  "name": "rxFileSlotFreeSegments",
+  "tag": "ror-inferred",
+  "was": "FUN_00245468",
+  "why": "returns every segment to the pool"
+ },
+ "00245520": {
+  "name": "rxFileSlotSegmentPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00245520",
+  "why": "file position of the byte n past the ring read offset, -1 beyond the segments"
+ },
+ "00245600": {
+  "name": "rxFileSlotSetTags",
+  "tag": "ror-inferred",
+  "was": "FUN_00245600",
+  "why": "as SetMarkers for 12-byte tag defs from pool 0x7de3b0"
+ },
+ "002457a8": {
+  "name": "rxFileSlotEnableTag",
+  "tag": "ror-inferred",
+  "was": "FUN_002457a8",
+  "why": "sets the active byte of every tag with id"
+ },
+ "002457e8": {
+  "name": "rxFileSlotGetTags",
+  "tag": "ror-inferred",
+  "was": "FUN_002457e8",
+  "why": "lists {ring offset, value} of active tags inside the first n bytes of the segments (hidden entry)"
+ },
  "002458b0": {
   "name": "rxFileCallDevice",
   "tag": "ror-inferred",
@@ -623,6 +905,18 @@
   "was": "FUN_002467f8",
   "why": "driver 0 slot 7: copies the root, null = host0:"
  },
+ "00246840": {
+  "name": "rxFileCdWait",
+  "tag": "ror-inferred",
+  "was": "FUN_00246840",
+  "why": "DI check ('DI error') then rxThYield"
+ },
+ "00246890": {
+  "name": "rxFileCdSyncWait",
+  "tag": "ror-inferred",
+  "was": "FUN_00246890",
+  "why": "while sceCdSync(1) yield"
+ },
  "002468c0": {
   "name": "rxFileCdInit",
   "tag": "ror-inferred",
@@ -634,6 +928,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00246950",
   "why": "empty; called by rxFileTerm"
+ },
+ "00246958": {
+  "name": "rxFileCdStatusWait",
+  "tag": "ror-inferred",
+  "was": "FUN_00246958",
+  "why": "while sceCdStatus() < 0 yield; returns the status"
+ },
+ "00246988": {
+  "name": "rxFileCdTray",
+  "tag": "ror-inferred",
+  "was": "FUN_00246988",
+  "why": "sceCdTrayReq(req, &count)"
  },
  "002469a8": {
   "name": "rxFileCdProcess",
@@ -683,6 +989,36 @@
   "was": "FUN_00246f68",
   "why": "driver 1 slot 6: returns -2 (read-only device)"
  },
+ "00246f70": {
+  "name": "rxFileCdIsoName",
+  "tag": "ror-inferred",
+  "was": "FUN_00246f70",
+  "why": "backslash + name, slash to backslash, a-z upper case, then ;1"
+ },
+ "00247048": {
+  "name": "rxFileCdMapSector",
+  "tag": "ror-inferred",
+  "was": "FUN_00247048",
+  "why": "adds the layer-1 start when dual layer and layer 1 is selected"
+ },
+ "00247080": {
+  "name": "rxFileCdReadBytes",
+  "tag": "ror-inferred",
+  "was": "FUN_00247080",
+  "why": "reads whole sectors 64-aligned into the buffer, shifts them down, reads the tail sectors through the buffer at 0x7efdc0"
+ },
+ "00247308": {
+  "name": "rxFileCdReadAt",
+  "tag": "ror-inferred",
+  "was": "FUN_00247308",
+  "why": "a read at the same offset as the last one first reads the sector 32 before it"
+ },
+ "002473c8": {
+  "name": "rxFileCdReadSectors",
+  "tag": "ror-inferred",
+  "was": "FUN_002473c8",
+  "why": "first read waits for the disc, sets the media mode and dual-layer info ('disk type', 'dual mode'); sceCdRead retries; -2 when the tray opened, -1 '*** read error retry'"
+ },
  "00247608": {
   "name": "rxFileCdInitCache",
   "tag": "ror-inferred",
@@ -695,6 +1031,42 @@
   "was": "FUN_00247668",
   "why": "moves every used sector node back to the free list, resets the cached sector 0x2dc218 to -1"
  },
+ "002476d0": {
+  "name": "rxFileCdFind",
+  "tag": "ror-inferred",
+  "was": "FUN_002476d0",
+  "why": "default lookup (pointer 0x2dc1dc): primary volume descriptor 0x8000 path table 0x808c / 0x8084, then rxFileCdFindDir"
+ },
+ "00247810": {
+  "name": "rxFileCdFindDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00247810",
+  "why": "walks the ISO 9660 path table by parent number for every dir element, rxFileCdFindInDir for the last"
+ },
+ "002479e0": {
+  "name": "rxFileCdFindInDir",
+  "tag": "ror-inferred",
+  "was": "FUN_002479e0",
+  "why": "scans ISO 9660 directory records for the file name; extent and size"
+ },
+ "00247bb0": {
+  "name": "rxFileCdPathElem",
+  "tag": "ror-inferred",
+  "was": "FUN_00247bb0",
+  "why": "copies a path element up to a backslash, returns past it"
+ },
+ "00247c10": {
+  "name": "rxFileCdIsLastElem",
+  "tag": "ror-inferred",
+  "was": "FUN_00247c10",
+  "why": "true when no backslash follows"
+ },
+ "00247c60": {
+  "name": "rxFileCdReadCached",
+  "tag": "ror-inferred",
+  "was": "FUN_00247c60",
+  "why": "copies bytes through the 32-sector LRU cache ('completed to read sector')"
+ },
  "00247e88": {
   "name": "rxFileCdGetRoot",
   "tag": "ror-inferred",
@@ -706,6 +1078,42 @@
   "tag": "ror-inferred",
   "was": "FUN_00247e98",
   "why": "driver 1 slot 7: empty (the cdrom root is fixed)"
+ },
+ "00247ea0": {
+  "name": "rxFileCdSetFindFunc",
+  "tag": "ror-inferred",
+  "was": "FUN_00247ea0",
+  "why": "swaps the lookup pointer 0x2dc1dc (hidden entry)"
+ },
+ "00247eb8": {
+  "name": "rxFileCdSetClockRead",
+  "tag": "ror-inferred",
+  "was": "FUN_00247eb8",
+  "why": "enables the periodic sceCdReadClock in rxFileCdProcess; resets interval 30 and the cache"
+ },
+ "00247f00": {
+  "name": "rxFileCdGetClockRead",
+  "tag": "ror-inferred",
+  "was": "FUN_00247f00",
+  "why": "the enable flag 0x2dc1e0"
+ },
+ "00247f10": {
+  "name": "rxFileCdGetClock",
+  "tag": "ror-inferred",
+  "was": "FUN_00247f10",
+  "why": "copies the cached clock under DI when valid and enabled"
+ },
+ "00247fd0": {
+  "name": "rxFileCdSetLayerMode",
+  "tag": "ror-inferred",
+  "was": "FUN_00247fd0",
+  "why": "0 / 1 picks the DVD layer at the next lookup; -1 for others (hidden entry)"
+ },
+ "00248008": {
+  "name": "rxFileCdGetLayerMode",
+  "tag": "ror-inferred",
+  "was": "FUN_00248008",
+  "why": "(hidden entry)"
  },
  "00248018": {
   "name": "rxFileHddInit",
@@ -947,17 +1355,95 @@
   "was": "FUN_00248fd8",
   "why": "0x2491c0(0, 2, 0x2495e0): the rxfile request thread ('rxfile : failed to create thread')"
  },
+ "00249000": {
+  "name": "rxFileStopThread",
+  "tag": "ror-inferred",
+  "was": "FUN_00249000",
+  "why": "sets the stop flag, waits for the thread to answer -1, deletes it"
+ },
+ "00249098": {
+  "name": "rxFilePostRequest",
+  "tag": "ror-inferred",
+  "was": "FUN_00249098",
+  "why": "picks the device's thread (table 0x2dc250) and queue, rxFileQueuePush"
+ },
+ "002490e0": {
+  "name": "rxFileCancelRequests",
+  "tag": "ror-inferred",
+  "was": "FUN_002490e0",
+  "why": "rxFileQueueCancel on both queues of the device's thread under DI"
+ },
  "002491c0": {
   "name": "rxFileCreateThread",
   "tag": "ror-inferred",
   "was": "FUN_002491c0",
   "why": "rxFileStartThread calls it; prints rxfile : failed to create thread"
  },
+ "002492b0": {
+  "name": "rxFileThreadMain",
+  "tag": "ror-inferred",
+  "was": "FUN_002492b0",
+  "why": "the request thread ('start execute request queue thread'): runs proc, serves queue 0 then 1 through the device driver (op 0 create, 1 size, 2 read, 3 write), retries failures, calls the callback, yields"
+ },
  "002495e0": {
   "name": "rxFileThreadProc",
   "tag": "ror-inferred",
   "was": "FUN_002495e0",
   "why": "rxFileStartThread passes it to rxFileCreateThread; a tail jump to 0x2469a8 (the cdrom request processor); was folded into rxFileCreateThread's body"
+ },
+ "002495f8": {
+  "name": "rxFileNop0",
+  "tag": "ror-inferred",
+  "was": "FUN_002495f8",
+  "why": "empty, unreferenced"
+ },
+ "00249600": {
+  "name": "rxFileNop1",
+  "tag": "ror-inferred",
+  "was": "FUN_00249600",
+  "why": "empty, unreferenced"
+ },
+ "00249608": {
+  "name": "rxFileQueueInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00249608",
+  "why": "head = tail = 0"
+ },
+ "00249618": {
+  "name": "rxFileQueuePush",
+  "tag": "ror-inferred",
+  "was": "FUN_00249618",
+  "why": "64-entry ring of 0x2c-byte requests ('Queue Over!')"
+ },
+ "00249778": {
+  "name": "rxFileQueueFront",
+  "tag": "ror-inferred",
+  "was": "FUN_00249778",
+  "why": "the tail entry or null"
+ },
+ "002497c0": {
+  "name": "rxFileQueuePop",
+  "tag": "ror-inferred",
+  "was": "FUN_002497c0",
+  "why": "tail = (tail + 1) % 64"
+ },
+ "00249818": {
+  "name": "rxFileQueueCount",
+  "tag": "ror-inferred",
+  "was": "FUN_00249818",
+  "why": "(head - tail) mod 64"
+ },
+ "00249838": {
+  "name": "rxFileQueueSpace",
+  "tag": "ror-inferred",
+  "was": "FUN_00249838",
+  "why": "63 - count"
+ },
+ "00249868": {
+  "name": "rxFileQueueCancel",
+  "tag": "ror-inferred",
+  "was": "FUN_00249868",
+  "why": "for the owner's entries not done: callback with the size, mark done; a running one only when abort"
  },
  "002499b8": {
   "name": "rxFileSetDeviceMap",
@@ -971,17 +1457,41 @@
   "was": "FUN_00249a68",
   "why": "returns 0x2dc228[a]"
  },
+ "00249ad0": {
+  "name": "rxFileSetFallbackDevice",
+  "tag": "ror-inferred",
+  "was": "FUN_00249ad0",
+  "why": "0x2dc238[device] = v (hidden entry)"
+ },
  "00249ae8": {
   "name": "rxFileGetFallbackDevice",
   "tag": "ror-inferred",
   "was": "FUN_00249ae8",
   "why": "returns 0x2dc238[a] ({0,1,2,-1}); rxFileHddOnError maps HDD to it"
  },
+ "00249b00": {
+  "name": "rxFileSetErrorHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00249b00",
+  "why": "0x2dc248 = hook (hidden entry)"
+ },
  "00249b10": {
   "name": "rxFileGetErrorHook",
   "tag": "ror-inferred",
   "was": "FUN_00249b10",
   "why": "returns 0x2dc248, called with (name, error) by rxFileHddOnError"
+ },
+ "00249b20": {
+  "name": "rxFileSetThreadPriority",
+  "tag": "ror-inferred",
+  "was": "FUN_00249b20",
+  "why": "rxThSetPriority on the file thread, stores prio + 1; returns the old"
+ },
+ "00249b78": {
+  "name": "rxFileGetThreadPriority",
+  "tag": "ror-inferred",
+  "was": "FUN_00249b78",
+  "why": "stored value - 1"
  },
  "00249d48": {
   "name": "rxThIsDispatchDisabled",
@@ -1019,6 +1529,42 @@
   "was": "FUN_0024a958",
   "why": "iPollSema on 0x807f44; at zero rearms the dispatch alarm"
  },
+ "0024aae0": {
+  "name": "rxThGetIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_0024aae0",
+  "why": "index of GetThreadId in the 8-entry rx thread table 0x807f70, -1"
+ },
+ "0024ab40": {
+  "name": "rxThDelete",
+  "tag": "ror-inferred",
+  "was": "FUN_0024ab40",
+  "why": "frees the entry; ExitDeleteThread for itself, else the delete helper"
+ },
+ "0024ac28": {
+  "name": "rxThSetPriority",
+  "tag": "ror-inferred",
+  "was": "FUN_0024ac28",
+  "why": "stores the entry's priority word +8"
+ },
+ "0024ac68": {
+  "name": "rxThGetParam",
+  "tag": "ror-inferred",
+  "was": "FUN_0024ac68",
+  "why": "the entry's param word +0xc"
+ },
+ "0024acc8": {
+  "name": "rxThSetState",
+  "tag": "ror-inferred",
+  "was": "FUN_0024acc8",
+  "why": "the entry's halfword +2; rxFileCreateThread sets 1"
+ },
+ "0024ace8": {
+  "name": "rxThCreate",
+  "tag": "ror-inferred",
+  "was": "FUN_0024ace8",
+  "why": "(entry, stack, size, priority, param): takes a free entry of 8, starts the dispatch alarm"
+ },
  "0024ae60": {
   "name": "rxThRequest",
   "tag": "ror-inferred",
@@ -1031,11 +1577,53 @@
   "was": "FUN_0024b0b0",
   "why": "tail to rxThInit; rxSysResetHardware calls it"
  },
+ "0024b3f8": {
+  "name": "rxThSync",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b3f8",
+  "why": "0 / 1 / n: waits; -1 returns the tick count 0x2dc290"
+ },
+ "0024c9e0": {
+  "name": "sceCdRead",
+  "tag": "lib-context",
+  "was": "FUN_0024c9e0",
+  "why": "(lsn, sectors, buf, mode) by use in rxFileCdReadSectors"
+ },
  "0024cc58": {
   "name": "sceCdGetDiskType",
   "tag": "lib-context",
   "was": "FUN_0024cc58",
   "why": "result compared with SCECdPS2DVD 0x14 / SCECdDVDV 0xfe before sceCdMmode"
+ },
+ "0024cc80": {
+  "name": "sceCdGetError",
+  "tag": "lib-context",
+  "was": "FUN_0024cc80",
+  "why": "error codes 0x11/0x12/0x31 checked after reads"
+ },
+ "0024cd18": {
+  "name": "sceCdStatus",
+  "tag": "lib-context",
+  "was": "FUN_0024cd18",
+  "why": "no args, 1 (shell open) flushes the cache"
+ },
+ "0024cea8": {
+  "name": "sceCdReadDvdDualInfo",
+  "tag": "lib-context",
+  "was": "FUN_0024cea8",
+  "why": "(&on_dual, &layer1_start) before 'dual mode'"
+ },
+ "0024d070": {
+  "name": "sceCdReadClock",
+  "tag": "lib-context",
+  "was": "FUN_0024d070",
+  "why": "8-byte clock copied to 0x2dc1f0"
+ },
+ "0024d130": {
+  "name": "sceCdTrayReq",
+  "tag": "lib-context",
+  "was": "FUN_0024d130",
+  "why": "(0 / 1, &count) from rxFileCdControl's request bits"
  },
  "0025c8f0": {
   "name": "sceDevVu1Reset",

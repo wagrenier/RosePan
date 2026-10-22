@@ -211,6 +211,12 @@ void sceSifInitCmd(void)
 {
 }
 
+/* Before LoadExecPS2 the EE shuts its command handlers down; nothing to undo
+ * on the host. */
+void sceSifExitCmd(void)
+{
+}
+
 void sceSifSetCmdBuffer(sceSifCmdData *db, int size)
 {
     (void)db;

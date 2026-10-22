@@ -27,14 +27,18 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    and the rxfile stubs return 0 -- the boot hangs until `rxFileLoad` / `rxFileRebootIop` /
    `rxFileLoadModule` answer (the host has no IOP: `sceSifRebootIop` / `sceSifLoadModule` succeed in
    src/sdk; `rxFileLoad` needs the disc data, see "The disc data").
-5. (2026-10-22, the rxfile session) `rx/rxfile.cpp` is `partial`: rxFileLoad / LoadModule / RebootIop,
-   the drivers' tables, the host0: and HDD drivers, contexts and dirs are written, so the IOP boot loop
-   above can now finish -- the next M1 step really is `main` (unassigned@001fd424). Still stubs in
-   rxfile: the cdrom driver's reader (rxFileCdMakePath / GetSize / Read / Control, rxFileCdProcess
-   0x2469a8..0x247f10), the default load / size hooks (0x245a48, 0x245ae8: they need rxsys's async
-   file calls 0x243788..), rxFileCreateThread 0x2491c0 and the async slots 0x2437f8..0x245800. Then
-   `rx/rxthread.cpp` (pinned 0x249b88..0x24b490, todo): it needs `DIntr` / `EIntr` in src/sdk (absent
-   today), as does rxFileCdControl.
+5. (2026-10-22, the rxfile sessions) `rx/rxfile.cpp` is complete (`verify`): every function in
+   0x2437f8..0x249b88 is written -- async slots, default hooks, cdrom ISO 9660 reader, file thread and
+   its queues. Nothing runs it yet: `main` (unassigned@001fd424) is still the placeholder, so the next
+   M1 step really is `main`. Then **`rx/rxthread.cpp`** (pinned 0x249b88..0x24b490, todo; its rxTh*
+   functions are stubs in src/rx/rxthread.cpp today): `rxThCreate` returns 0 and `rxThGetParam` null,
+   so the file thread never runs, and every slot open (the default load / size hooks, snd's streams)
+   spins for ever on `pending`. DIntr / EIntr now exist in src/sdk (a recursive mutex).
+6. (2026-10-22) **The cdrom driver reads ISO 9660 sectors itself** (architecture.md "The rx file
+   layer"), so a CDROM boot needs sceCdRead to serve a disc *image*: src/sdk/libcdvd.cpp still reads
+   FF3's IMG_BD.BIN. Decide (the user's call: platform): point sceCdRead at an `.iso` named by
+   `ROSEPAN_DATA`, or boot from host0: (the HOST driver reads loose files through sceOpen) and leave
+   the cdrom driver for real-disc parity only.
 
 ## Decisions
 

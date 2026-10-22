@@ -8,6 +8,8 @@
 #include "../rosepan/os/rosepan_time.h"   // RosePan_Sleep
 #include "../rosepan/os/rosepan_thread.h" // threads / semaphores / mutex / TLS
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define ROSEPAN_MAX_SEMAS   128
@@ -620,6 +622,34 @@ int RosePan_sceDevVu1Reset(void)
 int RosePan_GetMemorySize(void)
 {
     return 0x2000000;
+}
+
+/* SDL mutexes are recursive, which is what lets DIntr ... EIntr nest. */
+static RosePan_Mutex *s_intrMutex;
+
+int RosePan_DIntr(void)
+{
+    if (s_intrMutex == 0)
+    {
+        s_intrMutex = RosePan_MutexCreate();
+    }
+    RosePan_MutexLock(s_intrMutex);
+    return 1;
+}
+
+int RosePan_EIntr(void)
+{
+    RosePan_MutexUnlock(s_intrMutex);
+    return 1;
+}
+
+void RosePan_LoadExecPS2(const char *name, int argc, char **argv)
+{
+    (void)argc;
+    (void)argv;
+    printf("LoadExecPS2 '%s': cannot run another ELF on the host, exiting\n",
+           name != 0 ? name : "");
+    exit(0);
 }
 
 u_long RosePan_sceGsGetIMR(void)
