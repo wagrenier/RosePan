@@ -9,6 +9,8 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
 - Address map
 - Naming sources
 - Program flow
+- The rx file layer
+- The rx thread layer
 - Modules (RoR's own source files)
 - Classes
 - Key functions and globals
@@ -134,6 +136,36 @@ Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
   requests; `rxFileCdSetClockRead(1)` makes it read the drive clock every 30 ticks
   (`rxFileCdGetClock`). **On the host this needs an ISO image behind sceCdRead** (open-items.md).
 - `s_verbose` data 0x2dc1b0 = 1: the retail build prints every rxfile message.
+
+## The rx thread layer (`rx/rxthread.cpp`, 0x249b88..0x24b490, 2026-10-22)
+
+A scheduler over the EE kernel's priority threads (all 61 functions written, `verify`):
+- **Priorities**: base = the main thread's current priority at `rxThInit` 0x249ea0 (sdata 0x2dc264);
+  offsets `s_prioIndex` sdata 0x2dc278 = {0, 2, 4} for main / worker / rx threads + idle
+  (`rxThSetPrioIndex` 0x24b048 keeps them increasing).
+- **Threads**: the idle thread (stack bss 0x818240, 0x400, spins) and the worker (stack 0x808240,
+  0x10000, suspended except while the main thread yields; runs the 32-entry call queue bss 0x807ff0 that
+  `rxThPostCall` 0x249e08 fills -- snd/rxmpeg.cpp's user). Up to 8 rx threads in slots bss 0x807f70
+  `{short id, short state, int count, int priority, void *param}`; `rxThCreate` starts them at the low
+  level with state 0 (not dispatched until `rxThSetState(i, 1)`).
+- **Semaphores** bss 0x807f40: yield (max 1; the main thread waits on it), dispatch (a counter:
+  `rxThDisableDispatch` signals, `rxThEnableDispatch` polls), request lock (the worker's
+  `rxThLockRequest` / `rxThUnlockRequest`).
+- **The dispatch alarm** `rxThDispatchAlarm` 0x24a678, every `s_interval` HSYNCs (sdata 0x2dc274 = 4,
+  `rxThSetInterval` clamps 4..256): unless dispatch is disabled, the next dispatched slot gets the CPU on
+  every (priority + 1)-th pass that lands on it (so "priority" is a slowdown); then, if the main thread
+  waits and the request lock is 0, it polls the request (sdata 0x2dc270, args bss 0x8081f0) and signals
+  the yield semaphore when it answers non-zero. Re-arms while rx threads exist or a request is pending.
+- **rxThYield** 0x24a508 on the main thread: request "vblank count changed" unless one is set, run the 8
+  yield callbacks (bss 0x808200; rxsys installs `rxSysThreadCallback`) with 1, resume the worker, wait,
+  suspend it, callbacks with 0. On an rx thread: lower itself below the main thread. `rxThVSync`,
+  `rxThGsSyncPath`, `rxThDmaSync` (mode 0) are yields with their own requests.
+- **Frame pacing**: `rxThVBlankInit` 0x24b278 adds an INTC cause-2 handler (vblank count sdata 0x2dc290,
+  field 0x2dc288 from GS CSR when interlaced) and runs timer 0 on HBLANK. `rxThSync(mode)` 0x24b3f8:
+  -1 = the vblank count, 0 = wait one vblank, 1 = no wait, n = wait until n vblanks since the last read;
+  each returns the HSYNCs since the last read (`rxThReadHSync`).
+- `rxThFindCallback` 0x24a218 always returns -1 (a delay-slot bug): duplicates are not refused and
+  `rxThRemoveCallback` removes nothing.
 
 ## Modules (RoR's own source files)
 

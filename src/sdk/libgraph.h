@@ -300,6 +300,17 @@
 
 #include "sce_gs.h"             /* sceGsDBuff / sceGsLoadImage / sceGsStoreImage */
 
+/* The GS settings sceGsResetGraph was given (SDK 3.0 layout; host pointer). */
+typedef struct
+{
+    short sceGsInterMode;
+    short sceGsOutMode;
+    short sceGsFFMode;
+    short sceGsVersion;
+    volatile int (*sceGsVSCfunc)(int);
+    int sceGsVSCid;
+} sceGsGParam;
+
 /* VSync interrupt callback installed with sceGsSyncVCallback. */
 typedef int (*sceGsVCallbackFunc)(int);
 
@@ -311,6 +322,10 @@ void sceGsResetGraph(short mode, short inter, short omode, short ffmode);
 void sceGsResetPath(void);
 int  sceGsSyncV(int mode);
 int  sceGsSyncPath(int mode, u_short timeout);
+sceGsGParam *sceGsGetGParam(void);
+/* The kernel's VSync() (wait for the next field); RoR's rx layer calls it. */
+int  RosePan_VSync(void);
+#define VSync RosePan_VSync
 sceGsVCallbackFunc sceGsSyncVCallback(sceGsVCallbackFunc func);
 void sceGsSetDefDBuff(sceGsDBuff *dp, short psm, short w, short h,
                       short ztest, short zpsm, short clear);

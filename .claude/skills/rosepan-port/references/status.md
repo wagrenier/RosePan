@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-22 11:15 at commit `9501f25` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-22 11:31 at commit `0d5962f` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-22 11:15 at commit `9501f25` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6385**, named **1666** (26%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 544, lib-match-low 133, lib-context 25, ror-inferred 262
-- context-name ledger: 287 entries; overrides of wrong library matches: 4
-- placed in a source file: 1550/6385 in 76 files
+- game functions: **6396**, named **1704** (27%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 544, lib-match-low 133, lib-context 28, ror-inferred 300
+- context-name ledger: 328 entries; overrides of wrong library matches: 4
+- placed in a source file: 1561/6396 in 76 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,26 +30,27 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **242**; stubs: **16**
+- reconstructed RoR functions: **295**; stubs: **3**
 
 | file | reconstructed | stubs |
 |---|---|---|
-| `src/lib/unassigned_stubs.cpp` | 0 | 6 |
 | `src/main.cpp` | 1 | 0 |
 | `src/rx/rxfile.cpp` | 168 | 0 |
 | `src/rx/rxsys.cpp` | 73 | 3 |
-| `src/rx/rxthread.cpp` | 0 | 7 |
+| `src/rx/rxthread.cpp` | 53 | 0 |
 
 ## Translation units (one session each: `tus.py`)
 
-- 142 TUs: todo 140, partial 1, verify 2, done 2
-- next: **rx/rxthread.cpp** (frontier score 20)
+- 142 TUs: todo 139, partial 1, verify 3, done 2
+- next: **unassigned@001056f8** (frontier score 4)
 - pinned queue: (empty)
 - verify: `rx/rxfile.cpp` 168/168 -- Status verify: every function in 0x2437f8..0x249b88 is written, but nothing can show it: main 0x2045a8 is still the placeholder (black screen), and the rxthread
 - verify: `rx/rxsys.cpp` 73/119 -- Status verify: nothing calls rxSysInit yet - main 0x2045a8 is still the placeholder in src/main.cpp, so the screenshot is the black placeholder frame. Next: mai
+- verify: `rx/rxthread.cpp` 53/53 -- Complete; verify because main (unassigned@001fd424) is still the placeholder, so nothing calls rxThInit in the smoke run (black frame as before). A temporary ca
 
 Recent sessions:
 
+- 2026-10-22 11:31 `rx/rxthread.cpp` verify: rx thread layer complete: 61 functions (11 hidden ones created in Ghidra) -- scheduler with dispatch alarm, rxThYield / rxThRequest handshake, rx thread slots, 
 - 2026-10-22 11:15 `rx/rxfile.cpp` verify: rx file layer complete: async file slots (fd 1..63, ring buffers, markers, tags, segments), default load/size/save hooks, rxFileLoadExec, the cdrom driver's ISO
 - 2026-10-22 10:43 `rx/rxfile.cpp` partial: rx middleware file layer, first slice: pinned rx/rxfile.cpp 0x2437f8-0x249b88 and rx/rxthread.cpp 0x249b88-0x24b490; reconstructed the device driver tables, the
 - 2026-10-22 10:26 `rx/rxsys.cpp` verify: rx middleware system layer: pinned rx/rxsys.cpp 0x23ff58-0x2437f8 and reconstructed 60 functions - rxSysInit (hardware reset, boot device, memory hooks, rx subs
@@ -58,25 +59,14 @@ Recent sessions:
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `rx/rxthread.cpp` | todo | 0/13/42 | 6.1 | 20 | 0 |
-| `unassigned@001056f8` | todo | 0/0/23 | 1.8 | 4 | 0 |
 | `unassigned@001fd424` | partial | 1/0/90 | 31.2 | 4 | 0 |
+| `unassigned@001056f8` | todo | 0/0/23 | 1.8 | 4 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
 | RoR addr | name | call sites | provenance | state | inferred file |
 |---|---|---|---|---|---|
-| `0024a508` | rxThYield | 5 | ror | stub | rx/rxthread.cpp |
-| `0024ae60` | rxThRequest | 2 | ror | stub | rx/rxthread.cpp |
-| `0024aae0` | rxThGetIndex | 2 | ror | stub | rx/rxthread.cpp |
-| `0024ab40` | rxThDelete | 1 | ror | stub | rx/rxthread.cpp |
-| `0024ac68` | rxThGetParam | 1 | ror | stub | rx/rxthread.cpp |
-| `0024ac28` | rxThSetPriority | 1 | ror | stub | rx/rxthread.cpp |
-| `00249d48` | rxThIsDispatchDisabled | 1 | ror | missing | rx/rxthread.cpp |
-| `0024a8c8` | rxThDisableDispatch | 1 | ror | stub | rx/rxthread.cpp |
-| `0024a958` | rxThEnableDispatch | 1 | ror | stub | rx/rxthread.cpp |
 | `00241a00` | rxSysOpenTty | 1 | ror | stub | rx/rxsys.cpp |
-| `0024a258` | rxThAddCallback | 1 | ror | stub | rx/rxthread.cpp |
 | `002043dc` | FUN_002043dc | 1 | - | missing | - |
 | `00105be4` | FUN_00105be4 | 1 | - | missing | - |
 | `00242960` | FUN_00242960 | 1 | - | missing | rx/rxsys.cpp |
@@ -84,10 +74,6 @@ Recent sessions:
 | `002046d4` | FUN_002046d4 | 1 | - | missing | - |
 | `00204864` | FUN_00204864 | 1 | - | missing | - |
 | `0020483c` | FUN_0020483c | 1 | - | missing | - |
-| `0024b3f8` | rxThSync | 1 | ror | stub | rx/rxthread.cpp |
-| `0024ace8` | rxThCreate | 1 | ror | stub | rx/rxthread.cpp |
-| `0024acc8` | rxThSetState | 1 | ror | stub | rx/rxthread.cpp |
 | `002413d8` | rxSysIniFind | 1 | ror | stub | rx/rxsys.cpp |
 | `00243560` | rxSysUpdateDevices | 1 | ror | stub | rx/rxsys.cpp |
-| `0024b0b0` | rxThInitOnce | 1 | ror | stub | rx/rxthread.cpp |
 

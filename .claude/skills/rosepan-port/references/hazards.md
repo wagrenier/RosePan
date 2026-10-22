@@ -290,6 +290,17 @@ entries are marked **RoR** with the date.
   are host statics. Rebuild such data as host tables (datadump.py) and pass host pointers.
 - **A PSS movie froze for good after a hitch** in MioPan's decoder (fixed in ReiPan's copy): keep
   ReiPan's libmpeg_video.cpp.
+- **The rx scheduler runs on real host threads** (2026-10-22, rxthread): priorities are no-ops, so rx
+  threads run alongside the main thread, not only in its yields. What must keep working is the
+  handshake: the dispatch alarm is a host timer thread (src/sdk SetAlarm, handlers under DIntr), the
+  vblank count comes from libgraph's vblank thread raising INTC cause 2 (started by AddIntcHandler(2)),
+  and ReferSemaStatus reports count and waiters. Spins that would hold a core sleep (`// PC:`). Host
+  traps: SuspendThread / ResumeThread are still the FF3 loader mutex -- while the main thread is not
+  yielding it holds it, so *another* thread's WaitSema / SleepThread blocks after waking until the next
+  yield (a main-thread spin waiting on such a thread would deadlock); TerminateThread / DeleteThread do
+  not stop a host thread (a deleted rx thread keeps looping in rxThYield, sleeping); ExitDeleteThread
+  parks the host thread for ever. The ROM's rxThPostCall publishes the write index before filling the
+  entry: reordered on the host.
 - **Two host threads**: the OS main thread pumps SDL events, the game runs on its own thread; SDL
   "main thread only" calls go through the platform's run-on-main-thread helper.
 

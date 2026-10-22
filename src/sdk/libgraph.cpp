@@ -3,6 +3,7 @@
  * ======================================================================== */
 
 #include "libgraph.h"
+#include "eekernel.h"
 #include "rosepan/gs/rosepan_gs_c.h"
 
 #include "../rosepan/os/rosepan_time.h"   // RosePan_Sleep
@@ -157,6 +158,12 @@ static void VblankThreadMain(void *data)
         {
             callback(0);
         }
+
+        /* INTC cause 2 (vblank start) for the handlers AddIntcHandler took,
+         * with interrupts "off" as on the EE. */
+        RosePan_DIntr();
+        RosePan_IntcRaise(2);
+        RosePan_EIntr();
     }
 }
 
@@ -196,11 +203,15 @@ extern "C" {
  * Only 2 and 3 are reachable in practice (SetGsResetGraph passes SCE_GS_DTV480P
  * for video_mode 'P', which nothing selects); anything else keeps 60.
  */
+static sceGsGParam s_gparam = { 1, SCE_GS_NTSC, 1, 0, 0, 0 };
+
 void sceGsResetGraph(short mode, short inter, short omode, short ffmode)
 {
     (void)mode;
-    (void)inter;
-    (void)ffmode;
+
+    s_gparam.sceGsInterMode = inter;
+    s_gparam.sceGsOutMode = omode;
+    s_gparam.sceGsFFMode = ffmode;
 
     s_vblank_period_ns.store(omode == SCE_GS_PAL ? 1000000000ull / 50
                                                  : 1000000000ull / 60,
@@ -216,6 +227,23 @@ int sceGsSyncV(int mode)
     (void)mode;
     WaitForVblank(&s_sync_v_limiter);
     return 1;
+}
+
+sceGsGParam *sceGsGetGParam(void)
+{
+    return &s_gparam;
+}
+
+extern "C" void RosePan_GsStartVblank(void)
+{
+    EnsureVblankThread();
+}
+
+/* The kernel's VSync: wait for the next field. */
+int RosePan_VSync(void)
+{
+    WaitForVblank(&s_sync_v_limiter);
+    return 0;
 }
 
 int sceGsSyncPath(int mode, u_short timeout)
