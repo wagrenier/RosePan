@@ -429,6 +429,24 @@
    "status": "done",
    "task": "Create the PC project (no RoR functions to write). The platform layer comes from ReiPan (../ReiPan, read-only), which took it from MioPan (FF2) and adapted it to FF3: src/sdk emulates the PS2 SDK (libgraph, libdma, libvif, libvu0, libpad, libmc, libcdvd, sif / IOP host, libmpeg + FFmpeg, eekernel threads), src/reipan draws the GS through SDL3 GPU and holds the host thread, log, paths, config and the ImGui debug UI. Steps: (1) copy ../ReiPan/src/reipan to src/rosepan and ../ReiPan/src/sdk to src/sdk; rename ReiPan_ / REIPAN_ / reipan_ identifiers, env variables and file names to RosePan_ / ROSEPAN_ / rosepan_, keeping the tool contract in tools/reverse/README.md 'Platform contract' (ROSEPAN_SHOT_DIR / ROSEPAN_SHOT_EVERY screenshots of the presented frame, ROSEPAN_AUTOPAD scripted pad in sdk/libpad.cpp, ROSEPAN_DATA_DIR, the RosePanGame thread name, the stub log line). (2) Write src/common/rosepan_stub.h from ../ReiPan/src/common/reipan_stub.h: ROSEPAN_STUB / ROSEPAN_BRIDGE printing '[stub] Name (ROR 0x%08x) reached'. (3) Drop or neutralise FF3-only pieces and list each in open-items.md 'Platform bootstrap': reipan/debug/reipan_warp.* (FF3 chapter warps and snapshots), FF3 game hooks in rendering/reipan_graph3d.cpp and reipan_ui, FF3 file names in io/reipan_paths (IMG_BD.BIN, ZERO3.FHD: RoR reads 'cdrom0:\\\\DATA\\\\...' and data/... paths, decide the data folder layout from the ELF), the FF3 IOP services in sdk/iop_* (RoR loads only Sony modules: sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv, fileio, sifcmd, usbd, plus ioprp300.img; its sound goes through rxmpeg / the rx middleware). (4) CMakeLists.txt, CMakePresets.json, cmake/*.cmake and resources/ (shaders) from ReiPan with ReiPan renamed RosePan: target RosePan, output cmake-build-*/RosePan/RosePan.exe, the sibling extern fallback pointed at ../ReiPan/extern then ../MioPan/extern (FFmpeg, shadercross), -fno-strict-aliasing and the src/sdk/pc_prefix.h force-include kept, every .c/.cpp compiled as C++. (5) A placeholder src/main.cpp whose main() initialises the platform, opens the window and presents cleared frames until RoR's main (0x002045a8) is reconstructed. (6) python build.py green; python build.py --run 15 writes work/shots/last.png (look at it); python layoutcheck.py runs clean. Keep platform edits minimal and list them in the summary; record the layer's shape in architecture.md 'PC platform layer' and anything that burned time in hazards.md. Finish --status done (the screenshot of an empty window is the expected picture)."
   },
+  "snd/sndman.cpp": {
+   "notes": "Done as verify: SndMan::update runs every frame now, but every rxSnd call (rx/rxsnd.h, unassigned@00237ce8) is a stub, so nothing is heard and nothing on screen can show it; the screenshot stays black as before (the draw path waits on DogLightPool::createLight, MagScene::update, fileGetSize). Decisions: the TU was cut out of unassigned@00164fc0 (whose next-pick slice mixed Emy, Eff*, SctLayer, WrdSrv and SndMan); 0x1810f4/0x181128 are RxMpeg's ctor/dtor and stay with rxmpeg. rxSndXvabLoad takes a file name (GamSndEntry starts with the name; loadBankByName reads the bank number from chars 3..4). 0x2155f4 is a second assert handler (scePrintf, 27 sites) written as ROR_ASSERT. Field attr (rxSnd IOP param 2) may be pan or an effect send: unconfirmed. TskSnd ctor 0x1f8fc0 is a hand-written stub in lib/unassigned_stubs.cpp. Next: the host sound backend is the user's call (open-items.md Open questions); the rest of unassigned@00164fc0 needs its files defined (Eff* effects, SctLayer, WrdSrv) before porting from it.",
+   "ranges": [
+    [
+     "0017f0d0",
+     "001810f4"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 19:21",
+     "status": "verify",
+     "summary": "SndMan, the sound manager: all 52 functions of 0x17f0d0..0x1810f4 (ctor, init/term/update, master-volume fade, 48 slots with stream and SE state machines, id masks, XVAB banks by id/name, playStream with the TskSnd replay, updateStream feeding the rx file ring into rxSnd ADPCM). New headers rx/rxsnd.h (the rx sound library, stubs) and game/gamsnd.h (GamSndMan, GamMan member +0x18e00); the SndMan::init/update stubs are gone."
+    }
+   ],
+   "status": "verify",
+   "why": "SndMan: ctor 0x17f0d0 (static init 0x2041f8 constructs bss 0x7b2580), init/update, the stream/sound helpers up to the anchor 0x180230 (snd/sndman.cpp string) and its helpers to 0x1810f4, where RxMpeg's ctor starts (RxMpeg::open 0x181150 follows)"
+  },
   "spr/s2d.cpp": {
    "notes": "All 86 functions written; nothing on screen can show them yet (MagScene::draw is a stub), so verify: the first session whose screenshot shows S2d sprites marks it done. Callees are stubs in magscene.cpp, sprman.cpp and lib/unassigned_stubs.cpp. Trap: MagScene::m_camera_entity (+0x2ab70) is a host DogEntity (0xa0 bytes) but DogEntity::getMatrix returns this + 0xf0, which belongs to the derived camera class (likely DogCamera); give the scene the real class before writing getMatrix. g_wrdTable (0x298ee0) is defined in lib/unassigned_stubs.cpp. RxMpeg gained m_04 (+4) and m_name (+0x44). The user's top priority is now the render chain (open-items.md Next up item 0): system/sysnowloading.cpp first, then mag/magscenerender.cpp, unassigned@0021fb50, unassigned@00216ad0, spr/sprtexture.cpp, dog/dogtexinfo.cpp, spr/sprman.cpp.",
    "ranges": [
@@ -507,6 +525,7 @@
    "why": "the source string system/sysnowloading.cpp in init and clearVram; 0x204d38..0x2050e8 are SysNowLoading helpers called only from init / term / draw (this in a0, members +0x230..+0x29c); main.cpp ends at mainResetExceptionHandlers 0x204ca4, unassigned@002053f4 follows"
   },
   "unassigned@001056f8": {},
+  "unassigned@00164fc0": {},
   "unassigned@00190a78": {},
   "unassigned@001bde58": {},
   "unassigned@0020eda4": {},

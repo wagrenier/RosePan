@@ -75,6 +75,9 @@ void        rxSysTtyWrite(const char *buf, int size);           // ROR 0x002419a
 void        rxSysOpenTty(void);                                 // ROR 0x00241a00
 void        rxSysSetIopImage(const char *img);                  // ROR 0x00241b20
 const char *rxSysGetProductNumber(void);                        // ROR 0x00241b90
+/* Closes the tty, the semaphore, the file devices, the IOP RPC and the
+ * threads (SndMan::term). */
+void        rxSysTerm(void);                                    // ROR 0x00241ac8
 int         rxSysGetCountry(void);                              // ROR 0x00241bb0
 int         rxSysGetMemorySize(void);                           // ROR 0x00241c00
 int         rxSysIsCdromPath(const char *path);                 // ROR 0x00241c18

@@ -50,11 +50,40 @@ struct CmnTaskMan
     int  addTask(int group, int start, int prio, int frames, CmnITask *task, int arg,
                  int *id, int user);                                     // ROR 0x001e71fc
     void exec();                                                         // ROR 0x001e7a20
+    /* Non-zero while the task id still runs. */
+    void *getTask(int id);                                               // ROR 0x001e7d7c
 
     SysTimer m_timer;           // ROR 0x40 (bss 0x7a3dc0)
 };
 
 extern CmnTaskMan g_taskMan;    /* bss 0x7a3d80 */
+
+/* The parameter block TskSnd's constructor copies (0x40 bytes on the EE;
+ * only the words SndMan::playStream sets are named). layout: host. */
+struct TskSndParam
+{
+    int         _00[3];
+    int         m_id;           // ROR 0x0c: the stream id
+    int         _10[3];
+    const char *m_name;         // ROR 0x1c: kind 7 copies the name (0x1b chars)
+    int         _20[2];
+    int         m_arg;          // ROR 0x28: playStream's arg
+    int         m_mode;         // ROR 0x2c: playStream's mode
+    int         m_id2;          // ROR 0x30: the stream id again
+    int         _34[3];
+};
+
+/* TskSnd : CmnITask (vtable 0x2e4e70, EE 0xc0 bytes, unassigned@001f82e4):
+ * a sound task; kind picks its step function (7: play the stream m_name
+ * once the old one has stopped). layout: host -- no members. */
+struct TskSnd : CmnITask
+{
+    TskSnd(int kind, const TskSndParam *param);                          // ROR 0x001f8fc0
+};
+
+/* Swaps a sound id 0x0a00xxxx..0x0a02xxxx for its twin in the column the
+ * game's language / version picks (table data 0x295f08). Other ids pass. */
+u_int utlConvSndId(u_int id);                                            // ROR 0x00106658
 extern EmyManager g_emyManager; /* bss 0x7b2140 */
 extern int g_emyManagerTaskId;  /* bss 0x7b45c0: addTask's id for EmyManager (read by 0x1c58c0) */
 
@@ -84,6 +113,10 @@ struct RxMpeg
     /* The library's status word, -1 when not open (callers: 0 playing, 1 finished). */
     int  getStatus();                                                    // ROR 0x0018173c
     int  isEnd();                                                        // ROR 0x0018176c
+    /* Once a frame from SndMan::update (frame parity and the decoder). */
+    void update();                                                       // ROR 0x0018120c
+    /* Empty in the ROM; SndMan::update calls it after rxSndUpdate. */
+    void postUpdate();                                                   // ROR 0x00181494
 
     int  m_active;              // ROR 0x00: open sets it, close / the constructor clear it; MagSystem::waitVSync runs rxThVSync while set
     int  m_04;                  // ROR 0x04: 1 = S2dMovie::drawMovie draws a frame; RxMpeg::stop tests it
