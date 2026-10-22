@@ -500,11 +500,18 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   flags +0xa, file count +0xe), then per-file tables by flag: sizes (1), offsets from the header (2),
   16-bit attributes (0x10, 0x20 ...), NUL-separated names (0x8000). Loaders read the first 2048
   bytes, assert `getFileOffset(0) == 2048`, then read single files.
-- **The file reader** (unassigned@001bde58, 0x1be2cc..): `FileReader` {request, own fd} runs a
-  `FileReadReq` (0x24: fd, step, name, seek offset / whence, buffer / size, close flag) as an
-  open / seek / read / close state machine over rxSysStreamOpen / rxFileSeek / rxFileRead /
-  rxFileClose; while it waits it draws the now-loading screen (0x2051cc) when one is up, else
-  rxThSync + SndMan::update. `fileGetSize` 0x1be768, `fileExists` 0x1be84c.
+- **The file reader** (`game/gamfile.cpp`, pinned 0x1be2cc..0x1beb70, written 2026-10-22, `verify`;
+  file name a guess): `FileReader` {request, own fd} runs a `FileReadReq` (0x24: fd, step, name,
+  seek offset / whence, buffer / size, close flag) as an open / seek / read / close state machine
+  (`FileReader::update` 0x1be564; `read` 0x1be524 resets the step, `resume` 0x1be548 does not) over
+  rxSysStreamOpen(0x8001) / rxFileSeek / rxFileRead / rxFileClose. m_step is (step << 1) | waiting:
+  a step with nothing to do adds 2, an issued one adds 1 and the next +1 comes once isReady
+  (rxFileSync no-wait) is idle. Returns 0 once past the close step, 1 while busy (async callers poll
+  next frame). A waiting reader draws main's now-loading object (`g_nowLoading`, sdata 0x2d8ffc,
+  0x2051cc) when one is up, else rxThSync(1) + SndMan::update. `fileGetSize` 0x1be768 (open, seek
+  to end, close, each waited out), `fileExists` 0x1be84c (open flags 1). Uncalled: three rxFileCd
+  clock wrappers 0x1be880.., `fileClockToSeconds` 0x1be8bc / `fileClockDiff` 0x1bea18 (binary
+  sceCdCLOCK bytes; the month table 0x2b8da8 has 0 for December, a ROM quirk kept).
 - 0x7b40c0: a movie-player object (`RxMpeg`, ctor 0x1810f4; class name unverified): +0 open
   (`open` 0x181150 sets it, `close` 0x1816b0 clears it), +4 = 1 while a frame is there to draw,
   +0x2c / +0x30 width / height (0x200 x 0x180 by default), +0x44 the movie name (0x80 bytes).

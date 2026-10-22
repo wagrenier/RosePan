@@ -3562,27 +3562,37 @@
 /* 001be0c0 0000000c */ FUN_001be0c0(){}
 /* 001be0cc 00000044 */ FUN_001be0cc(){}
 /* 001be110 000001bc */ FUN_001be110(){}
+
+// *****************************************************************************
+// FILE -- game/gamfile.cpp
+// *****************************************************************************
+
 /* 001be2cc 00000010 */ FileReader::FileReader(){}  // ror
 /* 001be2dc 0000005c */ FileReader::~FileReader(){}  // ror
 /* 001be338 00000034 */ FileReader::openFile(){}  // ror
 /* 001be36c 00000020 */ FileReader::readFile(){}  // ror
-/* 001be38c 00000038 */ FUN_001be38c(){}
+/* 001be38c 00000038 */ FileReader::readCurrent(){}  // ror
 /* 001be3c4 00000050 */ FileReader::closeFile(){}  // ror
 /* 001be414 00000030 */ FileReader::close(){}  // ror
 /* 001be444 0000004c */ FileReader::seekFile(){}  // ror
-/* 001be490 00000038 */ FUN_001be490(){}
+/* 001be490 00000038 */ FileReader::seekCurrent(){}  // ror
 /* 001be4c8 0000005c */ FileReader::isReady(){}  // ror
 /* 001be524 00000024 */ FileReader::read(){}  // ror
-/* 001be548 0000001c */ FUN_001be548(){}
-/* 001be564 000001d0 */ FUN_001be564(){}
+/* 001be548 0000001c */ FileReader::resume(){}  // ror
+/* 001be564 000001d0 */ FileReader::update(){}  // ror
 /* 001be734 00000034 */ FileReadReq::FileReadReq(){}  // ror
 /* 001be768 000000e4 */ fileGetSize(){}  // ror
 /* 001be84c 00000034 */ fileExists(){}  // ror
-/* 001be880 00000014 */ FUN_001be880(){}
-/* 001be894 00000014 */ FUN_001be894(){}
-/* 001be8a8 00000014 */ FUN_001be8a8(){}
-/* 001be8bc 00000158 */ FUN_001be8bc(){}
-/* 001bea18 00000158 */ FUN_001bea18(){}
+/* 001be880 00000014 */ fileCdSetClockRead(){}  // ror
+/* 001be894 00000014 */ fileCdGetClockRead(){}  // ror
+/* 001be8a8 00000014 */ fileCdGetClock(){}  // ror
+/* 001be8bc 00000158 */ fileClockToSeconds(){}  // ror
+/* 001bea18 00000158 */ fileClockDiff(){}  // ror
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 001beb70 00000054 */ GamFont::GamFont(){}  // ror
 /* 001bebc4 00000028 */ GamFont::~GamFont(){}  // ror
 /* 001bebec 000001d4 */ GamFont::setFont(){}  // ror

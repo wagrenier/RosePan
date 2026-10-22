@@ -45,7 +45,7 @@
 
 static char           s_version[0x40];      /* bss 0x7b45d0: "0.1.<number>n.<date>.<time>" */
 static int            s_mainThreadId;       /* sdata 0x2d8ff8 */
-static SysNowLoading *s_nowLoading;         /* sdata 0x2d8ffc */
+SysNowLoading        *g_nowLoading;         /* sdata 0x2d8ffc */
 
 /* mainExceptionHandler's register rows (data 0x2d9000). */
 static const MainRegRow s_regRows[] = {
@@ -172,10 +172,10 @@ void mainInitGame(int stage)
     mainInitGraph();
     sysInitManagers();
     g_magSystem.init();
-    s_nowLoading = new SysNowLoading;
-    if (s_nowLoading != NULL)
+    g_nowLoading = new SysNowLoading;
+    if (g_nowLoading != NULL)
     {
-        s_nowLoading->init();
+        g_nowLoading->init();
         g_magSystem.setSceneFlags(1, 1, 1, 1, 1, 1, 0);
         g_magSystem.m_scene.initCamera();
         g_magSystem.start();
@@ -183,11 +183,11 @@ void mainInitGame(int stage)
         g_gamMan.loadSystemData();
         if (stage != -1)
             g_gamMan.loadStage(stage);
-        s_nowLoading->term();
-        delete s_nowLoading;    // ~SysNowLoading calls term again
+        g_nowLoading->term();
+        delete g_nowLoading;    // ~SysNowLoading calls term again
         g_bss_7a3d4c = 1;
         g_bss_7a3d48 = 1;
-        s_nowLoading = NULL;
+        g_nowLoading = NULL;
         g_magSystem.resetDBuff();
         MagSystem::m_v_interval = 2;
         g_magSystem.resetDBuff();
