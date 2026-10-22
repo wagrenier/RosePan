@@ -58,6 +58,18 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
         i3dCtxRunGroup's walk (the sorted layer / set order) or the packet writers themselves.
      4. `unassigned@00216ad0`: i3d packets and texture uploads (i3dPktOpenChain, i3dPktSetReg,
         i3dTexMakeUpload, i3dTexRegsSet ...).
+        **Packet writers written 2026-10-22 (`verify`)** as `i3d/i3dpacket.cpp` (pinned
+        0x21b220..0x21c960, 54 functions incl. 20 created in Ghidra): every bridge of the packet
+        module is gone (tags, SetReg, alpha, OpenChain, draw sets, the call tags) and the sprite /
+        line / point / triangle writers and packers are real. Black screen: still no host consumer.
+        Left in unassigned@00216ad0 (still queued here): the debug-menu code 0x216ad0..~0x218470
+        (DBGFLAG.BIN strings: belongs to a debug/ file, not i3d), the texture objects and GS
+        transfers 0x218470..0x21a120 (i3dTexMakeUpload ...), fog 0x21a120..0x21a3e8 (i3dFogInit is
+        a reached stub; I3dFogState is in i3dpacket.h until the fog file exists), the i3r helpers,
+        the lights (i3dCtxCreateLight 0x21b148), and the VU1 strip uploaders 0x21c960..0x21eb28.
+        **The host draw hook** is still undecided (the user's call): the REGLIST / *F writers
+        here are the natural place for a 2D host consumer (each one is one GS primitive with its
+        PRIM word); the strips need a VU1 replacement or a hook above the packets.
      5. `spr/sprtexture.cpp`: SprTexture (setList / update; replace the update bridge).
      6. `dog/dogtexinfo.cpp`: the texture table SprTexture loads into (DogTexInfo::init / add are
         reached).

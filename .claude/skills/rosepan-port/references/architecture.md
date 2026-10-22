@@ -234,15 +234,16 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   Files pinned so far (2026-10-22): **`i3d/i3dctx.cpp`** 0x21eb28..0x21fb30 (written, verify),
   **`i3d/i3dlayer.cpp`** 0x222f50..0x224de0 (written, verify), **`i3d/i3dtim2.cpp`**
   0x224de0..0x225018 (todo), **`i3d/i3dview.cpp`** 0x226278..0x227a98 (written, verify) and
-  **`i3d/i3dvram.cpp`** 0x227a98..0x228c08 (written, verify). Between tim2 and view,
+  **`i3d/i3dvram.cpp`** 0x227a98..0x228c08 (written, verify), **`i3d/i3dpacket.cpp`**
+  0x21b220..0x21c960 (written, verify; below). Between tim2 and view,
   0x225018..0x226278 (unassigned): animation curve sampling (0x225018 binary search over key times,
   0x225080 / 0x225148 scalar / vector segment eval) and vertex morph blending (0x225460..0x2261b8),
   called from the model packet builders. Modules seen around them: the wire-shape strip builders
   0x21e6f8 / 0x21e8f8 / 0x21e9f8 before 0x21eb28 (0x21e1d8 the line strip), model packet builders
   0x21fb50..0x222f50 (unassigned@0021fb50: per material a state packet node, i3dGroupBegin*Packet),
   GS transfer builders 0x218fa8 / 0x2190c8 / 0x2192c8 and 0x219c88..0x219d68, texture objects
-  0x219a98.., packet heads 0x21b220..0x21b698 (draw-set list / init, i3dPktDmaTag, SetReg, the view /
-  fog CALLs, ALPHA modes, OpenChain), TIM2 helpers from 0x224de0 (an unreferenced TIM2 / CLT header
+  0x219a98.., the fog state 0x21a120..0x21a3e8, i3r model helpers 0x21a3e8..0x21ac80, lights
+  0x21ac80..0x21b220, the packet writers (i3dpacket.cpp), TIM2 helpers from 0x224de0 (an unreferenced TIM2 / CLT header
   check, picture lookup 0x224e70, size 0x224ed0), the view (below), the i3d system calls
   0x237178..0x237cc8 (i3dFlushCache, i3dPrintf).
   - **Two copies of the vector / matrix module**: 0x236960..0x236dxx (i3dVecZero, i3dVecCopyW,
@@ -251,7 +252,24 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     (i3dVecCopy, i3dVecNeg 0x237468, i3dMatInverse 0x237678, i3dMatMul 0x2377d0 ...). The view uses
     the first; DogEntity / DogActor the second. Row-vector convention: i3dMatMul(out, a, b) runs VU0
     micro 0 (out row i = sum_j b[i][j] * a[j]), so p * out = (p * b) * a. The first copy is bridged in
-    lib/unassigned_stubs.cpp (unassigned@00228c08); the second is still stubs.
+    lib/unassigned_stubs.cpp (unassigned@00228c08); of the second, i3dVecCopy, i3dVecAdd 0x2373d8,
+    i3dVecMul 0x237438 / i3dVecMul2 0x237450, i3dVecFtoi0 0x237600, i3dVecFtoi4 0x237610 are bridged
+    (i3dpacket.cpp's float writers), the rest still stubs. The second copy has duplicates inside it too
+    (0x2373d8 = 0x2373f0 add, 0x237408 = 0x237420 sub, 0x237438 = 0x237450 mul).
+  - **The packet writers** (`i3d/i3dpacket.cpp`, 0x21b220..0x21c960; 20 of its 54 functions were
+    folded into the one before and created in Ghidra): draw-set list helpers, i3dPktDmaTag (tag top
+    byte 0x10 CNT / 0x30 REF / 0x50 CALL), i3dPktDirectTag 0x21b4d0 (VIF FLUSHA + DIRECT qwc, the
+    prefix of every GIF packet), i3dPktSetReg (A+D), ALPHA modes (jump table 0x3027c0), i3dPktClearZ
+    0x21b6c8 (a TEST_1 = alpha NEVER / fail ZB_ONLY full-screen sprite), and one writer per GS
+    primitive in two families: *F writers 0x21b7c8..0x21c0fc take float vectors (PACKED GIF tags at
+    data 0x302850..0x302898; XYZ = ftoi4(v * screen scale 0x2db340 + offset 0x2db330), set by
+    i3dPktSetScreenScale / Offset 0x21c120 / 0x21c100; colour = ftoi0(v * (255,255,255,128)) or
+    textured * 128 (data 0x3026c0 / 0x3026b0); UV ftoi4), and REGLIST writers 0x21c140..0x21c8c4 on
+    values from i3dPackXYZ / RGBAQ / UV / ST (PRIM first; some leave a NOP slot unwritten). Every
+    primitive sets ABE; the GIF tag's PRIM decides the name (Flat / Gouraud, Tex UV (FST) / ST).
+    0x21c960.. is a different module: VU1 strip uploaders (VIF UNPACK 0x6c.. codes, i3dPktDrawStrip*,
+    i3dPktDrawLineStrip, the wire shapes, matrix / vector uploads 0x21e428 / 0x21e488, the layer
+    header 0x21e5a0, 0x21e690).
   - **VU0 microprogram** (data 0x2949f0, `python vudis.py 2949f0 9c <addr>`): 0 the 4x4 multiply
     (vf4..7 = a, vf8..11 = b, result in vf8..11); 0xc8 a subroutine: vf12..15 = box rows (vf8..11)
     x matrix (vf4..7); 0x96 box culling (corners = vf15 +- vf12 +- vf13 +- vf14, CLIP each, vi2 =

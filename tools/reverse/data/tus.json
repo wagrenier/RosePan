@@ -68,6 +68,24 @@
    "status": "verify",
    "why": "the i3d layer / draw-group / sort module: layer setters and packet begin/end 0x222f50..0x2239b8 (all take an I3dLayer), the group node list, the radix / cocktail sort and the group run 0x2239b8..0x224b28, the texture register packets 0x224b28..0x224de0; model packet code before it (0x21fb50..) and the TIM2 module after it (0x224de0: the unreferenced TIM2 / CLUT header check, then picture and size helpers) are other files"
   },
+  "i3d/i3dpacket.cpp": {
+   "notes": "All packet-module bridges are gone. Black screen: nothing on the host consumes i3d packets (no GS emulation); the user still has to choose the host draw hook (open-items B.3 / B.4). Left in unassigned@00216ad0 (still first in the queue): debug code 0x216ad0..~0x218470 (DBGFLAG.BIN strings, a debug/ file), texture objects and GS transfers 0x218470..0x21a120, fog 0x21a120..0x21a3e8 (I3dFogState lives in i3dpacket.h until then; i3dFogInit is a reached stub), i3r helpers 0x21a3e8..0x21ac80, lights 0x21ac80..0x21b220 (i3dCtxCreateLight), and the VU1 strip uploaders 0x21c960..0x21eb28 (VIF UNPACK codes). Start the next session by defining one of those files; the fog and light files are small and reached.",
+   "ranges": [
+    [
+     "0021b220",
+     "0021c960"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 16:23",
+     "status": "verify",
+     "summary": "i3d packet writers pinned 0x21b220..0x21c960 and written: draw-set helpers, DMA / DIRECT tags, SetReg, alpha modes, OpenChain, ClearZ, the float PACKED and REGLIST primitive writers, screen transform, packers; 20 hidden functions created in Ghidra; vector second-copy bridges (Add, Mul, Ftoi0, Ftoi4, Copy)"
+    }
+   ],
+   "status": "verify",
+   "why": "the GS packet writers of the i3d library: draw-set list helpers 0x21b220 (after i3dCtxCreateLight ends 0x21b21c), DMA / GIF tags, register writes, the float (VU0 ftoi) and packed-REGLIST primitive writers, ending with the packers i3dPackXYZ 0x21c940; 0x21c960.. starts the VU1 strip uploaders (VIF UNPACK codes), a different module"
+  },
   "i3d/i3dtim2.cpp": {
    "ranges": [
     [

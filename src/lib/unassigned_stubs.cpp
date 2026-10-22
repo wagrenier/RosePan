@@ -145,16 +145,6 @@ int i3rGetNodeIndexByName(I3rRoot *root, const char *name)
     return {};
 }
 
-// bridge of ROR 0x0021b288 (the ROM's code; unassigned@00216ad0 replaces it)
-int i3dBatchClearTextures(I3dDrawSet *set)
-{
-    ROSEPAN_BRIDGE("i3dBatchClearTextures", 0x0021b288);
-    for (u_int i = 0; i < set->m_tex_count; i++)
-        if (set->m_tex_used[i] != 0)
-            i3dTexRegsSetNone(set->m_tex_regs[i]);
-    return 0;
-}
-
 // stub of ROR 0x00219d68
 u_long * i3dClutMakeMove(void *clut, u_long *pkt, u_int src, u_int dst)
 {
@@ -400,18 +390,6 @@ WrdEntry * WrdTable::get(int n)
     return {};
 }
 
-// bridge of ROR 0x0021b550 (the ROM's code; unassigned@00216ad0 replaces it):
-// a CNT tag with VIF DIRECT 2 (0x21b4d0), an A+D GIF tag, value / reg.
-u_long * i3dPktSetReg(u_long *pkt, u_long reg, u_long value)
-{
-    ROSEPAN_BRIDGE("i3dPktSetReg", 0x0021b550);
-    pkt[5] = reg;
-    pkt[2] = 0x1000000000008001ull;
-    pkt[4] = value;
-    pkt[3] = 0xe;
-    return i3dPktDmaTag(pkt, 2, 0x10, NULL, 0x11000000, 2 | 0x50000000) + 4;
-}
-
 // stub of ROR 0x0010fac0
 float DogCamera::getLensFov()
 {
@@ -471,14 +449,6 @@ void     * i3dCtxSetFog(i3dContext *ctx, const I3dFog *fog)
     return {};
 }
 
-// bridge of ROR 0x0021b260 (the ROM's code; unassigned@00216ad0 replaces it)
-u_long   * i3dDrawSetUseTex(I3dDrawSet *set, int n)
-{
-    ROSEPAN_BRIDGE("i3dDrawSetUseTex", 0x0021b260);
-    set->m_tex_used[n]++;
-    return set->m_tex_regs[n];
-}
-
 // stub of ROR 0x0021ac80
 void i3dLightDescInit(I3dLightDesc *desc)
 {
@@ -528,30 +498,6 @@ void i3dMatUnit(sceVu0FVECTOR *m)
     ROSEPAN_STUB("i3dMatUnit", 0x00237340);
 }
 
-// stub of ROR 0x0021c8c8
-u_long i3dPackRGBAQ(float q, u_int r, u_int g, u_int b, u_int a)
-{
-    ROSEPAN_STUB("i3dPackRGBAQ", 0x0021c8c8);
-    return {};
-}
-
-// stub of ROR 0x0021c940
-u_long i3dPackXYZ(u_int x, u_int y, u_int z)
-{
-    ROSEPAN_STUB("i3dPackXYZ", 0x0021c940);
-    return {};
-}
-
-// bridge of ROR 0x0021b490 (the ROM's code; unassigned@00216ad0 replaces it)
-u_long   * i3dPktDmaTag(u_long *pkt, u_int qwc, u_int id, const void *addr,
-                       u_int vif0, u_int vif1)
-{
-    ROSEPAN_BRIDGE("i3dPktDmaTag", 0x0021b490);
-    pkt[0] = ((u_long)i3dDmaAddr(addr) << 32) | (u_long)(u_int)(id << 24) | (qwc & 0xffff);
-    pkt[1] = ((u_long)vif1 << 32) | vif0;
-    return pkt + 2;
-}
-
 // stub of ROR 0x0021e1d8
 u_long   * i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
                               const void *color, const void *xyz, int flags)
@@ -580,26 +526,54 @@ u_long   * i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matri
     return pkt;
 }
 
-// bridge of ROR 0x0021b4f8 (the ROM's code; unassigned@00216ad0 replaces it):
-// a REF of the 6-qword register packet with VIF DIRECT 6.
-u_long   * i3dPktRefTexRegs(u_long *pkt, u_long *regs)
-{
-    ROSEPAN_BRIDGE("i3dPktRefTexRegs", 0x0021b4f8);
-    return i3dPktDmaTag(pkt, 6, 0x30, regs, 0x11000000, 6 | 0x50000000);
-}
+// ---- the vector module's second copy (unassigned@00228c08): bridges of
+// the ROM's VU0 macro code for i3d/i3dpacket.cpp's float writers ----
 
-// stub of ROR 0x0021c140
-u_long   * i3dPktSprite(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq)
-{
-    ROSEPAN_STUB("i3dPktSprite", 0x0021c140);
-    // PC: the packet cursor stays valid for the i3d groups (i3d/i3dlayer.cpp).
-    return pkt;
-}
-
-// stub of ROR 0x002372d0
+// bridge of ROR 0x002372d0: lq / sq.
 void i3dVecCopy(float *out, const float *in)
 {
-    ROSEPAN_STUB("i3dVecCopy", 0x002372d0);
+    ROSEPAN_BRIDGE("i3dVecCopy", 0x002372d0);
+    memmove(out, in, 4 * sizeof(float));
+}
+
+// bridge of ROR 0x002373d8: vadd.xyzw.
+void i3dVecAdd(float *out, const float *a, const float *b)
+{
+    ROSEPAN_BRIDGE("i3dVecAdd", 0x002373d8);
+    for (int i = 0; i < 4; i++)
+        out[i] = a[i] + b[i];
+}
+
+// bridge of ROR 0x00237438: vmul.xyzw.
+void i3dVecMul(float *out, const float *a, const float *b)
+{
+    ROSEPAN_BRIDGE("i3dVecMul", 0x00237438);
+    for (int i = 0; i < 4; i++)
+        out[i] = a[i] * b[i];
+}
+
+// bridge of ROR 0x00237450: a byte copy of i3dVecMul.
+void i3dVecMul2(float *out, const float *a, const float *b)
+{
+    ROSEPAN_BRIDGE("i3dVecMul2", 0x00237450);
+    for (int i = 0; i < 4; i++)
+        out[i] = a[i] * b[i];
+}
+
+// bridge of ROR 0x00237600: vftoi0.xyzw (truncates).
+void i3dVecFtoi0(int *out, const float *in)
+{
+    ROSEPAN_BRIDGE("i3dVecFtoi0", 0x00237600);
+    for (int i = 0; i < 4; i++)
+        out[i] = (int)in[i];
+}
+
+// bridge of ROR 0x00237610: vftoi4.xyzw (12.4 fixed point, truncates).
+void i3dVecFtoi4(int *out, const float *in)
+{
+    ROSEPAN_BRIDGE("i3dVecFtoi4", 0x00237610);
+    for (int i = 0; i < 4; i++)
+        out[i] = (int)(in[i] * 16.0f);
 }
 
 // stub of ROR 0x00237408
@@ -641,14 +615,6 @@ void i3dMatMul(sceVu0FVECTOR *out, sceVu0FVECTOR *a, sceVu0FVECTOR *b)
     ROSEPAN_STUB("i3dMatMul", 0x002377d0);
 }
 
-// stub of ROR 0x0021c538
-u_long   * i3dPktLine(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq)
-{
-    ROSEPAN_STUB("i3dPktLine", 0x0021c538);
-    // PC: the packet cursor stays valid for the i3d groups (i3d/i3dlayer.cpp).
-    return pkt;
-}
-
 // stub of ROR 0x002372e0
 void i3dVecCopy2(float *out, const float *in)
 {
@@ -675,131 +641,8 @@ void i3dVecScale(float s, float *out, const float *in)
 }
 
 // ---- i3d bridges the layer TU needs (i3d/i3dlayer.cpp, 2026-10-22) ----
-// The ROM's code for small helpers of the packet module (unassigned@00216ad0),
-// so the layers' packet cursor and draw sets stay valid until that TU is
-// written; it replaces them.
-
-// bridge of ROR 0x0021b600
-u_long *i3dPktSetAlphaMode(u_long *pkt, int mode)
-{
-    ROSEPAN_BRIDGE("i3dPktSetAlphaMode", 0x0021b600);
-    u_long alpha = 0;
-    if (mode == 0)
-        return pkt;
-    switch (mode)
-    {
-    case 1: alpha = 0x40; break;
-    case 2: alpha = 0; break;
-    case 0x10: alpha = 0x44; break;
-    case 0x11: alpha = 0x48; break;
-    case 0x12: alpha = 0x42; break;
-    case 0x20: alpha = 0x54; break;
-    case 0x21: alpha = 0x58; break;
-    case 0x22: alpha = 0x52; break;
-    }
-    return i3dPktSetReg(pkt, 0x42, alpha);
-}
-
-// bridge of ROR 0x0021b698: blend mode 0x10, then TEST_1 0x5000d.
-u_long *i3dPktOpenChain(u_char *pkt)
-{
-    ROSEPAN_BRIDGE("i3dPktOpenChain", 0x0021b698);
-    return i3dPktSetReg(i3dPktSetAlphaMode((u_long *)pkt, 0x10), 0x47, 0x5000d);
-}
-
-// bridge of ROR 0x0021b5a0 (the ROM's code; unassigned@00216ad0 replaces it):
-// a CALL of the layer view's packet (view +0x3f8), when it has a view.
-u_long *i3dPktCallView(u_long *pkt, I3dLayer *layer)
-{
-    ROSEPAN_BRIDGE("i3dPktCallView", 0x0021b5a0);
-    if (layer->m_view == NULL)
-        return pkt;
-    pkt[1] = 0;
-    pkt[0] = ((u_long)layer->m_view->m_packet << 32) | I3D_DMA_CALL;
-    return pkt + 2;
-}
-
-// stub of ROR 0x0021b5d0
-u_long *i3dPktCallFog(u_long *pkt, I3dLayer *layer)
-{
-    ROSEPAN_STUB("i3dPktCallFog", 0x0021b5d0);
-    // PC: a CALL of fog +0x18 when the layer has fog; i3dCtxSetFog is a stub.
-    return pkt;
-}
-
-// bridge of ROR 0x0021b220
-void i3dDrawSetInsertAfter(I3dDrawSet *set, I3dDrawSet *at)
-{
-    ROSEPAN_BRIDGE("i3dDrawSetInsertAfter", 0x0021b220);
-    I3dDrawSet *next = at->m_next;
-    set->m_next = next;
-    next->m_prev = set;
-    at->m_next = set;
-    set->m_prev = at;
-}
-
-// bridge of ROR 0x0021b238
-void i3dDrawSetMoveAfter(I3dDrawSet *set, I3dDrawSet *at)
-{
-    ROSEPAN_BRIDGE("i3dDrawSetMoveAfter", 0x0021b238);
-    set->m_prev->m_next = set->m_next;
-    set->m_next->m_prev = set->m_prev;
-    I3dDrawSet *next = at->m_next;
-    set->m_next = next;
-    next->m_prev = set;
-    at->m_next = set;
-    set->m_prev = at;
-}
-
-// bridge of ROR 0x0021b300
-void i3dTexSetDescInit(I3dTexSetDesc *desc)
-{
-    ROSEPAN_BRIDGE("i3dTexSetDescInit", 0x0021b300);
-    desc->m_sort_param = 0;
-    desc->m_depth = 0.0f;
-    desc->m_tex_no = NULL;
-    desc->m_tex_count = 0;
-    desc->m_sort_func = 0;
-    desc->m_sort_order = 0;
-}
-
-// bridge of ROR 0x0021b320: a draw set from a description, its group and
-// its per-slot texture numbers, register packets (6 qwords) and use counts.
-int i3dDrawSetInit(I3dDrawSet *set, I3dLayer *layer, const I3dTexSetDesc *desc, u_int hash)
-{
-    ROSEPAN_BRIDGE("i3dDrawSetInit", 0x0021b320);
-    i3dContext *ctx = layer->m_ctx;
-    set->m_hash = hash;
-    set->m_next = set;
-    set->m_prev = set;
-    set->m_group = i3dCtxCreateGroup(ctx, desc->m_sort_func, desc->m_sort_order, desc->m_sort_param);
-    set->m_layer = layer;
-    set->m_tex_regs = NULL;
-    set->m_reserved_next = NULL;
-    set->m_tex_index = NULL;
-    set->m_tex_count = desc->m_tex_count;
-    set->m_depth = desc->m_depth;
-    set->m_sort_func = desc->m_sort_func;
-    set->m_sort_order = desc->m_sort_order;
-    set->m_sort_param = desc->m_sort_param;
-    set->m_tex_used = NULL;
-    if (desc->m_tex_count != 0)
-    {
-        // PC: host-sized arrays (the ROM: count words each, 16-byte rounded).
-        u_int n = desc->m_tex_count;
-        u_int *index = (u_int *)i3dCtxAllocTail(ctx, (int)((n * sizeof(u_int) + 15) >> 4));
-        set->m_tex_regs = (u_long **)i3dCtxAllocTail(ctx, (int)((n * sizeof(u_long *) + 15) >> 4));
-        set->m_tex_used = (int *)i3dCtxAllocTail(ctx, (int)((n * sizeof(int) + 15) >> 4));
-        set->m_tex_index = index;
-        for (u_int i = 0; i < n; i++)
-        {
-            index[i] = (u_int)desc->m_tex_no[i];
-            set->m_tex_regs[i] = (u_long *)i3dCtxAllocTail(ctx, 6);
-            set->m_tex_used[i] = 0;
-        }
-    }
-    return 0;
-}
+// The ROM's code for small helpers of the texture objects (unassigned@00216ad0)
+// and the vector module, until their TUs replace them.
 
 // bridge of ROR 0x00218db8: bits per pixel by GS pixel format.
 int i3dPsmBits(int psm)
