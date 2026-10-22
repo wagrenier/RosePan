@@ -269,6 +269,23 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   +0x29120, light set +0x2050, view objects +0x2734[4], camera mode +0x2ad50, `MagLifePC` at
   +0x2adc0 (the player; vptr +0x14), `MagLifeBwn` at +0x2afe0 (Brown). Chapter archives
   `data/ch/NN/CHAPNN.RPK` (sdata 0x2961a8) feed `MagSystem::loadModel`.
+  Scene map from the constructor 0x1360a0 (magscene2 session, 2026-10-22; word index x 4 = offset):
+  +0x2330 `MagLifeMan` (64 x 16-byte entries + head, priority-sorted), +0x29520 `DogTexInfo`
+  (256 textures, shadow01 from rodata 0x2ed500 first), +0x29540 four sky ("tenkyu") slots of 0x520
+  (buffer +0, three DogModels at +0x10 stride 0x1a0, id +0x4f0 (-1 free), texture list +0x504,
+  data +0x508; released by 0x1386d4 / 0x13ff00), +0x2aa10 two 0x38-byte view records (near 5,
+  far 2000, +-5.12 x +-4.48, z 65530..1, screen 0..511 x 0..447, offset 1792 / 1824), +0x2aae0
+  four 0x20-byte i3d fog records (colour vector + four floats; i3dCtxSetFog 0x21a158), camera
+  target pos / at at +0x2ada0 / +0x2adb0, `MagLifePC` +0x2adc0 (<= 0x220), `MagLifeBwn` +0x2afe0
+  (0xd40), `MagLifeBwnCtrl` +0x2bd20 (0x140; its state word at +0 is MagSystem::getBwnState's),
+  the MagLifeMenu* objects +0x2be60..0x40780 (Item, Map, Stock, Save, Load, Title, Opt, Movie,
+  Mcd, Now, Board2D, SelLang, each vptr +0x14), life objects of unnamed classes at +0x41850
+  (ctor 0x12f008), +0x41890 (0x12f298), +0x418f0 (0x130da4), the 2D layers `S2dCineSco`
+  +0x41930, `S2dBg` +0x42260, `S2dMes` +0x42bb0 (all MagLife, level 7, life priorities 0x8006 /
+  0x8000 / 0x800a), objects at +0x837e0 (ctor 0x176a3c), +0x84aa8 (0x19226c), +0x8542c
+  (0x17c0f0), `MagSceneIFMap` / `MagSceneIFChara` at +0x854e0 / +0x854e8, Brown / PC actor
+  numbers +0x853b4 / +0x853b8. Every MagLife has `m_scene` at +0x20 and the vptr at +0x14;
+  MagLifeControlChara's bound actor is +0x58 (`m_actor`).
 - 0x7b40c0: a movie-player object (`RxMpeg`, ctor 0x1810f4; class name unverified); its first word
   set = a movie is playing.
 

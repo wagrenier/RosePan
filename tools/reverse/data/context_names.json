@@ -305,6 +305,12 @@
   "was": "FUN_00105e2c",
   "why": "BedMemory::check(heap 0x6e9800, 0); no callers"
  },
+ "0010620c": {
+  "name": "utlFindClear",
+  "tag": "ror-inferred",
+  "was": "FUN_0010620c",
+  "why": "utl/utlfind.cpp: sets four words to -1 and the next two to 0 (a 0x18-byte search record); MagLifeBwnCtrl::termWorld and MagScene::clearPC call it"
+ },
  "00109348": {
   "name": "DogActor::getMotionMove",
   "tag": "ror-inferred",
@@ -322,6 +328,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010a038",
   "why": "+0x40..+0x48 += a1[0..2], w = 1; f12 into +0x74 (the TransOfsY saveTransOfsY reads), f13 into +0x3d0 (clearRotYAAR's field), dirty"
+ },
+ "0010c17c": {
+  "name": "DogActor::loadPackMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0010c17c",
+  "why": "dog/dogactor.cpp asserts theFileName, m_pack_motion[theLevel] == __null; loads a motion pack (MagScene::setActorAnim passes data/ch/pc/pc/MOTIONPK.RPK)"
  },
  "0010eab8": {
   "name": "DogActor::getNodeWorldMatrix",
@@ -346,6 +358,24 @@
   "tag": "ror-inferred",
   "was": "FUN_001102b4",
   "why": "dog/dogentity.cpp line 302 assert p != m_parent while walking the parent chain at +0xe0 (DogEntityEx::getParent's field); resets +0x70 to (0,0,0,1), dirty"
+ },
+ "00115cec": {
+  "name": "DogModel::release",
+  "tag": "ror-inferred",
+  "was": "FUN_00115cec",
+  "why": "DogModel vtable slot 6, dog/dogmodel.cpp asserts m_ref_count <= 0, m_load_flag != LOAD_NONE, m_pack_file, m_tex_info, m_i3r_root: frees the loaded model; ~DogModel and the sky release call it"
+ },
+ "001162ac": {
+  "name": "DogTexInfo::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001162ac",
+  "why": "dog/dogtexinfo.cpp asserts theMax > 0, m_tex_info, m_tex_data: allocates theMax names (16 bytes) and theMax 0x198-byte texture records"
+ },
+ "00116b5c": {
+  "name": "DogTexInfo::add",
+  "tag": "ror-inferred",
+  "was": "FUN_00116b5c",
+  "why": "dog/dogtexinfo.cpp asserts m_num_tex <= m_max_tex, result == I3D_OK: finds the texture by name (strcmp) or a free record and builds it from the image (0x2197c8); MagScene::init adds shadow01"
  },
  "00117654": {
   "name": "MagSystem::vSyncCallback",
@@ -677,11 +707,59 @@
   "was": "FUN_0011948c",
   "why": "forwards to MagScene::clearPC"
  },
+ "00119630": {
+  "name": "MagLifeMan::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00119630",
+  "why": "mag/maglifeman.cpp: memset 0x400 (m_life_buf, 64 entries of 16 bytes), the list head at +0x400 = the buffer"
+ },
+ "001196d4": {
+  "name": "MagLifeMan::add",
+  "tag": "ror-inferred",
+  "was": "FUN_001196d4",
+  "why": "mag/maglifeman.cpp assert ppod >= &m_life_buf[0] && ppod < &m_life_buf[MAX_LIFE]; takes a free entry, stores the life object and its priority and links it sorted by priority; returns the entry index"
+ },
+ "0011a14c": {
+  "name": "MagLifeControlChara::updateMotionSeq",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a14c",
+  "why": "mag/maglife.cpp assert m_actor; steps a frame counter (+0x44) through a motion table of 0x18-byte entries (+0x5c) and jumps to the next entry; MagLifeControlChara::renderPostProcess calls it when m_actor is set"
+ },
+ "0011bd4c": {
+  "name": "MagLifePC::setActor",
+  "tag": "ror-inferred",
+  "was": "FUN_0011bd4c",
+  "why": "MagLifePC vtable slot 10: stores the actor at +0x58 (m_actor in mag/maglife.cpp asserts), its number +0x50 and mode +0x54; MagScene::setPC calls it with the actor or NULL"
+ },
+ "0011c418": {
+  "name": "MagLifePC::termWorld",
+  "tag": "ror-inferred",
+  "was": "FUN_0011c418",
+  "why": "MagLifePC vtable slot 13 (MagLifeBwn has MagLifeControlChara::termWorld there); virtual call slot 9 (-1, 0), +0x134 = 0, +0xd0 = 1000; MagScene::clearPC calls it"
+ },
+ "0011dd40": {
+  "name": "MagLifePC::initMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0011dd40",
+  "why": "with an actor bound: picks the start state (0x11cb70), looks its motion name up in the table 0x298178 on the actor and starts it when missing; setPC and MagScene::update call it"
+ },
  "0011e080": {
   "name": "MagLifePC::getSubStateClass",
   "tag": "ror-inferred",
   "was": "FUN_0011e080",
   "why": "on the MagLifePC (MagSystem::getPCStateClass passes scene +0x2adc0): +0xec 1 -> 6, 2 -> 7, else 5"
+ },
+ "001256d4": {
+  "name": "MagLifeBwn::setActor",
+  "tag": "ror-inferred",
+  "was": "FUN_001256d4",
+  "why": "MagLifeBwn vtable slot 10, same stores as MagLifePC::setActor (+0x58 actor, +0x50, +0x54); NULL actor runs 0x12498c"
+ },
+ "001259e8": {
+  "name": "MagLifeBwn::renderPostProcess",
+  "tag": "ror-inferred",
+  "was": "FUN_001259e8",
+  "why": "MagLifeBwn vtable slot 15 (MagLifeControlChara::renderPostProcess in the base): updateMotionSeq when m_actor is set and +0xce4 is 0"
  },
  "001316b8": {
   "name": "MagScene::setPC",
@@ -755,6 +833,18 @@
   "was": "FUN_001377f0",
   "why": "MagSystem::loadScene passes the i3d context and three args"
  },
+ "001386d4": {
+  "name": "MagScene::releaseTenkyu",
+  "tag": "ror-inferred",
+  "was": "FUN_001386d4",
+  "why": "frees sky slot n of 4 (stride 0x520 at scene +0x29540): releases its three DogModels (slot 6), frees its buffer, sets its id -1, calls the magscenetenkyu.cpp release 0x13ff00; callers pass the scene in a0"
+ },
+ "00138804": {
+  "name": "MagScene::releaseTenkyuAll",
+  "tag": "ror-inferred",
+  "was": "FUN_00138804",
+  "why": "calls MagScene::releaseTenkyu for slots 0..3; called by ~MagScene"
+ },
  "00138bc4": {
   "name": "MagScene::loadModelByName",
   "tag": "ror-inferred",
@@ -815,6 +905,12 @@
   "was": "FUN_0013d5ac",
   "why": "returns +0x2ad50; copies it and +0x2ad58 to the out array when given"
  },
+ "0013f4d0": {
+  "name": "MagScene::setLightNo",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f4d0",
+  "why": "mag/magscenelight.cpp assert theNo < (8); passes the number to the light pool at scene +0x2050 (0x110f78); init and initRender pass -1"
+ },
  "0013f528": {
   "name": "MagScene::setLightFlags",
   "tag": "ror-inferred",
@@ -839,6 +935,12 @@
   "was": "FUN_0013fe64",
   "why": "(type, mask): allocates a light in the set +0x2050 and applies the mask bits 0..8; returns the index or < 0"
  },
+ "0013ff00": {
+  "name": "MagScene::releaseTenkyuTex",
+  "tag": "ror-inferred",
+  "was": "FUN_0013ff00",
+  "why": "mag/magscenetenkyu.cpp: for sky slot n removes each texture of its i3r texture list (+0x504) from the scene DogTexInfo, frees the list and the buffer at +0x508"
+ },
  "0017f164": {
   "name": "SndMan::init",
   "tag": "ror-inferred",
@@ -862,6 +964,24 @@
   "tag": "ror-inferred",
   "was": "FUN_00182118",
   "why": "snd/rxmpeg.cpp; stores its argument into data 0x298fd0; MagSystem::vSyncCallback passes the V-blank count every V-blank"
+ },
+ "00190b70": {
+  "name": "S2dCineSco::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00190b70",
+  "why": "the scene's S2dCineSco at +0x41930 (constructor 0x190a78): stores the DogTexInfo at +0x458, 0x18bcc0(+0x3c, 3), sets +0x34 = 1; MagScene::initRender"
+ },
+ "00191068": {
+  "name": "S2dBg::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00191068",
+  "why": "the scene's S2dBg at +0x42260 (constructor 0x190f6c): stores the DogTexInfo at +0x938, 0x191124, sets +0x34 = 1; MagScene::initRender"
+ },
+ "00191588": {
+  "name": "S2dMes::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00191588",
+  "why": "the scene's S2dMes at +0x42bb0 (constructor 0x191494): stores the DogTexInfo at +0x464, 0x18bcc0(+0x48, 0x10), sets +0x34 = 1, returns 1; MagScene::initRender"
  },
  "001c0d70": {
   "name": "GamMan::init",
@@ -1066,6 +1186,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00219d68",
   "why": "a CLUT move re-uploads it at the new address (calls i3dClutMakeUpload)"
+ },
+ "0021a120": {
+  "name": "i3dFogInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0021a120",
+  "why": "zeroes a 0x20-byte record: a vector (0x236960) and four words; 0x21a158 reads the same record as fog colour vector plus four floats and builds the GS fog registers"
+ },
+ "0021a158": {
+  "name": "i3dCtxSetFog",
+  "tag": "ror-inferred",
+  "was": "FUN_0021a158",
+  "why": "allocates two qwords from the context tail, clamps the colour vector to 0..1 and packs it *255 (FOGCOL), derives the fog ramp from the four floats, links the packet at the context head"
  },
  "0021b288": {
   "name": "i3dBatchClearTextures",
@@ -1546,6 +1678,12 @@
   "tag": "lib-context",
   "was": "FUN_0022b3d8",
   "why": "i3d model root: looks the name up (0x22b1b0) in the root's node-name table (+0x10 -> +0x20, count +0x2e) and maps it through the index table +0x1c; -1 when absent; DogModel::getNodeIndexByName's body"
+ },
+ "00236960": {
+  "name": "i3dVecZero",
+  "tag": "ror-inferred",
+  "was": "FUN_00236960",
+  "why": "sq zero to the vector: clears 16 bytes"
  },
  "00237178": {
   "name": "i3dSysInit",

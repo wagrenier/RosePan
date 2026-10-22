@@ -9,6 +9,10 @@
 #ifndef _LIB_UNASSIGNED_H
 #define _LIB_UNASSIGNED_H
 
+#include <stddef.h>
+
+#include "sdk/vu0_intrin.h"
+
 /* ---- the globals file before main.cpp (unassigned@001fd424): its static
  * initializer 0x2041f8 constructs the heap, MagSystem, GamMan, the task
  * manager, the sequence, EmyManager, SndMan and 0x7b40c0 ---- */
@@ -109,6 +113,18 @@ int   i3dTexRegsSet(u_long *regs, I3dVramHandle *tex, I3dVramHandle *clut,
                     u_int arg);                                          // ROR 0x00224b28
 void  i3dTexRegsSetNone(u_long *regs);                                   // ROR 0x00224d88
 
+/* The fog record i3dCtxSetFog turns into FOGCOL and the fog ramp: a
+ * colour (0..1, clamped) and four floats. EE 0x20; float roles unverified. */
+struct I3dFog
+{
+    sceVu0FVECTOR m_color;      // ROR 0x00
+    float         m_param[4];   // ROR 0x10
+};
+static_assert(offsetof(I3dFog, m_param) == 0x10, "m_param");
+static_assert(sizeof(I3dFog) == 0x20, "I3dFog is 0x20 bytes on the EE");
+
+void  i3dFogInit(I3dFog *fog);     /* all zero */                        // ROR 0x0021a120
+
 /* An i3d model root (tag_I3rRoot_s in DogModel's symbols). Opaque. */
 struct I3rRoot;
 
@@ -127,6 +143,66 @@ int   i3rGetNodeIndexByName(I3rRoot *root, const char *name);            // ROR 
 /* bss 0x7812ac, just below GamMan: mainInitGame passes it to
  * seqSetLanguage (which ignores it). Role not known yet. */
 extern int g_bss_7812ac;
+
+/* ---- the 2D scene layers (unassigned@00190a78; classes from their
+ * vtables, all MagLife with the vptr at +0x14) ---- */
+
+#include "mag/maglife.h"
+
+struct DogTexInfo;
+struct MagScene;
+
+/* layout: host -- no members past MagLife's reconstructed. Constructors
+ * 0x190a78 / 0x190f6c / 0x191494; init stores the scene's DogTexInfo and
+ * sets +0x34 to 1. */
+struct S2dCineSco : MagLife
+{
+    void init(DogTexInfo *tex);                                          // ROR 0x00190b70
+};
+/* layout: host -- as S2dCineSco. */
+struct S2dBg : MagLife
+{
+    void init(DogTexInfo *tex);                                          // ROR 0x00191068
+};
+/* layout: host -- as S2dCineSco. */
+struct S2dMes : MagLife
+{
+    int  init(DogTexInfo *tex);                                          // ROR 0x00191588
+};
+
+/* Scene members whose class has no name yet, named by their constructor's
+ * address. layout: host -- only the words the scene touches. */
+struct MagLife12f008 : MagLife  /* scene +0x41850, constructor 0x12f008 */
+{
+};
+struct MagLife130da4 : MagLife  /* scene +0x418f0, constructor 0x130da4 */
+{
+    u_char _28[0x34 - 0x28];
+    int    m_34;                // ROR 0x34: initRender copies the scene's +0x2910 into it
+};
+static_assert(offsetof(MagLife130da4, m_34) >= 0x34, "m_34");
+struct Obj176a3c                /* scene +0x837e0, constructor 0x176a3c */
+{
+    int _00;
+};
+/* layout: host -- placeholder. */
+struct Obj19226c                /* scene +0x84aa8, constructor 0x19226c (render, holds the DogTexInfo) */
+{
+    int _00;
+};
+/* layout: host -- placeholder. */
+struct Obj17c0f0                /* scene +0x8542c, constructor 0x17c0f0: a flag word, a buffer, four 0x18-byte records */
+{
+    int _00;
+};
+static_assert(sizeof(Obj176a3c) >= 4 && sizeof(Obj19226c) >= 4 && sizeof(Obj17c0f0) >= 4, "placeholders");
+
+int   FUN_00176afc(Obj176a3c *obj, i3dContext *ctx, MagScene *scene);    // ROR 0x00176afc
+void  FUN_00192318(Obj19226c *obj, i3dContext *ctx, MagScene *scene);    // ROR 0x00192318
+void  FUN_0017c2c0(Obj17c0f0 *obj);  /* frees the buffer and the records */ // ROR 0x0017c2c0
+/* Allocates the 1 MB 2D packet buffer (data 0x29bfb4); mnuBase::initSystem
+ * calls it too. */
+void  FUN_001944d0(void);                                                // ROR 0x001944d0
 
 /* ---- the debug range before debug/mimu_debug.cpp (unassigned@0020eda4) ---- */
 

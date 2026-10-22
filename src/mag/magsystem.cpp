@@ -978,12 +978,12 @@ int MagSystem::getPCStateClass()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Brown's state word when it is 0..13, else -1.
+// Brown's state word (MagLifeBwnCtrl's, scene +0x2bd20) when it is 0..13, else -1.
 // ROR 0x00119090
 
 int MagSystem::getBwnState()
 {
-    switch (m_scene.m_bwn.m_d40)
+    switch (m_scene.m_bwn_ctrl.m_state)
     {
     case 0:  return 0;
     case 1:  return 1;

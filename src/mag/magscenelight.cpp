@@ -23,3 +23,9 @@ void MagScene::setLightParam(int type, int idx, int which, const float *v, int n
 {
     ROSEPAN_STUB("MagScene::setLightParam", 0x0013f980);
 }
+
+// stub of ROR 0x0013f4d0
+void MagScene::setLightNo(int theNo)
+{
+    ROSEPAN_STUB("MagScene::setLightNo", 0x0013f4d0);
+}

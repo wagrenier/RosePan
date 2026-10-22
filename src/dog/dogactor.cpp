@@ -30,3 +30,10 @@ void DogActor::releaseMotion(int theId)
 {
     ROSEPAN_STUB("DogActor::releaseMotion", 0x00109b88);
 }
+
+// stub of ROR 0x0010c17c
+u_int DogActor::loadPackMotion(const char *theFileName, int a, int b)
+{
+    ROSEPAN_STUB("DogActor::loadPackMotion", 0x0010c17c);
+    return {};
+}
