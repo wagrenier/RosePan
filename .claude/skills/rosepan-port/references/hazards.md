@@ -108,6 +108,13 @@ entries are marked **RoR** with the date.
   guard any pointer that can run past its array on the host.
 - **A ROM table reader that stops at a null field misses rows**: end tables where the row id stops
   matching its index or the key is empty.
+- **Function-pointer tables filled in code** (rxfile's driver init functions, 2026-10-22) point at
+  `LAB_` addresses: two-instruction slot functions (`jr ra; li v0,-2`, a getter) were never made
+  functions, and one thread entry (0x2495e0) sat inside the previous body. Every `LAB_` stored into a
+  table in a decompile is a function: `ghidra.py mkfunc` it before naming the table's slots.
+- **A ROM read of the byte after a copy** (`rxFilePathNextElem` 0x248e98 tests `*out == '.'` after
+  copying, i.e. the uninitialised next byte): keep the quirk with a comment, it only fires on stale
+  buffer contents.
 
 ## File inference (which TU a function belongs to)
 

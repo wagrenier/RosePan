@@ -87,6 +87,12 @@ int         rxSysCreateSema(int max, int init);                 // ROR 0x0024216
 void        rxSysInitSema(void);                                // ROR 0x00242390
 void        rxSysLockPrint(void);                               // ROR 0x00242400
 void        rxSysUnlockPrint(void);                             // ROR 0x00242460
+void        rxSysCheckCdPath(const char *path);                 // ROR 0x00242500
+int         rxSysOpen(const char *path, int mode);              // ROR 0x00242528
+int         rxSysClose(int fd);                                 // ROR 0x00242578
+int         rxSysRead(int fd, void *buf, int size);             // ROR 0x002425b0
+int         rxSysWrite(int fd, const void *buf, int size);      // ROR 0x00242608
+int         rxSysLseek(int fd, int offset, int whence);         // ROR 0x00242660
 void        rxSysLockSema1(void);                               // ROR 0x00242480
 void        rxSysUnlockSema1(void);                             // ROR 0x002424e0
 void        rxSysInitUser(void);                                // ROR 0x002433d8

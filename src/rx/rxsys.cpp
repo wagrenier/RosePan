@@ -7,7 +7,7 @@
  *
  *  Not reconstructed yet in this file: the ini parser (0x2410b8..0x241848),
  *  the tty / IOP RPC binding (0x241890..0x241ac8, 0x242188..0x2424e0), the
- *  file wrappers (0x242500..0x2426b8), the exception handler and system
+ *  rxSysIoctl (0x2426b8), the exception handler and system
  *  monitor (0x242710..0x2432d8) and the rxfile wrappers after 0x2436a0.
  * ======================================================================== */
 #include "common/rosepan_stub.h"
@@ -1020,6 +1020,75 @@ void rxSysLockSema1(void)
 void rxSysUnlockSema1(void)
 {
     SignalSema(s_sema1);
+}
+
+/* ---- file wrappers ------------------------------------------------------- */
+
+// ──────────────────────────────────────────────────────────────────────
+// A cdrom0: path switches the drive to CD mode first.
+// ROR 0x00242500
+
+void rxSysCheckCdPath(const char *path)
+{
+    if (rxSysIsCdromPath(path) != 0)
+        rxSysSetCdMode();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The file calls run under the print lock (the host tty shares fileio).
+// ROR 0x00242528
+
+int rxSysOpen(const char *path, int mode)
+{
+    rxSysLockPrint();
+    rxSysCheckCdPath(path);
+    int fd = sceOpen(path, mode);
+    rxSysUnlockPrint();
+    return fd;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00242578
+
+int rxSysClose(int fd)
+{
+    rxSysLockPrint();
+    int ret = sceClose(fd);
+    rxSysUnlockPrint();
+    return ret;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x002425b0
+
+int rxSysRead(int fd, void *buf, int size)
+{
+    rxSysLockPrint();
+    int ret = sceRead(fd, buf, size);
+    rxSysUnlockPrint();
+    return ret;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00242608
+
+int rxSysWrite(int fd, const void *buf, int size)
+{
+    rxSysLockPrint();
+    int ret = sceWrite(fd, buf, size);
+    rxSysUnlockPrint();
+    return ret;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00242660
+
+int rxSysLseek(int fd, int offset, int whence)
+{
+    rxSysLockPrint();
+    int ret = sceLseek(fd, offset, whence);
+    rxSysUnlockPrint();
+    return ret;
 }
 
 /* ---- subsystems ----------------------------------------------------------- */

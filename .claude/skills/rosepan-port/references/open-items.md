@@ -27,6 +27,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    and the rxfile stubs return 0 -- the boot hangs until `rxFileLoad` / `rxFileRebootIop` /
    `rxFileLoadModule` answer (the host has no IOP: `sceSifRebootIop` / `sceSifLoadModule` succeed in
    src/sdk; `rxFileLoad` needs the disc data, see "The disc data").
+5. (2026-10-22, the rxfile session) `rx/rxfile.cpp` is `partial`: rxFileLoad / LoadModule / RebootIop,
+   the drivers' tables, the host0: and HDD drivers, contexts and dirs are written, so the IOP boot loop
+   above can now finish -- the next M1 step really is `main` (unassigned@001fd424). Still stubs in
+   rxfile: the cdrom driver's reader (rxFileCdMakePath / GetSize / Read / Control, rxFileCdProcess
+   0x2469a8..0x247f10), the default load / size hooks (0x245a48, 0x245ae8: they need rxsys's async
+   file calls 0x243788..), rxFileCreateThread 0x2491c0 and the async slots 0x2437f8..0x245800. Then
+   `rx/rxthread.cpp` (pinned 0x249b88..0x24b490, todo): it needs `DIntr` / `EIntr` in src/sdk (absent
+   today), as does rxFileCdControl.
 
 ## Decisions
 
@@ -80,7 +88,18 @@ to adapt when a TU reaches them:
   pools `rxSysInitModules` builds (0x7dabb0.., element layouts unknown); `s_bootDev[0] == 'a'` adds
   usbd.irx (which host device starts with 'a'?); `rxSysReadRomDate` has no BIOS on the host (date 0).
 
+- **rxfile details left open**: what the device record's first word (`rxFileSetDeviceParam`, -1 at init)
+  means; whether the cdrom driver turns names into ISO form with "\" and ";1"; who sets the HDD error
+  hook 0x2dc248 (no setter found in rxfile's range); how the platform's sceOpen resolves `cdrom0:`
+  paths (`RosePan_PathResolveData`; check once main runs).
+
 ## Done
+
+- 2026-10-22: `rx/rxfile.cpp` pinned 0x2437f8..0x249b88 and `rx/rxthread.cpp` 0x249b88..0x24b490;
+  rxfile `partial`: drivers, host0: / HDD drivers, cdrom table and sector-cache init, contexts, dirs,
+  rxFileLoad / LoadModule / RebootIop, plus rxsys's sce* file wrappers 0x242500..0x242660. Platform:
+  `sceSifLoadModule` added to src/sdk/sifdev (succeeds). 14 driver-slot / thread functions created in
+  Ghidra.
 
 - 2026-10-22: `rx/rxsys.cpp` (0x23ff58..0x2437f8 pinned): 60 functions -- rxSysInit, the IOP module
   loader (iopconf.cnf), boot path, system.ini, rxSysPrintf, semaphores, memory hooks, rxfile wrappers;

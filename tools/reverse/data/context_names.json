@@ -341,6 +341,48 @@
   "was": "FUN_002424e0",
   "why": "SignalSema 0x2dbd94"
  },
+ "00242500": {
+  "name": "rxSysCheckCdPath",
+  "tag": "ror-inferred",
+  "was": "FUN_00242500",
+  "why": "sets the CD mode when the path is a cdrom0: path (rxSysIsCdromPath, rxSysSetCdMode); called by rxSysOpen"
+ },
+ "00242528": {
+  "name": "rxSysOpen",
+  "tag": "ror-inferred",
+  "was": "FUN_00242528",
+  "why": "sceOpen between rxSysLockPrint/rxSysUnlockPrint after rxSysCheckCdPath; the rx file layer opens every file through it"
+ },
+ "00242578": {
+  "name": "rxSysClose",
+  "tag": "ror-inferred",
+  "was": "FUN_00242578",
+  "why": "sceClose under the print lock"
+ },
+ "002425b0": {
+  "name": "rxSysRead",
+  "tag": "ror-inferred",
+  "was": "FUN_002425b0",
+  "why": "sceRead under the print lock"
+ },
+ "00242608": {
+  "name": "rxSysWrite",
+  "tag": "ror-inferred",
+  "was": "FUN_00242608",
+  "why": "sceWrite under the print lock"
+ },
+ "00242660": {
+  "name": "rxSysLseek",
+  "tag": "ror-inferred",
+  "was": "FUN_00242660",
+  "why": "sceLseek under the print lock; rxFileLoad seeks to end (whence 2) for the size"
+ },
+ "002426b8": {
+  "name": "rxSysIoctl",
+  "tag": "ror-inferred",
+  "was": "FUN_002426b8",
+  "why": "sceIoctl under the print lock"
+ },
  "002433d8": {
   "name": "rxSysInitUser",
   "tag": "ror-inferred",
@@ -407,6 +449,66 @@
   "was": "FUN_002458b0",
   "why": "device entry (0x2462d8) slot +0x1c called with an argument; dev -1 = boot device"
  },
+ "00245900": {
+  "name": "rxFileGetDeviceRoot",
+  "tag": "ror-inferred",
+  "was": "FUN_00245900",
+  "why": "calls slot 8 (+0x20) of the device driver, which returns the root string of the driver (host: 0x7dfa50)"
+ },
+ "00245948": {
+  "name": "rxFileCallLoadHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00245948",
+  "why": "calls the current context hook at +4 with (name, buf); default 0x245ae8 loads a whole file and prints [read]"
+ },
+ "00245988": {
+  "name": "rxFileCallSizeHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00245988",
+  "why": "calls the current context hook at +8 with (name); default 0x245a48 returns the file size and prints [seek]"
+ },
+ "002459b8": {
+  "name": "rxFileSetLoadHook",
+  "tag": "ror-inferred",
+  "was": "FUN_002459b8",
+  "why": "installs the context +4 hook, null = default 0x245ae8, returns the old one"
+ },
+ "00245a00": {
+  "name": "rxFileSetSizeHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00245a00",
+  "why": "installs the context +8 hook, null = default 0x245a48, returns the old one"
+ },
+ "00245a48": {
+  "name": "rxFileDefaultSizeHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00245a48",
+  "why": "default context +8 hook: opens through 0x243788, lseek to end, closes; prints [seek]: %s (%dBytes)"
+ },
+ "00245ae8": {
+  "name": "rxFileDefaultLoadHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00245ae8",
+  "why": "default context +4 hook: open, size, read the whole file into buf, close; prints [read]: %s $%X (%dBytes)"
+ },
+ "00245be0": {
+  "name": "rxFileDefaultSaveHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00245be0",
+  "why": "sibling of the load hook writing a buffer; prints [write]: %s $%X (%dBytes)"
+ },
+ "00245cb0": {
+  "name": "rxFileMakePath",
+  "tag": "ror-inferred",
+  "was": "FUN_00245cb0",
+  "why": "joins the current device dir and search dir with the name (absolute names skip them) and hands it to driver slot 0 to prefix the device; false without a driver"
+ },
+ "00245db8": {
+  "name": "rxFileLoadExec",
+  "tag": "ror-inferred",
+  "was": "FUN_00245db8",
+  "why": "checks the file opens, prints LoadExecPS2:%s / argc / argv, sceSifExitCmd, LoadExecPS2"
+ },
  "00245ed8": {
   "name": "rxFileLoad",
   "tag": "ror-inferred",
@@ -418,6 +520,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00246030",
   "why": "'rxfile : Load module' sceSifLoadModule(path, arglen, args)"
+ },
+ "00246178": {
+  "name": "rxFileLoadModuleList",
+  "tag": "ror-inferred",
+  "was": "FUN_00246178",
+  "why": "rxFileLoadModule for each of n names with no args; 0 on the first failure"
  },
  "002461f0": {
   "name": "rxFileRebootIop",
@@ -431,11 +539,275 @@
   "was": "FUN_00246278",
   "why": "inits three rxfile device blocks 0x7df9c0 / 0x7df9e4 / 0x7dfa2c"
  },
+ "002462b0": {
+  "name": "rxFileTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_002462b0",
+  "why": "calls the three driver term functions (host 0x2463a0, cdrom 0x246950, hdd 0x2480a0), counterpart of rxFileInit"
+ },
+ "002462d8": {
+  "name": "rxFileGetDriver",
+  "tag": "ror-inferred",
+  "was": "FUN_002462d8",
+  "why": "returns the 0x24-byte driver table at 0x7df9c0 for HOST, CDROM and HDD (index 0, 1, 3), null for MCARD and out of range"
+ },
+ "00246318": {
+  "name": "rxFileHostInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00246318",
+  "why": "fills driver 0 (0x7df9c0) with the host0: functions and sets the root to the default"
+ },
+ "002463a0": {
+  "name": "rxFileHostTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_002463a0",
+  "why": "empty; called by rxFileTerm"
+ },
+ "002463a8": {
+  "name": "rxFileHostMakePath",
+  "tag": "ror-inferred",
+  "was": "FUN_002463a8",
+  "why": "driver 0 slot 0: root + name via rxFileHostJoinRoot"
+ },
+ "002463c0": {
+  "name": "rxFileHostControl",
+  "tag": "ror-inferred",
+  "was": "FUN_002463c0",
+  "why": "driver 0 slot 2: returns 0 (the cdrom driver slot 2 sets pause flags)"
+ },
+ "002463c8": {
+  "name": "rxFileHostGetStatus",
+  "tag": "ror-inferred",
+  "was": "FUN_002463c8",
+  "why": "driver 0 slot 1: status 1 = busy bit of 0x2dc1b8, else 0"
+ },
+ "002463f0": {
+  "name": "rxFileHostGetSize",
+  "tag": "ror-inferred",
+  "was": "FUN_002463f0",
+  "why": "driver 0 slot 3: open, lseek to end, close; -2 when it does not open"
+ },
+ "002464b0": {
+  "name": "rxFileHostCreate",
+  "tag": "ror-inferred",
+  "was": "FUN_002464b0",
+  "why": "driver 0 slot 4: opens for writing with create (0x202, or 0x602 with truncate) and closes"
+ },
+ "00246560": {
+  "name": "rxFileHostRead",
+  "tag": "ror-inferred",
+  "was": "FUN_00246560",
+  "why": "driver 0 slot 5: (name, buf, offset, size) open, seek, read, close"
+ },
+ "00246680": {
+  "name": "rxFileHostWrite",
+  "tag": "ror-inferred",
+  "was": "FUN_00246680",
+  "why": "driver 0 slot 6: (name, offset, buf, size) open write, seek, write, close"
+ },
+ "002467a0": {
+  "name": "rxFileHostJoinRoot",
+  "tag": "ror-inferred",
+  "was": "FUN_002467a0",
+  "why": "strcpy root 0x7dfa50 then strcat the name"
+ },
+ "002467e8": {
+  "name": "rxFileHostGetRoot",
+  "tag": "ror-inferred",
+  "was": "FUN_002467e8",
+  "why": "driver 0 slot 8: returns the root 0x7dfa50"
+ },
+ "002467f8": {
+  "name": "rxFileHostSetRoot",
+  "tag": "ror-inferred",
+  "was": "FUN_002467f8",
+  "why": "driver 0 slot 7: copies the root, null = host0:"
+ },
+ "002468c0": {
+  "name": "rxFileCdInit",
+  "tag": "ror-inferred",
+  "was": "FUN_002468c0",
+  "why": "fills driver 1 (0x7df9e4) with the cdrom0: functions, sets the root and builds the sector cache list"
+ },
+ "00246950": {
+  "name": "rxFileCdTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_00246950",
+  "why": "empty; called by rxFileTerm"
+ },
+ "002469a8": {
+  "name": "rxFileCdProcess",
+  "tag": "ror-inferred",
+  "was": "FUN_002469a8",
+  "why": "the rxfile thread's work (via rxFileThreadProc): cd sync, sector cache, request completion"
+ },
+ "00246c70": {
+  "name": "rxFileCdMakePath",
+  "tag": "ror-inferred",
+  "was": "FUN_00246c70",
+  "why": "driver 1 slot 0: cdrom0: + converted name (0x246f70)"
+ },
+ "00246cb8": {
+  "name": "rxFileCdControl",
+  "tag": "ror-inferred",
+  "was": "FUN_00246cb8",
+  "why": "driver 1 slot 2: command 0 sets or clears flag bits 0/1 of 0x2dc1d8 with interrupts off"
+ },
+ "00246d80": {
+  "name": "rxFileCdGetStatus",
+  "tag": "ror-inferred",
+  "was": "FUN_00246d80",
+  "why": "driver 1 slot 1: status 0/1 = bits of 0x2dc1cc, status 2 = 0x2dc1d0 + 0x2dc1d4"
+ },
+ "00246e00": {
+  "name": "rxFileCdGetSize",
+  "tag": "ror-inferred",
+  "was": "FUN_00246e00",
+  "why": "driver 1 slot 3: looks the file up through 0x2dc1dc and returns its size"
+ },
+ "00246e78": {
+  "name": "rxFileCdCreate",
+  "tag": "ror-inferred",
+  "was": "FUN_00246e78",
+  "why": "driver 1 slot 4: returns -2 (read-only device)"
+ },
+ "00246e80": {
+  "name": "rxFileCdRead",
+  "tag": "ror-inferred",
+  "was": "FUN_00246e80",
+  "why": "driver 1 slot 5"
+ },
+ "00246f68": {
+  "name": "rxFileCdWrite",
+  "tag": "ror-inferred",
+  "was": "FUN_00246f68",
+  "why": "driver 1 slot 6: returns -2 (read-only device)"
+ },
+ "00247608": {
+  "name": "rxFileCdInitCache",
+  "tag": "ror-inferred",
+  "was": "FUN_00247608",
+  "why": "links 32 nodes (0x7dfb80, 16 bytes) with 0x800-byte sector buffers (0x7dfdc0) into a free list and empties the used list"
+ },
+ "00247668": {
+  "name": "rxFileCdFlushCache",
+  "tag": "ror-inferred",
+  "was": "FUN_00247668",
+  "why": "moves every used sector node back to the free list, resets the cached sector 0x2dc218 to -1"
+ },
+ "00247e88": {
+  "name": "rxFileCdGetRoot",
+  "tag": "ror-inferred",
+  "was": "FUN_00247e88",
+  "why": "driver 1 slot 8: returns the cdrom0: pointer 0x2dc1c0"
+ },
+ "00247e98": {
+  "name": "rxFileCdSetRoot",
+  "tag": "ror-inferred",
+  "was": "FUN_00247e98",
+  "why": "driver 1 slot 7: empty (the cdrom root is fixed)"
+ },
+ "00248018": {
+  "name": "rxFileHddInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00248018",
+  "why": "fills driver 3 (0x7dfa2c) like the host driver; its I/O errors print RX_FILE_DEVICE_HDD"
+ },
+ "002480a0": {
+  "name": "rxFileHddTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_002480a0",
+  "why": "empty; called by rxFileTerm"
+ },
+ "002480a8": {
+  "name": "rxFileHddOnError",
+  "tag": "ror-inferred",
+  "was": "FUN_002480a8",
+  "why": "on HDD error codes prints rxFile: occured I/O error (%d), RX_FILE_DEVICE_HDD, remaps HDD to its fallback device and calls the error hook"
+ },
+ "00248158": {
+  "name": "rxFileHddMakePath",
+  "tag": "ror-inferred",
+  "was": "FUN_00248158",
+  "why": "driver 3 slot 0"
+ },
+ "00248170": {
+  "name": "rxFileHddControl",
+  "tag": "ror-inferred",
+  "was": "FUN_00248170",
+  "why": "driver 3 slot 2: returns 0"
+ },
+ "00248178": {
+  "name": "rxFileHddGetStatus",
+  "tag": "ror-inferred",
+  "was": "FUN_00248178",
+  "why": "driver 3 slot 1: busy bit of 0x2dc224"
+ },
+ "002481a0": {
+  "name": "rxFileHddGetSize",
+  "tag": "ror-inferred",
+  "was": "FUN_002481a0",
+  "why": "driver 3 slot 3"
+ },
+ "00248270": {
+  "name": "rxFileHddCreate",
+  "tag": "ror-inferred",
+  "was": "FUN_00248270",
+  "why": "driver 3 slot 4"
+ },
+ "00248340": {
+  "name": "rxFileHddRead",
+  "tag": "ror-inferred",
+  "was": "FUN_00248340",
+  "why": "driver 3 slot 5"
+ },
+ "00248480": {
+  "name": "rxFileHddWrite",
+  "tag": "ror-inferred",
+  "was": "FUN_00248480",
+  "why": "driver 3 slot 6"
+ },
+ "002485c0": {
+  "name": "rxFileHddJoinRoot",
+  "tag": "ror-inferred",
+  "was": "FUN_002485c0",
+  "why": "strcpy root 0x7f1dc0 then strcat the name"
+ },
+ "00248608": {
+  "name": "rxFileHddGetRoot",
+  "tag": "ror-inferred",
+  "was": "FUN_00248608",
+  "why": "driver 3 slot 8: returns 0x7f1dc0"
+ },
+ "00248618": {
+  "name": "rxFileHddSetRoot",
+  "tag": "ror-inferred",
+  "was": "FUN_00248618",
+  "why": "driver 3 slot 7: copies the root, null = host0:"
+ },
  "00248660": {
   "name": "rxFileInitSlots",
   "tag": "ror-inferred",
   "was": "FUN_00248660",
   "why": "clears four 0x128c-byte file slots, sets read/seek handlers 0x245ae8 / 0x245a48"
+ },
+ "00248708": {
+  "name": "rxFileUpdate",
+  "tag": "ror-inferred",
+  "was": "FUN_00248708",
+  "why": "empty; called once from rxsys (guess: per-frame update left empty)"
+ },
+ "00248710": {
+  "name": "rxFileSetContext",
+  "tag": "ror-inferred",
+  "was": "FUN_00248710",
+  "why": "selects context 0 or 1 (0x7f1ec0), returns the old one; else prints unknow thread type"
+ },
+ "00248778": {
+  "name": "rxFileSetCurrent",
+  "tag": "ror-inferred",
+  "was": "FUN_00248778",
+  "why": "sets the device of the current context (as rxFileSetDevice for the current context)"
  },
  "00248870": {
   "name": "rxFileGetCurrent",
@@ -473,11 +845,143 @@
   "was": "FUN_00248bb0",
   "why": "0x248e30(): the buffer rxFileSetSearchDir writes"
  },
+ "00248bc8": {
+  "name": "rxFilePushSearchDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00248bc8",
+  "why": "pushes the search dir onto the 0x800-byte name stack (+0x80, top at +0x880); prints name stack is overflow"
+ },
+ "00248c50": {
+  "name": "rxFilePopSearchDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00248c50",
+  "why": "pops the name stack back into the search dir"
+ },
+ "00248cb8": {
+  "name": "rxFileSetLastName",
+  "tag": "ror-inferred",
+  "was": "FUN_00248cb8",
+  "why": "copies a name into +0x884 of the dir block"
+ },
+ "00248ce8": {
+  "name": "rxFileGetLastName",
+  "tag": "ror-inferred",
+  "was": "FUN_00248ce8",
+  "why": "returns +0x884 of the dir block"
+ },
+ "00248d08": {
+  "name": "rxFileSetDeviceParam",
+  "tag": "ror-inferred",
+  "was": "FUN_00248d08",
+  "why": "sets word +0 of the device record (init -1), returns the old value; meaning open"
+ },
+ "00248d38": {
+  "name": "rxFileGetDeviceParam",
+  "tag": "ror-inferred",
+  "was": "FUN_00248d38",
+  "why": "returns word +0 of the device record"
+ },
+ "00248d58": {
+  "name": "rxFileGetLoadHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00248d58",
+  "why": "returns context +4"
+ },
+ "00248d78": {
+  "name": "rxFileSwapLoadHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00248d78",
+  "why": "sets context +4, returns the old"
+ },
+ "00248da8": {
+  "name": "rxFileGetSizeHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00248da8",
+  "why": "returns context +8"
+ },
+ "00248dc8": {
+  "name": "rxFileSwapSizeHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00248dc8",
+  "why": "sets context +8, returns the old"
+ },
+ "00248df8": {
+  "name": "rxFileGetDeviceInfo",
+  "tag": "ror-inferred",
+  "was": "FUN_00248df8",
+  "why": "returns the 0x128c-byte record of a device at 0x7f1edc"
+ },
+ "00248e30": {
+  "name": "rxFileGetDirInfo",
+  "tag": "ror-inferred",
+  "was": "FUN_00248e30",
+  "why": "returns the 0x904-byte dir block of the current context inside a device record (+0x84)"
+ },
+ "00248e70": {
+  "name": "rxFileGetContext",
+  "tag": "ror-inferred",
+  "was": "FUN_00248e70",
+  "why": "returns the current context (0x7f1ec4 + 12 * index)"
+ },
+ "00248e98": {
+  "name": "rxFilePathNextElem",
+  "tag": "ror-inferred",
+  "was": "FUN_00248e98",
+  "why": "copies one path element up to and including /"
+ },
+ "00248f00": {
+  "name": "rxFilePathUp",
+  "tag": "ror-inferred",
+  "was": "FUN_00248f00",
+  "why": "drops the last element of a dir ending in /"
+ },
+ "00248f88": {
+  "name": "rxFilePathCountDots",
+  "tag": "ror-inferred",
+  "was": "FUN_00248f88",
+  "why": "counts the dots of a . or .. element (0 otherwise)"
+ },
  "00248fd8": {
   "name": "rxFileStartThread",
   "tag": "ror-inferred",
   "was": "FUN_00248fd8",
   "why": "0x2491c0(0, 2, 0x2495e0): the rxfile request thread ('rxfile : failed to create thread')"
+ },
+ "002491c0": {
+  "name": "rxFileCreateThread",
+  "tag": "ror-inferred",
+  "was": "FUN_002491c0",
+  "why": "rxFileStartThread calls it; prints rxfile : failed to create thread"
+ },
+ "002495e0": {
+  "name": "rxFileThreadProc",
+  "tag": "ror-inferred",
+  "was": "FUN_002495e0",
+  "why": "rxFileStartThread passes it to rxFileCreateThread; a tail jump to 0x2469a8 (the cdrom request processor); was folded into rxFileCreateThread's body"
+ },
+ "002499b8": {
+  "name": "rxFileSetDeviceMap",
+  "tag": "ror-inferred",
+  "was": "FUN_002499b8",
+  "why": "device map 0x2dc228[a] = b, both clamped 0..3, -1 = boot device"
+ },
+ "00249a68": {
+  "name": "rxFileGetDeviceMap",
+  "tag": "ror-inferred",
+  "was": "FUN_00249a68",
+  "why": "returns 0x2dc228[a]"
+ },
+ "00249ae8": {
+  "name": "rxFileGetFallbackDevice",
+  "tag": "ror-inferred",
+  "was": "FUN_00249ae8",
+  "why": "returns 0x2dc238[a] ({0,1,2,-1}); rxFileHddOnError maps HDD to it"
+ },
+ "00249b10": {
+  "name": "rxFileGetErrorHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00249b10",
+  "why": "returns 0x2dc248, called with (name, error) by rxFileHddOnError"
  },
  "00249d48": {
   "name": "rxThIsDispatchDisabled",
@@ -562,6 +1066,24 @@
   "tag": "lib-context",
   "was": "FUN_00261370",
   "why": "(client, fno, mode, send, ssize, recv, rsize, end) then sceSifCheckStatRpc loop"
+ },
+ "00262a40": {
+  "name": "sceClose",
+  "tag": "lib-context",
+  "was": "FUN_00262a40",
+  "why": "FF2 fileio sceClose 0x281b28 (0x17c bytes) in the same order close, lseek, read; RoR 0x178 bytes; rxSysClose calls it"
+ },
+ "00262bb8": {
+  "name": "sceLseek",
+  "tag": "lib-context",
+  "was": "FUN_00262bb8",
+  "why": "FF2 fileio sceLseek 0x281ca8 follows sceClose; rxSysLseek passes fd, offset, whence"
+ },
+ "00262df8": {
+  "name": "sceRead",
+  "tag": "lib-context",
+  "was": "FUN_00262df8",
+  "why": "FF2 fileio sceRead 0x281ee0 follows sceLseek; rxSysRead passes fd, buf, size"
  },
  "00263068": {
   "name": "sceWrite",
