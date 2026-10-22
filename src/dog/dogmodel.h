@@ -27,6 +27,8 @@
 /* EE size at least 0x148. layout: host -- holds the i3d pointers. */
 struct DogModel : DogEntityEx
 {
+    /* EE slot 6 (+0x30): frees what load brought in (asserts m_ref_count <= 0). */
+    void release(int arg);                                               // ROR 0x00115cec
     /* EE slot 10 (+0x50) */
     void setAttachNode(int node) { m_attach_node = node; }               // ROR 0x00281dc0
     void setLightID(int id) { m_light_id = id; }                         // ROR 0x00281d3c

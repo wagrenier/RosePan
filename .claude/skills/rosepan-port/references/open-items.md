@@ -105,6 +105,20 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    `i3dCtxCloseFrame`, ...) and `MagScene::draw` / `postDraw`; the texture objects at 0x219a98..
    (unassigned@00216ad0) call i3dVramHandleInit / Release.
 
+12. (2026-10-22, the first magscene2 session) **`mag/magscene2.cpp` is `partial`**: 12 of its 31
+   functions written (init, initRender, setPC, setBwn, clearPC, postDraw, setActorAnim,
+   setCameraTarget, initCamera, getCameraMode, releaseTenkyu / All); the scene map is in
+   architecture.md. Left: the constructor 0x1360a0 (0xc74: 128 DogActors, the sky DogModels, the
+   twelve MagLifeMenu* objects, the 2D layers, 0x2000 records at +0x437e0..), the destructor
+   0x136d14, `load` 0x1377f0 and the rest of the inferred range. The inferred range
+   0x1316b8..0x13ff00 also holds mag/magscene.cpp's update / setViewParam / drawView and the light
+   and camera files' functions: **pin the extent** (`tus.py define`) before the next slice. Open:
+   the classes at scene +0x41850 / +0x41890 / +0x418f0 / +0x837e0 / +0x84aa8 / +0x8542c (named by
+   their constructors in lib/unassigned.h) and four FUN_ callees of initRender / releaseTenkyu.
+   MagLife* classes are host structs, not polymorphic yet (mag/maglife.h, like dog/dogentity.h).
+   Next reached stubs in run order: MagLifeMan::init / add, DogTexInfo::init / add, the S2d inits,
+   then `MagScene::draw` / `update` and the i3d draw-group module.
+
 ## Decisions
 
 - One TU per session, run by the user (`/rosepan-port next`, the routine, or autopilot.py); sessions run

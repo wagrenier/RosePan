@@ -12,3 +12,21 @@ int MagLifePC::getSubStateClass()
     ROSEPAN_STUB("MagLifePC::getSubStateClass", 0x0011e080);
     return {};
 }
+
+// stub of ROR 0x0011dd40
+void MagLifePC::initMotion()
+{
+    ROSEPAN_STUB("MagLifePC::initMotion", 0x0011dd40);
+}
+
+// stub of ROR 0x0011bd4c
+void MagLifePC::setActor(DogActor *actor, int no, int mode)
+{
+    ROSEPAN_STUB("MagLifePC::setActor", 0x0011bd4c);
+}
+
+// stub of ROR 0x0011c418
+void MagLifePC::termWorld()
+{
+    ROSEPAN_STUB("MagLifePC::termWorld", 0x0011c418);
+}

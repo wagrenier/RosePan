@@ -27,6 +27,9 @@ struct DogActor : DogModel
 {
     int  getMotionMove(float t0, float t1, float *move, float *rot, float *pos); // ROR 0x00109348
     void releaseMotion(int theId);                                       // ROR 0x00109b88
+    /* Loads a motion pack (asserts theFileName, m_pack_motion[theLevel] == NULL);
+     * the order of the two ints is the ROM's (MagScene::setActorAnim swaps them). */
+    u_int loadPackMotion(const char *theFileName, int a, int b);         // ROR 0x0010c17c
     void addTrans(const float *d, float trans_ofs_y, float rot_y_aar);   // ROR 0x0010a038
     /* EE slot 17 (+0x88): out = m_matrix x the model matrix of node n. */
     void getNodeWorldMatrix(sceVu0FMATRIX out, int n);                   // ROR 0x0010eab8

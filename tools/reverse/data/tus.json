@@ -63,6 +63,17 @@
    "status": "verify",
    "why": "i3d VRAM cache: a block heap of 0x44-byte nodes on six intrusive lists (address order, LRU, locked, evict, new, moved), embedded twice in i3dContext (+0x0 texture pages, +0x70 CLUT); 0x227a98 list unlink .. 0x228b50 coalesce, next function 0x228c08 calls the i3d system module 0x237180."
   },
+  "mag/magscene2.cpp": {
+   "notes": "Screen still black: MagScene::draw and i3dCtxCloseFrame are stubs, so nothing reaches the GS; the smoke run now reaches MagLifeMan::init/add, DogTexInfo::init/add, the three S2d inits and four FUN_ objects through initRender. Left in this TU: the constructor 0x1360a0 (0xc74; 128 DogActors, the sky DogModels, twelve MagLifeMenu objects, 0x2000 records near +0x437e0, many float defaults), the destructor 0x136d14, load 0x1377f0 and the rest of the inferred range. The extent is NOT pinned: the inferred range 0x1316b8..0x13ff00 also covers magscene.cpp (update, setViewParam, drawView) and the light / camera / tenkyu functions; pin it with tus.py define before the next slice. Host DogModel is smaller than the EE 0x1a0, so no lower-bound asserts after embedded Dog objects (MagSceneTenkyu). Placeholders in lib/unassigned.h named by constructor address (MagLife12f008, MagLife130da4, Obj176a3c, Obj19226c, Obj17c0f0) and four unnamed callees FUN_00176afc, FUN_00192318, FUN_0017c2c0, FUN_001944d0 still need classes and names. The 4.48 view literal is the ROM's 0x408f5c28, written as a hex float.",
+   "sessions": [
+    {
+     "date": "2026-10-22 13:42",
+     "status": "partial",
+     "summary": "MagScene set-up half: init (fog records, light no, life manager, texture table with shadow01, sky slots), initRender (two view records, controller scene links, the S2dBg / S2dCineSco / S2dMes layers and two unnamed life objects on MagLifeMan, render objects, 2D packet buffer), setPC, setBwn, clearPC, postDraw, setActorAnim, setCameraTarget, initCamera, getCameraMode, releaseTenkyu and releaseTenkyuAll (12 of 31). New headers mag/maglife.h (MagLife / MagLifeControlChara, host structs with the EE vptr word as padding), maglifebwnctrl.h, maglifeman.h, dog/dogtexinfo.h, utl/utlfind.h; MagScene laid out in EE order from the constructor's map; MagSystem::getBwnState now reads MagLifeBwnCtrl's state word (scene +0x2bd20, same address). 23 names in Ghidra (batch magscene2_001)."
+    }
+   ],
+   "status": "partial"
+  },
   "mag/magsystem.cpp": {
    "notes": "All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes are NOT polymorphic on the host: the EE vptr word at +0x94 is kept as padding (_ee_vptr) and setAttachNode (slot 10) / getNodeWorldMatrix (slot 17) are plain members; the first dog/ TU needing a virtual makes them virtual in the slot order listed in the header comments. DogEntity::setRotate / normalizeRotate sit in unassigned@0010f944 (stubs in lib/unassigned_stubs.cpp) but are dog code: define that range when a dog TU starts. Next reached stubs: MagScene ctor/init/start/initRender/update/draw, i3d (unassigned@00216ad0), BedPad, SndMan::update.",
    "ranges": [
