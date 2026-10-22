@@ -42,6 +42,12 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    root (lower-case names from the game, upper-case on the disc: fine on Windows, not on a
    case-sensitive host).
 
+7. (2026-10-22, the utlmisc session) `utl/utlmisc.cpp` is written (`verify`): main's `utlMemInit`
+   creates the game heap, a `BedMemory`, and `utlMemAlloc` / `utlMemRealloc` / `utlMemFree` are the
+   rx memory hooks. **`bed/bedmemory.cpp` (0x100354..) is only stubs** (its alloc returns NULL): when
+   `main` is reconstructed and calls `utlMemInit`, reconstruct bedmemory in the same or the next
+   session, before anything allocates through the hooks.
+
 ## Decisions
 
 - One TU per session, run by the user (`/rosepan-port next`, the routine, or autopilot.py); sessions run
@@ -62,6 +68,15 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
   HOST driver reads files by name through sceOpen; the cdrom driver (which walks ISO 9660 sectors
   itself) stays written for parity but is not on the host's boot path, and libcdvd is not taught to
   build an image.
+
+- **The ROM's global operator new / delete are not the host's** (decided in the utlmisc session,
+  2026-10-22, unconfirmed with the user): 0x105b54 / 0x105b7c / 0x105ba4 / 0x105bc4 are written as
+  `utlOperatorNew*` / `utlOperatorDelete*` in utl/utlmisc.cpp and do not replace `::operator new`.
+  A new-expression in reconstructed code uses the host heap: host objects are bigger than the EE's,
+  and the platform layer allocates before main creates the game heap. Revisit if game code relies on
+  the game heap's bookkeeping (BedMemory::check, the debug tags).
+- **Asserts**: `ROR_ASSERT(expr)` in `src/common/ror_assert.h` prints the ROM handler's line and
+  continues (2026-10-22).
 
 ## Platform bootstrap (FF3 pieces dropped or still to adapt, 2026-10-22)
 

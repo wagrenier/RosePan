@@ -188,7 +188,7 @@ functions assert (`.h`). Directories and files:
 | `spr/` | sprman (+.h), sprtexture |
 | `system/` | sysnowloading |
 | `task/` | naga_chunk, tsk_bg_load, tsk_scene |
-| `utl/` | utlbtl, utlfile, utlfind, utlgame, utlmisc, utltm2 |
+| `utl/` | utlbtl, utlfile, utlfind, utlgame, utlmisc (0x105650..0x105e50: text helpers, `utlParseParam` name/value lines, the frame counter, operator new/delete, the game heap), utltm2 |
 
 Files without an assert are not named by the binary (`main`, the rx middleware, every file whose code
 never asserts): sessions name them (`tus.py define --why`).
@@ -222,7 +222,9 @@ never asserts): sessions name them (`tus.py define --why`).
 | 0x241f58 | `rxSysPrintf`: the middleware's and game's printf (151 callers): print hook 0x2db9d0, then `scePrintf`, or a buffered host tty (file 0x2dba34 / IOP tty RPC) | `rx/rxsys.cpp` |
 | 0x2dbe8c | `g_rxSysMemFunc[4]`: memory hooks the game's allocators call through (0x1830fc, 0x182818 ...) | `rx/rxsys.cpp` |
 | 0x215a30 | the assert handler `(file, line, expr)`: prints "Assertion Failed: %s(%d)   %s\n" through 0x260110 and loops for ever | 1,483 call sites |
-| 0x105ba4 | operator-delete wrapper: `if (p) 0x105e08(p)`; the deleting destructors tail-jump to it | 277 call sites; `DogEntity::~DogEntity` 0x280f34 |
+| 0x105ba4 | `operator delete` (`utlOperatorDelete` in src): `if (p) utlMemFree(p)`; the deleting destructors tail-jump to it. `operator new` 0x105b54, `new[]` 0x105b7c, `delete[]` 0x105bc4 | 277 call sites; `DogEntity::~DogEntity` 0x280f34; `utl/utlmisc.cpp` |
+| 0x6e9800 | the game heap: a `BedMemory` (bed/bedmemory.cpp 0x100354..) that `utlMemInit` 0x105be4 (called by main) creates over the largest malloc (probe from 0x1755100 down); `utlMemAlloc` 0x105ca0 / `utlMemRealloc` 0x105de0 / `utlMemFree` 0x105e08 are main's rxSys memory hooks | `utl/utlmisc.cpp` |
+| 0x215a30 | (see above) the assert handler; src writes asserts as `ROR_ASSERT(expr)` (common/ror_assert.h: reports and continues) | |
 | 0x267798 | `_InitSys` | libmatch (FF2 initsys.c) |
 | 0x100248 | `_exit`: crt0's `j Exit` thunk; `Exit` is 0x267b98 | FF2 symbols at the same addresses |
 

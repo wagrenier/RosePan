@@ -11,6 +11,192 @@
   "was": "Exit",
   "why": "crt0 thunk j Exit (FF2 symbol _exit at the same address); the FF3 reference called the thunk Exit"
  },
+ "00100354": {
+  "name": "BedMemory::create",
+  "tag": "ror-inferred",
+  "was": "FUN_00100354",
+  "why": "bed/bedmemory.cpp; zeroes the heap record, mallocs size & ~15 (assert h != __null), formats it, sets the ready flag; class name inferred from the file (BedPad / BedSubMode are classes)"
+ },
+ "00100568": {
+  "name": "BedMemory::destroy",
+  "tag": "ror-inferred",
+  "was": "FUN_00100568",
+  "why": "bed/bedmemory.cpp; the heap teardown utlMemTerm calls"
+ },
+ "00100a3c": {
+  "name": "BedMemory::alloc",
+  "tag": "ror-inferred",
+  "was": "FUN_00100a3c",
+  "why": "bed/bedmemory.cpp; (heap, size, align index or -1) returns the block"
+ },
+ "00100c84": {
+  "name": "BedMemory::allocDebug",
+  "tag": "ror-inferred",
+  "was": "FUN_00100c84",
+  "why": "BedMemory::alloc then stores three tag words in the block header at +0x18 (m_filename), +0x16, +0x14"
+ },
+ "001010a4": {
+  "name": "BedMemory::realloc",
+  "tag": "ror-inferred",
+  "was": "FUN_001010a4",
+  "why": "(heap, ptr, size): NULL ptr allocates, size < 1 frees; asserts theNewSize > 0"
+ },
+ "00101328": {
+  "name": "BedMemory::free",
+  "tag": "ror-inferred",
+  "was": "FUN_00101328",
+  "why": "(heap, ptr): the release utlMemFree and realloc call"
+ },
+ "00101518": {
+  "name": "BedMemory::check",
+  "tag": "ror-inferred",
+  "was": "FUN_00101518",
+  "why": "(heap, mode): walks the block list, mode 2 counts broken links, asserts p != p->m_next and errcnt == 0"
+ },
+ "00105650": {
+  "name": "utlIsTccName",
+  "tag": "ror-inferred",
+  "was": "FUN_00105650",
+  "why": "utl/utlmisc.cpp line 22 assert theName; returns 1 when the name contains _tcc (texture names such as map01_tcc.tm2)"
+ },
+ "001056f8": {
+  "name": "utlFtoi15",
+  "tag": "ror-inferred",
+  "was": "FUN_001056f8",
+  "why": "qmtc2 / vftoi15 / qmfc2: float to fixed point with 15 fraction bits"
+ },
+ "00105710": {
+  "name": "utlSkipSpace",
+  "tag": "ror-inferred",
+  "was": "FUN_00105710",
+  "why": "skips blanks and tabs, returns the first other char"
+ },
+ "00105750": {
+  "name": "utlSkipCtrl",
+  "tag": "ror-inferred",
+  "was": "FUN_00105750",
+  "why": "skips control chars 1..0x1f and DEL (line ends)"
+ },
+ "001057a8": {
+  "name": "utlSkipSymbol",
+  "tag": "ror-inferred",
+  "was": "FUN_001057a8",
+  "why": "skips [0-9A-Za-z_], the end of a parameter name"
+ },
+ "00105838": {
+  "name": "utlNextLine",
+  "tag": "ror-inferred",
+  "was": "FUN_00105838",
+  "why": "skips to the end of the line and past the line end; NULL at the end of the text"
+ },
+ "001058a0": {
+  "name": "utlParseParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001058a0",
+  "why": "parses name value lines into 12-byte records name, type 1 int / 2 float / 3 string, value; hex with $, strings in quotes; returns the count"
+ },
+ "00105b3c": {
+  "name": "utlIncFrameCount",
+  "tag": "ror-inferred",
+  "was": "FUN_00105b3c",
+  "why": "increments data 0x295f00, called once at the end of the per-frame system update 0x1182dc"
+ },
+ "00105b54": {
+  "name": "operator_new",
+  "tag": "ror-inferred",
+  "was": "FUN_00105b54",
+  "why": "tail-calls utlMemAlloc(size) on the game heap; 278 call sites before constructors; global operator new(unsigned int), GCC 2 __nw__FUi"
+ },
+ "00105b68": {
+  "name": "operator_new(unsigned_int,char_const*,int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_00105b68",
+  "why": "tail-calls utlMemAllocDebug with the size and three tag words; no callers; parameter types guessed from BedMemory::allocDebug stores (filename, line, id)"
+ },
+ "00105b7c": {
+  "name": "operator_new[]",
+  "tag": "ror-inferred",
+  "was": "FUN_00105b7c",
+  "why": "second plain size wrapper of utlMemAlloc, 16 call sites paired with the delete[] wrapper 0x105bc4: operator new[](unsigned int), __vn__FUi"
+ },
+ "00105b90": {
+  "name": "operator_new[](unsigned_int,char_const*,int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_00105b90",
+  "why": "array twin of 0x105b68: utlMemAllocDebug; no callers"
+ },
+ "00105ba4": {
+  "name": "operator_delete",
+  "tag": "ror-inferred",
+  "was": "FUN_00105ba4",
+  "why": "if (p) utlMemFree(p); deleting destructors tail-jump to it (277 call sites): operator delete(void *), __dl__FPv"
+ },
+ "00105bc4": {
+  "name": "operator_delete[]",
+  "tag": "ror-inferred",
+  "was": "FUN_00105bc4",
+  "why": "if (p) utlMemFree(p); 19 call sites, the same callers as operator new[]: operator delete[](void *), __vd__FPv"
+ },
+ "00105be4": {
+  "name": "utlMemInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00105be4",
+  "why": "main calls it: probes the largest malloc from 0x1755100 down in 0x100 steps, then BedMemory::create on the game heap 0x6e9800"
+ },
+ "00105c80": {
+  "name": "utlMemTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_00105c80",
+  "why": "BedMemory::destroy on the game heap 0x6e9800; no callers"
+ },
+ "00105ca0": {
+  "name": "utlMemAlloc",
+  "tag": "ror-inferred",
+  "was": "FUN_00105ca0",
+  "why": "BedMemory::alloc(heap 0x6e9800, size, -1); main installs it as rx memory hooks 0 and 1"
+ },
+ "00105cc4": {
+  "name": "utlMemAlignIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_00105cc4",
+  "why": "maps an alignment 0x40 -> 1, 0x80 -> 2, anything else 0 (0x20), the BedMemory::alloc align argument"
+ },
+ "00105d08": {
+  "name": "utlMemAllocAlign",
+  "tag": "ror-inferred",
+  "was": "FUN_00105d08",
+  "why": "BedMemory::alloc(heap, size, utlMemAlignIndex(align)); no callers"
+ },
+ "00105d40": {
+  "name": "utlMemAllocDebug",
+  "tag": "ror-inferred",
+  "was": "FUN_00105d40",
+  "why": "BedMemory::allocDebug(heap, size, a, b, c, -1); called by the debug operator new wrappers"
+ },
+ "00105d78": {
+  "name": "utlMemAllocAlignDebug",
+  "tag": "ror-inferred",
+  "was": "FUN_00105d78",
+  "why": "BedMemory::allocDebug with utlMemAlignIndex(align); no callers"
+ },
+ "00105de0": {
+  "name": "utlMemRealloc",
+  "tag": "ror-inferred",
+  "was": "FUN_00105de0",
+  "why": "BedMemory::realloc(heap 0x6e9800, ptr, size); main installs it as rx memory hook 2"
+ },
+ "00105e08": {
+  "name": "utlMemFree",
+  "tag": "ror-inferred",
+  "was": "FUN_00105e08",
+  "why": "BedMemory::free(heap 0x6e9800, ptr); main installs it as rx memory hook 3; the delete wrappers call it"
+ },
+ "00105e2c": {
+  "name": "utlMemCheck",
+  "tag": "ror-inferred",
+  "was": "FUN_00105e2c",
+  "why": "BedMemory::check(heap 0x6e9800, 0); no callers"
+ },
  "002045a8": {
   "name": "main",
   "tag": "ror-inferred",
