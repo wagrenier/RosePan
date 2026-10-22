@@ -1,0 +1,10 @@
+{
+ "lib_ranges": [
+  ["00100000", "00100258", "crt0 (_start, _exit): libmatch.py, FF2 crt0.s"],
+  ["0024b490", "00280e88", "Sony SDK 3.0 libraries (libmc, libmpeg, csc/ipu, libdbc, libpad2, libvib, libdma, libgraph, libvu0, devvu0/vif), the EE kernel stubs and libc (klib, intr, thread, sif, tty, deci2, filestub), libgcc2 / fp-bit / dp-bit, newlib: libmatch.py --ranges, 2026-10-22"],
+  ["002953b0", "00295eb8", "ee-gcc 2.9x C++ runtime in named linkonce sections (type_info, __user_type_info, __si_type_info, exception, bad_cast, ...)"]
+ ],
+ "satellite_ranges": [
+  ["00280e88", "0029122c", "named .gnu.linkonce.t sections (inline methods): they ride with their class's TU"]
+ ]
+}
