@@ -233,8 +233,11 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   (rodata 0x2e90a8) with `i3dGetStructSize` 0x21f1a8 (data 0x302ba0) and hangs on a mismatch.
   Files pinned so far (2026-10-22): **`i3d/i3dctx.cpp`** 0x21eb28..0x21fb30 (written, verify),
   **`i3d/i3dlayer.cpp`** 0x222f50..0x224de0 (written, verify), **`i3d/i3dtex.cpp`**
-  0x2184c0..0x21a120 (written, verify), **`i3d/i3dtim2.cpp`** 0x224de0..0x225018 (todo, queued:
-  header written, its four helpers are stubs that return NULL / 0), **`i3d/i3dview.cpp`** 0x226278..0x227a98 (written, verify) and
+  0x2184c0..0x21a120 (written, verify), **`i3d/i3dtim2.cpp`** 0x224de0..0x225018 (written, verify:
+  7 functions -- i3dTim2CheckHeader 0x224de0 (TIM2 -> 1, CLT2 -> 2; the ROM ors the TIM2 byte
+  tests), GetPicture, the hidden i3dTim2IsClutOnly 0x224ec0 and i3dTim2GetClutCount 0x224fb0,
+  GetMipSize, GetImage (level sizes at picture +0x40), GetClut; the check and the two hidden ones
+  have no callers), **`i3d/i3dview.cpp`** 0x226278..0x227a98 (written, verify) and
   **`i3d/i3dvram.cpp`** 0x227a98..0x228c08 (written, verify), **`i3d/i3dpacket.cpp`**
   0x21b220..0x21c960 (written, verify; below). Between tim2 and view,
   0x225018..0x226278 (unassigned): animation curve sampling (0x225018 binary search over key times,

@@ -1,6 +1,5 @@
 {
  "queue": [
-  "i3d/i3dtim2.cpp",
   "spr/sprtexture.cpp",
   "dog/dogtexinfo.cpp",
   "spr/sprman.cpp"
@@ -127,12 +126,21 @@
    "why": "texture / CLUT objects and their GS transfers: i3dTexMakeUpload family, PSM tables, TIM2 setup for DogTexInfo, PSMT8/PSMT4 to CT32 swizzle helpers (0x2184c0.. nibble get/set used only by the swizzlers); before it 0x21838c strncpy-like / 0x218450 angle wrap / 0x218470 empty varargs are utility code, after it i3dFogInit (i3denv.cpp)"
   },
   "i3d/i3dtim2.cpp": {
+   "notes": "Complete code; the smoke screenshot stays black because no host draw module consumes the i3d texture objects yet, so nothing on screen shows TIM2 decoding. The first session whose screenshot shows an i3d texture (S2dMovie loading.tm2 via MagScene::draw) marks this done. ROM quirk kept: CheckHeader ors the TIM2 byte tests, so any one matching byte passes. CheckHeader, IsClutOnly and GetClutCount have no callers in the ROM.",
    "ranges": [
     [
      "00224de0",
      "00225018"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-22 17:09",
+     "status": "verify",
+     "summary": "All 7 TIM2 helpers reconstructed: i3dTim2CheckHeader, GetPicture, IsClutOnly, GetMipSize, GetImage, GetClutCount, GetClut (two hidden functions created in Ghidra at 0x224ec0 and 0x224fb0); I3dTim2File and I3dTim2MipMap headers with asserts"
+    }
+   ],
+   "status": "verify",
    "why": "TIM2 file helpers after i3dlayer.cpp: header check (TIM2 / CLT2 magic, version 3/4), picture n, image size at a mip level, mip level data, CLUT data; called from the texture objects 0x2193f0 / 0x219ab0"
   },
   "i3d/i3dview.cpp": {
