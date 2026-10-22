@@ -160,6 +160,7 @@ void utlRandReset(void);                                                 // ROR 
 /* The context and the VRAM cache have their own files (i3d/i3dctx.h,
  * i3d/i3dvram.h); what they call in the rest of the library is below. */
 #include "i3d/i3dctx.h"
+#include "i3d/i3dlayer.h"
 
 int   i3dPrintf(const char *fmt);  /* printf-like in the ROM */          // ROR 0x00237c68
 void  i3dSysInit(void);            /* empty in the ROM */                // ROR 0x00237178
@@ -178,6 +179,24 @@ u_long *i3dPktSetReg(u_long *pkt, u_long reg, u_long value);             // ROR 
 u_long *i3dPktOpenChain(u_char *pkt);                                    // ROR 0x0021b698
 /* Writes the no-texture registers into each used slot of a draw set. */
 int   i3dBatchClearTextures(I3dDrawSet *set);                            // ROR 0x0021b288
+/* ALPHA_1 from a blend mode (0 writes nothing). */
+u_long *i3dPktSetAlphaMode(u_long *pkt, int mode);                       // ROR 0x0021b600
+/* CALL tags to the layer view's / fog's packet, when the layer has one. */
+u_long *i3dPktCallView(u_long *pkt, I3dLayer *layer);                    // ROR 0x0021b5a0
+u_long *i3dPktCallFog(u_long *pkt, I3dLayer *layer);                     // ROR 0x0021b5d0
+
+/* Draw sets (the packet module before the strip builders). */
+void  i3dDrawSetInsertAfter(I3dDrawSet *set, I3dDrawSet *at);            // ROR 0x0021b220
+void  i3dDrawSetMoveAfter(I3dDrawSet *set, I3dDrawSet *at);              // ROR 0x0021b238
+void  i3dTexSetDescInit(I3dTexSetDesc *desc);                            // ROR 0x0021b300
+int   i3dDrawSetInit(I3dDrawSet *set, I3dLayer *layer, const I3dTexSetDesc *desc,
+                     u_int hash);                                        // ROR 0x0021b320
+/* Bits per pixel of a GS pixel format (0 past the table). */
+int   i3dPsmBits(int psm);                                               // ROR 0x00218db8
+/* Copies four words (no alignment needed). */
+void  i3dVecCopyW(float *out, const float *in);                          // ROR 0x00236980
+/* The unit matrix (data 0x303c10). */
+sceVu0FVECTOR *i3dMatGetUnit(void);                                      // ROR 0x00237168
 
 /* A layer's light set, fog and view (EE layer +0x82c / +0x830 / +0x834).
  * Opaque: built by 0x11262c over the scene light pool, i3dCtxSetFog and
@@ -186,30 +205,9 @@ struct I3dLight;
 struct I3dView;
 struct MagViewParam;
 
-int   i3dLayerSetLight(I3dLayer *layer, I3dLight *light);                // ROR 0x00223240
-int   i3dLayerSetFog(I3dLayer *layer, void *fog);                        // ROR 0x00223250
-int   i3dLayerSetView(I3dLayer *layer, I3dView *view);                   // ROR 0x00223260
-/* The layer group's packet cursor, and its end once the caller wrote it. */
-u_long *i3dLayerBeginPacket(I3dLayer *layer);                            // ROR 0x00223378
-int   i3dLayerEndPacket(I3dLayer *layer, u_long *end);                   // ROR 0x00223398
-/* The same for the packet drawn after the layer's models (the draw group's
- * slot 2; i3dLayerBeginPacket is slot 0). */
-u_long *i3dLayerBeginPostPacket(I3dLayer *layer);                        // ROR 0x002233e8
-int   i3dLayerEndPostPacket(I3dLayer *layer, u_long *end);               // ROR 0x00223408
 /* A view from a view record and a camera matrix, in the context's tail. */
 I3dView *i3dCtxCreateView(i3dContext *ctx, MagViewParam *param, sceVu0FVECTOR *matrix); // ROR 0x00226c58
 
-/* The draw groups and layers (0x2239b8..0x224d88). */
-int   i3dLayerInit(I3dLayer *layer, i3dContext *ctx);                    // ROR 0x00223878
-int   i3dBatchAppend(I3dGroup *dst, I3dGroup *src);                      // ROR 0x00223d48
-I3dNode *i3dSortList(I3dNode *first, int order, int b, u_int count);     // ROR 0x00224368
-int   i3dGroupInit(I3dGroup *group, i3dContext *ctx, int a, int b, int c); // ROR 0x002243a0
-int   i3dCtxRunGroup(i3dContext *ctx, I3dGroup *group);                  // ROR 0x002246c8
-int   i3dCtxCloseFrame(i3dContext *ctx);                                 // ROR 0x00224798
-void  i3dGroupAddLayer(I3dGroup *group, u_int key, I3dGroup *layer);     // ROR 0x00224878
-int   i3dTexRegsSet(u_long *regs, I3dVramHandle *tex, I3dVramHandle *clut,
-                    u_int arg);                                          // ROR 0x00224b28
-void  i3dTexRegsSetNone(u_long *regs);                                   // ROR 0x00224d88
 
 /* The fog record i3dCtxSetFog turns into FOGCOL and the fog ramp: a
  * colour (0..1, clamped) and four floats. EE 0x20; float roles unverified. */
@@ -278,25 +276,6 @@ I3dLight *i3dCtxCreateLight(i3dContext *ctx, const I3dLightDesc *desc);  // ROR 
 /* The fog state of a frame from a fog record; NULL on failure. */
 void     *i3dCtxSetFog(i3dContext *ctx, const I3dFog *fog);              // ROR 0x0021a158
 
-/* A layer's draw sets: the default one, the current one, one found (or
- * made) for a texture-set description (EE 0x18; i3dLayerFindDrawSet hashes
- * every word). layout: host -- a pointer. */
-struct I3dTexSetDesc
-{
-    float  m_00;                // ROR 0x00: 1.0 (the run's depth key)
-    int   *m_tex_no;            // ROR 0x04: the texture numbers
-    u_int  m_tex_count;         // ROR 0x08
-    u_int  m_0c;                // ROR 0x0c: unverified
-    u_int  m_10;                // ROR 0x10: unverified
-    u_int  m_14;                // ROR 0x14: unverified
-};
-static_assert(offsetof(I3dTexSetDesc, m_tex_count) >= 0x08, "m_tex_count");
-I3dDrawSet *i3dLayerGetDrawSet(I3dLayer *layer);                         // ROR 0x00223270
-int       i3dLayerSetDrawSet(I3dLayer *layer, I3dDrawSet *set);          // ROR 0x00223228
-I3dDrawSet *i3dLayerFindDrawSet(I3dLayer *layer, const I3dTexSetDesc *desc); // ROR 0x00223558
-/* Opens a packet node with a sort key in the current set; its packet. */
-u_long   *i3dLayerBeginSet(I3dLayer *layer, float key);                  // ROR 0x00223298
-void      i3dLayerEndSet(I3dLayer *layer, u_long *end);                  // ROR 0x002232f0
 /* Counts a use of texture slot n; its GS register packet. */
 u_long   *i3dDrawSetUseTex(I3dDrawSet *set, int n);                      // ROR 0x0021b260
 u_long   *i3dPktRefTexRegs(u_long *pkt, u_long *regs);                   // ROR 0x0021b4f8
@@ -317,10 +296,13 @@ u_long   *i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix
                              int flags);                                 // ROR 0x0021dd10
 u_long   *i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
                               const void *color, const void *xyz, int flags); // ROR 0x0021e1d8
-/* MagScene::drawStrips' record types 4, 3 and 5; roles unknown. */
-int       FUN_00222f88(I3dLayer *layer, void *a, void *b, void *rec);    // ROR 0x00222f88
-int       FUN_00223050(void *a, I3dLayer *layer, void *b, const float *c); // ROR 0x00223050
-int       FUN_002230e8(I3dLayer *layer, void *a, const float *b, void *c, void *rec); // ROR 0x002230e8
+/* Wire shapes as line strips (MagScene::drawStrips' debug records through
+ * i3dLayerDrawWireSphere / Box / Shape). */
+u_long   *i3dPktDrawWireSphere(float radius, u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
+                               const float *center);                    // ROR 0x0021e6f8
+u_long   *i3dPktDrawWireBox(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
+                            const float *center, const void *extent, const void *color); // ROR 0x0021e8f8
+u_long   *i3dPktDrawWireShape(u_long *pkt, I3dLayer *layer, void *a, void *b, void *c); // ROR 0x0021e9f8
 
 /* i3d's vector / matrix helpers (VU0 macro code; the angle comes first in f12). */
 void  i3dVecCopy(float *out, const float *in);                           // ROR 0x002372d0

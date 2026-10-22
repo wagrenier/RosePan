@@ -23,85 +23,35 @@
 #define _I3D_I3DCTX_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include "i3d/i3dvram.h"
 
 struct i3dContext;
 
-/* ---- types of the draw module (unassigned@00216ad0: 0x2239b8..0x224d88),
- * as far as the context uses them ---- */
+/* The draw groups, layers and draw sets live in i3d/i3dlayer.h. */
+struct I3dNode;
+struct I3dGroup;
+struct I3dDrawSet;
+struct I3dLayer;
 
-/* A list node (EE 0x10): a sort key, the next node, two payload words. A
- * list head is a node too (0x2239b8 clears it, its +0xc points to the last
- * node). layout: host -- pointers. */
-struct I3dNode
-{
-    u_int    m_key;             // ROR 0x00: i3dSortList's key
-    I3dNode *m_next;            // ROR 0x04
-    void    *m_data;            // ROR 0x08: the payload (an I3dDrawSet in a layer)
-    void    *m_data2;           // ROR 0x0c: a list head's last node
-};
-static_assert(offsetof(I3dNode, m_key) == 0, "I3dNode::m_key");
+/* ---- DMA tags (shared by the i3d files) ---- */
 
-/* A draw group (EE 0x30, from the packet tail; i3dGroupInit 0x2243a0): a
- * list of nodes whose packets i3dCtxRunGroup links into the DMA chain and
- * whose callbacks it runs. i3dBatchAppend splices one group's nodes onto
- * another's. layout: host -- pointers. */
-struct I3dGroup
-{
-    u_int       m_key;          // ROR 0x00
-    I3dNode    *m_first;        // ROR 0x04
-    u_int       m_08;           // ROR 0x08: unverified
-    I3dNode    *m_last;         // ROR 0x0c: itself (as a node) when empty
-    i3dContext *m_ctx;          // ROR 0x10
-    int         m_14;           // ROR 0x14: i3dGroupInit's second parameter (unverified role)
-    int         m_sort;         // ROR 0x18: 1 = i3dCtxRunGroup sorts with mode -1 (unverified)
-    int         m_1c;           // ROR 0x1c: i3dGroupInit's fourth parameter (unverified role)
-    int         m_20;           // ROR 0x20: unverified
-    u_int       m_count;        // ROR 0x24: nodes (i3dGroupAddLayer counts them)
-    u_int       m_28;           // ROR 0x28: summed by i3dBatchAppend; non-zero = something to draw
-};
-static_assert(offsetof(I3dGroup, m_key) == 0, "I3dGroup::m_key");
+#define I3D_DMA_CNT     0x10000000u     /* tag id 1: qwc qwords follow */
+#define I3D_DMA_NEXT    0x20000000u     /* tag id 2: qwc qwords follow, then the tag at ADDR */
+#define I3D_DMA_REF     0x30000000u     /* tag id 3: qwc qwords at ADDR */
+#define I3D_DMA_CALL    0x50000000u     /* tag id 5: the chain at ADDR, back at its RET */
+#define I3D_DMA_END     0x70000000u     /* tag id 7: qwc qwords follow, then stop */
 
-/* A draw set: the textures one run of packets needs, and those packets.
- * The texture slots hold GS register packets that i3dTexRegsSet fills with
- * the VRAM addresses the heaps gave out. Name and the unknown words
- * unverified. layout: host -- partial. */
-struct I3dDrawSet
+/* The address word of a DMA tag. PC: the ROM's & 0x0fffffff of an EE
+ * address; the host's DMA does not follow chains (i3dctx.cpp). */
+static inline u_int i3dDmaAddr(const void *p)
 {
-    u_int           m_00;           // ROR 0x00: unverified
-    u_int           m_04;           // ROR 0x04: unverified
-    u_int           m_08;           // ROR 0x08: unverified
-    I3dGroup       *m_group;        // ROR 0x0c: the packets
-    u_long        **m_tex_regs;     // ROR 0x10: per slot, its texture register packet
-    int            *m_tex_used;     // ROR 0x14: per slot, non-zero = in use
-    u_int           m_18;           // ROR 0x18: unverified
-    I3dDrawSet     *m_reserved_next;// ROR 0x1c: the context's list of reserved sets
-    float           m_depth;        // ROR 0x20: equal m_depth and m_2c = one run
-    u_int          *m_tex_index;    // ROR 0x24: per slot, an index into the texture table
-    u_int           m_tex_count;    // ROR 0x28: slots
-    u_int           m_2c;           // ROR 0x2c: the run's second key (unverified role)
-};
-static_assert(offsetof(I3dDrawSet, m_00) == 0, "I3dDrawSet::m_00");
+    return (u_int)((uintptr_t)p & 0x0fffffff);
+}
 
-/* A layer (EE 0xe60, from the packet tail): a list of draw sets drawn by
- * i3dCtxDrawTexturedLayer, which i3dLayerInit (0x223878) installs as the
- * callback of the layer's own group. layout: host -- partial; the two
- * 0x100-word tables and the 0x62 qwords after +0x838 are not used here. */
-struct I3dLayer
-{
-    u_int       m_key;          // ROR 0x00
-    I3dNode    *m_first;        // ROR 0x04: the draw-set nodes
-    u_int       m_08;           // ROR 0x08: unverified
-    I3dNode    *m_last;         // ROR 0x0c
-    u_int       m_count;        // ROR 0x10
-    u_char      _14[0x800];     // ROR 0x14..0x813: two 0x100-word tables (unverified)
-    i3dContext *m_ctx;          // ROR 0x814
-    void       *m_818;          // ROR 0x818: unverified
-    I3dGroup   *m_group;        // ROR 0x81c: the layer's draw group
-    u_char      _820[0x640];    // ROR 0x820..0xe5f: unverified
-};
-static_assert(offsetof(I3dLayer, m_key) == 0, "I3dLayer::m_key");
+/* PC: the qwords a host-sized object takes from the packet tail. */
+#define I3D_QWC_OF(T) ((int)((sizeof(T) + 15) / 16))
 
 /* A texture table entry (i3dCtxSetTexTable; EE 0x10 each). layout: host --
  * pointers. */
@@ -110,7 +60,7 @@ struct I3dTexEntry
     u_int          m_00;        // ROR 0x00: unverified
     I3dVramHandle *m_tex;       // ROR 0x04: the texture's VRAM handle (or NULL)
     I3dVramHandle *m_clut;      // ROR 0x08: the CLUT's VRAM handle (or NULL)
-    u_int          m_0c;        // ROR 0x0c: passed to i3dTexRegsSet
+    u_int          m_0c;        // ROR 0x0c: i3dTexRegsSet's CLUT index
 };
 static_assert(offsetof(I3dTexEntry, m_00) == 0, "I3dTexEntry::m_00");
 
@@ -154,7 +104,7 @@ struct i3dContext
     int           m_frame_stat[4];          // ROR 0x12130: cleared by i3dCtxEndFrame (unverified)
     u_char        _12140[0x14];             // ROR 0x12140..0x12153: unknown
     u_long       *m_chain;                  // ROR 0x12154: the open DMA tag the next packet is linked from
-    int           m_12158[4];               // ROR 0x12158: cleared by i3dCtxCloseFrame (unverified)
+    u_int         m_chan_state[4];          // ROR 0x12158: per channel, the state packet last CALLed (i3dNodeState); cleared by i3dCtxCloseFrame
 };
 static_assert(offsetof(i3dContext, m_tex_vram) == 0x00, "i3dContext::m_tex_vram");
 static_assert(offsetof(i3dContext, m_tex_vram) + sizeof(I3dVramHeap) == offsetof(i3dContext, m_clut_vram),
@@ -192,7 +142,7 @@ int      i3dCtxBeginFrame(i3dContext *ctx);                              // ROR 
 int      i3dCtxEndFrame(i3dContext *ctx);                                // ROR 0x0021f760
 int      i3dCtxSetFloatParam(i3dContext *ctx, float value);              // ROR 0x0021f7c8
 I3dLayer *i3dCtxCreateLayer(i3dContext *ctx, float key);                 // ROR 0x0021f7e0
-I3dGroup *i3dCtxCreateGroup(i3dContext *ctx, int a, int b, int c);       // ROR 0x0021f850
+I3dGroup *i3dCtxCreateGroup(i3dContext *ctx, int sort_func, int sort_order, int sort_param);       // ROR 0x0021f850
 int      i3dCtxTerm(i3dContext *ctx);                                    // ROR 0x0021f8c8
 int      i3dCtxInit(i3dContext *ctx, void *buf, int size, int count);    // ROR 0x0021f900
 int      i3dCtxReserveTextures(i3dContext *ctx, I3dDrawSet *set);        // ROR 0x0021f9c8

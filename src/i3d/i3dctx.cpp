@@ -17,6 +17,7 @@
  *  i3dInitHardware have no host counterpart and are kept as comments.
  * ======================================================================== */
 #include "i3d/i3dctx.h"
+#include "i3d/i3dlayer.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -26,11 +27,6 @@
 #include "sdk/libgraph.h"
 
 /* ---- DMA tags, VIF codes, GIF tags ---------------------------------------- */
-
-#define I3D_DMA_CNT     0x10000000u     /* tag id 1: qwc qwords follow */
-#define I3D_DMA_NEXT    0x20000000u     /* tag id 2: qwc qwords follow, then the tag at ADDR */
-#define I3D_DMA_REF     0x30000000u     /* tag id 3: qwc qwords at ADDR */
-#define I3D_DMA_END     0x70000000u     /* tag id 7: qwc qwords follow, then stop */
 
 #define I3D_VIF_FLUSH   0x11000000u
 #define I3D_VIF_STROW   0x30000000u
@@ -44,21 +40,11 @@
 #define I3D_GS_TEX0_1    0x06ull
 #define I3D_GS_TEXFLUSH  0x3full
 
-/* The address word of a DMA tag. PC: the ROM's & 0x0fffffff of an EE
- * address; the host's DMA does not follow chains (see the file comment). */
-static inline u_int i3dDmaAddr(const void *p)
-{
-    return (u_int)((uintptr_t)p & 0x0fffffff);
-}
-
 /* Qwords from just after a tag at `tag` to `end`. */
 static inline u_long i3dQwc(const void *tag, const void *end)
 {
     return (u_long)(u_int)(((const u_char *)end - (const u_char *)tag - 0x10) >> 4);
 }
-
-/* PC: the qwords a host-sized object takes from the packet tail. */
-#define I3D_QWC_OF(T) ((int)((sizeof(T) + 15) / 16))
 
 /* ---- data ----------------------------------------------------------------- */
 
@@ -482,14 +468,14 @@ int i3dCtxDrawTexturedLayer(I3dLayer *layer)
         }
 
         float depth = first->m_depth;
-        u_int key = first->m_2c;
+        u_int key = first->m_sort_func;
         I3dDrawSet *set = first;
 
         i3dVramEndFrame(tex);
         i3dVramEndFrame(clut);
         for (;;)
         {
-            if (set->m_group->m_28 != 0 && i3dCtxReserveTextures(ctx, set) == I3D_ERR_FULL)
+            if (set->m_group->m_bytes != 0 && i3dCtxReserveTextures(ctx, set) == I3D_ERR_FULL)
             {
                 if (set != first)
                 {
@@ -507,12 +493,12 @@ int i3dCtxDrawTexturedLayer(I3dLayer *layer)
                 i3dBatchClearTextures(first);
             }
             if (set != first)
-                i3dBatchAppend(first->m_group, set->m_group);
+                i3dGroupAppend(first->m_group, set->m_group);
             node = node->m_next;
             if (node == NULL)
                 break;
             set = (I3dDrawSet *)node->m_data;
-            if (set == NULL || set->m_depth != depth || set->m_2c != key)
+            if (set == NULL || set->m_depth != depth || set->m_sort_func != key)
                 break;
         }
         i3dVramCompact(tex);
@@ -591,17 +577,17 @@ I3dLayer *i3dCtxCreateLayer(i3dContext *ctx, float key)
     // PC: the ROM takes 0xe6 qwords (EE 0xe60).
     layer = (I3dLayer *)i3dCtxAllocTail(ctx, I3D_QWC_OF(I3dLayer));
     i3dLayerInit(layer, ctx);
-    i3dGroupAddLayer(ctx->m_root, bits ^ ((u_int)((int)bits >> 31) | 0x80000000u), layer->m_group);
+    i3dGroupAddGroup(ctx->m_root, bits ^ ((u_int)((int)bits >> 31) | 0x80000000u), layer->m_group);
     return layer;
 }
 
 // ROR 0x0021f850
 
-I3dGroup *i3dCtxCreateGroup(i3dContext *ctx, int a, int b, int c)
+I3dGroup *i3dCtxCreateGroup(i3dContext *ctx, int sort_func, int sort_order, int sort_param)
 {
     // PC: the ROM takes 3 qwords (EE 0x30).
     I3dGroup *group = (I3dGroup *)i3dCtxAllocTail(ctx, I3D_QWC_OF(I3dGroup));
-    i3dGroupInit(group, ctx, a, b, c);
+    i3dGroupInit(group, ctx, sort_func, sort_order, sort_param);
     return group;
 }
 

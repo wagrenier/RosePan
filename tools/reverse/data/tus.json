@@ -1,6 +1,6 @@
 {
  "queue": [
-  "unassigned@0021fb50",
+  "unassigned@00224de0",
   "unassigned@00216ad0",
   "spr/sprtexture.cpp",
   "dog/dogtexinfo.cpp",
@@ -50,6 +50,24 @@
    ],
    "status": "verify",
    "why": "i3d draw context module: i3dInitHardware..i3dCtxInit and the per-frame texture batching (0x21f4d8, 0x21f9c8) all work on the 0x12168-byte i3dContext; bounded by the camera/matrix helpers before 0x21eb28 (calls into 0x21e1d8) and the texture-object helpers from 0x21fb30 (clear of a 0x18 struct, 0x21fb50 calls 0x225460). No source string in i3d; file named after its i3dCtx* API."
+  },
+  "i3d/i3dlayer.cpp": {
+   "notes": "Every frame now builds real groups, layers and a sorted DMA chain; the smoke run is stable and still black: nothing on the i3d path reaches a host draw module (no GS emulation by decision), SprMan and i3dCtxCreateView are stubs. Next (queued): unassigned@00224de0 holds i3dCtxCreateView 0x226c58 and its view maths 0x226278..0x227a98 after the TIM2 helpers from 0x224de0; pin the view file (i3d/i3dview.cpp?) and the TIM2 one first. Then unassigned@00216ad0 (B.4): it must replace the bridges in lib/unassigned_stubs.cpp marked unassigned@00216ad0. The old key unassigned@0021fb50 now names only the model packet builders 0x21fb50..0x222f50 (removed from the queue). Unverified: I3rMaterial layout read by i3dLayerFindMaterialDrawSet (only reader 0x228f50), the base argument there (a draw set? it adds +0x20), the layer +0x414 table and +0x838 user pairs (no readers). Untested paths: the radix sort (32+ nodes per group) and the state nodes (only the model builders add them). Where a host i3d renderer can hook in is open (open-items B.3 note).",
+   "ranges": [
+    [
+     "00222f50",
+     "00224de0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 15:47",
+     "status": "verify",
+     "summary": "i3d/i3dlayer.cpp pinned 0x222f50..0x224de0 and written: all 80 functions (21 created in Ghidra, 75 names): layer setters / getters and Begin/End packet pairs, draw-set lookup by description hash, sub layers, the group node lists (packet, channel, state, sub group, print, call, stop nodes), radix and cocktail sorts, i3dCtxRunGroup and i3dCtxCloseFrame building the frame DMA chain, i3dTexRegsSet / SetNone. Node, group, layer, draw-set types moved to i3d/i3dlayer.h. ROM-code bridges for the packet module helpers (i3dPktSetReg, DmaTag, OpenChain, SetAlphaMode, RefTexRegs, i3dDrawSetInit and list helpers, i3dPsmBits); stubbed packet writers return pkt. drawStrips now calls i3dLayerDrawLine / WireBox / WireSphere (type 5 passes the colour record float as the radius, fixed from a wrong argument order)."
+    }
+   ],
+   "status": "verify",
+   "why": "the i3d layer / draw-group / sort module: layer setters and packet begin/end 0x222f50..0x2239b8 (all take an I3dLayer), the group node list, the radix / cocktail sort and the group run 0x2239b8..0x224b28, the texture register packets 0x224b28..0x224de0; model packet code before it (0x21fb50..) and the TIM2 module after it (0x224de0: the unreferenced TIM2 / CLUT header check, then picture and size helpers) are other files"
   },
   "i3d/i3dvram.cpp": {
    "notes": "Complete; nothing on screen shows it yet (screen black: the draw path is stubbed). A host test (init, reserve x3 frames with eviction, compact, end frame, reset) kept every node accounted for and block sizes summing to the heap. One PC deviation: i3dVramReserve skips locking a NULL i3dVramAlloc result (the ROM would fault). Next reached stubs in run order: the draw-group module 0x2239b8..0x224d88 (i3dGroupInit, i3dCtxCloseFrame), MagScene::draw / postDraw; the texture objects at 0x219a98.. call i3dVramHandleInit / Release. The first session whose screenshot shows a textured layer marks this done.",
@@ -284,6 +302,7 @@
   "unassigned@00190a78": {},
   "unassigned@0020eda4": {},
   "unassigned@00216ad0": {},
+  "unassigned@0021fb50": {},
   "unassigned@002437f8": {},
   "utl/utlmisc.cpp": {
    "notes": "Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and installs utlMemAlloc twice, utlMemRealloc and utlMemFree as rxSysSetMemFunc0..3 hooks; bed/bedmemory.cpp (0x100354..) is only stubs (alloc returns NULL), so reconstruct BedMemory right after main, before anything allocates. Decided without the user: the ROM's operator new/delete are written as utlOperatorNew/utlOperatorDelete(+Array, +Debug) and do NOT replace the host's global operator new (open-items Decisions). BedMemory field names (m_top, m_last, m_buffer, m_size, m_id, m_owner) are from create/format/destroy and partly guessed; check them against the assert texts (m_size, m_buffer, m_next, m_chunk_size, m_header_size, m_flag, m_filename) when bedmemory is read. utlParseParam leaves the record type unchanged for a value that is not a quote, dollar or digit, as the ROM does. Hazard recorded: stubgen copies an access label (public:) into the next stub.",
