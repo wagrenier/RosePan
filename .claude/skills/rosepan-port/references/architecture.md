@@ -232,7 +232,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   the packet / draw library under the scene. initGraph compares the game's copy of its 36 struct sizes
   (rodata 0x2e90a8) with `i3dGetStructSize` 0x21f1a8 (data 0x302ba0) and hangs on a mismatch.
   Files pinned so far (2026-10-22): **`i3d/i3dctx.cpp`** 0x21eb28..0x21fb30 (written, verify) and
-  **`i3d/i3dvram.cpp`** 0x227a98..0x228c08 (header only). Modules seen around them: matrix / camera
+  **`i3d/i3dvram.cpp`** 0x227a98..0x228c08 (written, verify). Modules seen around them: matrix / camera
   helpers before 0x21eb28 (0x21e1d8), texture objects from 0x21fb30, GS transfer builders 0x218fa8 /
   0x2190c8 / 0x2192c8 and 0x219c88..0x219d68, packet heads 0x21b490..0x21b698, draw groups / layers /
   sort 0x2239b8..0x224d88, the i3d system calls 0x237178..0x237cc8 (i3dFlushCache, i3dPrintf).
@@ -259,6 +259,10 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     at the start and let compaction move everything (moved down -> list head, up -> tail).
     0x2281c0's third argument (a2) is the sentinel: 0x228528 leaves it there from its loop.
     Unreferenced: 0x2289e0 (clears +0x64..+0x6c), 0x228320 / 0x2283e8 (evict-window searches).
+    Block nodes come from a stack the ROM never checks for underflow (0x227cc8); i3dVramReserve
+    locks i3dVramAlloc's result unchecked (a NULL on a fragmented heap faults on the EE; the port
+    skips it, marked PC:). Handles sit at +0 of the 0x130 texture / CLUT objects (0x219e58 memsets
+    0x130, then i3dVramHandleInit 0x227c90; release 0x219a98 / 0x219c70 -> i3dVramHandleRelease).
   - **Hardware**: i3dInitHardware sends REFs of the VU1 microprogram (data 0x2912b0, 0x354 qwords,
     plus STCOL 1.0 / STROW 0) on VIF1 and the VU0 one (data 0x2949f0, 0x9c qwords) on VIF0.
 - The scene (`MagScene`, +0x12540): 128 actors of 0x4d0 at +0x2920 (vptr +0x94), actor flags at

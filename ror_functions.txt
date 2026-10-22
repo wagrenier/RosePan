@@ -4948,43 +4948,43 @@
 // FILE -- i3d/i3dvram.cpp
 // *****************************************************************************
 
-/* 00227a98 00000030 */ FUN_00227a98(){}
-/* 00227ac8 00000028 */ FUN_00227ac8(){}
-/* 00227af0 00000048 */ FUN_00227af0(){}
-/* 00227b38 00000038 */ FUN_00227b38(){}
-/* 00227b70 0000004c */ FUN_00227b70(){}
-/* 00227bc0 00000044 */ FUN_00227bc0(){}
-/* 00227c08 0000004c */ FUN_00227c08(){}
-/* 00227c58 00000008 */ FUN_00227c58(){}
-/* 00227c60 0000002c */ FUN_00227c60(){}
-/* 00227c90 00000018 */ FUN_00227c90(){}
-/* 00227ca8 00000020 */ FUN_00227ca8(){}
-/* 00227cc8 0000008c */ FUN_00227cc8(){}
-/* 00227d58 00000060 */ FUN_00227d58(){}
-/* 00227db8 00000030 */ FUN_00227db8(){}
-/* 00227de8 00000058 */ FUN_00227de8(){}
-/* 00227e40 00000064 */ FUN_00227e40(){}
-/* 00227ea8 00000088 */ FUN_00227ea8(){}
-/* 00227f30 00000068 */ FUN_00227f30(){}
-/* 00227f98 00000068 */ FUN_00227f98(){}
-/* 00228000 000000a8 */ FUN_00228000(){}
-/* 002280a8 0000008c */ FUN_002280a8(){}
-/* 00228138 00000084 */ FUN_00228138(){}
-/* 002281c0 0000015c */ FUN_002281c0(){}
-/* 00228320 000000c4 */ FUN_00228320(){}
-/* 002283e8 0000013c */ FUN_002283e8(){}
-/* 00228528 000000f0 */ FUN_00228528(){}
+/* 00227a98 00000030 */ i3dVramUnlink(){}  // ror
+/* 00227ac8 00000028 */ i3dVramLinkAfter(){}  // ror
+/* 00227af0 00000048 */ i3dVramMoveAfter(){}  // ror
+/* 00227b38 00000038 */ i3dVramBlockSetOwner(){}  // ror
+/* 00227b70 0000004c */ i3dVramBlockRelease(){}  // ror
+/* 00227bc0 00000044 */ i3dVramBlockInit(){}  // ror
+/* 00227c08 0000004c */ i3dVramBlockUnlinkAll(){}  // ror
+/* 00227c58 00000008 */ i3dVramHandleSetBlock(){}  // ror
+/* 00227c60 0000002c */ i3dVramHandleRelease(){}  // ror
+/* 00227c90 00000018 */ i3dVramHandleInit(){}  // ror
+/* 00227ca8 00000020 */ i3dVramHandleTerm(){}  // ror
+/* 00227cc8 0000008c */ i3dVramNewBlock(){}  // ror
+/* 00227d58 00000060 */ i3dVramFreeBlock(){}  // ror
+/* 00227db8 00000030 */ i3dVramAddEvict(){}  // ror
+/* 00227de8 00000058 */ i3dVramLock(){}  // ror
+/* 00227e40 00000064 */ i3dVramClearEvict(){}  // ror
+/* 00227ea8 00000088 */ i3dVramClearLock(){}  // ror
+/* 00227f30 00000068 */ i3dVramClearNew(){}  // ror
+/* 00227f98 00000068 */ i3dVramClearMove(){}  // ror
+/* 00228000 000000a8 */ i3dVramAssign(){}  // ror
+/* 002280a8 0000008c */ i3dVramMergeRun(){}  // ror
+/* 00228138 00000084 */ i3dVramFreeEvicted(){}  // ror
+/* 002281c0 0000015c */ i3dVramEvictLru(){}  // ror
+/* 00228320 000000c4 */ i3dVramEvictRunFits(){}  // ror
+/* 002283e8 0000013c */ i3dVramEvictBestWindow(){}  // ror
+/* 00228528 000000f0 */ i3dVramAlloc(){}  // ror
 /* 00228618 00000038 */ i3dVramEndFrame(){}  // ror
 /* 00228650 000001cc */ i3dVramReserve(){}  // ror
 /* 00228820 000000fc */ i3dVramCompact(){}  // ror
-/* 00228920 0000001c */ FUN_00228920(){}
+/* 00228920 0000001c */ i3dVramNewFreeAll(){}  // ror
 /* 00228940 00000018 */ i3dVramSetBase(){}  // ror
 /* 00228958 00000018 */ i3dVramSetSize(){}  // ror
 /* 00228970 0000006c */ i3dVramReset(){}  // ror
-/* 002289e0 00000014 */ FUN_002289e0(){}
+/* 002289e0 00000014 */ i3dVramClearStats(){}  // ror
 /* 002289f8 000000e4 */ i3dVramInit(){}  // ror
 /* 00228ae0 0000006c */ i3dVramTerm(){}  // ror
-/* 00228b50 000000b8 */ FUN_00228b50(){}
+/* 00228b50 000000b8 */ i3dVramCoalesce(){}  // ror
 
 // *****************************************************************************
 // FILE -- (unassigned)

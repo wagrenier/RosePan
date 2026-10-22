@@ -100,6 +100,19 @@ static_assert(offsetof(I3dVramHeap, m_locked) == 0x08, "I3dVramHeap::m_locked");
 static_assert(offsetof(I3dVramHeap, m_stamp) == 0x0c, "I3dVramHeap::m_stamp");
 static_assert(offsetof(I3dVramHeap, m_nodes) == 0x10, "I3dVramHeap::m_nodes");
 
+void i3dVramHandleSetBlock(I3dVramHandle *handle, I3dVramBlock *blk);   // ROR 0x00227c58
+/* ROR 0x00227c60: frees the handle's block (texture / CLUT release). */
+int  i3dVramHandleRelease(I3dVramHandle *handle);                        // ROR 0x00227c60
+/* ROR 0x00227c90: zeroes m_image, m_size, m_block, m_stamp (texture / CLUT init). */
+int  i3dVramHandleInit(I3dVramHandle *handle);                           // ROR 0x00227c90
+int  i3dVramHandleTerm(I3dVramHandle *handle);                           // ROR 0x00227ca8
+/* ROR 0x00228320 / 0x002283e8: queries over runs of evict-flagged
+ * blocks; no callers in the ROM. */
+int  i3dVramEvictRunFits(I3dVramHeap *heap, I3dVramBlock *blk, u_int want);
+void i3dVramEvictBestWindow(I3dVramHeap *heap, I3dVramBlock *blk, u_int want,
+                            I3dVramBlock **first, I3dVramBlock **end);
+/* ROR 0x002289e0: zeroes m_requested, m_new_size, m_moved_size; no callers. */
+int  i3dVramClearStats(I3dVramHeap *heap);
 /* ROR 0x00228618: empties the new, move and lock lists (m_locked back to 0). */
 int  i3dVramEndFrame(I3dVramHeap *heap);                                 // ROR 0x00228618
 /* ROR 0x00228650: locks n handles for this frame, allocating blocks for

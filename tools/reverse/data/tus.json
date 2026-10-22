@@ -1,7 +1,5 @@
 {
- "queue": [
-  "i3d/i3dvram.cpp"
- ],
+ "queue": [],
  "settings": {
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
   "frontier_ignore": [
@@ -48,12 +46,21 @@
    "why": "i3d draw context module: i3dInitHardware..i3dCtxInit and the per-frame texture batching (0x21f4d8, 0x21f9c8) all work on the 0x12168-byte i3dContext; bounded by the camera/matrix helpers before 0x21eb28 (calls into 0x21e1d8) and the texture-object helpers from 0x21fb30 (clear of a 0x18 struct, 0x21fb50 calls 0x225460). No source string in i3d; file named after its i3dCtx* API."
   },
   "i3d/i3dvram.cpp": {
+   "notes": "Complete; nothing on screen shows it yet (screen black: the draw path is stubbed). A host test (init, reserve x3 frames with eviction, compact, end frame, reset) kept every node accounted for and block sizes summing to the heap. One PC deviation: i3dVramReserve skips locking a NULL i3dVramAlloc result (the ROM would fault). Next reached stubs in run order: the draw-group module 0x2239b8..0x224d88 (i3dGroupInit, i3dCtxCloseFrame), MagScene::draw / postDraw; the texture objects at 0x219a98.. call i3dVramHandleInit / Release. The first session whose screenshot shows a textured layer marks this done.",
    "ranges": [
     [
      "00227a98",
      "00228c08"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-22 13:24",
+     "status": "verify",
+     "summary": "i3d VRAM cache: all 37 functions written (block lists, alloc first-fit from the LRU tail, LRU eviction, coalesce, compact, end frame, reset, init, term, handle init / release); 29 named in Ghidra"
+    }
+   ],
+   "status": "verify",
    "why": "i3d VRAM cache: a block heap of 0x44-byte nodes on six intrusive lists (address order, LRU, locked, evict, new, moved), embedded twice in i3dContext (+0x0 texture pages, +0x70 CLUT); 0x227a98 list unlink .. 0x228b50 coalesce, next function 0x228c08 calls the i3d system module 0x237180."
   },
   "mag/magsystem.cpp": {
