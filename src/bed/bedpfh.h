@@ -47,6 +47,12 @@ struct BedPfh
     /* The index of the file named theName, -1 when none. */
     int  getFileIndex(const char *theName) const;                        // ROR 0x001019f0
 
+    /* The ROM's line-70 inline: the constructor reads the flags through it. */
+    int getFlags() const
+    {
+        ROR_ASSERT(m_top); /* 70 */
+        return m_top->m_flags;
+    }
     int getNumFile() const
     {
         ROR_ASSERT(m_top); /* 71 */
@@ -56,6 +62,17 @@ struct BedPfh
     {
         ROR_ASSERT(m_top); /* 72 */
         return m_top->m_total_size;
+    }
+    /* The ROM's line-73 inline; the constructor's last check of m_top. */
+    const BedPfhHead *getTop() const
+    {
+        ROR_ASSERT(m_top); /* 73 */
+        return m_top;
+    }
+    bool checkID() const
+    {
+        ROR_ASSERT(m_top); /* 91 */
+        return m_top->m_id == 0x4b505452; /* "RTPK" */
     }
     int getFileSize(int n) const { return m_size ? m_size[n] : -1; }
     int getFileOffset(int n) const { return m_offset ? m_offset[n] : -1; }

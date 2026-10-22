@@ -27,6 +27,24 @@
    "status": "verify",
    "why": "12 of 16 functions reference bed/bedmemory.cpp; 0x100320 and 0x101718 are unanchored neighbours, bed/bedsubmode.cpp below and bed/bedpfh.cpp above"
   },
+  "bed/bedpfh.cpp": {
+   "notes": "Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the assert), and getFileName returns NULL without names. Not visible yet: the smoke run is black and no SprTexture / MagScene pack load reaches a real buffer, because fileGetSize 0x1be768 is still a stub returning 0 and FileReader::read 0x1be524 / 0x1be564 too. Write those next (see open-items Next up B.5); the first screenshot showing a texture loaded from a pack marks this done.",
+   "ranges": [
+    [
+     "00101738",
+     "00101aec"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 18:50",
+     "status": "verify",
+     "summary": "BedPfh, the RTPK pack view: constructor (tables by header flags: sizes, offsets, attribute rows, names), clear, getFileName, getFileIndex; header inlines getFlags, getTop, checkID with their bedpfh.h line numbers"
+    }
+   ],
+   "status": "verify",
+   "why": "the four BedPfh methods between BedMemory (0x101718 clears 7 words, not BedPfh's 5) and BedPad::~BedPad 0x101aec; bed/bedpfh.cpp / bedpfh.h assert strings in the ctor and getFileName"
+  },
   "dog/dogtexinfo.cpp": {
    "notes": "Pinned 0x1161e4..0x11764c, all 16 functions written. Smoke run: MagScene::init's init / add run without asserts; screen still black (SprMan::draw and the scene layers draw nothing yet). addData / setTexTable are not reached: SprTexture's lists end in error because fileGetSize 0x1be768 is a stub returning 0 and BedPfh::BedPfh / getFileIndex (bed/bedpfh.cpp) are stubs -- write those (and FileReader::read 0x1be524 / 0x1be564) next to see textures arrive. PC guards: release stops when the record's picture is NULL, copy and setTexFlag return on a bad index (the ROM writes on after the assert). term frees m_tex_data before terming the textures in it, as the ROM does (the heap keeps the bytes). The shadow01 rodata at 0x2ed500 is an I3dTexDesc: 256x256 CT32 at block 0x2300. Next on the queue: spr/sprman.cpp.",
    "ranges": [

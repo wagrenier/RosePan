@@ -1,28 +1,10 @@
-// bed/bedpfh.cpp -- Rule of Rose module (file from the inference in ror_functions.txt).
-// Functions below are stubs until reconstructed; see tools/reverse/stage.py.
+// bed/bedpfh.cpp -- BedPfh, the view on a pack file (bed/bedpfh.h).
 
 #include "bed/bedpfh.h"
 
-#include "common/rosepan_stub.h"
-
-// ---- stubs (hand-written: constructors and destructors are not stubbed by stubgen) ----
-
-// stub of ROR 0x00101750
-// PC: clears the view and keeps the header pointer so the inline getters
-// see a pack; the tables stay NULL until the constructor is reconstructed.
-BedPfh::BedPfh(const void *p)
-    : m_top((BedPfhHead *)p), m_size(NULL), m_offset(NULL), m_attr(NULL), m_name(NULL)
-{
-    ROSEPAN_STUB("BedPfh::BedPfh", 0x00101750);
-}
-
-// ---- bridges (hand-written) ----
-
-// bridge of ROR 0x00101738
-// The ROM's code; SprTexture's constructor calls it (spr/sprtexture.cpp).
+// ROR 0x00101738
 void BedPfh::clear()
 {
-    ROSEPAN_BRIDGE("BedPfh::clear", 0x00101738);
     m_name = NULL;
     m_top = NULL;
     m_size = NULL;
@@ -30,18 +12,77 @@ void BedPfh::clear()
     m_attr = NULL;
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x001019f0
-int BedPfh::getFileIndex(const char *theName) const
+// ROR 0x00101750  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// The tables follow the 0x20-byte header in flag order: sizes (1), offsets
+// (2), one 16-bit attribute row per consecutive flag bit from 0x10, names
+// (0x8000).
+BedPfh::BedPfh(const void *p)
 {
-    ROSEPAN_STUB("BedPfh::getFileIndex", 0x001019f0);
-    return {};
+    clear();
+    m_top = (BedPfhHead *)p;
+    // PC: the ROM's assert hangs here; the host carries on, so leave the view
+    // empty instead of reading tables out of a missing or foreign buffer.
+    if (!checkID()) {
+        ROR_ASSERT(checkID()); /* 53 */
+        return;
+    }
+
+    u_char *q = (u_char *)(m_top + 1);
+    int flags = getFlags();
+    if (flags & 1) {
+        m_size = (int *)q;
+        q += getNumFile() * 4;
+    }
+    if (flags & 2) {
+        m_offset = (int *)q;
+        q += getNumFile() * 4;
+    }
+    if (flags & 0x10) {
+        m_attr = (short *)q;
+        int rows = 1;
+        while (flags & (0x10 << rows))
+            rows++;
+        q += rows * getNumFile() * 2;
+    }
+    if (flags & 0x8000) {
+        m_name = (const char *)q;
+        getTop();
+    }
 }
 
-// stub of ROR 0x00101928
-const char * BedPfh::getFileName(int theN) const
+// ROR 0x00101928  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+const char *BedPfh::getFileName(int theN) const
 {
-    ROSEPAN_STUB("BedPfh::getFileName", 0x00101928);
-    return {};
+    ROR_ASSERT(theN >= 0 && theN <= getNumFile()); /* 90 */
+    const char *s = m_name;
+    // PC: guard the walk the ROM would not reach after a failed assert.
+    if (s == NULL)
+        return NULL;
+    for (; theN > 0; theN--)
+        while (*s++ != '\0')
+            ;
+    return s;
+}
+
+// ROR 0x001019f0  // callcheck: FUN_00215a30 (the assert handler, inside getNumFile)
+int BedPfh::getFileIndex(const char *theName) const
+{
+    const char *s = m_name;
+    if (s == NULL)
+        return -1;
+    int num = getNumFile();
+    for (int i = 0; i < num; i++) {
+        int k = 0;
+        if (s[0] == theName[0]) {
+            while (s[k] == theName[k]) {
+                if (s[k] == '\0')
+                    return i;
+                k++;
+            }
+        }
+        while (*s != '\0')
+            s++;
+        s++;
+    }
+    return -1;
 }
