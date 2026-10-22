@@ -99,6 +99,21 @@ int   i3dCtxTerm(i3dContext *ctx);                                       // ROR 
 int   i3dCtxInit(i3dContext *ctx, void *buf, int size, int count);       // ROR 0x0021f900
 int   i3dPrintf(const char *fmt);  /* printf-like in the ROM */          // ROR 0x00237c68
 
+/* An i3d model root (tag_I3rRoot_s in DogModel's symbols). Opaque. */
+struct I3rRoot;
+
+/* i3d's matrix struct (tag_I3dMatrixF4x4_s in DogModel's symbols): the
+ * same 16 floats as an sceVu0FMATRIX, but the ROM copies it with
+ * unaligned ldl / sdl, so it is only 4-aligned. EE 0x40. */
+struct I3dMatrixF4x4
+{
+    float m[4][4];
+};
+static_assert(sizeof(I3dMatrixF4x4) == 0x40, "I3dMatrixF4x4 is 0x40 bytes on the EE");
+
+/* The node index of the named node, -1 when the model has none. */
+int   i3rGetNodeIndexByName(I3rRoot *root, const char *name);            // ROR 0x0022b3d8
+
 /* bss 0x7812ac, just below GamMan: mainInitGame passes it to
  * seqSetLanguage (which ignores it). Role not known yet. */
 extern int g_bss_7812ac;
@@ -106,5 +121,11 @@ extern int g_bss_7812ac;
 /* ---- the debug range before debug/mimu_debug.cpp (unassigned@0020eda4) ---- */
 
 void debugNop(void);                                                     // ROR 0x002155a0
+
+/* ---- after the assert handler 0x215a30 (unassigned@0020ff34) ---- */
+
+/* Formats the three floats (3 digits) and prints nothing: a trace whose
+ * output the retail build compiled out. */
+void dbgTraceVector3(float x, float y, float z);                         // ROR 0x00215b5c
 
 #endif /* _LIB_UNASSIGNED_H */

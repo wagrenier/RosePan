@@ -3,8 +3,7 @@
  *
  *  The scene (mag/magscene*.cpp), EE 0x85500: MagSystem holds it as its
  *  member at +0x12540 (bss 0x6fbd80) up to its own words at +0x97a40. It
- *  owns 128 actors of 0x4d0 bytes at +0x2920 (DogActor-like: their vptr is
- *  at +0x94, as DogEntity's), one flag word per actor at +0x29120, the
+ *  owns 128 actors of 0x4d0 bytes at +0x2920 (DogActor, dog/dogactor.h), one flag word per actor at +0x29120, the
  *  player's MagLifePC at +0x2adc0 and Brown's MagLifeBwn at +0x2afe0, the
  *  light set at +0x2050, the camera (+0x2ad50..) and four view objects
  *  (+0x2734). Minimal: what MagSystem calls and reads; the scene TUs fill
@@ -14,6 +13,7 @@
 #define _MAG_MAGSCENE_H
 
 #include "bed/bedpad.h"
+#include "dog/dogactor.h"
 #include "lib/unassigned.h"
 #include "mag/maglifebwn.h"
 #include "mag/maglifepc.h"
@@ -53,6 +53,7 @@ struct MagScene
     int  addLight(int type, unsigned int mask);                          // ROR 0x0013fe64
 
     int        m_22cc;               // ROR 0x22cc: MagSystem::clearScene22cc zeroes it; role unknown
+    DogActor   m_actors[128];        // ROR 0x2920: stride 0x4d0
     unsigned   m_actor_flags[128];   // ROR 0x29120: one word per actor (+0x2920 + no * 0x4d0); 0x60 = bound / chapter model
     MagLifePC  m_pc;                 // ROR 0x2adc0
     MagLifeBwn m_bwn;                // ROR 0x2afe0

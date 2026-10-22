@@ -154,6 +154,10 @@ entries are marked **RoR** with the date.
 - **`param_1 != -0x240` in a decompile is a null test of `&obj->member`**: a sub-struct at that offset.
 - **EE float literals are not always round-to-nearest**: read the bits, write hex floats.
 - **EE float division by zero is not IEEE**: +-MAX, and 0 * MAX = 0; the host gives inf / NaN. Guard.
+- **Twin functions that differ only in an `ldl` / `sdl` copy are overloads on the matrix type**: one
+  writes an aligned `sceVu0FMATRIX` straight through, the other builds it in an aligned temporary and
+  copies it out unaligned -- an `I3dMatrixF4x4 *` (4-aligned struct; DogModel's symbols overload on
+  both). Declare both overloads, not two invented names (MagSystem::getActorNodeMatrix, 2026-10-22).
 
 ## Reconstruction bookkeeping
 

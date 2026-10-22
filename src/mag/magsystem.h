@@ -64,6 +64,7 @@ struct MagSystem
 
     bool setLanguage(int lang);                                          // ROR 0x001178b8
     void startVibration(int frames);                                     // ROR 0x00117924
+    void setActorLightID(int no, int id);                                // ROR 0x00117974
     void initGraph();                                                    // ROR 0x00117990
     void resetDBuff();                                                   // ROR 0x00117c58
     void resetDBuff384();                                                // ROR 0x00117d14
@@ -92,15 +93,27 @@ struct MagSystem
     void setViewParam(int no, int a, int b, int c, int d, int e);        // ROR 0x00118980
     void drawView(int no, int a, int b, const void *p, int c);           // ROR 0x001189bc
     int  loadScene(int a, int b, int c);                                 // ROR 0x001189e4
+    void setActorParent(int theNo, int parentNo, int node);              // ROR 0x00118a18
+    void getActorNodeMatrix(int no, I3dMatrixF4x4 *out, int n);          // ROR 0x00118adc
+    void getActorNodeMatrix(int no, sceVu0FMATRIX out, int n);           // ROR 0x00118c14
+    int  getActorNodeMatrixByName(int no, I3dMatrixF4x4 *out, const char *name); // ROR 0x00118ccc
+    int  getActorNodeMatrixByName(int no, sceVu0FMATRIX out, const char *name);  // ROR 0x00118d9c
+    int  getActorMotionMove(int no, float t0, float t1, float *move, float *rot,
+                            float *pos);                                 // ROR 0x00118e6c
+    void addActorTrans(int no, const float *d, float trans_ofs_y, float rot_y_aar); // ROR 0x00118ea4
     void setActorAnim(int no, int a, int b);                             // ROR 0x00118ed8
     int  loadActorAnim(int no, const char *name, int arg);               // ROR 0x00118f04
+    void releaseActorMotion(int no, int theId);                          // ROR 0x00118f30
     void setCameraTarget(const float *pos, const float *at);             // ROR 0x00118f64
     int  getPCWordE4();                                                  // ROR 0x00118fdc
     int  getPCStateClass();                                              // ROR 0x00118fec
     int  getBwnState();                                                  // ROR 0x00119090
     void loadModel(int id, int chapter);                                 // ROR 0x00119138
     void loadModelByName(const char *name, int arg, int chapter);        // ROR 0x001191e0
-    void clearPC();                                                      // ROR 0x0011948c
+    void setActorTrans(int no, float x, float y, float z);               // ROR 0x00119234
+    void setActorRotate(int no, float x, float y, float z);              // ROR 0x001192c8
+    void setActorRotate(int no, const float *v);                         // ROR 0x0011939c
+    void clearPC();                                                     // ROR 0x0011948c
 
     int             m_frame;                // ROR 0x00: frames updated; bit 0 picks the draw buffer
     int             m_vib_time;             // ROR 0x04: frames until update stops pad 0's motor

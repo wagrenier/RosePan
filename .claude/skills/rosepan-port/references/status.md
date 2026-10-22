@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-22 12:41 at commit `7857584` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-22 12:55 at commit `51c447b` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-22 12:41 at commit `7857584` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6399**, named **1869** (29%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 47, ror-inferred 454
-- context-name ledger: 501 entries; overrides of wrong library matches: 5
-- placed in a source file: 1807/6399 in 77 files
+- game functions: **6399**, named **1890** (30%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 48, ror-inferred 474
+- context-name ledger: 522 entries; overrides of wrong library matches: 5
+- placed in a source file: 1813/6399 in 77 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,21 +30,23 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **389**; stubs: **68**
+- reconstructed RoR functions: **401**; stubs: **77**
 
 | file | reconstructed | stubs |
 |---|---|---|
 | `src/bed/bedmemory.cpp` | 16 | 0 |
 | `src/bed/bedpad.cpp` | 0 | 5 |
+| `src/dog/dogactor.cpp` | 0 | 4 |
+| `src/dog/dogentity.cpp` | 0 | 1 |
 | `src/game/gamman.cpp` | 0 | 4 |
-| `src/lib/unassigned_stubs.cpp` | 0 | 20 |
+| `src/lib/unassigned_stubs.cpp` | 0 | 24 |
 | `src/mag/maglifepc.cpp` | 0 | 1 |
 | `src/mag/magscene.cpp` | 0 | 4 |
 | `src/mag/magscene2.cpp` | 0 | 16 |
 | `src/mag/magscenecamera.cpp` | 0 | 2 |
 | `src/mag/magscenelight.cpp` | 0 | 3 |
 | `src/mag/magscenerender.cpp` | 0 | 1 |
-| `src/mag/magsystem.cpp` | 43 | 0 |
+| `src/mag/magsystem.cpp` | 55 | 0 |
 | `src/main.cpp` | 11 | 0 |
 | `src/rx/rxfile.cpp` | 168 | 0 |
 | `src/rx/rxsys.cpp` | 74 | 5 |
@@ -57,11 +59,11 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 144 TUs: todo 140, partial 1, verify 6, done 2
-- next: **mag/magsystem.cpp** (continuing a partial TU)
+- 143 TUs: todo 139, verify 7, done 2
+- next: **unassigned@00216ad0** (frontier score 60)
 - pinned queue: (empty)
-- partial: `mag/magsystem.cpp` 43/55 -- Left: the 12 methods on the scene's 128 actors (scene +0x2920 + no*0x4d0, vptr +0x94): 0x117974, 0x118a18, 0x118adc, 0x118c14, 0x118ccc, 0x118d9c, 0x118e6c, 0x1
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
+- verify: `mag/magsystem.cpp` 55/55 -- All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes ar
 - verify: `main.cpp` 11/11 -- Status verify: the smoke run boots for real (iopconf.cnf, eight IOP modules and system.ini read from the disc folder through host0:), runs mainInitGame and loop
 - verify: `rx/rxfile.cpp` 168/168 -- Status verify: every function in 0x2437f8..0x249b88 is written, but nothing can show it: main 0x2045a8 is still the placeholder (black screen), and the rxthread
 - verify: `rx/rxsys.cpp` 74/119 -- Status verify: nothing calls rxSysInit yet - main 0x2045a8 is still the placeholder in src/main.cpp, so the screenshot is the black placeholder frame. Next: mai
@@ -70,6 +72,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-22 12:55 `mag/magsystem.cpp` verify: MagSystem complete: the 12 actor methods (setActorLightID, setActorParent, getActorNodeMatrix x2 and ByName x2, getActorMotionMove, addActorTrans, releaseActorM
 - 2026-10-22 12:41 `mag/magsystem.cpp` partial: MagSystem: 40 of 52 functions written - ctor/dtor, V-blank callbacks, initGraph (pads, VIF1, GS reset, 512x448 double buffer, i3d version check, i3d context on 
 - 2026-10-22 12:14 `main.cpp` verify: main.cpp (0x2043dc..0x204d38): RoR main and its 10 helpers written - argument parsing (-l language, -m stage), the rx bring-up booting from host0:, game heap an
 - 2026-10-22 11:53 `bed/bedmemory.cpp` verify: BedMemory block heap: create, format, destroy, alignBlock, splitTail, findFree, findFreeFromEnd, alloc, allocDebug, getHeader, shrink, trimFront, realloc, free,
@@ -77,11 +80,10 @@ Recent sessions:
 - 2026-10-22 11:31 `rx/rxthread.cpp` verify: rx thread layer complete: 53 functions (11 hidden ones created in Ghidra) -- scheduler with dispatch alarm, rxThYield / rxThRequest handshake, rx thread slots, 
 - 2026-10-22 11:15 `rx/rxfile.cpp` verify: rx file layer complete: async file slots (fd 1..63, ring buffers, markers, tags, segments), default load/size/save hooks, rxFileLoadExec, the cdrom driver's ISO
 - 2026-10-22 10:43 `rx/rxfile.cpp` partial: rx middleware file layer, first slice: pinned rx/rxfile.cpp 0x2437f8-0x249b88 and rx/rxthread.cpp 0x249b88-0x24b490; reconstructed the device driver tables, the
-- 2026-10-22 10:26 `rx/rxsys.cpp` verify: rx middleware system layer: pinned rx/rxsys.cpp 0x23ff58-0x2437f8 and reconstructed 60 functions - rxSysInit (hardware reset, boot device, memory hooks, rx subs
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00216ad0` | todo | 0/11/767 | 163.5 | 58 | 9 |
+| `unassigned@00216ad0` | todo | 0/12/767 | 163.5 | 60 | 9 |
 | `mag/magscene2.cpp` | todo | 0/17/31 | 15.4 | 42 | 5 |
 | `game/gamman.cpp` | todo | 0/4/288 | 44.9 | 24 | 4 |
 | `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
@@ -92,7 +94,7 @@ Recent sessions:
 | `unassigned@00164fc0` | todo | 0/2/433 | 108.5 | 12 | 2 |
 | `mag/magscenelight.cpp` | todo | 0/3/9 | 2.4 | 11 | 1 |
 | `unassigned@002053f4` | todo | 0/1/43 | 36.7 | 7 | 1 |
-| `unassigned@00103edc` | todo | 0/1/23 | 1.6 | 6 | 1 |
+| `sequence/sequence.cpp` | todo | 0/1/13 | 6.2 | 6 | 1 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -103,6 +105,8 @@ Recent sessions:
 | `00101b50` | BedPad::setVibration | 3 | ror | stub | bed/bedpad.cpp |
 | `0021f200` | i3dCtxGetRest | 3 | lib-ctx | stub | - |
 | `0020e3d8` | seqSetLanguage | 2 | ror | stub | - |
+| `001102b4` | DogEntityEx::setParent | 2 | ror | stub | dog/dogentity.cpp |
+| `0022b3d8` | i3rGetNodeIndexByName | 2 | lib-ctx | stub | - |
 | `00205394` | SysNowLoading::term | 2 | ror | stub | system/sysnowloading.cpp |
 | `00136d14` | MagScene::~MagScene | 1 | ror | stub | mag/magscene2.cpp |
 | `00101aec` | BedPad::~BedPad | 1 | ror | stub | bed/bedpad.cpp |
@@ -133,9 +137,7 @@ Recent sessions:
 | `001377f0` | MagScene::load | 1 | ror | stub | mag/magscene2.cpp |
 | `002155a0` | debugNop | 1 | ror | stub | - |
 | `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |
+| `00215b5c` | dbgTraceVector3 | 1 | ror | stub | - |
 | `00131790` | MagScene::setBwn | 1 | ror | stub | mag/magscene2.cpp |
-| `00181204` | RxMpeg::setFrameParity | 1 | ror | stub | - |
-| `001327dc` | MagScene::update | 1 | ror | stub | mag/magscene.cpp |
-| `0017f200` | SndMan::update | 1 | ror | stub | - |
-| `0013bcc0` | MagScene::draw | 1 | ror | stub | mag/magscenerender.cpp |
+| `0010fc7c` | DogEntity::setRotate | 1 | ror | stub | - |
 

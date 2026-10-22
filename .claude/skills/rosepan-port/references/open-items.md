@@ -60,9 +60,9 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
      sprite packet, the per-frame draw 0x2051cc) -- small, and it has a reference picture
      (architecture.md "Disc and data files": four "Now Loading" frames). It only shows once
      0x1be564 (the pfh loader inside GamMan's loads) calls its draw, so pair it with GamMan's load path.
-   - ~~**`mag/magsystem.cpp`**~~ (2026-10-22, `partial`): 40 of 52 written -- the frame runs on
-     MagSystem's V-blank semaphore at 30 fps (m_v_interval 2) and the PC `sceGsSyncV(0)` in
-     `mainLoop` is gone. Left: the 12 functions on the scene's actor array (see item 9).
+   - ~~**`mag/magsystem.cpp`**~~ (2026-10-22, `partial`, then `verify` the same day): the frame runs
+     on MagSystem's V-blank semaphore at 30 fps (m_v_interval 2) and the PC `sceGsSyncV(0)` in
+     `mainLoop` is gone; all 55 functions written (see item 9).
    - `game/gamman.cpp` (`GamMan::init`, `loadSystemData`, `loadStage`, `update`), the globals file
      (unassigned@001fd424's tail: `sysInitManagers`, `SysTimer`; it owns the global objects now kept in
      lib/unassigned_stubs.cpp), the task manager (unassigned@001e46b8), the sequence engine
@@ -71,16 +71,18 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    `-m N` on the RosePan command line picks the boot stage (mainParseArgs); without it the ROM's
    default is 99.
 
-9. (2026-10-22, the magsystem session) **`mag/magsystem.cpp` is `partial`**: everything but the 12
-   methods on the scene's 128 actors (0x2920 + no * 0x4d0, vptr +0x94 as DogEntity's) is written:
-   0x117974 (actor +0x144), 0x118a18 (DogEntity 0x1102b4 + a virtual at +0x50 / +0x54, assert
-   theNo >= 0), 0x118adc / 0x118c14 (the virtual at +0x88 / +0x8c: a 64-byte matrix of node n; asserts
-   no / n), 0x118ccc / 0x118d9c (dog/dogmodel.h inline: m_i3r_root, 0x22b3d8 finds the node by name),
-   0x118e6c / 0x118ea4 / 0x118f30 (DogActor 0x109348 / 0x10a038 / 0x109b88), 0x119234 (floats
-   f12..f14 into actor +0x40, and 0x215b5c when no == m_pc_no_last), 0x1192c8 (created 2026-10-22:
-   actor 0x10fc7c(x, y, z) and resets), 0x11939c (actor 0x10ff74 and resets). They need the actor
-   class in the scene (`DogActor m_actors[128]`, host layout): do them with the first dog/ TU that
-   defines DogEntity / DogModel / DogActor, or when a caller reaches them (game modes, not reached yet).
+9. (2026-10-22, the magsystem sessions) **`mag/magsystem.cpp` is complete (`verify`)**: the second
+   session wrote the 12 actor methods (setActorLightID / Parent / Trans / Rotate x2, getActorNodeMatrix
+   x2 and ByName x2, getActorMotionMove, addActorTrans, releaseActorMotion) over a minimal Dog layer:
+   `src/dog/dogentity.h` / `dogmodel.h` / `dogactor.h` (DogEntity <- DogEntityEx <- DogModel <-
+   DogActor, host structs, **not polymorphic yet**: the EE vptr word at +0x94 is kept as padding so
+   DogEntity's data keeps its EE offsets; setAttachNode (slot 10) and getNodeWorldMatrix (slot 17) are
+   plain members), and `MagScene::m_actors[128]`. The first dog/ TU that needs a virtual call makes
+   the four classes polymorphic in slot order (slot lists in the headers' comments) and drops the
+   `_ee_vptr` padding and the exact DogEntity offset asserts. Stubs it left: DogEntity::setRotate /
+   normalizeRotate (unassigned@0010f944, in lib/unassigned_stubs.cpp: really dog/ code -- define the
+   range when a dog TU starts), DogEntityEx::setParent, DogActor::getMotionMove / addTrans /
+   releaseMotion / getNodeWorldMatrix, i3rGetNodeIndexByName, dbgTraceVector3.
    The next reached stubs after this session, in run order: `MagScene::MagScene` / `init` / `start` /
    `initRender` / `update` / `draw` (mag/magscene2.cpp, magscenerender.cpp), the i3d library
    (unassigned@00216ad0: `i3dCtxBeginFrame` / `EndFrame` / `GetPacket`, two bridges), `BedPad::init` /
