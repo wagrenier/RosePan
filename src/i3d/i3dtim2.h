@@ -1,8 +1,8 @@
 /* ==========================================================================
  *  i3d/i3dtim2.h
  *
- *  The i3d library's TIM2 helpers (i3d/i3dtim2.cpp, ROR 0x224de0..0x225018,
- *  not written yet): picture lookup and the per-level size / image / CLUT
+ *  The i3d library's TIM2 helpers (i3d/i3dtim2.cpp, ROR 0x224de0..0x225018):
+ *  the header check, picture lookup and the per-level size / image / CLUT
  *  of a picture, read by the texture objects (i3d/i3dtex.cpp).
  *
  *  A TIM2 file: a 0x10-byte file header ("TIM2", version, alignment byte
@@ -14,6 +14,20 @@
 #define _I3D_I3DTIM2_H
 
 #include <stddef.h>
+
+/* The TIM2 file header (sceTim2FileHeader). EE 0x10, from the file. */
+struct I3dTim2File
+{
+    char    m_id[4];            // ROR 0x00: "TIM2" (or "CLT2", a CLUT file)
+    u_char  m_version;          // ROR 0x04
+    u_char  m_format;           // ROR 0x05: 0 pictures at +0x10, else at +0x80 (128-byte aligned)
+    u_short m_pictures;         // ROR 0x06
+    u_char  m_reserved[8];      // ROR 0x08
+};
+static_assert(offsetof(I3dTim2File, m_version) == 0x04, "I3dTim2File::m_version");
+static_assert(offsetof(I3dTim2File, m_format) == 0x05, "I3dTim2File::m_format");
+static_assert(offsetof(I3dTim2File, m_pictures) == 0x06, "I3dTim2File::m_pictures");
+static_assert(sizeof(I3dTim2File) == 0x10, "I3dTim2File is 0x10 bytes on the EE");
 
 /* A TIM2 picture header (Sony's TIM2 format, sceTim2PictureHeader). EE
  * 0x30, read from the file: plain EE layout. When MipMapTextures > 1 an
@@ -48,13 +62,32 @@ static_assert(offsetof(I3dTim2Picture, m_gs_tex0) == 0x18, "I3dTim2Picture::m_gs
 static_assert(offsetof(I3dTim2Picture, m_gs_tex1) == 0x20, "I3dTim2Picture::m_gs_tex1");
 static_assert(sizeof(I3dTim2Picture) == 0x30, "I3dTim2Picture is 0x30 bytes on the EE");
 
+/* The mipmap extension after a picture header with MipMapTextures > 1
+ * (sceTim2MipMapHeader): the level image sizes at +0x40. */
+struct I3dTim2MipMap
+{
+    u_long m_gs_miptbp1;        // ROR 0x30 (picture-relative)
+    u_long m_gs_miptbp2;        // ROR 0x38
+    u_int  m_mm_image_size[8];  // ROR 0x40: bytes of each level
+};
+static_assert(offsetof(I3dTim2MipMap, m_mm_image_size) == 0x10, "I3dTim2MipMap::m_mm_image_size");
+
+/* ROR 0x00224de0: 1 for a TIM2 file, 2 for a CLT2 one, 0 when the magic or
+ * the version is not one the library reads. No callers. */
+int i3dTim2CheckHeader(void *tim2);                                      // ROR 0x00224de0
 /* ROR 0x00224e70: picture n of a TIM2 file, NULL past the count. */
 I3dTim2Picture *i3dTim2GetPicture(void *tim2, u_int n);                  // ROR 0x00224e70
+/* ROR 0x00224ec0: the picture has no image levels (a CLUT-only picture).
+ * No callers. */
+int i3dTim2IsClutOnly(I3dTim2Picture *pict);                             // ROR 0x00224ec0
 /* ROR 0x00224ed0: level's width / height (either pointer may be NULL);
  * returns its image bytes rounded up to 16. */
 u_int  i3dTim2GetMipSize(I3dTim2Picture *pict, u_int level, int *w, int *h); // ROR 0x00224ed0
 /* ROR 0x00224f58: the level's image data, NULL past the levels. */
 u_char *i3dTim2GetImage(I3dTim2Picture *pict, int level);                // ROR 0x00224f58
+/* ROR 0x00224fb0: the palettes in the CLUT (16 colours each for 4-bit
+ * images, 256 for 8-bit), 0 for direct colour. No callers. */
+int i3dTim2GetClutCount(I3dTim2Picture *pict);                           // ROR 0x00224fb0
 /* ROR 0x00224ff0: the CLUT data, NULL when the picture has no colours. */
 u_char *i3dTim2GetClut(I3dTim2Picture *pict);                            // ROR 0x00224ff0
 

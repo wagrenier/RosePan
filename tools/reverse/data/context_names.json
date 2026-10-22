@@ -3767,11 +3767,23 @@
   "was": "FUN_00224d88",
   "why": "fills a GIF A+D packet of 5 registers (TEX0 6, TEX1 0x14, TEX2 0x16, MIPTBP1 0x34, MIPTBP2 0x36) with zeros"
  },
+ "00224de0": {
+  "name": "i3dTim2CheckHeader",
+  "tag": "ror-inferred",
+  "was": "FUN_00224de0",
+  "why": "first function of i3dtim2: compares bytes 0..3 with TIM2 (returns 1) or CLT2 (2), then the version byte 3, 0x82 or 4 with format < 2, else 0; no callers"
+ },
  "00224e70": {
   "name": "i3dTim2GetPicture",
   "tag": "ror-inferred",
   "was": "FUN_00224e70",
   "why": "TIM2 file -> picture header n (headers chained by their total size; first at +0x10 or +0x80 by the alignment byte +5); NULL past the picture count +6"
+ },
+ "00224ec0": {
+  "name": "i3dTim2IsClutOnly",
+  "tag": "ror-inferred",
+  "was": "FUN_00224ec0",
+  "why": "hidden after i3dTim2GetPicture: returns picture MipMapTextures +0x11 == 0, a TIM2 picture with no image levels; no callers"
  },
  "00224ed0": {
   "name": "i3dTim2GetMipSize",
@@ -3784,6 +3796,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00224f58",
   "why": "(picture, level): the level's image data (header size +0xc, then the MIPTBP sizes at +0x40)"
+ },
+ "00224fb0": {
+  "name": "i3dTim2GetClutCount",
+  "tag": "ror-inferred",
+  "was": "FUN_00224fb0",
+  "why": "hidden after i3dTim2GetImage: image type 4 -> (ClutColors + 15) >> 4, type 5 -> (ClutColors + 255) >> 8, else 0: the number of 16 / 256 colour palettes; no callers"
  },
  "00224ff0": {
   "name": "i3dTim2GetClut",
