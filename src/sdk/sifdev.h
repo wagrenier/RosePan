@@ -54,6 +54,9 @@ int  sceSifSyncIop(void);
 void sceSifLoadFileReset(void);
 void sceFsReset(void);
 
+/* Load and start an IRX from a device path; the module id, < 0 on failure. */
+int  sceSifLoadModule(const char *path, int arglen, const char *args);
+
 /* Start an IRX already resident in IOP memory; < 0 on failure. */
 int  sceSifLoadModuleBuffer(void *addr, int arglen, const char *args);
 

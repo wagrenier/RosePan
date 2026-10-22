@@ -58,6 +58,16 @@ void sceFsReset(void)
 {
 }
 
+/* Rule of Rose's rxfile loads every Sony module of iopconf.cnf by path; the
+ * host serves their RPCs itself, so loading succeeds with a positive id. */
+int sceSifLoadModule(const char *path, int arglen, const char *args)
+{
+    (void)path;
+    (void)arglen;
+    (void)args;
+    return 1;
+}
+
 int sceSifLoadModuleBuffer(void *addr, int arglen, const char *args)
 {
     (void)addr;

@@ -40,7 +40,7 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
 | range | contents |
 |---|---|
 | `0x100000`-`0x100258` | crt0 (`_start` 0x100008, `_exit`) |
-| `0x100258`-`~0x24b490` | game code; ends with the unsymbolised "rx" middleware: `rx/rxsys.cpp` 0x23ff58..0x2437f8 (pinned), rxfile 0x2437f8..~0x249000 and rxthread ~0x249000..0x24b490 (not pinned yet); below 0x23ff58 an IOP RPC client (0x23f960.., unprefixed "binding IOP module" strings) whose owner is open |
+| `0x100258`-`~0x24b490` | game code; ends with the unsymbolised "rx" middleware: `rx/rxsys.cpp` 0x23ff58..0x2437f8, `rx/rxfile.cpp` 0x2437f8..0x249b88, `rx/rxthread.cpp` 0x249b88..0x24b490 (all pinned); below 0x23ff58 an IOP RPC client (0x23f960.., unprefixed "binding IOP module" strings) whose owner is open |
 | `0x24b490`-`0x280e88` | Sony SDK 3.0 libraries (libmc, libmpeg / IPU / CSC, libdbc, libpad2, libvib, libdma, libgraph, libvu0, devvu0 / devvif), EE kernel stubs and libc (klib, intr, thread, sif, tty, deci2, filestub, initsys), libgcc2 / fp-bit / dp-bit, newlib (`data/layout.json` lib_ranges) |
 | `0x280e88`-`0x29122c` | named `.gnu.linkonce.t` sections: the game's inline methods (satellites, ride with their class) |
 | `0x291230`-`0x2953b0` | `.vutext` (VU microcode) |
@@ -83,6 +83,30 @@ Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
   `rxFileLoadModule`), `system.ini` [SYSTEM] NUMBER / VERSION / VMODE / COUNTRY / LANGUAGE / WARNING
   (optional), the save-data name = region prefix (BI / BA / BE by COUNTRY) + NUMBER. Then main installs
   the game's memory hooks (`rxSysSetMemFunc0..3`: 0x105ca0, 0x105ca0, 0x105de0, 0x105e08).
+
+## The rx file layer (`rx/rxfile.cpp`, 2026-10-22)
+
+- **Drivers** (bss 0x7df9c0, 9 code pointers each, indexed by RX_SYS_DEVICE): makePath, getStatus,
+  control, getSize, create, read(name, buf, offset, size), write(name, offset, buf, size), setRoot,
+  getRoot. HOST 0x7df9c0 (root bss 0x7dfa50, default "host0:"), CDROM 0x7df9e4 (root fixed
+  "cdrom0:"; "\" and ";1" sit next to it at 0x2dc1c4 / 0x2dc1c8, probably the ISO name form -- unverified;
+  create / write return -2), HDD 0x7dfa2c (a host0: copy whose
+  errors -5 / -6 / -19 / -65531 remap HDD to its fallback device, data 0x2dc238 = {0,1,2,-1}, and call
+  the error hook 0x2dc248). MCARD has no driver. `rxFileCallDevice` = the driver's setRoot (rxsys passes
+  the boot path's device part).
+- **Contexts** ("thread type" 0 / 1, bss 0x7f1ec4, index 0x7f1ec0): device + load hook
+  (default 0x245ae8: whole-file read through rxsys's 0x243788.. async calls) + size hook (default
+  0x245a48). `rxFileGetCurrent` = the current context's device.
+- **Dirs** (bss 0x7f1edc, 0x128c per device): param word (-1), dir (lower-cased, '/'), and per context
+  a search dir, a 0x800-byte name stack (top 0x880, 0x7ff empty) and a last name. `rxFileMakePath` =
+  dir + search dir + name ("/" makes either absolute) behind the driver's root.
+- `rxFileLoad` / `rxFileLoadModule` / `rxFileRebootIop` open through rxsys's print-locked sce*
+  wrappers (`rxSysOpen` 0x242528 .. `rxSysLseek` 0x242660). `rxFileLoad` reads size + 0x80 bytes.
+- The file thread: `rxFileStartThread` -> `rxFileCreateThread(0, 2, rxFileThreadProc)`; the proc
+  (0x2495e0, folded into 0x2491c0's body before 2026-10-22) tail-calls the cdrom reader 0x2469a8.
+- The cdrom sector cache: 32 nodes {prev, next, buf, sector} at 0x7dfb80 with 0x800-byte buffers at
+  0x7dfdc0, free list 0x7dfd90, circular used list through the sentinel 0x7dfd80.
+- `s_verbose` data 0x2dc1b0 = 1: the retail build prints every rxfile message.
 
 ## Modules (RoR's own source files)
 

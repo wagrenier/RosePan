@@ -15,7 +15,7 @@ sections are RoR's own. When something here proves wrong or incomplete, fix this
   proven. Settle a TU's extent from the brief's identity section and pin it with
   `tus.py define <file> <lo>-<hi> --why "..."`.
 - Files RoR does not name (no assert in them: the `rx` file / thread middleware just below the SDK
-  libraries -- its "rxfile : ..." strings run 0x244410..0x24aff8, its start is not settled -- `main` at
+  libraries -- pinned as rx/rxsys.cpp, rx/rxfile.cpp, rx/rxthread.cpp -- `main` at
   0x2045a8, unanchored runs): a descriptive file in the directory the code serves (the middleware under
   `rx/`), recorded with `define --why` and in `architecture.md`.
 - Inline methods and template instances (the named linkonce sections, data/layout.json

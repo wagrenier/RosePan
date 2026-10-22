@@ -5,6 +5,24 @@
   "smoke_pad": ""
  },
  "tus": {
+  "rx/rxfile.cpp": {
+   "notes": "Status partial: code left to write in rxfile. Screenshot is the black placeholder frame because main 0x2045a8 is still the placeholder, so nothing calls rxSysInit or rxfile yet. Stubs left in src/rx/rxfile.cpp (bottom, from stubgen): rxFileCdMakePath 0x246c70, rxFileCdControl 0x246cb8 (needs DIntr/EIntr, absent from src/sdk), rxFileCdGetSize 0x246e00, rxFileCdRead 0x246e80, rxFileCdProcess 0x2469a8, rxFileCreateThread 0x2491c0 (Ghidra body ends 0x2492ab; the rest to 0x249608 holds its request loop, check with ghidra.py asm and mkfunc), rxFileDefaultLoadHook 0x245ae8, rxFileDefaultSizeHook 0x245a48. Not written and not stubbed (no caller yet): async file slots 0x2437f8-0x245800 (they call rxsys 0x243788 open, 0x243c40 seek, 0x243938 read, 0x2437f8 close), rxFileDefaultSaveHook 0x245be0, rxFileLoadExec 0x245db8 (needs LoadExecPS2, sceSifExitCmd in src/sdk), the cdrom reader 0x246f70-0x247f10 (ISO lookup 0x2476d0 via data 0x2dc1dc, sector cache 0x247c60, dual-layer 0x2473c8), the request queue 0x249000-0x2499b8, rxFileSetThreadPriority-like 0x249b20/0x249b78. Start the next rxfile slice at rxFileCreateThread and the cdrom reader, or do main first (it is the M1 step that makes rxfile run). Decisions: rxFileCallDevice returns void (the ROM's does); header params renamed ctx/device after reading (rxFileSetDir and friends take a device index, rxFileSetDevice a context index). For the references: architecture.md got The rx file layer section; hazards.md got function-pointer tables pointing at LAB_ and the read-past-copy quirk; open-items Next up 5 and rxfile details.",
+   "ranges": [
+    [
+     "002437f8",
+     "00249b88"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 10:43",
+     "status": "partial",
+     "summary": "rx middleware file layer, first slice: pinned rx/rxfile.cpp 0x2437f8-0x249b88 and rx/rxthread.cpp 0x249b88-0x24b490; reconstructed the device driver tables, the host0: and HDD drivers, the cdrom driver table, sector-cache init and small slots, the two contexts with load/size hooks, per-device dirs, search dirs and name stack, rxFileMakePath, rxFileLoad, rxFileLoadModule, rxFileRebootIop, device map and HDD error path; plus rxsys file wrappers rxSysOpen/Close/Read/Write/Lseek 0x242500-0x242660. Named 100 functions (3 batches), created 14 Ghidra functions that were labels in driver tables or folded into rxFileCreateThread. Platform: sceSifLoadModule added to src/sdk/sifdev (succeeds)."
+    }
+   ],
+   "status": "partial",
+   "why": "rx middleware file layer: rxfile messages from 0x244410 (failed to alloc slot) to the request thread 0x2491c0 (rxfile : failed to create thread); starts after rxsys 0x2437f8, ends with the file thread priority helpers 0x249b20/0x249b78 (bss 0x7f6910/0x7f6918); 0x249b88 starts the rxthread kernel wrappers (CreateSema, CreateThread)"
+  },
   "rx/rxsys.cpp": {
    "notes": "Status verify: nothing calls rxSysInit yet - main 0x2045a8 is still the placeholder in src/main.cpp, so the screenshot is the black placeholder frame. Next: main (unassigned@001fd424) then rxfile right after it, because on a CDROM boot rxSysLoadIopModules loops while rxSysReadIopConf and rxFileRebootIop return 0, and the rxfile stubs return 0 (hang). Left in rx/rxsys.cpp: the ini parser 0x2410b8-0x241848 (rxSysIniFind is a stub), tty bind/open 0x241890-0x241ac8 (rxSysOpenTty stub), file wrappers 0x242500-0x2426b8, exception handler and system monitor 0x242710-0x2432d8, rxSysUpdateDevices 0x243560 (stub), rxfile wrappers after 0x2436f0. rxfile and rxthread callees are stubbed in src/lib/unassigned_stubs.cpp until those TUs are defined (rxfile ~0x2437f8-0x249000, rxthread ~0x249000-0x24b490). PC changes: rxSysReadRomDate compares against a zero host ROM (no BIOS), rxSysPrintf passes the text through a %s format. Open: memory hook signatures, the four rx pools at 0x7dabb0, which boot device starts with a (adds usbd.irx). References updated (architecture Program flow and Key functions, hazards callcheck/stubgen, open-items Next up 4).",
    "ranges": [
@@ -22,6 +40,15 @@
    ],
    "status": "verify",
    "why": "rx middleware system layer: rxSys/rxsys strings at 0x23ff58 (No Memory Allocate Func), 0x241890 and 0x242188 (rxsys binding IOP module); starts after the IOP RPC client ending 0x23feb8 (unprefixed binding strings), ends before rxfile at 0x2437f8 (DI error / rxfile file slots); main 0x2045a8 calls its init 0x240eb8 and setters"
+  },
+  "rx/rxthread.cpp": {
+   "ranges": [
+    [
+     "00249b88",
+     "0024b490"
+    ]
+   ],
+   "why": "rx middleware thread layer: kernel wrappers from 0x249b88 (CreateSema, CreateThread), rxThInit, dispatch semaphore, rxThRequest/rxThYield, rxthread/rxThread messages, vsync and DMA wait helpers to 0x24b48c; libcdvd sceCdCallback starts at 0x24b490"
   },
   "setup/ghidra_seed.cpp": {
    "notes": "Done. Snapshot of the names before seeding: work/snapshots/20261022_094006.json (gitignored, local). Every section function's Ghidra body now equals its section; the 3 tail-jump targets that do not follow a jr ra are labels inside functions (0x218424, 0x23a000, 0x2480a0) and were left alone. libmatch.py --list shows 5 SKIP rows, all named by hand already. Next: setup/platform_bootstrap.cpp.",
@@ -47,6 +74,7 @@
    "status": "done",
    "task": "Create the PC project (no RoR functions to write). The platform layer comes from ReiPan (../ReiPan, read-only), which took it from MioPan (FF2) and adapted it to FF3: src/sdk emulates the PS2 SDK (libgraph, libdma, libvif, libvu0, libpad, libmc, libcdvd, sif / IOP host, libmpeg + FFmpeg, eekernel threads), src/reipan draws the GS through SDL3 GPU and holds the host thread, log, paths, config and the ImGui debug UI. Steps: (1) copy ../ReiPan/src/reipan to src/rosepan and ../ReiPan/src/sdk to src/sdk; rename ReiPan_ / REIPAN_ / reipan_ identifiers, env variables and file names to RosePan_ / ROSEPAN_ / rosepan_, keeping the tool contract in tools/reverse/README.md 'Platform contract' (ROSEPAN_SHOT_DIR / ROSEPAN_SHOT_EVERY screenshots of the presented frame, ROSEPAN_AUTOPAD scripted pad in sdk/libpad.cpp, ROSEPAN_DATA_DIR, the RosePanGame thread name, the stub log line). (2) Write src/common/rosepan_stub.h from ../ReiPan/src/common/reipan_stub.h: ROSEPAN_STUB / ROSEPAN_BRIDGE printing '[stub] Name (ROR 0x%08x) reached'. (3) Drop or neutralise FF3-only pieces and list each in open-items.md 'Platform bootstrap': reipan/debug/reipan_warp.* (FF3 chapter warps and snapshots), FF3 game hooks in rendering/reipan_graph3d.cpp and reipan_ui, FF3 file names in io/reipan_paths (IMG_BD.BIN, ZERO3.FHD: RoR reads 'cdrom0:\\\\DATA\\\\...' and data/... paths, decide the data folder layout from the ELF), the FF3 IOP services in sdk/iop_* (RoR loads only Sony modules: sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv, fileio, sifcmd, usbd, plus ioprp300.img; its sound goes through rxmpeg / the rx middleware). (4) CMakeLists.txt, CMakePresets.json, cmake/*.cmake and resources/ (shaders) from ReiPan with ReiPan renamed RosePan: target RosePan, output cmake-build-*/RosePan/RosePan.exe, the sibling extern fallback pointed at ../ReiPan/extern then ../MioPan/extern (FFmpeg, shadercross), -fno-strict-aliasing and the src/sdk/pc_prefix.h force-include kept, every .c/.cpp compiled as C++. (5) A placeholder src/main.cpp whose main() initialises the platform, opens the window and presents cleared frames until RoR's main (0x002045a8) is reconstructed. (6) python build.py green; python build.py --run 15 writes work/shots/last.png (look at it); python layoutcheck.py runs clean. Keep platform edits minimal and list them in the summary; record the layer's shape in architecture.md 'PC platform layer' and anything that burned time in hazards.md. Finish --status done (the screenshot of an empty window is the expected picture)."
   },
-  "unassigned@00216ad0": {}
+  "unassigned@00216ad0": {},
+  "unassigned@002437f8": {}
  }
 }
