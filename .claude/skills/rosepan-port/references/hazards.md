@@ -209,6 +209,13 @@ entries are marked **RoR** with the date.
   spr/sprtexture.cpp has a hand-written `ROSEPAN_BRIDGE` returning 1 until the loader is written
   (2026-10-22).
 
+- **A stubbed packet writer's `return {}` is a NULL packet cursor.** Once i3d's groups were real
+  (i3d/i3dlayer.cpp), every Begin / write / End sequence ran `pkt = i3dPktSetReg(pkt, ...)` into a stub
+  and handed NULL to the End call, which would move the context's head to 0x80. Give writers that
+  only advance a cursor a bridge with the ROM's code (i3dPktSetReg / DmaTag / OpenChain ...), and make
+  the big ones' stubs `return pkt;` with a PC: line (2026-10-22). The same holds for init stubs whose
+  object is used right after (i3dDrawSetInit: an uninitialised set's group pointer).
+
 - **A call the optimiser proves dead gets no stub.** `rxSysPrintf` calls `rxThIsDispatchDisabled` only
   when the static tty fd 0x2dba34 is >= 0; nothing in the build wrote it yet (its writer `rxSysOpenTty`
   is a stub), so GCC folded the branch and no undefined reference -- hence no stub -- appeared. It shows
@@ -259,6 +266,12 @@ public:
   text in `--notes` under "For the references:"), no `rm`, no shell loops, no `git -C`. A denied call
   is final: use the listed tools.
 - **No backticks in `--notes` / `--summary`**: the shell runs them.
+- **`tus.py queue <key> --task TEXT` makes `<key>` a host task** (its brief skips boundaries / names /
+  code). Never use it to annotate a TU with code; write the reason in open-items.md. To undo:
+  `tus.Model()`, pop the entry's `task`, `save()` (2026-10-22).
+- **Defining a file inside an `unassigned@` run leaves the rest under new keys**: the run before keeps
+  the old key (now a different TU) and the run after gets `unassigned@<its first address>`; fix the
+  pinned queue (`tus.py queue <old> --remove`, queue the new key) in the same session.
 - **Batch file numbers collide**: `ls work/batches` and take the highest number + 1 (work/ is
   gitignored, so an overwritten batch leaves no trace).
 

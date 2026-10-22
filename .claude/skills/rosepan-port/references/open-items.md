@@ -31,6 +31,20 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
         i3dCtxRunGroup, i3dCtxCloseFrame, i3dGroupAddLayer, the i3dLayerSet* / Begin / EndPacket
         setters, i3dCtxCreateView 0x226c58) -- i3dGroupInit and i3dCtxCloseFrame are reached stubs
         every frame.
+        **Written 2026-10-22 (`verify`) as `i3d/i3dlayer.cpp`** (pinned 0x222f50..0x224de0, 80
+        functions incl. 21 created in Ghidra): every frame now builds real groups, layers, draw sets
+        and a sorted DMA chain (no crash over the smoke run); the screen stays black because nothing
+        on the i3d path reaches a host draw module yet. The rest of B.3, i3dCtxCreateView, is in
+        `unassigned@00224de0` (queued first; its stub returns NULL, hence the `pViewStatus` asserts).
+        The old key `unassigned@0021fb50` now names only the model packet builders 0x21fb50..0x222f50
+        (dropped from the queue). Bridges with the ROM's code for the packet module's small helpers
+        (i3dPktSetReg / DmaTag / RefTexRegs / SetAlphaMode / OpenChain, i3dDrawSetInit and its list
+        helpers, i3dTexSetDescInit, i3dDrawSetUseTex, i3dBatchClearTextures, i3dPsmBits,
+        i3dVecCopyW, i3dMatGetUnit) sit in lib/unassigned_stubs.cpp until B.4 replaces them, and the
+        stubbed packet writers (i3dPktSprite / Line / DrawStrip* / DrawLineStrip) return pkt.
+        **No picture comes from the i3d path until a host draw module consumes it** (Decisions: no
+        GS emulation): decide with B.4 / B.7 where `rosepan_i3d` hooks in -- the natural point is
+        i3dCtxRunGroup's walk (the sorted layer / set order) or the packet writers themselves.
      4. `unassigned@00216ad0`: i3d packets and texture uploads (i3dPktOpenChain, i3dPktSetReg,
         i3dTexMakeUpload, i3dTexRegsSet ...).
      5. `spr/sprtexture.cpp`: SprTexture (setList / update; replace the update bridge).

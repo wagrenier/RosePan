@@ -619,14 +619,14 @@ void MagScene::drawStrips(I3dLayer *layer)
             case 4:
             {
                 sceVu0FVECTOR *v = (sceVu0FVECTOR *)st->m_data;
-                FUN_00222f88(layer, v[0], v[1], st);
+                i3dLayerDrawLine(layer, v[0], v[1], st);
                 break;
             }
             case 3:
-                FUN_002230e8(layer, st->m_data2, s_origin, st->m_data, st);
+                i3dLayerDrawWireBox(layer, (sceVu0FVECTOR *)st->m_data2, s_origin, st->m_data, st);
                 break;
             case 5:
-                FUN_00223050((void *)st->m_colors, layer, st->m_data2, s_origin);
+                i3dLayerDrawWireSphere(layer, (sceVu0FVECTOR *)st->m_data2, s_origin, st->m_color[0]);
                 break;
             }
         }

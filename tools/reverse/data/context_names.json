@@ -2453,6 +2453,12 @@
   "was": "FUN_00215bb4",
   "why": "formats four floats (3 digits) into stack buffers and prints nothing, the four-float twin of dbgTraceVector3 0x215b5c"
  },
+ "00218db8": {
+  "name": "i3dPsmBits",
+  "tag": "ror-inferred",
+  "was": "FUN_00218db8",
+  "why": "jump table by GS pixel format (< 0x2d): bits per pixel (0x20 / 0x10 / 8 / 4 read by i3dTexRegsSet)"
+ },
  "00219c88": {
   "name": "i3dTexMakeUpload",
   "tag": "ror-inferred",
@@ -2519,6 +2525,18 @@
   "was": "FUN_0021b148",
   "why": "allocates an i3d light from the tail and fills it from a 0x40-byte description (ambient, then five (list, count) pairs)"
  },
+ "0021b220": {
+  "name": "i3dDrawSetInsertAfter",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b220",
+  "why": "links a draw set after another in a circular {+4 next, +8 prev} list"
+ },
+ "0021b238": {
+  "name": "i3dDrawSetMoveAfter",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b238",
+  "why": "unlinks a draw set and links it after another"
+ },
  "0021b260": {
   "name": "i3dDrawSetUseTex",
   "tag": "lib-context",
@@ -2530,6 +2548,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0021b288",
   "why": "writes the no-texture register packet (0x224d88) into each enabled texture slot of a batch"
+ },
+ "0021b300": {
+  "name": "i3dTexSetDescInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b300",
+  "why": "clears the six words of a texture-set description"
+ },
+ "0021b320": {
+  "name": "i3dDrawSetInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b320",
+  "why": "a draw set from a description: hash, self-linked, its group (desc +0xc / +0x10 / +0x14), layer, depth, copies of the texture numbers, a 6-qword register packet per slot"
  },
  "0021b490": {
   "name": "i3dPktDmaTag",
@@ -2548,6 +2578,24 @@
   "tag": "ror-inferred",
   "was": "FUN_0021b550",
   "why": "writes a DMA tag (0x21b4d0, qwc 2), a GIF tag NLOOP 1 EOP NREG 1 A+D, then value / register; returns the position after it (pkt + 0x30); called with TEST_1 (0x47) 0x5000d"
+ },
+ "0021b5a0": {
+  "name": "i3dPktCallView",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b5a0",
+  "why": "a CALL tag to the layer view packet (view +0x3f8) when the layer has a view"
+ },
+ "0021b5d0": {
+  "name": "i3dPktCallFog",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b5d0",
+  "why": "a CALL tag to the layer fog packet (fog +0x18) when the layer has fog"
+ },
+ "0021b600": {
+  "name": "i3dPktSetAlphaMode",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b600",
+  "why": "ALPHA_1 (reg 0x42) from a mode: 1 -> 0x40, 2 -> 0, 0x10.. -> 0x44 / 0x48 / 0x42, 0x20.. -> 0x54 / 0x58 / 0x52; mode 0 writes nothing"
  },
  "0021b698": {
   "name": "i3dPktOpenChain",
@@ -2596,6 +2644,24 @@
   "tag": "lib-context",
   "was": "FUN_0021e1d8",
   "why": "drawStrips type 2 and the sky packs' path records (pkt, layer, matrix, count, colour, xyz, flags); primitive role unverified"
+ },
+ "0021e6f8": {
+  "name": "i3dPktDrawWireSphere",
+  "tag": "ror-inferred",
+  "was": "FUN_0021e6f8",
+  "why": "three circles of nine points (sin / cos of 45-degree steps) of radius f12 round a centre, colours data 0x302a30, through i3dPktDrawLineStrip"
+ },
+ "0021e8f8": {
+  "name": "i3dPktDrawWireBox",
+  "tag": "ror-inferred",
+  "was": "FUN_0021e8f8",
+  "why": "eight corners centre +- half extents (signs data 0x302ab8), a 16-point line strip in the order of data 0x302a68"
+ },
+ "0021e9f8": {
+  "name": "i3dPktDrawWireShape",
+  "tag": "ror-inferred",
+  "was": "FUN_0021e9f8",
+  "why": "a wire shape after the sphere and box builders; not read (only the unreferenced i3dLayerDrawWireShape calls it)"
  },
  "0021eb28": {
   "name": "i3dInitHardware",
@@ -2783,6 +2849,36 @@
   "was": "FUN_0021f9c8",
   "why": "collects a batch non-static textures and CLUTs (up to 0x200 each) from the texture table and reserves them in the two VRAM heaps (0x228650); returns 0xf when they do not fit, else queues the batch on ctx+0x1211c"
  },
+ "00222f50": {
+  "name": "i3dPktLayerState",
+  "tag": "ror-inferred",
+  "was": "FUN_00222f50",
+  "why": "writes the layer view CALL tag (0x21b5a0), the fog CALL tag (0x21b5d0) and ALPHA mode 2 (0x21b600) at pkt"
+ },
+ "00222f88": {
+  "name": "i3dLayerDrawLine",
+  "tag": "ror-inferred",
+  "was": "FUN_00222f88",
+  "why": "default draw set, an unaligned set node, the layer state, a two-point i3dPktDrawLineStrip from two copied vectors with the unit matrix; MagScene::drawStrips type 4"
+ },
+ "00223050": {
+  "name": "i3dLayerDrawWireSphere",
+  "tag": "ror-inferred",
+  "was": "FUN_00223050",
+  "why": "the same frame around 0x21e6f8 (three 9-point circles of radius f12 round a centre); drawStrips type 5"
+ },
+ "002230e8": {
+  "name": "i3dLayerDrawWireBox",
+  "tag": "ror-inferred",
+  "was": "FUN_002230e8",
+  "why": "the same frame around 0x21e8f8 (8 corners from a centre and half extents, one 16-point strip); drawStrips type 3"
+ },
+ "00223190": {
+  "name": "i3dLayerDrawWireShape",
+  "tag": "ror-inferred",
+  "was": "FUN_00223190",
+  "why": "the same frame around 0x21e9f8 (a wire shape, not read); unreferenced"
+ },
  "00223228": {
   "name": "i3dLayerSetDrawSet",
   "tag": "lib-context",
@@ -2813,17 +2909,65 @@
   "was": "FUN_00223270",
   "why": "returns layer+0x824, the layer's default draw set"
  },
+ "00223278": {
+  "name": "i3dLayerGetCurDrawSet",
+  "tag": "ror-inferred",
+  "was": "FUN_00223278",
+  "why": "returns layer +0x828, the draw set i3dLayerSetDrawSet chose (created: folded into i3dLayerGetDrawSet)"
+ },
+ "00223280": {
+  "name": "i3dLayerGetLight",
+  "tag": "ror-inferred",
+  "was": "FUN_00223280",
+  "why": "returns layer +0x82c (i3dLayerSetLight field); created"
+ },
+ "00223288": {
+  "name": "i3dLayerGetFog",
+  "tag": "ror-inferred",
+  "was": "FUN_00223288",
+  "why": "returns layer +0x830 (i3dLayerSetFog field)"
+ },
+ "00223290": {
+  "name": "i3dLayerGetView",
+  "tag": "ror-inferred",
+  "was": "FUN_00223290",
+  "why": "returns layer +0x834 (i3dLayerSetView field); the strip packet builders read the view through it"
+ },
  "00223298": {
   "name": "i3dLayerBeginSet",
   "tag": "lib-context",
   "was": "FUN_00223298",
   "why": "opens a packet node with key f12 (sign-flipped float bits for sorting) in the current set's group (0x223c10); returns the packet"
  },
+ "002232d0": {
+  "name": "i3dLayerBeginSetKey",
+  "tag": "ror-inferred",
+  "was": "FUN_002232d0",
+  "why": "i3dLayerBeginSet with a ready sort key (no float conversion); created"
+ },
  "002232f0": {
   "name": "i3dLayerEndSet",
   "tag": "lib-context",
   "was": "FUN_002232f0",
   "why": "closes the packet node in the current set's group (0x223c78) at the end pointer"
+ },
+ "00223308": {
+  "name": "i3dLayerBeginSetUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_00223308",
+  "why": "float key made unsigned-sortable, unaligned channel-0 packet node in the current set group (0x223cc0); created"
+ },
+ "00223340": {
+  "name": "i3dLayerBeginSetUnalignedKey",
+  "tag": "ror-inferred",
+  "was": "FUN_00223340",
+  "why": "0x223308 with a ready key; the i3dLayerDraw* helpers pass key 0"
+ },
+ "00223360": {
+  "name": "i3dLayerEndSetUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_00223360",
+  "why": "closes the current set unaligned node (0x223d18)"
  },
  "00223378": {
   "name": "i3dLayerBeginPacket",
@@ -2837,6 +2981,18 @@
   "was": "FUN_00223398",
   "why": "0x223c78(layer group +0x81c, end): ends the packet opened by i3dLayerBeginPacket"
  },
+ "002233b0": {
+  "name": "i3dLayerBeginPacketUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_002233b0",
+  "why": "key 0 unaligned channel-0 packet node in the layer group (+0x81c); unreferenced"
+ },
+ "002233d0": {
+  "name": "i3dLayerEndPacketUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_002233d0",
+  "why": "closes the 0x2233b0 node"
+ },
  "002233e8": {
   "name": "i3dLayerBeginPostPacket",
   "tag": "ror-inferred",
@@ -2849,11 +3005,65 @@
   "was": "FUN_00223408",
   "why": "FUN_00223c78(layer +0x81c, end): closes i3dLayerBeginPostPacket's packet, the pair of i3dLayerEndPacket"
  },
+ "00223420": {
+  "name": "i3dLayerBeginPostPacketUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_00223420",
+  "why": "key 2 unaligned packet node in the layer group; unreferenced"
+ },
+ "00223440": {
+  "name": "i3dLayerEndPostPacketUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_00223440",
+  "why": "closes the 0x223420 node"
+ },
+ "00223458": {
+  "name": "i3dLayerSetUser",
+  "tag": "ror-inferred",
+  "was": "FUN_00223458",
+  "why": "stores a doubleword at layer +0x838 + 16 n (0x62 pairs cleared by i3dLayerInit); created"
+ },
+ "00223470": {
+  "name": "i3dLayerSetUser2",
+  "tag": "ror-inferred",
+  "was": "FUN_00223470",
+  "why": "stores a doubleword at layer +0x840 + 16 n; created"
+ },
+ "00223488": {
+  "name": "i3dLayerGetUser",
+  "tag": "ror-inferred",
+  "was": "FUN_00223488",
+  "why": "loads layer +0x838 + 16 n; created"
+ },
+ "00223498": {
+  "name": "i3dLayerGetUser2",
+  "tag": "ror-inferred",
+  "was": "FUN_00223498",
+  "why": "loads layer +0x840 + 16 n; created"
+ },
+ "002234a8": {
+  "name": "i3dLayerFindMaterialDrawSet",
+  "tag": "ror-inferred",
+  "was": "FUN_002234a8",
+  "why": "builds a texture-set description from a model material (texture numbers != -1 of its entries, bytes +0xa / +0xb, word +4, depth + optional offset) and calls i3dLayerFindDrawSet; called by model code 0x228f50"
+ },
  "00223558": {
   "name": "i3dLayerFindDrawSet",
   "tag": "lib-context",
   "was": "FUN_00223558",
   "why": "hashes a texture-set description (count, texture numbers ...) into the layer's 256 buckets and returns the matching draw set, making one from the tail when none matches"
+ },
+ "00223768": {
+  "name": "i3dLayerCreateSubLayer",
+  "tag": "ror-inferred",
+  "was": "FUN_00223768",
+  "why": "makes the layer sub group (+0x820, node key 3 in the layer group) on first use, then a new layer in it under a float key; created"
+ },
+ "00223808": {
+  "name": "i3dLayerAddVramReset",
+  "tag": "ror-inferred",
+  "was": "FUN_00223808",
+  "why": "a layer node with no draw set under a float key: i3dCtxDrawTexturedLayer resets both VRAM heaps there; unreferenced"
  },
  "00223878": {
   "name": "i3dLayerInit",
@@ -2861,11 +3071,131 @@
   "was": "FUN_00223878",
   "why": "initialises a 0xe60-byte layer: its own group, i3dCtxDrawTexturedLayer as callback, the context at +0x814"
  },
+ "002239b8": {
+  "name": "i3dListInit",
+  "tag": "ror-inferred",
+  "was": "FUN_002239b8",
+  "why": "a list head: key, first, +8 zero, last = the head itself; groups and layers start with one"
+ },
+ "002239d0": {
+  "name": "i3dGroupBeginPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_002239d0",
+  "why": "a 0x10 packet node (start = head 128-aligned, without the segment bits) that i3dCtxRunGroup links directly; returns the start; created"
+ },
+ "00223a20": {
+  "name": "i3dGroupEndPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00223a20",
+  "why": "closes the 0x2239d0 node: end tag pointer, bytes += size, head = 128-aligned past the end tag; created"
+ },
+ "00223a68": {
+  "name": "i3dGroupBeginPacketUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_00223a68",
+  "why": "0x2239d0 at the head as it is; model code 0x2210f0 / 0x2221e8"
+ },
+ "00223aa8": {
+  "name": "i3dGroupEndPacketUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_00223aa8",
+  "why": "closes the 0x223a68 node, head = end tag + 0x10"
+ },
+ "00223ad8": {
+  "name": "i3dGroupBeginStatePacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00223ad8",
+  "why": "a 0x20 node run by 0x2244f0 (a channel state CALL tag, then the packet), start 128-aligned; created"
+ },
+ "00223b40": {
+  "name": "i3dGroupEndStatePacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00223b40",
+  "why": "closes the 0x223ad8 node; created"
+ },
+ "00223b88": {
+  "name": "i3dGroupBeginStatePacketUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_00223b88",
+  "why": "0x223ad8 at the head as it is; the model packet builders 0x220838.. use it"
+ },
+ "00223be0": {
+  "name": "i3dGroupEndStatePacketUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_00223be0",
+  "why": "closes the 0x223b88 node"
+ },
+ "00223c10": {
+  "name": "i3dGroupBeginChanPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00223c10",
+  "why": "a 0x20 node run by 0x224620 (forgets the channel state, links the packet), start 128-aligned; layer begin set / packet"
+ },
+ "00223c78": {
+  "name": "i3dGroupEndChanPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00223c78",
+  "why": "closes the 0x223c10 node"
+ },
+ "00223cc0": {
+  "name": "i3dGroupBeginChanPacketUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_00223cc0",
+  "why": "0x223c10 at the head as it is"
+ },
+ "00223d18": {
+  "name": "i3dGroupEndChanPacketUnaligned",
+  "tag": "ror-inferred",
+  "was": "FUN_00223d18",
+  "why": "closes the 0x223cc0 node"
+ },
  "00223d48": {
-  "name": "i3dBatchAppend",
+  "name": "i3dGroupAppend",
   "tag": "ror-inferred",
   "was": "FUN_00223d48",
-  "why": "moves batch b chain to the end of batch a (tail at +0xc), adding its counts at +0x24/+0x28, and empties b"
+  "why": "splices src nodes onto dst (counts and packet bytes summed), src left empty; renamed from i3dBatchAppend"
+ },
+ "00223da0": {
+  "name": "i3dRadixScatter",
+  "tag": "ror-inferred",
+  "was": "FUN_00223da0",
+  "why": "appends each node of a list to bucket (key >> shift) & 0xff"
+ },
+ "00223de0": {
+  "name": "i3dRadixScatterDesc",
+  "tag": "ror-inferred",
+  "was": "FUN_00223de0",
+  "why": "the same with ~key (descending)"
+ },
+ "00223e20": {
+  "name": "i3dSortRadix",
+  "tag": "ror-inferred",
+  "was": "FUN_00223e20",
+  "why": "four 8-bit LSD radix passes over two 256-bucket arrays in the scratchpad, mode 1 ascending / 2 descending, then concatenates"
+ },
+ "00224050": {
+  "name": "i3dSortSmall",
+  "tag": "ror-inferred",
+  "was": "FUN_00224050",
+  "why": "copies (key, node) pairs to the scratchpad, cocktail-shaker sort (1 ascending / 2 descending), relinks"
+ },
+ "002242e0": {
+  "name": "i3dSortNone",
+  "tag": "ror-inferred",
+  "was": "FUN_002242e0",
+  "why": "sort table 0x3031f0 slot 0: returns the list as it is; created"
+ },
+ "002242e8": {
+  "name": "i3dSortDefault",
+  "tag": "ror-inferred",
+  "was": "FUN_002242e8",
+  "why": "sort table slot 1: tail-calls i3dSortList"
+ },
+ "00224300": {
+  "name": "i3dGroupSort",
+  "tag": "ror-inferred",
+  "was": "FUN_00224300",
+  "why": "terminates the list and calls sort table 0x3031f0[+0x14](first, +0x18, +0x1c, count)"
  },
  "00224368": {
   "name": "i3dSortList",
@@ -2878,6 +3208,54 @@
   "tag": "ror-inferred",
   "was": "FUN_002243a0",
   "why": "initialises a 0x30-byte draw group: base list init (0x2239b8) and four parameters at +0x10..+0x1c"
+ },
+ "00224418": {
+  "name": "i3dNodeRunGroup",
+  "tag": "ror-inferred",
+  "was": "FUN_00224418",
+  "why": "node callback: runs the sub group at +0x10 (i3dGroupAddGroup)"
+ },
+ "00224438": {
+  "name": "i3dNodeEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00224438",
+  "why": "node callback returning 1: stops i3dCtxRunGroup (i3dGroupAddEnd); created"
+ },
+ "00224440": {
+  "name": "i3dNodeState",
+  "tag": "ror-inferred",
+  "was": "FUN_00224440",
+  "why": "node callback: when channel +0x10 state differs from +0x14, a CALL tag to it (ctx +0x12158[ch] remembers it)"
+ },
+ "002244f0": {
+  "name": "i3dNodeStatePacket",
+  "tag": "ror-inferred",
+  "was": "FUN_002244f0",
+  "why": "node callback: the state CALL as 0x224440 when it changed, then links the packet +0x18..+0x1c"
+ },
+ "002245f8": {
+  "name": "i3dNodeClearState",
+  "tag": "ror-inferred",
+  "was": "FUN_002245f8",
+  "why": "node callback: forgets channel +0x10 state; created"
+ },
+ "00224620": {
+  "name": "i3dNodeChanPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00224620",
+  "why": "node callback: forgets channel +0x10 state and links the packet +0x14..+0x18; created"
+ },
+ "00224670": {
+  "name": "i3dNodePrint",
+  "tag": "ror-inferred",
+  "was": "FUN_00224670",
+  "why": "node callback: i3dPrintf of the string at +0x10"
+ },
+ "00224698": {
+  "name": "i3dNodeCall",
+  "tag": "ror-inferred",
+  "was": "FUN_00224698",
+  "why": "node callback: calls +0x10(+0x14, +0x18), stops the group when it returns non-zero"
  },
  "002246c8": {
   "name": "i3dCtxRunGroup",
@@ -2892,10 +3270,52 @@
   "why": "i3dCtxEndFrame body: starts the packet (ctx+0x118), runs the frame root group, then the end-of-packet hook"
  },
  "00224878": {
-  "name": "i3dGroupAddLayer",
+  "name": "i3dGroupAddGroup",
   "tag": "ror-inferred",
   "was": "FUN_00224878",
-  "why": "links a layer node (callback 0x224418) into a group with a sort key"
+  "why": "adds a node running a sub group (i3dNodeRunGroup) under a key; renamed from i3dGroupAddLayer (it takes the layer group)"
+ },
+ "002248c0": {
+  "name": "i3dGroupAddEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_002248c0",
+  "why": "adds the 0x10 stop node (i3dNodeEnd) i3dCtxRunGroup appends before sorting"
+ },
+ "00224900": {
+  "name": "i3dGroupAddState",
+  "tag": "ror-inferred",
+  "was": "FUN_00224900",
+  "why": "adds an i3dNodeState node (key, channel, state address); created"
+ },
+ "00224948": {
+  "name": "i3dGroupAddStatePacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00224948",
+  "why": "adds an i3dNodeStatePacket node over a ready packet; created"
+ },
+ "00224998": {
+  "name": "i3dGroupAddClearState",
+  "tag": "ror-inferred",
+  "was": "FUN_00224998",
+  "why": "adds an i3dNodeClearState node; created"
+ },
+ "002249e0": {
+  "name": "i3dGroupAddChanPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_002249e0",
+  "why": "adds an i3dNodeChanPacket node over a ready packet; created"
+ },
+ "00224a30": {
+  "name": "i3dGroupAddPrint",
+  "tag": "ror-inferred",
+  "was": "FUN_00224a30",
+  "why": "copies a string into the packet tail and adds an i3dNodePrint node"
+ },
+ "00224ad8": {
+  "name": "i3dGroupAddCall",
+  "tag": "ror-inferred",
+  "was": "FUN_00224ad8",
+  "why": "adds an i3dNodeCall node (func, two args); i3dLayerInit installs i3dCtxDrawTexturedLayer with it"
  },
  "00224b28": {
   "name": "i3dTexRegsSet",
@@ -3154,6 +3574,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00236960",
   "why": "sq zero to the vector: clears 16 bytes"
+ },
+ "00236980": {
+  "name": "i3dVecCopyW",
+  "tag": "ror-inferred",
+  "was": "FUN_00236980",
+  "why": "copies four words (lw / sw, no alignment)"
+ },
+ "00237168": {
+  "name": "i3dMatGetUnit",
+  "tag": "ror-inferred",
+  "was": "FUN_00237168",
+  "why": "returns data 0x303c10, the unit matrix"
  },
  "00237178": {
   "name": "i3dSysInit",

@@ -231,11 +231,43 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
 - **i3d** (unassigned@00216ad0 up to rxSnd 0x237d80; "i3d_package_version 050121-stable-050826"):
   the packet / draw library under the scene. initGraph compares the game's copy of its 36 struct sizes
   (rodata 0x2e90a8) with `i3dGetStructSize` 0x21f1a8 (data 0x302ba0) and hangs on a mismatch.
-  Files pinned so far (2026-10-22): **`i3d/i3dctx.cpp`** 0x21eb28..0x21fb30 (written, verify) and
-  **`i3d/i3dvram.cpp`** 0x227a98..0x228c08 (written, verify). Modules seen around them: matrix / camera
-  helpers before 0x21eb28 (0x21e1d8), texture objects from 0x21fb30, GS transfer builders 0x218fa8 /
-  0x2190c8 / 0x2192c8 and 0x219c88..0x219d68, packet heads 0x21b490..0x21b698, draw groups / layers /
-  sort 0x2239b8..0x224d88, the i3d system calls 0x237178..0x237cc8 (i3dFlushCache, i3dPrintf).
+  Files pinned so far (2026-10-22): **`i3d/i3dctx.cpp`** 0x21eb28..0x21fb30 (written, verify),
+  **`i3d/i3dlayer.cpp`** 0x222f50..0x224de0 (written, verify) and **`i3d/i3dvram.cpp`**
+  0x227a98..0x228c08 (written, verify). Modules seen around them: the wire-shape strip builders
+  0x21e6f8 / 0x21e8f8 / 0x21e9f8 before 0x21eb28 (0x21e1d8 the line strip), model packet builders
+  0x21fb50..0x222f50 (unassigned@0021fb50: per material a state packet node, i3dGroupBegin*Packet),
+  GS transfer builders 0x218fa8 / 0x2190c8 / 0x2192c8 and 0x219c88..0x219d68, texture objects
+  0x219a98.., packet heads 0x21b220..0x21b698 (draw-set list / init, i3dPktDmaTag, SetReg, the view /
+  fog CALLs, ALPHA modes, OpenChain), TIM2 helpers from 0x224de0 (an unreferenced TIM2 / CLT header
+  check, picture lookup 0x224e70, size 0x224ed0), view maths 0x226278..0x227a98 (i3dCtxCreateView
+  0x226c58: a 0x400-byte view in the tail, its packet at +0x3f8), the i3d system calls
+  0x237178..0x237cc8 (i3dFlushCache, i3dPrintf).
+  - **Groups and nodes** (`i3d/i3dlayer.cpp`): a group (0x30: list head key / first / 0 / last,
+    +0x10 ctx, +0x14 sort function index into data 0x3031f0 {none, i3dSortList, i3dSortList, NULL},
+    +0x18 order 1 asc / 2 desc, +0x1c param, +0x20 the open node, +0x24 count, +0x28 packet bytes).
+    An empty list's last node is its head (appending writes head->first). Nodes: packet nodes (0x10:
+    +8 start, +0xc end; the run links them with NEXT tags) and call nodes (0x20: +8 = 0, +0xc
+    callback, args from +0x10): run sub group 0x224418 (layers in the root), stop 0x224438 (returns
+    1; i3dCtxRunGroup appends it with key -1 ascending / 0 otherwise, then sorts), channel packet
+    0x224620 (clears ctx +0x12158[ch], links +0x14..+0x18), state CALL 0x224440 / state + packet
+    0x2244f0 (a DMA CALL of the channel's state packet only when ctx +0x12158[ch] differs), clear
+    state, print, user call (0x224698: func(a, b), non-zero stops). Begin/End pairs per kind, each in
+    an aligned flavour (start = head 128-aligned, head after = 128-aligned past the end tag) and an
+    unaligned one. i3dSortList: < 32 nodes a cocktail sort of (key, node) pairs in the scratchpad,
+    else a 4-pass 8-bit LSD radix sort over two 256-bucket arrays (0x70000000 / 0x70002000).
+  - **Layers** (0xe60): list head of draw-set nodes (1 qword: key = sortable depth, +8 the set),
+    +0x14 256 hash buckets of draw sets (circular {+4 next, +8 prev}; a hit moves to the front),
+    +0x414 256 words cleared and never read, +0x814 ctx, +0x818 the current set's group (Begin /
+    EndSet write there), +0x81c the layer's own group (key 0 i3dLayerBeginPacket, key 1 the draw
+    call node = i3dCtxDrawTexturedLayer, key 2 the post packet, key 3 the sub-layer group +0x820),
+    +0x824 default set (empty description), +0x828 current set, +0x82c light / +0x830 fog / +0x834
+    view, +0x838 0x62 doubleword pairs (setters 0x223458.., no caller). A draw set (0x38): hash,
+    links, group (from the description's +0xc / +0x10 / +0x14), +0x10 per-slot 6-qword TEX0 / TEX1 /
+    TEX2 / MIPTBP1 / MIPTBP2 packets, +0x14 use counts, +0x18 layer, +0x20 depth, +0x24 texture
+    numbers, +0x28 count. The texture-set description (0x18) is hashed word by word (not the
+    pointer) plus its texture numbers, folded to a byte. i3dTexRegsSet adds TBP0 (block << 5) to
+    TEX0 and the three MIPTBP fields, CBP (CLUT block << 2, plus the CLUT index scaled by the CLUT
+    size for PSMT8 / PSMT4; CSA = index & 0xf for PSMT4) -- the bits per pixel from 0x218db8.
   - **The context** (`i3dContext`, EE 0x12168): +0 texture VRAM heap (GS pages), +0x70 CLUT heap
     (4-block units; i3dCtxSetup(ctx, 0x158, 0xa8) gives textures 0xa8 - 0xb = 0x9d pages from page
     0x158 and CLUTs the 0xb pages after them), +0xe0 the frame's root group, +0xe4 / +0xe8 frames and
@@ -248,7 +280,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     segment), makes the root group; MagScene::draw makes layers (`i3dCtxCreateLayer(ctx, float
     key)`, key bits made unsigned-sortable) and sets each one's light set / fog / view
     (`i3dLayerSetLight` / `SetFog` / `SetView` 0x223240 / 0x223250 / 0x223260: layer +0x82c / +0x830 /
-    +0x834; getters 0x223270..0x223294 read +0x824..+0x834; the view from `i3dCtxCreateView`
+    +0x834; getters 0x223270..0x223290 read +0x824..+0x834; the view from `i3dCtxCreateView`
     0x226c58(ctx, MagViewParam, camera matrix), the light sets from 0x11262c over the light pool)
     and register packets (`i3dLayerBeginPacket` 0x223378 -> `i3dPktSetReg(pkt, reg, value)`
     0x21b550, one A+D write, 3 qwords -> `i3dLayerEndPacket` 0x223398, both on the layer's group
