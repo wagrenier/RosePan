@@ -563,6 +563,27 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   count units (`decodeRtcm` 0x190904). When the list is done and +0x418 (an i3dContext) is set,
   DogTexInfo::setTexTable(ctx).
 
+## The texture table (`dog/dogtexinfo.cpp`, 0x1161e4..0x11764c, 2026-10-22)
+
+- **DogTexInfo** (EE 0x20; the scene's at +0x29520, 256 entries): +0 m_max_tex, +4 m_num_tex,
+  +8 m_tex_info (theMax 16-byte name records = the i3d context's texture table `I3dTexEntry`:
+  pszTexName, pPicture, CLUT, a word the i3d regs use; names from the asserts), +0xc m_tex_data
+  (theMax 0x198-byte `DogTexData`: I3dTexture +0, I3dClut +0x130, the TIM2 +0x168, own flag
+  +0x16c, reference count +0x16e, name[40] +0x170), +0x10 m_dirty (every change; MagScene::draw
+  then calls setTexTable), +0x14..+0x1c a sepia colour (0xff 0xdc 0x98) that addPfh's `sepia`
+  argument applies to each TIM2 (`utlTm2ToSepia` 0x10559c: luminance 0x4d/0x96/0x1d times the
+  factor >> 16; its caller `setSepiaColor` 0x11626c is called from 0x144ae0).
+- Records are found by name. addData (TIM2) counts a reference when the name is there (unless
+  flag 2), else takes the first empty record (findFree), copies the TIM2 to the heap when flags is
+  not 0, and builds the texture / CLUT (tcc < 0: utlIsTccName); add (an I3dTexDesc already in
+  VRAM, e.g. shadow01 256x256 CT32 at block 0x2300) does not count references. release drops one;
+  the last terms the i3d objects, leaves the name "" and clears the record. releaseModel /
+  releasePfh release by an i3r model's / a pack's names and trim m_num_tex; setTexTable trims past
+  the last record with a picture and calls i3dCtxSetTexTable(ctx, m_tex_info, m_num_tex).
+- addPfh(pfh, i3r, flags, sepia): every pack file under its name (i3r NULL), or for each texture
+  the model names (`i3rGetNumTex` 0x22b428 / `i3rGetTexName` 0x22b438, DogModel's inline get_nTex /
+  getTexName) the pack file of that name; -3 when the pack lacks one.
+
 ## Modules (RoR's own source files)
 
 73 `.cpp` paths survive in assert / error strings (export.py anchors on them), plus headers whose inline

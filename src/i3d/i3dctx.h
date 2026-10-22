@@ -57,12 +57,12 @@ static inline u_int i3dDmaAddr(const void *p)
  * pointers. */
 struct I3dTexEntry
 {
-    u_int          m_00;        // ROR 0x00: unverified
-    I3dVramHandle *m_tex;       // ROR 0x04: the texture's VRAM handle (or NULL)
+    const char    *pszTexName;  // ROR 0x00: the texture's name (names from DogTexInfo's asserts)
+    I3dVramHandle *pPicture;    // ROR 0x04: the texture's VRAM handle (or NULL)
     I3dVramHandle *m_clut;      // ROR 0x08: the CLUT's VRAM handle (or NULL)
     u_int          m_0c;        // ROR 0x0c: i3dTexRegsSet's CLUT index
 };
-static_assert(offsetof(I3dTexEntry, m_00) == 0, "I3dTexEntry::m_00");
+static_assert(offsetof(I3dTexEntry, pszTexName) == 0, "I3dTexEntry::pszTexName");
 
 /* The end-of-packet hook: writes the chain's last tags at pkt, returns the
  * position after them. */

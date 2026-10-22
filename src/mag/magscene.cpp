@@ -15,9 +15,10 @@
 #include "utl/utlfind.h"
 #include "utl/utlmisc.h"
 
-/* rodata 0x2ed500: the shadow01 image DogTexInfo::add builds the scene's
- * first texture from (0x20 bytes; format not decoded yet). */
-static const u_char s_shadow01_image[0x20] = {
+/* rodata 0x2ed500: the shadow01 texture DogTexInfo::add builds the scene's
+ * first texture from: an I3dTexDesc (256 x 256, one level at block
+ * 0x2300, PSMCT32, tcc 1, bilinear; 0x20 bytes with the padding). */
+alignas(4) static const u_char s_shadow01_image[0x20] = {
     0x00, 0x01, 0x00, 0x01, 0x01, 0x00, 0x00, 0x23, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
@@ -85,7 +86,7 @@ void MagScene::init()
     setLightNo(-1);
     m_life_man.init();
     m_tex_info.init(0x100);
-    m_tex_info.add(s_shadow01_image, "shadow01");
+    m_tex_info.add((const I3dTexDesc *)s_shadow01_image, "shadow01");
     m_2aad1 = 3;
     m_2aad0 = 1;
     for (int i = 0; i < 4; i++)

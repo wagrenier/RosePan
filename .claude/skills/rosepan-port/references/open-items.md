@@ -107,6 +107,13 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
         pfh loader of A.1) in the same session.
      6. `dog/dogtexinfo.cpp`: the texture table SprTexture loads into (DogTexInfo::init / add are
         reached).
+        **Written 2026-10-22 (`verify`)**, pinned 0x1161e4..0x11764c (16 functions; architecture.md
+        "The texture table"). MagScene::init's init / add now run (no asserts); addData /
+        setTexTable wait on the SprTexture loads, which still end in error (fileGetSize 0x1be768,
+        BedPfh::BedPfh / getFileIndex are stubs). utlTm2GetSize 0x104e1c is a ROM-code bridge in
+        lib/unassigned_stubs.cpp until utl/utltm2.cpp (unassigned@00104970) is written;
+        utlTm2ToSepia, i3rGetNumTex / i3rGetTexName are stubs (nothing passes sepia or an i3r yet).
+        I3dTexEntry's first two fields are now pszTexName / pPicture (the ROM's names).
      7. `spr/sprman.cpp`: SprMan (init / update / draw, the pattern-table host format).
    After A, compare the screenshot with LOADING.BIN's picture; after B, with work/ref/S2DMAN.
    Then re-assess (the M1..M5 list below).

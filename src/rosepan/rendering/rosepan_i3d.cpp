@@ -551,8 +551,8 @@ void RosePan_I3dForcedTest(i3dContext *ctx)
             i3dClutInit(&s_clut[i]);
             i3dTexSetTim2(&s_tex[i], tim2, 0, 0);
             i3dClutSetTim2(&s_clut[i], tim2, 0, 0);
-            s_table[i].m_00 = 0;
-            s_table[i].m_tex = &s_tex[i].m_handle;
+            s_table[i].pszTexName = NULL;
+            s_table[i].pPicture = &s_tex[i].m_handle;
             s_table[i].m_clut = &s_clut[i].m_handle;
             s_table[i].m_0c = 0;
         }

@@ -422,7 +422,7 @@ int i3dCtxFlushTextures(i3dContext *ctx, I3dDrawSet *set)
             if (s->m_tex_index[i] < ctx->m_tex_table_count)
             {
                 I3dTexEntry *e = &ctx->m_tex_table[s->m_tex_index[i]];
-                i3dTexRegsSet(regs, e->m_tex, e->m_clut, e->m_0c);
+                i3dTexRegsSet(regs, e->pPicture, e->m_clut, e->m_0c);
             }
             else
             {
@@ -644,7 +644,7 @@ int i3dCtxReserveTextures(i3dContext *ctx, I3dDrawSet *set)
         if (index >= ctx->m_tex_table_count)
             continue;
         I3dTexEntry *e = &ctx->m_tex_table[index];
-        I3dVramHandle *t = e->m_tex;
+        I3dVramHandle *t = e->pPicture;
         I3dVramHandle *c = e->m_clut;
         if (t != NULL)
         {
