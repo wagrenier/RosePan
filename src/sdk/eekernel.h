@@ -111,6 +111,11 @@ void RosePan_IntcRaise(int cause);
 int  RosePan_sceDevVif0Reset(void);
 int  RosePan_sceDevVu0Reset(void);
 int  RosePan_sceDevVif1Reset(void);
+int  RosePan_sceDevVu1Reset(void);
+
+/* Main memory size: a retail console's 32 MB (a devkit reports 128 MB, which
+ * Rule of Rose's rx layer reads as "boot from host0:"). */
+int  RosePan_GetMemorySize(void);
 
 /* EE COP0 pipeline sync + interrupt enable (asm intrinsics on the target). */
 #ifndef SYNC
@@ -162,6 +167,8 @@ u_long RosePan_sceGsPutIMR(u_long imr);
 #define sceDevVif0Reset        RosePan_sceDevVif0Reset
 #define sceDevVu0Reset         RosePan_sceDevVu0Reset
 #define sceDevVif1Reset        RosePan_sceDevVif1Reset
+#define sceDevVu1Reset         RosePan_sceDevVu1Reset
+#define GetMemorySize          RosePan_GetMemorySize
 #define sceGsGetIMR            RosePan_sceGsGetIMR
 #define sceGsPutIMR            RosePan_sceGsPutIMR
 #endif

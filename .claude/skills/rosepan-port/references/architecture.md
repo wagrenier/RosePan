@@ -40,7 +40,7 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
 | range | contents |
 |---|---|
 | `0x100000`-`0x100258` | crt0 (`_start` 0x100008, `_exit`) |
-| `0x100258`-`~0x24b490` | game code; ends with the unsymbolised "rx" file / thread middleware ("rxfile : ..." strings 0x244410..0x24aff8; its start is not settled) |
+| `0x100258`-`~0x24b490` | game code; ends with the unsymbolised "rx" middleware: `rx/rxsys.cpp` 0x23ff58..0x2437f8 (pinned), rxfile 0x2437f8..~0x249000 and rxthread ~0x249000..0x24b490 (not pinned yet); below 0x23ff58 an IOP RPC client (0x23f960.., unprefixed "binding IOP module" strings) whose owner is open |
 | `0x24b490`-`0x280e88` | Sony SDK 3.0 libraries (libmc, libmpeg / IPU / CSC, libdbc, libpad2, libvib, libdma, libgraph, libvu0, devvu0 / devvif), EE kernel stubs and libc (klib, intr, thread, sif, tty, deci2, filestub, initsys), libgcc2 / fp-bit / dp-bit, newlib (`data/layout.json` lib_ranges) |
 | `0x280e88`-`0x29122c` | named `.gnu.linkonce.t` sections: the game's inline methods (satellites, ride with their class) |
 | `0x291230`-`0x2953b0` | `.vutext` (VU microcode) |
@@ -74,6 +74,15 @@ Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
   reboot with `ioprp300.img` (0x241b20), boot-device detection (0x241d68: "host0:", "BootDev = %s",
   "BootDir = %s"; 0x240eb8: "BootDevice = %d", "Rom Date"), `GetThreadId` / `ChangeThreadPriority`, then
   0x2046d4 (calls into many game modules: likely the game's init / main loop -- unverified).
+- The rx bring-up main runs, in order: `rxSysSetIopImage("IOPRP300.IMG")` 0x241b20,
+  `rxSysSetBootPath("cdrom0:")` 0x241d68 (boot device CDROM, dir, name), `rxSysResetHardware` via
+  `rxSysInit` 0x240eb8: VIF/VU/GS-path/DMA reset, `rxThInit`, memory hooks reset, boot device (more than
+  32 MB = devkit = HOST, else CDROM), `rxSysInitModules` (pools, `rxFileInit`, the rxfile thread,
+  `rxThAddCallback`), file devices and dir, `rxSysLoadIopModules` (default module table, SIF, CD,
+  IOP reboot with `modules/ioprp300.img`, then every `.irx` in `modules/iopconf.cnf` via
+  `rxFileLoadModule`), `system.ini` [SYSTEM] NUMBER / VERSION / VMODE / COUNTRY / LANGUAGE / WARNING
+  (optional), the save-data name = region prefix (BI / BA / BE by COUNTRY) + NUMBER. Then main installs
+  the game's memory hooks (`rxSysSetMemFunc0..3`: 0x105ca0, 0x105ca0, 0x105de0, 0x105e08).
 
 ## Modules (RoR's own source files)
 
@@ -126,6 +135,9 @@ never asserts): sessions name them (`tus.py define --why`).
 |---|---|---|
 | 0x100008 | `_start` (crt0) | libmatch (FF2 crt0.s) |
 | 0x2045a8 | `main` | crt0's call; build-date strings |
+| 0x240eb8 | `rxSysInit`: console bring-up (see Program flow) | strings; `rx/rxsys.cpp` |
+| 0x241f58 | `rxSysPrintf`: the middleware's and game's printf (151 callers): print hook 0x2db9d0, then `scePrintf`, or a buffered host tty (file 0x2dba34 / IOP tty RPC) | `rx/rxsys.cpp` |
+| 0x2dbe8c | `g_rxSysMemFunc[4]`: memory hooks the game's allocators call through (0x1830fc, 0x182818 ...) | `rx/rxsys.cpp` |
 | 0x215a30 | the assert handler `(file, line, expr)`: prints "Assertion Failed: %s(%d)   %s\n" through 0x260110 and loops for ever | 1,483 call sites |
 | 0x105ba4 | operator-delete wrapper: `if (p) 0x105e08(p)`; the deleting destructors tail-jump to it | 277 call sites; `DogEntity::~DogEntity` 0x280f34 |
 | 0x267798 | `_InitSys` | libmatch (FF2 initsys.c) |

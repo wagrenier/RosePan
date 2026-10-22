@@ -19,6 +19,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
      (`data/bg/mapunit.bin`).
    - **M5 Jennifer and Brown on screen**: `MagLifePC*`, `MagLifeBwn*`.
    Queue the TUs a smoke run reaches, in that order; `settings.smoke_pad` grows with each milestone.
+4. (2026-10-22, the rxsys session) `rx/rxsys.cpp` is written (`verify`) but nothing calls it: `main`
+   (0x2045a8, in `unassigned@001fd424`) is the next M1 step -- define its file (`main.cpp`? it has no
+   source string), replace the placeholder GameMain in `src/main.cpp`, and call `rxSysSetIopImage`,
+   `rxSysSetBootPath`, `rxSysInit`, the `rxSysSetMemFunc*` setters. **Then rxfile at once**: on a CDROM
+   boot `rxSysLoadIopModules` loops `while (!rxSysReadIopConf(...))` and `while (!rxFileRebootIop(...))`,
+   and the rxfile stubs return 0 -- the boot hangs until `rxFileLoad` / `rxFileRebootIop` /
+   `rxFileLoadModule` answer (the host has no IOP: `sceSifRebootIop` / `sceSifLoadModule` succeed in
+   src/sdk; `rxFileLoad` needs the disc data, see "The disc data").
 
 ## Decisions
 
@@ -67,7 +75,17 @@ to adapt when a TU reaches them:
 - 68 `(unassigned)` runs in ror_functions.txt after the first export: they become TUs as sessions reach
   them; do not define them all up front.
 
+- **rxsys details left open**: the memory hooks' signatures (0x105ca0 is installed as hooks 0 and 1;
+  0x105de0, 0x105e08 = the operator-delete target) -- name them when the allocator TU is read; the four
+  pools `rxSysInitModules` builds (0x7dabb0.., element layouts unknown); `s_bootDev[0] == 'a'` adds
+  usbd.irx (which host device starts with 'a'?); `rxSysReadRomDate` has no BIOS on the host (date 0).
+
 ## Done
+
+- 2026-10-22: `rx/rxsys.cpp` (0x23ff58..0x2437f8 pinned): 60 functions -- rxSysInit, the IOP module
+  loader (iopconf.cnf), boot path, system.ini, rxSysPrintf, semaphores, memory hooks, rxfile wrappers;
+  rxfile / rxthread callees named and stubbed (src/lib/unassigned_stubs.cpp). Platform: `GetMemorySize`
+  (32 MB, retail) and `sceDevVu1Reset` added to src/sdk/eekernel. `verify`: main is still the placeholder.
 
 - 2026-10-22: PC project created (`setup/platform_bootstrap.cpp`): ReiPan's platform layer as
   `src/rosepan` + `src/sdk`, CMake (target RosePan, sibling extern ReiPan then MioPan), placeholder
