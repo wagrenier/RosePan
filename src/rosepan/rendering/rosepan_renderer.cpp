@@ -13193,6 +13193,45 @@ void RosePan_RendererDrawSolidTriangles2D(const float *xy,
                       false, false);
 }
 
+void RosePan_RendererDrawImageTriangles2D(const void *texture,
+                                         const float *xy,
+                                         const float *uv,
+                                         const unsigned char *rgba,
+                                         int vertex_count,
+                                         int linear)
+{
+    const TextureEntry *entry = static_cast<const TextureEntry *>(texture);
+    std::vector<SpriteVertex> vertices;
+
+    if (entry == nullptr || entry->texture == nullptr || xy == nullptr ||
+        uv == nullptr || rgba == nullptr || vertex_count <= 0 ||
+        (vertex_count % 3) != 0 || !g_frame_active || !EnsureRenderer())
+    {
+        return;
+    }
+
+    vertices.resize((size_t)vertex_count);
+    for (int i = 0; i < vertex_count; i++)
+    {
+        SpriteVertex &vertex = vertices[(size_t)i];
+
+        vertex.uv[0] = uv[i * 2 + 0];
+        vertex.uv[1] = uv[i * 2 + 1];
+        vertex.colour[0] = Ps2ColorToFloat(rgba[i * 4 + 0]);
+        vertex.colour[1] = Ps2ColorToFloat(rgba[i * 4 + 1]);
+        vertex.colour[2] = Ps2ColorToFloat(rgba[i * 4 + 2]);
+        vertex.colour[3] = Ps2AlphaToFloat(rgba[i * 4 + 3]);
+        vertex.position[0] = ScreenXToClip(xy[i * 2 + 0]);
+        vertex.position[1] = ScreenYToClip(xy[i * 2 + 1]);
+        vertex.position[2] = 0.0f;
+        vertex.position[3] = 1.0f;
+    }
+
+    QueueTriangleList(entry->texture, entry->width, entry->height,
+                      vertices.data(), vertex_count, false, false);
+    (void)linear; /* QueueTriangleList always filters linearly (TEX1 0x60). */
+}
+
 static void BuildSolidVertex(SpriteVertex *vertex,
                              const float *position,
                              const unsigned char *rgba)

@@ -12,9 +12,11 @@
  *  module's second copy at 0x2372d0..).
  *
  *  PORT: the packets carry the ROM's VIF / GIF words; the host's DMA does
- *  not follow chains and nothing consumes them yet (no GS emulation, see
- *  open-items "The i3d packets on the host"). The tags' address words are
- *  the low 28 bits of host pointers (i3dDmaAddr).
+ *  not follow chains (no GS emulation). Each primitive writer, register
+ *  write and texture REF also records itself in the native i3d module
+ *  (rosepan/rendering/rosepan_i3d.h), keyed by its packet address, and the
+ *  group walk replays the records in the chain's order. The tags' address
+ *  words are the low 28 bits of host pointers (i3dDmaAddr).
  * ======================================================================== */
 #include "i3d/i3dpacket.h"
 #include "i3d/i3denv.h"
@@ -22,6 +24,7 @@
 #include <string.h>
 
 #include "lib/unassigned.h"
+#include "rosepan/rendering/rosepan_i3d.h"
 
 /* Qword n of a packet, as the four words the VU0 helpers write. */
 #define I3D_PKT_QW(pkt, n) ((int *)((pkt) + 2 * (n)))
@@ -146,6 +149,8 @@ u_long *i3dPktDirectTag(u_long *pkt, u_int qwc, u_int id, const void *addr)
 // ROR 0x0021b4f8
 u_long *i3dPktRefTexRegs(u_long *pkt, u_long *regs)
 {
+    // PC: the native i3d module reads the registers when it replays.
+    RosePan_I3dRecordTexRegs(pkt, (const uint64_t *)regs);
     return i3dPktDirectTag(pkt, 6, 0x30, regs);
 }
 
@@ -158,6 +163,7 @@ u_long *i3dPktUseTexRegs(u_long *pkt, I3dDrawSet *set, int n)
 // ROR 0x0021b550
 u_long *i3dPktSetReg(u_long *pkt, u_long reg, u_long value)
 {
+    RosePan_I3dRecordReg(pkt, reg, value);         // PC: the native i3d module
     pkt[5] = reg;
     pkt[2] = I3D_GIF_AD;
     pkt[4] = value;
@@ -170,6 +176,9 @@ u_long *i3dPktCallView(u_long *pkt, I3dLayer *layer)
 {
     if (layer->m_view == NULL)
         return pkt;
+    // PC: the view packet's SCISSOR_1, for the native i3d module (the
+    // CALLed packet itself is VU1 setup).
+    RosePan_I3dRecordReg(pkt, 0x40, layer->m_view->m_scissor);
     pkt[1] = 0;
     pkt[0] = ((u_long)layer->m_view->m_packet << 32) | I3D_DMA_CALL;
     return pkt + 2;
@@ -228,6 +237,7 @@ u_long *i3dPktClearZ(u_long *pkt)
     data[2] = 6;                                    // PRIM: sprite
     data[4] = 0xffffffffull;                        // XYZ2 0xffff, 0xffff (12.4)
     // data[5], the NOP, is not written.
+    RosePan_I3dRecordGif((const uint64_t *)(data - 2));   // PC: the native i3d module
     return i3dPktSetReg(data + 6, I3D_GS_TEST_1, 0x5000d);
 }
 
@@ -258,6 +268,7 @@ u_long *i3dPktFlatSpriteF(u_long *pkt, const float *xyz0, const float *xyz1, con
     i3dPktConvRGBA(I3D_PKT_QW(pkt, 2), rgba, s_colorScale);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 3), xyz0);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 4), xyz1);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 4, 0x10, NULL) + 2 * 4;
 }
 
@@ -272,6 +283,7 @@ u_long *i3dPktTexSpriteF(u_long *pkt, const float *xyz0, const float *xyz1, cons
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 4), xyz0);
     i3dVecFtoi4(I3D_PKT_QW(pkt, 5), uv1);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 6), xyz1);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 6, 0x10, NULL) + 2 * 6;
 }
 
@@ -285,6 +297,7 @@ u_long *i3dPktFlatTriangleF(u_long *pkt, const float *xyz0, const float *xyz1, c
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 3), xyz0);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 4), xyz1);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 5), xyz2);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 5, 0x10, NULL) + 2 * 5;
 }
 
@@ -301,6 +314,7 @@ u_long *i3dPktTexTriangleF(u_long *pkt, const float *xyz0, const float *xyz1, co
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 6), xyz1);
     i3dVecFtoi4(I3D_PKT_QW(pkt, 7), uv2);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 8), xyz2);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 8, 0x10, NULL) + 2 * 8;
 }
 
@@ -317,6 +331,7 @@ u_long *i3dPktGouraudTriangleF(u_long *pkt, const float *xyz0, const float *xyz1
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 5), xyz1);
     i3dPktConvRGBA(I3D_PKT_QW(pkt, 6), rgba2, s_colorScale);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 7), xyz2);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 7, 0x10, NULL) + 2 * 7;
 }
 
@@ -337,6 +352,7 @@ u_long *i3dPktGouraudTexTriangleF(u_long *pkt, const float *xyz0, const float *x
     i3dVecFtoi4(I3D_PKT_QW(pkt, 8), uv2);
     i3dPktConvRGBA(I3D_PKT_QW(pkt, 9), rgba2, s_texColorScale);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 10), xyz2);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 10, 0x10, NULL) + 2 * 10;
 }
 
@@ -348,6 +364,7 @@ u_long *i3dPktFlatLineF(u_long *pkt, const float *xyz0, const float *xyz1, const
     i3dPktConvRGBA(I3D_PKT_QW(pkt, 2), rgba, s_colorScale);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 3), xyz0);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 4), xyz1);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 4, 0x10, NULL) + 2 * 4;
 }
 
@@ -362,6 +379,7 @@ u_long *i3dPktTexLineF(u_long *pkt, const float *xyz0, const float *xyz1, const 
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 4), xyz0);
     i3dVecFtoi4(I3D_PKT_QW(pkt, 5), uv1);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 6), xyz1);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 6, 0x10, NULL) + 2 * 6;
 }
 
@@ -375,6 +393,7 @@ u_long *i3dPktGouraudLineF(u_long *pkt, const float *xyz0, const float *xyz1, co
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 3), xyz0);
     i3dPktConvRGBA(I3D_PKT_QW(pkt, 4), rgba1, s_colorScale);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 5), xyz1);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 5, 0x10, NULL) + 2 * 5;
 }
 
@@ -391,6 +410,7 @@ u_long *i3dPktGouraudTexLineF(u_long *pkt, const float *xyz0, const float *xyz1,
     i3dVecFtoi4(I3D_PKT_QW(pkt, 5), uv1);
     i3dPktConvRGBA(I3D_PKT_QW(pkt, 6), rgba1, s_texColorScale);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 7), xyz1);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 7, 0x10, NULL) + 2 * 7;
 }
 
@@ -401,6 +421,7 @@ u_long *i3dPktFlatPointF(u_long *pkt, const float *xyz, const float *rgba)
     pkt[3] = 0x51;
     i3dPktConvRGBA(I3D_PKT_QW(pkt, 2), rgba, s_colorScale);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 3), xyz);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 3, 0x10, NULL) + 2 * 3;
 }
 
@@ -412,6 +433,7 @@ u_long *i3dPktTexPointF(u_long *pkt, const float *xyz, const int *uv, const floa
     i3dVecCopy((float *)I3D_PKT_QW(pkt, 2), (const float *)uv);
     i3dPktConvRGBA(I3D_PKT_QW(pkt, 3), rgba, s_texColorScale);
     i3dPktConvXYZ(I3D_PKT_QW(pkt, 4), xyz);
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 4, 0x10, NULL) + 2 * 4;
 }
 
@@ -438,6 +460,7 @@ u_long *i3dPktSprite(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq)
     pkt[5] = rgbaq;
     pkt[3] = 0x5510;
     pkt[4] = 0x46;                                  // sprite, ABE
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 3, 0x10, NULL) + 2 * 3;
 }
 
@@ -453,6 +476,7 @@ u_long *i3dPktTexSpriteUV(u_long *pkt, u_long xyz0, u_long xyz1, u_long uv0, u_l
     pkt[3] = 0x535310;
     pkt[6] = uv0;
     pkt[4] = 0x156;                                 // sprite, TME, ABE, FST
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 4, 0x10, NULL) + 2 * 4;
 }
 
@@ -468,6 +492,7 @@ u_long *i3dPktTexSpriteST(u_long *pkt, u_long xyz0, u_long xyz1, u_long st0, u_l
     pkt[3] = 0x525210;
     pkt[6] = st0;
     pkt[4] = 0x56;                                  // sprite, TME, ABE
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 4, 0x10, NULL) + 2 * 4;
 }
 
@@ -482,6 +507,7 @@ u_long *i3dPktTriangle(u_long *pkt, u_long xyz0, u_long xyz1, u_long xyz2, u_lon
     pkt[3] = 0xf55510;
     pkt[4] = 0x43;                                  // triangle, ABE
     // pkt[9], the NOP, is not written.
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 4, 0x10, NULL) + 2 * 4;
 }
 
@@ -499,6 +525,7 @@ u_long *i3dPktTexTriangleUV(u_long *pkt, u_long xyz0, u_long xyz1, u_long xyz2, 
     pkt[9] = xyz1;
     pkt[10] = uv2;
     pkt[4] = 0x153;                                 // triangle, TME, ABE, FST
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 5, 0x10, NULL) + 2 * 5;
 }
 
@@ -516,6 +543,7 @@ u_long *i3dPktTexTriangleST(u_long *pkt, u_long xyz0, u_long xyz1, u_long xyz2, 
     pkt[9] = xyz1;
     pkt[10] = st2;
     pkt[4] = 0x53;                                  // triangle, TME, ABE
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 5, 0x10, NULL) + 2 * 5;
 }
 
@@ -533,6 +561,7 @@ u_long *i3dPktGouraudTriangle(u_long *pkt, u_long xyz0, u_long xyz1, u_long xyz2
     pkt[9] = xyz1;
     pkt[4] = 0x4b;                                  // triangle, IIP, ABE
     // pkt[5], the NOP, is not written.
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 5, 0x10, NULL) + 2 * 5;
 }
 
@@ -553,6 +582,7 @@ u_long *i3dPktGouraudTexTriangleUV(u_long *pkt, u_long xyz0, u_long xyz1, u_long
     pkt[9] = rgbaq1;
     pkt[11] = uv2;
     pkt[12] = rgbaq2;
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 6, 0x10, NULL) + 2 * 6;
 }
 
@@ -573,6 +603,7 @@ u_long *i3dPktGouraudTexTriangleST(u_long *pkt, u_long xyz0, u_long xyz1, u_long
     pkt[9] = rgbaq1;
     pkt[11] = st2;
     pkt[12] = rgbaq2;
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 6, 0x10, NULL) + 2 * 6;
 }
 
@@ -585,6 +616,7 @@ u_long *i3dPktLine(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq)
     pkt[5] = rgbaq;
     pkt[3] = 0x5510;
     pkt[4] = 0x41;                                  // line, ABE
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 3, 0x10, NULL) + 2 * 3;
 }
 
@@ -600,6 +632,7 @@ u_long *i3dPktTexLineUV(u_long *pkt, u_long xyz0, u_long xyz1, u_long uv0, u_lon
     pkt[3] = 0x535310;
     pkt[6] = uv0;
     pkt[4] = 0x151;                                 // line, TME, ABE, FST
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 4, 0x10, NULL) + 2 * 4;
 }
 
@@ -615,6 +648,7 @@ u_long *i3dPktTexLineST(u_long *pkt, u_long xyz0, u_long xyz1, u_long st0, u_lon
     pkt[3] = 0x525210;
     pkt[6] = st0;
     pkt[4] = 0x51;                                  // line, TME, ABE
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 4, 0x10, NULL) + 2 * 4;
 }
 
@@ -629,6 +663,7 @@ u_long *i3dPktGouraudLine(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq0, 
     pkt[3] = 0x5151f0;
     pkt[4] = 0x49;                                  // line, IIP, ABE
     // pkt[5], the NOP, is not written.
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 4, 0x10, NULL) + 2 * 4;
 }
 
@@ -646,6 +681,7 @@ u_long *i3dPktGouraudTexLineUV(u_long *pkt, u_long xyz0, u_long xyz1, u_long uv0
     pkt[5] = uv0;
     pkt[4] = 0x159;                                 // line, IIP, TME, ABE, FST
     // pkt[11], the NOP, is not written.
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 5, 0x10, NULL) + 2 * 5;
 }
 
@@ -663,6 +699,7 @@ u_long *i3dPktGouraudTexLineST(u_long *pkt, u_long xyz0, u_long xyz1, u_long st0
     pkt[5] = st0;
     pkt[4] = 0x59;                                  // line, IIP, TME, ABE
     // pkt[11], the NOP, is not written.
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 5, 0x10, NULL) + 2 * 5;
 }
 
@@ -675,6 +712,7 @@ u_long *i3dPktPoint(u_long *pkt, u_long xyz, u_long rgbaq)
     pkt[3] = 0xf510;
     pkt[4] = 0x40;                                  // point, ABE
     // pkt[7], the NOP, is not written.
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 3, 0x10, NULL) + 2 * 3;
 }
 
@@ -687,6 +725,7 @@ u_long *i3dPktTexPointUV(u_long *pkt, u_long xyz, u_long uv, u_long rgbaq)
     pkt[6] = rgbaq;
     pkt[3] = 0x5130;
     pkt[4] = 0x150;                                 // point, TME, ABE, FST
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 3, 0x10, NULL) + 2 * 3;
 }
 
@@ -699,6 +738,7 @@ u_long *i3dPktTexPointST(u_long *pkt, u_long xyz, u_long st, u_long rgbaq)
     pkt[6] = rgbaq;
     pkt[3] = 0x5120;
     pkt[4] = 0x50;                                  // point, TME, ABE
+    RosePan_I3dRecordGif((const uint64_t *)pkt);    // PC: the native i3d module
     return i3dPktDirectTag(pkt, 3, 0x10, NULL) + 2 * 3;
 }
 

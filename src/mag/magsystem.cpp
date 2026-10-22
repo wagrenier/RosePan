@@ -19,6 +19,7 @@
 
 #include "bed/bedmemory.h"
 #include "common/ror_assert.h"
+#include "rosepan/rendering/rosepan_i3d.h"
 #include "rx/rxthread.h"
 #include "sdk/eekernel.h"
 #include "sdk/eeregs.h"
@@ -529,6 +530,7 @@ void MagSystem::update()
     g_sndMan.update();
     beginPacket();
     m_scene.draw(&m_i3d, &m_dbuff, m_frame);
+    RosePan_I3dForcedTest(&m_i3d);  // PC: ROSEPAN_I3D_TEST=1 draws a TIM2 through i3d (rosepan_i3d.h)
     m_scene.postDraw();
     m_info.m_t_cpu = (int)REG_RCNT0_COUNT - t0;
     int r = i3dCtxGetRest(&m_i3d);

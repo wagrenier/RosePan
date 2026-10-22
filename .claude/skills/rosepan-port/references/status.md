@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-22 17:26 at commit `ddf41bf` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-22 17:42 at commit `73a0dde` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -81,9 +81,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 160 TUs: todo 141, partial 5, verify 20, done 2
-- next: **setup/i3d_draw_module.cpp** (pinned in the queue)
-- pinned queue: setup/i3d_draw_module.cpp, dog/dogtexinfo.cpp, spr/sprman.cpp
+- 160 TUs: todo 140, partial 5, verify 21, done 2
+- next: **dog/dogtexinfo.cpp** (pinned in the queue)
+- pinned queue: dog/dogtexinfo.cpp, spr/sprman.cpp
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `i3d/i3dctx.cpp` 31/31 -- Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the pa
 - verify: `i3d/i3denv.cpp` 12/12 -- Pinned 0x21a120..0x21a3e8 + 0x21ac80..0x21b220 as one file (a guess: the i3r helpers 0x21a3e8..0x21ac80 sit between; split into i3dfog / i3dlight if evidence ap
@@ -100,6 +100,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `rx/rxfile.cpp` 168/168 -- Status verify: every function in 0x2437f8..0x249b88 is written, but nothing can show it: main 0x2045a8 is still the placeholder (black screen), and the rxthread
 - verify: `rx/rxsys.cpp` 74/119 -- Status verify: nothing calls rxSysInit yet - main 0x2045a8 is still the placeholder in src/main.cpp, so the screenshot is the black placeholder frame. Next: mai
 - verify: `rx/rxthread.cpp` 53/53 -- Complete; verify because main (unassigned@001fd424) is still the placeholder, so nothing calls rxThInit in the smoke run (black frame as before). A temporary ca
+- verify: `setup/i3d_draw_module.cpp` 0/0 -- Hook recorded in open-items Decisions (The native i3d hook). The committed screenshot is the forced test (ROSEPAN_I3D_TEST=1): S2DMAN.RPK @0x800 (PSMT8, Now Loa
 - verify: `spr/s2d.cpp` 86/86 -- All 86 functions written; nothing on screen can show them yet (MagScene::draw is a stub), so verify: the first session whose screenshot shows S2d sprites marks 
 - verify: `spr/sprtexture.cpp` 21/21 -- Pinned 0x18f5b0..0x190a78. The code is complete; the smoke run reaches it (S2dMes / S2dMovie loadTexture) but every list ends in the error state because fileGet
 - verify: `system/sysnowloading.cpp` 8/8 -- Code complete, nothing on the boot path shows it yet: draw 0x2051cc is called only by the pfh loader 0x1be564 (GamMan load path, unassigned@001bde58), a stub, s
@@ -107,6 +108,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-22 17:41 `setup/i3d_draw_module.cpp` verify: Native i3d draw module rosepan_i3d: the 2D packet writers record host primitives by packet address, the DMA-chain walk replays them in the ROM order; i3dTexRegs
 - 2026-10-22 17:26 `spr/sprtexture.cpp` verify: SprTexture reconstructed: all 21 functions of 0x18f5b0..0x190a78 (ctor, clear, getters, setList, release, loadTex, the update and updateRead state machines, RTC
 - 2026-10-22 17:09 `i3d/i3dtim2.cpp` verify: All 7 TIM2 helpers reconstructed: i3dTim2CheckHeader, GetPicture, IsClutOnly, GetMipSize, GetImage, GetClutCount, GetClut (two hidden functions created in Ghidr
 - 2026-10-22 17:05 `i3d/i3dtex.cpp` verify: Pinned i3d/i3dtex.cpp 0x2184c0..0x21a120 out of unassigned@00216ad0 and wrote all 33 functions (4 hidden TEX1 setters created in Ghidra): texture and CLUT objec
@@ -114,7 +116,6 @@ Recent sessions:
 - 2026-10-22 16:23 `i3d/i3dpacket.cpp` verify: i3d packet writers pinned 0x21b220..0x21c960 and written: draw-set helpers, DMA / DIRECT tags, SetReg, alpha modes, OpenChain, ClearZ, the float PACKED and REGL
 - 2026-10-22 16:10 `i3d/i3dview.cpp` verify: i3d view: pinned i3d/i3dview.cpp 0x226278..0x227a98 (and i3d/i3dtim2.cpp 0x224de0..0x225018, todo) and wrote all 19 functions: i3dCtxCreateView and its ortho tw
 - 2026-10-22 15:47 `i3d/i3dlayer.cpp` verify: i3d/i3dlayer.cpp pinned 0x222f50..0x224de0 and written: all 80 functions (21 created in Ghidra, 75 names): layer setters / getters and Begin/End packet pairs, d
-- 2026-10-22 15:24 `mag/magscenerender.cpp` verify: Wrote MagScene::makeActorShadow 0x139b4c, the last function of the TU: the shadow texture layer at 700 + 10 n (256 x 256 target, clear, drawShadow under an ambi
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -129,7 +130,7 @@ Recent sessions:
 | `mag/magscene.cpp` | todo | 0/10/44 | 11.3 | 20 | 2 |
 | `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
 | `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 19 | 2 |
-| `unassigned@001fd424` | todo | 0/3/75 | 27.9 | 18 | 3 |
+| `unassigned@0010f944` | todo | 0/4/12 | 2.2 | 18 | 2 |
 
 ## Frontier (called by reconstructed code, not written yet)
 

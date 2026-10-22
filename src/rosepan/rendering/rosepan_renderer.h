@@ -765,6 +765,17 @@ void RosePan_RendererDrawSolidQuad(const float *xy, const unsigned char *rgba);
 void RosePan_RendererDrawSolidTriangles2D(const float *xy,
                                          const unsigned char *rgba,
                                          int vertex_count);
+/* Screen-space triangles from a RosePan_RendererCreateImageTexture handle:
+ * `vertex_count` (a multiple of 3) corners in 640x448 frame coordinates,
+ * uv normalised 0..1, colours on the PS2 scale (0x80 = 1.0, modulating the
+ * texel), bilinear when `linear`.  The native i3d module's textured GS
+ * triangles (rosepan_i3d.cpp). */
+void RosePan_RendererDrawImageTriangles2D(const void *texture,
+                                         const float *xy,
+                                         const float *uv,
+                                         const unsigned char *rgba,
+                                         int vertex_count,
+                                         int linear);
 void RosePan_RendererDrawLine2D(const float *xy,
                                const unsigned char *rgba,
                                float width);

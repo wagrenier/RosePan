@@ -384,6 +384,15 @@ public:
 - **Two host threads**: the OS main thread pumps SDL events, the game runs on its own thread; SDL
   "main thread only" calls go through the platform's run-on-main-thread helper.
 
+- **A 4-bit texture with half its colours black or transparent** (2026-10-22, the i3d module): its
+  CLUT is in CSM1 order too. i3d uploads every CLUT 16 colours a row (i3dPktClutUpload), and the GS
+  reads a CSM1 CLUT in 8x2 tiles, so a 4-bit palette's colours 8..15 are the second row's first eight
+  entries (index bits 3 and 4 swapped, as for 8-bit images). TIM2s with 32+ colours store them that
+  way (S2DMAN.RPK @0x11000: entries 8..15 are zero). rosepan_draw2d and tm2png.py both apply it now.
+- **i3d draws on the host only through the replay** (rosepan_i3d.h): a new packet writer, or a
+  register a writer sets some other way than i3dPktSetReg, draws nothing until it records itself;
+  a packet range the walk links without calling `RosePan_I3dReplay` is skipped.
+
 ## How to debug (the method that worked)
 
 - **The picture is the test.** Logs, stub hits and callcheck show the code ran, not that it is right.

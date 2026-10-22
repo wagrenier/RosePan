@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "lib/unassigned.h"
+#include "rosepan/rendering/rosepan_i3d.h"
 #include "sdk/libdma.h"
 #include "sdk/libgraph.h"
 
@@ -531,6 +532,7 @@ int i3dCtxBeginFrame(i3dContext *ctx)
         ctx->m_frame_index = 0;
     ctx->m_packet = NULL;
     ctx->m_root = i3dCtxCreateGroup(ctx, 1, 1, 0);
+    RosePan_I3dBeginFrame();                       // PC: the native i3d module
     return 0;
 }
 

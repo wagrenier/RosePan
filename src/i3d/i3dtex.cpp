@@ -17,6 +17,8 @@
 
 #include <string.h>
 
+#include "rosepan/rendering/rosepan_i3d.h"
+
 /* GIF tags: A+D with NLOOP 4 (the transfer registers), IMAGE (FLG 2). */
 #define I3D_GIF_AD4_EOP   0x1000000000008004ull
 #define I3D_GIF_IMAGE_EOP 0x0800000000008000ull
@@ -658,6 +660,7 @@ int i3dTexSetDesc(I3dTexture *tex, const I3dTexDesc *desc)
 // ROR 0x00219a98
 int i3dTexRelease(I3dTexture *tex)
 {
+    RosePan_I3dReleaseObject(tex);                 // PC: its GPU textures
     return i3dVramHandleRelease(&tex->m_handle);
 }
 
@@ -710,6 +713,7 @@ int i3dClutSetTim2(I3dClut *clut, void *tim2, u_int n, char ct16s)
 // ROR 0x00219c70
 int i3dClutRelease(I3dClut *clut)
 {
+    RosePan_I3dReleaseObject(clut);                // PC: its GPU textures
     return i3dVramHandleRelease(&clut->m_handle);
 }
 

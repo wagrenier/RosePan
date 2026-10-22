@@ -720,6 +720,14 @@ throughout (identifiers, env variables, files, shader macros):
     `RosePan_RendererDrawImageQuad`, stretching RoR's 512-wide frame buffer to the renderer's 640x448
     frame (the PS2 display stretches 512 to the full width). A draw outside `mainLoop` (the loading
     screen inside the loads) brackets itself with `RosePan_RendererBeginFrame` / `EndFrame`.
+  - **`src/rosepan/rendering/rosepan_i3d.*`** (2026-10-22): the i3d module. The 2D writers record host
+    primitives by packet address; the chain walk (i3dCtxRunGroup and the state / channel packet
+    nodes) replays each linked range, so layer / draw-set / sort-key order is the ROM's; GS state
+    (ALPHA, TEST, SCISSOR, XYOFFSET, the TEX packet) is followed as the GS holds it, default draw
+    offset (1792, 1824) for the 512x448 frame, x stretched 640/512. Textures: i3dTexRegsSet's objects,
+    decoded from main memory on first use. `ROSEPAN_I3D_TEST=1` (MagSystem::update, PC) draws two
+    S2DMAN.RPK pictures through i3dTexSetTim2 / a texture table / a layer / a draw set /
+    i3dPktTexSpriteUV. Details and gaps: open-items.md Decisions "The native i3d hook".
   - The emulated GS path remains only as a fallback for something not bridged yet; anything that
     lands there is a known performance debt to list in open-items.md.
 - Data root: the disc's root copied file by file (the folder holding `DATA/`); `LooksLikeDataRoot`
