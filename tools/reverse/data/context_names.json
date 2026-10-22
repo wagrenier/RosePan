@@ -173,6 +173,12 @@
   "was": "FUN_00101ccc",
   "why": "called on both pads at the start of every MagSystem::update"
  },
+ "0010254c": {
+  "name": "utlPlaySe3d",
+  "tag": "ror-inferred",
+  "was": "FUN_0010254c",
+  "why": "sound id at a position (NULL: none) through 0x1e4ebc on the sound object 0x79a0c0"
+ },
  "00103484": {
   "name": "utlIsVibrationOn",
   "tag": "ror-inferred",
@@ -202,6 +208,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00104e1c",
   "why": "TIM2 total size: header 0x10 (0x80 when the format byte +5 is set) plus every picture's total size, +6 pictures; addData sizes its copy with it"
+ },
+ "00104e64": {
+  "name": "utlTm2GetPicture",
+  "tag": "ror-inferred",
+  "was": "FUN_00104e64",
+  "why": "utl/utltm2.cpp asserts theN < h->Pictures: walks the picture sizes to picture n"
  },
  "0010559c": {
   "name": "utlTm2ToSepia",
@@ -383,6 +395,12 @@
   "was": "FUN_00106e70",
   "why": "sqrt of 0x106e14 (the squared distance of two vectors); collectActors keys actors by it from the camera"
  },
+ "00107248": {
+  "name": "utlVecToRot",
+  "tag": "ror-inferred",
+  "was": "FUN_00107248",
+  "why": "a direction to pitch / yaw angles (atan of -y, atan2 x / z, roll 0)"
+ },
  "00109348": {
   "name": "DogActor::getMotionMove",
   "tag": "ror-inferred",
@@ -406,6 +424,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010a038",
   "why": "+0x40..+0x48 += a1[0..2], w = 1; f12 into +0x74 (the TransOfsY saveTransOfsY reads), f13 into +0x3d0 (clearRotYAAR's field), dirty"
+ },
+ "0010bcc8": {
+  "name": "DogActor::getMotionEvent",
+  "tag": "ror-inferred",
+  "was": "FUN_0010bcc8",
+  "why": "the event bits of a motion (-1: the current one) between two frames; asserts m_motion_data"
  },
  "0010bf00": {
   "name": "DogActor::setParam1d8",
@@ -436,6 +460,24 @@
   "tag": "ror-inferred",
   "was": "FUN_0010cffc",
   "why": "DogActor vtable slot 21: takes the source actor's master model (+0x118) and i3r root, copies its motion table, increments the master's ref count (+0x104); returns 0"
+ },
+ "0010d388": {
+  "name": "DogActor::runMotionCmd",
+  "tag": "ror-inferred",
+  "was": "FUN_0010d388",
+  "why": "dog/dogactor.cpp asserts m_motion_cmd_idx < DOG_MAX_MOTION_CMD: the motion command list at +0x42c"
+ },
+ "0010da4c": {
+  "name": "DogActor::getMotionFrame",
+  "tag": "ror-inferred",
+  "was": "FUN_0010da4c",
+  "why": "the motion time in 60 Hz frames (+0x1ec * 60, or ~+0xf4 in mode 2)"
+ },
+ "0010dad8": {
+  "name": "DogActor::getMotionStep",
+  "tag": "ror-inferred",
+  "was": "FUN_0010dad8",
+  "why": "the motion speed +0x1e8 in frames per frame (0 while a sequence is not on its last entry)"
  },
  "0010e3ac": {
   "name": "DogActor::drawModel",
@@ -496,6 +538,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010ff74",
   "why": "wraps +0x50, +0x54, +0x58 into [-pi, pi) by 2 pi steps"
+ },
+ "00110114": {
+  "name": "DogEntity::getMatrixZ",
+  "tag": "ror-inferred",
+  "was": "FUN_00110114",
+  "why": "copies m_matrix row 2 (+0x20..+0x2c) to out and returns out"
  },
  "001102b4": {
   "name": "DogEntityEx::setParent",
@@ -1001,6 +1049,24 @@
   "was": "FUN_001196d4",
   "why": "mag/maglifeman.cpp assert ppod >= &m_life_buf[0] && ppod < &m_life_buf[MAX_LIFE]; takes a free entry, stores the life object and its priority and links it sorted by priority; returns the entry index"
  },
+ "00119810": {
+  "name": "MagLifeMan::remove",
+  "tag": "ror-inferred",
+  "was": "FUN_00119810",
+  "why": "unlinks the entry of a life (0x1194c8), 1 when found"
+ },
+ "001198d0": {
+  "name": "MagLifeMan::find",
+  "tag": "ror-inferred",
+  "was": "FUN_001198d0",
+  "why": "the index of a life in m_life_buf, -1 when absent"
+ },
+ "00119968": {
+  "name": "MagLifeMan::update",
+  "tag": "ror-inferred",
+  "was": "FUN_00119968",
+  "why": "calls slot 2 (live) of every life whose level word and mask; maglifeman.cpp asserts ppod / plife"
+ },
  "00119a38": {
   "name": "MagLifeMan::draw",
   "tag": "ror-inferred",
@@ -1012,6 +1078,24 @@
   "tag": "ror-inferred",
   "was": "FUN_0011a14c",
   "why": "mag/maglife.cpp assert m_actor; steps a frame counter (+0x44) through a motion table of 0x18-byte entries (+0x5c) and jumps to the next entry; MagLifeControlChara::renderPostProcess calls it when m_actor is set"
+ },
+ "0011ade4": {
+  "name": "MagLifePC::live",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ade4",
+  "why": "MagLifePC vtable slot 2 (MagLife::live in the base)"
+ },
+ "0011af10": {
+  "name": "MagLifePC::getState17Count",
+  "tag": "ror-inferred",
+  "was": "FUN_0011af10",
+  "why": "returns word 1 when the state word is 0x17, else -1; update spins the camera with it (sub mode 6)"
+ },
+ "0011b30c": {
+  "name": "MagLifePC::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0011b30c",
+  "why": "MagLifePC vtable slot 16, called with the first pad"
  },
  "0011bd4c": {
   "name": "MagLifePC::setActor",
@@ -1037,6 +1121,12 @@
   "was": "FUN_0011e080",
   "why": "on the MagLifePC (MagSystem::getPCStateClass passes scene +0x2adc0): +0xec 1 -> 6, 2 -> 7, else 5"
  },
+ "00124e40": {
+  "name": "MagLifeBwn::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00124e40",
+  "why": "MagLifeBwn vtable slot 2"
+ },
  "001256d4": {
   "name": "MagLifeBwn::setActor",
   "tag": "ror-inferred",
@@ -1048,6 +1138,60 @@
   "tag": "ror-inferred",
   "was": "FUN_001259e8",
   "why": "MagLifeBwn vtable slot 15 (MagLifeControlChara::renderPostProcess in the base): updateMotionSeq when m_actor is set and +0xce4 is 0"
+ },
+ "0012a61c": {
+  "name": "MagLifeBwnCtrl::live",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a61c",
+  "why": "the slot 2 body of MagLifeBwnCtrl, called by updateBwn"
+ },
+ "0012a6a0": {
+  "name": "MagLifeBwnCtrl::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a6a0",
+  "why": "MagLifeBwnCtrl vtable slot 9, empty, called with the second pad"
+ },
+ "0012f060": {
+  "name": "MagLifeFader::start",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f060",
+  "why": "state from the fade record's mode, time from word 2 (the record MagScene::setFade passes)"
+ },
+ "0012f080": {
+  "name": "MagLifeFader::stop",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f080",
+  "why": "state 4, word 1 -1"
+ },
+ "0012f2f0": {
+  "name": "MagLifeFadeKey::loadTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f2f0",
+  "why": "reads data/evntex/EVNTEX.RPK and adds kagiana_tcc to the texture table (maglifefadekey.cpp asserts)"
+ },
+ "0012f790": {
+  "name": "MagLifeFadeKey::releaseTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f790",
+  "why": "asserts theTexInfo, releases the texture at +0x40"
+ },
+ "0012f824": {
+  "name": "MagLifeFadeKey::start",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f824",
+  "why": "as MagLifeFader::start for the keyhole fade"
+ },
+ "001311f4": {
+  "name": "MagScene::setFade",
+  "tag": "ror-inferred",
+  "was": "FUN_001311f4",
+  "why": "takes a six-word fade record into +0x43700: kind 0 / 4 start the MagLifeFader at +0x41850 (black / 0xff), kinds 1..3 the MagLifeFadeKey at +0x41890 (EVNTEX keyhole texture), mode 0 stops; magscene.cpp asserts 0 at lines 201..269"
+ },
+ "00131550": {
+  "name": "MagScene::getFadeState",
+  "tag": "ror-inferred",
+  "was": "FUN_00131550",
+  "why": "maps the current fade object's state word (+0x41850 for kinds 0 / 4, +0x41890 for 1 / 2) to 0..6; update waits for > 4 (faded)"
  },
  "00131618": {
   "name": "MagScene::setViewFar",
@@ -1085,6 +1229,30 @@
   "was": "FUN_00131b90",
   "why": "MagSystem::start's last call with the i3d context; sets the render parameters and the sub-objects, returns 1"
  },
+ "00132048": {
+  "name": "MagScene::updateTenkyuBillboards",
+  "tag": "ror-inferred",
+  "was": "FUN_00132048",
+  "why": "sky slot model nodes with node flag 1 / 2 (b_a / b_y names) are turned to face the camera (rot z pi, x, y / z pi, y); assert pmat"
+ },
+ "0013233c": {
+  "name": "MagScene::updateBwn",
+  "tag": "ror-inferred",
+  "was": "FUN_0013233c",
+  "why": "runs the slot 2 of Brown's controller and command layer when Brown is bound; sets Brown's actor flag 0x60 while within 250 units of the PC in y"
+ },
+ "00132430": {
+  "name": "MagScene::playActorFootstep",
+  "tag": "ror-inferred",
+  "was": "FUN_00132430",
+  "why": "asserts m_actor_snd[theNo] and sndid < 12: a motion event in this frame's motion range plays the actor's sound for the floor sector under it"
+ },
+ "0013262c": {
+  "name": "MagScene::updateActors",
+  "tag": "ror-inferred",
+  "was": "FUN_0013262c",
+  "why": "for every live actor model: runs DogActor motion commands for actors without flag 8 (arg 0) or with it (arg 1); footsteps for those with a sound table"
+ },
  "00132744": {
   "name": "MagScene::pushSubMode",
   "tag": "ror-inferred",
@@ -1096,6 +1264,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00132784",
   "why": "BedSubMode::pop on +0x22d0; S2dMovie::closeMovie calls it"
+ },
+ "001327a0": {
+  "name": "MagScene::updatePaused",
+  "tag": "ror-inferred",
+  "was": "FUN_001327a0",
+  "why": "sub mode 8 (pushSubMode): only the lives of group 4 and the camera transform"
  },
  "001327dc": {
   "name": "MagScene::update",
@@ -1168,6 +1342,30 @@
   "tag": "ror-inferred",
   "was": "FUN_00135594",
   "why": "assert winNo >= 0 && winNo < MAX_WINDOW; 0x1beeb4 on window n's font record and 0x219a98 on the VRAM handle of its font texture (m_font_tex_no[n] in the texture table)"
+ },
+ "001357b0": {
+  "name": "MagScene::requestMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_001357b0",
+  "why": "sub mode 3 with the menu id at +0x22d8 and its argument at +0x2be54; update then fades out and opens the menu"
+ },
+ "0013580c": {
+  "name": "MagScene::openMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_0013580c",
+  "why": "picks m_pMenuBase (+0x2be5c) by menu id 0x10000.. (the embedded MagLifeMenu objects or new ones), inits it with the texture table and adds it to the life manager at 0x8002"
+ },
+ "00135b64": {
+  "name": "MagScene::isMenuRunning",
+  "tag": "ror-inferred",
+  "was": "FUN_00135b64",
+  "why": "true while the menu's processPad result at +0x2be58 is 0"
+ },
+ "00135b78": {
+  "name": "MagScene::closeMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_00135b78",
+  "why": "terms the menu, removes it from the life manager, deletes the allocated ones (ids 0x1000b..0x1000f), sub mode 4 (fade back in)"
  },
  "00135fa4": {
   "name": "MagScene::resetEntities",
@@ -1451,6 +1649,72 @@
   "was": "FUN_0013d5ac",
   "why": "returns +0x2ad50; copies it and +0x2ad58 to the out array when given"
  },
+ "0013d5e4": {
+  "name": "MagScene::changeCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_0013d5e4",
+  "why": "pad bits 8 / 9; magscenecamera.cpp asserts m_cam_map_no / m_cam_path_no"
+ },
+ "0013e548": {
+  "name": "MagScene::updateCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_0013e548",
+  "why": "the per-frame camera logic, between getCameraMode and the light code; called in every walking sub mode"
+ },
+ "0013f07c": {
+  "name": "MagScene::gamEnterMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f07c",
+  "why": "GamMan 0x1c5e1c on g_gamMan; requestMenu calls it"
+ },
+ "0013f09c": {
+  "name": "MagScene::gamLeaveMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f09c",
+  "why": "GamMan 0x1c5f70(g_gamMan, 0); closeMenu and closeSysMsgWindow call it"
+ },
+ "0013f0c0": {
+  "name": "MagScene::canOpenItemMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f0c0",
+  "why": "the PC not in states 7 / 0x13 / 10 and GamMan 0x1c97c8; gates menu 0x10000 (the MagLifeMenuItem at +0x2be60) on pad bit 3"
+ },
+ "0013f114": {
+  "name": "MagScene::canOpenMenu10001",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f114",
+  "why": "GamMan 0x1c97f0 (flags 0xad0..0xad2); gates menu 0x10001 on pad bit 0"
+ },
+ "0013f130": {
+  "name": "MagScene::setGamWord54",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f130",
+  "why": "stores 10 at *(0x7b205c) + 0x54 after menu 0x1000b closes"
+ },
+ "0013f144": {
+  "name": "MagScene::getMenuFadeOutTime",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f144",
+  "why": "0 when bit 26 of *(0x7b2060)+4, else 15, or *(0x7b205c)+0x170 with bit 25; the fade-out time before a menu"
+ },
+ "0013f194": {
+  "name": "MagScene::getMenuFadeInTime",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f194",
+  "why": "as getMenuFadeOutTime with +0x16c: the fade-in time after a menu"
+ },
+ "0013f1e4": {
+  "name": "MagScene::clearGamFlag25",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f1e4",
+  "why": "clears bit 25 of the word at *(0x7b2060) + 4 before a menu opens"
+ },
+ "0013f458": {
+  "name": "MagScene::closeSysMsgWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f458",
+  "why": "gamLeaveMenu, closeWindow(m_sys_msg_window), BedSubMode::pop; sub mode 5 on pad bits 13 / 14"
+ },
  "0013f4d0": {
   "name": "MagScene::setLightNo",
   "tag": "ror-inferred",
@@ -1511,11 +1775,23 @@
   "was": "FUN_00140030",
   "why": "after releaseTenkyuTex (0x13ff00): MagScene::load passes the sky slot number, the pack and the i3d context when a context is given"
  },
+ "0014062c": {
+  "name": "MagScene::rotateTenkyu",
+  "tag": "ror-inferred",
+  "was": "FUN_0014062c",
+  "why": "i3dMatRotY over the matrix list of each sky slot (+0x508 / +0x50c / +0x510)"
+ },
  "001406b8": {
   "name": "MagScene::drawSkyDome",
   "tag": "ror-inferred",
   "was": "FUN_001406b8",
   "why": "when a sky slot has a texture list (+0x504): a layer at 490, white light, the camera view with far 100000, and each list drawn by 0x106760 at the camera's x/z"
+ },
+ "00140c68": {
+  "name": "MagScene::updateRecords853fc",
+  "tag": "ror-inferred",
+  "was": "FUN_00140c68",
+  "why": "updates the three records at +0x853fc / +0x8540c / +0x8541c into +0x853c8.. and runs 0x14186c when +0x853d4 is set; roles unknown"
  },
  "00140e88": {
   "name": "MagScene::drawFocus",
@@ -1565,11 +1841,23 @@
   "was": "FUN_00142fd0",
   "why": "mag/magloader.cpp asserts theName, idx >= 0, size > 0, offset > 0, pbuf: allocates and reads the named map unit"
  },
+ "0014313c": {
+  "name": "MagScene::updateDebug",
+  "tag": "ror-inferred",
+  "was": "FUN_0014313c",
+  "why": "sub mode 9; magscenedebug.cpp assert m_window[m_dbg_window[i]]"
+ },
  "00143d7c": {
   "name": "MagScene::setFog",
   "tag": "ror-inferred",
   "was": "FUN_00143d7c",
   "why": "copies the current fog record (+0x2aae0) and the new one into a fade at +0x2ab20 / +0x2ab40 with a frame count (+0x2ab64) when frames > 0; MagScene::load passes m_fog[1] and 0"
+ },
+ "00143fd0": {
+  "name": "MagScene::updateFog",
+  "tag": "ror-inferred",
+  "was": "FUN_00143fd0",
+  "why": "steps the fog fade setFog started: m_fog[0] = lerp(m_fog[2], m_fog[3]) over +0x2ab64 frames"
  },
  "0017ea44": {
   "name": "WrdTable::get",
@@ -5062,6 +5350,12 @@
   "tag": "lib-context",
   "was": "FUN_0022b228",
   "why": "the name in the dogmodel.h assert I3D_OK == I3rRoot__CheckIdString( m_i3r_root ): compares the root's 8-byte id and the version byte 0x52, 0 = I3D_OK, 3 otherwise"
+ },
+ "0022b370": {
+  "name": "i3rGetNumNode",
+  "tag": "lib-context",
+  "was": "FUN_0022b370",
+  "why": "the low 24 bits of the root header word +0x34; the inline DogModel node accessor asserts m_i3r_root before it"
  },
  "0022b3d8": {
   "name": "i3rGetNodeIndexByName",

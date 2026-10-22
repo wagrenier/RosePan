@@ -12,3 +12,9 @@ int utlIsVibrationOn(void)
     ROSEPAN_STUB("utlIsVibrationOn", 0x00103484);
     return {};
 }
+
+// stub of ROR 0x0010254c
+void utlPlaySe3d(int id, const float *pos)
+{
+    ROSEPAN_STUB("utlPlaySe3d", 0x0010254c);
+}

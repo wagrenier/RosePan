@@ -38,6 +38,8 @@ struct DogEntity
      * scene calls it on its camera, +0x2ab70). */
     sceVu0FVECTOR *getMatrix();                                          // ROR 0x0010fa6c
     void setRotate(float x, float y, float z);                          // ROR 0x0010fc7c
+    /* Copies m_matrix's third row (the z axis) to out; returns out. */
+    float *getMatrixZ(float *out);                                       // ROR 0x00110114
     void normalizeRotate();                                              // ROR 0x0010ff74
     /* EE slot 2 (+0x10): rebuilds m_matrix when m_dirty. */
     void transform();                                                    // ROR 0x00280f18

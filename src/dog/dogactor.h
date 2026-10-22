@@ -39,6 +39,15 @@ struct DogActor : DogModel
     /* True when the actor's model is named theName. */
     int  checkName(const char *theName);                                 // ROR 0x0010f2dc
     int  getMotionMove(float t0, float t1, float *move, float *rot, float *pos); // ROR 0x00109348
+    /* The event bits of motion (-1: the current one) between frames t0
+     * and t1 (bit 0: a footstep). */
+    u_int getMotionEvent(float t0, float t1, int motion);                // ROR 0x0010bcc8
+    /* Runs the motion command list (asserts m_motion_cmd_idx < DOG_MAX_MOTION_CMD). */
+    void runMotionCmd();                                                 // ROR 0x0010d388
+    /* The motion time in 60 Hz frames. */
+    float getMotionFrame();                                              // ROR 0x0010da4c
+    /* The motion speed in frames per frame. */
+    float getMotionStep();                                               // ROR 0x0010dad8
     void releaseMotion(int theId);                                       // ROR 0x00109b88
     /* Loads a motion pack (asserts theFileName, m_pack_motion[theLevel] == NULL);
      * the order of the two ints is the ROM's (MagScene::setActorAnim swaps them). */

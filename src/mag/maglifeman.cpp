@@ -24,3 +24,23 @@ void MagLifeMan::draw(I3dLayer *layer, u_int group)
 {
     ROSEPAN_STUB("MagLifeMan::draw", 0x00119a38);
 }
+
+// stub of ROR 0x001198d0
+int MagLifeMan::find(MagLife *life)
+{
+    ROSEPAN_STUB("MagLifeMan::find", 0x001198d0);
+    return {};
+}
+
+// stub of ROR 0x00119810
+int MagLifeMan::remove(MagLife *life)
+{
+    ROSEPAN_STUB("MagLifeMan::remove", 0x00119810);
+    return {};
+}
+
+// stub of ROR 0x00119968
+void MagLifeMan::update(u_int mask)
+{
+    ROSEPAN_STUB("MagLifeMan::update", 0x00119968);
+}

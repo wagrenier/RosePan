@@ -197,12 +197,6 @@ void MagScene::setFog(const I3dFog *fog, int frames)
     ROSEPAN_STUB("MagScene::setFog", 0x00143d7c);
 }
 
-// stub of ROR 0x00131618
-void MagScene::setViewFar(float far)
-{
-    ROSEPAN_STUB("MagScene::setViewFar", 0x00131618);
-}
-
 // stub of ROR 0x00215bb4
 void dbgTraceVector4(const float *v)
 {
@@ -237,18 +231,6 @@ int MagScene::getWindowTextWidth(int no, const char *text)
 {
     ROSEPAN_STUB("MagScene::getWindowTextWidth", 0x0013555c);
     return {};
-}
-
-// stub of ROR 0x00132784
-void MagScene::popSubMode()
-{
-    ROSEPAN_STUB("MagScene::popSubMode", 0x00132784);
-}
-
-// stub of ROR 0x00132744
-void MagScene::pushSubMode()
-{
-    ROSEPAN_STUB("MagScene::pushSubMode", 0x00132744);
 }
 
 // stub of ROR 0x001816b0
@@ -685,4 +667,131 @@ u_int utlConvSndId(u_int id)
 {
     ROSEPAN_STUB("utlConvSndId", 0x00106658);
     return {};
+}
+
+// stub of ROR 0x00110114
+float * DogEntity::getMatrixZ(float *out)
+{
+    ROSEPAN_STUB("DogEntity::getMatrixZ", 0x00110114);
+    return {};
+}
+
+// stub of ROR 0x0017772c
+void FUN_0017772c(Obj176a3c *obj)
+{
+    ROSEPAN_STUB("FUN_0017772c", 0x0017772c);
+}
+
+// stub of ROR 0x0017c340
+void FUN_0017c340(Obj17c0f0 *obj, const float *pos, MagSectorHit **hit, int arg,
+                   float r, float h)
+{
+    ROSEPAN_STUB("FUN_0017c340", 0x0017c340);
+}
+
+// stub of ROR 0x0012f060
+void MagLifeFader::start(const MagFadeParam *p)
+{
+    ROSEPAN_STUB("MagLifeFader::start", 0x0012f060);
+}
+
+// stub of ROR 0x0012f080
+void MagLifeFader::stop()
+{
+    ROSEPAN_STUB("MagLifeFader::stop", 0x0012f080);
+}
+
+// stub of ROR 0x0013f0c0
+int MagScene::canOpenItemMenu()
+{
+    ROSEPAN_STUB("MagScene::canOpenItemMenu", 0x0013f0c0);
+    return {};
+}
+
+// stub of ROR 0x0013f114
+int MagScene::canOpenMenu10001()
+{
+    ROSEPAN_STUB("MagScene::canOpenMenu10001", 0x0013f114);
+    return {};
+}
+
+// stub of ROR 0x0013f1e4
+void MagScene::clearGamFlag25()
+{
+    ROSEPAN_STUB("MagScene::clearGamFlag25", 0x0013f1e4);
+}
+
+// stub of ROR 0x0013f458
+void MagScene::closeSysMsgWindow(int win)
+{
+    ROSEPAN_STUB("MagScene::closeSysMsgWindow", 0x0013f458);
+}
+
+// stub of ROR 0x0013f07c
+void MagScene::gamEnterMenu()
+{
+    ROSEPAN_STUB("MagScene::gamEnterMenu", 0x0013f07c);
+}
+
+// stub of ROR 0x0013f09c
+void MagScene::gamLeaveMenu()
+{
+    ROSEPAN_STUB("MagScene::gamLeaveMenu", 0x0013f09c);
+}
+
+// stub of ROR 0x0013f194
+int MagScene::getMenuFadeInTime()
+{
+    ROSEPAN_STUB("MagScene::getMenuFadeInTime", 0x0013f194);
+    return {};
+}
+
+// stub of ROR 0x0013f144
+int MagScene::getMenuFadeOutTime()
+{
+    ROSEPAN_STUB("MagScene::getMenuFadeOutTime", 0x0013f144);
+    return {};
+}
+
+// stub of ROR 0x0014062c
+void MagScene::rotateTenkyu()
+{
+    ROSEPAN_STUB("MagScene::rotateTenkyu", 0x0014062c);
+}
+
+// stub of ROR 0x0013f130
+void MagScene::setGamWord54()
+{
+    ROSEPAN_STUB("MagScene::setGamWord54", 0x0013f130);
+}
+
+// stub of ROR 0x0013e548
+void MagScene::updateCamera()
+{
+    ROSEPAN_STUB("MagScene::updateCamera", 0x0013e548);
+}
+
+// stub of ROR 0x00143fd0
+void MagScene::updateFog()
+{
+    ROSEPAN_STUB("MagScene::updateFog", 0x00143fd0);
+}
+
+// stub of ROR 0x00140c68
+void MagScene::updateRecords853fc()
+{
+    ROSEPAN_STUB("MagScene::updateRecords853fc", 0x00140c68);
+}
+
+// stub of ROR 0x0022b370
+int i3rGetNumNode(const I3rRoot *root)
+{
+    ROSEPAN_STUB("i3rGetNumNode", 0x0022b370);
+    return {};
+}
+
+// stub of ROR 0x00107248
+void utlVecToRot(const float *dir, float *rot)
+{
+    ROSEPAN_STUB("utlVecToRot", 0x00107248);
 }

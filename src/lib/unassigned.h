@@ -242,6 +242,7 @@ int   i3rGetNodeIndexByName(I3rRoot *root, const char *name);            // ROR 
 /* The root's texture count and its n-th texture name (the TIM2 names a
  * DogTexInfo holds them under). */
 int   i3rGetNumTex(const I3rRoot *root);                                 // ROR 0x0022b428
+int   i3rGetNumNode(const I3rRoot *root);                                // ROR 0x0022b370
 const char *i3rGetTexName(const I3rRoot *root, int n);                  // ROR 0x0022b438
 
 #define I3D_OK 0
@@ -283,6 +284,8 @@ u_long   *i3dPktDrawWireShape(u_long *pkt, I3dLayer *layer, void *a, void *b, vo
 
 /* The distance of two points (sqrt of 0x106e14). */
 float utlVecDist(const float *a, const float *b);                        // ROR 0x00106e70
+/* A direction to angles: rot x (pitch, from -y), y (yaw, atan2 x / z), z 0. */
+void  utlVecToRot(const float *dir, float *rot);                         // ROR 0x00107248
 
 /* bss 0x7812ac, just below GamMan: mainInitGame passes it to
  * seqSetLanguage (which ignores it). Role not known yet. */
@@ -295,9 +298,48 @@ struct MagScene;
 
 /* Scene members whose class has no name yet, named by their constructor's
  * address. layout: host -- only the words the scene touches. */
-struct MagLife12f008 : MagLife  /* scene +0x41850, constructor 0x12f008 */
+/* MagScene::setFade's record (six words; the scene keeps the current one
+ * at +0x43700, kind -1 = none). */
+struct MagFadeParam
 {
+    int m_kind;                 // ROR 0x00: 0 MagLifeFader to black, 4 to colour 0xff, 1..3 MagLifeFadeKey (the keyhole)
+    int m_mode;                 // ROR 0x04: the fader's state to start in; 0 stops the fade
+    int m_time;                 // ROR 0x08: frames
+    int m_0c;                   // ROR 0x0c: role unknown (MagScene::update leaves it unset)
+    int m_10;                   // ROR 0x10: role unknown (idem)
+    int m_level;                // ROR 0x14: the fade object's level (MagScene::update passes 7)
 };
+static_assert(offsetof(MagFadeParam, m_level) == 0x14, "m_level");
+static_assert(sizeof(MagFadeParam) == 0x18, "MagFadeParam is 0x18 bytes on the EE");
+
+/* The screen fader (scene +0x41850, constructor 0x12f008, vtable 0x2e1ca8;
+ * class name from rtti.py). layout: host -- a MagLife. */
+struct MagLifeFader : MagLife
+{
+    /* State m_mode, time m_time. */
+    void start(const MagFadeParam *p);                                   // ROR 0x0012f060
+    /* State 4, word 1 -1. */
+    void stop();                                                         // ROR 0x0012f080
+
+    u_char _28[0x38 - 0x28];
+    int    m_color;             // ROR 0x38: 0 for fade kind 0, 0xff for kind 4
+};
+static_assert(offsetof(MagLifeFader, m_color) >= 0x38, "m_color");
+/* The keyhole fade (scene +0x41890, mag/maglifefadekey.cpp: the
+ * kagiana_tcc texture of data/evntex/EVNTEX.RPK). layout: host -- a
+ * MagLife. */
+struct MagLifeFadeKey : MagLife
+{
+    /* Adds kagiana_tcc to tex (the int is 0 from MagScene::setFade). */
+    void loadTexture(DogTexInfo *tex, int arg);                          // ROR 0x0012f2f0
+    /* Releases the texture m_tex_no from theTexInfo. */
+    void releaseTexture(DogTexInfo *theTexInfo);                         // ROR 0x0012f790
+    void start(const MagFadeParam *p);                                   // ROR 0x0012f824
+
+    u_char _28[0x40 - 0x28];
+    int    m_tex_no;            // ROR 0x40: kagiana_tcc in the scene's table, -1 = not loaded
+};
+static_assert(offsetof(MagLifeFadeKey, m_tex_no) >= 0x40, "m_tex_no");
 struct MagLife130da4 : MagLife  /* scene +0x418f0, constructor 0x130da4 */
 {
     u_char _28[0x34 - 0x28];
@@ -309,18 +351,44 @@ struct Obj176a3c                /* scene +0x837e0, constructor 0x176a3c */
     int _00;
 };
 /* layout: host -- placeholder. */
+/* A floor sector of a sky pack's sector.sec (EE 0x80, file data). */
+struct MagSectorRec
+{
+    u_char _00[0x48];
+    int    m_snd;               // ROR 0x48: the footstep sound slot (1..11), < 0 = the map's default
+    u_char _4c[0x80 - 0x4c];
+};
+static_assert(offsetof(MagSectorRec, m_snd) == 0x48, "m_snd");
+static_assert(sizeof(MagSectorRec) == 0x80, "MagSectorRec is 0x80 bytes on the EE");
+/* What FUN_0017c340 finds under a point (its first word out). */
+struct MagSectorHit
+{
+    int m_00;                   // ROR 0x00
+    int m_sector;               // ROR 0x04: the sector's index
+};
+static_assert(offsetof(MagSectorHit, m_sector) == 0x04, "m_sector");
+/* layout: host -- placeholder. */
 struct Obj17c0f0                /* scene +0x8542c, constructor 0x17c0f0: a flag word, a buffer, four 0x18-byte records */
 {
-    int _00;
+    int           _00[3];
+    int           m_0c;         // ROR 0x0c: non-zero when the sectors are loaded; role unverified
+    MagSectorRec *m_sectors;    // ROR 0x10: the sector records
 };
 static_assert(sizeof(Obj176a3c) >= 4 && sizeof(Obj17c0f0) >= 4, "placeholders");
 
 int   FUN_00176afc(Obj176a3c *obj, i3dContext *ctx, MagScene *scene);    // ROR 0x00176afc
 void  FUN_00177830(Obj176a3c *obj, i3dContext *ctx);  /* MagScene::draw's world pass */ // ROR 0x00177830
+/* MagScene::update's step: runs a check slot of each of its objects and
+ * deletes the finished ones. */
+void  FUN_0017772c(Obj176a3c *obj);                                      // ROR 0x0017772c
 void  FUN_0017c2c0(Obj17c0f0 *obj);  /* frees the buffer and the records */ // ROR 0x0017c2c0
 /* Takes a sky pack's sector.sec (copied to the game heap when copy is
  * set); non-zero on success. */
 int   FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy);               // ROR 0x0017c1f4
+/* The sector under pos (hit[0], NULL when none) within r / h (the ROM
+ * passes 40 and 0 in f12 / f13). */
+void  FUN_0017c340(Obj17c0f0 *obj, const float *pos, MagSectorHit **hit, int arg,
+                   float r, float h);                                    // ROR 0x0017c340
 /* Allocates the 1 MB 2D packet buffer (data 0x29bfb4); mnuBase::initSystem
  * calls it too. */
 void  FUN_001944d0(void);                                                // ROR 0x001944d0

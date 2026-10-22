@@ -414,12 +414,18 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   far 2000, +-5.12 x +-4.48, z 65530..1, screen 0..511 x 0..447, offset 1792 / 1824), +0x2aae0
   four 0x20-byte i3d fog records (colour vector + four floats; i3dCtxSetFog 0x21a158), camera
   target pos / at at +0x2ada0 / +0x2adb0, `MagLifePC` +0x2adc0 (<= 0x220), `MagLifeBwn` +0x2afe0
-  (0xd40), `MagLifeBwnCtrl` +0x2bd20 (0x140; its state word at +0 is MagSystem::getBwnState's),
-  the MagLifeMenu* objects +0x2be60..0x40780 (Item, Map, Stock, Save, Load, Title, Opt, Movie,
-  Mcd, Now, Board2D, SelLang, each vptr +0x14), life objects of unnamed classes at +0x41850
-  (ctor 0x12f008), +0x41890 (0x12f298), +0x418f0 (0x130da4), the 2D layers `S2dCineSco`
+  (0xd40), `MagLifeBwnCtrl` +0x2bd20 (0x130; its state word at +0 is MagSystem::getBwnState's),
+  the menu words +0x2be50 (`m_menu_id`, -1 none), +0x2be54 (arg), +0x2be58 (`m_menu_result`, the
+  menu's last processPad), +0x2be5c (`m_pMenuBase`, the asserts' name), the MagLifeMenu* objects
+  +0x2be60..0x40780 (Item, Map, Stock, Save, Load, Title, Opt, Movie,
+  Mcd, Now, Board2D, SelLang, each vptr +0x14), the faders `MagLifeFader` +0x41850
+  (ctor 0x12f008; fade kinds 0 / 4, colour +0x38 0 / 0xff) and `MagLifeFadeKey` +0x41890 (0x12f298;
+  kinds 1..3, the kagiana_tcc keyhole of data/evntex/EVNTEX.RPK), a life of an unnamed class at
+  +0x418f0 (0x130da4), the 2D layers `S2dCineSco`
   +0x41930, `S2dBg` +0x42260, `S2dMes` +0x42bb0 (all MagLife, level 7, life priorities 0x8006 /
-  0x8000 / 0x800a), objects at +0x837e0 (ctor 0x176a3c), `S2dMovie` +0x84aa8 (spr/s2d.cpp), +0x8542c
+  0x8000 / 0x800a), the current fade record +0x43700 (six words: kind, mode, time, -, -, level;
+  `MagScene::setFade` 0x1311f4, `getFadeState` 0x131550 maps the fader state to 0..6) and the
+  system message window +0x43718, objects at +0x837e0 (ctor 0x176a3c), `S2dMovie` +0x84aa8 (spr/s2d.cpp), +0x8542c
   (0x17c0f0), `MagSceneIFMap` / `MagSceneIFChara` at +0x854e0 / +0x854e8, Brown / PC actor
   numbers +0x853b4 / +0x853b8. Every MagLife has `m_scene` at +0x20 and the vptr at +0x14;
   MagLifeControlChara's bound actor is +0x58 (`m_actor`).
@@ -531,7 +537,20 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
 - `BedSubMode` (bed/bedsubmode.cpp asserts `m_depth < MAX_STACK` / `m_depth > 0`): a current qword
   at +0, a stack of 4 at +0x10, m_depth +0x50; push 0x100258 / pop 0x1002c0. The scene has one at
   +0x22d0 (`MagScene::pushSubMode` 0x132744 pushes and sets mode 8 / -1, `popSubMode` 0x132784): the
-  movie skip runs in sub mode 8.
+  movie skip runs in sub mode 8. Its four words are the scene's mode, step (-1 on entry), the
+  requested menu id and the PC's mode << 16 | number (`requestMenu` 0x1357b0).
+- **The scene's update** (`MagScene::update(pad0, pad1)` 0x1327dc, mag/magscene.cpp, 2026-10-22):
+  S2dMovie::update, then by sub mode -- 0 the first frame (fog fade, the +0x837e0 objects,
+  MagLifeMan::update(2), the PC's live, Brown, the actors' motion commands and footsteps, camera,
+  sky billboards / rotation, the +0x853fc records) and 1 once the PC is bound; 1 walking (pad 0
+  m_7c bit 3 the item menu 0x10000, bit 0 menu 0x10001, m_7a bits 8 / 9 changeCamera, the PC takes
+  pad 0, Brown's command layer pad 1; the PC's state 0x17 goes to 6); 2 text windows (closes those
+  with m_wait_key 0, or > 0 on pad m_78 bit 14; back to 1 when none waits); 3 fade out
+  (getMenuFadeOutTime, fade kind 0 mode 6) then openMenu -> 7; 7 the menu takes pad 0 until
+  processPad returns non-zero, then closeMenu -> 4; 4 fade in (mode 2) -> 1; 5 the system message
+  (pad m_7c bits 13 / 14 close it); 6 the camera hangs from the PC and turns over 2400 counts; 8
+  paused (lives of group 4 only); 9 the debug windows (magscenedebug.cpp). Lives run by group:
+  MagLifeMan::update(mask) calls slot 2 of the lives whose level word has a bit of mask.
 - **The scene text windows** (mag/magscene.cpp asserts `MAX_WINDOW`, `m_window[ n ]`): 4 slots at
   scene +0x2734 of 0xe0-byte MagLife windows, each with a font record at +0x2744 + n * 0x6c over the
   language font (+0x2908) and font texture m_font_tex_no[n]: `openWindow(w, h, a3, life)` 0x134730
