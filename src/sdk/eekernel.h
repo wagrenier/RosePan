@@ -36,6 +36,10 @@ int RosePan_iSignalSema(int sema_id);
 int RosePan_WaitSema(int sema_id);
 int RosePan_PollSema(int sema_id);
 
+/* ReferSemaStatus fills currentCount, maxCount and numWaitThreads (the rx
+ * thread layer reads the count and whether anyone waits). */
+int RosePan_ReferSemaStatus(int sema_id, struct SemaParam *info);
+
 /* ---- threads (libkernel) ---------------------------------------------- */
 struct ThreadParam
 {
@@ -78,6 +82,21 @@ int  RosePan_WakeupThread(int thread_id);
 int  RosePan_ChangeThreadPriority(int thread_id, int priority);
 int  RosePan_ReferThreadStatus(int thread_id, struct ThreadParam *info);
 
+/* PORT: a host thread cannot be torn down from inside a call chain, so
+ * ExitDeleteThread frees the slot and parks the calling host thread for ever
+ * (it never runs game code again, as on the EE). */
+void RosePan_ExitDeleteThread(void);
+
+/* ---- alarms (libkernel) ----------------------------------------------- */
+/* An alarm calls handler(id, time, arg) once, `time` HSYNC ticks (NTSC
+ * 15734 Hz) from now.  PORT: one host timer thread serves them, each handler
+ * runs inside DIntr ... EIntr (the EE runs it in interrupt context), and a
+ * handler may re-arm itself with iSetAlarm. */
+typedef void (*RosePanAlarmHandler)(int id, u_short time, void *arg);
+
+int  RosePan_SetAlarm(u_short time, RosePanAlarmHandler handler, void *arg);
+int  RosePan_ReleaseAlarm(int alarm_id);
+
 /* ---- cache / exception / DMAC handlers -------------------------------- */
 typedef void (*RosePanDebugHandler)(u_int stat, u_int cause, u_int epc,
                                    u_int bva, u_int bpa, u_long128 *gpr);
@@ -101,6 +120,8 @@ int  RosePan_EnableDmac(int channel);
  * on its semaphore for ever if a real decoder ever ran it in PAL mode. */
 typedef int (*RosePanIntcHandler)(int cause);
 
+/* Adding a cause-2 handler starts libgraph's vblank thread, which raises
+ * cause 2 every field (RosePan_GsStartVblank). */
 int  RosePan_AddIntcHandler(int cause, RosePanIntcHandler handler, int next);
 int  RosePan_RemoveIntcHandler(int cause, int handler_id);
 int  RosePan_EnableIntc(int cause);
@@ -154,6 +175,14 @@ u_long RosePan_sceGsPutIMR(u_long imr);
 #define iSignalSema            RosePan_iSignalSema
 #define WaitSema               RosePan_WaitSema
 #define PollSema               RosePan_PollSema
+#define iPollSema              RosePan_PollSema
+#define ReferSemaStatus        RosePan_ReferSemaStatus
+#define iReferSemaStatus       RosePan_ReferSemaStatus
+#define ExitDeleteThread       RosePan_ExitDeleteThread
+#define SetAlarm               RosePan_SetAlarm
+#define iSetAlarm              RosePan_SetAlarm
+#define ReleaseAlarm           RosePan_ReleaseAlarm
+#define iReleaseAlarm          RosePan_ReleaseAlarm
 #define CreateThread           RosePan_CreateThread
 #define StartThread            RosePan_StartThread
 #define TerminateThread        RosePan_TerminateThread
@@ -164,6 +193,7 @@ u_long RosePan_sceGsPutIMR(u_long imr);
 #define SleepThread            RosePan_SleepThread
 #define WakeupThread           RosePan_WakeupThread
 #define ChangeThreadPriority   RosePan_ChangeThreadPriority
+#define iChangeThreadPriority  RosePan_ChangeThreadPriority
 #define ReferThreadStatus      RosePan_ReferThreadStatus
 #define FlushCache             RosePan_FlushCache
 #define SetDebugHandler        RosePan_SetDebugHandler

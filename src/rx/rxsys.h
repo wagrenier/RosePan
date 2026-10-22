@@ -12,6 +12,8 @@
 #ifndef _RX_RXSYS_H
 #define _RX_RXSYS_H
 
+#include <stdint.h>
+
 /* Boot devices: the index into the device-ready flags and the "Device[%s]"
  * names (0x2dbc38). rxSysDetectDevice picks HOST on a devkit (more than
  * 32 MB), CDROM on a retail console. */
@@ -79,7 +81,7 @@ int         rxSysIsCdromPath(const char *path);                 // ROR 0x00241c1
 char       *rxSysPathSkipDevice(char *path);                    // ROR 0x00241ca0
 void        rxSysSetBootPath(char *path);                       // ROR 0x00241d68
 RxSysPrintHook rxSysSetPrintHook(RxSysPrintHook hook);          // ROR 0x00241f08
-int         rxSysPrintWait(int a, int b, int c);                // ROR 0x00241f20
+int         rxSysPrintWait(intptr_t *args);                     // ROR 0x00241f20
 int         rxSysIsTtyOpen(void);                               // ROR 0x00241f28
 int         rxSysPrintf(const char *fmt, ...);                  // ROR 0x00241f58
 void        rxSysInitEnd(void);                                 // ROR 0x00242150
@@ -96,7 +98,7 @@ int         rxSysLseek(int fd, int offset, int whence);         // ROR 0x0024266
 void        rxSysLockSema1(void);                               // ROR 0x00242480
 void        rxSysUnlockSema1(void);                             // ROR 0x002424e0
 void        rxSysInitUser(void);                                // ROR 0x002433d8
-void        rxSysThreadCallback(void);                          // ROR 0x002433e8
+void        rxSysThreadCallback(int yielding);                  // ROR 0x002433e8
 void        rxSysInitModules(void);                             // ROR 0x00243400
 void        rxSysUpdateDevices(void);                           // ROR 0x00243560
 int         rxSysSetFileDevice(int slot, int device);           // ROR 0x00243638

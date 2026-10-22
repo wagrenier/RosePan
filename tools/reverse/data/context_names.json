@@ -1493,11 +1493,53 @@
   "was": "FUN_00249b78",
   "why": "stored value - 1"
  },
+ "00249b88": {
+  "name": "rxThCreateSema",
+  "tag": "ror-inferred",
+  "was": "FUN_00249b88",
+  "why": "CreateSema with maxCount a0, initCount a1; rxThInit makes its three semaphores with it"
+ },
+ "00249bb0": {
+  "name": "rxThStartThread",
+  "tag": "ror-inferred",
+  "was": "FUN_00249bb0",
+  "why": "CreateThread(entry a0, stack a1, size a2, priority a3, gp) then StartThread(id, 0); returns the id"
+ },
+ "00249c08": {
+  "name": "rxThKillThread",
+  "tag": "ror-inferred",
+  "was": "FUN_00249c08",
+  "why": "TerminateThread(id) then DeleteThread(id)"
+ },
+ "00249c30": {
+  "name": "rxThWorkerMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00249c30",
+  "why": "thread entry (rxThInit, stack 0x808240 size 0x10000, suspended): pops the 32-entry call queue 0x807ff0 and calls func(&args); resumed only while the main thread yields"
+ },
+ "00249cf0": {
+  "name": "rxThIdleMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00249cf0",
+  "why": "thread entry (rxThInit, stack 0x818240 size 0x400, lowest priority): loops for ever doing the DI check only (body was folded into rxThWorkerMain)"
+ },
  "00249d48": {
   "name": "rxThIsDispatchDisabled",
   "tag": "ror-inferred",
   "was": "FUN_00249d48",
   "why": "iReferSemaStatus on the dispatch semaphore 0x807f44, count > 0"
+ },
+ "00249de0": {
+  "name": "rxThGetCallCount",
+  "tag": "ror-inferred",
+  "was": "FUN_00249de0",
+  "why": "(write 0x2dc268 - read 0x2dc26c) & 31: entries waiting in the worker's call queue"
+ },
+ "00249e08": {
+  "name": "rxThPostCall",
+  "tag": "ror-inferred",
+  "was": "FUN_00249e08",
+  "why": "pushes {func, a, b, c} on the worker's call queue unless it holds 31; returns 1 when queued"
  },
  "00249ea0": {
   "name": "rxThInit",
@@ -1505,17 +1547,71 @@
   "was": "FUN_00249ea0",
   "why": "once: semaphores 0x807f40/44/48, the two rx threads, 0x807f4c = main thread"
  },
+ "0024a058": {
+  "name": "rxThExit",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a058",
+  "why": "undoes rxThInit when its count drops to 0: releases the alarm, kills the rx threads, worker and idle threads, deletes the semaphores, releases the vblank handler"
+ },
+ "0024a1b8": {
+  "name": "rxThRunCallbacks",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a1b8",
+  "why": "calls each of the 8 callbacks at 0x808200 with a0 (1 entering a main-thread yield, 0 leaving it)"
+ },
+ "0024a218": {
+  "name": "rxThFindCallback",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a218",
+  "why": "searches the callback table for a0; returns -1 even when found (the delay slot overwrites the index: a ROM bug)"
+ },
  "0024a258": {
   "name": "rxThAddCallback",
   "tag": "ror-inferred",
   "was": "FUN_0024a258",
   "why": "'rxthread: rxThAddCallback fail'"
  },
+ "0024a2e0": {
+  "name": "rxThRemoveCallback",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a2e0",
+  "why": "clears the callback table entry rxThFindCallback finds"
+ },
+ "0024a310": {
+  "name": "rxThIsYielding",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a310",
+  "why": "returns 0x807f60, 1 while the main thread waits in rxThYield"
+ },
+ "0024a320": {
+  "name": "rxThLockRequest",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a320",
+  "why": "on the worker thread only: iSignalSema(0x807f48), which holds off the dispatch alarm's request check"
+ },
+ "0024a3c8": {
+  "name": "rxThUnlockRequest",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a3c8",
+  "why": "on the worker thread only: iPollSema(0x807f48), undoing rxThLockRequest"
+ },
+ "0024a470": {
+  "name": "rxThIsRequestLocked",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a470",
+  "why": "count of semaphore 0x807f48 > 0"
+ },
  "0024a508": {
   "name": "rxThYield",
   "tag": "ror-inferred",
   "was": "FUN_0024a508",
   "why": "from the main thread runs the rx thread until it waits; else swaps priorities"
+ },
+ "0024a678": {
+  "name": "rxThDispatchAlarm",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a678",
+  "why": "the alarm handler (SetAlarm 0x24a678): round-robins the rx thread slots by priority, checks the main thread's request and wakes it, re-arms itself"
  },
  "0024a8c8": {
   "name": "rxThDisableDispatch",
@@ -1541,17 +1637,41 @@
   "was": "FUN_0024ab40",
   "why": "frees the entry; ExitDeleteThread for itself, else the delete helper"
  },
+ "0024ac18": {
+  "name": "rxThGetCount",
+  "tag": "ror-inferred",
+  "was": "FUN_0024ac18",
+  "why": "returns 0x807f64, the number of rx threads (body was folded into rxThDelete)"
+ },
  "0024ac28": {
   "name": "rxThSetPriority",
   "tag": "ror-inferred",
   "was": "FUN_0024ac28",
   "why": "stores the entry's priority word +8"
  },
+ "0024ac48": {
+  "name": "rxThGetPriority",
+  "tag": "ror-inferred",
+  "was": "FUN_0024ac48",
+  "why": "slot +8, the value rxThSetPriority writes (body was folded into rxThSetPriority)"
+ },
  "0024ac68": {
   "name": "rxThGetParam",
   "tag": "ror-inferred",
   "was": "FUN_0024ac68",
   "why": "the entry's param word +0xc"
+ },
+ "0024ac88": {
+  "name": "rxThSetParam",
+  "tag": "ror-inferred",
+  "was": "FUN_0024ac88",
+  "why": "writes slot +0xc, the value rxThGetParam reads (body was folded into rxThGetParam)"
+ },
+ "0024aca8": {
+  "name": "rxThGetState",
+  "tag": "ror-inferred",
+  "was": "FUN_0024aca8",
+  "why": "slot +2 (short), the value rxThSetState writes"
  },
  "0024acc8": {
   "name": "rxThSetState",
@@ -1571,11 +1691,119 @@
   "was": "FUN_0024ae60",
   "why": "main thread only: stores a function + 3 args, arms the alarm 0x24a678"
  },
+ "0024af58": {
+  "name": "rxThDummy0",
+  "tag": "ror-inferred",
+  "was": "FUN_0024af58",
+  "why": "empty function (jr ra), no references"
+ },
+ "0024af60": {
+  "name": "rxThDummy1",
+  "tag": "ror-inferred",
+  "was": "FUN_0024af60",
+  "why": "empty function (jr ra), no references"
+ },
+ "0024af68": {
+  "name": "rxThVSyncRequest",
+  "tag": "ror-inferred",
+  "was": "FUN_0024af68",
+  "why": "request function: 1 once rxThSync(-1) (the vblank count) differs from args[0]"
+ },
+ "0024afa0": {
+  "name": "rxThVSync",
+  "tag": "ror-inferred",
+  "was": "FUN_0024afa0",
+  "why": "mode 0: yield to the rx threads until the next vblank (rxThVSyncRequest); then returns rxThSync(1), the hsyncs since the last read"
+ },
+ "0024afe8": {
+  "name": "rxThGetInterval",
+  "tag": "ror-inferred",
+  "was": "FUN_0024afe8",
+  "why": "returns 0x2dc274, the dispatch alarm interval rxThSetInterval writes"
+ },
+ "0024aff8": {
+  "name": "rxThSetInterval",
+  "tag": "ror-inferred",
+  "was": "FUN_0024aff8",
+  "why": "clamps a0 to 4..256 and stores the dispatch alarm interval 0x2dc274; prints rxThread: HSync Interval"
+ },
+ "0024b048": {
+  "name": "rxThSetPrioIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b048",
+  "why": "stores the three priority offsets 0x2dc278/27c/280 (kept increasing); prints rxThread: PrioIndex"
+ },
  "0024b0b0": {
   "name": "rxThInitOnce",
   "tag": "ror-inferred",
   "was": "FUN_0024b0b0",
   "why": "tail to rxThInit; rxSysResetHardware calls it"
+ },
+ "0024b0c8": {
+  "name": "rxThExitOnce",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b0c8",
+  "why": "tail jump to rxThExit, the twin of rxThInitOnce"
+ },
+ "0024b0e0": {
+  "name": "rxThGsSyncRequest",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b0e0",
+  "why": "request function: sceGsSyncPath(1, 0) == 0"
+ },
+ "0024b108": {
+  "name": "rxThGsSyncPath",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b108",
+  "why": "mode != 0: sceGsSyncPath(mode, 0); mode 0: yield until rxThGsSyncRequest"
+ },
+ "0024b158": {
+  "name": "rxThDmaSyncRequest",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b158",
+  "why": "request function: sceDmaSync(sceDmaGetChan(args[0]), 1, 0) == 0"
+ },
+ "0024b188": {
+  "name": "rxThDmaSync",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b188",
+  "why": "mode != 0: sceDmaSync(sceDmaGetChan(chan), mode, 0); mode 0: yield until rxThDmaSyncRequest"
+ },
+ "0024b1f8": {
+  "name": "rxThVBlankHandler",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b1f8",
+  "why": "INTC cause 2 handler (rxThVBlankInit): counts vblanks in 0x2dc290, latches the GS CSR FIELD bit when interlaced"
+ },
+ "0024b278": {
+  "name": "rxThVBlankInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b278",
+  "why": "first call: AddIntcHandler(2, rxThVBlankHandler), EnableIntc(2), timer 0 counting hblanks (mode 0x8b)"
+ },
+ "0024b300": {
+  "name": "rxThVBlankExit",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b300",
+  "why": "last call: DisableIntc(2), RemoveIntcHandler"
+ },
+ "0024b360": {
+  "name": "rxThReadHSync",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b360",
+  "why": "returns timer 0 (hblanks) since the last read and restarts it; latches the vblank count in 0x818640"
+ },
+ "0024b398": {
+  "name": "rxThWaitVBlank",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b398",
+  "why": "spins until the vblank count changes, or VSync() when no vblank was counted yet"
+ },
+ "0024b3e8": {
+  "name": "rxThGetField",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b3e8",
+  "why": "returns 0x2dc288, the field the vblank handler latched"
  },
  "0024b3f8": {
   "name": "rxThSync",
@@ -1625,6 +1853,12 @@
   "was": "FUN_0024d130",
   "why": "(0 / 1, &count) from rxFileCdControl's request bits"
  },
+ "00259108": {
+  "name": "sceGsGetGParam",
+  "tag": "lib-context",
+  "was": "FUN_00259108",
+  "why": "libgraph: returns the address of the GParam block 0x2de090; rxThVBlankHandler reads its first short (sceGsInterMode)"
+ },
  "0025c8f0": {
   "name": "sceDevVu1Reset",
   "tag": "lib-context",
@@ -1642,6 +1876,18 @@
   "tag": "lib-context",
   "was": "FUN_0025d0c0",
   "why": "third in Sony's reset order (see 0x25cd90)"
+ },
+ "0025e140": {
+  "name": "DisableIntc",
+  "tag": "lib-context",
+  "was": "FUN_0025e140",
+  "why": "libkernel wrapper: DIntr when interrupts are on, _DisableIntc(a0), EIntr"
+ },
+ "0025e1a8": {
+  "name": "EnableIntc",
+  "tag": "lib-context",
+  "was": "FUN_0025e1a8",
+  "why": "libkernel wrapper: DIntr when interrupts are on, _EnableIntc(a0), EIntr"
  },
  "00260110": {
   "name": "scePrintf",

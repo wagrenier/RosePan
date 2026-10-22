@@ -865,11 +865,9 @@ RxSysPrintHook rxSysSetPrintHook(RxSysPrintHook hook)
 // The request rxSysLockPrint hands the rx thread while it waits.
 // ROR 0x00241f20
 
-int rxSysPrintWait(int a, int b, int c)
+int rxSysPrintWait(intptr_t *args)
 {
-    (void)a;
-    (void)b;
-    (void)c;
+    (void)args;
     return 1;
 }
 
@@ -1140,8 +1138,9 @@ void rxSysInitModules(void)
 // ──────────────────────────────────────────────────────────────────────
 // ROR 0x002433e8
 
-void rxSysThreadCallback(void)
+void rxSysThreadCallback(int yielding)
 {
+    (void)yielding;             // rxThRunCallbacks' argument, unused
     rxSysUpdateDevices();
 }
 

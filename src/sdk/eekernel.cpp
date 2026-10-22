@@ -8,6 +8,7 @@
 #include "../rosepan/os/rosepan_time.h"   // RosePan_Sleep
 #include "../rosepan/os/rosepan_thread.h" // threads / semaphores / mutex / TLS
 
+#include <atomic>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +22,8 @@ typedef struct HostSema
     int id;
     RosePan_Sema *sem;
     int maxCount;
+    std::atomic<int> count;     /* what ReferSemaStatus reports */
+    std::atomic<int> waiters;
 } HostSema;
 
 typedef struct HostThread
@@ -156,6 +159,8 @@ int RosePan_CreateSema(struct SemaParam *param)
 
             s_semas[i].id = i + 1;
             s_semas[i].maxCount = param != 0 ? param->maxCount : 0;
+            s_semas[i].count = initCount;
+            s_semas[i].waiters = 0;
             return s_semas[i].id;
         }
     }
@@ -177,7 +182,11 @@ int RosePan_DeleteSema(int sema_id)
         RosePan_SemaDestroy(sema->sem);
     }
 
-    memset(sema, 0, sizeof(*sema));
+    sema->id = 0;
+    sema->sem = 0;
+    sema->maxCount = 0;
+    sema->count = 0;
+    sema->waiters = 0;
     return 0;
 }
 
@@ -190,6 +199,7 @@ int RosePan_SignalSema(int sema_id)
         return -1;
     }
 
+    sema->count++;
     RosePan_SemaSignal(sema->sem);
     return 0;
 }
@@ -208,7 +218,10 @@ int RosePan_WaitSema(int sema_id)
         return -1;
     }
 
+    sema->waiters++;
     RosePan_SemaWait(sema->sem);
+    sema->waiters--;
+    sema->count--;
     ThreadPassSuspendGate();
     return 0;
 }
@@ -222,7 +235,28 @@ int RosePan_PollSema(int sema_id)
         return -1;
     }
 
-    return RosePan_SemaTryWait(sema->sem) ? 0 : -1;
+    if (!RosePan_SemaTryWait(sema->sem))
+    {
+        return -1;
+    }
+    sema->count--;
+    return 0;
+}
+
+int RosePan_ReferSemaStatus(int sema_id, struct SemaParam *info)
+{
+    HostSema *sema = FindSema(sema_id);
+
+    if (sema == 0 || info == 0)
+    {
+        return -1;
+    }
+
+    memset(info, 0, sizeof(*info));
+    info->currentCount = sema->count;
+    info->maxCount = sema->maxCount;
+    info->numWaitThreads = sema->waiters;
+    return sema_id;
 }
 
 int RosePan_CreateThread(struct ThreadParam *param)
@@ -462,6 +496,171 @@ int RosePan_ReferThreadStatus(int thread_id, struct ThreadParam *info)
     return 0;
 }
 
+void RosePan_ExitDeleteThread(void)
+{
+    HostThread *thread = (HostThread *)RosePan_TlsGet(GetThreadTls());
+    RosePan_Sema *park = RosePan_SemaCreate(0);
+
+    if (thread != 0)
+    {
+        RosePan_DeleteThread(thread->id);
+        RosePan_TlsSet(GetThreadTls(), 0);
+    }
+
+    for (;;)
+    {
+        if (park != 0)
+        {
+            RosePan_SemaWait(park);
+        }
+        else
+        {
+            RosePan_Sleep(1000);
+        }
+    }
+}
+
+/* ---- alarms --------------------------------------------------------------
+ *  One host thread serves every alarm: it sleeps to the earliest deadline
+ *  (at most 250 us at a time, so an alarm set meanwhile is seen promptly),
+ *  frees the slot and runs the handler under DIntr, as the EE runs it with
+ *  interrupts off.  The table has its own (recursive) mutex, so a handler's
+ *  iSetAlarm from the timer thread is fine.
+ * ------------------------------------------------------------------------ */
+
+#define ROSEPAN_MAX_ALARMS 64
+
+typedef struct
+{
+    int                 id;
+    uint64_t            due;        /* performance-counter ticks */
+    u_short             time;
+    RosePanAlarmHandler handler;
+    void               *arg;
+} HostAlarm;
+
+static const double kAlarmHSyncHz = 15734.264;
+
+static HostAlarm       s_alarms[ROSEPAN_MAX_ALARMS];
+static int             s_alarmNextId = 1;
+static RosePan_Mutex  *s_alarmMutex;
+static RosePan_Thread *s_alarmThread;
+
+static void AlarmThreadMain(void *data)
+{
+    (void)data;
+
+    for (;;)
+    {
+        HostAlarm fire;
+        uint64_t  now = RosePan_GetPerformanceCounter();
+        uint64_t  wait = RosePan_GetPerformanceFrequency() / 4000;  /* 250 us */
+        int       i;
+        int       best = -1;
+
+        RosePan_MutexLock(s_alarmMutex);
+        for (i = 0; i < ROSEPAN_MAX_ALARMS; i++)
+        {
+            if (s_alarms[i].id != 0 && (best < 0 || s_alarms[i].due < s_alarms[best].due))
+            {
+                best = i;
+            }
+        }
+        fire.id = 0;
+        if (best >= 0 && s_alarms[best].due <= now)
+        {
+            fire = s_alarms[best];
+            s_alarms[best].id = 0;
+        }
+        else if (best >= 0 && s_alarms[best].due - now < wait)
+        {
+            wait = s_alarms[best].due - now;
+        }
+        RosePan_MutexUnlock(s_alarmMutex);
+
+        if (fire.id != 0)
+        {
+            RosePan_DIntr();
+            fire.handler(fire.id, fire.time, fire.arg);
+            RosePan_EIntr();
+            continue;
+        }
+
+        RosePan_SleepNs(wait * 1000000000ull / RosePan_GetPerformanceFrequency());
+    }
+}
+
+int RosePan_SetAlarm(u_short time, RosePanAlarmHandler handler, void *arg)
+{
+    int i;
+    int id = -1;
+
+    if (handler == 0)
+    {
+        return -1;
+    }
+
+    if (s_alarmMutex == 0)
+    {
+        s_alarmMutex = RosePan_MutexCreate();
+        if (s_alarmMutex == 0)
+        {
+            return -1;
+        }
+    }
+
+    RosePan_MutexLock(s_alarmMutex);
+    for (i = 0; i < ROSEPAN_MAX_ALARMS; i++)
+    {
+        if (s_alarms[i].id == 0)
+        {
+            id = s_alarmNextId++;
+            if (s_alarmNextId > 0x7fff)
+            {
+                s_alarmNextId = 1;
+            }
+            s_alarms[i].id = id;
+            s_alarms[i].due = RosePan_GetPerformanceCounter()
+                + (uint64_t)((double)time * (double)RosePan_GetPerformanceFrequency()
+                             / kAlarmHSyncHz);
+            s_alarms[i].time = time;
+            s_alarms[i].handler = handler;
+            s_alarms[i].arg = arg;
+            break;
+        }
+    }
+    if (s_alarmThread == 0)
+    {
+        s_alarmThread = RosePan_ThreadCreate(AlarmThreadMain, 0, "ee-alarm");
+    }
+    RosePan_MutexUnlock(s_alarmMutex);
+    return id;
+}
+
+int RosePan_ReleaseAlarm(int alarm_id)
+{
+    int i;
+    int result = -1;
+
+    if (s_alarmMutex == 0)
+    {
+        return -1;
+    }
+
+    RosePan_MutexLock(s_alarmMutex);
+    for (i = 0; i < ROSEPAN_MAX_ALARMS; i++)
+    {
+        if (s_alarms[i].id == alarm_id)
+        {
+            s_alarms[i].id = 0;
+            result = alarm_id;
+            break;
+        }
+    }
+    RosePan_MutexUnlock(s_alarmMutex);
+    return result;
+}
+
 void RosePan_FlushCache(int mode)
 {
     (void)mode;
@@ -517,6 +716,8 @@ typedef struct
 } HostIntc;
 
 static HostIntc s_intc[ROSEPAN_MAX_INTC];
+
+extern "C" void RosePan_GsStartVblank(void);  /* libgraph.cpp */
 static int      s_intc_enabled[32];
 static int      s_intc_next_id = 1;
 
@@ -529,6 +730,11 @@ int RosePan_AddIntcHandler(int cause, RosePanIntcHandler handler, int next)
     if (handler == 0)
     {
         return -1;
+    }
+
+    if (cause == 2)
+    {
+        RosePan_GsStartVblank();
     }
 
     for (i = 0; i < ROSEPAN_MAX_INTC; i++)

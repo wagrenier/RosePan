@@ -31,9 +31,8 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    0x2437f8..0x249b88 is written -- async slots, default hooks, cdrom ISO 9660 reader, file thread and
    its queues. Nothing runs it yet: `main` (unassigned@001fd424) is still the placeholder, so the next
    M1 step really is `main`. Then **`rx/rxthread.cpp`** (pinned 0x249b88..0x24b490, todo; its rxTh*
-   functions are stubs in src/rx/rxthread.cpp today): `rxThCreate` returns 0 and `rxThGetParam` null,
-   so the file thread never runs, and every slot open (the default load / size hooks, snd's streams)
-   spins for ever on `pending`. DIntr / EIntr now exist in src/sdk (a recursive mutex).
+   functions are stubs in src/rx/rxthread.cpp today): ~~done 2026-10-22, see Done~~ -- the file thread
+   now gets created and dispatched; DIntr / EIntr exist in src/sdk (a recursive mutex).
 6. (2026-10-22) **The cdrom driver reads ISO 9660 sectors itself** (architecture.md "The rx file
    layer"), so a CDROM boot needs sceCdRead to serve a disc *image*: src/sdk/libcdvd.cpp still reads
    FF3's IMG_BD.BIN. Decide (the user's call: platform): point sceCdRead at an `.iso` named by
@@ -92,12 +91,26 @@ to adapt when a TU reaches them:
   pools `rxSysInitModules` builds (0x7dabb0.., element layouts unknown); `s_bootDev[0] == 'a'` adds
   usbd.irx (which host device starts with 'a'?); `rxSysReadRomDate` has no BIOS on the host (date 0).
 
+- **rxthread details left open** (2026-10-22): nothing in the ELF calls rxThSetPrioIndex,
+  rxThSetInterval, rxThLockRequest / rxThUnlockRequest, the getters or rxThDummy0/1 (the defaults
+  {0, 2, 4} and 4 HSYNCs hold); check snd/rxmpeg.cpp's rxThPostCall argument types (intptr_t on the
+  host) when it is reconstructed; decide whether the host should keep rx threads behind the main
+  thread (gate them on rxThYield) if a race shows up -- today they run concurrently.
+
 - **rxfile details left open**: what the device record's first word (`rxFileSetDeviceParam`, -1 at init)
   means; whether the cdrom driver turns names into ISO form with "\" and ";1"; who sets the HDD error
   hook 0x2dc248 (no setter found in rxfile's range); how the platform's sceOpen resolves `cdrom0:`
   paths (`RosePan_PathResolveData`; check once main runs).
 
 ## Done
+
+- 2026-10-22: `rx/rxthread.cpp` (0x249b88..0x24b490): all 61 functions written (`verify`; 11 were
+  folded into neighbours and created in Ghidra): scheduler, dispatch alarm, slots, call queue, yield
+  callbacks, vblank / HSYNC counters. Platform: SetAlarm / iSetAlarm / ReleaseAlarm (a host timer
+  thread), ReferSemaStatus / iReferSemaStatus (count + waiters), iPollSema, iChangeThreadPriority,
+  ExitDeleteThread (parks), VSync, sceGsGetGParam, and libgraph's vblank thread raising INTC cause 2.
+  A temporary call from main showed 60 vblanks a second, one per rxThVSync(0), ~262 HSYNCs a frame.
+  rxSysPrintWait / rxSysThreadCallback now take the real arguments (intptr_t *args / int yielding).
 
 - 2026-10-22: `rx/rxfile.cpp` pinned 0x2437f8..0x249b88 and `rx/rxthread.cpp` 0x249b88..0x24b490;
   rxfile `partial`: drivers, host0: / HDD drivers, cdrom table and sector-cache init, contexts, dirs,

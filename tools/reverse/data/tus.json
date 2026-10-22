@@ -47,12 +47,21 @@
    "why": "rx middleware system layer: rxSys/rxsys strings at 0x23ff58 (No Memory Allocate Func), 0x241890 and 0x242188 (rxsys binding IOP module); starts after the IOP RPC client ending 0x23feb8 (unprefixed binding strings), ends before rxfile at 0x2437f8 (DI error / rxfile file slots); main 0x2045a8 calls its init 0x240eb8 and setters"
   },
   "rx/rxthread.cpp": {
+   "notes": "Complete; verify because main (unassigned@001fd424) is still the placeholder, so nothing calls rxThInit in the smoke run (black frame as before). A temporary call from main (reverted) showed the handshake working: 60 vblanks a second, one per rxThVSync(0), about 262 HSYNCs per frame, an rx thread getting turns. Host model: rx threads are real host threads running alongside main; priorities are no-ops; spins sleep (PC: comments). Traps in hazards.md Platform layer (the FF3 SuspendThread mutex gate, TerminateThread not stopping host threads). Request and call args are intptr_t on the host. rxThFindCallback always returns -1 (ROM delay-slot bug, kept). Next M1 step: main 0x2045a8 replacing the placeholder, then rxfile runs with a real file thread.",
    "ranges": [
     [
      "00249b88",
      "0024b490"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-22 11:31",
+     "status": "verify",
+     "summary": "rx thread layer complete: 61 functions (11 hidden ones created in Ghidra) -- scheduler with dispatch alarm, rxThYield / rxThRequest handshake, rx thread slots, worker call queue, yield callbacks, vblank and HSYNC counters (rxThSync). Platform: SetAlarm / iSetAlarm / ReleaseAlarm on a host timer thread, ReferSemaStatus with count and waiters, iPollSema, iChangeThreadPriority, ExitDeleteThread (parks), VSync, sceGsGetGParam, libgraph vblank thread raises INTC cause 2. rxSysPrintWait and rxSysThreadCallback take their real arguments."
+    }
+   ],
+   "status": "verify",
    "why": "rx middleware thread layer: kernel wrappers from 0x249b88 (CreateSema, CreateThread), rxThInit, dispatch semaphore, rxThRequest/rxThYield, rxthread/rxThread messages, vsync and DMA wait helpers to 0x24b48c; libcdvd sceCdCallback starts at 0x24b490"
   },
   "setup/ghidra_seed.cpp": {

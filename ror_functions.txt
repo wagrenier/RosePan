@@ -5675,47 +5675,58 @@
 // FILE -- rx/rxthread.cpp
 // *****************************************************************************
 
-/* 00249b88 00000024 */ FUN_00249b88(){}
-/* 00249bb0 00000054 */ FUN_00249bb0(){}
-/* 00249c08 00000028 */ FUN_00249c08(){}
-/* 00249c30 00000110 */ FUN_00249c30(){}
+/* 00249b88 00000024 */ rxThCreateSema(){}  // ror
+/* 00249bb0 00000054 */ rxThStartThread(){}  // ror
+/* 00249c08 00000028 */ rxThKillThread(){}  // ror
+/* 00249c30 000000bc */ rxThWorkerMain(){}  // ror
+/* 00249cf0 00000050 */ rxThIdleMain(){}  // ror
 /* 00249d48 00000094 */ rxThIsDispatchDisabled(){}  // ror
-/* 00249de0 00000024 */ FUN_00249de0(){}
-/* 00249e08 00000098 */ FUN_00249e08(){}
+/* 00249de0 00000024 */ rxThGetCallCount(){}  // ror
+/* 00249e08 00000098 */ rxThPostCall(){}  // ror
 /* 00249ea0 000001b4 */ rxThInit(){}  // ror
-/* 0024a058 0000015c */ FUN_0024a058(){}
-/* 0024a1b8 0000005c */ FUN_0024a1b8(){}
-/* 0024a218 0000003c */ FUN_0024a218(){}
+/* 0024a058 0000015c */ rxThExit(){}  // ror
+/* 0024a1b8 0000005c */ rxThRunCallbacks(){}  // ror
+/* 0024a218 0000003c */ rxThFindCallback(){}  // ror
 /* 0024a258 00000084 */ rxThAddCallback(){}  // ror
-/* 0024a2e0 00000030 */ FUN_0024a2e0(){}
-/* 0024a310 0000000c */ FUN_0024a310(){}
-/* 0024a320 000000a8 */ FUN_0024a320(){}
-/* 0024a3c8 000000a8 */ FUN_0024a3c8(){}
-/* 0024a470 00000094 */ FUN_0024a470(){}
+/* 0024a2e0 00000030 */ rxThRemoveCallback(){}  // ror
+/* 0024a310 0000000c */ rxThIsYielding(){}  // ror
+/* 0024a320 000000a8 */ rxThLockRequest(){}  // ror
+/* 0024a3c8 000000a8 */ rxThUnlockRequest(){}  // ror
+/* 0024a470 00000094 */ rxThIsRequestLocked(){}  // ror
 /* 0024a508 0000016c */ rxThYield(){}  // ror
-/* 0024a678 00000250 */ FUN_0024a678(){}
+/* 0024a678 00000250 */ rxThDispatchAlarm(){}  // ror
 /* 0024a8c8 0000008c */ rxThDisableDispatch(){}  // ror
 /* 0024a958 00000184 */ rxThEnableDispatch(){}  // ror
 /* 0024aae0 0000005c */ rxThGetIndex(){}  // ror
-/* 0024ab40 000000e4 */ rxThDelete(){}  // ror
-/* 0024ac28 0000003c */ rxThSetPriority(){}  // ror
-/* 0024ac68 0000005c */ rxThGetParam(){}  // ror
+/* 0024ab40 000000d4 */ rxThDelete(){}  // ror
+/* 0024ac18 0000000c */ rxThGetCount(){}  // ror
+/* 0024ac28 00000018 */ rxThSetPriority(){}  // ror
+/* 0024ac48 0000001c */ rxThGetPriority(){}  // ror
+/* 0024ac68 0000001c */ rxThGetParam(){}  // ror
+/* 0024ac88 00000018 */ rxThSetParam(){}  // ror
+/* 0024aca8 0000001c */ rxThGetState(){}  // ror
 /* 0024acc8 00000018 */ rxThSetState(){}  // ror
 /* 0024ace8 00000174 */ rxThCreate(){}  // ror
-/* 0024ae60 00000104 */ rxThRequest(){}  // ror
-/* 0024af68 00000034 */ FUN_0024af68(){}
-/* 0024afa0 00000054 */ FUN_0024afa0(){}
-/* 0024aff8 000000b4 */ FUN_0024aff8(){}
+/* 0024ae60 000000f4 */ rxThRequest(){}  // ror
+/* 0024af58 00000004 */ rxThDummy0(){}  // ror
+/* 0024af60 00000004 */ rxThDummy1(){}  // ror
+/* 0024af68 00000034 */ rxThVSyncRequest(){}  // ror
+/* 0024afa0 00000044 */ rxThVSync(){}  // ror
+/* 0024afe8 0000000c */ rxThGetInterval(){}  // ror
+/* 0024aff8 00000050 */ rxThSetInterval(){}  // ror
+/* 0024b048 00000064 */ rxThSetPrioIndex(){}  // ror
 /* 0024b0b0 00000014 */ rxThInitOnce(){}  // ror
-/* 0024b0c8 0000003c */ FUN_0024b0c8(){}
-/* 0024b108 00000050 */ FUN_0024b108(){}
-/* 0024b158 00000030 */ FUN_0024b158(){}
-/* 0024b188 00000070 */ FUN_0024b188(){}
-/* 0024b1f8 00000080 */ FUN_0024b1f8(){}
-/* 0024b278 00000088 */ FUN_0024b278(){}
-/* 0024b300 0000005c */ FUN_0024b300(){}
-/* 0024b360 00000038 */ FUN_0024b360(){}
-/* 0024b398 0000005c */ FUN_0024b398(){}
+/* 0024b0c8 00000014 */ rxThExitOnce(){}  // ror
+/* 0024b0e0 00000024 */ rxThGsSyncRequest(){}  // ror
+/* 0024b108 00000050 */ rxThGsSyncPath(){}  // ror
+/* 0024b158 00000030 */ rxThDmaSyncRequest(){}  // ror
+/* 0024b188 00000070 */ rxThDmaSync(){}  // ror
+/* 0024b1f8 00000080 */ rxThVBlankHandler(){}  // ror
+/* 0024b278 00000088 */ rxThVBlankInit(){}  // ror
+/* 0024b300 0000005c */ rxThVBlankExit(){}  // ror
+/* 0024b360 00000038 */ rxThReadHSync(){}  // ror
+/* 0024b398 0000004c */ rxThWaitVBlank(){}  // ror
+/* 0024b3e8 0000000c */ rxThGetField(){}  // ror
 /* 0024b3f8 00000094 */ rxThSync(){}  // ror
 
 // *****************************************************************************
@@ -6081,7 +6092,7 @@
 // FILE -- (library) sdk
 // *****************************************************************************
 
-/* 00259108 0000000c */ FUN_00259108(){}
+/* 00259108 0000000c */ sceGsGetGParam(){}  // lib-ctx
 
 // *****************************************************************************
 // FILE -- (library) graphdev.c
@@ -6763,8 +6774,8 @@
 // FILE -- (library) sdk
 // *****************************************************************************
 
-/* 0025e140 00000068 */ FUN_0025e140(){}
-/* 0025e1a8 00000068 */ FUN_0025e1a8(){}
+/* 0025e140 00000068 */ DisableIntc(){}  // lib-ctx
+/* 0025e1a8 00000068 */ EnableIntc(){}  // lib-ctx
 /* 0025e210 00000068 */ FUN_0025e210(){}
 /* 0025e278 00000068 */ FUN_0025e278(){}
 /* 0025e2e0 00000020 */ FUN_0025e2e0(){}
