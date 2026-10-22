@@ -1241,11 +1241,203 @@
   "was": "FUN_00182118",
   "why": "snd/rxmpeg.cpp; stores its argument into data 0x298fd0; MagSystem::vSyncCallback passes the V-blank count every V-blank"
  },
+ "0018bb8c": {
+  "name": "SprMan::SprMan",
+  "tag": "ror-inferred",
+  "was": "FUN_0018bb8c",
+  "why": "spr/sprman.cpp (anchored 0x18bcc0); constructs the SprTexture at +8 (0x18f5b0) and the object at +0x440 (0x1beb70), clears the words; every S2d layer constructor calls it on its sprite manager member; class name from the file"
+ },
+ "0018bc18": {
+  "name": "SprMan::~SprMan",
+  "tag": "ror-inferred",
+  "was": "FUN_0018bc18",
+  "why": "deleting-destructor shape (flags & 1 -> operator delete) undoing SprMan::SprMan: 0x1bebc4 on +0x440, 0x18f5e4 on the SprTexture at +8"
+ },
+ "0018bcc0": {
+  "name": "SprMan::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0018bcc0",
+  "why": "spr/sprman.cpp line 0x70: allocates m_num (+0x4b4) sprite records of 0x154 bytes at +0x4ac and initialises each (0x18c814); 0 on success"
+ },
+ "0018bd94": {
+  "name": "SprMan::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_0018bd94",
+  "why": "the S2d layers' render slot stores the i3d layer at +0x4d0 and calls it; the movie layer sets +0x4d0 / +0x4d4 then calls it"
+ },
+ "0018c068": {
+  "name": "SprMan::update",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c068",
+  "why": "when +4 is set, runs 0x18df20 on every sprite with priority word 0, then on those > 0; each S2d layer calls it once per frame"
+ },
+ "0018c130": {
+  "name": "SprMan::release",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c130",
+  "why": "frees the sprite records (+0x4ac) with utlMemFree after 0x18f824 on the SprTexture, clears +4; -1 when nothing was allocated"
+ },
+ "0018c190": {
+  "name": "SprMan::setDispList",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c190",
+  "why": "walks 0x34-byte records until no == -1 and copies their words into sprite no (+0xc, +0x10, +0xd8, +0x0, +0x64..+0x6c), sets its anim list (0x18c448) and anim (0x18c4d8); the S2d layers pass their .data tables"
+ },
+ "0018c4d8": {
+  "name": "SprMan::setAnim",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c4d8",
+  "why": "(no, anim): when anim < the sprite's anim count (+0x134) stores it at +0x110 and restarts the frame (+0x114, +0xf4, +0x118 from the anim table +0x138); returns anim >= count"
+ },
+ "0018d7ec": {
+  "name": "SprMan::setFade",
+  "tag": "ror-inferred",
+  "was": "FUN_0018d7ec",
+  "why": "(no, mode, time, from, to): stores the mode at +0x14, the time at +0xec / +0xf0, the two RGBA colours at +0x28 / +0x38 and the per-frame steps at +0xdc..+0xe8 for modes 1..5"
+ },
+ "0018f1f4": {
+  "name": "SprMan::fadeInSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f1f4",
+  "why": "(no, a, time, b, c, from, to): 0x18f0ec(no, b, c), colour = from, state +0x10 = 2, +0x100 = a, then setFade(no, 4, time, from, to); S2dBg passes the clear -> opaque colours"
+ },
+ "0018f338": {
+  "name": "SprMan::fadeIn",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f338",
+  "why": "(no, time, from, to): when the sprite is off (+0x10 == 0) turns it on (+0x10, +0xc = 1), colour 0x80,0x80,0x80,0 and setFade(no, 4, time, from, to)"
+ },
+ "0018f41c": {
+  "name": "SprMan::fadeOutDefault",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f41c",
+  "why": "(no, time): setFade(no, 3, time, 0x2999b0, 0x299990), state +0x10 = 4, +0x100 = time, without fadeOut's on test"
+ },
+ "0018f520": {
+  "name": "SprMan::fadeOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f520",
+  "why": "(no, time, from, to): when the sprite is on, setFade(no, 3, ...), state +0x10 = 4, +0x100 = time"
+ },
+ "0018f744": {
+  "name": "SprTexture::setList",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f744",
+  "why": "spr/sprtexture.cpp neighbourhood: (list, rpk) stores the 0x18-byte file list and the pack name, clears every entry's buffer word (+0x14) and picks the first load step (0x1905a0 5 / 3 / 1 by +0x434)"
+ },
+ "0018f808": {
+  "name": "SprTexture::setListMode",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f808",
+  "why": "(list, rpk, mode): stores mode at +0x434, then setList"
+ },
+ "0018febc": {
+  "name": "SprTexture::update",
+  "tag": "ror-inferred",
+  "was": "FUN_0018febc",
+  "why": "spr/sprtexture.cpp: the load state machine on +0x11c (alloc, read the pack or files, BedPfh, add the textures); the S2d inits spin on it until it returns non-zero"
+ },
+ "00190a78": {
+  "name": "S2dCineSco::S2dCineSco",
+  "tag": "ror-inferred",
+  "was": "FUN_00190a78",
+  "why": "stores _vt$10S2dCineSco 0x2e4550 at +0x14, MagLife0 words, SprMan::SprMan(+0x3c), clear 0x190b60; MagScene::MagScene calls it on +0x41930"
+ },
+ "00190ad4": {
+  "name": "S2dCineSco::~S2dCineSco",
+  "tag": "ror-inferred",
+  "was": "FUN_00190ad4",
+  "why": "vtable slot 1 of S2dCineSco: close, term when inited, ~SprMan(+0x3c), MagLife0 vtable back"
+ },
+ "00190b60": {
+  "name": "S2dCineSco::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_00190b60",
+  "why": "zeroes +0x34 (inited) and +0x30 (open); the constructor's last call"
+ },
  "00190b70": {
   "name": "S2dCineSco::init",
   "tag": "ror-inferred",
   "was": "FUN_00190b70",
   "why": "the scene's S2dCineSco at +0x41930 (constructor 0x190a78): stores the DogTexInfo at +0x458, 0x18bcc0(+0x3c, 3), sets +0x34 = 1; MagScene::initRender"
+ },
+ "00190bbc": {
+  "name": "S2dCineSco::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00190bbc",
+  "why": "when inited: SprMan::release, close, inited = 0; the destructor calls it"
+ },
+ "00190c04": {
+  "name": "S2dCineSco::update",
+  "tag": "ror-inferred",
+  "was": "FUN_00190c04",
+  "why": "vtable slot 2 (MagLife's per-frame update); calls the step 0x190c84"
+ },
+ "00190c20": {
+  "name": "S2dCineSco::render",
+  "tag": "ror-inferred",
+  "was": "FUN_00190c20",
+  "why": "vtable slot 6 (MagLife::render): with a layer, stores it in the SprMan (+0x4d0) and SprMan::draw"
+ },
+ "00190c44": {
+  "name": "S2dCineSco::open",
+  "tag": "ror-inferred",
+  "was": "FUN_00190c44",
+  "why": "open (+0x30 = 1) and phase (+0x38) = 0 unless already open; -1 then"
+ },
+ "00190c68": {
+  "name": "S2dCineSco::close",
+  "tag": "ror-inferred",
+  "was": "FUN_00190c68",
+  "why": "+0x30 = 0 when open; -1 otherwise"
+ },
+ "00190c84": {
+  "name": "S2dCineSco::step",
+  "tag": "ror-inferred",
+  "was": "FUN_00190c84",
+  "why": "the phase machine on +0x38: 0 / 3 -> 4 with start 0x190d20, 4 runs 0x190d70 each frame, 6 -> 7 -> 0"
+ },
+ "00190d20": {
+  "name": "S2dCineSco::start",
+  "tag": "ror-inferred",
+  "was": "FUN_00190d20",
+  "why": "stores MagSystem::m_current_system at +0x928, the pattern table 0x2999d8 in the SprMan, setDispList(0x299b90), SprMan +4 = 1"
+ },
+ "00190d70": {
+  "name": "S2dCineSco::process",
+  "tag": "ror-inferred",
+  "was": "FUN_00190d70",
+  "why": "SprMan::update; returns 0"
+ },
+ "00190d90": {
+  "name": "S2dCineSco::fadeIn",
+  "tag": "ror-inferred",
+  "was": "FUN_00190d90",
+  "why": "(time): time 0 sets sprites 1 and 2 to black at once (colour words of records 1 / 2 = 0,0,0,0x80), else setFade(1 and 2, mode 1, time, 0x299b70 -> 0x299b80: black clear -> black opaque); both shown. Cinemascope bars: the name is S2dCineSco"
+ },
+ "00190e98": {
+  "name": "S2dCineSco::fadeOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00190e98",
+  "why": "(time): time 0 hides sprites 1 and 2 at once, else setFade(1 and 2, mode 2, time, ...) with state 4 and +0x100 = time"
+ },
+ "00190f6c": {
+  "name": "S2dBg::S2dBg",
+  "tag": "ror-inferred",
+  "was": "FUN_00190f6c",
+  "why": "stores _vt$5S2dBg 0x2e45a0, MagLife0 words, SprMan::SprMan(+0x48), clear 0x191054; MagScene::MagScene calls it on +0x42260"
+ },
+ "00190fc8": {
+  "name": "S2dBg::~S2dBg",
+  "tag": "ror-inferred",
+  "was": "FUN_00190fc8",
+  "why": "vtable slot 1 of S2dBg: close, term when inited, ~SprMan(+0x48), MagLife0 vtable back"
+ },
+ "00191054": {
+  "name": "S2dBg::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_00191054",
+  "why": "zeroes the bg step (+0x93c), open and inited"
  },
  "00191068": {
   "name": "S2dBg::init",
@@ -1253,11 +1445,335 @@
   "was": "FUN_00191068",
   "why": "the scene's S2dBg at +0x42260 (constructor 0x190f6c): stores the DogTexInfo at +0x938, 0x191124, sets +0x34 = 1; MagScene::initRender"
  },
+ "00191098": {
+  "name": "S2dBg::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00191098",
+  "why": "when inited: close, inited = 0"
+ },
+ "001910d8": {
+  "name": "S2dBg::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001910d8",
+  "why": "vtable slot 2: frame count +4 += 1, then the phase step 0x191174"
+ },
+ "00191100": {
+  "name": "S2dBg::render",
+  "tag": "ror-inferred",
+  "was": "FUN_00191100",
+  "why": "vtable slot 6: with a layer, stores it in the SprMan (+0x518 = +0x48 + 0x4d0) and SprMan::draw"
+ },
+ "00191124": {
+  "name": "S2dBg::open",
+  "tag": "ror-inferred",
+  "was": "FUN_00191124",
+  "why": "open = 1, phase 0, sub phase +0x3c 0, +0x44 = 2, +0x40 = 0 unless already open"
+ },
+ "00191158": {
+  "name": "S2dBg::close",
+  "tag": "ror-inferred",
+  "was": "FUN_00191158",
+  "why": "+0x30 = 0 when open; -1 otherwise"
+ },
+ "00191174": {
+  "name": "S2dBg::step",
+  "tag": "ror-inferred",
+  "was": "FUN_00191174",
+  "why": "phase machine on +0x38 as S2dCineSco::step, with the sub step 0x191278 while +0x3c is 0"
+ },
+ "00191248": {
+  "name": "S2dBg::start",
+  "tag": "ror-inferred",
+  "was": "FUN_00191248",
+  "why": "stores MagSystem::m_current_system at +0x934"
+ },
+ "00191258": {
+  "name": "S2dBg::process",
+  "tag": "ror-inferred",
+  "was": "FUN_00191258",
+  "why": "runs the bg loader 0x1912a0; returns 0"
+ },
+ "00191278": {
+  "name": "S2dBg::subStep",
+  "tag": "ror-inferred",
+  "was": "FUN_00191278",
+  "why": "+0x40 0 -> 3; returns 0"
+ },
+ "001912a0": {
+  "name": "S2dBg::processBg",
+  "tag": "ror-inferred",
+  "was": "FUN_001912a0",
+  "why": "the s2dBg* request machine on +0x93c (inline s2dBgInit / LoadStart / DispStart / Close move it 0->1, 2->3, 5->6, 6->7): 1 clears the seven texture slots, 3 inits 7 sprites and loads data/mnurpk/s2dgen.rpk, 4 waits for the textures and sets the display list, 7/8 release"
+ },
+ "001913c4": {
+  "name": "S2dBg::setTexName",
+  "tag": "ror-inferred",
+  "was": "FUN_001913c4",
+  "why": "(no, name): for no < 7 copies the name into the slot's 0x40-byte buffer 0x29a180 + no*0x40 and gives load-list entry no the id no"
+ },
+ "0019143c": {
+  "name": "S2dBg::dispIn",
+  "tag": "ror-inferred",
+  "was": "FUN_0019143c",
+  "why": "(no, time): SprMan::fadeInSprite(no, 1, time, 0, -1, clear, opaque)"
+ },
+ "00191478": {
+  "name": "S2dBg::dispOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00191478",
+  "why": "(no, time): SprMan::fadeOutDefault(no, time)"
+ },
+ "00191494": {
+  "name": "S2dMes::S2dMes",
+  "tag": "ror-inferred",
+  "was": "FUN_00191494",
+  "why": "stores _vt$6S2dMes 0x2e45f0, MagLife0 words, SprMan::SprMan(+0x48), clears open and inited; MagScene::MagScene calls it on +0x42bb0"
+ },
+ "001914fc": {
+  "name": "S2dMes::~S2dMes",
+  "tag": "ror-inferred",
+  "was": "FUN_001914fc",
+  "why": "vtable slot 1 of S2dMes: close, term when inited, ~SprMan(+0x48), MagLife0 vtable back"
+ },
  "00191588": {
   "name": "S2dMes::init",
   "tag": "ror-inferred",
   "was": "FUN_00191588",
   "why": "the scene's S2dMes at +0x42bb0 (constructor 0x191494): stores the DogTexInfo at +0x464, 0x18bcc0(+0x48, 0x10), sets +0x34 = 1, returns 1; MagScene::initRender"
+ },
+ "001915f8": {
+  "name": "S2dMes::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001915f8",
+  "why": "when inited: SprMan::release, close, inited = 0"
+ },
+ "00191640": {
+  "name": "S2dMes::loadTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_00191640",
+  "why": "SprTexture::setList(wait.tm2 / wait2.tm2 list 0x29a340, data/mnurpk/s2dman.rpk) and spins on SprTexture::update until it is done"
+ },
+ "00191684": {
+  "name": "S2dMes::update",
+  "tag": "ror-inferred",
+  "was": "FUN_00191684",
+  "why": "vtable slot 2: the phase step 0x191718"
+ },
+ "001916a0": {
+  "name": "S2dMes::render",
+  "tag": "ror-inferred",
+  "was": "FUN_001916a0",
+  "why": "vtable slot 6: with a layer, stores it in the SprMan and SprMan::draw"
+ },
+ "001916c4": {
+  "name": "S2dMes::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001916c4",
+  "why": "as S2dBg::open"
+ },
+ "001916f8": {
+  "name": "S2dMes::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001916f8",
+  "why": "when open: map number +0x93c = 0, open = 0"
+ },
+ "00191718": {
+  "name": "S2dMes::step",
+  "tag": "ror-inferred",
+  "was": "FUN_00191718",
+  "why": "phase machine on +0x38; phase 4 alternates the wait for a map name request (0x1918c8) and the map-name caption (0x191938) on +0x3c"
+ },
+ "0019183c": {
+  "name": "S2dMes::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_0019183c",
+  "why": "returns 0; the constructor's call between its stores"
+ },
+ "00191844": {
+  "name": "S2dMes::start",
+  "tag": "ror-inferred",
+  "was": "FUN_00191844",
+  "why": "system pointer at +0x934, pattern table 0x29a388, setDispList(0x29b7f8), SprMan +4 = 1, caption fade time +0x94c = 30"
+ },
+ "001918a8": {
+  "name": "S2dMes::process",
+  "tag": "ror-inferred",
+  "was": "FUN_001918a8",
+  "why": "SprMan::update; returns 0"
+ },
+ "001918c8": {
+  "name": "S2dMes::waitMapName",
+  "tag": "ror-inferred",
+  "was": "FUN_001918c8",
+  "why": "+0x40 0 -> 6 (clears the request +0x944), 6 -> 14 once setMapNameFadeIn sets +0x944, 14 -> 0 returning 1"
+ },
+ "00191938": {
+  "name": "S2dMes::drawMapName",
+  "tag": "ror-inferred",
+  "was": "FUN_00191938",
+  "why": "+0x40 machine: 0 looks up map +0x93c's name (0x17ea44 on 0x298ee0), renders it into a scene text view (0x134730 / 0x13555c / drawView) and fades sprite 2 in; 6 waits for setMapNameFadeOut; 15 fades out; 14 counts the fade and frees the view (0x1348b0)"
+ },
+ "00191ba8": {
+  "name": "S2dMes::setSpriteStdPoint(int,int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_00191ba8",
+  "why": "(no < 14, x, y): sprite 0x29bb70[no] words +0x58 / +0x5c; the inline setBtnStd / setIconStdPoint* / setMessageSpriteStdPoint call it"
+ },
+ "00191c00": {
+  "name": "S2dMes::setSpriteStdPoint(int,int,int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_00191c00",
+  "why": "as the 3-argument form plus +0x60"
+ },
+ "00191c64": {
+  "name": "S2dMes::setSpriteOffPoint(int,int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_00191c64",
+  "why": "(no, x, y): +0x64 / +0x68; the inline set*OffPoint call it"
+ },
+ "00191cbc": {
+  "name": "S2dMes::setSpriteOffPoint(int,int,int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_00191cbc",
+  "why": "as the 3-argument form plus +0x6c"
+ },
+ "00191d20": {
+  "name": "S2dMes::setSpriteState",
+  "tag": "ror-inferred",
+  "was": "FUN_00191d20",
+  "why": "(no, on): sprite word +0x10 = (on == 1); the Disp On / Off inlines call it"
+ },
+ "00191d74": {
+  "name": "S2dMes::setSpriteDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_00191d74",
+  "why": "(no, on): sprite word +0xc = (on == 1)"
+ },
+ "00191dc8": {
+  "name": "S2dMes::setSpriteAnim",
+  "tag": "ror-inferred",
+  "was": "FUN_00191dc8",
+  "why": "(no, anim): SprMan::setAnim(0x29bb70[no], anim)"
+ },
+ "00191e04": {
+  "name": "S2dMes::setSpriteFadeIn",
+  "tag": "ror-inferred",
+  "was": "FUN_00191e04",
+  "why": "(no, time): SprMan::setFade(sprite, 1, time, clear, opaque)"
+ },
+ "00191e58": {
+  "name": "S2dMes::setSpriteFadeOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00191e58",
+  "why": "(no, time): SprMan::fadeOut when the sprite is on; 1 for a valid no"
+ },
+ "00191ed0": {
+  "name": "S2dMes::setSpriteColorStd",
+  "tag": "ror-inferred",
+  "was": "FUN_00191ed0",
+  "why": "(no): sprite colour words +0x18..+0x24 = 0x80"
+ },
+ "00191f44": {
+  "name": "S2dMes::setSpriteProcessOff",
+  "tag": "ror-inferred",
+  "was": "FUN_00191f44",
+  "why": "(no): sprite flags +4 |= 2; the inline setKeyIconProcessOff calls it for all 14"
+ },
+ "00191f98": {
+  "name": "S2dMes::setSpriteProcessOn",
+  "tag": "ror-inferred",
+  "was": "FUN_00191f98",
+  "why": "(no): sprite flags +4 &= ~2"
+ },
+ "00191ff0": {
+  "name": "S2dMes::backupSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_00191ff0",
+  "why": "(no): saves flag bit 2, +0x58 (twice), +0x64, +0x68, +0x10 into the arrays 0x29bba8..0x29bcc0; inline backupKeyIconProcessOff"
+ },
+ "001920c4": {
+  "name": "S2dMes::restoreSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_001920c4",
+  "why": "(no): puts backupSprite's words back and re-shows or hides the sprite; inline restoreKeyIconProcessOff"
+ },
+ "0019226c": {
+  "name": "S2dMovie::S2dMovie",
+  "tag": "ror-inferred",
+  "was": "FUN_0019226c",
+  "why": "MagScene::MagScene on +0x84aa8: SprMan::SprMan(+0x18), clears open (+0) and inited (+4); no vtable. Loads loading.tm2 from s2dman.rpk and plays RxMpeg movies (0x192834..0x192920): the S2d family's movie / loading layer, name inferred"
+ },
+ "001922a4": {
+  "name": "S2dMovie::~S2dMovie",
+  "tag": "ror-inferred",
+  "was": "FUN_001922a4",
+  "why": "MagScene::~MagScene: close, term when inited, ~SprMan(+0x18)"
+ },
+ "00192318": {
+  "name": "S2dMovie::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00192318",
+  "why": "MagScene::initRender: scene at +0x908, SprMan::init(2), the scene's DogTexInfo (+0x29520) into the SprTexture, open, load the texture, inited = 1"
+ },
+ "0019237c": {
+  "name": "S2dMovie::term",
+  "tag": "ror-inferred",
+  "was": "FUN_0019237c",
+  "why": "when inited: SprMan::release, close, inited = 0; called from 0x131f74 too"
+ },
+ "001923c4": {
+  "name": "S2dMovie::loadTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_001923c4",
+  "why": "SprTexture::setList(loading.tm2 list 0x29bcf8, data/mnurpk/s2dman.rpk) and spins on SprTexture::update"
+ },
+ "00192408": {
+  "name": "S2dMovie::update",
+  "tag": "ror-inferred",
+  "was": "FUN_00192408",
+  "why": "MagScene::update calls it: the phase step 0x1926c0"
+ },
+ "00192670": {
+  "name": "S2dMovie::open",
+  "tag": "ror-inferred",
+  "was": "FUN_00192670",
+  "why": "as S2dBg::open on words +0..+0x14"
+ },
+ "001926a4": {
+  "name": "S2dMovie::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001926a4",
+  "why": "+0 = 0 when open"
+ },
+ "001926c0": {
+  "name": "S2dMovie::step",
+  "tag": "ror-inferred",
+  "was": "FUN_001926c0",
+  "why": "phase machine on +8 as S2dBg::step"
+ },
+ "00192794": {
+  "name": "S2dMovie::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_00192794",
+  "why": "returns 0; the constructor's call"
+ },
+ "0019279c": {
+  "name": "S2dMovie::start",
+  "tag": "ror-inferred",
+  "was": "FUN_0019279c",
+  "why": "system at +0x904, pattern table 0x29bd28, setDispList(0x29bf10), SprMan +4 = 1"
+ },
+ "001927ec": {
+  "name": "S2dMovie::process",
+  "tag": "ror-inferred",
+  "was": "FUN_001927ec",
+  "why": "SprMan::update"
+ },
+ "0019280c": {
+  "name": "S2dMovie::subStep",
+  "tag": "ror-inferred",
+  "was": "FUN_0019280c",
+  "why": "+0x10 0 -> 3"
  },
  "001be2cc": {
   "name": "FileReader::FileReader",

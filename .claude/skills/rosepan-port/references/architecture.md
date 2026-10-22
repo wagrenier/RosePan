@@ -282,7 +282,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   Mcd, Now, Board2D, SelLang, each vptr +0x14), life objects of unnamed classes at +0x41850
   (ctor 0x12f008), +0x41890 (0x12f298), +0x418f0 (0x130da4), the 2D layers `S2dCineSco`
   +0x41930, `S2dBg` +0x42260, `S2dMes` +0x42bb0 (all MagLife, level 7, life priorities 0x8006 /
-  0x8000 / 0x800a), objects at +0x837e0 (ctor 0x176a3c), +0x84aa8 (0x19226c), +0x8542c
+  0x8000 / 0x800a), objects at +0x837e0 (ctor 0x176a3c), `S2dMovie` +0x84aa8 (spr/s2d.cpp), +0x8542c
   (0x17c0f0), `MagSceneIFMap` / `MagSceneIFChara` at +0x854e0 / +0x854e8, Brown / PC actor
   numbers +0x853b4 / +0x853b8. Every MagLife has `m_scene` at +0x20 and the vptr at +0x14;
   MagLifeControlChara's bound actor is +0x58 (`m_actor`).
@@ -327,6 +327,26 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   rxThSync + SndMan::update. `fileGetSize` 0x1be768, `fileExists` 0x1be84c.
 - 0x7b40c0: a movie-player object (`RxMpeg`, ctor 0x1810f4; class name unverified); its first word
   set = a movie is playing.
+
+- **The 2D layers** (`spr/s2d.cpp`, pinned 0x190a78..0x192ac0, 2026-10-22; no source string, spr/
+  from the link order after spr/sprtexture.cpp): each holds a sprite manager (`SprMan`,
+  spr/sprman.cpp, EE 0x8ec: +4 active, +8 `SprTexture` loader (EE 0x438, DogTexInfo at its +0x414),
+  +0x4ac the 0x154-byte sprite records, +0x4b0 the pattern table, +0x4b4 count, +0x4d0 / +0x4d4 the
+  i3d layers to draw into) followed by the MagSystem pointer, and the same phase machine (open ->
+  phase 0/3 start -> 4 process each frame -> 6/7 end). `S2dCineSco` (EE 0x92c): two black bars
+  (sprites 1, 2) faded in / out by fadeIn / fadeOut 0x190d90 / 0x190e98 (black clear 0x299b70 ->
+  opaque 0x299b80) -- the cinemascope letterbox. `S2dBg` (EE 0x940): up to seven pictures
+  `sgbg0N_tcc` from data/mnurpk/s2dgen.rpk, files named by setTexName 0x1913c4, driven by the inline
+  `s2dBg*` requests on +0x93c. `S2dMes` (16 sprites): wait.tm2 / wait2.tm2 from
+  data/mnurpk/s2dman.rpk (the key-wait / write / select-cursor icons, the pad buttons, the message
+  frames), 14 items mapped to sprites by data 0x29bb70, set by 0x191ba8..0x1920c4 which the inline
+  setIcon* / setBtn* / setMessageSprite* call; the map-name caption (0x191938) renders map +0x93c's
+  name (record +0x10 of the table object 0x298ee0, lookup 0x17ea44) into a scene text view.
+  `S2dMovie` (EE 0x90c, no vtable): loading.tm2 from s2dman.rpk and the RxMpeg movie layers
+  (0x19241c / 0x1924e0 create i3d layers at keys 890 / 900 / 1000; 0x192834..0x192920 wrap RxMpeg
+  0x7b40c0). Fade colours: data 0x2999b0 (grey, alpha 0) -> 0x299990 (alpha 0x80). The pattern
+  tables are nested records with EE pointers inside; they are kept as EE word images until SprMan
+  is written (datadump.py --words).
 
 ## Modules (RoR's own source files)
 

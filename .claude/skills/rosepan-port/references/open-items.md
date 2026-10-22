@@ -137,6 +137,22 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    pointers live in a game-heap array (freed by releaseTenkyu), and the clip-sphere reads of the
    second / collision models are skipped when they have no root.
 
+14. (2026-10-22, the s2d session) **`spr/s2d.cpp` is pinned (0x190a78..0x192ac0) and `partial`**:
+   S2dCineSco, S2dBg, S2dMes (all but 0x191938) and S2dMovie's lifecycle and phase machine are
+   written over a minimal `SprMan` / `SprTexture` (spr/sprman.h, spr/sprtexture.h: all stubs, a
+   bridge for SprTexture::update). Left in the file: `S2dMes::drawMapName` 0x191938 (needs names
+   for the scene text-view functions 0x134730 / 0x13555c / 0x135594 / 0x1351b0 / 0x135088 /
+   0x13511c / 0x1348b0 in magscene.cpp and 0x17ea44 with its table object 0x298ee0), and S2dMovie's
+   0x19241c / 0x1924e0 / 0x1925f0 (i3d layer setup: 0x223240 / 0x223260 / 0x223378 / 0x223398 /
+   0x21b550 / 0x226c58, 0x10fa6c) and the RxMpeg wrappers 0x192834..0x192920 (RxMpeg 0x181150 /
+   0x18154c / 0x18173c / 0x181644 / 0x1816b0 / 0x18176c / 0x1812a8; MagScene 0x132744 / 0x132784).
+   Open: the file name (spr/s2d.cpp is a guess: the classes could be one file each); S2dMes's
+   EE size (its map-name buffer, at most 0x200); the pattern-table format (EE word images in
+   s2d.cpp; SprMan's TU decides the host form and resolves SprDispDef::m_anim_ee). Nothing shows
+   until SprMan (spr/sprman.cpp) and MagScene::draw are written: **spr/sprman.cpp +
+   spr/sprtexture.cpp are the next step for any 2D picture** (the now-loading screen too uses
+   loading.tm2 via S2dMovie).
+
 ## Decisions
 
 - One TU per session, run by the user (`/rosepan-port next`, the routine, or autopilot.py); sessions run
@@ -255,6 +271,10 @@ to adapt when a TU reaches them:
   rxsys is next touched.
 
 ## Done
+
+- 2026-10-22: `spr/s2d.cpp` (0x190a78..0x192ac0 pinned): 72 of 82 functions written (`partial`),
+  86 names (SprMan, SprTexture, S2d*); datadump.py `--words` for raw EE tables. Black screen: the
+  sprite manager and the scene draw are stubs.
 
 - 2026-10-22: `mag/magsystem.cpp` (0x117654..0x1194b4 pinned): 40 of 52 functions written
   (`partial`): constructor / destructor, the V-blank callbacks, initGraph (pads, VIF1, GS reset,

@@ -218,31 +218,10 @@ int   i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity);    // ROR 
  * seqSetLanguage (which ignores it). Role not known yet. */
 extern int g_bss_7812ac;
 
-/* ---- the 2D scene layers (unassigned@00190a78; classes from their
- * vtables, all MagLife with the vptr at +0x14) ---- */
-
 #include "mag/maglife.h"
 
 struct DogTexInfo;
 struct MagScene;
-
-/* layout: host -- no members past MagLife's reconstructed. Constructors
- * 0x190a78 / 0x190f6c / 0x191494; init stores the scene's DogTexInfo and
- * sets +0x34 to 1. */
-struct S2dCineSco : MagLife
-{
-    void init(DogTexInfo *tex);                                          // ROR 0x00190b70
-};
-/* layout: host -- as S2dCineSco. */
-struct S2dBg : MagLife
-{
-    void init(DogTexInfo *tex);                                          // ROR 0x00191068
-};
-/* layout: host -- as S2dCineSco. */
-struct S2dMes : MagLife
-{
-    int  init(DogTexInfo *tex);                                          // ROR 0x00191588
-};
 
 /* Scene members whose class has no name yet, named by their constructor's
  * address. layout: host -- only the words the scene touches. */
@@ -260,19 +239,13 @@ struct Obj176a3c                /* scene +0x837e0, constructor 0x176a3c */
     int _00;
 };
 /* layout: host -- placeholder. */
-struct Obj19226c                /* scene +0x84aa8, constructor 0x19226c (render, holds the DogTexInfo) */
-{
-    int _00;
-};
-/* layout: host -- placeholder. */
 struct Obj17c0f0                /* scene +0x8542c, constructor 0x17c0f0: a flag word, a buffer, four 0x18-byte records */
 {
     int _00;
 };
-static_assert(sizeof(Obj176a3c) >= 4 && sizeof(Obj19226c) >= 4 && sizeof(Obj17c0f0) >= 4, "placeholders");
+static_assert(sizeof(Obj176a3c) >= 4 && sizeof(Obj17c0f0) >= 4, "placeholders");
 
 int   FUN_00176afc(Obj176a3c *obj, i3dContext *ctx, MagScene *scene);    // ROR 0x00176afc
-void  FUN_00192318(Obj19226c *obj, i3dContext *ctx, MagScene *scene);    // ROR 0x00192318
 void  FUN_0017c2c0(Obj17c0f0 *obj);  /* frees the buffer and the records */ // ROR 0x0017c2c0
 /* Takes a sky pack's sector.sec (copied to the game heap when copy is
  * set); non-zero on success. */

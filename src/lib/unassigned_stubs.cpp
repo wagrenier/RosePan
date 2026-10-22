@@ -262,12 +262,6 @@ void FUN_0017c2c0(Obj17c0f0 *obj)
     ROSEPAN_STUB("FUN_0017c2c0", 0x0017c2c0);
 }
 
-// stub of ROR 0x00192318
-void FUN_00192318(Obj19226c *obj, i3dContext *ctx, MagScene *scene)
-{
-    ROSEPAN_STUB("FUN_00192318", 0x00192318);
-}
-
 // stub of ROR 0x001944d0
 void FUN_001944d0(void)
 {
@@ -278,25 +272,6 @@ void FUN_001944d0(void)
 void MagLifeBwn::renderPostProcess()
 {
     ROSEPAN_STUB("MagLifeBwn::renderPostProcess", 0x001259e8);
-}
-
-// stub of ROR 0x00191068
-void S2dBg::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("S2dBg::init", 0x00191068);
-}
-
-// stub of ROR 0x00190b70
-void S2dCineSco::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("S2dCineSco::init", 0x00190b70);
-}
-
-// stub of ROR 0x00191588
-int S2dMes::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("S2dMes::init", 0x00191588);
-    return {};
 }
 
 // stub of ROR 0x0021a120

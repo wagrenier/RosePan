@@ -32,12 +32,14 @@ struct MagScene;
 struct MagLife
 {
     int       m_state;          // ROR 0x00: MagSystem::getPCStateClass / getBwnState switch on it
-    u_char    _04[0x0c - 0x04];
+    int       m_04;             // ROR 0x04: the constructors set -1; role unknown
+    int       m_08;             // ROR 0x08: the constructors clear it
     int       m_0c;             // ROR 0x0c: MagSystem asks the PC's for 1 in state 9; role unknown
     int       m_level;          // ROR 0x10: MagLife0::getLevel; the scene's 2D layers get 7
     u_int     _ee_vptr;         // ROR 0x14: the EE vptr (see the file comment)
     u_char    _18[0x20 - 0x18];
     MagScene *m_scene;          // ROR 0x20: the owning scene, set by MagScene::initRender
+    int       m_24;             // ROR 0x24: the constructors clear it; role unknown
 };
 static_assert(offsetof(MagLife, m_0c) == 0x0c, "m_0c");
 static_assert(offsetof(MagLife, m_level) == 0x10, "m_level");
