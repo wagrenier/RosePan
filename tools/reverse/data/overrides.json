@@ -1,0 +1,18 @@
+{
+ "00100248": {
+  "now": "_exit",
+  "was": "Exit"
+ },
+ "00266770": {
+  "now": "sceSifLoadElfPart",
+  "was": "sceSifLoadElf"
+ },
+ "002675b8": {
+  "now": "kCopy_initsys",
+  "was": "kFindAddress"
+ },
+ "00267970": {
+  "now": "Copy_exit",
+  "was": "kCopy"
+ }
+}

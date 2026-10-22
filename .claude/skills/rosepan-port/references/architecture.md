@@ -53,13 +53,18 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
 
 ## Naming sources
 
+Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
+`work/snapshots/20261022_094006.json`). Ghidra went from 5,728 to 7,370 functions.
+
 | source | count | tool | tag |
 |---|---|---|---|
-| the ELF's named linkonce sections (inline methods, templates, ctors / dtors / `__tf`) | 1,449 (37 had a Ghidra function before seeding) | `sections.py` | `ror-symbol` |
-| vtable slot targets in .text (the out-of-line virtuals), class known, name not | 763 (95 without a Ghidra function) | `rtti.py`, `sections.py --apply` creates them | -- |
-| library / runtime code matched to FF3's SDK 3.0 libs and FF2's ee-gcc 2.96 runtime | 696 planned (555 high, 141 low) | `libmatch.py` | `lib-match` / `-low` |
+| the ELF's named linkonce sections (inline methods, templates, ctors / dtors / `__tf`) | 1,449 named (1,411 created; 37 existed as `FUN_`, 1 trial) | `sections.py` | `ror-symbol` |
+| vtable slot targets in .text (the out-of-line virtuals), class known, name not | 763 (95 created) | `rtti.py`, `sections.py --apply` | -- |
+| tail-jump targets after a `jr ra` that Ghidra had folded into their callers | 21 created (0x1bdc94, 0x105434, 0x173610.. ; 3 more targets are labels inside functions) | `sections.py --apply` | -- |
+| library / runtime code matched to FF3's SDK 3.0 libs and FF2's ee-gcc 2.96 runtime | 687 planned: 544 `lib-match` + 133 `lib-match-low` applied (114 functions created), 2 existing names kept (`_StartThread`, and `entry` -> `_start` by hand), 5 skipped as merged reference bodies / duplicate claims | `libmatch.py` | `lib-match` / `-low` |
+| named by reading during the seeding | 10: `main`, `_start`, `_exit`, `Exit`, `sceSifLoadElfPart`, `sceSifLoadElf`, `kCopy_initsys`, `kFindAddress`, `Copy_exit`, `kCopy_exit` (4 overrides of FF3-reference names) | `name_ctx.py` | `ror-inferred` / `lib-context` |
 | Ghidra's own syscall-stub names | 76 | Ghidra analysis | (none) |
-| source-path strings anchoring functions to files | 465 functions, 73 `.cpp` files | `export.py` | -- |
+| source-path strings anchoring functions to files | 473 functions, 73 `.cpp` files; 1,221 game functions placed | `export.py` | -- |
 
 ## Program flow
 
@@ -124,6 +129,7 @@ never asserts): sessions name them (`tus.py define --why`).
 | 0x215a30 | the assert handler `(file, line, expr)`: prints "Assertion Failed: %s(%d)   %s\n" through 0x260110 and loops for ever | 1,483 call sites |
 | 0x105ba4 | operator-delete wrapper: `if (p) 0x105e08(p)`; the deleting destructors tail-jump to it | 277 call sites; `DogEntity::~DogEntity` 0x280f34 |
 | 0x267798 | `_InitSys` | libmatch (FF2 initsys.c) |
+| 0x100248 | `_exit`: crt0's `j Exit` thunk; `Exit` is 0x267b98 | FF2 symbols at the same addresses |
 
 ## Disc and data files
 

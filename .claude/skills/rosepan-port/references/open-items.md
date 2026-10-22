@@ -6,8 +6,7 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
-1. **`setup/ghidra_seed.cpp`** (host task): snapshot names, `sections.py --apply`, `libmatch.py --apply`,
-   name `main`. Turns ~1,400 ELF symbols, ~700 library names and the class map into Ghidra state.
+1. ~~`setup/ghidra_seed.cpp`~~ (done 2026-10-22: see Done).
 2. **`setup/platform_bootstrap.cpp`** (host task): the PC project from ReiPan's platform layer, a
    placeholder main, a green build, a window in `work/shots/last.png`.
 3. Then **re-assess** with the user (the queue will be empty). Proposed path, the way ReiPan's paid off
@@ -51,6 +50,10 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Done
 
+- 2026-10-22: Ghidra seeded (`setup/ghidra_seed.cpp`): 1,449 ELF symbols, 1,642 functions created
+  (sections, vtable slots, library code, tail-jump targets), 677 library names, `main` / crt0 /
+  four FF3-reference collisions named by hand. Counts in architecture.md "Naming sources"; the traps it
+  found (tail targets folded into callers, merged FF3 reference bodies) in hazards.md.
 - 2026-10-22: RosePan created from ReiPan's learning: the rosepan-port skill and references, the tools
   in `tools/reverse/` (GCC 2 demangler, section symbols, GCC 2 RTTI with vptr offsets, the library
   matcher, file inference from RoR's own source strings, the TU queue, build / check / autopilot), the

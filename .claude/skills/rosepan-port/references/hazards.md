@@ -31,6 +31,24 @@ entries are marked **RoR** with the date.
   pointers for every slot it does not override; counting those as the derived class's members put
   DogActor in dog/dogmodel.cpp. Own slots = those that differ from the primary base's slot at that index
   (export.py).
+- **RoR: code reached only by tail jumps was folded into its callers** (seeding, 2026-10-22). Symptom:
+  nine `MagLifeMenu*::isInit` bodies ran past their linkonce section; `ghidra.py func` showed
+  `Body: 001bdc94 - 00283f97` (an address set reaching back to the jump target) and the decompile showed
+  the callee's field read inline (`return *(param_1 + 0x10c0)`). Cause: `j 0x1bdc94` with no function at
+  0x1bdc94. Fix: a function at every tail-jump target that follows a `jr ra` (sections.py --apply does
+  it; 21 created); targets that do not follow one are labels inside a function and stay. Creating the
+  target shrinks the caller's body back by itself.
+- **RoR: `get_function_by_address` answers for any address inside a body**, so "is there a function at
+  X" must compare its `Entry:` with X (rosepan.has_function does).
+- **RoR: the FF3 library reference has merged bodies.** ReiPan's Ghidra had kCopy + kFindAddress as one
+  "kFindAddress", sceSifLoadElfPart + sceSifLoadElf as one "sceSifLoadElf", Copy + kCopy as one "kCopy"; matched
+  word for word, such a name lands on the function *before* the real one, and the real one (matched
+  from FF2) then collides with it. Many other FF3 bodies swallowed the *next* function under a correct
+  name (FlushCache, the klib syscall stubs): harmless. libmatch skips a match when a function starting
+  inside its body claims the same name, and keeps one address per name; FF2's duplicate statics get
+  their file's stem (`kCopy_exit`).
+- **RoR: the decompiler spells `::` as `__`** (`DogEntity___DogEntity` for `DogEntity::~DogEntity`) in
+  its output, while Ghidra's names, ror_functions.txt and the tools keep `::`: grep for both.
 - **RoR: header assert strings are not file anchors.** Inline header functions expanded into a .cpp
   carry `"dog/dogactor.h"`, `"bed/bedpfh.h"`: they say which headers a file includes, not which file the
   function is in. Only `.cpp` / `.c` strings anchor.

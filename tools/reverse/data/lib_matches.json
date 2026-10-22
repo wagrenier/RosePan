@@ -1,0 +1,6131 @@
+{
+ "00100248": {
+  "file": null,
+  "name": "Exit",
+  "ref": "ff3",
+  "ref_addr": "00100378",
+  "size": 16,
+  "symbol": "Exit",
+  "tier": "lib-match-low"
+ },
+ "0024b490": {
+  "file": "eecdvd.c",
+  "name": "sceCdCallback",
+  "ref": "ff2",
+  "ref_addr": "0027b2e8",
+  "size": 104,
+  "symbol": "sceCdCallback",
+  "tier": "lib-match"
+ },
+ "0024b4f8": {
+  "file": "eecdvd.c",
+  "name": "_sceCd_cd_callback",
+  "ref": "ff2",
+  "ref_addr": "0027b350",
+  "size": 160,
+  "symbol": "_sceCd_cd_callback",
+  "tier": "lib-match"
+ },
+ "0024b598": {
+  "file": null,
+  "name": "_Cdvd_cbLoop",
+  "ref": "ff3",
+  "ref_addr": "00273e48",
+  "size": 552,
+  "symbol": "_Cdvd_cbLoop",
+  "tier": "lib-match"
+ },
+ "0024b708": {
+  "file": "eecdvd.c",
+  "name": "_sceCd_cd_read_intr",
+  "ref": "ff2",
+  "ref_addr": "0027b590",
+  "size": 184,
+  "symbol": "_sceCd_cd_read_intr",
+  "tier": "lib-match"
+ },
+ "0024b7c0": {
+  "file": null,
+  "name": "cmd_sem_init",
+  "ref": "ff3",
+  "ref_addr": "00274070",
+  "size": 228,
+  "symbol": "cmd_sem_init",
+  "tier": "lib-match"
+ },
+ "0024b8a8": {
+  "file": "eecdvd.c",
+  "name": "cdvd_exit",
+  "ref": "ff2",
+  "ref_addr": "0027b700",
+  "size": 160,
+  "symbol": "cdvd_exit",
+  "tier": "lib-match"
+ },
+ "0024b948": {
+  "file": "eecdvd.c",
+  "name": "sceCdPOffCallback",
+  "ref": "ff2",
+  "ref_addr": "0027b7a0",
+  "size": 128,
+  "symbol": "sceCdPOffCallback",
+  "tier": "lib-match"
+ },
+ "0024b9c8": {
+  "file": "eecdvd.c",
+  "name": "_sceCd_Poff_Intr",
+  "ref": "ff2",
+  "ref_addr": "0027b820",
+  "size": 84,
+  "symbol": "_sceCd_Poff_Intr",
+  "tier": "lib-match"
+ },
+ "0024ba20": {
+  "file": "eecdvd.c",
+  "name": "PowerOffCB",
+  "ref": "ff2",
+  "ref_addr": "0027b878",
+  "size": 120,
+  "symbol": "PowerOffCB",
+  "tier": "lib-match"
+ },
+ "0024ba98": {
+  "file": null,
+  "name": "sceCdLayerSearchFile",
+  "ref": "ff3",
+  "ref_addr": "00274348",
+  "size": 764,
+  "symbol": "sceCdLayerSearchFile",
+  "tier": "lib-match"
+ },
+ "0024bd98": {
+  "file": "eecdvd.c",
+  "name": "sceCdSearchFile",
+  "ref": "ff2",
+  "ref_addr": "0027bc08",
+  "size": 28,
+  "symbol": "sceCdSearchFile",
+  "tier": "lib-match"
+ },
+ "0024bfa8": {
+  "file": "eecdvd.c",
+  "name": "sceCdSync",
+  "ref": "ff2",
+  "ref_addr": "0027be30",
+  "size": 160,
+  "symbol": "sceCdSync",
+  "tier": "lib-match"
+ },
+ "0024c048": {
+  "file": "eecdvd.c",
+  "name": "sceCdSyncS",
+  "ref": "ff2",
+  "ref_addr": "0027bed0",
+  "size": 108,
+  "symbol": "sceCdSyncS",
+  "tier": "lib-match"
+ },
+ "0024c0b8": {
+  "file": null,
+  "name": "_sceCd_scmd_prechk",
+  "ref": "ff3",
+  "ref_addr": "00274968",
+  "size": 520,
+  "symbol": "_sceCd_scmd_prechk",
+  "tier": "lib-match"
+ },
+ "0024c210": {
+  "file": "eecdvd.c",
+  "name": "_sceCdSC",
+  "ref": "ff2",
+  "ref_addr": "0027c0b0",
+  "size": 176,
+  "symbol": "_sceCdSC",
+  "tier": "lib-match"
+ },
+ "0024c2c0": {
+  "file": null,
+  "name": "sceCdInit",
+  "ref": "ff3",
+  "ref_addr": "00274b70",
+  "size": 744,
+  "symbol": "sceCdInit",
+  "tier": "lib-match"
+ },
+ "0024c5a8": {
+  "file": null,
+  "name": "sceCdDiskReady_old",
+  "ref": "ff3",
+  "ref_addr": "00274e58",
+  "size": 536,
+  "symbol": "sceCdDiskReady_old",
+  "tier": "lib-match"
+ },
+ "0024c7c0": {
+  "file": null,
+  "name": "sceCdDiskReady",
+  "ref": "ff3",
+  "ref_addr": "00275070",
+  "size": 544,
+  "symbol": "sceCdDiskReady",
+  "tier": "lib-match"
+ },
+ "0024cf78": {
+  "file": "eecdvd.c",
+  "name": "sceCdMmode",
+  "ref": "ff2",
+  "ref_addr": "0027c840",
+  "size": 208,
+  "symbol": "sceCdMmode",
+  "tier": "lib-match"
+ },
+ "0024d220": {
+  "file": null,
+  "name": "sceMcInit",
+  "ref": "ff3",
+  "ref_addr": "00285158",
+  "size": 552,
+  "symbol": "sceMcInit",
+  "tier": "lib-match"
+ },
+ "0024d448": {
+  "file": null,
+  "name": "sceMcChangeThreadPriority",
+  "ref": "ff3",
+  "ref_addr": "00285380",
+  "size": 292,
+  "symbol": "sceMcChangeThreadPriority",
+  "tier": "lib-match"
+ },
+ "0024d570": {
+  "file": null,
+  "name": "sceMcGetSlotMax",
+  "ref": "ff3",
+  "ref_addr": "002854a8",
+  "size": 192,
+  "symbol": "sceMcGetSlotMax",
+  "tier": "lib-match"
+ },
+ "0024d630": {
+  "file": null,
+  "name": "sceMcOpen",
+  "ref": "ff3",
+  "ref_addr": "00285568",
+  "size": 296,
+  "symbol": "sceMcOpen",
+  "tier": "lib-match"
+ },
+ "0024d758": {
+  "file": "libmc.c",
+  "name": "sceMcMkdir",
+  "ref": "ff2",
+  "ref_addr": "0028c7e0",
+  "size": 52,
+  "symbol": "sceMcMkdir",
+  "tier": "lib-match"
+ },
+ "0024d790": {
+  "file": null,
+  "name": "sceMcClose",
+  "ref": "ff3",
+  "ref_addr": "002856c8",
+  "size": 188,
+  "symbol": "sceMcClose",
+  "tier": "lib-match"
+ },
+ "0024d850": {
+  "file": null,
+  "name": "sceMcSeek",
+  "ref": "ff3",
+  "ref_addr": "00285788",
+  "size": 400,
+  "symbol": "sceMcSeek",
+  "tier": "lib-match"
+ },
+ "0024dc70": {
+  "file": null,
+  "name": "sceMcSync",
+  "ref": "ff3",
+  "ref_addr": "00285ba8",
+  "size": 288,
+  "symbol": "sceMcSync",
+  "tier": "lib-match"
+ },
+ "0024dd38": {
+  "file": "libmc.c",
+  "name": "mceGetInfoApdx",
+  "ref": "ff2",
+  "ref_addr": "0028cda8",
+  "size": 88,
+  "symbol": "mceGetInfoApdx",
+  "tier": "lib-match"
+ },
+ "0024dd90": {
+  "file": null,
+  "name": "sceMcGetInfo",
+  "ref": "ff3",
+  "ref_addr": "00285cc8",
+  "size": 380,
+  "symbol": "sceMcGetInfo",
+  "tier": "lib-match"
+ },
+ "0024df10": {
+  "file": null,
+  "name": "sceMcUdCheckNewCard",
+  "ref": "ff3",
+  "ref_addr": "00285e48",
+  "size": 112,
+  "symbol": "sceMcUdCheckNewCard",
+  "tier": "lib-match"
+ },
+ "0024e0d0": {
+  "file": "libmc.c",
+  "name": "mceStorePwd",
+  "ref": "ff2",
+  "ref_addr": "0028d140",
+  "size": 140,
+  "symbol": "mceStorePwd",
+  "tier": "lib-match"
+ },
+ "0024e2a0": {
+  "file": null,
+  "name": "sceMcFormat",
+  "ref": "ff3",
+  "ref_addr": "002861d8",
+  "size": 204,
+  "symbol": "sceMcFormat",
+  "tier": "lib-match"
+ },
+ "0024e370": {
+  "file": null,
+  "name": "sceMcDelete",
+  "ref": "ff3",
+  "ref_addr": "002862a8",
+  "size": 284,
+  "symbol": "sceMcDelete",
+  "tier": "lib-match"
+ },
+ "0024e490": {
+  "file": null,
+  "name": "sceMcFlush",
+  "ref": "ff3",
+  "ref_addr": "002863c8",
+  "size": 188,
+  "symbol": "sceMcFlush",
+  "tier": "lib-match"
+ },
+ "0024e878": {
+  "file": null,
+  "name": "sceMcUnformat",
+  "ref": "ff3",
+  "ref_addr": "002867b0",
+  "size": 204,
+  "symbol": "sceMcUnformat",
+  "tier": "lib-match"
+ },
+ "0024eb28": {
+  "file": null,
+  "name": "sceMpegCreate",
+  "ref": "ff3",
+  "ref_addr": "002888b8",
+  "size": 568,
+  "symbol": "sceMpegCreate",
+  "tier": "lib-match"
+ },
+ "0024ef28": {
+  "file": null,
+  "name": "_getpic",
+  "ref": "ff3",
+  "ref_addr": "00288cb8",
+  "size": 436,
+  "symbol": "_getpic",
+  "tier": "lib-match"
+ },
+ "0024f398": {
+  "file": null,
+  "name": "_decodeOrSkipFrame",
+  "ref": "ff3",
+  "ref_addr": "00289128",
+  "size": 368,
+  "symbol": "_decodeOrSkipFrame",
+  "tier": "lib-match"
+ },
+ "0024f6d0": {
+  "file": "mpeg.c",
+  "name": "sceMpegInit",
+  "ref": "ff2",
+  "ref_addr": "0028ffb0",
+  "size": 176,
+  "symbol": "sceMpegInit",
+  "tier": "lib-match"
+ },
+ "0024f780": {
+  "file": null,
+  "name": "sceMpegDelete",
+  "ref": "ff3",
+  "ref_addr": "00289510",
+  "size": 68,
+  "symbol": "sceMpegDelete",
+  "tier": "lib-match"
+ },
+ "0024f788": {
+  "file": "mpeg.c",
+  "name": "sceMpegAddBs",
+  "ref": "ff2",
+  "ref_addr": "00290278",
+  "size": 60,
+  "symbol": "sceMpegAddBs",
+  "tier": "lib-match"
+ },
+ "0024f7c8": {
+  "file": null,
+  "name": "sceMpegGetPicture",
+  "ref": "ff3",
+  "ref_addr": "00289558",
+  "size": 72,
+  "symbol": "sceMpegGetPicture",
+  "tier": "lib-match"
+ },
+ "0024f868": {
+  "file": null,
+  "name": "sceMpegReset",
+  "ref": "ff3",
+  "ref_addr": "002895f8",
+  "size": 124,
+  "symbol": "sceMpegReset",
+  "tier": "lib-match"
+ },
+ "0024f8e8": {
+  "file": null,
+  "name": "sceMpegIsEnd",
+  "ref": "ff3",
+  "ref_addr": "00289678",
+  "size": 88,
+  "symbol": "sceMpegIsEnd",
+  "tier": "lib-match"
+ },
+ "0024f8f8": {
+  "file": "mpeg.c",
+  "name": "sceMpegIsRefBuffEmpty",
+  "ref": "ff2",
+  "ref_addr": "002903f0",
+  "size": 16,
+  "symbol": "sceMpegIsRefBuffEmpty",
+  "tier": "lib-match-low"
+ },
+ "0024f940": {
+  "file": "mpeg.c",
+  "name": "sceMpegAddCallback",
+  "ref": "ff2",
+  "ref_addr": "002904b8",
+  "size": 52,
+  "symbol": "sceMpegAddCallback",
+  "tier": "lib-match"
+ },
+ "0024fab0": {
+  "file": null,
+  "name": "_decodeOrSkip",
+  "ref": "ff3",
+  "ref_addr": "00289840",
+  "size": 68,
+  "symbol": "_decodeOrSkip",
+  "tier": "lib-match"
+ },
+ "0024fba0": {
+  "file": "mpeg.c",
+  "name": "sceMpegSetDefaultPtsGap",
+  "ref": "ff2",
+  "ref_addr": "00290590",
+  "size": 24,
+  "symbol": "sceMpegSetDefaultPtsGap",
+  "tier": "lib-match"
+ },
+ "0024fbb8": {
+  "file": "mpeg.c",
+  "name": "sceMpegResetDefaultPtsGap",
+  "ref": "ff2",
+  "ref_addr": "002905a8",
+  "size": 20,
+  "symbol": "sceMpegResetDefaultPtsGap",
+  "tier": "lib-match-low"
+ },
+ "0024fbf0": {
+  "file": "mpeg.c",
+  "name": "sceMpegDispWidth",
+  "ref": "ff2",
+  "ref_addr": "002905d0",
+  "size": 12,
+  "symbol": "sceMpegDispWidth",
+  "tier": "lib-match-low"
+ },
+ "0024fc48": {
+  "file": null,
+  "name": "_decPicture",
+  "ref": "ff3",
+  "ref_addr": "002899d8",
+  "size": 204,
+  "symbol": "_decPicture",
+  "tier": "lib-match"
+ },
+ "0024fd18": {
+  "file": "mpeg.c",
+  "name": "_alalcInit",
+  "ref": "ff2",
+  "ref_addr": "00290638",
+  "size": 20,
+  "symbol": "_alalcInit",
+  "tier": "lib-match-low"
+ },
+ "0024fd30": {
+  "file": "mpeg.c",
+  "name": "_alalcSetDynamic",
+  "ref": "ff2",
+  "ref_addr": "00290650",
+  "size": 12,
+  "symbol": "_alalcSetDynamic",
+  "tier": "lib-match-low"
+ },
+ "0024fd50": {
+  "file": "mpeg.c",
+  "name": "_alalcAlloc",
+  "ref": "ff2",
+  "ref_addr": "00290670",
+  "size": 108,
+  "symbol": "_alalcAlloc",
+  "tier": "lib-match"
+ },
+ "0024fdc0": {
+  "file": "mpeg.c",
+  "name": "_alalcRest",
+  "ref": "ff2",
+  "ref_addr": "002906e0",
+  "size": 24,
+  "symbol": "_alalcRest",
+  "tier": "lib-match"
+ },
+ "00250798": {
+  "file": null,
+  "name": "_lastFrame",
+  "ref": "ff3",
+  "ref_addr": "0028a528",
+  "size": 192,
+  "symbol": "_lastFrame",
+  "tier": "lib-match"
+ },
+ "00250f80": {
+  "file": "csc.c",
+  "name": "_ch3dmaCSC",
+  "ref": "ff2",
+  "ref_addr": "002968d0",
+  "size": 328,
+  "symbol": "_ch3dmaCSC",
+  "tier": "lib-match"
+ },
+ "002510c8": {
+  "file": "csc.c",
+  "name": "_ch4dma",
+  "ref": "ff2",
+  "ref_addr": "00296bd8",
+  "size": 212,
+  "symbol": "_ch4dma",
+  "tier": "lib-match"
+ },
+ "002511a0": {
+  "file": "pack.c",
+  "name": "_id2type",
+  "ref": "ff2",
+  "ref_addr": "0028f218",
+  "size": 508,
+  "symbol": "_id2type",
+  "tier": "lib-match"
+ },
+ "00253da0": {
+  "file": "pack.c",
+  "name": "sceMpegDemuxPss",
+  "ref": "ff2",
+  "ref_addr": "0028f728",
+  "size": 32,
+  "symbol": "sceMpegDemuxPss",
+  "tier": "lib-match"
+ },
+ "00253dc0": {
+  "file": null,
+  "name": "sceMpegAddStrCallback",
+  "ref": "ff3",
+  "ref_addr": "0028db50",
+  "size": 468,
+  "symbol": "sceMpegAddStrCallback",
+  "tier": "lib-match"
+ },
+ "00253f98": {
+  "file": "init.c",
+  "name": "_ErrMessage",
+  "ref": "ff2",
+  "ref_addr": "00290db0",
+  "size": 16,
+  "symbol": "_ErrMessage",
+  "tier": "lib-match-low"
+ },
+ "00254110": {
+  "file": null,
+  "name": "_Error",
+  "ref": "ff3",
+  "ref_addr": "0028dea0",
+  "size": 84,
+  "symbol": "_Error",
+  "tier": "lib-match"
+ },
+ "00254a40": {
+  "file": null,
+  "name": "_motionComp0",
+  "ref": "ff3",
+  "ref_addr": "0028e7d0",
+  "size": 592,
+  "symbol": "_motionComp0",
+  "tier": "lib-match"
+ },
+ "00254c90": {
+  "file": null,
+  "name": "_getRef0",
+  "ref": "ff3",
+  "ref_addr": "0028ea20",
+  "size": 1160,
+  "symbol": "_getRef0",
+  "tier": "lib-match"
+ },
+ "00255118": {
+  "file": null,
+  "name": "_doMC",
+  "ref": "ff3",
+  "ref_addr": "0028eea8",
+  "size": 540,
+  "symbol": "_doMC",
+  "tier": "lib-match"
+ },
+ "00255338": {
+  "file": null,
+  "name": "_pictureData0",
+  "ref": "ff3",
+  "ref_addr": "0028f0c8",
+  "size": 576,
+  "symbol": "_pictureData0",
+  "tier": "lib-match"
+ },
+ "00255578": {
+  "file": null,
+  "name": "_slice0",
+  "ref": "ff3",
+  "ref_addr": "0028f308",
+  "size": 812,
+  "symbol": "_slice0",
+  "tier": "lib-match"
+ },
+ "00255cd0": {
+  "file": "mpc.c",
+  "name": "_motionVectors",
+  "ref": "ff2",
+  "ref_addr": "00294448",
+  "size": 412,
+  "symbol": "_motionVectors",
+  "tier": "lib-match"
+ },
+ "00256540": {
+  "file": null,
+  "name": "_flushBuf",
+  "ref": "ff3",
+  "ref_addr": "002902d0",
+  "size": 360,
+  "symbol": "_flushBuf",
+  "tier": "lib-match"
+ },
+ "00256828": {
+  "file": null,
+  "name": "_nextBit",
+  "ref": "ff3",
+  "ref_addr": "002905b8",
+  "size": 232,
+  "symbol": "_nextBit",
+  "tier": "lib-match"
+ },
+ "00258360": {
+  "file": null,
+  "name": "_groupOfPicturesHeader",
+  "ref": "ff3",
+  "ref_addr": "002920f0",
+  "size": 160,
+  "symbol": "_groupOfPicturesHeader",
+  "tier": "lib-match"
+ },
+ "00258548": {
+  "file": null,
+  "name": "_sequenceExtension",
+  "ref": "ff3",
+  "ref_addr": "002922d8",
+  "size": 320,
+  "symbol": "_sequenceExtension",
+  "tier": "lib-match"
+ },
+ "00258688": {
+  "file": null,
+  "name": "_quantMatrixExtension",
+  "ref": "ff3",
+  "ref_addr": "00292418",
+  "size": 780,
+  "symbol": "_quantMatrixExtension",
+  "tier": "lib-match"
+ },
+ "00258e80": {
+  "file": null,
+  "name": "_pictureDisplayExtension",
+  "ref": "ff3",
+  "ref_addr": "00292c10",
+  "size": 244,
+  "symbol": "_pictureDisplayExtension",
+  "tier": "lib-match"
+ },
+ "00258f78": {
+  "file": "graphdev.c",
+  "name": "sceGsResetGraph",
+  "ref": "ff2",
+  "ref_addr": "0028dad0",
+  "size": 400,
+  "symbol": "sceGsResetGraph",
+  "tier": "lib-match"
+ },
+ "00259118": {
+  "file": "graphdev.c",
+  "name": "sceGsResetPath",
+  "ref": "ff2",
+  "ref_addr": "0028dc70",
+  "size": 104,
+  "symbol": "sceGsResetPath",
+  "tier": "lib-match"
+ },
+ "00259180": {
+  "file": "graphdev.c",
+  "name": "checkModelVersion",
+  "ref": "ff2",
+  "ref_addr": "0028e9b0",
+  "size": 160,
+  "symbol": "checkModelVersion",
+  "tier": "lib-match"
+ },
+ "00259220": {
+  "file": "graphdev.c",
+  "name": "_GetGsDxDyOffset",
+  "ref": "ff2",
+  "ref_addr": "0028ea50",
+  "size": 12,
+  "symbol": "_GetGsDxDyOffset",
+  "tier": "lib-match-low"
+ },
+ "002595a8": {
+  "file": null,
+  "name": "sceGsPutDispEnv",
+  "ref": "ff3",
+  "ref_addr": "00288190",
+  "size": 188,
+  "symbol": "sceGsPutDispEnv",
+  "tier": "lib-match"
+ },
+ "00259668": {
+  "file": null,
+  "name": "sceGsPutDrawEnv",
+  "ref": "ff3",
+  "ref_addr": "00286b98",
+  "size": 232,
+  "symbol": "sceGsPutDrawEnv",
+  "tier": "lib-match"
+ },
+ "00259750": {
+  "file": "graphdev.c",
+  "name": "sceGsSetDefDBuff",
+  "ref": "ff2",
+  "ref_addr": "0028dcd8",
+  "size": 664,
+  "symbol": "sceGsSetDefDBuff",
+  "tier": "lib-match"
+ },
+ "00259a48": {
+  "file": "graphdev.c",
+  "name": "sceGsSyncV",
+  "ref": "ff2",
+  "ref_addr": "0028df70",
+  "size": 148,
+  "symbol": "sceGsSyncV",
+  "tier": "lib-match"
+ },
+ "00259ae0": {
+  "file": "graphdev.c",
+  "name": "sceGsSyncPath",
+  "ref": "ff2",
+  "ref_addr": "0028e008",
+  "size": 788,
+  "symbol": "sceGsSyncPath",
+  "tier": "lib-match"
+ },
+ "00259df8": {
+  "file": "graphdev.c",
+  "name": "sceGsSetDefLoadImage",
+  "ref": "ff2",
+  "ref_addr": "0028e380",
+  "size": 484,
+  "symbol": "sceGsSetDefLoadImage",
+  "tier": "lib-match"
+ },
+ "00259fe0": {
+  "file": "graphdev.c",
+  "name": "sceGsSetDefStoreImage",
+  "ref": "ff2",
+  "ref_addr": "0028e568",
+  "size": 320,
+  "symbol": "sceGsSetDefStoreImage",
+  "tier": "lib-match"
+ },
+ "0025a120": {
+  "file": "graphdev.c",
+  "name": "sceGsExecLoadImage",
+  "ref": "ff2",
+  "ref_addr": "0028e6a8",
+  "size": 380,
+  "symbol": "sceGsExecLoadImage",
+  "tier": "lib-match"
+ },
+ "0025a2a0": {
+  "file": null,
+  "name": "sceGsExecStoreImage",
+  "ref": "ff3",
+  "ref_addr": "002872f0",
+  "size": 1676,
+  "symbol": "sceGsExecStoreImage",
+  "tier": "lib-match"
+ },
+ "0025a930": {
+  "file": "graphdev.c",
+  "name": "sceGsSyncVCallback",
+  "ref": "ff2",
+  "ref_addr": "0028e828",
+  "size": 160,
+  "symbol": "sceGsSyncVCallback",
+  "tier": "lib-match"
+ },
+ "0025a9d0": {
+  "file": "graphdev.c",
+  "name": "sceGsSetHalfOffset",
+  "ref": "ff2",
+  "ref_addr": "0028e908",
+  "size": 136,
+  "symbol": "sceGsSetHalfOffset",
+  "tier": "lib-match"
+ },
+ "0025aa58": {
+  "file": "graphdev.c",
+  "name": "sceGszbufaddr",
+  "ref": "ff2",
+  "ref_addr": "0028edd8",
+  "size": 200,
+  "symbol": "sceGszbufaddr",
+  "tier": "lib-match"
+ },
+ "0025ab20": {
+  "file": "graphdev.c",
+  "name": "sceGsSetDefDrawEnv",
+  "ref": "ff2",
+  "ref_addr": "0028eea0",
+  "size": 484,
+  "symbol": "sceGsSetDefDrawEnv",
+  "tier": "lib-match"
+ },
+ "0025ad08": {
+  "file": "graphdev.c",
+  "name": "sceGsSetDefClear",
+  "ref": "ff2",
+  "ref_addr": "0028f088",
+  "size": 260,
+  "symbol": "sceGsSetDefClear",
+  "tier": "lib-match"
+ },
+ "0025ae10": {
+  "file": "libdma.c",
+  "name": "WaitDma",
+  "ref": "ff2",
+  "ref_addr": "0027ca08",
+  "size": 112,
+  "symbol": "WaitDma",
+  "tier": "lib-match"
+ },
+ "0025ae80": {
+  "file": "libdma.c",
+  "name": "WatchDma",
+  "ref": "ff2",
+  "ref_addr": "0027ca78",
+  "size": 132,
+  "symbol": "WatchDma",
+  "tier": "lib-match"
+ },
+ "0025af08": {
+  "file": "libdma.c",
+  "name": "CheckAddress",
+  "ref": "ff2",
+  "ref_addr": "0027cb00",
+  "size": 40,
+  "symbol": "CheckAddress",
+  "tier": "lib-match"
+ },
+ "0025af30": {
+  "file": "libdma.c",
+  "name": "memclr",
+  "ref": "ff2",
+  "ref_addr": "0027cb28",
+  "size": 48,
+  "symbol": "memclr",
+  "tier": "lib-match"
+ },
+ "0025af68": {
+  "file": "libdma.c",
+  "name": "sceDmaGetChan",
+  "ref": "ff2",
+  "ref_addr": "0027cb60",
+  "size": 40,
+  "symbol": "sceDmaGetChan",
+  "tier": "lib-match"
+ },
+ "0025af90": {
+  "file": "libdma.c",
+  "name": "sceDmaReset",
+  "ref": "ff2",
+  "ref_addr": "0027cb88",
+  "size": 220,
+  "symbol": "sceDmaReset",
+  "tier": "lib-match"
+ },
+ "0025b248": {
+  "file": null,
+  "name": "sceDmaGetEnv",
+  "ref": "ff3",
+  "ref_addr": "00275880",
+  "size": 76,
+  "symbol": "sceDmaGetEnv",
+  "tier": "lib-match"
+ },
+ "0025b280": {
+  "file": "libdma.c",
+  "name": "sceDmaPutStallAddr",
+  "ref": "ff2",
+  "ref_addr": "0027ce78",
+  "size": 20,
+  "symbol": "sceDmaPutStallAddr",
+  "tier": "lib-match-low"
+ },
+ "0025b298": {
+  "file": "libdma.c",
+  "name": "sceDmaSend",
+  "ref": "ff2",
+  "ref_addr": "0027ce90",
+  "size": 104,
+  "symbol": "sceDmaSend",
+  "tier": "lib-match"
+ },
+ "0025b300": {
+  "file": "libdma.c",
+  "name": "sceDmaSendN",
+  "ref": "ff2",
+  "ref_addr": "0027cef8",
+  "size": 116,
+  "symbol": "sceDmaSendN",
+  "tier": "lib-match"
+ },
+ "0025b378": {
+  "file": "libdma.c",
+  "name": "sceDmaSendI",
+  "ref": "ff2",
+  "ref_addr": "0027cf70",
+  "size": 116,
+  "symbol": "sceDmaSendI",
+  "tier": "lib-match"
+ },
+ "0025b3f0": {
+  "file": "libdma.c",
+  "name": "sceDmaRecv",
+  "ref": "ff2",
+  "ref_addr": "0027cfe8",
+  "size": 72,
+  "symbol": "sceDmaRecv",
+  "tier": "lib-match"
+ },
+ "0025b438": {
+  "file": "libdma.c",
+  "name": "sceDmaRecvN",
+  "ref": "ff2",
+  "ref_addr": "0027d030",
+  "size": 124,
+  "symbol": "sceDmaRecvN",
+  "tier": "lib-match"
+ },
+ "0025b4b8": {
+  "file": "libdma.c",
+  "name": "sceDmaRecvI",
+  "ref": "ff2",
+  "ref_addr": "0027d0b0",
+  "size": 128,
+  "symbol": "sceDmaRecvI",
+  "tier": "lib-match"
+ },
+ "0025b538": {
+  "file": "libdma.c",
+  "name": "sceDmaSync",
+  "ref": "ff2",
+  "ref_addr": "0027d130",
+  "size": 56,
+  "symbol": "sceDmaSync",
+  "tier": "lib-match"
+ },
+ "0025b570": {
+  "file": "libdma.c",
+  "name": "sceDmaWatch",
+  "ref": "ff2",
+  "ref_addr": "0027d168",
+  "size": 52,
+  "symbol": "sceDmaWatch",
+  "tier": "lib-match"
+ },
+ "0025b5a8": {
+  "file": null,
+  "name": "sceDmaPause",
+  "ref": "ff3",
+  "ref_addr": "00275be0",
+  "size": 172,
+  "symbol": "sceDmaPause",
+  "tier": "lib-match"
+ },
+ "0025b640": {
+  "file": "libdma.c",
+  "name": "sceDmaRestart",
+  "ref": "ff2",
+  "ref_addr": "0027d238",
+  "size": 20,
+  "symbol": "sceDmaRestart",
+  "tier": "lib-match-low"
+ },
+ "0025b658": {
+  "file": null,
+  "name": "sceVu0ApplyMatrix",
+  "ref": "ff3",
+  "ref_addr": "00282ce0",
+  "size": 44,
+  "symbol": "sceVu0ApplyMatrix",
+  "tier": "lib-match"
+ },
+ "0025b688": {
+  "file": null,
+  "name": "sceVu0MulMatrix",
+  "ref": "ff3",
+  "ref_addr": "00282d10",
+  "size": 64,
+  "symbol": "sceVu0MulMatrix",
+  "tier": "lib-match"
+ },
+ "0025b6d0": {
+  "file": null,
+  "name": "sceVu0OuterProduct",
+  "ref": "ff3",
+  "ref_addr": "00282d58",
+  "size": 28,
+  "symbol": "sceVu0OuterProduct",
+  "tier": "lib-match"
+ },
+ "0025b6f0": {
+  "file": null,
+  "name": "sceVu0InnerProduct",
+  "ref": "ff3",
+  "ref_addr": "00282d78",
+  "size": 32,
+  "symbol": "sceVu0InnerProduct",
+  "tier": "lib-match"
+ },
+ "0025b718": {
+  "file": null,
+  "name": "sceVu0Normalize",
+  "ref": "ff3",
+  "ref_addr": "00282da0",
+  "size": 60,
+  "symbol": "sceVu0Normalize",
+  "tier": "lib-match"
+ },
+ "0025b7a0": {
+  "file": null,
+  "name": "sceVu0InversMatrix",
+  "ref": "ff3",
+  "ref_addr": "00282e28",
+  "size": 108,
+  "symbol": "sceVu0InversMatrix",
+  "tier": "lib-match"
+ },
+ "0025b810": {
+  "file": null,
+  "name": "sceVu0DivVector",
+  "ref": "ff3",
+  "ref_addr": "00282e98",
+  "size": 104,
+  "symbol": "sceVu0DivVector",
+  "tier": "lib-match"
+ },
+ "0025b8a8": {
+  "file": null,
+  "name": "sceVu0MulVector",
+  "ref": "ff3",
+  "ref_addr": "00282f30",
+  "size": 20,
+  "symbol": "sceVu0MulVector",
+  "tier": "lib-match-low"
+ },
+ "0025b8d8": {
+  "file": null,
+  "name": "sceVu0TransMatrix",
+  "ref": "ff3",
+  "ref_addr": "00282f60",
+  "size": 44,
+  "symbol": "sceVu0TransMatrix",
+  "tier": "lib-match"
+ },
+ "0025b908": {
+  "file": null,
+  "name": "sceVu0CopyVector",
+  "ref": "ff3",
+  "ref_addr": "00282f90",
+  "size": 12,
+  "symbol": "sceVu0CopyVector",
+  "tier": "lib-match-low"
+ },
+ "0025b980": {
+  "file": null,
+  "name": "sceVu0UnitMatrix",
+  "ref": "ff3",
+  "ref_addr": "00283008",
+  "size": 40,
+  "symbol": "sceVu0UnitMatrix",
+  "tier": "lib-match"
+ },
+ "0025b9a8": {
+  "file": "libvu0.c",
+  "name": "_sceVu0ecossin",
+  "ref": "ff2",
+  "ref_addr": "0028a088",
+  "size": 112,
+  "symbol": "_sceVu0ecossin",
+  "tier": "lib-match"
+ },
+ "0025ba20": {
+  "file": null,
+  "name": "sceVu0RotMatrixZ",
+  "ref": "ff3",
+  "ref_addr": "002830a8",
+  "size": 160,
+  "symbol": "sceVu0RotMatrixZ",
+  "tier": "lib-match"
+ },
+ "0025bac8": {
+  "file": null,
+  "name": "sceVu0RotMatrixX",
+  "ref": "ff3",
+  "ref_addr": "00283150",
+  "size": 164,
+  "symbol": "sceVu0RotMatrixX",
+  "tier": "lib-match"
+ },
+ "0025bb70": {
+  "file": null,
+  "name": "sceVu0RotMatrixY",
+  "ref": "ff3",
+  "ref_addr": "002831f8",
+  "size": 164,
+  "symbol": "sceVu0RotMatrixY",
+  "tier": "lib-match"
+ },
+ "0025bc18": {
+  "file": null,
+  "name": "sceVu0RotMatrix",
+  "ref": "ff3",
+  "ref_addr": "002832a0",
+  "size": 116,
+  "symbol": "sceVu0RotMatrix",
+  "tier": "lib-match"
+ },
+ "0025bc90": {
+  "file": "libvu0.c",
+  "name": "sceVu0CameraMatrix",
+  "ref": "ff2",
+  "ref_addr": "0028a4b8",
+  "size": 176,
+  "symbol": "sceVu0CameraMatrix",
+  "tier": "lib-match"
+ },
+ "0025bd40": {
+  "file": "libvu0.c",
+  "name": "sceVu0NormalLightMatrix",
+  "ref": "ff2",
+  "ref_addr": "0028a568",
+  "size": 192,
+  "symbol": "sceVu0NormalLightMatrix",
+  "tier": "lib-match"
+ },
+ "0025be00": {
+  "file": "libvu0.c",
+  "name": "sceVu0LightColorMatrix",
+  "ref": "ff2",
+  "ref_addr": "0028a628",
+  "size": 104,
+  "symbol": "sceVu0LightColorMatrix",
+  "tier": "lib-match"
+ },
+ "0025be68": {
+  "file": null,
+  "name": "sceVu0ViewScreenMatrix",
+  "ref": "ff3",
+  "ref_addr": "002834f0",
+  "size": 664,
+  "symbol": "sceVu0ViewScreenMatrix",
+  "tier": "lib-match"
+ },
+ "0025bf70": {
+  "file": "libvu0.c",
+  "name": "sceVu0DropShadowMatrix",
+  "ref": "ff2",
+  "ref_addr": "0028a798",
+  "size": 400,
+  "symbol": "sceVu0DropShadowMatrix",
+  "tier": "lib-match"
+ },
+ "0025c100": {
+  "file": null,
+  "name": "sceVu0RotTransPersN",
+  "ref": "ff3",
+  "ref_addr": "00283788",
+  "size": 84,
+  "symbol": "sceVu0RotTransPersN",
+  "tier": "lib-match"
+ },
+ "0025c158": {
+  "file": null,
+  "name": "sceVu0RotTransPers",
+  "ref": "ff3",
+  "ref_addr": "002837e0",
+  "size": 100,
+  "symbol": "sceVu0RotTransPers",
+  "tier": "lib-match"
+ },
+ "0025c1a0": {
+  "file": "libvu0.c",
+  "name": "sceVu0CopyVectorXYZ",
+  "ref": "ff2",
+  "ref_addr": "0028aa98",
+  "size": 28,
+  "symbol": "sceVu0CopyVectorXYZ",
+  "tier": "lib-match"
+ },
+ "0025c1c0": {
+  "file": null,
+  "name": "sceVu0InterVector",
+  "ref": "ff3",
+  "ref_addr": "00283848",
+  "size": 44,
+  "symbol": "sceVu0InterVector",
+  "tier": "lib-match"
+ },
+ "0025c1f0": {
+  "file": null,
+  "name": "sceVu0ScaleVectorXYZ",
+  "ref": "ff3",
+  "ref_addr": "00283878",
+  "size": 428,
+  "symbol": "sceVu0ScaleVectorXYZ",
+  "tier": "lib-match"
+ },
+ "0025c3a0": {
+  "file": "devvu0.c",
+  "name": "sceDevVu0CheckBusy",
+  "ref": "ff2",
+  "ref_addr": "0027d250",
+  "size": 20,
+  "symbol": "sceDevVu0CheckBusy",
+  "tier": "lib-match-low"
+ },
+ "0025c3b8": {
+  "file": "devvu0.c",
+  "name": "sceDevVu0Reset",
+  "ref": "ff2",
+  "ref_addr": "0027d268",
+  "size": 16,
+  "symbol": "sceDevVu0Reset",
+  "tier": "lib-match-low"
+ },
+ "0025c430": {
+  "file": null,
+  "name": "sceDevVu0Continue",
+  "ref": "ff3",
+  "ref_addr": "00275d20",
+  "size": 208,
+  "symbol": "sceDevVu0Continue",
+  "tier": "lib-match"
+ },
+ "0025c480": {
+  "file": "devvu0.c",
+  "name": "sceDevVu0PutDBit",
+  "ref": "ff2",
+  "ref_addr": "0027d330",
+  "size": 44,
+  "symbol": "sceDevVu0PutDBit",
+  "tier": "lib-match"
+ },
+ "0025c4b0": {
+  "file": "devvu0.c",
+  "name": "sceDevVu0PutTBit",
+  "ref": "ff2",
+  "ref_addr": "0027d360",
+  "size": 44,
+  "symbol": "sceDevVu0PutTBit",
+  "tier": "lib-match"
+ },
+ "0025c4e0": {
+  "file": "devvu0.c",
+  "name": "sceDevVu0GetDBit",
+  "ref": "ff2",
+  "ref_addr": "0027d390",
+  "size": 16,
+  "symbol": "sceDevVu0GetDBit",
+  "tier": "lib-match-low"
+ },
+ "0025c4f0": {
+  "file": "devvu0.c",
+  "name": "sceDevVu0GetTBit",
+  "ref": "ff2",
+  "ref_addr": "0027d3a0",
+  "size": 16,
+  "symbol": "sceDevVu0GetTBit",
+  "tier": "lib-match-low"
+ },
+ "0025c500": {
+  "file": "devvu0.c",
+  "name": "sceDevVu0Sync",
+  "ref": "ff2",
+  "ref_addr": "0027d3b0",
+  "size": 64,
+  "symbol": "sceDevVu0Sync",
+  "tier": "lib-match"
+ },
+ "0025c540": {
+  "file": "devvu0.c",
+  "name": "sceDevVu0Exec",
+  "ref": "ff2",
+  "ref_addr": "0027d3f0",
+  "size": 16,
+  "symbol": "sceDevVu0Exec",
+  "tier": "lib-match-low"
+ },
+ "0025c550": {
+  "file": "devvu0.c",
+  "name": "sceDevVu0GetTpc",
+  "ref": "ff2",
+  "ref_addr": "0027d400",
+  "size": 12,
+  "symbol": "sceDevVu0GetTpc",
+  "tier": "lib-match-low"
+ },
+ "0025c560": {
+  "file": "devvu0.c",
+  "name": "sceDevVu0GetCnd",
+  "ref": "ff2",
+  "ref_addr": "0027d410",
+  "size": 364,
+  "symbol": "sceDevVu0GetCnd",
+  "tier": "lib-match"
+ },
+ "0025c6d0": {
+  "file": "devvu0.c",
+  "name": "sceDevVu0PutCnd",
+  "ref": "ff2",
+  "ref_addr": "0027d580",
+  "size": 356,
+  "symbol": "sceDevVu0PutCnd",
+  "tier": "lib-match"
+ },
+ "0025cee0": {
+  "file": null,
+  "name": "sceDevVif0GetCnd",
+  "ref": "ff3",
+  "ref_addr": "00276278",
+  "size": 476,
+  "symbol": "sceDevVif0GetCnd",
+  "tier": "lib-match"
+ },
+ "0025d210": {
+  "file": "devvif1.c",
+  "name": "sceDevVif1GetCnd",
+  "ref": "ff2",
+  "ref_addr": "0027db68",
+  "size": 472,
+  "symbol": "sceDevVif1GetCnd",
+  "tier": "lib-match"
+ },
+ "0025d448": {
+  "file": "devvif1.c",
+  "name": "sceDevVif1GetFifo",
+  "ref": "ff2",
+  "ref_addr": "0027dda0",
+  "size": 92,
+  "symbol": "sceDevVif1GetFifo",
+  "tier": "lib-match"
+ },
+ "0025d4c0": {
+  "file": "klib.s",
+  "name": "RFU000_FullReset",
+  "ref": "ff2",
+  "ref_addr": "0027de00",
+  "size": 12,
+  "symbol": "RFU000_FullReset",
+  "tier": "lib-match-low"
+ },
+ "0025d4d0": {
+  "file": "klib.s",
+  "name": "ResetEE",
+  "ref": "ff2",
+  "ref_addr": "0027de10",
+  "size": 12,
+  "symbol": "ResetEE",
+  "tier": "lib-match-low"
+ },
+ "0025d4e0": {
+  "file": null,
+  "name": "SetGsCrt",
+  "ref": "ff3",
+  "ref_addr": "00276860",
+  "size": 28,
+  "symbol": "SetGsCrt",
+  "tier": "lib-match"
+ },
+ "0025d4f0": {
+  "file": "klib.s",
+  "name": "RFU003",
+  "ref": "ff2",
+  "ref_addr": "0027de30",
+  "size": 12,
+  "symbol": "RFU003",
+  "tier": "lib-match-low"
+ },
+ "0025d500": {
+  "file": null,
+  "name": "_Exit",
+  "ref": "ff3",
+  "ref_addr": "00276880",
+  "size": 28,
+  "symbol": "_Exit",
+  "tier": "lib-match"
+ },
+ "0025d510": {
+  "file": "klib.s",
+  "name": "RFU005",
+  "ref": "ff2",
+  "ref_addr": "0027de50",
+  "size": 12,
+  "symbol": "RFU005",
+  "tier": "lib-match-low"
+ },
+ "0025d520": {
+  "file": null,
+  "name": "_LoadExecPS2",
+  "ref": "ff3",
+  "ref_addr": "002768a0",
+  "size": 108,
+  "symbol": "_LoadExecPS2",
+  "tier": "lib-match"
+ },
+ "0025d530": {
+  "file": "klib.s",
+  "name": "_ExecPS2",
+  "ref": "ff2",
+  "ref_addr": "0027de70",
+  "size": 12,
+  "symbol": "_ExecPS2",
+  "tier": "lib-match-low"
+ },
+ "0025d540": {
+  "file": "klib.s",
+  "name": "RFU008",
+  "ref": "ff2",
+  "ref_addr": "0027de80",
+  "size": 12,
+  "symbol": "RFU008",
+  "tier": "lib-match-low"
+ },
+ "0025d550": {
+  "file": "klib.s",
+  "name": "RFU009",
+  "ref": "ff2",
+  "ref_addr": "0027de90",
+  "size": 12,
+  "symbol": "RFU009",
+  "tier": "lib-match-low"
+ },
+ "0025d560": {
+  "file": "klib.s",
+  "name": "AddSbusIntcHandler",
+  "ref": "ff2",
+  "ref_addr": "0027dea0",
+  "size": 12,
+  "symbol": "AddSbusIntcHandler",
+  "tier": "lib-match-low"
+ },
+ "0025d570": {
+  "file": "klib.s",
+  "name": "RemoveSbusIntcHandler",
+  "ref": "ff2",
+  "ref_addr": "0027deb0",
+  "size": 12,
+  "symbol": "RemoveSbusIntcHandler",
+  "tier": "lib-match-low"
+ },
+ "0025d580": {
+  "file": "klib.s",
+  "name": "Interrupt2Iop",
+  "ref": "ff2",
+  "ref_addr": "0027dec0",
+  "size": 12,
+  "symbol": "Interrupt2Iop",
+  "tier": "lib-match-low"
+ },
+ "0025d590": {
+  "file": null,
+  "name": "SetVTLBRefillHandler",
+  "ref": "ff3",
+  "ref_addr": "00276910",
+  "size": 44,
+  "symbol": "SetVTLBRefillHandler",
+  "tier": "lib-match"
+ },
+ "0025d5a0": {
+  "file": "klib.s",
+  "name": "SetVCommonHandler",
+  "ref": "ff2",
+  "ref_addr": "0027dee0",
+  "size": 12,
+  "symbol": "SetVCommonHandler",
+  "tier": "lib-match-low"
+ },
+ "0025d5b0": {
+  "file": "klib.s",
+  "name": "SetVInterruptHandler",
+  "ref": "ff2",
+  "ref_addr": "0027def0",
+  "size": 12,
+  "symbol": "SetVInterruptHandler",
+  "tier": "lib-match-low"
+ },
+ "0025d5e0": {
+  "file": "klib.s",
+  "name": "RemoveIntcHandler",
+  "ref": "ff2",
+  "ref_addr": "0027df20",
+  "size": 12,
+  "symbol": "RemoveIntcHandler",
+  "tier": "lib-match-low"
+ },
+ "0025d610": {
+  "file": "klib.s",
+  "name": "RemoveDmacHandler",
+  "ref": "ff2",
+  "ref_addr": "0027df50",
+  "size": 12,
+  "symbol": "RemoveDmacHandler",
+  "tier": "lib-match-low"
+ },
+ "0025d620": {
+  "file": "klib.s",
+  "name": "_EnableIntc",
+  "ref": "ff2",
+  "ref_addr": "0027df60",
+  "size": 12,
+  "symbol": "_EnableIntc",
+  "tier": "lib-match-low"
+ },
+ "0025d630": {
+  "file": "klib.s",
+  "name": "_DisableIntc",
+  "ref": "ff2",
+  "ref_addr": "0027df70",
+  "size": 12,
+  "symbol": "_DisableIntc",
+  "tier": "lib-match-low"
+ },
+ "0025d640": {
+  "file": "klib.s",
+  "name": "_EnableDmac",
+  "ref": "ff2",
+  "ref_addr": "0027df80",
+  "size": 12,
+  "symbol": "_EnableDmac",
+  "tier": "lib-match-low"
+ },
+ "0025d650": {
+  "file": null,
+  "name": "_DisableDmac",
+  "ref": "ff3",
+  "ref_addr": "002769d0",
+  "size": 44,
+  "symbol": "_DisableDmac",
+  "tier": "lib-match"
+ },
+ "0025d660": {
+  "file": "klib.s",
+  "name": "SetAlarm",
+  "ref": "ff2",
+  "ref_addr": "0027dfa0",
+  "size": 12,
+  "symbol": "SetAlarm",
+  "tier": "lib-match-low"
+ },
+ "0025d670": {
+  "file": "klib.s",
+  "name": "ReleaseAlarm",
+  "ref": "ff2",
+  "ref_addr": "0027dfb0",
+  "size": 12,
+  "symbol": "ReleaseAlarm",
+  "tier": "lib-match-low"
+ },
+ "0025d680": {
+  "file": "klib.s",
+  "name": "_iEnableIntc",
+  "ref": "ff2",
+  "ref_addr": "0027dfc0",
+  "size": 12,
+  "symbol": "_iEnableIntc",
+  "tier": "lib-match-low"
+ },
+ "0025d690": {
+  "file": "klib.s",
+  "name": "_iDisableIntc",
+  "ref": "ff2",
+  "ref_addr": "0027dfd0",
+  "size": 12,
+  "symbol": "_iDisableIntc",
+  "tier": "lib-match-low"
+ },
+ "0025d6a0": {
+  "file": "klib.s",
+  "name": "_iEnableDmac",
+  "ref": "ff2",
+  "ref_addr": "0027dfe0",
+  "size": 12,
+  "symbol": "_iEnableDmac",
+  "tier": "lib-match-low"
+ },
+ "0025d6b0": {
+  "file": null,
+  "name": "_iDisableDmac",
+  "ref": "ff3",
+  "ref_addr": "00276a30",
+  "size": 44,
+  "symbol": "_iDisableDmac",
+  "tier": "lib-match"
+ },
+ "0025d6c0": {
+  "file": "klib.s",
+  "name": "iSetAlarm",
+  "ref": "ff2",
+  "ref_addr": "0027e000",
+  "size": 12,
+  "symbol": "iSetAlarm",
+  "tier": "lib-match-low"
+ },
+ "0025d6d0": {
+  "file": "klib.s",
+  "name": "iReleaseAlarm",
+  "ref": "ff2",
+  "ref_addr": "0027e010",
+  "size": 12,
+  "symbol": "iReleaseAlarm",
+  "tier": "lib-match-low"
+ },
+ "0025d6e0": {
+  "file": "klib.s",
+  "name": "CreateThread",
+  "ref": "ff2",
+  "ref_addr": "0027e020",
+  "size": 12,
+  "symbol": "CreateThread",
+  "tier": "lib-match-low"
+ },
+ "0025d6f0": {
+  "file": "klib.s",
+  "name": "DeleteThread",
+  "ref": "ff2",
+  "ref_addr": "0027e030",
+  "size": 12,
+  "symbol": "DeleteThread",
+  "tier": "lib-match-low"
+ },
+ "0025d710": {
+  "file": "klib.s",
+  "name": "ExitThread",
+  "ref": "ff2",
+  "ref_addr": "0027e050",
+  "size": 12,
+  "symbol": "ExitThread",
+  "tier": "lib-match-low"
+ },
+ "0025d720": {
+  "file": "klib.s",
+  "name": "ExitDeleteThread",
+  "ref": "ff2",
+  "ref_addr": "0027e060",
+  "size": 12,
+  "symbol": "ExitDeleteThread",
+  "tier": "lib-match-low"
+ },
+ "0025d730": {
+  "file": null,
+  "name": "TerminateThread",
+  "ref": "ff3",
+  "ref_addr": "00276ab0",
+  "size": 60,
+  "symbol": "TerminateThread",
+  "tier": "lib-match"
+ },
+ "0025d740": {
+  "file": "klib.s",
+  "name": "iTerminateThread",
+  "ref": "ff2",
+  "ref_addr": "0027e080",
+  "size": 12,
+  "symbol": "iTerminateThread",
+  "tier": "lib-match-low"
+ },
+ "0025d750": {
+  "file": "klib.s",
+  "name": "DisableDispatchThread",
+  "ref": "ff2",
+  "ref_addr": "0027e090",
+  "size": 12,
+  "symbol": "DisableDispatchThread",
+  "tier": "lib-match-low"
+ },
+ "0025d760": {
+  "file": "klib.s",
+  "name": "EnableDispatchThread",
+  "ref": "ff2",
+  "ref_addr": "0027e0a0",
+  "size": 12,
+  "symbol": "EnableDispatchThread",
+  "tier": "lib-match-low"
+ },
+ "0025d770": {
+  "file": null,
+  "name": "ChangeThreadPriority",
+  "ref": "ff3",
+  "ref_addr": "00276af0",
+  "size": 28,
+  "symbol": "ChangeThreadPriority",
+  "tier": "lib-match"
+ },
+ "0025d780": {
+  "file": "klib.s",
+  "name": "iChangeThreadPriority",
+  "ref": "ff2",
+  "ref_addr": "0027e0c0",
+  "size": 12,
+  "symbol": "iChangeThreadPriority",
+  "tier": "lib-match-low"
+ },
+ "0025d790": {
+  "file": null,
+  "name": "RotateThreadReadyQueue",
+  "ref": "ff3",
+  "ref_addr": "00276b10",
+  "size": 60,
+  "symbol": "RotateThreadReadyQueue",
+  "tier": "lib-match"
+ },
+ "0025d7a0": {
+  "file": "klib.s",
+  "name": "_iRotateThreadReadyQueue",
+  "ref": "ff2",
+  "ref_addr": "0027e0e0",
+  "size": 12,
+  "symbol": "_iRotateThreadReadyQueue",
+  "tier": "lib-match-low"
+ },
+ "0025d7b0": {
+  "file": "klib.s",
+  "name": "ReleaseWaitThread",
+  "ref": "ff2",
+  "ref_addr": "0027e0f0",
+  "size": 12,
+  "symbol": "ReleaseWaitThread",
+  "tier": "lib-match-low"
+ },
+ "0025d7c0": {
+  "file": "klib.s",
+  "name": "iReleaseWaitThread",
+  "ref": "ff2",
+  "ref_addr": "0027e100",
+  "size": 12,
+  "symbol": "iReleaseWaitThread",
+  "tier": "lib-match-low"
+ },
+ "0025d7d0": {
+  "file": "klib.s",
+  "name": "GetThreadId",
+  "ref": "ff2",
+  "ref_addr": "0027e110",
+  "size": 12,
+  "symbol": "GetThreadId",
+  "tier": "lib-match-low"
+ },
+ "0025d7e0": {
+  "file": null,
+  "name": "ReferThreadStatus",
+  "ref": "ff3",
+  "ref_addr": "00276b60",
+  "size": 28,
+  "symbol": "ReferThreadStatus",
+  "tier": "lib-match"
+ },
+ "0025d7f0": {
+  "file": "klib.s",
+  "name": "iReferThreadStatus",
+  "ref": "ff2",
+  "ref_addr": "0027e130",
+  "size": 12,
+  "symbol": "iReferThreadStatus",
+  "tier": "lib-match-low"
+ },
+ "0025d800": {
+  "file": "klib.s",
+  "name": "SleepThread",
+  "ref": "ff2",
+  "ref_addr": "0027e140",
+  "size": 12,
+  "symbol": "SleepThread",
+  "tier": "lib-match-low"
+ },
+ "0025d810": {
+  "file": "klib.s",
+  "name": "WakeupThread",
+  "ref": "ff2",
+  "ref_addr": "0027e150",
+  "size": 12,
+  "symbol": "WakeupThread",
+  "tier": "lib-match-low"
+ },
+ "0025d820": {
+  "file": null,
+  "name": "_iWakeupThread",
+  "ref": "ff3",
+  "ref_addr": "00276ba0",
+  "size": 44,
+  "symbol": "_iWakeupThread",
+  "tier": "lib-match"
+ },
+ "0025d830": {
+  "file": "klib.s",
+  "name": "CancelWakeupThread",
+  "ref": "ff2",
+  "ref_addr": "0027e170",
+  "size": 12,
+  "symbol": "CancelWakeupThread",
+  "tier": "lib-match-low"
+ },
+ "0025d840": {
+  "file": "klib.s",
+  "name": "iCancelWakeupThread",
+  "ref": "ff2",
+  "ref_addr": "0027e180",
+  "size": 12,
+  "symbol": "iCancelWakeupThread",
+  "tier": "lib-match-low"
+ },
+ "0025d850": {
+  "file": "klib.s",
+  "name": "SuspendThread",
+  "ref": "ff2",
+  "ref_addr": "0027e190",
+  "size": 12,
+  "symbol": "SuspendThread",
+  "tier": "lib-match-low"
+ },
+ "0025d860": {
+  "file": "klib.s",
+  "name": "_iSuspendThread",
+  "ref": "ff2",
+  "ref_addr": "0027e1a0",
+  "size": 12,
+  "symbol": "_iSuspendThread",
+  "tier": "lib-match-low"
+ },
+ "0025d870": {
+  "file": null,
+  "name": "ResumeThread",
+  "ref": "ff3",
+  "ref_addr": "00276bf0",
+  "size": 76,
+  "symbol": "ResumeThread",
+  "tier": "lib-match"
+ },
+ "0025d880": {
+  "file": "klib.s",
+  "name": "iResumeThread",
+  "ref": "ff2",
+  "ref_addr": "0027e1c0",
+  "size": 12,
+  "symbol": "iResumeThread",
+  "tier": "lib-match-low"
+ },
+ "0025d890": {
+  "file": "klib.s",
+  "name": "JoinThread",
+  "ref": "ff2",
+  "ref_addr": "0027e1d0",
+  "size": 12,
+  "symbol": "JoinThread",
+  "tier": "lib-match-low"
+ },
+ "0025d8a0": {
+  "file": "klib.s",
+  "name": "RFU060",
+  "ref": "ff2",
+  "ref_addr": "0027e1e0",
+  "size": 12,
+  "symbol": "RFU060",
+  "tier": "lib-match-low"
+ },
+ "0025d8b0": {
+  "file": "klib.s",
+  "name": "RFU061",
+  "ref": "ff2",
+  "ref_addr": "0027e1f0",
+  "size": 12,
+  "symbol": "RFU061",
+  "tier": "lib-match-low"
+ },
+ "0025d8c0": {
+  "file": null,
+  "name": "EndOfHeap",
+  "ref": "ff3",
+  "ref_addr": "00276c40",
+  "size": 28,
+  "symbol": "EndOfHeap",
+  "tier": "lib-match"
+ },
+ "0025d8d0": {
+  "file": "klib.s",
+  "name": "RFU063",
+  "ref": "ff2",
+  "ref_addr": "0027e210",
+  "size": 12,
+  "symbol": "RFU063",
+  "tier": "lib-match-low"
+ },
+ "0025d8e0": {
+  "file": "klib.s",
+  "name": "CreateSema",
+  "ref": "ff2",
+  "ref_addr": "0027e220",
+  "size": 12,
+  "symbol": "CreateSema",
+  "tier": "lib-match-low"
+ },
+ "0025d8f0": {
+  "file": "klib.s",
+  "name": "DeleteSema",
+  "ref": "ff2",
+  "ref_addr": "0027e230",
+  "size": 12,
+  "symbol": "DeleteSema",
+  "tier": "lib-match-low"
+ },
+ "0025d900": {
+  "file": "klib.s",
+  "name": "SignalSema",
+  "ref": "ff2",
+  "ref_addr": "0027e240",
+  "size": 12,
+  "symbol": "SignalSema",
+  "tier": "lib-match-low"
+ },
+ "0025d910": {
+  "file": "klib.s",
+  "name": "iSignalSema",
+  "ref": "ff2",
+  "ref_addr": "0027e250",
+  "size": 12,
+  "symbol": "iSignalSema",
+  "tier": "lib-match-low"
+ },
+ "0025d920": {
+  "file": "klib.s",
+  "name": "WaitSema",
+  "ref": "ff2",
+  "ref_addr": "0027e260",
+  "size": 12,
+  "symbol": "WaitSema",
+  "tier": "lib-match-low"
+ },
+ "0025d930": {
+  "file": null,
+  "name": "PollSema",
+  "ref": "ff3",
+  "ref_addr": "00276cb0",
+  "size": 76,
+  "symbol": "PollSema",
+  "tier": "lib-match"
+ },
+ "0025d940": {
+  "file": "klib.s",
+  "name": "iPollSema",
+  "ref": "ff2",
+  "ref_addr": "0027e280",
+  "size": 12,
+  "symbol": "iPollSema",
+  "tier": "lib-match-low"
+ },
+ "0025d950": {
+  "file": "klib.s",
+  "name": "ReferSemaStatus",
+  "ref": "ff2",
+  "ref_addr": "0027e290",
+  "size": 12,
+  "symbol": "ReferSemaStatus",
+  "tier": "lib-match-low"
+ },
+ "0025d960": {
+  "file": "klib.s",
+  "name": "iReferSemaStatus",
+  "ref": "ff2",
+  "ref_addr": "0027e2a0",
+  "size": 12,
+  "symbol": "iReferSemaStatus",
+  "tier": "lib-match-low"
+ },
+ "0025d970": {
+  "file": "klib.s",
+  "name": "RFU073",
+  "ref": "ff2",
+  "ref_addr": "0027e2b0",
+  "size": 12,
+  "symbol": "RFU073",
+  "tier": "lib-match-low"
+ },
+ "0025d980": {
+  "file": "klib.s",
+  "name": "SetOsdConfigParam",
+  "ref": "ff2",
+  "ref_addr": "0027e2c0",
+  "size": 12,
+  "symbol": "SetOsdConfigParam",
+  "tier": "lib-match-low"
+ },
+ "0025d990": {
+  "file": null,
+  "name": "GetOsdConfigParam",
+  "ref": "ff3",
+  "ref_addr": "00276d10",
+  "size": 460,
+  "symbol": "GetOsdConfigParam",
+  "tier": "lib-match"
+ },
+ "0025d9a0": {
+  "file": "klib.s",
+  "name": "GetGsHParam",
+  "ref": "ff2",
+  "ref_addr": "0027e2e0",
+  "size": 12,
+  "symbol": "GetGsHParam",
+  "tier": "lib-match-low"
+ },
+ "0025d9b0": {
+  "file": "klib.s",
+  "name": "GetGsVParam",
+  "ref": "ff2",
+  "ref_addr": "0027e2f0",
+  "size": 12,
+  "symbol": "GetGsVParam",
+  "tier": "lib-match-low"
+ },
+ "0025d9c0": {
+  "file": "klib.s",
+  "name": "SetGsHParam",
+  "ref": "ff2",
+  "ref_addr": "0027e300",
+  "size": 12,
+  "symbol": "SetGsHParam",
+  "tier": "lib-match-low"
+ },
+ "0025d9d0": {
+  "file": "klib.s",
+  "name": "SetGsVParam",
+  "ref": "ff2",
+  "ref_addr": "0027e310",
+  "size": 12,
+  "symbol": "SetGsVParam",
+  "tier": "lib-match-low"
+ },
+ "0025d9e0": {
+  "file": "klib.s",
+  "name": "RFU080_CreateEventFlag",
+  "ref": "ff2",
+  "ref_addr": "0027e320",
+  "size": 12,
+  "symbol": "RFU080_CreateEventFlag",
+  "tier": "lib-match-low"
+ },
+ "0025d9f0": {
+  "file": "klib.s",
+  "name": "RFU081_DeleteEventFlag",
+  "ref": "ff2",
+  "ref_addr": "0027e330",
+  "size": 12,
+  "symbol": "RFU081_DeleteEventFlag",
+  "tier": "lib-match-low"
+ },
+ "0025da00": {
+  "file": "klib.s",
+  "name": "RFU082_SetEventFlag",
+  "ref": "ff2",
+  "ref_addr": "0027e340",
+  "size": 12,
+  "symbol": "RFU082_SetEventFlag",
+  "tier": "lib-match-low"
+ },
+ "0025da10": {
+  "file": "klib.s",
+  "name": "RFU083_iSetEventFlag",
+  "ref": "ff2",
+  "ref_addr": "0027e350",
+  "size": 12,
+  "symbol": "RFU083_iSetEventFlag",
+  "tier": "lib-match-low"
+ },
+ "0025da20": {
+  "file": "klib.s",
+  "name": "RFU084_ClearEventFlag",
+  "ref": "ff2",
+  "ref_addr": "0027e360",
+  "size": 12,
+  "symbol": "RFU084_ClearEventFlag",
+  "tier": "lib-match-low"
+ },
+ "0025da80": {
+  "file": "klib.s",
+  "name": "RFU090_iReferEventFlagStatus",
+  "ref": "ff2",
+  "ref_addr": "0027e3c0",
+  "size": 12,
+  "symbol": "RFU090_iReferEventFlagStatus",
+  "tier": "lib-match-low"
+ },
+ "0025daa0": {
+  "file": "klib.s",
+  "name": "EnableIntcHandler",
+  "ref": "ff2",
+  "ref_addr": "0027e3e0",
+  "size": 12,
+  "symbol": "EnableIntcHandler",
+  "tier": "lib-match-low"
+ },
+ "0025dab0": {
+  "file": "klib.s",
+  "name": "iEnableIntcHandler",
+  "ref": "ff2",
+  "ref_addr": "0027e3f0",
+  "size": 12,
+  "symbol": "iEnableIntcHandler",
+  "tier": "lib-match-low"
+ },
+ "0025dac0": {
+  "file": "klib.s",
+  "name": "DisableIntcHandler",
+  "ref": "ff2",
+  "ref_addr": "0027e400",
+  "size": 12,
+  "symbol": "DisableIntcHandler",
+  "tier": "lib-match-low"
+ },
+ "0025dad0": {
+  "file": "klib.s",
+  "name": "iDisableIntcHandler",
+  "ref": "ff2",
+  "ref_addr": "0027e410",
+  "size": 12,
+  "symbol": "iDisableIntcHandler",
+  "tier": "lib-match-low"
+ },
+ "0025dae0": {
+  "file": "klib.s",
+  "name": "EnableDmacHandler",
+  "ref": "ff2",
+  "ref_addr": "0027e420",
+  "size": 12,
+  "symbol": "EnableDmacHandler",
+  "tier": "lib-match-low"
+ },
+ "0025daf0": {
+  "file": "klib.s",
+  "name": "iEnableDmacHandler",
+  "ref": "ff2",
+  "ref_addr": "0027e430",
+  "size": 12,
+  "symbol": "iEnableDmacHandler",
+  "tier": "lib-match-low"
+ },
+ "0025db00": {
+  "file": "klib.s",
+  "name": "DisableDmacHandler",
+  "ref": "ff2",
+  "ref_addr": "0027e440",
+  "size": 12,
+  "symbol": "DisableDmacHandler",
+  "tier": "lib-match-low"
+ },
+ "0025db10": {
+  "file": "klib.s",
+  "name": "iDisableDmacHandler",
+  "ref": "ff2",
+  "ref_addr": "0027e450",
+  "size": 12,
+  "symbol": "iDisableDmacHandler",
+  "tier": "lib-match-low"
+ },
+ "0025db20": {
+  "file": "klib.s",
+  "name": "KSeg0",
+  "ref": "ff2",
+  "ref_addr": "0027e460",
+  "size": 12,
+  "symbol": "KSeg0",
+  "tier": "lib-match-low"
+ },
+ "0025db30": {
+  "file": "klib.s",
+  "name": "EnableCache",
+  "ref": "ff2",
+  "ref_addr": "0027e470",
+  "size": 12,
+  "symbol": "EnableCache",
+  "tier": "lib-match-low"
+ },
+ "0025db40": {
+  "file": "klib.s",
+  "name": "DisableCache",
+  "ref": "ff2",
+  "ref_addr": "0027e480",
+  "size": 12,
+  "symbol": "DisableCache",
+  "tier": "lib-match-low"
+ },
+ "0025db50": {
+  "file": "klib.s",
+  "name": "GetCop0",
+  "ref": "ff2",
+  "ref_addr": "0027e490",
+  "size": 12,
+  "symbol": "GetCop0",
+  "tier": "lib-match-low"
+ },
+ "0025db60": {
+  "file": null,
+  "name": "FlushCache",
+  "ref": "ff3",
+  "ref_addr": "00276ee0",
+  "size": 76,
+  "symbol": "FlushCache",
+  "tier": "lib-match"
+ },
+ "0025db70": {
+  "file": "klib.s",
+  "name": "CpuConfig",
+  "ref": "ff2",
+  "ref_addr": "0027e4b0",
+  "size": 12,
+  "symbol": "CpuConfig",
+  "tier": "lib-match-low"
+ },
+ "0025db80": {
+  "file": "klib.s",
+  "name": "iGetCop0",
+  "ref": "ff2",
+  "ref_addr": "0027e4c0",
+  "size": 12,
+  "symbol": "iGetCop0",
+  "tier": "lib-match-low"
+ },
+ "0025db90": {
+  "file": "klib.s",
+  "name": "iFlushCache",
+  "ref": "ff2",
+  "ref_addr": "0027e4d0",
+  "size": 12,
+  "symbol": "iFlushCache",
+  "tier": "lib-match-low"
+ },
+ "0025dba0": {
+  "file": "klib.s",
+  "name": "iCpuConfig",
+  "ref": "ff2",
+  "ref_addr": "0027e4e0",
+  "size": 12,
+  "symbol": "iCpuConfig",
+  "tier": "lib-match-low"
+ },
+ "0025dbb0": {
+  "file": null,
+  "name": "sceSifStopDma",
+  "ref": "ff3",
+  "ref_addr": "00276f30",
+  "size": 60,
+  "symbol": "sceSifStopDma",
+  "tier": "lib-match"
+ },
+ "0025dbc0": {
+  "file": "klib.s",
+  "name": "SetCPUTimerHandler",
+  "ref": "ff2",
+  "ref_addr": "0027e500",
+  "size": 12,
+  "symbol": "SetCPUTimerHandler",
+  "tier": "lib-match-low"
+ },
+ "0025dbd0": {
+  "file": "klib.s",
+  "name": "SetCPUTimer",
+  "ref": "ff2",
+  "ref_addr": "0027e510",
+  "size": 12,
+  "symbol": "SetCPUTimer",
+  "tier": "lib-match-low"
+ },
+ "0025dbe0": {
+  "file": "klib.s",
+  "name": "SetOsdConfigParam2",
+  "ref": "ff2",
+  "ref_addr": "0027e520",
+  "size": 12,
+  "symbol": "SetOsdConfigParam2",
+  "tier": "lib-match-low"
+ },
+ "0025dbf0": {
+  "file": "klib.s",
+  "name": "GetOsdConfigParam2",
+  "ref": "ff2",
+  "ref_addr": "0027e530",
+  "size": 12,
+  "symbol": "GetOsdConfigParam2",
+  "tier": "lib-match-low"
+ },
+ "0025dc00": {
+  "file": null,
+  "name": "GsGetIMR",
+  "ref": "ff3",
+  "ref_addr": "00276f80",
+  "size": 28,
+  "symbol": "GsGetIMR",
+  "tier": "lib-match"
+ },
+ "0025dc10": {
+  "file": "klib.s",
+  "name": "iGsGetIMR",
+  "ref": "ff2",
+  "ref_addr": "0027e550",
+  "size": 12,
+  "symbol": "iGsGetIMR",
+  "tier": "lib-match-low"
+ },
+ "0025dc20": {
+  "file": null,
+  "name": "GsPutIMR",
+  "ref": "ff3",
+  "ref_addr": "00276fa0",
+  "size": 44,
+  "symbol": "GsPutIMR",
+  "tier": "lib-match"
+ },
+ "0025dc30": {
+  "file": "klib.s",
+  "name": "iGsPutIMR",
+  "ref": "ff2",
+  "ref_addr": "0027e570",
+  "size": 12,
+  "symbol": "iGsPutIMR",
+  "tier": "lib-match-low"
+ },
+ "0025dc40": {
+  "file": "klib.s",
+  "name": "SetPgifHandler",
+  "ref": "ff2",
+  "ref_addr": "0027e580",
+  "size": 12,
+  "symbol": "SetPgifHandler",
+  "tier": "lib-match-low"
+ },
+ "0025dc50": {
+  "file": null,
+  "name": "SetVSyncFlag",
+  "ref": "ff3",
+  "ref_addr": "00276fd0",
+  "size": 44,
+  "symbol": "SetVSyncFlag",
+  "tier": "lib-match"
+ },
+ "0025dc70": {
+  "file": "klib.s",
+  "name": "_print",
+  "ref": "ff2",
+  "ref_addr": "0027e5b0",
+  "size": 12,
+  "symbol": "_print",
+  "tier": "lib-match-low"
+ },
+ "0025dc80": {
+  "file": null,
+  "name": "sceSifDmaStat",
+  "ref": "ff3",
+  "ref_addr": "00277000",
+  "size": 28,
+  "symbol": "sceSifDmaStat",
+  "tier": "lib-match"
+ },
+ "0025dc90": {
+  "file": "klib.s",
+  "name": "isceSifDmaStat",
+  "ref": "ff2",
+  "ref_addr": "0027e5d0",
+  "size": 12,
+  "symbol": "isceSifDmaStat",
+  "tier": "lib-match-low"
+ },
+ "0025dca0": {
+  "file": "klib.s",
+  "name": "sceSifSetDma",
+  "ref": "ff2",
+  "ref_addr": "0027e5e0",
+  "size": 12,
+  "symbol": "sceSifSetDma",
+  "tier": "lib-match-low"
+ },
+ "0025dcb0": {
+  "file": "klib.s",
+  "name": "isceSifSetDma",
+  "ref": "ff2",
+  "ref_addr": "0027e5f0",
+  "size": 12,
+  "symbol": "isceSifSetDma",
+  "tier": "lib-match-low"
+ },
+ "0025dcc0": {
+  "file": "klib.s",
+  "name": "sceSifSetDChain",
+  "ref": "ff2",
+  "ref_addr": "0027e600",
+  "size": 12,
+  "symbol": "sceSifSetDChain",
+  "tier": "lib-match-low"
+ },
+ "0025dcd0": {
+  "file": "klib.s",
+  "name": "isceSifSetDChain",
+  "ref": "ff2",
+  "ref_addr": "0027e610",
+  "size": 12,
+  "symbol": "isceSifSetDChain",
+  "tier": "lib-match-low"
+ },
+ "0025dce0": {
+  "file": "klib.s",
+  "name": "sceSifSetReg",
+  "ref": "ff2",
+  "ref_addr": "0027e620",
+  "size": 12,
+  "symbol": "sceSifSetReg",
+  "tier": "lib-match-low"
+ },
+ "0025dcf0": {
+  "file": "klib.s",
+  "name": "sceSifGetReg",
+  "ref": "ff2",
+  "ref_addr": "0027e630",
+  "size": 12,
+  "symbol": "sceSifGetReg",
+  "tier": "lib-match-low"
+ },
+ "0025dd00": {
+  "file": "klib.s",
+  "name": "_ExecOSD",
+  "ref": "ff2",
+  "ref_addr": "0027e640",
+  "size": 12,
+  "symbol": "_ExecOSD",
+  "tier": "lib-match-low"
+ },
+ "0025dd10": {
+  "file": null,
+  "name": "Deci2Call",
+  "ref": "ff3",
+  "ref_addr": "00277090",
+  "size": 44,
+  "symbol": "Deci2Call",
+  "tier": "lib-match"
+ },
+ "0025dd20": {
+  "file": "klib.s",
+  "name": "PSMode",
+  "ref": "ff2",
+  "ref_addr": "0027e660",
+  "size": 12,
+  "symbol": "PSMode",
+  "tier": "lib-match-low"
+ },
+ "0025dd30": {
+  "file": "klib.s",
+  "name": "MachineType",
+  "ref": "ff2",
+  "ref_addr": "0027e670",
+  "size": 12,
+  "symbol": "MachineType",
+  "tier": "lib-match-low"
+ },
+ "0025dd40": {
+  "file": "klib.s",
+  "name": "GetMemorySize",
+  "ref": "ff2",
+  "ref_addr": "0027e680",
+  "size": 12,
+  "symbol": "GetMemorySize",
+  "tier": "lib-match-low"
+ },
+ "0025dd50": {
+  "file": "klib.s",
+  "name": "_InitTLB",
+  "ref": "ff2",
+  "ref_addr": "0027e690",
+  "size": 12,
+  "symbol": "_InitTLB",
+  "tier": "lib-match-low"
+ },
+ "0025dd70": {
+  "file": "glue.c",
+  "name": "VSync",
+  "ref": "ff2",
+  "ref_addr": "00288688",
+  "size": 144,
+  "symbol": "VSync",
+  "tier": "lib-match"
+ },
+ "0025de00": {
+  "file": "glue.c",
+  "name": "VSync2",
+  "ref": "ff2",
+  "ref_addr": "00288718",
+  "size": 164,
+  "symbol": "VSync2",
+  "tier": "lib-match"
+ },
+ "0025dea8": {
+  "file": "glue.c",
+  "name": "write",
+  "ref": "ff2",
+  "ref_addr": "002887c0",
+  "size": 124,
+  "symbol": "write",
+  "tier": "lib-match"
+ },
+ "0025df28": {
+  "file": "glue.c",
+  "name": "read",
+  "ref": "ff2",
+  "ref_addr": "00288840",
+  "size": 116,
+  "symbol": "read",
+  "tier": "lib-match"
+ },
+ "0025dfe0": {
+  "file": "glue.c",
+  "name": "sbrk",
+  "ref": "ff2",
+  "ref_addr": "002888f8",
+  "size": 172,
+  "symbol": "sbrk",
+  "tier": "lib-match"
+ },
+ "0025e098": {
+  "file": null,
+  "name": "fstat",
+  "ref": "ff3",
+  "ref_addr": "00281c38",
+  "size": 32,
+  "symbol": "fstat",
+  "tier": "lib-match"
+ },
+ "0025e0b8": {
+  "file": "glue.c",
+  "name": "kill",
+  "ref": "ff2",
+  "ref_addr": "002889d0",
+  "size": 40,
+  "symbol": "kill",
+  "tier": "lib-match"
+ },
+ "0025e130": {
+  "file": "intr.c",
+  "name": "QueryIntrContext",
+  "ref": "ff2",
+  "ref_addr": "0027e6a0",
+  "size": 16,
+  "symbol": "QueryIntrContext",
+  "tier": "lib-match-low"
+ },
+ "0025e360": {
+  "file": "thread.c",
+  "name": "topThread",
+  "ref": "ff2",
+  "ref_addr": "0027e8d0",
+  "size": 212,
+  "symbol": "topThread",
+  "tier": "lib-match"
+ },
+ "0025e438": {
+  "file": null,
+  "name": "InitThread",
+  "ref": "ff3",
+  "ref_addr": "002773e8",
+  "size": 236,
+  "symbol": "InitThread",
+  "tier": "lib-match"
+ },
+ "0025e528": {
+  "file": "thread.c",
+  "name": "iWakeupThread",
+  "ref": "ff2",
+  "ref_addr": "0027ea80",
+  "size": 148,
+  "symbol": "iWakeupThread",
+  "tier": "lib-match"
+ },
+ "0025e5c0": {
+  "file": "thread.c",
+  "name": "iRotateThreadReadyQueue",
+  "ref": "ff2",
+  "ref_addr": "0027eb18",
+  "size": 124,
+  "symbol": "iRotateThreadReadyQueue",
+  "tier": "lib-match"
+ },
+ "0025e640": {
+  "file": "thread.c",
+  "name": "iSuspendThread",
+  "ref": "ff2",
+  "ref_addr": "0027eb98",
+  "size": 152,
+  "symbol": "iSuspendThread",
+  "tier": "lib-match"
+ },
+ "0025e6d8": {
+  "file": "thread.c",
+  "name": "DelayThread",
+  "ref": "ff2",
+  "ref_addr": "0027ec30",
+  "size": 200,
+  "symbol": "DelayThread",
+  "tier": "lib-match"
+ },
+ "0025e7a0": {
+  "file": null,
+  "name": "StartThread",
+  "ref": "ff3",
+  "ref_addr": "00277750",
+  "size": 376,
+  "symbol": "StartThread",
+  "tier": "lib-match"
+ },
+ "0025e918": {
+  "file": "thread.c",
+  "name": "_DelayThreadHandler",
+  "ref": "ff2",
+  "ref_addr": "0027ecf8",
+  "size": 40,
+  "symbol": "_DelayThreadHandler",
+  "tier": "lib-match"
+ },
+ "0025e940": {
+  "file": "tty.c",
+  "name": "QueueInit",
+  "ref": "ff2",
+  "ref_addr": "00288c80",
+  "size": 36,
+  "symbol": "QueueInit",
+  "tier": "lib-match"
+ },
+ "0025e968": {
+  "file": "tty.c",
+  "name": "QueuePeekWriteDone",
+  "ref": "ff2",
+  "ref_addr": "00288ca8",
+  "size": 56,
+  "symbol": "QueuePeekWriteDone",
+  "tier": "lib-match"
+ },
+ "0025e9a8": {
+  "file": "tty.c",
+  "name": "QueuePeekReadDone",
+  "ref": "ff2",
+  "ref_addr": "00288ce8",
+  "size": 56,
+  "symbol": "QueuePeekReadDone",
+  "tier": "lib-match"
+ },
+ "0025e9e8": {
+  "file": "tty.c",
+  "name": "sceTtyHandler",
+  "ref": "ff2",
+  "ref_addr": "00288d28",
+  "size": 404,
+  "symbol": "sceTtyHandler",
+  "tier": "lib-match"
+ },
+ "0025ecf8": {
+  "file": "tty.c",
+  "name": "sceTtyRead",
+  "ref": "ff2",
+  "ref_addr": "00289038",
+  "size": 208,
+  "symbol": "sceTtyRead",
+  "tier": "lib-match"
+ },
+ "0025edc8": {
+  "file": "tty.c",
+  "name": "sceTtyInit",
+  "ref": "ff2",
+  "ref_addr": "00289108",
+  "size": 188,
+  "symbol": "sceTtyInit",
+  "tier": "lib-match"
+ },
+ "0025ee88": {
+  "file": null,
+  "name": "kputchar",
+  "ref": "ff3",
+  "ref_addr": "002778f0",
+  "size": 56,
+  "symbol": "kputchar",
+  "tier": "lib-match"
+ },
+ "0025ef70": {
+  "file": "kprintf.c",
+  "name": "serialPutchar",
+  "ref": "ff2",
+  "ref_addr": "0027ee10",
+  "size": 52,
+  "symbol": "serialPutchar",
+  "tier": "lib-match"
+ },
+ "0025efa8": {
+  "file": null,
+  "name": "ftoi",
+  "ref": "ff3",
+  "ref_addr": "00277a10",
+  "size": 144,
+  "symbol": "ftoi",
+  "tier": "lib-match"
+ },
+ "0025f038": {
+  "file": null,
+  "name": "printfloat",
+  "ref": "ff3",
+  "ref_addr": "00277aa0",
+  "size": 472,
+  "symbol": "printfloat",
+  "tier": "lib-match"
+ },
+ "00260210": {
+  "file": "sifcmd.c",
+  "name": "_set_sreg",
+  "ref": "ff2",
+  "ref_addr": "0027f6d8",
+  "size": 28,
+  "symbol": "_set_sreg",
+  "tier": "lib-match"
+ },
+ "00260230": {
+  "file": "sifcmd.c",
+  "name": "_change_addr",
+  "ref": "ff2",
+  "ref_addr": "0027f6f8",
+  "size": 12,
+  "symbol": "_change_addr",
+  "tier": "lib-match-low"
+ },
+ "00260240": {
+  "file": null,
+  "name": "sceSifGetSreg",
+  "ref": "ff3",
+  "ref_addr": "00278ca8",
+  "size": 68,
+  "symbol": "sceSifGetSreg",
+  "tier": "lib-match"
+ },
+ "00260258": {
+  "file": "sifcmd.c",
+  "name": "sceSifSetSreg",
+  "ref": "ff2",
+  "ref_addr": "0027f720",
+  "size": 28,
+  "symbol": "sceSifSetSreg",
+  "tier": "lib-match"
+ },
+ "00260508": {
+  "file": "sifcmd.c",
+  "name": "sceSifExitCmd",
+  "ref": "ff2",
+  "ref_addr": "0027f9d0",
+  "size": 52,
+  "symbol": "sceSifExitCmd",
+  "tier": "lib-match"
+ },
+ "00260540": {
+  "file": null,
+  "name": "sceSifSetSysCmdBuffer",
+  "ref": "ff3",
+  "ref_addr": "00278fa8",
+  "size": 48,
+  "symbol": "sceSifSetSysCmdBuffer",
+  "tier": "lib-match"
+ },
+ "00260570": {
+  "file": "sifcmd.c",
+  "name": "sceSifAddCmdHandler",
+  "ref": "ff2",
+  "ref_addr": "0027fa38",
+  "size": 120,
+  "symbol": "sceSifAddCmdHandler",
+  "tier": "lib-match"
+ },
+ "002605e8": {
+  "file": "sifcmd.c",
+  "name": "sceSifRemoveCmdHandler",
+  "ref": "ff2",
+  "ref_addr": "0027fab0",
+  "size": 76,
+  "symbol": "sceSifRemoveCmdHandler",
+  "tier": "lib-match"
+ },
+ "00260638": {
+  "file": "sifcmd.c",
+  "name": "_sceSifSendCmd",
+  "ref": "ff2",
+  "ref_addr": "0027fb00",
+  "size": 308,
+  "symbol": "_sceSifSendCmd",
+  "tier": "lib-match"
+ },
+ "00260770": {
+  "file": "sifcmd.c",
+  "name": "sceSifSendCmd",
+  "ref": "ff2",
+  "ref_addr": "0027fc38",
+  "size": 60,
+  "symbol": "sceSifSendCmd",
+  "tier": "lib-match"
+ },
+ "002607b0": {
+  "file": "sifcmd.c",
+  "name": "isceSifSendCmd",
+  "ref": "ff2",
+  "ref_addr": "0027fc78",
+  "size": 60,
+  "symbol": "isceSifSendCmd",
+  "tier": "lib-match"
+ },
+ "002607f0": {
+  "file": "sifcmd.c",
+  "name": "_sceSifCmdIntrHdlr",
+  "ref": "ff2",
+  "ref_addr": "0027fcb8",
+  "size": 328,
+  "symbol": "_sceSifCmdIntrHdlr",
+  "tier": "lib-match"
+ },
+ "00260938": {
+  "file": "sifcmd.c",
+  "name": "sceSifWriteBackDCache",
+  "ref": "ff2",
+  "ref_addr": "0027fe00",
+  "size": 176,
+  "symbol": "sceSifWriteBackDCache",
+  "tier": "lib-match"
+ },
+ "002609e8": {
+  "file": "sifrpc.c",
+  "name": "sceSifInitRpc",
+  "ref": "ff2",
+  "ref_addr": "0027feb0",
+  "size": 412,
+  "symbol": "sceSifInitRpc",
+  "tier": "lib-match"
+ },
+ "00260b88": {
+  "file": "sifrpc.c",
+  "name": "sceSifExitRpc",
+  "ref": "ff2",
+  "ref_addr": "00280050",
+  "size": 36,
+  "symbol": "sceSifExitRpc",
+  "tier": "lib-match"
+ },
+ "00260bb0": {
+  "file": "sifrpc.c",
+  "name": "_sceRpcGetPacket",
+  "ref": "ff2",
+  "ref_addr": "00280078",
+  "size": 168,
+  "symbol": "_sceRpcGetPacket",
+  "tier": "lib-match"
+ },
+ "00260c58": {
+  "file": "sifrpc.c",
+  "name": "_sceRpcFreePacket",
+  "ref": "ff2",
+  "ref_addr": "00280120",
+  "size": 28,
+  "symbol": "_sceRpcFreePacket",
+  "tier": "lib-match"
+ },
+ "00260c78": {
+  "file": "sifrpc.c",
+  "name": "_sceRpcGetFPacket",
+  "ref": "ff2",
+  "ref_addr": "00280140",
+  "size": 48,
+  "symbol": "_sceRpcGetFPacket",
+  "tier": "lib-match"
+ },
+ "00260ca8": {
+  "file": "sifrpc.c",
+  "name": "_sceRpcGetFPacket2",
+  "ref": "ff2",
+  "ref_addr": "00280170",
+  "size": 64,
+  "symbol": "_sceRpcGetFPacket2",
+  "tier": "lib-match"
+ },
+ "00260ce8": {
+  "file": "sifrpc.c",
+  "name": "_request_end",
+  "ref": "ff2",
+  "ref_addr": "002801b0",
+  "size": 204,
+  "symbol": "_request_end",
+  "tier": "lib-match"
+ },
+ "00260db8": {
+  "file": "sifrpc.c",
+  "name": "_alarm_rdata",
+  "ref": "ff2",
+  "ref_addr": "00280280",
+  "size": 64,
+  "symbol": "_alarm_rdata",
+  "tier": "lib-match"
+ },
+ "00260df8": {
+  "file": "sifrpc.c",
+  "name": "_request_rdata",
+  "ref": "ff2",
+  "ref_addr": "002802c0",
+  "size": 208,
+  "symbol": "_request_rdata",
+  "tier": "lib-match"
+ },
+ "00260ec8": {
+  "file": null,
+  "name": "sceSifGetOtherData",
+  "ref": "ff3",
+  "ref_addr": "00279930",
+  "size": 356,
+  "symbol": "sceSifGetOtherData",
+  "tier": "lib-match"
+ },
+ "00261030": {
+  "file": "sifrpc.c",
+  "name": "_search_svdata",
+  "ref": "ff2",
+  "ref_addr": "002804e8",
+  "size": 76,
+  "symbol": "_search_svdata",
+  "tier": "lib-match"
+ },
+ "00261080": {
+  "file": "sifrpc.c",
+  "name": "_alarm_bind",
+  "ref": "ff2",
+  "ref_addr": "00280538",
+  "size": 64,
+  "symbol": "_alarm_bind",
+  "tier": "lib-match"
+ },
+ "002610c0": {
+  "file": "sifrpc.c",
+  "name": "_request_bind",
+  "ref": "ff2",
+  "ref_addr": "00280578",
+  "size": 204,
+  "symbol": "_request_bind",
+  "tier": "lib-match"
+ },
+ "00261190": {
+  "file": null,
+  "name": "sceSifBindRpc",
+  "ref": "ff3",
+  "ref_addr": "00279bf8",
+  "size": 472,
+  "symbol": "sceSifBindRpc",
+  "tier": "lib-match"
+ },
+ "002612e0": {
+  "file": "sifrpc.c",
+  "name": "_request_call",
+  "ref": "ff2",
+  "ref_addr": "00280788",
+  "size": 136,
+  "symbol": "_request_call",
+  "tier": "lib-match"
+ },
+ "00261570": {
+  "file": "sifrpc.c",
+  "name": "sceSifCheckStatRpc",
+  "ref": "ff2",
+  "ref_addr": "00280a10",
+  "size": 60,
+  "symbol": "sceSifCheckStatRpc",
+  "tier": "lib-match"
+ },
+ "002615b0": {
+  "file": "sifrpc.c",
+  "name": "sceSifSetRpcQueue",
+  "ref": "ff2",
+  "ref_addr": "00280a50",
+  "size": 148,
+  "symbol": "sceSifSetRpcQueue",
+  "tier": "lib-match"
+ },
+ "00261718": {
+  "file": "sifrpc.c",
+  "name": "sceSifRemoveRpc",
+  "ref": "ff2",
+  "ref_addr": "00280bb8",
+  "size": 148,
+  "symbol": "sceSifRemoveRpc",
+  "tier": "lib-match"
+ },
+ "002617b0": {
+  "file": "sifrpc.c",
+  "name": "sceSifRemoveRpcQueue",
+  "ref": "ff2",
+  "ref_addr": "00280c50",
+  "size": 144,
+  "symbol": "sceSifRemoveRpcQueue",
+  "tier": "lib-match"
+ },
+ "00261840": {
+  "file": "sifrpc.c",
+  "name": "sceSifGetNextRequest",
+  "ref": "ff2",
+  "ref_addr": "00280ce0",
+  "size": 88,
+  "symbol": "sceSifGetNextRequest",
+  "tier": "lib-match"
+ },
+ "00261898": {
+  "file": "sifrpc.c",
+  "name": "sceSifExecRequest",
+  "ref": "ff2",
+  "ref_addr": "00280d38",
+  "size": 452,
+  "symbol": "sceSifExecRequest",
+  "tier": "lib-match"
+ },
+ "00261a60": {
+  "file": "sifrpc.c",
+  "name": "sceSifRpcLoop",
+  "ref": "ff2",
+  "ref_addr": "00280f00",
+  "size": 60,
+  "symbol": "sceSifRpcLoop",
+  "tier": "lib-match"
+ },
+ "00261aa0": {
+  "file": null,
+  "name": "_sceFsIobSemaMK",
+  "ref": "ff3",
+  "ref_addr": "0027a508",
+  "size": 112,
+  "symbol": "_sceFsIobSemaMK",
+  "tier": "lib-match"
+ },
+ "00261b90": {
+  "file": "filestub.c",
+  "name": "new_iob",
+  "ref": "ff2",
+  "ref_addr": "00280fa0",
+  "size": 136,
+  "symbol": "new_iob",
+  "tier": "lib-match"
+ },
+ "00261d78": {
+  "file": "filestub.c",
+  "name": "_sceFs_Rcv_Intr",
+  "ref": "ff2",
+  "ref_addr": "00281098",
+  "size": 948,
+  "symbol": "_sceFs_Rcv_Intr",
+  "tier": "lib-match"
+ },
+ "00262130": {
+  "file": null,
+  "name": "_sceFsSemInit",
+  "ref": "ff3",
+  "ref_addr": "0027ab98",
+  "size": 84,
+  "symbol": "_sceFsSemInit",
+  "tier": "lib-match"
+ },
+ "00262188": {
+  "file": "filestub.c",
+  "name": "_sceFsWaitS",
+  "ref": "ff2",
+  "ref_addr": "002814a0",
+  "size": 44,
+  "symbol": "_sceFsWaitS",
+  "tier": "lib-match"
+ },
+ "002621b8": {
+  "file": null,
+  "name": "scePowerOffHandler",
+  "ref": "ff3",
+  "ref_addr": "0027ac20",
+  "size": 176,
+  "symbol": "scePowerOffHandler",
+  "tier": "lib-match"
+ },
+ "00262268": {
+  "file": "filestub.c",
+  "name": "_sceFs_Poff_Intr",
+  "ref": "ff2",
+  "ref_addr": "00281588",
+  "size": 68,
+  "symbol": "_sceFs_Poff_Intr",
+  "tier": "lib-match"
+ },
+ "002622b0": {
+  "file": null,
+  "name": "sceFsInit",
+  "ref": "ff3",
+  "ref_addr": "0027ad18",
+  "size": 520,
+  "symbol": "sceFsInit",
+  "tier": "lib-match"
+ },
+ "00262548": {
+  "file": "filestub.c",
+  "name": "sceFsReset",
+  "ref": "ff2",
+  "ref_addr": "00281868",
+  "size": 52,
+  "symbol": "sceFsReset",
+  "tier": "lib-match"
+ },
+ "002627b0": {
+  "file": null,
+  "name": "sceOpen",
+  "ref": "ff3",
+  "ref_addr": "0027b218",
+  "size": 656,
+  "symbol": "sceOpen",
+  "tier": "lib-match"
+ },
+ "00263328": {
+  "file": null,
+  "name": "sceIoctl",
+  "ref": "ff3",
+  "ref_addr": "0027bd90",
+  "size": 904,
+  "symbol": "sceIoctl",
+  "tier": "lib-match"
+ },
+ "002636b0": {
+  "file": null,
+  "name": "sceIoctl2",
+  "ref": "ff3",
+  "ref_addr": "0027c118",
+  "size": 488,
+  "symbol": "sceIoctl2",
+  "tier": "lib-match"
+ },
+ "00263898": {
+  "file": null,
+  "name": "_sceCallCode",
+  "ref": "ff3",
+  "ref_addr": "0027c300",
+  "size": 432,
+  "symbol": "_sceCallCode",
+  "tier": "lib-match"
+ },
+ "00263a48": {
+  "file": "filestub.c",
+  "name": "sceRemove",
+  "ref": "ff2",
+  "ref_addr": "00282b00",
+  "size": 28,
+  "symbol": "sceRemove",
+  "tier": "lib-match"
+ },
+ "00263a68": {
+  "file": null,
+  "name": "sceMkdir",
+  "ref": "ff3",
+  "ref_addr": "0027c4d0",
+  "size": 440,
+  "symbol": "sceMkdir",
+  "tier": "lib-match"
+ },
+ "00263c20": {
+  "file": "filestub.c",
+  "name": "sceRmdir",
+  "ref": "ff2",
+  "ref_addr": "00282cd0",
+  "size": 28,
+  "symbol": "sceRmdir",
+  "tier": "lib-match"
+ },
+ "00263c40": {
+  "file": null,
+  "name": "sceFormat",
+  "ref": "ff3",
+  "ref_addr": "0027c6a8",
+  "size": 640,
+  "symbol": "sceFormat",
+  "tier": "lib-match"
+ },
+ "00263ec0": {
+  "file": null,
+  "name": "sceAddDrv",
+  "ref": "ff3",
+  "ref_addr": "0027c928",
+  "size": 300,
+  "symbol": "sceAddDrv",
+  "tier": "lib-match"
+ },
+ "00263ff0": {
+  "file": "filestub.c",
+  "name": "sceDelDrv",
+  "ref": "ff2",
+  "ref_addr": "00283080",
+  "size": 28,
+  "symbol": "sceDelDrv",
+  "tier": "lib-match"
+ },
+ "00264010": {
+  "file": "filestub.c",
+  "name": "sceDopen",
+  "ref": "ff2",
+  "ref_addr": "002830a0",
+  "size": 200,
+  "symbol": "sceDopen",
+  "tier": "lib-match"
+ },
+ "002640d8": {
+  "file": null,
+  "name": "sceDclose",
+  "ref": "ff3",
+  "ref_addr": "0027cb40",
+  "size": 356,
+  "symbol": "sceDclose",
+  "tier": "lib-match"
+ },
+ "00264240": {
+  "file": null,
+  "name": "sceDread",
+  "ref": "ff3",
+  "ref_addr": "0027cca8",
+  "size": 340,
+  "symbol": "sceDread",
+  "tier": "lib-match"
+ },
+ "00264398": {
+  "file": null,
+  "name": "sceGetstat",
+  "ref": "ff3",
+  "ref_addr": "0027ce00",
+  "size": 436,
+  "symbol": "sceGetstat",
+  "tier": "lib-match"
+ },
+ "00264550": {
+  "file": null,
+  "name": "sceChstat",
+  "ref": "ff3",
+  "ref_addr": "0027cfb8",
+  "size": 588,
+  "symbol": "sceChstat",
+  "tier": "lib-match"
+ },
+ "002647a0": {
+  "file": null,
+  "name": "sceRename",
+  "ref": "ff3",
+  "ref_addr": "0027d208",
+  "size": 520,
+  "symbol": "sceRename",
+  "tier": "lib-match"
+ },
+ "002649a8": {
+  "file": "filestub.c",
+  "name": "sceChdir",
+  "ref": "ff2",
+  "ref_addr": "002839f8",
+  "size": 28,
+  "symbol": "sceChdir",
+  "tier": "lib-match"
+ },
+ "002649c8": {
+  "file": null,
+  "name": "sceSync",
+  "ref": "ff3",
+  "ref_addr": "0027d430",
+  "size": 428,
+  "symbol": "sceSync",
+  "tier": "lib-match"
+ },
+ "00264b78": {
+  "file": null,
+  "name": "sceMount",
+  "ref": "ff3",
+  "ref_addr": "0027d5e0",
+  "size": 640,
+  "symbol": "sceMount",
+  "tier": "lib-match"
+ },
+ "00264df8": {
+  "file": "filestub.c",
+  "name": "sceUmount",
+  "ref": "ff2",
+  "ref_addr": "00283e20",
+  "size": 28,
+  "symbol": "sceUmount",
+  "tier": "lib-match"
+ },
+ "00265058": {
+  "file": null,
+  "name": "sceDevctl",
+  "ref": "ff3",
+  "ref_addr": "0027dac0",
+  "size": 680,
+  "symbol": "sceDevctl",
+  "tier": "lib-match"
+ },
+ "00265300": {
+  "file": null,
+  "name": "sceSymlink",
+  "ref": "ff3",
+  "ref_addr": "0027dd68",
+  "size": 504,
+  "symbol": "sceSymlink",
+  "tier": "lib-match"
+ },
+ "002654f8": {
+  "file": null,
+  "name": "sceReadlink",
+  "ref": "ff3",
+  "ref_addr": "0027df60",
+  "size": 480,
+  "symbol": "sceReadlink",
+  "tier": "lib-match"
+ },
+ "002656d8": {
+  "file": "iopheap.c",
+  "name": "sceSifInitIopHeap",
+  "ref": "ff2",
+  "ref_addr": "00284658",
+  "size": 136,
+  "symbol": "sceSifInitIopHeap",
+  "tier": "lib-match"
+ },
+ "00265760": {
+  "file": "iopheap.c",
+  "name": "sceSifAllocIopHeap",
+  "ref": "ff2",
+  "ref_addr": "002846e0",
+  "size": 112,
+  "symbol": "sceSifAllocIopHeap",
+  "tier": "lib-match"
+ },
+ "002657d0": {
+  "file": "iopheap.c",
+  "name": "sceSifAllocSysMemory",
+  "ref": "ff2",
+  "ref_addr": "00284750",
+  "size": 128,
+  "symbol": "sceSifAllocSysMemory",
+  "tier": "lib-match"
+ },
+ "00265850": {
+  "file": "iopheap.c",
+  "name": "sceSifFreeSysMemory",
+  "ref": "ff2",
+  "ref_addr": "002847d0",
+  "size": 120,
+  "symbol": "sceSifFreeSysMemory",
+  "tier": "lib-match"
+ },
+ "002658e8": {
+  "file": "iopheap.c",
+  "name": "sceSifLoadIopHeap",
+  "ref": "ff2",
+  "ref_addr": "00284868",
+  "size": 240,
+  "symbol": "sceSifLoadIopHeap",
+  "tier": "lib-match"
+ },
+ "002659d8": {
+  "file": "iopheap.c",
+  "name": "sceSifQueryMemSize",
+  "ref": "ff2",
+  "ref_addr": "00284958",
+  "size": 112,
+  "symbol": "sceSifQueryMemSize",
+  "tier": "lib-match"
+ },
+ "00265a48": {
+  "file": "iopheap.c",
+  "name": "sceSifQueryMaxFreeMemSize",
+  "ref": "ff2",
+  "ref_addr": "002849c8",
+  "size": 112,
+  "symbol": "sceSifQueryMaxFreeMemSize",
+  "tier": "lib-match"
+ },
+ "00265ab8": {
+  "file": "iopheap.c",
+  "name": "sceSifQueryTotalFreeMemSize",
+  "ref": "ff2",
+  "ref_addr": "00284a38",
+  "size": 112,
+  "symbol": "sceSifQueryTotalFreeMemSize",
+  "tier": "lib-match"
+ },
+ "00265b28": {
+  "file": "iopheap.c",
+  "name": "sceSifQueryBlockTopAddress",
+  "ref": "ff2",
+  "ref_addr": "00284aa8",
+  "size": 124,
+  "symbol": "sceSifQueryBlockTopAddress",
+  "tier": "lib-match"
+ },
+ "00265ba8": {
+  "file": "iopheap.c",
+  "name": "sceSifQueryBlockSize",
+  "ref": "ff2",
+  "ref_addr": "00284b28",
+  "size": 124,
+  "symbol": "sceSifQueryBlockSize",
+  "tier": "lib-match"
+ },
+ "00265c28": {
+  "file": "eeloadfile.c",
+  "name": "_lf_bind",
+  "ref": "ff2",
+  "ref_addr": "00284ba8",
+  "size": 256,
+  "symbol": "_lf_bind",
+  "tier": "lib-match"
+ },
+ "00265db8": {
+  "file": "eeloadfile.c",
+  "name": "sceSifLoadFileReset",
+  "ref": "ff2",
+  "ref_addr": "00284d38",
+  "size": 56,
+  "symbol": "sceSifLoadFileReset",
+  "tier": "lib-match"
+ },
+ "00266200": {
+  "file": "eeloadfile.c",
+  "name": "sceSifUnloadModule",
+  "ref": "ff2",
+  "ref_addr": "00285180",
+  "size": 144,
+  "symbol": "sceSifUnloadModule",
+  "tier": "lib-match"
+ },
+ "00266290": {
+  "file": "eeloadfile.c",
+  "name": "sceSifSearchModuleByName",
+  "ref": "ff2",
+  "ref_addr": "00285210",
+  "size": 160,
+  "symbol": "sceSifSearchModuleByName",
+  "tier": "lib-match"
+ },
+ "00266330": {
+  "file": "eeloadfile.c",
+  "name": "sceSifSearchModuleByAddress",
+  "ref": "ff2",
+  "ref_addr": "002852b0",
+  "size": 144,
+  "symbol": "sceSifSearchModuleByAddress",
+  "tier": "lib-match"
+ },
+ "002663c0": {
+  "file": "eeloadfile.c",
+  "name": "sceSifLoadModuleBuffer",
+  "ref": "ff2",
+  "ref_addr": "00285340",
+  "size": 28,
+  "symbol": "sceSifLoadModuleBuffer",
+  "tier": "lib-match"
+ },
+ "00266400": {
+  "file": "eeloadfile.c",
+  "name": "_sceSifLoadModule",
+  "ref": "ff2",
+  "ref_addr": "00285380",
+  "size": 548,
+  "symbol": "_sceSifLoadModule",
+  "tier": "lib-match"
+ },
+ "00266628": {
+  "file": "eeloadfile.c",
+  "name": "sceSifLoadModule",
+  "ref": "ff2",
+  "ref_addr": "002855a8",
+  "size": 32,
+  "symbol": "sceSifLoadModule",
+  "tier": "lib-match"
+ },
+ "00266648": {
+  "file": "eeloadfile.c",
+  "name": "sceSifLoadStartModule",
+  "ref": "ff2",
+  "ref_addr": "002855c8",
+  "size": 28,
+  "symbol": "sceSifLoadStartModule",
+  "tier": "lib-match"
+ },
+ "00266668": {
+  "file": "eeloadfile.c",
+  "name": "_sceSifLoadElfPart",
+  "ref": "ff2",
+  "ref_addr": "002855e8",
+  "size": 260,
+  "symbol": "_sceSifLoadElfPart",
+  "tier": "lib-match"
+ },
+ "00266770": {
+  "file": null,
+  "name": "sceSifLoadElf",
+  "ref": "ff3",
+  "ref_addr": "0027f1d8",
+  "size": 72,
+  "symbol": "sceSifLoadElf",
+  "tier": "lib-match"
+ },
+ "002667b8": {
+  "file": "eeloadfile.c",
+  "name": "sceSifGetIopAddr",
+  "ref": "ff2",
+  "ref_addr": "00285738",
+  "size": 236,
+  "symbol": "sceSifGetIopAddr",
+  "tier": "lib-match"
+ },
+ "002668a8": {
+  "file": "eeloadfile.c",
+  "name": "sceSifSetIopAddr",
+  "ref": "ff2",
+  "ref_addr": "00285828",
+  "size": 220,
+  "symbol": "sceSifSetIopAddr",
+  "tier": "lib-match"
+ },
+ "00266988": {
+  "file": null,
+  "name": "sceSifResetIop",
+  "ref": "ff3",
+  "ref_addr": "0027f3f0",
+  "size": 340,
+  "symbol": "sceSifResetIop",
+  "tier": "lib-match"
+ },
+ "00266ae0": {
+  "file": "iopreset.c",
+  "name": "sceSifIsAliveIop",
+  "ref": "ff2",
+  "ref_addr": "00285a60",
+  "size": 40,
+  "symbol": "sceSifIsAliveIop",
+  "tier": "lib-match"
+ },
+ "00266b08": {
+  "file": "iopreset.c",
+  "name": "sceSifSyncIop",
+  "ref": "ff2",
+  "ref_addr": "00285a88",
+  "size": 80,
+  "symbol": "sceSifSyncIop",
+  "tier": "lib-match"
+ },
+ "00266b58": {
+  "file": "iopreset.c",
+  "name": "sceSifRebootIop",
+  "ref": "ff2",
+  "ref_addr": "00285ad8",
+  "size": 272,
+  "symbol": "sceSifRebootIop",
+  "tier": "lib-match"
+ },
+ "00266c68": {
+  "file": "tlbfunc.c",
+  "name": "SetTLBHandler",
+  "ref": "ff2",
+  "ref_addr": "00285be8",
+  "size": 96,
+  "symbol": "SetTLBHandler",
+  "tier": "lib-match"
+ },
+ "00266cc8": {
+  "file": "tlbfunc.c",
+  "name": "SetDebugHandler",
+  "ref": "ff2",
+  "ref_addr": "00285c48",
+  "size": 132,
+  "symbol": "SetDebugHandler",
+  "tier": "lib-match"
+ },
+ "00266db8": {
+  "file": "tlbfunc.c",
+  "name": "InitTLBFunctions",
+  "ref": "ff2",
+  "ref_addr": "00285d38",
+  "size": 196,
+  "symbol": "InitTLBFunctions",
+  "tier": "lib-match"
+ },
+ "00266e80": {
+  "file": "tlbfunc.c",
+  "name": "PutTLBEntry",
+  "ref": "ff2",
+  "ref_addr": "00285e00",
+  "size": 12,
+  "symbol": "PutTLBEntry",
+  "tier": "lib-match-low"
+ },
+ "00266eb0": {
+  "file": null,
+  "name": "SetTLBEntry",
+  "ref": "ff3",
+  "ref_addr": "00282698",
+  "size": 140,
+  "symbol": "SetTLBEntry",
+  "tier": "lib-match"
+ },
+ "00266ee0": {
+  "file": "tlbfunc.c",
+  "name": "iSetTLBEntry",
+  "ref": "ff2",
+  "ref_addr": "00285e60",
+  "size": 12,
+  "symbol": "iSetTLBEntry",
+  "tier": "lib-match-low"
+ },
+ "00266f00": {
+  "file": "tlbfunc.c",
+  "name": "iGetTLBEntry",
+  "ref": "ff2",
+  "ref_addr": "00285e80",
+  "size": 12,
+  "symbol": "iGetTLBEntry",
+  "tier": "lib-match-low"
+ },
+ "00266f10": {
+  "file": "tlbfunc.c",
+  "name": "ProbeTLBEntry",
+  "ref": "ff2",
+  "ref_addr": "00285e90",
+  "size": 12,
+  "symbol": "ProbeTLBEntry",
+  "tier": "lib-match-low"
+ },
+ "00266f40": {
+  "file": "tlbfunc.c",
+  "name": "InitTLB",
+  "ref": "ff2",
+  "ref_addr": "00285ec0",
+  "size": 64,
+  "symbol": "InitTLB",
+  "tier": "lib-match"
+ },
+ "00266f80": {
+  "file": "tlbfunc.c",
+  "name": "InitTLB32MB",
+  "ref": "ff2",
+  "ref_addr": "00285f00",
+  "size": 500,
+  "symbol": "InitTLB32MB",
+  "tier": "lib-match"
+ },
+ "00267180": {
+  "file": "tlbtrap.s",
+  "name": "_kTLBException",
+  "ref": "ff2",
+  "ref_addr": "00286100",
+  "size": 284,
+  "symbol": "_kTLBException",
+  "tier": "lib-match"
+ },
+ "002674e0": {
+  "file": null,
+  "name": "DIntr",
+  "ref": "ff3",
+  "ref_addr": "0027f6d0",
+  "size": 80,
+  "symbol": "DIntr",
+  "tier": "lib-match"
+ },
+ "00267530": {
+  "file": "diei.c",
+  "name": "EIntr",
+  "ref": "ff2",
+  "ref_addr": "002864b8",
+  "size": 24,
+  "symbol": "EIntr",
+  "tier": "lib-match"
+ },
+ "00267548": {
+  "file": null,
+  "name": "supplement_crt0",
+  "ref": "ff3",
+  "ref_addr": "0027f738",
+  "size": 108,
+  "symbol": "supplement_crt0",
+  "tier": "lib-match"
+ },
+ "002675b8": {
+  "file": null,
+  "name": "kFindAddress",
+  "ref": "ff3",
+  "ref_addr": "0027f7a8",
+  "size": 136,
+  "symbol": "kFindAddress",
+  "tier": "lib-match"
+ },
+ "00267640": {
+  "file": "initsys.c",
+  "name": "FindAddress",
+  "ref": "ff2",
+  "ref_addr": "002865b0",
+  "size": 12,
+  "symbol": "FindAddress",
+  "tier": "lib-match-low"
+ },
+ "00267650": {
+  "file": "initsys.c",
+  "name": "GetSystemCallEntry",
+  "ref": "ff2",
+  "ref_addr": "002865c0",
+  "size": 52,
+  "symbol": "GetSystemCallEntry",
+  "tier": "lib-match"
+ },
+ "00267688": {
+  "file": "initsys.c",
+  "name": "InitSystemCallTableAddress",
+  "ref": "ff2",
+  "ref_addr": "002865f8",
+  "size": 252,
+  "symbol": "InitSystemCallTableAddress",
+  "tier": "lib-match"
+ },
+ "00267798": {
+  "file": "initsys.c",
+  "name": "_InitSys",
+  "ref": "ff2",
+  "ref_addr": "00286708",
+  "size": 84,
+  "symbol": "_InitSys",
+  "tier": "lib-match"
+ },
+ "00267858": {
+  "file": "libosd.c",
+  "name": "PatchIsNeeded",
+  "ref": "ff2",
+  "ref_addr": "002867c8",
+  "size": 104,
+  "symbol": "PatchIsNeeded",
+  "tier": "lib-match"
+ },
+ "002678c0": {
+  "file": "libosd.c",
+  "name": "InitExecPS2",
+  "ref": "ff2",
+  "ref_addr": "00286830",
+  "size": 172,
+  "symbol": "InitExecPS2",
+  "tier": "lib-match"
+ },
+ "00267970": {
+  "file": null,
+  "name": "kCopy",
+  "ref": "ff3",
+  "ref_addr": "0027fb60",
+  "size": 64,
+  "symbol": "kCopy",
+  "tier": "lib-match"
+ },
+ "002679c0": {
+  "file": "exit.c",
+  "name": "SetArg",
+  "ref": "ff2",
+  "ref_addr": "00286930",
+  "size": 280,
+  "symbol": "SetArg",
+  "tier": "lib-match"
+ },
+ "00267ad8": {
+  "file": null,
+  "name": "ExecPS2",
+  "ref": "ff3",
+  "ref_addr": "0027fcc8",
+  "size": 120,
+  "symbol": "ExecPS2",
+  "tier": "lib-match"
+ },
+ "00267b50": {
+  "file": "exit.c",
+  "name": "LoadExecPS2",
+  "ref": "ff2",
+  "ref_addr": "00286ac0",
+  "size": 72,
+  "symbol": "LoadExecPS2",
+  "tier": "lib-match"
+ },
+ "00267bc0": {
+  "file": "exit.c",
+  "name": "ExecOSD",
+  "ref": "ff2",
+  "ref_addr": "00286b30",
+  "size": 76,
+  "symbol": "ExecOSD",
+  "tier": "lib-match"
+ },
+ "00267c78": {
+  "file": "alarm.c",
+  "name": "InitAlarm",
+  "ref": "ff2",
+  "ref_addr": "00286be8",
+  "size": 212,
+  "symbol": "InitAlarm",
+  "tier": "lib-match"
+ },
+ "00267d50": {
+  "file": "timer.c",
+  "name": "SetT2",
+  "ref": "ff2",
+  "ref_addr": "00286cc0",
+  "size": 108,
+  "symbol": "SetT2",
+  "tier": "lib-match"
+ },
+ "00267df0": {
+  "file": "timer.c",
+  "name": "InitTimer",
+  "ref": "ff2",
+  "ref_addr": "00286d60",
+  "size": 340,
+  "symbol": "InitTimer",
+  "tier": "lib-match"
+ },
+ "00267f48": {
+  "file": null,
+  "name": "EndTimer",
+  "ref": "ff3",
+  "ref_addr": "00280138",
+  "size": 228,
+  "symbol": "EndTimer",
+  "tier": "lib-match"
+ },
+ "00268000": {
+  "file": "timer.c",
+  "name": "GetTimerPreScaleFactor",
+  "ref": "ff2",
+  "ref_addr": "00286f70",
+  "size": 44,
+  "symbol": "GetTimerPreScaleFactor",
+  "tier": "lib-match"
+ },
+ "00268030": {
+  "file": "timer.c",
+  "name": "StartTimerSystemTime",
+  "ref": "ff2",
+  "ref_addr": "00286fa0",
+  "size": 144,
+  "symbol": "StartTimerSystemTime",
+  "tier": "lib-match"
+ },
+ "002680c0": {
+  "file": "timer.c",
+  "name": "StopTimerSystemTime",
+  "ref": "ff2",
+  "ref_addr": "00287030",
+  "size": 124,
+  "symbol": "StopTimerSystemTime",
+  "tier": "lib-match"
+ },
+ "00268140": {
+  "file": "timer.c",
+  "name": "SetNextComp",
+  "ref": "ff2",
+  "ref_addr": "002870b0",
+  "size": 400,
+  "symbol": "SetNextComp",
+  "tier": "lib-match"
+ },
+ "002682d0": {
+  "file": "timer.c",
+  "name": "InsertAlarm",
+  "ref": "ff2",
+  "ref_addr": "00287240",
+  "size": 132,
+  "symbol": "InsertAlarm",
+  "tier": "lib-match"
+ },
+ "00268358": {
+  "file": "timer.c",
+  "name": "UnlinkAlarm",
+  "ref": "ff2",
+  "ref_addr": "002872c8",
+  "size": 56,
+  "symbol": "UnlinkAlarm",
+  "tier": "lib-match"
+ },
+ "00268638": {
+  "file": "timer.c",
+  "name": "iGetTimerSystemTime",
+  "ref": "ff2",
+  "ref_addr": "002875a0",
+  "size": 72,
+  "symbol": "iGetTimerSystemTime",
+  "tier": "lib-match"
+ },
+ "00268688": {
+  "file": "timer.c",
+  "name": "GetTimerSystemTime",
+  "ref": "ff2",
+  "ref_addr": "002875f0",
+  "size": 124,
+  "symbol": "GetTimerSystemTime",
+  "tier": "lib-match"
+ },
+ "00268708": {
+  "file": "timer.c",
+  "name": "iAllocTimerCounter",
+  "ref": "ff2",
+  "ref_addr": "00287670",
+  "size": 112,
+  "symbol": "iAllocTimerCounter",
+  "tier": "lib-match"
+ },
+ "00268778": {
+  "file": "timer.c",
+  "name": "AllocTimerCounter",
+  "ref": "ff2",
+  "ref_addr": "002876e0",
+  "size": 72,
+  "symbol": "AllocTimerCounter",
+  "tier": "lib-match"
+ },
+ "002687c0": {
+  "file": "timer.c",
+  "name": "iFreeTimerCounter",
+  "ref": "ff2",
+  "ref_addr": "00287728",
+  "size": 160,
+  "symbol": "iFreeTimerCounter",
+  "tier": "lib-match"
+ },
+ "002688b0": {
+  "file": "timer.c",
+  "name": "iGetTimerUsedUnusedCounters",
+  "ref": "ff2",
+  "ref_addr": "00287818",
+  "size": 80,
+  "symbol": "iGetTimerUsedUnusedCounters",
+  "tier": "lib-match"
+ },
+ "00268900": {
+  "file": "timer.c",
+  "name": "GetTimerUsedUnusedCounters",
+  "ref": "ff2",
+  "ref_addr": "00287868",
+  "size": 92,
+  "symbol": "GetTimerUsedUnusedCounters",
+  "tier": "lib-match"
+ },
+ "00268960": {
+  "file": "timer.c",
+  "name": "iStartTimerCounter",
+  "ref": "ff2",
+  "ref_addr": "002878c8",
+  "size": 172,
+  "symbol": "iStartTimerCounter",
+  "tier": "lib-match"
+ },
+ "00268a60": {
+  "file": "timer.c",
+  "name": "iStopTimerCounter",
+  "ref": "ff2",
+  "ref_addr": "002879c8",
+  "size": 196,
+  "symbol": "iStopTimerCounter",
+  "tier": "lib-match"
+ },
+ "00268b78": {
+  "file": "timer.c",
+  "name": "SetTimerCount",
+  "ref": "ff2",
+  "ref_addr": "00287ae0",
+  "size": 204,
+  "symbol": "SetTimerCount",
+  "tier": "lib-match"
+ },
+ "00268c48": {
+  "file": "timer.c",
+  "name": "iGetTimerBaseTime",
+  "ref": "ff2",
+  "ref_addr": "00287bb0",
+  "size": 72,
+  "symbol": "iGetTimerBaseTime",
+  "tier": "lib-match"
+ },
+ "00268ce0": {
+  "file": "timer.c",
+  "name": "iGetTimerCount",
+  "ref": "ff2",
+  "ref_addr": "00287c48",
+  "size": 108,
+  "symbol": "iGetTimerCount",
+  "tier": "lib-match"
+ },
+ "00268da0": {
+  "file": "timer.c",
+  "name": "iSetTimerHandler",
+  "ref": "ff2",
+  "ref_addr": "00287d08",
+  "size": 244,
+  "symbol": "iSetTimerHandler",
+  "tier": "lib-match"
+ },
+ "00268e98": {
+  "file": "timer.c",
+  "name": "SetTimerHandler",
+  "ref": "ff2",
+  "ref_addr": "00287e00",
+  "size": 124,
+  "symbol": "SetTimerHandler",
+  "tier": "lib-match"
+ },
+ "00268f18": {
+  "file": "timer.c",
+  "name": "TimerBusClock2USec",
+  "ref": "ff2",
+  "ref_addr": "00287e80",
+  "size": 168,
+  "symbol": "TimerBusClock2USec",
+  "tier": "lib-match"
+ },
+ "00268fc0": {
+  "file": "timer.c",
+  "name": "TimerUSec2BusClock",
+  "ref": "ff2",
+  "ref_addr": "00287f28",
+  "size": 112,
+  "symbol": "TimerUSec2BusClock",
+  "tier": "lib-match"
+ },
+ "00269030": {
+  "file": null,
+  "name": "TimerBusClock2Freq",
+  "ref": "ff3",
+  "ref_addr": "00281220",
+  "size": 140,
+  "symbol": "TimerBusClock2Freq",
+  "tier": "lib-match"
+ },
+ "00269088": {
+  "file": "timer.c",
+  "name": "TimerFreq2BusClock",
+  "ref": "ff2",
+  "ref_addr": "00287ff0",
+  "size": 52,
+  "symbol": "TimerFreq2BusClock",
+  "tier": "lib-match"
+ },
+ "002690c0": {
+  "file": "timeralarm.c",
+  "name": "_InitAlarm",
+  "ref": "ff2",
+  "ref_addr": "00288028",
+  "size": 76,
+  "symbol": "_InitAlarm",
+  "tier": "lib-match"
+ },
+ "00269110": {
+  "file": "timeralarm.c",
+  "name": "AlarmHandler",
+  "ref": "ff2",
+  "ref_addr": "00288078",
+  "size": 92,
+  "symbol": "AlarmHandler",
+  "tier": "lib-match"
+ },
+ "00269170": {
+  "file": "timeralarm.c",
+  "name": "SetTimerAlarm",
+  "ref": "ff2",
+  "ref_addr": "002880d8",
+  "size": 300,
+  "symbol": "SetTimerAlarm",
+  "tier": "lib-match"
+ },
+ "002692a0": {
+  "file": "timeralarm.c",
+  "name": "iSetTimerAlarm",
+  "ref": "ff2",
+  "ref_addr": "00288208",
+  "size": 240,
+  "symbol": "iSetTimerAlarm",
+  "tier": "lib-match"
+ },
+ "00269390": {
+  "file": "timeralarm.c",
+  "name": "ReleaseTimerAlarm",
+  "ref": "ff2",
+  "ref_addr": "002882f8",
+  "size": 168,
+  "symbol": "ReleaseTimerAlarm",
+  "tier": "lib-match"
+ },
+ "00269438": {
+  "file": "timeralarm.c",
+  "name": "iReleaseTimerAlarm",
+  "ref": "ff2",
+  "ref_addr": "002883a0",
+  "size": 120,
+  "symbol": "iReleaseTimerAlarm",
+  "tier": "lib-match"
+ },
+ "002694b0": {
+  "file": null,
+  "name": "sceSifSetRebootNotifyBuffer",
+  "ref": "ff3",
+  "ref_addr": "002816a0",
+  "size": 164,
+  "symbol": "sceSifSetRebootNotifyBuffer",
+  "tier": "lib-match"
+ },
+ "00269558": {
+  "file": "iopnotify.c",
+  "name": "sceSifAddRebootNotifyHandler",
+  "ref": "ff2",
+  "ref_addr": "002884c0",
+  "size": 184,
+  "symbol": "sceSifAddRebootNotifyHandler",
+  "tier": "lib-match"
+ },
+ "00269668": {
+  "file": "iopnotify.c",
+  "name": "sceSifExecNotifyHandler",
+  "ref": "ff2",
+  "ref_addr": "002885d0",
+  "size": 168,
+  "symbol": "sceSifExecNotifyHandler",
+  "tier": "lib-match"
+ },
+ "00269710": {
+  "file": "deci2.c",
+  "name": "sceDeci2Open",
+  "ref": "ff2",
+  "ref_addr": "00288a48",
+  "size": 68,
+  "symbol": "sceDeci2Open",
+  "tier": "lib-match"
+ },
+ "00269758": {
+  "file": "deci2.c",
+  "name": "sceDeci2Close",
+  "ref": "ff2",
+  "ref_addr": "00288a90",
+  "size": 36,
+  "symbol": "sceDeci2Close",
+  "tier": "lib-match"
+ },
+ "00269780": {
+  "file": "deci2.c",
+  "name": "sceDeci2ReqSend",
+  "ref": "ff2",
+  "ref_addr": "00288ab8",
+  "size": 48,
+  "symbol": "sceDeci2ReqSend",
+  "tier": "lib-match"
+ },
+ "002697b0": {
+  "file": "deci2.c",
+  "name": "sceDeci2Poll",
+  "ref": "ff2",
+  "ref_addr": "00288ae8",
+  "size": 36,
+  "symbol": "sceDeci2Poll",
+  "tier": "lib-match"
+ },
+ "002697d8": {
+  "file": "deci2.c",
+  "name": "sceDeci2GrpOpen",
+  "ref": "ff2",
+  "ref_addr": "00288b10",
+  "size": 48,
+  "symbol": "sceDeci2GrpOpen",
+  "tier": "lib-match"
+ },
+ "00269808": {
+  "file": "deci2.c",
+  "name": "sceDeci2GrpClose",
+  "ref": "ff2",
+  "ref_addr": "00288b40",
+  "size": 36,
+  "symbol": "sceDeci2GrpClose",
+  "tier": "lib-match"
+ },
+ "00269830": {
+  "file": "deci2.c",
+  "name": "sceDeci2ExRecv",
+  "ref": "ff2",
+  "ref_addr": "00288b68",
+  "size": 52,
+  "symbol": "sceDeci2ExRecv",
+  "tier": "lib-match"
+ },
+ "00269868": {
+  "file": null,
+  "name": "sceDeci2ExSend",
+  "ref": "ff3",
+  "ref_addr": "00281e28",
+  "size": 104,
+  "symbol": "sceDeci2ExSend",
+  "tier": "lib-match"
+ },
+ "002698a0": {
+  "file": "deci2.c",
+  "name": "sceDeci2ExReqSend",
+  "ref": "ff2",
+  "ref_addr": "00288bd8",
+  "size": 48,
+  "symbol": "sceDeci2ExReqSend",
+  "tier": "lib-match"
+ },
+ "002698d0": {
+  "file": "deci2.c",
+  "name": "sceDeci2ExLock",
+  "ref": "ff2",
+  "ref_addr": "00288c08",
+  "size": 36,
+  "symbol": "sceDeci2ExLock",
+  "tier": "lib-match"
+ },
+ "002698f8": {
+  "file": "deci2.c",
+  "name": "sceDeci2ExUnLock",
+  "ref": "ff2",
+  "ref_addr": "00288c30",
+  "size": 36,
+  "symbol": "sceDeci2ExUnLock",
+  "tier": "lib-match"
+ },
+ "00269920": {
+  "file": "deci2.c",
+  "name": "kputs",
+  "ref": "ff2",
+  "ref_addr": "00288c58",
+  "size": 36,
+  "symbol": "kputs",
+  "tier": "lib-match"
+ },
+ "00269a38": {
+  "file": "libipu.c",
+  "name": "sceIpuStopDMA",
+  "ref": "ff2",
+  "ref_addr": "00297aa8",
+  "size": 228,
+  "symbol": "sceIpuStopDMA",
+  "tier": "lib-match"
+ },
+ "00269b20": {
+  "file": "libipu.c",
+  "name": "sceIpuRestartDMA",
+  "ref": "ff2",
+  "ref_addr": "00297b90",
+  "size": 336,
+  "symbol": "sceIpuRestartDMA",
+  "tier": "lib-match"
+ },
+ "00269c70": {
+  "file": "libipu.c",
+  "name": "sceIpuSync",
+  "ref": "ff2",
+  "ref_addr": "00297ce0",
+  "size": 100,
+  "symbol": "sceIpuSync",
+  "tier": "lib-match"
+ },
+ "00269d50": {
+  "file": "ipuinit.c",
+  "name": "sceIpuInit",
+  "ref": "ff2",
+  "ref_addr": "00297dc0",
+  "size": 568,
+  "symbol": "sceIpuInit",
+  "tier": "lib-match"
+ },
+ "0026ba58": {
+  "file": "libpad.c",
+  "name": "scePadReqIntToStr",
+  "ref": "ff2",
+  "ref_addr": "0028b7e8",
+  "size": 52,
+  "symbol": "scePadReqIntToStr",
+  "tier": "lib-match"
+ },
+ "0026bc00": {
+  "file": "libscf.c",
+  "name": "GetRomName",
+  "ref": "ff2",
+  "ref_addr": "00297ff8",
+  "size": 112,
+  "symbol": "GetRomName",
+  "tier": "lib-match"
+ },
+ "0026bc70": {
+  "file": "libscf.c",
+  "name": "IsT10K",
+  "ref": "ff2",
+  "ref_addr": "00298068",
+  "size": 64,
+  "symbol": "IsT10K",
+  "tier": "lib-match"
+ },
+ "0026bcb0": {
+  "file": null,
+  "name": "sceScfGetLanguage",
+  "ref": "ff3",
+  "ref_addr": "00293c78",
+  "size": 124,
+  "symbol": "sceScfGetLanguage",
+  "tier": "lib-match"
+ },
+ "0026bd10": {
+  "file": "libscf.c",
+  "name": "sceScfSetT10kConfig",
+  "ref": "ff2",
+  "ref_addr": "00298108",
+  "size": 28,
+  "symbol": "sceScfSetT10kConfig",
+  "tier": "lib-match"
+ },
+ "0026bd30": {
+  "file": "libscf.c",
+  "name": "sceScfGetAspect",
+  "ref": "ff2",
+  "ref_addr": "00298128",
+  "size": 64,
+  "symbol": "sceScfGetAspect",
+  "tier": "lib-match"
+ },
+ "0026bd70": {
+  "file": "libscf.c",
+  "name": "sceScfGetSpdif",
+  "ref": "ff2",
+  "ref_addr": "00298168",
+  "size": 60,
+  "symbol": "sceScfGetSpdif",
+  "tier": "lib-match"
+ },
+ "0026bdb0": {
+  "file": "libscf.c",
+  "name": "sceScfGetTimeZone",
+  "ref": "ff2",
+  "ref_addr": "002981a8",
+  "size": 76,
+  "symbol": "sceScfGetTimeZone",
+  "tier": "lib-match"
+ },
+ "0026be00": {
+  "file": "libscf.c",
+  "name": "sceScfGetDateNotation",
+  "ref": "ff2",
+  "ref_addr": "002981f8",
+  "size": 100,
+  "symbol": "sceScfGetDateNotation",
+  "tier": "lib-match"
+ },
+ "0026be68": {
+  "file": "libscf.c",
+  "name": "sceScfGetSummerTime",
+  "ref": "ff2",
+  "ref_addr": "00298260",
+  "size": 104,
+  "symbol": "sceScfGetSummerTime",
+  "tier": "lib-match"
+ },
+ "0026bed0": {
+  "file": "libscf.c",
+  "name": "sceScfGetTimeNotation",
+  "ref": "ff2",
+  "ref_addr": "002982c8",
+  "size": 104,
+  "symbol": "sceScfGetTimeNotation",
+  "tier": "lib-match"
+ },
+ "0026bf38": {
+  "file": "libscf.c",
+  "name": "tobcd",
+  "ref": "ff2",
+  "ref_addr": "00298330",
+  "size": 44,
+  "symbol": "tobcd",
+  "tier": "lib-match"
+ },
+ "0026bf68": {
+  "file": "libscf.c",
+  "name": "frombcd",
+  "ref": "ff2",
+  "ref_addr": "00298360",
+  "size": 32,
+  "symbol": "frombcd",
+  "tier": "lib-match"
+ },
+ "0026c058": {
+  "file": "libscf.c",
+  "name": "adddate",
+  "ref": "ff2",
+  "ref_addr": "00298450",
+  "size": 180,
+  "symbol": "adddate",
+  "tier": "lib-match"
+ },
+ "0026c110": {
+  "file": "libscf.c",
+  "name": "subdate",
+  "ref": "ff2",
+  "ref_addr": "00298508",
+  "size": 164,
+  "symbol": "subdate",
+  "tier": "lib-match"
+ },
+ "0026c1b8": {
+  "file": "libscf.c",
+  "name": "addhour",
+  "ref": "ff2",
+  "ref_addr": "002985b0",
+  "size": 44,
+  "symbol": "addhour",
+  "tier": "lib-match"
+ },
+ "0026c1e8": {
+  "file": "libscf.c",
+  "name": "subhour",
+  "ref": "ff2",
+  "ref_addr": "002985e0",
+  "size": 36,
+  "symbol": "subhour",
+  "tier": "lib-match"
+ },
+ "0026c210": {
+  "file": null,
+  "name": "AdjustTime",
+  "ref": "ff3",
+  "ref_addr": "002941d8",
+  "size": 152,
+  "symbol": "AdjustTime",
+  "tier": "lib-match"
+ },
+ "0026c2a8": {
+  "file": "libscf.c",
+  "name": "sceScfGetLocalTimefromRTC",
+  "ref": "ff2",
+  "ref_addr": "002986a0",
+  "size": 72,
+  "symbol": "sceScfGetLocalTimefromRTC",
+  "tier": "lib-match"
+ },
+ "0026c7e0": {
+  "file": "sf_cos.c",
+  "name": "cosf",
+  "ref": "ff2",
+  "ref_addr": "002989b8",
+  "size": 212,
+  "symbol": "cosf",
+  "tier": "lib-match"
+ },
+ "0026c8b8": {
+  "file": "sf_fabs.c",
+  "name": "fabsf",
+  "ref": "ff2",
+  "ref_addr": "00298a90",
+  "size": 40,
+  "symbol": "fabsf",
+  "tier": "lib-match"
+ },
+ "0026c970": {
+  "file": "sf_sin.c",
+  "name": "sinf",
+  "ref": "ff2",
+  "ref_addr": "00298ad0",
+  "size": 232,
+  "symbol": "sinf",
+  "tier": "lib-match"
+ },
+ "0026ca58": {
+  "file": "sf_tan.c",
+  "name": "tanf",
+  "ref": "ff2",
+  "ref_addr": "00298bb8",
+  "size": 120,
+  "symbol": "tanf",
+  "tier": "lib-match"
+ },
+ "0026d118": {
+  "file": "ef_acos.c",
+  "name": "__ieee754_acosf",
+  "ref": "ff2",
+  "ref_addr": "00298cc0",
+  "size": 1060,
+  "symbol": "__ieee754_acosf",
+  "tier": "lib-match"
+ },
+ "0026d8e0": {
+  "file": "ef_atan2.c",
+  "name": "__ieee754_atan2f",
+  "ref": "ff2",
+  "ref_addr": "002990e8",
+  "size": 480,
+  "symbol": "__ieee754_atan2f",
+  "tier": "lib-match"
+ },
+ "0026e820": {
+  "file": "ef_sqrt.c",
+  "name": "__ieee754_sqrtf",
+  "ref": "ff2",
+  "ref_addr": "0029a308",
+  "size": 200,
+  "symbol": "__ieee754_sqrtf",
+  "tier": "lib-match"
+ },
+ "0026f950": {
+  "file": "kf_cos.c",
+  "name": "__kernel_cosf",
+  "ref": "ff2",
+  "ref_addr": "0029a3d8",
+  "size": 336,
+  "symbol": "__kernel_cosf",
+  "tier": "lib-match"
+ },
+ "00270308": {
+  "file": "kf_sin.c",
+  "name": "__kernel_sinf",
+  "ref": "ff2",
+  "ref_addr": "0029ad90",
+  "size": 260,
+  "symbol": "__kernel_sinf",
+  "tier": "lib-match"
+ },
+ "00270410": {
+  "file": "kf_tan.c",
+  "name": "__kernel_tanf",
+  "ref": "ff2",
+  "ref_addr": "0029ae98",
+  "size": 644,
+  "symbol": "__kernel_tanf",
+  "tier": "lib-match"
+ },
+ "00270ad0": {
+  "file": "sf_floor.c",
+  "name": "floorf",
+  "ref": "ff2",
+  "ref_addr": "0029b120",
+  "size": 212,
+  "symbol": "floorf",
+  "tier": "lib-match"
+ },
+ "00270ba8": {
+  "file": "sf_scalbn.c",
+  "name": "scalbnf",
+  "ref": "ff2",
+  "ref_addr": "0029b1f8",
+  "size": 200,
+  "symbol": "scalbnf",
+  "tier": "lib-match"
+ },
+ "00270cb8": {
+  "file": "sf_copysign.c",
+  "name": "copysignf",
+  "ref": "ff2",
+  "ref_addr": "0029b2c0",
+  "size": 60,
+  "symbol": "copysignf",
+  "tier": "lib-match"
+ },
+ "00270cf8": {
+  "file": "libgcc2.c",
+  "name": "__muldi3",
+  "ref": "ff2",
+  "ref_addr": "0029b300",
+  "size": 116,
+  "symbol": "__muldi3",
+  "tier": "lib-match"
+ },
+ "00272580": {
+  "file": "libgcc2.c",
+  "name": "__floatdisf",
+  "ref": "ff2",
+  "ref_addr": "0029cb88",
+  "size": 232,
+  "symbol": "__floatdisf",
+  "tier": "lib-match"
+ },
+ "00272668": {
+  "file": "libgcc2.c",
+  "name": "__fixunsdfdi",
+  "ref": "ff2",
+  "ref_addr": "0029cc70",
+  "size": 280,
+  "symbol": "__fixunsdfdi",
+  "tier": "lib-match"
+ },
+ "00272780": {
+  "file": "libgcc2.c",
+  "name": "__fixunssfdi",
+  "ref": "ff2",
+  "ref_addr": "0029cd88",
+  "size": 296,
+  "symbol": "__fixunssfdi",
+  "tier": "lib-match"
+ },
+ "002728a8": {
+  "file": "libgcc2.c",
+  "name": "__do_global_dtors",
+  "ref": "ff2",
+  "ref_addr": "0029cef0",
+  "size": 140,
+  "symbol": "__do_global_dtors",
+  "tier": "lib-match"
+ },
+ "00272938": {
+  "file": "libgcc2.c",
+  "name": "__do_global_ctors",
+  "ref": "ff2",
+  "ref_addr": "0029cf80",
+  "size": 192,
+  "symbol": "__do_global_ctors",
+  "tier": "lib-match"
+ },
+ "002729f8": {
+  "file": "libgcc2.c",
+  "name": "__main",
+  "ref": "ff2",
+  "ref_addr": "0029d040",
+  "size": 56,
+  "symbol": "__main",
+  "tier": "lib-match"
+ },
+ "00272a78": {
+  "file": "libgcc2.c",
+  "name": "__throw_type_match",
+  "ref": "ff2",
+  "ref_addr": "0029d0c0",
+  "size": 44,
+  "symbol": "__throw_type_match",
+  "tier": "lib-match"
+ },
+ "00272ab0": {
+  "file": "libgcc2.c",
+  "name": "new_eh_context",
+  "ref": "ff2",
+  "ref_addr": "0029d0f8",
+  "size": 84,
+  "symbol": "new_eh_context",
+  "tier": "lib-match"
+ },
+ "00272b08": {
+  "file": "libgcc2.c",
+  "name": "eh_context_free",
+  "ref": "ff2",
+  "ref_addr": "0029d150",
+  "size": 36,
+  "symbol": "eh_context_free",
+  "tier": "lib-match"
+ },
+ "00272b58": {
+  "file": "libgcc2.c",
+  "name": "__get_eh_info",
+  "ref": "ff2",
+  "ref_addr": "0029d1a0",
+  "size": 40,
+  "symbol": "__get_eh_info",
+  "tier": "lib-match"
+ },
+ "00272b80": {
+  "file": "libgcc2.c",
+  "name": "init_reg_size_table",
+  "ref": "ff2",
+  "ref_addr": "0029d1c8",
+  "size": 520,
+  "symbol": "init_reg_size_table",
+  "tier": "lib-match"
+ },
+ "00272d88": {
+  "file": "libgcc2.c",
+  "name": "eh_threads_initialize",
+  "ref": "ff2",
+  "ref_addr": "0029d3d0",
+  "size": 20,
+  "symbol": "eh_threads_initialize",
+  "tier": "lib-match-low"
+ },
+ "00272da0": {
+  "file": "libgcc2.c",
+  "name": "eh_context_initialize",
+  "ref": "ff2",
+  "ref_addr": "0029d3e8",
+  "size": 100,
+  "symbol": "eh_context_initialize",
+  "tier": "lib-match"
+ },
+ "00272e08": {
+  "file": "libgcc2.c",
+  "name": "eh_context_static",
+  "ref": "ff2",
+  "ref_addr": "0029d450",
+  "size": 100,
+  "symbol": "eh_context_static",
+  "tier": "lib-match"
+ },
+ "00272e70": {
+  "file": "libgcc2.c",
+  "name": "eh_context_specific",
+  "ref": "ff2",
+  "ref_addr": "0029d4b8",
+  "size": 136,
+  "symbol": "eh_context_specific",
+  "tier": "lib-match"
+ },
+ "00272ef8": {
+  "file": "libgcc2.c",
+  "name": "__eh_alloc",
+  "ref": "ff2",
+  "ref_addr": "0029d540",
+  "size": 224,
+  "symbol": "__eh_alloc",
+  "tier": "lib-match"
+ },
+ "00272fd8": {
+  "file": "libgcc2.c",
+  "name": "__eh_free",
+  "ref": "ff2",
+  "ref_addr": "0029d620",
+  "size": 144,
+  "symbol": "__eh_free",
+  "tier": "lib-match"
+ },
+ "00273068": {
+  "file": "libgcc2.c",
+  "name": "__get_dynamic_handler_chain",
+  "ref": "ff2",
+  "ref_addr": "0029d6b0",
+  "size": 40,
+  "symbol": "__get_dynamic_handler_chain",
+  "tier": "lib-match"
+ },
+ "00273090": {
+  "file": "libgcc2.c",
+  "name": "__sjthrow",
+  "ref": "ff2",
+  "ref_addr": "0029d6d8",
+  "size": 352,
+  "symbol": "__sjthrow",
+  "tier": "lib-match"
+ },
+ "002731f0": {
+  "file": "libgcc2.c",
+  "name": "__sjpopnthrow",
+  "ref": "ff2",
+  "ref_addr": "0029d838",
+  "size": 296,
+  "symbol": "__sjpopnthrow",
+  "tier": "lib-match"
+ },
+ "00273318": {
+  "file": "libgcc2.c",
+  "name": "__eh_rtime_match",
+  "ref": "ff2",
+  "ref_addr": "0029d960",
+  "size": 72,
+  "symbol": "__eh_rtime_match",
+  "tier": "lib-match"
+ },
+ "00273370": {
+  "file": "libgcc2.c",
+  "name": "old_find_exception_handler",
+  "ref": "ff2",
+  "ref_addr": "0029d9b8",
+  "size": 208,
+  "symbol": "old_find_exception_handler",
+  "tier": "lib-match"
+ },
+ "00273440": {
+  "file": "libgcc2.c",
+  "name": "find_exception_handler",
+  "ref": "ff2",
+  "ref_addr": "0029da88",
+  "size": 316,
+  "symbol": "find_exception_handler",
+  "tier": "lib-match"
+ },
+ "00273580": {
+  "file": "libgcc2.c",
+  "name": "get_reg_addr",
+  "ref": "ff2",
+  "ref_addr": "0029dbc8",
+  "size": 144,
+  "symbol": "get_reg_addr",
+  "tier": "lib-match"
+ },
+ "00273678": {
+  "file": "libgcc2.c",
+  "name": "next_stack_level",
+  "ref": "ff2",
+  "ref_addr": "0029dcc0",
+  "size": 176,
+  "symbol": "next_stack_level",
+  "tier": "lib-match"
+ },
+ "00273730": {
+  "file": "libgcc2.c",
+  "name": "throw_helper",
+  "ref": "ff2",
+  "ref_addr": "0029dd78",
+  "size": 908,
+  "symbol": "throw_helper",
+  "tier": "lib-match"
+ },
+ "00273ac0": {
+  "file": "libgcc2.c",
+  "name": "__throw",
+  "ref": "ff2",
+  "ref_addr": "0029e108",
+  "size": 336,
+  "symbol": "__throw",
+  "tier": "lib-match"
+ },
+ "00273c10": {
+  "file": "libgcc2.c",
+  "name": "__rethrow",
+  "ref": "ff2",
+  "ref_addr": "0029e258",
+  "size": 352,
+  "symbol": "__rethrow",
+  "tier": "lib-match"
+ },
+ "00273d70": {
+  "file": "fp-bit.c",
+  "name": "fptodp",
+  "ref": "ff2",
+  "ref_addr": "0029e3b8",
+  "size": 60,
+  "symbol": "fptodp",
+  "tier": "lib-match"
+ },
+ "00273db0": {
+  "file": "dp-bit.c",
+  "name": "_fpadd_parts",
+  "ref": "ff2",
+  "ref_addr": "0029e3f8",
+  "size": 600,
+  "symbol": "_fpadd_parts",
+  "tier": "lib-match"
+ },
+ "00274010": {
+  "file": "dp-bit.c",
+  "name": "dpadd",
+  "ref": "ff2",
+  "ref_addr": "0029e658",
+  "size": 88,
+  "symbol": "dpadd",
+  "tier": "lib-match"
+ },
+ "00274068": {
+  "file": "dp-bit.c",
+  "name": "dpsub",
+  "ref": "ff2",
+  "ref_addr": "0029e6b0",
+  "size": 100,
+  "symbol": "dpsub",
+  "tier": "lib-match"
+ },
+ "002740d0": {
+  "file": "dp-bit.c",
+  "name": "dpmul",
+  "ref": "ff2",
+  "ref_addr": "0029e718",
+  "size": 644,
+  "symbol": "dpmul",
+  "tier": "lib-match"
+ },
+ "00274358": {
+  "file": "dp-bit.c",
+  "name": "dpdiv",
+  "ref": "ff2",
+  "ref_addr": "0029e9a0",
+  "size": 320,
+  "symbol": "dpdiv",
+  "tier": "lib-match"
+ },
+ "00274498": {
+  "file": "dp-bit.c",
+  "name": "dpcmp",
+  "ref": "ff2",
+  "ref_addr": "0029eae0",
+  "size": 76,
+  "symbol": "dpcmp",
+  "tier": "lib-match"
+ },
+ "002744e8": {
+  "file": "dp-bit.c",
+  "name": "litodp",
+  "ref": "ff2",
+  "ref_addr": "0029eb30",
+  "size": 184,
+  "symbol": "litodp",
+  "tier": "lib-match"
+ },
+ "002745a0": {
+  "file": "dp-bit.c",
+  "name": "dptoli",
+  "ref": "ff2",
+  "ref_addr": "002ae928",
+  "size": 156,
+  "symbol": "dptoli",
+  "tier": "lib-match"
+ },
+ "00274640": {
+  "file": "dp-bit.c",
+  "name": "__make_dp",
+  "ref": "ff2",
+  "ref_addr": "0029ebe8",
+  "size": 44,
+  "symbol": "__make_dp",
+  "tier": "lib-match"
+ },
+ "00274670": {
+  "file": "dp-bit.c",
+  "name": "dptofp",
+  "ref": "ff2",
+  "ref_addr": "0029ec18",
+  "size": 84,
+  "symbol": "dptofp",
+  "tier": "lib-match"
+ },
+ "002746c8": {
+  "file": "dp-bit.c",
+  "name": "dptoul",
+  "ref": "ff2",
+  "ref_addr": "0029ec70",
+  "size": 160,
+  "symbol": "dptoul",
+  "tier": "lib-match"
+ },
+ "00274768": {
+  "file": "frame-dwarf2.c",
+  "name": "decode_uleb128",
+  "ref": "ff2",
+  "ref_addr": "0029ed10",
+  "size": 68,
+  "symbol": "decode_uleb128",
+  "tier": "lib-match"
+ },
+ "002747b0": {
+  "file": "frame-dwarf2.c",
+  "name": "decode_sleb128",
+  "ref": "ff2",
+  "ref_addr": "0029ed58",
+  "size": 88,
+  "symbol": "decode_sleb128",
+  "tier": "lib-match"
+ },
+ "00274808": {
+  "file": "frame-dwarf2.c",
+  "name": "fde_merge",
+  "ref": "ff2",
+  "ref_addr": "0029edb0",
+  "size": 248,
+  "symbol": "fde_merge",
+  "tier": "lib-match"
+ },
+ "00274e78": {
+  "file": "frame-dwarf2.c",
+  "name": "__register_frame_info",
+  "ref": "ff2",
+  "ref_addr": "0029f420",
+  "size": 104,
+  "symbol": "__register_frame_info",
+  "tier": "lib-match"
+ },
+ "00274f10": {
+  "file": "frame-dwarf2.c",
+  "name": "__register_frame_info_table",
+  "ref": "ff2",
+  "ref_addr": "0029f4b8",
+  "size": 104,
+  "symbol": "__register_frame_info_table",
+  "tier": "lib-match"
+ },
+ "00275088": {
+  "file": "frame-dwarf2.c",
+  "name": "count_fdes",
+  "ref": "ff2",
+  "ref_addr": "0029f630",
+  "size": 64,
+  "symbol": "count_fdes",
+  "tier": "lib-match"
+ },
+ "002750c8": {
+  "file": "frame-dwarf2.c",
+  "name": "add_fdes",
+  "ref": "ff2",
+  "ref_addr": "0029f670",
+  "size": 140,
+  "symbol": "add_fdes",
+  "tier": "lib-match"
+ },
+ "00275158": {
+  "file": "frame-dwarf2.c",
+  "name": "search_fdes",
+  "ref": "ff2",
+  "ref_addr": "0029f700",
+  "size": 84,
+  "symbol": "search_fdes",
+  "tier": "lib-match"
+ },
+ "002751b0": {
+  "file": "frame-dwarf2.c",
+  "name": "frame_init",
+  "ref": "ff2",
+  "ref_addr": "0029f758",
+  "size": 360,
+  "symbol": "frame_init",
+  "tier": "lib-match"
+ },
+ "00275318": {
+  "file": "frame-dwarf2.c",
+  "name": "find_fde",
+  "ref": "ff2",
+  "ref_addr": "0029f8c0",
+  "size": 424,
+  "symbol": "find_fde",
+  "tier": "lib-match"
+ },
+ "002754c0": {
+  "file": "frame-dwarf2.c",
+  "name": "extract_cie_info",
+  "ref": "ff2",
+  "ref_addr": "0029fa68",
+  "size": 272,
+  "symbol": "extract_cie_info",
+  "tier": "lib-match"
+ },
+ "002755d0": {
+  "file": "frame-dwarf2.c",
+  "name": "decode_stack_op",
+  "ref": "ff2",
+  "ref_addr": "0029fb78",
+  "size": 288,
+  "symbol": "decode_stack_op",
+  "tier": "lib-match"
+ },
+ "00275b40": {
+  "file": "frame-dwarf2.c",
+  "name": "__frame_state_for",
+  "ref": "ff2",
+  "ref_addr": "002a00e8",
+  "size": 440,
+  "symbol": "__frame_state_for",
+  "tier": "lib-match"
+ },
+ "00275d30": {
+  "file": "tinfo.cc",
+  "name": "type_info::operator==",
+  "ref": "ff2",
+  "ref_addr": "002a02d8",
+  "size": 64,
+  "symbol": "__eq__C9type_infoRC9type_info",
+  "tier": "lib-match"
+ },
+ "00275d70": {
+  "file": "tinfo.cc",
+  "name": "__rtti_class",
+  "ref": "ff2",
+  "ref_addr": "002a0318",
+  "size": 32,
+  "symbol": "__rtti_class",
+  "tier": "lib-match"
+ },
+ "00275dd8": {
+  "file": "tinfo.cc",
+  "name": "__user_type_info::upcast",
+  "ref": "ff2",
+  "ref_addr": "002a0380",
+  "size": 120,
+  "symbol": "upcast__C16__user_type_infoRC9type_infoPvPPv",
+  "tier": "lib-match"
+ },
+ "00275e50": {
+  "file": "tinfo.cc",
+  "name": "__user_type_info::dyncast",
+  "ref": "ff2",
+  "ref_addr": "002a03f8",
+  "size": 328,
+  "symbol": "dyncast__C16__user_type_infoiRC9type_infoPvT2T3",
+  "tier": "lib-match"
+ },
+ "00275f98": {
+  "file": "tinfo.cc",
+  "name": "__user_type_info::do_upcast",
+  "ref": "ff2",
+  "ref_addr": "002a0540",
+  "size": 96,
+  "symbol": "do_upcast__C16__user_type_infoQ216__user_type_info8sub_kindRC9type_infoPvRQ216__user_type_info13upcast_result",
+  "tier": "lib-match"
+ },
+ "00275ff8": {
+  "file": "tinfo.cc",
+  "name": "__user_type_info::do_dyncast",
+  "ref": "ff2",
+  "ref_addr": "002a05a0",
+  "size": 152,
+  "symbol": "do_dyncast__C16__user_type_infoiQ216__user_type_info8sub_kindRC9type_infoPvT3T4RQ216__user_type_info14dyncast_result",
+  "tier": "lib-match"
+ },
+ "00276090": {
+  "file": "tinfo.cc",
+  "name": "__user_type_info::do_find_public_subobj",
+  "ref": "ff2",
+  "ref_addr": "002a0638",
+  "size": 20,
+  "symbol": "do_find_public_subobj__C16__user_type_infoiRC9type_infoPvT3",
+  "tier": "lib-match-low"
+ },
+ "002760a8": {
+  "file": "tinfo.cc",
+  "name": "__si_type_info::do_upcast",
+  "ref": "ff2",
+  "ref_addr": "002a0650",
+  "size": 172,
+  "symbol": "do_upcast__C14__si_type_infoQ216__user_type_info8sub_kindRC9type_infoPvRQ216__user_type_info13upcast_result",
+  "tier": "lib-match"
+ },
+ "00276158": {
+  "file": "tinfo.cc",
+  "name": "__si_type_info::do_dyncast",
+  "ref": "ff2",
+  "ref_addr": "002a0700",
+  "size": 288,
+  "symbol": "do_dyncast__C14__si_type_infoiQ216__user_type_info8sub_kindRC9type_infoPvT3T4RQ216__user_type_info14dyncast_result",
+  "tier": "lib-match"
+ },
+ "00276278": {
+  "file": "tinfo.cc",
+  "name": "__si_type_info::do_find_public_subobj",
+  "ref": "ff2",
+  "ref_addr": "002a0820",
+  "size": 152,
+  "symbol": "do_find_public_subobj__C14__si_type_infoiRC9type_infoPvT3",
+  "tier": "lib-match"
+ },
+ "00276310": {
+  "file": "tinfo.cc",
+  "name": "__class_type_info::do_upcast",
+  "ref": "ff2",
+  "ref_addr": "002a08b8",
+  "size": 572,
+  "symbol": "do_upcast__C17__class_type_infoQ216__user_type_info8sub_kindRC9type_infoPvRQ216__user_type_info13upcast_result",
+  "tier": "lib-match"
+ },
+ "00276550": {
+  "file": "tinfo.cc",
+  "name": "__class_type_info::do_dyncast",
+  "ref": "ff2",
+  "ref_addr": "002a0af8",
+  "size": 1088,
+  "symbol": "do_dyncast__C17__class_type_infoiQ216__user_type_info8sub_kindRC9type_infoPvT3T4RQ216__user_type_info14dyncast_result",
+  "tier": "lib-match"
+ },
+ "00276990": {
+  "file": "tinfo.cc",
+  "name": "__class_type_info::do_find_public_subobj",
+  "ref": "ff2",
+  "ref_addr": "002a0f38",
+  "size": 356,
+  "symbol": "do_find_public_subobj__C17__class_type_infoiRC9type_infoPvT3",
+  "tier": "lib-match"
+ },
+ "00276b68": {
+  "file": "exception.cc",
+  "name": "__cp_exception_info",
+  "ref": "ff2",
+  "ref_addr": "002a1ce8",
+  "size": 36,
+  "symbol": "__cp_exception_info",
+  "tier": "lib-match"
+ },
+ "00276bb0": {
+  "file": "exception.cc",
+  "name": "__start_cp_handler",
+  "ref": "ff2",
+  "ref_addr": "002a1d30",
+  "size": 56,
+  "symbol": "__start_cp_handler",
+  "tier": "lib-match"
+ },
+ "00276be8": {
+  "file": "exception.cc",
+  "name": "__cplus_type_matcher",
+  "ref": "ff2",
+  "ref_addr": "002a1d68",
+  "size": 96,
+  "symbol": "__cplus_type_matcher",
+  "tier": "lib-match"
+ },
+ "00276c48": {
+  "file": "exception.cc",
+  "name": "__cp_push_exception",
+  "ref": "ff2",
+  "ref_addr": "002a1dc8",
+  "size": 144,
+  "symbol": "__cp_push_exception",
+  "tier": "lib-match"
+ },
+ "00276cd8": {
+  "file": "exception.cc",
+  "name": "__cp_pop_exception",
+  "ref": "ff2",
+  "ref_addr": "002a1e58",
+  "size": 296,
+  "symbol": "__cp_pop_exception",
+  "tier": "lib-match"
+ },
+ "00276e00": {
+  "file": "exception.cc",
+  "name": "__uncatch_exception",
+  "ref": "ff2",
+  "ref_addr": "002a1f80",
+  "size": 96,
+  "symbol": "__uncatch_exception",
+  "tier": "lib-match"
+ },
+ "00276e60": {
+  "file": "exception.cc",
+  "name": "__check_eh_spec",
+  "ref": "ff2",
+  "ref_addr": "002a1fe0",
+  "size": 420,
+  "symbol": "__check_eh_spec",
+  "tier": "lib-match"
+ },
+ "00277008": {
+  "file": "exception.cc",
+  "name": "__check_null_eh_spec",
+  "ref": "ff2",
+  "ref_addr": "002a2188",
+  "size": 32,
+  "symbol": "__check_null_eh_spec",
+  "tier": "lib-match"
+ },
+ "002770f8": {
+  "file": "exception.cc",
+  "name": "uncaught_exception__Fv",
+  "ref": "ff2",
+  "ref_addr": "002a2278",
+  "size": 52,
+  "symbol": "uncaught_exception__Fv",
+  "tier": "lib-match"
+ },
+ "00277130": {
+  "file": "exception.cc",
+  "name": "exception::what",
+  "ref": "ff2",
+  "ref_addr": "002a22b0",
+  "size": 64,
+  "symbol": "what__C9exception",
+  "tier": "lib-match"
+ },
+ "00277170": {
+  "file": "libgcc2.c",
+  "name": "__floatdidf",
+  "ref": "ff2",
+  "ref_addr": "002a22f0",
+  "size": 168,
+  "symbol": "__floatdidf",
+  "tier": "lib-match"
+ },
+ "00277218": {
+  "file": "fp-bit.c",
+  "name": "__unpack_f",
+  "ref": "ff2",
+  "ref_addr": "002a2398",
+  "size": 92,
+  "symbol": "__unpack_f",
+  "tier": "lib-match"
+ },
+ "00277278": {
+  "file": "fp-bit.c",
+  "name": "__make_fp",
+  "ref": "ff2",
+  "ref_addr": "002a23f8",
+  "size": 44,
+  "symbol": "__make_fp",
+  "tier": "lib-match"
+ },
+ "002772a8": {
+  "file": "dp-bit.c",
+  "name": "__pack_d",
+  "ref": "ff2",
+  "ref_addr": "002a2428",
+  "size": 216,
+  "symbol": "__pack_d",
+  "tier": "lib-match"
+ },
+ "00277380": {
+  "file": "dp-bit.c",
+  "name": "__unpack_d",
+  "ref": "ff2",
+  "ref_addr": "002a2500",
+  "size": 188,
+  "symbol": "__unpack_d",
+  "tier": "lib-match"
+ },
+ "00277440": {
+  "file": "dp-bit.c",
+  "name": "__fpcmp_parts_d",
+  "ref": "ff2",
+  "ref_addr": "002a25c0",
+  "size": 284,
+  "symbol": "__fpcmp_parts_d",
+  "tier": "lib-match"
+ },
+ "00277560": {
+  "file": "tinfo2.cc",
+  "name": "type_info::before",
+  "ref": "ff2",
+  "ref_addr": "002a10a0",
+  "size": 36,
+  "symbol": "before__C9type_infoRC9type_info",
+  "tier": "lib-match"
+ },
+ "00277588": {
+  "file": "tinfo2.cc",
+  "name": "__throw_type_match_rtti_2",
+  "ref": "ff2",
+  "ref_addr": "002a10c8",
+  "size": 1292,
+  "symbol": "__throw_type_match_rtti_2",
+  "tier": "lib-match"
+ },
+ "00277a98": {
+  "file": "tinfo2.cc",
+  "name": "__throw_type_match_rtti",
+  "ref": "ff2",
+  "ref_addr": "002a15d8",
+  "size": 40,
+  "symbol": "__throw_type_match_rtti",
+  "tier": "lib-match"
+ },
+ "00277ac0": {
+  "file": "tinfo2.cc",
+  "name": "__is_pointer__FPv",
+  "ref": "ff2",
+  "ref_addr": "002a1600",
+  "size": 80,
+  "symbol": "__is_pointer__FPv",
+  "tier": "lib-match"
+ },
+ "00277b30": {
+  "file": "tinfo2.cc",
+  "name": "__rtti_attr",
+  "ref": "ff2",
+  "ref_addr": "002a1670",
+  "size": 32,
+  "symbol": "__rtti_attr",
+  "tier": "lib-match"
+ },
+ "00277bd8": {
+  "file": "tinfo2.cc",
+  "name": "__dynamic_cast",
+  "ref": "ff2",
+  "ref_addr": "002a1718",
+  "size": 136,
+  "symbol": "__dynamic_cast",
+  "tier": "lib-match"
+ },
+ "00277c60": {
+  "file": "tinfo2.cc",
+  "name": "__dynamic_cast_2",
+  "ref": "ff2",
+  "ref_addr": "002a17a0",
+  "size": 140,
+  "symbol": "__dynamic_cast_2",
+  "tier": "lib-match"
+ },
+ "00278118": {
+  "file": "fp-bit.c",
+  "name": "__pack_f",
+  "ref": "ff2",
+  "ref_addr": "002a26e0",
+  "size": 176,
+  "symbol": "__pack_f",
+  "tier": "lib-match"
+ },
+ "002781d0": {
+  "file": "abort.c",
+  "name": "abort",
+  "ref": "ff2",
+  "ref_addr": "002a2798",
+  "size": 24,
+  "symbol": "abort",
+  "tier": "lib-match"
+ },
+ "002781e8": {
+  "file": "atexit.c",
+  "name": "atexit",
+  "ref": "ff2",
+  "ref_addr": "002a27e8",
+  "size": 160,
+  "symbol": "atexit",
+  "tier": "lib-match"
+ },
+ "002782a0": {
+  "file": "atoi.c",
+  "name": "atoi",
+  "ref": "ff2",
+  "ref_addr": "002a2888",
+  "size": 40,
+  "symbol": "atoi",
+  "tier": "lib-match"
+ },
+ "002783a8": {
+  "file": "exit.c",
+  "name": "exit",
+  "ref": "ff2",
+  "ref_addr": "002a28c0",
+  "size": 172,
+  "symbol": "exit",
+  "tier": "lib-match"
+ },
+ "00278458": {
+  "file": "fflush.c",
+  "name": "fflush",
+  "ref": "ff2",
+  "ref_addr": "002aa530",
+  "size": 276,
+  "symbol": "fflush",
+  "tier": "lib-match"
+ },
+ "00278570": {
+  "file": "findfp.c",
+  "name": "std",
+  "ref": "ff2",
+  "ref_addr": "002aa648",
+  "size": 92,
+  "symbol": "std",
+  "tier": "lib-match"
+ },
+ "002785d0": {
+  "file": "findfp.c",
+  "name": "__sfmoreglue",
+  "ref": "ff2",
+  "ref_addr": "002aa6a8",
+  "size": 120,
+  "symbol": "__sfmoreglue",
+  "tier": "lib-match"
+ },
+ "00278648": {
+  "file": "findfp.c",
+  "name": "__sfp",
+  "ref": "ff2",
+  "ref_addr": "002aa720",
+  "size": 248,
+  "symbol": "__sfp",
+  "tier": "lib-match"
+ },
+ "00278740": {
+  "file": "findfp.c",
+  "name": "_cleanup_r",
+  "ref": "ff2",
+  "ref_addr": "002aa818",
+  "size": 28,
+  "symbol": "_cleanup_r",
+  "tier": "lib-match"
+ },
+ "00278780": {
+  "file": "findfp.c",
+  "name": "__sinit",
+  "ref": "ff2",
+  "ref_addr": "002aa858",
+  "size": 140,
+  "symbol": "__sinit",
+  "tier": "lib-match"
+ },
+ "00278810": {
+  "file": "fwalk.c",
+  "name": "_fwalk",
+  "ref": "ff2",
+  "ref_addr": "002ab250",
+  "size": 148,
+  "symbol": "_fwalk",
+  "tier": "lib-match"
+ },
+ "002788a8": {
+  "file": "malloc.c",
+  "name": "malloc",
+  "ref": "ff2",
+  "ref_addr": "002a29c8",
+  "size": 84,
+  "symbol": "malloc",
+  "tier": "lib-match"
+ },
+ "00278900": {
+  "file": "malloc.c",
+  "name": "free",
+  "ref": "ff2",
+  "ref_addr": "002a2a20",
+  "size": 72,
+  "symbol": "free",
+  "tier": "lib-match"
+ },
+ "00278948": {
+  "file": "mallocr.c",
+  "name": "malloc_extend_top",
+  "ref": "ff2",
+  "ref_addr": "002a2a68",
+  "size": 600,
+  "symbol": "malloc_extend_top",
+  "tier": "lib-match"
+ },
+ "002792c8": {
+  "file": "memcmp.S",
+  "name": "memcmp",
+  "ref": "ff2",
+  "ref_addr": "002a33e8",
+  "size": 148,
+  "symbol": "memcmp",
+  "tier": "lib-match"
+ },
+ "0027935c": {
+  "file": "memcpy.S",
+  "name": "memcpy",
+  "ref": "ff2",
+  "ref_addr": "002a347c",
+  "size": 176,
+  "symbol": "memcpy",
+  "tier": "lib-match"
+ },
+ "0027940c": {
+  "file": "memmove.S",
+  "name": "memmove",
+  "ref": "ff2",
+  "ref_addr": "002a352c",
+  "size": 260,
+  "symbol": "memmove",
+  "tier": "lib-match"
+ },
+ "00279510": {
+  "file": "memset.S",
+  "name": "memset",
+  "ref": "ff2",
+  "ref_addr": "002a3630",
+  "size": 192,
+  "symbol": "memset",
+  "tier": "lib-match"
+ },
+ "002795d0": {
+  "file": "mlock.c",
+  "name": "__malloc_lock",
+  "ref": "ff2",
+  "ref_addr": "002a36f0",
+  "size": 124,
+  "symbol": "__malloc_lock",
+  "tier": "lib-match"
+ },
+ "00279650": {
+  "file": "mlock.c",
+  "name": "__malloc_unlock",
+  "ref": "ff2",
+  "ref_addr": "002a3770",
+  "size": 76,
+  "symbol": "__malloc_unlock",
+  "tier": "lib-match"
+ },
+ "002796a0": {
+  "file": "rand.c",
+  "name": "srand",
+  "ref": "ff2",
+  "ref_addr": "002a4280",
+  "size": 24,
+  "symbol": "srand",
+  "tier": "lib-match"
+ },
+ "002796b8": {
+  "file": "rand.c",
+  "name": "rand",
+  "ref": "ff2",
+  "ref_addr": "002a4298",
+  "size": 100,
+  "symbol": "rand",
+  "tier": "lib-match"
+ },
+ "00279778": {
+  "file": "signal.c",
+  "name": "_init_signal_r",
+  "ref": "ff2",
+  "ref_addr": "002a4358",
+  "size": 112,
+  "symbol": "_init_signal_r",
+  "tier": "lib-match"
+ },
+ "002797e8": {
+  "file": "signal.c",
+  "name": "_signal_r",
+  "ref": "ff2",
+  "ref_addr": "002a43c8",
+  "size": 128,
+  "symbol": "_signal_r",
+  "tier": "lib-match"
+ },
+ "00279868": {
+  "file": "signal.c",
+  "name": "_raise_r",
+  "ref": "ff2",
+  "ref_addr": "002a4448",
+  "size": 216,
+  "symbol": "_raise_r",
+  "tier": "lib-match"
+ },
+ "00279940": {
+  "file": "signal.c",
+  "name": "__sigtramp_r",
+  "ref": "ff2",
+  "ref_addr": "002a4520",
+  "size": 152,
+  "symbol": "__sigtramp_r",
+  "tier": "lib-match"
+ },
+ "002799d8": {
+  "file": "signal.c",
+  "name": "raise",
+  "ref": "ff2",
+  "ref_addr": "002a45b8",
+  "size": 32,
+  "symbol": "raise",
+  "tier": "lib-match-low"
+ },
+ "00279c10": {
+  "file": "sprintf.c",
+  "name": "_sprintf_r",
+  "ref": "ff2",
+  "ref_addr": "002a46b8",
+  "size": 136,
+  "symbol": "_sprintf_r",
+  "tier": "lib-match"
+ },
+ "00279c98": {
+  "file": "sprintf.c",
+  "name": "sprintf",
+  "ref": "ff2",
+  "ref_addr": "002a4740",
+  "size": 144,
+  "symbol": "sprintf",
+  "tier": "lib-match"
+ },
+ "00279d28": {
+  "file": "stdio.c",
+  "name": "__sread",
+  "ref": "ff2",
+  "ref_addr": "002ac858",
+  "size": 100,
+  "symbol": "__sread",
+  "tier": "lib-match"
+ },
+ "00279d90": {
+  "file": "stdio.c",
+  "name": "__swrite",
+  "ref": "ff2",
+  "ref_addr": "002ac8c0",
+  "size": 128,
+  "symbol": "__swrite",
+  "tier": "lib-match"
+ },
+ "00279e10": {
+  "file": "stdio.c",
+  "name": "__sseek",
+  "ref": "ff2",
+  "ref_addr": "002ac940",
+  "size": 100,
+  "symbol": "__sseek",
+  "tier": "lib-match"
+ },
+ "00279e78": {
+  "file": "stdio.c",
+  "name": "__sclose",
+  "ref": "ff2",
+  "ref_addr": "002ac9a8",
+  "size": 28,
+  "symbol": "__sclose",
+  "tier": "lib-match"
+ },
+ "00279f70": {
+  "file": null,
+  "name": "strchr",
+  "ref": "ff3",
+  "ref_addr": "002a305c",
+  "size": 400,
+  "symbol": "strchr",
+  "tier": "lib-match"
+ },
+ "0027a100": {
+  "file": "strcmp.S",
+  "name": "strcmp",
+  "ref": "ff2",
+  "ref_addr": "002a49ac",
+  "size": 324,
+  "symbol": "strcmp",
+  "tier": "lib-match"
+ },
+ "0027a244": {
+  "file": "strcpy.S",
+  "name": "strcpy",
+  "ref": "ff2",
+  "ref_addr": "002a4af0",
+  "size": 276,
+  "symbol": "strcpy",
+  "tier": "lib-match"
+ },
+ "0027a358": {
+  "file": "strlen.S",
+  "name": "strlen",
+  "ref": "ff2",
+  "ref_addr": "002a511c",
+  "size": 312,
+  "symbol": "strlen",
+  "tier": "lib-match"
+ },
+ "0027a5b8": {
+  "file": "strncmp.S",
+  "name": "strncmp",
+  "ref": "ff2",
+  "ref_addr": "002a5258",
+  "size": 440,
+  "symbol": "strncmp",
+  "tier": "lib-match"
+ },
+ "0027a770": {
+  "file": "strncpy.S",
+  "name": "strncpy",
+  "ref": "ff2",
+  "ref_addr": "002a5410",
+  "size": 444,
+  "symbol": "strncpy",
+  "tier": "lib-match"
+ },
+ "0027a930": {
+  "file": "strrchr.c",
+  "name": "strrchr",
+  "ref": "ff2",
+  "ref_addr": "002a55d0",
+  "size": 80,
+  "symbol": "strrchr",
+  "tier": "lib-match"
+ },
+ "0027a980": {
+  "file": "strstr.c",
+  "name": "strstr",
+  "ref": "ff2",
+  "ref_addr": "002a5620",
+  "size": 132,
+  "symbol": "strstr",
+  "tier": "lib-match"
+ },
+ "0027bba8": {
+  "file": "strtol.c",
+  "name": "strtol",
+  "ref": "ff2",
+  "ref_addr": "002a58e0",
+  "size": 44,
+  "symbol": "strtol",
+  "tier": "lib-match-low"
+ },
+ "0027bbd8": {
+  "file": "vfprintf.c",
+  "name": "__sprint",
+  "ref": "ff2",
+  "ref_addr": "002a5918",
+  "size": 72,
+  "symbol": "__sprint",
+  "tier": "lib-match"
+ },
+ "0027bc20": {
+  "file": "vfprintf.c",
+  "name": "__sbprintf",
+  "ref": "ff2",
+  "ref_addr": "002a5960",
+  "size": 180,
+  "symbol": "__sbprintf",
+  "tier": "lib-match"
+ },
+ "0027bcd8": {
+  "file": "vfprintf.c",
+  "name": "vfiprintf",
+  "ref": "ff2",
+  "ref_addr": "002a5a18",
+  "size": 116,
+  "symbol": "vfiprintf",
+  "tier": "lib-match-low"
+ },
+ "0027d3c0": {
+  "file": "vfprintf.c",
+  "name": "cvt",
+  "ref": "ff2",
+  "ref_addr": "002a7e70",
+  "size": 448,
+  "symbol": "cvt",
+  "tier": "lib-match"
+ },
+ "0027d580": {
+  "file": "vfprintf.c",
+  "name": "exponent",
+  "ref": "ff2",
+  "ref_addr": "002a8030",
+  "size": 220,
+  "symbol": "exponent",
+  "tier": "lib-match"
+ },
+ "0027d660": {
+  "file": "vsprintf.c",
+  "name": "vsprintf",
+  "ref": "ff2",
+  "ref_addr": "002a8ea0",
+  "size": 84,
+  "symbol": "vsprintf",
+  "tier": "lib-match"
+ },
+ "0027d6b8": {
+  "file": "vsprintf.c",
+  "name": "vsprintf_r",
+  "ref": "ff2",
+  "ref_addr": "002a8ef8",
+  "size": 84,
+  "symbol": "vsprintf_r",
+  "tier": "lib-match"
+ },
+ "0027d770": {
+  "file": "wsetup.c",
+  "name": "__swsetup",
+  "ref": "ff2",
+  "ref_addr": "002a8f50",
+  "size": 268,
+  "symbol": "__swsetup",
+  "tier": "lib-match"
+ },
+ "0027d8d8": {
+  "file": "dtoa.c",
+  "name": "quorem",
+  "ref": "ff2",
+  "ref_addr": "002a9098",
+  "size": 556,
+  "symbol": "quorem",
+  "tier": "lib-match"
+ },
+ "0027ed70": {
+  "file": "mallocr.c",
+  "name": "_free_r",
+  "ref": "ff2",
+  "ref_addr": "002aaa08",
+  "size": 756,
+  "symbol": "_free_r",
+  "tier": "lib-match"
+ },
+ "0027f068": {
+  "file": "mallocr.c",
+  "name": "_malloc_trim_r",
+  "ref": "ff2",
+  "ref_addr": "002aad00",
+  "size": 364,
+  "symbol": "_malloc_trim_r",
+  "tier": "lib-match"
+ },
+ "0027f1d8": {
+  "file": "fvwrite.c",
+  "name": "__sfvwrite",
+  "ref": "ff2",
+  "ref_addr": "002aae70",
+  "size": 992,
+  "symbol": "__sfvwrite",
+  "tier": "lib-match"
+ },
+ "0027f5b8": {
+  "file": "locale.c",
+  "name": "_setlocale_r",
+  "ref": "ff2",
+  "ref_addr": "002ab2e8",
+  "size": 140,
+  "symbol": "_setlocale_r",
+  "tier": "lib-match"
+ },
+ "0027f6a0": {
+  "file": "lseekr.c",
+  "name": "_lseek_r",
+  "ref": "ff2",
+  "ref_addr": "002adfd0",
+  "size": 96,
+  "symbol": "_lseek_r",
+  "tier": "lib-match"
+ },
+ "0027f700": {
+  "file": "makebuf.c",
+  "name": "__smakebuf",
+  "ref": "ff2",
+  "ref_addr": "002ab3d0",
+  "size": 340,
+  "symbol": "__smakebuf",
+  "tier": "lib-match"
+ },
+ "0027f858": {
+  "file": "mbtowc_r.c",
+  "name": "_mbtowc_r",
+  "ref": "ff2",
+  "ref_addr": "002ab528",
+  "size": 52,
+  "symbol": "_mbtowc_r",
+  "tier": "lib-match"
+ },
+ "0027f88c": {
+  "file": "memchr.S",
+  "name": "memchr",
+  "ref": "ff2",
+  "ref_addr": "002ab55c",
+  "size": 224,
+  "symbol": "memchr",
+  "tier": "lib-match"
+ },
+ "0027f970": {
+  "file": "mprec.c",
+  "name": "_Balloc",
+  "ref": "ff2",
+  "ref_addr": "002ab640",
+  "size": 164,
+  "symbol": "_Balloc",
+  "tier": "lib-match"
+ },
+ "0027fa18": {
+  "file": "mprec.c",
+  "name": "_Bfree",
+  "ref": "ff2",
+  "ref_addr": "002ab6e8",
+  "size": 40,
+  "symbol": "_Bfree",
+  "tier": "lib-match"
+ },
+ "0027fa48": {
+  "file": "mprec.c",
+  "name": "_multadd",
+  "ref": "ff2",
+  "ref_addr": "002ab718",
+  "size": 264,
+  "symbol": "_multadd",
+  "tier": "lib-match"
+ },
+ "0027fb50": {
+  "file": "mprec.c",
+  "name": "_s2b",
+  "ref": "ff2",
+  "ref_addr": "002ab820",
+  "size": 304,
+  "symbol": "_s2b",
+  "tier": "lib-match"
+ },
+ "0027fc80": {
+  "file": "mprec.c",
+  "name": "_hi0bits",
+  "ref": "ff2",
+  "ref_addr": "002ab950",
+  "size": 124,
+  "symbol": "_hi0bits",
+  "tier": "lib-match"
+ },
+ "0027fd00": {
+  "file": "mprec.c",
+  "name": "_lo0bits",
+  "ref": "ff2",
+  "ref_addr": "002ab9d0",
+  "size": 184,
+  "symbol": "_lo0bits",
+  "tier": "lib-match"
+ },
+ "0027fdc0": {
+  "file": "mprec.c",
+  "name": "_i2b",
+  "ref": "ff2",
+  "ref_addr": "002aba90",
+  "size": 56,
+  "symbol": "_i2b",
+  "tier": "lib-match"
+ },
+ "0027fdf8": {
+  "file": "mprec.c",
+  "name": "_multiply",
+  "ref": "ff2",
+  "ref_addr": "002abac8",
+  "size": 524,
+  "symbol": "_multiply",
+  "tier": "lib-match"
+ },
+ "00280108": {
+  "file": "mprec.c",
+  "name": "_lshift",
+  "ref": "ff2",
+  "ref_addr": "002abdd8",
+  "size": 344,
+  "symbol": "_lshift",
+  "tier": "lib-match"
+ },
+ "00280260": {
+  "file": "mprec.c",
+  "name": "__mcmp",
+  "ref": "ff2",
+  "ref_addr": "002abf30",
+  "size": 100,
+  "symbol": "__mcmp",
+  "tier": "lib-match"
+ },
+ "002802c8": {
+  "file": "mprec.c",
+  "name": "__mdiff",
+  "ref": "ff2",
+  "ref_addr": "002abf98",
+  "size": 400,
+  "symbol": "__mdiff",
+  "tier": "lib-match"
+ },
+ "00280458": {
+  "file": "mprec.c",
+  "name": "_ulp",
+  "ref": "ff2",
+  "ref_addr": "002ac128",
+  "size": 204,
+  "symbol": "_ulp",
+  "tier": "lib-match"
+ },
+ "00280528": {
+  "file": "mprec.c",
+  "name": "_b2d",
+  "ref": "ff2",
+  "ref_addr": "002ac1f8",
+  "size": 408,
+  "symbol": "_b2d",
+  "tier": "lib-match"
+ },
+ "002806c0": {
+  "file": "mprec.c",
+  "name": "_d2b",
+  "ref": "ff2",
+  "ref_addr": "002ac390",
+  "size": 388,
+  "symbol": "_d2b",
+  "tier": "lib-match"
+ },
+ "00280848": {
+  "file": "mprec.c",
+  "name": "_ratio",
+  "ref": "ff2",
+  "ref_addr": "002ac518",
+  "size": 204,
+  "symbol": "_ratio",
+  "tier": "lib-match"
+ },
+ "002809e8": {
+  "file": "s_isinf.c",
+  "name": "isinf",
+  "ref": "ff2",
+  "ref_addr": "002ac810",
+  "size": 72,
+  "symbol": "isinf",
+  "tier": "lib-match"
+ },
+ "00280a30": {
+  "file": "s_isnan.c",
+  "name": "isnan",
+  "ref": "ff2",
+  "ref_addr": "002986e8",
+  "size": 60,
+  "symbol": "isnan",
+  "tier": "lib-match"
+ },
+ "00280a70": {
+  "file": "mallocr.c",
+  "name": "_calloc_r",
+  "ref": "ff2",
+  "ref_addr": "002ade60",
+  "size": 180,
+  "symbol": "_calloc_r",
+  "tier": "lib-match"
+ },
+ "00280b88": {
+  "file": "cache.c",
+  "name": "_sceSDC",
+  "ref": "ff2",
+  "ref_addr": "002ae630",
+  "size": 160,
+  "symbol": "_sceSDC",
+  "tier": "lib-match"
+ },
+ "00280cc8": {
+  "file": "cache.c",
+  "name": "_sceIDC",
+  "ref": "ff2",
+  "ref_addr": "002ae770",
+  "size": 160,
+  "symbol": "_sceIDC",
+  "tier": "lib-match"
+ },
+ "00280e08": {
+  "file": "libgcc2.c",
+  "name": "__fixdfdi",
+  "ref": "ff2",
+  "ref_addr": "002ae8b0",
+  "size": 120,
+  "symbol": "__fixdfdi",
+  "tier": "lib-match"
+ }
+}

@@ -182,7 +182,10 @@ def save_program(tries=6):
 # ignored it even in the query string). Every writer saves with save_program() when its batch is done.
 
 def has_function(addr):
-    return not http('GET', 'get_function_by_address', None, address=f'0x{addr:x}', timeout=60).startswith('No function')
+    """True when a function STARTS at addr (get_function_by_address answers for any address inside a body)."""
+    out = http('GET', 'get_function_by_address', None, address=f'0x{addr:x}', timeout=60)
+    m = re.search(r'Entry:\s*([0-9a-fA-F]+)', out)
+    return bool(m) and int(m.group(1), 16) == addr
 
 
 def create_function(addr, name='', tries=4):

@@ -1,0 +1,62 @@
+{
+ "00100008": {
+  "name": "_start",
+  "tag": "lib-context",
+  "was": "entry",
+  "why": "Sony crt0 entry; identical to FF2 crt0.s _start (libmatch); Ghidra had called it entry"
+ },
+ "00100248": {
+  "name": "_exit",
+  "tag": "lib-context",
+  "was": "Exit",
+  "why": "crt0 thunk j Exit (FF2 symbol _exit at the same address); the FF3 reference called the thunk Exit"
+ },
+ "002045a8": {
+  "name": "main",
+  "tag": "ror-inferred",
+  "was": "FUN_002045a8",
+  "why": "crt0 _start calls it (jal at 0x100238) after _InitSys and atexit; prints the version with the build date Jul 27 2006 22:25:45, detects the boot device (host0 / cdrom0) and reboots the IOP with ioprp300.img"
+ },
+ "00266770": {
+  "name": "sceSifLoadElfPart",
+  "tag": "lib-context",
+  "was": "sceSifLoadElf",
+  "why": "calls _sceSifLoadElfPart with fno 1, sits before sceSifLoadElf as in FF2 eeloadfile.c 0x2856f0; FF3's sceSifLoadElf 0x27f1d8 is a merged body of both"
+ },
+ "00266790": {
+  "name": "sceSifLoadElf",
+  "tag": "lib-context",
+  "was": "FUN_00266790",
+  "why": "FF2 eeloadfile.c sceSifLoadElf 0x285710, exact masked match"
+ },
+ "002675b8": {
+  "name": "kCopy_initsys",
+  "tag": "lib-context",
+  "was": "kFindAddress",
+  "why": "initsys.c static kCopy (FF2 0x286538), before kFindAddress; FF3's kFindAddress 0x27f7a8 is a merged body; suffix: FF2 has five static kCopy"
+ },
+ "00267600": {
+  "name": "kFindAddress",
+  "tag": "lib-context",
+  "was": "FUN_00267600",
+  "why": "FF2 initsys.c static kFindAddress 0x286570, exact masked match"
+ },
+ "00267970": {
+  "name": "Copy_exit",
+  "tag": "lib-context",
+  "was": "kCopy",
+  "why": "exit.c static Copy (FF2 0x2868e0): syscall 0x5a stub before kCopy; FF3's kCopy 0x27fb60 is a merged body of both"
+ },
+ "00267980": {
+  "name": "kCopy_exit",
+  "tag": "lib-context",
+  "was": "FUN_00267980",
+  "why": "FF2 exit.c static kCopy 0x2868f0, exact masked match; suffix: FF2 has five static kCopy"
+ },
+ "00267b98": {
+  "name": "Exit",
+  "tag": "lib-context",
+  "was": "FUN_00267b98",
+  "why": "FF2 exit.c Exit 0x286b08, exact masked match; the name was taken by the crt0 thunk"
+ }
+}

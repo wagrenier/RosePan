@@ -1,6 +1,5 @@
 {
  "queue": [
-  "setup/ghidra_seed.cpp",
   "setup/platform_bootstrap.cpp"
  ],
  "settings": {
@@ -9,6 +8,15 @@
  },
  "tus": {
   "setup/ghidra_seed.cpp": {
+   "notes": "Done. Snapshot of the names before seeding: work/snapshots/20261022_094006.json (gitignored, local). Every section function's Ghidra body now equals its section; the 3 tail-jump targets that do not follow a jr ra are labels inside functions (0x218424, 0x23a000, 0x2480a0) and were left alone. libmatch.py --list shows 5 SKIP rows, all named by hand already. Next: setup/platform_bootstrap.cpp.",
+   "sessions": [
+    {
+     "date": "2026-10-22 09:49",
+     "status": "done",
+     "summary": "Ghidra seeded: the ELF's 1,449 linkonce symbols applied (ror-symbol), 1,642 functions created (sections, 95 vtable slot targets, 114 library functions, 21 tail-jump targets Ghidra had folded into their callers), 677 library names (544 lib-match, 133 low), main / _start / _exit and four FF3-reference collisions named by hand. sections.py now creates tail-jump targets; libmatch.py suffixes duplicate statics, skips merged reference bodies and duplicate claims, and leaves hand names alone."
+    }
+   ],
+   "status": "done",
    "task": "One-time Ghidra seeding (no RoR functions to write; Ghidra must have /Rule of Rose - US open). From tools/reverse: (1) python restore_names.py --snapshot (a copy of every current name). (2) python sections.py --apply: creates the ~1,412 functions at the ELF's named .gnu.linkonce.t sections plus the ~95 vtable slot targets Ghidra never found, and names the sections with RoR's own symbols (tag ror-symbol). (3) python libmatch.py --list lib-match-low (look at the hints), then python libmatch.py --apply: ~555 high and ~141 low library / runtime names from the SDK 3.0 (ReiPan's FF3) and ee-gcc 2.96 (FF2 debug) references; existing names such as Ghidra's syscalls are kept. (4) Name the game's entry with a name_ctx.py batch: 002045a8 main (ror-inferred; crt0 _start calls it after _InitSys and atexit; it prints the build date 'Jul 27 2006' '22:25:45' and the boot device, and loads ioprp300.img). (5) python refresh.py; references/status.md 'Ghidra seeding' must show no '-> run' hint; then python ghidra.py func on a few slot targets and section functions to see the bodies are sane (a body that runs past its section end means a neighbour is missing a function: mkfunc it). (6) Record the counts in architecture.md 'Naming sources', then finish --status done."
   },
   "setup/platform_bootstrap.cpp": {
