@@ -145,5 +145,29 @@ Paths the ELF names (the disc dump has not been looked at yet: `ROSEPAN_DATA`):
 
 ## PC platform layer
 
-Not created yet: host task `setup/platform_bootstrap.cpp` copies ReiPan's (`src/reipan` ->
-`src/rosepan`, `src/sdk`) and records its shape here.
+Created 2026-10-22 (host task `setup/platform_bootstrap.cpp`) from ReiPan's, renamed ReiPan -> RosePan
+throughout (identifiers, env variables, files, shader macros):
+- `src/sdk/` -- the PS2 SDK on the host: libgraph (V-blank pacing, `sceGsResetGraph` picks 50/60 Hz),
+  libdma / libvif / libvu0 (`vu0_lib.cpp`, `vu0_intrin.h`), libpad (+ `ROSEPAN_AUTOPAD`), libmc,
+  libcdvd, libmpeg (+ FFmpeg), libsd / libsdr, sif / sifrpc / sifdev / fileio, eekernel threads and
+  semaphores, the host IOP (`iop_host`, `iop_sif`, `iop_libsd`, `iop_voice`, `iop_reverb`) and
+  `pc_prefix.h` (force-included EE base types).
+- `src/rosepan/` -- `os/` (host main thread vs game thread `RosePanGame`, pacing, time, rand),
+  `io/` (log, paths, input, file, movie stream), `gs/` (GS memory and registers), `rendering/`
+  (SDL3 GPU renderer: 2D GS primitives, the 3D mesh path, present, screenshots via
+  `ROSEPAN_SHOT_DIR` / `ROSEPAN_SHOT_EVERY`; video planes), `rosepan_ui/` (ImGui menus: performance,
+  graphics settings, data folder), config (`rosepan.ini` in `%APPDATA%/Mikompilation/RosePan/`),
+  memory (emulated EE RAM), profiler.
+- `src/common/rosepan_stub.h` -- `ROSEPAN_STUB` / `ROSEPAN_BRIDGE`.
+- `src/main.cpp` -- placeholder entry: `RosePan_LogInit`, then `RosePan_HostMain(GameMain)`, where
+  GameMain presents empty frames (`RosePan_RendererBeginFrame` / `sceGsSyncV` / `RosePan_RendererEndFrame`).
+  RoR's `main` (0x2045a8) replaces GameMain. The renderer opens the window lazily on the first
+  BeginFrame; a frame with no draws presents black.
+- Data root: the disc's root copied file by file (the folder holding `DATA/`); `LooksLikeDataRoot`
+  checks `DATA/CMNTEX`. `RosePan_PathResolveData` still carries FF3's "../bin/data" spellings; the RoR
+  file TU decides how `cdrom0:\DATA\...` and relative `data/...` names map onto it.
+- Removed as FF3-only: `debug/reipan_warp.*` (chapter warps / snapshots), `rendering/reipan_graph3d.*`
+  (FF3 SGD model glue; `g_dbg_flatcolor` / `g_dbg_nolighting` now live in the renderer),
+  `io/reipan_fileload.*` (IMG_BD.BIN + CMP decoder), the UI's warp window and FF3 light-cone menu, the
+  IOP boot's call into FF3's iopsys.irx `start()`. Still FF3-shaped but harmless until a TU reaches
+  them: see open-items.md "Platform bootstrap".
