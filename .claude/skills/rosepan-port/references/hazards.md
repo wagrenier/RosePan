@@ -239,6 +239,11 @@ entries are marked **RoR** with the date.
 - **`exited early with code 3221225477`** is an access violation: `python gdbrun.py` (with the same pad)
   gives the backtrace; the game thread is RosePanGame.
 
+- **Renaming ReiPan -> RosePan must cover the shaders' `.hlsli` includes** and all three spellings
+  (`REIPAN_`, `ReiPan`, `reipan`): the `.hlsl` files were renamed but the `.hlsli` kept
+  `ReiPanVu1*` / `REIPAN_*`, and shadercross failed with "unknown type name RosePanVu1LightImage"
+  (2026-10-22, bootstrap). The prebuilt `.msl` / `.spv` keep old names in comments only.
+
 ## Platform layer (ReiPan's, written for FF2 and FF3)
 
 - **SDK shims only answer what FF2 / FF3 asked.** RoR calls libraries they never did (libpad2, libdbc,
