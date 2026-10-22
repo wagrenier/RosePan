@@ -167,6 +167,27 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
 - `rxThFindCallback` 0x24a218 always returns -1 (a delay-slot bug): duplicates are not refused and
   `rxThRemoveCallback` removes nothing.
 
+## The block heap (`bed/bedmemory.cpp`, 0x100354..0x101718, 2026-10-22)
+
+- `BedMemory` (EE 0x1c): +0 `m_buffer` (first block; the assert names it), +4 set to the first block by
+  format (no reader), +8 the buffer as given (destroy frees it when +0x18 `m_owner`), +0xc `m_size`
+  (multiple of 16), +0x10 `m_id` (low 3 bits = default align mode), +0x14 live block count.
+- Blocks on a doubly linked list, each led by a `BEDMEMHEADER` (EE 0x20): +0 `m_next`, +4 `m_prev`,
+  +8 `m_chunk_size`, +0xc data pointer, +0x10 short (the heap id, written by format only), +0x12
+  `m_flag` (1 used), +0x14 id / +0x16 line (-1 none) / +0x18 file name (allocDebug's tags), +0x1c
+  `m_header_size` = data - header. The word before the data always holds that distance: getHeader
+  0x100ce4 finds the header from a pointer with it.
+- alloc 0x100a3c(size, flags): size rounded up to 16; flags & 7 = align mode (0 0x20, 1 0x40, 2 0x80,
+  3-6 4 bytes, 7 the heap default); (flags & 0x1c0) == 0x100 searches from the end (findFreeFromEnd /
+  splitTail), else first fit from the start (findFree / alignBlock). A rest of 0x40 bytes or more
+  becomes a free block. Every allocation is memset 0; format fills a new buffer with "$RUNTIME".
+- free merges with a free next and previous block; realloc shrinks in place (shrink 0x100d30), grows
+  into a free next block, or allocs + copies + frees. getInfo 0x1015fc returns {largest free, free total,
+  m_size}. trimFront 0x100ecc has no callers (and computes size - new - old).
+- ROM slips: realloc's grow-in-place leaves h->m_next at the swallowed header, shrink next to a used
+  block leaves next->m_prev at h, splitTail applies alignBlock's shift twice (-1 included). The host
+  mends the first two (`// PC:`), keeps the third.
+
 ## Modules (RoR's own source files)
 
 73 `.cpp` paths survive in assert / error strings (export.py anchors on them), plus headers whose inline

@@ -6,6 +6,24 @@
   "smoke_pad": ""
  },
  "tus": {
+  "bed/bedmemory.cpp": {
+   "notes": "All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host test (200 random allocs, frees, realloc grow/move/shrink, 0x40/0x80 aligned allocs, allocDebug tags) kept the list consistent under check(2) and merged back to one block. Host header is 56 bytes (EE 0x20; BEDMEM_HEADER_SIZE replaces 0x20, split thresholds 0x40 kept); m_header_size stays the header's last word so the word before the data is the distance back, as on the EE. Two ROM link slips in realloc paths are mended with PC: comments (grow in place leaves h->m_next stale; shrink next to a used block leaves next->m_prev stale); splitTail's double alignment shift is kept as written (only flags 0x100 callers). Decisions recorded in open-items.md. First run in which main calls utlMemInit and allocates marks this done.",
+   "ranges": [
+    [
+     "00100354",
+     "00101718"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 11:53",
+     "status": "verify",
+     "summary": "BedMemory block heap: create, format, destroy, alignBlock, splitTail, findFree, findFreeFromEnd, alloc, allocDebug, getHeader, shrink, trimFront, realloc, free, check, getInfo; BEDMEMHEADER and BEDMEMINFO types; extent pinned 0x100354..0x101718"
+    }
+   ],
+   "status": "verify",
+   "why": "12 of 16 functions reference bed/bedmemory.cpp; 0x100320 and 0x101718 are unanchored neighbours, bed/bedsubmode.cpp below and bed/bedpfh.cpp above"
+  },
   "rx/rxfile.cpp": {
    "notes": "Status verify: every function in 0x2437f8..0x249b88 is written, but nothing can show it: main 0x2045a8 is still the placeholder (black screen), and the rxthread functions rxThCreate / rxThGetParam / rxThGetIndex / rxThSetState / rxThSetPriority / rxThDelete / rxThSync are stubs in src/rx/rxthread.cpp, so the file thread never runs and any slot open (default load and size hooks, snd streams) would spin for ever on pending. Next: main (unassigned@001fd424), then rx/rxthread.cpp (0x249b88..0x24b490). The cdrom driver walks ISO 9660 itself, so a CDROM boot needs sceCdRead to read a disc image; src/sdk/libcdvd.cpp still serves FF3 IMG_BD.BIN (open-items Next up 6, a platform decision for the user). Decisions: DIntr/EIntr are a process-wide recursive SDL mutex; the ROM's Status save/restore and DI-error check are left out (rxFileSpin, callcheck comments). rxFileCdProcess gets step = priority + 1 from the thread block, as in the ROM. Renamed globals: s_cdCacheCount is s_cdDiscRead, s_cdCacheReset is s_cdNeedSetup, s_cdQueued0/1 are s_cdReadPos/2. Knowledge recorded in architecture.md (rx file layer), hazards.md (folded wrappers, hidden.py), open-items 5 and 6, README and SKILL tool tables.",
    "ranges": [

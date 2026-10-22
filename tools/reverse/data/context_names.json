@@ -17,11 +17,41 @@
   "was": "FUN_00100354",
   "why": "bed/bedmemory.cpp; zeroes the heap record, mallocs size & ~15 (assert h != __null), formats it, sets the ready flag; class name inferred from the file (BedPad / BedSubMode are classes)"
  },
+ "001003f8": {
+  "name": "BedMemory::format",
+  "tag": "ror-inferred",
+  "was": "FUN_001003f8",
+  "why": "bed/bedmemory.cpp lines 0x61..0x74 asserts theBuffer != __null, theSize >= 256; aligns the buffer to 16, fills it with $RUNTIME and makes it one free block; create calls it after malloc"
+ },
  "00100568": {
   "name": "BedMemory::destroy",
   "tag": "ror-inferred",
   "was": "FUN_00100568",
   "why": "bed/bedmemory.cpp; the heap teardown utlMemTerm calls"
+ },
+ "001005ac": {
+  "name": "BedMemory::alignBlock",
+  "tag": "ror-inferred",
+  "was": "FUN_001005ac",
+  "why": "asserts thePtr, theSize > 0, (newptr & (gr-1)) == 0; moves a block's data pointer up to the 0x20/0x40/0x80/4 grain of the align mode, returns the shift or -1 when the block is then too small"
+ },
+ "00100714": {
+  "name": "BedMemory::splitTail",
+  "tag": "ror-inferred",
+  "was": "FUN_00100714",
+  "why": "asserts ((int)(header+1)) & (gr-1)) == 0; cuts an aligned block of theSize off the end of a free block (new header linked after it), else aligns the block in place via alignBlock"
+ },
+ "001008f0": {
+  "name": "BedMemory::findFree",
+  "tag": "ror-inferred",
+  "was": "FUN_001008f0",
+  "why": "walks m_next from the first block: first free block with m_chunk_size >= size that alignBlock accepts; BedMemory::alloc's default search"
+ },
+ "00100988": {
+  "name": "BedMemory::findFreeFromEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00100988",
+  "why": "walks to the last block then m_prev: first free block splitTail can use; BedMemory::alloc's search when (flags & 0x1c0) == 0x100"
  },
  "00100a3c": {
   "name": "BedMemory::alloc",
@@ -34,6 +64,24 @@
   "tag": "ror-inferred",
   "was": "FUN_00100c84",
   "why": "BedMemory::alloc then stores three tag words in the block header at +0x18 (m_filename), +0x16, +0x14"
+ },
+ "00100ce4": {
+  "name": "BedMemory::getHeader",
+  "tag": "ror-inferred",
+  "was": "FUN_00100ce4",
+  "why": "ptr minus the word before it; asserts h->m_header_size == headersize; free / realloc / shrink use it"
+ },
+ "00100d30": {
+  "name": "BedMemory::shrink",
+  "tag": "ror-inferred",
+  "was": "FUN_00100d30",
+  "why": "asserts thePtr, theNewSize > 0; cuts the tail of a block off as a free block (merged with a free next); realloc's tail call for a smaller size"
+ },
+ "00100ecc": {
+  "name": "BedMemory::trimFront",
+  "tag": "ror-inferred",
+  "was": "FUN_00100ecc",
+  "why": "asserts theOldPtr, theNewPtr > theOldPtr, newsize > 0; moves a block's header up to theNewPtr and frees the front; no callers"
  },
  "001010a4": {
   "name": "BedMemory::realloc",
@@ -52,6 +100,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00101518",
   "why": "(heap, mode): walks the block list, mode 2 counts broken links, asserts p != p->m_next and errcnt == 0"
+ },
+ "001015fc": {
+  "name": "BedMemory::getInfo",
+  "tag": "ror-inferred",
+  "was": "FUN_001015fc",
+  "why": "walks the blocks (asserts p != p->m_next), returns the largest free chunk, the free total and m_size in a 3-int record; called from mag/magsystem.cpp and others"
  },
  "00105650": {
   "name": "utlIsTccName",
