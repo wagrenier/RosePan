@@ -47,6 +47,9 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    rx memory hooks. **`bed/bedmemory.cpp` (0x100354..) is only stubs** (its alloc returns NULL): when
    `main` is reconstructed and calls `utlMemInit`, reconstruct bedmemory in the same or the next
    session, before anything allocates through the hooks.
+   ~~Done 2026-10-22 (`verify`), see Done~~: the heap works (a host test of alloc / free / realloc /
+   aligned allocs kept the list consistent and merged back to one block); the first run in which main
+   calls `utlMemInit` and allocates proves it on screen.
 
 ## Decisions
 
@@ -129,7 +132,17 @@ to adapt when a TU reaches them:
   hook 0x2dc248 (no setter found in rxfile's range); how the platform's sceOpen resolves `cdrom0:`
   paths (`RosePan_PathResolveData`; check once main runs).
 
+- **bedmemory host deviations** (2026-10-22, decided in an unattended run): the two realloc link
+  slips (architecture.md "The block heap") are mended on the host, since the ROM's own free would hang
+  on them; splitTail's double shift is kept as written. Revisit if a caller passing flags 0x100 shows
+  misaligned blocks. Also: the host header is 56 bytes (EE 0x20), so the heap holds slightly less;
+  utlMemInit's probe size may need raising once host objects (bigger than EE ones) fill it.
+
 ## Done
+
+- 2026-10-22: `bed/bedmemory.cpp` (0x100354..0x101718 pinned): all 16 BedMemory functions written
+  (`verify`: nothing in the boot allocates yet); 9 helpers named (format, alignBlock, splitTail,
+  findFree, findFreeFromEnd, getHeader, shrink, trimFront, getInfo). Black screen as before.
 
 - 2026-10-22: `rx/rxthread.cpp` (0x249b88..0x24b490): all 53 functions written (`verify`; 11 were
   folded into neighbours and created in Ghidra): scheduler, dispatch alarm, slots, call queue, yield

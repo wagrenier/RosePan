@@ -186,6 +186,9 @@ entries are marked **RoR** with the date.
   (`git stash -u`, build, run, `git stash pop`), and `git bisect` with a worktree per step when the
   cause is not obvious (judge each step by a measurement of the shots, e.g. mean brightness after a frame).
 
+- **A class with members named `free` / `realloc` / `alloc`** (BedMemory): inside its members an
+  unqualified `free(p)` calls the member, not the C library. Write `::malloc` / `::free` there.
+
 ## callcheck / stubgen
 
 - **A call the optimiser proves dead gets no stub.** `rxSysPrintf` calls `rxThIsDispatchDisabled` only

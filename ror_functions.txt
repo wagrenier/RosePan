@@ -30,21 +30,21 @@
 // *****************************************************************************
 
 /* 00100354 000000a4 */ BedMemory::create(){}  // ror
-/* 001003f8 00000170 */ FUN_001003f8(){}
+/* 001003f8 00000170 */ BedMemory::format(){}  // ror
 /* 00100568 00000044 */ BedMemory::destroy(){}  // ror
-/* 001005ac 00000168 */ FUN_001005ac(){}
-/* 00100714 000001dc */ FUN_00100714(){}
-/* 001008f0 00000098 */ FUN_001008f0(){}
-/* 00100988 000000b4 */ FUN_00100988(){}
+/* 001005ac 00000168 */ BedMemory::alignBlock(){}  // ror
+/* 00100714 000001dc */ BedMemory::splitTail(){}  // ror
+/* 001008f0 00000098 */ BedMemory::findFree(){}  // ror
+/* 00100988 000000b4 */ BedMemory::findFreeFromEnd(){}  // ror
 /* 00100a3c 00000248 */ BedMemory::alloc(){}  // ror
 /* 00100c84 00000060 */ BedMemory::allocDebug(){}  // ror
-/* 00100ce4 0000004c */ FUN_00100ce4(){}
-/* 00100d30 0000019c */ FUN_00100d30(){}
-/* 00100ecc 000001d8 */ FUN_00100ecc(){}
+/* 00100ce4 0000004c */ BedMemory::getHeader(){}  // ror
+/* 00100d30 0000019c */ BedMemory::shrink(){}  // ror
+/* 00100ecc 000001d8 */ BedMemory::trimFront(){}  // ror
 /* 001010a4 00000284 */ BedMemory::realloc(){}  // ror
 /* 00101328 000001f0 */ BedMemory::free(){}  // ror
 /* 00101518 000000e4 */ BedMemory::check(){}  // ror
-/* 001015fc 0000011c */ FUN_001015fc(){}
+/* 001015fc 0000011c */ BedMemory::getInfo(){}  // ror
 
 // *****************************************************************************
 // FILE -- (unassigned)
