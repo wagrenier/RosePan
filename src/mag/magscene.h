@@ -19,6 +19,7 @@
 #include <stddef.h>
 
 #include "bed/bedpad.h"
+#include "bed/bedsubmode.h"
 #include "dog/dogactor.h"
 #include "dog/dogcamera.h"
 #include "dog/doglightpool.h"
@@ -28,7 +29,9 @@
 #include "mag/maglifebwn.h"
 #include "mag/maglifebwnctrl.h"
 #include "mag/maglifeman.h"
+#include "mag/maglifemenu.h"
 #include "mag/maglifepc.h"
+#include "mag/maglifewindow.h"
 #include "sdk/sce_gs.h"
 #include "spr/s2d.h"
 
@@ -156,6 +159,8 @@ struct MagShadowLight
 static_assert(offsetof(MagShadowLight, m_cone_outer) == 0x34, "m_cone_outer");
 static_assert(sizeof(MagShadowLight) == 0x40, "MagShadowLight is 0x40 bytes on the EE");
 
+#define MAX_WINDOW 4            /* the scene's text windows (asserts winNo < MAX_WINDOW) */
+
 /* EE 0x85500. layout: host -- holds the actors and controllers (pointers,
  * vptrs); EE offsets in the comments. */
 struct MagScene
@@ -166,9 +171,32 @@ struct MagScene
     void init();                                                         // ROR 0x00131840
     void setPC(int no, int mode);                                        // ROR 0x001316b8
     void setBwn(int no, int arg);                                        // ROR 0x00131790
+    /* After loadSystemData: points the four window fonts at their
+     * textures (bit8a..bit8d) and links the scene interfaces. */
     void start();                                                        // ROR 0x00131a28
     int  initRender(i3dContext *ctx);                                    // ROR 0x00131b90
+    /* One frame of the scene by sub mode: 0 start, 1 walking, 2 waiting
+     * for text windows, 3 fading out to a menu, 4 fading back in, 5 the
+     * system message, 6 the PC's state 0x17 camera spin, 7 a menu, 8
+     * paused, 9 debug. */
     void update(BedPad *pad0, BedPad *pad1);                             // ROR 0x001327dc
+    void updatePaused();                                                 // ROR 0x001327a0
+    void updateBwn();                                                    // ROR 0x0013233c
+    /* paused 0: the actors without flag 8 (and their footsteps); 1: those
+     * with it. */
+    void updateActors(int paused);                                       // ROR 0x0013262c
+    void playActorFootstep(int theNo);                                   // ROR 0x00132430
+    void updateTenkyuBillboards();                                       // ROR 0x00132048
+    /* Starts (or with m_mode 0 stops) a fade; see MagFadeParam. */
+    void setFade(const MagFadeParam *p);                                 // ROR 0x001311f4
+    /* The current fade object's state mapped to 0..6 (0 none; update waits
+     * for more than 4). */
+    int  getFadeState();                                                 // ROR 0x00131550
+    /* Sub mode 3: fade out, then openMenu(id) with arg. */
+    void requestMenu(int id, int arg);                                   // ROR 0x001357b0
+    void openMenu(int id);                                               // ROR 0x0013580c
+    bool isMenuRunning();                                                // ROR 0x00135b64
+    void closeMenu();                                                    // ROR 0x00135b78
     void pushSubMode();         /* BedSubMode::push on +0x22d0, then mode 8 */ // ROR 0x00132744
     void popSubMode();                                                   // ROR 0x00132784
     /* The text windows (MAX_WINDOW 4, slots at +0x2734; the "view" methods
@@ -227,6 +255,22 @@ struct MagScene
     void loadTenkyuTex(int no, const BedPfh *pfh, i3dContext *ctx);      // ROR 0x00140030
     /* Fades to fog over frames (0: at once). */
     void setFog(const I3dFog *fog, int frames);                          // ROR 0x00143d7c
+    void updateFog();                                                    // ROR 0x00143fd0
+    void updateDebug(BedPad *pad0, BedPad *pad1);                        // ROR 0x0014313c
+    void updateCamera();                                                 // ROR 0x0013e548
+    void changeCamera();                                                 // ROR 0x0013d5e4
+    void rotateTenkyu();                                                 // ROR 0x0014062c
+    void updateRecords853fc();                                           // ROR 0x00140c68
+    /* GamMan glue (g_gamMan and the words at *(0x7b2060) / *(0x7b205c)). */
+    void gamEnterMenu();                                                 // ROR 0x0013f07c
+    void gamLeaveMenu();                                                 // ROR 0x0013f09c
+    int  canOpenItemMenu();                                              // ROR 0x0013f0c0
+    int  canOpenMenu10001();                                             // ROR 0x0013f114
+    void setGamWord54();                                                 // ROR 0x0013f130
+    int  getMenuFadeOutTime();                                           // ROR 0x0013f144
+    int  getMenuFadeInTime();                                            // ROR 0x0013f194
+    void clearGamFlag25();                                               // ROR 0x0013f1e4
+    void closeSysMsgWindow(int win);                                     // ROR 0x0013f458
 
     /* ---- mag/magscenerender.cpp ---- */
     void releaseTexture(int no);                                         // ROR 0x00139540
@@ -274,9 +318,10 @@ struct MagScene
     float          m_22b0;              // ROR 0x22b0: blends m_22a4 toward 1 for the shadow view (1 = m_22a4 as is)
     int            m_22b4;              // ROR 0x22b4: sky path display: 0 off, 1 copy the points then 2, 2 draw the copy
     int            m_22cc;              // ROR 0x22cc: MagSystem::clearScene22cc zeroes it; role unknown
-    int            m_22d0;              // ROR 0x22d0: the sub mode word (pushSubMode sets 8; getDrawFlags tests 7 and 8); setPC sets 1, initRender 0
-    int            m_22d4;              // ROR 0x22d4: -1 after setPC / initRender; role unknown
+    BedSubMode     m_sub_mode;          // ROR 0x22d0: update's mode (pushSubMode sets 8; getDrawFlags tests 7 and 8); m_step -1 on entry; m_arg the requested menu id, m_arg2 the PC's mode / number then
     MagLifeMan     m_life_man;          // ROR 0x2330
+    MagLifeWindow *m_window[4];         // ROR 0x2734: MAX_WINDOW text windows (openWindow), NULL = free
+    GamFont        m_window_font[4];    // ROR 0x2744: stride 0x6c, each window's text buffer (start points it at bit8a..bit8d)
     int            m_font_tex_no[4];    // ROR 0x28f4: bit8a..bit8d in m_tex_info
     int            _2904;
     void          *m_font_data;         // ROR 0x2908: the language's font file from PREMIERE.RPK
@@ -284,7 +329,7 @@ struct MagScene
     void          *m_premiere;          // ROR 0x2914: PREMIERE.RPK's file 0 (the common textures)
     DogActor       m_actors[128];       // ROR 0x2920: stride 0x4d0
     unsigned       m_actor_flags[128];  // ROR 0x29120: one word per actor; 0x60 = bound / chapter model
-    unsigned       m_actor_flags2[128]; // ROR 0x29320: a second word per actor, cleared with the first
+    int           *m_actor_snd[128];    // ROR 0x29320: per actor, its 12 footstep sound ids by sector sound slot (asserted m_actor_snd[theNo]); NULL = none
     DogTexInfo     m_tex_info;          // ROR 0x29520: 256 textures, shadow01 first
     MagSceneTenkyu m_tenkyu[4];         // ROR 0x29540: stride 0x520
     int            m_focus_actor;       // ROR 0x2a9c4: the actor drawFocusActor shows close up, -1 = none (then drawShadows)
@@ -309,12 +354,18 @@ struct MagScene
     MagLifePC      m_pc;                // ROR 0x2adc0
     MagLifeBwn     m_bwn;               // ROR 0x2afe0
     MagLifeBwnCtrl m_bwn_ctrl;          // ROR 0x2bd20
-    MagLife12f008  m_life_41850;        // ROR 0x41850
+    int            m_menu_id;           // ROR 0x2be50: the open menu's id (0x10000..), -1 = none
+    int            m_menu_arg;          // ROR 0x2be54: requestMenu's argument
+    int            m_menu_result;       // ROR 0x2be58: the menu's last processPad result; 0 = still running
+    MagLifeMenuBase *m_pMenuBase;       // ROR 0x2be5c: the open menu (the asserts name it), NULL = none
+    MagLifeFader   m_fader;             // ROR 0x41850: fade kinds 0 / 4
+    MagLifeFadeKey m_fade_key;          // ROR 0x41890: fade kinds 1..3
     MagLife130da4  m_life_418f0;        // ROR 0x418f0
     S2dCineSco     m_cine_sco;          // ROR 0x41930
     S2dBg          m_bg;                // ROR 0x42260
     S2dMes         m_mes;               // ROR 0x42bb0
-    int            m_43700;             // ROR 0x43700: -1 after initRender; role unknown
+    MagFadeParam   m_fade;              // ROR 0x43700: the current fade (m_kind -1 = none; setFade)
+    int            m_sys_msg_window;    // ROR 0x43718: the system message's window (asserted >= 0 in sub mode 5)
     MagSceneStrip  m_strip[0x2000];     // ROR 0x437e0: drawStrips' records
     Obj176a3c      m_837e0;             // ROR 0x837e0
     S2dMovie       m_movie;             // ROR 0x84aa8
@@ -323,12 +374,17 @@ struct MagScene
     Obj17c0f0      m_8542c;             // ROR 0x8542c: reset by releaseTenkyu, sector.sec by load
     int            m_mirror_axis;       // ROR 0x85494: mapparam.bbb word 9 (files over 0x20 bytes): 0 none, 1 z, 2 y (floor), 3 x
     float          m_mirror_plane;      // ROR 0x85498: mapparam.bbb word 10 (a float): the mirror plane's coordinate
-    int            m_854a4;             // ROR 0x854a4: mapparam.bbb word 8; role unknown
+    int            m_854a4;             // ROR 0x854a4: mapparam.bbb word 8: the map's default footstep sound slot
+    MagScene      *m_854e0;             // ROR 0x854e0: start points it at the scene (an interface pointer; class unknown)
+    MagScene      *m_854e8;             // ROR 0x854e8: idem
 };
 static_assert(offsetof(MagScene, m_actors) > offsetof(MagScene, m_life_man), "EE order");
 static_assert(offsetof(MagScene, m_light_pool) > offsetof(MagScene, m_shadow_src), "EE order");
 static_assert(offsetof(MagScene, m_pc) > offsetof(MagScene, m_camera_at), "EE order");
 static_assert(offsetof(MagScene, m_actors) > offsetof(MagScene, m_premiere), "EE order");
 static_assert(offsetof(MagScene, m_view) > offsetof(MagScene, m_2a9cc), "EE order");
+static_assert(offsetof(MagScene, m_window) > offsetof(MagScene, m_life_man), "EE order");
+static_assert(offsetof(MagScene, m_pMenuBase) > offsetof(MagScene, m_bwn_ctrl), "EE order");
+static_assert(offsetof(MagScene, m_fade) > offsetof(MagScene, m_mes), "EE order");
 
 #endif /* _MAG_MAGSCENE_H */

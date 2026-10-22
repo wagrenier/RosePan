@@ -101,3 +101,30 @@ void DogActor::drawShadow(I3dLayer *layer)
 {
     ROSEPAN_STUB("DogActor::drawShadow", 0x0010e534);
 }
+
+// stub of ROR 0x0010bcc8
+u_int DogActor::getMotionEvent(float t0, float t1, int motion)
+{
+    ROSEPAN_STUB("DogActor::getMotionEvent", 0x0010bcc8);
+    return {};
+}
+
+// stub of ROR 0x0010da4c
+float DogActor::getMotionFrame()
+{
+    ROSEPAN_STUB("DogActor::getMotionFrame", 0x0010da4c);
+    return {};
+}
+
+// stub of ROR 0x0010dad8
+float DogActor::getMotionStep()
+{
+    ROSEPAN_STUB("DogActor::getMotionStep", 0x0010dad8);
+    return {};
+}
+
+// stub of ROR 0x0010d388
+void DogActor::runMotionCmd()
+{
+    ROSEPAN_STUB("DogActor::runMotionCmd", 0x0010d388);
+}

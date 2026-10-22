@@ -10,7 +10,10 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 Queued at the top of tus.json in this order: (1) DONE 2026-10-22: DogLightPool::createLight
 0x11262c (now `dog/doglightpool.cpp`, `partial`: the pool's setup code is left; the
 `lightstatus[i] != NULL` asserts are gone from the boot), (2)
-`mag/magscene.cpp` -- MagScene::update 0x1327dc (starts S2dMovie / S2dMes / S2dBg), (3)
+`mag/magscene.cpp` -- MagScene::update 0x1327dc: **written 2026-10-22 (`partial`)**, it runs every
+frame (sub mode 0, the PC is not bound), but MagLifeMan (`mag/maglifeman.cpp`, queued first since:
+init / add / remove / find / update / draw are stubs) never runs or draws the S2d layers it holds;
+openMenu, the constructor and the window functions are left in magscene.cpp, (3)
 `game/gamfile.cpp` -- fileGetSize 0x1be768 (the .rpk reads 0 bytes, so every SprTexture list
 ends in error). The rx sound library (unassigned@00237ce8) is parked `partial` with names only
 until these are done.
@@ -293,6 +296,12 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
    magscene2.cpp's load now copies mapparam word 10 as a float (it is lwc1 / swc1 in the ROM).
 
 ## Decisions
+
+- **Menus run through the base's slots on the host** (2026-10-22, the magscene session; decided
+  in-session): `MagLifeMenuBase` (mag/maglifemenu.h) declares slots 1 / 9..12 (dtor, init, term,
+  isInit, processPad) as plain members whose stubs carry MagLifeMenuItem's addresses; the scene
+  calls them through `m_pMenuBase`. The first menu TU makes the class polymorphic (as the Dog
+  decision below). `MagLifeWindow` likewise: closeWindow deletes through the host destructor.
 
 - **SprMan's table host format** (2026-10-22, the sprman session, decided unattended): the owner's
   pattern / anim / frame / move / key tables stay one writable EE word image (datadump.py --words);

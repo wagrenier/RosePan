@@ -478,7 +478,7 @@ int MagScene::shareActor(u_int theActorNo)
     DogActor *a = &m_actors[n];
     a->reset();
     m_actor_flags[n] = 0;
-    m_actor_flags2[n] = 0;
+    m_actor_snd[n] = NULL;
     if (a->shareModel(&m_actors[theActorNo]) != 0)
         return -200;
     return n;
@@ -523,7 +523,7 @@ int MagScene::loadActor(i3dContext *ctx, int theID, void *thePtr, int keep)
     DogActor *a = &m_actors[n];
     a->reset();
     m_actor_flags[n] = 0;
-    m_actor_flags2[n] = 0;
+    m_actor_snd[n] = NULL;
 
     if (theID >= 0)
     {
@@ -543,7 +543,7 @@ int MagScene::loadActor(i3dContext *ctx, int theID, void *thePtr, int keep)
     if (a->load(pfh, &m_tex_info, keep ? 2 : 1, m_22cc) != 0)
         return -4;
     m_actor_flags[n] = 0;
-    m_actor_flags2[n] = 0;
+    m_actor_snd[n] = NULL;
     a->setId(theID);
     a->setParam1d8(5);
     a->ready();
@@ -589,7 +589,7 @@ void MagScene::releaseActor(u_int theN)
     ROR_ASSERT(theN >= 0 && theN < 128); /* 1383 */
     m_actors[theN].releaseModel(&m_tex_info);
     m_actor_flags[theN] = 0;
-    m_actor_flags2[theN] = 0;
+    m_actor_snd[theN] = NULL;
     if (theN == (u_int)m_pc_no)
         setPC(-1, 0);
 }

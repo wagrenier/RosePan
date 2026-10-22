@@ -30,3 +30,22 @@ void MagLifePC::termWorld()
 {
     ROSEPAN_STUB("MagLifePC::termWorld", 0x0011c418);
 }
+
+// stub of ROR 0x0011af10
+int MagLifePC::getState17Count()
+{
+    ROSEPAN_STUB("MagLifePC::getState17Count", 0x0011af10);
+    return {};
+}
+
+// stub of ROR 0x0011ade4
+void MagLifePC::live()
+{
+    ROSEPAN_STUB("MagLifePC::live", 0x0011ade4);
+}
+
+// stub of ROR 0x0011b30c
+void MagLifePC::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MagLifePC::processPad", 0x0011b30c);
+}

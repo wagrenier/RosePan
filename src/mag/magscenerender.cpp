@@ -117,9 +117,9 @@ void MagScene::putDrawEnv(I3dLayer *layer, sceGsDBuff *dbuff, int frame)
 
 u_int MagScene::getDrawFlags()
 {
-    if (m_22d0 == 8)
+    if (m_sub_mode.m_mode == 8)
         return 0;
-    if (m_22d0 == 7)
+    if (m_sub_mode.m_mode == 7)
         return 0x200;
     return 0x101;
 }

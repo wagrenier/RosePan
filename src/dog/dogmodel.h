@@ -94,6 +94,15 @@ struct DogModel : DogEntityEx
         return i3rGetNodeIndexByName(m_i3r_root, p);
     }
 
+    // ROR 0x00281f08 (the line is the header's 297 in the ROM)
+    int get_nNode() const
+    {
+        ROR_ASSERT(m_i3r_root);
+        return i3rGetNumNode(m_i3r_root);
+    }
+    int *getNodeFlag() { return m_node_flag; }                           // ROR 0x00281dc8
+    sceVu0FMATRIX *getModelMatrix() { return m_model_matrix; }           // ROR 0x00281de8
+
     // ROR 0x00281f50
     int get_nTex() const
     {
@@ -118,7 +127,7 @@ struct DogModel : DogEntityEx
     I3rRoot       *m_i3r_root;      // ROR 0x11c: the model (DogModel(tag_I3rRoot_s *))
     u_char         _120[0x130 - 0x120];
     sceVu0FMATRIX *m_model_matrix;  // ROR 0x130: one matrix per node (getModelMatrix, getNodeMatrixPtr)
-    int            m_node_flag;     // ROR 0x134: getNodeFlag
+    int           *m_node_flag;     // ROR 0x134: getNodeFlag: one flag word per node (setupNodeFlags: b_a* names 1, b_y* 2)
     int            m_attach_node;   // ROR 0x138: the parent's node this model hangs from
     int            m_attention;     // ROR 0x13c: setAttention / getAttention
     int            m_hide;          // ROR 0x140: setHide / isHide

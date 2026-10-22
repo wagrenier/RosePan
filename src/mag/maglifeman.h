@@ -30,6 +30,12 @@ struct MagLifeMan
 {
     void init();                                                         // ROR 0x00119630
     int  add(MagLife *life, int priority);                               // ROR 0x001196d4
+    /* Unlinks life's entry; 1 when it was there. */
+    int  remove(MagLife *life);                                          // ROR 0x00119810
+    /* life's index in m_life_buf, -1 when absent. */
+    int  find(MagLife *life);                                            // ROR 0x001198d0
+    /* Runs slot 2 (live) of every life whose level word has a bit of mask. */
+    void update(u_int mask);                                             // ROR 0x00119968
     /* Draws the lives whose priority & 0xc000 is group (0, 0x4000, 0x8000)
      * into layer. */
     void draw(I3dLayer *layer, u_int group);                             // ROR 0x00119a38

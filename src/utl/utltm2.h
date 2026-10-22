@@ -10,8 +10,13 @@
 #ifndef _UTL_UTLTM2_H
 #define _UTL_UTLTM2_H
 
+struct I3dTim2Picture;
+
 /* The whole file's size: the header and every picture. */
 int  utlTm2GetSize(const void *tm2);                                     // ROR 0x00104e1c
+/* Picture theN's header (asserts theN < h->Pictures; its colour type is
+ * the byte +0x13). */
+const I3dTim2Picture *utlTm2GetPicture(const void *tm2, int theN);       // ROR 0x00104e64
 /* Rewrites the first picture's colours (CLUT or image, by colour type) as
  * their luminance (0x4d / 0x96 / 0x1d) times r, g, b >> 16 (DogTexInfo
  * passes 0xff 0xdc 0x98: sepia). */
