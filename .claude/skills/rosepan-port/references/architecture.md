@@ -280,7 +280,17 @@ never asserts): sessions name them (`tus.py define --why`).
   no vtable of its own in the ELF (a pure interface whose vtable was never emitted -- unverified).
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
-  (quadword `sq`).
+  (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00
+  world matrix, +0x40 translation, +0x50 rotation (radians, `normalizeRotate` 0x10ff74 wraps to
+  [-pi, pi)), +0x60 scale, +0x70 offset (y = TransOfsY), +0x80 a (0,0,0,1) vector of unknown role,
+  +0x90 dirty flag, +0x94 vptr; DogEntityEx +0xe0 parent (`setParent` 0x1102b4 refuses cycles);
+  DogModel +0x11c `m_i3r_root`, +0x124 i3c root, +0x128 colli table, +0x130 node matrices (0x40 each),
+  +0x134 node flag, +0x138 attach node, +0x13c attention, +0x140 hide, +0x144 light id; DogActor +0x1a0
+  id, +0x1c0 / +0x1c4 motion count / `m_motion_data` (0x20 each, banks 0..3), +0x3c0 base rotation,
+  +0x3d0 RotYAAR, +0x3d4 / +0x3d8 control node / flag, +0x420 TransOfsY save, +0x424 RotOfsY; EE size
+  0x4d0. Virtual slots: 10 = `DogModel::setAttachNode`, 17 = `DogActor::getNodeWorldMatrix` 0x10eab8
+  (m_matrix x node matrix through 0x2377d0, a VU0 micro call). The many tiny accessors are the ELF's
+  linkonce symbols (0x280e88..), so their field offsets are exact.
 - vptr offsets (from constructor stores): most common +0x34 (78 classes, the EmyOut family), +0x20,
   +0x00 (40), +0x14, +0x04, +0x200 (the EmyMain family), +0x94 (Dog*).
 - GamMan has 181 inline methods (the game manager; `game/gamman.cpp`), S2dMes 47, DogModel 44, EmyMain 44,

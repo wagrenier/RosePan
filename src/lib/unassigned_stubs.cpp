@@ -1,5 +1,6 @@
 // lib/unassigned_stubs.cpp -- Rule of Rose module (file from the inference in ror_functions.txt).
 // Functions below are stubs until reconstructed; see tools/reverse/stage.py.
+#include "dog/dogentity.h"
 
 #include "common/rosepan_stub.h"
 #include "game/gamman.h"
@@ -190,4 +191,29 @@ int i3dCtxGetRest(i3dContext *ctx)
     (void)ctx;
     ROSEPAN_BRIDGE("i3dCtxGetRest", 0x0021f200);
     return 0x1ae000;
+}
+
+// stub of ROR 0x0010ff74
+void DogEntity::normalizeRotate()
+{
+    ROSEPAN_STUB("DogEntity::normalizeRotate", 0x0010ff74);
+}
+
+// stub of ROR 0x0010fc7c
+void DogEntity::setRotate(float x, float y, float z)
+{
+    ROSEPAN_STUB("DogEntity::setRotate", 0x0010fc7c);
+}
+
+// stub of ROR 0x00215b5c
+void dbgTraceVector3(float x, float y, float z)
+{
+    ROSEPAN_STUB("dbgTraceVector3", 0x00215b5c);
+}
+
+// stub of ROR 0x0022b3d8
+int i3rGetNodeIndexByName(I3rRoot *root, const char *name)
+{
+    ROSEPAN_STUB("i3rGetNodeIndexByName", 0x0022b3d8);
+    return {};
 }

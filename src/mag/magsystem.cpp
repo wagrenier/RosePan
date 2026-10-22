@@ -203,6 +203,15 @@ void MagSystem::startVibration(int frames)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The light set actor no is lit by (DogModel::setLightID, inlined).
+// ROR 0x00117974
+
+void MagSystem::setActorLightID(int no, int id)
+{
+    m_scene.m_actors[no].setLightID(id);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Graphics bring-up: both pads, the VIF1 channel, DMA / VIF0 / GS resets,
 // NTSC interlaced frame mode, the 512x448 double buffer (frame pages 0x70
 // and 0, the Z buffer after the second), the i3d version check (a
@@ -768,6 +777,97 @@ int MagSystem::loadScene(int a, int b, int c)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Hangs actor theNo from actor parentNo's node (parentNo < 0: detaches
+// it, and the attach node is left as it was).
+// ROR 0x00118a18
+
+void MagSystem::setActorParent(int theNo, int parentNo, int node)
+{
+    ROR_ASSERT(theNo >= 0);  /* 1486 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    DogActor *actor = &m_scene.m_actors[theNo];
+    if (parentNo < 0)
+    {
+        actor->setParent(NULL);
+    }
+    else
+    {
+        actor->setParent(&m_scene.m_actors[parentNo]);
+        actor->setAttachNode(node);  /* EE: through vtable slot 10 */
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The world matrix of actor no's node n, into an i3d matrix (the ROM
+// builds it in an aligned temporary and copies it out unaligned).
+// ROR 0x00118adc
+
+void MagSystem::getActorNodeMatrix(int no, I3dMatrixF4x4 *out, int n)
+{
+    ROR_ASSERT(no >= 0);  /* 1511 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(n >= 0);   /* 1512 */
+    sceVu0FMATRIX m;
+    m_scene.m_actors[no].getNodeWorldMatrix(m, n);  /* EE: through vtable slot 17 */
+    memcpy(out, m, sizeof(*out));
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The same into an aligned matrix.
+// ROR 0x00118c14
+
+void MagSystem::getActorNodeMatrix(int no, sceVu0FMATRIX out, int n)
+{
+    ROR_ASSERT(no >= 0);  /* 1530 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(n >= 0);   /* 1531 */
+    m_scene.m_actors[no].getNodeWorldMatrix(out, n);  /* EE: through vtable slot 17 */
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The world matrix of actor no's named node; returns the node index, -1
+// (and out untouched) when the model has no such node.
+// ROR 0x00118ccc
+
+int MagSystem::getActorNodeMatrixByName(int no, I3dMatrixF4x4 *out, const char *name)
+{
+    /* DogModel::getNodeIndexByName inlined (its asserts: dog/dogmodel.h 305) */
+    int n = m_scene.m_actors[no].getNodeIndexByName(name);  // callcheck: FUN_00215a30, i3rGetNodeIndexByName (inside the inline DogModel::getNodeIndexByName)
+    if (n >= 0)
+    {
+        getActorNodeMatrix(no, out, n);
+    }
+    return n;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00118d9c
+
+int MagSystem::getActorNodeMatrixByName(int no, sceVu0FMATRIX out, const char *name)
+{
+    int n = m_scene.m_actors[no].getNodeIndexByName(name);  // callcheck: FUN_00215a30, i3rGetNodeIndexByName (inside the inline DogModel::getNodeIndexByName)
+    if (n >= 0)
+    {
+        getActorNodeMatrix(no, out, n);
+    }
+    return n;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// How far actor no's motion root moves from time t0 to t1.
+// ROR 0x00118e6c
+
+int MagSystem::getActorMotionMove(int no, float t0, float t1, float *move, float *rot, float *pos)
+{
+    return m_scene.m_actors[no].getMotionMove(t0, t1, move, rot, pos);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00118ea4
+
+void MagSystem::addActorTrans(int no, const float *d, float trans_ofs_y, float rot_y_aar)
+{
+    m_scene.m_actors[no].addTrans(d, trans_ofs_y, rot_y_aar);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // The scene takes the last two arguments the other way round.
 // ROR 0x00118ed8
 
@@ -783,6 +883,15 @@ void MagSystem::setActorAnim(int no, int a, int b)
 int MagSystem::loadActorAnim(int no, const char *name, int arg)
 {
     return m_scene.loadActorAnim(no, arg, name);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Drops actor no's motion bank theId (0..3).
+// ROR 0x00118f30
+
+void MagSystem::releaseActorMotion(int no, int theId)
+{
+    m_scene.m_actors[no].releaseMotion(theId);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -925,6 +1034,67 @@ void MagSystem::loadModelByName(const char *name, int arg, int chapter)
         rpk = s_chapter_rpk[chapter];
     }
     m_scene.loadModelByName(&m_i3d, name, arg, rpk);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Places actor no (w is left as it was); the player's last actor gets a
+// trace that prints nothing in the retail build.
+// ROR 0x00119234
+
+void MagSystem::setActorTrans(int no, float x, float y, float z)
+{
+    if (no == m_pc_no_last)
+    {
+        dbgTraceVector3(x, y, z);
+    }
+    DogActor *actor = &m_scene.m_actors[no];
+    actor->m_trans[0] = x;
+    actor->m_trans[1] = y;
+    actor->m_trans[2] = z;
+    actor->m_dirty = 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Turns actor no to (x, y, z) and makes that its base rotation; the
+// offset vector and the Y correction are reset.
+// ROR 0x001192c8
+
+void MagSystem::setActorRotate(int no, float x, float y, float z)
+{
+    DogActor *p = &m_scene.m_actors[no];
+    ROR_ASSERT(p);  /* 1877 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    p->setRotate(x, y, z);
+    p->setBaseRotate(x, y, z);
+    p->m_80[3] = 1.0f;
+    p->m_80[2] = 0.0f;
+    p->m_80[1] = 0.0f;
+    p->m_80[0] = 0.0f;
+    p->clearRotYAAR();
+    p->m_dirty = 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The same from a vector (all four words), and the Y offset is cleared.
+// ROR 0x0011939c
+
+void MagSystem::setActorRotate(int no, const float *v)
+{
+    DogActor *p = &m_scene.m_actors[no];
+    ROR_ASSERT(p);  /* 1895 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    p->m_rotate[0] = v[0];
+    p->m_rotate[1] = v[1];
+    p->m_rotate[2] = v[2];
+    p->m_rotate[3] = v[3];
+    p->normalizeRotate();
+    p->m_dirty = 1;
+    p->setBaseRotate(v);
+    p->m_80[3] = 1.0f;
+    p->m_80[2] = 0.0f;
+    p->m_80[1] = 0.0f;
+    p->m_80[0] = 0.0f;
+    p->clearRotYAAR();
+    p->m_dirty = 1;
+    p->clearRotOfsY();
 }
 
 // ──────────────────────────────────────────────────────────────────────

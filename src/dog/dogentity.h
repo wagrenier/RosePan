@@ -1,0 +1,64 @@
+/* ==========================================================================
+ *  dog/dogentity.h
+ *
+ *  DogEntity and DogEntityEx (dog/dogentity.cpp; vtables _vt$9DogEntity
+ *  0x2e0b38, _vt$11DogEntityEx 0x2e0b60, vptr at +0x94): the transform node
+ *  under every Dog object -- a world matrix at +0x0, translation, rotation
+ *  (radians, wrapped to [-pi, pi)), scale and an offset vector, a dirty
+ *  flag the transform pass clears, and (DogEntityEx) a parent link.
+ *  Minimal: what MagSystem's actor methods touch; the dog/ TUs fill in the
+ *  rest.
+ *
+ *  EE virtual slots (GCC 2, 8-byte entries after an 8-byte header):
+ *    DogEntity    1 reset 0x280ec8, 2 transform 0x280f18, 3 ~DogEntity 0x280f34
+ *    DogEntityEx  1 reset 0x11023c, 2 transform 0x11034c, 3 ~DogEntityEx
+ *                 0x281c80, 4 getParent 0x281cb4
+ *  PORT: not polymorphic on the host yet (no virtual is called through
+ *  these classes by written code); the first dog/ TU that needs one makes
+ *  them virtual in slot order and moves the vptr comment to a real one.
+ * ======================================================================== */
+#ifndef _DOG_DOGENTITY_H
+#define _DOG_DOGENTITY_H
+
+#include <stddef.h>
+
+#include "sdk/eetypes.h"
+#include "sdk/vu0_intrin.h"
+
+/* EE 0x98 + padding (data to +0x94, the vptr at +0x94). layout: host --
+ * the EE vptr word is kept as padding so the data keeps its EE offsets
+ * while the class is not polymorphic. */
+struct DogEntity
+{
+    void setRotate(float x, float y, float z);                          // ROR 0x0010fc7c
+    void normalizeRotate();                                              // ROR 0x0010ff74
+
+    sceVu0FMATRIX m_matrix;     // ROR 0x00: the world matrix (DogActor::getNodeWorldMatrix's left operand)
+    sceVu0FVECTOR m_trans;      // ROR 0x40: translation, w = 1
+    sceVu0FVECTOR m_rotate;     // ROR 0x50: rotation x, y, z in radians, wrapped by normalizeRotate
+    sceVu0FVECTOR m_scale;      // ROR 0x60: (1, 1, 1, 1) after reset
+    sceVu0FVECTOR m_trans_ofs;  // ROR 0x70: an offset; y is DogActor's TransOfsY (saveTransOfsY)
+    sceVu0FVECTOR m_80;         // ROR 0x80: (0, 0, 0, 1) after reset and setActorRotate; role unverified
+    int           m_dirty;      // ROR 0x90: set by every setter, 1 = the matrix needs a transform
+    u_int         _ee_vptr;     // ROR 0x94: the EE vptr (see the file comment)
+};
+static_assert(offsetof(DogEntity, m_trans) == 0x40, "m_trans");
+static_assert(offsetof(DogEntity, m_rotate) == 0x50, "m_rotate");
+static_assert(offsetof(DogEntity, m_scale) == 0x60, "m_scale");
+static_assert(offsetof(DogEntity, m_trans_ofs) == 0x70, "m_trans_ofs");
+static_assert(offsetof(DogEntity, m_80) == 0x80, "m_80");
+static_assert(offsetof(DogEntity, m_dirty) == 0x90, "m_dirty");
+static_assert(sizeof(DogEntity) == 0xa0, "DogEntity is 0x98 bytes of data, 16-aligned");
+
+/* EE size at least 0xe4. layout: host -- holds the parent pointer. */
+struct DogEntityEx : DogEntity
+{
+    void setParent(DogEntityEx *p);                                      // ROR 0x001102b4
+    DogEntityEx *getParent() { return m_parent; }                        // ROR 0x00281cb4
+
+    u_char       _a0[0xe0 - 0xa0];
+    DogEntityEx *m_parent;      // ROR 0xe0: NULL = a root; setParent refuses cycles (assert p != m_parent)
+};
+static_assert(offsetof(DogEntityEx, m_parent) == 0xe0, "m_parent");
+
+#endif /* _DOG_DOGENTITY_H */

@@ -28,7 +28,7 @@
    "why": "12 of 16 functions reference bed/bedmemory.cpp; 0x100320 and 0x101718 are unanchored neighbours, bed/bedsubmode.cpp below and bed/bedpfh.cpp above"
   },
   "mag/magsystem.cpp": {
-   "notes": "Left: the 12 methods on the scene's 128 actors (scene +0x2920 + no*0x4d0, vptr +0x94): 0x117974, 0x118a18, 0x118adc, 0x118c14, 0x118ccc, 0x118d9c, 0x118e6c, 0x118ea4, 0x118f30, 0x119234, 0x1192c8, 0x11939c - they need DogEntity/DogModel/DogActor in src (add DogActor m_actors[128] to MagScene, host layout); details in open-items.md item 9. Screenshot black: MagScene::draw and the i3d library are stubs. Start next from the reached stubs: MagScene ctor/init/start/initRender/update/draw (mag/magscene2.cpp, magscenerender.cpp), i3d (unassigned@00216ad0), BedPad (bed/bedpad.cpp). Decisions: MagScene holds MagLifePC at +0x2adc0 and MagLifeBwn at +0x2afe0 as minimal host structs; m_v_interval etc. are MagSystem statics (g_data_296198 removed); sceGsResetGraph gets raw 0,1,2,0 because the platform libgraph.h swaps INTERLACE/FRAME macro values (open question). Run at 30 fps confirmed by shot timestamps (60 frames per 2 s).",
+   "notes": "All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes are NOT polymorphic on the host: the EE vptr word at +0x94 is kept as padding (_ee_vptr) and setAttachNode (slot 10) / getNodeWorldMatrix (slot 17) are plain members; the first dog/ TU needing a virtual makes them virtual in the slot order listed in the header comments. DogEntity::setRotate / normalizeRotate sit in unassigned@0010f944 (stubs in lib/unassigned_stubs.cpp) but are dog code: define that range when a dog TU starts. Next reached stubs: MagScene ctor/init/start/initRender/update/draw, i3d (unassigned@00216ad0), BedPad, SndMan::update.",
    "ranges": [
     [
      "00117654",
@@ -40,9 +40,14 @@
      "date": "2026-10-22 12:41",
      "status": "partial",
      "summary": "MagSystem: 40 of 52 functions written - ctor/dtor, V-blank callbacks, initGraph (pads, VIF1, GS reset, 512x448 double buffer, i3d version check, i3d context on the static packet buffer), start/term, the frame (update, begin/end/kick packet, waitVSync, storeImage BMP dump), scene/light/camera/model forwarders, PC/Bwn binders; main loop now paced by the V-blank semaphore at 30 fps (PC sceGsSyncV removed); 3 folded functions created, ~80 names; platform: vif0ResetVu0 no-op, game heap exported as g_utlMemory; bridges for i3dGetStructSize and i3dCtxGetRest"
+    },
+    {
+     "date": "2026-10-22 12:55",
+     "status": "verify",
+     "summary": "MagSystem complete: the 12 actor methods (setActorLightID, setActorParent, getActorNodeMatrix x2 and ByName x2, getActorMotionMove, addActorTrans, releaseActorMotion, setActorTrans, setActorRotate x2) over a new minimal Dog layer - src/dog/dogentity.h, dogmodel.h, dogactor.h (DogEntity, DogEntityEx, DogModel, DogActor host structs at their EE offsets, inline linkonce accessors) and MagScene::m_actors[128]; 21 names; I3dMatrixF4x4 and i3rGetNodeIndexByName in lib/unassigned.h"
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "MagSystem methods: 0x117654/0x1176bc are the V-blank callbacks on the file's statics (m_v_sema sdata 0x29619c), asserts mag/magsystem.cpp x13 up to 0x11939c, 0x11948c forwards to the scene member +0x12540; 0x11764c (empty, called from the dog code) stays with dog/dogtexinfo.cpp, 0x1194b4.. is a list class before mag/maglifeman.cpp"
   },
   "main.cpp": {

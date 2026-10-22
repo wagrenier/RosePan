@@ -305,6 +305,48 @@
   "was": "FUN_00105e2c",
   "why": "BedMemory::check(heap 0x6e9800, 0); no callers"
  },
+ "00109348": {
+  "name": "DogActor::getMotionMove",
+  "tag": "ror-inferred",
+  "was": "FUN_00109348",
+  "why": "dog/dogactor.h asserts m_motion_data; samples the current motion's root (0x108c90) at f12 and f13 (clamped to the motion length), writes the difference to a1, the end position to a3 when set, a rotation to a2; returns 0, 1 or 2"
+ },
+ "00109b88": {
+  "name": "DogActor::releaseMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00109b88",
+  "why": "dog/dogactor.cpp asserts theId >= 0 && theId < (4) and pm->m_i3m_root; frees / clears the motion entries whose id is theId"
+ },
+ "0010a038": {
+  "name": "DogActor::addTrans",
+  "tag": "ror-inferred",
+  "was": "FUN_0010a038",
+  "why": "+0x40..+0x48 += a1[0..2], w = 1; f12 into +0x74 (the TransOfsY saveTransOfsY reads), f13 into +0x3d0 (clearRotYAAR's field), dirty"
+ },
+ "0010eab8": {
+  "name": "DogActor::getNodeWorldMatrix",
+  "tag": "ror-inferred",
+  "was": "FUN_0010eab8",
+  "why": "vtable slot 17 (first DogActor-only slot); dog/dogactor.cpp asserts the model matrices +0x130; out = 0x2377d0(this's matrix at +0x0, node matrix n)"
+ },
+ "0010fc7c": {
+  "name": "DogEntity::setRotate",
+  "tag": "ror-inferred",
+  "was": "FUN_0010fc7c",
+  "why": "f12..f14 into +0x50..+0x58, wraps them (0x10ff74), dirty +0x90"
+ },
+ "0010ff74": {
+  "name": "DogEntity::normalizeRotate",
+  "tag": "ror-inferred",
+  "was": "FUN_0010ff74",
+  "why": "wraps +0x50, +0x54, +0x58 into [-pi, pi) by 2 pi steps"
+ },
+ "001102b4": {
+  "name": "DogEntityEx::setParent",
+  "tag": "ror-inferred",
+  "was": "FUN_001102b4",
+  "why": "dog/dogentity.cpp line 302 assert p != m_parent while walking the parent chain at +0xe0 (DogEntityEx::getParent's field); resets +0x70 to (0,0,0,1), dirty"
+ },
  "00117654": {
   "name": "MagSystem::vSyncCallback",
   "tag": "ror-inferred",
@@ -340,6 +382,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00117924",
   "why": "when vibration is on (+0x8, the GamMan option 0x12) starts pad 0's big motor at 0xff and sets the frame count +0x4 that update counts down"
+ },
+ "00117974": {
+  "name": "MagSystem::setActorLightID",
+  "tag": "ror-inferred",
+  "was": "FUN_00117974",
+  "why": "stores a1's value at scene actor[no] +0x144, DogModel::setLightID's field (symbol 0x281d3c)"
  },
  "00117990": {
   "name": "MagSystem::initGraph",
@@ -509,6 +557,48 @@
   "was": "FUN_001189e4",
   "why": "MagScene::load(scene, i3d context, a, b, c)"
  },
+ "00118a18": {
+  "name": "MagSystem::setActorParent",
+  "tag": "ror-inferred",
+  "was": "FUN_00118a18",
+  "why": "assert theNo >= 0; DogEntityEx::setParent(actor[parentNo] or NULL) then the virtual slot 10 DogModel::setAttachNode(node)"
+ },
+ "00118adc": {
+  "name": "MagSystem::getActorNodeMatrix(I3dMatrixF4x4*)",
+  "tag": "ror-inferred",
+  "was": "FUN_00118adc",
+  "why": "asserts no >= 0, n >= 0; virtual slot 17 into an aligned temp, then copies 64 bytes with ldl/sdl to the unaligned out (the struct overload)"
+ },
+ "00118c14": {
+  "name": "MagSystem::getActorNodeMatrix(float(*)[4])",
+  "tag": "ror-inferred",
+  "was": "FUN_00118c14",
+  "why": "asserts no >= 0, n >= 0; virtual slot 17 straight into the out matrix (the sceVu0FMATRIX overload)"
+ },
+ "00118ccc": {
+  "name": "MagSystem::getActorNodeMatrixByName(I3dMatrixF4x4*)",
+  "tag": "ror-inferred",
+  "was": "FUN_00118ccc",
+  "why": "inlines DogModel::getNodeIndexByName (dog/dogmodel.h 305 asserts m_i3r_root, p) then 0x118adc when the index is >= 0; returns the index"
+ },
+ "00118d9c": {
+  "name": "MagSystem::getActorNodeMatrixByName(float(*)[4])",
+  "tag": "ror-inferred",
+  "was": "FUN_00118d9c",
+  "why": "same as 0x118ccc, then 0x118c14"
+ },
+ "00118e6c": {
+  "name": "MagSystem::getActorMotionMove",
+  "tag": "ror-inferred",
+  "was": "FUN_00118e6c",
+  "why": "tail-calls DogActor 0x109348 on actor[no] with a1..a3 and f12/f13"
+ },
+ "00118ea4": {
+  "name": "MagSystem::addActorTrans",
+  "tag": "ror-inferred",
+  "was": "FUN_00118ea4",
+  "why": "forwards to DogActor 0x10a038 on actor[no]"
+ },
  "00118ed8": {
   "name": "MagSystem::setActorAnim",
   "tag": "ror-inferred",
@@ -520,6 +610,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00118f04",
   "why": "MagScene::loadActorAnim(no, b, a): the last two args swapped; no callers"
+ },
+ "00118f30": {
+  "name": "MagSystem::releaseActorMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00118f30",
+  "why": "forwards to DogActor 0x109b88 (assert theId >= 0 && theId < (4)) on actor[no]"
  },
  "00118f64": {
   "name": "MagSystem::setCameraTarget",
@@ -556,6 +652,24 @@
   "tag": "ror-inferred",
   "was": "FUN_001191e0",
   "why": "MagScene::loadModelByName with the chapter's RPK name; folded after 0x119138, created 2026-10-22"
+ },
+ "00119234": {
+  "name": "MagSystem::setActorTrans",
+  "tag": "ror-inferred",
+  "was": "FUN_00119234",
+  "why": "f12..f14 into actor[no] +0x40..+0x48 (DogEntity translation), dirty flag +0x90; traces the vector through 0x215b5c when no == m_pc_no_last"
+ },
+ "001192c8": {
+  "name": "MagSystem::setActorRotate(float,float,float)",
+  "tag": "ror-inferred",
+  "was": "FUN_001192c8",
+  "why": "assert p; DogEntity 0x10fc7c(x, y, z), inlined DogActor::setBaseRotate(float,float,float) +0x3c0, +0x80 = (0,0,0,1), clearRotYAAR +0x3d0, dirty"
+ },
+ "0011939c": {
+  "name": "MagSystem::setActorRotate(floatconst*)",
+  "tag": "ror-inferred",
+  "was": "FUN_0011939c",
+  "why": "assert p; copies the vector to +0x50, DogEntity 0x10ff74, inlined setBaseRotate(float const*), +0x80 = (0,0,0,1), clearRotYAAR, clearRotOfsY +0x424"
  },
  "0011948c": {
   "name": "MagSystem::clearPC",
@@ -923,6 +1037,12 @@
   "was": "FUN_002155a0",
   "why": "empty function in the debug range before debug/mimu_debug.cpp; mainExceptionHandler calls it first"
  },
+ "00215b5c": {
+  "name": "dbgTraceVector3",
+  "tag": "ror-inferred",
+  "was": "FUN_00215b5c",
+  "why": "formats f12, f13, f14 with 0x215e1c (3 digits) into three stack buffers and returns: a trace print compiled out; next to the assert handler 0x215a30"
+ },
  "0021eb28": {
   "name": "i3dInitHardware",
   "tag": "lib-context",
@@ -982,6 +1102,12 @@
   "tag": "lib-context",
   "was": "FUN_0021f900",
   "why": "(ctx, buf, size, count): clears the 0x12168-byte context and sets its two packet lists"
+ },
+ "0022b3d8": {
+  "name": "i3rGetNodeIndexByName",
+  "tag": "lib-context",
+  "was": "FUN_0022b3d8",
+  "why": "i3d model root: looks the name up (0x22b1b0) in the root's node-name table (+0x10 -> +0x20, count +0x2e) and maps it through the index table +0x1c; -1 when absent; DogModel::getNodeIndexByName's body"
  },
  "00237c68": {
   "name": "i3dPrintf",
