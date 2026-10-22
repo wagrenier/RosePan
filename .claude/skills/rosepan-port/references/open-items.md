@@ -28,9 +28,10 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 - Automated runs at effort xhigh or above (user's rule).
 - The visual test decides done (user's rule): `verify` for complete code nothing can show yet.
 - Work happens on the work branch `ror-port`; `tus.py finish` refuses `main`. The remote is
-  `https://github.com/wagrenier/RosePan` (created by the user 2026-10-22, who had the first commit
-  pushed). Pushing each TU's commit from sessions or the routine is **not** approved yet: when the user
-  approves it, record it here; the routine pushes only then.
+  `https://github.com/wagrenier/RosePan` (created by the user 2026-10-22).
+- **Pushing is approved** (the user, 2026-10-22, as in ReiPan): sessions and the routine push each
+  TU's commit with `git push origin HEAD` after `tus.py finish`. Never force-push, rewrite history,
+  delete branches or tags; a failed push is reported, not retried with other flags.
 - Ghidra names are the C++ names (`Class::method`), kept with `::` in flat names (2026-10-22).
 
 ## Open questions

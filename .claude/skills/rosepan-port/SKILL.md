@@ -124,8 +124,8 @@ terminal. A session never starts other sessions, agents or scheduled tasks, and 
 `autopilot.py` or the routine (the user does). Within a session, run the protocol without asking at each
 step; pause only for decisions that are genuinely the user's (restructuring the tree, non-trivial
 platform-layer changes, destructive git) -- and when no answer can come, decide, record the doubt in
-`open-items.md`, and finish. Pushing is not approved for this repository until the user says so (it has
-no remote yet; open-items.md "Decisions" records it when it changes).
+`open-items.md`, and finish. Pushing each finished TU's commit (`git push origin HEAD`) is approved
+(the user, 2026-10-22; open-items.md "Decisions").
 An empty queue means re-assess, not "follow the frontier": the frontier score counts call sites from
 written code that may never run (in ReiPan it led seven sessions into effects nobody could see). Refill
 the queue from open-items.md "Next up", in the order a smoke run reaches the stubs.
