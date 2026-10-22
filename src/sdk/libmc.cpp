@@ -199,6 +199,25 @@ int sceMcInit(void)
     return 0;
 }
 
+/* Closes what is still open and drops the init flag: the host has no request
+ * to wait for and no semaphores to delete. Returns 1 like the ROM's. */
+int sceMcEnd(void)
+{
+    int i;
+
+    for (i = 0; i < MC_MAX_OPEN_FILES; i++)
+    {
+        if (open_files[i].fp != 0)
+        {
+            std::fclose(open_files[i].fp);
+            open_files[i].fp = 0;
+        }
+    }
+    sync_pending = 0;
+    init_done    = 0;
+    return 1;
+}
+
 int sceMcSync(int mode, int *cmd, int *result)
 {
     (void)mode;   /* the host has no request that can still be in flight */

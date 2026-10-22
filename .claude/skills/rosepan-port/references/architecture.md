@@ -72,10 +72,31 @@ Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
 
 - `_start` 0x100008 (crt0): `_InitSys` 0x267798, `FlushCache`, the init hook (`jalr s0`), `atexit`
   0x2781e8, then `main` 0x2045a8 (`jal` at 0x100238), then exit.
-- `main` 0x2045a8: calls 0x2729f8, 0x2043dc, a printf-like 0x279b70 (version and build date), the IOP
-  reboot with `ioprp300.img` (0x241b20), boot-device detection (0x241d68: "host0:", "BootDev = %s",
-  "BootDir = %s"; 0x240eb8: "BootDevice = %d", "Rom Date"), `GetThreadId` / `ChangeThreadPriority`, then
-  0x2046d4 (calls into many game modules: likely the game's init / main loop -- unverified).
+- `main` 0x2045a8 (`main.cpp`, 0x2043dc..0x204d38, written 2026-10-22; `mainGame` in src): `__main`,
+  `mainParseArgs` 0x2043dc (`-l fre|ger|spa|ita` -> `MagSystem::setLanguage` 1..4, `-m N` / `-mN` -> the
+  boot stage, 99 by default), `snprintf` 0x279b70 of the version line "0.1.%sn.%s.%s" (number "1.01" from
+  data 0x2d9e18, `__DATE__`, `__TIME__`) into bss 0x7b45d0, the rx bring-up below, `utlMemInit` and the
+  memory hooks, `strcpy` of argv[0] into `SndMan` +0x4, `rxSysSetDebugHandlers` 0x242960,
+  `rxSysInitFileDevice(1)` 0x243608, then `mainInitGame(stage)` 0x2046d4, `mainLoop` 0x204864 (never
+  returns), `mainExit` 0x20483c.
+- `mainInitGame`: `mainInitDevices` 0x20499c (`SndMan::init` -> `rxSndInit` 0x237d80, `sceDbcInit`,
+  `scePad2Init(0)`, `sceMcInit`), `mainInitGraph` 0x20491c (NTSC interlaced frame, a 640x224 double
+  buffer), `sysInitManagers` 0x204148 (`Sequence::init`, `GamMan::init`), `MagSystem::init`; then a new
+  `SysNowLoading` (0x2a0 bytes): `init`, `MagSystem::setSceneFlags(1,1,1,1,1,1,0)`,
+  `MagScene::initCamera` (empty), `MagSystem::start` (V-blank semaphore and callback 0x117654),
+  `seqSetLanguage`, `GamMan::loadSystemData` 0x1c1b48, `GamMan::loadStage(stage)` 0x1c204c (unless -1),
+  `term` + delete; bss 0x7a3d48 / 0x7a3d4c = 1, data 0x296198 = 2, `MagSystem::resetDBuff` twice. The
+  now-loading frame itself is drawn (0x2051cc) from 0x1be564, inside the pfh loader GamMan's loads use.
+- `mainLoop`: `SysTimer::start` on the task manager's timer (0x7a3dc0 = 0x7a3d80 + 0x40),
+  `CmnTaskMan::addTask(1, -1, 1, 0, &EmyManager 0x7b2140, 0, &id 0x7b45c0, 0)`, RCNT0 mode 0x83, then
+  per frame: RCNT0 = 0, `SysTimer::update`, `Sequence::exec` 0x20f98c, `GamMan::update` 0x1c526c,
+  `CmnTaskMan::exec` 0x1e7a20, `MagSystem::update` 0x1182dc (the V-blank wait, draw, frame counter),
+  `GamMan::postUpdate` (empty).
+- **The globals file** before main.cpp (ends with the static-init pair 0x20439c / 0x2043bc; 0x2041f8
+  constructs and destroys, in order): game heap `BedMemory` 0x6e9800, `MagSystem` 0x6e9840, `GamMan`
+  0x7812c0, `CmnTaskMan` 0x7a3d80, `Sequence` 0x7a4440, `EmyManager` 0x7b2140, `SndMan` 0x7b2580,
+  0x7b40c0 (ctor 0x1810f4, class unknown). In src these objects are defined in
+  `lib/unassigned_stubs.cpp` until that file is defined (the heap stays in utl/utlmisc.cpp).
 - The rx bring-up main runs, in order: `rxSysSetIopImage("IOPRP300.IMG")` 0x241b20,
   `rxSysSetBootPath("cdrom0:")` 0x241d68 (boot device CDROM, dir, name), `rxSysResetHardware` via
   `rxSysInit` 0x240eb8: VIF/VU/GS-path/DMA reset, `rxThInit`, memory hooks reset, boot device (more than
@@ -238,7 +259,7 @@ never asserts): sessions name them (`tus.py define --why`).
 | address | what | evidence |
 |---|---|---|
 | 0x100008 | `_start` (crt0) | libmatch (FF2 crt0.s) |
-| 0x2045a8 | `main` | crt0's call; build-date strings |
+| 0x2045a8 | `main` (`mainGame` in src/main.cpp): see Program flow | crt0's call; build-date strings |
 | 0x240eb8 | `rxSysInit`: console bring-up (see Program flow) | strings; `rx/rxsys.cpp` |
 | 0x241f58 | `rxSysPrintf`: the middleware's and game's printf (151 callers): print hook 0x2db9d0, then `scePrintf`, or a buffered host tty (file 0x2dba34 / IOP tty RPC) | `rx/rxsys.cpp` |
 | 0x2dbe8c | `g_rxSysMemFunc[4]`: memory hooks the game's allocators call through (0x1830fc, 0x182818 ...) | `rx/rxsys.cpp` |
@@ -247,6 +268,12 @@ never asserts): sessions name them (`tus.py define --why`).
 | 0x6e9800 | the game heap: a `BedMemory` (bed/bedmemory.cpp 0x100354..) that `utlMemInit` 0x105be4 (called by main) creates over the largest malloc (probe from 0x1755100 down); `utlMemAlloc` 0x105ca0 / `utlMemRealloc` 0x105de0 / `utlMemFree` 0x105e08 are main's rxSys memory hooks | `utl/utlmisc.cpp` |
 | 0x215a30 | (see above) the assert handler; src writes asserts as `ROR_ASSERT(expr)` (common/ror_assert.h: reports and continues) | |
 | 0x267798 | `_InitSys` | libmatch (FF2 initsys.c) |
+| 0x6e9840 | `MagSystem` (mag/magsystem.cpp): frame, V-blank semaphore `m_v_sema` (sdata 0x29619c), scene member at +0x12540 (0x6fbd80) | asserts; main |
+| 0x7812c0 | `GamMan` (game/gamman.cpp, vptr +0x2ab4): common data and stage loads, per-frame game update | vtable; main |
+| 0x7a3d80 | `CmnTaskMan` (name unverified): task list, its `SysTimer` at +0x40 | main; 66 addTask call sites |
+| 0x7a4440 | `Sequence` (sequence/sequence.cpp and the run 0x20eda4..0x215e1c): event sequences ("mst", "trg", "imdy", "single") | main |
+| 0x7b2580 | `SndMan` (name from snd/sndman.cpp, unverified): sound manager over rxSnd; +0x4 holds argv[0] (0x20 bytes) | main; rxsnd strings |
+| 0x269fe0.. | libdbc (`sceDbcInit` / `sceDbcEnd`) and libpad2 (`scePad2Init` 0x26b1d8 / `scePad2End`) between libipu and libpad: named by reading; `sceMcEnd` is 0x24d448 (libmatch had sceMcChangeThreadPriority) | strings; main |
 | 0x100248 | `_exit`: crt0's `j Exit` thunk; `Exit` is 0x267b98 | FF2 symbols at the same addresses |
 
 ## Disc and data files
@@ -258,6 +285,10 @@ Paths the ELF names (the disc dump has not been looked at yet: `ROSEPAN_DATA`):
 - Debug data: `host0:main.ee.elf`, `data/seq/DBGITEM.BIN`, `data/seq/w%03d/DBGFLAG.BIN` / `DBGAREA.BIN` /
   `DBGSTEP.BIN`.
 - Movies: 41 `.PSS` names (`CP_LOGO.PSS`, `mov/MV00_OPE.PSS` .. `mov/MV05_*.PSS`, `DEATH_B.PSS`, ...).
+- `DATA/CMNTEX/LOADING.BIN` (66,784 bytes) is raw GS data, not TIM2: 256x256 PSMT8 pixels (0x10000,
+  uploaded to dbp 0x1a40) then a 16x16 CT32 palette (CSM1 order; dbp 8000), then 0xe0 zero bytes. The
+  picture holds four 256x64 "Now Loading" frames with a girl icon; 0x204e98 picks frame n by V = n / 4.
+  Reference PNG: decode it as above into work/ref/LOADING/ (the 2026-10-22 main session did it inline).
 - Textures are TIM2 (`utl/utltm2.cpp`; names such as loading.tm2, option.tm2, texmoji.tm2, map01_tcc.tm2,
   `%s_%02d.tm2`): `tm2png.py` converts them, `--scan` carves them out of archives.
 
@@ -277,10 +308,14 @@ throughout (identifiers, env variables, files, shader macros):
   graphics settings, data folder), config (`rosepan.ini` in `%APPDATA%/Mikompilation/RosePan/`),
   memory (emulated EE RAM), profiler.
 - `src/common/rosepan_stub.h` -- `ROSEPAN_STUB` / `ROSEPAN_BRIDGE`.
-- `src/main.cpp` -- placeholder entry: `RosePan_LogInit`, then `RosePan_HostMain(GameMain)`, where
-  GameMain presents empty frames (`RosePan_RendererBeginFrame` / `sceGsSyncV` / `RosePan_RendererEndFrame`).
-  RoR's `main` (0x2045a8) replaces GameMain. The renderer opens the window lazily on the first
-  BeginFrame; a frame with no draws presents black.
+- `src/main.cpp` -- RoR's main file (2026-10-22): the process `main(argc, argv)` opens the log and runs
+  `GameMain` on the game thread (`RosePan_HostMain`); GameMain builds argv with argv[0] =
+  "cdrom0:\SLUS_214.48;1" plus the host's own arguments (so `-m N` picks the boot stage) and calls
+  `mainGame` (the ROM's main). PC deviations there: boot path "host0:" and file device -1 (the boot
+  device, HOST) instead of "cdrom0:" / 1; `mainLoop` brackets each frame with
+  `RosePan_RendererBeginFrame` / `EndFrame` and, until `MagSystem::update` is written, a
+  `sceGsSyncV(0)` for pacing. The renderer opens the window lazily on the first BeginFrame; a frame
+  with no draws presents black.
 - Data root: the disc's root copied file by file (the folder holding `DATA/`); `LooksLikeDataRoot`
   checks `DATA/CMNTEX`. `RosePan_PathResolveData` still carries FF3's "../bin/data" spellings; the RoR
   file TU decides how `cdrom0:\DATA\...` and relative `data/...` names map onto it.

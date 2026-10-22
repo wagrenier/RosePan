@@ -117,6 +117,8 @@ typedef struct                          /* 0x3c4 */
 } sceMcIconSys;
 
 int sceMcInit(void);
+/* Waits for the running request and releases the library (RoR's mainExitDevices). */
+int sceMcEnd(void);
 
 /* mode 0 blocks until the running request finishes, mode 1 polls.  Returns
  * one of the sceMcExec* values above; `cmd` (unused by this game, always 0)

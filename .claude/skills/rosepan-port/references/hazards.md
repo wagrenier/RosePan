@@ -208,6 +208,18 @@ entries are marked **RoR** with the date.
 - **stubgen finds one declaration per line**: write prototype blocks one per line.
 - **stubgen places stubs by inference**: a stub can land in a wrong or new file; move it, delete the
   stray file.
+- **stubgen glues `public:` into the stub** when a class's first method follows an access label
+  (`class X
+{
+public:
+    void f();`): the stub starts with `public:` and a void method gets
+  `return {};`. Declare minimal classes as `struct` without labels (or a label on a line of its own
+  after a member); delete the broken stubs and the files stubgen created, then run check again
+  (2026-10-22, main session).
+- **The frontier counts what the port replaces wholesale.** The assert handler 0x215a30 (1,483 call
+  sites, written back as `ROR_ASSERT`) made `tus.py next` pick the sequence engine run
+  unassigned@0020eda4 by "frontier x44"; `settings.frontier_ignore` in data/tus.json now lists it
+  (tus.py and status.py skip those callees). Add any other such callee there (2026-10-22).
 
 ## Sessions
 
@@ -268,6 +280,13 @@ entries are marked **RoR** with the date.
 
 ## Platform layer (ReiPan's, written for FF2 and FF3)
 
+- **`sdk/libgraph.h` swaps `SCE_GS_INTERLACE` (0) and `SCE_GS_NOINTERLACE` (1)** against Sony's
+  SDK (interlace = 1). The host's `sceGsResetGraph` only stores the value, so nothing breaks yet, but
+  code written with the macro passes the opposite of the ROM: write the ROM's literal with a comment
+  (main.cpp's `mainInitGraph` does), or fix the header and every caller in one commit.
+- **The host's `SetDebugHandler` returns 0**, not the old handler: code that saves and restores
+  handlers (mainSetExceptionHandlers / mainResetExceptionHandlers, rxSysSetDebugHandlers) restores
+  nothing on the host.
 - **SDK shims only answer what FF2 / FF3 asked.** RoR calls libraries they never did (libpad2, libdbc,
   libvib, the rx middleware's IOP use): a shim may return a placeholder. When RoR behaves as if hardware
   is missing, read the shim against Sony's semantics before blaming the reconstruction.
