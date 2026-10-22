@@ -9,8 +9,9 @@
  *
  *  PORT: the pattern tables are the ROM's .data words as they are (an EE
  *  image): the SprDispDef records and the tables themselves point into
- *  them by EE address (the _EE constants give each table's base), and
- *  only SprMan reads them -- its TU decides the host format.
+ *  them by EE address (the _EE constants give each table's base, which
+ *  goes to SprMan::m_pattern_ee next to m_pattern: SprMan::eePtr resolves
+ *  them). Writable: SprMan writes the anim counts back.
  * ======================================================================== */
 #include "spr/s2d.h"
 #include "common/rosepan_stub.h"
@@ -69,7 +70,7 @@ static int s2dMesBackupOffY[S2D_MES_ITEM_MAX];      /* data 0x29bc88 */
 static int s2dMesBackupState[S2D_MES_ITEM_MAX];     /* data 0x29bcc0 */
 
 /* S2dCineSco's pattern table (data 0x2999d8..0x299b70): EE image, see the file comment. */
-static const u_int s2dCineScoPattern[102] = {
+static u_int s2dCineScoPattern[102] = {
     0xffffff9e, 0x00000000, 0x00000000, 0x00000100, 0x00000100, 0xffffff9e, 0x00000000, 0x00000000,  // 0x002999d8
     0x00002000, 0x00000400, 0xffffff9e, 0x00000000, 0x00000000, 0x00002000, 0x00000300, 0x00000000,  // 0x002999f8
     0x00000005, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x01000000,  // 0x00299a18
@@ -98,7 +99,7 @@ static const SprDispDef s2dCineScoDisp[4] = {
 };
 
 /* S2dBg's pattern table (data 0x299d20..0x299fe0): EE image, see the file comment. */
-static const u_int s2dBgPattern[176] = {
+static u_int s2dBgPattern[176] = {
     0x00000000, 0x00000000, 0x00000000, 0x00002000, 0x00001c00, 0x00000001, 0x00000000, 0x00000000,  // 0x00299d20
     0x00002000, 0x00001c00, 0x00000002, 0x00000000, 0x00000000, 0x00002000, 0x00001c00, 0x00000003,  // 0x00299d40
     0x00000000, 0x00000000, 0x00002000, 0x00001c00, 0x00000004, 0x00000000, 0x00000000, 0x00002000,  // 0x00299d60
@@ -137,7 +138,7 @@ static const SprDispDef s2dBgDisp[8] = {
 };
 
 /* S2dMes's pattern table (data 0x29a388..0x29b7f8): EE image, see the file comment. */
-static const u_int s2dMesPattern[1308] = {
+static u_int s2dMesPattern[1308] = {
     0xffffffff, 0x00000000, 0x00000000, 0x00000100, 0x00000100, 0x00000001, 0x00000000, 0x00000000,  // 0x0029a388
     0x00000200, 0x00000200, 0x00000001, 0x00000200, 0x00000000, 0x00000200, 0x00000200, 0x00000001,  // 0x0029a3a8
     0x00000400, 0x00000000, 0x00000200, 0x00000200, 0x00000001, 0x00000600, 0x00000000, 0x00000200,  // 0x0029a3c8
@@ -327,7 +328,7 @@ static const SprDispDef s2dMesDisp[17] = {
 };
 
 /* S2dMovie's pattern table (data 0x29bd28..0x29bf10): EE image, see the file comment. */
-static const u_int s2dMoviePattern[122] = {
+static u_int s2dMoviePattern[122] = {
     0xffffffff, 0x00000000, 0x00000000, 0x00000100, 0x00000100, 0x00000000, 0x00000000, 0x00000000,  // 0x0029bd28
     0x00001000, 0x00000400, 0x00000000, 0x00000000, 0x00000400, 0x00001000, 0x00000400, 0x00000000,  // 0x0029bd48
     0x00000000, 0x00000800, 0x00001000, 0x00000400, 0x00000000, 0x00000000, 0x00000c00, 0x00001000,  // 0x0029bd68
@@ -513,6 +514,7 @@ void S2dCineSco::start()
 {
     m_system = MagSystem::m_current_system;
     m_spr.m_pattern = s2dCineScoPattern;
+    m_spr.m_pattern_ee = S2DCINESCOPATTERN_EE;    // PC
     m_spr.setDispList(s2dCineScoDisp);
     m_spr.m_active = 1;
 }
@@ -781,6 +783,7 @@ int S2dBg::processBg()
     case 4:
         if (m_spr.m_tex.update() != 0) {
             m_spr.m_pattern = s2dBgPattern;
+            m_spr.m_pattern_ee = S2DBGPATTERN_EE;    // PC
             m_spr.setDispList(s2dBgDisp);
             m_spr.m_active = 1;
             m_bg_step = 5;
@@ -1010,6 +1013,7 @@ void S2dMes::start()
 {
     m_system = MagSystem::m_current_system;
     m_spr.m_pattern = s2dMesPattern;
+    m_spr.m_pattern_ee = S2DMESPATTERN_EE;    // PC
     m_spr.setDispList(s2dMesDisp);
     m_spr.m_active = 1;
     m_fade_time = 30;
@@ -1503,6 +1507,7 @@ void S2dMovie::start()
 {
     m_system = MagSystem::m_current_system;
     m_spr.m_pattern = s2dMoviePattern;
+    m_spr.m_pattern_ee = S2DMOVIEPATTERN_EE;    // PC
     m_spr.setDispList(s2dMovieDisp);
     m_spr.m_active = 1;
 }

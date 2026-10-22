@@ -2959,56 +2959,56 @@
 
 /* 0018bb8c 0000008c */ SprMan::SprMan(){}  // ror
 /* 0018bc18 00000090 */ SprMan::~SprMan(){}  // ror
-/* 0018bca8 00000018 */ FUN_0018bca8(){}
+/* 0018bca8 00000018 */ SprMan::initDefault(){}  // ror
 /* 0018bcc0 000000d4 */ SprMan::init(){}  // ror
 /* 0018bd94 00000164 */ SprMan::draw(){}  // ror
-/* 0018bef8 00000170 */ FUN_0018bef8(){}
+/* 0018bef8 00000170 */ SprMan::drawFrameCopy(){}  // ror
 /* 0018c068 000000c8 */ SprMan::update(){}  // ror
 /* 0018c130 00000060 */ SprMan::release(){}  // ror
 /* 0018c190 00000154 */ SprMan::setDispList(){}  // ror
-/* 0018c2e4 00000164 */ FUN_0018c2e4(){}
-/* 0018c448 00000090 */ FUN_0018c448(){}
+/* 0018c2e4 00000164 */ SprMan::setFont(){}  // ror
+/* 0018c448 00000090 */ SprMan::setAnimTable(){}  // ror
 /* 0018c4d8 00000070 */ SprMan::setAnim(){}  // ror
-/* 0018c54c 000000e0 */ FUN_0018c54c(){}
-/* 0018c630 00000094 */ FUN_0018c630(){}
-/* 0018c6c4 00000074 */ FUN_0018c6c4(){}
-/* 0018c738 000000dc */ FUN_0018c738(){}
-/* 0018c814 000000fc */ FUN_0018c814(){}
-/* 0018c910 00000080 */ FUN_0018c910(){}
-/* 0018c990 00000044 */ FUN_0018c990(){}
-/* 0018c9d8 00000080 */ FUN_0018c9d8(){}
-/* 0018ca58 0000003c */ FUN_0018ca58(){}
-/* 0018ca98 0000002c */ FUN_0018ca98(){}
-/* 0018cac8 000002c0 */ FUN_0018cac8(){}
-/* 0018cd88 00000164 */ FUN_0018cd88(){}
-/* 0018ceec 00000104 */ FUN_0018ceec(){}
-/* 0018cff0 0000009c */ FUN_0018cff0(){}
-/* 0018d08c 0000015c */ FUN_0018d08c(){}
-/* 0018d1e8 00000458 */ FUN_0018d1e8(){}
-/* 0018d640 000001ac */ FUN_0018d640(){}
+/* 0018c54c 000000e0 */ SprMan::setSprAnim(){}  // ror
+/* 0018c630 00000094 */ SprMan::setMoveTable(){}  // ror
+/* 0018c6c4 00000074 */ SprMan::setMove(){}  // ror
+/* 0018c738 000000dc */ SprMan::setSprMove(){}  // ror
+/* 0018c814 000000fc */ SprMan::initSprite(){}  // ror
+/* 0018c910 00000080 */ SprMan::countAnims(){}  // ror
+/* 0018c990 00000044 */ SprMan::countFrames(){}  // ror
+/* 0018c9d8 00000080 */ SprMan::countMoves(){}  // ror
+/* 0018ca58 0000003c */ SprMan::countKeys(){}  // ror
+/* 0018ca98 0000002c */ SprMan::calcAccel(){}  // ror
+/* 0018cac8 000002c0 */ SprMan::startEaseMove(){}  // ror
+/* 0018cd88 00000164 */ SprMan::setEaseMove(){}  // ror
+/* 0018ceec 00000104 */ SprMan::setLinearMove(){}  // ror
+/* 0018cff0 0000009c */ SprMan::startSpeedMove(){}  // ror
+/* 0018d08c 0000015c */ SprMan::startMoveKey(){}  // ror
+/* 0018d1e8 00000458 */ SprMan::updateMove(){}  // ror
+/* 0018d640 000001ac */ SprMan::updateAnim(){}  // ror
 /* 0018d7ec 0000030c */ SprMan::setFade(){}  // ror
-/* 0018dafc 00000420 */ FUN_0018dafc(){}
-/* 0018df20 000000bc */ FUN_0018df20(){}
-/* 0018dfdc 0000004c */ FUN_0018dfdc(){}
-/* 0018e028 00000030 */ FUN_0018e028(){}
-/* 0018e05c 00000a40 */ FUN_0018e05c(){}
-/* 0018ea9c 00000108 */ FUN_0018ea9c(){}
-/* 0018eba4 000000b4 */ FUN_0018eba4(){}
-/* 0018ec58 000000ec */ FUN_0018ec58(){}
-/* 0018ed44 000001fc */ FUN_0018ed44(){}
-/* 0018ef40 000000b0 */ FUN_0018ef40(){}
-/* 0018eff0 00000034 */ FUN_0018eff0(){}
-/* 0018f024 0000003c */ FUN_0018f024(){}
-/* 0018f060 0000003c */ FUN_0018f060(){}
-/* 0018f09c 00000018 */ FUN_0018f09c(){}
-/* 0018f0b4 00000038 */ FUN_0018f0b4(){}
-/* 0018f0ec 00000108 */ FUN_0018f0ec(){}
+/* 0018dafc 00000420 */ SprMan::updateFade(){}  // ror
+/* 0018df20 000000bc */ SprMan::updateClut(){}  // ror
+/* 0018dfdc 0000004c */ SprMan::getTexImage(){}  // ror
+/* 0018e028 00000030 */ SprMan::isOnScreen(){}  // ror
+/* 0018e05c 00000a40 */ SprMan::drawSprite(){}  // ror
+/* 0018ea9c 00000108 */ SprMan::clearTextRect(){}  // ror
+/* 0018eba4 000000b4 */ SprMan::getTextLine(){}  // ror
+/* 0018ec58 000000ec */ SprMan::getTextWidth(){}  // ror
+/* 0018ed44 000001fc */ SprMan::drawText(){}  // ror
+/* 0018ef40 000000b0 */ SprMan::beginDraw(){}  // ror
+/* 0018eff0 00000034 */ SprMan::endDraw(){}  // ror
+/* 0018f024 0000003c */ SprMan::volumeOn(){}  // ror
+/* 0018f060 0000003c */ SprMan::volumeOff(){}  // ror
+/* 0018f09c 00000018 */ SprMan::saveVolume(){}  // ror
+/* 0018f0b4 00000038 */ SprMan::restoreVolume(){}  // ror
+/* 0018f0ec 00000108 */ SprMan::showSprite(){}  // ror
 /* 0018f1f4 000000f4 */ SprMan::fadeInSprite(){}  // ror
-/* 0018f2e8 00000050 */ FUN_0018f2e8(){}
+/* 0018f2e8 00000050 */ SprMan::fadeInWait(){}  // ror
 /* 0018f338 000000a8 */ SprMan::fadeIn(){}  // ror
-/* 0018f3e0 0000003c */ FUN_0018f3e0(){}
+/* 0018f3e0 0000003c */ SprMan::hideSprite(){}  // ror
 /* 0018f41c 00000084 */ SprMan::fadeOutDefault(){}  // ror
-/* 0018f4a0 00000080 */ FUN_0018f4a0(){}
+/* 0018f4a0 00000080 */ SprMan::fadeOutColor(){}  // ror
 /* 0018f520 00000090 */ SprMan::fadeOut(){}  // ror
 
 // *****************************************************************************
@@ -3583,25 +3583,25 @@
 /* 001be8a8 00000014 */ FUN_001be8a8(){}
 /* 001be8bc 00000158 */ FUN_001be8bc(){}
 /* 001bea18 00000158 */ FUN_001bea18(){}
-/* 001beb70 00000054 */ FUN_001beb70(){}
-/* 001bebc4 00000028 */ FUN_001bebc4(){}
-/* 001bebec 000001d4 */ FUN_001bebec(){}
-/* 001bedc0 000000cc */ FUN_001bedc0(){}
+/* 001beb70 00000054 */ GamFont::GamFont(){}  // ror
+/* 001bebc4 00000028 */ GamFont::~GamFont(){}  // ror
+/* 001bebec 000001d4 */ GamFont::setFont(){}  // ror
+/* 001bedc0 000000cc */ GamFont::setTarget(){}  // ror
 /* 001bee8c 00000024 */ FUN_001bee8c(){}
 /* 001beeb4 00000038 */ FUN_001beeb4(){}
 /* 001beeec 00000038 */ FUN_001beeec(){}
-/* 001bef24 000000fc */ FUN_001bef24(){}
-/* 001bf024 000008a0 */ FUN_001bf024(){}
+/* 001bef24 000000fc */ GamFont::fillRect(){}  // ror
+/* 001bf024 000008a0 */ GamFont::drawChar(){}  // ror
 /* 001bf8c4 0000056c */ FUN_001bf8c4(){}
 /* 001bfe30 000000f8 */ FUN_001bfe30(){}
 /* 001bff28 00000030 */ FUN_001bff28(){}
 /* 001bff5c 00000008 */ FUN_001bff5c(){}
-/* 001bff64 00000068 */ FUN_001bff64(){}
-/* 001bffcc 000000ac */ FUN_001bffcc(){}
+/* 001bff64 00000068 */ GamFont::setColor(){}  // ror
+/* 001bffcc 000000ac */ GamFont::getGlyph(){}  // ror
 /* 001c0078 000000d0 */ FUN_001c0078(){}
 /* 001c0148 000000c4 */ FUN_001c0148(){}
-/* 001c020c 00000044 */ FUN_001c020c(){}
-/* 001c0254 00000044 */ FUN_001c0254(){}
+/* 001c020c 00000044 */ GamFont::getGlyphLeft(){}  // ror
+/* 001c0254 00000044 */ GamFont::getGlyphWidth(){}  // ror
 /* 001c0298 0000001c */ FUN_001c0298(){}
 /* 001c02b8 00000028 */ FUN_001c02b8(){}
 /* 001c02e4 00000014 */ FUN_001c02e4(){}
@@ -3721,11 +3721,6 @@
 /* 001c9e20 000002b0 */ FUN_001c9e20(){}
 /* 001ca0d4 00000004 */ FUN_001ca0d4(){}
 /* 001ca0dc 000002b0 */ FUN_001ca0dc(){}
-
-// *****************************************************************************
-// FILE -- (unassigned)
-// *****************************************************************************
-
 /* 001ca38c 0000020c */ FUN_001ca38c(){}
 /* 001ca598 0000006c */ FUN_001ca598(){}
 /* 001ca604 00000128 */ FUN_001ca604(){}
@@ -3845,8 +3840,13 @@
 /* 001d3588 00000024 */ FUN_001d3588(){}
 /* 001d35ac 00000468 */ FUN_001d35ac(){}
 /* 001d3a14 00000024 */ FUN_001d3a14(){}
-/* 001d3a38 00000090 */ FUN_001d3a38(){}
-/* 001d3ac8 0000007c */ FUN_001d3ac8(){}
+/* 001d3a38 00000090 */ GamMan::setVolume(){}  // ror
+/* 001d3ac8 0000007c */ GamMan::switchVolume(){}  // ror
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 001d3b44 0000082c */ FUN_001d3b44(){}
 /* 001d4370 00000174 */ FUN_001d4370(){}
 /* 001d44e4 0000005c */ FUN_001d44e4(){}

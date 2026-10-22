@@ -1643,6 +1643,12 @@
   "was": "FUN_0018bc18",
   "why": "deleting-destructor shape (flags & 1 -> operator delete) undoing SprMan::SprMan: 0x1bebc4 on +0x440, 0x18f5e4 on the SprTexture at +8"
  },
+ "0018bca8": {
+  "name": "SprMan::initDefault",
+  "tag": "ror-inferred",
+  "was": "FUN_0018bca8",
+  "why": "tail call init(this, 0x100): init with 256 sprites; no callers found"
+ },
  "0018bcc0": {
   "name": "SprMan::init",
   "tag": "ror-inferred",
@@ -1654,6 +1660,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0018bd94",
   "why": "the S2d layers' render slot stores the i3d layer at +0x4d0 and calls it; the movie layer sets +0x4d0 / +0x4d4 then calls it"
+ },
+ "0018bef8": {
+  "name": "SprMan::drawFrameCopy",
+  "tag": "ror-inferred",
+  "was": "FUN_0018bef8",
+  "why": "on layer 1: TEX0 TBP 0 / 0xe00 by MagSystem frame parity (the frame buffers), a 512x448 textured sprite in m_back_color grey"
  },
  "0018c068": {
   "name": "SprMan::update",
@@ -1673,11 +1685,125 @@
   "was": "FUN_0018c190",
   "why": "walks 0x34-byte records until no == -1 and copies their words into sprite no (+0xc, +0x10, +0xd8, +0x0, +0x64..+0x6c), sets its anim list (0x18c448) and anim (0x18c4d8); the S2d layers pass their .data tables"
  },
+ "0018c2e4": {
+  "name": "SprMan::setFont",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c2e4",
+  "why": "font data from the texture pack (BedPfh::getFile of getPackIndex(name)) or the last one, given to the font object at +0x440"
+ },
+ "0018c448": {
+  "name": "SprMan::setAnimTable",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c448",
+  "why": "stores the anim table at sprite +0x138, anim 0 frame 0, timer from the first frame, count via countAnims; setDispList passes def+0x30"
+ },
  "0018c4d8": {
   "name": "SprMan::setAnim",
   "tag": "ror-inferred",
   "was": "FUN_0018c4d8",
   "why": "(no, anim): when anim < the sprite's anim count (+0x134) stores it at +0x110 and restarts the frame (+0x114, +0xf4, +0x118 from the anim table +0x138); returns anim >= count"
+ },
+ "0018c54c": {
+  "name": "SprMan::setSprAnim",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c54c",
+  "why": "setAnim on a sprite pointer (same body); updateAnim's jump code"
+ },
+ "0018c630": {
+  "name": "SprMan::setMoveTable",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c630",
+  "why": "stores the move table at sprite +0x140, move 0 key 0, count via countMoves, startMoveKey"
+ },
+ "0018c6c4": {
+  "name": "SprMan::setMove",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c6c4",
+  "why": "picks move n of the sprite's move table (bounded by +0x13c), key 0, startMoveKey"
+ },
+ "0018c738": {
+  "name": "SprMan::setSprMove",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c738",
+  "why": "setMove on a sprite pointer; updateMove's -2 jump key"
+ },
+ "0018c814": {
+  "name": "SprMan::initSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c814",
+  "why": "clears one 0x154 sprite record: parent -1, flags 1, colour 0x80, size 16, ids -1; init calls it per record"
+ },
+ "0018c910": {
+  "name": "SprMan::countAnims",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c910",
+  "why": "counts 12-byte anim entries to id -1, filling each count < 0 with countFrames"
+ },
+ "0018c990": {
+  "name": "SprMan::countFrames",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c990",
+  "why": "counts 0x1c-byte frames until a word with an end code in the top byte"
+ },
+ "0018c9d8": {
+  "name": "SprMan::countMoves",
+  "tag": "ror-inferred",
+  "was": "FUN_0018c9d8",
+  "why": "counts 12-byte move entries to id -1, filling each count < 0 with countKeys"
+ },
+ "0018ca58": {
+  "name": "SprMan::countKeys",
+  "tag": "ror-inferred",
+  "was": "FUN_0018ca58",
+  "why": "counts 0x20-byte move keys while the type is >= 0"
+ },
+ "0018ca98": {
+  "name": "SprMan::calcAccel",
+  "tag": "ror-inferred",
+  "was": "FUN_0018ca98",
+  "why": "dist / ((n*n + n) / 2): the step that sums to dist over n accelerating frames"
+ },
+ "0018cac8": {
+  "name": "SprMan::startEaseMove",
+  "tag": "ror-inferred",
+  "was": "FUN_0018cac8",
+  "why": "mode 1 on sprite n: ease from / to (ints with 4 fraction bits) over time frames; no callers found"
+ },
+ "0018cd88": {
+  "name": "SprMan::setEaseMove",
+  "tag": "ror-inferred",
+  "was": "FUN_0018cd88",
+  "why": "ease from / to (floats) over time: accel from calcAccel over half the time, speed 0"
+ },
+ "0018ceec": {
+  "name": "SprMan::setLinearMove",
+  "tag": "ror-inferred",
+  "was": "FUN_0018ceec",
+  "why": "linear from / to (floats) over time: speed (to - from) / time, accel 0"
+ },
+ "0018cff0": {
+  "name": "SprMan::startSpeedMove",
+  "tag": "ror-inferred",
+  "was": "FUN_0018cff0",
+  "why": "mode 2 on sprite n: from the current offset with a speed and an accel vector for time frames"
+ },
+ "0018d08c": {
+  "name": "SprMan::startMoveKey",
+  "tag": "ror-inferred",
+  "was": "FUN_0018d08c",
+  "why": "starts the current move key by type: 0 ease, 1 ease from here, 2 linear, 3 linear from here"
+ },
+ "0018d1e8": {
+  "name": "SprMan::updateMove",
+  "tag": "ror-inferred",
+  "was": "FUN_0018d1e8",
+  "why": "steps sprite +8 move modes 1 ease, 2 speed (clamped 8), 3 stop, 5 key table; writes the offset +0x64"
+ },
+ "0018d640": {
+  "name": "SprMan::updateAnim",
+  "tag": "ror-inferred",
+  "was": "FUN_0018d640",
+  "why": "counts down the frame timer and steps frames; end codes 1 stop, 2 hold, 3 loop, 4 jump to anim"
  },
  "0018d7ec": {
   "name": "SprMan::setFade",
@@ -1685,11 +1811,113 @@
   "was": "FUN_0018d7ec",
   "why": "(no, mode, time, from, to): stores the mode at +0x14, the time at +0xec / +0xf0, the two RGBA colours at +0x28 / +0x38 and the per-frame steps at +0xdc..+0xe8 for modes 1..5"
  },
+ "0018dafc": {
+  "name": "SprMan::updateFade",
+  "tag": "ror-inferred",
+  "was": "FUN_0018dafc",
+  "why": "steps setFade's colour fade on +0x18 (modes 1..5, ping-pong 0x101 / 0x102), clamps to 0..255"
+ },
+ "0018df20": {
+  "name": "SprMan::updateClut",
+  "tag": "ror-inferred",
+  "was": "FUN_0018df20",
+  "why": "every +0x130 frames adds +0x124 to the CLUT index +0x11c up to +0x12c; drawSprite stores it in the texture record +0xc"
+ },
+ "0018dfdc": {
+  "name": "SprMan::getTexImage",
+  "tag": "ror-inferred",
+  "was": "FUN_0018dfdc",
+  "why": "the pixels (+0x50, level 0 data) of sprite n's texture; no callers found"
+ },
+ "0018e028": {
+  "name": "SprMan::isOnScreen",
+  "tag": "ror-inferred",
+  "was": "FUN_0018e028",
+  "why": "0 when the rect ends left / above 0 or starts past 0x2800 / 0x1e00 (640 / 480 with 4 fraction bits)"
+ },
+ "0018e05c": {
+  "name": "SprMan::drawSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_0018e05c",
+  "why": "per sprite: state waits, parent + std + off + frame position, pattern uv / size, then i3dPktSprite (tex -98), frame-buffer (-99) or texture (i3dPktTexSpriteUV); text into the texture"
+ },
+ "0018ea9c": {
+  "name": "SprMan::clearTextRect",
+  "tag": "ror-inferred",
+  "was": "FUN_0018ea9c",
+  "why": "font setTarget on the texture, fillRect at the sprite uv + the rect at +0x150"
+ },
+ "0018eba4": {
+  "name": "SprMan::getTextLine",
+  "tag": "ror-inferred",
+  "was": "FUN_0018eba4",
+  "why": "copies line n of a #0-separated Shift-JIS text, at most 0x3f bytes"
+ },
+ "0018ec58": {
+  "name": "SprMan::getTextWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_0018ec58",
+  "why": "sums the font's glyph widths over a Shift-JIS text (proportional: + 2 each), skipping #0 and newlines"
+ },
+ "0018ed44": {
+  "name": "SprMan::drawText",
+  "tag": "ror-inferred",
+  "was": "FUN_0018ed44",
+  "why": "renders the sprite's text +0x14c into its texture through the font at +0x440 (#0 / newline, half / full spaces)"
+ },
+ "0018ef40": {
+  "name": "SprMan::beginDraw",
+  "tag": "ror-inferred",
+  "was": "FUN_0018ef40",
+  "why": "i3dLayerFindDrawSet with the loaded textures, SetDrawSet, BeginSet on layer n; 0 when the packet is open"
+ },
+ "0018eff0": {
+  "name": "SprMan::endDraw",
+  "tag": "ror-inferred",
+  "was": "FUN_0018eff0",
+  "why": "i3dLayerEndSet on layer n with the packet position"
+ },
+ "0018f024": {
+  "name": "SprMan::volumeOn",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f024",
+  "why": "GamMan::switchVolume(1) when a volume is saved (g_gamMan +0x22214 != -1)"
+ },
+ "0018f060": {
+  "name": "SprMan::volumeOff",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f060",
+  "why": "GamMan::switchVolume(0) when no volume is saved"
+ },
+ "0018f09c": {
+  "name": "SprMan::saveVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f09c",
+  "why": "+0x4c8 = 1 when the volume is on (none saved)"
+ },
+ "0018f0b4": {
+  "name": "SprMan::restoreVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f0b4",
+  "why": "volumeOff / volumeOn by +0x4c8"
+ },
+ "0018f0ec": {
+  "name": "SprMan::showSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f0ec",
+  "why": "setAnim (anim on, colour 0x80) and / or setMove (mode 5) unless -1, state 1"
+ },
  "0018f1f4": {
   "name": "SprMan::fadeInSprite",
   "tag": "ror-inferred",
   "was": "FUN_0018f1f4",
   "why": "(no, a, time, b, c, from, to): 0x18f0ec(no, b, c), colour = from, state +0x10 = 2, +0x100 = a, then setFade(no, 4, time, from, to); S2dBg passes the clear -> opaque colours"
+ },
+ "0018f2e8": {
+  "name": "SprMan::fadeInWait",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f2e8",
+  "why": "state 3 with a wait, setFade mode 4 (from the colour to to)"
  },
  "0018f338": {
   "name": "SprMan::fadeIn",
@@ -1697,11 +1925,23 @@
   "was": "FUN_0018f338",
   "why": "(no, time, from, to): when the sprite is off (+0x10 == 0) turns it on (+0x10, +0xc = 1), colour 0x80,0x80,0x80,0 and setFade(no, 4, time, from, to)"
  },
+ "0018f3e0": {
+  "name": "SprMan::hideSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f3e0",
+  "why": "anim, move and state off"
+ },
  "0018f41c": {
   "name": "SprMan::fadeOutDefault",
   "tag": "ror-inferred",
   "was": "FUN_0018f41c",
   "why": "(no, time): setFade(no, 3, time, 0x2999b0, 0x299990), state +0x10 = 4, +0x100 = time, without fadeOut's on test"
+ },
+ "0018f4a0": {
+  "name": "SprMan::fadeOutColor",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f4a0",
+  "why": "setFade mode 3, state 4, wait = time, colours from the caller (fadeOut without the state test)"
  },
  "0018f520": {
   "name": "SprMan::fadeOut",
@@ -2423,6 +2663,66 @@
   "was": "FUN_001be84c",
   "why": "rxSysStreamOpen then rxFileClose; true when the open succeeded"
  },
+ "001beb70": {
+  "name": "GamFont::GamFont",
+  "tag": "ror-inferred",
+  "was": "FUN_001beb70",
+  "why": "0x6c-byte font rasterizer object (SprMan +0x440, MagScene windows +0x2744); class named here, game/ by link order (before GamMan::init)"
+ },
+ "001bebc4": {
+  "name": "GamFont::~GamFont",
+  "tag": "ror-inferred",
+  "was": "FUN_001bebc4",
+  "why": "GCC 2 destructor: only the deleting variant (flags & 1)"
+ },
+ "001bebec": {
+  "name": "GamFont::setFont",
+  "tag": "ror-inferred",
+  "was": "FUN_001bebec",
+  "why": "reads a font file header: glyph size bytes +0xe..0x10, first code +0xc, width / code tables"
+ },
+ "001bedc0": {
+  "name": "GamFont::setTarget",
+  "tag": "ror-inferred",
+  "was": "FUN_001bedc0",
+  "why": "the pixel buffer, width (& 0xff80), height, bits 4 or 8 the glyphs are drawn into"
+ },
+ "001bef24": {
+  "name": "GamFont::fillRect",
+  "tag": "ror-inferred",
+  "was": "FUN_001bef24",
+  "why": "fills a rect of the target with the fill colour +0x64 (4 / 8 bit)"
+ },
+ "001bf024": {
+  "name": "GamFont::drawChar",
+  "tag": "ror-inferred",
+  "was": "FUN_001bf024",
+  "why": "rasterizes the glyph of a code at x, y into the target in colour +0x2c (1 / 2 bit glyphs)"
+ },
+ "001bff64": {
+  "name": "GamFont::setColor",
+  "tag": "ror-inferred",
+  "was": "FUN_001bff64",
+  "why": "the glyph colour +0x2c, masked to the target's bits"
+ },
+ "001bffcc": {
+  "name": "GamFont::getGlyph",
+  "tag": "ror-inferred",
+  "was": "FUN_001bffcc",
+  "why": "the glyph index of a code: bsearch in the code table, or a Shift-JIS table walk; -1 when none"
+ },
+ "001c020c": {
+  "name": "GamFont::getGlyphLeft",
+  "tag": "ror-inferred",
+  "was": "FUN_001c020c",
+  "why": "proportional fonts: the glyph's left bearing byte (width table +0x5c)"
+ },
+ "001c0254": {
+  "name": "GamFont::getGlyphWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_001c0254",
+  "why": "the glyph's width byte in proportional fonts, else the cell width +0x38"
+ },
  "001c0d70": {
   "name": "GamMan::init",
   "tag": "ror-inferred",
@@ -2452,6 +2752,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001c53d8",
   "why": "empty; mainLoop calls it last each frame"
+ },
+ "001d3a38": {
+  "name": "GamMan::setVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_001d3a38",
+  "why": "stores +0x22218, scales by the option volume +0x21fa0 / 255 and passes it to 0x130de0(0x73d670)"
+ },
+ "001d3ac8": {
+  "name": "GamMan::switchVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_001d3ac8",
+  "why": "0: saves the volume at +0x22214 and sets 0; 1: restores the saved one and marks -1"
  },
  "001e71fc": {
   "name": "CmnTaskMan::addTask",

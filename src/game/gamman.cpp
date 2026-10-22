@@ -29,3 +29,9 @@ void GamMan::update()
 {
     ROSEPAN_STUB("GamMan::update", 0x001c526c);
 }
+
+// stub of ROR 0x001d3ac8
+void GamMan::switchVolume(int on)
+{
+    ROSEPAN_STUB("GamMan::switchVolume", 0x001d3ac8);
+}

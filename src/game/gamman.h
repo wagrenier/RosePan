@@ -9,7 +9,8 @@
 #ifndef _GAME_GAMMAN_H
 #define _GAME_GAMMAN_H
 
-/* EE size at least 0x22098. layout: host -- no members reconstructed. */
+/* EE size at least 0x2221c. layout: host -- only the members other TUs
+ * read are declared. */
 struct GamMan
 {
     void init();                                                         // ROR 0x001c0d70
@@ -17,6 +18,12 @@ struct GamMan
     void loadStage(int stage);                                           // ROR 0x001c204c
     void update();                                                       // ROR 0x001c526c
     void postUpdate();                                                   // ROR 0x001c53d8
+    /* 0: saves the volume in m_saved_volume and silences; 1: restores
+     * the saved volume (when one is saved) and marks none saved. */
+    void switchVolume(int on);                                           // ROR 0x001d3ac8
+    void setVolume(int volume);                                          // ROR 0x001d3a38
+
+    int m_saved_volume;         // ROR 0x22214: -1 = none saved (SprMan::volumeOn / Off read it)
 };
 
 extern GamMan g_gamMan;         /* bss 0x7812c0 */

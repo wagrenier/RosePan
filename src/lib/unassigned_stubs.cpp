@@ -827,3 +827,56 @@ const char * i3rGetTexName(const I3rRoot *root, int n)
     ROSEPAN_STUB("i3rGetTexName", 0x0022b438);
     return {};
 }
+
+// stub of ROR 0x001bf024
+void GamFont::drawChar(int x, int y, int code)
+{
+    ROSEPAN_STUB("GamFont::drawChar", 0x001bf024);
+}
+
+// stub of ROR 0x001bef24
+int GamFont::fillRect(int x, int y, int w, int h)
+{
+    ROSEPAN_STUB("GamFont::fillRect", 0x001bef24);
+    return {};
+}
+
+// stub of ROR 0x001bffcc
+int GamFont::getGlyph(int code)
+{
+    ROSEPAN_STUB("GamFont::getGlyph", 0x001bffcc);
+    return {};
+}
+
+// stub of ROR 0x001c020c
+int GamFont::getGlyphLeft(int glyph)
+{
+    ROSEPAN_STUB("GamFont::getGlyphLeft", 0x001c020c);
+    return {};
+}
+
+// stub of ROR 0x001c0254
+int GamFont::getGlyphWidth(int glyph)
+{
+    ROSEPAN_STUB("GamFont::getGlyphWidth", 0x001c0254);
+    return {};
+}
+
+// stub of ROR 0x001bff64
+void GamFont::setColor(u_int color)
+{
+    ROSEPAN_STUB("GamFont::setColor", 0x001bff64);
+}
+
+// stub of ROR 0x001bebec
+void GamFont::setFont(const void *font)
+{
+    ROSEPAN_STUB("GamFont::setFont", 0x001bebec);
+}
+
+// stub of ROR 0x001bedc0
+int GamFont::setTarget(void *buf, u_int w, u_int h, int bits)
+{
+    ROSEPAN_STUB("GamFont::setTarget", 0x001bedc0);
+    return {};
+}
