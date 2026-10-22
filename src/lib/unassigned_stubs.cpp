@@ -86,21 +86,6 @@ void sysInitManagers(void)
 
 // ---- bridges (hand-written) ----
 
-// The i3d library's own struct sizes (data 0x302ba0); MagSystem::initGraph
-// compares them with the game's copy and hangs on a mismatch, so a {}
-// stub would stop the boot. Delete with the i3d library TU.
-int i3dGetStructSize(unsigned int i)
-{
-    static const int s_size[0x24] = {
-        0x20,  0x130, 0x130, 0x1e,  0x38,    0x38,    0x6,  0x18, 0x8,
-        0x20,  0x20,  0x20,  0x20,  0x40,    0x40,    0x40, 0x40, 0x20,
-        0x4d0, 0x3b0, 0x80,  0xa0,  0x8,     0x44,    0x18, 0x20, 0x12168,
-        0x12168, 0x10, 0x18, 0x60,  0x400,   0x400,   0x18, 0x20, 0x38,
-    };
-    ROSEPAN_BRIDGE("i3dGetStructSize", 0x0021f1a8);
-    return i < 0x24 ? s_size[i] : -1;
-}
-
 // stub of ROR 0x00181204
 void RxMpeg::setFrameParity(int parity)
 {
@@ -113,62 +98,6 @@ void SndMan::update()
     ROSEPAN_STUB("SndMan::update", 0x0017f200);
 }
 
-// stub of ROR 0x0021f6a0
-int i3dCtxBeginFrame(i3dContext *ctx)
-{
-    ROSEPAN_STUB("i3dCtxBeginFrame", 0x0021f6a0);
-    return {};
-}
-
-// stub of ROR 0x0021f760
-int i3dCtxEndFrame(i3dContext *ctx)
-{
-    ROSEPAN_STUB("i3dCtxEndFrame", 0x0021f760);
-    return {};
-}
-
-// stub of ROR 0x0021f250
-int i3dCtxGetOverrun(i3dContext *ctx)
-{
-    ROSEPAN_STUB("i3dCtxGetOverrun", 0x0021f250);
-    return {};
-}
-
-// stub of ROR 0x0021f1f8
-void * i3dCtxGetPacket(i3dContext *ctx)
-{
-    ROSEPAN_STUB("i3dCtxGetPacket", 0x0021f1f8);
-    return {};
-}
-
-
-// stub of ROR 0x0021f900
-int i3dCtxInit(i3dContext *ctx, void *buf, int size, int count)
-{
-    ROSEPAN_STUB("i3dCtxInit", 0x0021f900);
-    return {};
-}
-
-// stub of ROR 0x0021ed10
-int i3dCtxSetup(i3dContext *ctx, int a, int b)
-{
-    ROSEPAN_STUB("i3dCtxSetup", 0x0021ed10);
-    return {};
-}
-
-// stub of ROR 0x0021f8c8
-int i3dCtxTerm(i3dContext *ctx)
-{
-    ROSEPAN_STUB("i3dCtxTerm", 0x0021f8c8);
-    return {};
-}
-
-// stub of ROR 0x0021eb28
-int i3dInitHardware(void)
-{
-    ROSEPAN_STUB("i3dInitHardware", 0x0021eb28);
-    return {};
-}
 
 // stub of ROR 0x00237c68
 int i3dPrintf(const char *fmt)
@@ -181,16 +110,6 @@ int i3dPrintf(const char *fmt)
 void utlRandReset(void)
 {
     ROSEPAN_STUB("utlRandReset", 0x0010421c);
-}
-
-// A frame with nothing drawn leaves its whole share of the packet buffer
-// (0x1ae000); MagSystem::update asserts the rest is not 0 every frame, so a
-// {} stub would flood the log. Delete with the i3d library TU.
-int i3dCtxGetRest(i3dContext *ctx)
-{
-    (void)ctx;
-    ROSEPAN_BRIDGE("i3dCtxGetRest", 0x0021f200);
-    return 0x1ae000;
 }
 
 // stub of ROR 0x0010ff74
@@ -216,4 +135,114 @@ int i3rGetNodeIndexByName(I3rRoot *root, const char *name)
 {
     ROSEPAN_STUB("i3rGetNodeIndexByName", 0x0022b3d8);
     return {};
+}
+
+// stub of ROR 0x00223d48
+int i3dBatchAppend(I3dGroup *dst, I3dGroup *src)
+{
+    ROSEPAN_STUB("i3dBatchAppend", 0x00223d48);
+    return {};
+}
+
+// stub of ROR 0x0021b288
+int i3dBatchClearTextures(I3dDrawSet *set)
+{
+    ROSEPAN_STUB("i3dBatchClearTextures", 0x0021b288);
+    return {};
+}
+
+// stub of ROR 0x00219d68
+u_long * i3dClutMakeMove(void *clut, u_long *pkt, u_int src, u_int dst)
+{
+    ROSEPAN_STUB("i3dClutMakeMove", 0x00219d68);
+    return {};
+}
+
+// stub of ROR 0x00219d10
+u_long * i3dClutMakeUpload(void *clut, u_long *pkt, u_int dst)
+{
+    ROSEPAN_STUB("i3dClutMakeUpload", 0x00219d10);
+    return {};
+}
+
+// stub of ROR 0x00224798
+int i3dCtxCloseFrame(i3dContext *ctx)
+{
+    ROSEPAN_STUB("i3dCtxCloseFrame", 0x00224798);
+    return {};
+}
+
+// stub of ROR 0x002246c8
+int i3dCtxRunGroup(i3dContext *ctx, I3dGroup *group)
+{
+    ROSEPAN_STUB("i3dCtxRunGroup", 0x002246c8);
+    return {};
+}
+
+// stub of ROR 0x00237cc8
+int i3dFlushCache(void)
+{
+    ROSEPAN_STUB("i3dFlushCache", 0x00237cc8);
+    return {};
+}
+
+// stub of ROR 0x00224878
+void i3dGroupAddLayer(I3dGroup *group, u_int key, I3dGroup *layer)
+{
+    ROSEPAN_STUB("i3dGroupAddLayer", 0x00224878);
+}
+
+// stub of ROR 0x002243a0
+int i3dGroupInit(I3dGroup *group, i3dContext *ctx, int a, int b, int c)
+{
+    ROSEPAN_STUB("i3dGroupInit", 0x002243a0);
+    return {};
+}
+
+// stub of ROR 0x00223878
+int i3dLayerInit(I3dLayer *layer, i3dContext *ctx)
+{
+    ROSEPAN_STUB("i3dLayerInit", 0x00223878);
+    return {};
+}
+
+// stub of ROR 0x00224368
+I3dNode * i3dSortList(I3dNode *first, int order, int b, u_int count)
+{
+    ROSEPAN_STUB("i3dSortList", 0x00224368);
+    return {};
+}
+
+// stub of ROR 0x00237178
+void i3dSysInit(void)
+{
+    ROSEPAN_STUB("i3dSysInit", 0x00237178);
+}
+
+// stub of ROR 0x00219d40
+u_long * i3dTexMakeMove(void *tex, u_long *pkt, u_int src, u_int dst)
+{
+    ROSEPAN_STUB("i3dTexMakeMove", 0x00219d40);
+    return {};
+}
+
+// stub of ROR 0x00219c88
+u_long * i3dTexMakeUpload(void *tex, u_long *pkt, u_int dst)
+{
+    ROSEPAN_STUB("i3dTexMakeUpload", 0x00219c88);
+    return {};
+}
+
+// stub of ROR 0x00224b28
+int i3dTexRegsSet(u_long *regs, I3dVramHandle *tex, I3dVramHandle *clut,
+                    u_int arg)
+{
+    ROSEPAN_STUB("i3dTexRegsSet", 0x00224b28);
+    return {};
+}
+
+// stub of ROR 0x00224d88
+void i3dTexRegsSetNone(u_long *regs)
+{
+    ROSEPAN_STUB("i3dTexRegsSetNone", 0x00224d88);
 }

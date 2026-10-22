@@ -78,26 +78,36 @@ void utlRandReset(void);                                                 // ROR 
 /* ---- the i3d library (unassigned@00216ad0 .. 0x237d80; its version string
  * "i3d_package_version 050121-stable-050826") ---- */
 
-/* An i3d draw context: two packet lists over a caller's buffer (EE 0x12168,
- * entries 26 / 27 of the library's size table). Opaque until the library
- * is reconstructed. */
-struct i3dContext
-{
-    unsigned int m_data[0x12168 / 4];
-};
-static_assert(sizeof(i3dContext) == 0x12168, "i3dContext is 0x12168 bytes on the EE");
+/* The context and the VRAM cache have their own files (i3d/i3dctx.h,
+ * i3d/i3dvram.h); what they call in the rest of the library is below. */
+#include "i3d/i3dctx.h"
 
-int   i3dInitHardware(void);                                             // ROR 0x0021eb28
-int   i3dCtxSetup(i3dContext *ctx, int a, int b);                        // ROR 0x0021ed10
-int   i3dGetStructSize(unsigned int i);                                  // ROR 0x0021f1a8
-void *i3dCtxGetPacket(i3dContext *ctx);                                  // ROR 0x0021f1f8
-int   i3dCtxGetRest(i3dContext *ctx);                                    // ROR 0x0021f200
-int   i3dCtxGetOverrun(i3dContext *ctx);                                 // ROR 0x0021f250
-int   i3dCtxBeginFrame(i3dContext *ctx);                                 // ROR 0x0021f6a0
-int   i3dCtxEndFrame(i3dContext *ctx);                                   // ROR 0x0021f760
-int   i3dCtxTerm(i3dContext *ctx);                                       // ROR 0x0021f8c8
-int   i3dCtxInit(i3dContext *ctx, void *buf, int size, int count);       // ROR 0x0021f900
 int   i3dPrintf(const char *fmt);  /* printf-like in the ROM */          // ROR 0x00237c68
+void  i3dSysInit(void);            /* empty in the ROM */                // ROR 0x00237178
+int   i3dFlushCache(void);         /* FlushCache(0) */                   // ROR 0x00237cc8
+
+/* GS transfer packets for the VRAM cache (block addresses: 64-word units). */
+u_long *i3dTexMakeUpload(void *tex, u_long *pkt, u_int dst);             // ROR 0x00219c88
+u_long *i3dClutMakeUpload(void *clut, u_long *pkt, u_int dst);           // ROR 0x00219d10
+u_long *i3dTexMakeMove(void *tex, u_long *pkt, u_int src, u_int dst);    // ROR 0x00219d40
+u_long *i3dClutMakeMove(void *clut, u_long *pkt, u_int src, u_int dst);  // ROR 0x00219d68
+
+/* The packet's first tags (0x21b600 / 0x21b550); returns the chain cursor. */
+u_long *i3dPktOpenChain(u_char *pkt);                                    // ROR 0x0021b698
+/* Writes the no-texture registers into each used slot of a draw set. */
+int   i3dBatchClearTextures(I3dDrawSet *set);                            // ROR 0x0021b288
+
+/* The draw groups and layers (0x2239b8..0x224d88). */
+int   i3dLayerInit(I3dLayer *layer, i3dContext *ctx);                    // ROR 0x00223878
+int   i3dBatchAppend(I3dGroup *dst, I3dGroup *src);                      // ROR 0x00223d48
+I3dNode *i3dSortList(I3dNode *first, int order, int b, u_int count);     // ROR 0x00224368
+int   i3dGroupInit(I3dGroup *group, i3dContext *ctx, int a, int b, int c); // ROR 0x002243a0
+int   i3dCtxRunGroup(i3dContext *ctx, I3dGroup *group);                  // ROR 0x002246c8
+int   i3dCtxCloseFrame(i3dContext *ctx);                                 // ROR 0x00224798
+void  i3dGroupAddLayer(I3dGroup *group, u_int key, I3dGroup *layer);     // ROR 0x00224878
+int   i3dTexRegsSet(u_long *regs, I3dVramHandle *tex, I3dVramHandle *clut,
+                    u_int arg);                                          // ROR 0x00224b28
+void  i3dTexRegsSetNone(u_long *regs);                                   // ROR 0x00224d88
 
 /* An i3d model root (tag_I3rRoot_s in DogModel's symbols). Opaque. */
 struct I3rRoot;

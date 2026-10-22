@@ -1043,11 +1043,53 @@
   "was": "FUN_00215b5c",
   "why": "formats f12, f13, f14 with 0x215e1c (3 digits) into three stack buffers and returns: a trace print compiled out; next to the assert handler 0x215a30"
  },
+ "00219c88": {
+  "name": "i3dTexMakeUpload",
+  "tag": "ror-inferred",
+  "was": "FUN_00219c88",
+  "why": "for each of a texture images builds an upload to VRAM at the given address (0x218fa8)"
+ },
+ "00219d10": {
+  "name": "i3dClutMakeUpload",
+  "tag": "ror-inferred",
+  "was": "FUN_00219d10",
+  "why": "builds a CLUT upload to VRAM at the given address (0x2190c8)"
+ },
+ "00219d40": {
+  "name": "i3dTexMakeMove",
+  "tag": "ror-inferred",
+  "was": "FUN_00219d40",
+  "why": "builds a GS local copy of a texture from its old to its new VRAM address (0x2192c8)"
+ },
+ "00219d68": {
+  "name": "i3dClutMakeMove",
+  "tag": "ror-inferred",
+  "was": "FUN_00219d68",
+  "why": "a CLUT move re-uploads it at the new address (calls i3dClutMakeUpload)"
+ },
+ "0021b288": {
+  "name": "i3dBatchClearTextures",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b288",
+  "why": "writes the no-texture register packet (0x224d88) into each enabled texture slot of a batch"
+ },
+ "0021b698": {
+  "name": "i3dPktOpenChain",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b698",
+  "why": "writes the packet first tags (0x21b600 then 0x21b550 with 0x47 / 0x5000d) and returns the chain cursor"
+ },
  "0021eb28": {
   "name": "i3dInitHardware",
   "tag": "lib-context",
   "was": "FUN_0021eb28",
   "why": "i3d library (i3d_package_version 050121-stable-050826): DMAC CTRL, VIF1 / VIF0 setup packets, scratchpad DMA; returns 0"
+ },
+ "0021ecf8": {
+  "name": "i3dCtxDefaultEndFunc",
+  "tag": "ror-inferred",
+  "was": "FUN_0021ecf8",
+  "why": "i3dCtxInit installs it at ctx+0x12120: writes a DMA end tag (0x70000000) and returns the next qword"
  },
  "0021ed10": {
   "name": "i3dCtxSetup",
@@ -1055,11 +1097,47 @@
   "was": "FUN_0021ed10",
   "why": "(ctx, a, b): splits b into two list sizes and sets both lists"
  },
+ "0021ed90": {
+  "name": "i3dCtxMakeVramTransfer",
+  "tag": "ror-inferred",
+  "was": "FUN_0021ed90",
+  "why": "walks both VRAM heaps moved (list 5) and new (list 4) blocks into GS transfer packets (0x219d40/0x219c88 at page<<5, 0x219d68/0x219d10 at <<2), then a TEXFLUSH A+D"
+ },
+ "0021f028": {
+  "name": "i3dCtxKickPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f028",
+  "why": "unreferenced: sceDmaSend(VIF1) of i3dCtxGetPacket when non-zero"
+ },
+ "0021f098": {
+  "name": "i3dMakeVu0MicroPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f098",
+  "why": "DMA ref tag to data 0x2949f0, 0x9c qwords, sent on channel 0 (VIF0) by i3dInitHardware: the VU0 microprogram"
+ },
+ "0021f0d8": {
+  "name": "i3dMakeVu1MicroPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f0d8",
+  "why": "DMA ref tag to data 0x2912b0, 0x354 qwords plus STCOL 1.0 x4 / STROW 0 x4, sent on VIF1 by i3dInitHardware: the VU1 microprogram"
+ },
  "0021f1a8": {
   "name": "i3dGetStructSize",
   "tag": "lib-context",
   "was": "FUN_0021f1a8",
   "why": "returns the library's own table 0x302ba0[i] for i < 0x24, else -1; MagSystem::initGraph compares it with the game's copy (the version check)"
+ },
+ "0021f1d0": {
+  "name": "i3dCtxSetEndFunc",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f1d0",
+  "why": "unreferenced: stores a function and its argument at ctx+0x12120/+0x12124 (the end-of-packet hook i3dCtxEndFrame calls)"
+ },
+ "0021f1e8": {
+  "name": "i3dCtxSetTexTable",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f1e8",
+  "why": "stores a table pointer / count at ctx+0xfc/+0x100; i3dCtxReserveTextures indexes it by 16-byte entries holding the texture and CLUT VRAM handles"
  },
  "0021f1f8": {
   "name": "i3dCtxGetPacket",
@@ -1073,11 +1151,71 @@
   "was": "FUN_0021f200",
   "why": "end - current of the packet buffer, >= 0"
  },
+ "0021f228": {
+  "name": "i3dCtxGetRestFrom",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f228",
+  "why": "unreferenced: packet tail minus a given position, clamped at 0 (i3dCtxGetRest with any head)"
+ },
  "0021f250": {
   "name": "i3dCtxGetOverrun",
   "tag": "lib-context",
   "was": "FUN_0021f250",
   "why": "current - end of the packet buffer when past the end, else 0 (MagSystem asserts m_trash_overrun == 0)"
+ },
+ "0021f280": {
+  "name": "i3dCtxAllocTail",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f280",
+  "why": "moves the packet tail (ctx+0xf8) down by n qwords and returns it: work memory taken from the top of the frame packet share"
+ },
+ "0021f2a0": {
+  "name": "i3dCtxAllocHead",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f2a0",
+  "why": "unreferenced: advances the packet head (ctx+0xf4) by n qwords, 16-aligned"
+ },
+ "0021f2c0": {
+  "name": "i3dCtxGetAlignedHead",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f2c0",
+  "why": "unreferenced: packet head rounded up to 128 bytes, cache-mode bits dropped"
+ },
+ "0021f2f0": {
+  "name": "i3dCtxSetAlignedHead",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f2f0",
+  "why": "unreferenced: sets the head to an address rounded up to 128 bytes in the uncached-accelerated segment (0x30000000)"
+ },
+ "0021f320": {
+  "name": "i3dCtxGetHead",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f320",
+  "why": "returns ctx+0xf4, the packet write position"
+ },
+ "0021f328": {
+  "name": "i3dCtxSetHead",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f328",
+  "why": "sets ctx+0xf4, the packet write position"
+ },
+ "0021f338": {
+  "name": "i3dCtxResetVram",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f338",
+  "why": "unreferenced: resets both VRAM heaps (ctx+0, ctx+0x70)"
+ },
+ "0021f370": {
+  "name": "i3dCtxFlushTextures",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f370",
+  "why": "closes the DMA chain with a VRAM transfer packet, writes each reserved batch texture registers (0x224b28 with the table VRAM handles, 0x224d88 for a bad index), clears the batch list and runs the group draw callbacks (0x2246c8)"
+ },
+ "0021f4d8": {
+  "name": "i3dCtxDrawTexturedLayer",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f4d8",
+  "why": "a layer draw callback (0x223878 registers it): sorts the layer batches, reserves their textures in VRAM run by run, flushing (transfer + draw) whenever the heaps are full"
  },
  "0021f6a0": {
   "name": "i3dCtxBeginFrame",
@@ -1091,6 +1229,24 @@
   "was": "FUN_0021f760",
   "why": "closes the frame's chain; returns 9 on an error flag"
  },
+ "0021f7c8": {
+  "name": "i3dCtxSetFloatParam",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f7c8",
+  "why": "unreferenced: stores a float at ctx+0x12128 (i3dCtxInit sets 0.35); its reader is not found yet"
+ },
+ "0021f7e0": {
+  "name": "i3dCtxCreateLayer",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f7e0",
+  "why": "takes a 0xe60-byte layer from the packet tail, initialises it (0x223878) and links it into the frame root group with a sortable float key; MagScene::draw calls it"
+ },
+ "0021f850": {
+  "name": "i3dCtxCreateGroup",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f850",
+  "why": "takes a 0x30-byte draw group from the packet tail and initialises it (0x2243a0); i3dCtxBeginFrame makes the frame root group with it"
+ },
  "0021f8c8": {
   "name": "i3dCtxTerm",
   "tag": "lib-context",
@@ -1103,17 +1259,137 @@
   "was": "FUN_0021f900",
   "why": "(ctx, buf, size, count): clears the 0x12168-byte context and sets its two packet lists"
  },
+ "0021f9c8": {
+  "name": "i3dCtxReserveTextures",
+  "tag": "ror-inferred",
+  "was": "FUN_0021f9c8",
+  "why": "collects a batch non-static textures and CLUTs (up to 0x200 each) from the texture table and reserves them in the two VRAM heaps (0x228650); returns 0xf when they do not fit, else queues the batch on ctx+0x1211c"
+ },
+ "00223878": {
+  "name": "i3dLayerInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00223878",
+  "why": "initialises a 0xe60-byte layer: its own group, i3dCtxDrawTexturedLayer as callback, the context at +0x814"
+ },
+ "00223d48": {
+  "name": "i3dBatchAppend",
+  "tag": "ror-inferred",
+  "was": "FUN_00223d48",
+  "why": "moves batch b chain to the end of batch a (tail at +0xc), adding its counts at +0x24/+0x28, and empties b"
+ },
+ "00224368": {
+  "name": "i3dSortList",
+  "tag": "ror-inferred",
+  "was": "FUN_00224368",
+  "why": "picks 0x224050 under 32 entries, 0x223e20 otherwise; returns the sorted list of a layer batches"
+ },
+ "002243a0": {
+  "name": "i3dGroupInit",
+  "tag": "ror-inferred",
+  "was": "FUN_002243a0",
+  "why": "initialises a 0x30-byte draw group: base list init (0x2239b8) and four parameters at +0x10..+0x1c"
+ },
+ "002246c8": {
+  "name": "i3dCtxRunGroup",
+  "tag": "ror-inferred",
+  "was": "FUN_002246c8",
+  "why": "sorts a draw group, links its packets into the DMA chain at ctx+0x12154 and calls each node callback until one returns non-zero"
+ },
+ "00224798": {
+  "name": "i3dCtxCloseFrame",
+  "tag": "ror-inferred",
+  "was": "FUN_00224798",
+  "why": "i3dCtxEndFrame body: starts the packet (ctx+0x118), runs the frame root group, then the end-of-packet hook"
+ },
+ "00224878": {
+  "name": "i3dGroupAddLayer",
+  "tag": "ror-inferred",
+  "was": "FUN_00224878",
+  "why": "links a layer node (callback 0x224418) into a group with a sort key"
+ },
+ "00224b28": {
+  "name": "i3dTexRegsSet",
+  "tag": "ror-inferred",
+  "was": "FUN_00224b28",
+  "why": "writes the texture register packet from a texture and its CLUT VRAM blocks (called with the texture table entry words)"
+ },
+ "00224d88": {
+  "name": "i3dTexRegsSetNone",
+  "tag": "ror-inferred",
+  "was": "FUN_00224d88",
+  "why": "fills a GIF A+D packet of 5 registers (TEX0 6, TEX1 0x14, TEX2 0x16, MIPTBP1 0x34, MIPTBP2 0x36) with zeros"
+ },
+ "00228618": {
+  "name": "i3dVramEndFrame",
+  "tag": "ror-inferred",
+  "was": "FUN_00228618",
+  "why": "empties the new, moved and locked lists (flags 0x10000, 0x100000, 0x100) of a VRAM heap"
+ },
+ "00228650": {
+  "name": "i3dVramReserve",
+  "tag": "ror-inferred",
+  "was": "FUN_00228650",
+  "why": "locks a set of handles for this frame: fails with 0xf when locked plus new sizes exceed the heap, else locks resident blocks and allocates the rest (0x228528)"
+ },
+ "00228820": {
+  "name": "i3dVramCompact",
+  "tag": "ror-inferred",
+  "was": "FUN_00228820",
+  "why": "reassigns block addresses in address order from the heap base; owned blocks that moved go on the moved list (head when moving down, tail when up) for a GS-to-GS copy"
+ },
+ "00228940": {
+  "name": "i3dVramSetBase",
+  "tag": "ror-inferred",
+  "was": "FUN_00228940",
+  "why": "heap+0 = base (VRAM page), then reset (0x228970)"
+ },
+ "00228958": {
+  "name": "i3dVramSetSize",
+  "tag": "ror-inferred",
+  "was": "FUN_00228958",
+  "why": "heap+4 = size, then reset (0x228970)"
+ },
+ "00228970": {
+  "name": "i3dVramReset",
+  "tag": "ror-inferred",
+  "was": "FUN_00228970",
+  "why": "frees every block and makes one free block of the whole size"
+ },
+ "002289f8": {
+  "name": "i3dVramInit",
+  "tag": "ror-inferred",
+  "was": "FUN_002289f8",
+  "why": "sets up a heap over a caller node array (0x44 each) and free-node stack; i3dCtxInit makes two of 0x200 nodes"
+ },
+ "00228ae0": {
+  "name": "i3dVramTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_00228ae0",
+  "why": "unlinks every node and the sentinel; i3dCtxTerm calls it for both heaps"
+ },
  "0022b3d8": {
   "name": "i3rGetNodeIndexByName",
   "tag": "lib-context",
   "was": "FUN_0022b3d8",
   "why": "i3d model root: looks the name up (0x22b1b0) in the root's node-name table (+0x10 -> +0x20, count +0x2e) and maps it through the index table +0x1c; -1 when absent; DogModel::getNodeIndexByName's body"
  },
+ "00237178": {
+  "name": "i3dSysInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00237178",
+  "why": "empty; the first call of i3dInitHardware"
+ },
  "00237c68": {
   "name": "i3dPrintf",
   "tag": "lib-context",
   "was": "FUN_00237c68",
   "why": "vsprintf into 1 KB then rxSysPrintf and fflush(stdout); prints the i3d version error"
+ },
+ "00237cc8": {
+  "name": "i3dFlushCache",
+  "tag": "ror-inferred",
+  "was": "FUN_00237cc8",
+  "why": "FlushCache(0) and returns 0"
  },
  "00237d80": {
   "name": "rxSndInit",
