@@ -102,7 +102,7 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
         ready and the loadTexture loops would spin for ever). Every list still ends in the error
         state (update -1, the callers move on): **fileGetSize 0x1be768 is a stub returning 0** (so
         the .rpk reads 0 bytes) and **BedPfh::BedPfh / getFileIndex** (bed/bedpfh.cpp) are stubs.
-        Write those three before DogTexInfo (6) can be seen getting textures. Doubt: a real
+        Write those three before DogTexInfo (6) can be seen getting textures. **BedPfh written 2026-10-22 (`verify`)** as `bed/bedpfh.cpp` (pinned 0x101738..0x101aec, all 4 methods; the clear bridge is gone; a buffer without "RTPK" leaves the view empty instead of reading garbage tables): fileGetSize 0x1be768 is now the one left. Doubt: a real
         fileGetSize also wakes MagScene::loadActorAnim's pack read through FileReader::read (a stub:
         the 0x800 header stays uninitialised) -- write FileReader::read (0x1be524 / 0x1be564, the
         pfh loader of A.1) in the same session.

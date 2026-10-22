@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-22 18:46 at commit `e6b662d` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-22 18:50 at commit `20ddb14` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -30,13 +30,13 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **1017**; stubs: **158**
+- reconstructed RoR functions: **1021**; stubs: **154**
 
 | file | reconstructed | stubs |
 |---|---|---|
 | `src/bed/bedmemory.cpp` | 16 | 0 |
 | `src/bed/bedpad.cpp` | 0 | 5 |
-| `src/bed/bedpfh.cpp` | 0 | 4 |
+| `src/bed/bedpfh.cpp` | 4 | 0 |
 | `src/dog/dogactor.cpp` | 0 | 15 |
 | `src/dog/dogentity.cpp` | 0 | 3 |
 | `src/dog/dogmodel.cpp` | 0 | 8 |
@@ -84,10 +84,11 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 164 TUs: todo 140, partial 5, verify 25, done 2
-- next: **bed/bedpfh.cpp** (frontier score 38)
+- 164 TUs: todo 139, partial 5, verify 26, done 2
+- next: **unassigned@00164fc0** (frontier score 33)
 - pinned queue: (empty)
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
+- verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/dogtexinfo.cpp` 16/16 -- Pinned 0x1161e4..0x11764c, all 16 functions written. Smoke run: MagScene::init's init / add run without asserts; screen still black (SprMan::draw and the scene 
 - verify: `game/gamfile.cpp` 18/21 -- Black screen, as before: the code is complete but no boot path shows it yet; every FileReader::read caller that runs in the boot (GamMan::loadSystemData / loadS
 - verify: `i3d/i3dctx.cpp` 31/31 -- Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the pa
@@ -115,6 +116,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-22 18:50 `bed/bedpfh.cpp` verify: BedPfh, the RTPK pack view: constructor (tables by header flags: sizes, offsets, attribute rows, names), clear, getFileName, getFileIndex; header inlines getFla
 - 2026-10-22 18:46 `game/gamfile.cpp` verify: game/gamfile.cpp pinned 0x1be2cc..0x1beb70 out of unassigned@001bde58 and written whole (21 functions): FileReader and FileReadReq, the request state machine Fi
 - 2026-10-22 18:35 `i3d/i3dmath.cpp` verify: i3d vector / matrix module pinned 0x236960..0x237ce8 and complete: all 95 functions (35 hidden ones created in Ghidra, batch i3dmath_001), both copies of the VU
 - 2026-10-22 18:24 `spr/sprman.cpp` verify: SprMan complete: all 53 functions of 0x18bb8c..0x18f5b0 (init, draw, the motion / anim / fade / CLUT steppers, drawSprite to i3dPktSprite / TexSpriteUV, text in
@@ -122,11 +124,9 @@ Recent sessions:
 - 2026-10-22 17:41 `setup/i3d_draw_module.cpp` verify: Native i3d draw module rosepan_i3d: the 2D packet writers record host primitives by packet address, the DMA-chain walk replays them in the ROM order; i3dTexRegs
 - 2026-10-22 17:26 `spr/sprtexture.cpp` verify: SprTexture reconstructed: all 21 functions of 0x18f5b0..0x190a78 (ctor, clear, getters, setList, release, loadTex, the update and updateRead state machines, RTC
 - 2026-10-22 17:09 `i3d/i3dtim2.cpp` verify: All 7 TIM2 helpers reconstructed: i3dTim2CheckHeader, GetPicture, IsClutOnly, GetMipSize, GetImage, GetClutCount, GetClut (two hidden functions created in Ghidr
-- 2026-10-22 17:05 `i3d/i3dtex.cpp` verify: Pinned i3d/i3dtex.cpp 0x2184c0..0x21a120 out of unassigned@00216ad0 and wrote all 33 functions (4 hidden TEX1 setters created in Ghidra): texture and CLUT objec
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `bed/bedpfh.cpp` | todo | 0/4/4 | 0.9 | 38 | 3 |
 | `unassigned@00164fc0` | todo | 0/7/433 | 108.5 | 33 | 4 |
 | `game/gamman.cpp` | todo | 0/5/409 | 82.8 | 26 | 4 |
 | `unassigned@00228c08` | todo | 0/5/222 | 54.9 | 24 | 1 |
@@ -134,18 +134,17 @@ Recent sessions:
 | `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
 | `mag/magscene.cpp` | todo | 0/10/44 | 11.3 | 20 | 2 |
 | `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 19 | 2 |
-| `unassigned@0010f944` | todo | 0/4/12 | 2.2 | 18 | 2 |
 | `unassigned@001fd424` | todo | 0/3/75 | 27.9 | 18 | 3 |
+| `unassigned@0010f944` | todo | 0/4/12 | 2.2 | 18 | 2 |
 | `dog/dogmodel.cpp` | todo | 0/10/69 | 14.6 | 17 | 1 |
 | `unassigned@001beb70` | todo | 0/8/27 | 6.6 | 17 | 0 |
+| `unassigned@001809d8` | todo | 0/8/41 | 4.6 | 13 | 1 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
 | RoR addr | name | call sites | provenance | state | inferred file |
 |---|---|---|---|---|---|
-| `00101750` | BedPfh::BedPfh | 12 | ror | stub | bed/bedpfh.cpp |
 | `0022b228` | I3rRoot__CheckIdString | 10 | lib-ctx | stub | - |
-| `001019f0` | BedPfh::getFileIndex | 9 | ror | stub | bed/bedpfh.cpp |
 | `0017f200` | SndMan::update | 7 | ror | stub | - |
 | `001be2dc` | FileReader::~FileReader | 6 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 5 | ror | missing | game/gamfile.cpp |
@@ -183,4 +182,6 @@ Recent sessions:
 | `0011bd4c` | MagLifePC::setActor | 2 | ror | stub | mag/maglifepc.cpp |
 | `001256d4` | MagLifeBwn::setActor | 2 | ror | stub | mag/maglifebwn.cpp |
 | `00115790` | DogModel::loadData | 2 | ror | stub | dog/dogmodel.cpp |
+| `00136d14` | MagScene::~MagScene | 1 | ror | stub | dog/dogmodel.cpp |
+| `00101aec` | BedPad::~BedPad | 1 | ror | stub | bed/bedpad.cpp |
 
