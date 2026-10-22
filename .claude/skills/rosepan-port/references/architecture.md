@@ -256,6 +256,23 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     i3dVecMul 0x237438 / i3dVecMul2 0x237450, i3dVecFtoi0 0x237600, i3dVecFtoi4 0x237610 are bridged
     (i3dpacket.cpp's float writers), the rest still stubs. The second copy has duplicates inside it too
     (0x2373d8 = 0x2373f0 add, 0x237408 = 0x237420 sub, 0x237438 = 0x237450 mul).
+  - **The frame environment** (`i3d/i3denv.cpp`, 0x21a120..0x21a3e8 fog and 0x21ac80..0x21b220
+    lights, written 2026-10-22, verify). Fog: `I3dFog` = colour (clamped 0..1) + near distance, fog
+    amount at near (0..1), far distance, amount at far; i3dCtxSetFog 0x21a158 takes 2 tail qwords
+    (`I3dFogState`: FOGCOL = r | g << 8 | b << 16 at +0x10, a ramp F(z) = base + scale / z with
+    F 255 = no fog at +0x8 / +0xc, solved through F(near) / F(far)), and i3dPktMakeFog 0x21a270
+    writes a RET-tagged packet at the context head (STCYCL 1 1, UNPACK V4-32 to TOPS of a VU1
+    command buffer: 0x11 kick (A+D FOGCOL), 0x190 copy the ramp qword to VU address 0x3f8, 0x0a end;
+    then MSCAL 1) whose address the layer CALLs (i3dPktCallFog). Lights: a description and a created
+    light share one 0x40 layout: ambient qword, then (count, list) pairs at +0x10 / +0x18 / +0x20 /
+    +0x28 / +0x30 for five kinds -- parallel (0x20: direction normalized, colour), point (0x20,
+    copied), spot (0x40: position, direction normalized, colour, inner / outer half angles in
+    radians clamped to 0.001..pi/2 - 0.001 with inner <= 0.95 outer, turned into cos outer,
+    1 / (cos inner - cos outer), cos^2 outer, 1 / sin outer), kind 3 (0x30: direction normalized +
+    two vectors) and kind 4 (0x30, copied); +0x38 the context on a created light.
+    i3dCtxCreateLight 0x21b148 builds them in the order parallel, point, spot, kind 3, kind 4,
+    skipping kinds with a NULL list. The normalizer is 0x2375d8 (i3dVecNormalize2, the second
+    vector-module copy).
   - **The packet writers** (`i3d/i3dpacket.cpp`, 0x21b220..0x21c960; 20 of its 54 functions were
     folded into the one before and created in Ghidra): draw-set list helpers, i3dPktDmaTag (tag top
     byte 0x10 CNT / 0x30 REF / 0x50 CALL), i3dPktDirectTag 0x21b4d0 (VIF FLUSHA + DIRECT qwc, the

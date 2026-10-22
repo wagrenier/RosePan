@@ -17,6 +17,7 @@
  *  the low 28 bits of host pointers (i3dDmaAddr).
  * ======================================================================== */
 #include "i3d/i3dpacket.h"
+#include "i3d/i3denv.h"
 
 #include <string.h>
 

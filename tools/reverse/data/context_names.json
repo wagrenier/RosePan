@@ -2495,6 +2495,12 @@
   "was": "FUN_0021a158",
   "why": "allocates two qwords from the context tail, clamps the colour vector to 0..1 and packs it *255 (FOGCOL), derives the fog ramp from the four floats, links the packet at the context head"
  },
+ "0021a270": {
+  "name": "i3dPktMakeFog",
+  "tag": "ror-inferred",
+  "was": "FUN_0021a270",
+  "why": "called once by i3dCtxSetFog on the context head: writes a RET DMA tag, STCYCL, an UNPACK V4-32 of a VU1 buffer (header 0x11, an A+D GIF tag, FOGCOL 0x3d, the fog ramp qword sent to VU address 0x3f8), MSCAL 1; returns the new head"
+ },
  "0021a828": {
   "name": "i3rCopyClipSphere",
   "tag": "lib-context",
@@ -2518,6 +2524,48 @@
   "tag": "lib-context",
   "was": "FUN_0021ac80",
   "why": "zeroes a light description's ambient vector and its list words +0x10..+0x34"
+ },
+ "0021acd0": {
+  "name": "i3dLightSetParallel",
+  "tag": "ror-inferred",
+  "was": "FUN_0021acd0",
+  "why": "i3dCtxCreateLight's kind 0 (desc +0x10 count / +0x14 list): 0x20-byte records copied from the context tail with the first vector normalized (direction) and the second copied (colour); MagShadowLight's directional mode fills one"
+ },
+ "0021ad88": {
+  "name": "i3dLightSetDir2",
+  "tag": "ror-inferred",
+  "was": "FUN_0021ad88",
+  "why": "i3dCtxCreateLight's kind 3 (+0x28 / +0x2c): 0x30-byte records, first vector normalized (a direction), two more copied; role unverified"
+ },
+ "0021ae58": {
+  "name": "i3dLightSetVec3",
+  "tag": "ror-inferred",
+  "was": "FUN_0021ae58",
+  "why": "i3dCtxCreateLight's kind 4 (+0x30 / +0x34): 0x30-byte records memcpy'd to the context tail; role unverified"
+ },
+ "0021aed8": {
+  "name": "i3dLightSetPoint",
+  "tag": "ror-inferred",
+  "was": "FUN_0021aed8",
+  "why": "i3dCtxCreateLight's kind 1 (+0x18 / +0x1c): 0x20-byte records memcpy'd to the context tail (position, colour; roles unverified)"
+ },
+ "0021af50": {
+  "name": "i3dLightSetSpot",
+  "tag": "ror-inferred",
+  "was": "FUN_0021af50",
+  "why": "i3dCtxCreateLight's kind 2 (+0x20 / +0x24): 0x40-byte records: position copied, direction normalized, colour copied, inner / outer half angles clamped to 0.001..pi/2-0.001 (inner at most 0.95 outer) turned into cos outer, 1/(cos inner - cos outer), cos^2 outer, 1/sin outer"
+ },
+ "0021b100": {
+  "name": "i3dLightSetAmbient",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b100",
+  "why": "i3dCtxCreateLight copies the description's first qword (the ambient colour) into the light"
+ },
+ "0021b110": {
+  "name": "i3dLightInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0021b110",
+  "why": "i3dCtxCreateLight's first call on the new 4-qword light: zeroes the ambient qword, the five kind counts / lists and +0x38 (the context)"
  },
  "0021b148": {
   "name": "i3dCtxCreateLight",
@@ -4030,6 +4078,12 @@
   "tag": "lib-context",
   "was": "FUN_00237580",
   "why": "x*x + y*y + z*z of a*b"
+ },
+ "002375d8": {
+  "name": "i3dVecNormalize2",
+  "tag": "ror-inferred",
+  "was": "FUN_002375d8",
+  "why": "byte-identical second copy of i3dVecNormalize 0x236b38 (vmul.xyz, vrsqrt, w = 0) in the second vector-module copy"
  },
  "00237600": {
   "name": "i3dVecFtoi0",

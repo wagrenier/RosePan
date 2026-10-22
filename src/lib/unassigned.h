@@ -210,17 +210,8 @@ struct MagViewParam;
 #include "i3d/i3dview.h"
 
 
-/* The fog record i3dCtxSetFog turns into FOGCOL and the fog ramp: a
- * colour (0..1, clamped) and four floats. EE 0x20; float roles unverified. */
-struct I3dFog
-{
-    sceVu0FVECTOR m_color;      // ROR 0x00
-    float         m_param[4];   // ROR 0x10
-};
-static_assert(offsetof(I3dFog, m_param) == 0x10, "m_param");
-static_assert(sizeof(I3dFog) == 0x20, "I3dFog is 0x20 bytes on the EE");
-
-void  i3dFogInit(I3dFog *fog);     /* all zero */                        // ROR 0x0021a120
+/* The fog and light records have their own file. */
+#include "i3d/i3denv.h"
 
 /* An i3d model root (tag_I3rRoot_s in DogModel's symbols). Opaque. */
 struct I3rRoot;
@@ -257,26 +248,6 @@ int   i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity);    // ROR 
 /* Steps the frame counter of every animated texture of the root; I3D_OK. */
 int   i3rUpdateTexAnim(I3rRoot *root);                                   // ROR 0x0021a8e0
 
-/* An i3d light description (i3dCtxCreateLight's input; MagScene keeps the
- * shadow light's at +0x2a9d0): an ambient colour, then five (list, count)
- * pairs of light kinds. EE 0x40. layout: host -- pointers. */
-struct I3dLightDesc
-{
-    sceVu0FVECTOR m_ambient;    // ROR 0x00
-    struct
-    {
-        void *m_list;           // ROR 0x10 + 8 k: the kind's lights
-        int   m_count;          // ROR 0x14 + 8 k: 0 = the kind is not used
-    } m_kind[5];
-    int           _38[2];       // ROR 0x38
-};
-static_assert(offsetof(I3dLightDesc, m_ambient) == 0, "m_ambient");
-
-void      i3dLightDescInit(I3dLightDesc *desc);                          // ROR 0x0021ac80
-I3dLight *i3dCtxCreateLight(i3dContext *ctx, const I3dLightDesc *desc);  // ROR 0x0021b148
-/* The fog state of a frame from a fog record; NULL on failure. */
-void     *i3dCtxSetFog(i3dContext *ctx, const I3dFog *fog);              // ROR 0x0021a158
-
 /* Strips of count vertices with an optional matrix, STQ, colours and
  * positions (EE vectors); primitives unverified. */
 u_long   *i3dPktDrawStrip(u_long *pkt, sceVu0FVECTOR *matrix, int count, const void *stq,
@@ -297,6 +268,8 @@ u_long   *i3dPktDrawWireShape(u_long *pkt, I3dLayer *layer, void *a, void *b, vo
 /* i3d's vector / matrix helpers (VU0 macro code; the angle comes first in f12). */
 void  i3dVecCopy(float *out, const float *in);                           // ROR 0x002372d0
 void  i3dVecCopy2(float *out, const float *in);                          // ROR 0x002372e0
+/* The second copy of i3dVecNormalize: xyz normalized, w 0. */
+void  i3dVecNormalize2(float *out, const float *in);                     // ROR 0x002375d8
 void  i3dVecAdd(float *out, const float *a, const float *b);             // ROR 0x002373d8
 void  i3dVecMul(float *out, const float *a, const float *b);             // ROR 0x00237438
 void  i3dVecMul2(float *out, const float *a, const float *b);  /* = Mul */ // ROR 0x00237450
