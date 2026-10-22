@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-22 18:35 at commit `f38b2c6` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-22 18:46 at commit `e6b662d` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-22 18:35 at commit `f38b2c6` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6496**, named **2579** (40%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 90, ror-inferred 1121
-- context-name ledger: 1211 entries; overrides of wrong library matches: 5
-- placed in a source file: 2453/6496 in 87 files
+- game functions: **6496**, named **2588** (40%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 90, ror-inferred 1130
+- context-name ledger: 1220 entries; overrides of wrong library matches: 5
+- placed in a source file: 2474/6496 in 88 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **999**; stubs: **167**
+- reconstructed RoR functions: **1017**; stubs: **158**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -41,6 +41,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/dog/dogentity.cpp` | 0 | 3 |
 | `src/dog/dogmodel.cpp` | 0 | 8 |
 | `src/dog/dogtexinfo.cpp` | 16 | 0 |
+| `src/game/gamfile.cpp` | 18 | 0 |
 | `src/game/gamman.cpp` | 0 | 5 |
 | `src/i3d/i3dctx.cpp` | 31 | 0 |
 | `src/i3d/i3denv.cpp` | 12 | 0 |
@@ -51,7 +52,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dtim2.cpp` | 7 | 0 |
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 0 | 78 |
+| `src/lib/unassigned_stubs.cpp` | 0 | 69 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 1 |
 | `src/mag/maglifeman.cpp` | 0 | 3 |
@@ -83,11 +84,12 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 162 TUs: todo 139, partial 5, verify 24, done 2
-- next: **unassigned@001bde58** (frontier score 81)
+- 164 TUs: todo 140, partial 5, verify 25, done 2
+- next: **bed/bedpfh.cpp** (frontier score 38)
 - pinned queue: (empty)
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `dog/dogtexinfo.cpp` 16/16 -- Pinned 0x1161e4..0x11764c, all 16 functions written. Smoke run: MagScene::init's init / add run without asserts; screen still black (SprMan::draw and the scene 
+- verify: `game/gamfile.cpp` 18/21 -- Black screen, as before: the code is complete but no boot path shows it yet; every FileReader::read caller that runs in the boot (GamMan::loadSystemData / loadS
 - verify: `i3d/i3dctx.cpp` 31/31 -- Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the pa
 - verify: `i3d/i3denv.cpp` 12/12 -- Pinned 0x21a120..0x21a3e8 + 0x21ac80..0x21b220 as one file (a guess: the i3r helpers 0x21a3e8..0x21ac80 sit between; split into i3dfog / i3dlight if evidence ap
 - verify: `i3d/i3dlayer.cpp` 80/80 -- Every frame now builds real groups, layers and a sorted DMA chain; the smoke run is stable and still black: nothing on the i3d path reaches a host draw module (
@@ -113,6 +115,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-22 18:46 `game/gamfile.cpp` verify: game/gamfile.cpp pinned 0x1be2cc..0x1beb70 out of unassigned@001bde58 and written whole (21 functions): FileReader and FileReadReq, the request state machine Fi
 - 2026-10-22 18:35 `i3d/i3dmath.cpp` verify: i3d vector / matrix module pinned 0x236960..0x237ce8 and complete: all 95 functions (35 hidden ones created in Ghidra, batch i3dmath_001), both copies of the VU
 - 2026-10-22 18:24 `spr/sprman.cpp` verify: SprMan complete: all 53 functions of 0x18bb8c..0x18f5b0 (init, draw, the motion / anim / fade / CLUT steppers, drawSprite to i3dPktSprite / TexSpriteUV, text in
 - 2026-10-22 17:51 `dog/dogtexinfo.cpp` verify: DogTexInfo written whole: init / term / clear, find / findFree, add (VRAM desc), addData (TIM2 with refcount and heap copy), addPfh (pack or i3r-named textures,
@@ -120,22 +123,21 @@ Recent sessions:
 - 2026-10-22 17:26 `spr/sprtexture.cpp` verify: SprTexture reconstructed: all 21 functions of 0x18f5b0..0x190a78 (ctor, clear, getters, setList, release, loadTex, the update and updateRead state machines, RTC
 - 2026-10-22 17:09 `i3d/i3dtim2.cpp` verify: All 7 TIM2 helpers reconstructed: i3dTim2CheckHeader, GetPicture, IsClutOnly, GetMipSize, GetImage, GetClutCount, GetClut (two hidden functions created in Ghidr
 - 2026-10-22 17:05 `i3d/i3dtex.cpp` verify: Pinned i3d/i3dtex.cpp 0x2184c0..0x21a120 out of unassigned@00216ad0 and wrote all 33 functions (4 hidden TEX1 setters created in Ghidra): texture and CLUT objec
-- 2026-10-22 16:32 `i3d/i3denv.cpp` verify: i3d fog and lights: i3dFogInit, i3dCtxSetFog with its fog ramp and FOGCOL, the VU1 fog packet i3dPktMakeFog, i3dLightDescInit, i3dCtxCreateLight and its five ki
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@001bde58` | todo | 0/17/56 | 9.8 | 81 | 5 |
 | `bed/bedpfh.cpp` | todo | 0/4/4 | 0.9 | 38 | 3 |
-| `unassigned@00164fc0` | todo | 0/7/433 | 108.5 | 29 | 4 |
+| `unassigned@00164fc0` | todo | 0/7/433 | 108.5 | 33 | 4 |
 | `game/gamman.cpp` | todo | 0/5/409 | 82.8 | 26 | 4 |
-| `mag/maglifeman.cpp` | todo | 0/3/10 | 1.5 | 24 | 3 |
 | `unassigned@00228c08` | todo | 0/5/222 | 54.9 | 24 | 1 |
-| `mag/magscene.cpp` | todo | 0/10/44 | 11.3 | 20 | 2 |
+| `mag/maglifeman.cpp` | todo | 0/3/10 | 1.5 | 24 | 3 |
 | `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
+| `mag/magscene.cpp` | todo | 0/10/44 | 11.3 | 20 | 2 |
 | `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 19 | 2 |
-| `unassigned@001fd424` | todo | 0/3/75 | 27.9 | 18 | 3 |
 | `unassigned@0010f944` | todo | 0/4/12 | 2.2 | 18 | 2 |
+| `unassigned@001fd424` | todo | 0/3/75 | 27.9 | 18 | 3 |
 | `dog/dogmodel.cpp` | todo | 0/10/69 | 14.6 | 17 | 1 |
+| `unassigned@001beb70` | todo | 0/8/27 | 6.6 | 17 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -143,22 +145,19 @@ Recent sessions:
 |---|---|---|---|---|---|
 | `00101750` | BedPfh::BedPfh | 12 | ror | stub | bed/bedpfh.cpp |
 | `0022b228` | I3rRoot__CheckIdString | 10 | lib-ctx | stub | - |
-| `001be524` | FileReader::read | 10 | ror | stub | - |
 | `001019f0` | BedPfh::getFileIndex | 9 | ror | stub | bed/bedpfh.cpp |
-| `001be2dc` | FileReader::~FileReader | 6 | ror | missing | - |
-| `001be2cc` | FileReader::FileReader | 5 | ror | missing | - |
-| `001be734` | FileReadReq::FileReadReq | 5 | ror | missing | - |
+| `0017f200` | SndMan::update | 7 | ror | stub | - |
+| `001be2dc` | FileReader::~FileReader | 6 | ror | missing | game/gamfile.cpp |
+| `001be2cc` | FileReader::FileReader | 5 | ror | missing | game/gamfile.cpp |
+| `001be734` | FileReadReq::FileReadReq | 5 | ror | missing | game/gamfile.cpp |
 | `0021a828` | i3rCopyClipSphere | 5 | lib-ctx | stub | - |
 | `001196d4` | MagLifeMan::add | 5 | ror | stub | mag/maglifeman.cpp |
-| `001be4c8` | FileReader::isReady | 5 | ror | stub | - |
 | `0013f980` | MagScene::setLightParam | 4 | ror | stub | mag/magscenelight.cpp |
 | `00101ccc` | BedPad::update | 4 | ror | stub | bed/bedpad.cpp |
 | `001c0254` | GamFont::getGlyphWidth | 4 | ror | stub | - |
 | `0010ff74` | DogEntity::normalizeRotate | 3 | ror | stub | - |
 | `00101b50` | BedPad::setVibration | 3 | ror | stub | bed/bedpad.cpp |
-| `001be768` | fileGetSize | 3 | ror | stub | - |
 | `0010fa6c` | DogEntity::getMatrix | 3 | ror | stub | - |
-| `0017f200` | SndMan::update | 3 | ror | stub | - |
 | `00119a38` | MagLifeMan::draw | 3 | ror | stub | mag/maglifeman.cpp |
 | `0022b3d8` | i3rGetNodeIndexByName | 3 | lib-ctx | stub | - |
 | `0021e1d8` | i3dPktDrawLineStrip | 3 | lib-ctx | stub | - |
@@ -181,4 +180,7 @@ Recent sessions:
 | `00105e50` | utlStrCopy | 2 | ror | stub | utl/utlfile.cpp |
 | `0021db18` | i3dPktDrawStrip | 2 | lib-ctx | stub | - |
 | `001bf024` | GamFont::drawChar | 2 | ror | stub | - |
+| `0011bd4c` | MagLifePC::setActor | 2 | ror | stub | mag/maglifepc.cpp |
+| `001256d4` | MagLifeBwn::setActor | 2 | ror | stub | mag/maglifebwn.cpp |
+| `00115790` | DogModel::loadData | 2 | ror | stub | dog/dogmodel.cpp |
 

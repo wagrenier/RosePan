@@ -170,79 +170,6 @@ int FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy)
     return {};
 }
 
-// ---- FileReader bridges the sprite texture TU needs (spr/sprtexture.cpp,
-// 2026-10-22): the ROM's code for the reader's asynchronous steps, until
-// the file reader's TU (unassigned@001bde58) replaces them. As stubs they
-// would never report ready and SprTexture::update would spin for ever.
-
-// bridge of ROR 0x001be414
-int FileReader::close()
-{
-    ROSEPAN_BRIDGE("FileReader::close", 0x001be414);
-    if (m_fd >= 0)
-        return closeFile(m_fd);
-    return -1;
-}
-
-// bridge of ROR 0x001be338
-int FileReader::openFile(const char *theName)
-{
-    ROSEPAN_BRIDGE("FileReader::openFile", 0x001be338);
-    m_fd = rxSysStreamOpen(theName, 0x8001);
-    return 0;
-}
-
-// bridge of ROR 0x001be36c
-void FileReader::readFile(int fd, void *buf, int size)
-{
-    ROSEPAN_BRIDGE("FileReader::readFile", 0x001be36c);
-    rxFileRead(fd, buf, size);
-}
-
-// bridge of ROR 0x001be3c4
-int FileReader::closeFile(int fd)
-{
-    ROSEPAN_BRIDGE("FileReader::closeFile", 0x001be3c4);
-    if (fd == m_fd) {
-        rxFileClose(fd);
-        m_fd = -1;
-        return 1;
-    }
-    rxFileClose(fd);
-    return 2;
-}
-
-// bridge of ROR 0x001be444
-void FileReader::seekFile(int fd, int offset, int whence)
-{
-    ROSEPAN_BRIDGE("FileReader::seekFile", 0x001be444);
-    int w = 0;
-    if (whence == 1)
-        w = 1;
-    else if (whence == 2)
-        w = 2;
-    rxFileSeek(fd, offset, w);
-}
-
-// bridge of ROR 0x001be4c8
-int FileReader::isReady(int *unused, int *fd)
-{
-    ROSEPAN_BRIDGE("FileReader::isReady", 0x001be4c8);
-    int busy = 0;
-    if (m_fd >= 0)
-        busy = rxFileSync(m_fd, 1);
-    if (fd)
-        *fd = m_fd;
-    return busy == 0;
-}
-
-// stub of ROR 0x001be524
-int FileReader::read(FileReadReq *req, int async)
-{
-    ROSEPAN_STUB("FileReader::read", 0x001be524);
-    return {};
-}
-
 // stub of ROR 0x0022b228
 int I3rRoot__CheckIdString(const I3rRoot *root)
 {
@@ -284,20 +211,6 @@ void MagScene::setViewFar(float far)
 void dbgTraceVector4(const float *v)
 {
     ROSEPAN_STUB("dbgTraceVector4", 0x00215bb4);
-}
-
-// stub of ROR 0x001be84c
-int fileExists(const char *theName)
-{
-    ROSEPAN_STUB("fileExists", 0x001be84c);
-    return {};
-}
-
-// stub of ROR 0x001be768
-int fileGetSize(const char *theName)
-{
-    ROSEPAN_STUB("fileGetSize", 0x001be768);
-    return {};
 }
 
 // stub of ROR 0x0021a828

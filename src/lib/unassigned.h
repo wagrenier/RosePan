@@ -95,70 +95,8 @@ static_assert(offsetof(RxMpeg, m_name) == 0x44, "m_name");
 
 extern RxMpeg g_rxMpeg;         /* bss 0x7b40c0 */
 
-/* ---- the file reader (unassigned@001bde58: 0x1be2cc..0x1be880) ---- */
-
-/* One read request: open the name, seek, read, close -- each step only
- * when its field asks for it (the reader clears the field once done).
- * EE 0x24. layout: host -- the name and buffer are pointers. */
-struct FileReadReq
-{
-    // ROR 0x001be734 (memset 0x24 bytes, fd -1)
-    FileReadReq()
-    {
-        memset(this, 0, sizeof(*this));
-        m_fd = -1;
-    }
-
-    int         m_fd;           // ROR 0x00: the open file, -1 before the open step
-    int         m_step;         // ROR 0x04: (step << 1) | waiting; FileReader::read resets it
-    int         m_08;           // ROR 0x08: some callers set 1; the reader never reads it
-    const char *m_name;         // ROR 0x0c: opened when set (rxSysStreamOpen, 0x8001)
-    int         m_offset;       // ROR 0x10: the seek position
-    int         m_whence;       // ROR 0x14: -1 = no seek, 0 / 1 / 2 = set / current / end
-    void       *m_buf;          // ROR 0x18: read target
-    int         m_size;         // ROR 0x1c: bytes to read, 0 = no read
-    int         m_close;        // ROR 0x20: close the file after the read
-};
-static_assert(offsetof(FileReadReq, m_step) == 0x04, "m_step");
-static_assert(offsetof(FileReadReq, m_name) >= 0x0c, "m_name");
-
-/* Runs FileReadReqs (the pack loaders build one on the stack). EE 0x08.
- * layout: host -- holds a pointer. */
-struct FileReader
-{
-    // ROR 0x001be2cc
-    FileReader() : m_req(NULL), m_fd(-1) {}
-    // ROR 0x001be2dc (GCC 2 destructor; the ROM's callers pass 2, no delete)
-    ~FileReader()
-    {
-        if (m_fd >= 0)
-            close();
-    }
-
-    /* Starts the request and, unless async, waits for it (drawing the
-     * now-loading screen while it waits); returns the state machine's
-     * result (1 = done). */
-    int  read(FileReadReq *req, int async);                              // ROR 0x001be524
-    int  close();                                                        // ROR 0x001be414
-
-    /* The asynchronous steps SprTexture::updateRead runs one by one (the
-     * rx file calls; isReady polls the last one). */
-    int  openFile(const char *theName);                                  // ROR 0x001be338
-    void readFile(int fd, void *buf, int size);                          // ROR 0x001be36c
-    /* 1 (and m_fd -1) when fd is this reader's file, else 2. */
-    int  closeFile(int fd);                                              // ROR 0x001be3c4
-    void seekFile(int fd, int offset, int whence);                       // ROR 0x001be444
-    /* True when m_fd has no request running; stores m_fd to *fd. */
-    int  isReady(int *unused, int *fd);                                  // ROR 0x001be4c8
-
-    FileReadReq *m_req;         // ROR 0x00: the request being run
-    int          m_fd;          // ROR 0x04: the file this reader opened, -1 = none
-};
-
-/* The size of the file (rxSysStreamOpen, seek to the end), < 0 when it
- * does not open. */
-int  fileGetSize(const char *theName);                                   // ROR 0x001be768
-int  fileExists(const char *theName);                                    // ROR 0x001be84c
+/* ---- the file reader: moved to game/gamfile.h ---- */
+#include "game/gamfile.h"
 
 /* A font rasterizer (0x1beb70..0x1c0534, named in the sprman session; game/
  * by link order, before GamMan::init): draws a font file's 1- or 2-bit

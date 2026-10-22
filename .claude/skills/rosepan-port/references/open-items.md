@@ -28,7 +28,8 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
         (progress/20261022-1448_system_sysnowloading.cpp_forced_draw.png: the picture's frames in the
         bottom-right corner, stepping every 8 frames, as LOADING.BIN shows). The boot screenshot is
         still black: draw's only caller is the pfh loader **0x1be564** (GamMan's load path,
-        unassigned@001bde58), a stub. Reconstruct it with GamMan's loads; it reads main's object, so
+        unassigned@001bde58), a stub. **Real since 2026-10-22** (`game/gamfile.cpp`, main's object is
+        now the extern `g_nowLoading`): the screen shows once GamMan's loads run. Reconstruct GamMan's loads; it reads main's object, so
         main.cpp's `static SysNowLoading *s_nowLoading` (sdata 0x2d8ffc) becomes an extern global then.
    - **B. The scene's 2D layers through i3d** (the S2dMovie loading.tm2 / S2dMes sprites; s2d.cpp
      is written and waiting):
@@ -459,6 +460,16 @@ to adapt when a TU reaches them:
   rxsys is next touched.
 
 ## Done
+
+- 2026-10-22: `game/gamfile.cpp` (0x1be2cc..0x1beb70 pinned, all 21 functions, `verify`): the file
+  reader (FileReader / FileReadReq, the request state machine 0x1be564 that draws the now-loading
+  screen, fileGetSize, fileExists, clock helpers). The FileReader bridges and the fileGetSize /
+  fileExists stubs are gone; main's now-loading object is the extern `g_nowLoading`. Black screen:
+  every FileReader::read caller that runs in the boot (GamMan::loadSystemData / loadStage, MagScene's
+  loaders behind MagScene::start) is still a stub. What is left of unassigned@001bde58: the
+  language-select menu code 0x1bde58..0x1be2cc (mnusllg.rpk, SprMan calls: belongs to
+  mnu/mnuSelectLanguage.cpp, whose functions start at ~0x1bd028 -- pin it with that TU) and GamFont
+  0x1beb70..0x1c05c0 (game/gamfont.cpp is the natural key; GamFont::drawChar is sprman's text path).
 
 - 2026-10-22: host task `setup/i3d_draw_module.cpp` (`verify`): the native i3d module
   (rosepan_i3d.*), rosepan_draw2d's general TIM2 / GS-format decoder, the renderer's

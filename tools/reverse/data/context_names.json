@@ -2615,6 +2615,12 @@
   "was": "FUN_001be36c",
   "why": "rxFileRead(fd, buf, size); the reader is unused"
  },
+ "001be38c": {
+  "name": "FileReader::readCurrent",
+  "tag": "ror-inferred",
+  "was": "FUN_001be38c",
+  "why": "readFile on the reader's own m_fd (+4) when open, else -1; no callers"
+ },
  "001be3c4": {
   "name": "FileReader::closeFile",
   "tag": "ror-inferred",
@@ -2633,6 +2639,12 @@
   "was": "FUN_001be444",
   "why": "rxFileSeek(fd, offset, whence) with whence 1 / 2 passed through, anything else 0"
  },
+ "001be490": {
+  "name": "FileReader::seekCurrent",
+  "tag": "ror-inferred",
+  "was": "FUN_001be490",
+  "why": "seekFile on the reader's own m_fd (+4) when open, else -1; no callers"
+ },
  "001be4c8": {
   "name": "FileReader::isReady",
   "tag": "ror-inferred",
@@ -2644,6 +2656,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001be524",
   "why": "takes a FileReadReq, resets its step and runs the open / seek / read / close state machine 0x1be564 (rxSysStreamOpen, rxFileSeek, rxFileRead, rxFileClose), waiting with the now-loading draw unless async"
+ },
+ "001be548": {
+  "name": "FileReader::resume",
+  "tag": "ror-inferred",
+  "was": "FUN_001be548",
+  "why": "stores the request at +0 without resetting its step (read clears req+4) and tail-jumps to the state machine 0x1be564"
+ },
+ "001be564": {
+  "name": "FileReader::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001be564",
+  "why": "the request state machine: open / seek / read / close steps from req+4 (step<<1 | waiting), polls isReady, waits drawing SysNowLoading or rxThSync + SndMan::update; 0 done, 1 pending when async"
  },
  "001be734": {
   "name": "FileReadReq::FileReadReq",
@@ -2662,6 +2686,36 @@
   "tag": "ror-inferred",
   "was": "FUN_001be84c",
   "why": "rxSysStreamOpen then rxFileClose; true when the open succeeded"
+ },
+ "001be880": {
+  "name": "fileCdSetClockRead",
+  "tag": "ror-inferred",
+  "was": "FUN_001be880",
+  "why": "tail-jumps to rxFileCdSetClockRead; no callers"
+ },
+ "001be894": {
+  "name": "fileCdGetClockRead",
+  "tag": "ror-inferred",
+  "was": "FUN_001be894",
+  "why": "tail-jumps to rxFileCdGetClockRead; no callers"
+ },
+ "001be8a8": {
+  "name": "fileCdGetClock",
+  "tag": "ror-inferred",
+  "was": "FUN_001be8a8",
+  "why": "tail-jumps to rxFileCdGetClock; no callers"
+ },
+ "001be8bc": {
+  "name": "fileClockToSeconds",
+  "tag": "ror-inferred",
+  "was": "FUN_001be8bc",
+  "why": "sceCdCLOCK bytes (+1 second .. +7 year) to seconds into the year, seconds left in the year and the year's seconds, days table 0x2b8da8 with the leap rule; 0 for a bad month"
+ },
+ "001bea18": {
+  "name": "fileClockDiff",
+  "tag": "ror-inferred",
+  "was": "FUN_001bea18",
+  "why": "two fileClockToSeconds results to hours and minutes between two clocks (same or previous year), capped at 99:59; no callers"
  },
  "001beb70": {
   "name": "GamFont::GamFont",

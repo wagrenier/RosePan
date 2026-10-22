@@ -23,6 +23,12 @@ struct MainRegRow
     int         m_pad;          // ROR 0x0c: always 0
 };
 
+struct SysNowLoading;
+
+/* The now-loading object mainInitGame creates around the boot loads;
+ * FileReader::update draws it while it waits (NULL otherwise). */
+extern SysNowLoading *g_nowLoading;  /* sdata 0x2d8ffc */
+
 int  mainParseArgs(int argc, char **argv);                               // ROR 0x002043dc
 int  mainGame(int argc, char **argv);                                    // ROR 0x002045a8
 void mainInitGame(int stage);                                            // ROR 0x002046d4
