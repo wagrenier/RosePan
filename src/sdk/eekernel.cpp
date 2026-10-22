@@ -612,6 +612,16 @@ int RosePan_sceDevVif1Reset(void)
     return 0;
 }
 
+int RosePan_sceDevVu1Reset(void)
+{
+    return 0;
+}
+
+int RosePan_GetMemorySize(void)
+{
+    return 0x2000000;
+}
+
 u_long RosePan_sceGsGetIMR(void)
 {
     return s_gsImr;

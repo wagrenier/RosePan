@@ -174,6 +174,11 @@ entries are marked **RoR** with the date.
 
 ## callcheck / stubgen
 
+- **A call the optimiser proves dead gets no stub.** `rxSysPrintf` calls `rxThIsDispatchDisabled` only
+  when the static tty fd 0x2dba34 is >= 0; nothing in the build wrote it yet (its writer `rxSysOpenTty`
+  is a stub), so GCC folded the branch and no undefined reference -- hence no stub -- appeared. It shows
+  up once the writer is real; stubgen handles it then (2026-10-22).
+
 - **Your own helpers hide RoR's calls**: a `static inline` wrapper of a RoR callee makes every caller
   report it MISSING. Write the inlined code out as the ROM has it.
 - **`// callcheck:` syntax**: names first, separated by commas, one parenthesis last, all on the line

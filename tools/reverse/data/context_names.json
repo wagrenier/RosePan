@@ -17,6 +17,558 @@
   "was": "FUN_002045a8",
   "why": "crt0 _start calls it (jal at 0x100238) after _InitSys and atexit; prints the version with the build date Jul 27 2006 22:25:45, detects the boot device (host0 / cdrom0) and reboots the IOP with ioprp300.img"
  },
+ "0023ff58": {
+  "name": "rxSysNoMemFunc",
+  "tag": "ror-inferred",
+  "was": "FUN_0023ff58",
+  "why": "default of the four memory hooks: prints 'rxSys:No Memory Allocate Func !' and returns 0"
+ },
+ "0023ff80": {
+  "name": "rxSysSetMemFunc0",
+  "tag": "ror-inferred",
+  "was": "FUN_0023ff80",
+  "why": "swaps memory hook 0 (0x2dbe8c, null -> rxSysNoMemFunc), returns the old one; main passes 0x105ca0"
+ },
+ "0023ffb0": {
+  "name": "rxSysSetMemFunc1",
+  "tag": "ror-inferred",
+  "was": "FUN_0023ffb0",
+  "why": "swaps memory hook 1 (0x2dbe90); main passes 0x105ca0"
+ },
+ "0023ffe0": {
+  "name": "rxSysSetMemFunc2",
+  "tag": "ror-inferred",
+  "was": "FUN_0023ffe0",
+  "why": "swaps memory hook 2 (0x2dbe94); main passes 0x105de0"
+ },
+ "00240010": {
+  "name": "rxSysSetMemFunc3",
+  "tag": "ror-inferred",
+  "was": "FUN_00240010",
+  "why": "swaps memory hook 3 (0x2dbe98); main passes 0x105e08"
+ },
+ "00240040": {
+  "name": "rxSysStrLenToEol",
+  "tag": "ror-inferred",
+  "was": "FUN_00240040",
+  "why": "counts chars up to NUL, CR or LF"
+ },
+ "00240080": {
+  "name": "rxSysStrLenToSpace",
+  "tag": "ror-inferred",
+  "was": "FUN_00240080",
+  "why": "counts chars up to NUL, space or tab"
+ },
+ "002400c0": {
+  "name": "rxSysSkipEol",
+  "tag": "ror-inferred",
+  "was": "FUN_002400c0",
+  "why": "skips CR / LF, returns the pointer"
+ },
+ "00240100": {
+  "name": "rxSysSkipSpace",
+  "tag": "ror-inferred",
+  "was": "FUN_00240100",
+  "why": "skips spaces / tabs, returns the pointer"
+ },
+ "00240140": {
+  "name": "rxSysStrCopyN",
+  "tag": "ror-inferred",
+  "was": "FUN_00240140",
+  "why": "copies at most n chars and terminates"
+ },
+ "00240180": {
+  "name": "rxSysPathCopy",
+  "tag": "ror-inferred",
+  "was": "FUN_00240180",
+  "why": "copies at most n chars, backslash to slash, upper to lower case (ctype table 0x3079a9)"
+ },
+ "002401e8": {
+  "name": "rxSysIsModuleLoaded",
+  "tag": "ror-inferred",
+  "was": "FUN_002401e8",
+  "why": "strcmp against the loaded module table 0x7cc380 (32 x 32 chars, count 0x2dbbd0); callers ask for cdvdman.irx / mcman.irx"
+ },
+ "00240280": {
+  "name": "rxSysPathFileName",
+  "tag": "ror-inferred",
+  "was": "FUN_00240280",
+  "why": "returns the char after the last slash, backslash, colon or comma"
+ },
+ "00240338": {
+  "name": "rxSysPathExt",
+  "tag": "ror-inferred",
+  "was": "FUN_00240338",
+  "why": "returns the extension after the file name's last dot (or its end)"
+ },
+ "002403c0": {
+  "name": "rxSysIsCommentLine",
+  "tag": "ror-inferred",
+  "was": "FUN_002403c0",
+  "why": "true for an empty line or one starting with - or #; used on iopconf.cnf lines"
+ },
+ "002403f0": {
+  "name": "rxSysSkipModule",
+  "tag": "ror-inferred",
+  "was": "FUN_002403f0",
+  "why": "comment line or module already in the table"
+ },
+ "00240440": {
+  "name": "rxSysAddModule",
+  "tag": "ror-inferred",
+  "was": "FUN_00240440",
+  "why": "appends a name to the module table 0x7cc380 (max 32)"
+ },
+ "00240490": {
+  "name": "rxSysAddModuleList",
+  "tag": "ror-inferred",
+  "was": "FUN_00240490",
+  "why": "adds a null-terminated list (sifcmd.irx, fileio.irx, ... at 0x2dbd58)"
+ },
+ "002404d8": {
+  "name": "rxSysSetCdMode",
+  "tag": "ror-inferred",
+  "was": "FUN_002404d8",
+  "why": "sceCdMmode DVD for disk types 0x14 / 0xfe, else CD"
+ },
+ "00240520": {
+  "name": "rxSysRebootIop",
+  "tag": "ror-inferred",
+  "was": "FUN_00240520",
+  "why": "'Iop Rebooting : %s' then rxFileRebootIop, sceSifInitRpc, sceCdInit, sceFsReset; 'Skip Iop Reboot' off the CD"
+ },
+ "002405d8": {
+  "name": "rxSysLoadModuleList",
+  "tag": "ror-inferred",
+  "was": "FUN_002405d8",
+  "why": "parses iopconf.cnf lines: name + args, loads .irx with rxFileLoadModule, 'Illigal Module Name:%s'"
+ },
+ "002407b0": {
+  "name": "rxSysReadIopConf",
+  "tag": "ror-inferred",
+  "was": "FUN_002407b0",
+  "why": "reboots the IOP with dir + ioprp300.img once, then loads iopconf.cnf into the buffer"
+ },
+ "00240838": {
+  "name": "rxSysCdInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00240838",
+  "why": "'initializing CD (%d) ...' sceCdInit loop, marks device CDROM ready"
+ },
+ "00240890": {
+  "name": "rxSysLoadIopModules",
+  "tag": "ror-inferred",
+  "was": "FUN_00240890",
+  "why": "'IOP Modules Load Start/End/Failed': default module list, IOP reboot, iopconf.cnf from modules/ or /usr/local/sce/iop/modules/"
+ },
+ "00240a88": {
+  "name": "rxSysIsDeviceReady",
+  "tag": "ror-inferred",
+  "was": "FUN_00240a88",
+  "why": "device flag 0x7cc780[dev] (dev < 0: the boot device)"
+ },
+ "00240ab0": {
+  "name": "rxSysGetBootDevice",
+  "tag": "ror-inferred",
+  "was": "FUN_00240ab0",
+  "why": "returns 0x2dba24, printed as 'BootDevice = %d'"
+ },
+ "00240ac0": {
+  "name": "rxSysDetectDevice",
+  "tag": "ror-inferred",
+  "was": "FUN_00240ac0",
+  "why": "boot device unset: more than 32 MB (devkit) -> HOST, else CDROM; marks it ready"
+ },
+ "00240b40": {
+  "name": "rxSysFindString",
+  "tag": "ror-inferred",
+  "was": "FUN_00240b40",
+  "why": "index of a string in a null-terminated table, -1 if absent"
+ },
+ "00240bb0": {
+  "name": "rxSysReadSystemIni",
+  "tag": "ror-inferred",
+  "was": "FUN_00240bb0",
+  "why": "system.ini [SYSTEM] NUMBER VERSION VMODE COUNTRY LANGUAGE WARNING"
+ },
+ "00240df0": {
+  "name": "rxSysResetHardware",
+  "tag": "ror-inferred",
+  "was": "FUN_00240df0",
+  "why": "once: VIF / VU / GS path / DMA reset, rxThInit, print semaphores"
+ },
+ "00240e60": {
+  "name": "rxSysReadRomDate",
+  "tag": "ror-inferred",
+  "was": "FUN_00240e60",
+  "why": "BIOS 0x1fc00108 'Sony Computer Entertainment Inc.' -> ROM date word 0x1fc00100"
+ },
+ "00240eb8": {
+  "name": "rxSysInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00240eb8",
+  "why": "called once by main: hardware reset, hooks, devices, 'BootDevice', 'Rom Date', subsystems, IOP modules, 'Device[%s] %s', system.ini, save-data prefix"
+ },
+ "002413d8": {
+  "name": "rxSysIniFind",
+  "tag": "ror-inferred",
+  "was": "FUN_002413d8",
+  "why": "(out, text, section, key): the ini section / key search rxSysIniGetString wraps"
+ },
+ "002417c0": {
+  "name": "rxSysIniGetString",
+  "tag": "ror-inferred",
+  "was": "FUN_002417c0",
+  "why": "(out, section, key) over the loaded system.ini buffer 0x7cc7c0 when 0x2dba28 says it was read"
+ },
+ "002419a8": {
+  "name": "rxSysTtyWrite",
+  "tag": "ror-inferred",
+  "was": "FUN_002419a8",
+  "why": "sceSifCallRpc(0x7ce7c0, 0x10, NOWAIT, buf, size) then waits; rxSysPrintf flushes its tty buffer through it when the tty RPC is bound"
+ },
+ "00241a00": {
+  "name": "rxSysOpenTty",
+  "tag": "ror-inferred",
+  "was": "FUN_00241a00",
+  "why": "booted from a host device: binds the tty RPC (0x241968), else opens boot device + 0x3048c0 for writing into 0x2dba34"
+ },
+ "00241b20": {
+  "name": "rxSysSetIopImage",
+  "tag": "ror-inferred",
+  "was": "FUN_00241b20",
+  "why": "strcpy into the IOP image name 0x2dbc50; main passes IOPRP300.IMG"
+ },
+ "00241b90": {
+  "name": "rxSysGetProductNumber",
+  "tag": "ror-inferred",
+  "was": "FUN_00241b90",
+  "why": "returns 0x2dba00 'SCPS-00000', system.ini NUMBER"
+ },
+ "00241bb0": {
+  "name": "rxSysGetCountry",
+  "tag": "ror-inferred",
+  "was": "FUN_00241bb0",
+  "why": "returns 0x2dba14, system.ini COUNTRY index"
+ },
+ "00241c00": {
+  "name": "rxSysGetMemorySize",
+  "tag": "ror-inferred",
+  "was": "FUN_00241c00",
+  "why": "GetMemorySize wrapper"
+ },
+ "00241c18": {
+  "name": "rxSysIsCdromPath",
+  "tag": "ror-inferred",
+  "was": "FUN_00241c18",
+  "why": "path starts cdrom0: or ends ;1"
+ },
+ "00241ca0": {
+  "name": "rxSysPathSkipDevice",
+  "tag": "ror-inferred",
+  "was": "FUN_00241ca0",
+  "why": "returns the path after its device (x: drive, host comma, colon)"
+ },
+ "00241d68": {
+  "name": "rxSysSetBootPath",
+  "tag": "ror-inferred",
+  "was": "FUN_00241d68",
+  "why": "'BootDev = %s' 'BootDir = %s' 'BootName = %s' from the boot path; main passes cdrom0:"
+ },
+ "00241f08": {
+  "name": "rxSysSetPrintHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00241f08",
+  "why": "swaps the print filter 0x2db9d0 rxSysPrintf calls"
+ },
+ "00241f20": {
+  "name": "rxSysPrintWait",
+  "tag": "ror-inferred",
+  "was": "rxSysPrintWait",
+  "why": "returns 1; the request rxSysLockPrint posts with rxThRequest while it waits for the print semaphore (body folded after rxSysSetPrintHook)"
+ },
+ "00241f28": {
+  "name": "rxSysIsTtyOpen",
+  "tag": "ror-inferred",
+  "was": "FUN_00241f28",
+  "why": "tty RPC bound (0x2dba38) or host tty fd (0x2dba34) open"
+ },
+ "00241f58": {
+  "name": "rxSysPrintf",
+  "tag": "ror-inferred",
+  "was": "FUN_00241f58",
+  "why": "151 callers; vsprintf to a 1 KB buffer, filter hook, scePrintf or buffered tty write"
+ },
+ "00242150": {
+  "name": "rxSysInitEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00242150",
+  "why": "empty, tail of rxSysInit"
+ },
+ "00242160": {
+  "name": "rxSysCreateSema",
+  "tag": "ror-inferred",
+  "was": "FUN_00242160",
+  "why": "CreateSema(init, max)"
+ },
+ "00242390": {
+  "name": "rxSysInitSema",
+  "tag": "ror-inferred",
+  "was": "FUN_00242390",
+  "why": "creates the two binary semaphores 0x2dbd98 / 0x2dbd94"
+ },
+ "00242400": {
+  "name": "rxSysLockPrint",
+  "tag": "ror-inferred",
+  "was": "FUN_00242400",
+  "why": "PollSema 0x2dbd98 until free, yielding to the rx threads"
+ },
+ "00242460": {
+  "name": "rxSysUnlockPrint",
+  "tag": "ror-inferred",
+  "was": "FUN_00242460",
+  "why": "SignalSema 0x2dbd98"
+ },
+ "00242480": {
+  "name": "rxSysLockSema1",
+  "tag": "ror-inferred",
+  "was": "rxSysLockSema1",
+  "why": "rxSysLockPrint on the second semaphore 0x2dbd94 (body was folded into rxSysUnlockPrint)"
+ },
+ "002424e0": {
+  "name": "rxSysUnlockSema1",
+  "tag": "ror-inferred",
+  "was": "FUN_002424e0",
+  "why": "SignalSema 0x2dbd94"
+ },
+ "002433d8": {
+  "name": "rxSysInitUser",
+  "tag": "ror-inferred",
+  "was": "FUN_002433d8",
+  "why": "empty, called by rxSysInit before rxSysInitModules"
+ },
+ "002433e8": {
+  "name": "rxSysThreadCallback",
+  "tag": "ror-inferred",
+  "was": "FUN_002433e8",
+  "why": "the callback rxSysInitModules registers with rxThAddCallback; tail to 0x243560"
+ },
+ "00243400": {
+  "name": "rxSysInitModules",
+  "tag": "ror-inferred",
+  "was": "FUN_00243400",
+  "why": "builds four free lists, then rxfile / rxthread inits, rxThAddCallback(0x2433e8)"
+ },
+ "00243560": {
+  "name": "rxSysUpdateDevices",
+  "tag": "ror-inferred",
+  "was": "FUN_00243560",
+  "why": "unverified: per-tick work of rxSysThreadCallback, calls the rxfile device entry 0x2462d8 and 0x248710 (unknown thread type message)"
+ },
+ "00243608": {
+  "name": "rxSysInitFileDevice",
+  "tag": "ror-inferred",
+  "was": "FUN_00243608",
+  "why": "main calls with 1; tail to rxfile 0x248778 (device checks)"
+ },
+ "00243638": {
+  "name": "rxSysSetFileDevice",
+  "tag": "ror-inferred",
+  "was": "FUN_00243638",
+  "why": "tail to rxFileSetDevice(slot, dev)"
+ },
+ "00243650": {
+  "name": "rxSysSetFileDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00243650",
+  "why": "rxFileSetDir(rxFileGetCurrent(), dir); rxSysInit passes the boot dir"
+ },
+ "00243680": {
+  "name": "rxSysGetFileDir",
+  "tag": "ror-inferred",
+  "was": "rxSysGetFileDir",
+  "why": "rxFileGetDir(rxFileGetCurrent()) (body was folded into rxSysSetFileDir)"
+ },
+ "002436a0": {
+  "name": "rxSysSetFileSearchDir",
+  "tag": "ror-inferred",
+  "was": "FUN_002436a0",
+  "why": "rxSysLoadIopModules sets modules/ and /usr/local/sce/iop/modules/ before reading iopconf.cnf, 0 after"
+ },
+ "002436d0": {
+  "name": "rxSysGetFileSearchDir",
+  "tag": "ror-inferred",
+  "was": "rxSysGetFileSearchDir",
+  "why": "rxFileGetSearchDir(rxFileGetCurrent()) (body was folded into rxSysSetFileSearchDir)"
+ },
+ "002458b0": {
+  "name": "rxFileCallDevice",
+  "tag": "ror-inferred",
+  "was": "FUN_002458b0",
+  "why": "device entry (0x2462d8) slot +0x1c called with an argument; dev -1 = boot device"
+ },
+ "00245ed8": {
+  "name": "rxFileLoad",
+  "tag": "ror-inferred",
+  "was": "FUN_00245ed8",
+  "why": "'rxfile : Failed to open / seek / load file': reads a whole file into a buffer, returns its size"
+ },
+ "00246030": {
+  "name": "rxFileLoadModule",
+  "tag": "ror-inferred",
+  "was": "FUN_00246030",
+  "why": "'rxfile : Load module' sceSifLoadModule(path, arglen, args)"
+ },
+ "002461f0": {
+  "name": "rxFileRebootIop",
+  "tag": "ror-inferred",
+  "was": "FUN_002461f0",
+  "why": "'rxfile : Reboot Iop' sceSifRebootIop / sceSifSyncIop"
+ },
+ "00246278": {
+  "name": "rxFileInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00246278",
+  "why": "inits three rxfile device blocks 0x7df9c0 / 0x7df9e4 / 0x7dfa2c"
+ },
+ "00248660": {
+  "name": "rxFileInitSlots",
+  "tag": "ror-inferred",
+  "was": "FUN_00248660",
+  "why": "clears four 0x128c-byte file slots, sets read/seek handlers 0x245ae8 / 0x245a48"
+ },
+ "00248870": {
+  "name": "rxFileGetCurrent",
+  "tag": "ror-inferred",
+  "was": "FUN_00248870",
+  "why": "*0x248e70(), 14 callers"
+ },
+ "00248890": {
+  "name": "rxFileSetDevice",
+  "tag": "ror-inferred",
+  "was": "FUN_00248890",
+  "why": "'rxfile : device disabled / changed / unknown device type': sets a slot's device, returns the old"
+ },
+ "00248998": {
+  "name": "rxFileSetDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00248998",
+  "why": "copies a lower-cased, slash-terminated directory into the context"
+ },
+ "00248a60": {
+  "name": "rxFileGetDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00248a60",
+  "why": "context (0x248df8) + 4: the directory rxFileSetDir writes"
+ },
+ "00248a80": {
+  "name": "rxFileSetSearchDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00248a80",
+  "why": "rxSysSetFileSearchDir(dir) = rxFileSetSearchDir(rxFileGetCurrent(), dir); dir 0 clears it"
+ },
+ "00248bb0": {
+  "name": "rxFileGetSearchDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00248bb0",
+  "why": "0x248e30(): the buffer rxFileSetSearchDir writes"
+ },
+ "00248fd8": {
+  "name": "rxFileStartThread",
+  "tag": "ror-inferred",
+  "was": "FUN_00248fd8",
+  "why": "0x2491c0(0, 2, 0x2495e0): the rxfile request thread ('rxfile : failed to create thread')"
+ },
+ "00249d48": {
+  "name": "rxThIsDispatchDisabled",
+  "tag": "ror-inferred",
+  "was": "FUN_00249d48",
+  "why": "iReferSemaStatus on the dispatch semaphore 0x807f44, count > 0"
+ },
+ "00249ea0": {
+  "name": "rxThInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00249ea0",
+  "why": "once: semaphores 0x807f40/44/48, the two rx threads, 0x807f4c = main thread"
+ },
+ "0024a258": {
+  "name": "rxThAddCallback",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a258",
+  "why": "'rxthread: rxThAddCallback fail'"
+ },
+ "0024a508": {
+  "name": "rxThYield",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a508",
+  "why": "from the main thread runs the rx thread until it waits; else swaps priorities"
+ },
+ "0024a8c8": {
+  "name": "rxThDisableDispatch",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a8c8",
+  "why": "iSignalSema on the dispatch semaphore 0x807f44 (a nesting count); paired with rxThEnableDispatch in rxSysPrintf"
+ },
+ "0024a958": {
+  "name": "rxThEnableDispatch",
+  "tag": "ror-inferred",
+  "was": "FUN_0024a958",
+  "why": "iPollSema on 0x807f44; at zero rearms the dispatch alarm"
+ },
+ "0024ae60": {
+  "name": "rxThRequest",
+  "tag": "ror-inferred",
+  "was": "FUN_0024ae60",
+  "why": "main thread only: stores a function + 3 args, arms the alarm 0x24a678"
+ },
+ "0024b0b0": {
+  "name": "rxThInitOnce",
+  "tag": "ror-inferred",
+  "was": "FUN_0024b0b0",
+  "why": "tail to rxThInit; rxSysResetHardware calls it"
+ },
+ "0024cc58": {
+  "name": "sceCdGetDiskType",
+  "tag": "lib-context",
+  "was": "FUN_0024cc58",
+  "why": "result compared with SCECdPS2DVD 0x14 / SCECdDVDV 0xfe before sceCdMmode"
+ },
+ "0025c8f0": {
+  "name": "sceDevVu1Reset",
+  "tag": "lib-context",
+  "was": "FUN_0025c8f0",
+  "why": "fourth in Sony's reset order (see 0x25cd90)"
+ },
+ "0025cd90": {
+  "name": "sceDevVif0Reset",
+  "tag": "lib-context",
+  "was": "FUN_0025cd90",
+  "why": "Sony's reset order sceDevVif0Reset, sceDevVu0Reset, sceDevVif1Reset, sceDevVu1Reset, sceGsResetPath, sceDmaReset in rxSysResetHardware"
+ },
+ "0025d0c0": {
+  "name": "sceDevVif1Reset",
+  "tag": "lib-context",
+  "was": "FUN_0025d0c0",
+  "why": "third in Sony's reset order (see 0x25cd90)"
+ },
+ "00260110": {
+  "name": "scePrintf",
+  "tag": "lib-context",
+  "was": "FUN_00260110",
+  "why": "variadic, DIntr, formats through 0x25f210 with a putc callback, EIntr"
+ },
+ "00261370": {
+  "name": "sceSifCallRpc",
+  "tag": "lib-context",
+  "was": "FUN_00261370",
+  "why": "(client, fno, mode, send, ssize, recv, rsize, end) then sceSifCheckStatRpc loop"
+ },
+ "00263068": {
+  "name": "sceWrite",
+  "tag": "lib-context",
+  "was": "FUN_00263068",
+  "why": "(fd, buf, len), SceStdioWriteSema, _sceFsWaitS"
+ },
  "00266770": {
   "name": "sceSifLoadElfPart",
   "tag": "lib-context",
