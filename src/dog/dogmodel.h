@@ -94,6 +94,21 @@ struct DogModel : DogEntityEx
         return i3rGetNodeIndexByName(m_i3r_root, p);
     }
 
+    // ROR 0x00281f50
+    int get_nTex() const
+    {
+        ROR_ASSERT(m_i3r_root); /* 298 */
+        return i3rGetNumTex(m_i3r_root);
+    }
+
+    // ROR 0x00281f98
+    const char *getTexName(int i) const
+    {
+        ROR_ASSERT(m_i3r_root); /* 299 */
+        ROR_ASSERT(i>=0); /* 299 */
+        return i3rGetTexName(m_i3r_root, i);
+    }
+
     u_char         _e4[0xf0 - 0xe4];
     int            m_mode;          // ROR 0xf0: DogActor::getMode; ready() clears it
     int            m_f4;            // ROR 0xf4: ready() sets -1; role unknown

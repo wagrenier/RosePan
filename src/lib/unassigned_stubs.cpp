@@ -18,6 +18,7 @@
 #include "rx/rxthread.h"
 #include "sequence/sequence.h"
 #include "snd/sndman.h"
+#include "utl/utltm2.h"
 
 // ---- globals (hand-written) ----
 // PC: the ROM defines the global objects in the file before main.cpp, whose
@@ -793,5 +794,36 @@ u_long   * i3dPktDrawWireSphere(float radius, u_long *pkt, I3dLayer *layer, sceV
                                const float *center)
 {
     ROSEPAN_STUB("i3dPktDrawWireSphere", 0x0021e6f8);
+    return {};
+}
+
+// ---- bridge: utlTm2GetSize (2026-10-22, the dogtexinfo session) ----
+// The ROM's code, until utl/utltm2.cpp (unassigned@00104970) is written:
+// DogTexInfo::addData sizes its TIM2 copy with it, and a stub's 0 would
+// copy nothing.
+
+// bridge of ROR 0x00104e1c
+int utlTm2GetSize(const void *tm2)
+{
+    ROSEPAN_BRIDGE("utlTm2GetSize", 0x00104e1c);
+    const u_char *p = (const u_char *)tm2;
+    u_int n = *(const u_short *)(p + 6);
+    int size = p[5] != 0 ? 0x80 : 0x10;
+    for (; n != 0; n--)
+        size += *(const int *)(p + size);
+    return size;
+}
+
+// stub of ROR 0x0022b428
+int i3rGetNumTex(const I3rRoot *root)
+{
+    ROSEPAN_STUB("i3rGetNumTex", 0x0022b428);
+    return {};
+}
+
+// stub of ROR 0x0022b438
+const char * i3rGetTexName(const I3rRoot *root, int n)
+{
+    ROSEPAN_STUB("i3rGetTexName", 0x0022b438);
     return {};
 }

@@ -233,6 +233,10 @@ static_assert(sizeof(I3dMatrixF4x4) == 0x40, "I3dMatrixF4x4 is 0x40 bytes on the
 
 /* The node index of the named node, -1 when the model has none. */
 int   i3rGetNodeIndexByName(I3rRoot *root, const char *name);            // ROR 0x0022b3d8
+/* The root's texture count and its n-th texture name (the TIM2 names a
+ * DogTexInfo holds them under). */
+int   i3rGetNumTex(const I3rRoot *root);                                 // ROR 0x0022b428
+const char *i3rGetTexName(const I3rRoot *root, int n);                  // ROR 0x0022b438
 
 #define I3D_OK 0
 

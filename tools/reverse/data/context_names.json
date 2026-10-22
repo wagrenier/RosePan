@@ -197,6 +197,18 @@
   "was": "FUN_0010421c",
   "why": "stores the seed 0xc45330af into bss 0x308484, the state 0x1041c4 steps (x * 0x769 + 0x7cf9) and 0x1041e4 scales; MagSystem's constructor calls it"
  },
+ "00104e1c": {
+  "name": "utlTm2GetSize",
+  "tag": "ror-inferred",
+  "was": "FUN_00104e1c",
+  "why": "TIM2 total size: header 0x10 (0x80 when the format byte +5 is set) plus every picture's total size, +6 pictures; addData sizes its copy with it"
+ },
+ "0010559c": {
+  "name": "utlTm2ToSepia",
+  "tag": "ror-inferred",
+  "was": "FUN_0010559c",
+  "why": "utl/utltm2.cpp; stores three colour factors, picks the picture's colour type (+0x13) and rewrites its colours as luminance 0x4d/0x96/0x1d times each factor >> 16 (DogTexInfo's 0xff 0xdc 0x98)"
+ },
  "00105650": {
   "name": "utlIsTccName",
   "tag": "ror-inferred",
@@ -545,6 +557,18 @@
   "was": "FUN_001161e4",
   "why": "dog/dogtexinfo.cpp asserts m_tex_info and (theN >= 0) && (theN < m_num_tex); returns m_tex_info + theN * 16"
  },
+ "0011626c": {
+  "name": "DogTexInfo::setSepiaColor",
+  "tag": "ror-inferred",
+  "was": "FUN_0011626c",
+  "why": "stores three words at +0x14/+0x18/+0x1c of the DogTexInfo (a0); addPfh hands them to utlTm2ToSepia; clear sets 0xff/0xdc/0x98 (a sepia tone)"
+ },
+ "0011627c": {
+  "name": "DogTexInfo::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_0011627c",
+  "why": "zeroes m_max_tex / m_num_tex / m_tex_info / m_tex_data / +0x10 and sets the sepia colour 0xff 0xdc 0x98; MagScene::MagScene and term call it"
+ },
  "001162ac": {
   "name": "DogTexInfo::init",
   "tag": "ror-inferred",
@@ -557,11 +581,35 @@
   "was": "FUN_001163dc",
   "why": "index of the texture record whose name equals the string; loadSystemData asserts the result >= 0 for r_shadow, noise, bit8a.."
  },
+ "0011646c": {
+  "name": "DogTexInfo::findFree",
+  "tag": "ror-inferred",
+  "was": "FUN_0011646c",
+  "why": "first record with no name or an empty one below m_num_tex, else m_num_tex when below m_max_tex, else -1; addData's slot pick"
+ },
+ "001164d0": {
+  "name": "DogTexInfo::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001164d0",
+  "why": "frees owned TIM2 copies (+0x168 when +0x16c), m_tex_data, terms every texture / CLUT and frees m_tex_info, then clear; init and MagScene::~MagScene call it"
+ },
  "00116618": {
   "name": "DogTexInfo::release",
   "tag": "ror-inferred",
   "was": "FUN_00116618",
   "why": "drops texture no's reference (+0x16e); at 0 releases its VRAM handles, frees its data and clears the record; sets m_dirty (+0x10)"
+ },
+ "001167f4": {
+  "name": "DogTexInfo::releaseModel",
+  "tag": "ror-inferred",
+  "was": "FUN_001167f4",
+  "why": "DogModel::release passes the model; releases each texture named by the model's m_i3r_root (dogmodel.h asserts m_i3r_root, i>=0), then trims m_num_tex"
+ },
+ "001169d0": {
+  "name": "DogTexInfo::releasePfh",
+  "tag": "ror-inferred",
+  "was": "FUN_001169d0",
+  "why": "DogModel::release passes a pack header; walks its m_num_file NUL-separated names after the offset table (+0x20 + n*4), releases the textures with those names, trims m_num_tex"
  },
  "00116b5c": {
   "name": "DogTexInfo::add",
@@ -4306,6 +4354,18 @@
   "tag": "lib-context",
   "was": "FUN_0022b3d8",
   "why": "i3d model root: looks the name up (0x22b1b0) in the root's node-name table (+0x10 -> +0x20, count +0x2e) and maps it through the index table +0x1c; -1 when absent; DogModel::getNodeIndexByName's body"
+ },
+ "0022b428": {
+  "name": "i3rGetNumTex",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b428",
+  "why": "short at (root+0x10)->+0x2c; DogModel::get_nTex (an ELF inline symbol) wraps it"
+ },
+ "0022b438": {
+  "name": "i3rGetTexName",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b438",
+  "why": "(root+0x10)->+0x18 name pointer table [n]; DogModel::getTexName (an ELF inline symbol) wraps it"
  },
  "00236960": {
   "name": "i3dVecZero",
