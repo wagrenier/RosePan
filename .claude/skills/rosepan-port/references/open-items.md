@@ -6,6 +6,32 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+0. **TOP PRIORITY (the user, 2026-10-22): the TUs needed to start rendering something**, queued at
+   the top of tus.json in this order. Today every frame is black: the frame loop runs, but
+   MagScene::draw, the i3d group / layer code and SprMan are stubs, and nothing else draws.
+   - **A. First picture, the now-loading screen** (it draws straight through sceGs / sceDma, no
+     i3d):
+     1. `system/sysnowloading.cpp`: SysNowLoading::init 0x2052ac / term 0x205394 and the helpers
+        0x204d38..0x2051cc (0x204e98 / 0x204e68 the packet, 0x205078 the LoadImage upload,
+        0x2050e8, the draw 0x2051cc that rxSys's IOP wait loop and the file reader call). Settle the
+        boundary (unassigned@00204d38 may belong to it) and get LOADING.BIN onto the screen: the
+        first frame that proves the GS path end to end.
+   - **B. The scene's 2D layers through i3d** (the S2dMovie loading.tm2 / S2dMes sprites; s2d.cpp
+     is written and waiting):
+     2. `mag/magscenerender.cpp`: MagScene::draw 0x13bcc0 (its layers, light sets, view, calls
+        S2dMovie::drawMovie / draw and the S2d render slots).
+     3. `unassigned@0021fb50`: the i3d groups / layers / sort (i3dLayerInit, i3dGroupInit,
+        i3dCtxRunGroup, i3dCtxCloseFrame, i3dGroupAddLayer, the i3dLayerSet* / Begin / EndPacket
+        setters, i3dCtxCreateView 0x226c58) -- i3dGroupInit and i3dCtxCloseFrame are reached stubs
+        every frame.
+     4. `unassigned@00216ad0`: i3d packets and texture uploads (i3dPktOpenChain, i3dPktSetReg,
+        i3dTexMakeUpload, i3dTexRegsSet ...).
+     5. `spr/sprtexture.cpp`: SprTexture (setList / update; replace the update bridge).
+     6. `dog/dogtexinfo.cpp`: the texture table SprTexture loads into (DogTexInfo::init / add are
+        reached).
+     7. `spr/sprman.cpp`: SprMan (init / update / draw, the pattern-table host format).
+   After A, compare the screenshot with LOADING.BIN's picture; after B, with work/ref/S2DMAN.
+   Then re-assess (the M1..M5 list below).
 1. ~~`setup/ghidra_seed.cpp`~~ (done 2026-10-22: see Done).
 2. ~~`setup/platform_bootstrap.cpp`~~ (done 2026-10-22: see Done and "Platform bootstrap").
 3. Then **re-assess** with the user (the queue will be empty). Proposed path, the way ReiPan's paid off
@@ -137,16 +163,15 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    pointers live in a game-heap array (freed by releaseTenkyu), and the clip-sphere reads of the
    second / collision models are skipped when they have no root.
 
-14. (2026-10-22, the s2d session) **`spr/s2d.cpp` is pinned (0x190a78..0x192ac0) and `partial`**:
-   S2dCineSco, S2dBg, S2dMes (all but 0x191938) and S2dMovie's lifecycle and phase machine are
-   written over a minimal `SprMan` / `SprTexture` (spr/sprman.h, spr/sprtexture.h: all stubs, a
-   bridge for SprTexture::update). Left in the file: `S2dMes::drawMapName` 0x191938 (needs names
-   for the scene text-view functions 0x134730 / 0x13555c / 0x135594 / 0x1351b0 / 0x135088 /
-   0x13511c / 0x1348b0 in magscene.cpp and 0x17ea44 with its table object 0x298ee0), and S2dMovie's
-   0x19241c / 0x1924e0 / 0x1925f0 (i3d layer setup: 0x223240 / 0x223260 / 0x223378 / 0x223398 /
-   0x21b550 / 0x226c58, 0x10fa6c) and the RxMpeg wrappers 0x192834..0x192920 (RxMpeg 0x181150 /
-   0x18154c / 0x18173c / 0x181644 / 0x1816b0 / 0x18176c / 0x1812a8; MagScene 0x132744 / 0x132784).
-   Open: the file name (spr/s2d.cpp is a guess: the classes could be one file each); S2dMes's
+14. (2026-10-22, the s2d sessions) **`spr/s2d.cpp` is pinned (0x190a78..0x192ac0) and complete
+   (`verify`)**: all 86 functions (S2dCineSco, S2dBg, S2dMes incl. drawMapName, S2dMovie incl. its
+   draw / movie wrappers and four uncalled item setters 0x192978..0x192a70, created in Ghidra this
+   session) over a minimal `SprMan` / `SprTexture` (spr/sprman.h, spr/sprtexture.h: all stubs, a
+   bridge for SprTexture::update). The callees are stubs: MagScene's windows / sub mode
+   (magscene.cpp), RxMpeg (lib/unassigned.h), the i3d layer setters, i3dPktSetReg, i3dCtxCreateView,
+   WrdTable::get, DogEntity::getMatrix. MagScene::m_camera_entity (+0x2ab70) is a host DogEntity
+   (0xa0) but getMatrix returns +0xf0: whoever writes getMatrix must give the scene the real camera
+   class first. Open: the file name (spr/s2d.cpp is a guess: the classes could be one file each); S2dMes's
    EE size (its map-name buffer, at most 0x200); the pattern-table format (EE word images in
    s2d.cpp; SprMan's TU decides the host form and resolves SprDispDef::m_anim_ee). Nothing shows
    until SprMan (spr/sprman.cpp) and MagScene::draw are written: **spr/sprman.cpp +

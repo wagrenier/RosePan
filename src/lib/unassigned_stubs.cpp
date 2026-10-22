@@ -25,6 +25,7 @@ Sequence   g_sequence;          /* bss 0x7a4440 */
 EmyManager g_emyManager;        /* bss 0x7b2140 */
 SndMan     g_sndMan;            /* bss 0x7b2580 */
 RxMpeg     g_rxMpeg;            /* bss 0x7b40c0 */
+WrdTable   g_wrdTable;          /* data 0x298ee0: data/wrd/WRD.BIN's table */
 
 int g_emyManagerTaskId;         /* bss 0x7b45c0 */
 int g_bss_7a3d48;               /* bss 0x7a3d48 */
@@ -369,5 +370,126 @@ int i3rCopyClipSphere(I3rRoot *root, float *center, float *radius)
 int i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity)
 {
     ROSEPAN_STUB("i3rReplaceStqMapEntity", 0x0021a938);
+    return {};
+}
+
+// stub of ROR 0x0010fa6c
+sceVu0FVECTOR * DogEntity::getMatrix()
+{
+    ROSEPAN_STUB("DogEntity::getMatrix", 0x0010fa6c);
+    return {};
+}
+
+// stub of ROR 0x0013555c
+int MagScene::getWindowTextWidth(int no, const char *text)
+{
+    ROSEPAN_STUB("MagScene::getWindowTextWidth", 0x0013555c);
+    return {};
+}
+
+// stub of ROR 0x00132784
+void MagScene::popSubMode()
+{
+    ROSEPAN_STUB("MagScene::popSubMode", 0x00132784);
+}
+
+// stub of ROR 0x00132744
+void MagScene::pushSubMode()
+{
+    ROSEPAN_STUB("MagScene::pushSubMode", 0x00132744);
+}
+
+// stub of ROR 0x001816b0
+int RxMpeg::close()
+{
+    ROSEPAN_STUB("RxMpeg::close", 0x001816b0);
+    return {};
+}
+
+// stub of ROR 0x001812a8
+void RxMpeg::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("RxMpeg::draw", 0x001812a8);
+}
+
+// stub of ROR 0x0018173c
+int RxMpeg::getStatus()
+{
+    ROSEPAN_STUB("RxMpeg::getStatus", 0x0018173c);
+    return {};
+}
+
+// stub of ROR 0x0018176c
+int RxMpeg::isEnd()
+{
+    ROSEPAN_STUB("RxMpeg::isEnd", 0x0018176c);
+    return {};
+}
+
+// stub of ROR 0x00181150
+void RxMpeg::open()
+{
+    ROSEPAN_STUB("RxMpeg::open", 0x00181150);
+}
+
+// stub of ROR 0x0018154c
+void RxMpeg::play(const char *name, int w, int h)
+{
+    ROSEPAN_STUB("RxMpeg::play", 0x0018154c);
+}
+
+// stub of ROR 0x00181644
+int RxMpeg::stop()
+{
+    ROSEPAN_STUB("RxMpeg::stop", 0x00181644);
+    return {};
+}
+
+// stub of ROR 0x0017ea44
+WrdEntry * WrdTable::get(int n)
+{
+    ROSEPAN_STUB("WrdTable::get", 0x0017ea44);
+    return {};
+}
+
+// stub of ROR 0x00226c58
+I3dView * i3dCtxCreateView(i3dContext *ctx, MagViewParam *param, sceVu0FVECTOR *matrix)
+{
+    ROSEPAN_STUB("i3dCtxCreateView", 0x00226c58);
+    return {};
+}
+
+// stub of ROR 0x00223378
+u_long * i3dLayerBeginPacket(I3dLayer *layer)
+{
+    ROSEPAN_STUB("i3dLayerBeginPacket", 0x00223378);
+    return {};
+}
+
+// stub of ROR 0x00223398
+int i3dLayerEndPacket(I3dLayer *layer, u_long *end)
+{
+    ROSEPAN_STUB("i3dLayerEndPacket", 0x00223398);
+    return {};
+}
+
+// stub of ROR 0x00223240
+int i3dLayerSetLight(I3dLayer *layer, I3dLight *light)
+{
+    ROSEPAN_STUB("i3dLayerSetLight", 0x00223240);
+    return {};
+}
+
+// stub of ROR 0x00223260
+int i3dLayerSetView(I3dLayer *layer, I3dView *view)
+{
+    ROSEPAN_STUB("i3dLayerSetView", 0x00223260);
+    return {};
+}
+
+// stub of ROR 0x0021b550
+u_long * i3dPktSetReg(u_long *pkt, u_long reg, u_long value)
+{
+    ROSEPAN_STUB("i3dPktSetReg", 0x0021b550);
     return {};
 }

@@ -107,7 +107,18 @@ struct MagScene
     void start();                                                        // ROR 0x00131a28
     int  initRender(i3dContext *ctx);                                    // ROR 0x00131b90
     void update(BedPad *pad0, BedPad *pad1);                             // ROR 0x001327dc
+    void pushSubMode();         /* BedSubMode::push on +0x22d0, then mode 8 */ // ROR 0x00132744
+    void popSubMode();                                                   // ROR 0x00132784
+    /* The text windows (MAX_WINDOW 4, slots at +0x2734; the "view" methods
+     * take the same numbers). openWindow returns the slot. */
+    int  openWindow(int w, int h, int a3, int life);                     // ROR 0x00134730
+    void closeWindow(int no);                                            // ROR 0x001348b0
     void setViewParam(int no, const int *v);                             // ROR 0x00134944
+    void fadeInWindow(int no, int time, int from, int to);               // ROR 0x00135088
+    void fadeOutWindow(int no, int time, int from, int to);              // ROR 0x0013511c
+    void setWindowShow(int no, int on);                                  // ROR 0x001351b0
+    int  getWindowTextWidth(int no, const char *text);                   // ROR 0x0013555c
+    void updateWindowFont(int no);                                       // ROR 0x00135594
     void drawView(int no, int a, int b, const void *p, int c);           // ROR 0x00135234
     void setViewFar(float far);                                          // ROR 0x00131618
     void resetEntities();                                                // ROR 0x00135fa4
@@ -184,6 +195,7 @@ struct MagScene
     I3dFog         m_fog[4];            // ROR 0x2aae0: init clears [0] and copies it to the others
     int            m_fog_2ab60;         // ROR 0x2ab60: init zeroes it; role unknown
     int            m_fog_2ab64;         // ROR 0x2ab64: init zeroes it; role unknown
+    DogEntity      m_camera_entity;     // ROR 0x2ab70: the camera's transform node (its class, likely DogCamera, is bigger: getMatrix reads +0xf0)
     int            m_camera_mode;       // ROR 0x2ad50: getCameraMode returns it
     int            m_camera_2ad58;      // ROR 0x2ad58: getCameraMode's second word out
     int            m_camera_target_set; // ROR 0x2ad9c: setCameraTarget sets 1

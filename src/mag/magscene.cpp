@@ -197,3 +197,40 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
 {
     ROSEPAN_STUB("MagScene::update", 0x001327dc);
 }
+
+// stub of ROR 0x001348b0
+void MagScene::closeWindow(int no)
+{
+    ROSEPAN_STUB("MagScene::closeWindow", 0x001348b0);
+}
+
+// stub of ROR 0x00135088
+void MagScene::fadeInWindow(int no, int time, int from, int to)
+{
+    ROSEPAN_STUB("MagScene::fadeInWindow", 0x00135088);
+}
+
+// stub of ROR 0x0013511c
+void MagScene::fadeOutWindow(int no, int time, int from, int to)
+{
+    ROSEPAN_STUB("MagScene::fadeOutWindow", 0x0013511c);
+}
+
+// stub of ROR 0x00134730
+int MagScene::openWindow(int w, int h, int a3, int life)
+{
+    ROSEPAN_STUB("MagScene::openWindow", 0x00134730);
+    return {};
+}
+
+// stub of ROR 0x001351b0
+void MagScene::setWindowShow(int no, int on)
+{
+    ROSEPAN_STUB("MagScene::setWindowShow", 0x001351b0);
+}
+
+// stub of ROR 0x00135594
+void MagScene::updateWindowFont(int no)
+{
+    ROSEPAN_STUB("MagScene::updateWindowFont", 0x00135594);
+}

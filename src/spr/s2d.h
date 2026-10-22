@@ -29,6 +29,8 @@
 
 struct DogTexInfo;
 struct I3dLayer;
+struct I3dLight;
+struct I3dView;
 struct i3dContext;
 struct MagScene;
 struct MagSystem;
@@ -229,6 +231,9 @@ struct S2dMes : MagLife
     char       m_map_name[0x100]; // ROR 0x950: EE length not known (at most 0x200)
 };
 
+/* The sprites of S2dMovie's one item (data 0x29bfb0). */
+#define S2D_MOVIE_ITEM_MAX 1
+
 /* EE 0x90c (the scene's +0x853b4 follows). No vtable. layout: host. */
 struct S2dMovie
 {
@@ -239,6 +244,11 @@ struct S2dMovie
     void term();                                                         // ROR 0x0019237c
     void loadTexture();                                                  // ROR 0x001923c4
     void update();                                                       // ROR 0x00192408
+    /* MagScene::draw's calls: the movie frame (key 890, while RxMpeg has
+     * one) and the two sprite layers (keys 900 / 1000). */
+    void drawMovie(i3dContext *ctx, I3dLight *light, I3dView *view);     // ROR 0x0019241c
+    void draw(i3dContext *ctx, I3dLight *light, I3dView *view);          // ROR 0x001924e0
+    I3dLayer *createLayer(i3dContext *ctx, float key);                   // ROR 0x001925f0
     int  open();                                                         // ROR 0x00192670
     int  close();                                                        // ROR 0x001926a4
     int  step();                                                         // ROR 0x001926c0
@@ -246,6 +256,20 @@ struct S2dMovie
     void start();                                                        // ROR 0x0019279c
     int  process();                                                      // ROR 0x001927ec
     int  subStep();                                                      // ROR 0x0019280c
+
+    /* The movie (g_rxMpeg): status -1 idle, 0 playing, 1 finished. */
+    void playMovie(const char *name);                                    // ROR 0x00192834
+    void playMovie(const char *name, int w, int h);                      // ROR 0x00192850
+    int  isMovieEnd();                                                   // ROR 0x001928b8
+    int  stopMovie();                                                    // ROR 0x001928d4
+    int  getMovieStatus();                                               // ROR 0x00192904
+    int  closeMovie();                                                   // ROR 0x00192920
+
+    /* S2dMes's item setters over one item (no < S2D_MOVIE_ITEM_MAX). */
+    bool setSpriteStdPoint(int no, int x, int y);                        // ROR 0x00192978
+    bool setSpriteOffPoint(int no, int x, int y);                        // ROR 0x001929cc
+    bool setSpriteState(int no, int on);                                 // ROR 0x00192a20
+    bool setSpriteDisp(int no, int on);                                  // ROR 0x00192a70
 
     int        m_open;          // ROR 0x000
     int        m_inited;        // ROR 0x004

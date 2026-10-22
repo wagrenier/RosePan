@@ -17,8 +17,10 @@
 
 #include <string.h>
 
+#include "lib/unassigned.h"
 #include "mag/magscene.h"
 #include "mag/magsystem.h"
+#include "sdk/libgraph.h"
 
 /* ---- data ---- */
 
@@ -351,6 +353,13 @@ static const SprDispDef s2dMovieDisp[3] = {
     { 1, 0, 0, 0, 0, 1, 0, 0, 0, 512, 5920, 524288, 0x0029bed8u },  // 0x0029bf44
     { -1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0x0029beb0u },  // 0x0029bf78
 };
+
+/* The S2dMovie item -> sprite map (data 0x29bfb0). */
+static const int s2dMovieSprNo[S2D_MOVIE_ITEM_MAX] = { 1 };
+
+/* The layers' TEST_1 (0x5000d): alpha test GREATER than 0, depth test
+ * GEQUAL. */
+#define S2D_LAYER_TEST SCE_GS_SET_TEST(1, 6, 0, 0, 0, 0, 1, 2)
 
 
 /* ======================================================================
@@ -1038,6 +1047,63 @@ int S2dMes::waitMapName()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The map-name caption: the text of word-table record m_map_no in a scene
+// text window at y 0x168, centred on x 0x100, with sprite 2 (its frame)
+// fading in with it over m_fade_time frames; out again once
+// setMapNameFadeOut clears m_map_name_on, then 1.
+// ROR 0x00191938
+
+int S2dMes::drawMapName()
+{
+    MagScene *scene = &m_system->m_scene;
+
+    switch (m_sub_state) {
+    case 0: {
+        const char *text = NULL;
+        WrdEntry *entry;
+        int width;
+
+        m_sub_state = 6;
+        m_map_name[0] = '\0';
+        entry = g_wrdTable.get(m_map_no);
+        if (entry != NULL)
+            text = entry->m_text;
+        if (text != NULL)
+            strcpy(m_map_name, text);
+        m_view = scene->openWindow(0x200, 0x100, 0, -1);
+        width = scene->getWindowTextWidth(m_view, m_map_name);
+        scene->updateWindowFont(m_view);
+        m_system->setViewParam(m_view, 0x100 - width / 2, 0x168, 0xffff, 0x200, 0x100);
+        scene->setWindowShow(m_view, 0);
+        m_system->drawView(m_view, 0, 0, m_map_name, 0);
+        scene->fadeInWindow(m_view, m_fade_time, 0, 0x80);
+        m_spr.m_sprite[2].m_off[0] = 0x9c0;
+        m_spr.m_sprite[2].m_off[1] = 0x17c0;
+        m_spr.fadeIn(2, m_fade_time, g_sprColorClear, g_sprColorOpaque);
+        return 0;
+    }
+    case 6:
+        if (m_map_name_on != 1)
+            m_sub_state = 15;
+        return 0;
+    case 14:
+        if (m_fade_time < ++m_fade_count) {
+            scene->closeWindow(m_view);
+            m_sub_state = 0;
+            return 1;
+        }
+        return 0;
+    case 15:
+        m_fade_count = 0;
+        m_spr.fadeOut(2, m_fade_time, g_sprColorClear, g_sprColorOpaque);
+        scene->fadeOutWindow(m_view, m_fade_time, 0, 0x80);
+        m_sub_state = 14;
+        return 0;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x00191ba8
 
 bool S2dMes::setSpriteStdPoint(int no, int x, int y)
@@ -1310,6 +1376,61 @@ void S2dMovie::update()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The movie frame, while RxMpeg has one: a layer at key 890 with the
+// scene's light set 0 and view, depth / alpha test on, drawn by RxMpeg.
+// ROR 0x0019241c
+
+void S2dMovie::drawMovie(i3dContext *ctx, I3dLight *light, I3dView *view)
+{
+    I3dLayer *layer;
+
+    if (g_rxMpeg.m_04 == 1 && (layer = createLayer(ctx, 890.0f)) != NULL) {
+        i3dLayerSetLight(layer, light);
+        i3dLayerSetView(layer, view);
+        i3dLayerEndPacket(layer, i3dPktSetReg(i3dLayerBeginPacket(layer), SCE_GS_TEST_1, S2D_LAYER_TEST));
+        g_rxMpeg.draw(layer);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The sprites: two layers (keys 900 and 1000) set up as drawMovie's, the
+// SprMan's layer pair, then SprMan::draw.
+// ROR 0x001924e0
+
+void S2dMovie::draw(i3dContext *ctx, I3dLight *light, I3dView *view)
+{
+    I3dLayer *layer0 = createLayer(ctx, 900.0f);
+    I3dLayer *layer1 = createLayer(ctx, 1000.0f);
+
+    if (layer0 == NULL || layer1 == NULL)
+        return;
+    i3dLayerSetLight(layer0, light);
+    i3dLayerSetView(layer0, view);
+    i3dLayerEndPacket(layer0, i3dPktSetReg(i3dLayerBeginPacket(layer0), SCE_GS_TEST_1, S2D_LAYER_TEST));
+    i3dLayerSetLight(layer1, light);
+    i3dLayerSetView(layer1, view);
+    i3dLayerEndPacket(layer1, i3dPktSetReg(i3dLayerBeginPacket(layer1), SCE_GS_TEST_1, S2D_LAYER_TEST));
+    m_spr.m_layer[0] = layer0;
+    m_spr.m_layer[1] = layer1;
+    m_spr.draw();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A layer at key with a view from the scene's view 0 and camera. Both
+// callers replace the view at once with MagScene::draw's.
+// ROR 0x001925f0
+
+I3dLayer *S2dMovie::createLayer(i3dContext *ctx, float key)
+{
+    I3dLayer *layer = i3dCtxCreateLayer(ctx, key);
+    MagScene *scene = m_scene;
+    sceVu0FVECTOR *matrix = scene->m_camera_entity.getMatrix();
+
+    i3dLayerSetView(layer, i3dCtxCreateView(ctx, &scene->m_view[0], matrix));
+    return layer;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x00192670
 
 int S2dMovie::open()
@@ -1405,11 +1526,105 @@ int S2dMovie::subStep()
     return 0;
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00192834
 
-// stub of ROR 0x00191938
-int S2dMes::drawMapName()
+void S2dMovie::playMovie(const char *name)
 {
-    ROSEPAN_STUB("S2dMes::drawMapName", 0x00191938);
-    return {};
+    playMovie(name, 0x200, 0x180);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00192850
+
+void S2dMovie::playMovie(const char *name, int w, int h)
+{
+    strcpy(g_rxMpeg.m_name, name);
+    g_rxMpeg.open();
+    g_rxMpeg.play(g_rxMpeg.m_name, w, h);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001928b8
+
+int S2dMovie::isMovieEnd()
+{
+    return g_rxMpeg.isEnd();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The skip: the scene goes to sub mode 8 until closeMovie.
+// ROR 0x001928d4
+
+int S2dMovie::stopMovie()
+{
+    m_system->m_scene.pushSubMode();
+    return g_rxMpeg.stop();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00192904
+
+int S2dMovie::getMovieStatus()
+{
+    return g_rxMpeg.getStatus();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00192920
+
+int S2dMovie::closeMovie()
+{
+    int ret = g_rxMpeg.close();
+
+    if (ret >= 0)
+        m_system->m_scene.popSubMode();
+    return ret;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// As S2dMes's setters; no caller found in the ROM.
+// ROR 0x00192978
+
+bool S2dMovie::setSpriteStdPoint(int no, int x, int y)
+{
+    if (no < S2D_MOVIE_ITEM_MAX) {
+        SprSprite *spr = &m_spr.m_sprite[s2dMovieSprNo[no]];
+        spr->m_std[0] = x;
+        spr->m_std[1] = y;
+    }
+    return no < S2D_MOVIE_ITEM_MAX;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001929cc
+
+bool S2dMovie::setSpriteOffPoint(int no, int x, int y)
+{
+    if (no < S2D_MOVIE_ITEM_MAX) {
+        SprSprite *spr = &m_spr.m_sprite[s2dMovieSprNo[no]];
+        spr->m_off[0] = x;
+        spr->m_off[1] = y;
+    }
+    return no < S2D_MOVIE_ITEM_MAX;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00192a20
+
+bool S2dMovie::setSpriteState(int no, int on)
+{
+    if (no < S2D_MOVIE_ITEM_MAX)
+        m_spr.m_sprite[s2dMovieSprNo[no]].m_state = (on == 1);
+    return no < S2D_MOVIE_ITEM_MAX;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00192a70
+
+bool S2dMovie::setSpriteDisp(int no, int on)
+{
+    if (no < S2D_MOVIE_ITEM_MAX)
+        m_spr.m_sprite[s2dMovieSprNo[no]].m_disp = (on == 1);
+    return no < S2D_MOVIE_ITEM_MAX;
 }

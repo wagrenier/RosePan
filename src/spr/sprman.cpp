@@ -96,3 +96,9 @@ int SprMan::update()
     ROSEPAN_STUB("SprMan::update", 0x0018c068);
     return {};
 }
+
+// stub of ROR 0x0018f338
+void SprMan::fadeIn(int no, int time, const int *from, const int *to)
+{
+    ROSEPAN_STUB("SprMan::fadeIn", 0x0018f338);
+}

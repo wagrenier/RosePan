@@ -246,7 +246,13 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     overflow (EndFrame returns 9), +0x12154 the open DMA tag the next run links from.
   - **A frame**: BeginFrame takes buffer share idx of count (head 128-aligned in the uncached
     segment), makes the root group; MagScene::draw makes layers (`i3dCtxCreateLayer(ctx, float
-    key)`, key bits made unsigned-sortable); EndFrame -> 0x224798 opens the chain (0x21b698), runs the
+    key)`, key bits made unsigned-sortable) and sets each one's light set / fog / view
+    (`i3dLayerSetLight` / `SetFog` / `SetView` 0x223240 / 0x223250 / 0x223260: layer +0x82c / +0x830 /
+    +0x834; getters 0x223270..0x223294 read +0x824..+0x834; the view from `i3dCtxCreateView`
+    0x226c58(ctx, MagViewParam, camera matrix), the light sets from 0x11262c over the light pool)
+    and register packets (`i3dLayerBeginPacket` 0x223378 -> `i3dPktSetReg(pkt, reg, value)`
+    0x21b550, one A+D write, 3 qwords -> `i3dLayerEndPacket` 0x223398, both on the layer's group
+    +0x81c); EndFrame -> 0x224798 opens the chain (0x21b698), runs the
     root group (0x2246c8: sort, link packets, call node callbacks), then the end hook. A layer's
     callback `i3dCtxDrawTexturedLayer` 0x21f4d8 sorts its draw sets and reserves their textures in
     runs of equal (+0x20 float, +0x2c key); full heaps flush the run so far (compact, VRAM transfer
@@ -325,8 +331,26 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   open / seek / read / close state machine over rxSysStreamOpen / rxFileSeek / rxFileRead /
   rxFileClose; while it waits it draws the now-loading screen (0x2051cc) when one is up, else
   rxThSync + SndMan::update. `fileGetSize` 0x1be768, `fileExists` 0x1be84c.
-- 0x7b40c0: a movie-player object (`RxMpeg`, ctor 0x1810f4; class name unverified); its first word
-  set = a movie is playing.
+- 0x7b40c0: a movie-player object (`RxMpeg`, ctor 0x1810f4; class name unverified): +0 open
+  (`open` 0x181150 sets it, `close` 0x1816b0 clears it), +4 = 1 while a frame is there to draw,
+  +0x2c / +0x30 width / height (0x200 x 0x180 by default), +0x44 the movie name (0x80 bytes).
+  `play(name, w, h)` 0x18154c, `draw(I3dLayer*)` 0x1812a8, `stop` 0x181644, `getStatus` 0x18173c
+  (-1 not open, then the rxmpeg library's status word: callers read 0 playing, 1 finished), `isEnd`
+  0x18176c. Its users go through S2dMovie's wrappers (below); FUN_001aabb4 / 0x1ab04c play a movie,
+  skip it on a button (stopMovie) and close it once finished.
+- **Word table** 0x298ee0: data/wrd/WRD.BIN loaded by 0x17e5c0 (from GamMan::loadStage);
+  `WrdTable::get(n)` 0x17ea44 -> record n (count at the file's +8), its text at record +0x10 (the map
+  names S2dMes shows). Class name invented from the file.
+- `BedSubMode` (bed/bedsubmode.cpp asserts `m_depth < MAX_STACK` / `m_depth > 0`): a current qword
+  at +0, a stack of 4 at +0x10, m_depth +0x50; push 0x100258 / pop 0x1002c0. The scene has one at
+  +0x22d0 (`MagScene::pushSubMode` 0x132744 pushes and sets mode 8 / -1, `popSubMode` 0x132784): the
+  movie skip runs in sub mode 8.
+- **The scene text windows** (mag/magscene.cpp asserts `MAX_WINDOW`, `m_window[ n ]`): 4 slots at
+  scene +0x2734 of 0xe0-byte MagLife windows, each with a font record at +0x2744 + n * 0x6c over the
+  language font (+0x2908) and font texture m_font_tex_no[n]: `openWindow(w, h, a3, life)` 0x134730
+  -> slot, `closeWindow` 0x1348b0, `fadeInWindow` / `fadeOutWindow(no, time, from, to)` 0x135088 /
+  0x13511c, `setWindowShow` 0x1351b0 (slot 7), `getWindowTextWidth` 0x13555c, `updateWindowFont`
+  0x135594. MagScene::setViewParam / drawView (0x134944 / 0x135234) take the same window numbers.
 
 - **The 2D layers** (`spr/s2d.cpp`, pinned 0x190a78..0x192ac0, 2026-10-22; no source string, spr/
   from the link order after spr/sprtexture.cpp): each holds a sprite manager (`SprMan`,
@@ -340,11 +364,18 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   `s2dBg*` requests on +0x93c. `S2dMes` (16 sprites): wait.tm2 / wait2.tm2 from
   data/mnurpk/s2dman.rpk (the key-wait / write / select-cursor icons, the pad buttons, the message
   frames), 14 items mapped to sprites by data 0x29bb70, set by 0x191ba8..0x1920c4 which the inline
-  setIcon* / setBtn* / setMessageSprite* call; the map-name caption (0x191938) renders map +0x93c's
-  name (record +0x10 of the table object 0x298ee0, lookup 0x17ea44) into a scene text view.
-  `S2dMovie` (EE 0x90c, no vtable): loading.tm2 from s2dman.rpk and the RxMpeg movie layers
-  (0x19241c / 0x1924e0 create i3d layers at keys 890 / 900 / 1000; 0x192834..0x192920 wrap RxMpeg
-  0x7b40c0). Fade colours: data 0x2999b0 (grey, alpha 0) -> 0x299990 (alpha 0x80). The pattern
+  setIcon* / setBtn* / setMessageSprite* call; the map-name caption (`drawMapName` 0x191938) puts
+  word-table record +0x93c's text in a scene text window (0x200 x 0x100, centred on x 0x100 at y
+  0x168) and fades it in / out with sprite 2 (its frame, offset 0x9c0 / 0x17c0).
+  `S2dMovie` (EE 0x90c, no vtable): loading.tm2 from s2dman.rpk and the movie. MagScene::draw calls
+  `drawMovie` 0x19241c (while RxMpeg +4 == 1: a layer at key 890 that RxMpeg::draw fills) after the
+  3D layers and `draw` 0x1924e0 last (layers at 900 / 1000 into SprMan +0x4d0 / +0x4d4, then
+  SprMan::draw); both pass light set 0 and the scene view, and set TEST_1 0x5000d (alpha GREATER 0,
+  Z GEQUAL). `createLayer` 0x1925f0 = i3dCtxCreateLayer + a view from scene view 0 and the camera
+  (+0x2ab70), which both callers overwrite at once. Movie wrappers: playMovie 0x192834 / 0x192850
+  (name -> RxMpeg +0x44, open, play), isMovieEnd 0x1928b8, stopMovie 0x1928d4 (pushSubMode + stop),
+  getMovieStatus 0x192904, closeMovie 0x192920 (close, popSubMode). 0x192978..0x192ac0 are four item
+  setters (one item -> sprite 1, data 0x29bfb0) with no caller. Fade colours: data 0x2999b0 (grey, alpha 0) -> 0x299990 (alpha 0x80). The pattern
   tables are nested records with EE pointers inside; they are kept as EE word images until SprMan
   is written (datadump.py --words).
 
