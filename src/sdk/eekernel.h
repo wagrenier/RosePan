@@ -133,6 +133,9 @@ int  RosePan_sceDevVif0Reset(void);
 int  RosePan_sceDevVu0Reset(void);
 int  RosePan_sceDevVif1Reset(void);
 int  RosePan_sceDevVu1Reset(void);
+/* RoR's VIF0 + VU0 reset at 0x25c340 (MARK / ERR / FBRST, VPU-STAT bit 1,
+ * two qwords into the VIF0 FIFO; not sceDevVif0Reset): nothing to reset here. */
+void vif0ResetVu0(void);
 
 /* Main memory size: a retail console's 32 MB (a devkit reports 128 MB, which
  * Rule of Rose's rx layer reads as "boot from host0:"). */

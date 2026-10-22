@@ -186,6 +186,11 @@ entries are marked **RoR** with the date.
   (`git stash -u`, build, run, `git stash pop`), and `git bisect` with a worktree per step when the
   cause is not obvious (judge each step by a measurement of the shots, e.g. mean brightness after a frame).
 
+- **A library version check behind stubs hangs the boot** (MagSystem::initGraph compares 36 i3d struct
+  sizes with `i3dGetStructSize` and loops for ever on a mismatch; a `{}` stub returns 0): bridge such
+  queries with the ROM's own table. Likewise an assert on a stub's result every frame floods the log
+  (`r != 0` on `i3dCtxGetRest`): bridge with the common-case value.
+
 - **A class with members named `free` / `realloc` / `alloc`** (BedMemory): inside its members an
   unqualified `free(p)` calls the member, not the C library. Write `::malloc` / `::free` there.
 

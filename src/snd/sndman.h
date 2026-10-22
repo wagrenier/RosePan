@@ -17,6 +17,7 @@
 struct SndMan
 {
     void init();                                                         // ROR 0x0017f164
+    void update();                                                       // ROR 0x0017f200
 
     int  m_state;               // ROR 0x00: 0 after construction, 1 after init
     char m_bootName[0x20];      // ROR 0x04: main copies argv[0] here (the constructor clears +0x24 next)

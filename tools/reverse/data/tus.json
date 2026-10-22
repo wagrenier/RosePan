@@ -27,6 +27,24 @@
    "status": "verify",
    "why": "12 of 16 functions reference bed/bedmemory.cpp; 0x100320 and 0x101718 are unanchored neighbours, bed/bedsubmode.cpp below and bed/bedpfh.cpp above"
   },
+  "mag/magsystem.cpp": {
+   "notes": "Left: the 12 methods on the scene's 128 actors (scene +0x2920 + no*0x4d0, vptr +0x94): 0x117974, 0x118a18, 0x118adc, 0x118c14, 0x118ccc, 0x118d9c, 0x118e6c, 0x118ea4, 0x118f30, 0x119234, 0x1192c8, 0x11939c - they need DogEntity/DogModel/DogActor in src (add DogActor m_actors[128] to MagScene, host layout); details in open-items.md item 9. Screenshot black: MagScene::draw and the i3d library are stubs. Start next from the reached stubs: MagScene ctor/init/start/initRender/update/draw (mag/magscene2.cpp, magscenerender.cpp), i3d (unassigned@00216ad0), BedPad (bed/bedpad.cpp). Decisions: MagScene holds MagLifePC at +0x2adc0 and MagLifeBwn at +0x2afe0 as minimal host structs; m_v_interval etc. are MagSystem statics (g_data_296198 removed); sceGsResetGraph gets raw 0,1,2,0 because the platform libgraph.h swaps INTERLACE/FRAME macro values (open question). Run at 30 fps confirmed by shot timestamps (60 frames per 2 s).",
+   "ranges": [
+    [
+     "00117654",
+     "001194b4"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 12:41",
+     "status": "partial",
+     "summary": "MagSystem: 40 of 52 functions written - ctor/dtor, V-blank callbacks, initGraph (pads, VIF1, GS reset, 512x448 double buffer, i3d version check, i3d context on the static packet buffer), start/term, the frame (update, begin/end/kick packet, waitVSync, storeImage BMP dump), scene/light/camera/model forwarders, PC/Bwn binders; main loop now paced by the V-blank semaphore at 30 fps (PC sceGsSyncV removed); 3 folded functions created, ~80 names; platform: vif0ResetVu0 no-op, game heap exported as g_utlMemory; bridges for i3dGetStructSize and i3dCtxGetRest"
+    }
+   ],
+   "status": "partial",
+   "why": "MagSystem methods: 0x117654/0x1176bc are the V-blank callbacks on the file's statics (m_v_sema sdata 0x29619c), asserts mag/magsystem.cpp x13 up to 0x11939c, 0x11948c forwards to the scene member +0x12540; 0x11764c (empty, called from the dog code) stays with dog/dogtexinfo.cpp, 0x1194b4.. is a list class before mag/maglifeman.cpp"
+  },
   "main.cpp": {
    "notes": "Status verify: the smoke run boots for real (iopconf.cnf, eight IOP modules and system.ini read from the disc folder through host0:), runs mainInitGame and loops in mainLoop at 60 fps, but every game call after rxSys is a stub, so the screen is black. This run was first claimed as unassigned@0020eda4 (the sequence engine) by frontier x44 from the assert handler 0x215a30; that claim was released for main per open-items Next up, and 0x215a30 is now in settings.frontier_ignore. PC deviations in main.cpp: boot path host0: and file device -1 (boot device HOST) instead of cdrom0: and 1; RosePan_RendererBeginFrame/EndFrame around each mainLoop frame; a temporary sceGsSyncV(0) in mainLoop to delete when MagSystem::update (which waits on m_v_sema) is written. The process main builds argv[0] = cdrom0:\\SLUS_214.48;1 and passes the host arguments on, so -m N picks the boot stage. Global objects (MagSystem 0x6e9840, GamMan 0x7812c0, CmnTaskMan 0x7a3d80, Sequence 0x7a4440, EmyManager 0x7b2140, SndMan 0x7b2580) are defined in lib/unassigned_stubs.cpp until the globals file before main.cpp (static init 0x2041f8) is defined. Minimal headers created for them (mag/magsystem.h, mag/magscene.h, game/gamman.h, sequence/sequence.h, snd/sndman.h, system/sysnowloading.h, lib/unassigned.h), declared as struct because stubgen breaks on public: labels (hazards.md). Next: system/sysnowloading.cpp has a reference picture (LOADING.BIN is raw PSMT8 256x256 + CSM1 CT32 palette, four Now Loading frames; architecture.md Disc and data files) but its draw 0x2051cc is called from the pfh loader 0x1be564 inside GamMan loads; mag/magsystem.cpp is the top reached stub. Knowledge recorded in architecture.md (Program flow, Key globals, LOADING.BIN, platform main), hazards.md (stubgen public:, frontier_ignore, swapped SCE_GS_INTERLACE, host SetDebugHandler), open-items.md (Next up 8, main.cpp open points, Done).",
    "ranges": [

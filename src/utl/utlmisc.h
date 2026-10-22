@@ -13,6 +13,8 @@
 
 #include <stddef.h>
 
+#include "bed/bedmemory.h"
+
 /* utlParseParam's value kinds (the record's type word). */
 enum UTL_PARAM_TYPE
 {
@@ -45,6 +47,10 @@ char *utlSkipSymbol(char *p);                                            // ROR 
 char *utlNextLine(char *p);                                              // ROR 0x00105838
 int   utlParseParam(UtlParam *out, int max, char *text);                 // ROR 0x001058a0
 void  utlIncFrameCount(void);                                            // ROR 0x00105b3c
+
+/* The game heap: utlMemInit creates it; MagSystem checks it and reads its
+ * free space every frame. */
+extern BedMemory g_utlMemory;   /* bss 0x6e9800 */
 
 /* The ROM's global operator new / delete (GCC 2 __nw__FUi, __vn__FUi,
  * __dl__FPv, __vd__FPv and two debug overloads nothing calls). PORT: they
