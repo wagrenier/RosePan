@@ -5645,6 +5645,18 @@
   "was": "FUN_00237cc8",
   "why": "FlushCache(0) and returns 0"
  },
+ "00237ce8": {
+  "name": "rxSndThreadCallback",
+  "tag": "ror-inferred",
+  "was": "FUN_00237ce8",
+  "why": "rxThAddCallback'd by rxSndInit; passes the yielding flag to rxSndSetBufferBank"
+ },
+ "00237d00": {
+  "name": "rxSndCheckBgCall",
+  "tag": "ror-inferred",
+  "was": "rxSndCheckBgCall",
+  "why": "rxSndSetBgCallHook'd by rxSndInit; prints '*** rxsndut : BG thread called! %s' with the caller's name when rxThIsYielding and dispatch is on"
+ },
  "00237d80": {
   "name": "rxSndInit",
   "tag": "ror-inferred",
@@ -5657,17 +5669,185 @@
   "was": "FUN_00237db0",
   "why": "removes the rxSnd thread callback 0x237ce8 and shuts the library down; SndMan::term"
  },
+ "00237dd0": {
+  "name": "rxSndInitModules",
+  "tag": "ror-inferred",
+  "was": "FUN_00237dd0",
+  "why": "rxSndInit: inits rpc, config, iop buffers, spu heap, xvab, xseq, bgm, se, pcm, adpcm in order"
+ },
+ "00237e30": {
+  "name": "rxSndTermModules",
+  "tag": "ror-inferred",
+  "was": "FUN_00237e30",
+  "why": "rxSndTerm: IOP command 0x11 until 0, then every module's term in reverse"
+ },
  "00237eb0": {
   "name": "rxSndUpdate",
   "tag": "lib-context",
   "was": "FUN_00237eb0",
   "why": "per frame from SndMan::update: flushes the queued IOP commands"
  },
+ "00237f90": {
+  "name": "rxSndSetOutputMode",
+  "tag": "ror-inferred",
+  "was": "FUN_00237f90",
+  "why": "IOP command 0x30 {2, flag != 0}; called from an 8-way option switch 0x1c9c1c; meaning of parameter 2 is a guess (stereo/mono)"
+ },
+ "00238038": {
+  "name": "rxSndGetDebugFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_00238038",
+  "why": "returns byte 0x7b5ac0 (7 at init); bit 0 errors, bit 1 bg-thread warnings, bit 2 bind messages"
+ },
  "00238188": {
   "name": "rxSndSetMasterVolume",
   "tag": "lib-context",
   "was": "FUN_00238188",
   "why": "SndMan's fade passes the left / right master volume"
+ },
+ "00238268": {
+  "name": "rxSndSetBufferBank",
+  "tag": "ror-inferred",
+  "was": "FUN_00238268",
+  "why": "clamps to 0..1 into 0x2db638, the bank of the double RPC send/receive buffers; returns the old one"
+ },
+ "00238478": {
+  "name": "rxSndInitConfig",
+  "tag": "ror-inferred",
+  "was": "FUN_00238478",
+  "why": "sets debug flags 7 and master volume 0x80/0x80 (0x7b5ac0..)"
+ },
+ "002384a8": {
+  "name": "rxSndTermConfig",
+  "tag": "ror-inferred",
+  "was": "FUN_002384a8",
+  "why": "empty term of the config module"
+ },
+ "002384b8": {
+  "name": "rxSndGetBufferBank",
+  "tag": "ror-inferred",
+  "was": "FUN_002384b8",
+  "why": "returns 0x2db638"
+ },
+ "002384c8": {
+  "name": "rxSndGetMasterVolumeL",
+  "tag": "ror-inferred",
+  "was": "FUN_002384c8",
+  "why": "returns short 0x7b5ac4, set by rxSndSetMasterVolume"
+ },
+ "002384d8": {
+  "name": "rxSndGetMasterVolumeR",
+  "tag": "ror-inferred",
+  "was": "FUN_002384d8",
+  "why": "returns short 0x7b5ac6, set by rxSndSetMasterVolume"
+ },
+ "002384f8": {
+  "name": "rxSndWait",
+  "tag": "ror-inferred",
+  "was": "FUN_002384f8",
+  "why": "empty: the body of the busy-wait loops (9999 passes)"
+ },
+ "00238500": {
+  "name": "rxSndSetBgCallHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00238500",
+  "why": "stores a0 in 0x2db958"
+ },
+ "00238510": {
+  "name": "rxSndCallBgCallHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00238510",
+  "why": "calls 0x2db958 with the caller's name string (rxSndBgmStop / rxSndSeStop / rxSndAdpcmClose)"
+ },
+ "002385b8": {
+  "name": "rxSndDefIopAlloc",
+  "tag": "ror-inferred",
+  "was": "FUN_002385b8",
+  "why": "default IOP heap alloc in hook table 0x2db95c: IOP command 0x20 {0, size 64-aligned, 0}; 'can't allocate IOP heap'"
+ },
+ "00238630": {
+  "name": "rxSndDefIopAllocMode1",
+  "tag": "ror-inferred",
+  "was": "FUN_00238630",
+  "why": "default hook 0x2db960: IOP command 0x20 {1, size, 0}; mode 1 meaning unknown"
+ },
+ "002386b0": {
+  "name": "rxSndDefIopFree",
+  "tag": "ror-inferred",
+  "was": "FUN_002386b0",
+  "why": "default hook 0x2db964: IOP command 0x21 {addr}"
+ },
+ "00238740": {
+  "name": "rxSndIopAlloc",
+  "tag": "ror-inferred",
+  "was": "FUN_00238740",
+  "why": "calls hook 0x2db95c"
+ },
+ "00238768": {
+  "name": "rxSndIopAllocMode1",
+  "tag": "ror-inferred",
+  "was": "FUN_00238768",
+  "why": "calls hook 0x2db960"
+ },
+ "00238790": {
+  "name": "rxSndIopFree",
+  "tag": "ror-inferred",
+  "was": "FUN_00238790",
+  "why": "calls hook 0x2db964"
+ },
+ "00238d28": {
+  "name": "rxSndIopBufInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00238d28",
+  "why": "clears 0x7b6b00 (0x80) and allocates two 0x20-byte IOP blocks at +0x40/+0x44"
+ },
+ "00238d78": {
+  "name": "rxSndIopBufTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_00238d78",
+  "why": "frees the two IOP blocks of rxSndIopBufInit"
+ },
+ "002390f8": {
+  "name": "rxSndSpuFree",
+  "tag": "ror-inferred",
+  "was": "FUN_002390f8",
+  "why": "calls hook 0x2db970 (default 0x239030 -> SPU heap free)"
+ },
+ "00239288": {
+  "name": "rxSndXvabPoll",
+  "tag": "ror-inferred",
+  "was": "FUN_00239288",
+  "why": "IOP command 0x41 {id}; with wait set loops until 0; rxSndXvabCheck's worker"
+ },
+ "00239380": {
+  "name": "rxSndSpuHeapInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00239380",
+  "why": "256 SPU heap nodes of 0x18 at 0x7b6b80, one free block 0x5010..+0x1baff0 (SPU RAM above the reserved area)"
+ },
+ "002394a0": {
+  "name": "rxSndSpuHeapTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_002394a0",
+  "why": "empty"
+ },
+ "00239be8": {
+  "name": "rxSndSpuHeapNewNode",
+  "tag": "ror-inferred",
+  "was": "FUN_00239be8",
+  "why": "pops a node off the free list 0x7b8398"
+ },
+ "0023a170": {
+  "name": "rxSndXvabInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0023a170",
+  "why": "empty"
+ },
+ "0023a178": {
+  "name": "rxSndXvabTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_0023a178",
+  "why": "empty"
  },
  "0023a1b8": {
   "name": "rxSndXvabLoad",
@@ -5686,6 +5866,72 @@
   "tag": "lib-context",
   "was": "FUN_0023a720",
   "why": "XVAB transfer state: 1 while busy; arg 1 waits"
+ },
+ "0023b018": {
+  "name": "rxSndXseqInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0023b018",
+  "why": "empty; XSEQ strings follow"
+ },
+ "0023b020": {
+  "name": "rxSndXseqTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_0023b020",
+  "why": "empty"
+ },
+ "0023b238": {
+  "name": "rxSndBgmSetMasterVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_0023b238",
+  "why": "clamps to -0x80..0x80 into 0x7bbecc/ce and re-sends every playing BGM's volume"
+ },
+ "0023b3b8": {
+  "name": "rxSndBgmStop",
+  "tag": "ror-inferred",
+  "was": "FUN_0023b3b8",
+  "why": "calls the bg hook with 'rxSndBgmStop'; IOP queue 0x71 {id, 0, 1|2}; moves the slot to the stopping list"
+ },
+ "0023b840": {
+  "name": "rxSndBgmSetVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_0023b840",
+  "why": "stores the slot volume, queues 0x71 {id, 3, l*masterL*bgmL>>14, r...}"
+ },
+ "0023bb78": {
+  "name": "rxSndBgmInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0023bb78",
+  "why": "32 BGM slots of 0x18 at 0x7bbbc0 onto the free list, BGM master 0x80"
+ },
+ "0023bbd0": {
+  "name": "rxSndBgmTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_0023bbd0",
+  "why": "empty"
+ },
+ "0023bbd8": {
+  "name": "rxSndBgmUpdate",
+  "tag": "ror-inferred",
+  "was": "FUN_0023bbd8",
+  "why": "applies the IOP's BGM status (reply of 0x72) to the playing list, frees stopping slots the IOP no longer reports"
+ },
+ "0023bd50": {
+  "name": "rxSndBgmGetMasterVolumeL",
+  "tag": "ror-inferred",
+  "was": "FUN_0023bd50",
+  "why": "returns 0x7bbecc"
+ },
+ "0023bd60": {
+  "name": "rxSndBgmGetMasterVolumeR",
+  "tag": "ror-inferred",
+  "was": "FUN_0023bd60",
+  "why": "returns 0x7bbece"
+ },
+ "0023bd70": {
+  "name": "rxSndSeSetMasterVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_0023bd70",
+  "why": "clamps into 0x7bc3dc/de and re-sends rxSndSeSetVolume for every playing voice"
  },
  "0023be68": {
   "name": "rxSndSePlay",
@@ -5729,6 +5975,84 @@
   "was": "FUN_0023c510",
   "why": "voice in a0, float in f12 (SE +0x30, 1.0 default)"
  },
+ "0023c910": {
+  "name": "rxSndSeInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0023c910",
+  "why": "64 SE voices of 0x14 at 0x7bbed0 onto the free list, SE master 0x80"
+ },
+ "0023c970": {
+  "name": "rxSndSeTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_0023c970",
+  "why": "empty"
+ },
+ "0023c978": {
+  "name": "rxSndSeUpdate",
+  "tag": "ror-inferred",
+  "was": "FUN_0023c978",
+  "why": "applies the IOP's SE status (reply of 0x83); voices that stopped get bit 2 and rxSndSeStop"
+ },
+ "0023cae8": {
+  "name": "rxSndSeGetMasterVolumeL",
+  "tag": "ror-inferred",
+  "was": "FUN_0023cae8",
+  "why": "returns 0x7bc3dc"
+ },
+ "0023caf8": {
+  "name": "rxSndSeGetMasterVolumeR",
+  "tag": "ror-inferred",
+  "was": "FUN_0023caf8",
+  "why": "returns 0x7bc3de"
+ },
+ "0023cb08": {
+  "name": "rxSndPcmSetMasterVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_0023cb08",
+  "why": "clamps into 0x7bdf90/92 and re-sends every open PCM stream's volume"
+ },
+ "0023d7e0": {
+  "name": "rxSndPcmSetVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_0023d7e0",
+  "why": "stores the stream volume, queues 0xb2 {id, 4, l, r}"
+ },
+ "0023d908": {
+  "name": "rxSndPcmInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0023d908",
+  "why": "256 position-callback nodes at 0x7bc400 and 32 PCM streams of 0x3c at 0x7bd804; rxSndPcmClose string"
+ },
+ "0023d998": {
+  "name": "rxSndPcmTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_0023d998",
+  "why": "empty"
+ },
+ "0023d9a0": {
+  "name": "rxSndPcmUpdate",
+  "tag": "ror-inferred",
+  "was": "FUN_0023d9a0",
+  "why": "applies the IOP's PCM status (reply of 0xb3), fires the position callbacks passed, frees closed streams"
+ },
+ "0023dbb0": {
+  "name": "rxSndPcmGetMasterVolumeL",
+  "tag": "ror-inferred",
+  "was": "FUN_0023dbb0",
+  "why": "returns 0x7bdf90"
+ },
+ "0023dbc0": {
+  "name": "rxSndPcmGetMasterVolumeR",
+  "tag": "ror-inferred",
+  "was": "FUN_0023dbc0",
+  "why": "returns 0x7bdf92"
+ },
+ "0023dbd0": {
+  "name": "rxSndAdpcmSetMasterVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_0023dbd0",
+  "why": "clamps into 0x7c12d4/d6 and re-sends rxSndAdpcmSetVolume for every open stream"
+ },
  "0023dcc8": {
   "name": "rxSndAdpcmOpen",
   "tag": "lib-context",
@@ -5746,6 +6070,12 @@
   "tag": "lib-context",
   "was": "FUN_0023e158",
   "why": "status byte of the ADPCM stream (bit 0 open, 4 ended, 8 paused)"
+ },
+ "0023e1a0": {
+  "name": "rxSndAdpcmGetFreeSize",
+  "tag": "ror-inferred",
+  "was": "FUN_0023e1a0",
+  "why": "bytes the stream's IOP ring can take: size - filled, x2 for modes 1..2, x channels for 0x1000000; without all, minus 0x80 per channel"
  },
  "0023e240": {
   "name": "rxSndAdpcmGetFree",
@@ -5788,6 +6118,114 @@
   "tag": "lib-context",
   "was": "FUN_0023f310",
   "why": "stream in a0, float in f12 (stream +0x3c, 1.0 default)"
+ },
+ "0023f648": {
+  "name": "rxSndAdpcmInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0023f648",
+  "why": "256 position-callback nodes at 0x7befc0 and 48 ADPCM streams of 0x50 at 0x7c03c8"
+ },
+ "0023f6e0": {
+  "name": "rxSndAdpcmTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_0023f6e0",
+  "why": "empty"
+ },
+ "0023f6e8": {
+  "name": "rxSndAdpcmUpdate",
+  "tag": "ror-inferred",
+  "was": "FUN_0023f6e8",
+  "why": "applies the IOP's ADPCM status (reply of 0xa3): flags, filled size, 64-bit play position; fires position callbacks; frees closed streams"
+ },
+ "0023f940": {
+  "name": "rxSndAdpcmGetMasterVolumeL",
+  "tag": "ror-inferred",
+  "was": "FUN_0023f940",
+  "why": "returns 0x7c12d4"
+ },
+ "0023f950": {
+  "name": "rxSndAdpcmGetMasterVolumeR",
+  "tag": "ror-inferred",
+  "was": "FUN_0023f950",
+  "why": "returns 0x7c12d6"
+ },
+ "0023f960": {
+  "name": "rxSndCreateSema",
+  "tag": "ror-inferred",
+  "was": "FUN_0023f960",
+  "why": "CreateSema with max a0, init a1"
+ },
+ "0023f9b0": {
+  "name": "rxSndBindRpc",
+  "tag": "ror-inferred",
+  "was": "FUN_0023f9b0",
+  "why": "'binding IOP module %08X ...' / 'bind error' / '... binding completed'; binds until serve is set, creates the RPC semaphore"
+ },
+ "0023faa8": {
+  "name": "rxSndUnbindRpc",
+  "tag": "ror-inferred",
+  "was": "FUN_0023faa8",
+  "why": "DeleteSema of the RPC semaphore 0x2db9c0"
+ },
+ "0023fac8": {
+  "name": "rxSndRpcEndFunc",
+  "tag": "ror-inferred",
+  "was": "rxSndRpcEndFunc",
+  "why": "sceSifCallRpc end function: iSignalSema(0x2db9c0)"
+ },
+ "0023faf8": {
+  "name": "rxSndCallRpc",
+  "tag": "ror-inferred",
+  "was": "FUN_0023faf8",
+  "why": "WaitSema, sceSifCallRpc NOWAIT with rxSndRpcEndFunc, waits for sceSifCheckStatRpc"
+ },
+ "0023fbc0": {
+  "name": "rxSndRpcInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0023fbc0",
+  "why": "rxSndBindRpc(client 0x7ca300, 0xd000) until it succeeds"
+ },
+ "0023fbf8": {
+  "name": "rxSndRpcTerm",
+  "tag": "ror-inferred",
+  "was": "FUN_0023fbf8",
+  "why": "rxSndUnbindRpc(client 0x7ca300)"
+ },
+ "0023fc18": {
+  "name": "rxSndRpcCommand",
+  "tag": "ror-inferred",
+  "was": "FUN_0023fc18",
+  "why": "copies args into the bank's send buffer 0x7c9300, one direct RPC with fno=cmd, copies the reply out, returns reply word 0"
+ },
+ "0023fda8": {
+  "name": "rxSndQueueBegin",
+  "tag": "ror-inferred",
+  "was": "FUN_0023fda8",
+  "why": "opens a queued IOP command {cmd, replySize, dataSize} at 0x7ca340+0x2db9c4; flushes first when 0x1000 would overflow"
+ },
+ "0023fe40": {
+  "name": "rxSndQueueGetReply",
+  "tag": "ror-inferred",
+  "was": "FUN_0023fe40",
+  "why": "the reply slot of the open command: 0x7cb340 + 0x2db9c8"
+ },
+ "0023fe58": {
+  "name": "rxSndQueueGetData",
+  "tag": "ror-inferred",
+  "was": "FUN_0023fe58",
+  "why": "the data of the open command: 0x7ca34c + 0x2db9c4"
+ },
+ "0023fe70": {
+  "name": "rxSndQueueEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_0023fe70",
+  "why": "advances the queue by the open command's header + data and its reply size"
+ },
+ "0023feb8": {
+  "name": "rxSndQueueFlush",
+  "tag": "ror-inferred",
+  "was": "FUN_0023feb8",
+  "why": "terminates the queue with a zero header and sends it as RPC fno 0x200; resets to 0 / reply offset 4"
  },
  "0023ff58": {
   "name": "rxSysNoMemFunc",

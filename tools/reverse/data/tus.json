@@ -1,5 +1,9 @@
 {
- "queue": [],
+ "queue": [
+  "unassigned@0011262c",
+  "mag/magscene.cpp",
+  "game/gamfile.cpp"
+ ],
  "settings": {
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
   "frontier_ignore": [
@@ -357,6 +361,24 @@
    "status": "verify",
    "why": "rx middleware file layer: rxfile messages from 0x244410 (failed to alloc slot) to the request thread 0x2491c0 (rxfile : failed to create thread); starts after rxsys 0x2437f8, ends with the file thread priority helpers 0x249b20/0x249b78 (bss 0x7f6910/0x7f6918); 0x249b88 starts the rxthread kernel wrappers (CreateSema, CreateThread)"
   },
+  "rx/rxsnd.cpp": {
+   "notes": "Nothing written yet; all rxSnd entry points are still stubs in lib/unassigned_stubs.cpp. Start from architecture.md row 0x237ce8 (transport and command families). Plan for the writer: (1) the EE side is faithful but rxSndRpcInit loops rxSndBindRpc until serve is set and rxSndCallRpc WaitSema s on a semaphore only rxSndRpcEndFunc signals, so writing it without an IOP side hangs the boot: add a host service for RPC 0xd000 (stand-in for RXSNDDRV.IRX, e.g. src/sdk/iop_rxsnd.cpp registered from RosePan_IopBoot via sceSifSetRpcQueue / sceSifRegisterRpc / sceSifRpcLoop) that returns a zeroed reply buffer of at least 0x1040 bytes; zero replies are a sane silent IOP (term loop 0x11 ends, XvabPoll reports done, status counts 0) -- this is a platform-layer decision, record it under Decisions. (2) With zero replies the IOP heap alloc prints can't allocate IOP heap twice at boot (rxSndIopBufInit, debug flags 7) and SE voices never report ended; check SndMan code that waits on a voice. (3) Hook table 0x2db95c..0x2db970 defaults: 0x2385b8 / 0x238630 / 0x2386b0 (IOP, small) and 0x238ff0 / 0x239010 / 0x239030 (SPU, via 0x2394e0 / 0x2398f8). (4) A varint reader is hidden at 0x23a180 inside rxSndXvabTerm's span (mkfunc it). (5) rxSndSetOutputMode 0x237f90 name is a guess (command 0x30 {2, flag}). Screenshot black, unchanged (lightstatus asserts every frame).",
+   "ranges": [
+    [
+     "00237ce8",
+     "0023ff58"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 19:29",
+     "status": "partial",
+     "summary": "Pinned rx/rxsnd.cpp 0x237ce8..0x23ff58 (was unassigned@00237ce8) and named 73 functions of the rx sound library (transport, queue, config, heaps, BGM/SE/PCM/ADPCM init, update, volume); created hidden functions rxSndCheckBgCall 0x237d00 and rxSndRpcEndFunc 0x23fac8. No code written: parked for the user's render priority (DogLightPool::createLight, MagScene::update, fileGetSize queued first)."
+    }
+   ],
+   "status": "partial",
+   "why": "the whole run between i3dmath and rxsys is one library: rxsnd strings, one RPC client 0x7ca300 (IOP module 0xd000, RXSNDDRV.IRX), modules init/term in rxSndInitModules order"
+  },
   "rx/rxsys.cpp": {
    "notes": "Status verify: nothing calls rxSysInit yet - main 0x2045a8 is still the placeholder in src/main.cpp, so the screenshot is the black placeholder frame. Next: main (unassigned@001fd424) then rxfile right after it, because on a CDROM boot rxSysLoadIopModules loops while rxSysReadIopConf and rxFileRebootIop return 0, and the rxfile stubs return 0 (hang). Left in rx/rxsys.cpp: the ini parser 0x2410b8-0x241848 (rxSysIniFind is a stub), tty bind/open 0x241890-0x241ac8 (rxSysOpenTty stub), file wrappers 0x242500-0x2426b8, exception handler and system monitor 0x242710-0x2432d8, rxSysUpdateDevices 0x243560 (stub), rxfile wrappers after 0x2436f0. rxfile and rxthread callees are stubbed in src/lib/unassigned_stubs.cpp until those TUs are defined (rxfile ~0x2437f8-0x249000, rxthread ~0x249000-0x24b490). PC changes: rxSysReadRomDate compares against a zero host ROM (no BIOS), rxSysPrintf passes the text through a %s format. Open: memory hook signatures, the four rx pools at 0x7dabb0, which boot device starts with a (adds usbd.irx). References updated (architecture Program flow and Key functions, hazards callcheck/stubgen, open-items Next up 4).",
    "ranges": [
@@ -533,6 +555,7 @@
   "unassigned@0021fb50": {},
   "unassigned@00224de0": {},
   "unassigned@00228c08": {},
+  "unassigned@00237ce8": {},
   "unassigned@002437f8": {},
   "utl/utlmisc.cpp": {
    "notes": "Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and installs utlMemAlloc twice, utlMemRealloc and utlMemFree as rxSysSetMemFunc0..3 hooks; bed/bedmemory.cpp (0x100354..) is only stubs (alloc returns NULL), so reconstruct BedMemory right after main, before anything allocates. Decided without the user: the ROM's operator new/delete are written as utlOperatorNew/utlOperatorDelete(+Array, +Debug) and do NOT replace the host's global operator new (open-items Decisions). BedMemory field names (m_top, m_last, m_buffer, m_size, m_id, m_owner) are from create/format/destroy and partly guessed; check them against the assert texts (m_size, m_buffer, m_next, m_chunk_size, m_header_size, m_flag, m_filename) when bedmemory is read. utlParseParam leaves the record type unchanged for a value that is not a quote, dollar or digit, as the ROM does. Hazard recorded: stubgen copies an access label (public:) into the next stub.",

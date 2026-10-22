@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-22 19:21 at commit `99ede2c` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-22 19:29 at commit `6d0722f` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-22 19:21 at commit `99ede2c` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6496**, named **2669** (41%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 114, ror-inferred 1187
-- context-name ledger: 1301 entries; overrides of wrong library matches: 5
-- placed in a source file: 2525/6496 in 88 files
+- game functions: **6498**, named **2742** (42%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 114, ror-inferred 1260
+- context-name ledger: 1374 entries; overrides of wrong library matches: 5
+- placed in a source file: 2710/6498 in 89 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -86,9 +86,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 164 TUs: todo 138, partial 5, verify 27, done 2
-- next: **unassigned@00237ce8** (frontier score 60)
-- pinned queue: (empty)
+- 164 TUs: todo 138, partial 6, verify 27, done 2
+- next: **unassigned@0011262c** (pinned in the queue)
+- pinned queue: unassigned@0011262c, mag/magscene.cpp, game/gamfile.cpp
+- partial: `rx/rxsnd.cpp` 0/185 -- Nothing written yet; all rxSnd entry points are still stubs in lib/unassigned_stubs.cpp. Start from architecture.md row 0x237ce8 (transport and command families
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/dogtexinfo.cpp` 16/16 -- Pinned 0x1161e4..0x11764c, all 16 functions written. Smoke run: MagScene::init's init / add run without asserts; screen still black (SprMan::draw and the scene 
@@ -119,6 +120,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-22 19:29 `rx/rxsnd.cpp` partial: Pinned rx/rxsnd.cpp 0x237ce8..0x23ff58 (was unassigned@00237ce8) and named 73 functions of the rx sound library (transport, queue, config, heaps, BGM/SE/PCM/ADP
 - 2026-10-22 19:21 `snd/sndman.cpp` verify: SndMan, the sound manager: all 52 functions of 0x17f0d0..0x1810f4 (ctor, init/term/update, master-volume fade, 48 slots with stream and SE state machines, id ma
 - 2026-10-22 18:50 `bed/bedpfh.cpp` verify: BedPfh, the RTPK pack view: constructor (tables by header flags: sizes, offsets, attribute rows, names), clear, getFileName, getFileIndex; header inlines getFla
 - 2026-10-22 18:46 `game/gamfile.cpp` verify: game/gamfile.cpp pinned 0x1be2cc..0x1beb70 out of unassigned@001bde58 and written whole (21 functions): FileReader and FileReadReq, the request state machine Fi
@@ -126,18 +128,17 @@ Recent sessions:
 - 2026-10-22 18:24 `spr/sprman.cpp` verify: SprMan complete: all 53 functions of 0x18bb8c..0x18f5b0 (init, draw, the motion / anim / fade / CLUT steppers, drawSprite to i3dPktSprite / TexSpriteUV, text in
 - 2026-10-22 17:51 `dog/dogtexinfo.cpp` verify: DogTexInfo written whole: init / term / clear, find / findFree, add (VRAM desc), addData (TIM2 with refcount and heap copy), addPfh (pack or i3r-named textures,
 - 2026-10-22 17:41 `setup/i3d_draw_module.cpp` verify: Native i3d draw module rosepan_i3d: the 2D packet writers record host primitives by packet address, the DMA-chain walk replays them in the ROM order; i3dTexRegs
-- 2026-10-22 17:26 `spr/sprtexture.cpp` verify: SprTexture reconstructed: all 21 functions of 0x18f5b0..0x190a78 (ctor, clear, getters, setList, release, loadTex, the update and updateRead state machines, RTC
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00237ce8` | todo | 0/24/183 | 32.2 | 60 | 2 |
+| `rx/rxsnd.cpp` | partial | 0/24/185 | 32.2 | 60 | 2 |
 | `game/gamman.cpp` | todo | 0/5/409 | 82.8 | 26 | 4 |
 | `unassigned@001810f4` | todo | 0/10/28 | 2.8 | 25 | 3 |
-| `unassigned@00228c08` | todo | 0/5/222 | 54.9 | 24 | 1 |
 | `mag/maglifeman.cpp` | todo | 0/3/10 | 1.5 | 24 | 3 |
-| `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
+| `unassigned@00228c08` | todo | 0/5/222 | 54.9 | 24 | 1 |
 | `unassigned@0020ff34` | todo | 0/3/53 | 23.7 | 20 | 0 |
 | `mag/magscene.cpp` | todo | 0/10/44 | 11.3 | 20 | 2 |
+| `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
 | `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 19 | 2 |
 | `unassigned@0010f944` | todo | 0/4/12 | 2.2 | 18 | 2 |
 | `unassigned@001e46b8` | todo | 0/4/253 | 78.3 | 18 | 2 |
@@ -149,7 +150,7 @@ Recent sessions:
 |---|---|---|---|---|---|
 | `002155f4` | FUN_002155f4 | 15 | - | missing | - |
 | `0022b228` | I3rRoot__CheckIdString | 10 | lib-ctx | stub | - |
-| `0023e240` | rxSndAdpcmGetFree | 8 | lib-ctx | stub | - |
+| `0023e240` | rxSndAdpcmGetFree | 8 | lib-ctx | stub | rx/rxsnd.cpp |
 | `001be2dc` | FileReader::~FileReader | 6 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 5 | ror | missing | game/gamfile.cpp |
 | `001be734` | FileReadReq::FileReadReq | 5 | ror | missing | game/gamfile.cpp |
@@ -158,8 +159,8 @@ Recent sessions:
 | `001e4908` | GamSndMan::findSnd | 4 | ror | stub | - |
 | `0013f980` | MagScene::setLightParam | 4 | ror | stub | mag/magscenelight.cpp |
 | `00105f0c` | utlStrCopy2 | 4 | ror | stub | utl/utlfile.cpp |
-| `0023e158` | rxSndAdpcmGetStatus | 4 | lib-ctx | stub | - |
-| `0023e020` | rxSndAdpcmClose | 4 | lib-ctx | stub | - |
+| `0023e158` | rxSndAdpcmGetStatus | 4 | lib-ctx | stub | rx/rxsnd.cpp |
+| `0023e020` | rxSndAdpcmClose | 4 | lib-ctx | stub | rx/rxsnd.cpp |
 | `00101ccc` | BedPad::update | 4 | ror | stub | bed/bedpad.cpp |
 | `001c0254` | GamFont::getGlyphWidth | 4 | ror | stub | - |
 | `0010ff74` | DogEntity::normalizeRotate | 3 | ror | stub | - |
@@ -168,9 +169,9 @@ Recent sessions:
 | `00119a38` | MagLifeMan::draw | 3 | ror | stub | mag/maglifeman.cpp |
 | `0022b3d8` | i3rGetNodeIndexByName | 3 | lib-ctx | stub | - |
 | `0021e1d8` | i3dPktDrawLineStrip | 3 | lib-ctx | stub | - |
-| `0023c0f8` | rxSndSeStop | 3 | lib-ctx | stub | - |
+| `0023c0f8` | rxSndSeStop | 3 | lib-ctx | stub | rx/rxsnd.cpp |
 | `00115cec` | DogModel::release | 3 | ror | stub | dog/dogmodel.cpp |
-| `0023c228` | rxSndSeGetStatus | 3 | lib-ctx | stub | - |
+| `0023c228` | rxSndSeGetStatus | 3 | lib-ctx | stub | rx/rxsnd.cpp |
 | `00215bb4` | dbgTraceVector4 | 3 | ror | stub | - |
 | `001d3ac8` | GamMan::switchVolume | 2 | ror | stub | game/gamman.cpp |
 | `0013f4d0` | MagScene::setLightNo | 2 | ror | stub | mag/magscenelight.cpp |
@@ -179,12 +180,12 @@ Recent sessions:
 | `0022b438` | i3rGetTexName | 2 | ror | stub | - |
 | `0010559c` | utlTm2ToSepia | 2 | ror | stub | utl/utltm2.cpp |
 | `0020e3d8` | seqSetLanguage | 2 | ror | stub | - |
-| `0023a720` | rxSndXvabCheck | 2 | lib-ctx | stub | - |
+| `0023a720` | rxSndXvabCheck | 2 | lib-ctx | stub | rx/rxsnd.cpp |
 | `001102b4` | DogEntityEx::setParent | 2 | ror | stub | dog/dogentity.cpp |
-| `0023f038` | rxSndAdpcmSetVolume | 2 | lib-ctx | stub | - |
-| `0023f310` | rxSndAdpcmSetPitch | 2 | lib-ctx | stub | - |
-| `0023ef98` | rxSndAdpcmSetAttr | 2 | lib-ctx | stub | - |
-| `0023eef8` | rxSndAdpcmPause | 2 | lib-ctx | stub | - |
-| `0023eb10` | rxSndAdpcmWrite | 2 | lib-ctx | stub | - |
+| `0023f038` | rxSndAdpcmSetVolume | 2 | lib-ctx | stub | rx/rxsnd.cpp |
+| `0023f310` | rxSndAdpcmSetPitch | 2 | lib-ctx | stub | rx/rxsnd.cpp |
+| `0023ef98` | rxSndAdpcmSetAttr | 2 | lib-ctx | stub | rx/rxsnd.cpp |
+| `0023eef8` | rxSndAdpcmPause | 2 | lib-ctx | stub | rx/rxsnd.cpp |
+| `0023eb10` | rxSndAdpcmWrite | 2 | lib-ctx | stub | rx/rxsnd.cpp |
 | `001bedc0` | GamFont::setTarget | 2 | ror | stub | - |
 
