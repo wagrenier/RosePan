@@ -220,11 +220,11 @@ int MagScene::load(i3dContext *ctx, int id, void *data, int copy)
         // PC: the ROM writes the record pointers over the offsets after the
         // head word (4-byte pointers); the host keeps them in a game-heap
         // array, freed by releaseTenkyu.
-        t->m_c_rec = (MagSceneCRec **)g_utlMemory.alloc(t->m_c_num * (int)sizeof(MagSceneCRec *) + 1, 1);
+        t->m_path_data = (MagSceneCRec **)g_utlMemory.alloc(t->m_c_num * (int)sizeof(MagSceneCRec *) + 1, 1);
         for (int i = 0; i < t->m_c_num; i++)
         {
             MagSceneCRec *rec = (MagSceneCRec *)((u_char *)c + c[1 + i]);
-            t->m_c_rec[i] = rec;
+            t->m_path_data[i] = rec;
             rec->m_2c = 0;
             rec->m_02 = (u_char)(head >> 16);
             rec->m_03 = 0;
@@ -255,8 +255,8 @@ int MagScene::load(i3dContext *ctx, int id, void *data, int copy)
             if (pfh_head.getFileSize(idx) > 0x20)
             {
                 m_854a4 = mp[8];
-                m_85494 = mp[9];
-                m_85498 = mp[10];
+                m_mirror_axis = mp[9];
+                m_mirror_plane = ((const float *)mp)[10];   /* lwc1 / swc1: the word is a float */
             }
             float f = (float)mp[11] / 100.0f;
             m_2a9cc = f;
@@ -381,9 +381,9 @@ void MagScene::releaseTenkyu(int no)
     t->m_c_data = NULL;
     t->m_c_num = 0;
     // PC: the host's record table (see load).
-    if (t->m_c_rec)
-        g_utlMemory.free(t->m_c_rec);
-    t->m_c_rec = NULL;
+    if (t->m_path_data)
+        g_utlMemory.free(t->m_path_data);
+    t->m_path_data = NULL;
     t->m_light_data = NULL;
     if (t->m_buf)
     {

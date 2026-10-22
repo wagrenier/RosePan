@@ -39,6 +39,8 @@ struct DogEntity
     sceVu0FVECTOR *getMatrix();                                          // ROR 0x0010fa6c
     void setRotate(float x, float y, float z);                          // ROR 0x0010fc7c
     void normalizeRotate();                                              // ROR 0x0010ff74
+    /* EE slot 2 (+0x10): rebuilds m_matrix when m_dirty. */
+    void transform();                                                    // ROR 0x00280f18
 
     sceVu0FMATRIX m_matrix;     // ROR 0x00: the world matrix (DogActor::getNodeWorldMatrix's left operand)
     sceVu0FVECTOR m_trans;      // ROR 0x40: translation, w = 1
@@ -62,6 +64,8 @@ struct DogEntityEx : DogEntity
 {
     void setParent(DogEntityEx *p);                                      // ROR 0x001102b4
     DogEntityEx *getParent() { return m_parent; }                        // ROR 0x00281cb4
+    /* EE slot 2 (+0x10): the transform with the parent's matrix. */
+    void transform();                                                    // ROR 0x0011034c
 
     u_char       _a0[0xe0 - 0xa0];
     DogEntityEx *m_parent;      // ROR 0xe0: NULL = a root; setParent refuses cycles (assert p != m_parent)

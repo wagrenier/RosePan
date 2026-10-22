@@ -20,6 +20,8 @@
 
 #include "bed/bedpad.h"
 #include "dog/dogactor.h"
+#include "dog/dogcamera.h"
+#include "dog/doglightpool.h"
 #include "dog/dogtexinfo.h"
 #include "lib/unassigned.h"
 #include "mag/magloader.h"
@@ -60,7 +62,7 @@ struct MagSceneTenkyu
     int      m_id;              // ROR 0x4f0: -1 = a free slot
     u_int   *m_c_data;          // ROR 0x4f4: <name>_c.bin (head word: count in the low half)
     int      m_c_num;           // ROR 0x4f8: its record count
-    MagSceneCRec **m_c_rec;     // ROR 0x4fc: its records (the ROM turns the file's offsets into pointers in place)
+    MagSceneCRec **m_path_data; // ROR 0x4fc: its records (the ROM turns the file's offsets into pointers in place; drawStrips' assert names it pmd->m_path_data)
     void    *m_light_data;      // ROR 0x500: <name>_l.bin, NULL when the pack has none
     void    *m_tex_list;        // ROR 0x504: i3r texture list (releaseTenkyuTex)
     void    *m_data;            // ROR 0x508: freed by releaseTenkyuTex
@@ -69,6 +71,50 @@ struct MagSceneTenkyu
 static_assert(offsetof(MagSceneTenkyu, m_model) >= 0x10, "m_model");
 /* No bound on m_id: the host DogModel is smaller than the EE's 0x1a0. */
 static_assert(offsetof(MagSceneTenkyu, m_id) > offsetof(MagSceneTenkyu, m_model), "m_id");
+
+/* A sky pack's _c.bin record as drawStrips reads it when m_22b4 is set: a
+ * path of m_00 points from +0x30 (x, y, z). */
+static_assert(sizeof(MagSceneCRec) == 0x30, "the path points follow the header");
+
+/* A strip record (0x2000 of them at scene +0x437e0, reset by clearStrip):
+ * what drawStrips draws by type -- 0..2 strips of m_count vertices, 3..5
+ * other i3d primitives -- for m_life frames (-1: until cleared). EE 0x20.
+ * layout: host -- pointers. */
+struct MagSceneStrip
+{
+    union
+    {
+        const void *m_colors;   // ROR 0x00: types 0, 1 and 5: a pointer (colours)
+        float       m_color[4]; // ROR 0x00: type 2: the colour itself
+    };
+    void  *m_data;              // ROR 0x10: the positions (types 0..3), type 4's object
+    void  *m_data2;             // ROR 0x14: types 3 and 5
+    int    m_life;              // ROR 0x18: frames left; -1 = forever
+    short  m_count;             // ROR 0x1c: vertices (asserted > 0 for 0..2)
+    short  m_type;              // ROR 0x1e: -1 = free
+};
+static_assert(offsetof(MagSceneStrip, m_data) >= 0x10, "m_data");
+static_assert(offsetof(MagSceneStrip, m_type) >= 0x1e, "m_type");
+
+/* castRay's hit record (EE 0x60: drawBlobShadows clears it to five
+ * (0, 0, 0, 1) vectors and -1). Field roles unverified. */
+struct MagSceneRayHit
+{
+    sceVu0FVECTOR m_vec[5];     // ROR 0x00
+    int           m_50;         // ROR 0x50: -1 before the cast
+    int           _54[3];
+};
+static_assert(sizeof(MagSceneRayHit) == 0x60, "MagSceneRayHit is 0x60 bytes on the EE");
+
+/* An entry of the actor draw list collectActors fills (EE 0x10). */
+struct MagSceneDrawEntry
+{
+    DogActor *m_actor;          // ROR 0x00
+    int       m_key;            // ROR 0x04: 0x10000 when parented, + 65535 - distance to the camera; sortActors orders them ascending (far first, parented last)
+    int       m_no;             // ROR 0x08: the actor number
+    int       m_parent_no;      // ROR 0x0c: the parent actor's number, -1 = none
+};
+static_assert(offsetof(MagSceneDrawEntry, m_parent_no) >= 0x0c, "m_parent_no");
 
 /* A view record (the two the scene keeps at +0x2aa10 / +0x2aa48): a
  * frustum, a depth range and a GS screen rectangle. EE 0x38; field roles
@@ -166,13 +212,49 @@ struct MagScene
     /* Fades to fog over frames (0: at once). */
     void setFog(const I3dFog *fog, int frames);                          // ROR 0x00143d7c
 
+    /* ---- mag/magscenerender.cpp ---- */
+    void releaseTexture(int no);                                         // ROR 0x00139540
+    void copyTexture(const char *dst, const char *src);                  // ROR 0x00139568
+    /* Re-sends the double buffer's draw environment (frame & 1 picks it). */
+    static void putDrawEnv(I3dLayer *layer, sceGsDBuff *dbuff, int frame); // ROR 0x00139590
+    u_int getDrawFlags();                                                // ROR 0x0013963c
+    void drawCloseUp(i3dContext *ctx, DogActor *actor, DogEntity *src);  // ROR 0x00139664
+    void drawTenkyuRotated(i3dContext *ctx, I3dLight *light, const float *trans,
+                           const float *rot);                            // ROR 0x00139920
+    void makeActorShadow(int count, i3dContext *ctx, DogActor *actor,
+                         I3rStqMapEntity *stq);                          // ROR 0x00139b4c
+    void drawFocusActor(i3dContext *ctx, sceGsDBuff *dbuff, int frame);  // ROR 0x0013a464
+    void drawBlobShadows(I3dLayer *layer);                               // ROR 0x0013a57c
+    void drawShadows(i3dContext *ctx, sceGsDBuff *dbuff, int frame);     // ROR 0x0013a924
+    void drawActorShadow(int theChara, int theCount, i3dContext *ctx, sceGsDBuff *dbuff,
+                         int frame, I3dView *view);                      // ROR 0x0013ab30
+    void drawStrips(I3dLayer *layer);                                    // ROR 0x0013ad24
+    void drawTenkyu(I3dLayer *layer);                                    // ROR 0x0013b20c
+    int  collectActors(int *parented, MagSceneDrawEntry *theArray, int theMax,
+                       int flag3);                                       // ROR 0x0013b2ac
+    void sortActors(MagSceneDrawEntry *theArray, int theMax);            // ROR 0x0013b580
+    void drawActors(MagSceneDrawEntry *theArray, int theMaxArray, I3dLayer **theRenderStage,
+                    int theMaxStage, int flag3);                         // ROR 0x0013b650
+    void drawActorMirror(DogActor *actor, I3dLayer *stage);              // ROR 0x0013b870
+    /* ---- elsewhere ---- */
+    /* The distance along dir from pos to the sky slots' collision models
+     * (tenkyu < 0: all four), < 0 when nothing is hit. */
+    float castRay(MagSceneRayHit *hit, const float *pos, const float *dir, int tenkyu); // ROR 0x00133454
+    void clearStrip(int no);                                             // ROR 0x00134698
+    void drawSkyDome(i3dContext *ctx);                                   // ROR 0x001406b8
+    void drawFocus(i3dContext *ctx, int frame);                          // ROR 0x00140e88
+
+    DogLightPool   m_light_pool;        // ROR 0x2050: the render stages' light sets
     MagCharaLoader m_chara_loader;      // ROR 0x215c: data/ch/CHARA.RPK
     MagMapLoader   m_map_loader;        // ROR 0x224c: data/bg/mapunit.bin
     int            m_229c;              // ROR 0x229c: initRender zeroes it; role unknown
     float          m_22a4;              // ROR 0x22a4: scales the second view's depth range
+    float          m_22a8;              // ROR 0x22a8: the ambient scale of render stages 1 and 2 (others 1.0); role unverified
     int            m_pc_mode;           // ROR 0x22ac: setPC's mode
+    float          m_22b0;              // ROR 0x22b0: blends m_22a4 toward 1 for the shadow view (1 = m_22a4 as is)
+    int            m_22b4;              // ROR 0x22b4: sky path display: 0 off, 1 copy the points then 2, 2 draw the copy
     int            m_22cc;              // ROR 0x22cc: MagSystem::clearScene22cc zeroes it; role unknown
-    int            m_22d0;              // ROR 0x22d0: 1 while a PC is bound (setPC), 0 after initRender
+    int            m_22d0;              // ROR 0x22d0: the sub mode word (pushSubMode sets 8; getDrawFlags tests 7 and 8); setPC sets 1, initRender 0
     int            m_22d4;              // ROR 0x22d4: -1 after setPC / initRender; role unknown
     MagLifeMan     m_life_man;          // ROR 0x2330
     int            m_font_tex_no[4];    // ROR 0x28f4: bit8a..bit8d in m_tex_info
@@ -185,9 +267,12 @@ struct MagScene
     unsigned       m_actor_flags2[128]; // ROR 0x29320: a second word per actor, cleared with the first
     DogTexInfo     m_tex_info;          // ROR 0x29520: 256 textures, shadow01 first
     MagSceneTenkyu m_tenkyu[4];         // ROR 0x29540: stride 0x520
+    int            m_focus_actor;       // ROR 0x2a9c4: the actor drawFocusActor shows close up, -1 = none (then drawShadows)
+    u_int          m_2a9c8;             // ROR 0x2a9c8: bit 1 = draw the blob shadows; other bits unknown
     float          m_2a9cc;             // ROR 0x2a9cc: mapparam.bbb word 11 / 100, kept in 0..1 (1 when 0); role unknown
+    I3dLightDesc   m_shadow_light;      // ROR 0x2a9d0: the light of the shadow layers
     MagViewParam   m_view[2];           // ROR 0x2aa10
-    float          m_2aa80;             // ROR 0x2aa80: -1 after initRender; role unknown
+    float          m_2aa80;             // ROR 0x2aa80: the camera angle the frustum was built for (-1 after initRender: rebuild)
     int            m_2aa84;             // ROR 0x2aa84: load sets 1 with a map's fog; role unknown
     I3rStqMapEntity m_stq_map;          // ROR 0x2aa90: the sky's second model's STQ map
     u_char         m_2aad0;             // ROR 0x2aad0: init sets 1; role unknown
@@ -195,7 +280,7 @@ struct MagScene
     I3dFog         m_fog[4];            // ROR 0x2aae0: init clears [0] and copies it to the others
     int            m_fog_2ab60;         // ROR 0x2ab60: init zeroes it; role unknown
     int            m_fog_2ab64;         // ROR 0x2ab64: init zeroes it; role unknown
-    DogEntity      m_camera_entity;     // ROR 0x2ab70: the camera's transform node (its class, likely DogCamera, is bigger: getMatrix reads +0xf0)
+    DogCamera      m_camera_entity;     // ROR 0x2ab70: the camera (m_trans +0x2abb0 and m_rotate +0x2abc0 are the eye actors are drawn for)
     int            m_camera_mode;       // ROR 0x2ad50: getCameraMode returns it
     int            m_camera_2ad58;      // ROR 0x2ad58: getCameraMode's second word out
     int            m_camera_target_set; // ROR 0x2ad9c: setCameraTarget sets 1
@@ -210,13 +295,14 @@ struct MagScene
     S2dBg          m_bg;                // ROR 0x42260
     S2dMes         m_mes;               // ROR 0x42bb0
     int            m_43700;             // ROR 0x43700: -1 after initRender; role unknown
+    MagSceneStrip  m_strip[0x2000];     // ROR 0x437e0: drawStrips' records
     Obj176a3c      m_837e0;             // ROR 0x837e0
     S2dMovie       m_movie;             // ROR 0x84aa8
     int            m_bwn_no;            // ROR 0x853b4: setBwn's actor number, -1 = none
     int            m_pc_no;             // ROR 0x853b8: setPC's actor number, -1 = none
     Obj17c0f0      m_8542c;             // ROR 0x8542c: reset by releaseTenkyu, sector.sec by load
-    int            m_85494;             // ROR 0x85494: mapparam.bbb word 9 (files over 0x20 bytes); role unknown
-    int            m_85498;             // ROR 0x85498: mapparam.bbb word 10; role unknown
+    int            m_mirror_axis;       // ROR 0x85494: mapparam.bbb word 9 (files over 0x20 bytes): 0 none, 1 z, 2 y (floor), 3 x
+    float          m_mirror_plane;      // ROR 0x85498: mapparam.bbb word 10 (a float): the mirror plane's coordinate
     int            m_854a4;             // ROR 0x854a4: mapparam.bbb word 8; role unknown
 };
 static_assert(offsetof(MagScene, m_actors) > offsetof(MagScene, m_life_man), "EE order");

@@ -12,6 +12,7 @@
 #include <stddef.h>
 
 struct MagLife;
+struct I3dLayer;
 
 /* EE 0x10. layout: host -- pointers. */
 struct MagLifeEntry
@@ -29,6 +30,9 @@ struct MagLifeMan
 {
     void init();                                                         // ROR 0x00119630
     int  add(MagLife *life, int priority);                               // ROR 0x001196d4
+    /* Draws the lives whose priority & 0xc000 is group (0, 0x4000, 0x8000)
+     * into layer. */
+    void draw(I3dLayer *layer, u_int group);                             // ROR 0x00119a38
 
     MagLifeEntry  m_life_buf[64];   // ROR 0x000: MAX_LIFE entries
     MagLifeEntry *m_top;            // ROR 0x400: the first entry; init points it at m_life_buf

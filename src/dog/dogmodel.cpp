@@ -31,3 +31,28 @@ void DogModel::setupNodeFlags()
 {
     ROSEPAN_STUB("DogModel::setupNodeFlags", 0x0011550c);
 }
+
+// stub of ROR 0x001151f4
+void DogModel::draw(I3dLayer *layer, const float *cam_rotate, const float *cam_trans)
+{
+    ROSEPAN_STUB("DogModel::draw", 0x001151f4);
+}
+
+// stub of ROR 0x001152a8
+void DogModel::drawUnitMatrix(I3dLayer *layer)
+{
+    ROSEPAN_STUB("DogModel::drawUnitMatrix", 0x001152a8);
+}
+
+// stub of ROR 0x00116038
+float DogModel::getClipRadius()
+{
+    ROSEPAN_STUB("DogModel::getClipRadius", 0x00116038);
+    return {};
+}
+
+// stub of ROR 0x001150c0
+void DogModel::transform()
+{
+    ROSEPAN_STUB("DogModel::transform", 0x001150c0);
+}

@@ -46,6 +46,15 @@ struct DogActor : DogModel
     void addTrans(const float *d, float trans_ofs_y, float rot_y_aar);   // ROR 0x0010a038
     /* EE slot 17 (+0x88): out = m_matrix x the model matrix of node n. */
     void getNodeWorldMatrix(sceVu0FMATRIX out, int n);                   // ROR 0x0010eab8
+    /* EE slot 12 (+0x60): steps the motion, culls, transforms, drawModel. */
+    void draw(I3dLayer *layer, const float *cam_rotate, const float *cam_trans); // ROR 0x0010e5c0
+    /* EE slot 18 (+0x90): the world position of node n. */
+    void getNodeWorldPos(float *out, int n);                             // ROR 0x0010eb28
+    /* EE slot 19 (+0x98): the model into layer, with the node matrices when
+     * nodes is set, from entity src's matrix (NULL: this). */
+    void drawModel(I3dLayer *layer, int nodes, DogEntity *src);          // ROR 0x0010e3ac
+    /* EE slot 20 (+0xa0): the shadow model (or the model) into a shadow layer. */
+    void drawShadow(I3dLayer *layer);                                    // ROR 0x0010e534
 
     // ROR 0x00281244
     void setBaseRotate(const float *v)

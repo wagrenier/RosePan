@@ -92,7 +92,7 @@ void MagScene::init()
     {
         MagSceneTenkyu *t = &m_tenkyu[i];
         t->m_id = -1;
-        t->m_c_rec = NULL;
+        t->m_path_data = NULL;
         t->m_c_data = NULL;
         t->m_c_num = 0;
     }
@@ -164,6 +164,17 @@ void MagScene::clearPC()
 MagScene::MagScene()
 {
     ROSEPAN_STUB("MagScene::MagScene", 0x001360a0);
+    /* PC: until the constructor is written, its loop at 0x136ab4 that frees
+     * the strip records (MagScene::draw walks them every frame, and zeroed
+     * records read as type 0 with no vertices). */
+    for (int i = 0; i < 0x2000; i++)
+    {
+        m_strip[i].m_type = -1;
+        m_strip[i].m_data = NULL;
+        m_strip[i].m_life = -1;
+        m_strip[i].m_count = 0;
+        m_strip[i].m_colors = NULL;
+    }
 }
 
 // stub of ROR 0x00136d14

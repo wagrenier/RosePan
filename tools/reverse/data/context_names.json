@@ -359,6 +359,12 @@
   "was": "FUN_0010620c",
   "why": "utl/utlfind.cpp: sets four words to -1 and the next two to 0 (a 0x18-byte search record); MagLifeBwnCtrl::termWorld and MagScene::clearPC call it"
  },
+ "00106e70": {
+  "name": "utlVecDist",
+  "tag": "ror-inferred",
+  "was": "FUN_00106e70",
+  "why": "sqrt of 0x106e14 (the squared distance of two vectors); collectActors keys actors by it from the camera"
+ },
  "00109348": {
   "name": "DogActor::getMotionMove",
   "tag": "ror-inferred",
@@ -413,11 +419,35 @@
   "was": "FUN_0010cffc",
   "why": "DogActor vtable slot 21: takes the source actor's master model (+0x118) and i3r root, copies its motion table, increments the master's ref count (+0x104); returns 0"
  },
+ "0010e3ac": {
+  "name": "DogActor::drawModel",
+  "tag": "ror-inferred",
+  "was": "FUN_0010e3ac",
+  "why": "DogActor's slot 19: draws the root (0x106760) with the node matrices when arg 2 is set, from the entity arg 3 (or this), with the flash colour when +0x16c is set"
+ },
+ "0010e534": {
+  "name": "DogActor::drawShadow",
+  "tag": "ror-inferred",
+  "was": "FUN_0010e534",
+  "why": "DogActor's slot 20: asserts the layer and m_i3r_root, draws the shadow model (+0x120) or the model into the shadow layer"
+ },
+ "0010e5c0": {
+  "name": "DogActor::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_0010e5c0",
+  "why": "DogActor's slot 12: asserts the layer and m_i3r_root, steps the motion every +0x45c frames, culls (slot 11), transforms, calls slot 19, applies m_rot_y_aar"
+ },
  "0010eab8": {
   "name": "DogActor::getNodeWorldMatrix",
   "tag": "ror-inferred",
   "was": "FUN_0010eab8",
   "why": "vtable slot 17 (first DogActor-only slot); dog/dogactor.cpp asserts the model matrices +0x130; out = 0x2377d0(this's matrix at +0x0, node matrix n)"
+ },
+ "0010eb28": {
+  "name": "DogActor::getNodeWorldPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0010eb28",
+  "why": "DogActor's slot 18: the translation row of m_matrix x the node's model matrix (asserts the model matrices)"
  },
  "0010f2dc": {
   "name": "DogActor::checkName",
@@ -430,6 +460,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010fa6c",
   "why": "vtable slot 2 (DogEntity::transform, vptr +0x94) then 0x237678(this + 0xf0, this); returns this + 0xf0; called on the scene camera (+0x2ab70)"
+ },
+ "0010fac0": {
+  "name": "DogCamera::getLensFov",
+  "tag": "ror-inferred",
+  "was": "FUN_0010fac0",
+  "why": "maps the camera's angle at +0x140 (radians) through a 13-point table in 15-degree steps (0, 28, 57 .. 180) and returns radians; MagScene::draw recomputes the view frustum when +0x140 changes"
  },
  "0010fc7c": {
   "name": "DogEntity::setRotate",
@@ -448,6 +484,24 @@
   "tag": "ror-inferred",
   "was": "FUN_001102b4",
   "why": "dog/dogentity.cpp line 302 assert p != m_parent while walking the parent chain at +0xe0 (DogEntityEx::getParent's field); resets +0x70 to (0,0,0,1), dirty"
+ },
+ "0011262c": {
+  "name": "DogLightPool::createLight",
+  "tag": "ror-inferred",
+  "was": "FUN_0011262c",
+  "why": "builds an i3d light (i3dLightDescInit / i3dCtxCreateLight) from light set n of the pool, scaled by f12; MagScene::draw makes one per render stage (asserts lightstatus[i])"
+ },
+ "001151f4": {
+  "name": "DogModel::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001151f4",
+  "why": "DogModel's vtable slot 12: unless slot 11 (culled by the camera rotate / trans) transforms (slot 2) and, when not hidden (+0x140), draws the root with the node matrices (0x106760)"
+ },
+ "001152a8": {
+  "name": "DogModel::drawUnitMatrix",
+  "tag": "ror-inferred",
+  "was": "FUN_001152a8",
+  "why": "DogModel's vtable slot 13: draws the root with a unit matrix and no node matrices (0x106760); the sky models get drawn into the shadow layers by it"
  },
  "0011550c": {
   "name": "DogModel::setupNodeFlags",
@@ -473,6 +527,12 @@
   "was": "FUN_00115cec",
   "why": "DogModel vtable slot 6, dog/dogmodel.cpp asserts m_ref_count <= 0, m_load_flag != LOAD_NONE, m_pack_file, m_tex_info, m_i3r_root: frees the loaded model; ~DogModel and the sky release call it"
  },
+ "00116038": {
+  "name": "DogModel::getClipRadius",
+  "tag": "ror-inferred",
+  "was": "FUN_00116038",
+  "why": "returns +0x108, filling it from i3rCopyClipSphere when negative (dog/dogmodel.h assert)"
+ },
  "001162ac": {
   "name": "DogTexInfo::init",
   "tag": "ror-inferred",
@@ -484,6 +544,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001163dc",
   "why": "index of the texture record whose name equals the string; loadSystemData asserts the result >= 0 for r_shadow, noise, bit8a.."
+ },
+ "00116618": {
+  "name": "DogTexInfo::release",
+  "tag": "ror-inferred",
+  "was": "FUN_00116618",
+  "why": "drops texture no's reference (+0x16e); at 0 releases its VRAM handles, frees its data and clears the record; sets m_dirty (+0x10)"
  },
  "00116b5c": {
   "name": "DogTexInfo::add",
@@ -502,6 +568,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001170b8",
   "why": "adds every texture of a BedPfh pack (loadSystemData passes PREMIERE.RPK's first file)"
+ },
+ "001173d4": {
+  "name": "DogTexInfo::copy",
+  "tag": "ror-inferred",
+  "was": "FUN_001173d4",
+  "why": "find(dst), find(src), copies src's three handle words into dst's record, refs it (0x219a98), sets m_dirty"
  },
  "001174c4": {
   "name": "DogTexInfo::setTexFlag",
@@ -857,6 +929,12 @@
   "was": "FUN_001196d4",
   "why": "mag/maglifeman.cpp assert ppod >= &m_life_buf[0] && ppod < &m_life_buf[MAX_LIFE]; takes a free entry, stores the life object and its priority and links it sorted by priority; returns the entry index"
  },
+ "00119a38": {
+  "name": "MagLifeMan::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_00119a38",
+  "why": "walks m_top's entries; for those whose priority & 0xc000 == group and whose life's slot 8 returns 0, calls its slot 6 with the layer (asserts in maglifeman.cpp)"
+ },
  "0011a14c": {
   "name": "MagLifeControlChara::updateMotionSeq",
   "tag": "ror-inferred",
@@ -952,6 +1030,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001327dc",
   "why": "MagSystem::update passes the two pads"
+ },
+ "00133454": {
+  "name": "MagScene::castRay",
+  "tag": "ror-inferred",
+  "was": "FUN_00133454",
+  "why": "returns a hit distance (< 0 none) of a ray (pos, dir) against the sky slots' collision models (all when the slot arg < 0); drawBlobShadows drops the shadow onto it"
+ },
+ "00134698": {
+  "name": "MagScene::clearStrip",
+  "tag": "ror-inferred",
+  "was": "FUN_00134698",
+  "why": "resets strip record n (all 0x2000 when n < 0) at +0x437e0: type -1, life -1, count 0; drawStrips calls it when a life runs out"
  },
  "00134730": {
   "name": "MagScene::openWindow",
@@ -1145,6 +1235,108 @@
   "was": "FUN_00139308",
   "why": "reads entry theName of pack file theFile (asserts pfh_head.getFileOffset(0) == 2048, n >= 0, filelen > 0) into a temporary buffer and adds it to the scene DogTexInfo (0x116d14); returns the texture index"
  },
+ "00139540": {
+  "name": "MagScene::releaseTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_00139540",
+  "why": "a0 += 0x29520 (m_tex_info) and calls DogTexInfo::release(no): the scene's texture-table wrapper"
+ },
+ "00139568": {
+  "name": "MagScene::copyTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_00139568",
+  "why": "a0 += 0x29520 (m_tex_info) and calls DogTexInfo::copy(dst, src)"
+ },
+ "00139590": {
+  "name": "MagScene::putDrawEnv",
+  "tag": "ror-inferred",
+  "was": "FUN_00139590",
+  "why": "a0 is a layer: one packet with a DMA tag and NLOOP-8 A+D GIF tag (0x1000000000008008, 0xe) referencing dbuff+0x60 or +0x150 by frame & 1 -- re-sends the double buffer's draw environment after a full-screen pass"
+ },
+ "0013963c": {
+  "name": "MagScene::getDrawFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_0013963c",
+  "why": "0 when m_22d0 (sub mode) is 8, 0x200 when 7, else 0x101; draw tests 0xff00 (actors), bit 9 (only flag-3 actors) and bit 0 (the world pass)"
+ },
+ "00139664": {
+  "name": "MagScene::drawCloseUp",
+  "tag": "ror-inferred",
+  "was": "FUN_00139664",
+  "why": "makes a layer at 1000 with a dim sprite background, a 0.7 grey ambient light and a view looking at the actor's clip sphere from 4 radii away, then calls the actor's slot 19 (drawModel) into it"
+ },
+ "00139920": {
+  "name": "MagScene::drawTenkyuRotated",
+  "tag": "ror-inferred",
+  "was": "FUN_00139920",
+  "why": "no callers: a layer at 1000 cleared by a sprite, the given light, a view from rot (z, x, y) and a translation inverted, then drawTenkyu into it"
+ },
+ "00139b4c": {
+  "name": "MagScene::makeActorShadow",
+  "tag": "ror-inferred",
+  "was": "FUN_00139b4c",
+  "why": "asserts theCount 0..9, a layer at 700 + 10 n drawing the actor's slot 20 from the light (+0x2040 mode 1 directional / the light pool's nearest point light), then writes the projection into the STQ map (+0x2aa90) and the shadow params at +0x2000..+0x2034"
+ },
+ "0013a464": {
+  "name": "MagScene::drawFocusActor",
+  "tag": "ror-inferred",
+  "was": "FUN_0013a464",
+  "why": "when m_2a9c4 >= 0 and that actor is alive: drawCloseUp it, then a layer at 1000 that re-puts the draw env (putDrawEnv)"
+ },
+ "0013a57c": {
+  "name": "MagScene::drawBlobShadows",
+  "tag": "ror-inferred",
+  "was": "FUN_0013a57c",
+  "why": "for each alive, shown actor with flags & 0x60 == 0x20: a 4-vertex textured strip (r_shadow, m_common_tex_no[0]) sized by the clip radius, under Bip01 at the ground height castRay finds"
+ },
+ "0013a924": {
+  "name": "MagScene::drawShadows",
+  "tag": "ror-inferred",
+  "was": "FUN_0013a924",
+  "why": "for each alive, shown actor with flags & 0x60 == 0x60: sets view 1's depth from m_22a4 / m_22b0 and a view from the camera, then drawActorShadow with a running count"
+ },
+ "0013ab30": {
+  "name": "MagScene::drawActorShadow",
+  "tag": "ror-inferred",
+  "was": "FUN_0013ab30",
+  "why": "asserts theChara < 128, theCount < 10: makeActorShadow, a layer at 705 + 10 n with putDrawEnv, the shadow light (+0x2a9d0) and view, then the sky models' slot 13 into it"
+ },
+ "0013ad24": {
+  "name": "MagScene::drawStrips",
+  "tag": "ror-inferred",
+  "was": "FUN_0013ad24",
+  "why": "draws the 0x2000 strip records at +0x437e0 by type (0..2 strips, 3..5 other i3d calls; asserts m_strip[i].m_count > 0), counts down their lives (clearStrip), then the sky packs' _c.bin paths when m_22b4 is set (pmd->m_path_data[k])"
+ },
+ "0013b20c": {
+  "name": "MagScene::drawTenkyu",
+  "tag": "ror-inferred",
+  "was": "FUN_0013b20c",
+  "why": "for the four sky slots (+0x29550 stride 0x520, isAlive): DogModel::draw(layer, 0, 0)"
+ },
+ "0013b2ac": {
+  "name": "MagScene::collectActors",
+  "tag": "ror-inferred",
+  "was": "FUN_0013b2ac",
+  "why": "asserts theArray, 128 <= theMax: fills 16-byte entries (actor, key, no, parent no) for alive, shown actors whose flag bit 3 matches; key = 0x10000 when parented + 65535 - camera distance; returns the count, *out = parented ones"
+ },
+ "0013b580": {
+  "name": "MagScene::sortActors",
+  "tag": "ror-inferred",
+  "was": "FUN_0013b580",
+  "why": "asserts theArray, 128 >= theMax: bubble sort of the entries by key, ascending (smallest key, the farthest unparented actor, first)"
+ },
+ "0013b650": {
+  "name": "MagScene::drawActors",
+  "tag": "ror-inferred",
+  "was": "FUN_0013b650",
+  "why": "asserts theArray, theRenderStage, lightsetno < theMaxStage: mirror pass (drawActorMirror) when m_85494 is set, then each actor's slot 12 draw with its light set's stage and the camera rotate / trans"
+ },
+ "0013b870": {
+  "name": "MagScene::drawActorMirror",
+  "tag": "ror-inferred",
+  "was": "FUN_0013b870",
+  "why": "when the camera and the actor are on the same side of the mirror plane m_85498 on axis {-,z,y,x}[m_85494]: reflects the root entity (trans, rotate or the world matrix's y, scale negated), draws, restores"
+ },
  "0013bcc0": {
   "name": "MagScene::draw",
   "tag": "ror-inferred",
@@ -1240,6 +1432,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00140030",
   "why": "after releaseTenkyuTex (0x13ff00): MagScene::load passes the sky slot number, the pack and the i3d context when a context is given"
+ },
+ "001406b8": {
+  "name": "MagScene::drawSkyDome",
+  "tag": "ror-inferred",
+  "was": "FUN_001406b8",
+  "why": "when a sky slot has a texture list (+0x504): a layer at 490, white light, the camera view with far 100000, and each list drawn by 0x106760 at the camera's x/z"
+ },
+ "00140e88": {
+  "name": "MagScene::drawFocus",
+  "tag": "ror-inferred",
+  "was": "FUN_00140e88",
+  "why": "mag/magscenefocus.cpp neighbour; when +0x853c0 != -1 runs 0x140fdc / 0x141184 for the flags at +0x853bc (bit 1 twice, bit 0 once) with frame & 1 picking 0 or 0x70"
  },
  "00142500": {
   "name": "MagLoaderIndex::find",
@@ -2279,17 +2483,53 @@
   "was": "FUN_0021a828",
   "why": "i3d: copies the root's clip sphere centre (w 1) and radius out; the body of the inline DogModel::copyClipSphere(float*, float*)"
  },
+ "0021a8e0": {
+  "name": "i3rUpdateTexAnim",
+  "tag": "lib-context",
+  "was": "FUN_0021a8e0",
+  "why": "for each texture of the root's list (+0x18) with an animation flag (+0xc) steps its frame counter (+0x8); returns I3D_OK (r == I3D_OK at the caller)"
+ },
  "0021a938": {
   "name": "i3rReplaceStqMapEntity",
   "tag": "lib-context",
   "was": "FUN_0021a938",
   "why": "i3d: the body of the inline DogModel::replaceStqMapEntity (dogmodel.h line 313); returns I3D_OK (0) on success"
  },
+ "0021ac80": {
+  "name": "i3dLightDescInit",
+  "tag": "lib-context",
+  "was": "FUN_0021ac80",
+  "why": "zeroes a light description's ambient vector and its list words +0x10..+0x34"
+ },
+ "0021b148": {
+  "name": "i3dCtxCreateLight",
+  "tag": "lib-context",
+  "was": "FUN_0021b148",
+  "why": "allocates an i3d light from the tail and fills it from a 0x40-byte description (ambient, then five (list, count) pairs)"
+ },
+ "0021b260": {
+  "name": "i3dDrawSetUseTex",
+  "tag": "lib-context",
+  "was": "FUN_0021b260",
+  "why": "counts a use of texture slot n of the set (+0x14) and returns its register packet (+0x10)"
+ },
  "0021b288": {
   "name": "i3dBatchClearTextures",
   "tag": "ror-inferred",
   "was": "FUN_0021b288",
   "why": "writes the no-texture register packet (0x224d88) into each enabled texture slot of a batch"
+ },
+ "0021b490": {
+  "name": "i3dPktDmaTag",
+  "tag": "lib-context",
+  "was": "FUN_0021b490",
+  "why": "writes a DMA tag (qwc, id, addr) and two VIF codes; returns the next qword"
+ },
+ "0021b4f8": {
+  "name": "i3dPktRefTexRegs",
+  "tag": "lib-context",
+  "was": "FUN_0021b4f8",
+  "why": "a DMA ref tag (0x21b4d0, 6 qwords, id 3) to a texture register packet"
  },
  "0021b550": {
   "name": "i3dPktSetReg",
@@ -2302,6 +2542,42 @@
   "tag": "ror-inferred",
   "was": "FUN_0021b698",
   "why": "writes the packet first tags (0x21b600 then 0x21b550 with 0x47 / 0x5000d) and returns the chain cursor"
+ },
+ "0021c140": {
+  "name": "i3dPktSprite",
+  "tag": "lib-context",
+  "was": "FUN_0021c140",
+  "why": "a GIF tag with PRIM 0x46 (blended sprite) and RGBAQ, XYZ2, XYZ2 from the three words, behind a DMA tag; returns the packet after it"
+ },
+ "0021c8c8": {
+  "name": "i3dPackRGBAQ",
+  "tag": "lib-context",
+  "was": "FUN_0021c8c8",
+  "why": "r | g << 8 | b << 16 | a << 24 | q (f12 bits) << 32"
+ },
+ "0021c940": {
+  "name": "i3dPackXYZ",
+  "tag": "lib-context",
+  "was": "FUN_0021c940",
+  "why": "x | y << 16 | z << 32"
+ },
+ "0021db18": {
+  "name": "i3dPktDrawStrip",
+  "tag": "lib-context",
+  "was": "FUN_0021db18",
+  "why": "tail-calls 0x21c960; drawStrips type 0 and the blob shadow pass (pkt, matrix, count, stq, colours, xyz, flags); primitive role unverified"
+ },
+ "0021dd10": {
+  "name": "i3dPktDrawStripCtx",
+  "tag": "lib-context",
+  "was": "FUN_0021dd10",
+  "why": "drawStrips type 1: like i3dPktDrawStrip with the layer as the second argument; role unverified"
+ },
+ "0021e1d8": {
+  "name": "i3dPktDrawLineStrip",
+  "tag": "lib-context",
+  "was": "FUN_0021e1d8",
+  "why": "drawStrips type 2 and the sky packs' path records (pkt, layer, matrix, count, colour, xyz, flags); primitive role unverified"
  },
  "0021eb28": {
   "name": "i3dInitHardware",
@@ -2489,6 +2765,12 @@
   "was": "FUN_0021f9c8",
   "why": "collects a batch non-static textures and CLUTs (up to 0x200 each) from the texture table and reserves them in the two VRAM heaps (0x228650); returns 0xf when they do not fit, else queues the batch on ctx+0x1211c"
  },
+ "00223228": {
+  "name": "i3dLayerSetDrawSet",
+  "tag": "lib-context",
+  "was": "FUN_00223228",
+  "why": "layer+0x828 = set, layer+0x818 = set->m_group (+0xc): the set the next packets go into"
+ },
  "00223240": {
   "name": "i3dLayerSetLight",
   "tag": "ror-inferred",
@@ -2507,6 +2789,24 @@
   "was": "FUN_00223260",
   "why": "stores a1 at layer +0x834; MagScene::draw and S2dMovie::createLayer pass i3dCtxCreateView's result"
  },
+ "00223270": {
+  "name": "i3dLayerGetDrawSet",
+  "tag": "lib-context",
+  "was": "FUN_00223270",
+  "why": "returns layer+0x824, the layer's default draw set"
+ },
+ "00223298": {
+  "name": "i3dLayerBeginSet",
+  "tag": "lib-context",
+  "was": "FUN_00223298",
+  "why": "opens a packet node with key f12 (sign-flipped float bits for sorting) in the current set's group (0x223c10); returns the packet"
+ },
+ "002232f0": {
+  "name": "i3dLayerEndSet",
+  "tag": "lib-context",
+  "was": "FUN_002232f0",
+  "why": "closes the packet node in the current set's group (0x223c78) at the end pointer"
+ },
  "00223378": {
   "name": "i3dLayerBeginPacket",
   "tag": "ror-inferred",
@@ -2518,6 +2818,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00223398",
   "why": "0x223c78(layer group +0x81c, end): ends the packet opened by i3dLayerBeginPacket"
+ },
+ "00223558": {
+  "name": "i3dLayerFindDrawSet",
+  "tag": "lib-context",
+  "was": "FUN_00223558",
+  "why": "hashes a texture-set description (count, texture numbers ...) into the layer's 256 buckets and returns the matching draw set, making one from the tail when none matches"
  },
  "00223878": {
   "name": "i3dLayerInit",
@@ -2824,6 +3130,96 @@
   "tag": "ror-inferred",
   "was": "FUN_00237178",
   "why": "empty; the first call of i3dInitHardware"
+ },
+ "002372d0": {
+  "name": "i3dVecCopy",
+  "tag": "lib-context",
+  "was": "FUN_002372d0",
+  "why": "copies four words"
+ },
+ "002372e0": {
+  "name": "i3dVecCopy2",
+  "tag": "lib-context",
+  "was": "FUN_002372e0",
+  "why": "copies four words (a second copy of i3dVecCopy, used for colours)"
+ },
+ "00237340": {
+  "name": "i3dMatUnit",
+  "tag": "lib-context",
+  "was": "FUN_00237340",
+  "why": "unit matrix from vf0 rotated (vmr32)"
+ },
+ "00237360": {
+  "name": "i3dVecScale",
+  "tag": "lib-context",
+  "was": "FUN_00237360",
+  "why": "out = in * f12"
+ },
+ "002373a8": {
+  "name": "i3dMatApply",
+  "tag": "lib-context",
+  "was": "FUN_002373a8",
+  "why": "out = mat x vec (vmula / vmadda chain)"
+ },
+ "00237408": {
+  "name": "i3dVecSub",
+  "tag": "lib-context",
+  "was": "FUN_00237408",
+  "why": "out = a - b"
+ },
+ "00237468": {
+  "name": "i3dVecNeg",
+  "tag": "lib-context",
+  "was": "FUN_00237468",
+  "why": "out = 0 - in"
+ },
+ "00237580": {
+  "name": "i3dVecDot",
+  "tag": "lib-context",
+  "was": "FUN_00237580",
+  "why": "x*x + y*y + z*z of a*b"
+ },
+ "00237640": {
+  "name": "i3dMatTranslate",
+  "tag": "lib-context",
+  "was": "FUN_00237640",
+  "why": "copies the matrix and adds the vector to its translation row"
+ },
+ "00237678": {
+  "name": "i3dMatInverse",
+  "tag": "lib-context",
+  "was": "FUN_00237678",
+  "why": "cofactor inverse with vdiv (general 4x3 inverse)"
+ },
+ "002377d0": {
+  "name": "i3dMatMul",
+  "tag": "lib-context",
+  "was": "FUN_002377d0",
+  "why": "out = a x b through VU0 micro 0 (vcallms 0)"
+ },
+ "00237818": {
+  "name": "i3dMatRotX",
+  "tag": "lib-context",
+  "was": "FUN_00237818",
+  "why": "tail call to sceVu0RotMatrixX (angle f12, out, in)"
+ },
+ "00237830": {
+  "name": "i3dMatRotY",
+  "tag": "lib-context",
+  "was": "FUN_00237830",
+  "why": "tail call to sceVu0RotMatrixY"
+ },
+ "00237848": {
+  "name": "i3dMatRotZ",
+  "tag": "lib-context",
+  "was": "FUN_00237848",
+  "why": "tail call to sceVu0RotMatrixZ"
+ },
+ "00237ba0": {
+  "name": "i3dMatLookDir",
+  "tag": "lib-context",
+  "was": "FUN_00237ba0",
+  "why": "a view matrix from an eye, a direction and an up vector (cross product 0x237560 of up and dir)"
  },
  "00237c68": {
   "name": "i3dPrintf",
