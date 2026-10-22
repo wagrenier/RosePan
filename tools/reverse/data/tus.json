@@ -1,6 +1,6 @@
 {
  "queue": [
-  "spr/sprtexture.cpp",
+  "setup/i3d_draw_module.cpp",
   "dog/dogtexinfo.cpp",
   "spr/sprman.cpp"
  ],
@@ -337,6 +337,9 @@
    "status": "done",
    "task": "One-time Ghidra seeding (no RoR functions to write; Ghidra must have /Rule of Rose - US open). From tools/reverse: (1) python restore_names.py --snapshot (a copy of every current name). (2) python sections.py --apply: creates the ~1,412 functions at the ELF's named .gnu.linkonce.t sections plus the ~95 vtable slot targets Ghidra never found, and names the sections with RoR's own symbols (tag ror-symbol). (3) python libmatch.py --list lib-match-low (look at the hints), then python libmatch.py --apply: ~555 high and ~141 low library / runtime names from the SDK 3.0 (ReiPan's FF3) and ee-gcc 2.96 (FF2 debug) references; existing names such as Ghidra's syscalls are kept. (4) Name the game's entry with a name_ctx.py batch: 002045a8 main (ror-inferred; crt0 _start calls it after _InitSys and atexit; it prints the build date 'Jul 27 2006' '22:25:45' and the boot device, and loads ioprp300.img). (5) python refresh.py; references/status.md 'Ghidra seeding' must show no '-> run' hint; then python ghidra.py func on a few slot targets and section functions to see the bodies are sane (a body that runs past its section end means a neighbour is missing a function: mkfunc it). (6) Record the counts in architecture.md 'Naming sources', then finish --status done."
   },
+  "setup/i3d_draw_module.cpp": {
+   "task": "Create the native i3d draw module src/rosepan/rendering/rosepan_i3d.h / .cpp: the host consumer of the i3d path (no GS emulation, open-items Decisions). Today every frame builds real i3d groups, layers, draw sets, views, packets and texture objects (i3dlayer, i3dpacket, i3dview, i3dtex, i3dtim2, i3dvram: all verify) but nothing reaches the host renderer, so the screen is black. Steps: (1) Choose the hook and record it in open-items.md Decisions. Recommended: the 2D packet writers in i3d/i3dpacket.cpp (sprite / line / point / triangle REGLIST and F writers, each one GS primitive with its PRIM word) also append a host primitive to the open layer, and the sorted layer / draw-set walk in i3dCtxRunGroup (i3d/i3dlayer.cpp) replays them through the module in the ROM's order; keep the GS packet words as they are. VU1 strips are out of scope: leave a named hook for them. (2) Textures: the I3dTexture / I3dClut objects (i3d/i3dtex.cpp: level data, width, height, psm, filled by i3dTexSetTim2 / i3dClutSetTim2 through i3dTim2*) become GPU textures decoded on the host, cached per object and released with it; extend rosepan_draw2d for PSMT4, PSMCT32 / 24 / 16 and CLUT CSM1 / CSM2. The TEX0 a draw set references picks the texture. (3) Alpha blend, alpha test, scissor and draw offset from i3dPktSetAlphaMode and the layer / view state, mapped to the renderer's modes. (4) Prove it on screen: the boot may not reach a writer while spr/sprtexture.cpp, dog/dogtexinfo.cpp and spr/sprman.cpp are stubs, so add a forced test as system/sysnowloading.cpp did (an env switch drawing a TIM2 from the disc, e.g. S2DMAN or loading.tm2, through i3dTexSetTim2 and an i3dPktSprite into a layer) and compare its screenshot with tm2png.py output in work/ref. Finish verify when only the forced draw shows it, done when a boot screenshot does."
+  },
   "setup/platform_bootstrap.cpp": {
    "notes": "Done. The screenshot is the expected empty black window (1280x896, 60 frames per second). Next is re-assessing the queue (open-items.md Next up item 3: M1 boot from main 0x2045a8). Still FF3-shaped and listed in open-items.md Platform bootstrap: libcdvd reads IMG_BD.BIN by LSN, moviestream archive fallback, RosePan_PathResolveData bin/data spellings, iop_libsd/voice/reverb FF3 sound RPCs, the 3D mesh path. No RoR disc dump was found: set ROSEPAN_DATA to the disc root holding DATA/. RoR main replaces GameMain in src/main.cpp.",
    "sessions": [
@@ -371,6 +374,24 @@
    ],
    "status": "verify",
    "why": "the four S2d 2D layers between spr/sprtexture.cpp and mnuBase (0x192ac0): S2dCineSco 0x190a78, S2dBg 0x190f6c, S2dMes 0x191494, the movie / loading layer S2dMovie 0x19226c; all built on the spr sprite manager (SprMan, spr/sprman.cpp) and loading data/mnurpk/s2d*.rpk; RoR names no file here, spr/ from the link order and the sprite layer"
+  },
+  "spr/sprtexture.cpp": {
+   "notes": "Pinned 0x18f5b0..0x190a78. The code is complete; the smoke run reaches it (S2dMes / S2dMovie loadTexture) but every list ends in the error state because fileGetSize 0x1be768 is a stub returning 0 (the rpk reads 0 bytes) and BedPfh::BedPfh / getFileIndex are stubs; update then returns -1 and the callers move on (no hang). FileReader async helpers 0x1be338..0x1be4c8, FileReader::close and BedPfh::clear are ROM-code bridges in lib/unassigned_stubs.cpp and bed/bedpfh.cpp; as stubs isReady would never report ready and loadTexture would spin. DogTexInfo::getTexInfo 0x1161e4 is a new stub in dog/dogtexinfo.cpp. Screen black: SprMan::draw is a stub. Next: bed/bedpfh.cpp (ctor, getFileIndex) and fileGetSize plus FileReader::read together (a real fileGetSize wakes MagScene::loadActorAnim, whose FileReader::read is a stub), then DogTexInfo. Mark done when a screenshot shows S2dMes / S2dMovie sprites.",
+   "ranges": [
+    [
+     "0018f5b0",
+     "00190a78"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 17:26",
+     "status": "verify",
+     "summary": "SprTexture reconstructed: all 21 functions of 0x18f5b0..0x190a78 (ctor, clear, getters, setList, release, loadTex, the update and updateRead state machines, RTCM decoder); the update bridge is gone"
+    }
+   ],
+   "status": "verify",
+   "why": "SprTexture's ctor / dtor / clear / getters 0x18f5b0..0x18f744 (BedPfh member at +0x41c, setters shared with update) join setList..decodeRtcm (spr/sprtexture.cpp allocDebug strings); S2dCineSco (spr/s2d.cpp) starts at 0x190a78"
   },
   "system/sysnowloading.cpp": {
    "notes": "Code complete, nothing on the boot path shows it yet: draw 0x2051cc is called only by the pfh loader 0x1be564 (GamMan load path, unassigned@001bde58), a stub, so the smoke screenshot is black. A forced local draw (130 calls from init, reverted) showed the right picture: the LOADING.BIN frames at the bottom-right, stepping every 8 frames, see progress/20261022-1448_system_sysnowloading.cpp_forced_draw.png. When 0x1be564 is written it reads main's object at sdata 0x2d8ffc: make main.cpp s_nowLoading an extern global then; the first real screenshot of the loading screen marks this TU done. Decisions: the LoadImage uploads (CLUT, per-frame pixels, the 4 MB VRAM clear) and the DMA packet are not reconstructed (PC comments, callcheck lines); clearVram keeps its 1 MB alloc/free for heap parity; the ROM's 64 KB self-copy in loadImage is a no-op and not written; the host texture is cached for the session (no release API yet). RoR's 512-wide frame buffer is stretched to the renderer's 640x448 in rosepan_draw2d.",

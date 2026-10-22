@@ -16,6 +16,20 @@ BedPfh::BedPfh(const void *p)
     ROSEPAN_STUB("BedPfh::BedPfh", 0x00101750);
 }
 
+// ---- bridges (hand-written) ----
+
+// bridge of ROR 0x00101738
+// The ROM's code; SprTexture's constructor calls it (spr/sprtexture.cpp).
+void BedPfh::clear()
+{
+    ROSEPAN_BRIDGE("BedPfh::clear", 0x00101738);
+    m_name = NULL;
+    m_top = NULL;
+    m_size = NULL;
+    m_offset = NULL;
+    m_attr = NULL;
+}
+
 // ---- stubs (tools/reverse/stubgen.py) ----
 
 // stub of ROR 0x001019f0

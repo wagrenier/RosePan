@@ -539,6 +539,12 @@
   "was": "FUN_00116038",
   "why": "returns +0x108, filling it from i3rCopyClipSphere when negative (dog/dogmodel.h assert)"
  },
+ "001161e4": {
+  "name": "DogTexInfo::getTexInfo",
+  "tag": "ror-inferred",
+  "was": "FUN_001161e4",
+  "why": "dog/dogtexinfo.cpp asserts m_tex_info and (theN >= 0) && (theN < m_num_tex); returns m_tex_info + theN * 16"
+ },
  "001162ac": {
   "name": "DogTexInfo::init",
   "tag": "ror-inferred",
@@ -1655,6 +1661,42 @@
   "was": "FUN_0018f520",
   "why": "(no, time, from, to): when the sprite is on, setFade(no, 3, ...), state +0x10 = 4, +0x100 = time"
  },
+ "0018f5b0": {
+  "name": "SprTexture::SprTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f5b0",
+  "why": "BedPfh::clear on +0x41c, SprTexture::clear, +0x418 = 0; the SprMan constructor builds its +8 member with it"
+ },
+ "0018f5e4": {
+  "name": "SprTexture::~SprTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f5e4",
+  "why": "GCC 2 destructor: empty body, operator delete when bit 0 of the flag is set"
+ },
+ "0018f60c": {
+  "name": "SprTexture::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f60c",
+  "why": "zeroes the list, pack, steps, counters, the 60 texture numbers and records, slots to -1, +0x400 = 0x40"
+ },
+ "0018f6dc": {
+  "name": "SprTexture::getSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f6dc",
+  "why": "returns the +0x21c word of a file id (the load order index setList's update assigns), -1 when negative"
+ },
+ "0018f6f8": {
+  "name": "SprTexture::getTexNo",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f6f8",
+  "why": "the +0x12c DogTexInfo texture number of the file id's slot, -1 when it has none"
+ },
+ "0018f734": {
+  "name": "SprTexture::getTexRecord",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f734",
+  "why": "the +0x30c word of a file id: the DogTexInfo 16-byte record pointer loadTex stores"
+ },
  "0018f744": {
   "name": "SprTexture::setList",
   "tag": "ror-inferred",
@@ -1667,11 +1709,83 @@
   "was": "FUN_0018f808",
   "why": "(list, rpk, mode): stores mode at +0x434, then setList"
  },
+ "0018f824": {
+  "name": "SprTexture::release",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f824",
+  "why": "SprMan::release calls it: DogTexInfo::release of every loaded texture, frees the file buffers by flags 4 / 8, slots -1, frees the pack buffer"
+ },
+ "0018f9cc": {
+  "name": "SprTexture::freeFile",
+  "tag": "ror-inferred",
+  "was": "FUN_0018f9cc",
+  "why": "finds the list entry with the id and frees its buffer (flag 8 decoded, not flag 4 borrowed from the pack); 1 when the id is in the list"
+ },
+ "0018fab4": {
+  "name": "SprTexture::releaseTex",
+  "tag": "ror-inferred",
+  "was": "FUN_0018fab4",
+  "why": "DogTexInfo::release of the file id's texture, clears its number and record; 1 when released"
+ },
+ "0018fbb0": {
+  "name": "SprTexture::loadTex",
+  "tag": "ror-inferred",
+  "was": "FUN_0018fbb0",
+  "why": "adds the file id's picture to the DogTexInfo (addData by its texture name), taking it from the pack (bedpfh.h getFile asserts) and decoding RTCM first when not loaded yet"
+ },
+ "0018fe8c": {
+  "name": "SprTexture::getPackIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_0018fe8c",
+  "why": "BedPfh::getFileIndex on the +0x430 pack, -1 without a pack"
+ },
  "0018febc": {
   "name": "SprTexture::update",
   "tag": "ror-inferred",
   "was": "FUN_0018febc",
   "why": "spr/sprtexture.cpp: the load state machine on +0x11c (alloc, read the pack or files, BedPfh, add the textures); the S2d inits spin on it until it returns non-zero"
+ },
+ "001905a0": {
+  "name": "SprTexture::setStep",
+  "tag": "ror-inferred",
+  "was": "FUN_001905a0",
+  "why": "stores +0x11c, the step SprTexture::update switches on"
+ },
+ "001905a8": {
+  "name": "SprTexture::setReadStep",
+  "tag": "ror-inferred",
+  "was": "FUN_001905a8",
+  "why": "stores +0x120, the step of the file read machine 0x190618"
+ },
+ "001905b0": {
+  "name": "SprTexture::startRead",
+  "tag": "ror-inferred",
+  "was": "FUN_001905b0",
+  "why": "strcpy of the file name to +0x10, buffer / size / offset to +0x110.., read step 1"
+ },
+ "00190618": {
+  "name": "SprTexture::updateRead",
+  "tag": "ror-inferred",
+  "was": "FUN_00190618",
+  "why": "steps a FileReader through open, seek, read, close with rxThSync and SndMan::update while it waits; 1 done, 0 busy, < 0 error"
+ },
+ "00190884": {
+  "name": "SprTexture::compareId",
+  "tag": "ror-inferred",
+  "was": "FUN_00190884",
+  "why": "compares a NUL-ended id with the start of a buffer: -1 on a mismatch, else 0 or 1 by the byte after it"
+ },
+ "001908d0": {
+  "name": "SprTexture::isRtcm",
+  "tag": "ror-inferred",
+  "was": "FUN_001908d0",
+  "why": "1 when the buffer starts with the RTCM id (string 0x2f7a90)"
+ },
+ "00190904": {
+  "name": "SprTexture::decodeRtcm",
+  "tag": "ror-inferred",
+  "was": "FUN_00190904",
+  "why": "RTCM run-length decoder: allocDebug(size + unit, spr/sprtexture.cpp 1067), records of a kind byte and a 24-bit count, kind 0 repeats one unit, kind 1 copies count units"
  },
  "00190a78": {
   "name": "S2dCineSco::S2dCineSco",
@@ -2201,11 +2315,41 @@
   "was": "FUN_001be2dc",
   "why": "GCC 2 destructor (flags & 1 deletes): closes the reader's fd when it is >= 0 (0x1be414)"
  },
+ "001be338": {
+  "name": "FileReader::openFile",
+  "tag": "ror-inferred",
+  "was": "FUN_001be338",
+  "why": "rxSysStreamOpen(name, 0x8001) into the reader's fd (+4); returns 0"
+ },
+ "001be36c": {
+  "name": "FileReader::readFile",
+  "tag": "ror-inferred",
+  "was": "FUN_001be36c",
+  "why": "rxFileRead(fd, buf, size); the reader is unused"
+ },
+ "001be3c4": {
+  "name": "FileReader::closeFile",
+  "tag": "ror-inferred",
+  "was": "FUN_001be3c4",
+  "why": "rxFileClose(fd); 1 and fd -1 when it was the reader's own file, else 2; FileReader::close calls it"
+ },
  "001be414": {
   "name": "FileReader::close",
   "tag": "ror-inferred",
   "was": "FUN_001be414",
   "why": "closes the reader's own fd (+4) through 0x1be3c4 when it is >= 0, else returns -1; the destructor calls it"
+ },
+ "001be444": {
+  "name": "FileReader::seekFile",
+  "tag": "ror-inferred",
+  "was": "FUN_001be444",
+  "why": "rxFileSeek(fd, offset, whence) with whence 1 / 2 passed through, anything else 0"
+ },
+ "001be4c8": {
+  "name": "FileReader::isReady",
+  "tag": "ror-inferred",
+  "was": "FUN_001be4c8",
+  "why": "rxFileSync(fd, 1) == 0 on the reader's fd (true without one) and stores the fd to the third argument; the second is unused"
  },
  "001be524": {
   "name": "FileReader::read",

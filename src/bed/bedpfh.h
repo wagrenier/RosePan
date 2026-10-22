@@ -37,6 +37,9 @@ static_assert(sizeof(BedPfhHead) == 0x20, "BedPfhHead is 0x20 bytes on the EE");
  * the ROM's (bed/bedpfh.h; their asserts carry its line numbers). */
 struct BedPfh
 {
+    /* PC: GCC 2 builds a member BedPfh without a constructor call (its
+     * owner calls clear, as SprTexture's does); C++ needs one to declare. */
+    BedPfh() {}
     BedPfh(const void *p);                                               // ROR 0x00101750
     void clear();                                                        // ROR 0x00101738
 

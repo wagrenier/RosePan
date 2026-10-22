@@ -17,8 +17,9 @@ const int g_sprColorClear[4]  = { 0x80, 0x80, 0x80, 0 };       /* data 0x2999b0 
 
 // stub of ROR 0x0018bb8c
 // PC: runs before main (the S2d layers are members of g_magSystem's scene);
-// the stub only logs. The ROM constructs the SprTexture and the +0x440
-// object and clears the words; the host's zeroed global does the latter.
+// the stub only logs. The ROM constructs the SprTexture (C++ runs its
+// constructor before this body) and the +0x440 object and clears the
+// words; the host's zeroed global does the latter.
 SprMan::SprMan()
 {
     ROSEPAN_STUB("SprMan::SprMan", 0x0018bb8c);

@@ -545,6 +545,24 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   tables are nested records with EE pointers inside; they are kept as EE word images until SprMan
   is written (datadump.py --words).
 
+- **The sprite texture loader** (`spr/sprtexture.cpp`, pinned 0x18f5b0..0x190a78, 2026-10-22,
+  `verify`): `SprTexture` (EE 0x438) loads a list of `SprTexFile` (EE 0x18: id 0..59, file name,
+  texture name, size, flags, buffer; id < 0 or name "" ends it) into the DogTexInfo at +0x414,
+  one state per `update` call (0x18febc: 0 busy, 1 done, -1 after an error; state +0x11c).
+  setList 0x18f744 picks the start: no pack -> loose files (5); `m_mode` 0 (+0x434, setListMode)
+  -> fileGetSize + read the whole .rpk (3); mode 1 -> read its first 4 KB (1), then each file from
+  the disc at the pack's offset. Entry flags: 1 = add while loading (else loadTex 0x18fbb0 adds it
+  later from the pack), 4 = buffer borrowed from the pack, 8 = loadTex's RTCM decode (freed).
+  Tables: +0x12c DogTexInfo numbers by load slot, +0x21c slot by id (-1), +0x30c the DogTexInfo
+  16-byte record by id (`DogTexInfo::getTexInfo` 0x1161e4). The reads run through `updateRead`
+  0x190618, a FileReader stepped through open / seek / read / close with the asynchronous helpers
+  0x1be338..0x1be4c8 (rxSysStreamOpen, rxFileRead / Seek / Close, `isReady` = rxFileSync(fd, 1) ==
+  0), waiting with rxThSync(1) + SndMan::update. **RTCM** (id string 0x2f7a90): a run-length
+  format, header 0x20 (+8 decoded size, +0xc file size with the header, +0x10 short unit size),
+  then records of a kind byte and a 24-bit big-endian count: kind 0 one unit repeated, kind 1
+  count units (`decodeRtcm` 0x190904). When the list is done and +0x418 (an i3dContext) is set,
+  DogTexInfo::setTexTable(ctx).
+
 ## Modules (RoR's own source files)
 
 73 `.cpp` paths survive in assert / error strings (export.py anchors on them), plus headers whose inline

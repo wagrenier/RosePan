@@ -63,3 +63,10 @@ void DogTexInfo::release(int theNo)
 {
     ROSEPAN_STUB("DogTexInfo::release", 0x00116618);
 }
+
+// stub of ROR 0x001161e4
+void * DogTexInfo::getTexInfo(int theN)
+{
+    ROSEPAN_STUB("DogTexInfo::getTexInfo", 0x001161e4);
+    return {};
+}
