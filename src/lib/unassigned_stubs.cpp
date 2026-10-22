@@ -2,6 +2,8 @@
 // Functions below are stubs until reconstructed; see tools/reverse/stage.py.
 #include <math.h>
 #include <string.h>
+#include "game/gamsnd.h"
+#include "rx/rxsnd.h"
 
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
@@ -57,12 +59,6 @@ void CmnTaskMan::exec()
     ROSEPAN_STUB("CmnTaskMan::exec", 0x001e7a20);
 }
 
-// stub of ROR 0x0017f164
-void SndMan::init()
-{
-    ROSEPAN_STUB("SndMan::init", 0x0017f164);
-}
-
 // stub of ROR 0x00203ea8
 void SysTimer::start()
 {
@@ -95,16 +91,16 @@ void sysInitManagers(void)
 
 // ---- bridges (hand-written) ----
 
+// stub of ROR 0x001f8fc0 (a constructor: stubgen leaves it to hand)
+TskSnd::TskSnd(int kind, const TskSndParam *param)
+{
+    ROSEPAN_STUB("TskSnd::TskSnd", 0x001f8fc0);
+}
+
 // stub of ROR 0x00181204
 void RxMpeg::setFrameParity(int parity)
 {
     ROSEPAN_STUB("RxMpeg::setFrameParity", 0x00181204);
-}
-
-// stub of ROR 0x0017f200
-void SndMan::update()
-{
-    ROSEPAN_STUB("SndMan::update", 0x0017f200);
 }
 
 // stub of ROR 0x0010421c
@@ -517,5 +513,190 @@ void GamFont::setFont(const void *font)
 int GamFont::setTarget(void *buf, u_int w, u_int h, int bits)
 {
     ROSEPAN_STUB("GamFont::setTarget", 0x001bedc0);
+    return {};
+}
+
+// stub of ROR 0x001e7d7c
+void * CmnTaskMan::getTask(int id)
+{
+    ROSEPAN_STUB("CmnTaskMan::getTask", 0x001e7d7c);
+    return {};
+}
+
+// stub of ROR 0x001e4908
+int GamSndMan::findSnd(int id, GamSndEntry **entry, int arg)
+{
+    ROSEPAN_STUB("GamSndMan::findSnd", 0x001e4908);
+    return {};
+}
+
+// stub of ROR 0x00181494
+void RxMpeg::postUpdate()
+{
+    ROSEPAN_STUB("RxMpeg::postUpdate", 0x00181494);
+}
+
+// stub of ROR 0x0018120c
+void RxMpeg::update()
+{
+    ROSEPAN_STUB("RxMpeg::update", 0x0018120c);
+}
+
+// stub of ROR 0x0023e020
+void rxSndAdpcmClose(int stream)
+{
+    ROSEPAN_STUB("rxSndAdpcmClose", 0x0023e020);
+}
+
+// stub of ROR 0x0023eb28
+void rxSndAdpcmEnd(int stream)
+{
+    ROSEPAN_STUB("rxSndAdpcmEnd", 0x0023eb28);
+}
+
+// stub of ROR 0x0023e240
+int rxSndAdpcmGetFree(int stream)
+{
+    ROSEPAN_STUB("rxSndAdpcmGetFree", 0x0023e240);
+    return {};
+}
+
+// stub of ROR 0x0023e158
+u_int rxSndAdpcmGetStatus(int stream)
+{
+    ROSEPAN_STUB("rxSndAdpcmGetStatus", 0x0023e158);
+    return {};
+}
+
+// stub of ROR 0x0023dcc8
+int rxSndAdpcmOpen(int mode, int rate, int arg2, int arg3, int arg4, int arg5)
+{
+    ROSEPAN_STUB("rxSndAdpcmOpen", 0x0023dcc8);
+    return {};
+}
+
+// stub of ROR 0x0023eef8
+void rxSndAdpcmPause(int stream, int pause)
+{
+    ROSEPAN_STUB("rxSndAdpcmPause", 0x0023eef8);
+}
+
+// stub of ROR 0x0023ef98
+void rxSndAdpcmSetAttr(int stream, int value)
+{
+    ROSEPAN_STUB("rxSndAdpcmSetAttr", 0x0023ef98);
+}
+
+// stub of ROR 0x0023f310
+void rxSndAdpcmSetPitch(int stream, float pitch)
+{
+    ROSEPAN_STUB("rxSndAdpcmSetPitch", 0x0023f310);
+}
+
+// stub of ROR 0x0023f038
+void rxSndAdpcmSetVolume(int stream, int volL, int volR)
+{
+    ROSEPAN_STUB("rxSndAdpcmSetVolume", 0x0023f038);
+}
+
+// stub of ROR 0x0023eb10
+void rxSndAdpcmWrite(int stream, const void *data, int offset, int size)
+{
+    ROSEPAN_STUB("rxSndAdpcmWrite", 0x0023eb10);
+}
+
+// stub of ROR 0x00237d80
+void rxSndInit(void)
+{
+    ROSEPAN_STUB("rxSndInit", 0x00237d80);
+}
+
+// stub of ROR 0x0023c228
+u_int rxSndSeGetStatus(int voice)
+{
+    ROSEPAN_STUB("rxSndSeGetStatus", 0x0023c228);
+    return {};
+}
+
+// stub of ROR 0x0023c260
+void rxSndSePause(int voice, int pause, int arg)
+{
+    ROSEPAN_STUB("rxSndSePause", 0x0023c260);
+}
+
+// stub of ROR 0x0023be68
+int rxSndSePlay(int xvab, int prog, int note, int volL, int volR, int arg)
+{
+    ROSEPAN_STUB("rxSndSePlay", 0x0023be68);
+    return {};
+}
+
+// stub of ROR 0x0023c328
+void rxSndSeSetAttr(int voice, int value)
+{
+    ROSEPAN_STUB("rxSndSeSetAttr", 0x0023c328);
+}
+
+// stub of ROR 0x0023c510
+void rxSndSeSetPitch(int voice, float pitch)
+{
+    ROSEPAN_STUB("rxSndSeSetPitch", 0x0023c510);
+}
+
+// stub of ROR 0x0023c3c0
+void rxSndSeSetVolume(int voice, int volL, int volR)
+{
+    ROSEPAN_STUB("rxSndSeSetVolume", 0x0023c3c0);
+}
+
+// stub of ROR 0x0023c0f8
+void rxSndSeStop(int voice, int arg)
+{
+    ROSEPAN_STUB("rxSndSeStop", 0x0023c0f8);
+}
+
+// stub of ROR 0x00238188
+void rxSndSetMasterVolume(int volL, int volR)
+{
+    ROSEPAN_STUB("rxSndSetMasterVolume", 0x00238188);
+}
+
+// stub of ROR 0x00237db0
+void rxSndTerm(void)
+{
+    ROSEPAN_STUB("rxSndTerm", 0x00237db0);
+}
+
+// stub of ROR 0x00237eb0
+void rxSndUpdate(void)
+{
+    ROSEPAN_STUB("rxSndUpdate", 0x00237eb0);
+}
+
+// stub of ROR 0x0023a720
+int rxSndXvabCheck(int id, int wait)
+{
+    ROSEPAN_STUB("rxSndXvabCheck", 0x0023a720);
+    return {};
+}
+
+// stub of ROR 0x0023a5a8
+int rxSndXvabFree(int id, int arg)
+{
+    ROSEPAN_STUB("rxSndXvabFree", 0x0023a5a8);
+    return {};
+}
+
+// stub of ROR 0x0023a1b8
+int rxSndXvabLoad(int id, const char *name, int arg2, int arg3)
+{
+    ROSEPAN_STUB("rxSndXvabLoad", 0x0023a1b8);
+    return {};
+}
+
+// stub of ROR 0x00106658
+u_int utlConvSndId(u_int id)
+{
+    ROSEPAN_STUB("utlConvSndId", 0x00106658);
     return {};
 }

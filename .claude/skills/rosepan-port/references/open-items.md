@@ -371,6 +371,20 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-22, the sndman session) **Sound has no host backend.** `snd/sndman.cpp` is written
+  (`verify`) and SndMan::update now runs every frame, but every rx sound library call
+  (`rx/rxsnd.h`: rxSndInit, rxSndUpdate, the XVAB / SE / ADPCM functions) is a stub in
+  lib/unassigned_stubs.cpp, so nothing is heard and streams never report an end (status 0). Whether to
+  reconstruct rxSnd's EE side over a host IOP sound module (ReiPan's src/sdk iop_libsd / iop_voice) or
+  to replace it with a host mixer at the rxSnd API is the user's call; until then sound TUs finish
+  `verify`. The rxSnd field named "attr" (IOP command 0x82 / 0xa2, parameter 2) may be pan or an effect
+  send: unconfirmed.
+- (2026-10-22, the sndman session) The rest of **unassigned@00164fc0** (0x164fc0..0x17f0d0) still
+  mixes several files: EmyMain / EmyOut code to ~0x16a914, the Eff* effect classes (Eff0 vtable
+  0x2e3250 .. EffWater3, 0x16a914..~0x17c0f0; FUN_00176afc and FUN_00177830 are reached stubs from
+  them), SctLayer 0x17c0f0..~0x17c8b8, unread code 0x17c8b8..0x17e3d8 (role not checked), WrdSrv / WrdTable (data/wrd/WRD.BIN,
+  0x17e3d8..0x17f0d0). Define those files before porting from it.
+
 - (2026-10-22, the i3dmath session) **Naming of the vector module's two copies**: the older
   sessions gave five first-copy functions the plain names (i3dVecZero, i3dVecCopyW, i3dMatCopy,
   i3dVecCross, i3dVecNormalize) while the second copy has i3dVecCopy / i3dVecCross2 /

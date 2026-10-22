@@ -9,6 +9,8 @@
 #ifndef _GAME_GAMMAN_H
 #define _GAME_GAMMAN_H
 
+#include "game/gamsnd.h"
+
 /* EE size at least 0x2221c. layout: host -- only the members other TUs
  * read are declared. */
 struct GamMan
@@ -23,6 +25,7 @@ struct GamMan
     void switchVolume(int on);                                           // ROR 0x001d3ac8
     void setVolume(int volume);                                          // ROR 0x001d3a38
 
+    GamSndMan m_sndMan;         // ROR 0x18e00 (bss 0x79a0c0): the sound table
     int m_saved_volume;         // ROR 0x22214: -1 = none saved (SprMan::volumeOn / Off read it)
 };
 

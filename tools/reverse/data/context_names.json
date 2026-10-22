@@ -371,6 +371,12 @@
   "was": "FUN_0010620c",
   "why": "utl/utlfind.cpp: sets four words to -1 and the next two to 0 (a 0x18-byte search record); MagLifeBwnCtrl::termWorld and MagScene::clearPC call it"
  },
+ "00106658": {
+  "name": "utlConvSndId",
+  "tag": "ror-inferred",
+  "was": "FUN_00106658",
+  "why": "ids 0x0a00xxxx..0x0a02xxxx are swapped through the table 0x295f08 by the index GamMan 0x1c6c38 reports (a language / version column)"
+ },
  "00106e70": {
   "name": "utlVecDist",
   "tag": "ror-inferred",
@@ -1565,17 +1571,317 @@
   "was": "FUN_0017ea44",
   "why": "returns entry n (< count at data +8) of a loaded table (+4 data, +8 entries); its object 0x298ee0 is loaded from data/wrd/WRD.BIN by 0x17e5c0 (GamMan::loadStage); entry +0x10 is the map-name text S2dMes::drawMapName copies; class name invented from the file"
  },
+ "0017f0d0": {
+  "name": "SndMan::SndMan",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f0d0",
+  "why": "constructor of bss 0x7b2580 (static initializer 0x2041f8): clears the state, id masks, 65 bank handles and 48 slots, volumes 0x80"
+ },
+ "0017f13c": {
+  "name": "SndMan::~SndMan",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f13c",
+  "why": "GCC 2 destructor: only operator delete when bit 0 of the flag is set"
+ },
  "0017f164": {
   "name": "SndMan::init",
   "tag": "ror-inferred",
   "was": "FUN_0017f164",
   "why": "object 0x7b2580 (constructed by 0x17f0d0 in the static initializer 0x2041f8): sets word 0 = 1, +0x1af8 = 0, calls rxSndInit; between the static-init pair 0x17f090 and snd/sndman.cpp's anchor 0x180230; class name from the file, unverified"
  },
+ "0017f188": {
+  "name": "SndMan::term",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f188",
+  "why": "when initialised: rxSndTerm, rxSysTerm, then clears the bank handles and slots"
+ },
  "0017f200": {
   "name": "SndMan::update",
   "tag": "ror-inferred",
   "was": "FUN_0017f200",
   "why": "on g_sndMan (bss 0x7b2580) once m_state == 1: the sound and movie steps (0x17f6b8, 0x18120c, 0x237eb0, 0x181494, 0x17f3b8); MagSystem::update calls it every frame"
+ },
+ "0017f264": {
+  "name": "SndMan::fadeIn",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f264",
+  "why": "fade state 2: the per-frame step 0x17f3b8 raises the master volume from 0 to m_volL/R over frames"
+ },
+ "0017f308": {
+  "name": "SndMan::fadeOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f308",
+  "why": "fade state 1: the per-frame step lowers the master volume to 0 over frames"
+ },
+ "0017f3b8": {
+  "name": "SndMan::updateFade",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f3b8",
+  "why": "steps the fade counter and sets the master volume through rxSndSetMasterVolume"
+ },
+ "0017f514": {
+  "name": "SndMan::clearSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f514",
+  "why": "sets a slot's first five words to -1 (type, id, state ...)"
+ },
+ "0017f530": {
+  "name": "SndMan::clearSlots",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f530",
+  "why": "clearSlot over the 48 slots at +0x234 (0x84 bytes each)"
+ },
+ "0017f584": {
+  "name": "SndMan::getSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f584",
+  "why": "the slot whose id (+4) is id, NULL for id outside 0..47 or none"
+ },
+ "0017f5e8": {
+  "name": "SndMan::stopAll",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f5e8",
+  "why": "for every slot whose type matches the mask: stream (1) gets state 7, SE (8) is stopped with rxSndSeStop and freed"
+ },
+ "0017f6b8": {
+  "name": "SndMan::updateSlots",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f6b8",
+  "why": "per frame: updateStream for type 1, updateSe for type 8; a negative result frees the id and the slot"
+ },
+ "0017f7ac": {
+  "name": "SndMan::loadBankById",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f7ac",
+  "why": "looks the sound id up in GamSndMan (0x79a0c0 = GamMan + 0x18e00) and loadBank's its bank number (+0x20)"
+ },
+ "0017f81c": {
+  "name": "SndMan::finishBankById",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f81c",
+  "why": "GamSndMan lookup then finishBank on the entry's bank"
+ },
+ "0017f878": {
+  "name": "SndMan::loadBankByName",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f878",
+  "why": "the bank number is atoi of the name's chars 3..4; kept in +0x1af4, then loadBank"
+ },
+ "0017f8e4": {
+  "name": "SndMan::finishCurBank",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f8e4",
+  "why": "finishBank(+0x1af4), the bank loadBankByName loaded"
+ },
+ "0017f8fc": {
+  "name": "SndMan::playSe",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f8fc",
+  "why": "44 callers: converts the sound id, checks GamSndMan's bank is loaded, starts playSeBank with the entry's bank / prog / note; returns the slot id or -1"
+ },
+ "0017f9ac": {
+  "name": "SndMan::allocId",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f9ac",
+  "why": "first free bit: kind 0 ids 0..1 (streams), kind 1 ids 2..31 then 32..47 in the second mask"
+ },
+ "0017fa5c": {
+  "name": "SndMan::checkId",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fa5c",
+  "why": "kind 0 only: id when its bit is free, else -1"
+ },
+ "0017fa90": {
+  "name": "SndMan::setIdUsed",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fa90",
+  "why": "sets the id's bit in +0x24 (ids < 32) or +0x28"
+ },
+ "0017fac4": {
+  "name": "SndMan::setIdFree",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fac4",
+  "why": "clears the id's bit in +0x24 or +0x28"
+ },
+ "0017fb00": {
+  "name": "SndMan::initStreamSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fb00",
+  "why": "type 1, state 5, fd / fStream -1, volumes 0x80, pitch 1.0, empty name"
+ },
+ "0017fb5c": {
+  "name": "SndMan::findFreeSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fb5c",
+  "why": "the first slot whose id is -1, else NULL"
+ },
+ "0017fba4": {
+  "name": "SndMan::freeSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fba4",
+  "why": "clearSlot when not NULL"
+ },
+ "0017fbc4": {
+  "name": "SndMan::allocStreamSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fbc4",
+  "why": "free slot, initStreamSlot, ring buffer bss 0x668980 (id 0) or 0x6a8d80, cleared (0x40000 bytes)"
+ },
+ "0017fc74": {
+  "name": "SndMan::freeStreamSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fc74",
+  "why": "freeSlot (the stream twin of freeSlot, called by updateSlots)"
+ },
+ "0017fc90": {
+  "name": "SndMan::countStreams",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fc90",
+  "why": "counts used ids whose slot is a stream"
+ },
+ "0017fd1c": {
+  "name": "SndMan::playStreamStereo",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fd1c",
+  "why": "playStream(name, 1, -1, 0): mode 1 opens the ADPCM stream in mode 2"
+ },
+ "0017fd3c": {
+  "name": "SndMan::playStreamAuto",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fd3c",
+  "why": "playStream(name, mode, -1, 0): any free stream id"
+ },
+ "0017fd58": {
+  "name": "SndMan::playStream",
+  "tag": "ror-inferred",
+  "was": "FUN_0017fd58",
+  "why": "takes a stream id (or reuses the given one): same name restarts, another one is stopped and a TskSnd kind 7 replays the new name; copies the name (data/snd/xws/<name>)"
+ },
+ "0017ff58": {
+  "name": "SndMan::setStream",
+  "tag": "ror-inferred",
+  "was": "FUN_0017ff58",
+  "why": "stream slot: volumes, pitch (float), attribute, -1024 keeps a value; playing (2) -> 3 applies them"
+ },
+ "0018000c": {
+  "name": "SndMan::setStreamAttr",
+  "tag": "ror-inferred",
+  "was": "FUN_0018000c",
+  "why": "stream slot +0x34 (rxSndAdpcmSetAttr's value)"
+ },
+ "00180078": {
+  "name": "SndMan::setStreamLoop",
+  "tag": "ror-inferred",
+  "was": "FUN_00180078",
+  "why": "stream slot +0xc: 0 once, 1 loop"
+ },
+ "001800d0": {
+  "name": "SndMan::getStreamState",
+  "tag": "ror-inferred",
+  "was": "FUN_001800d0",
+  "why": "stream slot state (+0x10), -1 for none"
+ },
+ "00180108": {
+  "name": "SndMan::pauseStream",
+  "tag": "ror-inferred",
+  "was": "FUN_00180108",
+  "why": "state 2 -> 4 (updateStream pauses the ADPCM stream)"
+ },
+ "00180168": {
+  "name": "SndMan::resumeStream",
+  "tag": "ror-inferred",
+  "was": "FUN_00180168",
+  "why": "state 5 -> 6"
+ },
+ "001801c8": {
+  "name": "SndMan::stopStream",
+  "tag": "ror-inferred",
+  "was": "FUN_001801c8",
+  "why": "state 2 or 5 -> 7 (updateStream closes)"
+ },
+ "00180230": {
+  "name": "SndMan::updateStream",
+  "tag": "ror-inferred",
+  "was": "FUN_00180230",
+  "why": "snd/sndman.cpp asserts strSndInfo->uniPtr.sndFStream.fStream / fd: opens data/snd/xws/<name> as a ring, opens the ADPCM stream, feeds ring data, handles pause / stop / loop"
+ },
+ "001809d8": {
+  "name": "SndMan::loadBank",
+  "tag": "ror-inferred",
+  "was": "FUN_001809d8",
+  "why": "bank < 65: frees the old handle, rxSndXvabLoad(-1, data), waits for the transfer unless nowait"
+ },
+ "00180a90": {
+  "name": "SndMan::finishBank",
+  "tag": "ror-inferred",
+  "was": "FUN_00180a90",
+  "why": "when the bank's XVAB transfer is over, frees its source buffer (+0x130 table) through rx memory hook 3; 1 when freed"
+ },
+ "00180b30": {
+  "name": "SndMan::freeBank",
+  "tag": "ror-inferred",
+  "was": "FUN_00180b30",
+  "why": "rxSndXvabFree and handle -1"
+ },
+ "00180b9c": {
+  "name": "SndMan::initSeSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_00180b9c",
+  "why": "type 8, state 0, voice -1, bank 65, volumes 0x80, pitch 1.0"
+ },
+ "00180be4": {
+  "name": "SndMan::playSeBank",
+  "tag": "ror-inferred",
+  "was": "FUN_00180be4",
+  "why": "loaded bank: SE id (allocId 1) and slot, initSeSlot, bank / prog / note"
+ },
+ "00180ca8": {
+  "name": "SndMan::getSeState",
+  "tag": "ror-inferred",
+  "was": "FUN_00180ca8",
+  "why": "SE slot state, -1 for none"
+ },
+ "00180ce0": {
+  "name": "SndMan::setSe",
+  "tag": "ror-inferred",
+  "was": "FUN_00180ce0",
+  "why": "SE slot: volumes, pitch (float), attribute, -1024 keeps a value; 2 -> 3"
+ },
+ "00180d94": {
+  "name": "SndMan::setSeAttr",
+  "tag": "ror-inferred",
+  "was": "FUN_00180d94",
+  "why": "SE slot +0x2c"
+ },
+ "00180e00": {
+  "name": "SndMan::pauseSe",
+  "tag": "ror-inferred",
+  "was": "FUN_00180e00",
+  "why": "SE state 2 -> 4"
+ },
+ "00180e54": {
+  "name": "SndMan::resumeSe",
+  "tag": "ror-inferred",
+  "was": "FUN_00180e54",
+  "why": "SE state 5 -> 6"
+ },
+ "00180ea8": {
+  "name": "SndMan::stopSe",
+  "tag": "ror-inferred",
+  "was": "FUN_00180ea8",
+  "why": "SE state -> 7"
+ },
+ "00180eec": {
+  "name": "SndMan::setSeLoop",
+  "tag": "ror-inferred",
+  "was": "FUN_00180eec",
+  "why": "SE slot +0xc: 0 once, else 1"
+ },
+ "00180f44": {
+  "name": "SndMan::updateSe",
+  "tag": "ror-inferred",
+  "was": "FUN_00180f44",
+  "why": "starts the voice with rxSndSePlay, applies volume / pitch / attribute, pause / resume / stop, frees at the end unless looping"
  },
  "00181150": {
   "name": "RxMpeg::open",
@@ -1589,11 +1895,23 @@
   "was": "FUN_00181204",
   "why": "stores the arg at +0x3c of the object at bss 0x7b40c0 (constructor 0x1810f4: 0x200 / 0x180 / 0xe00 sizes, a movie player next to snd/rxmpeg.cpp); MagSystem::update passes frame & 1; class name unverified"
  },
+ "0018120c": {
+  "name": "RxMpeg::update",
+  "tag": "ror-inferred",
+  "was": "FUN_0018120c",
+  "why": "per frame from SndMan::update on bss 0x7b40c0 while open"
+ },
  "001812a8": {
   "name": "RxMpeg::draw",
   "tag": "ror-inferred",
   "was": "FUN_001812a8",
   "why": "takes an I3dLayer, opens its packet (i3dLayerBeginPacket), writes the decoded frame's upload and sprites (i3dPktSetReg, 0x21b4d0) and closes it; S2dMovie::drawMovie calls it"
+ },
+ "00181494": {
+  "name": "RxMpeg::postUpdate",
+  "tag": "ror-inferred",
+  "was": "FUN_00181494",
+  "why": "empty; SndMan::update calls it after rxSndUpdate"
  },
  "0018154c": {
   "name": "RxMpeg::play",
@@ -2819,6 +3137,18 @@
   "was": "FUN_001d3ac8",
   "why": "0: saves the volume at +0x22214 and sets 0; 1: restores the saved one and marks -1"
  },
+ "001e435c": {
+  "name": "GamSndMan::isSndBankLoaded",
+  "tag": "ror-inferred",
+  "was": "FUN_001e435c",
+  "why": "findSnd then 0x1e43a4(bank, +0x32, 1): the bank's handle (+0x1728 table) is set"
+ },
+ "001e4908": {
+  "name": "GamSndMan::findSnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4908",
+  "why": "this = 0x79a0c0 (GamMan + 0x18e00); walks the 0x38-byte entries at *(+0x1540) for the id at +0x1c, 1 and the entry when found"
+ },
  "001e71fc": {
   "name": "CmnTaskMan::addTask",
   "tag": "ror-inferred",
@@ -2830,6 +3160,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001e7a20",
   "why": "object 0x7a3d80: per frame, times with the member timer +0x40, runs the queued tasks whose start frame has come; mainLoop"
+ },
+ "001e7d7c": {
+  "name": "CmnTaskMan::getTask",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7d7c",
+  "why": "non-zero when the task id still runs; playStream does not queue a second TskSnd"
+ },
+ "001f8fc0": {
+  "name": "TskSnd::TskSnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001f8fc0",
+  "why": "writes vtable 0x2e4e70 (TskSnd), copies a 0x40-byte parameter block, picks the step function by kind (7 copies the stream name)"
  },
  "00203ea8": {
   "name": "SysTimer::start",
@@ -5309,6 +5651,144 @@
   "was": "FUN_00237d80",
   "why": "rx sound middleware (rxsnd strings in 0x237d80..0x23ff58): calls ten sub-inits, rxThAddCallback(0x237ce8), sets a hook to 0x237d00"
  },
+ "00237db0": {
+  "name": "rxSndTerm",
+  "tag": "lib-context",
+  "was": "FUN_00237db0",
+  "why": "removes the rxSnd thread callback 0x237ce8 and shuts the library down; SndMan::term"
+ },
+ "00237eb0": {
+  "name": "rxSndUpdate",
+  "tag": "lib-context",
+  "was": "FUN_00237eb0",
+  "why": "per frame from SndMan::update: flushes the queued IOP commands"
+ },
+ "00238188": {
+  "name": "rxSndSetMasterVolume",
+  "tag": "lib-context",
+  "was": "FUN_00238188",
+  "why": "SndMan's fade passes the left / right master volume"
+ },
+ "0023a1b8": {
+  "name": "rxSndXvabLoad",
+  "tag": "lib-context",
+  "was": "FUN_0023a1b8",
+  "why": "strings XVAB slot is empty / ID out of range / already exist; returns the XVAB id"
+ },
+ "0023a5a8": {
+  "name": "rxSndXvabFree",
+  "tag": "lib-context",
+  "was": "FUN_0023a5a8",
+  "why": "out of range / unused XVAB ID strings; frees an XVAB"
+ },
+ "0023a720": {
+  "name": "rxSndXvabCheck",
+  "tag": "lib-context",
+  "was": "FUN_0023a720",
+  "why": "XVAB transfer state: 1 while busy; arg 1 waits"
+ },
+ "0023be68": {
+  "name": "rxSndSePlay",
+  "tag": "lib-context",
+  "was": "FUN_0023be68",
+  "why": "can't allocate SE slot string; returns an SE voice from an XVAB, prog, note, volumes"
+ },
+ "0023c0f8": {
+  "name": "rxSndSeStop",
+  "tag": "lib-context",
+  "was": "FUN_0023c0f8",
+  "why": "its own string rxSndSeStop"
+ },
+ "0023c228": {
+  "name": "rxSndSeGetStatus",
+  "tag": "lib-context",
+  "was": "FUN_0023c228",
+  "why": "the voice's status word (bit 0 open, 4 ended, 8 paused), 0 when closed"
+ },
+ "0023c260": {
+  "name": "rxSndSePause",
+  "tag": "lib-context",
+  "was": "FUN_0023c260",
+  "why": "IOP command on an SE voice, 1 pauses 0 resumes (updateSe states 4 / 6)"
+ },
+ "0023c328": {
+  "name": "rxSndSeSetAttr",
+  "tag": "lib-context",
+  "was": "FUN_0023c328",
+  "why": "IOP command 0x82 parameter 2 on an SE voice; value SndMan keeps at SE +0x2c (role unknown: pan or effect)"
+ },
+ "0023c3c0": {
+  "name": "rxSndSeSetVolume",
+  "tag": "lib-context",
+  "was": "FUN_0023c3c0",
+  "why": "left / right volume of an SE voice"
+ },
+ "0023c510": {
+  "name": "rxSndSeSetPitch",
+  "tag": "lib-context",
+  "was": "FUN_0023c510",
+  "why": "voice in a0, float in f12 (SE +0x30, 1.0 default)"
+ },
+ "0023dcc8": {
+  "name": "rxSndAdpcmOpen",
+  "tag": "lib-context",
+  "was": "FUN_0023dcc8",
+  "why": "wraps 0x23dd08 (can't allocate ADPCM stream / open ADPCM strings); SndMan passes mode, 48000 Hz"
+ },
+ "0023e020": {
+  "name": "rxSndAdpcmClose",
+  "tag": "lib-context",
+  "was": "FUN_0023e020",
+  "why": "its own string rxSndAdpcmClose"
+ },
+ "0023e158": {
+  "name": "rxSndAdpcmGetStatus",
+  "tag": "lib-context",
+  "was": "FUN_0023e158",
+  "why": "status byte of the ADPCM stream (bit 0 open, 4 ended, 8 paused)"
+ },
+ "0023e240": {
+  "name": "rxSndAdpcmGetFree",
+  "tag": "lib-context",
+  "was": "FUN_0023e240",
+  "why": "bytes the stream can take now (0x23e1a0 with 0); updateStream clips its writes to it"
+ },
+ "0023eb10": {
+  "name": "rxSndAdpcmWrite",
+  "tag": "lib-context",
+  "was": "FUN_0023eb10",
+  "why": "queues ring data into the ADPCM stream"
+ },
+ "0023eb28": {
+  "name": "rxSndAdpcmEnd",
+  "tag": "lib-context",
+  "was": "FUN_0023eb28",
+  "why": "called once the whole file is written (read >= size)"
+ },
+ "0023eef8": {
+  "name": "rxSndAdpcmPause",
+  "tag": "lib-context",
+  "was": "FUN_0023eef8",
+  "why": "1 pauses 0 resumes the ADPCM stream"
+ },
+ "0023ef98": {
+  "name": "rxSndAdpcmSetAttr",
+  "tag": "lib-context",
+  "was": "FUN_0023ef98",
+  "why": "IOP command 0xa2 parameter 2 on an ADPCM stream; stream +0x34"
+ },
+ "0023f038": {
+  "name": "rxSndAdpcmSetVolume",
+  "tag": "lib-context",
+  "was": "FUN_0023f038",
+  "why": "left / right volume of the ADPCM stream"
+ },
+ "0023f310": {
+  "name": "rxSndAdpcmSetPitch",
+  "tag": "lib-context",
+  "was": "FUN_0023f310",
+  "why": "stream in a0, float in f12 (stream +0x3c, 1.0 default)"
+ },
  "0023ff58": {
   "name": "rxSysNoMemFunc",
   "tag": "ror-inferred",
@@ -5524,6 +6004,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00241a00",
   "why": "booted from a host device: binds the tty RPC (0x241968), else opens boot device + 0x3048c0 for writing into 0x2dba34"
+ },
+ "00241ac8": {
+  "name": "rxSysTerm",
+  "tag": "lib-context",
+  "was": "FUN_00241ac8",
+  "why": "closes the tty, the semaphore, file devices, RPC and threads (rxThExitOnce); SndMan::term"
  },
  "00241b20": {
   "name": "rxSysSetIopImage",

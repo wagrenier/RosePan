@@ -1286,3 +1286,9 @@ void rxSysSetDebugHandlers(void)
 {
     ROSEPAN_STUB("rxSysSetDebugHandlers", 0x00242960);
 }
+
+// stub of ROR 0x00241ac8
+void rxSysTerm(void)
+{
+    ROSEPAN_STUB("rxSysTerm", 0x00241ac8);
+}
