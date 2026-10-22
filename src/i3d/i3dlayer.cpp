@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "lib/unassigned.h"
+#include "rosepan/rendering/rosepan_i3d.h"
 
 /* GIF tag, low word: NREG 1, EOP; NLOOP is or-ed in. High word: A+D. */
 #define I3D_GIF_AD1_EOP 0x1000000000008000ull
@@ -1139,6 +1140,7 @@ int i3dNodeStatePacket(i3dContext *ctx, I3dNode *node)
         i3dCtxSetHead(ctx, (u_char *)(head + 4));
     }
     ctx->m_chain = n->m_state.m_end;
+    RosePan_I3dReplay(n->m_state.m_start, n->m_state.m_end);  // PC: the native i3d module
     return 0;
 }
 
@@ -1163,6 +1165,7 @@ int i3dNodeChanPacket(i3dContext *ctx, I3dNode *node)
     tag[1] = 0;
     tag[0] = ((u_long)i3dDmaAddr(n->m_chan.m_start) << 32) | I3D_DMA_NEXT;
     ctx->m_chain = n->m_chan.m_end;
+    RosePan_I3dReplay(n->m_chan.m_start, n->m_chan.m_end);    // PC: the native i3d module
     return 0;
 }
 
@@ -1203,6 +1206,7 @@ int i3dCtxRunGroup(i3dContext *ctx, I3dGroup *group)
         u_long *tag = ctx->m_chain;
         while (node->m_data != NULL)
         {
+            RosePan_I3dReplay(node->m_data, node->m_end);  // PC: the native i3d module
             tag[1] = 0;
             tag[0] = ((u_long)i3dDmaAddr(node->m_data) << 32) | I3D_DMA_NEXT;
             tag = node->m_end;
@@ -1228,6 +1232,7 @@ int i3dCtxCloseFrame(i3dContext *ctx)
     // PC: the ROM keeps head & 0x0fffffff (the EE address for the DMA).
     ctx->m_packet = head;
     ctx->m_chain = i3dPktOpenChain(head);
+    RosePan_I3dReplay(head, ctx->m_chain);         // PC: the opening ALPHA / TEST
     i3dCtxSetHead(ctx, (u_char *)(ctx->m_chain + 2));
     for (u_int i = 0; i < 4; i++)
         ctx->m_chan_state[i] = 0;
@@ -1353,6 +1358,7 @@ void i3dGroupAddCall(I3dGroup *group, u_int key, int (*func)(void *, void *), vo
 
 void i3dTexRegsSet(u_long *regs, I3dVramHandle *tex, I3dVramHandle *clut, u_int clut_index)
 {
+    RosePan_I3dBindTexRegs((const uint64_t *)regs, tex, clut, clut_index);  // PC: the native i3d module
     u_long cbp = 0;
     u_long csa = 0;
     u_long tbp = 0;
@@ -1428,6 +1434,7 @@ void i3dTexRegsSet(u_long *regs, I3dVramHandle *tex, I3dVramHandle *clut, u_int 
 
 void i3dTexRegsSetNone(u_long *regs)
 {
+    RosePan_I3dBindTexRegs((const uint64_t *)regs, NULL, NULL, 0);  // PC: the native i3d module
     regs[2] = 0;
     regs[11] = I3D_GS_MIPTBP2_1;
     regs[4] = 0;

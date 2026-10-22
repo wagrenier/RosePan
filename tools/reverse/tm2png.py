@@ -10,8 +10,9 @@ work/shots/last.png. RoR uses TIM2 (utl/utltm2.cpp; "loading.tm2", "option.tm2",
 TIM2 (Sony): 'TIM2', version, alignment, picture count, then per picture a header {total, clut size,
 image size, header size, clut colours, format, mipmaps, clut type, image type, width, height, GS regs},
 image data, then the CLUT. Image types 1/2/3 = 16/24/32-bit direct, 4/5 = 4/8-bit indexed; CLUT type
-low bits 1/2/3 = 16/24/32-bit entries, bit 0x80 = linear order (else 8-bit CLUTs are in CSM1 order,
-blocks of 8 entries 8..15 and 16..23 swapped). PS2 alpha 0..0x80 is scaled to 0..0xff.
+low bits 1/2/3 = 16/24/32-bit entries, bit 0x80 = linear order (else CLUTs of 32+ colours are in CSM1
+order, blocks of 8 entries 8..15 and 16..23 swapped, for 8-bit and 4-bit images alike: the GS reads the
+16-wide CLUT in 8x2 tiles). PS2 alpha 0..0x80 is scaled to 0..0xff.
 """
 import struct
 import sys
@@ -70,7 +71,9 @@ def pictures(buf, base=0):
             ck = clut_type & 0x3f
             size = {1: 2, 2: 3, 3: 4}[ck]
             pal = [colour(buf, clut + k * size, ck) for k in range(clut_colours)]
-            if image_type == 5 and not clut_type & 0x80 and clut_colours >= 32:
+            # CSM1 (the GS reads the 16-wide CLUT in 8x2 tiles): an 8-bit image's index, and a
+            # 4-bit image's (palette 0, colours 8..15 = entries 16..23), has bits 3 and 4 swapped.
+            if image_type in (4, 5) and not clut_type & 0x80 and clut_colours >= 32:
                 for b in range(0, clut_colours, 32):          # CSM1: swap entries 8..15 / 16..23
                     pal[b + 8:b + 16], pal[b + 16:b + 24] = pal[b + 16:b + 24], pal[b + 8:b + 16]
         rgba = bytearray(w * h * 4)

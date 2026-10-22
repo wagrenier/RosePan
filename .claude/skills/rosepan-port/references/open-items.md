@@ -6,13 +6,12 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
-**FIRST (the user, 2026-10-22, after i3d/i3dtim2.cpp): the native i3d draw module**, host task
-`setup/i3d_draw_module.cpp`, queued at the top of tus.json (its task text holds the steps). Every
-i3d file is written (`verify`) and every frame builds real layers, draw sets and packets, but no host
-module consumes them, so the screen is black. The session creates `src/rosepan/rendering/rosepan_i3d.*`,
-decides the hook (recommended: the 2D packet writers record host primitives, i3dCtxRunGroup's sorted
-walk replays them; VU1 strips later) and records it under Decisions, decodes I3dTexture / I3dClut on
-the host, and proves it with a forced TIM2 draw until SprMan reaches the writers in the boot.
+**Done 2026-10-22 (`verify`): the native i3d draw module** (`setup/i3d_draw_module.cpp`,
+`src/rosepan/rendering/rosepan_i3d.*`; hook under Decisions). `ROSEPAN_I3D_TEST=1` draws two S2DMAN.RPK
+pictures through the whole i3d path and matches work/ref/S2DMAN; the plain boot is still black because
+SprMan::draw (and the scene's layers) write no 2D primitive yet. The first boot screenshot that shows an
+i3d draw marks it `done`. Next on the draw path: `spr/sprman.cpp` (SprMan::draw), then the VU1 strip
+writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named hook).
 
 0. **TOP PRIORITY (the user, 2026-10-22): the TUs needed to start rendering something**, queued at
    the top of tus.json in this order. Today every frame is black: the frame loop runs, but
@@ -314,6 +313,21 @@ the host, and proves it with a forced TIM2 draw until SprMan reaches the writers
   stays with the first dog/ TU that writes these methods (it then drops the `_ee_vptr` padding and
   the exact DogEntity offset asserts, see item 9).
 
+- **The native i3d hook** (2026-10-22, the i3d draw module session; decided in-session as the task
+  text recommended): the i3d library keeps writing its GS packets; each 2D primitive writer
+  (i3dpacket.cpp, REGLIST and PACKED *F families, and i3dPktClearZ) passes its freshly written GIF tag
+  and data to `RosePan_I3dRecordGif`, which turns them into host vertices keyed by the packet address;
+  i3dPktSetReg records ALPHA_1 / TEST_1 / SCISSOR_1 / XYOFFSET_1, i3dPktRefTexRegs the draw set's TEX
+  packet, i3dPktCallView the view's SCISSOR_1. The walk that links packets into the DMA chain
+  (i3dCtxRunGroup's packet nodes, i3dNodeStatePacket / ChanPacket, i3dCtxCloseFrame's opening tags)
+  calls `RosePan_I3dReplay(start, end)`, so the host draws in the chain's order. i3dTexRegsSet binds a
+  TEX packet to its I3dTexture / I3dClut / palette; the first draw decodes it (rosepan_draw2d
+  `RosePan_Draw2dMakeTexture`, PSMT4 / T8 / CT32 / 24 / 16, CSM1 / CSM2), cached per object and dropped
+  by i3dTexRelease / i3dClutRelease. Not yet: VU1 strips (named hook `RosePan_I3dRecordVu1`), CALLed
+  channel state packets (VU1 / fog state), XYOFFSET 0 passes (MagSceneRender's offscreen stages:
+  skipped and logged), ALPHA modes the renderer cannot express (mode 2, Cs opaque, draws as an alpha
+  blend: no opaque blend mode in the renderer yet), TEXA (CT16 alpha bit -> 0x80 / 0, CT24 opaque).
+
 ## Platform bootstrap (FF3 pieces dropped or still to adapt, 2026-10-22)
 
 Dropped: ReiPan's warp / snapshot window (`debug/reipan_warp.*`), the FF3 3D glue
@@ -416,6 +430,11 @@ to adapt when a TU reaches them:
   rxsys is next touched.
 
 ## Done
+
+- 2026-10-22: host task `setup/i3d_draw_module.cpp` (`verify`): the native i3d module
+  (rosepan_i3d.*), rosepan_draw2d's general TIM2 / GS-format decoder, the renderer's
+  `RosePan_RendererDrawImageTriangles2D`, the forced test `ROSEPAN_I3D_TEST=1`. tm2png.py now applies
+  CSM1 to 4-bit CLUTs of 32+ colours (S2DMAN_00011000 was drawn with the wrong half of its palette).
 
 - 2026-10-22: `spr/s2d.cpp` (0x190a78..0x192ac0 pinned): 72 of 82 functions written (`partial`),
   86 names (SprMan, SprTexture, S2d*); datadump.py `--words` for raw EE tables. Black screen: the
