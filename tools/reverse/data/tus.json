@@ -1,5 +1,7 @@
 {
- "queue": [],
+ "queue": [
+  "i3d/i3dvram.cpp"
+ ],
  "settings": {
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
   "frontier_ignore": [
@@ -26,6 +28,33 @@
    ],
    "status": "verify",
    "why": "12 of 16 functions reference bed/bedmemory.cpp; 0x100320 and 0x101718 are unanchored neighbours, bed/bedsubmode.cpp below and bed/bedpfh.cpp above"
+  },
+  "i3d/i3dctx.cpp": {
+   "notes": "Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the packet yet; smoke run boots, no asserts, i3dGroupInit / i3dCtxCloseFrame reached each frame. Host design (open-items.md, i3d packets on the host): i3dContext is layout host with host pointers, the ROM's 0x30000000 segment bits and 0x0fffffff masks dropped (PC:), DMA tag address words are the low 28 bits of host pointers (i3dDmaAddr) since the host sceDmaSend does not walk chains; objects from the packet tail are host-sized. Next: i3d/i3dvram.cpp (queued top; analysis of all 34 + 3 hidden functions in architecture.md i3d; its stubbed i3dVramInit leaves sentinel links NULL, which would crash i3dCtxMakeVramTransfer once layers draw). Then the draw-group module 0x2239b8..0x224d88 (still in unassigned@00216ad0), then MagScene::draw. Types for that module (I3dNode, I3dGroup, I3dLayer, I3dDrawSet, I3dTexEntry) are partial in i3d/i3dctx.h with EE offsets; I3dDrawSet+0x0c is a draw group (FlushTextures runs it).",
+   "ranges": [
+    [
+     "0021eb28",
+     "0021fb30"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 13:15",
+     "status": "verify",
+     "summary": "i3d draw context: pinned i3d/i3dctx.cpp 0x21eb28-0x21fb30 and wrote all 32 functions (7 hidden ones created in Ghidra: default end hook, SetEndFunc, GetRestFrom, AllocHead, the layer callback i3dCtxDrawTexturedLayer, SetFloatParam): hardware set-up (VU0/VU1 microprogram REFs), init/setup/term, frame begin/end, head/tail packet allocation, rest/overrun, layers and groups from the packet tail, VRAM transfer packet, texture reservation and run batching. Pinned i3d/i3dvram.cpp 0x227a98-0x228c08 (VRAM cache heap) with its header and queued it next. i3dGetStructSize and i3dCtxGetRest bridges removed: the real rest passes MagSystem's per-frame assert."
+    }
+   ],
+   "status": "verify",
+   "why": "i3d draw context module: i3dInitHardware..i3dCtxInit and the per-frame texture batching (0x21f4d8, 0x21f9c8) all work on the 0x12168-byte i3dContext; bounded by the camera/matrix helpers before 0x21eb28 (calls into 0x21e1d8) and the texture-object helpers from 0x21fb30 (clear of a 0x18 struct, 0x21fb50 calls 0x225460). No source string in i3d; file named after its i3dCtx* API."
+  },
+  "i3d/i3dvram.cpp": {
+   "ranges": [
+    [
+     "00227a98",
+     "00228c08"
+    ]
+   ],
+   "why": "i3d VRAM cache: a block heap of 0x44-byte nodes on six intrusive lists (address order, LRU, locked, evict, new, moved), embedded twice in i3dContext (+0x0 texture pages, +0x70 CLUT); 0x227a98 list unlink .. 0x228b50 coalesce, next function 0x228c08 calls the i3d system module 0x237180."
   },
   "mag/magsystem.cpp": {
    "notes": "All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes are NOT polymorphic on the host: the EE vptr word at +0x94 is kept as padding (_ee_vptr) and setAttachNode (slot 10) / getNodeWorldMatrix (slot 17) are plain members; the first dog/ TU needing a virtual makes them virtual in the slot order listed in the header comments. DogEntity::setRotate / normalizeRotate sit in unassigned@0010f944 (stubs in lib/unassigned_stubs.cpp) but are dog code: define that range when a dog TU starts. Next reached stubs: MagScene ctor/init/start/initRender/update/draw, i3d (unassigned@00216ad0), BedPad, SndMan::update.",

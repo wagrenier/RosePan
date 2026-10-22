@@ -88,6 +88,15 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    (unassigned@00216ad0: `i3dCtxBeginFrame` / `EndFrame` / `GetPacket`, two bridges), `BedPad::init` /
    `update` (bed/bedpad.cpp), `SndMan::update`, `RxMpeg::setFrameParity`, `rxMpegSetVCount`.
 
+10. (2026-10-22, the i3dctx session) **`i3d/i3dctx.cpp` is written (`verify`)**: the i3d context
+   (0x21eb28..0x21fb30, 32 functions with 7 hidden ones created in Ghidra); the i3dGetStructSize and
+   i3dCtxGetRest bridges are gone (the real rest passes MagSystem's per-frame assert). **Queued next:
+   `i3d/i3dvram.cpp`** (pinned 0x227a98..0x228c08, header written, analysis in architecture.md "i3d"):
+   its stubbed `i3dVramInit` leaves the heap sentinels' links NULL, so the first frame that draws a
+   layer would walk NULL in `i3dCtxMakeVramTransfer`. Write it before the draw-group module
+   (0x2239b8..0x224d88: i3dGroupInit, i3dCtxRunGroup, i3dCtxCloseFrame, i3dLayerInit,
+   i3dGroupAddLayer, i3dSortList, i3dBatchAppend, i3dTexRegsSet*) and before `MagScene::draw`.
+
 ## Decisions
 
 - One TU per session, run by the user (`/rosepan-port next`, the routine, or autopilot.py); sessions run
@@ -151,6 +160,15 @@ to adapt when a TU reaches them:
   next to snd/rxmpeg.cpp) and `SndMan::update` are names from use, unverified; the MagScene method
   names come from what MagSystem passes them (ror-inferred, low confidence for load / draw / view).
 
+- **The i3d packets on the host** (2026-10-22, the i3dctx session; decided in-session, unconfirmed with
+  the user): i3d builds EE DMA chains (VIF / GIF codes, REFs of the ROM's VU microprograms at data
+  0x2912b0 / 0x2949f0). The context keeps host pointers and the tags' address words are the low 28
+  bits of host pointers (`i3dDmaAddr`), because the host's `sceDmaSend` only records the chain start
+  and nothing walks it. Before M4 the user should decide how the 3D path reaches the screen: a host
+  interpreter of i3d's chains (needs real addresses: put the packet buffer in emulated EE RAM and
+  store EE addresses, plus a VU1-microcode replacement), or a host renderer fed above the packets
+  (at i3d's draw-set / model level, the way ReiPan's renderer took FF3's meshes). The packet-maths
+  code in i3dctx.cpp is written so either can follow.
 - **The disc data**: found (Decisions, 2026-10-22). Still open: RoR's archive formats (`.RPK`, the
   DATA/ subfolders); the ELF reads `cdrom0:\DATA\...` and `data/...` paths (architecture.md "Disc
   and data files").

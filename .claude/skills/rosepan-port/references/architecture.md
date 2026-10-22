@@ -231,9 +231,36 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
 - **i3d** (unassigned@00216ad0 up to rxSnd 0x237d80; "i3d_package_version 050121-stable-050826"):
   the packet / draw library under the scene. initGraph compares the game's copy of its 36 struct sizes
   (rodata 0x2e90a8) with `i3dGetStructSize` 0x21f1a8 (data 0x302ba0) and hangs on a mismatch.
-  Context calls named: i3dInitHardware 0x21eb28, i3dCtxInit 0x21f900, i3dCtxSetup 0x21ed10,
-  BeginFrame 0x21f6a0, GetRest 0x21f200, GetOverrun 0x21f250, EndFrame 0x21f760, GetPacket 0x21f1f8,
-  Term 0x21f8c8, i3dPrintf 0x237c68.
+  Files pinned so far (2026-10-22): **`i3d/i3dctx.cpp`** 0x21eb28..0x21fb30 (written, verify) and
+  **`i3d/i3dvram.cpp`** 0x227a98..0x228c08 (header only). Modules seen around them: matrix / camera
+  helpers before 0x21eb28 (0x21e1d8), texture objects from 0x21fb30, GS transfer builders 0x218fa8 /
+  0x2190c8 / 0x2192c8 and 0x219c88..0x219d68, packet heads 0x21b490..0x21b698, draw groups / layers /
+  sort 0x2239b8..0x224d88, the i3d system calls 0x237178..0x237cc8 (i3dFlushCache, i3dPrintf).
+  - **The context** (`i3dContext`, EE 0x12168): +0 texture VRAM heap (GS pages), +0x70 CLUT heap
+    (4-block units; i3dCtxSetup(ctx, 0x158, 0xa8) gives textures 0xa8 - 0xb = 0x9d pages from page
+    0x158 and CLUTs the 0xb pages after them), +0xe0 the frame's root group, +0xe4 / +0xe8 frames and
+    next frame, +0xec / +0xf0 buffer, +0xf4 head (packets grow up) / +0xf8 tail (work objects grow
+    down: groups 0x30, layers 0xe60, list nodes), +0xfc / +0x100 texture table (16-byte entries: +4
+    texture handle, +8 CLUT handle), +0x118 the frame's packet, +0x11c / +0x911c 0x200 VRAM nodes per
+    heap, +0x1211c reserved draw sets, +0x12120 end hook (default: DMA END tag), +0x1212c VRAM
+    overflow (EndFrame returns 9), +0x12154 the open DMA tag the next run links from.
+  - **A frame**: BeginFrame takes buffer share idx of count (head 128-aligned in the uncached
+    segment), makes the root group; MagScene::draw makes layers (`i3dCtxCreateLayer(ctx, float
+    key)`, key bits made unsigned-sortable); EndFrame -> 0x224798 opens the chain (0x21b698), runs the
+    root group (0x2246c8: sort, link packets, call node callbacks), then the end hook. A layer's
+    callback `i3dCtxDrawTexturedLayer` 0x21f4d8 sorts its draw sets and reserves their textures in
+    runs of equal (+0x20 float, +0x2c key); full heaps flush the run so far (compact, VRAM transfer
+    packet: GS local copies of moved blocks, uploads of new ones, TEXFLUSH, a CLUT-reload TEX0 from
+    data 0x2f2b70; then each set's TEX0 / TEX1 / MIPTBP A+D packets via 0x224b28).
+  - **The VRAM heap** (0x70; nodes 0x44 on six intrusive {prev, next} lists: 0 address order, 1 LRU,
+    2 locked, 3 evict, 4 new, 5 moved; flags 1 free, 0x10 owned, 0x100 locked, 0x1000 evict, 0x10000
+    new, 0x100000 moved, 0x1000000 sentinel): reserve = lock resident blocks, allocate the rest
+    first-fit from the LRU tail along address order, else evict unlocked LRU blocks into one block
+    at the start and let compaction move everything (moved down -> list head, up -> tail).
+    0x2281c0's third argument (a2) is the sentinel: 0x228528 leaves it there from its loop.
+    Unreferenced: 0x2289e0 (clears +0x64..+0x6c), 0x228320 / 0x2283e8 (evict-window searches).
+  - **Hardware**: i3dInitHardware sends REFs of the VU1 microprogram (data 0x2912b0, 0x354 qwords,
+    plus STCOL 1.0 / STROW 0) on VIF1 and the VU0 one (data 0x2949f0, 0x9c qwords) on VIF0.
 - The scene (`MagScene`, +0x12540): 128 actors of 0x4d0 at +0x2920 (vptr +0x94), actor flags at
   +0x29120, light set +0x2050, view objects +0x2734[4], camera mode +0x2ad50, `MagLifePC` at
   +0x2adc0 (the player; vptr +0x14), `MagLifeBwn` at +0x2afe0 (Brown). Chapter archives
