@@ -463,9 +463,15 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   colour, cones +0x30 = t - 0.1 / +0x34 = t capped 0.7; I = m_22a0 x m_2a9cc, for points x 1e6 /
   distance x fade), which setShadowLight hangs into the shadow layers' light description +0x2a9d0
   (kind list 1 for directional, 3 for spot). View record data 0x298cb0, up vector 0x298cf0 = (1, -1,
-  1, 0). `DogLightPool` (+0x2050): per-kind light arrays at +0x00 and counts at +0x18 (kinds
-  DOG_LIGHT_DIRECT 1, POINT 2 (0x20 stride, position first), SPOT 3 (0x40 stride)); light-set masks
-  from +0x50, 0x18 per set.
+  1, 0). `DogLightPool` (+0x2050, `dog/doglightpool.cpp` pinned 0x1103dc..0x112b08): per-kind light
+  arrays at +0x00 and counts at +0x18 (kinds from the assert strings at 0x2e86d0..0x2e87c0:
+  DOG_LIGHT_AMBIENT 0 (0x10 stride, a colour), DIRECT 1 (0x20: direction, colour), POINT 2 (0x20:
+  position, colour), SPOT 3 (0x40)); eight light sets, `m_set_mask[set][kind]` at +0x48 (6 words =
+  0x18 per set; bit i = light i). `createLight` 0x11262c takes the set's first ambient (x scale, alpha
+  1), up to 8 direct and 16 point lights into an I3dLightDesc and calls i3dCtxCreateLight; its flag
+  argument (MagScene +0x22cc) runs `dogLightToGray` 0x110bb8 (luminance 0.299 / 0.587 / 0.114) over
+  every colour -- a monochrome scene mode. `findNearestPointLight` starts from 0x7fffffff (rodata
+  0x2e87dc: the PS2's largest float, a NaN on the host; the port uses FLT_MAX).
 - **The scene's loaders** (`mag/magscene2.cpp`, pinned 0x137300..0x139540, 2026-10-22; `verify`):
   - `MagScene::loadSystemData` 0x137330 (start's first call): data/options.txt -> `parseOption`
     (magsceneoption.cpp, buckets at +0x4371c); data/PREMIERE.RPK's 2048-byte header, then the font

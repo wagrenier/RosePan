@@ -503,6 +503,12 @@
   "was": "FUN_001102b4",
   "why": "dog/dogentity.cpp line 302 assert p != m_parent while walking the parent chain at +0xe0 (DogEntityEx::getParent's field); resets +0x70 to (0,0,0,1), dirty"
  },
+ "00110bb8": {
+  "name": "dogLightToGray",
+  "tag": "ror-inferred",
+  "was": "FUN_00110bb8",
+  "why": "in place: r = g = b = 0.299 r + 0.587 g + 0.114 b (luminance); DogLightPool::createLight calls it on every colour when its flag argument (MagScene +0x22cc) is set"
+ },
  "0011262c": {
   "name": "DogLightPool::createLight",
   "tag": "ror-inferred",
