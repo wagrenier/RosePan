@@ -3329,11 +3329,119 @@
   "was": "FUN_00224d88",
   "why": "fills a GIF A+D packet of 5 registers (TEX0 6, TEX1 0x14, TEX2 0x16, MIPTBP1 0x34, MIPTBP2 0x36) with zeros"
  },
+ "00226278": {
+  "name": "i3dViewMakePlanes",
+  "tag": "ror-inferred",
+  "was": "FUN_00226278",
+  "why": "four normalised cross products of the near-plane corners (bottom, right, top, left planes through the eye) as the columns of a matrix, times the camera matrix (0x236d30): world point -> four plane distances; i3dCtxCreateView writes view +0x2e0 / +0x320 with it"
+ },
+ "00226370": {
+  "name": "i3dViewGetCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_00226370",
+  "why": "returns view + 0xe0, the camera matrix i3dCtxCreateView copies in (0x236990)"
+ },
+ "00226380": {
+  "name": "i3dViewGetRectProj",
+  "tag": "ror-inferred",
+  "was": "FUN_00226380",
+  "why": "returns view + 0x220, the projection of the screen-rectangle frustum (i3dCtxCreateView's second 0x226628 call)"
+ },
+ "00226390": {
+  "name": "i3dViewGetRectViewport",
+  "tag": "ror-inferred",
+  "was": "FUN_00226390",
+  "why": "returns view + 0x2a0, the clip -> screen-rectangle viewport matrix (second 0x226628 call)"
+ },
+ "002263a0": {
+  "name": "i3dViewGetInverse",
+  "tag": "ror-inferred",
+  "was": "FUN_002263a0",
+  "why": "returns view + 0x3a0, the inverse camera matrix (0x236bd8 of the camera)"
+ },
+ "002263b0": {
+  "name": "i3dLerpf",
+  "tag": "ror-inferred",
+  "was": "FUN_002263b0",
+  "why": "a + (b - a) * t"
+ },
+ "002263c0": {
+  "name": "i3dRemapPair",
+  "tag": "ror-inferred",
+  "was": "FUN_002263c0",
+  "why": "the linear function that is v0 at x0 and v1 at x1, evaluated at a and at d (two outputs); extends a frustum's left/right to the GS guard band 64 / 4031.94"
+ },
+ "00226410": {
+  "name": "i3dViewFixRect",
+  "tag": "ror-inferred",
+  "was": "FUN_00226410",
+  "why": "widens a screen x / y range (+0x8..+0x14 of i3dCtxCreateView's local rect) to at least 0.5 around its middle"
+ },
+ "00226498": {
+  "name": "i3dViewFixFrustum",
+  "tag": "ror-inferred",
+  "was": "FUN_00226498",
+  "why": "widens a frustum's left/right and bottom/top to at least near * 0.0001 around their middle"
+ },
+ "00226530": {
+  "name": "i3dViewFixOrthoFrustum",
+  "tag": "ror-inferred",
+  "was": "FUN_00226530",
+  "why": "empty; the ortho view 0x2273d8 calls it where i3dCtxCreateView calls i3dViewFixFrustum"
+ },
+ "00226538": {
+  "name": "i3dMatMapBox",
+  "tag": "ror-inferred",
+  "was": "FUN_00226538",
+  "why": "the scale + translation matrix that maps box a..b onto box c..d per axis (an ortho projection or a viewport)"
+ },
+ "00226628": {
+  "name": "i3dViewMakePerspective",
+  "tag": "ror-inferred",
+  "was": "FUN_00226628",
+  "why": "a perspective matrix from a frustum (l,b,n)-(r,t,f) to an NDC box, and (optionally) the NDC -> screen matrix with the z range widened by 1/4096 (i3dMatMapBox)"
+ },
+ "002267e8": {
+  "name": "i3dViewMakeOrtho",
+  "tag": "ror-inferred",
+  "was": "FUN_002267e8",
+  "why": "the orthographic twin of i3dViewMakePerspective: i3dMatMapBox for the projection, the same widened viewport"
+ },
+ "002268b0": {
+  "name": "i3dViewTestBox",
+  "tag": "ror-inferred",
+  "was": "FUN_002268b0",
+  "why": "VU0 micro 0x96 (all 8 corners of box x view +0x260 outside one clip plane -> 0), then micro 0x69 (any corner outside view +0x1a0 -> 2, else 1); box rows are three half axes and the centre"
+ },
+ "00226920": {
+  "name": "i3dViewTestBoneBox",
+  "tag": "ror-inferred",
+  "was": "FUN_00226920",
+  "why": "the AABB of count boxes (+0x4 array, +0xe count) each times the matrix their u16 index picks, as a box in the space of matrix a3, then i3dViewTestBox"
+ },
+ "00226ad8": {
+  "name": "i3dViewTestSphere",
+  "tag": "ror-inferred",
+  "was": "FUN_00226ad8",
+  "why": "hidden after 0x226920 (created 2026-10-22): sphere against view +0x2e0 planes (outside -> 0), +0x360 near/far (outside -> 0, stores the depth), then near/far and the +0x320 guard planes (crossing -> 2, else 1); no callers"
+ },
+ "00226c18": {
+  "name": "i3dViewGetDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_00226c18",
+  "why": "z of point x view +0x360: (z - near) / (far - near) in camera space"
+ },
  "00226c58": {
   "name": "i3dCtxCreateView",
   "tag": "ror-inferred",
   "was": "FUN_00226c58",
   "why": "allocates from the context tail and builds a view from a MagViewParam (frustum, depth, screen) and a camera matrix; MagScene::draw / S2dMovie::createLayer give it to i3dLayerSetView"
+ },
+ "002273d8": {
+  "name": "i3dCtxCreateOrthoView",
+  "tag": "ror-inferred",
+  "was": "FUN_002273d8",
+  "why": "i3dCtxCreateView with i3dViewMakeOrtho / i3dViewFixOrthoFrustum and no plane matrices; no callers"
  },
  "00227a98": {
   "name": "i3dVramUnlink",
@@ -3557,6 +3665,12 @@
   "was": "FUN_00228b50",
   "why": "absorbs free address-order neighbours on both sides into a block"
  },
+ "00228c38": {
+  "name": "i3dMatGetScaleTrans",
+  "tag": "lib-context",
+  "was": "FUN_00228c38",
+  "why": "out[0] = (m00, m11, m22, 0), out[1] = m row 3 (i3dVecCopy); i3dCtxCreateView's view +0x80 from its viewport +0xa0"
+ },
  "0022b228": {
   "name": "I3rRoot__CheckIdString",
   "tag": "lib-context",
@@ -3580,6 +3694,42 @@
   "tag": "ror-inferred",
   "was": "FUN_00236980",
   "why": "copies four words (lw / sw, no alignment)"
+ },
+ "00236990": {
+  "name": "i3dMatCopy",
+  "tag": "lib-context",
+  "was": "FUN_00236990",
+  "why": "lq / sq of four qwords"
+ },
+ "00236a68": {
+  "name": "i3dVu0VecNeg",
+  "tag": "lib-context",
+  "was": "FUN_00236a68",
+  "why": "vsub vf0 - vf0 - v, all four fields; byte-identical to i3dVecNeg 0x237468 (the ROM has two copies of the vector module), hence the prefix"
+ },
+ "00236af0": {
+  "name": "i3dVecCross",
+  "tag": "lib-context",
+  "was": "FUN_00236af0",
+  "why": "vopmula / vopmsub: cross(a, b), w = 0"
+ },
+ "00236b38": {
+  "name": "i3dVecNormalize",
+  "tag": "lib-context",
+  "was": "FUN_00236b38",
+  "why": "xyz times vrsqrt of the squared length, w = 0"
+ },
+ "00236bd8": {
+  "name": "i3dVu0MatInverse",
+  "tag": "lib-context",
+  "was": "FUN_00236bd8",
+  "why": "affine inverse: the 3x3 adjugate over the determinant, translation -t x R^-1; the first copy of i3dMatInverse 0x237678"
+ },
+ "00236d30": {
+  "name": "i3dVu0MatMul",
+  "tag": "lib-context",
+  "was": "FUN_00236d30",
+  "why": "VU0 micro 0: out row i = sum_j b[i][j] * a[j] (a = a1, b = a2); byte-identical to i3dMatMul 0x2377d0"
  },
  "00237168": {
   "name": "i3dMatGetUnit",

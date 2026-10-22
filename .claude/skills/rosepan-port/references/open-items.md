@@ -42,6 +42,17 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
         helpers, i3dTexSetDescInit, i3dDrawSetUseTex, i3dBatchClearTextures, i3dPsmBits,
         i3dVecCopyW, i3dMatGetUnit) sit in lib/unassigned_stubs.cpp until B.4 replaces them, and the
         stubbed packet writers (i3dPktSprite / Line / DrawStrip* / DrawLineStrip) return pkt.
+        **i3dCtxCreateView written 2026-10-22 (`verify`)** as `i3d/i3dview.cpp` (pinned
+        0x226278..0x227a98, 19 functions incl. the hidden sphere test 0x226ad8): real views every
+        frame, the `pViewStatus` asserts are gone, and i3dPktCallView is bridged (layers CALL their
+        view's packet). The camera matrix is a placeholder: `DogEntity::getMatrix` 0x10fa6c is a stub
+        that now returns the unit matrix (the ROM runs the entity's transform slot and returns the
+        i3dMatInverse 0x237678 it writes at +0xf0, a member of the camera class past DogEntity --
+        write it with the camera class). The next asserts each frame: `lightstatus[i] != NULL`
+        (magscenerender.cpp:982, DogLightPool::createLight 0x11262c is a stub). The first copy of
+        the vector module (0x2369xx) is bridged; its second copy (0x2372xx: i3dMatMul,
+        i3dMatInverse, i3dVecNeg ...) is still no-op stubs that DogActor / DogEntity code calls.
+        `i3d/i3dtim2.cpp` 0x224de0..0x225018 is pinned (todo, not queued).
         **No picture comes from the i3d path until a host draw module consumes it** (Decisions: no
         GS emulation): decide with B.4 / B.7 where `rosepan_i3d` hooks in -- the natural point is
         i3dCtxRunGroup's walk (the sorted layer / set order) or the packet writers themselves.

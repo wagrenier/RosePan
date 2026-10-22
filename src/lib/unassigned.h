@@ -195,6 +195,22 @@ int   i3dDrawSetInit(I3dDrawSet *set, I3dLayer *layer, const I3dTexSetDesc *desc
 int   i3dPsmBits(int psm);                                               // ROR 0x00218db8
 /* Copies four words (no alignment needed). */
 void  i3dVecCopyW(float *out, const float *in);                          // ROR 0x00236980
+/* The i3d vector / matrix module (unassigned@00228c08; bridges of the
+ * ROM's VU0 macro code until it is reconstructed). Matrices are row-vector:
+ * p * i3dVu0MatMul(a, b) = (p * b) * a. Outputs may alias inputs. The ROM
+ * has a second, byte-identical copy at 0x2372d0..0x237814 (i3dMatMul,
+ * i3dMatInverse, i3dVecNeg ...), hence the Vu0 names here. */
+void  i3dVecZero(float *v);                                              // ROR 0x00236960
+void  i3dMatCopy(sceVu0FVECTOR *out, sceVu0FVECTOR *in);                 // ROR 0x00236990
+void  i3dVu0VecNeg(float *out, const float *in);        /* all four */   // ROR 0x00236a68
+void  i3dVecCross(float *out, const float *a, const float *b); /* w 0 */  // ROR 0x00236af0
+void  i3dVecNormalize(float *out, const float *in);     /* xyz, w 0 */   // ROR 0x00236b38
+/* The inverse of an affine matrix (3x3 part and translation). */
+void  i3dVu0MatInverse(sceVu0FVECTOR *out, sceVu0FVECTOR *in);           // ROR 0x00236bd8
+/* out row i = sum over j of b[i][j] * a[j] (VU0 micro 0). */
+void  i3dVu0MatMul(sceVu0FVECTOR *out, sceVu0FVECTOR *a, sceVu0FVECTOR *b); // ROR 0x00236d30
+/* out[0] = (m00, m11, m22, 0), out[1] = m[3]. */
+void  i3dMatGetScaleTrans(sceVu0FVECTOR *out, sceVu0FVECTOR *m);         // ROR 0x00228c38
 /* The unit matrix (data 0x303c10). */
 sceVu0FVECTOR *i3dMatGetUnit(void);                                      // ROR 0x00237168
 
@@ -205,8 +221,8 @@ struct I3dLight;
 struct I3dView;
 struct MagViewParam;
 
-/* A view from a view record and a camera matrix, in the context's tail. */
-I3dView *i3dCtxCreateView(i3dContext *ctx, MagViewParam *param, sceVu0FVECTOR *matrix); // ROR 0x00226c58
+/* The views (i3dCtxCreateView) have their own file. */
+#include "i3d/i3dview.h"
 
 
 /* The fog record i3dCtxSetFog turns into FOGCOL and the fog ramp: a
