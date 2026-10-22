@@ -95,12 +95,15 @@ int         rxSysClose(int fd);                                 // ROR 0x0024257
 int         rxSysRead(int fd, void *buf, int size);             // ROR 0x002425b0
 int         rxSysWrite(int fd, const void *buf, int size);      // ROR 0x00242608
 int         rxSysLseek(int fd, int offset, int whence);         // ROR 0x00242660
+void        rxSysSetDebugHandlers(void);                        // ROR 0x00242960
+void        rxSysInitExceptionScreen(void);                     // ROR 0x002431c0
 void        rxSysLockSema1(void);                               // ROR 0x00242480
 void        rxSysUnlockSema1(void);                             // ROR 0x002424e0
 void        rxSysInitUser(void);                                // ROR 0x002433d8
 void        rxSysThreadCallback(int yielding);                  // ROR 0x002433e8
 void        rxSysInitModules(void);                             // ROR 0x00243400
 void        rxSysUpdateDevices(void);                           // ROR 0x00243560
+int         rxSysInitFileDevice(int device);                    // ROR 0x00243608
 int         rxSysSetFileDevice(int slot, int device);           // ROR 0x00243638
 void        rxSysSetFileDir(const char *dir);                   // ROR 0x00243650
 char       *rxSysGetFileDir(void);                              // ROR 0x00243680

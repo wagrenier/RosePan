@@ -51,6 +51,25 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
    aligned allocs kept the list consistent and merged back to one block); the first run in which main
    calls `utlMemInit` and allocates proves it on screen.
 
+8. (2026-10-22, the main session) **`main.cpp` is written (`verify`)**: main runs on the host, boots
+   from host0: (iopconf.cnf, eight IOP modules, system.ini read from the disc folder), creates the heap,
+   runs mainInitGame through the now-loading object and loops at 60 fps; every game call after rxSys
+   is a stub, so the screen is black. Next, in the order the run reaches them (`tus.py next` now ranks
+   reached stubs, see hazards "The frontier counts..."):
+   - **`system/sysnowloading.cpp`** (0x204d38..0x2053f4: init, term, the LOADING.BIN loader, the
+     sprite packet, the per-frame draw 0x2051cc) -- small, and it has a reference picture
+     (architecture.md "Disc and data files": four "Now Loading" frames). It only shows once
+     0x1be564 (the pfh loader inside GamMan's loads) calls its draw, so pair it with GamMan's load path.
+   - **`mag/magsystem.cpp`** (MagSystem: init / start / update, the V-blank semaphore): when
+     `MagSystem::update` waits for the V-blank, delete the PC `sceGsSyncV(0)` in `mainLoop`.
+   - `game/gamman.cpp` (`GamMan::init`, `loadSystemData`, `loadStage`, `update`), the globals file
+     (unassigned@001fd424's tail: `sysInitManagers`, `SysTimer`; it owns the global objects now kept in
+     lib/unassigned_stubs.cpp), the task manager (unassigned@001e46b8), the sequence engine
+     (unassigned@0020eda4, 65 functions: an overlay-style loader of 0x18000..0x30000-byte images and a
+     cooperative thread scheduler -- "mst", "trg", "imdy", "single").
+   `-m N` on the RosePan command line picks the boot stage (mainParseArgs); without it the ROM's
+   default is 99.
+
 ## Decisions
 
 - One TU per session, run by the user (`/rosepan-port next`, the routine, or autopilot.py); sessions run
@@ -138,7 +157,22 @@ to adapt when a TU reaches them:
   misaligned blocks. Also: the host header is 56 bytes (EE 0x20), so the heap holds slightly less;
   utlMemInit's probe size may need raising once host objects (bigger than EE ones) fill it.
 
+- **main.cpp open points** (2026-10-22): `mainInitGame` passes bss 0x7812ac to `seqSetLanguage` (role
+  unknown; kept as `g_bss_7812ac`), and sets bss 0x7a3d48 / 0x7a3d4c = 1 and data 0x296198 = 2 after the
+  boot load (`g_bss_*` / `g_data_*` in lib/unassigned.h until the game modes that read them are
+  written). Class names `CmnTaskMan`, `SysTimer`, `SndMan`, `Sequence`, `MagScene` (for MagSystem's
+  +0x12540 member) are inferred, not from the ELF: confirm or rename when their TUs are read.
+  rxsys.cpp has a function Ghidra folded at 0x243620 (`j 0x248870`, between rxSysInitFileDevice and
+  rxSysSetFileDevice; probably rxSysGetFileDevice) -- create it in Ghidra (`ghidra.py mkfunc`) when
+  rxsys is next touched.
+
 ## Done
+
+- 2026-10-22: `main.cpp` (0x2043dc..0x204d38 pinned): main and its 10 helpers written (`verify`):
+  argument parsing, the rx bring-up from host0:, the game init around the now-loading object, the frame
+  loop, device init / exit, the debug exception handler. Also `rxSysInitFileDevice` (rx/rxsys.cpp),
+  host `sceMcEnd`, libdbc and libpad2 Init / End shims; 46 names. The run reaches mainLoop at 60 fps;
+  black screen (all draw code is stubs).
 
 - 2026-10-22: `bed/bedmemory.cpp` (0x100354..0x101718 pinned): all 16 BedMemory functions written
   (`verify`: nothing in the boot allocates yet); 9 helpers named (format, alignBlock, splitTail,

@@ -3,6 +3,10 @@
   "now": "_exit",
   "was": "Exit"
  },
+ "0024d448": {
+  "now": "sceMcEnd",
+  "was": "sceMcChangeThreadPriority"
+ },
  "00266770": {
   "now": "sceSifLoadElfPart",
   "was": "sceSifLoadElf"

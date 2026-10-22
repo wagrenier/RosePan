@@ -70,10 +70,13 @@ class Model:
                 self.callers[c].append(a)
         self._assign()
         self.frontier = Counter()
+        # settings.frontier_ignore: callees the port replaces wholesale (the assert handler, written
+        # back as ROR_ASSERT), so they never pull a session towards their file.
+        ignore = {int(x, 16) for x in self.db['settings'].get('frontier_ignore', [])}
         for a in self.done:
             f = self.feat.get(a, {})
             for c in f.get('calls', []) + f.get('tails', []) + f.get('fptrs', []):
-                if c not in self.done and c in self.feat and not rosepan.in_lib(c):
+                if c not in self.done and c in self.feat and not rosepan.in_lib(c) and c not in ignore:
                     self.frontier[c] += 1
 
     def name(self, a):

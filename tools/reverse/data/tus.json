@@ -2,6 +2,9 @@
  "queue": [],
  "settings": {
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
+  "frontier_ignore": [
+   "00215a30"
+  ],
   "slice_bytes": 10240,
   "smoke_pad": ""
  },
@@ -23,6 +26,24 @@
    ],
    "status": "verify",
    "why": "12 of 16 functions reference bed/bedmemory.cpp; 0x100320 and 0x101718 are unanchored neighbours, bed/bedsubmode.cpp below and bed/bedpfh.cpp above"
+  },
+  "main.cpp": {
+   "notes": "Status verify: the smoke run boots for real (iopconf.cnf, eight IOP modules and system.ini read from the disc folder through host0:), runs mainInitGame and loops in mainLoop at 60 fps, but every game call after rxSys is a stub, so the screen is black. This run was first claimed as unassigned@0020eda4 (the sequence engine) by frontier x44 from the assert handler 0x215a30; that claim was released for main per open-items Next up, and 0x215a30 is now in settings.frontier_ignore. PC deviations in main.cpp: boot path host0: and file device -1 (boot device HOST) instead of cdrom0: and 1; RosePan_RendererBeginFrame/EndFrame around each mainLoop frame; a temporary sceGsSyncV(0) in mainLoop to delete when MagSystem::update (which waits on m_v_sema) is written. The process main builds argv[0] = cdrom0:\\SLUS_214.48;1 and passes the host arguments on, so -m N picks the boot stage. Global objects (MagSystem 0x6e9840, GamMan 0x7812c0, CmnTaskMan 0x7a3d80, Sequence 0x7a4440, EmyManager 0x7b2140, SndMan 0x7b2580) are defined in lib/unassigned_stubs.cpp until the globals file before main.cpp (static init 0x2041f8) is defined. Minimal headers created for them (mag/magsystem.h, mag/magscene.h, game/gamman.h, sequence/sequence.h, snd/sndman.h, system/sysnowloading.h, lib/unassigned.h), declared as struct because stubgen breaks on public: labels (hazards.md). Next: system/sysnowloading.cpp has a reference picture (LOADING.BIN is raw PSMT8 256x256 + CSM1 CT32 palette, four Now Loading frames; architecture.md Disc and data files) but its draw 0x2051cc is called from the pfh loader 0x1be564 inside GamMan loads; mag/magsystem.cpp is the top reached stub. Knowledge recorded in architecture.md (Program flow, Key globals, LOADING.BIN, platform main), hazards.md (stubgen public:, frontier_ignore, swapped SCE_GS_INTERLACE, host SetDebugHandler), open-items.md (Next up 8, main.cpp open points, Done).",
+   "ranges": [
+    [
+     "002043dc",
+     "00204d38"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 12:14",
+     "status": "verify",
+     "summary": "main.cpp (0x2043dc..0x204d38): RoR main and its 10 helpers written - argument parsing (-l language, -m stage), the rx bring-up booting from host0:, game heap and memory hooks, mainInitGame around the now-loading object (common data and stage loads), the frame loop, device init/exit, the debug exception handler. Also rxSysInitFileDevice in rx/rxsys.cpp; platform: host sceMcEnd, libdbc and libpad2 Init/End shims; tools: settings.frontier_ignore (assert handler) in tus.py and status.py. 46 functions named (sceMcEnd replaces a wrong libmatch name)."
+    }
+   ],
+   "status": "verify",
+   "why": "main 0x2045a8 has no source string; the static-init pair 0x20439c/0x2043bc (calling 0x2041f8) ends the previous file, so main's file starts at its argument parser 0x2043dc; it holds main, the main loop 0x2046d4 / 0x204864, GS and memory-card init / exit, and the debug exception handler 0x204a00 with its install / remove pair. 0x204d38..0x2050e8 work on the now-loading object's fields (+0x230, +0x290, +0x294) and are called only from system/sysnowloading.cpp: left to that file"
   },
   "rx/rxfile.cpp": {
    "notes": "Status verify: every function in 0x2437f8..0x249b88 is written, but nothing can show it: main 0x2045a8 is still the placeholder (black screen), and the rxthread functions rxThCreate / rxThGetParam / rxThGetIndex / rxThSetState / rxThSetPriority / rxThDelete / rxThSync are stubs in src/rx/rxthread.cpp, so the file thread never runs and any slot open (default load and size hooks, snd streams) would spin for ever on pending. Next: main (unassigned@001fd424), then rx/rxthread.cpp (0x249b88..0x24b490). The cdrom driver walks ISO 9660 itself, so a CDROM boot needs sceCdRead to read a disc image; src/sdk/libcdvd.cpp still serves FF3 IMG_BD.BIN (open-items Next up 6, a platform decision for the user). Decisions: DIntr/EIntr are a process-wide recursive SDL mutex; the ROM's Status save/restore and DI-error check are left out (rxFileSpin, callcheck comments). rxFileCdProcess gets step = priority + 1 from the thread block, as in the ROM. Renamed globals: s_cdCacheCount is s_cdDiscRead, s_cdCacheReset is s_cdNeedSetup, s_cdQueued0/1 are s_cdReadPos/2. Knowledge recorded in architecture.md (rx file layer), hazards.md (folded wrappers, hidden.py), open-items 5 and 6, README and SKILL tool tables.",
@@ -108,6 +129,7 @@
    "task": "Create the PC project (no RoR functions to write). The platform layer comes from ReiPan (../ReiPan, read-only), which took it from MioPan (FF2) and adapted it to FF3: src/sdk emulates the PS2 SDK (libgraph, libdma, libvif, libvu0, libpad, libmc, libcdvd, sif / IOP host, libmpeg + FFmpeg, eekernel threads), src/reipan draws the GS through SDL3 GPU and holds the host thread, log, paths, config and the ImGui debug UI. Steps: (1) copy ../ReiPan/src/reipan to src/rosepan and ../ReiPan/src/sdk to src/sdk; rename ReiPan_ / REIPAN_ / reipan_ identifiers, env variables and file names to RosePan_ / ROSEPAN_ / rosepan_, keeping the tool contract in tools/reverse/README.md 'Platform contract' (ROSEPAN_SHOT_DIR / ROSEPAN_SHOT_EVERY screenshots of the presented frame, ROSEPAN_AUTOPAD scripted pad in sdk/libpad.cpp, ROSEPAN_DATA_DIR, the RosePanGame thread name, the stub log line). (2) Write src/common/rosepan_stub.h from ../ReiPan/src/common/reipan_stub.h: ROSEPAN_STUB / ROSEPAN_BRIDGE printing '[stub] Name (ROR 0x%08x) reached'. (3) Drop or neutralise FF3-only pieces and list each in open-items.md 'Platform bootstrap': reipan/debug/reipan_warp.* (FF3 chapter warps and snapshots), FF3 game hooks in rendering/reipan_graph3d.cpp and reipan_ui, FF3 file names in io/reipan_paths (IMG_BD.BIN, ZERO3.FHD: RoR reads 'cdrom0:\\\\DATA\\\\...' and data/... paths, decide the data folder layout from the ELF), the FF3 IOP services in sdk/iop_* (RoR loads only Sony modules: sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv, fileio, sifcmd, usbd, plus ioprp300.img; its sound goes through rxmpeg / the rx middleware). (4) CMakeLists.txt, CMakePresets.json, cmake/*.cmake and resources/ (shaders) from ReiPan with ReiPan renamed RosePan: target RosePan, output cmake-build-*/RosePan/RosePan.exe, the sibling extern fallback pointed at ../ReiPan/extern then ../MioPan/extern (FFmpeg, shadercross), -fno-strict-aliasing and the src/sdk/pc_prefix.h force-include kept, every .c/.cpp compiled as C++. (5) A placeholder src/main.cpp whose main() initialises the platform, opens the window and presents cleared frames until RoR's main (0x002045a8) is reconstructed. (6) python build.py green; python build.py --run 15 writes work/shots/last.png (look at it); python layoutcheck.py runs clean. Keep platform edits minimal and list them in the summary; record the layer's shape in architecture.md 'PC platform layer' and anything that burned time in hazards.md. Finish --status done (the screenshot of an empty window is the expected picture)."
   },
   "unassigned@001056f8": {},
+  "unassigned@0020eda4": {},
   "unassigned@00216ad0": {},
   "unassigned@002437f8": {},
   "utl/utlmisc.cpp": {

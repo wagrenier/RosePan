@@ -1145,6 +1145,16 @@ void rxSysThreadCallback(int yielding)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The current file context's device (main passes 1, CDROM); returns the
+// previous one.
+// ROR 0x00243608
+
+int rxSysInitFileDevice(int device)
+{
+    return rxFileSetCurrent(device);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x00243638
 
 int rxSysSetFileDevice(int slot, int device)
@@ -1263,4 +1273,16 @@ void rxSysOpenTty(void)
 void rxSysUpdateDevices(void)
 {
     ROSEPAN_STUB("rxSysUpdateDevices", 0x00243560);
+}
+
+// stub of ROR 0x002431c0
+void rxSysInitExceptionScreen(void)
+{
+    ROSEPAN_STUB("rxSysInitExceptionScreen", 0x002431c0);
+}
+
+// stub of ROR 0x00242960
+void rxSysSetDebugHandlers(void)
+{
+    ROSEPAN_STUB("rxSysSetDebugHandlers", 0x00242960);
 }

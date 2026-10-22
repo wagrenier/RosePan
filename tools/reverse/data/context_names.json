@@ -251,11 +251,239 @@
   "was": "FUN_00105e2c",
   "why": "BedMemory::check(heap 0x6e9800, 0); no callers"
  },
+ "001178b8": {
+  "name": "MagSystem::setLanguage",
+  "tag": "ror-inferred",
+  "was": "FUN_001178b8",
+  "why": "mag/magsystem.cpp, object 0x6e9840: when +0x97a70 is set, seqSetLanguage(lang, 1), stores lang at +0x97a6c, clears the flag; mainParseArgs passes 1..4 for fre/ger/spa/ita"
+ },
+ "00117c58": {
+  "name": "MagSystem::resetDBuff",
+  "tag": "ror-inferred",
+  "was": "FUN_00117c58",
+  "why": "sceGsSetDefDBuff(+0x170, 0, 512, 448, 2, 0x3a, 1) and fixes the draw offsets; mainInitGame calls it twice after the boot load"
+ },
+ "00117dc8": {
+  "name": "MagSystem::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00117dc8",
+  "why": "mag/magsystem.cpp: 0x117990 then the scene member at +0x12540 (0x131840); mainInitGame's first MagSystem call"
+ },
+ "00117e18": {
+  "name": "MagSystem::start",
+  "tag": "ror-inferred",
+  "was": "FUN_00117e18",
+  "why": "mag/magsystem.cpp line 0x247 assert m_v_sema >= 0: creates the V-blank semaphore, sceGsSyncVCallback(0x117654), heap check, links the scene to +0x3a0"
+ },
+ "00117ed0": {
+  "name": "MagSystem::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00117ed0",
+  "why": "mag/magsystem.cpp line 0x29b assert m_v_sema: frees +0x12508, tears down +0x3a0 and two 0x90 records at +0x40, removes the V-blank callback, deletes m_v_sema"
+ },
+ "00117f80": {
+  "name": "MagSystem::setSceneFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_00117f80",
+  "why": "packs its first three int arguments and three zeros into a record for the scene member +0x12540 (0x13f528); mainInitGame passes 1,1,1,1,1,1,0; meaning unverified"
+ },
+ "001182dc": {
+  "name": "MagSystem::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001182dc",
+  "why": "mag/magsystem.cpp: the per-frame system update (pads, scene, sound 0x7b2580, draw, RCNT0 timing), ends with utlIncFrameCount; mainLoop calls it every frame"
+ },
+ "0013c928": {
+  "name": "MagScene::initCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_0013c928",
+  "why": "empty, in mag/magscenecamera.cpp; mainInitGame calls it on 0x6fbd80 = MagSystem 0x6e9840 + 0x12540, the member 0x131840 / 0x13f528 (magscene) take; class name unverified"
+ },
+ "0017f164": {
+  "name": "SndMan::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f164",
+  "why": "object 0x7b2580 (constructed by 0x17f0d0 in the static initializer 0x2041f8): sets word 0 = 1, +0x1af8 = 0, calls rxSndInit; between the static-init pair 0x17f090 and snd/sndman.cpp's anchor 0x180230; class name from the file, unverified"
+ },
+ "001c0d70": {
+  "name": "GamMan::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001c0d70",
+  "why": "game/gamman.cpp, GamMan 0x7812c0: sets the state words at +0x21f48.. and allocates a 0x1840 list pool; called once by sysInitManagers"
+ },
+ "001c1b48": {
+  "name": "GamMan::loadSystemData",
+  "tag": "ror-inferred",
+  "was": "FUN_001c1b48",
+  "why": "game/gamman.cpp: loads a pfh archive (0000.se / 6400.se names, bed/bedpfh.h asserts) and hands a 0x20000-byte sequence image to 0x20eea8; mainInitGame calls it once before the stage"
+ },
+ "001c204c": {
+  "name": "GamMan::loadStage",
+  "tag": "ror-inferred",
+  "was": "FUN_001c204c",
+  "why": "game/gamman.cpp: (stage) formats data/SEQ/W%03d/W000.WRD, loads it, hands the sequence image to 0x20eda4; mainInitGame passes mainParseArgs' stage unless -1"
+ },
+ "001c526c": {
+  "name": "GamMan::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001c526c",
+  "why": "game/gamman.cpp: per-frame, counts frames at +0x21f60 (flag every 25), updates the two actors at +0x22090/+0x22094; mainLoop"
+ },
+ "001c53d8": {
+  "name": "GamMan::postUpdate",
+  "tag": "ror-inferred",
+  "was": "FUN_001c53d8",
+  "why": "empty; mainLoop calls it last each frame"
+ },
+ "001e71fc": {
+  "name": "CmnTaskMan::addTask",
+  "tag": "ror-inferred",
+  "was": "FUN_001e71fc",
+  "why": "object 0x7a3d80: allocates a 0x40 task record for a CmnITask (vtable slots at +8 / +0x18 called), assigns an id (written through the id pointer), start frame (-1 = current +0x58), length, links it (0x1e7184); 66 call sites; class name unverified"
+ },
+ "001e7a20": {
+  "name": "CmnTaskMan::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7a20",
+  "why": "object 0x7a3d80: per frame, times with the member timer +0x40, runs the queued tasks whose start frame has come; mainLoop"
+ },
+ "00203ea8": {
+  "name": "SysTimer::start",
+  "tag": "ror-inferred",
+  "was": "FUN_00203ea8",
+  "why": "object 0x7a3dc0 = the task manager 0x7a3d80 + 0x40: if not running, reads the counter (0x203f38) and adjusts +0x28 by the paused time, sets running"
+ },
+ "00203f38": {
+  "name": "SysTimer::read",
+  "tag": "ror-inferred",
+  "was": "FUN_00203f38",
+  "why": "reads the time counter into the timer; called by start / update / 0x203efc"
+ },
+ "00204014": {
+  "name": "SysTimer::update",
+  "tag": "ror-inferred",
+  "was": "FUN_00204014",
+  "why": "per frame: ++ +0x18, reads the counter, keeps the last two frame times at +0x1c/+0x24 and the elapsed at +0x20 while running"
+ },
+ "00204148": {
+  "name": "sysInitManagers",
+  "tag": "ror-inferred",
+  "was": "FUN_00204148",
+  "why": "Sequence::init(0x7a4440) and GamMan::init(0x7812c0); in the globals file whose static initializer 0x2041f8 constructs them; mainInitGame calls it"
+ },
+ "00204174": {
+  "name": "sysTermManagers",
+  "tag": "ror-inferred",
+  "was": "FUN_00204174",
+  "why": "pair of sysInitManagers: 0x20e664 on the sequence, 0x1c0d44 on GamMan; no callers"
+ },
+ "002043dc": {
+  "name": "mainParseArgs",
+  "tag": "ror-inferred",
+  "was": "FUN_002043dc",
+  "why": "main passes argc/argv; -l fre/ger/spa/ita -> MagSystem::setLanguage 1..4, -m N or -mN -> the returned stage number (99 when absent), a bare number is atoi'd and dropped"
+ },
  "002045a8": {
   "name": "main",
   "tag": "ror-inferred",
   "was": "FUN_002045a8",
   "why": "crt0 _start calls it (jal at 0x100238) after _InitSys and atexit; prints the version with the build date Jul 27 2006 22:25:45, detects the boot device (host0 / cdrom0) and reboots the IOP with ioprp300.img"
+ },
+ "002046d4": {
+  "name": "mainInitGame",
+  "tag": "ror-inferred",
+  "was": "FUN_002046d4",
+  "why": "main's second step: devices, GS, managers, MagSystem init/start, the now-loading object around GamMan's common and stage loads (stage from mainParseArgs, skipped for -1)"
+ },
+ "0020483c": {
+  "name": "mainExit",
+  "tag": "ror-inferred",
+  "was": "FUN_0020483c",
+  "why": "main's last call (after the endless loop, unreachable): MagSystem::term and the device shutdown"
+ },
+ "00204864": {
+  "name": "mainLoop",
+  "tag": "ror-inferred",
+  "was": "FUN_00204864",
+  "why": "main's endless frame loop: starts the task timer, adds EmyManager as a task, then per frame RCNT0=0, timer, sequence, GamMan, tasks, MagSystem update, GamMan post"
+ },
+ "0020491c": {
+  "name": "mainInitGraph",
+  "tag": "ror-inferred",
+  "was": "FUN_0020491c",
+  "why": "sceGsResetGraph(0,1,2,1), a 640x224 double buffer, both draw environments put once"
+ },
+ "0020499c": {
+  "name": "mainInitDevices",
+  "tag": "ror-inferred",
+  "was": "FUN_0020499c",
+  "why": "SndMan::init on 0x7b2580, sceDbcInit, scePad2Init(0), sceMcInit"
+ },
+ "002049d4": {
+  "name": "mainExitDevices",
+  "tag": "ror-inferred",
+  "was": "FUN_002049d4",
+  "why": "sceMcEnd, scePad2End, sceDbcEnd: the reverse of mainInitDevices"
+ },
+ "00204a00": {
+  "name": "mainExceptionHandler",
+  "tag": "ror-inferred",
+  "was": "FUN_00204a00",
+  "why": "debug handler (stat, cause, epc, bva, bpa, gpr) installed for causes 1-7 and 10-13 by mainSetExceptionHandlers: resets VIF/VU/GS/DMA, prints epc/status/cause, registers by the name table 0x2d9000 and 14 rows of the stack, then hangs"
+ },
+ "00204bf8": {
+  "name": "mainSetExceptionHandlers",
+  "tag": "ror-inferred",
+  "was": "FUN_00204bf8",
+  "why": "once: SetDebugHandler(1..7 and 10..13, mainExceptionHandler), old handlers kept at 0x2d90ac; no callers in the retail ELF"
+ },
+ "00204ca4": {
+  "name": "mainResetExceptionHandlers",
+  "tag": "ror-inferred",
+  "was": "FUN_00204ca4",
+  "why": "restores the handlers mainSetExceptionHandlers saved; no callers"
+ },
+ "002052ac": {
+  "name": "SysNowLoading::init",
+  "tag": "ror-inferred",
+  "was": "FUN_002052ac",
+  "why": "system/sysnowloading.cpp: allocates the 1 MB image +0x290 and 16 KB packet +0x294, DMA channel 2, a 512x448 double buffer, clears VRAM, loads LOADING.BIN; mainInitGame calls it on a new 0x2a0-byte object"
+ },
+ "00205394": {
+  "name": "SysNowLoading::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00205394",
+  "why": "clears VRAM (0x2050e8) and frees the two buffers; mainInitGame calls it, then again through the inline destructor before delete"
+ },
+ "0020e3d8": {
+  "name": "seqSetLanguage",
+  "tag": "ror-inferred",
+  "was": "FUN_0020e3d8",
+  "why": "snprintf(0x2d9910, 0x40, SEQ): the sequence data folder; both arguments (language, 1) unused in the US build; MagSystem::setLanguage and mainInitGame call it"
+ },
+ "0020e690": {
+  "name": "Sequence::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0020e690",
+  "why": "sequence/sequence.cpp, object 0x7a4440 (constructed by 0x20e454): allocates the sequence buffers; sysInitManagers calls it"
+ },
+ "0020f98c": {
+  "name": "Sequence::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0020f98c",
+  "why": "object 0x7a4440: per-frame sequence step (returns at once when +0xdc24 bit 0 is set); mainLoop calls it every frame"
+ },
+ "002155a0": {
+  "name": "debugNop",
+  "tag": "ror-inferred",
+  "was": "FUN_002155a0",
+  "why": "empty function in the debug range before debug/mimu_debug.cpp; mainExceptionHandler calls it first"
+ },
+ "00237d80": {
+  "name": "rxSndInit",
+  "tag": "ror-inferred",
+  "was": "FUN_00237d80",
+  "why": "rx sound middleware (rxsnd strings in 0x237d80..0x23ff58): calls ten sub-inits, rxThAddCallback(0x237ce8), sets a hook to 0x237d00"
  },
  "0023ff58": {
   "name": "rxSysNoMemFunc",
@@ -622,6 +850,18 @@
   "tag": "ror-inferred",
   "was": "FUN_002426b8",
   "why": "sceIoctl under the print lock"
+ },
+ "00242960": {
+  "name": "rxSysSetDebugHandlers",
+  "tag": "ror-inferred",
+  "was": "FUN_00242960",
+  "why": "rx/rxsys.cpp range: once, SetDebugHandler(1..7, 10..13, 0x242740), old handlers at 0x2dbe4c / 0x2dbe70; main calls it after the memory hooks"
+ },
+ "002431c0": {
+  "name": "rxSysInitExceptionScreen",
+  "tag": "ror-inferred",
+  "was": "FUN_002431c0",
+  "why": "once: patches _exit, rxSysResetHardware, print hook 0x243050, a text screen at 0x7d8870 sized from sceGsGetGParam; mainExceptionHandler calls it before printing"
  },
  "002433d8": {
   "name": "rxSysInitUser",
@@ -2093,6 +2333,12 @@
   "was": "FUN_0024d130",
   "why": "(0 / 1, &count) from rxFileCdControl's request bits"
  },
+ "0024d448": {
+  "name": "sceMcEnd",
+  "tag": "lib-context",
+  "was": "sceMcChangeThreadPriority",
+  "why": "libmc: if the semaphore exists, sceMcSync(0) then DeleteSema both semaphores, return 1; mainExitDevices calls it after mainInitDevices' sceMcInit. Replaces the libmatch name sceMcChangeThreadPriority"
+ },
  "00259108": {
   "name": "sceGsGetGParam",
   "tag": "lib-context",
@@ -2206,5 +2452,35 @@
   "tag": "lib-context",
   "was": "FUN_00267b98",
   "why": "FF2 exit.c Exit 0x286b08, exact masked match; the name was taken by the crt0 thunk"
+ },
+ "00269fe0": {
+  "name": "sceDbcInit",
+  "tag": "lib-context",
+  "was": "FUN_00269fe0",
+  "why": "libdbc: binds dbcman.irx RPCs 0x80001300 / 0x8000131c, 'libdbc: Module version mismatch', creates sceDbc_sema"
+ },
+ "0026a280": {
+  "name": "sceDbcEnd",
+  "tag": "lib-context",
+  "was": "FUN_0026a280",
+  "why": "libdbc: clears the init flag 0x2df8c0 sceDbcInit tests and deletes its semaphore"
+ },
+ "0026b1d8": {
+  "name": "scePad2Init",
+  "tag": "lib-context",
+  "was": "FUN_0026b1d8",
+  "why": "libpad2 (between libdbc and scePadReqIntToStr): sets the init flag, clears 16 port records of 0x334 bytes; main passes 0"
+ },
+ "0026b218": {
+  "name": "scePad2End",
+  "tag": "lib-context",
+  "was": "FUN_0026b218",
+  "why": "clears the libpad2 init flag and closes every open port record (0x26b388)"
+ },
+ "00279b70": {
+  "name": "snprintf",
+  "tag": "lib-context",
+  "was": "FUN_00279b70",
+  "why": "newlib: a string FILE (flags 0x208, size n-1) through vfiprintf, NUL-terminates when n != 0"
  }
 }
