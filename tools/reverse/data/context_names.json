@@ -491,6 +491,12 @@
   "was": "FUN_0011262c",
   "why": "builds an i3d light (i3dLightDescInit / i3dCtxCreateLight) from light set n of the pool, scaled by f12; MagScene::draw makes one per render stage (asserts lightstatus[i])"
  },
+ "001129cc": {
+  "name": "DogLightPool::findNearestPointLight",
+  "tag": "ror-inferred",
+  "was": "FUN_001129cc",
+  "why": "(pool, light set, pos): walks the set's point-light mask at pool +0x50 + set * 0x18 and returns the index of the point light (m_light[DOG_LIGHT_POINT], stride 0x20, position first) nearest to pos, -1 when none; doglightpool.h line 131 asserts"
+ },
  "001151f4": {
   "name": "DogModel::draw",
   "tag": "ror-inferred",
@@ -1414,6 +1420,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0013fa50",
   "why": "(type, idx, which, v != 0, no <= 7): reads from the light set +0x2050"
+ },
+ "0013fbe4": {
+  "name": "MagScene::setShadowLight",
+  "tag": "ror-inferred",
+  "was": "FUN_0013fbe4",
+  "why": "(mode 0..5, light no): resets the shadow light description +0x2a9d0, stores the mode at +0x2040 and the pool's DIRECT / POINT / SPOT light no at +0x2044, and hangs the scene's light record +0x2000 into the description as its one directional (mode 1) or spot (modes 2, 3) light; doglightpool.h asserts"
  },
  "0013fe64": {
   "name": "MagScene::addLight",
@@ -2549,6 +2561,12 @@
   "was": "FUN_0021c140",
   "why": "a GIF tag with PRIM 0x46 (blended sprite) and RGBAQ, XYZ2, XYZ2 from the three words, behind a DMA tag; returns the packet after it"
  },
+ "0021c538": {
+  "name": "i3dPktLine",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c538",
+  "why": "GIF tag NLOOP 1 PRIM, regs 0x5510 (PRIM RGBAQ XYZ2 XYZ2), PRIM 0x41 (line, alpha blend), from two XYZ2 and an RGBAQ; the line twin of i3dPktSprite"
+ },
  "0021c8c8": {
   "name": "i3dPackRGBAQ",
   "tag": "lib-context",
@@ -2818,6 +2836,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00223398",
   "why": "0x223c78(layer group +0x81c, end): ends the packet opened by i3dLayerBeginPacket"
+ },
+ "002233e8": {
+  "name": "i3dLayerBeginPostPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_002233e8",
+  "why": "FUN_00223c10(layer +0x81c, 2, 0): i3dLayerBeginPacket 0x223378 is the same call with 0; makeActorShadow writes the packet drawn after the layer's models (border lines) through it"
+ },
+ "00223408": {
+  "name": "i3dLayerEndPostPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00223408",
+  "why": "FUN_00223c78(layer +0x81c, end): closes i3dLayerBeginPostPacket's packet, the pair of i3dLayerEndPacket"
  },
  "00223558": {
   "name": "i3dLayerFindDrawSet",

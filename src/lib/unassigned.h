@@ -192,6 +192,10 @@ int   i3dLayerSetView(I3dLayer *layer, I3dView *view);                   // ROR 
 /* The layer group's packet cursor, and its end once the caller wrote it. */
 u_long *i3dLayerBeginPacket(I3dLayer *layer);                            // ROR 0x00223378
 int   i3dLayerEndPacket(I3dLayer *layer, u_long *end);                   // ROR 0x00223398
+/* The same for the packet drawn after the layer's models (the draw group's
+ * slot 2; i3dLayerBeginPacket is slot 0). */
+u_long *i3dLayerBeginPostPacket(I3dLayer *layer);                        // ROR 0x002233e8
+int   i3dLayerEndPostPacket(I3dLayer *layer, u_long *end);               // ROR 0x00223408
 /* A view from a view record and a camera matrix, in the context's tail. */
 I3dView *i3dCtxCreateView(i3dContext *ctx, MagViewParam *param, sceVu0FVECTOR *matrix); // ROR 0x00226c58
 
@@ -302,6 +306,8 @@ u_long    i3dPackXYZ(u_int x, u_int y, u_int z);                         // ROR 
 u_long    i3dPackRGBAQ(float q, u_int r, u_int g, u_int b, u_int a);     // ROR 0x0021c8c8
 /* A blended sprite (PRIM 0x46) from two XYZ2 corners and an RGBAQ. */
 u_long   *i3dPktSprite(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq); // ROR 0x0021c140
+/* A blended line (PRIM 0x41) from two XYZ2 ends and an RGBAQ. */
+u_long   *i3dPktLine(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq); // ROR 0x0021c538
 /* Strips of count vertices with an optional matrix, STQ, colours and
  * positions (EE vectors); primitives unverified. */
 u_long   *i3dPktDrawStrip(u_long *pkt, sceVu0FVECTOR *matrix, int count, const void *stq,
@@ -320,6 +326,13 @@ int       FUN_002230e8(I3dLayer *layer, void *a, const float *b, void *c, void *
 void  i3dVecCopy(float *out, const float *in);                           // ROR 0x002372d0
 void  i3dVecCopy2(float *out, const float *in);                          // ROR 0x002372e0
 void  i3dVecSub(float *out, const float *a, const float *b);             // ROR 0x00237408
+void  i3dVecScale(float s, float *out, const float *in);                // ROR 0x00237360
+/* out = m x v (an sceVu0 row-vector product, w included). */
+void  i3dMatApply(float *out, sceVu0FVECTOR *m, const float *v);        // ROR 0x002373a8
+/* out = -in, all four components. */
+void  i3dVecNeg(float *out, const float *in);                           // ROR 0x00237468
+float i3dVecDot(const float *a, const float *b);                        // ROR 0x00237580
+void  i3dMatMul(sceVu0FVECTOR *out, sceVu0FVECTOR *a, sceVu0FVECTOR *b); // ROR 0x002377d0
 void  i3dMatUnit(sceVu0FVECTOR *m);                                      // ROR 0x00237340
 void  i3dMatTranslate(sceVu0FVECTOR *out, sceVu0FVECTOR *in, const float *v); // ROR 0x00237640
 void  i3dMatInverse(sceVu0FVECTOR *out, sceVu0FVECTOR *in);              // ROR 0x00237678

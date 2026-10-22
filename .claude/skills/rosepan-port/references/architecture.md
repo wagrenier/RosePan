@@ -293,7 +293,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   numbers +0x853b4 / +0x853b8. Every MagLife has `m_scene` at +0x20 and the vptr at +0x14;
   MagLifeControlChara's bound actor is +0x58 (`m_actor`).
 - **The scene's frame** (`mag/magscenerender.cpp`, pinned 0x139540..0x13c328, 2026-10-22;
-  `partial`: all but makeActorShadow 0x139b4c). `MagScene::draw(ctx, dbuff, frame)` 0x13bcc0:
+  all 20 written, `verify`). `MagScene::draw(ctx, dbuff, frame)` 0x13bcc0:
   setTexTable when DogTexInfo +0x10 (dirty) is set; rebuilds both view records' frustum from the
   camera's lens angle (DogCamera +0x140 -> getLensFov 0x10fac0, a 13-point curve; tan(fov / 2) x
   -0.5 x near, height x 0.75) when it differs from +0x2aa80; one view (camera matrix) and the fog
@@ -316,6 +316,25 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   m_rotate (+0x2abc0) and m_trans (+0x2abb0). Dog vtable slots seen here: DogModel 2 transform,
   4 getParent, 8 / 9 setHide / isHide, 11 cull 0x114e38, 12 draw (0x1151f4; DogActor 0x10e5c0),
   13 drawUnitMatrix 0x1152a8; DogActor 18 getNodeWorldPos, 19 drawModel, 20 drawShadow.
+- **Projected shadows** (`MagScene::makeActorShadow` 0x139b4c): per shadowed actor a layer at 700 +
+  10 n drawn into the 256 x 256 target at fbp 0x118 (sprite clear to black, FBA 1, the actor's
+  DogActor::drawShadow under an ambient-only light (0, 0, 1, 0), then a post packet
+  (`i3dLayerBeginPostPacket` 0x2233e8, draw-group slot 2) with four black border lines,
+  `i3dPktLine` 0x21c538). The light: scene +0x2040 `m_shadow_mode` (set with +0x2044 by
+  `MagScene::setShadowLight` 0x13fbe4; < 0 = none, the constructor's value): 1 = the pool's
+  directional light (+0x2044 points at it; eye ten clip radii back), else the actor's nearest point
+  light (`DogLightPool::findNearestPointLight` 0x1129cc over the actor's light set; DogActor +0x160
+  / +0x164 / +0x168 = current light, previous light, frame counter: a change fades the old light out
+  over 30 frames and the new one in over 30; the eye is kept three clip radii away and at y <= 0).
+  Writes the STQ map (+0x2aa90 = texture matrix [[1,0,0,0],[0,1,0,0],[t,t,2t,0],[0,0,0,1]] x the
+  light's view, t = tan of the clip sphere's half angle) and the scene's light record +0x2000
+  (`MagShadowLight`, 0x40: directional = direction, colour (0,0,0,I); spot = position, direction,
+  colour, cones +0x30 = t - 0.1 / +0x34 = t capped 0.7; I = m_22a0 x m_2a9cc, for points x 1e6 /
+  distance x fade), which setShadowLight hangs into the shadow layers' light description +0x2a9d0
+  (kind list 1 for directional, 3 for spot). View record data 0x298cb0, up vector 0x298cf0 = (1, -1,
+  1, 0). `DogLightPool` (+0x2050): per-kind light arrays at +0x00 and counts at +0x18 (kinds
+  DOG_LIGHT_DIRECT 1, POINT 2 (0x20 stride, position first), SPOT 3 (0x40 stride)); light-set masks
+  from +0x50, 0x18 per set.
 - **The scene's loaders** (`mag/magscene2.cpp`, pinned 0x137300..0x139540, 2026-10-22; `verify`):
   - `MagScene::loadSystemData` 0x137330 (start's first call): data/options.txt -> `parseOption`
     (magsceneoption.cpp, buckets at +0x4371c); data/PREMIERE.RPK's 2048-byte header, then the font

@@ -21,6 +21,7 @@
 #include "mag/magscene.h"
 
 #include <math.h>
+#include <string.h>
 
 #include "common/ror_assert.h"
 #include "common/rosepan_stub.h"
@@ -35,6 +36,12 @@ static MagViewParam s_closeup_view = {
 static MagViewParam s_tenkyu_view = {
     1.0f, 65535.0f, 0.0f, 0.0f, 0.0f, 0.0f, 65535.0f, 1.0f, 0.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
 };
+/* data 0x298cb0: makeActorShadow's view (the 256 x 256 shadow target; it
+ * writes the frustum) and 0x298cf0 its up vector. */
+static MagViewParam s_shadow_view = {
+    1.0f, 65530.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 255.0f, 0.0f, 255.0f, 0.0f, 0.0f,
+};
+static const sceVu0FVECTOR s_shadow_up = { 1.0f, -1.0f, 1.0f, 0.0f };
 /* data 0x298d00: the blob shadow's quad (x / z set from the actor's clip
  * radius each time) and 0x298d40 its texture coordinates. */
 static sceVu0FVECTOR s_blob_xyz[4] = {
@@ -49,9 +56,10 @@ static sceVu0FVECTOR s_blob_stq[4] = {
     { 0.0f, 1.0f, 1.0f, 0.0f },
     { 1.0f, 1.0f, 1.0f, 0.0f },
 };
-/* rodata 0x2edfb0 / 0x2edfc0 / 0x2ee190 / 0x2ee1c0 */
+/* rodata 0x2edfb0 / 0x2edfc0 / 0x2ee040 / 0x2ee190 / 0x2ee1c0 */
 static const sceVu0FVECTOR s_closeup_ambient = { 0.7f, 0.7f, 0.7f, 1.0f };
 static const sceVu0FVECTOR s_up = { 0.0f, 1.0f, 0.0f, 0.0f };
+static const sceVu0FVECTOR s_shadow_ambient = { 0.0f, 0.0f, 1.0f, 0.0f };
 static const sceVu0FVECTOR s_origin = { 0.0f, 0.0f, 0.0f, 1.0f };
 static const sceVu0FVECTOR s_path_color = { 1.0f, 0.0f, 0.0f, 1.0f };
 
@@ -205,6 +213,192 @@ void MagScene::drawTenkyuRotated(i3dContext *ctx, I3dLight *light, const float *
     s_tenkyu_view.m_top = s_tenkyu_view.m_right;
     i3dLayerSetView(pRenderStage, i3dCtxCreateView(ctx, &s_tenkyu_view, m));
     drawTenkyu(pRenderStage);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// One actor's shadow texture, seen from its light: a layer at 700 + 10 n
+// drawn into the 256 x 256 target at fbp 0x118 -- cleared to black with
+// alpha forced on, the actor's shadow model drawn by an ambient-only light,
+// then a black border so the projection clamps to unlit. The light is the
+// scene's directional light (mode 1: from ten clip radii back along its
+// direction) or the actor's nearest point light (on a change, 30 frames
+// fading the old one out and 30 the new one in; kept at least three clip
+// radii from the actor and never above y 0). The view just holds the clip
+// sphere; stq gets the projection (texture matrix x view), and the scene's
+// shadow light record the light the layers at 705 + 10 n are lit by.
+// callcheck: FUN_00215a30, FUN_0026cb48, i3rCopyClipSphere (the assert handler inside ROR_ASSERT; sqrtf; inside the inline DogModel::copyClipSphere); transform / drawShadow are vtable slots 2 / 20
+// ROR 0x00139b4c
+
+void MagScene::makeActorShadow(int theCount, i3dContext *ctx, DogActor *actor, I3rStqMapEntity *stq)
+{
+    ROR_ASSERT(theCount >= 0 && theCount < 10); /* 466 */
+
+    I3dLightDesc light;
+    i3dLightDescInit(&light);
+    i3dVecCopy2(light.m_ambient, s_shadow_ambient);
+
+    I3dLayer *pRenderStage = i3dCtxCreateLayer(ctx, (float)theCount * 10.0f + 700.0f);
+    ROR_ASSERT(pRenderStage != NULL); /* 498 */
+
+    u_long *pkt = i3dLayerBeginPacket(pRenderStage);
+    pkt = i3dPktSetReg(pkt, SCE_GS_FRAME_1, 0x40118);
+    pkt = i3dPktSetReg(pkt, SCE_GS_XYOFFSET_1, 0);
+    pkt = i3dPktSetReg(pkt, SCE_GS_TEST_1, 0x31001);
+    pkt = i3dPktSetReg(pkt, SCE_GS_ALPHA_1, 0);
+    pkt = i3dPktSprite(pkt, i3dPackXYZ(0, 0, 0), i3dPackXYZ(0x1000, 0x1000, 0),
+                       i3dPackRGBAQ(1.0f, 0, 0, 0, 0));
+    pkt = i3dPktSetReg(pkt, SCE_GS_FBA_1, 1);
+    i3dLayerEndPacket(pRenderStage, pkt);
+
+    pkt = i3dLayerBeginPostPacket(pRenderStage);
+    pkt = i3dPktSetReg(pkt, SCE_GS_FBA_1, 0);
+    pkt = i3dPktSetReg(pkt, SCE_GS_TEST_1, 0x31001);
+    pkt = i3dPktLine(pkt, i3dPackXYZ(0, 0, 0), i3dPackXYZ(0, 0xff0, 0),
+                     i3dPackRGBAQ(1.0f, 0, 0, 0, 0));
+    pkt = i3dPktLine(pkt, i3dPackXYZ(0, 0xff0, 0), i3dPackXYZ(0xff0, 0xff0, 0),
+                     i3dPackRGBAQ(1.0f, 0, 0, 0, 0));
+    pkt = i3dPktLine(pkt, i3dPackXYZ(0xff0, 0xff0, 0), i3dPackXYZ(0xff0, 0, 0),
+                     i3dPackRGBAQ(1.0f, 0, 0, 0, 0));
+    pkt = i3dPktLine(pkt, i3dPackXYZ(0xff0, 0, 0), i3dPackXYZ(0, 0, 0),
+                     i3dPackRGBAQ(1.0f, 0, 0, 0, 0));
+    i3dLayerEndPostPacket(pRenderStage, pkt);
+
+    if (m_shadow_mode < 0)
+        return;
+
+    sceVu0FVECTOR center;
+    float radius[4];
+    actor->copyClipSphere(center, radius);
+
+    sceVu0FVECTOR dir;      /* from the light to the actor */
+    sceVu0FVECTOR eye;      /* the light */
+    sceVu0FVECTOR world;
+    sceVu0FVECTOR target;   /* the clip sphere's centre less the actor's offset */
+    sceVu0FVECTOR v;
+    float dist;
+    float fade = 1.0f;
+    if (m_shadow_mode == 1)
+    {
+        i3dVecNeg(dir, m_shadow_src);
+        actor->transform();
+        i3dMatApply(world, actor->m_matrix, center);
+        i3dVecSub(target, world, actor->m_trans_ofs);
+        target[3] = 1.0f;
+        dist = radius[0] * 10.0f;
+        i3dVecScale(dist, v, dir);
+        i3dVecSub(eye, target, v);
+    }
+    else
+    {
+        int frame = actor->m_shadow_fade;
+        actor->m_shadow_fade = frame + 1;
+        int no;
+        if ((u_int)frame < 60)
+        {
+            if (frame < 30)
+            {
+                fade = (float)(30 - frame) / 30.0f;
+                no = actor->m_shadow_light_prev;
+            }
+            else
+            {
+                fade = (float)(frame - 30) / 30.0f;
+                no = actor->m_shadow_light;
+            }
+        }
+        else
+        {
+            v[0] = actor->m_trans[0];
+            v[1] = actor->m_trans[1];
+            v[2] = actor->m_trans[2];
+            v[3] = actor->m_trans[3];
+            int nearest = m_light_pool.findNearestPointLight(actor->getLightID(), v);
+            if (nearest < 0)
+                return;
+            no = actor->m_shadow_light;
+            if (nearest != no)
+            {
+                /* the old light this frame; the fade starts with the next */
+                actor->m_shadow_light = nearest;
+                actor->m_shadow_light_prev = no;
+                actor->m_shadow_fade = 0;
+                if (frame < 0)
+                    actor->m_shadow_fade = 60;
+            }
+        }
+        if (no < 0)
+            return;
+
+        DogPointLight *plight = m_light_pool.getPointLight(no);
+        ROR_ASSERT(plight); /* 1095 */
+        if (plight == NULL)  /* PC: the ROM reads through it */
+            return;
+        i3dVecCopy(eye, plight->m_pos);
+
+        actor->transform();
+        i3dMatApply(world, actor->m_matrix, center);
+        i3dVecSub(target, world, actor->m_trans_ofs);
+        target[3] = 1.0f;
+        i3dVecSub(dir, target, eye);
+        dist = sqrtf(i3dVecDot(dir, dir));
+        if (dist < radius[0] * 3.0f)
+        {
+            i3dVecScale(radius[0] * 3.0f / dist, v, dir);
+            i3dVecSub(eye, target, v);
+            if (eye[1] > 0.0f)
+                eye[1] = 0.0f;
+            dist = radius[0] * 3.0f;
+        }
+    }
+
+    sceVu0FMATRIX view;
+    i3dMatLookDir(view, eye, dir, s_shadow_up);
+
+    /* The frustum holds the clip sphere (t: the tangent of its half
+     * angle); the texture matrix maps the view onto 0..1 with s = x + t z,
+     * t = y + t z, q = 2 t z. */
+    float s = radius[0] / dist;
+    float t = s / sqrtf(1.0f - s * s);
+    float near_z = s_shadow_view.m_near;
+    sceVu0FMATRIX tex;
+    memset(tex, 0, sizeof(tex));
+    tex[0][0] = 1.0f;
+    tex[1][1] = 1.0f;
+    tex[2][0] = t;
+    tex[2][1] = t;
+    tex[2][2] = t + t;
+    tex[3][3] = 1.0f;
+    s_shadow_view.m_left = -t * near_z;
+    s_shadow_view.m_right = t * near_z;
+    s_shadow_view.m_bottom = -t * near_z;
+    s_shadow_view.m_top = t * near_z;
+
+    i3dLayerSetLight(pRenderStage, i3dCtxCreateLight(ctx, &light));
+    i3dLayerSetView(pRenderStage, i3dCtxCreateView(ctx, &s_shadow_view, view));
+    actor->drawShadow(pRenderStage);
+    i3dMatMul((sceVu0FVECTOR *)stq, tex, view);
+
+    sceVu0FVECTOR color = { 0.0f, 0.0f, 0.0f, 0.0f };
+    if (m_shadow_mode == 1)
+    {
+        color[3] = m_22a0 * m_2a9cc;
+        i3dVecCopy(m_shadow_lightrec.m_00, m_shadow_src);
+        i3dVecCopy2(m_shadow_lightrec.m_10, color);
+    }
+    else
+    {
+        color[3] = (1000000.0f / dist) * m_22a0 * fade * m_2a9cc;
+        i3dVecCopy(m_shadow_lightrec.m_00, eye);
+        i3dVecCopy(m_shadow_lightrec.m_10, dir);
+        i3dVecCopy2(m_shadow_lightrec.m_color, color);
+        if (t > 0.7f)
+            t = 0.7f;
+        m_shadow_lightrec.m_cone_outer = t;
+        float inner = t - 0.1f;
+        if (inner < 0.0f)
+            inner = 0.0f;
+        m_shadow_lightrec.m_cone_inner = inner;
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -885,12 +1079,4 @@ void MagScene::setCameraTarget(const float *pos, const float *at)
     m_camera_at[2] = at[2];
     m_camera_at[3] = at[3];
     m_camera_target_set = 1;
-}
-
-// ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x00139b4c
-void MagScene::makeActorShadow(int count, i3dContext *ctx, DogActor *actor, I3rStqMapEntity *stq)
-{
-    ROSEPAN_STUB("MagScene::makeActorShadow", 0x00139b4c);
 }

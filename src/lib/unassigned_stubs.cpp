@@ -759,3 +759,68 @@ float utlVecDist(const float *a, const float *b)
     ROSEPAN_STUB("utlVecDist", 0x00106e70);
     return {};
 }
+
+// stub of ROR 0x001129cc
+int DogLightPool::findNearestPointLight(int set, const float *pos)
+{
+    ROSEPAN_STUB("DogLightPool::findNearestPointLight", 0x001129cc);
+    return {};
+}
+
+// stub of ROR 0x002233e8
+u_long * i3dLayerBeginPostPacket(I3dLayer *layer)
+{
+    ROSEPAN_STUB("i3dLayerBeginPostPacket", 0x002233e8);
+    return {};
+}
+
+// stub of ROR 0x00223408
+int i3dLayerEndPostPacket(I3dLayer *layer, u_long *end)
+{
+    ROSEPAN_STUB("i3dLayerEndPostPacket", 0x00223408);
+    return {};
+}
+
+// stub of ROR 0x002373a8
+void i3dMatApply(float *out, sceVu0FVECTOR *m, const float *v)
+{
+    ROSEPAN_STUB("i3dMatApply", 0x002373a8);
+}
+
+// stub of ROR 0x002377d0
+void i3dMatMul(sceVu0FVECTOR *out, sceVu0FVECTOR *a, sceVu0FVECTOR *b)
+{
+    ROSEPAN_STUB("i3dMatMul", 0x002377d0);
+}
+
+// stub of ROR 0x0021c538
+u_long   * i3dPktLine(u_long *pkt, u_long xyz0, u_long xyz1, u_long rgbaq)
+{
+    ROSEPAN_STUB("i3dPktLine", 0x0021c538);
+    return {};
+}
+
+// stub of ROR 0x002372e0
+void i3dVecCopy2(float *out, const float *in)
+{
+    ROSEPAN_STUB("i3dVecCopy2", 0x002372e0);
+}
+
+// stub of ROR 0x00237580
+float i3dVecDot(const float *a, const float *b)
+{
+    ROSEPAN_STUB("i3dVecDot", 0x00237580);
+    return {};
+}
+
+// stub of ROR 0x00237468
+void i3dVecNeg(float *out, const float *in)
+{
+    ROSEPAN_STUB("i3dVecNeg", 0x00237468);
+}
+
+// stub of ROR 0x00237360
+void i3dVecScale(float s, float *out, const float *in)
+{
+    ROSEPAN_STUB("i3dVecScale", 0x00237360);
+}
