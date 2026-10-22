@@ -535,7 +535,7 @@
 // FILE -- dog/dogtexinfo.cpp
 // *****************************************************************************
 
-/* 001161e4 00000088 */ FUN_001161e4(){}
+/* 001161e4 00000088 */ DogTexInfo::getTexInfo(){}  // ror
 /* 0011626c 00000010 */ FUN_0011626c(){}
 /* 0011627c 00000030 */ FUN_0011627c(){}
 /* 001162ac 00000130 */ DogTexInfo::init(){}  // ror
@@ -3012,35 +3012,30 @@
 /* 0018f520 00000090 */ SprMan::fadeOut(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
-// *****************************************************************************
-
-/* 0018f5b0 00000034 */ FUN_0018f5b0(){}
-/* 0018f5e4 00000028 */ FUN_0018f5e4(){}
-/* 0018f60c 000000d0 */ FUN_0018f60c(){}
-/* 0018f6dc 0000001c */ FUN_0018f6dc(){}
-/* 0018f6f8 0000003c */ FUN_0018f6f8(){}
-/* 0018f734 00000010 */ FUN_0018f734(){}
-
-// *****************************************************************************
 // FILE -- spr/sprtexture.cpp
 // *****************************************************************************
 
+/* 0018f5b0 00000034 */ SprTexture::SprTexture(){}  // ror
+/* 0018f5e4 00000028 */ SprTexture::~SprTexture(){}  // ror
+/* 0018f60c 000000d0 */ SprTexture::clear(){}  // ror
+/* 0018f6dc 0000001c */ SprTexture::getSlot(){}  // ror
+/* 0018f6f8 0000003c */ SprTexture::getTexNo(){}  // ror
+/* 0018f734 00000010 */ SprTexture::getTexRecord(){}  // ror
 /* 0018f744 000000c4 */ SprTexture::setList(){}  // ror
 /* 0018f808 0000001c */ SprTexture::setListMode(){}  // ror
-/* 0018f824 000001a8 */ FUN_0018f824(){}
-/* 0018f9cc 000000e8 */ FUN_0018f9cc(){}
-/* 0018fab4 000000fc */ FUN_0018fab4(){}
-/* 0018fbb0 000002dc */ FUN_0018fbb0(){}
-/* 0018fe8c 00000030 */ FUN_0018fe8c(){}
+/* 0018f824 000001a8 */ SprTexture::release(){}  // ror
+/* 0018f9cc 000000e8 */ SprTexture::freeFile(){}  // ror
+/* 0018fab4 000000fc */ SprTexture::releaseTex(){}  // ror
+/* 0018fbb0 000002dc */ SprTexture::loadTex(){}  // ror
+/* 0018fe8c 00000030 */ SprTexture::getPackIndex(){}  // ror
 /* 0018febc 000006e4 */ SprTexture::update(){}  // ror
-/* 001905a0 00000008 */ FUN_001905a0(){}
-/* 001905a8 00000008 */ FUN_001905a8(){}
-/* 001905b0 00000068 */ FUN_001905b0(){}
-/* 00190618 0000026c */ FUN_00190618(){}
-/* 00190884 00000048 */ FUN_00190884(){}
-/* 001908d0 00000034 */ FUN_001908d0(){}
-/* 00190904 00000174 */ FUN_00190904(){}
+/* 001905a0 00000008 */ SprTexture::setStep(){}  // ror
+/* 001905a8 00000008 */ SprTexture::setReadStep(){}  // ror
+/* 001905b0 00000068 */ SprTexture::startRead(){}  // ror
+/* 00190618 0000026c */ SprTexture::updateRead(){}  // ror
+/* 00190884 00000048 */ SprTexture::compareId(){}  // ror
+/* 001908d0 00000034 */ SprTexture::isRtcm(){}  // ror
+/* 00190904 00000174 */ SprTexture::decodeRtcm(){}  // ror
 
 // *****************************************************************************
 // FILE -- spr/s2d.cpp
@@ -3569,14 +3564,14 @@
 /* 001be110 000001bc */ FUN_001be110(){}
 /* 001be2cc 00000010 */ FileReader::FileReader(){}  // ror
 /* 001be2dc 0000005c */ FileReader::~FileReader(){}  // ror
-/* 001be338 00000034 */ FUN_001be338(){}
-/* 001be36c 00000020 */ FUN_001be36c(){}
+/* 001be338 00000034 */ FileReader::openFile(){}  // ror
+/* 001be36c 00000020 */ FileReader::readFile(){}  // ror
 /* 001be38c 00000038 */ FUN_001be38c(){}
-/* 001be3c4 00000050 */ FUN_001be3c4(){}
+/* 001be3c4 00000050 */ FileReader::closeFile(){}  // ror
 /* 001be414 00000030 */ FileReader::close(){}  // ror
-/* 001be444 0000004c */ FUN_001be444(){}
+/* 001be444 0000004c */ FileReader::seekFile(){}  // ror
 /* 001be490 00000038 */ FUN_001be490(){}
-/* 001be4c8 0000005c */ FUN_001be4c8(){}
+/* 001be4c8 0000005c */ FileReader::isReady(){}  // ror
 /* 001be524 00000024 */ FileReader::read(){}  // ror
 /* 001be548 0000001c */ FUN_001be548(){}
 /* 001be564 000001d0 */ FUN_001be564(){}

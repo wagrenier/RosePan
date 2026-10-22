@@ -6,6 +6,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**FIRST (the user, 2026-10-22, after i3d/i3dtim2.cpp): the native i3d draw module**, host task
+`setup/i3d_draw_module.cpp`, queued at the top of tus.json (its task text holds the steps). Every
+i3d file is written (`verify`) and every frame builds real layers, draw sets and packets, but no host
+module consumes them, so the screen is black. The session creates `src/rosepan/rendering/rosepan_i3d.*`,
+decides the hook (recommended: the 2D packet writers record host primitives, i3dCtxRunGroup's sorted
+walk replays them; VU1 strips later) and records it under Decisions, decodes I3dTexture / I3dClut on
+the host, and proves it with a forced TIM2 draw until SprMan reaches the writers in the boot.
+
 0. **TOP PRIORITY (the user, 2026-10-22): the TUs needed to start rendering something**, queued at
    the top of tus.json in this order. Today every frame is black: the frame loop runs, but
    MagScene::draw, the i3d group / layer code and SprMan are stubs, and nothing else draws.
@@ -87,6 +95,17 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
         header i3dtim2.h written): its stubs return NULL, and i3dTexSetTim2 / i3dClutSetTim2
         dereference the picture, so write it before DogTexInfo::addData runs.
      5. `spr/sprtexture.cpp`: SprTexture (setList / update; replace the update bridge).
+        **Written 2026-10-22 (`verify`)**, pinned 0x18f5b0..0x190a78 (21 functions; the ctor / clear /
+        getters before setList are SprTexture's): the update bridge is gone and S2dMes / S2dMovie's
+        loads run the real state machine. FileReader's asynchronous helpers 0x1be338..0x1be4c8 and
+        FileReader::close / BedPfh::clear are ROM-code bridges (a stubbed isReady would never report
+        ready and the loadTexture loops would spin for ever). Every list still ends in the error
+        state (update -1, the callers move on): **fileGetSize 0x1be768 is a stub returning 0** (so
+        the .rpk reads 0 bytes) and **BedPfh::BedPfh / getFileIndex** (bed/bedpfh.cpp) are stubs.
+        Write those three before DogTexInfo (6) can be seen getting textures. Doubt: a real
+        fileGetSize also wakes MagScene::loadActorAnim's pack read through FileReader::read (a stub:
+        the 0x800 header stays uninitialised) -- write FileReader::read (0x1be524 / 0x1be564, the
+        pfh loader of A.1) in the same session.
      6. `dog/dogtexinfo.cpp`: the texture table SprTexture loads into (DogTexInfo::init / add are
         reached).
      7. `spr/sprman.cpp`: SprMan (init / update / draw, the pattern-table host format).

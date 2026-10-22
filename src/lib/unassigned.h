@@ -141,6 +141,16 @@ struct FileReader
     int  read(FileReadReq *req, int async);                              // ROR 0x001be524
     int  close();                                                        // ROR 0x001be414
 
+    /* The asynchronous steps SprTexture::updateRead runs one by one (the
+     * rx file calls; isReady polls the last one). */
+    int  openFile(const char *theName);                                  // ROR 0x001be338
+    void readFile(int fd, void *buf, int size);                          // ROR 0x001be36c
+    /* 1 (and m_fd -1) when fd is this reader's file, else 2. */
+    int  closeFile(int fd);                                              // ROR 0x001be3c4
+    void seekFile(int fd, int offset, int whence);                       // ROR 0x001be444
+    /* True when m_fd has no request running; stores m_fd to *fd. */
+    int  isReady(int *unused, int *fd);                                  // ROR 0x001be4c8
+
     FileReadReq *m_req;         // ROR 0x00: the request being run
     int          m_fd;          // ROR 0x04: the file this reader opened, -1 = none
 };

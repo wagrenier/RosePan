@@ -101,6 +101,14 @@ entries are marked **RoR** with the date.
   the caller's caller's argument flows through -- give the function that parameter.
 - **Ghidra drops arguments** to callees it typed `void f(void)`, and orders float arguments wrongly
   (EABI: floats in f12.., ints in a0..). Read the asm before every `jal` whose arguments matter.
+- **A stubbed poll turns a step-per-call loader into a hang.** Loaders that step a state machine per
+  call (SprTexture::update / updateRead) wait on helpers such as FileReader::isReady; stubgen's `return
+  {}` reads as "not ready" for ever, and callers that spin (`while (update() == 0)`) hang the boot.
+  Fix: make the polled helpers ROM-code bridges in the same session (spr/sprtexture.cpp did for
+  0x1be338..0x1be4c8), and check every stub a new state machine polls before replacing a bridge.
+- **A member object GCC 2 never constructs** (BedPfh inside SprTexture: the ROM's constructor only
+  calls BedPfh::clear) has no default constructor in C++ when its class declares one with arguments.
+  Give it an empty inline `T() {}` with a PC: comment rather than calling the stubbed one.
 - **Variadic unpackers**: GCC spills each variadic argument to an 8-byte slot; floats are promoted to
   double (`dptofp` reads). `va_arg(ap, double)` for those, `int` for words, `void *` for pointers.
 - **Switch tables on bytes decompile into goto soup**: get the ROM's answer for every input with

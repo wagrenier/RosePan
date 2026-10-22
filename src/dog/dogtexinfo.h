@@ -37,6 +37,8 @@ struct DogTexInfo
     void release(int theNo);                                             // ROR 0x00116618
     /* Makes texture dst use src's picture (both by name). */
     void copy(const char *dst, const char *src);                         // ROR 0x001173d4
+    /* Record theN of m_tex_info (16 bytes, a name pointer first). */
+    void *getTexInfo(int theN);                                          // ROR 0x001161e4
 
     int   m_max_tex;            // ROR 0x00: theMax
     int   m_num_tex;            // ROR 0x04: records in use (assert m_num_tex <= m_max_tex)
