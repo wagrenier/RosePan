@@ -37,3 +37,43 @@ u_int DogActor::loadPackMotion(const char *theFileName, int a, int b)
     ROSEPAN_STUB("DogActor::loadPackMotion", 0x0010c17c);
     return {};
 }
+
+// stub of ROR 0x0010f2dc
+int DogActor::checkName(const char *theName)
+{
+    ROSEPAN_STUB("DogActor::checkName", 0x0010f2dc);
+    return {};
+}
+
+// stub of ROR 0x0010cd5c
+int DogActor::load(const BedPfh &pfh, DogTexInfo *tex, int mode, int light)
+{
+    ROSEPAN_STUB("DogActor::load", 0x0010cd5c);
+    return {};
+}
+
+// stub of ROR 0x0010c568
+u_int DogActor::loadMotion(const BedPfh &pfh, int arg)
+{
+    ROSEPAN_STUB("DogActor::loadMotion", 0x0010c568);
+    return {};
+}
+
+// stub of ROR 0x00109ed0
+void DogActor::releaseModel(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("DogActor::releaseModel", 0x00109ed0);
+}
+
+// stub of ROR 0x0010bf00
+void DogActor::setParam1d8(int v)
+{
+    ROSEPAN_STUB("DogActor::setParam1d8", 0x0010bf00);
+}
+
+// stub of ROR 0x0010cffc
+int DogActor::shareModel(DogActor *src)
+{
+    ROSEPAN_STUB("DogActor::shareModel", 0x0010cffc);
+    return {};
+}

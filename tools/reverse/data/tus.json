@@ -64,15 +64,27 @@
    "why": "i3d VRAM cache: a block heap of 0x44-byte nodes on six intrusive lists (address order, LRU, locked, evict, new, moved), embedded twice in i3dContext (+0x0 texture pages, +0x70 CLUT); 0x227a98 list unlink .. 0x228b50 coalesce, next function 0x228c08 calls the i3d system module 0x237180."
   },
   "mag/magscene2.cpp": {
-   "notes": "Screen still black: MagScene::draw and i3dCtxCloseFrame are stubs, so nothing reaches the GS; the smoke run now reaches MagLifeMan::init/add, DogTexInfo::init/add, the three S2d inits and four FUN_ objects through initRender. Left in this TU: the constructor 0x1360a0 (0xc74; 128 DogActors, the sky DogModels, twelve MagLifeMenu objects, 0x2000 records near +0x437e0, many float defaults), the destructor 0x136d14, load 0x1377f0 and the rest of the inferred range. The extent is NOT pinned: the inferred range 0x1316b8..0x13ff00 also covers magscene.cpp (update, setViewParam, drawView) and the light / camera / tenkyu functions; pin it with tus.py define before the next slice. Host DogModel is smaller than the EE 0x1a0, so no lower-bound asserts after embedded Dog objects (MagSceneTenkyu). Placeholders in lib/unassigned.h named by constructor address (MagLife12f008, MagLife130da4, Obj176a3c, Obj19226c, Obj17c0f0) and four unnamed callees FUN_00176afc, FUN_00192318, FUN_0017c2c0, FUN_001944d0 still need classes and names. The 4.48 view literal is the ROM's 0x408f5c28, written as a hex float.",
+   "notes": "Complete but unseen: MagScene::start (magscene.cpp) and the GamMan loads are stubs, so no loader runs and the screen stays black (MagScene::draw is a stub too). The next session that runs start or a GamMan load proves loadSystemData / load on screen. Stubs this left that matter first: BedPfh ctor / getFileName / getFileIndex (bed/bedpfh.cpp, 3 small functions; the ctor stub only sets m_top, so every table getter returns -1 until it is written), FileReader::read / close (unassigned@001bde58), utlStrCopy / utlStrCopy2, MagCharaLoader / MagMapLoader (mag/magloader.cpp), DogModel::loadPack / loadData, DogActor::load / shareModel, DogTexInfo::addPfh / find / setTexTable. PC deviations in load: the _c.bin record pointers go into a game-heap array freed by releaseTenkyu (the ROM overwrites the file offsets in place with 4-byte pointers), and the clip-sphere reads of models 1 and 2 are skipped when they have no root. magscene.cpp is not pinned: the guess is 0x1316b8..0x137300 (asserts 0x131a28..0x135f44; the ctor 0x1360a0 and dtor 0x136d14 have no strings). DogActor slot 1 (DogEntity::reset) and slot 21 (shareModel) are plain member calls until the Dog classes are made polymorphic.",
+   "ranges": [
+    [
+     "00137300",
+     "00139540"
+    ]
+   ],
    "sessions": [
     {
      "date": "2026-10-22 13:42",
      "status": "partial",
      "summary": "MagScene set-up half: init (fog records, light no, life manager, texture table with shadow01, sky slots), initRender (two view records, controller scene links, the S2dBg / S2dCineSco / S2dMes layers and two unnamed life objects on MagLifeMan, render objects, 2D packet buffer), setPC, setBwn, clearPC, postDraw, setActorAnim, setCameraTarget, initCamera, getCameraMode, releaseTenkyu and releaseTenkyuAll (12 of 31). New headers mag/maglife.h (MagLife / MagLifeControlChara, host structs with the EE vptr word as padding), maglifebwnctrl.h, maglifeman.h, dog/dogtexinfo.h, utl/utlfind.h; MagScene laid out in EE order from the constructor's map; MagSystem::getBwnState now reads MagLifeBwnCtrl's state word (scene +0x2bd20, same address). 23 names in Ghidra (batch magscene2_001)."
+    },
+    {
+     "date": "2026-10-22 14:04",
+     "status": "verify",
+     "summary": "Pinned mag/magscene2.cpp to 0x137300..0x139540 and wrote all 19 functions: loadSystemData (options.txt, the PREMIERE.RPK font and common textures), load (a map unit pack into a sky slot: three models, STQ map, _c.bin records, mapparam.bbb view far and fog, _l.bin light, sector.sec), loadMapUnit, loadMapByName, the actor finders, shareActor, loadActor, loadModel, loadModelByName, releaseActor, loadActorAnim, loadTexture, plus the two loader inits. New headers bed/bedpfh.h (RTPK packs, inline getters), mag/magloader.h (MagCharaLoader, MagMapLoader), utl/utlfile.h; FileReader / FileReadReq in lib/unassigned.h; DogModel / DogActor / DogTexInfo load methods declared. Moved setPC, setBwn, init, initRender, clearPC and the ctor/dtor stubs to magscene.cpp, postDraw / setCameraTarget to magscenerender.cpp, initCamera / getCameraMode to magscenecamera.cpp. MagSystem::loadScene now takes (id, data, copy). 58 names in Ghidra (batches magscene2_002, _003)."
     }
    ],
-   "status": "partial"
+   "status": "verify",
+   "why": "Every function from 0x137330 to 0x139308 that has a source string names mag/magscene2.cpp; magscene.cpp strings end at 0x135f44 and magscenerender.cpp starts at 0x139664. 0x137300 and 0x137318 are helpers only 0x137330 calls. The ctor/dtor 0x1360a0/0x136d14 and setPC..initRender (0x1316b8..) lie in magscene.cpp's span, not here."
   },
   "mag/magsystem.cpp": {
    "notes": "All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes are NOT polymorphic on the host: the EE vptr word at +0x94 is kept as padding (_ee_vptr) and setAttachNode (slot 10) / getNodeWorldMatrix (slot 17) are plain members; the first dog/ TU needing a virtual makes them virtual in the slot order listed in the header comments. DogEntity::setRotate / normalizeRotate sit in unassigned@0010f944 (stubs in lib/unassigned_stubs.cpp) but are dog code: define that range when a dog TU starts. Next reached stubs: MagScene ctor/init/start/initRender/update/draw, i3d (unassigned@00216ad0), BedPad, SndMan::update.",

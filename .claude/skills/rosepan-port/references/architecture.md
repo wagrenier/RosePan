@@ -286,6 +286,45 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   (0x17c0f0), `MagSceneIFMap` / `MagSceneIFChara` at +0x854e0 / +0x854e8, Brown / PC actor
   numbers +0x853b4 / +0x853b8. Every MagLife has `m_scene` at +0x20 and the vptr at +0x14;
   MagLifeControlChara's bound actor is +0x58 (`m_actor`).
+- **The scene's loaders** (`mag/magscene2.cpp`, pinned 0x137300..0x139540, 2026-10-22; `verify`):
+  - `MagScene::loadSystemData` 0x137330 (start's first call): data/options.txt -> `parseOption`
+    (magsceneoption.cpp, buckets at +0x4371c); data/PREMIERE.RPK's 2048-byte header, then the font
+    file (`fnt/fnt16US.bin`, a pointer variable at data 0x298b80) to +0x2908 and file 0 (the common
+    textures) to +0x2914, added with `DogTexInfo::addPfh`; texture numbers r_shadow / noise at
+    +0x290c[2] (initRender hands noise to the +0x418f0 object) and bit8a..bit8d at +0x28f4[4]
+    (bit8e is in the table, unused); then the two loaders' init.
+  - Loaders (`mag/magloader.cpp`, names descriptive): `MagCharaLoader` at +0x215c (CHARA.RPK;
+    character id = (category << 10) + n, < 0x5800, 22 categories; getIndex 0x142c88 / getId
+    0x142dac / load 0x142b18; name index `MagLoaderIndex` at +0xcc, find 0x142500 case-insensitive)
+    and `MagMapLoader` at +0x224c (data/bg/mapunit.bin, loadByName 0x142fd0). Both start with a
+    `FileReader` (+0) and its `FileReadReq` (+8).
+  - `MagScene::load(ctx, id, data, copy)` 0x1377f0 takes a map unit pack into the first free sky
+    slot (no check when all four are taken): file 0 is the model pack (its name minus the extension
+    names the other files), loaded by DogModel slot 14 into m_model[0]; the model pack's file 2 is
+    m_model[1] (slot 15) whose STQ map goes to +0x2aa90; `<name>_c.bin` (head word: count in the low
+    half, the rest offsets turned into record pointers in place), `mapparam.bbb` (int words: view
+    far -> setViewFar 0x131618, fog RGB / 255 and four params (/1, /100, /1, /100) -> m_fog[1] and
+    setFog 0x143d7c, scene words +0x854a4 / +0x85494 / +0x85498 when the file is over 0x20 bytes,
+    a factor /100 kept in 0..1 at +0x2a9cc), `<name>_col.i3s.i3r` + the next file -> m_model[2],
+    `<name>_l.bin` -> the slot's light data (loadLight 0x13f658), sky textures (0x140030, with a
+    context), the pack's `sector.sec` -> +0x8542c (0x17c1f4). Ends with setDefaultLight 0x13f8e4
+    and resetEntities 0x135fa4. Slot fields: +0x4f4 _c.bin, +0x4f8 count, +0x4fc records, +0x500
+    light data.
+  - Actors: findFreeActor / findActorById (DogActor id +0x1a0) / findActorByName; an actor whose
+    model another actor already shows is *shared* (DogActor slot 21 `shareModel`: master +0x118,
+    ref count +0x104) instead of loaded; `loadActor` 0x138ce8 loads with `DogActor::load(pfh,
+    textures, keep ? 2 : 1, m_22cc)`, then setId, 5 at +0x1d8, `ready()` (+0xf0 = 0, +0xf4 = -1).
+    A second flag word per actor sits at +0x29320. `loadModel` / `loadModelByName` take the pack
+    from CHARA.RPK; the rpk MagSystem passes is not read.
+- **Packs** (`bed/bedpfh.h`, BedPfh 0x101750..): magic "RTPK", 0x20-byte header (total size +4,
+  flags +0xa, file count +0xe), then per-file tables by flag: sizes (1), offsets from the header (2),
+  16-bit attributes (0x10, 0x20 ...), NUL-separated names (0x8000). Loaders read the first 2048
+  bytes, assert `getFileOffset(0) == 2048`, then read single files.
+- **The file reader** (unassigned@001bde58, 0x1be2cc..): `FileReader` {request, own fd} runs a
+  `FileReadReq` (0x24: fd, step, name, seek offset / whence, buffer / size, close flag) as an
+  open / seek / read / close state machine over rxSysStreamOpen / rxFileSeek / rxFileRead /
+  rxFileClose; while it waits it draws the now-loading screen (0x2051cc) when one is up, else
+  rxThSync + SndMan::update. `fileGetSize` 0x1be768, `fileExists` 0x1be84c.
 - 0x7b40c0: a movie-player object (`RxMpeg`, ctor 0x1810f4; class name unverified); its first word
   set = a movie is playing.
 

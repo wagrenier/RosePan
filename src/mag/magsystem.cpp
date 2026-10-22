@@ -771,9 +771,9 @@ void MagSystem::drawView(int no, int a, int b, const void *p, int c)
 // The scene's load on this system's i3d context.
 // ROR 0x001189e4
 
-int MagSystem::loadScene(int a, int b, int c)
+int MagSystem::loadScene(int id, void *data, int copy)
 {
-    return m_scene.load(&m_i3d, a, b, c);
+    return m_scene.load(&m_i3d, id, data, copy);
 }
 
 // ──────────────────────────────────────────────────────────────────────

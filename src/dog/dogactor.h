@@ -25,6 +25,19 @@
  * comments. */
 struct DogActor : DogModel
 {
+    /* Releases the model (the master's reference when shared) with the
+     * scene's textures. */
+    void releaseModel(DogTexInfo *tex);                                  // ROR 0x00109ed0
+    /* Stores the value at +0x1d8 (MagScene::loadActor sets 5); role unverified. */
+    void setParam1d8(int v);                                             // ROR 0x0010bf00
+    /* Loads motions from a pack. */
+    u_int loadMotion(const BedPfh &pfh, int arg);                        // ROR 0x0010c568
+    /* Loads the model from a pack with the scene's textures; 0 on success. */
+    int  load(const BedPfh &pfh, DogTexInfo *tex, int mode, int light);  // ROR 0x0010cd5c
+    /* EE slot 21 (+0xa8): uses src's master model (reference counted); 0 on success. */
+    int  shareModel(DogActor *src);                                      // ROR 0x0010cffc
+    /* True when the actor's model is named theName. */
+    int  checkName(const char *theName);                                 // ROR 0x0010f2dc
     int  getMotionMove(float t0, float t1, float *move, float *rot, float *pos); // ROR 0x00109348
     void releaseMotion(int theId);                                       // ROR 0x00109b88
     /* Loads a motion pack (asserts theFileName, m_pack_motion[theLevel] == NULL);
@@ -50,10 +63,21 @@ struct DogActor : DogModel
         m_base_rotate[1] = y;
         m_base_rotate[2] = z;
     }
+    void setId(int id) { m_id = id; }                                    // ROR 0x00280fd4
+    int  getId() const { return m_id; }                                  // ROR 0x00280fdc
+    int  getMode() const { return m_mode; }                              // ROR 0x00280fe4
+    // ROR 0x00280fec
+    void ready()
+    {
+        m_f4 = -1;
+        m_mode = 0;
+    }
     void clearRotYAAR() { m_rot_y_aar = 0.0f; }                          // ROR 0x0028128c
     void clearRotOfsY() { m_rot_ofs_y = 0.0f; }                          // ROR 0x00281294
 
-    u_char        _148[0x3c0 - 0x148];
+    u_char        _148[0x1a0 - 0x148];
+    int           m_id;                 // ROR 0x1a0: setId / getId (the character id it was loaded as)
+    u_char        _1a4[0x3c0 - 0x1a4];
     sceVu0FVECTOR m_base_rotate;        // ROR 0x3c0: getBaseRotateY reads y
     float         m_rot_y_aar;          // ROR 0x3d0: clearRotYAAR; addTrans's second float
     int           m_control_node;       // ROR 0x3d4: getControlNode
@@ -63,6 +87,7 @@ struct DogActor : DogModel
     float         m_rot_ofs_y;          // ROR 0x424: clearRotOfsY / getRotOfsYSave
     u_char        _428[0x4d0 - 0x428];
 };
+static_assert(offsetof(DogActor, m_id) >= 0x1a0, "m_id");
 static_assert(offsetof(DogActor, m_base_rotate) >= 0x3c0, "m_base_rotate");
 static_assert(offsetof(DogActor, m_rot_y_aar) >= 0x3d0, "m_rot_y_aar");
 static_assert(offsetof(DogActor, m_rot_ofs_y) >= 0x424, "m_rot_ofs_y");

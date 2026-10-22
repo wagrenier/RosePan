@@ -92,7 +92,7 @@ struct MagSystem
     int  getCameraMode(int *out);                                        // ROR 0x00118960
     void setViewParam(int no, int a, int b, int c, int d, int e);        // ROR 0x00118980
     void drawView(int no, int a, int b, const void *p, int c);           // ROR 0x001189bc
-    int  loadScene(int a, int b, int c);                                 // ROR 0x001189e4
+    int  loadScene(int id, void *data, int copy);                         // ROR 0x001189e4
     void setActorParent(int theNo, int parentNo, int node);              // ROR 0x00118a18
     void getActorNodeMatrix(int no, I3dMatrixF4x4 *out, int n);          // ROR 0x00118adc
     void getActorNodeMatrix(int no, sceVu0FMATRIX out, int n);           // ROR 0x00118c14

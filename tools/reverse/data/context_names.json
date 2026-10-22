@@ -107,6 +107,30 @@
   "was": "FUN_001015fc",
   "why": "walks the blocks (asserts p != p->m_next), returns the largest free chunk, the free total and m_size in a 3-int record; called from mag/magsystem.cpp and others"
  },
+ "00101738": {
+  "name": "BedPfh::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_00101738",
+  "why": "zeroes the five words of a BedPfh (m_top and the four tables); the constructor 0x101750 calls it first"
+ },
+ "00101750": {
+  "name": "BedPfh::BedPfh",
+  "tag": "ror-inferred",
+  "was": "FUN_00101750",
+  "why": "bed/bedpfh.cpp: asserts p and checkID() (magic RTPK), points the size / offset / attribute / name tables after the 0x20-byte header by its flags (1, 2, 0x10.., 0x8000); the assert expressions name m_top"
+ },
+ "00101928": {
+  "name": "BedPfh::getFileName",
+  "tag": "ror-inferred",
+  "was": "FUN_00101928",
+  "why": "asserts theN >= 0 && theN <= getNumFile(); walks the name table (+0x10) to the theN-th string"
+ },
+ "001019f0": {
+  "name": "BedPfh::getFileIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_001019f0",
+  "why": "index of the file whose name equals the string (exact compare over the name table), -1 when none or no names"
+ },
  "00101aec": {
   "name": "BedPad::~BedPad",
   "tag": "ror-inferred",
@@ -305,6 +329,18 @@
   "was": "FUN_00105e2c",
   "why": "BedMemory::check(heap 0x6e9800, 0); no callers"
  },
+ "00105e50": {
+  "name": "utlStrCopy",
+  "tag": "ror-inferred",
+  "was": "FUN_00105e50",
+  "why": "utl/utlfile.cpp asserts theDest and 2 <= theSize && theSize <= 1024; copies the source (NULL = nothing) up to theSize - 1 chars and terminates"
+ },
+ "00105f0c": {
+  "name": "utlStrCopy2",
+  "tag": "ror-inferred",
+  "was": "FUN_00105f0c",
+  "why": "utl/utlfile.cpp, same asserts: copies a then b (either NULL = nothing) up to theSize - 1 chars in all; MagScene::load builds <name>_c.bin etc. with it"
+ },
  "0010620c": {
   "name": "utlFindClear",
   "tag": "ror-inferred",
@@ -323,11 +359,23 @@
   "was": "FUN_00109b88",
   "why": "dog/dogactor.cpp asserts theId >= 0 && theId < (4) and pm->m_i3m_root; frees / clears the motion entries whose id is theId"
  },
+ "00109ed0": {
+  "name": "DogActor::releaseModel",
+  "tag": "ror-inferred",
+  "was": "FUN_00109ed0",
+  "why": "releases the actor's model (master / ref count at +0x118 / +0x104) with the scene DogTexInfo; MagScene::releaseActor calls it"
+ },
  "0010a038": {
   "name": "DogActor::addTrans",
   "tag": "ror-inferred",
   "was": "FUN_0010a038",
   "why": "+0x40..+0x48 += a1[0..2], w = 1; f12 into +0x74 (the TransOfsY saveTransOfsY reads), f13 into +0x3d0 (clearRotYAAR's field), dirty"
+ },
+ "0010bf00": {
+  "name": "DogActor::setParam1d8",
+  "tag": "ror-inferred",
+  "was": "FUN_0010bf00",
+  "why": "stores its argument at +0x1d8; MagScene::loadActor sets 5 after a load; role unverified"
  },
  "0010c17c": {
   "name": "DogActor::loadPackMotion",
@@ -335,11 +383,35 @@
   "was": "FUN_0010c17c",
   "why": "dog/dogactor.cpp asserts theFileName, m_pack_motion[theLevel] == __null; loads a motion pack (MagScene::setActorAnim passes data/ch/pc/pc/MOTIONPK.RPK)"
  },
+ "0010c568": {
+  "name": "DogActor::loadMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0010c568",
+  "why": "loads motions from a BedPfh pack; MagScene::loadActorAnim passes the pack it read and its argument"
+ },
+ "0010cd5c": {
+  "name": "DogActor::load",
+  "tag": "ror-inferred",
+  "was": "FUN_0010cd5c",
+  "why": "loads the actor's model from a BedPfh with the scene DogTexInfo, a mode (1 or 2) and the scene's m_22cc; 0 on success (MagScene::loadActor)"
+ },
+ "0010cffc": {
+  "name": "DogActor::shareModel",
+  "tag": "ror-inferred",
+  "was": "FUN_0010cffc",
+  "why": "DogActor vtable slot 21: takes the source actor's master model (+0x118) and i3r root, copies its motion table, increments the master's ref count (+0x104); returns 0"
+ },
  "0010eab8": {
   "name": "DogActor::getNodeWorldMatrix",
   "tag": "ror-inferred",
   "was": "FUN_0010eab8",
   "why": "vtable slot 17 (first DogActor-only slot); dog/dogactor.cpp asserts the model matrices +0x130; out = 0x2377d0(this's matrix at +0x0, node matrix n)"
+ },
+ "0010f2dc": {
+  "name": "DogActor::checkName",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f2dc",
+  "why": "dog/dogactor.cpp asserts theName; true when the actor's model name matches (MagScene::findActorByName)"
  },
  "0010fc7c": {
   "name": "DogEntity::setRotate",
@@ -359,6 +431,24 @@
   "was": "FUN_001102b4",
   "why": "dog/dogentity.cpp line 302 assert p != m_parent while walking the parent chain at +0xe0 (DogEntityEx::getParent's field); resets +0x70 to (0,0,0,1), dirty"
  },
+ "0011550c": {
+  "name": "DogModel::setupNodeFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_0011550c",
+  "why": "for each node of the i3r model whose name starts b_a / b_y sets that node's flag to 1 / 2 (asserts m_node_flag); MagScene::load calls it after loading the sky model"
+ },
+ "00115790": {
+  "name": "DogModel::loadData",
+  "tag": "ror-inferred",
+  "was": "FUN_00115790",
+  "why": "DogModel vtable slot 15: loads an i3r model (and a second file) with the scene DogTexInfo; MagScene::load uses it for the sky's second and collision models"
+ },
+ "001158ec": {
+  "name": "DogModel::loadPack",
+  "tag": "ror-inferred",
+  "was": "FUN_001158ec",
+  "why": "DogModel vtable slot 14: asserts m_pack_file == __null; loads the model from a BedPfh with the scene textures and a light id"
+ },
  "00115cec": {
   "name": "DogModel::release",
   "tag": "ror-inferred",
@@ -371,11 +461,41 @@
   "was": "FUN_001162ac",
   "why": "dog/dogtexinfo.cpp asserts theMax > 0, m_tex_info, m_tex_data: allocates theMax names (16 bytes) and theMax 0x198-byte texture records"
  },
+ "001163dc": {
+  "name": "DogTexInfo::find",
+  "tag": "ror-inferred",
+  "was": "FUN_001163dc",
+  "why": "index of the texture record whose name equals the string; loadSystemData asserts the result >= 0 for r_shadow, noise, bit8a.."
+ },
  "00116b5c": {
   "name": "DogTexInfo::add",
   "tag": "ror-inferred",
   "was": "FUN_00116b5c",
   "why": "dog/dogtexinfo.cpp asserts m_num_tex <= m_max_tex, result == I3D_OK: finds the texture by name (strcmp) or a free record and builds it from the image (0x2197c8); MagScene::init adds shadow01"
+ },
+ "00116d14": {
+  "name": "DogTexInfo::addData",
+  "tag": "ror-inferred",
+  "was": "FUN_00116d14",
+  "why": "adds a texture from a loaded image under a name (MagScene::loadTexture passes the name, the buffer, 1, -1); returns its index"
+ },
+ "001170b8": {
+  "name": "DogTexInfo::addPfh",
+  "tag": "ror-inferred",
+  "was": "FUN_001170b8",
+  "why": "adds every texture of a BedPfh pack (loadSystemData passes PREMIERE.RPK's first file)"
+ },
+ "001174c4": {
+  "name": "DogTexInfo::setTexFlag",
+  "tag": "ror-inferred",
+  "was": "FUN_001174c4",
+  "why": "asserts theNo >= 0 && theNo < m_max_tex and m_tex_info[theNo].pPicture; passes the picture and the flag to 0x219d80"
+ },
+ "0011756c": {
+  "name": "DogTexInfo::setTexTable",
+  "tag": "ror-inferred",
+  "was": "FUN_0011756c",
+  "why": "asserts p and m_tex_info; trims m_num_tex past the last used record and hands the table to i3dCtxSetTexTable(p, m_tex_info)"
  },
  "00117654": {
   "name": "MagSystem::vSyncCallback",
@@ -761,6 +881,12 @@
   "was": "FUN_001259e8",
   "why": "MagLifeBwn vtable slot 15 (MagLifeControlChara::renderPostProcess in the base): updateMotionSeq when m_actor is set and +0xce4 is 0"
  },
+ "00131618": {
+  "name": "MagScene::setViewFar",
+  "tag": "ror-inferred",
+  "was": "FUN_00131618",
+  "why": "stores its float in view 0's far (+0x2aa14) and view 1's far (+0x2aa4c) and copies view 0's near to view 1; MagScene::load passes mapparam.bbb's first word"
+ },
  "001316b8": {
   "name": "MagScene::setPC",
   "tag": "ror-inferred",
@@ -809,6 +935,12 @@
   "was": "FUN_00135234",
   "why": "(no <= 3, ...): draws through the view object +0x2734[no]"
  },
+ "00135fa4": {
+  "name": "MagScene::resetEntities",
+  "tag": "ror-inferred",
+  "was": "FUN_00135fa4",
+  "why": "clears two words of 256 0x20-byte records at scene +0x4, runs 0x10f298 on each of the 128 actors and resets the PC, Brown and Brown's controller; the last call of MagScene::load"
+ },
  "0013604c": {
   "name": "MagScene::clearPC",
   "tag": "ror-inferred",
@@ -827,11 +959,41 @@
   "was": "FUN_00136d14",
   "why": "MagSystem's dtor calls it with flags 2; re-installs the MagSceneIF vptrs"
  },
+ "00137300": {
+  "name": "MagScene::initCharaLoader",
+  "tag": "ror-inferred",
+  "was": "FUN_00137300",
+  "why": "calls 0x1425dc (MagCharaLoader::init, data/ch/CHARA.RPK) on the scene's +0x215c; only MagScene::loadSystemData calls it"
+ },
+ "00137318": {
+  "name": "MagScene::initMapLoader",
+  "tag": "ror-inferred",
+  "was": "FUN_00137318",
+  "why": "calls 0x142ed8 (MagMapLoader::init, data/bg/mapunit.bin) on the scene's +0x224c; only MagScene::loadSystemData calls it"
+ },
+ "00137330": {
+  "name": "MagScene::loadSystemData",
+  "tag": "ror-inferred",
+  "was": "FUN_00137330",
+  "why": "MagScene::start's first call: parses data/options.txt when it exists, loads the font file and file 0 of data/PREMIERE.RPK (m_font_data, asserts m_common_tex_no[i] / m_font_tex_no[i]) into the scene DogTexInfo, inits the two loaders"
+ },
  "001377f0": {
   "name": "MagScene::load",
   "tag": "ror-inferred",
   "was": "FUN_001377f0",
   "why": "MagSystem::loadScene passes the i3d context and three args"
+ },
+ "0013836c": {
+  "name": "MagScene::loadMapUnit",
+  "tag": "ror-inferred",
+  "was": "FUN_0013836c",
+  "why": "reads file theNo of data/bg/mapunit.bin (asserts theNo >= 0, theNo < pfh1.getNumFile()) into the game heap and passes it to MagScene::load; no callers found"
+ },
+ "00138610": {
+  "name": "MagScene::loadMapByName",
+  "tag": "ror-inferred",
+  "was": "FUN_00138610",
+  "why": "asserts theName; MagMapLoader::loadByName (scene +0x224c) then MagScene::load with id 9999 and keeps the buffer in the sky slot (+0x29540 + n*0x520)"
  },
  "001386d4": {
   "name": "MagScene::releaseTenkyu",
@@ -845,17 +1007,53 @@
   "was": "FUN_00138804",
   "why": "calls MagScene::releaseTenkyu for slots 0..3; called by ~MagScene"
  },
+ "0013884c": {
+  "name": "MagScene::findFreeActor",
+  "tag": "ror-inferred",
+  "was": "FUN_0013884c",
+  "why": "first of the 128 actors whose DogModel::isAlive is false (m_i3r_root at actor +0x11c), -1 when none"
+ },
+ "001388e8": {
+  "name": "MagScene::findActorById",
+  "tag": "ror-inferred",
+  "was": "FUN_001388e8",
+  "why": "asserts theID >= 0; first alive actor whose DogActor id (+0x1a0, setId) equals theID, -1 when none"
+ },
+ "001389c4": {
+  "name": "MagScene::findActorByName",
+  "tag": "ror-inferred",
+  "was": "FUN_001389c4",
+  "why": "asserts theName; first alive actor for which DogActor::checkName(theName) is true, -1 when none"
+ },
+ "00138ac8": {
+  "name": "MagScene::shareActor",
+  "tag": "ror-inferred",
+  "was": "FUN_00138ac8",
+  "why": "asserts theActorNo >= 0 && theActorNo < 128; takes a free actor, resets it (slot 1), clears its two flag words and shares actor theActorNo's model through DogActor slot 21; returns the new actor, -100 / -200 / -300 on failure"
+ },
  "00138bc4": {
   "name": "MagScene::loadModelByName",
   "tag": "ror-inferred",
   "was": "FUN_00138bc4",
   "why": "(i3d context, name != 0, ..., rpk name)"
  },
+ "00138ce8": {
+  "name": "MagScene::loadActor",
+  "tag": "ror-inferred",
+  "was": "FUN_00138ce8",
+  "why": "asserts thePtr; takes a free actor, shares an actor already holding theID or loads the pack thePtr into it (DogActor::load with the scene textures and m_22cc), sets its id and 5 at +0x1d8, uploads the texture table when a context is given"
+ },
  "00138ed0": {
   "name": "MagScene::loadModel",
   "tag": "ror-inferred",
   "was": "FUN_00138ed0",
   "why": "(i3d context, id >= 0, rpk name): returns the actor number"
+ },
+ "00139010": {
+  "name": "MagScene::releaseActor",
+  "tag": "ror-inferred",
+  "was": "FUN_00139010",
+  "why": "asserts theN >= 0 && theN < 128; waits for the GS path, releases actor theN's model (0x109ed0 with the scene textures), clears its flag words and unbinds the PC when it was the PC's actor"
  },
  "001390d4": {
   "name": "MagScene::setActorAnim",
@@ -868,6 +1066,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0013910c",
   "why": "(no, a, name): loads through 0x1be768"
+ },
+ "00139308": {
+  "name": "MagScene::loadTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_00139308",
+  "why": "reads entry theName of pack file theFile (asserts pfh_head.getFileOffset(0) == 2048, n >= 0, filelen > 0) into a temporary buffer and adds it to the scene DogTexInfo (0x116d14); returns the texture index"
  },
  "0013bcc0": {
   "name": "MagScene::draw",
@@ -886,6 +1090,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0013c2ec",
   "why": "stores two 4-float vectors at +0x2ada0 / +0x2adb0 and sets +0x2ad9c"
+ },
+ "0013c328": {
+  "name": "MagScene::parseOption",
+  "tag": "ror-inferred",
+  "was": "FUN_0013c328",
+  "why": "mag/magsceneoption.cpp: utlParseParam over the text into 16 buckets at scene +0x4371c (asserts m_option_bucket[i].m_type); loadSystemData passes data/options.txt"
  },
  "0013c928": {
   "name": "MagScene::initCamera",
@@ -917,6 +1127,18 @@
   "was": "FUN_0013f528",
   "why": "MagSystem::setSceneFlags passes a 6-int array and a number <= 7 (asserts); stores them into the light set +0x2050"
  },
+ "0013f658": {
+  "name": "MagScene::loadLight",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f658",
+  "why": "mag/magscenelight.cpp asserts theData; MagScene::load passes the sky slot's _l.bin file and sets the light pool from it"
+ },
+ "0013f8e4": {
+  "name": "MagScene::setDefaultLight",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f8e4",
+  "why": "takes a light from the pool at +0x2050 (0x111120), sets type 6 and colour (0.75, 0.75, 0.75, 1) through setLightParam; called at the end of every MagScene::load"
+ },
  "0013f980": {
   "name": "MagScene::setLightParam",
   "tag": "ror-inferred",
@@ -940,6 +1162,60 @@
   "tag": "ror-inferred",
   "was": "FUN_0013ff00",
   "why": "mag/magscenetenkyu.cpp: for sky slot n removes each texture of its i3r texture list (+0x504) from the scene DogTexInfo, frees the list and the buffer at +0x508"
+ },
+ "00140030": {
+  "name": "MagScene::loadTenkyuTex",
+  "tag": "ror-inferred",
+  "was": "FUN_00140030",
+  "why": "after releaseTenkyuTex (0x13ff00): MagScene::load passes the sky slot number, the pack and the i3d context when a context is given"
+ },
+ "00142500": {
+  "name": "MagLoaderIndex::find",
+  "tag": "ror-inferred",
+  "was": "FUN_00142500",
+  "why": "index of the name in the table (+0x14) of m_num entries (case-insensitive compare 0x106010), -1 when none"
+ },
+ "001425dc": {
+  "name": "MagCharaLoader::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001425dc",
+  "why": "mag/magloader.cpp: reads the header of data/ch/CHARA.RPK and fills the per-category character counts and the name index (+0xcc)"
+ },
+ "00142b18": {
+  "name": "MagCharaLoader::load",
+  "tag": "ror-inferred",
+  "was": "FUN_00142b18",
+  "why": "mag/magloader.cpp asserts theIndex >= 0, size > 0, offset > 0, pbuf: allocates the entry and reads it from CHARA.RPK"
+ },
+ "00142c88": {
+  "name": "MagCharaLoader::getIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_00142c88",
+  "why": "asserts theID >= 0 && theID < (0x5800), cat >= 0, no < m_num_chara[cat]: maps a character id (category = id >> 10) to its pack index"
+ },
+ "00142dac": {
+  "name": "MagCharaLoader::getId",
+  "tag": "ror-inferred",
+  "was": "FUN_00142dac",
+  "why": "the inverse of getIndex: the category holding the pack index, its id base (0x2000, 0x2400, 0, ...) plus the offset"
+ },
+ "00142ed8": {
+  "name": "MagMapLoader::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00142ed8",
+  "why": "reads the header of data/bg/mapunit.bin and fills the name index (+0x2c)"
+ },
+ "00142fd0": {
+  "name": "MagMapLoader::loadByName",
+  "tag": "ror-inferred",
+  "was": "FUN_00142fd0",
+  "why": "mag/magloader.cpp asserts theName, idx >= 0, size > 0, offset > 0, pbuf: allocates and reads the named map unit"
+ },
+ "00143d7c": {
+  "name": "MagScene::setFog",
+  "tag": "ror-inferred",
+  "was": "FUN_00143d7c",
+  "why": "copies the current fog record (+0x2aae0) and the new one into a fade at +0x2ab20 / +0x2ab40 with a frame count (+0x2ab64) when frames > 0; MagScene::load passes m_fog[1] and 0"
  },
  "0017f164": {
   "name": "SndMan::init",
@@ -982,6 +1258,48 @@
   "tag": "ror-inferred",
   "was": "FUN_00191588",
   "why": "the scene's S2dMes at +0x42bb0 (constructor 0x191494): stores the DogTexInfo at +0x464, 0x18bcc0(+0x48, 0x10), sets +0x34 = 1, returns 1; MagScene::initRender"
+ },
+ "001be2cc": {
+  "name": "FileReader::FileReader",
+  "tag": "ror-inferred",
+  "was": "FUN_001be2cc",
+  "why": "8-byte reader: request NULL, fd -1; every pack loader builds one on the stack and destroys it with 0x1be2dc(this, 2)"
+ },
+ "001be2dc": {
+  "name": "FileReader::~FileReader",
+  "tag": "ror-inferred",
+  "was": "FUN_001be2dc",
+  "why": "GCC 2 destructor (flags & 1 deletes): closes the reader's fd when it is >= 0 (0x1be414)"
+ },
+ "001be414": {
+  "name": "FileReader::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001be414",
+  "why": "closes the reader's own fd (+4) through 0x1be3c4 when it is >= 0, else returns -1; the destructor calls it"
+ },
+ "001be524": {
+  "name": "FileReader::read",
+  "tag": "ror-inferred",
+  "was": "FUN_001be524",
+  "why": "takes a FileReadReq, resets its step and runs the open / seek / read / close state machine 0x1be564 (rxSysStreamOpen, rxFileSeek, rxFileRead, rxFileClose), waiting with the now-loading draw unless async"
+ },
+ "001be734": {
+  "name": "FileReadReq::FileReadReq",
+  "tag": "ror-inferred",
+  "was": "FUN_001be734",
+  "why": "memset 0x24 bytes and fd -1: the request FileReader::read takes (name +0xc, offset / whence +0x10 / +0x14, buffer / size +0x18 / +0x1c, close +0x20)"
+ },
+ "001be768": {
+  "name": "fileGetSize",
+  "tag": "ror-inferred",
+  "was": "FUN_001be768",
+  "why": "rxSysStreamOpen, seek to the end, close: returns the file size (negative when it does not open)"
+ },
+ "001be84c": {
+  "name": "fileExists",
+  "tag": "ror-inferred",
+  "was": "FUN_001be84c",
+  "why": "rxSysStreamOpen then rxFileClose; true when the open succeeded"
  },
  "001c0d70": {
   "name": "GamMan::init",
@@ -1163,6 +1481,12 @@
   "was": "FUN_00215b5c",
   "why": "formats f12, f13, f14 with 0x215e1c (3 digits) into three stack buffers and returns: a trace print compiled out; next to the assert handler 0x215a30"
  },
+ "00215bb4": {
+  "name": "dbgTraceVector4",
+  "tag": "ror-inferred",
+  "was": "FUN_00215bb4",
+  "why": "formats four floats (3 digits) into stack buffers and prints nothing, the four-float twin of dbgTraceVector3 0x215b5c"
+ },
  "00219c88": {
   "name": "i3dTexMakeUpload",
   "tag": "ror-inferred",
@@ -1198,6 +1522,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0021a158",
   "why": "allocates two qwords from the context tail, clamps the colour vector to 0..1 and packs it *255 (FOGCOL), derives the fog ramp from the four floats, links the packet at the context head"
+ },
+ "0021a828": {
+  "name": "i3rCopyClipSphere",
+  "tag": "lib-context",
+  "was": "FUN_0021a828",
+  "why": "i3d: copies the root's clip sphere centre (w 1) and radius out; the body of the inline DogModel::copyClipSphere(float*, float*)"
+ },
+ "0021a938": {
+  "name": "i3rReplaceStqMapEntity",
+  "tag": "lib-context",
+  "was": "FUN_0021a938",
+  "why": "i3d: the body of the inline DogModel::replaceStqMapEntity (dogmodel.h line 313); returns I3D_OK (0) on success"
  },
  "0021b288": {
   "name": "i3dBatchClearTextures",
@@ -1672,6 +2008,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00228b50",
   "why": "absorbs free address-order neighbours on both sides into a block"
+ },
+ "0022b228": {
+  "name": "I3rRoot__CheckIdString",
+  "tag": "lib-context",
+  "was": "FUN_0022b228",
+  "why": "the name in the dogmodel.h assert I3D_OK == I3rRoot__CheckIdString( m_i3r_root ): compares the root's 8-byte id and the version byte 0x52, 0 = I3D_OK, 3 otherwise"
  },
  "0022b3d8": {
   "name": "i3rGetNodeIndexByName",
