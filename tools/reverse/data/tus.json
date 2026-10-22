@@ -58,7 +58,7 @@
     {
      "date": "2026-10-22 11:31",
      "status": "verify",
-     "summary": "rx thread layer complete: 61 functions (11 hidden ones created in Ghidra) -- scheduler with dispatch alarm, rxThYield / rxThRequest handshake, rx thread slots, worker call queue, yield callbacks, vblank and HSYNC counters (rxThSync). Platform: SetAlarm / iSetAlarm / ReleaseAlarm on a host timer thread, ReferSemaStatus with count and waiters, iPollSema, iChangeThreadPriority, ExitDeleteThread (parks), VSync, sceGsGetGParam, libgraph vblank thread raises INTC cause 2. rxSysPrintWait and rxSysThreadCallback take their real arguments."
+     "summary": "rx thread layer complete: 53 functions (11 hidden ones created in Ghidra) -- scheduler with dispatch alarm, rxThYield / rxThRequest handshake, rx thread slots, worker call queue, yield callbacks, vblank and HSYNC counters (rxThSync). Platform: SetAlarm / iSetAlarm / ReleaseAlarm on a host timer thread, ReferSemaStatus with count and waiters, iPollSema, iChangeThreadPriority, ExitDeleteThread (parks), VSync, sceGsGetGParam, libgraph vblank thread raises INTC cause 2. rxSysPrintWait and rxSysThreadCallback take their real arguments."
     }
    ],
    "status": "verify",

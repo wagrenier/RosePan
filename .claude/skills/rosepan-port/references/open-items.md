@@ -104,7 +104,7 @@ to adapt when a TU reaches them:
 
 ## Done
 
-- 2026-10-22: `rx/rxthread.cpp` (0x249b88..0x24b490): all 61 functions written (`verify`; 11 were
+- 2026-10-22: `rx/rxthread.cpp` (0x249b88..0x24b490): all 53 functions written (`verify`; 11 were
   folded into neighbours and created in Ghidra): scheduler, dispatch alarm, slots, call queue, yield
   callbacks, vblank / HSYNC counters. Platform: SetAlarm / iSetAlarm / ReleaseAlarm (a host timer
   thread), ReferSemaStatus / iReferSemaStatus (count + waiters), iPollSema, iChangeThreadPriority,
