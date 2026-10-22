@@ -6,6 +6,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**TOP PRIORITY (the user, 2026-10-22, live during the rx sound run): get something to render first.**
+Queued at the top of tus.json in this order: (1) `unassigned@0011262c` -- DogLightPool::createLight
+0x11262c (dog/doglightpool.cpp; the `lightstatus[i] != NULL` asserts each frame), (2)
+`mag/magscene.cpp` -- MagScene::update 0x1327dc (starts S2dMovie / S2dMes / S2dBg), (3)
+`game/gamfile.cpp` -- fileGetSize 0x1be768 (the .rpk reads 0 bytes, so every SprTexture list
+ends in error). The rx sound library (unassigned@00237ce8) is parked `partial` with names only
+until these are done.
+
 **Done 2026-10-22 (`verify`): the native i3d draw module** (`setup/i3d_draw_module.cpp`,
 `src/rosepan/rendering/rosepan_i3d.*`; hook under Decisions). `ROSEPAN_I3D_TEST=1` draws two S2DMAN.RPK
 pictures through the whole i3d path and matches work/ref/S2DMAN; the plain boot is still black because
