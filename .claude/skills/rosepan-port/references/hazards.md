@@ -156,6 +156,11 @@ entries are marked **RoR** with the date.
 - **`long` is 32-bit on both Windows compilers**; the EE's is 64-bit.
 - **A plain `float[4]` is not a VU0 vector** (4- vs 16-aligned); offset asserts catch it.
 - **Tail padding differs between the host compilers**: assert `>=` on derived host-layout classes.
+- **Giving a POD base a constructor moves its derived classes' fields (MinGW)** (2026-10-22, the
+  magscene session): DogEntity (0x98 bytes of data, 16-aligned to 0xa0) got an inline constructor;
+  being non-POD, MinGW (Itanium ABI) then placed DogEntityEx's first field in its tail padding, at
+  0x98, and every `offsetof(DogEntityEx / DogModel, ...)` assert failed. Fix: spell the tail padding
+  as a field (`u_int _98[2]`) before adding a constructor to a padded base.
 - **A mid-struct pointer moves every later host offset**: asserts after it become `>=` bounds and the
   layout note says where host and EE part.
 - **Allocations sized from the EE under-allocate host objects**: `new (operator_new(0x28)) T` copies

@@ -29,6 +29,8 @@ struct MagLifeBwnCtrl : MagLife
     void live() override;                                                // ROR 0x0012a61c
     /* EE slot 9 (+0x48): empty. */
     void processPad(BedPad *pad) {}                                      // ROR 0x0012a6a0
+    /* Empty (MagScene::resetEntities). */
+    void reset() {}                                                      // ROR 0x0012ab18
 
     u_char      _28[0x48 - 0x28];
     UtlFind     m_find;         // ROR 0x48: cleared by MagScene::clearPC and termWorld

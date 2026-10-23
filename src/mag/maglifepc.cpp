@@ -49,3 +49,9 @@ void MagLifePC::processPad(BedPad *pad)
 {
     ROSEPAN_STUB("MagLifePC::processPad", 0x0011b30c);
 }
+
+// stub of ROR 0x0011be60
+void MagLifePC::reset()
+{
+    ROSEPAN_STUB("MagLifePC::reset", 0x0011be60);
+}

@@ -179,12 +179,6 @@ void MagScene::loadTenkyuTex(int no, const BedPfh *pfh, i3dContext *ctx)
     ROSEPAN_STUB("MagScene::loadTenkyuTex", 0x00140030);
 }
 
-// stub of ROR 0x00135fa4
-void MagScene::resetEntities()
-{
-    ROSEPAN_STUB("MagScene::resetEntities", 0x00135fa4);
-}
-
 // stub of ROR 0x0013f8e4
 void MagScene::setDefaultLight()
 {
@@ -224,13 +218,6 @@ sceVu0FVECTOR * DogEntity::getMatrix()
     // PC: the unit matrix until the camera class that holds the +0xf0
     // matrix is written; i3dCtxCreateView copies what this returns.
     return i3dMatGetUnit();
-}
-
-// stub of ROR 0x0013555c
-int MagScene::getWindowTextWidth(int no, const char *text)
-{
-    ROSEPAN_STUB("MagScene::getWindowTextWidth", 0x0013555c);
-    return {};
 }
 
 // stub of ROR 0x001816b0
@@ -304,12 +291,6 @@ float MagScene::castRay(MagSceneRayHit *hit, const float *pos, const float *dir,
 {
     ROSEPAN_STUB("MagScene::castRay", 0x00133454);
     return {};
-}
-
-// stub of ROR 0x00134698
-void MagScene::clearStrip(int no)
-{
-    ROSEPAN_STUB("MagScene::clearStrip", 0x00134698);
 }
 
 // stub of ROR 0x00140e88
@@ -794,4 +775,24 @@ int i3rGetNumNode(const I3rRoot *root)
 void utlVecToRot(const float *dir, float *rot)
 {
     ROSEPAN_STUB("utlVecToRot", 0x00107248);
+}
+
+// stub of ROR 0x001beeb4
+int GamFont::clear()
+{
+    ROSEPAN_STUB("GamFont::clear", 0x001beeb4);
+    return {};
+}
+
+// stub of ROR 0x001c047c
+int GamFont::getTextWidth(const char *text)
+{
+    ROSEPAN_STUB("GamFont::getTextWidth", 0x001c047c);
+    return {};
+}
+
+// stub of ROR 0x00140a84
+void MagScene::initRecords853bc()
+{
+    ROSEPAN_STUB("MagScene::initRecords853bc", 0x00140a84);
 }

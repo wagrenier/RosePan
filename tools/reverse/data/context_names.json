@@ -509,6 +509,12 @@
   "was": "FUN_0010eb28",
   "why": "DogActor's slot 18: the translation row of m_matrix x the node's model matrix (asserts the model matrices)"
  },
+ "0010f298": {
+  "name": "DogActor::resetShadow",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f298",
+  "why": "moves m_shadow_light to m_shadow_light_prev, sets m_shadow_light / m_shadow_fade -1, sets flag 8 at +0xf0 and +0x1e8 = 1/60, clears +0x1e4 / +0x1ec; MagScene::resetEntities runs it on every actor"
+ },
  "0010f2dc": {
   "name": "DogActor::checkName",
   "tag": "ror-inferred",
@@ -1139,6 +1145,12 @@
   "was": "FUN_0011bd4c",
   "why": "MagLifePC vtable slot 10: stores the actor at +0x58 (m_actor in mag/maglife.cpp asserts), its number +0x50 and mode +0x54; MagScene::setPC calls it with the actor or NULL"
  },
+ "0011be60": {
+  "name": "MagLifePC::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_0011be60",
+  "why": "MagLifeControlChara slot 12 (rtti), MagLifePC's override; MagScene::resetEntities calls it after a map load ('wait2' motion)"
+ },
  "0011c418": {
   "name": "MagLifePC::termWorld",
   "tag": "ror-inferred",
@@ -1163,6 +1175,12 @@
   "was": "FUN_00124e40",
   "why": "MagLifeBwn vtable slot 2"
  },
+ "00124f38": {
+  "name": "MagLifeBwn::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_00124f38",
+  "why": "slot 12, MagLifeBwn's override; MagScene::resetEntities calls it after MagLifePC::reset"
+ },
  "001256d4": {
   "name": "MagLifeBwn::setActor",
   "tag": "ror-inferred",
@@ -1186,6 +1204,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0012a6a0",
   "why": "MagLifeBwnCtrl vtable slot 9, empty, called with the second pad"
+ },
+ "0012ab18": {
+  "name": "MagLifeBwnCtrl::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ab18",
+  "why": "an empty function (jr ra) MagScene::resetEntities calls on Brown's controller after the PC's and Brown's reset"
  },
  "0012f060": {
   "name": "MagLifeFader::start",
@@ -1216,6 +1240,42 @@
   "tag": "ror-inferred",
   "was": "FUN_0012f824",
   "why": "as MagLifeFader::start for the keyhole fade"
+ },
+ "0012fe30": {
+  "name": "MagLifeWindow::setup",
+  "tag": "ror-inferred",
+  "was": "FUN_0012fe30",
+  "why": "openWindow's first call on a new window with its w / h: stores them at +0x94 / +0x98 (setViewParam writes the same words), alpha 128 at +0xb4 / +0xbc, fade time -1, buffer 0x200 x 0x200 at +0xd0 / +0xd4"
+ },
+ "0012fe68": {
+  "name": "MagLifeWindow::fadeIn",
+  "tag": "ror-inferred",
+  "was": "FUN_0012fe68",
+  "why": "MagScene::fadeInWindow's body: clamps (time, from, to) to 1.., 0..0x7f, from+1..0x80 and sets an alpha ramp from -> to over time frames (+0xac..+0xbc)"
+ },
+ "0012fef8": {
+  "name": "MagLifeWindow::fadeOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0012fef8",
+  "why": "MagScene::fadeOutWindow's body: the same clamps, an alpha ramp from 'to' down to 'from' over time frames"
+ },
+ "00130258": {
+  "name": "MagLifeWindow::drawText",
+  "tag": "ror-inferred",
+  "was": "FUN_00130258",
+  "why": "MagScene::drawView's body: asserts m_fntman / m_ch_w / m_ch_h / m_buf_w / m_buf_h (mag/maglifewindow.cpp), then GamFont::setColor and drawChar over the string"
+ },
+ "00130778": {
+  "name": "MagLifeWindow::setFontManager",
+  "tag": "ror-inferred",
+  "was": "FUN_00130778",
+  "why": "asserts thefontManager (mag/maglifewindow.cpp:578), stores the GamFont at +0xc4 and copies its cell / buffer sizes (asserts m_ch_w, m_ch_h, m_buf_w, m_buf_h)"
+ },
+ "001308bc": {
+  "name": "MagLifeWindow::MagLifeWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_001308bc",
+  "why": "stores _vt$13MagLifeWindow (rtti: the class's only constructor); MagScene::openWindow runs it on operator_new(0xe0)"
  },
  "001311f4": {
   "name": "MagScene::setFade",
@@ -1264,6 +1324,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00131b90",
   "why": "MagSystem::start's last call with the i3d context; sets the render parameters and the sub-objects, returns 1"
+ },
+ "00131f74": {
+  "name": "MagScene::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00131f74",
+  "why": "frees the font data (+0x2908), releases every actor's model, the sky slots and the textures, removes the fader and deletes every life; ends with 0x194548"
  },
  "00132048": {
   "name": "MagScene::updateTenkyuBillboards",
@@ -1751,6 +1817,12 @@
   "was": "FUN_0013f458",
   "why": "gamLeaveMenu, closeWindow(m_sys_msg_window), BedSubMode::pop; sub mode 5 on pad bits 13 / 14"
  },
+ "0013f49c": {
+  "name": "MagScene::checkLightNo",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f49c",
+  "why": "only asserts theNo < (8) (mag/magscenelight.cpp:32); the destructor calls it with -1"
+ },
  "0013f4d0": {
   "name": "MagScene::setLightNo",
   "tag": "ror-inferred",
@@ -1822,6 +1894,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001406b8",
   "why": "when a sky slot has a texture list (+0x504): a layer at 490, white light, the camera view with far 100000, and each list drawn by 0x106760 at the camera's x/z"
+ },
+ "00140a84": {
+  "name": "MagScene::initRecords853bc",
+  "tag": "ror-inferred",
+  "was": "FUN_00140a84",
+  "why": "the constructor's last call: clears 0x70 bytes at +0x853bc and sets +0x853c0 -1, +0x853c8 1.0, +0x853cc 300, +0x853d0 600 (next to updateRecords853fc 0x140c68)"
  },
  "00140c68": {
   "name": "MagScene::updateRecords853fc",
@@ -3389,6 +3467,12 @@
   "was": "FUN_001bedc0",
   "why": "the pixel buffer, width (& 0xff80), height, bits 4 or 8 the glyphs are drawn into"
  },
+ "001beeb4": {
+  "name": "GamFont::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_001beeb4",
+  "why": "memsets the target buffer (+0x0c) with the fill byte (+0x64) over its size (+0x1c); 1 when there is a buffer"
+ },
  "001bef24": {
   "name": "GamFont::fillRect",
   "tag": "ror-inferred",
@@ -3424,6 +3508,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c0254",
   "why": "the glyph's width byte in proportional fonts, else the cell width +0x38"
+ },
+ "001c047c": {
+  "name": "GamFont::getTextWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_001c047c",
+  "why": "tail jump to 0x1c02f8, which sums the glyph widths of a Shift-JIS string; MagScene::getWindowTextWidth calls it on a window font"
  },
  "001c0d70": {
   "name": "GamMan::init",

@@ -17,3 +17,9 @@ void MagLifeBwn::live()
 {
     ROSEPAN_STUB("MagLifeBwn::live", 0x00124e40);
 }
+
+// stub of ROR 0x00124f38
+void MagLifeBwn::reset()
+{
+    ROSEPAN_STUB("MagLifeBwn::reset", 0x00124f38);
+}
