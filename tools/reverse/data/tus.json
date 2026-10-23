@@ -1,6 +1,5 @@
 {
  "queue": [
-  "mag/maglifeman.cpp",
   "mag/magscene.cpp",
   "game/gamfile.cpp"
  ],
@@ -268,6 +267,24 @@
    ],
    "status": "verify",
    "why": "i3d VRAM cache: a block heap of 0x44-byte nodes on six intrusive lists (address order, LRU, locked, evict, new, moved), embedded twice in i3dContext (+0x0 texture pages, +0x70 CLUT); 0x227a98 list unlink .. 0x228b50 coalesce, next function 0x228c08 calls the i3d system module 0x237180."
+  },
+  "mag/maglifeman.cpp": {
+   "notes": "Status verify: the S2d layers now run live and render every frame (one i3d primitive reaches rosepan_i3d without a texture object), but the screenshot stays black because their textures never load: game/gamfile.cpp fileGetSize 0x1be768 (queued next) makes the .rpk reads return 0 bytes. The first session whose screenshot shows an S2d layer marks this done. Decisions (open-items): MagLife has real virtuals for slots 1/2/6/7/8 only; slots 3-5 and 9+ remain plain members (getName is pure in MagLife0, so declaring it would make every life abstract). Lives not reconstructed yet (MagLifeFader slot 2/6 0x12f094/0x12f128, MagLife130da4, MagLifeWindow 0x12ff84/0x12ff9c, menus) run the base bodies. PC guards: update/draw skip a NULL life after the plife assert; add links the pod as head when the list was emptied (the ROM faults there). Open: deleteAll deletes every registered life; the scene's member lives must be removed before ~MagScene / 0x131f74 reach it.",
+   "ranges": [
+    [
+     "001194b4",
+     "00119b34"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-22 20:05",
+     "status": "verify",
+     "summary": "MagLifeMan complete: all 12 functions (pinned 0x1194b4..0x119b34: clearPod, unlink, insertBefore, insertAfter, init, deleteAll, add, remove, find, removeNo, update, draw); MagLife made polymorphic on the host (slots 1, 2, 6, 7, 8) so the scene's lives run live / render; S2d slot 2 renamed update -> live"
+    }
+   ],
+   "status": "verify",
+   "why": "the entry helpers 0x1194b4 / 0x1194c8 are called only from remove / removeNo; mag/maglifeman.cpp strings anchor 0x11950c..0x119a38; 0x119b34 starts another object (touches +0x60 / +0x70, no MagLifeMan callers)"
   },
   "mag/magscene.cpp": {
    "notes": "Screen still black: update runs every frame in sub mode 0 (the PC is never bound), but MagLifeMan add / update / draw are stubs, so the S2d layers and the fader never run; mag/maglifeman.cpp is queued first. Left in this TU: openMenu 0x13580c (needs the embedded menu objects +0x2be60..0x40780 as host members, from the constructor), the constructor 0x1360a0 / destructor 0x136d14, openWindow and the window setters 0x134730..0x135740, castRay and the collision helpers 0x133090..0x133f68, 0x131184 / 0x1311bc / 0x131608 / 0x13164c..0x131690, 0x131f74 (term), 0x135cac..0x135f44, resetEntities. Decisions: menus and windows are plain host structs whose slot calls go to the base (open-items Decisions); start skips a window font whose texture failed to load (PC guard; loadSystemData asserts first). Quirk kept from the ROM: in sub mode 7 closeMenu has already set m_menu_id -1, so the fade-in always starts and setGamWord54 never runs. Fade params m_0c / m_10 (and m_time of the stop / mode 1 fades) are unset in the ROM; written as 0. Pad words m_78 / m_7a / m_7c have unverified roles.",

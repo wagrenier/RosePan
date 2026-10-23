@@ -14,9 +14,8 @@
  *    layers.
  *  S2dCineSco / S2dBg / S2dMes are MagLife (vtables _vt$10S2dCineSco
  *  0x2e4550, _vt$5S2dBg 0x2e45a0, _vt$6S2dMes 0x2e45f0, vptr at +0x14):
- *  slot 1 the destructor, 2 update, 6 render(layer).
- *  PORT: not polymorphic on the host yet (as mag/maglife.h); the slots are
- *  plain members.
+ *  slot 1 the destructor, 2 live, 6 render(layer): they override MagLife's
+ *  virtuals (mag/maglife.h), MagLifeMan runs them.
  * ======================================================================== */
 #ifndef _SPR_S2D_H
 #define _SPR_S2D_H
@@ -45,9 +44,9 @@ struct S2dCineSco : MagLife
     int  clear();                                                        // ROR 0x00190b60
     void term();                                                         // ROR 0x00190bbc
     /* EE slot 2. */
-    void update();                                                       // ROR 0x00190c04
+    void live() override;                                                // ROR 0x00190c04
     /* EE slot 6. */
-    void render(I3dLayer *layer);                                        // ROR 0x00190c20
+    void render(I3dLayer *layer) override;                               // ROR 0x00190c20
     int  open();                                                         // ROR 0x00190c44
     int  close();                                                        // ROR 0x00190c68
     int  step();                                                         // ROR 0x00190c84
@@ -74,9 +73,9 @@ struct S2dBg : MagLife
     int  clear();                                                        // ROR 0x00191054
     void term();                                                         // ROR 0x00191098
     /* EE slot 2. */
-    void update();                                                       // ROR 0x001910d8
+    void live() override;                                                // ROR 0x001910d8
     /* EE slot 6. */
-    void render(I3dLayer *layer);                                        // ROR 0x00191100
+    void render(I3dLayer *layer) override;                               // ROR 0x00191100
     int  open();                                                         // ROR 0x00191124
     int  close();                                                        // ROR 0x00191158
     int  step();                                                         // ROR 0x00191174
@@ -168,9 +167,9 @@ struct S2dMes : MagLife
     void term();                                                         // ROR 0x001915f8
     void loadTexture();                                                  // ROR 0x00191640
     /* EE slot 2. */
-    void update();                                                       // ROR 0x00191684
+    void live() override;                                                // ROR 0x00191684
     /* EE slot 6. */
-    void render(I3dLayer *layer);                                        // ROR 0x001916a0
+    void render(I3dLayer *layer) override;                               // ROR 0x001916a0
     int  open();                                                         // ROR 0x001916c4
     int  close();                                                        // ROR 0x001916f8
     int  step();                                                         // ROR 0x00191718

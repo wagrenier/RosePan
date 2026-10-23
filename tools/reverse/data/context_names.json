@@ -1037,11 +1037,41 @@
   "was": "FUN_0011948c",
   "why": "forwards to MagScene::clearPC"
  },
+ "001194b4": {
+  "name": "MagLifeMan::clearPod",
+  "tag": "ror-inferred",
+  "was": "FUN_001194b4",
+  "why": "zeroes the four words of a 0x10-byte m_life_buf entry (life, priority, prev, next); unlink's tail call"
+ },
+ "001194c8": {
+  "name": "MagLifeMan::unlink",
+  "tag": "ror-inferred",
+  "was": "FUN_001194c8",
+  "why": "(pod): links pod->prev (+8) and pod->next (+0xc) to each other, a NULL prev moves the head (+0x400), then clearPod; remove and removeNo call it"
+ },
+ "0011950c": {
+  "name": "MagLifeMan::insertBefore",
+  "tag": "ror-inferred",
+  "was": "FUN_0011950c",
+  "why": "mag/maglifeman.cpp asserts thePod1 / thePod2 (lines 0x67 / 0x68): links thePod2 before thePod1, head (+0x400) when thePod1 had no prev; add's insert in front of the first entry with priority >= its own"
+ },
+ "001195ac": {
+  "name": "MagLifeMan::insertAfter",
+  "tag": "ror-inferred",
+  "was": "FUN_001195ac",
+  "why": "mag/maglifeman.cpp asserts thePod1 / thePod2 (lines 0x8c / 0x8d): links thePod2 after thePod1; add's append at the tail"
+ },
  "00119630": {
   "name": "MagLifeMan::init",
   "tag": "ror-inferred",
   "was": "FUN_00119630",
   "why": "mag/maglifeman.cpp: memset 0x400 (m_life_buf, 64 entries of 16 bytes), the list head at +0x400 = the buffer"
+ },
+ "00119660": {
+  "name": "MagLifeMan::deleteAll",
+  "tag": "ror-inferred",
+  "was": "FUN_00119660",
+  "why": "runs vtable slot 1 with flags 3 (deleting destructor) on every life in the 64 entries, clears them, then MagLifeMan::init; MagScene::~MagScene calls it"
  },
  "001196d4": {
   "name": "MagLifeMan::add",
@@ -1060,6 +1090,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001198d0",
   "why": "the index of a life in m_life_buf, -1 when absent"
+ },
+ "00119908": {
+  "name": "MagLifeMan::removeNo",
+  "tag": "ror-inferred",
+  "was": "FUN_00119908",
+  "why": "(theNo): asserts theNo >= 0 && theNo < MAX_LIFE (mag/maglifeman.cpp line 0x10c) and unlinks entry theNo; no callers (find's index counterpart of remove)"
  },
  "00119968": {
   "name": "MagLifeMan::update",
@@ -2718,10 +2754,10 @@
   "why": "when inited: SprMan::release, close, inited = 0; the destructor calls it"
  },
  "00190c04": {
-  "name": "S2dCineSco::update",
+  "name": "S2dCineSco::live",
   "tag": "ror-inferred",
   "was": "FUN_00190c04",
-  "why": "vtable slot 2 (MagLife's per-frame update); calls the step 0x190c84"
+  "why": "vtable slot 2, whose base is MagLife0::live (ror-symbol 0x282ad4); MagLifeMan::update runs it each frame. Was S2dCineSco::update"
  },
  "00190c20": {
   "name": "S2dCineSco::render",
@@ -2802,10 +2838,10 @@
   "why": "when inited: close, inited = 0"
  },
  "001910d8": {
-  "name": "S2dBg::update",
+  "name": "S2dBg::live",
   "tag": "ror-inferred",
   "was": "FUN_001910d8",
-  "why": "vtable slot 2: frame count +4 += 1, then the phase step 0x191174"
+  "why": "vtable slot 2, whose base is MagLife0::live (ror-symbol 0x282ad4); MagLifeMan::update runs it each frame. Was S2dBg::update"
  },
  "00191100": {
   "name": "S2dBg::render",
@@ -2904,10 +2940,10 @@
   "why": "SprTexture::setList(wait.tm2 / wait2.tm2 list 0x29a340, data/mnurpk/s2dman.rpk) and spins on SprTexture::update until it is done"
  },
  "00191684": {
-  "name": "S2dMes::update",
+  "name": "S2dMes::live",
   "tag": "ror-inferred",
   "was": "FUN_00191684",
-  "why": "vtable slot 2: the phase step 0x191718"
+  "why": "vtable slot 2, whose base is MagLife0::live (ror-symbol 0x282ad4); MagLifeMan::update runs it each frame. Was S2dMes::update"
  },
  "001916a0": {
   "name": "S2dMes::render",

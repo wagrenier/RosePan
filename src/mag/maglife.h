@@ -14,9 +14,12 @@
  *  5 getName, 6 MagLife::render, 7 setHide, 8 getHide, 9 0x119fe0,
  *  10 setActor, 11 getActor, 12 0x11be60, 13 termWorld, 14 0x11b5e0,
  *  15 renderPostProcess, 16 0x11b30c.
- *  PORT: not polymorphic on the host yet (as dog/dogentity.h): the EE vptr
- *  word at +0x14 is padding, and the slots written code calls are plain
- *  members of the class the scene holds.
+ *  Polymorphic on the host since mag/maglifeman.cpp (MagLifeMan runs slots
+ *  1 / 2 / 6 / 8 on lives of any class): slots 1, 2, 6, 7, 8 are real
+ *  virtuals; 3 attached, 4 getLevel, 5 getName (pure in MagLife0) and 9..
+ *  are declared when a TU needs them (the classes' other slots are still
+ *  plain members, called on the known class). The host vptr sits at offset
+ *  0, so the EE offsets below are comments with >= asserts.
  * ======================================================================== */
 #ifndef _MAG_MAGLIFE_H
 #define _MAG_MAGLIFE_H
@@ -26,24 +29,41 @@
 #include "sdk/eetypes.h"
 
 struct DogActor;
+struct I3dLayer;
 struct MagScene;
 
-/* EE at least 0x24. layout: host -- holds the scene pointer. */
+/* EE at least 0x28 (MagLife0 0x24 + MagLife's hide word). layout: host --
+ * polymorphic (EE vptr at +0x14). MagLife0 and MagLife are one host class. */
 struct MagLife
 {
+    /* EE slot 1 (+0x08): MagLife0's restores _vt$8MagLife0; flags & 1
+     * deletes (MagLifeMan::deleteAll passes 3). */
+    virtual ~MagLife() {}                                                // ROR 0x00282aa0
+    /* EE slot 2 (+0x10): counts the frames in m_04 (MagLife0::live; MagLife's
+     * own 0x283e44 is the same). MagLifeMan::update runs it. */
+    virtual void live() { m_04++; }                                      // ROR 0x00282ad4
+    /* EE slot 6 (+0x30): draws into layer; nothing by default.
+     * MagLifeMan::draw runs it while getHide() is 0. */
+    virtual void render(I3dLayer *layer) {}                              // ROR 0x00282844
+    /* EE slot 7 (+0x38) */
+    virtual void setHide(int hide) { m_hide = hide; }                    // ROR 0x0028284c
+    /* EE slot 8 (+0x40) */
+    virtual int  getHide() { return m_hide; }                            // ROR 0x00282854
+
     int       m_state;          // ROR 0x00: MagSystem::getPCStateClass / getBwnState switch on it
     int       m_04;             // ROR 0x04: the constructors set -1; role unknown
     int       m_08;             // ROR 0x08: the constructors clear it
     int       m_0c;             // ROR 0x0c: MagSystem asks the PC's for 1 in state 9; role unknown
     int       m_level;          // ROR 0x10: MagLife0::getLevel; the scene's 2D layers get 7
-    u_int     _ee_vptr;         // ROR 0x14: the EE vptr (see the file comment)
+    /* ROR 0x14: the EE vptr (the host's is at 0) */
     u_char    _18[0x20 - 0x18];
     MagScene *m_scene;          // ROR 0x20: the owning scene, set by MagScene::initRender
-    int       m_24;             // ROR 0x24: the constructors clear it; role unknown
+    int       m_hide;           // ROR 0x24: MagLife::setHide / getHide; the constructors clear it
 };
-static_assert(offsetof(MagLife, m_0c) == 0x0c, "m_0c");
-static_assert(offsetof(MagLife, m_level) == 0x10, "m_level");
-static_assert(offsetof(MagLife, m_scene) == 0x20, "m_scene");
+static_assert(offsetof(MagLife, m_0c) >= 0x0c, "m_0c");
+static_assert(offsetof(MagLife, m_level) >= 0x10, "m_level");
+static_assert(offsetof(MagLife, m_scene) >= 0x20, "m_scene");
+static_assert(offsetof(MagLife, m_hide) >= 0x24, "m_hide");
 
 /* EE at least 0x60. layout: host -- holds the actor pointer. */
 struct MagLifeControlChara : MagLife

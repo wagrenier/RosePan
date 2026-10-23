@@ -551,6 +551,20 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   (pad m_7c bits 13 / 14 close it); 6 the camera hangs from the PC and turns over 2400 counts; 8
   paused (lives of group 4 only); 9 the debug windows (magscenedebug.cpp). Lives run by group:
   MagLifeMan::update(mask) calls slot 2 of the lives whose level word has a bit of mask.
+- **MagLifeMan** (`mag/maglifeman.cpp`, 0x1194b4..0x119b34, 2026-10-22; scene +0x2330, EE 0x404):
+  64 pods of 0x10 `{life, priority, prev, next}` and the head m_top at +0x400. init zeroes the
+  pods and points m_top at pod 0 (free; the first add takes pod 0 and links it to itself as the
+  head). add takes the lowest free pod and links it before the first pod with priority >= its
+  own (insertBefore 0x11950c) or after the last (insertAfter 0x1195ac); remove / removeNo unlink
+  (0x1194c8, then clearPod 0x1194b4); find is a linear search of the pool (index, -1).
+  update(mask): slot 2 when life->m_level (+0x10) & mask; draw(layer, group): for pods with
+  priority & 0xc000 == group, slot 6 render(layer) unless slot 8 getHide (+0x24). deleteAll
+  0x119660 (from ~MagScene and the scene term 0x131f74) runs slot 1 with flags 3 (deleting) on
+  every life still in the pool, then init. An empty list (m_top NULL after removing the last)
+  faults in the ROM's next add (insertAfter(NULL)); the game never empties it.
+  MagLife base slots (linkonce): 1 ~MagLife0 0x282aa0, 2 MagLife0::live 0x282ad4 (m_04++),
+  3 attached 0x282834 (empty), 4 getLevel 0x28283c (0), 5 getName (pure, 0x272a30), 6
+  MagLife::render 0x282844 (empty), 7 setHide 0x28284c / 8 getHide 0x282854 (+0x24).
 - **The scene text windows** (mag/magscene.cpp asserts `MAX_WINDOW`, `m_window[ n ]`): 4 slots at
   scene +0x2734 of 0xe0-byte MagLife windows, each with a font record at +0x2744 + n * 0x6c over the
   language font (+0x2908) and font texture m_font_tex_no[n]: `openWindow(w, h, a3, life)` 0x134730

@@ -26,7 +26,7 @@ struct MagLifePC;
 struct MagLifeBwnCtrl : MagLife
 {
     /* EE slot 2 (+0x10) */
-    void live();                                                         // ROR 0x0012a61c
+    void live() override;                                                // ROR 0x0012a61c
     /* EE slot 9 (+0x48): empty. */
     void processPad(BedPad *pad) {}                                      // ROR 0x0012a6a0
 
