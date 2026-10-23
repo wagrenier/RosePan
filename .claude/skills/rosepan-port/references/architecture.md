@@ -402,6 +402,10 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     0x130, then i3dVramHandleInit 0x227c90; release 0x219a98 / 0x219c70 -> i3dVramHandleRelease).
   - **Hardware**: i3dInitHardware sends REFs of the VU1 microprogram (data 0x2912b0, 0x354 qwords,
     plus STCOL 1.0 / STROW 0) on VIF1 and the VU0 one (data 0x2949f0, 0x9c qwords) on VIF0.
+- The scene's first 0x2000 bytes are 256 **wall segments** (two (x, y, z, w) ends each):
+  `MagScene::castWalls` 0x133a0c tests a level ray against those whose height range covers the ray's
+  y with `i3dSegSegDist2` 0x234050 (squared segment distance 0 = a hit) before `castRay` 0x133454
+  falls back to the sky slots' collision models (`DogModel::castRay` 0x11440c on model 2).
 - The scene (`MagScene`, +0x12540): 128 actors of 0x4d0 at +0x2920 (vptr +0x94), actor flags at
   +0x29120, light set +0x2050, view objects +0x2734[4], camera mode +0x2ad50, `MagLifePC` at
   +0x2adc0 (the player; vptr +0x14), `MagLifeBwn` at +0x2afe0 (Brown). Chapter archives
@@ -721,6 +725,8 @@ never asserts): sessions name them (`tus.py define --why`).
   DogModel +0x11c `m_i3r_root`, +0x124 i3c root, +0x128 colli table, +0x130 node matrices (0x40 each),
   +0x134 node flag, +0x138 attach node, +0x13c attention, +0x140 hide, +0x144 light id; DogActor +0x1a0
   id, +0x1c0 / +0x1c4 motion count / `m_motion_data` (0x20 each, banks 0..3), +0x3c0 base rotation,
+  +0x1e4 `m_motion` (DogMotionBlend: motion index, speed in frames per frame -- the scene stores
+  fps x 1/60 --, frame), +0x3f0 / +0x3f4 setMotion's two flag words,
   +0x3d0 RotYAAR, +0x3d4 / +0x3d8 control node / flag, +0x420 TransOfsY save, +0x424 RotOfsY; EE size
   0x4d0. Virtual slots: 10 = `DogModel::setAttachNode`, 17 = `DogActor::getNodeWorldMatrix` 0x10eab8
   (m_matrix x node matrix through 0x2377d0, a VU0 micro call). The many tiny accessors are the ELF's

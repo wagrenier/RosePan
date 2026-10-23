@@ -413,6 +413,13 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-22, magscene session 3) **Who fills the scene's 256 wall segments?** `m_vec_pair`
+  (scene +0x0) is read by castWalls; the constructor sets the ends to (0, 0, 0, 1) and resetEntities
+  clears their y, so no wall is live yet. Find the writer (likely the map / event loader) before
+  trusting castRay on walls. Also: `MagScene::term` takes the scene's member lives off the manager
+  before deleteAll (a PC guard: the host's delete on a member corrupts the heap); check what the ROM
+  relies on there when term is first reached.
+
 - (2026-10-22, the sndman session) **Sound has no host backend.** `snd/sndman.cpp` is written
   (`verify`) and SndMan::update now runs every frame, but every rx sound library call
   (`rx/rxsnd.h`: rxSndInit, rxSndUpdate, the XVAB / SE / ADPCM functions) is a stub in

@@ -55,3 +55,23 @@ void MagLifePC::reset()
 {
     ROSEPAN_STUB("MagLifePC::reset", 0x0011be60);
 }
+
+// stub of ROR 0x0011b5e0
+int MagLifePC::command(int cmd, const float *arg, int a3)
+{
+    ROSEPAN_STUB("MagLifePC::command", 0x0011b5e0);
+    return {};
+}
+
+// stub of ROR 0x0011af04
+bool MagLifePC::isWordDcSet()
+{
+    ROSEPAN_STUB("MagLifePC::isWordDcSet", 0x0011af04);
+    return {};
+}
+
+// stub of ROR 0x0012c9c0
+void MagLifePC::setState14(int arg, int word)
+{
+    ROSEPAN_STUB("MagLifePC::setState14", 0x0012c9c0);
+}

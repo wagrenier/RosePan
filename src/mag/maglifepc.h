@@ -35,6 +35,13 @@ struct MagLifePC : MagLifeControlChara
     /* Word 1 while the state word is 0x17, else -1. */
     int  getState17Count();                                              // ROR 0x0011af10
     int  getSubStateClass();                                             // ROR 0x0011e080
+    /* Word +0xdc != 0 (role unknown). */
+    bool isWordDcSet();                                                  // ROR 0x0011af04
+    /* An event command (0..0xe) that moves the PC between states; returns
+     * 0, or 0xfffffe93 without an actor. */
+    int  command(int cmd, const float *arg, int a3);                     // ROR 0x0011b5e0
+    /* State 0xe with arg (mag/maglifepcbtl.cpp), word +0x0c = word. */
+    void setState14(int arg, int word);                                  // ROR 0x0012c9c0
 
     u_char _60[0xe4 - 0x60];
     int    m_e4;                // ROR 0xe4: MagSystem::getPCWordE4 returns it; setActor stores 0x11ab88's result

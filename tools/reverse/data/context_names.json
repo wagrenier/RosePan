@@ -389,6 +389,12 @@
   "was": "FUN_00106658",
   "why": "ids 0x0a00xxxx..0x0a02xxxx are swapped through the table 0x295f08 by the index GamMan 0x1c6c38 reports (a language / version column)"
  },
+ "00106db0": {
+  "name": "utlNormalize3",
+  "tag": "ror-inferred",
+  "was": "FUN_00106db0",
+  "why": "clears v[3] and runs sceVu0Normalize(v, v)"
+ },
  "00106e70": {
   "name": "utlVecDist",
   "tag": "ror-inferred",
@@ -400,6 +406,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00107248",
   "why": "a direction to pitch / yaw angles (atan of -y, atan2 x / z, roll 0)"
+ },
+ "001081a8": {
+  "name": "DogMotionBlend::getNo",
+  "tag": "ror-inferred",
+  "was": "FUN_001081a8",
+  "why": "returns the first word of DogActor's m_motion (+0x1e4; dog/dogmotionblend.h asserts name m_motion), the current motion number"
  },
  "00109348": {
   "name": "DogActor::getMotionMove",
@@ -424,6 +436,24 @@
   "tag": "ror-inferred",
   "was": "FUN_0010a038",
   "why": "+0x40..+0x48 += a1[0..2], w = 1; f12 into +0x74 (the TransOfsY saveTransOfsY reads), f13 into +0x3d0 (clearRotYAAR's field), dirty"
+ },
+ "0010aa9c": {
+  "name": "DogActor::findMotionByName",
+  "tag": "ror-inferred",
+  "was": "FUN_0010aa9c",
+  "why": "asserts theName; strcmp over the m_motion_data records (+0x1c4, stride 0x20, name at +0x1c), returns the index or -1"
+ },
+ "0010af18": {
+  "name": "DogActor::setMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0010af18",
+  "why": "asserts m_max_motion > 0; stores the motion index +0x1e4, speed +0x1e8, frame +0x1ec, the flags at +0x3f0 / +0x3f4"
+ },
+ "0010b1b0": {
+  "name": "DogActor::changeMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0010b1b0",
+  "why": "asserts theNo >= 0; with flag 4 and the same motion only updates the speed +0x1e8, else blends to the motion"
  },
  "0010bcc8": {
   "name": "DogActor::getMotionEvent",
@@ -460,6 +490,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010cffc",
   "why": "DogActor vtable slot 21: takes the source actor's master model (+0x118) and i3r root, copies its motion table, increments the master's ref count (+0x104); returns 0"
+ },
+ "0010d0e8": {
+  "name": "DogActor::getMotionLength",
+  "tag": "ror-inferred",
+  "was": "FUN_0010d0e8",
+  "why": "asserts theID >= 0 and m_motion_data[n].m_i3m_root; returns 0x22e958 of the motion's i3m root (its word +0x18)"
  },
  "0010d388": {
   "name": "DogActor::runMotionCmd",
@@ -574,6 +610,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001129cc",
   "why": "(pool, light set, pos): walks the set's point-light mask at pool +0x50 + set * 0x18 and returns the index of the point light (m_light[DOG_LIGHT_POINT], stride 0x20, position first) nearest to pos, -1 when none; doglightpool.h line 131 asserts"
+ },
+ "0011440c": {
+  "name": "DogModel::castRay",
+  "tag": "ror-inferred",
+  "was": "FUN_0011440c",
+  "why": "asserts m_i3c_root / m_colli_tbl; the ray (pos, dir) against the model's collision tables; MagScene::castRay's sky collision model test, >= 0 on a hit"
  },
  "001151f4": {
   "name": "DogModel::draw",
@@ -1127,6 +1169,12 @@
   "was": "FUN_0011ade4",
   "why": "MagLifePC vtable slot 2 (MagLife::live in the base)"
  },
+ "0011af04": {
+  "name": "MagLifePC::isWordDcSet",
+  "tag": "ror-inferred",
+  "was": "FUN_0011af04",
+  "why": "returns this +0xdc != 0"
+ },
  "0011af10": {
   "name": "MagLifePC::getState17Count",
   "tag": "ror-inferred",
@@ -1138,6 +1186,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0011b30c",
   "why": "MagLifePC vtable slot 16, called with the first pad"
+ },
+ "0011b5e0": {
+  "name": "MagLifePC::command",
+  "tag": "ror-inferred",
+  "was": "FUN_0011b5e0",
+  "why": "switch on a command number (0..0xe) that sets PC states through 0x11c1e8 (8, 9, 0xd ...), counts word +0x188 for 0 / 1, asserts on unknown commands; returns 0xfffffe93 without an actor"
  },
  "0011bd4c": {
   "name": "MagLifePC::setActor",
@@ -1211,6 +1265,12 @@
   "was": "FUN_0012ab18",
   "why": "an empty function (jr ra) MagScene::resetEntities calls on Brown's controller after the PC's and Brown's reset"
  },
+ "0012c9c0": {
+  "name": "MagLifePC::setState14",
+  "tag": "ror-inferred",
+  "was": "FUN_0012c9c0",
+  "why": "with an actor and not already in state 0xe (or its step > 7): changes to state 0xe with a1 through 0x11c1e8 and stores a2 in word +0x0c (mag/maglifepcbtl.cpp)"
+ },
  "0012f060": {
   "name": "MagLifeFader::start",
   "tag": "ror-inferred",
@@ -1241,6 +1301,30 @@
   "was": "FUN_0012f824",
   "why": "as MagLifeFader::start for the keyhole fade"
  },
+ "0012fca8": {
+  "name": "MagLifeWindow::getCharMetrics",
+  "tag": "ror-inferred",
+  "was": "FUN_0012fca8",
+  "why": "asserts its GamFont +0xc4 (maglifewindow.cpp 43); GamFont::getCharMetrics with the four arguments"
+ },
+ "0012fd30": {
+  "name": "MagLifeWindow::setProportional",
+  "tag": "ror-inferred",
+  "was": "FUN_0012fd30",
+  "why": "asserts the GamFont +0xc4; its m_prop_on (+0x28) = arg != 0"
+ },
+ "0012fd88": {
+  "name": "MagLifeWindow::setFontWord30",
+  "tag": "ror-inferred",
+  "was": "FUN_0012fd88",
+  "why": "asserts the GamFont +0xc4; its word +0x30 = arg"
+ },
+ "0012fddc": {
+  "name": "MagLifeWindow::setFontWord34",
+  "tag": "ror-inferred",
+  "was": "FUN_0012fddc",
+  "why": "asserts the GamFont +0xc4; its word +0x34 = arg"
+ },
  "0012fe30": {
   "name": "MagLifeWindow::setup",
   "tag": "ror-inferred",
@@ -1258,6 +1342,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0012fef8",
   "why": "MagScene::fadeOutWindow's body: the same clamps, an alpha ramp from 'to' down to 'from' over time frames"
+ },
+ "00130214": {
+  "name": "MagLifeWindow::getPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00130214",
+  "why": "x, y out of the position floats +0x30 / +0x34 as ints"
+ },
+ "00130230": {
+  "name": "MagLifeWindow::getPos3",
+  "tag": "ror-inferred",
+  "was": "FUN_00130230",
+  "why": "x, y, z out of +0x30..+0x38 as ints"
  },
  "00130258": {
   "name": "MagLifeWindow::drawText",
@@ -1277,6 +1373,18 @@
   "was": "FUN_001308bc",
   "why": "stores _vt$13MagLifeWindow (rtti: the class's only constructor); MagScene::openWindow runs it on operator_new(0xe0)"
  },
+ "00131184": {
+  "name": "MagScene::fadeIn",
+  "tag": "ror-inferred",
+  "was": "FUN_00131184",
+  "why": "builds a MagFadeParam {kind a3 ? 4 : 0, mode 2, time a1, level a2} and calls setFade; mode 2 is what update's sub mode 4 (back from a menu) uses"
+ },
+ "001311bc": {
+  "name": "MagScene::fadeOut",
+  "tag": "ror-inferred",
+  "was": "FUN_001311bc",
+  "why": "the same with mode 6, what update's sub mode 3 (fading out to a menu) uses"
+ },
  "001311f4": {
   "name": "MagScene::setFade",
   "tag": "ror-inferred",
@@ -1289,11 +1397,35 @@
   "was": "FUN_00131550",
   "why": "maps the current fade object's state word (+0x41850 for kinds 0 / 4, +0x41890 for 1 / 2) to 0..6; update waits for > 4 (faded)"
  },
+ "00131608": {
+  "name": "MagScene::getFaderWord30",
+  "tag": "ror-inferred",
+  "was": "FUN_00131608",
+  "why": "returns scene +0x41880 = the MagLifeFader (+0x41850) word +0x30; role unknown"
+ },
  "00131618": {
   "name": "MagScene::setViewFar",
   "tag": "ror-inferred",
   "was": "FUN_00131618",
   "why": "stores its float in view 0's far (+0x2aa14) and view 1's far (+0x2aa4c) and copies view 0's near to view 1; MagScene::load passes mapparam.bbb's first word"
+ },
+ "0013164c": {
+  "name": "MagScene::isPCWordDcSet",
+  "tag": "ror-inferred",
+  "was": "FUN_0013164c",
+  "why": "returns MagLifePC (+0x2adc0) 0x11af04: its word +0xdc != 0"
+ },
+ "0013166c": {
+  "name": "MagScene::commandPC",
+  "tag": "ror-inferred",
+  "was": "FUN_0013166c",
+  "why": "passes (a1, a2, 0) to MagLifePC::command 0x11b5e0 on the scene's PC"
+ },
+ "00131690": {
+  "name": "MagScene::setPCState14",
+  "tag": "ror-inferred",
+  "was": "FUN_00131690",
+  "why": "passes a1, a2 to MagLifePC::setState14 0x12c9c0 on the scene's PC"
  },
  "001316b8": {
   "name": "MagScene::setPC",
@@ -1379,11 +1511,71 @@
   "was": "FUN_001327dc",
   "why": "MagSystem::update passes the two pads"
  },
+ "00133090": {
+  "name": "MagScene::getActorNo",
+  "tag": "ror-inferred",
+  "was": "FUN_00133090",
+  "why": "asserts thePtr (magscene.cpp 1495) and returns (thePtr - (this + 0x2920)) / 0x4d0, the index in m_actors"
+ },
+ "001330f4": {
+  "name": "MagScene::getActorMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001330f4",
+  "why": "actor no's motion number (DogActor +0x1e4 via 0x1081a8), bit-inverted when its speed +0x1e8 is 0"
+ },
+ "00133144": {
+  "name": "MagScene::setActorMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00133144",
+  "why": "f12 speed, a1 no, a2 motion, a3 >= 0 -> DogActor::setParam1d8, then DogActor::setMotion(speed, motion, 0, -1, -1) and t0 >> 8 / t0 & 0xff into actor +0x3f0 / +0x3f4"
+ },
+ "001331f4": {
+  "name": "MagScene::changeActorMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001331f4",
+  "why": "the same through DogActor::changeMotion(speed, motion, t0 >> 8, t0 & 0xff, -1)"
+ },
+ "00133288": {
+  "name": "MagScene::setActorMotionByName",
+  "tag": "ror-inferred",
+  "was": "FUN_00133288",
+  "why": "DogActor::findMotionByName(a2) then setActorMotion when found"
+ },
+ "00133324": {
+  "name": "MagScene::changeActorMotionByName",
+  "tag": "ror-inferred",
+  "was": "FUN_00133324",
+  "why": "DogActor::findMotionByName(a2) then changeActorMotion when found"
+ },
+ "001333c0": {
+  "name": "MagScene::setActorMotionSpeed",
+  "tag": "ror-inferred",
+  "was": "FUN_001333c0",
+  "why": "actor +0x1e8 = f12 * 0x3c888897 (1/60)"
+ },
+ "001333e4": {
+  "name": "MagScene::getActorMotionLength",
+  "tag": "ror-inferred",
+  "was": "FUN_001333e4",
+  "why": "a2 < 0 takes the current motion; tail jump to DogActor::getMotionLength"
+ },
+ "00133440": {
+  "name": "MagScene::getActorMotionSpeed",
+  "tag": "ror-inferred",
+  "was": "FUN_00133440",
+  "why": "returns actor +0x1e8 as a float"
+ },
  "00133454": {
   "name": "MagScene::castRay",
   "tag": "ror-inferred",
   "was": "FUN_00133454",
   "why": "returns a hit distance (< 0 none) of a ray (pos, dir) against the sky slots' collision models (all when the slot arg < 0); drawBlobShadows drops the shadow onto it"
+ },
+ "00133a0c": {
+  "name": "MagScene::castWalls",
+  "tag": "ror-inferred",
+  "was": "FUN_00133a0c",
+  "why": "asserts theD.m_y == 0.0f (line 1740); tests the ray against the 256 segment pairs at the scene's start with 0x234050 (segment-segment distance 0 = a hit); hit +0x10 = the wall normal; called by castRay before the sky collision models"
  },
  "00134698": {
   "name": "MagScene::clearStrip",
@@ -1408,6 +1600,78 @@
   "tag": "ror-inferred",
   "was": "FUN_00134944",
   "why": "(no <= 3, int v[5]): three ints as floats and two ints into the view object +0x2734[no]"
+ },
+ "00134a00": {
+  "name": "MagScene::setWindowPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00134a00",
+  "why": "asserts winNo; the window's position +0x30 = (x, y, z, 1)"
+ },
+ "00134ab8": {
+  "name": "MagScene::setWindowSize",
+  "tag": "ror-inferred",
+  "was": "FUN_00134ab8",
+  "why": "asserts winNo; the window's +0x94 / +0x98 (setup's w / h)"
+ },
+ "00134b34": {
+  "name": "MagScene::getWindowPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00134b34",
+  "why": "asserts winNo; MagLifeWindow::getPos 0x130214 (x, y)"
+ },
+ "00134bb8": {
+  "name": "MagScene::getWindowPos3",
+  "tag": "ror-inferred",
+  "was": "FUN_00134bb8",
+  "why": "asserts winNo; MagLifeWindow::getPos3 0x130230 (x, y, z)"
+ },
+ "00134c4c": {
+  "name": "MagScene::getWindowSize",
+  "tag": "ror-inferred",
+  "was": "FUN_00134c4c",
+  "why": "asserts theN; reads the window's +0x94 / +0x98"
+ },
+ "00134cd0": {
+  "name": "MagScene::setWindowWords84",
+  "tag": "ror-inferred",
+  "was": "FUN_00134cd0",
+  "why": "asserts theN; the window's words +0x84..+0x90; role unknown"
+ },
+ "00134d6c": {
+  "name": "MagScene::getWindowWords84",
+  "tag": "ror-inferred",
+  "was": "FUN_00134d6c",
+  "why": "asserts theN; reads the window's words +0x84..+0x90"
+ },
+ "00134e18": {
+  "name": "MagScene::getWindowWordCc",
+  "tag": "ror-inferred",
+  "was": "FUN_00134e18",
+  "why": "asserts theN; reads the window's word +0xcc"
+ },
+ "00134e88": {
+  "name": "MagScene::getWindowCharMetrics",
+  "tag": "ror-inferred",
+  "was": "FUN_00134e88",
+  "why": "asserts winNo; MagLifeWindow::getCharMetrics 0x12fca8"
+ },
+ "00134f2c": {
+  "name": "MagScene::setWindowProportional",
+  "tag": "ror-inferred",
+  "was": "FUN_00134f2c",
+  "why": "asserts winNo; MagLifeWindow::setProportional 0x12fd30"
+ },
+ "00134fa0": {
+  "name": "MagScene::setWindowFontWord30",
+  "tag": "ror-inferred",
+  "was": "FUN_00134fa0",
+  "why": "asserts winNo; MagLifeWindow::setFontWord30 0x12fd88"
+ },
+ "00135014": {
+  "name": "MagScene::setWindowFontWord34",
+  "tag": "ror-inferred",
+  "was": "FUN_00135014",
+  "why": "asserts winNo; MagLifeWindow::setFontWord34 0x12fddc"
  },
  "00135088": {
   "name": "MagScene::fadeInWindow",
@@ -1468,6 +1732,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00135b78",
   "why": "terms the menu, removes it from the life manager, deletes the allocated ones (ids 0x1000b..0x1000f), sub mode 4 (fade back in)"
+ },
+ "00135dcc": {
+  "name": "MagScene::removeFadeKey",
+  "tag": "ror-inferred",
+  "was": "FUN_00135dcc",
+  "why": "removes the keyhole fade (+0x41890) from the life manager and releases its texture from m_tex_info"
  },
  "00135fa4": {
   "name": "MagScene::resetEntities",
@@ -3497,6 +3767,12 @@
   "was": "FUN_001bffcc",
   "why": "the glyph index of a code: bsearch in the code table, or a Shift-JIS table walk; -1 when none"
  },
+ "001c0078": {
+  "name": "GamFont::getCharMetrics",
+  "tag": "ror-inferred",
+  "was": "FUN_001c0078",
+  "why": "code < 0x20: 0, 0; proportional: the glyph's left and width (getGlyphLeft / getGlyphWidth) and m_30 or m_34; else the fixed width"
+ },
  "001c020c": {
   "name": "GamFont::getGlyphLeft",
   "tag": "ror-inferred",
@@ -5500,6 +5776,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0022b438",
   "why": "(root+0x10)->+0x18 name pointer table [n]; DogModel::getTexName (an ELF inline symbol) wraps it"
+ },
+ "00234050": {
+  "name": "i3dSegSegDist2",
+  "tag": "ror-inferred",
+  "was": "FUN_00234050",
+  "why": "closest points of segments p0 + s d0 and p1 + t d1 (dots of d0, d1, p1 - p0; the 0.0001 parallel test), writes s and t, returns the squared distance"
  },
  "00236960": {
   "name": "i3dVecZero",

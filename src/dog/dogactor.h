@@ -20,6 +20,7 @@
 #include <stddef.h>
 
 #include "dog/dogmodel.h"
+#include "dog/dogmotionblend.h"
 
 /* EE 0x4d0. layout: host -- a DogModel (pointers); EE offsets in the
  * comments. */
@@ -67,6 +68,16 @@ struct DogActor : DogModel
     void drawModel(I3dLayer *layer, int nodes, DogEntity *src);          // ROR 0x0010e3ac
     /* EE slot 20 (+0xa0): the shadow model (or the model) into a shadow layer. */
     void drawShadow(I3dLayer *layer);                                    // ROR 0x0010e534
+    /* The index of the motion record named theName, -1 when none. */
+    int  findMotionByName(const char *theName);                          // ROR 0x0010aa9c
+    /* Starts motion theID at speed (frames per frame); flags / flags2 go to
+     * +0x3f0 / +0x3f4, p1d8 < 0 takes the motion's own +0x1d8 value.
+     * Returns the motion index, -1 when it has none. */
+    int  setMotion(float speed, int theID, u_int flags, int flags2, int p1d8); // ROR 0x0010af18
+    /* Blends to motion theNo (flag 4 with the same motion: only the speed). */
+    int  changeMotion(float speed, int theNo, u_int flags, int flags2, int arg); // ROR 0x0010b1b0
+    /* Motion theID's i3m length (its root's word +0x18). */
+    int  getMotionLength(int theID);                                     // ROR 0x0010d0e8
 
     // ROR 0x00281244
     void setBaseRotate(const float *v)
@@ -102,12 +113,17 @@ struct DogActor : DogModel
     int           m_shadow_fade;        // ROR 0x168: frames since the light changed (0..59 fade out then in; 60 and up, or negative, steady)
     u_char        _16c[0x1a0 - 0x16c];
     int           m_id;                 // ROR 0x1a0: setId / getId (the character id it was loaded as)
-    u_char        _1a4[0x3c0 - 0x1a4];
+    u_char        _1a4[0x1e4 - 0x1a4];
+    DogMotionBlend m_motion;            // ROR 0x1e4: the current motion (its number, speed, frame)
+    u_char        _1f0[0x3c0 - 0x1f0];
     sceVu0FVECTOR m_base_rotate;        // ROR 0x3c0: getBaseRotateY reads y
     float         m_rot_y_aar;          // ROR 0x3d0: clearRotYAAR; addTrans's second float
     int           m_control_node;       // ROR 0x3d4: getControlNode
     int           m_control_node_flg;   // ROR 0x3d8: setControlNodeFlg / getControlNodeFlg
-    u_char        _3dc[0x420 - 0x3dc];
+    u_char        _3dc[0x3f0 - 0x3dc];
+    int           m_motion_flags;       // ROR 0x3f0: setMotion's flags (0x80: start from the motion's length; 0x40 added by the motion record)
+    int           m_motion_flags2;      // ROR 0x3f4: setMotion's second word; role unknown
+    u_char        _3f8[0x420 - 0x3f8];
     float         m_trans_ofs_y_save;   // ROR 0x420: saveTransOfsY copies m_trans_ofs[1]
     float         m_rot_ofs_y;          // ROR 0x424: clearRotOfsY / getRotOfsYSave
     u_char        _428[0x4d0 - 0x428];
@@ -115,7 +131,9 @@ struct DogActor : DogModel
 static_assert(offsetof(DogActor, m_shadow_light) >= 0x160, "m_shadow_light");
 static_assert(offsetof(DogActor, m_shadow_fade) >= 0x168, "m_shadow_fade");
 static_assert(offsetof(DogActor, m_id) >= 0x1a0, "m_id");
+static_assert(offsetof(DogActor, m_motion) >= 0x1e4, "m_motion");
 static_assert(offsetof(DogActor, m_base_rotate) >= 0x3c0, "m_base_rotate");
+static_assert(offsetof(DogActor, m_motion_flags2) >= 0x3f4, "m_motion_flags2");
 static_assert(offsetof(DogActor, m_rot_y_aar) >= 0x3d0, "m_rot_y_aar");
 static_assert(offsetof(DogActor, m_rot_ofs_y) >= 0x424, "m_rot_ofs_y");
 static_assert(sizeof(DogActor) >= 0x4d0, "DogActor is 0x4d0 bytes on the EE");

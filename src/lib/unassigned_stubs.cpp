@@ -286,13 +286,6 @@ void FUN_00177830(Obj176a3c *obj, i3dContext *ctx)
     ROSEPAN_STUB("FUN_00177830", 0x00177830);
 }
 
-// stub of ROR 0x00133454
-float MagScene::castRay(MagSceneRayHit *hit, const float *pos, const float *dir, int tenkyu)
-{
-    ROSEPAN_STUB("MagScene::castRay", 0x00133454);
-    return {};
-}
-
 // stub of ROR 0x00140e88
 void MagScene::drawFocus(i3dContext *ctx, int frame)
 {
@@ -795,4 +788,30 @@ int GamFont::getTextWidth(const char *text)
 void MagScene::initRecords853bc()
 {
     ROSEPAN_STUB("MagScene::initRecords853bc", 0x00140a84);
+}
+
+// stub of ROR 0x00176c50
+void FUN_00176c50(Obj176a3c *obj)
+{
+    ROSEPAN_STUB("FUN_00176c50", 0x00176c50);
+}
+
+// stub of ROR 0x00194548
+void FUN_00194548(void)
+{
+    ROSEPAN_STUB("FUN_00194548", 0x00194548);
+}
+
+// stub of ROR 0x00234050
+float i3dSegSegDist2(const float *p0, const float *d0, const float *p1, const float *d1,
+                     float *s, float *t)
+{
+    ROSEPAN_STUB("i3dSegSegDist2", 0x00234050);
+    return {};
+}
+
+// stub of ROR 0x00106db0
+void utlNormalize3(float *v)
+{
+    ROSEPAN_STUB("utlNormalize3", 0x00106db0);
 }

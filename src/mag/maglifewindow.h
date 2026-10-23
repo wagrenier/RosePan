@@ -40,21 +40,35 @@ struct MagLifeWindow : MagLife
     void drawText(int x, int y, const char *str, int arg);               // ROR 0x00130258
     /* Takes the GamFont the window draws with (asserts thefontManager). */
     void setFontManager(GamFont *thefontManager);                        // ROR 0x00130778
+    /* The position as ints: x, y (getPos) or x, y, z (getPos3). */
+    void getPos(int *x, int *y);                                         // ROR 0x00130214
+    void getPos3(int *x, int *y, int *z);                                // ROR 0x00130230
+    /* GamFont::getCharMetrics on the window's font. */
+    void getCharMetrics(int code, int *left, int *width, int *extra);    // ROR 0x0012fca8
+    /* The font's m_prop_on = on != 0. */
+    void setProportional(int on);                                        // ROR 0x0012fd30
+    void setFontWord30(int v);                                           // ROR 0x0012fd88
+    void setFontWord34(int v);                                           // ROR 0x0012fddc
 
     u_char        _28[0x30 - 0x28];
     sceVu0FVECTOR m_pos;        // ROR 0x30: MagLifePos's position (setViewParam: x, y, z, 1)
     u_char        _40[0x80 - 0x40];
     int    m_wait_key;          // ROR 0x80: 0 = close at the next scene update, > 0 = close on pad bit 14, < 0 = stay (MagScene::update sub mode 2)
-    u_char _84[0x94 - 0x84];
+    int    m_84[4];             // ROR 0x84: MagScene::setWindowWords84 / getWindowWords84; roles unknown
     int    m_w;                 // ROR 0x94: setup / setViewParam
     int    m_h;                 // ROR 0x98: idem
     u_char _9c[0xc0 - 0x9c];
     int    m_tex_no;            // ROR 0xc0: the window font's texture in the scene's DogTexInfo (openWindow)
-    u_char _c4[0xe0 - 0xc4];
+    GamFont *m_fntman;          // ROR 0xc4: setFontManager's font (the setters assert it)
+    int    m_c8;                // ROR 0xc8: role unknown
+    int    m_cc;                // ROR 0xcc: MagScene::getWindowWordCc; role unknown
+    u_char _d0[0xe0 - 0xd0];
 };
 static_assert(offsetof(MagLifeWindow, m_pos) >= 0x30, "m_pos");
 static_assert(offsetof(MagLifeWindow, m_wait_key) >= 0x80, "m_wait_key");
 static_assert(offsetof(MagLifeWindow, m_w) >= 0x94, "m_w");
+static_assert(offsetof(MagLifeWindow, m_84) >= 0x84, "m_84");
 static_assert(offsetof(MagLifeWindow, m_tex_no) >= 0xc0, "m_tex_no");
+static_assert(offsetof(MagLifeWindow, m_cc) >= 0xcc, "m_cc");
 
 #endif /* _MAG_MAGLIFEWINDOW_H */

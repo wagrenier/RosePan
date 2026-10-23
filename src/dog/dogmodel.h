@@ -53,6 +53,10 @@ struct DogModel : DogEntityEx
     void drawUnitMatrix(I3dLayer *layer);                                // ROR 0x001152a8
     /* The clip sphere's radius, read from the root on first use. */
     float getClipRadius();                                               // ROR 0x00116038
+    /* The ray pos + t dir against the model's collision tables (asserts
+     * m_i3c_root, m_colli_tbl); t >= 0 on a hit, written into hit (the
+     * scene's MagSceneRayHit). */
+    float castRay(void *hit, const float *pos, const float *dir);        // ROR 0x0011440c
     /* EE slot 8 (+0x40) */
     void setHide(int hide) { m_hide = hide; }                            // ROR 0x00281db0
     /* EE slot 9 (+0x48) */
