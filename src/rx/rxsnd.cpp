@@ -4,9 +4,10 @@
  *  The rx sound library: the EE client of RXSNDDRV.IRX (RPC 0xd000). See
  *  rxsnd.h for the command families. Written so far: init / term, the
  *  transport (bind, call, direct commands, the command queue), the config,
- *  the IOP / SPU heap hooks, the per-frame status update of every family,
- *  volumes, stop / close and the set commands. Left: XVAB load / free, XSEQ,
- *  BGM / SE play, PCM, ADPCM open / write / end, the SPU heap allocator.
+ *  the IOP / SPU heap hooks, the SPU heap allocator, EE -> IOP / SPU
+ *  transfers, XVAB load / free, the per-frame status update of every
+ *  family, volumes, SE play / pause, ADPCM open / write / end, stop / close
+ *  and the set commands. Left: XSEQ, BGM play, PCM open / play.
  *
  *  PC: the IOP side is a host stand-in (src/sdk/iop_rxsnd.cpp) registered
  *  at the IOP boot; without it rxSndRpcInit would bind for ever. The RPC
@@ -19,8 +20,11 @@
 #include "rx/rxsys.h"
 #include "rx/rxthread.h"
 #include "sdk/eekernel.h"
+#include "sdk/sifman.h"
 #include "sdk/sifrpc.h"
 
+#include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 /* ---- data ------------------------------------------------------------- */
@@ -62,8 +66,8 @@ static RxSndSeVoice *s_seStopping;                 /* bss 0x7bc3d4 */
 static RxSndSeVoice *s_seFree;                     /* bss 0x7bc3d8 */
 static short         s_seMasterVolL;               /* bss 0x7bc3dc */
 static short         s_seMasterVolR;               /* bss 0x7bc3de */
-static int           s_se_3e0;                     /* bss 0x7bc3e0: set -1 (unverified) */
-static int           s_se_3e4;                     /* bss 0x7bc3e4: set -1 (unverified) */
+static int           s_seParamB;                   /* bss 0x7bc3e0: rxSndSePlay's default, -1 none */
+static int           s_seParamC;                   /* bss 0x7bc3e4: rxSndSePlay's default, -1 none */
 
 static RxSndPosCallback  s_pcmCallbacks[256];      /* bss 0x7bc400 */
 static RxSndPosCallback *s_pcmCallbackFree;        /* bss 0x7bd800 */
@@ -82,8 +86,17 @@ static RxSndAdpcm       *s_adpcmStopping;          /* bss 0x7c12cc */
 static RxSndAdpcm       *s_adpcmFree;              /* bss 0x7c12d0 */
 static short             s_adpcmMasterVolL;        /* bss 0x7c12d4 */
 static short             s_adpcmMasterVolR;        /* bss 0x7c12d6 */
-static int               s_adpcm_2d8;              /* bss 0x7c12d8: set 0 (unverified) */
-static int               s_adpcm_2dc;              /* bss 0x7c12dc: set 0 (unverified) */
+static int               s_adpcmParam6;            /* bss 0x7c12d8: rxSndAdpcmOpenBytes's default, 0 none */
+static int               s_adpcmParam7;            /* bss 0x7c12dc: rxSndAdpcmOpenBytes's default, 0 none */
+/* rxSndAdpcmWriteEx copies each chunk here (channel 0, 1) to clear and set
+ * the blocks' loop flags before sending it to the IOP ring. */
+static u_char            s_adpcmStage[2][0x4000];  /* bss 0x7c1300, 0x7c5300 */
+/* rxSndAdpcmEnd's end block: four ADPCM blocks of silence, the first with
+ * the end flag (1). */
+static const u_int       s_adpcmEndBlock[16] = {   /* sdata 0x2db980 */
+    0x00000100, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+};
 
 /* The direct commands' buffers, one bank per rxTh yield state. */
 static u_int            s_rpcSend[2][0x100];       /* bss 0x7c9300 */
@@ -187,6 +200,29 @@ void rxSndUpdate(void)
     rxSndSeUpdate(se);
     rxSndPcmUpdate(pcm);
     rxSndAdpcmUpdate(adpcm);
+}
+
+// ROR 0x00237f90
+void rxSndSetOutputMode(int mode)
+{
+    u_int req[2];
+
+    req[0] = 2;
+    req[1] = mode != 0;
+    rxSndRpcCommand(0x30, NULL, 0, req, sizeof(req));
+}
+
+// ROR 0x00237fe0
+u_char rxSndSetDebugFlags(int flags)
+{
+    u_char old = s_config.m_debugFlags;
+    u_int  req[2];
+
+    s_config.m_debugFlags = (u_char)flags;
+    req[0] = 0;
+    req[1] = flags;
+    rxSndRpcCommand(0x30, NULL, 0, req, sizeof(req));
+    return old;
 }
 
 // ROR 0x00238038
@@ -347,21 +383,106 @@ void rxSndIopFree(u_int addr)
     s_iopFreeHook(addr);
 }
 
+/* PC: the IOP addresses are the stand-in's fake ones, so sceSifSetDma drops
+ * the transfers (sdk/sif.cpp) and command 0x23 is answered with nothing. */
+// ROR 0x002387b8
+int rxSndIopWrite(u_int iopAddr, const void *src, int size)
+{
+    uintptr_t from = (uintptr_t)src;
+    u_int     mis  = (u_int)(from & 0xf);
+    u_int     head;
+
+    if (mis == 0)
+    {
+        head = 0;
+        if ((size & 0xf) == 0 && (iopAddr & 3) == 0 && (size & 3) == 0)
+        {
+            sceSifDmaData dma;
+
+            FlushCache(0);
+            dma.data = (void *)src;
+            dma.addr = (void *)(uintptr_t)iopAddr;
+            dma.size = size;
+            dma.mode = 0;
+            u_int id = sceSifSetDma(&dma, 1);
+            while (sceSifDmaStat(id) >= 0)
+                ;
+            FlushCache(0);
+            return 1;
+        }
+    }
+    else
+    {
+        head = 0u - mis;
+    }
+    head &= 0xf;
+
+    /* The unaligned head: the 0x20 bytes around it go to the bounce buffer,
+     * the IOP copies the part that belongs to iopAddr. */
+    int rest = size;
+    if (size > 0 && mis != 0)
+    {
+        int n = size <= (int)head ? size : (int)head;
+        rest  = size - n;
+        rxSndIopWrite(s_iopBuf.m_buf[rxSndGetBufferBank()], (const void *)(from - mis), 0x20);
+        rxSndIopCopy(iopAddr, s_iopBuf.m_buf[rxSndGetBufferBank()] + mis, n);
+    }
+
+    /* The aligned middle, sent to a 4-aligned IOP address and moved down
+     * when iopAddr is not. */
+    if (rest > 15)
+    {
+        u_int pad = (0u - (iopAddr & 3)) & 3;
+        int   mid = rest - (int)pad;
+        if (mid < 0)
+            mid = 0;
+        mid &= ~0xf;
+        if (mid > 0)
+        {
+            u_int tmp = iopAddr + head + pad;
+            rxSndIopWrite(tmp, (const void *)(from + head), mid);
+            if (pad != 0)
+                rxSndIopCopy(iopAddr + head, tmp, mid);
+            rest -= mid;
+        }
+    }
+
+    /* The tail through the bounce buffer. */
+    if (rest > 0)
+    {
+        rxSndIopWrite(s_iopBuf.m_buf[rxSndGetBufferBank()], (const u_char *)src + size - rest,
+                      (rest + 0xf) & ~0xf);
+        rxSndIopCopy(iopAddr + size - rest, s_iopBuf.m_buf[rxSndGetBufferBank()], rest);
+    }
+    return 1;
+}
+
+// ROR 0x00238cf0
+void rxSndIopCopy(u_int dst, u_int src, int size)
+{
+    u_int req[3];
+
+    req[0] = dst;
+    req[1] = src;
+    req[2] = size;
+    rxSndRpcCommand(0x23, NULL, 0, req, sizeof(req));
+}
+
 // ROR 0x00238d28
 void rxSndIopBufInit(void)
 {
     memset(&s_iopBuf, 0, sizeof(s_iopBuf));
-    s_iopBuf.m_buf0 = rxSndIopAlloc(0x20);
-    s_iopBuf.m_buf1 = rxSndIopAlloc(0x20);
+    s_iopBuf.m_buf[0] = rxSndIopAlloc(0x20);
+    s_iopBuf.m_buf[1] = rxSndIopAlloc(0x20);
 }
 
 // ROR 0x00238d78
 void rxSndIopBufTerm(void)
 {
-    if (s_iopBuf.m_buf0 != 0)
-        rxSndIopFree(s_iopBuf.m_buf0);
-    if (s_iopBuf.m_buf1 != 0)
-        rxSndIopFree(s_iopBuf.m_buf1);
+    if (s_iopBuf.m_buf[0] != 0)
+        rxSndIopFree(s_iopBuf.m_buf[0]);
+    if (s_iopBuf.m_buf[1] != 0)
+        rxSndIopFree(s_iopBuf.m_buf[1]);
 }
 
 // ROR 0x00238ff0
@@ -418,6 +539,22 @@ void rxSndSpuFree(u_int addr)
     s_spuFreeHook(addr);
 }
 
+/* PC: m_eeAddr keeps the low 32 bits of the host pointer; the stand-in
+ * does not read it. */
+// ROR 0x00239120
+int rxSndSpuTransfer(u_int spuAddr, const void *src, int size)
+{
+    RxSndCmdTransfer req;
+
+    memset(&req, 0, sizeof(req));
+    req.m_type    = 3;
+    req.m_dir     = 1;
+    req.m_spuAddr = spuAddr;
+    req.m_eeAddr  = (u_int)(uintptr_t)src;
+    req.m_size    = size;
+    return (int)rxSndRpcCommand(0x40, NULL, 0, &req, sizeof(req));
+}
+
 // ROR 0x00239288
 int rxSndXvabPoll(int handle, int wait)
 {
@@ -455,8 +592,8 @@ void rxSndSpuHeapInit(void)
     node->m_prev->m_next = node;
     node->m_size    = 0x1baff0;
     node->m_addr    = 0x5010;
-    node->m_8       = 0;
-    node->m_c       = 0;
+    node->m_owner   = NULL;
+    node->m_used    = 0;
 
     for (int i = 0; i < 256; i++)
     {
@@ -464,18 +601,212 @@ void rxSndSpuHeapInit(void)
         s_spuSlots[i].m_used  = 0;
     }
 
-    s_spuRegion.m_addr = 0x5010;
-    s_spuRegion.m_10   = 0;
-    s_spuRegion.m_0    = -1;
-    s_spuRegion.m_4    = 1;
-    s_spuRegion.m_size = 0x1baff0;
+    s_spuRegion.m_slot.m_addr  = 0x5010;
+    s_spuRegion.m_slot.m_count = 0;
+    s_spuRegion.m_slot.m_index = -1;
+    s_spuRegion.m_slot.m_used  = 1;
+    s_spuRegion.m_slot.m_size  = 0x1baff0;
     for (int i = 1; i >= 0; i--)
-        s_spuRegion.m_14[i] = -1;
+        s_spuRegion.m_bankSlot[i] = -1;
 }
 
 // ROR 0x002394a0
 void rxSndSpuHeapTerm(void)
 {
+}
+
+// ROR 0x002394a8
+RxSndSpuSlot *rxSndSpuHeapGetSlot(u_int id)
+{
+    if (id > 0xff)
+        return &s_spuRegion.m_slot;
+    return &s_spuSlots[id];
+}
+
+/* The window tests compare unsigned, as the ROM does: a block outside the
+ * slot gives hi < lo and passes the size test. */
+// ROR 0x002394e0
+u_int rxSndSpuHeapAlloc(int mode, u_int addr, int size)
+{
+    int   bytes  = (size + 0x3f) / 0x40 * 0x40;
+    u_int result = 0;
+
+    DIntr();
+    if (bytes <= 0)
+    {
+        if (rxSndGetDebugFlags() & 2)
+            rxSysPrintf("rxsnd : can't allocate SPU heap '%d'\n", bytes);
+        EIntr();
+        return 0;
+    }
+
+    RxSndSpuSlot *slot  = rxSndSpuHeapGetSlot((u_int)s_spuRegion.m_bankSlot[rxSndGetBufferBank()]);
+    u_int         lo    = slot->m_addr;
+    u_int         hi    = slot->m_addr + slot->m_size;
+    RxSndSpuNode *node  = NULL;
+    u_int         start = 0;
+    bool          found = false;
+
+    if (mode == 1)
+    {
+        /* Down from the top of SPU memory. */
+        node  = s_spuList.m_next;
+        start = 0x1c0000 - node->m_size;
+        while (node != &s_spuList)
+        {
+            u_int a = start < lo ? lo : start;
+            u_int b = hi < start + node->m_size ? hi : start + node->m_size;
+            if (node->m_used == 0 && b - a >= (u_int)bytes)
+            {
+                addr  = b - bytes;
+                found = true;
+                break;
+            }
+            node   = node->m_next;
+            start -= node->m_size;
+        }
+    }
+    else if (mode == 0 || mode == 2)
+    {
+        /* Up from 0x5010: the lowest fit, or the block holding `addr`. */
+        start = 0x5010;
+        for (node = s_spuList.m_prev; node != &s_spuList; node = node->m_prev)
+        {
+            u_int a = start < lo ? lo : start;
+            u_int b = hi < start + node->m_size ? hi : start + node->m_size;
+            if (node->m_used == 0)
+            {
+                if (mode == 0 && b - a >= (u_int)bytes)
+                {
+                    addr  = a;
+                    found = true;
+                    break;
+                }
+                if (mode == 2 && addr >= a && addr + bytes <= b)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            start += node->m_size;
+        }
+    }
+
+    if (!found)
+    {
+        if (rxSndGetDebugFlags() & 2)
+            rxSysPrintf("**********rxsnd : can't allocate SPU heap '%d'\n", bytes);
+        EIntr();
+        return 0;
+    }
+
+    RxSndSpuNode *front = rxSndSpuHeapNewNode();
+    RxSndSpuNode *back  = NULL;
+    if (front != NULL)
+        back = rxSndSpuHeapNewNode();
+    if (front == NULL || back == NULL)
+    {
+        rxSndSpuHeapFreeNode(front);
+        rxSndSpuHeapFreeNode(back);
+        if (rxSndGetDebugFlags() & 2)
+            rxSysPrintf("rxsnd : can't allocate SPU heap slot\n");
+        EIntr();
+        return 0;
+    }
+
+    /* Split off the free space below addr (m_next side) and above the
+     * block (m_prev side). */
+    if (start < addr)
+    {
+        front->m_size         = addr - start;
+        front->m_next         = node->m_next;
+        front->m_prev         = node;
+        front->m_used         = 0;
+        node->m_next->m_prev  = front;
+        node->m_next          = front;
+        node->m_size         -= front->m_size;
+    }
+    else
+    {
+        rxSndSpuHeapFreeNode(front);
+    }
+    if (bytes < (int)node->m_size)
+    {
+        back->m_next          = node;
+        back->m_used          = 0;
+        back->m_prev          = node->m_prev;
+        back->m_size          = node->m_size - bytes;
+        node->m_prev->m_next  = back;
+        node->m_prev          = back;
+        node->m_size         -= back->m_size;
+    }
+    else
+    {
+        rxSndSpuHeapFreeNode(back);
+    }
+
+    node->m_owner  = slot;
+    node->m_used   = 1;
+    s_spuHeapSize -= bytes;
+    slot->m_count++;
+    if (rxSndGetDebugFlags() & 4)
+        rxSysPrintf("rxsnd : SPU heap alloc %08X - %08X (%d) left %d / %d\n", addr,
+                    addr + bytes - 1, bytes, s_spuHeapSize, 0x1baff0);
+    result = addr;
+    EIntr();
+    return result;
+}
+
+// ROR 0x002398f8
+void rxSndSpuHeapFree(u_int addr)
+{
+    DIntr();
+    u_int start = 0x5010;
+    for (RxSndSpuNode *node = s_spuList.m_prev; node != &s_spuList; node = node->m_prev)
+    {
+        if (node->m_used == 1 && start == addr)
+        {
+            node->m_used = 0;
+            node->m_owner->m_count--;
+            s_spuHeapSize += node->m_size;
+
+            /* Merge with a free block below, then above. */
+            RxSndSpuNode *below = node->m_next;
+            if (below != &s_spuList && below->m_used == 0)
+            {
+                below->m_prev        = node->m_prev;
+                node->m_prev->m_next = below;
+                below->m_size       += node->m_size;
+                rxSndSpuHeapFreeNode(node);
+                node = below;
+            }
+            RxSndSpuNode *above = node->m_prev;
+            if (above != &s_spuList && above->m_used == 0)
+            {
+                node->m_next->m_prev = above;
+                above->m_next        = node->m_next;
+                above->m_size       += node->m_size;
+                rxSndSpuHeapFreeNode(node);
+                node = above;
+            }
+            if (node->m_used == 0 && node->m_size == 0)
+            {
+                node->m_next->m_prev = node->m_prev;
+                node->m_prev->m_next = node->m_next;
+                rxSndSpuHeapFreeNode(node);
+            }
+
+            if (rxSndGetDebugFlags() & 4)
+                rxSysPrintf("rxsnd : SPU heap free (%d / %d)\n", s_spuHeapSize, 0x1baff0);
+            EIntr();
+            return;
+        }
+        start += node->m_size;
+    }
+
+    if (rxSndGetDebugFlags() & 2)
+        rxSysPrintf("rxsnd : can't found SPU heap address %08X\n", addr);
+    EIntr();
 }
 
 // ROR 0x00239be8
@@ -491,6 +822,16 @@ RxSndSpuNode *rxSndSpuHeapNewNode(void)
     return NULL;
 }
 
+// ROR 0x00239c10
+void rxSndSpuHeapFreeNode(RxSndSpuNode *node)
+{
+    if (node != NULL)
+    {
+        node->m_prev   = s_spuFreeNodes;
+        s_spuFreeNodes = node;
+    }
+}
+
 /* ---- XVAB / XSEQ ------------------------------------------------------ */
 
 // ROR 0x0023a170
@@ -501,6 +842,170 @@ void rxSndXvabInit(void)
 // ROR 0x0023a178
 void rxSndXvabTerm(void)
 {
+}
+
+/* Takes bank `id` (-1: the first free one), copies the file to IOP memory,
+ * opens it there (command 0x50) and starts sending its samples to SPU
+ * memory; the IOP's reply is the bank id. iopAddr / spuAddr 0 allocate. */
+// ROR 0x0023a1b8
+int rxSndXvabLoad(int id, const void *xvab, u_int iopAddr, u_int spuAddr)
+{
+    char       msg[0x100];
+    u_int      owned = 0;
+    RxSndXvab *bank  = NULL;
+
+    msg[0] = '\0';
+    DIntr();
+    if (id < 0)
+    {
+        for (id = 0; id < 0x100; id++)
+        {
+            if (!(s_xvab[id].m_flags & 1))
+            {
+                s_xvab[id].m_flags = 1;
+                bank               = &s_xvab[id];
+                break;
+            }
+        }
+        if (id == 0x100)
+            strcpy(msg, "XVAB slot is empty\n");
+    }
+    else if (id < 0x100)
+    {
+        if (!(s_xvab[id].m_flags & 1))
+        {
+            s_xvab[id].m_flags = 1;
+            bank               = &s_xvab[id];
+        }
+        else
+        {
+            sprintf(msg, "XVAB ID '%d' is already exist\n", id);
+        }
+    }
+    else
+    {
+        sprintf(msg, "XVAB ID '%d' is out of range\n", id);
+    }
+    EIntr();
+
+    if (bank == NULL)
+    {
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("%s", msg);
+        return -1;
+    }
+
+    u_int magic = rxSndReadU32(xvab);
+    if (magic == 0x42415658)            /* "XVAB" */
+    {
+        int           size = rxSndChunkGetFileSize(xvab);
+        const u_char *samples;
+        int           sampleSize;
+        rxSndXvabGetSampleData(&samples, &sampleSize, xvab);
+
+        if (iopAddr == 0)
+        {
+            iopAddr = rxSndIopAlloc(size);
+            if (iopAddr == 0)
+            {
+                if (rxSndGetDebugFlags() & 2)
+                    rxSysPrintf("rxsnd : can't allocate IOP heap size '%d'\n", size);
+                goto fail;
+            }
+            owned = 0x10000;
+        }
+        if (spuAddr == 0 && samples != NULL)
+        {
+            spuAddr = rxSndSpuAlloc(sampleSize);
+            if (spuAddr == 0)
+            {
+                if (rxSndGetDebugFlags() & 2)
+                    rxSysPrintf("rxsnd : can't allocate SPU heap size '%d'\n", sampleSize);
+                goto fail;
+            }
+            owned |= 0x20000;
+        }
+
+        rxSndIopWrite(iopAddr, xvab, size);
+        u_int req[3];
+        req[0]  = id;
+        req[1]  = iopAddr;
+        req[2]  = spuAddr;
+        int ret = (int)rxSndRpcCommand(0x50, NULL, 0, req, sizeof(req));
+        if (ret >= 0)
+        {
+            bank->m_iopBuf    = iopAddr;
+            bank->m_iopSize   = size;
+            bank->m_flags    |= owned;
+            bank->m_spuBuf    = spuAddr;
+            bank->m_transfer  = -1;
+            bank->m_spuSize   = sampleSize;
+            if (samples != NULL)
+            {
+                int handle;
+                do
+                    handle = rxSndSpuTransfer(spuAddr, samples, sampleSize);
+                while (handle < 0);
+                bank->m_transfer  = handle;
+                bank->m_flags    |= 0x40000;
+            }
+            return ret;
+        }
+        if (rxSndGetDebugFlags() & 2)
+            rxSysPrintf("rxsnd : failed to open XVAB\n");
+    }
+    else if (rxSndGetDebugFlags() & 1)
+    {
+        rxSysPrintf("rxsnd : wrong type XVAB ID '%c%c%c%c'\n", magic & 0xff, (magic >> 8) & 0xff,
+                    (magic >> 16) & 0xff, magic >> 24);
+    }
+
+fail:
+    bank->m_flags = 0;
+    if ((owned & 0x10000) && iopAddr != 0)
+        rxSndIopFree(iopAddr);
+    if ((owned & 0x20000) && spuAddr != 0)
+        rxSndSpuFree(spuAddr);
+    return -1;
+}
+
+// ROR 0x0023a5a8
+int rxSndXvabFree(int id, int wait)
+{
+    if ((u_int)id >= 0x100)
+    {
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("rxsnd : out of range XVAB ID '%d'\n", id);
+        return 0;
+    }
+
+    RxSndXvab *bank = &s_xvab[id];
+    if (!(bank->m_flags & 1))
+    {
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("rxsnd : specified XVAB ID '%d' is unused\n", id);
+        return 0;
+    }
+
+    /* Command 0x51 answers 1 while voices still play the bank. */
+    u_int req[1];
+    req[0] = id;
+    while (rxSndRpcCommand(0x51, NULL, 0, req, sizeof(req)) == 1)
+    {
+        if (!wait)
+            return 1;
+        if (rxSndGetBufferBank() == 0)
+            rxSndUpdate();
+        for (int i = 9999; i >= 0; i--)
+            rxSndWait();
+    }
+
+    if ((bank->m_flags & 0x10000) && bank->m_iopBuf != 0)
+        rxSndIopFree(bank->m_iopBuf);
+    if ((bank->m_flags & 0x20000) && bank->m_spuBuf != 0)
+        rxSndSpuFree(bank->m_spuBuf);
+    bank->m_flags = 0;
+    return 0;
 }
 
 // ROR 0x0023a720
@@ -529,6 +1034,30 @@ int rxSndXvabCheck(int id, int wait)
     return busy;
 }
 
+// ROR 0x0023a930
+int rxSndXvabGetSampleData(const u_char **data, int *size, const void *xvab)
+{
+    /* A HEAD chunk with byte 1 set: the samples follow the file. */
+    const u_char *head = rxSndChunkFindData(xvab, 0x44414548);      /* "HEAD" */
+    if (head != NULL && head[1] != 0)
+    {
+        *data = (const u_char *)xvab + ((rxSndChunkGetFileSize(xvab) + 0xf) & ~0xf);
+        *size = *(const int *)(head + 4);
+        return 1;
+    }
+
+    const u_char *smpl = rxSndChunkFindData(xvab, 0x4c504d53);      /* "SMPL" */
+    if (smpl == NULL)
+    {
+        *data = NULL;
+        *size = 0;
+        return 0;
+    }
+    *data = (const u_char *)xvab + *(const int *)(smpl + 8);
+    *size = *(const int *)(smpl + 0xc);
+    return 1;
+}
+
 // ROR 0x0023b018
 void rxSndXseqInit(void)
 {
@@ -540,9 +1069,71 @@ void rxSndXseqTerm(void)
 }
 
 // ROR 0x0023b028
-u_int rxSndReadU32(const u_int *p)
+u_int rxSndReadU32(const void *p)
 {
-    return *p;
+    return *(const u_int *)p;
+}
+
+// ROR 0x0023b030
+u_int rxSndChunkGetVersion(const void *file)
+{
+    return ((const u_int *)file)[1];
+}
+
+// ROR 0x0023b038
+int rxSndChunkGetFileSize(const void *file)
+{
+    int size = ((const int *)file)[2];
+    if (rxSndChunkGetVersion(file) > 0x1ff)
+        size += 0x10;
+    return size;
+}
+
+// ROR 0x0023b078
+int rxSndChunkFind(const u_char **data, int *size, const void *file, u_int tag)
+{
+    const u_char *base  = (const u_char *)file;
+    int           total = ((const int *)file)[2];
+
+    if (rxSndChunkGetVersion(file) > 0x1ff)
+    {
+        for (int pos = 0; pos < total;)
+        {
+            const int *chunk = (const int *)(base + 0x10 + pos);
+            if ((u_int)chunk[0] == tag)
+            {
+                *data = (const u_char *)(chunk + 4);
+                *size = chunk[2];
+                return 1;
+            }
+            pos += chunk[2] + 0x10;
+        }
+        return 0;
+    }
+
+    for (int pos = 0xc; pos < total;)
+    {
+        const int *chunk = (const int *)(base + pos);
+        if ((u_int)chunk[0] == tag)
+        {
+            *data = (const u_char *)(chunk + 2);
+            *size = chunk[1];
+            return 1;
+        }
+        pos += chunk[1] + 8;
+    }
+    return 0;
+}
+
+// ROR 0x0023b1c8
+const u_char *rxSndChunkFindData(const void *file, u_int tag)
+{
+    const u_char *data;
+    int           size;
+
+    if (rxSndChunkFind(&data, &size, file, tag) == 0)
+        data = NULL;
+    return data;
 }
 
 /* ---- BGM -------------------------------------------------------------- */
@@ -703,6 +1294,42 @@ void rxSndSeSetMasterVolume(int volL, int volR)
         rxSndSeSetVolume(voice->m_id, voice->m_volL, voice->m_volR);
 }
 
+// ROR 0x0023be68
+int rxSndSePlay(int xvab, int prog, int note, int volL, int volR, int keep)
+{
+    RxSndSeVoice *voice = s_seFree;
+
+    if (voice == NULL)
+    {
+        if (rxSndGetDebugFlags() & 4)
+            rxSysPrintf("rxsnd : can't allocate SE slot ( SE '%d, %d, %d' )\n", xvab, prog, note);
+        return -1;
+    }
+
+    rxSndQueueBegin(0x80, 0, sizeof(RxSndCmdSePlay));
+    RxSndCmdSePlay *cmd = (RxSndCmdSePlay *)rxSndQueueGetData();
+    cmd->m_note  = (u_char)note;
+    cmd->m_voice = (u_char)voice->m_id;
+    cmd->m_xvab  = (u_char)xvab;
+    cmd->m_prog  = (u_char)prog;
+    rxSndQueueEnd();
+
+    voice->m_flags = 3;
+    voice->m_keep  = keep;
+    voice->m_volL  = (short)volL;
+    voice->m_volR  = (short)volR;
+    s_seFree       = voice->m_next;
+    voice->m_next  = s_seActive;
+    s_seActive     = voice;
+
+    rxSndSeSetVolume(voice->m_id, volL, volR);
+    if (s_seParamB > 0)
+        rxSndSeSetParamB(voice->m_id, s_seParamB);
+    if (s_seParamC > 0)
+        rxSndSeSetParamC(voice->m_id, s_seParamC);
+    return voice->m_id;
+}
+
 // ROR 0x0023c0f8
 void rxSndSeStop(int id, int arg)
 {
@@ -739,6 +1366,22 @@ u_int rxSndSeGetStatus(int id)
     if ((u_int)id > 0x3f || !(s_se[id].m_flags & 1))
         return 0;
     return s_se[id].m_flags;
+}
+
+/* pause != 0: arg != 0 pauses with value 1, else 2 (the IOP's two pause
+ * kinds, not known); pause 0 resumes. */
+// ROR 0x0023c260
+void rxSndSePause(int id, int pause, int arg)
+{
+    if ((u_int)id >= 0x40 || !(s_se[id].m_flags & 1))
+        return;
+
+    rxSndQueueBegin(0x82, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_param = 1;
+    cmd->m_id    = s_se[id].m_id;
+    cmd->m_value = pause != 0 ? (arg != 0 ? 1 : 2) : 0;
+    rxSndQueueEnd();
 }
 
 // ROR 0x0023c328
@@ -794,16 +1437,46 @@ void rxSndSeSetPitch(int id, float pitch)
     rxSndQueueEnd();
 }
 
+// ROR 0x0023c660
+void rxSndSeSetParam(int id, int param, int value)
+{
+    if ((u_int)id >= 0x40 || !(s_se[id].m_flags & 1))
+        return;
+
+    rxSndQueueBegin(0x82, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_value = value;
+    cmd->m_param = param;
+    cmd->m_id    = s_se[id].m_id;
+    rxSndQueueEnd();
+}
+
+// ROR 0x0023c860
+void rxSndSeSetParamB(int id, int value)
+{
+    if (value < 0)
+        return;
+    rxSndSeSetParam(id, 0xb, rxSndClamp(value, -1, 2));
+}
+
+// ROR 0x0023c8b8
+void rxSndSeSetParamC(int id, int value)
+{
+    if (value < 0)
+        return;
+    rxSndSeSetParam(id, 0xc, rxSndClamp(value, -1, 0x7e));
+}
+
 // ROR 0x0023c910
 void rxSndSeInit(void)
 {
     s_seMasterVolR = 0x80;
-    s_se_3e4       = -1;
+    s_seParamC       = -1;
     s_seActive     = NULL;
     s_seStopping   = NULL;
     s_seFree       = NULL;
     s_seMasterVolL = 0x80;
-    s_se_3e0       = -1;
+    s_seParamB       = -1;
     for (int i = 0; i < 0x40; i++)
     {
         s_se[i].m_id   = i;
@@ -1031,6 +1704,131 @@ void rxSndAdpcmSetMasterVolume(int volL, int volR)
         rxSndAdpcmSetVolume(s->m_id, s->m_volL, s->m_volR);
 }
 
+// ROR 0x0023dcc8
+int rxSndAdpcmOpen(int mode, int rate, u_int iopAddr, int iopKB, u_int spuAddr, int spuKB)
+{
+    return rxSndAdpcmOpenBytes(mode, rate, iopAddr, iopKB << 10, spuAddr, spuKB << 10, -1);
+}
+
+// ROR 0x0023dce8
+int rxSndAdpcmOpenEx(int mode, int rate, u_int iopAddr, int iopKB, u_int spuAddr, int spuKB,
+                     int arg)
+{
+    return rxSndAdpcmOpenBytes(mode, rate, iopAddr, iopKB << 10, spuAddr, spuKB << 10, arg);
+}
+
+// ROR 0x0023dd08
+int rxSndAdpcmOpenBytes(int mode, int rate, u_int iopAddr, int iopSize, u_int spuAddr,
+                        int spuSize, int arg)
+{
+    RxSndAdpcm *s        = s_adpcmFree;
+    u_int       owned    = 0;
+    int         channels = 0;
+
+    if (s == NULL)
+    {
+        if (rxSndGetDebugFlags() & 2)
+            rxSysPrintf("rxsnd : can't allocate ADPCM stream slot\n");
+        goto fail;
+    }
+
+    if (mode & 0x1000000)
+    {
+        channels = mode & 0xff;
+        mode     = 0x1000000;
+    }
+    else if (mode == 0)
+    {
+        channels = 1;
+    }
+    else if (mode > 0 && mode < 3)
+    {
+        channels = 2;
+    }
+    else
+    {
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("rxsnd : no supported ADPCM stream mode '%d'\n", mode);
+        goto fail;
+    }
+
+    if (iopAddr == 0)
+    {
+        iopAddr = rxSndIopAlloc(iopSize * channels);
+        if (iopAddr == 0)
+            goto fail;
+        owned = 1;
+    }
+    if (spuAddr == 0)
+    {
+        spuAddr = rxSndSpuAlloc(spuSize * channels);
+        if (spuAddr == 0)
+            goto fail;
+        owned |= 2;
+    }
+
+    {
+        rxSndQueueBegin(0xa0, 0, channels * sizeof(RxSndCmdAdpcmBuf) + sizeof(RxSndCmdAdpcmOpen));
+        RxSndCmdAdpcmOpen *cmd = (RxSndCmdAdpcmOpen *)rxSndQueueGetData();
+        cmd->m_arg      = (short)arg;
+        cmd->m_id       = s->m_id;
+        cmd->m_channels = (u_char)channels;
+        cmd->m_iopSize  = iopSize;
+        cmd->m_spuSize  = spuSize;
+        cmd->m_pitch    = (short)((rate << 12) / 48000);
+        RxSndCmdAdpcmBuf *buf = (RxSndCmdAdpcmBuf *)(cmd + 1);
+        for (int i = 0; i < channels; i++)
+        {
+            buf[i].m_iopBuf = iopAddr + iopSize * i;
+            buf[i].m_spuBuf = spuAddr + spuSize * i;
+        }
+        rxSndQueueEnd();
+    }
+
+    s->m_status     = 1;
+    s->m_mode       = mode;
+    s->m_alloc      = (u_char)owned;
+    s->m_volR       = 0x80;
+    s->m_end        = 0;
+    s->m_channels   = (u_char)channels;
+    s->m_10         = 0;
+    s->m_volL       = 0x80;
+    s->m_iopBuf     = iopAddr;
+    s->m_bufSize    = iopSize;
+    s->m_bufFill    = 0;
+    s->m_writePos   = 0;
+    s->m_pending    = 0;
+    s->m_spuBuf     = spuAddr;
+    s->m_spuSize    = spuSize;
+    s->m_spuPos     = 0;
+    s->m_writtenHi  = 0;
+    s->m_writtenLo  = 0;
+    s->m_position   = 0;
+    s->m_callbacks  = NULL;
+    s_adpcmFree     = s->m_next;
+    s->m_next       = s_adpcmActive;
+    s_adpcmActive   = s;
+
+    if (rxSndGetDebugFlags() & 4)
+        rxSysPrintf("rxsnd : open ADPCM '%d'\n        IOP   %08X - %08X ( %d )\n"
+                    "        ADPCM %08X - %08X ( %d )\n",
+                    s->m_id, iopAddr, iopAddr + iopSize * channels, iopSize * channels, spuAddr,
+                    spuAddr + spuSize * channels, spuSize * channels);
+    rxSndAdpcmSetVolume(s->m_id, 0x80, 0x80);
+    if (s_adpcmParam6 > 0)
+        rxSndAdpcmSetParam6(s->m_id, s_adpcmParam6);
+    if (s_adpcmParam7 > 0)
+        rxSndAdpcmSetParam7(s->m_id, s_adpcmParam7);
+    return s->m_id;
+
+fail:
+    if ((owned & 1) && iopAddr != 0)
+        rxSndIopFree(iopAddr);
+    if ((owned & 2) && spuAddr != 0)
+        rxSndSpuFree(spuAddr);
+    return -1;
+}
+
 // ROR 0x0023e020
 void rxSndAdpcmClose(int id)
 {
@@ -1102,6 +1900,223 @@ int rxSndAdpcmGetFreeSize(int id, int raw)
 int rxSndAdpcmGetFree(int id)
 {
     return rxSndAdpcmGetFreeSize(id, 0);
+}
+
+/* Copies `count` 16-byte blocks from src (one every `stride` bytes) to dst,
+ * clearing each block's flag byte (inlined in the ROM). */
+static inline void rxSndAdpcmStage(u_char *dst, const u_char *src, int stride, u_int count)
+{
+    for (u_int i = 0; i < count; i++)
+    {
+        memcpy(dst, src, 0x10);
+        dst[1]  = 0;
+        dst    += 0x10;
+        src    += stride;
+    }
+}
+
+/* The last block before each wrap of the SPU buffer gets flags 3 (loop end
+ * + repeat): `pos` is the chunk's position in the SPU buffer (inlined).
+ * PC: a chunk that does not start on a block (a write of an odd size)
+ * would put the flag before the stage buffer; skipped. */
+static inline void rxSndAdpcmMarkLoops(u_char *stage, int pos, int spuSize, int n)
+{
+    for (int k = spuSize; k <= pos + n; k += spuSize)
+    {
+        int at = k - pos - 0x10 + 1;
+        if (at >= 0)
+            stage[at] = 3;
+    }
+}
+
+/* Chunks are min(run, 0x4000) for modes 0 / 1, not min(run left, 0x4000):
+ * a run over 0x4000 bytes overshoots it, as in the ROM (mode 2 and the
+ * interleaved mode take what is left). */
+// ROR 0x0023e258
+int rxSndAdpcmWriteEx(int id, const void *data, const void *dataR, int size, int raw)
+{
+    if ((u_int)id >= 0x30 || !(s_adpcm[id].m_status & 1))
+        return 0;
+    RxSndAdpcm *s = &s_adpcm[id];
+    if (s->m_end == 1)
+        return 0;
+
+    /* The bytes per channel. */
+    int per = size;
+    if (s->m_mode < 3)
+    {
+        if (s->m_mode > 0)
+            per = size / 2;
+    }
+    else if (s->m_mode == 0x1000000)
+    {
+        per = size / s->m_channels / 0x10 * 0x10;
+    }
+    int free = rxSndAdpcmGetFreeSize(id, raw);
+    int n    = per < free ? per : free;
+    if (n < 0)
+        n = 0;
+    if (n <= 0)
+        return size;
+
+    const u_char *src  = (const u_char *)data;
+    const u_char *srcR = (const u_char *)dataR;
+    if (s->m_mode == 0 || s->m_mode == 1)
+    {
+        bool two = s->m_mode == 1;
+        for (int done = 0; done < n;)
+        {
+            int run = n - done;
+            if (s->m_bufSize - s->m_writePos <= run)
+                run = s->m_bufSize - s->m_writePos;
+            if (run < 0)
+                run = 0;
+            for (int sent = 0; sent < run;)
+            {
+                int chunk = (u_int)run < 0x4001 ? run : 0x4000;
+                rxSndAdpcmStage(s_adpcmStage[0], src, 0x10, (u_int)chunk >> 4);
+                if (two)
+                    rxSndAdpcmStage(s_adpcmStage[1], srcR, 0x10, (u_int)chunk >> 4);
+                rxSndAdpcmMarkLoops(s_adpcmStage[0], s->m_spuPos, s->m_spuSize, chunk);
+                if (two)
+                    rxSndAdpcmMarkLoops(s_adpcmStage[1], s->m_spuPos, s->m_spuSize, chunk);
+                s->m_spuPos = (s->m_spuPos + chunk) % s->m_spuSize;
+                rxSndIopWrite(s->m_iopBuf + s->m_writePos, s_adpcmStage[0], chunk);
+                if (two)
+                    rxSndIopWrite(s->m_iopBuf + s->m_writePos + s->m_bufSize, s_adpcmStage[1], chunk);
+                s->m_writePos += chunk;
+                if (s->m_bufSize <= s->m_writePos)
+                    s->m_writePos = 0;
+                sent       += chunk;
+                src        += chunk;
+                if (two)
+                    srcR   += chunk;
+                s->m_bufFill += chunk;
+            }
+            done += run;
+        }
+    }
+    else if (s->m_mode == 2)
+    {
+        /* Stereo interleaved by block: L, R, L, R ... */
+        for (int left = n; left > 0;)
+        {
+            int run = s->m_bufSize - s->m_writePos;
+            if (left < run)
+                run = left;
+            for (int rest = run; rest > 0;)
+            {
+                int chunk = (u_int)rest < 0x4001 ? rest : 0x4000;
+                rxSndAdpcmStage(s_adpcmStage[0], src, 0x20, (u_int)chunk >> 4);
+                rxSndAdpcmStage(s_adpcmStage[1], src + 0x10, 0x20, (u_int)chunk >> 4);
+                rxSndAdpcmMarkLoops(s_adpcmStage[0], s->m_spuPos, s->m_spuSize, chunk);
+                rxSndAdpcmMarkLoops(s_adpcmStage[1], s->m_spuPos, s->m_spuSize, chunk);
+                s->m_spuPos = (s->m_spuPos + chunk) % s->m_spuSize;
+                rxSndIopWrite(s->m_iopBuf + s->m_writePos, s_adpcmStage[0], chunk);
+                rxSndIopWrite(s->m_iopBuf + s->m_writePos + s->m_bufSize, s_adpcmStage[1], chunk);
+                s->m_writePos += chunk;
+                if (s->m_bufSize <= s->m_writePos)
+                    s->m_writePos = 0;
+                src          += chunk * 2;
+                s->m_bufFill += chunk;
+                rest         -= chunk;
+            }
+            left -= run;
+        }
+    }
+    else if (s->m_mode == 0x1000000)
+    {
+        /* m_channels channels interleaved by block. */
+        int channels = s->m_channels;
+        for (int left = n; left > 0;)
+        {
+            u_int chunk = (u_int)(s->m_bufSize - s->m_writePos);
+            if (left < (int)chunk)
+                chunk = left;
+            if (chunk > 0x4000)
+                chunk = 0x4000;
+            for (int ch = 0; ch < channels; ch++)
+            {
+                rxSndAdpcmStage(s_adpcmStage[0], src + ch * 0x10, channels * 0x10, chunk >> 4);
+                rxSndAdpcmMarkLoops(s_adpcmStage[0], s->m_spuPos, s->m_spuSize, (int)chunk);
+                rxSndIopWrite(s->m_iopBuf + s->m_bufSize * ch + s->m_writePos, s_adpcmStage[0],
+                              (int)chunk);
+            }
+            left         -= chunk;
+            src          += chunk * channels;
+            s->m_spuPos   = (s->m_spuPos + (int)chunk) % s->m_spuSize;
+            s->m_writePos = (s->m_writePos + (int)chunk) % s->m_bufSize;
+            s->m_bufFill += chunk;
+        }
+    }
+
+    /* Announce the whole 0x40 units; the rest waits for the next write. */
+    rxSndQueueBegin(0xa1, 0, sizeof(RxSndCmdAdpcmData));
+    RxSndCmdAdpcmData *cmd = (RxSndCmdAdpcmData *)rxSndQueueGetData();
+    int pending   = s->m_pending;
+    s->m_pending  = (pending + n) & 0x3f;
+    cmd->m_size   = (pending + n) & ~0x3f;
+    cmd->m_id     = s->m_id;
+    cmd->m_end    = 0;
+    rxSndQueueEnd();
+
+    u_int lo       = s->m_writtenLo;
+    s->m_writtenLo = lo + n;
+    if (s->m_writtenLo < lo)
+        s->m_writtenHi++;
+    return size;
+}
+
+// ROR 0x0023eb10
+int rxSndAdpcmWrite(int id, const void *data, const void *dataR, int size)
+{
+    return rxSndAdpcmWriteEx(id, data, dataR, size, 0);
+}
+
+// ROR 0x0023eb28
+void rxSndAdpcmEnd(int id)
+{
+    if ((u_int)id >= 0x30 || !(s_adpcm[id].m_status & 1))
+        return;
+    RxSndAdpcm *s = &s_adpcm[id];
+
+    /* Pad the last unit with the (zero) work buffer, then the end block. */
+    int mode = s->m_mode;
+    if (s->m_pending > 0)
+    {
+        int pad;
+        if (mode < 4)
+            pad = mode < 1 ? 0x40 - s->m_pending : (0x40 - s->m_pending) * 2;
+        else if (mode == 0x1000000)
+            pad = (0x40 - s->m_pending) * s->m_channels;
+        else
+            pad = 0x40 - s->m_pending;
+        rxSndAdpcmWriteEx(id, rxSndGetWorkBuffer(), rxSndGetWorkBuffer(), pad, 1);
+        mode = s->m_mode;
+    }
+
+    if (mode < 4 && mode >= 1)
+    {
+        rxSndIopWrite(s->m_iopBuf + s->m_writePos, s_adpcmEndBlock, 0x40);
+        rxSndIopWrite(s->m_iopBuf + s->m_writePos + s->m_bufSize, s_adpcmEndBlock, 0x40);
+    }
+    else if (mode == 0x1000000)
+    {
+        for (int ch = 0; ch < s->m_channels; ch++)
+            rxSndIopWrite(s->m_iopBuf + s->m_bufSize * ch + s->m_writePos, s_adpcmEndBlock, 0x40);
+    }
+    else
+    {
+        rxSndIopWrite(s->m_iopBuf + s->m_writePos, s_adpcmEndBlock, 0x40);
+    }
+
+    rxSndQueueBegin(0xa1, 0, sizeof(RxSndCmdAdpcmData));
+    RxSndCmdAdpcmData *cmd = (RxSndCmdAdpcmData *)rxSndQueueGetData();
+    cmd->m_size = 0x40;
+    cmd->m_id   = s->m_id;
+    cmd->m_end  = 1;
+    rxSndQueueEnd();
+    s->m_end = 1;
 }
 
 // ROR 0x0023eef8
@@ -1197,6 +2212,34 @@ void rxSndAdpcmSetPitch(int id, float pitch)
     rxSndQueueEnd();
 }
 
+// ROR 0x0023f470
+void rxSndAdpcmSetParam6(int id, int value)
+{
+    if ((u_int)id >= 0x30 || !(s_adpcm[id].m_status & 1))
+        return;
+
+    rxSndQueueBegin(0xa2, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_value = rxSndClamp(value, 0, 2);
+    cmd->m_id    = s_adpcm[id].m_id;
+    cmd->m_param = 6;
+    rxSndQueueEnd();
+}
+
+// ROR 0x0023f538
+void rxSndAdpcmSetParam7(int id, int value)
+{
+    if ((u_int)id >= 0x30 || !(s_adpcm[id].m_status & 1))
+        return;
+
+    rxSndQueueBegin(0xa2, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_value = rxSndClamp(value, 0, 0x7f);
+    cmd->m_id    = s_adpcm[id].m_id;
+    cmd->m_param = 7;
+    rxSndQueueEnd();
+}
+
 // ROR 0x0023f648
 void rxSndAdpcmInit(void)
 {
@@ -1219,8 +2262,8 @@ void rxSndAdpcmInit(void)
         s_adpcm[i].m_next   = s_adpcmFree;
         s_adpcmFree         = &s_adpcm[i];
     }
-    s_adpcm_2dc = 0;
-    s_adpcm_2d8 = 0;
+    s_adpcmParam7 = 0;
+    s_adpcmParam6 = 0;
 }
 
 // ROR 0x0023f6e0
@@ -1458,19 +2501,4 @@ void rxSndQueueFlush(void)
         s_queuePos      = 0;
         s_queueReplyPos = 4;
     }
-}
-
-// ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x002394e0
-u_int rxSndSpuHeapAlloc(int mode, int arg, int size)
-{
-    ROSEPAN_STUB("rxSndSpuHeapAlloc", 0x002394e0);
-    return {};
-}
-
-// stub of ROR 0x002398f8
-void rxSndSpuHeapFree(u_int addr)
-{
-    ROSEPAN_STUB("rxSndSpuHeapFree", 0x002398f8);
 }

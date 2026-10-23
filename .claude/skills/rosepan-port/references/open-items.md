@@ -302,7 +302,13 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
   unattended, platform layer). `src/sdk/iop_rxsnd.cpp` registers RPC 0xd000 from RosePan_IopBoot and
   answers every call with a zeroed reply (0x11 term done, 0x41 XVAB transfer done, the queued
   status lists empty), except IOP heap alloc 0x20: a bump allocator over fake IOP addresses
-  0x100000..0x200000 so rxSndIopAlloc does not fail. No sound is produced. Real sound needs a host
+  0x100000..0x200000 so rxSndIopAlloc does not fail; XVAB open 0x50 echoes the bank id (the client
+  returns the reply as the id); and every SE voice a queued 0x80 / 0x81 starts is listed once with
+  status 0 in the next SE status (0x83), so it ends at once and its slot frees (added 2026-10-22,
+  second rxsnd session: otherwise all 64 voices stay "playing" and rxSndSePlay runs out). ADPCM
+  streams still get free 0 from the zero status, so SndMan never writes to them: a stand-in that
+  reports the ring free and the stream ended after rxSndAdpcmEnd is the next step if streaming must
+  progress without sound. No sound is produced. Real sound needs a host
   driver that answers play / status commands and mixes voices (SE from XVAB banks, ADPCM streams
   from SndMan's xws files) -- the user's call when sound becomes a priority.
 - **MagScene::~MagScene stays a stub** (2026-10-22, the magscene constructor session; decided
@@ -439,8 +445,9 @@ to adapt when a TU reaches them:
 
 - (2026-10-22, the sndman session) **Sound has no host backend.** `snd/sndman.cpp` is written
   (`verify`) and SndMan::update now runs every frame, but every rx sound library call
-  (`rx/rxsnd.h`: rxSndInit, rxSndUpdate, the XVAB / SE / ADPCM functions) is a stub in
-  lib/unassigned_stubs.cpp, so nothing is heard and streams never report an end (status 0). Whether to
+  (`rx/rxsnd.h`) talks to the silent IOP stand-in src/sdk/iop_rxsnd.cpp (the EE side is written
+  apart from XSEQ / BGM play / PCM, 2026-10-22), so nothing is heard and streams never report an end
+  (status 0). Whether to
   reconstruct rxSnd's EE side over a host IOP sound module (ReiPan's src/sdk iop_libsd / iop_voice) or
   to replace it with a host mixer at the rxSnd API is the user's call; until then sound TUs finish
   `verify`. The rxSnd field named "attr" (IOP command 0x82 / 0xa2, parameter 2) may be pan or an effect
