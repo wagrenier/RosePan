@@ -57,6 +57,10 @@ struct DogModel : DogEntityEx
      * m_i3c_root, m_colli_tbl); t >= 0 on a hit, written into hit (the
      * scene's MagSceneRayHit). */
     float castRay(void *hit, const float *pos, const float *dir);        // ROR 0x0011440c
+    /* A sphere of radius r at pos / a cylinder at pos of radius r and
+     * height dir[1] against the collision tables; >= 0 on a hit. */
+    float castSphere(float r, void *hit, const float *pos);              // ROR 0x001145c0
+    float castCylinder(float r, const float *pos, const float *dir, void *hit); // ROR 0x001149d4
     /* EE slot 8 (+0x40) */
     void setHide(int hide) { m_hide = hide; }                            // ROR 0x00281db0
     /* EE slot 9 (+0x48) */

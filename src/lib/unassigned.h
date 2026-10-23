@@ -160,6 +160,12 @@ struct GamFont
     /* Fills the rect with m_fill. */
     int  fillRect(int x, int y, int w, int h);                           // ROR 0x001bef24
     void drawChar(int x, int y, int code);                               // ROR 0x001bf024
+    /* Scrolls the buffer by rows (< 0: up), filling the freed rows with
+     * m_fill; nothing beyond +-m_dst_h. */
+    void scroll(int rows);                                               // ROR 0x001bfe30
+    /* m_fill = fill (| 0x80 for 8-bit targets while m_68 is set). */
+    void setFill(u_int fill);                                            // ROR 0x001bff28
+    void setFillMsb(int on);                                             // ROR 0x001bff5c
     void setColor(u_int color);                                          // ROR 0x001bff64
     /* The glyph of a (Shift-JIS) code, -1 when the font has none. */
     int  getGlyph(int code);                                             // ROR 0x001bffcc
@@ -347,6 +353,12 @@ struct MagLifeFadeKey : MagLife
     /* Releases the texture m_tex_no from theTexInfo. */
     void releaseTexture(DogTexInfo *theTexInfo);                         // ROR 0x0012f790
     void start(const MagFadeParam *p);                                   // ROR 0x0012f824
+    /* Adds theName from data/evntex/EVNTEX.RPK to tex. */
+    void loadTextureByName(DogTexInfo *tex, const char *theName);       // ROR 0x0012f518
+    /* m_state = state, the time words = time, the magnify words 1. */
+    void reset(int state, int time);                                     // ROR 0x0012f7f4
+    /* The magnify word to magnify over time frames (<= 0: at once). */
+    void setMagnify(float magnify, int time);                            // ROR 0x0012fc80
 
     u_char _28[0x40 - 0x28];
     int    m_tex_no;            // ROR 0x40: kagiana_tcc in the scene's table, -1 = not loaded
@@ -413,6 +425,9 @@ void  FUN_00176c50(Obj176a3c *obj);                                      // ROR 
  * either out pointer may be NULL); returns the squared distance. */
 float i3dSegSegDist2(const float *p0, const float *d0, const float *p1, const float *d1,
                      float *s, float *t);                                // ROR 0x00234050
+/* The squared distance from p to the segment a + t d (t in 0..1, written
+ * to *t when t is not NULL). */
+float i3dPointSegDist2(const float *p, const float *a, const float *d, float *t); // ROR 0x002337e0
 
 /* ---- the word table (unassigned@00164fc0: 0x17e0a8..0x17eff4) ---- */
 

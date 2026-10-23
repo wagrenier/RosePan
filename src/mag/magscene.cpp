@@ -995,6 +995,100 @@ float MagScene::castRay(MagSceneRayHit *hit, const float *pos, const float *dir,
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// A sphere of radius r at pos: the walls first (1 on a hit), then sky
+// slot 0's collision model; -1 when nothing is hit or r <= 0.
+// ROR 0x00133658 // callcheck: FUN_00215a30, I3rRoot__CheckIdString (inside the inline DogModel::isAlive)
+
+float MagScene::castSphere(float r, MagSceneRayHit *hit, const float *pos)
+{
+    if (r <= 0.0f)
+        return -1.0f;
+    float t = hitWallsSphere(r, hit, pos);
+    if (t >= 0.0f)
+        return t;
+    if (m_tenkyu[0].m_id < 0)
+        return -1.0f;
+    DogModel *col = &m_tenkyu[0].m_model[2];
+    if (!col->isAlive())
+        return -1.0f;
+    return col->castSphere(r, hit, pos);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The height where pos + t dir (t in 0..1) meets sky slot 0, 100000 when
+// it does not. Nothing in the ROM calls it.
+// ROR 0x0013377c
+
+float MagScene::getGroundHeight(const float *pos, const float *dir)
+{
+    MagSceneRayHit hit;
+
+    for (int i = 0; i < 5; i++)
+    {
+        hit.m_vec[i][0] = 0.0f;
+        hit.m_vec[i][1] = 0.0f;
+        hit.m_vec[i][2] = 0.0f;
+        hit.m_vec[i][3] = 1.0f;
+    }
+    hit.m_50 = -1;
+    float t = castRay(&hit, pos, dir, 0);
+    if (t >= 0.0f && t <= 1.0f)
+        return pos[1] + dir[1] * t;
+    return 100000.0f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A vertical cylinder of radius theR standing on pos and reaching theH
+// (< 0) along y, against the wall segments whose height range overlaps
+// it: within theR of a segment (taken at pos's height) is a hit, with the
+// wall normal in hit->m_vec[1]. 1 on a hit, else -1.
+// ROR 0x0013386c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+float MagScene::hitWallsCylinder(float theH, float theR, MagSceneRayHit *hit, const float *pos)
+{
+    ROR_ASSERT(theH < 0.0f); /* 1683 */
+    float r2 = theR * theR;
+    float h = fabsf(theH);
+    float mid = pos[1] + theH * 0.5f;
+
+    for (int i = 0; i < MAX_PRIVATE_COLLI; i++)
+    {
+        const MagSceneVecPair *w = &m_vec_pair[i];
+        float y0 = w->m_a[1];
+        float y1 = w->m_b[1];
+
+        if (y0 == y1)
+            continue;
+        if (fabsf((y0 + y1) * 0.5f - mid) > (fabsf(y0 - y1) + h) * 0.5f)
+            continue;
+
+        sceVu0FVECTOR p1, d1;
+        p1[0] = w->m_a[0];
+        p1[1] = pos[1];
+        p1[2] = w->m_a[2];
+        p1[3] = w->m_a[3];
+        d1[0] = w->m_b[0] - w->m_a[0];
+        d1[1] = 0.0f;
+        d1[2] = w->m_b[2] - w->m_a[2];
+        d1[3] = 1.0f;
+
+        float t;
+        if (i3dPointSegDist2(pos, p1, d1, &t) <= r2)
+        {
+            if (hit)
+            {
+                hit->m_vec[1][1] = 0.0f;
+                hit->m_vec[1][2] = d1[0];
+                hit->m_vec[1][0] = -d1[2];
+                utlNormalize3(hit->m_vec[1]);
+            }
+            return 1.0f;
+        }
+    }
+    return -1.0f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // The level ray pos + t dir (t in 0..1) against the wall segments in
 // m_vec_pair whose height range covers pos's y: each is tested in the
 // plane at that height (i3dSegSegDist2 0 = they cross). Returns t of the
@@ -1039,6 +1133,244 @@ float MagScene::castWalls(MagSceneRayHit *hit, const float *pos, const float *di
         }
     }
     return -1.0f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A sphere of radius theR at pos against the wall segments whose height
+// range covers pos's y; as hitWallsCylinder.
+// ROR 0x00133b80 // callcheck: FUN_00215a30, FUN_0026cb48 (the assert handler; sqrtf's NaN path)
+
+float MagScene::hitWallsSphere(float theR, MagSceneRayHit *hit, const float *pos)
+{
+    ROR_ASSERT(theR > 0.0f); /* 1794 */
+    for (int i = 0; i < MAX_PRIVATE_COLLI; i++)
+    {
+        const MagSceneVecPair *w = &m_vec_pair[i];
+        float y0 = w->m_a[1];
+        float y1 = w->m_b[1];
+
+        if (y0 == y1)
+            continue;
+        if (fabsf((y0 + y1) * 0.5f - pos[1]) > fabsf(y0 - y1) * 0.5f)
+            continue;
+
+        sceVu0FVECTOR p1, d1;
+        p1[0] = w->m_a[0];
+        p1[1] = pos[1];
+        p1[2] = w->m_a[2];
+        p1[3] = w->m_a[3];
+        d1[0] = w->m_b[0] - w->m_a[0];
+        d1[1] = 0.0f;
+        d1[2] = w->m_b[2] - w->m_a[2];
+        d1[3] = 1.0f;
+
+        float t;
+        if (sqrtf(i3dPointSegDist2(pos, p1, d1, &t)) <= theR)
+        {
+            if (hit)
+            {
+                hit->m_vec[1][1] = 0.0f;
+                hit->m_vec[1][2] = d1[0];
+                hit->m_vec[1][0] = -d1[2];
+                utlNormalize3(hit->m_vec[1]);
+            }
+            return 1.0f;
+        }
+    }
+    return -1.0f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A cylinder of radius r at pos, dir[1] high, against the walls, then
+// the collision model of sky slot tenkyu (< 0: the first of the four that
+// is hit). >= 0 on a hit.
+// ROR 0x00133d10 // callcheck: FUN_00215a30, I3rRoot__CheckIdString (inside the inline DogModel::isAlive)
+
+float MagScene::castCylinder(float r, const float *pos, const float *dir, int tenkyu,
+                             MagSceneRayHit *hit)
+{
+    float t = hitWallsCylinder(dir[1], r, hit, pos);
+    if (t >= 0.0f)
+        return t;
+    if (tenkyu >= 0)
+        return m_tenkyu[tenkyu].m_model[2].castCylinder(r, pos, dir, hit);
+    for (int i = 0; i < 4; i++)
+    {
+        if (m_tenkyu[i].m_id < 0)
+            continue;
+        DogModel *col = &m_tenkyu[i].m_model[2];
+        if (col->isAlive())
+        {
+            t = col->castCylinder(r, pos, dir, hit);
+            if (t >= 0.0f)
+                return t;
+        }
+    }
+    return -1.0f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A strip record's colour from RGBA bytes: r, g, b / 255, a / 128 (the
+// PS2's alpha 0x80 = 1). The ROM inlines it in each adder.
+
+static void setStripRGBA(float *c, u_int rgba)
+{
+    c[0] = (float)(rgba & 0xff) / 255.0f;
+    c[1] = (float)((rgba >> 8) & 0xff) / 255.0f;
+    c[2] = (float)((rgba >> 16) & 0xff) / 255.0f;
+    c[3] = (float)(rgba >> 24) * 0.0078125f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A strip of count vertices at pos with a colour per vertex (type 0) for
+// life frames (-1: until cleared). Returns the record, -1 when all are
+// used.
+// ROR 0x00133e94
+
+int MagScene::addStrip(int count, void *pos, const void *colors, void *data2, int life)
+{
+    for (int i = 0; i < 0x2000; i++)
+    {
+        MagSceneStrip *st = &m_strip[i];
+        if (st->m_type != -1)
+            continue;
+        st->m_data2 = data2;
+        st->m_life = life;
+        st->m_count = (short)count;
+        st->m_data = pos;
+        st->m_type = 0;
+        st->m_colors = colors;
+        return i;
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The same drawn through the layer's context (type 1); the life is left
+// as the record has it.
+// ROR 0x00133efc
+
+int MagScene::addStripCtx(int count, void *pos, const void *colors, void *data2)
+{
+    for (int i = 0; i < 0x2000; i++)
+    {
+        MagSceneStrip *st = &m_strip[i];
+        if (st->m_type != -1)
+            continue;
+        st->m_data2 = data2;
+        st->m_type = 1;
+        st->m_count = (short)count;
+        st->m_data = pos;
+        st->m_colors = colors;
+        return i;
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A line strip of count vertices in one colour (type 2).
+// ROR 0x00133f68
+
+int MagScene::addLineStrip(int count, void *pos, u_int rgba, void *data2)
+{
+    for (int i = 0; i < 0x2000; i++)
+    {
+        MagSceneStrip *st = &m_strip[i];
+        if (st->m_type != -1)
+            continue;
+        st->m_data2 = data2;
+        st->m_type = 2;
+        st->m_count = (short)count;
+        st->m_data = pos;
+        setStripRGBA(st->m_color, rgba);
+        return i;
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A wire box (type 3: drawStrips passes data2 and data to
+// i3dLayerDrawWireBox). Nothing in the ROM calls it.
+// ROR 0x00134114
+
+int MagScene::addWireBox(void *data, void *data2, u_int rgba)
+{
+    for (int i = 0; i < 0x2000; i++)
+    {
+        MagSceneStrip *st = &m_strip[i];
+        if (st->m_type != -1)
+            continue;
+        st->m_data2 = data2;
+        st->m_type = 3;
+        st->m_data = data;
+        setStripRGBA(st->m_color, rgba);
+        return i;
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Type 4 (drawStrips draws data's vectors). Nothing in the ROM calls it.
+// ROR 0x001342bc
+
+int MagScene::addStripType4(void *data, u_int rgba)
+{
+    for (int i = 0; i < 0x2000; i++)
+    {
+        MagSceneStrip *st = &m_strip[i];
+        if (st->m_type != -1)
+            continue;
+        st->m_data = data;
+        st->m_type = 4;
+        setStripRGBA(st->m_color, rgba);
+        return i;
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A wire sphere of radius r at pos (type 5). Nothing in the ROM calls it.
+// ROR 0x00134460
+
+int MagScene::addWireSphere(float r, void *pos)
+{
+    for (int i = 0; i < 0x2000; i++)
+    {
+        MagSceneStrip *st = &m_strip[i];
+        if (st->m_type != -1)
+            continue;
+        st->m_data2 = pos;
+        st->m_type = 5;
+        st->m_color[0] = r;
+        return i;
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Record no's colour (no check of no). Nothing in the ROM calls it.
+// ROR 0x001344c4
+
+int MagScene::setStripColor(int no, u_int rgba)
+{
+    setStripRGBA(m_strip[no].m_color, rgba);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A copy of rec in the first free record. Nothing in the ROM calls it.
+// ROR 0x00134624
+
+int MagScene::addStripRecord(const MagSceneStrip *rec)
+{
+    for (int i = 0; i < 0x2000; i++)
+    {
+        if (m_strip[i].m_type != -1)
+            continue;
+        m_strip[i] = *rec;
+        return i;
+    }
+    return -1;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1342,6 +1674,52 @@ void MagScene::drawView(int winNo, int x, int y, const void *p, int arg)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Draws text in color at window winNo's cursor (when it is open) and
+// re-uploads its font texture.
+// ROR 0x00135364 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::printWindow(int winNo, const char *text, int color)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2395 */
+    if (m_window[winNo])
+    {
+        m_window[winNo]->print(text, color);
+        i3dTexRelease((I3dTexture *)m_tex_info.m_tex_info[m_font_tex_no[winNo]].pPicture);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Window winNo's fill colour (its font's setFill).
+// ROR 0x00135418 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::setWindowFill(int winNo, u_int fill)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2409 */
+    m_window_font[winNo].setFill(fill);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The font's fill flag, then the fill colour 0 again (so it takes the flag).
+// ROR 0x00135494 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::setWindowFillMsb(int winNo, int on)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2417 */
+    m_window_font[winNo].setFillMsb(on);
+    setWindowFill(winNo, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Window winNo's text colour (no check of winNo). Nothing in the ROM
+// calls it.
+// ROR 0x00135520
+
+void MagScene::setWindowColor(int winNo, u_int color)
+{
+    m_window_font[winNo].setColor(color);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // The width of text in window no's font.
 // ROR 0x0013555c
 
@@ -1362,6 +1740,37 @@ void MagScene::updateWindowFont(int winNo)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Re-uploads window winNo's font texture.
+// ROR 0x00135628 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::releaseWindowTex(int winNo)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2469 */
+    i3dTexRelease((I3dTexture *)m_tex_info.m_tex_info[m_font_tex_no[winNo]].pPicture);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Scrolls window theN's text buffer by rows and re-uploads it.
+// ROR 0x0013569c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::scrollWindow(int theN, int rows)
+{
+    ROR_ASSERT(theN >= 0 && theN < MAX_WINDOW); /* 2478 */
+    m_window_font[theN].scroll(rows);
+    i3dTexRelease((I3dTexture *)m_tex_info.m_tex_info[m_font_tex_no[theN]].pPicture);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Gives window winNo's font the language's font file again.
+// ROR 0x00135740 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::resetWindowFont(int winNo)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2489 */
+    m_window_font[winNo].setFont(m_font_data);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Asks for menu id (with arg): sub mode 3 fades out and opens it. The PC's
 // mode and number are kept beside the id.
 // ROR 0x001357b0
@@ -1374,6 +1783,104 @@ void MagScene::requestMenu(int id, int arg)
     m_sub_mode.m_arg = id;
     m_sub_mode.m_arg2 = (int)(((u_int)m_pc_mode << 16) | ((u_int)m_pc_no & 0xffff));
     gamEnterMenu();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Makes menu id the open one: ids 0x10000..0x10009 and 0x10010 are the
+// embedded menus, 0x1000b and 0x1000c..0x1000f are allocated (closeMenu
+// deletes them), the families 0x20001..0x7fffff pick the board / pbook
+// menu by bit and keep the id in it. A menu not yet initialised gets the
+// scene, the requested argument and the texture table. Then it goes on
+// the life manager and its result is cleared.
+// ROR 0x0013580c // callcheck: operator_new, FUN_00215a30, MagLifeMenuSpecial, MagLifeMenuSpecial2 (new MagLifeMenuSpecial / Special2; the assert handler, inside ROR_ASSERT)
+
+void MagScene::openMenu(int id)
+{
+    switch (id)
+    {
+    case 0x10000:
+        m_pMenuBase = &m_menu_item;
+        break;
+    case 0x10001:
+        m_pMenuBase = &m_menu_map;
+        break;
+    case 0x10002:
+        m_pMenuBase = &m_menu_stock;
+        break;
+    case 0x10003:
+        m_pMenuBase = &m_menu_save;
+        break;
+    case 0x10004:
+        m_pMenuBase = &m_menu_load;
+        break;
+    case 0x10005:
+        m_pMenuBase = &m_menu_title;
+        break;
+    case 0x10006:
+        m_pMenuBase = &m_menu_opt;
+        break;
+    case 0x10007:
+        m_pMenuBase = &m_menu_movie;
+        break;
+    case 0x10008:
+        m_pMenuBase = &m_menu_mcd;
+        break;
+    case 0x10009:
+        m_pMenuBase = &m_menu_now;
+        break;
+    case 0x1000b:
+        m_pMenuBase = new MagLifeMenuSpecial;
+        break;
+    case 0x1000c:
+    case 0x1000d:
+    case 0x1000e:
+    case 0x1000f:
+    {
+        MagLifeMenuSpecial2 *menu = new MagLifeMenuSpecial2;
+        m_pMenuBase = menu;
+        menu->m_menu_id = id - 0x1000c;
+        break;
+    }
+    case 0x10010:
+        m_pMenuBase = &m_menu_sellang;
+        break;
+    default:
+        if ((u_int)(id - 0x20001) < 0x7dffff)
+        {
+            MagLifeMenuBase *menu;
+            if (id & 0x40000)
+                menu = &m_menu_board2d;
+            else if (id & 0x80000)
+                menu = &m_menu_board3d;
+            else if ((id & 0x100000) || (id & 0x200000))
+                menu = &m_menu_pbook;
+            else
+            {
+                ROR_ASSERT(0); /* 2602 */
+                break;
+            }
+            m_pMenuBase = menu;
+            menu->m_menu_id = id;
+        }
+        else
+        {
+            ROR_ASSERT(0); /* 2606 */
+        }
+        break;
+    }
+    /* PC: an unknown id leaves no menu (the ROM goes on with what
+     * m_pMenuBase held, NULL after closeMenu). */
+    if (!m_pMenuBase)
+        return;
+    if (!m_pMenuBase->isInit())
+    {
+        m_pMenuBase->m_menu_scene = this;
+        m_pMenuBase->m_menu_arg = m_menu_arg;
+        m_pMenuBase->init(&m_tex_info);
+    }
+    m_life_man.add(m_pMenuBase, 0x8002);
+    m_menu_id = id;
+    m_menu_result = 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1414,6 +1921,31 @@ void MagScene::closeMenu()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The keyhole fade with theTexName from EVNTEX.RPK: loads the texture,
+// resets the fade key to state 5 and puts it on the life manager (0x8003)
+// when it is not there yet.
+// ROR 0x00135cac // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::openFadeKey(const char *theTexName)
+{
+    ROR_ASSERT(theTexName); /* 2711 */
+    m_fade_key.loadTextureByName(&m_tex_info, theTexName);
+    m_fade_key.reset(5, 0);
+    if (m_life_man.find(&m_fade_key) < 0)
+        m_life_man.add(&m_fade_key, 0x8003);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The keyhole's magnification, over time frames (<= 0: at once).
+// ROR 0x00135d58 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::setFadeKeyMagnify(float theMagnify, int time)
+{
+    ROR_ASSERT(theMagnify > 0.0f); /* 2725 */
+    m_fade_key.setMagnify(theMagnify, time);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Takes the keyhole fade off the life manager and frees its texture.
 // ROR 0x00135dcc
 
@@ -1421,6 +1953,48 @@ void MagScene::removeFadeKey()
 {
     m_life_man.remove(&m_fade_key);
     m_fade_key.releaseTexture(&m_tex_info);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Adds the wall segment theP1 -> theP2 (their heights must differ: equal
+// heights mark a free segment) to the first free one of the
+// MAX_PRIVATE_COLLI that castWalls and the hitWalls tests read. Returns
+// its id, -1 when all are used.
+// ROR 0x00135e20 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+int MagScene::addPrivateColli(const float *theP1, const float *theP2)
+{
+    ROR_ASSERT(theP1); /* 2740 */
+    ROR_ASSERT(theP2); /* 2741 */
+    ROR_ASSERT(theP1[1] != theP2[1]); /* 2742 */
+    for (int i = 0; i < MAX_PRIVATE_COLLI; i++)
+    {
+        MagSceneVecPair *w = &m_vec_pair[i];
+        if (w->m_a[1] != w->m_b[1])
+            continue;
+        w->m_a[0] = theP1[0];
+        w->m_a[1] = theP1[1];
+        w->m_a[3] = 0.0f;
+        w->m_a[2] = theP1[2];
+        w->m_b[0] = theP2[0];
+        w->m_b[1] = theP2[1];
+        w->m_b[3] = 0.0f;
+        w->m_b[2] = theP2[2];
+        return i;
+    }
+    ROR_ASSERT(0); /* 2764 */
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Frees wall segment theID (both end heights 0).
+// ROR 0x00135f44 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::removePrivateColli(int theID)
+{
+    ROR_ASSERT(theID >= 0 && theID < MAX_PRIVATE_COLLI); /* 2773 */
+    m_vec_pair[theID].m_a[1] = 0.0f;
+    m_vec_pair[theID].m_b[1] = 0.0f;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1463,7 +2037,7 @@ void MagScene::clearPC()
 // that exist as C++ constructors (GamFont, DogEntity / DogCamera, S2d*),
 // the rest start zeroed as part of g_magSystem until their TUs write them.
 // ROR 0x001360a0
-// callcheck: FUN_00100320, FUN_0010eebc, FUN_00110a94, FUN_00114c54, FUN_0011bf0c, FUN_00125aa4, FUN_0012ba80, FUN_0012d398, FUN_0012d58c, FUN_0012f008, FUN_0012f298, FUN_00130da4, FUN_0014257c, FUN_00142e84, FUN_00176a3c, FUN_0017c0f0, FUN_001947a4, FUN_0019a52c, FUN_001a1244, FUN_001a59b8, FUN_001a90ec, FUN_001ab474, FUN_001ad6b4, FUN_001adf04, FUN_001ae474, FUN_001ae954, FUN_001bdae4, FileReader, GamFont, S2dBg, S2dCineSco, S2dMes, S2dMovie, memset (member constructors: the host runs the C++ ones itself, the others are not written yet; the memsets are the field clears below)
+// callcheck: FUN_00100320, FUN_0010eebc, FUN_00110a94, FUN_00114c54, FUN_0011bf0c, FUN_00125aa4, FUN_0012ba80, FUN_0012d398, FUN_0012d58c, MagLifeMenuPBook, MagLifeMenuBoard3D, FUN_0012f008, FUN_0012f298, FUN_00130da4, FUN_0014257c, FUN_00142e84, FUN_00176a3c, FUN_0017c0f0, FUN_001947a4, FUN_0019a52c, FUN_001a1244, FUN_001a59b8, FUN_001a90ec, FUN_001ab474, FUN_001ad6b4, FUN_001adf04, FUN_001ae474, FUN_001ae954, FUN_001bdae4, FileReader, GamFont, S2dBg, S2dCineSco, S2dMes, S2dMovie, memset (member constructors: the host runs the C++ ones itself, the others are not written yet; the memsets are the field clears below)
 
 MagScene::MagScene()
 {
@@ -1552,21 +2126,21 @@ MagScene::MagScene()
 
 // ---- stubs (hand-written: constructors and destructors are not stubbed by stubgen) ----
 
-// stub of ROR 0x00136d14
-// PC: the ROM never destroys the scene (g_magSystem lives for the whole
-// run); on the host only std::exit's static teardown reaches this, with
-// the game threads still running and the scene's own lives (fader, PC,
-// windows, 2D layers) still in m_life_man, which MagLifeMan::deleteAll
-// would delete. Left a stub until that is decided (open-items.md).
+// ──────────────────────────────────────────────────────────────────────
+// The scene's destructor. The ROM's body: checkLightNo(-1),
+// releaseTenkyuAll(), then its members' destructors in reverse order (the
+// scene interfaces, the 2D layers, the menus, the sky models, the texture
+// table, the 128 actors, the window fonts, MagLifeMan::deleteAll, the two
+// loaders, the light pool). The host runs the member destructors itself.
+// PORT: the explicit part is left out. The ROM never destroys the scene
+// (g_magSystem lives for the whole run); on the host only std::exit's
+// static teardown reaches it, with the game threads still running, and
+// releasing the sky models there races their drawing (open-items.md
+// Decisions).
+// ROR 0x00136d14 // callcheck: checkLightNo, releaseTenkyuAll, FUN_00110b78, FUN_0012d5e0, FUN_0014259c, FUN_00176aa0, FUN_0017c14c, FUN_00194858, FUN_00196b2c, FUN_001987b0, FUN_0019a598, FUN_001a12a8, FUN_001a5a34, FUN_001a9150, FUN_001ab4e0, FUN_001ad72c, FUN_001adf3c, FUN_001ae4ac, FUN_001ae9f4, FUN_001bdb4c, deleteAll, operator_delete, release, term, ~FileReader, ~GamFont, ~S2dBg, ~S2dCineSco, ~S2dMes, ~S2dMovie (the explicit part left out on the host, see above; the member destructors run by the host)
 MagScene::~MagScene()
 {
-    ROSEPAN_STUB("MagScene::~MagScene", 0x00136d14);
 }
 
 // ---- stubs (tools/reverse/stubgen.py) ----
 
-// stub of ROR 0x0013580c
-void MagScene::openMenu(int id)
-{
-    ROSEPAN_STUB("MagScene::openMenu", 0x0013580c);
-}

@@ -30,6 +30,7 @@
 #include "mag/maglifebwnctrl.h"
 #include "mag/maglifeman.h"
 #include "mag/maglifemenu.h"
+#include "mag/maglifemenusp.h"
 #include "mag/maglifepc.h"
 #include "mag/maglifewindow.h"
 #include "sdk/sce_gs.h"
@@ -173,6 +174,7 @@ static_assert(offsetof(MagSceneVecPair, m_b) == 0x10, "m_b");
 static_assert(sizeof(MagSceneVecPair) == 0x20, "MagSceneVecPair is 0x20 bytes on the EE");
 
 #define MAX_WINDOW 4            /* the scene's text windows (asserts winNo < MAX_WINDOW) */
+#define MAX_PRIVATE_COLLI 256    /* the wall segments at the scene's start (addPrivateColli) */
 
 /* EE 0x85500. layout: host -- holds the actors and controllers (pointers,
  * vptrs); EE offsets in the comments. */
@@ -363,6 +365,51 @@ struct MagScene
      * segments in m_vec_pair: t of the first hit (hit->m_vec[1] its
      * normal), -1 when none. */
     float castWalls(MagSceneRayHit *hit, const float *pos, const float *dir); // ROR 0x00133a0c
+    /* A sphere (r > 0) at pos against the walls, then sky slot 0's
+     * collision model: 1 (walls) / the model's result, -1 when nothing. */
+    float castSphere(float r, MagSceneRayHit *hit, const float *pos);    // ROR 0x00133658
+    /* The height under pos along dir (castRay on sky slot 0), 100000 when
+     * the ray does not hit within its length. Nothing calls it. */
+    float getGroundHeight(const float *pos, const float *dir);          // ROR 0x0013377c
+    /* A vertical cylinder at pos (radius r, from pos.y down to pos.y + h,
+     * h < 0) against the walls: 1 on a hit (hit->m_vec[1] the wall
+     * normal), else -1. */
+    float hitWallsCylinder(float h, float r, MagSceneRayHit *hit, const float *pos); // ROR 0x0013386c
+    /* A sphere against the walls whose height range covers pos.y. */
+    float hitWallsSphere(float r, MagSceneRayHit *hit, const float *pos); // ROR 0x00133b80
+    /* The cylinder pos .. pos + dir.y (radius r) against the walls, then the
+     * sky slots' collision models (tenkyu < 0: all four). */
+    float castCylinder(float r, const float *pos, const float *dir, int tenkyu,
+                       MagSceneRayHit *hit);                             // ROR 0x00133d10
+    /* The wall segments (MAX_PRIVATE_COLLI of them, m_vec_pair): a free one
+     * (equal end heights) takes p1 -> p2; returns its id, -1 when full. */
+    int  addPrivateColli(const float *theP1, const float *theP2);        // ROR 0x00135e20
+    void removePrivateColli(int theID);                                  // ROR 0x00135f44
+    /* drawStrips' records: each adder takes the first free one and returns
+     * its index (-1 when all 0x2000 are used); colours as RGBA bytes
+     * (r, g, b / 255, a / 128). Only the type 0..2 adders have callers. */
+    int  addStrip(int count, void *pos, const void *colors, void *data2, int life); // ROR 0x00133e94
+    int  addStripCtx(int count, void *pos, const void *colors, void *data2); // ROR 0x00133efc
+    int  addLineStrip(int count, void *pos, u_int rgba, void *data2);    // ROR 0x00133f68
+    int  addWireBox(void *data, void *data2, u_int rgba);                // ROR 0x00134114
+    int  addStripType4(void *data, u_int rgba);                          // ROR 0x001342bc
+    int  addWireSphere(float r, void *pos);                              // ROR 0x00134460
+    int  setStripColor(int no, u_int rgba);                              // ROR 0x001344c4
+    int  addStripRecord(const MagSceneStrip *rec);                       // ROR 0x00134624
+    /* Window text: printWindow draws text in colour at the window's cursor;
+     * the font-buffer helpers re-upload the window's texture
+     * (i3dTexRelease) where the ROM does. */
+    void printWindow(int winNo, const char *text, int color);            // ROR 0x00135364
+    void setWindowFill(int winNo, u_int fill);                           // ROR 0x00135418
+    void setWindowFillMsb(int winNo, int on);                            // ROR 0x00135494
+    void setWindowColor(int winNo, u_int color);                         // ROR 0x00135520
+    void releaseWindowTex(int winNo);                                    // ROR 0x00135628
+    void scrollWindow(int theN, int rows);                               // ROR 0x0013569c
+    void resetWindowFont(int winNo);                                     // ROR 0x00135740
+    /* The keyhole fade with an EVNTEX.RPK texture: loads it, resets the
+     * fade key to state 5 and puts it on the life manager. */
+    void openFadeKey(const char *theTexName);                            // ROR 0x00135cac
+    void setFadeKeyMagnify(float theMagnify, int time);                  // ROR 0x00135d58
     void clearStrip(int no);                                             // ROR 0x00134698
     void drawSkyDome(i3dContext *ctx);                                   // ROR 0x001406b8
     void drawFocus(i3dContext *ctx, int frame);                          // ROR 0x00140e88
@@ -433,6 +480,23 @@ struct MagScene
     int            m_menu_arg;          // ROR 0x2be54: requestMenu's argument
     int            m_menu_result;       // ROR 0x2be58: the menu's last processPad result; 0 = still running
     MagLifeMenuBase *m_pMenuBase;       // ROR 0x2be5c: the open menu (the asserts name it), NULL = none
+    /* The embedded menus (openMenu's ids). PORT: host MagLifeMenuBase
+     * objects until each menu TU gives its class (maglifemenu.h); the
+     * comment names the ROM's class. */
+    MagLifeMenuBase m_menu_item;        // ROR 0x2be60: MagLifeMenuItem, id 0x10000
+    MagLifeMenuBase m_menu_map;         // ROR 0x2e5b0: MagLifeMenuMap, 0x10001
+    MagLifeMenuBase m_menu_stock;       // ROR 0x2eed0: MagLifeMenuStock, 0x10002
+    MagLifeMenuBase m_menu_save;        // ROR 0x304c0: MagLifeMenuSave, 0x10003
+    MagLifeMenuBase m_menu_load;        // ROR 0x32c80: MagLifeMenuLoad, 0x10004
+    MagLifeMenuBase m_menu_pbook;       // ROR 0x35440: MagLifeMenuPBook, ids with bit 0x100000 / 0x200000
+    MagLifeMenuBase m_menu_title;       // ROR 0x36640: MagLifeMenuTitle, 0x10005
+    MagLifeMenuBase m_menu_opt;         // ROR 0x3bd80: MagLifeMenuOpt, 0x10006
+    MagLifeMenuBase m_menu_movie;       // ROR 0x3ceb0: MagLifeMenuMovie, 0x10007
+    MagLifeMenuBase m_menu_mcd;         // ROR 0x3d880: MagLifeMenuMcd, 0x10008
+    MagLifeMenuBase m_menu_now;         // ROR 0x3ecc0: MagLifeMenuNow, 0x10009
+    MagLifeMenuBase m_menu_board2d;     // ROR 0x3f620: MagLifeMenuBoard2D, ids with bit 0x40000
+    MagLifeMenuBase m_menu_board3d;     // ROR 0x40720: MagLifeMenuBoard3D, ids with bit 0x80000
+    MagLifeMenuBase m_menu_sellang;     // ROR 0x40780: MagLifeMenuSelLang, 0x10010
     MagLifeFader   m_fader;             // ROR 0x41850: fade kinds 0 / 4
     MagLifeFadeKey m_fade_key;          // ROR 0x41890: fade kinds 1..3
     MagLife130da4  m_life_418f0;        // ROR 0x418f0
@@ -464,6 +528,7 @@ static_assert(offsetof(MagScene, m_actors) > offsetof(MagScene, m_premiere), "EE
 static_assert(offsetof(MagScene, m_view) > offsetof(MagScene, m_2a9cc), "EE order");
 static_assert(offsetof(MagScene, m_window) > offsetof(MagScene, m_life_man), "EE order");
 static_assert(offsetof(MagScene, m_pMenuBase) > offsetof(MagScene, m_bwn_ctrl), "EE order");
+static_assert(offsetof(MagScene, m_fader) > offsetof(MagScene, m_menu_sellang), "EE order");
 static_assert(offsetof(MagScene, m_fade) > offsetof(MagScene, m_mes), "EE order");
 static_assert(offsetof(MagScene, m_shadow_lightrec) >= 0x2000, "m_vec_pair comes first");
 static_assert(offsetof(MagScene, m_854d5) > offsetof(MagScene, m_854a4), "EE order");

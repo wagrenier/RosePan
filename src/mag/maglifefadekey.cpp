@@ -23,3 +23,21 @@ void MagLifeFadeKey::start(const MagFadeParam *p)
 {
     ROSEPAN_STUB("MagLifeFadeKey::start", 0x0012f824);
 }
+
+// stub of ROR 0x0012f518
+void MagLifeFadeKey::loadTextureByName(DogTexInfo *tex, const char *theName)
+{
+    ROSEPAN_STUB("MagLifeFadeKey::loadTextureByName", 0x0012f518);
+}
+
+// stub of ROR 0x0012f7f4
+void MagLifeFadeKey::reset(int state, int time)
+{
+    ROSEPAN_STUB("MagLifeFadeKey::reset", 0x0012f7f4);
+}
+
+// stub of ROR 0x0012fc80
+void MagLifeFadeKey::setMagnify(float magnify, int time)
+{
+    ROSEPAN_STUB("MagLifeFadeKey::setMagnify", 0x0012fc80);
+}

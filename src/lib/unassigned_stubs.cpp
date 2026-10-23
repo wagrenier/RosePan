@@ -815,3 +815,28 @@ void utlNormalize3(float *v)
 {
     ROSEPAN_STUB("utlNormalize3", 0x00106db0);
 }
+
+// stub of ROR 0x001bfe30
+void GamFont::scroll(int rows)
+{
+    ROSEPAN_STUB("GamFont::scroll", 0x001bfe30);
+}
+
+// stub of ROR 0x001bff28
+void GamFont::setFill(u_int fill)
+{
+    ROSEPAN_STUB("GamFont::setFill", 0x001bff28);
+}
+
+// stub of ROR 0x001bff5c
+void GamFont::setFillMsb(int on)
+{
+    ROSEPAN_STUB("GamFont::setFillMsb", 0x001bff5c);
+}
+
+// stub of ROR 0x002337e0
+float i3dPointSegDist2(const float *p, const float *a, const float *d, float *t)
+{
+    ROSEPAN_STUB("i3dPointSegDist2", 0x002337e0);
+    return {};
+}

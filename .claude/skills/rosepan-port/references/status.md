@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-22 20:32 at commit `4d44e1e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-22 21:04 at commit `cfa1752` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-22 20:32 at commit `4d44e1e` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6498**, named **2860** (44%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 115, ror-inferred 1377
-- context-name ledger: 1492 entries; overrides of wrong library matches: 5
-- placed in a source file: 2762/6498 in 89 files
+- game functions: **6506**, named **2898** (45%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 115, ror-inferred 1415
+- context-name ledger: 1530 entries; overrides of wrong library matches: 5
+- placed in a source file: 2773/6506 in 89 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **1146**; stubs: **237**
+- reconstructed RoR functions: **1172**; stubs: **247**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -41,7 +41,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/dog/dogactor.cpp` | 0 | 24 |
 | `src/dog/dogentity.cpp` | 0 | 3 |
 | `src/dog/doglightpool.cpp` | 3 | 0 |
-| `src/dog/dogmodel.cpp` | 0 | 9 |
+| `src/dog/dogmodel.cpp` | 0 | 11 |
 | `src/dog/dogmotionblend.cpp` | 0 | 1 |
 | `src/dog/dogtexinfo.cpp` | 16 | 0 |
 | `src/game/gamfile.cpp` | 18 | 0 |
@@ -56,17 +56,18 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dtim2.cpp` | 7 | 0 |
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 0 | 115 |
+| `src/lib/unassigned_stubs.cpp` | 0 | 119 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
-| `src/mag/maglifefadekey.cpp` | 0 | 3 |
+| `src/mag/maglifefadekey.cpp` | 0 | 6 |
 | `src/mag/maglifeman.cpp` | 12 | 0 |
 | `src/mag/maglifemenu.cpp` | 0 | 5 |
+| `src/mag/maglifemenusp.cpp` | 0 | 2 |
 | `src/mag/maglifepc.cpp` | 0 | 11 |
-| `src/mag/maglifewindow.cpp` | 0 | 13 |
+| `src/mag/maglifewindow.cpp` | 0 | 14 |
 | `src/mag/magloader.cpp` | 0 | 7 |
-| `src/mag/magscene.cpp` | 63 | 2 |
+| `src/mag/magscene.cpp` | 89 | 0 |
 | `src/mag/magscene2.cpp` | 19 | 0 |
 | `src/mag/magscenecamera.cpp` | 2 | 2 |
 | `src/mag/magscenedebug.cpp` | 0 | 1 |
@@ -94,11 +95,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 157 TUs: todo 132, partial 5, verify 28, done 2
-- next: **mag/magscene.cpp** (pinned in the queue)
-- pinned queue: mag/magscene.cpp, game/gamfile.cpp
+- 156 TUs: todo 131, partial 4, verify 29, done 2
+- next: **rx/rxsnd.cpp** (continuing a partial TU)
+- pinned queue: game/gamfile.cpp
 - partial: `dog/doglightpool.cpp` 3/29 -- Left: the pool setup, 26 functions 0x1103dc..0x1123b0 (load / alloc / set-mask edits, mostly called from mag/magscenelight.cpp; spot-light builders 0x111584 / 0
-- partial: `mag/magscene.cpp` 63/81 -- Screen still black: textures never load (game/gamfile.cpp fileGetSize 0x1be768 is the blocker, unchanged by this TU; nothing here is on the draw path yet). Left
 - partial: `rx/rxsnd.cpp` 0/185 -- Nothing written yet; all rxSnd entry points are still stubs in lib/unassigned_stubs.cpp. Start from architecture.md row 0x237ce8 (transport and command families
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -114,6 +114,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `i3d/i3dview.cpp` 19/19 -- Status verify: views are built every frame (host test: screen centre 2047.5, frustum corner on the rectangle corner, depth 4094.6..1.06, scissor 0..511 x 0..447
 - verify: `i3d/i3dvram.cpp` 37/37 -- Complete; nothing on screen shows it yet (screen black: the draw path is stubbed). A host test (init, reserve x3 frames with eviction, compact, end frame, reset
 - verify: `mag/maglifeman.cpp` 12/12 -- Status verify: the S2d layers now run live and render every frame (one i3d primitive reaches rosepan_i3d without a texture object), but the screenshot stays bla
+- verify: `mag/magscene.cpp` 89/89 -- Screen still black (textures never load; game/gamfile.cpp callers GamMan::loadSystemData / loadStage are stubs), and nothing calls this slice's new code in the 
 - verify: `mag/magscene2.cpp` 19/19 -- Complete but unseen: MagScene::start (magscene.cpp) and the GamMan loads are stubs, so no loader runs and the screen stays black (MagScene::draw is a stub too).
 - verify: `mag/magscenerender.cpp` 20/20 -- All 20 functions written; verify because nothing on screen can show it: no boot actor has the 0x60 shadow flags and all i3d layer / view / light functions are s
 - verify: `mag/magsystem.cpp` 55/55 -- All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes ar
@@ -131,6 +132,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-22 21:04 `mag/magscene.cpp` verify: Wrote the rest of mag/magscene.cpp: the wall collision (castSphere, castCylinder, hitWallsSphere, hitWallsCylinder, getGroundHeight; i3dPointSegDist2 named), th
 - 2026-10-22 20:31 `mag/magscene.cpp` partial: Wrote 34 more mag/magscene.cpp functions: castRay and the new castWalls (the scene's first 0x2000 bytes are 256 wall segments, tested with i3dSegSegDist2 before
 - 2026-10-22 20:19 `mag/magscene.cpp` partial: Wrote MagScene::MagScene 0x1360a0 (the scene's own field defaults: vector pairs, shadow mode -1, the 0x22a0.. scales, sky slots free, strips free, focus -1, the
 - 2026-10-22 20:05 `mag/maglifeman.cpp` verify: MagLifeMan complete: all 12 functions (pinned 0x1194b4..0x119b34: clearPod, unlink, insertBefore, insertAfter, init, deleteAll, add, remove, find, removeNo, upd
@@ -138,32 +140,32 @@ Recent sessions:
 - 2026-10-22 19:36 `dog/doglightpool.cpp` partial: Pinned dog/doglightpool.cpp 0x1103dc..0x112b08 (was unassigned@0011262c); reconstructed DogLightPool::createLight 0x11262c, findNearestPointLight 0x1129cc and d
 - 2026-10-22 19:29 `rx/rxsnd.cpp` partial: Pinned rx/rxsnd.cpp 0x237ce8..0x23ff58 (was unassigned@00237ce8) and named 73 functions of the rx sound library (transport, queue, config, heaps, BGM/SE/PCM/ADP
 - 2026-10-22 19:21 `snd/sndman.cpp` verify: SndMan, the sound manager: all 52 functions of 0x17f0d0..0x1810f4 (ctor, init/term/update, master-volume fade, 48 slots with stream and SE state machines, id ma
-- 2026-10-22 18:50 `bed/bedpfh.cpp` verify: BedPfh, the RTPK pack view: constructor (tables by header flags: sizes, offsets, attribute rows, names), clear, getFileName, getFileIndex; header inlines getFla
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `rx/rxsnd.cpp` | partial | 0/24/185 | 32.2 | 60 | 2 |
-| `unassigned@00228c08` | todo | 0/7/222 | 54.9 | 30 | 1 |
-| `unassigned@00164fc0` | todo | 0/8/395 | 104.2 | 27 | 3 |
+| `unassigned@00228c08` | todo | 0/8/222 | 54.9 | 34 | 1 |
+| `unassigned@00164fc0` | todo | 0/8/395 | 104.2 | 29 | 3 |
+| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 29 | 0 |
 | `game/gamman.cpp` | todo | 0/5/409 | 82.8 | 26 | 4 |
 | `unassigned@001810f4` | todo | 0/10/28 | 2.8 | 25 | 3 |
+| `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 24 | 1 |
 | `unassigned@00140030` | todo | 0/4/6 | 2.7 | 24 | 3 |
 | `dog/dogactor.cpp` | todo | 0/24/139 | 30.3 | 24 | 0 |
-| `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 24 | 1 |
-| `unassigned@001beb70` | todo | 0/10/27 | 6.6 | 23 | 0 |
+| `mag/magloader.cpp` | todo | 0/7/15 | 4.7 | 22 | 2 |
+| `dog/dogmodel.cpp` | todo | 0/11/67 | 10.0 | 21 | 0 |
 | `unassigned@0020ff34` | todo | 0/3/53 | 23.7 | 20 | 0 |
-| `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
-| `mag/magloader.cpp` | todo | 0/7/15 | 4.7 | 20 | 2 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
 | RoR addr | name | call sites | provenance | state | inferred file |
 |---|---|---|---|---|---|
+| `0022b228` | I3rRoot__CheckIdString | 16 | lib-ctx | stub | - |
 | `002155f4` | FUN_002155f4 | 15 | - | missing | - |
-| `0022b228` | I3rRoot__CheckIdString | 14 | lib-ctx | stub | - |
+| `001be2dc` | FileReader::~FileReader | 8 | ror | missing | game/gamfile.cpp |
 | `0023e240` | rxSndAdpcmGetFree | 8 | lib-ctx | stub | rx/rxsnd.cpp |
 | `001be2cc` | FileReader::FileReader | 6 | ror | missing | game/gamfile.cpp |
-| `001be2dc` | FileReader::~FileReader | 6 | ror | missing | game/gamfile.cpp |
+| `00115cec` | DogModel::release | 6 | ror | stub | dog/dogmodel.cpp |
 | `00143fd0` | MagScene::updateFog | 6 | ror | stub | - |
 | `0014062c` | MagScene::rotateTenkyu | 6 | ror | stub | - |
 | `00140c68` | MagScene::updateRecords853fc | 6 | ror | stub | - |
@@ -177,8 +179,10 @@ Recent sessions:
 | `0023e158` | rxSndAdpcmGetStatus | 4 | lib-ctx | stub | rx/rxsnd.cpp |
 | `0023e020` | rxSndAdpcmClose | 4 | lib-ctx | stub | rx/rxsnd.cpp |
 | `00101ccc` | BedPad::update | 4 | ror | stub | bed/bedpad.cpp |
+| `001bebec` | GamFont::setFont | 4 | ror | stub | - |
 | `001c0254` | GamFont::getGlyphWidth | 4 | ror | stub | - |
 | `0011034c` | FUN_0011034c | 4 | - | stub | dog/dogentity.cpp |
+| `00106db0` | utlNormalize3 | 3 | ror | stub | - |
 | `0010ff74` | DogEntity::normalizeRotate | 3 | ror | stub | - |
 | `00114c54` | FUN_00114c54 | 3 | - | missing | dog/dogmodel.cpp |
 | `00101b50` | BedPad::setVibration | 3 | ror | stub | bed/bedpad.cpp |
@@ -187,16 +191,13 @@ Recent sessions:
 | `0010bf00` | DogActor::setParam1d8 | 3 | ror | stub | dog/dogactor.cpp |
 | `0012f790` | MagLifeFadeKey::releaseTexture | 3 | ror | stub | mag/maglifefadekey.cpp |
 | `001102b4` | DogEntityEx::setParent | 3 | ror | stub | dog/dogentity.cpp |
-| `001bebec` | GamFont::setFont | 3 | ror | stub | - |
 | `0013f1e4` | MagScene::clearGamFlag25 | 3 | ror | stub | - |
 | `0022b3d8` | i3rGetNodeIndexByName | 3 | lib-ctx | stub | - |
 | `0021e1d8` | i3dPktDrawLineStrip | 3 | lib-ctx | stub | - |
 | `0023c0f8` | rxSndSeStop | 3 | lib-ctx | stub | rx/rxsnd.cpp |
-| `00115cec` | DogModel::release | 3 | ror | stub | dog/dogmodel.cpp |
 | `0023c228` | rxSndSeGetStatus | 3 | lib-ctx | stub | rx/rxsnd.cpp |
 | `0017772c` | FUN_0017772c | 3 | - | stub | - |
 | `0013e548` | MagScene::updateCamera | 3 | ror | stub | - |
 | `00215bb4` | dbgTraceVector4 | 3 | ror | stub | - |
 | `00109ed0` | DogActor::releaseModel | 2 | ror | stub | dog/dogactor.cpp |
-| `001d3ac8` | GamMan::switchVolume | 2 | ror | stub | game/gamman.cpp |
 

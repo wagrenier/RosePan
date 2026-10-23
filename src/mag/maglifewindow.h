@@ -38,6 +38,9 @@ struct MagLifeWindow : MagLife
     /* Draws a string into the window font's buffer (asserts m_fntman and
      * the cell / buffer sizes). */
     void drawText(int x, int y, const char *str, int arg);               // ROR 0x00130258
+    /* Draws str in colour (the font's setColor(color << 2)) from the
+     * window's cursor, which it advances (asserts m_fntman). */
+    void print(const char *str, int color);                              // ROR 0x001305ec
     /* Takes the GamFont the window draws with (asserts thefontManager). */
     void setFontManager(GamFont *thefontManager);                        // ROR 0x00130778
     /* The position as ints: x, y (getPos) or x, y, z (getPos3). */

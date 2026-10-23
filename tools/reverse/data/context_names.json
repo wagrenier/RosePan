@@ -617,6 +617,18 @@
   "was": "FUN_0011440c",
   "why": "asserts m_i3c_root / m_colli_tbl; the ray (pos, dir) against the model's collision tables; MagScene::castRay's sky collision model test, >= 0 on a hit"
  },
+ "001145c0": {
+  "name": "DogModel::castSphere",
+  "tag": "ror-inferred",
+  "was": "FUN_001145c0",
+  "why": "asserts the model's collision root (+0x124); f12 r, a1 hit, a2 pos: the sphere against the collision tables; MagScene::castSphere's sky model test"
+ },
+ "001149d4": {
+  "name": "DogModel::castCylinder",
+  "tag": "ror-inferred",
+  "was": "FUN_001149d4",
+  "why": "f12 r, a1 pos, a2 dir, a3 hit: the cylinder test against the collision tables; MagScene::castCylinder's sky model test"
+ },
  "001151f4": {
   "name": "DogModel::draw",
   "tag": "ror-inferred",
@@ -1271,6 +1283,30 @@
   "was": "FUN_0012c9c0",
   "why": "with an actor and not already in state 0xe (or its step > 7): changes to state 0xe with a1 through 0x11c1e8 and stores a2 in word +0x0c (mag/maglifepcbtl.cpp)"
  },
+ "0012d398": {
+  "name": "MagLifeMenuPBook::MagLifeMenuPBook",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d398",
+  "why": "stores MagLifeMenuPBook's vtable 0x2e16f8 (rtti); MagScene::MagScene constructs the menu at +0x35440 with it, openMenu's 0x100000 / 0x200000 families"
+ },
+ "0012d58c": {
+  "name": "MagLifeMenuBoard3D::MagLifeMenuBoard3D",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d58c",
+  "why": "stores MagLifeMenuBoard3D's vtable 0x2e1618 (rtti); the scene's menu at +0x40720, openMenu's 0x80000 family"
+ },
+ "0012e23c": {
+  "name": "MagLifeMenuSpecial::MagLifeMenuSpecial",
+  "tag": "ror-inferred",
+  "was": "FUN_0012e23c",
+  "why": "stores MagLifeMenuSpecial's vtable 0x2e1c38 (rtti); openMenu 0x1000b news 0x80 bytes and runs it"
+ },
+ "0012eef0": {
+  "name": "MagLifeMenuSpecial2::MagLifeMenuSpecial2",
+  "tag": "ror-inferred",
+  "was": "FUN_0012eef0",
+  "why": "stores MagLifeMenuSpecial2's vtable 0x2e1bc8 (rtti); openMenu 0x1000c..0x1000f news 0x70 bytes and runs it"
+ },
  "0012f060": {
   "name": "MagLifeFader::start",
   "tag": "ror-inferred",
@@ -1289,17 +1325,35 @@
   "was": "FUN_0012f2f0",
   "why": "reads data/evntex/EVNTEX.RPK and adds kagiana_tcc to the texture table (maglifefadekey.cpp asserts)"
  },
+ "0012f518": {
+  "name": "MagLifeFadeKey::loadTextureByName",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f518",
+  "why": "asserts theName (maglifefadekey 110); reads data/evntex/EVNTEX.RPK's index and adds the named texture to the tex info a1"
+ },
  "0012f790": {
   "name": "MagLifeFadeKey::releaseTexture",
   "tag": "ror-inferred",
   "was": "FUN_0012f790",
   "why": "asserts theTexInfo, releases the texture at +0x40"
  },
+ "0012f7f4": {
+  "name": "MagLifeFadeKey::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f7f4",
+  "why": "m_state = a1, m_08 and +0x34 = a2, m_04 / m_0c / +0x30 = 0, the three magnify words +0x44 / +0x48 / +0x4c = 1"
+ },
  "0012f824": {
   "name": "MagLifeFadeKey::start",
   "tag": "ror-inferred",
   "was": "FUN_0012f824",
   "why": "as MagLifeFader::start for the keyhole fade"
+ },
+ "0012fc80": {
+  "name": "MagLifeFadeKey::setMagnify",
+  "tag": "ror-inferred",
+  "was": "FUN_0012fc80",
+  "why": "a2 > 0: blends +0x44 to f12 over a2 frames (+0x34 time, +0x48 from, +0x4c to, +0x30 = 0); else +0x44 = f12 at once"
  },
  "0012fca8": {
   "name": "MagLifeWindow::getCharMetrics",
@@ -1360,6 +1414,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00130258",
   "why": "MagScene::drawView's body: asserts m_fntman / m_ch_w / m_ch_h / m_buf_w / m_buf_h (mag/maglifewindow.cpp), then GamFont::setColor and drawChar over the string"
+ },
+ "001305ec": {
+  "name": "MagLifeWindow::print",
+  "tag": "ror-inferred",
+  "was": "FUN_001305ec",
+  "why": "asserts m_fntman (maglifewindow.cpp 503); sets the font colour a2 << 2 and draws the Shift-JIS text a1 from the cursor (+0xd8 / +0xdc), newlines included, keeping the cursor"
  },
  "00130778": {
   "name": "MagLifeWindow::setFontManager",
@@ -1571,11 +1631,89 @@
   "was": "FUN_00133454",
   "why": "returns a hit distance (< 0 none) of a ray (pos, dir) against the sky slots' collision models (all when the slot arg < 0); drawBlobShadows drops the shadow onto it"
  },
+ "00133658": {
+  "name": "MagScene::castSphere",
+  "tag": "ror-inferred",
+  "was": "FUN_00133658",
+  "why": "f12 radius (<= 0: -1), a1 hit, a2 pos: hitWallsSphere first, then sky slot 0's collision model (m_tenkyu[0].m_model[2], +0x29890, when its id +0x29a30 >= 0 and isAlive) through DogModel::castSphere (tail jump)"
+ },
+ "0013377c": {
+  "name": "MagScene::getGroundHeight",
+  "tag": "ror-inferred",
+  "was": "FUN_0013377c",
+  "why": "hidden after castSphere (no xrefs); castRay(hit, a1 pos, a2 dir, tenkyu 0) with a fresh hit record; t in 0..1 -> pos.y + dir.y * t, else 100000"
+ },
+ "0013386c": {
+  "name": "MagScene::hitWallsCylinder",
+  "tag": "ror-inferred",
+  "was": "FUN_0013386c",
+  "why": "asserts theH < 0.0f (magscene.cpp 1683); f12 h, f13 r, a1 hit, a2 pos: a wall whose height range overlaps pos.y .. pos.y + h and whose segment (at pos.y) is within r of pos (i3dPointSegDist2 <= r*r) is a hit: hit normal, 1; else -1"
+ },
  "00133a0c": {
   "name": "MagScene::castWalls",
   "tag": "ror-inferred",
   "was": "FUN_00133a0c",
   "why": "asserts theD.m_y == 0.0f (line 1740); tests the ray against the 256 segment pairs at the scene's start with 0x234050 (segment-segment distance 0 = a hit); hit +0x10 = the wall normal; called by castRay before the sky collision models"
+ },
+ "00133b80": {
+  "name": "MagScene::hitWallsSphere",
+  "tag": "ror-inferred",
+  "was": "FUN_00133b80",
+  "why": "asserts theR > 0.0f (1794); f12 r, a1 hit, a2 pos: a wall whose height range covers pos.y and whose segment is within r of pos (sqrt i3dPointSegDist2) is a hit: hit normal, 1; else -1"
+ },
+ "00133d10": {
+  "name": "MagScene::castCylinder",
+  "tag": "ror-inferred",
+  "was": "FUN_00133d10",
+  "why": "f12 r, a1 pos, a2 dir (its y the height), a3 tenkyu, t0 hit: hitWallsCylinder(dir.y, r) first, then the sky slots' collision models (tenkyu < 0: the first of the four that hits) through DogModel::castCylinder"
+ },
+ "00133e94": {
+  "name": "MagScene::addStrip",
+  "tag": "ror-inferred",
+  "was": "FUN_00133e94",
+  "why": "first free strip record (m_type -1 at +0x437fe): type 0, count a1, positions a2, colours a3, +0x14 t0, life t1; returns its index or -1"
+ },
+ "00133efc": {
+  "name": "MagScene::addStripCtx",
+  "tag": "ror-inferred",
+  "was": "FUN_00133efc",
+  "why": "hidden after addStrip; the same record with type 1 (drawStrips' i3dPktDrawStripCtx), count a1, positions a2, colours a3, +0x14 t0; life not written"
+ },
+ "00133f68": {
+  "name": "MagScene::addLineStrip",
+  "tag": "ror-inferred",
+  "was": "FUN_00133f68",
+  "why": "type 2 (drawStrips' i3dPktDrawLineStrip): count a1, positions a2, +0x14 t0, colour a3 as RGBA bytes -> floats r/255, g/255, b/255, a/128"
+ },
+ "00134114": {
+  "name": "MagScene::addWireBox",
+  "tag": "ror-inferred",
+  "was": "FUN_00134114",
+  "why": "hidden; type 3 (drawStrips' i3dLayerDrawWireBox): m_data a1, m_data2 a2, colour a3 (RGBA bytes -> floats)"
+ },
+ "001342bc": {
+  "name": "MagScene::addStripType4",
+  "tag": "ror-inferred",
+  "was": "FUN_001342bc",
+  "why": "hidden; type 4: m_data a1, colour a2 (RGBA bytes -> floats); drawStrips draws m_data's vectors"
+ },
+ "00134460": {
+  "name": "MagScene::addWireSphere",
+  "tag": "ror-inferred",
+  "was": "FUN_00134460",
+  "why": "hidden; type 5 (drawStrips' i3dLayerDrawWireSphere): m_data2 a1 (the centre), radius f12 into +0x00"
+ },
+ "001344c4": {
+  "name": "MagScene::setStripColor",
+  "tag": "ror-inferred",
+  "was": "FUN_001344c4",
+  "why": "hidden; strip record a1's colour floats = RGBA bytes a2 (r/255, g/255, b/255, a/128); returns 1"
+ },
+ "00134624": {
+  "name": "MagScene::addStripRecord",
+  "tag": "ror-inferred",
+  "was": "FUN_00134624",
+  "why": "hidden; copies the 0x20-byte record a1 into the first free strip record; returns its index or -1"
  },
  "00134698": {
   "name": "MagScene::clearStrip",
@@ -1697,6 +1835,30 @@
   "was": "FUN_00135234",
   "why": "(no <= 3, ...): draws through the view object +0x2734[no]"
  },
+ "00135364": {
+  "name": "MagScene::printWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_00135364",
+  "why": "asserts winNo < MAX_WINDOW (2395); with window winNo open: MagLifeWindow::print(text, colour) and i3dTexRelease of its font texture (re-upload)"
+ },
+ "00135418": {
+  "name": "MagScene::setWindowFill",
+  "tag": "ror-inferred",
+  "was": "FUN_00135418",
+  "why": "asserts winNo (2409); GamFont::setFill on window winNo's font (+0x2744 + 0x6c n)"
+ },
+ "00135494": {
+  "name": "MagScene::setWindowFillMsb",
+  "tag": "ror-inferred",
+  "was": "FUN_00135494",
+  "why": "asserts winNo (2417); GamFont::setFillMsb(a2) then setWindowFill(winNo, 0)"
+ },
+ "00135520": {
+  "name": "MagScene::setWindowColor",
+  "tag": "ror-inferred",
+  "was": "FUN_00135520",
+  "why": "hidden after setWindowFillMsb (no xrefs, no assert); GamFont::setColor(a2) on window a1 font (+0x2744 + 0x6c n)"
+ },
  "0013555c": {
   "name": "MagScene::getWindowTextWidth",
   "tag": "ror-inferred",
@@ -1708,6 +1870,24 @@
   "tag": "ror-inferred",
   "was": "FUN_00135594",
   "why": "assert winNo >= 0 && winNo < MAX_WINDOW; 0x1beeb4 on window n's font record and 0x219a98 on the VRAM handle of its font texture (m_font_tex_no[n] in the texture table)"
+ },
+ "00135628": {
+  "name": "MagScene::releaseWindowTex",
+  "tag": "ror-inferred",
+  "was": "FUN_00135628",
+  "why": "asserts winNo (2469); i3dTexRelease of window winNo's font texture m_tex_info[m_font_tex_no[winNo]]"
+ },
+ "0013569c": {
+  "name": "MagScene::scrollWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_0013569c",
+  "why": "asserts theN < MAX_WINDOW (2478); GamFont::scroll(rows) on window theN's font, then i3dTexRelease of its texture"
+ },
+ "00135740": {
+  "name": "MagScene::resetWindowFont",
+  "tag": "ror-inferred",
+  "was": "FUN_00135740",
+  "why": "asserts winNo (2489); GamFont::setFont(m_font_data +0x2908) on window winNo's font"
  },
  "001357b0": {
   "name": "MagScene::requestMenu",
@@ -1733,11 +1913,35 @@
   "was": "FUN_00135b78",
   "why": "terms the menu, removes it from the life manager, deletes the allocated ones (ids 0x1000b..0x1000f), sub mode 4 (fade back in)"
  },
+ "00135cac": {
+  "name": "MagScene::openFadeKey",
+  "tag": "ror-inferred",
+  "was": "FUN_00135cac",
+  "why": "asserts theTexName (2711); MagLifeFadeKey::loadTextureByName(&m_tex_info, name), reset(5, 0), and adds the fade key to the life manager with 0x8003 when it is not on it"
+ },
+ "00135d58": {
+  "name": "MagScene::setFadeKeyMagnify",
+  "tag": "ror-inferred",
+  "was": "FUN_00135d58",
+  "why": "asserts theMagnify > 0.0f (2725); MagLifeFadeKey::setMagnify(magnify, a2 frames)"
+ },
  "00135dcc": {
   "name": "MagScene::removeFadeKey",
   "tag": "ror-inferred",
   "was": "FUN_00135dcc",
   "why": "removes the keyhole fade (+0x41890) from the life manager and releases its texture from m_tex_info"
+ },
+ "00135e20": {
+  "name": "MagScene::addPrivateColli",
+  "tag": "ror-inferred",
+  "was": "FUN_00135e20",
+  "why": "asserts theP1, theP2, theP1[1] != theP2[1] (2740..2742); the first wall segment with equal end heights (free) gets (p1, 0) / (p2, 0); returns its index, asserts 0 (2764) and -1 when all 256 are used; answers who fills castWalls' segments"
+ },
+ "00135f44": {
+  "name": "MagScene::removePrivateColli",
+  "tag": "ror-inferred",
+  "was": "FUN_00135f44",
+  "why": "asserts theID >= 0 && theID < MAX_PRIVATE_COLLI (2773); clears both end heights of wall segment theID (free again)"
  },
  "00135fa4": {
   "name": "MagScene::resetEntities",
@@ -3754,6 +3958,24 @@
   "tag": "ror-inferred",
   "was": "FUN_001bf024",
   "why": "rasterizes the glyph of a code at x, y into the target in colour +0x2c (1 / 2 bit glyphs)"
+ },
+ "001bfe30": {
+  "name": "GamFont::scroll",
+  "tag": "ror-inferred",
+  "was": "FUN_001bfe30",
+  "why": "a1 rows (within +-m_dst_h): memmove the buffer by rows * m_dst_w pixels (4-bit: half) and memset the freed rows with the fill colour"
+ },
+ "001bff28": {
+  "name": "GamFont::setFill",
+  "tag": "ror-inferred",
+  "was": "FUN_001bff28",
+  "why": "m_fill (+0x64) = a1, with bit 0x80 added for 8-bit targets when m_68 is set"
+ },
+ "001bff5c": {
+  "name": "GamFont::setFillMsb",
+  "tag": "ror-inferred",
+  "was": "FUN_001bff5c",
+  "why": "m_68 = a1: the flag setFill adds 0x80 for (8-bit targets)"
  },
  "001bff64": {
   "name": "GamFont::setColor",
@@ -5776,6 +5998,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0022b438",
   "why": "(root+0x10)->+0x18 name pointer table [n]; DogModel::getTexName (an ELF inline symbol) wraps it"
+ },
+ "002337e0": {
+  "name": "i3dPointSegDist2",
+  "tag": "ror-inferred",
+  "was": "FUN_002337e0",
+  "why": "p - a projected on d clamped to 0..1 (written to the a3 out pointer when not NULL); returns the squared distance from p to the segment a + t d"
  },
  "00234050": {
   "name": "i3dSegSegDist2",
