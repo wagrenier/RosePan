@@ -153,6 +153,8 @@ struct GamFont
     /* The pixel buffer the glyphs go to; w & 0xff80, bits 4 or 8. 1 when
      * set. */
     int  setTarget(void *buf, u_int w, u_int h, int bits);               // ROR 0x001bedc0
+    /* Fills the whole buffer with m_fill; 1 when there is one. */
+    int  clear();                                                        // ROR 0x001beeb4
     /* Fills the rect with m_fill. */
     int  fillRect(int x, int y, int w, int h);                           // ROR 0x001bef24
     void drawChar(int x, int y, int code);                               // ROR 0x001bf024
@@ -162,6 +164,8 @@ struct GamFont
     int  getGlyphLeft(int glyph);                                        // ROR 0x001c020c
     /* The glyph's width (proportional fonts), else m_char_w. */
     int  getGlyphWidth(int glyph);                                       // ROR 0x001c0254
+    /* The width of a Shift-JIS string (a tail jump to 0x1c02f8). */
+    int  getTextWidth(const char *text);                                 // ROR 0x001c047c
 
     int            m_00;            // ROR 0x00
     int            m_04;            // ROR 0x04

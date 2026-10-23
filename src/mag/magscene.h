@@ -159,6 +159,17 @@ struct MagShadowLight
 static_assert(offsetof(MagShadowLight, m_cone_outer) == 0x34, "m_cone_outer");
 static_assert(sizeof(MagShadowLight) == 0x40, "MagShadowLight is 0x40 bytes on the EE");
 
+/* The 256 records at the scene's start (EE 0x20 each): the constructor
+ * sets both vectors to (0, 0, 0, 1), resetEntities clears their y. Roles
+ * unknown. */
+struct MagSceneVecPair
+{
+    sceVu0FVECTOR m_a;          // ROR 0x00
+    sceVu0FVECTOR m_b;          // ROR 0x10
+};
+static_assert(offsetof(MagSceneVecPair, m_b) == 0x10, "m_b");
+static_assert(sizeof(MagSceneVecPair) == 0x20, "MagSceneVecPair is 0x20 bytes on the EE");
+
 #define MAX_WINDOW 4            /* the scene's text windows (asserts winNo < MAX_WINDOW) */
 
 /* EE 0x85500. layout: host -- holds the actors and controllers (pointers,
@@ -206,12 +217,16 @@ struct MagScene
     void setViewParam(int no, const int *v);                             // ROR 0x00134944
     void fadeInWindow(int no, int time, int from, int to);               // ROR 0x00135088
     void fadeOutWindow(int no, int time, int from, int to);              // ROR 0x0013511c
-    void setWindowShow(int no, int on);                                  // ROR 0x001351b0
+    /* The window's setHide(hide != 0). */
+    void setWindowShow(int no, int hide);                                // ROR 0x001351b0
     int  getWindowTextWidth(int no, const char *text);                   // ROR 0x0013555c
     void updateWindowFont(int no);                                       // ROR 0x00135594
     void drawView(int no, int a, int b, const void *p, int c);           // ROR 0x00135234
     void setViewFar(float far);                                          // ROR 0x00131618
     void resetEntities();                                                // ROR 0x00135fa4
+    /* Frees the font data, the actors' models, the sky slots and the
+     * textures, and every life but the fader. */
+    void term();                                                         // ROR 0x00131f74
     void clearPC();                                                      // ROR 0x0013604c
     void initCharaLoader();                                              // ROR 0x00137300
     void initMapLoader();                                                // ROR 0x00137318
@@ -245,6 +260,8 @@ struct MagScene
     void setCameraMode(int mode);                                        // ROR 0x0013caf0
     int  getCameraMode(int *out);                                        // ROR 0x0013d5ac
     void setLightNo(int theNo);                                          // ROR 0x0013f4d0
+    /* Only asserts theNo < 8 (the destructor passes -1). */
+    void checkLightNo(int theNo);                                        // ROR 0x0013f49c
     void loadLight(const void *theData);                                 // ROR 0x0013f658
     void setDefaultLight();                                              // ROR 0x0013f8e4
     void setLightFlags(const int *flags, int no);                        // ROR 0x0013f528
@@ -261,6 +278,9 @@ struct MagScene
     void changeCamera();                                                 // ROR 0x0013d5e4
     void rotateTenkyu();                                                 // ROR 0x0014062c
     void updateRecords853fc();                                           // ROR 0x00140c68
+    /* The constructor's: clears the records at +0x853bc and sets their
+     * defaults. */
+    void initRecords853bc();                                             // ROR 0x00140a84
     /* GamMan glue (g_gamMan and the words at *(0x7b2060) / *(0x7b205c)). */
     void gamEnterMenu();                                                 // ROR 0x0013f07c
     void gamLeaveMenu();                                                 // ROR 0x0013f09c
@@ -304,9 +324,12 @@ struct MagScene
     void drawSkyDome(i3dContext *ctx);                                   // ROR 0x001406b8
     void drawFocus(i3dContext *ctx, int frame);                          // ROR 0x00140e88
 
+    MagSceneVecPair m_vec_pair[256];    // ROR 0x0000: see MagSceneVecPair
     MagShadowLight m_shadow_lightrec;   // ROR 0x2000: the shadow layers' light record
     int            m_shadow_mode;       // ROR 0x2040: setShadowLight's mode: < 0 no projected shadows (the constructor's value), 1 directional, 2 point, 3 spot (2 and 3: the actor's nearest point light)
     const float   *m_shadow_src;        // ROR 0x2044: mode 1: the pool's directional light (its direction first); else that kind's light or NULL
+    int            m_2048;              // ROR 0x2048: cleared with the shadow light by the constructor; role unknown
+    int            m_204c;              // ROR 0x204c: idem
     DogLightPool   m_light_pool;        // ROR 0x2050: the render stages' light sets
     MagCharaLoader m_chara_loader;      // ROR 0x215c: data/ch/CHARA.RPK
     MagMapLoader   m_map_loader;        // ROR 0x224c: data/bg/mapunit.bin
@@ -316,7 +339,9 @@ struct MagScene
     float          m_22a8;              // ROR 0x22a8: the ambient scale of render stages 1 and 2 (others 1.0); role unverified
     int            m_pc_mode;           // ROR 0x22ac: setPC's mode
     float          m_22b0;              // ROR 0x22b0: blends m_22a4 toward 1 for the shadow view (1 = m_22a4 as is)
-    int            m_22b4;              // ROR 0x22b4: sky path display: 0 off, 1 copy the points then 2, 2 draw the copy
+    int            m_22b4;              // ROR 0x22b4: sky path display: 0 off, 1 copy the points then 2, 2 draw the copy (the constructor's value: 1)
+    int            m_22b8;              // ROR 0x22b8: the constructor clears it; role unknown
+    int            m_22bc[4];           // ROR 0x22bc: the constructor sets -1; role unknown
     int            m_22cc;              // ROR 0x22cc: MagSystem::clearScene22cc zeroes it; role unknown
     BedSubMode     m_sub_mode;          // ROR 0x22d0: update's mode (pushSubMode sets 8; getDrawFlags tests 7 and 8); m_step -1 on entry; m_arg the requested menu id, m_arg2 the PC's mode / number then
     MagLifeMan     m_life_man;          // ROR 0x2330
@@ -332,6 +357,7 @@ struct MagScene
     int           *m_actor_snd[128];    // ROR 0x29320: per actor, its 12 footstep sound ids by sector sound slot (asserted m_actor_snd[theNo]); NULL = none
     DogTexInfo     m_tex_info;          // ROR 0x29520: 256 textures, shadow01 first
     MagSceneTenkyu m_tenkyu[4];         // ROR 0x29540: stride 0x520
+    int            m_2a9c0;             // ROR 0x2a9c0: the constructor clears it; role unknown
     int            m_focus_actor;       // ROR 0x2a9c4: the actor drawFocusActor shows close up, -1 = none (then drawShadows)
     u_int          m_2a9c8;             // ROR 0x2a9c8: bit 1 = draw the blob shadows; other bits unknown
     float          m_2a9cc;             // ROR 0x2a9cc: mapparam.bbb word 11 / 100, kept in 0..1 (1 when 0); role unknown
@@ -348,6 +374,12 @@ struct MagScene
     DogCamera      m_camera_entity;     // ROR 0x2ab70: the camera (m_trans +0x2abb0 and m_rotate +0x2abc0 are the eye actors are drawn for)
     int            m_camera_mode;       // ROR 0x2ad50: getCameraMode returns it
     int            m_camera_2ad58;      // ROR 0x2ad58: getCameraMode's second word out
+    float          m_camera_2ad5c;      // ROR 0x2ad5c: 600 from the constructor; role unknown
+    float          m_camera_2ad60;      // ROR 0x2ad60: 500 from the constructor; role unknown
+    int            m_camera_2ad64;      // ROR 0x2ad64: the constructor clears it; role unknown
+    int            m_camera_2ad68;      // ROR 0x2ad68: idem
+    int            _2ad6c[5];
+    int            m_camera_2ad80;      // ROR 0x2ad80: the constructor clears it; role unknown
     int            m_camera_target_set; // ROR 0x2ad9c: setCameraTarget sets 1
     sceVu0FVECTOR  m_camera_pos;        // ROR 0x2ada0: setCameraTarget's position
     sceVu0FVECTOR  m_camera_at;         // ROR 0x2adb0: setCameraTarget's look-at point
@@ -375,6 +407,10 @@ struct MagScene
     int            m_mirror_axis;       // ROR 0x85494: mapparam.bbb word 9 (files over 0x20 bytes): 0 none, 1 z, 2 y (floor), 3 x
     float          m_mirror_plane;      // ROR 0x85498: mapparam.bbb word 10 (a float): the mirror plane's coordinate
     int            m_854a4;             // ROR 0x854a4: mapparam.bbb word 8: the map's default footstep sound slot
+    sceVu0FVECTOR  m_854b0;             // ROR 0x854b0: (0.1, 0.1, 0.1, 1) from the constructor (a colour?); role unknown
+    int            m_854c0[5];          // ROR 0x854c0: the constructor clears them; roles unknown
+    u_char         m_854d4;             // ROR 0x854d4: the constructor sets 1; role unknown
+    u_char         m_854d5;             // ROR 0x854d5: idem
     MagScene      *m_854e0;             // ROR 0x854e0: start points it at the scene (an interface pointer; class unknown)
     MagScene      *m_854e8;             // ROR 0x854e8: idem
 };
@@ -386,5 +422,7 @@ static_assert(offsetof(MagScene, m_view) > offsetof(MagScene, m_2a9cc), "EE orde
 static_assert(offsetof(MagScene, m_window) > offsetof(MagScene, m_life_man), "EE order");
 static_assert(offsetof(MagScene, m_pMenuBase) > offsetof(MagScene, m_bwn_ctrl), "EE order");
 static_assert(offsetof(MagScene, m_fade) > offsetof(MagScene, m_mes), "EE order");
+static_assert(offsetof(MagScene, m_shadow_lightrec) >= 0x2000, "m_vec_pair comes first");
+static_assert(offsetof(MagScene, m_854d5) > offsetof(MagScene, m_854a4), "EE order");
 
 #endif /* _MAG_MAGSCENE_H */

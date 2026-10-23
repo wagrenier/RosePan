@@ -25,6 +25,8 @@ struct MagLifePC : MagLifeControlChara
     void setActor(DogActor *actor, int no, int mode);                    // ROR 0x0011bd4c
     /* EE slot 13 (+0x68). */
     void termWorld();                                                    // ROR 0x0011c418
+    /* EE slot 12 (+0x60): back to the 'wait2' motion (MagScene::resetEntities). */
+    void reset();                                                        // ROR 0x0011be60
     void initMotion();                                                   // ROR 0x0011dd40
     /* EE slot 2 (+0x10) */
     void live() override;                                                // ROR 0x0011ade4

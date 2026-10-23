@@ -30,6 +30,24 @@
  * while the class is not polymorphic. */
 struct DogEntity
 {
+    /* Inline in the ROM (no symbol; GCC 2 writes it into every derived
+     * constructor -- the sky models' and the camera's in MagScene's,
+     * 0x1360a0): translation, rotation, offset and m_80 (0, 0, 0, 1),
+     * scale 1, dirty. The matrix is left as it is. */
+    DogEntity()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            float v = (i == 3) ? 1.0f : 0.0f;
+            m_trans[i] = v;
+            m_rotate[i] = v;
+            m_trans_ofs[i] = v;
+            m_80[i] = v;
+            m_scale[i] = 1.0f;
+        }
+        m_dirty = 1;
+    }
+
     /* EE slot 1 (+0x08): zero rotation / offset / translation (w 1), scale
      * 1, dirty, no parent. */
     void reset();                                                        // ROR 0x0011023c
@@ -52,6 +70,10 @@ struct DogEntity
     sceVu0FVECTOR m_80;         // ROR 0x80: (0, 0, 0, 1) after reset and setActorRotate; role unverified
     int           m_dirty;      // ROR 0x90: set by every setter, 1 = the matrix needs a transform
     u_int         _ee_vptr;     // ROR 0x94: the EE vptr (see the file comment)
+    /* PC: the 16-byte tail padding as a field. With a constructor the class
+     * is no longer POD and MinGW (Itanium ABI) would put DogEntityEx's first
+     * field in the tail padding, at 0x98 instead of 0xa0. */
+    u_int         _98[2];
 };
 static_assert(offsetof(DogEntity, m_trans) == 0x40, "m_trans");
 static_assert(offsetof(DogEntity, m_rotate) == 0x50, "m_rotate");
@@ -64,6 +86,9 @@ static_assert(sizeof(DogEntity) == 0xa0, "DogEntity is 0x98 bytes of data, 16-al
 /* EE size at least 0xe4. layout: host -- holds the parent pointer. */
 struct DogEntityEx : DogEntity
 {
+    /* Inline in the ROM, as DogEntity's: no parent. */
+    DogEntityEx() : m_parent(NULL) {}
+
     void setParent(DogEntityEx *p);                                      // ROR 0x001102b4
     DogEntityEx *getParent() { return m_parent; }                        // ROR 0x00281cb4
     /* EE slot 2 (+0x10): the transform with the parent's matrix. */

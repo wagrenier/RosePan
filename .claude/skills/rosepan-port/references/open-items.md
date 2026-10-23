@@ -298,6 +298,17 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
 
 ## Decisions
 
+- **MagScene::~MagScene stays a stub** (2026-10-22, the magscene constructor session; decided
+  unattended). The ROM never destroys the scene; on the host g_magSystem's static teardown under
+  std::exit is the only caller, with the game threads still running and the scene's member lives
+  (fader, controllers, windows, 2D layers) still in m_life_man, which MagLifeMan::deleteAll would
+  delete as if heap objects. Writing it needs a decision: skip it at exit (a host exit flag), or run
+  term() 0x131f74 first. The ROM body is short (checkLightNo(-1), releaseTenkyuAll, the sky
+  models' DogModel::release, DogTexInfo::term, MagLifeMan::deleteAll, the loaders' / light pool's
+  frees). Constructors of members that the host has no C++ constructor for (DogActor 0x10eebc,
+  DogModel 0x114c54, the controllers, the fades, the 13 menus) are left to their TUs; the scene's
+  constructor does not imitate them.
+
 - **MagLife is polymorphic on the host** (2026-10-22, the maglifeman session; decided unattended,
   required: MagLifeMan runs slots 1 / 2 / 6 / 8 on lives of any class). mag/maglife.h declares
   slots 1 (~MagLife), 2 live, 6 render(I3dLayer *), 7 setHide, 8 getHide as virtuals with the ROM's

@@ -23,6 +23,8 @@ struct MagLifeBwn : MagLifeControlChara
     void setActor(DogActor *actor, int no, int mode);                    // ROR 0x001256d4
     /* EE slot 15 (+0x78): MagLifeControlChara's, unless +0xce4 is set. */
     void renderPostProcess();                                            // ROR 0x001259e8
+    /* EE slot 12 (+0x60) (MagScene::resetEntities). */
+    void reset();                                                        // ROR 0x00124f38
     /* EE slot 2 (+0x10) */
     void live() override;                                                // ROR 0x00124e40
 

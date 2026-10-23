@@ -7,10 +7,12 @@
  *  actors, init and initRender (fog, texture table, the 2D layers
  *  registered with the life manager, the view records), start, the
  *  per-frame update by sub mode (fades, menus, text windows, actors and
- *  their footsteps, sky billboards). The constructor, destructor, openMenu
- *  and most window functions are still stubs.
+ *  their footsteps, sky billboards), the text windows, the strip records
+ *  and the constructor. The destructor and openMenu are still stubs.
  * ======================================================================== */
 #include "mag/magscene.h"
+
+#include <string.h>
 
 #include "common/ror_assert.h"
 #include "common/rosepan_stub.h"
@@ -764,6 +766,65 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Frees strip record no (no < 0: all 0x2000): no type, no data, no life.
+// ROR 0x00134698
+
+void MagScene::clearStrip(int no)
+{
+    if (no < 0)
+    {
+        for (int i = 0; i < 0x2000; i++)
+        {
+            m_strip[i].m_type = -1;
+            m_strip[i].m_data = NULL;
+            m_strip[i].m_life = -1;
+            m_strip[i].m_count = 0;
+            m_strip[i].m_colors = NULL;
+        }
+        return;
+    }
+    m_strip[no].m_type = -1;
+    m_strip[no].m_data = NULL;
+    m_strip[no].m_life = -1;
+    m_strip[no].m_count = 0;
+    m_strip[no].m_colors = NULL;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Opens a text window w x h in the first free slot, drawing with that
+// slot's font (its texture from start) and closing by life (see
+// MagLifeWindow::m_wait_key; > 0 also waits in sub mode 2). Returns the
+// slot, -1 when all four are open. a3 is not read.
+// ROR 0x00134730 // callcheck: operator_new, FUN_00215a30 (new MagLifeWindow; the assert handler, inside ROR_ASSERT)
+
+int MagScene::openWindow(int w, int h, int a3, int life)
+{
+    int n;
+
+    for (n = 0; n < MAX_WINDOW; n++)
+        if (m_window[n] == NULL)
+            break;
+    if (n >= MAX_WINDOW)
+        return -1;
+
+    m_window[n] = new MagLifeWindow();
+    ROR_ASSERT(m_window[ n ]); /* 2110 */
+    m_window[n]->setup(w, h);
+    GamFont *font = &m_window_font[n];
+    font->setFont(m_font_data);
+    m_window[n]->setFontManager(font);
+    m_window[n]->m_tex_no = m_font_tex_no[n];
+    m_window[n]->m_wait_key = life;
+    if (life > 0)
+    {
+        m_sub_mode.m_mode = 2;
+        m_sub_mode.m_step = -1;
+    }
+    m_life_man.add(m_window[n], 0x800c);
+    return n;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Closes text window winNo (removed from the life manager and deleted).
 // ROR 0x001348b0 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
 
@@ -777,6 +838,103 @@ void MagScene::closeWindow(int winNo)
         delete *pw; /* the ROM runs slot 1 with flags 3 */
         *pw = NULL;
     }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Places window theN: v = x, y, z (the position, w 1), width, height.
+// ROR 0x00134944 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::setViewParam(int theN, const int *v)
+{
+    ROR_ASSERT(theN >= 0 && theN < MAX_WINDOW); /* 2156 */
+    MagLifeWindow *w = m_window[theN];
+    if (w)
+    {
+        w->m_pos[0] = (float)v[0];
+        w->m_pos[1] = (float)v[1];
+        w->m_pos[2] = (float)v[2];
+        w->m_pos[3] = 1.0f;
+        w->m_w = v[3];
+        w->m_h = v[4];
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Fades window theN in (MagLifeWindow::fadeIn).
+// ROR 0x00135088 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::fadeInWindow(int theN, int time, int from, int to)
+{
+    ROR_ASSERT(theN >= 0 && theN < MAX_WINDOW); /* 2318 */
+    if (m_window[theN])
+        m_window[theN]->fadeIn(time, from, to);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Fades window theN out (MagLifeWindow::fadeOut).
+// ROR 0x0013511c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::fadeOutWindow(int theN, int time, int from, int to)
+{
+    ROR_ASSERT(theN >= 0 && theN < MAX_WINDOW); /* 2333 */
+    if (m_window[theN])
+        m_window[theN]->fadeOut(time, from, to);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Hides window winNo (hide != 0) or shows it: the window's slot 7,
+// setHide. (The Ghidra name says "show"; the ROM passes the flag to
+// setHide, and S2d's map name passes 0 to show its window.)
+// ROR 0x001351b0 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::setWindowShow(int winNo, int hide)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2349 */
+    if (m_window[winNo])
+        m_window[winNo]->setHide(hide != 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Draws str into window winNo's font buffer at (x, y), then releases the
+// window font's texture so the next frame uploads the new pixels.
+// ROR 0x00135234 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::drawView(int winNo, int x, int y, const void *p, int arg)
+{
+    const char *str = (const char *)p;
+
+    ROR_ASSERT(str != NULL); /* 2369: "str != __null" (GCC's NULL) */
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2371 */
+    if (m_window[winNo])
+    {
+        m_window[winNo]->drawText(x, y, str, arg);
+        I3dTexEntry *pti = m_tex_info.getTexInfo(m_font_tex_no[winNo]);
+        ROR_ASSERT(pti); /* 2381 */
+        if (pti == NULL)
+            return; /* PC: the ROM reads address 4 here */
+        ROR_ASSERT(pti->pPicture); /* 2382 */
+        i3dTexRelease((I3dTexture *)pti->pPicture);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The width of text in window no's font.
+// ROR 0x0013555c
+
+int MagScene::getWindowTextWidth(int no, const char *text)
+{
+    return m_window_font[no].getTextWidth(text);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Clears window winNo's font buffer and releases its texture.
+// ROR 0x00135594 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::updateWindowFont(int winNo)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2452 */
+    m_window_font[winNo].clear();
+    i3dTexRelease((I3dTexture *)m_tex_info.m_tex_info[m_font_tex_no[winNo]].pPicture);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -832,6 +990,26 @@ void MagScene::closeMenu()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// After a map load (the last call of load): clears the y of both vectors
+// of the 256 records at the scene's start, resets every actor's shadow
+// light, and resets the PC, Brown and Brown's controller.
+// ROR 0x00135fa4
+
+void MagScene::resetEntities()
+{
+    for (int i = 0; i < 256; i++)
+    {
+        m_vec_pair[i].m_a[1] = 0.0f;
+        m_vec_pair[i].m_b[1] = 0.0f;
+    }
+    for (int i = 0; i < 128; i++)
+        m_actors[i].resetShadow();
+    m_pc.reset();
+    m_bwn.reset();
+    m_bwn_ctrl.reset();
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Unbinds the PC from Brown's command layer and ends the PC's world.
 // ROR 0x0013604c
 
@@ -842,76 +1020,116 @@ void MagScene::clearPC()
     m_pc.termWorld();
 }
 
-// ---- stubs (hand-written: constructors and destructors are not stubbed by stubgen) ----
+// ──────────────────────────────────────────────────────────────────────
+// The scene's constructor. g_magSystem holds the scene, so on the host it
+// runs before main. The ROM also runs its members' constructors here (the
+// light pool, the loaders, the sub mode, 128 DogActors, the sky models,
+// the camera, the PC / Brown controllers, the fades, the 13 menus at
+// +0x2be60.., the 2D layers, the scene interfaces); the host runs those
+// that exist as C++ constructors (GamFont, DogEntity / DogCamera, S2d*),
+// the rest start zeroed as part of g_magSystem until their TUs write them.
+// ROR 0x001360a0
+// callcheck: FUN_00100320, FUN_0010eebc, FUN_00110a94, FUN_00114c54, FUN_0011bf0c, FUN_00125aa4, FUN_0012ba80, FUN_0012d398, FUN_0012d58c, FUN_0012f008, FUN_0012f298, FUN_00130da4, FUN_0014257c, FUN_00142e84, FUN_00176a3c, FUN_0017c0f0, FUN_001947a4, FUN_0019a52c, FUN_001a1244, FUN_001a59b8, FUN_001a90ec, FUN_001ab474, FUN_001ad6b4, FUN_001adf04, FUN_001ae474, FUN_001ae954, FUN_001bdae4, FileReader, GamFont, S2dBg, S2dCineSco, S2dMes, S2dMovie, memset (member constructors: the host runs the C++ ones itself, the others are not written yet; the memsets are the field clears below)
 
-// stub of ROR 0x001360a0
-// PC: runs before main (g_magSystem's member); the stub only logs.
 MagScene::MagScene()
 {
-    ROSEPAN_STUB("MagScene::MagScene", 0x001360a0);
-    /* PC: until the constructor is written, its loop at 0x136ab4 that frees
-     * the strip records (MagScene::draw walks them every frame, and zeroed
-     * records read as type 0 with no vertices). */
-    for (int i = 0; i < 0x2000; i++)
+    for (int i = 0; i < 256; i++)
     {
-        m_strip[i].m_type = -1;
-        m_strip[i].m_data = NULL;
-        m_strip[i].m_life = -1;
-        m_strip[i].m_count = 0;
-        m_strip[i].m_colors = NULL;
+        for (int k = 0; k < 4; k++)
+        {
+            float v = (k == 3) ? 1.0f : 0.0f;
+            m_vec_pair[i].m_a[k] = v;
+            m_vec_pair[i].m_b[k] = v;
+        }
     }
+
+    m_22a0 = 0x1.999998p-1f;    /* 0x3f4ccccc, 0.8 */
+    m_22a4 = 1.03f;
+    m_22a8 = 0x1.999998p-2f;    /* 0x3ecccccc, 0.4 */
+    m_22b0 = 1.0f;
+    m_22b4 = 1;
+    m_22b8 = 0;
+    m_22cc = 0;
+    m_sub_mode.m_mode = 0;
+    m_sub_mode.m_step = 0;
+    m_sub_mode.m_arg = 0;
+    m_sub_mode.m_arg2 = 0;
+    memset(m_sub_mode.m_stack, 0, sizeof(m_sub_mode.m_stack));
+    m_life_man.init();
+    m_tex_info.clear();
+
+    m_2a9c0 = 0;
+    for (int k = 0; k < 4; k++)
+    {
+        float v = (k == 3) ? 1.0f : 0.0f;
+        m_camera_pos[k] = v;
+        m_camera_at[k] = v;
+    }
+    m_854e0 = NULL;
+    m_854e8 = NULL;
+
+    memset(&m_shadow_lightrec, 0, sizeof(m_shadow_lightrec));
+    m_shadow_mode = 0;
+    m_shadow_src = NULL;
+    m_2048 = 0;
+    m_204c = 0;
+    m_shadow_mode = -1;
+    m_sub_mode.m_step = -1;
+    m_sub_mode.m_mode = 0;
+    m_pc_no = 0;
+    clearStrip(-1); /* inlined in the ROM */
+    m_camera_2ad60 = 500.0f;
+    m_camera_2ad5c = 600.0f;
+    m_font_data = NULL;
+    m_pMenuBase = NULL;
+    m_camera_2ad64 = 0;
+    m_camera_2ad68 = 0;
+    m_camera_2ad80 = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        MagSceneTenkyu *t = &m_tenkyu[i];
+        t->m_c_data = NULL;
+        t->m_id = -1;
+        t->m_c_num = 0;
+        t->m_path_data = NULL;
+        t->m_light_data = NULL;
+        /* the ROM clears 0x10 bytes from m_tex_list */
+        t->m_tex_list = NULL;
+        t->m_data = NULL;
+        memset(t->_50c, 0, 8);
+    }
+    initRecords853bc();
+    m_854a4 = 0;
+    m_focus_actor = -1;
+    m_2a9c8 = 3;
+    m_2aa84 = 1;
+    m_mirror_axis = 0;
+    for (int i = 0; i < 4; i++)
+        m_22bc[i] = -1;
+    m_854d5 = 1;
+    m_854d4 = 1;
+    m_854b0[0] = 0x1.999998p-4f; /* 0x3dcccccc, 0.1 */
+    m_854b0[3] = 1.0f;
+    for (int i = 0; i < 5; i++)
+        m_854c0[i] = 0;
+    m_854b0[2] = 0x1.999998p-4f;
+    m_854b0[1] = 0x1.999998p-4f;
 }
 
+// ---- stubs (hand-written: constructors and destructors are not stubbed by stubgen) ----
+
 // stub of ROR 0x00136d14
+// PC: the ROM never destroys the scene (g_magSystem lives for the whole
+// run); on the host only std::exit's static teardown reaches this, with
+// the game threads still running and the scene's own lives (fader, PC,
+// windows, 2D layers) still in m_life_man, which MagLifeMan::deleteAll
+// would delete. Left a stub until that is decided (open-items.md).
 MagScene::~MagScene()
 {
     ROSEPAN_STUB("MagScene::~MagScene", 0x00136d14);
 }
 
 // ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x00135234
-void MagScene::drawView(int no, int a, int b, const void *p, int c)
-{
-    ROSEPAN_STUB("MagScene::drawView", 0x00135234);
-}
-
-// stub of ROR 0x00134944
-void MagScene::setViewParam(int no, const int *v)
-{
-    ROSEPAN_STUB("MagScene::setViewParam", 0x00134944);
-}
-
-// stub of ROR 0x00135088
-void MagScene::fadeInWindow(int no, int time, int from, int to)
-{
-    ROSEPAN_STUB("MagScene::fadeInWindow", 0x00135088);
-}
-
-// stub of ROR 0x0013511c
-void MagScene::fadeOutWindow(int no, int time, int from, int to)
-{
-    ROSEPAN_STUB("MagScene::fadeOutWindow", 0x0013511c);
-}
-
-// stub of ROR 0x00134730
-int MagScene::openWindow(int w, int h, int a3, int life)
-{
-    ROSEPAN_STUB("MagScene::openWindow", 0x00134730);
-    return {};
-}
-
-// stub of ROR 0x001351b0
-void MagScene::setWindowShow(int no, int on)
-{
-    ROSEPAN_STUB("MagScene::setWindowShow", 0x001351b0);
-}
-
-// stub of ROR 0x00135594
-void MagScene::updateWindowFont(int no)
-{
-    ROSEPAN_STUB("MagScene::updateWindowFont", 0x00135594);
-}
 
 // stub of ROR 0x0013580c
 void MagScene::openMenu(int id)

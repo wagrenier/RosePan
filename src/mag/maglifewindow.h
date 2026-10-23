@@ -15,17 +15,46 @@
 #include <stddef.h>
 
 #include "mag/maglife.h"
+#include "sdk/vu0_intrin.h"
+
+struct GamFont;
 
 /* layout: host -- polymorphic in the ROM (vptr +0x14); EE offsets in the
- * comments. */
+ * comments. EE size 0xe0 (MagScene::openWindow's operator_new). */
 struct MagLifeWindow : MagLife
 {
+    MagLifeWindow();                                                     // ROR 0x001308bc
     /* EE slot 1 (+0x08), linkonce in the ROM. */
     ~MagLifeWindow();                                                    // ROR 0x00285234
 
-    u_char _28[0x80 - 0x28];
+    /* The window's size (also setViewParam's v[3] / v[4]), alpha 128, no
+     * fade, a 0x200 x 0x200 buffer. */
+    void setup(int w, int h);                                            // ROR 0x0012fe30
+    /* An alpha ramp from -> to (0..0x7f, from + 1..0x80; from < 0: the
+     * current alpha) over time frames. */
+    void fadeIn(int time, int from, int to);                             // ROR 0x0012fe68
+    /* The ramp from to (< 0: the current alpha) down to from. */
+    void fadeOut(int time, int from, int to);                            // ROR 0x0012fef8
+    /* Draws a string into the window font's buffer (asserts m_fntman and
+     * the cell / buffer sizes). */
+    void drawText(int x, int y, const char *str, int arg);               // ROR 0x00130258
+    /* Takes the GamFont the window draws with (asserts thefontManager). */
+    void setFontManager(GamFont *thefontManager);                        // ROR 0x00130778
+
+    u_char        _28[0x30 - 0x28];
+    sceVu0FVECTOR m_pos;        // ROR 0x30: MagLifePos's position (setViewParam: x, y, z, 1)
+    u_char        _40[0x80 - 0x40];
     int    m_wait_key;          // ROR 0x80: 0 = close at the next scene update, > 0 = close on pad bit 14, < 0 = stay (MagScene::update sub mode 2)
+    u_char _84[0x94 - 0x84];
+    int    m_w;                 // ROR 0x94: setup / setViewParam
+    int    m_h;                 // ROR 0x98: idem
+    u_char _9c[0xc0 - 0x9c];
+    int    m_tex_no;            // ROR 0xc0: the window font's texture in the scene's DogTexInfo (openWindow)
+    u_char _c4[0xe0 - 0xc4];
 };
+static_assert(offsetof(MagLifeWindow, m_pos) >= 0x30, "m_pos");
 static_assert(offsetof(MagLifeWindow, m_wait_key) >= 0x80, "m_wait_key");
+static_assert(offsetof(MagLifeWindow, m_w) >= 0x94, "m_w");
+static_assert(offsetof(MagLifeWindow, m_tex_no) >= 0xc0, "m_tex_no");
 
 #endif /* _MAG_MAGLIFEWINDOW_H */

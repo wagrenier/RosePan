@@ -6,8 +6,46 @@
 
 // ---- stubs (hand-written: constructors and destructors are not stubbed by stubgen) ----
 
+// stub of ROR 0x001308bc
+MagLifeWindow::MagLifeWindow()
+{
+    ROSEPAN_STUB("MagLifeWindow::MagLifeWindow", 0x001308bc);
+}
+
 // stub of ROR 0x00285234
 MagLifeWindow::~MagLifeWindow()
 {
     ROSEPAN_STUB("MagLifeWindow::~MagLifeWindow", 0x00285234);
+}
+
+// ---- stubs (tools/reverse/stubgen.py) ----
+
+// stub of ROR 0x00130258
+void MagLifeWindow::drawText(int x, int y, const char *str, int arg)
+{
+    ROSEPAN_STUB("MagLifeWindow::drawText", 0x00130258);
+}
+
+// stub of ROR 0x0012fe68
+void MagLifeWindow::fadeIn(int time, int from, int to)
+{
+    ROSEPAN_STUB("MagLifeWindow::fadeIn", 0x0012fe68);
+}
+
+// stub of ROR 0x0012fef8
+void MagLifeWindow::fadeOut(int time, int from, int to)
+{
+    ROSEPAN_STUB("MagLifeWindow::fadeOut", 0x0012fef8);
+}
+
+// stub of ROR 0x00130778
+void MagLifeWindow::setFontManager(GamFont *thefontManager)
+{
+    ROSEPAN_STUB("MagLifeWindow::setFontManager", 0x00130778);
+}
+
+// stub of ROR 0x0012fe30
+void MagLifeWindow::setup(int w, int h)
+{
+    ROSEPAN_STUB("MagLifeWindow::setup", 0x0012fe30);
 }

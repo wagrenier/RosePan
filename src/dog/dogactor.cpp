@@ -128,3 +128,9 @@ void DogActor::runMotionCmd()
 {
     ROSEPAN_STUB("DogActor::runMotionCmd", 0x0010d388);
 }
+
+// stub of ROR 0x0010f298
+void DogActor::resetShadow()
+{
+    ROSEPAN_STUB("DogActor::resetShadow", 0x0010f298);
+}

@@ -28,6 +28,9 @@ struct DogActor : DogModel
     /* Releases the model (the master's reference when shared) with the
      * scene's textures. */
     void releaseModel(DogTexInfo *tex);                                  // ROR 0x00109ed0
+    /* The shadow light becomes the previous one (none now, no fade), flag
+     * 8 at +0xf0, +0x1e8 = 1/60; MagScene::resetEntities after a load. */
+    void resetShadow();                                                  // ROR 0x0010f298
     /* Stores the value at +0x1d8 (MagScene::loadActor sets 5); role unverified. */
     void setParam1d8(int v);                                             // ROR 0x0010bf00
     /* Loads motions from a pack. */
