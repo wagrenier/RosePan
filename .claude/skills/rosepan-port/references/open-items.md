@@ -11,9 +11,10 @@ Queued at the top of tus.json in this order: (1) DONE 2026-10-22: DogLightPool::
 0x11262c (now `dog/doglightpool.cpp`, `partial`: the pool's setup code is left; the
 `lightstatus[i] != NULL` asserts are gone from the boot), (2)
 `mag/magscene.cpp` -- MagScene::update 0x1327dc: **written 2026-10-22 (`partial`)**, it runs every
-frame (sub mode 0, the PC is not bound), but MagLifeMan (`mag/maglifeman.cpp`, queued first since:
-init / add / remove / find / update / draw are stubs) never runs or draws the S2d layers it holds;
-openMenu, the constructor and the window functions are left in magscene.cpp, (3)
+frame (sub mode 0, the PC is not bound); MagLifeMan (`mag/maglifeman.cpp`) **written 2026-10-22
+(`verify`)**: all 12 functions, MagLife is polymorphic on the host (Decisions), so the scene's S2d
+layers now run their live / render each frame -- the screen stays black because their textures
+never load (item 3); openMenu, the constructor and the window functions are left in magscene.cpp, (3)
 `game/gamfile.cpp` -- fileGetSize 0x1be768 (the .rpk reads 0 bytes, so every SprTexture list
 ends in error). The rx sound library (unassigned@00237ce8) is parked `partial` with names only
 until these are done.
@@ -296,6 +297,18 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
    magscene2.cpp's load now copies mapparam word 10 as a float (it is lwc1 / swc1 in the ROM).
 
 ## Decisions
+
+- **MagLife is polymorphic on the host** (2026-10-22, the maglifeman session; decided unattended,
+  required: MagLifeMan runs slots 1 / 2 / 6 / 8 on lives of any class). mag/maglife.h declares
+  slots 1 (~MagLife), 2 live, 6 render(I3dLayer *), 7 setHide, 8 getHide as virtuals with the ROM's
+  base bodies; the S2d layers' slot 2 is now `live` (was `update`, renamed in Ghidra too) and the
+  subclasses' live / render are `override`. Slots 3..5 and 9.. stay plain members on the class
+  that defines them until a TU needs them virtual (getName is pure in MagLife0: declaring it makes
+  every life abstract). MagLife's EE offsets are comments with >= asserts now (host vptr at 0).
+  Lives the host does not know yet (MagLifeFader, MagLife130da4, the menus) run the base's live /
+  render. Open: MagLifeMan::deleteAll deletes every life still registered -- the scene's member
+  lives (S2d layers, fader) must be removed before the scene's term (0x131f74) reaches it, or
+  the host deletes non-heap objects; check when ~MagScene / 0x131f74 are written.
 
 - **Menus run through the base's slots on the host** (2026-10-22, the magscene session; decided
   in-session): `MagLifeMenuBase` (mag/maglifemenu.h) declares slots 1 / 9..12 (dtor, init, term,

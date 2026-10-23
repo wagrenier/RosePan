@@ -27,7 +27,7 @@ struct MagLifePC : MagLifeControlChara
     void termWorld();                                                    // ROR 0x0011c418
     void initMotion();                                                   // ROR 0x0011dd40
     /* EE slot 2 (+0x10) */
-    void live();                                                         // ROR 0x0011ade4
+    void live() override;                                                // ROR 0x0011ade4
     /* EE slot 16 (+0x90) */
     void processPad(BedPad *pad);                                        // ROR 0x0011b30c
     /* Word 1 while the state word is 0x17, else -1. */

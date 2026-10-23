@@ -382,7 +382,7 @@ S2dCineSco::S2dCineSco()
     m_level = 1;
     m_04 = -1;
     m_state = 0;
-    m_24 = 0;
+    m_hide = 0;
     m_scene = NULL;
     clear();
 }
@@ -437,7 +437,7 @@ void S2dCineSco::term()
 // EE slot 2: the per-frame step.
 // ROR 0x00190c04
 
-void S2dCineSco::update()
+void S2dCineSco::live()
 {
     step();
 }
@@ -596,7 +596,7 @@ S2dBg::S2dBg()
     m_level = 1;
     m_04 = -1;
     m_state = 0;
-    m_24 = 0;
+    m_hide = 0;
     m_scene = NULL;
     clear();
 }
@@ -653,7 +653,7 @@ void S2dBg::term()
 // EE slot 2: counts the frame (MagLife +4 starts at -1), then steps.
 // ROR 0x001910d8
 
-void S2dBg::update()
+void S2dBg::live()
 {
     m_04 = m_04 + 1;
     step();
@@ -849,7 +849,7 @@ S2dMes::S2dMes()
     m_04 = 0;
     m_08 = 0;
     m_0c = 0;
-    m_24 = 0;
+    m_hide = 0;
     m_04 = -1;
     m_state = 0;
     m_scene = NULL;
@@ -912,7 +912,7 @@ void S2dMes::loadTexture()
 // EE slot 2.
 // ROR 0x00191684
 
-void S2dMes::update()
+void S2dMes::live()
 {
     step();
 }
