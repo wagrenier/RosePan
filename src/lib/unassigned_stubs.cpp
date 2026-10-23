@@ -484,30 +484,10 @@ void RxMpeg::update()
     ROSEPAN_STUB("RxMpeg::update", 0x0018120c);
 }
 
-// stub of ROR 0x0023e020
-void rxSndAdpcmClose(int stream)
-{
-    ROSEPAN_STUB("rxSndAdpcmClose", 0x0023e020);
-}
-
 // stub of ROR 0x0023eb28
 void rxSndAdpcmEnd(int stream)
 {
     ROSEPAN_STUB("rxSndAdpcmEnd", 0x0023eb28);
-}
-
-// stub of ROR 0x0023e240
-int rxSndAdpcmGetFree(int stream)
-{
-    ROSEPAN_STUB("rxSndAdpcmGetFree", 0x0023e240);
-    return {};
-}
-
-// stub of ROR 0x0023e158
-u_int rxSndAdpcmGetStatus(int stream)
-{
-    ROSEPAN_STUB("rxSndAdpcmGetStatus", 0x0023e158);
-    return {};
 }
 
 // stub of ROR 0x0023dcc8
@@ -517,47 +497,10 @@ int rxSndAdpcmOpen(int mode, int rate, int arg2, int arg3, int arg4, int arg5)
     return {};
 }
 
-// stub of ROR 0x0023eef8
-void rxSndAdpcmPause(int stream, int pause)
-{
-    ROSEPAN_STUB("rxSndAdpcmPause", 0x0023eef8);
-}
-
-// stub of ROR 0x0023ef98
-void rxSndAdpcmSetAttr(int stream, int value)
-{
-    ROSEPAN_STUB("rxSndAdpcmSetAttr", 0x0023ef98);
-}
-
-// stub of ROR 0x0023f310
-void rxSndAdpcmSetPitch(int stream, float pitch)
-{
-    ROSEPAN_STUB("rxSndAdpcmSetPitch", 0x0023f310);
-}
-
-// stub of ROR 0x0023f038
-void rxSndAdpcmSetVolume(int stream, int volL, int volR)
-{
-    ROSEPAN_STUB("rxSndAdpcmSetVolume", 0x0023f038);
-}
-
 // stub of ROR 0x0023eb10
 void rxSndAdpcmWrite(int stream, const void *data, int offset, int size)
 {
     ROSEPAN_STUB("rxSndAdpcmWrite", 0x0023eb10);
-}
-
-// stub of ROR 0x00237d80
-void rxSndInit(void)
-{
-    ROSEPAN_STUB("rxSndInit", 0x00237d80);
-}
-
-// stub of ROR 0x0023c228
-u_int rxSndSeGetStatus(int voice)
-{
-    ROSEPAN_STUB("rxSndSeGetStatus", 0x0023c228);
-    return {};
 }
 
 // stub of ROR 0x0023c260
@@ -570,55 +513,6 @@ void rxSndSePause(int voice, int pause, int arg)
 int rxSndSePlay(int xvab, int prog, int note, int volL, int volR, int arg)
 {
     ROSEPAN_STUB("rxSndSePlay", 0x0023be68);
-    return {};
-}
-
-// stub of ROR 0x0023c328
-void rxSndSeSetAttr(int voice, int value)
-{
-    ROSEPAN_STUB("rxSndSeSetAttr", 0x0023c328);
-}
-
-// stub of ROR 0x0023c510
-void rxSndSeSetPitch(int voice, float pitch)
-{
-    ROSEPAN_STUB("rxSndSeSetPitch", 0x0023c510);
-}
-
-// stub of ROR 0x0023c3c0
-void rxSndSeSetVolume(int voice, int volL, int volR)
-{
-    ROSEPAN_STUB("rxSndSeSetVolume", 0x0023c3c0);
-}
-
-// stub of ROR 0x0023c0f8
-void rxSndSeStop(int voice, int arg)
-{
-    ROSEPAN_STUB("rxSndSeStop", 0x0023c0f8);
-}
-
-// stub of ROR 0x00238188
-void rxSndSetMasterVolume(int volL, int volR)
-{
-    ROSEPAN_STUB("rxSndSetMasterVolume", 0x00238188);
-}
-
-// stub of ROR 0x00237db0
-void rxSndTerm(void)
-{
-    ROSEPAN_STUB("rxSndTerm", 0x00237db0);
-}
-
-// stub of ROR 0x00237eb0
-void rxSndUpdate(void)
-{
-    ROSEPAN_STUB("rxSndUpdate", 0x00237eb0);
-}
-
-// stub of ROR 0x0023a720
-int rxSndXvabCheck(int id, int wait)
-{
-    ROSEPAN_STUB("rxSndXvabCheck", 0x0023a720);
     return {};
 }
 

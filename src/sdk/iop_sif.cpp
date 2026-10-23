@@ -111,10 +111,10 @@ void sceSifRpcLoop(sceSifQueueData *q)
 }
 
 /* FF3 booted its own IOP module here (iopsys.irx's start()).  Rule of Rose
- * loads only Sony modules (sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv,
- * fileio, sifcmd, usbd) plus ioprp300.img, so there is no game IOP code to
- * run: the boot only brings up the lock.  Whatever RoR's rx sound middleware
- * needs from the IOP is decided when its TU is reconstructed. */
+ * loads Sony modules (sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv,
+ * fileio, sifcmd, usbd) plus ioprp300.img, and one middleware module, the rx
+ * sound driver RXSNDDRV.IRX (RPC 0xd000): the boot brings up the lock and
+ * registers the host stand-in for that driver (iop_rxsnd.cpp). */
 
 /* Set ROSEPAN_IOP=0 in the environment to leave the IOP unbooted, so every
  * sceSifCallRpc() falls through and the EE behaves as it did before the IOP
@@ -157,6 +157,8 @@ void RosePan_IopBoot(void)
      * dispatch exists, which is what lets everything else treat a null lock as
      * "the IOP is not up". */
     RosePan_IopBklInit();
+
+    RosePan_IopRxSndStart();
 }
 
 void *RosePan_IopRpcDispatch(u_int rpc_number, u_int command, void *data, int size)
