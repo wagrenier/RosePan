@@ -6629,6 +6629,12 @@
   "was": "FUN_00237f90",
   "why": "IOP command 0x30 {2, flag != 0}; called from an 8-way option switch 0x1c9c1c; meaning of parameter 2 is a guess (stereo/mono)"
  },
+ "00237fe0": {
+  "name": "rxSndSetDebugFlags",
+  "tag": "lib-context",
+  "was": "FUN_00237fe0",
+  "why": "stores the byte into config 0x7b5ac0 (rxSndGetDebugFlags reads it), sends command 0x30 {0, flags}, returns the old value"
+ },
  "00238038": {
   "name": "rxSndGetDebugFlags",
   "tag": "ror-inferred",
@@ -6737,6 +6743,18 @@
   "was": "FUN_00238790",
   "why": "calls hook 0x2db964"
  },
+ "002387b8": {
+  "name": "rxSndIopWrite",
+  "tag": "lib-context",
+  "was": "FUN_002387b8",
+  "why": "EE -> IOP copy (iop addr, ee src, size): one sceSifSetDma when 16-byte aligned, otherwise head and tail through the bounce buffers 0x7b6b40 plus IOP command 0x23"
+ },
+ "00238cf0": {
+  "name": "rxSndIopCopy",
+  "tag": "lib-context",
+  "was": "FUN_00238cf0",
+  "why": "IOP command 0x23 {dst, src, size}: copies inside IOP memory, the second half of rxSndIopWrite's unaligned path"
+ },
  "00238d28": {
   "name": "rxSndIopBufInit",
   "tag": "ror-inferred",
@@ -6803,6 +6821,12 @@
   "was": "FUN_002390f8",
   "why": "calls hook 0x2db970 (default 0x239030 -> SPU heap free)"
  },
+ "00239120": {
+  "name": "rxSndSpuTransfer",
+  "tag": "lib-context",
+  "was": "FUN_00239120",
+  "why": "command 0x40 {3, 1, spu, ee, size}: starts an EE -> SPU transfer, returns the handle rxSndXvabPoll waits on"
+ },
  "00239288": {
   "name": "rxSndXvabPoll",
   "tag": "ror-inferred",
@@ -6821,6 +6845,12 @@
   "was": "FUN_002394a0",
   "why": "empty"
  },
+ "002394a8": {
+  "name": "rxSndSpuHeapGetSlot",
+  "tag": "lib-context",
+  "was": "FUN_002394a8",
+  "why": "id < 0x100: SPU slot 0x7b83a0 + id * 0x14, else the whole region 0x7b97a0"
+ },
  "002394e0": {
   "name": "rxSndSpuHeapAlloc",
   "tag": "ror-inferred",
@@ -6838,6 +6868,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00239be8",
   "why": "pops a node off the free list 0x7b8398"
+ },
+ "00239c10": {
+  "name": "rxSndSpuHeapFreeNode",
+  "tag": "lib-context",
+  "was": "FUN_00239c10",
+  "why": "puts a block node back on the free node list 0x7b8398 (through +0x4); twin of rxSndSpuHeapNewNode"
  },
  "0023a170": {
   "name": "rxSndXvabInit",
@@ -6869,6 +6905,12 @@
   "was": "FUN_0023a720",
   "why": "XVAB transfer state: 1 while busy; arg 1 waits"
  },
+ "0023a930": {
+  "name": "rxSndXvabGetSampleData",
+  "tag": "lib-context",
+  "was": "FUN_0023a930",
+  "why": "finds the XVAB's sample data: HEAD chunk with byte 1 set -> after the 16-aligned file, size HEAD+4; else the SMPL chunk's offset and size"
+ },
  "0023b018": {
   "name": "rxSndXseqInit",
   "tag": "ror-inferred",
@@ -6886,6 +6928,30 @@
   "tag": "ror-inferred",
   "was": "FUN_0023b028",
   "why": "returns *p; rxSndXvabLoad and 0x23aa68 read header words of an XVAB image through it"
+ },
+ "0023b030": {
+  "name": "rxSndChunkGetVersion",
+  "tag": "lib-context",
+  "was": "FUN_0023b030",
+  "why": "returns word 1 of an XVAB / XSEQ file; >= 0x200 means 16-byte chunk headers"
+ },
+ "0023b038": {
+  "name": "rxSndChunkGetFileSize",
+  "tag": "lib-context",
+  "was": "FUN_0023b038",
+  "why": "word 2 of the file, plus 0x10 for version >= 0x200 (the bigger header); rxSndXvabLoad allocates this much IOP memory"
+ },
+ "0023b078": {
+  "name": "rxSndChunkFind",
+  "tag": "lib-context",
+  "was": "FUN_0023b078",
+  "why": "walks the chunks {tag, size} (or {tag, ?, size, ?} for version >= 0x200) for a four-char tag, returns data and size"
+ },
+ "0023b1c8": {
+  "name": "rxSndChunkFindData",
+  "tag": "lib-context",
+  "was": "FUN_0023b1c8",
+  "why": "rxSndChunkFind returning only the data pointer, NULL when absent"
  },
  "0023b238": {
   "name": "rxSndBgmSetMasterVolume",
@@ -6983,6 +7049,24 @@
   "was": "FUN_0023c510",
   "why": "voice in a0, float in f12 (SE +0x30, 1.0 default)"
  },
+ "0023c660": {
+  "name": "rxSndSeSetParam",
+  "tag": "lib-context",
+  "was": "FUN_0023c660",
+  "why": "queued command 0x82 {voice, param, value} with the open check; rxSndSeSetAttr / SetVolume / SetPitch are the inlined forms"
+ },
+ "0023c860": {
+  "name": "rxSndSeSetParamB",
+  "tag": "lib-context",
+  "was": "FUN_0023c860",
+  "why": "rxSndSeSetParam(voice, 0xb, value clamped -1..2), skipped when negative; rxSndSePlay applies the default 0x7bc3e0"
+ },
+ "0023c8b8": {
+  "name": "rxSndSeSetParamC",
+  "tag": "lib-context",
+  "was": "FUN_0023c8b8",
+  "why": "rxSndSeSetParam(voice, 0xc, value clamped -1..0x7e), skipped when negative; rxSndSePlay applies the default 0x7bc3e4"
+ },
  "0023c910": {
   "name": "rxSndSeInit",
   "tag": "ror-inferred",
@@ -7067,6 +7151,18 @@
   "was": "FUN_0023dcc8",
   "why": "wraps 0x23dd08 (can't allocate ADPCM stream / open ADPCM strings); SndMan passes mode, 48000 Hz"
  },
+ "0023dce8": {
+  "name": "rxSndAdpcmOpenEx",
+  "tag": "lib-context",
+  "was": "FUN_0023dce8",
+  "why": "rxSndAdpcmOpen with the 7th argument passed through (sizes in KB shifted by 10); no callers"
+ },
+ "0023dd08": {
+  "name": "rxSndAdpcmOpenBytes",
+  "tag": "lib-context",
+  "was": "FUN_0023dd08",
+  "why": "the body of rxSndAdpcmOpen with byte sizes and a 7th argument: takes a free stream, allocates IOP / SPU buffers per channel, queues command 0xa0"
+ },
  "0023e020": {
   "name": "rxSndAdpcmClose",
   "tag": "lib-context",
@@ -7090,6 +7186,12 @@
   "tag": "lib-context",
   "was": "FUN_0023e240",
   "why": "bytes the stream can take now (0x23e1a0 with 0); updateStream clips its writes to it"
+ },
+ "0023e258": {
+  "name": "rxSndAdpcmWriteEx",
+  "tag": "lib-context",
+  "was": "FUN_0023e258",
+  "why": "rxSndAdpcmWrite's body with the raw flag of rxSndAdpcmGetFreeSize: copies ADPCM blocks into the staging buffers 0x7c1300 / 0x7c5300, marks the loop flags at each SPU buffer wrap, DMAs them to the IOP ring, queues command 0xa1"
  },
  "0023eb10": {
   "name": "rxSndAdpcmWrite",
@@ -7126,6 +7228,18 @@
   "tag": "lib-context",
   "was": "FUN_0023f310",
   "why": "stream in a0, float in f12 (stream +0x3c, 1.0 default)"
+ },
+ "0023f470": {
+  "name": "rxSndAdpcmSetParam6",
+  "tag": "lib-context",
+  "was": "FUN_0023f470",
+  "why": "queued command 0xa2 {stream, 6, value clamped 0..2}; rxSndAdpcmOpenBytes applies the default 0x7c12d8"
+ },
+ "0023f538": {
+  "name": "rxSndAdpcmSetParam7",
+  "tag": "lib-context",
+  "was": "FUN_0023f538",
+  "why": "queued command 0xa2 {stream, 7, value clamped 0..0x7f}; rxSndAdpcmOpenBytes applies the default 0x7c12dc"
  },
  "0023f648": {
   "name": "rxSndAdpcmInit",

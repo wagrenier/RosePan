@@ -484,52 +484,6 @@ void RxMpeg::update()
     ROSEPAN_STUB("RxMpeg::update", 0x0018120c);
 }
 
-// stub of ROR 0x0023eb28
-void rxSndAdpcmEnd(int stream)
-{
-    ROSEPAN_STUB("rxSndAdpcmEnd", 0x0023eb28);
-}
-
-// stub of ROR 0x0023dcc8
-int rxSndAdpcmOpen(int mode, int rate, int arg2, int arg3, int arg4, int arg5)
-{
-    ROSEPAN_STUB("rxSndAdpcmOpen", 0x0023dcc8);
-    return {};
-}
-
-// stub of ROR 0x0023eb10
-void rxSndAdpcmWrite(int stream, const void *data, int offset, int size)
-{
-    ROSEPAN_STUB("rxSndAdpcmWrite", 0x0023eb10);
-}
-
-// stub of ROR 0x0023c260
-void rxSndSePause(int voice, int pause, int arg)
-{
-    ROSEPAN_STUB("rxSndSePause", 0x0023c260);
-}
-
-// stub of ROR 0x0023be68
-int rxSndSePlay(int xvab, int prog, int note, int volL, int volR, int arg)
-{
-    ROSEPAN_STUB("rxSndSePlay", 0x0023be68);
-    return {};
-}
-
-// stub of ROR 0x0023a5a8
-int rxSndXvabFree(int id, int arg)
-{
-    ROSEPAN_STUB("rxSndXvabFree", 0x0023a5a8);
-    return {};
-}
-
-// stub of ROR 0x0023a1b8
-int rxSndXvabLoad(int id, const char *name, int arg2, int arg3)
-{
-    ROSEPAN_STUB("rxSndXvabLoad", 0x0023a1b8);
-    return {};
-}
-
 // stub of ROR 0x00106658
 u_int utlConvSndId(u_int id)
 {
