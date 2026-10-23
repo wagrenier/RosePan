@@ -48,7 +48,7 @@
    "why": "the four BedPfh methods between BedMemory (0x101718 clears 7 words, not BedPfh's 5) and BedPad::~BedPad 0x101aec; bed/bedpfh.cpp / bedpfh.h assert strings in the ctor and getFileName"
   },
   "dog/doglightpool.cpp": {
-   "notes": "Left: the pool setup, 26 functions 0x1103dc..0x1123b0 (load / alloc / set-mask edits, mostly called from mag/magscenelight.cpp; spot-light builders 0x111584 / 0x111b5c). Facts: kinds AMBIENT 0 (0x10 stride), DIRECT 1, POINT 2 (0x20), SPOT 3 (0x40); m_set_mask[8][6] at +0x48; +0x30 (6 words) and +0x108 unknown. The flag MagScene +0x22cc turns light colours grey (dogLightToGray). findNearestPointLight starts from 0x7fffffff (PS2 max float, NaN on host): FLT_MAX in the port. Boot screenshot still black: GamMan::loadStage is a stub so the pool holds no lights and nothing draws, but the per-frame lightstatus asserts are gone. 0x112b08..0x112bc8 (three small functions on a light-desc object, called from dog/doglight.cpp 0x112d60) left as unassigned@00112b08 for dog/doglight.cpp. Removed unassigned@0011262c from the pinned queue; next is mag/magscene.cpp.",
+   "notes": "TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark done when a screenshot shows a lit stage. Decisions: DogLightPool got a host constructor calling init (the ROM MagScene ctor calls it), no destructor (g_magSystem is static, the heap is gone by static destruction; ~MagScene calls term in the ROM). doglightpool.h lines 129..132 are the non-const getters, 140..143 their const twins, so createLight and getLightParam are const. DogLightBuffer::setupDesc 0x110578 in the ROM reads the counts from +0x5e0 / +0x600, past m_num at +0x5c0; nothing calls it, the port uses m_num (open-items.md). Spot cone angles use the ROM pi 0x40490fdc. Still left near this file: unassigned@00112b08 (three small light-desc helpers) belongs to dog/doglight.cpp.",
    "ranges": [
     [
      "001103dc",
@@ -60,9 +60,14 @@
      "date": "2026-10-22 19:36",
      "status": "partial",
      "summary": "Pinned dog/doglightpool.cpp 0x1103dc..0x112b08 (was unassigned@0011262c); reconstructed DogLightPool::createLight 0x11262c, findNearestPointLight 0x1129cc and dogLightToGray 0x110bb8; light kinds and the per-set mask table settled"
+    },
+    {
+     "date": "2026-10-22 21:58",
+     "status": "verify",
+     "summary": "Wrote the rest of DogLightPool (26 functions 0x1103dc..0x1123b0): init/term/create/alloc/newLight, the id and set-mask edits (allocId, addToSet, removeLight, resetSet, buildSet, copySet), the per-kind set getters, set/getLightParam and their per-set twins, and DogLightBuffer (copyLights, setupDesc, clear); +0x30 is m_used, +0x108 m_data"
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "doglightpool.cpp source strings from 0x1103dc (after DogEntityEx::setParent / dogentity.cpp at 0x1102b4..0x1103dc) through 0x1123b0, DogLightPool::createLight / findNearestPointLight use the doglightpool.h inline getters; 0x112b08.. works on a light-desc object freed/cleared from dog/doglight.cpp 0x112d60, so the file ends there"
   },
   "dog/dogtexinfo.cpp": {

@@ -8,7 +8,7 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 **TOP PRIORITY (the user, 2026-10-22, live during the rx sound run): get something to render first.**
 Queued at the top of tus.json in this order: (1) DONE 2026-10-22: DogLightPool::createLight
-0x11262c (now `dog/doglightpool.cpp`, `partial`: the pool's setup code is left; the
+0x11262c (now `dog/doglightpool.cpp`, `verify` since the second session: every function written; the
 `lightstatus[i] != NULL` asserts are gone from the boot), (2)
 `mag/magscene.cpp` -- MagScene::update 0x1327dc: **written 2026-10-22 (`partial`)**, it runs every
 frame (sub mode 0, the PC is not bound); MagLifeMan (`mag/maglifeman.cpp`) **written 2026-10-22
@@ -535,9 +535,12 @@ to adapt when a TU reaches them:
   loop register (s8, li 3 then decremented; most likely -1) -- confirm when the constructor is
   written; the host stub leaves it 0 (mode 0 = the point-light path), harmless while no actor has
   the 0x60 flags. The light-set mask layout is settled (2026-10-22, dog/doglightpool.cpp): masks at
-  +0x48, one word per kind, 0x18 per set; +0x50 is the POINT word. Still open in DogLightPool: the
-  six words at +0x30 and the word at +0x108; doglightpool.h has two point-light getters (lines 131
-  and 142) -- which inline is which is a guess (getPointLight / getPointLightAt).
+  +0x48, one word per kind, 0x18 per set; +0x50 is the POINT word. DogLightPool is fully written
+  (2026-10-22, `verify`: +0x30 m_used, +0x108 m_data; lines 129..132 / 140..143 are the non-const /
+  const getters). Open: DogLightBuffer::setupDesc 0x110578 reads its direct / point counts from
+  +0x5e0 / +0x600, past the counts at +0x5c0 (a ROM bug or a bigger struct; nothing calls it, the
+  port uses m_num); the pool's ~MagScene term call is not run on the host (static destruction order).
+  It shows on screen once MagScene::loadLight fills the pool (GamMan::loadStage is still a stub).
 
 - **main.cpp open points** (2026-10-22): `mainInitGame` passes bss 0x7812ac to `seqSetLanguage` (role
   unknown; kept as `g_bss_7812ac`), and sets bss 0x7a3d48 / 0x7a3d4c = 1 and data 0x296198 = 2 after the
