@@ -413,6 +413,7 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-22, the user, live) **The Now Loading screen shows for about 1 frame, then black.** Why: SysNowLoading::draw is only called from FileReader::update 0x1be564's synchronous wait loop, which runs until isReady reports the read done; host reads finish at once, so it draws once per read. The boot then has almost nothing to read: GamMan::loadSystemData 0x1c1b48 and GamMan::loadStage 0x1c204c are stubs, so main tears the loading screen down right away and the frame loop shows the (still empty) scene. Expected until GamMan's loads are real; not a draw bug. If the screen should stay up like on the PS2, that is a decision for the user (e.g. a minimum display time in the PC read path), not ROM behaviour.
 - (2026-10-22, magscene session 3) **Who fills the scene's 256 wall segments?** `m_vec_pair`
   (scene +0x0) is read by castWalls; the constructor sets the ends to (0, 0, 0, 1) and resetEntities
   clears their y, so no wall is live yet. Find the writer (likely the map / event loader) before
