@@ -12,6 +12,7 @@
  * ======================================================================== */
 #include "mag/magscene.h"
 
+#include <math.h>
 #include <string.h>
 
 #include "common/ror_assert.h"
@@ -31,6 +32,27 @@ alignas(4) static const u_char s_shadow01_image[0x20] = {
     0x00, 0x01, 0x00, 0x01, 0x01, 0x00, 0x00, 0x23, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
+
+// ──────────────────────────────────────────────────────────────────────
+// Fades the screen in (mode 2) over time frames at level: from black, or
+// from the 0xff colour when white is set (fade kind 4).
+// ROR 0x00131184
+
+void MagScene::fadeIn(int time, int level, int white)
+{
+    MagFadeParam fade = {white ? 4 : 0, 2, time, 0, 0, level}; /* the ROM leaves m_0c / m_10 unset */
+    setFade(&fade);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Fades the screen out (mode 6) the same way.
+// ROR 0x001311bc
+
+void MagScene::fadeOut(int time, int level, int white)
+{
+    MagFadeParam fade = {white ? 4 : 0, 6, time, 0, 0, level}; /* idem */
+    setFade(&fade);
+}
 
 // ──────────────────────────────────────────────────────────────────────
 // Starts a fade (p->m_mode 0 stops the current one): kinds 0 / 4 run the
@@ -153,6 +175,15 @@ int MagScene::getFadeState()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The fader's word +0x30 (role unknown).
+// ROR 0x00131608
+
+int MagScene::getFaderWord30()
+{
+    return m_fader.m_30;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // The far plane of both view records (the second also takes the first's
 // near plane).
 // ROR 0x00131618
@@ -162,6 +193,31 @@ void MagScene::setViewFar(float far)
     m_view[0].m_far = far;
     m_view[1].m_near = m_view[0].m_near;
     m_view[1].m_far = far;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0013164c
+
+bool MagScene::isPCWordDcSet()
+{
+    return m_pc.isWordDcSet();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Passes an event command to the player's controller.
+// ROR 0x0013166c
+
+void MagScene::commandPC(int cmd, const float *arg)
+{
+    m_pc.command(cmd, arg, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00131690
+
+void MagScene::setPCState14(int arg, int word)
+{
+    m_pc.setState14(arg, word);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -312,6 +368,38 @@ int MagScene::initRender(i3dContext *ctx)
     FUN_001944d0();
     m_229c = 0;
     return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Tears the scene down: the 0x837e0 object and the movie, the font file,
+// every actor's model, the sky slots, the texture table, and every life
+// object (the fader, a member, is taken off first).
+// ROR 0x00131f74
+
+void MagScene::term()
+{
+    FUN_00176c50(&m_837e0);
+    m_movie.term();
+    if (m_font_data)
+    {
+        g_utlMemory.free(m_font_data);
+        m_font_data = NULL;
+    }
+    for (int i = 0; i < 128; i++)
+        m_actors[i].releaseModel(NULL);
+    releaseTenkyuAll();
+    m_tex_info.term();
+    m_life_man.remove(&m_fader);
+    // PC: the scene's other member lives (initRender adds them) come off
+    // the manager too: deleteAll deletes what is left, and the host's
+    // delete on a member of the scene corrupts the heap.
+    m_life_man.remove(&m_fade_key);
+    m_life_man.remove(&m_life_418f0);
+    m_life_man.remove(&m_cine_sco);
+    m_life_man.remove(&m_bg);
+    m_life_man.remove(&m_mes);
+    m_life_man.deleteAll();
+    FUN_00194548();
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -766,6 +854,194 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The number of actor thePtr (its index in m_actors).
+// ROR 0x00133090 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+int MagScene::getActorNo(DogActor *thePtr)
+{
+    ROR_ASSERT(thePtr); /* 1495 */
+    return (int)(thePtr - m_actors);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Actor no's motion number, bit-inverted while its motion is stopped
+// (speed 0).
+// ROR 0x001330f4
+
+int MagScene::getActorMotion(int no)
+{
+    DogActor *actor = &m_actors[no];
+    if (actor->m_motion.m_speed == 0.0f)
+        return ~actor->m_motion.getNo();
+    return actor->m_motion.getNo();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Starts motion on actor no at speed (p1d8 >= 0 first goes to
+// setParam1d8); flags >> 8 and flags & 0xff become the actor's two motion
+// flag words.
+// ROR 0x00133144
+
+void MagScene::setActorMotion(float speed, int no, int motion, int p1d8, u_int flags)
+{
+    if (p1d8 >= 0)
+        m_actors[no].setParam1d8(p1d8);
+    DogActor *actor = &m_actors[no];
+    actor->setMotion(speed, motion, 0, -1, -1);
+    actor->m_motion_flags = (int)flags >> 8;
+    actor->m_motion_flags2 = flags & 0xff;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Blends actor no to motion (the flags as in setActorMotion).
+// ROR 0x001331f4
+
+void MagScene::changeActorMotion(float speed, int no, int motion, int p1d8, u_int flags)
+{
+    if (p1d8 >= 0)
+        m_actors[no].setParam1d8(p1d8);
+    m_actors[no].changeMotion(speed, motion, (int)flags >> 8, flags & 0xff, -1);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00133288
+
+void MagScene::setActorMotionByName(float speed, int no, const char *name, int p1d8, u_int flags)
+{
+    int motion = m_actors[no].findMotionByName(name);
+    if (motion >= 0)
+        setActorMotion(speed, no, motion, p1d8, flags);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00133324
+
+void MagScene::changeActorMotionByName(float speed, int no, const char *name, int p1d8,
+                                       u_int flags)
+{
+    int motion = m_actors[no].findMotionByName(name);
+    if (motion >= 0)
+        changeActorMotion(speed, no, motion, p1d8, flags);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// fps motion frames per second -> frames per 60 Hz frame.
+// ROR 0x001333c0
+
+void MagScene::setActorMotionSpeed(float fps, int no)
+{
+    m_actors[no].m_motion.m_speed = fps * 0x1.11112Ep-6f; /* 0x3c888897, the ROM's 1/60 */
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The length of motion (< 0: the current one) of actor no.
+// ROR 0x001333e4
+
+int MagScene::getActorMotionLength(int no, int motion)
+{
+    if (motion < 0)
+        motion = m_actors[no].m_motion.getNo();
+    return m_actors[no].getMotionLength(motion);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00133440
+
+float MagScene::getActorMotionSpeed(int no)
+{
+    return m_actors[no].m_motion.m_speed;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The distance (in dir lengths) along dir from pos to the first thing it
+// hits: a wall segment when dir is level, else (or when no wall is hit)
+// the collision model of sky slot tenkyu (< 0: the first of the four that
+// is hit). -1 when nothing is.
+// ROR 0x00133454  // callcheck: FUN_00215a30, I3rRoot__CheckIdString (inside the inline DogModel::isAlive)
+
+float MagScene::castRay(MagSceneRayHit *hit, const float *pos, const float *dir, int tenkyu)
+{
+    float t;
+
+    if (dir[1] == 0.0f)
+    {
+        t = castWalls(hit, pos, dir);
+        if (t >= 0.0f)
+            return t;
+    }
+    if (tenkyu < 0)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            DogModel *col = &m_tenkyu[i].m_model[2];
+            if (m_tenkyu[i].m_id < 0)
+                continue;
+            if (col->isAlive())
+            {
+                t = col->castRay(hit, pos, dir);
+                if (t >= 0.0f)
+                    return t;
+            }
+        }
+    }
+    else if (m_tenkyu[tenkyu].m_id >= 0)
+    {
+        DogModel *col = &m_tenkyu[tenkyu].m_model[2];
+        if (!col->isAlive())
+            return -1.0f;
+        return col->castRay(hit, pos, dir);
+    }
+    return -1.0f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The level ray pos + t dir (t in 0..1) against the wall segments in
+// m_vec_pair whose height range covers pos's y: each is tested in the
+// plane at that height (i3dSegSegDist2 0 = they cross). Returns t of the
+// first hit with its wall normal in hit->m_vec[1], else -1.
+// ROR 0x00133a0c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+float MagScene::castWalls(MagSceneRayHit *hit, const float *pos, const float *dir)
+{
+    ROR_ASSERT(dir[1] == 0.0f); /* 1740: "theD.m_y == 0.0f" */
+    for (int i = 0; i < 256; i++)
+    {
+        const MagSceneVecPair *w = &m_vec_pair[i];
+        float y0 = w->m_a[1];
+        float y1 = w->m_b[1];
+
+        if (y0 == y1)
+            continue;
+        if (fabsf((y0 + y1) * 0.5f - pos[1]) > fabsf(y0 - y1) * 0.5f)
+            continue;
+
+        sceVu0FVECTOR p1, d1;
+        p1[0] = w->m_a[0];
+        p1[1] = pos[1];
+        p1[2] = w->m_a[2];
+        p1[3] = w->m_a[3];
+        d1[0] = w->m_b[0] - w->m_a[0];
+        d1[1] = 0.0f;
+        d1[2] = w->m_b[2] - w->m_a[2];
+        d1[3] = 1.0f;
+
+        float s, u;
+        if (i3dSegSegDist2(pos, dir, p1, d1, &s, &u) == 0.0f)
+        {
+            if (hit)
+            {
+                hit->m_vec[1][1] = 0.0f;
+                hit->m_vec[1][2] = d1[0];
+                hit->m_vec[1][0] = -d1[2];
+                utlNormalize3(hit->m_vec[1]);
+            }
+            return s;
+        }
+    }
+    return -1.0f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Frees strip record no (no < 0: all 0x2000): no type, no data, no life.
 // ROR 0x00134698
 
@@ -857,6 +1133,154 @@ void MagScene::setViewParam(int theN, const int *v)
         w->m_w = v[3];
         w->m_h = v[4];
     }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Moves window winNo to (x, y, z).
+// ROR 0x00134a00 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::setWindowPos(int winNo, int x, int y, int z)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2179 */
+    MagLifeWindow *w = m_window[winNo];
+    if (w)
+    {
+        w->m_pos[0] = (float)x;
+        w->m_pos[1] = (float)y;
+        w->m_pos[2] = (float)z;
+        w->m_pos[3] = 1.0f;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00134ab8 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::setWindowSize(int winNo, int w, int h)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2194 */
+    MagLifeWindow *pw = m_window[winNo];
+    if (pw)
+    {
+        pw->m_h = h;
+        pw->m_w = w;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00134b34 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::getWindowPos(int winNo, int *x, int *y)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2205 */
+    if (m_window[winNo])
+        m_window[winNo]->getPos(x, y);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00134bb8 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::getWindowPos3(int winNo, int *x, int *y, int *z)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2215 */
+    if (m_window[winNo])
+        m_window[winNo]->getPos3(x, y, z);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00134c4c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::getWindowSize(int theN, int *w, int *h)
+{
+    ROR_ASSERT(theN >= 0 && theN < MAX_WINDOW); /* 2225 */
+    MagLifeWindow *pw = m_window[theN];
+    if (pw)
+    {
+        *w = pw->m_w;
+        *h = pw->m_h;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The window's four words +0x84..+0x90 (roles unknown).
+// ROR 0x00134cd0 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::setWindowWords84(int theN, int a, int b, int c, int d)
+{
+    ROR_ASSERT(theN >= 0 && theN < MAX_WINDOW); /* 2242 */
+    MagLifeWindow *pw = m_window[theN];
+    if (pw)
+    {
+        pw->m_84[3] = d;
+        pw->m_84[0] = a;
+        pw->m_84[1] = b;
+        pw->m_84[2] = c;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00134d6c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::getWindowWords84(int theN, int *a, int *b, int *c, int *d)
+{
+    ROR_ASSERT(theN >= 0 && theN < MAX_WINDOW); /* 2252 */
+    MagLifeWindow *pw = m_window[theN];
+    if (pw)
+    {
+        *a = pw->m_84[0];
+        *b = pw->m_84[1];
+        *c = pw->m_84[2];
+        *d = pw->m_84[3];
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00134e18 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::getWindowWordCc(int theN, int *out)
+{
+    ROR_ASSERT(theN >= 0 && theN < MAX_WINDOW); /* 2262 */
+    if (m_window[theN])
+        *out = m_window[theN]->m_cc;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00134e88 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::getWindowCharMetrics(int winNo, int code, int *left, int *width, int *extra)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2272 */
+    if (m_window[winNo])
+        m_window[winNo]->getCharMetrics(code, left, width, extra);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00134f2c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::setWindowProportional(int winNo, int on)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2282 */
+    if (m_window[winNo])
+        m_window[winNo]->setProportional(on);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00134fa0 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::setWindowFontWord30(int winNo, int v)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2292 */
+    if (m_window[winNo])
+        m_window[winNo]->setFontWord30(v);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00135014 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+
+void MagScene::setWindowFontWord34(int winNo, int v)
+{
+    ROR_ASSERT(winNo >= 0 && winNo < MAX_WINDOW); /* 2302 */
+    if (m_window[winNo])
+        m_window[winNo]->setFontWord34(v);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -987,6 +1411,16 @@ void MagScene::closeMenu()
         clearGamFlag25();
         requestMenu(0x10005, 0);
     }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Takes the keyhole fade off the life manager and frees its texture.
+// ROR 0x00135dcc
+
+void MagScene::removeFadeKey()
+{
+    m_life_man.remove(&m_fade_key);
+    m_fade_key.releaseTexture(&m_tex_info);
 }
 
 // ──────────────────────────────────────────────────────────────────────

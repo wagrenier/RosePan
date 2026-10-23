@@ -134,3 +134,31 @@ void DogActor::resetShadow()
 {
     ROSEPAN_STUB("DogActor::resetShadow", 0x0010f298);
 }
+
+// stub of ROR 0x0010b1b0
+int DogActor::changeMotion(float speed, int theNo, u_int flags, int flags2, int arg)
+{
+    ROSEPAN_STUB("DogActor::changeMotion", 0x0010b1b0);
+    return {};
+}
+
+// stub of ROR 0x0010aa9c
+int DogActor::findMotionByName(const char *theName)
+{
+    ROSEPAN_STUB("DogActor::findMotionByName", 0x0010aa9c);
+    return {};
+}
+
+// stub of ROR 0x0010d0e8
+int DogActor::getMotionLength(int theID)
+{
+    ROSEPAN_STUB("DogActor::getMotionLength", 0x0010d0e8);
+    return {};
+}
+
+// stub of ROR 0x0010af18
+int DogActor::setMotion(float speed, int theID, u_int flags, int flags2, int p1d8)
+{
+    ROSEPAN_STUB("DogActor::setMotion", 0x0010af18);
+    return {};
+}

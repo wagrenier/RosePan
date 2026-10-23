@@ -56,3 +56,10 @@ void DogModel::transform()
 {
     ROSEPAN_STUB("DogModel::transform", 0x001150c0);
 }
+
+// stub of ROR 0x0011440c
+float DogModel::castRay(void *hit, const float *pos, const float *dir)
+{
+    ROSEPAN_STUB("DogModel::castRay", 0x0011440c);
+    return {};
+}

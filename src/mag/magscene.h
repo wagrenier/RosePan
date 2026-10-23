@@ -103,7 +103,7 @@ static_assert(offsetof(MagSceneStrip, m_type) >= 0x1e, "m_type");
  * (0, 0, 0, 1) vectors and -1). Field roles unverified. */
 struct MagSceneRayHit
 {
-    sceVu0FVECTOR m_vec[5];     // ROR 0x00
+    sceVu0FVECTOR m_vec[5];     // ROR 0x00: [1] = the hit normal (castWalls: the wall's, unit, w 0)
     int           m_50;         // ROR 0x50: -1 before the cast
     int           _54[3];
 };
@@ -159,9 +159,11 @@ struct MagShadowLight
 static_assert(offsetof(MagShadowLight, m_cone_outer) == 0x34, "m_cone_outer");
 static_assert(sizeof(MagShadowLight) == 0x40, "MagShadowLight is 0x40 bytes on the EE");
 
-/* The 256 records at the scene's start (EE 0x20 each): the constructor
- * sets both vectors to (0, 0, 0, 1), resetEntities clears their y. Roles
- * unknown. */
+/* The 256 records at the scene's start (EE 0x20 each): wall segments
+ * m_a -> m_b that castWalls tests a level ray against (only where m_a.y !=
+ * m_b.y, the segment's height range covering the ray's y). The
+ * constructor sets both ends to (0, 0, 0, 1), resetEntities clears their
+ * y (so no wall is live until something fills them). */
 struct MagSceneVecPair
 {
     sceVu0FVECTOR m_a;          // ROR 0x00
@@ -203,6 +205,30 @@ struct MagScene
     /* The current fade object's state mapped to 0..6 (0 none; update waits
      * for more than 4). */
     int  getFadeState();                                                 // ROR 0x00131550
+    /* setFade with fade kind 0 (white: 4), mode 2 (in) / 6 (out). */
+    void fadeIn(int time, int level, int white);                         // ROR 0x00131184
+    void fadeOut(int time, int level, int white);                        // ROR 0x001311bc
+    int  getFaderWord30();                                               // ROR 0x00131608
+    /* Takes the keyhole fade off the life manager and frees its texture. */
+    void removeFadeKey();                                                // ROR 0x00135dcc
+    /* The scene's PC (m_pc). */
+    bool isPCWordDcSet();                                                // ROR 0x0013164c
+    void commandPC(int cmd, const float *arg);                           // ROR 0x0013166c
+    void setPCState14(int arg, int word);                                // ROR 0x00131690
+    /* The actors' motions (no = the actor number). setActorMotion packs
+     * the second flag word into flags' low byte (flags >> 8 the first). */
+    int  getActorNo(DogActor *thePtr);                                   // ROR 0x00133090
+    int  getActorMotion(int no);                                         // ROR 0x001330f4
+    void setActorMotion(float speed, int no, int motion, int p1d8, u_int flags); // ROR 0x00133144
+    void changeActorMotion(float speed, int no, int motion, int p1d8, u_int flags); // ROR 0x001331f4
+    void setActorMotionByName(float speed, int no, const char *name, int p1d8,
+                              u_int flags);                              // ROR 0x00133288
+    void changeActorMotionByName(float speed, int no, const char *name, int p1d8,
+                                 u_int flags);                           // ROR 0x00133324
+    /* fps: motion frames per second (the actor keeps fps / 60). */
+    void setActorMotionSpeed(float fps, int no);                         // ROR 0x001333c0
+    int  getActorMotionLength(int no, int motion);                       // ROR 0x001333e4
+    float getActorMotionSpeed(int no);                                   // ROR 0x00133440
     /* Sub mode 3: fade out, then openMenu(id) with arg. */
     void requestMenu(int id, int arg);                                   // ROR 0x001357b0
     void openMenu(int id);                                               // ROR 0x0013580c
@@ -220,6 +246,19 @@ struct MagScene
     /* The window's setHide(hide != 0). */
     void setWindowShow(int no, int hide);                                // ROR 0x001351b0
     int  getWindowTextWidth(int no, const char *text);                   // ROR 0x0013555c
+    void setWindowPos(int winNo, int x, int y, int z);                   // ROR 0x00134a00
+    void setWindowSize(int winNo, int w, int h);                         // ROR 0x00134ab8
+    void getWindowPos(int winNo, int *x, int *y);                        // ROR 0x00134b34
+    void getWindowPos3(int winNo, int *x, int *y, int *z);               // ROR 0x00134bb8
+    void getWindowSize(int theN, int *w, int *h);                        // ROR 0x00134c4c
+    void setWindowWords84(int theN, int a, int b, int c, int d);         // ROR 0x00134cd0
+    void getWindowWords84(int theN, int *a, int *b, int *c, int *d);     // ROR 0x00134d6c
+    void getWindowWordCc(int theN, int *out);                            // ROR 0x00134e18
+    void getWindowCharMetrics(int winNo, int code, int *left, int *width,
+                              int *extra);                               // ROR 0x00134e88
+    void setWindowProportional(int winNo, int on);                       // ROR 0x00134f2c
+    void setWindowFontWord30(int winNo, int v);                          // ROR 0x00134fa0
+    void setWindowFontWord34(int winNo, int v);                          // ROR 0x00135014
     void updateWindowFont(int no);                                       // ROR 0x00135594
     void drawView(int no, int a, int b, const void *p, int c);           // ROR 0x00135234
     void setViewFar(float far);                                          // ROR 0x00131618
@@ -320,6 +359,10 @@ struct MagScene
     /* The distance along dir from pos to the sky slots' collision models
      * (tenkyu < 0: all four), < 0 when nothing is hit. */
     float castRay(MagSceneRayHit *hit, const float *pos, const float *dir, int tenkyu); // ROR 0x00133454
+    /* The ray pos + t dir (dir level: asserted y == 0) against the wall
+     * segments in m_vec_pair: t of the first hit (hit->m_vec[1] its
+     * normal), -1 when none. */
+    float castWalls(MagSceneRayHit *hit, const float *pos, const float *dir); // ROR 0x00133a0c
     void clearStrip(int no);                                             // ROR 0x00134698
     void drawSkyDome(i3dContext *ctx);                                   // ROR 0x001406b8
     void drawFocus(i3dContext *ctx, int frame);                          // ROR 0x00140e88

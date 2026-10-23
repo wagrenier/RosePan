@@ -84,6 +84,8 @@ struct TskSnd : CmnITask
 /* Swaps a sound id 0x0a00xxxx..0x0a02xxxx for its twin in the column the
  * game's language / version picks (table data 0x295f08). Other ids pass. */
 u_int utlConvSndId(u_int id);                                            // ROR 0x00106658
+/* v[3] = 0, then v normalised in place (sceVu0Normalize). */
+void  utlNormalize3(float *v);                                           // ROR 0x00106db0
 extern EmyManager g_emyManager; /* bss 0x7b2140 */
 extern int g_emyManagerTaskId;  /* bss 0x7b45c0: addTask's id for EmyManager (read by 0x1c58c0) */
 
@@ -166,6 +168,9 @@ struct GamFont
     int  getGlyphWidth(int glyph);                                       // ROR 0x001c0254
     /* The width of a Shift-JIS string (a tail jump to 0x1c02f8). */
     int  getTextWidth(const char *text);                                 // ROR 0x001c047c
+    /* A character's left offset, width and spacing (m_30 fixed, m_34
+     * proportional); all 0 below 0x20. */
+    void getCharMetrics(int code, int *left, int *width, int *extra);    // ROR 0x001c0078
 
     int            m_00;            // ROR 0x00
     int            m_04;            // ROR 0x04
@@ -325,9 +330,12 @@ struct MagLifeFader : MagLife
     /* State 4, word 1 -1. */
     void stop();                                                         // ROR 0x0012f080
 
-    u_char _28[0x38 - 0x28];
+    u_char _28[0x30 - 0x28];
+    int    m_30;                // ROR 0x30: MagScene::getFaderWord30; role unknown
+    int    _34;
     int    m_color;             // ROR 0x38: 0 for fade kind 0, 0xff for kind 4
 };
+static_assert(offsetof(MagLifeFader, m_30) >= 0x30, "m_30");
 static_assert(offsetof(MagLifeFader, m_color) >= 0x38, "m_color");
 /* The keyhole fade (scene +0x41890, mag/maglifefadekey.cpp: the
  * kagiana_tcc texture of data/evntex/EVNTEX.RPK). layout: host -- a
@@ -396,6 +404,15 @@ void  FUN_0017c340(Obj17c0f0 *obj, const float *pos, MagSectorHit **hit, int arg
 /* Allocates the 1 MB 2D packet buffer (data 0x29bfb4); mnuBase::initSystem
  * calls it too. */
 void  FUN_001944d0(void);                                                // ROR 0x001944d0
+/* Frees the buffer FUN_001944d0 allocates (sdata 0x29bfb4); MagScene::term
+ * and mnuBase::termSystem. */
+void  FUN_00194548(void);                                                // ROR 0x00194548
+/* m_837e0's teardown (frees its buffer, closes its FileReader). */
+void  FUN_00176c50(Obj176a3c *obj);                                      // ROR 0x00176c50
+/* The closest points of segments p0 + s d0 and p1 + t d1 (s, t in 0..1,
+ * either out pointer may be NULL); returns the squared distance. */
+float i3dSegSegDist2(const float *p0, const float *d0, const float *p1, const float *d1,
+                     float *s, float *t);                                // ROR 0x00234050
 
 /* ---- the word table (unassigned@00164fc0: 0x17e0a8..0x17eff4) ---- */
 
