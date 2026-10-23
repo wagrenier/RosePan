@@ -63,3 +63,17 @@ float DogModel::castRay(void *hit, const float *pos, const float *dir)
     ROSEPAN_STUB("DogModel::castRay", 0x0011440c);
     return {};
 }
+
+// stub of ROR 0x001149d4
+float DogModel::castCylinder(float r, const float *pos, const float *dir, void *hit)
+{
+    ROSEPAN_STUB("DogModel::castCylinder", 0x001149d4);
+    return {};
+}
+
+// stub of ROR 0x001145c0
+float DogModel::castSphere(float r, void *hit, const float *pos)
+{
+    ROSEPAN_STUB("DogModel::castSphere", 0x001145c0);
+    return {};
+}

@@ -85,3 +85,9 @@ void MagLifeWindow::setProportional(int on)
 {
     ROSEPAN_STUB("MagLifeWindow::setProportional", 0x0012fd30);
 }
+
+// stub of ROR 0x001305ec
+void MagLifeWindow::print(const char *str, int color)
+{
+    ROSEPAN_STUB("MagLifeWindow::print", 0x001305ec);
+}

@@ -305,7 +305,9 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
   delete as if heap objects. Writing it needs a decision: skip it at exit (a host exit flag), or run
   term() 0x131f74 first. The ROM body is short (checkLightNo(-1), releaseTenkyuAll, the sky
   models' DogModel::release, DogTexInfo::term, MagLifeMan::deleteAll, the loaders' / light pool's
-  frees). Constructors of members that the host has no C++ constructor for (DogActor 0x10eebc,
+  frees). Update (2026-10-22, magscene session 4): ~MagScene is now written as an empty body with
+  the ROM's steps in its comment (callcheck explained), so it is no longer a stub; the decision
+  above stands -- add the explicit part only behind a host exit decision. Constructors of members that the host has no C++ constructor for (DogActor 0x10eebc,
   DogModel 0x114c54, the controllers, the fades, the 13 menus) are left to their TUs; the scene's
   constructor does not imitate them.
 
@@ -320,6 +322,12 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
   render. Open: MagLifeMan::deleteAll deletes every life still registered -- the scene's member
   lives (S2d layers, fader) must be removed before the scene's term (0x131f74) reaches it, or
   the host deletes non-heap objects; check when ~MagScene / 0x131f74 are written.
+
+- **The scene's embedded menus are host `MagLifeMenuBase` members** (2026-10-22, magscene session
+  4; decided unattended): `m_menu_item` .. `m_menu_sellang` in EE order (classes and offsets in the
+  comments of mag/magscene.h), so openMenu can point m_pMenuBase at them. When a menu TU gives its
+  class a host type, change that member's type; the 0x1000b / 0x1000c.. menus are `new
+  MagLifeMenuSpecial` / `MagLifeMenuSpecial2` (mag/maglifemenusp.h, constructors stubbed).
 
 - **Menus run through the base's slots on the host** (2026-10-22, the magscene session; decided
   in-session): `MagLifeMenuBase` (mag/maglifemenu.h) declares slots 1 / 9..12 (dtor, init, term,
@@ -414,10 +422,11 @@ to adapt when a TU reaches them:
 ## Open questions
 
 - (2026-10-22, the user, live) **The Now Loading screen shows for about 1 frame, then black.** Why: SysNowLoading::draw is only called from FileReader::update 0x1be564's synchronous wait loop, which runs until isReady reports the read done; host reads finish at once, so it draws once per read. The boot then has almost nothing to read: GamMan::loadSystemData 0x1c1b48 and GamMan::loadStage 0x1c204c are stubs, so main tears the loading screen down right away and the frame loop shows the (still empty) scene. Expected until GamMan's loads are real; not a draw bug. If the screen should stay up like on the PS2, that is a decision for the user (e.g. a minimum display time in the PC read path), not ROM behaviour.
-- (2026-10-22, magscene session 3) **Who fills the scene's 256 wall segments?** `m_vec_pair`
-  (scene +0x0) is read by castWalls; the constructor sets the ends to (0, 0, 0, 1) and resetEntities
-  clears their y, so no wall is live yet. Find the writer (likely the map / event loader) before
-  trusting castRay on walls. Also: `MagScene::term` takes the scene's member lives off the manager
+- (2026-10-22, magscene session 3; answered in session 4) **Who fills the scene's 256 wall
+  segments?** `MagScene::addPrivateColli` 0x135e20 (MAX_PRIVATE_COLLI 256; called from 0x1d080c /
+  0x1d091c / 0x1d0c64, unassigned code at 0x1d0..., likely event scripts) and removePrivateColli
+  0x135f44 (from 0x1ccc30); a segment with equal end heights is free. Still open: which event
+  commands those callers are. Also: `MagScene::term` takes the scene's member lives off the manager
   before deleteAll (a PC guard: the host's delete on a member corrupts the heap); check what the ROM
   relies on there when term is first reached.
 

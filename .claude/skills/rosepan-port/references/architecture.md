@@ -406,6 +406,19 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   `MagScene::castWalls` 0x133a0c tests a level ray against those whose height range covers the ray's
   y with `i3dSegSegDist2` 0x234050 (squared segment distance 0 = a hit) before `castRay` 0x133454
   falls back to the sky slots' collision models (`DogModel::castRay` 0x11440c on model 2).
+  They are the scene's **private collision** (MAX_PRIVATE_COLLI 256): `addPrivateColli(p1, p2)`
+  0x135e20 takes the first free one (free = equal end heights, so p1.y != p2.y is asserted),
+  `removePrivateColli` 0x135f44 zeroes both heights. The other wall tests: `hitWallsSphere`
+  0x133b80 (radius, height range covering pos.y) and `hitWallsCylinder` 0x13386c (radius, height h <
+  0 below pos), both with `i3dPointSegDist2` 0x2337e0 on the segment taken at pos's height; the
+  movers call `castSphere` 0x133658 (walls, then sky slot 0's DogModel::castSphere 0x1145c0) and
+  `castCylinder` 0x133d10 (walls, then DogModel::castCylinder 0x1149d4 on one or all sky slots).
+- The scene's 0x2000 **strip records** (+0x437e0, MagSceneStrip) are a debug-draw queue drawStrips
+  empties: adders 0x133e94 (type 0 strip with colours, life), 0x133efc (type 1), 0x133f68 (type 2
+  line strip, one RGBA colour as r, g, b / 255, a / 128), 0x134114 (3 wire box), 0x1342bc (4),
+  0x134460 (5 wire sphere, radius in m_color[0]), setStripColor 0x1344c4, addStripRecord 0x134624.
+  Only types 0 and 2 have callers (0x11e0d8 / 0x11ea04, the PC mover); the rest sit uncalled in the
+  ROM (six of them were folded into 0x133f68's body until session 4 split them).
 - The scene (`MagScene`, +0x12540): 128 actors of 0x4d0 at +0x2920 (vptr +0x94), actor flags at
   +0x29120, light set +0x2050, view objects +0x2734[4], camera mode +0x2ad50, `MagLifePC` at
   +0x2adc0 (the player; vptr +0x14), `MagLifeBwn` at +0x2afe0 (Brown). Chapter archives
