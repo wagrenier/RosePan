@@ -429,7 +429,7 @@
    "why": "rx middleware file layer: rxfile messages from 0x244410 (failed to alloc slot) to the request thread 0x2491c0 (rxfile : failed to create thread); starts after rxsys 0x2437f8, ends with the file thread priority helpers 0x249b20/0x249b78 (bss 0x7f6910/0x7f6918); 0x249b88 starts the rxthread kernel wrappers (CreateSema, CreateThread)"
   },
   "rx/rxsnd.cpp": {
-   "notes": "Nothing written yet; all rxSnd entry points are still stubs in lib/unassigned_stubs.cpp. Start from architecture.md row 0x237ce8 (transport and command families). Plan for the writer: (1) the EE side is faithful but rxSndRpcInit loops rxSndBindRpc until serve is set and rxSndCallRpc WaitSema s on a semaphore only rxSndRpcEndFunc signals, so writing it without an IOP side hangs the boot: add a host service for RPC 0xd000 (stand-in for RXSNDDRV.IRX, e.g. src/sdk/iop_rxsnd.cpp registered from RosePan_IopBoot via sceSifSetRpcQueue / sceSifRegisterRpc / sceSifRpcLoop) that returns a zeroed reply buffer of at least 0x1040 bytes; zero replies are a sane silent IOP (term loop 0x11 ends, XvabPoll reports done, status counts 0) -- this is a platform-layer decision, record it under Decisions. (2) With zero replies the IOP heap alloc prints can't allocate IOP heap twice at boot (rxSndIopBufInit, debug flags 7) and SE voices never report ended; check SndMan code that waits on a voice. (3) Hook table 0x2db95c..0x2db970 defaults: 0x2385b8 / 0x238630 / 0x2386b0 (IOP, small) and 0x238ff0 / 0x239010 / 0x239030 (SPU, via 0x2394e0 / 0x2398f8). (4) A varint reader is hidden at 0x23a180 inside rxSndXvabTerm's span (mkfunc it). (5) rxSndSetOutputMode 0x237f90 name is a guess (command 0x30 {2, flag}). Screenshot black, unchanged (lightstatus asserts every frame).",
+   "notes": "Boot runs 300 frames with rxSndInit binding RPC 0xd000 and rxSndUpdate flushing each frame (no hang); screen black as before, sound has no picture. The bind messages (debug flag 4) do not appear in the log: check whether rxSysPrintf filters them. Left in this TU: rxSndXvabLoad 0x23a1b8 (a varint reader is hidden at 0x23a180, mkfunc it) and rxSndXvabFree 0x23a5a8, XSEQ, BGM play, rxSndSePlay 0x23be68 / rxSndSePause 0x23c260, all PCM open/play, rxSndAdpcmOpen 0x23dcc8 (wraps 0x23dd08) / rxSndAdpcmWrite 0x23eb10 (wraps 0x23e258) / rxSndAdpcmEnd 0x23eb28, the SPU heap allocator rxSndSpuHeapAlloc 0x2394e0 / rxSndSpuHeapFree 0x2398f8, IOP hook setters near 0x2386d8. The host IOP stand-in answers zero for everything but alloc 0x20, so SE voices never report ended once SePlay is written (SeUpdate only touches voices the IOP lists): if SndMan waits on a voice ending, make the stand-in list open voices as ended. ADPCM m_position stores (u_long)(posHi or posLo), the ROM's own or plus zero-extend. Decision recorded under open-items Decisions.",
    "ranges": [
     [
      "00237ce8",
@@ -441,6 +441,11 @@
      "date": "2026-10-22 19:29",
      "status": "partial",
      "summary": "Pinned rx/rxsnd.cpp 0x237ce8..0x23ff58 (was unassigned@00237ce8) and named 73 functions of the rx sound library (transport, queue, config, heaps, BGM/SE/PCM/ADPCM init, update, volume); created hidden functions rxSndCheckBgCall 0x237d00 and rxSndRpcEndFunc 0x23fac8. No code written: parked for the user's render priority (DogLightPool::createLight, MagScene::update, fileGetSize queued first)."
+    },
+    {
+     "date": "2026-10-22 21:21",
+     "status": "partial",
+     "summary": "Wrote 85 rx sound functions: init/term, RPC transport (bind, call, direct commands, command queue and flush), config, IOP and SPU heap hooks (3 hidden SPU hook setters created), per-frame status update of BGM/SE/PCM/ADPCM with position callbacks, master and voice volumes, stop/close/pause/attr/pitch commands; host stand-in for RXSNDDRV.IRX (src/sdk/iop_rxsnd.cpp, RPC 0xd000, zero replies plus a fake IOP heap) registered at IOP boot; 17 stubs removed."
     }
    ],
    "status": "partial",

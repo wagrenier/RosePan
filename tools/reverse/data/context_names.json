@@ -6677,6 +6677,12 @@
   "was": "FUN_002384d8",
   "why": "returns short 0x7b5ac6, set by rxSndSetMasterVolume"
  },
+ "002384e8": {
+  "name": "rxSndGetWorkBuffer",
+  "tag": "ror-inferred",
+  "was": "FUN_002384e8",
+  "why": "returns bss 0x7b5b00, a 0x1000-byte scratch area before the IOP buffer block 0x7b6b00; used by rxSndAdpcmEnd and two command builders"
+ },
  "002384f8": {
   "name": "rxSndWait",
   "tag": "ror-inferred",
@@ -6699,13 +6705,13 @@
   "name": "rxSndDefIopAlloc",
   "tag": "ror-inferred",
   "was": "FUN_002385b8",
-  "why": "default IOP heap alloc in hook table 0x2db95c: IOP command 0x20 {0, size 64-aligned, 0}; 'can't allocate IOP heap'"
+  "why": "default hook 0x2db95c: IOP command 0x20 {0, size rounded to 0x40, 0}; prints can't allocate IOP heap on 0"
  },
  "00238630": {
   "name": "rxSndDefIopAllocMode1",
   "tag": "ror-inferred",
   "was": "FUN_00238630",
-  "why": "default hook 0x2db960: IOP command 0x20 {1, size, 0}; mode 1 meaning unknown"
+  "why": "default hook 0x2db960: IOP command 0x20 {1, size, 0}"
  },
  "002386b0": {
   "name": "rxSndDefIopFree",
@@ -6743,6 +6749,54 @@
   "was": "FUN_00238d78",
   "why": "frees the two IOP blocks of rxSndIopBufInit"
  },
+ "00238ff0": {
+  "name": "rxSndDefSpuAlloc",
+  "tag": "ror-inferred",
+  "was": "FUN_00238ff0",
+  "why": "default hook 0x2db968: tail-calls 0x2394e0 (0, 0, size)"
+ },
+ "00239010": {
+  "name": "rxSndDefSpuAllocMode1",
+  "tag": "ror-inferred",
+  "was": "FUN_00239010",
+  "why": "default hook 0x2db96c: tail-calls 0x2394e0 (1, 0, size)"
+ },
+ "00239030": {
+  "name": "rxSndDefSpuFree",
+  "tag": "ror-inferred",
+  "was": "FUN_00239030",
+  "why": "default hook 0x2db970: tail-calls 0x2398f8 (addr)"
+ },
+ "00239048": {
+  "name": "rxSndSetSpuAllocHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00239048",
+  "why": "stores a0 into hook 0x2db968, NULL restores rxSndDefSpuAlloc"
+ },
+ "00239068": {
+  "name": "rxSndSetSpuAllocMode1Hook",
+  "tag": "ror-inferred",
+  "was": "FUN_00239068",
+  "why": "stores a0 into hook 0x2db96c, NULL restores rxSndDefSpuAllocMode1"
+ },
+ "00239088": {
+  "name": "rxSndSetSpuFreeHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00239088",
+  "why": "stores a0 into hook 0x2db970, NULL restores rxSndDefSpuFree"
+ },
+ "002390a8": {
+  "name": "rxSndSpuAlloc",
+  "tag": "ror-inferred",
+  "was": "FUN_002390a8",
+  "why": "calls hook 0x2db968 (the SPU twin of rxSndIopAlloc)"
+ },
+ "002390d0": {
+  "name": "rxSndSpuAllocMode1",
+  "tag": "ror-inferred",
+  "was": "FUN_002390d0",
+  "why": "calls hook 0x2db96c"
+ },
  "002390f8": {
   "name": "rxSndSpuFree",
   "tag": "ror-inferred",
@@ -6766,6 +6820,18 @@
   "tag": "ror-inferred",
   "was": "FUN_002394a0",
   "why": "empty"
+ },
+ "002394e0": {
+  "name": "rxSndSpuHeapAlloc",
+  "tag": "ror-inferred",
+  "was": "FUN_002394e0",
+  "why": "the default SPU alloc hooks tail-call it with (mode 0 or 1, 0, size); allocates from the SPU heap 0x5010..+0x1baff0 rxSndSpuHeapInit builds"
+ },
+ "002398f8": {
+  "name": "rxSndSpuHeapFree",
+  "tag": "ror-inferred",
+  "was": "FUN_002398f8",
+  "why": "the default SPU free hook tail-calls it with the address"
  },
  "00239be8": {
   "name": "rxSndSpuHeapNewNode",
@@ -6814,6 +6880,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0023b020",
   "why": "empty"
+ },
+ "0023b028": {
+  "name": "rxSndReadU32",
+  "tag": "ror-inferred",
+  "was": "FUN_0023b028",
+  "why": "returns *p; rxSndXvabLoad and 0x23aa68 read header words of an XVAB image through it"
  },
  "0023b238": {
   "name": "rxSndBgmSetMasterVolume",

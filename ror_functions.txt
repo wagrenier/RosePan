@@ -5436,7 +5436,7 @@
 /* 002384b8 0000000c */ rxSndGetBufferBank(){}  // ror
 /* 002384c8 0000000c */ rxSndGetMasterVolumeL(){}  // ror
 /* 002384d8 0000000c */ rxSndGetMasterVolumeR(){}  // ror
-/* 002384e8 0000000c */ FUN_002384e8(){}
+/* 002384e8 0000000c */ rxSndGetWorkBuffer(){}  // ror
 /* 002384f8 00000004 */ rxSndWait(){}  // ror
 /* 00238500 0000000c */ rxSndSetBgCallHook(){}  // ror
 /* 00238510 00000028 */ rxSndCallBgCallHook(){}  // ror
@@ -5460,11 +5460,14 @@
 /* 00238f00 00000058 */ FUN_00238f00(){}
 /* 00238f58 00000060 */ FUN_00238f58(){}
 /* 00238fb8 00000034 */ FUN_00238fb8(){}
-/* 00238ff0 00000020 */ FUN_00238ff0(){}
-/* 00239010 00000020 */ FUN_00239010(){}
-/* 00239030 00000074 */ FUN_00239030(){}
-/* 002390a8 00000024 */ FUN_002390a8(){}
-/* 002390d0 00000024 */ FUN_002390d0(){}
+/* 00238ff0 00000020 */ rxSndDefSpuAlloc(){}  // ror
+/* 00239010 00000020 */ rxSndDefSpuAllocMode1(){}  // ror
+/* 00239030 00000014 */ rxSndDefSpuFree(){}  // ror
+/* 00239048 0000001c */ rxSndSetSpuAllocHook(){}  // ror
+/* 00239068 0000001c */ rxSndSetSpuAllocMode1Hook(){}  // ror
+/* 00239088 0000001c */ rxSndSetSpuFreeHook(){}  // ror
+/* 002390a8 00000024 */ rxSndSpuAlloc(){}  // ror
+/* 002390d0 00000024 */ rxSndSpuAllocMode1(){}  // ror
 /* 002390f8 00000024 */ rxSndSpuFree(){}  // ror
 /* 00239120 00000048 */ FUN_00239120(){}
 /* 00239168 00000048 */ FUN_00239168(){}
@@ -5475,8 +5478,8 @@
 /* 00239380 0000011c */ rxSndSpuHeapInit(){}  // ror
 /* 002394a0 00000004 */ rxSndSpuHeapTerm(){}  // ror
 /* 002394a8 00000034 */ FUN_002394a8(){}
-/* 002394e0 00000418 */ FUN_002394e0(){}
-/* 002398f8 000001fc */ FUN_002398f8(){}
+/* 002394e0 00000418 */ rxSndSpuHeapAlloc(){}  // ror
+/* 002398f8 000001fc */ rxSndSpuHeapFree(){}  // ror
 /* 00239af8 000000ec */ FUN_00239af8(){}
 /* 00239be8 00000028 */ rxSndSpuHeapNewNode(){}  // ror
 /* 00239c10 0000001c */ FUN_00239c10(){}
@@ -5505,7 +5508,7 @@
 /* 0023b000 00000014 */ FUN_0023b000(){}
 /* 0023b018 00000004 */ rxSndXseqInit(){}  // ror
 /* 0023b020 00000004 */ rxSndXseqTerm(){}  // ror
-/* 0023b028 00000008 */ FUN_0023b028(){}
+/* 0023b028 00000008 */ rxSndReadU32(){}  // ror
 /* 0023b030 00000008 */ FUN_0023b030(){}
 /* 0023b038 0000003c */ FUN_0023b038(){}
 /* 0023b078 00000150 */ FUN_0023b078(){}

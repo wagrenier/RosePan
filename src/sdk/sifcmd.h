@@ -100,6 +100,10 @@ int   RosePan_IopRpcIsReady(u_int rpc_number);
 /* Runs iopsys.irx's start().  Idempotent; the first sceSifBindRpc() calls it. */
 void  RosePan_IopBoot(void);
 
+/* Registers the host stand-in for RXSNDDRV.IRX (RPC 0xd000, iop_rxsnd.cpp).
+ * RosePan_IopBoot() calls it. */
+void  RosePan_IopRxSndStart(void);
+
 #ifdef __cplusplus
 }
 #endif

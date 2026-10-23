@@ -298,6 +298,13 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
 
 ## Decisions
 
+- **RXSNDDRV.IRX is a silent host stand-in** (2026-10-22, the rx/rxsnd.cpp session; decided
+  unattended, platform layer). `src/sdk/iop_rxsnd.cpp` registers RPC 0xd000 from RosePan_IopBoot and
+  answers every call with a zeroed reply (0x11 term done, 0x41 XVAB transfer done, the queued
+  status lists empty), except IOP heap alloc 0x20: a bump allocator over fake IOP addresses
+  0x100000..0x200000 so rxSndIopAlloc does not fail. No sound is produced. Real sound needs a host
+  driver that answers play / status commands and mixes voices (SE from XVAB banks, ADPCM streams
+  from SndMan's xws files) -- the user's call when sound becomes a priority.
 - **MagScene::~MagScene stays a stub** (2026-10-22, the magscene constructor session; decided
   unattended). The ROM never destroys the scene; on the host g_magSystem's static teardown under
   std::exit is the only caller, with the game threads still running and the scene's member lives
