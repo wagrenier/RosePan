@@ -504,6 +504,19 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   argument (MagScene +0x22cc) runs `dogLightToGray` 0x110bb8 (luminance 0.299 / 0.587 / 0.114) over
   every colour -- a monochrome scene mode. `findNearestPointLight` starts from 0x7fffffff (rodata
   0x2e87dc: the PS2's largest float, a NaN on the host; the port uses FLT_MAX).
+  The rest of the pool (written 2026-10-22, `verify`): +0x30 `m_used[kind]` = OR of every set's mask
+  (allocId's free list), +0x108 `m_data`. `create` 0x110d68 (MagScene::loadLight) allocates one
+  0x580 block -- 8 ambient, 8 direct, 16 point, 8 spot (m_num 8/8/16/8, kinds 4 / 5 none) -- not
+  cleared; `term` 0x110b78 frees it. Ids: `allocId` 0x111120 (first bit free in m_used), `addToSet`
+  0x1112a8, `removeLight` 0x1111e4, `resetSet` 0x110f78 (set < 0 = init + create), `buildSet`
+  0x111064. Light fields by `setLightParam` 0x111584 / `getLightParam` 0x111b5c (param 0 position,
+  1 direction, 2 colour, 5 spot cone angles in degrees -> radians at spot +0x30 / +0x34, with the
+  ROM's pi 0x40490fdc); `setSetLightParam` 0x112134 / `getSetLightParam` 0x1123b0 address the n-th
+  light of a set through the getters 0x110660..0x110988. doglightpool.h lines 129..132 are the
+  non-const per-kind getters, 140..143 their const twins. Per-kind tables: capacity 0x2e85d8
+  {8,8,16,8,0,0}, light size 0x2e87e0 {0x10,0x20,0x20,0x40,0x30,0x30}. `DogLightBuffer` (copyToBuffer
+  0x111460, copyLights 0x1103dc, setupDesc 0x110578): a pool set copied with its own I3dLightDesc at
+  +0x580 -- no callers in the ROM.
 - **The scene's loaders** (`mag/magscene2.cpp`, pinned 0x137300..0x139540, 2026-10-22; `verify`):
   - `MagScene::loadSystemData` 0x137330 (start's first call): data/options.txt -> `parseOption`
     (magsceneoption.cpp, buckets at +0x4371c); data/PREMIERE.RPK's 2048-byte header, then the font

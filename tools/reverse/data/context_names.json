@@ -593,11 +593,167 @@
   "was": "FUN_001102b4",
   "why": "dog/dogentity.cpp line 302 assert p != m_parent while walking the parent chain at +0xe0 (DogEntityEx::getParent's field); resets +0x70 to (0,0,0,1), dirty"
  },
+ "001103dc": {
+  "name": "DogLightBuffer::copyLights",
+  "tag": "ror-inferred",
+  "was": "FUN_001103dc",
+  "why": "doglightpool.cpp lines 0x4c..0x6e: (theType, theLight, mask) memcpys the masked lights of a kind (stride table 0x2e87e0, max table 0x2e85d8) into embedded arrays at +0/+0x80/+0x180/+0x380, stores the count at +0x5c0[type]; only DogLightPool::copyToBuffer calls it"
+ },
+ "00110578": {
+  "name": "DogLightBuffer::setupDesc",
+  "tag": "ror-inferred",
+  "was": "FUN_00110578",
+  "why": "i3dLightDescInit(this+0x580) then points the desc's ambient / parallel / point / spot lists at the embedded arrays"
+ },
+ "00110614": {
+  "name": "DogLightBuffer::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_00110614",
+  "why": "i3dLightDescInit(this+0x580) and zeroes the six counts at +0x5c0; no callers"
+ },
+ "00110660": {
+  "name": "DogLightPool::getAmbientLight(int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_00110660",
+  "why": "asserts m_light[type], theSetNo < 8, theNo < m_num[type] (lines 0x10e..0x110): the theNo-th ambient light in light set theSetNo, stride 0x10"
+ },
+ "0011076c": {
+  "name": "DogLightPool::getDirectLight(int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_0011076c",
+  "why": "twin of 0x110660 for kind 1 (stride 0x20, lines 0x126..)"
+ },
+ "00110878": {
+  "name": "DogLightPool::getPointLight(int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_00110878",
+  "why": "twin of 0x110660 for kind 2 (stride 0x20, lines 0x13e..)"
+ },
+ "00110988": {
+  "name": "DogLightPool::getSpotLight(int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_00110988",
+  "why": "twin of 0x110660 for kind 3 (stride 0x40, lines 0x156..)"
+ },
+ "00110a94": {
+  "name": "DogLightPool::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00110a94",
+  "why": "zeroes m_light, m_num, the used masks, every set mask and m_data (+0x108); MagScene's constructor calls it for its m_light_pool member"
+ },
+ "00110af8": {
+  "name": "DogLightPool::freeLights",
+  "tag": "ror-inferred",
+  "was": "FUN_00110af8",
+  "why": "assert 0 (line 0x184), frees the six m_light arrays, init"
+ },
+ "00110b78": {
+  "name": "DogLightPool::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00110b78",
+  "why": "frees m_data (+0x108) then init; ~MagScene and MagScene::loadLight call it"
+ },
  "00110bb8": {
   "name": "dogLightToGray",
   "tag": "ror-inferred",
   "was": "FUN_00110bb8",
   "why": "in place: r = g = b = 0.299 r + 0.587 g + 0.114 b (luminance); DogLightPool::createLight calls it on every colour when its flag argument (MagScene +0x22cc) is set"
+ },
+ "00110c0c": {
+  "name": "DogLightPool::newLight",
+  "tag": "ror-inferred",
+  "was": "FUN_00110c0c",
+  "why": "grows kind theType's array by one zeroed light (max 0x20, alloc assert a at line 0x1b7); returns theType*32 + index, -1 when full; no callers"
+ },
+ "00110d60": {
+  "name": "DogLightPool::getDataSize",
+  "tag": "ror-inferred",
+  "was": "FUN_00110d60",
+  "why": "returns 0x580: 8 ambient + 8 direct + 16 point + 8 spot lights, the block create allocates"
+ },
+ "00110d68": {
+  "name": "DogLightPool::create",
+  "tag": "ror-inferred",
+  "was": "FUN_00110d68",
+  "why": "asserts m_data == __null, init, allocates getDataSize() into m_data and points m_light[0..3] into it with m_num 8/8/16/8; MagScene::loadLight"
+ },
+ "00110e64": {
+  "name": "DogLightPool::alloc",
+  "tag": "ror-inferred",
+  "was": "FUN_00110e64",
+  "why": "freeLights then per kind allocates num[type] zeroed lights (assert p at line 0x25c); no callers"
+ },
+ "00110f78": {
+  "name": "DogLightPool::resetSet",
+  "tag": "ror-inferred",
+  "was": "FUN_00110f78",
+  "why": "theSet < 0: init + create; else assert theSet < 8, clears set theSet's masks and recomputes each kind's used mask (+0x30) as the OR of all sets; MagScene::setLightNo"
+ },
+ "00111064": {
+  "name": "DogLightPool::buildSet",
+  "tag": "ror-inferred",
+  "was": "FUN_00111064",
+  "why": "resetSet(theSet) then for each kind takes num[type] free ids (allocId) into set theSet; MagScene::setLightFlags"
+ },
+ "00111120": {
+  "name": "DogLightPool::allocId",
+  "tag": "ror-inferred",
+  "was": "FUN_00111120",
+  "why": "first index below m_num[type] not in the used mask (+0x30), marks it used and returns it; assert 0 and -1 when none; MagScene::addLight / loadLight / setDefaultLight"
+ },
+ "001111e4": {
+  "name": "DogLightPool::removeLight",
+  "tag": "ror-inferred",
+  "was": "FUN_001111e4",
+  "why": "asserts theNo >= 0: clears bit theNo of kind theType in the used mask and every set mask"
+ },
+ "001112a8": {
+  "name": "DogLightPool::addToSet",
+  "tag": "ror-inferred",
+  "was": "FUN_001112a8",
+  "why": "(theSet, theType, theID): sets bit theID in the used mask and in set theSet's mask; MagScene::addLight / loadLight / setDefaultLight"
+ },
+ "0011139c": {
+  "name": "DogLightPool::addToAllSets",
+  "tag": "ror-inferred",
+  "was": "FUN_0011139c",
+  "why": "(theType, theID): sets bit theID in the used mask and in all eight set masks; no callers"
+ },
+ "00111460": {
+  "name": "DogLightPool::copyToBuffer",
+  "tag": "ror-inferred",
+  "was": "FUN_00111460",
+  "why": "for each kind with lights and a nonzero mask, DogLightBuffer::copyLights, then DogLightBuffer::setupDesc; no callers"
+ },
+ "00111528": {
+  "name": "DogLightPool::copySet",
+  "tag": "ror-inferred",
+  "was": "FUN_00111528",
+  "why": "m_set_mask[dst] = m_set_mask[src] for the six kinds; called from 0x13fb3c"
+ },
+ "00111584": {
+  "name": "DogLightPool::setLightParam",
+  "tag": "ror-inferred",
+  "was": "FUN_00111584",
+  "why": "(type, n, param, v): param 0 position, 1 direction, 2 colour (4 floats), 5 spot cone angles in degrees -> radians; MagScene::setLightParam"
+ },
+ "00111b5c": {
+  "name": "DogLightPool::getLightParam",
+  "tag": "ror-inferred",
+  "was": "FUN_00111b5c",
+  "why": "read twin of setLightParam (radians -> degrees); MagScene::getLightParam"
+ },
+ "00112134": {
+  "name": "DogLightPool::setSetLightParam",
+  "tag": "ror-inferred",
+  "was": "FUN_00112134",
+  "why": "setLightParam addressed by (set, n-th light in the set) through the getX(int,int) getters; MagScene::setLightParam"
+ },
+ "001123b0": {
+  "name": "DogLightPool::getSetLightParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001123b0",
+  "why": "read twin of setSetLightParam; MagScene::getLightParam"
  },
  "0011262c": {
   "name": "DogLightPool::createLight",
