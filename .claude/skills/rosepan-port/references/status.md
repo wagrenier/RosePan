@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-25 19:18 at commit `328fd84` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-25 19:53 at commit `2945105` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,27 +10,27 @@ Generated 2026-10-25 19:18 at commit `328fd84` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6655**, named **3427** (51%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 230, ror-inferred 1829
-- context-name ledger: 2059 entries; overrides of wrong library matches: 5
-- placed in a source file: 3060/6655 in 92 files
+- game functions: **6655**, named **3564** (54%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 230, ror-inferred 1966
+- context-name ledger: 2196 entries; overrides of wrong library matches: 5
+- placed in a source file: 3063/6655 in 92 files
 
 Least-named game-code regions (64 KB blocks):
 
 | block | named | inferred files |
 |---|---|---|
 | `00150000` | 0/272 (0%) | - |
-| `001a0000` | 0/211 (0%) | mnu/mnusvld.cpp, mnu/mnuselect.cpp, mnu/mnudlg.cpp |
 | `00160000` | 2/268 (1%) | emy/emy_main.cpp |
 | `001f0000` | 10/221 (5%) | task/naga_chunk.cpp, task/tsk_bg_load.cpp, task/tsk_scene.cpp |
 | `00140000` | 19/293 (6%) | mag/magloader.cpp, mag/magsceneif.cpp, mag/magscenefocus.cpp |
-| `00120000` | 27/283 (10%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
 | `001e0000` | 23/169 (14%) | game/gamsnd.cpp |
 | `00170000` | 35/251 (14%) | snd/sndman.cpp |
+| `00120000` | 70/283 (25%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
+| `001d0000` | 45/181 (25%) | game/gamman.cpp, game/gamstat.cpp, game/gamtrg.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **1694**; stubs: **328**
+- reconstructed RoR functions: **1739**; stubs: **400**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -57,14 +57,14 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 2 | 144 |
+| `src/lib/unassigned_stubs.cpp` | 2 | 206 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
 | `src/mag/maglifefadekey.cpp` | 0 | 6 |
 | `src/mag/maglifeman.cpp` | 12 | 0 |
-| `src/mag/maglifemenu.cpp` | 0 | 5 |
-| `src/mag/maglifemenusp.cpp` | 0 | 2 |
+| `src/mag/maglifemenu.cpp` | 45 | 0 |
+| `src/mag/maglifemenusp.cpp` | 0 | 12 |
 | `src/mag/maglifepc.cpp` | 0 | 11 |
 | `src/mag/maglifewindow.cpp` | 0 | 14 |
 | `src/mag/magloader.cpp` | 0 | 7 |
@@ -78,6 +78,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/magscenetenkyu.cpp` | 0 | 1 |
 | `src/mag/magsystem.cpp` | 55 | 0 |
 | `src/main.cpp` | 11 | 0 |
+| `src/mnu/mnusvld.cpp` | 0 | 5 |
 | `src/rx/rxfile.cpp` | 168 | 0 |
 | `src/rx/rxsnd.cpp` | 222 | 0 |
 | `src/rx/rxsys.cpp` | 74 | 6 |
@@ -99,9 +100,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 159 TUs: todo 127, partial 8, verify 34, done 2
-- next: **mag/maglifemenu.cpp** (pinned in the queue)
-- pinned queue: mag/maglifemenu.cpp, sequence/seqcall.cpp, unassigned@0020ff34, game/gamman.cpp, unassigned@001fd424, unassigned@001e46b8, bed/bedpad.cpp, unassigned@001a6830, snd/rxmpeg.cpp, unassigned@001810f4
+- 159 TUs: todo 126, partial 8, verify 35, done 2
+- next: **unassigned@001a6830** (pinned in the queue)
+- pinned queue: unassigned@001a6830, sequence/seqcall.cpp, unassigned@0020ff34, game/gamman.cpp, unassigned@001fd424, unassigned@001e46b8, bed/bedpad.cpp, snd/rxmpeg.cpp, unassigned@001810f4
 - partial: `game/gamman.cpp` 80/409 -- Screen still black: nothing in this slice draws, and boot stage 99 hits loadStageSnd's default (no packs, as in the ROM). The boot's blockers are the natives se
 - partial: `sequence/seqcall.cpp` 14/43 -- Left: 27 handler stubs (006, 007, 009, 012, 014, 016, 019, 020, 023, 026, 028, 036, 038, 039, 100, 106, 151..281); none is reached by the smoke run any more, wr
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
@@ -120,6 +121,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `i3d/i3dvram.cpp` 37/37 -- Complete; nothing on screen shows it yet (screen black: the draw path is stubbed). A host test (init, reserve x3 frames with eviction, compact, end frame, reset
 - verify: `i3d/i3rroot.cpp` 14/14 -- Verify: no model loads in the smoke run yet, so nothing can show it (screen still black, as before). Port trap: the ROM relocates i3r files in place into absolu
 - verify: `mag/maglifeman.cpp` 12/12 -- Status verify: the S2d layers now run live and render every frame (one i3d primitive reaches rosepan_i3d without a texture object), but the screenshot stays bla
+- verify: `mag/maglifemenu.cpp` 45/53 -- Complete, nothing on screen yet: the smoke run now opens the title (MagScene::openMenu 0x10005 -> MagLifeMenuTitle) and reaches MnuTitle::isInit / init / draw /
 - verify: `mag/magscene.cpp` 89/89 -- Screen still black (textures never load; game/gamfile.cpp callers GamMan::loadSystemData / loadStage are stubs), and nothing calls this slice's new code in the 
 - verify: `mag/magscene2.cpp` 19/19 -- Complete but unseen: MagScene::start (magscene.cpp) and the GamMan loads are stubs, so no loader runs and the screen stays black (MagScene::draw is a stub too).
 - verify: `mag/magscenerender.cpp` 20/20 -- All 20 functions written; verify because nothing on screen can show it: no boot actor has the 0x60 shadow flags and all i3d layer / view / light functions are s
@@ -141,6 +143,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-25 19:53 `mag/maglifemenu.cpp` verify: MagLifeMenuBase polymorphic on the host (slots 9..12 pure, render slot 6); all 14 scene menu classes written (wrappers forwarding to the menu object at +0x40, i
 - 2026-10-25 19:18 `sequence/seqcall.cpp` partial: Script natives the G000 threads reach: seqFunc004 (wait until, 19 cases, table data 0x2ff930) and seqFunc029 (stage changes: rooms, chapter, the kind 0xb frame 
 - 2026-10-25 19:03 `sequence/seqvm.cpp` verify: Finished the sequence VM file (143/143): queueThread, callEntry, callEntryNow with execImmediate 0x211830 (imdy), endThread, endThreadOf with findThreadNamed / 
 - 2026-10-25 18:35 `sequence/seqcall.cpp` partial: Script natives the boot reaches: seqFunc001 (new game state), 002 (default scene lights), 021 (GamMan state service, 32 cases), 027 (object service, 205 cases),
@@ -148,22 +151,21 @@ Recent sessions:
 - 2026-10-25 18:10 `game/gamman.cpp` partial: GamMan slice 2: onStageSeqEnd, afterSeqExec and execStageReq (the stage change), setImage, resetObj, pause / resume / enterMenu with pauseForMenu, resumeFromMen
 - 2026-10-25 17:39 `game/gamman.cpp` partial: GamMan boot path: constructor (nine node pools, item vector), init, initGameState, loadSystemData (system pack: GamSysData, SE packs, sound tables, system scrip
 - 2026-10-25 17:15 `sequence/seqvm.cpp` partial: The sequence script VM: pinned sequence/seqvm.cpp 0x20ff34..0x2155a0 (was unassigned@0020ff34), created and named 104 Ghidra functions (the 99 opcode handlers o
-- 2026-10-25 16:37 `sequence/sequence.cpp` verify: Sequence: constructor, init / term, the three image loaders, stopImages, the per-frame exec with runImage and reapThreads, releaseThread, the global / stage var
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `game/gamsnd.cpp` | todo | 0/14/72 | 23.9 | 78 | 8 |
 | `unassigned@001d859c` | todo | 0/20/75 | 19.9 | 69 | 3 |
 | `unassigned@001e6cac` | todo | 0/12/220 | 68.8 | 62 | 5 |
+| `unassigned@001a6830` | todo | 0/33/162 | 93.1 | 50 | 4 |
 | `game/gamman.cpp` | partial | 80/23/409 | 82.8 | 43 | 3 |
 | `unassigned@00164fc0` | todo | 0/10/395 | 104.2 | 37 | 4 |
 | `unassigned@00143d3c` | todo | 0/7/602 | 129.5 | 30 | 2 |
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 30 | 3 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 29 | 0 |
+| `unassigned@0010f944` | todo | 0/5/12 | 2.2 | 28 | 3 |
 | `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 28 | 3 |
-| `unassigned@0010f944` | todo | 0/5/12 | 2.2 | 26 | 3 |
 | `unassigned@001810f4` | todo | 0/10/28 | 2.8 | 25 | 3 |
-| `unassigned@00140030` | todo | 0/4/6 | 2.7 | 24 | 3 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -198,6 +200,7 @@ Recent sessions:
 | `001bebec` | GamFont::setFont | 4 | ror | stub | - |
 | `001cc250` | GamMan::addChr | 4 | ror | stub | game/gamman.cpp |
 | `0011034c` | FUN_0011034c | 4 | - | stub | dog/dogentity.cpp |
+| `0010fc7c` | DogEntity::setRotate | 4 | ror | stub | - |
 | `001f184c` | TskFrameFunc::TskFrameFunc | 4 | ror | stub | - |
 | `001bedc0` | GamFont::setTarget | 4 | ror | stub | - |
 | `001c0254` | GamFont::getGlyphWidth | 4 | ror | stub | - |
@@ -208,5 +211,4 @@ Recent sessions:
 | `001d966c` | ObjStat::releaseActor | 3 | ror | stub | - |
 | `0017772c` | FUN_0017772c | 3 | - | stub | - |
 | `0013e548` | MagScene::updateCamera | 3 | ror | stub | - |
-| `0013f1e4` | MagScene::clearGamFlag25 | 3 | ror | stub | - |
 

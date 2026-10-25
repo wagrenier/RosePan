@@ -298,6 +298,11 @@ struct MagScene
     void parseOption(char *text);                                        // ROR 0x0013c328
     void setCameraTarget(const float *pos, const float *at);             // ROR 0x0013c2ec
     void initCamera();                                                   // ROR 0x0013c928
+    /* Saves the camera entity and the six camera words +0x2ad50.. (a
+     * menu's own camera goes over them), counting in m_camera_2ad80;
+     * restoreCamera puts them back. */
+    void saveCamera();                                                   // ROR 0x0013c930
+    void restoreCamera();                                                // ROR 0x0013ca10
     void setCameraMode(int mode, int arg, const int *param);             // ROR 0x0013caf0
     /* The ROM's line-816 inline (mag/magscene.h; GamMan::getMapCamNum):
      * sky slot no's _c.bin record count. */
@@ -493,23 +498,21 @@ struct MagScene
     int            m_menu_arg;          // ROR 0x2be54: requestMenu's argument
     int            m_menu_result;       // ROR 0x2be58: the menu's last processPad result; 0 = still running
     MagLifeMenuBase *m_pMenuBase;       // ROR 0x2be5c: the open menu (the asserts name it), NULL = none
-    /* The embedded menus (openMenu's ids). PORT: host MagLifeMenuBase
-     * objects until each menu TU gives its class (maglifemenu.h); the
-     * comment names the ROM's class. */
-    MagLifeMenuBase m_menu_item;        // ROR 0x2be60: MagLifeMenuItem, id 0x10000
-    MagLifeMenuBase m_menu_map;         // ROR 0x2e5b0: MagLifeMenuMap, 0x10001
-    MagLifeMenuBase m_menu_stock;       // ROR 0x2eed0: MagLifeMenuStock, 0x10002
-    MagLifeMenuBase m_menu_save;        // ROR 0x304c0: MagLifeMenuSave, 0x10003
-    MagLifeMenuBase m_menu_load;        // ROR 0x32c80: MagLifeMenuLoad, 0x10004
-    MagLifeMenuBase m_menu_pbook;       // ROR 0x35440: MagLifeMenuPBook, ids with bit 0x100000 / 0x200000
-    MagLifeMenuBase m_menu_title;       // ROR 0x36640: MagLifeMenuTitle, 0x10005
-    MagLifeMenuBase m_menu_opt;         // ROR 0x3bd80: MagLifeMenuOpt, 0x10006
-    MagLifeMenuBase m_menu_movie;       // ROR 0x3ceb0: MagLifeMenuMovie, 0x10007
-    MagLifeMenuBase m_menu_mcd;         // ROR 0x3d880: MagLifeMenuMcd, 0x10008
-    MagLifeMenuBase m_menu_now;         // ROR 0x3ecc0: MagLifeMenuNow, 0x10009
-    MagLifeMenuBase m_menu_board2d;     // ROR 0x3f620: MagLifeMenuBoard2D, ids with bit 0x40000
-    MagLifeMenuBase m_menu_board3d;     // ROR 0x40720: MagLifeMenuBoard3D, ids with bit 0x80000
-    MagLifeMenuBase m_menu_sellang;     // ROR 0x40780: MagLifeMenuSelLang, 0x10010
+    /* The embedded menus (openMenu's ids; mag/maglifemenu.h). */
+    MagLifeMenuItem    m_menu_item;     // ROR 0x2be60: id 0x10000
+    MagLifeMenuMap     m_menu_map;      // ROR 0x2e5b0: 0x10001
+    MagLifeMenuStock   m_menu_stock;    // ROR 0x2eed0: 0x10002
+    MagLifeMenuSave    m_menu_save;     // ROR 0x304c0: 0x10003
+    MagLifeMenuLoad    m_menu_load;     // ROR 0x32c80: 0x10004
+    MagLifeMenuPBook   m_menu_pbook;    // ROR 0x35440: ids with bit 0x100000 / 0x200000
+    MagLifeMenuTitle   m_menu_title;    // ROR 0x36640: 0x10005
+    MagLifeMenuOpt     m_menu_opt;      // ROR 0x3bd80: 0x10006
+    MagLifeMenuMovie   m_menu_movie;    // ROR 0x3ceb0: 0x10007
+    MagLifeMenuMcd     m_menu_mcd;      // ROR 0x3d880: 0x10008
+    MagLifeMenuNow     m_menu_now;      // ROR 0x3ecc0: 0x10009
+    MagLifeMenuBoard2D m_menu_board2d;  // ROR 0x3f620: ids with bit 0x40000
+    MagLifeMenuBoard3D m_menu_board3d;  // ROR 0x40720: ids with bit 0x80000
+    MagLifeMenuSelLang m_menu_sellang;  // ROR 0x40780: 0x10010
     MagLifeFader   m_fader;             // ROR 0x41850: fade kinds 0 / 4
     MagLifeFadeKey m_fade_key;          // ROR 0x41890: fade kinds 1..3
     MagLife130da4  m_life_418f0;        // ROR 0x418f0

@@ -4,6 +4,7 @@
 #include <string.h>
 #include "game/gamsnd.h"
 #include "rx/rxsnd.h"
+#include "mnu/mnuSelectLanguage.h"
 
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
@@ -1014,4 +1015,401 @@ u_int chrCreateItemObj(short id, const float *pos, const float *rot)
 void GamSysData::getField(int id, int field, void *out)
 {
     ROSEPAN_STUB("GamSysData::getField", 0x001dc48c);
+}
+
+// ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
+
+// stub of ROR 0x00192d60
+void mnuBase::term()
+{
+    ROSEPAN_STUB("mnuBase::term", 0x00192d60);
+}
+
+// stub of ROR 0x00194908
+void MnuMap::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuMap::init", 0x00194908);
+}
+
+// stub of ROR 0x00194960
+void MnuMap::term()
+{
+    ROSEPAN_STUB("MnuMap::term", 0x00194960);
+}
+
+// stub of ROR 0x00194fe4
+int MnuMap::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuMap::processPad", 0x00194fe4);
+    return {};
+}
+
+// stub of ROR 0x00195e90
+void MnuMap::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuMap::draw", 0x00195e90);
+}
+
+// stub of ROR 0x00196bdc
+void MnuPBook::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuPBook::init", 0x00196bdc);
+}
+
+// stub of ROR 0x00196d98
+void MnuPBook::term()
+{
+    ROSEPAN_STUB("MnuPBook::term", 0x00196d98);
+}
+
+// stub of ROR 0x001976b8
+int MnuPBook::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuPBook::processPad", 0x001976b8);
+    return {};
+}
+
+// stub of ROR 0x00197f70
+void MnuPBook::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuPBook::draw", 0x00197f70);
+}
+
+// stub of ROR 0x00198860
+void MnuDiary::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuDiary::init", 0x00198860);
+}
+
+// stub of ROR 0x00198a38
+void MnuDiary::term()
+{
+    ROSEPAN_STUB("MnuDiary::term", 0x00198a38);
+}
+
+// stub of ROR 0x001990b0
+int MnuDiary::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuDiary::processPad", 0x001990b0);
+    return {};
+}
+
+// stub of ROR 0x00199c94
+void MnuDiary::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuDiary::draw", 0x00199c94);
+}
+
+// stub of ROR 0x0013ca10
+void MagScene::restoreCamera()
+{
+    ROSEPAN_STUB("MagScene::restoreCamera", 0x0013ca10);
+}
+
+// stub of ROR 0x0013c930
+void MagScene::saveCamera()
+{
+    ROSEPAN_STUB("MagScene::saveCamera", 0x0013c930);
+}
+
+// stub of ROR 0x001ad8e0
+void MnuBoard2D::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuBoard2D::draw", 0x001ad8e0);
+}
+
+// stub of ROR 0x001ad824
+void MnuBoard2D::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuBoard2D::init", 0x001ad824);
+}
+
+// stub of ROR 0x001ad8bc
+int MnuBoard2D::isInit()
+{
+    ROSEPAN_STUB("MnuBoard2D::isInit", 0x001ad8bc);
+    return {};
+}
+
+// stub of ROR 0x001ad8cc
+int MnuBoard2D::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuBoard2D::processPad", 0x001ad8cc);
+    return {};
+}
+
+// stub of ROR 0x001ad870
+void MnuBoard2D::term()
+{
+    ROSEPAN_STUB("MnuBoard2D::term", 0x001ad870);
+}
+
+// stub of ROR 0x00198b04
+int MnuDiary::setType(int type)
+{
+    ROSEPAN_STUB("MnuDiary::setType", 0x00198b04);
+    return {};
+}
+
+// stub of ROR 0x001aed08
+void MnuItem::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuItem::draw", 0x001aed08);
+}
+
+// stub of ROR 0x001aeacc
+void MnuItem::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuItem::init", 0x001aeacc);
+}
+
+// stub of ROR 0x001aec48
+int MnuItem::isInit()
+{
+    ROSEPAN_STUB("MnuItem::isInit", 0x001aec48);
+    return {};
+}
+
+// stub of ROR 0x001b099c
+int MnuItem::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuItem::processPad", 0x001b099c);
+    return {};
+}
+
+// stub of ROR 0x001aebc8
+void MnuItem::term()
+{
+    ROSEPAN_STUB("MnuItem::term", 0x001aebc8);
+}
+
+// stub of ROR 0x001a1428
+void MnuMcd::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuMcd::draw", 0x001a1428);
+}
+
+// stub of ROR 0x001a134c
+void MnuMcd::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuMcd::init", 0x001a134c);
+}
+
+// stub of ROR 0x001a140c
+int MnuMcd::isInit()
+{
+    ROSEPAN_STUB("MnuMcd::isInit", 0x001a140c);
+    return {};
+}
+
+// stub of ROR 0x001a1414
+int MnuMcd::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuMcd::processPad", 0x001a1414);
+    return {};
+}
+
+// stub of ROR 0x001a13f0
+void MnuMcd::term()
+{
+    ROSEPAN_STUB("MnuMcd::term", 0x001a13f0);
+}
+
+// stub of ROR 0x001ae040
+void MnuMovie::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuMovie::draw", 0x001ae040);
+}
+
+// stub of ROR 0x001adfb0
+void MnuMovie::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuMovie::init", 0x001adfb0);
+}
+
+// stub of ROR 0x001ae01c
+int MnuMovie::isInit()
+{
+    ROSEPAN_STUB("MnuMovie::isInit", 0x001ae01c);
+    return {};
+}
+
+// stub of ROR 0x001ae02c
+int MnuMovie::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuMovie::processPad", 0x001ae02c);
+    return {};
+}
+
+// stub of ROR 0x001adfe4
+void MnuMovie::term()
+{
+    ROSEPAN_STUB("MnuMovie::term", 0x001adfe4);
+}
+
+// stub of ROR 0x001ae614
+void MnuNow::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuNow::draw", 0x001ae614);
+}
+
+// stub of ROR 0x001ae520
+void MnuNow::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuNow::init", 0x001ae520);
+}
+
+// stub of ROR 0x001ae5b4
+int MnuNow::isInit()
+{
+    ROSEPAN_STUB("MnuNow::isInit", 0x001ae5b4);
+    return {};
+}
+
+// stub of ROR 0x001ae600
+int MnuNow::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuNow::processPad", 0x001ae600);
+    return {};
+}
+
+// stub of ROR 0x001ae574
+void MnuNow::term()
+{
+    ROSEPAN_STUB("MnuNow::term", 0x001ae574);
+}
+
+// stub of ROR 0x001ab680
+void MnuOpt::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuOpt::draw", 0x001ab680);
+}
+
+// stub of ROR 0x001ab598
+void MnuOpt::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuOpt::init", 0x001ab598);
+}
+
+// stub of ROR 0x001ab65c
+int MnuOpt::isInit()
+{
+    ROSEPAN_STUB("MnuOpt::isInit", 0x001ab65c);
+    return {};
+}
+
+// stub of ROR 0x001ab66c
+int MnuOpt::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuOpt::processPad", 0x001ab66c);
+    return {};
+}
+
+// stub of ROR 0x001ab5e4
+void MnuOpt::term()
+{
+    ROSEPAN_STUB("MnuOpt::term", 0x001ab5e4);
+}
+
+// stub of ROR 0x00196e54
+int MnuPBook::setType(int type)
+{
+    ROSEPAN_STUB("MnuPBook::setType", 0x00196e54);
+    return {};
+}
+
+// stub of ROR 0x001bdfe0
+void MnuSelectLanguage::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuSelectLanguage::draw", 0x001bdfe0);
+}
+
+// stub of ROR 0x001bdc00
+void MnuSelectLanguage::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuSelectLanguage::init", 0x001bdc00);
+}
+
+// stub of ROR 0x001bdc94
+int MnuSelectLanguage::isInit()
+{
+    ROSEPAN_STUB("MnuSelectLanguage::isInit", 0x001bdc94);
+    return {};
+}
+
+// stub of ROR 0x001bde58
+int MnuSelectLanguage::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuSelectLanguage::processPad", 0x001bde58);
+    return {};
+}
+
+// stub of ROR 0x001bdc54
+void MnuSelectLanguage::term()
+{
+    ROSEPAN_STUB("MnuSelectLanguage::term", 0x001bdc54);
+}
+
+// stub of ROR 0x0019a754
+void MnuStock::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuStock::draw", 0x0019a754);
+}
+
+// stub of ROR 0x0019a650
+void MnuStock::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuStock::init", 0x0019a650);
+}
+
+// stub of ROR 0x0019a730
+int MnuStock::isInit()
+{
+    ROSEPAN_STUB("MnuStock::isInit", 0x0019a730);
+    return {};
+}
+
+// stub of ROR 0x0019a740
+int MnuStock::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuStock::processPad", 0x0019a740);
+    return {};
+}
+
+// stub of ROR 0x0019a6b8
+void MnuStock::term()
+{
+    ROSEPAN_STUB("MnuStock::term", 0x0019a6b8);
+}
+
+// stub of ROR 0x001a972c
+void MnuTitle::draw(I3dLayer *layer)
+{
+    ROSEPAN_STUB("MnuTitle::draw", 0x001a972c);
+}
+
+// stub of ROR 0x001a91f4
+void MnuTitle::init(DogTexInfo *tex)
+{
+    ROSEPAN_STUB("MnuTitle::init", 0x001a91f4);
+}
+
+// stub of ROR 0x001a9298
+int MnuTitle::isInit()
+{
+    ROSEPAN_STUB("MnuTitle::isInit", 0x001a9298);
+    return {};
+}
+
+// stub of ROR 0x001a92a0
+int MnuTitle::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuTitle::processPad", 0x001a92a0);
+    return {};
+}
+
+// stub of ROR 0x001a9258
+void MnuTitle::term()
+{
+    ROSEPAN_STUB("MnuTitle::term", 0x001a9258);
 }

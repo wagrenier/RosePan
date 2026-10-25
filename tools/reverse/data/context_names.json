@@ -1445,17 +1445,275 @@
   "was": "FUN_0012c9c0",
   "why": "with an actor and not already in state 0xe (or its step > 7): changes to state 0xe with a1 through 0x11c1e8 and stores a2 in word +0x0c (mag/maglifepcbtl.cpp)"
  },
+ "0012cf3c": {
+  "name": "MagLifeMenuBase::getTypeValue",
+  "tag": "ror-inferred",
+  "was": "FUN_0012cf3c",
+  "why": "looks m_type (+0x34, the assert names it) up in the type table 0x298318, returns the paired value (the board model / page id); mag/maglifemenu.cpp line 329 assert m_type"
+ },
+ "0012cfe0": {
+  "name": "MagLifeMenuSelLang::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012cfe0",
+  "why": "MagLifeMenuSelLang vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d00c": {
+  "name": "MagLifeMenuSelLang::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d00c",
+  "why": "MagLifeMenuSelLang vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d024": {
+  "name": "MagLifeMenuSelLang::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d024",
+  "why": "MagLifeMenuSelLang vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
+ "0012d040": {
+  "name": "MagLifeMenuItem::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d040",
+  "why": "MagLifeMenuItem vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d06c": {
+  "name": "MagLifeMenuItem::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d06c",
+  "why": "MagLifeMenuItem vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d084": {
+  "name": "MagLifeMenuItem::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d084",
+  "why": "MagLifeMenuItem vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
+ "0012d0a0": {
+  "name": "MagLifeMenuMap::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d0a0",
+  "why": "MagLifeMenuMap vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d0cc": {
+  "name": "MagLifeMenuMap::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d0cc",
+  "why": "MagLifeMenuMap vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d0e4": {
+  "name": "MagLifeMenuMap::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d0e4",
+  "why": "MagLifeMenuMap vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
+ "0012d100": {
+  "name": "MagLifeMenuStock::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d100",
+  "why": "MagLifeMenuStock vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d12c": {
+  "name": "MagLifeMenuStock::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d12c",
+  "why": "MagLifeMenuStock vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d144": {
+  "name": "MagLifeMenuStock::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d144",
+  "why": "MagLifeMenuStock vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
+ "0012d160": {
+  "name": "MagLifeMenuSave::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d160",
+  "why": "MagLifeMenuSave vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d18c": {
+  "name": "MagLifeMenuSave::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d18c",
+  "why": "MagLifeMenuSave vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d1a8": {
+  "name": "MagLifeMenuSave::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d1a8",
+  "why": "MagLifeMenuSave vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
+ "0012d1c4": {
+  "name": "MagLifeMenuLoad::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d1c4",
+  "why": "MagLifeMenuLoad vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d1f0": {
+  "name": "MagLifeMenuLoad::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d1f0",
+  "why": "MagLifeMenuLoad vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d20c": {
+  "name": "MagLifeMenuLoad::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d20c",
+  "why": "MagLifeMenuLoad vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
+ "0012d228": {
+  "name": "MagLifeMenuOpt::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d228",
+  "why": "MagLifeMenuOpt vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d254": {
+  "name": "MagLifeMenuOpt::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d254",
+  "why": "MagLifeMenuOpt vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d26c": {
+  "name": "MagLifeMenuOpt::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d26c",
+  "why": "MagLifeMenuOpt vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
+ "0012d288": {
+  "name": "MagLifeMenuMovie::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d288",
+  "why": "MagLifeMenuMovie vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d2b4": {
+  "name": "MagLifeMenuMovie::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d2b4",
+  "why": "MagLifeMenuMovie vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d2cc": {
+  "name": "MagLifeMenuMovie::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d2cc",
+  "why": "MagLifeMenuMovie vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
+ "0012d2e8": {
+  "name": "MagLifeMenuTitle::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d2e8",
+  "why": "MagLifeMenuTitle vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d314": {
+  "name": "MagLifeMenuTitle::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d314",
+  "why": "MagLifeMenuTitle vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d32c": {
+  "name": "MagLifeMenuTitle::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d32c",
+  "why": "MagLifeMenuTitle vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
+ "0012d348": {
+  "name": "MagLifeMenuMcd::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d348",
+  "why": "MagLifeMenuMcd vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d364": {
+  "name": "MagLifeMenuMcd::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d364",
+  "why": "MagLifeMenuMcd vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d37c": {
+  "name": "MagLifeMenuMcd::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d37c",
+  "why": "MagLifeMenuMcd vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
  "0012d398": {
   "name": "MagLifeMenuPBook::MagLifeMenuPBook",
   "tag": "ror-inferred",
   "was": "FUN_0012d398",
   "why": "stores MagLifeMenuPBook's vtable 0x2e16f8 (rtti); MagScene::MagScene constructs the menu at +0x35440 with it, openMenu's 0x100000 / 0x200000 families"
  },
+ "0012d400": {
+  "name": "MagLifeMenuPBook::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d400",
+  "why": "MagLifeMenuPBook vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d4cc": {
+  "name": "MagLifeMenuPBook::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d4cc",
+  "why": "MagLifeMenuPBook vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d4fc": {
+  "name": "MagLifeMenuPBook::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d4fc",
+  "why": "MagLifeMenuPBook vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
+ "0012d52c": {
+  "name": "MagLifeMenuNow::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d52c",
+  "why": "MagLifeMenuNow vtable slot 9 (MagLifeMenuBase::init, the slot MagScene::openMenu calls with the texture table); forwards to the menu object at +0x40"
+ },
+ "0012d558": {
+  "name": "MagLifeMenuNow::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d558",
+  "why": "MagLifeMenuNow vtable slot 12 (the slot MagScene::update mode 7 calls with the pad); forwards to the menu object at +0x40"
+ },
+ "0012d570": {
+  "name": "MagLifeMenuNow::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d570",
+  "why": "MagLifeMenuNow vtable slot 6 (MagLife::render, the layer); forwards to the menu object at +0x40"
+ },
  "0012d58c": {
   "name": "MagLifeMenuBoard3D::MagLifeMenuBoard3D",
   "tag": "ror-inferred",
   "was": "FUN_0012d58c",
   "why": "stores MagLifeMenuBoard3D's vtable 0x2e1618 (rtti); the scene's menu at +0x40720, openMenu's 0x80000 family"
+ },
+ "0012d5e0": {
+  "name": "MagLifeMenuBoard3D::~MagLifeMenuBoard3D",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d5e0",
+  "why": "MagLifeMenuBoard3D slot 1: restores its vtable, runs term 0x12d6c0, restores MagLife0's, deletes when flags & 1"
+ },
+ "0012d648": {
+  "name": "MagLifeMenuBoard3D::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d648",
+  "why": "slot 9: asserts m_scene, loads the model getTypeValue names through MagScene::loadModel into +0x50, step 0"
+ },
+ "0012d6c0": {
+  "name": "MagLifeMenuBoard3D::term",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d6c0",
+  "why": "slot 10: releases the loaded actor (MagScene::releaseActor), -1"
+ },
+ "0012d72c": {
+  "name": "MagLifeMenuBoard3D::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d72c",
+  "why": "slot 11: actor number >= 0"
+ },
+ "0012d73c": {
+  "name": "MagLifeMenuBoard3D::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d73c",
+  "why": "slot 12: step 2 waits for pad bit 13 (then step 3 fades out), step 4 returns 1"
+ },
+ "0012d788": {
+  "name": "MagLifeMenuBoard3D::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d788",
+  "why": "slot 6: asserts theRenderStage / actor; places the camera and the actor, fades, draws the actor (DogActor slot 19 drawModel)"
  },
  "0012e23c": {
   "name": "MagLifeMenuSpecial::MagLifeMenuSpecial",
@@ -2380,6 +2638,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0013c928",
   "why": "empty, in mag/magscenecamera.cpp; mainInitGame calls it on 0x6fbd80 = MagSystem 0x6e9840 + 0x12540, the member 0x131840 / 0x13f528 (magscene) take; class name unverified"
+ },
+ "0013c930": {
+  "name": "MagScene::saveCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_0013c930",
+  "why": "saves the camera entity (0x10f860 on +0x2ab70), counts the saves in +0x2ad80, copies the six camera words +0x2ad50.. to +0x2ad84..; MagLifeMenuBoard3D::init runs it before its own camera"
+ },
+ "0013ca10": {
+  "name": "MagScene::restoreCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_0013ca10",
+  "why": "the inverse of saveCamera 0x13c930: 0x10f8cc on the camera entity, -1 on +0x2ad80, the six words back; MagLifeMenuBoard3D::term"
  },
  "0013caf0": {
   "name": "MagScene::setCameraMode",
@@ -4012,6 +4282,558 @@
   "tag": "ror-inferred",
   "was": "FUN_00192a70",
   "why": "as S2dMes::setSpriteDisp: sprite +0x0c = (on == 1), item map 0x29bfb0; no caller found"
+ },
+ "00192ac0": {
+  "name": "mnuBase::mnuBase",
+  "tag": "ror-inferred",
+  "was": "FUN_00192ac0",
+  "why": "mnuBase (vtable 0x2e4640, vptr +0x10c) ctor"
+ },
+ "00192b3c": {
+  "name": "mnuBase::~mnuBase",
+  "tag": "ror-inferred",
+  "was": "FUN_00192b3c",
+  "why": "mnuBase (vtable 0x2e4640, vptr +0x10c) dtor"
+ },
+ "00192d60": {
+  "name": "mnuBase::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00192d60",
+  "why": "mnuBase (vtable 0x2e4640, vptr +0x10c) term"
+ },
+ "001947a4": {
+  "name": "MnuMap::MnuMap",
+  "tag": "ror-inferred",
+  "was": "FUN_001947a4",
+  "why": "MnuMap : mnuBase (rtti) ctor; MagLifeMenuMap's menu object"
+ },
+ "00194858": {
+  "name": "MnuMap::~MnuMap",
+  "tag": "ror-inferred",
+  "was": "FUN_00194858",
+  "why": "MnuMap : mnuBase (rtti) dtor; MagLifeMenuMap's menu object"
+ },
+ "00194908": {
+  "name": "MnuMap::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00194908",
+  "why": "MnuMap : mnuBase (rtti) init; MagLifeMenuMap's menu object"
+ },
+ "00194960": {
+  "name": "MnuMap::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00194960",
+  "why": "MnuMap : mnuBase (rtti) term; MagLifeMenuMap's menu object"
+ },
+ "00194fe4": {
+  "name": "MnuMap::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_00194fe4",
+  "why": "MnuMap : mnuBase (rtti) processPad; MagLifeMenuMap's menu object"
+ },
+ "00195e90": {
+  "name": "MnuMap::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_00195e90",
+  "why": "MnuMap : mnuBase (rtti) draw; MagLifeMenuMap's menu object"
+ },
+ "00196a9c": {
+  "name": "MnuPBook::MnuPBook",
+  "tag": "ror-inferred",
+  "was": "FUN_00196a9c",
+  "why": "MnuPBook : mnuBase (rtti) ctor; MagLifeMenuPBook (+0x50)'s menu object"
+ },
+ "00196b2c": {
+  "name": "MnuPBook::~MnuPBook",
+  "tag": "ror-inferred",
+  "was": "FUN_00196b2c",
+  "why": "MnuPBook : mnuBase (rtti) dtor; MagLifeMenuPBook (+0x50)'s menu object"
+ },
+ "00196bdc": {
+  "name": "MnuPBook::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00196bdc",
+  "why": "MnuPBook : mnuBase (rtti) init; MagLifeMenuPBook (+0x50)'s menu object"
+ },
+ "00196d98": {
+  "name": "MnuPBook::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00196d98",
+  "why": "MnuPBook : mnuBase (rtti) term; MagLifeMenuPBook (+0x50)'s menu object"
+ },
+ "00196e54": {
+  "name": "MnuPBook::setType",
+  "tag": "ror-inferred",
+  "was": "FUN_00196e54",
+  "why": "MnuPBook: finds type in its page table (0x29c0f8 / 0x29c368, 12-byte rows), keeps it at +0x114, 1 when found; MagLifeMenuPBook::init picks the book that knows the type"
+ },
+ "001976b8": {
+  "name": "MnuPBook::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001976b8",
+  "why": "MnuPBook : mnuBase (rtti) processPad; MagLifeMenuPBook (+0x50)'s menu object"
+ },
+ "00197f70": {
+  "name": "MnuPBook::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_00197f70",
+  "why": "MnuPBook : mnuBase (rtti) draw; MagLifeMenuPBook (+0x50)'s menu object"
+ },
+ "00198720": {
+  "name": "MnuDiary::MnuDiary",
+  "tag": "ror-inferred",
+  "was": "FUN_00198720",
+  "why": "MnuDiary : mnuBase (rtti) ctor; MagLifeMenuPBook (+0x910)'s menu object"
+ },
+ "001987b0": {
+  "name": "MnuDiary::~MnuDiary",
+  "tag": "ror-inferred",
+  "was": "FUN_001987b0",
+  "why": "MnuDiary : mnuBase (rtti) dtor; MagLifeMenuPBook (+0x910)'s menu object"
+ },
+ "00198860": {
+  "name": "MnuDiary::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00198860",
+  "why": "MnuDiary : mnuBase (rtti) init; MagLifeMenuPBook (+0x910)'s menu object"
+ },
+ "00198a38": {
+  "name": "MnuDiary::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00198a38",
+  "why": "MnuDiary : mnuBase (rtti) term; MagLifeMenuPBook (+0x910)'s menu object"
+ },
+ "00198b04": {
+  "name": "MnuDiary::setType",
+  "tag": "ror-inferred",
+  "was": "FUN_00198b04",
+  "why": "MnuDiary: finds type in its page table (0x29c0f8 / 0x29c368, 12-byte rows), keeps it at +0x114, 1 when found; MagLifeMenuPBook::init picks the book that knows the type"
+ },
+ "001990b0": {
+  "name": "MnuDiary::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001990b0",
+  "why": "MnuDiary : mnuBase (rtti) processPad; MagLifeMenuPBook (+0x910)'s menu object"
+ },
+ "00199c94": {
+  "name": "MnuDiary::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_00199c94",
+  "why": "MnuDiary : mnuBase (rtti) draw; MagLifeMenuPBook (+0x910)'s menu object"
+ },
+ "0019a52c": {
+  "name": "MnuStock::MnuStock",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a52c",
+  "why": "the menu object at +0x40 of MagLifeMenuStock: its wrapper's ctor calls it (class name from the wrapper, real one unknown)"
+ },
+ "0019a598": {
+  "name": "MnuStock::~MnuStock",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a598",
+  "why": "the menu object at +0x40 of MagLifeMenuStock: its wrapper's dtor calls it (class name from the wrapper, real one unknown)"
+ },
+ "0019a650": {
+  "name": "MnuStock::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a650",
+  "why": "the menu object at +0x40 of MagLifeMenuStock: its wrapper's init calls it (class name from the wrapper, real one unknown)"
+ },
+ "0019a6b8": {
+  "name": "MnuStock::term",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a6b8",
+  "why": "the menu object at +0x40 of MagLifeMenuStock: its wrapper's term calls it (class name from the wrapper, real one unknown)"
+ },
+ "0019a730": {
+  "name": "MnuStock::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a730",
+  "why": "the menu object at +0x40 of MagLifeMenuStock: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
+ },
+ "0019a740": {
+  "name": "MnuStock::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a740",
+  "why": "the menu object at +0x40 of MagLifeMenuStock: its wrapper's processPad calls it (class name from the wrapper, real one unknown)"
+ },
+ "0019a754": {
+  "name": "MnuStock::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a754",
+  "why": "the menu object at +0x40 of MagLifeMenuStock: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a1244": {
+  "name": "MnuMcd::MnuMcd",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1244",
+  "why": "the menu object at +0x40 of MagLifeMenuMcd: its wrapper's ctor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a12a8": {
+  "name": "MnuMcd::~MnuMcd",
+  "tag": "ror-inferred",
+  "was": "FUN_001a12a8",
+  "why": "the menu object at +0x40 of MagLifeMenuMcd: its wrapper's dtor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a134c": {
+  "name": "MnuMcd::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001a134c",
+  "why": "the menu object at +0x40 of MagLifeMenuMcd: its wrapper's init calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a13f0": {
+  "name": "MnuMcd::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001a13f0",
+  "why": "the menu object at +0x40 of MagLifeMenuMcd: its wrapper's term calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a140c": {
+  "name": "MnuMcd::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_001a140c",
+  "why": "the menu object at +0x40 of MagLifeMenuMcd: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a1414": {
+  "name": "MnuMcd::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1414",
+  "why": "the menu object at +0x40 of MagLifeMenuMcd: its wrapper's processPad calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a1428": {
+  "name": "MnuMcd::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1428",
+  "why": "the menu object at +0x40 of MagLifeMenuMcd: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a59b8": {
+  "name": "MnuSvld::MnuSvld",
+  "tag": "ror-inferred",
+  "was": "FUN_001a59b8",
+  "why": "the menu object at +0x40 of MagLifeMenuSave / Load: its wrapper's ctor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a5a34": {
+  "name": "MnuSvld::~MnuSvld",
+  "tag": "ror-inferred",
+  "was": "FUN_001a5a34",
+  "why": "the menu object at +0x40 of MagLifeMenuSave / Load: its wrapper's dtor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a5af4": {
+  "name": "MnuSvld::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001a5af4",
+  "why": "the menu object at +0x40 of MagLifeMenuSave / Load: its wrapper's init calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a5bf4": {
+  "name": "MnuSvld::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001a5bf4",
+  "why": "the menu object at +0x40 of MagLifeMenuSave / Load: its wrapper's term calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a5c78": {
+  "name": "MnuSvld::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_001a5c78",
+  "why": "the menu object at +0x40 of MagLifeMenuSave / Load: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a5cc4": {
+  "name": "MnuSvld::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001a5cc4",
+  "why": "the menu object at +0x40 of MagLifeMenuSave / Load: its wrapper's processPad calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a5cd8": {
+  "name": "MnuSvld::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001a5cd8",
+  "why": "the menu object at +0x40 of MagLifeMenuSave / Load: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a90ec": {
+  "name": "MnuTitle::MnuTitle",
+  "tag": "ror-inferred",
+  "was": "FUN_001a90ec",
+  "why": "the menu object at +0x40 of MagLifeMenuTitle: its wrapper's ctor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a9150": {
+  "name": "MnuTitle::~MnuTitle",
+  "tag": "ror-inferred",
+  "was": "FUN_001a9150",
+  "why": "the menu object at +0x40 of MagLifeMenuTitle: its wrapper's dtor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a91f4": {
+  "name": "MnuTitle::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001a91f4",
+  "why": "the menu object at +0x40 of MagLifeMenuTitle: its wrapper's init calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a9258": {
+  "name": "MnuTitle::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001a9258",
+  "why": "the menu object at +0x40 of MagLifeMenuTitle: its wrapper's term calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a9298": {
+  "name": "MnuTitle::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_001a9298",
+  "why": "the menu object at +0x40 of MagLifeMenuTitle: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a92a0": {
+  "name": "MnuTitle::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001a92a0",
+  "why": "the menu object at +0x40 of MagLifeMenuTitle: its wrapper's processPad calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a972c": {
+  "name": "MnuTitle::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001a972c",
+  "why": "the menu object at +0x40 of MagLifeMenuTitle: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ab474": {
+  "name": "MnuOpt::MnuOpt",
+  "tag": "ror-inferred",
+  "was": "FUN_001ab474",
+  "why": "the menu object at +0x40 of MagLifeMenuOpt: its wrapper's ctor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ab4e0": {
+  "name": "MnuOpt::~MnuOpt",
+  "tag": "ror-inferred",
+  "was": "FUN_001ab4e0",
+  "why": "the menu object at +0x40 of MagLifeMenuOpt: its wrapper's dtor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ab598": {
+  "name": "MnuOpt::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001ab598",
+  "why": "the menu object at +0x40 of MagLifeMenuOpt: its wrapper's init calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ab5e4": {
+  "name": "MnuOpt::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001ab5e4",
+  "why": "the menu object at +0x40 of MagLifeMenuOpt: its wrapper's term calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ab65c": {
+  "name": "MnuOpt::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_001ab65c",
+  "why": "the menu object at +0x40 of MagLifeMenuOpt: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ab66c": {
+  "name": "MnuOpt::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001ab66c",
+  "why": "the menu object at +0x40 of MagLifeMenuOpt: its wrapper's processPad calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ab680": {
+  "name": "MnuOpt::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001ab680",
+  "why": "the menu object at +0x40 of MagLifeMenuOpt: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ad72c": {
+  "name": "MnuBoard2D::~MnuBoard2D",
+  "tag": "ror-inferred",
+  "was": "FUN_001ad72c",
+  "why": "the menu object at +0x40 of MagLifeMenuBoard2D: its wrapper's dtor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ad824": {
+  "name": "MnuBoard2D::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001ad824",
+  "why": "the menu object at +0x40 of MagLifeMenuBoard2D: its wrapper's init calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ad870": {
+  "name": "MnuBoard2D::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001ad870",
+  "why": "the menu object at +0x40 of MagLifeMenuBoard2D: its wrapper's term calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ad8bc": {
+  "name": "MnuBoard2D::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_001ad8bc",
+  "why": "the menu object at +0x40 of MagLifeMenuBoard2D: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ad8cc": {
+  "name": "MnuBoard2D::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001ad8cc",
+  "why": "the menu object at +0x40 of MagLifeMenuBoard2D: its wrapper's processPad calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ad8e0": {
+  "name": "MnuBoard2D::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001ad8e0",
+  "why": "the menu object at +0x40 of MagLifeMenuBoard2D: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001adf04": {
+  "name": "MnuMovie::MnuMovie",
+  "tag": "ror-inferred",
+  "was": "FUN_001adf04",
+  "why": "the menu object at +0x40 of MagLifeMenuMovie: its wrapper's ctor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001adf3c": {
+  "name": "MnuMovie::~MnuMovie",
+  "tag": "ror-inferred",
+  "was": "FUN_001adf3c",
+  "why": "the menu object at +0x40 of MagLifeMenuMovie: its wrapper's dtor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001adfb0": {
+  "name": "MnuMovie::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001adfb0",
+  "why": "the menu object at +0x40 of MagLifeMenuMovie: its wrapper's init calls it (class name from the wrapper, real one unknown)"
+ },
+ "001adfe4": {
+  "name": "MnuMovie::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001adfe4",
+  "why": "the menu object at +0x40 of MagLifeMenuMovie: its wrapper's term calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae01c": {
+  "name": "MnuMovie::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae01c",
+  "why": "the menu object at +0x40 of MagLifeMenuMovie: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae02c": {
+  "name": "MnuMovie::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae02c",
+  "why": "the menu object at +0x40 of MagLifeMenuMovie: its wrapper's processPad calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae040": {
+  "name": "MnuMovie::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae040",
+  "why": "the menu object at +0x40 of MagLifeMenuMovie: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae474": {
+  "name": "MnuNow::MnuNow",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae474",
+  "why": "the menu object at +0x40 of MagLifeMenuNow: its wrapper's ctor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae4ac": {
+  "name": "MnuNow::~MnuNow",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae4ac",
+  "why": "the menu object at +0x40 of MagLifeMenuNow: its wrapper's dtor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae520": {
+  "name": "MnuNow::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae520",
+  "why": "the menu object at +0x40 of MagLifeMenuNow: its wrapper's init calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae574": {
+  "name": "MnuNow::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae574",
+  "why": "the menu object at +0x40 of MagLifeMenuNow: its wrapper's term calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae5b4": {
+  "name": "MnuNow::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae5b4",
+  "why": "the menu object at +0x40 of MagLifeMenuNow: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae600": {
+  "name": "MnuNow::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae600",
+  "why": "the menu object at +0x40 of MagLifeMenuNow: its wrapper's processPad calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae614": {
+  "name": "MnuNow::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae614",
+  "why": "the menu object at +0x40 of MagLifeMenuNow: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae954": {
+  "name": "MnuItem::MnuItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae954",
+  "why": "the menu object at +0x40 of MagLifeMenuItem: its wrapper's ctor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae9f4": {
+  "name": "MnuItem::~MnuItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae9f4",
+  "why": "the menu object at +0x40 of MagLifeMenuItem: its wrapper's dtor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001aeacc": {
+  "name": "MnuItem::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001aeacc",
+  "why": "the menu object at +0x40 of MagLifeMenuItem: its wrapper's init calls it (class name from the wrapper, real one unknown)"
+ },
+ "001aebc8": {
+  "name": "MnuItem::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001aebc8",
+  "why": "the menu object at +0x40 of MagLifeMenuItem: its wrapper's term calls it (class name from the wrapper, real one unknown)"
+ },
+ "001aec48": {
+  "name": "MnuItem::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_001aec48",
+  "why": "the menu object at +0x40 of MagLifeMenuItem: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
+ },
+ "001aed08": {
+  "name": "MnuItem::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001aed08",
+  "why": "the menu object at +0x40 of MagLifeMenuItem: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001b099c": {
+  "name": "MnuItem::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001b099c",
+  "why": "the menu object at +0x40 of MagLifeMenuItem: its wrapper's processPad calls it (class name from the wrapper, real one unknown)"
+ },
+ "001bdae4": {
+  "name": "MnuSelectLanguage::MnuSelectLanguage",
+  "tag": "ror-inferred",
+  "was": "FUN_001bdae4",
+  "why": "the menu object at +0x40 of MagLifeMenuSelLang: its wrapper's ctor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001bdb4c": {
+  "name": "MnuSelectLanguage::~MnuSelectLanguage",
+  "tag": "ror-inferred",
+  "was": "FUN_001bdb4c",
+  "why": "the menu object at +0x40 of MagLifeMenuSelLang: its wrapper's dtor calls it (class name from the wrapper, real one unknown)"
+ },
+ "001bdc00": {
+  "name": "MnuSelectLanguage::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001bdc00",
+  "why": "the menu object at +0x40 of MagLifeMenuSelLang: its wrapper's init calls it (class name from the wrapper, real one unknown)"
+ },
+ "001bdc54": {
+  "name": "MnuSelectLanguage::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001bdc54",
+  "why": "the menu object at +0x40 of MagLifeMenuSelLang: its wrapper's term calls it (class name from the wrapper, real one unknown)"
+ },
+ "001bdc94": {
+  "name": "MnuSelectLanguage::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_001bdc94",
+  "why": "the menu object at +0x40 of MagLifeMenuSelLang: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
+ },
+ "001bde58": {
+  "name": "MnuSelectLanguage::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001bde58",
+  "why": "the menu object at +0x40 of MagLifeMenuSelLang: its wrapper's processPad calls it (class name from the wrapper, real one unknown)"
+ },
+ "001bdfe0": {
+  "name": "MnuSelectLanguage::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_001bdfe0",
+  "why": "the menu object at +0x40 of MagLifeMenuSelLang: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
  },
  "001be2cc": {
   "name": "FileReader::FileReader",

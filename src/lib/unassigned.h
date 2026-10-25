@@ -498,6 +498,222 @@ struct WrdTable
 
 extern WrdTable g_wrdTable;     /* data 0x298ee0 */
 
+/* ---- the mnu/ menu objects (unassigned@00192ac0, @001a0950, @001a6830):
+ * each MagLifeMenu* wrapper (mag/maglifemenu.h) holds one at its +0x40 and
+ * forwards init / term / isInit / processPad / render to it. Class names
+ * from the wrappers (ror-inferred) except mnuBase, MnuMap, MnuPBook and
+ * MnuDiary (the ELF's vtables). Their constructors are not written: the
+ * objects live in the global scene and start zeroed (a stub constructor
+ * would log before main). EE sizes from the scene's member spacing.
+ * MnuSvld (mnu/mnusvld.h) and MnuSelectLanguage (mnu/mnuSelectLanguage.h)
+ * have their files' headers. ---- */
+
+struct BedPad;
+struct I3dLayer;
+
+/* The polymorphic menu base (vtable 0x2e4640, vptr +0x10c; constructor
+ * 0x192ac0 also builds a FileReader at +0x68). layout: host -- polymorphic.
+ * EE slots: 1 ~dtor 0x192b3c, 2 init (pure), 3 term 0x192d60, 4 isInit,
+ * 5 processPad (pure), 6 draw (pure), 7 0x193140, 8 getType, 9 getFlags,
+ * 10 0x1938a8, 11 0x193920; 7.. are declared when a TU needs them. */
+struct mnuBase
+{
+    /* EE slot 1 (+0x08); 0x192b3c is not written (nothing to release in a
+     * zeroed object). */
+    virtual ~mnuBase() {}
+    /* EE slot 2 (+0x10) */
+    virtual void init(DogTexInfo *tex) = 0;
+    /* EE slot 3 (+0x18) */
+    virtual void term();                                                 // ROR 0x00192d60
+    /* EE slot 4 (+0x20): bit 0 of the flags. */
+    // ROR 0x0028dec0
+    virtual int  isInit() { return m_flags & 1; }
+    /* EE slot 5 (+0x28) */
+    virtual int  processPad(BedPad *pad) = 0;
+    /* EE slot 6 (+0x30) */
+    virtual void draw(I3dLayer *layer) = 0;
+
+    int       m_type;           // ROR 0x00: mnuBase::getType 0x28dee0
+    u_int     m_flags;          // ROR 0x04: bit 0 set once init has run
+    MagScene *m_scene;          // ROR 0x08: MagLifeMenuPBook::init stores the wrapper's scene
+    u_char    _0c[0x10c - 0x0c];
+    /* ROR 0x10c: the EE vptr (the host's is at 0) */
+};
+static_assert(offsetof(mnuBase, m_flags) >= 0x04, "m_flags");
+static_assert(offsetof(mnuBase, m_scene) >= 0x08, "m_scene");
+
+/* The map menu (vtable 0x2e46a8). EE 0x8e0 (MagLifeMenuMap +0x40..+0x920).
+ * layout: host -- polymorphic. */
+struct MnuMap : mnuBase
+{
+    void init(DogTexInfo *tex) override;                                 // ROR 0x00194908
+    void term() override;                                                // ROR 0x00194960
+    int  processPad(BedPad *pad) override;                               // ROR 0x00194fe4
+    void draw(I3dLayer *layer) override;                                 // ROR 0x00195e90
+
+    u_char    _110[0x8e0 - 0x110];
+};
+static_assert(sizeof(MnuMap) >= 0x8e0, "EE 0x8e0");
+
+/* The two books MagLifeMenuPBook switches between (vtables 0x2e4710 /
+ * 0x2e4778). setType keeps the row of its page table (0x29c0f8 /
+ * 0x29c368, 12-byte rows, -1 ends) whose first word is type. layout: host
+ * -- polymorphic. EE 0x8c0 (MagLifeMenuPBook +0x50..+0x910). */
+struct MnuPBook : mnuBase
+{
+    void init(DogTexInfo *tex) override;                                 // ROR 0x00196bdc
+    void term() override;                                                // ROR 0x00196d98
+    int  processPad(BedPad *pad) override;                               // ROR 0x001976b8
+    void draw(I3dLayer *layer) override;                                 // ROR 0x00197f70
+    /* 1 when type is one of its pages (kept at +0x114), else 0. */
+    int  setType(int type);                                              // ROR 0x00196e54
+
+    u_char    _110[0x8c0 - 0x110];
+};
+static_assert(sizeof(MnuPBook) >= 0x8c0, "EE 0x8c0");
+
+/* EE 0x8f0 (MagLifeMenuPBook +0x910..+0x1200). layout: host -- polymorphic. */
+struct MnuDiary : mnuBase
+{
+    void init(DogTexInfo *tex) override;                                 // ROR 0x00198860
+    void term() override;                                                // ROR 0x00198a38
+    int  processPad(BedPad *pad) override;                               // ROR 0x001990b0
+    void draw(I3dLayer *layer) override;                                 // ROR 0x00199c94
+    /* 1 when type is one of its pages (kept at +0x114), else 0. */
+    int  setType(int type);                                              // ROR 0x00198b04
+
+    u_char    _110[0x8f0 - 0x110];
+};
+static_assert(sizeof(MnuDiary) >= 0x8f0, "EE 0x8f0");
+
+/* The plain menu objects: the same five calls, not polymorphic. Each
+ * keeps the wrapper's scene at the offset its init wrapper writes.
+ * layout: host -- unwritten classes padded to their EE size. */
+
+/* The item menu. EE 0x2710 (MagLifeMenuItem +0x40..+0x2750). */
+struct MnuItem
+{
+    void init(DogTexInfo *tex);                                          // ROR 0x001aeacc
+    void term();                                                         // ROR 0x001aebc8
+    int  isInit();                                                       // ROR 0x001aec48
+    int  processPad(BedPad *pad);                                        // ROR 0x001b099c
+    void draw(I3dLayer *layer);                                          // ROR 0x001aed08
+
+    u_char    _00[0x1b60];
+    MagScene *m_scene;          // ROR 0x1b60: MagLifeMenuItem::init stores the scene
+    u_char    _1b64[0x2710 - 0x1b64];
+};
+static_assert(offsetof(MnuItem, m_scene) == 0x1b60, "m_scene");
+
+/* The stock (item box) menu. EE 0x15b0 (MagLifeMenuStock +0x40..+0x15f0). */
+struct MnuStock
+{
+    void init(DogTexInfo *tex);                                          // ROR 0x0019a650
+    void term();                                                         // ROR 0x0019a6b8
+    int  isInit();                                                       // ROR 0x0019a730
+    int  processPad(BedPad *pad);                                        // ROR 0x0019a740
+    void draw(I3dLayer *layer);                                          // ROR 0x0019a754
+
+    u_char    _00[0x110c];
+    MagScene *m_scene;          // ROR 0x110c: MagLifeMenuStock::init stores the scene
+    u_char    _1110[0x15b0 - 0x1110];
+};
+static_assert(offsetof(MnuStock, m_scene) >= 0x110c, "m_scene");
+
+/* The options menu (also inside MnuTitle at +0x3b80). EE 0x10f0
+ * (MagLifeMenuOpt +0x40..+0x1130). */
+struct MnuOpt
+{
+    void init(DogTexInfo *tex);                                          // ROR 0x001ab598
+    void term();                                                         // ROR 0x001ab5e4
+    int  isInit();                                                       // ROR 0x001ab65c
+    int  processPad(BedPad *pad);                                        // ROR 0x001ab66c
+    void draw(I3dLayer *layer);                                          // ROR 0x001ab680
+
+    u_char    _00[0x10c8];
+    MagScene *m_scene;          // ROR 0x10c8: MagLifeMenuOpt::init stores the scene
+    u_char    _10cc[0x10f0 - 0x10cc];
+};
+static_assert(offsetof(MnuOpt, m_scene) == 0x10c8, "m_scene");
+
+/* The movie (theatre) menu. EE 0x990 (MagLifeMenuMovie +0x40..+0x9d0). */
+struct MnuMovie
+{
+    void init(DogTexInfo *tex);                                          // ROR 0x001adfb0
+    void term();                                                         // ROR 0x001adfe4
+    int  isInit();                                                       // ROR 0x001ae01c
+    int  processPad(BedPad *pad);                                        // ROR 0x001ae02c
+    void draw(I3dLayer *layer);                                          // ROR 0x001ae040
+
+    u_char    _00[0x968];
+    MagScene *m_scene;          // ROR 0x968: MagLifeMenuMovie::init stores the scene
+    u_char    _96c[0x990 - 0x96c];
+};
+static_assert(offsetof(MnuMovie, m_scene) == 0x968, "m_scene");
+
+/* The memory card menu (also MnuTitle's first member). EE 0x1400
+ * (MagLifeMenuMcd +0x40..+0x1440; MnuTitle's next member is at +0x1400). */
+struct MnuMcd
+{
+    void init(DogTexInfo *tex);                                          // ROR 0x001a134c
+    void term();                                                         // ROR 0x001a13f0
+    int  isInit();                                                       // ROR 0x001a140c
+    int  processPad(BedPad *pad);                                        // ROR 0x001a1414
+    void draw(I3dLayer *layer);                                          // ROR 0x001a1428
+
+    u_char    _00[0x1400];
+};
+static_assert(sizeof(MnuMcd) == 0x1400, "EE 0x1400");
+
+/* The title screen: an MnuMcd at +0, an MnuSvld at +0x1400, an MnuOpt at
+ * +0x3b80, SprMan at +0x4df0 (its constructor 0x1a90ec), data/mnurpk/
+ * mnuboard.rpk, the s100000.str stream. EE 0x5700 (MagLifeMenuTitle
+ * +0x40..+0x5740). */
+struct MnuTitle
+{
+    void init(DogTexInfo *tex);                                          // ROR 0x001a91f4
+    void term();                                                         // ROR 0x001a9258
+    int  isInit();                                                       // ROR 0x001a9298
+    /* -1 before init. */
+    int  processPad(BedPad *pad);                                        // ROR 0x001a92a0
+    void draw(I3dLayer *layer);                                          // ROR 0x001a972c
+
+    u_char    _00[0x56f0];
+    MagScene *m_scene;          // ROR 0x56f0: MagLifeMenuTitle::init stores the scene
+    u_char    _56f4[0x5700 - 0x56f4];
+};
+static_assert(offsetof(MnuTitle, m_scene) == 0x56f0, "m_scene");
+
+/* The "now" (status) menu. EE 0x920 (MagLifeMenuNow +0x40..+0x960). */
+struct MnuNow
+{
+    void init(DogTexInfo *tex);                                          // ROR 0x001ae520
+    void term();                                                         // ROR 0x001ae574
+    int  isInit();                                                       // ROR 0x001ae5b4
+    int  processPad(BedPad *pad);                                        // ROR 0x001ae600
+    void draw(I3dLayer *layer);                                          // ROR 0x001ae614
+
+    u_char    _00[0x90c];
+    MagScene *m_scene;          // ROR 0x90c: MagLifeMenuNow::init stores the scene
+    u_char    _910[0x920 - 0x910];
+};
+static_assert(offsetof(MnuNow, m_scene) >= 0x90c, "m_scene");
+
+/* The 2D board. EE 0x10c0 (MagLifeMenuBoard2D +0x40..+0x1100). */
+struct MnuBoard2D
+{
+    void init(DogTexInfo *tex);                                          // ROR 0x001ad824
+    void term();                                                         // ROR 0x001ad870
+    int  isInit();                                                       // ROR 0x001ad8bc
+    int  processPad(BedPad *pad);                                        // ROR 0x001ad8cc
+    void draw(I3dLayer *layer);                                          // ROR 0x001ad8e0
+
+    u_char    _00[0x10b8];
+    int       m_board;          // ROR 0x10b8: MagLifeMenuBoard2D::init stores getTypeValue's board id
+    u_char    _10bc[0x10c0 - 0x10bc];
+};
+static_assert(offsetof(MnuBoard2D, m_board) == 0x10b8, "m_board");
+
 /* ---- the debug range before debug/mimu_debug.cpp (unassigned@0020eda4) ---- */
 
 void debugNop(void);                                                     // ROR 0x002155a0
