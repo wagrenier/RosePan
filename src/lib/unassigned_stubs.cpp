@@ -998,3 +998,9 @@ u_int chrCreateItemObj(short id, const float *pos, const float *rot)
     ROSEPAN_STUB("chrCreateItemObj", 0x001f6578);
     return {};
 }
+
+// stub of ROR 0x001dc48c
+void GamSysData::getField(int id, int field, void *out)
+{
+    ROSEPAN_STUB("GamSysData::getField", 0x001dc48c);
+}

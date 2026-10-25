@@ -1,5 +1,6 @@
 {
  "queue": [
+  "sequence/seqvm.cpp",
   "sequence/seqcall.cpp",
   "unassigned@0020ff34",
   "game/gamman.cpp",
@@ -563,7 +564,7 @@
    "why": "rx middleware thread layer: kernel wrappers from 0x249b88 (CreateSema, CreateThread), rxThInit, dispatch semaphore, rxThRequest/rxThYield, rxthread/rxThread messages, vsync and DMA wait helpers to 0x24b48c; libcdvd sceCdCallback starts at 0x24b490"
   },
   "sequence/seqcall.cpp": {
-   "notes": "Left: 36 handler stubs in seqcall.cpp (seqFunc001, 002, 004, 006, 007, 009, 012, 014, 016, 019..039, 100..281); write each when a decoded script reaches it, not before. The boot screenshot stays black: Sequence::exec (sequence/sequence.cpp, next in the queue) and the VM 0x214c24 (unassigned@0020ff34) are stubs, so no native function runs yet. Decision (open-items Decisions): script registers are intptr_t on the host holding host addresses; native functions are intptr_t f(a0..a3, t0, t1) and return SEQ_RET_* codes (seqcall.h). Four handlers were hidden in earlier Ghidra bodies (0x205928, 0x206614, 0x208dc4, 0x20df98) and 0x205564 / 0x209344 had no function: all created. New host members: GamMan m_area (GamArea, +0x40), m_flags, m_flags2, m_pcActor, m_pcMotion, m_sysWord, m_equipItem, m_frameTaskId, m_sysTaskId, m_seqPair, m_seqWord; Sequence m_base, m_global, m_bits, m_flags. TskFrameFunc / TskSysFunc constructors are hand stubs in lib/unassigned_stubs.cpp. Start the next session in sequence.cpp: Sequence ctor 0x20e454 (three node pools), init, the image loader 0x20eda4 that GamMan::loadStage calls, exec.",
+   "notes": "Left: 29 handler stubs in seqcall.cpp (004, 006, 007, 009, 012, 014, 016, 019, 020, 023, 026, 028, 029, 036, 038, 039, 100, 106, 151..281); write each when a decoded script reaches it. The smoke run passes every native the boot reaches; the screen is still black. The next blocker is Sequence::queueThread 0x2120ac (sequence/seqvm.cpp, queued first): native 110 case 1 and 30 queue G000's registered threads through it into m_start; it rebases entry by the image table bss 0x7b4850 minus m_base[id >> 30] and moves it to the nearest addiu sp within 4 words. Then GamSysData::getField 0x1dc48c (field 0xf = record short +0x46, the model id), GamMan::createObjByModel, addChr, setMurder (new member m_murderOid +0x21fd8), setLightFlag. Native 027 case 7 tests a3 against 0xffff instead of the model (ROM quirk kept). GamMan::empty1ca0d4 / empty1cd7c0 take no host arguments; the ROM passes (a1, 2 or 3) / a1. Script global indices used: m_global 0x5d (021 case 9), 0x2e (027 case 36 place), 0x62 (027 case 200 oid). Batch file work/batches/seqcall_002.json was overwritten by mistake this session (gitignored scratch; its names are in data/context_names.json); this session's batch is seqcall_004.json.",
    "ranges": [
     [
      "002053f4",
@@ -575,6 +576,11 @@
      "date": "2026-10-25 16:23",
      "status": "partial",
      "summary": "Script native functions: pinned sequence/seqcall.cpp 0x2053f4..0x20e3d8 (the 512-entry table data 0x2d90f8 the sequence VM calls), named 41 handlers seqFuncNNN and 37 callees, wrote the table, the empty and return-code entries, seqFunc000 (jump), seqFunc005 (rand) and the system call seqFunc018 0x20694c (menus incl. 8 / 0x16 the title menu 0x10005, items, stock, tasks, event scenes, fade key); seqSetLanguage / seqGetDataDir / seqMakeGlobalPath written in sequence/sequence.cpp (0x20e3d8..0x20ff34 pinned to it)"
+    },
+    {
+     "date": "2026-10-25 18:35",
+     "status": "partial",
+     "summary": "Script natives the boot reaches: seqFunc001 (new game state), 002 (default scene lights), 021 (GamMan state service, 32 cases), 027 (object service, 205 cases), 032 (string clamp), 033 (fades, volume, cine bars, fade tasks) and 110 (threads, entries, chr registrations); named 19 callees (GamMan createObjByName / createObjByModel / addChr / addVFchr / addChrGroup / changeObjModel / loadMapUnit / setMurder / setLightFlag ..., GamSysData::getField, Sequence::queueThread / callEntry / callEntryNow / endThread / endThreadOf)"
     }
    ],
    "status": "partial",

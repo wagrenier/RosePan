@@ -205,8 +205,21 @@ struct Sequence
      * words entry + 0x94..0xb0 (on the start list; exec moves it into
      * its image pool). */
     void startThread(u_int id, intptr_t entry);                          // ROR 0x00211e84
+    /* Queues a thread start in m_start: entry (an address in image id >>
+     * 30, moved to its addiu sp), arg, flags; callSave != 0 adds a call
+     * save slot (flag 0x80). */
+    void queueThread(u_int id, intptr_t entry, int arg, u_int flags, int callSave,
+                     const char *name);                                  // ROR 0x002120ac
     void freeStageEntries();                                             // ROR 0x002127f4
     void addEntry(u_int id, int value);                                  // ROR 0x00212920
+    /* addEntry's id: queueThread(id, its value, arg, 2, callSave, "none"). */
+    void callEntry(u_int id, int arg, int callSave);                     // ROR 0x002129b8
+    /* The same started at once (0x211830) with the VM state saved around it. */
+    void callEntryNow(u_int id, int arg, int callSave);                  // ROR 0x00212a5c
+    /* Copies the thread id / arg (findThread) into m_ended. */
+    void endThread(u_int id, int arg);                                   // ROR 0x00212d08
+    /* The same for the thread 0x213d90 finds by key. */
+    void endThreadOf(intptr_t key);                                      // ROR 0x00212e64
     /* Moves image idx's threads to the ended list, reaps them, and clears
      * the image and its registers. */
     void killThreads(int idx);                                           // ROR 0x00213450

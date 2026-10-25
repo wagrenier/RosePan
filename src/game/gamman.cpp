@@ -2359,3 +2359,87 @@ void GamMan::startStage2()
 {
     ROSEPAN_STUB("GamMan::startStage2", 0x001cd60c);
 }
+
+// stub of ROR 0x001cc250
+void GamMan::addChr(int model, u_int oid, int kind, const void *pos, int place)
+{
+    ROSEPAN_STUB("GamMan::addChr", 0x001cc250);
+}
+
+// stub of ROR 0x001cc560
+void GamMan::addChrGroup(int model, u_int oid, int a, int b, int c, int count, int d,
+                     int e, int kind, const void *pos, int place, float f)
+{
+    ROSEPAN_STUB("GamMan::addChrGroup", 0x001cc560);
+}
+
+// stub of ROR 0x001cc044
+void GamMan::addVFchr(int model, u_int oid, int arg, int kind, intptr_t pos)
+{
+    ROSEPAN_STUB("GamMan::addVFchr", 0x001cc044);
+}
+
+// stub of ROR 0x001cad88
+u_int GamMan::changeObjModel(u_int model, const char *name, u_int oid, int keepPos)
+{
+    ROSEPAN_STUB("GamMan::changeObjModel", 0x001cad88);
+    return {};
+}
+
+// stub of ROR 0x001ca8e8
+int GamMan::createObjByModel(int model, u_int oid, int kind, const void *pos,
+                          int place, int add)
+{
+    ROSEPAN_STUB("GamMan::createObjByModel", 0x001ca8e8);
+    return {};
+}
+
+// stub of ROR 0x001ca72c
+u_int GamMan::createObjByName(u_int kind, const char *name, int group, u_int oid,
+                          int kind2, const void *pos, int place)
+{
+    ROSEPAN_STUB("GamMan::createObjByName", 0x001ca72c);
+    return {};
+}
+
+// stub of ROR 0x001ca0dc
+void GamMan::loadMapUnit(const char *name, int id, int mode)
+{
+    ROSEPAN_STUB("GamMan::loadMapUnit", 0x001ca0dc);
+}
+
+// stub of ROR 0x001d2724
+void GamMan::setLightFlag(int which)
+{
+    ROSEPAN_STUB("GamMan::setLightFlag", 0x001d2724);
+}
+
+// stub of ROR 0x001cb424
+void GamMan::setMurder(int oid)
+{
+    ROSEPAN_STUB("GamMan::setMurder", 0x001cb424);
+}
+
+// stub of ROR 0x001d024c
+void GamMan::setObjDir(u_int oid, float dir)
+{
+    ROSEPAN_STUB("GamMan::setObjDir", 0x001d024c);
+}
+
+// stub of ROR 0x001c4f38
+void GamMan::setPcAnim(int anim)
+{
+    ROSEPAN_STUB("GamMan::setPcAnim", 0x001c4f38);
+}
+
+// stub of ROR 0x001c53e0
+void GamMan::setPcJnfc(int on)
+{
+    ROSEPAN_STUB("GamMan::setPcJnfc", 0x001c53e0);
+}
+
+// stub of ROR 0x001c6f08
+void GamMan::setSysParam(int which, const void *v)
+{
+    ROSEPAN_STUB("GamMan::setSysParam", 0x001c6f08);
+}

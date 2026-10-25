@@ -34,6 +34,7 @@
 // the Sequence thread methods startThread, execThread, waitFrames, jumpTo,
 // killThreads, the find / has helpers, the entry pool. Left: the other
 // thread starters and queries 0x211830..0x213e78, 0x214e98..0x215430.
+#include "common/rosepan_stub.h"
 
 #include <string.h>
 
@@ -1525,4 +1526,37 @@ intptr_t seqVmRun(intptr_t pc)
             g_seqBranch = 0;
         }
     }
+}
+
+// ---- stubs (tools/reverse/stubgen.py) ----
+
+// stub of ROR 0x002129b8
+void Sequence::callEntry(u_int id, int arg, int callSave)
+{
+    ROSEPAN_STUB("Sequence::callEntry", 0x002129b8);
+}
+
+// stub of ROR 0x00212a5c
+void Sequence::callEntryNow(u_int id, int arg, int callSave)
+{
+    ROSEPAN_STUB("Sequence::callEntryNow", 0x00212a5c);
+}
+
+// stub of ROR 0x00212d08
+void Sequence::endThread(u_int id, int arg)
+{
+    ROSEPAN_STUB("Sequence::endThread", 0x00212d08);
+}
+
+// stub of ROR 0x00212e64
+void Sequence::endThreadOf(intptr_t key)
+{
+    ROSEPAN_STUB("Sequence::endThreadOf", 0x00212e64);
+}
+
+// stub of ROR 0x002120ac
+void Sequence::queueThread(u_int id, intptr_t entry, int arg, u_int flags, int callSave,
+                     const char *name)
+{
+    ROSEPAN_STUB("Sequence::queueThread", 0x002120ac);
 }

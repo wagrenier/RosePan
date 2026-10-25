@@ -4313,6 +4313,12 @@
   "was": "FUN_001c4f30",
   "why": "jr ra only, before update; no callers found"
  },
+ "001c4f38": {
+  "name": "GamMan::setPcAnim",
+  "tag": "ror-inferred",
+  "was": "FUN_001c4f38",
+  "why": "MagSystem::setActorAnim(m_pcActor, anim, 1); native 027 case 20"
+ },
  "001c526c": {
   "name": "GamMan::update",
   "tag": "ror-inferred",
@@ -4324,6 +4330,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c53d8",
   "why": "empty; mainLoop calls it last each frame"
+ },
+ "001c53e0": {
+  "name": "GamMan::setPcJnfc",
+  "tag": "ror-inferred",
+  "was": "FUN_001c53e0",
+  "why": "stores m_pcJnfc (+0x21ff0, is_pc_jnfc) then MagSystem::setPC(m_pcActor); native 021 case 20"
  },
  "001c541c": {
   "name": "GamMan::setInuMode",
@@ -4390,6 +4402,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c6ccc",
   "why": "switch on which: copies one status word (+0x21f48, +0x21f60, +0x21f50 ...) to *out"
+ },
+ "001c6f08": {
+  "name": "GamMan::setSysParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001c6f08",
+  "why": "switch on which 0x11..0x1c copies *v into option / camera words (+0x21f8c.., 0x1b -> +0x21f54, 0x1c -> +0x4); native 021 case 9 passes 0x1b"
  },
  "001c6fe0": {
   "name": "GamMan::makeOid",
@@ -4529,6 +4547,30 @@
   "was": "FUN_001ca0d4",
   "why": "jr ra; seqFunc027 calls it"
  },
+ "001ca0dc": {
+  "name": "GamMan::loadMapUnit",
+  "tag": "ror-inferred",
+  "was": "FUN_001ca0dc",
+  "why": "reads data/bg/mapunit.bin, finds name (cut at a separator) in its pfh, loads that file into a heap block kept as m_keepBuf; skips when a loaded unit has the id; native 027 cases 12 / 13 pass mode 2 / 3"
+ },
+ "001ca72c": {
+  "name": "GamMan::createObjByName",
+  "tag": "ror-inferred",
+  "was": "FUN_001ca72c",
+  "why": "makes an oid when 0 (makeOid by kind >> 10), MagScene::loadModelByName(name), then addChr and the object params 0x1004 name / 0x1000 kind; returns the oid"
+ },
+ "001ca8e8": {
+  "name": "GamMan::createObjByModel",
+  "tag": "ror-inferred",
+  "was": "FUN_001ca8e8",
+  "why": "MagSystem::loadModel(model), binds it to oid, addChr when add != 0; returns the scene model number (-1 when oid already exists)"
+ },
+ "001cad88": {
+  "name": "GamMan::changeObjModel",
+  "tag": "ror-inferred",
+  "was": "FUN_001cad88",
+  "why": "for a live oid: releases the actor's model and loads model (or name) instead, optionally keeping the position; returns oid or 0"
+ },
  "001cb01c": {
   "name": "GamMan::releaseTenkyus",
   "tag": "ror-inferred",
@@ -4546,6 +4588,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001cb384",
   "why": "stores +0x21fd0, getDogPtr +0x22094, getDogChrNo +0x21fe8, MagSystem::setBwn"
+ },
+ "001cb424": {
+  "name": "GamMan::setMurder",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb424",
+  "why": "stores oid at +0x21fd8 and m_murderPtr (+0x22098, getMurderPtr) = getAchr(oid); the setPc / setDog sibling, native 021 case 4"
  },
  "001cb4f0": {
   "name": "GamMan::setPcParam",
@@ -4594,6 +4642,24 @@
   "tag": "ror-inferred",
   "was": "FUN_001cc004",
   "why": "zeroes the first word equal to oid among the 0x180 words at +0x1f24c"
+ },
+ "001cc044": {
+  "name": "GamMan::addVFchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001cc044",
+  "why": "unless isVFchr(oid): builds an FCHRstat (vtable 0x2e47f8) and links it into the vfchr list +0x1dcc0 (and +0x1ef00 when arg is m_21f7c); native 110 case 4"
+ },
+ "001cc250": {
+  "name": "GamMan::addChr",
+  "tag": "ror-inferred",
+  "was": "FUN_001cc250",
+  "why": "by oid list bits 28..29: 1 an ACHRstat (0x480, vtable 0x2e4810) in m_achr[] and m_achrList, 2 an FCHRstat (0x2c0) in m_fchr[]; pos optional; kind is the system data id"
+ },
+ "001cc560": {
+  "name": "GamMan::addChrGroup",
+  "tag": "ror-inferred",
+  "was": "FUN_001cc560",
+  "why": "count times: createObjByModel plus an ACHRstat registered with 0x7b2140 (0x162b68 / 0x162c2c); native 027 case 8 passes an 8-word block, its float word 7"
  },
  "001cc7c8": {
   "name": "GamMan::releaseFchr",
@@ -4667,6 +4733,12 @@
   "was": "FUN_001cfb38",
   "why": "+0x2227c = the handle MagScene::openSysMsgWindow returned"
  },
+ "001d024c": {
+  "name": "GamMan::setObjDir",
+  "tag": "ror-inferred",
+  "was": "FUN_001d024c",
+  "why": "(oid, float in f12) normalises the angle (0x273d70 / 0x274498) and sets oid's rotation; native 027 case 200 passes *t0"
+ },
  "001d046c": {
   "name": "GamMan::isObj",
   "tag": "ror-inferred",
@@ -4690,6 +4762,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d1c80",
   "why": "findFchrType9 reads param 0x41 of each type-9 fchr through it; not read yet"
+ },
+ "001d2724": {
+  "name": "GamMan::setLightFlag",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2724",
+  "why": "which 1 / 0 / 6 / 7 sets m_flags bit 0x4000000 / 0x2000000 / 0x8000000 / 0x10000000, then MagScene 0x13fb3c (the light code)"
  },
  "001d2aac": {
   "name": "GamMan::isAchr",
@@ -4870,6 +4948,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001dbfa0",
   "why": "the system data record of id: table (id >> 9) of the ten pointers, record id & 0x1ff (strides 0xa0, 0xa0, 0xc0, 0xe0, 0xc0, 0x200, 0xc0...); addItem stores it in the item slot"
+ },
+ "001dc48c": {
+  "name": "GamSysData::getField",
+  "tag": "ror-inferred",
+  "was": "FUN_001dc48c",
+  "why": "(id, field, out): switch on table id >> 9 then field; field 0xf the record's short +0x46 (a model id, 0xffff none)"
  },
  "001dcd38": {
   "name": "GamSysData::setFlags",
@@ -6251,6 +6335,12 @@
   "was": "FUN_00211e84",
   "why": "builds a 0xb0 thread record (id, pc = the first addiu sp of the entry, -1, 1) and appends it to the start list (+0x40) that exec moves into the image pools"
  },
+ "002120ac": {
+  "name": "Sequence::queueThread",
+  "tag": "ror-inferred",
+  "was": "FUN_002120ac",
+  "why": "builds a SeqThread (flags, id, entry rebased to the image and moved to its addiu sp, arg, name, wait -1) and appends it to m_start (+0x40); callSave != 0 sets flag 0x80 and seqVmAllocCallSave"
+ },
  "002127f4": {
   "name": "Sequence::freeStageEntries",
   "tag": "ror-inferred",
@@ -6262,6 +6352,30 @@
   "tag": "ror-inferred",
   "was": "FUN_00212920",
   "why": "pops a free node of the entry pool +0xc3c0 and appends {id, value} to its used list (seqFunc110)"
+ },
+ "002129b8": {
+  "name": "Sequence::callEntry",
+  "tag": "ror-inferred",
+  "was": "FUN_002129b8",
+  "why": "finds id in m_entries (addEntry's list) and queueThread(id, its value, arg, 2, callSave, none)"
+ },
+ "00212a5c": {
+  "name": "Sequence::callEntryNow",
+  "tag": "ror-inferred",
+  "was": "FUN_00212a5c",
+  "why": "as callEntry but saves the VM state, runs 0x211830 at once and restores it; native 110 case 15 returns SEQ_RET_RETURN after it"
+ },
+ "00212d08": {
+  "name": "Sequence::endThread",
+  "tag": "ror-inferred",
+  "was": "FUN_00212d08",
+  "why": "findThread(id, arg) then copies the thread into m_ended (+0x6200); native 110 case 99"
+ },
+ "00212e64": {
+  "name": "Sequence::endThreadOf",
+  "tag": "ror-inferred",
+  "was": "FUN_00212e64",
+  "why": "endThread's twin with the lookup 0x213d90 (by another key); native 110 case 31"
  },
  "00213448": {
   "name": "seqUnused213448",

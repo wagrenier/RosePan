@@ -63,6 +63,15 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      still nothing draws. The boot's next blockers are still the natives (seqFunc027 / 021 / 033 /
      110 / 001 / 002 / 032): queue sequence/seqcall.cpp ahead of more gamman. Open: GamItemSlot
      holds a host pointer (m_rec), so a save that copies the slots raw needs a converter.
+  4b. PARTIAL 2026-10-25 (session 2 of `sequence/seqcall.cpp`): the boot's natives 001, 002, 021,
+     027 (205-case object service, data 0x300700), 032, 033 (fades / volume / cine bars, data
+     0x300ac0) and 110 (data 0x300d20) are written. The smoke run gets through all of them; still
+     black. Reached next, in boot order: **`Sequence::queueThread` 0x2120ac** (sequence/seqvm.cpp,
+     queued first: native 110 case 1 / 30 -- G000's ~80 registrations -- queue threads through it,
+     so no registered thread starts until it is written; callEntry / callEntryNow / endThread /
+     endThreadOf 0x2129b8.. are its neighbours), then `GamSysData::getField` 0x1dc48c
+     (unassigned, after gamman), `GamMan::createObjByModel` / `addChr` / `setMurder` /
+     `setLightFlag` (game/gamman.cpp).
   5. `unassigned@001fd424` -- sysInitManagers 0x204148, SysTimer::start / update (reached stubs).
   6. `unassigned@001e46b8` -- CmnTaskMan::exec / addTask and 0x1f688c that GamMan::update calls (the
      per-frame task runner; 253 functions: only what the title path reaches).

@@ -13,7 +13,7 @@
 // same two instructions (return 0); one function stands for all of them.
 //
 // Written so far: the table, the empty and the return-code entries, 000,
-// 005 and the system call 018. The others are stubs (seqcall.h lists them).
+// 001, 002, 005, the system call 018, 021, 027, 032, 033 and 110. The others are stubs (seqcall.h lists them).
 
 #include "sequence/seqcall.h"
 
@@ -348,6 +348,381 @@ intptr_t seqFunc018(intptr_t id, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
     }
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// A new game's state: the script globals and GamMan's game state cleared.
+// ROR 0x0020541c
+
+intptr_t seqFunc001(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
+{
+    g_sequence.clearGlobals();
+    g_gamMan.initGameState();
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The default scene setup: every scene flag but the last on, the ambient
+// and the two lights of set 1 (grey 0.3, the direction {pi, 0, 0}), the
+// sky path display off and GamMan's light flag 1.
+// ROR 0x0020544c
+
+intptr_t seqFunc002(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
+{
+    static const float grey[4] = {0.3f, 0.3f, 0.3f, 1.0f};
+    static const float dir[4] = {3.1415925f, 0.0f, 0.0f, 1.0f};
+    MagScene &scene = g_magSystem.m_scene;
+
+    scene.m_22b4 = 0;
+    g_magSystem.setSceneFlags(1, 1, 1, 1, 1, 1, 0);
+    scene.setLightParam(0, 0, 2, grey, 0);
+    scene.setLightParam(1, 0, 1, dir, 0);
+    scene.setLightParam(1, 0, 2, grey, 0);
+    g_gamMan.setLightFlag(1);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// GamMan's state: a0 picks the service (a jump table, data 0x3005c0), a1
+// its argument. The script flag bits are g_sequence.m_bits.
+// ROR 0x0020810c
+
+intptr_t seqFunc021(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t)
+{
+    GamMan &gam = g_gamMan;
+    int     arg = (int)a1;
+
+    switch ((u_int)op)
+    {
+    case 1:
+        gam.resume((u_int)a1);
+        return 0;
+    case 2:     // the menu pause continues next frame
+        gam.pause((u_int)a1);
+        if ((u_int)a1 != 0x100000)
+            return 0;
+        return SEQ_RET_YIELD;
+    case 3:
+        gam.setDog(arg);
+        return 0;
+    case 4:
+        gam.setMurder(arg);
+        return 0;
+    case 5:
+    case 6:
+        gam.setPc(arg);
+        return 0;
+    case 7:
+        g_sequence.m_bits[(u_int)a1 >> 5] |= 1u << ((u_int)a1 & 0x1f);
+        return 0;
+    case 8:
+        g_sequence.m_bits[(u_int)a1 >> 5] &= ~(1u << ((u_int)a1 & 0x1f));
+        return 0;
+    case 9:
+        g_sequence.m_global[0x5d] = arg;
+        gam.setSysParam(0x1b, &arg);
+        return 0;
+    case 10:
+        return (gam.m_flags & (u_int)a1) != 0;
+    case 11:
+        return gam.m_chapter;
+    case 12:
+        gam.m_flags2 |= (u_int)a1;
+        return 0;
+    case 13:
+        gam.m_flags2 &= ~(u_int)a1;
+        return 0;
+    case 14:
+        return (gam.m_flags2 & (u_int)a1) != 0;
+    case 20:
+        gam.setPcJnfc(arg);
+        return 0;
+    case 21:
+        gam.m_21ff4 = arg;
+        gam.m_21ff8 = (int)a2;
+        gam.m_flags2 |= 0x10000000;
+        return 0;
+    case 30:
+        return gam.m_pcPtr ? gam.m_pcPtr->m_oid : 0;
+    case 31:
+        return gam.m_dogPtr ? gam.m_dogPtr->m_oid : 0;
+    default:    // 0, 15..19, 22..29
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Objects of the stage: a0 picks the service (data 0x300700, 205
+// entries, 14 with code), a1..t1 its arguments. Models come from the
+// system data record's field 0xf when it has one, else the object is
+// added without a model (-1).
+
+// Field 0xf of system data record id (inline in the ROM).
+static int seqModelOf(int id)
+{
+    u_short model[8];
+    g_gamMan.m_sysData.getField(id, 0xf, model);
+    return model[0];
+}
+
+// callcheck: getField (inline in the ROM: seqModelOf)
+// ROR 0x00208640
+intptr_t seqFunc027(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t t0, intptr_t t1)
+{
+    GamMan &gam = g_gamMan;
+    int     id = (int)(a1 & 0xffff);
+    int     model;
+
+    gamStage2Loaded();
+    switch ((u_int)op)
+    {
+    case 2:     // the ROM passes (a1, 2) to the empty function
+        gam.empty1ca0d4();
+        return 0;
+    case 3:
+        gam.createObjByModel(id, (u_int)a2, 0xffff, NULL, -1, 1);
+        return 0;
+    case 4:
+        model = seqModelOf(id);
+        if (model != 0xffff)
+            gam.createObjByModel(model, (u_int)a2, id, NULL, -1, 1);
+        else
+            gam.addChr(-1, (u_int)a2, id, NULL, 0);
+        return 0;
+    case 5:     // at position a3
+        model = seqModelOf(id);
+        if (model != 0xffff)
+            gam.createObjByModel(model, (u_int)a2, id, (const void *)a3, -1, 1);
+        else
+            gam.addChr(-1, (u_int)a2, id, (const void *)a3, 0);
+        return 0;
+    case 6:     // at position t0, place a3
+        model = seqModelOf(id);
+        if (model != 0xffff)
+            gam.createObjByModel(model, (u_int)a2, id, (const void *)t0, (int)a3, 1);
+        else
+            gam.addChr(-1, (u_int)a2, id, (const void *)t0, (int)a3);
+        return 0;
+    case 7:     // at position t1, place t0 (the ROM tests a3, not the model)
+        model = seqModelOf(id);
+        if ((int)a3 != 0xffff)
+            gam.createObjByModel(model, (u_int)a2, id, (const void *)t1, (int)t0, 1);
+        else
+            gam.addChr(-1, (u_int)a2, id, (const void *)t1, (int)t0);
+        return 0;
+    case 8:     // a group: t1 points to 8 words, word 7 an int made float
+    {
+        const int *w = (const int *)t1;
+        model = seqModelOf(id);
+        gam.addChrGroup(model, (u_int)a2, w[1], w[2], w[3], w[4], w[5], w[6], id,
+                        (const void *)t0, w[0], (float)w[7]);
+        return 0;
+    }
+    case 9:
+        gam.createObjByName((u_int)id, (const char *)a2, -1, (u_int)a3, 0xffff,
+                            (const void *)t0, -1);
+        return 0;
+    case 10:    // the ROM passes (a1, 3) to the empty function
+        gam.empty1ca0d4();
+        return 0;
+    case 12:
+        gam.loadMapUnit((const char *)a1, (int)a2, 2);
+        return 0;
+    case 13:
+        gam.loadMapUnit((const char *)a1, (int)a2, 3);
+        return 0;
+    case 14:
+        gam.changeObjModel((u_int)id, (const char *)a2, (u_int)a3, 1);
+        return 0;
+    case 15:
+        gam.changeObjModel((u_int)id, NULL, (u_int)a2, 1);
+        return 0;
+    case 20:
+        gam.setPcAnim((int)a1);
+        return 0;
+    case 35:
+        gam.createObjByName((u_int)(t1 & 0xffff), (const char *)a1, 9, (u_int)a3,
+                            (int)(a2 & 0xffff), NULL, -1);
+        return 0;
+    case 36:    // model of record a2, oid a3, at t0, place = script global 0x2e
+    {
+        int kind = (int)(a2 & 0xffff);
+        gam.createObjByModel(seqModelOf(kind), (u_int)a3, kind, (const void *)t0,
+                             g_sequence.m_global[0x2e], 1);
+        return 0;
+    }
+    case 50:
+        gam.createObjByModel(id, (u_int)a2, (int)(a3 & 0xffff), NULL, -1, 1);
+        return 0;
+    case 100:   // only while no BG load task runs
+        if (!g_taskMan.getTask(gam.m_bgLoadTaskId))
+            gam.empty1cd7c0();
+        return 0;
+    case 200:   // a new object; its oid to script global 0x62, its angle *t0
+    {
+        u_int oid = gam.createObjByName((u_int)id, (const char *)a2, (int)((u_int)a1 >> 10), 0,
+                                        0xffff, (const void *)a3, -1);
+        g_sequence.m_global[0x62] = (int)oid;
+        if (t0 != 0)
+            gam.setObjDir(oid, *(const float *)t0);
+        return 0;
+    }
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Terminates the script string a1 (op 10) that runs past 0x1fd chars.
+// ROR 0x00208dc4
+
+intptr_t seqFunc032(intptr_t op, intptr_t a1, intptr_t, intptr_t, intptr_t, intptr_t)
+{
+    // The ROM's a1 < 0x8000000 (an EE RAM address) is the host's non-null.
+    if (op != 10 || a1 == 0)
+        return 0;
+    char *p = (char *)a1;
+    char *c;
+    int   n = 0;
+    for (;;)
+    {
+        c = p;
+        if (*c == '\0')
+            break;
+        int more = n < 0x200;
+        n++;
+        p = c + 1;
+        if (!more)
+            break;
+    }
+    if (n > 0x1fd)
+    {
+        c[2] = '\0';
+        c[1] = '\0';
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Fades, the volume, the cinemascope bars and the fade tasks: a0 picks
+// (data 0x300ac0, 14 entries), a1 is the time or value.
+// callcheck: operator_new, TskFrameFunc, addTask (inline in the ROM: seqStartFrameTask)
+// ROR 0x00208e24
+
+intptr_t seqFunc033(intptr_t op, intptr_t a1, intptr_t, intptr_t, intptr_t, intptr_t)
+{
+    MagScene &scene = g_magSystem.m_scene;
+    int       state;
+    intptr_t  word;
+
+    switch ((u_int)op)
+    {
+    case 1:     // fade in unless one is running or done (states 0, 3, 5)
+        state = scene.getFadeState();
+        if (state == 3 || state == 5 || state == 0)
+            return 0;
+        scene.fadeIn((int)a1, 7, 0);
+        return 1;
+    case 2:     // fade out unless one is running or done (states 4, 6)
+        state = scene.getFadeState();
+        if (state == 4 || state == 6)
+            return 0;
+        scene.fadeOut((int)a1, 7, 0);
+        return 1;
+    case 3:
+        return scene.getFaderWord30() - 1;
+    case 4:
+        return (u_int)(scene.getFadeState() - 3) < 2;
+    case 5:     // a1 is an unsigned volume, halved
+        g_gamMan.setVolume((int)((float)(u_int)a1 * 0.5f));
+        return 0;
+    case 6:
+        scene.m_cine_sco.fadeIn((int)a1);
+        return 0;
+    case 7:
+        scene.m_cine_sco.fadeOut((int)a1);
+        return 0;
+    case 10:    // TskFrameFunc kinds 2..5 over the word a1
+    case 11:
+    case 12:
+    case 13:
+        word = a1;
+        seqStartFrameTask((int)op - 8, (intptr_t)&word, 0);
+        return 0;
+    default:    // 0, 8, 9
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Threads, entries and objects of the init scripts: a0 picks (data
+// 0x300d20, 100 entries, 13 with code). G000's main calls it ~80 times.
+// ROR 0x002099bc
+
+static float s_seqChrPos[3];    // data 0x2d9900: case 21's position
+
+intptr_t seqFunc110(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t, intptr_t)
+{
+    GamMan   &gam = g_gamMan;
+    Sequence &seq = g_sequence;
+
+    switch ((u_int)op)
+    {
+    case 1:     // a thread at a1 with id a2
+        seq.queueThread((u_int)a2, a1, 0, 0, 0, "none");
+        return 0;
+    case 2:
+        gam.addChr((int)a1, (u_int)a2, 0xffff, NULL, 0);
+        return 0;
+    case 3:
+        gam.addChr(-1, (u_int)a1, 0xc00, NULL, 0);
+        return 0;
+    case 4:     // a vfchr of record a1's model (a1 0xffff: none)
+    {
+        u_short model[8];
+        if ((int)a1 != 0xffff)
+            gam.m_sysData.getField((int)(a1 & 0xffff), 0xf, model);
+        else
+            model[0] = 0xffff;
+        gam.addVFchr(model[0], (u_int)a2, (int)a3, (int)(a1 & 0xffff), 0);
+        return 0;
+    }
+    case 11:
+        seq.addEntry((u_int)a2, (int)a1);
+        return 0;
+    case 13:
+        seq.callEntry((u_int)a1, 0, 0);
+        return SEQ_RET_YIELD;
+    case 14:
+        seq.callEntry((u_int)a1, 0, 1);
+        return SEQ_RET_YIELD;
+    case 15:
+        seq.callEntryNow((u_int)a1, 0, 1);
+        return SEQ_RET_RETURN;
+    case 20:
+        gam.addChr((int)a1, (u_int)a2, (int)(a3 & 0xffff), NULL, 0);
+        return 0;
+    case 21:    // an achr of kind 0x1200 at a copy of the position a2
+    {
+        const float *pos = (const float *)a2;
+        s_seqChrPos[0] = pos[0];
+        s_seqChrPos[1] = pos[1];
+        s_seqChrPos[2] = pos[2];
+        gam.addChr(-1, (u_int)a1, 0x1200, s_seqChrPos, 0);
+        return 0;
+    }
+    case 30:    // a named thread at a1 with id a2
+        seq.queueThread((u_int)a2, a1, 0, 0, 0, (const char *)a3);
+        return 0;
+    case 31:
+        seq.endThreadOf(a1);
+        return 0;
+    case 99:
+        seq.endThread((u_int)a2, 0);
+        return 0;
+    default:
+        return 0;
+    }
+}
+
 // The table (data 0x2d90f8).
 const SeqFunc g_seqFuncTable[SEQ_FUNC_COUNT] = {
     /*   0 */ seqFunc000, seqFunc001, seqFunc002, seqFunc003,
@@ -482,20 +857,6 @@ const SeqFunc g_seqFuncTable[SEQ_FUNC_COUNT] = {
 
 // ---- stubs (tools/reverse/stubgen.py) ----
 
-// stub of ROR 0x0020541c
-intptr_t seqFunc001(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc001", 0x0020541c);
-    return {};
-}
-
-// stub of ROR 0x0020544c
-intptr_t seqFunc002(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc002", 0x0020544c);
-    return {};
-}
-
 // stub of ROR 0x00205570
 intptr_t seqFunc004(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
@@ -559,13 +920,6 @@ intptr_t seqFunc020(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
     return {};
 }
 
-// stub of ROR 0x0020810c
-intptr_t seqFunc021(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc021", 0x0020810c);
-    return {};
-}
-
 // stub of ROR 0x0020839c
 intptr_t seqFunc023(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
@@ -580,13 +934,6 @@ intptr_t seqFunc026(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
     return {};
 }
 
-// stub of ROR 0x00208640
-intptr_t seqFunc027(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc027", 0x00208640);
-    return {};
-}
-
 // stub of ROR 0x00208b10
 intptr_t seqFunc028(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
@@ -598,20 +945,6 @@ intptr_t seqFunc028(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 intptr_t seqFunc029(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
     ROSEPAN_STUB("seqFunc029", 0x00208b98);
-    return {};
-}
-
-// stub of ROR 0x00208dc4
-intptr_t seqFunc032(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc032", 0x00208dc4);
-    return {};
-}
-
-// stub of ROR 0x00208e24
-intptr_t seqFunc033(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc033", 0x00208e24);
     return {};
 }
 
@@ -647,13 +980,6 @@ intptr_t seqFunc100(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 intptr_t seqFunc106(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
     ROSEPAN_STUB("seqFunc106", 0x002098e0);
-    return {};
-}
-
-// stub of ROR 0x002099bc
-intptr_t seqFunc110(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc110", 0x002099bc);
     return {};
 }
 
