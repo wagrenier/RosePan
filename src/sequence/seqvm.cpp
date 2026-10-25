@@ -94,7 +94,7 @@ static void seqVmRawStore(intptr_t addr, int value)
     memcpy((void *)addr, &value, sizeof(value));
 }
 
-static intptr_t seqVmLoadWord(intptr_t addr)
+intptr_t seqVmLoadWord(intptr_t addr)
 {
     int value = seqVmRawLoad(addr);
     if (!s_wideWords.empty()) {
@@ -105,7 +105,7 @@ static intptr_t seqVmLoadWord(intptr_t addr)
     return value;
 }
 
-static void seqVmStoreWord(intptr_t addr, intptr_t value)
+void seqVmStoreWord(intptr_t addr, intptr_t value)
 {
     seqVmRawStore(addr, (int)value);
     if (value != (intptr_t)(int)value)

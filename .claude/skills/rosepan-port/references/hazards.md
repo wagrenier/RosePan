@@ -162,6 +162,12 @@ entries are marked **RoR** with the date.
 
 ## Types and layouts
 
+- **A bss global with "no writer" may be a member of a global struct.** Symptom: loads of
+  `lui at, 0x7b; lw v, 0x2060(at)` everywhere, and a .text scan for stores with offset 0x2060 finds
+  none. Cause: the word is a member (Sequence +0xdc20 at 0x7a4440) stored through the struct's base
+  register (`sw v, -0x23e0(s0)` or similar). Fix: subtract the nearby globals' bases (address map,
+  bss table) from the address before calling it unwritten (2026-10-25: 0x7b2060 = g_sequence.m_bits).
+
 - **A forwarding wrapper's arity comes from its callers, not its body.** `MagSystem::setCameraMode`
   0x118880 only adds 0x12540 to a0 and jumps: it was declared with one argument, but GamMan passes
   mode, a camera number and a 3-word pointer through a1..a3. When a stub or a 2-line forwarder is

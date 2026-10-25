@@ -98,6 +98,8 @@ struct DogActor : DogModel
     void setId(int id) { m_id = id; }                                    // ROR 0x00280fd4
     int  getId() const { return m_id; }                                  // ROR 0x00280fdc
     int  getMode() const { return m_mode; }                              // ROR 0x00280fe4
+    /* m_mode != 0 (the actor is in a mode; GamMan::pause tests the dog's). */
+    bool isModeSet() const;                                              // ROR 0x0010a834
     // ROR 0x00280fec
     void ready()
     {

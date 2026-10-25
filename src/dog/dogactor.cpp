@@ -162,3 +162,10 @@ int DogActor::setMotion(float speed, int theID, u_int flags, int flags2, int p1d
     ROSEPAN_STUB("DogActor::setMotion", 0x0010af18);
     return {};
 }
+
+// stub of ROR 0x0010a834
+bool DogActor::isModeSet() const
+{
+    ROSEPAN_STUB("DogActor::isModeSet", 0x0010a834);
+    return {};
+}

@@ -329,7 +329,7 @@ struct MagScene
     /* The constructor's: clears the records at +0x853bc and sets their
      * defaults. */
     void initRecords853bc();                                             // ROR 0x00140a84
-    /* GamMan glue (g_gamMan and the words at *(0x7b2060) / *(0x7b205c)). */
+    /* GamMan glue (g_gamMan and g_sequence.m_bits / m_global, read via bss 0x7b2060 / 0x7b205c). */
     void gamEnterMenu();                                                 // ROR 0x0013f07c
     void gamLeaveMenu();                                                 // ROR 0x0013f09c
     int  canOpenItemMenu();                                              // ROR 0x0013f0c0

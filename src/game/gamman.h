@@ -30,12 +30,25 @@ struct GamArea
      * 1 sets bits, 2 ors, 3 clears, 4 tests, 5 tests and clears
      * 0x20000000 (with GamMan::pause(0x8000)). */
     int  ctl_trg_flg(int op, int id, u_int bits);                        // ROR 0x001e0c2c
+    /* afterSeqExec's stage change kind 3: the rects / triggers of kind. */
+    void stopKind(int kind);                                             // ROR 0x001dd7bc
+    void clearKind(int kind);                                            // ROR 0x001dddbc
 };
+
+struct DogActor;
+
+/* An object id (OID_STATE in the ELF's symbols): bits 28..29 the list
+ * (0 vfchr, 1 achr, 2 fchr), bits 23..27 the object type, bits 0..8 the
+ * slot. */
+static inline u_int gamOidList(u_int oid) { return oid >> 0x1c & 3; }
+static inline u_int gamOidType(u_int oid) { return oid >> 0x17 & 0x1f; }
+static inline u_int gamOidSlot(u_int oid) { return oid & 0x1ff; }
 
 /* A game object's state (class ObjStat, vtable 0x2e4828, vptr at +0x258;
  * ACHRstat / FCHRstat derive from it; its code is in unassigned@001d3b44).
  * The ELF's inlines read +0x100 (oid), +0x108 (the scene actor, -1 none),
- * +0x190 position, +0x1a0 rotation. layout: host -- no members. */
+ * +0x190 position, +0x1a0 rotation. save / load copy the 0xb0 bytes from
+ * +0x100. layout: host -- EE offsets in the comments. */
 struct ObjStat
 {
     /* The actor's position into +0x190 and out (x, y, z, w); moves the
@@ -43,10 +56,48 @@ struct ObjStat
     void updatePos(float *out);                                          // ROR 0x001d8f04
     /* The actor's rotation (or +0x1a0 without one) into out[0..2]. */
     void getRot(float *out);                                             // ROR 0x001d8964
+    /* The actor's position into +0x190; a new secta cell when it left
+     * the current one's bounds. */
+    void syncActorPos();                                                 // ROR 0x001d8dc4
+    /* The secta cell of +0x190 from scratch. */
+    void findSecta();                                                    // ROR 0x001d8ea8
+    /* Hides (hide) / shows the actor through its setHide; with bit 0x40
+     * of m_flags showing re-finds the secta cell, hiding re-links it. */
+    void setHide(int hide);                                              // ROR 0x001d95c4
     /* Refreshes position and rotation, then copies +0x100..+0x1a0 to out. */
     int  save(void *out);                                                // ROR 0x001d96ec
+    /* save's inverse: the 0xb0 bytes back to +0x100, the secta words
+     * cleared. Returns 0xb0. */
+    int  load(const void *in);                                           // ROR 0x001d9830
+    /* Clears the secta words (+0x10c too when all), then 0x1da07c. */
+    void clearSecta(int all);                                            // ROR 0x001d9f10
     /* +0x100, the object id (the ELF's inline). */
-    int  getOID() const;                                                 // ROR 0x0028f92c
+    // ROR 0x0028f92c
+    int  getOID() const { return (int)m_oid; }
+
+    u_int m_oid;                // ROR 0x100
+    int   m_actor;              // ROR 0x108: the scene actor number, -1 none
+    u_int m_flags;              // ROR 0x120: 1 hidden, 0x40 off the secta, 0x10000 the PC / dog, 0x200000, 0x10000000
+    int   m_link;               // ROR 0x254: the oid of an object shown with this one, -1 none
+};
+
+/* An actor character (vtable 0x2e4810, EE 0x480 bytes, built by
+ * 0x1cc250). layout: host. */
+struct ACHRstat : ObjStat
+{
+    /* Pauses (on) / resumes its tasks: +0x3d4, +0x3e0, +0x3d8 and, with
+     * all, +0x3dc. */
+    void pauseTasks(int on, int all);                                    // ROR 0x001da130
+
+    int   m_task[4];            // ROR 0x3d4: task ids, -1 none
+    int   m_taskId;             // ROR 0x3e8: resetObj kills it
+};
+
+/* A field character (vtable 0x2e47f8, EE 0x2c0 bytes). layout: host. */
+struct FCHRstat : ObjStat
+{
+    /* ObjStat::getRot's twin: the actor's rotation or +0x1a0. */
+    void getRot(float *out);                                             // ROR 0x001db774
 };
 
 /* The system pack's file 0 (GamMan +0x22220; class name invented): ten
@@ -80,6 +131,73 @@ struct GamItemHave
     GamItemSlot  m_slot[12];    // ROR 0x40
 };
 
+/* One record of the object table (EE 0x50; file data). ctlObjParam's ops
+ * name the words they touch. */
+struct GamObjRec
+{
+    u_int    m_oid;             // ROR 0x00
+    u_int    m_flags;           // ROR 0x04: ops 0 set / 1 clear / 2 test / 0x11 store; 0x8000 cleared on a stage reset
+    int      m_08;              // ROR 0x08: ops 9 / 10 / 15
+    int      m_0c;              // ROR 0x0c: ops 4 / 5
+    float    m_10[4];           // ROR 0x10: ops 8 / 14
+    float    m_20;              // ROR 0x20: op 13
+    int      _24;
+    int      m_28;              // ROR 0x28: ops 6 / 12; op 16 compares it with GamMan +0x21f7c
+    int      m_2c;              // ROR 0x2c: ops 7 / 12
+    float    m_30[4];           // ROR 0x30: op 11 (a4 == 0), op 16
+    float    m_40[4];           // ROR 0x40: op 11 (a4 != 0), op 16
+};
+static_assert(sizeof(GamObjRec) == 0x50, "GamObjRec");
+static_assert(offsetof(GamObjRec, m_flags) == 0x04, "m_flags");
+static_assert(offsetof(GamObjRec, m_08) == 0x08, "m_08");
+static_assert(offsetof(GamObjRec, m_0c) == 0x0c, "m_0c");
+static_assert(offsetof(GamObjRec, m_10) == 0x10, "m_10");
+static_assert(offsetof(GamObjRec, m_20) == 0x20, "m_20");
+static_assert(offsetof(GamObjRec, m_28) == 0x28, "m_28");
+static_assert(offsetof(GamObjRec, m_2c) == 0x2c, "m_2c");
+static_assert(offsetof(GamObjRec, m_30) == 0x30, "m_30");
+static_assert(offsetof(GamObjRec, m_40) == 0x40, "m_40");
+
+/* One record of the list at +0x18bc0 (0x600 bytes, ended by oid 0; EE
+ * 6): onStageSeqEnd puts each word back into the oid's table record
+ * (ctlObjParam ops 0x11 / 4). */
+struct GamObjReset
+{
+    short    m_oid;             // ROR 0x0
+    u_short  m_flags;           // ROR 0x2: to GamObjRec::m_flags
+    u_short  m_0c;              // ROR 0x4: to GamObjRec::m_0c
+};
+static_assert(sizeof(GamObjReset) == 6, "GamObjReset");
+static_assert(offsetof(GamObjReset, m_0c) == 4, "m_0c");
+
+/* ctlObjParam op 16's answer (EE 0x20): the record's field character. */
+struct GamObjInfo
+{
+    u_int    m_oid;             // ROR 0x00: the FCHRstat's oid
+    float    m_rotY;            // ROR 0x04: its rotation's y
+    float    m_pos[3];          // ROR 0x08: the record's m_30 or m_40 (x, y, z)
+    int      m_alt;             // ROR 0x14: 1 when m_28 != GamMan +0x21f7c (m_40 picked)
+    u_int    m_flags;           // ROR 0x18: the record's m_flags & 0xf8
+    int      _1c;               // ROR 0x1c: stack garbage in the ROM
+};
+static_assert(sizeof(GamObjInfo) == 0x20, "GamObjInfo");
+static_assert(offsetof(GamObjInfo, m_pos) == 0x08, "m_pos");
+static_assert(offsetof(GamObjInfo, m_alt) == 0x14, "m_alt");
+static_assert(offsetof(GamObjInfo, m_flags) == 0x18, "m_flags");
+
+/* A script image GamMan keeps (system call 0x14; file data in the stage
+ * image): width and height bytes, the pixels before it (16-aligned), a
+ * word at +0xc that setImage points at them. */
+struct GamImage
+{
+    u_char   m_w;               // ROR 0x0
+    u_char   m_h;               // ROR 0x1
+    u_char   _2[10];
+    u_int    m_pixels;          // ROR 0xc: the pixels' address (PC: through the VM's word store)
+};
+static_assert(sizeof(GamImage) == 0x10, "GamImage");
+static_assert(offsetof(GamImage, m_pixels) == 0xc, "m_pixels");
+
 /* The stage's object table (W000.WRD file 1, +0x18bcc; EE 0x5020): a
  * 0x20-byte header with the count at +8, then 0x50-byte records. */
 struct GamObjTable
@@ -89,7 +207,7 @@ struct GamObjTable
     u_short  _a;
     int      _c[4];
     int      m_version;         // ROR 0x1c: 1 = the current record size (0x50), else 0x30
-    u_char   m_rec[0x100][0x50];// ROR 0x20
+    GamObjRec m_rec[0x100];     // ROR 0x20
 };
 static_assert(offsetof(GamObjTable, m_num) == 0x08, "m_num");
 static_assert(offsetof(GamObjTable, m_version) == 0x1c, "m_version");
@@ -146,15 +264,38 @@ struct GamMan
      * image's main thread) / 0x84000000 (image 2's) ends. */
     void onStageSeqEnd();                                                // ROR 0x001c4168
     void onSubSeqEnd();                                                  // ROR 0x001c43f0
+    /* Stage change kind 2's second half (stage 2 data). */
+    void initStage2();                                                   // ROR 0x001c47c4
     void empty1c4f30();                                                  // ROR 0x001c4f30
     void update();                                                       // ROR 0x001c526c
     void postUpdate();                                                   // ROR 0x001c53d8
+    /* The dog's mode (getInuMode): 1 follows the PC (shown, Brown's
+     * controller on), 2 hidden and away (bitset word 1 bits 2 / 4 clear),
+     * 3 hidden, 4 shown but held. */
+    void setInuMode(int mode);                                           // ROR 0x001c541c
+    /* Returns 0; the pause / resume pair calls it with 1 / 0. */
+    int  empty1c58b8(int on);                                            // ROR 0x001c58b8
+    /* Pauses (1) / resumes (0) the type-2 actor characters' tasks and
+     * the tasks of kinds 0x13 / 0x14 and EmyManager's; flags2 bit 0x10000
+     * holds the state. Returns 0 when nothing changes. */
+    int  pauseAchr(int on);                                              // ROR 0x001c58c0
     /* Stops the stage sound and the tasks before a menu opens; kind 1 / 2
      * also sets Sequence flag 1. */
     void enterMenu(int kind);                                            // ROR 0x001c5bf4
+    /* pause(0x100000)'s part: flags2 bit 4, pause(2), enterMenu for the
+     * menu ids (0x10000.. item / map, 0x1000a the ehon). */
+    void pauseForMenu(int menu);                                         // ROR 0x001c5e1c
+    /* resume(0x100000)'s part: hides S2dMes sprite 2 after the ehon,
+     * flags2 bit 8. */
+    void resumeFromMenu(int arg);                                        // ROR 0x001c5f70
     /* Halts / restarts parts of the game by mask (0x100000 before the
      * menus; resume(4) once the PC's motion is over). */
     void resume(u_int mask);                                             // ROR 0x001c65e8
+    /* Shows the actor of the object linked to the achr oid (+0x254) and,
+     * for type 0, EmyManager's two objects. */
+    void showLinked(u_int oid);                                          // ROR 0x001c687c
+    /* EmyManager's two object ids into +0x22004 / +0x22008. */
+    void getEmyOids();                                                   // ROR 0x001c6a04
     void pause(u_int mask);                                              // ROR 0x001c6a40
     /* Copies one status word (which = 1.., see the switch) to *out. */
     void getStatus(int which, void *out);                                // ROR 0x001c6ccc
@@ -175,22 +316,86 @@ struct GamMan
     int  canAddItem(int arg, short id);                                  // ROR 0x001c8ca4
     int  addStock(short id, int count);                                  // ROR 0x001c8f7c
     int  delStock(short id, int one);                                    // ROR 0x001c94d8
+    /* 1 when the fchr of oid (types 4 / 5) can be talked to: shown, not
+     * held (0x200000), and 0x10 or both 8 and 2 in its flags. */
+    int  isFchrActive(u_int oid);                                        // ROR 0x001c96c8
+    /* The item the PC's find cursor targets (0xa00 none) to the scene. */
+    void setFindTargetItem(short id);                                    // ROR 0x001c9784
     /* Empty in the US build (before the map menu). */
     void beforeMapMenu();                                                // ROR 0x001c98b8
+    /* The object table record of oid: op 0..0x13 sets / reads one of its
+     * words through data (see GamObjRec); -1 when oid has no record or
+     * for the read ops that return nothing, 0 or a test result else. */
+    int  ctlObjParam(u_int oid, u_int op, void *data, int alt);          // ROR 0x001c9920
     /* The options: 0 brightness, 1 master volume, 2 stream volume, 3 SE
      * volume (levels 0..8), 4 / 5 read 2 / 3 into *(int *)arg, 6 the
      * sound output mode, 7 vibration. Returns -1. */
     int  setOption(u_int no, intptr_t arg);                              // ROR 0x001c9c1c
+    /* Releases the stage's sky domes (the +0x1d240 records) of kind. */
+    void releaseTenkyus(int kind);                                       // ROR 0x001cb01c
+    /* The PC becomes the achr oid (-1: none to the scene): m_pcPtr, its
+     * actor, the camera. */
+    void setPc(int oid);                                                 // ROR 0x001cb24c
+    /* The dog becomes the achr oid (-1: hides the dog). */
+    void setDog(int oid);                                                // ROR 0x001cb384
+    void ctlObj1cb8e4(u_int oid, int a, int b);                          // ROR 0x001cb8e4
+    void ctlObj1cbb80(u_int oid);                                        // ROR 0x001cbb80
+    /* Frees the +0x20b00 records of kind (after 0x17762c). */
+    void clearPool20b00(int kind);                                       // ROR 0x001cbd0c
+    /* The scene actor of oid, NULL without one. */
+    DogActor *getActor(u_int oid);                                       // ROR 0x001cbdb8
     /* Keeps a script image {w, h, ...} in slot. */
     void setImage(int slot, u_char *image);                              // ROR 0x001cbdfc
+    /* The scene actor number of oid, -1 without one. */
+    int  getActorNo(u_int oid);                                          // ROR 0x001cbe38
     void releaseChr(int arg);                                            // ROR 0x001ccc30
+    /* Stage change kind 2's first half. */
+    void releaseStage2();                                                // ROR 0x001cd224
+    void releaseObjs(int kind, int arg);                                 // ROR 0x001cdf5c
     /* Sequence::exec's last call: the stage-change requests in flags2. */
     void afterSeqExec();                                                 // ROR 0x001cd25c
     void storePcTransform();                                             // ROR 0x001cd404
+    void startStage2();                                                  // ROR 0x001cd60c
+    /* The requested stage change by m_cur_stat (1 loadStage, 2 the stage-2
+     * data, 3 nothing yet), then the sequence globals [1..4] and resume(2). */
+    void execStageReq();                                                 // ROR 0x001cd7c8
+    /* Stage change kind 5: the menus, the PC, the objects, the sounds
+     * and the sequence images of the stage dropped. */
+    void resetStage();                                                   // ROR 0x001cdbf0
     void setSysMsgHandle(int handle);                                    // ROR 0x001cfb38
-    void resetObj(int oid, int arg);                                     // ROR 0x001d1410
+    /* 1 when oid names a live object of its list. */
+    int  isObj(u_int oid);                                               // ROR 0x001d046c
+    /* Clears bits of the object's flags; bits 0x40 / 0x10000000 / 1 / 0x10
+     * also re-link, re-place, show and ... it. Returns 0 for no object. */
+    int  resetObj(u_int oid, u_int bits);                                // ROR 0x001d1410
     /* MagScene's open menu id != -1. */
     int  isMenuOpen();                                                   // ROR 0x001d1a48
+    int  isAchr(u_int oid);                                              // ROR 0x001d2aac
+    int  isFchr(u_int oid);                                              // ROR 0x001d2adc
+    int  isVFchr(u_int oid);                                             // ROR 0x001d2b10
+    ACHRstat *getAchr(u_int oid);                                        // ROR 0x001d2b8c
+    /* Type 5 looks in the vfchr list first. */
+    FCHRstat *getFchr(u_int oid);                                        // ROR 0x001d2ba8
+    /* The type-9 fchr whose param 0x41 is no, NULL none. */
+    FCHRstat *findFchrType9(int no);                                     // ROR 0x001d2c0c
+    FCHRstat *getVFchr(u_int oid);                                       // ROR 0x001d2d00
+    /* The ELF's inline: the object of oid in its list. */
+    // ROR 0x0028f7e4
+    ObjStat *find(u_int oid)
+    {
+        switch (gamOidList(oid))
+        {
+        case 1:  return getAchr(oid);
+        case 0:  return getVFchr(oid);
+        case 2:  return getFchr(oid);
+        default: return NULL;
+        }
+    }
+    /* An object's param by which (0x41 the type-9 number ...). */
+    void getObjParam(u_int oid, int which, void *out);                   // ROR 0x001d1c80
+    /* In unassigned@001d3b44 (GamMan methods past switchVolume). */
+    void relinkObj(u_int oid);                                           // ROR 0x001d5da0
+    void placeAchr(int oid, void *out, int arg);                         // ROR 0x001d544c
     void markReset();                                                    // ROR 0x001d3588
     /* 0: saves the volume in m_saved_volume and silences; 1: restores
      * the saved volume (when one is saved) and marks none saved. */
@@ -213,7 +418,7 @@ struct GamMan
     void        *m_18bc0;           // ROR 0x18bc0: 0x600 bytes (init)
     void        *m_18bc4;           // ROR 0x18bc4: 0xc00 bytes (init)
     GamObjTable *m_objTable;        // ROR 0x18bcc: W000.WRD file 1
-    u_char      *m_objRec;          // ROR 0x18bd0: m_objTable + 0x20, its records
+    GamObjRec   *m_objRec;          // ROR 0x18bd0: m_objTable + 0x20, its records
     int          m_18dc4;           // ROR 0x18dc4
     int          m_18dc8;           // ROR 0x18dc8
     GamSndMan    m_sndMan;          // ROR 0x18e00 (bss 0x79a0c0): the sound table
@@ -224,9 +429,9 @@ struct GamMan
     int          m_1d200;           // ROR 0x1d200
     SeqFixedPool<GamRec16, 4>      m_pool1d240; // ROR 0x1d240
     int          m_mapModelNo;      // ROR 0x1d300: the scene sky slot (no < MAX_MAP_MODEL)
-    SeqFixedPool<GamRec4, 0x80>    m_achrList;  // ROR 0x1d340: getAchrListPtr
-    SeqFixedPool<GamRec4, 0x40>    m_fchrList;  // ROR 0x1d980: getFchrListPtr
-    SeqFixedPool<GamRec4, 0x180>   m_vfchrList; // ROR 0x1dcc0: getVFchrListPtr
+    SeqFixedPool<ACHRstat *, 0x80> m_achrList;  // ROR 0x1d340: getAchrListPtr
+    SeqFixedPool<FCHRstat *, 0x40> m_fchrList;  // ROR 0x1d980: getFchrListPtr
+    SeqFixedPool<FCHRstat *, 0x180> m_vfchrList;// ROR 0x1dcc0: getVFchrListPtr (getVFchr's objects)
     SeqFixedPool<GamRec4, 0x40>    m_avfchrList;// ROR 0x1ef00: getAVFchrListPtr
     u_char      *m_1f240;           // ROR 0x1f240: 0x5a4 bytes, zeroed by init
     int          m_1f244;           // ROR 0x1f244
@@ -235,6 +440,8 @@ struct GamMan
     SeqFixedPool<GamRec12, 0x80>   m_pool1f880; // ROR 0x1f880
     SeqFixedPool<GamRec8, 0x80>    m_pool202c0; // ROR 0x202c0
     SeqFixedPool<GamRec8, 0x80>    m_pool20b00; // ROR 0x20b00
+    ACHRstat    *m_achr[0x80];      // ROR 0x21340: by oid slot (set_achr)
+    FCHRstat    *m_fchr[0x280];     // ROR 0x21540: by oid slot (slots 1..0x27f)
     int          m_cur_stat;        // ROR 0x21f40: getCurStat; 0 system data, 1 a stage loading
     u_int        m_flags;           // ROR 0x21f48: getSysFlg; 1 one second passed (isOneSec), 0x400 setExistMenu, 0x40000 the reset frame
     u_int        m_flags2;          // ROR 0x21f4c: chkSysFlg2; 0x2000 / 0x4000 read by system call 0x22
@@ -245,6 +452,10 @@ struct GamMan
     int          m_21f70;           // ROR 0x21f70: setCameraMode's third word
     u_int        m_21f74;           // ROR 0x21f74: the map camera mode 4 set last, -1 none
     u_int        m_21f78;           // ROR 0x21f78
+    int          m_21f7c;           // ROR 0x21f7c: to sequence global [1] on a stage change; -1 after resetStage
+    int          m_21f80;           // ROR 0x21f80: ... global [2] (-1 for change kind 2)
+    int          m_21f84;           // ROR 0x21f84: ... global [3]
+    int          m_21f88;           // ROR 0x21f88: ... global [4]
     int          m_optOutput;       // ROR 0x21f8c: option 6
     int          m_optVibration;    // ROR 0x21f90: option 7
     int          m_21f94;           // ROR 0x21f94
@@ -258,15 +469,15 @@ struct GamMan
     int          m_21fd0;           // ROR 0x21fd0: ... for the dog
     int          m_inuMode;         // ROR 0x21fd4: getInuMode
     int          m_pcActor;         // ROR 0x21fdc: getPcChrNo, the PC's actor number in the scene
-    int          m_21fe0;           // ROR 0x21fe0
+    DogActor    *m_pcActorPtr;      // ROR 0x21fe0: the PC's scene actor (setPc)
     int          m_pcMotion;        // ROR 0x21fe4: get_pc_last_mot, the motion system call 0x2a waits on
     int          m_dogChrNo;        // ROR 0x21fe8: getDogChrNo
     int          m_murderChrNo;     // ROR 0x21fec: getMurderChrNo
     int          m_pcJnfc;          // ROR 0x21ff0: is_pc_jnfc
     int          m_21ff4;           // ROR 0x21ff4
     int          m_21ff8;           // ROR 0x21ff8
-    int          m_22004;           // ROR 0x22004
-    int          m_22008;           // ROR 0x22008
+    int          m_22004;           // ROR 0x22004: EmyManager's object id (getEmyOids)
+    int          m_22008;           // ROR 0x22008: ... its second
     int          m_pcEquipItemChrID;// ROR 0x2200c: getPcEquipItemChrID
     int          m_inuTask;         // ROR 0x22010: get_inu_task
     float        m_pcPos[4];        // ROR 0x22020: getPcPos
@@ -283,6 +494,7 @@ struct GamMan
     short        m_findTargetItem;  // ROR 0x2220e: getFindTargetItem
     int          m_saved_volume;    // ROR 0x22214: chkNoise; -1 = none saved (SprMan::volumeOn / Off read it)
     int          m_volume;          // ROR 0x22218: setVolume's last volume (0x80 after init)
+    int          m_stageReq;        // ROR 0x2221c: afterSeqExec's change kind (3 the stage-2 images, 5 a full reset)
     GamSysData   m_sysData;         // ROR 0x22220: the system pack's file 0
     int          m_sysMsgHandle;    // ROR 0x2227c: getSysMsgHND
     int          m_22280[7];        // ROR 0x22280: 10, 10, 0xffff, 0x100, 0x100, 0, 0 (initGameState)
@@ -296,7 +508,7 @@ struct GamMan
     int          m_bgLoadTaskId;    // ROR 0x222bc: getBGLoadTaskID
     int          m_itemUseTaskId;   // ROR 0x222c0: getItemUseTaskID
     SeqPair      m_seqPair[4];      // ROR 0x222c4: system calls 0x35, 0x32, 0x33, 0x34
-    u_char       m_222e4[0x80];     // ROR 0x222e4
+    GamImage    *m_image[0x20];     // ROR 0x222e4: setImage's slots (system call 0x14)
     intptr_t     m_seqWord;         // ROR 0x22364: setEmyParam; system call 0x15 stores its a1
     char         m_2236c[4][0x40];  // ROR 0x2236c: four strings, emptied by initGameState
     SeqFixedPool<GamRec16, 0x100> *m_pool2246c; // ROR 0x2246c: init's new (0x1840 bytes)
@@ -318,10 +530,24 @@ extern GamMan g_gamMan;         /* bss 0x7812c0 */
 /* Outside GamMan (files not yet defined). */
 void gamClearFrameReq(void);                                             // ROR 0x001f688c
 void gamSystemDataLoaded(void);                                          // ROR 0x001f8fb8
+/* execStageReq's last call for change kind 2. */
+void gamStage2Loaded(void);                                              // ROR 0x001fbbd0
 extern int    g_bss_780d04;     /* bss 0x780d04: option 0's brightness word (32..176) */
-/* bss 0x7b2060: a pointer to the debug / start flag words GamMan,
- * MagScene and the menus test (+0 0x8000, +4 bits 25 / 26, +8 0x8000). No
- * code stores it (scanned 2026-10-25): see open-items. */
-extern u_int *g_bss_7b2060;
+/* The words GamMan, MagScene and the menus read through bss 0x7b2060 /
+ * 0x7b205c are g_sequence.m_bits / m_global (Sequence +0xdc20 / +0xdc1c,
+ * stored by Sequence::init): the script's flag bitset and globals. */
+
+/* ---- outside this file (unassigned@00143d3c: MagScene's Brown glue;
+ * unassigned@001e6cac: the chr task helpers) ---- */
+/* Brown's controller mode: 0 when on, 2 when off. */
+void gamSetBwnFollow(int on);                                            // ROR 0x00144334
+/* The find-target item to Brown's controller (0 none). */
+void gamSetBwnItem(int item);                                            // ROR 0x00144500
+/* Brown's controller mode: 1 when on, 0 when off. */
+void gamSetBwnWait(int on);                                              // ROR 0x0014457c
+/* Changes the motion of oid's actor (an achr through a task in its slot
+ * +0x3dc); rotY >= 32769 keeps the current rotation. */
+void *chrChangeMotion(u_int oid, int motion, int a2, int a3, float blend,
+                      float rotY);                                        // ROR 0x001f5e48
 
 #endif /* _GAME_GAMMAN_H */

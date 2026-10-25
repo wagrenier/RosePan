@@ -279,6 +279,12 @@ extern SeqNode<SeqThread> *g_seqThreadEnd;  /* bss 0x7b4650: its list's end */
 extern u_int    g_seqFpr[32];               /* bss 0x7b4680: the FPU registers (float bits) */
 extern intptr_t g_seqGpr[32];               /* bss 0x7b4700: the registers (gp 28, sp 29, ra 31) */
 extern intptr_t g_seqPc;                    /* bss 0x7b4780: the word being run */
+
+/* PC: a 32-bit word of script memory that may hold a host pointer (the
+ * wide-word map of seqvm.cpp; open-items "Decisions"). Game code that
+ * stores an address into script data goes through these. */
+intptr_t seqVmLoadWord(intptr_t addr);
+void     seqVmStoreWord(intptr_t addr, intptr_t value);
 extern int      g_seqHi;                    /* bss 0x7b4790 */
 extern int      g_seqLo;                    /* bss 0x7b47a0 */
 /* A taken jump: an image offset + 0x8160, a native call below 0x8160, or
