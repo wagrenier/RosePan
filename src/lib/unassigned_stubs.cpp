@@ -40,6 +40,14 @@ int g_emyManagerTaskId;         /* bss 0x7b45c0 */
 int g_bss_7a3d48;               /* bss 0x7a3d48 */
 int g_bss_7a3d4c;               /* bss 0x7a3d4c */
 int g_bss_7812ac;               /* bss 0x7812ac */
+int g_bss_780d04;               /* bss 0x780d04: GamMan option 0 (brightness) */
+
+// PC: no ROM code stores the pointer at bss 0x7b2060 (a full .text scan,
+// 2026-10-25); GamMan::loadStage, MagScene and the menus dereference it.
+// Until its writer turns up (a script native or a static initializer), it
+// points at zeroed words: every flag clear.
+static u_int s_bss_7b2060_words[0x10];
+u_int *g_bss_7b2060 = s_bss_7b2060_words;   /* bss 0x7b2060 */
 
 const char *g_versionNumber = "1.01";   /* data 0x2d9e18 -> 0x301720 */
 
@@ -736,3 +744,71 @@ int GamArea::ctl_trg_flg(int op, int id, u_int bits)
     return {};
 }
 
+
+// stub of ROR 0x001dd414
+void GamArea::init()
+{
+    ROSEPAN_STUB("GamArea::init", 0x001dd414);
+}
+
+// stub of ROR 0x001dee78
+void GamArea::update(const float *pos, const float *rot)
+{
+    ROSEPAN_STUB("GamArea::update", 0x001dee78);
+}
+
+// stub of ROR 0x001dbef8
+void GamSysData::set(const u_char *data)
+{
+    ROSEPAN_STUB("GamSysData::set", 0x001dbef8);
+}
+
+// stub of ROR 0x00130de0
+void MagLife130da4::setVolume(int volume)
+{
+    ROSEPAN_STUB("MagLife130da4::setVolume", 0x00130de0);
+}
+
+// stub of ROR 0x0028f92c
+int ObjStat::getOID() const
+{
+    ROSEPAN_STUB("ObjStat::getOID", 0x0028f92c);
+    return {};
+}
+
+// stub of ROR 0x001d8964
+void ObjStat::getRot(float *out)
+{
+    ROSEPAN_STUB("ObjStat::getRot", 0x001d8964);
+}
+
+// stub of ROR 0x001d96ec
+int ObjStat::save(void *out)
+{
+    ROSEPAN_STUB("ObjStat::save", 0x001d96ec);
+    return {};
+}
+
+// stub of ROR 0x001d8f04
+void ObjStat::updatePos(float *out)
+{
+    ROSEPAN_STUB("ObjStat::updatePos", 0x001d8f04);
+}
+
+// stub of ROR 0x0017e5c0
+void WrdTable::load(int stage)
+{
+    ROSEPAN_STUB("WrdTable::load", 0x0017e5c0);
+}
+
+// stub of ROR 0x001f688c
+void gamClearFrameReq(void)
+{
+    ROSEPAN_STUB("gamClearFrameReq", 0x001f688c);
+}
+
+// stub of ROR 0x001f8fb8
+void gamSystemDataLoaded(void)
+{
+    ROSEPAN_STUB("gamSystemDataLoaded", 0x001f8fb8);
+}

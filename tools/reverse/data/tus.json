@@ -114,6 +114,24 @@
    "status": "verify",
    "why": "FileReader / FileReadReq methods, fileGetSize / fileExists, the rxFileCd clock wrappers and two clock helpers that follow them; bounded by the language-select menu code (mnusllg.rpk, SprMan calls) below and GamFont::GamFont above. No source string: game/ by link order (GamFont, then GamMan), gamfile after RoR's gam* names -- a guess"
   },
+  "game/gamman.cpp": {
+   "notes": "Smoke run: the system pack and W099 load, G000 and W099 main threads run (natives 110, 032, 001, 002, 033, 027, 021 reached), GamMan::onStageSeqEnd 0x1c4168 and afterSeqExec 0x1cd25c are reached every frame. Screen still black: the title path (script natives, MagLifeMenuTitle, mnu code) is stubbed, so partial. Next gamman slice: onStageSeqEnd, afterSeqExec, setImage 0x1cbdfc (the likeliest road from W099 to the title), then loadStageSnd 0x1c2f50, resetObj 0x1d1410, releaseChr 0x1ccc30. PC: bss 0x7b2060 has no writer in .text (full scan); g_bss_7b2060 points at 16 zeroed words in lib/unassigned_stubs.cpp, see open-items. GamMan is layout host; pool record types are opaque GamRec4..16 until their code is written. Callees named this session in other files: GamSndMan init / update / loadSePack / freeSePack / registSnd / registStrSnd / clear_snd_lst / funcSnd, GamArea init / update, ObjStat updatePos / getRot / save, GamSysData::set, WrdTable::load, MagLife130da4::setVolume, gamClearFrameReq, gamSystemDataLoaded.",
+   "ranges": [
+    [
+     "001c05c0",
+     "001d3b44"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-25 17:39",
+     "status": "partial",
+     "summary": "GamMan boot path: constructor (nine node pools, item vector), init, initGameState, loadSystemData (system pack: GamSysData, SE packs, sound tables, system script image), loadStage (W%03d/W000.WRD: stage script image, object table with the old-format convert, file 2, event pack, camera), update, postUpdate, setOption (8 options), setVolume, switchVolume, setCameraMode, getMapCamNum, clearItemHave and the small ones; ~60 fields named from the ELF's inline accessors; MagSystem / MagScene::setCameraMode fixed to their 3 arguments; pinned 0x1c05c0..0x1d3b44"
+    }
+   ],
+   "status": "partial",
+   "why": "game/gamman.cpp asserts and allocDebug tags in init, loadSystemData, loadStage; GamMan's constructor 0x1c05c0 starts it after GamFont, switchVolume 0x1d3ac8 ends it; ObjStat and GamArea code follows (unassigned@001d3b44)"
+  },
   "i3d/i3dctx.cpp": {
    "notes": "Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the packet yet; smoke run boots, no asserts, i3dGroupInit / i3dCtxCloseFrame reached each frame. Host design (open-items.md, i3d packets on the host): i3dContext is layout host with host pointers, the ROM's 0x30000000 segment bits and 0x0fffffff masks dropped (PC:), DMA tag address words are the low 28 bits of host pointers (i3dDmaAddr) since the host sceDmaSend does not walk chains; objects from the packet tail are host-sized. Next: i3d/i3dvram.cpp (queued top; analysis of all 34 + 3 hidden functions in architecture.md i3d; its stubbed i3dVramInit leaves sentinel links NULL, which would crash i3dCtxMakeVramTransfer once layers draw). Then the draw-group module 0x2239b8..0x224d88 (still in unassigned@00216ad0), then MagScene::draw. Types for that module (I3dNode, I3dGroup, I3dLayer, I3dDrawSet, I3dTexEntry) are partial in i3d/i3dctx.h with EE offsets; I3dDrawSet+0x0c is a draw group (FlushTextures runs it).",
    "ranges": [

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-25 17:15 at commit `54edd9e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-25 17:39 at commit `ffced0d` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-25 17:15 at commit `54edd9e` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6655**, named **3278** (49%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 230, ror-inferred 1680
-- context-name ledger: 1910 entries; overrides of wrong library matches: 5
-- placed in a source file: 3016/6655 in 92 files
+- game functions: **6655**, named **3311** (50%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 230, ror-inferred 1713
+- context-name ledger: 1943 entries; overrides of wrong library matches: 5
+- placed in a source file: 3060/6655 in 92 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -22,15 +22,15 @@ Least-named game-code regions (64 KB blocks):
 | `00150000` | 0/272 (0%) | - |
 | `00160000` | 0/268 (0%) | emy/emy_main.cpp |
 | `001a0000` | 0/211 (0%) | mnu/mnusvld.cpp, mnu/mnuselect.cpp, mnu/mnudlg.cpp |
-| `001f0000` | 5/221 (2%) | task/naga_chunk.cpp, task/tsk_bg_load.cpp, task/tsk_scene.cpp |
-| `001d0000` | 5/181 (3%) | game/gamman.cpp, game/gamstat.cpp, game/gamtrg.cpp |
-| `001e0000` | 8/169 (5%) | game/gamsnd.cpp |
+| `001f0000` | 7/221 (3%) | task/naga_chunk.cpp, task/tsk_bg_load.cpp, task/tsk_scene.cpp |
 | `00140000` | 16/293 (5%) | mag/magloader.cpp, mag/magsceneif.cpp, mag/magscenefocus.cpp |
+| `001d0000` | 14/181 (8%) | game/gamman.cpp, game/gamstat.cpp, game/gamtrg.cpp |
+| `001e0000` | 16/169 (9%) | game/gamsnd.cpp |
 | `00120000` | 27/283 (10%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **1584**; stubs: **289**
+- reconstructed RoR functions: **1606**; stubs: **302**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -45,8 +45,8 @@ Least-named game-code regions (64 KB blocks):
 | `src/dog/dogmotionblend.cpp` | 0 | 1 |
 | `src/dog/dogtexinfo.cpp` | 16 | 0 |
 | `src/game/gamfile.cpp` | 18 | 0 |
-| `src/game/gamman.cpp` | 0 | 29 |
-| `src/game/gamsnd.cpp` | 0 | 2 |
+| `src/game/gamman.cpp` | 22 | 23 |
+| `src/game/gamsnd.cpp` | 0 | 10 |
 | `src/i3d/i3dctx.cpp` | 31 | 0 |
 | `src/i3d/i3denv.cpp` | 12 | 0 |
 | `src/i3d/i3dlayer.cpp` | 80 | 0 |
@@ -57,7 +57,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 1 | 101 |
+| `src/lib/unassigned_stubs.cpp` | 1 | 112 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
@@ -99,9 +99,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 159 TUs: todo 131, partial 5, verify 33, done 2
+- 159 TUs: todo 129, partial 7, verify 33, done 2
 - next: **game/gamman.cpp** (pinned in the queue)
 - pinned queue: unassigned@0020ff34, game/gamman.cpp, unassigned@001fd424, unassigned@001e46b8, bed/bedpad.cpp, mag/maglifemenu.cpp, unassigned@001a6830, snd/rxmpeg.cpp, unassigned@001810f4
+- partial: `game/gamman.cpp` 21/409 -- Smoke run: the system pack and W099 load, G000 and W099 main threads run (natives 110, 032, 001, 002, 033, 027, 021 reached), GamMan::onStageSeqEnd 0x1c4168 and
 - partial: `sequence/seqcall.cpp` 5/43 -- Left: 36 handler stubs in seqcall.cpp (seqFunc001, 002, 004, 006, 007, 009, 012, 014, 016, 019..039, 100..281); write each when a decoded script reaches it, not
 - partial: `sequence/seqvm.cpp` 125/143 -- Left in this file: the other thread starters and queries 0x211830 (imdy), 0x211be4 (single), 0x2120ac, 0x212330 (trg), 0x212598, 0x2129b8, 0x212a5c, 0x212d08, 0
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
@@ -140,6 +141,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-25 17:39 `game/gamman.cpp` partial: GamMan boot path: constructor (nine node pools, item vector), init, initGameState, loadSystemData (system pack: GamSysData, SE packs, sound tables, system scrip
 - 2026-10-25 17:15 `sequence/seqvm.cpp` partial: The sequence script VM: pinned sequence/seqvm.cpp 0x20ff34..0x2155a0 (was unassigned@0020ff34), created and named 104 Ghidra functions (the 99 opcode handlers o
 - 2026-10-25 16:37 `sequence/sequence.cpp` verify: Sequence: constructor, init / term, the three image loaders, stopImages, the per-frame exec with runImage and reapThreads, releaseThread, the global / stage var
 - 2026-10-25 16:23 `sequence/seqcall.cpp` partial: Script native functions: pinned sequence/seqcall.cpp 0x2053f4..0x20e3d8 (the 512-entry table data 0x2d90f8 the sequence VM calls), named 41 handlers seqFuncNNN 
@@ -147,40 +149,39 @@ Recent sessions:
 - 2026-10-25 15:41 `rx/rxsnd.cpp` verify: Wrote the last 24 rx sound functions (12 hidden ones created in Ghidra, named in rxsnd_005): PCM streams (open, close, close all, status, free, write with mode 
 - 2026-10-25 15:31 `rx/rxsnd.cpp` partial: Wrote 70 rx sound functions (22 hidden ones created in Ghidra, named in rxsnd_004): system commands 0x30 / 0x31, the 0x9x per-voice tables, rxSndCentToPitch wit
 - 2026-10-22 21:58 `dog/doglightpool.cpp` verify: Wrote the rest of DogLightPool (26 functions 0x1103dc..0x1123b0): init/term/create/alloc/newLight, the id and set-mask edits (allocId, addToSet, removeLight, re
-- 2026-10-22 21:37 `rx/rxsnd.cpp` partial: Wrote 28 rx sound functions: SPU heap allocator and free with node helpers, EE to IOP copy (rxSndIopWrite with bounce buffers, rxSndIopCopy), SPU transfer, XVAB
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `game/gamman.cpp` | todo | 0/29/409 | 82.8 | 61 | 1 |
+| `game/gamman.cpp` | partial | 21/23/409 | 82.8 | 68 | 5 |
+| `game/gamsnd.cpp` | todo | 0/11/72 | 23.9 | 58 | 8 |
+| `unassigned@00164fc0` | todo | 0/9/395 | 104.2 | 36 | 4 |
+| `sequence/seqcall.cpp` | partial | 5/36/43 | 36.0 | 35 | 7 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 29 | 0 |
+| `unassigned@001e6cac` | todo | 0/7/220 | 68.8 | 29 | 3 |
+| `unassigned@0010f944` | todo | 0/5/12 | 2.2 | 26 | 3 |
+| `unassigned@001810f4` | todo | 0/10/28 | 2.8 | 25 | 3 |
 | `dog/dogactor.cpp` | todo | 0/24/139 | 30.3 | 24 | 0 |
-| `dog/dogmodel.cpp` | todo | 0/11/67 | 10.0 | 21 | 0 |
-| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 20 | 0 |
-| `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 20 | 2 |
-| `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 19 | 0 |
-| `unassigned@001e46b8` | todo | 0/7/253 | 78.3 | 17 | 0 |
-| `unassigned@0013e2ec` | todo | 0/11/15 | 4.4 | 15 | 0 |
-| `unassigned@00164fc0` | todo | 0/8/395 | 104.2 | 15 | 0 |
-| `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 15 | 1 |
-| `unassigned@00140030` | todo | 0/4/6 | 2.7 | 14 | 1 |
+| `unassigned@00140030` | todo | 0/4/6 | 2.7 | 24 | 3 |
+| `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 24 | 1 |
+| `mag/magloader.cpp` | todo | 0/7/15 | 4.7 | 22 | 2 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
 | RoR addr | name | call sites | provenance | state | inferred file |
 |---|---|---|---|---|---|
 | `002155f4` | FUN_002155f4 | 15 | - | missing | - |
-| `001d1a48` | GamMan::isMenuOpen | 9 | ror | stub | game/gamman.cpp |
+| `001be2dc` | FileReader::~FileReader | 10 | ror | missing | game/gamfile.cpp |
 | `001c6a40` | GamMan::pause | 9 | ror | stub | game/gamman.cpp |
-| `001be2dc` | FileReader::~FileReader | 8 | ror | missing | game/gamfile.cpp |
-| `001be2cc` | FileReader::FileReader | 6 | ror | missing | game/gamfile.cpp |
+| `001be2cc` | FileReader::FileReader | 8 | ror | missing | game/gamfile.cpp |
+| `001be734` | FileReadReq::FileReadReq | 8 | ror | missing | game/gamfile.cpp |
 | `00115cec` | DogModel::release | 6 | ror | stub | dog/dogmodel.cpp |
 | `00143fd0` | MagScene::updateFog | 6 | ror | stub | - |
 | `0014062c` | MagScene::rotateTenkyu | 6 | ror | stub | - |
 | `00140c68` | MagScene::updateRecords853fc | 6 | ror | stub | - |
-| `001be734` | FileReadReq::FileReadReq | 5 | ror | missing | game/gamfile.cpp |
 | `0011ade4` | MagLifePC::live | 5 | ror | stub | mag/maglifepc.cpp |
 | `001e0c2c` | GamArea::ctl_trg_flg | 5 | ror | stub | - |
 | `0021a828` | i3rCopyClipSphere | 5 | lib-ctx | stub | - |
+| `0010ff74` | DogEntity::normalizeRotate | 4 | ror | stub | - |
 | `00105f0c` | utlStrCopy2 | 4 | ror | stub | utl/utlfile.cpp |
 | `00101ccc` | BedPad::update | 4 | ror | stub | bed/bedpad.cpp |
 | `001bebec` | GamFont::setFont | 4 | ror | stub | - |
@@ -190,7 +191,7 @@ Recent sessions:
 | `001c5bf4` | GamMan::enterMenu | 4 | ror | stub | game/gamman.cpp |
 | `001bedc0` | GamFont::setTarget | 4 | ror | stub | - |
 | `001c0254` | GamFont::getGlyphWidth | 4 | ror | stub | - |
-| `001e4908` | GamSndMan::findSnd | 4 | ror | stub | - |
+| `001e4908` | GamSndMan::findSnd | 4 | ror | stub | game/gamsnd.cpp |
 | `00114c54` | FUN_00114c54 | 3 | - | missing | dog/dogmodel.cpp |
 | `00101b50` | BedPad::setVibration | 3 | ror | stub | bed/bedpad.cpp |
 | `0010fa6c` | DogEntity::getMatrix | 3 | ror | stub | - |
@@ -204,8 +205,8 @@ Recent sessions:
 | `0021e1d8` | i3dPktDrawLineStrip | 3 | lib-ctx | stub | - |
 | `001081a8` | DogMotionBlend::getNo | 3 | ror | stub | dog/dogmotionblend.cpp |
 | `0012f790` | MagLifeFadeKey::releaseTexture | 3 | ror | stub | mag/maglifefadekey.cpp |
-| `0010ff74` | DogEntity::normalizeRotate | 3 | ror | stub | - |
 | `00215bb4` | dbgTraceVector4 | 3 | ror | stub | - |
 | `00106db0` | utlNormalize3 | 3 | ror | stub | - |
-| `001beb70` | GamFont::GamFont | 2 | ror | missing | - |
+| `001e46b8` | GamSndMan::freeSePack | 2 | ror | stub | game/gamsnd.cpp |
+| `001d96ec` | ObjStat::save | 2 | ror | stub | - |
 

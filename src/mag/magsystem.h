@@ -86,7 +86,9 @@ struct MagSystem
     void setDispCircuit2(int on);                                        // ROR 0x0011871c
     void waitVSync();                                                    // ROR 0x00118754
     void kickPacket();                                                   // ROR 0x00118840
-    void setCameraMode(int mode);                                        // ROR 0x00118880
+    /* Forwards a1..a3 to the scene (GamMan::setCameraMode passes the
+     * mode, a camera number and NULL or three words). */
+    void setCameraMode(int mode, int arg, const int *param);             // ROR 0x00118880
     void setLightColor(int type, int idx, int which, float r, float g, float b, float a); // ROR 0x001188a8
     void getLightColor(int type, int idx, int which, float *r, float *g, float *b, float *a); // ROR 0x001188e4
     int  getCameraMode(int *out);                                        // ROR 0x00118960

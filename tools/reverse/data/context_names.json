@@ -1589,6 +1589,12 @@
   "was": "FUN_001308bc",
   "why": "stores _vt$13MagLifeWindow (rtti: the class's only constructor); MagScene::openWindow runs it on operator_new(0xe0)"
  },
+ "00130de0": {
+  "name": "MagLife130da4::setVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_00130de0",
+  "why": "stores a1 at +0x30; GamMan::setVolume's only call, on the scene's +0x418f0 life object with the scaled master volume"
+ },
  "00131184": {
   "name": "MagScene::fadeIn",
   "tag": "ror-inferred",
@@ -2608,6 +2614,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00143fd0",
   "why": "steps the fog fade setFog started: m_fog[0] = lerp(m_fog[2], m_fog[3]) over +0x2ab64 frames"
+ },
+ "0017e5c0": {
+  "name": "WrdTable::load",
+  "tag": "ror-inferred",
+  "was": "FUN_0017e5c0",
+  "why": "loadStage's call on data 0x298ee0 with the stage: reads data/wrd/WRD.BIN, finds file %03d and allocates the table"
  },
  "0017ea44": {
   "name": "WrdTable::get",
@@ -4175,11 +4187,29 @@
   "was": "FUN_001c047c",
   "why": "tail jump to 0x1c02f8, which sums the glyph widths of a Shift-JIS string; MagScene::getWindowTextWidth calls it on a window font"
  },
+ "001c05c0": {
+  "name": "GamMan::GamMan",
+  "tag": "ror-inferred",
+  "was": "FUN_001c05c0",
+  "why": "rtti.py: GamMan's constructor (stores vtable 0x2e47e0 at +0x22ab4); builds GamArea, GamSndMan and the nine node pools (ItemStock 0x14e, AchrList 0x80 ...)"
+ },
  "001c0d70": {
   "name": "GamMan::init",
   "tag": "ror-inferred",
   "was": "FUN_001c0d70",
   "why": "game/gamman.cpp, GamMan 0x7812c0: sets the state words at +0x21f48.. and allocates a 0x1840 list pool; called once by sysInitManagers"
+ },
+ "001c143c": {
+  "name": "GamMan::initGameState",
+  "tag": "ror-inferred",
+  "was": "FUN_001c143c",
+  "why": "init's last call and seqFunc001's: the equip / find items to 0xa00, every task id -1, the callbacks 0, the chr / item pools cleared, the item slots reset"
+ },
+ "001c1a88": {
+  "name": "GamMan::empty1c1a88",
+  "tag": "ror-inferred",
+  "was": "FUN_001c1a88",
+  "why": "jr ra only, between loadSystemData and loadStage; no callers found"
  },
  "001c1b48": {
   "name": "GamMan::loadSystemData",
@@ -4187,11 +4217,23 @@
   "was": "FUN_001c1b48",
   "why": "game/gamman.cpp: loads a pfh archive (0000.se / 6400.se names, bed/bedpfh.h asserts) and hands a 0x20000-byte sequence image to 0x20eea8; mainInitGame calls it once before the stage"
  },
+ "001c1f84": {
+  "name": "GamMan::convertObjTable",
+  "tag": "ror-inferred",
+  "was": "FUN_001c1f84",
+  "why": "loadStage's W000.WRD file 1 when its version word +0x1c != 1: the 0x20 header, then count 0x30-byte records into 0x50-byte slots"
+ },
  "001c204c": {
   "name": "GamMan::loadStage",
   "tag": "ror-inferred",
   "was": "FUN_001c204c",
   "why": "game/gamman.cpp: (stage) formats data/SEQ/W%03d/W000.WRD, loads it, hands the sequence image to 0x20eda4; mainInitGame passes mainParseArgs' stage unless -1"
+ },
+ "001c2f50": {
+  "name": "GamMan::loadStageSnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001c2f50",
+  "why": "loadStage's call after the pack (m_chapter): frees and loads data/snd/xv/1001.se, 1101.se, 1102.se ... per stage"
  },
  "001c3d38": {
   "name": "GamMan::setPcStartPos",
@@ -4210,6 +4252,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001c43f0",
   "why": "reapThreads calls it when thread 0x84000000 (image 2's main thread) ends: re-equips the item, sets the PC start position, clears flags2 0x1800"
+ },
+ "001c46f4": {
+  "name": "GamMan::setStagePack",
+  "tag": "ror-inferred",
+  "was": "FUN_001c46f4",
+  "why": "empty in the US build; loadStage hands it the stage pack buffer right after allocDebug"
+ },
+ "001c4f30": {
+  "name": "GamMan::empty1c4f30",
+  "tag": "ror-inferred",
+  "was": "FUN_001c4f30",
+  "why": "jr ra only, before update; no callers found"
  },
  "001c526c": {
   "name": "GamMan::update",
@@ -4247,6 +4301,18 @@
   "was": "FUN_001c6ccc",
   "why": "switch on which: copies one status word (+0x21f48, +0x21f60, +0x21f50 ...) to *out"
  },
+ "001c7210": {
+  "name": "GamMan::setCameraMode",
+  "tag": "ror-inferred",
+  "was": "FUN_001c7210",
+  "why": "switch on mode 1..5 calling MagSystem::setCameraMode, stores the mode at +0x21f6c (GamMan::getCameraMode's word)"
+ },
+ "001c7494": {
+  "name": "GamMan::getMapCamNum",
+  "tag": "ror-inferred",
+  "was": "FUN_001c7494",
+  "why": "the mag/magscene.h inline (assert no >= 0 && no < MAX_MAP_MODEL, line 816) on the scene's sky slot m_1d300: its _c.bin record count"
+ },
  "001c7a4c": {
   "name": "GamMan::equipItem",
   "tag": "ror-inferred",
@@ -4270,6 +4336,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c8414",
   "why": "GamMan::delItem(id, 0) and GamMan::delStock(id, 0)"
+ },
+ "001c845c": {
+  "name": "GamMan::clearItemHave",
+  "tag": "ror-inferred",
+  "was": "FUN_001c845c",
+  "why": "empties the 16-byte vector at +0x1a6c0 (getItemHavePtr) and pushes 12 slots with item 0xa00 (none)"
  },
  "001c8598": {
   "name": "GamMan::selectItem",
@@ -4313,11 +4385,23 @@
   "was": "FUN_001c98b8",
   "why": "empty in the US build; the system call runs it before the map menu 0x10001 only"
  },
+ "001c9c1c": {
+  "name": "GamMan::setOption",
+  "tag": "ror-inferred",
+  "was": "FUN_001c9c1c",
+  "why": "8-case table 0x2fbbf0: 0 brightness 0x780d04, 1 master volume via setVolume, 2 / 3 stream / SE volume via funcSnd 0xf / 0xe, 4 / 5 read them back, 6 rxSndSetOutputMode, 7 a flag copied to MagSystem +8; returns -1"
+ },
  "001cbdfc": {
   "name": "GamMan::setImage",
   "tag": "ror-inferred",
   "was": "FUN_001cbdfc",
   "why": "+0x222e4[slot] = a script image {w, h, ...} and its +0xc = the data before it (w * h rounded to 16)"
+ },
+ "001ccc30": {
+  "name": "GamMan::releaseChr",
+  "tag": "ror-inferred",
+  "was": "FUN_001ccc30",
+  "why": "loadStage calls it with +0x21fcc / +0x21fd0 after saving the PC / dog ObjStat; removes private collision, kills tasks"
  },
  "001cd25c": {
   "name": "GamMan::afterSeqExec",
@@ -4337,11 +4421,23 @@
   "was": "FUN_001cfb38",
   "why": "+0x2227c = the handle MagScene::openSysMsgWindow returned"
  },
+ "001d1410": {
+  "name": "GamMan::resetObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001d1410",
+  "why": "130 call sites with (oid, 1): loadStage passes the PC's and dog's ObjStat oid (+0x100); kills the object's tasks"
+ },
  "001d1a48": {
   "name": "GamMan::isMenuOpen",
   "tag": "ror-inferred",
   "was": "FUN_001d1a48",
   "why": "returns MagScene m_menu_id (0x727bd0 = scene 0x6fbd80 + 0x2be50) != -1"
+ },
+ "001d3588": {
+  "name": "GamMan::markReset",
+  "tag": "ror-inferred",
+  "was": "FUN_001d3588",
+  "why": "m_sys_flg |= 0x40000; update clears 0x40001 every frame, so it marks the frame after initGameState"
  },
  "001d3a38": {
   "name": "GamMan::setVolume",
@@ -4355,6 +4451,42 @@
   "was": "FUN_001d3ac8",
   "why": "0: saves the volume at +0x22214 and sets 0; 1: restores the saved one and marks -1"
  },
+ "001d84a8": {
+  "name": "GamMan::resetExtra",
+  "tag": "ror-inferred",
+  "was": "FUN_001d84a8",
+  "why": "returns 1 and does nothing in the US build; initGameState's last call"
+ },
+ "001d8964": {
+  "name": "ObjStat::getRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001d8964",
+  "why": "ObjStat::get_o_rot forwards to it: the actor's rotation from the scene table 0x6fe6f0 (stride 0x4d0) or +0x1a0"
+ },
+ "001d8f04": {
+  "name": "ObjStat::updatePos",
+  "tag": "ror-inferred",
+  "was": "FUN_001d8f04",
+  "why": "copies the actor's position into +0x190 and out, then moves the object to a new secta cell when it left +0x114's box"
+ },
+ "001d96ec": {
+  "name": "ObjStat::save",
+  "tag": "ror-inferred",
+  "was": "FUN_001d96ec",
+  "why": "refreshes pos / rot from the actor, then copies +0x100..+0x1a0 to out; loadStage saves the PC / dog into GamMan +0x220a0 / +0x22150"
+ },
+ "001dbef8": {
+  "name": "GamSysData::set",
+  "tag": "ror-inferred",
+  "was": "FUN_001dbef8",
+  "why": "loadSystemData's file 0: keeps the data at +0x58 and turns its ten offsets at +0x10..+0x34 into pointers past the 0x40 header"
+ },
+ "001dd414": {
+  "name": "GamArea::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001dd414",
+  "why": "GamMan::init's call on its +0x40 member; allocates with operator new / new[]"
+ },
  "001dea40": {
   "name": "GamArea::startPcAction",
   "tag": "ror-inferred",
@@ -4367,11 +4499,29 @@
   "was": "FUN_001deaac",
   "why": "on GamMan +0x40 (class name invented): reads the PC's position (0x1d05f4) and walks the rect list +0xc290 for entries with flags 0x4000001 whose x / z bounds contain it"
  },
+ "001dee78": {
+  "name": "GamArea::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001dee78",
+  "why": "GamMan::update's call on +0x40 with the PC position and rotation when m_sys_flg bit 2 is set"
+ },
  "001e0c2c": {
   "name": "GamArea::ctl_trg_flg",
   "tag": "ror-inferred",
   "was": "FUN_001e0c2c",
   "why": "op 1 set / 2 or / 3 and-not / 4 test / 5 test-and-clear 0x20000000 (with GamMan::pause 0x8000) on the trigger word +0x30 of the area rect whose id +0x3c matches (0 = all); GamMan::set_trg_flg and its siblings call it"
+ },
+ "001e0f1c": {
+  "name": "GamSndMan::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001e0f1c",
+  "why": "GamMan::init's call on its +0x18e00 member; allocDebug with game/gamsnd.cpp"
+ },
+ "001e100c": {
+  "name": "GamSndMan::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001e100c",
+  "why": "GamMan::update's call every frame; when +0x110 is set runs 0x1e3c24 with the camera position 0x726930 (mode 1)"
  },
  "001e17b4": {
   "name": "GamSndMan::stopBgm",
@@ -4385,11 +4535,47 @@
   "was": "FUN_001e435c",
   "why": "findSnd then 0x1e43a4(bank, +0x32, 1): the bank's handle (+0x1728 table) is set"
  },
+ "001e4458": {
+  "name": "GamSndMan::loadSePack",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4458",
+  "why": "GamMan::loadSePack(char *, void *) forwards to it with a3 0; looks the name up, then loads"
+ },
+ "001e46b8": {
+  "name": "GamSndMan::freeSePack",
+  "tag": "ror-inferred",
+  "was": "FUN_001e46b8",
+  "why": "SndMan::freeBank and slot +0x1728[n] = -1; loadStage frees slots 0xc and 0x1f"
+ },
+ "001e4790": {
+  "name": "GamSndMan::registSnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4790",
+  "why": "GamMan::registSnd(OID_STATE, void *) forwards to it: copies 0xe000 bytes into the table at +0x1540"
+ },
+ "001e484c": {
+  "name": "GamSndMan::registStrSnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001e484c",
+  "why": "GamMan::registStrSnd(OID_STATE, void *) forwards to it"
+ },
  "001e4908": {
   "name": "GamSndMan::findSnd",
   "tag": "ror-inferred",
   "was": "FUN_001e4908",
   "why": "this = 0x79a0c0 (GamMan + 0x18e00); walks the 0x38-byte entries at *(+0x1540) for the id at +0x1c, 1 and the entry when found"
+ },
+ "001e6570": {
+  "name": "GamSndMan::clear_snd_lst",
+  "tag": "ror-inferred",
+  "was": "FUN_001e6570",
+  "why": "GamMan::clear_snd_lst() forwards to it with 0"
+ },
+ "001e6734": {
+  "name": "GamSndMan::funcSnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001e6734",
+  "why": "GamMan::funcSnd(SND_FUNC_NO, int, int, int, int) forwards to it; sets the master volumes, starts TskSnd"
  },
  "001e71fc": {
   "name": "CmnTaskMan::addTask",
@@ -4427,6 +4613,12 @@
   "was": "FUN_001f4184",
   "why": "vtable 0x2e4cd0 (rtti.py TskSysFunc); kind 0..1 sets the defaults 100, 0x1e, 0xf, 0x1b"
  },
+ "001f688c": {
+  "name": "gamClearFrameReq",
+  "tag": "ror-inferred",
+  "was": "FUN_001f688c",
+  "why": "GamMan::update's first call: memset(0x2d8f70, 0, 0x20) and 0x2d8f68 = 0"
+ },
  "001f83f4": {
   "name": "scenePlayStart",
   "tag": "ror-inferred",
@@ -4438,6 +4630,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f8cec",
   "why": "like scenePlayStart without the map / CHARA / THREAD sections: news a ScenePlay, adds its task on GamMan +0x222ac"
+ },
+ "001f8fb8": {
+  "name": "gamSystemDataLoaded",
+  "tag": "ror-inferred",
+  "was": "FUN_001f8fb8",
+  "why": "empty in the US build; loadSystemData's last call"
  },
  "001f8fc0": {
   "name": "TskSnd::TskSnd",

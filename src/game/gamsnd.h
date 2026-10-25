@@ -31,9 +31,23 @@ static_assert(sizeof(GamSndEntry) == 0x38, "GamSndEntry");
 static_assert(offsetof(GamSndEntry, m_bank) == 0x20, "m_bank");
 static_assert(offsetof(GamSndEntry, m_32) == 0x32, "m_32");
 
-/* layout: host -- no members reconstructed. */
+/* layout: host -- only the words GamMan reads. GamMan's same-named inline
+ * methods (registSnd, funcSnd, clear_snd_lst, loadSePack, the ELF's
+ * symbols) forward to these. */
 struct GamSndMan
 {
+    void init();                                                         // ROR 0x001e0f1c
+    /* Every frame (GamMan::update; pos unused: mode 1 takes the camera's). */
+    void update(const float *pos);                                       // ROR 0x001e100c
+    /* Frees bank slot n (SndMan::freeBank) and marks it -1. */
+    void freeSePack(int n);                                              // ROR 0x001e46b8
+    void loadSePack(const char *name, void *data, int arg);              // ROR 0x001e4458
+    void registSnd(int state, void *data);                               // ROR 0x001e4790
+    void registStrSnd(int state, void *data);                            // ROR 0x001e484c
+    void clear_snd_lst(int arg);                                         // ROR 0x001e6570
+    /* Sound function no (SND_FUNC_NO: 0xe / 0xf the SE / stream master
+     * volumes, 0x11 at loadSystemData). */
+    void funcSnd(int no, int a, int b, int c, int d);                    // ROR 0x001e6734
     /* 1 and *entry when id is in the table, else 0 and NULL. */
     int findSnd(int id, GamSndEntry **entry, int arg);                   // ROR 0x001e4908
     /* Non-zero when id's bank is loaded (its handle at +0x1728 is set). */
@@ -41,6 +55,10 @@ struct GamSndMan
     /* Fades the current BGM slot out over 0x1e frames (mode 1 keeps it,
      * 2 works on the other slot +0x1708). */
     void stopBgm(int mode);                                              // ROR 0x001e17b4
+
+    int m_mode;                 // ROR 0x0000: loadStage sets 1 (update then uses the camera position)
+    int m_mstVolSe[2];          // ROR 0x1590: option 3's funcSnd(0xe) words
+    int m_mstVolStr[2];         // ROR 0x1598: GamMan::getMstVolStr, option 2's funcSnd(0xf) words
 };
 
 #endif /* _GAME_GAMSND_H */

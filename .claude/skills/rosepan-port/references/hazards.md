@@ -162,6 +162,14 @@ entries are marked **RoR** with the date.
 
 ## Types and layouts
 
+- **A forwarding wrapper's arity comes from its callers, not its body.** `MagSystem::setCameraMode`
+  0x118880 only adds 0x12540 to a0 and jumps: it was declared with one argument, but GamMan passes
+  mode, a camera number and a 3-word pointer through a1..a3. When a stub or a 2-line forwarder is
+  declared, check one caller's a1..a3 / t0..t1 setup before fixing the signature.
+- **GamMan's inline accessors name its fields.** `sections.py --list <Class>` lists every linkonce
+  symbol; for a big class without asserts, disassembling the short ones (`mipsdis.py <addr> +<size>`,
+  a lui / lw pair each) maps dozens of offsets to RoR's own names in one pass.
+
 - **MinGW is not "GCC layout".** MinGW-w64 defaults to `-mms-bitfields`: a bitfield run that changes
   declared type opens a new unit on MinGW *and* MSVC, while EE GCC packs it.
 - **`long` is 32-bit on both Windows compilers**; the EE's is 64-bit.

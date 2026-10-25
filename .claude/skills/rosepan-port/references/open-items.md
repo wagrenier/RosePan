@@ -41,8 +41,15 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      GamMan reacting to onStageSeqEnd. With the stubs returning 0 nothing waits. So after GamMan's
      loads (item 4), the natives the boot scripts reach come next: seqFunc027, 021, 033 (jump tables
      data 0x3005c0 / 0x300ac0), 110, 001, 002, 032, and system calls 0x14 / 0x15 / 0x1e.
-  4. `game/gamman.cpp` -- slice: loadSystemData, loadStage, update, postUpdate (409 functions: only the
-     load / update path, the rest stays stubs).
+  4. PARTIAL 2026-10-25: `game/gamman.cpp` -- the constructor, init, initGameState, loadSystemData,
+     loadStage, update, postUpdate, setOption, setVolume / switchVolume, setCameraMode and the small
+     ones are written. The smoke run now loads the system pack and W099, runs G000's and W099's
+     main threads (natives 110, 032, 001, 002, 033, 027, 021 reached) and reaches
+     `GamMan::onStageSeqEnd` 0x1c4168 and `afterSeqExec` 0x1cd25c every frame: **those two (and
+     setImage 0x1cbdfc) are the next gamman slice** -- onStageSeqEnd is the likeliest road from the
+     W099 script to the title (it calls setOption 0x1c9c1c too). Still stubs on the load path:
+     loadStageSnd 0x1c2f50, resetObj 0x1d1410, releaseChr 0x1ccc30; the GamSndMan / GamSysData /
+     WrdTable::load callees live in other files.
   5. `unassigned@001fd424` -- sysInitManagers 0x204148, SysTimer::start / update (reached stubs).
   6. `unassigned@001e46b8` -- CmnTaskMan::exec / addTask and 0x1f688c that GamMan::update calls (the
      per-frame task runner; 253 functions: only what the title path reaches).
@@ -502,6 +509,22 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- (2026-10-25) **bss 0x7b2060 has no writer.** A pointer to flag words that GamMan::loadStage (+0
+  0x8000, +8 0x8000, clears +4 bit 0x100), MagScene's menu glue and ~50 menu / task functions
+  dereference. A full .text scan (mipsdis 0x100000..0x290000) finds no store with offset 0x2060 or
+  0x205c off any register but sp, and the data word does not appear. Candidates: a script native
+  that registers image addresses (seqFunc110's 100 cases, table data 0x300d20, G000's init calls it
+  ~80 times), or a struct base below 0x7b2060. PC: `g_bss_7b2060` points at 16 zeroed words
+  (lib/unassigned_stubs.cpp), every flag clear. Whoever writes seqFunc110 should look for it.
+- (2026-10-25) `bed/bedpfh.h` inline line numbers: GamMan::loadSystemData / loadStage assert line
+  71 (0x47) in the inline whose result is m_top itself (utlMemRealloc's pointer), and line 72 in
+  getTotalSize. The header has getNumFile at 71 and getTop at 73; either the line-71 inline is a
+  second m_top getter or the two are swapped. Only the comments are affected.
+- (2026-10-25) GamMan's option words: setOption 0x1c9c1c's cases are named from what they touch
+  (0 a brightness word bss 0x780d04, 1 the scene life +0x418f0's volume, 2 / 3 funcSnd 0xf / 0xe,
+  6 rxSndSetOutputMode, 7 MagSystem::m_vib_on). architecture.md's "GamMan option 0x12"
+  (utlIsVibrationOn) is another numbering; reconcile when the options menu is written.
 
 - (2026-10-25) `sequence/seqvm.cpp`: the file name is invented (no source string, no assert); it holds
   Sequence's remaining methods, so it may be part of sequence.cpp. 0x2155a0..0x215e1c after it (debugNop,
