@@ -42,6 +42,8 @@ struct CmnITask
  * 0x16265c). layout: host -- no members reconstructed. */
 struct EmyManager : CmnITask
 {
+    /* Its two object ids (+0x138 / +0x13c). */
+    void getOids(int *a, int *b);                                        // ROR 0x00163ab8
 };
 
 /* The task manager, one global at bss 0x7a3d80. EE size at least 0x288.
@@ -55,6 +57,14 @@ struct CmnTaskMan
     void *getTask(int id);                                               // ROR 0x001e7d7c
     /* Queues the task id for removal (once; -1 is ignored). */
     void killTask(int id);                                               // ROR 0x001e7724
+    /* Pauses (on) / resumes the task id (-1 ignored). */
+    void pauseTask(int id, int on);                                      // ROR 0x001e7414
+    /* Pauses / resumes every task whose kind is in kinds (-1 ends the
+     * list; a list starting with -1 matches nothing). */
+    void pauseKinds(const int *kinds, int on);                           // ROR 0x001e747c
+    /* Pauses / resumes every task but those of kinds 1, 2, 5, 7, 0xf,
+     * 0x11, 0x12, 0x17. */
+    void pauseOthers(int on);                                            // ROR 0x001e7544
 
     SysTimer m_timer;           // ROR 0x40 (bss 0x7a3dc0)
 };

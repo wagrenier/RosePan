@@ -69,7 +69,7 @@ void GamMan::init()
     m_murderChrNo = -1;
     m_21ff4 = -1;
     m_21ff8 = -1;
-    m_21fe0 = 0;
+    m_pcActorPtr = NULL;
     m_pcMotion = -1;
     m_pcPtr = NULL;
     m_dogPtr = NULL;
@@ -79,7 +79,7 @@ void GamMan::init()
     m_pool2246c->clear();
 
     m_objTable = (GamObjTable *)g_utlMemory.allocDebug(0x5020, s_file, 342, 0, 1);
-    m_objRec = m_objTable->m_rec[0];
+    m_objRec = m_objTable->m_rec;
     m_18bc0 = g_utlMemory.allocDebug(0x600, s_file, 345, 0, 1);
     m_18bc4 = g_utlMemory.allocDebug(0xc00, s_file, 347, 0, 1);
     m_1f240 = (u_char *)g_utlMemory.allocDebug(0x5a4, s_file, 350, 0, 1);
@@ -105,7 +105,7 @@ void GamMan::init()
     m_area.init();
     m_sndMan.init();
     m_22a84 = -1;
-    memset(m_222e4, 0, sizeof(m_222e4));
+    memset(m_image, 0, sizeof(m_image));
     m_seqWord = 0;
 
     static const int s_225f4[0x1a] = {
@@ -267,9 +267,9 @@ void GamMan::loadStage(int stage)
     g_wrdTable.load(stage);
     m_flags2 |= 0x3800;
     snd->m_mode = 1;
-    if (m_chapter == 6 && (g_bss_7b2060[0] & 0x8000) != 0)
+    if (m_chapter == 6 && (g_sequence.m_bits[0] & 0x8000) != 0)
         m_flags2 |= 0x20000000;
-    if ((g_bss_7b2060[2] & 0x8000) != 0)
+    if ((g_sequence.m_bits[2] & 0x8000) != 0)
     {
         if (m_pcActor != -1 && m_pcPtr != NULL)
         {
@@ -285,7 +285,7 @@ void GamMan::loadStage(int stage)
             m_dogChrNo = -1;
         }
     }
-    g_bss_7b2060[1] &= ~0x100u;
+    g_sequence.m_bits[1] &= ~0x100u;
 
     {
         FileReader reader;
@@ -655,6 +655,833 @@ int GamMan::resetExtra()
     return 1;
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// PC: the ROM indexes the scene's actor array with whatever number it got,
+// -1 included (memory before the array); the host skips that one.
+
+static void gamShowActor(int no)
+{
+    if (no < 0)
+        return;
+    g_magSystem.m_scene.m_actors[no].setHide(0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The end of the stage script's main thread. After a stage change (flags2
+// 0x40) the dog's mode is set again, the PC and the dog get their saved
+// state back, the start records reset their objects' table words, the
+// options apply once (until flags2 0x400 is set) and the find target is
+// re-sent; the debug restart word does the PC / dog part on its own.
+// ROR 0x001c4168
+
+void GamMan::onStageSeqEnd()
+{
+    if ((m_flags2 & 0x40) != 0)
+    {
+        setInuMode(m_inuMode);
+        if (m_pcPtr != NULL)    /* PC: the ROM does not test it */
+            m_pcPtr->load(m_pcSave);
+        if (m_dogPtr != NULL)
+            m_dogPtr->load(m_dogSave);
+        const GamObjReset *rec = (const GamObjReset *)m_18bc0;
+        if (rec->m_oid != 0)
+        {
+            u_int word = rec->m_flags;
+            for (;;)
+            {
+                ctlObjParam((u_int)(int)rec->m_oid, 0x11, &word, 0);
+                word = rec->m_0c;
+                ctlObjParam((u_int)(int)rec->m_oid, 4, &word, 0);
+                if (rec[1].m_oid == 0)
+                    break;
+                word = rec[1].m_flags;
+                rec++;
+            }
+        }
+        if ((m_flags2 & 0x400) == 0)
+        {
+            setOption(0, m_optBrightLevel);
+            setOption(1, m_optMasterLevel);
+            setOption(2, m_optStrLevel);
+            setOption(3, m_optSeLevel);
+            setOption(6, m_optOutput);
+            setOption(7, m_optVibration);
+            m_flags2 &= ~0x400u;
+        }
+        if (m_findTargetItem != 0xa00)
+            setFindTargetItem(m_findTargetItem);
+    }
+    if ((g_sequence.m_bits[2] & 0x8000) != 0 && m_pcPtr != NULL)
+    {
+        m_pcPtr->load(m_pcSave);
+        if (m_dogPtr != NULL)   /* PC: the ROM does not test it */
+            m_dogPtr->load(m_dogSave);
+        g_sequence.m_bits[2] &= ~0x8000u;
+    }
+    m_flags2 &= ~0x2000u;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c541c
+
+void GamMan::setInuMode(int mode)
+{
+    m_inuMode = mode;
+    switch (mode)
+    {
+    case 2:
+        resume(0x200000);
+        pause(0x100);
+        if (m_dogPtr != NULL)
+        {
+            m_dogPtr->setHide(1);
+            m_dogPtr->m_flags |= 0x10000000;
+        }
+        g_sequence.m_bits[1] &= ~2u;
+        g_sequence.m_bits[1] &= ~4u;
+        m_findTargetItem = 0xa00;
+        gamSetBwnFollow(0);
+        return;
+    case 1:
+        pause(0x200000);
+        if (m_dogPtr != NULL)
+        {
+            m_dogPtr->setHide(0);
+            m_dogPtr->m_flags &= ~0x10000000u;
+        }
+        g_sequence.m_bits[1] |= 2;
+        g_sequence.m_bits[1] |= 4;
+        resume(0x100);
+        gamSetBwnFollow(1);
+        return;
+    case 3:
+        pause(0x200000);
+        pause(0x100);
+        if (m_dogPtr != NULL)
+        {
+            m_dogPtr->setHide(1);
+            m_dogPtr->m_flags |= 0x10000000;
+        }
+        g_sequence.m_bits[1] |= 2;
+        g_sequence.m_bits[1] |= 4;
+        gamSetBwnFollow(0);
+        return;
+    case 4:
+        pause(0x200000);
+        pause(0x100);
+        if (m_dogPtr != NULL)
+        {
+            m_dogPtr->setHide(0);
+            m_dogPtr->m_flags &= ~0x10000000u;
+        }
+        g_sequence.m_bits[1] |= 2;
+        g_sequence.m_bits[1] |= 4;
+        gamSetBwnFollow(0);
+        return;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c58b8
+
+int GamMan::empty1c58b8(int on)
+{
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c58c0
+
+int GamMan::pauseAchr(int on)
+{
+    if ((m_flags2 & 0x10000) == 0)
+    {
+        if (on == 0)
+            return 0;
+    }
+    else if (on == 1)
+    {
+        return 0;
+    }
+    for (SeqNode<ACHRstat *> *node = m_achrList.m_used.begin(); node != m_achrList.m_used.end();
+         node = node->m_next)
+    {
+        u_int oid = node->m_data->m_oid;
+        if (gamOidType(oid) == 2)
+        {
+            getActor(oid);      /* the ROM discards it */
+            node->m_data->pauseTasks(on, 1);
+        }
+    }
+    int kinds[4] = { 0x13, 0x14, -1, 0 };
+    g_taskMan.pauseKinds(kinds, on);
+    g_taskMan.pauseTask(g_emyManagerTaskId, on);
+    if (on == 1)
+        m_flags2 |= 0x10000;
+    else
+        m_flags2 &= 0xfffcffff;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c5bf4
+
+void GamMan::enterMenu(int kind)
+{
+    m_sndMan.stopBgm(0);
+    m_flags2 &= ~8u;
+    int kinds[2] = { 5, -1 };
+    g_taskMan.pauseKinds(kinds, 1);
+    m_flags2 |= 0x100000;
+    if (kind == 1 || kind == 2)
+        g_sequence.m_flags |= 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c5e1c
+
+void GamMan::pauseForMenu(int menu)
+{
+    m_flags2 |= 4;
+    pause(2);
+    if (menu < 0x10005)
+    {
+        if (menu > 0x10001 || menu == 0x10000)
+        {
+            enterMenu(1);
+            return;
+        }
+        if (menu > 0x10000)
+        {
+            enterMenu(2);
+            return;
+        }
+        if (menu < 1 && menu > -3)
+            return;
+    }
+    else if (menu < 0x1000a)
+    {
+        if (menu < 0x10008)
+            return;
+    }
+    else if (menu == 0x1000a)
+    {
+        m_flags2 |= 0x20;
+        enterMenu(1);
+        return;
+    }
+    if ((u_int)(menu - 0x20000) > 0x3dffff)
+        enterMenu(1);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c5f70
+
+void GamMan::resumeFromMenu(int arg)
+{
+    if ((m_flags2 & 0x20) != 0)
+    {
+        g_magSystem.m_scene.m_mes.setSpriteState(2, 0);
+        g_magSystem.m_scene.m_mes.setSpriteDisp(2, 0);
+    }
+    m_flags2 |= 8;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The running bits come back (m_flags |= mask): 0x100004 the PC, the
+// characters' tasks, the held item's actor and the BGM; 0x100104 the dog
+// when it follows; 0x80000 Brown's controller.
+// ROR 0x001c65e8 // callcheck: FUN_00281db0 (the actor's setHide, a virtual slot in the ROM)
+
+void GamMan::resume(u_int mask)
+{
+    if ((mask & 0x100000) != 0)
+        resumeFromMenu(0);
+    if ((mask & 0x100004) != 0)
+    {
+        pauseAchr(0);
+        empty1c58b8(0);
+        u_int f2 = m_flags2;
+        m_flags &= ~0x10000u;
+        m_flags2 = f2 & ~0x8000000u;
+        if ((f2 & 0x1000) == 0)
+            m_flags2 = f2 & 0xf7fff7ff;
+        if (m_pcPtr != NULL)
+        {
+            g_magSystem.setPC(m_pcActor, m_pcJnfc);
+            m_pcPtr->clearSecta(1);
+            if ((m_flags2 & 0x1000) == 0)
+            {
+                u_char pos[0x20];
+                placeAchr(m_21fcc, pos, 1);
+            }
+        }
+        if (m_pcEquipItemChrID != -1)
+            gamShowActor(m_pcEquipItemChrID);
+        getEmyOids();
+        showLinked(m_21fcc);
+        m_sndMan.resumeBgm(0, 0, 1);
+    }
+    if ((mask & 0x100104) != 0)
+    {
+        if (m_inuMode == 1 && (m_flags2 & 0x2000) == 0)
+        {
+            gamSetBwnFollow(1);
+            if (m_dogPtr != NULL && m_dogChrNo != -1)
+            {
+                g_magSystem.setBwn(m_dogChrNo, 0);
+                m_dogPtr->clearSecta(1);
+            }
+        }
+        else
+        {
+            mask &= ~0x100u;
+        }
+    }
+    if ((mask & 0x80000) != 0)
+        gamSetBwnWait(1);
+    m_flags |= mask;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c687c // callcheck: FUN_00281db0 (the actors' setHide, a virtual slot in the ROM)
+
+void GamMan::showLinked(u_int oid)
+{
+    if (!isObj(oid) || gamOidList(oid) != 1)
+        return;
+    ACHRstat *chr = getAchr(oid);
+    if (chr->m_link != -1)
+        gamShowActor(getActorNo(chr->m_link));
+    if (gamOidType(oid) == 0)
+    {
+        if (m_22004 != 0 && isObj(m_22004))
+            gamShowActor(getActorNo(m_22004));
+        if (m_22008 != 0 && isObj(m_22008))
+            gamShowActor(getActorNo(m_22008));
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c6a04
+
+void GamMan::getEmyOids()
+{
+    g_emyManager.getOids(&m_22004, &m_22008);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The running bits go (m_flags &= ~mask): 0x100000 the menu part,
+// 0x100004 the PC and the characters' tasks, 0x100104 the dog (back to
+// its motion 1 unless it is in a mode), 0x80000 Brown's controller,
+// 0x200000 shows the dog.
+// ROR 0x001c6a40
+
+void GamMan::pause(u_int mask)
+{
+    if ((mask & 0x100000) != 0)
+        pauseForMenu(-1);
+    if ((mask & 0x100004) != 0)
+    {
+        m_flags |= 0x10000;
+        m_flags2 = (m_flags2 & ~0x80000u) | 0x800;
+        pauseAchr(1);
+        empty1c58b8(1);
+        if (m_pcPtr != NULL)
+            setPc(-1);
+    }
+    if ((mask & 0x100104) != 0)
+    {
+        gamSetBwnFollow(0);
+        if (m_dogPtr != NULL)
+        {
+            if (!g_magSystem.m_scene.m_actors[m_dogChrNo].isModeSet())
+                chrChangeMotion(m_21fd0, 1, -1, 0x100, 0x1.11111p-6f /* 0x3c888888 */,
+                                32769.0f /* 0x47000100 */);
+            setDog(-1);
+        }
+    }
+    if ((mask & 0x80000) != 0)
+        gamSetBwnWait(0);
+    if ((mask & 0x200000) != 0 && m_dogPtr != NULL)
+    {
+        m_dogPtr->setHide(0);
+        m_dogPtr->m_flags &= ~0x10000000u;
+    }
+    m_flags &= ~mask;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c96c8
+
+int GamMan::isFchrActive(u_int oid)
+{
+    u_int type = gamOidType(oid);
+    if (type - 4 >= 2)
+        return 0;
+    FCHRstat *chr = getFchr(oid);
+    if (chr->m_actor == -1)
+        return 0;
+    u_int flags = chr->m_flags;
+    if (type == 4 && (flags & 1) == 0)
+        return 1;
+    if ((flags & 0x200000) != 0 || (flags & 1) != 0)
+        return 0;
+    if ((flags & 0x10) != 0)
+        return 1;
+    if ((flags & 8) == 0)
+        return 0;
+    return (flags & 2) != 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c9784
+
+void GamMan::setFindTargetItem(short id)
+{
+    m_findTargetItem = id;
+    if (id == 0xa00)
+    {
+        gamSetBwnItem(0);
+        return;
+    }
+    gamSetBwnItem(id);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A jump table of 20 ops (data 0x2fbba0); ops 3, 0x12 and 0x13 do nothing.
+// ROR 0x001c9920
+
+int GamMan::ctlObjParam(u_int oid, u_int op, void *data, int alt)
+{
+    GamObjRec *rec = m_objRec;
+    if (oid == (u_int)-1)
+        return 0;
+    u_int *word = (u_int *)data;
+    for (int i = 0; i < m_objTable->m_num; i++, rec++)
+    {
+        if (rec->m_oid != oid)
+            continue;
+        if (op > 0x13)
+            return -1;
+        switch (op)
+        {
+        case 0x00: rec->m_flags |= *word;               return 0;
+        case 0x01: rec->m_flags &= ~*word;              return 0;
+        case 0x02: return (rec->m_flags & *word) != 0;
+        case 0x04: rec->m_0c = (int)*word;              return 0;
+        case 0x05: *word = (u_int)rec->m_0c;            return 0;
+        case 0x06: *word = (u_int)rec->m_28;            return 0;
+        case 0x07: *word = (u_int)rec->m_2c;            return 0;
+        case 0x08: memcpy(data, rec->m_10, 0x10);       return 0;
+        case 0x09: rec->m_08 = (int)*word;              return 0;
+        case 0x0a: *word = (u_int)rec->m_08;            return 0;
+        case 0x0b: memcpy(data, alt == 0 ? rec->m_30 : rec->m_40, 0x10); return -1;
+        case 0x0c:
+            word[0] = (u_int)rec->m_28;
+            word[1] = (u_int)rec->m_2c;
+            return -1;
+        case 0x0d: *(float *)data = rec->m_20;          return -1;
+        case 0x0e: memcpy(data, rec->m_10, 0x10);       return -1;
+        case 0x0f: *word = (u_int)rec->m_08;            return -1;
+        case 0x10:
+        {
+            FCHRstat *chr = findFchrType9((int)oid);
+            if (chr == NULL)
+                return -1;
+            float rot[3];
+            chr->getRot(rot);
+            GamObjInfo info;
+            info.m_alt = rec->m_28 != m_21f7c;
+            const float *pos = info.m_alt ? rec->m_40 : rec->m_30;
+            info.m_oid = chr->m_oid;
+            info.m_rotY = rot[1];
+            info.m_pos[0] = pos[0];
+            info.m_pos[1] = pos[1];
+            info.m_pos[2] = pos[2];
+            info.m_flags = rec->m_flags & 0xf8;
+            info._1c = 0;       /* stack garbage in the ROM */
+            memcpy(data, &info, sizeof(info));
+            return -1;
+        }
+        case 0x11: rec->m_flags = *word;                return 0;
+        default:                                        return -1;
+        }
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cb24c
+
+void GamMan::setPc(int oid)
+{
+    if (oid == -1)
+    {
+        g_magSystem.setPC(-1, 0);
+        return;
+    }
+    m_21fcc = oid;
+    ACHRstat *pc = getAchr((u_int)oid);
+    m_pcPtr = pc;
+    if (pc == NULL)
+        return;
+    pc->clearSecta(1);
+    m_pcPtr->m_flags |= 0x10000;
+    m_pcActor = m_pcPtr->m_actor;
+    m_pcActorPtr = &g_magSystem.m_scene.m_actors[m_pcActor];
+    g_magSystem.setPC(-1, 0);
+    m_21f74 = (u_int)-1;
+    m_21f70 = m_pcActor;
+    setCameraMode(m_cameraMode, (u_char)m_21f78);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cb384
+
+void GamMan::setDog(int oid)
+{
+    if (oid == -1)
+    {
+        gamSetBwnFollow(0);
+        return;
+    }
+    m_21fd0 = oid;
+    ACHRstat *dog = getAchr((u_int)oid);
+    m_dogPtr = dog;
+    if (dog == NULL)
+        return;
+    dog->m_flags |= 0x10000;
+    m_dogChrNo = m_dogPtr->m_actor;
+    g_magSystem.setBwn(m_dogChrNo, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Reads the global, not this (as the ROM does).
+// ROR 0x001cbdb8
+
+DogActor *GamMan::getActor(u_int oid)
+{
+    int no = g_gamMan.getActorNo(oid);
+    if (no == -1)
+        return NULL;
+    return &g_magSystem.m_scene.m_actors[no];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The image's pixels lie before it, w * h bytes rounded up to 16.
+// ROR 0x001cbdfc
+
+void GamMan::setImage(int slot, u_char *image)
+{
+    GamImage *img = (GamImage *)image;
+    u_int size = (u_int)img->m_w * img->m_h;
+    if ((size & 0xf) != 0)
+        size = (size & 0xfff0) + 0x10;
+    // PC: a host address does not fit the word; the VM's word store keeps
+    // it whole for the script (and the readers that go through seqVmLoadWord).
+    seqVmStoreWord((intptr_t)&img->m_pixels, (intptr_t)(image - size));
+    m_image[slot] = img;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The inline GamMan::find in the ROM, with -1 for no object.
+// ROR 0x001cbe38 // callcheck: getAchr, getFchr, getVFchr (inside the inline find)
+
+int GamMan::getActorNo(u_int oid)
+{
+    if (!isObj(oid))
+        return -1;
+    ObjStat *obj = find(oid);
+    if (obj == NULL)
+        return -1;
+    return obj->m_actor;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cd224
+
+void GamMan::releaseStage2()
+{
+    releaseTenkyus(2);
+    releaseObjs(2, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A stage change asked by the scripts: flags2 bit 2 runs it now (the PC
+// and dog off their cells, camera mode 1, the menu pause, then kind 3 the
+// stage-2 images and areas or kind 5 a full reset, and execStageReq); bit
+// 1 waits on the background loading task.
+// ROR 0x001cd25c
+
+void GamMan::afterSeqExec()
+{
+    if ((m_flags & 0x8000) != 0)
+        return;
+    u_int f2 = m_flags2;
+    if ((f2 & 3) == 0)
+        return;
+    u_int keep;
+    if ((f2 & 2) == 0)
+    {
+        if ((f2 & 1) == 0)
+            return;
+        if (g_taskMan.getTask(m_bgLoadTaskId) == NULL)
+            return;
+        keep = ~1u;
+        f2 = m_flags2;
+    }
+    else
+    {
+        if (m_pcPtr != NULL)
+            m_pcPtr->clearSecta(1);
+        if (m_dogPtr != NULL)
+            m_dogPtr->clearSecta(1);
+        m_21f74 = (u_int)-1;
+        setCameraMode(1, 0);
+        pause(0x100000);
+        if (m_stageReq == 3)
+        {
+            g_sequence.stopImages(2);
+            m_area.stopKind(2);
+            m_area.clearKind(2);
+            clearPool20b00(2);
+        }
+        else if (m_stageReq == 5)
+        {
+            resetStage();
+            releaseTenkyus(0);
+            g_sequence.clearStageVars();
+        }
+        execStageReq();
+        f2 = m_flags2;
+        keep = ~2u;
+    }
+    m_flags2 = f2 & keep;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cd7c8
+
+void GamMan::execStageReq()
+{
+    int stat = m_cur_stat;
+    if (stat == 2)
+    {
+        releaseStage2();
+        initStage2();
+        m_225e4 = 0;
+        startStage2();
+        gamStage2Loaded();
+    }
+    else if (stat == 3)
+    {
+        empty1c4f30();
+    }
+    else if (stat == 1)
+    {
+        m_flags &= ~0x20u;
+        g_sequence.m_global[5] = 0;
+        g_sequence.m_global[7] = 0;
+        loadStage(m_chapter);
+    }
+    g_sequence.m_global[3] = m_21f84;
+    g_sequence.m_global[4] = m_21f88;
+    g_sequence.m_global[1] = m_21f7c;
+    g_sequence.m_global[2] = m_stageReq != 2 ? m_21f80 : -1;
+    resume(2);
+    g_taskMan.pauseOthers(0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d046c
+
+int GamMan::isObj(u_int oid)
+{
+    switch (gamOidList(oid))
+    {
+    case 1:
+        return isAchr(oid);
+    case 0:
+        return isVFchr(oid);
+    case 2:
+        if (gamOidType(oid) != 5)
+            return isFchr(oid);
+        if (isVFchr(oid))
+            return 1;
+        return isFchr(oid) != 0;
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// fchr / vfchr objects: the bits off their flags (both lists for a type 5),
+// then 0x40 re-finds the cell and re-links twice, 0x10000000 follows the
+// actor, 1 shows it (or keeps it hidden while held), 0x10 the 0x1cbb80 part.
+// achr objects: 0x40 re-links and kills its task, 1 shows it, the held
+// item's actor for the PC and its linked object's actor.
+// ROR 0x001d1410 // callcheck: FUN_00281db0 (the actors' setHide, a virtual slot in the ROM)
+
+int GamMan::resetObj(u_int oid, u_int bits)
+{
+    if (!isObj(oid))
+        return 0;
+    u_int list = gamOidList(oid);
+    if (list != 1)
+    {
+        if (list != 0 && list != 2)
+            return 0;
+        FCHRstat *vchr = getVFchr(oid);
+        if (vchr != NULL)
+            vchr->m_flags &= ~bits;
+        FCHRstat *chr = getFchr(oid);
+        if (chr != NULL)
+        {
+            chr->m_flags &= ~bits;
+            if ((bits & 0x40) != 0)
+            {
+                chr->findSecta();
+                chr->m_flags |= 0x10000080;
+                relinkObj(oid);
+                relinkObj(oid);
+            }
+            if ((bits & 0x10000000) != 0)
+                chr->syncActorPos();
+            if ((bits & 1) != 0)
+            {
+                if ((chr->m_flags & 0x200000) == 0)
+                {
+                    chr->setHide(0);
+                    if (isFchrActive(oid) && gamOidType(oid) == 5)
+                        ctlObj1cb8e4(oid, 0x32, 0);
+                }
+                else
+                {
+                    chr->m_flags |= 1;
+                }
+            }
+            if ((bits & 0x10) != 0)
+                ctlObj1cbb80(oid);
+        }
+        return 1;
+    }
+
+    ACHRstat *chr = getAchr(oid);
+    if ((bits & 0x40) != 0)
+    {
+        relinkObj(oid);
+        chr->m_flags |= 0x10000080;
+        g_taskMan.killTask(chr->m_taskId);
+    }
+    if ((bits & 0x10000000) != 0)
+        chr->syncActorPos();
+    if ((bits & 1) != 0)
+    {
+        chr->setHide(0);
+        if (oid == (u_int)m_21fcc && m_pcEquipItemChrID != -1 && (m_flags2 & 0x4000000) == 0)
+            gamShowActor(m_pcEquipItemChrID);
+        int link = chr->m_link;
+        if (link != -1 && isObj((u_int)link))
+            gamShowActor(getActorNo((u_int)link));
+    }
+    if ((bits & 0x10) != 0)
+        ctlObj1cbb80(oid);
+    chr->m_flags &= ~bits;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d2aac
+
+int GamMan::isAchr(u_int oid)
+{
+    u_int slot = gamOidSlot(oid);
+    if (slot >= 0x80)
+        return 0;
+    return m_achr[slot] != NULL;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d2adc
+
+int GamMan::isFchr(u_int oid)
+{
+    u_int slot = gamOidSlot(oid);
+    if (slot - 1 >= 0x27f)
+        return 0;
+    return m_fchr[slot] != NULL;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d2b10
+
+int GamMan::isVFchr(u_int oid)
+{
+    for (SeqNode<FCHRstat *> *node = m_vfchrList.m_used.begin(); node != m_vfchrList.m_used.end();
+         node = node->m_next)
+    {
+        if (node->m_data->m_oid == oid)
+            return 1;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d2b8c
+
+ACHRstat *GamMan::getAchr(u_int oid)
+{
+    return m_achr[gamOidSlot(oid)];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d2ba8
+
+FCHRstat *GamMan::getFchr(u_int oid)
+{
+    if (gamOidType(oid) == 5)
+    {
+        FCHRstat *chr = getVFchr(oid);
+        if (chr != NULL)
+            return chr;
+    }
+    return m_fchr[gamOidSlot(oid)];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d2c0c
+
+FCHRstat *GamMan::findFchrType9(int no)
+{
+    for (SeqNode<FCHRstat *> *node = m_fchrList.m_used.begin(); node != m_fchrList.m_used.end();
+         node = node->m_next)
+    {
+        u_int oid = node->m_data->m_oid;
+        if (gamOidType(oid) != 9)
+            continue;
+        int param[4];
+        getObjParam(oid, 0x41, param);
+        if (param[0] == no)
+            return node->m_data;
+    }
+    return NULL;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d2d00
+
+FCHRstat *GamMan::getVFchr(u_int oid)
+{
+    for (SeqNode<FCHRstat *> *node = m_vfchrList.m_used.begin(); node != m_vfchrList.m_used.end();
+         node = node->m_next)
+    {
+        if (node->m_data->m_oid == oid)
+            return node->m_data;
+    }
+    return NULL;
+}
+
 // ---- stubs (tools/reverse/stubgen.py) ----
 
 // stub of ROR 0x001c2f50
@@ -667,12 +1494,6 @@ void GamMan::loadStageSnd(int chapter)
 void GamMan::releaseChr(int arg)
 {
     ROSEPAN_STUB("GamMan::releaseChr", 0x001ccc30);
-}
-
-// stub of ROR 0x001d1410
-void GamMan::resetObj(int oid, int arg)
-{
-    ROSEPAN_STUB("GamMan::resetObj", 0x001d1410);
 }
 
 // stub of ROR 0x001c7e40
@@ -714,12 +1535,6 @@ int GamMan::delStock(short id, int one)
     return {};
 }
 
-// stub of ROR 0x001c5bf4
-void GamMan::enterMenu(int kind)
-{
-    ROSEPAN_STUB("GamMan::enterMenu", 0x001c5bf4);
-}
-
 // stub of ROR 0x001c7a4c
 void GamMan::equipItem(short id)
 {
@@ -746,28 +1561,10 @@ int GamMan::hasItem(short id, int withStock)
     return {};
 }
 
-// stub of ROR 0x001c6a40
-void GamMan::pause(u_int mask)
-{
-    ROSEPAN_STUB("GamMan::pause", 0x001c6a40);
-}
-
-// stub of ROR 0x001c65e8
-void GamMan::resume(u_int mask)
-{
-    ROSEPAN_STUB("GamMan::resume", 0x001c65e8);
-}
-
 // stub of ROR 0x001c8598
 void GamMan::selectItem(short id)
 {
     ROSEPAN_STUB("GamMan::selectItem", 0x001c8598);
-}
-
-// stub of ROR 0x001cbdfc
-void GamMan::setImage(int slot, u_char *image)
-{
-    ROSEPAN_STUB("GamMan::setImage", 0x001cbdfc);
 }
 
 // stub of ROR 0x001c3d38
@@ -782,20 +1579,62 @@ void GamMan::storePcTransform()
     ROSEPAN_STUB("GamMan::storePcTransform", 0x001cd404);
 }
 
-// stub of ROR 0x001cd25c
-void GamMan::afterSeqExec()
-{
-    ROSEPAN_STUB("GamMan::afterSeqExec", 0x001cd25c);
-}
-
-// stub of ROR 0x001c4168
-void GamMan::onStageSeqEnd()
-{
-    ROSEPAN_STUB("GamMan::onStageSeqEnd", 0x001c4168);
-}
-
 // stub of ROR 0x001c43f0
 void GamMan::onSubSeqEnd()
 {
     ROSEPAN_STUB("GamMan::onSubSeqEnd", 0x001c43f0);
+}
+
+// stub of ROR 0x001cbd0c
+void GamMan::clearPool20b00(int kind)
+{
+    ROSEPAN_STUB("GamMan::clearPool20b00", 0x001cbd0c);
+}
+
+// stub of ROR 0x001cb8e4
+void GamMan::ctlObj1cb8e4(u_int oid, int a, int b)
+{
+    ROSEPAN_STUB("GamMan::ctlObj1cb8e4", 0x001cb8e4);
+}
+
+// stub of ROR 0x001cbb80
+void GamMan::ctlObj1cbb80(u_int oid)
+{
+    ROSEPAN_STUB("GamMan::ctlObj1cbb80", 0x001cbb80);
+}
+
+// stub of ROR 0x001d1c80
+void GamMan::getObjParam(u_int oid, int which, void *out)
+{
+    ROSEPAN_STUB("GamMan::getObjParam", 0x001d1c80);
+}
+
+// stub of ROR 0x001c47c4
+void GamMan::initStage2()
+{
+    ROSEPAN_STUB("GamMan::initStage2", 0x001c47c4);
+}
+
+// stub of ROR 0x001cdf5c
+void GamMan::releaseObjs(int kind, int arg)
+{
+    ROSEPAN_STUB("GamMan::releaseObjs", 0x001cdf5c);
+}
+
+// stub of ROR 0x001cb01c
+void GamMan::releaseTenkyus(int kind)
+{
+    ROSEPAN_STUB("GamMan::releaseTenkyus", 0x001cb01c);
+}
+
+// stub of ROR 0x001cdbf0
+void GamMan::resetStage()
+{
+    ROSEPAN_STUB("GamMan::resetStage", 0x001cdbf0);
+}
+
+// stub of ROR 0x001cd60c
+void GamMan::startStage2()
+{
+    ROSEPAN_STUB("GamMan::startStage2", 0x001cd60c);
 }

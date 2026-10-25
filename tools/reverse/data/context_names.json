@@ -437,6 +437,12 @@
   "was": "FUN_0010a038",
   "why": "+0x40..+0x48 += a1[0..2], w = 1; f12 into +0x74 (the TransOfsY saveTransOfsY reads), f13 into +0x3d0 (clearRotYAAR's field), dirty"
  },
+ "0010a834": {
+  "name": "DogActor::isModeSet",
+  "tag": "ror-inferred",
+  "was": "FUN_0010a834",
+  "why": "returns +0xf0 (DogModel m_mode, getMode) != 0"
+ },
  "0010aa9c": {
   "name": "DogActor::findMotionByName",
   "tag": "ror-inferred",
@@ -2615,6 +2621,30 @@
   "was": "FUN_00143fd0",
   "why": "steps the fog fade setFog started: m_fog[0] = lerp(m_fog[2], m_fog[3]) over +0x2ab64 frames"
  },
+ "00144334": {
+  "name": "gamSetBwnFollow",
+  "tag": "ror-inferred",
+  "was": "FUN_00144334",
+  "why": "MagLifeBwnCtrl (scene +0x2bd20) 0x12b7cc with 0 when on, 2 when off"
+ },
+ "00144500": {
+  "name": "gamSetBwnItem",
+  "tag": "ror-inferred",
+  "was": "FUN_00144500",
+  "why": "MagLifeBwnCtrl 0x12a758(item, 0, 0)"
+ },
+ "0014457c": {
+  "name": "gamSetBwnWait",
+  "tag": "ror-inferred",
+  "was": "FUN_0014457c",
+  "why": "MagLifeBwnCtrl 0x12b7cc with 1 when on, 0 when off"
+ },
+ "00163ab8": {
+  "name": "EmyManager::getOids",
+  "tag": "ror-inferred",
+  "was": "FUN_00163ab8",
+  "why": "copies +0x138 / +0x13c to its two out pointers"
+ },
  "0017e5c0": {
   "name": "WrdTable::load",
   "tag": "ror-inferred",
@@ -4259,6 +4289,12 @@
   "was": "FUN_001c46f4",
   "why": "empty in the US build; loadStage hands it the stage pack buffer right after allocDebug"
  },
+ "001c47c4": {
+  "name": "GamMan::initStage2",
+  "tag": "ror-inferred",
+  "was": "FUN_001c47c4",
+  "why": "execStageReq stat 2; not read yet"
+ },
  "001c4f30": {
   "name": "GamMan::empty1c4f30",
   "tag": "ror-inferred",
@@ -4277,17 +4313,59 @@
   "was": "FUN_001c53d8",
   "why": "empty; mainLoop calls it last each frame"
  },
+ "001c541c": {
+  "name": "GamMan::setInuMode",
+  "tag": "ror-inferred",
+  "was": "FUN_001c541c",
+  "why": "stores +0x21fd4 (the ELF's getInuMode) then per mode 1..4 pauses / resumes 0x200000 / 0x100 and shows / hides the dog"
+ },
+ "001c58b8": {
+  "name": "GamMan::empty1c58b8",
+  "tag": "ror-inferred",
+  "was": "FUN_001c58b8",
+  "why": "returns 0; pause / resume call it with 1 / 0"
+ },
+ "001c58c0": {
+  "name": "GamMan::pauseAchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001c58c0",
+  "why": "walks the achr list (+0x1d350) pausing type-2 chars tasks, task kinds 0x13 / 0x14 and the EmyManager task; flags2 bit 0x10000 holds the state"
+ },
  "001c5bf4": {
   "name": "GamMan::enterMenu",
   "tag": "ror-inferred",
   "was": "FUN_001c5bf4",
   "why": "stops the stage sound (GamSndMan 0x1e17b4 mode 0), clears flag 8, sends task message 5, sets 0x100000; kind 1 / 2 also sets Sequence flag 1; called before the item, map, save, stock menus"
  },
+ "001c5e1c": {
+  "name": "GamMan::pauseForMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_001c5e1c",
+  "why": "part of pause(0x100000): flags2 |= 4, pause(2), enterMenu 1 / 2 by menu id 0x10000.. / 0x1000a"
+ },
+ "001c5f70": {
+  "name": "GamMan::resumeFromMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_001c5f70",
+  "why": "part of resume(0x100000): S2dMes sprite 2 off after flags2 0x20, flags2 |= 8"
+ },
  "001c65e8": {
   "name": "GamMan::resume",
   "tag": "ror-inferred",
   "was": "FUN_001c65e8",
   "why": "clears what GamMan::pause set for the same mask bits (re-binds the PC with MagSystem::setPC)"
+ },
+ "001c687c": {
+  "name": "GamMan::showLinked",
+  "tag": "ror-inferred",
+  "was": "FUN_001c687c",
+  "why": "setHide(0) on the actor of the achr +0x254 object and, type 0, of the two EmyManager objects"
+ },
+ "001c6a04": {
+  "name": "GamMan::getEmyOids",
+  "tag": "ror-inferred",
+  "was": "FUN_001c6a04",
+  "why": "EmyManager 0x163ab8 copies its +0x138 / +0x13c into GamMan +0x22004 / +0x22008"
  },
  "001c6a40": {
   "name": "GamMan::pause",
@@ -4379,11 +4457,29 @@
   "was": "FUN_001c94d8",
   "why": "removes the id's node from the stock list +0x1a7f0, or decrements it (arg 1)"
  },
+ "001c96c8": {
+  "name": "GamMan::isFchrActive",
+  "tag": "ror-inferred",
+  "was": "FUN_001c96c8",
+  "why": "types 4 / 5 only: the fchr actor set and its flags (1, 0x200000, 0x10, 8, 2) tested"
+ },
+ "001c9784": {
+  "name": "GamMan::setFindTargetItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001c9784",
+  "why": "stores +0x2220e (the ELF getFindTargetItem) and sends it (0 for 0xa00) to 0x144500"
+ },
  "001c98b8": {
   "name": "GamMan::beforeMapMenu",
   "tag": "ror-inferred",
   "was": "FUN_001c98b8",
   "why": "empty in the US build; the system call runs it before the map menu 0x10001 only"
+ },
+ "001c9920": {
+  "name": "GamMan::ctlObjParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001c9920",
+  "why": "finds the object table record (+0x18bd0, 0x50 bytes) of oid and runs one of 20 ops (table 0x2fbba0) on its words"
  },
  "001c9c1c": {
   "name": "GamMan::setOption",
@@ -4391,17 +4487,71 @@
   "was": "FUN_001c9c1c",
   "why": "8-case table 0x2fbbf0: 0 brightness 0x780d04, 1 master volume via setVolume, 2 / 3 stream / SE volume via funcSnd 0xf / 0xe, 4 / 5 read them back, 6 rxSndSetOutputMode, 7 a flag copied to MagSystem +8; returns -1"
  },
+ "001cb01c": {
+  "name": "GamMan::releaseTenkyus",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb01c",
+  "why": "frees the +0x1d240 records calling MagScene::releaseTenkyu on each, then frees +0x225e8"
+ },
+ "001cb24c": {
+  "name": "GamMan::setPc",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb24c",
+  "why": "stores +0x21fcc, getPCPtr +0x22090 = the achr, its actor +0x21fdc, MagSystem::setPC, setCameraMode"
+ },
+ "001cb384": {
+  "name": "GamMan::setDog",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb384",
+  "why": "stores +0x21fd0, getDogPtr +0x22094, getDogChrNo +0x21fe8, MagSystem::setBwn"
+ },
+ "001cb8e4": {
+  "name": "GamMan::ctlObj1cb8e4",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb8e4",
+  "why": "resetObj calls it (oid, 0x32, 0) for an active type-5 fchr; role not read yet"
+ },
+ "001cbb80": {
+  "name": "GamMan::ctlObj1cbb80",
+  "tag": "ror-inferred",
+  "was": "FUN_001cbb80",
+  "why": "resetObj calls it for bit 0x10; role not read yet"
+ },
+ "001cbd0c": {
+  "name": "GamMan::clearPool20b00",
+  "tag": "ror-inferred",
+  "was": "FUN_001cbd0c",
+  "why": "0x17762c then the +0x20b00 pool used list back to free"
+ },
+ "001cbdb8": {
+  "name": "GamMan::getActor",
+  "tag": "ror-inferred",
+  "was": "FUN_001cbdb8",
+  "why": "the scene actor (0x6fe6a0 + n * 0x4d0) of g_gamMan.getActorNo(oid), NULL for -1"
+ },
  "001cbdfc": {
   "name": "GamMan::setImage",
   "tag": "ror-inferred",
   "was": "FUN_001cbdfc",
   "why": "+0x222e4[slot] = a script image {w, h, ...} and its +0xc = the data before it (w * h rounded to 16)"
  },
+ "001cbe38": {
+  "name": "GamMan::getActorNo",
+  "tag": "ror-inferred",
+  "was": "FUN_001cbe38",
+  "why": "isObj then +0x108 of the object the inline find returns, -1 none"
+ },
  "001ccc30": {
   "name": "GamMan::releaseChr",
   "tag": "ror-inferred",
   "was": "FUN_001ccc30",
   "why": "loadStage calls it with +0x21fcc / +0x21fd0 after saving the PC / dog ObjStat; removes private collision, kills tasks"
+ },
+ "001cd224": {
+  "name": "GamMan::releaseStage2",
+  "tag": "ror-inferred",
+  "was": "FUN_001cd224",
+  "why": "execStageReq stat 2: releaseTenkyus(2), 0x1cdf5c(2, 0)"
  },
  "001cd25c": {
   "name": "GamMan::afterSeqExec",
@@ -4415,11 +4565,41 @@
   "was": "FUN_001cd404",
   "why": "reads the PC actor's (+0x22090) position into +0x22020 and rotation into +0x22030, angle wrapped to -pi..pi"
  },
+ "001cd60c": {
+  "name": "GamMan::startStage2",
+  "tag": "ror-inferred",
+  "was": "FUN_001cd60c",
+  "why": "execStageReq stat 2 after initStage2; not read yet"
+ },
+ "001cd7c8": {
+  "name": "GamMan::execStageReq",
+  "tag": "ror-inferred",
+  "was": "FUN_001cd7c8",
+  "why": "the change afterSeqExec asks for, by getCurStat (1 loadStage(getChapter)), then sequence globals 1..4 from +0x21f7c.., resume(2), task pause off"
+ },
+ "001cdbf0": {
+  "name": "GamMan::resetStage",
+  "tag": "ror-inferred",
+  "was": "FUN_001cdbf0",
+  "why": "afterSeqExec kind 5: closeMenu, clearPC, setPc / setDog -1, the object table bits, sounds, images, areas"
+ },
+ "001cdf5c": {
+  "name": "GamMan::releaseObjs",
+  "tag": "ror-inferred",
+  "was": "FUN_001cdf5c",
+  "why": "releaseStage2 calls it with (2, 0); not read yet"
+ },
  "001cfb38": {
   "name": "GamMan::setSysMsgHandle",
   "tag": "ror-inferred",
   "was": "FUN_001cfb38",
   "why": "+0x2227c = the handle MagScene::openSysMsgWindow returned"
+ },
+ "001d046c": {
+  "name": "GamMan::isObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001d046c",
+  "why": "by oid bits 28..29: isAchr / isVFchr / isFchr (type 5 tries vfchr first)"
  },
  "001d1410": {
   "name": "GamMan::resetObj",
@@ -4432,6 +4612,54 @@
   "tag": "ror-inferred",
   "was": "FUN_001d1a48",
   "why": "returns MagScene m_menu_id (0x727bd0 = scene 0x6fbd80 + 0x2be50) != -1"
+ },
+ "001d1c80": {
+  "name": "GamMan::getObjParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001d1c80",
+  "why": "findFchrType9 reads param 0x41 of each type-9 fchr through it; not read yet"
+ },
+ "001d2aac": {
+  "name": "GamMan::isAchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2aac",
+  "why": "slot < 0x80 and +0x21340[slot] set (the set_achr table)"
+ },
+ "001d2adc": {
+  "name": "GamMan::isFchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2adc",
+  "why": "slot 1..0x27f and +0x21540[slot] set"
+ },
+ "001d2b10": {
+  "name": "GamMan::isVFchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2b10",
+  "why": "walks the vfchr list (getVFchrListPtr +0x1dcc0) for the oid"
+ },
+ "001d2b8c": {
+  "name": "GamMan::getAchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2b8c",
+  "why": "+0x21340[slot] (the set_achr table); the inline GamMan::find calls it for list 1"
+ },
+ "001d2ba8": {
+  "name": "GamMan::getFchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2ba8",
+  "why": "type 5 tries getVFchr, else +0x21540[slot]; list 2 of find"
+ },
+ "001d2c0c": {
+  "name": "GamMan::findFchrType9",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2c0c",
+  "why": "the type-9 object of the fchr list whose getObjParam 0x41 equals the argument"
+ },
+ "001d2d00": {
+  "name": "GamMan::getVFchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2d00",
+  "why": "the object of the vfchr list with the oid; list 0 of find"
  },
  "001d3588": {
   "name": "GamMan::markReset",
@@ -4451,6 +4679,18 @@
   "was": "FUN_001d3ac8",
   "why": "0: saves the volume at +0x22214 and sets 0; 1: restores the saved one and marks -1"
  },
+ "001d544c": {
+  "name": "GamMan::placeAchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001d544c",
+  "why": "resume calls it (pc oid, a 0x20-byte local, 1) unless flags2 0x1000; not read yet"
+ },
+ "001d5da0": {
+  "name": "GamMan::relinkObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001d5da0",
+  "why": "ObjStat::setHide and resetObj (bit 0x40) call it with GamMan and the oid; not read yet"
+ },
  "001d84a8": {
   "name": "GamMan::resetExtra",
   "tag": "ror-inferred",
@@ -4463,17 +4703,59 @@
   "was": "FUN_001d8964",
   "why": "ObjStat::get_o_rot forwards to it: the actor's rotation from the scene table 0x6fe6f0 (stride 0x4d0) or +0x1a0"
  },
+ "001d8dc4": {
+  "name": "ObjStat::syncActorPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001d8dc4",
+  "why": "copies the actor position (+0x40 of the 0x4d0 actor) to +0x190 and re-finds the secta cell when out of its bounds"
+ },
+ "001d8ea8": {
+  "name": "ObjStat::findSecta",
+  "tag": "ror-inferred",
+  "was": "FUN_001d8ea8",
+  "why": "0x1d8064(GamMan, +0x190, +0x114, type 2) and 0x1d8d28 on a hit"
+ },
  "001d8f04": {
   "name": "ObjStat::updatePos",
   "tag": "ror-inferred",
   "was": "FUN_001d8f04",
   "why": "copies the actor's position into +0x190 and out, then moves the object to a new secta cell when it left +0x114's box"
  },
+ "001d95c4": {
+  "name": "ObjStat::setHide",
+  "tag": "ror-inferred",
+  "was": "FUN_001d95c4",
+  "why": "calls the actor setHide slot (vtable +0x40) with the argument; bit 0x40 re-links / re-finds"
+ },
  "001d96ec": {
   "name": "ObjStat::save",
   "tag": "ror-inferred",
   "was": "FUN_001d96ec",
   "why": "refreshes pos / rot from the actor, then copies +0x100..+0x1a0 to out; loadStage saves the PC / dog into GamMan +0x220a0 / +0x22150"
+ },
+ "001d9830": {
+  "name": "ObjStat::load",
+  "tag": "ror-inferred",
+  "was": "FUN_001d9830",
+  "why": "copies 0xb0 bytes to +0x100 (the inverse of ObjStat::save) and clears +0x10c..+0x114; returns 0xb0"
+ },
+ "001d9f10": {
+  "name": "ObjStat::clearSecta",
+  "tag": "ror-inferred",
+  "was": "FUN_001d9f10",
+  "why": "clears +0x110 / +0x114 (and +0x10c with the flag) then 0x1da07c"
+ },
+ "001da130": {
+  "name": "ACHRstat::pauseTasks",
+  "tag": "ror-inferred",
+  "was": "FUN_001da130",
+  "why": "CmnTaskMan 0x1e7414 on the task ids +0x3d4 / +0x3e0 / +0x3d8 (+0x3dc with the flag)"
+ },
+ "001db774": {
+  "name": "FCHRstat::getRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001db774",
+  "why": "twin of ObjStat::getRot: the actor rotation (+0x50 of the actor) or +0x1a0"
  },
  "001dbef8": {
   "name": "GamSysData::set",
@@ -4486,6 +4768,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001dd414",
   "why": "GamMan::init's call on its +0x40 member; allocates with operator new / new[]"
+ },
+ "001dd7bc": {
+  "name": "GamArea::stopKind",
+  "tag": "ror-inferred",
+  "was": "FUN_001dd7bc",
+  "why": "afterSeqExec kind 3 calls it on GamMan +0x40 with 2; not read yet"
+ },
+ "001dddbc": {
+  "name": "GamArea::clearKind",
+  "tag": "ror-inferred",
+  "was": "FUN_001dddbc",
+  "why": "afterSeqExec kind 3, after stopKind; not read yet"
  },
  "001dea40": {
   "name": "GamArea::startPcAction",
@@ -4528,6 +4822,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e17b4",
   "why": "on GamMan +0x18e00 (the sound table): 0x1e111c then command 0x1b with 0x1e frames for the current slot (mode 1 skips it, 2 the other slot)"
+ },
+ "001e1920": {
+  "name": "GamSndMan::resumeBgm",
+  "tag": "ror-inferred",
+  "was": "FUN_001e1920",
+  "why": "GamMan::resume calls it (0, 0, 1) on +0x18e00; clears bit 0 of +0x1870 and restarts the +0x1684 slot"
  },
  "001e435c": {
   "name": "GamSndMan::isSndBankLoaded",
@@ -4583,6 +4883,24 @@
   "was": "FUN_001e71fc",
   "why": "object 0x7a3d80: allocates a 0x40 task record for a CmnITask (vtable slots at +8 / +0x18 called), assigns an id (written through the id pointer), start frame (-1 = current +0x58), length, links it (0x1e7184); 66 call sites; class name unverified"
  },
+ "001e7414": {
+  "name": "CmnTaskMan::pauseTask",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7414",
+  "why": "finds the task id in the list, 0x1e7340 and stores the state at +8"
+ },
+ "001e747c": {
+  "name": "CmnTaskMan::pauseKinds",
+  "tag": "ror-inferred",
+  "was": "FUN_001e747c",
+  "why": "each task whose virtual kind (vtable +0xc) is in the list ended by -1"
+ },
+ "001e7544": {
+  "name": "CmnTaskMan::pauseOthers",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7544",
+  "why": "every task but kinds 1, 2, 5, 7, 0xf, 0x11, 0x12, 0x17"
+ },
  "001e7724": {
   "name": "CmnTaskMan::killTask",
   "tag": "ror-inferred",
@@ -4613,6 +4931,12 @@
   "was": "FUN_001f4184",
   "why": "vtable 0x2e4cd0 (rtti.py TskSysFunc); kind 0..1 sets the defaults 100, 0x1e, 0xf, 0x1b"
  },
+ "001f5e48": {
+  "name": "chrChangeMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001f5e48",
+  "why": "achr: kills the +0x3dc task and starts a new 0xc0-byte task; else MagScene::changeActorMotion"
+ },
  "001f688c": {
   "name": "gamClearFrameReq",
   "tag": "ror-inferred",
@@ -4642,6 +4966,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f8fc0",
   "why": "writes vtable 0x2e4e70 (TskSnd), copies a 0x40-byte parameter block, picks the step function by kind (7 copies the stream name)"
+ },
+ "001fbbd0": {
+  "name": "gamStage2Loaded",
+  "tag": "ror-inferred",
+  "was": "FUN_001fbbd0",
+  "why": "the last call of execStageReq stat 2; not read yet"
  },
  "00203ea8": {
   "name": "SysTimer::start",

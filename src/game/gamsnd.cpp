@@ -66,3 +66,9 @@ void GamSndMan::update(const float *pos)
 {
     ROSEPAN_STUB("GamSndMan::update", 0x001e100c);
 }
+
+// stub of ROR 0x001e1920
+void GamSndMan::resumeBgm(int a, int mode, int reset)
+{
+    ROSEPAN_STUB("GamSndMan::resumeBgm", 0x001e1920);
+}

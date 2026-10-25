@@ -50,6 +50,13 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      W099 script to the title (it calls setOption 0x1c9c1c too). Still stubs on the load path:
      loadStageSnd 0x1c2f50, resetObj 0x1d1410, releaseChr 0x1ccc30; the GamSndMan / GamSysData /
      WrdTable::load callees live in other files.
+     Session 2 (2026-10-25, `partial`): onStageSeqEnd, afterSeqExec + execStageReq, setImage,
+     resetObj, pause / resume / enterMenu and their helpers, the object lookups (isObj, getAchr /
+     getFchr / getVFchr, getActorNo) and ctlObjParam are written; none of it draws, the screen is
+     still black. The boot's script still ends without system call 0x16 (no title): the reached
+     stubs on that road are the natives seqFunc027 / 021 / 033 / 110 / 001 / 002 / 032 (item 3's
+     list, sequence/seqcall.cpp) -- they decide what W099 does next, so they come before more
+     gamman code. Still stubs on gamman's load path: loadStageSnd 0x1c2f50 (reached every boot).
   5. `unassigned@001fd424` -- sysInitManagers 0x204148, SysTimer::start / update (reached stubs).
   6. `unassigned@001e46b8` -- CmnTaskMan::exec / addTask and 0x1f688c that GamMan::update calls (the
      per-frame task runner; 253 functions: only what the title path reaches).
@@ -510,13 +517,15 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
-- (2026-10-25) **bss 0x7b2060 has no writer.** A pointer to flag words that GamMan::loadStage (+0
-  0x8000, +8 0x8000, clears +4 bit 0x100), MagScene's menu glue and ~50 menu / task functions
-  dereference. A full .text scan (mipsdis 0x100000..0x290000) finds no store with offset 0x2060 or
-  0x205c off any register but sp, and the data word does not appear. Candidates: a script native
-  that registers image addresses (seqFunc110's 100 cases, table data 0x300d20, G000's init calls it
-  ~80 times), or a struct base below 0x7b2060. PC: `g_bss_7b2060` points at 16 zeroed words
-  (lib/unassigned_stubs.cpp), every flag clear. Whoever writes seqFunc110 should look for it.
+- RESOLVED (2026-10-25, gamman session 2): **bss 0x7b2060 is `g_sequence.m_bits`** (0x7a4440 +
+  0xdc20, stored by Sequence::init through the struct base, which a scan for offset 0x2060 cannot
+  see) and 0x7b205c is `m_global`. `g_bss_7b2060` and its zeroed stand-in are gone; code reads
+  `g_sequence.m_bits[n]` / `m_global[n]`. MagScene's glue (magscene.h "GamMan glue") still says
+  *(0x7b2060): read it as the sequence bitset when that code is written.
+- (2026-10-25) **GamMan methods past 0x1d3b44**: `GamMan::placeAchr` 0x1d544c and `relinkObj` 0x1d5da0
+  are called with GamMan in a0 (resume, resetObj, ObjStat::setHide) but sit in unassigned@001d3b44
+  (ObjStat's run). Either gamman.cpp's pinned end (switchVolume 0x1d3ac8) is early or a second file
+  (an object / secta file) holds GamMan methods. Decide when unassigned@001d3b44 is defined.
 - (2026-10-25) `bed/bedpfh.h` inline line numbers: GamMan::loadSystemData / loadStage assert line
   71 (0x47) in the inline whose result is m_top itself (utlMemRealloc's pointer), and line 72 in
   getTotalSize. The header has getNumFile at 71 and getTop at 73; either the line-71 inline is a

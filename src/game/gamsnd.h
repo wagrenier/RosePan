@@ -55,6 +55,9 @@ struct GamSndMan
     /* Fades the current BGM slot out over 0x1e frames (mode 1 keeps it,
      * 2 works on the other slot +0x1708). */
     void stopBgm(int mode);                                              // ROR 0x001e17b4
+    /* GamMan::resume's call (0, 0, 1): restarts the BGM slot (+0x1684,
+     * reset to 0 when reset is set). */
+    void resumeBgm(int a, int mode, int reset);                          // ROR 0x001e1920
 
     int m_mode;                 // ROR 0x0000: loadStage sets 1 (update then uses the camera position)
     int m_mstVolSe[2];          // ROR 0x1590: option 3's funcSnd(0xe) words

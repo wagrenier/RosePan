@@ -115,7 +115,7 @@
    "why": "FileReader / FileReadReq methods, fileGetSize / fileExists, the rxFileCd clock wrappers and two clock helpers that follow them; bounded by the language-select menu code (mnusllg.rpk, SprMan calls) below and GamFont::GamFont above. No source string: game/ by link order (GamFont, then GamMan), gamfile after RoR's gam* names -- a guess"
   },
   "game/gamman.cpp": {
-   "notes": "Smoke run: the system pack and W099 load, G000 and W099 main threads run (natives 110, 032, 001, 002, 033, 027, 021 reached), GamMan::onStageSeqEnd 0x1c4168 and afterSeqExec 0x1cd25c are reached every frame. Screen still black: the title path (script natives, MagLifeMenuTitle, mnu code) is stubbed, so partial. Next gamman slice: onStageSeqEnd, afterSeqExec, setImage 0x1cbdfc (the likeliest road from W099 to the title), then loadStageSnd 0x1c2f50, resetObj 0x1d1410, releaseChr 0x1ccc30. PC: bss 0x7b2060 has no writer in .text (full scan); g_bss_7b2060 points at 16 zeroed words in lib/unassigned_stubs.cpp, see open-items. GamMan is layout host; pool record types are opaque GamRec4..16 until their code is written. Callees named this session in other files: GamSndMan init / update / loadSePack / freeSePack / registSnd / registStrSnd / clear_snd_lst / funcSnd, GamArea init / update, ObjStat updatePos / getRot / save, GamSysData::set, WrdTable::load, MagLife130da4::setVolume, gamClearFrameReq, gamSystemDataLoaded.",
+   "notes": "Screen still black: nothing in this slice draws; onStageSeqEnd and afterSeqExec now run every frame and do nothing at boot (flags2 bits 0x40 / 3 clear). W099 still ends without system call 0x16, so the title road is the natives the boot reaches (seqFunc027 / 021 / 033 / 110 / 001 / 002 / 032 in sequence/seqcall.cpp): do those before more gamman. Next gamman slice: loadStageSnd 0x1c2f50 (reached every boot), releaseChr 0x1ccc30, resetStage 0x1cdbf0, releaseTenkyus 0x1cb01c, clearPool20b00 0x1cbd0c, the stage-2 trio initStage2 0x1c47c4 / startStage2 0x1cd60c / releaseObjs 0x1cdf5c, getObjParam 0x1d1c80, ctlObj1cb8e4 / ctlObj1cbb80, and the item functions (addItem, delItem...). Decisions: ObjStat is layout host with m_oid / m_actor / m_flags / m_link; the chr lists are SeqFixedPool of ACHRstat / FCHRstat pointers; setImage stores the pixel address through seqVmStoreWord (host pointers do not fit the image word); actor index -1 is skipped on the host (gamShowActor). Open: placeAchr 0x1d544c / relinkObj 0x1d5da0 are GamMan methods past the pinned end (open-items).",
    "ranges": [
     [
      "001c05c0",
@@ -127,6 +127,11 @@
      "date": "2026-10-25 17:39",
      "status": "partial",
      "summary": "GamMan boot path: constructor (nine node pools, item vector), init, initGameState, loadSystemData (system pack: GamSysData, SE packs, sound tables, system script image), loadStage (W%03d/W000.WRD: stage script image, object table with the old-format convert, file 2, event pack, camera), update, postUpdate, setOption (8 options), setVolume, switchVolume, setCameraMode, getMapCamNum, clearItemHave and the small ones; ~60 fields named from the ELF's inline accessors; MagSystem / MagScene::setCameraMode fixed to their 3 arguments; pinned 0x1c05c0..0x1d3b44"
+    },
+    {
+     "date": "2026-10-25 18:10",
+     "status": "partial",
+     "summary": "GamMan slice 2: onStageSeqEnd, afterSeqExec and execStageReq (the stage change), setImage, resetObj, pause / resume / enterMenu with pauseForMenu, resumeFromMenu, pauseAchr, setInuMode, setPc / setDog, showLinked, the object lookups (isObj, isAchr / isFchr / isVFchr, getAchr / getFchr / getVFchr, the inline find, getActorNo, getActor, findFchrType9), ctlObjParam (20 ops), isFchrActive, setFindTargetItem, releaseStage2; ObjStat / ACHRstat / FCHRstat fields, GamObjRec, the oid format; bss 0x7b2060 / 0x7b205c found to be g_sequence.m_bits / m_global (stand-in removed); seqVmLoadWord / seqVmStoreWord exported for setImage"
     }
    ],
    "status": "partial",

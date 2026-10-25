@@ -42,13 +42,6 @@ int g_bss_7a3d4c;               /* bss 0x7a3d4c */
 int g_bss_7812ac;               /* bss 0x7812ac */
 int g_bss_780d04;               /* bss 0x780d04: GamMan option 0 (brightness) */
 
-// PC: no ROM code stores the pointer at bss 0x7b2060 (a full .text scan,
-// 2026-10-25); GamMan::loadStage, MagScene and the menus dereference it.
-// Until its writer turns up (a script native or a static initializer), it
-// points at zeroed words: every flag clear.
-static u_int s_bss_7b2060_words[0x10];
-u_int *g_bss_7b2060 = s_bss_7b2060_words;   /* bss 0x7b2060 */
-
 const char *g_versionNumber = "1.01";   /* data 0x2d9e18 -> 0x301720 */
 
 // ---- stubs (tools/reverse/stubgen.py) ----
@@ -769,13 +762,6 @@ void MagLife130da4::setVolume(int volume)
     ROSEPAN_STUB("MagLife130da4::setVolume", 0x00130de0);
 }
 
-// stub of ROR 0x0028f92c
-int ObjStat::getOID() const
-{
-    ROSEPAN_STUB("ObjStat::getOID", 0x0028f92c);
-    return {};
-}
-
 // stub of ROR 0x001d8964
 void ObjStat::getRot(float *out)
 {
@@ -811,4 +797,127 @@ void gamClearFrameReq(void)
 void gamSystemDataLoaded(void)
 {
     ROSEPAN_STUB("gamSystemDataLoaded", 0x001f8fb8);
+}
+
+// stub of ROR 0x001da130
+void ACHRstat::pauseTasks(int on, int all)
+{
+    ROSEPAN_STUB("ACHRstat::pauseTasks", 0x001da130);
+}
+
+// stub of ROR 0x001e747c
+void CmnTaskMan::pauseKinds(const int *kinds, int on)
+{
+    ROSEPAN_STUB("CmnTaskMan::pauseKinds", 0x001e747c);
+}
+
+// stub of ROR 0x001e7544
+void CmnTaskMan::pauseOthers(int on)
+{
+    ROSEPAN_STUB("CmnTaskMan::pauseOthers", 0x001e7544);
+}
+
+// stub of ROR 0x001e7414
+void CmnTaskMan::pauseTask(int id, int on)
+{
+    ROSEPAN_STUB("CmnTaskMan::pauseTask", 0x001e7414);
+}
+
+// stub of ROR 0x00163ab8
+void EmyManager::getOids(int *a, int *b)
+{
+    ROSEPAN_STUB("EmyManager::getOids", 0x00163ab8);
+}
+
+// stub of ROR 0x001db774
+void FCHRstat::getRot(float *out)
+{
+    ROSEPAN_STUB("FCHRstat::getRot", 0x001db774);
+}
+
+// stub of ROR 0x001dddbc
+void GamArea::clearKind(int kind)
+{
+    ROSEPAN_STUB("GamArea::clearKind", 0x001dddbc);
+}
+
+// stub of ROR 0x001dd7bc
+void GamArea::stopKind(int kind)
+{
+    ROSEPAN_STUB("GamArea::stopKind", 0x001dd7bc);
+}
+
+// stub of ROR 0x001d544c
+void GamMan::placeAchr(int oid, void *out, int arg)
+{
+    ROSEPAN_STUB("GamMan::placeAchr", 0x001d544c);
+}
+
+// stub of ROR 0x001d5da0
+void GamMan::relinkObj(u_int oid)
+{
+    ROSEPAN_STUB("GamMan::relinkObj", 0x001d5da0);
+}
+
+// stub of ROR 0x001d9f10
+void ObjStat::clearSecta(int all)
+{
+    ROSEPAN_STUB("ObjStat::clearSecta", 0x001d9f10);
+}
+
+// stub of ROR 0x001d8ea8
+void ObjStat::findSecta()
+{
+    ROSEPAN_STUB("ObjStat::findSecta", 0x001d8ea8);
+}
+
+// stub of ROR 0x001d9830
+int ObjStat::load(const void *in)
+{
+    ROSEPAN_STUB("ObjStat::load", 0x001d9830);
+    return {};
+}
+
+// stub of ROR 0x001d95c4
+void ObjStat::setHide(int hide)
+{
+    ROSEPAN_STUB("ObjStat::setHide", 0x001d95c4);
+}
+
+// stub of ROR 0x001d8dc4
+void ObjStat::syncActorPos()
+{
+    ROSEPAN_STUB("ObjStat::syncActorPos", 0x001d8dc4);
+}
+
+// stub of ROR 0x001f5e48
+void * chrChangeMotion(u_int oid, int motion, int a2, int a3, float blend,
+                      float rotY)
+{
+    ROSEPAN_STUB("chrChangeMotion", 0x001f5e48);
+    return {};
+}
+
+// stub of ROR 0x00144334
+void gamSetBwnFollow(int on)
+{
+    ROSEPAN_STUB("gamSetBwnFollow", 0x00144334);
+}
+
+// stub of ROR 0x00144500
+void gamSetBwnItem(int item)
+{
+    ROSEPAN_STUB("gamSetBwnItem", 0x00144500);
+}
+
+// stub of ROR 0x0014457c
+void gamSetBwnWait(int on)
+{
+    ROSEPAN_STUB("gamSetBwnWait", 0x0014457c);
+}
+
+// stub of ROR 0x001fbbd0
+void gamStage2Loaded(void)
+{
+    ROSEPAN_STUB("gamStage2Loaded", 0x001fbbd0);
 }
