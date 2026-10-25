@@ -86,6 +86,11 @@ entries are marked **RoR** with the date.
   its first words (return 0 / lui+ori return code / real code), `mkfunc` the real ones, and let one host
   function stand for the identical empty ones (seqcall.cpp seqFuncNone). Generate the C++ initializer
   from the classification instead of typing 512 entries.
+- **RoR: the sequence VM's opcode handlers had no functions** (2026-10-25): three tables (data 0x2d9958
+  primary, 0x2d9a58 SPECIAL, 0x2d9b08 COP1) point at 99 short handlers that Ghidra left as bare code
+  (its "FUN_0020ff34" covered only the nop). The SPECIAL table is 0x2c entries: the COP1 table starts
+  where SPECIAL funct 0x2c would be, so a dump of 64 SPECIAL entries shows FPU handlers. Dump each table
+  from the ELF, `create_function` every target, name them from the table index.
 - **A body swallows the unreferenced function after it.** Code reached only through data -- vtable
   slots, callback tables, dispatch tables, hook lists, step chains kept as function pointers, functions
   after a tail call -- was never made a function, so the previous function's body runs on over it. The
@@ -361,6 +366,12 @@ public:
   (2026-10-22, bootstrap). The prebuilt `.msl` / `.spv` keep old names in comments only.
 
 ## Platform layer (ReiPan's, written for FF2 and FF3)
+
+- **RoR: script pointers in 32-bit words** (2026-10-25). Symptom to expect: a script that stores a
+  pointer (sw) and loads it back crashes on a truncated host address. Cause: the scripts' memory is
+  32-bit words, host pointers are 64-bit. Fix in place: sequence/seqvm.cpp seqVmLoadWord /
+  seqVmStoreWord / seqVmCopyArea (open-items Decisions). Any new code that writes a pointer into
+  script memory (a native filling a script buffer) must go through seqVmStoreWord, not a plain store.
 
 - **`sdk/libgraph.h` swaps `SCE_GS_INTERLACE` (0) and `SCE_GS_NOINTERLACE` (1)** against Sony's
   SDK (interlace = 1). The host's `sceGsResetGraph` only stores the value, so nothing breaks yet, but

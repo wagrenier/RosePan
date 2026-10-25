@@ -7,12 +7,13 @@
 // threads whose run ended at the next frame (ended list -> free node).
 //
 // Written: the whole file. The VM it drives (seqVm*, startThread,
-// findThread, killThreads, setupImage) is unassigned@0020ff34.
+// findThread, killThreads, setupImage) is sequence/seqvm.cpp.
 
 #include <stdio.h>
 #include <string.h>
 
 #include "game/gamman.h"
+#include "rosepan/rosepan_seqtest.h"
 #include "sequence/sequence.h"
 #include "utl/utlmisc.h"
 
@@ -20,18 +21,6 @@ static const char s_file[] = "sequence/sequence.cpp";
 
 // The sequence data folder (data 0x2d9910, 0x40 bytes).
 static char s_dataDir[0x40];
-
-// The VM's state (see sequence.h).
-SeqNode<SeqThread> *g_seqThread;
-SeqNode<SeqThread> *g_seqThreadEnd;
-intptr_t g_seqImageCode;
-int     *g_seqGlobal;
-u_char  *g_seqStackMid;
-intptr_t g_seqCallSave[0x100];
-u_char  *g_seqStack;
-int      g_seqStackUsed[32];
-int      g_seqImage;
-u_char  *g_seqImageSave[3];
 
 // ──────────────────────────────────────────────────────────────────────
 // The US build has one folder whatever the language: both arguments are
@@ -127,7 +116,7 @@ void Sequence::init()
     m_threads[2]->clear();
     m_entries.clear();
 
-    m_dce0 = 0;
+    m_record = NULL;
     m_global = (int *)g_utlMemory.allocDebug(0xa00, s_file, 484, 0, 1);
     m_bits = (u_int *)g_utlMemory.allocDebug(0xa00, s_file, 485, 0, 1);
     m_image[0] = (u_char *)g_utlMemory.allocDebug(0x20000, s_file, 489, 0, 1);
@@ -202,13 +191,13 @@ void Sequence::stopImages(int kind)
 {
     if (kind == 1) {
         freeStageEntries();
-        killThreads(1, 0);
-        killThreads(2, 0);
+        killThreads(1);
+        killThreads(2);
         return;
     }
     if (kind != 2)
         return;
-    killThreads(2, 0);
+    killThreads(2);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -218,7 +207,7 @@ int Sequence::getThreadArg()
 {
     if ((m_flags & 0x100) == 0)
         return g_seqThread->m_data.m_arg;
-    return m_arg;
+    return m_single.m_arg;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -324,7 +313,7 @@ void Sequence::runImage()
 {
     seqVmSelectImage(g_seqImage);
     while (g_seqThread != g_seqThreadEnd) {
-        seqVmLoadThread(this);
+        seqVmLoadThread();
         SeqThread &thread = g_seqThread->m_data;
         if (thread.m_flags & 0x80) {
             thread.m_flags &= ~0x80u;
@@ -347,6 +336,7 @@ void Sequence::runImage()
 
 void Sequence::exec()
 {
+    RosePan_SeqForcedTest();  // PC: ROSEPAN_SEQ_TEST=1 loads the G000 image (rosepan_seqtest.h)
     if (m_flags & 1)
         return;
 

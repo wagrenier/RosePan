@@ -26,7 +26,21 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      reapThreads); sysInitManagers 0x204148 written ahead in lib/unassigned_stubs.cpp (it calls Sequence::init).
      exec runs every frame with empty pools until GamMan::loadSystemData / loadStage call loadSystemImage /
      loadStageImage (gamman, item 4); the VM entry points (seqVm*, startThread, setupImage) are item 3.
-  3. `unassigned@0020ff34` -- the script thread scheduler ("mst", "trg", "imdy", "single") the VM calls.
+  3. DONE 2026-10-25 (`partial`): `sequence/seqvm.cpp` (pinned 0x20ff34..0x2155a0, was
+     unassigned@0020ff34) -- the VM: all 99 opcode handlers, seqVmRun, the image / thread state
+     functions, startThread / execThread / waitFrames / jumpTo / killThreads / findThread. Left: the
+     other thread starters and queries 0x211830..0x213e78 and 0x214e98..0x215430 (callers are natives
+     not written yet). **Tested on the real scripts** with `ROSEPAN_SEQ_TEST=1` (src/rosepan/
+     rosepan_seqtest.cpp loads the ELFR image of DATA/SEQ/G000.GRB and of W099/W000.WRD as GamMan
+     will): G000's main is an init routine -- system call 0x1e, ~80 x native 110 (registrations, a1 =
+     pointers into the image), system call 0x14 with a1 0..0x12 (handlers), 0x15 -- and returns (ra 0
+     ends the thread, as on the PS2). W099's main calls 18 (0x1e, 1), 32 (0xa, string), 1, 2, 33 (5),
+     27 (4, 1, 0x50000001), 27 (4, 0x201, 0x50800002), 21 (3, 0x50000001), 21 (4, 0x50800002),
+     21 (2, 4 / 0x100 / 0x100000) and returns: it does not reach system call 0x16 itself -- the title
+     comes later, from what natives 27 / 21 set up (0x5..... ids are image-1 thread ids) or from
+     GamMan reacting to onStageSeqEnd. With the stubs returning 0 nothing waits. So after GamMan's
+     loads (item 4), the natives the boot scripts reach come next: seqFunc027, 021, 033 (jump tables
+     data 0x3005c0 / 0x300ac0), 110, 001, 002, 032, and system calls 0x14 / 0x15 / 0x1e.
   4. `game/gamman.cpp` -- slice: loadSystemData, loadStage, update, postUpdate (409 functions: only the
      load / update path, the rest stays stubs).
   5. `unassigned@001fd424` -- sysInitManagers 0x204148, SysTimer::start / update (reached stubs).
@@ -336,6 +350,15 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
 
 ## Decisions
 
+- 2026-10-25 (session decision, sequence/seqvm.cpp): **script memory words keep host pointers beside
+  memory.** The VM's loads and stores move 32-bit words (as in the ROM), so a host pointer a script
+  stores (sw of a register, setupImage's m_global / m_bits slots) would lose its top half on Win64.
+  seqVmStoreWord records the full value of any word that does not fit in 32 bits in a map keyed by
+  the word's address; seqVmLoadWord gives it back while the word still holds its low half; the gp
+  area copies (thread save / load) carry the entries along. addu / subu wrap at 32 bits when both
+  operands are 32-bit values, else add as pointers. Alternative not taken: keep every script-visible
+  allocation below 2 GB (the IOP arena's approach) -- natives also return pointers to exe globals.
+
 - 2026-10-25 (session decision, the VM TU may revisit): **script registers are `intptr_t` on the host.**
   The sequence scripts are MIPS code the VM interprets with raw EE addresses (its lw / sw handlers add the
   register to the offset and dereference, e.g. 0x210a08); the native functions get pointers in a1..a3
@@ -479,6 +502,18 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- (2026-10-25) `sequence/seqvm.cpp`: the file name is invented (no source string, no assert); it holds
+  Sequence's remaining methods, so it may be part of sequence.cpp. 0x2155a0..0x215e1c after it (debugNop,
+  the assert handler 0x215a30, dbgTraceVector3 / 4, the fatal print 0x2155f4) is debug code of another
+  file, left unassigned (key unassigned@0020ff34 now names only that run).
+- (2026-10-25) The VM keeps ROM quirks: `beq zero, rt` always branches, sltiu's immediate is
+  zero-extended, mult is unsigned, jal keeps 16 bits of target, killThreads(0) copies the image-0
+  list's sentinel to the ended list (its loop has no body), seqVmResume loads a0..a3 from the slot's
+  a2..t1. Unknown: who sets g_seqReturnPc (bss 0x7b4db0, SEQ_RET_RETURN continues there); what
+  header +0x20 / +0x24 and g_seqData2 are for.
+- (2026-10-25) seqFunc032 (0x208dc4) tests its string pointer `< 0x8000000` (EE RAM): on the host
+  that test fails for every heap pointer -- drop it (PC comment) when the function is written.
 
 - (2026-10-25) sequence/seqcall.cpp: the file name is invented (no source string). The boundary between
   it and sequence/sequence.cpp is a guess too: seqSetLanguage .. Sequence::term (0x20e3d8..0x20e690) went

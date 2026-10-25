@@ -2,7 +2,7 @@
  *  sequence/sequence.h
  *
  *  The event sequence system (sequence/sequence.cpp 0x20e3d8..0x20ff34 and
- *  the VM run after it, 0x20ff34..0x215e1c, still unassigned): one global
+ *  the VM after it, sequence/seqvm.cpp 0x20ff34..0x2155a0): one global
  *  at bss 0x7a4440 that loads the sequence images GamMan hands it and steps
  *  their threads every frame ("mst", "trg", "imdy", "single" thread kinds).
  *  The scripts are MIPS code the VM 0x214c24 interprets; their calls into
@@ -141,22 +141,24 @@ struct SeqFixedPool : SeqPool<T>
 };
 
 /* A sequence thread (EE 0xb0 bytes). startThread 0x211e84 fills id, pc,
- * m_1c = -1 and m_24 = 1; the VM keeps the rest (the bytes it does not
- * set are stack garbage in the ROM). layout: host -- pc and stack hold
- * host addresses (open-items "Decisions": script registers are intptr_t). */
+ * m_wait = -1 and m_24 = 1; the VM keeps the rest (the bytes it does not
+ * set are stack garbage in the ROM, zero on the host). layout: host -- pc,
+ * the registers and the stack hold host addresses (open-items "Decisions":
+ * script registers are intptr_t). */
 struct SeqThread
 {
     u_int    m_flags;           // ROR 0x00: 0x40 holds pause 0x8000, 0x80 resume a call, 0x200 VM state saved
     u_int    m_id;              // ROR 0x04: image << 30 | ...
     intptr_t m_pc;              // ROR 0x08: where the VM continues
-    int      m_resume;          // ROR 0x0c: the save slot seqVmResume loads (flag 0x80)
-    int      _10[3];            // ROR 0x10
-    int      m_1c;              // ROR 0x1c: -1 at the start
+    int      m_resume;          // ROR 0x0c: the call save slot seqVmResume loads (flag 0x80)
+    char     m_name[8];         // ROR 0x10: "mst", "trg", "imdy", "single" (startThread copies it into Sequence::m_single)
+    int      _18;               // ROR 0x18
+    int      m_wait;            // ROR 0x1c: Sequence::waitFrames' count, -1 idle
     int      m_area;            // ROR 0x20: the GamArea rect id whose trigger bits the thread holds, 0 none
     int      m_24;              // ROR 0x24: 1 at the start; the VM sets 1 after a native call
     int      m_arg;             // ROR 0x28: matched by findThread, returned by getThreadArg
-    int      _2c[32];           // ROR 0x2c
-    intptr_t m_stack;           // ROR 0xac: the VM stack slot, freed by releaseThread
+    intptr_t m_reg[32];         // ROR 0x2c: the VM registers seqVmSaveThread keeps (flag 0x200)
+    intptr_t m_stack;           // ROR 0xac: a 2 KB slot holding the thread's 0x780-byte gp area
 };
 
 /* An entry of the third pool (EE 0x10 bytes; freeStageEntries and
@@ -164,7 +166,8 @@ struct SeqThread
 struct SeqEntry
 {
     u_int m_id;                 // ROR 0x0: image << 30 | ...
-    int   _4[3];                // ROR 0x4
+    int   m_value;              // ROR 0x4: addEntry's value
+    int   _8[2];                // ROR 0x8: stack garbage in the ROM
 };
 
 /* EE size at least 0xdce4. layout: host -- EE offsets in the comments. */
@@ -187,19 +190,33 @@ struct Sequence
     void runImage();                                                     // ROR 0x0020f788
     void exec();                                                         // ROR 0x0020f98c
 
-    /* ---- the VM run (unassigned@0020ff34) ---- */
+    /* ---- the VM's thread functions (sequence/seqvm.cpp) ---- */
     /* Makes the VM continue at target, an address in the current image
      * (the native function then returns SEQ_RET_JUMP). */
     void jumpTo(intptr_t target);                                        // ROR 0x002113a4
+    /* The running thread waits n frames: 1 while it waits, 0 when the
+     * count ends (flag 0x400 starts it again). */
+    int  waitFrames(int n);                                              // ROR 0x00211318
+    /* Runs a thread at once in m_single (flag 0x100); one that waits goes
+     * on the start list. Nothing when (id, arg) already runs. */
+    void execThread(u_int id, intptr_t entry, int arg, u_int flags, int resume,
+                    int area, const char *name);                         // ROR 0x002113dc
     /* Queues a thread: id, starting at the first "addiu sp" among the
      * words entry + 0x94..0xb0 (on the start list; exec moves it into
      * its image pool). */
     void startThread(u_int id, intptr_t entry);                          // ROR 0x00211e84
     void freeStageEntries();                                             // ROR 0x002127f4
-    /* Moves image idx's threads to the ended list and reaps them. */
-    void killThreads(int idx, int arg);                                  // ROR 0x00213450
+    void addEntry(u_int id, int value);                                  // ROR 0x00212920
+    /* Moves image idx's threads to the ended list, reaps them, and clears
+     * the image and its registers. */
+    void killThreads(int idx);                                           // ROR 0x00213450
+    int  hasThreadIn(u_int id, SeqNode<SeqThread> *it, SeqNode<SeqThread> *end,
+                     int arg);                                           // ROR 0x00213adc
+    int  findThreadIn(u_int id, SeqNode<SeqThread> *it, SeqNode<SeqThread> *end,
+                      SeqNode<SeqThread> **node, int arg);               // ROR 0x00213b28
     /* Non-zero when the id's image pool has it; *node gets its node. */
     int  findThread(u_int id, SeqNode<SeqThread> **node, int arg);       // ROR 0x00213c6c
+    int  hasThread(u_int id, int arg);                                   // ROR 0x00213d00
     /* Points the VM at image (registers 0x7b47d0..) and saves its state
      * for image idx. */
     void setupImage(u_char *image, int idx);                             // ROR 0x00213f48
@@ -228,37 +245,89 @@ struct Sequence
      * nothing while set); 0x100 picks the word getThreadArg returns; 0x400
      * set by scenePlayStart. */
     u_int    m_flags;           // ROR 0xdc24
-    char     m_name[8];         // ROR 0xdc40: startThread copies 8 chars of data 0x301708
-    int      m_arg;             // ROR 0xdc58: getThreadArg's word under flag 0x100
-    int      m_dce0;            // ROR 0xdce0: 0 after init
+    /* The thread execThread runs at once (flag 0x100: the VM saves into
+     * it, getThreadArg returns its arg). */
+    SeqThread m_single;         // ROR 0xdc30
+    /* A record seqVmLoadRecord 0x2144cc (unreferenced) loads and clears;
+     * NULL after init. */
+    SeqThread *m_record;        // ROR 0xdce0
 };
 
 extern Sequence g_sequence;     /* bss 0x7a4440 */
 
-/* ---- the VM's state (bss 0x7b4640..0x7b4dd0; the VM file defines it in
- * the ROM, sequence.cpp holds it until that file is written) ---- */
+/* ---- the VM's state (bss 0x7b4640..0x7b4dd0, data 0x2d9950..0x2d9e18;
+ * sequence/seqvm.cpp) ---- */
+
+/* An image's VM addresses, kept by setupImage and restored by
+ * seqVmSelectImage (bss 0x7b4850, 0x30 bytes each). layout: host. */
+struct SeqVmImage
+{
+    intptr_t m_code;            // ROR 0x00: the image + 0x30
+    int      m_link;            // ROR 0x04: header +0x10, the gp area's link address
+    intptr_t m_data;            // ROR 0x08: the image + header +0x14
+    intptr_t m_data2;           // ROR 0x0c: m_data + header +0x1c + 8
+    int      m_hdr20;           // ROR 0x10: header +0x20
+    int      m_hdr24;           // ROR 0x14: header +0x24
+    intptr_t m_reloc;           // ROR 0x18: what lui 0x41 / 0x45 loads
+    int      _1c;               // ROR 0x1c
+    intptr_t m_gp;              // ROR 0x20: the 0x780-byte gp area (stack at its top)
+    intptr_t m_sp;              // ROR 0x24
+};
 
 extern SeqNode<SeqThread> *g_seqThread;     /* bss 0x7b4640: the running thread */
 extern SeqNode<SeqThread> *g_seqThreadEnd;  /* bss 0x7b4650: its list's end */
+extern u_int    g_seqFpr[32];               /* bss 0x7b4680: the FPU registers (float bits) */
+extern intptr_t g_seqGpr[32];               /* bss 0x7b4700: the registers (gp 28, sp 29, ra 31) */
+extern intptr_t g_seqPc;                    /* bss 0x7b4780: the word being run */
+extern int      g_seqHi;                    /* bss 0x7b4790 */
+extern int      g_seqLo;                    /* bss 0x7b47a0 */
+/* A taken jump: an image offset + 0x8160, a native call below 0x8160, or
+ * the host pc Sequence::jumpTo sets. */
+extern intptr_t g_seqJump;                  /* bss 0x7b47b0 */
+extern u_int    g_seqBranch;                /* bss 0x7b47c0: a branch after the delay slot, | 0x80000000 */
 extern intptr_t g_seqImageCode;             /* bss 0x7b47d0: the current image + 0x30 */
+extern int      g_seqDataLink;              /* bss 0x7b47e0 */
+extern intptr_t g_seqData2;                 /* bss 0x7b47f0 */
+extern intptr_t g_seqData;                  /* bss 0x7b4800 */
+extern intptr_t g_seqDataReloc;             /* bss 0x7b4810 */
+extern int      g_seqHdr20;                 /* bss 0x7b4820 */
+extern int      g_seqHdr24;                 /* bss 0x7b4830 */
+extern int      g_seqFpuCond;               /* bss 0x7b4840: the compare result bc1t / bc1f test */
+extern SeqVmImage g_seqImageState[3];       /* bss 0x7b4850 */
 extern int     *g_seqGlobal;                /* bss 0x7b4910: Sequence::m_global */
 extern u_char  *g_seqStackMid;              /* bss 0x7b4914: g_seqStack + 0x4000 */
-/* Save slots of a waiting call's registers (0x400 bytes, 8 x 0x80 in
- * the ROM; seqVmResume reads a0..a3 back). PC: intptr_t words. */
+/* Save slots of a waiting call's registers (8 x 32 registers;
+ * seqVmResume reads a0..a3 back; word 0 0xcccccccc = free). PC: intptr_t
+ * registers, compared on the low 32 bits. */
 extern intptr_t g_seqCallSave[0x100];       /* bss 0x7b4920 */
 extern u_char  *g_seqStack;                 /* bss 0x7b4d20: 0x10000 bytes, 32 stacks of 2 KB */
 extern int      g_seqStackUsed[32];         /* bss 0x7b4d30 */
+/* Where SEQ_RET_RETURN continues (+ 4); nothing in the VM file sets it. */
+extern intptr_t g_seqReturnPc;              /* bss 0x7b4db0 */
 extern int      g_seqImage;                 /* bss 0x7b4dd0: the image exec is running */
+extern int      g_seqStackNext;             /* data 0x2d9950: the next stack slot to try */
+extern intptr_t g_seqImageRegs[3][32];      /* data 0x2d9c08: each image's registers */
 extern u_char  *g_seqImageSave[3];          /* data 0x2d9e08: 0x780 bytes per image */
 
 void     seqVmSelectImage(int idx);                                      // ROR 0x00214310
+/* Empty in the ROM. */
 void     seqVmSaveImage(int idx);                                        // ROR 0x002144c4
-void     seqVmLoadThread(Sequence *seq);                                 // ROR 0x00214664
+void     seqVmLoadThread(void);                                          // ROR 0x00214664
+void     seqVmSaveThread(Sequence *seq);                                 // ROR 0x002147e0
+u_char  *seqVmAllocStack(void);                                          // ROR 0x002149a8
 void     seqVmFreeStack(intptr_t stack);                                 // ROR 0x00214a94
+int      seqVmAllocCallSave(void);                                       // ROR 0x00214ac4
 void     seqVmResume(int slot);                                          // ROR 0x00214bcc
 /* Runs a thread from pc until it waits; returns where it continues, 0
  * when it ended. */
 intptr_t seqVmRun(intptr_t pc);                                          // ROR 0x00214c24
+
+/* The VM's word-0 handler and its unreferenced functions. */
+void     seqOpNop(u_int a, u_int b, u_int c, u_int d);                   // ROR 0x0020ff34
+void     seqOpUnused211298(void);                                        // ROR 0x00211298
+void     seqUnused213448(void);                                          // ROR 0x00213448
+void     seqVmIdleLoop(void);                                            // ROR 0x002142c0
+void     seqVmLoadRecord(Sequence *seq);                                 // ROR 0x002144cc
 
 /* Writes "SEQ" into the sequence data folder name (data 0x2d9910, 0x40
  * bytes); both arguments are unused in the US build. */

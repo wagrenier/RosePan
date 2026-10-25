@@ -569,6 +569,24 @@
    "status": "verify",
    "why": "Sequence::init 0x20e690 has the sequence/sequence.cpp string; before it seqSetLanguage, seqGetDataDir, seqMakeGlobalPath (the seq data folder and global script paths) and the Sequence constructor / destructor / term the static initializer and sysTermManagers call; Sequence::exec ends at 0x20ff34 where the VM run unassigned@0020ff34 starts"
   },
+  "sequence/seqvm.cpp": {
+   "notes": "Left in this file: the other thread starters and queries 0x211830 (imdy), 0x211be4 (single), 0x2120ac, 0x212330 (trg), 0x212598, 0x2129b8, 0x212a5c, 0x212d08, 0x212e64, 0x212fbc, 0x213b7c, 0x213bfc, 0x213d90, 0x213e78, 0x214e98, 0x2150b0, 0x2152b8, 0x215430 -- write them when the natives that call them are written (their callers are seqFunc stubs). The boot screenshot is unchanged (Now Loading corner): GamMan::loadSystemData / loadStage are stubs, so no image is loaded in the plain boot. With ROSEPAN_SEQ_TEST=1 (src/rosepan/rosepan_seqtest.cpp, hooked in Sequence::exec) the VM runs G000 and W099/W000.WRD correctly: G000 main = system call 0x1e, ~80 x native 110, system call 0x14 x19, 0x15, return; W099 main = natives 18, 32, 1, 2, 33, 27 x2, 21 x5, return -- no title call yet (open-items Next up 3 has the arguments). Decisions: script memory words keep host pointers beside memory (seqVmLoadWord / StoreWord / CopyArea, open-items Decisions); NULL table entries and out-of-range native indexes are skipped on the host (the ROM calls address 0). Header changes: SeqThread m_name / m_wait / m_reg, Sequence m_single (+0xdc30, replaces m_name / m_arg) and m_record (+0xdce0), killThreads(int idx) without the bogus second argument, seqVmLoadThread(void). The key unassigned@0020ff34 now names only the debug range 0x2155a0..0x215e1c (assert handler 0x215a30, debugNop, dbgTraceVector3 / 4).",
+   "ranges": [
+    [
+     "0020ff34",
+     "002155a0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-25 17:15",
+     "status": "partial",
+     "summary": "The sequence script VM: pinned sequence/seqvm.cpp 0x20ff34..0x2155a0 (was unassigned@0020ff34), created and named 104 Ghidra functions (the 99 opcode handlers of the tables data 0x2d9958 / 0x2d9a58 / 0x2d9b08 and 5 hidden ones); wrote 125 functions: every handler, seqVmRun, setupImage, the image / thread save and load, stack and call-save slots, startThread, execThread, waitFrames, jumpTo, killThreads, find / has thread, the entry pool. PC: pointer-preserving script memory words. Tested on the real G000 and W099 scripts with ROSEPAN_SEQ_TEST=1."
+    }
+   ],
+   "status": "partial",
+   "why": "The script VM after sequence.cpp: opcode handlers (tables data 0x2d9958 / 0x2d9a58 / 0x2d9b08), seqVmRun, the thread record save / load and the Sequence thread methods (startThread, killThreads, findThread, setupImage). No source-path string; a separate file is a guess (sequence.cpp could hold it all). 0x2155a0.. is debug / assert code, not the VM."
+  },
   "setup/ghidra_seed.cpp": {
    "notes": "Done. Snapshot of the names before seeding: work/snapshots/20261022_094006.json (gitignored, local). Every section function's Ghidra body now equals its section; the 3 tail-jump targets that do not follow a jr ra are labels inside functions (0x218424, 0x23a000, 0x2480a0) and were left alone. libmatch.py --list shows 5 SKIP rows, all named by hand already. Next: setup/platform_bootstrap.cpp.",
    "sessions": [
@@ -707,6 +725,7 @@
   "unassigned@001bde58": {},
   "unassigned@002053f4": {},
   "unassigned@0020eda4": {},
+  "unassigned@0020ff34": {},
   "unassigned@00216ad0": {},
   "unassigned@0021fb50": {},
   "unassigned@00224de0": {},
