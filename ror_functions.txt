@@ -1430,7 +1430,7 @@
 /* 0013f1e4 00000028 */ MagScene::clearGamFlag25(){}  // ror
 /* 0013f210 00000070 */ FUN_0013f210(){}
 /* 0013f280 000001c4 */ MagScene::openSysMsgWindow(){}  // ror
-/* 0013f444 00000014 */ FUN_0013f444(){}
+/* 0013f444 00000014 */ MagScene::isWindowOpen(){}  // ror
 /* 0013f458 00000044 */ MagScene::closeSysMsgWindow(){}  // ror
 
 // *****************************************************************************
@@ -3689,7 +3689,7 @@
 /* 001cad88 000001f0 */ GamMan::changeObjModel(){}  // ror
 /* 001caf78 000000a4 */ FUN_001caf78(){}
 /* 001cb01c 000001a4 */ GamMan::releaseTenkyus(){}  // ror
-/* 001cb1c0 0000008c */ FUN_001cb1c0(){}
+/* 001cb1c0 0000008c */ GamMan::resetTenkyuFlags(){}  // ror
 /* 001cb24c 00000138 */ GamMan::setPc(){}  // ror
 /* 001cb384 000000a0 */ GamMan::setDog(){}  // ror
 /* 001cb424 0000003c */ GamMan::setMurder(){}  // ror
@@ -3721,7 +3721,7 @@
 /* 001cc7c8 000001a8 */ GamMan::releaseFchr(){}  // ror
 /* 001cc970 000002c0 */ GamMan::releaseVFchr(){}  // ror
 /* 001ccc30 00000414 */ GamMan::releaseChr(){}  // ror
-/* 001cd044 000001e0 */ FUN_001cd044(){}
+/* 001cd044 000001e0 */ GamMan::requestStage(){}  // ror
 /* 001cd224 00000038 */ GamMan::releaseStage2(){}  // ror
 /* 001cd25c 000001a8 */ GamMan::afterSeqExec(){}  // ror
 /* 001cd404 00000208 */ GamMan::storePcTransform(){}  // ror
@@ -3740,7 +3740,7 @@
 /* 001cf7d0 00000084 */ FUN_001cf7d0(){}
 /* 001cf854 00000108 */ FUN_001cf854(){}
 /* 001cf95c 00000078 */ FUN_001cf95c(){}
-/* 001cf9d4 00000088 */ FUN_001cf9d4(){}
+/* 001cf9d4 00000088 */ GamMan::isMsgBusy(){}  // ror
 /* 001cfa5c 0000004c */ FUN_001cfa5c(){}
 /* 001cfaa8 00000090 */ FUN_001cfaa8(){}
 /* 001cfb38 00000010 */ GamMan::setSysMsgHandle(){}  // ror

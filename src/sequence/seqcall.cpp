@@ -13,7 +13,8 @@
 // same two instructions (return 0); one function stands for all of them.
 //
 // Written so far: the table, the empty and the return-code entries, 000,
-// 001, 002, 005, the system call 018, 021, 027, 032, 033 and 110. The others are stubs (seqcall.h lists them).
+// 001, 002, 004 (wait until), 005, the system call 018, 021, 027, 029
+// (stage changes), 032, 033 and 110. The others are stubs (seqcall.h lists them).
 
 #include "sequence/seqcall.h"
 
@@ -55,6 +56,96 @@ intptr_t seqFunc003(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Wait until: a0 picks the condition (19 cases, jump table data 0x2ff930);
+// while it holds the call runs again next frame, else the script goes on
+// with 0. Out-of-range a0 and a missing object go on at once.
+
+static intptr_t seqWaitWhile(int busy)
+{
+    return busy != 0 ? SEQ_RET_WAIT : 0;
+}
+
+// ROR 0x00205570
+
+intptr_t seqFunc004(intptr_t id, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t)
+{
+    GamMan   &gam = g_gamMan;
+    MagScene &scene = g_magSystem.m_scene;
+    u_int     oid = (u_int)a1;
+
+    switch ((u_int)id)
+    {
+    case 0:  // a1 frames
+        if (a1 == 0)
+            return 0;
+        return seqWaitWhile(g_sequence.waitFrames((int)a1));
+    case 1:
+        return seqWaitWhile(gam.resetTenkyuFlags());
+    case 2:  // while the object's actor plays motion a2
+        if (!gam.isObj(oid))
+            return 0;
+        return scene.getActorMotion(gam.getActorNo(oid)) == (int)a2 ? SEQ_RET_WAIT : 0;
+    case 3:  // while the object's task (param 0x19) runs
+    {
+        int task = 0;   // PC: the ROM leaves it unset when getObjParam has nothing
+        gam.getObjParam(oid, 0x19, &task);
+        return seqWaitWhile(g_taskMan.getTask(task) != NULL);
+    }
+    case 4:  // while thread a1 lives
+        return seqWaitWhile(g_sequence.hasThread((u_int)a1, 0));
+    case 5:  // while the actor's fourth task runs
+        if (!gam.isObj(oid))
+            return 0;
+        return gam.getAchr(oid)->m_task[3] != -1 ? SEQ_RET_WAIT : 0;
+    case 6:  // 17 frames, then while a menu is open
+        if (g_sequence.waitFrames(0x11) != 0)
+            return SEQ_RET_WAIT;
+        return seqWaitWhile(gam.isMenuOpen());
+    case 7:  // while a message shows
+        return seqWaitWhile(gam.isMsgBusy());
+    case 8:
+        return seqWaitWhile(g_taskMan.getTask(gam.m_frameTaskId) != NULL);
+    case 9:  // until pad 0 bit a1 is set (0..15 in +0x78, 16.. in +0x7a)
+    {
+        // a1 == 16 tests bit 16 of the 16-bit +0x78 and waits for ever (the
+        // ROM bounds a1 < 0x11; kept).
+        const BedPad *pad = g_magSystem.m_pad_ref[0].m_pad;
+        if ((u_int)a1 < 0x11)
+        {
+            u_int bit = 1u << (u_int)a1;
+            return (pad->m_78 & bit) == bit ? 0 : SEQ_RET_WAIT;
+        }
+        u_int bit = 1u << (u_int)(a1 - 0x10);
+        return (pad->m_7a & bit) == bit ? 0 : SEQ_RET_WAIT;
+    }
+    case 10:
+        return seqWaitWhile(g_taskMan.getTask(gam.m_selectTaskId) != NULL);
+    case 11:
+        return seqWaitWhile(g_taskMan.getTask(gam.m_movieTaskId) != NULL);
+    case 12:  // while the actor's second task runs
+        if (!gam.isObj(oid))
+            return 0;
+        return gam.getAchr(oid)->m_task[1] != -1 ? SEQ_RET_WAIT : 0;
+    case 13:
+        return seqWaitWhile(g_taskMan.getTask(gam.m_camTaskId) != NULL);
+    case 14:
+        return seqWaitWhile(g_taskMan.getTask(gam.m_bgLoadTaskId) != NULL);
+    case 15:  // while the system message window is open
+        return seqWaitWhile(scene.isWindowOpen(gam.m_sysMsgHandle));
+    case 16:  // while a thread named a1 lives
+        return seqWaitWhile(g_sequence.hasThreadNamed((const char *)a1));
+    case 17:  // while the object's actor is in a mode
+        if (!gam.isObj(oid))
+            return 0;
+        return seqWaitWhile(scene.m_actors[gam.getActorNo(oid)].isModeSet());
+    case 18:  // until script flag 62 is set
+        return (g_sequence.m_bits[1] & 0x40000000) != 0 ? 0 : SEQ_RET_WAIT;
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // A random number 0..a1-1 (a1 = 0 counts as 1).
 // ROR 0x002058f0
 
@@ -64,6 +155,41 @@ intptr_t seqFunc005(intptr_t, intptr_t a1, intptr_t, intptr_t, intptr_t, intptr_
     if (a1 != 0)
         range = (int)a1;
     return rand() % range;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Stage changes: a0 1 / 2 a room a1 of the stage (2 with a2 for the
+// fade's word, 1 with SEQ_RET_WAIT), 10 chapter a1; the thread ends either
+// way. Rooms wait while the background load runs (flags 0x800). With a
+// TskFrameFunc pair set by system call 0x34 the change goes through a kind
+// 0xb frame task (the pair, the room, the word) instead of at once.
+// callcheck: operator_new (new TskFrameFunc)
+// ROR 0x00208b98
+
+intptr_t seqFunc029(intptr_t id, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t)
+{
+    GamMan &gam = g_gamMan;
+    u_int   word;
+
+    if (id == 1 || id == 2)
+    {
+        if ((gam.m_flags & 0x800) != 0 && g_taskMan.getTask(gam.m_bgLoadTaskId) != NULL)
+            return SEQ_RET_WAIT;
+        word = id == 1 ? (u_int)SEQ_RET_WAIT : (u_int)a2;
+        if (gam.m_seqPair[3].m_a == 0)
+        {
+            gam.requestStage(2, (int)a1, 0, -1, word);
+            return SEQ_RET_END;
+        }
+        // The task reads the four words (the ROM's stack block).
+        int words[4] = {gam.m_seqPair[3].m_b, gam.m_seqPair[3].m_a, (int)a1, (int)word};
+        TskFrameFunc *task = new TskFrameFunc(0xb, (intptr_t)words, 0);
+        g_taskMan.addTask(1, -1, 1, 0, task, 0, NULL, 1);
+        return SEQ_RET_END;
+    }
+    if (id == 10)
+        gam.requestStage(1, -1, -1, (int)a1, (u_int)SEQ_RET_WAIT);
+    return SEQ_RET_END;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -857,13 +983,6 @@ const SeqFunc g_seqFuncTable[SEQ_FUNC_COUNT] = {
 
 // ---- stubs (tools/reverse/stubgen.py) ----
 
-// stub of ROR 0x00205570
-intptr_t seqFunc004(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc004", 0x00205570);
-    return {};
-}
-
 // stub of ROR 0x00205928
 intptr_t seqFunc006(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
@@ -938,13 +1057,6 @@ intptr_t seqFunc026(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 intptr_t seqFunc028(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
     ROSEPAN_STUB("seqFunc028", 0x00208b10);
-    return {};
-}
-
-// stub of ROR 0x00208b98
-intptr_t seqFunc029(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc029", 0x00208b98);
     return {};
 }
 

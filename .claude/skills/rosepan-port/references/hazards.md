@@ -357,6 +357,13 @@ public:
 - **Never pipe `name_ctx.py` / `refresh.py` into `head`**: the closed pipe kills the refresh.
 - `python -I` drops the script directory from `sys.path`: run the tools as `python tool.py` from
   tools/reverse.
+- **`gdbrun.py --help` has no help: it launches the game under gdb** and blocks the shell. Read its
+  docstring instead.
+- **A stub name can lie about which object runs.** A host placeholder class (the embedded menus
+  are all plain MagLifeMenuBase, whose methods carry MagLifeMenuItem's addresses) logs the stand-in
+  class's stub for every object of it: "MagLifeMenuItem::init reached" meant the title menu was
+  opening. To know what was asked for, put a temporary printf (the log only catches stdout) at the
+  request site, run `build.py --run 6`, and revert it before `finish`.
 
 ## Build
 

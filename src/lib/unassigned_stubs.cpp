@@ -711,6 +711,16 @@ void GamArea::startPcAction()
     ROSEPAN_STUB("GamArea::startPcAction", 0x001dea40);
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// A text window slot is in use (unassigned@0013e2ec, written ahead for
+// GamMan::isMsgBusy and native 004).
+// ROR 0x0013f444
+
+int MagScene::isWindowOpen(int win)
+{
+    return m_window[win] != NULL;
+}
+
 // stub of ROR 0x0013f280
 int MagScene::openSysMsgWindow(int msg, const int *args, int arg)
 {

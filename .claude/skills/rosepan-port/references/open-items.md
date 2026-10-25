@@ -81,6 +81,18 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      candidates: MagScene::update mode 1's pad test (pad0 +0x7c bit 3 with BedPad::update a
      stub) or seqFunc018 0x07 / 0x09 with a1 = 0x10000. Find which first -- the title needs the
      right menu. Still black.
+  4d. PARTIAL 2026-10-25 (session 3 of `sequence/seqcall.cpp`): seqFunc004 (wait until, 19
+     cases) and seqFunc029 (stage changes) written, with GamMan::requestStage 0x1cd044,
+     resetTenkyuFlags, isMsgBusy, MagScene::isWindowOpen, DogActor::isModeSet. **Resolved 4c:
+     the title IS requested.** A temporary trace in MagScene::requestMenu showed one call,
+     id 0x10005 (the title), sub mode 0. The "MagLifeMenuItem::isInit / init / processPad" stub
+     hits are not the item menu: every embedded menu on the host is a plain MagLifeMenuBase
+     (magscene.h "PORT: host MagLifeMenuBase objects"), whose non-virtual methods carry
+     MagLifeMenuItem's addresses, so openMenu(0x10005) runs those stubs. **Next blocker:
+     `mag/maglifemenu.cpp`** -- make MagLifeMenuBase's slots 6 / 9..12 virtual and give
+     m_menu_title its class MagLifeMenuTitle (vtable 0x2e17d8; slots 6 / 9 / 12 at 0x12d32c /
+     0x12d2e8 / 0x12d314 forward to the title object at +0x40), then the title code
+     (unassigned@001a6830, item 9). Still black.
   5. `unassigned@001fd424` -- sysInitManagers 0x204148, SysTimer::start / update (reached stubs).
   6. `unassigned@001e46b8` -- CmnTaskMan::exec / addTask and 0x1f688c that GamMan::update calls (the
      per-frame task runner; 253 functions: only what the title path reaches).

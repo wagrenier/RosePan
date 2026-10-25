@@ -342,6 +342,8 @@ struct MagScene
      * NULL); returns the window handle. */
     int  openSysMsgWindow(int msg, const int *args, int arg);            // ROR 0x0013f280
     void closeSysMsgWindow(int win);                                     // ROR 0x0013f458
+    /* m_window[win] is in use. */
+    int  isWindowOpen(int win);                                          // ROR 0x0013f444
 
     /* ---- mag/magscenerender.cpp ---- */
     void releaseTexture(int no);                                         // ROR 0x00139540

@@ -1,12 +1,12 @@
 {
  "queue": [
+  "mag/maglifemenu.cpp",
   "sequence/seqcall.cpp",
   "unassigned@0020ff34",
   "game/gamman.cpp",
   "unassigned@001fd424",
   "unassigned@001e46b8",
   "bed/bedpad.cpp",
-  "mag/maglifemenu.cpp",
   "unassigned@001a6830",
   "snd/rxmpeg.cpp",
   "unassigned@001810f4"
@@ -563,7 +563,7 @@
    "why": "rx middleware thread layer: kernel wrappers from 0x249b88 (CreateSema, CreateThread), rxThInit, dispatch semaphore, rxThRequest/rxThYield, rxthread/rxThread messages, vsync and DMA wait helpers to 0x24b48c; libcdvd sceCdCallback starts at 0x24b490"
   },
   "sequence/seqcall.cpp": {
-   "notes": "Left: 29 handler stubs in seqcall.cpp (004, 006, 007, 009, 012, 014, 016, 019, 020, 023, 026, 028, 029, 036, 038, 039, 100, 106, 151..281); write each when a decoded script reaches it. The smoke run passes every native the boot reaches; the screen is still black. The next blocker is Sequence::queueThread 0x2120ac (sequence/seqvm.cpp, queued first): native 110 case 1 and 30 queue G000's registered threads through it into m_start; it rebases entry by the image table bss 0x7b4850 minus m_base[id >> 30] and moves it to the nearest addiu sp within 4 words. Then GamSysData::getField 0x1dc48c (field 0xf = record short +0x46, the model id), GamMan::createObjByModel, addChr, setMurder (new member m_murderOid +0x21fd8), setLightFlag. Native 027 case 7 tests a3 against 0xffff instead of the model (ROM quirk kept). GamMan::empty1ca0d4 / empty1cd7c0 take no host arguments; the ROM passes (a1, 2 or 3) / a1. Script global indices used: m_global 0x5d (021 case 9), 0x2e (027 case 36 place), 0x62 (027 case 200 oid). Batch file work/batches/seqcall_002.json was overwritten by mistake this session (gitignored scratch; its names are in data/context_names.json); this session's batch is seqcall_004.json.",
+   "notes": "Left: 27 handler stubs (006, 007, 009, 012, 014, 016, 019, 020, 023, 026, 028, 036, 038, 039, 100, 106, 151..281); none is reached by the smoke run any more, write each when a script reaches it. Resolved the 4c question in open-items: a temporary printf in MagScene::requestMenu showed the script requests 0x10005 (the TITLE) once; the MagLifeMenuItem isInit / init / processPad stub hits come from the host placeholder MagLifeMenuBase (all embedded menus share it, its methods carry MagLifeMenuItem addresses). Next blocker, queued first: mag/maglifemenu.cpp -- virtual slots 6 / 9..12 on MagLifeMenuBase and m_menu_title as MagLifeMenuTitle (vtable 0x2e17d8, slots forward to the title object at +0x40), then unassigned@001a6830 (the title code). Quirks kept: native 004 case 9 bounds a1 below 0x11, so a1 = 16 tests bit 16 of a 16-bit word and waits for ever; case 3 leaves the task id unset in the ROM when getObjParam has nothing (0 on the host). Native 029 passes the TskFrameFunc four int words (pair m_b, m_a, room, word); TskFrameFunc is still a stub. Screen still black. Batch: work/batches/seqcall_005.json.",
    "ranges": [
     [
      "002053f4",
@@ -580,6 +580,11 @@
      "date": "2026-10-25 18:35",
      "status": "partial",
      "summary": "Script natives the boot reaches: seqFunc001 (new game state), 002 (default scene lights), 021 (GamMan state service, 32 cases), 027 (object service, 205 cases), 032 (string clamp), 033 (fades, volume, cine bars, fade tasks) and 110 (threads, entries, chr registrations); named 19 callees (GamMan createObjByName / createObjByModel / addChr / addVFchr / addChrGroup / changeObjModel / loadMapUnit / setMurder / setLightFlag ..., GamSysData::getField, Sequence::queueThread / callEntry / callEntryNow / endThread / endThreadOf)"
+    },
+    {
+     "date": "2026-10-25 19:18",
+     "status": "partial",
+     "summary": "Script natives the G000 threads reach: seqFunc004 (wait until, 19 cases, table data 0x2ff930) and seqFunc029 (stage changes: rooms, chapter, the kind 0xb frame task of system call 0x34); written ahead for them GamMan::requestStage 0x1cd044, resetTenkyuFlags 0x1cb1c0, isMsgBusy 0x1cf9d4 (game/gamman.cpp), MagScene::isWindowOpen 0x13f444 (lib/unassigned_stubs.cpp), DogActor::isModeSet 0x10a834; new GamMan member m_prev_stat +0x21f44, GamTenkyuRec m_flags"
     }
    ],
    "status": "partial",

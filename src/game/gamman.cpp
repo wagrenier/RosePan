@@ -591,6 +591,22 @@ int GamMan::setOption(u_int no, intptr_t arg)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// 1 while the message task runs or the system message window is open.
+// ROR 0x001cf9d4
+
+int GamMan::isMsgBusy()
+{
+    if (g_taskMan.getTask(m_msgTaskId) == NULL)
+    {
+        if (m_sysMsgHandle == -1)
+            return 0;
+        if (!g_magSystem.m_scene.isWindowOpen(m_sysMsgHandle))
+            return 0;
+    }
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001cfb38
 
 void GamMan::setSysMsgHandle(int handle)
@@ -1205,6 +1221,57 @@ void GamMan::releaseStage2()
 {
     releaseTenkyus(2);
     releaseObjs(2, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A stage change for afterSeqExec to run (flags2 bit 2). Kind 1 is a new
+// chapter (globals 0x2f / 0x30 get the new and the old one; nothing when it
+// is the current one), kind 2 a room of the stage (the room already loaded
+// only resumes the menu pause), kind 3 the stage-2 data with a3; the tasks
+// other than the current one pause until execStageReq resumes them.
+// ROR 0x001cd044
+
+void GamMan::requestStage(int kind, int room, int a3, int chapter, u_int word)
+{
+    m_1a684 = word;
+    m_flags2 |= 0x80000000u;
+    if (kind == 1)
+    {
+        if (chapter == m_chapter)
+            return;
+        g_sequence.m_global[0x2f] = chapter;
+        g_sequence.m_global[0x30] = m_chapter;
+        m_stageReq = 5;
+        m_chapter = chapter;
+    }
+    else
+    {
+        if (kind == m_cur_stat && kind == 2 && m_21f7c == room)
+        {
+            resume(0x100000);
+            return;
+        }
+        m_stageReq = 3;
+    }
+    m_prev_stat = m_cur_stat;
+    m_flags2 |= 2;
+    m_21f84 = m_21f7c;
+    m_21f88 = m_21f80;
+    m_cur_stat = kind;
+    if (kind == 2)
+    {
+        m_21f7c = room;
+    }
+    else if (kind == 3)
+    {
+        m_21f80 = a3;
+    }
+    else
+    {
+        m_21f80 = -1;
+        m_21f7c = -1;
+    }
+    g_taskMan.pauseOthers(1);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -2089,6 +2156,22 @@ void GamMan::releaseTenkyus(int kind)
         utlMemFree(m_keepBuf);
         m_keepBuf = NULL;
     }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Bit 0 of every sky dome record's flags cleared. Native 004 case 1 waits
+// on the result, which is always 0.
+// ROR 0x001cb1c0
+
+int GamMan::resetTenkyuFlags()
+{
+    for (SeqNode<GamTenkyuRec> *node = m_pool1d240.m_used.begin();
+         node != m_pool1d240.m_used.end(); node = node->m_next)
+    {
+        if ((node->m_data.m_flags & 1) != 0)
+            node->m_data.m_flags &= ~1u;
+    }
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
