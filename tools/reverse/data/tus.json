@@ -1,6 +1,5 @@
 {
  "queue": [
-  "sequence/sequence.cpp",
   "unassigned@0020ff34",
   "game/gamman.cpp",
   "unassigned@001fd424",
@@ -553,12 +552,21 @@
    "why": "exactly the 512 script native functions of the table data 0x2d90f8 (the VM 0x214c24 calls entry (jal target - 0x144) / 0x40) plus the two helpers 0x20de34 / 0x20dea8 that entry 281 calls; the table's last entry is 0x20de2c and seqSetLanguage follows. File name invented (no source string): seq = sequence, call = what the script calls"
   },
   "sequence/sequence.cpp": {
+   "notes": "All 19 functions written; the smoke run executes Sequence::exec every frame with empty pools (screen black as before: no image is loaded because GamMan::loadSystemData and loadStage are stubs). Mark done once a screenshot shows script output. Next: unassigned@0020ff34, the VM run: seqVmRun 0x214c24, startThread 0x211e84, setupImage 0x213f48, findThread 0x213c6c, killThreads 0x213450, freeStageEntries 0x2127f4, seqVmSelectImage / SaveImage / LoadThread / FreeStack / Resume are declared in sequence.h and stubbed in lib/unassigned_stubs.cpp. The VM globals 0x7b4640..0x7b4dd0 and data 0x2d9e08 are defined in sequence.cpp for now; move them to the VM file if its bss order says so. SeqThread (0xb0) has host layout with pc and stack as intptr_t; the VM TU should name the fields it keeps in 0x10..0x1c and 0x2c..0xac. The ROM allocates a fourth thread pool in init and drops it (kept, a leak); clearStageVars skips the node after each removal as the ROM does (asm 0x20f358 checked). sysInitManagers 0x204148 (unassigned@001fd424) now calls Sequence::init and GamMan::init (stub) from the bridges section. callcheck.py now accepts names ending in [] in callcheck comments.",
    "ranges": [
     [
      "0020e3d8",
      "0020ff34"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-25 16:37",
+     "status": "verify",
+     "summary": "Sequence: constructor, init / term, the three image loaders, stopImages, the per-frame exec with runImage and reapThreads, releaseThread, the global / stage variable clears and the node pool templates (SeqNode / SeqList / SeqPool); sysInitManagers written ahead so init builds the image pools"
+    }
+   ],
+   "status": "verify",
    "why": "Sequence::init 0x20e690 has the sequence/sequence.cpp string; before it seqSetLanguage, seqGetDataDir, seqMakeGlobalPath (the seq data folder and global script paths) and the Sequence constructor / destructor / term the static initializer and sysTermManagers call; Sequence::exec ends at 0x20ff34 where the VM run unassigned@0020ff34 starts"
   },
   "setup/ghidra_seed.cpp": {

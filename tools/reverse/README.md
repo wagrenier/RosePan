@@ -70,7 +70,7 @@ python refresh.py          # all of the above that is not a one-time write, in o
 | `restore_names.py` | `--snapshot` every name before bulk writes; restore from a snapshot. |
 | `build.py` | Build (MinGW + ninja, configures on first use, reuses ReiPan's / MioPan's fetched deps), `--run N [--pad S] [--shot-every F] [--env K=V]` smoke run with screenshots and stub hits. Needs the bootstrapped PC project. |
 | `stubgen.py` | Undefined references -> `ROSEPAN_STUB` definitions in their TU's file (address from a trailing `// ROR 0x...` on the declaration, else the Ghidra name, also `Class::Method`). |
-| `callcheck.py` | Calls in each `ROR 0x...`-annotated function vs RoR's callees (jal + tail jumps), by name's last component or the source definition at that address; `// callcheck: A, B (why)` explains invisible calls. |
+| `callcheck.py` | Calls in each `ROR 0x...`-annotated function vs RoR's callees (jal + tail jumps), by name's last component or the source definition at that address; `// callcheck: A, B (why)` explains invisible calls (names may end in [], e.g. operator_new[] for a C++ new[]). |
 | `layoutcheck.py` | Every game header on its own under MinGW GCC and MSVC so both evaluate the `static_assert` layouts; lints structs without asserts (or a `layout: host` note), plain `long`, `wchar_t`, `packed`. |
 | `gdbrun.py` / `gdbdrive.py` | The game under CLion's gdb: a fault holds it and writes `work/gdb/crash.txt`; `--cmd` inspects, `--break` stops a hang. |
 | `autopilot.py` | The unattended chain: one headless `claude -p "/rosepan-port tu <TU>"` per TU on a fixed allow-list, verified (finished, committed, clean, green), usage limits waited out and the session resumed. Run it yourself from a terminal. |

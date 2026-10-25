@@ -22,7 +22,10 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      native functions (table data 0x2d90f8) with the system call seqFunc018 0x20694c written (8 / 0x16 =
      title); 36 other handlers are stubs, written when a script reaches them. seqSetLanguage /
      seqGetDataDir / seqMakeGlobalPath are written in sequence/sequence.cpp (0x20e3d8.. now pinned to it).
-  2. `sequence/sequence.cpp` -- the Sequence VM (`Sequence::exec` is a reached stub).
+  2. DONE 2026-10-25 (`verify`): `sequence/sequence.cpp` -- all 19 functions (pools, image loaders, exec / runImage /
+     reapThreads); sysInitManagers 0x204148 written ahead in lib/unassigned_stubs.cpp (it calls Sequence::init).
+     exec runs every frame with empty pools until GamMan::loadSystemData / loadStage call loadSystemImage /
+     loadStageImage (gamman, item 4); the VM entry points (seqVm*, startThread, setupImage) are item 3.
   3. `unassigned@0020ff34` -- the script thread scheduler ("mst", "trg", "imdy", "single") the VM calls.
   4. `game/gamman.cpp` -- slice: loadSystemData, loadStage, update, postUpdate (409 functions: only the
      load / update path, the rest stays stubs).
