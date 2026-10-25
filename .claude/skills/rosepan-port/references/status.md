@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-25 15:31 at commit `105b8d3` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-25 15:41 at commit `6449d1d` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-25 15:31 at commit `105b8d3` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6531**, named **3025** (46%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 204, ror-inferred 1453
-- context-name ledger: 1657 entries; overrides of wrong library matches: 5
-- placed in a source file: 2798/6531 in 89 files
+- game functions: **6543**, named **3049** (47%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 228, ror-inferred 1453
+- context-name ledger: 1681 entries; overrides of wrong library matches: 5
+- placed in a source file: 2810/6543 in 89 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **1396**; stubs: **223**
+- reconstructed RoR functions: **1420**; stubs: **223**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -78,7 +78,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/magsystem.cpp` | 55 | 0 |
 | `src/main.cpp` | 11 | 0 |
 | `src/rx/rxfile.cpp` | 168 | 0 |
-| `src/rx/rxsnd.cpp` | 198 | 0 |
+| `src/rx/rxsnd.cpp` | 222 | 0 |
 | `src/rx/rxsys.cpp` | 74 | 6 |
 | `src/rx/rxthread.cpp` | 53 | 0 |
 | `src/sequence/sequence.cpp` | 0 | 1 |
@@ -96,10 +96,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 156 TUs: todo 131, partial 3, verify 30, done 2
-- next: **rx/rxsnd.cpp** (continuing a partial TU)
+- 156 TUs: todo 131, partial 2, verify 31, done 2
+- next: **unassigned@00228c08** (frontier score 34)
 - pinned queue: game/gamfile.cpp
-- partial: `rx/rxsnd.cpp` 198/210 -- Screen black as before: sound has no picture and the boot does not reach SndMan bank, BGM or stream calls. Left in this TU: PCM open and play (0x23cba0, 0x23cbf
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
@@ -121,6 +120,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/magsystem.cpp` 55/55 -- All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes ar
 - verify: `main.cpp` 11/11 -- Status verify: the smoke run boots for real (iopconf.cnf, eight IOP modules and system.ini read from the disc folder through host0:), runs mainInitGame and loop
 - verify: `rx/rxfile.cpp` 168/168 -- Status verify: every function in 0x2437f8..0x249b88 is written, but nothing can show it: main 0x2045a8 is still the placeholder (black screen), and the rxthread
+- verify: `rx/rxsnd.cpp` 222/222 -- Complete apart from two unreferenced trivia (0x2384b0 empty, 0x23a910 returns its argument). Screen black as before: sound has no picture and the boot reaches n
 - verify: `rx/rxsys.cpp` 74/119 -- Status verify: nothing calls rxSysInit yet - main 0x2045a8 is still the placeholder in src/main.cpp, so the screenshot is the black placeholder frame. Next: mai
 - verify: `rx/rxthread.cpp` 53/53 -- Complete; verify because main (unassigned@001fd424) is still the placeholder, so nothing calls rxThInit in the smoke run (black frame as before). A temporary ca
 - verify: `setup/i3d_draw_module.cpp` 0/0 -- Hook recorded in open-items Decisions (The native i3d hook). The committed screenshot is the forced test (ROSEPAN_I3D_TEST=1): S2DMAN.RPK @0x800 (PSMT8, Now Loa
@@ -133,6 +133,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-25 15:41 `rx/rxsnd.cpp` verify: Wrote the last 24 rx sound functions (12 hidden ones created in Ghidra, named in rxsnd_005): PCM streams (open, close, close all, status, free, write with mode 
 - 2026-10-25 15:31 `rx/rxsnd.cpp` partial: Wrote 70 rx sound functions (22 hidden ones created in Ghidra, named in rxsnd_004): system commands 0x30 / 0x31, the 0x9x per-voice tables, rxSndCentToPitch wit
 - 2026-10-22 21:58 `dog/doglightpool.cpp` verify: Wrote the rest of DogLightPool (26 functions 0x1103dc..0x1123b0): init/term/create/alloc/newLight, the id and set-mask edits (allocId, addToSet, removeLight, re
 - 2026-10-22 21:37 `rx/rxsnd.cpp` partial: Wrote 28 rx sound functions: SPU heap allocator and free with node helpers, EE to IOP copy (rxSndIopWrite with bounce buffers, rxSndIopCopy), SPU transfer, XVAB
@@ -140,13 +141,12 @@ Recent sessions:
 - 2026-10-22 21:04 `mag/magscene.cpp` verify: Wrote the rest of mag/magscene.cpp: the wall collision (castSphere, castCylinder, hitWallsSphere, hitWallsCylinder, getGroundHeight; i3dPointSegDist2 named), th
 - 2026-10-22 20:31 `mag/magscene.cpp` partial: Wrote 34 more mag/magscene.cpp functions: castRay and the new castWalls (the scene's first 0x2000 bytes are 256 wall segments, tested with i3dSegSegDist2 before
 - 2026-10-22 20:19 `mag/magscene.cpp` partial: Wrote MagScene::MagScene 0x1360a0 (the scene's own field defaults: vector pairs, shadow mode -1, the 0x22a0.. scales, sky slots free, strips free, focus -1, the
-- 2026-10-22 20:05 `mag/maglifeman.cpp` verify: MagLifeMan complete: all 12 functions (pinned 0x1194b4..0x119b34: clearPod, unlink, insertBefore, insertAfter, init, deleteAll, add, remove, find, removeNo, upd
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `unassigned@00228c08` | todo | 0/8/222 | 54.9 | 34 | 1 |
-| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 29 | 0 |
 | `unassigned@00164fc0` | todo | 0/8/395 | 104.2 | 29 | 3 |
+| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 29 | 0 |
 | `game/gamman.cpp` | todo | 0/5/409 | 82.8 | 26 | 4 |
 | `unassigned@001810f4` | todo | 0/10/28 | 2.8 | 25 | 3 |
 | `unassigned@00140030` | todo | 0/4/6 | 2.7 | 24 | 3 |
@@ -154,8 +154,8 @@ Recent sessions:
 | `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 24 | 1 |
 | `mag/magloader.cpp` | todo | 0/7/15 | 4.7 | 22 | 2 |
 | `dog/dogmodel.cpp` | todo | 0/11/67 | 10.0 | 21 | 0 |
-| `unassigned@0020ff34` | todo | 0/3/53 | 23.7 | 20 | 0 |
 | `bed/bedpad.cpp` | todo | 0/5/5 | 0.9 | 20 | 2 |
+| `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 20 | 2 |
 
 ## Frontier (called by reconstructed code, not written yet)
 

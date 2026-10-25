@@ -434,7 +434,7 @@
    "why": "rx middleware file layer: rxfile messages from 0x244410 (failed to alloc slot) to the request thread 0x2491c0 (rxfile : failed to create thread); starts after rxsys 0x2437f8, ends with the file thread priority helpers 0x249b20/0x249b78 (bss 0x7f6910/0x7f6918); 0x249b88 starts the rxthread kernel wrappers (CreateSema, CreateThread)"
   },
   "rx/rxsnd.cpp": {
-   "notes": "Screen black as before: sound has no picture and the boot does not reach SndMan bank, BGM or stream calls. Left in this TU: PCM open and play (0x23cba0, 0x23cbf8, 0x23cca8 called from 0x1810f4, 0x23ce98, 0x23cf90, 0x23d018, 0x23d078, hidden 0x23cc68, 0x23cfd0, 0x23d4b8, 0x23d610, 0x23d658), ADPCM hidden setters 0x23dc68 / 0x23dc98 / 0x23ed10 / 0x23ee68 / 0x23eeb0 / 0x23f3c0 / 0x23f600, and 0x23e118; python hidden.py 0x237ce8 0x23ff58 lists the hidden ones (mkfunc, then name). Skipped as unnamable trivia: 0x2384b0 (empty) and 0x23a910 (returns its argument), both unreferenced. Meanings guessed only in comments: command 0x32 is the SPU2 reverb (libsd mode 0..9, depth, delay, feedback); 0x30 kinds 3..5, 0x31, 0x22, 0x63, 0x74 and SPU transfer types 1 / 2 / 4 / 5 are not known. rxSndIopWriteWorkBuffer never advances the IOP address, as in the ROM. s_iopBuf is alignas(16): rxSndIopRead recurses until its bounce buffer is aligned (hazards.md).",
+   "notes": "Complete apart from two unreferenced trivia (0x2384b0 empty, 0x23a910 returns its argument). Screen black as before: sound has no picture and the boot reaches no PCM or ADPCM stream, so verify. PCM layout: RxSndPcm fields named (blocks, blockSize, mode, queued, ringSize, writePos, pending, seq, attr); commands 0xb0 open, 0xb1 blocks filled with sequence numbers, 0xb2 params 0 close, 1 pause, 2 attr, 4 volume, 5 end. The IOP stand-in src/sdk/iop_rxsnd.cpp ignores 0xb0 and 0xb1 and reports no PCM status; give it a PCM entry if a PCM stream must report progress. Unknown meanings kept in comments and open-items: 0x31 params 0 and 2, 0xb4, 0xa4 param 5. Table 0x298f68 in the sound driver pairs the PCM and ADPCM open, close, free, write and pause functions.",
    "ranges": [
     [
      "00237ce8",
@@ -461,9 +461,14 @@
      "date": "2026-10-25 15:31",
      "status": "partial",
      "summary": "Wrote 70 rx sound functions (22 hidden ones created in Ghidra, named in rxsnd_004): system commands 0x30 / 0x31, the 0x9x per-voice tables, rxSndCentToPitch with its two ratio tables, rxSndMemMove, IOP hook setters, rxSndIopRead (sceSifGetOtherData, added to sdk/sifrpc), IOP write helpers, SPU heap slots (set, release, free all, bank slot, free size, largest block, status print), the other SPU transfer types, the SPU2 effect commands 0x32 (mode, depth, delay, feedback, per core and both), MIDI varlen reader, XVAB getters, XSEQ load / free / set / getters, rxSndChunkGetSize, BGM play / stop all / pause / status / value / channel volumes 0x73 0x74 / attr / pitch / params 5 6, SE default params, rxSndSePlayEx, SE stop all, SE params 5..9 and pan. IOP stand-in answers the XSEQ open 0x60 with the id."
+    },
+    {
+     "date": "2026-10-25 15:41",
+     "status": "verify",
+     "summary": "Wrote the last 24 rx sound functions (12 hidden ones created in Ghidra, named in rxsnd_005): PCM streams (open, close, close all, status, free, write with mode 1 split halves and block announce 0xb1, end padding, position callbacks, user data, attr, pause), system commands 0x31 mix and mute, 0xb4, ADPCM default params 6 and 7, close all, position callbacks, user data, per-channel volume and param 5, position getter. The rx sound library EE side is complete."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "the whole run between i3dmath and rxsys is one library: rxsnd strings, one RPC client 0x7ca300 (IOP module 0xd000, RXSNDDRV.IRX), modules init/term in rxSndInitModules order"
   },
   "rx/rxsys.cpp": {
