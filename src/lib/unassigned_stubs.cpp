@@ -921,3 +921,80 @@ void gamStage2Loaded(void)
 {
     ROSEPAN_STUB("gamStage2Loaded", 0x001fbbd0);
 }
+
+// stub of ROR 0x001da228
+void ACHRstat::getParam(int which, void *out)
+{
+    ROSEPAN_STUB("ACHRstat::getParam", 0x001da228);
+}
+
+// stub of ROR 0x001da740
+void ACHRstat::setParam(int which, const void *data)
+{
+    ROSEPAN_STUB("ACHRstat::setParam", 0x001da740);
+}
+
+// stub of ROR 0x001634d4
+void EmyManager::releaseObj(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::releaseObj", 0x001634d4);
+}
+
+// stub of ROR 0x001db31c
+void FCHRstat::getParam(int which, void *out)
+{
+    ROSEPAN_STUB("FCHRstat::getParam", 0x001db31c);
+}
+
+// stub of ROR 0x001e0d70
+int GamArea::hasId(u_int id)
+{
+    ROSEPAN_STUB("GamArea::hasId", 0x001e0d70);
+    return {};
+}
+
+// stub of ROR 0x001d83d0
+int GamMan::lookupFlagTable(int keyCol, int key, int col)
+{
+    ROSEPAN_STUB("GamMan::lookupFlagTable", 0x001d83d0);
+    return {};
+}
+
+// stub of ROR 0x001dbfa0
+const void * GamSysData::getRec(short id)
+{
+    ROSEPAN_STUB("GamSysData::getRec", 0x001dbfa0);
+    return {};
+}
+
+// stub of ROR 0x001dcd38
+void GamSysData::setFlags(short id, u_int bits)
+{
+    ROSEPAN_STUB("GamSysData::setFlags", 0x001dcd38);
+}
+
+// stub of ROR 0x001dd00c
+int GamSysData::testFlags(short id, u_int bits)
+{
+    ROSEPAN_STUB("GamSysData::testFlags", 0x001dd00c);
+    return {};
+}
+
+// stub of ROR 0x0017756c
+void Obj176a3c::release(int no)
+{
+    ROSEPAN_STUB("Obj176a3c::release", 0x0017756c);
+}
+
+// stub of ROR 0x001d966c
+void ObjStat::releaseActor()
+{
+    ROSEPAN_STUB("ObjStat::releaseActor", 0x001d966c);
+}
+
+// stub of ROR 0x001f6578
+u_int chrCreateItemObj(short id, const float *pos, const float *rot)
+{
+    ROSEPAN_STUB("chrCreateItemObj", 0x001f6578);
+    return {};
+}

@@ -42,6 +42,10 @@ struct GamSndMan
     /* Frees bank slot n (SndMan::freeBank) and marks it -1. */
     void freeSePack(int n);                                              // ROR 0x001e46b8
     void loadSePack(const char *name, void *data, int arg);              // ROR 0x001e4458
+    /* The object sound list's entries of oid stopped / released (GamMan::
+     * releaseChr). */
+    void stopObjSe(u_int oid);                                           // ROR 0x001e2c40
+    void releaseObjSe(u_int oid);                                        // ROR 0x001e3698
     void registSnd(int state, void *data);                               // ROR 0x001e4790
     void registStrSnd(int state, void *data);                            // ROR 0x001e484c
     void clear_snd_lst(int arg);                                         // ROR 0x001e6570

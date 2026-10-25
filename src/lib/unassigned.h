@@ -44,6 +44,8 @@ struct EmyManager : CmnITask
 {
     /* Its two object ids (+0x138 / +0x13c). */
     void getOids(int *a, int *b);                                        // ROR 0x00163ab8
+    /* Deletes its object whose first word is oid (a type-2 achr's). */
+    void releaseObj(u_int oid);                                          // ROR 0x001634d4
 };
 
 /* The task manager, one global at bss 0x7a3d80. EE size at least 0x288.
@@ -409,6 +411,9 @@ struct MagLife130da4 : MagLife  /* scene +0x418f0, constructor 0x130da4 */
 static_assert(offsetof(MagLife130da4, m_34) >= 0x34, "m_34");
 struct Obj176a3c                /* scene +0x837e0, constructor 0x176a3c */
 {
+    /* Deletes entry no of its table (GamMan::ctlObj1cbb80). */
+    void release(int no);                                                // ROR 0x0017756c
+
     int _00;
 };
 /* layout: host -- placeholder. */

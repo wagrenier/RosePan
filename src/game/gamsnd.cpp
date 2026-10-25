@@ -72,3 +72,15 @@ void GamSndMan::resumeBgm(int a, int mode, int reset)
 {
     ROSEPAN_STUB("GamSndMan::resumeBgm", 0x001e1920);
 }
+
+// stub of ROR 0x001e3698
+void GamSndMan::releaseObjSe(u_int oid)
+{
+    ROSEPAN_STUB("GamSndMan::releaseObjSe", 0x001e3698);
+}
+
+// stub of ROR 0x001e2c40
+void GamSndMan::stopObjSe(u_int oid)
+{
+    ROSEPAN_STUB("GamSndMan::stopObjSe", 0x001e2c40);
+}

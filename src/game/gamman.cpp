@@ -136,7 +136,7 @@ void GamMan::initGameState()
     m_22280[4] = 0x100;
     m_pcEquipItemOID = 0;
     m_equipItem = 0xa00;
-    m_1d200 = 0;
+    m_selItemNum = 0;
     m_inuTask = -1;
     m_sysMsgHandle = -1;
     m_msgTaskId = -1;
@@ -178,9 +178,9 @@ void GamMan::initGameState()
     m_22008 = 0;
     m_21f54 = 0;
     m_1f244 = 0;
-    memset(m_1f24c, 0, sizeof(m_1f24c));
+    memset(m_vfchrSlot, 0, 0x180);     /* 0x180 bytes of the 0x600, as in the ROM */
     m_225e4 = 0;
-    m_225e8 = 0;
+    m_keepBuf = NULL;
     m_225f0 = 0;
     markReset();
     clearItemHave();
@@ -1482,89 +1482,828 @@ FCHRstat *GamMan::getVFchr(u_int oid)
     return NULL;
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+// ════════════════════════════════════════════════════════════════════════
+// Slice 3: the stage sounds, the items and the stock, object ids and the
+// chr teardown.
+// ════════════════════════════════════════════════════════════════════════
 
-// stub of ROR 0x001c2f50
+// One SE pack file into buf (loadStageSnd's and loadItemSe's request: the
+// file whole, closed after the read).
+static void gamReadSe(FileReader &reader, const char *path, void *buf, int size)
+{
+    FileReadReq req;
+    req.m_name = path;
+    req.m_08 = 1;
+    req.m_offset = 0;
+    req.m_whence = 0;
+    req.m_buf = buf;
+    req.m_size = size;
+    req.m_close = 1;
+    reader.read(&req, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The stage's SE packs by chapter: the sound stops, slots 10 / 11 / 0x20 /
+// 0x1f / 0xc are freed, then one 1xxx.se pair (the walk / area sounds) and
+// one 3xxx.se (the chapter's own) are read through one 1 MB buffer and
+// registered under their names. Chapters 9 and > 13 get no 3xxx pack;
+// chapter 9 no 1xxx pair either.
+// ROR 0x001c2f50 // callcheck: FileReader, FileReadReq, read, ~FileReader (the reader local and the request in gamReadSe, inline in the ROM)
+
 void GamMan::loadStageSnd(int chapter)
 {
-    ROSEPAN_STUB("GamMan::loadStageSnd", 0x001c2f50);
+    GamSndMan *snd = &m_sndMan;
+    void *buf = g_utlMemory.allocDebug(0x101480, s_file, 1579, 0, 1);
+    FileReader reader;
+    snd->funcSnd(0x11, 0, 0, 0, -1);
+    snd->freeSePack(10);
+    snd->freeSePack(0xb);
+    snd->freeSePack(0x20);
+    snd->freeSePack(0x1f);
+    snd->freeSePack(0xc);
+
+    switch (chapter)
+    {
+    case 1:
+    case 7:
+    case 13:
+        gamReadSe(reader, "data/snd/xv/1001.se", buf, 0x80000);
+        snd->loadSePack("1001.se", buf, 0);
+        gamReadSe(reader, "data/snd/xv/1102.se", buf, 0x80000);
+        snd->loadSePack("1102.se", buf, 0);
+        break;
+    case 2:
+    case 3:
+    case 4:
+    case 10:
+    case 11:
+    case 12:
+        gamReadSe(reader, "data/snd/xv/1000.se", buf, 0x80000);
+        snd->loadSePack("1000.se", buf, 0);
+        gamReadSe(reader, "data/snd/xv/1100.se", buf, 0x80000);
+        snd->loadSePack("1100.se", buf, 0);
+        break;
+    case 5:
+        gamReadSe(reader, "data/snd/xv/1001.se", buf, 0x80000);
+        snd->loadSePack("1001.se", buf, 0);
+        gamReadSe(reader, "data/snd/xv/1101.se", buf, 0x80000);
+        snd->loadSePack("1101.se", buf, 0);
+        break;
+    case 6:
+        gamReadSe(reader, "data/snd/xv/1001.se", buf, 0x80000);
+        snd->loadSePack("1001.se", buf, 0);
+        gamReadSe(reader, "data/snd/xv/1103.se", buf, 0x80000);
+        snd->loadSePack("1103.se", buf, 0);
+        break;
+    case 8:
+        gamReadSe(reader, "data/snd/xv/1002.se", buf, 0x80000);
+        snd->loadSePack("1002.se", buf, 0);
+        gamReadSe(reader, "data/snd/xv/1104.se", buf, 0x80000);
+        snd->loadSePack("1104.se", buf, 0);
+        break;
+    case 9:
+        break;
+    default:
+        goto done;
+    }
+
+    switch (chapter)
+    {
+    case 1:  gamReadSe(reader, "data/snd/xv/3200.se", buf, 0x80000); snd->loadSePack("3200.se", buf, 0); break;
+    case 2:  gamReadSe(reader, "data/snd/xv/3201.se", buf, 0x80000); snd->loadSePack("3201.se", buf, 0); break;
+    case 3:  gamReadSe(reader, "data/snd/xv/3202.se", buf, 0x80000); snd->loadSePack("3202.se", buf, 0); break;
+    case 4:  gamReadSe(reader, "data/snd/xv/3203.se", buf, 0x80000); snd->loadSePack("3203.se", buf, 0); break;
+    case 5:
+    case 13: gamReadSe(reader, "data/snd/xv/3204.se", buf, 0x80000); snd->loadSePack("3204.se", buf, 0); break;
+    case 6:  gamReadSe(reader, "data/snd/xv/3205.se", buf, 0x80000); snd->loadSePack("3205.se", buf, 0); break;
+    case 7:  gamReadSe(reader, "data/snd/xv/3206.se", buf, 0x80000); snd->loadSePack("3206.se", buf, 0); break;
+    case 8:  gamReadSe(reader, "data/snd/xv/3207.se", buf, 0x80000); snd->loadSePack("3207.se", buf, 0); break;
+    case 10: gamReadSe(reader, "data/snd/xv/3208.se", buf, 0x80000); snd->loadSePack("3208.se", buf, 0); break;
+    case 11: gamReadSe(reader, "data/snd/xv/3209.se", buf, 0x80000); snd->loadSePack("3209.se", buf, 0); break;
+    case 12: gamReadSe(reader, "data/snd/xv/3210.se", buf, 0x80000); snd->loadSePack("3210.se", buf, 0); break;
+    default: break;
+    }
+done:
+    utlMemFree(buf);
 }
 
-// stub of ROR 0x001ccc30
-void GamMan::releaseChr(int arg)
+// ──────────────────────────────────────────────────────────────────────
+// A new object id. Types 0 / 1 / 3 and 2 are achrs (list 1) with their own
+// counters (+0x225f8, +0x225f4), the other types below 10 take list and the
+// counter +0x225fc, all counted down past the ids isObj finds taken; types
+// 10..15 share +0x22600 (13 skips the ids GamArea holds, the others take
+// the next number as it is). Types >= 16 get 0.
+// ROR 0x001c6fe0
+
+u_int GamMan::makeOid(u_int list, u_int type, int image)
 {
-    ROSEPAN_STUB("GamMan::releaseChr", 0x001ccc30);
+    if (image == -1)
+        image = m_cur_stat;
+    u_int oid = 0;
+    if (type < 0x10)
+    {
+        u_int stage = (u_int)m_21f7c;
+        u_int n;
+        switch (type)
+        {
+        case 0:
+        case 1:
+        case 3:
+            oid = (u_int)image << 30 | (stage & 0x7f) << 16 | type << 23 | 0x10000000 | m_225f4[1];
+            while (isObj(oid))
+                oid--;
+            m_225f4[1] = (oid & 0x2ff) - 1;
+            break;
+        case 2:
+            oid = (u_int)image << 30 | (stage & 0x7f) << 16 | type << 23 | 0x10000000 | m_225f4[0];
+            while (isObj(oid))
+                oid--;
+            m_225f4[0] = (oid & 0x2ff) - 1;
+            break;
+        default:
+            oid = (u_int)image << 30 | (stage & 0x7f) << 16 | type << 23 | (list & 3) << 28 | m_225f4[2];
+            while (isObj(oid))
+                oid--;
+            m_225f4[2] = (oid & 0x2ff) - 1;
+            break;
+        case 10:
+        case 11:
+        case 12:
+        case 14:
+        case 15:
+            n = m_225f4[3];
+            m_225f4[3] = n - 1;
+            oid = (u_int)image << 30 | type << 23 | (stage & 0x7f) << 16 | n;
+            break;
+        case 13:
+            oid = (u_int)image << 30 | type << 23 | (stage & 0x7f) << 16 | m_225f4[3];
+            while (m_area.hasId(oid))
+                oid--;
+            m_225f4[3] = (oid & 0x2ff) - 1;
+            break;
+        }
+    }
+    return oid;
 }
 
-// stub of ROR 0x001c7e40
-void GamMan::addItem(short id, int arg)
+// ──────────────────────────────────────────────────────────────────────
+// The SE pack of a held item (the sounds its use makes): 6400.se for any
+// item without its own.
+// ROR 0x001c772c // callcheck: FileReader, FileReadReq, read, ~FileReader (the reader local and the request in gamReadSe, inline in the ROM)
+
+void GamMan::loadItemSe(u_short id, int cur)
 {
-    ROSEPAN_STUB("GamMan::addItem", 0x001c7e40);
+    void *buf = g_utlMemory.allocDebug(0x18040, s_file, 4573, 0, 1);
+    if (cur != 0)
+        id = (u_short)m_equipItem;
+
+    int no;
+    switch (id)
+    {
+    case 0xa36: case 0xa37: case 0xa40: case 0xa41:
+    case 0xafd: case 0xafe: case 0xaff: case 0xb00: case 0xb01:
+    case 0xb33:
+        no = 1; break;
+    case 0xa38: case 0xb35:
+        no = 2; break;
+    case 0xa3b: case 0xb27: case 0xb31: case 0xb34:
+        no = 3; break;
+    case 0xa3c:
+        no = 4; break;
+    case 0xa39: case 0xa44: case 0xb32:
+        no = 5; break;
+    case 0xa3a:
+        no = 6; break;
+    case 0xa3e: case 0xa43:
+        no = 7; break;
+    case 0xa3d: case 0xb25: case 0xb36:
+        no = 8; break;
+    default:
+        no = 0; break;
+    }
+    char path[0x20];
+    char name[0x10];
+    snprintf(path, sizeof(path), "data/snd/xv/640%d.se", no);
+    snprintf(name, sizeof(name), "640%d.se", no);
+
+    FileReader reader;
+    gamReadSe(reader, path, buf, 0x18000);
+    m_sndMan.loadSePack(name, buf, 0);
+    utlMemFree(buf);
 }
 
-// stub of ROR 0x001c8f7c
-int GamMan::addStock(short id, int count)
-{
-    ROSEPAN_STUB("GamMan::addStock", 0x001c8f7c);
-    return {};
-}
+// ──────────────────────────────────────────────────────────────────────
+// The PC takes item id in hand: flags2 0x200000 when it changes, the PC's
+// param 0x32, the old held object released, a new one created and parented
+// to the PC's node p_hn_r (the lamp 0xa3e / 0xa43 keeps its count in
+// m_selItemNum), and its SE pack once flags2 0x40 or 0x200000 is set.
+// ROR 0x001c7a4c // callcheck: FUN_00215a30, i3rGetNodeIndexByName, memset (the assert handler and the call inside the inline DogModel::getNodeIndexByName; memset clears the zero vector, an initializer here)
 
-// stub of ROR 0x001c8ca4
-int GamMan::canAddItem(int arg, short id)
-{
-    ROSEPAN_STUB("GamMan::canAddItem", 0x001c8ca4);
-    return {};
-}
-
-// stub of ROR 0x001c82f8
-void GamMan::delItem(short id, int arg)
-{
-    ROSEPAN_STUB("GamMan::delItem", 0x001c82f8);
-}
-
-// stub of ROR 0x001c8414
-void GamMan::delItemAll(short id)
-{
-    ROSEPAN_STUB("GamMan::delItemAll", 0x001c8414);
-}
-
-// stub of ROR 0x001c94d8
-int GamMan::delStock(short id, int one)
-{
-    ROSEPAN_STUB("GamMan::delStock", 0x001c94d8);
-    return {};
-}
-
-// stub of ROR 0x001c7a4c
 void GamMan::equipItem(short id)
 {
-    ROSEPAN_STUB("GamMan::equipItem", 0x001c7a4c);
+    short item = id;
+    if (id == 0xa3e || id == 0xa43)
+        selectItem(id);
+    if (m_equipItem != item)
+        m_flags2 |= 0x200000;
+    m_equipItem = item;
+    setPcParam(0x32, &item);
+
+    float zero[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    if (m_pcEquipItemChrID != -1)
+        releaseChr(m_pcEquipItemOID);
+    if (item == 0xa00)
+    {
+        if (m_pcEquipItemOID != 0)
+        {
+            releaseChr(m_pcEquipItemOID);
+            m_pcEquipItemOID = 0;
+            m_pcEquipItemChrID = -1;
+        }
+    }
+    else
+    {
+        u_int oid = chrCreateItemObj(item, zero, zero);
+        m_pcEquipItemOID = (int)oid;
+        m_pcEquipItemChrID = g_gamMan.getActorNo(oid);
+        MagScene &scene = g_magSystem.m_scene;
+        int node = scene.m_actors[m_pcActor].getNodeIndexByName("p_hn_r");
+        scene.changeActorMotion(0x1.11112ep-6f, m_pcEquipItemChrID, 2, 0, 0); /* 0x3c888897 */
+        g_magSystem.setActorParent(m_pcEquipItemChrID, m_pcActor, node);
+        if (m_equipItem == 0xa3e || m_equipItem == 0xa43)
+            m_selItemNum = getItemNum(m_equipItem);
+    }
+    if ((m_flags2 & 0x200040) != 0)    /* the ROM tests the doubleword +0x21f48 & 0x20004000000000 */
+        loadItemSe((u_short)item, 0);
 }
 
-// stub of ROR 0x001c8ae8
+// ──────────────────────────────────────────────────────────────────────
+// Item id into the slots: its flag bit (table column 3 of the row whose
+// column 2 is id) and system data flag 4, then the first slot holding it
+// or the first free one. A stacking item (system flag 0x20000) counts up
+// to 99 -- num != 0 sets the count of the slot outright; others take a new
+// slot with a new object id. 1 when no slot is free.
+// ROR 0x001c7e40
+
+int GamMan::addItem(short id, int num)
+{
+    int bit = lookupFlagTable(2, id, 3);
+    if (bit != -1)
+        g_sequence.m_bits[(u_int)bit >> 5] |= 1u << (bit & 0x1f);
+    m_sysData.setFlags(id, 4);
+
+    GamItemSlot *slot = m_itemHave.m_begin;
+    int i = 0;
+    int found = -1;
+    for (; i < 0xc; i++)
+    {
+        if (slot[i].m_id == id)
+        {
+            found = i;
+            break;
+        }
+        if (slot[i].m_id == 0xa00)
+            break;
+    }
+    if (i == 0xc && !hasFreeItemSlot())
+        return 1;
+
+    const void *rec = m_sysData.getRec(id);
+    if (m_sysData.testFlags(id, 0x20000))
+    {
+        if (num != 0)
+        {
+            u_int oid = makeOid(2, 5, -1);
+            if (num > 99)
+                num = 99;
+            slot[i].m_rec = rec;
+            slot[i].m_oid = oid;
+            slot[i].m_id = id;
+            slot[i].m_num = (u_short)num;
+            slot[i]._c = 0;
+            return 0;
+        }
+        if (found == -1)
+        {
+            /* the ROM looks on from the free slot */
+            for (int j = i; j < 0xc; j++)
+            {
+                if (slot[j].m_id == id)
+                {
+                    found = j;
+                    break;
+                }
+            }
+        }
+        if (found != -1)
+        {
+            slot[found].m_num++;
+            if (slot[found].m_num > 99)
+                slot[found].m_num = 99;
+            return 0;
+        }
+    }
+    u_int oid = makeOid(2, 5, -1);
+    slot[i].m_rec = rec;
+    slot[i].m_oid = oid;
+    slot[i].m_id = id;
+    slot[i].m_num = 1;
+    slot[i]._c = 0;
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Item id out of the slots: put away first when held, no longer the find
+// target; a stacking item with more than one counts down, else its slot
+// empties (one: only the first such slot).
+// ROR 0x001c82f8
+
+void GamMan::delItem(short id, int one)
+{
+    if (id == m_equipItem)
+        equipItem(0xa00);
+    if (id == m_findTargetItem)
+        setFindTargetItem(0xa00);
+    for (int i = 0; i < 0xc; i++)
+    {
+        GamItemSlot *slot = &m_itemHave.m_begin[i];
+        if (slot->m_id != id)
+            continue;
+        if (m_sysData.testFlags(id, 0x20000) && slot->m_num > 1)
+        {
+            slot->m_num--;
+            return;
+        }
+        slot->m_id = 0xa00;
+        if (one)
+            return;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c8414
+
+void GamMan::delItemAll(short id)
+{
+    delItem(id, 0);
+    delStock(id, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c8508
+
+int GamMan::getItemNum(short id)
+{
+    for (int i = 0; i < 0xc; i++)
+    {
+        GamItemSlot *slot = &m_itemHave.m_begin[i];
+        if (slot->m_id == id)
+            return slot->m_num;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c8598
+
+void GamMan::selectItem(short id)
+{
+    m_selItem = NULL;
+    for (int i = 0; i < 0xc; i++)
+    {
+        GamItemSlot *slot = &m_itemHave.m_begin[i];
+        if (slot->m_id == id)
+        {
+            m_selItem = slot;
+            m_selItemNum = slot->m_num;
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// 1 when a slot (or with withStock a stock record) holds item id.
+// ROR 0x001c8a28
+
+int GamMan::hasItem(short id, int withStock)
+{
+    for (int i = 0; i < 0xc; i++)
+    {
+        if (m_itemHave.m_begin[i].m_id == id)
+            return 1;
+    }
+    if (withStock != 0)
+    {
+        for (SeqNode<GamItemSlot> *node = m_itemStock.m_used.begin(); node != m_itemStock.m_used.end();
+             node = node->m_next)
+        {
+            if (node->m_data.m_id == id)
+                return 1;
+        }
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// How many of item id the slots (and with withStock the stock) hold: a
+// stacking item's counts, one per slot else.
+// ROR 0x001c8ae8
+
 int GamMan::getItemCount(short id, int withStock)
 {
-    ROSEPAN_STUB("GamMan::getItemCount", 0x001c8ae8);
-    return {};
+    int count = 0;
+    for (int i = 0; i < 0xc; i++)
+    {
+        GamItemSlot *slot = &m_itemHave.m_begin[i];
+        if (slot->m_id != id)
+            continue;
+        if (m_sysData.testFlags(slot->m_id, 0x20000))
+            count += slot->m_num;
+        else
+            count++;
+    }
+    if (withStock != 0)
+    {
+        for (SeqNode<GamItemSlot> *node = m_itemStock.m_used.begin(); node != m_itemStock.m_used.end();
+             node = node->m_next)
+        {
+            if (node->m_data.m_id != id)
+                continue;
+            if (m_sysData.testFlags(node->m_data.m_id, 0x20000))
+                count += node->m_data.m_num;
+            else
+                count++;
+        }
+    }
+    return count;
 }
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c8c50
+
+int GamMan::hasFreeItemSlot()
+{
+    int i = 0;
+    if (m_itemHave.m_begin[0].m_id != 0xa00)
+    {
+        for (i = 1; i < 0xc && m_itemHave.m_begin[i].m_id != 0xa00; i++)
+            ;
+    }
+    return i < 0xc;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Whether item id fits the slots (id 0: the item of object oid, its param
+// 2): a stacking item already held under 99, or a free slot before the
+// first empty one.
+// ROR 0x001c8ca4
+
+int GamMan::canAddItem(u_int oid, short id)
+{
+    short param[8];
+    param[0] = 0;
+    short item = id;
+    if (id == 0 && isObj(oid))
+    {
+        getObjParam(oid, 2, param);
+        item = param[0];
+    }
+
+    int i = 0;
+    if (m_itemHave.m_begin[0].m_id != 0xa00)
+    {
+        do
+        {
+            GamItemSlot *slot = &m_itemHave.m_begin[i];
+            if (slot->m_id == item && slot->m_id != 0 && m_sysData.testFlags(item, 0x20000) &&
+                slot->m_num < 99)
+                return 1;
+            i++;
+        } while (i < 0xc && m_itemHave.m_begin[i].m_id != 0xa00);
+    }
+    return i < 0xc;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Item id into the stock: a stacking item already there counts up (1 when
+// it reaches 99), else a new record (count 1 or count, at most 99) with a
+// new object id. 1 when the stock's 0x14e records are taken.
+// ROR 0x001c8f7c
+
+int GamMan::addStock(short id, int count)
+{
+    if ((u_int)m_itemStock.m_used.m_count >= 0x14e)
+        return 1;
+
+    u_short num = (u_short)count;
+    if (m_sysData.testFlags(id, 0x20000))
+    {
+        for (SeqNode<GamItemSlot> *node = m_itemStock.m_used.begin(); node != m_itemStock.m_used.end();
+             node = node->m_next)
+        {
+            if (node->m_data.m_id != id)
+                continue;
+            if (count == 0)
+                num = 1;
+            node->m_data.m_num += num;
+            if (node->m_data.m_num < 100)
+                return 0;
+            node->m_data.m_num = 99;
+            return 1;
+        }
+    }
+    if (count == 0)
+        num = 1;
+    if (num > 99)
+        num = 99;
+
+    GamItemSlot item;
+    item.m_rec = m_sysData.getRec(id);
+    item.m_oid = makeOid(2, 5, -1);
+    item.m_id = id;
+    item.m_num = num;
+    item._c = 0;
+    m_itemStock.add(item);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Item id out of the stock: with one a stacking record counts down first
+// and only one record goes; without, every record of id. 1 when a record
+// was freed.
+// ROR 0x001c94d8
+
+int GamMan::delStock(short id, int one)
+{
+    if (m_itemStock.m_used.m_count == 0)
+        return 0;
+    SeqNode<GamItemSlot> *node = m_itemStock.m_used.begin();
+    while (node != m_itemStock.m_used.end())
+    {
+        if (node->m_data.m_id != id)
+        {
+            node = node->m_next;
+            continue;
+        }
+        if (m_sysData.testFlags(id, 0x20000) && one != 0 && node->m_data.m_num > 1)
+        {
+            node->m_data.m_num--;
+            return 0;
+        }
+        SeqNode<GamItemSlot> *next = node->m_next;
+        m_itemStock.remove(node);
+        if (one != 0 || m_itemStock.m_used.m_count == 0)
+            return 1;
+        node = next;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Empty in the US build (seqFunc027 calls it).
+// ROR 0x001ca0d4
+
+void GamMan::empty1ca0d4()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Every sky dome of the stage released (kind is unused: the ROM reads only
+// this), then the map's keep buffer freed when there was one.
+// ROR 0x001cb01c // callcheck: rorDebugPrintf (the empty debug print of dropMap : m_p_keep_buf, left out)
+
+void GamMan::releaseTenkyus(int kind)
+{
+    (void)kind;
+    bool any = false;
+    SeqNode<GamTenkyuRec> *node = m_pool1d240.m_used.begin();
+    while (node != m_pool1d240.m_used.end())
+    {
+        g_magSystem.m_scene.releaseTenkyu(node->m_data.m_no);
+        SeqNode<GamTenkyuRec> *next = node->m_next;
+        any = true;
+        m_pool1d240.remove(node);
+        node = next;
+    }
+    if (any)
+    {
+        utlMemFree(m_keepBuf);
+        m_keepBuf = NULL;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cb4f0
+
+void GamMan::setPcParam(int which, const void *data)
+{
+    if (m_pcPtr != NULL)
+        ((ACHRstat *)m_pcPtr)->setParam(which, data);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cbb80
+
+void GamMan::ctlObj1cbb80(u_int oid)
+{
+    SeqNode<GamObjFxRec> *node = m_pool20b00.m_used.begin();
+    while (node != m_pool20b00.m_used.end())
+    {
+        if (node->m_data.m_oid != oid)
+        {
+            node = node->m_next;
+            continue;
+        }
+        if (node->m_data.m_no != -1)
+            g_magSystem.m_scene.m_837e0.release(node->m_data.m_no);
+        SeqNode<GamObjFxRec> *next = node->m_next;
+        m_pool20b00.remove(node);
+        node = next;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cc004
+
+void GamMan::clearVFchrSlot(u_int oid)
+{
+    for (int i = 0; i < 0x180; i++)
+    {
+        if ((u_int)m_vfchrSlot[i] == oid)
+        {
+            m_vfchrSlot[i] = 0;
+            return;
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The fchr of oid: its actor released, its slot cleared, the object deleted
+// and its list node freed.
+// ROR 0x001cc7c8 // callcheck: FUN_00105ba4 (the object's deleting destructor, vtable slot 1 with 3 in the ROM: delete here)
+
+void GamMan::releaseFchr(u_int oid)
+{
+    for (SeqNode<FCHRstat *> *node = m_fchrList.m_used.begin(); node != m_fchrList.m_used.end();
+         node = node->m_next)
+    {
+        FCHRstat *chr = node->m_data;
+        if (chr->m_oid != oid)
+            continue;
+        chr->releaseActor();
+        m_fchr[gamOidSlot(chr->m_oid)] = NULL;
+        delete node->m_data;
+        m_fchrList.remove(node);
+        return;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The vfchr of oid: re-linked, its avfchr records freed, then its own
+// record (the actor released when it has one, its +0x1f24c entry
+// cleared). The object is not deleted.
+// ROR 0x001cc970
+
+void GamMan::releaseVFchr(u_int oid)
+{
+    if (m_vfchrList.m_used.m_count == 0)
+        return;
+    relinkObj(oid);
+
+    SeqNode<FCHRstat *> *node = m_avfchrList.m_used.begin();
+    while (node != m_avfchrList.m_used.end())
+    {
+        SeqNode<FCHRstat *> *next = node->m_next;
+        if (node->m_data->m_oid == oid)
+            m_avfchrList.remove(node);
+        node = next;
+    }
+
+    for (node = m_vfchrList.m_used.begin(); node != m_vfchrList.m_used.end(); node = node->m_next)
+    {
+        if (node->m_data->m_oid != oid)
+            continue;
+        if (node->m_data->m_actor != -1)
+        {
+            markReset();
+            node->m_data->releaseActor();
+        }
+        clearVFchrSlot(oid);
+        m_vfchrList.remove(node);
+        return;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Object oid leaves the game: its private collisions (kind 5 one, kind 6
+// four) go first. An achr -- not the dog -- loses its links, its secta
+// cell, EmyManager's object (type 2), its actor and its slot, is deleted
+// and its node freed (the PC's words cleared when it was the PC); this
+// returns before the sounds. An fchr / vfchr goes through releaseFchr /
+// releaseVFchr. Then the object's sounds stop.
+// ROR 0x001ccc30 // callcheck: FUN_00105ba4 (the object's deleting destructor, vtable slot 1 with 3 in the ROM: delete here)
+
+void GamMan::releaseChr(u_int oid)
+{
+    if (!isObj(oid))
+        return;
+
+    GamObjColli colli;
+    colli.m_kind = -1;
+    getObjParam(oid, 0x18, &colli);
+    MagScene &scene = g_magSystem.m_scene;
+    if (colli.m_kind == 5)
+    {
+        scene.removePrivateColli(colli.m_colli[0]);
+    }
+    else if (colli.m_kind == 6)
+    {
+        scene.removePrivateColli(colli.m_colli[0]);
+        scene.removePrivateColli(colli.m_colli[1]);
+        scene.removePrivateColli(colli.m_colli[2]);
+        scene.removePrivateColli(colli.m_colli[3]);
+    }
+
+    u_int list = gamOidList(oid);
+    if (list == 1)
+    {
+        if (m_achrList.m_used.m_count == 0 || !isAchr(oid))
+            return;
+        if (oid == (m_dogPtr != NULL ? m_dogPtr->m_oid : 0))
+            return;
+        if (oid == (m_pcPtr != NULL ? m_pcPtr->m_oid : 0))
+        {
+            m_pcPtr = NULL;
+            m_pcMotion = -1;
+            m_pcActorPtr = NULL;
+            m_pcActor = -1;
+        }
+        relinkObj(oid);
+        for (SeqNode<ACHRstat *> *node = m_achrList.m_used.begin(); node != m_achrList.m_used.end();
+             node = node->m_next)
+        {
+            if (node->m_data->m_oid != oid)
+                continue;
+            if (oid == (m_pcPtr != NULL ? m_pcPtr->m_oid : 0))
+                m_pcPtr = NULL;
+            node->m_data->clearSecta(1);
+            ACHRstat *chr = node->m_data;
+            u_int id = chr->m_oid;
+            if (gamOidType(id) == 2)
+                g_emyManager.releaseObj(id);
+            chr->releaseActor();
+            m_achr[gamOidSlot(id)] = NULL;
+            delete node->m_data;
+            m_achrList.remove(node);
+            return;
+        }
+    }
+    else if (list == 0 || list == 2)
+    {
+        if (m_fchrList.m_used.m_count != 0 && isFchr(oid))
+        {
+            markReset();
+            relinkObj(oid);
+            releaseFchr(oid);
+        }
+        releaseVFchr(oid);
+    }
+    m_sndMan.stopObjSe(oid);
+    m_sndMan.releaseObjSe(oid);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Empty in the US build (seqFunc027 calls it).
+// ROR 0x001cd7c0
+
+void GamMan::empty1cd7c0()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The param which of object oid through its class (achr, or fchr for the
+// vfchr and fchr lists); nothing for an unknown oid. Returns 0 in the ROM.
+// ROR 0x001d1c80
+
+void GamMan::getObjParam(u_int oid, int which, void *out)
+{
+    int live = isObj(oid);
+    u_int list = gamOidList(oid);
+    if (!live)
+        return;
+    if (list == 1)
+        getAchr(oid)->getParam(which, out);
+    else if (list == 0)
+        getVFchr(oid)->getParam(which, out);
+    else if (list == 2)
+        getFchr(oid)->getParam(which, out);
+}
+
+// ---- stubs (tools/reverse/stubgen.py) ----
 
 // stub of ROR 0x001c6ccc
 void GamMan::getStatus(int which, void *out)
 {
     ROSEPAN_STUB("GamMan::getStatus", 0x001c6ccc);
-}
-
-// stub of ROR 0x001c8a28
-int GamMan::hasItem(short id, int withStock)
-{
-    ROSEPAN_STUB("GamMan::hasItem", 0x001c8a28);
-    return {};
-}
-
-// stub of ROR 0x001c8598
-void GamMan::selectItem(short id)
-{
-    ROSEPAN_STUB("GamMan::selectItem", 0x001c8598);
 }
 
 // stub of ROR 0x001c3d38
@@ -1597,18 +2336,6 @@ void GamMan::ctlObj1cb8e4(u_int oid, int a, int b)
     ROSEPAN_STUB("GamMan::ctlObj1cb8e4", 0x001cb8e4);
 }
 
-// stub of ROR 0x001cbb80
-void GamMan::ctlObj1cbb80(u_int oid)
-{
-    ROSEPAN_STUB("GamMan::ctlObj1cbb80", 0x001cbb80);
-}
-
-// stub of ROR 0x001d1c80
-void GamMan::getObjParam(u_int oid, int which, void *out)
-{
-    ROSEPAN_STUB("GamMan::getObjParam", 0x001d1c80);
-}
-
 // stub of ROR 0x001c47c4
 void GamMan::initStage2()
 {
@@ -1619,12 +2346,6 @@ void GamMan::initStage2()
 void GamMan::releaseObjs(int kind, int arg)
 {
     ROSEPAN_STUB("GamMan::releaseObjs", 0x001cdf5c);
-}
-
-// stub of ROR 0x001cb01c
-void GamMan::releaseTenkyus(int kind)
-{
-    ROSEPAN_STUB("GamMan::releaseTenkyus", 0x001cb01c);
 }
 
 // stub of ROR 0x001cdbf0
