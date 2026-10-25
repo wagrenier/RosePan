@@ -4949,11 +4949,629 @@
   "was": "FUN_0020f98c",
   "why": "object 0x7a4440: per-frame sequence step (returns at once when +0xdc24 bit 0 is set); mainLoop calls it every frame"
  },
+ "0020ff34": {
+  "name": "seqOpNop",
+  "tag": "ror-inferred",
+  "was": "FUN_0020ff34",
+  "why": "seqVmRun 0x214c24 calls it for the word 0 (nop); jr ra"
+ },
+ "0020ff3c": {
+  "name": "seqOpAdd",
+  "tag": "ror-inferred",
+  "was": "FUN_0020ff3c",
+  "why": "entry 0x20 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding add (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "0020ff8c": {
+  "name": "seqOpAddu",
+  "tag": "ror-inferred",
+  "was": "FUN_0020ff8c",
+  "why": "entry 0x21 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding addu (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "0020ffdc": {
+  "name": "seqOpAddi",
+  "tag": "ror-inferred",
+  "was": "FUN_0020ffdc",
+  "why": "entry 0x8 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding addi (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210024": {
+  "name": "seqOpAddiu",
+  "tag": "ror-inferred",
+  "was": "FUN_00210024",
+  "why": "entry 0x9 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding addiu (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "0021006c": {
+  "name": "seqOpAnd",
+  "tag": "ror-inferred",
+  "was": "FUN_0021006c",
+  "why": "entry 0x24 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding and (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002100a0": {
+  "name": "seqOpAndi",
+  "tag": "ror-inferred",
+  "was": "FUN_002100a0",
+  "why": "entry 0xc of the sequence VM primary opcode table data 0x2d9958; MIPS encoding andi (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002100c8": {
+  "name": "seqOpDiv",
+  "tag": "ror-inferred",
+  "was": "FUN_002100c8",
+  "why": "entry 0x1a of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding div (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210110": {
+  "name": "seqOpDivu",
+  "tag": "ror-inferred",
+  "was": "FUN_00210110",
+  "why": "entry 0x1b of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding divu (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210158": {
+  "name": "seqOpMult",
+  "tag": "ror-inferred",
+  "was": "FUN_00210158",
+  "why": "entry 0x18 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding mult (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002101b4": {
+  "name": "seqOpMultu",
+  "tag": "ror-inferred",
+  "was": "FUN_002101b4",
+  "why": "entry 0x19 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding multu (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210210": {
+  "name": "seqOpNor",
+  "tag": "ror-inferred",
+  "was": "FUN_00210210",
+  "why": "entry 0x27 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding nor (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210244": {
+  "name": "seqOpOr",
+  "tag": "ror-inferred",
+  "was": "FUN_00210244",
+  "why": "entry 0x25 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding or (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210278": {
+  "name": "seqOpOri",
+  "tag": "ror-inferred",
+  "was": "FUN_00210278",
+  "why": "entry 0xd of the sequence VM primary opcode table data 0x2d9958; MIPS encoding ori (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002102a0": {
+  "name": "seqOpSll",
+  "tag": "ror-inferred",
+  "was": "FUN_002102a0",
+  "why": "entry 0x0 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding sll (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002102c8": {
+  "name": "seqOpSllv",
+  "tag": "ror-inferred",
+  "was": "FUN_002102c8",
+  "why": "entry 0x4 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding sllv (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002102fc": {
+  "name": "seqOpSra",
+  "tag": "ror-inferred",
+  "was": "FUN_002102fc",
+  "why": "entry 0x3 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding sra (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210324": {
+  "name": "seqOpSrav",
+  "tag": "ror-inferred",
+  "was": "FUN_00210324",
+  "why": "entry 0x7 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding srav (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210358": {
+  "name": "seqOpSrl",
+  "tag": "ror-inferred",
+  "was": "FUN_00210358",
+  "why": "entry 0x2 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding srl (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210380": {
+  "name": "seqOpSrlv",
+  "tag": "ror-inferred",
+  "was": "FUN_00210380",
+  "why": "entry 0x6 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding srlv (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002103b4": {
+  "name": "seqOpSub",
+  "tag": "ror-inferred",
+  "was": "FUN_002103b4",
+  "why": "entry 0x22 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding sub (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002103e8": {
+  "name": "seqOpSubu",
+  "tag": "ror-inferred",
+  "was": "FUN_002103e8",
+  "why": "entry 0x23 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding subu (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "0021041c": {
+  "name": "seqOpXor",
+  "tag": "ror-inferred",
+  "was": "FUN_0021041c",
+  "why": "entry 0x26 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding xor (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210450": {
+  "name": "seqOpXori",
+  "tag": "ror-inferred",
+  "was": "FUN_00210450",
+  "why": "entry 0xe of the sequence VM primary opcode table data 0x2d9958; MIPS encoding xori (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210478": {
+  "name": "seqOpLui",
+  "tag": "ror-inferred",
+  "was": "FUN_00210478",
+  "why": "entry 0xf of the sequence VM primary opcode table data 0x2d9958; MIPS encoding lui (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002104ec": {
+  "name": "seqOpSlt",
+  "tag": "ror-inferred",
+  "was": "FUN_002104ec",
+  "why": "entry 0x2a of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding slt (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210534": {
+  "name": "seqOpSlti",
+  "tag": "ror-inferred",
+  "was": "FUN_00210534",
+  "why": "entry 0xa of the sequence VM primary opcode table data 0x2d9958; MIPS encoding slti (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210578": {
+  "name": "seqOpSltu",
+  "tag": "ror-inferred",
+  "was": "FUN_00210578",
+  "why": "entry 0x2b of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding sltu (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002105c0": {
+  "name": "seqOpSltiu",
+  "tag": "ror-inferred",
+  "was": "FUN_002105c0",
+  "why": "entry 0xb of the sequence VM primary opcode table data 0x2d9958; MIPS encoding sltiu (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002105fc": {
+  "name": "seqOpBeq",
+  "tag": "ror-inferred",
+  "was": "FUN_002105fc",
+  "why": "entry 0x4 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding beq (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002106a0": {
+  "name": "seqOpBgtz",
+  "tag": "ror-inferred",
+  "was": "FUN_002106a0",
+  "why": "entry 0x7 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding bgtz (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002106f4": {
+  "name": "seqOpBlez",
+  "tag": "ror-inferred",
+  "was": "FUN_002106f4",
+  "why": "entry 0x6 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding blez (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210748": {
+  "name": "seqOpBne",
+  "tag": "ror-inferred",
+  "was": "FUN_00210748",
+  "why": "entry 0x5 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding bne (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002107ac": {
+  "name": "seqOpRegimm",
+  "tag": "ror-inferred",
+  "was": "FUN_002107ac",
+  "why": "entry 0x1 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding regimm (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "0021082c": {
+  "name": "seqOpJ",
+  "tag": "ror-inferred",
+  "was": "FUN_0021082c",
+  "why": "entry 0x2 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding j (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210864": {
+  "name": "seqOpJal",
+  "tag": "ror-inferred",
+  "was": "FUN_00210864",
+  "why": "entry 0x3 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding jal (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002108b8": {
+  "name": "seqOpJalr",
+  "tag": "ror-inferred",
+  "was": "FUN_002108b8",
+  "why": "entry 0x9 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding jalr (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210908": {
+  "name": "seqOpJr",
+  "tag": "ror-inferred",
+  "was": "FUN_00210908",
+  "why": "entry 0x8 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding jr (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "0021092c": {
+  "name": "seqOpLb",
+  "tag": "ror-inferred",
+  "was": "FUN_0021092c",
+  "why": "entry 0x20 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding lb (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210960": {
+  "name": "seqOpLwl",
+  "tag": "ror-inferred",
+  "was": "FUN_00210960",
+  "why": "entry 0x22 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding lwl (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002109a0": {
+  "name": "seqOpLh",
+  "tag": "ror-inferred",
+  "was": "FUN_002109a0",
+  "why": "entry 0x21 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding lh (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002109d4": {
+  "name": "seqOpLbu",
+  "tag": "ror-inferred",
+  "was": "FUN_002109d4",
+  "why": "entry 0x24 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding lbu (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210a08": {
+  "name": "seqOpLw",
+  "tag": "ror-inferred",
+  "was": "FUN_00210a08",
+  "why": "entry 0x23 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding lw (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210a3c": {
+  "name": "seqOpLhu",
+  "tag": "ror-inferred",
+  "was": "FUN_00210a3c",
+  "why": "entry 0x25 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding lhu (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210a70": {
+  "name": "seqOpLwr",
+  "tag": "ror-inferred",
+  "was": "FUN_00210a70",
+  "why": "entry 0x26 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding lwr (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210aa4": {
+  "name": "seqOpSb",
+  "tag": "ror-inferred",
+  "was": "FUN_00210aa4",
+  "why": "entry 0x28 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding sb (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210ad8": {
+  "name": "seqOpSh",
+  "tag": "ror-inferred",
+  "was": "FUN_00210ad8",
+  "why": "entry 0x29 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding sh (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210b0c": {
+  "name": "seqOpSwl",
+  "tag": "ror-inferred",
+  "was": "FUN_00210b0c",
+  "why": "entry 0x2a of the sequence VM primary opcode table data 0x2d9958; MIPS encoding swl (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210b54": {
+  "name": "seqOpSwr",
+  "tag": "ror-inferred",
+  "was": "FUN_00210b54",
+  "why": "entry 0x2e of the sequence VM primary opcode table data 0x2d9958; MIPS encoding swr (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210ba4": {
+  "name": "seqOpSw",
+  "tag": "ror-inferred",
+  "was": "FUN_00210ba4",
+  "why": "entry 0x2b of the sequence VM primary opcode table data 0x2d9958; MIPS encoding sw (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210bd8": {
+  "name": "seqOpMfhi",
+  "tag": "ror-inferred",
+  "was": "FUN_00210bd8",
+  "why": "entry 0x10 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding mfhi (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210bf8": {
+  "name": "seqOpMflo",
+  "tag": "ror-inferred",
+  "was": "FUN_00210bf8",
+  "why": "entry 0x12 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding mflo (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210c18": {
+  "name": "seqOpMthi",
+  "tag": "ror-inferred",
+  "was": "FUN_00210c18",
+  "why": "entry 0x11 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding mthi (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210c34": {
+  "name": "seqOpMtlo",
+  "tag": "ror-inferred",
+  "was": "FUN_00210c34",
+  "why": "entry 0x13 of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding mtlo (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210c50": {
+  "name": "seqOpSyscall",
+  "tag": "ror-inferred",
+  "was": "FUN_00210c50",
+  "why": "entry 0xc of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding syscall (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210c58": {
+  "name": "seqOpBreak",
+  "tag": "ror-inferred",
+  "was": "FUN_00210c58",
+  "why": "entry 0xd of the sequence VM SPECIAL table data 0x2d9a58 (funct); MIPS encoding break (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210c60": {
+  "name": "seqOpLl",
+  "tag": "ror-inferred",
+  "was": "FUN_00210c60",
+  "why": "entry 0x30 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding ll (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210c68": {
+  "name": "seqOpLwc1",
+  "tag": "ror-inferred",
+  "was": "FUN_00210c68",
+  "why": "entry 0x31 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding lwc1 (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210ca0": {
+  "name": "seqOpLwc2",
+  "tag": "ror-inferred",
+  "was": "FUN_00210ca0",
+  "why": "entry 0x32 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding lwc2 (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210ca8": {
+  "name": "seqOpPref",
+  "tag": "ror-inferred",
+  "was": "FUN_00210ca8",
+  "why": "entry 0x33 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding pref (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210cb0": {
+  "name": "seqOpSc",
+  "tag": "ror-inferred",
+  "was": "FUN_00210cb0",
+  "why": "entry 0x38 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding sc (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210cb8": {
+  "name": "seqOpSwc1",
+  "tag": "ror-inferred",
+  "was": "FUN_00210cb8",
+  "why": "entry 0x39 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding swc1 (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210cec": {
+  "name": "seqOpSwc2",
+  "tag": "ror-inferred",
+  "was": "FUN_00210cec",
+  "why": "entry 0x3a of the sequence VM primary opcode table data 0x2d9958; MIPS encoding swc2 (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210cf4": {
+  "name": "seqOpOp3b",
+  "tag": "ror-inferred",
+  "was": "FUN_00210cf4",
+  "why": "entry 0x3b of the sequence VM primary opcode table data 0x2d9958; MIPS encoding op3b (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210cfc": {
+  "name": "seqOpSdc1",
+  "tag": "ror-inferred",
+  "was": "FUN_00210cfc",
+  "why": "entry 0x3d of the sequence VM primary opcode table data 0x2d9958; MIPS encoding sdc1 (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210d34": {
+  "name": "seqOpCop0",
+  "tag": "ror-inferred",
+  "was": "FUN_00210d34",
+  "why": "entry 0x10 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding cop0 (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210d3c": {
+  "name": "seqOpCop1",
+  "tag": "ror-inferred",
+  "was": "FUN_00210d3c",
+  "why": "entry 0x11 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding cop1 (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210ebc": {
+  "name": "seqOpCop2",
+  "tag": "ror-inferred",
+  "was": "FUN_00210ebc",
+  "why": "entry 0x12 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding cop2 (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210ec4": {
+  "name": "seqOpCop3",
+  "tag": "ror-inferred",
+  "was": "FUN_00210ec4",
+  "why": "entry 0x13 of the sequence VM primary opcode table data 0x2d9958; MIPS encoding cop3 (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210ecc": {
+  "name": "seqOpFAdd",
+  "tag": "ror-inferred",
+  "was": "FUN_00210ecc",
+  "why": "entry 0x0 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding add (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210f00": {
+  "name": "seqOpFSub",
+  "tag": "ror-inferred",
+  "was": "FUN_00210f00",
+  "why": "entry 0x1 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding sub (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210f34": {
+  "name": "seqOpFMul",
+  "tag": "ror-inferred",
+  "was": "FUN_00210f34",
+  "why": "entry 0x2 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding mul (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210f68": {
+  "name": "seqOpFDiv",
+  "tag": "ror-inferred",
+  "was": "FUN_00210f68",
+  "why": "entry 0x3 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding div (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210fa4": {
+  "name": "seqOpFLt",
+  "tag": "ror-inferred",
+  "was": "FUN_00210fa4",
+  "why": "entry 0x1c of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding lt (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00210fe4": {
+  "name": "seqOpFEq",
+  "tag": "ror-inferred",
+  "was": "FUN_00210fe4",
+  "why": "entry 0x12 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding eq (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211024": {
+  "name": "seqOpFLe",
+  "tag": "ror-inferred",
+  "was": "FUN_00211024",
+  "why": "entry 0x1e of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding le (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211064": {
+  "name": "seqOpFAbs",
+  "tag": "ror-inferred",
+  "was": "FUN_00211064",
+  "why": "entry 0x5 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding abs (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002110e4": {
+  "name": "seqOpFMov",
+  "tag": "ror-inferred",
+  "was": "FUN_002110e4",
+  "why": "entry 0x6 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding mov (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211108": {
+  "name": "seqOpFNeg",
+  "tag": "ror-inferred",
+  "was": "FUN_00211108",
+  "why": "entry 0x7 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding neg (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211130": {
+  "name": "seqOpFCvtS",
+  "tag": "ror-inferred",
+  "was": "FUN_00211130",
+  "why": "entry 0x20 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cvts (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211158": {
+  "name": "seqOpFCvtD",
+  "tag": "ror-inferred",
+  "was": "FUN_00211158",
+  "why": "entry 0x21 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cvtd (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211160": {
+  "name": "seqOpFCvtW",
+  "tag": "ror-inferred",
+  "was": "FUN_00211160",
+  "why": "entry 0x24 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cvtw (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211168": {
+  "name": "seqOpFCf",
+  "tag": "ror-inferred",
+  "was": "FUN_00211168",
+  "why": "entry 0x30 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cf (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211174": {
+  "name": "seqOpFCun",
+  "tag": "ror-inferred",
+  "was": "FUN_00211174",
+  "why": "entry 0x31 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cun (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "0021117c": {
+  "name": "seqOpFCeq",
+  "tag": "ror-inferred",
+  "was": "FUN_0021117c",
+  "why": "entry 0x32 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding ceq (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002111bc": {
+  "name": "seqOpFCueq",
+  "tag": "ror-inferred",
+  "was": "FUN_002111bc",
+  "why": "entry 0x33 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cueq (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002111c4": {
+  "name": "seqOpFColt",
+  "tag": "ror-inferred",
+  "was": "FUN_002111c4",
+  "why": "entry 0x34 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding colt (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002111cc": {
+  "name": "seqOpFCult",
+  "tag": "ror-inferred",
+  "was": "FUN_002111cc",
+  "why": "entry 0x35 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cult (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002111d4": {
+  "name": "seqOpFCole",
+  "tag": "ror-inferred",
+  "was": "FUN_002111d4",
+  "why": "entry 0x36 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cole (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002111dc": {
+  "name": "seqOpFCule",
+  "tag": "ror-inferred",
+  "was": "FUN_002111dc",
+  "why": "entry 0x37 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cule (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002111e4": {
+  "name": "seqOpFCsf",
+  "tag": "ror-inferred",
+  "was": "FUN_002111e4",
+  "why": "entry 0x38 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding csf (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002111f0": {
+  "name": "seqOpFCngle",
+  "tag": "ror-inferred",
+  "was": "FUN_002111f0",
+  "why": "entry 0x39 of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cngle (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002111f8": {
+  "name": "seqOpFCseq",
+  "tag": "ror-inferred",
+  "was": "FUN_002111f8",
+  "why": "entry 0x3a of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cseq (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211200": {
+  "name": "seqOpFCngl",
+  "tag": "ror-inferred",
+  "was": "FUN_00211200",
+  "why": "entry 0x3b of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cngl (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211208": {
+  "name": "seqOpFClt",
+  "tag": "ror-inferred",
+  "was": "FUN_00211208",
+  "why": "entry 0x3c of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding clt (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211248": {
+  "name": "seqOpFCnge",
+  "tag": "ror-inferred",
+  "was": "FUN_00211248",
+  "why": "entry 0x3d of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cnge (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211250": {
+  "name": "seqOpFCle",
+  "tag": "ror-inferred",
+  "was": "FUN_00211250",
+  "why": "entry 0x3e of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cle (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211290": {
+  "name": "seqOpFCngt",
+  "tag": "ror-inferred",
+  "was": "FUN_00211290",
+  "why": "entry 0x3f of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding cngt (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211298": {
+  "name": "seqOpUnused211298",
+  "tag": "ror-inferred",
+  "was": "FUN_00211298",
+  "why": "jr ra after the COP1 handlers, in no table"
+ },
+ "002112a0": {
+  "name": "seqOpFTrunc",
+  "tag": "ror-inferred",
+  "was": "FUN_002112a0",
+  "why": "entry 0xd of the sequence VM COP1 function table data 0x2d9b08 (the COP1 handler 0x210d3c indexes it by funct); MIPS encoding trunc (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "002112d8": {
+  "name": "seqOpMmi",
+  "tag": "ror-inferred",
+  "was": "FUN_002112d8",
+  "why": "entry 0x1c of the sequence VM primary opcode table data 0x2d9958; MIPS encoding mmi (the VM has its own semantics: see sequence/seqvm.cpp)"
+ },
+ "00211318": {
+  "name": "Sequence::waitFrames",
+  "tag": "ror-inferred",
+  "was": "FUN_00211318",
+  "why": "counts the running thread down on +0x1c (-1 idle): returns 1 while waiting, 0 when the count ends; flag 0x400 restarts it (seqFunc004 / 253)"
+ },
  "002113a4": {
   "name": "Sequence::jumpTo",
   "tag": "ror-inferred",
   "was": "FUN_002113a4",
   "why": "sets the VM's pending jump 0x7b47b0 = target + image base 0x7b47d0 - m_base[current image 0x7b4dd0] (Sequence +0xdc08); seqFunc000 calls it and returns 0xccccccce"
+ },
+ "002113dc": {
+  "name": "Sequence::execThread",
+  "tag": "ror-inferred",
+  "was": "FUN_002113dc",
+  "why": "runs a thread at once in the record at +0xdc30 under flag 0x100 (registers saved / restored around it); queued on the start list if it waits; GamArea::checkPc calls it"
  },
  "00211e84": {
   "name": "Sequence::startThread",
@@ -4967,11 +5585,35 @@
   "was": "FUN_002127f4",
   "why": "returns the image-1 entries (top bits 1) of the entry pool +0xc3c0 to its free list, the same loop as clearStageVars without the clears"
  },
+ "00212920": {
+  "name": "Sequence::addEntry",
+  "tag": "ror-inferred",
+  "was": "FUN_00212920",
+  "why": "pops a free node of the entry pool +0xc3c0 and appends {id, value} to its used list (seqFunc110)"
+ },
+ "00213448": {
+  "name": "seqUnused213448",
+  "tag": "ror-inferred",
+  "was": "FUN_00213448",
+  "why": "jr ra before killThreads, unreferenced"
+ },
  "00213450": {
   "name": "Sequence::killThreads",
   "tag": "ror-inferred",
   "was": "FUN_00213450",
   "why": "image index argument: moves the image's threads to the ended list and reaps them (calls reapThreads), Sequence::stopImages' worker"
+ },
+ "00213adc": {
+  "name": "Sequence::hasThreadIn",
+  "tag": "ror-inferred",
+  "was": "FUN_00213adc",
+  "why": "scans a thread list for id (+0x4) and arg (+0x28); 1 found"
+ },
+ "00213b28": {
+  "name": "Sequence::findThreadIn",
+  "tag": "ror-inferred",
+  "was": "FUN_00213b28",
+  "why": "scans a thread list for id and arg, *node gets the node; 1 found"
  },
  "00213c6c": {
   "name": "Sequence::findThread",
@@ -4979,11 +5621,23 @@
   "was": "FUN_00213c6c",
   "why": "picks the image pool by the id's top two bits (0..2, else 0) and searches it (0x213b28) for the id, returning the node through the third argument"
  },
+ "00213d00": {
+  "name": "Sequence::hasThread",
+  "tag": "ror-inferred",
+  "was": "FUN_00213d00",
+  "why": "picks the image pool of id >> 30 and calls 0x213adc"
+ },
  "00213f48": {
   "name": "Sequence::setupImage",
   "tag": "ror-inferred",
   "was": "FUN_00213f48",
   "why": "sets the VM's image registers 0x7b47d0.. from the image header (+0xc..+0x24), saves them per image at 0x7b4850 + idx * 0x30 and the register file at 0x2d9c08 + idx * 0x80"
+ },
+ "002142c0": {
+  "name": "seqVmIdleLoop",
+  "tag": "ror-inferred",
+  "was": "FUN_002142c0",
+  "why": "unreferenced: two empty countdown loops 0x1ff by 0x20 (cache-line style), after setupImage"
  },
  "00214310": {
   "name": "seqVmSelectImage",
@@ -4997,17 +5651,41 @@
   "was": "FUN_002144c4",
   "why": "runImage's closing call with the image index: the counterpart of seqVmSelectImage"
  },
+ "002144cc": {
+  "name": "seqVmLoadRecord",
+  "tag": "ror-inferred",
+  "was": "FUN_002144cc",
+  "why": "unreferenced: seqVmLoadThread for the record pointer at Sequence +0xdce0, which it clears"
+ },
  "00214664": {
   "name": "seqVmLoadThread",
   "tag": "ror-inferred",
   "was": "FUN_00214664",
   "why": "runImage calls it for each thread before the run: copies the running thread's saved state (flag 0x200) into the VM"
  },
+ "002147e0": {
+  "name": "seqVmSaveThread",
+  "tag": "ror-inferred",
+  "was": "FUN_002147e0",
+  "why": "copies the VM registers 0x7b4700 into the running thread record (+0x2c; or +0xdc30 under flag 0x100), sets 0x200, gives it a stack slot and saves the 0x780-byte gp area there"
+ },
+ "002149a8": {
+  "name": "seqVmAllocStack",
+  "tag": "ror-inferred",
+  "was": "FUN_002149a8",
+  "why": "takes the next free 2 KB slot of the 0x10000-byte stack block (cursor data 0x2d9950, used words 0x7b4d30), clears it"
+ },
  "00214a94": {
   "name": "seqVmFreeStack",
   "tag": "ror-inferred",
   "was": "FUN_00214a94",
   "why": "(stack - 0x7b4d20 base) >> 11 picks a 2 KB stack slot whose use word at 0x7b4d30 it clears"
+ },
+ "00214ac4": {
+  "name": "seqVmAllocCallSave",
+  "tag": "ror-inferred",
+  "was": "FUN_00214ac4",
+  "why": "first of 8 call save slots 0x7b4920 whose word 0 is 0xcccccccc; copies the registers there and returns its index"
  },
  "00214bcc": {
   "name": "seqVmResume",

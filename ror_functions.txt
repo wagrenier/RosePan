@@ -4546,49 +4546,157 @@
 /* 0020f98c 000005a8 */ Sequence::exec(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- sequence/seqvm.cpp
 // *****************************************************************************
 
-/* 0020ff34 00001130 */ FUN_0020ff34(){}
-/* 00211064 000002b4 */ FUN_00211064(){}
-/* 00211318 0000008c */ FUN_00211318(){}
+/* 0020ff34 00000004 */ seqOpNop(){}  // ror
+/* 0020ff3c 00000050 */ seqOpAdd(){}  // ror
+/* 0020ff8c 00000050 */ seqOpAddu(){}  // ror
+/* 0020ffdc 00000048 */ seqOpAddi(){}  // ror
+/* 00210024 00000048 */ seqOpAddiu(){}  // ror
+/* 0021006c 00000034 */ seqOpAnd(){}  // ror
+/* 002100a0 00000028 */ seqOpAndi(){}  // ror
+/* 002100c8 00000048 */ seqOpDiv(){}  // ror
+/* 00210110 00000048 */ seqOpDivu(){}  // ror
+/* 00210158 0000005c */ seqOpMult(){}  // ror
+/* 002101b4 0000005c */ seqOpMultu(){}  // ror
+/* 00210210 00000034 */ seqOpNor(){}  // ror
+/* 00210244 00000034 */ seqOpOr(){}  // ror
+/* 00210278 00000028 */ seqOpOri(){}  // ror
+/* 002102a0 00000028 */ seqOpSll(){}  // ror
+/* 002102c8 00000034 */ seqOpSllv(){}  // ror
+/* 002102fc 00000028 */ seqOpSra(){}  // ror
+/* 00210324 00000034 */ seqOpSrav(){}  // ror
+/* 00210358 00000028 */ seqOpSrl(){}  // ror
+/* 00210380 00000034 */ seqOpSrlv(){}  // ror
+/* 002103b4 00000034 */ seqOpSub(){}  // ror
+/* 002103e8 00000034 */ seqOpSubu(){}  // ror
+/* 0021041c 00000034 */ seqOpXor(){}  // ror
+/* 00210450 00000028 */ seqOpXori(){}  // ror
+/* 00210478 00000074 */ seqOpLui(){}  // ror
+/* 002104ec 00000048 */ seqOpSlt(){}  // ror
+/* 00210534 00000044 */ seqOpSlti(){}  // ror
+/* 00210578 00000048 */ seqOpSltu(){}  // ror
+/* 002105c0 0000003c */ seqOpSltiu(){}  // ror
+/* 002105fc 000000a0 */ seqOpBeq(){}  // ror
+/* 002106a0 00000050 */ seqOpBgtz(){}  // ror
+/* 002106f4 00000050 */ seqOpBlez(){}  // ror
+/* 00210748 00000060 */ seqOpBne(){}  // ror
+/* 002107ac 0000007c */ seqOpRegimm(){}  // ror
+/* 0021082c 00000038 */ seqOpJ(){}  // ror
+/* 00210864 00000054 */ seqOpJal(){}  // ror
+/* 002108b8 00000050 */ seqOpJalr(){}  // ror
+/* 00210908 00000024 */ seqOpJr(){}  // ror
+/* 0021092c 00000034 */ seqOpLb(){}  // ror
+/* 00210960 00000040 */ seqOpLwl(){}  // ror
+/* 002109a0 00000034 */ seqOpLh(){}  // ror
+/* 002109d4 00000034 */ seqOpLbu(){}  // ror
+/* 00210a08 00000034 */ seqOpLw(){}  // ror
+/* 00210a3c 00000034 */ seqOpLhu(){}  // ror
+/* 00210a70 00000034 */ seqOpLwr(){}  // ror
+/* 00210aa4 00000034 */ seqOpSb(){}  // ror
+/* 00210ad8 00000034 */ seqOpSh(){}  // ror
+/* 00210b0c 00000048 */ seqOpSwl(){}  // ror
+/* 00210b54 00000050 */ seqOpSwr(){}  // ror
+/* 00210ba4 00000034 */ seqOpSw(){}  // ror
+/* 00210bd8 0000001c */ seqOpMfhi(){}  // ror
+/* 00210bf8 0000001c */ seqOpMflo(){}  // ror
+/* 00210c18 0000001c */ seqOpMthi(){}  // ror
+/* 00210c34 0000001c */ seqOpMtlo(){}  // ror
+/* 00210c50 00000004 */ seqOpSyscall(){}  // ror
+/* 00210c58 00000004 */ seqOpBreak(){}  // ror
+/* 00210c60 00000004 */ seqOpLl(){}  // ror
+/* 00210c68 00000034 */ seqOpLwc1(){}  // ror
+/* 00210ca0 00000004 */ seqOpLwc2(){}  // ror
+/* 00210ca8 00000004 */ seqOpPref(){}  // ror
+/* 00210cb0 00000004 */ seqOpSc(){}  // ror
+/* 00210cb8 00000034 */ seqOpSwc1(){}  // ror
+/* 00210cec 00000004 */ seqOpSwc2(){}  // ror
+/* 00210cf4 00000004 */ seqOpOp3b(){}  // ror
+/* 00210cfc 00000034 */ seqOpSdc1(){}  // ror
+/* 00210d34 00000004 */ seqOpCop0(){}  // ror
+/* 00210d3c 00000180 */ seqOpCop1(){}  // ror
+/* 00210ebc 00000004 */ seqOpCop2(){}  // ror
+/* 00210ec4 00000004 */ seqOpCop3(){}  // ror
+/* 00210ecc 00000034 */ seqOpFAdd(){}  // ror
+/* 00210f00 00000034 */ seqOpFSub(){}  // ror
+/* 00210f34 00000034 */ seqOpFMul(){}  // ror
+/* 00210f68 0000003c */ seqOpFDiv(){}  // ror
+/* 00210fa4 00000040 */ seqOpFLt(){}  // ror
+/* 00210fe4 00000040 */ seqOpFEq(){}  // ror
+/* 00211024 00000040 */ seqOpFLe(){}  // ror
+/* 00211064 00000080 */ seqOpFAbs(){}  // ror
+/* 002110e4 00000024 */ seqOpFMov(){}  // ror
+/* 00211108 00000028 */ seqOpFNeg(){}  // ror
+/* 00211130 00000028 */ seqOpFCvtS(){}  // ror
+/* 00211158 00000004 */ seqOpFCvtD(){}  // ror
+/* 00211160 00000004 */ seqOpFCvtW(){}  // ror
+/* 00211168 0000000c */ seqOpFCf(){}  // ror
+/* 00211174 00000004 */ seqOpFCun(){}  // ror
+/* 0021117c 00000040 */ seqOpFCeq(){}  // ror
+/* 002111bc 00000004 */ seqOpFCueq(){}  // ror
+/* 002111c4 00000004 */ seqOpFColt(){}  // ror
+/* 002111cc 00000004 */ seqOpFCult(){}  // ror
+/* 002111d4 00000004 */ seqOpFCole(){}  // ror
+/* 002111dc 00000004 */ seqOpFCule(){}  // ror
+/* 002111e4 0000000c */ seqOpFCsf(){}  // ror
+/* 002111f0 00000004 */ seqOpFCngle(){}  // ror
+/* 002111f8 00000004 */ seqOpFCseq(){}  // ror
+/* 00211200 00000004 */ seqOpFCngl(){}  // ror
+/* 00211208 00000040 */ seqOpFClt(){}  // ror
+/* 00211248 00000004 */ seqOpFCnge(){}  // ror
+/* 00211250 00000040 */ seqOpFCle(){}  // ror
+/* 00211290 00000004 */ seqOpFCngt(){}  // ror
+/* 00211298 00000004 */ seqOpUnused211298(){}  // ror
+/* 002112a0 00000038 */ seqOpFTrunc(){}  // ror
+/* 002112d8 00000040 */ seqOpMmi(){}  // ror
+/* 00211318 0000008c */ Sequence::waitFrames(){}  // ror
 /* 002113a4 00000038 */ Sequence::jumpTo(){}  // ror
-/* 002113dc 00000454 */ FUN_002113dc(){}
+/* 002113dc 00000454 */ Sequence::execThread(){}  // ror
 /* 00211830 000003b4 */ FUN_00211830(){}
 /* 00211be4 000002a0 */ FUN_00211be4(){}
 /* 00211e84 00000228 */ Sequence::startThread(){}  // ror
 /* 002120ac 00000284 */ FUN_002120ac(){}
-/* 00212330 000004c4 */ FUN_00212330(){}
+/* 00212330 00000268 */ FUN_00212330(){}
+/* 00212598 0000025c */ FUN_00212598(){}
 /* 002127f4 0000012c */ Sequence::freeStageEntries(){}  // ror
-/* 00212920 00000098 */ FUN_00212920(){}
+/* 00212920 00000098 */ Sequence::addEntry(){}  // ror
 /* 002129b8 000000a4 */ FUN_002129b8(){}
 /* 00212a5c 000002ac */ FUN_00212a5c(){}
 /* 00212d08 0000015c */ FUN_00212d08(){}
 /* 00212e64 00000158 */ FUN_00212e64(){}
-/* 00212fbc 00000490 */ FUN_00212fbc(){}
+/* 00212fbc 0000048c */ FUN_00212fbc(){}
+/* 00213448 00000004 */ seqUnused213448(){}  // ror
 /* 00213450 0000068c */ Sequence::killThreads(){}  // ror
-/* 00213adc 0000004c */ FUN_00213adc(){}
-/* 00213b28 00000054 */ FUN_00213b28(){}
+/* 00213adc 0000004c */ Sequence::hasThreadIn(){}  // ror
+/* 00213b28 00000054 */ Sequence::findThreadIn(){}  // ror
 /* 00213b7c 00000080 */ FUN_00213b7c(){}
 /* 00213bfc 00000070 */ FUN_00213bfc(){}
 /* 00213c6c 00000094 */ Sequence::findThread(){}  // ror
-/* 00213d00 00000090 */ FUN_00213d00(){}
+/* 00213d00 00000090 */ Sequence::hasThread(){}  // ror
 /* 00213d90 000000e8 */ FUN_00213d90(){}
 /* 00213e78 000000d0 */ FUN_00213e78(){}
-/* 00213f48 000003c4 */ Sequence::setupImage(){}  // ror
+/* 00213f48 00000378 */ Sequence::setupImage(){}  // ror
+/* 002142c0 0000004c */ seqVmIdleLoop(){}  // ror
 /* 00214310 000001b4 */ seqVmSelectImage(){}  // ror
-/* 002144c4 000001a0 */ seqVmSaveImage(){}  // ror
+/* 002144c4 00000004 */ seqVmSaveImage(){}  // ror
+/* 002144cc 00000198 */ seqVmLoadRecord(){}  // ror
 /* 00214664 00000178 */ seqVmLoadThread(){}  // ror
-/* 002147e0 000001c8 */ FUN_002147e0(){}
-/* 002149a8 000000ec */ FUN_002149a8(){}
+/* 002147e0 000001c8 */ seqVmSaveThread(){}  // ror
+/* 002149a8 000000ec */ seqVmAllocStack(){}  // ror
 /* 00214a94 0000002c */ seqVmFreeStack(){}  // ror
-/* 00214ac4 00000104 */ FUN_00214ac4(){}
+/* 00214ac4 00000104 */ seqVmAllocCallSave(){}  // ror
 /* 00214bcc 00000058 */ seqVmResume(){}  // ror
 /* 00214c24 00000274 */ seqVmRun(){}  // ror
 /* 00214e98 00000218 */ FUN_00214e98(){}
 /* 002150b0 00000208 */ FUN_002150b0(){}
 /* 002152b8 00000178 */ FUN_002152b8(){}
 /* 00215430 00000170 */ FUN_00215430(){}
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 002155a0 00000004 */ debugNop(){}  // ror
 /* 002155a8 00000028 */ FUN_002155a8(){}
 /* 002155d4 00000020 */ FUN_002155d4(){}
