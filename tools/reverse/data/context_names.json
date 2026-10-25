@@ -6797,6 +6797,24 @@
   "was": "FUN_00238038",
   "why": "returns byte 0x7b5ac0 (7 at init); bit 0 errors, bit 1 bg-thread warnings, bit 2 bind messages"
  },
+ "00238048": {
+  "name": "rxSndSetFrameRate",
+  "tag": "lib-context",
+  "was": "FUN_00238048",
+  "why": "command 0x30 {1, 50 or 60}: only 0x32 passes through, everything else sends 0x3c; the config's m_2 is set 0x3c at init"
+ },
+ "002380a0": {
+  "name": "rxSndSetSysParam",
+  "tag": "lib-context",
+  "was": "FUN_002380a0",
+  "why": "command 0x30 {3/4/5 for kind 0/1/2, value}; other kinds send nothing; meaning of the kinds not known"
+ },
+ "00238120": {
+  "name": "rxSndSetSysVolume",
+  "tag": "lib-context",
+  "was": "FUN_00238120",
+  "why": "queued command 0x31 {id, 1, short L, short R}: a volume pair in the set-command layout (param 1); what id selects is not known"
+ },
  "00238188": {
   "name": "rxSndSetMasterVolume",
   "tag": "lib-context",
@@ -6808,6 +6826,36 @@
   "tag": "ror-inferred",
   "was": "FUN_00238268",
   "why": "clamps to 0..1 into 0x2db638, the bank of the double RPC send/receive buffers; returns the old one"
+ },
+ "002382a0": {
+  "name": "rxSndGetVoiceTable",
+  "tag": "lib-context",
+  "was": "FUN_002382a0",
+  "why": "command 0x90 with a 0xc0-byte reply copied to the caller: 48 words, one per SPU2 voice (2 x 24)"
+ },
+ "00238300": {
+  "name": "rxSndGetVoiceTableEx",
+  "tag": "lib-context",
+  "was": "FUN_00238300",
+  "why": "command 0x93 {arg}, 48-word reply copied to the second argument, the 0x90 twin with an argument"
+ },
+ "00238360": {
+  "name": "rxSndSetVoiceEntry",
+  "tag": "lib-context",
+  "was": "FUN_00238360",
+  "why": "hidden after 0x238300; command 0x91 {voice, value} for voice < 48 (0x30), the setter of the 0x9x voice tables"
+ },
+ "002383a8": {
+  "name": "rxSndGetVoiceTable2",
+  "tag": "lib-context",
+  "was": "FUN_002383a8",
+  "why": "command 0x92 with a 48-word reply copied to the caller, same shape as 0x90"
+ },
+ "00238408": {
+  "name": "rxSndCentToPitch",
+  "tag": "lib-context",
+  "was": "FUN_00238408",
+  "why": "hidden after 0x2383a8; clamps to +-4800, adds 4800, returns table 0x2db640[v / 100] * table 0x2db7c8[v % 100]: semitone and cent ratios"
  },
  "00238478": {
   "name": "rxSndInitConfig",
@@ -6863,6 +6911,12 @@
   "was": "FUN_00238510",
   "why": "calls 0x2db958 with the caller's name string (rxSndBgmStop / rxSndSeStop / rxSndAdpcmClose)"
  },
+ "00238538": {
+  "name": "rxSndMemMove",
+  "tag": "lib-context",
+  "was": "FUN_00238538",
+  "why": "byte copy (dst, src, n) forwards when dst < src, backwards otherwise: memmove; rxSndIopRead's bounce copies"
+ },
  "002385b8": {
   "name": "rxSndDefIopAlloc",
   "tag": "ror-inferred",
@@ -6880,6 +6934,24 @@
   "tag": "ror-inferred",
   "was": "FUN_002386b0",
   "why": "default hook 0x2db964: IOP command 0x21 {addr}"
+ },
+ "002386e0": {
+  "name": "rxSndSetIopAllocHook",
+  "tag": "lib-context",
+  "was": "FUN_002386e0",
+  "why": "hidden; stores a0 in sdata 0x2db95c (the hook rxSndIopAlloc calls), NULL restores rxSndDefIopAlloc 0x2385b8"
+ },
+ "00238700": {
+  "name": "rxSndSetIopAllocMode1Hook",
+  "tag": "lib-context",
+  "was": "FUN_00238700",
+  "why": "hidden; stores a0 in sdata 0x2db960, NULL restores rxSndDefIopAllocMode1 0x238630"
+ },
+ "00238720": {
+  "name": "rxSndSetIopFreeHook",
+  "tag": "lib-context",
+  "was": "FUN_00238720",
+  "why": "hidden; stores a0 in sdata 0x2db964, NULL restores rxSndDefIopFree 0x2386b0"
  },
  "00238740": {
   "name": "rxSndIopAlloc",
@@ -6905,6 +6977,36 @@
   "was": "FUN_002387b8",
   "why": "EE -> IOP copy (iop addr, ee src, size): one sceSifSetDma when 16-byte aligned, otherwise head and tail through the bounce buffers 0x7b6b40 plus IOP command 0x23"
  },
+ "002389c8": {
+  "name": "rxSndIopRead",
+  "tag": "lib-context",
+  "was": "FUN_002389c8",
+  "why": "the mirror of rxSndIopWrite: (ee dst, iop src, size) with sceSifGetOtherData when aligned, else head and tail through the EE bounce buffers 0x7b6b00 + bank * 0x20 and rxSndMemMove"
+ },
+ "00238bb0": {
+  "name": "rxSndIopWriteWorkBuffer",
+  "tag": "lib-context",
+  "was": "FUN_00238bb0",
+  "why": "writes the 0x1000-byte work buffer to the same IOP address in chunks of min(left, 0x1000) until size is used; the address never advances"
+ },
+ "00238c28": {
+  "name": "rxSndIopAllocWrite",
+  "tag": "lib-context",
+  "was": "FUN_00238c28",
+  "why": "(src, size): rxSndIopAlloc(size), then rxSndIopWrite of src when it succeeded; returns the IOP address"
+ },
+ "00238c80": {
+  "name": "rxSndIopHeapCmd1",
+  "tag": "lib-context",
+  "was": "FUN_00238c80",
+  "why": "command 0x22 {1}: the IOP heap family (0x20 alloc, 0x21 free, 0x23 copy); what 1 asks is not known"
+ },
+ "00238cb8": {
+  "name": "rxSndIopHeapCmd2",
+  "tag": "lib-context",
+  "was": "FUN_00238cb8",
+  "why": "command 0x22 {2}, the twin of rxSndIopHeapCmd1"
+ },
  "00238cf0": {
   "name": "rxSndIopCopy",
   "tag": "lib-context",
@@ -6922,6 +7024,30 @@
   "tag": "ror-inferred",
   "was": "FUN_00238d78",
   "why": "frees the two IOP blocks of rxSndIopBufInit"
+ },
+ "00238dc8": {
+  "name": "rxSndSpuHeapSetSlot",
+  "tag": "lib-context",
+  "was": "FUN_00238dc8",
+  "why": "defines SPU slot id (-1 the first unused; string: out of range over heap block ID): releases it if used, clamps addr to 0x5010..0x1bffff and size to the end, marks used; returns the id"
+ },
+ "00238f00": {
+  "name": "rxSndSpuHeapReleaseSlot",
+  "tag": "lib-context",
+  "was": "FUN_00238f00",
+  "why": "id < 0x100 and used: frees the slot's blocks (0x239af8) and clears m_used"
+ },
+ "00238f58": {
+  "name": "rxSndSpuHeapSetBankSlot",
+  "tag": "lib-context",
+  "was": "FUN_00238f58",
+  "why": "stores a0 in the region's m_bankSlot[rxSndGetBufferBank()] (0x7b97b4), returns the old one"
+ },
+ "00238fb8": {
+  "name": "rxSndSpuHeapGetBankSlot",
+  "tag": "lib-context",
+  "was": "FUN_00238fb8",
+  "why": "returns m_bankSlot[rxSndGetBufferBank()] (0x7b97b4)"
  },
  "00238ff0": {
   "name": "rxSndDefSpuAlloc",
@@ -6983,11 +7109,47 @@
   "was": "FUN_00239120",
   "why": "command 0x40 {3, 1, spu, ee, size}: starts an EE -> SPU transfer, returns the handle rxSndXvabPoll waits on"
  },
+ "00239168": {
+  "name": "rxSndSpuTransferType4",
+  "tag": "lib-context",
+  "was": "FUN_00239168",
+  "why": "command 0x40 {4, 1, a, b, c}: the rxSndSpuTransfer request with type 4; direction not known"
+ },
+ "002391b0": {
+  "name": "rxSndSpuTransferType1",
+  "tag": "lib-context",
+  "was": "FUN_002391b0",
+  "why": "command 0x40 {1, 1, a, b, c}"
+ },
+ "002391f8": {
+  "name": "rxSndSpuTransferType2",
+  "tag": "lib-context",
+  "was": "FUN_002391f8",
+  "why": "command 0x40 {2, 1, a, b, c}"
+ },
+ "00239240": {
+  "name": "rxSndSpuTransferType5",
+  "tag": "lib-context",
+  "was": "FUN_00239240",
+  "why": "command 0x40 {5, 1, a, 0, b}: no source address (a fill or clear, unverified)"
+ },
  "00239288": {
   "name": "rxSndXvabPoll",
   "tag": "ror-inferred",
   "was": "FUN_00239288",
   "why": "IOP command 0x41 {id}; with wait set loops until 0; rxSndXvabCheck's worker"
+ },
+ "00239320": {
+  "name": "rxSndSpuHeapGetFreeSize",
+  "tag": "lib-context",
+  "was": "FUN_00239320",
+  "why": "hidden; returns bss 0x7b839c, the free byte count rxSndSpuHeapAlloc / Free keep"
+ },
+ "00239330": {
+  "name": "rxSndSpuHeapGetMaxFreeBlock",
+  "tag": "lib-context",
+  "was": "FUN_00239330",
+  "why": "hidden; walks the block list from the sentinel 0x7b8380 and returns the largest m_size of an unused block"
  },
  "00239380": {
   "name": "rxSndSpuHeapInit",
@@ -7019,6 +7181,12 @@
   "was": "FUN_002398f8",
   "why": "the default SPU free hook tail-calls it with the address"
  },
+ "00239af8": {
+  "name": "rxSndSpuHeapFreeSlot",
+  "tag": "lib-context",
+  "was": "FUN_00239af8",
+  "why": "with interrupts off frees every block whose owner is rxSndSpuHeapGetSlot(id), walking addresses up from 0x5010"
+ },
  "00239be8": {
   "name": "rxSndSpuHeapNewNode",
   "tag": "ror-inferred",
@@ -7031,6 +7199,60 @@
   "was": "FUN_00239c10",
   "why": "puts a block node back on the free node list 0x7b8398 (through +0x4); twin of rxSndSpuHeapNewNode"
  },
+ "00239c30": {
+  "name": "rxSndSpuHeapPrintStatus",
+  "tag": "lib-context",
+  "was": "FUN_00239c30",
+  "why": "debug flag 4: prints the SPU heap status banner, each block [o]/[x] with range and owner slot, then use slot / free slot counts"
+ },
+ "00239e58": {
+  "name": "rxSndSetEffectModeCore",
+  "tag": "lib-context",
+  "was": "FUN_00239e58",
+  "why": "queued command 0x32 {core 0..1, 0, mode 0..9}: SPU2 core and the ten libsd reverb modes (clamp 9)"
+ },
+ "00239ef8": {
+  "name": "rxSndSetEffectDepthCore",
+  "tag": "lib-context",
+  "was": "FUN_00239ef8",
+  "why": "queued command 0x32 {core, 2, short L, short R}: a per-core L/R pair after the mode, the reverb depth"
+ },
+ "00239f80": {
+  "name": "rxSndSetEffectDelayCore",
+  "tag": "lib-context",
+  "was": "FUN_00239f80",
+  "why": "queued command 0x32 {core, 3, value}: the order of libsd's effect attributes (mode, depth, delay, feedback)"
+ },
+ "0023a000": {
+  "name": "rxSndSetEffectFeedbackCore",
+  "tag": "lib-context",
+  "was": "FUN_0023a000",
+  "why": "hidden; queued command 0x32 {core, 4, value}, called by 0x23a138"
+ },
+ "0023a080": {
+  "name": "rxSndSetEffectMode",
+  "tag": "lib-context",
+  "was": "FUN_0023a080",
+  "why": "rxSndSetEffectModeCore for cores 0 and 1; called by SndMan code at 0x1e4cc4"
+ },
+ "0023a0b8": {
+  "name": "rxSndSetEffectDepth",
+  "tag": "lib-context",
+  "was": "FUN_0023a0b8",
+  "why": "rxSndSetEffectDepthCore for cores 0 and 1; called by SndMan code at 0x1e4cc4"
+ },
+ "0023a100": {
+  "name": "rxSndSetEffectDelay",
+  "tag": "lib-context",
+  "was": "FUN_0023a100",
+  "why": "rxSndSetEffectDelayCore for cores 0 and 1"
+ },
+ "0023a138": {
+  "name": "rxSndSetEffectFeedback",
+  "tag": "lib-context",
+  "was": "FUN_0023a138",
+  "why": "hidden; rxSndSetEffectFeedbackCore for cores 0 and 1"
+ },
  "0023a170": {
   "name": "rxSndXvabInit",
   "tag": "ror-inferred",
@@ -7042,6 +7264,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0023a178",
   "why": "empty"
+ },
+ "0023a180": {
+  "name": "rxSndReadVarLen",
+  "tag": "lib-context",
+  "was": "FUN_0023a180",
+  "why": "hidden; reads a 7-bit-per-byte big-endian number with the 0x80 continue bit from *p and advances it (MIDI variable length)"
  },
  "0023a1b8": {
   "name": "rxSndXvabLoad",
@@ -7061,11 +7289,71 @@
   "was": "FUN_0023a720",
   "why": "XVAB transfer state: 1 while busy; arg 1 waits"
  },
+ "0023a7f0": {
+  "name": "rxSndXvabGetIopAddr",
+  "tag": "lib-context",
+  "was": "FUN_0023a7f0",
+  "why": "XVAB id checks as rxSndXvabFree, returns the bank's m_iopBuf (+4)"
+ },
+ "0023a880": {
+  "name": "rxSndXvabGetSpuAddr",
+  "tag": "lib-context",
+  "was": "FUN_0023a880",
+  "why": "XVAB id checks, returns the bank's m_spuBuf (+0xc)"
+ },
+ "0023a918": {
+  "name": "rxSndXvabGetFileSize",
+  "tag": "lib-context",
+  "was": "FUN_0023a918",
+  "why": "tail call of rxSndChunkGetFileSize"
+ },
  "0023a930": {
   "name": "rxSndXvabGetSampleData",
   "tag": "lib-context",
   "was": "FUN_0023a930",
   "why": "finds the XVAB's sample data: HEAD chunk with byte 1 set -> after the 16-aligned file, size HEAD+4; else the SMPL chunk's offset and size"
+ },
+ "0023aa08": {
+  "name": "rxSndXvabGetSampleAddr",
+  "tag": "lib-context",
+  "was": "FUN_0023aa08",
+  "why": "rxSndXvabGetSampleData's data pointer, 0 when the bank has no samples"
+ },
+ "0023aa38": {
+  "name": "rxSndXvabGetSampleSize",
+  "tag": "lib-context",
+  "was": "FUN_0023aa38",
+  "why": "rxSndXvabGetSampleData's size, 0 when the bank has no samples"
+ },
+ "0023aa68": {
+  "name": "rxSndXseqLoad",
+  "tag": "lib-context",
+  "was": "FUN_0023aa68",
+  "why": "the XSEQ twin of rxSndXvabLoad: table 0x7bafc0 (256 x 0xc), magic XSEQ, IOP copy, command 0x60 {id, iop}, string: failed to open XSEQ"
+ },
+ "0023ad60": {
+  "name": "rxSndXseqFree",
+  "tag": "lib-context",
+  "was": "FUN_0023ad60",
+  "why": "command 0x61 {id} while it answers 1 (wait as rxSndXvabFree), then frees an owned IOP buffer; XSEQ id strings"
+ },
+ "0023aeb0": {
+  "name": "rxSndXseqSetParam",
+  "tag": "lib-context",
+  "was": "FUN_0023aeb0",
+  "why": "command 0x63 {id, a, b} for a used XSEQ id"
+ },
+ "0023af70": {
+  "name": "rxSndXseqGetIopAddr",
+  "tag": "lib-context",
+  "was": "FUN_0023af70",
+  "why": "XSEQ id checks, returns the entry's IOP address (+4)"
+ },
+ "0023b000": {
+  "name": "rxSndXseqGetFileSize",
+  "tag": "lib-context",
+  "was": "FUN_0023b000",
+  "why": "tail call of rxSndChunkGetFileSize"
  },
  "0023b018": {
   "name": "rxSndXseqInit",
@@ -7109,11 +7397,23 @@
   "was": "FUN_0023b1c8",
   "why": "rxSndChunkFind returning only the data pointer, NULL when absent"
  },
+ "0023b200": {
+  "name": "rxSndChunkGetSize",
+  "tag": "lib-context",
+  "was": "FUN_0023b200",
+  "why": "rxSndChunkFind's size for (file, tag), 0 when absent"
+ },
  "0023b238": {
   "name": "rxSndBgmSetMasterVolume",
   "tag": "ror-inferred",
   "was": "FUN_0023b238",
   "why": "clamps to -0x80..0x80 into 0x7bbecc/ce and re-sends every playing BGM's volume"
+ },
+ "0023b2d0": {
+  "name": "rxSndBgmPlay",
+  "tag": "lib-context",
+  "was": "FUN_0023b2d0",
+  "why": "takes a free BGM slot (string: can't allocate BGM slot), flags 3, queued command 0x70 {slot, xseq}, rxSndBgmSetVolume; returns the slot"
  },
  "0023b3b8": {
   "name": "rxSndBgmStop",
@@ -7121,11 +7421,71 @@
   "was": "FUN_0023b3b8",
   "why": "calls the bg hook with 'rxSndBgmStop'; IOP queue 0x71 {id, 0, 1|2}; moves the slot to the stopping list"
  },
+ "0023b498": {
+  "name": "rxSndBgmStopAll",
+  "tag": "lib-context",
+  "was": "FUN_0023b498",
+  "why": "rxSndBgmStop(i, arg) for all 32 slots"
+ },
+ "0023b4e8": {
+  "name": "rxSndBgmPause",
+  "tag": "lib-context",
+  "was": "FUN_0023b4e8",
+  "why": "hidden; the BGM twin of rxSndSePause: queued 0x71 {id, 1, pause ? (arg ? 1 : 2) : 0}"
+ },
+ "0023b5b0": {
+  "name": "rxSndBgmGetStatus",
+  "tag": "lib-context",
+  "was": "FUN_0023b5b0",
+  "why": "hidden; the slot's flags when open, else 0 (as rxSndSeGetStatus)"
+ },
+ "0023b5e8": {
+  "name": "rxSndBgmGetValue",
+  "tag": "lib-context",
+  "was": "FUN_0023b5e8",
+  "why": "hidden; the slot's m_value (+0x10, from the status reply) when open, else 0"
+ },
+ "0023b628": {
+  "name": "rxSndBgmSetChannelVolume",
+  "tag": "lib-context",
+  "was": "FUN_0023b628",
+  "why": "hidden; queued command 0x73 {u8 slot, u8 channel, param 3, short L, short R} for an open slot: per-channel volume, raw (no master mix)"
+ },
+ "0023b6e8": {
+  "name": "rxSndBgmSetChannelVolume74",
+  "tag": "lib-context",
+  "was": "FUN_0023b6e8",
+  "why": "hidden; command 0x74 with the same layout as 0x73 (param 3, L / R); which part of the sequence it targets is not known"
+ },
+ "0023b7a8": {
+  "name": "rxSndBgmSetAttr",
+  "tag": "lib-context",
+  "was": "FUN_0023b7a8",
+  "why": "queued 0x71 {id, 2, value}, the BGM twin of rxSndSeSetAttr"
+ },
  "0023b840": {
   "name": "rxSndBgmSetVolume",
   "tag": "ror-inferred",
   "was": "FUN_0023b840",
   "why": "stores the slot volume, queues 0x71 {id, 3, l*masterL*bgmL>>14, r...}"
+ },
+ "0023b990": {
+  "name": "rxSndBgmSetPitch",
+  "tag": "lib-context",
+  "was": "FUN_0023b990",
+  "why": "queued 0x71 {id, 4, pitch * 4096}"
+ },
+ "0023ba38": {
+  "name": "rxSndBgmSetParam5",
+  "tag": "lib-context",
+  "was": "FUN_0023ba38",
+  "why": "queued 0x71 {id, 5, float * 4096}; a second float parameter after pitch (tempo, unverified)"
+ },
+ "0023bae0": {
+  "name": "rxSndBgmSetParam6",
+  "tag": "lib-context",
+  "was": "FUN_0023bae0",
+  "why": "queued 0x71 {id, 6, value}"
  },
  "0023bb78": {
   "name": "rxSndBgmInit",
@@ -7163,17 +7523,41 @@
   "was": "FUN_0023bd70",
   "why": "clamps into 0x7bc3dc/de and re-sends rxSndSeSetVolume for every playing voice"
  },
+ "0023be08": {
+  "name": "rxSndSeSetDefaultParamB",
+  "tag": "lib-context",
+  "was": "FUN_0023be08",
+  "why": "hidden; clamps to -1..2 and stores bss 0x7bc3e0, the parameter 0xb rxSndSePlay applies"
+ },
+ "0023be38": {
+  "name": "rxSndSeSetDefaultParamC",
+  "tag": "lib-context",
+  "was": "FUN_0023be38",
+  "why": "hidden; clamps to -1..0x7e and stores bss 0x7bc3e4, the parameter 0xc rxSndSePlay applies"
+ },
  "0023be68": {
   "name": "rxSndSePlay",
   "tag": "lib-context",
   "was": "FUN_0023be68",
   "why": "can't allocate SE slot string; returns an SE voice from an XVAB, prog, note, volumes"
  },
+ "0023bfb0": {
+  "name": "rxSndSePlayEx",
+  "tag": "lib-context",
+  "was": "FUN_0023bfb0",
+  "why": "rxSndSePlay with queued command 0x81 instead of 0x80, same slot handling and string"
+ },
  "0023c0f8": {
   "name": "rxSndSeStop",
   "tag": "lib-context",
   "was": "FUN_0023c0f8",
   "why": "its own string rxSndSeStop"
+ },
+ "0023c1d8": {
+  "name": "rxSndSeStopAll",
+  "tag": "lib-context",
+  "was": "FUN_0023c1d8",
+  "why": "rxSndSeStop(i, arg) for all 64 voices"
  },
  "0023c228": {
   "name": "rxSndSeGetStatus",
@@ -7205,11 +7589,47 @@
   "was": "FUN_0023c510",
   "why": "voice in a0, float in f12 (SE +0x30, 1.0 default)"
  },
+ "0023c5b8": {
+  "name": "rxSndSeSetParam5",
+  "tag": "lib-context",
+  "was": "FUN_0023c5b8",
+  "why": "queued 0x82 {id, 5, float * 4096}, the SE twin of rxSndBgmSetParam5"
+ },
  "0023c660": {
   "name": "rxSndSeSetParam",
   "tag": "lib-context",
   "was": "FUN_0023c660",
   "why": "queued command 0x82 {voice, param, value} with the open check; rxSndSeSetAttr / SetVolume / SetPitch are the inlined forms"
+ },
+ "0023c700": {
+  "name": "rxSndSeSetParam6",
+  "tag": "lib-context",
+  "was": "FUN_0023c700",
+  "why": "hidden; rxSndSeSetParam(id, 6, clamp(v, 0, 0x80))"
+ },
+ "0023c740": {
+  "name": "rxSndSeSetParam7",
+  "tag": "lib-context",
+  "was": "FUN_0023c740",
+  "why": "hidden; rxSndSeSetParam(id, 7, clamp(v, 0, 0x80))"
+ },
+ "0023c780": {
+  "name": "rxSndSeSetParam8",
+  "tag": "lib-context",
+  "was": "FUN_0023c780",
+  "why": "hidden; rxSndSeSetParam(id, 8, clamp(v, 0, 0x80))"
+ },
+ "0023c7c0": {
+  "name": "rxSndSeSetParam9",
+  "tag": "lib-context",
+  "was": "FUN_0023c7c0",
+  "why": "hidden; rxSndSeSetParam(id, 9, clamp(v, 0, 0x80))"
+ },
+ "0023c800": {
+  "name": "rxSndSeSetPan",
+  "tag": "lib-context",
+  "was": "FUN_0023c800",
+  "why": "hidden; rxSndSeSetParam(id, 10, clamp((f + 1) * 128, 0, 255)): a float -1..1 mapped to 0..255"
  },
  "0023c860": {
   "name": "rxSndSeSetParamB",

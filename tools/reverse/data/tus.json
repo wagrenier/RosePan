@@ -434,7 +434,7 @@
    "why": "rx middleware file layer: rxfile messages from 0x244410 (failed to alloc slot) to the request thread 0x2491c0 (rxfile : failed to create thread); starts after rxsys 0x2437f8, ends with the file thread priority helpers 0x249b20/0x249b78 (bss 0x7f6910/0x7f6918); 0x249b88 starts the rxthread kernel wrappers (CreateSema, CreateThread)"
   },
   "rx/rxsnd.cpp": {
-   "notes": "Screen black as before (sound has no picture; the boot does not reach SndMan bank, SE or stream calls yet). Left in this TU (about 60 functions): XSEQ (0x23aa08 onwards, the varint reader hidden at 0x23a180), BGM play (0x23b2xx..0x23b840 region), all PCM open and play (0x23cb08..0x23d7e0), the SE twin 0x23bfb0 (command 0x81, no callers). Hidden unreferenced setters not created yet: IOP hook setters 0x2386e0 / 0x238700 / 0x238720, SE param defaults 0x23be08 / 0x23be38, SE param 6..9 / 10 setters 0x23c700..0x23c800, ADPCM param defaults 0x23dc68 / 0x23dc98 (python hidden.py 0x237ce8 0x23ff58 lists them; mkfunc then name). Traps: rxSndAdpcmWriteEx modes 0 and 1 take chunks of min(run, 0x4000), not of what is left, so a run over 0x4000 overshoots as in the ROM; rxSndSpuHeapAlloc compares the slot window unsigned like the ROM. The stand-in still answers ADPCM free 0, so SndMan never writes a stream: make it report the ring free and the stream ended after the end command if streaming has to progress. Signature changes: rxSndXvabLoad(id, xvab data, iopAddr, spuAddr), rxSndAdpcmWrite(id, data, dataR, size) returns size, rxSndAdpcmOpen sizes in KB, rxSndSetDebugFlags(int).",
+   "notes": "Screen black as before: sound has no picture and the boot does not reach SndMan bank, BGM or stream calls. Left in this TU: PCM open and play (0x23cba0, 0x23cbf8, 0x23cca8 called from 0x1810f4, 0x23ce98, 0x23cf90, 0x23d018, 0x23d078, hidden 0x23cc68, 0x23cfd0, 0x23d4b8, 0x23d610, 0x23d658), ADPCM hidden setters 0x23dc68 / 0x23dc98 / 0x23ed10 / 0x23ee68 / 0x23eeb0 / 0x23f3c0 / 0x23f600, and 0x23e118; python hidden.py 0x237ce8 0x23ff58 lists the hidden ones (mkfunc, then name). Skipped as unnamable trivia: 0x2384b0 (empty) and 0x23a910 (returns its argument), both unreferenced. Meanings guessed only in comments: command 0x32 is the SPU2 reverb (libsd mode 0..9, depth, delay, feedback); 0x30 kinds 3..5, 0x31, 0x22, 0x63, 0x74 and SPU transfer types 1 / 2 / 4 / 5 are not known. rxSndIopWriteWorkBuffer never advances the IOP address, as in the ROM. s_iopBuf is alignas(16): rxSndIopRead recurses until its bounce buffer is aligned (hazards.md).",
    "ranges": [
     [
      "00237ce8",
@@ -456,6 +456,11 @@
      "date": "2026-10-22 21:37",
      "status": "partial",
      "summary": "Wrote 28 rx sound functions: SPU heap allocator and free with node helpers, EE to IOP copy (rxSndIopWrite with bounce buffers, rxSndIopCopy), SPU transfer, XVAB load and free with the chunk readers and sample lookup, SE play, pause and parameter setters, ADPCM open (KB, Ex and byte forms), write (all four channel modes, staging and loop flags), end, parameters 6 and 7, set output mode and debug flags; named 19 functions (rxsnd_003); IOP stand-in now echoes the XVAB id and reports started SE voices ended; 7 stubs removed."
+    },
+    {
+     "date": "2026-10-25 15:31",
+     "status": "partial",
+     "summary": "Wrote 70 rx sound functions (22 hidden ones created in Ghidra, named in rxsnd_004): system commands 0x30 / 0x31, the 0x9x per-voice tables, rxSndCentToPitch with its two ratio tables, rxSndMemMove, IOP hook setters, rxSndIopRead (sceSifGetOtherData, added to sdk/sifrpc), IOP write helpers, SPU heap slots (set, release, free all, bank slot, free size, largest block, status print), the other SPU transfer types, the SPU2 effect commands 0x32 (mode, depth, delay, feedback, per core and both), MIDI varlen reader, XVAB getters, XSEQ load / free / set / getters, rxSndChunkGetSize, BGM play / stop all / pause / status / value / channel volumes 0x73 0x74 / attr / pitch / params 5 6, SE default params, rxSndSePlayEx, SE stop all, SE params 5..9 and pan. IOP stand-in answers the XSEQ open 0x60 with the id."
     }
    ],
    "status": "partial",

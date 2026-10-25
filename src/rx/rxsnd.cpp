@@ -7,7 +7,9 @@
  *  the IOP / SPU heap hooks, the SPU heap allocator, EE -> IOP / SPU
  *  transfers, XVAB load / free, the per-frame status update of every
  *  family, volumes, SE play / pause, ADPCM open / write / end, stop / close
- *  and the set commands. Left: XSEQ, BGM play, PCM open / play.
+ *  and the set commands, XSEQ load / free, BGM play and its setters, the
+ *  effect (reverb) commands, the SPU heap slots, IOP reads. Left: PCM open /
+ *  play and the hidden ADPCM setters.
  *
  *  PC: the IOP side is a host stand-in (src/sdk/iop_rxsnd.cpp) registered
  *  at the IOP boot; without it rxSndRpcInit would bind for ever. The RPC
@@ -43,7 +45,9 @@ static int             s_queueReplyPos;            /* sdata 0x2db9c8: reply byte
 
 static RxSndConfig s_config;                       /* bss 0x7b5ac0 */
 static u_char      s_workBuffer[0x1000];           /* bss 0x7b5b00 */
-static RxSndIopBuf s_iopBuf;                       /* bss 0x7b6b00 */
+/* PC: aligned as on the EE (0x7b6b00): rxSndIopRead's bounce buffers must be
+ * 16-byte aligned or its unaligned path recurses for ever. */
+alignas(16) static RxSndIopBuf s_iopBuf;           /* bss 0x7b6b00 */
 
 static RxSndSpuNode   s_spuNodes[256];             /* bss 0x7b6b80 */
 static RxSndSpuNode   s_spuList;                   /* bss 0x7b8380: sentinel of the block list */
@@ -52,6 +56,7 @@ static u_int          s_spuHeapSize;               /* bss 0x7b839c */
 static RxSndSpuSlot   s_spuSlots[256];             /* bss 0x7b83a0 */
 static RxSndSpuRegion s_spuRegion;                 /* bss 0x7b97a0 */
 static RxSndXvab      s_xvab[256];                 /* bss 0x7b97c0 */
+static RxSndXseq      s_xseq[256];                 /* bss 0x7bafc0 */
 
 static RxSndBgm  s_bgm[32];                        /* bss 0x7bbbc0 */
 static RxSndBgm *s_bgmActive;                      /* bss 0x7bbec0 */
@@ -98,6 +103,39 @@ static const u_int       s_adpcmEndBlock[16] = {   /* sdata 0x2db980 */
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 };
 
+/* rxSndCentToPitch's ratios as float bits: 2^((n - 48) / 12) for the
+ * semitones -48..48, 2^(c / 1200) for the cents 0..99. */
+static const u_int s_semitoneRatio[97] = {         /* sdata 0x2db640 */
+    0x3d800000, 0x3d879c41, 0x3d8face6, 0x3d9837b4, 0x3da1450e, 0x3daadbc6, 0x3db504c4, 0x3dbfc86c,
+    0x3dcb302f, 0x3dd744f5, 0x3de411c2, 0x3df1a198, 0x3e000000, 0x3e079c84, 0x3e0face6, 0x3e1837f7,
+    0x3e21450e, 0x3e2adc09, 0x3e350507, 0x3e3fc86c, 0x3e4b2fec, 0x3e5744f5, 0x3e641205, 0x3e71a1db,
+    0x3e800000, 0x3e879c84, 0x3e8face6, 0x3e9837f7, 0x3ea1450e, 0x3eaadc09, 0x3eb504e6, 0x3ebfc88e,
+    0x3ecb2fec, 0x3ed744f5, 0x3ee411e4, 0x3ef1a1b9, 0x3f000000, 0x3f079c84, 0x3f0facd5, 0x3f1837f7,
+    0x3f21451f, 0x3f2adc09, 0x3f3504f6, 0x3f3fc88e, 0x3f4b2ffd, 0x3f5744f5, 0x3f6411f4, 0x3f71a1b9,
+    0x3f800000, 0x3f879c7b, 0x3f8facd5, 0x3f9837ef, 0x3fa14517, 0x3faadc09, 0x3fb504f6, 0x3fbfc886,
+    0x3fcb2ff4, 0x3fd744fe, 0x3fe411ec, 0x3ff1a1c2, 0x40000000, 0x40079c7b, 0x400facd5, 0x401837ef,
+    0x40214517, 0x402adc09, 0x403504f2, 0x403fc886, 0x404b2ff4, 0x405744fe, 0x406411f0, 0x4071a1be,
+    0x40800000, 0x40879c7b, 0x408facd5, 0x409837ef, 0x40a14517, 0x40aadc07, 0x40b504f2, 0x40bfc886,
+    0x40cb2ff4, 0x40d744fc, 0x40e411f0, 0x40f1a1c0, 0x41000000, 0x41079c7c, 0x410facd5, 0x411837f0,
+    0x41214517, 0x412adc08, 0x413504f2, 0x413fc887, 0x414b2ff4, 0x415744fd, 0x416411ef, 0x4171a1bf,
+    0x41800000,
+};
+static const u_int s_centRatio[100] = {            /* sdata 0x2db7c8 */
+    0x3f800000, 0x3f8012f0, 0x3f8025e1, 0x3f8038d1, 0x3f804bca, 0x3f805ec3, 0x3f8071c5, 0x3f8084c6,
+    0x3f8097c8, 0x3f80aac9, 0x3f80bdd3, 0x3f80d0dc, 0x3f80e3ef, 0x3f80f6f8, 0x3f810a13, 0x3f811d25,
+    0x3f813040, 0x3f81435a, 0x3f815675, 0x3f816998, 0x3f817cbb, 0x3f818fe6, 0x3f81a311, 0x3f81b63d,
+    0x3f81c968, 0x3f81dc9c, 0x3f81efd8, 0x3f82030c, 0x3f821648, 0x3f822984, 0x3f823cc8, 0x3f82500d,
+    0x3f826351, 0x3f827696, 0x3f8289e3, 0x3f829d38, 0x3f82b085, 0x3f82c3da, 0x3f82d72f, 0x3f82ea8d,
+    0x3f82fdeb, 0x3f831148, 0x3f8324af, 0x3f833815, 0x3f834b7b, 0x3f835ee9, 0x3f837258, 0x3f8385c6,
+    0x3f83993d, 0x3f83acb4, 0x3f83c02a, 0x3f83d3aa, 0x3f83e729, 0x3f83faa8, 0x3f840e30, 0x3f8421b7,
+    0x3f843547, 0x3f8448cf, 0x3f845c67, 0x3f846ff7, 0x3f848390, 0x3f849728, 0x3f84aac9, 0x3f84be61,
+    0x3f84d20a, 0x3f84e5ab, 0x3f84f954, 0x3f850cfe, 0x3f8520af, 0x3f853461, 0x3f854812, 0x3f855bcc,
+    0x3f856f86, 0x3f858340, 0x3f859702, 0x3f85aac5, 0x3f85be87, 0x3f85d252, 0x3f85e61c, 0x3f85f9e7,
+    0x3f860dba, 0x3f86218d, 0x3f863569, 0x3f864944, 0x3f865d20, 0x3f8670fb, 0x3f8684df, 0x3f8698c3,
+    0x3f86acaf, 0x3f86c09c, 0x3f86d488, 0x3f86e87d, 0x3f86fc71, 0x3f871066, 0x3f872463, 0x3f873860,
+    0x3f874c5d, 0x3f876063, 0x3f877468, 0x3f87886d,
+};
+
 /* The direct commands' buffers, one bank per rxTh yield state. */
 static u_int            s_rpcSend[2][0x100];       /* bss 0x7c9300 */
 static u_int            s_rpcReply[2][0x100];      /* bss 0x7c9b00 */
@@ -111,6 +149,14 @@ static u_char           s_queueReply[0x1000];      /* bss 0x7cb340 */
 static inline int rxSndClamp(int v, int lo, int hi)
 {
     return v < lo ? lo : (v > hi ? hi : v);
+}
+
+static inline float rxSndBitsToFloat(u_int bits)
+{
+    float f;
+
+    memcpy(&f, &bits, sizeof(f));
+    return f;
 }
 
 /* ---- init / term ------------------------------------------------------ */
@@ -231,6 +277,51 @@ u_char rxSndGetDebugFlags(void)
     return s_config.m_debugFlags;
 }
 
+// ROR 0x00238048
+void rxSndSetFrameRate(int rate)
+{
+    u_int req[2];
+
+    req[0] = 1;
+    req[1] = rate == 50 ? 50 : 60;
+    rxSndRpcCommand(0x30, NULL, 0, req, sizeof(req));
+}
+
+// ROR 0x002380a0
+void rxSndSetSysParam(int kind, int value)
+{
+    u_int req[2];
+
+    switch (kind)
+    {
+    case 0:
+        req[0] = 3;
+        break;
+    case 1:
+        req[0] = 4;
+        break;
+    case 2:
+        req[0] = 5;
+        break;
+    default:
+        return;
+    }
+    req[1] = value;
+    rxSndRpcCommand(0x30, NULL, 0, req, sizeof(req));
+}
+
+// ROR 0x00238120
+void rxSndSetSysVolume(int id, int volL, int volR)
+{
+    rxSndQueueBegin(0x31, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_vol[1] = (short)volR;
+    cmd->m_id     = id;
+    cmd->m_vol[0] = (short)volL;
+    cmd->m_param  = 1;
+    rxSndQueueEnd();
+}
+
 // ROR 0x00238188
 void rxSndSetMasterVolume(int volL, int volR)
 {
@@ -256,6 +347,59 @@ int rxSndSetBufferBank(int bank)
     else
         s_bufferBank = 1;
     return old;
+}
+
+// ROR 0x002382a0
+void rxSndGetVoiceTable(u_int *out)
+{
+    u_int reply[48];
+
+    rxSndRpcCommand(0x90, reply, sizeof(reply), NULL, 0);
+    for (int i = 0; i < 48; i++)
+        out[i] = reply[i];
+}
+
+// ROR 0x00238300
+void rxSndGetVoiceTableEx(int arg, u_int *out)
+{
+    u_int reply[48];
+    u_int req[1];
+
+    req[0] = arg;
+    rxSndRpcCommand(0x93, reply, sizeof(reply), req, sizeof(req));
+    for (int i = 0; i < 48; i++)
+        out[i] = reply[i];
+}
+
+// ROR 0x00238360
+void rxSndSetVoiceEntry(u_int voice, int value)
+{
+    if (voice < 48)
+    {
+        u_int req[2];
+
+        req[0] = voice;
+        req[1] = value;
+        rxSndRpcCommand(0x91, NULL, 0, req, sizeof(req));
+    }
+}
+
+// ROR 0x002383a8
+void rxSndGetVoiceTable2(u_int *out)
+{
+    u_int reply[48];
+
+    rxSndRpcCommand(0x92, reply, sizeof(reply), NULL, 0);
+    for (int i = 0; i < 48; i++)
+        out[i] = reply[i];
+}
+
+// ROR 0x00238408
+float rxSndCentToPitch(int cents)
+{
+    int v = rxSndClamp(cents, -4800, 4800) + 4800;
+
+    return rxSndBitsToFloat(s_semitoneRatio[v / 100]) * rxSndBitsToFloat(s_centRatio[v % 100]);
 }
 
 // ROR 0x00238478
@@ -317,6 +461,26 @@ void rxSndCallBgCallHook(const char *func)
 
 /* ---- IOP / SPU memory ------------------------------------------------- */
 
+// ROR 0x00238538
+void rxSndMemMove(void *dst, const void *src, int size)
+{
+    u_char       *d = (u_char *)dst;
+    const u_char *s = (const u_char *)src;
+
+    if (d < s)
+    {
+        for (int i = 0; i < size; i++)
+            *d++ = *s++;
+    }
+    else
+    {
+        d += size;
+        s += size;
+        for (; size > 0; size--)
+            *--d = *--s;
+    }
+}
+
 /* Command 0x20 {mode, size, 0}: the IOP address, 0 when the heap is full. */
 // ROR 0x002385b8
 u_int rxSndDefIopAlloc(int size)
@@ -363,6 +527,24 @@ void rxSndDefIopFree(u_int addr)
 
     req[0] = addr;
     rxSndRpcCommand(0x21, NULL, 0, req, sizeof(req));
+}
+
+// ROR 0x002386e0
+void rxSndSetIopAllocHook(RxSndAllocFunc func)
+{
+    s_iopAllocHook = func != NULL ? func : rxSndDefIopAlloc;
+}
+
+// ROR 0x00238700
+void rxSndSetIopAllocMode1Hook(RxSndAllocFunc func)
+{
+    s_iopAllocMode1Hook = func != NULL ? func : rxSndDefIopAllocMode1;
+}
+
+// ROR 0x00238720
+void rxSndSetIopFreeHook(RxSndFreeFunc func)
+{
+    s_iopFreeHook = func != NULL ? func : rxSndDefIopFree;
 }
 
 // ROR 0x00238740
@@ -457,6 +639,118 @@ int rxSndIopWrite(u_int iopAddr, const void *src, int size)
     return 1;
 }
 
+/* The mirror of rxSndIopWrite: the unaligned head and tail come through the
+ * EE bounce buffer; the middle is read 16-byte aligned (the pad from `dst`'s
+ * own alignment, as the ROM computes it) and moved into place.
+ * PC: the stand-in's IOP addresses are fake, so sceSifGetOtherData leaves
+ * the destination as it is (sdk/sifrpc.cpp). */
+// ROR 0x002389c8
+int rxSndIopRead(void *dst, u_int iopAddr, int size)
+{
+    uintptr_t to  = (uintptr_t)dst;
+    u_int     mis = iopAddr & 3;
+    u_int     head;
+
+    if ((to & 0xf) == 0)
+    {
+        head = 0u - mis;
+        if ((size & 0xf) == 0 && (iopAddr & 3) == 0)
+        {
+            if ((size & 3) == 0)
+            {
+                sceSifReceiveData rd;
+
+                FlushCache(0);
+                while (sceSifGetOtherData(&rd, (void *)(uintptr_t)iopAddr, dst, size, 0) < 0)
+                    ;
+                FlushCache(0);
+                return 1;
+            }
+            head = 0;
+        }
+    }
+    else
+    {
+        head = 0u - mis;
+    }
+    head &= 3;
+
+    int rest = size;
+    if (size > 0 && head != 0)
+    {
+        int n = size <= (int)head ? size : (int)head;
+        rxSndIopRead(s_iopBuf.m_eeBuf[rxSndGetBufferBank()], iopAddr - mis, 0x20);
+        rest = size - n;
+        rxSndMemMove(dst, s_iopBuf.m_eeBuf[rxSndGetBufferBank()] + mis, n);
+    }
+
+    if (rest > 3)
+    {
+        u_int pad = (0u - (u_int)(to & 0xf)) & 0xf;
+        int   mid = rest - (int)pad;
+        if (mid < 0)
+            mid = 0;
+        mid &= ~0xf;
+        u_char *at = (u_char *)dst + head;
+        if (mid > 0)
+        {
+            u_char *tmp = at + pad;
+            rxSndIopRead(tmp, iopAddr + head, mid);
+            if (pad != 0)
+                rxSndMemMove(at, tmp, mid);
+            rest -= mid;
+        }
+    }
+
+    if (rest > 0)
+    {
+        rxSndIopRead(s_iopBuf.m_eeBuf[rxSndGetBufferBank()], iopAddr + size - rest,
+                     (rest + 0xf) & ~0xf);
+        rxSndMemMove((u_char *)dst + size - rest, s_iopBuf.m_eeBuf[rxSndGetBufferBank()], rest);
+    }
+    return 1;
+}
+
+// ROR 0x00238bb0
+int rxSndIopWriteWorkBuffer(u_int iopAddr, int size)
+{
+    while (size > 0)
+    {
+        int n = size <= 0x1000 ? size : 0x1000;
+        size -= n;
+        rxSndIopWrite(iopAddr, rxSndGetWorkBuffer(), n);
+    }
+    return 1;
+}
+
+// ROR 0x00238c28
+u_int rxSndIopAllocWrite(const void *src, int size)
+{
+    u_int addr = rxSndIopAlloc(size);
+
+    if (addr != 0)
+        rxSndIopWrite(addr, src, size);
+    return addr;
+}
+
+// ROR 0x00238c80
+void rxSndIopHeapCmd1(void)
+{
+    u_int req[1];
+
+    req[0] = 1;
+    rxSndRpcCommand(0x22, NULL, 0, req, sizeof(req));
+}
+
+// ROR 0x00238cb8
+void rxSndIopHeapCmd2(void)
+{
+    u_int req[1];
+
+    req[0] = 2;
+    rxSndRpcCommand(0x22, NULL, 0, req, sizeof(req));
+}
+
 // ROR 0x00238cf0
 void rxSndIopCopy(u_int dst, u_int src, int size)
 {
@@ -483,6 +777,61 @@ void rxSndIopBufTerm(void)
         rxSndIopFree(s_iopBuf.m_buf[0]);
     if (s_iopBuf.m_buf[1] != 0)
         rxSndIopFree(s_iopBuf.m_buf[1]);
+}
+
+// ROR 0x00238dc8
+int rxSndSpuHeapSetSlot(int id, u_int addr, u_int size)
+{
+    if (id < 0)
+    {
+        for (id = 0; id < 0x100 && s_spuSlots[id].m_used != 0; id++)
+            ;
+    }
+    if ((u_int)id >= 0x100)
+    {
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("rxsnd : out of range over heap block ID '%d'\n", id);
+        return -1;
+    }
+
+    if (s_spuSlots[id].m_used != 0)
+        rxSndSpuHeapReleaseSlot(id);
+    if (addr < 0x5010)
+        addr = 0x5010;
+    else if (addr > 0x1bffff)
+        addr = 0x1bffff;
+    u_int room = 0x1c0000 - addr;
+    s_spuSlots[id].m_used = 1;
+    if (size >= room)
+        size = room;
+    s_spuSlots[id].m_addr = addr;
+    s_spuSlots[id].m_size = size;
+    return id;
+}
+
+// ROR 0x00238f00
+void rxSndSpuHeapReleaseSlot(u_int id)
+{
+    if (id < 0x100 && s_spuSlots[id].m_used != 0)
+    {
+        rxSndSpuHeapFreeSlot(id);
+        s_spuSlots[id].m_used = 0;
+    }
+}
+
+// ROR 0x00238f58
+int rxSndSpuHeapSetBankSlot(int slot)
+{
+    int old = s_spuRegion.m_bankSlot[rxSndGetBufferBank()];
+
+    s_spuRegion.m_bankSlot[rxSndGetBufferBank()] = slot;
+    return old;
+}
+
+// ROR 0x00238fb8
+int rxSndSpuHeapGetBankSlot(void)
+{
+    return s_spuRegion.m_bankSlot[rxSndGetBufferBank()];
 }
 
 // ROR 0x00238ff0
@@ -555,6 +904,49 @@ int rxSndSpuTransfer(u_int spuAddr, const void *src, int size)
     return (int)rxSndRpcCommand(0x40, NULL, 0, &req, sizeof(req));
 }
 
+/* The other transfer types of command 0x40; the fields are rxSndSpuTransfer's
+ * (SPU address, EE address, size), what each type moves is not known. */
+static void rxSndSpuTransferCmd(u_char type, u_int a, u_int b, int size)
+{
+    RxSndCmdTransfer req;
+
+    memset(&req, 0, sizeof(req));
+    req.m_type    = type;
+    req.m_dir     = 1;
+    req.m_spuAddr = a;
+    req.m_eeAddr  = b;
+    req.m_size    = size;
+    rxSndRpcCommand(0x40, NULL, 0, &req, sizeof(req));
+}
+
+// callcheck: rxSndRpcCommand (through rxSndSpuTransferCmd)
+// ROR 0x00239168
+void rxSndSpuTransferType4(u_int a, u_int b, int size)
+{
+    rxSndSpuTransferCmd(4, a, b, size);
+}
+
+// callcheck: rxSndRpcCommand (through rxSndSpuTransferCmd)
+// ROR 0x002391b0
+void rxSndSpuTransferType1(u_int a, u_int b, int size)
+{
+    rxSndSpuTransferCmd(1, a, b, size);
+}
+
+// callcheck: rxSndRpcCommand (through rxSndSpuTransferCmd)
+// ROR 0x002391f8
+void rxSndSpuTransferType2(u_int a, u_int b, int size)
+{
+    rxSndSpuTransferCmd(2, a, b, size);
+}
+
+// callcheck: rxSndRpcCommand (through rxSndSpuTransferCmd)
+// ROR 0x00239240
+void rxSndSpuTransferType5(u_int a, int size)
+{
+    rxSndSpuTransferCmd(5, a, 0, size);
+}
+
 // ROR 0x00239288
 int rxSndXvabPoll(int handle, int wait)
 {
@@ -571,6 +963,25 @@ int rxSndXvabPoll(int handle, int wait)
         for (int i = 9999; i >= 0; i--)
             rxSndWait();
     }
+}
+
+// ROR 0x00239320
+u_int rxSndSpuHeapGetFreeSize(void)
+{
+    return s_spuHeapSize;
+}
+
+// ROR 0x00239330
+u_int rxSndSpuHeapGetMaxFreeBlock(void)
+{
+    int best = 0;
+
+    for (RxSndSpuNode *node = s_spuList.m_prev; node != &s_spuList; node = node->m_prev)
+    {
+        if (node->m_used == 0 && best < (int)node->m_size)
+            best = (int)node->m_size;
+    }
+    return (u_int)best;
 }
 
 // ROR 0x00239380
@@ -809,6 +1220,29 @@ void rxSndSpuHeapFree(u_int addr)
     EIntr();
 }
 
+/* The size is read after the free, as the ROM does: a block merged into
+ * the one above keeps its own m_size. */
+// ROR 0x00239af8
+void rxSndSpuHeapFreeSlot(u_int id)
+{
+    RxSndSpuSlot *slot = rxSndSpuHeapGetSlot(id);
+
+    if (slot->m_used == 0)
+        return;
+
+    DIntr();
+    u_int         addr = 0x5010;
+    RxSndSpuNode *next;
+    for (RxSndSpuNode *node = s_spuList.m_prev; node != &s_spuList; node = next)
+    {
+        next = node->m_prev;
+        if (node->m_owner == slot)
+            rxSndSpuHeapFree(addr);
+        addr += node->m_size;
+    }
+    EIntr();
+}
+
 // ROR 0x00239be8
 RxSndSpuNode *rxSndSpuHeapNewNode(void)
 {
@@ -832,6 +1266,122 @@ void rxSndSpuHeapFreeNode(RxSndSpuNode *node)
     }
 }
 
+// ROR 0x00239c30
+void rxSndSpuHeapPrintStatus(void)
+{
+    int used = 0;
+    int free = 0;
+
+    if (rxSndGetDebugFlags() & 4)
+        rxSysPrintf("-------- < SPU heap status > --------\n");
+
+    u_int addr = 0x5010;
+    for (RxSndSpuNode *node = s_spuList.m_prev; node != &s_spuList; node = node->m_prev)
+    {
+        u_int last = addr + node->m_size - 1;
+        if (node->m_used == 0)
+        {
+            if (rxSndGetDebugFlags() & 4)
+                rxSysPrintf("[x] %08X - %08X (%07d)\n", addr, last, node->m_size);
+        }
+        else if (node->m_owner == &s_spuRegion.m_slot)
+        {
+            if (rxSndGetDebugFlags() & 4)
+                rxSysPrintf("[o] %08X - %08X (%07d) in global\n", addr, last, node->m_size);
+        }
+        else
+        {
+            const RxSndSpuSlot *slot = node->m_owner;
+            if (rxSndGetDebugFlags() & 4)
+                rxSysPrintf("[o] %08X - %08X (%07d) in ( BLOCK %03d : %08X - %08X )\n", addr, last,
+                            node->m_size, slot->m_index, slot->m_addr, slot->m_addr + slot->m_size - 1);
+        }
+        used++;
+        addr += node->m_size;
+    }
+    for (RxSndSpuNode *node = s_spuFreeNodes; node != NULL; node = node->m_prev)
+        free++;
+
+    if (rxSndGetDebugFlags() & 4)
+        rxSysPrintf("use slot  %d\nfree slot %d\n", used, free);
+    if (rxSndGetDebugFlags() & 4)
+        rxSysPrintf("-------------------------------------\n");
+}
+
+/* ---- effect ------------------------------------------------------------ */
+
+/* Queued command 0x32 {core, attribute, value}, core clamped to 0..1. */
+static void rxSndQueueEffect(int core, int attr, int value)
+{
+    rxSndQueueBegin(0x32, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_value = value;
+    cmd->m_id    = rxSndClamp(core, 0, 1);
+    cmd->m_param = attr;
+    rxSndQueueEnd();
+}
+
+// callcheck: rxSndQueueBegin, rxSndQueueGetData, rxSndQueueEnd (through rxSndQueueEffect)
+// ROR 0x00239e58
+void rxSndSetEffectModeCore(int core, int mode)
+{
+    rxSndQueueEffect(core, 0, rxSndClamp(mode, 0, 9));
+}
+
+// ROR 0x00239ef8
+void rxSndSetEffectDepthCore(int core, int depthL, int depthR)
+{
+    rxSndQueueBegin(0x32, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_vol[1] = (short)depthR;
+    cmd->m_id     = rxSndClamp(core, 0, 1);
+    cmd->m_vol[0] = (short)depthL;
+    cmd->m_param  = 2;
+    rxSndQueueEnd();
+}
+
+// callcheck: rxSndQueueBegin, rxSndQueueGetData, rxSndQueueEnd (through rxSndQueueEffect)
+// ROR 0x00239f80
+void rxSndSetEffectDelayCore(int core, int delay)
+{
+    rxSndQueueEffect(core, 3, delay);
+}
+
+// callcheck: rxSndQueueBegin, rxSndQueueGetData, rxSndQueueEnd (through rxSndQueueEffect)
+// ROR 0x0023a000
+void rxSndSetEffectFeedbackCore(int core, int feedback)
+{
+    rxSndQueueEffect(core, 4, feedback);
+}
+
+// ROR 0x0023a080
+void rxSndSetEffectMode(int mode)
+{
+    rxSndSetEffectModeCore(0, mode);
+    rxSndSetEffectModeCore(1, mode);
+}
+
+// ROR 0x0023a0b8
+void rxSndSetEffectDepth(int depthL, int depthR)
+{
+    rxSndSetEffectDepthCore(0, depthL, depthR);
+    rxSndSetEffectDepthCore(1, depthL, depthR);
+}
+
+// ROR 0x0023a100
+void rxSndSetEffectDelay(int delay)
+{
+    rxSndSetEffectDelayCore(0, delay);
+    rxSndSetEffectDelayCore(1, delay);
+}
+
+// ROR 0x0023a138
+void rxSndSetEffectFeedback(int feedback)
+{
+    rxSndSetEffectFeedbackCore(0, feedback);
+    rxSndSetEffectFeedbackCore(1, feedback);
+}
+
 /* ---- XVAB / XSEQ ------------------------------------------------------ */
 
 // ROR 0x0023a170
@@ -842,6 +1392,22 @@ void rxSndXvabInit(void)
 // ROR 0x0023a178
 void rxSndXvabTerm(void)
 {
+}
+
+// ROR 0x0023a180
+u_int rxSndReadVarLen(const u_char **p)
+{
+    const u_char *at = *p;
+    u_int         v  = 0;
+    u_char        c;
+
+    do
+    {
+        c = *at++;
+        v = (v << 7) | (c & 0x7f);
+    } while (c & 0x80);
+    *p = at;
+    return v;
 }
 
 /* Takes bank `id` (-1: the first free one), copies the file to IOP memory,
@@ -1034,6 +1600,46 @@ int rxSndXvabCheck(int id, int wait)
     return busy;
 }
 
+// ROR 0x0023a7f0
+u_int rxSndXvabGetIopAddr(int id)
+{
+    if ((u_int)id < 0x100)
+    {
+        if (s_xvab[id].m_flags & 1)
+            return s_xvab[id].m_iopBuf;
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("rxsnd : specified XVAB ID '%d' is unused\n", id);
+    }
+    else if (rxSndGetDebugFlags() & 1)
+    {
+        rxSysPrintf("rxsnd : out of range XVAB ID '%d'\n", id);
+    }
+    return 0;
+}
+
+// ROR 0x0023a880
+u_int rxSndXvabGetSpuAddr(int id)
+{
+    if ((u_int)id < 0x100)
+    {
+        if (s_xvab[id].m_flags & 1)
+            return s_xvab[id].m_spuBuf;
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("rxsnd : specified XVAB ID '%d' is unused\n", id);
+    }
+    else if (rxSndGetDebugFlags() & 1)
+    {
+        rxSysPrintf("rxsnd : out of range XVAB ID '%d'\n", id);
+    }
+    return 0;
+}
+
+// ROR 0x0023a918
+int rxSndXvabGetFileSize(const void *xvab)
+{
+    return rxSndChunkGetFileSize(xvab);
+}
+
 // ROR 0x0023a930
 int rxSndXvabGetSampleData(const u_char **data, int *size, const void *xvab)
 {
@@ -1056,6 +1662,207 @@ int rxSndXvabGetSampleData(const u_char **data, int *size, const void *xvab)
     *data = (const u_char *)xvab + *(const int *)(smpl + 8);
     *size = *(const int *)(smpl + 0xc);
     return 1;
+}
+
+// ROR 0x0023aa08
+const u_char *rxSndXvabGetSampleAddr(const void *xvab)
+{
+    const u_char *data;
+    int           size;
+
+    if (rxSndXvabGetSampleData(&data, &size, xvab) == 0)
+        data = NULL;
+    return data;
+}
+
+// ROR 0x0023aa38
+int rxSndXvabGetSampleSize(const void *xvab)
+{
+    const u_char *data;
+    int           size;
+
+    if (rxSndXvabGetSampleData(&data, &size, xvab) == 0)
+        size = 0;
+    return size;
+}
+
+/* Takes sequence `id` (-1: the first free one), copies the file to IOP
+ * memory (iopAddr 0 allocates) and opens it there (command 0x60); the IOP's
+ * reply is the id. */
+// ROR 0x0023aa68
+int rxSndXseqLoad(int id, const void *xseq, u_int iopAddr)
+{
+    char       msg[0x100];
+    u_int      owned = 0;
+    RxSndXseq *seq   = NULL;
+
+    msg[0] = '\0';
+    DIntr();
+    if (id < 0)
+    {
+        for (id = 0; id < 0x100; id++)
+        {
+            if (!(s_xseq[id].m_flags & 1))
+            {
+                s_xseq[id].m_flags = 1;
+                seq                = &s_xseq[id];
+                break;
+            }
+        }
+        if (id == 0x100)
+            strcpy(msg, "XSEQ slot is empty\n");
+    }
+    else if (id < 0x100)
+    {
+        if (!(s_xseq[id].m_flags & 1))
+        {
+            s_xseq[id].m_flags = 1;
+            seq                = &s_xseq[id];
+        }
+        else
+        {
+            sprintf(msg, "XSEQ ID '%d' is already exist\n", id);
+        }
+    }
+    else
+    {
+        sprintf(msg, "XSEQ ID '%d' is out of range\n", id);
+    }
+    EIntr();
+
+    if (seq == NULL)
+    {
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("%s", msg);
+        return -1;
+    }
+
+    u_int magic = rxSndReadU32(xseq);
+    if (magic == 0x51455358)            /* "XSEQ" */
+    {
+        int size = rxSndChunkGetFileSize(xseq);
+        if (iopAddr == 0)
+        {
+            iopAddr = rxSndIopAlloc(size);
+            if (iopAddr == 0)
+            {
+                if (rxSndGetDebugFlags() & 2)
+                    rxSysPrintf("rxsnd : can't allocate IOP heap size '%d'\n", size);
+                goto fail;
+            }
+            owned = 0x10000;
+        }
+
+        rxSndIopWrite(iopAddr, xseq, size);
+        u_int req[2];
+        req[0]  = id;
+        req[1]  = iopAddr;
+        int ret = (int)rxSndRpcCommand(0x60, NULL, 0, req, sizeof(req));
+        if (ret >= 0)
+        {
+            seq->m_iopSize  = size;
+            seq->m_iopBuf   = iopAddr;
+            seq->m_flags   |= owned;
+            return ret;
+        }
+        if (rxSndGetDebugFlags() & 2)
+            rxSysPrintf("rxsnd : failed to open XSEQ\n");
+    }
+    else if (rxSndGetDebugFlags() & 1)
+    {
+        rxSysPrintf("error : wrong type XSEQ ID '%c%c%c%c'\n", magic & 0xff, (magic >> 8) & 0xff,
+                    (magic >> 16) & 0xff, magic >> 24);
+    }
+
+fail:
+    seq->m_flags = 0;
+    if (owned != 0 && iopAddr != 0)
+        rxSndIopFree(iopAddr);
+    return -1;
+}
+
+// ROR 0x0023ad60
+int rxSndXseqFree(int id, int wait)
+{
+    if ((u_int)id >= 0x100)
+    {
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("rxsnd : out of range XSEQ ID '%d'\n", id);
+        return 0;
+    }
+
+    RxSndXseq *seq = &s_xseq[id];
+    if (!(seq->m_flags & 1))
+    {
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("rxsnd : specified XSEQ ID '%d' is unused\n", id);
+        return 0;
+    }
+
+    /* Command 0x61 answers 1 while a BGM still plays the sequence. */
+    u_int req[1];
+    req[0] = id;
+    while (rxSndRpcCommand(0x61, NULL, 0, req, sizeof(req)) == 1)
+    {
+        if (!wait)
+            return 1;
+        if (rxSndGetBufferBank() == 0)
+            rxSndUpdate();
+        for (int i = 9999; i >= 0; i--)
+            rxSndWait();
+    }
+
+    if ((seq->m_flags & 0x10000) && seq->m_iopBuf != 0)
+        rxSndIopFree(seq->m_iopBuf);
+    seq->m_flags = 0;
+    return 0;
+}
+
+// ROR 0x0023aeb0
+void rxSndXseqSetParam(int id, int a, int b)
+{
+    if ((u_int)id < 0x100)
+    {
+        if (s_xseq[id].m_flags & 1)
+        {
+            u_int req[3];
+
+            req[0] = id;
+            req[1] = a;
+            req[2] = b;
+            rxSndRpcCommand(0x63, NULL, 0, req, sizeof(req));
+            return;
+        }
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("rxsnd : specified XSEQ ID '%d' is unused\n", id);
+    }
+    else if (rxSndGetDebugFlags() & 1)
+    {
+        rxSysPrintf("rxsnd : out of range XSEQ ID '%d'\n", id);
+    }
+}
+
+// ROR 0x0023af70
+u_int rxSndXseqGetIopAddr(int id)
+{
+    if ((u_int)id < 0x100)
+    {
+        if (s_xseq[id].m_flags & 1)
+            return s_xseq[id].m_iopBuf;
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("rxsnd : specified XSEQ ID '%d' is unused\n", id);
+    }
+    else if (rxSndGetDebugFlags() & 1)
+    {
+        rxSysPrintf("rxsnd : out of range XSEQ ID '%d'\n", id);
+    }
+    return 0;
+}
+
+// ROR 0x0023b000
+int rxSndXseqGetFileSize(const void *xseq)
+{
+    return rxSndChunkGetFileSize(xseq);
 }
 
 // ROR 0x0023b018
@@ -1136,6 +1943,17 @@ const u_char *rxSndChunkFindData(const void *file, u_int tag)
     return data;
 }
 
+// ROR 0x0023b200
+int rxSndChunkGetSize(const void *file, u_int tag)
+{
+    const u_char *data;
+    int           size;
+
+    if (rxSndChunkFind(&data, &size, file, tag) == 0)
+        size = 0;
+    return size;
+}
+
 /* ---- BGM -------------------------------------------------------------- */
 
 // ROR 0x0023b238
@@ -1145,6 +1963,36 @@ void rxSndBgmSetMasterVolume(int volL, int volR)
     s_bgmMasterVolR = (short)rxSndClamp(volR, -0x80, 0x80);
     for (RxSndBgm *bgm = s_bgmActive; bgm != NULL; bgm = bgm->m_next)
         rxSndBgmSetVolume(bgm->m_id, bgm->m_volL, bgm->m_volR);
+}
+
+// ROR 0x0023b2d0
+int rxSndBgmPlay(int xseq, int volL, int volR, int keep)
+{
+    RxSndBgm *bgm = s_bgmFree;
+
+    if (bgm == NULL)
+    {
+        if (rxSndGetDebugFlags() & 4)
+            rxSysPrintf("rxsnd : can't allocate BGM slot ( BGM ID '%d' )\n", xseq);
+        return -1;
+    }
+
+    bgm->m_keep  = keep;
+    bgm->m_volL  = (short)volL;
+    bgm->m_volR  = (short)volR;
+    bgm->m_flags = 3;
+    s_bgmFree    = bgm->m_next;
+    bgm->m_next  = s_bgmActive;
+    s_bgmActive  = bgm;
+
+    rxSndQueueBegin(0x70, 0, 8);
+    u_int *cmd = (u_int *)rxSndQueueGetData();
+    cmd[1] = xseq;
+    cmd[0] = bgm->m_id;
+    rxSndQueueEnd();
+
+    rxSndBgmSetVolume(bgm->m_id, volL, volR);
+    return bgm->m_id;
 }
 
 // ROR 0x0023b3b8
@@ -1177,6 +2025,94 @@ void rxSndBgmStop(int id, int arg)
     s_bgmStopping = bgm;
 }
 
+// ROR 0x0023b498
+void rxSndBgmStopAll(int arg)
+{
+    for (int i = 0; i < 0x20; i++)
+        rxSndBgmStop(i, arg);
+}
+
+/* As rxSndSePause. */
+// ROR 0x0023b4e8
+void rxSndBgmPause(int id, int pause, int arg)
+{
+    if ((u_int)id >= 0x20 || !(s_bgm[id].m_flags & 1))
+        return;
+
+    rxSndQueueBegin(0x71, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_param = 1;
+    cmd->m_id    = s_bgm[id].m_id;
+    cmd->m_value = pause != 0 ? (arg != 0 ? 1 : 2) : 0;
+    rxSndQueueEnd();
+}
+
+// ROR 0x0023b5b0
+u_int rxSndBgmGetStatus(int id)
+{
+    if ((u_int)id >= 0x20 || !(s_bgm[id].m_flags & 1))
+        return 0;
+    return s_bgm[id].m_flags;
+}
+
+// ROR 0x0023b5e8
+u_int rxSndBgmGetValue(int id)
+{
+    if ((u_int)id >= 0x20 || !(s_bgm[id].m_flags & 1))
+        return 0;
+    return s_bgm[id].m_value;
+}
+
+static void rxSndBgmQueueChannelVolume(u_int cmdNo, int id, int channel, int volL, int volR)
+{
+    if ((u_int)id >= 0x20 || !(s_bgm[id].m_flags & 1))
+        return;
+
+    rxSndQueueBegin(cmdNo, 0, sizeof(RxSndCmdBgmChannelSet));
+    RxSndCmdBgmChannelSet *cmd = (RxSndCmdBgmChannelSet *)rxSndQueueGetData();
+    cmd->m_vol[1]  = (short)volR;
+    cmd->m_channel = (u_char)channel;
+    cmd->m_vol[0]  = (short)volL;
+    cmd->m_id      = (u_char)s_bgm[id].m_id;
+    cmd->m_param   = 3;
+    rxSndQueueEnd();
+}
+
+// callcheck: rxSndQueueBegin, rxSndQueueGetData, rxSndQueueEnd (through rxSndBgmQueueChannelVolume)
+// ROR 0x0023b628
+void rxSndBgmSetChannelVolume(int id, int channel, int volL, int volR)
+{
+    rxSndBgmQueueChannelVolume(0x73, id, channel, volL, volR);
+}
+
+// callcheck: rxSndQueueBegin, rxSndQueueGetData, rxSndQueueEnd (through rxSndBgmQueueChannelVolume)
+// ROR 0x0023b6e8
+void rxSndBgmSetChannelVolume74(int id, int channel, int volL, int volR)
+{
+    rxSndBgmQueueChannelVolume(0x74, id, channel, volL, volR);
+}
+
+/* Queued 0x71 {slot, param, value} for an open slot. */
+static void rxSndBgmQueueSet(int id, int param, int value)
+{
+    if ((u_int)id >= 0x20 || !(s_bgm[id].m_flags & 1))
+        return;
+
+    rxSndQueueBegin(0x71, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_value = value;
+    cmd->m_id    = s_bgm[id].m_id;
+    cmd->m_param = param;
+    rxSndQueueEnd();
+}
+
+// callcheck: rxSndQueueBegin, rxSndQueueGetData, rxSndQueueEnd (through rxSndBgmQueueSet)
+// ROR 0x0023b7a8
+void rxSndBgmSetAttr(int id, int value)
+{
+    rxSndBgmQueueSet(id, 2, value);
+}
+
 // ROR 0x0023b840
 void rxSndBgmSetVolume(int id, int volL, int volR)
 {
@@ -1200,6 +2136,27 @@ void rxSndBgmSetVolume(int id, int volL, int volR)
     cmd->m_id     = bgm->m_id;
     cmd->m_param  = 3;
     rxSndQueueEnd();
+}
+
+// callcheck: rxSndQueueBegin, rxSndQueueGetData, rxSndQueueEnd (through rxSndBgmQueueSet)
+// ROR 0x0023b990
+void rxSndBgmSetPitch(int id, float pitch)
+{
+    rxSndBgmQueueSet(id, 4, (int)(pitch * 4096.0f));
+}
+
+// callcheck: rxSndQueueBegin, rxSndQueueGetData, rxSndQueueEnd (through rxSndBgmQueueSet)
+// ROR 0x0023ba38
+void rxSndBgmSetParam5(int id, float value)
+{
+    rxSndBgmQueueSet(id, 5, (int)(value * 4096.0f));
+}
+
+// callcheck: rxSndQueueBegin, rxSndQueueGetData, rxSndQueueEnd (through rxSndBgmQueueSet)
+// ROR 0x0023bae0
+void rxSndBgmSetParam6(int id, int value)
+{
+    rxSndBgmQueueSet(id, 6, value);
 }
 
 // ROR 0x0023bb78
@@ -1294,6 +2251,18 @@ void rxSndSeSetMasterVolume(int volL, int volR)
         rxSndSeSetVolume(voice->m_id, voice->m_volL, voice->m_volR);
 }
 
+// ROR 0x0023be08
+void rxSndSeSetDefaultParamB(int value)
+{
+    s_seParamB = rxSndClamp(value, -1, 2);
+}
+
+// ROR 0x0023be38
+void rxSndSeSetDefaultParamC(int value)
+{
+    s_seParamC = rxSndClamp(value, -1, 0x7e);
+}
+
 // ROR 0x0023be68
 int rxSndSePlay(int xvab, int prog, int note, int volL, int volR, int keep)
 {
@@ -1307,6 +2276,42 @@ int rxSndSePlay(int xvab, int prog, int note, int volL, int volR, int keep)
     }
 
     rxSndQueueBegin(0x80, 0, sizeof(RxSndCmdSePlay));
+    RxSndCmdSePlay *cmd = (RxSndCmdSePlay *)rxSndQueueGetData();
+    cmd->m_note  = (u_char)note;
+    cmd->m_voice = (u_char)voice->m_id;
+    cmd->m_xvab  = (u_char)xvab;
+    cmd->m_prog  = (u_char)prog;
+    rxSndQueueEnd();
+
+    voice->m_flags = 3;
+    voice->m_keep  = keep;
+    voice->m_volL  = (short)volL;
+    voice->m_volR  = (short)volR;
+    s_seFree       = voice->m_next;
+    voice->m_next  = s_seActive;
+    s_seActive     = voice;
+
+    rxSndSeSetVolume(voice->m_id, volL, volR);
+    if (s_seParamB > 0)
+        rxSndSeSetParamB(voice->m_id, s_seParamB);
+    if (s_seParamC > 0)
+        rxSndSeSetParamC(voice->m_id, s_seParamC);
+    return voice->m_id;
+}
+
+// ROR 0x0023bfb0
+int rxSndSePlayEx(int xvab, int prog, int note, int volL, int volR, int keep)
+{
+    RxSndSeVoice *voice = s_seFree;
+
+    if (voice == NULL)
+    {
+        if (rxSndGetDebugFlags() & 4)
+            rxSysPrintf("rxsnd : can't allocate SE slot ( SE '%d, %d, %d' )\n", xvab, prog, note);
+        return -1;
+    }
+
+    rxSndQueueBegin(0x81, 0, sizeof(RxSndCmdSePlay));
     RxSndCmdSePlay *cmd = (RxSndCmdSePlay *)rxSndQueueGetData();
     cmd->m_note  = (u_char)note;
     cmd->m_voice = (u_char)voice->m_id;
@@ -1358,6 +2363,13 @@ void rxSndSeStop(int id, int arg)
     *link          = voice->m_next;
     voice->m_next  = s_seStopping;
     s_seStopping   = voice;
+}
+
+// ROR 0x0023c1d8
+void rxSndSeStopAll(int arg)
+{
+    for (int i = 0; i < 0x40; i++)
+        rxSndSeStop(i, arg);
 }
 
 // ROR 0x0023c228
@@ -1437,6 +2449,20 @@ void rxSndSeSetPitch(int id, float pitch)
     rxSndQueueEnd();
 }
 
+// ROR 0x0023c5b8
+void rxSndSeSetParam5(int id, float value)
+{
+    if ((u_int)id >= 0x40 || !(s_se[id].m_flags & 1))
+        return;
+
+    rxSndQueueBegin(0x82, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_value = (int)(value * 4096.0f);
+    cmd->m_id    = s_se[id].m_id;
+    cmd->m_param = 5;
+    rxSndQueueEnd();
+}
+
 // ROR 0x0023c660
 void rxSndSeSetParam(int id, int param, int value)
 {
@@ -1449,6 +2475,36 @@ void rxSndSeSetParam(int id, int param, int value)
     cmd->m_param = param;
     cmd->m_id    = s_se[id].m_id;
     rxSndQueueEnd();
+}
+
+// ROR 0x0023c700
+void rxSndSeSetParam6(int id, int value)
+{
+    rxSndSeSetParam(id, 6, rxSndClamp(value, 0, 0x80));
+}
+
+// ROR 0x0023c740
+void rxSndSeSetParam7(int id, int value)
+{
+    rxSndSeSetParam(id, 7, rxSndClamp(value, 0, 0x80));
+}
+
+// ROR 0x0023c780
+void rxSndSeSetParam8(int id, int value)
+{
+    rxSndSeSetParam(id, 8, rxSndClamp(value, 0, 0x80));
+}
+
+// ROR 0x0023c7c0
+void rxSndSeSetParam9(int id, int value)
+{
+    rxSndSeSetParam(id, 9, rxSndClamp(value, 0, 0x80));
+}
+
+// ROR 0x0023c800
+void rxSndSeSetPan(int id, float pan)
+{
+    rxSndSeSetParam(id, 10, rxSndClamp((int)((pan + 1.0f) * 128.0f), 0, 0xff));
 }
 
 // ROR 0x0023c860

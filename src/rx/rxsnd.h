@@ -66,6 +66,20 @@ static_assert(offsetof(RxSndCmdChannelSet, m_channel) == 0x2, "RxSndCmdChannelSe
 static_assert(offsetof(RxSndCmdChannelSet, m_param) == 0x4, "RxSndCmdChannelSet::m_param");
 static_assert(offsetof(RxSndCmdChannelSet, m_vol) == 0x8, "RxSndCmdChannelSet::m_vol");
 
+/* Commands 0x73 / 0x74: one channel's parameter of a BGM slot. EE 0xc. */
+struct RxSndCmdBgmChannelSet
+{
+    u_char m_id;                        // ROR +0x0
+    u_char m_channel;                   // ROR +0x1
+    u_char _2[2];
+    int    m_param;                     // ROR +0x4: 3 volume
+    short  m_vol[2];                    // ROR +0x8: L, R
+};
+static_assert(sizeof(RxSndCmdBgmChannelSet) == 0xc, "RxSndCmdBgmChannelSet");
+static_assert(offsetof(RxSndCmdBgmChannelSet, m_channel) == 0x1, "RxSndCmdBgmChannelSet::m_channel");
+static_assert(offsetof(RxSndCmdBgmChannelSet, m_param) == 0x4, "RxSndCmdBgmChannelSet::m_param");
+static_assert(offsetof(RxSndCmdBgmChannelSet, m_vol) == 0x8, "RxSndCmdBgmChannelSet::m_vol");
+
 /* Command 0x40: an EE -> SPU transfer. EE 0x10. */
 struct RxSndCmdTransfer
 {
@@ -227,10 +241,11 @@ static_assert(sizeof(RxSndConfig) == 0x8, "RxSndConfig");
 static_assert(offsetof(RxSndConfig, m_masterVolL) == 0x4, "RxSndConfig::m_masterVolL");
 static_assert(offsetof(RxSndConfig, m_masterVolR) == 0x6, "RxSndConfig::m_masterVolR");
 
-/* bss 0x7b6b00: two IOP buffers taken at init. EE 0x80. */
+/* bss 0x7b6b00: the bounce buffers of the unaligned EE <-> IOP copies, one
+ * per buffer bank: EE ones (rxSndIopRead) and two IOP ones taken at init. EE 0x80. */
 struct RxSndIopBuf
 {
-    u_int _0[0x10];
+    u_char m_eeBuf[2][0x20];            // ROR +0x0: EE side, rxSndIopRead's bounce
     u_int m_buf[2];                     // ROR +0x40: IOP address, one per buffer bank (rxSndIopWrite's bounce)
     u_int _48[0xe];
 };
@@ -296,6 +311,17 @@ static_assert(offsetof(RxSndXvab, m_iopSize) == 0x8, "RxSndXvab::m_iopSize");
 static_assert(offsetof(RxSndXvab, m_spuBuf) == 0xc, "RxSndXvab::m_spuBuf");
 static_assert(offsetof(RxSndXvab, m_spuSize) == 0x10, "RxSndXvab::m_spuSize");
 static_assert(offsetof(RxSndXvab, m_transfer) == 0x14, "RxSndXvab::m_transfer");
+
+/* An XSEQ sequence (bss 0x7bafc0, 256 of them; filled by rxSndXseqLoad). EE 0xc. */
+struct RxSndXseq
+{
+    u_int m_flags;                      // ROR +0x0: bit 0 used, 0x10000 m_iopBuf is ours
+    u_int m_iopBuf;                     // ROR +0x4: IOP address of the file
+    int   m_iopSize;                    // ROR +0x8
+};
+static_assert(sizeof(RxSndXseq) == 0xc, "RxSndXseq");
+static_assert(offsetof(RxSndXseq, m_iopBuf) == 0x4, "RxSndXseq::m_iopBuf");
+static_assert(offsetof(RxSndXseq, m_iopSize) == 0x8, "RxSndXseq::m_iopSize");
 
 /* A BGM slot (bss 0x7bbbc0, 32). layout: host -- next pointer. EE 0x18. */
 struct RxSndBgm
@@ -402,8 +428,21 @@ void  rxSndSetOutputMode(int mode);                                      // ROR 
 /* Stores the flags (command 0x30 {0, flags} tells the IOP); the old ones back. */
 u_char rxSndSetDebugFlags(int flags);                                   // ROR 0x00237fe0
 u_char rxSndGetDebugFlags(void);                                         // ROR 0x00238038
+/* Command 0x30 {1, rate}: 50 passes, anything else sends 60. */
+void  rxSndSetFrameRate(int rate);                                       // ROR 0x00238048
+/* Command 0x30 {3 + kind, value} for kind 0..2 (meaning not known). */
+void  rxSndSetSysParam(int kind, int value);                             // ROR 0x002380a0
+/* Queued command 0x31 {id, 1, L, R}. */
+void  rxSndSetSysVolume(int id, int volL, int volR);                     // ROR 0x00238120
 void  rxSndSetMasterVolume(int volL, int volR);                          // ROR 0x00238188
 int   rxSndSetBufferBank(int bank);                                      // ROR 0x00238268
+/* Commands 0x90 / 0x93 / 0x92: 48 words, one per SPU2 voice; 0x91 sets one. */
+void  rxSndGetVoiceTable(u_int *out);                                    // ROR 0x002382a0
+void  rxSndGetVoiceTableEx(int arg, u_int *out);                         // ROR 0x00238300
+void  rxSndSetVoiceEntry(u_int voice, int value);                        // ROR 0x00238360
+void  rxSndGetVoiceTable2(u_int *out);                                   // ROR 0x002383a8
+/* The pitch ratio of `cents` (clamped to +-4800): 2^(cents / 1200) by table. */
+float rxSndCentToPitch(int cents);                                       // ROR 0x00238408
 void  rxSndInitConfig(void);                                             // ROR 0x00238478
 void  rxSndTermConfig(void);                                             // ROR 0x002384a8
 int   rxSndGetBufferBank(void);                                          // ROR 0x002384b8
@@ -413,9 +452,13 @@ void *rxSndGetWorkBuffer(void);                                          // ROR 
 void  rxSndWait(void);                                                   // ROR 0x002384f8
 void  rxSndSetBgCallHook(RxSndBgCallHook hook);                          // ROR 0x00238500
 void  rxSndCallBgCallHook(const char *func);                             // ROR 0x00238510
+void  rxSndMemMove(void *dst, const void *src, int size);              // ROR 0x00238538
 u_int rxSndDefIopAlloc(int size);                                        // ROR 0x002385b8
 u_int rxSndDefIopAllocMode1(int size);                                   // ROR 0x00238630
 void  rxSndDefIopFree(u_int addr);                                       // ROR 0x002386b0
+void  rxSndSetIopAllocHook(RxSndAllocFunc func);                         // ROR 0x002386e0
+void  rxSndSetIopAllocMode1Hook(RxSndAllocFunc func);                    // ROR 0x00238700
+void  rxSndSetIopFreeHook(RxSndFreeFunc func);                           // ROR 0x00238720
 u_int rxSndIopAlloc(int size);                                           // ROR 0x00238740
 u_int rxSndIopAllocMode1(int size);                                      // ROR 0x00238768
 void  rxSndIopFree(u_int addr);                                          // ROR 0x00238790
@@ -423,9 +466,25 @@ void  rxSndIopFree(u_int addr);                                          // ROR 
  * when everything is 16-byte aligned, else the unaligned head and tail go
  * through a bounce buffer and IOP command 0x23. Returns 1. */
 int   rxSndIopWrite(u_int iopAddr, const void *src, int size);           // ROR 0x002387b8
+/* IOP address `iopAddr` -> EE `dst`, the mirror of rxSndIopWrite. Returns 1. */
+int   rxSndIopRead(void *dst, u_int iopAddr, int size);                  // ROR 0x002389c8
+/* Writes the work buffer to `iopAddr` in 0x1000-byte chunks until `size`
+ * bytes went (the ROM never advances the address). Returns 1. */
+int   rxSndIopWriteWorkBuffer(u_int iopAddr, int size);                  // ROR 0x00238bb0
+/* rxSndIopAlloc + rxSndIopWrite; the IOP address, 0 when the heap is full. */
+u_int rxSndIopAllocWrite(const void *src, int size);                     // ROR 0x00238c28
+void  rxSndIopHeapCmd1(void);                                            // ROR 0x00238c80
+void  rxSndIopHeapCmd2(void);                                            // ROR 0x00238cb8
 void  rxSndIopCopy(u_int dst, u_int src, int size);                      // ROR 0x00238cf0
 void  rxSndIopBufInit(void);                                             // ROR 0x00238d28
 void  rxSndIopBufTerm(void);                                             // ROR 0x00238d78
+/* Defines SPU slot `id` (-1: the first unused) over [addr, addr + size)
+ * inside the heap; the id, -1 when out of range. */
+int   rxSndSpuHeapSetSlot(int id, u_int addr, u_int size);               // ROR 0x00238dc8
+void  rxSndSpuHeapReleaseSlot(u_int id);                                 // ROR 0x00238f00
+/* The slot the current buffer bank allocates from (-1: the whole heap). */
+int   rxSndSpuHeapSetBankSlot(int slot);                                 // ROR 0x00238f58
+int   rxSndSpuHeapGetBankSlot(void);                                     // ROR 0x00238fb8
 u_int rxSndDefSpuAlloc(int size);                                        // ROR 0x00238ff0
 u_int rxSndDefSpuAllocMode1(int size);                                   // ROR 0x00239010
 void  rxSndDefSpuFree(u_int addr);                                       // ROR 0x00239030
@@ -438,9 +497,16 @@ void  rxSndSpuFree(u_int addr);                                          // ROR 
 /* Command 0x40: starts sending `size` bytes of EE memory to SPU address
  * `spuAddr`; the handle for rxSndXvabPoll, negative while the IOP is busy. */
 int   rxSndSpuTransfer(u_int spuAddr, const void *src, int size);        // ROR 0x00239120
+/* Command 0x40 with the other transfer types (directions not known). */
+void  rxSndSpuTransferType4(u_int a, u_int b, int size);                 // ROR 0x00239168
+void  rxSndSpuTransferType1(u_int a, u_int b, int size);                 // ROR 0x002391b0
+void  rxSndSpuTransferType2(u_int a, u_int b, int size);                 // ROR 0x002391f8
+void  rxSndSpuTransferType5(u_int a, int size);                          // ROR 0x00239240
 /* Asks the IOP whether XVAB transfer `handle` is still running (command
  * 0x41); wait != 0 polls until it is done. */
 int   rxSndXvabPoll(int handle, int wait);                               // ROR 0x00239288
+u_int rxSndSpuHeapGetFreeSize(void);                                     // ROR 0x00239320
+u_int rxSndSpuHeapGetMaxFreeBlock(void);                                 // ROR 0x00239330
 void  rxSndSpuHeapInit(void);                                            // ROR 0x00239380
 void  rxSndSpuHeapTerm(void);                                            // ROR 0x002394a0
 RxSndSpuSlot *rxSndSpuHeapGetSlot(u_int id);                             // ROR 0x002394a8
@@ -449,12 +515,40 @@ RxSndSpuSlot *rxSndSpuHeapGetSlot(u_int id);                             // ROR 
  * address, 0 when it does not fit. */
 u_int rxSndSpuHeapAlloc(int mode, u_int addr, int size);                 // ROR 0x002394e0
 void  rxSndSpuHeapFree(u_int addr);                                      // ROR 0x002398f8
+/* Frees every block allocated in slot `id`. */
+void  rxSndSpuHeapFreeSlot(u_int id);                                    // ROR 0x00239af8
 RxSndSpuNode *rxSndSpuHeapNewNode(void);                                 // ROR 0x00239be8
 void  rxSndSpuHeapFreeNode(RxSndSpuNode *node);                          // ROR 0x00239c10
+void  rxSndSpuHeapPrintStatus(void);                                     // ROR 0x00239c30
+/* Queued command 0x32 {core, attribute, value}: the SPU2 cores' effect
+ * (mode 0..9 as libsd's reverb modes, depth L / R, delay, feedback). */
+void  rxSndSetEffectModeCore(int core, int mode);                        // ROR 0x00239e58
+void  rxSndSetEffectDepthCore(int core, int depthL, int depthR);         // ROR 0x00239ef8
+void  rxSndSetEffectDelayCore(int core, int delay);                      // ROR 0x00239f80
+void  rxSndSetEffectFeedbackCore(int core, int feedback);                // ROR 0x0023a000
+void  rxSndSetEffectMode(int mode);                                      // ROR 0x0023a080
+void  rxSndSetEffectDepth(int depthL, int depthR);                       // ROR 0x0023a0b8
+void  rxSndSetEffectDelay(int delay);                                    // ROR 0x0023a100
+void  rxSndSetEffectFeedback(int feedback);                              // ROR 0x0023a138
 void  rxSndXvabInit(void);                                               // ROR 0x0023a170
 void  rxSndXvabTerm(void);                                               // ROR 0x0023a178
+/* A MIDI variable-length number at *p (7 bits a byte, 0x80 continues). */
+u_int rxSndReadVarLen(const u_char **p);                                 // ROR 0x0023a180
 /* The bank's SPU samples: 1 and their address / size, or 0 when it has none. */
 int   rxSndXvabGetSampleData(const u_char **data, int *size, const void *xvab); // ROR 0x0023a930
+u_int rxSndXvabGetIopAddr(int id);                                       // ROR 0x0023a7f0
+u_int rxSndXvabGetSpuAddr(int id);                                       // ROR 0x0023a880
+int   rxSndXvabGetFileSize(const void *xvab);                            // ROR 0x0023a918
+const u_char *rxSndXvabGetSampleAddr(const void *xvab);                  // ROR 0x0023aa08
+int   rxSndXvabGetSampleSize(const void *xvab);                          // ROR 0x0023aa38
+/* XSEQ sequences: Load as rxSndXvabLoad (no SPU part; command 0x60), the id
+ * or -1; Free as rxSndXvabFree (command 0x61). */
+int   rxSndXseqLoad(int id, const void *xseq, u_int iopAddr);            // ROR 0x0023aa68
+int   rxSndXseqFree(int id, int wait);                                   // ROR 0x0023ad60
+/* Command 0x63 {id, a, b} (meaning not known). */
+void  rxSndXseqSetParam(int id, int a, int b);                           // ROR 0x0023aeb0
+u_int rxSndXseqGetIopAddr(int id);                                       // ROR 0x0023af70
+int   rxSndXseqGetFileSize(const void *xseq);                            // ROR 0x0023b000
 void  rxSndXseqInit(void);                                               // ROR 0x0023b018
 void  rxSndXseqTerm(void);                                               // ROR 0x0023b020
 u_int rxSndReadU32(const void *p);                                       // ROR 0x0023b028
@@ -464,15 +558,33 @@ u_int rxSndChunkGetVersion(const void *file);                            // ROR 
 int   rxSndChunkGetFileSize(const void *file);                           // ROR 0x0023b038
 int   rxSndChunkFind(const u_char **data, int *size, const void *file, u_int tag); // ROR 0x0023b078
 const u_char *rxSndChunkFindData(const void *file, u_int tag);           // ROR 0x0023b1c8
+int   rxSndChunkGetSize(const void *file, u_int tag);                    // ROR 0x0023b200
 void  rxSndBgmSetMasterVolume(int volL, int volR);                       // ROR 0x0023b238
+/* Plays XSEQ `xseq` on a free BGM slot (command 0x70); the slot, -1 when
+ * all 32 are taken. keep as rxSndSePlay. */
+int   rxSndBgmPlay(int xseq, int volL, int volR, int keep);              // ROR 0x0023b2d0
 void  rxSndBgmStop(int bgm, int arg);                                    // ROR 0x0023b3b8
+void  rxSndBgmStopAll(int arg);                                          // ROR 0x0023b498
+void  rxSndBgmPause(int bgm, int pause, int arg);                        // ROR 0x0023b4e8
+u_int rxSndBgmGetStatus(int bgm);                                        // ROR 0x0023b5b0
+u_int rxSndBgmGetValue(int bgm);                                         // ROR 0x0023b5e8
+/* Queued commands 0x73 / 0x74 {slot, channel, 3, L, R}: raw volumes. */
+void  rxSndBgmSetChannelVolume(int bgm, int channel, int volL, int volR);   // ROR 0x0023b628
+void  rxSndBgmSetChannelVolume74(int bgm, int channel, int volL, int volR); // ROR 0x0023b6e8
+void  rxSndBgmSetAttr(int bgm, int value);                               // ROR 0x0023b7a8
 void  rxSndBgmSetVolume(int bgm, int volL, int volR);                    // ROR 0x0023b840
+void  rxSndBgmSetPitch(int bgm, float pitch);                            // ROR 0x0023b990
+void  rxSndBgmSetParam5(int bgm, float value);                           // ROR 0x0023ba38
+void  rxSndBgmSetParam6(int bgm, int value);                             // ROR 0x0023bae0
 void  rxSndBgmInit(void);                                                // ROR 0x0023bb78
 void  rxSndBgmTerm(void);                                                // ROR 0x0023bbd0
 void  rxSndBgmUpdate(const RxSndBgmStatus *status);                      // ROR 0x0023bbd8
 short rxSndBgmGetMasterVolumeL(void);                                    // ROR 0x0023bd50
 short rxSndBgmGetMasterVolumeR(void);                                    // ROR 0x0023bd60
 void  rxSndSeSetMasterVolume(int volL, int volR);                        // ROR 0x0023bd70
+/* rxSndSePlay's parameters 0xb / 0xc for every voice it starts (-1 none). */
+void  rxSndSeSetDefaultParamB(int value);                                // ROR 0x0023be08
+void  rxSndSeSetDefaultParamC(int value);                                // ROR 0x0023be38
 void  rxSndSeInit(void);                                                 // ROR 0x0023c910
 void  rxSndSeTerm(void);                                                 // ROR 0x0023c970
 void  rxSndSeUpdate(const RxSndSeStatus *status);                        // ROR 0x0023c978
@@ -531,17 +643,28 @@ int   rxSndXvabCheck(int id, int wait);                                  // ROR 
  * Play returns the voice, -1 when all 64 are taken; keep != 0 leaves an
  * ended voice open for its owner to stop. */
 int   rxSndSePlay(int xvab, int prog, int note, int volL, int volR, int keep); // ROR 0x0023be68
+/* rxSndSePlay with command 0x81. */
+int   rxSndSePlayEx(int xvab, int prog, int note, int volL, int volR, int keep); // ROR 0x0023bfb0
 void  rxSndSeStop(int voice, int arg);                                   // ROR 0x0023c0f8
+void  rxSndSeStopAll(int arg);                                           // ROR 0x0023c1d8
 u_int rxSndSeGetStatus(int voice);                                       // ROR 0x0023c228
 void  rxSndSePause(int voice, int pause, int arg);                       // ROR 0x0023c260
 /* Queued command 0x82 {voice, param, value}. */
 void  rxSndSeSetParam(int voice, int param, int value);                  // ROR 0x0023c660
+/* Parameters 6..9, 0..0x80. */
+void  rxSndSeSetParam6(int voice, int value);                            // ROR 0x0023c700
+void  rxSndSeSetParam7(int voice, int value);                            // ROR 0x0023c740
+void  rxSndSeSetParam8(int voice, int value);                            // ROR 0x0023c780
+void  rxSndSeSetParam9(int voice, int value);                            // ROR 0x0023c7c0
+/* Parameter 10: pan -1..1 as 0..255. */
+void  rxSndSeSetPan(int voice, float pan);                               // ROR 0x0023c800
 void  rxSndSeSetParamB(int voice, int value);                            // ROR 0x0023c860
 void  rxSndSeSetParamC(int voice, int value);                            // ROR 0x0023c8b8
 /* IOP command 0x82, parameter 2 (pan or an effect level: not known). */
 void  rxSndSeSetAttr(int voice, int value);                              // ROR 0x0023c328
 void  rxSndSeSetVolume(int voice, int volL, int volR);                   // ROR 0x0023c3c0
 void  rxSndSeSetPitch(int voice, float pitch);                           // ROR 0x0023c510
+void  rxSndSeSetParam5(int voice, float value);                          // ROR 0x0023c5b8
 
 /* ADPCM streams fed from memory. Status: bit 0 open, bit 2 ended, bit 3
  * paused. GetFree: the bytes Write can take now. */

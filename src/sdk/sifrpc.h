@@ -62,6 +62,20 @@ int sceSifCallRpc(sceSifClientData *bd, unsigned int fno, unsigned int mode,
                   void *send, int ssize, void *receive, int rsize,
                   sceSifEndFunc func, void *para);
 
+/* sceSifGetOtherData()'s scratch descriptor. */
+typedef struct _sif_receive_data    /* 0x1c */
+{
+    /* 0x00 */ sceSifRpcData rpcd;
+    /* 0x10 */ void         *src;
+    /* 0x14 */ void         *dest;
+    /* 0x18 */ int           size;
+} sceSifReceiveData;
+
+/* Copy `size` bytes of IOP memory at `src` to EE `dest`; < 0 while the SIF
+ * is busy (callers retry). */
+int sceSifGetOtherData(sceSifReceiveData *rd, void *src, void *dest, int size,
+                       unsigned int mode);
+
 #ifdef __cplusplus
 }
 #endif

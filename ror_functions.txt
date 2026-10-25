@@ -5423,14 +5423,16 @@
 /* 00237f90 0000004c */ rxSndSetOutputMode(){}  // ror
 /* 00237fe0 00000054 */ rxSndSetDebugFlags(){}  // lib-ctx
 /* 00238038 0000000c */ rxSndGetDebugFlags(){}  // ror
-/* 00238048 00000054 */ FUN_00238048(){}
-/* 002380a0 00000080 */ FUN_002380a0(){}
-/* 00238120 00000064 */ FUN_00238120(){}
+/* 00238048 00000054 */ rxSndSetFrameRate(){}  // lib-ctx
+/* 002380a0 00000080 */ rxSndSetSysParam(){}  // lib-ctx
+/* 00238120 00000064 */ rxSndSetSysVolume(){}  // lib-ctx
 /* 00238188 000000e0 */ rxSndSetMasterVolume(){}  // lib-ctx
 /* 00238268 00000034 */ rxSndSetBufferBank(){}  // ror
-/* 002382a0 00000060 */ FUN_002382a0(){}
-/* 00238300 000000a4 */ FUN_00238300(){}
-/* 002383a8 000000cc */ FUN_002383a8(){}
+/* 002382a0 00000060 */ rxSndGetVoiceTable(){}  // lib-ctx
+/* 00238300 00000060 */ rxSndGetVoiceTableEx(){}  // lib-ctx
+/* 00238360 00000044 */ rxSndSetVoiceEntry(){}  // lib-ctx
+/* 002383a8 00000060 */ rxSndGetVoiceTable2(){}  // lib-ctx
+/* 00238408 0000006c */ rxSndCentToPitch(){}  // lib-ctx
 /* 00238478 00000030 */ rxSndInitConfig(){}  // ror
 /* 002384a8 0000000c */ rxSndTermConfig(){}  // ror
 /* 002384b8 0000000c */ rxSndGetBufferBank(){}  // ror
@@ -5440,26 +5442,29 @@
 /* 002384f8 00000004 */ rxSndWait(){}  // ror
 /* 00238500 0000000c */ rxSndSetBgCallHook(){}  // ror
 /* 00238510 00000028 */ rxSndCallBgCallHook(){}  // ror
-/* 00238538 00000078 */ FUN_00238538(){}
+/* 00238538 00000078 */ rxSndMemMove(){}  // lib-ctx
 /* 002385b8 00000078 */ rxSndDefIopAlloc(){}  // ror
 /* 00238630 0000007c */ rxSndDefIopAllocMode1(){}  // ror
-/* 002386b0 0000008c */ rxSndDefIopFree(){}  // ror
+/* 002386b0 00000030 */ rxSndDefIopFree(){}  // ror
+/* 002386e0 0000001c */ rxSndSetIopAllocHook(){}  // lib-ctx
+/* 00238700 0000001c */ rxSndSetIopAllocMode1Hook(){}  // lib-ctx
+/* 00238720 0000001c */ rxSndSetIopFreeHook(){}  // lib-ctx
 /* 00238740 00000024 */ rxSndIopAlloc(){}  // ror
 /* 00238768 00000024 */ rxSndIopAllocMode1(){}  // ror
 /* 00238790 00000024 */ rxSndIopFree(){}  // ror
 /* 002387b8 00000210 */ rxSndIopWrite(){}  // lib-ctx
-/* 002389c8 000001e8 */ FUN_002389c8(){}
-/* 00238bb0 00000078 */ FUN_00238bb0(){}
-/* 00238c28 00000058 */ FUN_00238c28(){}
-/* 00238c80 00000034 */ FUN_00238c80(){}
-/* 00238cb8 00000034 */ FUN_00238cb8(){}
+/* 002389c8 000001e8 */ rxSndIopRead(){}  // lib-ctx
+/* 00238bb0 00000078 */ rxSndIopWriteWorkBuffer(){}  // lib-ctx
+/* 00238c28 00000058 */ rxSndIopAllocWrite(){}  // lib-ctx
+/* 00238c80 00000034 */ rxSndIopHeapCmd1(){}  // lib-ctx
+/* 00238cb8 00000034 */ rxSndIopHeapCmd2(){}  // lib-ctx
 /* 00238cf0 00000038 */ rxSndIopCopy(){}  // lib-ctx
 /* 00238d28 0000004c */ rxSndIopBufInit(){}  // ror
 /* 00238d78 0000004c */ rxSndIopBufTerm(){}  // ror
-/* 00238dc8 00000138 */ FUN_00238dc8(){}
-/* 00238f00 00000058 */ FUN_00238f00(){}
-/* 00238f58 00000060 */ FUN_00238f58(){}
-/* 00238fb8 00000034 */ FUN_00238fb8(){}
+/* 00238dc8 00000138 */ rxSndSpuHeapSetSlot(){}  // lib-ctx
+/* 00238f00 00000058 */ rxSndSpuHeapReleaseSlot(){}  // lib-ctx
+/* 00238f58 00000060 */ rxSndSpuHeapSetBankSlot(){}  // lib-ctx
+/* 00238fb8 00000034 */ rxSndSpuHeapGetBankSlot(){}  // lib-ctx
 /* 00238ff0 00000020 */ rxSndDefSpuAlloc(){}  // ror
 /* 00239010 00000020 */ rxSndDefSpuAllocMode1(){}  // ror
 /* 00239030 00000014 */ rxSndDefSpuFree(){}  // ror
@@ -5470,42 +5475,47 @@
 /* 002390d0 00000024 */ rxSndSpuAllocMode1(){}  // ror
 /* 002390f8 00000024 */ rxSndSpuFree(){}  // ror
 /* 00239120 00000048 */ rxSndSpuTransfer(){}  // lib-ctx
-/* 00239168 00000048 */ FUN_00239168(){}
-/* 002391b0 00000044 */ FUN_002391b0(){}
-/* 002391f8 00000048 */ FUN_002391f8(){}
-/* 00239240 00000048 */ FUN_00239240(){}
-/* 00239288 000000f4 */ rxSndXvabPoll(){}  // ror
+/* 00239168 00000048 */ rxSndSpuTransferType4(){}  // lib-ctx
+/* 002391b0 00000044 */ rxSndSpuTransferType1(){}  // lib-ctx
+/* 002391f8 00000048 */ rxSndSpuTransferType2(){}  // lib-ctx
+/* 00239240 00000048 */ rxSndSpuTransferType5(){}  // lib-ctx
+/* 00239288 00000098 */ rxSndXvabPoll(){}  // ror
+/* 00239320 0000000c */ rxSndSpuHeapGetFreeSize(){}  // lib-ctx
+/* 00239330 0000004c */ rxSndSpuHeapGetMaxFreeBlock(){}  // lib-ctx
 /* 00239380 0000011c */ rxSndSpuHeapInit(){}  // ror
 /* 002394a0 00000004 */ rxSndSpuHeapTerm(){}  // ror
 /* 002394a8 00000034 */ rxSndSpuHeapGetSlot(){}  // lib-ctx
 /* 002394e0 00000418 */ rxSndSpuHeapAlloc(){}  // ror
 /* 002398f8 000001fc */ rxSndSpuHeapFree(){}  // ror
-/* 00239af8 000000ec */ FUN_00239af8(){}
+/* 00239af8 000000ec */ rxSndSpuHeapFreeSlot(){}  // lib-ctx
 /* 00239be8 00000028 */ rxSndSpuHeapNewNode(){}  // ror
 /* 00239c10 0000001c */ rxSndSpuHeapFreeNode(){}  // lib-ctx
-/* 00239c30 00000228 */ FUN_00239c30(){}
-/* 00239e58 0000009c */ FUN_00239e58(){}
-/* 00239ef8 00000088 */ FUN_00239ef8(){}
-/* 00239f80 000000fc */ FUN_00239f80(){}
-/* 0023a080 00000034 */ FUN_0023a080(){}
-/* 0023a0b8 00000048 */ FUN_0023a0b8(){}
-/* 0023a100 0000006c */ FUN_0023a100(){}
+/* 00239c30 00000228 */ rxSndSpuHeapPrintStatus(){}  // lib-ctx
+/* 00239e58 0000009c */ rxSndSetEffectModeCore(){}  // lib-ctx
+/* 00239ef8 00000088 */ rxSndSetEffectDepthCore(){}  // lib-ctx
+/* 00239f80 0000007c */ rxSndSetEffectDelayCore(){}  // lib-ctx
+/* 0023a000 0000007c */ rxSndSetEffectFeedbackCore(){}  // lib-ctx
+/* 0023a080 00000034 */ rxSndSetEffectMode(){}  // lib-ctx
+/* 0023a0b8 00000048 */ rxSndSetEffectDepth(){}  // lib-ctx
+/* 0023a100 00000034 */ rxSndSetEffectDelay(){}  // lib-ctx
+/* 0023a138 00000034 */ rxSndSetEffectFeedback(){}  // lib-ctx
 /* 0023a170 00000004 */ rxSndXvabInit(){}  // ror
-/* 0023a178 00000040 */ rxSndXvabTerm(){}  // ror
+/* 0023a178 00000004 */ rxSndXvabTerm(){}  // ror
+/* 0023a180 00000038 */ rxSndReadVarLen(){}  // lib-ctx
 /* 0023a1b8 000003ec */ rxSndXvabLoad(){}  // lib-ctx
 /* 0023a5a8 00000178 */ rxSndXvabFree(){}  // lib-ctx
 /* 0023a720 000000cc */ rxSndXvabCheck(){}  // lib-ctx
-/* 0023a7f0 00000090 */ FUN_0023a7f0(){}
-/* 0023a880 00000098 */ FUN_0023a880(){}
-/* 0023a918 00000014 */ FUN_0023a918(){}
+/* 0023a7f0 00000090 */ rxSndXvabGetIopAddr(){}  // lib-ctx
+/* 0023a880 00000098 */ rxSndXvabGetSpuAddr(){}  // lib-ctx
+/* 0023a918 00000014 */ rxSndXvabGetFileSize(){}  // lib-ctx
 /* 0023a930 000000d8 */ rxSndXvabGetSampleData(){}  // lib-ctx
-/* 0023aa08 00000030 */ FUN_0023aa08(){}
-/* 0023aa38 00000030 */ FUN_0023aa38(){}
-/* 0023aa68 000002f8 */ FUN_0023aa68(){}
-/* 0023ad60 00000150 */ FUN_0023ad60(){}
-/* 0023aeb0 000000c0 */ FUN_0023aeb0(){}
-/* 0023af70 00000090 */ FUN_0023af70(){}
-/* 0023b000 00000014 */ FUN_0023b000(){}
+/* 0023aa08 00000030 */ rxSndXvabGetSampleAddr(){}  // lib-ctx
+/* 0023aa38 00000030 */ rxSndXvabGetSampleSize(){}  // lib-ctx
+/* 0023aa68 000002f8 */ rxSndXseqLoad(){}  // lib-ctx
+/* 0023ad60 00000150 */ rxSndXseqFree(){}  // lib-ctx
+/* 0023aeb0 000000c0 */ rxSndXseqSetParam(){}  // lib-ctx
+/* 0023af70 00000090 */ rxSndXseqGetIopAddr(){}  // lib-ctx
+/* 0023b000 00000014 */ rxSndXseqGetFileSize(){}  // lib-ctx
 /* 0023b018 00000004 */ rxSndXseqInit(){}  // ror
 /* 0023b020 00000004 */ rxSndXseqTerm(){}  // ror
 /* 0023b028 00000008 */ rxSndReadU32(){}  // ror
@@ -5513,33 +5523,45 @@
 /* 0023b038 0000003c */ rxSndChunkGetFileSize(){}  // lib-ctx
 /* 0023b078 00000150 */ rxSndChunkFind(){}  // lib-ctx
 /* 0023b1c8 00000034 */ rxSndChunkFindData(){}  // lib-ctx
-/* 0023b200 00000034 */ FUN_0023b200(){}
+/* 0023b200 00000034 */ rxSndChunkGetSize(){}  // lib-ctx
 /* 0023b238 00000098 */ rxSndBgmSetMasterVolume(){}  // ror
-/* 0023b2d0 000000e4 */ FUN_0023b2d0(){}
+/* 0023b2d0 000000e4 */ rxSndBgmPlay(){}  // lib-ctx
 /* 0023b3b8 000000dc */ rxSndBgmStop(){}  // ror
-/* 0023b498 0000030c */ FUN_0023b498(){}
-/* 0023b7a8 00000094 */ FUN_0023b7a8(){}
+/* 0023b498 0000004c */ rxSndBgmStopAll(){}  // lib-ctx
+/* 0023b4e8 000000c8 */ rxSndBgmPause(){}  // lib-ctx
+/* 0023b5b0 00000034 */ rxSndBgmGetStatus(){}  // lib-ctx
+/* 0023b5e8 00000040 */ rxSndBgmGetValue(){}  // lib-ctx
+/* 0023b628 000000bc */ rxSndBgmSetChannelVolume(){}  // lib-ctx
+/* 0023b6e8 000000bc */ rxSndBgmSetChannelVolume74(){}  // lib-ctx
+/* 0023b7a8 00000094 */ rxSndBgmSetAttr(){}  // lib-ctx
 /* 0023b840 00000150 */ rxSndBgmSetVolume(){}  // ror
-/* 0023b990 000000a4 */ FUN_0023b990(){}
-/* 0023ba38 000000a4 */ FUN_0023ba38(){}
-/* 0023bae0 00000094 */ FUN_0023bae0(){}
+/* 0023b990 000000a4 */ rxSndBgmSetPitch(){}  // lib-ctx
+/* 0023ba38 000000a4 */ rxSndBgmSetParam5(){}  // lib-ctx
+/* 0023bae0 00000094 */ rxSndBgmSetParam6(){}  // lib-ctx
 /* 0023bb78 00000054 */ rxSndBgmInit(){}  // ror
 /* 0023bbd0 00000004 */ rxSndBgmTerm(){}  // ror
 /* 0023bbd8 00000174 */ rxSndBgmUpdate(){}  // ror
 /* 0023bd50 0000000c */ rxSndBgmGetMasterVolumeL(){}  // ror
 /* 0023bd60 0000000c */ rxSndBgmGetMasterVolumeR(){}  // ror
-/* 0023bd70 000000f8 */ rxSndSeSetMasterVolume(){}  // ror
+/* 0023bd70 00000098 */ rxSndSeSetMasterVolume(){}  // ror
+/* 0023be08 00000030 */ rxSndSeSetDefaultParamB(){}  // lib-ctx
+/* 0023be38 00000030 */ rxSndSeSetDefaultParamC(){}  // lib-ctx
 /* 0023be68 00000148 */ rxSndSePlay(){}  // lib-ctx
-/* 0023bfb0 00000148 */ FUN_0023bfb0(){}
+/* 0023bfb0 00000148 */ rxSndSePlayEx(){}  // lib-ctx
 /* 0023c0f8 000000dc */ rxSndSeStop(){}  // lib-ctx
-/* 0023c1d8 0000004c */ FUN_0023c1d8(){}
+/* 0023c1d8 0000004c */ rxSndSeStopAll(){}  // lib-ctx
 /* 0023c228 00000034 */ rxSndSeGetStatus(){}  // lib-ctx
 /* 0023c260 000000c8 */ rxSndSePause(){}  // lib-ctx
 /* 0023c328 00000094 */ rxSndSeSetAttr(){}  // lib-ctx
 /* 0023c3c0 00000150 */ rxSndSeSetVolume(){}  // lib-ctx
 /* 0023c510 000000a4 */ rxSndSeSetPitch(){}  // lib-ctx
-/* 0023c5b8 000000a4 */ FUN_0023c5b8(){}
-/* 0023c660 000001fc */ rxSndSeSetParam(){}  // lib-ctx
+/* 0023c5b8 000000a4 */ rxSndSeSetParam5(){}  // lib-ctx
+/* 0023c660 000000a0 */ rxSndSeSetParam(){}  // lib-ctx
+/* 0023c700 00000040 */ rxSndSeSetParam6(){}  // lib-ctx
+/* 0023c740 00000040 */ rxSndSeSetParam7(){}  // lib-ctx
+/* 0023c780 00000040 */ rxSndSeSetParam8(){}  // lib-ctx
+/* 0023c7c0 00000040 */ rxSndSeSetParam9(){}  // lib-ctx
+/* 0023c800 0000005c */ rxSndSeSetPan(){}  // lib-ctx
 /* 0023c860 00000054 */ rxSndSeSetParamB(){}  // lib-ctx
 /* 0023c8b8 00000054 */ rxSndSeSetParamC(){}  // lib-ctx
 /* 0023c910 0000005c */ rxSndSeInit(){}  // ror

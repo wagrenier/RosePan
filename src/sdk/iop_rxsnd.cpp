@@ -15,8 +15,9 @@
  *
  *  except the IOP heap (0x20 alloc {mode, size, 0}): a bump allocator over a
  *  fake IOP address range, so rxSndIopAlloc does not print "can't allocate
- *  IOP heap" and its callers get distinct non-zero addresses; the XVAB open
- *  (0x50 {id, iop, spu}), which answers the bank id; and the SE voices:
+ *  IOP heap" and its callers get distinct non-zero addresses; the XVAB and
+ *  XSEQ opens (0x50 {id, iop, spu}, 0x60 {id, iop}), which answer the id;
+ *  and the SE voices:
  *  every voice a queued 0x80 / 0x81 started is listed once in the next SE
  *  status (0x83) with status 0, i.e. ended at once, so rxSndSeUpdate stops
  *  it and its slot goes back to the free list.  No sound is
@@ -91,7 +92,7 @@ static void *RxSndDriverCall(u_int fno, void *data, int size)
             s_heapNext += bytes;
         }
     }
-    else if (fno == 0x50 && req != NULL && size >= 4)
+    else if ((fno == 0x50 || fno == 0x60) && req != NULL && size >= 4)
     {
         s_reply[0] = req[0];
     }
