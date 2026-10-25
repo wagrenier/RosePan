@@ -2639,11 +2639,23 @@
   "was": "FUN_0014457c",
   "why": "MagLifeBwnCtrl 0x12b7cc with 1 when on, 0 when off"
  },
+ "001634d4": {
+  "name": "EmyManager::releaseObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001634d4",
+  "why": "a0 = g_emyManager 0x7b2140: the object of its 0x40 slots (+4) whose first word is oid is deleted (vtable slot 1 with 3), the slot and +0x330 entry cleared; releaseChr for type-2 achrs"
+ },
  "00163ab8": {
   "name": "EmyManager::getOids",
   "tag": "ror-inferred",
   "was": "FUN_00163ab8",
   "why": "copies +0x138 / +0x13c to its two out pointers"
+ },
+ "0017756c": {
+  "name": "Obj176a3c::release",
+  "tag": "ror-inferred",
+  "was": "FUN_0017756c",
+  "why": "a0 = MagScene +0x837e0: entry no of its table (+4) deleted, count +0x448 down, +0x1294 / +0x1298 = -1 when they named it; GamMan::ctlObj1cbb80 passes the pool record's second word"
  },
  "0017e5c0": {
   "name": "WrdTable::load",
@@ -4379,6 +4391,12 @@
   "was": "FUN_001c6ccc",
   "why": "switch on which: copies one status word (+0x21f48, +0x21f60, +0x21f50 ...) to *out"
  },
+ "001c6fe0": {
+  "name": "GamMan::makeOid",
+  "tag": "ror-inferred",
+  "was": "FUN_001c6fe0",
+  "why": "builds an object id: a3 image (-1 = m_cur_stat) << 30, type << 23, list << 28, the stage word +0x21f7c & 0x7f << 16, a counter from init's table +0x225f4.. counted down while isObj finds it taken; addItem / addStock make their item oids with type 5"
+ },
  "001c7210": {
   "name": "GamMan::setCameraMode",
   "tag": "ror-inferred",
@@ -4390,6 +4408,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c7494",
   "why": "the mag/magscene.h inline (assert no >= 0 && no < MAX_MAP_MODEL, line 816) on the scene's sky slot m_1d300: its _c.bin record count"
+ },
+ "001c772c": {
+  "name": "GamMan::loadItemSe",
+  "tag": "ror-inferred",
+  "was": "FUN_001c772c",
+  "why": "reads the equipped item's SE pack data/snd/xv/640N.se (switch on the item id, a2 = use the equipped item +0x2220c) into a 0x18040 buffer and loadSePack's it under its name"
  },
  "001c7a4c": {
   "name": "GamMan::equipItem",
@@ -4421,6 +4445,12 @@
   "was": "FUN_001c845c",
   "why": "empties the 16-byte vector at +0x1a6c0 (getItemHavePtr) and pushes 12 slots with item 0xa00 (none)"
  },
+ "001c8508": {
+  "name": "GamMan::getItemNum",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8508",
+  "why": "the count short +0xa of the item slot whose id matches, 0 none; equipItem keeps it in +0x1d200 for items 0xa3e / 0xa43"
+ },
  "001c8598": {
   "name": "GamMan::selectItem",
   "tag": "ror-inferred",
@@ -4438,6 +4468,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c8ae8",
   "why": "sum of the id's counts in the item slots (and the stock list when arg)"
+ },
+ "001c8c50": {
+  "name": "GamMan::hasFreeItemSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8c50",
+  "why": "1 when one of the 12 item slots (+0x1a6c0 vector) holds 0xa00; addItem's full-slots check"
  },
  "001c8ca4": {
   "name": "GamMan::canAddItem",
@@ -4487,6 +4523,12 @@
   "was": "FUN_001c9c1c",
   "why": "8-case table 0x2fbbf0: 0 brightness 0x780d04, 1 master volume via setVolume, 2 / 3 stream / SE volume via funcSnd 0xf / 0xe, 4 / 5 read them back, 6 rxSndSetOutputMode, 7 a flag copied to MagSystem +8; returns -1"
  },
+ "001ca0d4": {
+  "name": "GamMan::empty1ca0d4",
+  "tag": "ror-inferred",
+  "was": "FUN_001ca0d4",
+  "why": "jr ra; seqFunc027 calls it"
+ },
  "001cb01c": {
   "name": "GamMan::releaseTenkyus",
   "tag": "ror-inferred",
@@ -4504,6 +4546,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001cb384",
   "why": "stores +0x21fd0, getDogPtr +0x22094, getDogChrNo +0x21fe8, MagSystem::setBwn"
+ },
+ "001cb4f0": {
+  "name": "GamMan::setPcParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb4f0",
+  "why": "m_pcPtr (+0x22090) != NULL -> its setParam 0x1da740(which, data); equipItem passes 0x32 and the item id"
  },
  "001cb8e4": {
   "name": "GamMan::ctlObj1cb8e4",
@@ -4541,6 +4589,24 @@
   "was": "FUN_001cbe38",
   "why": "isObj then +0x108 of the object the inline find returns, -1 none"
  },
+ "001cc004": {
+  "name": "GamMan::clearVFchrSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_001cc004",
+  "why": "zeroes the first word equal to oid among the 0x180 words at +0x1f24c"
+ },
+ "001cc7c8": {
+  "name": "GamMan::releaseFchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001cc7c8",
+  "why": "finds the fchr list (+0x1d980) node whose object oid (+0x100) matches, releases its actor, clears m_fchr[slot], deletes the object (vtable slot 1 with 3) and frees the node"
+ },
+ "001cc970": {
+  "name": "GamMan::releaseVFchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001cc970",
+  "why": "with vfchr objects: relinkObj, frees the avfchr list nodes of oid, then the vfchr list node (actor released when it has one, the +0x1f24c table entry cleared); seqFunc155 and releaseChr call it"
+ },
  "001ccc30": {
   "name": "GamMan::releaseChr",
   "tag": "ror-inferred",
@@ -4570,6 +4636,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001cd60c",
   "why": "execStageReq stat 2 after initStage2; not read yet"
+ },
+ "001cd7c0": {
+  "name": "GamMan::empty1cd7c0",
+  "tag": "ror-inferred",
+  "was": "FUN_001cd7c0",
+  "why": "jr ra; seqFunc027 calls it"
  },
  "001cd7c8": {
   "name": "GamMan::execStageReq",
@@ -4691,6 +4763,12 @@
   "was": "FUN_001d5da0",
   "why": "ObjStat::setHide and resetObj (bit 0x40) call it with GamMan and the oid; not read yet"
  },
+ "001d83d0": {
+  "name": "GamMan::lookupFlagTable",
+  "tag": "ror-inferred",
+  "was": "FUN_001d83d0",
+  "why": "the table data 0x2fc1f8 of 8-word rows ended by -1: the row whose column keyCol equals key, its column col (keyCol 99: row key directly); addItem sets the returned bit of the sequence bitset"
+ },
  "001d84a8": {
   "name": "GamMan::resetExtra",
   "tag": "ror-inferred",
@@ -4727,6 +4805,12 @@
   "was": "FUN_001d95c4",
   "why": "calls the actor setHide slot (vtable +0x40) with the argument; bit 0x40 re-links / re-finds"
  },
+ "001d966c": {
+  "name": "ObjStat::releaseActor",
+  "tag": "ror-inferred",
+  "was": "FUN_001d966c",
+  "why": "MagScene::releaseActor(+0x108) when set, +0x108 = -1; type-5 objects also GamMan::ctlObj1cbb80"
+ },
  "001d96ec": {
   "name": "ObjStat::save",
   "tag": "ror-inferred",
@@ -4751,6 +4835,24 @@
   "was": "FUN_001da130",
   "why": "CmnTaskMan 0x1e7414 on the task ids +0x3d4 / +0x3e0 / +0x3d8 (+0x3dc with the flag)"
  },
+ "001da228": {
+  "name": "ACHRstat::getParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001da228",
+  "why": "GamMan::getObjParam's achr branch: (which, out)"
+ },
+ "001da740": {
+  "name": "ACHRstat::setParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001da740",
+  "why": "switch on which storing *data into the achr's words (0x26 +0x3a0, 0x2e +0x3c0, 0x37 the short +0x432 ...); GamMan::setPcParam calls it on the PC"
+ },
+ "001db31c": {
+  "name": "FCHRstat::getParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001db31c",
+  "why": "GamMan::getObjParam's fchr and vfchr branch: (which, out)"
+ },
  "001db774": {
   "name": "FCHRstat::getRot",
   "tag": "ror-inferred",
@@ -4762,6 +4864,24 @@
   "tag": "ror-inferred",
   "was": "FUN_001dbef8",
   "why": "loadSystemData's file 0: keeps the data at +0x58 and turns its ten offsets at +0x10..+0x34 into pointers past the 0x40 header"
+ },
+ "001dbfa0": {
+  "name": "GamSysData::getRec",
+  "tag": "ror-inferred",
+  "was": "FUN_001dbfa0",
+  "why": "the system data record of id: table (id >> 9) of the ten pointers, record id & 0x1ff (strides 0xa0, 0xa0, 0xc0, 0xe0, 0xc0, 0x200, 0xc0...); addItem stores it in the item slot"
+ },
+ "001dcd38": {
+  "name": "GamSysData::setFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_001dcd38",
+  "why": "ors bits into the record's flag word (+0x90 for tables 0..3, +0xb0 else); addItem sets 4"
+ },
+ "001dd00c": {
+  "name": "GamSysData::testFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_001dd00c",
+  "why": "the record's flag word & bits != 0; 0x20000 = the item stacks (count in the slot)"
  },
  "001dd414": {
   "name": "GamArea::init",
@@ -4805,6 +4925,12 @@
   "was": "FUN_001e0c2c",
   "why": "op 1 set / 2 or / 3 and-not / 4 test / 5 test-and-clear 0x20000000 (with GamMan::pause 0x8000) on the trigger word +0x30 of the area rect whose id +0x3c matches (0 = all); GamMan::set_trg_flg and its siblings call it"
  },
+ "001e0d70": {
+  "name": "GamArea::hasId",
+  "tag": "ror-inferred",
+  "was": "FUN_001e0d70",
+  "why": "1 when the list at +0xd0 (count +0x190) has a node whose +0x3c equals id; GamMan::makeOid counts type-13 ids down past the taken ones"
+ },
  "001e0f1c": {
   "name": "GamSndMan::init",
   "tag": "ror-inferred",
@@ -4828,6 +4954,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001e1920",
   "why": "GamMan::resume calls it (0, 0, 1) on +0x18e00; clears bit 0 of +0x1870 and restarts the +0x1684 slot"
+ },
+ "001e2c40": {
+  "name": "GamSndMan::stopObjSe",
+  "tag": "ror-inferred",
+  "was": "FUN_001e2c40",
+  "why": "for each node of the list +0xb0 whose +0x3c is oid: 0x1e649c(+0x30, +0x34), +0x34 = -1, node freed; releaseChr's end"
+ },
+ "001e3698": {
+  "name": "GamSndMan::releaseObjSe",
+  "tag": "ror-inferred",
+  "was": "FUN_001e3698",
+  "why": "for each node of the list +0xb0 whose +0x3c is oid: 0x1e5660(+0x30, 1, 0), node freed; releaseChr's end"
  },
  "001e435c": {
   "name": "GamSndMan::isSndBankLoaded",
@@ -4936,6 +5074,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f5e48",
   "why": "achr: kills the +0x3dc task and starts a new 0xc0-byte task; else MagScene::changeActorMotion"
+ },
+ "001f6578": {
+  "name": "chrCreateItemObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6578",
+  "why": "(item id, pos, rot): looks up the item's chr no (param 0xf) and model (0xb) in the system data 0x7a34e0, creates the object through GamMan 0x1ca72c (type 5) or 0x1cc250, places it with pos / rot when given; returns its oid; equipItem's held item"
  },
  "001f688c": {
   "name": "gamClearFrameReq",
@@ -6244,6 +6388,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00215bb4",
   "why": "formats four floats (3 digits) into stack buffers and prints nothing, the four-float twin of dbgTraceVector3 0x215b5c"
+ },
+ "00218470": {
+  "name": "rorDebugPrintf",
+  "tag": "ror-inferred",
+  "was": "FUN_00218470",
+  "why": "a variadic stub (saves a1..a3, returns): the debug print; releaseTenkyus passes the format dropMap : m_p_keep_buf %x"
  },
  "002184c0": {
   "name": "i3dNibbleSet",

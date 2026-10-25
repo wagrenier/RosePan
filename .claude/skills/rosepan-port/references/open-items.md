@@ -57,6 +57,12 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      stubs on that road are the natives seqFunc027 / 021 / 033 / 110 / 001 / 002 / 032 (item 3's
      list, sequence/seqcall.cpp) -- they decide what W099 does next, so they come before more
      gamman code. Still stubs on gamman's load path: loadStageSnd 0x1c2f50 (reached every boot).
+     Session 3 (2026-10-25, `partial`): loadStageSnd, the item code (addItem / delItem / equipItem /
+     selectItem / hasItem / getItemCount / canAddItem / addStock / delStock, makeOid, loadItemSe),
+     releaseChr with releaseFchr / releaseVFchr, getObjParam, releaseTenkyus, ctlObj1cbb80 written;
+     still nothing draws. The boot's next blockers are still the natives (seqFunc027 / 021 / 033 /
+     110 / 001 / 002 / 032): queue sequence/seqcall.cpp ahead of more gamman. Open: GamItemSlot
+     holds a host pointer (m_rec), so a save that copies the slots raw needs a converter.
   5. `unassigned@001fd424` -- sysInitManagers 0x204148, SysTimer::start / update (reached stubs).
   6. `unassigned@001e46b8` -- CmnTaskMan::exec / addTask and 0x1f688c that GamMan::update calls (the
      per-frame task runner; 253 functions: only what the title path reaches).

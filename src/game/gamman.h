@@ -33,6 +33,8 @@ struct GamArea
     /* afterSeqExec's stage change kind 3: the rects / triggers of kind. */
     void stopKind(int kind);                                             // ROR 0x001dd7bc
     void clearKind(int kind);                                            // ROR 0x001dddbc
+    /* 1 when one of its rects (the list +0xd0) has id. */
+    int  hasId(u_int id);                                                // ROR 0x001e0d70
 };
 
 struct DogActor;
@@ -51,6 +53,9 @@ static inline u_int gamOidSlot(u_int oid) { return oid & 0x1ff; }
  * +0x100. layout: host -- EE offsets in the comments. */
 struct ObjStat
 {
+    /* MagScene::releaseActor(m_actor) when it has one, m_actor = -1; a
+     * type-5 object also drops its GamMan pool 0x20b00 records. */
+    void releaseActor();                                                 // ROR 0x001d966c
     /* The actor's position into +0x190 and out (x, y, z, w); moves the
      * object to another secta cell when it left the current one. */
     void updatePos(float *out);                                          // ROR 0x001d8f04
@@ -88,6 +93,10 @@ struct ACHRstat : ObjStat
     /* Pauses (on) / resumes its tasks: +0x3d4, +0x3e0, +0x3d8 and, with
      * all, +0x3dc. */
     void pauseTasks(int on, int all);                                    // ROR 0x001da130
+    /* One of its params by which (0x18 the collision kind and ids ...). */
+    void getParam(int which, void *out);                                 // ROR 0x001da228
+    /* Stores *data into the param which (0x32 the equipped item ...). */
+    void setParam(int which, const void *data);                          // ROR 0x001da740
 
     int   m_task[4];            // ROR 0x3d4: task ids, -1 none
     int   m_taskId;             // ROR 0x3e8: resetObj kills it
@@ -98,7 +107,20 @@ struct FCHRstat : ObjStat
 {
     /* ObjStat::getRot's twin: the actor's rotation or +0x1a0. */
     void getRot(float *out);                                             // ROR 0x001db774
+    /* One of its params by which (0x41 the type-9 number, 0x18 ...). */
+    void getParam(int which, void *out);                                 // ROR 0x001db31c
 };
+
+/* GamMan::getObjParam(0x18)'s answer: the object's private collisions
+ * (kind 5 one in m_colli[0], kind 6 four). EE 0x28 at least; the ROM's
+ * caller clears only m_kind. */
+struct GamObjColli
+{
+    int m_kind;                 // ROR 0x00: -1 before the call
+    int _04[5];
+    int m_colli[4];             // ROR 0x18: MagScene private collision ids
+};
+static_assert(offsetof(GamObjColli, m_colli) == 0x18, "m_colli");
 
 /* The system pack's file 0 (GamMan +0x22220; class name invented): ten
  * pointers past the 0x40-byte header from its offsets +0x10..+0x34, the
@@ -106,20 +128,29 @@ struct FCHRstat : ObjStat
 struct GamSysData
 {
     void set(const u_char *data);                                        // ROR 0x001dbef8
+    /* The record of id: table id >> 9 of the ten, record id & 0x1ff. */
+    const void *getRec(short id);                                        // ROR 0x001dbfa0
+    /* Ors bits into the record's flag word (+0x90 / +0xb0). */
+    void setFlags(short id, u_int bits);                                 // ROR 0x001dcd38
+    /* The record's flag word & bits != 0 (0x20000: the item stacks). */
+    int  testFlags(short id, u_int bits);                                // ROR 0x001dd00c
 };
 
-/* One of the 12 item slots (GamMan +0x1a700, getItemHavePtr's vector;
- * EE 0x10). clearItemHave sets only the id: the rest is stack garbage in
- * the ROM, zero on the host. */
-struct GamItemSlot
+/* One item (EE 0x10, 16-aligned): the 12 slots at GamMan +0x1a700
+ * (getItemHavePtr's vector) and the stock pool's records. addItem /
+ * addStock fill all of it but +0xc (stack garbage in the ROM, zero on the
+ * host); clearItemHave sets only the id. layout: host -- m_rec is a
+ * pointer. */
+struct alignas(16) GamItemSlot
 {
-    int   _0[2];
-    short m_id;                 // ROR 0x8: 0xa00 = none
-    short _a;
-    int   _c;
+    const void *m_rec;          // ROR 0x0: GamSysData::getRec(id), the item's system data record
+    u_int       m_oid;          // ROR 0x4: GamMan::makeOid(2, 5)
+    short       m_id;           // ROR 0x8: 0xa00 = none
+    u_short     m_num;          // ROR 0xa: the count of a stacking item (1..99)
+    int         _c;             // ROR 0xc
 };
-static_assert(sizeof(GamItemSlot) == 0x10, "GamItemSlot");
-static_assert(offsetof(GamItemSlot, m_id) == 0x8, "m_id");
+static_assert(offsetof(GamItemSlot, m_oid) >= 0x4, "m_oid");
+static_assert(offsetof(GamItemSlot, m_id) >= 0x8, "m_id");
 
 /* The vector at +0x1a6c0: begin, end, capacity, the 12 slots at +0x40.
  * layout: host -- pointers. */
@@ -220,12 +251,31 @@ struct GamRec4  { u_int _0; };
 struct GamRec8  { u_int _0[2]; };
 struct GamRec12 { u_int _0[3]; };
 struct GamRec16 { u_int _0[4]; };
-struct alignas(16) GamRec16A { u_int _0[4]; };
 static_assert(sizeof(GamRec4) == 4, "GamRec4");
 static_assert(sizeof(GamRec8) == 8, "GamRec8");
 static_assert(sizeof(GamRec12) == 0xc, "GamRec12");
 static_assert(sizeof(GamRec16) == 0x10, "GamRec16");
-static_assert(sizeof(GamRec16A) == 0x10, "GamRec16A");
+
+/* A sky dome record of the pool +0x1d240 (EE 0x10): releaseTenkyus
+ * hands m_no to MagScene::releaseTenkyu. */
+struct GamTenkyuRec
+{
+    int _0[2];
+    int m_no;                   // ROR 0x8: the scene's tenkyu number
+    int _c;
+};
+static_assert(sizeof(GamTenkyuRec) == 0x10, "GamTenkyuRec");
+static_assert(offsetof(GamTenkyuRec, m_no) == 0x8, "m_no");
+
+/* A record of the pool +0x20b00 (EE 8): an object's entry in the scene's
+ * +0x837e0 table (ctlObj1cbb80 releases it). */
+struct GamObjFxRec
+{
+    u_int m_oid;                // ROR 0x0
+    int   m_no;                 // ROR 0x4: the Obj176a3c entry, -1 none
+};
+static_assert(sizeof(GamObjFxRec) == 8, "GamObjFxRec");
+static_assert(offsetof(GamObjFxRec, m_no) == 4, "m_no");
 
 /* GamMan +0x22470: four records, id -1 = free (EE 0x30). */
 struct GamRec22470
@@ -304,17 +354,42 @@ struct GamMan
     void setCameraMode(int mode, u_int no);                              // ROR 0x001c7210
     /* The record count of the current sky slot's _c.bin (the cameras). */
     int  getMapCamNum();                                                 // ROR 0x001c7494
+    /* A new object id: image (-1 = m_cur_stat) << 30, type << 23, list
+     * << 28 for the types without their own counter, the stage word, and
+     * a free number counted down from init's table +0x225f4... */
+    u_int makeOid(u_int list, u_int type, int image);                    // ROR 0x001c6fe0
+    /* Loads the SE pack of an equipped item (data/snd/xv/640N.se; cur:
+     * the equipped item +0x2220c instead of id). */
+    void loadItemSe(u_short id, int cur);                                // ROR 0x001c772c
+    /* The PC holds item id (0xa00 none): the PC's param 0x32, the item's
+     * actor in the PC's right hand (node p_hn_r), its SE pack. */
     void equipItem(short id);                                            // ROR 0x001c7a4c
-    void addItem(short id, int arg);                                     // ROR 0x001c7e40
-    void delItem(short id, int arg);                                     // ROR 0x001c82f8
+    /* Puts item id in its slot (a stacking one counts up to 99; num sets
+     * the count of a new one) and sets its flag bit. 1 when every slot is
+     * taken. */
+    int  addItem(short id, int num);                                     // ROR 0x001c7e40
+    /* Takes item id out (a stacking one counts down first); one: only the
+     * first slot holding it. */
+    void delItem(short id, int one);                                     // ROR 0x001c82f8
     void delItemAll(short id);                                           // ROR 0x001c8414
     /* The 12 item slots, all 0xa00. */
     void clearItemHave();                                                // ROR 0x001c845c
+    /* m_selItem / m_selItemNum: the slot holding id (the last of them). */
     void selectItem(short id);                                           // ROR 0x001c8598
+    /* The count of item id's slot, 0 when none holds it. */
+    int  getItemNum(short id);                                           // ROR 0x001c8508
     int  hasItem(short id, int withStock);                               // ROR 0x001c8a28
     int  getItemCount(short id, int withStock);                          // ROR 0x001c8ae8
-    int  canAddItem(int arg, short id);                                  // ROR 0x001c8ca4
+    /* 1 when an item slot is free. */
+    int  hasFreeItemSlot();                                              // ROR 0x001c8c50
+    /* 1 when item id (0: oid's param 2) fits: a stacking one under 99 in
+     * its slot, or a free slot. */
+    int  canAddItem(u_int oid, short id);                                // ROR 0x001c8ca4
+    /* Item id into the stock (0x14e records; a stacking one counts up).
+     * 1 when the stock is full or a count hit 99. */
     int  addStock(short id, int count);                                  // ROR 0x001c8f7c
+    /* Item id out of the stock (one: a stacking one counts down, only the
+     * first record). 1 when a record was freed. */
     int  delStock(short id, int one);                                    // ROR 0x001c94d8
     /* 1 when the fchr of oid (types 4 / 5) can be talked to: shown, not
      * held (0x200000), and 0x10 or both 8 and 2 in its flags. */
@@ -331,6 +406,7 @@ struct GamMan
      * volume (levels 0..8), 4 / 5 read 2 / 3 into *(int *)arg, 6 the
      * sound output mode, 7 vibration. Returns -1. */
     int  setOption(u_int no, intptr_t arg);                              // ROR 0x001c9c1c
+    void empty1ca0d4();                                                  // ROR 0x001ca0d4
     /* Releases the stage's sky domes (the +0x1d240 records) of kind. */
     void releaseTenkyus(int kind);                                       // ROR 0x001cb01c
     /* The PC becomes the achr oid (-1: none to the scene): m_pcPtr, its
@@ -338,7 +414,10 @@ struct GamMan
     void setPc(int oid);                                                 // ROR 0x001cb24c
     /* The dog becomes the achr oid (-1: hides the dog). */
     void setDog(int oid);                                                // ROR 0x001cb384
+    /* The PC's ACHRstat::setParam(which, data), when there is a PC. */
+    void setPcParam(int which, const void *data);                        // ROR 0x001cb4f0
     void ctlObj1cb8e4(u_int oid, int a, int b);                          // ROR 0x001cb8e4
+    /* Frees oid's +0x20b00 records, releasing their scene +0x837e0 entry. */
     void ctlObj1cbb80(u_int oid);                                        // ROR 0x001cbb80
     /* Frees the +0x20b00 records of kind (after 0x17762c). */
     void clearPool20b00(int kind);                                       // ROR 0x001cbd0c
@@ -348,7 +427,14 @@ struct GamMan
     void setImage(int slot, u_char *image);                              // ROR 0x001cbdfc
     /* The scene actor number of oid, -1 without one. */
     int  getActorNo(u_int oid);                                          // ROR 0x001cbe38
-    void releaseChr(int arg);                                            // ROR 0x001ccc30
+    /* Drops object oid: its private collisions, then an achr (not the
+     * dog; the PC's words cleared) or its fchr / vfchr records, and its
+     * object sounds. */
+    void releaseChr(u_int oid);                                          // ROR 0x001ccc30
+    /* An achr / fchr / vfchr object's teardown pieces. */
+    void releaseFchr(u_int oid);                                         // ROR 0x001cc7c8
+    void releaseVFchr(u_int oid);                                        // ROR 0x001cc970
+    void clearVFchrSlot(u_int oid);                                      // ROR 0x001cc004
     /* Stage change kind 2's first half. */
     void releaseStage2();                                                // ROR 0x001cd224
     void releaseObjs(int kind, int arg);                                 // ROR 0x001cdf5c
@@ -356,6 +442,7 @@ struct GamMan
     void afterSeqExec();                                                 // ROR 0x001cd25c
     void storePcTransform();                                             // ROR 0x001cd404
     void startStage2();                                                  // ROR 0x001cd60c
+    void empty1cd7c0();                                                  // ROR 0x001cd7c0
     /* The requested stage change by m_cur_stat (1 loadStage, 2 the stage-2
      * data, 3 nothing yet), then the sequence globals [1..4] and resume(2). */
     void execStageReq();                                                 // ROR 0x001cd7c8
@@ -396,6 +483,9 @@ struct GamMan
     /* In unassigned@001d3b44 (GamMan methods past switchVolume). */
     void relinkObj(u_int oid);                                           // ROR 0x001d5da0
     void placeAchr(int oid, void *out, int arg);                         // ROR 0x001d544c
+    /* The table data 0x2fc1f8 (8-word rows, -1 ends): column col of the
+     * row whose column keyCol is key (keyCol 99: row key). -1 none. */
+    int  lookupFlagTable(int keyCol, int key, int col);                  // ROR 0x001d83d0
     void markReset();                                                    // ROR 0x001d3588
     /* 0: saves the volume in m_saved_volume and silences; 1: restores
      * the saved volume (when one is saved) and marks none saved. */
@@ -425,21 +515,22 @@ struct GamMan
     u_char      *m_wrdFile2;        // ROR 0x1a680: 0x4000 bytes, W000.WRD file 2
     u_int        m_1a684;           // ROR 0x1a684: 0xcccccccc after init
     GamItemHave  m_itemHave;        // ROR 0x1a6c0: getItemHavePtr
-    SeqFixedPool<GamRec16A, 0x14e> m_itemStock; // ROR 0x1a7c0: getItemStockPtr
-    int          m_1d200;           // ROR 0x1d200
-    SeqFixedPool<GamRec16, 4>      m_pool1d240; // ROR 0x1d240
+    SeqFixedPool<GamItemSlot, 0x14e> m_itemStock; // ROR 0x1a7c0: getItemStockPtr (used list +0x1a7f0, count +0x1a810)
+    int          m_selItemNum;      // ROR 0x1d200: the selected item's count (selectItem)
+    GamItemSlot *m_selItem;         // ROR 0x1d204: the selected item's slot, NULL none
+    SeqFixedPool<GamTenkyuRec, 4>  m_pool1d240; // ROR 0x1d240: the stage's sky domes (releaseTenkyus)
     int          m_mapModelNo;      // ROR 0x1d300: the scene sky slot (no < MAX_MAP_MODEL)
     SeqFixedPool<ACHRstat *, 0x80> m_achrList;  // ROR 0x1d340: getAchrListPtr
     SeqFixedPool<FCHRstat *, 0x40> m_fchrList;  // ROR 0x1d980: getFchrListPtr
     SeqFixedPool<FCHRstat *, 0x180> m_vfchrList;// ROR 0x1dcc0: getVFchrListPtr (getVFchr's objects)
-    SeqFixedPool<GamRec4, 0x40>    m_avfchrList;// ROR 0x1ef00: getAVFchrListPtr
+    SeqFixedPool<FCHRstat *, 0x40> m_avfchrList;// ROR 0x1ef00: getAVFchrListPtr (object pointers: releaseVFchr reads their oid)
     u_char      *m_1f240;           // ROR 0x1f240: 0x5a4 bytes, zeroed by init
     int          m_1f244;           // ROR 0x1f244
     u_char      *m_1f248;           // ROR 0x1f248: 0x42000 bytes
-    u_char       m_1f24c[0x180];    // ROR 0x1f24c
+    int          m_vfchrSlot[0x180];// ROR 0x1f24c: vfchr oids (clearVFchrSlot); initGameState clears only 0x180 bytes
     SeqFixedPool<GamRec12, 0x80>   m_pool1f880; // ROR 0x1f880
     SeqFixedPool<GamRec8, 0x80>    m_pool202c0; // ROR 0x202c0
-    SeqFixedPool<GamRec8, 0x80>    m_pool20b00; // ROR 0x20b00
+    SeqFixedPool<GamObjFxRec, 0x80> m_pool20b00; // ROR 0x20b00
     ACHRstat    *m_achr[0x80];      // ROR 0x21340: by oid slot (set_achr)
     FCHRstat    *m_fchr[0x280];     // ROR 0x21540: by oid slot (slots 1..0x27f)
     int          m_cur_stat;        // ROR 0x21f40: getCurStat; 0 system data, 1 a stage loading
@@ -517,7 +608,7 @@ struct GamMan
     GamRec22540  m_22540[3];        // ROR 0x22540: stride 0x20
     int          m_msgMode;         // ROR 0x225d8: chgMsgMode
     int          m_225e4;           // ROR 0x225e4
-    int          m_225e8;           // ROR 0x225e8
+    void        *m_keepBuf;         // ROR 0x225e8: dropMap's m_p_keep_buf (releaseTenkyus frees it)
     int          m_225f0;           // ROR 0x225f0
     int          m_225f4[0x1a];     // ROR 0x225f4: init's table (0x7f, 0x6f, 0x27f, 0x2ff, 3, 8, 4, 5, ...)
     u_char      *m_evtPack;         // ROR 0x22a80: getEvtPack, 0xa0000 bytes, W000.WRD file 4
@@ -549,5 +640,8 @@ void gamSetBwnWait(int on);                                              // ROR 
  * +0x3dc); rotY >= 32769 keeps the current rotation. */
 void *chrChangeMotion(u_int oid, int motion, int a2, int a3, float blend,
                       float rotY);                                        // ROR 0x001f5e48
+/* Creates item id's object (its chr no and model from the system data),
+ * placed at pos / rot when given; returns its oid. */
+u_int chrCreateItemObj(short id, const float *pos, const float *rot);    // ROR 0x001f6578
 
 #endif /* _GAME_GAMMAN_H */

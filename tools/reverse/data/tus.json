@@ -1,5 +1,6 @@
 {
  "queue": [
+  "sequence/seqcall.cpp",
   "unassigned@0020ff34",
   "game/gamman.cpp",
   "unassigned@001fd424",
@@ -115,7 +116,7 @@
    "why": "FileReader / FileReadReq methods, fileGetSize / fileExists, the rxFileCd clock wrappers and two clock helpers that follow them; bounded by the language-select menu code (mnusllg.rpk, SprMan calls) below and GamFont::GamFont above. No source string: game/ by link order (GamFont, then GamMan), gamfile after RoR's gam* names -- a guess"
   },
   "game/gamman.cpp": {
-   "notes": "Screen still black: nothing in this slice draws; onStageSeqEnd and afterSeqExec now run every frame and do nothing at boot (flags2 bits 0x40 / 3 clear). W099 still ends without system call 0x16, so the title road is the natives the boot reaches (seqFunc027 / 021 / 033 / 110 / 001 / 002 / 032 in sequence/seqcall.cpp): do those before more gamman. Next gamman slice: loadStageSnd 0x1c2f50 (reached every boot), releaseChr 0x1ccc30, resetStage 0x1cdbf0, releaseTenkyus 0x1cb01c, clearPool20b00 0x1cbd0c, the stage-2 trio initStage2 0x1c47c4 / startStage2 0x1cd60c / releaseObjs 0x1cdf5c, getObjParam 0x1d1c80, ctlObj1cb8e4 / ctlObj1cbb80, and the item functions (addItem, delItem...). Decisions: ObjStat is layout host with m_oid / m_actor / m_flags / m_link; the chr lists are SeqFixedPool of ACHRstat / FCHRstat pointers; setImage stores the pixel address through seqVmStoreWord (host pointers do not fit the image word); actor index -1 is skipped on the host (gamShowActor). Open: placeAchr 0x1d544c / relinkObj 0x1d5da0 are GamMan methods past the pinned end (open-items).",
+   "notes": "Screen still black: nothing in this slice draws, and boot stage 99 hits loadStageSnd's default (no packs, as in the ROM). The boot's blockers are the natives seqFunc027 / 021 / 033 / 110 / 001 / 002 / 032: sequence/seqcall.cpp is now queued first. Next gamman slice: resetStage 0x1cdbf0, clearPool20b00 0x1cbd0c, initStage2 0x1c47c4 / startStage2 0x1cd60c / releaseObjs 0x1cdf5c, ctlObj1cb8e4, getStatus 0x1c6ccc, setPcStartPos 0x1c3d38, storePcTransform 0x1cd404, onSubSeqEnd 0x1c43f0. Decisions: GamItemSlot is layout host (m_rec is a pointer to the GamSysData record; a raw save of the slots needs a converter, open-items); m_1f24c is m_vfchrSlot int[0x180] and initGameState clears only its first 0x180 bytes as the ROM does; the avfchr list holds FCHRstat pointers; releaseTenkyus ignores its kind (the ROM reads only this) and skips the empty debug print rorDebugPrintf 0x218470; deleting achr / fchr objects is plain delete (vtable slot 1 with 3 in the ROM). New stubs in other files: GamSysData::getRec / setFlags / testFlags, ACHRstat::getParam / setParam, FCHRstat::getParam, ObjStat::releaseActor, GamSndMan::stopObjSe / releaseObjSe, EmyManager::releaseObj, Obj176a3c::release, GamArea::hasId, GamMan::lookupFlagTable, chrCreateItemObj.",
    "ranges": [
     [
      "001c05c0",
@@ -132,6 +133,11 @@
      "date": "2026-10-25 18:10",
      "status": "partial",
      "summary": "GamMan slice 2: onStageSeqEnd, afterSeqExec and execStageReq (the stage change), setImage, resetObj, pause / resume / enterMenu with pauseForMenu, resumeFromMenu, pauseAchr, setInuMode, setPc / setDog, showLinked, the object lookups (isObj, isAchr / isFchr / isVFchr, getAchr / getFchr / getVFchr, the inline find, getActorNo, getActor, findFchrType9), ctlObjParam (20 ops), isFchrActive, setFindTargetItem, releaseStage2; ObjStat / ACHRstat / FCHRstat fields, GamObjRec, the oid format; bss 0x7b2060 / 0x7b205c found to be g_sequence.m_bits / m_global (stand-in removed); seqVmLoadWord / seqVmStoreWord exported for setImage"
+    },
+    {
+     "date": "2026-10-25 18:23",
+     "status": "partial",
+     "summary": "GamMan slice 3: loadStageSnd (the chapter SE packs 1xxx / 3200..3210.se), the item code (addItem, delItem, delItemAll, equipItem with the held object on node p_hn_r, selectItem, getItemNum, hasItem, getItemCount, hasFreeItemSlot, canAddItem, addStock, delStock, loadItemSe 640N.se), makeOid, setPcParam, releaseChr with releaseFchr / releaseVFchr / clearVFchrSlot, getObjParam, releaseTenkyus, ctlObj1cbb80 and two empty natives' helpers; GamItemSlot, GamTenkyuRec, GamObjFxRec, GamObjColli typed; 23 callees named in Ghidra"
     }
    ],
    "status": "partial",
