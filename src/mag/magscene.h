@@ -331,6 +331,9 @@ struct MagScene
     int  getMenuFadeOutTime();                                           // ROR 0x0013f144
     int  getMenuFadeInTime();                                            // ROR 0x0013f194
     void clearGamFlag25();                                               // ROR 0x0013f1e4
+    /* Opens message msg with 16 argument words (copied; args may be
+     * NULL); returns the window handle. */
+    int  openSysMsgWindow(int msg, const int *args, int arg);            // ROR 0x0013f280
     void closeSysMsgWindow(int win);                                     // ROR 0x0013f458
 
     /* ---- mag/magscenerender.cpp ---- */

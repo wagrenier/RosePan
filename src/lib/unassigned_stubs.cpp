@@ -77,12 +77,6 @@ void debugNop(void)
     ROSEPAN_STUB("debugNop", 0x002155a0);
 }
 
-// stub of ROR 0x0020e3d8
-void seqSetLanguage(int lang, int arg)
-{
-    ROSEPAN_STUB("seqSetLanguage", 0x0020e3d8);
-}
-
 // stub of ROR 0x00204148
 void sysInitManagers(void)
 {
@@ -95,6 +89,18 @@ void sysInitManagers(void)
 TskSnd::TskSnd(int kind, const TskSndParam *param)
 {
     ROSEPAN_STUB("TskSnd::TskSnd", 0x001f8fc0);
+}
+
+// stub of ROR 0x001f184c (a constructor: stubgen leaves it to hand)
+TskFrameFunc::TskFrameFunc(int kind, intptr_t arg, int frames)
+{
+    ROSEPAN_STUB("TskFrameFunc::TskFrameFunc", 0x001f184c);
+}
+
+// stub of ROR 0x001f4184 (a constructor: stubgen leaves it to hand)
+TskSysFunc::TskSysFunc(int kind, int a, intptr_t arg)
+{
+    ROSEPAN_STUB("TskSysFunc::TskSysFunc", 0x001f4184);
 }
 
 // stub of ROR 0x00181204
@@ -680,4 +686,48 @@ int i3rItemUnrelocate(I3rItem *item, I3rItem *base)
 {
     ROSEPAN_STUB("i3rItemUnrelocate", 0x0022c328);
     return {};
+}
+
+// stub of ROR 0x001e7724
+void CmnTaskMan::killTask(int id)
+{
+    ROSEPAN_STUB("CmnTaskMan::killTask", 0x001e7724);
+}
+
+// stub of ROR 0x001deaac
+void GamArea::checkPc()
+{
+    ROSEPAN_STUB("GamArea::checkPc", 0x001deaac);
+}
+
+// stub of ROR 0x001dea40
+void GamArea::startPcAction()
+{
+    ROSEPAN_STUB("GamArea::startPcAction", 0x001dea40);
+}
+
+// stub of ROR 0x0013f280
+int MagScene::openSysMsgWindow(int msg, const int *args, int arg)
+{
+    ROSEPAN_STUB("MagScene::openSysMsgWindow", 0x0013f280);
+    return {};
+}
+
+// stub of ROR 0x002113a4
+void Sequence::jumpTo(intptr_t target)
+{
+    ROSEPAN_STUB("Sequence::jumpTo", 0x002113a4);
+}
+
+// stub of ROR 0x001f83f4
+int scenePlayStart(const char *name, intptr_t arg, int wait)
+{
+    ROSEPAN_STUB("scenePlayStart", 0x001f83f4);
+    return {};
+}
+
+// stub of ROR 0x001f8cec
+void scenePlayStartSimple(const char *name)
+{
+    ROSEPAN_STUB("scenePlayStartSimple", 0x001f8cec);
 }

@@ -18,8 +18,10 @@ slots 9 / 12 / 6 (0x12d2e8 init, 0x12d314 pad, 0x12d32c draw) forward to the tit
 code 0x1a91f4 / 0x1a92a0 / 0x1a972c (unassigned@001a6830, the mnu/ menu code: SprMan, SndMan, RxMpeg,
 data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x10002 stock, 0x10003 save,
 0x10004 load, 0x10006 option, 0x10007 movie. Missing today (all stubs or unwritten), queued in run order:
-  1. `unassigned@002053f4` -- the seq script system: G000.GRB / g000.seq globals, seqSet*, the system
-     call handler 0x20694c (0x16 = title). Name its file (seq/ or sequence/).
+  1. DONE 2026-10-25 (`partial`): `sequence/seqcall.cpp` (pinned 0x2053f4..0x20e3d8) -- the 512 script
+     native functions (table data 0x2d90f8) with the system call seqFunc018 0x20694c written (8 / 0x16 =
+     title); 36 other handlers are stubs, written when a script reaches them. seqSetLanguage /
+     seqGetDataDir / seqMakeGlobalPath are written in sequence/sequence.cpp (0x20e3d8.. now pinned to it).
   2. `sequence/sequence.cpp` -- the Sequence VM (`Sequence::exec` is a reached stub).
   3. `unassigned@0020ff34` -- the script thread scheduler ("mst", "trg", "imdy", "single") the VM calls.
   4. `game/gamman.cpp` -- slice: loadSystemData, loadStage, update, postUpdate (409 functions: only the
@@ -331,6 +333,14 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
 
 ## Decisions
 
+- 2026-10-25 (session decision, the VM TU may revisit): **script registers are `intptr_t` on the host.**
+  The sequence scripts are MIPS code the VM interprets with raw EE addresses (its lw / sw handlers add the
+  register to the offset and dereference, e.g. 0x210a08); the native functions get pointers in a1..a3
+  (strings, float blocks, word blocks). So the VM keeps its 32 registers as intptr_t holding host
+  addresses, and the native table is `intptr_t f(intptr_t a0..a3, t0, t1)` (sequence/seqcall.h). The
+  VM must relocate the image's own address constants (lui / addiu pairs, jal targets >= 0x8160 are
+  image offsets: base + target - 0x8160) and keep SEQ_RET_* comparisons on the low 32 bits.
+
 - **RXSNDDRV.IRX is a silent host stand-in** (2026-10-22, the rx/rxsnd.cpp session; decided
   unattended, platform layer). `src/sdk/iop_rxsnd.cpp` registers RPC 0xd000 from RosePan_IopBoot and
   answers every call with a zeroed reply (0x11 term done, 0x41 XVAB transfer done, the queued
@@ -466,6 +476,15 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- (2026-10-25) sequence/seqcall.cpp: the file name is invented (no source string). The boundary between
+  it and sequence/sequence.cpp is a guess too: seqSetLanguage .. Sequence::term (0x20e3d8..0x20e690) went
+  to sequence.cpp because the Sequence constructor sits right before Sequence::init; the folder buffer data
+  0x2d9910 lies between the table's data and the VM's, so it fits either file.
+- (2026-10-25) GamMan +0x40 is named `GamArea` (invented: a rect list +0xc290 tested against the PC). The
+  GamMan item methods (addItem / delItem / addStock ...) are named from their code: the slots +0x1a6c0
+  (12 x 0x10, id +8, count +0xa) are the held items, the list +0x1a7f0 (up to 0x14e) the stock -- check
+  against the item / stock menus when they run.
 
 - **The i3r run's file split** (2026-10-25, the i3rroot session, decided unattended):
   0x228c08..0x22e840 has no source strings. Pinned only `i3d/i3rroot.cpp` 0x22b1b0..0x22b4b8 (the

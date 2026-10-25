@@ -80,6 +80,12 @@ entries are marked **RoR** with the date.
 
 ## Functions Ghidra got wrong (the most common time sink in ReiPan)
 
+- **A dispatch table full of two-instruction functions.** The script native table data 0x2d90f8 has
+  512 entries, 471 of them `jr ra; move v0,zero` with no Ghidra function, and four real handlers hidden
+  inside the bodies before them (2026-10-25). Read the table words from the ELF, classify each target by
+  its first words (return 0 / lui+ori return code / real code), `mkfunc` the real ones, and let one host
+  function stand for the identical empty ones (seqcall.cpp seqFuncNone). Generate the C++ initializer
+  from the classification instead of typing 512 entries.
 - **A body swallows the unreferenced function after it.** Code reached only through data -- vtable
   slots, callback tables, dispatch tables, hook lists, step chains kept as function pointers, functions
   after a tail call -- was never made a function, so the previous function's body runs on over it. The

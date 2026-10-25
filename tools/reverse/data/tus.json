@@ -1,6 +1,5 @@
 {
  "queue": [
-  "unassigned@002053f4",
   "sequence/sequence.cpp",
   "unassigned@0020ff34",
   "game/gamman.cpp",
@@ -535,6 +534,33 @@
    "status": "verify",
    "why": "rx middleware thread layer: kernel wrappers from 0x249b88 (CreateSema, CreateThread), rxThInit, dispatch semaphore, rxThRequest/rxThYield, rxthread/rxThread messages, vsync and DMA wait helpers to 0x24b48c; libcdvd sceCdCallback starts at 0x24b490"
   },
+  "sequence/seqcall.cpp": {
+   "notes": "Left: 36 handler stubs in seqcall.cpp (seqFunc001, 002, 004, 006, 007, 009, 012, 014, 016, 019..039, 100..281); write each when a decoded script reaches it, not before. The boot screenshot stays black: Sequence::exec (sequence/sequence.cpp, next in the queue) and the VM 0x214c24 (unassigned@0020ff34) are stubs, so no native function runs yet. Decision (open-items Decisions): script registers are intptr_t on the host holding host addresses; native functions are intptr_t f(a0..a3, t0, t1) and return SEQ_RET_* codes (seqcall.h). Four handlers were hidden in earlier Ghidra bodies (0x205928, 0x206614, 0x208dc4, 0x20df98) and 0x205564 / 0x209344 had no function: all created. New host members: GamMan m_area (GamArea, +0x40), m_flags, m_flags2, m_pcActor, m_pcMotion, m_sysWord, m_equipItem, m_frameTaskId, m_sysTaskId, m_seqPair, m_seqWord; Sequence m_base, m_global, m_bits, m_flags. TskFrameFunc / TskSysFunc constructors are hand stubs in lib/unassigned_stubs.cpp. Start the next session in sequence.cpp: Sequence ctor 0x20e454 (three node pools), init, the image loader 0x20eda4 that GamMan::loadStage calls, exec.",
+   "ranges": [
+    [
+     "002053f4",
+     "0020e3d8"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-25 16:23",
+     "status": "partial",
+     "summary": "Script native functions: pinned sequence/seqcall.cpp 0x2053f4..0x20e3d8 (the 512-entry table data 0x2d90f8 the sequence VM calls), named 41 handlers seqFuncNNN and 37 callees, wrote the table, the empty and return-code entries, seqFunc000 (jump), seqFunc005 (rand) and the system call seqFunc018 0x20694c (menus incl. 8 / 0x16 the title menu 0x10005, items, stock, tasks, event scenes, fade key); seqSetLanguage / seqGetDataDir / seqMakeGlobalPath written in sequence/sequence.cpp (0x20e3d8..0x20ff34 pinned to it)"
+    }
+   ],
+   "status": "partial",
+   "why": "exactly the 512 script native functions of the table data 0x2d90f8 (the VM 0x214c24 calls entry (jal target - 0x144) / 0x40) plus the two helpers 0x20de34 / 0x20dea8 that entry 281 calls; the table's last entry is 0x20de2c and seqSetLanguage follows. File name invented (no source string): seq = sequence, call = what the script calls"
+  },
+  "sequence/sequence.cpp": {
+   "ranges": [
+    [
+     "0020e3d8",
+     "0020ff34"
+    ]
+   ],
+   "why": "Sequence::init 0x20e690 has the sequence/sequence.cpp string; before it seqSetLanguage, seqGetDataDir, seqMakeGlobalPath (the seq data folder and global script paths) and the Sequence constructor / destructor / term the static initializer and sysTermManagers call; Sequence::exec ends at 0x20ff34 where the VM run unassigned@0020ff34 starts"
+  },
   "setup/ghidra_seed.cpp": {
    "notes": "Done. Snapshot of the names before seeding: work/snapshots/20261022_094006.json (gitignored, local). Every section function's Ghidra body now equals its section; the 3 tail-jump targets that do not follow a jr ra are labels inside functions (0x218424, 0x23a000, 0x2480a0) and were left alone. libmatch.py --list shows 5 SKIP rows, all named by hand already. Next: setup/platform_bootstrap.cpp.",
    "sessions": [
@@ -671,6 +697,7 @@
   "unassigned@00164fc0": {},
   "unassigned@00190a78": {},
   "unassigned@001bde58": {},
+  "unassigned@002053f4": {},
   "unassigned@0020eda4": {},
   "unassigned@00216ad0": {},
   "unassigned@0021fb50": {},
