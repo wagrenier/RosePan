@@ -6,6 +6,39 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**TOP PRIORITY (the user, 2026-10-25): the title menu working and on screen.** This supersedes the
+render-first list below (most of it is written, `verify`). How the ROM gets there (traced 2026-10-25):
+main -> mainInitGame -> `GamMan::loadSystemData` 0x1c1b48 / `GamMan::loadStage(99)` 0x1c204c (99 is the
+default boot stage) -> loadStage reads `data/SEQ/W099/W000.WRD` (a pfh: 19 KB on the disc) and hands it
+to the sequence engine (`0x20eda4(0x7a4440, ...)`) -> each frame `GamMan::update` and the sequence VM
+(`Sequence::exec` 0x20f98c) run the stage script -> the script's system call 0x16 (handler 0x20694c,
+table 0x2d9140) does `MagScene::fadeIn(0, 7, 0)` and `MagScene::requestMenu(0x10005)` -> MagScene::update
+-> `openMenu(0x10005)` (written) selects MagLifeMenuTitle (MagScene +0x36640; vtable 0x2e17d8) -> its
+slots 9 / 12 / 6 (0x12d2e8 init, 0x12d314 pad, 0x12d32c draw) forward to the title object at +0x40,
+code 0x1a91f4 / 0x1a92a0 / 0x1a972c (unassigned@001a6830, the mnu/ menu code: SprMan, SndMan, RxMpeg,
+data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x10002 stock, 0x10003 save,
+0x10004 load, 0x10006 option, 0x10007 movie. Missing today (all stubs or unwritten), queued in run order:
+  1. `unassigned@002053f4` -- the seq script system: G000.GRB / g000.seq globals, seqSet*, the system
+     call handler 0x20694c (0x16 = title). Name its file (seq/ or sequence/).
+  2. `sequence/sequence.cpp` -- the Sequence VM (`Sequence::exec` is a reached stub).
+  3. `unassigned@0020ff34` -- the script thread scheduler ("mst", "trg", "imdy", "single") the VM calls.
+  4. `game/gamman.cpp` -- slice: loadSystemData, loadStage, update, postUpdate (409 functions: only the
+     load / update path, the rest stays stubs).
+  5. `unassigned@001fd424` -- sysInitManagers 0x204148, SysTimer::start / update (reached stubs).
+  6. `unassigned@001e46b8` -- CmnTaskMan::exec / addTask and 0x1f688c that GamMan::update calls (the
+     per-frame task runner; 253 functions: only what the title path reaches).
+  7. `bed/bedpad.cpp` -- BedPad::init / update: the menu needs pad input to "work"; extend
+     `settings.smoke_pad` to press through the title once it shows.
+  8. `mag/maglifemenu.cpp` -- MagLifeMenuTitle's wrappers and the MagLifeMenuBase methods.
+  9. `unassigned@001a6830` -- the title screen itself (init / pad / draw at 0x1a91f4.., mnuboard.rpk).
+  10. `snd/rxmpeg.cpp`, `unassigned@001810f4` -- RxMpeg: the title code calls it 13 times (background
+     movie; the logo movie may come first in the W099 script). If the script waits on a movie, a
+     host stand-in that reports "ended" unblocks the title before real MPEG playback.
+  Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
+  select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
+  queue what it reaches. The test is the picture: the title menu on screen matching its textures
+  (`python tm2png.py --scan data/mnurpk/...` into work/ref/), then a New Game press via smoke_pad.
+
 **TOP PRIORITY (the user, 2026-10-22, live during the rx sound run): get something to render first.**
 Queued at the top of tus.json in this order: (1) DONE 2026-10-22: DogLightPool::createLight
 0x11262c (now `dog/doglightpool.cpp`, `verify` since the second session: every function written; the
