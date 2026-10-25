@@ -2459,6 +2459,12 @@
   "was": "FUN_0013f280",
   "why": "opens a message window with message id and 16 argument words (copied), returns its handle; next to MagScene::closeSysMsgWindow 0x13f458"
  },
+ "0013f444": {
+  "name": "MagScene::isWindowOpen",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f444",
+  "why": "m_window[win] (+0x2734, MAX_WINDOW text windows) != NULL; GamMan::isMsgBusy, native 004 case 15"
+ },
  "0013f458": {
   "name": "MagScene::closeSysMsgWindow",
   "tag": "ror-inferred",
@@ -4577,6 +4583,12 @@
   "was": "FUN_001cb01c",
   "why": "frees the +0x1d240 records calling MagScene::releaseTenkyu on each, then frees +0x225e8"
  },
+ "001cb1c0": {
+  "name": "GamMan::resetTenkyuFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb1c0",
+  "why": "clears bit 0 of the first word of every used record of the sky dome pool +0x1d240; returns 0; native 004 case 1"
+ },
  "001cb24c": {
   "name": "GamMan::setPc",
   "tag": "ror-inferred",
@@ -4679,6 +4691,12 @@
   "was": "FUN_001ccc30",
   "why": "loadStage calls it with +0x21fcc / +0x21fd0 after saving the PC / dog ObjStat; removes private collision, kills tasks"
  },
+ "001cd044": {
+  "name": "GamMan::requestStage",
+  "tag": "ror-inferred",
+  "was": "FUN_001cd044",
+  "why": "records a stage change for afterSeqExec: kind 1 a new chapter (m_stageReq 5, globals 0x2f / 0x30 new / old chapter), else kind 2 / 3 (m_stageReq 3) with the room in +0x21f7c or +0x21f80; keeps the old m_cur_stat in +0x21f44, sets flags2 0x80000002, pauses the other tasks; native 029"
+ },
  "001cd224": {
   "name": "GamMan::releaseStage2",
   "tag": "ror-inferred",
@@ -4726,6 +4744,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001cdf5c",
   "why": "releaseStage2 calls it with (2, 0); not read yet"
+ },
+ "001cf9d4": {
+  "name": "GamMan::isMsgBusy",
+  "tag": "ror-inferred",
+  "was": "FUN_001cf9d4",
+  "why": "1 while the message task +0x222a0 runs or the system message window +0x2227c is open (MagScene 0x13f444); native 004 case 7"
  },
  "001cfb38": {
   "name": "GamMan::setSysMsgHandle",

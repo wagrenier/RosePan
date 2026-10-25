@@ -163,9 +163,11 @@ int DogActor::setMotion(float speed, int theID, u_int flags, int flags2, int p1d
     return {};
 }
 
-// stub of ROR 0x0010a834
+// ──────────────────────────────────────────────────────────────────────
+// The actor is in a mode (native 004 case 17 waits while it is).
+// ROR 0x0010a834
+
 bool DogActor::isModeSet() const
 {
-    ROSEPAN_STUB("DogActor::isModeSet", 0x0010a834);
-    return {};
+    return m_mode != 0;
 }

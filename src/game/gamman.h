@@ -263,12 +263,14 @@ static_assert(sizeof(GamRec16) == 0x10, "GamRec16");
  * hands m_no to MagScene::releaseTenkyu. */
 struct GamTenkyuRec
 {
-    int _0[2];
+    u_int m_flags;              // ROR 0x0: bit 0 cleared by resetTenkyuFlags (role unverified)
+    int _4;
     int m_no;                   // ROR 0x8: the scene's tenkyu number
     int _c;
 };
 static_assert(sizeof(GamTenkyuRec) == 0x10, "GamTenkyuRec");
 static_assert(offsetof(GamTenkyuRec, m_no) == 0x8, "m_no");
+static_assert(offsetof(GamTenkyuRec, m_flags) == 0x0, "m_flags");
 
 /* A record of the pool +0x20b00 (EE 8): an object's entry in the scene's
  * +0x837e0 table (ctlObj1cbb80 releases it). */
@@ -473,6 +475,11 @@ struct GamMan
     void releaseStage2();                                                // ROR 0x001cd224
     void releaseObjs(int kind, int arg);                                 // ROR 0x001cdf5c
     /* Sequence::exec's last call: the stage-change requests in flags2. */
+    /* Records a stage change for afterSeqExec: kind 1 chapter (a full
+     * reset, m_stageReq 5), kind 2 room into +0x21f7c, kind 3 a3 into
+     * +0x21f80 (m_stageReq 3); word goes to +0x1a684. Kind 2 to the room
+     * already loaded only resumes the menu pause. */
+    void requestStage(int kind, int room, int a3, int chapter, u_int word); // ROR 0x001cd044
     void afterSeqExec();                                                 // ROR 0x001cd25c
     void storePcTransform();                                             // ROR 0x001cd404
     void startStage2();                                                  // ROR 0x001cd60c
@@ -493,6 +500,10 @@ struct GamMan
     int  resetObj(u_int oid, u_int bits);                                // ROR 0x001d1410
     /* MagScene's open menu id != -1. */
     int  isMenuOpen();                                                   // ROR 0x001d1a48
+    /* Clears bit 0 of every sky dome record's flags; returns 0. */
+    int  resetTenkyuFlags();                                             // ROR 0x001cb1c0
+    /* 1 while the message task runs or the system message window is open. */
+    int  isMsgBusy();                                                    // ROR 0x001cf9d4
     int  isAchr(u_int oid);                                              // ROR 0x001d2aac
     int  isFchr(u_int oid);                                              // ROR 0x001d2adc
     int  isVFchr(u_int oid);                                             // ROR 0x001d2b10
@@ -573,6 +584,7 @@ struct GamMan
     ACHRstat    *m_achr[0x80];      // ROR 0x21340: by oid slot (set_achr)
     FCHRstat    *m_fchr[0x280];     // ROR 0x21540: by oid slot (slots 1..0x27f)
     int          m_cur_stat;        // ROR 0x21f40: getCurStat; 0 system data, 1 a stage loading
+    int          m_prev_stat;       // ROR 0x21f44: m_cur_stat before the last requestStage
     u_int        m_flags;           // ROR 0x21f48: getSysFlg; 1 one second passed (isOneSec), 0x400 setExistMenu, 0x40000 the reset frame
     u_int        m_flags2;          // ROR 0x21f4c: chkSysFlg2; 0x2000 / 0x4000 read by system call 0x22
     int          m_chapter;         // ROR 0x21f50: getChapter, the stage loadStage loaded
