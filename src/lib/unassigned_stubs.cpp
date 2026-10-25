@@ -39,6 +39,7 @@ WrdTable   g_wrdTable;          /* data 0x298ee0: data/wrd/WRD.BIN's table */
 int g_emyManagerTaskId;         /* bss 0x7b45c0 */
 int g_bss_7a3d48;               /* bss 0x7a3d48 */
 int g_bss_7a3d4c;               /* bss 0x7a3d4c */
+int g_bss_7a3210;               /* bss 0x7a3210 */
 int g_bss_7812ac;               /* bss 0x7812ac */
 int g_bss_780d04;               /* bss 0x780d04: GamMan option 0 (brightness) */
 

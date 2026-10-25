@@ -72,6 +72,15 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      endThreadOf 0x2129b8.. are its neighbours), then `GamSysData::getField` 0x1dc48c
      (unassigned, after gamman), `GamMan::createObjByModel` / `addChr` / `setMurder` /
      `setLightFlag` (game/gamman.cpp).
+  4c. DONE 2026-10-25 (`verify`, sequence/seqvm.cpp complete, 143/143): queueThread and the
+     other starters / queries / save data are written. G000's registered threads now start: the
+     smoke run newly reaches **seqFunc004** 0x205570 and **seqFunc029** 0x208b98 (natives, write
+     next in sequence/seqcall.cpp), then `MagLifeFader::start`, `MagScene::gamEnterMenu`,
+     `getMenuFadeOutTime` and `MagLifeMenuItem::isInit / init / processPad`: the **item menu**
+     (0x10000) opens, not the title. A trace showed it is not system call 1 (seqFunc018 case 1);
+     candidates: MagScene::update mode 1's pad test (pad0 +0x7c bit 3 with BedPad::update a
+     stub) or seqFunc018 0x07 / 0x09 with a1 = 0x10000. Find which first -- the title needs the
+     right menu. Still black.
   5. `unassigned@001fd424` -- sysInitManagers 0x204148, SysTimer::start / update (reached stubs).
   6. `unassigned@001e46b8` -- CmnTaskMan::exec / addTask and 0x1f688c that GamMan::update calls (the
      per-frame task runner; 253 functions: only what the title path reaches).

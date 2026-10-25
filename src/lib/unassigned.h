@@ -131,6 +131,10 @@ extern int g_emyManagerTaskId;  /* bss 0x7b45c0: addTask's id for EmyManager (re
  * known yet. */
 extern int g_bss_7a3d48;        /* bss 0x7a3d48: main sets 1 */
 extern int g_bss_7a3d4c;        /* bss 0x7a3d4c: main sets 1 */
+/* An index 1..13 (other values count as 9) that picks the save slot of the
+ * sequence globals and bits (Sequence::saveGlobals); 0x172b30, 0x1af130,
+ * 0x1b4488, 0x216ad0, 0x217260 read it too. Role not known yet. */
+extern int g_bss_7a3210;        /* bss 0x7a3210 */
 
 /* The object at bss 0x7b40c0 (constructor 0x1810f4: sizes 0x200 / 0x180 /
  * 0xe00, between snd/sndman.cpp and snd/rxmpeg.cpp): a movie player, class

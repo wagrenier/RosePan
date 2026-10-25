@@ -1,6 +1,5 @@
 {
  "queue": [
-  "sequence/seqvm.cpp",
   "sequence/seqcall.cpp",
   "unassigned@0020ff34",
   "game/gamman.cpp",
@@ -605,7 +604,7 @@
    "why": "Sequence::init 0x20e690 has the sequence/sequence.cpp string; before it seqSetLanguage, seqGetDataDir, seqMakeGlobalPath (the seq data folder and global script paths) and the Sequence constructor / destructor / term the static initializer and sysTermManagers call; Sequence::exec ends at 0x20ff34 where the VM run unassigned@0020ff34 starts"
   },
   "sequence/seqvm.cpp": {
-   "notes": "Left in this file: the other thread starters and queries 0x211830 (imdy), 0x211be4 (single), 0x2120ac, 0x212330 (trg), 0x212598, 0x2129b8, 0x212a5c, 0x212d08, 0x212e64, 0x212fbc, 0x213b7c, 0x213bfc, 0x213d90, 0x213e78, 0x214e98, 0x2150b0, 0x2152b8, 0x215430 -- write them when the natives that call them are written (their callers are seqFunc stubs). The boot screenshot is unchanged (Now Loading corner): GamMan::loadSystemData / loadStage are stubs, so no image is loaded in the plain boot. With ROSEPAN_SEQ_TEST=1 (src/rosepan/rosepan_seqtest.cpp, hooked in Sequence::exec) the VM runs G000 and W099/W000.WRD correctly: G000 main = system call 0x1e, ~80 x native 110, system call 0x14 x19, 0x15, return; W099 main = natives 18, 32, 1, 2, 33, 27 x2, 21 x5, return -- no title call yet (open-items Next up 3 has the arguments). Decisions: script memory words keep host pointers beside memory (seqVmLoadWord / StoreWord / CopyArea, open-items Decisions); NULL table entries and out-of-range native indexes are skipped on the host (the ROM calls address 0). Header changes: SeqThread m_name / m_wait / m_reg, Sequence m_single (+0xdc30, replaces m_name / m_arg) and m_record (+0xdce0), killThreads(int idx) without the bogus second argument, seqVmLoadThread(void). The key unassigned@0020ff34 now names only the debug range 0x2155a0..0x215e1c (assert handler 0x215a30, debugNop, dbgTraceVector3 / 4).",
+   "notes": "Status verify: complete code, screen still black. New in the boot: the registered threads run and reach seqFunc004 0x205570 and seqFunc029 0x208b98 (stubs in sequence/seqcall.cpp, the next work), then MagLifeFader::start, MagScene::gamEnterMenu and MagLifeMenuItem init / processPad: the item menu 0x10000 opens instead of the title. A temporary trace showed seqFunc018 case 1 is not the caller; check MagScene::update mode 1 pad test (BedPad::update is a stub) and seqFunc018 cases 0x07 / 0x09 next (open-items Next up 4c). ROM facts kept: execImmediate selects image 2 at the end whatever ran (li a0, 2), startThread and queueSingle copy their name into m_single, not the queued thread. Header: endThreadOf takes the thread name (const char pointer), SeqTrgRec (EE layout, +0x2c image, +0x30 id, +0x34 entry), SEQ_GLOBAL_SLOT / SEQ_BITS_SLOT, g_seqCallNowKind (bss 0x7b4dc0, only callEntryNow writes it), g_bss_7a3210 in lib/unassigned (the save slot index 1..13, else 9; role unknown). queueTrigger stores a host pointer truncated into m_area (unreferenced code). Save data are raw words: wide script pointers in the globals are not saved.",
    "ranges": [
     [
      "0020ff34",
@@ -617,9 +616,14 @@
      "date": "2026-10-25 17:15",
      "status": "partial",
      "summary": "The sequence script VM: pinned sequence/seqvm.cpp 0x20ff34..0x2155a0 (was unassigned@0020ff34), created and named 104 Ghidra functions (the 99 opcode handlers of the tables data 0x2d9958 / 0x2d9a58 / 0x2d9b08 and 5 hidden ones); wrote 125 functions: every handler, seqVmRun, setupImage, the image / thread save and load, stack and call-save slots, startThread, execThread, waitFrames, jumpTo, killThreads, find / has thread, the entry pool. PC: pointer-preserving script memory words. Tested on the real G000 and W099 scripts with ROSEPAN_SEQ_TEST=1."
+    },
+    {
+     "date": "2026-10-25 19:03",
+     "status": "verify",
+     "summary": "Finished the sequence VM file (143/143): queueThread, callEntry, callEntryNow with execImmediate 0x211830 (imdy), endThread, endThreadOf with findThreadNamed / hasThreadNamed, endThreadsWithArg, queueSingle (single), queueTrigger / queueTriggerThread (trg, unreferenced) and the save data saveGlobals / saveBits / loadGlobals / loadBits; named 13 Ghidra functions (batch seqvm_002). G000's registered threads now start in the smoke run."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "The script VM after sequence.cpp: opcode handlers (tables data 0x2d9958 / 0x2d9a58 / 0x2d9b08), seqVmRun, the thread record save / load and the Sequence thread methods (startThread, killThreads, findThread, setupImage). No source-path string; a separate file is a guess (sequence.cpp could hold it all). 0x2155a0.. is debug / assert code, not the VM."
   },
   "setup/ghidra_seed.cpp": {
