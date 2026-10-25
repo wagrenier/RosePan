@@ -57,14 +57,43 @@ struct RxSndCmdChannelSet
 {
     u_short m_id;                       // ROR +0x0
     u_short m_channel;                  // ROR +0x2
-    u_short m_param;                    // ROR +0x4: 3 volume
+    u_short m_param;                    // ROR +0x4: 3 volume, 5 not known
     u_short m_6;                        // ROR +0x6: always 0
-    short   m_vol[2];                   // ROR +0x8: L, R (the other side 0)
+    union
+    {
+        short m_vol[2];                 // ROR +0x8: L, R (the other side 0)
+        int   m_value;                  // ROR +0x8: parameter 5
+    };
 };
 static_assert(sizeof(RxSndCmdChannelSet) == 0xc, "RxSndCmdChannelSet");
 static_assert(offsetof(RxSndCmdChannelSet, m_channel) == 0x2, "RxSndCmdChannelSet::m_channel");
 static_assert(offsetof(RxSndCmdChannelSet, m_param) == 0x4, "RxSndCmdChannelSet::m_param");
 static_assert(offsetof(RxSndCmdChannelSet, m_vol) == 0x8, "RxSndCmdChannelSet::m_vol");
+
+/* Queued command 0xb0: open a PCM stream. EE 0xc. */
+struct RxSndCmdPcmOpen
+{
+    u_char m_id;                        // ROR +0x0
+    u_char m_mode;                      // ROR +0x1
+    u_char _2[2];
+    u_int  m_iopBuf;                    // ROR +0x4
+    int    m_blocks;                    // ROR +0x8
+};
+static_assert(sizeof(RxSndCmdPcmOpen) == 0xc, "RxSndCmdPcmOpen");
+static_assert(offsetof(RxSndCmdPcmOpen, m_mode) == 0x1, "RxSndCmdPcmOpen::m_mode");
+static_assert(offsetof(RxSndCmdPcmOpen, m_iopBuf) == 0x4, "RxSndCmdPcmOpen::m_iopBuf");
+static_assert(offsetof(RxSndCmdPcmOpen, m_blocks) == 0x8, "RxSndCmdPcmOpen::m_blocks");
+
+/* Queued command 0xb1: m_count more blocks of a PCM stream are filled; their
+ * sequence numbers (int each) follow. EE 0x4 + 4 * m_count. */
+struct RxSndCmdPcmData
+{
+    u_char m_id;                        // ROR +0x0
+    u_char m_count;                     // ROR +0x1
+    u_char _2[2];
+};
+static_assert(sizeof(RxSndCmdPcmData) == 0x4, "RxSndCmdPcmData");
+static_assert(offsetof(RxSndCmdPcmData, m_count) == 0x1, "RxSndCmdPcmData::m_count");
 
 /* Commands 0x73 / 0x74: one channel's parameter of a BGM slot. EE 0xc. */
 struct RxSndCmdBgmChannelSet
@@ -185,7 +214,7 @@ struct RxSndPcmStatusEntry              /* EE 0xc */
 {
     u_char m_id;                        // ROR +0x0
     u_char m_status;                    // ROR +0x1
-    short  m_2;                         // ROR +0x2: stored in RxSndPcm::m_20 (unverified)
+    short  m_2;                         // ROR +0x2: stored in RxSndPcm::m_queued (unverified)
     int    m_posHi;                     // ROR +0x4: play position, compared signed
     int    m_posLo;                     // ROR +0x8
 };
@@ -358,22 +387,31 @@ struct RxSndPosCallback
     int               m_arg;            // ROR +0x10
 };
 
-/* A PCM stream (bss 0x7bd804, 32). layout: host -- pointers. EE 0x3c. */
+/* A PCM stream (bss 0x7bd804, 32): an IOP ring of m_blocks blocks of
+ * m_blockSize bytes (mode 0: 0x800, modes 1..3: 0x1000; mode 1 keeps the
+ * left half of each block in the first m_blocks * 0x800 bytes and the right
+ * half after them). Whole blocks are announced to the IOP with a running
+ * sequence number. layout: host -- pointers. EE 0x3c. */
 struct RxSndPcm
 {
     RxSndPcm         *m_next;           // ROR +0x0
     int               m_id;             // ROR +0x4
-    int               m_8;              // ROR +0x8
+    int               m_user;           // ROR +0x8: rxSndPcmSetUserData, unread by the library
     u_int             m_iopBuf;         // ROR +0xc: IOP address
-    int               _10[2];
+    int               m_blocks;         // ROR +0x10
+    int               m_blockSize;      // ROR +0x14
     u_char            m_status;         // ROR +0x18: 1 open, 2 playing, 4 ended, 8 paused
-    u_char            _19;
+    u_char            m_mode;           // ROR +0x19: 0..3
     u_char            m_alloc;          // ROR +0x1a: bit 0 m_iopBuf is ours
     u_char            _1b;
     short             m_volL;           // ROR +0x1c
     short             m_volR;           // ROR +0x1e
-    int               m_20;             // ROR +0x20: RxSndPcmStatusEntry::m_2
-    int               _24[5];
+    int               m_queued;         // ROR +0x20: blocks the IOP holds (RxSndPcmStatusEntry::m_2)
+    int               m_ringSize;       // ROR +0x24: m_blocks * m_blockSize
+    int               m_writePos;       // ROR +0x28: next write offset in the ring
+    int               m_pending;        // ROR +0x2c: bytes written past the last whole block
+    int               m_seq;            // ROR +0x30: sequence number of the next block
+    int               m_attr;           // ROR +0x34: rxSndPcmSetAttr; rxSndPcmEnd's mode 3 padding
     RxSndPosCallback *m_callbacks;      // ROR +0x38
 };
 
@@ -390,7 +428,7 @@ struct RxSndAdpcm
     u_char            m_end;            // ROR +0xb: rxSndAdpcmEnd sent the end block
     u_char            m_channels;       // ROR +0xc
     u_char            _d[3];
-    int               m_10;             // ROR +0x10: set 0 at open
+    int               m_user;           // ROR +0x10: rxSndAdpcmSetUserData, 0 at open
     short             m_volL;           // ROR +0x14
     short             m_volR;           // ROR +0x16
     u_int             m_iopBuf;         // ROR +0x18: IOP address
@@ -694,5 +732,50 @@ void  rxSndAdpcmSetPitch(int stream, float pitch);                       // ROR 
 /* Queued command 0xa2 parameters 6 (0..2) and 7 (0..0x7f). */
 void  rxSndAdpcmSetParam6(int stream, int value);                        // ROR 0x0023f470
 void  rxSndAdpcmSetParam7(int stream, int value);                        // ROR 0x0023f538
+/* rxSndAdpcmOpenBytes's defaults for parameters 6 (0..2) and 7 (0..0x7f). */
+void  rxSndAdpcmSetDefaultParam6(int value);                             // ROR 0x0023dc68
+void  rxSndAdpcmSetDefaultParam7(int value);                             // ROR 0x0023dc98
+void  rxSndAdpcmCloseAll(void);                                          // ROR 0x0023e118
+/* Calls func(stream, arg) once the play position passes `offset` bytes
+ * (all channels) after what has been written so far. 0 when no node is free. */
+int   rxSndAdpcmAddCallback(int stream, int offset, RxSndPosFunc func, int arg); // ROR 0x0023ed10
+int   rxSndAdpcmSetUserData(int stream, int data);                       // ROR 0x0023ee68
+int   rxSndAdpcmGetUserData(int stream);                                 // ROR 0x0023eeb0
+/* Command 0xa4 parameter 3 for one channel, without the master volumes. */
+void  rxSndAdpcmSetChannelVolume(int stream, int channel, int volL, int volR); // ROR 0x0023f1d8
+/* Command 0xa4 parameter 5 (not known) for one channel. */
+void  rxSndAdpcmSetChannelParam5(int stream, int channel, int value);    // ROR 0x0023f3c0
+u_long rxSndAdpcmGetPosition(int stream);                                // ROR 0x0023f600
+
+/* PCM streams fed from memory, the block-ring twin of the ADPCM streams
+ * (the sound driver's slot table at 0x298f68 pairs them). Status: bit 0
+ * open, bit 2 ended, bit 3 paused. */
+/* Queued command 0x31 {0, 0, 0xffc when on, else 0xfcc}: mix bits (not known). */
+void  rxSndSetSysMix(int on);                                            // ROR 0x0023cba0
+/* Queued command 0x31 {0, 2, L, R}: 0x7fff both, 0 both when muted. */
+void  rxSndSetSysMute(int mute);                                         // ROR 0x0023cbf8
+/* Queued command 0xb4 {value} (not known). */
+void  rxSndPcmSetParamB4(int value);                                     // ROR 0x0023cc68
+/* Opens a stream of `blocks` blocks (RxSndPcm); iopAddr 0: allocated here.
+ * Returns the stream, -1 on failure. */
+int   rxSndPcmOpen(int mode, u_int iopAddr, int blocks);                 // ROR 0x0023cca8
+void  rxSndPcmClose(int stream);                                         // ROR 0x0023ce98
+void  rxSndPcmCloseAll(void);                                            // ROR 0x0023cf90
+u_int rxSndPcmGetStatus(int stream);                                     // ROR 0x0023cfd0
+/* The bytes rxSndPcmWrite can take now. */
+int   rxSndPcmGetFree(int stream);                                       // ROR 0x0023d018
+/* Feeds up to `size` bytes (mode 1: half from data, half from dataR);
+ * returns what was taken. */
+int   rxSndPcmWrite(int stream, const void *data, const void *dataR, int size); // ROR 0x0023d078
+/* Pads the last block and tells the IOP no more data comes. */
+void  rxSndPcmEnd(int stream);                                           // ROR 0x0023d360
+/* Calls func(stream, arg) once the play position passes `offset` bytes
+ * after what has been written so far. 0 when no node is free. */
+int   rxSndPcmAddCallback(int stream, int offset, RxSndPosFunc func, int arg); // ROR 0x0023d4b8
+int   rxSndPcmSetUserData(int stream, int data);                         // ROR 0x0023d610
+int   rxSndPcmGetUserData(int stream);                                   // ROR 0x0023d658
+/* Command 0xb2 parameter 2 (the stream twin of rxSndSeSetAttr). */
+void  rxSndPcmSetAttr(int stream, int value);                            // ROR 0x0023d6a0
+void  rxSndPcmPause(int stream, int pause);                              // ROR 0x0023d740
 
 #endif /* _RX_RXSND_H */

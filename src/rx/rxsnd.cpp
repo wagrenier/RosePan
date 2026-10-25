@@ -82,6 +82,8 @@ static RxSndPcm         *s_pcmStopping;            /* bss 0x7bdf88 */
 static RxSndPcm         *s_pcmFree;                /* bss 0x7bdf8c */
 static short             s_pcmMasterVolL;          /* bss 0x7bdf90 */
 static short             s_pcmMasterVolR;          /* bss 0x7bdf92 */
+/* rxSndPcmEnd's mode 3 padding: 0x400 copies of the stream's attr word. */
+static short             s_pcmPad[0x800];          /* bss 0x7bdfc0 */
 
 static RxSndPosCallback  s_adpcmCallbacks[256];    /* bss 0x7befc0 */
 static RxSndPosCallback *s_adpcmCallbackFree;      /* bss 0x7c03c0 */
@@ -2617,6 +2619,397 @@ void rxSndPcmSetMasterVolume(int volL, int volR)
         rxSndPcmSetVolume(pcm->m_id, pcm->m_volL, pcm->m_volR);
 }
 
+// ROR 0x0023cba0
+void rxSndSetSysMix(int on)
+{
+    rxSndQueueBegin(0x31, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_value = 0xfcc;
+    cmd->m_id    = 0;
+    cmd->m_param = 0;
+    if (on != 0)
+        cmd->m_value = 0xffc;
+    rxSndQueueEnd();
+}
+
+// ROR 0x0023cbf8
+void rxSndSetSysMute(int mute)
+{
+    rxSndQueueBegin(0x31, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_param = 2;
+    cmd->m_id    = 0;
+    if (mute == 0)
+    {
+        cmd->m_vol[0] = 0x7fff;
+        cmd->m_vol[1] = 0x7fff;
+    }
+    else
+    {
+        cmd->m_vol[0] = 0;
+        cmd->m_vol[1] = 0;
+    }
+    rxSndQueueEnd();
+}
+
+// ROR 0x0023cc68
+void rxSndPcmSetParamB4(int value)
+{
+    rxSndQueueBegin(0xb4, 0, sizeof(int));
+    int *cmd = (int *)rxSndQueueGetData();
+    *cmd     = value;
+    rxSndQueueEnd();
+}
+
+// ROR 0x0023cca8
+int rxSndPcmOpen(int mode, u_int iopAddr, int blocks)
+{
+    RxSndPcm *pcm   = s_pcmFree;
+    u_char    owned = 0;
+    if (pcm == NULL)
+    {
+        if (rxSndGetDebugFlags() & 4)
+            rxSysPrintf("rxsnd : can't allocate PCM stream slot\n");
+        return -1;
+    }
+
+    int blockSize;
+    if (mode == 0)
+    {
+        blockSize = 0x800;
+    }
+    else if (mode > 0 && mode < 4)
+    {
+        blockSize = 0x1000;
+    }
+    else
+    {
+        if (rxSndGetDebugFlags() & 1)
+            rxSysPrintf("rxsnd : unknow PCM mode '%d'\n", mode);
+        return -1;
+    }
+
+    if (iopAddr == 0)
+    {
+        iopAddr = rxSndIopAlloc(blocks * blockSize);
+        owned   = 1;
+        if (iopAddr == 0)
+            return -1;
+    }
+
+    rxSndQueueBegin(0xb0, 0, sizeof(RxSndCmdPcmOpen));
+    RxSndCmdPcmOpen *cmd = (RxSndCmdPcmOpen *)rxSndQueueGetData();
+    cmd->m_blocks = blocks;
+    cmd->m_id     = (u_char)pcm->m_id;
+    cmd->m_mode   = (u_char)mode;
+    cmd->m_iopBuf = iopAddr;
+    rxSndQueueEnd();
+
+    pcm->m_mode      = (u_char)rxSndClamp(mode, 0, 3);
+    pcm->m_status    = 1;
+    pcm->m_volR      = 0x80;
+    pcm->m_ringSize  = blocks * blockSize;
+    pcm->m_volL      = 0x80;
+    pcm->m_alloc     = owned;
+    pcm->m_user      = 0;
+    pcm->m_blockSize = blockSize;
+    pcm->m_iopBuf    = iopAddr;
+    pcm->m_blocks    = blocks;
+    pcm->m_queued    = blocks;
+    pcm->m_writePos  = 0;
+    pcm->m_pending   = 0;
+    pcm->m_seq       = 0;
+    pcm->m_callbacks = NULL;
+    pcm->m_attr      = 0;
+    rxSndPcmSetVolume(pcm->m_id, 0x80, 0x80);
+    s_pcmFree   = pcm->m_next;
+    pcm->m_next = s_pcmActive;
+    s_pcmActive = pcm;
+
+    if (rxSndGetDebugFlags() & 4)
+        rxSysPrintf("rxsnd : open PCM '%d'\n        IOP %08X - %08X ( %d )\n", pcm->m_id, iopAddr,
+                    iopAddr + pcm->m_blockSize * blocks, pcm->m_blockSize * blocks);
+    return pcm->m_id;
+}
+
+// ROR 0x0023ce98
+void rxSndPcmClose(int id)
+{
+    rxSndCallBgCallHook("rxSndPcmClose");
+
+    RxSndPcm **link = &s_pcmActive;
+    RxSndPcm  *pcm;
+    for (;;)
+    {
+        pcm = *link;
+        if (pcm == NULL)
+            return;
+        if (pcm->m_id == id)
+            break;
+        link = &pcm->m_next;
+    }
+
+    rxSndQueueBegin(0xb2, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_value = 0;
+    cmd->m_id    = pcm->m_id;
+    cmd->m_param = 0;
+    rxSndQueueEnd();
+
+    while (pcm->m_callbacks != NULL)
+    {
+        RxSndPosCallback *cb = pcm->m_callbacks;
+        pcm->m_callbacks     = cb->m_next;
+        cb->m_next           = s_pcmCallbackFree;
+        s_pcmCallbackFree    = cb;
+    }
+    pcm->m_status = 0;
+    *link         = pcm->m_next;
+    pcm->m_next   = s_pcmStopping;
+    s_pcmStopping = pcm;
+}
+
+// ROR 0x0023cf90
+void rxSndPcmCloseAll(void)
+{
+    for (int i = 0; i < 0x20; i++)
+        rxSndPcmClose(i);
+}
+
+// ROR 0x0023cfd0
+u_int rxSndPcmGetStatus(int id)
+{
+    if ((u_int)id < 0x20 && (s_pcm[id].m_status & 1))
+        return s_pcm[id].m_status;
+    return 0;
+}
+
+// ROR 0x0023d018
+int rxSndPcmGetFree(int id)
+{
+    if ((u_int)id >= 0x20 || !(s_pcm[id].m_status & 1))
+        return 0;
+
+    RxSndPcm *pcm = &s_pcm[id];
+    return (pcm->m_blocks - pcm->m_queued) * pcm->m_blockSize - pcm->m_pending;
+}
+
+// ROR 0x0023d078
+int rxSndPcmWrite(int id, const void *data, const void *dataR, int size)
+{
+    if ((u_int)id > 0x1f)
+        return 0;
+    RxSndPcm *pcm = &s_pcm[id];
+    if (!(pcm->m_status & 1))
+        return 0;
+
+    int n = size;
+    if (n > rxSndPcmGetFree(id))
+        n = rxSndPcmGetFree(id);
+    if (n < 0)
+        n = 0;
+    if (n < 1)
+        return n;
+
+    const u_char *src  = (const u_char *)data;
+    const u_char *srcR = (const u_char *)dataR;
+    int           rest = n;
+    switch (pcm->m_mode)
+    {
+    case 1:
+        /* Left halves in the first m_blocks * 0x800 bytes, right ones after. */
+        do
+        {
+            int chunk = pcm->m_ringSize - pcm->m_writePos;
+            if (rest < chunk)
+                chunk = rest;
+            if (chunk < 0)
+                chunk = 0;
+            rest -= chunk;
+            int half = chunk / 2;
+            rxSndIopWrite(pcm->m_iopBuf + pcm->m_writePos / 2, src, half);
+            rxSndIopWrite(pcm->m_iopBuf + pcm->m_writePos / 2 + pcm->m_blocks * 0x800, srcR, half);
+            pcm->m_writePos += chunk;
+            if (pcm->m_writePos >= pcm->m_ringSize)
+                pcm->m_writePos = 0;
+            src += half;
+            srcR += half;
+        } while (rest > 0);
+        break;
+    case 0:
+    case 2:
+    case 3:
+        do
+        {
+            int chunk = pcm->m_ringSize - pcm->m_writePos;
+            if (rest < chunk)
+                chunk = rest;
+            if (chunk < 0)
+                chunk = 0;
+            rest -= chunk;
+            rxSndIopWrite(pcm->m_iopBuf + pcm->m_writePos, src, chunk);
+            src += chunk;
+            pcm->m_writePos += chunk;
+            if (pcm->m_writePos >= pcm->m_ringSize)
+                pcm->m_writePos = 0;
+        } while (rest > 0);
+        break;
+    }
+
+    /* Announce the blocks this write completed. */
+    int total      = pcm->m_pending + n;
+    int count      = total / pcm->m_blockSize;
+    pcm->m_pending = total % pcm->m_blockSize;
+    rxSndQueueBegin(0xb1, 0, count * (int)sizeof(int) + (int)sizeof(RxSndCmdPcmData));
+    RxSndCmdPcmData *cmd = (RxSndCmdPcmData *)rxSndQueueGetData();
+    cmd->m_count = (u_char)count;
+    cmd->m_id    = (u_char)pcm->m_id;
+    int *seq     = (int *)(cmd + 1);
+    for (int i = 0; i < count; i++)
+        seq[i] = pcm->m_seq++;
+    rxSndQueueEnd();
+    pcm->m_queued += count;
+    return n;
+}
+
+// ROR 0x0023d360
+void rxSndPcmEnd(int id)
+{
+    if ((u_int)id >= 0x20 || !(s_pcm[id].m_status & 1))
+        return;
+
+    RxSndPcm   *pcm = &s_pcm[id];
+    const void *pad;
+    if (pcm->m_mode == 3)
+    {
+        /* Mode 3 pads with the attr word, its halves swapped. */
+        short hi = (short)(pcm->m_attr >> 16);
+        short lo = (short)pcm->m_attr;
+        for (int i = 0; i < 0x400; i++)
+        {
+            s_pcmPad[i * 2]     = hi;
+            s_pcmPad[i * 2 + 1] = lo;
+        }
+        pad = s_pcmPad;
+    }
+    else
+    {
+        pad = rxSndGetWorkBuffer();
+    }
+
+    if (pcm->m_pending > 0)
+    {
+        for (int rest = 0x1000 - pcm->m_pending; rest > 0;)
+        {
+            int chunk = rest > 0x1000 ? 0x1000 : rest;
+            rest -= chunk;
+            rxSndPcmWrite(id, pad, pad, chunk);
+        }
+    }
+
+    rxSndQueueBegin(0xb2, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_param = 5;
+    cmd->m_id    = s_pcm[id].m_id;
+    cmd->m_value = 0;
+    rxSndQueueEnd();
+}
+
+// ROR 0x0023d4b8
+int rxSndPcmAddCallback(int id, int offset, RxSndPosFunc func, int arg)
+{
+    RxSndPosCallback *node = s_pcmCallbackFree;
+    if ((u_int)id > 0x1f || !(s_pcm[id].m_status & 1) || node == NULL)
+        return 0;
+
+    /* The position is (block sequence number, offset in the block; modes
+     * 1..3 count the offset per channel). */
+    RxSndPcm *pcm   = &s_pcm[id];
+    int       total = pcm->m_pending + offset;
+    int       block;
+    int       off;
+    if (pcm->m_mode == 0)
+    {
+        off   = total % pcm->m_blockSize;
+        block = pcm->m_seq + total / pcm->m_blockSize;
+    }
+    else if (pcm->m_mode < 4)
+    {
+        block = pcm->m_seq + total / pcm->m_blockSize;
+        off   = total % pcm->m_blockSize / 2;
+    }
+    else
+    {
+        block = 0;
+        off   = 0;
+    }
+
+    s_pcmCallbackFree = node->m_next;
+    node->m_func      = func;
+    node->m_arg       = arg;
+    node->m_posHi     = (u_int)block;
+    node->m_posLo     = (u_int)off;
+
+    RxSndPosCallback **link = &pcm->m_callbacks;
+    RxSndPosCallback  *cb;
+    for (cb = *link; cb != NULL; cb = *link)
+    {
+        if (block < (int)cb->m_posHi || (block == (int)cb->m_posHi && off < (int)cb->m_posLo))
+            break;
+        link = &cb->m_next;
+    }
+    node->m_next = cb;
+    *link        = node;
+    return 1;
+}
+
+// ROR 0x0023d610
+int rxSndPcmSetUserData(int id, int data)
+{
+    if ((u_int)id >= 0x20 || !(s_pcm[id].m_status & 1))
+        return 0;
+    int old          = s_pcm[id].m_user;
+    s_pcm[id].m_user = data;
+    return old;
+}
+
+// ROR 0x0023d658
+int rxSndPcmGetUserData(int id)
+{
+    if ((u_int)id < 0x20 && (s_pcm[id].m_status & 1))
+        return s_pcm[id].m_user;
+    return 0;
+}
+
+// ROR 0x0023d6a0
+void rxSndPcmSetAttr(int id, int value)
+{
+    if ((u_int)id >= 0x20 || !(s_pcm[id].m_status & 1))
+        return;
+
+    s_pcm[id].m_attr = value;
+    rxSndQueueBegin(0xb2, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_value = value;
+    cmd->m_id    = s_pcm[id].m_id;
+    cmd->m_param = 2;
+    rxSndQueueEnd();
+}
+
+// ROR 0x0023d740
+void rxSndPcmPause(int id, int pause)
+{
+    if ((u_int)id >= 0x20 || !(s_pcm[id].m_status & 1))
+        return;
+
+    rxSndQueueBegin(0xb2, 0, sizeof(RxSndCmdSet));
+    RxSndCmdSet *cmd = (RxSndCmdSet *)rxSndQueueGetData();
+    cmd->m_value = pause;
+    cmd->m_id    = s_pcm[id].m_id;
+    cmd->m_param = 1;
+    rxSndQueueEnd();
+}
+
 // ROR 0x0023d7e0
 void rxSndPcmSetVolume(int id, int volL, int volR)
 {
@@ -2686,7 +3079,7 @@ void rxSndPcmUpdate(const RxSndPcmStatus *status)
 
             u_char st     = e->m_status;
             pcm->m_status = (u_char)((pcm->m_status & 0xf1) | (st & 2) | (st & 8) | (st & 4));
-            pcm->m_20     = e->m_2;
+            pcm->m_queued = e->m_2;
             if (e->m_status & 2)
             {
                 RxSndPosCallback **link = &pcm->m_callbacks;
@@ -2758,6 +3151,18 @@ void rxSndAdpcmSetMasterVolume(int volL, int volR)
     s_adpcmMasterVolR = (short)rxSndClamp(volR, -0x80, 0x80);
     for (RxSndAdpcm *s = s_adpcmActive; s != NULL; s = s->m_next)
         rxSndAdpcmSetVolume(s->m_id, s->m_volL, s->m_volR);
+}
+
+// ROR 0x0023dc68
+void rxSndAdpcmSetDefaultParam6(int value)
+{
+    s_adpcmParam6 = rxSndClamp(value, 0, 2);
+}
+
+// ROR 0x0023dc98
+void rxSndAdpcmSetDefaultParam7(int value)
+{
+    s_adpcmParam7 = rxSndClamp(value, 0, 0x7f);
 }
 
 // ROR 0x0023dcc8
@@ -2847,7 +3252,7 @@ int rxSndAdpcmOpenBytes(int mode, int rate, u_int iopAddr, int iopSize, u_int sp
     s->m_volR       = 0x80;
     s->m_end        = 0;
     s->m_channels   = (u_char)channels;
-    s->m_10         = 0;
+    s->m_user       = 0;
     s->m_volL       = 0x80;
     s->m_iopBuf     = iopAddr;
     s->m_bufSize    = iopSize;
@@ -2920,6 +3325,13 @@ void rxSndAdpcmClose(int id)
     *link           = s->m_next;
     s->m_next       = s_adpcmStopping;
     s_adpcmStopping = s;
+}
+
+// ROR 0x0023e118
+void rxSndAdpcmCloseAll(void)
+{
+    for (int i = 0; i < 0x30; i++)
+        rxSndAdpcmClose(i);
 }
 
 // ROR 0x0023e158
@@ -3175,6 +3587,63 @@ void rxSndAdpcmEnd(int id)
     s->m_end = 1;
 }
 
+// ROR 0x0023ed10
+int rxSndAdpcmAddCallback(int id, int offset, RxSndPosFunc func, int arg)
+{
+    RxSndPosCallback *node = s_adpcmCallbackFree;
+    if ((u_int)id > 0x2f || !(s_adpcm[id].m_status & 1) || node == NULL)
+        return 0;
+
+    /* The position counts bytes per channel, as m_written. */
+    RxSndAdpcm *s = &s_adpcm[id];
+    if (s->m_mode < 4)
+    {
+        if (s->m_mode > 0)
+            offset /= 2;
+    }
+    else if (s->m_mode == 0x1000000)
+    {
+        offset /= s->m_channels;
+    }
+    u_long pos    = ((u_long)s->m_writtenHi << 32 | s->m_writtenLo) + (u_int)offset;
+    node->m_posHi = (u_int)(pos >> 32);
+    node->m_func  = func;
+    node->m_arg   = arg;
+    node->m_posLo = (u_int)pos;
+
+    RxSndPosCallback **link = &s->m_callbacks;
+    RxSndPosCallback  *cb;
+    for (cb = *link; cb != NULL; cb = *link)
+    {
+        if (node->m_posHi < cb->m_posHi
+            || (node->m_posHi == cb->m_posHi && node->m_posLo < cb->m_posLo))
+            break;
+        link = &cb->m_next;
+    }
+    s_adpcmCallbackFree = node->m_next;
+    node->m_next        = cb;
+    *link               = node;
+    return 1;
+}
+
+// ROR 0x0023ee68
+int rxSndAdpcmSetUserData(int id, int data)
+{
+    if ((u_int)id >= 0x30 || !(s_adpcm[id].m_status & 1))
+        return 0;
+    int old            = s_adpcm[id].m_user;
+    s_adpcm[id].m_user = data;
+    return old;
+}
+
+// ROR 0x0023eeb0
+int rxSndAdpcmGetUserData(int id)
+{
+    if ((u_int)id < 0x30 && (s_adpcm[id].m_status & 1))
+        return s_adpcm[id].m_user;
+    return 0;
+}
+
 // ROR 0x0023eef8
 void rxSndAdpcmPause(int id, int pause)
 {
@@ -3254,6 +3723,27 @@ void rxSndAdpcmSetVolume(int id, int volL, int volR)
     }
 }
 
+// ROR 0x0023f1d8
+void rxSndAdpcmSetChannelVolume(int id, int channel, int volL, int volR)
+{
+    if ((u_int)id >= 0x30 || !(s_adpcm[id].m_status & 1))
+        return;
+    if (channel < 0 || channel > s_adpcm[id].m_channels - 1)
+        return;
+
+    int outL = rxSndClamp(volL, -0x80, 0x80);
+    int outR = rxSndClamp(volR, -0x80, 0x80);
+    rxSndQueueBegin(0xa4, 0, sizeof(RxSndCmdChannelSet));
+    RxSndCmdChannelSet *ch = (RxSndCmdChannelSet *)rxSndQueueGetData();
+    ch->m_vol[1]  = (short)outR;
+    ch->m_channel = (u_short)channel;
+    ch->m_vol[0]  = (short)outL;
+    ch->m_id      = s_adpcm[id].m_id;
+    ch->m_param   = 3;
+    ch->m_6       = 0;
+    rxSndQueueEnd();
+}
+
 // ROR 0x0023f310
 void rxSndAdpcmSetPitch(int id, float pitch)
 {
@@ -3265,6 +3755,22 @@ void rxSndAdpcmSetPitch(int id, float pitch)
     cmd->m_param = 4;
     cmd->m_value = (int)(pitch * 4096.0f);
     cmd->m_id    = s_adpcm[id].m_id;
+    rxSndQueueEnd();
+}
+
+// ROR 0x0023f3c0
+void rxSndAdpcmSetChannelParam5(int id, int channel, int value)
+{
+    if ((u_int)id >= 0x30 || !(s_adpcm[id].m_status & 1))
+        return;
+
+    rxSndQueueBegin(0xa4, 0, sizeof(RxSndCmdChannelSet));
+    RxSndCmdChannelSet *ch = (RxSndCmdChannelSet *)rxSndQueueGetData();
+    ch->m_value   = value;
+    ch->m_channel = (u_short)channel;
+    ch->m_id      = s_adpcm[id].m_id;
+    ch->m_param   = 5;
+    ch->m_6       = 0;
     rxSndQueueEnd();
 }
 
@@ -3294,6 +3800,14 @@ void rxSndAdpcmSetParam7(int id, int value)
     cmd->m_id    = s_adpcm[id].m_id;
     cmd->m_param = 7;
     rxSndQueueEnd();
+}
+
+// ROR 0x0023f600
+u_long rxSndAdpcmGetPosition(int id)
+{
+    if ((u_int)id < 0x30 && (s_adpcm[id].m_status & 1))
+        return s_adpcm[id].m_position;
+    return 0;
 }
 
 // ROR 0x0023f648

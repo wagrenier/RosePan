@@ -445,13 +445,16 @@ to adapt when a TU reaches them:
 
 - (2026-10-22, the sndman session) **Sound has no host backend.** `snd/sndman.cpp` is written
   (`verify`) and SndMan::update now runs every frame, but every rx sound library call
-  (`rx/rxsnd.h`) talks to the silent IOP stand-in src/sdk/iop_rxsnd.cpp (the EE side is written
-  apart from XSEQ / BGM play / PCM, 2026-10-22), so nothing is heard and streams never report an end
+  (`rx/rxsnd.h`) talks to the silent IOP stand-in src/sdk/iop_rxsnd.cpp (the EE side is complete
+  since 2026-10-25; the stand-in ignores the PCM commands 0xb0 / 0xb1), so nothing is heard and streams never report an end
   (status 0). Whether to
   reconstruct rxSnd's EE side over a host IOP sound module (ReiPan's src/sdk iop_libsd / iop_voice) or
   to replace it with a host mixer at the rxSnd API is the user's call; until then sound TUs finish
-  `verify`. The rxSnd field named "attr" (IOP command 0x82 / 0xa2, parameter 2) may be pan or an effect
-  send: unconfirmed.
+  `verify`. The rxSnd field named "attr" (IOP command 0x82 / 0xa2 / 0xb2, parameter 2) may be pan or an
+  effect send: unconfirmed (rxSndPcmEnd pads a mode 3 PCM stream with it, so for PCM it may be a
+  sample value). Also unknown (2026-10-25): queued 0x31 parameter 0 (rxSndSetSysMix sends 0xfcc /
+  0xffc, MMIX-like bits) and parameter 2 (rxSndSetSysMute, 0x7fff pairs), command 0xb4
+  (rxSndPcmSetParamB4) and 0xa4 parameter 5 (rxSndAdpcmSetChannelParam5); all are unreferenced.
 - (2026-10-22, the sndman session) The rest of **unassigned@00164fc0** (0x164fc0..0x17f0d0) still
   mixes several files: EmyMain / EmyOut code to ~0x16a914, the Eff* effect classes (Eff0 vtable
   0x2e3250 .. EffWater3, 0x16a914..~0x17c0f0; FUN_00176afc and FUN_00177830 are reached stubs from
