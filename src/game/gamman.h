@@ -134,6 +134,9 @@ struct GamSysData
     void setFlags(short id, u_int bits);                                 // ROR 0x001dcd38
     /* The record's flag word & bits != 0 (0x20000: the item stacks). */
     int  testFlags(short id, u_int bits);                                // ROR 0x001dd00c
+    /* Field field of record id into out (0xf: the record's model id, a
+     * u_short, 0xffff none; others words or pointers). */
+    void getField(int id, int field, void *out);                         // ROR 0x001dc48c
 };
 
 /* One item (EE 0x10, 16-aligned): the 12 slots at GamMan +0x1a700
@@ -308,6 +311,12 @@ struct GamMan
     void loadStage(int stage);                                           // ROR 0x001c204c
     /* The stage's sound packs (data/snd/xv/....se). */
     void loadStageSnd(int chapter);                                      // ROR 0x001c2f50
+    /* The PC's actor plays anim (MagSystem::setActorAnim(.., 1)). */
+    void setPcAnim(int anim);                                            // ROR 0x001c4f38
+    /* m_pcJnfc = on, then MagSystem::setPC(m_pcActor). */
+    void setPcJnfc(int on);                                              // ROR 0x001c53e0
+    /* which 0x11..0x1c: *v into an option / camera word (0x1b m_21f54). */
+    void setSysParam(int which, const void *v);                          // ROR 0x001c6f08
     void setPcStartPos();                                                // ROR 0x001c3d38
     void setStagePack(void *buf);                                        // ROR 0x001c46f4
     /* Sequence::reapThreads' calls when thread 0x44000000 (the stage
@@ -407,6 +416,21 @@ struct GamMan
      * sound output mode, 7 vibration. Returns -1. */
     int  setOption(u_int no, intptr_t arg);                              // ROR 0x001c9c1c
     void empty1ca0d4();                                                  // ROR 0x001ca0d4
+    /* Loads map unit name from data/bg/mapunit.bin (mode 2 / 3) unless a
+     * loaded unit already has id. */
+    void loadMapUnit(const char *name, int id, int mode);                // ROR 0x001ca0dc
+    /* A new object from model file name (oid 0: one is made from kind
+     * >> 10), added with addChr(.., kind2, pos, place); returns the oid,
+     * 0 when oid already exists. */
+    u_int createObjByName(u_int kind, const char *name, int group, u_int oid,
+                          int kind2, const void *pos, int place);        // ROR 0x001ca72c
+    /* MagSystem::loadModel(model) bound to oid, addChr when add != 0;
+     * returns the scene model number, -1 when oid exists. */
+    int  createObjByModel(int model, u_int oid, int kind, const void *pos,
+                          int place, int add);                           // ROR 0x001ca8e8
+    /* Swaps a live oid's model for model (or file name), keepPos keeps its
+     * position; returns oid, 0 for no object or no change. */
+    u_int changeObjModel(u_int model, const char *name, u_int oid, int keepPos); // ROR 0x001cad88
     /* Releases the stage's sky domes (the +0x1d240 records) of kind. */
     void releaseTenkyus(int kind);                                       // ROR 0x001cb01c
     /* The PC becomes the achr oid (-1: none to the scene): m_pcPtr, its
@@ -414,6 +438,8 @@ struct GamMan
     void setPc(int oid);                                                 // ROR 0x001cb24c
     /* The dog becomes the achr oid (-1: hides the dog). */
     void setDog(int oid);                                                // ROR 0x001cb384
+    /* The murderer becomes the achr oid (m_murderOid, m_murderPtr). */
+    void setMurder(int oid);                                             // ROR 0x001cb424
     /* The PC's ACHRstat::setParam(which, data), when there is a PC. */
     void setPcParam(int which, const void *data);                        // ROR 0x001cb4f0
     void ctlObj1cb8e4(u_int oid, int a, int b);                          // ROR 0x001cb8e4
@@ -435,6 +461,14 @@ struct GamMan
     void releaseFchr(u_int oid);                                         // ROR 0x001cc7c8
     void releaseVFchr(u_int oid);                                        // ROR 0x001cc970
     void clearVFchrSlot(u_int oid);                                      // ROR 0x001cc004
+    /* Adds a vfchr object (an FCHRstat in the vfchr list) unless oid is one. */
+    void addVFchr(int model, u_int oid, int arg, int kind, intptr_t pos); // ROR 0x001cc044
+    /* Adds the object oid of scene model (-1 none) by its list: an achr
+     * (ACHRstat) or an fchr (FCHRstat); kind is its system data id. */
+    void addChr(int model, u_int oid, int kind, const void *pos, int place); // ROR 0x001cc250
+    /* count achr objects of model registered as a group with 0x7b2140. */
+    void addChrGroup(int model, u_int oid, int a, int b, int c, int count, int d,
+                     int e, int kind, const void *pos, int place, float f); // ROR 0x001cc560
     /* Stage change kind 2's first half. */
     void releaseStage2();                                                // ROR 0x001cd224
     void releaseObjs(int kind, int arg);                                 // ROR 0x001cdf5c
@@ -452,6 +486,8 @@ struct GamMan
     void setSysMsgHandle(int handle);                                    // ROR 0x001cfb38
     /* 1 when oid names a live object of its list. */
     int  isObj(u_int oid);                                               // ROR 0x001d046c
+    /* oid's rotation from an angle (normalised first). */
+    void setObjDir(u_int oid, float dir);                                // ROR 0x001d024c
     /* Clears bits of the object's flags; bits 0x40 / 0x10000000 / 1 / 0x10
      * also re-link, re-place, show and ... it. Returns 0 for no object. */
     int  resetObj(u_int oid, u_int bits);                                // ROR 0x001d1410
@@ -487,6 +523,9 @@ struct GamMan
      * row whose column keyCol is key (keyCol 99: row key). -1 none. */
     int  lookupFlagTable(int keyCol, int key, int col);                  // ROR 0x001d83d0
     void markReset();                                                    // ROR 0x001d3588
+    /* which 1 / 0 / 6 / 7 sets m_flags 0x4000000 / 0x2000000 / 0x8000000 /
+     * 0x10000000, then the scene's light update 0x13fb3c. */
+    void setLightFlag(int which);                                        // ROR 0x001d2724
     /* 0: saves the volume in m_saved_volume and silences; 1: restores
      * the saved volume (when one is saved) and marks none saved. */
     void switchVolume(int on);                                           // ROR 0x001d3ac8
@@ -559,6 +598,7 @@ struct GamMan
     int          m_21fcc;           // ROR 0x21fcc: releaseChr's argument for the PC
     int          m_21fd0;           // ROR 0x21fd0: ... for the dog
     int          m_inuMode;         // ROR 0x21fd4: getInuMode
+    int          m_murderOid;       // ROR 0x21fd8: setMurder's oid
     int          m_pcActor;         // ROR 0x21fdc: getPcChrNo, the PC's actor number in the scene
     DogActor    *m_pcActorPtr;      // ROR 0x21fe0: the PC's scene actor (setPc)
     int          m_pcMotion;        // ROR 0x21fe4: get_pc_last_mot, the motion system call 0x2a waits on
