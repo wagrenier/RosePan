@@ -12,3 +12,9 @@ int GamSndMan::isSndBankLoaded(int id)
     ROSEPAN_STUB("GamSndMan::isSndBankLoaded", 0x001e435c);
     return {};
 }
+
+// stub of ROR 0x001e17b4
+void GamSndMan::stopBgm(int mode)
+{
+    ROSEPAN_STUB("GamSndMan::stopBgm", 0x001e17b4);
+}

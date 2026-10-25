@@ -2441,6 +2441,12 @@
   "was": "FUN_0013f1e4",
   "why": "clears bit 25 of the word at *(0x7b2060) + 4 before a menu opens"
  },
+ "0013f280": {
+  "name": "MagScene::openSysMsgWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f280",
+  "why": "opens a message window with message id and 16 argument words (copied), returns its handle; next to MagScene::closeSysMsgWindow 0x13f458"
+ },
  "0013f458": {
   "name": "MagScene::closeSysMsgWindow",
   "tag": "ror-inferred",
@@ -4187,6 +4193,12 @@
   "was": "FUN_001c204c",
   "why": "game/gamman.cpp: (stage) formats data/SEQ/W%03d/W000.WRD, loads it, hands the sequence image to 0x20eda4; mainInitGame passes mainParseArgs' stage unless -1"
  },
+ "001c3d38": {
+  "name": "GamMan::setPcStartPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001c3d38",
+  "why": "places the PC at start point +0x1a684 of the table +0x1a680 (0xcccccccc = none), then GamMan::storePcTransform"
+ },
  "001c526c": {
   "name": "GamMan::update",
   "tag": "ror-inferred",
@@ -4199,6 +4211,120 @@
   "was": "FUN_001c53d8",
   "why": "empty; mainLoop calls it last each frame"
  },
+ "001c5bf4": {
+  "name": "GamMan::enterMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_001c5bf4",
+  "why": "stops the stage sound (GamSndMan 0x1e17b4 mode 0), clears flag 8, sends task message 5, sets 0x100000; kind 1 / 2 also sets Sequence flag 1; called before the item, map, save, stock menus"
+ },
+ "001c65e8": {
+  "name": "GamMan::resume",
+  "tag": "ror-inferred",
+  "was": "FUN_001c65e8",
+  "why": "clears what GamMan::pause set for the same mask bits (re-binds the PC with MagSystem::setPC)"
+ },
+ "001c6a40": {
+  "name": "GamMan::pause",
+  "tag": "ror-inferred",
+  "was": "FUN_001c6a40",
+  "why": "sets halt flags by mask (0x100000, 0x100004, 0x100104, 0x80000 ...), counterpart of 0x1c65e8; the system call passes 0x100000 before every menu"
+ },
+ "001c6ccc": {
+  "name": "GamMan::getStatus",
+  "tag": "ror-inferred",
+  "was": "FUN_001c6ccc",
+  "why": "switch on which: copies one status word (+0x21f48, +0x21f60, +0x21f50 ...) to *out"
+ },
+ "001c7a4c": {
+  "name": "GamMan::equipItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001c7a4c",
+  "why": "+0x2220c = the id (0xa00 = none), flag 0x200000 when it changes"
+ },
+ "001c7e40": {
+  "name": "GamMan::addItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001c7e40",
+  "why": "sets the item's got-bit in the Sequence bitset, then puts the id into the item slots +0x1a6c0"
+ },
+ "001c82f8": {
+  "name": "GamMan::delItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001c82f8",
+  "why": "item slots +0x1a6c0 (12 x 0x10, id +8, count +0xa): unequips (0x1c7a4c 0xa00) when the id is equipped, decrements the count or clears the slot"
+ },
+ "001c8414": {
+  "name": "GamMan::delItemAll",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8414",
+  "why": "GamMan::delItem(id, 0) and GamMan::delStock(id, 0)"
+ },
+ "001c8598": {
+  "name": "GamMan::selectItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8598",
+  "why": "+0x1d204 = the slot holding the id, +0x1d200 = its count"
+ },
+ "001c8a28": {
+  "name": "GamMan::hasItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8a28",
+  "why": "1 when the id is in the 12 item slots, or (arg) in the stock list +0x1a7f0"
+ },
+ "001c8ae8": {
+  "name": "GamMan::getItemCount",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8ae8",
+  "why": "sum of the id's counts in the item slots (and the stock list when arg)"
+ },
+ "001c8ca4": {
+  "name": "GamMan::canAddItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8ca4",
+  "why": "true when the id (0: the current one, 0x1d1c80) sits in a slot with count < 99 and its record allows stacking (0x1dd00c flag 0x20000)"
+ },
+ "001c8f7c": {
+  "name": "GamMan::addStock",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8f7c",
+  "why": "the stock list +0x1a7f0 (count +0x1a810 < 0x14e): adds count (0 = 1) to the id's node, capped at 99, else a new node"
+ },
+ "001c94d8": {
+  "name": "GamMan::delStock",
+  "tag": "ror-inferred",
+  "was": "FUN_001c94d8",
+  "why": "removes the id's node from the stock list +0x1a7f0, or decrements it (arg 1)"
+ },
+ "001c98b8": {
+  "name": "GamMan::beforeMapMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_001c98b8",
+  "why": "empty in the US build; the system call runs it before the map menu 0x10001 only"
+ },
+ "001cbdfc": {
+  "name": "GamMan::setImage",
+  "tag": "ror-inferred",
+  "was": "FUN_001cbdfc",
+  "why": "+0x222e4[slot] = a script image {w, h, ...} and its +0xc = the data before it (w * h rounded to 16)"
+ },
+ "001cd404": {
+  "name": "GamMan::storePcTransform",
+  "tag": "ror-inferred",
+  "was": "FUN_001cd404",
+  "why": "reads the PC actor's (+0x22090) position into +0x22020 and rotation into +0x22030, angle wrapped to -pi..pi"
+ },
+ "001cfb38": {
+  "name": "GamMan::setSysMsgHandle",
+  "tag": "ror-inferred",
+  "was": "FUN_001cfb38",
+  "why": "+0x2227c = the handle MagScene::openSysMsgWindow returned"
+ },
+ "001d1a48": {
+  "name": "GamMan::isMenuOpen",
+  "tag": "ror-inferred",
+  "was": "FUN_001d1a48",
+  "why": "returns MagScene m_menu_id (0x727bd0 = scene 0x6fbd80 + 0x2be50) != -1"
+ },
  "001d3a38": {
   "name": "GamMan::setVolume",
   "tag": "ror-inferred",
@@ -4210,6 +4336,24 @@
   "tag": "ror-inferred",
   "was": "FUN_001d3ac8",
   "why": "0: saves the volume at +0x22214 and sets 0; 1: restores the saved one and marks -1"
+ },
+ "001dea40": {
+  "name": "GamArea::startPcAction",
+  "tag": "ror-inferred",
+  "was": "FUN_001dea40",
+  "why": "on GamMan +0x40: 0x1f5bdc(1/60, 0x47000100, the PC record 0x7a3350 +0x100, GamMan +0x21fe4, -1, 0, 0), no use of this"
+ },
+ "001deaac": {
+  "name": "GamArea::checkPc",
+  "tag": "ror-inferred",
+  "was": "FUN_001deaac",
+  "why": "on GamMan +0x40 (class name invented): reads the PC's position (0x1d05f4) and walks the rect list +0xc290 for entries with flags 0x4000001 whose x / z bounds contain it"
+ },
+ "001e17b4": {
+  "name": "GamSndMan::stopBgm",
+  "tag": "ror-inferred",
+  "was": "FUN_001e17b4",
+  "why": "on GamMan +0x18e00 (the sound table): 0x1e111c then command 0x1b with 0x1e frames for the current slot (mode 1 skips it, 2 the other slot)"
  },
  "001e435c": {
   "name": "GamSndMan::isSndBankLoaded",
@@ -4229,6 +4373,12 @@
   "was": "FUN_001e71fc",
   "why": "object 0x7a3d80: allocates a 0x40 task record for a CmnITask (vtable slots at +8 / +0x18 called), assigns an id (written through the id pointer), start frame (-1 = current +0x58), length, links it (0x1e7184); 66 call sites; class name unverified"
  },
+ "001e7724": {
+  "name": "CmnTaskMan::killTask",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7724",
+  "why": "appends the id to the kill list +0x84..(+0x284 end) unless already there"
+ },
  "001e7a20": {
   "name": "CmnTaskMan::exec",
   "tag": "ror-inferred",
@@ -4240,6 +4390,30 @@
   "tag": "ror-inferred",
   "was": "FUN_001e7d7c",
   "why": "non-zero when the task id still runs; playStream does not queue a second TskSnd"
+ },
+ "001f184c": {
+  "name": "TskFrameFunc::TskFrameFunc",
+  "tag": "ror-inferred",
+  "was": "FUN_001f184c",
+  "why": "vtable 0x2e4d50 (rtti.py TskFrameFunc); kind < 0x17 picks the step function (table 0x2fe420)"
+ },
+ "001f4184": {
+  "name": "TskSysFunc::TskSysFunc",
+  "tag": "ror-inferred",
+  "was": "FUN_001f4184",
+  "why": "vtable 0x2e4cd0 (rtti.py TskSysFunc); kind 0..1 sets the defaults 100, 0x1e, 0xf, 0x1b"
+ },
+ "001f83f4": {
+  "name": "scenePlayStart",
+  "tag": "ror-inferred",
+  "was": "FUN_001f83f4",
+  "why": "builds data/evt/%02d/scene/<name> (0x1f839c), reads map / CHARA / THREAD from the stage pfh, news a ScenePlay (0x580, vtable 0x2e4dd0) and adds its task"
+ },
+ "001f8cec": {
+  "name": "scenePlayStartSimple",
+  "tag": "ror-inferred",
+  "was": "FUN_001f8cec",
+  "why": "like scenePlayStart without the map / CHARA / THREAD sections: news a ScenePlay, adds its task on GamMan +0x222ac"
  },
  "001f8fc0": {
   "name": "TskSnd::TskSnd",
@@ -4391,11 +4565,287 @@
   "was": "FUN_00205394",
   "why": "clears VRAM (0x2050e8) and frees the two buffers; mainInitGame calls it, then again through the inline destructor before delete"
  },
+ "002053f4": {
+  "name": "seqFunc000",
+  "tag": "ror-inferred",
+  "was": "FUN_002053f4",
+  "why": "entry 0 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020541c": {
+  "name": "seqFunc001",
+  "tag": "ror-inferred",
+  "was": "FUN_0020541c",
+  "why": "entry 1 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020544c": {
+  "name": "seqFunc002",
+  "tag": "ror-inferred",
+  "was": "FUN_0020544c",
+  "why": "entry 2 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00205564": {
+  "name": "seqFunc003",
+  "tag": "ror-inferred",
+  "was": "FUN_00205564",
+  "why": "entry 3 of the script native-function table data 0x2d90f8: returns 0xcccccccd (the VM continues after the call next frame)"
+ },
+ "00205570": {
+  "name": "seqFunc004",
+  "tag": "ror-inferred",
+  "was": "FUN_00205570",
+  "why": "entry 4 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "002058f0": {
+  "name": "seqFunc005",
+  "tag": "ror-inferred",
+  "was": "FUN_002058f0",
+  "why": "entry 5 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00205928": {
+  "name": "seqFunc006",
+  "tag": "ror-inferred",
+  "was": "FUN_00205928",
+  "why": "entry 6 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00205b18": {
+  "name": "seqFunc007",
+  "tag": "ror-inferred",
+  "was": "FUN_00205b18",
+  "why": "entry 7 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00205b44": {
+  "name": "seqFunc009",
+  "tag": "ror-inferred",
+  "was": "FUN_00205b44",
+  "why": "entry 9 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00205b88": {
+  "name": "seqFunc012",
+  "tag": "ror-inferred",
+  "was": "FUN_00205b88",
+  "why": "entry 12 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00206614": {
+  "name": "seqFunc014",
+  "tag": "ror-inferred",
+  "was": "FUN_00206614",
+  "why": "entry 14 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00206640": {
+  "name": "seqFunc016",
+  "tag": "ror-inferred",
+  "was": "FUN_00206640",
+  "why": "entry 16 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020694c": {
+  "name": "seqFunc018",
+  "tag": "ror-inferred",
+  "was": "FUN_0020694c",
+  "why": "entry 18 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1); the system call: a switch on a0 (menus 0x10000.., 8 / 0x16 the title menu 0x10005, items, events, tasks)"
+ },
+ "002076cc": {
+  "name": "seqFunc019",
+  "tag": "ror-inferred",
+  "was": "FUN_002076cc",
+  "why": "entry 19 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00207ae8": {
+  "name": "seqFunc020",
+  "tag": "ror-inferred",
+  "was": "FUN_00207ae8",
+  "why": "entry 20 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020810c": {
+  "name": "seqFunc021",
+  "tag": "ror-inferred",
+  "was": "FUN_0020810c",
+  "why": "entry 21 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020839c": {
+  "name": "seqFunc023",
+  "tag": "ror-inferred",
+  "was": "FUN_0020839c",
+  "why": "entry 23 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00208518": {
+  "name": "seqFunc026",
+  "tag": "ror-inferred",
+  "was": "FUN_00208518",
+  "why": "entry 26 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00208640": {
+  "name": "seqFunc027",
+  "tag": "ror-inferred",
+  "was": "FUN_00208640",
+  "why": "entry 27 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00208b10": {
+  "name": "seqFunc028",
+  "tag": "ror-inferred",
+  "was": "FUN_00208b10",
+  "why": "entry 28 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00208b98": {
+  "name": "seqFunc029",
+  "tag": "ror-inferred",
+  "was": "FUN_00208b98",
+  "why": "entry 29 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00208dc4": {
+  "name": "seqFunc032",
+  "tag": "ror-inferred",
+  "was": "FUN_00208dc4",
+  "why": "entry 32 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00208e24": {
+  "name": "seqFunc033",
+  "tag": "ror-inferred",
+  "was": "FUN_00208e24",
+  "why": "entry 33 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "002090a0": {
+  "name": "seqFunc036",
+  "tag": "ror-inferred",
+  "was": "FUN_002090a0",
+  "why": "entry 36 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "002090e0": {
+  "name": "seqFunc038",
+  "tag": "ror-inferred",
+  "was": "FUN_002090e0",
+  "why": "entry 38 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00209270": {
+  "name": "seqFunc039",
+  "tag": "ror-inferred",
+  "was": "FUN_00209270",
+  "why": "entry 39 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00209344": {
+  "name": "seqFunc040",
+  "tag": "ror-inferred",
+  "was": "FUN_00209344",
+  "why": "entry 40 of the script native-function table data 0x2d90f8: returns 0xccccccca (the VM ends the thread)"
+ },
+ "00209528": {
+  "name": "seqFunc100",
+  "tag": "ror-inferred",
+  "was": "FUN_00209528",
+  "why": "entry 100 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "002098e0": {
+  "name": "seqFunc106",
+  "tag": "ror-inferred",
+  "was": "FUN_002098e0",
+  "why": "entry 106 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "002099bc": {
+  "name": "seqFunc110",
+  "tag": "ror-inferred",
+  "was": "FUN_002099bc",
+  "why": "entry 110 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "00209d4c": {
+  "name": "seqFunc151",
+  "tag": "ror-inferred",
+  "was": "FUN_00209d4c",
+  "why": "entry 151 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020a368": {
+  "name": "seqFunc152",
+  "tag": "ror-inferred",
+  "was": "FUN_0020a368",
+  "why": "entry 152 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020a7d0": {
+  "name": "seqFunc155",
+  "tag": "ror-inferred",
+  "was": "FUN_0020a7d0",
+  "why": "entry 155 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020abfc": {
+  "name": "seqFunc156",
+  "tag": "ror-inferred",
+  "was": "FUN_0020abfc",
+  "why": "entry 156 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020b3c0": {
+  "name": "seqFunc200",
+  "tag": "ror-inferred",
+  "was": "FUN_0020b3c0",
+  "why": "entry 200 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020b528": {
+  "name": "seqFunc202",
+  "tag": "ror-inferred",
+  "was": "FUN_0020b528",
+  "why": "entry 202 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020bd08": {
+  "name": "seqFunc211",
+  "tag": "ror-inferred",
+  "was": "FUN_0020bd08",
+  "why": "entry 211 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020c4c8": {
+  "name": "seqFunc212",
+  "tag": "ror-inferred",
+  "was": "FUN_0020c4c8",
+  "why": "entry 212 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020c6fc": {
+  "name": "seqFunc252",
+  "tag": "ror-inferred",
+  "was": "FUN_0020c6fc",
+  "why": "entry 252 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020d428": {
+  "name": "seqFunc253",
+  "tag": "ror-inferred",
+  "was": "FUN_0020d428",
+  "why": "entry 253 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020df98": {
+  "name": "seqFunc281",
+  "tag": "ror-inferred",
+  "was": "FUN_0020df98",
+  "why": "entry 281 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
  "0020e3d8": {
   "name": "seqSetLanguage",
   "tag": "ror-inferred",
   "was": "FUN_0020e3d8",
   "why": "snprintf(0x2d9910, 0x40, SEQ): the sequence data folder; both arguments (language, 1) unused in the US build; MagSystem::setLanguage and mainInitGame call it"
+ },
+ "0020e400": {
+  "name": "seqGetDataDir",
+  "tag": "ror-inferred",
+  "was": "FUN_0020e400",
+  "why": "returns the folder-name buffer data 0x2d9910 that seqSetLanguage fills (SEQ); GamMan 0x1c47c4 builds stage paths from it"
+ },
+ "0020e40c": {
+  "name": "seqMakeGlobalPath",
+  "tag": "ror-inferred",
+  "was": "FUN_0020e40c",
+  "why": "snprintf(buf, size, kind ? data/SEQ/G000.GRB : data/seq/seq_global/g000.seq); GamMan::loadSystemData calls it"
+ },
+ "0020e454": {
+  "name": "Sequence::Sequence",
+  "tag": "ror-inferred",
+  "was": "FUN_0020e454",
+  "why": "the static initializer 0x2041f8 runs it on 0x7a4440 (the Sequence global): three free-lists of 0x80 x 0xc0, 0x80 x 0xc0, 0x100 x 0x18 nodes"
+ },
+ "0020e63c": {
+  "name": "Sequence::~Sequence",
+  "tag": "ror-inferred",
+  "was": "FUN_0020e63c",
+  "why": "the static initializer's destructor call; GCC 2 delete flag bit 0"
+ },
+ "0020e664": {
+  "name": "Sequence::term",
+  "tag": "ror-inferred",
+  "was": "FUN_0020e664",
+  "why": "sysTermManagers calls it on the Sequence: 0x20f37c then Sequence::init"
  },
  "0020e690": {
   "name": "Sequence::init",
@@ -4408,6 +4858,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0020f98c",
   "why": "object 0x7a4440: per-frame sequence step (returns at once when +0xdc24 bit 0 is set); mainLoop calls it every frame"
+ },
+ "002113a4": {
+  "name": "Sequence::jumpTo",
+  "tag": "ror-inferred",
+  "was": "FUN_002113a4",
+  "why": "sets the VM's pending jump 0x7b47b0 = target + image base 0x7b47d0 - m_base[current image 0x7b4dd0] (Sequence +0xdc08); seqFunc000 calls it and returns 0xccccccce"
  },
  "002155a0": {
   "name": "debugNop",

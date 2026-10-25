@@ -38,6 +38,9 @@ struct GamSndMan
     int findSnd(int id, GamSndEntry **entry, int arg);                   // ROR 0x001e4908
     /* Non-zero when id's bank is loaded (its handle at +0x1728 is set). */
     int isSndBankLoaded(int id);                                         // ROR 0x001e435c
+    /* Fades the current BGM slot out over 0x1e frames (mode 1 keeps it,
+     * 2 works on the other slot +0x1708). */
+    void stopBgm(int mode);                                              // ROR 0x001e17b4
 };
 
 #endif /* _GAME_GAMSND_H */

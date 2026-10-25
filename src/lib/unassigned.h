@@ -10,6 +10,7 @@
 #define _LIB_UNASSIGNED_H
 
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "sdk/vu0_intrin.h"
@@ -52,6 +53,8 @@ struct CmnTaskMan
     void exec();                                                         // ROR 0x001e7a20
     /* Non-zero while the task id still runs. */
     void *getTask(int id);                                               // ROR 0x001e7d7c
+    /* Queues the task id for removal (once; -1 is ignored). */
+    void killTask(int id);                                               // ROR 0x001e7724
 
     SysTimer m_timer;           // ROR 0x40 (bss 0x7a3dc0)
 };
@@ -80,6 +83,28 @@ struct TskSnd : CmnITask
 {
     TskSnd(int kind, const TskSndParam *param);                          // ROR 0x001f8fc0
 };
+
+/* TskFrameFunc : CmnITask (vtable 0x2e4d50, EE 0x80 bytes): kind < 0x17
+ * picks its step function (table 0x2fe420); arg is a value or a pointer
+ * to the caller's words, frames its length. layout: host -- no members. */
+struct TskFrameFunc : CmnITask
+{
+    TskFrameFunc(int kind, intptr_t arg, int frames);                    // ROR 0x001f184c
+};
+
+/* TskSysFunc : CmnITask (vtable 0x2e4cd0, EE 0x80 bytes): kinds 0..1 set
+ * the defaults 100, 0x1e, 0xf, 0x1b and keep arg. layout: host. */
+struct TskSysFunc : CmnITask
+{
+    TskSysFunc(int kind, int a, intptr_t arg);                           // ROR 0x001f4184
+};
+
+/* Event scenes (unassigned@001f82e4): data/evt/%02d/scene/<name> from
+ * the stage pfh, played by a ScenePlay task (vtable 0x2e4dd0, 0x580
+ * bytes). scenePlayStart also reads the map / CHARA / THREAD sections and
+ * halts the game; wait is its third argument. */
+int  scenePlayStart(const char *name, intptr_t arg, int wait);           // ROR 0x001f83f4
+void scenePlayStartSimple(const char *name);                             // ROR 0x001f8cec
 
 /* Swaps a sound id 0x0a00xxxx..0x0a02xxxx for its twin in the column the
  * game's language / version picks (table data 0x295f08). Other ids pass. */
