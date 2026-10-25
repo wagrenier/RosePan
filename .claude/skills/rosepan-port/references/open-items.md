@@ -467,6 +467,15 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- **The i3r run's file split** (2026-10-25, the i3rroot session, decided unattended):
+  0x228c08..0x22e840 has no source strings. Pinned only `i3d/i3rroot.cpp` 0x22b1b0..0x22b4b8 (the
+  I3D_BIN root). Guesses for the rest: the mesh packet builder 0x228c08..0x22a7d0, per-type
+  accessor / fixup clusters (one file per item type, or one generated file?), I3D_I3M
+  0x22b4b8..0x22ba20, I3D_I3C 0x22ba20..0x22c1d8, the item tree core (bisect 0x22c1f8, relocators
+  0x22c2a0..0x22c5a0) -- next: the item core with the two 90-entry fixup tables, needed before any
+  model relocates. The root data's +0x10 / +0x14 0x40-byte tables and +0x24 value have unknown
+  roles (names i3rGetRootMatrix10 / 14, i3rGetRootParam24 are placeholders).
+
 - (2026-10-22, the user, live) **The Now Loading screen shows for about 1 frame, then black.** Why: SysNowLoading::draw is only called from FileReader::update 0x1be564's synchronous wait loop, which runs until isReady reports the read done; host reads finish at once, so it draws once per read. The boot then has almost nothing to read: GamMan::loadSystemData 0x1c1b48 and GamMan::loadStage 0x1c204c are stubs, so main tears the loading screen down right away and the frame loop shows the (still empty) scene. Expected until GamMan's loads are real; not a draw bug. If the screen should stay up like on the PS2, that is a decision for the user (e.g. a minimum display time in the PC read path), not ROM behaviour.
 - (2026-10-22, magscene session 3; answered in session 4) **Who fills the scene's 256 wall
   segments?** `MagScene::addPrivateColli` 0x135e20 (MAX_PRIVATE_COLLI 256; called from 0x1d080c /

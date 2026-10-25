@@ -267,6 +267,26 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     in 12.4 (16.0 at 0x303c04 / 0x303c54), mode 0 z w in 12.4, mode 1 z w truncated. i3dPrintf
     0x237c68 is vsprintf into 1 KB + rxSysPrintf + fflush(stdout). i3dMatGetScaleTrans 0x228c38 (just
     before, still in unassigned@00228c08) stays a bridge.
+  - **The i3r model files** (I3D_BIN / I3D_I3M / I3D_I3C; 0x228c08..0x22e840, 2026-10-25). An
+    I3D_BIN file (`i3d/i3rroot.cpp` 0x22b1b0..0x22b4b8, written, verify; types in i3rroot.h): id
+    "I3D_BIN\0" (rodata 0x3039d0), +8 version 0x00100001, +0xc relocated flag, +0x10 the root
+    item (type 0x52). Every item is 16 bytes {data, info (bit 31 no data fixup, 30..24 type,
+    23..0 child count), children, name}; child lists are sorted by name (0x22c1f8 bisects with
+    strcmp). In the file item fields are offsets from the root item, pointers inside an item's data
+    offsets from that data. i3rRelocate 0x22b330 (DogModel::loadPack and 9 more callers) ->
+    i3rSetRelocate 0x22b280 -> i3rItemRelocate 0x22c478 (recursive; per-type data fixups in the
+    90-entry table 0x2db4c8, unfixups 0x2db360 for i3rItemUnrelocate 0x22c328; i3rIsItemType
+    0x22c2a0 rejects 13 ids) then i3rBuildPackets 0x21a3e8 (0x21fb50 per mesh into child 6's slots).
+    Root data (type 0x52, fixups 0x22ad20 / 0x22adf8): +0x10 / +0x14 tables of 0x40-byte records,
+    +0x18 texture names (count u16 +0x2c), +0x1c u16 node indices and +0x20 their names (count
+    u16 +0x2e), +0x24 a plain value. Root child 3 = the nodes (i3rGetNumNode), child 2 the meshes,
+    child 6 the packet slots. The rest of the run is per-type code, each type a cluster of small
+    accessors (`*(item+8)` = its children) plus its fixup pair -- ~450 functions Ghidra folded
+    (hidden.py), e.g. type 77's fixups 0x22a6c0 / 0x22a730 sit inside the mesh packet builder
+    0x228c08..0x22a7d0 (0x228f50: a per-layer cache of mesh packets hashed on mesh / light / fog
+    / view). I3D_I3M roots from 0x22b4b8 (id check 0x22b4b8), I3D_I3C from 0x22ba20, curve /
+    interpolation maths 0x22e840..0x231198, collision (i3dPointSegDist2, i3dSegSegDist2)
+    0x231198..0x23695c. Host pointers in these files: hazards.md "Types and layouts".
   - **Texture and CLUT objects** (`i3d/i3dtex.cpp`, 0x2184c0..0x21a120, written 2026-10-22, verify;
     33 functions incl. 4 hidden TEX1 setters 0x219dd0..0x219e30). Both start with their
     I3dVramHandle (+0 m_image = the object, +4 size: texture pages / CLUT 4-block units, +0x10 kind

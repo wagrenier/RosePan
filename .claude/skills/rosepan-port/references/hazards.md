@@ -188,6 +188,11 @@ entries are marked **RoR** with the date.
   exists at 0x2369xx and 0x2372xx; the second copy had the names (i3dMatMul ...), so the first got
   `i3dVu0*` for the collisions. Check `ror_functions.txt` for an existing name before naming a math
   helper.
+- **Files the ROM relocates in place cannot hold host pointers** (2026-10-25, i3rroot): the i3r
+  files turn 32-bit offsets into absolute pointers in the same words; an x64 pointer does not fit.
+  Convention (i3rroot.h): a relocated field holds the signed distance from the field itself to its
+  target (0 = NULL); read with `i3rPtr(&field)`, write with `i3rSetPtr`. Every reader of i3r data
+  (the per-type accessors, i3rBuildPackets, DogModel) must go through it -- never cast a field.
 
 ## Reconstruction bookkeeping
 

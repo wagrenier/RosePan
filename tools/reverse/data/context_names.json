@@ -4643,6 +4643,18 @@
   "was": "FUN_0021a270",
   "why": "called once by i3dCtxSetFog on the context head: writes a RET DMA tag, STCYCL, an UNPACK V4-32 of a VU1 buffer (header 0x11, an A+D GIF tag, FOGCOL 0x3d, the fog ramp qword sent to VU address 0x3f8), MSCAL 1; returns the new head"
  },
+ "0021a3e8": {
+  "name": "i3rBuildPackets",
+  "tag": "lib-context",
+  "was": "FUN_0021a3e8",
+  "why": "i3rSetRelocate's relocate hook: for every mesh item of the root's child 2 runs the model packet builder 0x21fb50 over its groups, writing into the buffer in child 6's data"
+ },
+ "0021a558": {
+  "name": "i3rClearPackets",
+  "tag": "lib-context",
+  "was": "FUN_0021a558",
+  "why": "i3rSetRelocate's unrelocate hook: zeroes the 16-byte records in child 6's data table (the packet slots i3rBuildPackets fills)"
+ },
  "0021a828": {
   "name": "i3rCopyClipSphere",
   "tag": "lib-context",
@@ -6125,17 +6137,47 @@
   "was": "FUN_00228c38",
   "why": "out[0] = (m00, m11, m22, 0), out[1] = m row 3 (i3dVecCopy); i3dCtxCreateView's view +0x80 from its viewport +0xa0"
  },
+ "0022b1b0": {
+  "name": "i3rFindName",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b1b0",
+  "why": "(names, count, name): linear strcmp over a table of count name pointers, returns the index or -1; the root's texture and node name lookups tail-call it"
+ },
  "0022b228": {
   "name": "I3rRoot__CheckIdString",
   "tag": "lib-context",
   "was": "FUN_0022b228",
   "why": "the name in the dogmodel.h assert I3D_OK == I3rRoot__CheckIdString( m_i3r_root ): compares the root's 8-byte id and the version byte 0x52, 0 = I3D_OK, 3 otherwise"
  },
+ "0022b280": {
+  "name": "i3rSetRelocate",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b280",
+  "why": "(root, on): checks the I3D_BIN id (3) and version 0x00100001 (4); on 1 relocates the item tree from the root item (0x22c478) and runs 0x21a3e8, on 0 runs 0x21a558 and unrelocates (0x22c328); keeps the state at +0xc"
+ },
+ "0022b330": {
+  "name": "i3rRelocate",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b330",
+  "why": "i3rSetRelocate(root, 1), returns 0; DogModel::loadPack calls it on the model it finds in the pack"
+ },
+ "0022b350": {
+  "name": "i3rUnrelocate",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b350",
+  "why": "i3rSetRelocate(root, 0), returns 0"
+ },
  "0022b370": {
   "name": "i3rGetNumNode",
   "tag": "lib-context",
   "was": "FUN_0022b370",
   "why": "the low 24 bits of the root header word +0x34; the inline DogModel node accessor asserts m_i3r_root before it"
+ },
+ "0022b388": {
+  "name": "i3rGetNodeNameByIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b388",
+  "why": "(root, index): finds index in the root data's u16 node index table (+0x1c, count +0x2e) and returns the matching name (+0x20), NULL when absent; inverse of i3rGetNodeIndexByName"
  },
  "0022b3d8": {
   "name": "i3rGetNodeIndexByName",
@@ -6154,6 +6196,48 @@
   "tag": "ror-inferred",
   "was": "FUN_0022b438",
   "why": "(root+0x10)->+0x18 name pointer table [n]; DogModel::getTexName (an ELF inline symbol) wraps it"
+ },
+ "0022b450": {
+  "name": "i3rGetTexIndexByName",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b450",
+  "why": "i3rFindName over the root data's texture names (+0x18, count +0x2c); the twin of i3rGetTexName"
+ },
+ "0022b478": {
+  "name": "i3rGetRootParam24",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b478",
+  "why": "returns the root data word +0x24 (not relocated, so a value); no callers, meaning unknown"
+ },
+ "0022b488": {
+  "name": "i3rGetRootMatrix10",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b488",
+  "why": "(root, i): root data table +0x10 + i * 0x40 (a 0x40-byte record, likely a matrix); no callers, role unknown"
+ },
+ "0022b4a0": {
+  "name": "i3rGetRootMatrix14",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b4a0",
+  "why": "(root, i): root data table +0x14 + i * 0x40, the twin of 0x22b488; no callers, role unknown"
+ },
+ "0022c2a0": {
+  "name": "i3rIsItemType",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c2a0",
+  "why": "0 for the item type ids with no fixup pair (4, 0x16, 0x24, 0x2c, 0x2e, 0x2f, 0x36, 0x3f, 0x40, 0x41, 0x48, 0x4e, 0x51), 1 otherwise; both item relocators fail with 4 on 0"
+ },
+ "0022c328": {
+  "name": "i3rItemUnrelocate",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c328",
+  "why": "(item, base): recursive; runs the type's unfixup from table 0x2db360 on the data (bit 31 of +4 clear), unrelocates the children, then turns data / children / name back into offsets from base"
+ },
+ "0022c478": {
+  "name": "i3rItemRelocate",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c478",
+  "why": "(item, base): recursive; data / children / name offsets + base, then the type's fixup from table 0x2db4c8 on the data (bit 31 of +4 clear, type <= 0x59 else 3), then the children (16 bytes each, count = low 24 bits of +4)"
  },
  "002337e0": {
   "name": "i3dPointSegDist2",

@@ -127,13 +127,6 @@ void dbgTraceVector3(float x, float y, float z)
     ROSEPAN_STUB("dbgTraceVector3", 0x00215b5c);
 }
 
-// stub of ROR 0x0022b3d8
-int i3rGetNodeIndexByName(I3rRoot *root, const char *name)
-{
-    ROSEPAN_STUB("i3rGetNodeIndexByName", 0x0022b3d8);
-    return {};
-}
-
 // stub of ROR 0x00176afc
 int FUN_00176afc(Obj176a3c *obj, i3dContext *ctx, MagScene *scene)
 {
@@ -163,13 +156,6 @@ void MagLifeBwn::renderPostProcess()
 int FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy)
 {
     ROSEPAN_STUB("FUN_0017c1f4", 0x0017c1f4);
-    return {};
-}
-
-// stub of ROR 0x0022b228
-int I3rRoot__CheckIdString(const I3rRoot *root)
-{
-    ROSEPAN_STUB("I3rRoot__CheckIdString", 0x0022b228);
     return {};
 }
 
@@ -391,20 +377,6 @@ int utlTm2GetSize(const void *tm2)
     return size;
 }
 
-// stub of ROR 0x0022b428
-int i3rGetNumTex(const I3rRoot *root)
-{
-    ROSEPAN_STUB("i3rGetNumTex", 0x0022b428);
-    return {};
-}
-
-// stub of ROR 0x0022b438
-const char * i3rGetTexName(const I3rRoot *root, int n)
-{
-    ROSEPAN_STUB("i3rGetTexName", 0x0022b438);
-    return {};
-}
-
 // stub of ROR 0x001bf024
 void GamFont::drawChar(int x, int y, int code)
 {
@@ -605,13 +577,6 @@ void MagScene::updateRecords853fc()
     ROSEPAN_STUB("MagScene::updateRecords853fc", 0x00140c68);
 }
 
-// stub of ROR 0x0022b370
-int i3rGetNumNode(const I3rRoot *root)
-{
-    ROSEPAN_STUB("i3rGetNumNode", 0x0022b370);
-    return {};
-}
-
 // stub of ROR 0x00107248
 void utlVecToRot(const float *dir, float *rot)
 {
@@ -686,5 +651,33 @@ void GamFont::setFillMsb(int on)
 float i3dPointSegDist2(const float *p, const float *a, const float *d, float *t)
 {
     ROSEPAN_STUB("i3dPointSegDist2", 0x002337e0);
+    return {};
+}
+
+// stub of ROR 0x0021a3e8
+int i3rBuildPackets(I3rRoot *root)
+{
+    ROSEPAN_STUB("i3rBuildPackets", 0x0021a3e8);
+    return {};
+}
+
+// stub of ROR 0x0021a558
+int i3rClearPackets(I3rRoot *root)
+{
+    ROSEPAN_STUB("i3rClearPackets", 0x0021a558);
+    return {};
+}
+
+// stub of ROR 0x0022c478
+int i3rItemRelocate(I3rItem *item, I3rItem *base)
+{
+    ROSEPAN_STUB("i3rItemRelocate", 0x0022c478);
+    return {};
+}
+
+// stub of ROR 0x0022c328
+int i3rItemUnrelocate(I3rItem *item, I3rItem *base)
+{
+    ROSEPAN_STUB("i3rItemUnrelocate", 0x0022c328);
     return {};
 }

@@ -240,8 +240,9 @@ struct MagViewParam;
 /* The fog and light records have their own file. */
 #include "i3d/i3denv.h"
 
-/* An i3d model root (tag_I3rRoot_s in DogModel's symbols). Opaque. */
-struct I3rRoot;
+/* The i3d model root (I3D_BIN, tag_I3rRoot_s in DogModel's symbols) and
+ * its item tree have their own file. */
+#include "i3d/i3rroot.h"
 
 /* i3d's matrix struct (tag_I3dMatrixF4x4_s in DogModel's symbols): the
  * same 16 floats as an sceVu0FMATRIX, but the ROM copies it with
@@ -252,15 +253,15 @@ struct I3dMatrixF4x4
 };
 static_assert(sizeof(I3dMatrixF4x4) == 0x40, "I3dMatrixF4x4 is 0x40 bytes on the EE");
 
-/* The node index of the named node, -1 when the model has none. */
-int   i3rGetNodeIndexByName(I3rRoot *root, const char *name);            // ROR 0x0022b3d8
-/* The root's texture count and its n-th texture name (the TIM2 names a
- * DogTexInfo holds them under). */
-int   i3rGetNumTex(const I3rRoot *root);                                 // ROR 0x0022b428
-int   i3rGetNumNode(const I3rRoot *root);                                // ROR 0x0022b370
-const char *i3rGetTexName(const I3rRoot *root, int n);                  // ROR 0x0022b438
-
-#define I3D_OK 0
+/* The item tree's relocators (unassigned@0022b4b8): recursive over the
+ * children, base = the root item; per-type data fixups from the tables
+ * 0x2db4c8 / 0x2db360. I3D_OK, 3 type > 0x59, 4 an invalid type. */
+int   i3rItemRelocate(I3rItem *item, I3rItem *base);                     // ROR 0x0022c478
+int   i3rItemUnrelocate(I3rItem *item, I3rItem *base);                   // ROR 0x0022c328
+/* i3rSetRelocate's hooks: build the root's model packets (0x21fb50 per
+ * mesh) into the slots of its child 6, and clear those slots. */
+int   i3rBuildPackets(I3rRoot *root);                                    // ROR 0x0021a3e8
+int   i3rClearPackets(I3rRoot *root);                                    // ROR 0x0021a558
 
 /* An i3d STQ map entity (tag_I3rStqMapEntity_s in DogModel's symbols).
  * The scene keeps one at +0x2aa90 (less than 0x40 bytes before +0x2aad0).
@@ -271,9 +272,6 @@ struct I3rStqMapEntity
 };
 static_assert(sizeof(I3rStqMapEntity) >= 0x40, "placeholder");
 
-/* I3D_OK when the root carries the i3r id string and version 0x52, 3
- * otherwise (the name is in dogmodel.h's assert text). */
-int   I3rRoot__CheckIdString(const I3rRoot *root);                       // ROR 0x0022b228
 /* The model's clip sphere: centre (w = 1) and radius. */
 int   i3rCopyClipSphere(I3rRoot *root, float *center, float *radius);    // ROR 0x0021a828
 int   i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity);    // ROR 0x0021a938
