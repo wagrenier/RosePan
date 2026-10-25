@@ -389,7 +389,11 @@ struct MagLifeFadeKey : MagLife
 static_assert(offsetof(MagLifeFadeKey, m_tex_no) >= 0x40, "m_tex_no");
 struct MagLife130da4 : MagLife  /* scene +0x418f0, constructor 0x130da4 */
 {
-    u_char _28[0x34 - 0x28];
+    /* m_volume = volume (GamMan::setVolume's scaled master volume). */
+    void setVolume(int volume);                                          // ROR 0x00130de0
+
+    u_char _28[0x30 - 0x28];
+    int    m_volume;            // ROR 0x30
     int    m_34;                // ROR 0x34: initRender copies the scene's +0x2910 into it
 };
 static_assert(offsetof(MagLife130da4, m_34) >= 0x34, "m_34");
@@ -469,6 +473,8 @@ struct WrdTable
 {
     /* Record n, NULL when none is loaded or n is out of range. */
     WrdEntry *get(int n);                                                // ROR 0x0017ea44
+    /* Reads data/wrd/WRD.BIN and keeps file "%03d" of stage. */
+    void load(int stage);                                                // ROR 0x0017e5c0
 };
 
 extern WrdTable g_wrdTable;     /* data 0x298ee0 */

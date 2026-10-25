@@ -705,9 +705,9 @@ void MagSystem::kickPacket()
 // ──────────────────────────────────────────────────────────────────────
 // ROR 0x00118880
 
-void MagSystem::setCameraMode(int mode)
+void MagSystem::setCameraMode(int mode, int arg, const int *param)
 {
-    m_scene.setCameraMode(mode);
+    m_scene.setCameraMode(mode, arg, param);
 }
 
 // ──────────────────────────────────────────────────────────────────────

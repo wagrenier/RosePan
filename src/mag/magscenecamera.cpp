@@ -28,7 +28,7 @@ int MagScene::getCameraMode(int *out)
 // ---- stubs (tools/reverse/stubgen.py) ----
 
 // stub of ROR 0x0013caf0
-void MagScene::setCameraMode(int mode)
+void MagScene::setCameraMode(int mode, int arg, const int *param)
 {
     ROSEPAN_STUB("MagScene::setCameraMode", 0x0013caf0);
 }

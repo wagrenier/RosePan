@@ -298,7 +298,14 @@ struct MagScene
     void parseOption(char *text);                                        // ROR 0x0013c328
     void setCameraTarget(const float *pos, const float *at);             // ROR 0x0013c2ec
     void initCamera();                                                   // ROR 0x0013c928
-    void setCameraMode(int mode);                                        // ROR 0x0013caf0
+    void setCameraMode(int mode, int arg, const int *param);             // ROR 0x0013caf0
+    /* The ROM's line-816 inline (mag/magscene.h; GamMan::getMapCamNum):
+     * sky slot no's _c.bin record count. */
+    int  getTenkyuCNum(int no)
+    {
+        ROR_ASSERT(no >= 0 && no < MAX_MAP_MODEL); /* 816 */
+        return m_tenkyu[no].m_c_num;
+    }
     int  getCameraMode(int *out);                                        // ROR 0x0013d5ac
     void setLightNo(int theNo);                                          // ROR 0x0013f4d0
     /* Only asserts theNo < 8 (the destructor passes -1). */
@@ -449,7 +456,8 @@ struct MagScene
     unsigned       m_actor_flags[128];  // ROR 0x29120: one word per actor; 0x60 = bound / chapter model
     int           *m_actor_snd[128];    // ROR 0x29320: per actor, its 12 footstep sound ids by sector sound slot (asserted m_actor_snd[theNo]); NULL = none
     DogTexInfo     m_tex_info;          // ROR 0x29520: 256 textures, shadow01 first
-    MagSceneTenkyu m_tenkyu[4];         // ROR 0x29540: stride 0x520
+    enum { MAX_MAP_MODEL = 4 };         /* the assert text's name for the slot count */
+    MagSceneTenkyu m_tenkyu[MAX_MAP_MODEL]; // ROR 0x29540: stride 0x520
     int            m_2a9c0;             // ROR 0x2a9c0: the constructor clears it; role unknown
     int            m_focus_actor;       // ROR 0x2a9c4: the actor drawFocusActor shows close up, -1 = none (then drawShadows)
     u_int          m_2a9c8;             // ROR 0x2a9c8: bit 1 = draw the blob shadows; other bits unknown
