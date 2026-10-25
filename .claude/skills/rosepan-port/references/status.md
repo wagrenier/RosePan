@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-25 18:35 at commit `da9ec2d` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-25 19:03 at commit `1df9483` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-25 18:35 at commit `da9ec2d` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6655**, named **3410** (51%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 230, ror-inferred 1812
-- context-name ledger: 2042 entries; overrides of wrong library matches: 5
+- game functions: **6655**, named **3423** (51%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 230, ror-inferred 1825
+- context-name ledger: 2055 entries; overrides of wrong library matches: 5
 - placed in a source file: 3060/6655 in 92 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **1669**; stubs: **336**
+- reconstructed RoR functions: **1687**; stubs: **331**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -84,7 +84,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/rx/rxthread.cpp` | 53 | 0 |
 | `src/sequence/seqcall.cpp` | 12 | 29 |
 | `src/sequence/sequence.cpp` | 19 | 0 |
-| `src/sequence/seqvm.cpp` | 125 | 5 |
+| `src/sequence/seqvm.cpp` | 143 | 0 |
 | `src/snd/rxmpeg.cpp` | 0 | 1 |
 | `src/snd/sndman.cpp` | 52 | 0 |
 | `src/spr/s2d.cpp` | 86 | 0 |
@@ -99,12 +99,11 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 159 TUs: todo 129, partial 7, verify 33, done 2
-- next: **sequence/seqvm.cpp** (pinned in the queue)
-- pinned queue: sequence/seqvm.cpp, sequence/seqcall.cpp, unassigned@0020ff34, game/gamman.cpp, unassigned@001fd424, unassigned@001e46b8, bed/bedpad.cpp, mag/maglifemenu.cpp, unassigned@001a6830, snd/rxmpeg.cpp, unassigned@001810f4
+- 159 TUs: todo 129, partial 6, verify 34, done 2
+- next: **sequence/seqcall.cpp** (pinned in the queue)
+- pinned queue: sequence/seqcall.cpp, unassigned@0020ff34, game/gamman.cpp, unassigned@001fd424, unassigned@001e46b8, bed/bedpad.cpp, mag/maglifemenu.cpp, unassigned@001a6830, snd/rxmpeg.cpp, unassigned@001810f4
 - partial: `game/gamman.cpp` 77/409 -- Screen still black: nothing in this slice draws, and boot stage 99 hits loadStageSnd's default (no packs, as in the ROM). The boot's blockers are the natives se
 - partial: `sequence/seqcall.cpp` 12/43 -- Left: 29 handler stubs in seqcall.cpp (004, 006, 007, 009, 012, 014, 016, 019, 020, 023, 026, 028, 029, 036, 038, 039, 100, 106, 151..281); write each when a de
-- partial: `sequence/seqvm.cpp` 125/143 -- Left in this file: the other thread starters and queries 0x211830 (imdy), 0x211be4 (single), 0x2120ac, 0x212330 (trg), 0x212598, 0x2129b8, 0x212a5c, 0x212d08, 0
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
@@ -131,6 +130,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `rx/rxsys.cpp` 74/119 -- Status verify: nothing calls rxSysInit yet - main 0x2045a8 is still the placeholder in src/main.cpp, so the screenshot is the black placeholder frame. Next: mai
 - verify: `rx/rxthread.cpp` 53/53 -- Complete; verify because main (unassigned@001fd424) is still the placeholder, so nothing calls rxThInit in the smoke run (black frame as before). A temporary ca
 - verify: `sequence/sequence.cpp` 19/19 -- All 19 functions written; the smoke run executes Sequence::exec every frame with empty pools (screen black as before: no image is loaded because GamMan::loadSys
+- verify: `sequence/seqvm.cpp` 143/143 -- Status verify: complete code, screen still black. New in the boot: the registered threads run and reach seqFunc004 0x205570 and seqFunc029 0x208b98 (stubs in se
 - verify: `setup/i3d_draw_module.cpp` 0/0 -- Hook recorded in open-items Decisions (The native i3d hook). The committed screenshot is the forced test (ROSEPAN_I3D_TEST=1): S2DMAN.RPK @0x800 (PSMT8, Now Loa
 - verify: `snd/sndman.cpp` 52/52 -- Done as verify: SndMan::update runs every frame now, but every rxSnd call (rx/rxsnd.h, unassigned@00237ce8) is a stub, so nothing is heard and nothing on screen
 - verify: `spr/s2d.cpp` 86/86 -- All 86 functions written; nothing on screen can show them yet (MagScene::draw is a stub), so verify: the first session whose screenshot shows S2d sprites marks 
@@ -141,6 +141,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-25 19:03 `sequence/seqvm.cpp` verify: Finished the sequence VM file (143/143): queueThread, callEntry, callEntryNow with execImmediate 0x211830 (imdy), endThread, endThreadOf with findThreadNamed / 
 - 2026-10-25 18:35 `sequence/seqcall.cpp` partial: Script natives the boot reaches: seqFunc001 (new game state), 002 (default scene lights), 021 (GamMan state service, 32 cases), 027 (object service, 205 cases),
 - 2026-10-25 18:23 `game/gamman.cpp` partial: GamMan slice 3: loadStageSnd (the chapter SE packs 1xxx / 3200..3210.se), the item code (addItem, delItem, delItemAll, equipItem with the held object on node p_
 - 2026-10-25 18:10 `game/gamman.cpp` partial: GamMan slice 2: onStageSeqEnd, afterSeqExec and execStageReq (the stage change), setImage, resetObj, pause / resume / enterMenu with pauseForMenu, resumeFromMen
@@ -148,7 +149,6 @@ Recent sessions:
 - 2026-10-25 17:15 `sequence/seqvm.cpp` partial: The sequence script VM: pinned sequence/seqvm.cpp 0x20ff34..0x2155a0 (was unassigned@0020ff34), created and named 104 Ghidra functions (the 99 opcode handlers o
 - 2026-10-25 16:37 `sequence/sequence.cpp` verify: Sequence: constructor, init / term, the three image loaders, stopImages, the per-frame exec with runImage and reapThreads, releaseThread, the global / stage var
 - 2026-10-25 16:23 `sequence/seqcall.cpp` partial: Script native functions: pinned sequence/seqcall.cpp 0x2053f4..0x20e3d8 (the 512-entry table data 0x2d90f8 the sequence VM calls), named 41 handlers seqFuncNNN 
-- 2026-10-25 15:53 `i3d/i3rroot.cpp` verify: Pinned i3d/i3rroot.cpp 0x22b1b0-0x22b4b8 out of unassigned@00228c08 and wrote all 14 functions (3 hidden ones created in Ghidra): the I3D_BIN id check, i3rSetRe
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -157,13 +157,13 @@ Recent sessions:
 | `unassigned@001e6cac` | todo | 0/12/220 | 68.8 | 50 | 5 |
 | `game/gamman.cpp` | partial | 77/23/409 | 82.8 | 43 | 3 |
 | `unassigned@00164fc0` | todo | 0/10/395 | 104.2 | 37 | 4 |
+| `unassigned@0013e2ec` | todo | 0/11/15 | 4.4 | 30 | 3 |
 | `unassigned@00143d3c` | todo | 0/7/602 | 129.5 | 30 | 2 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 29 | 0 |
 | `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 28 | 3 |
 | `unassigned@0010f944` | todo | 0/5/12 | 2.2 | 26 | 3 |
-| `unassigned@001810f4` | todo | 0/10/28 | 2.8 | 25 | 3 |
 | `dog/dogactor.cpp` | todo | 0/25/139 | 30.3 | 25 | 0 |
-| `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 24 | 1 |
+| `unassigned@001810f4` | todo | 0/10/28 | 2.8 | 25 | 3 |
 
 ## Frontier (called by reconstructed code, not written yet)
 

@@ -6329,6 +6329,18 @@
   "was": "FUN_002113dc",
   "why": "runs a thread at once in the record at +0xdc30 under flag 0x100 (registers saved / restored around it); queued on the start list if it waits; GamArea::checkPc calls it"
  },
+ "00211830": {
+  "name": "Sequence::execImmediate",
+  "tag": "ror-inferred",
+  "was": "FUN_00211830",
+  "why": "callEntryNow's worker: unless hasThread(id, arg), fills m_single (name imdy), optional call save, selects the image, sets flag 0x100, seqVmRun, releases or queues the rest on m_start, then selects image 2"
+ },
+ "00211be4": {
+  "name": "Sequence::queueSingle",
+  "tag": "ror-inferred",
+  "was": "FUN_00211be4",
+  "why": "unless hasThread(id, arg), queues a thread on m_start at the addiu-sp entry with arg and flags; copies the name single into m_single as startThread does"
+ },
  "00211e84": {
   "name": "Sequence::startThread",
   "tag": "ror-inferred",
@@ -6340,6 +6352,18 @@
   "tag": "ror-inferred",
   "was": "FUN_002120ac",
   "why": "builds a SeqThread (flags, id, entry rebased to the image and moved to its addiu sp, arg, name, wait -1) and appends it to m_start (+0x40); callSave != 0 sets flag 0x80 and seqVmAllocCallSave"
+ },
+ "00212330": {
+  "name": "Sequence::queueTrigger",
+  "tag": "ror-inferred",
+  "was": "FUN_00212330",
+  "why": "queues a trg thread from a record (+0x2c image id, +0x30 thread id, +0x34 entry), m_area = the record; no callers"
+ },
+ "00212598": {
+  "name": "Sequence::queueTriggerThread",
+  "tag": "ror-inferred",
+  "was": "FUN_00212598",
+  "why": "queues a trg thread: image and m_area from a1, id a2, entry a3, arg, flags; no callers"
  },
  "002127f4": {
   "name": "Sequence::freeStageEntries",
@@ -6377,6 +6401,12 @@
   "was": "FUN_00212e64",
   "why": "endThread's twin with the lookup 0x213d90 (by another key); native 110 case 31"
  },
+ "00212fbc": {
+  "name": "Sequence::endThreadsWithArg",
+  "tag": "ror-inferred",
+  "was": "FUN_00212fbc",
+  "why": "copies every thread of the three image pools whose m_arg (+0x28) equals arg to m_ended"
+ },
  "00213448": {
   "name": "seqUnused213448",
   "tag": "ror-inferred",
@@ -6401,6 +6431,18 @@
   "was": "FUN_00213b28",
   "why": "scans a thread list for id and arg, *node gets the node; 1 found"
  },
+ "00213b7c": {
+  "name": "Sequence::findThreadNamedIn",
+  "tag": "ror-inferred",
+  "was": "FUN_00213b7c",
+  "why": "walks a node range for a thread whose m_name strcmp-equals name, stores the node"
+ },
+ "00213bfc": {
+  "name": "Sequence::hasThreadNamedIn",
+  "tag": "ror-inferred",
+  "was": "FUN_00213bfc",
+  "why": "the same without storing the node"
+ },
  "00213c6c": {
   "name": "Sequence::findThread",
   "tag": "ror-inferred",
@@ -6412,6 +6454,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00213d00",
   "why": "picks the image pool of id >> 30 and calls 0x213adc"
+ },
+ "00213d90": {
+  "name": "Sequence::findThreadNamed",
+  "tag": "ror-inferred",
+  "was": "FUN_00213d90",
+  "why": "findThreadNamedIn over the used lists of images 0, 1, 2; endThreadOf calls it"
+ },
+ "00213e78": {
+  "name": "Sequence::hasThreadNamed",
+  "tag": "ror-inferred",
+  "was": "FUN_00213e78",
+  "why": "hasThreadNamedIn over the used lists of images 0, 1, 2; natives 004 / 152 call it"
  },
  "00213f48": {
   "name": "Sequence::setupImage",
@@ -6484,6 +6538,30 @@
   "tag": "ror-inferred",
   "was": "FUN_00214c24",
   "why": "the interpreter loop: decodes MIPS opcodes through the tables 0x2d9958 / 0x2d9a58, calls natives below 0x8160; returns the pc to continue at, 0 when the thread ends"
+ },
+ "00214e98": {
+  "name": "Sequence::saveGlobals",
+  "tag": "ror-inferred",
+  "was": "FUN_00214e98",
+  "why": "copies 0x544 bytes of m_global to a buffer with the 0x40-byte slot of index g 0x7a3210 (0x4c4 + i * 0x40) at 0x504; returns 0x544; save code 0x1d6078 calls it"
+ },
+ "002150b0": {
+  "name": "Sequence::saveBits",
+  "tag": "ror-inferred",
+  "was": "FUN_002150b0",
+  "why": "copies 0x400 bytes of m_bits with the 0x40-byte slot of index 0x7a3210 (0x320 + i * 0x40) at 0x360; returns 0x400"
+ },
+ "002152b8": {
+  "name": "Sequence::loadGlobals",
+  "tag": "ror-inferred",
+  "was": "FUN_002152b8",
+  "why": "inverse of saveGlobals: 0x544 bytes into m_global, then the 0x504 slot into slot 0x7a3210; returns 0x544; load code 0x1d68a0"
+ },
+ "00215430": {
+  "name": "Sequence::loadBits",
+  "tag": "ror-inferred",
+  "was": "FUN_00215430",
+  "why": "inverse of saveBits: 0x360 bytes into m_bits, then the 0x360 slot into slot 0x7a3210; returns 0x400"
  },
  "002155a0": {
   "name": "debugNop",

@@ -16,6 +16,7 @@
 #ifndef _SEQUENCE_SEQUENCE_H
 #define _SEQUENCE_SEQUENCE_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "sdk/eetypes.h"
@@ -170,6 +171,26 @@ struct SeqEntry
     int   _8[2];                // ROR 0x8: stack garbage in the ROM
 };
 
+/* The record queueTrigger reads (only the three words it uses; what it
+ * belongs to is not known: no caller). EE layout. */
+struct SeqTrgRec
+{
+    u_char _0[0x2c];
+    u_int  m_image;             // ROR 0x2c: the image is its top two bits
+    u_int  m_id;                // ROR 0x30: the thread id
+    int    m_entry;             // ROR 0x34: an address in the image
+};
+static_assert(sizeof(SeqTrgRec) == 0x38, "SeqTrgRec size");
+static_assert(offsetof(SeqTrgRec, m_image) == 0x2c, "SeqTrgRec m_image");
+static_assert(offsetof(SeqTrgRec, m_id) == 0x30, "SeqTrgRec m_id");
+static_assert(offsetof(SeqTrgRec, m_entry) == 0x34, "SeqTrgRec m_entry");
+
+/* The save slots: m_global / m_bits keep one 0x40-byte slot per value of
+ * g_bss_7a3210 (1..13, anything else counts as 9); a save keeps only the
+ * current one, at slot 1's place. */
+#define SEQ_GLOBAL_SLOT(i)  (0x4c4 + (i) * 0x40)
+#define SEQ_BITS_SLOT(i)    (0x320 + (i) * 0x40)
+
 /* EE size at least 0xdce4. layout: host -- EE offsets in the comments. */
 struct Sequence
 {
@@ -210,16 +231,34 @@ struct Sequence
      * save slot (flag 0x80). */
     void queueThread(u_int id, intptr_t entry, int arg, u_int flags, int callSave,
                      const char *name);                                  // ROR 0x002120ac
+    /* Runs a thread at once in m_single ("imdy", like execThread without
+     * keeping the caller's registers); nothing when (id, arg) already runs.
+     * Selects image 2 afterwards, whatever ran before (the ROM's li a0, 2). */
+    void execImmediate(u_int id, intptr_t entry, int arg, u_int flags,
+                       int callSave);                                    // ROR 0x00211830
+    /* queueThread without a call save slot ("single"), unless (id, arg)
+     * already runs. */
+    void queueSingle(u_int id, intptr_t entry, int arg, u_int flags);    // ROR 0x00211be4
+    /* A "trg" thread for a trigger record: image from its m_image, id and
+     * entry from it, m_area = the record itself. Unreferenced. */
+    void queueTrigger(const SeqTrgRec *rec, int arg, u_int flags); // ROR 0x00212330
+    /* A "trg" thread: area gives the image and m_area. Unreferenced. */
+    void queueTriggerThread(u_int area, u_int id, intptr_t entry, int arg,
+                            u_int flags);                                // ROR 0x00212598
     void freeStageEntries();                                             // ROR 0x002127f4
     void addEntry(u_int id, int value);                                  // ROR 0x00212920
     /* addEntry's id: queueThread(id, its value, arg, 2, callSave, "none"). */
     void callEntry(u_int id, int arg, int callSave);                     // ROR 0x002129b8
-    /* The same started at once (0x211830) with the VM state saved around it. */
+    /* The same run at once (execImmediate) with the caller's registers and
+     * gp area kept around it. */
     void callEntryNow(u_int id, int arg, int callSave);                  // ROR 0x00212a5c
-    /* Copies the thread id / arg (findThread) into m_ended. */
+    /* Copies the thread id / arg (findThread) to m_ended. */
     void endThread(u_int id, int arg);                                   // ROR 0x00212d08
-    /* The same for the thread 0x213d90 finds by key. */
-    void endThreadOf(intptr_t key);                                      // ROR 0x00212e64
+    /* The same for the thread named name (findThreadNamed). */
+    void endThreadOf(const char *name);                                  // ROR 0x00212e64
+    /* Copies every thread of the three image pools with m_arg == arg to
+     * m_ended. */
+    void endThreadsWithArg(int arg);                                     // ROR 0x00212fbc
     /* Moves image idx's threads to the ended list, reaps them, and clears
      * the image and its registers. */
     void killThreads(int idx);                                           // ROR 0x00213450
@@ -230,9 +269,29 @@ struct Sequence
     /* Non-zero when the id's image pool has it; *node gets its node. */
     int  findThread(u_int id, SeqNode<SeqThread> **node, int arg);       // ROR 0x00213c6c
     int  hasThread(u_int id, int arg);                                   // ROR 0x00213d00
+    int  findThreadNamedIn(const char *name, SeqNode<SeqThread> *it, SeqNode<SeqThread> *end,
+                           SeqNode<SeqThread> **node);                   // ROR 0x00213b7c
+    int  hasThreadNamedIn(const char *name, SeqNode<SeqThread> *it,
+                          SeqNode<SeqThread> *end);                      // ROR 0x00213bfc
+    /* Images 0, 1, 2 in order; *node gets the first match. */
+    int  findThreadNamed(const char *name, SeqNode<SeqThread> **node);   // ROR 0x00213d90
+    int  hasThreadNamed(const char *name);                               // ROR 0x00213e78
     /* Points the VM at image (registers 0x7b47d0..) and saves its state
      * for image idx. */
     void setupImage(u_char *image, int idx);                             // ROR 0x00213f48
+
+    /* ---- the save data (the save / load code 0x1d6078 / 0x1d68a0) ---- */
+    /* m_global's first 0x544 bytes into dst, the 0x40-byte slot of index
+     * g_bss_7a3210 (SEQ_GLOBAL_SLOT) put at 0x504; returns 0x544. */
+    int  saveGlobals(void *dst);                                         // ROR 0x00214e98
+    /* m_bits' first 0x400 bytes into dst, the slot (SEQ_BITS_SLOT) put at
+     * 0x360; returns 0x400. */
+    int  saveBits(void *dst);                                            // ROR 0x002150b0
+    /* The reverse: 0x544 bytes into m_global, then 0x504 into the slot. */
+    int  loadGlobals(const void *src);                                   // ROR 0x002152b8
+    /* 0x360 bytes into m_bits, then 0x360 into the slot (0x3a0..0x400 of
+     * src are not read back). */
+    int  loadBits(const void *src);                                      // ROR 0x00215430
 
     u_char                *m_image[4];      // ROR 0x00: images 0..2 (the game heap), [3] = 0
     SeqPool<SeqThread>    *m_threads[4];    // ROR 0x10: each image's 0x40 threads, [3] = 0
@@ -323,6 +382,8 @@ extern u_char  *g_seqStack;                 /* bss 0x7b4d20: 0x10000 bytes, 32 s
 extern int      g_seqStackUsed[32];         /* bss 0x7b4d30 */
 /* Where SEQ_RET_RETURN continues (+ 4); nothing in the VM file sets it. */
 extern intptr_t g_seqReturnPc;              /* bss 0x7b4db0 */
+/* callEntryNow sets 2; nothing else in the ELF refers to it. */
+extern int      g_seqCallNowKind;           /* bss 0x7b4dc0 */
 extern int      g_seqImage;                 /* bss 0x7b4dd0: the image exec is running */
 extern int      g_seqStackNext;             /* data 0x2d9950: the next stack slot to try */
 extern intptr_t g_seqImageRegs[3][32];      /* data 0x2d9c08: each image's registers */

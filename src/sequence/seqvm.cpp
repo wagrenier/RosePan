@@ -30,16 +30,17 @@
 // not fit in 32 bits beside memory (s_wideWords) and give it back when the
 // word still holds its low half (hazards.md "Script pointers").
 //
-// Written: the handlers, seqVmRun, the image / thread state functions, and
-// the Sequence thread methods startThread, execThread, waitFrames, jumpTo,
-// killThreads, the find / has helpers, the entry pool. Left: the other
-// thread starters and queries 0x211830..0x213e78, 0x214e98..0x215430.
+// Complete: the handlers, seqVmRun, the image / thread state functions,
+// every Sequence thread method (the starters execThread / execImmediate /
+// startThread / queueThread / queueSingle / queueTrigger*, the entry calls,
+// the end / find / has queries) and the save data of the globals and bits.
 #include "common/rosepan_stub.h"
 
 #include <string.h>
 
 #include <unordered_map>
 
+#include "lib/unassigned.h"
 #include "sequence/seqcall.h"
 #include "sequence/sequence.h"
 
@@ -68,6 +69,7 @@ intptr_t g_seqCallSave[0x100];
 u_char  *g_seqStack;
 int      g_seqStackUsed[32];
 intptr_t g_seqReturnPc;
+int      g_seqCallNowKind;
 int      g_seqImage;
 int      g_seqStackNext;
 intptr_t g_seqImageRegs[3][32];
@@ -1080,6 +1082,13 @@ static intptr_t seqFindEntry(intptr_t pc)
     return pc;
 }
 
+// A script address of image idx (as m_base counts it) as a host address
+// in its code (inline in every thread starter).
+static intptr_t seqImagePc(const Sequence *seq, u_int idx, intptr_t entry)
+{
+    return entry + g_seqImageState[idx].m_code - seq->m_base[idx];
+}
+
 // ──────────────────────────────────────────────────────────────────────
 // entry is an address in id's image (as m_base counts it). The caller's
 // registers are kept around the run.
@@ -1089,7 +1098,7 @@ void Sequence::execThread(u_int id, intptr_t entry, int arg, u_int flags, int re
                           int area, const char *name)
 {
     u_int image = id >> 30;
-    intptr_t pc = entry + g_seqImageState[image].m_code - m_base[image];
+    intptr_t pc = seqImagePc(this, image, entry);
     if (hasThread(id, arg) != 0)
         return;
 
@@ -1126,6 +1135,71 @@ void Sequence::execThread(u_int id, intptr_t entry, int arg, u_int flags, int re
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// execThread's sibling for callEntryNow: no registers kept (the caller
+// keeps them), m_area 0, and image 2 selected at the end.
+// ROR 0x00211830
+
+void Sequence::execImmediate(u_int id, intptr_t entry, int arg, u_int flags, int callSave)
+{
+    u_int image = id >> 30;
+    intptr_t pc = seqImagePc(this, image, entry);
+    if (hasThread(id, arg) != 0)
+        return;
+
+    m_single.m_flags = flags;
+    m_single.m_id = id;
+    m_single.m_pc = seqFindEntry(pc);
+    m_single.m_wait = -1;
+    m_single.m_24 = 1;
+    m_single.m_arg = arg;
+    m_single.m_area = 0;
+    m_single.m_stack = 0;
+    strncpy(m_single.m_name, "imdy", 8);
+    if (callSave != 0)
+        m_single.m_resume = seqVmAllocCallSave();
+    seqVmSelectImage(image);
+    if (callSave != 0)
+        seqVmResume(m_single.m_resume);
+
+    m_flags |= 0x100;
+    intptr_t next = seqVmRun(m_single.m_pc);
+    if (next == 0) {
+        releaseThread(&m_single);
+    } else {
+        m_single.m_pc = next;
+        m_start.add(m_single);
+    }
+    m_flags &= ~0x100u;
+    seqVmSelectImage(2);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00211be4
+
+void Sequence::queueSingle(u_int id, intptr_t entry, int arg, u_int flags)
+{
+    u_int image = id >> 30;
+    intptr_t pc = seqImagePc(this, image, entry);
+    if (hasThread(id, arg) != 0)
+        return;
+
+    // PC: the ROM leaves m_resume and m_name as stack garbage.
+    SeqThread thread;
+    memset(&thread, 0, sizeof(thread));
+    thread.m_pc = seqFindEntry(pc);
+    thread.m_24 = 1;
+    thread.m_wait = -1;
+    thread.m_arg = arg;
+    thread.m_area = 0;
+    thread.m_stack = 0;
+    thread.m_flags = flags;
+    thread.m_id = id;
+    // The ROM copies the name into m_single, as startThread does.
+    strncpy(m_single.m_name, "single", 8);
+    m_start.add(thread);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x00211e84
 
 void Sequence::startThread(u_int id, intptr_t entry)
@@ -1143,6 +1217,76 @@ void Sequence::startThread(u_int id, intptr_t entry)
     thread.m_stack = 0;
     // The ROM copies the name into m_single, not into the new thread.
     strncpy(m_single.m_name, "mst", 8);
+    m_start.add(thread);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x002120ac
+
+void Sequence::queueThread(u_int id, intptr_t entry, int arg, u_int flags, int callSave,
+                           const char *name)
+{
+    u_int image = id >> 30;
+    // PC: the ROM leaves m_resume (without a call save) and _18 as stack
+    // garbage.
+    SeqThread thread;
+    memset(&thread, 0, sizeof(thread));
+    thread.m_pc = seqFindEntry(seqImagePc(this, image, entry));
+    thread.m_wait = -1;
+    thread.m_24 = 1;
+    thread.m_area = 0;
+    thread.m_stack = 0;
+    thread.m_flags = flags;
+    thread.m_id = id;
+    thread.m_arg = arg;
+    strncpy(thread.m_name, name, 8);
+    if (callSave != 0) {
+        thread.m_flags |= 0x80;
+        thread.m_resume = seqVmAllocCallSave();
+    }
+    m_start.add(thread);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Unreferenced. m_area holds the record's address (the GamArea trigger
+// functions compare it with a rect's id word).
+// ROR 0x00212330
+
+void Sequence::queueTrigger(const SeqTrgRec *rec, int arg, u_int flags)
+{
+    u_int image = rec->m_image >> 30;
+    SeqThread thread;
+    memset(&thread, 0, sizeof(thread));
+    thread.m_id = rec->m_id;
+    thread.m_pc = seqFindEntry(seqImagePc(this, image, rec->m_entry));
+    thread.m_24 = 1;
+    thread.m_wait = -1;
+    thread.m_stack = 0;
+    thread.m_flags = flags;
+    // PC: a host pointer does not fit the 32-bit id; nothing calls this.
+    thread.m_area = (int)(intptr_t)rec;
+    thread.m_arg = arg;
+    strncpy(thread.m_name, "trg", 8);
+    m_start.add(thread);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Unreferenced.
+// ROR 0x00212598
+
+void Sequence::queueTriggerThread(u_int area, u_int id, intptr_t entry, int arg, u_int flags)
+{
+    SeqThread thread;
+    memset(&thread, 0, sizeof(thread));
+    thread.m_pc = seqFindEntry(seqImagePc(this, area >> 30, entry));
+    thread.m_24 = 1;
+    thread.m_wait = -1;
+    thread.m_stack = 0;
+    thread.m_flags = flags;
+    thread.m_id = id;
+    thread.m_area = (int)area;
+    thread.m_arg = arg;
+    strncpy(thread.m_name, "trg", 8);
     m_start.add(thread);
 }
 
@@ -1173,6 +1317,87 @@ void Sequence::addEntry(u_int id, int value)
     entry.m_id = id;
     entry.m_value = value;
     m_entries.add(entry);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x002129b8
+
+void Sequence::callEntry(u_int id, int arg, int callSave)
+{
+    SeqList<SeqEntry> &used = m_entries.m_used;
+    for (SeqNode<SeqEntry> *it = used.begin(); it != used.end(); it = it->m_next) {
+        if (it->m_data.m_id == id) {
+            queueThread(id, it->m_data.m_value, arg, 2, callSave, "none");
+            return;
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The thread runs inside the native call: the caller's registers and gp
+// area are kept around it, and SEQ_RET_RETURN continues the caller after
+// the call (g_seqReturnPc).
+// ROR 0x00212a5c
+
+void Sequence::callEntryNow(u_int id, int arg, int callSave)
+{
+    SeqList<SeqEntry> &used = m_entries.m_used;
+    SeqNode<SeqEntry> *it = used.begin();
+    while (true) {
+        if (it == used.end())
+            return;
+        if (it->m_data.m_id == id)
+            break;
+        it = it->m_next;
+    }
+
+    g_seqReturnPc = g_seqPc;
+    g_seqCallNowKind = 2;
+    intptr_t regs[32];
+    u_char area[SEQ_GP_AREA];
+    memcpy(regs, g_seqGpr, sizeof(regs));
+    seqVmCopyArea(area, (const u_char *)R(28));
+
+    execImmediate(id, it->m_data.m_value, arg, 2, callSave);
+
+    memcpy(g_seqGpr, regs, sizeof(regs));
+    seqVmCopyArea((u_char *)R(28), area);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The thread is copied to m_ended (reapThreads removes it from its pool
+// at the next exec).
+// ROR 0x00212d08
+
+void Sequence::endThread(u_int id, int arg)
+{
+    SeqNode<SeqThread> *node = NULL;
+    if (findThread(id, &node, arg) != 0)
+        m_ended.add(node->m_data);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00212e64
+
+void Sequence::endThreadOf(const char *name)
+{
+    SeqNode<SeqThread> *node = NULL;
+    if (findThreadNamed(name, &node) != 0)
+        m_ended.add(node->m_data);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00212fbc
+
+void Sequence::endThreadsWithArg(int arg)
+{
+    for (int idx = 0; idx < 3; idx++) {
+        SeqList<SeqThread> &used = m_threads[idx]->m_used;
+        for (SeqNode<SeqThread> *it = used.begin(); it != used.end(); it = it->m_next) {
+            if (it->m_data.m_arg == arg)
+                m_ended.add(it->m_data);
+        }
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1241,6 +1466,33 @@ int Sequence::findThreadIn(u_int id, SeqNode<SeqThread> *it, SeqNode<SeqThread> 
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x00213b7c
+
+int Sequence::findThreadNamedIn(const char *name, SeqNode<SeqThread> *it,
+                                SeqNode<SeqThread> *end, SeqNode<SeqThread> **node)
+{
+    for (; it != end; it = it->m_next) {
+        if (strcmp(it->m_data.m_name, name) == 0) {
+            *node = it;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00213bfc
+
+int Sequence::hasThreadNamedIn(const char *name, SeqNode<SeqThread> *it, SeqNode<SeqThread> *end)
+{
+    for (; it != end; it = it->m_next) {
+        if (strcmp(it->m_data.m_name, name) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x00213c6c
 
 int Sequence::findThread(u_int id, SeqNode<SeqThread> **node, int arg)
@@ -1262,6 +1514,32 @@ int Sequence::hasThread(u_int id, int arg)
         return 0;
     SeqList<SeqThread> &used = m_threads[image]->m_used;
     return hasThreadIn(id, used.begin(), used.end(), arg);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00213d90
+
+int Sequence::findThreadNamed(const char *name, SeqNode<SeqThread> **node)
+{
+    for (int idx = 0; idx < 3; idx++) {
+        SeqList<SeqThread> &used = m_threads[idx]->m_used;
+        if (findThreadNamedIn(name, used.begin(), used.end(), node) == 1)
+            return 1;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00213e78
+
+int Sequence::hasThreadNamed(const char *name)
+{
+    for (int idx = 0; idx < 3; idx++) {
+        SeqList<SeqThread> &used = m_threads[idx]->m_used;
+        if (hasThreadNamedIn(name, used.begin(), used.end()) == 1)
+            return 1;
+    }
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1528,35 +1806,63 @@ intptr_t seqVmRun(intptr_t pc)
     }
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x002129b8
-void Sequence::callEntry(u_int id, int arg, int callSave)
+// ──────────────────────────────────────────────────────────────────────
+// The save slot index (inline in the four save functions).
+static int seqSaveSlot(void)
 {
-    ROSEPAN_STUB("Sequence::callEntry", 0x002129b8);
+    int slot = g_bss_7a3210;
+    if ((u_int)(slot - 1) > 0xc)
+        slot = 9;
+    return slot;
 }
 
-// stub of ROR 0x00212a5c
-void Sequence::callEntryNow(u_int id, int arg, int callSave)
+// The save data are the raw words: a host pointer a script stored in the
+// globals (seqVmStoreWord) keeps only its low half.
+// ROR 0x00214e98
+
+int Sequence::saveGlobals(void *dst)
 {
-    ROSEPAN_STUB("Sequence::callEntryNow", 0x00212a5c);
+    const u_char *global = (const u_char *)m_global;
+    u_char buf[0x544];
+    memcpy(buf, global, sizeof(buf));
+    memcpy(buf + 0x504, global + SEQ_GLOBAL_SLOT(seqSaveSlot()), 0x40);
+    memcpy(dst, buf, sizeof(buf));
+    return 0x544;
 }
 
-// stub of ROR 0x00212d08
-void Sequence::endThread(u_int id, int arg)
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x002150b0
+
+int Sequence::saveBits(void *dst)
 {
-    ROSEPAN_STUB("Sequence::endThread", 0x00212d08);
+    const u_char *bits = (const u_char *)m_bits;
+    u_char buf[0x400];
+    memcpy(buf, bits, sizeof(buf));
+    memcpy(buf + 0x360, bits + SEQ_BITS_SLOT(seqSaveSlot()), 0x40);
+    memcpy(dst, buf, sizeof(buf));
+    return 0x400;
 }
 
-// stub of ROR 0x00212e64
-void Sequence::endThreadOf(intptr_t key)
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x002152b8
+
+int Sequence::loadGlobals(const void *src)
 {
-    ROSEPAN_STUB("Sequence::endThreadOf", 0x00212e64);
+    const u_char *in = (const u_char *)src;
+    int slot = seqSaveSlot();
+    memcpy(m_global, in, 0x544);
+    memcpy((u_char *)m_global + SEQ_GLOBAL_SLOT(slot), in + 0x504, 0x40);
+    return 0x544;
 }
 
-// stub of ROR 0x002120ac
-void Sequence::queueThread(u_int id, intptr_t entry, int arg, u_int flags, int callSave,
-                     const char *name)
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00215430
+
+int Sequence::loadBits(const void *src)
 {
-    ROSEPAN_STUB("Sequence::queueThread", 0x002120ac);
+    const u_char *in = (const u_char *)src;
+    int slot = seqSaveSlot();
+    memcpy(m_bits, in, 0x360);
+    memcpy((u_char *)m_bits + SEQ_BITS_SLOT(slot), in + 0x360, 0x40);
+    return 0x400;
 }

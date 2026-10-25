@@ -713,7 +713,7 @@ intptr_t seqFunc110(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
         seq.queueThread((u_int)a2, a1, 0, 0, 0, (const char *)a3);
         return 0;
     case 31:
-        seq.endThreadOf(a1);
+        seq.endThreadOf((const char *)a1);
         return 0;
     case 99:
         seq.endThread((u_int)a2, 0);
