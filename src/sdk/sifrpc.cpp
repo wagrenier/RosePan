@@ -4,6 +4,7 @@
 
 #include "sifrpc.h"
 #include "sifcmd.h"                 /* the IOP half of this transport */
+#include "iop_host.h"
 
 #include <string.h>
 
@@ -77,6 +78,30 @@ int sceSifCallRpc(sceSifClientData *bd, unsigned int fno, unsigned int mode,
         func();
     }
 
+    return 0;
+}
+
+/* IOP -> EE, the mirror of sceSifSetDma() (sif.cpp): one address space, so a
+ * memcpy -- unless `src` is a bare IOP offset nothing here maps (the IOP heap
+ * stand-ins hand those out); then `dest` is left as it is.  Never busy. */
+int sceSifGetOtherData(sceSifReceiveData *rd, void *src, void *dest, int size,
+                       unsigned int mode)
+{
+    (void)mode;
+
+    if (rd != 0)
+    {
+        rd->src  = src;
+        rd->dest = dest;
+        rd->size = size;
+    }
+
+    if (src == 0 || dest == 0 || size <= 0 || RosePan_IopMemIsBareOffset(src))
+    {
+        return 0;
+    }
+
+    memcpy(dest, src, (size_t)size);
     return 0;
 }
 

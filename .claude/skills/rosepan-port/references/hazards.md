@@ -405,6 +405,10 @@ public:
 - **i3d draws on the host only through the replay** (rosepan_i3d.h): a new packet writer, or a
   register a writer sets some other way than i3dPktSetReg, draws nothing until it records itself;
   a packet range the walk links without calling `RosePan_I3dReplay` is skipped.
+- **A bounce buffer the ROM relies on being aligned** (2026-10-25, rxSndIopRead): EE bss is laid out
+  with alignments host statics do not get. rxSndIopRead recurses into its own bounce buffer and only
+  stops when that buffer is 16-byte aligned (0x7b6b00 on the EE); unaligned on the host it recurses
+  for ever. Give such buffers `alignas(16)` (or whatever the ROM address implies).
 
 ## How to debug (the method that worked)
 
