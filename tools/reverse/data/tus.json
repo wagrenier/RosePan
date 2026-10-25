@@ -1,13 +1,12 @@
 {
  "queue": [
-  "mag/maglifemenu.cpp",
+  "unassigned@001a6830",
   "sequence/seqcall.cpp",
   "unassigned@0020ff34",
   "game/gamman.cpp",
   "unassigned@001fd424",
   "unassigned@001e46b8",
   "bed/bedpad.cpp",
-  "unassigned@001a6830",
   "snd/rxmpeg.cpp",
   "unassigned@001810f4"
  ],
@@ -344,6 +343,32 @@
    ],
    "status": "verify",
    "why": "the entry helpers 0x1194b4 / 0x1194c8 are called only from remove / removeNo; mag/maglifeman.cpp strings anchor 0x11950c..0x119a38; 0x119b34 starts another object (touches +0x60 / +0x70, no MagLifeMan callers)"
+  },
+  "mag/maglifemenu.cpp": {
+   "notes": "Complete, nothing on screen yet: the smoke run now opens the title (MagScene::openMenu 0x10005 -> MagLifeMenuTitle) and reaches MnuTitle::isInit / init / draw / processPad (0x1a9298 / 0x1a91f4 / 0x1a972c / 0x1a92a0), all stubs, so the screen is still black. Next: unassigned@001a6830 (queued first) -- MnuTitle's code. The inner menu objects have no constructors on the host (they start zeroed in g_magSystem; a stub ctor would log before main): when MnuTitle gets members, write its constructor 0x1a90ec for real. MagLifeMenuSpecial / Special2 got stub overrides of the now-pure slots (maglifemenusp.cpp). The ROM names the +0x30 scene m_scene; the host calls it m_menu_scene (MagLife has m_scene at +0x20). Seen once: a run hanging on endless options.txt open retries, gone on rerun (hazards.md).",
+   "ranges": [
+    [
+     "0012cf3c",
+     "0012d9c8"
+    ],
+    [
+     "00284b78",
+     "00284cc4"
+    ],
+    [
+     "00284e10",
+     "00284eb8"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-25 19:53",
+     "status": "verify",
+     "summary": "MagLifeMenuBase polymorphic on the host (slots 9..12 pure, render slot 6); all 14 scene menu classes written (wrappers forwarding to the menu object at +0x40, inline ctors / dtors / term / isInit / getName), getTypeValue with the type table 0x298318, MagLifeMenuPBook book choice, MagLifeMenuBoard3D (model, camera, fades); MagScene's m_menu_* get their classes; mnu menu objects declared (lib/unassigned.h, src/mnu/mnusvld.h, mnuSelectLanguage.h) with hand stubs for the mnuBase virtuals; MagScene::saveCamera / restoreCamera named"
+    }
+   ],
+   "status": "verify",
+   "why": "source string mag/maglifemenu.cpp anchors 0x12cf3c..0x12d788 (asserts m_type, m_scene, theRenderStage, actor); every function is a MagLifeMenu* vtable slot; maglifemenusp.cpp starts at 0x12d9c8; plus the PBook / Board3D / Base linkonce symbols the brief placed here"
   },
   "mag/magscene.cpp": {
    "notes": "Screen still black (textures never load; game/gamfile.cpp callers GamMan::loadSystemData / loadStage are stubs), and nothing calls this slice's new code in the smoke run, so verify: the first session whose screenshot shows a menu, a text window or a debug strip marks it done. Left in the range: two uncalled empty functions (jr ra; nop) at 0x131f6c and 0x136098 have no Ghidra function and no name -- harmless. Decisions: ~MagScene keeps only its comment (open-items Decisions: the explicit part needs a host exit decision); the embedded menus are host MagLifeMenuBase members (open-items Decisions) -- a menu TU that gives its class a host type changes that member. New stubs to write with their TUs: DogModel::castSphere 0x1145c0 / castCylinder 0x1149d4 (dog/dogmodel.cpp), MagLifeWindow::print 0x1305ec, MagLifeFadeKey::loadTextureByName / reset / setMagnify (0x12f518 / 0x12f7f4 / 0x12fc80; reset and setMagnify are a few stores, see the batch whys), GamFont::scroll / setFill / setFillMsb (0x1bfe30 / 0x1bff28 / 0x1bff5c), i3dPointSegDist2 0x2337e0, MagLifeMenuSpecial / Special2 constructors. Open: which event commands call addPrivateColli (0x1d080c, 0x1d091c, 0x1d0c64) and removePrivateColli (0x1ccc30).",

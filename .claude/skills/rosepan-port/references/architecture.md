@@ -935,3 +935,27 @@ throughout (identifiers, env variables, files, shader macros):
   returns the pc to continue at; seqVmLoadThread restores them next frame. Sequence::execThread
   0x2113dc runs a thread at once in the record at Sequence +0xdc30 (flag 0x100), around the caller's
   registers; GamArea::checkPc calls it. Thread names: "mst" (startThread), "trg", "imdy", "single".
+
+## The scene's menus (mag/maglifemenu.cpp, 0x12cf3c..0x12d9c8, 2026-10-25)
+
+- **MagLifeMenuBase** (EE 0x40, abstract: no vtable of its own): +0x30 the scene (the asserts' m_scene;
+  host m_menu_scene), +0x34 m_type, +0x38 requestMenu's argument. Slots 9 init(DogTexInfo *), 10 term,
+  11 isInit, 12 processPad(BedPad *) (non-zero closes), 6 render(layer); getName (5) is 0 in all.
+- **Wrappers**: Item, Map, Stock, Save, Load, Title, Opt, Movie, Mcd, Now, SelLang, Board2D hold a
+  menu object at +0x40 and forward to it; init first copies the scene into the object (Mcd's does
+  not). The objects: MnuItem 0x1aeacc.., MnuMap (mnuBase) 0x194908.., MnuStock 0x19a650.., MnuSvld
+  (save and load, m_save +0x24e8 set by the wrappers' constructors) 0x1a5af4.., MnuOpt 0x1ab598..,
+  MnuMovie 0x1adfb0.., MnuTitle 0x1a91f4.. (contains an MnuMcd +0, MnuSvld +0x1400, MnuOpt +0x3b80,
+  SprMan +0x4df0), MnuMcd 0x1a134c.., MnuNow 0x1ae520.., MnuBoard2D 0x1ad824.., MnuSelectLanguage
+  0x1bdc00... Their EE sizes come from the scene's member spacing (+0x2be60..0x41850).
+- **mnuBase** (vtable 0x2e4640, vptr +0x10c): +0 type, +4 flags (bit 0 = inited, mnuBase::isInit),
+  +8 scene; slots 2 init, 3 term, 4 isInit, 5 processPad, 6 draw. MnuMap, MnuPBook, MnuDiary derive it.
+- **MagLifeMenuPBook** (0x100000 / 0x200000 types): init looks the type up (getTypeValue) and asks
+  MnuPBook (+0x50) then MnuDiary (+0x910) setType (page tables 0x29c0f8 / 0x29c368, 12-byte rows);
+  the one that knows the page becomes +0x40 and runs through mnuBase's virtuals.
+- **MagLifeMenuBoard3D** (0x80000 types): loads model getTypeValue(type) (0x10c5..) as a scene actor,
+  saves the scene camera (MagScene::saveCamera 0x13c930 / restoreCamera 0x13ca10), puts the camera at
+  (0, -200, 500) rotated (-0.1, pi, 0) and the actor at the origin, fades in 30 frames, closes on pad
+  bit 13 after a fade out.
+- **Type table** data 0x298318 (267 rows + -1): 0x40001.. -> themselves (2D boards), 0x80001.. ->
+  0x10c5.. (3D board models), 0x100001.. / 0x200001.. -> page ids 0x1000.., 0x400001.. -> 0.

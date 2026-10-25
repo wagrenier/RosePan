@@ -386,6 +386,13 @@ public:
   `ReiPanVu1*` / `REIPAN_*`, and shadercross failed with "unknown type name RosePanVu1LightImage"
   (2026-10-22, bootstrap). The prebuilt `.msl` / `.spv` keep old names in comments only.
 
+- **A smoke run can hang retrying `data/options.txt`** (100k "rxfile : failed to open file
+  'host0:data/options.txt'" lines, nothing after MagScene::loadSystemData): seen once on
+  2026-10-25 (maglifemenu session); the same build passed on the next run (fileExists -> -1, one
+  failure line each). A race in the rx file layer around the missing file (fileExists flags 1,
+  then FileReader's 0x8001 = NOWAIT | retry read); rerun before suspecting your change, and look
+  at rxFileOpenEx's state / pending handling if it comes back.
+
 ## Platform layer (ReiPan's, written for FF2 and FF3)
 
 - **RoR: script pointers in 32-bit words** (2026-10-25). Symptom to expect: a script that stores a

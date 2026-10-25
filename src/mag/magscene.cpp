@@ -1838,7 +1838,7 @@ void MagScene::openMenu(int id)
     {
         MagLifeMenuSpecial2 *menu = new MagLifeMenuSpecial2;
         m_pMenuBase = menu;
-        menu->m_menu_id = id - 0x1000c;
+        menu->m_type = id - 0x1000c;
         break;
     }
     case 0x10010:
@@ -1860,7 +1860,7 @@ void MagScene::openMenu(int id)
                 break;
             }
             m_pMenuBase = menu;
-            menu->m_menu_id = id;
+            menu->m_type = id;
         }
         else
         {

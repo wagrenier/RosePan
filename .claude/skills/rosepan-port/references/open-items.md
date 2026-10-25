@@ -93,12 +93,22 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      m_menu_title its class MagLifeMenuTitle (vtable 0x2e17d8; slots 6 / 9 / 12 at 0x12d32c /
      0x12d2e8 / 0x12d314 forward to the title object at +0x40), then the title code
      (unassigned@001a6830, item 9). Still black.
+  4e. DONE 2026-10-25 (`verify`): `mag/maglifemenu.cpp` -- MagLifeMenuBase is polymorphic on the
+     host (slots 9..12 pure, render = MagLife slot 6) and every scene menu has its class
+     (magscene.h m_menu_*), each forwarding to its menu object at +0x40 (MnuTitle, MnuItem ...,
+     lib/unassigned.h; MnuSvld / MnuSelectLanguage in src/mnu/). The smoke run now opens the
+     **title**: MnuTitle::isInit / init / draw / processPad 0x1a9298 / 0x1a91f4 / 0x1a972c /
+     0x1a92a0 are the reached stubs. Still black: **next is `unassigned@001a6830`** (queued
+     first): MnuTitle's init / processPad / draw and what they call (SprMan, mnuboard.rpk, the
+     s100000.str stream); MnuTitle's constructor 0x1a90ec is not written (the object starts zeroed
+     in the global scene -- write it as a real constructor when the class gets members, it runs
+     before main). MnuTitle::processPad returns -1 (closes the menu) until init has set +0x4d6c.
   5. `unassigned@001fd424` -- sysInitManagers 0x204148, SysTimer::start / update (reached stubs).
   6. `unassigned@001e46b8` -- CmnTaskMan::exec / addTask and 0x1f688c that GamMan::update calls (the
      per-frame task runner; 253 functions: only what the title path reaches).
   7. `bed/bedpad.cpp` -- BedPad::init / update: the menu needs pad input to "work"; extend
      `settings.smoke_pad` to press through the title once it shows.
-  8. `mag/maglifemenu.cpp` -- MagLifeMenuTitle's wrappers and the MagLifeMenuBase methods.
+  8. DONE 2026-10-25 (`verify`, see 4e): `mag/maglifemenu.cpp` -- MagLifeMenuTitle's wrappers and the MagLifeMenuBase methods.
   9. `unassigned@001a6830` -- the title screen itself (init / pad / draw at 0x1a91f4.., mnuboard.rpk).
   10. `snd/rxmpeg.cpp`, `unassigned@001810f4` -- RxMpeg: the title code calls it 13 times (background
      movie; the logo movie may come first in the W099 script). If the script waits on a movie, a
