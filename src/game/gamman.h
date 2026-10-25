@@ -20,6 +20,10 @@ struct GamArea
 {
     void checkPc();                                                      // ROR 0x001deaac
     void startPcAction();                                                // ROR 0x001dea40
+    /* The trigger word of the rect whose id matches (0 = every rect): op
+     * 1 sets bits, 2 ors, 3 clears, 4 tests, 5 tests and clears
+     * 0x20000000 (with GamMan::pause(0x8000)). */
+    int  ctl_trg_flg(int op, int id, u_int bits);                        // ROR 0x001e0c2c
 };
 
 /* EE size at least 0x22368. layout: host -- only the members other TUs
@@ -30,6 +34,10 @@ struct GamMan
     void loadSystemData();                                               // ROR 0x001c1b48
     void loadStage(int stage);                                           // ROR 0x001c204c
     void setPcStartPos();                                                // ROR 0x001c3d38
+    /* Sequence::reapThreads' calls when thread 0x44000000 (the stage
+     * image's main thread) / 0x84000000 (image 2's) ends. */
+    void onStageSeqEnd();                                                // ROR 0x001c4168
+    void onSubSeqEnd();                                                  // ROR 0x001c43f0
     void update();                                                       // ROR 0x001c526c
     void postUpdate();                                                   // ROR 0x001c53d8
     /* Stops the stage sound and the tasks before a menu opens; kind 1 / 2
@@ -55,6 +63,8 @@ struct GamMan
     void beforeMapMenu();                                                // ROR 0x001c98b8
     /* Keeps a script image {w, h, ...} in slot. */
     void setImage(int slot, u_char *image);                              // ROR 0x001cbdfc
+    /* Sequence::exec's last call: the stage-change requests in flags2. */
+    void afterSeqExec();                                                 // ROR 0x001cd25c
     void storePcTransform();                                             // ROR 0x001cd404
     void setSysMsgHandle(int handle);                                    // ROR 0x001cfb38
     /* MagScene's open menu id != -1. */

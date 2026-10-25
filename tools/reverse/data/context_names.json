@@ -4199,6 +4199,18 @@
   "was": "FUN_001c3d38",
   "why": "places the PC at start point +0x1a684 of the table +0x1a680 (0xcccccccc = none), then GamMan::storePcTransform"
  },
+ "001c4168": {
+  "name": "GamMan::onStageSeqEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001c4168",
+  "why": "reapThreads calls it when thread 0x44000000 (the stage image's main thread) ends: applies the stage's start records when flags2 bit 0x40"
+ },
+ "001c43f0": {
+  "name": "GamMan::onSubSeqEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001c43f0",
+  "why": "reapThreads calls it when thread 0x84000000 (image 2's main thread) ends: re-equips the item, sets the PC start position, clears flags2 0x1800"
+ },
  "001c526c": {
   "name": "GamMan::update",
   "tag": "ror-inferred",
@@ -4307,6 +4319,12 @@
   "was": "FUN_001cbdfc",
   "why": "+0x222e4[slot] = a script image {w, h, ...} and its +0xc = the data before it (w * h rounded to 16)"
  },
+ "001cd25c": {
+  "name": "GamMan::afterSeqExec",
+  "tag": "ror-inferred",
+  "was": "FUN_001cd25c",
+  "why": "Sequence::exec's last call: unless flag 0x8000, acts on the requests in flags2 bits 1 / 2 (stage change: stopImages, clearStageVars, area resets)"
+ },
  "001cd404": {
   "name": "GamMan::storePcTransform",
   "tag": "ror-inferred",
@@ -4348,6 +4366,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001deaac",
   "why": "on GamMan +0x40 (class name invented): reads the PC's position (0x1d05f4) and walks the rect list +0xc290 for entries with flags 0x4000001 whose x / z bounds contain it"
+ },
+ "001e0c2c": {
+  "name": "GamArea::ctl_trg_flg",
+  "tag": "ror-inferred",
+  "was": "FUN_001e0c2c",
+  "why": "op 1 set / 2 or / 3 and-not / 4 test / 5 test-and-clear 0x20000000 (with GamMan::pause 0x8000) on the trigger word +0x30 of the area rect whose id +0x3c matches (0 = all); GamMan::set_trg_flg and its siblings call it"
  },
  "001e17b4": {
   "name": "GamSndMan::stopBgm",
@@ -4853,6 +4877,72 @@
   "was": "FUN_0020e690",
   "why": "sequence/sequence.cpp, object 0x7a4440 (constructed by 0x20e454): allocates the sequence buffers; sysInitManagers calls it"
  },
+ "0020eda4": {
+  "name": "Sequence::loadStageImage",
+  "tag": "ror-inferred",
+  "was": "FUN_0020eda4",
+  "why": "GamMan::loadStage hands it the W.WRD script: copies 0x18000 bytes into image 1 (+0x4), sets the image up (0x213f48 idx 1) and starts thread 0x44000000"
+ },
+ "0020eea8": {
+  "name": "Sequence::loadSystemImage",
+  "tag": "ror-inferred",
+  "was": "FUN_0020eea8",
+  "why": "GamMan::loadSystemData: copies 0x20000 bytes into image 0 (+0x0), sets it up (idx 0) and starts thread 0x04000000"
+ },
+ "0020efac": {
+  "name": "Sequence::loadSubImage",
+  "tag": "ror-inferred",
+  "was": "FUN_0020efac",
+  "why": "kind 2 only: copies 0x30000 bytes into image 2 (+0x8), sets it up (idx 2) and starts thread 0x84000000; kind 1 does nothing"
+ },
+ "0020f0c8": {
+  "name": "Sequence::stopImages",
+  "tag": "ror-inferred",
+  "was": "FUN_0020f0c8",
+  "why": "kind 1: frees the image-1 entries (0x2127f4) and kills the threads of images 1 and 2 (0x213450); kind 2: image 2 only; GamMan calls it when it changes stage"
+ },
+ "0020f140": {
+  "name": "Sequence::getThreadArg",
+  "tag": "ror-inferred",
+  "was": "FUN_0020f140",
+  "why": "flag 0x100: word +0xdc58, else the running thread's word +0x28 (the arg findThread matches); seqFunc036 returns it"
+ },
+ "0020f1a8": {
+  "name": "Sequence::clearGlobals",
+  "tag": "ror-inferred",
+  "was": "FUN_0020f1a8",
+  "why": "memset of the 0x800-byte global variables (+0xdc1c) and the bitset (+0xdc20) but its first word"
+ },
+ "0020f1fc": {
+  "name": "Sequence::clearStageVars",
+  "tag": "ror-inferred",
+  "was": "FUN_0020f1fc",
+  "why": "clears globals 0x300..0x500 and bitset 0x20..0x220, then returns the image-1 entries of the entry pool (+0xc3c0) to its free list"
+ },
+ "0020f37c": {
+  "name": "Sequence::freeThreadPools",
+  "tag": "ror-inferred",
+  "was": "FUN_0020f37c",
+  "why": "deletes the three per-image thread pools (+0x10..+0x18) and their node arrays (+0x1c0), Sequence::term before init"
+ },
+ "0020f428": {
+  "name": "Sequence::releaseThread",
+  "tag": "ror-inferred",
+  "was": "FUN_0020f428",
+  "why": "a thread record ends: clears its area trigger bits (GamArea op 2..5), resumes pause bit 0x8000 for flag 0x40, frees its VM stack (0x214a94) and zeroes the 0xb0 bytes"
+ },
+ "0020f4fc": {
+  "name": "Sequence::reapThreads",
+  "tag": "ror-inferred",
+  "was": "FUN_0020f4fc",
+  "why": "for each record on the ended list (+0x6200) finds the thread in its image pool, notifies GamMan for 0x44000000 / 0x84000000, moves it to the free list and releases it"
+ },
+ "0020f788": {
+  "name": "Sequence::runImage",
+  "tag": "ror-inferred",
+  "was": "FUN_0020f788",
+  "why": "runs every thread of the current image through the VM (0x214c24) from 0x7b4640 to 0x7b4650; a thread whose run returns pc 0 is copied to the ended list"
+ },
  "0020f98c": {
   "name": "Sequence::exec",
   "tag": "ror-inferred",
@@ -4864,6 +4954,72 @@
   "tag": "ror-inferred",
   "was": "FUN_002113a4",
   "why": "sets the VM's pending jump 0x7b47b0 = target + image base 0x7b47d0 - m_base[current image 0x7b4dd0] (Sequence +0xdc08); seqFunc000 calls it and returns 0xccccccce"
+ },
+ "00211e84": {
+  "name": "Sequence::startThread",
+  "tag": "ror-inferred",
+  "was": "FUN_00211e84",
+  "why": "builds a 0xb0 thread record (id, pc = the first addiu sp of the entry, -1, 1) and appends it to the start list (+0x40) that exec moves into the image pools"
+ },
+ "002127f4": {
+  "name": "Sequence::freeStageEntries",
+  "tag": "ror-inferred",
+  "was": "FUN_002127f4",
+  "why": "returns the image-1 entries (top bits 1) of the entry pool +0xc3c0 to its free list, the same loop as clearStageVars without the clears"
+ },
+ "00213450": {
+  "name": "Sequence::killThreads",
+  "tag": "ror-inferred",
+  "was": "FUN_00213450",
+  "why": "image index argument: moves the image's threads to the ended list and reaps them (calls reapThreads), Sequence::stopImages' worker"
+ },
+ "00213c6c": {
+  "name": "Sequence::findThread",
+  "tag": "ror-inferred",
+  "was": "FUN_00213c6c",
+  "why": "picks the image pool by the id's top two bits (0..2, else 0) and searches it (0x213b28) for the id, returning the node through the third argument"
+ },
+ "00213f48": {
+  "name": "Sequence::setupImage",
+  "tag": "ror-inferred",
+  "was": "FUN_00213f48",
+  "why": "sets the VM's image registers 0x7b47d0.. from the image header (+0xc..+0x24), saves them per image at 0x7b4850 + idx * 0x30 and the register file at 0x2d9c08 + idx * 0x80"
+ },
+ "00214310": {
+  "name": "seqVmSelectImage",
+  "tag": "ror-inferred",
+  "was": "FUN_00214310",
+  "why": "loads the VM image registers 0x7b47d0.. and the register file from the image idx save areas (0x7b4850 + idx * 0x30, 0x2d9c08 + idx * 0x80)"
+ },
+ "002144c4": {
+  "name": "seqVmSaveImage",
+  "tag": "ror-inferred",
+  "was": "FUN_002144c4",
+  "why": "runImage's closing call with the image index: the counterpart of seqVmSelectImage"
+ },
+ "00214664": {
+  "name": "seqVmLoadThread",
+  "tag": "ror-inferred",
+  "was": "FUN_00214664",
+  "why": "runImage calls it for each thread before the run: copies the running thread's saved state (flag 0x200) into the VM"
+ },
+ "00214a94": {
+  "name": "seqVmFreeStack",
+  "tag": "ror-inferred",
+  "was": "FUN_00214a94",
+  "why": "(stack - 0x7b4d20 base) >> 11 picks a 2 KB stack slot whose use word at 0x7b4d30 it clears"
+ },
+ "00214bcc": {
+  "name": "seqVmResume",
+  "tag": "ror-inferred",
+  "was": "FUN_00214bcc",
+  "why": "loads a0..a3 from save slot n (0x7b4920 + n * 0x80) into the VM registers and marks the slot 0xcccccccc; runImage calls it for thread flag 0x80"
+ },
+ "00214c24": {
+  "name": "seqVmRun",
+  "tag": "ror-inferred",
+  "was": "FUN_00214c24",
+  "why": "the interpreter loop: decodes MIPS opcodes through the tables 0x2d9958 / 0x2d9a58, calls natives below 0x8160; returns the pc to continue at, 0 when the thread ends"
  },
  "002155a0": {
   "name": "debugNop",

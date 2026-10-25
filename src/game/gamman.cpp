@@ -161,3 +161,27 @@ void GamMan::storePcTransform()
 {
     ROSEPAN_STUB("GamMan::storePcTransform", 0x001cd404);
 }
+
+// stub of ROR 0x001cd25c
+void GamMan::afterSeqExec()
+{
+    ROSEPAN_STUB("GamMan::afterSeqExec", 0x001cd25c);
+}
+
+// stub of ROR 0x001c0d70
+void GamMan::init()
+{
+    ROSEPAN_STUB("GamMan::init", 0x001c0d70);
+}
+
+// stub of ROR 0x001c4168
+void GamMan::onStageSeqEnd()
+{
+    ROSEPAN_STUB("GamMan::onStageSeqEnd", 0x001c4168);
+}
+
+// stub of ROR 0x001c43f0
+void GamMan::onSubSeqEnd()
+{
+    ROSEPAN_STUB("GamMan::onSubSeqEnd", 0x001c43f0);
+}

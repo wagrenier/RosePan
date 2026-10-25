@@ -77,13 +77,16 @@ void debugNop(void)
     ROSEPAN_STUB("debugNop", 0x002155a0);
 }
 
-// stub of ROR 0x00204148
+// ---- bridges (hand-written) ----
+
+// Written ahead of its file (unassigned@001fd424) by the sequence.cpp
+// session: Sequence::exec needs the image pools init builds.
+// ROR 0x00204148
 void sysInitManagers(void)
 {
-    ROSEPAN_STUB("sysInitManagers", 0x00204148);
+    g_sequence.init();
+    g_gamMan.init();
 }
-
-// ---- bridges (hand-written) ----
 
 // stub of ROR 0x001f8fc0 (a constructor: stubgen leaves it to hand)
 TskSnd::TskSnd(int kind, const TskSndParam *param)
@@ -730,4 +733,79 @@ int scenePlayStart(const char *name, intptr_t arg, int wait)
 void scenePlayStartSimple(const char *name)
 {
     ROSEPAN_STUB("scenePlayStartSimple", 0x001f8cec);
+}
+
+// stub of ROR 0x001e0c2c
+int GamArea::ctl_trg_flg(int op, int id, u_int bits)
+{
+    ROSEPAN_STUB("GamArea::ctl_trg_flg", 0x001e0c2c);
+    return {};
+}
+
+// stub of ROR 0x00213c6c
+int Sequence::findThread(u_int id, SeqNode<SeqThread> **node, int arg)
+{
+    ROSEPAN_STUB("Sequence::findThread", 0x00213c6c);
+    return {};
+}
+
+// stub of ROR 0x002127f4
+void Sequence::freeStageEntries()
+{
+    ROSEPAN_STUB("Sequence::freeStageEntries", 0x002127f4);
+}
+
+// stub of ROR 0x00213450
+void Sequence::killThreads(int idx, int arg)
+{
+    ROSEPAN_STUB("Sequence::killThreads", 0x00213450);
+}
+
+// stub of ROR 0x00213f48
+void Sequence::setupImage(u_char *image, int idx)
+{
+    ROSEPAN_STUB("Sequence::setupImage", 0x00213f48);
+}
+
+// stub of ROR 0x00211e84
+void Sequence::startThread(u_int id, intptr_t entry)
+{
+    ROSEPAN_STUB("Sequence::startThread", 0x00211e84);
+}
+
+// stub of ROR 0x00214a94
+void seqVmFreeStack(intptr_t stack)
+{
+    ROSEPAN_STUB("seqVmFreeStack", 0x00214a94);
+}
+
+// stub of ROR 0x00214664
+void seqVmLoadThread(Sequence *seq)
+{
+    ROSEPAN_STUB("seqVmLoadThread", 0x00214664);
+}
+
+// stub of ROR 0x00214bcc
+void seqVmResume(int slot)
+{
+    ROSEPAN_STUB("seqVmResume", 0x00214bcc);
+}
+
+// stub of ROR 0x00214c24
+intptr_t seqVmRun(intptr_t pc)
+{
+    ROSEPAN_STUB("seqVmRun", 0x00214c24);
+    return {};
+}
+
+// stub of ROR 0x002144c4
+void seqVmSaveImage(int idx)
+{
+    ROSEPAN_STUB("seqVmSaveImage", 0x002144c4);
+}
+
+// stub of ROR 0x00214310
+void seqVmSelectImage(int idx)
+{
+    ROSEPAN_STUB("seqVmSelectImage", 0x00214310);
 }
