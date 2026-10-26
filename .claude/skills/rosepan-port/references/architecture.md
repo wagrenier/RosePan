@@ -880,6 +880,22 @@ never asserts): sessions name them (`tus.py define --why`).
   4 / 9 (`setObjLight` 0x1ca598).
 - Markers: `ctlObj1cb8e4` 0x1cb8e4 -> `addObjMarker` 0x1cb970: an Obj176a3c effect 0x32 {x, y, z, 50}
   bound to the oid in the pool +0x20b00 (released by ctlObj1cbb80).
+- **game/gamstat.cpp** (pinned 0x1d84c8..0x1dd1e8, 2026-10-26; game/gamstat.h): ObjStat / ACHRstat /
+  FCHRstat code and GamSysData. ObjStat's fields are named by the ELF's accessor inlines 0x28f874..
+  0x28fdb8 (ror-symbol): +0x100 o_oid, +0x104 o_stat, +0x108 o_chr_id (actor), +0x114 the secta cell
+  (o_secta_id = cell +0), +0x118 o_smell_range, +0x11c o_scale, +0x126 a_lp, +0x128 o_uid (the system
+  data id), +0x12a.. o_smell_uid_1..3, +0x130 o_area_no, +0x138 o_inu_func, +0x150 the collision words
+  (getColPrm, 0x30 bytes; +0x220 init's copy, getColPrmKeep), +0x190 pos, +0x1a0 rot, +0x1b0 work[16].
+  **One param id space** (gamstat.h GamParam): 1..0x21 are the accessors in ACHRstat::initParamFuncs'
+  table of GCC 2 method pointers at +0x280 (getParam dispatches through it), 0x22.. per class, 0x1000..
+  0x1005 ObjStat's (base getParam 0x1d9044 / setParam 0x1d932c). GamSysData::getField 0x1dc48c uses
+  the same ids for the record fields: 0xb / 0xc the names (English +0x20, Japanese +0), 0xf the model
+  id (+0x46, o_chr_id_low), 0x1c..0x21 the stats at +0x80 of a character record (max_lp, st, def, avoid,
+  agi, neck_rot_range in degrees: field 0x21 returns radians). GamSysData: ten tables (record id =
+  table << 9 | record): 0..3 characters (records 0xa0, 0xa0, 0xc0, 0xe0; flags +0x90, table 2 a second
+  word +0x94), 4..9 objects (0xc0, table 5 0x200; flags +0xb0); FCHRstat::init reads only table 5.
+  ObjStat::setPos / getPos / setRot were named ACHRstat::* before: the base setter calls them for fchrs
+  too (FCHRstat has its own four). The secta cells come from GamMan::findSectaCell 0x1d8064 (stub).
 
 ## Disc and data files
 

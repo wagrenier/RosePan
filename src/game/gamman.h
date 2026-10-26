@@ -14,6 +14,7 @@
 #include <stdint.h>
 
 #include "game/gamsnd.h"
+#include "game/gamstat.h"
 #include "i3d/i3denv.h"
 #include "sequence/sequence.h"
 
@@ -76,129 +77,6 @@ static inline u_int gamOidList(u_int oid) { return oid >> 0x1c & 3; }
 static inline u_int gamOidType(u_int oid) { return oid >> 0x17 & 0x1f; }
 static inline u_int gamOidSlot(u_int oid) { return oid & 0x1ff; }
 
-/* A game object's state (class ObjStat, vtable 0x2e4828, vptr at +0x258;
- * ACHRstat / FCHRstat derive from it; its code is in unassigned@001d3b44).
- * The ELF's inlines read +0x100 (oid), +0x108 (the scene actor, -1 none),
- * +0x190 position, +0x1a0 rotation. save / load copy the 0xb0 bytes from
- * +0x100. layout: host -- EE offsets in the comments. */
-struct ObjStat
-{
-    /* The vptr (ObjStat's), the 8-node pool at +0x40, oid, actor, kind,
-     * a1 into +0x104 and the words +0x110 / +0x114 / +0x130 / +0x140
-     * cleared. The ROM passes a node count (0x40 / 8) it never reads. */
-    ObjStat(int a1, u_int oid, int actor, short kind);                   // ROR 0x001d87f4
-    /* MagScene::releaseActor(m_actor) when it has one, m_actor = -1; a
-     * type-5 object also drops its GamMan pool 0x20b00 records. */
-    void releaseActor();                                                 // ROR 0x001d966c
-    /* The actor's position into +0x190 and out (x, y, z, w); moves the
-     * object to another secta cell when it left the current one. */
-    void updatePos(float *out);                                          // ROR 0x001d8f04
-    /* The actor's rotation (or +0x1a0 without one) into out[0..2]. */
-    void getRot(float *out);                                             // ROR 0x001d8964
-    /* The actor's position into +0x190; a new secta cell when it left
-     * the current one's bounds. */
-    void syncActorPos();                                                 // ROR 0x001d8dc4
-    /* The secta cell of +0x190 from scratch. */
-    void findSecta();                                                    // ROR 0x001d8ea8
-    /* Hides (hide) / shows the actor through its setHide; with bit 0x40
-     * of m_flags showing re-finds the secta cell, hiding re-links it. */
-    void setHide(int hide);                                              // ROR 0x001d95c4
-    /* Refreshes position and rotation, then copies +0x100..+0x1a0 to out. */
-    int  save(void *out);                                                // ROR 0x001d96ec
-    /* save's inverse: the 0xb0 bytes back to +0x100, the secta words
-     * cleared. Returns 0xb0. */
-    int  load(const void *in);                                           // ROR 0x001d9830
-    /* Clears the secta words (+0x10c too when all), then 0x1da07c. */
-    void clearSecta(int all);                                            // ROR 0x001d9f10
-    /* Work word no (+0x1b0 + no * 4); setWork stores one. */
-    int  getWork(int no);                                                // ROR 0x001db17c
-    void setWork(int no, int value);                                     // ROR 0x001db18c
-    /* +0x100, the object id (the ELF's inline). */
-    // ROR 0x0028f92c
-    int  getOID() const { return (int)m_oid; }
-
-    SeqFixedPool<int, 8> m_nodes; // ROR 0x40: free +0x40, used +0x50, max +0x60, nodes +0x80 (role unverified)
-    u_int m_oid;                // ROR 0x100
-    int   m_104;                // ROR 0x104: the constructor's a1 (0 from addChr / addVFchr)
-    int   m_actor;              // ROR 0x108: the scene actor number, -1 none
-    int   m_110;                // ROR 0x110
-    int   m_secta;              // ROR 0x114: the secta cell, 0 none (setPos searches one)
-    u_int m_flags;              // ROR 0x120: 1 hidden, 0x40 off the secta, 0x10000 the PC / dog, 0x200000, 0x10000000
-    short m_kind;               // ROR 0x128: the system data id
-    int   m_130;                // ROR 0x130
-    int   m_140;                // ROR 0x140: addVFchr sets 1
-    int   m_move[12];           // ROR 0x150: [0] the move state (2 after init), [1] its sub state, [4]; init copies the block to +0x220
-    float m_pos[4];             // ROR 0x190
-    float m_rot[4];             // ROR 0x1a0
-    int   m_link;               // ROR 0x254: the oid of an object shown with this one, -1 none
-};
-
-/* An actor character (vtable 0x2e4810, EE 0x480 bytes, built by
- * 0x1cc250). layout: host. */
-struct ACHRstat : ObjStat
-{
-    /* Inline in the ROM (addChr): the task ids -1 around the vptr store. */
-    ACHRstat(u_int oid, int actor, short kind) : ObjStat(0, oid, actor, kind)
-    {
-        m_taskId = -1;
-        m_task[0] = -1;
-        m_task[1] = -1;
-        m_task[2] = -1;
-        m_task[3] = -1;
-        m_placeTask = -1;
-    }
-    /* The record of kind (GamSysData::getRec) and the defaults; flags from
-     * the record | 0x200040. */
-    void init(short kind);                                               // ROR 0x001d9908
-    /* The param table +0x288.. of method pointers (the ELF's accessors). */
-    void initParamFuncs();                                               // ROR 0x001d9b2c
-    /* pos (x, y, z) into +0x190 and the actor's trans; a new secta cell. */
-    void setPos(const float *pos);                                       // ROR 0x001d89c4
-    /* The actor's trans (or +0x190) into out[0..2]. */
-    void getPos(float *out);                                             // ROR 0x001d890c
-    /* rot into +0x1a0 and the actor's rotation. */
-    void setRot(const float *rot);                                       // ROR 0x001d8a8c
-    /* Pauses (on) / resumes its tasks: +0x3d4, +0x3e0, +0x3d8 and, with
-     * all, +0x3dc. */
-    void pauseTasks(int on, int all);                                    // ROR 0x001da130
-    /* One of its params by which (0x18 the collision kind and ids ...). */
-    void getParam(int which, void *out);                                 // ROR 0x001da228
-    /* Stores *data into the param which (0x32 the equipped item ...). */
-    void setParam(int which, const void *data);                          // ROR 0x001da740
-
-    /* The motion speed into +0x418 and the actor's
-     * MagScene::setActorMotionSpeed (native 106). */
-    void setMotionSpeed(float speed);                                    // ROR 0x001db1b8
-    /* Kills its four tasks (m_task[2], [0], [3], [1]) and sets them -1. */
-    void killTasks();                                                    // ROR 0x001da07c
-
-    int   m_task[4];            // ROR 0x3d4: task ids, -1 none; [1] the turn task (chrRotStart)
-    int   m_placeTask;          // ROR 0x3e4: startAchrPlaceTask's TskSeqEvent, -1 none
-    int   m_taskId;             // ROR 0x3e8: resetObj kills it
-    u_int m_3f4;                // ROR 0x3f4: bit 0 cleared when setObj hides a type-2 achr
-    float m_motionSpeed;        // ROR 0x418: setMotionSpeed
-};
-
-/* A field character (vtable 0x2e47f8, EE 0x2c0 bytes). layout: host. */
-struct FCHRstat : ObjStat
-{
-    /* Inline in the ROM (addChr / addVFchr). */
-    FCHRstat(u_int oid, int actor, short kind) : ObjStat(0, oid, actor, kind) {}
-    /* The record of kind (table 5) and the defaults. */
-    void init(short kind);                                               // ROR 0x001db1f0
-    /* ACHRstat's twins: position in / out, rotation in. */
-    void setPos(const float *pos);                                       // ROR 0x001db7cc
-    void getPos(float *out);                                             // ROR 0x001db71c
-    void setRot(const float *rot);                                       // ROR 0x001db898
-    /* ObjStat::getRot's twin: the actor's rotation or +0x1a0. */
-    void getRot(float *out);                                             // ROR 0x001db774
-    /* One of its params by which (0x41 the type-9 number, 0x18 ...). */
-    void getParam(int which, void *out);                                 // ROR 0x001db31c
-    /* getParam's counterpart: *data into the field by which (0x1000 the
-     * model number, 0x1004 its name, 0x40, 3 the actor ...). */
-    void setParam(int which, const void *data);                          // ROR 0x001db520
-};
-
 /* GamMan::getObjParam(0x18)'s answer: the object's shape and private
  * collisions (kind 5 one in m_colli[0], kind 6 four). EE 0x28; the ROM's
  * callers clear only m_kind. */
@@ -218,40 +96,6 @@ static_assert(offsetof(GamObjColli, m_0c) == 0x0c, "m_0c");
 static_assert(offsetof(GamObjColli, m_radius) == 0x10, "m_radius");
 static_assert(offsetof(GamObjColli, m_colli) == 0x18, "m_colli");
 static_assert(sizeof(GamObjColli) == 0x28, "GamObjColli is 0x28 bytes on the EE");
-
-/* The system pack's file 0 (GamMan +0x22220; class name invented): ten
- * pointers past the 0x40-byte header from its offsets +0x10..+0x34, the
- * data at +0x58. layout: host -- no members. */
-struct GamSysData
-{
-    void set(const u_char *data);                                        // ROR 0x001dbef8
-    /* The record of id: table id >> 9 of the ten, record id & 0x1ff. */
-    const void *getRec(short id);                                        // ROR 0x001dbfa0
-    /* Ors bits into the record's flag word (+0x90 / +0xb0). */
-    void setFlags(short id, u_int bits);                                 // ROR 0x001dcd38
-    /* The record's flag word & bits != 0 (0x20000: the item stacks). */
-    int  testFlags(short id, u_int bits);                                // ROR 0x001dd00c
-    /* Field field of record id into out (0xf: the record's model id, a
-     * u_short, 0xffff none; others words or pointers). */
-    void getField(int id, int field, void *out);                         // ROR 0x001dc48c
-    /* getField's counterpart: field of record id from *data (u_short
-     * fields; table 0 reads into data instead, as the ROM does). */
-    void setField(int id, int field, const void *data);                  // ROR 0x001dc070
-    /* Clears bits in the record's flag word (setFlags' counterpart). */
-    void clearFlags(short id, u_int bits);                               // ROR 0x001dce30
-    /* Table 2 records only: the second flag word +0x94 (a2 unused). */
-    void setFlags2(short id, int unused, u_int bits);                    // ROR 0x001dd118
-    void clearFlags2(short id, int unused, u_int bits);                  // ROR 0x001dd154
-    /* Table 2 records only: +0x94 & bits != 0 (a2 unused). */
-    int  testFlags94(short id, int unused, u_int bits);                  // ROR 0x001dd194
-};
-
-/* The WRD room coordinates (unassigned@001d859c; the ROM passes GamMan
- * +0x18c00 as a this it never reads): op 0 world to local, 1 local to
- * world (the WRD table's converters with the room GamMan +0x21f7c), 2 the
- * room's x, 0, z offset into a. The ELF's inlines GamMan::cnvPosW2L /
- * cnvPosL2W / getWrdOffset call it. */
-void gamWrdConvPos(int op, float *a, float *b);                          // ROR 0x001dba3c
 
 /* One item (EE 0x10, 16-aligned): the 12 slots at GamMan +0x1a700
  * (getItemHavePtr's vector) and the stock pool's records. addItem /
@@ -727,8 +571,9 @@ struct GamMan
     void setActorBindMode(u_int oid, int mode);                          // ROR 0x001d2428
     /* Param 0x18 becomes shape 4 sized to the corner quad (0x1003). */
     void fitObjBounds(u_int oid);                                        // ROR 0x001d480c
-    /* {kind, oid} to the tail of the +0x2246c update list. */
-    void queueObjUpdate(int kind, u_int oid);                            // ROR 0x001d5bc8
+    /* {cell, oid} to the tail of the +0x2246c update list (an oid listed
+     * already moves there). */
+    void queueObjUpdate(GamSecta *cell, u_int oid);                      // ROR 0x001d5bc8
     /* The radius param 0x18's shape word picks (0, 17, 25, 45, or its
      * own); word 0 to *out when out. */
     float getObjRadius(u_int oid, int *out);                             // ROR 0x001d4a3c
@@ -806,6 +651,10 @@ struct GamMan
     void getObjParam(u_int oid, int which, void *out);                   // ROR 0x001d1c80
     /* In unassigned@001d3b44 (GamMan methods past switchVolume). */
     void relinkObj(u_int oid);                                           // ROR 0x001d5da0
+    /* The secta cell of pos (0x17c340 over the list bss 0x7811ac, starting
+     * at cur), NULL when none or its flags bit 2 is set; type2: the oid's
+     * type is 2 (ObjStat's position setters). */
+    GamSecta *findSectaCell(const float *pos, GamSecta *cur, int type2); // ROR 0x001d8064
     void placeAchr(int oid, void *out, int arg);                         // ROR 0x001d544c
     /* The table data 0x2fc1f8 (8-word rows, -1 ends): column col of the
      * row whose column keyCol is key (keyCol 99: row key). -1 none. */
@@ -912,7 +761,8 @@ struct GamMan
     ObjStat     *m_dogPtr;          // ROR 0x22094: getDogPtr
     ObjStat     *m_murderPtr;       // ROR 0x22098: getMurderPtr
     u_char       m_pcSave[0xb0];    // ROR 0x220a0: ObjStat::save of the PC across a stage change
-    u_char       m_dogSave[0xa0];   // ROR 0x22150: ... of the dog
+    u_char       m_dogSave[0xb0];   // ROR 0x22150: ... of the dog (ObjStat::save writes 0xb0)
+    u_char       _22200[8];         // ROR 0x22200
     int          m_pcEquipItemOID;  // ROR 0x22208: getPcEquipItemOID
     short        m_equipItem;       // ROR 0x2220c: getPcEquipItem, 0xa00 = none
     short        m_findTargetItem;  // ROR 0x2220e: getFindTargetItem

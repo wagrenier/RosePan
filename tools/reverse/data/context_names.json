@@ -3263,6 +3263,18 @@
   "was": "FUN_0017ea44",
   "why": "returns entry n (< count at data +8) of a loaded table (+4 data, +8 entries); its object 0x298ee0 is loaded from data/wrd/WRD.BIN by 0x17e5c0 (GamMan::loadStage); entry +0x10 is the map-name text S2dMes::drawMapName copies; class name invented from the file"
  },
+ "0017eb3c": {
+  "name": "WrdTable::cnvPosL2W",
+  "tag": "ror-inferred",
+  "was": "FUN_0017eb3c",
+  "why": "out = record(no)+0x20 + in when a table is loaded; gamWrdConvPos op 1, behind the ELF's inline GamMan::cnvPosL2W"
+ },
+ "0017ebac": {
+  "name": "WrdTable::cnvPosW2L",
+  "tag": "ror-inferred",
+  "was": "FUN_0017ebac",
+  "why": "out = in - record(no)+0x20 when a table is loaded; gamWrdConvPos op 0, behind the ELF's inline GamMan::cnvPosW2L"
+ },
  "0017f0d0": {
   "name": "SndMan::SndMan",
   "tag": "ror-inferred",
@@ -7655,6 +7667,12 @@
   "was": "FUN_001d68a0",
   "why": "(buf): the load screen's applyLoadData hands it the buffer read from the card"
  },
+ "001d8064": {
+  "name": "GamMan::findSectaCell",
+  "tag": "ror-inferred",
+  "was": "FUN_001d8064",
+  "why": "ObjStat's position setters call it with (pos, the current cell, oid type == 2): the cell of pos from 0x17c340 over the list 0x7811ac, NULL when none or its flags +8 bit 2 are set"
+ },
  "001d83d0": {
   "name": "GamMan::lookupFlagTable",
   "tag": "ror-inferred",
@@ -7673,11 +7691,17 @@
   "was": "FUN_001d87f4",
   "why": "stores vtable 0x2e4828 (ObjStat) at +0x258, builds an 8-node pool at +0x40, oid +0x100, actor +0x108, kind +0x128; GamMan::addChr / addVFchr call it right after operator_new before the ACHRstat / FCHRstat vtable store"
  },
+ "001d88c8": {
+  "name": "ObjStat::~ObjStat",
+  "tag": "ror-inferred",
+  "was": "FUN_001d88c8",
+  "why": "slot 1 of ObjStat's vtable 0x2e4828: stores that vtable at +0x258, operator delete when bit 0 of the flag argument (GCC 2 deleting destructor)"
+ },
  "001d890c": {
-  "name": "ACHRstat::getPos",
+  "name": "ObjStat::getPos",
   "tag": "ror-inferred",
   "was": "FUN_001d890c",
-  "why": "the scene actor's trans or +0x190 into out; GamMan::getObjPos's achr branch"
+  "why": "was ACHRstat::getPos: the ELF's inline ObjStat::get_o_pos (0x28f8b0) calls it, and it reads only ObjStat members (actor trans or +0x190); FCHRstat::getPos 0x1db71c is its twin"
  },
  "001d8964": {
   "name": "ObjStat::getRot",
@@ -7686,16 +7710,22 @@
   "why": "ObjStat::get_o_rot forwards to it: the actor's rotation from the scene table 0x6fe6f0 (stride 0x4d0) or +0x1a0"
  },
  "001d89c4": {
-  "name": "ACHRstat::setPos",
+  "name": "ObjStat::setPos",
   "tag": "ror-inferred",
   "was": "FUN_001d89c4",
-  "why": "pos into +0x190 and the scene actor's trans (+0x40, dirty +0x90), then a new secta cell; GamMan::setObjPos's achr branch"
+  "why": "was ACHRstat::setPos: the base param setter ObjStat::setParam 0x1d932c (shared by ACHRstat::setParam and FCHRstat::setParam) calls it for param 5 (o_pos); ObjStat members only"
  },
  "001d8a8c": {
-  "name": "ACHRstat::setRot",
+  "name": "ObjStat::setRot",
   "tag": "ror-inferred",
   "was": "FUN_001d8a8c",
-  "why": "rot into +0x1a0 and MagSystem::setActorRotate; GamMan::setObjDir's achr branch"
+  "why": "was ACHRstat::setRot: ObjStat::setParam 0x1d932c calls it for param 6 (o_rot); ObjStat members only"
+ },
+ "001d8d28": {
+  "name": "ObjStat::setSecta",
+  "tag": "ror-inferred",
+  "was": "FUN_001d8d28",
+  "why": "stores a secta cell into +0x110 / +0x114 (+0x10c and the entry position +0x1f0 when non-NULL); off the secta lists (flag 0x40) it queues GamMan::queueObjUpdate(cell, oid); returns 1 then"
  },
  "001d8dc4": {
   "name": "ObjStat::syncActorPos",
@@ -7714,6 +7744,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001d8f04",
   "why": "copies the actor's position into +0x190 and out, then moves the object to a new secta cell when it left +0x114's box"
+ },
+ "001d9044": {
+  "name": "ObjStat::getParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001d9044",
+  "why": "the base param getter: params 1..0x18 and 0x1000..0x1005 by the ELF's accessor ids (1 o_oid +0x100, 2 o_uid +0x128, 3 o_chr_id, 4 o_secta_id ...); ACHRstat::getParam and FCHRstat::getParam fall back to it"
+ },
+ "001d932c": {
+  "name": "ObjStat::setParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001d932c",
+  "why": "the base param setter, getParam 0x1d9044's counterpart (same ids and offsets); ACHRstat::setParam and FCHRstat::setParam fall back to it"
  },
  "001d95c4": {
   "name": "ObjStat::setHide",
@@ -7882,6 +7924,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001dce30",
   "why": "the counterpart of setFlags 0x1dcd38: clears bits in the record's flag word (+0x90 tables 0..3, +0xb0 the others); native 151 case 0x11 a1 == 0, GamMan::unsetUnqFlg"
+ },
+ "001dcf28": {
+  "name": "GamSysData::getFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_001dcf28",
+  "why": "the record flag word (+0x90 tables 0..3, +0xb0 tables 4..9) of id, 0 for a bad table: setFlags / clearFlags / testFlags read the same word"
  },
  "001dd00c": {
   "name": "GamSysData::testFlags",

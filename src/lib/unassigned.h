@@ -611,6 +611,8 @@ struct WrdEntry
 {
     int         _00[4];
     const char *m_text;         // ROR 0x10: S2dMes::drawMapName's caption
+    int         _14[3];
+    float       m_ofs[3];       // ROR 0x20: the room's offset (cnvPosW2L / cnvPosL2W, gamWrdConvPos op 2)
 };
 
 /* data/wrd/WRD.BIN once loaded (0x17e5c0, from GamMan::loadStage): +4 the
@@ -622,6 +624,10 @@ struct WrdTable
     WrdEntry *get(int n);                                                // ROR 0x0017ea44
     /* Reads data/wrd/WRD.BIN and keeps file "%03d" of stage. */
     void load(int stage);                                                // ROR 0x0017e5c0
+    /* out = in - record no's offset, when a table is loaded. */
+    void cnvPosW2L(float *out, const float *in, int no);                 // ROR 0x0017ebac
+    /* out = record no's offset + in, when a table is loaded. */
+    void cnvPosL2W(float *out, int no, const float *in);                 // ROR 0x0017eb3c
 };
 
 extern WrdTable g_wrdTable;     /* data 0x298ee0 */

@@ -2558,8 +2558,8 @@
 /* 0017e9d0 00000074 */ FUN_0017e9d0(){}
 /* 0017ea44 0000003c */ WrdTable::get(){}  // ror
 /* 0017ea84 000000b8 */ FUN_0017ea84(){}
-/* 0017eb3c 00000070 */ FUN_0017eb3c(){}
-/* 0017ebac 00000070 */ FUN_0017ebac(){}
+/* 0017eb3c 00000070 */ WrdTable::cnvPosL2W(){}  // ror
+/* 0017ebac 00000070 */ WrdTable::cnvPosW2L(){}  // ror
 /* 0017ec1c 000003d8 */ FUN_0017ec1c(){}
 /* 0017eff4 00000040 */ FUN_0017eff4(){}
 /* 0017f038 00000058 */ FUN_0017f038(){}
@@ -3823,7 +3823,7 @@
 /* 001d7ed4 00000074 */ FUN_001d7ed4(){}
 /* 001d7f48 00000070 */ FUN_001d7f48(){}
 /* 001d7fb8 000000ac */ FUN_001d7fb8(){}
-/* 001d8064 000000b4 */ FUN_001d8064(){}
+/* 001d8064 000000b4 */ GamMan::findSectaCell(){}  // ror
 /* 001d811c 00000060 */ FUN_001d811c(){}
 /* 001d817c 00000048 */ FUN_001d817c(){}
 /* 001d81c4 0000002c */ FUN_001d81c4(){}
@@ -3838,32 +3838,27 @@
 // *****************************************************************************
 
 /* 001d84c8 000000d4 */ FUN_001d84c8(){}
-
-// *****************************************************************************
-// FILE -- (unassigned)
-// *****************************************************************************
-
 /* 001d859c 0000005c */ FUN_001d859c(){}
 /* 001d85f8 0000017c */ FUN_001d85f8(){}
 /* 001d8778 0000007c */ FUN_001d8778(){}
 /* 001d87f4 000000d4 */ ObjStat::ObjStat(){}  // ror
-/* 001d88c8 00000034 */ FUN_001d88c8(){}
+/* 001d88c8 00000034 */ ObjStat::~ObjStat(){}  // ror
 /* 001d88fc 00000010 */ FUN_001d88fc(){}
-/* 001d890c 00000058 */ ACHRstat::getPos(){}  // ror
+/* 001d890c 00000058 */ ObjStat::getPos(){}  // ror
 /* 001d8964 00000060 */ ObjStat::getRot(){}  // ror
-/* 001d89c4 000000c8 */ ACHRstat::setPos(){}  // ror
-/* 001d8a8c 00000050 */ ACHRstat::setRot(){}  // ror
+/* 001d89c4 000000c8 */ ObjStat::setPos(){}  // ror
+/* 001d8a8c 00000050 */ ObjStat::setRot(){}  // ror
 /* 001d8adc 00000080 */ FUN_001d8adc(){}
 /* 001d8b5c 00000040 */ FUN_001d8b5c(){}
 /* 001d8b9c 000000b4 */ FUN_001d8b9c(){}
 /* 001d8c50 000000d8 */ FUN_001d8c50(){}
-/* 001d8d28 0000009c */ FUN_001d8d28(){}
+/* 001d8d28 0000009c */ ObjStat::setSecta(){}  // ror
 /* 001d8dc4 000000e4 */ ObjStat::syncActorPos(){}  // ror
 /* 001d8ea8 0000005c */ ObjStat::findSecta(){}  // ror
 /* 001d8f04 000000e8 */ ObjStat::updatePos(){}  // ror
 /* 001d8fec 00000058 */ FUN_001d8fec(){}
-/* 001d9044 000002e8 */ FUN_001d9044(){}
-/* 001d932c 00000298 */ FUN_001d932c(){}
+/* 001d9044 000002e8 */ ObjStat::getParam(){}  // ror
+/* 001d932c 00000298 */ ObjStat::setParam(){}  // ror
 /* 001d95c4 000000a8 */ ObjStat::setHide(){}  // ror
 /* 001d966c 00000080 */ ObjStat::releaseActor(){}  // ror
 /* 001d96ec 00000144 */ ObjStat::save(){}  // ror
@@ -3910,11 +3905,16 @@
 /* 001dc48c 000008ac */ GamSysData::getField(){}  // ror
 /* 001dcd38 000000f4 */ GamSysData::setFlags(){}  // ror
 /* 001dce30 000000f4 */ GamSysData::clearFlags(){}  // ror
-/* 001dcf28 000000e4 */ FUN_001dcf28(){}
+/* 001dcf28 000000e4 */ GamSysData::getFlags(){}  // ror
 /* 001dd00c 0000010c */ GamSysData::testFlags(){}  // ror
 /* 001dd118 00000038 */ GamSysData::setFlags2(){}  // ror
 /* 001dd154 0000003c */ GamSysData::clearFlags2(){}  // ror
 /* 001dd194 00000050 */ GamSysData::testFlags94(){}  // ror
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 001dd1e8 00000204 */ FUN_001dd1e8(){}
 /* 001dd3ec 00000028 */ FUN_001dd3ec(){}
 /* 001dd414 00000144 */ GamArea::init(){}  // ror

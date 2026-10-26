@@ -91,38 +91,6 @@ void sysInitManagers(void)
     g_gamMan.init();
 }
 
-// ──────────────────────────────────────────────────────────────────────
-// Written ahead of its file (unassigned@001d859c, the ObjStat code): every
-// object GamMan::addChr / addVFchr makes is built through it. The pool is
-// set up as SeqPool::build does (the ROM first empties both lists).
-// ROR 0x001d87f4
-
-ObjStat::ObjStat(int a1, u_int oid, int actor, short kind)
-{
-    m_nodes.build(m_nodes.m_storage, 8);
-    m_oid = oid;
-    m_kind = kind;
-    m_actor = actor;
-    m_104 = a1;
-    m_140 = 0;
-    m_secta = 0;
-    m_110 = 0;
-    m_130 = 0;
-    // PORT: ACHRstat::init / FCHRstat::init set these (stubs until their
-    // file is written); start them as init leaves a fresh object.
-    m_flags = 0;
-    m_link = -1;
-    for (int i = 0; i < 12; i++)
-        m_move[i] = 0;
-    m_move[0] = 2;
-    m_move[1] = 2;
-    for (int i = 0; i < 4; i++)
-    {
-        m_pos[i] = 0.0f;
-        m_rot[i] = 0.0f;
-    }
-}
-
 // stub of ROR 0x001f47f0 (a constructor: stubgen leaves it to hand)
 TskSeqEvent::TskSeqEvent(u_int, int, const void *)
 {
@@ -827,35 +795,10 @@ void GamArea::update(const float *pos, const float *rot)
     ROSEPAN_STUB("GamArea::update", 0x001dee78);
 }
 
-// stub of ROR 0x001dbef8
-void GamSysData::set(const u_char *data)
-{
-    ROSEPAN_STUB("GamSysData::set", 0x001dbef8);
-}
-
 // stub of ROR 0x00130de0
 void MagLife130da4::setVolume(int volume)
 {
     ROSEPAN_STUB("MagLife130da4::setVolume", 0x00130de0);
-}
-
-// stub of ROR 0x001d8964
-void ObjStat::getRot(float *out)
-{
-    ROSEPAN_STUB("ObjStat::getRot", 0x001d8964);
-}
-
-// stub of ROR 0x001d96ec
-int ObjStat::save(void *out)
-{
-    ROSEPAN_STUB("ObjStat::save", 0x001d96ec);
-    return {};
-}
-
-// stub of ROR 0x001d8f04
-void ObjStat::updatePos(float *out)
-{
-    ROSEPAN_STUB("ObjStat::updatePos", 0x001d8f04);
 }
 
 // stub of ROR 0x0017e5c0
@@ -874,12 +817,6 @@ void gamClearFrameReq(void)
 void gamSystemDataLoaded(void)
 {
     ROSEPAN_STUB("gamSystemDataLoaded", 0x001f8fb8);
-}
-
-// stub of ROR 0x001da130
-void ACHRstat::pauseTasks(int on, int all)
-{
-    ROSEPAN_STUB("ACHRstat::pauseTasks", 0x001da130);
 }
 
 // stub of ROR 0x001e747c
@@ -906,12 +843,6 @@ void EmyManager::getOids(int *a, int *b)
     ROSEPAN_STUB("EmyManager::getOids", 0x00163ab8);
 }
 
-// stub of ROR 0x001db774
-void FCHRstat::getRot(float *out)
-{
-    ROSEPAN_STUB("FCHRstat::getRot", 0x001db774);
-}
-
 // stub of ROR 0x001dddbc
 void GamArea::clearKind(int kind)
 {
@@ -934,37 +865,6 @@ void GamMan::placeAchr(int oid, void *out, int arg)
 void GamMan::relinkObj(u_int oid)
 {
     ROSEPAN_STUB("GamMan::relinkObj", 0x001d5da0);
-}
-
-// stub of ROR 0x001d9f10
-void ObjStat::clearSecta(int all)
-{
-    ROSEPAN_STUB("ObjStat::clearSecta", 0x001d9f10);
-}
-
-// stub of ROR 0x001d8ea8
-void ObjStat::findSecta()
-{
-    ROSEPAN_STUB("ObjStat::findSecta", 0x001d8ea8);
-}
-
-// stub of ROR 0x001d9830
-int ObjStat::load(const void *in)
-{
-    ROSEPAN_STUB("ObjStat::load", 0x001d9830);
-    return {};
-}
-
-// stub of ROR 0x001d95c4
-void ObjStat::setHide(int hide)
-{
-    ROSEPAN_STUB("ObjStat::setHide", 0x001d95c4);
-}
-
-// stub of ROR 0x001d8dc4
-void ObjStat::syncActorPos()
-{
-    ROSEPAN_STUB("ObjStat::syncActorPos", 0x001d8dc4);
 }
 
 // stub of ROR 0x001f5e48
@@ -999,28 +899,10 @@ void gamStage2Loaded(void)
     ROSEPAN_STUB("gamStage2Loaded", 0x001fbbd0);
 }
 
-// stub of ROR 0x001da228
-void ACHRstat::getParam(int which, void *out)
-{
-    ROSEPAN_STUB("ACHRstat::getParam", 0x001da228);
-}
-
-// stub of ROR 0x001da740
-void ACHRstat::setParam(int which, const void *data)
-{
-    ROSEPAN_STUB("ACHRstat::setParam", 0x001da740);
-}
-
 // stub of ROR 0x001634d4
 void EmyManager::releaseObj(u_int oid)
 {
     ROSEPAN_STUB("EmyManager::releaseObj", 0x001634d4);
-}
-
-// stub of ROR 0x001db31c
-void FCHRstat::getParam(int which, void *out)
-{
-    ROSEPAN_STUB("FCHRstat::getParam", 0x001db31c);
 }
 
 // stub of ROR 0x001e0d70
@@ -1037,36 +919,10 @@ int GamMan::lookupFlagTable(int keyCol, int key, int col)
     return {};
 }
 
-// stub of ROR 0x001dbfa0
-const void * GamSysData::getRec(short id)
-{
-    ROSEPAN_STUB("GamSysData::getRec", 0x001dbfa0);
-    return {};
-}
-
-// stub of ROR 0x001dcd38
-void GamSysData::setFlags(short id, u_int bits)
-{
-    ROSEPAN_STUB("GamSysData::setFlags", 0x001dcd38);
-}
-
-// stub of ROR 0x001dd00c
-int GamSysData::testFlags(short id, u_int bits)
-{
-    ROSEPAN_STUB("GamSysData::testFlags", 0x001dd00c);
-    return {};
-}
-
 // stub of ROR 0x0017756c
 void Obj176a3c::release(int no)
 {
     ROSEPAN_STUB("Obj176a3c::release", 0x0017756c);
-}
-
-// stub of ROR 0x001d966c
-void ObjStat::releaseActor()
-{
-    ROSEPAN_STUB("ObjStat::releaseActor", 0x001d966c);
 }
 
 // stub of ROR 0x001f6578
@@ -1074,12 +930,6 @@ u_int chrCreateItemObj(short id, const float *pos, const float *rot)
 {
     ROSEPAN_STUB("chrCreateItemObj", 0x001f6578);
     return {};
-}
-
-// stub of ROR 0x001dc48c
-void GamSysData::getField(int id, int field, void *out)
-{
-    ROSEPAN_STUB("GamSysData::getField", 0x001dc48c);
 }
 
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
@@ -1519,33 +1369,9 @@ float GamMan::getObjRadius(u_int oid, int *out)
 }
 
 // stub of ROR 0x001d5bc8
-void GamMan::queueObjUpdate(int kind, u_int oid)
+void GamMan::queueObjUpdate(GamSecta *cell, u_int oid)
 {
     ROSEPAN_STUB("GamMan::queueObjUpdate", 0x001d5bc8);
-}
-
-// stub of ROR 0x001dce30
-void GamSysData::clearFlags(short id, u_int bits)
-{
-    ROSEPAN_STUB("GamSysData::clearFlags", 0x001dce30);
-}
-
-// stub of ROR 0x001dd154
-void GamSysData::clearFlags2(short id, int unused, u_int bits)
-{
-    ROSEPAN_STUB("GamSysData::clearFlags2", 0x001dd154);
-}
-
-// stub of ROR 0x001dc070
-void GamSysData::setField(int id, int field, const void *data)
-{
-    ROSEPAN_STUB("GamSysData::setField", 0x001dc070);
-}
-
-// stub of ROR 0x001dd118
-void GamSysData::setFlags2(short id, int unused, u_int bits)
-{
-    ROSEPAN_STUB("GamSysData::setFlags2", 0x001dd118);
 }
 
 // stub of ROR 0x00144ae0
@@ -1553,31 +1379,6 @@ intptr_t magBwnSeqCommand(const intptr_t *args)
 {
     ROSEPAN_STUB("magBwnSeqCommand", 0x00144ae0);
     return {};
-}
-
-// stub of ROR 0x001db520
-void FCHRstat::setParam(int which, const void *data)
-{
-    ROSEPAN_STUB("FCHRstat::setParam", 0x001db520);
-}
-
-// stub of ROR 0x001dd194
-int GamSysData::testFlags94(short id, int unused, u_int bits)
-{
-    ROSEPAN_STUB("GamSysData::testFlags94", 0x001dd194);
-    return {};
-}
-
-// stub of ROR 0x001dba3c
-void gamWrdConvPos(int op, float *a, float *b)
-{
-    ROSEPAN_STUB("gamWrdConvPos", 0x001dba3c);
-}
-
-// stub of ROR 0x001db1b8
-void ACHRstat::setMotionSpeed(float speed)
-{
-    ROSEPAN_STUB("ACHRstat::setMotionSpeed", 0x001db1b8);
 }
 
 // stub of ROR 0x001f6b8c
@@ -1615,12 +1416,6 @@ void sectorClearFlags(Obj17c0f0 *obj, int key, u_int bits, int rec)
 void sectorSetFlags(Obj17c0f0 *obj, int key, u_int bits, int rec)
 {
     ROSEPAN_STUB("sectorSetFlags", 0x0017c45c);
-}
-
-// stub of ROR 0x001da07c
-void ACHRstat::killTasks()
-{
-    ROSEPAN_STUB("ACHRstat::killTasks", 0x001da07c);
 }
 
 // stub of ROR 0x001dd5e8
@@ -1750,36 +1545,6 @@ void chrSetMotion(float speed, int no, int motion, int p1d8, u_int flags, u_int 
     ROSEPAN_STUB("chrSetMotion", 0x001f6308);
 }
 
-// stub of ROR 0x001d890c
-void ACHRstat::getPos(float *out)
-{
-    ROSEPAN_STUB("ACHRstat::getPos", 0x001d890c);
-}
-
-// stub of ROR 0x001d9908
-void ACHRstat::init(short kind)
-{
-    ROSEPAN_STUB("ACHRstat::init", 0x001d9908);
-}
-
-// stub of ROR 0x001d9b2c
-void ACHRstat::initParamFuncs()
-{
-    ROSEPAN_STUB("ACHRstat::initParamFuncs", 0x001d9b2c);
-}
-
-// stub of ROR 0x001d89c4
-void ACHRstat::setPos(const float *pos)
-{
-    ROSEPAN_STUB("ACHRstat::setPos", 0x001d89c4);
-}
-
-// stub of ROR 0x001d8a8c
-void ACHRstat::setRot(const float *rot)
-{
-    ROSEPAN_STUB("ACHRstat::setRot", 0x001d8a8c);
-}
-
 // stub of ROR 0x00162c2c
 void EmyManager::addEmy(int chrNo, short kind, void *chr, intptr_t seqWord, void *image,
                 const void *pos, u_int oid)
@@ -1787,33 +1552,28 @@ void EmyManager::addEmy(int chrNo, short kind, void *chr, intptr_t seqWord, void
     ROSEPAN_STUB("EmyManager::addEmy", 0x00162c2c);
 }
 
-// stub of ROR 0x001db71c
-void FCHRstat::getPos(float *out)
-{
-    ROSEPAN_STUB("FCHRstat::getPos", 0x001db71c);
-}
-
-// stub of ROR 0x001db1f0
-void FCHRstat::init(short kind)
-{
-    ROSEPAN_STUB("FCHRstat::init", 0x001db1f0);
-}
-
-// stub of ROR 0x001db7cc
-void FCHRstat::setPos(const float *pos)
-{
-    ROSEPAN_STUB("FCHRstat::setPos", 0x001db7cc);
-}
-
-// stub of ROR 0x001db898
-void FCHRstat::setRot(const float *rot)
-{
-    ROSEPAN_STUB("FCHRstat::setRot", 0x001db898);
-}
-
 // stub of ROR 0x00217f10
 float utlAtan2(float x, float z)
 {
     ROSEPAN_STUB("utlAtan2", 0x00217f10);
     return {};
+}
+
+// stub of ROR 0x001d8064
+GamSecta * GamMan::findSectaCell(const float *pos, GamSecta *cur, int type2)
+{
+    ROSEPAN_STUB("GamMan::findSectaCell", 0x001d8064);
+    return {};
+}
+
+// stub of ROR 0x0017eb3c
+void WrdTable::cnvPosL2W(float *out, int no, const float *in)
+{
+    ROSEPAN_STUB("WrdTable::cnvPosL2W", 0x0017eb3c);
+}
+
+// stub of ROR 0x0017ebac
+void WrdTable::cnvPosW2L(float *out, const float *in, int no)
+{
+    ROSEPAN_STUB("WrdTable::cnvPosW2L", 0x0017ebac);
 }
