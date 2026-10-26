@@ -1413,6 +1413,20 @@ TskSeqEvent, TskSysFunc, TskFrameFunc / TskGenFrameFunc.
   MagSystem::m_v_interval = 1 (60 fps while the film runs; 2 again at the end). START held skips
   (pad m_hold bit 8 through MagSystem +0x97a40). Word 1 bit 0x80000000 set by the script suppresses
   the final fade-in. Seen working 2026-10-26: the New Game opening film plays to its end.
+- **TskMsgMan** (kind 0x10, EE 0x9c0, GamMan::openMsg's task m_msgTaskId): **the narration
+  subtitles of the opening film** ("Once upon a time,", "there was a precious little girl." -- frames
+  ~2950 / ~3090 of a New Game run; the film's own handwritten cards are part of the movie). Text kept
+  as "#C" + text at +4 (the strings carry their own "#R" codes), a scene window opened from
+  GamMan::m_msgParam (p[0..1] position, p[3..4] size, p[5] the setMessage flag, p[6] life; p[2] gets
+  0x8001), MsgManSet at +0x224. exec's end rule by mode +0x204: 1 time frames, 2 text out + CROSS
+  (m_trig bit 14) after 10 frames, 3 either, 4 text out; MsgManSet::release (0x18761c) at the end.
+  Nothing shows until msg/msgman.cpp (MsgMan / MsgManSet) is written.
+- **TskMtnMove2** (kind 5, EE 0x100, chrMtnMove2): TskMtnMove's twin moving through DogActor::
+  getMotionMove / addTrans with the root move turned by the actor's m_base_rotate[1] (a VU0 RotMatrixY)
+  instead of a stored heading; its hit step tests from the "Bip01 Spine1" node (chrGetNodeWorldPos
+  0x1f5558, DogActor vtable slot 18 getNodeWorldPos) and 1.25 radii ahead (GamMan::getObjRadius), and
+  starts a TskAvoidMove (0x1ef184, not written) on ACHRstat::m_taskId (+0x3e8) when the actor stands
+  in something. PMF at +0xcc.
 - Frame request list: data 0x2d8f68 (count) / 0x2d8f70 (32 oids), filled by 0x1f68bc (an object
   pushed aside, table entry 0x2e50f4), cleared each frame by gamClearFrameReq (only 8 words).
 

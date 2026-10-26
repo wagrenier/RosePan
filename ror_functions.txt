@@ -2834,7 +2834,7 @@
 /* 001874ac 00000048 */ MsgManSet::update(){}  // ror
 /* 001874f4 000000cc */ MsgManSet::setMessage(){}  // ror
 /* 001875c0 0000005c */ MsgManSet::getState(){}  // ror
-/* 0018761c 00000104 */ FUN_0018761c(){}
+/* 0018761c 00000104 */ MsgManSet::release(){}  // ror
 
 // *****************************************************************************
 // FILE -- mcd/mcdman.cpp
@@ -4068,11 +4068,12 @@
 /* 001e8f88 00000034 */ chrMotionRefEnd(){}  // ror
 /* 001e8fbc 00000008 */ TskMtnMove::stepNone(){}  // ror
 /* 001e8fc4 00000260 */ TskMtnMove2::TskMtnMove2(){}  // ror
-/* 001e9224 00000004 */ FUN_001e9224(){}
-/* 001e922c 00000068 */ FUN_001e922c(){}
-/* 001e9294 00000158 */ FUN_001e9294(){}
-/* 001e93ec 00000228 */ FUN_001e93ec(){}
-/* 001e9614 00000428 */ FUN_001e9614(){}
+/* 001e9224 00000004 */ TskMtnMove2::term(){}  // ror
+/* 001e922c 00000068 */ TskMtnMove2::exec(){}  // ror
+/* 001e9294 00000158 */ TskMtnMove2::pause(){}  // ror
+/* 001e93ec 00000228 */ TskMtnMove2::stepMove(){}  // ror
+/* 001e9614 00000420 */ TskMtnMove2::stepMoveHit(){}  // ror
+/* 001e9a34 00000008 */ TskMtnMove2::stepNone(){}  // ror
 /* 001e9a3c 0000023c */ TskMoveTypeGen::TskMoveTypeGen(){}  // ror
 /* 001e9c78 00000034 */ FUN_001e9c78(){}
 /* 001e9cac 00000004 */ FUN_001e9cac(){}
@@ -4128,7 +4129,7 @@
 /* 001ef0d8 00000028 */ FUN_001ef0d8(){}
 /* 001ef100 0000001c */ FUN_001ef100(){}
 /* 001ef11c 00000068 */ FUN_001ef11c(){}
-/* 001ef184 00000290 */ FUN_001ef184(){}
+/* 001ef184 00000290 */ TskAvoidMove::TskAvoidMove(){}  // ror
 /* 001ef414 00000034 */ FUN_001ef414(){}
 /* 001ef448 00000050 */ FUN_001ef448(){}
 /* 001ef498 000003f0 */ FUN_001ef498(){}
@@ -4189,10 +4190,10 @@
 /* 001f48a8 00000070 */ FUN_001f48a8(){}
 /* 001f4918 0000010c */ FUN_001f4918(){}
 /* 001f4a24 00000250 */ TskMsgMan::TskMsgMan(){}  // ror
-/* 001f4c74 000000a0 */ FUN_001f4c74(){}
-/* 001f4d14 00000070 */ FUN_001f4d14(){}
-/* 001f4d84 000001d8 */ FUN_001f4d84(){}
-/* 001f4f5c 0000015c */ FUN_001f4f5c(){}
+/* 001f4c74 000000a0 */ TskMsgMan::~TskMsgMan(){}  // ror
+/* 001f4d14 00000070 */ TskMsgMan::term(){}  // ror
+/* 001f4d84 000001d8 */ TskMsgMan::pause(){}  // ror
+/* 001f4f5c 0000015c */ TskMsgMan::exec(){}  // ror
 /* 001f50b8 0000018c */ FUN_001f50b8(){}
 /* 001f5244 00000064 */ TskAttach::TskAttach(){}  // ror
 /* 001f52a8 00000034 */ FUN_001f52a8(){}
@@ -4200,7 +4201,7 @@
 /* 001f52e4 0000006c */ FUN_001f52e4(){}
 /* 001f5350 000000c0 */ FUN_001f5350(){}
 /* 001f5410 00000148 */ FUN_001f5410(){}
-/* 001f5558 00000128 */ FUN_001f5558(){}
+/* 001f5558 00000128 */ chrGetNodeWorldPos(){}  // ror
 /* 001f5680 00000330 */ FUN_001f5680(){}
 /* 001f59b4 00000228 */ chrMtnMove(){}  // ror
 /* 001f5bdc 000001b4 */ chrMtnMove2(){}  // ror

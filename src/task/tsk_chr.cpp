@@ -3,9 +3,10 @@
  *
  *  The script's tasks: the achr motion / movement tasks with their chr*
  *  starters and the generic script tasks (pinned 0x1e7f28..0x1f6c64); see
- *  tsk_chr.h. Written so far: TskMtnMove and its starters (chrMtnMove,
- *  chrChangeMotion, chrKillMotionTask), TskMovie (the film task), the
- *  frame request list.
+ *  tsk_chr.h. Written so far: TskMtnMove / TskMtnMove2 and their starters
+ *  (chrMtnMove, chrMtnMove2, chrChangeMotion, chrKillMotionTask,
+ *  chrSetMotion, chrGetNodeWorldPos), TskMovie (the film task),
+ *  TskMsgMan (the message window task), the frame request list.
  * ======================================================================== */
 #include "task/tsk_chr.h"
 
@@ -315,6 +316,280 @@ int chrMotionRefEnd(const ChrMotionRef *ref)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The task: the motion (unless it runs already: flag 4), its speed and
+// length, the base heading, the achr, and the step function (the same
+// choice as TskMtnMove's).
+// ROR 0x001e8fc4
+
+TskMtnMove2::TskMtnMove2(float speed, int no, int motion, int p1d8, u_int flags, u_int oid)
+{
+    m_mpos[0] = 0.0f;
+    m_mpos[1] = 0.0f;
+    m_mpos[2] = 0.0f;
+    m_mpos[3] = 1.0f;
+    m_move[0] = 0.0f;
+    m_move[1] = 0.0f;
+    m_move[2] = 0.0f;
+    m_move[3] = 1.0f;
+    m_actor = no;
+    m_motion = motion;
+    m_flagsF = (float)(int)flags;
+    m_oid = oid;
+    m_speed = speed;
+    m_flags = 0;
+    m_c4 = 0;
+    if ((short)m_actor == -1)
+    {
+        m_stepFunc = &TskMtnMove2::stepNone;
+        return;
+    }
+
+    if (gamOidList(oid) == 1)
+    {
+        m_achr = g_gamMan.getAchr(oid);
+        m_dogActor = g_gamMan.getActor(m_oid);
+    }
+    else
+    {
+        m_achr = NULL;
+        m_dogActor = NULL;
+    }
+    MagScene &scene = g_magSystem.m_scene;
+    if (m_motion != scene.getActorMotion(m_actor))
+    {
+        m_dogActor->changeMotion(speed, m_motion, (int)flags >> 8, flags & 0xff, p1d8);
+        m_flags |= 4;
+    }
+    m_step = speed / 0x1.11111p-6f; /* 0x3c888888 (1/60) */
+    scene.setActorMotionSpeed(m_step, m_actor);
+    m_end = scene.getActorMotionLength(m_actor, m_motion) * 120.0f;
+    m_rotY = scene.m_actors[m_actor].m_base_rotate[1];
+
+    if (m_achr != NULL
+        && (((m_achr->m_flags & 0x40) != 0 && (m_achr->m_flags & 0x80) == 0)
+            || (m_achr->m_flags & 0x4000000) != 0))
+    {
+        m_radius = g_gamMan.getObjRadius(m_oid, NULL);
+        m_stepFunc = &TskMtnMove2::stepMoveHit;
+    }
+    else
+    {
+        m_stepFunc = &TskMtnMove2::stepMove;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Empty.
+// ROR 0x001e9224
+
+void TskMtnMove2::term()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The step function the constructor picked.
+// ROR 0x001e922c
+
+int TskMtnMove2::exec(int id, int time, int arg)
+{
+    (void)id;
+    (void)time;
+    (void)arg;
+    return (this->*m_stepFunc)();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// TskMtnMove::pause's rule: pausing freezes the motion (speed 1e-7) and
+// keeps the speed in the achr's param 0x1201; resuming restores it (1/60
+// when it is about 0). The PC's task is left alone.
+// ROR 0x001e9294
+
+void TskMtnMove2::pause(int on)
+{
+    float speed;
+    u_int pc = 0;
+
+    if (g_gamMan.m_pcPtr != NULL)
+        pc = g_gamMan.m_pcPtr->m_oid;
+    if (m_oid == pc)
+        return;
+
+    if (on != 0)
+    {
+        speed = g_magSystem.m_scene.getActorMotionSpeed(m_actor);
+        if ((m_flags & 2) == 0)
+        {
+            if (m_dogActor != NULL)
+                m_dogActor->m_motion.m_speed = 0x1.ad7f28p-24f; /* 0x33d6bf94 */
+            if (m_achr != NULL)
+                m_achr->setParam(0x1201, &speed);
+        }
+        m_flags |= 2;
+        return;
+    }
+
+    speed = 0x1.11111p-6f; /* 0x3c888888 */
+    if ((m_flags & 2) != 0)
+    {
+        if (m_achr != NULL)
+            m_achr->getParam(0x1201, &speed);
+        if (speed < 0.0f)
+        {
+            if (-0x1.0624dcp-10f /* 0xba83126e */ < speed)
+                speed = 0x1.11111p-6f;
+        }
+        else if (speed < 0x1.0624dcp-10f /* 0x3a83126e */)
+        {
+            speed = 0x1.11111p-6f;
+        }
+        if (m_dogActor != NULL)
+            m_dogActor->m_motion.m_speed = speed;
+    }
+    m_flags &= ~2u;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// One frame: while the motion runs (|speed| > 1e-7, before its end) the
+// actor moves by the root move of the next two steps turned by its base
+// heading; paused or standing it only takes the motion's turn. Ends (1)
+// when the object lost its actor.
+// ROR 0x001e93ec
+
+int TskMtnMove2::stepMove()
+{
+    MagScene &scene = g_magSystem.m_scene;
+    sceVu0FVECTOR zero = {0.0f, 0.0f, 0.0f, 1.0f};
+    sceVu0FMATRIX mat;
+    float rot[4];
+    float speed = scene.getActorMotionSpeed(m_actor);
+    float frame = scene.m_actors[m_actor].getMotionFrame120();
+
+    if (frame >= 0.0f && (m_flags & 2) == 0
+        && (speed < 0.0f ? speed < -0x1.ad7f28p-24f /* 0xb3d6bf94 */
+                         : speed > 0x1.ad7f28p-24f /* 0x33d6bf94 */))
+    {
+        if (frame < m_end)
+        {
+            m_actor = g_gamMan.getActorNo(m_oid);
+            if (m_actor == -1)
+                return 1;
+            if (m_dogActor->getMotionMove(frame, frame + (m_step + m_step), m_move, rot, m_mpos)
+                != 0)
+            {
+                if ((m_flags & 1) != 0)
+                    return 0;
+                m_move[3] = 1.0f;
+                m_move[1] = 0.0f;
+                sceVu0UnitMatrix(mat);
+                sceVu0RotMatrixY(mat, mat, m_dogActor->m_base_rotate[1]);
+                sceVu0ApplyMatrix(m_move, mat, m_move);
+                m_dogActor->addTrans(m_move, m_mpos[1], rot[0]);
+            }
+        }
+    }
+    else if (m_dogActor->getMotionMove(frame, frame + (m_step + m_step), m_move, rot, m_mpos)
+             != 0)
+    {
+        m_dogActor->addTrans(zero, m_mpos[1], rot[0]);
+    }
+    m_rotYOut = m_rotY;
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// stepMove for achrs off the secta lists: standing, the heading follows
+// the actor. A move is refused (the actor only turns) when the hit test
+// finds something at the target -- for achrs on the secta lists, only
+// when also no cell lies 1.25 radii ahead -- and then, when the actor
+// stands in something, a TskAvoidMove (unless one runs) pushes it out.
+// The ROM adds the unturned move to the position before the test (kept).
+// ROR 0x001e9614
+
+int TskMtnMove2::stepMoveHit()
+{
+    MagScene &scene = g_magSystem.m_scene;
+    sceVu0FVECTOR zero = {0.0f, 0.0f, 0.0f, 1.0f};
+    sceVu0FMATRIX mat;
+    u_int hit[8];
+    float rot[4];
+    float to[4];
+    float ahead[4];
+    int   refused = 0;
+    float speed = scene.getActorMotionSpeed(m_actor);
+    float frame = scene.m_actors[m_actor].getMotionFrame120();
+
+    rot[0] = 0.0f;
+    if (frame < 0.0f || (m_flags & 2) != 0
+        || (speed < 0.0f ? speed >= -0x1.ad7f28p-24f /* 0xb3d6bf94 */
+                         : speed <= 0x1.ad7f28p-24f /* 0x33d6bf94 */))
+    {
+        m_rotY = m_dogActor->getRotY();
+    }
+    else if (frame < m_end && (m_flags & 1) == 0)
+    {
+        m_actor = g_gamMan.getActorNo(m_oid);
+        if (m_actor != -1
+            && m_dogActor->getMotionMove(frame, frame + (m_step + m_step), m_move, rot, m_mpos)
+                   != 0)
+        {
+            m_achr->getPos(m_achrPos);
+            m_move[1] = 0.0f;
+            m_move[3] = 1.0f;
+            if (chrGetNodeWorldPos(m_oid, m_pos, "Bip01 Spine1") == 0)
+                m_achr->getPos(m_pos);
+            m_pos[0] += m_move[0];
+            m_pos[2] += m_move[2];
+            sceVu0UnitMatrix(mat);
+            sceVu0RotMatrixY(mat, mat, m_dogActor->m_base_rotate[1]);
+            sceVu0ApplyMatrix(m_move, mat, m_move);
+
+            to[0] = m_pos[0] + m_move[0];
+            to[1] = 0.0f;
+            to[2] = m_pos[2] + m_move[2];
+            to[3] = 0.0f;
+            float d = m_radius * 1.25f;
+            ahead[0] = m_pos[0] + (m_move[0] < 0.0f ? -d : d);
+            ahead[1] = 0.0f;
+            ahead[2] = m_pos[2] + (m_move[2] < 0.0f ? -d : d);
+            ahead[3] = 0.0f;
+            if (g_gamMan.testHitAt(to, m_oid, 0, 1, hit) != 0 && (m_achr->m_flags & 0x40) != 0)
+                refused = 1;
+            else if (m_achr->hasSectaAt(ahead) == 0)
+                refused = 1;
+            else
+                m_dogActor->addTrans(m_move, m_mpos[1], rot[0]);
+
+            if (refused)
+            {
+                sceVu0ApplyMatrix(zero, mat, zero);
+                m_dogActor->addTrans(zero, m_mpos[1], rot[0]);
+                if (chrGetNodeWorldPos(m_oid, m_pos, "Bip01 Spine1") == 0)
+                    m_achr->getPos(m_pos);
+                if (g_gamMan.testHitAt(m_pos, m_oid, 0, 1, hit) != 0
+                    && g_taskMan.getTask(m_achr->m_taskId) == 0)
+                {
+                    // callcheck: operator_new (the new expression)
+                    TskAvoidMove *task = new TskAvoidMove(m_oid, hit, 8, 0x10, 0, 0);
+                    g_taskMan.addTask(1, -1, 1, 0, task, 0, &m_achr->m_taskId, 0x11);
+                }
+            }
+        }
+    }
+    m_rotYOut = m_rotY;
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// No actor: the task ends at once (hidden after stepMoveHit; created in
+// Ghidra 2026-10-26).
+// ROR 0x001e9a34
+
+int TskMtnMove2::stepNone()
+{
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Stops the music, fades sprite 3 out and starts the film at 60 fps.
 // ROR 0x001f438c
 
@@ -426,6 +701,137 @@ void TskMovie::term()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Opens the window from the words param (writing 0x8001 into the caller's
+// p[2], the view's flag), fills it and shows "#C" + text. arg is not read.
+// ROR 0x001f4a24 // callcheck: MsgMan::MsgMan (MsgManSet's members construct zeroed on the host)
+
+TskMsgMan::TskMsgMan(const char *text, int arg, int *param, int fill, int mode, int time)
+{
+    MagScene &scene = g_magSystem.m_scene;
+
+    (void)arg;
+    m_text[0] = '#';
+    m_text[1] = 'C';
+    m_text[2] = '\0';
+    // PORT: the ROM's strncpy may write 0x200 bytes after the 2-byte
+    // prefix, two past m_text into m_mode (set right after); bounded here.
+    size_t len = strlen(m_text);
+    strncpy(m_text + len, text, sizeof(m_text) - len - 1);
+    m_text[sizeof(m_text) - 1] = '\0';
+    memcpy(m_param, param, sizeof(m_param));
+    m_textPtr = m_text;
+    m_mode = mode;
+    m_count = 0;
+    m_window = scene.openWindow(param[3], param[4], param[6], -1);
+    m_time = time;
+    m_count = 0;
+    param[2] = 0x8001;
+    g_magSystem.setViewParam(m_window, param[0], param[1], 0x8001, param[3], param[4]);
+    scene.setWindowWords84(m_window, 0, 0, param[3], param[4]);
+    if (fill == 0)
+    {
+        scene.setWindowFillMsb(m_window, 0);
+        scene.setWindowFill(m_window, 1);
+    }
+    else
+    {
+        scene.setWindowFillMsb(m_window, 1);
+        scene.setWindowFill(m_window, 0);
+    }
+    scene.updateWindowFont(m_window);
+    m_msg.open();
+    m_msg.setMessage(m_window, m_textPtr, param[5]);
+    scePrintf("TskMsgMan::TskMsgMan \n");
+    scePrintf("m_window_no : %d %s \n", m_window, m_textPtr);
+    scePrintf("======= ======= ======= ======= ======= ======= ======= ======= ======= \n");
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: ~MsgMan, operator_delete (the implicit member destructors, GCC 2's delete flag; the host's delete frees)
+// ROR 0x001f4c74
+
+TskMsgMan::~TskMsgMan()
+{
+    TskMsgMan::term();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Closes the text and the window.
+// ROR 0x001f4d14
+
+void TskMsgMan::term()
+{
+    MagScene &scene = g_magSystem.m_scene;
+
+    m_msg.close();
+    scene.setWindowShow(m_window, 1);
+    scene.updateWindowFont(m_window);
+    scene.closeWindow(m_window);
+    m_mode = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The message sprites in the ROM's order.
+// ROR 0x001f4d84
+
+void TskMsgMan::pause(int on)
+{
+    static const int sprites[] = {0, 2, 1, 3, 5, 4, 6, 7, 8, 9, 10, 11, 12, 13};
+    MagScene &scene = g_magSystem.m_scene;
+
+    scene.setWindowShow(m_window, on != 0);
+    for (size_t i = 0; i < sizeof(sprites) / sizeof(sprites[0]); i++)
+    {
+        if (on != 0)
+            scene.m_mes.setSpriteProcessOff(sprites[i]);
+        else
+            scene.m_mes.setSpriteProcessOn(sprites[i]);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// One frame of the text; at the end the window's MsgMan is released
+// (term closes the window).
+// ROR 0x001f4f5c
+
+int TskMsgMan::exec(int id, int time, int arg)
+{
+    const BedPad *pad = g_magSystem.m_pad_ref[0].m_pad;
+    int done = 0;
+
+    (void)id;
+    (void)time;
+    (void)arg;
+    switch (m_mode)
+    {
+    case 1:
+        done = m_time < m_count++;
+        break;
+    case 2:
+        if (m_msg.getState(m_window) == 0 && ((pad->m_trig >> 14) & 1) != 0)
+            done = 10 < m_count;
+        m_count++;
+        break;
+    case 3:
+        if (m_msg.getState(m_window) == 0 && 10 < m_count)
+            done = ((pad->m_trig >> 14) & 1) != 0;
+        if (!done)
+            done = m_time < m_count;
+        m_count++;
+        break;
+    case 4:
+        done = m_msg.getState(m_window) == 0;
+        m_count++;
+        break;
+    }
+    if (!done)
+        m_msg.update();
+    else
+        m_msg.release(m_window);
+    return done;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // A new TskMtnMove for oid: an achr's replaces its motion task m_task[2]
 // (rotY >= 32769 first sets the actor's rotation to its heading); other
 // objects get one with no actor.
@@ -468,6 +874,72 @@ CmnITask *chrMtnMove(float speed, float rotY, u_int oid, int motion, int p1d8, u
     else
     {
         task = new TskMtnMove(speed, CHR_ROT_KEEP, -1, motion, p1d8, flags, oid);
+        id = NULL;
+        g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 1);
+    }
+    return task;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// oid's actor's node by name, as DogActor::getNodeWorldPos (vtable slot
+// 18) gives it; the ROM inlines DogModel::getNodeIndexByName with its
+// asserts.
+// ROR 0x001f5558 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (the inlined getNodeIndexByName: its assert handler and lookup)
+
+int chrGetNodeWorldPos(u_int oid, float *out, const char *name)
+{
+    DogActor *actor = g_gamMan.getActor(oid);
+    sceVu0FVECTOR pos;
+
+    if (actor == NULL || (g_gamMan.m_flags2 & 0x3000) != 0)
+        return 0;
+    int node = actor->getNodeIndexByName(name);
+    if (node < 0)
+        return 0;
+    pos[0] = 0.0f;
+    pos[1] = 0.0f;
+    pos[2] = 0.0f;
+    pos[3] = 1.0f;
+    actor->getNodeWorldPos(pos, node);
+    out[0] = pos[0];
+    out[3] = pos[3];
+    out[1] = pos[1];
+    out[2] = pos[2];
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A new TskMtnMove2 for oid: an achr's replaces its motion task m_task[2];
+// other objects get one with no actor.
+// ROR 0x001f5bdc
+
+CmnITask *chrMtnMove2(float speed, u_int oid, int motion, int p1d8, u_int flags,
+                      const char *name)
+{
+    TskMtnMove2 *task;
+    int         *id;
+
+    if (gamOidList(oid) == 1)
+    {
+        ACHRstat *chr = g_gamMan.getAchr(oid);
+        int       no = chr->m_actor;
+
+        id = &chr->m_task[2];
+        if (name != NULL)
+            motion = g_magSystem.m_scene.m_actors[no].findMotionByName(name);
+        if (g_taskMan.getTask(*id) != 0)
+        {
+            g_taskMan.killTask(*id);
+            *id = -1;
+        }
+        chr->m_13c = motion;
+        // callcheck: operator_new (the new expression)
+        task = new TskMtnMove2(speed, no, motion, p1d8, flags, oid);
+        g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 0x11);
+    }
+    else
+    {
+        task = new TskMtnMove2(speed, -1, motion, p1d8, flags, oid);
         id = NULL;
         g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 1);
     }
@@ -527,6 +999,71 @@ void chrKillMotionTask(u_int oid)
     {
         g_taskMan.killTask(*id);
         *id = -1;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A speed outside 0.0001..100 becomes 1/60 with p1d8 1, a p1d8 below -1
+// or above 300 becomes 1. An achr keeps the heading of its running motion
+// task (TskMtnMove's m_rotY), which is killed; other objects keep the
+// actor's heading.
+// ROR 0x001f6308 // callcheck: findTask (only when the task runs; inlined below as the TskMtnMove cast)
+
+void chrSetMotion(float speed, int no, int motion, int p1d8, u_int flags, u_int oid,
+                  const char *name)
+{
+    MagScene &scene = g_magSystem.m_scene;
+    sceVu0FVECTOR rot;
+
+    if (speed < 0.0001f || speed > 100.0f)
+    {
+        speed = 0x1.11111p-6f; /* 0x3c888888 */
+        p1d8 = 1;
+    }
+    else if (p1d8 < -1)
+    {
+        p1d8 = 1;
+    }
+    if (300.0f < (float)p1d8)
+        p1d8 = 1;
+    if (name != NULL)
+        motion = scene.m_actors[no].findMotionByName(name);
+
+    DogActor &actor = scene.m_actors[no];
+    if (gamOidList(oid) == 1)
+    {
+        ACHRstat *chr = g_gamMan.getAchr(oid);
+        int      *id = &chr->m_task[2];
+
+        rot[0] = actor.m_rotate[0];
+        rot[1] = actor.m_rotate[1];
+        rot[2] = actor.m_rotate[2];
+        rot[3] = 0.0f; /* PORT: not set by the ROM (not read by setActorRotate's x, y, z) */
+        scene.changeActorMotion(speed, no, motion, p1d8, flags);
+        if (g_taskMan.getTask(*id) != 0)
+        {
+            TskMtnMove *task = static_cast<TskMtnMove *>(g_taskMan.findTask(*id));
+            rot[1] = task->m_rotY;
+            rot[0] = 0.0f;
+            rot[2] = 0.0f;
+            rot[3] = 0.0f;
+        }
+        g_magSystem.setActorRotate(no, rot);
+        if (g_taskMan.getTask(*id) != 0)
+        {
+            g_taskMan.killTask(*id);
+            *id = -1;
+        }
+        chr->m_13c = motion;
+    }
+    else
+    {
+        rot[1] = actor.m_rotate[1];
+        scene.changeActorMotion(speed, no, motion, p1d8 != 0 ? p1d8 : 1, flags);
+        rot[0] = 0.0f;
+        rot[2] = 0.0f;
+        rot[3] = 0.0f;
+        g_magSystem.setActorRotate(no, rot);
     }
 }
 

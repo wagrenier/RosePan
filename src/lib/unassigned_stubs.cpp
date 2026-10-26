@@ -47,17 +47,17 @@ void debugNop(void)
 
 // ---- bridges (hand-written) ----
 
+// stub of ROR 0x001ef184 (a constructor: stubgen leaves it to hand)
+TskAvoidMove::TskAvoidMove(u_int, const void *, int, int, int, int)
+{
+    ROSEPAN_STUB("TskAvoidMove::TskAvoidMove", 0x001ef184);
+}
+
 // stub of ROR 0x001f47f0 (a constructor: stubgen leaves it to hand)
 TskSeqEvent::TskSeqEvent(u_int, int, const void *)
 {
     ROSEPAN_STUB("TskSeqEvent::TskSeqEvent", 0x001f47f0);
     m_radius = 0.0f;
-}
-
-// stub of ROR 0x001f4a24 (a constructor: stubgen leaves it to hand)
-TskMsgMan::TskMsgMan(const char *, int, const int *, int, int, int)
-{
-    ROSEPAN_STUB("TskMsgMan::TskMsgMan", 0x001f4a24);
 }
 
 // stub of ROR 0x001f8fc0 (a constructor: stubgen leaves it to hand)
@@ -1394,21 +1394,6 @@ int chrChangeMotionBySuffix(float blend, float rotY, u_int oid, const char *name
     return {};
 }
 
-// stub of ROR 0x001f5bdc
-CmnITask * chrMtnMove2(float speed, u_int oid, int motion, int p1d8, u_int flags,
-                      const char *name)
-{
-    ROSEPAN_STUB("chrMtnMove2", 0x001f5bdc);
-    return {};
-}
-
-// stub of ROR 0x001f6308
-void chrSetMotion(float speed, int no, int motion, int p1d8, u_int flags, u_int oid,
-                  const char *name)
-{
-    ROSEPAN_STUB("chrSetMotion", 0x001f6308);
-}
-
 // stub of ROR 0x00162c2c
 u_int EmyManager::addEmy(int chrNo, short kind, void *chr, intptr_t seqWord, void *image,
                 const void *pos, u_int oid, int group)
@@ -1544,4 +1529,10 @@ int GamMan::testHitAt(const float *pos, u_int oid, int a3, int a4, void *out)
 {
     ROSEPAN_STUB("GamMan::testHitAt", 0x001d5a0c);
     return {};
+}
+
+// stub of ROR 0x0018761c
+void MsgManSet::release(int window)
+{
+    ROSEPAN_STUB("MsgManSet::release", 0x0018761c);
 }

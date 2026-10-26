@@ -4235,6 +4235,12 @@
   "was": "FUN_001875c0",
   "why": "(window): 0 when no object has that window; else 2 | (+4 == 0), or (+4 == 0) when +0x20 is 1: non-zero while a text is being shown"
  },
+ "0018761c": {
+  "name": "MsgManSet::release",
+  "tag": "ror-inferred",
+  "was": "FUN_0018761c",
+  "why": "MsgManSet method (strides 0xef words over the two MsgMan): the MsgMan showing window gets four resets with 0, m_window -1 and word 1 = 1; TskMsgMan::exec calls it when the message ends"
+ },
  "00187724": {
   "name": "McdMan::McdMan",
   "tag": "ror-inferred",
@@ -9329,6 +9335,42 @@
   "was": "FUN_001e8fc4",
   "why": "stores vtable 0x2e48d0 (rtti: TskMtnMove2), 0x100 bytes: actor no +0xc, motion +0x10, frames +0x58, oid +8, speed +0x68, two unit quaternions +0x30 / +0x40"
  },
+ "001e9224": {
+  "name": "TskMtnMove2::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001e9224",
+  "why": "vtable 0x2e48d0 slot 5: empty (as TskMtnMove::term)"
+ },
+ "001e922c": {
+  "name": "TskMtnMove2::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001e922c",
+  "why": "vtable 0x2e48d0 slot 4: calls the member-function pointer at +0xcc"
+ },
+ "001e9294": {
+  "name": "TskMtnMove2::pause",
+  "tag": "ror-inferred",
+  "was": "FUN_001e9294",
+  "why": "vtable 0x2e48d0 slot 2: the same speed save / restore through achr param 0x1201 as TskMtnMove::pause"
+ },
+ "001e93ec": {
+  "name": "TskMtnMove2::stepMove",
+  "tag": "ror-inferred",
+  "was": "FUN_001e93ec",
+  "why": "the constructor's default step (pfn 0x1e93ec): DogActor::getMotionMove of the next two steps turned by the actor's base rotY, DogActor::addTrans"
+ },
+ "001e9614": {
+  "name": "TskMtnMove2::stepMoveHit",
+  "tag": "ror-inferred",
+  "was": "FUN_001e9614",
+  "why": "the step for achrs off the secta lists (pfn 0x1e9614, same test as TskMtnMove): tests the target from the Bip01 Spine1 position with testHitAt / hasSectaAt, starts TskAvoidMove on a hit"
+ },
+ "001e9a34": {
+  "name": "TskMtnMove2::stepNone",
+  "tag": "ror-inferred",
+  "was": "TskMtnMove2::stepNone",
+  "why": "pfn 0x1e9a34 when the constructor gets no actor: returns 1 (hidden after stepMoveHit, created 2026-10-26)"
+ },
  "001e9a3c": {
   "name": "TskMoveTypeGen::TskMoveTypeGen",
   "tag": "ror-inferred",
@@ -9358,6 +9400,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001ed998",
   "why": "the constructor of class TskMoveSecta (rtti); 0x80 bytes, native 211 ops 40..51"
+ },
+ "001ef184": {
+  "name": "TskAvoidMove::TskAvoidMove",
+  "tag": "ror-inferred",
+  "was": "FUN_001ef184",
+  "why": "stores vtable 0x2e4b50 (TskAvoidMove), picks its step by the hit record and mode; TskMtnMove2::stepMoveHit starts it on the achr's task +0x3e8"
  },
  "001f0e90": {
   "name": "chrRotStart",
@@ -9425,11 +9473,41 @@
   "was": "FUN_001f4a24",
   "why": "stores vtable 0x2e4c10 (TskMsgMan per rtti.py), two MsgMan objects at +0x224, copies the text after #C, opens a MagScene window; GamMan::openMsg news 0x9c0 bytes for it"
  },
+ "001f4c74": {
+  "name": "TskMsgMan::~TskMsgMan",
+  "tag": "ror-inferred",
+  "was": "FUN_001f4c74",
+  "why": "vtable 0x2e4c10 slot 6: stores the vtable, calls term, destroys the two MsgMan at +0x224, operator_delete on bit 0"
+ },
+ "001f4d14": {
+  "name": "TskMsgMan::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001f4d14",
+  "why": "vtable 0x2e4c10 slot 5: MsgManSet::close, hides, refreshes and closes the scene window +0x214, mode 0"
+ },
+ "001f4d84": {
+  "name": "TskMsgMan::pause",
+  "tag": "ror-inferred",
+  "was": "FUN_001f4d84",
+  "why": "vtable 0x2e4c10 slot 2: on hides the window and turns S2dMes sprites 0..13 off, off shows them again"
+ },
+ "001f4f5c": {
+  "name": "TskMsgMan::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f4f5c",
+  "why": "vtable 0x2e4c10 slot 4: by mode +0x204 waits for time, the text end and CROSS (m_trig bit 14); MsgManSet::update each frame, the window's MsgMan released at the end"
+ },
  "001f5244": {
   "name": "TskAttach::TskAttach",
   "tag": "ror-inferred",
   "was": "FUN_001f5244",
   "why": "stores vtable 0x2e4bd0 (_vt$9TskAttach; rtti.py lists it as the class's ctor), +4 the oid, +8 GamMan::getActorNo(oid), +0xc a3, +0x10 *a2; native 012 case 0x3c news 0x40 bytes for it"
+ },
+ "001f5558": {
+  "name": "chrGetNodeWorldPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001f5558",
+  "why": "oid's actor's node by name (the inlined DogModel::getNodeIndexByName asserts, dogmodel.h 305) through DogActor vtable slot 18 getNodeWorldPos into out; 0 without actor, node, or with GamMan m_flags2 0x3000"
  },
  "001f59b4": {
   "name": "chrMtnMove",

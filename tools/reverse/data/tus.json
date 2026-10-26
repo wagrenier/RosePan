@@ -1119,7 +1119,7 @@
    "why": "SysTimer (ctor 0x203d94, dtor 0x203da8, init / start / stop / read / update / hold), sysInit/TermManagers, the host0 reboot 0x2041a0 and the static initializer pair 0x2041f8 / 0x20439c / 0x2043bc that constructs the global managers: the globals file before main.cpp (no source string; file name a guess)"
   },
   "task/tsk_chr.cpp": {
-   "notes": "Next in this TU: TskMsgMan 0x1f4a24 (reached right after the film, the message window task; EE 0x9c0, two MsgMan at +0x224), then TskMtnMove2 0x1e8fc4 with chrMtnMove2 (same shape as TskMtnMove: PMF at +0x80, steps 0x1e93ec / 0x1e9614), TskFrameFunc 0x1f184c (frontier x9, step table 0x2fe420), chrSetMotion, TskMovePointPath, chrRotStart. hidden.py lists more folded functions in the range (0x1e9a34, 0x1eec44, 0x1efaa8, 0x1efab0, 0x1f3d90, 0x1f4910, 0x1f59ac, 0x1f6570): mkfunc them when their class is written. The TskMtnMove constructor's p1d8 >= 0 branch wraps rotY into a vector it never uses (kept as a PORT note). The TskMovie screenshot sequence: frames ~5800-9800 of a 200 s New Game run show the film; one of two runs stalled black after the Atlus logo (the known boot movie race, open-items 10e), so a New Game check may need a retry. Boundary: 0x1f6c64.. (DisplayMessage, SeManager, VoiceManager, ScenePlay) is tsk_scene.cpp with unassigned@001f82e4.",
+   "notes": "Next in this TU: TskFrameFunc 0x1f184c (frontier x9, step table 0x2fe420, 0xe98 bytes), TskMovePointPath 0x1ec344, chrRotStart / chrRotTo with TskChrRot 0x1f0434, TskMoveTypeGen 0x1e9a3c / TskMoveTypeRound 0x1eb63c, TskAvoidMove 0x1ef184 (hand stub in lib/unassigned_stubs.cpp; steps 0x1ef498 / 0x1ef888 / 0x1ef9cc / 0x1efab0, helpers 0x1efab8 / 0x1efeb8 / 0x1f0288). TskMsgMan is the subtitle window of the opening film (frames ~2950 and ~3090 of a 200 s New Game run): to see it, msg/msgman.cpp (MsgMan 0x18330c..) and MsgManSet 0x18741c..0x18761c (unassigned@00184f2c) must be written; not on the path to the first room, so the priorities list keeps tsk_scene / dogmodel first. chrSetMotion reads the running motion task as a TskMtnMove (m_rotY at +0x6c) even if it is a TskMtnMove2 (+0x6c is m_step there): faithful to the ROM. TskMtnMove2::stepMoveHit adds the unturned move to the position before the hit test (ROM quirk, kept). hidden.py still lists 0x1eec44, 0x1efaa8, 0x1efab0, 0x1f3d90, 0x1f4910, 0x1f59ac, 0x1f6570: mkfunc them with their class.",
    "ranges": [
     [
      "001e7f28",
@@ -1131,6 +1131,11 @@
      "date": "2026-10-26 17:12",
      "status": "partial",
      "summary": "Pinned unassigned@001e7f28 as task/tsk_chr.cpp (0x1e7f28..0x1f6c64, the script tasks). Wrote TskMovie (ctor, exec state machine, term, dtor): the New Game opening film now plays on screen to its end. Wrote TskMtnMove (ctor, exec through its member-function pointer, pause, term, stepMove, stepMoveHit, stepNone), chrMtnMove, chrChangeMotion, chrKillMotionTask, chrMotionRefEnd, chrIsOidType2, gamClearFrameReq, and DogActor::getMotionFrame120 ahead. Moved the Tsk and chr declarations from lib/unassigned.h and game/gamman.h into task/tsk_chr.h."
+    },
+    {
+     "date": "2026-10-26 17:38",
+     "status": "partial",
+     "summary": "Wrote TskMsgMan (ctor, exec end rules by mode, pause, term, dtor): the film's narration subtitles now open their window (Once upon a time, ...), but nothing draws while MsgMan / MsgManSet are stubs. Wrote TskMtnMove2 (ctor, exec, pause, term, stepMove, stepMoveHit, stepNone) with chrMtnMove2, chrSetMotion and chrGetNodeWorldPos (0x1f5558); TskAvoidMove::TskAvoidMove is a hand stub. New Game run: the opening film still plays to its March 1930 card."
     }
    ],
    "status": "partial",

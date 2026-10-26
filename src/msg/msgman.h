@@ -43,6 +43,9 @@ struct MsgManSet
     void setMessage(int window, const char *text, int flag);             // ROR 0x001874f4
     /* 0 when no MsgMan shows window; non-zero while its text runs. */
     int  getState(int window);                                           // ROR 0x001875c0
+    /* The MsgMan showing window is reset (its four parts cleared, window
+     * -1, word 1 = 1). */
+    void release(int window);                                            // ROR 0x0018761c
 
     MsgMan m_msg[2];            // ROR 0x000, 0x3bc
 };
