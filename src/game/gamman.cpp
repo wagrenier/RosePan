@@ -221,7 +221,7 @@ void GamMan::loadSystemData()
         BedPfh pfh(req.m_buf);
         void *top = (void *)pfh.getTop();
         utlMemRealloc(top, pfh.getTotalSize());
-        m_sysData.set((const u_char *)pfh.getFile(0));
+        m_sysData.set((u_char *)pfh.getFile(0));
         m_sndMan.loadSePack("0000.se", pfh.getFile(1), 0);
         m_sndMan.loadSePack("6400.se", pfh.getFile(2), 0);
         m_sndMan.registSnd(0, pfh.getFile(3));
@@ -3184,10 +3184,10 @@ void GamMan::startAchrPlaceTask(float radius, ACHRstat *chr, int keep)
     placeAchr((int)chr->m_oid, place, 1);
     if ((chr->m_flags & 0x8000000) != 0)
         return;
-    if (chr->m_move[0] != 2 || g_taskMan.getTask(chr->m_placeTask) != NULL)
+    if (chr->m_colPrm[0] != 2 || g_taskMan.getTask(chr->m_placeTask) != NULL)
         return;
-    chr->m_move[1] = 4;
-    chr->m_move[4] = 0;
+    chr->m_colPrm[1] = 4;
+    chr->m_colPrm[4] = 0;
     struct
     {
         int   m_frames;

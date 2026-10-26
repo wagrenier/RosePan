@@ -254,6 +254,23 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      right after GamMan::setPcAnim / ACHRstat::setParam (the 10d crash); under gdbrun it does not
      crash and goes on to GamMan::initStage2 / startStage2 (stubs). Nothing past the title menu
      draws yet, so the loader is not visible.
+  10j. PARTIAL 2026-10-26: `game/gamstat.cpp` (pinned 0x1d84c8..0x1dd1e8, was unassigned@001d859c;
+     0x1dd1e8..0x1dd558 -- a GamMan member constructor, its deleting destructor, GamArea::init -- left
+     for game/gamtrg.cpp). Written: ObjStat (ctor, getPos / getRot / setPos / setRot, setSecta,
+     syncActorPos / findSecta / updatePos, base getParam / setParam, setHide, releaseActor, save / load
+     through an EE-layout ObjStatSave, clearSecta, work words, the ELF's accessors), ACHRstat (init,
+     initParamFuncs, getParam / setParam, killTasks, pauseTasks, setMotionSpeed), FCHRstat (init,
+     get / setParam, the position / rotation twins), gamWrdConvPos, GamSysData (set, getRec, getField,
+     the flag functions). The New Game run (pad 1800:START,2400:START,2700:CROSS, 140 s) now gets
+     through getField (0xf, the model ids; not checked by a trace) and runs init / setParam / setHide on the PC
+     (50000001), 62000003 and 51800005 -- then still dies with the 10d access violation. Entry traces
+     in every gamstat function showed the fault comes after the last ObjStat::setHide returns, outside
+     this file. All objects get scene actor 0 (MagSystem::loadModel / DogActor::load are stubs), so
+     they share one actor. Left in this TU: GamSysData::setField 0x1dc070 (stub), the helpers
+     0x1d84c8..0x1d87f4, 0x1d88fc, 0x1d8adc..0x1d8c50, 0x1d8fec, 0x1d9e9c, 0x1d9f40..0x1da1b4,
+     0x1dac8c, 0x1db19c, 0x1db8e8..0x1dbdf0, the hidden 0x1d96e0 (clears +0x110 / +0x114).
+     Kept ROM quirk: ACHRstat::setParam's base params fall through into param 0x32 (m_428 takes the
+     data's first u_short after ObjStat::setParam; no break in the ROM).
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures
