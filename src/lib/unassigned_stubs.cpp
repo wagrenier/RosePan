@@ -72,12 +72,6 @@ TskFrameFunc::TskFrameFunc(int kind, intptr_t arg, int frames)
     ROSEPAN_STUB("TskFrameFunc::TskFrameFunc", 0x001f184c);
 }
 
-// stub of ROR 0x001f438c (a constructor: stubgen leaves it to hand)
-TskMovie::TskMovie(const char *)
-{
-    ROSEPAN_STUB("TskMovie::TskMovie", 0x001f438c);
-}
-
 // stub of ROR 0x001e9a3c (a constructor: stubgen leaves it to hand)
 TskMoveTypeGen::TskMoveTypeGen(u_int, int, intptr_t, int, float, float)
 {
@@ -730,12 +724,6 @@ void MagLife130da4::setVolume(int volume)
     ROSEPAN_STUB("MagLife130da4::setVolume", 0x00130de0);
 }
 
-// stub of ROR 0x001f688c
-void gamClearFrameReq(void)
-{
-    ROSEPAN_STUB("gamClearFrameReq", 0x001f688c);
-}
-
 // stub of ROR 0x001f8fb8
 void gamSystemDataLoaded(void)
 {
@@ -770,14 +758,6 @@ void GamMan::placeAchr(int oid, void *out, int arg)
 void GamMan::relinkObj(u_int oid)
 {
     ROSEPAN_STUB("GamMan::relinkObj", 0x001d5da0);
-}
-
-// stub of ROR 0x001f5e48
-void * chrChangeMotion(u_int oid, int motion, int a2, int a3, float blend,
-                      float rotY)
-{
-    ROSEPAN_STUB("chrChangeMotion", 0x001f5e48);
-    return {};
 }
 
 // stub of ROR 0x00144334
@@ -1414,20 +1394,6 @@ int chrChangeMotionBySuffix(float blend, float rotY, u_int oid, const char *name
     return {};
 }
 
-// stub of ROR 0x001f61ec
-void chrKillMotionTask(u_int oid)
-{
-    ROSEPAN_STUB("chrKillMotionTask", 0x001f61ec);
-}
-
-// stub of ROR 0x001f59b4
-CmnITask * chrMtnMove(float speed, float rotY, u_int oid, int motion, int p1d8, u_int flags,
-                     const char *name)
-{
-    ROSEPAN_STUB("chrMtnMove", 0x001f59b4);
-    return {};
-}
-
 // stub of ROR 0x001f5bdc
 CmnITask * chrMtnMove2(float speed, u_int oid, int motion, int p1d8, u_int flags,
                       const char *name)
@@ -1554,13 +1520,6 @@ void GamMan::selectSectaList(int list)
     ROSEPAN_STUB("GamMan::selectSectaList", 0x001d7eb8);
 }
 
-// stub of ROR 0x001e8f88
-int chrMotionRefEnd(const ChrMotionRef *ref)
-{
-    ROSEPAN_STUB("chrMotionRefEnd", 0x001e8f88);
-    return {};
-}
-
 // stub of ROR 0x00144418
 void gamGetBwnPos(float *out)
 {
@@ -1577,5 +1536,12 @@ void gamGetBwnRot(float *out)
 int TskSnd::getVolume(int *volL, int *volR)
 {
     ROSEPAN_STUB("TskSnd::getVolume", 0x001f9658);
+    return {};
+}
+
+// stub of ROR 0x001d5a0c
+int GamMan::testHitAt(const float *pos, u_int oid, int a3, int a4, void *out)
+{
+    ROSEPAN_STUB("GamMan::testHitAt", 0x001d5a0c);
     return {};
 }

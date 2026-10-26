@@ -260,3 +260,14 @@ float DogActor::getRotY()
     ROSEPAN_STUB("DogActor::getRotY", 0x0010a650);
     return {};
 }
+
+// ──────────────────────────────────────────────────────────────────────
+// The motion frame in 120ths (written ahead with task/tsk_chr.cpp, whose
+// TskMtnMove compares it with the motion's length * 120).
+// ROR 0x0010da80
+
+float DogActor::getMotionFrame120()
+{
+    float f = m_motion.m_frame * 60.0f;
+    return f + f;
+}

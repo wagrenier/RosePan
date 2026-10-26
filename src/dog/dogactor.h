@@ -50,6 +50,9 @@ struct DogActor : DogModel
     void runMotionCmd();                                                 // ROR 0x0010d388
     /* The motion time in 60 Hz frames. */
     float getMotionFrame();                                              // ROR 0x0010da4c
+    /* m_motion.m_frame * 60 * 2 (TskMtnMove compares it with the motion's
+     * length * 120). */
+    float getMotionFrame120();                                           // ROR 0x0010da80
     /* The motion speed in frames per frame. */
     float getMotionStep();                                               // ROR 0x0010dad8
     void releaseMotion(int theId);                                       // ROR 0x00109b88

@@ -12,8 +12,13 @@ address in an int (hazards.md); fixed, plus a PORT guard in DogModel::getNodeInd
 while DogActor::load is a stub; GamMan::attachObj asked one). A New Game run (`settings.smoke_pad` is
 now 1800:START,2400:START,2700:CROSS; needs `--run 200`) now runs 200 s without a fault: the stage-2
 start, the map pack, lights, effects, then the opening's movie task and the picture book -- the screen
-is **black from frame ~2820** (nothing after New Game draws yet). Reached stubs in run order, queued
-in this order: **TskMovie::TskMovie 0x1f438c** (unassigned@001e7f28, the Tsk* classes: the opening
+is **black from frame ~2820** (nothing after New Game draws yet). DONE 2026-10-26 (task/tsk_chr.cpp,
+`partial`, was unassigned@001e7f28): TskMovie written -- **the New Game opening film now plays on
+screen to its end** (bus ceiling, Jennifer at the window, the dated card), then TskMsgMan::TskMsgMan
+0x1f4a24 (same TU), TskSnd::TskSnd 0x1f8fc0 (unassigned@001f82e4, the BGM fade back) and
+BedSubMode::push / pop are the reached stubs; one run of two still stalled black after the Atlus logo
+(the boot movie race, item 10e). Reached stubs in run order, queued
+in this order: ~~TskMovie::TskMovie 0x1f438c~~ (done; unassigned@001e7f28, the Tsk* classes: the opening
 film through S2dMovie::playMovie, likely the first picture), **scenePlayStart 0x1f83f4**
 (unassigned@001f82e4), **MnuPBook::setType 0x196e54 / MnuDiary::setType 0x198b04** (unassigned@00192ac0;
 MagLifeMenuPBook::init asserts when neither book takes the type), **DogModel::loadPack 0x1158ec /

@@ -1,6 +1,6 @@
 {
  "queue": [
-  "unassigned@001e7f28",
+  "task/tsk_chr.cpp",
   "unassigned@001f82e4",
   "unassigned@00192ac0",
   "dog/dogmodel.cpp",
@@ -1115,6 +1115,24 @@
    "status": "verify",
    "why": "SysTimer (ctor 0x203d94, dtor 0x203da8, init / start / stop / read / update / hold), sysInit/TermManagers, the host0 reboot 0x2041a0 and the static initializer pair 0x2041f8 / 0x20439c / 0x2043bc that constructs the global managers: the globals file before main.cpp (no source string; file name a guess)"
   },
+  "task/tsk_chr.cpp": {
+   "notes": "Next in this TU: TskMsgMan 0x1f4a24 (reached right after the film, the message window task; EE 0x9c0, two MsgMan at +0x224), then TskMtnMove2 0x1e8fc4 with chrMtnMove2 (same shape as TskMtnMove: PMF at +0x80, steps 0x1e93ec / 0x1e9614), TskFrameFunc 0x1f184c (frontier x9, step table 0x2fe420), chrSetMotion, TskMovePointPath, chrRotStart. hidden.py lists more folded functions in the range (0x1e9a34, 0x1eec44, 0x1efaa8, 0x1efab0, 0x1f3d90, 0x1f4910, 0x1f59ac, 0x1f6570): mkfunc them when their class is written. The TskMtnMove constructor's p1d8 >= 0 branch wraps rotY into a vector it never uses (kept as a PORT note). The TskMovie screenshot sequence: frames ~5800-9800 of a 200 s New Game run show the film; one of two runs stalled black after the Atlus logo (the known boot movie race, open-items 10e), so a New Game check may need a retry. Boundary: 0x1f6c64.. (DisplayMessage, SeManager, VoiceManager, ScenePlay) is tsk_scene.cpp with unassigned@001f82e4.",
+   "ranges": [
+    [
+     "001e7f28",
+     "001f6c64"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-26 17:12",
+     "status": "partial",
+     "summary": "Pinned unassigned@001e7f28 as task/tsk_chr.cpp (0x1e7f28..0x1f6c64, the script tasks). Wrote TskMovie (ctor, exec state machine, term, dtor): the New Game opening film now plays on screen to its end. Wrote TskMtnMove (ctor, exec through its member-function pointer, pause, term, stepMove, stepMoveHit, stepNone), chrMtnMove, chrChangeMotion, chrKillMotionTask, chrMotionRefEnd, chrIsOidType2, gamClearFrameReq, and DogActor::getMotionFrame120 ahead. Moved the Tsk and chr declarations from lib/unassigned.h and game/gamman.h into task/tsk_chr.h."
+    }
+   ],
+   "status": "partial",
+   "why": "Unanchored run between task/tsk_man.cpp and task/tsk_scene.cpp: the seq-driven character tasks (TskMtnMove*, TskMove*, TskRotAdj, TskChrRot, TskAttach) and their chr* starters, plus the generic script tasks (TskMovie, TskMsgMan, TskSeqEvent, TskSysFunc, TskFrameFunc). Ends at 0x1f6c64 where DisplayMessage / SeManager / VoiceManager / ScenePlay (tsk_scene.cpp's classes, used by 0x1f82e4..) begin; 0x1f6c14 is still called from TskChrRot code. Name descriptive (no source string)."
+  },
   "task/tsk_man.cpp": {
    "notes": "Pinned 0x1e7094..0x1e7f28 out of unassigned@001e6d54 (file name a guess, open-items). CmnITask slots: 1 get_task_type, 2 pause, 3 init, 4 exec(id, time, arg) nonzero ends, 5 term, 6 dtor. Task classes whose virtuals are not written run host defaults (kind 0, exec returns 1 so the task ends on its first step, as when the manager was a stub); writing a class's exec/get_task_type replaces that. Smoke runs: 15 s boot shows the Sony logo then the Atlus disclaimer, an 80 s run with 1800:START,2400:START reaches Press START and the title menu exactly as before. Nothing draws through the manager yet, hence verify. Next in the old range: the Tsk* classes 0x1e7f28..0x1f8034 (TskMtnMove/2, TskMove*, TskFrameFunc, TskMsgMan, TskMovie...), in New Game order; 0x1e6d54/0x1e6e00 are GamSndMan 3D volume helpers for game/gamsnd.cpp.",
    "ranges": [
@@ -1144,6 +1162,7 @@
   "unassigned@001bde58": {},
   "unassigned@001d859c": {},
   "unassigned@001e6d54": {},
+  "unassigned@001e7f28": {},
   "unassigned@001fd424": {},
   "unassigned@002053f4": {},
   "unassigned@0020eda4": {},

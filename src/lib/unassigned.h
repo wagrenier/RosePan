@@ -90,16 +90,8 @@ struct EmyManager : CmnITask
     EmySlot m_slot[8];          // ROR 0x148
 };
 
-/* What ACHRstat +0x3d0 points at: only its actor no is read. EE layout
- * (the rest unknown). */
-struct ChrMotionRef
-{
-    int _00[3];
-    int m_actor;                // ROR 0x0c: the DogActor no
-};
-static_assert(offsetof(ChrMotionRef, m_actor) == 0x0c, "ChrMotionRef m_actor");
-/* !DogActor::isModeSet of ref's actor (unassigned@001e6d54). */
-int chrMotionRefEnd(const ChrMotionRef *ref);                            // ROR 0x001e8f88
+/* ChrMotionRef, the Tsk* script tasks, the chr* helpers: task/tsk_chr.h. */
+#include "task/tsk_chr.h"
 
 /* The parameter block TskSnd's constructor copies (0x40 bytes on the EE).
  * A fade (GamSndMan::funcSnd / funcSE / funcStr): m_snd the sound, m_id
@@ -133,94 +125,11 @@ struct TskSnd : CmnITask
     int getVolume(int *volL, int *volR);                                 // ROR 0x001f9658
 };
 
-/* TskFrameFunc : CmnITask (vtable 0x2e4d50, EE 0x80 bytes): kind < 0x17
- * picks its step function (table 0x2fe420); arg is a value or a pointer
- * to the caller's words, frames its length. layout: host -- no members. */
-struct TskFrameFunc : CmnITask
-{
-    TskFrameFunc(int kind, intptr_t arg, int frames);                    // ROR 0x001f184c
-};
-
-/* TskMovie : CmnITask (vtable 0x2e4c50, EE 0x80 bytes): plays the movie
- * name (S2dMovie::playMovie) after stopping the sound; native 253's movie
- * task (GamMan::m_movieTaskId). layout: host. */
-struct TskMovie : CmnITask
-{
-    TskMovie(const char *name);                                          // ROR 0x001f438c
-
-    int  _04;
-    int  m_state;               // ROR 0x08: 100 from the constructor; native 253 case 4 waits while <= 100
-    int  _0c;
-    char m_name[0x40];          // ROR 0x10
-};
-
-/* The achr movement tasks (unassigned@001e6cac; class names from their
- * vtables): oid the achr, mode the way it moves, rate the step per frame
- * (1/60 by default). Natives 202 / 211 start them on the achr's
- * m_task[0]. layout: host -- no members. */
-struct TskMoveTypeGen : CmnITask           // EE 0xc0, vtable 0x2e4ad0
-{
-    TskMoveTypeGen(u_int oid, int mode, intptr_t arg, int kind, float frames, float rate); // ROR 0x001e9a3c
-};
-/* layout: host */
-struct TskMoveTypeRound : CmnITask         // EE 0x80
-{
-    TskMoveTypeRound(u_int oid, int mode, intptr_t arg, int kind, float a, float b, float rate); // ROR 0x001eb63c
-};
-/* layout: host */
-struct TskMovePointPath : CmnITask         // EE 0xc0
-{
-    TskMovePointPath(u_int oid, int mode, intptr_t path, int arg, int kind, float a, float rate); // ROR 0x001ec344
-};
-/* layout: host */
-struct TskMoveSectaFindPath : CmnITask     // EE 0x2c0
-{
-    TskMoveSectaFindPath(u_int oid, intptr_t arg, int a3, int kind, int shift, int t2, float a,
-                         float rate);                                    // ROR 0x001ec940
-};
-/* layout: host */
-struct TskMoveSecta : CmnITask             // EE 0x80
-{
-    TskMoveSecta(u_int oid, int mode, intptr_t arg, int a3, int kind, float a, float rate); // ROR 0x001ed998
-};
-
 /* TskCamera : CmnITask (EE 0xc0, unassigned@001f82e4): a scripted camera
  * move (native 016 case 50, on GamMan's m_camTaskId). layout: host. */
 struct TskCamera : CmnITask
 {
     TskCamera(intptr_t a, intptr_t b);                                   // ROR 0x001fbc0c
-};
-
-/* TskAttach : CmnITask (vtable 0x2e4bd0, EE 0x40 bytes): +4 the oid, +8
- * its actor, +0xc arg, +0x10 *value. layout: host -- no members. */
-struct TskAttach : CmnITask
-{
-    TskAttach(u_int oid, const int *value, int arg);                     // ROR 0x001f5244
-};
-
-/* TskSeqEvent : CmnITask (vtable 0x2e4c90, EE 0x80 bytes): kind 0 reads
- * {frames, radius} from param and the achr of oid; GamMan::
- * startAchrPlaceTask's task (ACHRstat::m_placeTask). layout: host. */
-struct TskSeqEvent : CmnITask
-{
-    TskSeqEvent(u_int oid, int kind, const void *param);                 // ROR 0x001f47f0
-
-    float m_radius;             // ROR 0x48: param word 1
-};
-
-/* TskMsgMan : CmnITask (vtable 0x2e4c10, EE 0x9c0 bytes): a message
- * window on text (two MsgMan at +0x224) with the eight window words param;
- * GamMan::openMsg's task (m_msgTaskId). layout: host -- no members. */
-struct TskMsgMan : CmnITask
-{
-    TskMsgMan(const char *text, int arg, const int *param, int a4, int mode, int time); // ROR 0x001f4a24
-};
-
-/* TskSysFunc : CmnITask (vtable 0x2e4cd0, EE 0x80 bytes): kinds 0..1 set
- * the defaults 100, 0x1e, 0xf, 0x1b and keep arg. layout: host. */
-struct TskSysFunc : CmnITask
-{
-    TskSysFunc(int kind, int a, intptr_t arg);                           // ROR 0x001f4184
 };
 
 /* Event scenes (unassigned@001f82e4): data/evt/%02d/scene/<name> from
@@ -240,17 +149,6 @@ u_int utlConvSndId(u_int id);                                            // ROR 
 void  utlNormalize3(float *v);                                           // ROR 0x00106db0
 /* The heading of (x, z) in -pi..pi, 0 for a zero vector (unassigned@00216ad0). */
 float utlAtan2(float x, float z);                                        // ROR 0x00217f10
-/* v.x += sinf(angle) * dist, v.z += cosf(angle) * dist (unassigned@001e6cac). */
-void  utlAddPolar(float angle, float dist, float *v);                    // ROR 0x001f6b28
-/* An achr's turn task (TskChrRot, ctor 0x1f0434) on ACHRstat::m_task[1]:
- * chrRotStart kills the running one and, for a non-zero angle, turns by
- * angle over frames; chrRotTo / chrRotToIn turn to the heading dir (the
- * delta wrapped into -pi..pi) at speed / over frames. chrRotFrames is
- * |angle / (speed * 0.05233)|. */
-void  chrRotStart(float angle, u_int oid, int frames);                   // ROR 0x001f0e90
-void  chrRotTo(float dir, float speed, u_int oid);                       // ROR 0x001f0f9c
-void  chrRotToIn(float dir, u_int oid, int frames);                      // ROR 0x001f10a4
-int   chrRotFrames(float angle, float speed);                            // ROR 0x001f6b8c
 extern EmyManager g_emyManager; /* bss 0x7b2140 */
 extern int g_emyManagerTaskId;  /* bss 0x7b45c0: addTask's id for EmyManager (read by 0x1c58c0) */
 

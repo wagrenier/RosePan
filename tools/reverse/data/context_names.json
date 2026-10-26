@@ -593,6 +593,12 @@
   "was": "FUN_0010da4c",
   "why": "the motion time in 60 Hz frames (+0x1ec * 60, or ~+0xf4 in mode 2)"
  },
+ "0010da80": {
+  "name": "DogActor::getMotionFrame120",
+  "tag": "ror-inferred",
+  "was": "FUN_0010da80",
+  "why": "m_motion.m_frame * 60 * 2 (getMotionFrame is * 60); TskMtnMove compares it with the length * 120"
+ },
  "0010dad8": {
   "name": "DogActor::getMotionStep",
   "tag": "ror-inferred",
@@ -8123,6 +8129,12 @@
   "was": "FUN_001d544c",
   "why": "resume calls it (pc oid, a 0x20-byte local, 1) unless flags2 0x1000; not read yet"
  },
+ "001d5a0c": {
+  "name": "GamMan::testHitAt",
+  "tag": "ror-inferred",
+  "was": "FUN_001d5a0c",
+  "why": "puts pos and the object's radius into GamMan +0x225a0.., runs the hit test 0x1d7c20; non-zero = something is there (TskMtnMove::stepMoveHit refuses the move)"
+ },
  "001d5bc8": {
   "name": "GamMan::queueObjUpdate",
   "tag": "ror-inferred",
@@ -9269,11 +9281,47 @@
   "was": "FUN_001e7f28",
   "why": "stores vtable 0x2e4910 (rtti: TskMtnMove), 0xc0 bytes: actor no +0xc, motion +0x10, frames +0x68, oid +8, speed +0x78; starts the motion on the actor (changeMotion for an fchr oid)"
  },
+ "001e8408": {
+  "name": "TskMtnMove::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001e8408",
+  "why": "TskMtnMove vtable 0x2e4910 slot 5 (empty)"
+ },
+ "001e8410": {
+  "name": "TskMtnMove::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001e8410",
+  "why": "TskMtnMove vtable slot 4: calls the member-function pointer at +0x80 the constructor picked"
+ },
+ "001e8478": {
+  "name": "TskMtnMove::pause",
+  "tag": "ror-inferred",
+  "was": "FUN_001e8478",
+  "why": "TskMtnMove vtable slot 2: freezes / restores the actor's motion speed (param 0x1201), not for the PC"
+ },
+ "001e85d0": {
+  "name": "TskMtnMove::stepMove",
+  "tag": "ror-inferred",
+  "was": "FUN_001e85d0",
+  "why": "step picked by the constructor for achrs on the secta lists: moves the actor by its motion's root move"
+ },
+ "001e89c0": {
+  "name": "TskMtnMove::stepMoveHit",
+  "tag": "ror-inferred",
+  "was": "FUN_001e89c0",
+  "why": "step picked for achrs with flag 0x40 (not 0x80) or 0x4000000: the root move with a hit test (0x1d5a0c) and a secta test"
+ },
  "001e8f88": {
   "name": "chrMotionRefEnd",
   "tag": "ror-inferred",
   "was": "FUN_001e8f88",
   "why": "returns !DogActor::isModeSet of actor no +0xc of its argument (ACHRstat +0x3d0 in isMotionTaskEnd)"
+ },
+ "001e8fbc": {
+  "name": "TskMtnMove::stepNone",
+  "tag": "ror-inferred",
+  "was": "FUN_001e8fbc",
+  "why": "step picked when there is no actor (-1): returns 1, the task ends"
  },
  "001e8fc4": {
   "name": "TskMtnMove2::TskMtnMove2",
@@ -9347,6 +9395,24 @@
   "was": "FUN_001f438c",
   "why": "the constructor of class TskMovie (rtti, vtable 0x2e4c50), 0x80 bytes: sound 0x1d, SndMan::stopAll(8), name copied to +0x10 (0x40 chars), message sprite fade out, +8 = 100, S2dMovie::playMovie(name); native 253 case 1"
  },
+ "001f448c": {
+  "name": "TskMovie::~TskMovie",
+  "tag": "ror-inferred",
+  "was": "FUN_001f448c",
+  "why": "TskMovie vtable slot 6: stores the vtable, calls term, deletes on flag 1"
+ },
+ "001f44e8": {
+  "name": "TskMovie::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001f44e8",
+  "why": "TskMovie vtable slot 5: clears seq bit 0x8000000, killMsgTask, closeMovie, 30 fps again"
+ },
+ "001f454c": {
+  "name": "TskMovie::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f454c",
+  "why": "TskMovie vtable 0x2e4c50 slot 4: the movie's state machine 100..0x6a (isMovieEnd, stopMovie, fades, closeMovie)"
+ },
  "001f47f0": {
   "name": "TskSeqEvent::TskSeqEvent",
   "tag": "ror-inferred",
@@ -9406,6 +9472,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f6578",
   "why": "(item id, pos, rot): looks up the item's chr no (param 0xf) and model (0xb) in the system data 0x7a34e0, creates the object through GamMan 0x1ca72c (type 5) or 0x1cc250, places it with pos / rot when given; returns its oid; equipItem's held item"
+ },
+ "001f6878": {
+  "name": "chrIsOidType2",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6878",
+  "why": "(oid >> 23 & 0x1f) == 2, the oid type test TskMtnMove inlines"
  },
  "001f688c": {
   "name": "gamClearFrameReq",
