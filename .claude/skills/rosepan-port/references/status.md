@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-26 15:37 at commit `34b72f4` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-26 15:57 at commit `95349b2` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -110,9 +110,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 159 TUs: todo 113, partial 10, verify 46, done 8
-- next: **unassigned@00143d3c** (frontier score 56)
-- pinned queue: unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
+- 159 TUs: todo 113, partial 10, verify 46, done 9
+- next: **unassigned@001e7f28** (pinned in the queue)
+- pinned queue: unassigned@001e7f28, unassigned@001f82e4, unassigned@00192ac0, dog/dogmodel.cpp, mag/magscenelight.cpp, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
@@ -162,6 +162,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-26 15:57 `setup/newgame_crash.cpp` done: New Game crash fixed: Sequence::addEntry kept a script address (a host pointer) in an int, so callEntry queued a thread at a cut pc and seqFindEntry faulted; Se
 - 2026-10-26 15:37 `wrd/wrdsrv.cpp` verify: WrdSrv room table (was unassigned@00164fc0 0x17e540..0x17f0d0): all 14 functions - ctor / dtor, load of data/wrd/WRD.BIN, setup building host WrdEntry records b
 - 2026-10-26 15:21 `game/gamsnd.cpp` verify: GamSndMan finished: the 3D sounds (put_se/str_3d_pos and _chr, del_*, update3d, update3dVolume 0x1e386c, GamSnd3d::setPos 0x1e2350, stopObjSnds), the 7-argument
 - 2026-10-26 15:04 `game/gamsnd.cpp` partial: GamSndMan: constructor and destructor, init, reset, update, master volumes (funcSnd, resetVolume), SE packs, the SE and stream tables, playSE and playStr with t
@@ -169,22 +170,21 @@ Recent sessions:
 - 2026-10-26 14:11 `game/gamstat.cpp` verify: game/gamstat.cpp slice 3: the last nine functions -- ObjStat::~ObjStat out of line, ObjStat::clearSectaCells (hidden 0x1d96e0, made a function), ACHRstat::isMot
 - 2026-10-26 14:02 `game/gamstat.cpp` partial: game/gamstat.cpp slice 2: the seven frontier stubs written (ObjStat::getPosSectaY, ACHRstat::isMotionEnd / isTurnDone / empty1d9f08, gamGetWrdString, gamSetWrdR
 - 2026-10-26 13:51 `system/system.cpp` verify: Defined system/system.cpp (0x203d94..0x2043dc, the tail of unassigned@001fd424: the globals file before main.cpp) and wrote SysTimer (ctor, dtor, reset, start, 
-- 2026-10-26 13:44 `game/gamman.cpp` verify: GamMan slice 9 (last): the ELF inline accessors 0x28eb68..0x28f7e4 written out of line (3D sound forwarders, track status / volume, list pointers, PC / dog oid,
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00143d3c` | todo | 0/22/602 | 129.5 | 56 | 2 |
-| `unassigned@001e7f28` | partial | 1/24/192 | 64.2 | 56 | 2 |
-| `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 51 | 4 |
-| `unassigned@001d3b44` | partial | 2/14/37 | 18.4 | 45 | 1 |
+| `unassigned@00143d3c` | todo | 0/22/602 | 129.5 | 76 | 6 |
+| `unassigned@001e7f28` | partial | 1/24/192 | 64.2 | 66 | 4 |
+| `unassigned@001dd5e8` | todo | 0/12/18 | 14.0 | 65 | 6 |
+| `dog/dogactor.cpp` | partial | 5/28/146 | 31.5 | 61 | 6 |
+| `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 56 | 5 |
+| `unassigned@001d3b44` | partial | 2/14/37 | 18.4 | 55 | 3 |
+| `unassigned@00164fc0` | todo | 0/14/381 | 101.3 | 51 | 6 |
+| `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 44 | 5 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
-| `dog/dogactor.cpp` | partial | 5/28/146 | 31.5 | 41 | 2 |
+| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 41 | 5 |
+| `dog/dogmodel.cpp` | todo | 0/12/67 | 10.0 | 37 | 3 |
 | `unassigned@00184f2c` | todo | 0/5/84 | 10.0 | 37 | 3 |
-| `unassigned@00164fc0` | todo | 0/14/381 | 101.3 | 36 | 3 |
-| `unassigned@001dd5e8` | todo | 0/12/18 | 14.0 | 35 | 0 |
-| `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 33 | 4 |
-| `unassigned@001f82e4` | todo | 0/7/52 | 16.5 | 32 | 2 |
-| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 31 | 3 |
 
 ## Frontier (called by reconstructed code, not written yet)
 

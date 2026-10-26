@@ -101,6 +101,10 @@ struct DogModel : DogEntityEx
     {
         ROR_ASSERT(m_i3r_root);
         ROR_ASSERT(p);
+        /* PORT: no node without a model (GamMan::attachObj asks actors
+         * whose model is not loaded while DogActor::load is a stub). */
+        if (m_i3r_root == NULL)
+            return -1;
         return i3rGetNodeIndexByName(m_i3r_root, p);
     }
 

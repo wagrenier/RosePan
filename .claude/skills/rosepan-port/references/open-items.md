@@ -6,6 +6,26 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**TOP PRIORITY (the user, 2026-10-26): get in game.** DONE first step (setup/newgame_crash.cpp,
+2026-10-26): the New Game access violation (items 10d..10l) was Sequence::addEntry keeping a script
+address in an int (hazards.md); fixed, plus a PORT guard in DogModel::getNodeIndexByName (no model
+while DogActor::load is a stub; GamMan::attachObj asked one). A New Game run (`settings.smoke_pad` is
+now 1800:START,2400:START,2700:CROSS; needs `--run 200`) now runs 200 s without a fault: the stage-2
+start, the map pack, lights, effects, then the opening's movie task and the picture book -- the screen
+is **black from frame ~2820** (nothing after New Game draws yet). Reached stubs in run order, queued
+in this order: **TskMovie::TskMovie 0x1f438c** (unassigned@001e7f28, the Tsk* classes: the opening
+film through S2dMovie::playMovie, likely the first picture), **scenePlayStart 0x1f83f4**
+(unassigned@001f82e4), **MnuPBook::setType 0x196e54 / MnuDiary::setType 0x198b04** (unassigned@00192ac0;
+MagLifeMenuPBook::init asserts when neither book takes the type), **DogModel::loadPack 0x1158ec /
+loadData 0x115790 / setupNodeFlags** (dog/dogmodel.cpp: no model loads, so no map or character can
+draw; DogActor::load 0x10cd5c / loadPackMotion in dog/dogactor.cpp go with it), MagScene::loadLight /
+setDefaultLight (mag/magscenelight.cpp), GamArea::addTrg / stopKind / clearKind (unassigned@001dd5e8),
+GamMan::relinkObj (unassigned@001d3b44). Also reached: MagScene::setFog 0x143d7c / loadTenkyuTex
+0x140030, EmyManager::resetWork, Obj176a3c::createEff (the effect manager), magBwnSeqCommand,
+chrMtnMove, DogActor::getRotY / resetShadow, MagLifePC / MagLifeBwn::reset, i3rCopyClipSphere /
+i3rReplaceStqMapEntity. The movie-start stall (item 10e/10f, rx/rxthread.cpp) was not seen in this
+session's three runs.
+
 **TOP PRIORITY (the user, 2026-10-25): the title menu working and on screen.** This supersedes the
 render-first list below (most of it is written, `verify`). How the ROM gets there (traced 2026-10-25):
 main -> mainInitGame -> `GamMan::loadSystemData` 0x1c1b48 / `GamMan::loadStage(99)` 0x1c204c (99 is the

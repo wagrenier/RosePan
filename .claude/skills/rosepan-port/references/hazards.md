@@ -569,7 +569,16 @@ public:
   minimal header for another TU, declare the class as a `struct` (no labels), or put the label on the
   line after a member, and keep each declaration on one line (2026-10-22, bed/bedmemory.h).
 
-- **A crash that gdbrun does not reproduce** (2026-10-26). Symptom: the plain smoke run exits with
+- **A crash that gdbrun does not reproduce** (2026-10-26). **Solved (setup/newgame_crash.cpp,
+  2026-10-26): a script address cut to 32 bits.** Native 110 case 11 registers an entry with a script
+  address (a1), and on the host script addresses are host pointers (the image lives in the game heap,
+  0x1xxxxxxxxxx); SeqEntry::m_value was an int, so callEntry later queued a thread at the cut address
+  and seqFindEntry read 0x554905c0 (`ROSEPAN_CRASH_LOG=1` + addr2line found it in one run). Rule: every
+  value a script passes that can be an address (a pc, an entry, a pointer into the image) stays
+  intptr_t from the VM register to where it is used; grep seqcall.cpp for `(int)a` casts when a
+  native stores one. Where a1..a3 are used as script addresses check the native's ROM (`lw` vs `ld`
+  does not tell: the EE keeps 32-bit pointers). The rest of this entry is the earlier hunt.
+  Symptom: the plain smoke run exits with
   0xC0000005 right after a New Game press, every time; `gdbrun.py` with the same pad runs on without a
   fault. Cause: unknown yet (timing, or a fault gdb passes as first-chance in a DLL). Fix so far: bisect
   by disabling the suspect (a temporary early return) in plain runs -- native 151 was cleared that way.

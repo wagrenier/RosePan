@@ -166,9 +166,10 @@ struct SeqThread
  * clearStageVars free the image-1 ones). layout: host. */
 struct SeqEntry
 {
-    u_int m_id;                 // ROR 0x0: image << 30 | ...
-    int   m_value;              // ROR 0x4: addEntry's value
-    int   _8[2];                // ROR 0x8: stack garbage in the ROM
+    u_int    m_id;              // ROR 0x0: image << 30 | ...
+    intptr_t m_value;           // ROR 0x4: addEntry's value, a script address (a host pointer: an
+                                //          int cut it and callEntry ran a wild pc after New Game)
+    int      _8[2];             // ROR 0x8: stack garbage in the ROM
 };
 
 /* The record queueTrigger reads (only the three words it uses; what it
@@ -246,7 +247,7 @@ struct Sequence
     void queueTriggerThread(u_int area, u_int id, intptr_t entry, int arg,
                             u_int flags);                                // ROR 0x00212598
     void freeStageEntries();                                             // ROR 0x002127f4
-    void addEntry(u_int id, int value);                                  // ROR 0x00212920
+    void addEntry(u_int id, intptr_t value);                             // ROR 0x00212920
     /* addEntry's id: queueThread(id, its value, arg, 2, callSave, "none"). */
     void callEntry(u_int id, int arg, int callSave);                     // ROR 0x002129b8
     /* The same run at once (execImmediate) with the caller's registers and
