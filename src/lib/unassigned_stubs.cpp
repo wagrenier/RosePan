@@ -5,6 +5,8 @@
 #include "game/gamsnd.h"
 #include "rx/rxsnd.h"
 #include "mnu/mnuSelectLanguage.h"
+#include "mcd/mcdman.h"
+#include "msg/msgman.h"
 
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
@@ -1183,38 +1185,6 @@ void MnuItem::term()
     ROSEPAN_STUB("MnuItem::term", 0x001aebc8);
 }
 
-// stub of ROR 0x001a1428
-void MnuMcd::draw(I3dLayer *layer)
-{
-    ROSEPAN_STUB("MnuMcd::draw", 0x001a1428);
-}
-
-// stub of ROR 0x001a134c
-void MnuMcd::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("MnuMcd::init", 0x001a134c);
-}
-
-// stub of ROR 0x001a140c
-int MnuMcd::isInit()
-{
-    ROSEPAN_STUB("MnuMcd::isInit", 0x001a140c);
-    return {};
-}
-
-// stub of ROR 0x001a1414
-int MnuMcd::processPad(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuMcd::processPad", 0x001a1414);
-    return {};
-}
-
-// stub of ROR 0x001a13f0
-void MnuMcd::term()
-{
-    ROSEPAN_STUB("MnuMcd::term", 0x001a13f0);
-}
-
 // stub of ROR 0x001ae040
 void MnuMovie::draw(I3dLayer *layer)
 {
@@ -1383,13 +1353,6 @@ void MnuStock::term()
 }
 
 
-// stub of ROR 0x001a1658
-int MnuMcd::startCheck(int arg)
-{
-    ROSEPAN_STUB("MnuMcd::startCheck", 0x001a1658);
-    return {};
-}
-
 // stub of ROR 0x001a074c
 int MnuTextList::close()
 {
@@ -1433,5 +1396,76 @@ void MnuTextList::setItems(const char *items, u_int mask)
 int RxMpeg::checkSkip()
 {
     ROSEPAN_STUB("RxMpeg::checkSkip", 0x00181780);
+    return {};
+}
+
+// stub of ROR 0x0018b9b8
+int McdMan::findSave(const char *name)
+{
+    ROSEPAN_STUB("McdMan::findSave", 0x0018b9b8);
+    return {};
+}
+
+// stub of ROR 0x0018b874
+int McdMan::hasIconSys()
+{
+    ROSEPAN_STUB("McdMan::hasIconSys", 0x0018b874);
+    return {};
+}
+
+// stub of ROR 0x0018bb28
+int McdMan::hasSpace()
+{
+    ROSEPAN_STUB("McdMan::hasSpace", 0x0018bb28);
+    return {};
+}
+
+// stub of ROR 0x00187788
+void McdMan::init()
+{
+    ROSEPAN_STUB("McdMan::init", 0x00187788);
+}
+
+// stub of ROR 0x001879c4
+void McdMan::term()
+{
+    ROSEPAN_STUB("McdMan::term", 0x001879c4);
+}
+
+// stub of ROR 0x00187464
+void MsgManSet::close()
+{
+    ROSEPAN_STUB("MsgManSet::close", 0x00187464);
+}
+
+// stub of ROR 0x001875c0
+int MsgManSet::getState(int window)
+{
+    ROSEPAN_STUB("MsgManSet::getState", 0x001875c0);
+    return {};
+}
+
+// stub of ROR 0x0018741c
+void MsgManSet::open()
+{
+    ROSEPAN_STUB("MsgManSet::open", 0x0018741c);
+}
+
+// stub of ROR 0x001874f4
+void MsgManSet::setMessage(int window, const char *text, int flag)
+{
+    ROSEPAN_STUB("MsgManSet::setMessage", 0x001874f4);
+}
+
+// stub of ROR 0x001874ac
+void MsgManSet::update()
+{
+    ROSEPAN_STUB("MsgManSet::update", 0x001874ac);
+}
+
+// stub of ROR 0x001832e8
+const char * msgGetSysText(int no)
+{
+    ROSEPAN_STUB("msgGetSysText", 0x001832e8);
     return {};
 }

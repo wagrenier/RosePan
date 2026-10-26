@@ -3329,6 +3329,144 @@
   "was": "FUN_00182118",
   "why": "snd/rxmpeg.cpp; stores its argument into data 0x298fd0; MagSystem::vSyncCallback passes the V-blank count every V-blank"
  },
+ "001832e8": {
+  "name": "msgGetSysText",
+  "tag": "ror-inferred",
+  "was": "FUN_001832e8",
+  "why": "(no): the system text pointer table data 0x298fe8, 0x1d4 entries, NULL past the end; MnuMcd::updateMessage's texts 0x1d..0x39"
+ },
+ "0018330c": {
+  "name": "MsgMan::MsgMan",
+  "tag": "ror-inferred",
+  "was": "FUN_0018330c",
+  "why": "constructor of the 0x3bc-byte message object (MnuMcd +0xb80 x2); class named after msg/msgman.cpp (0x183db0 asserts m_strBuf there)"
+ },
+ "00183b24": {
+  "name": "MsgMan::~MsgMan",
+  "tag": "ror-inferred",
+  "was": "FUN_00183b24",
+  "why": "the MsgMan destructor (flag 2 from MnuMcd's array destructor loop, stride 0x3bc)"
+ },
+ "00183bb8": {
+  "name": "MsgMan::open",
+  "tag": "ror-inferred",
+  "was": "FUN_00183bb8",
+  "why": "first-use reset when +8 is not 1: defaults (0x14, 0x9c, the system pointer 0x296190), +8 1; -1 when open"
+ },
+ "00183c4c": {
+  "name": "MsgMan::close",
+  "tag": "ror-inferred",
+  "was": "FUN_00183c4c",
+  "why": "when open: window -1, four sub resets, stops its stream (SndMan::stopStream), +8 0"
+ },
+ "00183db0": {
+  "name": "MsgMan::setMessage",
+  "tag": "ror-inferred",
+  "was": "FUN_00183db0",
+  "why": "copies a text into m_strBuf (msg/msgman.cpp assert) and lays it out in the scene window"
+ },
+ "0018741c": {
+  "name": "MsgManSet::open",
+  "tag": "ror-inferred",
+  "was": "FUN_0018741c",
+  "why": "MsgMan::open on both of its two 0x3bc objects"
+ },
+ "00187464": {
+  "name": "MsgManSet::close",
+  "tag": "ror-inferred",
+  "was": "FUN_00187464",
+  "why": "MsgMan::close on both objects"
+ },
+ "001874ac": {
+  "name": "MsgManSet::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001874ac",
+  "why": "0x184008 on both objects each frame while a text is shown (MnuMcd::updateMessage)"
+ },
+ "001874f4": {
+  "name": "MsgManSet::setMessage",
+  "tag": "ror-inferred",
+  "was": "FUN_001874f4",
+  "why": "(window, text, flag): MsgMan::setMessage on the object bound to that window"
+ },
+ "001875c0": {
+  "name": "MsgManSet::getState",
+  "tag": "ror-inferred",
+  "was": "FUN_001875c0",
+  "why": "(window): 0 when no object has that window; else 2 | (+4 == 0), or (+4 == 0) when +0x20 is 1: non-zero while a text is being shown"
+ },
+ "00187724": {
+  "name": "McdMan::McdMan",
+  "tag": "ror-inferred",
+  "was": "FUN_00187724",
+  "why": "MnuMcd's constructor calls it on +0xc0; tail jump to 0x187788; class named after mcd/mcdman.cpp (0x187a28's source path)"
+ },
+ "00187738": {
+  "name": "McdMan::~McdMan",
+  "tag": "ror-inferred",
+  "was": "FUN_00187738",
+  "why": "MnuMcd's destructor on +0xc0 with flag 2: term, operator_delete when flag & 1"
+ },
+ "00187788": {
+  "name": "McdMan::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00187788",
+  "why": "the constructor's body and MnuMcd::exec state 0: resets the manager (ERR_NoErr .. names)"
+ },
+ "001879c4": {
+  "name": "McdMan::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001879c4",
+  "why": "calls releaseData; MnuMcd::close"
+ },
+ "00187b10": {
+  "name": "McdMan::loadData",
+  "tag": "ror-inferred",
+  "was": "FUN_00187b10",
+  "why": "MnuMcd::exec state 1 (a1 0): reads a pfh through FileReader (mcd/mcdman.cpp) and takes file a1 out of it; likely the icon data"
+ },
+ "00187c30": {
+  "name": "McdMan::releaseData",
+  "tag": "ror-inferred",
+  "was": "FUN_00187c30",
+  "why": "frees what loadData read (0x1879e0 utlMemFree)"
+ },
+ "00187c4c": {
+  "name": "McdMan::update",
+  "tag": "ror-inferred",
+  "was": "FUN_00187c4c",
+  "why": "per frame: dispatches the current command (+0x5c) to its handler (0x187e44 getInfo with sceMcGetInfo / sceMcSync ...)"
+ },
+ "00187e00": {
+  "name": "McdMan::getStatus",
+  "tag": "ror-inferred",
+  "was": "FUN_00187e00",
+  "why": "returns +0x64: 1 busy, 2 done (MnuMcd reads the result code +0x58 then)"
+ },
+ "00187e08": {
+  "name": "McdMan::request",
+  "tag": "ror-inferred",
+  "was": "FUN_00187e08",
+  "why": "(cmd): when idle (+0x5c 0) takes the command word cmd from its table, clears +0x68, status 1, returns 1; 6 when busy"
+ },
+ "0018b874": {
+  "name": "McdMan::hasIconSys",
+  "tag": "ror-inferred",
+  "was": "FUN_0018b874",
+  "why": "1 when a directory entry is named icon.sys and is 0x3c4 bytes"
+ },
+ "0018b9b8": {
+  "name": "McdMan::findSave",
+  "tag": "ror-inferred",
+  "was": "FUN_0018b9b8",
+  "why": "(name): finds the entry matching name (0x18b918) and returns whether it is not the ________ placeholder"
+ },
+ "0018bb28": {
+  "name": "McdMan::hasSpace",
+  "tag": "ror-inferred",
+  "was": "FUN_0018bb28",
+  "why": "sums the entries' sizes and compares with the free space +0x84 (0xed / 0xec): enough room for the save"
+ },
  "0018bb8c": {
   "name": "SprMan::SprMan",
   "tag": "ror-inferred",
@@ -4559,11 +4697,197 @@
   "was": "FUN_001a1428",
   "why": "the menu object at +0x40 of MagLifeMenuMcd: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
  },
+ "001a1430": {
+  "name": "MnuMcd::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1430",
+  "why": "MnuMcd::init's first call: m_open 1, state 0, next 4, modes 0; -1 when already open (the MnuTextList::open pattern)"
+ },
+ "001a1468": {
+  "name": "MnuMcd::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1468",
+  "why": "MnuMcd::term and the destructor: closes both scene windows, McdMan releaseData / term, MsgManSet close, m_open and m_init 0; -1 when not open"
+ },
+ "001a1514": {
+  "name": "MnuMcd::makeChecksum",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1514",
+  "why": "adds every byte of 0x2d1 rows x 16 into the row sums at +0x2d20 and the column sums at +0x2d10 of the save image"
+ },
+ "001a1574": {
+  "name": "MnuMcd::testChecksum",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1574",
+  "why": "recomputes makeChecksum's row and column sums and compares; 0 for an all-zero image; the load check (mode 6) calls it on the read buffer"
+ },
+ "001a1650": {
+  "name": "MnuMcd::setTextMode",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1650",
+  "why": "stores +0x13b8, which picks the message variant (0 / 1 / 2) in updateMessage and the yes / no prompts of modes 2 / 3"
+ },
  "001a1658": {
   "name": "MnuMcd::startCheck",
   "tag": "ror-inferred",
   "was": "FUN_001a1658",
   "why": "when the card state +0x24 is 4 sets +0x30 = arg, +0x1390 = 0, +0x28 = 2 and returns 1; MnuTitle polls it after MnuMcd::init until the check can start"
+ },
+ "001a1684": {
+  "name": "MnuMcd::getSlotState",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1684",
+  "why": "returns the per-slot card state word +0x78[slot] (8 for slot >= 2); execCmd writes it from McdMan's results"
+ },
+ "001a16b4": {
+  "name": "MnuMcd::setSlotState",
+  "tag": "ror-inferred",
+  "was": "FUN_001a16b4",
+  "why": "writes +0x78[slot] when slot < 2, returns slot < 2"
+ },
+ "001a1714": {
+  "name": "MnuMcd::setSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1714",
+  "why": "stores the current card slot +0x74 that requestCmd / isCmdDone / execCmd use"
+ },
+ "001a171c": {
+  "name": "MnuMcd::requestCmd",
+  "tag": "ror-inferred",
+  "was": "FUN_001a171c",
+  "why": "(slot, cmd): when no command is pending (+0x90 0) sets the slot, clears its state and queues cmd for execCmd; returns 1 when queued"
+ },
+ "001a177c": {
+  "name": "MnuMcd::setMessage",
+  "tag": "ror-inferred",
+  "was": "FUN_001a177c",
+  "why": "sets the message number +0x13b0 (updateMessage maps it to a system text) and flags 0x14 to redraw; clears flag 0x10 when unchanged"
+ },
+ "001a17b0": {
+  "name": "MnuMcd::setChoice",
+  "tag": "ror-inferred",
+  "was": "FUN_001a17b0",
+  "why": "sets the second window's text number +0x13b4 (yes / no cursor texts 0x30..0x39) and flag 0x20"
+ },
+ "001a17dc": {
+  "name": "MnuMcd::isCmdDone",
+  "tag": "ror-inferred",
+  "was": "FUN_001a17dc",
+  "why": "getSlotState(current slot) != 0: execCmd has written a result"
+ },
+ "001a17fc": {
+  "name": "MnuMcd::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001a17fc",
+  "why": "MnuMcd::processPad's body: the menu's state machine (open windows, load McdMan data, idle at 4, run check mode +0x2c, close); returns 1 when a check finished"
+ },
+ "001a1b2c": {
+  "name": "MnuMcd::resetCursors",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1b2c",
+  "why": "the constructor's call: clears the seven per-mode answer words +0x08..+0x20"
+ },
+ "001a1b54": {
+  "name": "MnuMcd::updateWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1b54",
+  "why": "every running frame of exec: execCmd, McdMan::update, updateMessage"
+ },
+ "001a1b8c": {
+  "name": "MnuMcd::setSaveFile",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1b8c",
+  "why": "(path, dir, size, buf): copies the file path to +0x1310 and the directory to +0x1350, size +0x1308, buffer +0x130c; the save mode (5) hands them to McdMan"
+ },
+ "001a1c08": {
+  "name": "MnuMcd::setLoadFile",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1c08",
+  "why": "(path, size, buf): setSaveFile without a directory; the load mode (6) reads path into buf"
+ },
+ "001a1c64": {
+  "name": "MnuMcd::setDir",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1c64",
+  "why": "copies the directory string to +0x1350 (NULL clears it)"
+ },
+ "001a1c8c": {
+  "name": "MnuMcd::getFileNum",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1c8c",
+  "why": "McdMan +0x90, the number of directory entries the last getDir returned"
+ },
+ "001a1c94": {
+  "name": "MnuMcd::getFileName",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1c94",
+  "why": "folded into getFileNum's body (hidden.py): entry i's EntryName (McdMan +0x1e0 + i*0x40) or NULL"
+ },
+ "001a1cbc": {
+  "name": "MnuMcd::getFileSize",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1cbc",
+  "why": "folded after getFileName: entry i's FileSizeByte (McdMan +0x1d0 + i*0x40) or 0"
+ },
+ "001a1ce4": {
+  "name": "MnuMcd::execCmd",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1ce4",
+  "why": "runs the queued command (+0x90 -> +0x8c) through McdMan::request / getStatus (getInfo 0, getDir 0x12 on /BASLUS-21448/*, 0x11, 0x13, 0x14, 8) and turns McdMan's result into the slot state 1..8"
+ },
+ "001a239c": {
+  "name": "MnuMcd::checkBoot",
+  "tag": "ror-inferred",
+  "was": "FUN_001a239c",
+  "why": "check mode 0 (MnuTitle::execLogo's startCheck(0)): getInfo on both slots, getDir, space test; the no card / no space prompts with a continue choice"
+ },
+ "001a2b14": {
+  "name": "MnuMcd::checkBootDebug",
+  "tag": "ror-inferred",
+  "was": "FUN_001a2b14",
+  "why": "check mode 1: the same boot check with its Japanese texts drawn straight into the window (no system messages)"
+ },
+ "001a30cc": {
+  "name": "MnuMcd::checkSave",
+  "tag": "ror-inferred",
+  "was": "FUN_001a30cc",
+  "why": "check mode 2: getInfo + getDir + McdMan::hasSpace on slot 0; m_result 1 when a save can go there"
+ },
+ "001a3568": {
+  "name": "MnuMcd::hasSaveData",
+  "tag": "ror-inferred",
+  "was": "FUN_001a3568",
+  "why": "scans the directory entries for a dtNN... name whose five two-digit fields parse; check mode 3 needs one"
+ },
+ "001a36c4": {
+  "name": "MnuMcd::checkLoad",
+  "tag": "ror-inferred",
+  "was": "FUN_001a36c4",
+  "why": "check mode 3: getInfo + getDir and hasSaveData on slot 0; m_result 1 when there is something to load"
+ },
+ "001a3b80": {
+  "name": "MnuMcd::checkInfo",
+  "tag": "ror-inferred",
+  "was": "FUN_001a3b80",
+  "why": "check mode 4: one getInfo on slot 0, m_result 1"
+ },
+ "001a3c4c": {
+  "name": "MnuMcd::execSave",
+  "tag": "ror-inferred",
+  "was": "FUN_001a3c4c",
+  "why": "check mode 5: format prompt (cmd 0xc), mkdir (6), overwrite prompt, write (8) of setSaveFile's buffer"
+ },
+ "001a44fc": {
+  "name": "MnuMcd::execLoad",
+  "tag": "ror-inferred",
+  "was": "FUN_001a44fc",
+  "why": "check mode 6: read (cmd 10) setLoadFile's file into its buffer, testChecksum"
+ },
+ "001a47f0": {
+  "name": "MnuMcd::updateMessage",
+  "tag": "ror-inferred",
+  "was": "FUN_001a47f0",
+  "why": "shows / hides the two windows (flags 1 / 2) and on flags 0x10 / 0x20 puts the system text of the message / choice number into them through MsgManSet"
  },
  "001a59b8": {
   "name": "MnuSvld::MnuSvld",

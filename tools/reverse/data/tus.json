@@ -1,6 +1,6 @@
 {
  "queue": [
-  "unassigned@001a0950",
+  "mcd/mcdman.cpp",
   "unassigned@001a6830",
   "sequence/seqcall.cpp",
   "unassigned@0020ff34",
@@ -491,6 +491,33 @@
    "status": "verify",
    "why": "main 0x2045a8 has no source string; the static-init pair 0x20439c/0x2043bc (calling 0x2041f8) ends the previous file, so main's file starts at its argument parser 0x2043dc; it holds main, the main loop 0x2046d4 / 0x204864, GS and memory-card init / exit, and the debug exception handler 0x204a00 with its install / remove pair. 0x204d38..0x2050e8 work on the now-loading object's fields (+0x230, +0x290, +0x294) and are called only from system/sysnowloading.cpp: left to that file"
   },
+  "mnu/mnumcd.cpp": {
+   "notes": "Status verify: code complete, nothing on screen yet. The boot (MnuTitle::execLogo, check mode 0) now runs MnuMcd::exec, opens its two windows and waits at checkBoot step 2 because McdMan::request 0x187e08 is a stub returning 0, so execCmd never gets a command through; screenshot still black (progress/ shot). Next: mcd/mcdman.cpp, queued first. Its extent is not pinned: McdMan is 0x187724..about 0x18bb88 (file string mcd/mcdman.cpp at 0x187a28) but ror_functions puts 0x187724..0x187c30 in unassigned@00184f2c, so define it first. Write request / getStatus / update and the getInfo (cmd 0) and getDir (0x12) handlers over src/sdk/libmc.cpp; result codes MnuMcd expects are in architecture.md (The memory card check). Then MsgMan / MsgManSet (msg/msgman.cpp 0x18330c.., 0x18741c..0x18761c) or the check shows empty windows. Decisions: MnuMcd now has a real constructor (m_open 0, resetCursors) and destructor (close), running before main inside the global scene; McdMan / MsgMan have none (zeroed). McdDirEntry copies sceMcTblGetDir without its alignas(64), which would spread into MagScene. Hidden functions found and created: MnuMcd::getFileName 0x1a1c94, getFileSize 0x1a1cbc (folded into getFileNum). Names invented (ror-inferred): all MnuMcd helpers, McdMan / MsgMan / MsgManSet and their methods, msgGetSysText. Slot state meanings in mnumcd.h are read from use, unverified. m_both (+0x88) is only cleared here: find who sets it in the save screen code (unassigned@001a6830).",
+   "ranges": [
+    [
+     "001a1244",
+     "001a4bd8"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-25 20:41",
+     "status": "verify",
+     "summary": "MnuMcd, the memory card check, all 39 functions: exec state machine, the seven check modes (boot, boot debug, save check, load check, info, save, load), execCmd over McdMan, updateMessage, checksums. Pinned mnu/mnumcd.cpp 0x1a1244..0x1a4bd8 and mnu/mnuselect.cpp 0x1a066c..0x1a1244 (MnuTextList, from its allocDebug source path). New headers mcd/mcdman.h and msg/msgman.h declare McdMan, MsgMan, MsgManSet, msgGetSysText for their stubs."
+    }
+   ],
+   "status": "verify",
+   "why": "MnuMcd: ctor 0x1a1244 / dtor 0x1a12a8 .. the check dialogs and 0x1a47f0; every function uses MnuMcd's members and the memory card manager, the strings are the memory card messages; 0x1a4bd8.. is another class (no callers, vtable-only, next to mnu/mnudlg.cpp)"
+  },
+  "mnu/mnuselect.cpp": {
+   "ranges": [
+    [
+     "001a066c",
+     "001a1244"
+    ]
+   ],
+   "why": "MnuTextList (ctor 0x1a066c .. list draw 0x1a0be4); its allocator 0x1a08d4 passes the source path mnu/mnuselect.cpp to BedMemory::allocDebug"
+  },
   "mnu/mnutitle.cpp": {
    "notes": "Status verify: the code is complete but the plain boot stays black because execLogo waits at step 1 on MnuMcd::startCheck (a stub returning 0; MnuMcd init / processPad / term are stubs too, unassigned@001a0950, queued first). Proof it draws: a temporary run with the logo flag mnuTitleLogoDone (data 0x2a8400) forced to 1 skipped to the main menu and showed titlebg2 with New Game / Load Game / Option at the right places from the game's textures (progress/20261025-2016_mnu_mnutitle.cpp_menu-testflag.png; reference work/ref/MNUTITLE). Wrong in that shot, not from this TU: the whole ti_06 text sheet drawn 1:1 at the top left by no MnuTitle sprite (all 15 dumped: only 7 and 9..11 were on). Likely a primitive whose TEX0 is written directly (frame-buffer texture: SprMan::drawFrameCopy, SPR_TEX_FRAME or a scene effect) replayed by rosepan_i3d with the last bound texture. Mark this TU done when a boot screenshot shows the logos or the menu matching the reference. Next on the road after MnuMcd: RxMpeg (isEnd / getStatus / checkSkip must report the movie end or execLogo waits at steps 9..0x13), then a smoke_pad start press (BedPad m_7a bit 3) and cross (bit 14). Decisions: MnuTitle now has a real constructor (runs before main inside the global scene: SprMan's constructor and initCursors; MnuMcd / MnuSvld / MnuOpt / MnuTextList have none, their memory starts zeroed). Names invented: MnuTextList (0x1a066c..0x1a0bb8), the exec* sub-menu names, MnuMcd::startCheck, RxMpeg::checkSkip, GamMan::resetPcStat, GamSndMan::resetVolume. Unreached in retail: sub menus 2, 5, 6. The rest of unassigned@001a6830 (MnuOpt 0x1ab474.., MnuBoard2D, MnuMovie, MnuNow, MnuItem, and the save-screen code 0x1a6830..0x1a90ec that belongs to mnu/mnusvld.cpp) is still unassigned.",
    "ranges": [
@@ -810,6 +837,7 @@
   "unassigned@0011262c": {},
   "unassigned@00164fc0": {},
   "unassigned@00190a78": {},
+  "unassigned@001a0950": {},
   "unassigned@001a6830": {},
   "unassigned@001bde58": {},
   "unassigned@002053f4": {},

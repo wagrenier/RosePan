@@ -655,22 +655,8 @@ struct MnuMovie
 };
 static_assert(offsetof(MnuMovie, m_scene) == 0x968, "m_scene");
 
-/* The memory card menu (also MnuTitle's first member). EE 0x1400
- * (MagLifeMenuMcd +0x40..+0x1440; MnuTitle's next member is at +0x1400). */
-struct MnuMcd
-{
-    void init(DogTexInfo *tex);                                          // ROR 0x001a134c
-    void term();                                                         // ROR 0x001a13f0
-    int  isInit();                                                       // ROR 0x001a140c
-    int  processPad(BedPad *pad);                                        // ROR 0x001a1414
-    void draw(I3dLayer *layer);                                          // ROR 0x001a1428
-    /* When the card state (+0x24) is 4: starts the check with arg and
-     * returns 1, else 0 (MnuTitle polls it after init). */
-    int  startCheck(int arg);                                            // ROR 0x001a1658
-
-    u_char    _00[0x1400];
-};
-static_assert(sizeof(MnuMcd) == 0x1400, "EE 0x1400");
+/* The memory card menu MnuMcd: mnu/mnumcd.h. */
+#include "mnu/mnumcd.h"
 
 /* The title screen MnuTitle: mnu/mnutitle.h. */
 
