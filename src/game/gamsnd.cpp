@@ -244,3 +244,23 @@ void GamSndMan::stopObjSnds()
 {
     ROSEPAN_STUB("GamSndMan::stopObjSnds", 0x001e2178);
 }
+
+// stub of ROR 0x001e4a0c
+int GamSndMan::getSeID(const char *name)
+{
+    ROSEPAN_STUB("GamSndMan::getSeID", 0x001e4a0c);
+    return {};
+}
+
+// stub of ROR 0x001e4c1c
+int GamSndMan::getStrSnd(int str, GamSndEntry **entry)
+{
+    ROSEPAN_STUB("GamSndMan::getStrSnd", 0x001e4c1c);
+    return {};
+}
+
+// stub of ROR 0x001e4d18
+void GamSndMan::stopSE(int se)
+{
+    ROSEPAN_STUB("GamSndMan::stopSE", 0x001e4d18);
+}

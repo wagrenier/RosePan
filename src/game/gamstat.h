@@ -458,6 +458,13 @@ struct ACHRstat : ObjStat
     void setMotionSpeed(float speed);                                    // ROR 0x001db1b8
     /* Kills its four tasks (m_task[2], [0], [3], [1]) and sets them -1. */
     void killTasks();                                                    // ROR 0x001da07c
+    /* Empty (GamMan::emptyAchr1d3a14). */
+    void empty1d9f08();                                                  // ROR 0x001d9f08
+    /* The actor's motion ended (DogActor::isModeSet clear; with m_flags
+     * 0x100 the scene's motion speed sign decides). */
+    int  isMotionEnd();                                                  // ROR 0x001d9f84
+    /* m_task[1], the turn task, is -1. */
+    int  isTurnDone();                                                   // ROR 0x001da05c
 
     /* The ELF's param accessors over the record. */
     // ROR 0x0028fbb4
@@ -577,6 +584,10 @@ struct FCHRstat : ObjStat
  * offset into a. The ELF's inlines GamMan::cnvPosW2L / cnvPosL2W /
  * getWrdOffset call it. */
 void gamWrdConvPos(int op, float *a, float *b);                          // ROR 0x001dba3c
+/* One of the WRD entry strings of room wrd (-1: GamMan's room), which
+ * 0..4 (2 the room name GamMan::showRoomName shows); "" without an
+ * entry. The ROM's this is GamMan +0x18c00, not read. */
+const char *gamGetWrdString(int which, int wrd);                         // ROR 0x001db8e8
 /* The room offset's x / z of GamMan's room, 0 without a WRD entry (the
  * ROM's this, GamMan +0x18c00, is not read). */
 float gamGetWrdOfsX(void);                                               // ROR 0x001db9c4

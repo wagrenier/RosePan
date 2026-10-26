@@ -590,3 +590,13 @@ public:
 - **Hidden functions inside GamMan bodies**: 0x1d1e88 (setObjScale) holds a float getter at 0x1d1f14,
   0x1d18c4 (clearObjAttr) one at 0x1d1958 (achr tail call 0x1d9f40); Ghidra's sizes include them.
 
+
+- **Header inline definitions do not count as reconstructed.** Symptom: a TU's ELF inlines (GamMan
+  0x28e254, getWrdNo 0x1c6c28) stayed `todo` in the brief though written inline in the header with
+  their `ROR 0x...` comment. Cause: `rosepan.reconstructed()` scans only .c / .cpp (headers carry an
+  annotation on every declaration). Fix: define the ELF's inline copies out of line in the class's
+  .cpp under their `// ROR 0x...` line (gamstat.cpp's and gamman.cpp's "ELF's inline accessors"
+  blocks); a type_info function (`__tf`) gets a comment-only annotation.
+- **A bss word right after GamMan is GamMan.** 0x7a3208 / 0x7a320c are g_gamMan (0x7812c0) +
+  0x21f48 / +0x21f4c, m_flags / m_flags2 reached through the global: check `addr - 0x7812c0` against
+  GamMan's members before declaring a `g_bss_` stand-in.
