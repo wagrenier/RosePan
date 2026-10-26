@@ -271,6 +271,16 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      0x1dac8c, 0x1db19c, 0x1db8e8..0x1dbdf0, the hidden 0x1d96e0 (clears +0x110 / +0x114).
      Kept ROM quirk: ACHRstat::setParam's base params fall through into param 0x32 (m_428 takes the
      data's first u_short after ObjStat::setParam; no break in the ROM).
+  10k. PARTIAL 2026-10-26 (`game/gamman.cpp` session 5): setMurder, loadChapterSe, loadMapUnit with
+     showMapUnits 0x1c9e20 / loadMapPack 0x1ca38c / resetAVFchrMotions 0x1c4610, setPcStartPos with
+     setPcPos / setPcRot 0x1cb520 / 0x1cb57c, storePcTransform, onSubSeqEnd, initStage2 with
+     reloadVFchrModels 0x1c387c / setupPcDogStage2 0x1cd954 / reloadAchrModel 0x1caf78, setObjRot,
+     setKindFlags, moveAchr, resetPcStat, setPcAnim / setPcJnfc, clearPool20b00. The 10d access
+     violation after New Game is unchanged: the last commit without this session's code dies the same
+     way (last stub GamMan::relinkObj 0x1d5da0), so it is not in this slice. Under gdb a run once
+     reached initStage2 and faulted in Sequence::loadSubImage (fixed here, hazards.md). Open: who
+     writes GamMan +0x18bc4 (the object bits onSubSeqEnd applies; allocDebug memory, not cleared by
+     init), +0x22a5c (the BGM record) and +0x22060 / +0x22070 (the kept PC / dog start transforms).
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

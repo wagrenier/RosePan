@@ -1577,3 +1577,27 @@ void WrdTable::cnvPosW2L(float *out, const float *in, int no)
 {
     ROSEPAN_STUB("WrdTable::cnvPosW2L", 0x0017ebac);
 }
+
+// stub of ROR 0x0017762c
+void Obj176a3c::releaseAll()
+{
+    ROSEPAN_STUB("Obj176a3c::releaseAll", 0x0017762c);
+}
+
+// stub of ROR 0x00172678
+void gamCreateEff1a(void)
+{
+    ROSEPAN_STUB("gamCreateEff1a", 0x00172678);
+}
+
+// stub of ROR 0x00144398
+void gamSetBwnPos(const float *pos)
+{
+    ROSEPAN_STUB("gamSetBwnPos", 0x00144398);
+}
+
+// stub of ROR 0x001443d8
+void gamSetBwnRot(const float *rot)
+{
+    ROSEPAN_STUB("gamSetBwnRot", 0x001443d8);
+}

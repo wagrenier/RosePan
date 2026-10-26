@@ -162,6 +162,16 @@ struct GamObjReset
 static_assert(sizeof(GamObjReset) == 6, "GamObjReset");
 static_assert(offsetof(GamObjReset, m_0c) == 4, "m_0c");
 
+/* One record of the list at +0x18bc4 (0xc00 bytes, 0x180 records, ended
+ * by oid 0; EE 8): onSubSeqEnd sets / resets the object's bits 4, 1,
+ * 0x40, 0x80 and 0x10 by these flags. */
+struct GamObjSet
+{
+    u_int m_oid;                // ROR 0x0
+    u_int m_flags;              // ROR 0x4
+};
+static_assert(sizeof(GamObjSet) == 8, "GamObjSet");
+
 /* ctlObjParam op 16's answer (EE 0x20): the record's field character. */
 struct GamObjInfo
 {
@@ -210,25 +220,24 @@ static_assert(sizeof(GamObjTable) == 0x5020, "GamObjTable is 0x5020 bytes (init'
  * that fills them). */
 struct GamRec4  { u_int _0; };
 struct GamRec8  { u_int _0[2]; };
-struct GamRec12 { u_int _0[3]; };
 struct GamRec16 { u_int _0[4]; };
 static_assert(sizeof(GamRec4) == 4, "GamRec4");
 static_assert(sizeof(GamRec8) == 8, "GamRec8");
-static_assert(sizeof(GamRec12) == 0xc, "GamRec12");
 static_assert(sizeof(GamRec16) == 0x10, "GamRec16");
 
 /* A sky dome record of the pool +0x1d240 (EE 0x10): releaseTenkyus
  * hands m_no to MagScene::releaseTenkyu. */
 struct GamTenkyuRec
 {
-    u_int m_flags;              // ROR 0x0: bit 0 cleared by resetTenkyuFlags (role unverified)
-    int _4;
+    u_int m_flags;              // ROR 0x0: the load mode << 30 (2 / 3: which of a pair shows, showMapUnits); bit 0 cleared by resetTenkyuFlags
+    int m_unit;                 // ROR 0x4: the unit's index in data/bg/mapunit.bin (loadMapUnit's id)
     int m_no;                   // ROR 0x8: the scene's tenkyu number
-    int _c;
+    int _c;                     // ROR 0xc: stack garbage in the ROM
 };
 static_assert(sizeof(GamTenkyuRec) == 0x10, "GamTenkyuRec");
 static_assert(offsetof(GamTenkyuRec, m_no) == 0x8, "m_no");
 static_assert(offsetof(GamTenkyuRec, m_flags) == 0x0, "m_flags");
+static_assert(offsetof(GamTenkyuRec, m_unit) == 0x4, "m_unit");
 
 /* A record of the pool +0x20b00 (EE 8): an object's entry in the scene's
  * +0x837e0 table (ctlObj1cbb80 releases it). */
@@ -239,6 +248,19 @@ struct GamObjFxRec
 };
 static_assert(sizeof(GamObjFxRec) == 8, "GamObjFxRec");
 static_assert(offsetof(GamObjFxRec, m_no) == 4, "m_no");
+
+/* A record of the pool +0x1f880 (EE 0xc): a stage-2 actor initStage2
+ * loaded from its A%03d.ARA pack. */
+struct GamActorRec
+{
+    u_short m_flags;            // ROR 0x0: 1
+    short   m_model;            // ROR 0x2: the pack's model id
+    int     m_actor;            // ROR 0x4: MagScene::loadActor's number
+    int     m_8;                // ROR 0x8: stack garbage in the ROM, 0 here
+};
+static_assert(sizeof(GamActorRec) == 0xc, "GamActorRec");
+static_assert(offsetof(GamActorRec, m_model) == 2, "m_model");
+static_assert(offsetof(GamActorRec, m_actor) == 4, "m_actor");
 
 /* GamMan +0x22470: four records, id -1 = free (EE 0x30). */
 struct GamRec22470
@@ -263,8 +285,9 @@ struct GamMan
     void convertObjTable(GamObjTable *dst, const GamObjTable *src, int count); // ROR 0x001c1f84
     void loadStage(int stage);                                           // ROR 0x001c204c
     /* The stage's sound packs (data/snd/xv/....se). */
-    /* data/snd/xv/32NN.se of chapter into GamSndMan::loadSePack(.., arg). */
-    void loadChapterSe(int chapter, int arg);                            // ROR 0x001c2848
+    /* The chapter's own 3xxx.se pack, and with withArea its 1xxx area pack
+     * (the second of loadStageSnd's pair), read and registered again. */
+    void loadChapterSe(int chapter, int withArea);                            // ROR 0x001c2848
     void loadStageSnd(int chapter);                                      // ROR 0x001c2f50
     /* The PC's actor plays anim (MagSystem::setActorAnim(.., 1)). */
     void setPcAnim(int anim);                                            // ROR 0x001c4f38
@@ -276,7 +299,15 @@ struct GamMan
      * into 0x1b; then 0x1d84b0 and four words cleared. MnuTitle calls it
      * when the title closes for a new game. */
     void resetPcStat();                                                  // ROR 0x001c1378
+    /* The PC (and dog) placed for a stage start by m_1a684: 0xcccccccc
+     * leaves them; 0xcccccccb the kept start transforms (m_pcStart /
+     * m_dogStart); -n the room's n-th start of W000.WRD file 2; an oid
+     * 50 units in front of that fchr (type 9), turned round when the
+     * object's param 12 room is this one. */
     void setPcStartPos();                                                // ROR 0x001c3d38
+    /* Every avfchr's actor gets motion 1 at 1/60 (after a map unit
+     * load). */
+    void resetAVFchrMotions();                                           // ROR 0x001c4610
     void setStagePack(void *buf);                                        // ROR 0x001c46f4
     /* Sequence::reapThreads' calls when thread 0x44000000 (the stage
      * image's main thread) / 0x84000000 (image 2's) ends. */
@@ -284,6 +315,9 @@ struct GamMan
     void onSubSeqEnd();                                                  // ROR 0x001c43f0
     /* Stage change kind 2's second half (stage 2 data). */
     void initStage2();                                                   // ROR 0x001c47c4
+    /* The vfchrs of this room get their models again (loadVFchrModel at
+     * their position), hidden ones hidden; the avfchr list emptied first. */
+    void reloadVFchrModels();                                            // ROR 0x001c387c
     void empty1c4f30();                                                  // ROR 0x001c4f30
     /* The scene's S2dMes sprite no (the menus' button guides 4 / 5): show
      * (process on, standard colour, anim - 1) or hide; its position in
@@ -415,6 +449,13 @@ struct GamMan
     /* Loads map unit name from data/bg/mapunit.bin (mode 2 / 3) unless a
      * loaded unit already has id. */
     void loadMapUnit(const char *name, int id, int mode);                // ROR 0x001ca0dc
+    /* Shows / hides the loaded map units by their load mode: mode 1 shows
+     * all; 2 shows mode-2 units (m_mapModelNo = the last) and hides mode-3
+     * ones; 3 the other way round. */
+    void showMapUnits(int mode);                                         // ROR 0x001c9e20
+    /* The RTPK pack data of unit into a scene sky slot (MagSystem::
+     * loadScene) and a +0x1d240 record, unless the unit is loaded. */
+    void loadMapPack(u_short unit, void *data, int mode);                // ROR 0x001ca38c
     /* A new object from model file name (oid 0: one is made from kind
      * >> 10), added with addChr(.., kind2, pos, place); returns the oid,
      * 0 when oid already exists. */
@@ -441,6 +482,10 @@ struct GamMan
     void setDog(int oid);                                                // ROR 0x001cb384
     /* The murderer becomes the achr oid (m_murderOid, m_murderPtr). */
     void setMurder(int oid);                                             // ROR 0x001cb424
+    /* The PC's position / rotation (when there is a PC) and its copy in
+     * m_pcPos / m_pcRot. */
+    void setPcPos(const float *pos);                                     // ROR 0x001cb520
+    void setPcRot(const float *rot);                                     // ROR 0x001cb57c
     /* The PC's ACHRstat::setParam(which, data), when there is a PC. */
     void setPcParam(int which, const void *data);                        // ROR 0x001cb4f0
     void ctlObj1cb8e4(u_int oid, int a, int b);                          // ROR 0x001cb8e4
@@ -455,7 +500,8 @@ struct GamMan
     int  findObjFx(u_int oid);                                           // ROR 0x001cbafc
     /* Frees oid's +0x20b00 records, releasing their scene +0x837e0 entry. */
     void ctlObj1cbb80(u_int oid);                                        // ROR 0x001cbb80
-    /* Frees the +0x20b00 records of kind (after 0x17762c). */
+    /* Clears the scene's +0x837e0 effect table and frees every +0x20b00
+     * record (kind is not read). */
     void clearPool20b00(int kind);                                       // ROR 0x001cbd0c
     /* The scene actor of oid, NULL without one. */
     DogActor *getActor(u_int oid);                                       // ROR 0x001cbdb8
@@ -525,7 +571,19 @@ struct GamMan
      * already loaded only resumes the menu pause. */
     void requestStage(int kind, int room, int a3, int chapter, u_int word); // ROR 0x001cd044
     void afterSeqExec();                                                 // ROR 0x001cd25c
+    /* Reads the PC's position / rotation into m_pcPos / m_pcRot, puts the
+     * dog 35 units to the PC's side with its heading, and tells Brown's
+     * controller. */
     void storePcTransform();                                             // ROR 0x001cd404
+    /* Stage 2 with the PC and dog kept (flags2 0x10000000): their models
+     * m_21ff4 / m_21ff8 (0x2005..0x2009 / 0x2401..0x2404 kept, else
+     * 0x2000 / 0x2400), setPc /
+     * setDog, the dog shown by script bit [1] 4, the PC's chapter anim;
+     * sequence globals 0x51 / 0x52 get the models. */
+    void setupPcDogStage2();                                             // ROR 0x001cd954
+    /* Achr oid's actor released and model loaded again (params 3 and
+     * 0x1000); returns the actor. */
+    int  reloadAchrModel(u_short model, u_int oid);                      // ROR 0x001caf78
     void startStage2();                                                  // ROR 0x001cd60c
     void empty1cd7c0();                                                  // ROR 0x001cd7c0
     /* The requested stage change by m_cur_stat (1 loadStage, 2 the stage-2
@@ -668,6 +726,11 @@ struct GamMan
     void setVolume(int volume);                                          // ROR 0x001d3a38
     /* Returns 1; nothing else in the US build. */
     int  resetExtra();                                                   // ROR 0x001d84a8
+    /* Returns 0 (resetPcStat's call). */
+    int  empty1d84b0();                                                  // ROR 0x001d84b0
+    /* The ELF's inlines; nothing calls them. */
+    int  getPlayTime_HH() const { return m_playTimeHH; }                 // ROR 0x0028e254
+    void *getSectaObjPtr() const { return NULL; }                        // ROR 0x0028e3c4
     /* Empty (an inline in the ELF; nothing calls it). */
     void rmSnd() {}                                                      // ROR 0x0028eb60
 
@@ -684,11 +747,13 @@ struct GamMan
     int          m_04;              // ROR 0x04: getStatus 28
     GamArea      m_area;            // ROR 0x40 (bss 0x781300)
     void        *m_18bc0;           // ROR 0x18bc0: 0x600 bytes (init)
-    void        *m_18bc4;           // ROR 0x18bc4: 0xc00 bytes (init)
+    GamObjSet   *m_18bc4;           // ROR 0x18bc4: 0xc00 bytes (init), the object bits onSubSeqEnd applies (writer not found yet)
     GamObjTable *m_objTable;        // ROR 0x18bcc: W000.WRD file 1
     GamObjRec   *m_objRec;          // ROR 0x18bd0: m_objTable + 0x20, its records
+    int          m_18dc0;           // ROR 0x18dc0: the room's WRD table word 0x1c (gamSetWrdRoom)
     int          m_18dc4;           // ROR 0x18dc4
     int          m_18dc8;           // ROR 0x18dc8
+    int          m_18dd0;           // ROR 0x18dd0: ... word 0x18, 0 when the room has no entry
     GamSndMan    m_sndMan;          // ROR 0x18e00 (bss 0x79a0c0): the sound table
     u_char      *m_wrdFile2;        // ROR 0x1a680: 0x4000 bytes, W000.WRD file 2
     u_int        m_1a684;           // ROR 0x1a684: 0xcccccccc after init
@@ -706,7 +771,7 @@ struct GamMan
     int          m_1f244;           // ROR 0x1f244
     u_char      *m_1f248;           // ROR 0x1f248: 0x42000 bytes
     int          m_vfchrSlot[0x180];// ROR 0x1f24c: vfchr oids (clearVFchrSlot); initGameState clears only 0x180 bytes
-    SeqFixedPool<GamRec12, 0x80>   m_pool1f880; // ROR 0x1f880
+    SeqFixedPool<GamActorRec, 0x80> m_pool1f880; // ROR 0x1f880: the stage-2 actors (initStage2)
     SeqFixedPool<GamRec8, 0x80>    m_pool202c0; // ROR 0x202c0
     SeqFixedPool<GamObjFxRec, 0x80> m_pool20b00; // ROR 0x20b00
     ACHRstat    *m_achr[0x80];      // ROR 0x21340: by oid slot (set_achr)
@@ -757,6 +822,8 @@ struct GamMan
     float        m_pcRot[4];        // ROR 0x22030: getPcRot
     float        m_dogPos[4];       // ROR 0x22040: getDogPos
     int          m_sysWord[4];      // ROR 0x22050: setPCPosAMJ; system call 0x67 copies four words here
+    float        m_pcStart[4];      // ROR 0x22060: the PC's kept start position, [3] its rotation y (setPcStartPos 0xcccccccb; writer not found yet)
+    float        m_dogStart[4];     // ROR 0x22070: the dog's
     ObjStat     *m_pcPtr;           // ROR 0x22090: getPCPtr
     ObjStat     *m_dogPtr;          // ROR 0x22094: getDogPtr
     ObjStat     *m_murderPtr;       // ROR 0x22098: getMurderPtr
@@ -790,12 +857,15 @@ struct GamMan
     int          m_22530;           // ROR 0x22530
     I3dFog       m_fogStack[3];     // ROR 0x22540: pushFog / popFog; m_color[0] -1 = a free slot
     int          m_msgMode;         // ROR 0x225d8: chgMsgMode
+    int          m_225dc;           // ROR 0x225dc: initStage2 clears it
     int          m_225e4;           // ROR 0x225e4
     void        *m_keepBuf;         // ROR 0x225e8: dropMap's m_p_keep_buf (releaseTenkyus frees it)
     int          m_225f0;           // ROR 0x225f0
     int          m_225f4[0x1a];     // ROR 0x225f4: init's table (0x7f, 0x6f, 0x27f, 0x2ff, 3, 8, 4, 5, ...)
+    GamBgmRec    m_bgmRec;          // ROR 0x22a5c: onSubSeqEnd hands it to GamSndMan::setBgmRec (writer not found yet)
     u_char      *m_evtPack;         // ROR 0x22a80: getEvtPack, 0xa0000 bytes, W000.WRD file 4
     int          m_22a84;           // ROR 0x22a84
+    int          m_playTimeHH;      // ROR 0x22aa0: getPlayTime_HH
     int          m_22ab0;           // ROR 0x22ab0
 };
 
@@ -806,6 +876,9 @@ void gamClearFrameReq(void);                                             // ROR 
 void gamSystemDataLoaded(void);                                          // ROR 0x001f8fb8
 /* execStageReq's last call for change kind 2. */
 void gamStage2Loaded(void);                                              // ROR 0x001fbbd0
+/* Effect kind 0x1a created in the scene's +0x837e0 table (initStage2's
+ * first call). */
+void gamCreateEff1a(void);                                               // ROR 0x00172678
 extern int    g_bss_780d04;     /* bss 0x780d04: option 0's brightness word (32..176) */
 /* The words GamMan, MagScene and the menus read through bss 0x7b2060 /
  * 0x7b205c are g_sequence.m_bits / m_global (Sequence +0xdc20 / +0xdc1c,
@@ -819,6 +892,10 @@ void gamSetBwnFollow(int on);                                            // ROR 
 void gamSetBwnItem(int item);                                            // ROR 0x00144500
 /* Brown's controller mode: 1 when on, 0 when off. */
 void gamSetBwnWait(int on);                                              // ROR 0x0014457c
+/* Brown's controller (MagScene +0x2bd20) gets the dog's position / rotation
+ * (0x12a808 / 0x12a89c; a debug trace of the vector first). */
+void gamSetBwnPos(const float *pos);                                     // ROR 0x00144398
+void gamSetBwnRot(const float *rot);                                     // ROR 0x001443d8
 /* Changes the motion of oid's actor (an achr through a task in its slot
  * +0x3dc); rotY >= 32769 keeps the current rotation. */
 void *chrChangeMotion(u_int oid, int motion, int a2, int a3, float blend,

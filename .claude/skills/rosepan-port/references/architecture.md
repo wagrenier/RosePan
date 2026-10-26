@@ -896,6 +896,20 @@ never asserts): sessions name them (`tus.py define --why`).
   word +0x94), 4..9 objects (0xc0, table 5 0x200; flags +0xb0); FCHRstat::init reads only table 5.
   ObjStat::setPos / getPos / setRot were named ACHRstat::* before: the base setter calls them for fchrs
   too (FCHRstat has its own four). The secta cells come from GamMan::findSectaCell 0x1d8064 (stub).
+- **Map units** (gamman session 5): `GamMan::loadMapUnit` 0x1ca0dc (native 027) reads the first
+  0x1800 bytes of data/bg/mapunit.bin (an RTPK, one file per unit, named without extension), then
+  the unit's file into a keep buffer (+0x225e8), `loadMapPack` 0x1ca38c checks the RTPK magic,
+  `MagSystem::loadScene`s it into a sky slot and records {mode << 30, unit index, slot} in the pool
+  +0x1d240 (GamTenkyuRec). Modes 2 / 3 pair two units: `showMapUnits` 0x1c9e20 shows one kind, hides
+  the other (the sky slot's model[0] m_hide) and points m_mapModelNo (+0x1d300) at the shown one.
+- **Stage 2** (`initStage2` 0x1c47c4, change kind 3): data/SEQ/W<ch>/A<room>/A<room>.ARA, an RTPK of
+  n files: file 0 the actor model ids (-1 ends; every W001 pack has none), the actor files from n-5
+  down, n-4 the image-2 script (ELFR, Sequence::loadSubImage), n-2 the room data for gamSetWrdRoom
+  0x1dbcf0 (464 bytes). Loaded actors are hidden and recorded in the pool +0x1f880 (GamActorRec).
+- **PC start** (`setPcStartPos` 0x1c3d38) by +0x1a684: 0xcccccccc none, 0xcccccccb the kept start
+  transforms +0x22060 / +0x22070, -n the n-th record of this room in W000.WRD file 2 (0x20 bytes: room,
+  pos +0x10, rotY +0x1c), else a type-9 fchr oid: 50 units in front of it. `storePcTransform`
+  0x1cd404 puts the dog 35 units to the PC's side (heading - pi/2) and tells Brown's controller.
 
 ## Disc and data files
 

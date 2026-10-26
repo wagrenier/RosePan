@@ -572,5 +572,11 @@ struct FCHRstat : ObjStat
  * offset into a. The ELF's inlines GamMan::cnvPosW2L / cnvPosL2W /
  * getWrdOffset call it. */
 void gamWrdConvPos(int op, float *a, float *b);                          // ROR 0x001dba3c
+/* The WRD table entry of GamMan's room (WrdTable::get): its words 0x18 /
+ * 0x1c into GamMan +0x18dd0 / +0x18dc0, +0x18dd0 = 0 without an entry.
+ * The ROM's this is GamMan +0x18c00; initStage2 passes the room's
+ * A%03d.ARA file as a second argument it does not read. */
+struct GamMan;
+void gamSetWrdRoom(GamMan *gam, const void *file);                      // ROR 0x001dbcf0
 
 #endif /* _GAME_GAMSTAT_H */

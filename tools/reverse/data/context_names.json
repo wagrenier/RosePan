@@ -3137,6 +3137,18 @@
   "was": "FUN_00144334",
   "why": "MagLifeBwnCtrl (scene +0x2bd20) 0x12b7cc with 0 when on, 2 when off"
  },
+ "00144398": {
+  "name": "gamSetBwnPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00144398",
+  "why": "dbgTraceVector4 then 0x12a808 on MagLifeBwnCtrl (scene +0x2bd20); storePcTransform passes the dog position"
+ },
+ "001443d8": {
+  "name": "gamSetBwnRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001443d8",
+  "why": "dbgTraceVector4 then 0x12a89c on MagLifeBwnCtrl; storePcTransform passes the dog rotation"
+ },
  "00144500": {
   "name": "gamSetBwnItem",
   "tag": "ror-inferred",
@@ -3227,6 +3239,12 @@
   "was": "FUN_0016aa04",
   "why": "vtable slot 10 of Eff0 and of all 43 Eff classes (never overridden): flag word bit 4 set for false, cleared for true, bit 8 set; native 281 op 98 calls it with a2[0] != 0"
  },
+ "00172678": {
+  "name": "gamCreateEff1a",
+  "tag": "ror-inferred",
+  "was": "FUN_00172678",
+  "why": "Obj176a3c::createEff on scene +0x837e0 with kind 0x1a; initStage2's call"
+ },
  "00176cc8": {
   "name": "Obj176a3c::createEff",
   "tag": "ror-inferred",
@@ -3238,6 +3256,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0017756c",
   "why": "a0 = MagScene +0x837e0: entry no of its table (+4) deleted, count +0x448 down, +0x1294 / +0x1298 = -1 when they named it; GamMan::ctlObj1cbb80 passes the pool record's second word"
+ },
+ "0017762c": {
+  "name": "Obj176a3c::releaseAll",
+  "tag": "ror-inferred",
+  "was": "FUN_0017762c",
+  "why": "deletes all 0x110 table entries through their vtable slot 1, resets +0x448 / +0x1294 / +0x1298 / +0xc8c; GamMan::clearPool20b00 calls it on scene +0x837e0"
  },
  "0017c45c": {
   "name": "sectorSetFlags",
@@ -6677,6 +6701,12 @@
   "was": "FUN_001c2f50",
   "why": "loadStage's call after the pack (m_chapter): frees and loads data/snd/xv/1001.se, 1101.se, 1102.se ... per stage"
  },
+ "001c387c": {
+  "name": "GamMan::reloadVFchrModels",
+  "tag": "ror-inferred",
+  "was": "FUN_001c387c",
+  "why": "clears the avfchr list, then loadVFchrModel for each vfchr whose param 8 room is +0x21f7c; hidden ones setHide(1)"
+ },
  "001c3d38": {
   "name": "GamMan::setPcStartPos",
   "tag": "ror-inferred",
@@ -6694,6 +6724,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c43f0",
   "why": "reapThreads calls it when thread 0x84000000 (image 2's main thread) ends: re-equips the item, sets the PC start position, clears flags2 0x1800"
+ },
+ "001c4610": {
+  "name": "GamMan::resetAVFchrMotions",
+  "tag": "ror-inferred",
+  "was": "FUN_001c4610",
+  "why": "every avfchr list (+0x1ef10) actor gets MagScene::changeActorMotion(1/60, actor, 1)"
  },
  "001c46f4": {
   "name": "GamMan::setStagePack",
@@ -7055,6 +7091,12 @@
   "was": "FUN_001c9c1c",
   "why": "8-case table 0x2fbbf0: 0 brightness 0x780d04, 1 master volume via setVolume, 2 / 3 stream / SE volume via funcSnd 0xf / 0xe, 4 / 5 read them back, 6 rxSndSetOutputMode, 7 a flag copied to MagSystem +8; returns -1"
  },
+ "001c9e20": {
+  "name": "GamMan::showMapUnits",
+  "tag": "ror-inferred",
+  "was": "FUN_001c9e20",
+  "why": "walks the +0x1d240 map unit records: by mode 1 / 2 / 3 sets the sky slot model's m_hide (scene +0x29540 stride 0x520, +0x150) and m_mapModelNo +0x1d300"
+ },
  "001ca0d4": {
   "name": "GamMan::empty1ca0d4",
   "tag": "ror-inferred",
@@ -7066,6 +7108,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001ca0dc",
   "why": "reads data/bg/mapunit.bin, finds name (cut at a separator) in its pfh, loads that file into a heap block kept as m_keepBuf; skips when a loaded unit has the id; native 027 cases 12 / 13 pass mode 2 / 3"
+ },
+ "001ca38c": {
+  "name": "GamMan::loadMapPack",
+  "tag": "ror-inferred",
+  "was": "FUN_001ca38c",
+  "why": "debug strings loadMapPack(%d,%x,%d) and loadMapPack no load exit; RTPK magic check, MagSystem::loadScene, adds a +0x1d240 record"
  },
  "001ca598": {
   "name": "GamMan::setObjLight",
@@ -7109,6 +7157,12 @@
   "was": "FUN_001cad88",
   "why": "for a live oid: releases the actor's model and loads model (or name) instead, optionally keeping the position; returns oid or 0"
  },
+ "001caf78": {
+  "name": "GamMan::reloadAchrModel",
+  "tag": "ror-inferred",
+  "was": "FUN_001caf78",
+  "why": "getAchr, releaseActor, MagSystem::loadModel(model, -1), setObjLight, params 3 and 0x1000"
+ },
  "001cb01c": {
   "name": "GamMan::releaseTenkyus",
   "tag": "ror-inferred",
@@ -7144,6 +7198,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001cb4f0",
   "why": "m_pcPtr (+0x22090) != NULL -> its setParam 0x1da740(which, data); equipItem passes 0x32 and the item id"
+ },
+ "001cb520": {
+  "name": "GamMan::setPcPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb520",
+  "why": "PC ObjStat (+0x22090) setPos, copy into +0x22020 (getPcPos)"
+ },
+ "001cb57c": {
+  "name": "GamMan::setPcRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb57c",
+  "why": "PC ObjStat setRot, copy into +0x22030 (getPcRot)"
  },
  "001cb8e4": {
   "name": "GamMan::ctlObj1cb8e4",
@@ -7288,6 +7354,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001cd7c8",
   "why": "the change afterSeqExec asks for, by getCurStat (1 loadStage(getChapter)), then sequence globals 1..4 from +0x21f7c.., resume(2), task pause off"
+ },
+ "001cd954": {
+  "name": "GamMan::setupPcDogStage2",
+  "tag": "ror-inferred",
+  "was": "FUN_001cd954",
+  "why": "flags2 0x10000000 to 0x20000000; reloads oid 0x50000001 / 0x50800002 models from +0x21ff4 / +0x21ff8, setPc / setDog, chapter anim, globals 0x51 / 0x52"
  },
  "001cdbf0": {
   "name": "GamMan::resetStage",
@@ -7685,6 +7757,12 @@
   "was": "FUN_001d84a8",
   "why": "returns 1 and does nothing in the US build; initGameState's last call"
  },
+ "001d84b0": {
+  "name": "GamMan::empty1d84b0",
+  "tag": "ror-inferred",
+  "was": "FUN_001d84b0",
+  "why": "returns 0; resetPcStat calls it with this, next to GamMan::resetExtra"
+ },
  "001d87f4": {
   "name": "ObjStat::ObjStat",
   "tag": "ror-inferred",
@@ -7889,6 +7967,12 @@
   "was": "FUN_001dba3c",
   "why": "op 0 / 1 tail-jump into the WRD table converters with the room GamMan +0x21f7c, op 2 copies the room's x, z offset; the inlines GamMan::cnvPosW2L / cnvPosL2W / getWrdOffset (0x28f300..) call it with GamMan+0x18c00 as an unused this"
  },
+ "001dbcf0": {
+  "name": "gamSetWrdRoom",
+  "tag": "ror-inferred",
+  "was": "FUN_001dbcf0",
+  "why": "WrdTable::get(getWrdNo): words 0x18 / 0x1c into this +0x1d0 / +0x1c0 (this = GamMan +0x18c00)"
+ },
  "001dbef8": {
   "name": "GamSysData::set",
   "tag": "ror-inferred",
@@ -8044,6 +8128,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e107c",
   "why": "sets +0x171c = 4, +0x1720 / +0x1724 = 0x80, word 0 = 0, the four volume words +0x1590..+0x159c to 0x80 and calls funcSnd 0xd / 0xe / 0xf with 0x80, 0x80; the title's first frame"
+ },
+ "001e15d0": {
+  "name": "GamSndMan::setBgmRec",
+  "tag": "ror-inferred",
+  "was": "FUN_001e15d0",
+  "why": "copies 0x24 bytes to +0x15a0 and clears +0x1684; GamMan::onSubSeqEnd passes GamMan +0x22a5c before resumeBgm"
  },
  "001e1620": {
   "name": "GamSndMan::unpush_snd",

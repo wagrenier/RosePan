@@ -417,6 +417,17 @@ public:
   failure line each). A race in the rx file layer around the missing file (fileExists flags 1,
   then FileReader's 0x8001 = NOWAIT | retry read); rerun before suspecting your change, and look
   at rxFileOpenEx's state / pending handling if it comes back.
+  2026-10-26 (gamman session 5): two of eight runs of one tree hung this way (one under gdb, 2.8M
+  lines), so it is not rare any more; it also makes gdbrun runs useless. Worth its own host task.
+- **Sequence::loadSubImage copies 0x30000 bytes whatever the image's size** (as the ROM does). The
+  ARA packs' stage-2 images are 12..31 KB near the end of a ~90 KB pack buffer: the PS2 reads what
+  follows, the host faulted in memmove past the heap block (GamMan::initStage2, 2026-10-26). The
+  caller copies the image into a zeroed 0x30000 buffer first (PORT in initStage2); loadStageImage /
+  loadSystemImage copy 0x18000 / 0x20000 the same way and are fine only while their files are
+  big enough.
+- **Under gdb the New Game path takes another road**: the same pad script asserted m_i3r_root
+  (dog/dogmodel.h 94) and maglifemenu.cpp 358 early, then timed out, while build.py runs reach the
+  10d crash. Compare stub logs before trusting a gdb backtrace for a build.py crash.
 
 ## Platform layer (ReiPan's, written for FF2 and FF3)
 - **The rxSnd IOP stand-in (src/sdk/iop_rxsnd.cpp) is silent, and a writer that waits for room
