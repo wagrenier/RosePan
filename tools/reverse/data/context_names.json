@@ -6581,6 +6581,12 @@
   "was": "FUN_001c204c",
   "why": "game/gamman.cpp: (stage) formats data/SEQ/W%03d/W000.WRD, loads it, hands the sequence image to 0x20eda4; mainInitGame passes mainParseArgs' stage unless -1"
  },
+ "001c2848": {
+  "name": "GamMan::loadChapterSe",
+  "tag": "ror-inferred",
+  "was": "FUN_001c2848",
+  "why": "switch on chapter - 1 reading data/snd/xv/32NN.se into a debug buffer and handing it to GamSndMan::loadSePack with the flag arg; called by 0x1c766c / 0x1c76cc with m_chapter"
+ },
  "001c2f50": {
   "name": "GamMan::loadStageSnd",
   "tag": "ror-inferred",
@@ -6808,6 +6814,30 @@
   "tag": "ror-inferred",
   "was": "FUN_001c7494",
   "why": "the mag/magscene.h inline (assert no >= 0 && no < MAX_MAP_MODEL, line 816) on the scene's sky slot m_1d300: its _c.bin record count"
+ },
+ "001c7500": {
+  "name": "GamMan::loadScriptSePack",
+  "tag": "ror-inferred",
+  "was": "FUN_001c7500",
+  "why": "stops SE (type 8), frees banks 0xb / 0x20 / 0x40, GamSndMan::loadSePack(name, 0), loadItemSe(0xa00, 1), m_flags2 |= 0x1000000; native 252 case 48"
+ },
+ "001c75bc": {
+  "name": "GamMan::loadScriptSePack2",
+  "tag": "ror-inferred",
+  "was": "FUN_001c75bc",
+  "why": "as 0x1c7500 but keeps bank 0xb and sets m_flags2 0x2000000; native 252 case 100"
+ },
+ "001c766c": {
+  "name": "GamMan::reloadChapterSe1f",
+  "tag": "ror-inferred",
+  "was": "FUN_001c766c",
+  "why": "stops SE, frees bank 0x1f, loadChapterSe(m_chapter, 1); initStage2 and native 252 case 101"
+ },
+ "001c76cc": {
+  "name": "GamMan::reloadChapterSe0c",
+  "tag": "ror-inferred",
+  "was": "FUN_001c76cc",
+  "why": "stops SE, frees bank 0xc, loadChapterSe(m_chapter, 0); initStage2 and native 252 case 102"
  },
  "001c772c": {
   "name": "GamMan::loadItemSe",
@@ -7799,6 +7829,12 @@
   "was": "FUN_001e107c",
   "why": "sets +0x171c = 4, +0x1720 / +0x1724 = 0x80, word 0 = 0, the four volume words +0x1590..+0x159c to 0x80 and calls funcSnd 0xd / 0xe / 0xf with 0x80, 0x80; the title's first frame"
  },
+ "001e1620": {
+  "name": "GamSndMan::unpush_snd",
+  "tag": "ror-inferred",
+  "was": "FUN_001e1620",
+  "why": "GamMan::unpush_snd(int, unsigned int, int) (ELF symbol 0x28e820) forwards to it with this + 0x18e00; native 252 cases 4 / 11 / 15 / 53 / 55"
+ },
  "001e17b4": {
   "name": "GamSndMan::stopBgm",
   "tag": "ror-inferred",
@@ -7811,17 +7847,53 @@
   "was": "FUN_001e1920",
   "why": "GamMan::resume calls it (0, 0, 1) on +0x18e00; clears bit 0 of +0x1870 and restarts the +0x1684 slot"
  },
+ "001e239c": {
+  "name": "GamSndMan::put_se_3d_pos",
+  "tag": "ror-inferred",
+  "was": "FUN_001e239c",
+  "why": "GamMan::put_se_3d_pos(unsigned int, float *, int, unsigned int) forwards to it (0x28eb68)"
+ },
+ "001e2704": {
+  "name": "GamSndMan::put_se_3d_pos_chr",
+  "tag": "ror-inferred",
+  "was": "FUN_001e2704",
+  "why": "GamMan::put_se_3d_pos_chr(unsigned int, unsigned int, unsigned int) forwards to it (0x28eb90)"
+ },
+ "001e2aa0": {
+  "name": "GamSndMan::del_se_3d_pos",
+  "tag": "ror-inferred",
+  "was": "FUN_001e2aa0",
+  "why": "GamMan::del_se_3d_pos(unsigned int, int) forwards to it (0x28ebb8)"
+ },
  "001e2c40": {
-  "name": "GamSndMan::stopObjSe",
+  "name": "GamSndMan::del_se_3d_pos_chr",
   "tag": "ror-inferred",
   "was": "FUN_001e2c40",
-  "why": "for each node of the list +0xb0 whose +0x3c is oid: 0x1e649c(+0x30, +0x34), +0x34 = -1, node freed; releaseChr's end"
+  "why": "GamMan::del_se_3d_pos_chr(unsigned int) forwards to it (0x28ebe0); was stopObjSe (read from GamMan::releaseChr)"
+ },
+ "001e2db4": {
+  "name": "GamSndMan::put_str_3d_pos",
+  "tag": "ror-inferred",
+  "was": "FUN_001e2db4",
+  "why": "GamMan::put_str_3d_pos(int, float *, int, unsigned int) forwards to it (0x28ec08)"
+ },
+ "001e3138": {
+  "name": "GamSndMan::put_str_3d_pos_chr",
+  "tag": "ror-inferred",
+  "was": "FUN_001e3138",
+  "why": "GamMan::put_str_3d_pos_chr(int, unsigned int, unsigned int) forwards to it (0x28ec30)"
+ },
+ "001e34ec": {
+  "name": "GamSndMan::del_str_3d_pos",
+  "tag": "ror-inferred",
+  "was": "FUN_001e34ec",
+  "why": "GamMan::del_str_3d_pos(int, int) forwards to it (0x28ec58)"
  },
  "001e3698": {
-  "name": "GamSndMan::releaseObjSe",
+  "name": "GamSndMan::del_str_3d_pos_chr",
   "tag": "ror-inferred",
   "was": "FUN_001e3698",
-  "why": "for each node of the list +0xb0 whose +0x3c is oid: 0x1e5660(+0x30, 1, 0), node freed; releaseChr's end"
+  "why": "GamMan::del_str_3d_pos_chr(unsigned int) forwards to it (0x28ec80); was releaseObjSe (read from GamMan::releaseChr)"
  },
  "001e435c": {
   "name": "GamSndMan::isSndBankLoaded",
@@ -7834,6 +7906,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e4458",
   "why": "GamMan::loadSePack(char *, void *) forwards to it with a3 0; looks the name up, then loads"
+ },
+ "001e4540": {
+  "name": "GamSndMan::loadSePack(char*,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4540",
+  "why": "GamMan::loadSePack(char *, int) forwards to it (0x28e8d8); native 252 cases 45 / 46"
  },
  "001e46b8": {
   "name": "GamSndMan::freeSePack",
@@ -7859,6 +7937,78 @@
   "was": "FUN_001e4908",
   "why": "this = 0x79a0c0 (GamMan + 0x18e00); walks the 0x38-byte entries at *(+0x1540) for the id at +0x1c, 1 and the entry when found"
  },
+ "001e4ab8": {
+  "name": "GamSndMan::getStrNO",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4ab8",
+  "why": "GamMan::getStrNO(char *) and GamMan::get_str_no(char *) tail-jump to it (0x28e9b4 / 0x28ede0)"
+ },
+ "001e4cc4": {
+  "name": "GamSndMan::setReverb",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4cc4",
+  "why": "GamMan::setReverb(int, int, int) forwards to it (0x28e9f4)"
+ },
+ "001e4d04": {
+  "name": "GamSndMan::get_se_oid",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4d04",
+  "why": "GamMan::get_se_oid(char *) tail-jumps to it (0x28edc0)"
+ },
+ "001e4ebc": {
+  "name": "GamSndMan::playSE(unsignedint,bool,float*,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4ebc",
+  "why": "GamMan::playSE(unsigned int, bool, float *) tail-jumps to it with t0 = 0 (0x28ea44)"
+ },
+ "001e50c8": {
+  "name": "GamSndMan::playSE(unsignedint,int,int,float,int,int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_001e50c8",
+  "why": "GamMan::playSE(unsigned int, int, int, float, int, int) tail-jumps to it with t2 = 0 (0x28ea68)"
+ },
+ "001e5250": {
+  "name": "GamSndMan::playStr(int,int,float*,bool,unsignedint)",
+  "tag": "ror-inferred",
+  "was": "FUN_001e5250",
+  "why": "GamMan::playStr(int, int, float *, bool, unsigned int) tail-jumps to it (0x28eaac)"
+ },
+ "001e5428": {
+  "name": "GamSndMan::playStr(int,int,int,float,int,int,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_001e5428",
+  "why": "GamMan::playStr(int, int, int, float, int, int) tail-jumps to it with t2 = 0 (0x28eacc)"
+ },
+ "001e5540": {
+  "name": "GamSndMan::set_str_3d_snd_prm",
+  "tag": "ror-inferred",
+  "was": "FUN_001e5540",
+  "why": "GamMan::set_str_3d_snd_prm(int, int, int, int, int) forwards to it (0x28ece0)"
+ },
+ "001e5660": {
+  "name": "GamSndMan::funcStr",
+  "tag": "ror-inferred",
+  "was": "FUN_001e5660",
+  "why": "GamMan::funcStr(int, SND_FUNC_NO, void *) tail-jumps to it (0x28eaf0)"
+ },
+ "001e5be0": {
+  "name": "GamSndMan::getStrNoByChan",
+  "tag": "ror-inferred",
+  "was": "FUN_001e5be0",
+  "why": "GamMan::getStrNoByChan(int) tail-jumps to it (0x28ed08)"
+ },
+ "001e5de4": {
+  "name": "GamSndMan::set_se_3d_snd_prm",
+  "tag": "ror-inferred",
+  "was": "FUN_001e5de4",
+  "why": "GamMan::set_se_3d_snd_prm(int, int, int, int, int) forwards to it (0x28ecb8)"
+ },
+ "001e5e58": {
+  "name": "GamSndMan::funcSE",
+  "tag": "ror-inferred",
+  "was": "FUN_001e5e58",
+  "why": "GamMan::funcSE(unsigned int, SND_FUNC_NO, void *) tail-jumps to it (0x28ea8c); a switch on the function number over the 0x30 SE records at +0xd40"
+ },
  "001e6570": {
   "name": "GamSndMan::clear_snd_lst",
   "tag": "ror-inferred",
@@ -7870,6 +8020,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e6734",
   "why": "GamMan::funcSnd(SND_FUNC_NO, int, int, int, int) forwards to it; sets the master volumes, starts TskSnd"
+ },
+ "001e6cac": {
+  "name": "GamSndMan::isPlayEnvStr",
+  "tag": "ror-inferred",
+  "was": "FUN_001e6cac",
+  "why": "GamMan::isPlayEnvStr() tail-jumps to it with this + 0x18e00 (0x28ee48)"
  },
  "001e71fc": {
   "name": "CmnTaskMan::addTask",

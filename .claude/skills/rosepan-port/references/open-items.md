@@ -222,6 +222,13 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      for rxThDispatchAlarm / s_yieldSema (platform layer) probably belongs before more natives -- not
      queued without the user. Next natives here: 252 (sound, 201 cases, ~40 unnamed GamSndMan callees:
      a session of its own), then 156, 020, 100, 212.
+  10g. DONE 2026-10-26 (session 13 of `sequence/seqcall.cpp`, now `verify`): native 252 (sound, 67
+     handlers) written -- every entry of the native table is code now. Its ~25 GamSndMan callees are
+     named from GamMan's inline forwarders and stubbed in game/gamsnd.cpp (stopObjSe / releaseObjSe
+     renamed del_se_3d_pos_chr / del_str_3d_pos_chr); GamMan's SE pack swaps 0x1c7500..0x1c76cc
+     written ahead. The boot smoke run stops at NowLoading, so nothing reaches 252 yet. The sound side
+     it drives is game/gamsnd.cpp (funcSE 0x1e5e58 / funcStr 0x1e5660 / playSE / playStr are the core),
+     a TU of its own once the stage-2 start runs.
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

@@ -18,9 +18,8 @@
 // changes), 032, 033, 036, 038, 039, 106 (motion speed), 110, 151 (object
 // control), 152 (object queries), 155 (vfchr objects), 016 (camera), 023
 // (area triggers), 026, 156 (ray tests), 200 (turns), 202 / 211 (achr
-// moves), 100 (actor motions), 212 (enemies), 253 (movies) and 281
-// (scene effects) with its helpers. The others are stubs (seqcall.h
-// lists them).
+// moves), 100 (actor motions), 212 (enemies), 252 (sound), 253 (movies)
+// and 281 (scene effects) with its helpers: every entry of the table.
 
 #include "sequence/seqcall.h"
 
@@ -2413,6 +2412,283 @@ intptr_t seqFunc212(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Sound (jump table data 0x301280, a0 0..200; 131 of the 201 entries do
+// nothing): the script's calls into GamSndMan, GamMan's member at
+// +0x18e00. 1..8 and 42..47 the sound functions (funcSnd), master
+// volumes and reverb; 10..32 SEs; 52..92 streams; 48 and 100..102 SE
+// pack swaps; 200 a stream started looping. a1 is the SE / stream id
+// (or a name), a2..t1 its arguments; script vectors and names are
+// addresses in the script image. Most cases return 0; the queries return
+// their result, 81 / 82 wait on one.
+
+// The movie task runs: native 252 plays no SE.
+static int seqMoviePlays(void)
+{
+    return g_taskMan.getTask(g_gamMan.m_movieTaskId) != NULL;
+}
+
+// callcheck: operator_new, TskSnd, addTask, getTask (case 30 the new expression; inline in the ROM: seqAddTask, seqMoviePlays)
+// ROR 0x0020c6fc
+
+intptr_t seqFunc252(intptr_t id, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t t0, intptr_t t1)
+{
+    GamMan    &gam = g_gamMan;
+    GamSndMan &snd = gam.m_sndMan;
+    u_int      se = (u_int)a1;
+    int        str = (int)a1;
+    // The ROM builds these on its stack and leaves the words it does not
+    // set unset; PC: zeroed.
+    int         prm[8] = {};    // funcSE / funcStr 5 and 0xb: words 0, 1, 2, 4
+    TskSndParam task = {};      // 0x13 (the block TskSnd copies) and case 30
+
+    switch ((u_int)id)
+    {
+    case 1:
+        snd.funcSnd(0xd, (int)a1, (int)a2, 0, -1);
+        return 0;
+    case 2:
+        snd.funcSnd(0xd, (int)a1, (int)a2, (int)a3, -1);
+        return 0;
+    case 3:  // the 3D centre: 1 the camera
+        snd.m_mode = a1 != 0;
+        return 0;
+    case 4:
+        snd.unpush_snd(1, 0, -1);
+        snd.funcSnd(0x11, 0x40, 0x40, 0, -1);
+        return 0;
+    case 5:
+        snd.funcSnd(0x12, 0x40, 0x40, 0, -1);
+        return 0;
+    case 6:  // the SE master volume
+        snd.funcSnd(0xe, (int)a1, (int)a2, (int)a3, -1);
+        return 0;
+    case 7:  // the stream master volume
+        snd.funcSnd(0xf, (int)a1, (int)a2, (int)a3, -1);
+        return 0;
+    case 8:
+        snd.setReverb((int)a1, (int)a2, (int)a3);
+        return 0;
+
+    case 10:
+    case 13:
+        if (seqMoviePlays())
+            return 0;
+        snd.playSE(se, true, NULL, 0);
+        return 0;
+    case 11:  // stop
+        snd.unpush_snd(1, se, -1);
+        snd.funcSE(se, 1, NULL);
+        return 0;
+    case 12:  // at the position a2 (NULL none)
+        if (seqMoviePlays())
+            return 0;
+        snd.playSE(se, false, (float *)a2, 0);
+        return 0;
+    case 14:
+        if (seqMoviePlays())
+            return 0;
+        snd.playSE(se, (int)a2, (int)a3, seqWordFloat(t0), (int)t1, 0, 0);
+        return 0;
+    case 15:
+        snd.unpush_snd(1, se, -1);
+        snd.funcSE(se, 8, NULL);
+        return 0;
+    case 16:
+    case 17:
+        prm[0] = (int)a2;
+        prm[1] = (int)a3;
+        memcpy(&prm[2], (const float *)t0, sizeof(float));
+        prm[4] = (int)t1;
+        snd.funcSE(se, id == 16 ? 5 : 0xb, prm);
+        return 0;
+    case 18:
+        task._00[0] = (int)a1;
+        task._00[1] = (int)a2;
+        task._00[2] = (int)a3;
+        task._10[1] = (int)t0;
+        snd.funcSE(se, 0x13, &task);
+        return 0;
+    case 19:
+        snd.put_se_3d_pos(se, (float *)a2, (int)a3, 0);
+        return 0;
+    case 20:
+        snd.put_se_3d_pos_chr(se, (u_int)a2, 0);
+        return 0;
+    case 21:
+        snd.del_se_3d_pos(se, (int)a2);
+        return 0;
+    case 22:
+        snd.del_se_3d_pos_chr(se);
+        return 0;
+    case 23:  // in the current room
+        snd.put_se_3d_pos(se, (float *)a2, gam.getWrdNo(), 4);
+        return 0;
+    case 25:  // non-zero while it plays
+        return snd.funcSE(se, 0x16, NULL);
+    case 26:
+    case 27:
+    {
+        // The ROM passes the address of its spilled a2, t0 next to it.
+        int words[2] = { (int)a2, (int)t0 };
+        snd.funcSE(se, id == 26 ? 6 : 0xc, words);
+        return 0;
+    }
+    case 28:
+        return snd.get_se_oid((const char *)a1);
+    case 29:  // loop
+        snd.funcSE(se, 4, (void *)a2);
+        return 0;
+    case 30:
+        task._00[0] = (int)a1;
+        task._10[1] = (int)a2;
+        seqAddTask(new TskSnd(6, &task));
+        return 0;
+    case 31:
+        snd.put_se_3d_pos(se, (float *)a2, (int)a3, 0x20);
+        return 0;
+    case 32:
+        snd.put_se_3d_pos_chr(se, (u_int)a2, 0x20);
+        return 0;
+
+    case 40:
+        snd.set_se_3d_snd_prm(se, (int)a2, (int)a3, (int)t0, (int)t1);
+        return 0;
+    case 41:
+        snd.set_str_3d_snd_prm(str, (int)a2, (int)a3, (int)t0, (int)t1);
+        return 0;
+    case 42:
+    case 43:
+    case 44:
+        snd.funcSnd(0x1c + ((int)id - 42), (int)a1, 0x40, 0, -1);
+        return 0;
+    case 45:
+    case 46:
+        snd.loadSePack((const char *)a1, id == 46);
+        return 0;
+    case 47:  // the number in the first two characters of a1
+    {
+        const char *name = (const char *)a1;
+        char        num[3] = { name[0], name[1], 0 };
+        snd.funcSnd(0x19, 0, 0, 0, atoi(num));
+        return 0;
+    }
+    case 48:
+        gam.loadScriptSePack((const char *)a1);
+        return 0;
+    case 100:
+        gam.loadScriptSePack2((const char *)a1);
+        return 0;
+    case 101:
+        gam.reloadChapterSe1f();
+        return 0;
+    case 102:
+        gam.reloadChapterSe0c();
+        return 0;
+
+    case 52:
+        return snd.playStr(str, 1, NULL, false, 0);
+    case 53:  // stop
+        snd.unpush_snd(2, 0, str);
+        snd.funcStr(str, 1, NULL);
+        return 0;
+    case 54:
+    case 69:
+        snd.playStr(str, (int)a2, (int)a3, seqWordFloat(t0), (int)t1, -1, 0);
+        return 0;
+    case 55:
+        snd.unpush_snd(2, 0, str);
+        snd.funcStr(str, 8, NULL);
+        return 0;
+    case 56:
+    {
+        int words[2] = { (int)a2, (int)a3 };
+        snd.funcStr(str, 2, words);
+        return 0;
+    }
+    case 57:
+    {
+        int word = (int)a2;     // the ROM stores it through f0
+        snd.funcStr(str, 3, &word);
+        return 0;
+    }
+    case 58:  // loop
+        snd.funcStr(str, 4, (void *)a2);
+        return 0;
+    case 59:
+    case 60:
+        // Unlike 16 / 17, word 2 is t0 itself.
+        prm[0] = (int)a2;
+        prm[1] = (int)a3;
+        prm[2] = (int)t0;
+        snd.funcStr(str, id == 59 ? 5 : 0xb, prm);
+        return 0;
+    case 61:
+        task._00[0] = (int)a1;
+        task._00[1] = (int)a2;
+        task._00[2] = (int)a3;
+        task._10[1] = (int)t0;
+        snd.funcStr(str, 0x13, &task);
+        return 0;
+    case 63:
+        snd.put_str_3d_pos(str, (float *)a2, (int)a3, 0);
+        return 0;
+    case 64:
+        snd.put_str_3d_pos_chr(str, (u_int)a2, 0);
+        return 0;
+    case 65:
+        snd.del_str_3d_pos(str, (int)a2);
+        return 0;
+    case 66:
+        snd.del_str_3d_pos_chr((u_int)a1);
+        return 0;
+    case 67:  // in the current room
+        snd.put_str_3d_pos(str, (float *)a2, gam.getWrdNo(), 4);
+        return 0;
+    case 68:
+        return snd.playStr(str, (int)a2, NULL, false, 0);
+    case 70:
+        return snd.getStrNO((const char *)a1);
+    case 71:
+        snd.playStr(str, -1, (float *)a2, false, 0);
+        return 0;
+    case 72:
+        snd.put_str_3d_pos(str, (float *)a2, (int)a3, 0x20);
+        return 0;
+    case 73:
+        snd.put_str_3d_pos_chr(str, (u_int)a2, 0x20);
+        return 0;
+    case 80:  // non-zero while it plays
+        return snd.funcStr(str, 0x16, NULL);
+    case 81:  // until it plays
+        return snd.funcStr(str, 0x16, NULL) != 0 ? 0 : SEQ_RET_WAIT;
+    case 82:  // while it plays
+        return snd.funcStr(str, 0x16, NULL) != 0 ? SEQ_RET_WAIT : 0;
+    case 90:
+        return snd.playStr(str, 0, NULL, true, 0);
+    case 91:
+        return snd.isPlayEnvStr();
+    case 92:  // 61 on the stream of channel a1
+    {
+        int no = snd.getStrNoByChan((int)a1);
+        if (no == -1)
+            return 0;
+        task._00[0] = no;
+        task._00[1] = (int)a2;
+        task._00[2] = (int)a3;
+        task._10[1] = (int)t0;
+        snd.funcStr(no, 0x13, &task);
+        return 0;
+    }
+    case 200:  // started with flag 0x100, then looped
+        snd.playStr(str, 0, NULL, false, 0x100);
+        snd.funcStr(str, 4, (void *)1);
+        return 0;
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Movies (jump table data 0x3015b0, a0 0..10) over the TskMovie task
 // GamMan::m_movieTaskId: 1 starts the movie a1 (a name) once no movie
 // task is listed, stopping the sound first, and yields; 2 kills it and
@@ -2735,12 +3011,3 @@ const SeqFunc g_seqFuncTable[SEQ_FUNC_COUNT] = {
     /* 504 */ seqFuncNone, seqFuncNone, seqFuncNone, seqFuncNone,
     /* 508 */ seqFuncNone, seqFuncNone, seqFuncNone, seqFuncNone,
 };
-
-// ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x0020c6fc
-intptr_t seqFunc252(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc252", 0x0020c6fc);
-    return {};
-}

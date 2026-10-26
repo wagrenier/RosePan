@@ -304,6 +304,11 @@ entries are marked **RoR** with the date.
 - **A constructor with an initializer list parses as a function named after the base class**: its
   explanation still has to name the base constructor.
 - **stubgen finds one declaration per line**: write prototype blocks one per line.
+- **stubgen and overloads**: for an undefined overload it copies the first declaration of that name, so
+  two overloads get two identical stubs (redefinition error), and an overload whose name already has a
+  definition is never stubbed (the link stays red with the same undefined reference each pass). Write
+  those stubs by hand with their own signature and ROR address (2026-10-26, native 252: GamSndMan
+  playSE / playStr / loadSePack).
 - **stubgen places stubs by inference**: a stub can land in a wrong or new file; move it, delete the
   stray file.
 - **stubgen glues `public:` into the stub** when a class's first method follows an access label
