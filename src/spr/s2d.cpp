@@ -1388,7 +1388,7 @@ void S2dMovie::drawMovie(i3dContext *ctx, I3dLight *light, I3dView *view)
 {
     I3dLayer *layer;
 
-    if (g_rxMpeg.m_04 == 1 && (layer = createLayer(ctx, 890.0f)) != NULL) {
+    if (g_rxMpeg.m_playing == 1 && (layer = createLayer(ctx, 890.0f)) != NULL) {
         i3dLayerSetLight(layer, light);
         i3dLayerSetView(layer, view);
         i3dLayerEndPacket(layer, i3dPktSetReg(i3dLayerBeginPacket(layer), SCE_GS_TEST_1, S2D_LAYER_TEST));
@@ -1554,7 +1554,7 @@ void S2dMovie::playMovie(const char *name, int w, int h)
 
 int S2dMovie::isMovieEnd()
 {
-    return g_rxMpeg.isEnd();
+    return g_rxMpeg.isReady();
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1564,7 +1564,7 @@ int S2dMovie::isMovieEnd()
 int S2dMovie::stopMovie()
 {
     m_system->m_scene.pushSubMode();
-    return g_rxMpeg.stop();
+    return g_rxMpeg.run();
 }
 
 // ──────────────────────────────────────────────────────────────────────

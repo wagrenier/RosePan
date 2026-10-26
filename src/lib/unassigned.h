@@ -136,44 +136,8 @@ extern int g_bss_7a3d4c;        /* bss 0x7a3d4c: main sets 1 */
  * 0x1b4488, 0x216ad0, 0x217260 read it too. Role not known yet. */
 extern int g_bss_7a3210;        /* bss 0x7a3210 */
 
-/* The object at bss 0x7b40c0 (constructor 0x1810f4: sizes 0x200 / 0x180 /
- * 0xe00, between snd/sndman.cpp and snd/rxmpeg.cpp): a movie player, class
- * name unverified. The words are ints, so the EE offsets hold on the host.
- * layout: host -- only the words MagSystem and S2dMovie use. */
-struct I3dLayer;
-
-struct RxMpeg
-{
-    void open();                                                         // ROR 0x00181150
-    void setFrameParity(int parity);                                     // ROR 0x00181204
-    /* Draws the decoded frame into layer's packet. */
-    void draw(I3dLayer *layer);                                          // ROR 0x001812a8
-    /* Starts the movie name at w x h. */
-    void play(const char *name, int w, int h);                           // ROR 0x0018154c
-    /* Asks the library to stop; -1 when nothing plays. */
-    int  stop();                                                         // ROR 0x00181644
-    int  close();                                                        // ROR 0x001816b0
-    /* The library's status word, -1 when not open (callers: 0 playing, 1 finished). */
-    int  getStatus();                                                    // ROR 0x0018173c
-    int  isEnd();                                                        // ROR 0x0018176c
-    /* Non-zero when the movie is to be skipped (0x182a60); then, once
-     * (+0x34), fades the scene out when it is not fading and bit 0x8000000
-     * of g_sequence.m_bits[1] is set. */
-    int  checkSkip();                                                    // ROR 0x00181780
-    /* Once a frame from SndMan::update (frame parity and the decoder). */
-    void update();                                                       // ROR 0x0018120c
-    /* Empty in the ROM; SndMan::update calls it after rxSndUpdate. */
-    void postUpdate();                                                   // ROR 0x00181494
-
-    int  m_active;              // ROR 0x00: open sets it, close / the constructor clear it; MagSystem::waitVSync runs rxThVSync while set
-    int  m_04;                  // ROR 0x04: 1 = S2dMovie::drawMovie draws a frame; RxMpeg::stop tests it
-    int  _08[(0x44 - 0x08) / 4];
-    char m_name[0x80];          // ROR 0x44: S2dMovie::playMovie copies the name here (0xc4 is the next word close reads)
-};
-static_assert(offsetof(RxMpeg, m_04) == 0x04, "m_04");
-static_assert(offsetof(RxMpeg, m_name) == 0x44, "m_name");
-
-extern RxMpeg g_rxMpeg;         /* bss 0x7b40c0 */
+/* ---- the movie player: moved to snd/rxmpeg.h ---- */
+#include "snd/rxmpeg.h"
 
 /* ---- the file reader: moved to game/gamfile.h ---- */
 #include "game/gamfile.h"

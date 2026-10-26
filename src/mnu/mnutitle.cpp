@@ -574,14 +574,14 @@ int MnuTitle::execLogo(BedPad *pad)
         m_step = 9;
         /* fall through */
     case 9:
-        if (g_rxMpeg.isEnd() != 1)
+        if (g_rxMpeg.isReady() != 1)
             return 0;
-        g_rxMpeg.stop();
+        g_rxMpeg.run();
         m_timer = 0;
         m_step = 10;
         break;
     case 10:
-        g_rxMpeg.checkSkip();
+        g_rxMpeg.checkNearEnd();
         if (g_rxMpeg.getStatus() != 1)
             return 0;
         g_rxMpeg.close();
@@ -608,10 +608,10 @@ int MnuTitle::execLogo(BedPad *pad)
         m_step = 0x12;
         /* fall through */
     case 0x12:
-        if (g_rxMpeg.isEnd() != 1)
+        if (g_rxMpeg.isReady() != 1)
             return 0;
         m_timer = 0;
-        g_rxMpeg.stop();
+        g_rxMpeg.run();
         g_sequence.m_bits[1] &= ~0x8000000u;
         m_step = 0x13;
         break;
@@ -629,7 +629,7 @@ int MnuTitle::execLogo(BedPad *pad)
             m_timer = 0;
             break;
         }
-        if (g_rxMpeg.checkSkip() == 1) {
+        if (g_rxMpeg.checkNearEnd() == 1) {
             g_sndMan.fadeOut(0x3c);
             m_step = 0x14;
             sprite(6).m_state = 1;

@@ -362,7 +362,15 @@ struct GamMan
     /* EmyManager's two object ids into +0x22004 / +0x22008. */
     void getEmyOids();                                                   // ROR 0x001c6a04
     void pause(u_int mask);                                              // ROR 0x001c6a40
-    /* Copies one status word (which = 1.., see the switch) to *out. */
+    /* m_playMinutes plus the minutes in m_vcount (1800 frames each). */
+    int  getPlayMinutes();                                               // ROR 0x001c6c98
+    /* Copies one status word to *out: 1 m_flags, 2 m_vcount, 3 the play
+     * minutes, 4 m_chapter (a short), 5 / 6 m_21f7c / m_21f80, 7
+     * m_21f68, 8 m_cameraMode, 9 m_pcActor, 10 m_dogChrNo, 11
+     * m_murderChrNo, 12..14 the PC / dog / murderer ObjStat, 15 m_volume
+     * (a short), 16 m_optBrightLevel, 17..20 m_optOutput ..
+     * m_optMasterLevel, 21 &m_optOutput, 22 / 23 m_21fbc[0] / [1] (their
+     * bits), 25 m_findTargetItem, 26 m_equipItem, 28 m_04. */
     void getStatus(int which, void *out);                                // ROR 0x001c6ccc
     /* Camera mode 1..5 through MagSystem::setCameraMode; 4 / 5 take map
      * camera no (below getMapCamNum). */
@@ -558,6 +566,7 @@ struct GamMan
     };
 
     int          m_rate;            // ROR 0x00: getRate; the constructor sets 1
+    int          m_04;              // ROR 0x04: getStatus 28
     GamArea      m_area;            // ROR 0x40 (bss 0x781300)
     void        *m_18bc0;           // ROR 0x18bc0: 0x600 bytes (init)
     void        *m_18bc4;           // ROR 0x18bc4: 0xc00 bytes (init)
@@ -594,6 +603,8 @@ struct GamMan
     int          m_chapter;         // ROR 0x21f50: getChapter, the stage loadStage loaded
     int          m_21f54;           // ROR 0x21f54
     int          m_vcount;          // ROR 0x21f60: getVCount, frames since init
+    int          m_playMinutes;     // ROR 0x21f64: getPlayMinutes adds m_vcount's minutes
+    int          m_21f68;           // ROR 0x21f68: getStatus 7
     int          m_cameraMode;      // ROR 0x21f6c: getCameraMode
     int          m_21f70;           // ROR 0x21f70: setCameraMode's third word
     u_int        m_21f74;           // ROR 0x21f74: the map camera mode 4 set last, -1 none

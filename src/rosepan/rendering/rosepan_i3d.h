@@ -48,6 +48,13 @@ void RosePan_I3dRecordReg(const void *at, uint64_t reg, uint64_t value);
  * at replay, when i3dCtxFlushTextures has filled it. */
 void RosePan_I3dRecordTexRegs(const void *at, const uint64_t *regs);
 
+/* RxMpeg::draw's picture (snd/rxmpeg.cpp), at `at` in its layer packet:
+ * the live movie frame (rosepan_video.h, `pic_w` x `pic_h`) over x0..x1 x
+ * y0..y1 of a `frame_w` x `frame_h` frame buffer, where the ROM's image
+ * transfer would have written it.  Replayed in the layer's order like the
+ * primitives, so what draws after it (the fader) still covers it. */
+void RosePan_I3dRecordMovie(const void *at, int x0, int y0, int x1, int y1,
+                            int frame_w, int frame_h, int pic_w, int pic_h);
 /* i3dTexRegsSet / i3dTexRegsSetNone: the objects `regs` describes (NULL
  * texture = no texture). */
 void RosePan_I3dBindTexRegs(const uint64_t *regs, const void *tex, const void *clut,

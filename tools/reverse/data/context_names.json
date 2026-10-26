@@ -3275,11 +3275,29 @@
   "was": "FUN_00180f44",
   "why": "starts the voice with rxSndSePlay, applies volume / pitch / attribute, pause / resume / stop, frees at the end unless looping"
  },
+ "001810f4": {
+  "name": "RxMpeg::RxMpeg",
+  "tag": "ror-inferred",
+  "was": "FUN_001810f4",
+  "why": "the static initializer 0x2041f8 constructs bss 0x7b40c0 with it: +0 / +4 0, +0x18 / +0x1c / +0x20 0x80, +0x28 0xe00, +0x2c 0x200, +0x30 0x180"
+ },
+ "00181128": {
+  "name": "RxMpeg::~RxMpeg",
+  "tag": "ror-inferred",
+  "was": "FUN_00181128",
+  "why": "GCC 2 deleting destructor shape (operator delete when flags & 1), registered by the same static initializer"
+ },
  "00181150": {
   "name": "RxMpeg::open",
   "tag": "ror-inferred",
   "was": "FUN_00181150",
   "why": "g_rxMpeg: sets +0 = 1, +0x28 = 0xe00, clears +4 / +8 / +0x10 / +0x24 / +0x34 and resets the rxmpeg library state (0x1828c4, 0x182fdc / fc8 / f3c with 0)"
+ },
+ "001811d0": {
+  "name": "RxMpeg::setUserWord",
+  "tag": "ror-inferred",
+  "was": "FUN_001811d0",
+  "why": "+0x28 = 0xe00 and the argument into the library word 0x298fe0 (rxMpegSetUserWord); no callers"
  },
  "00181204": {
   "name": "RxMpeg::setFrameParity",
@@ -3305,17 +3323,35 @@
   "was": "FUN_00181494",
   "why": "empty; SndMan::update calls it after rxSndUpdate"
  },
+ "001814ac": {
+  "name": "RxMpeg::playNow",
+  "tag": "ror-inferred",
+  "was": "FUN_001814ac",
+  "why": "play's twin: stores w / h at +0x2c / +0x30 and tail-calls 0x1814cc, which opens through rxMpegOpenNow (run flag set: no prebuffer wait); MnuMovie 0x1ae330 uses it"
+ },
+ "001814cc": {
+  "name": "RxMpeg::startNow",
+  "tag": "ror-inferred",
+  "was": "FUN_001814cc",
+  "why": "when open: +0x40 = 0, then if the library is idle (status != 0) prepare + rxMpegOpenNow(name); +4 = 1 on success; returns the fd or -1"
+ },
  "0018154c": {
   "name": "RxMpeg::play",
   "tag": "ror-inferred",
   "was": "FUN_0018154c",
   "why": "stores w (+0x2c) and h (+0x30) and tail calls 0x18156c with the name; S2dMovie::playMovie passes the name copied to +0x44 and 0x200 x 0x180"
  },
+ "0018156c": {
+  "name": "RxMpeg::startPaused",
+  "tag": "ror-inferred",
+  "was": "FUN_0018156c",
+  "why": "when open: saves GamMan status 0x10 (the brightness level) at +0xc4, raises option 0 half way to 5, then loops prepare + rxMpegOpenPaused(name) until it opens; +4 = 1"
+ },
  "00181644": {
-  "name": "RxMpeg::stop",
+  "name": "RxMpeg::run",
   "tag": "ror-inferred",
   "was": "FUN_00181644",
-  "why": "when +4 == 1 asks the rxmpeg library to stop (0x182b7c sets its stop flag), with a MagSystem call 0x131184 when 0x7b2060's word +4 has bit 0x8000000; -1 when not playing"
+  "why": "was RxMpeg::stop: when +4 == 1 calls rxMpegRun 0x182b7c, which sets the run flag 0x298f38 = 1 and unpauses the ring (the decoder only demuxes while it is 1), plus a scene fadeIn(30, 7, 0) under sequence bit 0x8000000; execLogo calls it once isReady says the ring is primed"
  },
  "001816b0": {
   "name": "RxMpeg::close",
@@ -3330,22 +3366,370 @@
   "why": "when +0 == 1 returns the rxmpeg library's status word (0x1830f0), else -1"
  },
  "0018176c": {
-  "name": "RxMpeg::isEnd",
+  "name": "RxMpeg::isReady",
   "tag": "ror-inferred",
   "was": "FUN_0018176c",
-  "why": "tail call 0x182bfc: the rxmpeg library's end flag"
+  "why": "was RxMpeg::isEnd: tail-calls rxMpegIsReady (0x298f3c), which rxMpegUpdate sets once the ring holds 0x30000 bytes or playback started; execLogo waits on it before run"
  },
  "00181780": {
-  "name": "RxMpeg::checkSkip",
+  "name": "RxMpeg::checkNearEnd",
   "tag": "ror-inferred",
   "was": "FUN_00181780",
-  "why": "returns 0x182a60's result (non-zero: the movie is to be skipped) and, when it is set, the scene is not fading and bit 0x8000000 of the sequence bits word 1 is set, fades the scene out once (+0x34)"
+  "why": "was RxMpeg::checkSkip: rxMpegIsNearEnd (0x298f54, set when fewer than 0x2800 bytes of the file are left); once (+0x34) fades the scene out over 30 frames under sequence bit 0x8000000; returns the flag"
+ },
+ "0018182c": {
+  "name": "rxMpegPcmOpen",
+  "tag": "ror-inferred",
+  "was": "FUN_0018182c",
+  "why": "slot 0 of the open table data 0x298f68: (stereo, rate, iop, blocks) -> rxSndPcmOpen(stereo, iop, blocks)"
+ },
+ "00181848": {
+  "name": "rxMpegAdpcmOpen",
+  "tag": "ror-inferred",
+  "was": "FUN_00181848",
+  "why": "slot 1 of the open table data 0x298f68: tail-calls rxSndAdpcmOpen with the six arguments"
+ },
+ "0018185c": {
+  "name": "rxMpegAudioInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0018185c",
+  "why": "clears audio channel n (data 0x6e9288 + n * 0x40): type / stream -1, volumes 0x80, que 0, header 0x20 bytes zeroed"
+ },
+ "001818b4": {
+  "name": "rxMpegAudioReset",
+  "tag": "ror-inferred",
+  "was": "FUN_001818b4",
+  "why": "rxMpegAudioInit plus unitQueReset of the channel que (kept)"
+ },
+ "00181920": {
+  "name": "rxMpegAudioOpen",
+  "tag": "ror-inferred",
+  "was": "FUN_00181920",
+  "why": "opens the channel PCM / ADPCM stream through the open table when a type is known and none is open: (channels > 1, rate, 0, 8, 0, 8)"
+ },
+ "00181998": {
+  "name": "rxMpegAudioClose",
+  "tag": "ror-inferred",
+  "was": "FUN_00181998",
+  "why": "closes the channel stream through the close table 0x298f70 and sets it to -1"
+ },
+ "001819f4": {
+  "name": "rxMpegAudioIsOpen",
+  "tag": "ror-inferred",
+  "was": "FUN_001819f4",
+  "why": "stream >= 0 and type != -1"
+ },
+ "00181a24": {
+  "name": "rxMpegAudioCreate",
+  "tag": "ror-inferred",
+  "was": "FUN_00181a24",
+  "why": "unitQueCreate(0x20000) as the channel que, then rxMpegAudioReset"
+ },
+ "00181a70": {
+  "name": "rxMpegAudioDelete",
+  "tag": "ror-inferred",
+  "was": "FUN_00181a70",
+  "why": "unitQueDelete of the channel que"
+ },
+ "00181ab4": {
+  "name": "rxMpegAudioUpdate",
+  "tag": "ror-inferred",
+  "was": "FUN_00181ab4",
+  "why": "moves whole interleave * channels units from the channel que to the stream while it has room (get-free / write tables), then pause (0x298f14) and volume through the tables"
+ },
+ "00181bf4": {
+  "name": "rxMpegResetFrames",
+  "tag": "ror-inferred",
+  "was": "FUN_00181bf4",
+  "why": "two free picture buffers (data 0x6e9280 = 2), decode and display indices 0"
+ },
+ "00181c14": {
+  "name": "rxMpegCreatePictures",
+  "tag": "ror-inferred",
+  "was": "FUN_00181c14",
+  "why": "two pictures: BedMemory::allocDebug(w * h * 8 + 0x40) into 0x298f40, asserts voData (snd/rxmpeg.cpp 0x178 / 0x17c)"
+ },
+ "00181ce4": {
+  "name": "rxMpegDeletePictures",
+  "tag": "ror-inferred",
+  "was": "FUN_00181ce4",
+  "why": "utlMemFree(0x298f40)"
+ },
+ "00181d54": {
+  "name": "rxMpegVideoCallback",
+  "tag": "ror-inferred",
+  "was": "FUN_00181d54",
+  "why": "sceMpegAddStrCallback type 0 (M2V): copies the PES payload into the video que (arg) when it has room; 0 refuses"
+ },
+ "00181dd4": {
+  "name": "rxMpegAudioCallback",
+  "tag": "ror-inferred",
+  "was": "FUN_00181dd4",
+  "why": "sceMpegAddStrCallback types 2 / 3: the first payload SShd header (0x28 bytes from +4) into the channel, type 0x10+ = ADPCM; the samples into the channel que when it has room"
+ },
+ "00181eec": {
+  "name": "rxMpegErrorCallback",
+  "tag": "ror-inferred",
+  "was": "rxMpegErrorCallback",
+  "why": "sceMpegAddCallback type 0 (error): returns 1; was folded into 0x181dd4's body"
+ },
+ "00181ef4": {
+  "name": "rxMpegSetIpuDma",
+  "tag": "ror-inferred",
+  "was": "FUN_00181ef4",
+  "why": "DIntr, D_ENABLEW |= 0x10000, D4 (toIPU) CHCR = arg, D_ENABLEW restored, EIntr"
+ },
+ "00181f5c": {
+  "name": "rxMpegNodataCallback",
+  "tag": "ror-inferred",
+  "was": "FUN_00181f5c",
+  "why": "sceMpegAddCallback type 1: consumes the last DMA bytes from the video que and starts the next toIPU DMA of up to 0x80000 (2 KB units), or the end code 0x298fc0 when the file is spent"
+ },
+ "00182094": {
+  "name": "rxMpegStopDmaCallback",
+  "tag": "ror-inferred",
+  "was": "FUN_00182094",
+  "why": "sceMpegAddCallback type 2: 0x298f24 = 0, sceIpuStopDMA(0x6e9248)"
+ },
+ "001820d0": {
+  "name": "rxMpegRestartDmaCallback",
+  "tag": "ror-inferred",
+  "was": "FUN_001820d0",
+  "why": "sceMpegAddCallback type 3: sceIpuRestartDMA(0x6e9248), 0x298f24 = 1"
+ },
+ "0018210c": {
+  "name": "rxMpegSetUserWord",
+  "tag": "ror-inferred",
+  "was": "FUN_0018210c",
+  "why": "stores the argument in data 0x298fe0, which nothing reads"
  },
  "00182118": {
   "name": "rxMpegSetVCount",
   "tag": "ror-inferred",
   "was": "FUN_00182118",
   "why": "snd/rxmpeg.cpp; stores its argument into data 0x298fd0; MagSystem::vSyncCallback passes the V-blank count every V-blank"
+ },
+ "00182148": {
+  "name": "rxMpegSetDemuxed",
+  "tag": "ror-inferred",
+  "was": "FUN_00182148",
+  "why": "data 0x298fd4: rxMpegUpdate clears it each frame and sets it when the demux took bytes; write-only"
+ },
+ "00182154": {
+  "name": "rxMpegDecodeThread",
+  "tag": "ror-inferred",
+  "was": "FUN_00182154",
+  "why": "the call rxMpegStartDecode posts (rxThPostCall): until 0x298f44, while running decodes pictures (sceMpegGetPicture) into the free buffer while one is free and the video que holds over 0x800 bytes"
+ },
+ "001822c4": {
+  "name": "rxMpegDecodePoll",
+  "tag": "ror-inferred",
+  "was": "FUN_001822c4",
+  "why": "one pass of rxMpegDecodeThread's loop body; no callers in the ROM"
+ },
+ "0018240c": {
+  "name": "rxMpegRequestTrue",
+  "tag": "ror-inferred",
+  "was": "rxMpegRequestTrue",
+  "why": "returns 1: the request rxMpegStopDecode yields with; was folded into 0x1822c4's body"
+ },
+ "00182414": {
+  "name": "rxMpegStopDecode",
+  "tag": "ror-inferred",
+  "was": "FUN_00182414",
+  "why": "0x298f44 = 1, yields (rxThRequest(0x18240c) + rxThYield) until the rx call queue is empty, then 0"
+ },
+ "0018247c": {
+  "name": "rxMpegStartDecode",
+  "tag": "ror-inferred",
+  "was": "FUN_0018247c",
+  "why": "0x298f44 = 0, rxThPostCall(rxMpegDecodeThread)"
+ },
+ "001824c8": {
+  "name": "rxMpegCloseStream",
+  "tag": "ror-inferred",
+  "was": "FUN_001824c8",
+  "why": "bytes left 0, rxMpegStopDecode, rxFileClose of the ring fd, rxMpegAudioClose(0)"
+ },
+ "0018252c": {
+  "name": "rxMpegReset",
+  "tag": "ror-inferred",
+  "was": "FUN_0018252c",
+  "why": "when created: close the stream, clear the flags, status 0x298f18 = 1 (idle), sceMpegReset, audio and video que reset, IPU DMA on, volume 0x80, pause 0, rxMpegResetFrames"
+ },
+ "001825e4": {
+  "name": "rxMpegCreate",
+  "tag": "ror-inferred",
+  "was": "FUN_001825e4",
+  "why": "once: the ring buffer (0x60040, gBuffer) and the decoder work (gMpegWork) through the rx memory hook, pictures, audio channel, video que (0x80000), sceMpegCreate at 0x6e9200 and its callbacks; asserts snd/rxmpeg.cpp"
+ },
+ "00182818": {
+  "name": "rxMpegDelete",
+  "tag": "ror-inferred",
+  "was": "FUN_00182818",
+  "why": "when created: sceMpegReset / Delete, frees the video que, audio channel, pictures, work and ring buffer"
+ },
+ "001828c4": {
+  "name": "rxMpegInit",
+  "tag": "ror-inferred",
+  "was": "FUN_001828c4",
+  "why": "RxMpeg::open's first call: library words to their start values, sceMpegInit, rxMpegAudioInit(0)"
+ },
+ "00182928": {
+  "name": "rxMpegPrepare",
+  "tag": "ror-inferred",
+  "was": "FUN_00182928",
+  "why": "rxMpegCreate then rxMpegReset"
+ },
+ "0018294c": {
+  "name": "rxMpegOpenNow",
+  "tag": "ror-inferred",
+  "was": "FUN_0018294c",
+  "why": "movie/<name>: fileGetSize, rxSysStreamOpenRing on the ring buffer (0x60000, threshold 0x30000), status 0, run flag 1, rxMpegStartDecode; returns the fd or -1"
+ },
+ "00182a60": {
+  "name": "rxMpegIsNearEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00182a60",
+  "why": "returns data 0x298f54, which rxMpegUpdate sets when fewer than 0x2800 bytes are left"
+ },
+ "00182a6c": {
+  "name": "rxMpegOpenPaused",
+  "tag": "ror-inferred",
+  "was": "FUN_00182a6c",
+  "why": "rxMpegOpenNow with the run flag 0: the ring fills and rxMpegUpdate holds it until rxMpegRun"
+ },
+ "00182b7c": {
+  "name": "rxMpegRun",
+  "tag": "ror-inferred",
+  "was": "FUN_00182b7c",
+  "why": "when a file is open: run flag 0x298f38 = 1, rxFilePause(fd, 0)"
+ },
+ "00182bb4": {
+  "name": "rxMpegClose",
+  "tag": "ror-inferred",
+  "was": "FUN_00182bb4",
+  "why": "rxMpegReset, rxMpegDelete, ready and run flags 0"
+ },
+ "00182be8": {
+  "name": "rxMpegGetFrameCount",
+  "tag": "ror-inferred",
+  "was": "FUN_00182be8",
+  "why": "sceMpeg 0x6e9200 frameCount (+8), 0 when negative"
+ },
+ "00182bfc": {
+  "name": "rxMpegIsReady",
+  "tag": "ror-inferred",
+  "was": "FUN_00182bfc",
+  "why": "returns data 0x298f3c, set by rxMpegUpdate once the ring is primed"
+ },
+ "00182c08": {
+  "name": "rxMpegUpdate",
+  "tag": "ror-inferred",
+  "was": "FUN_00182c08",
+  "why": "per frame from RxMpeg::update: ready once primed, pauses the ring until run, demuxes up to 2 x 16 KB, opens the audio after the first picture, near-end / end flags, flips the shown picture every other frame, rxMpegAudioUpdate"
+ },
+ "00182f3c": {
+  "name": "rxMpegSetFlag4c",
+  "tag": "ror-inferred",
+  "was": "FUN_00182f3c",
+  "why": "data 0x298f4c = (arg != 0); nothing reads it"
+ },
+ "00182f58": {
+  "name": "rxMpegGetHeight",
+  "tag": "ror-inferred",
+  "was": "FUN_00182f58",
+  "why": "sceMpeg 0x6e9200 height (+4)"
+ },
+ "00182f64": {
+  "name": "rxMpegGetPicture",
+  "tag": "ror-inferred",
+  "was": "FUN_00182f64",
+  "why": "the shown picture: buffer 0x298f40 (64-aligned) + ((display index + 1) % 2) * w * h * 4"
+ },
+ "00182fc8": {
+  "name": "rxMpegDummy",
+  "tag": "ror-inferred",
+  "was": "FUN_00182fc8",
+  "why": "empty; RxMpeg::open calls it with 0"
+ },
+ "00182fdc": {
+  "name": "rxMpegSetFlag34",
+  "tag": "ror-inferred",
+  "was": "FUN_00182fdc",
+  "why": "data 0x298f34 = (arg != 0); nothing reads it"
+ },
+ "00182fec": {
+  "name": "rxMpegSetVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_00182fec",
+  "why": "data 0x298f10 = arg clamped 0..0x80 (start 0x80); RxMpeg::update passes +0x20; nothing reads it"
+ },
+ "001830dc": {
+  "name": "rxMpegSetPause",
+  "tag": "ror-inferred",
+  "was": "FUN_001830dc",
+  "why": "swaps data 0x298f14, returns the old value; it holds the shown picture and pauses the audio"
+ },
+ "001830f0": {
+  "name": "rxMpegGetStatus",
+  "tag": "ror-inferred",
+  "was": "FUN_001830f0",
+  "why": "data 0x298f18: 1 idle (reset) or finished (no picture left, under 5 bytes of the file), 0 playing (open)"
+ },
+ "001830fc": {
+  "name": "unitQueCreate",
+  "tag": "ror-inferred",
+  "was": "FUN_001830fc",
+  "why": "snd/unitque.cpp line 0x1b assert pQue: rx memory hook 0 allocates size + 0x40, +0x10 = size, unitQueReset"
+ },
+ "0018316c": {
+  "name": "unitQueDelete",
+  "tag": "ror-inferred",
+  "was": "FUN_0018316c",
+  "why": "frees the que through rx memory hook 3 when non-null"
+ },
+ "00183194": {
+  "name": "unitQueReset",
+  "tag": "ror-inferred",
+  "was": "FUN_00183194",
+  "why": "write / read / count / user word 0"
+ },
+ "001831a8": {
+  "name": "unitQueGetReadable",
+  "tag": "ror-inferred",
+  "was": "FUN_001831a8",
+  "why": "contiguous bytes from the read position: min(size - read, count)"
+ },
+ "001831c4": {
+  "name": "unitQueGetCount",
+  "tag": "ror-inferred",
+  "was": "FUN_001831c4",
+  "why": "returns +8, the bytes held"
+ },
+ "001831cc": {
+  "name": "unitQueGetFree",
+  "tag": "ror-inferred",
+  "was": "FUN_001831cc",
+  "why": "size - count"
+ },
+ "001831f8": {
+  "name": "unitQueWrite",
+  "tag": "ror-inferred",
+  "was": "FUN_001831f8",
+  "why": "copies len bytes in at the write position, wrapping at the size (data from +0x40)"
+ },
+ "001832a4": {
+  "name": "unitQueGetReadPtr",
+  "tag": "ror-inferred",
+  "was": "FUN_001832a4",
+  "why": "que + 0x40 + read position"
+ },
+ "001832b8": {
+  "name": "unitQueConsume",
+  "tag": "ror-inferred",
+  "was": "FUN_001832b8",
+  "why": "count -= n, read position += n modulo the size"
  },
  "001832e8": {
   "name": "msgGetSysText",
@@ -5890,6 +6274,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c6a40",
   "why": "sets halt flags by mask (0x100000, 0x100004, 0x100104, 0x80000 ...), counterpart of 0x1c65e8; the system call passes 0x100000 before every menu"
+ },
+ "001c6c98": {
+  "name": "GamMan::getPlayMinutes",
+  "tag": "ror-inferred",
+  "was": "FUN_001c6c98",
+  "why": "GamMan +0x21f64 plus +0x21f60 (getVCount, frames) / 1800: minutes at 30 frames a second; GamMan::getStatus case 3 returns it"
  },
  "001c6ccc": {
   "name": "GamMan::getStatus",

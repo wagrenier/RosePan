@@ -57,7 +57,8 @@ enum RecordKind
 {
     REC_PRIM,
     REC_REG,
-    REC_TEXREGS
+    REC_TEXREGS,
+    REC_MOVIE
 };
 
 struct Record
@@ -68,6 +69,7 @@ struct Record
     Vertex          v[4];
     uint64_t        reg, value;     /* REC_REG */
     const uint64_t *regs;           /* REC_TEXREGS */
+    int             movie[8];       /* REC_MOVIE: x0, y0, x1, y1, frame w / h, picture w / h */
 };
 
 struct Binding
@@ -345,6 +347,36 @@ void DrawPrim(const Record &r)
     }
 }
 
+/* The smallest power of two exponent covering n. */
+int CeilLog2(int n)
+{
+    int e = 0;
+    while ((1 << e) < n && e < 12)
+        e++;
+    return e;
+}
+
+void DrawMovie(const Record &r)
+{
+    const int *m = r.movie;
+    if (m[4] <= 0 || m[5] <= 0 || m[6] <= 0 || m[7] <= 0)
+        return;
+    const int tw = CeilLog2(m[6]), th = CeilLog2(m[7]);
+    const void *texture = RosePan_RendererVideoTexture(tw, th);
+    if (texture == nullptr)
+        return;
+    /* The transfer replaces the frame buffer's pixels: no blending, the
+     * whole frame. */
+    RestoreState();
+    const float sx = 640.0f / (float)m[4], sy = 448.0f / (float)m[5];
+    const float x0 = m[0] * sx, x1 = m[2] * sx, y0 = m[1] * sy, y1 = m[3] * sy;
+    const float s1 = (float)(m[2] - m[0]) / (float)(1 << tw);
+    const float t1 = (float)(m[3] - m[1]) / (float)(1 << th);
+    const float xy[8] = {x0, y0, x1, y0, x0, y1, x1, y1};
+    const float uv[8] = {0.0f, 0.0f, s1, 0.0f, 0.0f, t1, s1, t1};
+    RosePan_RendererDrawImageQuad(texture, xy, uv, 0x80, 0x80, 0x80, 0x80, 1);
+}
+
 void ApplyReg(uint64_t reg, uint64_t value)
 {
     switch (reg)
@@ -469,6 +501,16 @@ void RosePan_I3dRecordTexRegs(const void *at, const uint64_t *regs)
     s_records[(uintptr_t)at] = r;
 }
 
+void RosePan_I3dRecordMovie(const void *at, int x0, int y0, int x1, int y1,
+                            int frame_w, int frame_h, int pic_w, int pic_h)
+{
+    Record r = {};
+    r.kind = REC_MOVIE;
+    const int m[8] = {x0, y0, x1, y1, frame_w, frame_h, pic_w, pic_h};
+    memcpy(r.movie, m, sizeof(m));
+    s_records[(uintptr_t)at] = r;
+}
+
 void RosePan_I3dBindTexRegs(const uint64_t *regs, const void *tex, const void *clut,
                             unsigned int clut_index)
 {
@@ -507,6 +549,7 @@ void RosePan_I3dReplay(const void *start, const void *end)
         case REC_REG:     ApplyReg(r.reg, r.value); break;
         case REC_TEXREGS: s_state.tex_regs = r.regs; s_state.direct_tex0 = false; break;
         case REC_PRIM:    DrawPrim(r); drew = true; break;
+        case REC_MOVIE:   DrawMovie(r); drew = true; break;
         }
     }
     if (drew)

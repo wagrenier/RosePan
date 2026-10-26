@@ -1655,6 +1655,52 @@ done:
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c6c98
+
+int GamMan::getPlayMinutes()
+{
+    return m_playMinutes + m_vcount / 1800;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c6ccc
+
+void GamMan::getStatus(int which, void *out)
+{
+    u_int *word = (u_int *)out;
+    switch (which) {
+    case 1:    *word = m_flags; break;
+    case 2:    *word = (u_int)m_vcount; break;
+    case 3:    *word = (u_int)getPlayMinutes(); break;
+    case 4:    *(short *)out = (short)m_chapter; break;
+    case 5:    *word = (u_int)m_21f7c; break;
+    case 6:    *word = (u_int)m_21f80; break;
+    case 7:    *word = (u_int)m_21f68; break;
+    case 8:    *word = (u_int)m_cameraMode; break;
+    case 9:    *word = (u_int)m_pcActor; break;
+    case 10:   *word = (u_int)m_dogChrNo; break;
+    case 0xb:  *word = (u_int)m_murderChrNo; break;
+    // PC: the three ObjStat pointers whole (a word on the EE).
+    case 0xc:  *(ObjStat **)out = m_pcPtr; break;
+    case 0xd:  *(ObjStat **)out = m_dogPtr; break;
+    case 0xe:  *(ObjStat **)out = m_murderPtr; break;
+    case 0xf:  *(short *)out = (short)m_volume; break;
+    case 0x10: *word = (u_int)m_optBrightLevel; break;
+    case 0x11: *word = (u_int)m_optOutput; break;
+    case 0x12: *word = (u_int)m_optVibration; break;
+    case 0x13: *word = (u_int)m_21f94; break;
+    case 0x14: *word = (u_int)m_optMasterLevel; break;
+    // PC: the address whole (a word on the EE).
+    case 0x15: *(int **)out = &m_optOutput; break;
+    case 0x16: memcpy(out, &m_21fbc[0], 4); break;
+    case 0x17: memcpy(out, &m_21fbc[1], 4); break;
+    case 0x19: *word = (u_int)(u_short)m_findTargetItem; break;
+    case 0x1a: *word = (u_int)(u_short)m_equipItem; break;
+    case 0x1c: *word = (u_int)m_04; break;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // A new object id. Types 0 / 1 / 3 and 2 are achrs (list 1) with their own
 // counters (+0x225f8, +0x225f4), the other types below 10 take list and the
 // counter +0x225fc, all counted down past the ids isObj finds taken; types
@@ -2382,12 +2428,6 @@ void GamMan::getObjParam(u_int oid, int which, void *out)
 }
 
 // ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x001c6ccc
-void GamMan::getStatus(int which, void *out)
-{
-    ROSEPAN_STUB("GamMan::getStatus", 0x001c6ccc);
-}
 
 // stub of ROR 0x001c3d38
 void GamMan::setPcStartPos()

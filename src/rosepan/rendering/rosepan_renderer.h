@@ -761,6 +761,11 @@ void RosePan_RendererDrawImageQuad(const void *texture,
                                   unsigned char b,
                                   unsigned char a,
                                   int linear);
+/* The live movie's picture as such a handle (rosepan_video.h: the frame the
+ * decoder published, uploaded into one persistent texture of 1 << tw by
+ * 1 << th, the picture in its top-left corner).  NULL when no movie is live.
+ * For a native draw module that has no TEX0 to name the movie with. */
+const void *RosePan_RendererVideoTexture(int tw, int th);
 void RosePan_RendererDrawSolidQuad(const float *xy, const unsigned char *rgba);
 void RosePan_RendererDrawSolidTriangles2D(const float *xy,
                                          const unsigned char *rgba,
