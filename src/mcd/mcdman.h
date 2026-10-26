@@ -104,12 +104,14 @@ enum McdStep
  * spread into every class that holds an MnuMcd. EE 0x40. */
 struct McdDirEntry
 {
-    u_char m_00[0x10];          // ROR 0x00: the create / modify dates
+    sceMcStDateTime m_create;   // ROR 0x00
+    sceMcStDateTime m_modify;   // ROR 0x08: MnuSvld::readSlots shows it
     u_int  m_size;              // ROR 0x10: FileSizeByte
     u_char m_14[0x20 - 0x14];
     char   m_name[0x20];        // ROR 0x20: EntryName
 };
 static_assert(sizeof(McdDirEntry) == 0x40, "EE 0x40");
+static_assert(offsetof(McdDirEntry, m_modify) == 0x08, "m_modify");
 static_assert(offsetof(McdDirEntry, m_size) == 0x10, "m_size");
 static_assert(offsetof(McdDirEntry, m_name) == 0x20, "m_name");
 

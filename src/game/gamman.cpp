@@ -392,6 +392,54 @@ void GamMan::empty1c4f30()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Shows (process on, standard colour, state / disp on, anim - 1) or
+// hides the scene's message sprite no.
+// ROR 0x001c5094
+
+void GamMan::showMesSprite(int no, int show, int anim)
+{
+    S2dMes &mes = g_magSystem.m_scene.m_mes;
+    if (show != 0) {
+        mes.setSpriteProcessOn(no);
+        mes.setSpriteColorStd(no);
+        mes.setSpriteState(no, 1);
+        mes.setSpriteDisp(no, 1);
+        mes.setSpriteAnim(no, anim > 0 ? anim - 1 : 0);
+        return;
+    }
+    mes.setSpriteState(no, 0);
+    mes.setSpriteDisp(no, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c5168
+
+void GamMan::setMesSpritePos(int no, int x, int y)
+{
+    S2dMes &mes = g_magSystem.m_scene.m_mes;
+    mes.setSpriteStdPoint(no, 0, 0);
+    mes.setSpriteOffPoint(no, x << 4, y << 4);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c51e0
+
+void GamMan::fadeInMesSprite(int no, int time)
+{
+    S2dMes &mes = g_magSystem.m_scene.m_mes;
+    mes.setSpriteProcessOn(no);
+    mes.setSpriteFadeIn(no, time);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c5240
+
+void GamMan::fadeOutMesSprite(int no, int time)
+{
+    g_magSystem.m_scene.m_mes.setSpriteFadeOut(no, time);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Every frame: the frame count (bit 0 of the flags every 25 frames, the
 // reset bit 0x40000 cleared), the PC's and the dog's positions while the
 // game is not halted (flags2 0x8000000), the sound, and the area rects

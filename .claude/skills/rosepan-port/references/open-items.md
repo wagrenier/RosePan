@@ -176,6 +176,16 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      failed to open data/options.txt every frame (rxfile) -- the New Game load path, or a boot that
      raced; if a New Game press ends there, MagScene2's options.txt read (mag/magscene2.cpp) and
      the stage load are the first suspects.
+  10c. DONE 2026-10-25 (`verify`): `mnu/mnusvld.cpp` (pinned 0x1a59b8..0x1a90ec; the queue's
+     unassigned@001a6830 was its tail) -- all 40 MnuSvld functions, the save / load screen, plus
+     GamMan::showMesSprite / setMesSpritePos / fadeIn/OutMesSprite (0x1c5094..0x1c526c, written ahead
+     in game/gamman.cpp). A Load Game press (pad 1800:START,2400:START,2700:DOWN,2800:CROSS, ~100 s)
+     shows the screen: background, "Load Game" and the list frame match work/ref/mnusvld; the PC card
+     has no save, so MnuMcd::checkLoad stops at its "no data" prompt (3100:RIGHT,3200:CROSS quits back
+     to the title menu, seen). Not seen yet: the slot list rows (need a save on the card) and every
+     window text (**MsgMan / MsgManSet are stubs**: msg/msgman.cpp 0x18330c.. and 0x18741c..). Saving
+     needs **GamMan::writeSaveData 0x1d6078 / readSaveData 0x1d68a0** (unassigned@001d3b44, stubs).
+     Still next on the main road: the New Game press (2700:CROSS) and what it reaches.
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

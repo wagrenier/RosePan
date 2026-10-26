@@ -5549,6 +5549,12 @@
   "was": "FUN_001a5c78",
   "why": "the menu object at +0x40 of MagLifeMenuSave / Load: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
  },
+ "001a5c80": {
+  "name": "MnuSvld::loadTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_001a5c80",
+  "why": "SprTexture::setList(data 0x2a4530, data/mnurpk/mnusvld.rpk) on the member SprMan's texture, then update until loaded; same shape as MnuTitle::loadTexture"
+ },
  "001a5cc4": {
   "name": "MnuSvld::processPad",
   "tag": "ror-inferred",
@@ -5560,6 +5566,204 @@
   "tag": "ror-inferred",
   "was": "FUN_001a5cd8",
   "why": "the menu object at +0x40 of MagLifeMenuSave / Load: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a5d04": {
+  "name": "MnuSvld::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001a5d04",
+  "why": "if +0x1400 != 1: sets it 1, clears the step / sub state and cursors, MsgManSet::open; -1 when already open (as MnuTitle::open)"
+ },
+ "001a5d74": {
+  "name": "MnuSvld::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001a5d74",
+  "why": "clears the open flag +0x1400; -1 when not open (as MnuTitle::close)"
+ },
+ "001a5da0": {
+  "name": "MnuSvld::showWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_001a5da0",
+  "why": "(on): fades the scene window +0x2744 and S2dMes sprites 5 / 4 in or out once, remembered in +0x2748"
+ },
+ "001a5ed0": {
+  "name": "MnuSvld::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001a5ed0",
+  "why": "processPad tail-jumps to it: steps +0x144c (open the window, back up 14 S2dMes sprites, MnuMcd::init, display list, fade in), runs the sub screen +0x1450 (list / check / save / load), fades out, closes; 1 when done"
+ },
+ "001a65f0": {
+  "name": "MnuSvld::initWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001a65f0",
+  "why": "constructor: clears nine cursors at +0x1404, clearSlots, sets the counts +0x142c 12 (slots), +0x1430 5 (rows shown), +0x1448 36"
+ },
+ "001a665c": {
+  "name": "MnuSvld::setDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_001a665c",
+  "why": "pattern table 0x2a45c0 and display list 0x2a64e0 into the SprMan, sprite 62's anim 3 (load) or 1 (save), SprMan active; as MnuTitle::setDisp"
+ },
+ "001a66f0": {
+  "name": "MnuSvld::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001a66f0",
+  "why": "MsgManSet::update, SprMan::update; once the scene fade is past 4 sets bit 0x40000000 of the sequence bits word 1"
+ },
+ "001a6764": {
+  "name": "MnuSvld::makeSaveData",
+  "tag": "ror-inferred",
+  "was": "FUN_001a6764",
+  "why": "asserts m_svldBuf (line 708), clears the 0x3000 buffer, has GamMan 0x1d6078 write the game into it, MnuMcd::makeChecksum; returns the buffer"
+ },
+ "001a67d8": {
+  "name": "MnuSvld::applyLoadData",
+  "tag": "ror-inferred",
+  "was": "FUN_001a67d8",
+  "why": "asserts m_svldBuf (line 727), hands the loaded buffer to GamMan 0x1d68a0; returns 1"
+ },
+ "001a6830": {
+  "name": "MnuSvld::isSlotUsed",
+  "tag": "ror-inferred",
+  "was": "FUN_001a6830",
+  "why": "(slot): 1 when the slot record's first word (+0x2508 + slot * 0x2c) is not negative (clearSlots sets -1)"
+ },
+ "001a6858": {
+  "name": "MnuSvld::makeFileName",
+  "tag": "ror-inferred",
+  "was": "FUN_001a6858",
+  "why": "byte-identical twin of makeLoadName 0x1a68e0 with no caller: sprintf %s/%s%02d%d%d%02d%02d%02d of /BASLUS-21448, dt, slot and the slot record's five numbers"
+ },
+ "001a68e0": {
+  "name": "MnuSvld::makeLoadName",
+  "tag": "ror-inferred",
+  "was": "FUN_001a68e0",
+  "why": "the save file path of a listed slot from its record: sprintf %s/%s%02d%d%d%02d%02d%02d (/BASLUS-21448, dt, slot, the five numbers); execLoad passes it to MnuMcd::setLoadFile"
+ },
+ "001a6968": {
+  "name": "MnuSvld::makeSaveName",
+  "tag": "ror-inferred",
+  "was": "FUN_001a6968",
+  "why": "the save file path for the current game: GamMan::getStatus 4 (chapter) and 3 (play minutes) into the same format; execSave passes it to MnuMcd::setSaveFile"
+ },
+ "001a6ab8": {
+  "name": "MnuSvld::makeSaveDir",
+  "tag": "ror-inferred",
+  "was": "FUN_001a6ab8",
+  "why": "the slot's directory: %s/%s%d%d________ (new) or %s/%s with the existing dt<slot> entry's name from the card list (MnuMcd::getFileNum)"
+ },
+ "001a6bf8": {
+  "name": "MnuSvld::clearSlots",
+  "tag": "ror-inferred",
+  "was": "FUN_001a6bf8",
+  "why": "sets the eleven words of each of the 12 slot records (+0x2508, stride 0x2c) to -1"
+ },
+ "001a6c90": {
+  "name": "MnuSvld::setSlotDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_001a6c90",
+  "why": "(row, slot): chapter picture sprite 29+row (pattern 10 + chapter) and the play time text hh:mm or --:-- into sprite 41+row"
+ },
+ "001a6fe8": {
+  "name": "MnuSvld::setSlotsDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_001a6fe8",
+  "why": "setSlotDisp(i, i) for every slot (+0x142c)"
+ },
+ "001a7040": {
+  "name": "mnuBcdToInt",
+  "tag": "ror-inferred",
+  "was": "FUN_001a7040",
+  "why": "(b): (b & 0xff) >> 4 * 10 + (b & 15); the card date after sceScfGetLocalTimefromRTC"
+ },
+ "001a7060": {
+  "name": "mnuIntToBcd",
+  "tag": "ror-inferred",
+  "was": "FUN_001a7060",
+  "why": "(n): n / 10 * 16 + n % 10; the card date into sceCdCLOCK for sceScfGetLocalTimefromRTC"
+ },
+ "001a7088": {
+  "name": "MnuSvld::readSlots",
+  "tag": "ror-inferred",
+  "was": "FUN_001a7088",
+  "why": "parses the card's dt.. directory names (five two-digit numbers) into the slot records and their modify dates (to local time with sceScfGetLocalTimefromRTC)"
+ },
+ "001a7418": {
+  "name": "MnuSvld::scrollList",
+  "tag": "ror-inferred",
+  "was": "FUN_001a7418",
+  "why": "(dir 0 / 1): SprMan::setMove(1, cursor - row) and sprite 1's move mode 5: scrolls the slot list"
+ },
+ "001a7498": {
+  "name": "MnuSvld::setRowColor",
+  "tag": "ror-inferred",
+  "was": "FUN_001a7498",
+  "why": "(row or 12 for all, mode 0..4): colours / fades the row sprites 5+, 17+, 29+, 41+ (0 dim, 1 flash, 2 clear) and the frame sprites (3 grey, 4 full); jump table 0x2f9410"
+ },
+ "001a7b90": {
+  "name": "mnuSvldMakeTitle",
+  "tag": "ror-inferred",
+  "was": "FUN_001a7b90",
+  "why": "(buf, text): keeps the text's leading full-width spaces and puts the rest in brackets, snprintf %s[%s]%c into 0x40 bytes; no this"
+ },
+ "001a7c54": {
+  "name": "MnuSvld::setInfo",
+  "tag": "ror-inferred",
+  "was": "FUN_001a7c54",
+  "why": "(slot): the info texts: date MM/DD/YY, chapter title (msgGetSysText 0x1c6 + chapter), or Save data is corrupted, into sprites 64..67"
+ },
+ "001a7f40": {
+  "name": "MnuSvld::execIdle",
+  "tag": "ror-inferred",
+  "was": "FUN_001a7f40",
+  "why": "no callers: a sub screen that clears the slots and waits for the cancel button (SE 2, returns 2)"
+ },
+ "001a8000": {
+  "name": "MnuSvld::execList",
+  "tag": "ror-inferred",
+  "was": "FUN_001a8000",
+  "why": "sub screen 0: the slot list (move tables, cursor up / down with scrolling, decide / cancel), MnuMcd check 4; returns 1 check again, 2 save, 3 load, 999 leave"
+ },
+ "001a8730": {
+  "name": "MnuSvld::execCheck",
+  "tag": "ror-inferred",
+  "was": "FUN_001a8730",
+  "why": "sub screen 1: MnuMcd::startCheck 3 (load) / 2 (save), then readSlots and back to the list; 999 leave"
+ },
+ "001a891c": {
+  "name": "MnuSvld::execSave",
+  "tag": "ror-inferred",
+  "was": "FUN_001a891c",
+  "why": "sub screen 2: makeSaveDir / makeSaveName / makeSaveData, MnuMcd::setSaveFile, check mode 5 (execSave); 1 back to the check"
+ },
+ "001a8b7c": {
+  "name": "MnuSvld::execLoad",
+  "tag": "ror-inferred",
+  "was": "FUN_001a8b7c",
+  "why": "sub screen 3: makeLoadName, MnuMcd::setLoadFile, check mode 6 (execLoad), applyLoadData, sets +0x2754; 999 leave, 1 back"
+ },
+ "001a8d44": {
+  "name": "MnuSvld::execConfirm",
+  "tag": "ror-inferred",
+  "was": "FUN_001a8d44",
+  "why": "no callers: shows sprite 69 and waits for cancel with no other button (then 1)"
+ },
+ "001a8e84": {
+  "name": "MnuSvld::execGrid",
+  "tag": "ror-inferred",
+  "was": "FUN_001a8e84",
+  "why": "no callers: a cursor over +0x1448 (36) items in rows of 9 (left / right / up / down wrap), decide calls the empty 0x1a90dc / 0x1a90e4"
+ },
+ "001a90dc": {
+  "name": "MnuSvld::empty1a90dc",
+  "tag": "ror-inferred",
+  "was": "FUN_001a90dc",
+  "why": "returns 0; called only by the unreferenced execGrid (decide)"
+ },
+ "001a90e4": {
+  "name": "MnuSvld::empty1a90e4",
+  "tag": "ror-inferred",
+  "was": "FUN_001a90e4",
+  "why": "returns 0; called only by the unreferenced execGrid"
  },
  "001a90ec": {
   "name": "MnuTitle::MnuTitle",
@@ -6245,6 +6449,30 @@
   "was": "FUN_001c4f38",
   "why": "MagSystem::setActorAnim(m_pcActor, anim, 1); native 027 case 20"
  },
+ "001c5094": {
+  "name": "GamMan::showMesSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_001c5094",
+  "why": "(no, show, anim) on the scene's S2dMes 0x73e930: process on, standard colour, state / disp 1, anim - 1; or state / disp 0"
+ },
+ "001c5168": {
+  "name": "GamMan::setMesSpritePos",
+  "tag": "ror-inferred",
+  "was": "FUN_001c5168",
+  "why": "(no, x, y): S2dMes::setSpriteStdPoint(no, 0, 0), setSpriteOffPoint(no, x << 4, y << 4)"
+ },
+ "001c51e0": {
+  "name": "GamMan::fadeInMesSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_001c51e0",
+  "why": "(no, time): S2dMes::setSpriteProcessOn, setSpriteFadeIn"
+ },
+ "001c5240": {
+  "name": "GamMan::fadeOutMesSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_001c5240",
+  "why": "(no, time): S2dMes::setSpriteFadeOut"
+ },
  "001c526c": {
   "name": "GamMan::update",
   "tag": "ror-inferred",
@@ -6790,6 +7018,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001d5da0",
   "why": "ObjStat::setHide and resetObj (bit 0x40) call it with GamMan and the oid; not read yet"
+ },
+ "001d6078": {
+  "name": "GamMan::writeSaveData",
+  "tag": "ror-inferred",
+  "was": "FUN_001d6078",
+  "why": "(buf): the save screen's makeSaveData has it fill the 0x3000-byte save buffer before the checksum"
+ },
+ "001d68a0": {
+  "name": "GamMan::readSaveData",
+  "tag": "ror-inferred",
+  "was": "FUN_001d68a0",
+  "why": "(buf): the load screen's applyLoadData hands it the buffer read from the card"
  },
  "001d83d0": {
   "name": "GamMan::lookupFlagTable",

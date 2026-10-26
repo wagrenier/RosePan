@@ -1039,7 +1039,7 @@ int MnuTitle::execLoad(BedPad *pad)
         if (m_svld.processPad(pad) == 0)
             return 0;
         r = 1;
-        if (m_svld.m_2754 != 0)
+        if (m_svld.m_loaded != 0)
             r = 2;
         m_svld.term();
         m_step = 0;

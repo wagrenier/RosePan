@@ -1,6 +1,5 @@
 {
  "queue": [
-  "unassigned@001a6830",
   "sequence/seqcall.cpp",
   "unassigned@0020ff34",
   "game/gamman.cpp",
@@ -576,6 +575,24 @@
     ]
    ],
    "why": "MnuTextList (ctor 0x1a066c .. list draw 0x1a0be4); its allocator 0x1a08d4 passes the source path mnu/mnuselect.cpp to BedMemory::allocDebug"
+  },
+  "mnu/mnusvld.cpp": {
+   "notes": "Status verify: a Load Game press (pad 1800:START,2400:START,2700:DOWN,2800:CROSS, about 100 s) opens the screen and it matches work/ref/mnusvld (background, Load Game title, list frame; progress/ of this commit). Not visible yet, not from this TU: the slot rows need a save on the PC card (there is none, so MnuMcd::checkLoad waits at its no-data prompt; RIGHT then CROSS quits back to the title menu, seen), and every window text is blank because MsgMan / MsgManSet (msg/msgman.cpp 0x18330c.., 0x18741c..) are stubs. Saving needs GamMan::writeSaveData 0x1d6078 and readSaveData 0x1d68a0 (unassigned@001d3b44, stubs now). Mark done when a screenshot shows the list rows and texts. Decisions: MnuSvld holds its MnuMcd as member m_mcd at +0 (the ROM calls MnuMcd methods on this); the save buffer member is m_svldBuf (the assert text); MnuSvld now has a real constructor (runs before main in the global scene; sets m_save 1, the wrappers then set 0 for load). Names invented: all MnuSvld methods but the five ror ones, mnuBcdToInt / mnuIntToBcd / mnuSvldMakeTitle, the GamMan MesSprite helpers and write/readSaveData. Removed the stale unassigned@001a6830 from the queue; unassigned@0020ff34 in the queue looks stale too (pinned as sequence/seqvm.cpp).",
+   "ranges": [
+    [
+     "001a59b8",
+     "001a90ec"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-25 23:33",
+     "status": "verify",
+     "summary": "MnuSvld, the memory card save / load screen, written whole (40 functions; pinned mnu/mnusvld.cpp 0x1a59b8..0x1a90ec, which absorbed the queue's unassigned@001a6830): constructor / destructor, init / term / processPad / draw, exec (window, S2dMes backup, fades), the sub screens execList / execCheck / execSave / execLoad and the unreferenced execIdle / execConfirm / execGrid, slot records (MnuSvldSlot) parsed from the card's dtSSabCCHHMM directory names with their local dates, list rows / chapter pictures / play times / info texts, row colours (jump table 0x2f9410), the pattern image, display list and texture list from the ROM. Also GamMan::showMesSprite / setMesSpritePos / fadeInMesSprite / fadeOutMesSprite written ahead in game/gamman.cpp, McdDirEntry dates typed, a hidden function at 0x1a6858 created in Ghidra."
+    }
+   ],
+   "status": "verify",
+   "why": "MnuSvld's constructor 0x1a59b8 up to MnuTitle's constructor 0x1a90ec: the run 0x1a6830..0x1a90ec works on the same object (save-slot table at +0x2500, 11 entries of 0x2c; MnuMcd member) and is called from MnuSvld's code (0x1a5ed0, 0x1a65f0); file string area and class say mnu/mnusvld.cpp"
   },
   "mnu/mnutitle.cpp": {
    "notes": "Status verify: the code is complete but the plain boot stays black because execLogo waits at step 1 on MnuMcd::startCheck (a stub returning 0; MnuMcd init / processPad / term are stubs too, unassigned@001a0950, queued first). Proof it draws: a temporary run with the logo flag mnuTitleLogoDone (data 0x2a8400) forced to 1 skipped to the main menu and showed titlebg2 with New Game / Load Game / Option at the right places from the game's textures (progress/20261025-2016_mnu_mnutitle.cpp_menu-testflag.png; reference work/ref/MNUTITLE). Wrong in that shot, not from this TU: the whole ti_06 text sheet drawn 1:1 at the top left by no MnuTitle sprite (all 15 dumped: only 7 and 9..11 were on). Likely a primitive whose TEX0 is written directly (frame-buffer texture: SprMan::drawFrameCopy, SPR_TEX_FRAME or a scene effect) replayed by rosepan_i3d with the last bound texture. Mark this TU done when a boot screenshot shows the logos or the menu matching the reference. Next on the road after MnuMcd: RxMpeg (isEnd / getStatus / checkSkip must report the movie end or execLogo waits at steps 9..0x13), then a smoke_pad start press (BedPad m_7a bit 3) and cross (bit 14). Decisions: MnuTitle now has a real constructor (runs before main inside the global scene: SprMan's constructor and initCursors; MnuMcd / MnuSvld / MnuOpt / MnuTextList have none, their memory starts zeroed). Names invented: MnuTextList (0x1a066c..0x1a0bb8), the exec* sub-menu names, MnuMcd::startCheck, RxMpeg::checkSkip, GamMan::resetPcStat, GamSndMan::resetVolume. Unreached in retail: sub menus 2, 5, 6. The rest of unassigned@001a6830 (MnuOpt 0x1ab474.., MnuBoard2D, MnuMovie, MnuNow, MnuItem, and the save-screen code 0x1a6830..0x1a90ec that belongs to mnu/mnusvld.cpp) is still unassigned.",
