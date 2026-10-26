@@ -157,18 +157,6 @@ TskSnd::TskSnd(int kind, const TskSndParam *param)
     ROSEPAN_STUB("TskSnd::TskSnd", 0x001f8fc0);
 }
 
-// stub of ROR 0x001ec940 (a constructor: stubgen leaves it to hand)
-TskMoveSectaFindPath::TskMoveSectaFindPath(u_int, intptr_t, int, int, int, int, float, float)
-{
-    ROSEPAN_STUB("TskMoveSectaFindPath::TskMoveSectaFindPath", 0x001ec940);
-}
-
-// stub of ROR 0x001ed998 (a constructor: stubgen leaves it to hand)
-TskMoveSecta::TskMoveSecta(u_int, int, intptr_t, int, int, float, float)
-{
-    ROSEPAN_STUB("TskMoveSecta::TskMoveSecta", 0x001ed998);
-}
-
 // stub of ROR 0x001fbc0c (a constructor: stubgen leaves it to hand)
 TskCamera::TskCamera(intptr_t, intptr_t)
 {
@@ -1561,3 +1549,17 @@ void MsgManSet::release(int window)
     ROSEPAN_STUB("MsgManSet::release", 0x0018761c);
 }
 
+
+// stub of ROR 0x001d81f0
+int GamMan::findSectaPath(int list, int from, int to, GamSectaPath *path)
+{
+    ROSEPAN_STUB("GamMan::findSectaPath", 0x001d81f0);
+    return {};
+}
+
+// stub of ROR 0x001d7b08
+int GamMan::getObjSectaNo(u_int oid, int list)
+{
+    ROSEPAN_STUB("GamMan::getObjSectaNo", 0x001d7b08);
+    return {};
+}

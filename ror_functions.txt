@@ -3821,7 +3821,7 @@
 /* 001d5ec4 000001b4 */ FUN_001d5ec4(){}
 /* 001d6078 00000828 */ GamMan::writeSaveData(){}  // ror
 /* 001d68a0 00001264 */ GamMan::readSaveData(){}  // ror
-/* 001d7b08 00000118 */ FUN_001d7b08(){}
+/* 001d7b08 00000118 */ GamMan::getObjSectaNo(){}  // ror
 /* 001d7c20 000001c4 */ FUN_001d7c20(){}
 /* 001d7de4 000000d4 */ FUN_001d7de4(){}
 /* 001d7eb8 0000001c */ GamMan::selectSectaList(){}  // ror
@@ -3832,7 +3832,7 @@
 /* 001d811c 00000060 */ GamMan::getSectaCell(){}  // ror
 /* 001d817c 00000048 */ GamMan::getSectaCellY(){}  // ror
 /* 001d81c4 0000002c */ FUN_001d81c4(){}
-/* 001d81f0 000001d0 */ FUN_001d81f0(){}
+/* 001d81f0 000001d0 */ GamMan::findSectaPath(){}  // ror
 /* 001d83c0 00000010 */ FUN_001d83c0(){}
 /* 001d83d0 000000d8 */ GamMan::lookupFlagTable(){}  // ror
 /* 001d84a8 00000008 */ GamMan::resetExtra(){}  // ror
@@ -4101,18 +4101,18 @@
 /* 001ec7e8 0000004c */ TskMovePointPath::stepRandomLoop(){}  // ror
 /* 001ec834 0000010c */ TskMovePointPath::aim(){}  // ror
 /* 001ec940 00000264 */ TskMoveSectaFindPath::TskMoveSectaFindPath(){}  // ror
-/* 001ecba4 00000034 */ FUN_001ecba4(){}
-/* 001ecbd8 00000004 */ FUN_001ecbd8(){}
-/* 001ecbe0 000001f4 */ FUN_001ecbe0(){}
-/* 001ecdd4 000000e8 */ FUN_001ecdd4(){}
-/* 001ecebc 00000080 */ FUN_001ecebc(){}
-/* 001ecf3c 000001c4 */ FUN_001ecf3c(){}
-/* 001ed100 000000d0 */ FUN_001ed100(){}
-/* 001ed1d0 000007c8 */ FUN_001ed1d0(){}
+/* 001ecba4 00000034 */ TskMoveSectaFindPath::~TskMoveSectaFindPath(){}  // ror
+/* 001ecbd8 00000004 */ TskMoveSectaFindPath::term(){}  // ror
+/* 001ecbe0 000001f4 */ TskMoveSectaFindPath::stepTurn(){}  // ror
+/* 001ecdd4 000000e8 */ TskMoveSectaFindPath::stepSlideHit(){}  // ror
+/* 001ecebc 00000080 */ TskMoveSectaFindPath::stepSlide(){}  // ror
+/* 001ecf3c 000001c4 */ TskMoveSectaFindPath::stepMotion(){}  // ror
+/* 001ed100 000000d0 */ TskMoveSectaFindPath::exec(){}  // ror
+/* 001ed1d0 000007c8 */ TskMoveSectaFindPath::aim(){}  // ror
 /* 001ed998 00000370 */ TskMoveSecta::TskMoveSecta(){}  // ror
-/* 001edd08 00000034 */ FUN_001edd08(){}
-/* 001edd3c 00000054 */ FUN_001edd3c(){}
-/* 001edd90 000005a0 */ FUN_001edd90(){}
+/* 001edd08 00000034 */ TskMoveSecta::~TskMoveSecta(){}  // ror
+/* 001edd3c 00000054 */ TskMoveSecta::term(){}  // ror
+/* 001edd90 000005a0 */ TskMoveSecta::exec(){}  // ror
 /* 001ee330 00000034 */ FUN_001ee330(){}
 /* 001ee364 00000004 */ FUN_001ee364(){}
 /* 001ee36c 0000013c */ FUN_001ee36c(){}

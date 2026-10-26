@@ -798,6 +798,13 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- TskMoveSectaFindPath (2026-10-26, task/tsk_chr.cpp): only aim (0x1ed1d0) writes a step pointer,
+  and only stepTurn; the constructor overwrites it after its first aim, but an aim from exec or
+  stepSlideHit that plays a turn motion leaves stepTurn for good, and stepTurn only re-aims -- so once a
+  leg turns by motion the achr stops walking. Kept as the ROM does. The ROM also never writes m_target
+  (+0x240, which stepMotion aims at) nor m_flags (+0x2a8): the port aims stepMotion at the current
+  cell's point and zeroes the flags. Check both the first time a script walks an achr through native
+  211 cases 30 / 40..51 on screen.
 - TskMoveTypeRound (2026-10-26, task/tsk_chr.cpp): stepPoint (modes 1 / 3) computes its off-ring push
   with the sign opposite to stepObj / stepObjMotion (inward when inside the ring). Mode 3 subtracts it
   (so it pushes outward, as the others do); mode 1 adds it, so a mode-1 achr inside the ring is pulled

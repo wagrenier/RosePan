@@ -1405,6 +1405,11 @@ TskSeqEvent, TskSysFunc, TskFrameFunc / TskGenFrameFunc.
   index (-1 non-virtual), pfn} at +0x80, copied from data 0x2fd940.. by the constructor; exec calls it
   and returns its result. Written as `int (TskMtnMove::*)()` on the host. The other Tsk* classes with a
   table of step functions (TskFrameFunc 0x2fe420) use the same idiom.
+- **Secta walks**: TskMoveSecta (kind 0xc) runs legs on ACHRstat::m_task[3] (+0x3e0), each a
+  TskMoveSectaFindPath (kind 0xb) over GamMan::findSectaPath 0x1d81f0 (a GamSectaPath: 127 cell
+  pointers, the count at +0x1fc; a cell's point at GamSecta +0x10) from GamMan::getObjSectaNo 0x1d7b08;
+  the leg reports into the owner's status word +0xc (4 no way, bit 2 done). Both GamMan functions are
+  stubs in unassigned@001d3b44.
 - **Achr task slots**: ACHRstat::m_task[2] (+0x3dc) is the motion task (chrMtnMove / chrChangeMotion
   replace it, addTask flags 0x11 = owned); m_task[1] the turn task; m_task[0] the move type task.
   Non-achr objects get a TskMtnMove with actor -1 whose step (0x1e8fbc) ends it at once.

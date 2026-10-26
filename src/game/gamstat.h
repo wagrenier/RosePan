@@ -270,15 +270,26 @@ struct GamSecta
     int   m_id;                     // ROR 0x00: ObjStat::get_o_secta_id
     int   _04;
     u_int m_flags;                  // ROR 0x08: bit 2, findSectaCell refuses it
-    int   _0c[4];
-    float m_x0;                     // ROR 0x1c: the bounds an object leaves (x0 <= x <= x1, z0 <= z <= z1)
+    int   _0c;
+    float m_pos[3];                 // ROR 0x10: the cell's point (x, y, z): TskMoveSectaFindPath walks to it
+    float m_x0;                   // ROR 0x1c: the bounds an object leaves (x0 <= x <= x1, z0 <= z <= z1)
     float m_z0;                     // ROR 0x20
     float m_x1;                     // ROR 0x24
     float m_z1;                     // ROR 0x28
 };
 static_assert(offsetof(GamSecta, m_flags) == 0x08, "m_flags");
 static_assert(offsetof(GamSecta, m_x0) == 0x1c, "m_x0");
+static_assert(offsetof(GamSecta, m_pos) == 0x10, "m_pos");
 static_assert(offsetof(GamSecta, m_z1) == 0x28, "m_z1");
+
+/* GamMan::findSectaPath's answer: the cells from the start to the goal (at
+ * most 127). layout: host -- cell pointers; EE offsets in the comments. */
+#define GAM_SECTA_PATH_MAX 127
+struct GamSectaPath
+{
+    GamSecta *m_cell[GAM_SECTA_PATH_MAX]; // ROR 0x000
+    int       m_num;                      // ROR 0x1fc: cells in m_cell
+};
 
 /* ObjStat::save's block: +0x100..+0x1b0 as the EE lays it out (GamMan
  * keeps the PC's and the dog's across a stage change). The cell words
