@@ -1,6 +1,6 @@
 {
  "queue": [
-  "unassigned@0012f008",
+  "unassigned@001810f4",
   "unassigned@001a6830",
   "sequence/seqcall.cpp",
   "unassigned@0020ff34",
@@ -8,8 +8,7 @@
   "unassigned@001fd424",
   "unassigned@001e46b8",
   "bed/bedpad.cpp",
-  "snd/rxmpeg.cpp",
-  "unassigned@001810f4"
+  "snd/rxmpeg.cpp"
  ],
  "settings": {
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
@@ -326,6 +325,33 @@
    ],
    "status": "verify",
    "why": "The I3D_BIN model root API: the id check (memcmp with I3D_BIN at 0x3039d0, root item type 0x52), relocation driver and the root data lookups (textures, node names). Bounded by the per-type accessor / fixup pairs before 0x22b1b0 (the root type's own fixups 0x22ad20 / 0x22adf8 sit there) and the I3D_I3M root check from 0x22b4b8. No source string; named after I3rRoot (DogModel's tag_I3rRoot_s)."
+  },
+  "mag/maglifefadekey.cpp": {
+   "ranges": [
+    [
+     "0012f298",
+     "0012fca8"
+    ]
+   ],
+   "why": "MagLifeFadeKeyHole ctor 0x12f298 (vtable 0x2e1cf8) through setMagnify (ends 0x12fca8); loadTexture / loadTextureByName / releaseTexture assert mag/maglifefadekey.cpp; MagLifeWindow::getCharMetrics 0x12fca8 asserts mag/maglifewindow.cpp"
+  },
+  "mag/maglifefader.cpp": {
+   "notes": "Done and seen: per-frame shots show the Sony logo ramping 32..212 over frames 109..115, and the disclaimer fading out at frame 420. The class moved from lib/unassigned.h to src/mag/maglifefader.h (m_30 is now m_frame, +0x34 m_time). Native module: ApplyReg marks a TEX0 written by i3dPktSetReg, DrawPrim skips textured prims until the next draw-set registers (logged once): frame-buffer copies are not drawn on the host (open-items Open questions). Doubt for mag/maglifefadekey.cpp: the vtable at 0x2e1cf8 is MagLifeFadeKeyHole, the code calls it MagLifeFadeKey (open-items). Next blocker: execLogo step 8 plays CP_LOGO.PSS and waits on RxMpeg::isEnd 0x18176c (open 0x181150, play 0x18154c stubs): unassigned@001810f4 queued first.",
+   "ranges": [
+    [
+     "0012f008",
+     "0012f298"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-25 21:26",
+     "status": "done",
+     "summary": "MagLifeFader (scene fader, fade kinds 0 and 4): constructor, start, stop, live and render, all 5 functions; extent pinned 0x12f008..0x12f298 and mag/maglifefadekey.cpp pinned 0x12f298..0x12fca8. rosepan_i3d now skips textured primitives with a direct TEX0 (SprMan::drawFrameCopy), which had painted the logo over the fader. The boot logo now fades in and out over 7 frames, then the Atlus disclaimer (MNUTITLE_00000800) fades in and out."
+    }
+   ],
+   "status": "done",
+   "why": "MagLifeFader's ctor (vtable 0x2e1ca8), start, stop, live (slot 2) and render (slot 6) form a run before MagLifeFadeKeyHole's ctor 0x12f298, which opens mag/maglifefadekey.cpp (its first asserting function 0x12f2f0 follows); no source-path string here, file named after the class like maglifefadekey.cpp"
   },
   "mag/maglifeman.cpp": {
    "notes": "Status verify: the S2d layers now run live and render every frame (one i3d primitive reaches rosepan_i3d without a texture object), but the screenshot stays black because their textures never load: game/gamfile.cpp fileGetSize 0x1be768 (queued next) makes the .rpk reads return 0 bytes. The first session whose screenshot shows an S2d layer marks this done. Decisions (open-items): MagLife has real virtuals for slots 1/2/6/7/8 only; slots 3-5 and 9+ remain plain members (getName is pure in MagLife0, so declaring it would make every life abstract). Lives not reconstructed yet (MagLifeFader slot 2/6 0x12f094/0x12f128, MagLife130da4, MagLifeWindow 0x12ff84/0x12ff9c, menus) run the base bodies. PC guards: update/draw skip a NULL life after the plife assert; add links the pod as head when the list was emptied (the ROM faults there). Open: deleteAll deletes every registered life; the scene's member lives must be removed before ~MagScene / 0x131f74 reach it.",
@@ -853,6 +879,7 @@
   },
   "unassigned@001056f8": {},
   "unassigned@0011262c": {},
+  "unassigned@0012f008": {},
   "unassigned@00164fc0": {},
   "unassigned@00190a78": {},
   "unassigned@001a0950": {},

@@ -496,18 +496,6 @@ void FUN_0017c340(Obj17c0f0 *obj, const float *pos, MagSectorHit **hit, int arg,
     ROSEPAN_STUB("FUN_0017c340", 0x0017c340);
 }
 
-// stub of ROR 0x0012f060
-void MagLifeFader::start(const MagFadeParam *p)
-{
-    ROSEPAN_STUB("MagLifeFader::start", 0x0012f060);
-}
-
-// stub of ROR 0x0012f080
-void MagLifeFader::stop()
-{
-    ROSEPAN_STUB("MagLifeFader::stop", 0x0012f080);
-}
-
 // stub of ROR 0x0013f0c0
 int MagScene::canOpenItemMenu()
 {

@@ -465,6 +465,15 @@ public:
   with alignments host statics do not get. rxSndIopRead recurses into its own bounce buffer and only
   stops when that buffer is 16-byte aligned (0x7b6b00 on the EE); unaligned on the host it recurses
   for ever. Give such buffers `alignas(16)` (or whatever the ROM address implies).
+- **RoR: a full-screen picture drawn again over everything** (2026-10-25, mag/maglifefader.cpp: the
+  logo stayed opaque while the fader's sprites reached the renderer with the right alpha). Cause:
+  SprMan::drawFrameCopy (S2dMovie's layer 1, every frame) writes TEX0 with i3dPktSetReg to sample
+  the other frame buffer; rosepan_i3d only binds textures through RosePan_I3dRecordTexRegs, so it
+  drew that sprite with the last bound texture -- the logo, on a layer after the fader. Fix:
+  ApplyReg marks a direct TEX0 and DrawPrim skips textured primitives until the next draw set's
+  registers (logged once). How it was found: a temporary log of every sprite DrawPrim draws (type,
+  tme, rgba, texture pointer) and of each RosePan_I3dReplay range, against MagLifeMan::draw's life
+  order -- the same texture pointer twice per frame, once before and once after the fader.
 
 ## How to debug (the method that worked)
 

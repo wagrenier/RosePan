@@ -101,6 +101,10 @@ struct GsState
     int             offx = kDefaultOffX;
     int             offy = kDefaultOffY;
     const uint64_t *tex_regs = nullptr;
+    /* A TEX0 written as a plain register (i3dPktSetReg) after the draw set's
+     * registers: GS memory the module does not hold -- SprMan::drawFrameCopy's
+     * other frame buffer, SPR_TEX_FRAME sprites. */
+    bool            direct_tex0 = false;
 };
 
 std::map<uintptr_t, Record> s_records;
@@ -110,6 +114,7 @@ GsState s_state;
 unsigned s_vu1_count;
 bool s_logged_offscreen;
 bool s_logged_notex;
+bool s_logged_direct_tex0;
 
 float FloatOf(uint32_t bits)
 {
@@ -227,6 +232,18 @@ void DrawPrim(const Record &r)
     const void *texture = nullptr;
     float tw = 1.0f, th = 1.0f;
     int decal = 0, linear = 1;
+    if (tme && gs.direct_tex0)
+    {
+        /* Drawn with the last bound texture it would paint that texture over
+         * the frame (the title's logo over the fader); left out until the
+         * module keeps frame-buffer copies. */
+        if (!s_logged_direct_tex0)
+        {
+            RosePan_LogPrintf("rosepan_i3d: textured primitive with a direct TEX0 (frame buffer) not drawn yet\n");
+            s_logged_direct_tex0 = true;
+        }
+        return;
+    }
     if (tme)
     {
         auto it = gs.tex_regs ? s_bindings.find(gs.tex_regs) : s_bindings.end();
@@ -335,6 +352,7 @@ void ApplyReg(uint64_t reg, uint64_t value)
     case kRegAlpha:    s_state.alpha = value; break;
     case kRegTest:     s_state.test = value; break;
     case kRegScissor:  s_state.scissor = value; break;
+    case kRegTex0:     s_state.direct_tex0 = true; break;
     case kRegXyOffset:
         s_state.offx = (int)(value & 0xffff);
         s_state.offy = (int)((value >> 32) & 0xffff);
@@ -487,7 +505,7 @@ void RosePan_I3dReplay(const void *start, const void *end)
         switch (r.kind)
         {
         case REC_REG:     ApplyReg(r.reg, r.value); break;
-        case REC_TEXREGS: s_state.tex_regs = r.regs; break;
+        case REC_TEXREGS: s_state.tex_regs = r.regs; s_state.direct_tex0 = false; break;
         case REC_PRIM:    DrawPrim(r); drew = true; break;
         }
     }

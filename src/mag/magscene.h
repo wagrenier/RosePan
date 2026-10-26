@@ -28,6 +28,7 @@
 #include "mag/magloader.h"
 #include "mag/maglifebwn.h"
 #include "mag/maglifebwnctrl.h"
+#include "mag/maglifefader.h"
 #include "mag/maglifeman.h"
 #include "mag/maglifemenu.h"
 #include "mag/maglifemenusp.h"

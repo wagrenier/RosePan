@@ -1727,6 +1727,12 @@
   "was": "FUN_0012eef0",
   "why": "stores MagLifeMenuSpecial2's vtable 0x2e1bc8 (rtti); openMenu 0x1000c..0x1000f news 0x70 bytes and runs it"
  },
+ "0012f008": {
+  "name": "MagLifeFader::MagLifeFader",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f008",
+  "why": "stores _vt$12MagLifeFader 0x2e1ca8 at +0x14, MagLife0 words (level 1), colour +0x38 0, frame / time +0x30 / +0x34 0; MagScene::MagScene runs it on +0x41850"
+ },
  "0012f060": {
   "name": "MagLifeFader::start",
   "tag": "ror-inferred",
@@ -1738,6 +1744,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0012f080",
   "why": "state 4, word 1 -1"
+ },
+ "0012f094": {
+  "name": "MagLifeFader::live",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f094",
+  "why": "vtable 0x2e1ca8 slot 2 (MagLife0::live's slot): counts m_04, in states 2..3 / 6..7 counts +0x30 up to +0x34 and then goes to state 4 / 8"
+ },
+ "0012f128": {
+  "name": "MagLifeFader::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f128",
+  "why": "vtable 0x2e1ca8 slot 6 (MagLife::render): a full-screen i3dPktSprite in colour +0x38 with alpha from the state (1 / 8 opaque, 2..3 ramp down, 6..7 ramp up)"
  },
  "0012f2f0": {
   "name": "MagLifeFadeKey::loadTexture",
