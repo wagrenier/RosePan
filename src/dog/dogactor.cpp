@@ -271,3 +271,9 @@ float DogActor::getMotionFrame120()
     float f = m_motion.m_frame * 60.0f;
     return f + f;
 }
+
+// stub of ROR 0x0010eba0
+void DogActor::setNodeScale(float scale, int node)
+{
+    ROSEPAN_STUB("DogActor::setNodeScale", 0x0010eba0);
+}

@@ -1463,8 +1463,17 @@ TskSeqEvent, TskSysFunc, TskFrameFunc / TskGenFrameFunc.
   heading), chrRotMotion / chrRotMotionBySign / chrRotToMotion (a turn played by a turn motion through
   TskChrRot's stepMotion). All replace ACHRstat::m_task[1]; their callers are the move tasks
   (TskMoveTypeGen, TskMoveSecta*) and 0x14a860 / 0x14bf1c / 0x154fd8.
-- Frame request list: data 0x2d8f68 (count) / 0x2d8f70 (32 oids), filled by 0x1f68bc (an object
-  pushed aside, table entry 0x2e50f4), cleared each frame by gamClearFrameReq (only 8 words).
+- Frame request list: data 0x2d8f68 (count) / 0x2d8f70 (32 oids), filled by chrStepAwayFrom 0x1f68bc
+  (achr a1 steps one unit away from object a0; a0 recorded; only reference a table word at 0x2e50f4),
+  cleared each frame by gamClearFrameReq (only 8 words, while the lookup scans all 32).
+- **Limbs**: ACHRstat::m_attr[0] bits 0..4 = Bip01 Neck / R UpperArm / L UpperArm / R Thigh / L Thigh;
+  chrRestoreLimb 0x1f5680 (from 0x165074) clears the bit and calls DogActor::setNodeScale(1.0, node)
+  0x10eba0: a 5-entry node / float list at DogActor +0x3f8 / +0x40c where 1.0 frees an entry (the
+  setter of other values, likely the limb loss, not found yet).
+- Last chr* helpers (2026-10-26): chrMtnMove2Achr 0x1f603c (10 callers 0x146944..0x168844) with the
+  folded, uncalled chrSetMtnMove2Step 0x1f616c; chrSetMotionByOid 0x1f627c (0x14e850, 0x14f360); the
+  uncalled chrCreateChr 0x1f6694 (no < 4 achr, < 10 fchr) and chrCreateFchr6 0x1f67a0 (fchr type 6,
+  params 0x32 / 0x33).
 
 ## The sound state (game/gamsnd.cpp, 0x1e0df0..0x1e7094, 2026-10-26)
 

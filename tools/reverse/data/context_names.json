@@ -641,6 +641,12 @@
   "was": "FUN_0010eb28",
   "why": "DogActor's slot 18: the translation row of m_matrix x the node's model matrix (asserts the model matrices)"
  },
+ "0010eba0": {
+  "name": "DogActor::setNodeScale",
+  "tag": "ror-inferred",
+  "was": "FUN_0010eba0",
+  "why": "5-entry list node +0x3f8 / float +0x40c: an entry for node gets the value, 1.0 frees it; else the first free (< 0) or 1.0 entry takes node and value. chrRestoreLimb passes 1.0; scale is a guess"
+ },
  "0010f298": {
   "name": "DogActor::resetShadow",
   "tag": "ror-inferred",
@@ -10205,6 +10211,12 @@
   "was": "FUN_001f5558",
   "why": "oid's actor's node by name (the inlined DogModel::getNodeIndexByName asserts, dogmodel.h 305) through DogActor vtable slot 18 getNodeWorldPos into out; 0 without actor, node, or with GamMan m_flags2 0x3000"
  },
+ "001f5680": {
+  "name": "chrRestoreLimb",
+  "tag": "ror-inferred",
+  "was": "FUN_001f5680",
+  "why": "part 0..4 picks achr attr word +0x3ec bit 1<<part and node Bip01 Neck / R UpperArm / L UpperArm / R Thigh / L Thigh; clears the bit (0 when unset) and calls DogActor 0x10eba0 with 1.0 on that node"
+ },
  "001f59b4": {
   "name": "chrMtnMove",
   "tag": "ror-inferred",
@@ -10229,11 +10241,29 @@
   "was": "FUN_001f5e48",
   "why": "achr: kills the +0x3dc task and starts a new 0xc0-byte task; else MagScene::changeActorMotion"
  },
+ "001f603c": {
+  "name": "chrMtnMove2Achr",
+  "tag": "ror-inferred",
+  "was": "FUN_001f603c",
+  "why": "chrMtnMove2 for achrs only: m_13c = motion, kills m_task[2] (id not reset), new TskMtnMove2(speed, actor, motion, a2, a3, oid) added with last arg 1; NULL for other objects"
+ },
+ "001f616c": {
+  "name": "chrSetMtnMove2Step",
+  "tag": "ror-inferred",
+  "was": "FUN_001f616c",
+  "why": "folded after chrMtnMove2Achr, no callers: achr's running m_task[2] task (findTask) gets f12 at +0x6c, TskMtnMove2::m_step"
+ },
  "001f61ec": {
   "name": "chrKillMotionTask",
   "tag": "ror-inferred",
   "was": "FUN_001f61ec",
   "why": "for an achr oid: kills the task in its slot +0x3dc (the motion task chrMtnMove / chrMtnMove2 start) and sets it -1; native 100 before direct motion changes"
+ },
+ "001f627c": {
+  "name": "chrSetMotionByOid",
+  "tag": "ror-inferred",
+  "was": "FUN_001f627c",
+  "why": "chrSetMotion(speed, GamMan::getActorNo(oid), a1, a2, a3, oid, t0 name)"
  },
  "001f6308": {
   "name": "chrSetMotion",
@@ -10247,6 +10277,18 @@
   "was": "FUN_001f6578",
   "why": "(item id, pos, rot): looks up the item's chr no (param 0xf) and model (0xb) in the system data 0x7a34e0, creates the object through GamMan 0x1ca72c (type 5) or 0x1cc250, places it with pos / rot when given; returns its oid; equipItem's held item"
  },
+ "001f6694": {
+  "name": "chrCreateChr",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6694",
+  "why": "MagSystem::loadModel(a0 unless 0xffff), makeOid(no < 4 ? 1 : no < 10 ? 2 : -1, no), addChr(model, oid, no), setObjPos / setObjRot when given; returns the oid; no callers"
+ },
+ "001f67a0": {
+  "name": "chrCreateFchr6",
+  "tag": "ror-inferred",
+  "was": "FUN_001f67a0",
+  "why": "makeOid(2, 6), addChr(-1, oid, 0xffff), setObjPos / setObjRot when given, setObjParam 0x32 (short a2) and 0x33 (float f12); returns the oid; no callers"
+ },
  "001f6878": {
   "name": "chrIsOidType2",
   "tag": "ror-inferred",
@@ -10258,6 +10300,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f688c",
   "why": "GamMan::update's first call: memset(0x2d8f70, 0, 0x20) and 0x2d8f68 = 0"
+ },
+ "001f68bc": {
+  "name": "chrStepAwayFrom",
+  "tag": "ror-inferred",
+  "was": "FUN_001f68bc",
+  "why": "achr a1 steps one unit away from object a0 (utlAtan2 of the positions, a random diagonal when degenerate) when testHitAt finds nothing 10 ahead and ObjStat::trySetPos succeeds; a0 recorded in the frame list 0x2d8f70 (once per frame)"
  },
  "001f6b28": {
   "name": "utlAddPolar",

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-26 19:27 at commit `0d7349e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-26 19:36 at commit `9ffebbb` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-26 19:27 at commit `0d7349e` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6670**, named **4291** (64%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 247, ror-inferred 2693
-- context-name ledger: 2940 entries; overrides of wrong library matches: 5
-- placed in a source file: 3556/6670 in 99 files
+- game functions: **6671**, named **4299** (64%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 247, ror-inferred 2701
+- context-name ledger: 2948 entries; overrides of wrong library matches: 5
+- placed in a source file: 3557/6671 in 99 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -24,13 +24,13 @@ Least-named game-code regions (64 KB blocks):
 | `00140000` | 37/293 (13%) | mag/magloader.cpp, mag/magsceneif.cpp, mag/magscenefocus.cpp |
 | `00170000` | 52/251 (21%) | snd/sndman.cpp, wrd/wrdsrv.cpp |
 | `00120000` | 73/283 (26%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
-| `00100000` | 118/301 (39%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmisc.cpp |
-| `001f0000` | 90/226 (40%) | task/tsk_chr.cpp, task/naga_chunk.cpp, task/tsk_bg_load.cpp |
+| `00100000` | 119/301 (40%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmisc.cpp |
+| `001f0000` | 97/227 (43%) | task/tsk_chr.cpp, task/naga_chunk.cpp, task/tsk_bg_load.cpp |
 | `00220000` | 161/331 (49%) | i3d/i3dlayer.cpp, i3d/i3dvram.cpp, i3d/i3dview.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **2714**; stubs: **326**
+- reconstructed RoR functions: **2721**; stubs: **327**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -38,7 +38,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/bed/bedpad.cpp` | 14 | 0 |
 | `src/bed/bedpfh.cpp` | 4 | 0 |
 | `src/bed/bedsubmode.cpp` | 0 | 2 |
-| `src/dog/dogactor.cpp` | 6 | 28 |
+| `src/dog/dogactor.cpp` | 6 | 29 |
 | `src/dog/dogentity.cpp` | 0 | 3 |
 | `src/dog/doglightpool.cpp` | 29 | 0 |
 | `src/dog/dogmodel.cpp` | 0 | 12 |
@@ -100,7 +100,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/spr/sprtexture.cpp` | 21 | 0 |
 | `src/system/sysnowloading.cpp` | 8 | 0 |
 | `src/system/system.cpp` | 11 | 0 |
-| `src/task/tsk_chr.cpp` | 144 | 0 |
+| `src/task/tsk_chr.cpp` | 151 | 0 |
 | `src/task/tsk_man.cpp` | 25 | 0 |
 | `src/utl/utlbtl.cpp` | 0 | 1 |
 | `src/utl/utlfile.cpp` | 2 | 0 |
@@ -112,10 +112,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 160 TUs: todo 113, partial 12, verify 46, done 9
-- next: **task/tsk_chr.cpp** (pinned in the queue)
-- pinned queue: task/tsk_chr.cpp, unassigned@001f82e4, unassigned@00192ac0, dog/dogmodel.cpp, dog/dogactor.cpp, mag/magscenelight.cpp, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
-- partial: `task/tsk_chr.cpp` 143/168 -- Left in this TU: 0x1f5680 (called from unassigned@00164fc0), 0x1f603c (from 00143d3c and 00164fc0), 0x1f627c (from 00143d3c), 0x1f6694, 0x1f67a0 -- the chr* hel
+- 160 TUs: todo 113, partial 11, verify 47, done 9
+- next: **unassigned@001f82e4** (pinned in the queue)
+- pinned queue: unassigned@001f82e4, unassigned@00192ac0, dog/dogmodel.cpp, dog/dogactor.cpp, mag/magscenelight.cpp, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
@@ -159,12 +158,14 @@ Least-named game-code regions (64 KB blocks):
 - verify: `spr/sprtexture.cpp` 21/21 -- Pinned 0x18f5b0..0x190a78. The code is complete; the smoke run reaches it (S2dMes / S2dMovie loadTexture) but every list ends in the error state because fileGet
 - verify: `system/sysnowloading.cpp` 8/8 -- Code complete, nothing on the boot path shows it yet: draw 0x2051cc is called only by the pfh loader 0x1be564 (GamMan load path, unassigned@001bde58), a stub, s
 - verify: `system/system.cpp` 11/14 -- Complete except the three static-init functions 0x2041f8 / 0x20439c / 0x2043bc, which the host compiler generates (the globals' definition order in system.cpp r
+- verify: `task/tsk_chr.cpp` 150/169 -- All of task/tsk_chr.cpp is now written; the inline dtors and empty terms the brief still lists as todo are in tsk_chr.h. Status verify: nothing on screen reache
 - verify: `task/tsk_man.cpp` 25/25 -- Pinned 0x1e7094..0x1e7f28 out of unassigned@001e6d54 (file name a guess, open-items). CmnITask slots: 1 get_task_type, 2 pause, 3 init, 4 exec(id, time, arg) no
 - verify: `utl/utlmisc.cpp` 24/24 -- Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and i
 - verify: `wrd/wrdsrv.cpp` 11/14 -- Verified by a temporary self-test (not committed) loading WRD.BIN stages 1 and 13: 49 rooms of 247 index slots, names, floors, captions, offsets, get / findByNa
 
 Recent sessions:
 
+- 2026-10-26 19:35 `task/tsk_chr.cpp` verify: Wrote the last chr helpers: chrRestoreLimb 0x1f5680 (limb attr bits 0..4 and Bip01 nodes, DogActor::setNodeScale 1.0), chrMtnMove2Achr 0x1f603c with the folded 
 - 2026-10-26 19:27 `task/tsk_chr.cpp` partial: Wrote TskAvoidMove whole (ctor 0x1ef184 replacing the hand stub, term, exec, aimAway / aimAwayHit / aimToward, stepAway / stepAwayHit / stepToward / stepNone: a
 - 2026-10-26 19:09 `task/tsk_chr.cpp` partial: Wrote TskMoveSectaFindPath whole (ctor 0x1ec940, exec 0x1ed100, term, aim 0x1ed1d0 with its inline setOff, stepTurn 0x1ecbe0, stepSlideHit 0x1ecdd4, stepSlide 0
 - 2026-10-26 18:55 `task/tsk_chr.cpp` partial: Wrote TskMoveTypeGen whole (native 202's straight moves: ctor with the achr move params 0x1100..0x1105, exec, term, dtor, aim 0x1e9cb4 over its 15 modes, retarg
@@ -172,12 +173,11 @@ Recent sessions:
 - 2026-10-26 18:27 `task/tsk_chr.cpp` partial: Wrote TskMovePointPath (ctor, exec, term, aim 0x1ec834, stepOnce / stepLoop / stepRandom / stepRandomLoop) and TskMoveTypeRound (ctor, exec with the HIT in movi
 - 2026-10-26 18:14 `task/tsk_chr.cpp` partial: Wrote TskChrRot (ctor 0x1f0434, exec, term, dtor, stepFrames 0x1f090c, stepMotion 0x1f0b50; kind 0xe) and its starters chrRotStart, chrRotTo, chrRotToIn, chrRot
 - 2026-10-26 18:06 `task/tsk_chr.cpp` partial: Wrote TskFrameFunc whole: the constructor switch over all 23 kinds (read from the asm: Ghidra cannot recover the 0xe98-byte jump table), exec, term, and its 18 
-- 2026-10-26 17:38 `task/tsk_chr.cpp` partial: Wrote TskMsgMan (ctor, exec end rules by mode, pause, term, dtor): the film's narration subtitles now open their window (Once upon a time, ...), but nothing dra
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `dog/dogactor.cpp` | partial | 6/28/146 | 31.5 | 89 | 5 |
-| `unassigned@001d3b44` | partial | 2/17/37 | 18.4 | 71 | 1 |
+| `dog/dogactor.cpp` | partial | 6/29/146 | 31.5 | 90 | 5 |
+| `unassigned@001d3b44` | partial | 2/17/37 | 18.4 | 72 | 1 |
 | `unassigned@00143d3c` | todo | 0/22/602 | 129.5 | 57 | 2 |
 | `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 52 | 4 |
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 48 | 3 |
@@ -185,9 +185,9 @@ Recent sessions:
 | `unassigned@00164fc0` | todo | 0/14/381 | 101.3 | 37 | 3 |
 | `unassigned@001dd5e8` | todo | 0/12/18 | 14.0 | 35 | 0 |
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 34 | 3 |
-| `unassigned@001f82e4` | todo | 0/8/52 | 16.5 | 33 | 2 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 33 | 4 |
-| `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
+| `unassigned@001f82e4` | todo | 0/8/52 | 16.5 | 33 | 2 |
+| `unassigned@0010f944` | partial | 2/5/12 | 2.2 | 31 | 3 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -212,6 +212,7 @@ Recent sessions:
 | `001875c0` | MsgManSet::getState | 7 | ror | stub | - |
 | `001874f4` | MsgManSet::setMessage | 7 | ror | stub | - |
 | `001d5bc8` | GamMan::queueObjUpdate | 7 | ror | stub | - |
+| `001d5a0c` | GamMan::testHitAt | 7 | ror | stub | - |
 | `00143d7c` | MagScene::setFog | 6 | ror | stub | - |
 | `00115cec` | DogModel::release | 6 | ror | stub | dog/dogmodel.cpp |
 | `00143fd0` | MagScene::updateFog | 6 | ror | stub | - |
@@ -220,8 +221,8 @@ Recent sessions:
 | `0018741c` | MsgManSet::open | 6 | ror | stub | - |
 | `001832e8` | msgGetSysText | 6 | ror | stub | - |
 | `001d7b08` | GamMan::getObjSectaNo | 6 | ror | stub | - |
-| `001d5a0c` | GamMan::testHitAt | 6 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 5 | ror | missing | - |
+| `00217f10` | utlAtan2 | 5 | ror | stub | - |
 | `001dd5e8` | GamArea::addTrg | 5 | ror | stub | - |
 | `001d544c` | GamMan::placeAchr | 5 | ror | stub | - |
 | `0011ade4` | MagLifePC::live | 5 | ror | stub | mag/maglifepc.cpp |
@@ -229,7 +230,6 @@ Recent sessions:
 | `001634d4` | EmyManager::releaseObj | 5 | ror | stub | - |
 | `0010a038` | DogActor::addTrans | 5 | ror | stub | dog/dogactor.cpp |
 | `0021a828` | i3rCopyClipSphere | 5 | lib-ctx | stub | - |
-| `00217f10` | utlAtan2 | 4 | ror | stub | - |
 | `001bebec` | GamFont::setFont | 4 | ror | stub | - |
 | `001ddc80` | GamArea::stopTrgs | 4 | ror | stub | - |
 | `001a074c` | MnuTextList::close | 4 | ror | stub | mnu/mnuselect.cpp |
