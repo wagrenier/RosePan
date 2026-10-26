@@ -5,7 +5,6 @@
 #include "game/gamsnd.h"
 #include "rx/rxsnd.h"
 #include "mnu/mnuSelectLanguage.h"
-#include "mcd/mcdman.h"
 #include "msg/msgman.h"
 
 #include "dog/dogentity.h"
@@ -1397,39 +1396,6 @@ int RxMpeg::checkSkip()
 {
     ROSEPAN_STUB("RxMpeg::checkSkip", 0x00181780);
     return {};
-}
-
-// stub of ROR 0x0018b9b8
-int McdMan::findSave(const char *name)
-{
-    ROSEPAN_STUB("McdMan::findSave", 0x0018b9b8);
-    return {};
-}
-
-// stub of ROR 0x0018b874
-int McdMan::hasIconSys()
-{
-    ROSEPAN_STUB("McdMan::hasIconSys", 0x0018b874);
-    return {};
-}
-
-// stub of ROR 0x0018bb28
-int McdMan::hasSpace()
-{
-    ROSEPAN_STUB("McdMan::hasSpace", 0x0018bb28);
-    return {};
-}
-
-// stub of ROR 0x00187788
-void McdMan::init()
-{
-    ROSEPAN_STUB("McdMan::init", 0x00187788);
-}
-
-// stub of ROR 0x001879c4
-void McdMan::term()
-{
-    ROSEPAN_STUB("McdMan::term", 0x001879c4);
 }
 
 // stub of ROR 0x00187464

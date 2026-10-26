@@ -1,12 +1,11 @@
 /* ==========================================================================
  *  sdk/libmc.h  (SCE PS2 memory-card library)
  *
- *  Only the eleven entry points the reconstructed system/mc modules reach are
- *  declared: sceMcInit, sceMcSync, sceMcGetInfo, sceMcGetDir, sceMcOpen,
- *  sceMcClose, sceMcRead, sceMcWrite, sceMcMkdir, sceMcDelete, sceMcFormat.
- *  ZERO2.MAP links the rest of libmc.a in (sceMcSeek, sceMcFlush, sceMcRename,
- *  sceMcChdir, sceMcUnformat, sceMcGetEntSpace, sceMcSetFileInfo, ...) but a
- *  scan of the loadable segments finds no call site for any of them.
+ *  The eleven entry points FF3's system/mc modules reach (sceMcInit, sceMcSync,
+ *  sceMcGetInfo, sceMcGetDir, sceMcOpen, sceMcClose, sceMcRead, sceMcWrite,
+ *  sceMcMkdir, sceMcDelete, sceMcFormat), plus the seven Rule of Rose's
+ *  McdMan also calls (sceMcGetSlotMax, sceMcSeek, sceMcFlush, sceMcUnformat,
+ *  sceMcChdir, sceMcRename, sceMcGetEntSpace; RoR 0x24d570..0x24e948).
  *
  *  The library is asynchronous: every request returns immediately with 0 when
  *  it was accepted, and the caller then polls sceMcSync() until it reports
@@ -135,6 +134,19 @@ int sceMcWrite(int fd, const void *buff, int size);
 int sceMcMkdir(int port, int slot, const char *name);
 int sceMcDelete(int port, int slot, const char *name);
 int sceMcFormat(int port, int slot);
+
+/* Rule of Rose's McdMan (mcd/mcdman.cpp) also reaches these. */
+/* Synchronous: the number of slots on port (1: no multitap). */
+int sceMcGetSlotMax(int port);
+int sceMcSeek(int fd, int offset, int mode);
+int sceMcFlush(int fd);
+int sceMcUnformat(int port, int slot);
+/* The host keeps no current directory: newDir must exist, curDir gets "/". */
+int sceMcChdir(int port, int slot, const char *newDir, char *curDir);
+/* Renames org (a path) to newName (a bare name in the same directory). */
+int sceMcRename(int port, int slot, const char *org, const char *newName);
+/* Entries still free in the directory's last cluster (two per KB cluster). */
+int sceMcGetEntSpace(int port, int slot, const char *path);
 
 #ifdef __cplusplus
 }

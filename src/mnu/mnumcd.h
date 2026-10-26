@@ -39,8 +39,9 @@ struct MagSystem;
  * offsets before it are exact. */
 struct MnuMcd
 {
-    /* callcheck: McdMan::McdMan, MsgMan::MsgMan (not written: the members
-     * start zeroed in the global scene). */
+    /* callcheck: McdMan::McdMan (the member's constructor, implicit on the
+     * host), MsgMan::MsgMan (not written: the member starts zeroed in the
+     * global scene). */
     MnuMcd();                                                            // ROR 0x001a1244
     /* callcheck: MsgMan::~MsgMan, McdMan::~McdMan (implicit). */
     ~MnuMcd();                                                           // ROR 0x001a12a8

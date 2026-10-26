@@ -3419,6 +3419,18 @@
   "was": "FUN_001879c4",
   "why": "calls releaseData; MnuMcd::close"
  },
+ "001879e0": {
+  "name": "McdMan::freeIconPack",
+  "tag": "ror-inferred",
+  "was": "FUN_001879e0",
+  "why": "frees +0x6e0 (the mcdicon.rpk buffer) and clears the icon pointer / size"
+ },
+ "00187a28": {
+  "name": "McdMan::loadIconPack",
+  "tag": "ror-inferred",
+  "was": "FUN_00187a28",
+  "why": "fileGetSize + allocDebug (mcd/mcdman.cpp line 281) + FileReader::read of data/mnurpk/mcdicon.rpk into +0x6e0"
+ },
  "00187b10": {
   "name": "McdMan::loadData",
   "tag": "ror-inferred",
@@ -3449,17 +3461,185 @@
   "was": "FUN_00187e08",
   "why": "(cmd): when idle (+0x5c 0) takes the command word cmd from its table, clears +0x68, status 1, returns 1; 6 when busy"
  },
+ "00187e44": {
+  "name": "McdMan::cmdGetInfo",
+  "tag": "ror-inferred",
+  "was": "FUN_00187e44",
+  "why": "update case 1: sceMcGetInfo + sceMcSync step machine (+0x60 steps 0/3/4/5)"
+ },
+ "001880cc": {
+  "name": "McdMan::cmdGetSlotMax",
+  "tag": "ror-inferred",
+  "was": "FUN_001880cc",
+  "why": "update case 2: sceMcGetSlotMax, answer to +0x78"
+ },
+ "001881c0": {
+  "name": "McdMan::cmdGetEntSpace",
+  "tag": "ror-inferred",
+  "was": "FUN_001881c0",
+  "why": "update case 3: sceMcGetEntSpace (0x24e948) on +0x114, answer to +0x8c"
+ },
+ "001883c0": {
+  "name": "McdMan::cmdChdir",
+  "tag": "ror-inferred",
+  "was": "FUN_001883c0",
+  "why": "update case 4: sceMcChdir (0x24e160) +0x114 -> +0x154"
+ },
+ "001885d4": {
+  "name": "McdMan::cmdClose",
+  "tag": "ror-inferred",
+  "was": "FUN_001885d4",
+  "why": "update case 5: sceMcClose of +0x94"
+ },
+ "001887c0": {
+  "name": "McdMan::findNextMatch",
+  "tag": "ror-inferred",
+  "was": "FUN_001887c0",
+  "why": "strrchr / strchr * / strstr over the getDir table from index a1, full name to a3; cmdDelete's wildcard"
+ },
+ "0018894c": {
+  "name": "McdMan::cmdDelete",
+  "tag": "ror-inferred",
+  "was": "FUN_0018894c",
+  "why": "update case 6: sceMcDelete of +0x114, every findNextMatch hit when it has a *"
+ },
+ "00188bfc": {
+  "name": "McdMan::cmdDeleteNow",
+  "tag": "ror-inferred",
+  "was": "FUN_00188bfc",
+  "why": "update case 7: sceMcDelete with no sync step"
+ },
+ "00188cd4": {
+  "name": "McdMan::cmdFlush",
+  "tag": "ror-inferred",
+  "was": "FUN_00188cd4",
+  "why": "update case 8: sceMcFlush of +0x94"
+ },
+ "00188ec0": {
+  "name": "McdMan::cmdFormat",
+  "tag": "ror-inferred",
+  "was": "FUN_00188ec0",
+  "why": "update case 9: sceMcFormat"
+ },
+ "00189068": {
+  "name": "McdMan::cmdGetDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00189068",
+  "why": "update case 10: sceMcGetDir (0x24df80) of +0x114, 19 entries to +0x1c0, count to +0x90"
+ },
+ "001892b0": {
+  "name": "McdMan::cmdMkdir",
+  "tag": "ror-inferred",
+  "was": "FUN_001892b0",
+  "why": "update case 11: sceMcMkdir of +0x114"
+ },
+ "001894d4": {
+  "name": "McdMan::cmdOpen",
+  "tag": "ror-inferred",
+  "was": "FUN_001894d4",
+  "why": "update case 12: sceMcOpen +0x114 mode +0x9c, fd to +0x94"
+ },
+ "00189718": {
+  "name": "McdMan::cmdRead",
+  "tag": "ror-inferred",
+  "was": "FUN_00189718",
+  "why": "update case 13: sceMcRead (0x24d9e0) fd +0x94 buf +0xb4 size +0xb0"
+ },
+ "0018993c": {
+  "name": "McdMan::cmdRename",
+  "tag": "ror-inferred",
+  "was": "FUN_0018993c",
+  "why": "update case 14: sceMcRename (0x24e720) +0x114 to the file name of +0x154"
+ },
+ "00189b7c": {
+  "name": "McdMan::cmdSeek",
+  "tag": "ror-inferred",
+  "was": "FUN_00189b7c",
+  "why": "update case 15: sceMcSeek fd +0x94 offset +0xa8 mode +0xac"
+ },
+ "00189d94": {
+  "name": "McdMan::cmdUnformat",
+  "tag": "ror-inferred",
+  "was": "FUN_00189d94",
+  "why": "update case 16: sceMcUnformat"
+ },
+ "00189f58": {
+  "name": "McdMan::cmdWrite",
+  "tag": "ror-inferred",
+  "was": "FUN_00189f58",
+  "why": "update case 17: sceMcWrite (0x24daf8) fd +0x94 buf +0xb4 size +0xb0"
+ },
+ "0018a17c": {
+  "name": "McdMan::makeIconSys",
+  "tag": "ror-inferred",
+  "was": "FUN_0018a17c",
+  "why": "fills the sceMcIconSys at +0x6e8: PS2D, the Rule of Rose SJIS title, lights, slime1.ico"
+ },
+ "0018a3f4": {
+  "name": "McdMan::makeDataPath",
+  "tag": "ror-inferred",
+  "was": "FUN_0018a3f4",
+  "why": "builds /BASLUS-21448/dtNN________ from a1"
+ },
+ "0018a4d4": {
+  "name": "McdMan::freeWork",
+  "tag": "ror-inferred",
+  "was": "FUN_0018a4d4",
+  "why": "frees +0x80, cmdCreateSave's 0x3000 zero buffer"
+ },
+ "0018a50c": {
+  "name": "McdMan::cmdCreateSave",
+  "tag": "ror-inferred",
+  "was": "FUN_0018a50c",
+  "why": "update case 18: mkdir /BASLUS-21448, icon, icon.sys, the main file and dt00..dt11 through the libmc commands"
+ },
+ "0018ad0c": {
+  "name": "McdMan::cmdReadDir",
+  "tag": "ror-inferred",
+  "was": "FUN_0018ad0c",
+  "why": "update case 19: cmdGetDir wrapped in the +0x68 sub steps"
+ },
+ "0018ade0": {
+  "name": "McdMan::cmdWriteFile",
+  "tag": "ror-inferred",
+  "was": "FUN_0018ade0",
+  "why": "update case 20: open / write / close +0x154 through a /dtNN1 marked name and cmdRename"
+ },
+ "0018b12c": {
+  "name": "McdMan::cmdReadFile",
+  "tag": "ror-inferred",
+  "was": "FUN_0018b12c",
+  "why": "update case 21: open (mode 1) / read / close of +0x114"
+ },
+ "0018b2bc": {
+  "name": "McdMan::cmdFillDummy",
+  "tag": "ror-inferred",
+  "was": "FUN_0018b2bc",
+  "why": "update case 22: /FEBDUMMY icon, icon.sys and a file written in 100 KB pieces up to the free space"
+ },
  "0018b874": {
   "name": "McdMan::hasIconSys",
   "tag": "ror-inferred",
   "was": "FUN_0018b874",
   "why": "1 when a directory entry is named icon.sys and is 0x3c4 bytes"
  },
+ "0018b918": {
+  "name": "McdMan::matchName",
+  "tag": "ror-inferred",
+  "was": "FUN_0018b918",
+  "why": "string compare where ? in either matches any char; 0 match, -1 not"
+ },
  "0018b9b8": {
   "name": "McdMan::findSave",
   "tag": "ror-inferred",
   "was": "FUN_0018b9b8",
   "why": "(name): finds the entry matching name (0x18b918) and returns whether it is not the ________ placeholder"
+ },
+ "0018ba68": {
+  "name": "McdMan::checkFile",
+  "tag": "ror-inferred",
+  "was": "FUN_0018ba68",
+  "why": "0 no getDir entry matches a1, 1 one does with size a2, 2 with another size"
  },
  "0018bb28": {
   "name": "McdMan::hasSpace",
@@ -13492,6 +13672,48 @@
   "tag": "lib-context",
   "was": "sceMcChangeThreadPriority",
   "why": "libmc: if the semaphore exists, sceMcSync(0) then DeleteSema both semaphores, return 1; mainExitDevices calls it after mainInitDevices' sceMcInit. Replaces the libmatch name sceMcChangeThreadPriority"
+ },
+ "0024d9e0": {
+  "name": "sceMcRead",
+  "tag": "lib-context",
+  "was": "FUN_0024d9e0",
+  "why": "libmc between sceMcSeek and sceMcWrite (SDK link order), sceSifWriteBackDCache of the read buffer; McdMan passes fd, buf, size"
+ },
+ "0024daf8": {
+  "name": "sceMcWrite",
+  "tag": "lib-context",
+  "was": "FUN_0024daf8",
+  "why": "libmc before sceMcSync, FlushCache of the source; McdMan passes fd, buf, size"
+ },
+ "0024df80": {
+  "name": "sceMcGetDir",
+  "tag": "lib-context",
+  "was": "FUN_0024df80",
+  "why": "libmc after sceMcUdCheckNewCard; strncpy of the name; McdMan passes port, slot, name, mode, maxent 19, table"
+ },
+ "0024e160": {
+  "name": "sceMcChdir",
+  "tag": "lib-context",
+  "was": "FUN_0024e160",
+  "why": "libmc after mceStorePwd; McdMan passes port, slot, new dir, cur dir buffer"
+ },
+ "0024e550": {
+  "name": "sceMcSetFileInfo",
+  "tag": "lib-context",
+  "was": "FUN_0024e550",
+  "why": "libmc between sceMcFlush and sceMcRename (SDK link order); no caller"
+ },
+ "0024e720": {
+  "name": "sceMcRename",
+  "tag": "lib-context",
+  "was": "FUN_0024e720",
+  "why": "libmc before sceMcUnformat; McdMan passes port, slot, path, new name"
+ },
+ "0024e948": {
+  "name": "sceMcGetEntSpace",
+  "tag": "lib-context",
+  "was": "FUN_0024e948",
+  "why": "libmc after sceMcUnformat (last in SDK order); McdMan passes port, slot, path"
  },
  "00259108": {
   "name": "sceGsGetGParam",

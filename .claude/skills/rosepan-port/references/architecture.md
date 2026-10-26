@@ -982,11 +982,22 @@ throughout (identifiers, env variables, files, shader macros):
   (+0x58): getInfo 1 / 0x15 -> 1 (3 when McdMan +0x84 is 0), 7 -> 4, 8 / 0xe -> 2, else 8; getDir 1 ->
   5 with icon.sys (0x3c4 bytes) else 7, 5 -> 6, 7 -> 4, 0xf -> 7. Messages: msgGetSysText 0x1d..0x2f
   for MnuMcd messages 1..0x17, 0x30..0x39 for the choices (data 0x298fe8, 0x1d4 texts).
-- **McdMan** (mcd/mcdman.cpp, 0x187724..; not written): request(cmd) 0x187e08 takes the command word
-  cmd from its table at +0 when idle (+0x5c 0; 6 when busy) and sets status +0x64 to 1; update
-  0x187c4c runs it (0x187e44 getInfo: sceMcGetInfo / sceMcSync); getStatus 0x187e00 (2 done); result
-  +0x58, port +0x70, free +0x84, entry count +0x90, size / buffer +0xb0 / +0xb4, path +0x114, file name
-  +0x154, getDir table +0x1c0 (sceMcTblGetDir rows of 0x40).
+- **McdMan** (mcd/mcdman.cpp, 0x187724..0x18bb8c, written 2026-10-25; EE 0xac0): request(n)
+  0x187e08 takes command word n (init fills +0 with n + 1) when idle (+0x5c 0; 6 when busy), status
+  +0x64 1 busy / 2 done / 3 error, result +0x58 = the index of init's ERR_ name (+0x680: 1 NoErr ..
+  0x15 ChangedCard). update 0x187c4c dispatches commands 1..0x16 (0x187e44..0x18b2bc): 1..0x11 are one
+  libmc call each (GetInfo, GetSlotMax, GetEntSpace, Chdir, Close, Delete with '*' over the dir table,
+  DeleteNow, Flush, Format, GetDir (19 entries), Mkdir, Open, Read, Rename, Seek, Unformat, Write),
+  each the same step machine on +0x60 (0 start, 3 issue, 4 sceMcSync poll (mode +0xc8 = 1), 5 end;
+  sync result -2 retries the issue up to 8 times); 0x12..0x16 chain them on +0x68: create the save
+  (/BASLUS-21448: slime1.ico from data/mnurpk/mcdicon.rpk, icon.sys built at +0x6e8, the main file
+  BASLUS-21448 and dt00..dt11 ________ of 0x3000 zero bytes, each skipped when the dir already has it
+  at that size), read the dir, write a file (a data file goes through the temporary name dtNN1___),
+  read a file, fill the card (/FEBDUMMY, debug). Fields: port +0x70, slot +0x74, type +0x7c, free
+  KB +0x84, format +0x88, count +0x90, fd +0x94, open mode +0x9c, size / buffer +0xb0 / +0xb4, path
+  +0x114, name +0x154, dir table +0x1c0 (rows of 0x40). The unnamed libmc calls by SDK 3.0 link
+  order: 0x24d9e0 sceMcRead, 0x24daf8 sceMcWrite, 0x24df80 sceMcGetDir, 0x24e160 sceMcChdir,
+  0x24e550 sceMcSetFileInfo, 0x24e720 sceMcRename, 0x24e948 sceMcGetEntSpace.
 - **MsgMan** (msg/msgman.cpp, 0x18330c..; EE 0x3bc; not written): a text in a scene window (m_strBuf,
   optional voice stream). **MsgManSet** 0x18741c..0x18761c: two of them found by window number.
 

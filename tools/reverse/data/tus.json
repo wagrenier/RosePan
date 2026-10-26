@@ -1,6 +1,6 @@
 {
  "queue": [
-  "mcd/mcdman.cpp",
+  "unassigned@0012f008",
   "unassigned@001a6830",
   "sequence/seqcall.cpp",
   "unassigned@0020ff34",
@@ -490,6 +490,24 @@
    ],
    "status": "verify",
    "why": "main 0x2045a8 has no source string; the static-init pair 0x20439c/0x2043bc (calling 0x2041f8) ends the previous file, so main's file starts at its argument parser 0x2043dc; it holds main, the main loop 0x2046d4 / 0x204864, GS and memory-card init / exit, and the debug exception handler 0x204a00 with its install / remove pair. 0x204d38..0x2050e8 work on the now-loading object's fields (+0x230, +0x290, +0x294) and are called only from system/sysnowloading.cpp: left to that file"
+  },
+  "mcd/mcdman.cpp": {
+   "notes": "All 42 functions of 0x187724..0x18bb8c written (extent pinned). Screenshot frames 180..360: the SCE Presents logo, matching work/ref/MNUTITLE/MNUTITLE_000c2000.png; before this TU the boot was black. It stays on that logo: MnuTitle::execLogo step 6 waits for MagScene::getFadeState() >= 5, which reads m_fader.m_state, and MagLifeFader::start 0x12f060 is a stub. Next: unassigned@0012f008 (queued first; 0x12f008..0x12f2e8, MagLifeFader start / stop / live, likely mag/maglifefader.cpp). The save-side commands (18 create save, 20 write file, 21 read file) are written but no smoke run reaches them yet: test them with a New Game save once the title works. Quirks kept as the ROM (open-items Open questions): createSave can write dt files from a NULL m_data when the main file already exists; hasSpace mixes KB and bytes; cmdDeleteNow never syncs. The per-command result maps follow the ROM; the shared issue / sync tails are PC helpers (issued, synced, retryNoFormat, setDone, next) documented at the top of mcdman.cpp.",
+   "ranges": [
+    [
+     "00187724",
+     "0018bb8c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-25 21:05",
+     "status": "done",
+     "summary": "McdMan complete: request / update / getStatus, the 17 libmc command step machines, the composite commands (create save, read dir, write file via a marked temp name, read file, FEBDUMMY fill), icon.sys builder, dir-table helpers; host libmc gains sceMcGetSlotMax / Seek / Flush / Unformat / Chdir / Rename / GetEntSpace. The boot passes the memory card check and shows the SCE Presents logo."
+    }
+   ],
+   "status": "done",
+   "why": "McdMan ctor 0x187724 .. hasSpace 0x18bb28 is one class; mcd/mcdman.cpp string at 0x187a28; 0x18761c calls MsgMan code (msg/), 0x18bb8c is SprMan::SprMan (spr/sprman.cpp)"
   },
   "mnu/mnumcd.cpp": {
    "notes": "Status verify: code complete, nothing on screen yet. The boot (MnuTitle::execLogo, check mode 0) now runs MnuMcd::exec, opens its two windows and waits at checkBoot step 2 because McdMan::request 0x187e08 is a stub returning 0, so execCmd never gets a command through; screenshot still black (progress/ shot). Next: mcd/mcdman.cpp, queued first. Its extent is not pinned: McdMan is 0x187724..about 0x18bb88 (file string mcd/mcdman.cpp at 0x187a28) but ror_functions puts 0x187724..0x187c30 in unassigned@00184f2c, so define it first. Write request / getStatus / update and the getInfo (cmd 0) and getDir (0x12) handlers over src/sdk/libmc.cpp; result codes MnuMcd expects are in architecture.md (The memory card check). Then MsgMan / MsgManSet (msg/msgman.cpp 0x18330c.., 0x18741c..0x18761c) or the check shows empty windows. Decisions: MnuMcd now has a real constructor (m_open 0, resetCursors) and destructor (close), running before main inside the global scene; McdMan / MsgMan have none (zeroed). McdDirEntry copies sceMcTblGetDir without its alignas(64), which would spread into MagScene. Hidden functions found and created: MnuMcd::getFileName 0x1a1c94, getFileSize 0x1a1cbc (folded into getFileNum). Names invented (ror-inferred): all MnuMcd helpers, McdMan / MsgMan / MsgManSet and their methods, msgGetSysText. Slot state meanings in mnumcd.h are read from use, unverified. m_both (+0x88) is only cleared here: find who sets it in the save screen code (unassigned@001a6830).",

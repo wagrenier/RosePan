@@ -537,4 +537,155 @@ int sceMcFormat(int port, int slot)
     return PostResult(ec ? sceMcResDeniedPermit : sceMcResSucceed);
 }
 
+/* ---- the rest RoR's McdMan reaches ------------------------------------- */
+
+int sceMcGetSlotMax(int port)
+{
+    if (init_done == 0)
+    {
+        return sceMcErrNotInit;
+    }
+    if (port < 0 || port > 1)
+    {
+        return sceMcErrPortSlot;
+    }
+
+    /* No multitap: one slot per port. Answers at once, like the ROM's. */
+    return 1;
+}
+
+int sceMcSeek(int fd, int offset, int mode)
+{
+    McFile *f;
+    int     whence;
+
+    if (init_done == 0)
+    {
+        return sceMcErrNotInit;
+    }
+
+    f = GetHandle(fd);
+    if (f == 0)
+    {
+        return PostResult(sceMcResNoEntry);
+    }
+
+    /* The card's seek modes are SEEK_SET / SEEK_CUR / SEEK_END (0, 1, 2). */
+    whence = mode == 1 ? SEEK_CUR : mode == 2 ? SEEK_END : SEEK_SET;
+    if (std::fseek(f->fp, offset, whence) != 0)
+    {
+        return PostResult(sceMcResDeniedPermit);
+    }
+
+    return PostResult((int)std::ftell(f->fp));
+}
+
+int sceMcFlush(int fd)
+{
+    McFile *f;
+
+    if (init_done == 0)
+    {
+        return sceMcErrNotInit;
+    }
+
+    f = GetHandle(fd);
+    if (f == 0)
+    {
+        return PostResult(sceMcResNoEntry);
+    }
+
+    std::fflush(f->fp);
+    return PostResult(sceMcResSucceed);
+}
+
+int sceMcUnformat(int port, int slot)
+{
+    std::error_code ec;
+
+    if (init_done == 0)
+    {
+        return sceMcErrNotInit;
+    }
+
+    /* An unformatted host card is one whose directory is gone; the next
+     * sceMcGetInfo creates it formatted again. */
+    std::filesystem::remove_all(CardRoot(port, slot), ec);
+    return PostResult(ec ? sceMcResDeniedPermit : sceMcResSucceed);
+}
+
+int sceMcChdir(int port, int slot, const char *newDir, char *curDir)
+{
+    std::filesystem::path path;
+    std::error_code       ec;
+
+    if (init_done == 0)
+    {
+        return sceMcErrNotInit;
+    }
+
+    if (curDir != 0)
+    {
+        std::strcpy(curDir, "/");
+    }
+
+    path = CardRoot(port, slot) / NormalizeName(newDir);
+    if (!std::filesystem::is_directory(path, ec))
+    {
+        return PostResult(sceMcResNoEntry);
+    }
+
+    return PostResult(sceMcResSucceed);
+}
+
+int sceMcRename(int port, int slot, const char *org, const char *newName)
+{
+    std::filesystem::path from;
+    std::filesystem::path to;
+    std::error_code       ec;
+
+    if (init_done == 0)
+    {
+        return sceMcErrNotInit;
+    }
+
+    from = CardRoot(port, slot) / NormalizeName(org);
+    if (!std::filesystem::exists(from, ec))
+    {
+        return PostResult(sceMcResNoEntry);
+    }
+
+    to = from.parent_path() / (newName != 0 ? newName : "");
+    std::filesystem::rename(from, to, ec);
+    return PostResult(ec ? sceMcResDeniedPermit : sceMcResSucceed);
+}
+
+int sceMcGetEntSpace(int port, int slot, const char *path)
+{
+    std::filesystem::path dir;
+    std::error_code       ec;
+    int                   count;
+
+    if (init_done == 0)
+    {
+        return sceMcErrNotInit;
+    }
+
+    dir = CardRoot(port, slot) / NormalizeName(path);
+    if (!std::filesystem::is_directory(dir, ec))
+    {
+        return PostResult(sceMcResNoEntry);
+    }
+
+    /* "." and ".." plus the entries: two 512-byte entries per cluster. */
+    count = 2;
+    for (std::filesystem::directory_iterator it(dir, ec), end;
+         it != end && !ec; it.increment(ec))
+    {
+        count++;
+    }
+
+    return PostResult(count % 2);
+}
+
 } /* extern "C" */
