@@ -16,6 +16,7 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
 - Key functions and globals
 - Disc and data files
 - PC platform layer
+- The title screen (mnu/mnutitle.cpp)
 
 ## Binary and toolchain
 
@@ -959,3 +960,27 @@ throughout (identifiers, env variables, files, shader macros):
   bit 13 after a fade out.
 - **Type table** data 0x298318 (267 rows + -1): 0x40001.. -> themselves (2D boards), 0x80001.. ->
   0x10c5.. (3D board models), 0x100001.. / 0x200001.. -> page ids 0x1000.., 0x400001.. -> 0.
+
+## The title screen (mnu/mnutitle.cpp, 0x1a90ec..0x1ab474, 2026-10-25)
+
+- **MnuTitle** (EE 0x5700, MagLifeMenuTitle +0x40): MnuMcd +0, MnuSvld +0x1400 (m_save 0: load),
+  MnuOpt +0x3b80, a text list +0x4c68 (MnuTextList, code 0x1a066c..0x1a0bb8, name invented), open word
+  +0x4d6c, nine cursors +0x4d70 with item counts +0x4d94, timer +0x4db8, m_mode +0x4dc4 (processPad's
+  step), m_sub +0x4dc8 (the sub menu), m_step +0x4dcc, SprMan +0x4df0 (EE 0x8ec), MagSystem* +0x56dc,
+  layer +0x56e0, DogTexInfo* +0x56e4, the s100000.str stream id +0x56e8, m_result +0x56ec, init flag
+  +0x56f4. Data: texture list 0x2a7798 (data/mnurpk/mnutitle.rpk: titlebg, titlebg2, ti_06 = the text
+  sheet, sce, punch, siro, keikoku = the disclaimer), pattern image 0x2a7858..0x2a80c0, display list
+  0x2a80c0 (15 sprites), logo flag 0x2a8400, logo sprites / frame counts 0x2a8408 / 0x2a8418, movie
+  viewer pages 0x2a8428 (8 x 0x78).
+- **Sprites**: 2..5 the logos (sce, punch, siro by pattern), 6 titlebg (press start), 7 titlebg2 (the
+  menu background), 8 "Press START button", 9..11 New Game / Load Game / Option (anim 1 = selected),
+  12..14 a three-way choice (Easy / Normal / Hard on the sheet; execSelect, unreached).
+- **Flow**: processPad mode 0 silences the game (SprMan::saveVolume / volumeOff, GamMan::setOption(0,
+  4), GamSndMan::resetVolume), 1 loads the textures (waits), 2 setDisp, 3 runs: sub 0 execLogo (first
+  boot: MnuMcd check, logos 2 and 5 for 90 / 150 frames, CP_LOGO.PSS and MV00_AD.PSS through g_rxMpeg
+  with MagSystem::m_v_interval 1, then press start over s100000.str; 0x708 idle frames replay the
+  movie), sub 1 execMain (cursor with BedPad +0x70 bits 0x10 / 0x40, cross = +0x7a bit 14; result 2 new
+  game, 3 load (g_sequence.m_global[0x17] = 0x10004, sub 3 execLoad), 4 options (0x10006, sub 4
+  execOption), 1 when g_sequence.m_bits[1] bit 0x80 is clear). Results 1 / 2 close the title: mode 6
+  calls GamMan::resetPcStat and processPad returns m_result to MagLifeMenuTitle. Subs 2 (test000.pss
+  test), 5 (movie viewer) and 6 are set by no retail code.

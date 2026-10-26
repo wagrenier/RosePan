@@ -32,6 +32,7 @@
 #include "mag/maglife.h"
 #include "mnu/mnuSelectLanguage.h"
 #include "mnu/mnusvld.h"
+#include "mnu/mnutitle.h"
 
 struct BedPad;
 struct DogTexInfo;
@@ -234,7 +235,7 @@ struct MagLifeMenuPBook : MagLifeMenuBase
 /* The title screen, 0x10005 (vtable 0x2e17d8). EE 0x5740. */
 struct MagLifeMenuTitle : MagLifeMenuBase
 {
-    // ROR 0x00284930; callcheck: MnuTitle::MnuTitle (not written; the member starts zeroed)
+    // ROR 0x00284930; callcheck: MnuTitle::MnuTitle (the member's, implicit)
     MagLifeMenuTitle() {}
     // ROR 0x00284980; callcheck: MnuTitle::~MnuTitle (the member's)
     ~MagLifeMenuTitle() {}
