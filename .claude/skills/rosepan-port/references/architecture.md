@@ -942,6 +942,17 @@ never asserts): sessions name them (`tus.py define --why`).
 - **Enemy groups** (`addChrGroup` 0x1cc560, native 100 case 8): EmyManager::setGroup 0x162b68 (group
   a < 9 at stride 0x3c), then count achrs built with oid 0: addEmy (0x162c88) makes their oids
   0x9100006f + n and stores them in GamMan's m_achr table itself.
+- **Object queries** (gamman session 9): `collectAchrs` 0x1d2e2c / `collectFchrs` 0x1d327c count the
+  objects of a type (-1 any) whose ObjStat m_flags (+0x120) has a bit of need and none of exclude,
+  copying them into a caller's SeqPool when given (the fchr one walks the fchr and avfchr lists);
+  `collectAchrsNear` 0x1d2ff0 / `collectFchrsNear` 0x1d35ac add an x / z distance < radius and store
+  the distance in ObjStat +0x144 (m_dist). collectFchrsNear is the one the game uses (maglifepc2, the
+  emy code 0x15xxxx, GamArea 0x1ddf48, checkMenuReq).
+- **Script callbacks** m_seqPair (+0x222c4, four {b, a} pairs): [0] ehon, [1] menu, [2] seq_evt,
+  [3] jump_area_act (the ELF's regist_call_back_* / clear_*); `check_event_after_menu` is pair 1 set
+  and getSysFlg bit 0x8000 clear.
+- GamMan +0x18c00 is a WRD block whose words the port keeps as GamMan members (the gam*Wrd* functions
+  take GamMan or nothing); getMapObjPtr returns GamMan on the host.
 
 ## Disc and data files
 

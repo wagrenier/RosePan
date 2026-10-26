@@ -132,6 +132,10 @@ struct CmnTaskMan
     /* Every live task of the list at +0 whose kind (virtual +8) is kind
      * marked for removal (state 2). */
     void killKind(int kind);                                             // ROR 0x001e77b4
+    /* killTask for every task of the list at +0 whose kind (virtual +0xc)
+     * is in kinds (-1 ends it). The ROM's caller passes a third word it
+     * never reads. */
+    void killKinds(const int *kinds);                                    // ROR 0x001e7910
 
     SysTimer m_timer;           // ROR 0x40 (bss 0x7a3dc0)
 };

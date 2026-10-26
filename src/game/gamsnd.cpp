@@ -264,3 +264,37 @@ void GamSndMan::stopSE(int se)
 {
     ROSEPAN_STUB("GamSndMan::stopSE", 0x001e4d18);
 }
+
+// stub of ROR 0x001e4700
+void GamSndMan::free_all_se_bank()
+{
+    ROSEPAN_STUB("GamSndMan::free_all_se_bank", 0x001e4700);
+}
+
+// stub of ROR 0x001e6368
+bool GamSndMan::getStatSEtrack(u_int se, int track)
+{
+    ROSEPAN_STUB("GamSndMan::getStatSEtrack", 0x001e6368);
+    return {};
+}
+
+// stub of ROR 0x001e5b60
+bool GamSndMan::getStatSTRtrack(u_int str, int track)
+{
+    ROSEPAN_STUB("GamSndMan::getStatSTRtrack", 0x001e5b60);
+    return {};
+}
+
+// stub of ROR 0x001e63c0
+int GamSndMan::setVolSEtrack(u_int se, int track, int a, int b)
+{
+    ROSEPAN_STUB("GamSndMan::setVolSEtrack", 0x001e63c0);
+    return {};
+}
+
+// stub of ROR 0x001e5c40
+int GamSndMan::setVolSTRtrack(u_int str, int track, int a, int b)
+{
+    ROSEPAN_STUB("GamSndMan::setVolSTRtrack", 0x001e5c40);
+    return {};
+}
