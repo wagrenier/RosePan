@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-26 13:44 at commit `ef7e9c9` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-26 13:51 at commit `ee7aedb` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-26 13:44 at commit `ef7e9c9` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6660**, named **4070** (61%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 247, ror-inferred 2472
-- context-name ledger: 2719 entries; overrides of wrong library matches: 5
-- placed in a source file: 3332/6660 in 95 files
+- game functions: **6660**, named **4079** (61%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 247, ror-inferred 2481
+- context-name ledger: 2728 entries; overrides of wrong library matches: 5
+- placed in a source file: 3346/6660 in 96 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **2419**; stubs: **408**
+- reconstructed RoR functions: **2429**; stubs: **406**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -58,7 +58,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 6 | 237 |
+| `src/lib/unassigned_stubs.cpp` | 5 | 235 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
@@ -99,6 +99,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/spr/sprman.cpp` | 53 | 0 |
 | `src/spr/sprtexture.cpp` | 21 | 0 |
 | `src/system/sysnowloading.cpp` | 8 | 0 |
+| `src/system/system.cpp` | 11 | 0 |
 | `src/utl/utlfile.cpp` | 2 | 0 |
 | `src/utl/utlfind.cpp` | 0 | 1 |
 | `src/utl/utlgame.cpp` | 0 | 2 |
@@ -107,9 +108,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 156 TUs: todo 112, partial 12, verify 41, done 8
-- next: **unassigned@001fd424** (pinned in the queue)
-- pinned queue: unassigned@001d859c, unassigned@0020ff34, unassigned@001fd424, unassigned@001e46b8
+- 157 TUs: todo 113, partial 11, verify 42, done 8
+- next: **game/gamstat.cpp** (continuing a partial TU)
+- pinned queue: unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
 - partial: `game/gamstat.cpp` 49/73 -- Left: GamSysData::setField 0x1dc070 (stub, a tangled switch that reads into data for most fields), helpers 0x1d84c8..0x1d87f4, 0x1d88fc, 0x1d8adc..0x1d8c50, 0x1
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -151,10 +152,12 @@ Least-named game-code regions (64 KB blocks):
 - verify: `spr/sprman.cpp` 53/53 -- Verify: nothing calls SprMan::draw with m_active set yet. S2dMovie / S2dMes / S2dBg start only from MagScene::update 0x1327dc (stub), and textures never load (f
 - verify: `spr/sprtexture.cpp` 21/21 -- Pinned 0x18f5b0..0x190a78. The code is complete; the smoke run reaches it (S2dMes / S2dMovie loadTexture) but every list ends in the error state because fileGet
 - verify: `system/sysnowloading.cpp` 8/8 -- Code complete, nothing on the boot path shows it yet: draw 0x2051cc is called only by the pfh loader 0x1be564 (GamMan load path, unassigned@001bde58), a stub, s
+- verify: `system/system.cpp` 11/14 -- Complete except the three static-init functions 0x2041f8 / 0x20439c / 0x2043bc, which the host compiler generates (the globals' definition order in system.cpp r
 - verify: `utl/utlmisc.cpp` 24/24 -- Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and i
 
 Recent sessions:
 
+- 2026-10-26 13:51 `system/system.cpp` verify: Defined system/system.cpp (0x203d94..0x2043dc, the tail of unassigned@001fd424: the globals file before main.cpp) and wrote SysTimer (ctor, dtor, reset, start, 
 - 2026-10-26 13:44 `game/gamman.cpp` verify: GamMan slice 9 (last): the ELF inline accessors 0x28eb68..0x28f7e4 written out of line (3D sound forwarders, track status / volume, list pointers, PC / dog oid,
 - 2026-10-26 13:31 `game/gamman.cpp` partial: GamMan slice 8: the ELF inline accessors 0x28e254..0x28ee00 written out of line (flags, chr numbers and pointers, task ids, getSysTime / getElapsedSysTime, set_
 - 2026-10-26 10:28 `game/gamman.cpp` partial: GamMan slice 7: the native 151 object helpers - addObjColliSegment / Box / Quad (private walls, param 0x18 and 0x1003), setObjAttr / clearObjAttr, placeObjAt wi
@@ -162,22 +165,21 @@ Recent sessions:
 - 2026-10-26 09:53 `game/gamman.cpp` partial: GamMan slice 5: setMurder, loadChapterSe, loadMapUnit with showMapUnits / loadMapPack / resetAVFchrMotions, setPcStartPos with setPcPos / setPcRot, storePcTrans
 - 2026-10-26 09:06 `game/gamstat.cpp` partial: game/gamstat.cpp pinned (0x1d84c8..0x1dd1e8, was unassigned@001d859c) with gamstat.h: ObjStat (ctor, pos / rot, secta cells, base params, setHide, releaseActor,
 - 2026-10-26 08:26 `mag/magloader.cpp` verify: mag/magloader.cpp: reconstruct all 17 functions (MagLoaderIndex create/add/find/clear/release, MagCharaLoader ctor/init/initFromPacks/load/getIndex/getId/getCat
-- 2026-10-26 08:08 `game/gamman.cpp` partial: GamMan slice 4: object creation and accessors - addChr, addVFchr with allocVFchr, createObjByModel, createObjByName with getChrRpk and setObjLight, setObj, setO
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `unassigned@001e6d54` | partial | 1/34/219 | 68.6 | 206 | 6 |
 | `game/gamsnd.cpp` | todo | 0/47/73 | 24.0 | 189 | 9 |
 | `unassigned@00143d3c` | todo | 0/20/602 | 129.5 | 54 | 2 |
-| `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 51 | 4 |
 | `unassigned@00164fc0` | todo | 0/18/395 | 104.2 | 51 | 4 |
+| `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 51 | 4 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
 | `dog/dogactor.cpp` | partial | 5/28/146 | 31.5 | 41 | 2 |
 | `unassigned@001d3b44` | partial | 2/11/37 | 18.4 | 37 | 1 |
 | `unassigned@00184f2c` | todo | 0/5/84 | 10.0 | 37 | 3 |
 | `unassigned@001dd5e8` | todo | 0/12/18 | 14.0 | 35 | 0 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 33 | 4 |
-| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 31 | 3 |
+| `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 

@@ -2,7 +2,6 @@
  "queue": [
   "unassigned@001d859c",
   "unassigned@0020ff34",
-  "unassigned@001fd424",
   "unassigned@001e46b8"
  ],
  "settings": {
@@ -1046,6 +1045,24 @@
    "status": "verify",
    "why": "the source string system/sysnowloading.cpp in init and clearVram; 0x204d38..0x2050e8 are SysNowLoading helpers called only from init / term / draw (this in a0, members +0x230..+0x29c); main.cpp ends at mainResetExceptionHandlers 0x204ca4, unassigned@002053f4 follows"
   },
+  "system/system.cpp": {
+   "notes": "Complete except the three static-init functions 0x2041f8 / 0x20439c / 0x2043bc, which the host compiler generates (the globals' definition order in system.cpp reproduces the ROM's construction order). Nothing on screen shows SysTimer: its reader is CmnTaskMan::exec (unassigned@001e46b8, next in the queue), which also calls SysTimer::hold. SysTimer keeps the EE layout (0x2c, all words). The file name system/system.cpp is a guess (no source string). unassigned@001fd424 now covers only 0x1fd424..0x203d94, the TskEnemyMove / TskEnemyTurn enemy tasks; dropped from the queue (off the title / New Game path). Smoke run 15 s: boot unchanged, ends on the Atlus disclaimer as before.",
+   "ranges": [
+    [
+     "00203d94",
+     "002043dc"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-26 13:51",
+     "status": "verify",
+     "summary": "Defined system/system.cpp (0x203d94..0x2043dc, the tail of unassigned@001fd424: the globals file before main.cpp) and wrote SysTimer (ctor, dtor, reset, start, stop, read, update, hold), sysInitManagers, sysTermManagers and sysExecHostElf; the six global managers moved here from lib/unassigned_stubs.cpp; the SysTimer start / update stubs are gone"
+    }
+   ],
+   "status": "verify",
+   "why": "SysTimer (ctor 0x203d94, dtor 0x203da8, init / start / stop / read / update / hold), sysInit/TermManagers, the host0 reboot 0x2041a0 and the static initializer pair 0x2041f8 / 0x20439c / 0x2043bc that constructs the global managers: the globals file before main.cpp (no source string; file name a guess)"
+  },
   "unassigned@001056f8": {},
   "unassigned@0011262c": {},
   "unassigned@0012f008": {},
@@ -1056,6 +1073,7 @@
   "unassigned@001a6830": {},
   "unassigned@001bde58": {},
   "unassigned@001d859c": {},
+  "unassigned@001fd424": {},
   "unassigned@002053f4": {},
   "unassigned@0020eda4": {},
   "unassigned@0020ff34": {},

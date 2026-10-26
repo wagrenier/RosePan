@@ -25,16 +25,8 @@
 #include "utl/utltm2.h"
 
 // ---- globals (hand-written) ----
-// PC: the ROM defines the global objects in the file before main.cpp, whose
-// static initializer 0x2041f8 constructs them (unassigned@001fd424). They
-// live here until that file is defined; move them with it.
+// (The global managers moved to system/system.cpp.)
 
-MagSystem  g_magSystem;         /* bss 0x6e9840 */
-GamMan     g_gamMan;            /* bss 0x7812c0 */
-CmnTaskMan g_taskMan;           /* bss 0x7a3d80 */
-Sequence   g_sequence;          /* bss 0x7a4440 */
-EmyManager g_emyManager;        /* bss 0x7b2140 */
-SndMan     g_sndMan;            /* bss 0x7b2580 */
 WrdTable   g_wrdTable;          /* data 0x298ee0: data/wrd/WRD.BIN's table */
 
 int g_emyManagerTaskId;         /* bss 0x7b45c0 */
@@ -62,18 +54,6 @@ void CmnTaskMan::exec()
     ROSEPAN_STUB("CmnTaskMan::exec", 0x001e7a20);
 }
 
-// stub of ROR 0x00203ea8
-void SysTimer::start()
-{
-    ROSEPAN_STUB("SysTimer::start", 0x00203ea8);
-}
-
-// stub of ROR 0x00204014
-void SysTimer::update()
-{
-    ROSEPAN_STUB("SysTimer::update", 0x00204014);
-}
-
 // stub of ROR 0x002155a0
 void debugNop(void)
 {
@@ -81,15 +61,6 @@ void debugNop(void)
 }
 
 // ---- bridges (hand-written) ----
-
-// Written ahead of its file (unassigned@001fd424) by the sequence.cpp
-// session: Sequence::exec needs the image pools init builds.
-// ROR 0x00204148
-void sysInitManagers(void)
-{
-    g_sequence.init();
-    g_gamMan.init();
-}
 
 // stub of ROR 0x001f47f0 (a constructor: stubgen leaves it to hand)
 TskSeqEvent::TskSeqEvent(u_int, int, const void *)
