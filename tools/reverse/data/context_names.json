@@ -3311,29 +3311,89 @@
   "was": "FUN_0017c4f4",
   "why": "sectorSetFlags' inverse (0x17e4d0 clears the bits); native 281 op 201"
  },
+ "0017e540": {
+  "name": "WrdSrv::WrdSrv",
+  "tag": "ror-inferred",
+  "was": "FUN_0017e540",
+  "why": "stores vtable _vt$6WrdSrv 0x2e4538 at +0x14 and zeroes +0..+0x10; the static initializer 0x17f038 runs it on data 0x298ee0"
+ },
+ "0017e564": {
+  "name": "WrdSrv::~WrdSrv",
+  "tag": "ror-inferred",
+  "was": "FUN_0017e564",
+  "why": "vtable 0x2e4538 slot 1 (GCC 2 deleting destructor): resets the vptr, calls release 0x17e9d0, deletes when bit 0"
+ },
  "0017e5c0": {
-  "name": "WrdTable::load",
+  "name": "WrdSrv::load",
   "tag": "ror-inferred",
   "was": "FUN_0017e5c0",
-  "why": "loadStage's call on data 0x298ee0 with the stage: reads data/wrd/WRD.BIN, finds file %03d and allocates the table"
+  "why": "was WrdTable::load (class from the ELF vtable 0x2e4538, the global 0x298ee0 is a WrdSrv); reads data/wrd/WRD.BIN's pfh header and file %03d of the stage, then setup(copy 1); stage 99 loads nothing"
+ },
+ "0017e798": {
+  "name": "WrdSrv::setup",
+  "tag": "ror-inferred",
+  "was": "FUN_0017e798",
+  "why": "(file, copy): release, alloc the 0x10-byte search records, copy the file (flag 2) or keep it, index at +0x10, rooms after it; relocates the offsets when the file's +2 bit 0 is set"
+ },
+ "0017e9d0": {
+  "name": "WrdSrv::release",
+  "tag": "ror-inferred",
+  "was": "FUN_0017e9d0",
+  "why": "frees the search records +0x10 and the file copy when flag 2, clears +0..+0xc; the destructor and setup call it"
  },
  "0017ea44": {
-  "name": "WrdTable::get",
+  "name": "WrdSrv::get",
   "tag": "ror-inferred",
   "was": "FUN_0017ea44",
-  "why": "returns entry n (< count at data +8) of a loaded table (+4 data, +8 entries); its object 0x298ee0 is loaded from data/wrd/WRD.BIN by 0x17e5c0 (GamMan::loadStage); entry +0x10 is the map-name text S2dMes::drawMapName copies; class name invented from the file"
+  "why": "was WrdTable::get: room record n from the index +8 (count file +8), NULL out of range or without a file"
+ },
+ "0017ea84": {
+  "name": "WrdSrv::findByName",
+  "tag": "ror-inferred",
+  "was": "FUN_0017ea84",
+  "why": "walks the 0x40-byte rooms comparing +4 (o1_cway ...) with memcmp + strlen; no callers"
  },
  "0017eb3c": {
-  "name": "WrdTable::cnvPosL2W",
+  "name": "WrdSrv::cnvPosL2W",
   "tag": "ror-inferred",
   "was": "FUN_0017eb3c",
-  "why": "out = record(no)+0x20 + in when a table is loaded; gamWrdConvPos op 1, behind the ELF's inline GamMan::cnvPosL2W"
+  "why": "was WrdTable::cnvPosL2W: out = room offset +0x20 + in"
  },
  "0017ebac": {
-  "name": "WrdTable::cnvPosW2L",
+  "name": "WrdSrv::cnvPosW2L",
   "tag": "ror-inferred",
   "was": "FUN_0017ebac",
-  "why": "out = in - record(no)+0x20 when a table is loaded; gamWrdConvPos op 0, behind the ELF's inline GamMan::cnvPosW2L"
+  "why": "was WrdTable::cnvPosW2L: out = in - room offset +0x20"
+ },
+ "0017ec1c": {
+  "name": "WrdSrv::findRoute",
+  "tag": "ror-inferred",
+  "was": "FUN_0017ec1c",
+  "why": "(from, to, out): breadth-first search over the rooms' link lists +0x2c / +0x30 from to, marking the search records; out = the rooms from..to (63 pointers, count at +0xfc); one caller 0x127b28"
+ },
+ "0017eff4": {
+  "name": "WrdSrv::clearSearch",
+  "tag": "ror-inferred",
+  "was": "FUN_0017eff4",
+  "why": "clears bit 0 of every 0x10-byte search record; findRoute calls it first"
+ },
+ "0017f038": {
+  "name": "__static_initialization_and_destruction_0$wrdsrv",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f038",
+  "why": "GCC 2 file initializer: (1, 0xffff) constructs the WrdSrv at 0x298ee0, (0, 0xffff) destroys it; suffixed because 0x2041f8 has the plain name"
+ },
+ "0017f090": {
+  "name": "_GLOBAL_$I$wrdsrv",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f090",
+  "why": "calls 0x17f038(1, 0xffff): the file's global constructor"
+ },
+ "0017f0b0": {
+  "name": "_GLOBAL_$D$wrdsrv",
+  "tag": "ror-inferred",
+  "was": "FUN_0017f0b0",
+  "why": "calls 0x17f038(0, 0xffff): the file's global destructor"
  },
  "0017f0d0": {
   "name": "SndMan::SndMan",

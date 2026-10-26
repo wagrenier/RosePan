@@ -365,7 +365,7 @@ intptr_t seqFunc018(intptr_t id, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
     }
     case 0x22:  // a TskSysFunc for record a1 of the word table, replacing the running one
     {
-        if (g_wrdTable.get((int)a1) && !(gam.m_flags2 & 0x2000))
+        if (g_wrdSrv.get((int)a1) && !(gam.m_flags2 & 0x2000))
         {
             if (!(gam.m_flags2 & 0x4000))
             {

@@ -596,38 +596,8 @@ float i3dSegSegDist2(const float *p0, const float *d0, const float *p1, const fl
  * to *t when t is not NULL). */
 float i3dPointSegDist2(const float *p, const float *a, const float *d, float *t); // ROR 0x002337e0
 
-/* ---- the word table (unassigned@00164fc0: 0x17e0a8..0x17eff4) ---- */
-
-/* A word-table record: the strings +0x08..+0x14. layout: host -- the
- * strings are pointers; the file format is not read yet. */
-struct WrdEntry
-{
-    int         _00[2];
-    const char *m_str0;         // ROR 0x08: gamGetWrdString 0
-    const char *m_mapName;      // ROR 0x0c: gamGetWrdString 1 / 4 (GamMan::getMapName)
-    const char *m_text;         // ROR 0x10: gamGetWrdString 2, S2dMes::drawMapName's caption
-    const char *m_str3;         // ROR 0x14: gamGetWrdString 3
-    int         m_18;           // ROR 0x18: gamSetWrdRoom keeps it in GamMan +0x18dd0
-    int         m_mapArea;      // ROR 0x1c: GamMan::getMapArea (gamSetWrdRoom keeps it in GamMan +0x18dc0)
-    float       m_ofs[3];       // ROR 0x20: the room's offset (cnvPosW2L / cnvPosL2W, gamWrdConvPos op 2)
-};
-
-/* data/wrd/WRD.BIN once loaded (0x17e5c0, from GamMan::loadStage): +4 the
- * file (count at its +8), +8 the record pointers. Class name from the
- * file, invented. layout: host -- no members reconstructed. */
-struct WrdTable
-{
-    /* Record n, NULL when none is loaded or n is out of range. */
-    WrdEntry *get(int n);                                                // ROR 0x0017ea44
-    /* Reads data/wrd/WRD.BIN and keeps file "%03d" of stage. */
-    void load(int stage);                                                // ROR 0x0017e5c0
-    /* out = in - record no's offset, when a table is loaded. */
-    void cnvPosW2L(float *out, const float *in, int no);                 // ROR 0x0017ebac
-    /* out = record no's offset + in, when a table is loaded. */
-    void cnvPosL2W(float *out, int no, const float *in);                 // ROR 0x0017eb3c
-};
-
-extern WrdTable g_wrdTable;     /* data 0x298ee0 */
+/* ---- the room table: wrd/wrdsrv.h (WrdSrv, g_wrdSrv) ---- */
+#include "wrd/wrdsrv.h"
 
 /* ---- the mnu/ menu objects (unassigned@00192ac0, @001a0950, @001a6830):
  * each MagLifeMenu* wrapper (mag/maglifemenu.h) holds one at its +0x40 and

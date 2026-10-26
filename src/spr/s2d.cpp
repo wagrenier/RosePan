@@ -1069,7 +1069,7 @@ int S2dMes::drawMapName()
 
         m_sub_state = 6;
         m_map_name[0] = '\0';
-        entry = g_wrdTable.get(m_map_no);
+        entry = g_wrdSrv.get(m_map_no);
         if (entry != NULL)
             text = entry->m_text;
         if (text != NULL)

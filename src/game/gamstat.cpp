@@ -1328,7 +1328,7 @@ const char *gamGetWrdString(int which, int wrd)
 {
     if (g_gamMan.getWrdNo() == -1)
         return s_mapNone;
-    const WrdEntry *e = g_wrdTable.get(wrd == -1 ? g_gamMan.getWrdNo() : wrd);
+    const WrdEntry *e = g_wrdSrv.get(wrd == -1 ? g_gamMan.getWrdNo() : wrd);
     if (e == NULL)
         return s_mapNone;
     switch (which)
@@ -1348,7 +1348,7 @@ const char *gamGetWrdString(int which, int wrd)
 
 float gamGetWrdOfsX(void)
 {
-    const WrdEntry *e = g_wrdTable.get(g_gamMan.getWrdNo());
+    const WrdEntry *e = g_wrdSrv.get(g_gamMan.getWrdNo());
     if (e == NULL)
         return 0.0f;
     return e->m_ofs[0];
@@ -1359,7 +1359,7 @@ float gamGetWrdOfsX(void)
 
 float gamGetWrdOfsZ(void)
 {
-    const WrdEntry *e = g_wrdTable.get(g_gamMan.getWrdNo());
+    const WrdEntry *e = g_wrdSrv.get(g_gamMan.getWrdNo());
     if (e == NULL)
         return 0.0f;
     return e->m_ofs[2];
@@ -1374,14 +1374,14 @@ void gamWrdConvPos(int op, float *a, float *b)
     switch ((u_int)op)
     {
     case 0:
-        g_wrdTable.cnvPosW2L(a, b, g_gamMan.getWrdNo());
+        g_wrdSrv.cnvPosW2L(a, b, g_gamMan.getWrdNo());
         break;
     case 1:
-        g_wrdTable.cnvPosL2W(a, g_gamMan.getWrdNo(), b);
+        g_wrdSrv.cnvPosL2W(a, g_gamMan.getWrdNo(), b);
         break;
     case 2:
     {
-        const WrdEntry *e = g_wrdTable.get(g_gamMan.getWrdNo());
+        const WrdEntry *e = g_wrdSrv.get(g_gamMan.getWrdNo());
         // PORT: the ROM reads low memory when no table is loaded.
         if (e == NULL)
             break;
@@ -1461,7 +1461,7 @@ void gamMapConvLocal(GamMan *gam, int area, const float *pos, float *out)
 void gamSetWrdRoom(GamMan *gam, const void *file)
 {
     (void)file;
-    const WrdEntry *e = g_wrdTable.get(g_gamMan.getWrdNo());
+    const WrdEntry *e = g_wrdSrv.get(g_gamMan.getWrdNo());
     if (e == NULL)
     {
         gam->m_18dd0 = 0;
