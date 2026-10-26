@@ -2939,3 +2939,28 @@ int GamMan::testAchrFlag(u_int oid, u_int bits)
     ROSEPAN_STUB("GamMan::testAchrFlag", 0x001d17c8);
     return {};
 }
+
+// stub of ROR 0x001cfb48
+float GamMan::getObjDirTo(u_int oid, u_int target)
+{
+    ROSEPAN_STUB("GamMan::getObjDirTo", 0x001cfb48);
+    return {};
+}
+
+// stub of ROR 0x001cf854
+void GamMan::openMsg(const char *text, int arg, int time)
+{
+    ROSEPAN_STUB("GamMan::openMsg", 0x001cf854);
+}
+
+// stub of ROR 0x001cfa5c
+void GamMan::openSysMsg(const char *text, int a, int b, int c, int d)
+{
+    ROSEPAN_STUB("GamMan::openSysMsg", 0x001cfa5c);
+}
+
+// stub of ROR 0x001cf6bc
+void GamMan::showMsgSprite(int on, const int *param)
+{
+    ROSEPAN_STUB("GamMan::showMsgSprite", 0x001cf6bc);
+}

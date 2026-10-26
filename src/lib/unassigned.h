@@ -138,6 +138,15 @@ u_int utlConvSndId(u_int id);                                            // ROR 
 void  utlNormalize3(float *v);                                           // ROR 0x00106db0
 /* v.x += sinf(angle) * dist, v.z += cosf(angle) * dist (unassigned@001e6cac). */
 void  utlAddPolar(float angle, float dist, float *v);                    // ROR 0x001f6b28
+/* An achr's turn task (TskChrRot, ctor 0x1f0434) on ACHRstat::m_task[1]:
+ * chrRotStart kills the running one and, for a non-zero angle, turns by
+ * angle over frames; chrRotTo / chrRotToIn turn to the heading dir (the
+ * delta wrapped into -pi..pi) at speed / over frames. chrRotFrames is
+ * |angle / (speed * 0.05233)|. */
+void  chrRotStart(float angle, u_int oid, int frames);                   // ROR 0x001f0e90
+void  chrRotTo(float dir, float speed, u_int oid);                       // ROR 0x001f0f9c
+void  chrRotToIn(float dir, u_int oid, int frames);                      // ROR 0x001f10a4
+int   chrRotFrames(float angle, float speed);                            // ROR 0x001f6b8c
 extern EmyManager g_emyManager; /* bss 0x7b2140 */
 extern int g_emyManagerTaskId;  /* bss 0x7b45c0: addTask's id for EmyManager (read by 0x1c58c0) */
 
@@ -419,6 +428,10 @@ void  FUN_00177830(Obj176a3c *obj, i3dContext *ctx);  /* MagScene::draw's world 
  * deletes the finished ones. */
 void  FUN_0017772c(Obj176a3c *obj);                                      // ROR 0x0017772c
 void  FUN_0017c2c0(Obj17c0f0 *obj);  /* frees the buffer and the records */ // ROR 0x0017c2c0
+/* Bits into (set) / out of (clear) the entries of the group key finds,
+ * in record rec or all four when rec < 0 (native 281 ops 200 / 201). */
+void  sectorSetFlags(Obj17c0f0 *obj, int key, u_int bits, int rec);      // ROR 0x0017c45c
+void  sectorClearFlags(Obj17c0f0 *obj, int key, u_int bits, int rec);    // ROR 0x0017c4f4
 /* Takes a sky pack's sector.sec (copied to the game heap when copy is
  * set); non-zero on success. */
 int   FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy);               // ROR 0x0017c1f4

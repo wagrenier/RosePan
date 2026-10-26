@@ -13,10 +13,11 @@
 // same two instructions (return 0); one function stands for all of them.
 //
 // Written so far: the table, the empty and the return-code entries, 000,
-// 001, 002, 004 (wait until), 005, 007, 009, 012 (lights, fog), 014, the system call 018, 019
-// (pad), 021, 027, 028, 029 (stage changes), 032, 033, 036, 038, 039, 110,
-// 151 (object control), 152 (object queries) and 155 (vfchr objects). The others are
-// stubs (seqcall.h lists them).
+// 001, 002, 004 (wait until), 005, 006 (messages), 007, 009, 012 (lights,
+// fog), 014, the system call 018, 019 (pad), 021, 027, 028, 029 (stage
+// changes), 032, 033, 036, 038, 039, 106 (motion speed), 110, 151 (object
+// control), 152 (object queries), 155 (vfchr objects), 200 (turns) and
+// 281's helpers. The others are stubs (seqcall.h lists them).
 
 #include "sequence/seqcall.h"
 
@@ -1592,6 +1593,186 @@ intptr_t seqFunc155(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
     }
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Messages: a0 picks the call (21 cases, jump table data 0x2ff980).
+// 1 / 2 / 5 open the message window on text a1 (1 cuts it at 0x1fe
+// characters first), 3 the system message window, 4 sets the message mode,
+// 10 / 11 show / hide message sprite 3 with the words at a1, 0x14 starts
+// the item-use frame task (kind 0x15), 0x15 waits for it.
+// ROR 0x00205928
+
+intptr_t seqFunc006(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t)
+{
+    GamMan &gam = g_gamMan;
+
+    switch ((u_int)op)
+    {
+    case 1:
+    {
+        // The ROM's count stops at 0x201 and leaves p one past the byte
+        // that ended it; a long text gets two NULs there.
+        char *text = (char *)a1;
+        char *p = text;
+        int   n = 0;
+        for (;;)
+        {
+            char c = *p++;
+            if (c == '\0')
+                break;
+            int more = n < 0x200;
+            n++;
+            if (!more)
+                break;
+        }
+        if (n >= 0x1fe)
+        {
+            p[1] = '\0';
+            p[0] = '\0';
+        }
+        gam.openMsg(text, 0, 0xb4);
+        return 0;
+    }
+    case 2:
+        gam.openMsg((const char *)a1, (int)a2, 0xb4);
+        return 0;
+    case 3:
+        gam.openSysMsg((const char *)a1, -1, -1, -1, -1);
+        return 0;
+    case 4:
+        gam.m_msgMode = (int)a1;
+        return 0;
+    case 5:
+        gam.openMsg((const char *)a1, 0, (int)a2);
+        return 0;
+    case 10:
+        gam.showMsgSprite(1, (const int *)a1);
+        return 0;
+    case 11:
+        gam.showMsgSprite(0, (const int *)a1);
+        return 0;
+    case 0x14:  // callcheck: operator_new (new TskFrameFunc)
+    {
+        gam.m_flags2 |= 0x80000;
+        TskFrameFunc *task = new TskFrameFunc(0x15, 0, 0);
+        g_taskMan.addTask(1, -1, 1, 0, task, 0, &gam.m_itemUseTaskId, 0x11);
+        return 0;
+    }
+    case 0x15:
+        return g_taskMan.getTask(gam.m_itemUseTaskId) != NULL ? SEQ_RET_WAIT : 0;
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Motion speed of object a1's actor to the float at a2: a0 1 through the
+// scene only, 2 through the achr (which keeps it, +0x418).
+// ROR 0x002098e0
+
+intptr_t seqFunc106(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t)
+{
+    GamMan &gam = g_gamMan;
+    u_int   oid = (u_int)a1;
+
+    if (!gam.isObj(oid))
+        return 0;
+    ACHRstat *achr = gam.getAchr(oid);
+    if (op == 1)
+        g_magSystem.m_scene.setActorMotionSpeed(*(const float *)a2, achr->m_actor);
+    else if (op == 2)
+        achr->setMotionSpeed(*(const float *)a2);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Turns object a1 (an achr): a0 1 stops, 2 by the angle at a2 at the
+// speed at a3, 3 by the angle at a2 over a3 frames, 4 / 5 to the heading
+// at a2 at the speed at a3 / over a3 frames, 6 / 7 the same toward object
+// a2. Cases 0 and 8.. do nothing (jump table data 0x3010f0).
+// ROR 0x0020b3c0
+
+intptr_t seqFunc200(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t, intptr_t)
+{
+    GamMan &gam = g_gamMan;
+    u_int   oid = (u_int)a1;
+
+    if (!gam.isObj(oid))
+        return 0;
+    switch ((u_int)op)
+    {
+    case 1:
+        chrRotStart(*(const float *)a2, oid, 0);
+        break;
+    case 2:
+    {
+        float angle = *(const float *)a2;
+        chrRotStart(angle, oid, chrRotFrames(angle, *(const float *)a3));
+        break;
+    }
+    case 3:
+        chrRotStart(*(const float *)a2, oid, (int)a3);
+        break;
+    case 4:
+        chrRotTo(*(const float *)a2, *(const float *)a3, oid);
+        break;
+    case 5:
+        chrRotToIn(*(const float *)a2, oid, (int)a3);
+        break;
+    case 6:
+        chrRotTo(gam.getObjDirTo(oid, (u_int)a2), *(const float *)a3, oid);
+        break;
+    case 7:
+        chrRotToIn(gam.getObjDirTo(oid, (u_int)a2), oid, (int)a3);
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Native 281's helpers. Ops 200 / 201 set / clear bits in sector group
+// key of the scene's sector.sec object, all four records.
+// ROR 0x0020de34
+
+intptr_t seqSectorFlags(int op, int key, u_int bits)
+{
+    Obj17c0f0 *sector = &g_magSystem.m_scene.m_8542c;
+    if (op == 200)
+        sectorSetFlags(sector, key, bits, -1);
+    else if (op == 201)
+        sectorClearFlags(sector, key, bits, -1);
+    return 0;
+}
+
+// The pair no (< 50) of the table data 0x3015e0 into *id and *flag;
+// returns *id (-1 rows are none), -1 for no out of range. The ROM copies
+// the 0x64-byte table to the stack first.
+
+static const signed char s_seqIdPairs[50][2] = {
+    { -1, 0 }, { 18, 1 }, { 45, 1 }, { 14, 1 }, { 15, 1 },
+    { 20, 1 }, { 23, 1 }, { 29, 0 }, { 49, 0 }, {  5, 1 },
+    { 40, 1 }, { 38, 0 }, {  9, 0 }, { -1, 0 }, {  1, 0 },
+    {  2, 0 }, {  3, 1 }, {  4, 1 }, {  7, 1 }, { 13, 0 },
+    { 17, 0 }, { -1, 0 }, { 22, 1 }, { 24, 1 }, { -1, 0 },
+    { 41, 1 }, { 43, 1 }, { 47, 1 }, { 48, 1 }, { 51, 1 },
+    { 33, 1 }, { 34, 1 }, { 35, 1 }, { 36, 1 }, { 37, 1 },
+    { 50, 1 }, {  8, 0 }, { 52, 1 }, { 21, 1 }, { 26, 0 },
+    { 27, 0 }, { 28, 0 }, { -1, 0 }, { -1, 0 }, { -1, 0 },
+    { -1, 0 }, { -1, 0 }, { -1, 0 }, { -1, 0 }, { -1, 0 },
+};
+
+// ROR 0x0020dea8
+
+int seqGetIdPair(u_int no, int *id, int *flag)
+{
+    if (no >= 50)
+        return -1;
+    *id   = s_seqIdPairs[no][0];
+    *flag = s_seqIdPairs[no][1];
+    return *id;
+}
+
 // The table (data 0x2d90f8).
 const SeqFunc g_seqFuncTable[SEQ_FUNC_COUNT] = {
     /*   0 */ seqFunc000, seqFunc001, seqFunc002, seqFunc003,
@@ -1726,13 +1907,6 @@ const SeqFunc g_seqFuncTable[SEQ_FUNC_COUNT] = {
 
 // ---- stubs (tools/reverse/stubgen.py) ----
 
-// stub of ROR 0x00205928
-intptr_t seqFunc006(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc006", 0x00205928);
-    return {};
-}
-
 // stub of ROR 0x00206640
 intptr_t seqFunc016(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
@@ -1768,24 +1942,10 @@ intptr_t seqFunc100(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
     return {};
 }
 
-// stub of ROR 0x002098e0
-intptr_t seqFunc106(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc106", 0x002098e0);
-    return {};
-}
-
 // stub of ROR 0x0020abfc
 intptr_t seqFunc156(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
     ROSEPAN_STUB("seqFunc156", 0x0020abfc);
-    return {};
-}
-
-// stub of ROR 0x0020b3c0
-intptr_t seqFunc200(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc200", 0x0020b3c0);
     return {};
 }
 

@@ -3017,6 +3017,18 @@
   "was": "FUN_0017756c",
   "why": "a0 = MagScene +0x837e0: entry no of its table (+4) deleted, count +0x448 down, +0x1294 / +0x1298 = -1 when they named it; GamMan::ctlObj1cbb80 passes the pool record's second word"
  },
+ "0017c45c": {
+  "name": "sectorSetFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c45c",
+  "why": "on the scene's +0x8542c (sector.sec) object: record rec (or all four 0x18-byte records at +8 when rec < 0) gets 0x17e464(key, bits), which ORs bits into each entry +8 of the group key finds; native 281 op 200"
+ },
+ "0017c4f4": {
+  "name": "sectorClearFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c4f4",
+  "why": "sectorSetFlags' inverse (0x17e4d0 clears the bits); native 281 op 201"
+ },
  "0017e5c0": {
   "name": "WrdTable::load",
   "tag": "ror-inferred",
@@ -6971,11 +6983,23 @@
   "was": "FUN_001cea44",
   "why": "walks the vfchr list releasing every actor; with 0 also clears the slot and unlinks the record"
  },
+ "001cf6bc": {
+  "name": "GamMan::showMsgSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_001cf6bc",
+  "why": "on: S2dMes sprite 3 on with anim p[0], std point p[1], p[2], off point p[5], p[6], fade in p[3]; off: fade out p[4]; native 006 cases 10 / 11, resetStage"
+ },
  "001cf7d0": {
   "name": "GamMan::setMsgParam",
   "tag": "ror-inferred",
   "was": "FUN_001cf7d0",
   "why": "copies 32 bytes (four ld / sd) from a1 into +0x22280..0x2229f, the eight words initGameState seeds 10, 10, 0xffff, 0x100, 0x100, 0, 0 next to the message task id +0x222a0; native 007 case 1 passes the script's a1"
+ },
+ "001cf854": {
+  "name": "GamMan::openMsg",
+  "tag": "ror-inferred",
+  "was": "FUN_001cf854",
+  "why": "kills the message task (+0x222a0), starts a 0x9c0-byte task (0x1f4a24) over text, arg, m_msgParam, 1, m_msgMode and time on that id; native 006 cases 1 / 2 / 5"
  },
  "001cf95c": {
   "name": "GamMan::killMsgTask",
@@ -6989,11 +7013,23 @@
   "was": "FUN_001cf9d4",
   "why": "1 while the message task +0x222a0 runs or the system message window +0x2227c is open (MagScene 0x13f444); native 004 case 7"
  },
+ "001cfa5c": {
+  "name": "GamMan::openSysMsg",
+  "tag": "ror-inferred",
+  "was": "FUN_001cfa5c",
+  "why": "MagScene::openSysMsgWindow(text, 0, 0) into m_sysMsgHandle +0x2227c; native 006 case 3 passes four -1 the body never reads"
+ },
  "001cfb38": {
   "name": "GamMan::setSysMsgHandle",
   "tag": "ror-inferred",
   "was": "FUN_001cfb38",
   "why": "+0x2227c = the handle MagScene::openSysMsgWindow returned"
+ },
+ "001cfb48": {
+  "name": "GamMan::getObjDirTo",
+  "tag": "ror-inferred",
+  "was": "FUN_001cfb48",
+  "why": "both objects exist: the heading (0x217f10 of dx, dz) from oid's position to target's (0x1d05f4 twice), 0 otherwise; native 200 cases 6 / 7 turn toward it"
  },
  "001cfbe4": {
   "name": "GamMan::setObjPos",
@@ -7373,6 +7409,12 @@
   "was": "FUN_001db18c",
   "why": "setObjWork's per-list call, the setter of +0x1b0 words"
  },
+ "001db1b8": {
+  "name": "ACHRstat::setMotionSpeed",
+  "tag": "ror-inferred",
+  "was": "FUN_001db1b8",
+  "why": "stores the speed at +0x418 (past FCHRstat's 0x2c0, so the achr) and MagScene::setActorMotionSpeed(speed, m_actor); native 106 case 2 calls it on getAchr"
+ },
  "001db31c": {
   "name": "FCHRstat::getParam",
   "tag": "ror-inferred",
@@ -7637,6 +7679,24 @@
   "was": "FUN_001e7d7c",
   "why": "non-zero when the task id still runs; playStream does not queue a second TskSnd"
  },
+ "001f0e90": {
+  "name": "chrRotStart",
+  "tag": "ror-inferred",
+  "was": "FUN_001f0e90",
+  "why": "kills the achr's task m_task[1] (+0x3d8) and, for a non-zero angle, starts a TskChrRot (ctor 0x1f0434) turning by angle over frames on it; native 004 case 12 waits on that task"
+ },
+ "001f0f9c": {
+  "name": "chrRotTo",
+  "tag": "ror-inferred",
+  "was": "FUN_001f0f9c",
+  "why": "turns the achr to heading dir: delta from its rotation y (0x1d06b8) wrapped into -pi..pi, frames = chrRotFrames(delta, speed), then chrRotStart"
+ },
+ "001f10a4": {
+  "name": "chrRotToIn",
+  "tag": "ror-inferred",
+  "was": "FUN_001f10a4",
+  "why": "chrRotTo with a frame count instead of a speed"
+ },
  "001f184c": {
   "name": "TskFrameFunc::TskFrameFunc",
   "tag": "ror-inferred",
@@ -7678,6 +7738,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f6b28",
   "why": "v.x += sinf(angle) * dist, v.z += cosf(angle) * dist"
+ },
+ "001f6b8c": {
+  "name": "chrRotFrames",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6b8c",
+  "why": "|(int)(angle / (speed * 0.05233))|: frames to turn angle at speed units of about 3 degrees per frame"
  },
  "001f83f4": {
   "name": "scenePlayStart",
@@ -8092,6 +8158,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0020d428",
   "why": "entry 253 of the script native-function table data 0x2d90f8 (512 entries; the VM 0x214c24 calls entry (jal target - 0x144) / 0x40 with a0..a3, t0, t1)"
+ },
+ "0020de34": {
+  "name": "seqSectorFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_0020de34",
+  "why": "native 281 ops 200 / 201: sectorSetFlags / sectorClearFlags(&scene +0x8542c, key, bits, -1)"
+ },
+ "0020dea8": {
+  "name": "seqGetIdPair",
+  "tag": "ror-inferred",
+  "was": "FUN_0020dea8",
+  "why": "no < 50: the signed byte pair no of the table data 0x3015e0 (copied to the stack) into *id, *flag, returns *id; -1 otherwise; native 281 skips on a negative id"
  },
  "0020df98": {
   "name": "seqFunc281",

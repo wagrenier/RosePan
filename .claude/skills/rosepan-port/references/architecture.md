@@ -1000,6 +1000,19 @@ throughout (identifiers, env variables, files, shader macros):
   inlines cnvPosL2W / cnvPosW2L / getWrdOffset (0x28f300..) over gamWrdConvPos 0x1dba3c (the WRD
   table's room converters 0x17ebac / 0x17eb3c with the room +0x21f7c; this = GamMan+0x18c00 unused),
   23 hasVFchrParam(2, a1) 0x1d2d7c.
+- **Natives 006 / 106 / 200 and 281's helpers** (session 8, 2026-10-26): 006 messages (jump table data
+  0x2ff980, cases 1..0x15): 1 / 2 / 5 GamMan::openMsg 0x1cf854 (restarts the 0x9c0-byte message task on
+  m_msgTaskId +0x222a0 with text, arg, m_msgParam, 1, m_msgMode +0x225d8, time 0xb4 or a2; 1 first cuts
+  the text at 0x1fe), 3 openSysMsg 0x1cfa5c (openSysMsgWindow into +0x2227c), 4 m_msgMode = a1, 10 / 11
+  showMsgSprite 0x1cf6bc (S2dMes sprite 3), 0x14 m_flags2 |= 0x80000 and a TskFrameFunc kind 0x15 on
+  m_itemUseTaskId +0x222c0, 0x15 waits for it. 106: motion speed by the scene (1) or
+  ACHRstat::setMotionSpeed 0x1db1b8 (2, keeps it at +0x418). 200: achr turns over the TskChrRot task
+  (ctor 0x1f0434) on ACHRstat::m_task[1] +0x3d8 -- chrRotStart 0x1f0e90 (angle, oid, frames; 0 stops),
+  chrRotTo 0x1f0f9c (heading at speed), chrRotToIn 0x1f10a4 (heading in frames), chrRotFrames 0x1f6b8c
+  |angle / (speed * 0.05233)|, GamMan::getObjDirTo 0x1cfb48 (heading between two objects via 0x217f10).
+  281 ops 200 / 201 go to seqSectorFlags 0x20de34 (sectorSetFlags 0x17c45c / sectorClearFlags 0x17c4f4
+  on the scene's sector.sec object +0x8542c); seqGetIdPair 0x20dea8 reads the 50 signed byte pairs at
+  data 0x3015e0.
 - **Natives written 2026-10-26** (session 5): 007 a0 1 GamMan::setMsgParam 0x1cf7d0 (eight words over
   +0x22280, the message window's 10, 10, 0xffff, 0x100, 0x100 ...); 009 a0 1 killMsgTask 0x1cf95c; 012
   lights and fog (table data 0x2ff9e0, 501 entries, 63 cases): three runs over the same (light type,
