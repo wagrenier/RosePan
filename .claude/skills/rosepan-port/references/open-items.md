@@ -122,6 +122,15 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      SPR_TEX_FRAME, or a scene effect) that rosepan_i3d replays with the last bound texture; find it
      when the title shows for real. After MnuMcd: the logo movies need RxMpeg (item 10; isEnd /
      getStatus must report the end or execLogo waits), then a smoke_pad start press.
+  9b. DONE 2026-10-25 (`verify`): `mnu/mnumcd.cpp` (pinned 0x1a1244..0x1a4bd8; MnuTextList's
+     0x1a066c..0x1a1244 pinned as `mnu/mnuselect.cpp`) -- all 39 MnuMcd functions (exec, the seven
+     check modes, execCmd, updateMessage). Still black: execLogo's check now waits at
+     **McdMan::request** 0x187e08 (a stub returning 0: no command is ever taken). Next:
+     **`mcd/mcdman.cpp`** (queued first; its extent is not pinned: McdMan 0x187724..~0x18bb88, the
+     file string at 0x187a28; ror_functions puts 0x187724..0x187c30 in unassigned@00184f2c) --
+     request / getStatus / update and the getInfo / getDir handlers over src/sdk/libmc.cpp, so that
+     a PC with no card file answers "no card" or an empty formatted card. Then MsgMan / MsgManSet
+     (msg/msgman.cpp 0x18330c.., 0x18741c..) for the texts, or the check runs with empty windows.
   10. `snd/rxmpeg.cpp`, `unassigned@001810f4` -- RxMpeg: the title code calls it 13 times (background
      movie; the logo movie may come first in the W099 script). If the script waits on a movie, a
      host stand-in that reports "ended" unblocks the title before real MPEG playback.

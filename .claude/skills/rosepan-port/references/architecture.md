@@ -961,6 +961,35 @@ throughout (identifiers, env variables, files, shader macros):
 - **Type table** data 0x298318 (267 rows + -1): 0x40001.. -> themselves (2D boards), 0x80001.. ->
   0x10c5.. (3D board models), 0x100001.. / 0x200001.. -> page ids 0x1000.., 0x400001.. -> 0.
 
+## The memory card check (mnu/mnumcd.cpp, 0x1a1244..0x1a4bd8, 2026-10-25)
+
+- **MnuMcd** (EE 0x1400; MnuTitle +0, MagLifeMenuMcd +0x40): open +0, init +4, per-mode yes / no
+  cursors +0x08..+0x20 (2 = no prompt), exec state +0x24 (0 open two scene windows 0x200 x 0x100 at
+  view (0x3c, 0x82), McdMan::init, MsgManSet::open; 1 McdMan::loadData(0); 4 idle; 2 run the check
+  mode +0x2c; 5..7 close and return 1), next state +0x28 (startCheck sets 2), requested mode +0x30,
+  mode step +0x34, MagSystem* +0x58, blink counter +0x64, slot +0x74, slot states +0x78[2], "check
+  slot 2 too" +0x88 (only init writes it: 0), worker command +0x8c / queued +0x90, McdMan +0xc0 (EE
+  0xac0), MsgManSet +0xb80 (2 x 0x3bc), windows +0x1300[2], save file size / buffer / path / dir
+  +0x1308 / +0x130c / +0x1310 / +0x1350, m_result +0x1390, flags +0x13ac (1 freeze, 2 hide, 4 font,
+  8 blink, 0x10 message, 0x20 choice), message +0x13b0, choice +0x13b4, text mode +0x13b8.
+- **Check modes** (startCheck(mode)): 0 checkBoot (MnuTitle::execLogo; ok when either slot is
+  unformatted or has our directory / space, else a "continue?" prompt), 1 checkBootDebug (Japanese
+  texts drawn straight with MagSystem::drawView, rodata 0x2f88e0..), 2 checkSave, 3 checkLoad
+  (hasSaveData: an entry dtNNNNNNNNNN), 4 checkInfo, 5 execSave (format cmd 0xc, mkdir 6, overwrite
+  prompt, write 8), 6 execLoad (read 10, then testChecksum: row sums +0x2d20 / column sums +0x2d10 of
+  the 0x2d10-byte image). MnuMcd commands -> McdMan commands: 1 getInfo (0), 4 getDir (0x12 on
+  /BASLUS-21448/*), 6 -> 0x11, 8 -> 0x13, 10 -> 0x14, 0xc -> 8. Slot states from McdMan's result
+  (+0x58): getInfo 1 / 0x15 -> 1 (3 when McdMan +0x84 is 0), 7 -> 4, 8 / 0xe -> 2, else 8; getDir 1 ->
+  5 with icon.sys (0x3c4 bytes) else 7, 5 -> 6, 7 -> 4, 0xf -> 7. Messages: msgGetSysText 0x1d..0x2f
+  for MnuMcd messages 1..0x17, 0x30..0x39 for the choices (data 0x298fe8, 0x1d4 texts).
+- **McdMan** (mcd/mcdman.cpp, 0x187724..; not written): request(cmd) 0x187e08 takes the command word
+  cmd from its table at +0 when idle (+0x5c 0; 6 when busy) and sets status +0x64 to 1; update
+  0x187c4c runs it (0x187e44 getInfo: sceMcGetInfo / sceMcSync); getStatus 0x187e00 (2 done); result
+  +0x58, port +0x70, free +0x84, entry count +0x90, size / buffer +0xb0 / +0xb4, path +0x114, file name
+  +0x154, getDir table +0x1c0 (sceMcTblGetDir rows of 0x40).
+- **MsgMan** (msg/msgman.cpp, 0x18330c..; EE 0x3bc; not written): a text in a scene window (m_strBuf,
+  optional voice stream). **MsgManSet** 0x18741c..0x18761c: two of them found by window number.
+
 ## The title screen (mnu/mnutitle.cpp, 0x1a90ec..0x1ab474, 2026-10-25)
 
 - **MnuTitle** (EE 0x5700, MagLifeMenuTitle +0x40): MnuMcd +0, MnuSvld +0x1400 (m_save 0: load),
