@@ -68,8 +68,20 @@ struct EmyManager : CmnITask
     /* A new enemy for the type-2 achr chr (forwards to 0x162c88): chrNo
      * from the kind's system data field 0x72, GamMan's script word
      * +0x22364, the image slot the caller picked, the position. */
-    void addEmy(int chrNo, short kind, void *chr, intptr_t seqWord, void *image,
-                const void *pos, u_int oid);                             // ROR 0x00162c2c
+    /* oid 0 (addChrGroup's achrs): one is made, 0x9100006f + a count
+     * (when a further stack word the callers leave unset is non-zero),
+     * set in GamMan's achr slot table and the achr's param 1. group is
+     * EmyManager's group (addChr passes 0). Returns the oid, 0 when no
+     * enemy was added. */
+    u_int addEmy(int chrNo, short kind, void *chr, intptr_t seqWord, void *image,
+                 const void *pos, u_int oid, int group = 0);             // ROR 0x00162c2c
+    /* Group a (< 9) set up: b (< 0x11), c (at least 60), count (< 0x11),
+     * d, the position and f; on. */
+    void setGroup(float f, int a, int b, int c, int count, int d,
+                  const void *pos);                                      // ROR 0x00162b68
+    /* Clears its stage work: bytes +0x134 / +0x135, the two object ids,
+     * +0x144 and the 0x1e0 bytes at +0x148. */
+    void resetWork();                                                    // ROR 0x001635e0
     /* Its two object ids (+0x138 / +0x13c). */
     void getOids(int *a, int *b);                                        // ROR 0x00163ab8
     /* Deletes its object whose first word is oid (a type-2 achr's). */
@@ -114,6 +126,9 @@ struct CmnTaskMan
     void pauseOthers(int on);                                            // ROR 0x001e7544
     /* The task object of id (the list at +4, then +0), NULL when none. */
     CmnITask *findTask(int id);                                          // ROR 0x001e79c0
+    /* Every task of the list at +0 is marked for removal (state 2) but
+     * those whose kind (virtual +0xc) is 1..3 or 0x11. */
+    void killStageTasks();                                               // ROR 0x001e7618
 
     SysTimer m_timer;           // ROR 0x40 (bss 0x7a3dc0)
 };

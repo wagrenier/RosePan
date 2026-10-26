@@ -235,6 +235,12 @@ entries are marked **RoR** with the date.
 - **work/ is gitignored: an overwritten batch file is gone** (2026-10-26): take the next batch number
   from a listing made right before writing (ls work/batches | sort -V), never from memory; the names
   themselves survive in data/context_names.json.
+- **ROM bug kept out: releaseObjs frees vfchr nodes into the fchr pool** (2026-10-26, gamman session
+  6): 0x1cdf5c's last loop walks the vfchr list (+0x1dcd0) for kinds 0 / 1 but deletes the object
+  (which lives in the +0x1f248 storage, not the heap) and frees its node with the fchr pool's inline
+  (+0x1d980 / +0x1d990 counts). The host destroys in place and returns the node to the vfchr pool
+  (PORT comment there). Look for the same copy-paste when a release loop's pool offsets do not match
+  the list it walks.
 - **A stub that tolerated null becomes a member that does not.** When stubs turn into real members,
   check every caller the smoke run reaches for objects the host does not build yet; add `// PC:` guards.
 - **Stubs that return a buffer pointer return null**, invisible until the next consumer is real: when a
@@ -365,6 +371,10 @@ public:
 - **A python heredoc's "\n" became a real newline** inside a C string (the build broke with an
   unterminated printf): the Bash tool's heredoc plus Python escaping is two levels. Fix: write C
   string escapes with the Edit tool, or read the file back before building.
+
+- **A long C++ heredoc in one Bash call failed to parse** ("unexpected EOF while looking for matching
+  quote", 2026-10-26) and nothing was written. Write big code blocks with the Write tool (scratchpad
+  file), then splice them in with a short python -c.
 
 - A batch JSON for name_ctx.py with a PS2 path in a `why` (`cdrom0:\DATA\...`) fails to parse: a
   quoted heredoc keeps one backslash, and `\D` is not a JSON escape. Write paths with `/` in `why`.

@@ -66,6 +66,17 @@ ObjStat::ObjStat(int a1, u_int oid, int actor, short kind)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Written ahead for GamMan::clearChrSectaPtrs.
+// ROR 0x001d88fc
+
+void ObjStat::clearSectaPtrs()
+{
+    m_sectaLast = NULL;
+    m_secta = NULL;
+    m_110 = NULL;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001d890c
 
 void ObjStat::getPos(float *out)
@@ -990,6 +1001,29 @@ void FCHRstat::setRot(const float *rot)
     m_rot[2] = rot[2];
     if (m_actor != -1)
         g_magSystem.setActorRotate(m_actor, m_rot);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Written ahead for GamMan::startStage2.
+// ROR 0x001db9c4
+
+float gamGetWrdOfsX(void)
+{
+    const WrdEntry *e = g_wrdTable.get(g_gamMan.getWrdNo());
+    if (e == NULL)
+        return 0.0f;
+    return e->m_ofs[0];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001dba00
+
+float gamGetWrdOfsZ(void)
+{
+    const WrdEntry *e = g_wrdTable.get(g_gamMan.getWrdNo());
+    if (e == NULL)
+        return 0.0f;
+    return e->m_ofs[2];
 }
 
 // ──────────────────────────────────────────────────────────────────────

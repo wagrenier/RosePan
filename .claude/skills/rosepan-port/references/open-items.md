@@ -281,6 +281,15 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      reached initStage2 and faulted in Sequence::loadSubImage (fixed here, hazards.md). Open: who
      writes GamMan +0x18bc4 (the object bits onSubSeqEnd applies; allocDebug memory, not cleared by
      init), +0x22a5c (the BGM record) and +0x22060 / +0x22070 (the kept PC / dog start transforms).
+  10l. PARTIAL 2026-10-26 (`game/gamman.cpp` session 6): switchEnemies, pushCamera / popCamera,
+     loadVFchrModel(ByName), changeObjModel, addChrGroup, startStage2, resetStage, releaseObjs,
+     releaseAllChrs / releaseAll / term, releaseVFchrs, clearChrSectaPtrs, clearOidListImages,
+     openSysMsg (its first argument is a message number, not text: seqcall fixed), testAchrFlag;
+     ACHRstat +0x3ec is a word array m_attr[4]. New Game now runs resetStage (GamSndMan::reset,
+     GamArea::clear reached) and still dies after GamMan::relinkObj 0x1d5da0 (unassigned@001d3b44,
+     the next thing to write or debug with gdbrun.py). Open: EmyManager::addEmy (0x162c88) reads a
+     stack word after the group that neither addChr nor addChrGroup writes (oid 0 needs it non-zero
+     to make an oid); its host signature (group default 0) waits for the EmyManager TU.
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

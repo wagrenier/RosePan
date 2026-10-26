@@ -2807,6 +2807,18 @@
   "was": "FUN_0013d240",
   "why": "camera modes 3 / 4 on a path (m_camera_2ad58 the map camera): places the camera on the path point nearest the distance (int a1 as float) and searches up to 1000 steps within 5 units; native 016 case 7"
  },
+ "0013d4d0": {
+  "name": "MagScene::getCameraPathPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0013d4d0",
+  "why": "the scene's map camera path record (sky slot +0x2ad68, path +0x2ad64 in the 0x520 records at +0x29a3c): int +0x20 plus float +0x28; pushCamera keeps it"
+ },
+ "0013d52c": {
+  "name": "MagScene::setCameraPathPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0013d52c",
+  "why": "the reverse of 0x13d4d0: splits f12 with 0x26c8e0 into +0x28 and int +0x20; popCamera"
+ },
  "0013d5ac": {
   "name": "MagScene::getCameraMode",
   "tag": "ror-inferred",
@@ -3173,6 +3185,12 @@
   "was": "FUN_00162afc",
   "why": "word +0x24 of slot no of the 8 0x3c-byte slots at +0x148 (init clears 0x1e0 bytes there); native 212 case 30 (case 24 stores the slot's +0xc inline)"
  },
+ "00162b68": {
+  "name": "EmyManager::setGroup",
+  "tag": "ror-inferred",
+  "was": "FUN_00162b68",
+  "why": "GamMan::addChrGroup: group a < 9 record (stride 0x3c at +0x148): b < 0x11, c min 60, count < 0x11, d, pos, f, on"
+ },
  "00162c2c": {
   "name": "EmyManager::addEmy",
   "tag": "ror-inferred",
@@ -3184,6 +3202,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001634d4",
   "why": "a0 = g_emyManager 0x7b2140: the object of its 0x40 slots (+4) whose first word is oid is deleted (vtable slot 1 with 3), the slot and +0x330 entry cleared; releaseChr for type-2 achrs"
+ },
+ "001635e0": {
+  "name": "EmyManager::resetWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001635e0",
+  "why": "on 0x7b2140: clears bytes +0x134/+0x135, the object ids +0x138/+0x13c, +0x144 and 0x1e0 bytes at +0x148; releaseObjs"
  },
  "0016366c": {
   "name": "EmyManager::setEmyActive",
@@ -6647,6 +6671,12 @@
   "was": "FUN_001c05c0",
   "why": "rtti.py: GamMan's constructor (stores vtable 0x2e47e0 at +0x22ab4); builds GamArea, GamSndMan and the nine node pools (ItemStock 0x14e, AchrList 0x80 ...)"
  },
+ "001c0d44": {
+  "name": "GamMan::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001c0d44",
+  "why": "sysTermManagers calls it on the GamMan global: releaseAll (0x1c4fa4) then GamMan::init"
+ },
  "001c0d70": {
   "name": "GamMan::init",
   "tag": "ror-inferred",
@@ -6760,6 +6790,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c4f70",
   "why": "MagSystem::releaseActorMotion(getPcChrNo +0x21fdc, a1): frees motion a1 of the PC's actor; native 028 case 0x14"
+ },
+ "001c4fa4": {
+  "name": "GamMan::releaseAll",
+  "tag": "ror-inferred",
+  "was": "FUN_001c4fa4",
+  "why": "only forwards to releaseAllChrs 0x1ced18; called from term 0x1c0d44"
  },
  "001c5094": {
   "name": "GamMan::showMesSprite",
@@ -6976,6 +7012,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c7da8",
   "why": "1 when id is one of the 0x169 words of the 0x5a4-byte buffer +0x1f240"
+ },
+ "001c7dec": {
+  "name": "GamMan::clearOidListImages",
+  "tag": "ror-inferred",
+  "was": "FUN_001c7dec",
+  "why": "zeroes the words of the 0x169-word list +0x1f240 whose top two bits (the oid image) are set; resetStage"
  },
  "001c7e40": {
   "name": "GamMan::addItem",
@@ -7379,6 +7421,18 @@
   "was": "FUN_001cea44",
   "why": "walks the vfchr list releasing every actor; with 0 also clears the slot and unlinks the record"
  },
+ "001cebf8": {
+  "name": "GamMan::clearChrSectaPtrs",
+  "tag": "ror-inferred",
+  "was": "FUN_001cebf8",
+  "why": "0x1d88fc on every achr list (+0x1d350) and fchr list (+0x1d990) object; releaseObjs' first call"
+ },
+ "001ced18": {
+  "name": "GamMan::releaseAllChrs",
+  "tag": "ror-inferred",
+  "was": "FUN_001ced18",
+  "why": "deletes every achr (PC and dog kept with script bit [2] 0x8000) and fchr through the pool inlines, releases the avfchr actors, releaseVFchrs(0) when bit [7] sign clear"
+ },
  "001cf6bc": {
   "name": "GamMan::showMsgSprite",
   "tag": "ror-inferred",
@@ -7775,6 +7829,12 @@
   "was": "FUN_001d88c8",
   "why": "slot 1 of ObjStat's vtable 0x2e4828: stores that vtable at +0x258, operator delete when bit 0 of the flag argument (GCC 2 deleting destructor)"
  },
+ "001d88fc": {
+  "name": "ObjStat::clearSectaPtrs",
+  "tag": "ror-inferred",
+  "was": "FUN_001d88fc",
+  "why": "zeroes ObjStat +0x10c, +0x114, +0x110 (the secta cell pointers) without touching the cell lists"
+ },
  "001d890c": {
   "name": "ObjStat::getPos",
   "tag": "ror-inferred",
@@ -7961,6 +8021,18 @@
   "was": "FUN_001db898",
   "why": "ACHRstat::setRot's fchr twin; setObjDir's vfchr / fchr branches"
  },
+ "001db9c4": {
+  "name": "gamGetWrdOfsX",
+  "tag": "ror-inferred",
+  "was": "FUN_001db9c4",
+  "why": "WrdTable::get(GamMan::getWrdNo()) word +0x20 (room offset x), 0 without an entry; startStage2"
+ },
+ "001dba00": {
+  "name": "gamGetWrdOfsZ",
+  "tag": "ror-inferred",
+  "was": "FUN_001dba00",
+  "why": "as 0x1db9c4 with word +0x28 (room offset z)"
+ },
  "001dba3c": {
   "name": "gamWrdConvPos",
   "tag": "ror-inferred",
@@ -8057,6 +8129,12 @@
   "was": "FUN_001dd7bc",
   "why": "afterSeqExec kind 3 calls it on GamMan +0x40 with 2; not read yet"
  },
+ "001ddaa8": {
+  "name": "GamArea::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_001ddaa8",
+  "why": "GamMan +0x40: splices its pools (+0xc1c0, the pool at +0x18b40, the list +0xd0) back to their free lists; releaseObjs and resetStage after stopTrgs"
+ },
  "001ddc80": {
   "name": "GamArea::stopTrgs",
   "tag": "ror-inferred",
@@ -8152,6 +8230,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001e1920",
   "why": "GamMan::resume calls it (0, 0, 1) on +0x18e00; clears bit 0 of +0x1870 and restarts the +0x1684 slot"
+ },
+ "001e1fa4": {
+  "name": "GamSndMan::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_001e1fa4",
+  "why": "GamMan::resetStage on GamMan +0x18e00: clears the BGM / stream records and the 0x30 sound records, kills the three sound tasks +0x170c / +0x1710 / +0x1718, empties the list +0x40"
+ },
+ "001e2178": {
+  "name": "GamSndMan::stopObjSnds",
+  "tag": "ror-inferred",
+  "was": "FUN_001e2178",
+  "why": "frees the used nodes of the list +0x40 with flag 2 (funcStr stop when flag 1) or flag 4 (0x1e649c); releaseObjs"
  },
  "001e239c": {
   "name": "GamSndMan::put_se_3d_pos",
@@ -8356,6 +8446,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e7544",
   "why": "every task but kinds 1, 2, 5, 7, 0xf, 0x11, 0x12, 0x17"
+ },
+ "001e7618": {
+  "name": "CmnTaskMan::killStageTasks",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7618",
+  "why": "on 0x7a3d80: walks the task list, sets state 2 on each task whose virtual +0xc kind is not 1..3 or 0x11; releaseObjs kinds 0..2"
  },
  "001e7724": {
   "name": "CmnTaskMan::killTask",

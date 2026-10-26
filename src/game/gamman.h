@@ -64,6 +64,9 @@ struct GamArea
     void startTrgs();                                                    // ROR 0x001de4e4
     /* Empties the active list +0xc290 into its free list. */
     void stopTrgs();                                                     // ROR 0x001ddc80
+    /* Empties its trigger lists (+0xc1c0 / +0x18b40's / +0xd0) into their
+     * free lists. */
+    void clear();                                                        // ROR 0x001ddaa8
     /* Adds value to key's up-to-8 values in the pool *(+0x18b40). */
     void registFtb(int key, u_int value);                                // ROR 0x001de6fc
 };
@@ -262,13 +265,26 @@ static_assert(sizeof(GamActorRec) == 0xc, "GamActorRec");
 static_assert(offsetof(GamActorRec, m_model) == 2, "m_model");
 static_assert(offsetof(GamActorRec, m_actor) == 4, "m_actor");
 
-/* GamMan +0x22470: four records, id -1 = free (EE 0x30). */
-struct GamRec22470
+/* A pushCamera record (GamMan +0x22470, EE 0x30; init sets four modes
+ * -1, pushCamera fills three): the camera mode and its words, and the
+ * scene camera entity's translation, rotation and lens angle. */
+struct GamCamRec
 {
-    int m_id;                   // ROR 0x00
-    int _04[11];
+    int   m_mode;               // ROR 0x00: MagSystem::getCameraMode's word 0 & 0xf (0..5), -1 after init
+    int   m_arg;                // ROR 0x04: its word 1 (the camera number)
+    u_int m_21f78;              // ROR 0x08: GamMan +0x21f78 (setCameraMode's arg for modes 3..5)
+    float m_trans[3];           // ROR 0x0c: DogCamera m_trans x, y, z
+    float m_rotate[3];          // ROR 0x18: DogCamera m_rotate x, y, z
+    float m_angle;              // ROR 0x24: DogCamera m_angle
+    float m_pathPos;            // ROR 0x28: modes 3..5: MagScene::getCameraPathPos
+    int   _2c;
 };
-static_assert(sizeof(GamRec22470) == 0x30, "GamRec22470 stride");
+static_assert(sizeof(GamCamRec) == 0x30, "GamCamRec stride");
+static_assert(offsetof(GamCamRec, m_21f78) == 0x08, "m_21f78");
+static_assert(offsetof(GamCamRec, m_trans) == 0x0c, "m_trans");
+static_assert(offsetof(GamCamRec, m_rotate) == 0x18, "m_rotate");
+static_assert(offsetof(GamCamRec, m_angle) == 0x24, "m_angle");
+static_assert(offsetof(GamCamRec, m_pathPos) == 0x28, "m_pathPos");
 
 /* GamMan +0x22540: three records, -1.0 = unset (EE 0x20). */
 /* EE size 0x22ab8. layout: host -- EE offsets in the comments. Items are
@@ -558,12 +574,29 @@ struct GamMan
     /* Adds the object oid of scene model (-1 none) by its list: an achr
      * (ACHRstat) or an fchr (FCHRstat); kind is its system data id. */
     void addChr(int model, u_int oid, int kind, const void *pos, int place); // ROR 0x001cc250
-    /* count achr objects of model registered as a group with 0x7b2140. */
+    /* EmyManager group a set up (b, c, count, d, pos, f), then count
+     * type-2 achrs of kind's model (field 0xf) at pos, oid 0: EmyManager
+     * gives each its oid. model, oid and e are never read. */
     void addChrGroup(int model, u_int oid, int a, int b, int c, int count, int d,
                      int e, int kind, const void *pos, int place, float f); // ROR 0x001cc560
     /* Stage change kind 2's first half. */
     void releaseStage2();                                                // ROR 0x001cd224
-    void releaseObjs(int kind, int arg);                                 // ROR 0x001cdf5c
+    /* Drops the stage's objects by kind (2: those not of image 1 and the
+     * vfchr actors of room m_21f84; 3: image 3; else all): tasks, enemy
+     * work, script callbacks, update list, area triggers, object sounds,
+     * camera stack, achrs, and unless keepFchrs the fchrs and vfchrs. */
+    void releaseObjs(int kind, int keepFchrs);                           // ROR 0x001cdf5c
+    /* Every achr (the PC and dog kept with script bit [2] 0x8000) and
+     * fchr deleted, the avfchr actors released, and with [7] >= 0 the
+     * vfchrs (releaseVFchrs(0)). */
+    void releaseAllChrs();                                               // ROR 0x001ced18
+    void releaseAll() { releaseAllChrs(); }                              // ROR 0x001c4fa4
+    /* sysTermManagers: releaseAll, then init again. */
+    void term();                                                         // ROR 0x001c0d44
+    /* Every achr's and fchr's secta pointers cleared. */
+    void clearChrSectaPtrs();                                            // ROR 0x001cebf8
+    /* The words of m_1f240 with an image (bits 30..31) cleared. */
+    void clearOidListImages();                                           // ROR 0x001c7dec
     /* Sequence::exec's last call: the stage-change requests in flags2. */
     /* Records a stage change for afterSeqExec: kind 1 chapter (a full
      * reset, m_stageReq 5), kind 2 room into +0x21f7c, kind 3 a3 into
@@ -584,6 +617,10 @@ struct GamMan
     /* Achr oid's actor released and model loaded again (params 3 and
      * 0x1000); returns the actor. */
     int  reloadAchrModel(u_short model, u_int oid);                      // ROR 0x001caf78
+    /* With m_flags 0x20: the PC at m_sysWord moved by the room offset
+     * change from globals [5] / [7] plus 50 units along global [10]'s
+     * heading, the dog beside it; then globals [5] / [7] = this room's
+     * offset x / z. */
     void startStage2();                                                  // ROR 0x001cd60c
     void empty1cd7c0();                                                  // ROR 0x001cd7c0
     /* The requested stage change by m_cur_stat (1 loadStage, 2 the stage-2
@@ -657,9 +694,9 @@ struct GamMan
     /* Restarts the message task (m_msgTaskId) on text with arg, m_msgParam,
      * m_msgMode and time (native 006). */
     void openMsg(const char *text, int arg, int time);                   // ROR 0x001cf854
-    /* MagScene::openSysMsgWindow(text, 0, 0) into m_sysMsgHandle; the
+    /* MagScene::openSysMsgWindow(msg, 0, 0) into m_sysMsgHandle; the
      * four ints are never read (native 006 passes -1). */
-    void openSysMsg(const char *text, int a, int b, int c, int d);       // ROR 0x001cfa5c
+    void openSysMsg(int msg, int a, int b, int c, int d);                // ROR 0x001cfa5c
     /* S2dMes sprite 3: on with param {anim, x, y, fade in, fade out,
      * off x, off y} (points * 16), or fades it out by param[4]. */
     void showMsgSprite(int on, const int *param);                        // ROR 0x001cf6bc
@@ -853,8 +890,8 @@ struct GamMan
     intptr_t     m_seqWord;         // ROR 0x22364: setEmyParam; system call 0x15 stores its a1
     char         m_2236c[4][0x40];  // ROR 0x2236c: four strings, emptied by initGameState
     SeqFixedPool<GamRec16, 0x100> *m_pool2246c; // ROR 0x2246c: init's new (0x1840 bytes)
-    GamRec22470  m_22470[4];        // ROR 0x22470: stride 0x30
-    int          m_22530;           // ROR 0x22530
+    GamCamRec    m_camStack[4];     // ROR 0x22470: pushCamera / popCamera (three used)
+    int          m_camDepth;        // ROR 0x22530: the records pushed
     I3dFog       m_fogStack[3];     // ROR 0x22540: pushFog / popFog; m_color[0] -1 = a free slot
     int          m_msgMode;         // ROR 0x225d8: chgMsgMode
     int          m_225dc;           // ROR 0x225dc: initStage2 clears it

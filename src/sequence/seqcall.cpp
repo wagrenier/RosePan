@@ -1783,7 +1783,7 @@ intptr_t seqFunc006(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
         gam.openMsg((const char *)a1, (int)a2, 0xb4);
         return 0;
     case 3:
-        gam.openSysMsg((const char *)a1, -1, -1, -1, -1);
+        gam.openSysMsg((int)a1, -1, -1, -1, -1);
         return 0;
     case 4:
         gam.m_msgMode = (int)a1;

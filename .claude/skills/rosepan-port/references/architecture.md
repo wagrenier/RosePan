@@ -910,6 +910,23 @@ never asserts): sessions name them (`tus.py define --why`).
   transforms +0x22060 / +0x22070, -n the n-th record of this room in W000.WRD file 2 (0x20 bytes: room,
   pos +0x10, rotY +0x1c), else a type-9 fchr oid: 50 units in front of it. `storePcTransform`
   0x1cd404 puts the dog 35 units to the PC's side (heading - pi/2) and tells Brown's controller.
+- **Stage resets** (gamman session 6): `resetStage` 0x1cdbf0 (change kind 5, a new chapter) unsets the
+  room (+0x21f7c = -1), closes the menu, camera mode 1, clears the PC / dog, the object records' 0x8000
+  bits, then (script bits word 7 sign clear) the held item, the image oids of the list +0x1f240 and
+  bits word 6 bits 0..3; sounds (`GamSndMan::reset` 0x1e1fa4), callbacks +0x222c4.., messages, effects,
+  Sequence::stopImages(1), `releaseAllChrs` 0x1ced18 (every achr / fchr deleted; with bits word 2
+  0x8000 the PC and dog stay) and the area triggers. `releaseObjs(kind, keepFchrs)` 0x1cdf5c (kinds
+  0 / 1 from task/tsk_bg_load.cpp, 2 from releaseStage2) picks by the oid's image (bits 30..31): kind
+  2 drops all but image 1, kind 3 only image 3, else all. term 0x1c0d44 = releaseAll + init.
+- **Camera stack** (`pushCamera` 0x1c5ffc / `popCamera` 0x1c621c, native 016): three GamCamRec of
+  0x30 at +0x22470 (count +0x22530): MagSystem::getCameraMode's mode & 0xf (0..5 only) and number,
+  +0x21f78, the scene camera entity's (MagScene +0x2ab70, bss 0x7268f0) trans / rotate xyz and lens
+  angle (+0x140), and for map cameras 3..5 the path point (MagScene 0x13d4d0 / 0x13d52c: the path
+  record +0x20 int + +0x28 fraction). Pop sets modes 3..5 as setCameraMode(mode, +0x21f78, {-1, -1,
+  number}).
+- **Enemy groups** (`addChrGroup` 0x1cc560, native 100 case 8): EmyManager::setGroup 0x162b68 (group
+  a < 9 at stride 0x3c), then count achrs built with oid 0: addEmy (0x162c88) makes their oids
+  0x9100006f + n and stores them in GamMan's m_achr table itself.
 
 ## Disc and data files
 
