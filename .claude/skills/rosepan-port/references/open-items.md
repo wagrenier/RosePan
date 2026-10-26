@@ -151,9 +151,18 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      **`unassigned@001810f4`** -- RxMpeg::open 0x181150 / play 0x18154c / isEnd 0x18176c: execLogo
      step 8 plays CP_LOGO.PSS and waits for isEnd. A host stand-in that reports the end unblocks the
      Punchline / Shirogumi logos and the title.
-  10. `snd/rxmpeg.cpp`, `unassigned@001810f4` -- RxMpeg: the title code calls it 13 times (background
-     movie; the logo movie may come first in the W099 script). If the script waits on a movie, a
-     host stand-in that reports "ended" unblocks the title before real MPEG playback.
+  10. DONE 2026-10-25 (`done`): `snd/rxmpeg.cpp` (pinned 0x1810f4..0x1830fc, was
+     unassigned@001810f4) and `snd/unitque.cpp` (0x1830fc..0x1832e8) -- the whole movie player and
+     library over the host libmpeg (FFmpeg), no stand-in: CP_LOGO.PSS plays through (Punchline,
+     then "Published by Atlus USA", letterboxed at y 64 as the ROM's transfer puts it) and closes,
+     then MV00_AD.PSS (the 252 MB attract film, ~5 minutes) plays at the pace of its audio -- silent:
+     the IOP sound stand-in only drains ADPCM streams now (hazards.md). Renamed from what the code
+     does: RxMpeg::isEnd -> isReady, stop -> run, checkSkip -> checkNearEnd (S2dMovie::isMovieEnd /
+     stopMovie keep their names but mean "ready" / "run"). Also written: GamMan::getStatus 0x1c6ccc
+     and getPlayMinutes 0x1c6c98 (startPaused reads the brightness level through it). **Next
+     blocker: `bed/bedpad.cpp` (queued first)** -- execLogo leaves MV00_AD on a Start press (BedPad
+     m_7a bit 3) or after its five minutes; BedPad::update is a stub, so the title ("press start",
+     then the main menu) waits for the film's end; then `settings.smoke_pad` presses Start.
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

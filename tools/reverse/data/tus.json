@@ -1,14 +1,12 @@
 {
  "queue": [
-  "unassigned@001810f4",
+  "bed/bedpad.cpp",
   "unassigned@001a6830",
   "sequence/seqcall.cpp",
   "unassigned@0020ff34",
   "game/gamman.cpp",
   "unassigned@001fd424",
-  "unassigned@001e46b8",
-  "bed/bedpad.cpp",
-  "snd/rxmpeg.cpp"
+  "unassigned@001e46b8"
  ],
  "settings": {
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
@@ -782,6 +780,24 @@
    "status": "done",
    "task": "Create the PC project (no RoR functions to write). The platform layer comes from ReiPan (../ReiPan, read-only), which took it from MioPan (FF2) and adapted it to FF3: src/sdk emulates the PS2 SDK (libgraph, libdma, libvif, libvu0, libpad, libmc, libcdvd, sif / IOP host, libmpeg + FFmpeg, eekernel threads), src/reipan draws the GS through SDL3 GPU and holds the host thread, log, paths, config and the ImGui debug UI. Steps: (1) copy ../ReiPan/src/reipan to src/rosepan and ../ReiPan/src/sdk to src/sdk; rename ReiPan_ / REIPAN_ / reipan_ identifiers, env variables and file names to RosePan_ / ROSEPAN_ / rosepan_, keeping the tool contract in tools/reverse/README.md 'Platform contract' (ROSEPAN_SHOT_DIR / ROSEPAN_SHOT_EVERY screenshots of the presented frame, ROSEPAN_AUTOPAD scripted pad in sdk/libpad.cpp, ROSEPAN_DATA_DIR, the RosePanGame thread name, the stub log line). (2) Write src/common/rosepan_stub.h from ../ReiPan/src/common/reipan_stub.h: ROSEPAN_STUB / ROSEPAN_BRIDGE printing '[stub] Name (ROR 0x%08x) reached'. (3) Drop or neutralise FF3-only pieces and list each in open-items.md 'Platform bootstrap': reipan/debug/reipan_warp.* (FF3 chapter warps and snapshots), FF3 game hooks in rendering/reipan_graph3d.cpp and reipan_ui, FF3 file names in io/reipan_paths (IMG_BD.BIN, ZERO3.FHD: RoR reads 'cdrom0:\\\\DATA\\\\...' and data/... paths, decide the data folder layout from the ELF), the FF3 IOP services in sdk/iop_* (RoR loads only Sony modules: sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv, fileio, sifcmd, usbd, plus ioprp300.img; its sound goes through rxmpeg / the rx middleware). (4) CMakeLists.txt, CMakePresets.json, cmake/*.cmake and resources/ (shaders) from ReiPan with ReiPan renamed RosePan: target RosePan, output cmake-build-*/RosePan/RosePan.exe, the sibling extern fallback pointed at ../ReiPan/extern then ../MioPan/extern (FFmpeg, shadercross), -fno-strict-aliasing and the src/sdk/pc_prefix.h force-include kept, every .c/.cpp compiled as C++. (5) A placeholder src/main.cpp whose main() initialises the platform, opens the window and presents cleared frames until RoR's main (0x002045a8) is reconstructed. (6) python build.py green; python build.py --run 15 writes work/shots/last.png (look at it); python layoutcheck.py runs clean. Keep platform edits minimal and list them in the summary; record the layer's shape in architecture.md 'PC platform layer' and anything that burned time in hazards.md. Finish --status done (the screenshot of an empty window is the expected picture)."
   },
+  "snd/rxmpeg.cpp": {
+   "notes": "Done: all 65 functions of snd/rxmpeg.cpp (pinned 0x1810f4..0x1830fc from unassigned@001810f4; the snd/rxmpeg.cpp assert strings sit at 0x1825e4) and the 9 of snd/unitque.cpp (pinned 0x1830fc..0x1832e8, written here because only the movie uses it). No stand-in: the ROM library runs over src/sdk/libmpeg (real PSS demux, FFmpeg MPEG-2). Three PC: changes, all in the banner of snd/rxmpeg.cpp: the Nodata callback retires the video que by what the decoder parsed (RosePanMpegVideoPending), rounded to the ROM 2 KB units; rxMpegDecodeThread is not posted, rxMpegUpdate runs rxMpegDecodePoll (the ROM one-pass twin) each frame; RxMpeg::draw still writes the ROM GS transfer packet but the picture reaches the screen through the new RosePan_I3dRecordMovie record (rosepan_i3d) and RosePan_RendererVideoTexture (the renderer movie texture). Platform fix: src/sdk/iop_rxsnd.cpp now drains open ADPCM streams at their real rate (0xa0 open, 0xa1 data, 0xa2 param 0 close, 0xa3 status), still silent; before it every ADPCM writer stalled (hazards.md). Seen on screen (40 s smoke run; longer runs reach MV00_AD petals): Punchline logo then Published by Atlus USA, letterboxed 512x336 at y 64 as the ROM transfer places it, the film ends and closes, then MV00_AD (252 MB, about five minutes) plays at its audio pace. Renamed: RxMpeg isEnd to isReady, stop to run, checkSkip to checkNearEnd; S2dMovie isMovieEnd / stopMovie keep names but mean ready / run. GamMan gained m_04, m_playMinutes (0x21f64), m_21f68. Next: bed/bedpad.cpp (queued first) so a Start press leaves the attract film for the title; then settings.smoke_pad. Untested paths: playNow / MnuMovie, the frame hold (m_hold), PCM audio (no disc movie has it).",
+   "ranges": [
+    [
+     "001810f4",
+     "001830fc"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-25 22:19",
+     "status": "done",
+     "summary": "The movie player: RxMpeg (17 methods) and the C movie library (48 functions) over the host libmpeg, plus snd/unitque.cpp (9) and GamMan::getStatus / getPlayMinutes; CP_LOGO.PSS and MV00_AD.PSS play on screen"
+    }
+   ],
+   "status": "done",
+   "why": "The movie module between snd/sndman.cpp (ends 0x1810f4) and snd/unitque.cpp (0x1830fc): the RxMpeg class 0x1810f4..0x18182c (ctor 0x1810f4, its methods over the g_rxMpeg object) calls only the C movie library after it; 0x1825e4 asserts with the source string snd/rxmpeg.cpp and the strings gBuffer / gMpegWork, 0x182818..0x1830f0 are that library's state accessors (sceMpegReset / Delete, the data 0x298f00.. words) and the 0x18182c..0x181c14 PCM channel table feeds rxSndPcm* from the same demux. No other source string or class claims the range; one file named after the class."
+  },
   "snd/sndman.cpp": {
    "notes": "Done as verify: SndMan::update runs every frame now, but every rxSnd call (rx/rxsnd.h, unassigned@00237ce8) is a stub, so nothing is heard and nothing on screen can show it; the screenshot stays black as before (the draw path waits on DogLightPool::createLight, MagScene::update, fileGetSize). Decisions: the TU was cut out of unassigned@00164fc0 (whose next-pick slice mixed Emy, Eff*, SctLayer, WrdSrv and SndMan); 0x1810f4/0x181128 are RxMpeg's ctor/dtor and stay with rxmpeg. rxSndXvabLoad takes a file name (GamSndEntry starts with the name; loadBankByName reads the bank number from chars 3..4). 0x2155f4 is a second assert handler (scePrintf, 27 sites) written as ROR_ASSERT. Field attr (rxSnd IOP param 2) may be pan or an effect send: unconfirmed. TskSnd ctor 0x1f8fc0 is a hand-written stub in lib/unassigned_stubs.cpp. Next: the host sound backend is the user's call (open-items.md Open questions); the rest of unassigned@00164fc0 needs its files defined (Eff* effects, SctLayer, WrdSrv) before porting from it.",
    "ranges": [
@@ -799,6 +815,15 @@
    ],
    "status": "verify",
    "why": "SndMan: ctor 0x17f0d0 (static init 0x2041f8 constructs bss 0x7b2580), init/update, the stream/sound helpers up to the anchor 0x180230 (snd/sndman.cpp string) and its helpers to 0x1810f4, where RxMpeg's ctor starts (RxMpeg::open 0x181150 follows)"
+  },
+  "snd/unitque.cpp": {
+   "ranges": [
+    [
+     "001830fc",
+     "001832e8"
+    ]
+   ],
+   "why": "unitQueCreate 0x1830fc asserts pQue with the source string snd/unitque.cpp; the eight que accessors after it (0x18316c..0x1832b8) work on the same 0x40-byte header (write / read / count / user / size) and only snd/rxmpeg.cpp calls them; msgGetSysText 0x1832e8 starts msg/."
   },
   "spr/s2d.cpp": {
    "notes": "All 86 functions written; nothing on screen can show them yet (MagScene::draw is a stub), so verify: the first session whose screenshot shows S2d sprites marks it done. Callees are stubs in magscene.cpp, sprman.cpp and lib/unassigned_stubs.cpp. Trap: MagScene::m_camera_entity (+0x2ab70) is a host DogEntity (0xa0 bytes) but DogEntity::getMatrix returns this + 0xf0, which belongs to the derived camera class (likely DogCamera); give the scene the real class before writing getMatrix. g_wrdTable (0x298ee0) is defined in lib/unassigned_stubs.cpp. RxMpeg gained m_04 (+4) and m_name (+0x44). The user's top priority is now the render chain (open-items.md Next up item 0): system/sysnowloading.cpp first, then mag/magscenerender.cpp, unassigned@0021fb50, unassigned@00216ad0, spr/sprtexture.cpp, dog/dogtexinfo.cpp, spr/sprman.cpp.",
@@ -881,6 +906,7 @@
   "unassigned@0011262c": {},
   "unassigned@0012f008": {},
   "unassigned@00164fc0": {},
+  "unassigned@001810f4": {},
   "unassigned@00190a78": {},
   "unassigned@001a0950": {},
   "unassigned@001a6830": {},

@@ -11934,6 +11934,24 @@ const void *RosePan_RendererCreateImageTexture(const unsigned char *rgba,
     return CreatePendingTexture(hash, width, height, std::move(pixels));
 }
 
+const void *RosePan_RendererVideoTexture(int tw, int th)
+{
+    if (!g_frame_active || RosePan_VideoIsLive() == 0 || tw <= 0 || th <= 0 ||
+        tw > 12 || th > 12)
+    {
+        return nullptr;
+    }
+
+    sceGsTex0 tex0{};
+    tex0.TBP0 = (u_long)RosePan_VideoGsAddr();
+    tex0.PSM = RosePan::GS::PSMCT32;
+    tex0.TW = (u_long)tw;
+    tex0.TH = (u_long)th;
+
+    TextureEntry *entry = GetVideoTexture(&tex0);
+    return entry != nullptr && entry->texture != nullptr ? entry : nullptr;
+}
+
 void RosePan_RendererDrawImageQuad(const void *texture,
                                   const float *xy,
                                   const float *uv,

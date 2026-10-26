@@ -35,7 +35,6 @@ CmnTaskMan g_taskMan;           /* bss 0x7a3d80 */
 Sequence   g_sequence;          /* bss 0x7a4440 */
 EmyManager g_emyManager;        /* bss 0x7b2140 */
 SndMan     g_sndMan;            /* bss 0x7b2580 */
-RxMpeg     g_rxMpeg;            /* bss 0x7b40c0 */
 WrdTable   g_wrdTable;          /* data 0x298ee0: data/wrd/WRD.BIN's table */
 
 int g_emyManagerTaskId;         /* bss 0x7b45c0 */
@@ -108,12 +107,6 @@ TskFrameFunc::TskFrameFunc(int kind, intptr_t arg, int frames)
 TskSysFunc::TskSysFunc(int kind, int a, intptr_t arg)
 {
     ROSEPAN_STUB("TskSysFunc::TskSysFunc", 0x001f4184);
-}
-
-// stub of ROR 0x00181204
-void RxMpeg::setFrameParity(int parity)
-{
-    ROSEPAN_STUB("RxMpeg::setFrameParity", 0x00181204);
 }
 
 // stub of ROR 0x0010421c
@@ -217,52 +210,6 @@ sceVu0FVECTOR * DogEntity::getMatrix()
     // PC: the unit matrix until the camera class that holds the +0xf0
     // matrix is written; i3dCtxCreateView copies what this returns.
     return i3dMatGetUnit();
-}
-
-// stub of ROR 0x001816b0
-int RxMpeg::close()
-{
-    ROSEPAN_STUB("RxMpeg::close", 0x001816b0);
-    return {};
-}
-
-// stub of ROR 0x001812a8
-void RxMpeg::draw(I3dLayer *layer)
-{
-    ROSEPAN_STUB("RxMpeg::draw", 0x001812a8);
-}
-
-// stub of ROR 0x0018173c
-int RxMpeg::getStatus()
-{
-    ROSEPAN_STUB("RxMpeg::getStatus", 0x0018173c);
-    return {};
-}
-
-// stub of ROR 0x0018176c
-int RxMpeg::isEnd()
-{
-    ROSEPAN_STUB("RxMpeg::isEnd", 0x0018176c);
-    return {};
-}
-
-// stub of ROR 0x00181150
-void RxMpeg::open()
-{
-    ROSEPAN_STUB("RxMpeg::open", 0x00181150);
-}
-
-// stub of ROR 0x0018154c
-void RxMpeg::play(const char *name, int w, int h)
-{
-    ROSEPAN_STUB("RxMpeg::play", 0x0018154c);
-}
-
-// stub of ROR 0x00181644
-int RxMpeg::stop()
-{
-    ROSEPAN_STUB("RxMpeg::stop", 0x00181644);
-    return {};
 }
 
 // stub of ROR 0x0017ea44
@@ -455,18 +402,6 @@ int GamSndMan::findSnd(int id, GamSndEntry **entry, int arg)
 {
     ROSEPAN_STUB("GamSndMan::findSnd", 0x001e4908);
     return {};
-}
-
-// stub of ROR 0x00181494
-void RxMpeg::postUpdate()
-{
-    ROSEPAN_STUB("RxMpeg::postUpdate", 0x00181494);
-}
-
-// stub of ROR 0x0018120c
-void RxMpeg::update()
-{
-    ROSEPAN_STUB("RxMpeg::update", 0x0018120c);
 }
 
 // stub of ROR 0x00106658
@@ -1377,13 +1312,6 @@ void MnuTextList::processPad(BedPad *pad)
 void MnuTextList::setItems(const char *items, u_int mask)
 {
     ROSEPAN_STUB("MnuTextList::setItems", 0x001a09b8);
-}
-
-// stub of ROR 0x00181780
-int RxMpeg::checkSkip()
-{
-    ROSEPAN_STUB("RxMpeg::checkSkip", 0x00181780);
-    return {};
 }
 
 // stub of ROR 0x00187464

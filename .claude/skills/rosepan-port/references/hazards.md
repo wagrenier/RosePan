@@ -346,6 +346,9 @@ public:
   gitignored, so an overwritten batch leaves no trace).
 
 ## Shell and Python on Windows
+- **A python heredoc's "\n" became a real newline** inside a C string (the build broke with an
+  unterminated printf): the Bash tool's heredoc plus Python escaping is two levels. Fix: write C
+  string escapes with the Edit tool, or read the file back before building.
 
 - A batch JSON for name_ctx.py with a PS2 path in a `why` (`cdrom0:\DATA\...`) fails to parse: a
   quoted heredoc keeps one backslash, and `\D` is not a JSON escape. Write paths with `/` in `why`.
@@ -400,6 +403,22 @@ public:
   at rxFileOpenEx's state / pending handling if it comes back.
 
 ## Platform layer (ReiPan's, written for FF2 and FF3)
+- **The rxSnd IOP stand-in (src/sdk/iop_rxsnd.cpp) is silent, and a writer that waits for room
+  stalls**: rxSndAdpcmGetFree is the IOP buffer size minus what the 0xa3 status says it holds, and
+  an empty status left every ADPCM stream full after its first 8 KB, so the movie's audio que
+  filled and back-pressured the demuxer (the attract movie froze on frame 71). The stand-in now
+  drains each open ADPCM stream at its own rate (16 bytes per 28 samples per channel) and lists it
+  playing. Trap inside it: queued command 0xa2 is {id, param, value} for close (param 0) and
+  pause / volume / the rest (1..7) -- closing on every 0xa2 closed the stream each frame. PCM
+  streams (0xb0..) still never drain (no disc movie uses PCM).
+- **The host libmpeg feeds its decoder from the demuxer; a que the ROM empties by IPU DMA has to
+  be emptied by what the decoder parsed**, in the ROM's own units: rxMpegNodataCallback retires
+  min(2 KB-rounded readable, 2 KB-rounded parsed). Retiring odd counts broke the que's 2 KB read
+  alignment, left a sliver under 0x800 before the wrap that no DMA could take, and froze the logo
+  movie at its 103rd picture.
+- **One run logged ~160 "rxfile : failed to open file 'host0:data/options.txt'" lines a frame**
+  (fileExists in MagScene::loadSystemData runs once; the file is not on the disc). Not seen again in
+  five later runs of the same tree; if it comes back, find who re-issues the open.
 
 - **RoR: script pointers in 32-bit words** (2026-10-25). Symptom to expect: a script that stores a
   pointer (sw) and loads it back crashes on a truncated host address. Cause: the scripts' memory is

@@ -587,13 +587,25 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   to end, close, each waited out), `fileExists` 0x1be84c (open flags 1). Uncalled: three rxFileCd
   clock wrappers 0x1be880.., `fileClockToSeconds` 0x1be8bc / `fileClockDiff` 0x1bea18 (binary
   sceCdCLOCK bytes; the month table 0x2b8da8 has 0 for December, a ROM quirk kept).
-- 0x7b40c0: a movie-player object (`RxMpeg`, ctor 0x1810f4; class name unverified): +0 open
-  (`open` 0x181150 sets it, `close` 0x1816b0 clears it), +4 = 1 while a frame is there to draw,
-  +0x2c / +0x30 width / height (0x200 x 0x180 by default), +0x44 the movie name (0x80 bytes).
-  `play(name, w, h)` 0x18154c, `draw(I3dLayer*)` 0x1812a8, `stop` 0x181644, `getStatus` 0x18173c
-  (-1 not open, then the rxmpeg library's status word: callers read 0 playing, 1 finished), `isEnd`
-  0x18176c. Its users go through S2dMovie's wrappers (below); FUN_001aabb4 / 0x1ab04c play a movie,
-  skip it on a button (stopMovie) and close it once finished.
+- 0x7b40c0: the movie player `RxMpeg` (`snd/rxmpeg.cpp` 0x1810f4..0x1830fc, `done` 2026-10-25;
+  ctor 0x1810f4 from the static initializer 0x2041f8; snd/rxmpeg.h has every member): +0 open, +4
+  playing (S2dMovie::drawMovie draws while 1), +0x10 / +0x14 hold at a frame, +0x2c / +0x30 the
+  frame buffer width / height (0x200 x 0x180), +0x34 faded out, +0x3c frame parity, +0x44 the name,
+  +0xc4 the brightness level `startPaused` saves (GamMan status 0x10) and `close` restores (option
+  0). A movie: `open`, `play(name, w, h)` (held: the ring fills) -> `isReady` 0x18176c -> `run`
+  0x181644 (scene fadeIn under sequence bit 0x8000000) -> `getStatus` 1 -> `close`; `playNow`
+  0x1814ac runs at once (MnuMovie). `checkNearEnd` 0x181780: fewer than 0x2800 bytes left (fades
+  the scene out once). Under it a C library (`rxMpeg*`, data 0x298f00.., sceMpeg at bss 0x6e9200,
+  audio channel bss 0x6e9288): movie/<name> through an rx file ring (0x60000, primed at 0x30000),
+  sceMpegDemuxPss 2 x 16 KB a frame from `RxMpeg::update` (SndMan::update), the video stream into a
+  0x80000 que (snd/unitque.cpp) that the IPU reads in 2 KB DMA units (the Nodata callback), two
+  RGBA32 pictures (voData) flipped every other frame, the SShd audio (every disc movie: ADPCM
+  0x10, 48 kHz stereo except DEATH_J 44.1 kHz; CP_LOGO has none) into a 0x20000 que fed to an
+  rxSnd stream. Status 1 = idle or ended (no picture left and the file spent). `RxMpeg::draw`
+  uploads the shown picture into the frame buffer (0xe00 / 0x12c0, 0 on odd frames), 64 lines down
+  for pictures under 448: the movie is letterboxed 512 x 336 at y 64. On the host: the shim libmpeg
+  (FFmpeg) decodes, the picture goes through `RosePan_I3dRecordMovie`, the decode loop runs on the
+  main thread (rxMpegDecodePoll) -- see the banner of snd/rxmpeg.cpp. Disc: 40 movies in MOVIE/.
 - **Word table** 0x298ee0: data/wrd/WRD.BIN loaded by 0x17e5c0 (from GamMan::loadStage);
   `WrdTable::get(n)` 0x17ea44 -> record n (count at the file's +8), its text at record +0x10 (the map
   names S2dMes shows). Class name invented from the file.
