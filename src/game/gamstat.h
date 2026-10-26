@@ -339,6 +339,8 @@ struct ObjStat
     /* Clears the cell words (+0x10c too when all), then kills the tasks
      * (an achr's: every caller passes one). */
     void clearSecta(int all);                                            // ROR 0x001d9f10
+    /* The three cell pointers cleared (no list is touched). */
+    void clearSectaPtrs();                                               // ROR 0x001d88fc
     /* The base params (1..0x18, 0x1000..0x1005). */
     void getParam(int which, void *out);                                 // ROR 0x001d9044
     void setParam(int which, const void *data);                          // ROR 0x001d932c
@@ -499,10 +501,7 @@ struct ACHRstat : ObjStat
     int       m_task[4];            // ROR 0x3d4: task ids, -1 none; [0] a_move_type, [1] the turn task (chrRotStart)
     int       m_placeTask;          // ROR 0x3e4: startAchrPlaceTask's TskSeqEvent, -1 none
     int       m_taskId;             // ROR 0x3e8: resetObj kills it
-    u_int     m_3ec;                // ROR 0x3ec: setObjAttr's word (bits >> 24 / low 24 bits)
-    int       _3f0;
-    u_int     m_3f4;                // ROR 0x3f4: bit 0 cleared when setObj hides a type-2 achr
-    int       _3f8;
+    u_int     m_attr[4];            // ROR 0x3ec: setObjAttr / testAchrFlag's words (bits >> 24 picks one, the low 24 bits test); [2] bit 0: switchEnemies hid it (setObj clears it)
     float     m_offsetRot;          // ROR 0x3fc: a_offset_rot (param 0x1a)
     const GamSysChrRec *m_rec;      // ROR 0x400: the system record (tables 0..3)
     const GamSysStats  *m_stats;    // ROR 0x404: its stats (+0x80)
@@ -572,6 +571,10 @@ struct FCHRstat : ObjStat
  * offset into a. The ELF's inlines GamMan::cnvPosW2L / cnvPosL2W /
  * getWrdOffset call it. */
 void gamWrdConvPos(int op, float *a, float *b);                          // ROR 0x001dba3c
+/* The room offset's x / z of GamMan's room, 0 without a WRD entry (the
+ * ROM's this, GamMan +0x18c00, is not read). */
+float gamGetWrdOfsX(void);                                               // ROR 0x001db9c4
+float gamGetWrdOfsZ(void);                                               // ROR 0x001dba00
 /* The WRD table entry of GamMan's room (WrdTable::get): its words 0x18 /
  * 0x1c into GamMan +0x18dd0 / +0x18dc0, +0x18dd0 = 0 without an entry.
  * The ROM's this is GamMan +0x18c00; initStage2 passes the room's

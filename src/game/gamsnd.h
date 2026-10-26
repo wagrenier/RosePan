@@ -108,6 +108,12 @@ struct GamSndMan
     /* The same over the 0x30 SE records (+0xd40, 0x28 bytes each). */
     int  funcSE(u_int se, int no, void *arg);                            // ROR 0x001e5e58
     int  isPlayEnvStr();                                                 // ROR 0x001e6cac
+    /* A stage reset: the BGM / stream records, the 0x30 sound records,
+     * the three sound tasks killed, the 3D sound list emptied. */
+    void reset();                                                        // ROR 0x001e1fa4
+    /* The 3D sound list's object entries freed: streams (flag 2) stopped
+     * when playing (flag 1), SEs (flag 4) through 0x1e649c. */
+    void stopObjSnds();                                                  // ROR 0x001e2178
 
     int m_mode;                 // ROR 0x0000: loadStage sets 1 (update then uses the camera position)
     int m_mstVolSe[2];          // ROR 0x1590: option 3's funcSnd(0xe) words

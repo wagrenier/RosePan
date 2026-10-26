@@ -1546,10 +1546,11 @@ void chrSetMotion(float speed, int no, int motion, int p1d8, u_int flags, u_int 
 }
 
 // stub of ROR 0x00162c2c
-void EmyManager::addEmy(int chrNo, short kind, void *chr, intptr_t seqWord, void *image,
-                const void *pos, u_int oid)
+u_int EmyManager::addEmy(int chrNo, short kind, void *chr, intptr_t seqWord, void *image,
+                const void *pos, u_int oid, int group)
 {
     ROSEPAN_STUB("EmyManager::addEmy", 0x00162c2c);
+    return {};
 }
 
 // stub of ROR 0x00217f10
@@ -1600,4 +1601,42 @@ void gamSetBwnPos(const float *pos)
 void gamSetBwnRot(const float *rot)
 {
     ROSEPAN_STUB("gamSetBwnRot", 0x001443d8);
+}
+
+// stub of ROR 0x001e7618
+void CmnTaskMan::killStageTasks()
+{
+    ROSEPAN_STUB("CmnTaskMan::killStageTasks", 0x001e7618);
+}
+
+// stub of ROR 0x001635e0
+void EmyManager::resetWork()
+{
+    ROSEPAN_STUB("EmyManager::resetWork", 0x001635e0);
+}
+
+// stub of ROR 0x00162b68
+void EmyManager::setGroup(float f, int a, int b, int c, int count, int d,
+                  const void *pos)
+{
+    ROSEPAN_STUB("EmyManager::setGroup", 0x00162b68);
+}
+
+// stub of ROR 0x001ddaa8
+void GamArea::clear()
+{
+    ROSEPAN_STUB("GamArea::clear", 0x001ddaa8);
+}
+
+// stub of ROR 0x0013d4d0
+float MagScene::getCameraPathPos()
+{
+    ROSEPAN_STUB("MagScene::getCameraPathPos", 0x0013d4d0);
+    return {};
+}
+
+// stub of ROR 0x0013d52c
+void MagScene::setCameraPathPos(float pos)
+{
+    ROSEPAN_STUB("MagScene::setCameraPathPos", 0x0013d52c);
 }

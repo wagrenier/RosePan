@@ -232,3 +232,15 @@ void GamSndMan::setBgmRec(const GamBgmRec *rec)
 {
     ROSEPAN_STUB("GamSndMan::setBgmRec", 0x001e15d0);
 }
+
+// stub of ROR 0x001e1fa4
+void GamSndMan::reset()
+{
+    ROSEPAN_STUB("GamSndMan::reset", 0x001e1fa4);
+}
+
+// stub of ROR 0x001e2178
+void GamSndMan::stopObjSnds()
+{
+    ROSEPAN_STUB("GamSndMan::stopObjSnds", 0x001e2178);
+}

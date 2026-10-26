@@ -328,6 +328,11 @@ struct MagScene
     /* Camera modes 3 / 4 (a map camera's path): the camera to the path
      * point at distance pos (native 016 case 7). */
     void seekCameraPath(float pos);                                      // ROR 0x0013d240
+    /* The current map camera path's point (sky slot m_camera_2ad68, path
+     * m_camera_2ad64): its int +0x20 plus its fraction +0x28, and back
+     * (GamMan::pushCamera / popCamera). */
+    float getCameraPathPos();                                            // ROR 0x0013d4d0
+    void setCameraPathPos(float pos);                                    // ROR 0x0013d52c
     void setLightNo(int theNo);                                          // ROR 0x0013f4d0
     /* Only asserts theNo < 8 (the destructor passes -1). */
     void checkLightNo(int theNo);                                        // ROR 0x0013f49c

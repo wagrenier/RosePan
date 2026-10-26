@@ -162,10 +162,10 @@ void GamMan::initGameState()
     m_msgParam[6] = 0;
     m_msgParam[5] = 0;
     for (int i = 0; i < 4; i++)
-        m_22470[i].m_id = -1;
+        m_camStack[i].m_mode = -1;
     for (int i = 0; i < 3; i++)
         m_fogStack[i].m_color[0] = -1.0f;
-    m_22530 = 0;
+    m_camDepth = 0;
     m_21f70 = 0;
     m_pool1d240.clear();
     m_pool1f880.clear();
@@ -3130,7 +3130,7 @@ int GamMan::setObj(u_int oid, u_int bits)
                 gamHideActor(getActorNo((u_int)link));
             chr->setHide(1);
             if (gamOidType(oid) == 2)
-                chr->m_3f4 &= ~1u;
+                chr->m_attr[2] &= ~1u;
         }
         if ((bits & 0x10) != 0)
             ctlObj1cb8e4(oid, 0x32, 0);
@@ -4058,39 +4058,652 @@ int GamMan::reloadAchrModel(u_short model, u_int oid)
     return actor;
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+// ════════════════════════════════════════════════════════════════════════
+//  The stage resets, the vfchr models, the camera stack (session 6)
+// ════════════════════════════════════════════════════════════════════════
 
-// stub of ROR 0x001cdf5c
-void GamMan::releaseObjs(int kind, int arg)
+// ──────────────────────────────────────────────────────────────────────
+// sysTermManagers' call.
+// ROR 0x001c0d44
+
+void GamMan::term()
 {
-    ROSEPAN_STUB("GamMan::releaseObjs", 0x001cdf5c);
+    releaseAll();
+    init();
 }
 
-// stub of ROR 0x001cdbf0
-void GamMan::resetStage()
+// ──────────────────────────────────────────────────────────────────────
+// Native 212 case 50. An enemy turned off hides; turned on again, the
+// object its param 0x67 names is reset (shown) first.
+// The actor's virtual +0x44 is DogModel::setHide.
+// ROR 0x001c5a5c
+
+void GamMan::switchEnemies(int on)
 {
-    ROSEPAN_STUB("GamMan::resetStage", 0x001cdbf0);
+    for (SeqNode<ACHRstat *> *node = m_achrList.m_used.begin(); node != m_achrList.m_used.end();
+         node = node->m_next)
+    {
+        ACHRstat *chr = node->m_data;
+        if (gamOidType(chr->m_oid) != 2)
+            continue;
+        int actor = chr->m_actor;
+        if (on == 0)
+        {
+            if ((chr->m_attr[2] & 1) == 0)
+                continue;
+            int param[4];
+            chr->getParam(0x67, param);
+            if (param[0] != 0)
+                resetObj((u_int)param[0], 1);
+            if (actor >= 0)     // PORT: the ROM writes actor -1's words
+                g_magSystem.m_scene.m_actors[actor].setHide(0);
+            chr->m_attr[2] &= ~1u;
+        }
+        else
+        {
+            if (actor >= 0)     // PORT: as above
+                g_magSystem.m_scene.m_actors[actor].setHide(1);
+            chr->m_attr[2] |= 1;
+        }
+    }
 }
 
-// stub of ROR 0x001cd60c
-void GamMan::startStage2()
+// ──────────────────────────────────────────────────────────────────────
+// Native 016 (and the map menu): at most three deep; modes 6.. are not
+// kept. A map camera (3..5) keeps its path point too.
+// ROR 0x001c5ffc
+
+void GamMan::pushCamera()
 {
-    ROSEPAN_STUB("GamMan::startStage2", 0x001cd60c);
+    if (m_camDepth >= 3)
+        return;
+    int mode[2];
+    g_magSystem.getCameraMode(mode);
+    mode[0] &= 0xf;
+    if ((u_int)mode[0] >= 6)
+        return;
+    GamCamRec &rec = m_camStack[m_camDepth];
+    rec.m_mode = mode[0];
+    rec.m_arg = mode[1];
+    rec.m_21f78 = m_21f78;
+    MagScene &scene = g_magSystem.m_scene;
+    if ((u_int)(mode[0] - 3) < 3)
+        rec.m_pathPos = scene.getCameraPathPos();
+    DogCamera &cam = scene.m_camera_entity;
+    rec.m_trans[0] = cam.m_trans[0];
+    rec.m_trans[1] = cam.m_trans[1];
+    rec.m_trans[2] = cam.m_trans[2];
+    rec.m_rotate[0] = cam.m_rotate[0];
+    rec.m_rotate[1] = cam.m_rotate[1];
+    rec.m_rotate[2] = cam.m_rotate[2];
+    rec.m_angle = cam.m_angle;
+    m_camDepth++;
 }
 
-// stub of ROR 0x001cc560
-void GamMan::addChrGroup(int model, u_int oid, int a, int b, int c, int count, int d,
-                     int e, int kind, const void *pos, int place, float f)
+// ──────────────────────────────────────────────────────────────────────
+// The last pushed camera back: modes 0..2 directly, 3..5 as a map camera
+// (number m_21f78, the kept word third) at its path point, else mode 1;
+// then the entity's translation, rotation (normalised) and angle.
+// ROR 0x001c621c
+
+void GamMan::popCamera()
 {
-    ROSEPAN_STUB("GamMan::addChrGroup", 0x001cc560);
+    if (m_camDepth == 0)
+        return;
+    m_camDepth--;
+    GamCamRec &rec = m_camStack[m_camDepth];
+    MagScene &scene = g_magSystem.m_scene;
+    int mode = rec.m_mode;
+    if (mode >= 0 && mode < 3)
+    {
+        g_magSystem.setCameraMode(mode, rec.m_arg, NULL);
+    }
+    else if (mode >= 0 && mode < 6)
+    {
+        g_gamMan.getMapCamNum();    // its answer is not read
+        int param[3] = { -1, -1, rec.m_arg };
+        g_magSystem.setCameraMode(rec.m_mode, (int)rec.m_21f78, param);
+        scene.setCameraPathPos(rec.m_pathPos);
+    }
+    else
+    {
+        g_magSystem.setCameraMode(1, 0, NULL);
+    }
+    DogCamera &cam = scene.m_camera_entity;
+    cam.m_trans[0] = rec.m_trans[0];
+    cam.m_trans[1] = rec.m_trans[1];
+    cam.m_trans[2] = rec.m_trans[2];
+    cam.m_dirty = 1;
+    cam.m_rotate[0] = rec.m_rotate[0];
+    cam.m_rotate[1] = rec.m_rotate[1];
+    cam.m_rotate[2] = rec.m_rotate[2];
+    cam.normalizeRotate();
+    cam.m_angle = rec.m_angle;
+    cam.m_dirty = 1;
 }
 
-// stub of ROR 0x001cad88
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c7dec
+
+void GamMan::clearOidListImages()
+{
+    u_int *word = (u_int *)m_1f240;
+    for (int i = 0; i < 0x169; i++)
+    {
+        if ((word[i] >> 30) != 0)
+            word[i] = 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Native 100's vfchr models (sequence/seqcall.cpp) and reloadVFchrModels.
+// ROR 0x001caa14
+
+void GamMan::loadVFchrModel(int model, u_int oid, intptr_t pos)
+{
+    model &= 0xffff;
+    FCHRstat *chr = getVFchr(oid);
+    int actor = g_magSystem.loadModel(model, -1);
+    setObjLight(actor, oid);
+    u_int param = (u_int)model;
+    chr->setParam(3, &actor);
+    chr->setParam(0x1000, &param);
+    chr->setPos((const float *)pos);
+    g_magSystem.m_scene.changeActorMotion(0.0166666936f, actor, 1, 0, 0);
+    if (isFchrActive(oid))
+        ctlObj1cb8e4(oid, 0x32, 0);
+    if (model == 0x800)
+        gamShrinkActor(actor);
+    m_avfchrList.add(chr);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cabd4
+
+void GamMan::loadVFchrModelByName(int model, const char *name, u_int oid, intptr_t pos)
+{
+    FCHRstat *chr = getVFchr(oid);
+    int actor = g_magSystem.m_scene.loadModelByName(&g_magSystem.m_i3d, name, -1,
+                                                    getChrRpk((u_int)(model & 0xffff) >> 10));
+    setObjLight(actor, oid);
+    u_int param = (u_int)(model & 0xffff);
+    chr->setParam(0x1000, &param);
+    chr->setParam(0x1004, name);
+    chr->setParam(3, &actor);
+    chr->setPos((const float *)pos);
+    g_magSystem.m_scene.changeActorMotion(0.0166666936f, actor, 1, 0, 0);
+    if (isFchrActive(oid))
+        ctlObj1cb8e4(oid, 0x32, 0);
+    m_avfchrList.add(chr);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Native 100 cases 44 / 45 (keepPos 1). A live object only; nothing
+// changes when the model (or file name) is the one it has.
+// ROR 0x001cad88 // callcheck: getAchr, getVFchr, getFchr (through the inline find)
+
 u_int GamMan::changeObjModel(u_int model, const char *name, u_int oid, int keepPos)
 {
-    ROSEPAN_STUB("GamMan::changeObjModel", 0x001cad88);
-    return {};
+    model &= 0xffff;
+    if (!isObj(oid))
+        return 0;
+    float pos[4];
+    if (keepPos != 0)
+        getObjPos(oid, pos);
+    ObjStat *chr = find(oid);
+    if (chr == NULL)
+        return oid;     // PORT: the ROM goes on with NULL (isObj passed: not reached)
+    int actor;
+    if (name == NULL)
+    {
+        u_int cur[4];
+        chr->getParam(0x1000, cur);
+        if (model == cur[0])
+            return 0;
+        chr->releaseActor();
+        actor = g_magSystem.loadModel((int)model, -1);
+    }
+    else
+    {
+        char cur[0x10];
+        chr->getParam(0x1004, cur);
+        if (strcmp(name, cur) == 0)
+            return 0;
+        chr->releaseActor();
+        actor = g_magSystem.m_scene.loadModelByName(&g_magSystem.m_i3d, name, -1,
+                                                    getChrRpk(model >> 10));
+        chr->setParam(0x1004, name);
+    }
+    setObjLight(actor, oid);
+    chr->setParam(3, &actor);
+    chr->setParam(0x1000, &model);
+    if (keepPos != 0)
+        setObjPos(oid, pos);
+    return oid;
 }
+
+// ──────────────────────────────────────────────────────────────────────
+// Native 100 case 8. The group's achrs are built as addChr builds one,
+// but with oid 0: EmyManager::addEmy makes their oids (0x9100006f + n)
+// and fills their m_achr slots.
+// ROR 0x001cc560 // callcheck: operator_new, ObjStat (new ACHRstat: its constructor is inline over ObjStat::ObjStat)
+
+void GamMan::addChrGroup(int model, u_int oid, int a, int b, int c, int count, int d,
+                         int e, int kind, const void *pos, int place, float f)
+{
+    u_short id = (u_short)kind;
+    u_short chrNo[8] = {0};     // the ROM's stack words
+    m_sysData.getField(id, 0x72, chrNo);
+    g_emyManager.setGroup(f, a, b, c, count, d, pos);
+    for (int i = count; i > 0; i--)
+    {
+        u_short chrModel[8] = {0};
+        chrModel[0] = (u_short)model;   // overwritten by the field
+        m_sysData.getField(id, 0xf, chrModel);
+        int actor = createObjByModel(chrModel[0], 0, id, pos, place, 0);
+        ACHRstat *chr = new ACHRstat(0, actor, (short)id);
+        chr->init((short)id);
+        chr->initParamFuncs();
+        u_int newOid = g_emyManager.addEmy(chrNo[0], (short)id, chr, m_seqWord, m_image[place],
+                                           pos, 0, a);
+        if (pos != NULL)
+            setObjPos(newOid, (const float *)pos);
+        m_achrList.add(chr);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The ROM's release test of releaseObjs' loops: kind 2 the objects not of
+// image 1 (the stage-2 ones), kind 3 those of image 3, else every one.
+static int gamReleaseKindMatch(int kind, u_int oid)
+{
+    if (kind == 2)
+        return (oid >> 30) != 1;
+    if (kind == 3)
+        return (oid >> 30) == 3;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kinds 0 / 1 (task/tsk_bg_load.cpp) and 2 (releaseStage2). Kind 2 sets
+// the kept PC and dog again first (flags2 0x10000000) and frees the PC
+// actor's motion 3 held for flags2 0x200000; the script callbacks of
+// images 2 / 3 go. The achr loops do not clear m_pcPtr (the PC is image
+// 1, kept by kind 2).
+// ROR 0x001cdf5c // callcheck: FUN_00105ba4 (the objects' deleting destructor, vtable slot 1 with 3 in the ROM: delete here)
+
+void GamMan::releaseObjs(int kind, int keepFchrs)
+{
+    if (kind >= 0 && kind < 2)
+    {
+        g_taskMan.killStageTasks();
+        g_emyManager.resetWork();
+        m_seqPair[1].m_a = 0;
+        m_seqPair[1].m_b = 0;
+        m_seqPair[2].m_a = 0;
+        m_seqPair[2].m_b = 0;
+    }
+    else if (kind == 2)
+    {
+        g_taskMan.killStageTasks();
+        if ((m_flags2 & 0x10000000) != 0)
+        {
+            setPc(0x50000001);
+            setDog(0x50800002);
+        }
+        if ((m_flags2 & 0x200000) != 0 && m_pcActor != -1)
+        {
+            g_magSystem.setPC(m_pcActor, m_pcJnfc);
+            g_magSystem.m_scene.m_actors[m_pcActor].releaseMotion(3);
+            g_magSystem.setPC(m_pcActor, m_pcJnfc);
+            g_magSystem.setPC(-1, 0);
+            m_flags2 &= ~0x200000u;
+        }
+        g_emyManager.resetWork();
+        for (int i = 0; i < 3; i++)
+        {
+            if (((u_int)m_seqPair[i].m_b >> 30) > 1)
+            {
+                m_seqPair[i].m_a = 0;
+                m_seqPair[i].m_b = 0;
+            }
+        }
+    }
+
+    clearChrSectaPtrs();
+    m_pool2246c->clear();
+    g_sequence.stopImages(kind);
+    m_area.stopTrgs();
+    m_area.clear();
+    clearPool20b00(kind);
+    m_sndMan.stopObjSnds();
+    m_camDepth = 0;
+    m_225f4[0] = 0x7f;
+    m_225f4[1] = 0x6f;
+    m_225f4[2] = 0x27f;
+    m_225f4[3] = 0x2ff;
+
+    SeqNode<ACHRstat *> *node;
+    for (node = m_achrList.m_used.begin(); node != m_achrList.m_used.end(); node = node->m_next)
+    {
+        if (gamReleaseKindMatch(kind, node->m_data->m_oid))
+            node->m_data->clearSecta(1);
+    }
+    node = m_achrList.m_used.begin();
+    while (node != m_achrList.m_used.end())
+    {
+        SeqNode<ACHRstat *> *next = node->m_next;
+        ACHRstat *chr = node->m_data;
+        u_int oid = chr->m_oid;
+        if (gamReleaseKindMatch(kind, oid))
+        {
+            if (gamOidType(oid) == 2)
+                g_emyManager.releaseObj(oid);
+            chr->releaseActor();
+            m_achr[gamOidSlot(oid)] = NULL;
+            delete chr;
+            m_achrList.remove(node);
+        }
+        node = next;
+    }
+    if (keepFchrs != 0)
+        return;
+
+    SeqNode<FCHRstat *> *fnode = m_fchrList.m_used.begin();
+    while (fnode != m_fchrList.m_used.end())
+    {
+        SeqNode<FCHRstat *> *next = fnode->m_next;
+        FCHRstat *chr = fnode->m_data;
+        u_int oid = chr->m_oid;
+        if (gamReleaseKindMatch(kind, oid))
+        {
+            if (oid == (u_int)m_pcEquipItemOID)
+            {
+                g_magSystem.setActorParent(m_pcEquipItemChrID, -1, 0);
+                m_pcEquipItemOID = 0;
+                m_pcEquipItemChrID = -1;
+            }
+            chr->releaseActor();
+            m_fchr[gamOidSlot(chr->m_oid)] = NULL;
+            delete chr;
+            m_fchrList.remove(fnode);
+        }
+        fnode = next;
+    }
+
+    for (fnode = m_avfchrList.m_used.begin(); fnode != m_avfchrList.m_used.end();
+         fnode = fnode->m_next)
+    {
+        if (kind >= 0 && kind <= 2)
+            fnode->m_data->releaseActor();
+    }
+    m_avfchrList.clear();
+
+    fnode = m_vfchrList.m_used.begin();
+    while (fnode != m_vfchrList.m_used.end())
+    {
+        SeqNode<FCHRstat *> *next = fnode->m_next;
+        FCHRstat *chr = fnode->m_data;
+        int room[4];
+        chr->getParam(8, room);
+        if (kind == 2)
+        {
+            if (room[0] == m_21f84)
+                chr->releaseActor();
+        }
+        else if (kind >= 0 && kind < 2)
+        {
+            chr->releaseActor();
+            // PORT: the ROM deletes the object (it lives in the m_1f248
+            // storage) and frees the node with the fchr pool's inline:
+            // the node lands in m_fchrList's free list, its counts go
+            // wrong. Here the object is destroyed in place and the node
+            // goes back to the vfchr pool; its m_vfchrSlot stays taken,
+            // as in the ROM.
+            chr->~FCHRstat();
+            m_vfchrList.remove(fnode);
+        }
+        fnode = next;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Stage change kind 5 (afterSeqExec) and 0x1cb638: the room unset, the
+// menus, camera, PC and dog dropped, the object records' 0x8000 bits
+// cleared; unless script bit [7] 0x80000000, the held item (or, with
+// [2] 0x8000, only its chr no) and the image oids go and [6] loses bits
+// 0..3. Then sounds, callbacks, messages, effects, images, objects and
+// area triggers.
+// ROR 0x001cdbf0 // callcheck: rorDebugPrintf (the empty debug print of m_keepBuf, left out)
+
+void GamMan::resetStage()
+{
+    m_wrdNo = -1;
+    g_magSystem.m_scene.closeMenu();
+    m_pool2246c->clear();
+    g_gamMan.setCameraMode(1, 0);
+    m_camDepth = 0;
+    g_magSystem.clearPC();
+    setPc(-1);
+    setDog(-1);
+    for (int i = 0; i < m_objTable->m_num; i++)
+        m_objRec[i].m_flags &= ~0x8000u;
+    if ((int)g_sequence.m_bits[7] >= 0)
+    {
+        if ((g_sequence.m_bits[2] & 0x8000) == 0)
+        {
+            equipItem(0xa00);
+            m_findTargetItem = 0xa00;
+        }
+        else
+        {
+            m_pcEquipItemChrID = -1;
+        }
+        clearOidListImages();
+        g_sequence.m_bits[6] &= ~1u;
+        g_sequence.m_bits[6] &= ~2u;
+        g_sequence.m_bits[6] &= ~4u;
+        g_sequence.m_bits[6] &= ~8u;
+    }
+    g_sndMan.stopAll(1);
+    g_sndMan.stopAll(8);
+    m_sndMan.reset();
+    m_seqPair[1].m_b = 0;
+    m_seqPair[1].m_a = 0;
+    m_seqPair[0].m_b = 0;
+    m_seqPair[0].m_a = 0;
+    m_seqPair[2].m_b = 0;
+    m_seqPair[2].m_a = 0;
+    int param[8] = {0};     // only [4] (the fade time) is set in the ROM
+    killMsgTask();
+    showMsgSprite(0, param);
+    clearPool20b00(0);
+    g_sequence.stopImages(1);
+    releaseAllChrs();
+    m_area.stopTrgs();
+    m_area.clear();
+    m_225f4[0] = 0x7f;
+    m_225f4[3] = 0x2ff;
+    m_225f4[1] = 0x6f;
+    m_225f4[2] = 0x27f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Stage 2 started with m_flags 0x20: the PC goes to the position kept in
+// m_sysWord, shifted by the difference between the old room offset
+// (globals [5] / [7]) and this room's, 50 units along global [10] (a
+// float's bits); the dog beside it. The globals then hold this room's
+// offset.
+// ROR 0x001cd60c
+
+void GamMan::startStage2()
+{
+    int *global = g_sequence.m_global;
+    if ((m_flags & 0x20) != 0)
+    {
+        m_flags |= 0x4000;
+        float pos[4];
+        pos[0] = (float)global[5];
+        pos[2] = (float)global[7];
+        pos[1] = 0.0f;
+        pos[3] = 0.0f;
+        float dir;
+        memcpy(&dir, &global[10], sizeof(dir));
+        float off[4];
+        off[0] = sinf(dir) * 50.0f;
+        off[1] = 0.0f;
+        off[2] = cosf(dir) * 50.0f;
+        off[3] = 0.0f;
+        off[0] = off[0] + (gamGetWrdOfsX() - pos[0]);
+        off[2] = off[2] + (gamGetWrdOfsZ() - pos[2]);
+        memcpy(m_pcPos, m_sysWord, sizeof(m_pcPos));
+        sceVu0AddVector(pos, m_pcPos, off);
+        m_pcPtr->setPos(pos);
+        if (m_dogPtr != NULL)
+            storePcTransform();
+    }
+    global[5] = (int)gamGetWrdOfsX();
+    global[7] = (int)gamGetWrdOfsZ();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cea44
+
+void GamMan::releaseVFchrs(int keep)
+{
+    SeqNode<FCHRstat *> *node = m_vfchrList.m_used.begin();
+    while (node != m_vfchrList.m_used.end())
+    {
+        SeqNode<FCHRstat *> *next = node->m_next;
+        FCHRstat *chr = node->m_data;
+        int actor = chr->m_actor;
+        u_int oid = chr->m_oid;
+        int room[4];
+        chr->getParam(8, room);     // not read
+        if (actor != -1)
+            chr->releaseActor();
+        if (keep == 0)
+        {
+            clearVFchrSlot(oid);
+            m_vfchrList.remove(node);
+        }
+        node = next;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// releaseAll's work (also 0x1cb638 and resetStage). The PC and dog lose
+// their words when their achr goes (the PC actor's motions 1 and 3 freed
+// with it set as the PC once more).
+// ROR 0x001ced18 // callcheck: FUN_00105ba4 (the objects' deleting destructor, vtable slot 1 with 3 in the ROM: delete here)
+
+void GamMan::releaseAllChrs()
+{
+    markReset();
+    int keepPcDog = (g_sequence.m_bits[2] & 0x8000) != 0;
+    SeqNode<ACHRstat *> *node = m_achrList.m_used.begin();
+    while (node != m_achrList.m_used.end())
+    {
+        SeqNode<ACHRstat *> *next = node->m_next;
+        u_int oid = node->m_data->m_oid;
+        u_int pcOid = m_pcPtr != NULL ? m_pcPtr->m_oid : 0;
+        u_int dogOid = m_dogPtr != NULL ? m_dogPtr->m_oid : 0;
+        if (keepPcDog)
+        {
+            if (oid == pcOid || oid == dogOid)
+            {
+                node = next;
+                continue;
+            }
+        }
+        else
+        {
+            if (oid == pcOid)
+            {
+                g_magSystem.setPC(m_pcActor, m_pcJnfc);
+                DogActor &actor = g_magSystem.m_scene.m_actors[m_pcActor];
+                actor.releaseMotion(1);
+                actor.releaseMotion(3);
+                g_magSystem.setPC(-1, 0);
+                m_pcPtr = NULL;
+                m_pcActorPtr = NULL;
+                m_pcMotion = -1;
+                m_pcActor = -1;
+            }
+            if (oid == (m_dogPtr != NULL ? m_dogPtr->m_oid : 0))
+            {
+                m_dogPtr = NULL;
+                m_dogChrNo = -1;
+            }
+        }
+        ACHRstat *chr = node->m_data;
+        chr->clearSecta(1);
+        u_int id = chr->m_oid;
+        if (gamOidType(id) == 2)
+            g_emyManager.releaseObj(id);
+        chr->releaseActor();
+        m_achr[gamOidSlot(id)] = NULL;
+        delete chr;
+        m_achrList.remove(node);
+        node = next;
+    }
+
+    SeqNode<FCHRstat *> *fnode = m_fchrList.m_used.begin();
+    while (fnode != m_fchrList.m_used.end())
+    {
+        SeqNode<FCHRstat *> *next = fnode->m_next;
+        FCHRstat *chr = fnode->m_data;
+        chr->releaseActor();
+        m_fchr[gamOidSlot(chr->m_oid)] = NULL;
+        delete chr;
+        m_fchrList.remove(fnode);
+        fnode = next;
+    }
+
+    for (fnode = m_avfchrList.m_used.begin(); fnode != m_avfchrList.m_used.end();
+         fnode = fnode->m_next)
+        fnode->m_data->releaseActor();
+    m_avfchrList.clear();
+
+    if ((int)g_sequence.m_bits[7] >= 0)
+        releaseVFchrs(0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cebf8
+
+void GamMan::clearChrSectaPtrs()
+{
+    for (SeqNode<ACHRstat *> *node = m_achrList.m_used.begin(); node != m_achrList.m_used.end();
+         node = node->m_next)
+        node->m_data->clearSectaPtrs();
+    for (SeqNode<FCHRstat *> *node = m_fchrList.m_used.begin(); node != m_fchrList.m_used.end();
+         node = node->m_next)
+        node->m_data->clearSectaPtrs();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Native 006 case 3. The four ints are never read.
+// ROR 0x001cfa5c
+
+void GamMan::openSysMsg(int msg, int a, int b, int c, int d)
+{
+    m_sysMsgHandle = g_magSystem.m_scene.openSysMsgWindow(msg, NULL, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Native 152. Achr objects only.
+// ROR 0x001d17c8
+
+int GamMan::testAchrFlag(u_int oid, u_int bits)
+{
+    if (gamOidList(oid) != 1)
+        return 0;
+    ACHRstat *chr = getAchr(oid);
+    return (chr->m_attr[bits >> 24] & bits & 0xffffff) != 0;
+}
+
+// ---- stubs (tools/reverse/stubgen.py) ----
 
 // stub of ROR 0x001d091c
 void GamMan::addObjColliBox(u_int oid, const float *box)
@@ -4175,54 +4788,5 @@ int GamMan::getObjWork(u_int oid, int no)
 {
     ROSEPAN_STUB("GamMan::getObjWork", 0x001d217c);
     return {};
-}
-
-// stub of ROR 0x001caa14
-void GamMan::loadVFchrModel(int model, u_int oid, intptr_t pos)
-{
-    ROSEPAN_STUB("GamMan::loadVFchrModel", 0x001caa14);
-}
-
-// stub of ROR 0x001cabd4
-void GamMan::loadVFchrModelByName(int model, const char *name, u_int oid, intptr_t pos)
-{
-    ROSEPAN_STUB("GamMan::loadVFchrModelByName", 0x001cabd4);
-}
-
-// stub of ROR 0x001cea44
-void GamMan::releaseVFchrs(int keep)
-{
-    ROSEPAN_STUB("GamMan::releaseVFchrs", 0x001cea44);
-}
-
-// stub of ROR 0x001d17c8
-int GamMan::testAchrFlag(u_int oid, u_int bits)
-{
-    ROSEPAN_STUB("GamMan::testAchrFlag", 0x001d17c8);
-    return {};
-}
-
-// stub of ROR 0x001cfa5c
-void GamMan::openSysMsg(const char *text, int a, int b, int c, int d)
-{
-    ROSEPAN_STUB("GamMan::openSysMsg", 0x001cfa5c);
-}
-
-// stub of ROR 0x001c621c
-void GamMan::popCamera()
-{
-    ROSEPAN_STUB("GamMan::popCamera", 0x001c621c);
-}
-
-// stub of ROR 0x001c5ffc
-void GamMan::pushCamera()
-{
-    ROSEPAN_STUB("GamMan::pushCamera", 0x001c5ffc);
-}
-
-// stub of ROR 0x001c5a5c
-void GamMan::switchEnemies(int on)
-{
-    ROSEPAN_STUB("GamMan::switchEnemies", 0x001c5a5c);
 }
 
