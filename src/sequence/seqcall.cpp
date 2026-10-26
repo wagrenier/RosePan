@@ -99,7 +99,7 @@ intptr_t seqFunc004(intptr_t id, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
     {
         int task = 0;   // PC: the ROM leaves it unset when getObjParam has nothing
         gam.getObjParam(oid, 0x19, &task);
-        return seqWaitWhile(g_taskMan.getTask(task) != NULL);
+        return seqWaitWhile(g_taskMan.getTask(task) != 0);
     }
     case 4:  // while thread a1 lives
         return seqWaitWhile(g_sequence.hasThread((u_int)a1, 0));
@@ -114,7 +114,7 @@ intptr_t seqFunc004(intptr_t id, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
     case 7:  // while a message shows
         return seqWaitWhile(gam.isMsgBusy());
     case 8:
-        return seqWaitWhile(g_taskMan.getTask(gam.m_frameTaskId) != NULL);
+        return seqWaitWhile(g_taskMan.getTask(gam.m_frameTaskId) != 0);
     case 9:  // until pad 0 bit a1 is set (0..15 held, m_hold +0x78; 16.. pressed this frame, m_trig +0x7a)
     {
         // a1 == 16 tests bit 16 of the 16-bit m_hold and waits for ever (the
@@ -129,17 +129,17 @@ intptr_t seqFunc004(intptr_t id, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
         return (pad->m_trig & bit) == bit ? 0 : SEQ_RET_WAIT;
     }
     case 10:
-        return seqWaitWhile(g_taskMan.getTask(gam.m_selectTaskId) != NULL);
+        return seqWaitWhile(g_taskMan.getTask(gam.m_selectTaskId) != 0);
     case 11:
-        return seqWaitWhile(g_taskMan.getTask(gam.m_movieTaskId) != NULL);
+        return seqWaitWhile(g_taskMan.getTask(gam.m_movieTaskId) != 0);
     case 12:  // while the actor's second task runs
         if (!gam.isObj(oid))
             return 0;
         return gam.getAchr(oid)->m_task[1] != -1 ? SEQ_RET_WAIT : 0;
     case 13:
-        return seqWaitWhile(g_taskMan.getTask(gam.m_camTaskId) != NULL);
+        return seqWaitWhile(g_taskMan.getTask(gam.m_camTaskId) != 0);
     case 14:
-        return seqWaitWhile(g_taskMan.getTask(gam.m_bgLoadTaskId) != NULL);
+        return seqWaitWhile(g_taskMan.getTask(gam.m_bgLoadTaskId) != 0);
     case 15:  // while the system message window is open
         return seqWaitWhile(scene.isWindowOpen(gam.m_sysMsgHandle));
     case 16:  // while a thread named a1 lives
@@ -183,7 +183,7 @@ intptr_t seqFunc029(intptr_t id, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
 
     if (id == 1 || id == 2)
     {
-        if ((gam.m_flags & 0x800) != 0 && g_taskMan.getTask(gam.m_bgLoadTaskId) != NULL)
+        if ((gam.m_flags & 0x800) != 0 && g_taskMan.getTask(gam.m_bgLoadTaskId) != 0)
             return SEQ_RET_WAIT;
         word = id == 1 ? (u_int)SEQ_RET_WAIT : (u_int)a2;
         if (gam.m_seqPair[3].m_a == 0)
@@ -1805,7 +1805,7 @@ intptr_t seqFunc006(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
         return 0;
     }
     case 0x15:
-        return g_taskMan.getTask(gam.m_itemUseTaskId) != NULL ? SEQ_RET_WAIT : 0;
+        return g_taskMan.getTask(gam.m_itemUseTaskId) != 0 ? SEQ_RET_WAIT : 0;
     default:
         return 0;
     }
@@ -2052,7 +2052,7 @@ intptr_t seqFunc016(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
         break;
     }
     case 51:
-        if (g_taskMan.getTask(gam.m_camTaskId) != NULL)
+        if (g_taskMan.getTask(gam.m_camTaskId) != 0)
         {
             g_taskMan.killTask(gam.m_camTaskId);
             gam.m_camTaskId = -1;
@@ -2241,7 +2241,7 @@ static float seqWrapPi(float a)
 // Kills the task on id (when it runs) and sets id -1.
 static void seqKillTaskOn(int *id)
 {
-    if (g_taskMan.getTask(*id) != NULL)
+    if (g_taskMan.getTask(*id) != 0)
     {
         g_taskMan.killTask(*id);
         *id = -1;
@@ -2426,7 +2426,7 @@ intptr_t seqFunc212(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
 // The movie task runs: native 252 plays no SE.
 static int seqMoviePlays(void)
 {
-    return g_taskMan.getTask(g_gamMan.m_movieTaskId) != NULL;
+    return g_taskMan.getTask(g_gamMan.m_movieTaskId) != 0;
 }
 
 // callcheck: operator_new, TskSnd, addTask, getTask (case 30 the new expression; inline in the ROM: seqAddTask, seqMoviePlays)
@@ -2710,10 +2710,10 @@ intptr_t seqFunc253(intptr_t id, intptr_t a1, intptr_t, intptr_t, intptr_t, intp
     {
     case 1:
     {
-        if (g_taskMan.getTask(gam.m_movieTaskId) != NULL)
+        if (g_taskMan.getTask(gam.m_movieTaskId) != 0)
             return 0;
         g_sndMan.stopAll(1);
-        if (g_taskMan.getTask(gam.m_movieTaskId) != NULL)
+        if (g_taskMan.getTask(gam.m_movieTaskId) != 0)
             return 0;
         // callcheck: operator_new (the new expression)
         TskMovie *movie = new TskMovie((const char *)a1);
@@ -2721,15 +2721,15 @@ intptr_t seqFunc253(intptr_t id, intptr_t a1, intptr_t, intptr_t, intptr_t, intp
         return SEQ_RET_YIELD;
     }
     case 2:
-        if (g_taskMan.getTask(gam.m_movieTaskId) != NULL)
+        if (g_taskMan.getTask(gam.m_movieTaskId) != 0)
             g_taskMan.killTask(gam.m_movieTaskId);
         return g_sequence.waitFrames(5) != 0 ? SEQ_RET_WAIT : 0;
     case 3:
         // PC: the ROM returns getTask's word itself (0 or 1).
-        return g_taskMan.getTask(task) != NULL;
+        return g_taskMan.getTask(task) != 0;
     case 4:
     {
-        if (g_taskMan.getTask(task) != NULL)
+        if (g_taskMan.getTask(task) != 0)
             return 0;
         TskMovie *movie = (TskMovie *)g_taskMan.findTask(task);
         if (movie == NULL)

@@ -109,8 +109,15 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      reader is CmnTaskMan::exec (item 6, a stub). unassigned@001fd424 (now 0x1fd424..0x203d94, the
      TskEnemyMove / TskEnemyTurn enemy tasks) was dropped from the queue: off the title / New Game
      path. Doubt: the file name system/system.cpp is a guess (RoR has no source string for it).
-  6. `unassigned@001e46b8` -- CmnTaskMan::exec / addTask and 0x1f688c that GamMan::update calls (the
-     per-frame task runner; 253 functions: only what the title path reaches).
+  6. DONE 2026-10-26 (`verify`): `task/tsk_man.cpp` (pinned 0x1e7094..0x1e7f28, cut from
+     unassigned@001e6d54) -- CmnTaskMan complete (25 functions: addTask, exec, the kill / pause / find
+     calls, the node and live-id helpers) plus TskTest / TskLogger. CmnITask is polymorphic on the host
+     with its six slots; classes whose virtuals are not written run the host defaults (exec ends at
+     once). getTask now returns int (callers compare with 0). The boot and title menu look as before
+     (nothing on screen draws through it yet). Next in the old range: the Tsk* classes 0x1e7f28..
+     0x1f8034 (unassigned@001e7f28: TskMtnMove / 2, TskMove*, TskFrameFunc, TskMsgMan, TskMovie ...),
+     each class's get_task_type / exec, in the order the New Game road reaches them; 0x1e6d54 /
+     0x1e6e00 are GamSndMan 3D-volume helpers (callers playSE / playStr) for game/gamsnd.cpp.
   7. DONE 2026-10-25 (`done`, see 10b): `bed/bedpad.cpp` -- BedPad::init / update: the menu needs pad
      input to "work"; `settings.smoke_pad` now presses through the title.
   8. DONE 2026-10-25 (`verify`, see 4e): `mag/maglifemenu.cpp` -- MagLifeMenuTitle's wrappers and the MagLifeMenuBase methods.
@@ -744,6 +751,11 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- task/tsk_man.cpp (2026-10-26): the file name is a guess (no source string; RoR's task/ files are
+  tsk_scene, tsk_bg_load, naga_chunk). Rename freely if a string turns up. Also unknown: CmnTaskMan +0x0c..
+  +0x40, +0x6c..+0x84, +0x688..+0x6c0 (no code in the file touches them), the list at +4 (findTask reads
+  it, nothing adds to it), node flag 0x10 (all callers pass 0x11).
 
 - MagSceneRayHit size (2026-10-26, sequence/seqcall.cpp session 9): native 156 copies castRay's hit
   record out as 0x70 bytes (3 x 0x20 + 0x10 struct-copy code) while magscene.h asserts 0x60 (from

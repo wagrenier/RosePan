@@ -8939,11 +8939,35 @@
   "was": "FUN_001e6cac",
   "why": "GamMan::isPlayEnvStr() tail-jumps to it with this + 0x18e00 (0x28ee48)"
  },
+ "001e7094": {
+  "name": "CmnTaskMan::CmnTaskMan",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7094",
+  "why": "SysTimer ctor at +0x40, lists 0, next id 2, kill queue end = +0x84, live id table +0x288 = -1"
+ },
+ "001e70dc": {
+  "name": "CmnTaskMan::~CmnTaskMan",
+  "tag": "ror-inferred",
+  "was": "FUN_001e70dc",
+  "why": "frees every node of the lists at +4 and +0 (freeNode), ~SysTimer, operator delete on flag bit 0 (GCC 2 dtor)"
+ },
+ "001e7184": {
+  "name": "CmnTaskMan::insertNode",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7184",
+  "why": "inserts a node into the list at +0 sorted by its next-run frame (+0x34), after equal ones"
+ },
  "001e71fc": {
   "name": "CmnTaskMan::addTask",
   "tag": "ror-inferred",
   "was": "FUN_001e71fc",
   "why": "object 0x7a3d80: allocates a 0x40 task record for a CmnITask (vtable slots at +8 / +0x18 called), assigns an id (written through the id pointer), start frame (-1 = current +0x58), length, links it (0x1e7184); 66 call sites; class name unverified"
+ },
+ "001e7340": {
+  "name": "CmnTaskMan::setNodePause",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7340",
+  "why": "kinds 0x10 / 5 / 0x13 / 0x14 whose state differs get task->pause(on) (virtual slot 2); called by pauseTask / pauseKinds / pauseOthers before they store the state"
  },
  "001e7414": {
   "name": "CmnTaskMan::pauseTask",
@@ -8969,6 +8993,18 @@
   "was": "FUN_001e7618",
   "why": "on 0x7a3d80: walks the task list, sets state 2 on each task whose virtual +0xc kind is not 1..3 or 0x11; releaseObjs kinds 0..2"
  },
+ "001e7698": {
+  "name": "CmnTaskMan::untrackNode",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7698",
+  "why": "a non-NULL node's id leaves the live id table (removeLiveId)"
+ },
+ "001e76b8": {
+  "name": "CmnTaskMan::killListed",
+  "tag": "ror-inferred",
+  "was": "FUN_001e76b8",
+  "why": "the live node of id in the list at +0 gets state 2 and leaves the live table; 1 when found, else killTask queues the id"
+ },
  "001e7724": {
   "name": "CmnTaskMan::killTask",
   "tag": "ror-inferred",
@@ -8980,6 +9016,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e77b4",
   "why": "walks the task list at +0, each live task whose kind (virtual +8) equals a1 gets state 2 and is unlinked / queued (0x1e7d08, 0x1e7698)"
+ },
+ "001e785c": {
+  "name": "CmnTaskMan::applyKillQueue",
+  "tag": "ror-inferred",
+  "was": "FUN_001e785c",
+  "why": "exec, after the run: nodes whose id is in the kill queue (+0x84..+0x284 end pointer) are terminated (termNode) and get state 2"
  },
  "001e7910": {
   "name": "CmnTaskMan::killKinds",
@@ -8999,11 +9041,53 @@
   "was": "FUN_001e7a20",
   "why": "object 0x7a3d80: per frame, times with the member timer +0x40, runs the queued tasks whose start frame has come; mainLoop"
  },
+ "001e7c7c": {
+  "name": "CmnTaskMan::freeNode",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7c7c",
+  "why": "termNode then memset 0x40 and operator delete of the node"
+ },
+ "001e7d08": {
+  "name": "CmnTaskMan::termNode",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7d08",
+  "why": "untrackNode, task->term (virtual slot 5), operator delete of the task when node flag bit 0, task = NULL"
+ },
  "001e7d7c": {
   "name": "CmnTaskMan::getTask",
   "tag": "ror-inferred",
   "was": "FUN_001e7d7c",
   "why": "non-zero when the task id still runs; playStream does not queue a second TskSnd"
+ },
+ "001e7de8": {
+  "name": "CmnTaskMan::removeLiveId",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7de8",
+  "why": "the id's entries in the live id table (+0x288, 256 words, -1 ends) become -2"
+ },
+ "001e7e50": {
+  "name": "CmnTaskMan::addLiveId",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7e50",
+  "why": "appends the id to the live id table (+0x288) unless present, while fewer than 0xfe entries; addTask's call"
+ },
+ "001e7ed0": {
+  "name": "TskTest::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7ed0",
+  "why": "TskTest vtable 0x2e4898 slot 4 (+0x20, the task step slot CmnTaskMan::exec calls); returns 0"
+ },
+ "001e7ed8": {
+  "name": "TskLogger::TskLogger",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7ed8",
+  "why": "stores vtable 0x2e4858 (TskLogger), +4 = arg, +8 = GamMan::getActorNo()"
+ },
+ "001e7f18": {
+  "name": "TskLogger::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7f18",
+  "why": "TskLogger vtable 0x2e4858 slot 4 (+0x20, the step slot); returns 0"
  },
  "001e7f28": {
   "name": "TskMtnMove::TskMtnMove",

@@ -718,9 +718,9 @@ void ACHRstat::initParamFuncs()
 void ACHRstat::release()
 {
     releaseActor();
-    if (g_taskMan.getTask(m_taskId) != NULL)
+    if (g_taskMan.getTask(m_taskId) != 0)
         g_taskMan.killTask(m_taskId);
-    if (g_taskMan.getTask(m_placeTask) != NULL)
+    if (g_taskMan.getTask(m_placeTask) != 0)
         g_taskMan.killTask(m_placeTask);
 }
 
@@ -749,7 +749,7 @@ void ObjStat::clearSecta(int all)
 
 int ACHRstat::isMotionTaskEnd()
 {
-    if (g_taskMan.getTask(m_task[2]) == NULL)
+    if (g_taskMan.getTask(m_task[2]) == 0)
         return 0;
     return chrMotionRefEnd(m_motionRef);
 }
@@ -794,13 +794,13 @@ void ACHRstat::empty1da074()
 
 void ACHRstat::killTasks()
 {
-    if (g_taskMan.getTask(m_task[2]) != NULL)
+    if (g_taskMan.getTask(m_task[2]) != 0)
         g_taskMan.killTask(m_task[2]);
-    if (g_taskMan.getTask(m_task[0]) != NULL)
+    if (g_taskMan.getTask(m_task[0]) != 0)
         g_taskMan.killTask(m_task[0]);
-    if (g_taskMan.getTask(m_task[3]) != NULL)
+    if (g_taskMan.getTask(m_task[3]) != 0)
         g_taskMan.killTask(m_task[3]);
-    if (g_taskMan.getTask(m_task[1]) != NULL)
+    if (g_taskMan.getTask(m_task[1]) != 0)
         g_taskMan.killTask(m_task[1]);
     m_task[1] = -1;
     m_task[2] = -1;
@@ -826,9 +826,9 @@ void ACHRstat::pauseTasks(int on, int all)
 
 void ACHRstat::killMoveTasks()
 {
-    if (g_taskMan.getTask(m_task[0]) != NULL)
+    if (g_taskMan.getTask(m_task[0]) != 0)
         g_taskMan.killTask(m_task[0]);
-    if (g_taskMan.getTask(m_task[3]) != NULL)
+    if (g_taskMan.getTask(m_task[3]) != 0)
         g_taskMan.killTask(m_task[3]);
     m_task[3] = -1;
     m_task[0] = -1;
