@@ -4075,17 +4075,17 @@
 /* 001e9614 00000420 */ TskMtnMove2::stepMoveHit(){}  // ror
 /* 001e9a34 00000008 */ TskMtnMove2::stepNone(){}  // ror
 /* 001e9a3c 0000023c */ TskMoveTypeGen::TskMoveTypeGen(){}  // ror
-/* 001e9c78 00000034 */ FUN_001e9c78(){}
-/* 001e9cac 00000004 */ FUN_001e9cac(){}
-/* 001e9cb4 00000938 */ FUN_001e9cb4(){}
-/* 001ea5ec 0000044c */ FUN_001ea5ec(){}
-/* 001eaa38 0000011c */ FUN_001eaa38(){}
-/* 001eab54 000000e4 */ FUN_001eab54(){}
-/* 001eac38 00000080 */ FUN_001eac38(){}
-/* 001eacb8 000001c4 */ FUN_001eacb8(){}
-/* 001eae7c 00000084 */ FUN_001eae7c(){}
-/* 001eaf00 000000b0 */ FUN_001eaf00(){}
-/* 001eafb0 0000068c */ FUN_001eafb0(){}
+/* 001e9c78 00000034 */ TskMoveTypeGen::~TskMoveTypeGen(){}  // ror
+/* 001e9cac 00000004 */ TskMoveTypeGen::term(){}  // ror
+/* 001e9cb4 00000938 */ TskMoveTypeGen::aim(){}  // ror
+/* 001ea5ec 0000044c */ TskMoveTypeGen::retarget(){}  // ror
+/* 001eaa38 0000011c */ TskMoveTypeGen::stepTurn(){}  // ror
+/* 001eab54 000000e4 */ TskMoveTypeGen::stepSlideHit(){}  // ror
+/* 001eac38 00000080 */ TskMoveTypeGen::stepSlide(){}  // ror
+/* 001eacb8 000001c4 */ TskMoveTypeGen::stepMotion(){}  // ror
+/* 001eae7c 00000084 */ TskMoveTypeGen::exec(){}  // ror
+/* 001eaf00 000000b0 */ TskMoveTypeGen::next(){}  // ror
+/* 001eafb0 0000068c */ TskMoveTypeGen::turnTo(){}  // ror
 /* 001eb63c 00000308 */ TskMoveTypeRound::TskMoveTypeRound(){}  // ror
 /* 001eb944 00000034 */ TskMoveTypeRound::~TskMoveTypeRound(){}  // ror
 /* 001eb978 00000004 */ TskMoveTypeRound::term(){}  // ror

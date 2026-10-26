@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-26 18:35 at commit `31bf69f` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-26 18:55 at commit `b665513` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-26 18:35 at commit `31bf69f` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6668**, named **4230** (63%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 247, ror-inferred 2632
-- context-name ledger: 2879 entries; overrides of wrong library matches: 5
+- game functions: **6668**, named **4241** (64%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 247, ror-inferred 2643
+- context-name ledger: 2890 entries; overrides of wrong library matches: 5
 - placed in a source file: 3554/6668 in 99 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **2662**; stubs: **328**
+- reconstructed RoR functions: **2674**; stubs: **326**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -58,7 +58,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 210 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 208 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
@@ -100,7 +100,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/spr/sprtexture.cpp` | 21 | 0 |
 | `src/system/sysnowloading.cpp` | 8 | 0 |
 | `src/system/system.cpp` | 11 | 0 |
-| `src/task/tsk_chr.cpp` | 92 | 0 |
+| `src/task/tsk_chr.cpp` | 104 | 0 |
 | `src/task/tsk_man.cpp` | 25 | 0 |
 | `src/utl/utlfile.cpp` | 2 | 0 |
 | `src/utl/utlfind.cpp` | 0 | 1 |
@@ -114,7 +114,7 @@ Least-named game-code regions (64 KB blocks):
 - 160 TUs: todo 113, partial 12, verify 46, done 9
 - next: **task/tsk_chr.cpp** (pinned in the queue)
 - pinned queue: task/tsk_chr.cpp, unassigned@001f82e4, unassigned@00192ac0, dog/dogmodel.cpp, dog/dogactor.cpp, mag/magscenelight.cpp, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
-- partial: `task/tsk_chr.cpp` 91/166 -- All code written this session is complete but unseen (TskSysFunc shows a map-name caption on entering a room via seqcall 0x22; check it the first time a room is
+- partial: `task/tsk_chr.cpp` 103/166 -- TskMoveTypeGen and chrChangeMotionBySuffix are complete but unseen (native 202 moves an achr; first visible once a room with a scripted walk runs). TskMtnMove m
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
@@ -164,6 +164,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-26 18:55 `task/tsk_chr.cpp` partial: Wrote TskMoveTypeGen whole (native 202's straight moves: ctor with the achr move params 0x1100..0x1105, exec, term, dtor, aim 0x1e9cb4 over its 15 modes, retarg
 - 2026-10-26 18:35 `task/tsk_chr.cpp` partial: Wrote TskSysFunc whole (ctor, exec, term, stepMapName 0x1f42c4: the seqcall 0x22 map-name caption through S2dMes setMapNumber / setMapNameFadeIn / Out), TskSeqE
 - 2026-10-26 18:27 `task/tsk_chr.cpp` partial: Wrote TskMovePointPath (ctor, exec, term, aim 0x1ec834, stepOnce / stepLoop / stepRandom / stepRandomLoop) and TskMoveTypeRound (ctor, exec with the HIT in movi
 - 2026-10-26 18:14 `task/tsk_chr.cpp` partial: Wrote TskChrRot (ctor 0x1f0434, exec, term, dtor, stepFrames 0x1f090c, stepMotion 0x1f0b50; kind 0xe) and its starters chrRotStart, chrRotTo, chrRotToIn, chrRot
@@ -171,14 +172,13 @@ Recent sessions:
 - 2026-10-26 17:38 `task/tsk_chr.cpp` partial: Wrote TskMsgMan (ctor, exec end rules by mode, pause, term, dtor): the film's narration subtitles now open their window (Once upon a time, ...), but nothing dra
 - 2026-10-26 17:12 `task/tsk_chr.cpp` partial: Pinned unassigned@001e7f28 as task/tsk_chr.cpp (0x1e7f28..0x1f6c64, the script tasks). Wrote TskMovie (ctor, exec state machine, term, dtor): the New Game openi
 - 2026-10-26 15:57 `setup/newgame_crash.cpp` done: New Game crash fixed: Sequence::addEntry kept a script address (a host pointer) in an int, so callEntry queued a thread at a cut pc and seqFindEntry faulted; Se
-- 2026-10-26 15:37 `wrd/wrdsrv.cpp` verify: WrdSrv room table (was unassigned@00164fc0 0x17e540..0x17f0d0): all 14 functions - ctor / dtor, load of data/wrd/WRD.BIN, setup building host WrdEntry records b
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `dog/dogactor.cpp` | partial | 6/28/146 | 31.5 | 83 | 5 |
+| `dog/dogactor.cpp` | partial | 6/28/146 | 31.5 | 86 | 5 |
 | `unassigned@00143d3c` | todo | 0/22/602 | 129.5 | 57 | 2 |
 | `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 52 | 4 |
-| `unassigned@001d3b44` | partial | 2/15/37 | 18.4 | 50 | 1 |
+| `unassigned@001d3b44` | partial | 2/15/37 | 18.4 | 51 | 1 |
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 45 | 3 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
 | `unassigned@00164fc0` | todo | 0/14/381 | 101.3 | 37 | 3 |
@@ -186,7 +186,7 @@ Recent sessions:
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 34 | 3 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 33 | 4 |
 | `unassigned@001f82e4` | todo | 0/7/52 | 16.5 | 32 | 2 |
-| `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
+| `unassigned@0010f944` | partial | 2/5/12 | 2.2 | 31 | 3 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -200,13 +200,13 @@ Recent sessions:
 | `0010aa9c` | DogActor::findMotionByName | 13 | ror | stub | dog/dogactor.cpp |
 | `001f8fc0` | TskSnd::TskSnd | 12 | ror | stub | - |
 | `001e0c2c` | GamArea::ctl_trg_flg | 10 | ror | stub | - |
+| `0010a650` | DogActor::getRotY | 9 | ror | stub | dog/dogactor.cpp |
 | `0013fb3c` | MagScene::copyLightSet | 9 | ror | stub | mag/magscenelight.cpp |
 | `001d5da0` | GamMan::relinkObj | 9 | ror | stub | - |
 | `00144334` | gamSetBwnFollow | 8 | ror | stub | - |
 | `00187464` | MsgManSet::close | 8 | ror | stub | - |
 | `001d8064` | GamMan::findSectaCell | 8 | ror | stub | - |
 | `0010ff74` | DogEntity::normalizeRotate | 7 | ror | stub | - |
-| `0010a650` | DogActor::getRotY | 7 | ror | stub | dog/dogactor.cpp |
 | `001875c0` | MsgManSet::getState | 7 | ror | stub | - |
 | `001d5bc8` | GamMan::queueObjUpdate | 7 | ror | stub | - |
 | `00143d7c` | MagScene::setFog | 6 | ror | stub | - |
@@ -224,12 +224,12 @@ Recent sessions:
 | `001634d4` | EmyManager::releaseObj | 5 | ror | stub | - |
 | `0010a038` | DogActor::addTrans | 5 | ror | stub | dog/dogactor.cpp |
 | `0021a828` | i3rCopyClipSphere | 5 | lib-ctx | stub | - |
+| `00217f10` | utlAtan2 | 4 | ror | stub | - |
 | `001bebec` | GamFont::setFont | 4 | ror | stub | - |
 | `001ddc80` | GamArea::stopTrgs | 4 | ror | stub | - |
+| `001d544c` | GamMan::placeAchr | 4 | ror | stub | - |
 | `001a074c` | MnuTextList::close | 4 | ror | stub | mnu/mnuselect.cpp |
 | `0011034c` | FUN_0011034c | 4 | - | stub | dog/dogentity.cpp |
 | `0010fc7c` | DogEntity::setRotate | 4 | ror | stub | - |
 | `001bedc0` | GamFont::setTarget | 4 | ror | stub | - |
-| `001c0254` | GamFont::getGlyphWidth | 4 | ror | stub | - |
-| `00109b88` | DogActor::releaseMotion | 4 | ror | stub | dog/dogactor.cpp |
 

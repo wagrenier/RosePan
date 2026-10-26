@@ -9383,6 +9383,72 @@
   "was": "FUN_001e9a3c",
   "why": "the constructor of class TskMoveTypeGen (rtti, vtable 0x2e4ad0); 0xc0 bytes: oid +8, mode +0x1c, arg +0x6c, kind +0xa4, frames +0xa0, achr params 0x1100..0x1105; native 202"
  },
+ "001e9c78": {
+  "name": "TskMoveTypeGen::~TskMoveTypeGen",
+  "tag": "ror-inferred",
+  "was": "FUN_001e9c78",
+  "why": "TskMoveTypeGen vtable slot 6: stores vtable 0x2e4ad0, operator_delete on bit 0"
+ },
+ "001e9cac": {
+  "name": "TskMoveTypeGen::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001e9cac",
+  "why": "TskMoveTypeGen vtable slot 5 (term): empty"
+ },
+ "001e9cb4": {
+  "name": "TskMoveTypeGen::aim",
+  "tag": "ror-inferred",
+  "was": "FUN_001e9cb4",
+  "why": "called by the ctor and stepTurn: switch on mode +0x1c sets velocity, frames, chrSetMotion / chrMtnMove / chrMoveFrames and the step pointer; returns the heading"
+ },
+ "001ea5ec": {
+  "name": "TskMoveTypeGen::retarget",
+  "tag": "ror-inferred",
+  "was": "FUN_001ea5ec",
+  "why": "called by next for modes 3/4/11/12: re-reads the actor position, getObjPos of the followed object, new velocity / frames, step pointer; returns the heading"
+ },
+ "001eaa38": {
+  "name": "TskMoveTypeGen::stepTurn",
+  "tag": "ror-inferred",
+  "was": "FUN_001eaa38",
+  "why": "step turnTo sets: waits for the achr turn task m_task[1], then aim and chrRotTo / chrRotFromTo"
+ },
+ "001eab54": {
+  "name": "TskMoveTypeGen::stepSlideHit",
+  "tag": "ror-inferred",
+  "was": "FUN_001eab54",
+  "why": "step for an achr flagged 0x40 without 0x80: placeAchr, HIT in moving task, sceVu0AddVector + trySetPos"
+ },
+ "001eac38": {
+  "name": "TskMoveTypeGen::stepSlide",
+  "tag": "ror-inferred",
+  "was": "FUN_001eac38",
+  "why": "default step of modes 0..7: sceVu0AddVector + ObjStat::setPosOnFloor, frames--"
+ },
+ "001eacb8": {
+  "name": "TskMoveTypeGen::stepMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001eacb8",
+  "why": "step of modes 8..: holds the chrMtnMove task (+4 bit 0) while turning, re-aims by chrMoveFrames below half the frames"
+ },
+ "001eae7c": {
+  "name": "TskMoveTypeGen::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001eae7c",
+  "why": "TskMoveTypeGen vtable slot 4: calls the member pointer at +0x7c while +0x60 frames > 0, else 0x1eaf00"
+ },
+ "001eaf00": {
+  "name": "TskMoveTypeGen::next",
+  "tag": "ror-inferred",
+  "was": "FUN_001eaf00",
+  "why": "exec once frames run out and stepSlideHit on no cell: modes other than 3/4/11/12 chrKillMotionTask and return 1; else retarget + turnTo"
+ },
+ "001eafb0": {
+  "name": "TskMoveTypeGen::turnTo",
+  "tag": "ror-inferred",
+  "was": "FUN_001eafb0",
+  "why": "takes the heading from aim / retarget: chrRotToMotion with params 0x1101 / 0x1102 when within 0x1105 of behind (step 0x1eaa38), else chrRotTo / chrRotFromTo"
+ },
  "001eb63c": {
   "name": "TskMoveTypeRound::TskMoveTypeRound",
   "tag": "ror-inferred",

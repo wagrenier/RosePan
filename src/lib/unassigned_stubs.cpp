@@ -157,12 +157,6 @@ TskSnd::TskSnd(int kind, const TskSndParam *param)
     ROSEPAN_STUB("TskSnd::TskSnd", 0x001f8fc0);
 }
 
-// stub of ROR 0x001e9a3c (a constructor: stubgen leaves it to hand)
-TskMoveTypeGen::TskMoveTypeGen(u_int, int, intptr_t, int, float, float)
-{
-    ROSEPAN_STUB("TskMoveTypeGen::TskMoveTypeGen", 0x001e9a3c);
-}
-
 // stub of ROR 0x001ec940 (a constructor: stubgen leaves it to hand)
 TskMoveSectaFindPath::TskMoveSectaFindPath(u_int, intptr_t, int, int, int, int, float, float)
 {
@@ -1421,14 +1415,6 @@ void EmyManager::setSlotWord24(int no, int v)
 int EmyManager::testEmyView(u_int oid)
 {
     ROSEPAN_STUB("EmyManager::testEmyView", 0x00163b80);
-    return {};
-}
-
-// stub of ROR 0x001f5d90
-int chrChangeMotionBySuffix(float blend, float rotY, u_int oid, const char *name, int a2,
-                             int a3)
-{
-    ROSEPAN_STUB("chrChangeMotionBySuffix", 0x001f5d90);
     return {};
 }
 

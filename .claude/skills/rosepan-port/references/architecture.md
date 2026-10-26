@@ -917,6 +917,9 @@ never asserts): sessions name them (`tus.py define --why`).
   agi, neck_rot_range in degrees: field 0x21 returns radians). GamSysData: ten tables (record id =
   table << 9 | record): 0..3 characters (records 0xa0, 0xa0, 0xc0, 0xe0; flags +0x90, table 2 a second
   word +0x94), 4..9 objects (0xc0, table 5 0x200; flags +0xb0); FCHRstat::init reads only table 5.
+  An achr's move params (read by TskMoveTypeGen 0x1e9a3c): 0x1100 the walk motion, 0x1103 its speed
+  per 60th, 0x1101 / 0x1102 the right / left turn motions (-1 none), 0x1104 the turn speed, 0x1105 the
+  angle from straight behind within which a turn plays the turn motion.
   ObjStat::setPos / getPos / setRot were named ACHRstat::* before: the base setter calls them for fchrs
   too (FCHRstat has its own four). The secta cells come from GamMan::findSectaCell 0x1d8064 (stub);
   the floor height from GamMan::getSectaCellY 0x1d817c (100000 = no cell; ObjStat::getPosSectaY

@@ -74,7 +74,7 @@ struct TskMtnMove : CmnITask
     int  stepMoveHit();                                                  // ROR 0x001e89c0
     int  stepNone();                                                     // ROR 0x001e8fbc
 
-    u_int     m_flags;          // ROR 0x04: bit 0 stops the moving (writer elsewhere), bit 1 paused
+    u_int     m_flags;          // ROR 0x04: bit 0 stops the moving (TskMoveTypeGen::stepMotion), bit 1 paused
     u_int     m_oid;            // ROR 0x08
     int       m_actor;          // ROR 0x0c: the scene actor no, re-read from m_oid each step
     int       m_motion;         // ROR 0x10
@@ -235,13 +235,77 @@ struct TskMovie : CmnITask
     int  m_vol[2];              // ROR 0x50: GamSndMan::m_mstVol saved by state 0x68
 };
 
-/* The achr movement tasks (class names from their vtables): oid the achr,
- * mode the way it moves, rate the step per frame (1/60 by default).
- * Natives 202 / 211 start them on the achr's m_task[0]. layout: host --
- * no members. */
-struct TskMoveTypeGen : CmnITask           // EE 0xc0, vtable 0x2e4ad0
+/* TskMoveTypeGen : CmnITask (vtable 0x2e4ad0, EE 0xc0 bytes; kind 8):
+ * native 202's straight moves of an achr (on its m_task[0]). By mode & 7:
+ * 0 by the vector arg each frame for frames frames, 1 along the heading at
+ * the speed *arg for frames frames, 2 the distance *arg along the heading
+ * over frames frames, 3 / 4 toward the object arg at speed frames (4 aims
+ * again every kind frames, 3 when it gets there; a negative speed walks
+ * backwards), 5 / 7 to the point arg at speed frames, 6 to the point arg in
+ * frames frames. Modes 0..7 slide the achr (stepSlide / stepSlideHit)
+ * while the achr's walk motion (param 0x1100 at param 0x1103 / 60) plays;
+ * modes 8.. (an achr flagged 0x200000) let a chrMtnMove of it walk there
+ * (stepMotion). Before setting off the achr turns to the heading (param
+ * 0x1104 its speed): a heading within param 0x1105 of straight behind plays
+ * the turn motion (0x1101 right, 0x1102 left) and waits for it (stepTurn).
+ * An achr flagged 0x400000 holds still while a turn task runs. Modes 0..2
+ * and 5.. end after their frames; 3 / 4 follow the object until killed.
+ * rate is not read. layout: host -- pointers and a member-function pointer;
+ * EE offsets in the comments. */
+struct TskMoveTypeGen : CmnITask
 {
+    typedef int (TskMoveTypeGen::*StepFunc)();
+
     TskMoveTypeGen(u_int oid, int mode, intptr_t arg, int kind, float frames, float rate); // ROR 0x001e9a3c
+    ~TskMoveTypeGen() override {}                                        // ROR 0x001e9c78
+
+    int  get_task_type() override { return 8; }                          // ROR 0x00290198
+    void init() override {}                                              // ROR 0x002901a0
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001eae7c
+    void term() override;                                                // ROR 0x001e9cac
+
+    /* Sets off by mode (the velocity, frames, motion and step); returns
+     * the heading to take. */
+    float aim();                                                         // ROR 0x001e9cb4
+    /* Modes 3 / 4 / 11 / 12: aim again at the object from where the actor
+     * stands; returns the heading. */
+    float retarget();                                                    // ROR 0x001ea5ec
+    /* The turn to dir before (or while) moving. */
+    void  turnTo(float dir);                                             // ROR 0x001eafb0
+    /* The frames ran out: 1 ends the task, the following modes aim again. */
+    int   next();                                                        // ROR 0x001eaf00
+    int   stepTurn();                                                    // ROR 0x001eaa38
+    int   stepSlideHit();                                                // ROR 0x001eab54
+    int   stepSlide();                                                   // ROR 0x001eac38
+    int   stepMotion();                                                  // ROR 0x001eacb8
+
+    ACHRstat     *m_achr;          // ROR 0x04
+    u_int         m_oid;           // ROR 0x08
+    int           m_actor;         // ROR 0x0c: the achr's actor (ObjStat::m_actor)
+    u_int         m_targetOid;     // ROR 0x10: modes 3 / 4, the object followed
+    float         m_speed;         // ROR 0x14: the slide per frame
+    float         m_dist;          // ROR 0x18: mode 2's distance
+    int           m_mode;          // ROR 0x1c
+    sceVu0FVECTOR m_target;        // ROR 0x20: modes 3.., the position walked to
+    sceVu0FVECTOR m_pos;           // ROR 0x30
+    sceVu0FVECTOR m_rot;           // ROR 0x40: [1] the heading
+    sceVu0FVECTOR m_vel;           // ROR 0x50: the slide (modes 0..7)
+    int           m_frames;        // ROR 0x60: frames left
+    int           m_half;          // ROR 0x64: stepMotion aims again below it
+    int           m_every;         // ROR 0x68: modes 4 / 12, kind: the frames between aims
+    intptr_t      m_arg;           // ROR 0x6c
+    int           m_motion;        // ROR 0x70: param 0x1100, the walk motion
+    float         m_rate;          // ROR 0x74: param 0x1103 / 60, its speed
+    float         m_rotSpeed;      // ROR 0x78: param 0x1104, the turn speed
+    StepFunc      m_stepFunc;      // ROR 0x7c: GCC 2 {delta, index, pfn}
+    CmnITask     *m_mtnTask;       // ROR 0x84: modes 8.., chrMtnMove's (a TskMtnMove)
+    sceVu0FVECTOR m_lastPos;       // ROR 0x90: the last position placed
+    float         m_value;         // ROR 0xa0: frames (modes 0..2, 6) or the speed (3..5, 7)
+    int           m_kind;          // ROR 0xa4
+    u_int         m_flags;         // ROR 0xa8: 1 hold while a turn task runs, 2 the motion held
+    int           m_turnRight;     // ROR 0xac: param 0x1101, -1 none
+    int           m_turnLeft;      // ROR 0xb0: param 0x1102, -1 none
+    float         m_turnBack;      // ROR 0xb4: param 0x1105, the angle from behind that plays them
 };
 /* TskMoveTypeRound : CmnITask (vtable 0x2e4a90, EE 0x80 bytes; kind 9):
  * native 211 cases 10 / 11 -- an achr circles a centre at radius (kept
