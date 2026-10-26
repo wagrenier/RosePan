@@ -744,7 +744,73 @@ struct GamMan
     }
     /* An object's param by which (0x41 the type-9 number ...). */
     void getObjParam(u_int oid, int which, void *out);                   // ROR 0x001d1c80
+    /* The PC actor's motion speed (DogActor +0x1e8) set to 1e-7: its
+     * motion stands still (GamArea::update). */
+    void freezePcMotion();                                               // ROR 0x001c46c8
+    /* 1 while the scene's fade is in states 1, 3 or 4. */
+    int  isFading();                                                     // ROR 0x001c574c
+    /* The room's WRD entry word 0x1c (the map area the map items 0xad0 ..
+     * 0xad2 open: 0 / 2 / 1); -1 without a room, with flags2 0x2000 or
+     * without an entry. */
+    int  getMapArea();                                                   // ROR 0x001c6c38
+    /* oid into the 0x169-word list m_1f240 (unless listed), then
+     * releaseChr(oid). */
+    void listAndReleaseChr(u_int oid);                                   // ROR 0x001c7d04
+    /* Item slot slot = item; a stacking item (record flag 0x20000) held in
+     * another slot is counted into that one first (99 at most) and slot
+     * gets id 0xa00 with item's other words. */
+    void setItemSlot(int slot, GamItemSlot item);                        // ROR 0x001c812c
+    /* Slot slot emptied (the empty item's record, id 0xa00), unequipping /
+     * untargeting what it held. */
+    void clearItemSlot(int slot);                                        // ROR 0x001c8214
+    /* The slot holding the equipped item, -1 none. */
+    int  getEquipSlot();                                                 // ROR 0x001c854c
+    /* The equipped weapon (0xa3e / 0xa43) not full (m_selItemNum != 6):
+     * 1 + the slot of its ammo (0xa42 / 0xa3f) with the lowest count, the
+     * number of such slots into *count; 0 none. */
+    int  findReloadSlot(int *count);                                     // ROR 0x001c8604
+    /* Moves ammo into the equipped weapon's count (6 at most): slot -1
+     * takes findReloadSlot's and then others, else slot (0xa3f only).
+     * Emptied slots cleared, m_selItem's count updated. 1 when reloaded. */
+    int  reloadEquip(int slot);                                          // ROR 0x001c870c
+    /* m_selItemNum (and m_selItem's count) down by one when above 0. */
+    void decSelItemNum();                                                // ROR 0x001c899c
+    /* The item slots holding something (id != 0xa00). */
+    int  countItems();                                                   // ROR 0x001c89e4
+    /* A type-5 fchr's flags & 0x100000 (0 for other types). */
+    int  testFchr100000(u_int oid);                                      // ROR 0x001c8dc8
+    /* Its kind's system flag 4, object bit 2 set and bit 1 cleared (shown),
+     * the 0x32 marker when it can be talked to. */
+    void markObjTaken(u_int oid);                                        // ROR 0x001c8e1c
+    /* The object's system data id (ObjStat::m_kind), -1 for none. */
+    short getObjKind(u_int oid);                                         // ROR 0x001cbedc
+    /* Item id's model (field 0xf) loaded as a new type-5 fchr at pos. */
+    void createItemObj(short id, const float *pos);                      // ROR 0x001c8eb4
+    /* A copy of item into the stock; a stacking one (record flag 0x20000)
+     * counts into its record. 1 when the stock is full. */
+    int  addStockItem(GamItemSlot item);                                 // ROR 0x001c9198
+    /* The stock record with oid back to the free list; 1 when found. */
+    int  delStockByOid(u_int oid);                                       // ROR 0x001c9334
+    /* m_flags 4 set and m_flags2 0x800 clear (MagScene::canOpenItemMenu). */
+    int  canOpenItemMenu();                                              // ROR 0x001c97c8
+    /* Map item 0xad0 / 0xad1 / 0xad2 held for map area 0 / 2 / 1, and
+     * canOpenItemMenu (MagScene::canOpenMenu10001). */
+    int  canOpenMapMenu();                                               // ROR 0x001c97f0
+    /* ACHRstat::getParam / setParam of the PC / dog / murderer when set. */
+    void getPcParam(int which, void *out);                               // ROR 0x001cb460
+    void getDogParam(int which, void *out);                              // ROR 0x001cb490
+    void getMurderParam(int which, void *out);                           // ROR 0x001cb4c0
+    void setDogParam(int which, const void *data);                       // ROR 0x001cb5d8
+    void setMurderParam(int which, const void *data);                    // ROR 0x001cb608
+    /* The system message window closed (m_sysMsgHandle -1), the message
+     * mode 0. */
+    void closeSysMsg();                                                  // ROR 0x001cfaa8
+    /* setObj(oid, 1) when hide, else resetObj(oid, 1). */
+    void hideObj(u_int oid, int hide);                                   // ROR 0x001d23f8
     /* In unassigned@001d3b44 (GamMan methods past switchVolume). */
+    /* Cell no of secta list list (bss 0x7811ac, 0x18 per list, 0x90 per
+     * cell) and its position (+0x10) into pos. */
+    GamSecta *getSectaCell(int no, float *pos, int list);                // ROR 0x001d811c
     void relinkObj(u_int oid);                                           // ROR 0x001d5da0
     /* The secta cell of pos (0x17c340 over the list bss 0x7811ac, starting
      * at cur), NULL when none or its flags bit 2 is set; type2: the oid's

@@ -347,6 +347,10 @@ struct ObjStat
     /* Work word no (+0x1b0 + no * 4); setWork stores one. */
     int  getWork(int no);                                                // ROR 0x001db17c
     void setWork(int no, int value);                                     // ROR 0x001db18c
+    void addWork(int no, int value);                                     // ROR 0x001db19c
+    /* Into cell where of secta list 0 (GamMan::getSectaCell) and, when it
+     * has one, to the cell's position. */
+    void placeAt(int where);                                             // ROR 0x001d8fec
     /* +0x100, the object id (the ELF's inline). */
     // ROR 0x0028f92c
     int  getOID() const { return (int)m_oid; }
@@ -447,6 +451,8 @@ struct ACHRstat : ObjStat
     void getParam(int which, void *out);                                 // ROR 0x001da228
     /* Stores *data into the param which (0x32 the equipped item ...). */
     void setParam(int which, const void *data);                          // ROR 0x001da740
+    /* Adds *data to the param which (GamMan::addObjParam; native 151). */
+    void addParam(int which, const void *data);                          // ROR 0x001dac8c
     /* The motion speed into +0x418 and the actor's
      * MagScene::setActorMotionSpeed (native 106). */
     void setMotionSpeed(float speed);                                    // ROR 0x001db1b8

@@ -1640,3 +1640,10 @@ void MagScene::setCameraPathPos(float pos)
 {
     ROSEPAN_STUB("MagScene::setCameraPathPos", 0x0013d52c);
 }
+
+// stub of ROR 0x001d811c
+GamSecta * GamMan::getSectaCell(int no, float *pos, int list)
+{
+    ROSEPAN_STUB("GamMan::getSectaCell", 0x001d811c);
+    return {};
+}
