@@ -2620,3 +2620,102 @@ void GamMan::resetPcStat()
 {
     ROSEPAN_STUB("GamMan::resetPcStat", 0x001c1378);
 }
+
+// stub of ROR 0x001d091c
+void GamMan::addObjColliBox(u_int oid, const float *box)
+{
+    ROSEPAN_STUB("GamMan::addObjColliBox", 0x001d091c);
+}
+
+// stub of ROR 0x001d0c64
+void GamMan::addObjColliQuad(u_int oid, const float *quad)
+{
+    ROSEPAN_STUB("GamMan::addObjColliQuad", 0x001d0c64);
+}
+
+// stub of ROR 0x001d080c
+void GamMan::addObjColliSegment(u_int oid, const float *seg)
+{
+    ROSEPAN_STUB("GamMan::addObjColliSegment", 0x001d080c);
+}
+
+// stub of ROR 0x001d1f74
+void GamMan::addObjParam(u_int oid, int which, const void *data)
+{
+    ROSEPAN_STUB("GamMan::addObjParam", 0x001d1f74);
+}
+
+// stub of ROR 0x001d2334
+void GamMan::addObjWork(u_int oid, int no, int value)
+{
+    ROSEPAN_STUB("GamMan::addObjWork", 0x001d2334);
+}
+
+// stub of ROR 0x001d18c4
+void GamMan::clearObjAttr(u_int oid, u_int bits)
+{
+    ROSEPAN_STUB("GamMan::clearObjAttr", 0x001d18c4);
+}
+
+// stub of ROR 0x001cfda4
+void GamMan::placeObjAt(u_int oid, int where)
+{
+    ROSEPAN_STUB("GamMan::placeObjAt", 0x001cfda4);
+}
+
+// stub of ROR 0x001d2428
+void GamMan::setActorBindMode(u_int oid, int mode)
+{
+    ROSEPAN_STUB("GamMan::setActorBindMode", 0x001d2428);
+}
+
+// stub of ROR 0x001d1fd8
+void GamMan::setKindFlags(int id, u_int bits, int on)
+{
+    ROSEPAN_STUB("GamMan::setKindFlags", 0x001d1fd8);
+}
+
+// stub of ROR 0x001d10d0
+int GamMan::setObj(u_int oid, u_int bits)
+{
+    ROSEPAN_STUB("GamMan::setObj", 0x001d10d0);
+    return {};
+}
+
+// stub of ROR 0x001d1838
+void GamMan::setObjAttr(u_int oid, u_int bits)
+{
+    ROSEPAN_STUB("GamMan::setObjAttr", 0x001d1838);
+}
+
+// stub of ROR 0x001d1d5c
+int GamMan::setObjParam(u_int oid, int which, const void *data)
+{
+    ROSEPAN_STUB("GamMan::setObjParam", 0x001d1d5c);
+    return {};
+}
+
+// stub of ROR 0x001cfbe4
+int GamMan::setObjPos(u_int oid, const float *pos)
+{
+    ROSEPAN_STUB("GamMan::setObjPos", 0x001cfbe4);
+    return {};
+}
+
+// stub of ROR 0x001cfe78
+void GamMan::setObjRot(u_int oid, float *rot)
+{
+    ROSEPAN_STUB("GamMan::setObjRot", 0x001cfe78);
+}
+
+// stub of ROR 0x001d1e88
+void GamMan::setObjScale(u_int oid, float scale)
+{
+    ROSEPAN_STUB("GamMan::setObjScale", 0x001d1e88);
+}
+
+// stub of ROR 0x001d2270
+void GamMan::setObjWork(u_int oid, int no, int value)
+{
+    ROSEPAN_STUB("GamMan::setObjWork", 0x001d2270);
+}

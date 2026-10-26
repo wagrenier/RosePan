@@ -186,6 +186,17 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      window text (**MsgMan / MsgManSet are stubs**: msg/msgman.cpp 0x18330c.. and 0x18741c..). Saving
      needs **GamMan::writeSaveData 0x1d6078 / readSaveData 0x1d68a0** (unassigned@001d3b44, stubs).
      Still next on the main road: the New Game press (2700:CROSS) and what it reaches.
+  10d. PARTIAL 2026-10-26 (session 4 of `sequence/seqcall.cpp`): a New Game press
+     (smoke pad 1800:START,2400:START,2700:CROSS, ~130 s run) reaches native **151** (object
+     control, now written; 24 GamMan / GamSysData callees named and stubbed). Its calls so far
+     (oids 0x50000001 / 0x50800002 / 0x62000003 / 0x51800005, ops 1 / 5 / 10 / 40) all stop at
+     GamMan::isObj: the objects do not exist because GamMan::createObjByModel / addChr are stubs.
+     **New blocker: plain runs crash (access violation) right after the New Game press**, after
+     GamMan::setPcAnim, 3 of 3 runs, also with native 151 disabled (so not 151); under gdbrun it does
+     NOT crash (timing?), and there it goes on to natives 155, 252, 039, 012, 152, 038, 019 and
+     GamMan::initStage2 / startStage2. Find the fault first (a crash handler / minidump in the
+     platform layer would help, gdb hides it), then GamMan::createObjByModel 0x1ca8e8 / addChr so
+     the stage objects exist, then those natives.
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

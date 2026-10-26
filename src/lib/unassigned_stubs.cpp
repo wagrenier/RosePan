@@ -1363,3 +1363,46 @@ void GamMan::writeSaveData(void *buf)
 {
     ROSEPAN_STUB("GamMan::writeSaveData", 0x001d6078);
 }
+
+// stub of ROR 0x001d480c
+void GamMan::fitObjBounds(u_int oid)
+{
+    ROSEPAN_STUB("GamMan::fitObjBounds", 0x001d480c);
+}
+
+// stub of ROR 0x001d4a3c
+float GamMan::getObjRadius(u_int oid, int *out)
+{
+    ROSEPAN_STUB("GamMan::getObjRadius", 0x001d4a3c);
+    return {};
+}
+
+// stub of ROR 0x001d5bc8
+void GamMan::queueObjUpdate(int kind, u_int oid)
+{
+    ROSEPAN_STUB("GamMan::queueObjUpdate", 0x001d5bc8);
+}
+
+// stub of ROR 0x001dce30
+void GamSysData::clearFlags(short id, u_int bits)
+{
+    ROSEPAN_STUB("GamSysData::clearFlags", 0x001dce30);
+}
+
+// stub of ROR 0x001dd154
+void GamSysData::clearFlags2(short id, int unused, u_int bits)
+{
+    ROSEPAN_STUB("GamSysData::clearFlags2", 0x001dd154);
+}
+
+// stub of ROR 0x001dc070
+void GamSysData::setField(int id, int field, const void *data)
+{
+    ROSEPAN_STUB("GamSysData::setField", 0x001dc070);
+}
+
+// stub of ROR 0x001dd118
+void GamSysData::setFlags2(short id, int unused, u_int bits)
+{
+    ROSEPAN_STUB("GamSysData::setFlags2", 0x001dd118);
+}

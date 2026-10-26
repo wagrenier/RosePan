@@ -976,6 +976,14 @@ throughout (identifiers, env variables, files, shader macros):
   returns the pc to continue at; seqVmLoadThread restores them next frame. Sequence::execThread
   0x2113dc runs a thread at once in the record at Sequence +0xdc30 (flag 0x100), around the caller's
   registers; GamArea::checkPc calls it. Thread names: "mst" (startThread), "trg", "imdy", "single".
+- **Native 151 0x209d4c, object control** (jump table data 0x300eb0, 58 cases; the first native a New
+  Game press reaches): t1 is the oid (nothing unless GamMan::isObj), a0 the operation: 1 / 6 setObjPos,
+  2 setObjRot, 3 setObjScale (a1's bits are the float), 5 setObjDir, 10 / 11 set / addObjParam, 12 / 13
+  setObj / resetObj, 15..17 GamSysData setField / set- / clearFlags(2) on record t1, 18 / 19 object
+  attribute bits, 20 placeObjAt, 25 / 26 setKindFlags on record a1, 30 / 31 object work words (+0x1b0),
+  40 bit 1, 41 actor bind bits, 50..54 the shape param 0x18 (GamObjColli: m_shape 0 none / 1 17 / 2 25 /
+  3 45 / 4 m_radius), 53 a rotated box -> corners param 0x1003, 55..57 private collisions (segment, box,
+  quad). Objects' getters / setters dispatch on the oid's list (bits 28..29: 1 achr, 0 vfchr, 2 fchr).
 
 ## The scene's menus (mag/maglifemenu.cpp, 0x12cf3c..0x12d9c8, 2026-10-25)
 

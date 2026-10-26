@@ -851,6 +851,12 @@
   "was": "FUN_001152a8",
   "why": "DogModel's vtable slot 13: draws the root with a unit matrix and no node matrices (0x106760); the sky models get drawn into the shadow layers by it"
  },
+ "0011531c": {
+  "name": "DogModel::setFlag100Bits",
+  "tag": "ror-inferred",
+  "was": "FUN_0011531c",
+  "why": "bits 1..3 of the word +0x100 = v & 7; native 151 case 0x2a on the scene actor of an oid"
+ },
  "0011550c": {
   "name": "DogModel::setupNodeFlags",
   "tag": "ror-inferred",
@@ -6911,6 +6917,24 @@
   "was": "FUN_001cfb38",
   "why": "+0x2227c = the handle MagScene::openSysMsgWindow returned"
  },
+ "001cfbe4": {
+  "name": "GamMan::setObjPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001cfbe4",
+  "why": "isObj, then by the oid's list (bits 28..29) the achr 0x1d89c4 / vfchr / fchr 0x1db7cc position setter with the vector; returns 1, 0 for no object; native 151 case 1 / 6, the corner-box case 0x35 passes the box centre"
+ },
+ "001cfda4": {
+  "name": "GamMan::placeObjAt",
+  "tag": "ror-inferred",
+  "was": "FUN_001cfda4",
+  "why": "achr / fchr: 0x1d8fec(obj, where) -- the point 0x1d811c(gam, where) resolves set as the object's place, its position too when +0x114; native 151 case 0x14"
+ },
+ "001cfe78": {
+  "name": "GamMan::setObjRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001cfe78",
+  "why": "wraps the three angles of the vector in place into -pi..pi (fptodp / dpcmp against 0xc00921fb54442d18), then the achr 0x1d8a8c / vfchr / fchr 0x1db898 rotation setter; native 151 case 2"
+ },
  "001d024c": {
   "name": "GamMan::setObjDir",
   "tag": "ror-inferred",
@@ -6923,11 +6947,47 @@
   "was": "FUN_001d046c",
   "why": "by oid bits 28..29: isAchr / isVFchr / isFchr (type 5 tries vfchr first)"
  },
+ "001d080c": {
+  "name": "GamMan::addObjColliSegment",
+  "tag": "ror-inferred",
+  "was": "FUN_001d080c",
+  "why": "params 5 / 6 = the two points of seg, one MagScene::addPrivateColli(seg, seg + 4), its handle into param 0x18 {5, 0, ..}; native 151 case 0x37"
+ },
+ "001d091c": {
+  "name": "GamMan::addObjColliBox",
+  "tag": "ror-inferred",
+  "was": "FUN_001d091c",
+  "why": "box {x, y, z, sx, sy, sz, rot}: four walls (addPrivateColli) round the rotated rectangle, the corners into param 0x1003, the position, shape {6, 4, -sy, y, avg} into 0x18; native 151 case 0x38"
+ },
+ "001d0c64": {
+  "name": "GamMan::addObjColliQuad",
+  "tag": "ror-inferred",
+  "was": "FUN_001d0c64",
+  "why": "like addObjColliBox from four given corners (x, z pairs) with height [8] / [9]: four walls, param 0x1003, the position, param 0x18; native 151 case 0x39"
+ },
+ "001d10d0": {
+  "name": "GamMan::setObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001d10d0",
+  "why": "the counterpart of resetObj 0x1d1410: ors bits into the object's flags with the same side effects (relink, hide, sectors, the queue 0x1d5bc8); native 151 case 12 and case 0x28 a1 != 0 with bit 1"
+ },
  "001d1410": {
   "name": "GamMan::resetObj",
   "tag": "ror-inferred",
   "was": "FUN_001d1410",
   "why": "130 call sites with (oid, 1): loadStage passes the PC's and dog's ObjStat oid (+0x100); kills the object's tasks"
+ },
+ "001d1838": {
+  "name": "GamMan::setObjAttr",
+  "tag": "ror-inferred",
+  "was": "FUN_001d1838",
+  "why": "achr: word bits >> 24 of the array +0x3ec |= bits & 0xffffff; fchr: +0x120 |= bits; native 151 case 0x12"
+ },
+ "001d18c4": {
+  "name": "GamMan::clearObjAttr",
+  "tag": "ror-inferred",
+  "was": "FUN_001d18c4",
+  "why": "the counterpart of setObjAttr (clears the bits); native 151 case 0x13. Its body hides a second function at 0x1d1958 (achr tail call 0x1d9f40)"
  },
  "001d1a48": {
   "name": "GamMan::isMenuOpen",
@@ -6940,6 +7000,48 @@
   "tag": "ror-inferred",
   "was": "FUN_001d1c80",
   "why": "findFchrType9 reads param 0x41 of each type-9 fchr through it; not read yet"
+ },
+ "001d1d5c": {
+  "name": "GamMan::setObjParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001d1d5c",
+  "why": "the counterpart of getObjParam 0x1d1c80: ACHRstat::setParam(which, data) for an achr (which 0x18 on an oid of group 2 also refits through getObjRadius / 0x1d0efc), 0x1db520 for vfchr / fchr; returns 1, 0 no object; native 151 cases 10 / 0x32..0x35"
+ },
+ "001d1e88": {
+  "name": "GamMan::setObjScale",
+  "tag": "ror-inferred",
+  "was": "FUN_001d1e88",
+  "why": "achr / fchr oids only: the scene actor getActorNo(oid) gets +0x90 = 1 and the float in f12 into +0x60 / +0x64 / +0x68 (one scale for x y z); native 151 case 3 passes a1's bits as the float. Its body hides a second function at 0x1d1f14 (a float getter tail-jumping to 0x1d8c50)"
+ },
+ "001d1f74": {
+  "name": "GamMan::addObjParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001d1f74",
+  "why": "achr oids only: tail call 0x1dac8c (adds data to param which: 5 position, 6 rotation, 0x22..0x31 counters ...); native 151 case 11"
+ },
+ "001d1fd8": {
+  "name": "GamMan::setKindFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_001d1fd8",
+  "why": "GamSysData::setFlags(id, bits) (even when on is 0: the ROM's quirk), then every live achr (id >> 9 < 4) or fchr (< 10) whose system id +0x128 is id gets bits set (on) or cleared in +0x120; native 151 cases 0x19 / 0x1a"
+ },
+ "001d2270": {
+  "name": "GamMan::setObjWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2270",
+  "why": "the object's 0x1db18c: word no of its work array +0x1b0 = value; native 151 case 0x1e"
+ },
+ "001d2334": {
+  "name": "GamMan::addObjWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2334",
+  "why": "the object's 0x1db19c: word no of its work array +0x1b0 += value; native 151 case 0x1f"
+ },
+ "001d2428": {
+  "name": "GamMan::setActorBindMode",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2428",
+  "why": "achr / fchr: bits 5..6 of the scene's m_actor_flags[getActorNo(oid)] (0x724ea0) = mode & 3 (0x60 = bound / chapter model); native 151 case 0x29"
  },
  "001d2724": {
   "name": "GamMan::setLightFlag",
@@ -7007,11 +7109,29 @@
   "was": "FUN_001d3ac8",
   "why": "0: saves the volume at +0x22214 and sets 0; 1: restores the saved one and marks -1"
  },
+ "001d480c": {
+  "name": "GamMan::fitObjBounds",
+  "tag": "ror-inferred",
+  "was": "FUN_001d480c",
+  "why": "the object's corner quad (param 0x1003) recentred (0x1d05f4 / 0x1d4730), the position moved to its centre, then param 0x18 set to shape 4 with the radius = the larger x / z extent; native 151 case 0x34 when the shape word is 1"
+ },
+ "001d4a3c": {
+  "name": "GamMan::getObjRadius",
+  "tag": "ror-inferred",
+  "was": "FUN_001d4a3c",
+  "why": "param 0x18's shape word picks the radius: 0 -> 0, 1 -> 17, 2 -> 25, 3 -> 45, 4 -> its own float (+0x10); word 0 to *out when out; returns a float; native 151 case 0x36"
+ },
  "001d544c": {
   "name": "GamMan::placeAchr",
   "tag": "ror-inferred",
   "was": "FUN_001d544c",
   "why": "resume calls it (pc oid, a 0x20-byte local, 1) unless flags2 0x1000; not read yet"
+ },
+ "001d5bc8": {
+  "name": "GamMan::queueObjUpdate",
+  "tag": "ror-inferred",
+  "was": "FUN_001d5bc8",
+  "why": "the {kind, oid} list at +0x2246c: an entry of oid moves to the free list, then a fresh one goes to the tail of the used list; native 151 case 0x35, the colli adders, setObj"
  },
  "001d5da0": {
   "name": "GamMan::relinkObj",
@@ -7139,6 +7259,12 @@
   "was": "FUN_001dbfa0",
   "why": "the system data record of id: table (id >> 9) of the ten pointers, record id & 0x1ff (strides 0xa0, 0xa0, 0xc0, 0xe0, 0xc0, 0x200, 0xc0...); addItem stores it in the item slot"
  },
+ "001dc070": {
+  "name": "GamSysData::setField",
+  "tag": "ror-inferred",
+  "was": "FUN_001dc070",
+  "why": "the counterpart of getField 0x1dc48c: table id >> 9, record id & 0x1ff, field 0x10..0x76 written as u_short from *data (table 0 reads instead: the ROM's quirk); native 151 case 15, GamMan::setUnqParam"
+ },
  "001dc48c": {
   "name": "GamSysData::getField",
   "tag": "ror-inferred",
@@ -7151,11 +7277,29 @@
   "was": "FUN_001dcd38",
   "why": "ors bits into the record's flag word (+0x90 for tables 0..3, +0xb0 else); addItem sets 4"
  },
+ "001dce30": {
+  "name": "GamSysData::clearFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_001dce30",
+  "why": "the counterpart of setFlags 0x1dcd38: clears bits in the record's flag word (+0x90 tables 0..3, +0xb0 the others); native 151 case 0x11 a1 == 0, GamMan::unsetUnqFlg"
+ },
  "001dd00c": {
   "name": "GamSysData::testFlags",
   "tag": "ror-inferred",
   "was": "FUN_001dd00c",
   "why": "the record's flag word & bits != 0; 0x20000 = the item stacks (count in the slot)"
+ },
+ "001dd118": {
+  "name": "GamSysData::setFlags2",
+  "tag": "ror-inferred",
+  "was": "FUN_001dd118",
+  "why": "table 2 records only: ors a3 into the second flag word +0x94 (a2 unused); native 151 case 0x10 with a1 != 0, GamMan::setUnqFlg2"
+ },
+ "001dd154": {
+  "name": "GamSysData::clearFlags2",
+  "tag": "ror-inferred",
+  "was": "FUN_001dd154",
+  "why": "table 2 records only: clears a3 in the second flag word +0x94; native 151 case 0x11 a1 != 0, GamMan::unsetUnqFlg2"
  },
  "001dd414": {
   "name": "GamArea::init",

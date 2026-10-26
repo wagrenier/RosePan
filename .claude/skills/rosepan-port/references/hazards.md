@@ -517,3 +517,12 @@ public:
   the text from the previous member up to the declaration, and `public:` sits in between. Fix: in a
   minimal header for another TU, declare the class as a `struct` (no labels), or put the label on the
   line after a member, and keep each declaration on one line (2026-10-22, bed/bedmemory.h).
+
+- **A crash that gdbrun does not reproduce** (2026-10-26). Symptom: the plain smoke run exits with
+  0xC0000005 right after a New Game press, every time; `gdbrun.py` with the same pad runs on without a
+  fault. Cause: unknown yet (timing, or a fault gdb passes as first-chance in a DLL). Fix so far: bisect
+  by disabling the suspect (a temporary early return) in plain runs -- native 151 was cleared that way.
+  Note the run log is not flushed at the fault: the last logged stub is not necessarily the last call.
+- **Hidden functions inside GamMan bodies**: 0x1d1e88 (setObjScale) holds a float getter at 0x1d1f14,
+  0x1d18c4 (clearObjAttr) one at 0x1d1958 (achr tail call 0x1d9f40); Ghidra's sizes include them.
+

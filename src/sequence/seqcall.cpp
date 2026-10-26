@@ -14,10 +14,12 @@
 //
 // Written so far: the table, the empty and the return-code entries, 000,
 // 001, 002, 004 (wait until), 005, the system call 018, 021, 027, 029
-// (stage changes), 032, 033 and 110. The others are stubs (seqcall.h lists them).
+// (stage changes), 032, 033, 110 and 151 (object control). The others are
+// stubs (seqcall.h lists them).
 
 #include "sequence/seqcall.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -849,6 +851,176 @@ intptr_t seqFunc110(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
     }
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// A script word that holds a float's bits (the ROM loads it with lwc1).
+
+static float seqWordFloat(intptr_t word)
+{
+    int   bits = (int)word;
+    float f;
+    memcpy(&f, &bits, sizeof(f));
+    return f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Object control: a0 picks the operation (58 cases, jump table data
+// 0x300eb0) on object t1 -- nothing unless t1 is live. a1 / a2 are words,
+// float bits or pointers by case; cases 15..17 and 25 / 26 work on the
+// system data record t1 / a1 instead. Always returns 0.
+// ROR 0x00209d4c
+
+intptr_t seqFunc151(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t t1)
+{
+    GamMan     &gam = g_gamMan;
+    u_int       oid = (u_int)t1;
+    short       id = (short)(t1 & 0xffff);
+    GamObjColli colli;
+
+    if (!gam.isObj(oid))
+        return 0;
+    switch ((u_int)op)
+    {
+    case 1:
+    case 6:
+        gam.setObjPos(oid, (const float *)a1);
+        break;
+    case 2:
+        gam.setObjRot(oid, (float *)a1);
+        break;
+    case 3:
+        gam.setObjScale(oid, seqWordFloat(a1));
+        break;
+    case 5:
+        gam.setObjDir(oid, *(const float *)a1);
+        break;
+    case 10:
+        gam.setObjParam(oid, (int)a1, (const void *)a2);
+        break;
+    case 11:
+        gam.addObjParam(oid, (int)a1, (const void *)a2);
+        break;
+    case 12:
+        gam.setObj(oid, (u_int)a1);
+        break;
+    case 13:
+        gam.resetObj(oid, (u_int)a1);
+        break;
+    case 15:
+        gam.m_sysData.setField(id, (int)a1, (const void *)a2);
+        break;
+    case 16:
+        if ((int)a1 == 0)
+            gam.m_sysData.setFlags(id, (u_int)a2);
+        else
+            gam.m_sysData.setFlags2(id, (u_short)a1, (u_int)a2);
+        break;
+    case 17:
+        if ((int)a1 == 0)
+            gam.m_sysData.clearFlags(id, (u_int)a2);
+        else
+            gam.m_sysData.clearFlags2(id, (u_short)a1, (u_int)a2);
+        break;
+    case 18:
+        gam.setObjAttr(oid, (u_int)a1);
+        break;
+    case 19:
+        gam.clearObjAttr(oid, (u_int)a1);
+        break;
+    case 20:
+        gam.placeObjAt(oid, (int)a1);
+        break;
+    case 25:
+        gam.setKindFlags((u_short)a1, (u_int)a2, 1);
+        break;
+    case 26:
+        gam.setKindFlags((u_short)a1, (u_int)a2, 0);
+        break;
+    case 30:
+        gam.setObjWork(oid, (int)a1, (int)a2);
+        break;
+    case 31:
+        gam.addObjWork(oid, (int)a1, (int)a2);
+        break;
+    case 40:
+        if ((int)a1 != 0)
+            gam.setObj(oid, 1);
+        else
+            gam.resetObj(oid, 1);
+        break;
+    case 41:
+        gam.setActorBindMode(oid, (int)a1);
+        break;
+    case 42:
+        g_magSystem.m_scene.m_actors[gam.getActorNo(oid)].setFlag100Bits((int)a1);
+        break;
+    case 50:    // the shape word
+        gam.getObjParam(oid, 0x18, &colli);
+        colli.m_shape = (int)a1;
+        gam.setObjParam(oid, 0x18, &colli);
+        break;
+    case 51:    // the shape word, shape 4 with its radius
+        gam.getObjParam(oid, 0x18, &colli);
+        colli.m_shape = (int)a1;
+        if ((int)a1 == 4)
+            colli.m_radius = seqWordFloat(a2);
+        gam.setObjParam(oid, 0x18, &colli);
+        break;
+    case 52:    // a whole shape; kind 1 is refitted to the corners
+    {
+        GamObjColli *shape = (GamObjColli *)a1;
+        gam.setObjParam(oid, 0x18, shape);
+        if (shape->m_kind == 1)
+            gam.fitObjBounds(oid);
+        break;
+    }
+    case 53:    // a box {x, y, z, sx, sy, sz, rot, -}: the shape a1 (4, the
+                // mean size), the corners of the rotated x / z rectangle,
+                // the position
+    {
+        GamObjColli *shape = (GamObjColli *)a1;
+        float        box[8];
+        float        quad[8];
+
+        memcpy(box, (const void *)a2, sizeof(box));
+        shape->m_shape = 4;
+        shape->m_radius = (box[3] + box[4] + box[5]) / 3.0f;
+        gam.setObjParam(oid, 0x18, shape);
+
+        float c = cosf(box[6]);
+        float s = sinf(box[6]);
+        float hx = box[3] * 0.5f;
+        float hz = box[5] * 0.5f;
+        quad[0] = c * -hx + s * -hz + box[0];
+        quad[1] = s * hx + c * -hz + box[2];
+        quad[2] = c * hx + s * -hz + box[0];
+        quad[3] = -s * hx + c * -hz + box[2];
+        quad[4] = c * hx + s * hz + box[0];
+        quad[5] = -s * hx + c * hz + box[2];
+        quad[6] = c * -hx + s * hz + box[0];
+        quad[7] = s * hx + c * hz + box[2];
+        gam.setObjParam(oid, 0x1003, quad);
+        gam.setObjPos(oid, box);
+        gam.queueObjUpdate(0, oid);
+        break;
+    }
+    case 54:
+        *(float *)a1 = gam.getObjRadius(oid, NULL);
+        break;
+    case 55:
+        gam.addObjColliSegment(oid, (const float *)a1);
+        break;
+    case 56:
+        gam.addObjColliBox(oid, (const float *)a1);
+        break;
+    case 57:
+        gam.addObjColliQuad(oid, (const float *)a1);
+        break;
+    default:    // 0, 4, 7..9, 14, 21..24, 27..29, 32..39, 43..49
+        break;
+    }
+    return 0;
+}
+
 // The table (data 0x2d90f8).
 const SeqFunc g_seqFuncTable[SEQ_FUNC_COUNT] = {
     /*   0 */ seqFunc000, seqFunc001, seqFunc002, seqFunc003,
@@ -1092,13 +1264,6 @@ intptr_t seqFunc100(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 intptr_t seqFunc106(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
     ROSEPAN_STUB("seqFunc106", 0x002098e0);
-    return {};
-}
-
-// stub of ROR 0x00209d4c
-intptr_t seqFunc151(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc151", 0x00209d4c);
     return {};
 }
 
