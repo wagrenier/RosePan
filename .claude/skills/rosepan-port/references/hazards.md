@@ -124,6 +124,11 @@ entries are marked **RoR** with the date.
   double (`dptofp` reads). `va_arg(ap, double)` for those, `int` for words, `void *` for pointers.
 - **Switch tables on bytes decompile into goto soup**: get the ROM's answer for every input with
   `mipsemu.py --grid`, compile the C rewrite with MinGW in a scratch harness and diff all pairs.
+- **"Could not recover jumptable ... Too many branches"** (TskFrameFunc::TskFrameFunc 0x1f184c, a
+  0xe98-byte switch): the decompile shows only the dispatch. run_script_inline (a JumpTable override)
+  is disabled in GhidraMCP. Read the table words from the ELF (data 0x2fe420), then `ghidra.py asm`
+  the whole body to a scratch file and read each case; big cases are mostly soft-double angle wraps
+  (fptodp / dpcmp / dpadd / dpsub / dptofp around +-pi constants) that collapse to chrWrapPi.
 - **VU0 macro code** decompiles into `extraout_vfN` noise: reconstruct from the asm. `vaddz.x` adds only
   z (an x/z distance, not 3D); `vsqrt` is sqrt(|x|); vf0 = (0,0,0,1) and constant registers are set once
   at start-up -- decode the raw word before trusting a reading (MioPan skill "VU0 macro-mode idioms").

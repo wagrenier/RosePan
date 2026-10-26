@@ -1427,6 +1427,18 @@ TskSeqEvent, TskSysFunc, TskFrameFunc / TskGenFrameFunc.
   0x1f5558, DogActor vtable slot 18 getNodeWorldPos) and 1.25 radii ahead (GamMan::getObjRadius), and
   starts a TskAvoidMove (0x1ef184, not written) on ACHRstat::m_taskId (+0x3e8) when the actor stands
   in something. PMF at +0xcc.
+- **TskFrameFunc** (kind 0x11, EE 0x80; the script's / GamMan's multi-frame jobs, written
+  2026-10-26): constructor switch on kind (jump table data 0x2fe420, 23 entries) copies the job's
+  words to +0x20.. and a PMF from 0x2fe2c0.. into +8; exec just calls it. Kinds: 2..5 keyhole fades
+  (setFade kind 1 / 2, mode 2 in / 6 out), 6 system message 0xd / 0xe, 7 a door opening (PC motion
+  pc_ / jnfc_door{r,o,l,t}_open__{x,y} by the side the PC stands on -- |wrap(angle - pi - doorRotY)|
+  < 0.1 picks r (o for obj kind 0x1201) else l (t) --, camera at MagScene +0x2ab70 set out along the
+  door's heading, PC placed 50 in front, GamMan +0x22050 = the door point), 8 a MnuTextList choice
+  into script global 0x2d, 9 enterMenuPause, 10 PC rot 0, 11 a system call 0x34 pair's thread then
+  requestStage(2), 12 fog lerp, 14 game over (DEATH_J.PSS film, reset, stage 99), 15 / 16 S2dBg
+  picture 0 in / out (inlined s2dBg* requests on +0x93c), 0x11 / 0x16 clear GamMan m_flags2 bits,
+  0x12 nothing, 0x13 an item found (windows 0x11 / 0x13, item menu when 12 are held), 0x15 the PC
+  state-class 5..7 message (windows 0xb / 0x16). Kinds 0, 1, 13, 20 set no step.
 - Frame request list: data 0x2d8f68 (count) / 0x2d8f70 (32 oids), filled by 0x1f68bc (an object
   pushed aside, table entry 0x2e50f4), cleared each frame by gamClearFrameReq (only 8 words).
 

@@ -1119,7 +1119,7 @@
    "why": "SysTimer (ctor 0x203d94, dtor 0x203da8, init / start / stop / read / update / hold), sysInit/TermManagers, the host0 reboot 0x2041a0 and the static initializer pair 0x2041f8 / 0x20439c / 0x2043bc that constructs the global managers: the globals file before main.cpp (no source string; file name a guess)"
   },
   "task/tsk_chr.cpp": {
-   "notes": "Next in this TU: TskFrameFunc 0x1f184c (frontier x9, step table 0x2fe420, 0xe98 bytes), TskMovePointPath 0x1ec344, chrRotStart / chrRotTo with TskChrRot 0x1f0434, TskMoveTypeGen 0x1e9a3c / TskMoveTypeRound 0x1eb63c, TskAvoidMove 0x1ef184 (hand stub in lib/unassigned_stubs.cpp; steps 0x1ef498 / 0x1ef888 / 0x1ef9cc / 0x1efab0, helpers 0x1efab8 / 0x1efeb8 / 0x1f0288). TskMsgMan is the subtitle window of the opening film (frames ~2950 and ~3090 of a 200 s New Game run): to see it, msg/msgman.cpp (MsgMan 0x18330c..) and MsgManSet 0x18741c..0x18761c (unassigned@00184f2c) must be written; not on the path to the first room, so the priorities list keeps tsk_scene / dogmodel first. chrSetMotion reads the running motion task as a TskMtnMove (m_rotY at +0x6c) even if it is a TskMtnMove2 (+0x6c is m_step there): faithful to the ROM. TskMtnMove2::stepMoveHit adds the unturned move to the position before the hit test (ROM quirk, kept). hidden.py still lists 0x1eec44, 0x1efaa8, 0x1efab0, 0x1f3d90, 0x1f4910, 0x1f59ac, 0x1f6570: mkfunc them with their class.",
+   "notes": "TskFrameFunc is complete but nothing on screen shows it yet (no kind seen in the 200 s New Game run; kind 0x15 comes from GamMan::enterMenuPause / system call 0x14, kind 7 from native 18 door opens, 0xb from native 29 room changes): the first session whose screenshot shows a door opening, a keyhole fade or a fog change confirms it. Arg conventions: kind 8 reads intptr_t words (pointer items), all other word kinds read int/float words (seqcall case 0x12 changed to int). Kind 15 copies the texture name into 0x20 bytes (the ROM allows 0x100, overflowing its own words). Kind 7 for obj kind 0x1201 computes and throws away an o/t choice; left out. The ROM passes an extra float (rotY) in f13 to chrMtnMove2 from kinds 7 and 0x15; the existing chrMtnMove2 has no such parameter. Next in this TU: TskMovePointPath 0x1ec344, chrRotStart / chrRotTo / chrRotToIn with TskChrRot 0x1f0434, TskMoveTypeGen 0x1e9a3c (exec 0x1e9cb4, 0x938 bytes) / TskMoveTypeRound 0x1eb63c, TskSysFunc 0x1f4184, TskAttach 0x1f5244, TskAvoidMove 0x1ef184 (hand stub), TskGenFrameFunc 0x1f4088. hidden.py still lists 0x1eec44, 0x1efaa8, 0x1efab0, 0x1f4910, 0x1f59ac, 0x1f6570 (0x1f3d90 was made this session).",
    "ranges": [
     [
      "001e7f28",
@@ -1136,6 +1136,11 @@
      "date": "2026-10-26 17:38",
      "status": "partial",
      "summary": "Wrote TskMsgMan (ctor, exec end rules by mode, pause, term, dtor): the film's narration subtitles now open their window (Once upon a time, ...), but nothing draws while MsgMan / MsgManSet are stubs. Wrote TskMtnMove2 (ctor, exec, pause, term, stepMove, stepMoveHit, stepNone) with chrMtnMove2, chrSetMotion and chrGetNodeWorldPos (0x1f5558); TskAvoidMove::TskAvoidMove is a hand stub. New Game run: the opening film still plays to its March 1930 card."
+    },
+    {
+     "date": "2026-10-26 18:06",
+     "status": "partial",
+     "summary": "Wrote TskFrameFunc whole: the constructor switch over all 23 kinds (read from the asm: Ghidra cannot recover the 0xe98-byte jump table), exec, term, and its 18 step functions (keyhole fades, system messages, the door opening with camera and PC placement, the MnuTextList choice, stage-change thread, fog lerp, game over with the DEATH_J.PSS film, S2dBg picture in/out, item found, PC state message, flag clears). Wrote ahead MnuTextList ctor/dtor/clear and utlStrNCopy (0x21838c); MnuTextList::processPad returns int. seqcall case 0x12 now passes int words. New Game run unchanged: the opening film plays to its March 1930 card."
     }
    ],
    "status": "partial",

@@ -191,7 +191,7 @@ static const MnuTitleMoviePage mnuTitleMoviePage[8] = {
 // ──────────────────────────────────────────────────────────────────────
 // The members' constructors, the cursor counts; everything else starts
 // zeroed (the object lives in the global scene).
-// ROR 0x001a90ec; callcheck: MnuMcd, MnuOpt, MnuSvld, MnuTextList, SprMan (member constructors: SprMan's is implicit, the others are not written and their objects start zeroed)
+// ROR 0x001a90ec; callcheck: MnuMcd, MnuOpt, MnuSvld, MnuTextList, SprMan (member constructors: SprMan's is implicit, MnuTextList's written ahead, the others are not written and their objects start zeroed)
 
 MnuTitle::MnuTitle()
 {
