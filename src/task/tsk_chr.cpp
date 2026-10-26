@@ -12,7 +12,10 @@
  *  TskMsgMan (the message window task), TskChrRot and chrRotStart / chrRotTo /
  *  chrRotToIn / chrRotFrames (turns), TskFrameFunc (the multi-frame
  *  jobs: fades, the door opening, game over, fog, items), the frame
- *  request list.
+ *  request list, TskAvoidMove (pushes out of a hit), TskMovePhysic (a
+ *  thrown fchr), TskGenFrameFunc, TskMoveAdj / TskRotAdj and
+ *  chrMoveInFrames (no callers), chrCreateItemObj, chrIsNear /
+ *  chrIsNearNode.
  * ======================================================================== */
 #include "task/tsk_chr.h"
 
@@ -32,6 +35,7 @@
 #include "snd/rxmpeg.h"
 #include "snd/sndman.h"
 #include "spr/s2d.h"
+#include "utl/utlbtl.h"
 
 /* The angle limits the ROM compares in double (data 0x2fd958..). */
 #define CHR_PI     3.141592653589793
@@ -46,6 +50,12 @@ static inline float chrWrapPi(float r)
     if ((double)r > CHR_PI)
         r = (float)((double)r - CHR_TWO_PI);
     return r;
+}
+
+/* r + pi/4, added in double (the avoid task's turn round in eighths). */
+static inline float chrAddEighth(float r)
+{
+    return (float)((double)r + CHR_PI / 4);
 }
 
 /* chrWrapPi, then 0 when still outside -pi..pi. */
@@ -2103,6 +2113,101 @@ int TskMoveSecta::exec(int id, int time, int arg)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x001ee2fc (folded into the body of 0x1edd90 by Ghidra)
+
+TskMoveAdj::TskMoveAdj(float a, int actor, const float *base, int count, const float *pos,
+                       int b)
+{
+    m_actor = actor;
+    m_count = count;
+    m_ref = base + 4;
+    m_a = a;
+    m_b = b;
+    memcpy(m_pos, pos, sizeof(m_pos));
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// count frames above pos (the height shrinking with the count), then at
+// pos; either way the actor's matrix is marked for its transform.
+// ROR 0x001ee36c
+
+int TskMoveAdj::exec(int, int, int)
+{
+    DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+    int       count = m_count;
+
+    if (count < 0)
+    {
+        // The ROM also adds m_pos to a stack vector it never reads.
+        actor.m_trans[0] = m_pos[0];
+        actor.m_trans[1] = m_pos[1];
+        actor.m_trans[2] = m_pos[2];
+        actor.m_dirty = 1;
+    }
+    else
+    {
+        sceVu0FVECTOR v;
+        m_len = actor.m_1d8;
+        v[0] = 0.0f;
+        v[1] = m_ref[2] * ((float)count / (float)m_len) - 7.5f;
+        v[2] = 0.0f;
+        v[3] = 0.0f;    // PORT: unset in the ROM (w is not stored)
+        sceVu0AddVector(v, v, m_pos);
+        actor.m_dirty = 1;
+        actor.m_trans[0] = v[0];
+        actor.m_trans[1] = v[1];
+        actor.m_trans[2] = v[2];
+        m_count--;
+    }
+    return count < 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The actor's rotation; frames < 1 turns it now by angle (unwrapped, the
+// sum wrapped), else angle / frames a frame.
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrWrapPi)
+// ROR 0x001ee4a8
+
+TskRotAdj::TskRotAdj(float angle, int actor, int frames)
+{
+    DogActor &a = g_magSystem.m_scene.m_actors[actor];
+
+    m_actor = actor;
+    m_angle = chrWrapPi(angle);
+    m_rot[0] = a.m_rotate[0];
+    m_rot[1] = a.m_rotate[1];
+    m_rot[2] = a.m_rotate[2];
+    m_rot[3] = 0.0f;    // PORT: unset in the ROM
+    if (frames < 1)
+    {
+        m_rot[1] = chrWrapPi(m_rot[1] + angle);
+        g_magSystem.setActorRotate(m_actor, m_rot);
+        m_step = 0.0f;
+        m_frames = 0;
+        m_count = 0;
+    }
+    else
+    {
+        m_frames = frames;
+        m_count = frames;
+        m_step = angle / (float)frames;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrWrapPi)
+// ROR 0x001ee6ec
+
+int TskRotAdj::exec(int, int, int)
+{
+    if (m_count-- < 0)
+        return 1;
+    m_rot[1] = chrWrapPi(m_rot[1] + m_step);
+    g_magSystem.setActorRotate(m_actor, m_rot);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // A motion-driven move of dist toward dir: the motion task (started once,
 // into *task), then the frames from the motion's root move over 50 x its
 // length at rate (x 25; 0 when the motion does not move).
@@ -2127,6 +2232,553 @@ int chrMoveFrames(float dir, float dist, float rate, u_int oid, int no, CmnITask
     else
         t = dist / speed * len;
     return (int)(t * 25.0f);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The motion at 1/60 on the actor, its root move across 50 x its length,
+// and a chrMtnMove (unless *task runs) at the rate that covers dist in
+// frames frames.
+// callcheck: sqrtf (the NaN fallback of sqrt.S)
+// ROR 0x001ee954
+
+void chrMoveInFrames(float dir, float dist, u_int oid, int no, CmnITask **task, int motion,
+                     int frames)
+{
+    MagScene &scene = g_magSystem.m_scene;
+    float rot[4] = {dir, 0.0f, 0.0f, 0.0f};    // PORT: the ROM stores only rot[0]
+    float move[4] = {0.0f, 0.0f, 0.0f, 0.0f};  // PORT: read even if the actor has no motion
+    float rate = 0.0f;
+
+    no &= 0xffff;
+    float len = scene.getActorMotionLength(no, motion);
+    scene.changeActorMotion(0x1.11112ep-6f /* 0x3c888897 */, no, motion, 0, 0x100);
+    g_magSystem.getActorMotionMove(no, 0.0f, len * 50.0f, move, rot, NULL);
+    float d = sqrtf(move[0] * move[0] + move[2] * move[2]);
+    if (d > 0.0f && frames != 0)
+        rate = chrRateForFrames(dist / d, frames);
+    if (*task == NULL)
+        *task = chrMtnMove(rate, CHR_ROT_KEEP, oid, motion, -1, 0x100, NULL);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// An fchr's throw: its actor's position and heading.
+// ROR 0x001eeaec
+
+TskMovePhysic::TskMovePhysic(u_int oid)
+{
+    m_oid = oid;
+    m_58 = 0;
+    // PORT: the ROM counts on from the heap's words (m_count, m_flags,
+    // m_speed) and, for anything but an fchr, reads an unset actor and
+    // sets no step (exec then calls garbage); those end at once here.
+    m_count = 0;
+    m_flags = 0;
+    m_speed = 0.0f;
+    m_fchr = NULL;
+    m_stepFunc = NULL;
+    if (gamOidList(oid) != 2)
+        return;
+
+    m_fchr = g_gamMan.getFchr(oid);
+    m_stepFunc = &TskMovePhysic::stepThrow;
+    m_actor = m_fchr->m_actor;
+
+    DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+    m_pos[0] = actor.m_trans[0];
+    m_pos[1] = actor.m_trans[1];
+    m_pos[2] = actor.m_trans[2];
+    m_rot[0] = actor.m_rotate[0];
+    m_rot[1] = actor.m_rotate[1];
+    m_rot[2] = actor.m_rotate[2];
+    m_dir[1] = 1.0f;
+    m_dir[0] = sinf(m_rot[1]);
+    m_dir[2] = cosf(m_rot[1]);
+    m_flags |= 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// One frame of the throw: up by the height curve, along at the speed
+// curve; a wall stops it there and turns it back at a quarter (to a stop
+// when the bounce meets a wall too). The PC (or the dog) within 100 gets
+// the character request once. Ends below its cell's floor.
+// ROR 0x001eec4c
+
+int TskMovePhysic::stepThrow()
+{
+    MagScene      &scene = g_magSystem.m_scene;
+    MagSceneRayHit hit;
+    sceVu0FVECTOR  move;
+    sceVu0FVECTOR  to;
+    sceVu0FVECTOR  from;
+    sceVu0FVECTOR  dir;
+
+    memset(&hit, 0, sizeof(hit));   // PORT: the ROM sets only the five vectors
+    for (int i = 0; i < 5; i++)
+        hit.m_vec[i][3] = 1.0f;
+
+    m_count++;
+    g_gamMan.getObjPos(m_oid, m_pos);
+    float t = (float)m_count / 30.0f;
+    float up;
+    float along;
+    if (0.5f < t)
+        up = chrThrowHeight(t) - chrThrowHeight(t - 0.5f);
+    else
+        up = chrThrowHeight(t);
+    if (0.5f < t)
+        along = chrThrowSpeed(t) - chrThrowSpeed(t - 0.5f);
+    else
+        along = chrThrowSpeed(t);
+    if (along < 16.0f)
+        along = m_speed;
+    move[0] = m_dir[0] * along;
+    m_speed = along;
+    move[1] = m_dir[1] * -up;
+    move[2] = m_dir[2] * along;
+    move[3] = 0.0f;     // PORT: unset in the ROM
+    sceVu0AddVector(to, m_pos, move);
+    memcpy(from, to, sizeof(from));
+    memcpy(dir, move, sizeof(dir));
+    float r = scene.castRay(&hit, from, dir, 0);
+    if (r < 0.0f || 1.0f < r)
+    {
+        memcpy(m_pos, to, sizeof(m_pos));
+    }
+    else
+    {
+        move[0] *= r;
+        move[2] *= r;
+        sceVu0AddVector(to, m_pos, move);
+        memcpy(m_pos, to, sizeof(m_pos));
+        move[1] = m_dir[1] * -up;
+        m_dir[0] = -(m_dir[0] * 0.25f);
+        m_dir[2] = -(m_dir[2] * 0.25f);
+        move[0] = m_dir[0] * along;
+        move[2] = m_dir[2] * along;
+        sceVu0AddVector(to, to, move);
+        memcpy(from, to, sizeof(from));
+        memcpy(dir, move, sizeof(dir));
+        r = scene.castRay(&hit, from, dir, 0);
+        if (0.0f <= r && r <= 1.0f)
+        {
+            m_dir[2] = 0.0f;
+            m_dir[0] = 0.0f;
+        }
+    }
+    m_fchr->setPos(m_pos);
+
+    if ((m_flags & 1) != 0)
+    {
+        int   chr = 0;
+        u_int pc = g_gamMan.m_pcPtr != NULL ? g_gamMan.m_pcPtr->m_oid : 0;
+        if (chrIsNear(100.0f, m_oid, pc) != 0)
+        {
+            chr = 4;
+        }
+        else
+        {
+            u_int dog = g_gamMan.m_dogPtr != NULL ? g_gamMan.m_dogPtr->m_oid : 0;
+            if (chrIsNear(100.0f, m_oid, dog) != 0)
+                chr = 3;
+        }
+        if (chr != 0)
+        {
+            scnChrRequest(chr, m_oid, 0, 0, 0x15, 0, 0);
+            m_flags &= ~1u;
+        }
+    }
+
+    GamSecta *cell = g_gamMan.pickSectaCell(m_pos, 0);
+    return cell != NULL && cell->m_pos[1] < m_pos[1];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001ef0d8
+
+float chrThrowHeight(float t)
+{
+    return t * 16.0f - t * 0x1.d66664p+4f /* 0x41eb3332 */ * t;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001ef100
+
+float chrThrowSpeed(float t)
+{
+    return 24.0f - t * 16.0f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001ef11c
+
+int TskMovePhysic::exec(int, int, int)
+{
+    if (m_stepFunc == NULL)     // PORT: see the constructor
+        return 1;
+    return (this->*m_stepFunc)();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The achr's start position (its Bip01 Spine1 node), then the push by
+// what was hit (or toward to); the PC, the 0x3000 states and objects
+// flagged 0x4000 are not pushed.
+// ROR 0x001ef184
+
+TskAvoidMove::TskAvoidMove(u_int oid, const void *hit, int frames, int limit, const float *to,
+                           int byHit)
+{
+    const ChrHitRec *rec = (const ChrHitRec *)hit;
+
+    m_time = frames;
+    m_limit = limit;
+    m_oid = oid;
+    m_58 = 0;
+    m_tries = 0;
+    m_achr = NULL;  // PORT: unset in the ROM for objects other than achrs
+    if (oid == (g_gamMan.m_pcPtr != NULL ? g_gamMan.m_pcPtr->m_oid : 0))
+    {
+        m_stepFunc = &TskAvoidMove::stepNone;
+        return;
+    }
+    if (gamOidList(oid) == 1)
+    {
+        m_achr = g_gamMan.getAchr(oid);
+        m_actor = m_achr->m_actor;
+    }
+    if ((g_gamMan.m_flags2 & 0x3000) != 0)
+    {
+        m_stepFunc = &TskAvoidMove::stepNone;
+        return;
+    }
+    if (chrGetNodeWorldPos(m_oid, m_pos, "Bip01 Spine1") == 0)
+        m_achr->getPos(m_pos);
+    if (rec == NULL)
+    {
+        // PORT: with no point either the ROM sets no step (exec then
+        // calls garbage); the task ends at once here.
+        m_stepFunc = &TskAvoidMove::stepNone;
+        if (to != NULL)
+        {
+            m_stepFunc = &TskAvoidMove::stepToward;
+            aimToward(m_oid, m_pos, to, m_time);
+        }
+    }
+    else
+    {
+        u_int target = rec->m_oid;
+        if (byHit != 0 && gamOidType(target) - 1 < 2)
+        {
+            m_stepFunc = &TskAvoidMove::stepNone;
+            return;
+        }
+        if (gamOidList(target) == 1 && g_gamMan.testObjFlags(target, 0x4000) != 0)
+        {
+            m_stepFunc = &TskAvoidMove::stepNone;
+            return;
+        }
+        if (byHit == 0)
+        {
+            m_stepFunc = &TskAvoidMove::stepAway;
+            aimAway(target, m_pos, m_time);
+        }
+        else
+        {
+            m_stepFunc = &TskAvoidMove::stepAwayHit;
+            aimAwayHit(target, m_pos, m_time);
+        }
+    }
+    if (m_achr != NULL)     // PORT: see m_achr above
+        m_achr->m_flags |= 0x4000;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001ef448
+
+void TskAvoidMove::term()
+{
+    if (g_gamMan.isObj(m_oid) != 0 && m_achr != NULL)
+        m_achr->m_flags &= ~0x4000u;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Pushed along m_vel while a cell lies m_ahead; else the look-ahead
+// turns round in eighths (then at the achr's radius) to find one -- none
+// ends the task. Ends once past m_frames with nothing hit, or after
+// m_limit frames.
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrAddEighth and chrWrapPi)
+// ROR 0x001ef498
+
+int TskAvoidMove::stepAway()
+{
+    sceVu0FVECTOR next;
+    sceVu0FVECTOR ahead;
+    ChrHitRec     hit;
+
+    hit.m_oid = 0;
+    m_achr->getPos(m_pos);
+    sceVu0AddVector(next, m_pos, m_vel);
+    sceVu0AddVector(ahead, m_pos, m_ahead);
+    if (m_achr->hasSectaAt(ahead) == 0)
+    {
+        float d = chrAddEighth(m_dir);
+        int   i;
+        for (i = 0; i < 16; i++)
+        {
+            if (m_achr->hasSectaAt(ahead) != 0)
+                break;
+            m_ahead[1] = 0.0f;
+            m_ahead[0] = sinf(d) * m_speed * 1.25f;
+            m_ahead[2] = cosf(d) * m_speed * 1.25f;
+            sceVu0AddVector(ahead, m_pos, m_ahead);
+            d = chrWrapPi(chrAddEighth(d));
+        }
+        if (i >= 16)
+        {
+            m_speed = g_gamMan.getObjRadius(m_oid, NULL);
+            for (i = 0; i < 16; i++)
+            {
+                if (m_achr->hasSectaAt(ahead) != 0)
+                    break;
+                m_ahead[1] = 0.0f;
+                m_ahead[0] = sinf(d) * m_speed * 1.25f;
+                m_ahead[2] = cosf(d) * m_speed * 1.25f;
+                sceVu0AddVector(ahead, m_pos, m_ahead);
+                d = chrWrapPi(chrAddEighth(d));
+            }
+            m_count = m_frames + 1;
+        }
+        m_vel[1] = 0.0f;
+        m_vel[0] = sinf(d) * m_speed;
+        m_vel[2] = cosf(d) * m_speed;
+        if (i > 15)
+            return 1;
+        m_dir = d;
+    }
+    else
+    {
+        m_achr->setPos(next);
+        int n = m_count++;
+        if (m_frames < n && g_gamMan.testHitAt(next, m_oid, 0, 0, &hit) == 0)
+            return 1;
+    }
+    return m_limit < m_tries++;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Pushed along m_vel while the step from the Bip01 Spine1 node still hits
+// something; ends when it does not (past m_frames), or after m_limit
+// frames.
+// ROR 0x001ef888
+
+int TskAvoidMove::stepAwayHit()
+{
+    sceVu0FVECTOR at;
+    sceVu0FVECTOR to;
+    ChrHitRec     hit;
+
+    hit.m_oid = 0;
+    m_achr->getPos(m_pos);
+    if (chrGetNodeWorldPos(m_oid, at, "Bip01 Spine1") == 0)
+        memcpy(at, m_pos, sizeof(at));
+    sceVu0AddVector(to, at, m_vel);
+    if (g_gamMan.testHitAt(to, m_oid, 0, 0, &hit) == 0)
+        return 1;
+    sceVu0AddVector(to, m_pos, m_vel);
+    m_achr->setPos(to);
+    m_still = 0;
+    int n = m_count++;
+    if (m_frames < n && g_gamMan.testHitAt(to, m_oid, 0, 0, &hit) == 0)
+        return 1;
+    return m_limit < m_tries++;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Toward the point while cells lie ahead (ends after 9 such frames);
+// each m_limit frames the step grows by a quarter.
+// ROR 0x001ef9cc
+
+int TskAvoidMove::stepToward()
+{
+    sceVu0FVECTOR to;
+
+    m_achr->getPos(m_pos);
+    sceVu0AddVector(to, m_pos, m_vel);
+    if (m_achr->hasSectaAt(to) == 0)
+    {
+        m_still = 0;
+    }
+    else
+    {
+        m_achr->setPos(to);
+        if (8 < m_still++)
+            return 1;
+    }
+    if (m_limit < m_tries++)
+    {
+        m_vel[2] *= 1.25f;
+        m_vel[0] *= 1.25f;
+        m_tries = 0;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001efab0
+
+int TskAvoidMove::stepNone()
+{
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Away from target (its Bip01 Spine1 node) at half its distance over
+// frames: the heading turns round in eighths until a cell lies the
+// distance away (then one at the achr's radius). The ROM keeps m_dir at
+// the first heading and starts the push one eighth past the cell found.
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrAddEighth and chrWrapPi)
+// ROR 0x001efab8
+
+void TskAvoidMove::aimAway(u_int target, const float *pos, int frames)
+{
+    sceVu0FVECTOR at;
+    float         dist;
+
+    m_target = target;
+    g_gamMan.getObjRadius(target, NULL);    // not read
+    g_gamMan.getObjRadius(m_oid, NULL);
+    if (chrGetNodeWorldPos(target, at, "Bip01 Spine1") == 0)
+        g_gamMan.getObjPos(target, at);
+    float dir = utlDirDist(pos[0] - at[0], pos[2] - at[2], &dist);
+    m_dir = dir;
+    m_speed = dist / (float)frames * 0.5f;
+    at[0] = pos[0] + sinf(dir) * dist;
+    at[1] = pos[1];
+    at[2] = pos[2] + cosf(dir) * dist;
+    if (m_achr->hasSectaAt(at) == 0)
+    {
+        float d = chrAddEighth(dir);
+        int   i;
+        for (i = 0; i < 16; i++)
+        {
+            if (m_achr->hasSectaAt(at) != 0)
+                break;
+            at[0] = pos[0] + sinf(d) * dist;
+            at[1] = pos[1];
+            at[2] = pos[2] + cosf(d) * dist;
+            d = chrWrapPi(chrAddEighth(d));
+        }
+        if (i >= 16)
+        {
+            m_speed = g_gamMan.getObjRadius(m_oid, NULL);
+            for (i = 0; i < 16 && m_achr->hasSectaAt(at) == 0; i++)
+            {
+                at[0] = pos[0] + sinf(d) * m_speed;
+                at[1] = pos[1];
+                at[2] = pos[2] + cosf(d) * m_speed;
+                d = chrWrapPi(chrAddEighth(d));
+            }
+        }
+        dir = d;
+    }
+    m_vel[1] = 0.0f;
+    m_vel[0] = sinf(dir) * m_speed;
+    m_vel[2] = cosf(dir) * m_speed;
+    m_frames = frames;
+    m_ahead[1] = 0.0f;
+    m_count = 0;
+    m_ahead[0] = m_vel[0] * 1.25f;
+    m_ahead[2] = m_vel[2] * 1.25f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Away from target by its whole distance over frames, first probing a
+// cell at target's radius; the same eighth turns as aimAway (the second
+// round at target's radius, which then is the length).
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrAddEighth and chrWrapPi)
+// ROR 0x001efeb8
+
+void TskAvoidMove::aimAwayHit(u_int target, const float *pos, int frames)
+{
+    sceVu0FVECTOR at;
+    float         dist;
+
+    m_target = target;
+    g_gamMan.getObjRadius(target, NULL);    // not read
+    g_gamMan.getObjRadius(m_oid, NULL);
+    if (chrGetNodeWorldPos(target, at, "Bip01 Spine1") == 0)
+        g_gamMan.getObjPos(target, at);
+    float dir = utlDirDist(pos[0] - at[0], pos[2] - at[2], &dist);
+    float radius = g_gamMan.getObjRadius(target, NULL);
+    float len = dist;
+    at[0] = pos[0] + sinf(dir) * radius;
+    at[1] = pos[1];
+    at[2] = pos[2] + cosf(dir) * radius;
+    if (m_achr->hasSectaAt(at) == 0)
+    {
+        float d = chrAddEighth(dir);
+        int   i;
+        for (i = 0; i < 16; i++)
+        {
+            if (m_achr->hasSectaAt(at) != 0)
+                break;
+            at[0] = pos[0] + sinf(d) * dist;
+            at[1] = pos[1];
+            at[2] = pos[2] + cosf(d) * dist;
+            d = chrWrapPi(chrAddEighth(d));
+        }
+        if (i >= 16)
+        {
+            len = radius;
+            for (i = 0; i < 16 && m_achr->hasSectaAt(at) == 0; i++)
+            {
+                at[0] = pos[0] + sinf(d) * radius;
+                at[1] = pos[1];
+                at[2] = pos[2] + cosf(d) * radius;
+                d = chrWrapPi(chrAddEighth(d));
+            }
+        }
+        dir = d;
+    }
+    m_dir = dir;
+    m_speed = len / (float)frames;
+    m_vel[1] = 0.0f;
+    m_vel[0] = sinf(dir) * m_speed;
+    m_vel[2] = cosf(dir) * m_speed;
+    m_frames = frames;
+    m_count = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Toward to at 1.5 x its distance / frames a frame, at most 1/30. oid is
+// not read.
+// ROR 0x001f0288
+
+void TskAvoidMove::aimToward(u_int, const float *pos, const float *to, int frames)
+{
+    float dist;
+
+    m_still = 0;
+    float dir = utlDirDist(to[0] - pos[0], to[2] - pos[2], &dist);
+    float speed = 0x1.11111p-5f; /* 0x3d088888 */
+    float want = dist * 1.5f / (float)frames;
+    if (want <= speed)
+        speed = want;
+    m_vel[1] = 0.0f;
+    m_vel[0] = sinf(dir) * speed;
+    m_count = 0;
+    m_frames = frames;
+    m_vel[2] = cosf(dir) * speed;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Ends when the object is gone.
+// ROR 0x001f0398
+
+int TskAvoidMove::exec(int, int, int)
+{
+    if (g_gamMan.isObj(m_oid) == 0)
+        return 1;
+    return (this->*m_stepFunc)();
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -2282,6 +2934,26 @@ int TskChrRot::stepMotion()
     m_rot[0] = 0.0f;
     m_rot[2] = 0.0f;
     g_gamMan.setObjRot(m_oid, m_rot);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f0e14
+
+int TskChrRot::isTurned()
+{
+    const float near = 0x1.999998p-4f; /* 0x3dcccccc */
+    float d = m_dogActor->getRotY() - m_angle;
+
+    if (d < 0.0f)
+    {
+        if (d < -near)
+            return 0;
+    }
+    else if (near < d)
+    {
+        return 0;
+    }
     return 1;
 }
 
@@ -3332,6 +4004,39 @@ int TskFrameFunc::stepGetItem()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Kind 1 plays the sound effect value; a3 is not read.
+// ROR 0x001f4088
+
+TskGenFrameFunc::TskGenFrameFunc(int kind, int value, int)
+{
+    m_value = value;
+    // PORT: other kinds set no step in the ROM (exec then calls garbage);
+    // they end at once here.
+    m_stepFunc = NULL;
+    if (kind == 1)
+        m_stepFunc = &TskGenFrameFunc::stepPlaySe;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f40f4
+
+int TskGenFrameFunc::exec(int, int, int)
+{
+    if (m_stepFunc == NULL)     // PORT: see the constructor
+        return 1;
+    return (this->*m_stepFunc)();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f415c
+
+int TskGenFrameFunc::stepPlaySe()
+{
+    g_sndMan.playSe(m_value);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Kinds 0..1: map arg's caption, 30 frames in, 27 held, 15 out.
 // ROR 0x001f4184
 
@@ -3707,6 +4412,43 @@ int TskMsgMan::exec(int id, int time, int arg)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The window closed and opened again from the kept window words, text
+// shown without the "#C" prefix (m_textPtr is text itself, and the
+// message goes to window 0).
+// ROR 0x001f50b8
+
+void TskMsgMan::setText(const char *text, int word, int, int fill)
+{
+    MagScene &scene = g_magSystem.m_scene;
+
+    strncpy(m_text, text, sizeof(m_text));
+    m_textPtr = (char *)text;
+    m_word = word;
+    m_msg.close();
+    scene.setWindowShow(m_window, 1);
+    scene.updateWindowFont(m_window);
+    scene.closeWindow(m_window);
+    m_param[2] = 0x8001;
+    m_window = scene.openWindow(m_param[3], m_param[4], m_param[6], -1);
+    g_magSystem.setViewParam(m_window, m_param[0], m_param[1], m_param[2], m_param[3],
+                             m_param[4]);
+    scene.setWindowWords84(m_window, 0, 0, m_param[3], m_param[4]);
+    if (fill == 0)
+    {
+        scene.setWindowFillMsb(m_window, 0);
+        scene.setWindowFill(m_window, 1);
+    }
+    else
+    {
+        scene.setWindowFillMsb(m_window, 1);
+        scene.setWindowFill(m_window, 0);
+    }
+    scene.updateWindowFont(m_window);
+    m_msg.open();
+    m_msg.setMessage(0, m_textPtr, m_param[5]);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001f5244
 
 TskAttach::TskAttach(u_int oid, const int *value, const char *name)
@@ -3730,6 +4472,63 @@ int TskAttach::exec(int, int, int)
     g_magSystem.getActorNodeMatrixByName(m_actor, &m, m_name);
     g_magSystem.m_scene.setLightParam(2, m_light, 0, m.m[3], 0);
     return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A sphere of range around oid against target's (its radius). oid's
+// rotation is read and not used.
+// ROR 0x001f5350
+
+int chrIsNear(float range, u_int oid, u_int target)
+{
+    sceVu0FVECTOR to;
+    sceVu0FVECTOR from;
+    sceVu0FVECTOR rot;
+    UtlHitCheck   check;
+
+    g_gamMan.getObjPos(target, to);
+    g_gamMan.getObjRot(oid, rot);
+    g_gamMan.getObjPos(oid, from);
+    to[3] = g_gamMan.getObjRadius(target, NULL);
+    check.m_dir = NULL;
+    check.m_origin_pos = from;
+    check.m_len = range;
+    check.m_target_pos = to;
+    from[3] = range;
+    check.m_10 = 0.0f;  // PORT: the ROM leaves this word to the stack
+    return utlHitCheck(&check) != 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A sphere of range around node name of oid's actor against target's
+// position at radius 50.
+// ROR 0x001f5410 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (the inlined getNodeIndexByName: its assert handler and lookup)
+
+int chrIsNearNode(float range, u_int oid, u_int target, const char *name)
+{
+    sceVu0FVECTOR at;
+    sceVu0FVECTOR to;
+    UtlHitCheck   check;
+    int           no = g_gamMan.getActorNo(oid);
+
+    if (no < 0)     // PORT: the ROM indexes the actor before the scene's first
+        return 0;
+    DogActor &actor = g_magSystem.m_scene.m_actors[no];
+    int node = actor.getNodeIndexByName(name);
+    at[0] = 0.0f;
+    at[1] = 0.0f;
+    at[2] = 0.0f;
+    at[3] = 1.0f;
+    actor.getNodeWorldPos(at, node);
+    g_gamMan.getObjPos(target, to);
+    check.m_10 = 0.0f;
+    check.m_len = 0.0f;
+    to[3] = 50.0f;
+    check.m_dir = NULL;
+    at[3] = range;
+    check.m_origin_pos = at;
+    check.m_target_pos = to;
+    return utlHitCheck(&check) != 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -3985,6 +4784,38 @@ void chrSetMotion(float speed, int no, int motion, int p1d8, u_int flags, u_int 
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Item id's object: its model (field 0xf) by name (field 0xb) in group 5,
+// or a model-less object (oid 0 returned) when it has none.
+// ROR 0x001f6578
+
+u_int chrCreateItemObj(short id, const float *pos, const float *rot)
+{
+    GamMan     &gam = g_gamMan;
+    u_short     rec[8] = {0xffff};  // PORT: see seqModelOf
+    const char *name[2] = {NULL, NULL};
+    int         kind = (u_short)id;
+    u_int       oid;
+
+    gam.m_sysData.getField(kind, 0xf, rec);
+    gam.m_sysData.getField(kind, 0xb, name);
+    gam.getChrRpk(rec[0] >> 10);    // not read
+    if (rec[0] == 0xffff)
+    {
+        oid = 0;
+        gam.addChr(-1, 0, kind, NULL, 0);
+    }
+    else
+    {
+        oid = gam.createObjByName(rec[0], name[0], 5, 0, 0xffff, NULL, -1);
+    }
+    if (pos != NULL)
+        gam.setObjPos(oid, pos);
+    if (rot != NULL)
+        gam.setObjRot(oid, (float *)rot);
+    return oid;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001f6878
 
 int chrIsOidType2(u_int oid)
@@ -4013,4 +4844,15 @@ int chrRotFrames(float angle, float speed)
     if ((float)frames < 0.0f)
         frames = -frames;
     return frames;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f6c14
+
+float chrRateForFrames(float ratio, int frames)
+{
+    float rate = 0.0f;
+    if (frames != 0)
+        rate = ratio / (float)frames / 0x1.c725c2p-6f; /* 0x3ce392e1 */
+    return rate;
 }

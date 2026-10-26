@@ -1119,7 +1119,7 @@
    "why": "SysTimer (ctor 0x203d94, dtor 0x203da8, init / start / stop / read / update / hold), sysInit/TermManagers, the host0 reboot 0x2041a0 and the static initializer pair 0x2041f8 / 0x20439c / 0x2043bc that constructs the global managers: the globals file before main.cpp (no source string; file name a guess)"
   },
   "task/tsk_chr.cpp": {
-   "notes": "TskMoveSecta and TskMoveSectaFindPath are complete but unseen: they need GamMan::getObjSectaNo 0x1d7b08 and GamMan::findSectaPath 0x1d81f0 (stubs in lib/unassigned_stubs.cpp, unassigned@001d3b44; findSectaPath wraps 0x17d298) and a script that walks an achr. Trap: the brief listed FUN_001edd90 as TskMoveAdj ctor, rtti shows it is TskMoveSecta::exec; TskMoveAdj ctor is still to find (its vtable 0x2e4990, rtti.py --class TskMoveAdj). ROM quirks kept or patched are in open-items Open questions (stepTurn sticks once set; m_target and m_flags never written). Next in this TU: TskMoveAdj (vtable 0x2e4990, dtor 0x1ee330, slot 0x1ee364), TskRotAdj 0x1ee4a8 (dtor 0x1ee6b0), TskMovePhysic 0x1eeaec (dtor 0x1eec08, 0x1eec3c), TskAvoidMove 0x1ef184 (hand stub; also 0x1ef0d8, 0x1efab8, 0x1efeb8, 0x1f0288), TskGenFrameFunc 0x1f4088.., chrCreateItemObj 0x1f6578 (stub in lib/unassigned_stubs.cpp).",
+   "notes": "Left in this TU: 0x1f5680 (called from unassigned@00164fc0), 0x1f603c (from 00143d3c and 00164fc0), 0x1f627c (from 00143d3c), 0x1f6694, 0x1f67a0 -- the chr* helpers between chrGetNodeWorldPos and chrIsOidType2; once written the TU is complete except the inline dtors / terms the brief lists as todo (they are written in tsk_chr.h). New frontier stubs: utlHitCheck 0x10456c (utl/utlbtl.cpp, sphere / sweep test; struct UtlHitCheck in utl/utlbtl.h, m_10 picks the second test) and scnChrRequest 0x1fac60 (unassigned@001f82e4, jump table 0x2fed40). DogActor gained m_1d8 (read only by TskMoveAdj). ChrHitRec in tsk_chr.h is the testHitAt record (+0x10 the object hit); TskAvoidMove ctor arguments are (oid, hit, frames, limit, to, byHit): GamMan passes 8, 30, NULL, 0. ROM garbage choices are in open-items Open questions. For the references: architecture.md -- TskAvoidMove vtable 0x2e4b50 kind 0, TskMovePhysic 0x2e4b10 kind 0, TskGenFrameFunc 0x2e4d10, TskMoveAdj 0x2e4990 kind 0xd and TskRotAdj 0x2e4950 kind 0xe have no callers.",
    "ranges": [
     [
      "001e7f28",
@@ -1166,6 +1166,11 @@
      "date": "2026-10-26 19:09",
      "status": "partial",
      "summary": "Wrote TskMoveSectaFindPath whole (ctor 0x1ec940, exec 0x1ed100, term, aim 0x1ed1d0 with its inline setOff, stepTurn 0x1ecbe0, stepSlideHit 0x1ecdd4, stepSlide 0x1ecebc, stepMotion 0x1ecf3c; kind 0xb) and TskMoveSecta whole (ctor 0x1ed998, exec 0x1edd90, term 0x1edd3c; kind 0xc): native 211 cases 30 / 40..51 walk an achr over secta cells. Added GamSectaPath and GamSecta m_pos (+0x10), declared GamMan::getObjSectaNo 0x1d7b08 and findSectaPath 0x1d81f0 (now stubs), fixed seqcall's TskMoveSecta argument order (count a3, list or oid t0, intptr_t). Deleted two ctor stubs, named 13 functions (batch tskchr_010). 15 s smoke run unchanged: the boot disclaimer; no script reaches these tasks yet."
+    },
+    {
+     "date": "2026-10-26 19:27",
+     "status": "partial",
+     "summary": "Wrote TskAvoidMove whole (ctor 0x1ef184 replacing the hand stub, term, exec, aimAway / aimAwayHit / aimToward, stepAway / stepAwayHit / stepToward / stepNone: an achr pushed out of a testHitAt hit or toward a point), TskMovePhysic whole (a thrown fchr: height and speed curves chrThrowHeight / chrThrowSpeed, castRay bounce, PC or dog request 0x1fac60), TskGenFrameFunc (kind 1 plays a sound effect), the uncalled TskMoveAdj / TskRotAdj / chrMoveInFrames / chrRateForFrames / TskChrRot::isTurned / TskMsgMan::setText, chrCreateItemObj (stub deleted) and the range tests chrIsNear / chrIsNearNode over the new utl/utlbtl.h UtlHitCheck. Named 37 functions (batch tskchr_011), created two in Ghidra. 15 s smoke run unchanged: the boot disclaimer; none of these tasks is reached yet."
     }
    ],
    "status": "partial",

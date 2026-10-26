@@ -145,12 +145,6 @@ void debugNop(void)
 
 // ---- bridges (hand-written) ----
 
-// stub of ROR 0x001ef184 (a constructor: stubgen leaves it to hand)
-TskAvoidMove::TskAvoidMove(u_int, const void *, int, int, int, int)
-{
-    ROSEPAN_STUB("TskAvoidMove::TskAvoidMove", 0x001ef184);
-}
-
 // stub of ROR 0x001f8fc0 (a constructor: stubgen leaves it to hand)
 TskSnd::TskSnd(int kind, const TskSndParam *param)
 {
@@ -854,13 +848,6 @@ void Obj176a3c::release(int no)
     ROSEPAN_STUB("Obj176a3c::release", 0x0017756c);
 }
 
-// stub of ROR 0x001f6578
-u_int chrCreateItemObj(short id, const float *pos, const float *rot)
-{
-    ROSEPAN_STUB("chrCreateItemObj", 0x001f6578);
-    return {};
-}
-
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
 
 // stub of ROR 0x00192d60
@@ -1562,4 +1549,10 @@ int GamMan::getObjSectaNo(u_int oid, int list)
 {
     ROSEPAN_STUB("GamMan::getObjSectaNo", 0x001d7b08);
     return {};
+}
+
+// stub of ROR 0x001fac60
+void scnChrRequest(int chr, u_int oid, int a2, int a3, int word, u_int chrOid, int a6)
+{
+    ROSEPAN_STUB("scnChrRequest", 0x001fac60);
 }

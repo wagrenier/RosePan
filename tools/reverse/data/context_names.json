@@ -251,6 +251,12 @@
   "was": "FUN_0010421c",
   "why": "stores the seed 0xc45330af into bss 0x308484, the state 0x1041c4 steps (x * 0x769 + 0x7cf9) and 0x1041e4 scales; MagSystem's constructor calls it"
  },
+ "0010456c": {
+  "name": "utlHitCheck",
+  "tag": "ror-inferred",
+  "was": "FUN_0010456c",
+  "why": "asserts theHitCheck, theHitCheck->m_origin_pos, ->m_target_pos in utl/utlbtl.cpp; sphere or sweep test by its words"
+ },
  "00104e1c": {
   "name": "utlTm2GetSize",
   "tag": "ror-inferred",
@@ -9623,17 +9629,173 @@
   "was": "FUN_001edd90",
   "why": "TskMoveSecta vtable slot 4 (rtti; not TskMoveAdj): status word +0xc, per mode starts the next TskMoveSectaFindPath / TskMoveTypeGen on m_task[3] or ends with chrMtnMove motion 1"
  },
+ "001ee2fc": {
+  "name": "TskMoveAdj::TskMoveAdj",
+  "tag": "ror-inferred",
+  "was": "TskMoveAdj::TskMoveAdj",
+  "why": "stores TskMoveAdj vtable 0x2e4990, actor a1 +0x20, a2+0x10 +0x28, count a3 +0x30, f12 +0x24, t1 +0x34, vector t0 to +0x10; folded after TskMoveSecta::exec, no callers"
+ },
+ "001ee330": {
+  "name": "TskMoveAdj::~TskMoveAdj",
+  "tag": "ror-inferred",
+  "was": "FUN_001ee330",
+  "why": "TskMoveAdj vtable slot 6: stores vtable 0x2e4990, operator_delete on bit 0"
+ },
+ "001ee364": {
+  "name": "TskMoveAdj::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001ee364",
+  "why": "TskMoveAdj vtable slot 5: empty"
+ },
+ "001ee36c": {
+  "name": "TskMoveAdj::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001ee36c",
+  "why": "TskMoveAdj vtable slot 4: scene actor +0x20 trans = +0x10 vector plus a height falling with the count +0x30, then the vector; ends at count < 0"
+ },
+ "001ee4a8": {
+  "name": "TskRotAdj::TskRotAdj",
+  "tag": "ror-inferred",
+  "was": "FUN_001ee4a8",
+  "why": "stores TskRotAdj vtable 0x2e4950; actor rotate copy, angle / frames step or setActorRotate at once"
+ },
+ "001ee6b0": {
+  "name": "TskRotAdj::~TskRotAdj",
+  "tag": "ror-inferred",
+  "was": "FUN_001ee6b0",
+  "why": "TskRotAdj vtable slot 6: stores vtable 0x2e4950, operator_delete on bit 0"
+ },
+ "001ee6e4": {
+  "name": "TskRotAdj::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001ee6e4",
+  "why": "TskRotAdj vtable slot 5: empty"
+ },
+ "001ee6ec": {
+  "name": "TskRotAdj::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001ee6ec",
+  "why": "TskRotAdj vtable slot 4: rot y += step (wrapped -pi..pi), MagSystem::setActorRotate, count down"
+ },
  "001ee7f0": {
   "name": "chrMoveFrames",
   "tag": "ror-inferred",
   "was": "FUN_001ee7f0",
   "why": "starts chrMtnMove into *a2 once, returns frames from the motion length and getActorMotionMove root move for the distance; 7 movement-task callers"
  },
+ "001ee954": {
+  "name": "chrMoveInFrames",
+  "tag": "ror-inferred",
+  "was": "FUN_001ee954",
+  "why": "chrMoveFrames' twin: changeActorMotion at 1/60, getActorMotionMove over 50 x length, rate 0x1f6c14(dist / move, frames) into chrMtnMove when *task NULL; no callers"
+ },
+ "001eeaec": {
+  "name": "TskMovePhysic::TskMovePhysic",
+  "tag": "ror-inferred",
+  "was": "FUN_001eeaec",
+  "why": "stores TskMovePhysic vtable 0x2e4b10; fchr (getFchr) actor trans / rotate, (sin, 1, cos) of heading, step 0x1eec4c, flag 1"
+ },
+ "001eec08": {
+  "name": "TskMovePhysic::~TskMovePhysic",
+  "tag": "ror-inferred",
+  "was": "FUN_001eec08",
+  "why": "TskMovePhysic vtable slot 6: stores vtable 0x2e4b10, operator_delete on bit 0"
+ },
+ "001eec3c": {
+  "name": "TskMovePhysic::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001eec3c",
+  "why": "TskMovePhysic vtable slot 5: empty"
+ },
+ "001eec4c": {
+  "name": "TskMovePhysic::stepThrow",
+  "tag": "ror-inferred",
+  "was": "FUN_001eec4c",
+  "why": "TskMovePhysic step: height 0x1ef0d8 / speed 0x1ef100 curves of frames/30, MagScene::castRay bounce at a quarter, FCHRstat::setPos, chrIsNear 100 of PC / dog -> 0x1fac60, ends below pickSectaCell floor"
+ },
+ "001ef0d8": {
+  "name": "chrThrowHeight",
+  "tag": "ror-inferred",
+  "was": "FUN_001ef0d8",
+  "why": "t*16 - t*29.4*t, TskMovePhysic::stepThrow's vertical curve"
+ },
+ "001ef100": {
+  "name": "chrThrowSpeed",
+  "tag": "ror-inferred",
+  "was": "FUN_001ef100",
+  "why": "24 - 16t, TskMovePhysic::stepThrow's horizontal curve"
+ },
+ "001ef11c": {
+  "name": "TskMovePhysic::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001ef11c",
+  "why": "TskMovePhysic vtable slot 4: calls the member pointer at +0x70"
+ },
  "001ef184": {
   "name": "TskAvoidMove::TskAvoidMove",
   "tag": "ror-inferred",
   "was": "FUN_001ef184",
   "why": "stores vtable 0x2e4b50 (TskAvoidMove), picks its step by the hit record and mode; TskMtnMove2::stepMoveHit starts it on the achr's task +0x3e8"
+ },
+ "001ef414": {
+  "name": "TskAvoidMove::~TskAvoidMove",
+  "tag": "ror-inferred",
+  "was": "FUN_001ef414",
+  "why": "TskAvoidMove vtable slot 6: stores vtable 0x2e4b50, operator_delete on bit 0"
+ },
+ "001ef448": {
+  "name": "TskAvoidMove::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001ef448",
+  "why": "TskAvoidMove vtable slot 5: clears achr flag 0x4000 the ctor set, when the object lives"
+ },
+ "001ef498": {
+  "name": "TskAvoidMove::stepAway",
+  "tag": "ror-inferred",
+  "was": "FUN_001ef498",
+  "why": "TskAvoidMove step (hit, byHit 0): setPos along +0x30 while hasSectaAt the +0x40 look-ahead, else turns the heading in pi/4 steps; ends past frames when testHitAt finds nothing"
+ },
+ "001ef888": {
+  "name": "TskAvoidMove::stepAwayHit",
+  "tag": "ror-inferred",
+  "was": "FUN_001ef888",
+  "why": "TskAvoidMove step (hit, byHit set): setPos along +0x30 while testHitAt from the Bip01 Spine1 node still hits"
+ },
+ "001ef9cc": {
+  "name": "TskAvoidMove::stepToward",
+  "tag": "ror-inferred",
+  "was": "FUN_001ef9cc",
+  "why": "TskAvoidMove step (no hit, a point): setPos along +0x30 on cells, ends after 9; x1.25 every limit frames stuck"
+ },
+ "001efab0": {
+  "name": "TskAvoidMove::stepNone",
+  "tag": "ror-inferred",
+  "was": "TskAvoidMove::stepNone",
+  "why": "returns 1; the ctor's step for the PC, flag 0x3000 states and refused targets"
+ },
+ "001efab8": {
+  "name": "TskAvoidMove::aimAway",
+  "tag": "ror-inferred",
+  "was": "FUN_001efab8",
+  "why": "ctor set-up for stepAway: utlDirDist from the hit object, half the distance / frames, pi/4 search for a cell, look-ahead x1.25"
+ },
+ "001efeb8": {
+  "name": "TskAvoidMove::aimAwayHit",
+  "tag": "ror-inferred",
+  "was": "FUN_001efeb8",
+  "why": "ctor set-up for stepAwayHit: utlDirDist from the hit object, distance / frames, cell probe at its radius with the pi/4 search"
+ },
+ "001f0288": {
+  "name": "TskAvoidMove::aimToward",
+  "tag": "ror-inferred",
+  "was": "FUN_001f0288",
+  "why": "ctor set-up for stepToward: utlDirDist to the point, min(1.5 dist / frames, 1/30)"
+ },
+ "001f0398": {
+  "name": "TskAvoidMove::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f0398",
+  "why": "TskAvoidMove vtable slot 4: ends when GamMan::isObj fails, else the member pointer at +0x7c"
  },
  "001f0434": {
   "name": "TskChrRot::TskChrRot",
@@ -9670,6 +9832,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f0b50",
   "why": "the ctor's member pointer with a turn motion: ends when DogActor::getRotY is within 0.1 of the target, kills m_task[2]"
+ },
+ "001f0e14": {
+  "name": "TskChrRot::isTurned",
+  "tag": "ror-inferred",
+  "was": "FUN_001f0e14",
+  "why": "DogActor::getRotY of +0x50 minus +0x30 within 0.1; TskChrRot fields, no callers"
  },
  "001f0e90": {
   "name": "chrRotStart",
@@ -9851,6 +10019,30 @@
   "was": "FUN_001f3d98",
   "why": "kind 0x13 step: SE 0x11, system window 0x11 / 0x13 (item menu), GamMan::addItem"
  },
+ "001f4088": {
+  "name": "TskGenFrameFunc::TskGenFrameFunc",
+  "tag": "ror-inferred",
+  "was": "FUN_001f4088",
+  "why": "stores TskGenFrameFunc vtable 0x2e4d10, value +0x10, kind 1 -> step 0x1f415c"
+ },
+ "001f40c0": {
+  "name": "TskGenFrameFunc::~TskGenFrameFunc",
+  "tag": "ror-inferred",
+  "was": "FUN_001f40c0",
+  "why": "TskGenFrameFunc vtable slot 6: stores vtable 0x2e4d10, operator_delete on bit 0"
+ },
+ "001f40f4": {
+  "name": "TskGenFrameFunc::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f40f4",
+  "why": "TskGenFrameFunc vtable slot 4: calls the member pointer at +0x8"
+ },
+ "001f415c": {
+  "name": "TskGenFrameFunc::stepPlaySe",
+  "tag": "ror-inferred",
+  "was": "FUN_001f415c",
+  "why": "SndMan::playSe(+0x10), returns 1"
+ },
  "001f4184": {
   "name": "TskSysFunc::TskSysFunc",
   "tag": "ror-inferred",
@@ -9965,6 +10157,12 @@
   "was": "FUN_001f4f5c",
   "why": "vtable 0x2e4c10 slot 4: by mode +0x204 waits for time, the text end and CROSS (m_trig bit 14); MsgManSet::update each frame, the window's MsgMan released at the end"
  },
+ "001f50b8": {
+  "name": "TskMsgMan::setText",
+  "tag": "ror-inferred",
+  "was": "FUN_001f50b8",
+  "why": "TskMsgMan fields: strncpy into +4, MsgManSet close, closeWindow / openWindow from the kept words +0x99c, setMessage; no callers"
+ },
  "001f5244": {
   "name": "TskAttach::TskAttach",
   "tag": "ror-inferred",
@@ -9988,6 +10186,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001f52e4",
   "why": "TskAttach vtable slot 4: setLightParam(2, light, 0, node matrix translation)"
+ },
+ "001f5350": {
+  "name": "chrIsNear",
+  "tag": "ror-inferred",
+  "was": "FUN_001f5350",
+  "why": "getObjPos of both, getObjRadius of the target, utl/utlbtl.cpp hit check 0x10456c with range as the origin radius"
+ },
+ "001f5410": {
+  "name": "chrIsNearNode",
+  "tag": "ror-inferred",
+  "was": "FUN_001f5410",
+  "why": "node by name of oid's actor (dog/dogmodel.h asserts), getNodeWorldPos, utl hit check 0x10456c against the target at radius 50"
  },
  "001f5558": {
   "name": "chrGetNodeWorldPos",
@@ -10061,6 +10271,12 @@
   "was": "FUN_001f6b8c",
   "why": "|(int)(angle / (speed * 0.05233))|: frames to turn angle at speed units of about 3 degrees per frame"
  },
+ "001f6c14": {
+  "name": "chrRateForFrames",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6c14",
+  "why": "(a / frames) / 0.02778, 0 for frames 0; chrMoveInFrames' rate"
+ },
  "001f83f4": {
   "name": "scenePlayStart",
   "tag": "ror-inferred",
@@ -10090,6 +10306,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f9658",
   "why": "returns the task's words +0x84 / +0x88 through two pointers; pushSnd reads a running fade's current volume through it"
+ },
+ "001fac60": {
+  "name": "scnChrRequest",
+  "tag": "ror-inferred",
+  "was": "FUN_001fac60",
+  "why": "jump table 0x2fed40 over chr 0..10, chr 11 from object t1's kind (4 / 3 / system field 0x72); many callers, TskMovePhysic passes 4 / 3 with 0x15"
  },
  "001fbbd0": {
   "name": "gamStage2Loaded",

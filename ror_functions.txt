@@ -157,7 +157,7 @@
 // FILE -- utl/utlbtl.cpp
 // *****************************************************************************
 
-/* 0010456c 00000148 */ FUN_0010456c(){}
+/* 0010456c 00000148 */ utlHitCheck(){}  // ror
 /* 001046b4 000002bc */ FUN_001046b4(){}
 
 // *****************************************************************************
@@ -4112,40 +4112,42 @@
 /* 001ed998 00000370 */ TskMoveSecta::TskMoveSecta(){}  // ror
 /* 001edd08 00000034 */ TskMoveSecta::~TskMoveSecta(){}  // ror
 /* 001edd3c 00000054 */ TskMoveSecta::term(){}  // ror
-/* 001edd90 000005a0 */ TskMoveSecta::exec(){}  // ror
-/* 001ee330 00000034 */ FUN_001ee330(){}
-/* 001ee364 00000004 */ FUN_001ee364(){}
-/* 001ee36c 0000013c */ FUN_001ee36c(){}
-/* 001ee4a8 00000208 */ FUN_001ee4a8(){}
-/* 001ee6b0 00000034 */ FUN_001ee6b0(){}
-/* 001ee6e4 00000004 */ FUN_001ee6e4(){}
-/* 001ee6ec 00000104 */ FUN_001ee6ec(){}
+/* 001edd90 0000056c */ TskMoveSecta::exec(){}  // ror
+/* 001ee2fc 00000034 */ TskMoveAdj::TskMoveAdj(){}  // ror
+/* 001ee330 00000034 */ TskMoveAdj::~TskMoveAdj(){}  // ror
+/* 001ee364 00000004 */ TskMoveAdj::term(){}  // ror
+/* 001ee36c 0000013c */ TskMoveAdj::exec(){}  // ror
+/* 001ee4a8 00000208 */ TskRotAdj::TskRotAdj(){}  // ror
+/* 001ee6b0 00000034 */ TskRotAdj::~TskRotAdj(){}  // ror
+/* 001ee6e4 00000004 */ TskRotAdj::term(){}  // ror
+/* 001ee6ec 00000104 */ TskRotAdj::exec(){}  // ror
 /* 001ee7f0 00000164 */ chrMoveFrames(){}  // ror
-/* 001ee954 00000198 */ FUN_001ee954(){}
-/* 001eeaec 0000011c */ FUN_001eeaec(){}
-/* 001eec08 00000034 */ FUN_001eec08(){}
-/* 001eec3c 00000010 */ FUN_001eec3c(){}
-/* 001eec4c 0000048c */ FUN_001eec4c(){}
-/* 001ef0d8 00000028 */ FUN_001ef0d8(){}
-/* 001ef100 0000001c */ FUN_001ef100(){}
-/* 001ef11c 00000068 */ FUN_001ef11c(){}
+/* 001ee954 00000198 */ chrMoveInFrames(){}  // ror
+/* 001eeaec 0000011c */ TskMovePhysic::TskMovePhysic(){}  // ror
+/* 001eec08 00000034 */ TskMovePhysic::~TskMovePhysic(){}  // ror
+/* 001eec3c 00000010 */ TskMovePhysic::term(){}  // ror
+/* 001eec4c 0000048c */ TskMovePhysic::stepThrow(){}  // ror
+/* 001ef0d8 00000028 */ chrThrowHeight(){}  // ror
+/* 001ef100 0000001c */ chrThrowSpeed(){}  // ror
+/* 001ef11c 00000068 */ TskMovePhysic::exec(){}  // ror
 /* 001ef184 00000290 */ TskAvoidMove::TskAvoidMove(){}  // ror
-/* 001ef414 00000034 */ FUN_001ef414(){}
-/* 001ef448 00000050 */ FUN_001ef448(){}
-/* 001ef498 000003f0 */ FUN_001ef498(){}
-/* 001ef888 00000144 */ FUN_001ef888(){}
-/* 001ef9cc 000000ec */ FUN_001ef9cc(){}
-/* 001efab8 00000400 */ FUN_001efab8(){}
-/* 001efeb8 000003d0 */ FUN_001efeb8(){}
-/* 001f0288 00000110 */ FUN_001f0288(){}
-/* 001f0398 0000009c */ FUN_001f0398(){}
+/* 001ef414 00000034 */ TskAvoidMove::~TskAvoidMove(){}  // ror
+/* 001ef448 00000050 */ TskAvoidMove::term(){}  // ror
+/* 001ef498 000003f0 */ TskAvoidMove::stepAway(){}  // ror
+/* 001ef888 00000144 */ TskAvoidMove::stepAwayHit(){}  // ror
+/* 001ef9cc 000000e4 */ TskAvoidMove::stepToward(){}  // ror
+/* 001efab0 00000008 */ TskAvoidMove::stepNone(){}  // ror
+/* 001efab8 00000400 */ TskAvoidMove::aimAway(){}  // ror
+/* 001efeb8 000003d0 */ TskAvoidMove::aimAwayHit(){}  // ror
+/* 001f0288 00000110 */ TskAvoidMove::aimToward(){}  // ror
+/* 001f0398 0000009c */ TskAvoidMove::exec(){}  // ror
 /* 001f0434 00000434 */ TskChrRot::TskChrRot(){}  // ror
 /* 001f0868 00000034 */ TskChrRot::~TskChrRot(){}  // ror
 /* 001f089c 00000004 */ TskChrRot::term(){}  // ror
 /* 001f08a4 00000068 */ TskChrRot::exec(){}  // ror
 /* 001f090c 00000244 */ TskChrRot::stepFrames(){}  // ror
 /* 001f0b50 000002c4 */ TskChrRot::stepMotion(){}  // ror
-/* 001f0e14 0000007c */ FUN_001f0e14(){}
+/* 001f0e14 0000007c */ TskChrRot::isTurned(){}  // ror
 /* 001f0e90 0000010c */ chrRotStart(){}  // ror
 /* 001f0f9c 00000108 */ chrRotTo(){}  // ror
 /* 001f10a4 000000fc */ chrRotToIn(){}  // ror
@@ -4176,10 +4178,10 @@
 /* 001f3c44 0000014c */ TskFrameFunc::stepFog(){}  // ror
 /* 001f3d90 00000008 */ TskFrameFunc::stepNone(){}  // ror
 /* 001f3d98 000002f0 */ TskFrameFunc::stepGetItem(){}  // ror
-/* 001f4088 00000034 */ FUN_001f4088(){}
-/* 001f40c0 00000034 */ FUN_001f40c0(){}
-/* 001f40f4 00000068 */ FUN_001f40f4(){}
-/* 001f415c 00000028 */ FUN_001f415c(){}
+/* 001f4088 00000034 */ TskGenFrameFunc::TskGenFrameFunc(){}  // ror
+/* 001f40c0 00000034 */ TskGenFrameFunc::~TskGenFrameFunc(){}  // ror
+/* 001f40f4 00000068 */ TskGenFrameFunc::exec(){}  // ror
+/* 001f415c 00000028 */ TskGenFrameFunc::stepPlaySe(){}  // ror
 /* 001f4184 00000064 */ TskSysFunc::TskSysFunc(){}  // ror
 /* 001f41ec 00000034 */ TskSysFunc::~TskSysFunc(){}  // ror
 /* 001f4220 00000038 */ TskSysFunc::term(){}  // ror
@@ -4199,13 +4201,13 @@
 /* 001f4d14 00000070 */ TskMsgMan::term(){}  // ror
 /* 001f4d84 000001d8 */ TskMsgMan::pause(){}  // ror
 /* 001f4f5c 0000015c */ TskMsgMan::exec(){}  // ror
-/* 001f50b8 0000018c */ FUN_001f50b8(){}
+/* 001f50b8 0000018c */ TskMsgMan::setText(){}  // ror
 /* 001f5244 00000064 */ TskAttach::TskAttach(){}  // ror
 /* 001f52a8 00000034 */ TskAttach::~TskAttach(){}  // ror
 /* 001f52dc 00000004 */ TskAttach::term(){}  // ror
 /* 001f52e4 0000006c */ TskAttach::exec(){}  // ror
-/* 001f5350 000000c0 */ FUN_001f5350(){}
-/* 001f5410 00000148 */ FUN_001f5410(){}
+/* 001f5350 000000c0 */ chrIsNear(){}  // ror
+/* 001f5410 00000148 */ chrIsNearNode(){}  // ror
 /* 001f5558 00000128 */ chrGetNodeWorldPos(){}  // ror
 /* 001f5680 00000330 */ FUN_001f5680(){}
 /* 001f59b4 00000228 */ chrMtnMove(){}  // ror
@@ -4224,7 +4226,7 @@
 /* 001f68bc 0000026c */ FUN_001f68bc(){}
 /* 001f6b28 00000064 */ utlAddPolar(){}  // ror
 /* 001f6b8c 00000084 */ chrRotFrames(){}  // ror
-/* 001f6c14 00000050 */ FUN_001f6c14(){}
+/* 001f6c14 00000050 */ chrRateForFrames(){}  // ror
 
 // *****************************************************************************
 // FILE -- (unassigned)
@@ -4310,7 +4312,7 @@
 /* 001faa70 00000160 */ FUN_001faa70(){}
 /* 001fabd0 00000028 */ FUN_001fabd0(){}
 /* 001fabf8 00000068 */ FUN_001fabf8(){}
-/* 001fac60 000001b4 */ FUN_001fac60(){}
+/* 001fac60 000001b4 */ scnChrRequest(){}  // ror
 /* 001fae14 00000270 */ FUN_001fae14(){}
 /* 001fb084 00000550 */ FUN_001fb084(){}
 /* 001fb5d4 00000050 */ FUN_001fb5d4(){}
