@@ -1,5 +1,7 @@
 {
  "queue": [
+  "mag/magloader.cpp",
+  "unassigned@001d859c",
   "unassigned@0020ff34",
   "game/gamman.cpp",
   "unassigned@001fd424",
@@ -128,7 +130,7 @@
    "why": "FileReader / FileReadReq methods, fileGetSize / fileExists, the rxFileCd clock wrappers and two clock helpers that follow them; bounded by the language-select menu code (mnusllg.rpk, SprMan calls) below and GamFont::GamFont above. No source string: game/ by link order (GamFont, then GamMan), gamfile after RoR's gam* names -- a guess"
   },
   "game/gamman.cpp": {
-   "notes": "Screen still black: nothing in this slice draws, and boot stage 99 hits loadStageSnd's default (no packs, as in the ROM). The boot's blockers are the natives seqFunc027 / 021 / 033 / 110 / 001 / 002 / 032: sequence/seqcall.cpp is now queued first. Next gamman slice: resetStage 0x1cdbf0, clearPool20b00 0x1cbd0c, initStage2 0x1c47c4 / startStage2 0x1cd60c / releaseObjs 0x1cdf5c, ctlObj1cb8e4, getStatus 0x1c6ccc, setPcStartPos 0x1c3d38, storePcTransform 0x1cd404, onSubSeqEnd 0x1c43f0. Decisions: GamItemSlot is layout host (m_rec is a pointer to the GamSysData record; a raw save of the slots needs a converter, open-items); m_1f24c is m_vfchrSlot int[0x180] and initGameState clears only its first 0x180 bytes as the ROM does; the avfchr list holds FCHRstat pointers; releaseTenkyus ignores its kind (the ROM reads only this) and skips the empty debug print rorDebugPrintf 0x218470; deleting achr / fchr objects is plain delete (vtable slot 1 with 3 in the ROM). New stubs in other files: GamSysData::getRec / setFlags / testFlags, ACHRstat::getParam / setParam, FCHRstat::getParam, ObjStat::releaseActor, GamSndMan::stopObjSe / releaseObjSe, EmyManager::releaseObj, Obj176a3c::release, GamArea::hasId, GamMan::lookupFlagTable, chrCreateItemObj.",
+   "notes": "Visual test: the boot still shows the logos, disclaimer and title menu (15 s check ends on the disclaimer). A New Game run (pad 1800:START,2400:START,2700:CROSS, build.py --run 140) shows the title menu matching the reference, then the script creates the PC object through createObjByModel and the game crashes in MagScene::loadModel: MagCharaLoader::getIndex / load are stubs and load returns NULL (asserts p, thePtr, m_top, then an access violation). Queued first: mag/magloader.cpp (pinned 0x141e44..0x14313c), then unassigned@001d859c (ObjStat / ACHRstat / FCHRstat init, setPos, getPos, setRot and GamSysData set / getRec / getField 0x1dbef8..; all are stubs, so objects have no system data yet). Decisions: ObjStat::ObjStat 0x1d87f4 written ahead in lib/unassigned_stubs.cpp and, as a PORT, starts m_flags 0, m_link -1, m_move[0..1] 2 and pos / rot 0 because init is a stub; ACHRstat / FCHRstat constructors are inline header constructors (the ROM inlines them in addChr); vfchr objects are placement-new FCHRstat in m_1f248 with a static_assert that FCHRstat fits 0x2c0; addVFchr returns when the storage is full (the ROM goes on with NULL); getObjRotY reads a vfchr actor where the ROM reads address 0x108; createObjByModel skips the tiny scale for actor -1. seqcall's u_short model buffers start at 0xffff (PORT) because GamSysData::getField is a stub: without it the real createObjByModel got garbage model ids and asserted at boot. TskSeqEvent and TskMsgMan constructors are hand stubs. Still to write in gamman: loadMapUnit 0x1ca0dc with 0x1c9e20 and 0x1ca38c, loadChapterSe 0x1c2848, 0x1c4610, and the stage-2 start (initStage2, startStage2, resetStage, releaseObjs, clearPool20b00, setPcStartPos, storePcTransform, onSubSeqEnd). References updated: architecture.md Game objects, hazards.md (stub out-buffers, batch numbering), open-items.md 10h.",
    "ranges": [
     [
      "001c05c0",
@@ -150,6 +152,11 @@
      "date": "2026-10-25 18:23",
      "status": "partial",
      "summary": "GamMan slice 3: loadStageSnd (the chapter SE packs 1xxx / 3200..3210.se), the item code (addItem, delItem, delItemAll, equipItem with the held object on node p_hn_r, selectItem, getItemNum, hasItem, getItemCount, hasFreeItemSlot, canAddItem, addStock, delStock, loadItemSe 640N.se), makeOid, setPcParam, releaseChr with releaseFchr / releaseVFchr / clearVFchrSlot, getObjParam, releaseTenkyus, ctlObj1cbb80 and two empty natives' helpers; GamItemSlot, GamTenkyuRec, GamObjFxRec, GamObjColli typed; 23 callees named in Ghidra"
+    },
+    {
+     "date": "2026-10-26 08:08",
+     "status": "partial",
+     "summary": "GamMan slice 4: object creation and accessors - addChr, addVFchr with allocVFchr, createObjByModel, createObjByName with getChrRpk and setObjLight, setObj, setObjParam, setObjPos, getObjPos, getObjRot, getObjRotY, setObjDir, getObjDirTo, startAchrPlaceTask, ctlObj1cb8e4 with addObjMarker, openMsg, showMsgSprite, setSysParam, getSelItemNum, rmSnd; ObjStat::ObjStat written ahead; ObjStat / ACHRstat / FCHRstat members typed; MagSystem::loadModel returns the actor; 20 callees named"
     }
    ],
    "status": "partial",
@@ -409,6 +416,15 @@
    ],
    "status": "verify",
    "why": "source string mag/maglifemenu.cpp anchors 0x12cf3c..0x12d788 (asserts m_type, m_scene, theRenderStage, actor); every function is a MagLifeMenu* vtable slot; maglifemenusp.cpp starts at 0x12d9c8; plus the PBook / Board3D / Base linkonce symbols the brief placed here"
+  },
+  "mag/magloader.cpp": {
+   "ranges": [
+    [
+     "00141e44",
+     "0014313c"
+    ]
+   ],
+   "why": "mag/magloader.cpp asserts in 0x141e90..0x142fd0 (MagLoaderIndex, MagCharaLoader init/load/getIndex/getId, MagMapLoader init/loadByName); 0x141e44 / 0x141e78 are helpers its functions call; magscenefocus.cpp ends before, magscenedebug.cpp starts at MagScene::updateDebug 0x14313c"
   },
   "mag/magscene.cpp": {
    "notes": "Screen still black (textures never load; game/gamfile.cpp callers GamMan::loadSystemData / loadStage are stubs), and nothing calls this slice's new code in the smoke run, so verify: the first session whose screenshot shows a menu, a text window or a debug strip marks it done. Left in the range: two uncalled empty functions (jr ra; nop) at 0x131f6c and 0x136098 have no Ghidra function and no name -- harmless. Decisions: ~MagScene keeps only its comment (open-items Decisions: the explicit part needs a host exit decision); the embedded menus are host MagLifeMenuBase members (open-items Decisions) -- a menu TU that gives its class a host type changes that member. New stubs to write with their TUs: DogModel::castSphere 0x1145c0 / castCylinder 0x1149d4 (dog/dogmodel.cpp), MagLifeWindow::print 0x1305ec, MagLifeFadeKey::loadTextureByName / reset / setMagnify (0x12f518 / 0x12f7f4 / 0x12fc80; reset and setMagnify are a few stores, see the batch whys), GamFont::scroll / setFill / setFillMsb (0x1bfe30 / 0x1bff28 / 0x1bff5c), i3dPointSegDist2 0x2337e0, MagLifeMenuSpecial / Special2 constructors. Open: which event commands call addPrivateColli (0x1d080c, 0x1d091c, 0x1d0c64) and removePrivateColli (0x1ccc30).",

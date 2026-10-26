@@ -65,6 +65,11 @@ static_assert(offsetof(EmySlot, m_24) == 0x24, "EmySlot m_24");
  * finds none. */
 struct EmyManager : CmnITask
 {
+    /* A new enemy for the type-2 achr chr (forwards to 0x162c88): chrNo
+     * from the kind's system data field 0x72, GamMan's script word
+     * +0x22364, the image slot the caller picked, the position. */
+    void addEmy(int chrNo, short kind, void *chr, intptr_t seqWord, void *image,
+                const void *pos, u_int oid);                             // ROR 0x00162c2c
     /* Its two object ids (+0x138 / +0x13c). */
     void getOids(int *a, int *b);                                        // ROR 0x00163ab8
     /* Deletes its object whose first word is oid (a type-2 achr's). */
@@ -203,6 +208,24 @@ struct TskAttach : CmnITask
     TskAttach(u_int oid, const int *value, int arg);                     // ROR 0x001f5244
 };
 
+/* TskSeqEvent : CmnITask (vtable 0x2e4c90, EE 0x80 bytes): kind 0 reads
+ * {frames, radius} from param and the achr of oid; GamMan::
+ * startAchrPlaceTask's task (ACHRstat::m_placeTask). layout: host. */
+struct TskSeqEvent : CmnITask
+{
+    TskSeqEvent(u_int oid, int kind, const void *param);                 // ROR 0x001f47f0
+
+    float m_radius;             // ROR 0x48: param word 1
+};
+
+/* TskMsgMan : CmnITask (vtable 0x2e4c10, EE 0x9c0 bytes): a message
+ * window on text (two MsgMan at +0x224) with the eight window words param;
+ * GamMan::openMsg's task (m_msgTaskId). layout: host -- no members. */
+struct TskMsgMan : CmnITask
+{
+    TskMsgMan(const char *text, int arg, const int *param, int a4, int mode, int time); // ROR 0x001f4a24
+};
+
 /* TskSysFunc : CmnITask (vtable 0x2e4cd0, EE 0x80 bytes): kinds 0..1 set
  * the defaults 100, 0x1e, 0xf, 0x1b and keep arg. layout: host. */
 struct TskSysFunc : CmnITask
@@ -222,6 +245,8 @@ void scenePlayStartSimple(const char *name);                             // ROR 
 u_int utlConvSndId(u_int id);                                            // ROR 0x00106658
 /* v[3] = 0, then v normalised in place (sceVu0Normalize). */
 void  utlNormalize3(float *v);                                           // ROR 0x00106db0
+/* The heading of (x, z) in -pi..pi, 0 for a zero vector (unassigned@00216ad0). */
+float utlAtan2(float x, float z);                                        // ROR 0x00217f10
 /* v.x += sinf(angle) * dist, v.z += cosf(angle) * dist (unassigned@001e6cac). */
 void  utlAddPolar(float angle, float dist, float *v);                    // ROR 0x001f6b28
 /* An achr's turn task (TskChrRot, ctor 0x1f0434) on ACHRstat::m_task[1]:

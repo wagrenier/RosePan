@@ -1007,10 +1007,11 @@ int MagSystem::getBwnState()
 
 // ──────────────────────────────────────────────────────────────────────
 // Loads model id from a chapter's archive (chapter < 0: none); models
-// 0x20xx and 0x24xx get actor flags 0x60.
+// 0x20xx and 0x24xx get actor flags 0x60. Returns the actor number, -1 on
+// failure (the ROM leaves it in v0).
 // ROR 0x00119138
 
-void MagSystem::loadModel(int id, int chapter)
+int MagSystem::loadModel(int id, int chapter)
 {
     const char *rpk = NULL;
     if (chapter >= 0)
@@ -1022,6 +1023,7 @@ void MagSystem::loadModel(int id, int chapter)
     {
         m_scene.m_actor_flags[no] |= 0x60;
     }
+    return no;
 }
 
 // ──────────────────────────────────────────────────────────────────────
