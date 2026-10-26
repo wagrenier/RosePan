@@ -4087,19 +4087,19 @@
 /* 001eaf00 000000b0 */ FUN_001eaf00(){}
 /* 001eafb0 0000068c */ FUN_001eafb0(){}
 /* 001eb63c 00000308 */ TskMoveTypeRound::TskMoveTypeRound(){}  // ror
-/* 001eb944 00000034 */ FUN_001eb944(){}
-/* 001eb978 00000004 */ FUN_001eb978(){}
-/* 001eb980 00000200 */ FUN_001eb980(){}
-/* 001ebb80 00000268 */ FUN_001ebb80(){}
-/* 001ebde8 000002fc */ FUN_001ebde8(){}
-/* 001ec0e4 00000260 */ FUN_001ec0e4(){}
+/* 001eb944 00000034 */ TskMoveTypeRound::~TskMoveTypeRound(){}  // ror
+/* 001eb978 00000004 */ TskMoveTypeRound::term(){}  // ror
+/* 001eb980 00000200 */ TskMoveTypeRound::exec(){}  // ror
+/* 001ebb80 00000268 */ TskMoveTypeRound::stepPoint(){}  // ror
+/* 001ebde8 000002fc */ TskMoveTypeRound::stepObjMotion(){}  // ror
+/* 001ec0e4 00000260 */ TskMoveTypeRound::stepObj(){}  // ror
 /* 001ec344 00000258 */ TskMovePointPath::TskMovePointPath(){}  // ror
-/* 001ec59c 00000034 */ FUN_001ec59c(){}
-/* 001ec5d0 00000004 */ FUN_001ec5d0(){}
-/* 001ec5d8 0000019c */ FUN_001ec5d8(){}
-/* 001ec774 00000074 */ FUN_001ec774(){}
-/* 001ec7e8 0000004c */ FUN_001ec7e8(){}
-/* 001ec834 0000010c */ FUN_001ec834(){}
+/* 001ec59c 00000034 */ TskMovePointPath::~TskMovePointPath(){}  // ror
+/* 001ec5d0 00000004 */ TskMovePointPath::term(){}  // ror
+/* 001ec5d8 0000019c */ TskMovePointPath::exec(){}  // ror
+/* 001ec774 00000074 */ TskMovePointPath::stepRandom(){}  // ror
+/* 001ec7e8 0000004c */ TskMovePointPath::stepRandomLoop(){}  // ror
+/* 001ec834 0000010c */ TskMovePointPath::aim(){}  // ror
 /* 001ec940 00000264 */ TskMoveSectaFindPath::TskMoveSectaFindPath(){}  // ror
 /* 001ecba4 00000034 */ FUN_001ecba4(){}
 /* 001ecbd8 00000004 */ FUN_001ecbd8(){}
@@ -4120,7 +4120,7 @@
 /* 001ee6b0 00000034 */ FUN_001ee6b0(){}
 /* 001ee6e4 00000004 */ FUN_001ee6e4(){}
 /* 001ee6ec 00000104 */ FUN_001ee6ec(){}
-/* 001ee7f0 00000164 */ FUN_001ee7f0(){}
+/* 001ee7f0 00000164 */ chrMoveFrames(){}  // ror
 /* 001ee954 00000198 */ FUN_001ee954(){}
 /* 001eeaec 0000011c */ FUN_001eeaec(){}
 /* 001eec08 00000034 */ FUN_001eec08(){}
@@ -4796,7 +4796,7 @@
 /* 00217d68 0000003c */ FUN_00217d68(){}
 /* 00217da4 0000016c */ FUN_00217da4(){}
 /* 00217f10 000001d4 */ utlAtan2(){}  // ror
-/* 002180e4 000001e0 */ FUN_002180e4(){}
+/* 002180e4 000001e0 */ utlDirDist(){}  // ror
 /* 002182c4 00000074 */ FUN_002182c4(){}
 /* 00218338 00000054 */ FUN_00218338(){}
 /* 0021838c 000000c4 */ utlStrNCopy(){}  // ror

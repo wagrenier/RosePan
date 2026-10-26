@@ -5,7 +5,8 @@
  *  starters and the generic script tasks (pinned 0x1e7f28..0x1f6c64); see
  *  tsk_chr.h. Written so far: TskMtnMove / TskMtnMove2 and their starters
  *  (chrMtnMove, chrMtnMove2, chrChangeMotion, chrKillMotionTask,
- *  chrSetMotion, chrGetNodeWorldPos), TskMovie (the film task),
+ *  chrSetMotion, chrGetNodeWorldPos), TskMoveTypeRound (circling),
+ *  TskMovePointPath (path walks) with chrMoveFrames, TskMovie (the film task),
  *  TskMsgMan (the message window task), TskChrRot and chrRotStart / chrRotTo /
  *  chrRotToIn / chrRotFrames (turns), TskFrameFunc (the multi-frame
  *  jobs: fades, the door opening, game over, fog, items), the frame
@@ -24,6 +25,7 @@
 #include "mag/magscene.h"
 #include "mag/magsystem.h"
 #include "rx/rxsys.h"
+#include "sdk/libvu0.h"
 #include "sequence/sequence.h"
 #include "snd/rxmpeg.h"
 #include "snd/sndman.h"
@@ -594,6 +596,525 @@ int TskMtnMove2::stepMoveHit()
 int TskMtnMove2::stepNone()
 {
     return 1;
+}
+
+/* The heading a quarter turn from dir (way < 0 adds pi/2, else subtracts;
+ * in double, as the ROM does), wrapped once into -pi..pi. */
+static inline float chrQuarterTurn(float dir, float way)
+{
+    float r;
+
+    if (way < 0.0f)
+        r = (float)((double)dir + 1.5707963267948966);
+    else
+        r = (float)((double)dir - 1.5707963267948966);
+    return chrWrapPi(r);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The circling: the achr, its actor's position and heading, the centre
+// by mode (0 / 2 an object's actor, 1 / 3 the point arg) and its step;
+// modes 0 / 1 play motion at rate here, 2 / 3 walk by a chrMtnMove.
+// ROR 0x001eb63c
+
+TskMoveTypeRound::TskMoveTypeRound(float radius, float speed, float rate, u_int oid, int mode,
+                                   intptr_t arg, int motion)
+{
+    m_oid = oid;
+    m_achr = g_gamMan.getAchr(oid);
+    m_actor = m_achr->m_actor;
+    m_radius = radius;
+    m_speed = speed;
+    m_dir = 1.0f;
+    m_mode = mode;
+    // PORT: the ROM leaves m_flags, m_lastPos and the w words unset (a
+    // hit on the first frame would restore garbage).
+    m_flags = 0;
+    m_mtnTask = NULL;
+    m_target = 0;
+    m_targetActor = -1;
+    m_pos[3] = m_rot[3] = m_center[3] = 0.0f;
+    // PORT: the ROM reads actor -1's slot too; an achr here has an actor.
+    if (m_actor >= 0)
+    {
+        DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+        m_pos[0] = actor.m_trans[0];
+        m_pos[1] = actor.m_trans[1];
+        m_pos[2] = actor.m_trans[2];
+        m_rot[0] = actor.m_rotate[0];
+        m_rot[1] = actor.m_rotate[1];
+        m_rot[2] = actor.m_rotate[2];
+    }
+    memcpy(m_lastPos, m_pos, sizeof(m_lastPos));
+
+    // PORT: other modes set no step in the ROM (exec then calls garbage);
+    // they circle the point here.
+    m_stepFunc = &TskMoveTypeRound::stepPoint;
+    switch (m_mode)
+    {
+    case 0:
+    case 2:
+        m_target = (u_int)arg;
+        m_targetActor = g_gamMan.getActorNo(m_target);
+        // PORT: the ROM reads actor -1's slot too.
+        if (m_targetActor >= 0)
+        {
+            const DogActor &actor = g_magSystem.m_scene.m_actors[m_targetActor];
+            m_center[0] = actor.m_trans[0];
+            m_center[1] = actor.m_trans[1];
+            m_center[2] = actor.m_trans[2];
+        }
+        break;
+    case 1:
+    case 3:
+    {
+        const float *p = (const float *)arg;
+        m_center[0] = p[0];
+        m_center[1] = p[1];
+        m_center[2] = p[2];
+        break;
+    }
+    default:
+        return;
+    }
+    switch (m_mode)
+    {
+    case 0:
+        m_stepFunc = &TskMoveTypeRound::stepObj;
+        chrSetMotion(rate, m_actor, motion, 0, 0x100, oid, NULL);
+        break;
+    case 1:
+        m_stepFunc = &TskMoveTypeRound::stepPoint;
+        chrSetMotion(rate, m_actor, motion, 0, 0x100, oid, NULL);
+        break;
+    case 2:
+        m_stepFunc = &TskMoveTypeRound::stepObjMotion;
+        m_mtnTask = (TskMtnMove *)chrMtnMove(rate, CHR_ROT_KEEP, oid, motion, -1, 0x100, NULL);
+        break;
+    case 3:
+        m_stepFunc = &TskMoveTypeRound::stepPoint;
+        m_mtnTask = (TskMtnMove *)chrMtnMove(rate, CHR_ROT_KEEP, oid, motion, -1, 0x100, NULL);
+        break;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001eb978
+
+void TskMoveTypeRound::term()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The step, then the placing: a hit (for an achr off the secta lists) or
+// no cell keeps the last position, flags the achr 0x1000 and the first
+// time turns the way round (again once a 60th frame cleared bit 2); a
+// free move becomes the last position. The heading goes to the object.
+// callcheck: scePrintf (the hit message)
+// ROR 0x001eb980
+
+int TskMoveTypeRound::exec(int id, int time, int arg)
+{
+    u_int hit[0x10];
+
+    (void)id;
+    (void)time;
+    (void)arg;
+    (this->*m_stepFunc)();
+    memset(hit, 0, sizeof(hit));  // PORT: placeAchr writes it only on a hit
+    int blocked;
+    if (g_gamMan.placeAchr((int)m_oid, hit, 0) != 0 && (m_achr->m_flags & 0x40) != 0)
+        blocked = 1;
+    else
+        blocked = !m_achr->trySetPos(m_pos);
+
+    if (blocked)
+    {
+        scePrintf("HIT in moving task ! oid 0x%x \n", hit[4]);
+        if ((m_flags & 1) == 0)
+            m_achr->m_flags |= 0x1000;
+        m_flags |= 1;
+        memcpy(m_pos, m_lastPos, sizeof(m_pos));
+        if ((m_flags & 2) == 0)
+        {
+            m_flags |= 2;
+            m_dir = -m_dir;
+            m_achr->m_flags &= ~0x1000u;
+        }
+        else if (g_gamMan.m_vcount % 60 == 0)
+        {
+            m_flags &= ~2u;
+        }
+    }
+    else
+    {
+        memcpy(m_lastPos, m_pos, sizeof(m_lastPos));
+        m_achr->m_flags &= ~0x1000u;
+        if ((m_flags & 1) != 0)
+            m_achr->m_flags &= ~0x1000u;
+        m_flags &= ~1u;
+    }
+    m_achr->ObjStat::setRot(m_rot);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Modes 1 / 3, around the point: the heading a quarter turn from the
+// centre, plus a push of speed when off the ring by more than 10 (this
+// step pushes inward when inside, the object steps outward: a ROM
+// quirk). Mode 3 gives the motion task the heading and takes the actor's
+// position less the push; mode 1 slides along the heading plus the push.
+// callcheck: fptodp, dpadd, dpsub, dpcmp, dptofp (chrQuarterTurn)
+// ROR 0x001ebb80
+
+void TskMoveTypeRound::stepPoint()
+{
+    float dist, px, pz;
+
+    float dir = utlDirDist(m_center[0] - m_pos[0], m_center[2] - m_pos[2], &dist);
+    if (dist < m_radius - 10.0f)
+    {
+        px = sinf(dir) * m_speed;
+        pz = cosf(dir) * m_speed;
+    }
+    else if (m_radius + 10.0f < dist)
+    {
+        px = -sinf(dir) * m_speed;
+        pz = -cosf(dir) * m_speed;
+    }
+    else
+    {
+        px = pz = 0.0f;
+    }
+    float rot = chrQuarterTurn(dir, m_dir);
+    m_rot[1] = rot;
+    if (m_mode == 3)
+    {
+        m_mtnTask->m_rotY = rot;
+        const DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+        m_pos[0] = actor.m_trans[0] - px;
+        m_pos[1] = actor.m_trans[1];
+        m_pos[2] = actor.m_trans[2] - pz;
+    }
+    else
+    {
+        m_pos[0] = m_pos[0] + sinf(rot) * m_speed;
+        m_pos[0] = m_pos[0] + px;
+        m_pos[2] = m_pos[2] + cosf(rot) * m_speed + pz;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Mode 2, around an object by the motion: the centre follows the object;
+// off the ring the heading points from the pushed position to the centre
+// once (bit 4, cleared each 180th frame), else a quarter turn from it.
+// The motion task takes the heading; the position is the actor's.
+// callcheck: fptodp, dpadd, dpsub, dpcmp, dptofp (chrQuarterTurn)
+// ROR 0x001ebde8
+
+void TskMoveTypeRound::stepObjMotion()
+{
+    float dist, px, pz;
+
+    if (m_targetActor >= 0)  // PORT: the ROM reads actor -1's slot too
+    {
+        const DogActor &target = g_magSystem.m_scene.m_actors[m_targetActor];
+        m_center[0] = target.m_trans[0];
+        m_center[1] = target.m_trans[1];
+        m_center[2] = target.m_trans[2];
+    }
+    float dir = utlDirDist(m_center[0] - m_pos[0], m_center[2] - m_pos[2], &dist);
+    if (dist < m_radius - 10.0f)
+    {
+        px = -sinf(dir) * m_speed;
+        pz = -cosf(dir) * m_speed;
+    }
+    else if (m_radius + 10.0f < dist)
+    {
+        px = sinf(dir) * m_speed;
+        pz = cosf(dir) * m_speed;
+    }
+    else
+    {
+        px = pz = 0.0f;
+    }
+    float rot = chrQuarterTurn(dir, m_dir);
+    const DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+    float x = actor.m_trans[0] + px;
+    float z = actor.m_trans[2] + pz;
+    if ((px != 0.0f || pz != 0.0f) && (m_flags & 4) == 0)
+    {
+        rot = utlAtan2(m_center[0] - x, m_center[2] - z);
+        m_flags |= 4;
+    }
+    else if (g_gamMan.m_vcount % 180 == 0)
+    {
+        m_flags &= ~4u;
+    }
+    m_rot[1] = rot;
+    m_mtnTask->m_rotY = rot;
+    m_pos[0] = actor.m_trans[0];
+    m_pos[1] = actor.m_trans[1];
+    m_pos[2] = actor.m_trans[2];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Mode 0, sliding around an object: the centre follows it; the achr
+// slides a quarter turn from the centre plus the push off the ring, and
+// faces the centre while pushed both ways (x and z non-zero).
+// callcheck: fptodp, dpadd, dpsub, dpcmp, dptofp (chrQuarterTurn)
+// ROR 0x001ec0e4
+
+void TskMoveTypeRound::stepObj()
+{
+    float dist, px, pz;
+
+    if (m_targetActor >= 0)  // PORT: the ROM reads actor -1's slot too
+    {
+        const DogActor &target = g_magSystem.m_scene.m_actors[m_targetActor];
+        m_center[0] = target.m_trans[0];
+        m_center[1] = target.m_trans[1];
+        m_center[2] = target.m_trans[2];
+    }
+    float dir = utlDirDist(m_center[0] - m_pos[0], m_center[2] - m_pos[2], &dist);
+    if (dist < m_radius - 10.0f)
+    {
+        px = -sinf(dir) * m_speed;
+        pz = -cosf(dir) * m_speed;
+    }
+    else if (m_radius + 10.0f < dist)
+    {
+        px = sinf(dir) * m_speed;
+        pz = cosf(dir) * m_speed;
+    }
+    else
+    {
+        px = pz = 0.0f;
+    }
+    float rot = chrQuarterTurn(dir, m_dir);
+    m_rot[1] = rot;
+    m_pos[0] = m_pos[0] + (sinf(rot) * m_speed + px);
+    m_pos[2] = m_pos[2] + (cosf(rot) * m_speed + pz);
+    if (px != 0.0f && pz != 0.0f)
+        m_rot[1] = utlAtan2(m_center[0] - m_pos[0], m_center[2] - m_pos[2]);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The path walk: the achr, its actor's position and heading, the first
+// point by mode & 3 (2 / 3 a random one) and its step; modes 0..3 play
+// motion at rate here (4..7 start it in aim, through chrMoveFrames).
+// callcheck: rand (the random first point), sinf, cosf (aim, tail-called)
+// ROR 0x001ec344
+
+TskMovePointPath::TskMovePointPath(float speed, float rate, u_int oid, int mode, int count,
+                                   const ChrPathPoint *path, int motion)
+{
+    m_oid = oid;
+    m_achr = g_gamMan.getAchr(oid);
+    m_actor = m_achr->m_actor;
+    m_mode = mode;
+    m_path = path;
+    m_count = count;
+    m_speed = speed;
+    m_motion = motion;
+    m_rate = rate;
+    m_index = 0;
+    m_mtnTask = NULL;
+    // PORT: the ROM leaves the w words (and m_vel) unset; sceVu0AddVector
+    // adds w too.
+    m_pos[3] = m_rot[3] = 0.0f;
+    m_vel[0] = m_vel[1] = m_vel[2] = m_vel[3] = 0.0f;
+    // PORT: the ROM reads actor -1's slot too; an achr here has an actor.
+    if (m_actor >= 0)
+    {
+        DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+        m_pos[0] = actor.m_trans[0];
+        m_pos[1] = actor.m_trans[1];
+        m_pos[2] = actor.m_trans[2];
+        m_rot[0] = actor.m_rotate[0];
+        m_rot[1] = actor.m_rotate[1];
+        m_rot[2] = actor.m_rotate[2];
+    }
+
+    // PORT: modes >= 8 (a script global shift > 1) set no step in the ROM,
+    // which then calls garbage; they walk the path once here.
+    m_stepFunc = &TskMovePointPath::stepOnce;
+    switch ((u_int)m_mode)
+    {
+    case 0: case 4:
+        m_point = m_path;
+        m_stepFunc = &TskMovePointPath::stepOnce;
+        break;
+    case 1: case 5:
+        m_point = m_path;
+        m_stepFunc = &TskMovePointPath::stepLoop;
+        break;
+    case 2: case 6:
+        m_point = m_path + rand() % m_count;
+        m_stepFunc = &TskMovePointPath::stepRandom;
+        break;
+    case 3: case 7:
+        m_point = m_path + rand() % m_count;
+        m_stepFunc = &TskMovePointPath::stepRandomLoop;
+        break;
+    default:
+        m_point = m_path;  // PORT: unset in the ROM
+        break;
+    }
+    if (m_mode < 4)
+        chrSetMotion(m_rate, m_actor, m_motion, 0, 0x100, oid, NULL);
+    aim();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001ec5d0
+
+void TskMovePointPath::term()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Toward the point: modes 0..3 slide by m_vel, 4..7 follow where the
+// motion took the achr; a frame counts only when the position has a cell.
+// At the point the step picks the next one (re-aimed) or ends the walk
+// with motion 1 (heading kept).
+// ROR 0x001ec5d8
+
+int TskMovePointPath::exec(int id, int time, int arg)
+{
+    (void)id;
+    (void)time;
+    (void)arg;
+    if (m_frames > 0)
+    {
+        if (m_mode < 4)
+            sceVu0AddVector(m_pos, m_pos, m_vel);
+        else
+            m_achr->ObjStat::getPos(m_pos);
+        if (m_achr->trySetPos(m_pos))
+            m_frames--;
+        return 0;
+    }
+    if ((this->*m_stepFunc)())
+    {
+        chrMtnMove(m_rate, CHR_ROT_KEEP, m_oid, 1, -1, 0x100, NULL);
+        return 1;
+    }
+    aim();
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Mode 0: the next point; after the last one the walk ends.
+// ROR 0x001ec6e8
+
+int TskMovePointPath::stepOnce()
+{
+    if (m_index++ < m_count - 1)
+    {
+        m_point++;
+        return 0;
+    }
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Mode 1: the next point, after the last one the first again.
+// ROR 0x001ec72c
+
+int TskMovePointPath::stepLoop()
+{
+    if (m_index++ < m_count - 1)
+    {
+        m_point++;
+    }
+    else
+    {
+        m_index = 0;
+        m_point = m_path;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Mode 2: count random points (the first included), then the end.
+// callcheck: rand
+// ROR 0x001ec774
+
+int TskMovePointPath::stepRandom()
+{
+    if (m_index++ < m_count)
+    {
+        m_point = m_path + rand() % m_count;
+        return 0;
+    }
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Mode 3: random points for ever.
+// callcheck: rand
+// ROR 0x001ec7e8
+
+int TskMovePointPath::stepRandomLoop()
+{
+    m_point = m_path + rand() % m_count;
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The direction and distance from the achr to m_point: modes 0..3 face
+// it (setObjRot) and slide m_speed a frame; 4..7 hand it to the motion.
+// callcheck: sinf, cosf
+// ROR 0x001ec834
+
+void TskMovePointPath::aim()
+{
+    float dist;
+
+    g_gamMan.getObjPos(m_oid, m_pos);
+    float dir = utlDirDist(m_point->x - m_pos[0], m_point->z - m_pos[2], &dist);
+    if (m_mode < 4)
+    {
+        m_vel[1] = 0.0f;
+        m_vel[0] = sinf(dir) * m_speed;
+        m_rot[1] = dir;
+        m_vel[2] = cosf(dir) * m_speed;
+        m_frames = (int)(dist / m_speed);
+        g_gamMan.setObjRot(m_oid, m_rot);
+    }
+    else
+    {
+        m_frames = chrMoveFrames(dir, dist, m_rate, m_oid, (u_short)m_actor, &m_mtnTask,
+                                 m_motion);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A motion-driven move of dist toward dir: the motion task (started once,
+// into *task), then the frames from the motion's root move over 50 x its
+// length at rate (x 25; 0 when the motion does not move).
+// callcheck: sqrtf (the NaN fallback of sqrt.S)
+// ROR 0x001ee7f0
+
+int chrMoveFrames(float dir, float dist, float rate, u_int oid, int no, CmnITask **task,
+                  int motion)
+{
+    float rot[4] = {dir, 0.0f, 0.0f, 0.0f};  // PORT: the ROM stores only rot[0]
+    float move[4] = {0.0f, 0.0f, 0.0f, 0.0f};  // PORT: read even if the actor has no motion
+
+    no &= 0xffff;
+    if (*task == NULL)
+        *task = chrMtnMove(rate, dir, oid, motion, -1, 0x100, NULL);
+    float len = g_magSystem.m_scene.getActorMotionLength(no, motion);
+    g_magSystem.getActorMotionMove(no, 0.0f, len * 50.0f, move, rot, NULL);
+    float speed = sqrtf(move[0] * move[0] + move[2] * move[2]) * (rate / 0x1.11111p-6f);
+    float t;
+    if (speed <= 0.0f)
+        t = 0.0f * len;
+    else
+        t = dist / speed * len;
+    return (int)(t * 25.0f);
 }
 
 // ──────────────────────────────────────────────────────────────────────

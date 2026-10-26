@@ -1119,7 +1119,7 @@
    "why": "SysTimer (ctor 0x203d94, dtor 0x203da8, init / start / stop / read / update / hold), sysInit/TermManagers, the host0 reboot 0x2041a0 and the static initializer pair 0x2041f8 / 0x20439c / 0x2043bc that constructs the global managers: the globals file before main.cpp (no source string; file name a guess)"
   },
   "task/tsk_chr.cpp": {
-   "notes": "TskChrRot is complete but no screenshot shows a turn yet (natives 200 cases via seqcall, TskFrameFunc::stepGameOver, the door opening). Ctor args: angle f12, rotY f13 (>= 32769 keeps the actor heading), speed f14, oid a1, frames a2, motion a3 (-1 none; an achr with flag 0x80000 takes param 0x1102 left / 0x1101 right), restore t0, t1 unread. Two ROM quirks kept and listed in open-items.md: stepFrames writes word +0x6c of whatever runs in m_task[2] (TskMtnMove m_rotY, TskMtnMove2 m_step), and stepMotion kills the TskMtnMove2 it just started for motion 1. Next in this TU: TskMovePointPath 0x1ec344 (exec 0x1ec834?), TskMoveTypeGen 0x1e9a3c (exec 0x1e9cb4, 0x938 bytes), TskMoveTypeRound 0x1eb63c, TskMoveSectaFindPath 0x1ec940, the turn helpers 0x1f11a0 / 0x1f1298 / 0x1f13a8 / 0x1f14cc / 0x1f1670 that also new a TskChrRot (ctor now available), TskRotAdj 0x1ee4a8, TskSysFunc 0x1f4184, TskAttach 0x1f5244, TskAvoidMove 0x1ef184 (hand stub). 0x1f6bd0 right after chrRotFrames is a sibling with constant 0.02778 (unnamed). hidden.py still lists 0x1eec44, 0x1efaa8, 0x1efab0, 0x1f4910, 0x1f59ac, 0x1f6570.",
+   "notes": "TskMovePointPath and TskMoveTypeRound are complete but unseen (native 211 cases 10..23 run only in game scripts); mark them done the first time a screenshot shows an achr walking a path or circling. Ctor args now (speed f12, rate f13, oid, mode, count or arg, points, motion). Quirks kept and listed in open-items.md: TskMoveTypeRound::stepPoint pushes inward for mode 1; unknown modes get a default step (PORT). chrMoveFrames (0x1ee7f0) is shared by 7 move tasks: TskMoveTypeGen 0x1e9cb4 / 0x1ea5ec / 0x1eacb8, TskMoveSectaFindPath 0x1ecbe0 / 0x1ecf3c, 0x1ed1d0. Next in this TU: TskMoveTypeGen 0x1e9a3c (exec 0x1e9cb4 0x938 bytes, 0x1eafb0), TskMoveSectaFindPath 0x1ec940 (0x1ed1d0), TskMoveSecta 0x1ed998, the turn helpers 0x1f11a0 / 0x1f1298 / 0x1f13a8 / 0x1f14cc / 0x1f1670, TskRotAdj 0x1ee4a8, TskMoveAdj 0x1edd90, TskMovePhysic 0x1eeaec, TskSysFunc 0x1f4184, TskAttach 0x1f5244, TskAvoidMove 0x1ef184 (hand stub). GamMan::placeAchr 0x1d544c is a stub returning 0 (no hits yet).",
    "ranges": [
     [
      "001e7f28",
@@ -1146,6 +1146,11 @@
      "date": "2026-10-26 18:14",
      "status": "partial",
      "summary": "Wrote TskChrRot (ctor 0x1f0434, exec, term, dtor, stepFrames 0x1f090c, stepMotion 0x1f0b50; kind 0xe) and its starters chrRotStart, chrRotTo, chrRotToIn, chrRotFrames; deleted their four stubs and named the six TskChrRot functions in Ghidra. 15 s smoke run unchanged: the boot disclaimer screen; no turn is reached yet."
+    },
+    {
+     "date": "2026-10-26 18:27",
+     "status": "partial",
+     "summary": "Wrote TskMovePointPath (ctor, exec, term, aim 0x1ec834, stepOnce / stepLoop / stepRandom / stepRandomLoop) and TskMoveTypeRound (ctor, exec with the HIT in moving task placing, term, stepPoint / stepObjMotion / stepObj), chrMoveFrames 0x1ee7f0, and ahead utlDirDist 0x2180e4 in lib/unassigned_stubs.cpp. Deleted their two ctor stubs, fixed native 211's argument order (count a2, points a3), GamMan::placeAchr returns int. Named 16 functions (batch tskchr_006). 15 s smoke run unchanged: the boot disclaimer; no script reaches these tasks yet."
     }
    ],
    "status": "partial",
