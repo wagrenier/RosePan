@@ -6,7 +6,8 @@
  *  tsk_chr.h. Written so far: TskMtnMove / TskMtnMove2 and their starters
  *  (chrMtnMove, chrMtnMove2, chrChangeMotion, chrKillMotionTask,
  *  chrSetMotion, chrGetNodeWorldPos), TskMoveTypeRound (circling),
- *  TskMoveTypeGen (straight moves), TskMovePointPath (path walks) with
+ *  TskMoveTypeGen (straight moves), TskMoveSecta / TskMoveSectaFindPath
+ *  (secta cell walks), TskMovePointPath (path walks) with
  *  chrMoveFrames, chrChangeMotionBySuffix, TskMovie (the film task),
  *  TskMsgMan (the message window task), TskChrRot and chrRotStart / chrRotTo /
  *  chrRotToIn / chrRotFrames (turns), TskFrameFunc (the multi-frame
@@ -1599,6 +1600,506 @@ void TskMovePointPath::aim()
         m_frames = chrMoveFrames(dir, dist, m_rate, m_oid, (u_short)m_actor, &m_mtnTask,
                                  m_motion);
     }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The cell walk: the achr's walk and turn params (the walk speed per 60th,
+// 1/60 for mode > 0 outside 0.0001..1), the start cell (an achr's own
+// cell, or the cell of its position for a type-2 oid), the path to cell
+// to; no path writes 4 to the status word, else the first aim. The step
+// by mode (member pointers data 0x2fdda0..): stepMotion, stepSlide, or
+// stepSlideHit for an achr off the secta lists -- set after the aim, so
+// a turn motion there does not give stepTurn.
+// ROR 0x001ec940
+
+TskMoveSectaFindPath::TskMoveSectaFindPath(u_int oid, int to, int *status, int kind, int mode,
+                                           int maxCells, float speed, float rate)
+{
+    (void)kind;
+    (void)maxCells;
+    (void)rate;
+    m_oid = oid;
+    m_achr = g_gamMan.getAchr(oid);
+    m_actor = m_achr->m_actor;
+    m_achr->getParam(0x1100, &m_motion);
+    m_achr->getParam(0x1103, &m_rate);
+    m_achr->getParam(0x1101, &m_turnRight);
+    m_achr->getParam(0x1102, &m_turnLeft);
+    m_achr->getParam(0x1105, &m_turnBack);
+    m_achr->getParam(0x1104, &m_rotSpeed);
+    int list = chrIsOidType2(m_oid);
+    if (list == 0)
+        m_from = m_achr->m_secta != NULL ? m_achr->m_secta->m_id : -1;
+    else
+        m_from = g_gamMan.getObjSectaNo(m_oid, list);
+    m_to = to;
+    m_speed = speed;
+    m_status = status;
+    m_index = 0;
+    m_frames = 0;
+    m_mode = mode;
+    m_mtnTask = NULL;
+    m_rate = m_rate * 0x1.11111p-6f;
+    if (m_mode > 0 && !(0.0001f < m_rate && m_rate < 1.0f))
+        m_rate = 0x1.11111p-6f;
+    // PORT: the ROM leaves these unset (m_flags and m_target are never
+    // written; stepMotion's aim is set by setOff here). findSectaPath
+    // writes the count only when it finds a way.
+    m_flags = 0;
+    m_half = 0;
+    m_path.m_num = 0;
+    memset(m_target, 0, sizeof(m_target));
+    memset(m_vel, 0, sizeof(m_vel));
+    memset(m_lastPos, 0, sizeof(m_lastPos));
+    m_pos[3] = m_rot[3] = 0.0f;
+
+    g_gamMan.findSectaPath(chrIsOidType2(oid), m_from, m_to, &m_path);
+    if (m_path.m_num < 1)
+    {
+        if (m_status != NULL)
+            *m_status = 4;
+    }
+    else
+    {
+        aim();
+    }
+    if (m_mode > 0)
+        m_stepFunc = &TskMoveSectaFindPath::stepMotion;
+    else if ((m_achr->m_flags & 0x40) == 0 || (m_achr->m_flags & 0x80) != 0)
+        m_stepFunc = &TskMoveSectaFindPath::stepSlide;
+    else
+        m_stepFunc = &TskMoveSectaFindPath::stepSlideHit;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001ecbd8
+
+void TskMoveSectaFindPath::term()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The step while frames are left; then the next cell (aimed at), or after
+// the last one bit 2 in the status word and the end.
+// ROR 0x001ed100
+
+int TskMoveSectaFindPath::exec(int id, int time, int arg)
+{
+    (void)id;
+    (void)time;
+    (void)arg;
+    if (m_frames > 0)
+        return (this->*m_stepFunc)();
+    if (m_index++ < m_path.m_num - 1)
+    {
+        aim();
+        return 0;
+    }
+    if (m_status != NULL)
+        *m_status |= 2;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The ROM's inline shared by aim and stepTurn: from where the actor
+// stands to cell m_index's point; mode < 1 slides m_speed (0 -> 1) a frame
+// with the walk motion at m_rate, mode > 0 hands it to a chrMoveFrames
+// walk.
+// callcheck: sinf, cosf (chrSlideVel)
+
+float TskMoveSectaFindPath::setOff()
+{
+    float dist;
+
+    DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+    m_pos[0] = actor.m_trans[0];
+    m_pos[1] = actor.m_trans[1];
+    m_pos[2] = actor.m_trans[2];
+    m_rot[0] = 0.0f;
+    m_rot[1] = actor.getRotY();
+    m_rot[2] = 0.0f;
+    const GamSecta *cell = m_path.m_cell[m_index];
+    float dir = utlDirDist(cell->m_pos[0] - m_pos[0], cell->m_pos[2] - m_pos[2], &dist);
+    // PORT: the ROM's stepMotion aims at m_target, which it never writes.
+    m_target[0] = cell->m_pos[0];
+    m_target[1] = cell->m_pos[1];
+    m_target[2] = cell->m_pos[2];
+    if (m_mode < 1)
+    {
+        if (m_speed == 0.0f)
+            m_speed = 1.0f;
+        chrSlideVel(m_vel, dir, m_speed);
+        m_frames = (int)(dist / m_speed);
+        chrSetMotion(m_rate, m_actor, m_motion, 0, 0x100, m_oid, NULL);
+    }
+    else
+    {
+        m_frames = chrMoveFrames(dir, dist, m_rate, m_oid, (u_short)m_actor, &m_mtnTask,
+                                 m_motion);
+    }
+    return dir;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Sets off toward the cell, then turns: with a turn motion and the cell
+// within m_turnBack of straight behind, the turn motion by the side and
+// stepTurn waits for it; else a plain turn (mode > 0 from the heading).
+// Once stepTurn is set no aim sets another step: the ROM's walk then only
+// re-aims (kept).
+// callcheck: fptodp, dpadd, dpcmp, dpsub, dptofp (libgcc soft double: chrWrapPi and the heading + pi)
+// callcheck: chrMoveFrames, chrSetMotion, cosf, getRotY, sinf, utlDirDist (setOff, the ROM's inline)
+// ROR 0x001ed1d0
+
+void TskMoveSectaFindPath::aim()
+{
+    float dir = setOff();
+    float rotY = m_rot[1];
+
+    if (m_turnLeft != -1 || m_turnRight != -1)
+    {
+        float back = chrWrapPi((float)((double)rotY + CHR_PI));
+        float off = chrWrapPi(dir - back);
+        if ((off < 0.0f ? -off : off) < m_turnBack)
+        {
+            int motion = dir - rotY < 0.0f ? m_turnLeft : m_turnRight;
+            if (m_mode < 1)
+                chrRotToMotion(dir, m_rotSpeed, CHR_ROT_KEEP, m_oid, motion, 1);
+            else
+                chrRotToMotion(dir, m_rotSpeed, rotY, m_oid, motion, 0);
+            m_frames = 1;
+            m_stepFunc = &TskMoveSectaFindPath::stepTurn;
+            return;
+        }
+    }
+    if (m_mode < 1)
+        chrRotTo(dir, m_rotSpeed, m_oid);
+    else
+        chrRotFromTo(rotY, dir, m_rotSpeed, m_oid);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Waits for the turn motion (the heading followed meanwhile); once the
+// turn task is gone (and not on the first frame), sets off again from the
+// actor and turns the rest of the way.
+// callcheck: chrMoveFrames, chrSetMotion, cosf, getRotY, sinf, utlDirDist (setOff, the ROM's inline)
+// ROR 0x001ecbe0
+
+int TskMoveSectaFindPath::stepTurn()
+{
+    if (g_taskMan.getTask(m_achr->m_task[1]) == 0 && m_frames != 1)
+    {
+        m_mtnTask = NULL;
+        float dir = setOff();
+        if (m_mode < 1)
+            chrRotTo(dir, m_rotSpeed, m_oid);
+        else
+            chrRotFromTo(m_rot[1], dir, m_rotSpeed, m_oid);
+    }
+    else
+    {
+        m_achr->ObjStat::getRot(m_rot);
+        m_frames = 2;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The slide of an achr off the secta lists: (held while turning when
+// flag 1) a hit keeps the last position and prints "HIT in moving task";
+// a position with no cell aims again; else a frame is done.
+// callcheck: scePrintf (the hit message)
+// ROR 0x001ecdd4
+
+int TskMoveSectaFindPath::stepSlideHit()
+{
+    u_int hit[0x10];
+
+    if ((m_flags & 1) != 0 && g_taskMan.getTask(m_achr->m_task[1]) != 0)
+        return 0;
+    memset(hit, 0, sizeof(hit));  // PORT: placeAchr writes it only on a hit
+    if (g_gamMan.placeAchr((int)m_oid, hit, 0) != 0)
+    {
+        memcpy(m_pos, m_lastPos, sizeof(m_pos));
+        scePrintf("HIT in moving task ! oid 0x%x \n", hit[4]);
+        return 0;
+    }
+    sceVu0AddVector(m_pos, m_pos, m_vel);
+    if (!m_achr->trySetPos(m_pos))
+    {
+        aim();
+        return 0;
+    }
+    m_frames--;
+    memcpy(m_lastPos, m_pos, sizeof(m_lastPos));
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The slide (held while turning when flag 1), set on the floor.
+// ROR 0x001ecebc
+
+int TskMoveSectaFindPath::stepSlide()
+{
+    if ((m_flags & 1) == 0 || g_taskMan.getTask(m_achr->m_task[1]) == 0)
+    {
+        sceVu0AddVector(m_pos, m_pos, m_vel);
+        m_achr->setPosOnFloor(m_pos);
+        m_frames--;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Mode > 0: the motion walks the achr (with flag 1 its moving held while
+// a turn task runs); below half the frames the walk aims again at
+// m_target from where the actor stands (the turn at speed 1), half of the
+// new frames till the next aim (none under 6). TskMoveTypeGen::stepMotion
+// with this task's offsets.
+// ROR 0x001ecf3c
+
+int TskMoveSectaFindPath::stepMotion()
+{
+    TskMtnMove *mtn = (TskMtnMove *)m_mtnTask;
+
+    // PORT: the ROM writes through the task pointer unchecked.
+    if ((m_flags & 1) != 0 && mtn != NULL)
+    {
+        int turning = g_taskMan.getTask(m_achr->m_task[1]) != 0;
+        if ((m_flags & 2) == 0)
+        {
+            if (turning)
+            {
+                m_flags |= 2;
+                mtn->m_flags |= 1;
+            }
+        }
+        else if (!turning)
+        {
+            m_flags &= ~2u;
+            mtn->m_flags &= ~1u;
+        }
+    }
+    if (m_frames < m_half)
+    {
+        float dist;
+        DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+        m_pos[0] = actor.m_trans[0];
+        m_pos[1] = actor.m_trans[1];
+        m_pos[2] = actor.m_trans[2];
+        float dir = utlDirDist(m_target[0] - m_pos[0], m_target[2] - m_pos[2], &dist);
+        m_frames = chrMoveFrames(dir, dist, m_rate, m_oid, (u_short)m_actor, &m_mtnTask,
+                                 m_motion);
+        m_rot[0] = actor.m_rotate[0];
+        m_rot[1] = actor.m_rotate[1];
+        m_rot[2] = actor.m_rotate[2];
+        chrRotFromTo(m_rot[1], dir, 1.0f, m_oid);
+        m_half = m_frames < 6 ? 0 : m_frames / 2;
+    }
+    m_frames--;
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The cell walks: the first leg by mode (jump table data 0x2fde60, 12
+// cases) -- the list's first cell, a random one, or the cell of object
+// arg (already in it: a TskMoveTypeGen toward the object at speed 1; no
+// cell: status 4). Modes 5 / 11 then go again every max(count, 10)
+// frames.
+// callcheck: operator_new, rand, TskMoveSectaFindPath (the legs: startLeg, the ROM's inline)
+// ROR 0x001ed998
+
+TskMoveSecta::TskMoveSecta(u_int oid, int mode, int count, intptr_t arg, int kind, float speed,
+                           float rate)
+{
+    m_oid = oid;
+    m_achr = g_gamMan.getAchr(oid);
+    m_actor = m_achr->m_actor;
+    m_left = count;
+    m_speed = speed;
+    m_arg = arg;
+    m_kind = kind;
+    m_rate = rate;
+    m_taskId = &m_achr->m_task[3];
+    m_mode = mode;
+    m_count = count;
+    m_status = 0;
+    m_cur = (const int *)arg;  // PORT: unset in the ROM for modes 4..
+
+    switch ((u_int)mode)
+    {
+    case 0: case 1: case 6: case 7:
+        m_cur = (const int *)m_arg;
+        startLeg(*m_cur);
+        break;
+    case 2: case 3: case 8: case 9:
+        m_cur = (const int *)m_arg;
+        // PORT: the ROM traps on a zero count (break 7).
+        startLeg(m_cur[m_count > 0 ? rand() % m_count : 0]);
+        break;
+    case 4: case 5: case 10: case 11:
+    {
+        int to = g_gamMan.getObjSectaNo((u_int)m_arg, chrIsOidType2(m_oid));
+        if (to == -1)
+        {
+            m_status |= 4;
+        }
+        else if (g_gamMan.getObjSectaNo(m_oid, chrIsOidType2(m_oid)) == to)
+        {
+            // callcheck: operator_new (the new expression)
+            TskMoveTypeGen *task = new TskMoveTypeGen(m_oid, mode >= 6 ? 0xb : 3, m_arg, 0, 1.0f,
+                                                      0x1.11111p-6f);
+            g_taskMan.addTask(1, -1, 1, 0, task, 0, m_taskId, 0x11);
+        }
+        else
+        {
+            startLeg(to);
+        }
+        if (mode == 5 || mode == 11)
+        {
+            if (m_count < 10)
+                m_count = 10;
+            m_status |= 8;
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A TskMoveSectaFindPath to cell to on the leg slot, reporting into
+// m_status (modes 6.. walk by the motion).
+// callcheck: operator_new (the new expression)
+
+void TskMoveSecta::startLeg(int to)
+{
+    TskMoveSectaFindPath *task = new TskMoveSectaFindPath(m_oid, to, &m_status, m_kind,
+                                                          m_mode >= 6, 0x20, m_speed, m_rate);
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, m_taskId, 0x11);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kills the running leg.
+// ROR 0x001edd3c
+
+void TskMoveSecta::term()
+{
+    if (g_taskMan.getTask(*m_taskId) != 0)
+        g_taskMan.killTask(*m_taskId);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Waits while a leg runs (status 0). Status 8 counts m_left frames down,
+// then kills the leg and asks for the next (2); 2 becomes 1 for a frame;
+// then by mode (jump table data 0x2fde90): the next list cell (0 / 6 end
+// after count with motion 1; 1 / 7 start over), a random one (2 / 8 end
+// after count; 3 / 9 never), or the object's cell again (4 / 5: in it, a
+// TskMoveTypeGen toward the object; no cell or no way, stand with motion
+// 1 and try again in 60 frames; 5 / 11 every m_count frames).
+// callcheck: operator_new, rand, TskMoveSectaFindPath (the legs: startLeg, the ROM's inline)
+// ROR 0x001edd90
+
+int TskMoveSecta::exec(int id, int time, int arg)
+{
+    (void)id;
+    (void)time;
+    (void)arg;
+    int mode = m_mode;
+    const int *list = (const int *)m_arg;
+
+    if (m_status == 0)
+        return 0;
+    if ((m_status & 8) != 0)
+    {
+        if (m_left-- > 0)
+            return 0;
+        if (g_taskMan.getTask(*m_taskId) != 0)
+            g_taskMan.killTask(*m_taskId);
+        m_left = m_count;
+        m_status = (m_status & ~8) | 2;
+        return 0;
+    }
+    if ((m_status & 2) != 0)
+    {
+        m_status = (m_status & ~2) | 1;
+        return 0;
+    }
+    switch ((u_int)mode)
+    {
+    case 0: case 6:
+        if (--m_left < 1)
+            break;
+        m_status = 0;
+        m_cur++;
+        startLeg(*m_cur);
+        return 0;
+    case 1: case 7:
+        if (--m_left < 1)
+        {
+            m_left = m_count;
+            m_cur = list;
+        }
+        else
+        {
+            m_cur++;
+        }
+        m_status = 0;
+        startLeg(*m_cur);
+        return 0;
+    case 2: case 8:
+        if (--m_left < 1)
+            break;
+        m_status = 0;
+        // PORT: the ROM traps on a zero count (break 7).
+        startLeg(list[m_count > 0 ? rand() % m_count : 0]);
+        return 0;
+    case 3: case 9:
+        if (--m_left < 1)
+            m_left = m_count;
+        m_status = 0;
+        startLeg(list[m_count > 0 ? rand() % m_count : 0]);
+        return 0;
+    case 4: case 5: case 10: case 11:
+    {
+        int to = -1;
+        if ((m_status & 4) == 0)
+            to = g_gamMan.getObjSectaNo((u_int)m_arg, chrIsOidType2(m_oid));
+        if (to != -1)
+        {
+            if (g_taskMan.getTask(*m_taskId) != 0)
+                g_taskMan.killTask(*m_taskId);
+            // The ROM asks twice for the achr's cell; once is the same.
+            if (g_gamMan.getObjSectaNo(m_oid, chrIsOidType2(m_oid)) == to)
+            {
+                // callcheck: operator_new (the new expression)
+                TskMoveTypeGen *task = new TskMoveTypeGen(m_oid, m_mode < 6 ? 3 : 0xb, m_arg,
+                                                          m_kind, 1.0f, m_rate);
+                g_taskMan.addTask(1, -1, 1, 0, task, 0, m_taskId, 0x11);
+            }
+            else
+            {
+                startLeg(to);
+            }
+            m_status = 0;
+        }
+        else
+        {
+            chrMtnMove(m_rate * 0x1.11111p-6f, CHR_ROT_KEEP, m_oid, 1, -1, 0x100, NULL);
+            m_left = 60;
+            m_count = 60;
+            m_status = (m_status & ~4) | 8;
+        }
+        if (m_mode == 5 || m_mode == 11)
+            m_status |= 8;
+        return 0;
+    }
+    default:
+        return 0;
+    }
+    // Modes 0 / 2 / 6 / 8 at the end of the list: stand.
+    chrMtnMove(m_rate * 0x1.11111p-6f, CHR_ROT_KEEP, m_oid, 1, -1, 0x100, NULL);
+    return 1;
 }
 
 // ──────────────────────────────────────────────────────────────────────

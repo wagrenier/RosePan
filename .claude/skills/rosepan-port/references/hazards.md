@@ -80,6 +80,10 @@ entries are marked **RoR** with the date.
 
 ## Functions Ghidra got wrong (the most common time sink in ReiPan)
 
+- **The brief's class role can be wrong for an unnamed function; rtti.py is the authority**
+  (2026-10-26): the tsk_chr.cpp brief listed FUN_001edd90 as TskMoveAdj's constructor, but
+  `rtti.py --class TskMoveSecta` shows it is TskMoveSecta's exec (slot 4). Check the vtable slots
+  before writing a class's methods.
 - **A dispatch table full of two-instruction functions.** The script native table data 0x2d90f8 has
   512 entries, 471 of them `jr ra; move v0,zero` with no Ghidra function, and four real handlers hidden
   inside the bodies before them (2026-10-25). Read the table words from the ELF, classify each target by

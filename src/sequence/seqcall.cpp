@@ -2349,14 +2349,14 @@ intptr_t seqFunc211(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
         break;
     case 30:
         seqKillTaskOn(id);
-        task = new TskMoveSectaFindPath(oid, a2, 0, kind, shift, 0x7f, seqWordFloat(t0), rate);
+        task = new TskMoveSectaFindPath(oid, (int)a2, NULL, kind, shift, 0x7f, seqWordFloat(t0), rate);
         break;
     case 40: case 41: case 42: case 43: case 50: case 51:
     {
         int      no = op < 50 ? (int)(op - 40) : (int)(op - 46);
         intptr_t arg = op == 50 ? 0 : op == 51 ? t1 : a2;
         seqKillTaskOn(id);
-        task = new TskMoveSecta(oid, shift * 6 + no, arg, (int)a3, kind, seqWordFloat(t0), rate);
+        task = new TskMoveSecta(oid, shift * 6 + no, (int)arg, a3, kind, seqWordFloat(t0), rate);
         break;
     }
     case 800:

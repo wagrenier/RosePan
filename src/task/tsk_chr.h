@@ -23,6 +23,7 @@
 
 #include "sdk/eetypes.h"
 #include "i3d/i3denv.h"
+#include "game/gamstat.h"
 #include "msg/msgman.h"
 #include "task/tsk_man.h"
 
@@ -409,16 +410,109 @@ struct TskMovePointPath : CmnITask
     int                 m_motion;      // ROR 0x7c
     float               m_rate;        // ROR 0x80: the motion's speed
 };
-/* layout: host */
-struct TskMoveSectaFindPath : CmnITask     // EE 0x2c0
+/* TskMoveSectaFindPath : CmnITask (vtable 0x2e4a10, EE 0x2c0 bytes; kind
+ * 0xb): an achr walks the secta cells from the one it stands in to cell
+ * no to (GamMan::findSectaPath over list chrIsOidType2(oid)), cell point
+ * by cell point. mode < 1 slides it at speed a frame (stepSlide, or
+ * stepSlideHit for an achr off the secta lists) while its walk motion
+ * (param 0x1100 at param 0x1103 / 60) plays; mode > 0 lets a chrMtnMove
+ * of the walk motion carry it (stepMotion). Each aim turns the achr like
+ * TskMoveTypeGen::turnTo (params 0x1101 / 0x1102 within 0x1105 of
+ * behind -> stepTurn). The status word *status (may be NULL) gets 4 when
+ * there is no path, bit 2 when the last cell is reached. kind and maxCells
+ * are not read. layout: host -- pointers and a member-function pointer;
+ * EE offsets in the comments. */
+struct TskMoveSectaFindPath : CmnITask
 {
-    TskMoveSectaFindPath(u_int oid, intptr_t arg, int a3, int kind, int shift, int t2, float a,
-                         float rate);                                    // ROR 0x001ec940
+    typedef int (TskMoveSectaFindPath::*StepFunc)();
+
+    TskMoveSectaFindPath(u_int oid, int to, int *status, int kind, int mode, int maxCells,
+                         float speed, float rate);                       // ROR 0x001ec940
+    ~TskMoveSectaFindPath() override {}                                  // ROR 0x001ecba4
+
+    int  get_task_type() override { return 0xb; }                        // ROR 0x002902b8
+    void init() override {}                                              // ROR 0x002902c0
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001ed100
+    void term() override;                                                // ROR 0x001ecbd8
+
+    /* Sets off toward cell m_index: the velocity and frames (or the
+     * motion's frames), then the turn. */
+    void aim();                                                          // ROR 0x001ed1d0
+    /* aim's first half (the ROM's inline, also in stepTurn): the actor's
+     * position and heading, the slide or chrMoveFrames; returns the
+     * heading to the cell. */
+    float setOff();
+    int  stepTurn();                                                     // ROR 0x001ecbe0
+    int  stepSlideHit();                                                 // ROR 0x001ecdd4
+    int  stepSlide();                                                    // ROR 0x001ecebc
+    int  stepMotion();                                                   // ROR 0x001ecf3c
+
+    ACHRstat     *m_achr;          // ROR 0x004
+    u_int         m_oid;           // ROR 0x008
+    int           m_actor;         // ROR 0x00c: the achr's actor (ObjStat::m_actor)
+    GamSectaPath  m_path;          // ROR 0x010: the cells (count at 0x20c)
+    int           m_index;         // ROR 0x218: the cell walked to
+    int           m_frames;        // ROR 0x21c: frames left to it
+    int           m_half;          // ROR 0x220: stepMotion aims again below it
+    int           m_from;          // ROR 0x224: the start cell no
+    int           m_to;            // ROR 0x228: the goal cell no
+    float         m_speed;         // ROR 0x230: the slide per frame (0 -> 1)
+    sceVu0FVECTOR m_target;        // ROR 0x240: stepMotion's aim (never written by the ROM)
+    sceVu0FVECTOR m_pos;           // ROR 0x250
+    sceVu0FVECTOR m_rot;           // ROR 0x260: [1] the heading
+    sceVu0FVECTOR m_vel;           // ROR 0x270: the slide (mode < 1)
+    sceVu0FVECTOR m_lastPos;       // ROR 0x280: the last position placed
+    int          *m_status;        // ROR 0x290: the owner's status word, NULL none
+    CmnITask     *m_mtnTask;       // ROR 0x294: mode > 0, chrMoveFrames' chrMtnMove (a TskMtnMove)
+    int           m_mode;          // ROR 0x298: > 0 walk by the motion
+    int           m_motion;        // ROR 0x29c: param 0x1100, the walk motion
+    float         m_rate;          // ROR 0x2a0: param 0x1103 / 60, its speed
+    float         m_rotSpeed;      // ROR 0x2a4: param 0x1104, the turn speed
+    u_int         m_flags;         // ROR 0x2a8: 1 hold while a turn task runs, 2 the motion held (never set by the ROM)
+    int           m_turnRight;     // ROR 0x2ac: param 0x1101, -1 none
+    int           m_turnLeft;      // ROR 0x2b0: param 0x1102, -1 none
+    float         m_turnBack;      // ROR 0x2b4: param 0x1105, the angle from behind that plays them
+    StepFunc      m_stepFunc;      // ROR 0x2b8: GCC 2 {delta, index, pfn}
 };
-/* layout: host */
-struct TskMoveSecta : CmnITask             // EE 0x80
+
+/* TskMoveSecta : CmnITask (vtable 0x2e49d0, EE 0x80 bytes; kind 0xc):
+ * native 211 cases 40..43 / 50 / 51 -- an achr walks to secta cells, each
+ * leg a TskMoveSectaFindPath on the achr's m_task[3] that reports into
+ * m_status (bit 1 the leg is to start, 2 it ended, 4 no way, 8 wait
+ * m_left frames, then go again). By mode % 6 (6.. walk by the motion):
+ * 0 the count cells of the list arg in turn, 1 round and round, 2 count
+ * random ones, 3 random ones for ever, 4 to the cell of object arg (a
+ * TskMoveTypeGen mode 3 / 11 when already in it), 5 the same, again every
+ * max(count, 10) frames. Without a way it stands (motion 1) and tries
+ * again in 60 frames. Modes 0 / 2 end with motion 1. layout: host --
+ * pointers; EE offsets in the comments. */
+struct TskMoveSecta : CmnITask
 {
-    TskMoveSecta(u_int oid, int mode, intptr_t arg, int a3, int kind, float a, float rate); // ROR 0x001ed998
+    TskMoveSecta(u_int oid, int mode, int count, intptr_t arg, int kind, float speed,
+                 float rate);                                            // ROR 0x001ed998
+    ~TskMoveSecta() override {}                                          // ROR 0x001edd08
+
+    int  get_task_type() override { return 0xc; }                        // ROR 0x00290318
+    void init() override {}                                              // ROR 0x00290320
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001edd90
+    void term() override;                                                // ROR 0x001edd3c
+
+    /* A new leg to cell no to on *m_taskId. */
+    void startLeg(int to);
+
+    ACHRstat  *m_achr;          // ROR 0x04
+    u_int      m_oid;           // ROR 0x08
+    int        m_status;        // ROR 0x0c: written by the legs (see above)
+    int       *m_taskId;        // ROR 0x10: &m_achr->m_task[3], the leg's task id
+    int        m_actor;         // ROR 0x14
+    intptr_t   m_arg;           // ROR 0x18: modes 0..3 the cell list (const int *), 4 / 5 the object
+    const int *m_cur;           // ROR 0x1c: modes 0 / 1, the list entry walked to
+    float      m_speed;         // ROR 0x2c
+    int        m_mode;          // ROR 0x30
+    int        m_count;         // ROR 0x38: the list's length (mode 5: the frames between goes)
+    int        m_left;          // ROR 0x3c: entries (frames) left
+    int        m_kind;          // ROR 0x40: handed to the legs
+    float      m_rate;          // ROR 0x44
 };
 
 /* TskAttach : CmnITask (vtable 0x2e4bd0, EE 0x40 bytes; kind 0): seqcall

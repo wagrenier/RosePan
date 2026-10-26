@@ -8171,6 +8171,12 @@
   "was": "FUN_001d68a0",
   "why": "(buf): the load screen's applyLoadData hands it the buffer read from the card"
  },
+ "001d7b08": {
+  "name": "GamMan::getObjSectaNo",
+  "tag": "ror-inferred",
+  "was": "FUN_001d7b08",
+  "why": "achr / fchr position into 0x17c340 over secta list bss 0x7811ac (radius 40), returns the found cell's word 0 (its id) or -1; list = chrIsOidType2"
+ },
  "001d7eb8": {
   "name": "GamMan::selectSectaList",
   "tag": "ror-inferred",
@@ -8200,6 +8206,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d817c",
   "why": "(cell, pos, list): 0x17dd5c on list +8 with the cell's id: the floor height under pos (flat, x or z slope); 100000 for a NULL cell"
+ },
+ "001d81f0": {
+  "name": "GamMan::findSectaPath",
+  "tag": "ror-inferred",
+  "was": "FUN_001d81f0",
+  "why": "cells from / to (no * 0x90) of list into 0x17d298 with the out buffer a3; returns buffer +0x1fc (the cell count) or 0"
  },
  "001d83d0": {
   "name": "GamMan::lookupFlagTable",
@@ -9539,11 +9551,77 @@
   "was": "FUN_001ec940",
   "why": "the constructor of class TskMoveSectaFindPath (rtti); 0x2c0 bytes, native 211 op 30"
  },
+ "001ecba4": {
+  "name": "TskMoveSectaFindPath::~TskMoveSectaFindPath",
+  "tag": "ror-inferred",
+  "was": "FUN_001ecba4",
+  "why": "TskMoveSectaFindPath vtable slot 6: stores vtable 0x2e4a10, operator_delete on bit 0"
+ },
+ "001ecbd8": {
+  "name": "TskMoveSectaFindPath::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001ecbd8",
+  "why": "TskMoveSectaFindPath vtable slot 5 (term): empty"
+ },
+ "001ecbe0": {
+  "name": "TskMoveSectaFindPath::stepTurn",
+  "tag": "ror-inferred",
+  "was": "FUN_001ecbe0",
+  "why": "step aim sets: waits for the achr turn task m_task[1], then re-aims and chrRotTo / chrRotFromTo"
+ },
+ "001ecdd4": {
+  "name": "TskMoveSectaFindPath::stepSlideHit",
+  "tag": "ror-inferred",
+  "was": "FUN_001ecdd4",
+  "why": "step for an achr flagged 0x40 without 0x80: placeAchr, HIT in moving task, sceVu0AddVector + trySetPos, no cell re-aims"
+ },
+ "001ecebc": {
+  "name": "TskMoveSectaFindPath::stepSlide",
+  "tag": "ror-inferred",
+  "was": "FUN_001ecebc",
+  "why": "default step of mode < 1: sceVu0AddVector + ObjStat::setPosOnFloor, frames--"
+ },
+ "001ecf3c": {
+  "name": "TskMoveSectaFindPath::stepMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001ecf3c",
+  "why": "step of mode > 0: holds the chrMtnMove task (+4 bit 0) while turning, re-aims by chrMoveFrames below half the frames (TskMoveTypeGen::stepMotion copy)"
+ },
+ "001ed100": {
+  "name": "TskMoveSectaFindPath::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001ed100",
+  "why": "TskMoveSectaFindPath vtable slot 4: member pointer at +0x2b8 while frames +0x21c > 0, else next path cell (aim) or sets status bit 2 and ends"
+ },
+ "001ed1d0": {
+  "name": "TskMoveSectaFindPath::aim",
+  "tag": "ror-inferred",
+  "was": "FUN_001ed1d0",
+  "why": "ctor / exec / stepSlideHit: actor pos, utlDirDist to path cell [+0x218] pos, slide velocity or chrMoveFrames, turn with params 0x1101/0x1102 within 0x1105 of behind (step 0x1ecbe0)"
+ },
  "001ed998": {
   "name": "TskMoveSecta::TskMoveSecta",
   "tag": "ror-inferred",
   "was": "FUN_001ed998",
   "why": "the constructor of class TskMoveSecta (rtti); 0x80 bytes, native 211 ops 40..51"
+ },
+ "001edd08": {
+  "name": "TskMoveSecta::~TskMoveSecta",
+  "tag": "ror-inferred",
+  "was": "FUN_001edd08",
+  "why": "TskMoveSecta vtable slot 6: stores vtable 0x2e49d0, operator_delete on bit 0"
+ },
+ "001edd3c": {
+  "name": "TskMoveSecta::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001edd3c",
+  "why": "TskMoveSecta vtable slot 5 (term): kills the sub task whose id is at *(+0x10) (achr m_task[3])"
+ },
+ "001edd90": {
+  "name": "TskMoveSecta::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001edd90",
+  "why": "TskMoveSecta vtable slot 4 (rtti; not TskMoveAdj): status word +0xc, per mode starts the next TskMoveSectaFindPath / TskMoveTypeGen on m_task[3] or ends with chrMtnMove motion 1"
  },
  "001ee7f0": {
   "name": "chrMoveFrames",
