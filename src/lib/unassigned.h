@@ -110,6 +110,43 @@ struct TskFrameFunc : CmnITask
     TskFrameFunc(int kind, intptr_t arg, int frames);                    // ROR 0x001f184c
 };
 
+/* The achr movement tasks (unassigned@001e6cac; class names from their
+ * vtables): oid the achr, mode the way it moves, rate the step per frame
+ * (1/60 by default). Natives 202 / 211 start them on the achr's
+ * m_task[0]. layout: host -- no members. */
+struct TskMoveTypeGen : CmnITask           // EE 0xc0, vtable 0x2e4ad0
+{
+    TskMoveTypeGen(u_int oid, int mode, intptr_t arg, int kind, float frames, float rate); // ROR 0x001e9a3c
+};
+/* layout: host */
+struct TskMoveTypeRound : CmnITask         // EE 0x80
+{
+    TskMoveTypeRound(u_int oid, int mode, intptr_t arg, int kind, float a, float b, float rate); // ROR 0x001eb63c
+};
+/* layout: host */
+struct TskMovePointPath : CmnITask         // EE 0xc0
+{
+    TskMovePointPath(u_int oid, int mode, intptr_t path, int arg, int kind, float a, float rate); // ROR 0x001ec344
+};
+/* layout: host */
+struct TskMoveSectaFindPath : CmnITask     // EE 0x2c0
+{
+    TskMoveSectaFindPath(u_int oid, intptr_t arg, int a3, int kind, int shift, int t2, float a,
+                         float rate);                                    // ROR 0x001ec940
+};
+/* layout: host */
+struct TskMoveSecta : CmnITask             // EE 0x80
+{
+    TskMoveSecta(u_int oid, int mode, intptr_t arg, int a3, int kind, float a, float rate); // ROR 0x001ed998
+};
+
+/* TskCamera : CmnITask (EE 0xc0, unassigned@001f82e4): a scripted camera
+ * move (native 016 case 50, on GamMan's m_camTaskId). layout: host. */
+struct TskCamera : CmnITask
+{
+    TskCamera(intptr_t a, intptr_t b);                                   // ROR 0x001fbc0c
+};
+
 /* TskAttach : CmnITask (vtable 0x2e4bd0, EE 0x40 bytes): +4 the oid, +8
  * its actor, +0xc arg, +0x10 *value. layout: host -- no members. */
 struct TskAttach : CmnITask

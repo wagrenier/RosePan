@@ -17,6 +17,25 @@
 #include "i3d/i3denv.h"
 #include "sequence/sequence.h"
 
+/* An area trigger record (EE 0xb0, plain EE layout: the scripts pass it
+ * from their image, native 023; GamArea copies it whole into a node).
+ * Field roles beyond the ones named are unverified. */
+struct GamAreaTrg
+{
+    float m_rect[4];            // ROR 0x00: x0, z0, x1, z1; native 023 orders each pair when m_flags & 0x103
+    u_int _10[4];
+    u_int m_flags;              // ROR 0x20: native 023 sets 0x3000000; 0x1000000 registers it (0x1de104), 0x400000 set by addTrg when m_70
+    u_int _24[2];
+    u_int m_id;                 // ROR 0x2c: addTrg skips a listed id; newId replaces it with a fresh oid
+    u_int _30[16];
+    u_int m_70;                 // ROR 0x70: non-zero: addTrg sets m_flags 0x400000
+    u_int _74[15];
+};
+static_assert(sizeof(GamAreaTrg) == 0xb0, "GamAreaTrg is 0xb0 bytes on the EE");
+static_assert(offsetof(GamAreaTrg, m_flags) == 0x20, "m_flags");
+static_assert(offsetof(GamAreaTrg, m_id) == 0x2c, "m_id");
+static_assert(offsetof(GamAreaTrg, m_70) == 0x70, "m_70");
+
 /* GamMan's member at +0x40 (bss 0x781300; its code is in
  * unassigned@001dd5e8, class name invented): a list of rects at +0xc290
  * tested against the PC's position. layout: host -- no members. */
@@ -36,6 +55,16 @@ struct GamArea
     void clearKind(int kind);                                            // ROR 0x001dddbc
     /* 1 when one of its rects (the list +0xd0) has id. */
     int  hasId(u_int id);                                                // ROR 0x001e0d70
+    /* Copies trg into a node of its list +0xd0 unless a listed one has
+     * its id; newId != 0 first gives trg a fresh oid (GamMan::makeOid(0,
+     * 0xd)). The ROM's callers pass a fourth word it never reads. */
+    void addTrg(GamAreaTrg *trg, int newId);                             // ROR 0x001dd5e8
+    /* stopTrgs, then the listed triggers with flag 0x1000000 again. */
+    void startTrgs();                                                    // ROR 0x001de4e4
+    /* Empties the active list +0xc290 into its free list. */
+    void stopTrgs();                                                     // ROR 0x001ddc80
+    /* Adds value to key's up-to-8 values in the pool *(+0x18b40). */
+    void registFtb(int key, u_int value);                                // ROR 0x001de6fc
 };
 
 struct DogActor;
@@ -105,6 +134,8 @@ struct ACHRstat : ObjStat
     /* The motion speed into +0x418 and the actor's
      * MagScene::setActorMotionSpeed (native 106). */
     void setMotionSpeed(float speed);                                    // ROR 0x001db1b8
+    /* Kills its four tasks (m_task[2], [0], [3], [1]) and sets them -1. */
+    void killTasks();                                                    // ROR 0x001da07c
 
     int   m_task[4];            // ROR 0x3d4: task ids, -1 none; [1] the turn task (chrRotStart)
     int   m_taskId;             // ROR 0x3e8: resetObj kills it
@@ -646,6 +677,16 @@ struct GamMan
     void showMsgSprite(int on, const int *param);                        // ROR 0x001cf6bc
     /* The heading from oid's position to target's (0 unless both exist). */
     float getObjDirTo(u_int oid, u_int target);                          // ROR 0x001cfb48
+    /* The object's position / rotation (x, y, z, w) into out; 1 when it
+     * exists. getObjRot leaves out alone for a vfchr. */
+    int  getObjPos(u_int oid, float *out);                               // ROR 0x001d05f4
+    int  getObjRot(u_int oid, float *out);                               // ROR 0x001d06b8
+    /* An achr's position += d (x, y, z); other objects are left alone. */
+    void moveAchr(u_int oid, const float *d);                            // ROR 0x001d2a14
+    /* Camera mode, path position and the scene camera's trans / rotate /
+     * angle onto a three-deep stack (+0x22470, count +0x22530), and back. */
+    void pushCamera();                                                   // ROR 0x001c5ffc
+    void popCamera();                                                    // ROR 0x001c621c
     /* Frees motion id of the PC's actor (native 028). */
     void releasePcMotion(int id);                                        // ROR 0x001c4f70
     /* Saves the scene's fog in the first free of three slots (native 012). */

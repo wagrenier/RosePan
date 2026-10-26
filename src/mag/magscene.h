@@ -313,6 +313,9 @@ struct MagScene
         return m_tenkyu[no].m_c_num;
     }
     int  getCameraMode(int *out);                                        // ROR 0x0013d5ac
+    /* Camera modes 3 / 4 (a map camera's path): the camera to the path
+     * point at distance pos (native 016 case 7). */
+    void seekCameraPath(float pos);                                      // ROR 0x0013d240
     void setLightNo(int theNo);                                          // ROR 0x0013f4d0
     /* Only asserts theNo < 8 (the destructor passes -1). */
     void checkLightNo(int theNo);                                        // ROR 0x0013f49c

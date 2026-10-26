@@ -623,6 +623,18 @@
   "was": "FUN_0010fac0",
   "why": "maps the camera's angle at +0x140 (radians) through a 13-point table in 15-degree steps (0, 28, 57 .. 180) and returns radians; MagScene::draw recomputes the view frustum when +0x140 changes"
  },
+ "0010fbd4": {
+  "name": "DogCamera::getLensScale",
+  "tag": "ror-inferred",
+  "was": "FUN_0010fbd4",
+  "why": "m_angle / m_144 / 0.901526, setLensScale's inverse; native 016 case 6"
+ },
+ "0010fc08": {
+  "name": "DogCamera::setLensScale",
+  "tag": "ror-inferred",
+  "was": "FUN_0010fc08",
+  "why": "m_angle (+0x140) = scale * m_144 * 0.901526; native 016 case 5"
+ },
  "0010fc7c": {
   "name": "DogEntity::setRotate",
   "tag": "ror-inferred",
@@ -2728,6 +2740,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0013caf0",
   "why": "stores the mode +0x2ad50 and dispatches modes 0..5 through a jump table"
+ },
+ "0013d240": {
+  "name": "MagScene::seekCameraPath",
+  "tag": "ror-inferred",
+  "was": "FUN_0013d240",
+  "why": "camera modes 3 / 4 on a path (m_camera_2ad58 the map camera): places the camera on the path point nearest the distance (int a1 as float) and searches up to 1000 steps within 5 units; native 016 case 7"
  },
  "0013d5ac": {
   "name": "MagScene::getCameraMode",
@@ -6563,6 +6581,18 @@
   "was": "FUN_001c5f70",
   "why": "part of resume(0x100000): S2dMes sprite 2 off after flags2 0x20, flags2 |= 8"
  },
+ "001c5ffc": {
+  "name": "GamMan::pushCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_001c5ffc",
+  "why": "below 3 entries (+0x22530): camera mode / word (MagSystem::getCameraMode), +0x21f78, the path pos (0x13d4d0) for modes 3..5, the scene camera's trans / rotate / angle into a 0x30-byte record at +0x22470; native 016 case 20"
+ },
+ "001c621c": {
+  "name": "GamMan::popCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_001c621c",
+  "why": "pushCamera's inverse: setCameraMode from the record (map cameras 3..5 with 0x13d52c), the camera's trans / rotate / angle restored, dirty set; native 016 case 21"
+ },
  "001c6470": {
   "name": "GamMan::pushFog",
   "tag": "ror-inferred",
@@ -7061,6 +7091,18 @@
   "was": "FUN_001d046c",
   "why": "by oid bits 28..29: isAchr / isVFchr / isFchr (type 5 tries vfchr first)"
  },
+ "001d05f4": {
+  "name": "GamMan::getObjPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001d05f4",
+  "why": "isObj, then by oid list the achr (0x1d890c) or vfchr / fchr (0x1db71c) position into out; 1 when the object exists"
+ },
+ "001d06b8": {
+  "name": "GamMan::getObjRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001d06b8",
+  "why": "isObj, then ObjStat::getRot (achr) or FCHRstat::getRot (fchr) into out; 1 when the object exists"
+ },
  "001d080c": {
   "name": "GamMan::addObjColliSegment",
   "tag": "ror-inferred",
@@ -7204,6 +7246,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d2724",
   "why": "which 1 / 0 / 6 / 7 sets m_flags bit 0x4000000 / 0x2000000 / 0x8000000 / 0x10000000, then MagScene 0x13fb3c (the light code)"
+ },
+ "001d2a14": {
+  "name": "GamMan::moveAchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2a14",
+  "why": "an achr oid: its position (0x1d890c) plus the vector d, stored back (0x1d89c4); native 202 cases 1 / 2"
  },
  "001d2aac": {
   "name": "GamMan::isAchr",
@@ -7379,6 +7427,12 @@
   "was": "FUN_001d9f10",
   "why": "clears +0x110 / +0x114 (and +0x10c with the flag) then 0x1da07c"
  },
+ "001da07c": {
+  "name": "ACHRstat::killTasks",
+  "tag": "ror-inferred",
+  "was": "FUN_001da07c",
+  "why": "kills the four task ids +0x3dc, +0x3d4, +0x3e0, +0x3d8 and sets them -1; ACHRstat dtor, ObjStat::clearSecta, native 211 op 800"
+ },
  "001da130": {
   "name": "ACHRstat::pauseTasks",
   "tag": "ror-inferred",
@@ -7505,17 +7559,41 @@
   "was": "FUN_001dd414",
   "why": "GamMan::init's call on its +0x40 member; allocates with operator new / new[]"
  },
+ "001dd5e8": {
+  "name": "GamArea::addTrg",
+  "tag": "ror-inferred",
+  "was": "FUN_001dd5e8",
+  "why": "copies a 0xb0-byte trigger record into a node of the pool at +0 linked on the list +0xd0 unless its id (+0x2c) is listed; newId != 0 gives it GamMan::makeOid(0, 0xd) first; flag 0x1000000 also registers it (0x1de104); native 023 cases 1..5, GamMan::create_trg"
+ },
  "001dd7bc": {
   "name": "GamArea::stopKind",
   "tag": "ror-inferred",
   "was": "FUN_001dd7bc",
   "why": "afterSeqExec kind 3 calls it on GamMan +0x40 with 2; not read yet"
  },
+ "001ddc80": {
+  "name": "GamArea::stopTrgs",
+  "tag": "ror-inferred",
+  "was": "FUN_001ddc80",
+  "why": "empties the active list +0xc290 back into its free list +0xc1c0 (count +0xc350); native 023 case 11, GamMan::stop_trg / releaseObjs / resetStage"
+ },
  "001dddbc": {
   "name": "GamArea::clearKind",
   "tag": "ror-inferred",
   "was": "FUN_001dddbc",
   "why": "afterSeqExec kind 3, after stopKind; not read yet"
+ },
+ "001de4e4": {
+  "name": "GamArea::startTrgs",
+  "tag": "ror-inferred",
+  "was": "FUN_001de4e4",
+  "why": "stopTrgs, then every listed trigger with flag 0x1000000 registered again (0x1de104); native 023 case 10, GamMan::start_trg"
+ },
+ "001de6fc": {
+  "name": "GamArea::registFtb",
+  "tag": "ror-inferred",
+  "was": "FUN_001de6fc",
+  "why": "adds value to the up-to-8 values of key in the pool *(+0x18b40), a new record when key is not there; native 023 case 30, GamMan::regist_ftb"
  },
  "001dea40": {
   "name": "GamArea::startPcAction",
@@ -7679,6 +7757,36 @@
   "was": "FUN_001e7d7c",
   "why": "non-zero when the task id still runs; playStream does not queue a second TskSnd"
  },
+ "001e9a3c": {
+  "name": "TskMoveTypeGen::TskMoveTypeGen",
+  "tag": "ror-inferred",
+  "was": "FUN_001e9a3c",
+  "why": "the constructor of class TskMoveTypeGen (rtti, vtable 0x2e4ad0); 0xc0 bytes: oid +8, mode +0x1c, arg +0x6c, kind +0xa4, frames +0xa0, achr params 0x1100..0x1105; native 202"
+ },
+ "001eb63c": {
+  "name": "TskMoveTypeRound::TskMoveTypeRound",
+  "tag": "ror-inferred",
+  "was": "FUN_001eb63c",
+  "why": "the constructor of class TskMoveTypeRound (rtti); 0x80 bytes, native 211 ops 10 / 11"
+ },
+ "001ec344": {
+  "name": "TskMovePointPath::TskMovePointPath",
+  "tag": "ror-inferred",
+  "was": "FUN_001ec344",
+  "why": "the constructor of class TskMovePointPath (rtti); 0xc0 bytes, native 211 ops 20..23"
+ },
+ "001ec940": {
+  "name": "TskMoveSectaFindPath::TskMoveSectaFindPath",
+  "tag": "ror-inferred",
+  "was": "FUN_001ec940",
+  "why": "the constructor of class TskMoveSectaFindPath (rtti); 0x2c0 bytes, native 211 op 30"
+ },
+ "001ed998": {
+  "name": "TskMoveSecta::TskMoveSecta",
+  "tag": "ror-inferred",
+  "was": "FUN_001ed998",
+  "why": "the constructor of class TskMoveSecta (rtti); 0x80 bytes, native 211 ops 40..51"
+ },
  "001f0e90": {
   "name": "chrRotStart",
   "tag": "ror-inferred",
@@ -7774,6 +7882,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001fbbd0",
   "why": "the last call of execStageReq stat 2; not read yet"
+ },
+ "001fbc0c": {
+  "name": "TskCamera::TskCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_001fbc0c",
+  "why": "the constructor of class TskCamera (rtti); 0xc0 bytes, native 016 case 50 starts it on GamMan +0x222b8 with (a2, a1)"
  },
  "00203ea8": {
   "name": "SysTimer::start",

@@ -16,8 +16,9 @@
 // 001, 002, 004 (wait until), 005, 006 (messages), 007, 009, 012 (lights,
 // fog), 014, the system call 018, 019 (pad), 021, 027, 028, 029 (stage
 // changes), 032, 033, 036, 038, 039, 106 (motion speed), 110, 151 (object
-// control), 152 (object queries), 155 (vfchr objects), 200 (turns) and
-// 281's helpers. The others are stubs (seqcall.h lists them).
+// control), 152 (object queries), 155 (vfchr objects), 016 (camera), 023
+// (area triggers), 026, 156 (ray tests), 200 (turns), 202 / 211 (achr
+// moves) and 281's helpers. The others are stubs (seqcall.h lists them).
 
 #include "sequence/seqcall.h"
 
@@ -1731,6 +1732,396 @@ intptr_t seqFunc200(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The camera: a0 1 / 2 set the scene camera's position / rotation from
+// the vector at a1, 3 / 4 read them back into it, 5 / 6 its lens scale
+// (the float at a1), 7 the path position a1 (unless flags 0x20000), 8
+// the actor of object a1 the camera follows, 10 / 11 camera mode a1
+// (11 with map camera a2), 20 / 21 push / pop the camera, 50 / 51 start
+// / stop a TskCamera (a2, a1). Jump table data 0x3001c0 (52 cases).
+// callcheck: operator_new (new TskCamera)
+// ROR 0x00206640
+
+intptr_t seqFunc016(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t)
+{
+    GamMan    &gam = g_gamMan;
+    DogCamera &cam = g_magSystem.m_scene.m_camera_entity;
+    float     *v = (float *)a1;
+
+    switch ((u_int)op)
+    {
+    case 1:
+        cam.m_trans[0] = v[0];
+        cam.m_trans[1] = v[1];
+        cam.m_trans[2] = v[2];
+        cam.m_dirty = 1;
+        break;
+    case 2:
+        cam.m_rotate[0] = v[0];
+        cam.m_rotate[1] = v[1];
+        cam.m_rotate[2] = v[2];
+        cam.normalizeRotate();
+        cam.m_dirty = 1;
+        break;
+    case 3:
+        v[0] = cam.m_trans[0];
+        v[1] = cam.m_trans[1];
+        v[2] = cam.m_trans[2];
+        break;
+    case 4:
+        v[0] = cam.m_rotate[0];
+        v[1] = cam.m_rotate[1];
+        v[2] = cam.m_rotate[2];
+        break;
+    case 5:
+        cam.setLensScale(v[0]);
+        break;
+    case 6:
+        v[0] = cam.getLensScale();
+        break;
+    case 7:
+        if ((gam.m_flags & 0x20000) == 0)
+            g_magSystem.m_scene.seekCameraPath((float)(u_int)a1);
+        break;
+    case 8:
+        gam.m_21f70 = gam.getActorNo((u_int)a1);
+        break;
+    case 10:
+        gam.setCameraMode((int)a1, 0);
+        break;
+    case 11:
+        gam.setCameraMode((int)a1, (u_int)a2 & 0xffff);
+        break;
+    case 20:
+        gam.pushCamera();
+        break;
+    case 21:
+        gam.popCamera();
+        break;
+    case 50:
+    {
+        TskCamera *task = new TskCamera(a2, a1);
+        g_taskMan.addTask(1, -1, 1, 0, task, 0, &gam.m_camTaskId, 0x11);
+        break;
+    }
+    case 51:
+        if (g_taskMan.getTask(gam.m_camTaskId) != NULL)
+        {
+            g_taskMan.killTask(gam.m_camTaskId);
+            gam.m_camTaskId = -1;
+        }
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Area triggers (GamMan's GamArea): a0 1..5 add the trigger record at a1
+// (1 keeps its id, 2..5 give it a new one; the ROM passes 2..5 a fourth
+// word -1, 0, 1, 2 addTrg never reads), 10 / 11 start / stop them, 30
+// registers a2 under key a1. The record is flagged 0x3000000 first, and
+// with flags 0x103 its rect's corners are ordered. Jump tables data
+// 0x300640 (31 cases) and 0x3006c0.
+// ROR 0x0020839c
+
+intptr_t seqFunc023(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t)
+{
+    GamArea &area = g_gamMan.m_area;
+
+    switch ((u_int)op)
+    {
+    case 1: case 2: case 3: case 4: case 5:
+    {
+        GamAreaTrg *trg = (GamAreaTrg *)a1;
+        trg->m_flags |= 0x3000000;
+        if ((trg->m_flags & 0x103) != 0)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                float lo = trg->m_rect[i];
+                float hi = trg->m_rect[i + 2];
+                if (hi < lo)
+                {
+                    trg->m_rect[i] = hi;
+                    trg->m_rect[i + 2] = lo;
+                }
+            }
+        }
+        area.addTrg(trg, op != 1);
+        break;
+    }
+    case 10:
+        area.startTrgs();
+        break;
+    case 11:
+        area.stopTrgs();
+        break;
+    case 30:
+        area.registFtb((int)a1, (u_int)a2);
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A kind 8 frame task over the words a1..t0: a0 1 on GamMan's frame-task
+// id, 2 on its select-task id. Jump table data 0x3006e0 (6 cases).
+// callcheck: operator_new (new TskFrameFunc)
+// ROR 0x00208518
+
+intptr_t seqFunc026(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t t0, intptr_t)
+{
+    GamMan &gam = g_gamMan;
+    int    *id;
+
+    if (op == 1)
+        id = &gam.m_frameTaskId;
+    else if (op == 2)
+        id = &gam.m_selectTaskId;
+    else
+        return 0;
+    // The task reads the four words (the ROM's stack block).
+    intptr_t words[4] = {a1, a2, a3, t0};
+    TskFrameFunc *task = new TskFrameFunc(8, (intptr_t)words, 0);
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 0x11);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Ray tests against the sky slots' collision (MagScene::castRay, all
+// four): a0 1 from the point a1 along a2, 2 from a1 lowered by 10 toward
+// the heading at a2 over the length at a3, 3 from object a1 raised by 10
+// along its heading over the length at a2. The hit record goes to a3
+// (case 2 always: the length's word is overwritten). 1 when the hit lies
+// within the ray (0 <= t <= 1).
+
+struct SeqRayHit
+{
+    MagSceneRayHit hit;
+    u_int          m_60[4];     // the ROM copies 0x70 bytes: 0x10 past MagSceneRayHit (stale stack)
+};
+static_assert(sizeof(SeqRayHit) == 0x70, "the 0x70 bytes native 156 copies out");
+
+static void seqClearHit(SeqRayHit *h)
+{
+    for (int k = 0; k < 5; k++)
+    {
+        h->hit.m_vec[k][0] = 0.0f;
+        h->hit.m_vec[k][1] = 0.0f;
+        h->hit.m_vec[k][2] = 0.0f;
+        h->hit.m_vec[k][3] = 1.0f;
+    }
+    h->hit.m_50 = -1;
+    h->hit._54[0] = h->hit._54[1] = h->hit._54[2] = 0;  // PC: unset in the ROM
+    h->m_60[0] = h->m_60[1] = h->m_60[2] = h->m_60[3] = 0;
+}
+
+// ROR 0x0020abfc
+
+intptr_t seqFunc156(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t, intptr_t)
+{
+    MagScene &scene = g_magSystem.m_scene;
+    SeqRayHit h;
+    float     p[4], q[4], t;
+
+    seqClearHit(&h);
+    switch ((u_int)op)
+    {
+    case 1:
+        memcpy(p, (const float *)a1, sizeof(p));
+        memcpy(q, (const float *)a2, sizeof(q));
+        t = scene.castRay(&h.hit, p, q, 0);
+        if (a3 != 0)
+            memcpy((void *)a3, &h, sizeof(h));
+        break;
+    case 2:
+    {
+        const float *dir = (const float *)a2;
+        float       *len = (float *)a3;
+        memcpy(p, (const float *)a1, sizeof(p));
+        p[1] -= 10.0f;
+        memcpy(q, p, sizeof(q));
+        q[0] += sinf(dir[0]) * len[0];
+        q[1] += cosf(dir[0]) * len[0];
+        t = scene.castRay(&h.hit, p, q, 0);
+        memcpy(len, &h, sizeof(h));
+        break;
+    }
+    case 3:
+    {
+        float r[4] = {0.0f, 0.0f, 0.0f, 0.0f};  // PC: the ROM leaves it unset for a vfchr
+        const float *len = (const float *)a2;
+        p[0] = p[1] = p[2] = p[3] = 0.0f;       // PC: idem for no object
+        g_gamMan.getObjPos((u_int)a1, p);
+        g_gamMan.getObjRot((u_int)a1, r);
+        p[1] += 10.0f;
+        memcpy(q, p, sizeof(q));
+        q[0] += sinf(r[1]) * len[0];
+        q[1] += cosf(r[1]) * len[0];
+        t = scene.castRay(&h.hit, p, q, 0);
+        if (a3 != 0)
+            memcpy((void *)a3, &h, sizeof(h));
+        break;
+    }
+    default:
+        return 0;
+    }
+    return 0.0f <= t && t <= 1.0f ? 1 : 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Achr movement: a0 1 moves object a1 by the vector at a2, 2 by the float
+// a2 along its heading; the others start a TskMoveTypeGen on the achr's
+// m_task[0] (killing the one there) with a mode (+8 for an achr flagged
+// 0x200000), a2 and the frames a3 (10 / 11 / 20 / 21 / 22 a count, 12 /
+// 13 / 14 / 23 / 24 / 25 the float at a3). Jump table data 0x301110 (26
+// cases).
+
+// The heading wrapped into -pi..pi in double precision, as the ROM does.
+static float seqWrapPi(float a)
+{
+    if ((double)a < -3.141592653589793)
+        a = (float)((double)a + 6.283185307179586);
+    if ((double)a > 3.141592653589793)
+        a = (float)((double)a - 6.283185307179586);
+    return a;
+}
+
+// Kills the task on id (when it runs) and sets id -1.
+static void seqKillTaskOn(int *id)
+{
+    if (g_taskMan.getTask(*id) != NULL)
+    {
+        g_taskMan.killTask(*id);
+        *id = -1;
+    }
+}
+
+static const float SEQ_RATE_60 = 0x1.11111p-6f;  // 0x3c888888: one frame of 60
+
+// callcheck: operator_new, getTask, killTask, fptodp, dpcmp, dpadd, dpsub, dptofp (new
+// TskMoveTypeGen, seqKillTaskOn, the double compares in seqWrapPi)
+// ROR 0x0020b528
+
+intptr_t seqFunc202(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t t0, intptr_t)
+{
+    GamMan &gam = g_gamMan;
+    u_int   oid = (u_int)a1;
+    int     mode, kind;
+    float   frames;
+
+    if (!gam.isObj(oid))
+        return 0;
+    ACHRstat *achr = gam.getAchr(oid);
+    int       base = (achr->m_flags & 0x200000) != 0 ? 8 : 0;
+
+    switch ((u_int)op)
+    {
+    case 1:
+        gam.moveAchr(oid, (const float *)a2);
+        return 0;
+    case 2:
+    {
+        float r[4] = {0.0f, 0.0f, 0.0f, 0.0f};  // PC: the ROM leaves it unset for a vfchr
+        float dist = seqWordFloat(a2);
+        float d[4];
+        gam.getObjRot(oid, r);
+        d[0] = sinf(seqWrapPi(r[1])) * dist;
+        d[1] = 0.0f;
+        d[2] = cosf(seqWrapPi(r[1])) * dist;
+        d[3] = 0.0f;                            // PC: unset in the ROM; moveAchr reads x, y, z
+        gam.moveAchr(oid, d);
+        return 0;
+    }
+    case 10: mode = 0; kind = 2; frames = (float)(u_int)a3; break;
+    case 11: mode = 1; kind = 2; frames = (float)(u_int)a3; break;
+    case 12: mode = 5; kind = 2; frames = *(const float *)a3; break;
+    case 13: mode = 3; kind = 2; frames = *(const float *)a3; break;
+    case 14: mode = 4; kind = 2; frames = *(const float *)a3; break;
+    case 20: mode = 2; kind = 0; frames = (float)(u_int)a3; break;
+    case 21: mode = 1; kind = 0; frames = (float)(u_int)a3; break;
+    case 22: mode = 6; kind = 0; frames = (float)(u_int)a3; break;
+    case 23: mode = 5; kind = 0; frames = *(const float *)a3; break;
+    case 24: mode = 3; kind = 0; frames = *(const float *)a3; break;
+    case 25: mode = 4; kind = (int)t0; frames = *(const float *)a3; break;
+    default:
+        return 0;
+    }
+    seqKillTaskOn(&achr->m_task[0]);
+    TskMoveTypeGen *task = new TskMoveTypeGen(oid, base + mode, a2, kind, frames, SEQ_RATE_60);
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, &achr->m_task[0], 0x11);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Achr path moves on the achr's m_task[0] (the running one killed): a0
+// 10 / 11 a TskMoveTypeRound, 20..23 a TskMovePointPath, 30 a
+// TskMoveSectaFindPath, 40..43 / 50 / 51 a TskMoveSecta, 800 kills all
+// its tasks. a3 and t0 are float words. Script globals 13 / 14 / 15 give
+// the kind, the rate (x 10000) and a mode shift; a zero rate means one
+// frame of 60, kind 2, shift 0.
+// callcheck: operator_new, getTask, killTask (new TskMove*, seqKillTaskOn)
+// ROR 0x0020bd08
+
+intptr_t seqFunc211(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t t0, intptr_t t1)
+{
+    GamMan &gam = g_gamMan;
+    u_int   oid = (u_int)a1;
+
+    if (!gam.isObj(oid))
+        return 0;
+    ACHRstat  *achr = gam.getAchr(oid);
+    int       *id = &achr->m_task[0];
+    const int *glob = g_sequence.m_global;
+    int        kind = glob[0xd];
+    float      rate = (float)(u_int)glob[0xe] / 10000.0f;
+    int        shift = glob[0xf];
+    if (rate == 0.0f)
+    {
+        rate = SEQ_RATE_60;
+        kind = 2;
+        shift = 0;
+    }
+
+    CmnITask *task;
+    switch ((u_int)op)
+    {
+    case 10: case 11:
+        seqKillTaskOn(id);
+        task = new TskMoveTypeRound(oid, shift * 2 + (int)(op - 10), a2, kind, seqWordFloat(a3),
+                                    seqWordFloat(t0), rate);
+        break;
+    case 20: case 21: case 22: case 23:
+        seqKillTaskOn(id);
+        task = new TskMovePointPath(oid, shift * 4 + (int)(op - 20), a2, (int)a3, kind,
+                                    seqWordFloat(t0), rate);
+        break;
+    case 30:
+        seqKillTaskOn(id);
+        task = new TskMoveSectaFindPath(oid, a2, 0, kind, shift, 0x7f, seqWordFloat(t0), rate);
+        break;
+    case 40: case 41: case 42: case 43: case 50: case 51:
+    {
+        int      no = op < 50 ? (int)(op - 40) : (int)(op - 46);
+        intptr_t arg = op == 50 ? 0 : op == 51 ? t1 : a2;
+        seqKillTaskOn(id);
+        task = new TskMoveSecta(oid, shift * 6 + no, arg, (int)a3, kind, seqWordFloat(t0), rate);
+        break;
+    }
+    case 800:
+        achr->killTasks();
+        return 0;
+    default:
+        return 0;
+    }
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 0x11);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Native 281's helpers. Ops 200 / 201 set / clear bits in sector group
 // key of the scene's sector.sec object, all four records.
 // ROR 0x0020de34
@@ -1907,13 +2298,6 @@ const SeqFunc g_seqFuncTable[SEQ_FUNC_COUNT] = {
 
 // ---- stubs (tools/reverse/stubgen.py) ----
 
-// stub of ROR 0x00206640
-intptr_t seqFunc016(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc016", 0x00206640);
-    return {};
-}
-
 // stub of ROR 0x00207ae8
 intptr_t seqFunc020(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
@@ -1921,45 +2305,10 @@ intptr_t seqFunc020(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
     return {};
 }
 
-// stub of ROR 0x0020839c
-intptr_t seqFunc023(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc023", 0x0020839c);
-    return {};
-}
-
-// stub of ROR 0x00208518
-intptr_t seqFunc026(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc026", 0x00208518);
-    return {};
-}
-
 // stub of ROR 0x00209528
 intptr_t seqFunc100(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
     ROSEPAN_STUB("seqFunc100", 0x00209528);
-    return {};
-}
-
-// stub of ROR 0x0020abfc
-intptr_t seqFunc156(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc156", 0x0020abfc);
-    return {};
-}
-
-// stub of ROR 0x0020b528
-intptr_t seqFunc202(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc202", 0x0020b528);
-    return {};
-}
-
-// stub of ROR 0x0020bd08
-intptr_t seqFunc211(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc211", 0x0020bd08);
     return {};
 }
 

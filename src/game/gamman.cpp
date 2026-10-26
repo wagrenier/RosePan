@@ -2964,3 +2964,35 @@ void GamMan::showMsgSprite(int on, const int *param)
 {
     ROSEPAN_STUB("GamMan::showMsgSprite", 0x001cf6bc);
 }
+
+// stub of ROR 0x001d05f4
+int GamMan::getObjPos(u_int oid, float *out)
+{
+    ROSEPAN_STUB("GamMan::getObjPos", 0x001d05f4);
+    return {};
+}
+
+// stub of ROR 0x001d06b8
+int GamMan::getObjRot(u_int oid, float *out)
+{
+    ROSEPAN_STUB("GamMan::getObjRot", 0x001d06b8);
+    return {};
+}
+
+// stub of ROR 0x001d2a14
+void GamMan::moveAchr(u_int oid, const float *d)
+{
+    ROSEPAN_STUB("GamMan::moveAchr", 0x001d2a14);
+}
+
+// stub of ROR 0x001c621c
+void GamMan::popCamera()
+{
+    ROSEPAN_STUB("GamMan::popCamera", 0x001c621c);
+}
+
+// stub of ROR 0x001c5ffc
+void GamMan::pushCamera()
+{
+    ROSEPAN_STUB("GamMan::pushCamera", 0x001c5ffc);
+}
