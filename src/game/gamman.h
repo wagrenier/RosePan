@@ -292,6 +292,44 @@ static_assert(offsetof(GamCamRec, m_pathPos) == 0x28, "m_pathPos");
 struct GamMan
 {
     GamMan();                                                            // ROR 0x001c05c0
+    /* The ROM's deleting destructor (vtable slot 1): GamSndMan's and
+     * GamArea's destructors; nothing of its own. */
+    ~GamMan();                                                           // ROR 0x001c0c8c
+    /* buf (1 MB) zeroed and uploaded over both frame buffers (two 512 x
+     * 228 images at dbp 0). No callers. */
+    void clearVram(void *buf);                                           // ROR 0x001c1a90
+    /* The room's name (WRD string 2) as a 0xb4-frame message at 0x30,
+     * 0xe0. No callers (a debug aid). */
+    void showRoomName();                                                 // ROR 0x001c46fc
+    /* Every type-9 fchr: param 0x41's object record read through
+     * ctlObjParam op 0xc into a local nobody reads. No callers. */
+    void readFchrType9Recs();                                            // ROR 0x001c4fc0
+    /* CmnTaskMan::exec's call each frame: m_flags2 bit 4 pauses the
+     * game for a menu (pauseOthers, pauseAchr, Brown's follow off), bit
+     * 8 resumes it once no fade runs (or bit 0x10 forces it) and
+     * checks for a menu request (checkMenuReq). */
+    void execPauseReq();                                                 // ROR 0x001c57a0
+    /* Into a menu: sequence global [0x15] cleared when clear, [0x28] -1,
+     * pause(0x2000), bss 0x7a320c bit 0x80 cleared; with m_flags2
+     * 0x80000 and no item-use task, a TskFrameFunc kind 0x15 becomes it. */
+    void enterMenuPause(int clear);                                      // ROR 0x001c5d08
+    /* Back to a clean game (0x1f2f0c): pause 0x100000, the message task,
+     * sky domes, stage, state, all chrs hidden then released, task kinds
+     * 0x13 / 0x14 / 5 killed, the pool +0x2246c emptied; m_pcJnfc 0, the
+     * dog mode 2. */
+    void resetGame();                                                    // ROR 0x001cb638
+    /* markReset, then ObjStat::setHide(hide) on every achr, fchr and
+     * avfchr. */
+    void hideAllChrs(int hide);                                          // ROR 0x001cf518
+    /* The achr oid's motion ended (type 1 oids only, else 0). */
+    int  isAchrMotionEnd(u_int oid);                                     // ROR 0x001d19a8
+    /* The achr oid has no turn task (type 1 oids only, else 0). */
+    int  isAchrTurnDone(u_int oid);                                      // ROR 0x001d19f8
+    /* getAchr(oid) and its empty method. No callers. */
+    void emptyAchr1d3a14(u_int oid);                                     // ROR 0x001d3a14
+    /* After a menu pause: the menu the script asked for (sequence global
+     * 0x54) opened through MagScene::requestMenu (unassigned@001d3b44). */
+    void checkMenuReq();                                                 // ROR 0x001d3b44
     void init();                                                         // ROR 0x001c0d70
     /* Resets the game state: items, task ids, callbacks, the chr pools. */
     void initGameState();                                                // ROR 0x001c143c
@@ -395,7 +433,7 @@ struct GamMan
     void setCameraMode(int mode, u_int no);                              // ROR 0x001c7210
     /* The record count of the current sky slot's _c.bin (the cameras). */
     /* The current room (WRD) number (an inline in the ELF). */
-    int  getWrdNo() const { return m_wrdNo; }                            // ROR 0x001c6c28
+    int  getWrdNo() const;                                               // ROR 0x001c6c28
     int  getMapCamNum();                                                 // ROR 0x001c7494
     /* The script's SE pack swaps (native 252 cases 48 / 100): every SE
      * stopped, banks 0xb (the first only), 0x20 and 0x40 freed, name
@@ -590,7 +628,7 @@ struct GamMan
      * fchr deleted, the avfchr actors released, and with [7] >= 0 the
      * vfchrs (releaseVFchrs(0)). */
     void releaseAllChrs();                                               // ROR 0x001ced18
-    void releaseAll() { releaseAllChrs(); }                              // ROR 0x001c4fa4
+    void releaseAll();                                                   // ROR 0x001c4fa4
     /* sysTermManagers: releaseAll, then init again. */
     void term();                                                         // ROR 0x001c0d44
     /* Every achr's and fchr's secta pointers cleared. */
@@ -831,11 +869,101 @@ struct GamMan
     int  resetExtra();                                                   // ROR 0x001d84a8
     /* Returns 0 (resetPcStat's call). */
     int  empty1d84b0();                                                  // ROR 0x001d84b0
-    /* The ELF's inlines; nothing calls them. */
-    int  getPlayTime_HH() const { return m_playTimeHH; }                 // ROR 0x0028e254
-    void *getSectaObjPtr() const { return NULL; }                        // ROR 0x0028e3c4
-    /* Empty (an inline in the ELF; nothing calls it). */
-    void rmSnd() {}                                                      // ROR 0x0028eb60
+    /* The ELF's inline accessors (linkonce copies 0x28e214..0x28ee00;
+     * game code mostly reads the members directly). */
+    int  getPlayTime_HH();                                               // ROR 0x0028e254
+    int  getPlayTime_MM();                                               // ROR 0x0028e264
+    int  getVCount() const;                                              // ROR 0x0028e274
+    /* m_vcount in ms (x 1000 / 25, unsigned), kept in m_sysTime. */
+    u_int getSysTime();                                                  // ROR 0x0028e284
+    /* The ms since the last getSysTime. */
+    u_int getElapsedSysTime() const;                                     // ROR 0x0028e31c
+    u_int getSysFlg() const;                                             // ROR 0x0028e3b4
+    void *getSectaObjPtr();                                              // ROR 0x0028e3c4
+    int  isOneSec() const;                                               // ROR 0x0028e3cc
+    bool chkSysFlg(u_int bits) const;                                    // ROR 0x0028e3e0
+    bool chkSysFlg2(u_int bits) const;                                   // ROR 0x0028e3f8
+    void setExistMenu();                                                 // ROR 0x0028e410
+    void setCursolInitFlg_Item(int on);                                  // ROR 0x0028e430
+    int  getCursolInitFlg_Item();                                        // ROR 0x0028e440
+    void setCursolInitFlg_Stock(int on);                                 // ROR 0x0028e450
+    int  getCursolInitFlg_Stock();                                       // ROR 0x0028e460
+    int  getPcChrNo() const;                                             // ROR 0x0028e470
+    int  getDogChrNo() const;                                            // ROR 0x0028e480
+    int  getMurderChrNo() const;                                         // ROR 0x0028e490
+    int  get_inu_task() const;                                           // ROR 0x0028e4a0
+    ObjStat *getPCPtr() const;                                           // ROR 0x0028e4b0
+    ObjStat *getDogPtr() const;                                          // ROR 0x0028e4c0
+    ObjStat *getMurderPtr() const;                                       // ROR 0x0028e4d0
+    int  getChapter() const;                                             // ROR 0x0028e4e0
+    int  getDiffPlace() const;                                           // ROR 0x0028e4f0
+    int  getPlayTime() const;                                            // ROR 0x0028e500
+    int  getCurStat() const;                                             // ROR 0x0028e510
+    int  getSeqEvtTaskID() const;                                        // ROR 0x0028e520
+    int *getSeqEvtTaskIDPtr();                                           // ROR 0x0028e530
+    int  getSysTaskID() const;                                           // ROR 0x0028e540
+    int *getSysTaskIDPtr();                                              // ROR 0x0028e550
+    int  getMsgTaskID() const;                                           // ROR 0x0028e560
+    int *getMsgTaskIDPtr();                                              // ROR 0x0028e570
+    int  getSelectTaskID() const;                                        // ROR 0x0028e580
+    int *getSelectTaskIDPtr();                                           // ROR 0x0028e590
+    int  getMovieTaskID() const;                                         // ROR 0x0028e5a0
+    int *getMovieTaskIDPtr();                                            // ROR 0x0028e5b0
+    int  getCamTaskID() const;                                           // ROR 0x0028e5c0
+    int *getCamTaskIDPtr();                                              // ROR 0x0028e5d0
+    int  getBGLoadTaskID() const;                                        // ROR 0x0028e5e0
+    int *getBGLoadTaskIDPtr();                                           // ROR 0x0028e5f0
+    int  getItemUseTaskID() const;                                       // ROR 0x0028e600
+    int *getItemUseTaskIDPtr();                                          // ROR 0x0028e610
+    int  getInuMode();                                                   // ROR 0x0028e620
+    int  get_real_mem_size();                                            // ROR 0x0028e630
+    int  getRate();                                                      // ROR 0x0028e640
+    int  getSysMsgHND();                                                 // ROR 0x0028e648
+    /* The camera follows oid's actor (m_21f70 = getActorNo). */
+    void setCameraTarget(u_int oid);                                     // ROR 0x0028e658
+    /* The PC's costume pair, flags2 0x10000000 marks it changed. */
+    void setPcCostume(int a, int b);                                     // ROR 0x0028e688
+    void setSysFlg2(u_int bits);                                         // ROR 0x0028e6c4
+    void unsetSysFlg2(u_int bits);                                       // ROR 0x0028e6e4
+    void set_inu_task(int id);                                           // ROR 0x0028e708
+    void reveal_mem_size(u_int size);                                    // ROR 0x0028e718
+    /* m_achr[oid slot] = achr, and the oid into its param 1. */
+    void set_achr(u_int oid, ACHRstat *achr);                            // ROR 0x0028e738
+    bool checkSysFlg(u_int bits) const;                                  // ROR 0x0028e778
+    /* A volume is saved (switchVolume(0) silenced the game). */
+    bool chkNoise();                                                     // ROR 0x0028e790
+    /* The sound forwarders to m_sndMan (the ELF's SND_PARAM is
+     * GamSndEntry). */
+    void resume_snd(bool a, int mode, bool reset);                       // ROR 0x0028e7a8
+    void pause_snd();                                                    // ROR 0x0028e7d0
+    void pauseSnd();                                                     // ROR 0x0028e7f8
+    void unpush_snd(int mode, u_int se, int str);                        // ROR 0x0028e820
+    void init_snd_vol();                                                 // ROR 0x0028e848
+    void getMstVolStr(int &a, int &b);                                   // ROR 0x0028e870
+    void getMstVol(int &a, int &b);                                      // ROR 0x0028e890
+    void loadSePack(char *name, void *data);                             // ROR 0x0028e8b0
+    void loadSePack(char *name, int arg);                                // ROR 0x0028e8d8
+    void registSnd(int state, void *data);                               // ROR 0x0028e900
+    void registStrSnd(int state, void *data);                            // ROR 0x0028e928
+    int  getSnd(u_int id, GamSndEntry **entry);                          // ROR 0x0028e950
+    int  getStrSnd(int str, GamSndEntry **entry);                        // ROR 0x0028e974
+    int  getSeID(char *name);                                            // ROR 0x0028e994
+    int  getStrNO(char *name);                                           // ROR 0x0028e9b4
+    int  chkSePackID(u_int id);                                          // ROR 0x0028e9d4
+    void setReverb(int a, int b, int c);                                 // ROR 0x0028e9f4
+    void stopSE(int se);                                                 // ROR 0x0028ea1c
+    int  playSE(u_int se, bool loop, float *pos);                        // ROR 0x0028ea44
+    int  playSE(u_int se, int a, int b, float c, int d, int e);          // ROR 0x0028ea68
+    int  funcSE(u_int se, int no, void *arg);                            // ROR 0x0028ea8c
+    int  playStr(int str, int a, float *pos, bool b, u_int flags);       // ROR 0x0028eaac
+    int  playStr(int str, int a, int b, float c, int d, int e);          // ROR 0x0028eacc
+    int  funcStr(int str, int no, void *arg);                            // ROR 0x0028eaf0
+    void clear_snd_lst();                                                // ROR 0x0028eb10
+    void funcSnd(int no, int a, int b, int c, int d);                    // ROR 0x0028eb38
+    /* Empty. */
+    void rmSnd(u_int id);                                                // ROR 0x0028eb60
+    void setSnd3DCnt(int type);                                          // ROR 0x0028eca8
+    GamSndEntry *getSndParam();                                          // ROR 0x0028ee00
 
     /* An {a, b} pair the system calls 0x32..0x35 set (in the ROM b, the
      * script's a2, comes first): the ELF's regist_call_back_ehon / _menu /
@@ -884,6 +1012,7 @@ struct GamMan
     u_int        m_flags;           // ROR 0x21f48: getSysFlg; 1 one second passed (isOneSec), 0x400 setExistMenu, 0x40000 the reset frame
     u_int        m_flags2;          // ROR 0x21f4c: chkSysFlg2; 0x2000 / 0x4000 read by system call 0x22
     int          m_chapter;         // ROR 0x21f50: getChapter, the stage loadStage loaded
+    int          m_diffPlace;       // ROR 0x21f58: getDiffPlace
     int          m_21f54;           // ROR 0x21f54
     int          m_vcount;          // ROR 0x21f60: getVCount, frames since init
     int          m_playMinutes;     // ROR 0x21f64: getPlayMinutes adds m_vcount's minutes
@@ -954,13 +1083,14 @@ struct GamMan
     SeqPair      m_seqPair[4];      // ROR 0x222c4: system calls 0x35, 0x32, 0x33, 0x34
     GamImage    *m_image[0x20];     // ROR 0x222e4: setImage's slots (system call 0x14)
     intptr_t     m_seqWord;         // ROR 0x22364: setEmyParam; system call 0x15 stores its a1
+    u_int        m_sysTime;         // ROR 0x22368: getSysTime's last value
     char         m_2236c[4][0x40];  // ROR 0x2236c: four strings, emptied by initGameState
     SeqFixedPool<GamRec16, 0x100> *m_pool2246c; // ROR 0x2246c: init's new (0x1840 bytes)
     GamCamRec    m_camStack[4];     // ROR 0x22470: pushCamera / popCamera (three used)
     int          m_camDepth;        // ROR 0x22530: the records pushed
     I3dFog       m_fogStack[3];     // ROR 0x22540: pushFog / popFog; m_color[0] -1 = a free slot
     int          m_msgMode;         // ROR 0x225d8: chgMsgMode
-    int          m_225dc;           // ROR 0x225dc: initStage2 clears it
+    int          m_225dc;           // ROR 0x225dc: get_real_mem_size / reveal_mem_size; initStage2 clears it
     int          m_225e4;           // ROR 0x225e4
     void        *m_keepBuf;         // ROR 0x225e8: dropMap's m_p_keep_buf (releaseTenkyus frees it)
     int          m_225f0;           // ROR 0x225f0
@@ -968,7 +1098,10 @@ struct GamMan
     GamBgmRec    m_bgmRec;          // ROR 0x22a5c: onSubSeqEnd hands it to GamSndMan::setBgmRec (writer not found yet)
     u_char      *m_evtPack;         // ROR 0x22a80: getEvtPack, 0xa0000 bytes, W000.WRD file 4
     int          m_22a84;           // ROR 0x22a84
+    int          m_cursolInitItem;  // ROR 0x22a88: get / setCursolInitFlg_Item
+    int          m_cursolInitStock; // ROR 0x22a8c: get / setCursolInitFlg_Stock
     int          m_playTimeHH;      // ROR 0x22aa0: getPlayTime_HH
+    int          m_playTimeMM;      // ROR 0x22aa4: getPlayTime_MM
     int          m_22ab0;           // ROR 0x22ab0
 };
 

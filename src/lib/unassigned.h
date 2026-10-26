@@ -129,6 +129,9 @@ struct CmnTaskMan
     /* Every task of the list at +0 is marked for removal (state 2) but
      * those whose kind (virtual +0xc) is 1..3 or 0x11. */
     void killStageTasks();                                               // ROR 0x001e7618
+    /* Every live task of the list at +0 whose kind (virtual +8) is kind
+     * marked for removal (state 2). */
+    void killKind(int kind);                                             // ROR 0x001e77b4
 
     SysTimer m_timer;           // ROR 0x40 (bss 0x7a3dc0)
 };

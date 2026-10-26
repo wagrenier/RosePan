@@ -5441,4 +5441,410 @@ void GamMan::closeSysMsg()
     m_msgMode = 0;
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// The deleting destructor of the ROM (the vtable store, the item vector's
+// empty element loop, GamSndMan's and GamArea's destructors with 2, then
+// operator delete for bit 0): on the host the members' destructors run
+// implicitly and delete is the caller's.
+// ROR 0x001c0c8c // callcheck: FUN_001e0eb8, FUN_001dd3ec, operator_delete (the members' implicit destructors and delete on the host)
+
+GamMan::~GamMan()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c1a90 // callcheck: sceGsSetDefLoadImage, FlushCache, sceGsExecLoadImage, sceGsSyncPath (PC: no GS memory on the native draw path)
+
+void GamMan::clearVram(void *buf)
+{
+    memset(buf, 0, 0x100000);
+    // The ROM uploads buf twice, 512 x 228 PSMCT32 at dbp 0 / dbw 8, rows
+    // -4 and 0xdc: both frame buffers black. The host draws natively.
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c46fc
+
+void GamMan::showRoomName()
+{
+    static char s_msg[0x200];   // bss 0x6e9640
+    if (g_wrdTable.get(m_wrdNo) == NULL)
+        return;
+    sprintf(s_msg, "%s #f060 \n", gamGetWrdString(2, -1));
+    // PORT: word 7 is stack garbage in the ROM; 0 here.
+    int param[8] = { 0x30, 0xe0, 0xffff, 0x100, 0x20, 0, 0, 0 };
+    setMsgParam(param);
+    openMsg(s_msg, 0, 0xb4);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The answer of op 0xc goes into a local nobody reads (the ROM's buffer is
+// the loop iterator's spill slot).
+// ROR 0x001c4fc0 // callcheck: getParam (the type-9 object's param 0x41, FCHRstat::getParam)
+
+void GamMan::readFchrType9Recs()
+{
+    for (SeqNode<FCHRstat *> *node = m_fchrList.m_used.begin(); node != m_fchrList.m_used.end();
+         node = node->m_next)
+    {
+        if (gamOidType(node->m_data->m_oid) != 9)
+            continue;
+        int param[4];
+        node->m_data->getParam(0x41, param);
+        u_int rec[4];
+        g_gamMan.ctlObjParam(param[0], 0xc, rec, 0);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c57a0
+
+void GamMan::execPauseReq()
+{
+    if ((m_flags2 & 0xc) == 0)
+        return;
+    if ((m_flags2 & 4) != 0)
+    {
+        g_taskMan.pauseOthers(1);
+        empty1c58b8(1);
+        pauseAchr(1);
+        gamSetBwnFollow(0);
+        m_flags2 &= ~4u;
+        return;
+    }
+    if (isFading() && (m_flags2 & 0x10) == 0)
+        return;
+    m_flags2 &= ~0x10u;
+    g_taskMan.pauseOthers(0);
+    pauseAchr(0);
+    empty1c58b8(0);
+    checkMenuReq();
+    m_flags2 &= ~8u;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The pause and the flag go through the global (0x7812c0, its m_flags2 at
+// 0x7a320c), the task test through this.
+// ROR 0x001c5d08 // callcheck: operator_new (new TskFrameFunc)
+
+void GamMan::enterMenuPause(int clear)
+{
+    if (clear != 0)
+        g_sequence.m_global[0x15] = 0;
+    g_sequence.m_global[0x28] = -1;
+    g_gamMan.pause(0x2000);
+    g_gamMan.m_flags2 &= ~0x80u;
+    if ((m_flags2 & 0x80000) != 0 && g_taskMan.getTask(m_itemUseTaskId) == NULL)
+    {
+        TskFrameFunc *task = new TskFrameFunc(0x15, 0, 0);
+        g_taskMan.addTask(1, -1, 1, 0, task, 0, &m_itemUseTaskId, 0x11);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cb638
+
+void GamMan::resetGame()
+{
+    pause(0x100000);
+    killMsgTask();
+    releaseTenkyus(2);
+    resetStage();
+    initGameState();
+    hideAllChrs(1);
+    releaseAllChrs();
+    g_taskMan.killKind(0x13);
+    g_taskMan.killKind(0x14);
+    g_taskMan.killKind(5);
+    m_pool2246c->clear();
+    m_pcJnfc = 0;
+    m_inuMode = 2;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cf518
+
+void GamMan::hideAllChrs(int hide)
+{
+    markReset();
+    for (SeqNode<ACHRstat *> *node = m_achrList.m_used.begin(); node != m_achrList.m_used.end();
+         node = node->m_next)
+        node->m_data->setHide(hide);
+    for (SeqNode<FCHRstat *> *node = m_fchrList.m_used.begin(); node != m_fchrList.m_used.end();
+         node = node->m_next)
+        node->m_data->setHide(hide);
+    for (SeqNode<FCHRstat *> *node = m_avfchrList.m_used.begin(); node != m_avfchrList.m_used.end();
+         node = node->m_next)
+        node->m_data->setHide(hide);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d19a8
+
+int GamMan::isAchrMotionEnd(u_int oid)
+{
+    if (gamOidList(oid) != 1)
+        return 0;
+    return getAchr(oid)->isMotionEnd();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d19f8
+
+int GamMan::isAchrTurnDone(u_int oid)
+{
+    if (gamOidList(oid) != 1)
+        return 0;
+    return getAchr(oid)->isTurnDone();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d3a14
+
+void GamMan::emptyAchr1d3a14(u_int oid)
+{
+    getAchr(oid)->empty1d9f08();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Defined in the class in the ROM (getWrdNo, releaseAll: own copies in
+// the file's range).
+// ROR 0x001c6c28
+
+int GamMan::getWrdNo() const
+{
+    return m_wrdNo;
+}
+
+// ROR 0x001c4fa4
+
+void GamMan::releaseAll()
+{
+    releaseAllChrs();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The ELF's inline accessors (linkonce copies after the game code).
+// ROR 0x0028e214 GamMan::__tf, GCC 2's type_info function: the host
+// compiler's RTTI stands in.
+
+// ROR 0x0028e254
+int GamMan::getPlayTime_HH() { return m_playTimeHH; }
+// ROR 0x0028e264
+int GamMan::getPlayTime_MM() { return m_playTimeMM; }
+// ROR 0x0028e274
+int GamMan::getVCount() const { return m_vcount; }
+
+// ROR 0x0028e284
+u_int GamMan::getSysTime()
+{
+    m_sysTime = (u_int)((float)((u_int)m_vcount * 1000u) / 25.0f);
+    return m_sysTime;
+}
+
+// ROR 0x0028e31c
+u_int GamMan::getElapsedSysTime() const
+{
+    return (u_int)((float)((u_int)m_vcount * 1000u) / 25.0f) - m_sysTime;
+}
+
+// ROR 0x0028e3b4
+u_int GamMan::getSysFlg() const { return m_flags; }
+// ROR 0x0028e3c4
+void *GamMan::getSectaObjPtr() { return NULL; }
+// ROR 0x0028e3cc
+int GamMan::isOneSec() const { return m_flags & 1; }
+// ROR 0x0028e3e0
+bool GamMan::chkSysFlg(u_int bits) const { return (m_flags & bits) != 0; }
+// ROR 0x0028e3f8
+bool GamMan::chkSysFlg2(u_int bits) const { return (m_flags2 & bits) != 0; }
+// ROR 0x0028e410
+void GamMan::setExistMenu() { m_flags |= 0x400; }
+// ROR 0x0028e430
+void GamMan::setCursolInitFlg_Item(int on) { m_cursolInitItem = on; }
+// ROR 0x0028e440
+int GamMan::getCursolInitFlg_Item() { return m_cursolInitItem; }
+// ROR 0x0028e450
+void GamMan::setCursolInitFlg_Stock(int on) { m_cursolInitStock = on; }
+// ROR 0x0028e460
+int GamMan::getCursolInitFlg_Stock() { return m_cursolInitStock; }
+// ROR 0x0028e470
+int GamMan::getPcChrNo() const { return m_pcActor; }
+// ROR 0x0028e480
+int GamMan::getDogChrNo() const { return m_dogChrNo; }
+// ROR 0x0028e490
+int GamMan::getMurderChrNo() const { return m_murderChrNo; }
+// ROR 0x0028e4a0
+int GamMan::get_inu_task() const { return m_inuTask; }
+// ROR 0x0028e4b0
+ObjStat *GamMan::getPCPtr() const { return m_pcPtr; }
+// ROR 0x0028e4c0
+ObjStat *GamMan::getDogPtr() const { return m_dogPtr; }
+// ROR 0x0028e4d0
+ObjStat *GamMan::getMurderPtr() const { return m_murderPtr; }
+// ROR 0x0028e4e0
+int GamMan::getChapter() const { return m_chapter; }
+// ROR 0x0028e4f0
+int GamMan::getDiffPlace() const { return m_diffPlace; }
+// ROR 0x0028e500
+int GamMan::getPlayTime() const { return m_playMinutes; }
+// ROR 0x0028e510
+int GamMan::getCurStat() const { return m_cur_stat; }
+// ROR 0x0028e520
+int GamMan::getSeqEvtTaskID() const { return m_frameTaskId; }
+// ROR 0x0028e530
+int *GamMan::getSeqEvtTaskIDPtr() { return &m_frameTaskId; }
+// ROR 0x0028e540
+int GamMan::getSysTaskID() const { return m_sysTaskId; }
+// ROR 0x0028e550
+int *GamMan::getSysTaskIDPtr() { return &m_sysTaskId; }
+// ROR 0x0028e560
+int GamMan::getMsgTaskID() const { return m_msgTaskId; }
+// ROR 0x0028e570
+int *GamMan::getMsgTaskIDPtr() { return &m_msgTaskId; }
+// ROR 0x0028e580
+int GamMan::getSelectTaskID() const { return m_selectTaskId; }
+// ROR 0x0028e590
+int *GamMan::getSelectTaskIDPtr() { return &m_selectTaskId; }
+// ROR 0x0028e5a0
+int GamMan::getMovieTaskID() const { return m_movieTaskId; }
+// ROR 0x0028e5b0
+int *GamMan::getMovieTaskIDPtr() { return &m_movieTaskId; }
+// ROR 0x0028e5c0
+int GamMan::getCamTaskID() const { return m_camTaskId; }
+// ROR 0x0028e5d0
+int *GamMan::getCamTaskIDPtr() { return &m_camTaskId; }
+// ROR 0x0028e5e0
+int GamMan::getBGLoadTaskID() const { return m_bgLoadTaskId; }
+// ROR 0x0028e5f0
+int *GamMan::getBGLoadTaskIDPtr() { return &m_bgLoadTaskId; }
+// ROR 0x0028e600
+int GamMan::getItemUseTaskID() const { return m_itemUseTaskId; }
+// ROR 0x0028e610
+int *GamMan::getItemUseTaskIDPtr() { return &m_itemUseTaskId; }
+// ROR 0x0028e620
+int GamMan::getInuMode() { return m_inuMode; }
+// ROR 0x0028e630
+int GamMan::get_real_mem_size() { return m_225dc; }
+// ROR 0x0028e640
+int GamMan::getRate() { return m_rate; }
+// ROR 0x0028e648
+int GamMan::getSysMsgHND() { return m_sysMsgHandle; }
+// ROR 0x0028e658
+void GamMan::setCameraTarget(u_int oid) { m_21f70 = getActorNo(oid); }
+
+// ROR 0x0028e688
+void GamMan::setPcCostume(int a, int b)
+{
+    m_21ff4 = a;
+    m_21ff8 = b;
+    m_flags2 |= 0x10000000;
+}
+
+// ROR 0x0028e6c4
+void GamMan::setSysFlg2(u_int bits) { m_flags2 |= bits; }
+// ROR 0x0028e6e4
+void GamMan::unsetSysFlg2(u_int bits) { m_flags2 &= ~bits; }
+// ROR 0x0028e708
+void GamMan::set_inu_task(int id) { m_inuTask = id; }
+// ROR 0x0028e718
+void GamMan::reveal_mem_size(u_int size) { m_225dc += size; }
+
+// ROR 0x0028e738
+void GamMan::set_achr(u_int oid, ACHRstat *achr)
+{
+    m_achr[gamOidSlot(oid)] = achr;
+    u_int data[4] = { oid, 0, 0, 0 };
+    achr->setParam(1, data);
+}
+
+// ROR 0x0028e778
+bool GamMan::checkSysFlg(u_int bits) const { return (m_flags & bits) != 0; }
+// ROR 0x0028e790
+bool GamMan::chkNoise() { return m_saved_volume != -1; }
+
+// ROR 0x0028e7a8
+void GamMan::resume_snd(bool a, int mode, bool reset) { m_sndMan.resumeBgm(a, mode, reset); }
+// ROR 0x0028e7d0
+void GamMan::pause_snd() { m_sndMan.stopBgm(0); }
+// ROR 0x0028e7f8
+void GamMan::pauseSnd() { m_sndMan.stopBgm(0); }
+// ROR 0x0028e820
+void GamMan::unpush_snd(int mode, u_int se, int str) { m_sndMan.unpush_snd(mode, se, str); }
+// ROR 0x0028e848
+void GamMan::init_snd_vol() { m_sndMan.resetVolume(); }
+
+// ROR 0x0028e870
+void GamMan::getMstVolStr(int &a, int &b)
+{
+    a = m_sndMan.m_mstVolStr[0];
+    b = m_sndMan.m_mstVolStr[1];
+}
+
+// ROR 0x0028e890
+void GamMan::getMstVol(int &a, int &b)
+{
+    a = m_sndMan.m_mstVol[0];
+    b = m_sndMan.m_mstVol[1];
+}
+
+// ROR 0x0028e8b0
+void GamMan::loadSePack(char *name, void *data) { m_sndMan.loadSePack(name, data, 0); }
+// ROR 0x0028e8d8
+void GamMan::loadSePack(char *name, int arg) { m_sndMan.loadSePack(name, arg); }
+// ROR 0x0028e900
+void GamMan::registSnd(int state, void *data) { m_sndMan.registSnd(state, data); }
+// ROR 0x0028e928
+void GamMan::registStrSnd(int state, void *data) { m_sndMan.registStrSnd(state, data); }
+// ROR 0x0028e950
+int GamMan::getSnd(u_int id, GamSndEntry **entry) { return m_sndMan.findSnd(id, entry, 1); }
+// ROR 0x0028e974
+int GamMan::getStrSnd(int str, GamSndEntry **entry) { return m_sndMan.getStrSnd(str, entry); }
+// ROR 0x0028e994
+int GamMan::getSeID(char *name) { return m_sndMan.getSeID(name); }
+// ROR 0x0028e9b4
+int GamMan::getStrNO(char *name) { return m_sndMan.getStrNO(name); }
+// ROR 0x0028e9d4
+int GamMan::chkSePackID(u_int id) { return m_sndMan.isSndBankLoaded(id); }
+// ROR 0x0028e9f4
+void GamMan::setReverb(int a, int b, int c) { m_sndMan.setReverb(a, b, c); }
+// ROR 0x0028ea1c
+void GamMan::stopSE(int se) { m_sndMan.stopSE(se); }
+// ROR 0x0028ea44
+int GamMan::playSE(u_int se, bool loop, float *pos) { return m_sndMan.playSE(se, loop, pos, 0); }
+
+// ROR 0x0028ea68
+int GamMan::playSE(u_int se, int a, int b, float c, int d, int e)
+{
+    return m_sndMan.playSE(se, a, b, c, d, e, 0);
+}
+
+// ROR 0x0028ea8c
+int GamMan::funcSE(u_int se, int no, void *arg) { return m_sndMan.funcSE(se, no, arg); }
+
+// ROR 0x0028eaac
+int GamMan::playStr(int str, int a, float *pos, bool b, u_int flags)
+{
+    return m_sndMan.playStr(str, a, pos, b, flags);
+}
+
+// ROR 0x0028eacc
+int GamMan::playStr(int str, int a, int b, float c, int d, int e)
+{
+    return m_sndMan.playStr(str, a, b, c, d, e, 0);
+}
+
+// ROR 0x0028eaf0
+int GamMan::funcStr(int str, int no, void *arg) { return m_sndMan.funcStr(str, no, arg); }
+// ROR 0x0028eb10
+void GamMan::clear_snd_lst() { m_sndMan.clear_snd_lst(0); }
+// ROR 0x0028eb38
+void GamMan::funcSnd(int no, int a, int b, int c, int d) { m_sndMan.funcSnd(no, a, b, c, d); }
+// ROR 0x0028eb60
+void GamMan::rmSnd(u_int id) { (void)id; }
+// ROR 0x0028eca8
+void GamMan::setSnd3DCnt(int type) { m_sndMan.m_mode = type; }
+// ROR 0x0028ee00
+GamSndEntry *GamMan::getSndParam() { return m_sndMan.m_table; }
+
 // ---- stubs (tools/reverse/stubgen.py) ----

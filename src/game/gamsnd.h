@@ -68,6 +68,10 @@ struct GamSndMan
     int findSnd(int id, GamSndEntry **entry, int arg);                   // ROR 0x001e4908
     /* Non-zero when id's bank is loaded (its handle at +0x1728 is set). */
     int isSndBankLoaded(int id);                                         // ROR 0x001e435c
+    /* GamMan::getSeID / getStrSnd / stopSE forward here. */
+    int  getSeID(const char *name);                                      // ROR 0x001e4a0c
+    int  getStrSnd(int str, GamSndEntry **entry);                        // ROR 0x001e4c1c
+    void stopSE(int se);                                                 // ROR 0x001e4d18
     /* Fades the current BGM slot out over 0x1e frames (mode 1 keeps it,
      * 2 works on the other slot +0x1708). */
     void stopBgm(int mode);                                              // ROR 0x001e17b4
@@ -116,6 +120,8 @@ struct GamSndMan
     void stopObjSnds();                                                  // ROR 0x001e2178
 
     int m_mode;                 // ROR 0x0000: loadStage sets 1 (update then uses the camera position)
+    GamSndEntry *m_table;       // ROR 0x1540: the sound table (GamMan::getSndParam)
+    int m_mstVol[2];            // ROR 0x1588: GamMan::getMstVol
     int m_mstVolSe[2];          // ROR 0x1590: option 3's funcSnd(0xe) words
     int m_mstVolStr[2];         // ROR 0x1598: GamMan::getMstVolStr, option 2's funcSnd(0xf) words
 };

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-26 10:28 at commit `2ae8b0d` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-26 13:31 at commit `2a2c158` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-26 10:28 at commit `2ae8b0d` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6660**, named **4034** (61%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 247, ror-inferred 2436
-- context-name ledger: 2683 entries; overrides of wrong library matches: 5
+- game functions: **6660**, named **4054** (61%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 247, ror-inferred 2456
+- context-name ledger: 2703 entries; overrides of wrong library matches: 5
 - placed in a source file: 3332/6660 in 95 files
 
 Least-named game-code regions (64 KB blocks):
@@ -25,12 +25,12 @@ Least-named game-code regions (64 KB blocks):
 | `00140000` | 35/293 (12%) | mag/magloader.cpp, mag/magsceneif.cpp, mag/magscenefocus.cpp |
 | `00170000` | 42/251 (17%) | snd/sndman.cpp |
 | `00120000` | 73/283 (26%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
-| `001e0000` | 57/169 (34%) | game/gamsnd.cpp |
+| `001e0000` | 61/169 (36%) | game/gamsnd.cpp |
 | `00100000` | 116/301 (39%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmisc.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **2215**; stubs: **392**
+- reconstructed RoR functions: **2313**; stubs: **401**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -45,9 +45,9 @@ Least-named game-code regions (64 KB blocks):
 | `src/dog/dogmotionblend.cpp` | 0 | 1 |
 | `src/dog/dogtexinfo.cpp` | 16 | 0 |
 | `src/game/gamfile.cpp` | 18 | 0 |
-| `src/game/gamman.cpp` | 207 | 0 |
-| `src/game/gamsnd.cpp` | 0 | 38 |
-| `src/game/gamstat.cpp` | 54 | 2 |
+| `src/game/gamman.cpp` | 305 | 0 |
+| `src/game/gamsnd.cpp` | 0 | 41 |
+| `src/game/gamstat.cpp` | 54 | 6 |
 | `src/i3d/i3dctx.cpp` | 31 | 0 |
 | `src/i3d/i3denv.cpp` | 12 | 0 |
 | `src/i3d/i3dlayer.cpp` | 80 | 0 |
@@ -58,7 +58,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 6 | 234 |
+| `src/lib/unassigned_stubs.cpp` | 6 | 236 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
@@ -110,7 +110,7 @@ Least-named game-code regions (64 KB blocks):
 - 156 TUs: todo 112, partial 13, verify 40, done 8
 - next: **game/gamman.cpp** (pinned in the queue)
 - pinned queue: unassigned@001d859c, unassigned@0020ff34, game/gamman.cpp, unassigned@001fd424, unassigned@001e46b8
-- partial: `game/gamman.cpp` 205/409 -- Visual test: the 15 s boot still ends on the Atlus disclaimer; the New Game run (build.py --run 140 --pad 1800:START,2400:START,2700:CROSS) shows the title menu
+- partial: `game/gamman.cpp` 303/409 -- Visual test: the 15 s boot still ends on the Atlus disclaimer, unchanged; nothing in this slice draws. Left in gamman: 0x1c3a48 (an A%03d.ARA loader, no callers
 - partial: `game/gamstat.cpp` 49/73 -- Left: GamSysData::setField 0x1dc070 (stub, a tangled switch that reads into data for most fields), helpers 0x1d84c8..0x1d87f4, 0x1d88fc, 0x1d8adc..0x1d8c50, 0x1
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -155,6 +155,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-26 13:31 `game/gamman.cpp` partial: GamMan slice 8: the ELF inline accessors 0x28e254..0x28ee00 written out of line (flags, chr numbers and pointers, task ids, getSysTime / getElapsedSysTime, set_
 - 2026-10-26 10:28 `game/gamman.cpp` partial: GamMan slice 7: the native 151 object helpers - addObjColliSegment / Box / Quad (private walls, param 0x18 and 0x1003), setObjAttr / clearObjAttr, placeObjAt wi
 - 2026-10-26 10:09 `game/gamman.cpp` partial: GamMan slice 6: the stage resets and object teardown - resetStage, releaseObjs (kinds 0..3 by oid image), releaseAllChrs / releaseAll / term, releaseVFchrs, cle
 - 2026-10-26 09:53 `game/gamman.cpp` partial: GamMan slice 5: setMurder, loadChapterSe, loadMapUnit with showMapUnits / loadMapPack / resetAVFchrMotions, setPcStartPos with setPcPos / setPcRot, storePcTrans
@@ -162,65 +163,64 @@ Recent sessions:
 - 2026-10-26 08:26 `mag/magloader.cpp` verify: mag/magloader.cpp: reconstruct all 17 functions (MagLoaderIndex create/add/find/clear/release, MagCharaLoader ctor/init/initFromPacks/load/getIndex/getId/getCat
 - 2026-10-26 08:08 `game/gamman.cpp` partial: GamMan slice 4: object creation and accessors - addChr, addVFchr with allocVFchr, createObjByModel, createObjByName with getChrRpk and setObjLight, setObj, setO
 - 2026-10-26 07:46 `sequence/seqcall.cpp` verify: Script native 252 (sound, jump table data 0x301280, 201 entries over 67 handlers): funcSnd volumes and reverb, SE play / stop / set / 3D position, stream play /
-- 2026-10-26 07:18 `sequence/seqcall.cpp` partial: Script native 020 (script math, 62-case jump table data 0x3004a0: sin / cos of degrees and radians, atan2f, + - / *, float-int conversions, sqrtf, Y-rotated off
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@001e6d54` | partial | 1/32/219 | 68.6 | 197 | 6 |
-| `game/gamsnd.cpp` | todo | 0/39/73 | 24.0 | 145 | 9 |
+| `unassigned@001e6d54` | partial | 1/33/219 | 68.6 | 205 | 6 |
+| `game/gamsnd.cpp` | todo | 0/42/73 | 24.0 | 170 | 9 |
+| `unassigned@00143d3c` | todo | 0/20/602 | 129.5 | 52 | 2 |
 | `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 51 | 4 |
-| `unassigned@00143d3c` | todo | 0/20/602 | 129.5 | 51 | 2 |
-| `unassigned@00164fc0` | todo | 0/18/395 | 104.2 | 50 | 4 |
+| `unassigned@00164fc0` | todo | 0/18/395 | 104.2 | 51 | 4 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
 | `dog/dogactor.cpp` | partial | 5/28/146 | 31.5 | 41 | 2 |
 | `unassigned@00184f2c` | todo | 0/5/84 | 10.0 | 37 | 3 |
-| `unassigned@001d3b44` | partial | 2/10/37 | 18.4 | 36 | 1 |
+| `unassigned@001d3b44` | partial | 2/11/37 | 18.4 | 37 | 1 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 33 | 4 |
-| `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 31 | 3 |
+| `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
 | RoR addr | name | call sites | provenance | state | inferred file |
 |---|---|---|---|---|---|
-| `001e7d7c` | CmnTaskMan::getTask | 57 | ror | stub | - |
+| `001e7d7c` | CmnTaskMan::getTask | 58 | ror | stub | - |
 | `001be734` | FileReadReq::FileReadReq | 54 | ror | missing | game/gamfile.cpp |
 | `001e7724` | CmnTaskMan::killTask | 35 | ror | stub | - |
 | `002155f4` | FUN_002155f4 | 22 | - | missing | - |
+| `001e71fc` | CmnTaskMan::addTask | 19 | ror | stub | - |
 | `001be2dc` | FileReader::~FileReader | 18 | ror | missing | game/gamfile.cpp |
-| `001e71fc` | CmnTaskMan::addTask | 18 | ror | stub | - |
+| `001e4458` | GamSndMan::loadSePack | 17 | ror | stub | game/gamsnd.cpp |
 | `001be2cc` | FileReader::FileReader | 16 | ror | missing | game/gamfile.cpp |
-| `001e4458` | GamSndMan::loadSePack | 16 | ror | stub | game/gamsnd.cpp |
 | `0013f980` | MagScene::setLightParam | 14 | ror | stub | mag/magscenelight.cpp |
-| `001e5660` | GamSndMan::funcStr | 10 | ror | stub | game/gamsnd.cpp |
+| `001e5660` | GamSndMan::funcStr | 11 | ror | stub | game/gamsnd.cpp |
 | `0013fb3c` | MagScene::copyLightSet | 9 | ror | stub | mag/magscenelight.cpp |
+| `001f184c` | TskFrameFunc::TskFrameFunc | 9 | ror | stub | - |
 | `001d5da0` | GamMan::relinkObj | 9 | ror | stub | - |
-| `001f184c` | TskFrameFunc::TskFrameFunc | 8 | ror | stub | - |
+| `00144334` | gamSetBwnFollow | 8 | ror | stub | - |
 | `001e46b8` | GamSndMan::freeSePack | 7 | ror | stub | game/gamsnd.cpp |
-| `00144334` | gamSetBwnFollow | 7 | ror | stub | - |
-| `001c6c28` | GamMan::getWrdNo | 7 | ror | missing | game/gamman.cpp |
+| `0017ea44` | WrdTable::get | 7 | ror | stub | - |
+| `001e5e58` | GamSndMan::funcSE | 7 | ror | stub | game/gamsnd.cpp |
 | `00187464` | MsgManSet::close | 7 | ror | stub | - |
 | `001d5bc8` | GamMan::queueObjUpdate | 7 | ror | stub | - |
 | `0010ff74` | DogEntity::normalizeRotate | 6 | ror | stub | - |
 | `00115cec` | DogModel::release | 6 | ror | stub | dog/dogmodel.cpp |
-| `001e5e58` | GamSndMan::funcSE | 6 | ror | stub | game/gamsnd.cpp |
+| `001e1620` | GamSndMan::unpush_snd | 6 | ror | stub | game/gamsnd.cpp |
+| `001e6734` | GamSndMan::funcSnd | 6 | ror | stub | game/gamsnd.cpp |
 | `00143fd0` | MagScene::updateFog | 6 | ror | stub | - |
 | `0014062c` | MagScene::rotateTenkyu | 6 | ror | stub | - |
 | `00140c68` | MagScene::updateRecords853fc | 6 | ror | stub | - |
 | `001832e8` | msgGetSysText | 6 | ror | stub | - |
-| `0017ea44` | WrdTable::get | 6 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 5 | ror | missing | - |
 | `001e7414` | CmnTaskMan::pauseTask | 5 | ror | stub | - |
 | `00143d7c` | MagScene::setFog | 5 | ror | stub | - |
-| `001e1620` | GamSndMan::unpush_snd | 5 | ror | stub | game/gamsnd.cpp |
-| `001e6734` | GamSndMan::funcSnd | 5 | ror | stub | game/gamsnd.cpp |
 | `0011ade4` | MagLifePC::live | 5 | ror | stub | mag/maglifepc.cpp |
 | `001874f4` | MsgManSet::setMessage | 5 | ror | stub | - |
+| `001e4908` | GamSndMan::findSnd | 5 | ror | stub | game/gamsnd.cpp |
 | `001d8064` | GamMan::findSectaCell | 5 | ror | stub | - |
 | `001e0c2c` | GamArea::ctl_trg_flg | 5 | ror | stub | - |
 | `0021a828` | i3rCopyClipSphere | 5 | lib-ctx | stub | - |
 | `001bebec` | GamFont::setFont | 4 | ror | stub | - |
 | `001dd5e8` | GamArea::addTrg | 4 | ror | stub | - |
-| `0011034c` | FUN_0011034c | 4 | - | stub | dog/dogentity.cpp |
-| `0010fc7c` | DogEntity::setRotate | 4 | ror | stub | - |
+| `001e4540` | GamSndMan::loadSePack(char*,int) | 4 | ror | stub | game/gamsnd.cpp |
+| `001e5250` | GamSndMan::playStr(int,int,float*,bool,unsignedint) | 4 | ror | stub | game/gamsnd.cpp |
 

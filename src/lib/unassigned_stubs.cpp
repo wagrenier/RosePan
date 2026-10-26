@@ -1647,3 +1647,15 @@ GamSecta * GamMan::getSectaCell(int no, float *pos, int list)
     ROSEPAN_STUB("GamMan::getSectaCell", 0x001d811c);
     return {};
 }
+
+// stub of ROR 0x001e77b4
+void CmnTaskMan::killKind(int kind)
+{
+    ROSEPAN_STUB("CmnTaskMan::killKind", 0x001e77b4);
+}
+
+// stub of ROR 0x001d3b44
+void GamMan::checkMenuReq()
+{
+    ROSEPAN_STUB("GamMan::checkMenuReq", 0x001d3b44);
+}

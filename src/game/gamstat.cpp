@@ -1447,3 +1447,30 @@ void gamSetWrdRoom(GamMan *gam, const void *file)
 {
     ROSEPAN_STUB("gamSetWrdRoom", 0x001dbcf0);
 }
+
+// stub of ROR 0x001d9f08
+void ACHRstat::empty1d9f08()
+{
+    ROSEPAN_STUB("ACHRstat::empty1d9f08", 0x001d9f08);
+}
+
+// stub of ROR 0x001d9f84
+int ACHRstat::isMotionEnd()
+{
+    ROSEPAN_STUB("ACHRstat::isMotionEnd", 0x001d9f84);
+    return {};
+}
+
+// stub of ROR 0x001da05c
+int ACHRstat::isTurnDone()
+{
+    ROSEPAN_STUB("ACHRstat::isTurnDone", 0x001da05c);
+    return {};
+}
+
+// stub of ROR 0x001db8e8
+const char * gamGetWrdString(int which, int wrd)
+{
+    ROSEPAN_STUB("gamGetWrdString", 0x001db8e8);
+    return {};
+}
