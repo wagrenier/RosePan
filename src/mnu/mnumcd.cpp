@@ -63,9 +63,9 @@ static const char mnuMcdTextStart[] =
     "\x82\xb1\x82\xcc\x82\xdc\x82\xdc\x8en\x82\xdf\x82\xe9";               // 0x002f8ae8
 
 /* The pad bits the prompts read (bed/bedpad.h). */
-#define MCD_PAD_CROSS(pad)  (((pad)->m_7a >> 14) & 1)   /* confirm */
-#define MCD_PAD_CIRCLE(pad) (((pad)->m_7c >> 13) & 1)   /* back (checkBootDebug) */
-#define MCD_PAD_LEFT        0x80                        /* m_70 */
+#define MCD_PAD_CROSS(pad)  (((pad)->m_trig >> 14) & 1)   /* confirm */
+#define MCD_PAD_CIRCLE(pad) (((pad)->m_repeat >> 13) & 1)   /* back (checkBootDebug) */
+#define MCD_PAD_LEFT        0x80                        /* m_dir_repeat */
 #define MCD_PAD_RIGHT       0x20
 
 /* The string copy the ROM inlines everywhere here: NULL clears dest. */
@@ -794,12 +794,12 @@ int MnuMcd::checkBoot(BedPad *pad)
                     setMessage(m_both == 0 ? 8 : 10);
                     *cursor = 2;
                 }
-            } else if (pad->m_70 & MCD_PAD_LEFT) {
+            } else if (pad->m_dir_repeat & MCD_PAD_LEFT) {
                 if (*cursor != 0) {
                     *cursor = 0;
                     g_sndMan.playSe(1);
                 }
-            } else if ((pad->m_70 & MCD_PAD_RIGHT) && *cursor != 1) {
+            } else if ((pad->m_dir_repeat & MCD_PAD_RIGHT) && *cursor != 1) {
                 *cursor = 1;
                 g_sndMan.playSe(1);
             }
@@ -896,13 +896,13 @@ int MnuMcd::checkBootDebug(BedPad *pad)
             m_debug_next = 0x32;
             m_cursor[1] = 2;
             g_sndMan.playSe(2);
-        } else if (pad->m_70 & MCD_PAD_LEFT) {
+        } else if (pad->m_dir_repeat & MCD_PAD_LEFT) {
             redraw = 1;
             if (m_cursor[1] != 0) {
                 m_cursor[1] = 0;
                 g_sndMan.playSe(1);
             }
-        } else if (pad->m_70 & MCD_PAD_RIGHT) {
+        } else if (pad->m_dir_repeat & MCD_PAD_RIGHT) {
             redraw = 1;
             if (m_cursor[1] != 1) {
                 m_cursor[1] = 1;
@@ -1045,12 +1045,12 @@ int MnuMcd::checkSave(BedPad *pad)
                     scene->updateWindowFont(m_win[1]);
                     *cursor = 2;
                 }
-            } else if (pad->m_70 & MCD_PAD_LEFT) {
+            } else if (pad->m_dir_repeat & MCD_PAD_LEFT) {
                 if (*cursor != 0) {
                     *cursor = 0;
                     g_sndMan.playSe(1);
                 }
-            } else if ((pad->m_70 & MCD_PAD_RIGHT) && *cursor != 1) {
+            } else if ((pad->m_dir_repeat & MCD_PAD_RIGHT) && *cursor != 1) {
                 *cursor = 1;
                 g_sndMan.playSe(1);
             }
@@ -1224,12 +1224,12 @@ int MnuMcd::checkLoad(BedPad *pad)
                     scene->updateWindowFont(m_win[1]);
                     *cursor = 2;
                 }
-            } else if (pad->m_70 & MCD_PAD_LEFT) {
+            } else if (pad->m_dir_repeat & MCD_PAD_LEFT) {
                 if (*cursor != 0) {
                     *cursor = 0;
                     g_sndMan.playSe(1);
                 }
-            } else if ((pad->m_70 & MCD_PAD_RIGHT) && *cursor != 1) {
+            } else if ((pad->m_dir_repeat & MCD_PAD_RIGHT) && *cursor != 1) {
                 *cursor = 1;
                 g_sndMan.playSe(1);
             }
@@ -1343,12 +1343,12 @@ int MnuMcd::execSave(BedPad *pad)
             m_decided = 1;
             g_sndMan.playSe(4);
         } else if (m_decided == 0) {
-            if (pad->m_70 & MCD_PAD_LEFT) {
+            if (pad->m_dir_repeat & MCD_PAD_LEFT) {
                 if (m_cursor[5] != 0) {
                     m_cursor[5] = 0;
                     g_sndMan.playSe(1);
                 }
-            } else if ((pad->m_70 & MCD_PAD_RIGHT) && m_cursor[5] != 1) {
+            } else if ((pad->m_dir_repeat & MCD_PAD_RIGHT) && m_cursor[5] != 1) {
                 m_cursor[5] = 1;
                 g_sndMan.playSe(1);
             }
@@ -1508,11 +1508,11 @@ int MnuMcd::execSave(BedPad *pad)
             m_decided = 1;
             g_sndMan.playSe(4);
         } else if (m_decided == 0) {
-            if ((pad->m_70 & MCD_PAD_LEFT) && m_cursor[5] != 0) {
+            if ((pad->m_dir_repeat & MCD_PAD_LEFT) && m_cursor[5] != 0) {
                 m_cursor[5] = 0;
                 g_sndMan.playSe(1);
             }
-            if ((pad->m_70 & MCD_PAD_RIGHT) && m_cursor[5] != 1) {
+            if ((pad->m_dir_repeat & MCD_PAD_RIGHT) && m_cursor[5] != 1) {
                 m_cursor[5] = 1;
                 g_sndMan.playSe(1);
             }

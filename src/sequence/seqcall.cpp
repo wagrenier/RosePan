@@ -105,18 +105,18 @@ intptr_t seqFunc004(intptr_t id, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
         return seqWaitWhile(gam.isMsgBusy());
     case 8:
         return seqWaitWhile(g_taskMan.getTask(gam.m_frameTaskId) != NULL);
-    case 9:  // until pad 0 bit a1 is set (0..15 in +0x78, 16.. in +0x7a)
+    case 9:  // until pad 0 bit a1 is set (0..15 held, m_hold +0x78; 16.. pressed this frame, m_trig +0x7a)
     {
-        // a1 == 16 tests bit 16 of the 16-bit +0x78 and waits for ever (the
+        // a1 == 16 tests bit 16 of the 16-bit m_hold and waits for ever (the
         // ROM bounds a1 < 0x11; kept).
         const BedPad *pad = g_magSystem.m_pad_ref[0].m_pad;
         if ((u_int)a1 < 0x11)
         {
             u_int bit = 1u << (u_int)a1;
-            return (pad->m_78 & bit) == bit ? 0 : SEQ_RET_WAIT;
+            return (pad->m_hold & bit) == bit ? 0 : SEQ_RET_WAIT;
         }
         u_int bit = 1u << (u_int)(a1 - 0x10);
-        return (pad->m_7a & bit) == bit ? 0 : SEQ_RET_WAIT;
+        return (pad->m_trig & bit) == bit ? 0 : SEQ_RET_WAIT;
     }
     case 10:
         return seqWaitWhile(g_taskMan.getTask(gam.m_selectTaskId) != NULL);

@@ -445,12 +445,12 @@ void MagSystem::setPC(int no, int code)
     }
     else
     {
-        m_pad[0].m_44 = 0;
-        m_pad[0].m_48 = 0;
-        m_pad[0].m_40 = 0;
-        m_pad[1].m_44 = 0;
-        m_pad[1].m_48 = 0;
-        m_pad[1].m_40 = 0;
+        m_pad[0].m_last_dir_y = 0;
+        m_pad[0].m_last_dir_len = 0;
+        m_pad[0].m_last_dir_x = 0;
+        m_pad[1].m_last_dir_y = 0;
+        m_pad[1].m_last_dir_len = 0;
+        m_pad[1].m_last_dir_x = 0;
         m_pc_no = no;
         m_pc_no_last = no;
     }

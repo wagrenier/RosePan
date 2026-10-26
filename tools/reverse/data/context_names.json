@@ -173,6 +173,54 @@
   "was": "FUN_00101ccc",
   "why": "called on both pads at the start of every MagSystem::update"
  },
+ "00101e64": {
+  "name": "BedPad::getRightX",
+  "tag": "ror-inferred",
+  "was": "FUN_00101e64",
+  "why": "byte 0x7e (pad report byte 2, the right stick X) with a 0x60..0xa0 dead zone, mapped to -1..1"
+ },
+ "00101eec": {
+  "name": "BedPad::getRightY",
+  "tag": "ror-inferred",
+  "was": "FUN_00101eec",
+  "why": "byte 0x7f (report byte 3, right stick Y) through the same dead zone"
+ },
+ "00101f74": {
+  "name": "BedPad::getLeftX",
+  "tag": "ror-inferred",
+  "was": "FUN_00101f74",
+  "why": "byte 0x80 (report byte 4, left stick X); BedPad::updateDir takes it as the X direction when left / right are not pressed"
+ },
+ "00101ffc": {
+  "name": "BedPad::getLeftY",
+  "tag": "ror-inferred",
+  "was": "FUN_00101ffc",
+  "why": "byte 0x81 (report byte 5, left stick Y); updateDir takes it as Y when up / down are not pressed"
+ },
+ "00102084": {
+  "name": "BedPad::getDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00102084",
+  "why": "returns the direction vector 0x4c / 0x50 through two pointers and its length 0x54 (updateDir writes them)"
+ },
+ "0010209c": {
+  "name": "BedPad::getDirChange",
+  "tag": "ror-inferred",
+  "was": "FUN_0010209c",
+  "why": "returns float 0x58, the value calcDirChange computes each update"
+ },
+ "001020a4": {
+  "name": "BedPad::calcDirChange",
+  "tag": "ror-inferred",
+  "was": "FUN_001020a4",
+  "why": "(1 - dot of the normalised current 0x4c..0x54 and last 0x40..0x48 directions) / 2 + |length change| * 0.1; update latches the direction when it is 0.001 or more"
+ },
+ "00102188": {
+  "name": "BedPad::updateDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00102188",
+  "why": "d-pad bits of 0x78 or the left stick past 0.7 -> direction bits 0x68 held / 0x6c triggered / 0x70 repeated with BedPad's own repeat counters, vector 0x4c / 0x50, length 0x54, quadrant 0x60 and a quick-change counter 0x64"
+ },
  "0010254c": {
   "name": "utlPlaySe3d",
   "tag": "ror-inferred",
@@ -14272,6 +14320,36 @@
   "tag": "lib-context",
   "was": "FUN_0026b218",
   "why": "clears the libpad2 init flag and closes every open port record (0x26b388)"
+ },
+ "0026b280": {
+  "name": "scePad2CreateSocket",
+  "tag": "lib-context",
+  "was": "FUN_0026b280",
+  "why": "libpad2: takes a scePad2SocketParam (option, port, slot, number, name) and a 64-byte aligned DMA buffer (prints an error otherwise), returns a socket index into the 0x334-byte records at 0x824308; BedPad::init"
+ },
+ "0026b388": {
+  "name": "scePad2DeleteSocket",
+  "tag": "lib-context",
+  "was": "FUN_0026b388",
+  "why": "libpad2: closes the socket and clears its record flags; BedPad::term asserts m_socket>=0 before it"
+ },
+ "0026b3e0": {
+  "name": "scePad2Read",
+  "tag": "lib-context",
+  "was": "FUN_0026b3e0",
+  "why": "libpad2: copies the socket's report into the buffer, returns its byte count or -1; BedPad::update reads into the BedPad itself (buttons at 0, sticks at 2..5)"
+ },
+ "0026b588": {
+  "name": "scePad2GetState",
+  "tag": "lib-context",
+  "was": "FUN_0026b588",
+  "why": "libpad2: socket state byte; BedPad::update reads only when it is 1 (scePad2StateStable)"
+ },
+ "0026bb10": {
+  "name": "sceVibSetActParam",
+  "tag": "lib-context",
+  "was": "FUN_0026bb10",
+  "why": "libvib: (socket, profile size, profile, data size, data) packed into a 0x103400b DBC request; BedPad::setVibration passes profile bit 0 small motor / bit 1 big motor"
  },
  "00279b70": {
   "name": "snprintf",
