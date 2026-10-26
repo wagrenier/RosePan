@@ -1013,6 +1013,17 @@ throughout (identifiers, env variables, files, shader macros):
   281 ops 200 / 201 go to seqSectorFlags 0x20de34 (sectorSetFlags 0x17c45c / sectorClearFlags 0x17c4f4
   on the scene's sector.sec object +0x8542c); seqGetIdPair 0x20dea8 reads the 50 signed byte pairs at
   data 0x3015e0.
+- **Natives 253 / 281** (session 10, 2026-10-26): 253 movies (table data 0x3015b0, 11 cases) on the
+  TskMovie task (0x80, ctor 0x1f438c, vtable 0x2e4c50: sound 0x1d, SndMan::stopAll(8), name at +0x10,
+  m_state +8 = 100, S2dMovie::playMovie) kept in GamMan::m_movieTaskId +0x222b4: 1 start (yields), 2 kill
+  + 5 frames, 3 listed?, 4 wait while gone from getTask but CmnTaskMan::findTask 0x1e79c0 still finds it
+  with state <= 100, 5 rxMpegGetFrameCount. 281 scene effects: 13 the focus (mag/magscenefocus.cpp:
+  setFocus 0x140b20, startLerp 0x140e60 fills a MagLerp {from, to, frame, frames}, setFocusLerp 0x140d94;
+  values +0x853c8[3], lerps +0x853fc[3]); 21 DogActor eye ops 0x10f70c / 73c / 7a0 / 808 on +0x480..0x494
+  (setEyeTex 0x10f5e4 finds the model node named "eye"); 38 / 0..49 via seqGetIdPair build a 0x80-byte
+  EffParam for Obj176a3c::createEff 0x176cc8 (scene +0x837e0, the Eff* factory, 0x110 entries at +4) and
+  GamMan::addObjFx 0x1cba0c enters {oid, no} in pool +0x20b00 (findObjFx 0x1cbafc reads it back); 98
+  Eff0::setVisible 0x16aa04 (slot 10, shared by all 43 Eff classes); 100 / 101 ctlObj1cb8e4 / ctlObj1cbb80.
 - **Natives 016 / 023 / 026 / 156 / 202 / 211** (session 9, 2026-10-26): 016 the camera (table data
   0x3001c0, 52 cases) on MagScene::m_camera_entity +0x2ab70: 1 / 2 set m_trans / m_rotate (+dirty), 3 / 4
   read them, 5 / 6 DogCamera::setLensScale 0x10fc08 / getLensScale 0x10fbd4 (m_angle = s * m_144 *

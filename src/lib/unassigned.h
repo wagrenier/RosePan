@@ -73,6 +73,8 @@ struct CmnTaskMan
     /* Pauses / resumes every task but those of kinds 1, 2, 5, 7, 0xf,
      * 0x11, 0x12, 0x17. */
     void pauseOthers(int on);                                            // ROR 0x001e7544
+    /* The task object of id (the list at +4, then +0), NULL when none. */
+    CmnITask *findTask(int id);                                          // ROR 0x001e79c0
 
     SysTimer m_timer;           // ROR 0x40 (bss 0x7a3dc0)
 };
@@ -108,6 +110,19 @@ struct TskSnd : CmnITask
 struct TskFrameFunc : CmnITask
 {
     TskFrameFunc(int kind, intptr_t arg, int frames);                    // ROR 0x001f184c
+};
+
+/* TskMovie : CmnITask (vtable 0x2e4c50, EE 0x80 bytes): plays the movie
+ * name (S2dMovie::playMovie) after stopping the sound; native 253's movie
+ * task (GamMan::m_movieTaskId). layout: host. */
+struct TskMovie : CmnITask
+{
+    TskMovie(const char *name);                                          // ROR 0x001f438c
+
+    int  _04;
+    int  m_state;               // ROR 0x08: 100 from the constructor; native 253 case 4 waits while <= 100
+    int  _0c;
+    char m_name[0x40];          // ROR 0x10
 };
 
 /* The achr movement tasks (unassigned@001e6cac; class names from their
@@ -426,12 +441,46 @@ struct MagLife130da4 : MagLife  /* scene +0x418f0, constructor 0x130da4 */
     int    m_34;                // ROR 0x34: initRender copies the scene's +0x2910 into it
 };
 static_assert(offsetof(MagLife130da4, m_34) >= 0x34, "m_34");
+struct DogActor;
+/* The base of the 43 Eff* effect classes (vtable 0x2e3250, vptr at +0x20).
+ * layout: host -- only the flag word is placed. */
+struct Eff0
+{
+    /* Slot 10 of every Eff class (never overridden): flag bit 4 = hidden,
+     * bit 8 = changed. */
+    void setVisible(bool on);                                            // ROR 0x0016aa04
+
+    u_short m_flags;            // ROR 0x00
+};
+/* Obj176a3c::createEff's parameter block (EE 0x80; natives 281 fill it on
+ * the stack). m_kind picks the class (1..0x34). layout: host -- word 0x10
+ * holds a DogActor for kind 0x15, so the data that follows moves. */
+struct EffParam
+{
+    int m_kind;                 // ROR 0x00
+    int _04;
+    int m_08;                   // ROR 0x08: 0 from every caller seen
+    int _0c;
+    union
+    {
+        u_char m_data[0x70];    // ROR 0x10: the script's 0x70 bytes (native 281 ops 0..49)
+        struct
+        {
+            DogActor *m_actor;  // ROR 0x10
+            int       m_args[12]; // ROR 0x14
+        } m_achr;               // kind 0x15 (native 281 op 38)
+    };
+};
 struct Obj176a3c                /* scene +0x837e0, constructor 0x176a3c */
 {
+    /* News the Eff class of param->m_kind into a free table entry; its
+     * number (scenePlayStart, native 281). */
+    int  createEff(const EffParam *param);                               // ROR 0x00176cc8
     /* Deletes entry no of its table (GamMan::ctlObj1cbb80). */
     void release(int no);                                                // ROR 0x0017756c
 
-    int _00;
+    int   _00;
+    Eff0 *m_entry[0x110];       // ROR 0x04: the constructor clears 0x440 bytes
 };
 /* layout: host -- placeholder. */
 /* A floor sector of a sky pack's sector.sec (EE 0x80, file data). */

@@ -530,6 +530,10 @@ struct GamMan
     /* The PC's ACHRstat::setParam(which, data), when there is a PC. */
     void setPcParam(int which, const void *data);                        // ROR 0x001cb4f0
     void ctlObj1cb8e4(u_int oid, int a, int b);                          // ROR 0x001cb8e4
+    /* A +0x20b00 record {oid, no}: the scene +0x837e0 entry no belongs to oid. */
+    void addObjFx(u_int oid, int no);                                    // ROR 0x001cba0c
+    /* The scene +0x837e0 entry of oid's first +0x20b00 record, -1 none. */
+    int  findObjFx(u_int oid);                                           // ROR 0x001cbafc
     /* Frees oid's +0x20b00 records, releasing their scene +0x837e0 entry. */
     void ctlObj1cbb80(u_int oid);                                        // ROR 0x001cbb80
     /* Frees the +0x20b00 records of kind (after 0x17762c). */
