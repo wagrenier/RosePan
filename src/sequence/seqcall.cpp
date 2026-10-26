@@ -824,7 +824,7 @@ intptr_t seqFunc110(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
         return 0;
     }
     case 11:
-        seq.addEntry((u_int)a2, (int)a1);
+        seq.addEntry((u_int)a2, (intptr_t)a1);
         return 0;
     case 13:
         seq.callEntry((u_int)a1, 0, 0);

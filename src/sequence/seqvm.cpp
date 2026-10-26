@@ -1309,7 +1309,7 @@ void Sequence::freeStageEntries()
 // ──────────────────────────────────────────────────────────────────────
 // ROR 0x00212920
 
-void Sequence::addEntry(u_int id, int value)
+void Sequence::addEntry(u_int id, intptr_t value)
 {
     // PC: the ROM's last 8 bytes are stack garbage.
     SeqEntry entry;
