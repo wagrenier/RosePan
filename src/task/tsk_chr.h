@@ -22,6 +22,7 @@
 #include <stdint.h>
 
 #include "sdk/eetypes.h"
+#include "msg/msgman.h"
 #include "task/tsk_man.h"
 
 struct ACHRstat;
@@ -88,6 +89,64 @@ struct TskMtnMove : CmnITask
     float     m_speed;          // ROR 0x78
     float     m_step;           // ROR 0x7c: speed / (1/60)
     StepFunc  m_stepFunc;       // ROR 0x80: GCC 2 {delta, index, pfn}
+};
+
+/* TskMtnMove2 : CmnITask (vtable 0x2e48d0, EE 0x100 bytes; kind 5): the
+ * variant of TskMtnMove native 100 starts through chrMtnMove2. The
+ * motion (changeMotion on the achr's actor unless it runs; flag 4 then)
+ * moves the actor by its root move turned by the actor's base heading
+ * (m_base_rotate[1]) through DogActor::getMotionMove / addTrans; while
+ * the motion stands it only takes the motion's turn. The achrs
+ * TskMtnMove sends to stepMoveHit get stepMoveHit here too: a move into
+ * something (testHitAt from the Bip01 Spine1 node, or no cell 1.25 radii
+ * ahead) is refused, and when the actor stands in something a
+ * TskAvoidMove starts on the achr's m_taskId. layout: host -- pointers
+ * and a member-function pointer; EE offsets in the comments. */
+struct TskMtnMove2 : CmnITask
+{
+    typedef int (TskMtnMove2::*StepFunc)();
+
+    TskMtnMove2(float speed, int no, int motion, int p1d8, u_int flags, u_int oid); // ROR 0x001e8fc4
+    ~TskMtnMove2() override {}                                           // ROR 0x002900b8
+
+    int  get_task_type() override { return 5; }                          // ROR 0x002900ec
+    void pause(int on) override;                                         // ROR 0x001e9294
+    void init() override {}                                              // ROR 0x00290140
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001e922c
+    void term() override;                                                // ROR 0x001e9224
+
+    int  stepMove();                                                     // ROR 0x001e93ec
+    int  stepMoveHit();                                                  // ROR 0x001e9614
+    int  stepNone();                                                     // ROR 0x001e9a34
+
+    u_int     m_flags;          // ROR 0x04: bit 0 stops the moving, bit 1 paused, bit 2 the motion was changed
+    u_int     m_oid;            // ROR 0x08
+    int       m_actor;          // ROR 0x0c: the scene actor no, re-read from m_oid each step
+    int       m_motion;         // ROR 0x10
+    float     m_pos[4];         // ROR 0x20: stepMoveHit's position (the Bip01 Spine1 node or the achr's)
+    float     m_mpos[4];        // ROR 0x30: getMotionMove's position ([1] goes to addTrans)
+    float     m_move[4];        // ROR 0x40: the root move
+    ACHRstat *m_achr;           // ROR 0x50: NULL unless oid is an achr
+    DogActor *m_dogActor;       // ROR 0x54: GamMan::getActor(oid)
+    float     m_flagsF;         // ROR 0x58: flags as a float (not read here)
+    float     m_rotY;           // ROR 0x5c: the actor's base heading
+    float     m_rotYOut;        // ROR 0x60: m_rotY after each step
+    float     m_end;            // ROR 0x64: the motion's length * 120
+    float     m_speed;          // ROR 0x68
+    float     m_step;           // ROR 0x6c: speed / (1/60)
+    float     m_achrPos[4];     // ROR 0x70: the achr's position (stepMoveHit; not read)
+    int       m_c4;             // ROR 0xc4: 0 (not read here)
+    float     m_radius;         // ROR 0xc8: GamMan::getObjRadius (stepMoveHit's look-ahead)
+    StepFunc  m_stepFunc;       // ROR 0xcc: GCC 2 {delta, index, pfn}
+};
+
+/* TskAvoidMove : CmnITask (vtable 0x2e4b50, EE 0xc0 bytes): pushes an
+ * achr out of what it stands in (hit the testHitAt record whose +0x10 is
+ * the other object; a3 / a4 its two speeds). Not written: the constructor
+ * is a hand stub. layout: host -- no members. */
+struct TskAvoidMove : CmnITask
+{
+    TskAvoidMove(u_int oid, const void *hit, int a3, int a4, int a5, int a6); // ROR 0x001ef184
 };
 
 /* TskFrameFunc : CmnITask (vtable 0x2e4d50, EE 0x80 bytes): kind < 0x17
@@ -172,12 +231,36 @@ struct TskSeqEvent : CmnITask
     float m_radius;             // ROR 0x48: param word 1
 };
 
-/* TskMsgMan : CmnITask (vtable 0x2e4c10, EE 0x9c0 bytes): a message
- * window on text (two MsgMan at +0x224) with the eight window words param;
- * GamMan::openMsg's task (m_msgTaskId). layout: host -- no members. */
+/* TskMsgMan : CmnITask (vtable 0x2e4c10, EE 0x9c0 bytes; kind 0x10): a
+ * message window -- GamMan::openMsg's task (m_msgTaskId). The constructor
+ * opens a scene window sized by the eight window words param (p[0..1] the
+ * position, p[3..4] the size, p[5] MsgManSet::setMessage's flag, p[6] the
+ * window's life; it writes 0x8001 into the caller's p[2]) and shows "#C"
+ * + text in it; fill picks the window fill (0: fill 1, else the msb fill).
+ * exec, by mode: 1 ends after time frames, 2 when the text is out and
+ * CROSS is pressed (after 10 frames), 3 the same or after time frames, 4
+ * when the text is out. pause hides the window and stops the message
+ * sprites 0..13. layout: host -- MsgManSet holds host pointers later; EE
+ * offsets in the comments. */
 struct TskMsgMan : CmnITask
 {
-    TskMsgMan(const char *text, int arg, const int *param, int a4, int mode, int time); // ROR 0x001f4a24
+    TskMsgMan(const char *text, int arg, int *param, int fill, int mode, int time); // ROR 0x001f4a24
+    ~TskMsgMan() override;                                               // ROR 0x001f4c74
+
+    int  get_task_type() override { return 0x10; }                      // ROR 0x00290774
+    void pause(int on) override;                                         // ROR 0x001f4d84
+    void init() override {}                                              // ROR 0x0029077c
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001f4f5c
+    void term() override;                                                // ROR 0x001f4d14
+
+    char      m_text[0x200];    // ROR 0x004: "#C" + the text (strncpy 0x200 after the prefix)
+    int       m_mode;           // ROR 0x204: exec's end rule 1..4; 0 after term
+    int       m_time;           // ROR 0x210: frames (modes 1 and 3)
+    int       m_window;         // ROR 0x214: the scene window (MagScene::openWindow)
+    int       m_count;          // ROR 0x21c: frames run
+    char     *m_textPtr;        // ROR 0x220: m_text
+    MsgManSet m_msg;            // ROR 0x224
+    int       m_param[8];       // ROR 0x99c: the window words as given (not read again)
 };
 
 /* TskSysFunc : CmnITask (vtable 0x2e4cd0, EE 0x80 bytes): kinds 0..1 set
@@ -226,6 +309,9 @@ void chrSetMotion(float speed, int no, int motion, int p1d8, u_int flags, u_int 
 /* Creates item id's object (its chr no and model from the system data),
  * placed at pos / rot when given; returns its oid. */
 u_int chrCreateItemObj(short id, const float *pos, const float *rot);    // ROR 0x001f6578
+/* The world position of oid's actor's node name into out (x, y, z, 1):
+ * 0 without an actor or node, or while GamMan::m_flags2 has 0x3000. */
+int  chrGetNodeWorldPos(u_int oid, float *out, const char *name);       // ROR 0x001f5558
 /* gamOidType(oid) == 2 (TskMtnMove's test, inlined there). */
 int  chrIsOidType2(u_int oid);                                           // ROR 0x001f6878
 

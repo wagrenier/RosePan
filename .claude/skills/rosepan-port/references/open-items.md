@@ -15,8 +15,11 @@ address to an int, hazards.md; plus a PORT guard in DogModel::getNodeIndexByName
 ceiling lamps, Jennifer at the window, a "March 1930" card; silent -- the IOP sound stand-in). After
 the film nothing draws: no model loads yet. **Priorities, in this order** (the queue in tus.json
 follows it; reached stubs in run order):
-  1. `task/tsk_chr.cpp` -- TskMsgMan::TskMsgMan 0x1f4a24, reached right after the film (the message
-     window task), then the rest of the TU's reached / frontier functions.
+  1. `task/tsk_chr.cpp` -- TskMsgMan written 2026-10-26 (it opens the film's narration subtitles,
+     frames ~2950..; nothing shows until MsgMan / MsgManSet are written -- `msg/msgman.cpp` 0x18330c..
+     and unassigned@00184f2c 0x18741c..0x18761c: queue them when the subtitles matter; they are not on
+     the path to the first room), TskMtnMove2 / chrMtnMove2 / chrSetMotion written; then the rest of the
+     TU's reached / frontier functions (TskFrameFunc 0x1f184c, TskMovePointPath, chrRotStart).
   2. `unassigned@001f82e4` (task/tsk_scene.cpp's classes) -- TskSnd::TskSnd 0x1f8fc0 (the BGM fade
      back after the film), **scenePlayStart 0x1f83f4** (event scenes: map / CHARA / THREAD sections).
   3. `unassigned@00192ac0` -- MnuPBook::setType 0x196e54 / MnuDiary::setType 0x198b04
