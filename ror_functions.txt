@@ -4139,12 +4139,12 @@
 /* 001efeb8 000003d0 */ FUN_001efeb8(){}
 /* 001f0288 00000110 */ FUN_001f0288(){}
 /* 001f0398 0000009c */ FUN_001f0398(){}
-/* 001f0434 00000434 */ FUN_001f0434(){}
-/* 001f0868 00000034 */ FUN_001f0868(){}
-/* 001f089c 00000004 */ FUN_001f089c(){}
-/* 001f08a4 00000068 */ FUN_001f08a4(){}
-/* 001f090c 00000244 */ FUN_001f090c(){}
-/* 001f0b50 000002c4 */ FUN_001f0b50(){}
+/* 001f0434 00000434 */ TskChrRot::TskChrRot(){}  // ror
+/* 001f0868 00000034 */ TskChrRot::~TskChrRot(){}  // ror
+/* 001f089c 00000004 */ TskChrRot::term(){}  // ror
+/* 001f08a4 00000068 */ TskChrRot::exec(){}  // ror
+/* 001f090c 00000244 */ TskChrRot::stepFrames(){}  // ror
+/* 001f0b50 000002c4 */ TskChrRot::stepMotion(){}  // ror
 /* 001f0e14 0000007c */ FUN_001f0e14(){}
 /* 001f0e90 0000010c */ chrRotStart(){}  // ror
 /* 001f0f9c 00000108 */ chrRotTo(){}  // ror

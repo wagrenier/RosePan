@@ -1327,31 +1327,6 @@ intptr_t magBwnSeqCommand(const intptr_t *args)
     return {};
 }
 
-// stub of ROR 0x001f6b8c
-int chrRotFrames(float angle, float speed)
-{
-    ROSEPAN_STUB("chrRotFrames", 0x001f6b8c);
-    return {};
-}
-
-// stub of ROR 0x001f0e90
-void chrRotStart(float angle, u_int oid, int frames)
-{
-    ROSEPAN_STUB("chrRotStart", 0x001f0e90);
-}
-
-// stub of ROR 0x001f0f9c
-void chrRotTo(float dir, float speed, u_int oid)
-{
-    ROSEPAN_STUB("chrRotTo", 0x001f0f9c);
-}
-
-// stub of ROR 0x001f10a4
-void chrRotToIn(float dir, u_int oid, int frames)
-{
-    ROSEPAN_STUB("chrRotToIn", 0x001f10a4);
-}
-
 // stub of ROR 0x0017c4f4
 void sectorClearFlags(Obj17c0f0 *obj, int key, u_int bits, int rec)
 {

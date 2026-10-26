@@ -6,7 +6,8 @@
  *  tsk_chr.h. Written so far: TskMtnMove / TskMtnMove2 and their starters
  *  (chrMtnMove, chrMtnMove2, chrChangeMotion, chrKillMotionTask,
  *  chrSetMotion, chrGetNodeWorldPos), TskMovie (the film task),
- *  TskMsgMan (the message window task), TskFrameFunc (the multi-frame
+ *  TskMsgMan (the message window task), TskChrRot and chrRotStart / chrRotTo /
+ *  chrRotToIn / chrRotFrames (turns), TskFrameFunc (the multi-frame
  *  jobs: fades, the door opening, game over, fog, items), the frame
  *  request list.
  * ======================================================================== */
@@ -593,6 +594,215 @@ int TskMtnMove2::stepMoveHit()
 int TskMtnMove2::stepNone()
 {
     return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The turn: angle wrapped (still outside -pi..pi: no turn, at once), the
+// heading (rotY >= 32769 the actor's), the achr's turn motion when it has
+// flag 0x80000 (param 0x1102 turning left, 0x1101 right). No motion: the
+// turn over frames (frames < 1: set now); a motion: it plays at speed /
+// 60 toward the target heading.
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrWrapPi and the -pi..pi checks)
+// ROR 0x001f0434
+
+TskChrRot::TskChrRot(float angle, float rotY, float speed, u_int oid, int frames, int motion,
+                     int restore, int unused)
+{
+    (void)unused;
+    m_oid = oid;
+    m_actor = g_gamMan.getActorNo(oid);
+    m_angle = chrWrapPi(angle);
+    m_restore = restore;
+    m_achr = g_gamMan.getAchr(m_oid);
+    m_motion = motion;
+    m_motionTask = NULL;
+    // PORT: the ROM forms the address for actor -1 too; it is only read
+    // below for an achr, which has an actor.
+    m_dogActor = m_actor >= 0 ? &g_magSystem.m_scene.m_actors[m_actor] : NULL;
+
+    u_int flags = m_achr->m_flags;
+    if ((double)m_angle < -CHR_PI || (double)m_angle > CHR_PI)
+    {
+        m_angle = 0.0f;
+        frames = 0;
+    }
+    if (rotY >= CHR_ROT_KEEP)
+        rotY = m_dogActor->getRotY();
+    m_rot[0] = 0.0f;
+    m_rot[1] = rotY;
+    m_rot[2] = 0.0f;
+    m_rot[3] = 0.0f;
+    if ((flags & 0x80000) != 0)
+        m_achr->getParam(angle < 0.0f ? 0x1102 : 0x1101, &m_motion);
+
+    if (m_motion == -1)
+    {
+        if (frames < 1)
+        {
+            m_rot[1] = chrWrapPi(m_rot[1] + m_angle);
+            g_magSystem.setActorRotate(m_actor, m_rot);
+            m_step = 0.0f;
+            m_frames = 0;
+            m_count = 0;
+        }
+        else
+        {
+            m_frames = frames - 1;
+            m_count = frames - 1;
+            m_step = m_angle / (float)frames;
+        }
+        m_stepFunc = &TskChrRot::stepFrames;
+    }
+    else
+    {
+        float from = m_rot[1];
+        m_speed = speed * 0x1.11111p-6f; /* 0x3c888888 */
+        m_angle = chrWrapPi(from + m_angle);
+        m_step = 0.0f;
+        // The ROM passes from in f13 as well; chrMtnMove2 does not read it.
+        m_motionTask = chrMtnMove2(m_speed, oid, m_motion, 0, 0x100, NULL);
+        m_stepFunc = &TskChrRot::stepMotion;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The step function the constructor picked.
+// ROR 0x001f08a4
+
+int TskChrRot::exec(int id, int time, int arg)
+{
+    (void)id;
+    (void)time;
+    (void)arg;
+    return (this->*m_stepFunc)();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f089c
+
+void TskChrRot::term()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// One frame of the turn: the heading moves by m_step and goes to the
+// object; a running motion task (m_task[2]) gets it as its heading. Ends
+// after m_frames + 1 frames.
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrWrapPi / chrNormPi)
+// ROR 0x001f090c
+
+int TskChrRot::stepFrames()
+{
+    if (m_count-- < 0)
+        return 1;
+    m_rot[1] = chrWrapPi(m_rot[1] + m_step);
+    g_gamMan.setObjRot(m_oid, m_rot);
+
+    int *id = &m_achr->m_task[2];
+    if (g_taskMan.getTask(*id) == 0)
+        return 0;
+    m_motionTask = g_taskMan.findTask(*id);
+    m_rot[1] = chrNormPi(m_rot[1]);
+    // The ROM stores the word at +0x6c of whatever task it is: TskMtnMove's
+    // m_rotY; a TskMtnMove2 (native 100's) has its m_step there.
+    if (TskMtnMove *move = dynamic_cast<TskMtnMove *>(m_motionTask))
+        move->m_rotY = m_rot[1];
+    else if (TskMtnMove2 *move2 = dynamic_cast<TskMtnMove2 *>(m_motionTask))
+        move2->m_step = m_rot[1];
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The turn motion runs until the actor's heading is within 0.1 of the
+// target; then motion 1 again (m_restore), the motion task killed (the
+// ROM kills the one chrMtnMove2 just started: the motion change stays,
+// the moving stops) and the heading set.
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrWrapPi)
+// ROR 0x001f0b50
+
+int TskChrRot::stepMotion()
+{
+    const float near = 0x1.999998p-4f; /* 0x3dcccccc */
+    float rotY = m_dogActor->getRotY();
+    float d = chrWrapPi(rotY - m_angle);
+
+    if (d < 0.0f)
+    {
+        if (d < -near)
+            return 0;
+    }
+    else if (near < d)
+    {
+        return 0;
+    }
+    if (m_restore != 0)
+        chrMtnMove2(0x1.11111p-6f, m_oid, 1, 0, 0, NULL);
+
+    int *id = &m_achr->m_task[2];
+    if (g_taskMan.getTask(*id) != 0)
+    {
+        g_taskMan.killTask(*id);
+        *id = -1;
+    }
+    m_rot[1] = rotY;
+    m_rot[3] = 1.0f;
+    m_rot[0] = 0.0f;
+    m_rot[2] = 0.0f;
+    g_gamMan.setObjRot(m_oid, m_rot);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kills the achr's turn task (m_task[1]) and starts a new one turning by
+// angle over frames (none for 0).
+// ROR 0x001f0e90
+
+void chrRotStart(float angle, u_int oid, int frames)
+{
+    ACHRstat *chr = g_gamMan.getAchr(oid);
+    int      *id = &chr->m_task[1];
+
+    if (g_taskMan.getTask(*id) != 0)
+    {
+        g_taskMan.killTask(*id);
+        *id = -1;
+    }
+    if (angle == 0.0f)
+        return;
+    // callcheck: operator_new (the new expression)
+    TskChrRot *task = new TskChrRot(angle, CHR_ROT_KEEP, 1.0f, oid, frames, -1, 1, 1);
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 0x11);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A turn to the heading dir at speed (chrRotFrames frames).
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrWrapPi)
+// ROR 0x001f0f9c
+
+void chrRotTo(float dir, float speed, u_int oid)
+{
+    sceVu0FVECTOR rot;
+
+    g_gamMan.getObjRot(oid, rot);
+    if (rot[1] == dir)
+        return;
+    float angle = chrWrapPi(dir - rot[1]);
+    chrRotStart(angle, oid, chrRotFrames(angle, speed));
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A turn to the heading dir over frames.
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrWrapPi)
+// ROR 0x001f10a4
+
+void chrRotToIn(float dir, u_int oid, int frames)
+{
+    sceVu0FVECTOR rot;
+
+    g_gamMan.getObjRot(oid, rot);
+    if (rot[1] == dir)
+        return;
+    chrRotStart(chrWrapPi(dir - rot[1]), oid, frames);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1973,4 +2183,16 @@ void gamClearFrameReq(void)
     // PC: the ROM clears 0x20 bytes, the first 8 of the 32 words.
     memset(g_frameReq, 0, 0x20);
     g_frameReqNum = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The frames a turn by angle takes at speed: |angle / (speed * 0.05233)|.
+// ROR 0x001f6b8c
+
+int chrRotFrames(float angle, float speed)
+{
+    int frames = (int)(angle / (speed * 0x1.acaff6p-5f)); /* 0x3d5657fb */
+    if ((float)frames < 0.0f)
+        frames = -frames;
+    return frames;
 }

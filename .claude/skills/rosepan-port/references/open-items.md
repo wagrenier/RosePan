@@ -798,6 +798,15 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- TskChrRot::stepFrames (2026-10-26, task/tsk_chr.cpp): each frame the ROM writes the heading into word
+  +0x6c of whatever task runs in ACHRstat::m_task[2]. That is TskMtnMove's m_rotY, but TskMtnMove2's
+  m_step (its speed / (1/60)). The port keeps the ROM's write for both classes (through dynamic_cast).
+  Unconfirmed: a turn without a motion that runs while native 100's TskMtnMove2 moves the achr may change
+  that move's speed. Check it the first time a screenshot shows a turn while the achr is walking.
+- TskChrRot::stepMotion (same session): with m_restore set it starts motion 1 through chrMtnMove2, then
+  kills m_task[2] at once. That is the task it just started, so the motion change stays but the moving
+  stops. The port does the same. If idle motions look frozen after a turn, look here first.
+
 - task/tsk_man.cpp (2026-10-26): the file name is a guess (no source string; RoR's task/ files are
   tsk_scene, tsk_bg_load, naga_chunk). Rename freely if a string turns up. Also unknown: CmnTaskMan +0x0c..
   +0x40, +0x6c..+0x84, +0x688..+0x6c0 (no code in the file touches them), the list at +4 (findTask reads
