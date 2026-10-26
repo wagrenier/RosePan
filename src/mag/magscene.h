@@ -111,6 +111,18 @@ struct MagSceneRayHit
 };
 static_assert(sizeof(MagSceneRayHit) == 0x60, "MagSceneRayHit is 0x60 bytes on the EE");
 
+/* A value running from m_from to m_to over m_frames (EE 0x10; startLerp
+ * fills it, updateRecords853fc steps it). */
+struct MagLerp
+{
+    float m_from;               // ROR 0x0
+    float m_to;                 // ROR 0x4
+    int   m_frame;              // ROR 0x8: frames run, 0 at the start
+    int   m_frames;             // ROR 0xc: the length, 0 = done
+};
+static_assert(sizeof(MagLerp) == 0x10, "MagLerp is 0x10 bytes on the EE");
+static_assert(offsetof(MagLerp, m_frames) == 0xc, "m_frames");
+
 /* An entry of the actor draw list collectActors fills (EE 0x10). */
 struct MagSceneDrawEntry
 {
@@ -340,6 +352,15 @@ struct MagScene
     /* The constructor's: clears the records at +0x853bc and sets their
      * defaults. */
     void initRecords853bc();                                             // ROR 0x00140a84
+    /* mag/magscenefocus.cpp: mode 0 releases the efffocus texture, any
+     * other adds it (once) and becomes the focus mode (+0x853bc). */
+    void setFocus(int mode);                                             // ROR 0x00140b20
+    /* rec runs from -> to over frames; returns the value to show now
+     * (from, or to at once when frames is 0). this is not read. */
+    float startLerp(float from, float to, MagLerp *rec, int frames);     // ROR 0x00140e60
+    /* Focus value which (1, 2) runs to to over frames (from < 0: from
+     * where it is). */
+    void setFocusLerp(int which, float from, float to, int frames);      // ROR 0x00140d94
     /* GamMan glue (g_gamMan and g_sequence.m_bits / m_global, read via bss 0x7b2060 / 0x7b205c). */
     void gamEnterMenu();                                                 // ROR 0x0013f07c
     void gamLeaveMenu();                                                 // ROR 0x0013f09c
@@ -532,6 +553,8 @@ struct MagScene
     S2dMovie       m_movie;             // ROR 0x84aa8
     int            m_bwn_no;            // ROR 0x853b4: setBwn's actor number, -1 = none
     int            m_pc_no;             // ROR 0x853b8: setPC's actor number, -1 = none
+    float          m_focus_val[3];      // ROR 0x853c8: the focus values the lerps below drive (native 281 op 13)
+    MagLerp        m_focus_lerp[3];     // ROR 0x853fc: their lerps (startLerp; updateRecords853fc steps them)
     Obj17c0f0      m_8542c;             // ROR 0x8542c: reset by releaseTenkyu, sector.sec by load
     int            m_mirror_axis;       // ROR 0x85494: mapparam.bbb word 9 (files over 0x20 bytes): 0 none, 1 z, 2 y (floor), 3 x
     float          m_mirror_plane;      // ROR 0x85498: mapparam.bbb word 10 (a float): the mirror plane's coordinate

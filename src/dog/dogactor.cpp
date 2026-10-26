@@ -171,3 +171,71 @@ bool DogActor::isModeSet() const
 {
     return m_mode != 0;
 }
+
+// ──────────────────────────────────────────────────────────────────────
+// The eye flag ops of native 281 op 21: each does nothing unless the
+// model has an eye node with a material (setEyeTex found them).
+// ROR 0x0010f70c
+
+void DogActor::eyeHold()
+{
+    if (m_eye_node != NULL && m_eye_mat != NULL)
+        m_eye_flags = (m_eye_flags & ~2u) | 1;
+}
+
+// ROR 0x0010f73c
+
+void DogActor::eyeStart()
+{
+    if (m_eye_node == NULL || m_eye_mat == NULL)
+        return;
+    if ((m_eye_flags & 1) == 0)
+    {
+        m_eye_flags |= 3;
+        if (m_eye_state != 0)
+            return;
+    }
+    else if (m_eye_count >= m_eye_period)
+    {
+        return;
+    }
+    m_eye_count = 0;
+    m_eye_period = 1;
+}
+
+// ROR 0x0010f7a0
+
+void DogActor::eyeStep()
+{
+    if (m_eye_node == NULL || m_eye_mat == NULL)
+        return;
+    u_int flags = m_eye_flags;
+    if ((flags & 1) != 0)
+    {
+        if (m_eye_count < m_eye_period)
+            m_eye_flags = flags & ~3u;
+        else
+            m_eye_flags = flags | 2;
+        return;
+    }
+    if (m_eye_count >= m_eye_period)
+        m_eye_flags = flags | 3;
+}
+
+// ROR 0x0010f808
+
+void DogActor::eyeReset()
+{
+    if (m_eye_node == NULL || m_eye_mat == NULL)
+        return;
+    setEyeTex(2);
+    m_eye_period = 0;
+    m_eye_count = 0;
+    m_eye_flags &= ~3u;
+}
+
+// stub of ROR 0x0010f5e4
+void DogActor::setEyeTex(int state)
+{
+    ROSEPAN_STUB("DogActor::setEyeTex", 0x0010f5e4);
+}

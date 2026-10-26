@@ -103,6 +103,12 @@ TskFrameFunc::TskFrameFunc(int kind, intptr_t arg, int frames)
     ROSEPAN_STUB("TskFrameFunc::TskFrameFunc", 0x001f184c);
 }
 
+// stub of ROR 0x001f438c (a constructor: stubgen leaves it to hand)
+TskMovie::TskMovie(const char *)
+{
+    ROSEPAN_STUB("TskMovie::TskMovie", 0x001f438c);
+}
+
 // stub of ROR 0x001e9a3c (a constructor: stubgen leaves it to hand)
 TskMoveTypeGen::TskMoveTypeGen(u_int, int, intptr_t, int, float, float)
 {
@@ -1571,4 +1577,24 @@ void GamArea::startTrgs()
 void GamArea::stopTrgs()
 {
     ROSEPAN_STUB("GamArea::stopTrgs", 0x001ddc80);
+}
+
+// stub of ROR 0x001e79c0
+CmnITask * CmnTaskMan::findTask(int id)
+{
+    ROSEPAN_STUB("CmnTaskMan::findTask", 0x001e79c0);
+    return {};
+}
+
+// stub of ROR 0x0016aa04
+void Eff0::setVisible(bool on)
+{
+    ROSEPAN_STUB("Eff0::setVisible", 0x0016aa04);
+}
+
+// stub of ROR 0x00176cc8
+int Obj176a3c::createEff(const EffParam *param)
+{
+    ROSEPAN_STUB("Obj176a3c::createEff", 0x00176cc8);
+    return {};
 }

@@ -2460,6 +2460,32 @@ void GamMan::setPcParam(int which, const void *data)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cba0c
+
+void GamMan::addObjFx(u_int oid, int no)
+{
+    // The ROM first walks the used list to its end and does nothing with it.
+    GamObjFxRec rec;
+    rec.m_oid = oid;
+    rec.m_no = no;
+    m_pool20b00.add(rec);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cbafc
+
+int GamMan::findObjFx(u_int oid)
+{
+    for (SeqNode<GamObjFxRec> *node = m_pool20b00.m_used.begin();
+         node != m_pool20b00.m_used.end(); node = node->m_next)
+    {
+        if (node->m_data.m_oid == oid)
+            return node->m_data.m_no;
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001cbb80
 
 void GamMan::ctlObj1cbb80(u_int oid)

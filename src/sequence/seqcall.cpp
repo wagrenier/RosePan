@@ -18,7 +18,8 @@
 // changes), 032, 033, 036, 038, 039, 106 (motion speed), 110, 151 (object
 // control), 152 (object queries), 155 (vfchr objects), 016 (camera), 023
 // (area triggers), 026, 156 (ray tests), 200 (turns), 202 / 211 (achr
-// moves) and 281's helpers. The others are stubs (seqcall.h lists them).
+// moves), 253 (movies) and 281 (scene effects) with its helpers. The
+// others are stubs (seqcall.h lists them).
 
 #include "sequence/seqcall.h"
 
@@ -31,6 +32,9 @@
 #include "lib/unassigned.h"
 #include "mag/magsystem.h"
 #include "sequence/sequence.h"
+#include "snd/rxmpeg.h"
+#include "snd/sndman.h"
+#include "utl/utlmisc.h"
 
 // ──────────────────────────────────────────────────────────────────────
 // The 471 empty entries (8-byte "return 0" functions in the ROM, from
@@ -2122,6 +2126,59 @@ intptr_t seqFunc211(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Movies (jump table data 0x3015b0, a0 0..10) over the TskMovie task
+// GamMan::m_movieTaskId: 1 starts the movie a1 (a name) once no movie
+// task is listed, stopping the sound first, and yields; 2 kills it and
+// waits 5 frames; 3 is the task listed; 4 waits while the task is gone
+// but its state is still <= 100; 5 the movie's frame count. 0 and 6..10
+// return 0.
+// ROR 0x0020d428
+
+intptr_t seqFunc253(intptr_t id, intptr_t a1, intptr_t, intptr_t, intptr_t, intptr_t)
+{
+    GamMan    &gam = g_gamMan;
+    BEDMEMINFO info;
+    g_utlMemory.getInfo(&info);   // the ROM passes a third word 0; the result is not used
+    int task = gam.m_movieTaskId;
+
+    switch ((u_int)id)
+    {
+    case 1:
+    {
+        if (g_taskMan.getTask(gam.m_movieTaskId) != NULL)
+            return 0;
+        g_sndMan.stopAll(1);
+        if (g_taskMan.getTask(gam.m_movieTaskId) != NULL)
+            return 0;
+        // callcheck: operator_new (the new expression)
+        TskMovie *movie = new TskMovie((const char *)a1);
+        g_taskMan.addTask(1, -1, 1, 0, movie, 0, &gam.m_movieTaskId, 0x11);
+        return SEQ_RET_YIELD;
+    }
+    case 2:
+        if (g_taskMan.getTask(gam.m_movieTaskId) != NULL)
+            g_taskMan.killTask(gam.m_movieTaskId);
+        return g_sequence.waitFrames(5) != 0 ? SEQ_RET_WAIT : 0;
+    case 3:
+        // PC: the ROM returns getTask's word itself (0 or 1).
+        return g_taskMan.getTask(task) != NULL;
+    case 4:
+    {
+        if (g_taskMan.getTask(task) != NULL)
+            return 0;
+        TskMovie *movie = (TskMovie *)g_taskMan.findTask(task);
+        if (movie == NULL)
+            return 0;   // PC: the ROM reads the state of a NULL task
+        return movie->m_state <= 100 ? SEQ_RET_WAIT : 0;
+    }
+    case 5:
+        return rxMpegGetFrameCount();
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Native 281's helpers. Ops 200 / 201 set / clear bits in sector group
 // key of the scene's sector.sec object, all four records.
 // ROR 0x0020de34
@@ -2162,6 +2219,102 @@ int seqGetIdPair(u_int no, int *id, int *flag)
     *id   = s_seqIdPairs[no][0];
     *flag = s_seqIdPairs[no][1];
     return *id;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Scene effects, by a0: 200..299 sector flags (seqSectorFlags); 13 the
+// focus (a1 0: setFocus(word 0), 1: focus value 0 lerps from float 0 (< 0
+// where it is) to float 1 over word 2 frames, 2: setFocusLerp(word 0,
+// float 1, float 2, word 3)); 21 the eye ops of object a1's actor (a2
+// 0..3); 38 an effect of kind 0x15 on the actor of object word 0 with
+// words 1..12, entered for object a1; 98 shows / hides object a1's effect
+// (word 0); 100 ctlObj1cb8e4(a1, a2, 0); 101 releases a1's effects. Other
+// a0 below 50 take an effect kind and a flag from seqGetIdPair: the
+// effect gets the script's 0x70 bytes at a2 and, with the flag, is
+// entered for object a1. a2 points at the words unless noted.
+// ROR 0x0020df98
+
+intptr_t seqFunc281(intptr_t a0, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t)
+{
+    GamMan      &gam = g_gamMan;
+    MagScene    &scene = g_magSystem.m_scene;
+    u_int        op = (u_int)a0;
+    const int   *word = (const int *)a2;
+    const float *fword = (const float *)a2;
+    EffParam     param;
+
+    if (op / 100 == 2)
+        return seqSectorFlags((int)op, (int)a1, (u_int)a2);
+
+    memset(&param, 0, sizeof(param));   // PC: the ROM's stack words it does not set are garbage
+    switch (op)
+    {
+    case 13:
+        if (a1 == 1)
+        {
+            float from = fword[0];
+            if (from < 0.0f)
+                from = scene.m_focus_val[0];
+            scene.m_focus_val[0] = scene.startLerp(from, fword[1], &scene.m_focus_lerp[0], word[2]);
+        }
+        else if (a1 == 0)
+        {
+            scene.setFocus(word[0]);
+        }
+        else if (a1 == 2)
+        {
+            scene.setFocusLerp(word[0], fword[1], fword[2], word[3]);
+        }
+        return 0;
+    case 21:
+    {
+        DogActor *actor = gam.getActor((u_int)a1);
+        if (actor == NULL)
+            return 0;   // PC: the ROM reads the eye words of a NULL actor
+        switch (a2)
+        {
+        case 0: actor->eyeHold();  break;
+        case 1: actor->eyeStart(); break;
+        case 2: actor->eyeStep();  break;
+        case 3: actor->eyeReset(); break;
+        }
+        return 0;
+    }
+    case 38:
+        param.m_kind = 0x15;
+        param.m_08 = 0;
+        param.m_achr.m_actor = gam.getActor((u_int)word[0]);
+        memcpy(param.m_achr.m_args, word + 1, sizeof(param.m_achr.m_args));
+        gam.addObjFx((u_int)a1, scene.m_837e0.createEff(&param));
+        return 0;
+    case 98:
+    {
+        int no = gam.findObjFx((u_int)a1);
+        // PC: the ROM indexes the table with -1 when a1 has no effect.
+        Eff0 *eff = no >= 0 && no < 0x110 ? scene.m_837e0.m_entry[no] : NULL;
+        if (eff != NULL)
+            eff->setVisible(word[0] != 0);
+        return 0;
+    }
+    case 99:
+        return 0;
+    case 100:
+        gam.ctlObj1cb8e4((u_int)a1, (int)a2, 0);
+        return 0;
+    case 101:
+        gam.ctlObj1cbb80((u_int)a1);
+        return 0;
+    }
+
+    int flag;
+    if (seqGetIdPair(op, &param.m_kind, &flag) < 0)
+        return 0;
+    param.m_08 = 0;
+    memcpy(param.m_data, (const void *)a2, sizeof(param.m_data));
+    int no = scene.m_837e0.createEff(&param);
+    if (flag != 0)
+        gam.addObjFx((u_int)a1, no);
+    return 0;
 }
 
 // The table (data 0x2d90f8).
@@ -2323,19 +2476,5 @@ intptr_t seqFunc212(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 intptr_t seqFunc252(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
     ROSEPAN_STUB("seqFunc252", 0x0020c6fc);
-    return {};
-}
-
-// stub of ROR 0x0020d428
-intptr_t seqFunc253(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc253", 0x0020d428);
-    return {};
-}
-
-// stub of ROR 0x0020df98
-intptr_t seqFunc281(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc281", 0x0020df98);
     return {};
 }

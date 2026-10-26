@@ -100,6 +100,16 @@ struct DogActor : DogModel
     int  getMode() const { return m_mode; }                              // ROR 0x00280fe4
     /* m_mode != 0 (the actor is in a mode; GamMan::pause tests the dog's). */
     bool isModeSet() const;                                              // ROR 0x0010a834
+    /* The eye texture (the model node named "eye" and its material):
+     * state picks the texture offset {0, 0.32, 0.65}. */
+    void setEyeTex(int state);                                           // ROR 0x0010f5e4
+    /* Eye flag ops (native 281 op 21; nothing without an eye node). Bit 0
+     * of m_eye_flags runs the count m_eye_count up to m_eye_period, bit 1
+     * goes with it; game meaning (blinking?) unverified. */
+    void eyeHold();                                                      // ROR 0x0010f70c
+    void eyeStart();                                                     // ROR 0x0010f73c
+    void eyeStep();                                                      // ROR 0x0010f7a0
+    void eyeReset();                                                     // ROR 0x0010f808
     // ROR 0x00280fec
     void ready()
     {
@@ -128,7 +138,14 @@ struct DogActor : DogModel
     u_char        _3f8[0x420 - 0x3f8];
     float         m_trans_ofs_y_save;   // ROR 0x420: saveTransOfsY copies m_trans_ofs[1]
     float         m_rot_ofs_y;          // ROR 0x424: clearRotOfsY / getRotOfsYSave
-    u_char        _428[0x4d0 - 0x428];
+    u_char        _428[0x480 - 0x428];
+    void         *m_eye_mat;            // ROR 0x480: the eye node's material (setEyeTex)
+    void         *m_eye_node;           // ROR 0x484: the model node named "eye", NULL = none
+    u_int         m_eye_flags;          // ROR 0x488: bits 0 and 1 (eyeHold .. eyeReset)
+    int           m_eye_state;          // ROR 0x48c: setEyeTex's state
+    int           m_eye_count;          // ROR 0x490
+    int           m_eye_period;         // ROR 0x494
+    u_char        _498[0x4d0 - 0x498];
 };
 static_assert(offsetof(DogActor, m_shadow_light) >= 0x160, "m_shadow_light");
 static_assert(offsetof(DogActor, m_shadow_fade) >= 0x168, "m_shadow_fade");

@@ -611,6 +611,36 @@
   "was": "FUN_0010f2dc",
   "why": "dog/dogactor.cpp asserts theName; true when the actor's model name matches (MagScene::findActorByName)"
  },
+ "0010f5e4": {
+  "name": "DogActor::setEyeTex",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f5e4",
+  "why": "for a new state (+0x48c) finds the model's node named with 'eye' (+0x484) and its material (+0x480), then sets +0x474 from {0, 0.32, 0.65} by state and applies it (0x21ab30 on +0x470): the eye texture offset"
+ },
+ "0010f70c": {
+  "name": "DogActor::eyeHold",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f70c",
+  "why": "with an eye node and material (+0x484, +0x480): eye flags +0x488 bit 0 set, bit 1 cleared; native 281 op 21 a2 = 0; game meaning (blink hold?) unverified"
+ },
+ "0010f73c": {
+  "name": "DogActor::eyeStart",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f73c",
+  "why": "eye flags +0x488: without bit 0 sets bits 0 and 1 and, in eye state 0, restarts the count +0x490 = 0 with period +0x494 = 1; with bit 0 restarts them only while count < period; native 281 op 21 a2 = 1"
+ },
+ "0010f7a0": {
+  "name": "DogActor::eyeStep",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f7a0",
+  "why": "eye flags +0x488: with bit 0, count +0x490 below period +0x494 clears bits 0..1, else sets bit 1; without bit 0 sets bits 0..1 once count reached the period; native 281 op 21 a2 = 2"
+ },
+ "0010f808": {
+  "name": "DogActor::eyeReset",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f808",
+  "why": "setEyeTex(2), count +0x490 and period +0x494 zero, eye flags +0x488 bits 0..1 cleared; native 281 op 21 a2 = 3"
+ },
  "0010fa6c": {
   "name": "DogEntity::getMatrix",
   "tag": "ror-inferred",
@@ -2921,11 +2951,29 @@
   "was": "FUN_00140a84",
   "why": "the constructor's last call: clears 0x70 bytes at +0x853bc and sets +0x853c0 -1, +0x853c8 1.0, +0x853cc 300, +0x853d0 600 (next to updateRecords853fc 0x140c68)"
  },
+ "00140b20": {
+  "name": "MagScene::setFocus",
+  "tag": "ror-inferred",
+  "was": "FUN_00140b20",
+  "why": "mag/magscenefocus.cpp (assert m_focus.m_texindex != -1): mode 0 releases the efffocus texture (+0x853c0) and clears +0x853bc / +0x853d4 / +0x853dc; else adds the texture once and stores the mode at +0x853bc; native 281 op 13 a1 = 0"
+ },
  "00140c68": {
   "name": "MagScene::updateRecords853fc",
   "tag": "ror-inferred",
   "was": "FUN_00140c68",
   "why": "updates the three records at +0x853fc / +0x8540c / +0x8541c into +0x853c8.. and runs 0x14186c when +0x853d4 is set; roles unknown"
+ },
+ "00140d94": {
+  "name": "MagScene::setFocusLerp",
+  "tag": "ror-inferred",
+  "was": "FUN_00140d94",
+  "why": "which 1: +0x853cc lerps over the record +0x8540c, which 2: +0x853d0 over +0x8541c (a negative from keeps the current value); native 281 op 13 a1 = 2"
+ },
+ "00140e60": {
+  "name": "MagScene::startLerp",
+  "tag": "ror-inferred",
+  "was": "FUN_00140e60",
+  "why": "fills a 0x10-byte record {from, to, 0, frames} and returns from; frames 0 only clears the frame word and returns to; the focus values +0x853c8 / +0x853cc / +0x853d0 over the records +0x853fc / +0x8540c / +0x8541c"
  },
  "00140e88": {
   "name": "MagScene::drawFocus",
@@ -3028,6 +3076,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00163ab8",
   "why": "copies +0x138 / +0x13c to its two out pointers"
+ },
+ "0016aa04": {
+  "name": "Eff0::setVisible",
+  "tag": "ror-inferred",
+  "was": "FUN_0016aa04",
+  "why": "vtable slot 10 of Eff0 and of all 43 Eff classes (never overridden): flag word bit 4 set for false, cleared for true, bit 8 set; native 281 op 98 calls it with a2[0] != 0"
+ },
+ "00176cc8": {
+  "name": "Obj176a3c::createEff",
+  "tag": "ror-inferred",
+  "was": "FUN_00176cc8",
+  "why": "a switch on the parameter block's first word (1..0x34) that news one of the Eff* classes (their ctors run here) and enters it in the table +4 (0x110 entries); returns the entry number; scenePlayStart, native 281"
  },
  "0017756c": {
   "name": "Obj176a3c::release",
@@ -6881,6 +6941,18 @@
   "was": "FUN_001cb8e4",
   "why": "resetObj calls it (oid, 0x32, 0) for an active type-5 fchr; role not read yet"
  },
+ "001cba0c": {
+  "name": "GamMan::addObjFx",
+  "tag": "ror-inferred",
+  "was": "FUN_001cba0c",
+  "why": "takes the last free node of the pool +0x20b00 (count +0x20b10), stores {oid, no} and appends it to the used list +0x20b14 (count +0x20b24); native 281 after Obj176a3c::createEff, the record ctlObj1cbb80 releases"
+ },
+ "001cbafc": {
+  "name": "GamMan::findObjFx",
+  "tag": "ror-inferred",
+  "was": "FUN_001cbafc",
+  "why": "walks the used list +0x20b14 of the pool +0x20b00 for the record of oid and returns its entry number (+0xc), -1 when none; native 281 op 98, ctlObj1cb8e4"
+ },
  "001cbb80": {
   "name": "GamMan::ctlObj1cbb80",
   "tag": "ror-inferred",
@@ -7745,6 +7817,12 @@
   "was": "FUN_001e7724",
   "why": "appends the id to the kill list +0x84..(+0x284 end) unless already there"
  },
+ "001e79c0": {
+  "name": "CmnTaskMan::findTask",
+  "tag": "ror-inferred",
+  "was": "FUN_001e79c0",
+  "why": "the task object (node word 0) whose id (node word 3) matches, searching the list at +4 then the list at +0; NULL when none; native 253 case 4 reads the TskMovie's +8"
+ },
  "001e7a20": {
   "name": "CmnTaskMan::exec",
   "tag": "ror-inferred",
@@ -7816,6 +7894,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f4184",
   "why": "vtable 0x2e4cd0 (rtti.py TskSysFunc); kind 0..1 sets the defaults 100, 0x1e, 0xf, 0x1b"
+ },
+ "001f438c": {
+  "name": "TskMovie::TskMovie",
+  "tag": "ror-inferred",
+  "was": "FUN_001f438c",
+  "why": "the constructor of class TskMovie (rtti, vtable 0x2e4c50), 0x80 bytes: sound 0x1d, SndMan::stopAll(8), name copied to +0x10 (0x40 chars), message sprite fade out, +8 = 100, S2dMovie::playMovie(name); native 253 case 1"
  },
  "001f5244": {
   "name": "TskAttach::TskAttach",
