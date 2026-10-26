@@ -4884,7 +4884,7 @@ void GamMan::placeObjAt(u_int oid, int where)
 // ──────────────────────────────────────────────────────────────────────
 // The isObj answer is not read; an achr / fchr without an actor writes
 // actor -1 in the ROM (the host skips it).
-// ROR 0x001d1e88 // callcheck: FUN_001d8c50, getAchr, getFchr (the unreferenced function 0x1d1f14 Ghidra folded into this body)
+// ROR 0x001d1e88 // callcheck: getPosSectaY, getAchr, getFchr (the unreferenced function 0x1d1f14 Ghidra folded into this body)
 
 void GamMan::setObjScale(u_int oid, float scale)
 {
@@ -5607,6 +5607,279 @@ void GamMan::emptyAchr1d3a14(u_int oid)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c3a48 // callcheck: FUN_00215a30, BedPfh (the assert handler inside BedPfh's inlines)
+
+void GamMan::initStage2FromPack(void *pack)
+{
+    reloadVFchrModels();
+    empty1c1a88();
+    BedPfh pfh(pack);
+
+    int num = pfh.getNumFile();
+    const short *ids = (const short *)pfh.getFile(0);
+    u_int count = 0;
+    while ((int)count < num && ids[count] != -1)
+        count++;
+    int base = (int)((u_int)(num - (int)count - 6) & 0xffff) + (int)count;
+    // PORT: as in initStage2, loadSubImage copies 0x30000 bytes: the image
+    // goes through a zeroed full-size buffer.
+    static u_char s_subImage[0x30000];
+    int imageSize = pfh.getFileSize(base + 2);
+    if (imageSize < 0 || imageSize > (int)sizeof(s_subImage))
+        imageSize = sizeof(s_subImage);
+    memset(s_subImage, 0, sizeof(s_subImage));
+    memcpy(s_subImage, pfh.getFile(base + 2), imageSize);
+    g_sequence.loadSubImage(2, s_subImage);
+    gamSetWrdRoom(this, pfh.getFile(base + 4));
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The oid the PC is commanded for (list 0, type 0xb, slot 1).
+static const u_int GAM_OID_PC_FX = 0x85fffe01;
+
+// ROR 0x001cb74c
+
+void GamMan::setObjFxOn(u_int oid, int on)
+{
+    SeqNode<GamObjFxRec> *node;
+    if (on == 0)
+    {
+        for (node = m_pool20b00.m_used.begin(); node != m_pool20b00.m_used.end();
+             node = node->m_next)
+        {
+            if (node->m_data.m_oid == oid)
+            {
+                ctlObj1cbb80(oid);
+                if (oid == GAM_OID_PC_FX)
+                    g_magSystem.m_scene.commandPC(0xf, NULL);
+                return;
+            }
+        }
+        return;
+    }
+
+    for (node = m_pool20b00.m_used.begin(); node != m_pool20b00.m_used.end();
+         node = node->m_next)
+    {
+        if (node->m_data.m_oid == oid)
+            return;
+    }
+    GamObjFxRec rec;
+    rec.m_oid = oid;
+    rec.m_no = -1;
+    m_pool20b00.add(rec);
+    if (oid == GAM_OID_PC_FX)
+        g_magSystem.m_scene.commandPC(0xe, NULL);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cf2e8 // callcheck: FUN_00105ba4, releaseObj, releaseActor (the deleting destructor, vtable slot 1 with 3 in the ROM: delete here; the other two inside delete_achr_core, inlined in the ROM)
+
+void GamMan::releaseEnemies()
+{
+    static const int kinds[] = { 0x15, 0x16, -1 };
+    g_taskMan.killKinds(kinds);
+
+    SeqNode<ACHRstat *> *node = m_achrList.m_used.begin();
+    while (node != m_achrList.m_used.end())
+    {
+        ACHRstat *chr = node->m_data;
+        if (gamOidType(chr->m_oid) != 2)
+        {
+            node = node->m_next;
+            continue;
+        }
+        chr->clearSecta(1);
+        delete_achr_core(chr);
+        delete chr;
+        SeqNode<ACHRstat *> *next = node->m_next;
+        m_achrList.remove(node);
+        node = next;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cfca8
+
+void GamMan::setObjPosLocal(u_int oid, float *pos, const float *ofs)
+{
+    float x = gamGetWrdOfsX();
+    float z = gamGetWrdOfsZ();
+    pos[0] -= x;
+    pos[1] -= 0.0f;
+    pos[2] -= z;
+    pos[3] -= 0.0f;
+    if (ofs != NULL)
+        sceVu0AddVector(pos, pos, (float *)ofs);
+
+    switch (gamOidList(oid))
+    {
+    case 1:
+        getAchr(oid)->setPos(pos);
+        break;
+    case 2:
+        getFchr(oid)->setPos(pos);
+        break;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d27dc // callcheck: dpadd, dpcmp, dpsub, dptofp, fptodp (the soft-float doubles, C doubles here)
+
+void GamMan::addObjRot(u_int oid, const float *delta)
+{
+    if (gamOidList(oid) != 1)
+        return;
+    ACHRstat *chr = getAchr(oid);
+    float rot[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    chr->getRot(rot);
+    rot[0] = gamWrapAngleOnce(rot[0] + delta[0]);
+    rot[1] = gamWrapAngleOnce(rot[1] + delta[1]);
+    rot[2] = gamWrapAngleOnce(rot[2] + delta[2]);
+    chr->setRot(rot);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The collect functions' filter: type -1 any, need 0 any, exclude 0 none.
+static bool gamObjMatch(const ObjStat *chr, int type, u_int need, u_int exclude)
+{
+    if ((u_int)type != 0xffffffffu && (u_int)type != gamOidType(chr->m_oid))
+        return false;
+    if (need != 0 && (chr->m_flags & need) == 0)
+        return false;
+    if (exclude != 0 && (chr->m_flags & exclude) != 0)
+        return false;
+    return true;
+}
+
+// ROR 0x001d2e2c
+
+int GamMan::collectAchrs(SeqPool<ACHRstat *> *out, int type, u_int need, u_int exclude)
+{
+    if (out == NULL)
+    {
+        if (type == -1)
+            return m_achrList.m_used.m_count;
+    }
+    else
+        out->clear();
+
+    int n = 0;
+    for (SeqNode<ACHRstat *> *node = m_achrList.m_used.begin(); node != m_achrList.m_used.end();
+         node = node->m_next)
+    {
+        if (!gamObjMatch(node->m_data, type, need, exclude))
+            continue;
+        if (out != NULL)
+            out->add(node->m_data);
+        n++;
+    }
+    return n;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d2ff0
+
+void GamMan::collectAchrsNear(const float *pos, float radius, SeqPool<ACHRstat *> *out,
+                              int type, u_int need, u_int exclude)
+{
+    if (out != NULL)
+        out->clear();
+
+    for (SeqNode<ACHRstat *> *node = m_achrList.m_used.begin(); node != m_achrList.m_used.end();
+         node = node->m_next)
+    {
+        ACHRstat *chr = node->m_data;
+        if (!gamObjMatch(chr, type, need, exclude))
+            continue;
+        float at[4];
+        chr->getPos(at);
+        float dx = fabsf(pos[0] - at[0]);
+        float dz = fabsf(pos[2] - at[2]);
+        if (dx < radius && dz < radius)
+        {
+            float d = sqrtf(dx * dx + dz * dz);
+            if (d < radius)
+            {
+                chr->m_dist = d;
+                out->add(chr);
+            }
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d327c
+
+int GamMan::collectFchrs(SeqPool<FCHRstat *> *out, int type, u_int need, u_int exclude)
+{
+    if (out == NULL)
+    {
+        // The fchr list's count only, as the ROM does: the avfchrs are not
+        // counted on this path.
+        if (type == -1 && need == 0)
+            return m_fchrList.m_used.m_count;
+    }
+    else
+        out->clear();
+
+    int n = 0;
+    SeqNode<FCHRstat *> *node;
+    for (node = m_fchrList.m_used.begin(); node != m_fchrList.m_used.end(); node = node->m_next)
+    {
+        if (!gamObjMatch(node->m_data, type, need, exclude))
+            continue;
+        if (out != NULL)
+            out->add(node->m_data);
+        n++;
+    }
+    for (node = m_avfchrList.m_used.begin(); node != m_avfchrList.m_used.end();
+         node = node->m_next)
+    {
+        if (!gamObjMatch(node->m_data, type, need, exclude))
+            continue;
+        if (out != NULL)
+            out->add(node->m_data);
+        n++;
+    }
+    return n;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d35ac
+
+void GamMan::collectFchrsNear(const float *pos, float radius, SeqPool<FCHRstat *> *out,
+                              int type, u_int need, u_int exclude)
+{
+    out->clear();
+
+    SeqPool<FCHRstat *> *lists[2] = { &m_fchrList, &m_avfchrList };
+    for (int i = 0; i < 2; i++)
+    {
+        for (SeqNode<FCHRstat *> *node = lists[i]->m_used.begin();
+             node != lists[i]->m_used.end(); node = node->m_next)
+        {
+            FCHRstat *chr = node->m_data;
+            if (!gamObjMatch(chr, type, need, exclude))
+                continue;
+            float at[4];
+            chr->getPos(at);
+            float dx = fabsf(pos[0] - at[0]);
+            float dz = fabsf(pos[2] - at[2]);
+            if (dx < radius && dz < radius)
+            {
+                float d = sqrtf(dx * dx + dz * dz);
+                if (d < radius)
+                {
+                    chr->m_dist = d;
+                    out->add(chr);
+                }
+            }
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Defined in the class in the ROM (getWrdNo, releaseAll: own copies in
 // the file's range).
 // ROR 0x001c6c28
@@ -5846,5 +6119,364 @@ void GamMan::rmSnd(u_int id) { (void)id; }
 void GamMan::setSnd3DCnt(int type) { m_sndMan.m_mode = type; }
 // ROR 0x0028ee00
 GamSndEntry *GamMan::getSndParam() { return m_sndMan.m_table; }
+
+// ROR 0x0028eb68
+void GamMan::put_se_3d_pos(u_int se, float *pos, int wrd, u_int flags)
+{
+    m_sndMan.put_se_3d_pos(se, pos, wrd, flags);
+}
+// ROR 0x0028eb90
+void GamMan::put_se_3d_pos_chr(u_int se, u_int oid, u_int flags)
+{
+    m_sndMan.put_se_3d_pos_chr(se, oid, flags);
+}
+// ROR 0x0028ebb8
+void GamMan::del_se_3d_pos(u_int se, int arg) { m_sndMan.del_se_3d_pos(se, arg); }
+// ROR 0x0028ebe0
+void GamMan::del_se_3d_pos_chr(u_int oid) { m_sndMan.del_se_3d_pos_chr(oid); }
+// ROR 0x0028ec08
+void GamMan::put_str_3d_pos(int str, float *pos, int wrd, u_int flags)
+{
+    m_sndMan.put_str_3d_pos(str, pos, wrd, flags);
+}
+// ROR 0x0028ec30
+void GamMan::put_str_3d_pos_chr(int str, u_int oid, u_int flags)
+{
+    m_sndMan.put_str_3d_pos_chr(str, oid, flags);
+}
+// ROR 0x0028ec58
+void GamMan::del_str_3d_pos(int str, int arg) { m_sndMan.del_str_3d_pos(str, arg); }
+// ROR 0x0028ec80
+void GamMan::del_str_3d_pos_chr(u_int oid) { m_sndMan.del_str_3d_pos_chr(oid); }
+// ROR 0x0028ecb8
+void GamMan::set_se_3d_snd_prm(int se, int a, int b, int c, int d)
+{
+    m_sndMan.set_se_3d_snd_prm((u_int)se, a, b, c, d);
+}
+// ROR 0x0028ece0
+void GamMan::set_str_3d_snd_prm(int str, int a, int b, int c, int d)
+{
+    m_sndMan.set_str_3d_snd_prm(str, a, b, c, d);
+}
+// ROR 0x0028ed08
+int GamMan::getStrNoByChan(int chan) { return m_sndMan.getStrNoByChan(chan); }
+// ROR 0x0028ed28
+char *GamMan::getSndFileName(int n) { return m_sndMan.m_fileName[n]; }
+// ROR 0x0028ed40
+bool GamMan::getStatSEtrack(u_int se, int track) { return m_sndMan.getStatSEtrack(se, track); }
+// ROR 0x0028ed60
+int GamMan::setVolSEtrack(u_int se, int track, int a, int b)
+{
+    return m_sndMan.setVolSEtrack(se, track, a, b);
+}
+// ROR 0x0028ed80
+bool GamMan::getStatSTRtrack(u_int str, int track) { return m_sndMan.getStatSTRtrack(str, track); }
+// ROR 0x0028eda0
+int GamMan::setVolSTRtrack(u_int str, int track, int a, int b)
+{
+    return m_sndMan.setVolSTRtrack(str, track, a, b);
+}
+// ROR 0x0028edc0
+int GamMan::get_se_oid(char *name) { return m_sndMan.get_se_oid(name); }
+// ROR 0x0028ede0
+int GamMan::get_str_no(char *name) { return m_sndMan.getStrNO(name); }
+// ROR 0x0028ee10
+void GamMan::free_all_se_bank() { m_sndMan.free_all_se_bank(); }
+// ROR 0x0028ee38
+u_char *GamMan::getEvtPack() { return m_evtPack; }
+// ROR 0x0028ee48
+int GamMan::isPlayEnvStr() { return m_sndMan.isPlayEnvStr(); }
+// ROR 0x0028ee68
+int GamMan::getCameraMode() { return m_cameraMode; }
+// ROR 0x0028ee78
+SeqPool<ACHRstat *> *GamMan::getAchrListPtr() { return &m_achrList; }
+// ROR 0x0028ee88
+SeqPool<FCHRstat *> *GamMan::getFchrListPtr() { return &m_fchrList; }
+// ROR 0x0028ee98
+SeqPool<FCHRstat *> *GamMan::getVFchrListPtr() { return &m_vfchrList; }
+// ROR 0x0028eea8
+SeqPool<FCHRstat *> *GamMan::getAVFchrListPtr() { return &m_avfchrList; }
+
+// ROR 0x0028eeb8
+void GamMan::updatePcSecta()
+{
+    if (m_pcPtr != NULL)
+        m_pcPtr->syncActorPos();
+}
+
+// ROR 0x0028eee8
+void GamMan::updateDogSecta()
+{
+    if (m_dogPtr != NULL)
+        m_dogPtr->syncActorPos();
+}
+
+// ROR 0x0028ef18
+u_int GamMan::getPcOID() { return m_pcPtr != NULL ? m_pcPtr->m_oid : 0; }
+// ROR 0x0028ef38
+u_int GamMan::getInuOID() { return m_dogPtr != NULL ? m_dogPtr->m_oid : 0; }
+// ROR 0x0028ef58
+int GamMan::get_pc_last_mot() { return m_pcMotion; }
+
+// The ROM's quad copies write a fourth word past the ELF's float[3]; the
+// host copies three.
+// ROR 0x0028ef68
+void GamMan::getPcPos(float (&out)[3]) { memcpy(out, m_pcPos, sizeof(out)); }
+// ROR 0x0028ef80
+void GamMan::getPcRot(float (&out)[3]) { memcpy(out, m_pcRot, sizeof(out)); }
+// ROR 0x0028ef98
+void GamMan::getDogPos(float (&out)[3]) { memcpy(out, m_dogPos, sizeof(out)); }
+
+// ROR 0x0028efb0
+void GamMan::getUnqParam(u_short id, int field, void *out) { m_sysData.getField(id, field, out); }
+// ROR 0x0028efd8
+const void *GamMan::getUnqPtr(u_short id) { return m_sysData.getRec((short)id); }
+
+// ROR 0x0028effc
+float GamMan::getPcPosSectaY()
+{
+    if (m_pcPtr != NULL)
+        return m_pcPtr->getPosSectaY();
+    return 0.0f;
+}
+
+// ROR 0x0028f034
+float GamMan::getDogPosSectaY()
+{
+    if (m_dogPtr != NULL)
+        return m_dogPtr->getPosSectaY();
+    return 0.0f;
+}
+
+// ROR 0x0028f06c
+void GamMan::setPcFlg(u_int bits)
+{
+    if (m_pcPtr != NULL)
+        m_pcPtr->m_flags |= bits;
+}
+
+// ROR 0x0028f094
+void GamMan::unsetPcFlg(u_int bits)
+{
+    if (m_pcPtr != NULL)
+        m_pcPtr->m_flags &= ~bits;
+}
+
+// ROR 0x0028f0bc
+bool GamMan::chkPcFlg(u_int bits)
+{
+    if (m_pcPtr != NULL)
+        return (m_pcPtr->m_flags & bits) != 0;
+    return false;
+}
+
+// ROR 0x0028f0e8
+void GamMan::setPCPosAMJ(float *pos) { memcpy(m_sysWord, pos, sizeof(m_sysWord)); }
+// ROR 0x0028f100
+void GamMan::setUnqParam(u_short id, int field, void *data) { m_sysData.setField(id, field, data); }
+// ROR 0x0028f128
+u_int GamMan::getUnqFlg(u_short id) { return m_sysData.getFlags((short)id); }
+// ROR 0x0028f14c
+int GamMan::chkUnqFlg(u_short id, u_int bits) { return m_sysData.testFlags((short)id, bits); }
+// ROR 0x0028f170
+void GamMan::setUnqFlg(u_short id, u_int bits) { m_sysData.setFlags((short)id, bits); }
+// ROR 0x0028f198
+void GamMan::unsetUnqFlg(u_short id, u_int bits) { m_sysData.clearFlags((short)id, bits); }
+
+// ROR 0x0028f1c0
+int GamMan::chkUnqFlg2(u_short id, u_short unused, u_int bits)
+{
+    return m_sysData.testFlags94((short)id, unused, bits);
+}
+
+// ROR 0x0028f1e8
+void GamMan::setUnqFlg2(u_short id, u_short unused, u_int bits)
+{
+    m_sysData.setFlags2((short)id, unused, bits);
+}
+
+// ROR 0x0028f214
+void GamMan::unsetUnqFlg2(u_short id, u_short unused, u_int bits)
+{
+    m_sysData.clearFlags2((short)id, unused, bits);
+}
+
+// ROR 0x0028f240
+void GamMan::setEmyParam(intptr_t value) { m_seqWord = value; }
+// ROR 0x0028f250
+int GamMan::getPcEquipItemOID() const { return m_pcEquipItemOID; }
+// ROR 0x0028f260
+int GamMan::getPcEquipItemChrID() const { return m_pcEquipItemChrID; }
+// ROR 0x0028f270
+short GamMan::getPcEquipItem() const { return m_equipItem; }
+// ROR 0x0028f280
+short GamMan::getFindTargetItem() const { return m_findTargetItem; }
+// ROR 0x0028f290
+short GamMan::getFindTargetItemCandidate() const { return m_findTargetItemCandidate; }
+// ROR 0x0028f2a0
+GamItemHave *GamMan::getItemHavePtr() { return &m_itemHave; }
+// ROR 0x0028f2b0
+SeqPool<GamItemSlot> *GamMan::getItemStockPtr() { return &m_itemStock; }
+// ROR 0x0028f2c0
+GamMan *GamMan::getMapObjPtr() { return this; }
+// ROR 0x0028f2d0
+const char *GamMan::getMapName() { return gamGetWrdString(1, m_wrdNo); }
+// ROR 0x0028f300
+void GamMan::cnvPosW2L(float *a, float *b) { gamWrdConvPos(0, a, b); }
+// ROR 0x0028f334
+void GamMan::cnvPosL2W(float *a, float *b) { gamWrdConvPos(1, a, b); }
+// ROR 0x0028f368
+void GamMan::getWrdOffset(float *out) { gamWrdConvPos(2, out, NULL); }
+
+// ROR 0x0028f398
+void GamMan::getDoorObj(GamObjTable **head, GamObjRec **obj)
+{
+    *head = m_objTable;
+    *obj = m_objRec;
+}
+
+// ROR 0x0028f3bc
+int GamMan::get_oid_info(u_int oid) { (void)oid; return 0; }
+// ROR 0x0028f3c4
+bool GamMan::is_pc_jnfc() { return m_pcJnfc == 2; }
+// ROR 0x0028f3dc
+void GamMan::set_pc_last_mot(int mot) { m_pcMotion = mot; }
+// ROR 0x0028f3ec
+void GamMan::chgMsgMode(int mode) { m_msgMode = mode; }
+
+// ROR 0x0028f3fc
+void GamMan::regist_call_back_seq_evt(u_int a, u_int b)
+{
+    m_seqPair[2].m_b = (int)b;
+    m_seqPair[2].m_a = (int)a;
+}
+
+// ROR 0x0028f418
+void GamMan::regist_call_back_menu(u_int a, u_int b)
+{
+    m_seqPair[1].m_b = (int)b;
+    m_seqPair[1].m_a = (int)a;
+}
+
+// ROR 0x0028f434
+void GamMan::regist_call_back_ehon(u_int a, u_int b)
+{
+    m_seqPair[0].m_b = (int)b;
+    m_seqPair[0].m_a = (int)a;
+}
+
+// ROR 0x0028f450
+void GamMan::regist_jump_area_act(u_int a, u_int b)
+{
+    m_seqPair[3].m_b = (int)b;
+    m_seqPair[3].m_a = (int)a;
+}
+
+// ROR 0x0028f46c
+void GamMan::clear_call_back_seq_evt()
+{
+    m_seqPair[2].m_b = 0;
+    m_seqPair[2].m_a = 0;
+}
+
+// ROR 0x0028f488
+void GamMan::clear_call_back_menu()
+{
+    m_seqPair[1].m_b = 0;
+    m_seqPair[1].m_a = 0;
+}
+
+// ROR 0x0028f4a4
+void GamMan::clear_call_back_ehon()
+{
+    m_seqPair[0].m_b = 0;
+    m_seqPair[0].m_a = 0;
+}
+
+// ROR 0x0028f4c0
+void GamMan::clear_call_jump_area_act()
+{
+    m_seqPair[3].m_b = 0;
+    m_seqPair[3].m_a = 0;
+}
+
+// ROR 0x0028f4dc
+GamMan::SeqPair *GamMan::get_jump_area_act() { return &m_seqPair[3]; }
+
+// ROR 0x0028f4ec
+void GamMan::create_trg(GamAreaTrg &trg, bool newId, int unused)
+{
+    (void)unused;
+    m_area.addTrg(&trg, newId);
+}
+
+// ROR 0x0028f508
+void GamMan::check_trg() { m_area.update(m_pcPos, m_pcRot); }
+// ROR 0x0028f544
+void GamMan::clear_trg() { m_area.clear(); }
+// ROR 0x0028f560
+int GamMan::chg_trg_flg(u_int id, u_int bits) { return m_area.ctl_trg_flg(1, (int)id, bits); }
+// ROR 0x0028f58c
+int GamMan::set_trg_flg(u_int id, u_int bits) { return m_area.ctl_trg_flg(2, (int)id, bits); }
+// ROR 0x0028f5b8
+int GamMan::unset_trg_flg(u_int id, u_int bits) { return m_area.ctl_trg_flg(3, (int)id, bits); }
+// ROR 0x0028f5e4
+int GamMan::chk_trg_flg(u_int id, u_int bits) { return m_area.ctl_trg_flg(4, (int)id, bits); }
+// ROR 0x0028f60c
+int GamMan::chk_trg_evt_flg(u_int id) { return m_area.ctl_trg_flg(5, (int)id, 0); }
+// ROR 0x0028f634
+void GamMan::start_trg() { m_area.startTrgs(); }
+// ROR 0x0028f650
+void GamMan::stop_trg() { m_area.stopTrgs(); }
+// ROR 0x0028f66c
+void GamMan::init_pc_pos_cam_pnl() { m_area.checkPc(); }
+// ROR 0x0028f688
+void GamMan::dispose_get_item() { m_area.startPcAction(); }
+// ROR 0x0028f6a4
+void GamMan::regist_ftb(u_int key, u_int value) { m_area.registFtb((int)key, value); }
+
+// ROR 0x0028f6c0
+bool GamMan::check_event_after_menu()
+{
+    if (m_seqPair[1].m_b != 0 && m_seqPair[1].m_a != 0)
+        return (m_flags & 0x8000) == 0;
+    return false;
+}
+
+// ROR 0x0028f704
+void GamMan::getNextSecta(float *pos, GamSecta **cell) { (void)pos; (void)cell; }
+// ROR 0x0028f70c
+void GamMan::getNextSecta(int no, GamSecta **cell) { (void)no; (void)cell; }
+// ROR 0x0028f714
+int GamMan::getSectaZoneNo(float *pos) { (void)pos; return -1; }
+
+// ROR 0x0028f71c
+void GamMan::delete_achr_core(ACHRstat *chr)
+{
+    u_int oid = chr->m_oid;
+    if (gamOidType(oid) == 2)
+        g_emyManager.releaseObj(oid);
+    chr->releaseActor();
+    m_achr[gamOidSlot(oid)] = NULL;
+}
+
+// ROR 0x0028f794
+void GamMan::delete_fchr_core(FCHRstat *chr)
+{
+    chr->releaseActor();
+    m_fchr[gamOidSlot(chr->m_oid)] = NULL;
+}
+
+// ROR 0x0028f7e4
+ObjStat *GamMan::find(u_int oid)
+{
+    switch (gamOidList(oid))
+    {
+    case 1:  return getAchr(oid);
+    case 0:  return getVFchr(oid);
+    case 2:  return getFchr(oid);
+    default: return NULL;
+    }
+}
 
 // ---- stubs (tools/reverse/stubgen.py) ----

@@ -6749,6 +6749,12 @@
   "was": "FUN_001c387c",
   "why": "clears the avfchr list, then loadVFchrModel for each vfchr whose param 8 room is +0x21f7c; hidden ones setHide(1)"
  },
+ "001c3a48": {
+  "name": "GamMan::initStage2FromPack",
+  "tag": "ror-inferred",
+  "was": "FUN_001c3a48",
+  "why": "reloadVFchrModels, empty1c1a88, then initStage2's BedPfh walk over a given pack: Sequence::loadSubImage(2, file base+2), gamSetWrdRoom(file base+4); no callers"
+ },
  "001c3d38": {
   "name": "GamMan::setPcStartPos",
   "tag": "ror-inferred",
@@ -7433,6 +7439,12 @@
   "was": "FUN_001cb638",
   "why": "pause 0x100000, killMsgTask, releaseTenkyus(2), resetStage, initGameState, hideAllChrs(1), releaseAllChrs, kills task kinds 0x13 / 0x14 / 5, clears pool +0x2246c"
  },
+ "001cb74c": {
+  "name": "GamMan::setObjFxOn",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb74c",
+  "why": "on != 0 adds a +0x20b00 record {oid, -1} unless listed; on == 0 frees oid's records (ctlObj1cbb80); oid 0x85fffe01 also sends MagScene::commandPC 0xe / 0xf"
+ },
  "001cb8e4": {
   "name": "GamMan::ctlObj1cb8e4",
   "tag": "ror-inferred",
@@ -7619,6 +7631,12 @@
   "was": "FUN_001ced18",
   "why": "deletes every achr (PC and dog kept with script bit [2] 0x8000) and fchr through the pool inlines, releases the avfchr actors, releaseVFchrs(0) when bit [7] sign clear"
  },
+ "001cf2e8": {
+  "name": "GamMan::releaseEnemies",
+  "tag": "ror-inferred",
+  "was": "FUN_001cf2e8",
+  "why": "kills task kinds 0x15 / 0x16, then every type-2 achr: clearSecta(1), EmyManager::releaseObj, releaseActor, slot cleared, deleting destructor, node freed"
+ },
  "001cf518": {
   "name": "GamMan::hideAllChrs",
   "tag": "ror-inferred",
@@ -7684,6 +7702,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001cfbe4",
   "why": "isObj, then by the oid's list (bits 28..29) the achr 0x1d89c4 / vfchr / fchr 0x1db7cc position setter with the vector; returns 1, 0 for no object; native 151 case 1 / 6, the corner-box case 0x35 passes the box centre"
+ },
+ "001cfca8": {
+  "name": "GamMan::setObjPosLocal",
+  "tag": "ror-inferred",
+  "was": "FUN_001cfca8",
+  "why": "pos minus the WRD offset (gamGetWrdOfsX / Z), plus an optional offset vector, then ObjStat / FCHRstat::setPos by the oid's list"
  },
  "001cfda4": {
   "name": "GamMan::placeObjAt",
@@ -7895,6 +7919,12 @@
   "was": "FUN_001d2724",
   "why": "which 1 / 0 / 6 / 7 sets m_flags bit 0x4000000 / 0x2000000 / 0x8000000 / 0x10000000, then MagScene 0x13fb3c (the light code)"
  },
+ "001d27dc": {
+  "name": "GamMan::addObjRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001d27dc",
+  "why": "achr only: getRot + delta, each angle wrapped into -pi..pi (double compares with 2*pi), setRot"
+ },
  "001d2a14": {
   "name": "GamMan::moveAchr",
   "tag": "ror-inferred",
@@ -7949,11 +7979,35 @@
   "was": "FUN_001d2d7c",
   "why": "walks the vfchr list (+0x1dcd0): 1 when one's FCHRstat::getParam(which) word 0 equals value"
  },
+ "001d2e2c": {
+  "name": "GamMan::collectAchrs",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2e2c",
+  "why": "counts (and copies into an optional pool) the achrs of type (-1 any) whose m_flags has need and lacks exclude; no pool and type -1 returns the list count"
+ },
+ "001d2ff0": {
+  "name": "GamMan::collectAchrsNear",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2ff0",
+  "why": "collectAchrs' filter plus an XZ distance < radius from pos (ObjStat::getPos, sqrtf); the distance into +0x144 and the object into the pool"
+ },
+ "001d327c": {
+  "name": "GamMan::collectFchrs",
+  "tag": "ror-inferred",
+  "was": "FUN_001d327c",
+  "why": "collectAchrs over the fchr list +0x1d980 and the avfchr list +0x1ef00; shortcut (type -1, need 0) returns the fchr list count only"
+ },
  "001d3588": {
   "name": "GamMan::markReset",
   "tag": "ror-inferred",
   "was": "FUN_001d3588",
   "why": "m_sys_flg |= 0x40000; update clears 0x40001 every frame, so it marks the frame after initGameState"
+ },
+ "001d35ac": {
+  "name": "GamMan::collectFchrsNear",
+  "tag": "ror-inferred",
+  "was": "FUN_001d35ac",
+  "why": "collectAchrsNear over the fchr and avfchr lists with FCHRstat::getPos; called from maglifepc2 and the emy code"
  },
  "001d3a14": {
   "name": "GamMan::emptyAchr1d3a14",
@@ -8092,6 +8146,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d8a8c",
   "why": "was ACHRstat::setRot: ObjStat::setParam 0x1d932c calls it for param 6 (o_rot); ObjStat members only"
+ },
+ "001d8c50": {
+  "name": "ObjStat::getPosSectaY",
+  "tag": "ror-inferred",
+  "was": "FUN_001d8c50",
+  "why": "finds the object's secta cell when it has none (setSecta), then the cell height under getPos (0x1d817c); GamMan::getPcPosSectaY's callee"
  },
  "001d8d28": {
   "name": "ObjStat::setSecta",
@@ -8591,6 +8651,12 @@
   "was": "FUN_001e46b8",
   "why": "SndMan::freeBank and slot +0x1728[n] = -1; loadStage frees slots 0xc and 0x1f"
  },
+ "001e4700": {
+  "name": "GamSndMan::free_all_se_bank",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4700",
+  "why": "SndMan::stopAll(8) then freeSePack 0, 10, 11, 12, 0x1f, 0x20, 0x21, 0x40; GamMan::free_all_se_bank forwards to it"
+ },
  "001e4790": {
   "name": "GamSndMan::registSnd",
   "tag": "ror-inferred",
@@ -8681,11 +8747,23 @@
   "was": "FUN_001e5660",
   "why": "GamMan::funcStr(int, SND_FUNC_NO, void *) tail-jumps to it (0x28eaf0)"
  },
+ "001e5b60": {
+  "name": "GamSndMan::getStatSTRtrack",
+  "tag": "ror-inferred",
+  "was": "FUN_001e5b60",
+  "why": "GamMan::getStatSTRtrack(u_int, int) tail-jumps to it"
+ },
  "001e5be0": {
   "name": "GamSndMan::getStrNoByChan",
   "tag": "ror-inferred",
   "was": "FUN_001e5be0",
   "why": "GamMan::getStrNoByChan(int) tail-jumps to it (0x28ed08)"
+ },
+ "001e5c40": {
+  "name": "GamSndMan::setVolSTRtrack",
+  "tag": "ror-inferred",
+  "was": "FUN_001e5c40",
+  "why": "GamMan::setVolSTRtrack(u_int, int, int, int) tail-jumps to it"
  },
  "001e5de4": {
   "name": "GamSndMan::set_se_3d_snd_prm",
@@ -8698,6 +8776,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001e5e58",
   "why": "GamMan::funcSE(unsigned int, SND_FUNC_NO, void *) tail-jumps to it (0x28ea8c); a switch on the function number over the 0x30 SE records at +0xd40"
+ },
+ "001e6368": {
+  "name": "GamSndMan::getStatSEtrack",
+  "tag": "ror-inferred",
+  "was": "FUN_001e6368",
+  "why": "GamMan::getStatSEtrack(u_int, int) tail-jumps to it"
+ },
+ "001e63c0": {
+  "name": "GamSndMan::setVolSEtrack",
+  "tag": "ror-inferred",
+  "was": "FUN_001e63c0",
+  "why": "GamMan::setVolSEtrack(u_int, int, int, int) tail-jumps to it"
  },
  "001e6570": {
   "name": "GamSndMan::clear_snd_lst",
@@ -8758,6 +8848,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e77b4",
   "why": "walks the task list at +0, each live task whose kind (virtual +8) equals a1 gets state 2 and is unlinked / queued (0x1e7d08, 0x1e7698)"
+ },
+ "001e7910": {
+  "name": "CmnTaskMan::killKinds",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7910",
+  "why": "for every task of list +0, killTask(its id) when its kind (virtual +0xc) is in the -1 terminated list"
  },
  "001e79c0": {
   "name": "CmnTaskMan::findTask",

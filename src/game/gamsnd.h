@@ -112,6 +112,13 @@ struct GamSndMan
     /* The same over the 0x30 SE records (+0xd40, 0x28 bytes each). */
     int  funcSE(u_int se, int no, void *arg);                            // ROR 0x001e5e58
     int  isPlayEnvStr();                                                 // ROR 0x001e6cac
+    /* SndMan::stopAll(8), then the SE packs 0, 10..12, 0x1f..0x21 and
+     * 0x40 freed. */
+    void free_all_se_bank();                                             // ROR 0x001e4700
+    bool getStatSEtrack(u_int se, int track);                            // ROR 0x001e6368
+    int  setVolSEtrack(u_int se, int track, int a, int b);               // ROR 0x001e63c0
+    bool getStatSTRtrack(u_int str, int track);                          // ROR 0x001e5b60
+    int  setVolSTRtrack(u_int str, int track, int a, int b);             // ROR 0x001e5c40
     /* A stage reset: the BGM / stream records, the 0x30 sound records,
      * the three sound tasks killed, the 3D sound list emptied. */
     void reset();                                                        // ROR 0x001e1fa4
@@ -120,6 +127,7 @@ struct GamSndMan
     void stopObjSnds();                                                  // ROR 0x001e2178
 
     int m_mode;                 // ROR 0x0000: loadStage sets 1 (update then uses the camera position)
+    char m_fileName[4][0x10];   // ROR 0x1500: GamMan::getSndFileName
     GamSndEntry *m_table;       // ROR 0x1540: the sound table (GamMan::getSndParam)
     int m_mstVol[2];            // ROR 0x1588: GamMan::getMstVol
     int m_mstVolSe[2];          // ROR 0x1590: option 3's funcSnd(0xe) words

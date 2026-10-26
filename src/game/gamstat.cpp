@@ -50,7 +50,7 @@ ObjStat::ObjStat(int a1, u_int oid, int actor, short kind)
     m_134 = 0;
     m_inuFunc = 0;
     m_13c = 0;
-    m_144 = 0;
+    m_dist = 0.0f;
     m_148 = 0;
     m_14c = 0;
     memset(m_colPrm, 0, sizeof(m_colPrm));
@@ -424,7 +424,7 @@ int ObjStat::save(void *out)
     s->m_inuFunc = m_inuFunc;
     s->m_13c = m_13c;
     s->m_140 = m_140;
-    s->m_144 = m_144;
+    s->m_dist = m_dist;
     s->m_148 = m_148;
     s->m_14c = m_14c;
     memcpy(s->m_colPrm, m_colPrm, sizeof(m_colPrm));
@@ -455,7 +455,7 @@ int ObjStat::load(const void *in)
     m_inuFunc = s->m_inuFunc;
     m_13c = s->m_13c;
     m_140 = s->m_140;
-    m_144 = s->m_144;
+    m_dist = s->m_dist;
     m_148 = s->m_148;
     m_14c = s->m_14c;
     memcpy(m_colPrm, s->m_colPrm, sizeof(m_colPrm));
@@ -1472,5 +1472,12 @@ int ACHRstat::isTurnDone()
 const char * gamGetWrdString(int which, int wrd)
 {
     ROSEPAN_STUB("gamGetWrdString", 0x001db8e8);
+    return {};
+}
+
+// stub of ROR 0x001d8c50
+float ObjStat::getPosSectaY()
+{
+    ROSEPAN_STUB("ObjStat::getPosSectaY", 0x001d8c50);
     return {};
 }

@@ -1659,3 +1659,9 @@ void GamMan::checkMenuReq()
 {
     ROSEPAN_STUB("GamMan::checkMenuReq", 0x001d3b44);
 }
+
+// stub of ROR 0x001e7910
+void CmnTaskMan::killKinds(const int *kinds)
+{
+    ROSEPAN_STUB("CmnTaskMan::killKinds", 0x001e7910);
+}

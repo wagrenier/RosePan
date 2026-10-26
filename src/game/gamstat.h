@@ -276,7 +276,7 @@ struct ObjStatSave
     int    m_inuFunc;               // ROR 0x38
     int    m_13c;                   // ROR 0x3c
     int    m_140;                   // ROR 0x40
-    int    m_144;                   // ROR 0x44
+    float  m_dist;                  // ROR 0x44 (+0x144)
     int    m_148;                   // ROR 0x48
     int    m_14c;                   // ROR 0x4c
     int    m_colPrm[12];            // ROR 0x50
@@ -325,6 +325,9 @@ struct ObjStat
     /* The actor's position into +0x190; a new cell when it left the
      * current one's bounds. */
     void syncActorPos();                                                 // ROR 0x001d8dc4
+    /* Finds its secta cell when it has none (setSecta; 0 when none is
+     * found), then the cell's height under its position. */
+    float getPosSectaY();                                                // ROR 0x001d8c50
     /* The cell of +0x190 from scratch. */
     void findSecta();                                                    // ROR 0x001d8ea8
     /* Hides (hide) / shows the actor through its setHide; with bit 0x40
@@ -402,7 +405,7 @@ struct ObjStat
     int       m_inuFunc;            // ROR 0x138: o_inu_func, -1 after init
     int       m_13c;                // ROR 0x13c: -1 after init
     int       m_140;                // ROR 0x140: addVFchr sets 1
-    int       m_144;                // ROR 0x144
+    float     m_dist;               // ROR 0x144: GamMan::collectAchrsNear / collectFchrsNear's distance
     int       m_148;                // ROR 0x148: param 0x1000 (the model number)
     int       m_14c;                // ROR 0x14c
     int       m_colPrm[12];         // ROR 0x150: getColPrm (param 0x18): [0] kind (2 after init), [1] shape, [4] radius

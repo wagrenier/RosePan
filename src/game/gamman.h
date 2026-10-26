@@ -291,6 +291,8 @@ static_assert(offsetof(GamCamRec, m_pathPos) == 0x28, "m_pathPos");
  * short ids, 0xa00 = none. */
 struct GamMan
 {
+    struct SeqPair;
+
     GamMan();                                                            // ROR 0x001c05c0
     /* The ROM's deleting destructor (vtable slot 1): GamSndMan's and
      * GamArea's destructors; nothing of its own. */
@@ -603,12 +605,6 @@ struct GamMan
     void detachObj(u_int oid, u_int parent);                             // ROR 0x001d1bec
     /* 1 when a vfchr's getParam(which) word 0 is value. */
     int  hasVFchrParam(int which, int value);                            // ROR 0x001d2d7c
-    // ROR 0x0028f300
-    void cnvPosW2L(float *a, float *b) { gamWrdConvPos(0, a, b); }
-    // ROR 0x0028f334
-    void cnvPosL2W(float *a, float *b) { gamWrdConvPos(1, a, b); }
-    // ROR 0x0028f368
-    void getWrdOffset(float *out) { gamWrdConvPos(2, out, NULL); }
     /* Adds the object oid of scene model (-1 none) by its list: an achr
      * (ACHRstat) or an fchr (FCHRstat); kind is its system data id. */
     void addChr(int model, u_int oid, int kind, const void *pos, int place); // ROR 0x001cc250
@@ -768,18 +764,33 @@ struct GamMan
     /* The type-9 fchr whose param 0x41 is no, NULL none. */
     FCHRstat *findFchrType9(int no);                                     // ROR 0x001d2c0c
     FCHRstat *getVFchr(u_int oid);                                       // ROR 0x001d2d00
-    /* The ELF's inline: the object of oid in its list. */
-    // ROR 0x0028f7e4
-    ObjStat *find(u_int oid)
-    {
-        switch (gamOidList(oid))
-        {
-        case 1:  return getAchr(oid);
-        case 0:  return getVFchr(oid);
-        case 2:  return getFchr(oid);
-        default: return NULL;
-        }
-    }
+    /* initStage2's pack walk over a loaded pack: the vfchr models
+     * reloaded, its script image (file base + 2) and room (base + 4). No
+     * callers. */
+    void initStage2FromPack(void *pack);                                 // ROR 0x001c3a48
+    /* on: a +0x20b00 record {oid, -1} unless one is listed; off: oid's
+     * records freed (ctlObj1cbb80). Oid 0x85fffe01 also commands the PC
+     * (0xe on, 0xf off). No callers. */
+    void setObjFxOn(u_int oid, int on);                                  // ROR 0x001cb74c
+    /* Task kinds 0x15 / 0x16 killed, every type-2 (enemy) achr released
+     * and deleted. No callers. */
+    void releaseEnemies();                                               // ROR 0x001cf2e8
+    /* pos (world) less the room offset, plus ofs when given (pos keeps
+     * the result), into the achr / fchr of oid. No callers. */
+    void setObjPosLocal(u_int oid, float *pos, const float *ofs);        // ROR 0x001cfca8
+    /* An achr's rotation plus delta, each angle wrapped into -pi..pi. */
+    void addObjRot(u_int oid, const float *delta);                       // ROR 0x001d27dc
+    /* The achrs (fchrs and avfchrs) of type (-1 any) whose m_flags has a
+     * bit of need (0 any) and none of exclude (0 none): counted, and
+     * copied into out when given (emptied first). */
+    int  collectAchrs(SeqPool<ACHRstat *> *out, int type, u_int need, u_int exclude); // ROR 0x001d2e2c
+    int  collectFchrs(SeqPool<FCHRstat *> *out, int type, u_int need, u_int exclude); // ROR 0x001d327c
+    /* The same within radius of pos on x / z (out required), the
+     * distance into each object's m_dist. */
+    void collectAchrsNear(const float *pos, float radius, SeqPool<ACHRstat *> *out, int type,
+                          u_int need, u_int exclude);                    // ROR 0x001d2ff0
+    void collectFchrsNear(const float *pos, float radius, SeqPool<FCHRstat *> *out, int type,
+                          u_int need, u_int exclude);                    // ROR 0x001d35ac
     /* An object's param by which (0x41 the type-9 number ...). */
     void getObjParam(u_int oid, int which, void *out);                   // ROR 0x001d1c80
     /* The PC actor's motion speed (DogActor +0x1e8) set to 1e-7: its
@@ -964,6 +975,119 @@ struct GamMan
     void rmSnd(u_int id);                                                // ROR 0x0028eb60
     void setSnd3DCnt(int type);                                          // ROR 0x0028eca8
     GamSndEntry *getSndParam();                                          // ROR 0x0028ee00
+    void put_se_3d_pos(u_int se, float *pos, int wrd, u_int flags);      // ROR 0x0028eb68
+    void put_se_3d_pos_chr(u_int se, u_int oid, u_int flags);            // ROR 0x0028eb90
+    void del_se_3d_pos(u_int se, int arg);                               // ROR 0x0028ebb8
+    void del_se_3d_pos_chr(u_int oid);                                   // ROR 0x0028ebe0
+    void put_str_3d_pos(int str, float *pos, int wrd, u_int flags);      // ROR 0x0028ec08
+    void put_str_3d_pos_chr(int str, u_int oid, u_int flags);            // ROR 0x0028ec30
+    void del_str_3d_pos(int str, int arg);                               // ROR 0x0028ec58
+    void del_str_3d_pos_chr(u_int oid);                                  // ROR 0x0028ec80
+    void set_se_3d_snd_prm(int se, int a, int b, int c, int d);          // ROR 0x0028ecb8
+    void set_str_3d_snd_prm(int str, int a, int b, int c, int d);        // ROR 0x0028ece0
+    int  getStrNoByChan(int chan);                                       // ROR 0x0028ed08
+    /* m_sndMan's file name n (OID_STATE in the ELF; 16 bytes each). */
+    char *getSndFileName(int n);                                         // ROR 0x0028ed28
+    bool getStatSEtrack(u_int se, int track);                            // ROR 0x0028ed40
+    int  setVolSEtrack(u_int se, int track, int a, int b);               // ROR 0x0028ed60
+    bool getStatSTRtrack(u_int str, int track);                          // ROR 0x0028ed80
+    int  setVolSTRtrack(u_int str, int track, int a, int b);             // ROR 0x0028eda0
+    int  get_se_oid(char *name);                                         // ROR 0x0028edc0
+    int  get_str_no(char *name);                                         // ROR 0x0028ede0
+    void free_all_se_bank();                                             // ROR 0x0028ee10
+    u_char *getEvtPack();                                                // ROR 0x0028ee38
+    int  isPlayEnvStr();                                                 // ROR 0x0028ee48
+    int  getCameraMode();                                                // ROR 0x0028ee68
+    SeqPool<ACHRstat *> *getAchrListPtr();                               // ROR 0x0028ee78
+    SeqPool<FCHRstat *> *getFchrListPtr();                               // ROR 0x0028ee88
+    SeqPool<FCHRstat *> *getVFchrListPtr();                              // ROR 0x0028ee98
+    SeqPool<FCHRstat *> *getAVFchrListPtr();                             // ROR 0x0028eea8
+    void updatePcSecta();                                                // ROR 0x0028eeb8
+    void updateDogSecta();                                               // ROR 0x0028eee8
+    /* The PC's / dog's object id, 0 without one. */
+    u_int getPcOID();                                                    // ROR 0x0028ef18
+    u_int getInuOID();                                                   // ROR 0x0028ef38
+    int  get_pc_last_mot();                                              // ROR 0x0028ef58
+    /* The ROM copies four words (a quad load / store) into the array. */
+    void getPcPos(float (&out)[3]);                                      // ROR 0x0028ef68
+    void getPcRot(float (&out)[3]);                                      // ROR 0x0028ef80
+    void getDogPos(float (&out)[3]);                                     // ROR 0x0028ef98
+    /* The m_sysData forwarders ("unq": a record by its unique id). */
+    void getUnqParam(u_short id, int field, void *out);                  // ROR 0x0028efb0
+    const void *getUnqPtr(u_short id);                                   // ROR 0x0028efd8
+    /* The cell height under the PC / dog, 0 without one. */
+    float getPcPosSectaY();                                              // ROR 0x0028effc
+    float getDogPosSectaY();                                             // ROR 0x0028f034
+    void setPcFlg(u_int bits);                                           // ROR 0x0028f06c
+    void unsetPcFlg(u_int bits);                                         // ROR 0x0028f094
+    bool chkPcFlg(u_int bits);                                           // ROR 0x0028f0bc
+    void setPCPosAMJ(float *pos);                                        // ROR 0x0028f0e8
+    void setUnqParam(u_short id, int field, void *data);                 // ROR 0x0028f100
+    u_int getUnqFlg(u_short id);                                         // ROR 0x0028f128
+    int  chkUnqFlg(u_short id, u_int bits);                              // ROR 0x0028f14c
+    void setUnqFlg(u_short id, u_int bits);                              // ROR 0x0028f170
+    void unsetUnqFlg(u_short id, u_int bits);                            // ROR 0x0028f198
+    int  chkUnqFlg2(u_short id, u_short unused, u_int bits);             // ROR 0x0028f1c0
+    void setUnqFlg2(u_short id, u_short unused, u_int bits);             // ROR 0x0028f1e8
+    void unsetUnqFlg2(u_short id, u_short unused, u_int bits);           // ROR 0x0028f214
+    void setEmyParam(intptr_t value);                                    // ROR 0x0028f240
+    int  getPcEquipItemOID() const;                                      // ROR 0x0028f250
+    int  getPcEquipItemChrID() const;                                    // ROR 0x0028f260
+    short getPcEquipItem() const;                                        // ROR 0x0028f270
+    short getFindTargetItem() const;                                     // ROR 0x0028f280
+    short getFindTargetItemCandidate() const;                            // ROR 0x0028f290
+    GamItemHave *getItemHavePtr();                                       // ROR 0x0028f2a0
+    SeqPool<GamItemSlot> *getItemStockPtr();                             // ROR 0x0028f2b0
+    /* The WRD block +0x18c00: the port's gam*Wrd* functions take GamMan
+     * itself (its words are GamMan members). */
+    GamMan *getMapObjPtr();                                              // ROR 0x0028f2c0
+    /* The room's WRD string 1. */
+    const char *getMapName();                                            // ROR 0x0028f2d0
+    void cnvPosW2L(float *a, float *b);                                  // ROR 0x0028f300
+    void cnvPosL2W(float *a, float *b);                                  // ROR 0x0028f334
+    void getWrdOffset(float *out);                                       // ROR 0x0028f368
+    void getDoorObj(GamObjTable **head, GamObjRec **obj);                // ROR 0x0028f398
+    /* Returns 0. */
+    int  get_oid_info(u_int oid);                                        // ROR 0x0028f3bc
+    bool is_pc_jnfc();                                                   // ROR 0x0028f3c4
+    void set_pc_last_mot(int mot);                                       // ROR 0x0028f3dc
+    void chgMsgMode(int mode);                                           // ROR 0x0028f3ec
+    /* The script callbacks m_seqPair (a = the first argument). */
+    void regist_call_back_seq_evt(u_int a, u_int b);                     // ROR 0x0028f3fc
+    void regist_call_back_menu(u_int a, u_int b);                        // ROR 0x0028f418
+    void regist_call_back_ehon(u_int a, u_int b);                        // ROR 0x0028f434
+    void regist_jump_area_act(u_int a, u_int b);                         // ROR 0x0028f450
+    void clear_call_back_seq_evt();                                      // ROR 0x0028f46c
+    void clear_call_back_menu();                                         // ROR 0x0028f488
+    void clear_call_back_ehon();                                         // ROR 0x0028f4a4
+    void clear_call_jump_area_act();                                     // ROR 0x0028f4c0
+    SeqPair *get_jump_area_act();                                        // ROR 0x0028f4dc
+    /* The m_area forwarders (TRG_PRI is GamAreaTrg). */
+    void create_trg(GamAreaTrg &trg, bool newId, int unused);            // ROR 0x0028f4ec
+    void check_trg();                                                    // ROR 0x0028f508
+    void clear_trg();                                                    // ROR 0x0028f544
+    int  chg_trg_flg(u_int id, u_int bits);                              // ROR 0x0028f560
+    int  set_trg_flg(u_int id, u_int bits);                              // ROR 0x0028f58c
+    int  unset_trg_flg(u_int id, u_int bits);                            // ROR 0x0028f5b8
+    int  chk_trg_flg(u_int id, u_int bits);                              // ROR 0x0028f5e4
+    int  chk_trg_evt_flg(u_int id);                                      // ROR 0x0028f60c
+    void start_trg();                                                    // ROR 0x0028f634
+    void stop_trg();                                                     // ROR 0x0028f650
+    void init_pc_pos_cam_pnl();                                          // ROR 0x0028f66c
+    void dispose_get_item();                                             // ROR 0x0028f688
+    void regist_ftb(u_int key, u_int value);                             // ROR 0x0028f6a4
+    /* A menu callback is registered and flags bit 0x8000 is clear. */
+    bool check_event_after_menu();                                       // ROR 0x0028f6c0
+    /* Empty (the secta queries live in ObjStat). */
+    void getNextSecta(float *pos, GamSecta **cell);                      // ROR 0x0028f704
+    void getNextSecta(int no, GamSecta **cell);                          // ROR 0x0028f70c
+    /* Returns -1. */
+    int  getSectaZoneNo(float *pos);                                     // ROR 0x0028f714
+    /* releaseObjs' per-object step: enemy work, actor, slot. */
+    void delete_achr_core(ACHRstat *chr);                                // ROR 0x0028f71c
+    void delete_fchr_core(FCHRstat *chr);                                // ROR 0x0028f794
+    /* The object of oid in its list. */
+    ObjStat *find(u_int oid);                                            // ROR 0x0028f7e4
 
     /* An {a, b} pair the system calls 0x32..0x35 set (in the ROM b, the
      * script's a2, comes first): the ELF's regist_call_back_ehon / _menu /
@@ -1065,6 +1189,8 @@ struct GamMan
     int          m_pcEquipItemOID;  // ROR 0x22208: getPcEquipItemOID
     short        m_equipItem;       // ROR 0x2220c: getPcEquipItem, 0xa00 = none
     short        m_findTargetItem;  // ROR 0x2220e: getFindTargetItem
+    short        m_findTargetItemCandidate; // ROR 0x22210: getFindTargetItemCandidate
+    short        _22212;            // ROR 0x22212
     int          m_saved_volume;    // ROR 0x22214: chkNoise; -1 = none saved (SprMan::volumeOn / Off read it)
     int          m_volume;          // ROR 0x22218: setVolume's last volume (0x80 after init)
     int          m_stageReq;        // ROR 0x2221c: afterSeqExec's change kind (3 the stage-2 images, 5 a full reset)

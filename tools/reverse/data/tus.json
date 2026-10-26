@@ -2,7 +2,6 @@
  "queue": [
   "unassigned@001d859c",
   "unassigned@0020ff34",
-  "game/gamman.cpp",
   "unassigned@001fd424",
   "unassigned@001e46b8"
  ],
@@ -129,7 +128,7 @@
    "why": "FileReader / FileReadReq methods, fileGetSize / fileExists, the rxFileCd clock wrappers and two clock helpers that follow them; bounded by the language-select menu code (mnusllg.rpk, SprMan calls) below and GamFont::GamFont above. No source string: game/ by link order (GamFont, then GamMan), gamfile after RoR's gam* names -- a guess"
   },
   "game/gamman.cpp": {
-   "notes": "Visual test: the 15 s boot still ends on the Atlus disclaimer, unchanged; nothing in this slice draws. Left in gamman: 0x1c3a48 (an A%03d.ARA loader, no callers, same pfh walk as initStage2), 0x1cb74c, 0x1cf2e8, 0x1cfca8, 0x1d27dc, 0x1d2e2c, 0x1d2ff0, 0x1d327c, 0x1d35ac (called from maglifepc2 and others), then brief for more. GamMan::checkMenuReq 0x1d3b44 is the first function of unassigned@001d3b44 (a stub now; execPauseReq and enterMenuPause call it / are called by it). The ROM reaches g_gamMan.m_flags / m_flags2 through bss 0x7a3208 / 0x7a320c (enterMenuPause clears bit 0x80 that way). Header inline definitions do not count as reconstructed (tool scans .cpp only): ELF inlines are defined out of line in gamman.cpp now; GamMan::__tf has a comment-only annotation. PORT: showRoomName passes word 7 of the message params as 0 (stack garbage in the ROM). The earlier crash after the relinkObj stub on the New Game run is still the next blocker (unassigned@001d3b44). References: hazards.md (header inlines not counted; bss words after GamMan are its members).",
+   "notes": "All 409 gamman functions are written; status verify because nothing in the TU draws in the 15 s boot, which still ends on the Atlus disclaimer (correct for that point). initStage2FromPack, setObjFxOn, releaseEnemies, setObjPosLocal have no callers in the ROM. collectFchrs' no-pool shortcut (type -1, need 0) returns only the fchr list count, as the ROM does. getPcPos / getPcRot / getDogPos copy three floats on the host: the ROM's quad copy writes a fourth word past the ELF float[3]. getMapObjPtr returns GamMan itself: the WRD block +0x18c00 lives as GamMan members on the host. New stubs in other TUs: GamSndMan::free_all_se_bank / getStatSEtrack / setVolSEtrack / getStatSTRtrack / setVolSTRtrack (game/gamsnd.cpp), ObjStat::getPosSectaY 0x1d8c50 (game/gamstat.cpp), CmnTaskMan::killKinds 0x1e7910 (unassigned). The next blocker on the New Game run is still unassigned@001d3b44 (GamMan::checkMenuReq and the code after relinkObj).",
    "ranges": [
     [
      "001c05c0",
@@ -176,9 +175,14 @@
      "date": "2026-10-26 13:31",
      "status": "partial",
      "summary": "GamMan slice 8: the ELF inline accessors 0x28e254..0x28ee00 written out of line (flags, chr numbers and pointers, task ids, getSysTime / getElapsedSysTime, set_achr, setPcCostume, the sound forwarders to GamSndMan), getWrdNo / releaseAll moved out of the header; the destructor, clearVram, showRoomName, readFchrType9Recs, execPauseReq (CmnTaskMan::exec's menu pause / resume), enterMenuPause, resetGame, hideAllChrs, isAchrMotionEnd, isAchrTurnDone, emptyAchr1d3a14; GamSndMan m_table / m_mstVol and getSeID / getStrSnd / stopSE, ACHRstat isMotionEnd / isTurnDone, gamGetWrdString, CmnTaskMan::killKind declared (stubs); 20 names (batch gamman_010)"
+    },
+    {
+     "date": "2026-10-26 13:44",
+     "status": "verify",
+     "summary": "GamMan slice 9 (last): the ELF inline accessors 0x28eb68..0x28f7e4 written out of line (3D sound forwarders, track status / volume, list pointers, PC / dog oid, pos, secta Y and flags, the unq m_sysData forwarders, equip / find-target getters, door / map name / WRD conversions, the script callback pairs, the GamArea trigger forwarders, delete_achr_core / delete_fchr_core, find), cnvPos* / find moved out of the header; the nine unnamed functions: initStage2FromPack, setObjFxOn, releaseEnemies, setObjPosLocal, addObjRot, collectAchrs / collectFchrs and collectAchrsNear / collectFchrsNear; ObjStat +0x144 is the float m_dist; 16 names (batch gamman_011)"
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "game/gamman.cpp asserts and allocDebug tags in init, loadSystemData, loadStage; GamMan's constructor 0x1c05c0 starts it after GamFont, switchVolume 0x1d3ac8 ends it; ObjStat and GamArea code follows (unassigned@001d3b44)"
   },
   "game/gamstat.cpp": {
