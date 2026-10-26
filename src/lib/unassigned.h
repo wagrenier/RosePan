@@ -101,16 +101,23 @@ static_assert(offsetof(ChrMotionRef, m_actor) == 0x0c, "ChrMotionRef m_actor");
 /* !DogActor::isModeSet of ref's actor (unassigned@001e6d54). */
 int chrMotionRefEnd(const ChrMotionRef *ref);                            // ROR 0x001e8f88
 
-/* The parameter block TskSnd's constructor copies (0x40 bytes on the EE;
- * only the words SndMan::playStream sets are named). layout: host. */
+/* The parameter block TskSnd's constructor copies (0x40 bytes on the EE).
+ * A fade (GamSndMan::funcSnd / funcSE / funcStr): m_snd the sound, m_id
+ * its SndMan id, m_volL / m_volR the target, m_frames its length, m_curL /
+ * m_curR the volume now. layout: host. */
 struct TskSndParam
 {
-    int         _00[3];
-    int         m_id;           // ROR 0x0c: the stream id
-    int         _10[3];
+    int         m_snd;          // ROR 0x00: the SE id / stream number
+    int         m_volL;         // ROR 0x04
+    int         m_volR;         // ROR 0x08
+    int         m_id;           // ROR 0x0c: the SndMan id
+    int         _10;
+    int         m_frames;       // ROR 0x14
+    int         _18;
     const char *m_name;         // ROR 0x1c: kind 7 copies the name (0x1b chars)
-    int         _20[2];
-    int         m_arg;          // ROR 0x28: playStream's arg
+    int         m_curL;         // ROR 0x20
+    int         m_curR;         // ROR 0x24
+    int         m_arg;          // ROR 0x28: playStream's arg; funcStr's fades: 1 stops the stream at the end (unverified)
     int         m_mode;         // ROR 0x2c: playStream's mode
     int         m_id2;          // ROR 0x30: the stream id again
     int         _34[3];
@@ -122,6 +129,8 @@ struct TskSndParam
 struct TskSnd : CmnITask
 {
     TskSnd(int kind, const TskSndParam *param);                          // ROR 0x001f8fc0
+    /* The fade's volume now (+0x84 / +0x88); returns 0. */
+    int getVolume(int *volL, int *volR);                                 // ROR 0x001f9658
 };
 
 /* TskFrameFunc : CmnITask (vtable 0x2e4d50, EE 0x80 bytes): kind < 0x17

@@ -1381,3 +1381,30 @@ throughout (identifiers, env variables, files, shader macros):
   0, exec returns 1: the task ends on its first step, as when the manager was a stub), so a script that
   waits on getTask(id) does not hang on a stub class. A class's real exec replaces that.
 
+## The sound state (game/gamsnd.cpp, 0x1e0df0..0x1e7094, 2026-10-26)
+
+- `GamSndMan` (GamMan +0x18e00 = 0x79a0c0, EE 0x1878, vptr +0x1874, one virtual: the destructor).
+  +0 the listener mode (0 the PC: GamMan +0x22020 pos / +0x22030 rot; 1 the camera: MagScene +0x2ab70
+  m_trans / m_rotate; loadStage sets 1). +0x40 / +0xb0 two 3D sound lists (a 0x60-byte sentinel node and
+  a count at +0x60 each; prev at +0, next at +4), 32 nodes at +0x140 (node +0x30 the sound, +0x34 its
+  record, +0x38 bit 0 a stream). +0xd40 / +0xd44 / +0xd48 a record range {begin, end, 0x30} over 0x30
+  `GamSndRec` (0x28) at +0xd80, indexed by SndMan id: +0 flags (1 stream, 8 playStr's bool -- isPlayEnvStr,
+  0x10 loop set, 0x80 kept, 0x100 a BGM stream), +4 / +8 volume, +0xc SE id, +0x14 stream number, +0x18
+  SndMan id. +0x1540 the SE table (0x400 x 0x38, allocDebug line 81), +0x1544 the stream table (900,
+  line 82; hashed from (str % 100000) / 2, -1 free). +0x1588 / +0x1590 / +0x1598 the master / SE / stream
+  volume words; +0x15a0 four 0x24-byte BGM push levels (`GamBgmRec`: SE, stream, a second stream fadeOut3dSnds
+  keeps, each with volL / volR), +0x1654 a second SE per level, +0x1684 the push depth (-1 none; pushSnd
+  only pushes from -1), +0x1688 eight looping SEs, count +0x1708; task ids +0x170c (master fade),
+  +0x1710 / +0x1714 (SE fades), +0x1718 (stream fade); +0x1728 the SE pack id loaded in each of the 65
+  banks; +0x186c the 3D scale (0.5); +0x1870 flags (bit 0 set by stopBgm, cleared by resumeBgm).
+- SE packs are named "BBII.se": bank BB, pack id II (`parseSePackName` 0x1e43e0); `loadSePackData`
+  0x1e44b4 stops SEs (funcSnd 0x11), `SndMan::loadBank(bank, data, nowait)` -- the second argument is the
+  XVAB *data* (rxSndXvabLoad's), not a name.
+- SE ids: id >> 24 == 0xb are BGM-class SEs (pushed with the music); 0xb030352 is special-cased (looped
+  on resume, never pushed). The option levels 0..8 scale the SE / stream master volume to 10..100..128
+  (funcSnd 0xe / 0xf, at least 10).
+- Fades are `TskSnd` tasks over a `TskSndParam` block (lib/unassigned.h): kind 0 SE, 1 stream, 2 / 3 / 4
+  the master / SE / stream master volume; target +4 / +8, frames +0x14, current +0x20 / +0x24, +0x28 1
+  stops a stream at the end (funcStr 0x15 / 0x1b). `TskSnd::getVolume` 0x1f9658 reads a fade's volume now.
+- `gamSnd3dVolume` 0x1e6e00: the entry's distance fade (+0x2e up to distance +0x2c, +0x30 from +0x2a,
+  linear between) times `gamSndEarGain` 0x1e6d54 per ear (+-pi/3 off the facing; 0.3 behind .. 1.0 ahead).

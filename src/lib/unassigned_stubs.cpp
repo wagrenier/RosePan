@@ -422,13 +422,6 @@ int GamFont::setTarget(void *buf, u_int w, u_int h, int bits)
     return {};
 }
 
-// stub of ROR 0x001e4908
-int GamSndMan::findSnd(int id, GamSndEntry **entry, int arg)
-{
-    ROSEPAN_STUB("GamSndMan::findSnd", 0x001e4908);
-    return {};
-}
-
 // ──────────────────────────────────────────────────────────────────────
 // Equality without case: a..z fold to A..Z (unassigned@00106010, written
 // ahead for MagLoaderIndex::find).
@@ -1604,4 +1597,11 @@ void gamGetBwnPos(float *out)
 void gamGetBwnRot(float *out)
 {
     ROSEPAN_STUB("gamGetBwnRot", 0x0014448c);
+}
+
+// stub of ROR 0x001f9658
+int TskSnd::getVolume(int *volL, int *volR)
+{
+    ROSEPAN_STUB("TskSnd::getVolume", 0x001f9658);
+    return {};
 }

@@ -157,9 +157,10 @@ struct SndMan
     /* One frame of a stream; -1 when the slot is done. */
     int  updateStream(SndInfo *strSndInfo);                              // ROR 0x00180230
 
-    /* Loads the XVAB file name as bank; waits for the transfer unless
+    /* Loads the XVAB xvab (rxSndXvabLoad's data; the by-id / by-name
+     * callers pass a name there) as bank; waits for the transfer unless
      * nowait. The XVAB id, -1 on failure. */
-    int  loadBank(int bank, const char *name, int nowait);               // ROR 0x001809d8
+    int  loadBank(int bank, const void *xvab, int nowait);               // ROR 0x001809d8
     int  finishBank(int bank);                                           // ROR 0x00180a90
     int  freeBank(int bank);                                             // ROR 0x00180b30
     void initSeSlot(SndInfo *info);                                      // ROR 0x00180b9c

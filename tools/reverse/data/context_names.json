@@ -8657,6 +8657,18 @@
   "was": "FUN_001e0d70",
   "why": "1 when the list at +0xd0 (count +0x190) has a node whose +0x3c equals id; GamMan::makeOid counts type-13 ids down past the taken ones"
  },
+ "001e0df0": {
+  "name": "GamSndMan::GamSndMan",
+  "tag": "ror-inferred",
+  "was": "FUN_001e0df0",
+  "why": "stores _vt$9GamSndMan 0x2e4840 at +0x1874 (rtti.py constructor); builds the 32-node 3D sound list and points +0xd40 at the 0x30 records"
+ },
+ "001e0eb8": {
+  "name": "GamSndMan::~GamSndMan",
+  "tag": "ror-inferred",
+  "was": "FUN_001e0eb8",
+  "why": "re-installs the vtable, walks the record range, flags & 1 deletes: GCC 2 destructor"
+ },
  "001e0f1c": {
   "name": "GamSndMan::init",
   "tag": "ror-inferred",
@@ -8674,6 +8686,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e107c",
   "why": "sets +0x171c = 4, +0x1720 / +0x1724 = 0x80, word 0 = 0, the four volume words +0x1590..+0x159c to 0x80 and calls funcSnd 0xd / 0xe / 0xf with 0x80, 0x80; the title's first frame"
+ },
+ "001e111c": {
+  "name": "GamSndMan::pushSnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001e111c",
+  "why": "funcSnd 0x1d / 0x1f and stopBgm: with the push depth +0x1684 below 0 takes one level and saves the playing BGM-class SE (id >> 24 == 0xb), the stream flagged 0x100 and the looping SEs with their volumes; resumeBgm pops it"
  },
  "001e15d0": {
   "name": "GamSndMan::setBgmRec",
@@ -8759,17 +8777,47 @@
   "was": "FUN_001e3698",
   "why": "GamMan::del_str_3d_pos_chr(unsigned int) forwards to it (0x28ec80); was releaseObjSe (read from GamMan::releaseChr)"
  },
+ "001e3c24": {
+  "name": "GamSndMan::update3d",
+  "tag": "ror-inferred",
+  "was": "FUN_001e3c24",
+  "why": "update's only callee: walks the used 3D sound list +0xb0 against the listener position, stops sounds past 15000"
+ },
+ "001e4120": {
+  "name": "GamSndMan::fadeOut3dSnds",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4120",
+  "why": "stopBgm's last call: every used 3D node still playing gets an untracked TskSnd fade to 0 (SEs 60 frames, streams 30 through funcStr 0x15, the stream kept in the push level's m_str2)"
+ },
  "001e435c": {
   "name": "GamSndMan::isSndBankLoaded",
   "tag": "ror-inferred",
   "was": "FUN_001e435c",
   "why": "findSnd then 0x1e43a4(bank, +0x32, 1): the bank's handle (+0x1728 table) is set"
  },
+ "001e43a4": {
+  "name": "GamSndMan::isBankSet",
+  "tag": "ror-inferred",
+  "was": "FUN_001e43a4",
+  "why": "bank < 0x41 and, when check, the bank's pack id +0x1728[bank] != -1; isSndBankLoaded's callee"
+ },
+ "001e43e0": {
+  "name": "GamSndMan::parseSePackName",
+  "tag": "ror-inferred",
+  "was": "FUN_001e43e0",
+  "why": "atoi of a pack name's chars 0..1 and 2..3 (0000.se, 6400.se): the bank and the pack id; both loadSePack overloads call it"
+ },
  "001e4458": {
   "name": "GamSndMan::loadSePack",
   "tag": "ror-inferred",
   "was": "FUN_001e4458",
   "why": "GamMan::loadSePack(char *, void *) forwards to it with a3 0; looks the name up, then loads"
+ },
+ "001e44b4": {
+  "name": "GamSndMan::loadSePackData",
+  "tag": "ror-inferred",
+  "was": "FUN_001e44b4",
+  "why": "funcSnd(0x11) then SndMan::loadBank(bank, data, nowait) and the pack id into +0x1728[bank]"
  },
  "001e4540": {
   "name": "GamSndMan::loadSePack(char*,int)",
@@ -8824,6 +8872,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e4c1c",
   "why": "GamMan::getStrSnd(int, SND_PARAM**) forwards here with this + 0x18e00"
+ },
+ "001e4cbc": {
+  "name": "gamSndReturnZero",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4cbc",
+  "why": "returns 0; one caller, del_str_3d_pos"
  },
  "001e4cc4": {
   "name": "GamSndMan::setReverb",
@@ -8921,6 +8975,12 @@
   "was": "FUN_001e63c0",
   "why": "GamMan::setVolSEtrack(u_int, int, int, int) tail-jumps to it"
  },
+ "001e649c": {
+  "name": "GamSndMan::stopSeTrack",
+  "tag": "ror-inferred",
+  "was": "FUN_001e649c",
+  "why": "when record track still holds se and SndMan still plays it: stopSe and the record cleared, returns 1; stopSE / update3d / stopObjSnds call it"
+ },
  "001e6570": {
   "name": "GamSndMan::clear_snd_lst",
   "tag": "ror-inferred",
@@ -8938,6 +8998,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001e6cac",
   "why": "GamMan::isPlayEnvStr() tail-jumps to it with this + 0x18e00 (0x28ee48)"
+ },
+ "001e6d54": {
+  "name": "gamSndEarGain",
+  "tag": "ror-inferred",
+  "was": "FUN_001e6d54",
+  "why": "rotation matrix from a listener rotation and an ear angle (+-pi/3), dot with the direction to the sound: (dot + 1) * 0.5 * 0.7 + 0.3"
+ },
+ "001e6e00": {
+  "name": "gamSnd3dVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_001e6e00",
+  "why": "playSE / playStr with a position: listener mode 0 the PC (GamMan +0x22020), 1 the camera; distance fade from the sound entry's +0x2a..+0x30 words, times gamSndEarGain for each ear into volL / volR"
  },
  "001e7094": {
   "name": "CmnTaskMan::CmnTaskMan",
@@ -9274,6 +9346,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f8fc0",
   "why": "writes vtable 0x2e4e70 (TskSnd), copies a 0x40-byte parameter block, picks the step function by kind (7 copies the stream name)"
+ },
+ "001f9658": {
+  "name": "TskSnd::getVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9658",
+  "why": "returns the task's words +0x84 / +0x88 through two pointers; pushSnd reads a running fade's current volume through it"
  },
  "001fbbd0": {
   "name": "gamStage2Loaded",
