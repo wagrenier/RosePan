@@ -321,12 +321,57 @@ struct TskSysFunc : CmnITask
     TskSysFunc(int kind, int a, intptr_t arg);                           // ROR 0x001f4184
 };
 
+/* TskChrRot : CmnITask (vtable 0x2e4b90, EE 0x80 bytes; kind 0xe): an
+ * achr's turn by angle (wrapped into -pi..pi) from the heading rotY
+ * (>= 32769: the actor's). Without a turn motion (motion -1; an achr with
+ * flag 0x80000 takes its param 0x1102 for a left turn, 0x1101 for a right
+ * one) stepFrames adds angle / frames to the heading for frames frames
+ * (frames < 1: at once) and hands it to the running motion task;
+ * with one, the motion plays through chrMtnMove2 (speed / 60) and
+ * stepMotion waits until the actor's heading is within 0.1 of the
+ * target, then (restore set) changes back to motion 1, kills the motion
+ * task and sets the heading. Started by chrRotStart on ACHRstat::m_task[1]
+ * and by 0x14d65c, 0x1f1298, 0x1f13a8, 0x1f14cc, 0x1f1670. layout: host --
+ * pointers and a member-function pointer; EE offsets in the comments. */
+struct TskChrRot : CmnITask
+{
+    typedef int (TskChrRot::*StepFunc)();
+
+    /* unused: the ROM's callers pass a sixth word (t1) it never reads. */
+    TskChrRot(float angle, float rotY, float speed, u_int oid, int frames, int motion,
+              int restore, int unused);                                  // ROR 0x001f0434
+    ~TskChrRot() override {}                                             // ROR 0x001f0868
+
+    int  get_task_type() override { return 0xe; }                        // ROR 0x002904f8
+    void init() override {}                                              // ROR 0x00290500
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001f08a4
+    void term() override;                                                // ROR 0x001f089c
+
+    int  stepFrames();                                                   // ROR 0x001f090c
+    int  stepMotion();                                                   // ROR 0x001f0b50
+
+    float     m_rot[4];         // ROR 0x10: (0, heading, 0, -) for setObjRot / setActorRotate
+    u_int     m_oid;            // ROR 0x20
+    int       m_actor;          // ROR 0x24: GamMan::getActorNo(m_oid)
+    float     m_angle;          // ROR 0x30: the turn; the target heading with a motion
+    float     m_step;           // ROR 0x34: angle / frames
+    int       m_count;          // ROR 0x38: frames left - 1
+    int       m_frames;         // ROR 0x3c
+    int       m_restore;        // ROR 0x40: stepMotion ends with motion 1
+    int       m_motion;         // ROR 0x44: the turn motion, -1 none
+    float     m_speed;          // ROR 0x48: speed / 60
+    CmnITask *m_motionTask;     // ROR 0x4c: chrMtnMove2's, then findTask(m_task[2])
+    DogActor *m_dogActor;       // ROR 0x50: the scene actor m_actor
+    ACHRstat *m_achr;           // ROR 0x54
+    StepFunc  m_stepFunc;       // ROR 0x58: GCC 2 {delta, index, pfn}
+};
+
 /* ---- the chr* starters (natives 100 / 106 / 202.., GamMan) ---- */
 
-/* An achr's turn task (TskChrRot, ctor 0x1f0434) on ACHRstat::m_task[1]:
- * chrRotStart kills the running one and, for a non-zero angle, turns by
- * angle over frames; chrRotTo / chrRotToIn turn to the heading dir (the
- * delta wrapped into -pi..pi) at speed / over frames. chrRotFrames is
+/* An achr's turn task (TskChrRot) on ACHRstat::m_task[1]: chrRotStart
+ * kills the running one and, for a non-zero angle, turns by angle over
+ * frames; chrRotTo / chrRotToIn turn to the heading dir (the delta
+ * wrapped into -pi..pi) at speed / over frames. chrRotFrames is
  * |angle / (speed * 0.05233)|. */
 void  chrRotStart(float angle, u_int oid, int frames);                   // ROR 0x001f0e90
 void  chrRotTo(float dir, float speed, u_int oid);                       // ROR 0x001f0f9c
