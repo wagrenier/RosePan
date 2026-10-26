@@ -227,6 +227,14 @@ entries are marked **RoR** with the date.
   disclaimer (the list's last file). Symptom: every sprite of a SprMan shows one picture. Check
   SprTexture's m_tex_no[] (all equal = this) before suspecting the renderer.
 
+- **A stub's untouched out-buffer becomes garbage once its consumer is real** (2026-10-26, gamman
+  session 4): GamSysData::getField is a stub, so seqModelOf's u_short buffer kept stack garbage; while
+  GamMan::createObjByModel was a stub nothing read it, the real one handed the garbage to
+  MagScene::loadModel (assert theID >= 0, then an out-of-range actor). Initialise such buffers to the
+  ROM's "none" (0xffff for model ids) with a PORT comment until the callee is written.
+- **work/ is gitignored: an overwritten batch file is gone** (2026-10-26): take the next batch number
+  from a listing made right before writing (ls work/batches | sort -V), never from memory; the names
+  themselves survive in data/context_names.json.
 - **A stub that tolerated null becomes a member that does not.** When stubs turn into real members,
   check every caller the smoke run reaches for objects the host does not build yet; add `// PC:` guards.
 - **Stubs that return a buffer pointer return null**, invisible until the next consumer is real: when a

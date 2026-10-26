@@ -594,7 +594,9 @@ intptr_t seqFunc021(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
 // Field 0xf of system data record id (inline in the ROM).
 static int seqModelOf(int id)
 {
-    u_short model[8];
+    // PORT: 0xffff (no model) until GamSysData::getField is written (a stub
+    // leaves the words as they are; the ROM's getField always stores one).
+    u_short model[8] = {0xffff};
     g_gamMan.m_sysData.getField(id, 0xf, model);
     return model[0];
 }
@@ -813,7 +815,7 @@ intptr_t seqFunc110(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
         return 0;
     case 4:     // a vfchr of record a1's model (a1 0xffff: none)
     {
-        u_short model[8];
+        u_short model[8] = {0xffff};   // PORT: see seqModelOf
         if ((int)a1 != 0xffff)
             gam.m_sysData.getField((int)(a1 & 0xffff), 0xf, model);
         else
@@ -1683,7 +1685,7 @@ intptr_t seqFunc155(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
         if (gam.getVFchr(oid) != NULL || gam.isInOidList((int)oid) != 0 ||
             gam.isObjRecRef((int)a3) == 0)
             return 0;
-        u_short rec[8];
+        u_short rec[8] = {0xffff};     // PORT: see seqModelOf
         gam.m_sysData.getField((int)(a1 & 0xffff), 0xf, rec);
         int recModel = rec[0] == 0xffff ? 0x800 : rec[0];
         gam.addVFchr(-1, oid, (int)a3, (int)(a1 & 0xffff), t1);
@@ -1702,7 +1704,7 @@ intptr_t seqFunc155(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
     case 5:     // a new vfchr (image a3) of system record a1's model by name, room a2
     {
         int         id = (int)(a1 & 0xffff);
-        u_short     rec[8];
+        u_short     rec[8] = {0xffff}; // PORT: see seqModelOf
         const char *name[2] = {NULL, NULL};
         gam.m_sysData.getField(id, 0xf, rec);
         gam.m_sysData.getField(id, 0xb, name);

@@ -91,6 +91,51 @@ void sysInitManagers(void)
     g_gamMan.init();
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Written ahead of its file (unassigned@001d859c, the ObjStat code): every
+// object GamMan::addChr / addVFchr makes is built through it. The pool is
+// set up as SeqPool::build does (the ROM first empties both lists).
+// ROR 0x001d87f4
+
+ObjStat::ObjStat(int a1, u_int oid, int actor, short kind)
+{
+    m_nodes.build(m_nodes.m_storage, 8);
+    m_oid = oid;
+    m_kind = kind;
+    m_actor = actor;
+    m_104 = a1;
+    m_140 = 0;
+    m_secta = 0;
+    m_110 = 0;
+    m_130 = 0;
+    // PORT: ACHRstat::init / FCHRstat::init set these (stubs until their
+    // file is written); start them as init leaves a fresh object.
+    m_flags = 0;
+    m_link = -1;
+    for (int i = 0; i < 12; i++)
+        m_move[i] = 0;
+    m_move[0] = 2;
+    m_move[1] = 2;
+    for (int i = 0; i < 4; i++)
+    {
+        m_pos[i] = 0.0f;
+        m_rot[i] = 0.0f;
+    }
+}
+
+// stub of ROR 0x001f47f0 (a constructor: stubgen leaves it to hand)
+TskSeqEvent::TskSeqEvent(u_int, int, const void *)
+{
+    ROSEPAN_STUB("TskSeqEvent::TskSeqEvent", 0x001f47f0);
+    m_radius = 0.0f;
+}
+
+// stub of ROR 0x001f4a24 (a constructor: stubgen leaves it to hand)
+TskMsgMan::TskMsgMan(const char *, int, const int *, int, int, int)
+{
+    ROSEPAN_STUB("TskMsgMan::TskMsgMan", 0x001f4a24);
+}
+
 // stub of ROR 0x001f8fc0 (a constructor: stubgen leaves it to hand)
 TskSnd::TskSnd(int kind, const TskSndParam *param)
 {
@@ -1680,4 +1725,72 @@ void chrSetMotion(float speed, int no, int motion, int p1d8, u_int flags, u_int 
                   const char *name)
 {
     ROSEPAN_STUB("chrSetMotion", 0x001f6308);
+}
+
+// stub of ROR 0x001d890c
+void ACHRstat::getPos(float *out)
+{
+    ROSEPAN_STUB("ACHRstat::getPos", 0x001d890c);
+}
+
+// stub of ROR 0x001d9908
+void ACHRstat::init(short kind)
+{
+    ROSEPAN_STUB("ACHRstat::init", 0x001d9908);
+}
+
+// stub of ROR 0x001d9b2c
+void ACHRstat::initParamFuncs()
+{
+    ROSEPAN_STUB("ACHRstat::initParamFuncs", 0x001d9b2c);
+}
+
+// stub of ROR 0x001d89c4
+void ACHRstat::setPos(const float *pos)
+{
+    ROSEPAN_STUB("ACHRstat::setPos", 0x001d89c4);
+}
+
+// stub of ROR 0x001d8a8c
+void ACHRstat::setRot(const float *rot)
+{
+    ROSEPAN_STUB("ACHRstat::setRot", 0x001d8a8c);
+}
+
+// stub of ROR 0x00162c2c
+void EmyManager::addEmy(int chrNo, short kind, void *chr, intptr_t seqWord, void *image,
+                const void *pos, u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::addEmy", 0x00162c2c);
+}
+
+// stub of ROR 0x001db71c
+void FCHRstat::getPos(float *out)
+{
+    ROSEPAN_STUB("FCHRstat::getPos", 0x001db71c);
+}
+
+// stub of ROR 0x001db1f0
+void FCHRstat::init(short kind)
+{
+    ROSEPAN_STUB("FCHRstat::init", 0x001db1f0);
+}
+
+// stub of ROR 0x001db7cc
+void FCHRstat::setPos(const float *pos)
+{
+    ROSEPAN_STUB("FCHRstat::setPos", 0x001db7cc);
+}
+
+// stub of ROR 0x001db898
+void FCHRstat::setRot(const float *rot)
+{
+    ROSEPAN_STUB("FCHRstat::setRot", 0x001db898);
+}
+
+// stub of ROR 0x00217f10
+float utlAtan2(float x, float z)
+{
+    ROSEPAN_STUB("utlAtan2", 0x00217f10);
+    return {};
 }

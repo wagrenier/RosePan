@@ -253,3 +253,10 @@ float DogActor::getMotionTime()
     ROSEPAN_STUB("DogActor::getMotionTime", 0x0010d9ec);
     return {};
 }
+
+// stub of ROR 0x0010a650
+float DogActor::getRotY()
+{
+    ROSEPAN_STUB("DogActor::getRotY", 0x0010a650);
+    return {};
+}

@@ -83,6 +83,10 @@ static inline u_int gamOidSlot(u_int oid) { return oid & 0x1ff; }
  * +0x100. layout: host -- EE offsets in the comments. */
 struct ObjStat
 {
+    /* The vptr (ObjStat's), the 8-node pool at +0x40, oid, actor, kind,
+     * a1 into +0x104 and the words +0x110 / +0x114 / +0x130 / +0x140
+     * cleared. The ROM passes a node count (0x40 / 8) it never reads. */
+    ObjStat(int a1, u_int oid, int actor, short kind);                   // ROR 0x001d87f4
     /* MagScene::releaseActor(m_actor) when it has one, m_actor = -1; a
      * type-5 object also drops its GamMan pool 0x20b00 records. */
     void releaseActor();                                                 // ROR 0x001d966c
@@ -113,9 +117,19 @@ struct ObjStat
     // ROR 0x0028f92c
     int  getOID() const { return (int)m_oid; }
 
+    SeqFixedPool<int, 8> m_nodes; // ROR 0x40: free +0x40, used +0x50, max +0x60, nodes +0x80 (role unverified)
     u_int m_oid;                // ROR 0x100
+    int   m_104;                // ROR 0x104: the constructor's a1 (0 from addChr / addVFchr)
     int   m_actor;              // ROR 0x108: the scene actor number, -1 none
+    int   m_110;                // ROR 0x110
+    int   m_secta;              // ROR 0x114: the secta cell, 0 none (setPos searches one)
     u_int m_flags;              // ROR 0x120: 1 hidden, 0x40 off the secta, 0x10000 the PC / dog, 0x200000, 0x10000000
+    short m_kind;               // ROR 0x128: the system data id
+    int   m_130;                // ROR 0x130
+    int   m_140;                // ROR 0x140: addVFchr sets 1
+    int   m_move[12];           // ROR 0x150: [0] the move state (2 after init), [1] its sub state, [4]; init copies the block to +0x220
+    float m_pos[4];             // ROR 0x190
+    float m_rot[4];             // ROR 0x1a0
     int   m_link;               // ROR 0x254: the oid of an object shown with this one, -1 none
 };
 
@@ -123,6 +137,27 @@ struct ObjStat
  * 0x1cc250). layout: host. */
 struct ACHRstat : ObjStat
 {
+    /* Inline in the ROM (addChr): the task ids -1 around the vptr store. */
+    ACHRstat(u_int oid, int actor, short kind) : ObjStat(0, oid, actor, kind)
+    {
+        m_taskId = -1;
+        m_task[0] = -1;
+        m_task[1] = -1;
+        m_task[2] = -1;
+        m_task[3] = -1;
+        m_placeTask = -1;
+    }
+    /* The record of kind (GamSysData::getRec) and the defaults; flags from
+     * the record | 0x200040. */
+    void init(short kind);                                               // ROR 0x001d9908
+    /* The param table +0x288.. of method pointers (the ELF's accessors). */
+    void initParamFuncs();                                               // ROR 0x001d9b2c
+    /* pos (x, y, z) into +0x190 and the actor's trans; a new secta cell. */
+    void setPos(const float *pos);                                       // ROR 0x001d89c4
+    /* The actor's trans (or +0x190) into out[0..2]. */
+    void getPos(float *out);                                             // ROR 0x001d890c
+    /* rot into +0x1a0 and the actor's rotation. */
+    void setRot(const float *rot);                                       // ROR 0x001d8a8c
     /* Pauses (on) / resumes its tasks: +0x3d4, +0x3e0, +0x3d8 and, with
      * all, +0x3dc. */
     void pauseTasks(int on, int all);                                    // ROR 0x001da130
@@ -138,13 +173,23 @@ struct ACHRstat : ObjStat
     void killTasks();                                                    // ROR 0x001da07c
 
     int   m_task[4];            // ROR 0x3d4: task ids, -1 none; [1] the turn task (chrRotStart)
+    int   m_placeTask;          // ROR 0x3e4: startAchrPlaceTask's TskSeqEvent, -1 none
     int   m_taskId;             // ROR 0x3e8: resetObj kills it
+    u_int m_3f4;                // ROR 0x3f4: bit 0 cleared when setObj hides a type-2 achr
     float m_motionSpeed;        // ROR 0x418: setMotionSpeed
 };
 
 /* A field character (vtable 0x2e47f8, EE 0x2c0 bytes). layout: host. */
 struct FCHRstat : ObjStat
 {
+    /* Inline in the ROM (addChr / addVFchr). */
+    FCHRstat(u_int oid, int actor, short kind) : ObjStat(0, oid, actor, kind) {}
+    /* The record of kind (table 5) and the defaults. */
+    void init(short kind);                                               // ROR 0x001db1f0
+    /* ACHRstat's twins: position in / out, rotation in. */
+    void setPos(const float *pos);                                       // ROR 0x001db7cc
+    void getPos(float *out);                                             // ROR 0x001db71c
+    void setRot(const float *rot);                                       // ROR 0x001db898
     /* ObjStat::getRot's twin: the actor's rotation or +0x1a0. */
     void getRot(float *out);                                             // ROR 0x001db774
     /* One of its params by which (0x41 the type-9 number, 0x18 ...). */
@@ -492,6 +537,8 @@ struct GamMan
     void selectItem(short id);                                           // ROR 0x001c8598
     /* The count of item id's slot, 0 when none holds it. */
     int  getItemNum(short id);                                           // ROR 0x001c8508
+    /* m_selItemNum (selectItem's count). */
+    int  getSelItemNum();                                                // ROR 0x001c898c
     int  hasItem(short id, int withStock);                               // ROR 0x001c8a28
     int  getItemCount(short id, int withStock);                          // ROR 0x001c8ae8
     /* 1 when an item slot is free. */
@@ -533,6 +580,11 @@ struct GamMan
      * returns the scene model number, -1 when oid exists. */
     int  createObjByModel(int model, u_int oid, int kind, const void *pos,
                           int place, int add);                           // ROR 0x001ca8e8
+    /* The archive of model group no (kind >> 10): data/ch/<group>/....RPK,
+     * NULL for 7 and past 21. */
+    const char *getChrRpk(u_int no);                                     // ROR 0x001ca604
+    /* The actor's light id by the object type: 1 for 0..3 / 5, 0 for 4 / 9. */
+    void setObjLight(int actor, u_int oid);                              // ROR 0x001ca598
     /* Swaps a live oid's model for model (or file name), keepPos keeps its
      * position; returns oid, 0 for no object or no change. */
     u_int changeObjModel(u_int model, const char *name, u_int oid, int keepPos); // ROR 0x001cad88
@@ -548,6 +600,11 @@ struct GamMan
     /* The PC's ACHRstat::setParam(which, data), when there is a PC. */
     void setPcParam(int which, const void *data);                        // ROR 0x001cb4f0
     void ctlObj1cb8e4(u_int oid, int a, int b);                          // ROR 0x001cb8e4
+    /* Kind 0x32: an Obj176a3c effect 0x32 at pos (radius 50) bound to oid. */
+    void addObjMarker(u_int oid, int kind, const float *pos);            // ROR 0x001cb970
+    /* A type-2 achr placed (placeAchr) and, in move state 2 without one, a
+     * TskSeqEvent {60, radius} on its m_placeTask. */
+    void startAchrPlaceTask(float radius, ACHRstat *chr, int keep);      // ROR 0x001d0efc
     /* A +0x20b00 record {oid, no}: the scene +0x837e0 entry no belongs to oid. */
     void addObjFx(u_int oid, int no);                                    // ROR 0x001cba0c
     /* The scene +0x837e0 entry of oid's first +0x20b00 record, -1 none. */
@@ -572,6 +629,9 @@ struct GamMan
     void clearVFchrSlot(u_int oid);                                      // ROR 0x001cc004
     /* Adds a vfchr object (an FCHRstat in the vfchr list) unless oid is one. */
     void addVFchr(int model, u_int oid, int arg, int kind, intptr_t pos); // ROR 0x001cc044
+    /* The first free of the 0x180 vfchr slots takes oid; its FCHRstat
+     * storage in m_1f248, NULL when all are taken. */
+    FCHRstat *allocVFchr(u_int oid);                                     // ROR 0x001cbfb0
     /* Loads model (MagSystem::loadModel) for vfchr oid: its params 3 (the
      * actor) and 0x1000, position pos, motion 1, the avfchr list; model
      * 0x800 gets a 1e-7 scale. */
@@ -759,6 +819,8 @@ struct GamMan
     void setVolume(int volume);                                          // ROR 0x001d3a38
     /* Returns 1; nothing else in the US build. */
     int  resetExtra();                                                   // ROR 0x001d84a8
+    /* Empty (an inline in the ELF; nothing calls it). */
+    void rmSnd() {}                                                      // ROR 0x0028eb60
 
     /* An {a, b} pair the system calls 0x32..0x35 set (in the ROM b, the
      * script's a2, comes first): the ELF's regist_call_back_ehon / _menu /

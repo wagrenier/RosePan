@@ -110,7 +110,7 @@ struct MagSystem
     int  getPCWordE4();                                                  // ROR 0x00118fdc
     int  getPCStateClass();                                              // ROR 0x00118fec
     int  getBwnState();                                                  // ROR 0x00119090
-    void loadModel(int id, int chapter);                                 // ROR 0x00119138
+    int  loadModel(int id, int chapter);                                 // ROR 0x00119138
     void loadModelByName(const char *name, int arg, int chapter);        // ROR 0x001191e0
     void setActorTrans(int no, float x, float y, float z);               // ROR 0x00119234
     void setActorRotate(int no, float x, float y, float z);              // ROR 0x001192c8

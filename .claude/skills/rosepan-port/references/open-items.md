@@ -229,6 +229,22 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      written ahead. The boot smoke run stops at NowLoading, so nothing reaches 252 yet. The sound side
      it drives is game/gamsnd.cpp (funcSE 0x1e5e58 / funcStr 0x1e5660 / playSE / playStr are the core),
      a TU of its own once the stage-2 start runs.
+  10h. PARTIAL 2026-10-26 (`game/gamman.cpp` session 4): object creation written -- addChr,
+     addVFchr (+ allocVFchr), createObjByModel, createObjByName (+ getChrRpk, setObjLight), setObj,
+     setObjParam, setObjPos / getObjPos / getObjRot / getObjRotY / setObjDir / getObjDirTo,
+     startAchrPlaceTask, ctlObj1cb8e4 / addObjMarker, openMsg, showMsgSprite, setSysParam;
+     ObjStat::ObjStat 0x1d87f4 written ahead in lib/unassigned_stubs.cpp (members ObjStat
+     +0x40..+0x1a0, ACHRstat +0x3e4 / +0x3f4). A New Game run (pad 1800:START,2400:START,2700:CROSS,
+     --run 140) now creates the PC object and **crashes in MagScene::loadModel**: MagCharaLoader::
+     getIndex / load (0x142c88 / 0x142b18) are stubs, load returns NULL, MagScene::loadActor parses
+     it (asserts p, thePtr, m_top, then an access violation). **Queued first: `mag/magloader.cpp`**
+     (pinned 0x141e44..0x14313c: MagLoaderIndex, MagCharaLoader init / load / getIndex / getId,
+     MagMapLoader init / loadByName), then **`unassigned@001d859c`** (ObjStat / ACHRstat / FCHRstat
+     init / setPos / getPos / setRot and GamSysData set / getRec / getField 0x1dbef8.. -- every
+     object's state and every system-data model id come from there; seqcall's model buffers start at
+     0xffff until getField is written). Still in gamman: loadMapUnit 0x1ca0dc with 0x1c9e20 /
+     0x1ca38c, loadChapterSe 0x1c2848, 0x1c4610, the stage-2 start (initStage2 / startStage2 /
+     resetStage / releaseObjs / clearPool20b00).
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

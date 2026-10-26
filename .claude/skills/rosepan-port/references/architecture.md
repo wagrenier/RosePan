@@ -846,6 +846,28 @@ never asserts): sessions name them (`tus.py define --why`).
 | 0x269fe0.. | libdbc (`sceDbcInit` / `sceDbcEnd`) and libpad2 (`scePad2Init` 0x26b1d8 / `scePad2End`) between libipu and libpad: named by reading; `sceMcEnd` is 0x24d448 (libmatch had sceMcChangeThreadPriority) | strings; main |
 | 0x100248 | `_exit`: crt0's `j Exit` thunk; `Exit` is 0x267b98 | FF2 symbols at the same addresses |
 
+## Game objects (GamMan, game/gamman.cpp, 2026-10-26)
+
+- An object is an oid (list bits 28..29: 0 vfchr, 1 achr, 2 fchr; type bits 23..27; slot 0..8) and an
+  ObjStat-derived record: `ACHRstat` (EE 0x480, vtable 0x2e4810, `m_achr[slot]` +0x21340 and the achr
+  list +0x1d340), `FCHRstat` (EE 0x2c0, vtable 0x2e47f8, `m_fchr[slot]` +0x21540 and the fchr list
+  +0x1d980) or a vfchr: an FCHRstat built in place in the 0x180-slot storage +0x1f248 (slot oids
+  +0x1f24c), on the vfchr list +0x1dcc0 and, when its room (param 8) is the loaded one, the avfchr list
+  +0x1ef00. vfchr records are never deleted.
+- Construction: `ObjStat::ObjStat(a1, oid, actor, kind)` 0x1d87f4 (8-node pool +0x40, oid +0x100,
+  actor +0x108, kind +0x128), the class's inline constructor (achr: task ids +0x3d4..+0x3e8 = -1), then
+  `ACHRstat::init` 0x1d9908 + `initParamFuncs` 0x1d9b2c or `FCHRstat::init` 0x1db1f0 (system data record
+  by kind), `setPos` 0x1d89c4 / 0x1db7cc. Type-2 achr objects (enemies) also get
+  `EmyManager::addEmy` 0x162c2c with the chr no from system data field 0x72.
+- Models: `createObjByModel` 0x1ca8e8 (`MagSystem::loadModel`, which returns the actor number) and
+  `createObjByName` 0x1ca72c (`MagScene::loadModelByName` from the archive of group kind >> 10:
+  table 0x2fbed0 -> data/ch/action/ACTION.RPK, target/TRG, fix/FIX, item/ITEM, inst/INST,
+  enemy/ENEMY, door/DOOR, (7 none), pc/PC, bwn/BWN, 01/CHAP01 .. 12/CHAP12.RPK). Model 0x800 and the
+  model named "target" get scale 9.9999994e-8 (hidden markers). Light id: 1 for types 0..3 / 5, 0 for
+  4 / 9 (`setObjLight` 0x1ca598).
+- Markers: `ctlObj1cb8e4` 0x1cb8e4 -> `addObjMarker` 0x1cb970: an Obj176a3c effect 0x32 {x, y, z, 50}
+  bound to the oid in the pool +0x20b00 (released by ctlObj1cbb80).
+
 ## Disc and data files
 
 Paths the ELF names (the disc dump has not been looked at yet: `ROSEPAN_DATA`):

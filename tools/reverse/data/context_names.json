@@ -3095,6 +3095,12 @@
   "was": "FUN_00162afc",
   "why": "word +0x24 of slot no of the 8 0x3c-byte slots at +0x148 (init clears 0x1e0 bytes there); native 212 case 30 (case 24 stores the slot's +0xc inline)"
  },
+ "00162c2c": {
+  "name": "EmyManager::addEmy",
+  "tag": "ror-inferred",
+  "was": "FUN_00162c2c",
+  "why": "this = 0x7b2140 (EmyManager); forwards to 0x162c88; addChr calls it for type-2 achr objects with the chr no from GamSysData field 0x72, the kind, the ACHRstat, GamMan +0x22364, an image slot, the position and the oid"
+ },
  "001634d4": {
   "name": "EmyManager::releaseObj",
   "tag": "ror-inferred",
@@ -6893,6 +6899,12 @@
   "was": "FUN_001c8598",
   "why": "+0x1d204 = the slot holding the id, +0x1d200 = its count"
  },
+ "001c898c": {
+  "name": "GamMan::getSelItemNum",
+  "tag": "ror-inferred",
+  "was": "FUN_001c898c",
+  "why": "returns +0x1d200 (m_selItemNum, set by selectItem)"
+ },
  "001c8a28": {
   "name": "GamMan::hasItem",
   "tag": "ror-inferred",
@@ -6977,6 +6989,18 @@
   "was": "FUN_001ca0dc",
   "why": "reads data/bg/mapunit.bin, finds name (cut at a separator) in its pfh, loads that file into a heap block kept as m_keepBuf; skips when a loaded unit has the id; native 027 cases 12 / 13 pass mode 2 / 3"
  },
+ "001ca598": {
+  "name": "GamMan::setObjLight",
+  "tag": "ror-inferred",
+  "was": "FUN_001ca598",
+  "why": "MagSystem::setActorLightID(actor, 1) for object types 0..3 and 5, 0 for types 4 and 9; after every model load"
+ },
+ "001ca604": {
+  "name": "GamMan::getChrRpk",
+  "tag": "ror-inferred",
+  "was": "FUN_001ca604",
+  "why": "jump table 0x2fbed0 of 22: kind >> 10 to data/ch/action/ACTION.RPK .. data/ch/12/CHAP12.RPK (7 none); the rpk passed to MagScene::loadModelByName"
+ },
  "001ca72c": {
   "name": "GamMan::createObjByName",
   "tag": "ror-inferred",
@@ -7049,6 +7073,12 @@
   "was": "FUN_001cb8e4",
   "why": "resetObj calls it (oid, 0x32, 0) for an active type-5 fchr; role not read yet"
  },
+ "001cb970": {
+  "name": "GamMan::addObjMarker",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb970",
+  "why": "kind 0x32 only: Obj176a3c::createEff({0x32, pos x, y, z, 50.0}) and addObjFx(oid, entry); ctlObj1cb8e4's worker"
+ },
  "001cba0c": {
   "name": "GamMan::addObjFx",
   "tag": "ror-inferred",
@@ -7090,6 +7120,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001cbe38",
   "why": "isObj then +0x108 of the object the inline find returns, -1 none"
+ },
+ "001cbfb0": {
+  "name": "GamMan::allocVFchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001cbfb0",
+  "why": "first zero word of +0x1f24c (0x180 vfchr slots) takes oid, returns +0x1f248 + i * 0x2c0 (the FCHRstat storage), 0 when full; addVFchr's only callee for storage"
  },
  "001cc004": {
   "name": "GamMan::clearVFchrSlot",
@@ -7306,6 +7342,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d0c64",
   "why": "like addObjColliBox from four given corners (x, z pairs) with height [8] / [9]: four walls, param 0x1003, the position, param 0x18; native 151 case 0x39"
+ },
+ "001d0efc": {
+  "name": "GamMan::startAchrPlaceTask",
+  "tag": "ror-inferred",
+  "was": "FUN_001d0efc",
+  "why": "placeAchr(oid), then for an achr in move state 2 without a task on +0x3e4: state word +0x154 = 4 and a TskSeqEvent(oid, 0, {0x3c, radius}) on +0x3e4; setObj 0x40 / setObjParam 0x18 call it for type-2 objects"
  },
  "001d10d0": {
   "name": "GamMan::setObj",
@@ -7559,11 +7601,35 @@
   "was": "FUN_001d84a8",
   "why": "returns 1 and does nothing in the US build; initGameState's last call"
  },
+ "001d87f4": {
+  "name": "ObjStat::ObjStat",
+  "tag": "ror-inferred",
+  "was": "FUN_001d87f4",
+  "why": "stores vtable 0x2e4828 (ObjStat) at +0x258, builds an 8-node pool at +0x40, oid +0x100, actor +0x108, kind +0x128; GamMan::addChr / addVFchr call it right after operator_new before the ACHRstat / FCHRstat vtable store"
+ },
+ "001d890c": {
+  "name": "ACHRstat::getPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001d890c",
+  "why": "the scene actor's trans or +0x190 into out; GamMan::getObjPos's achr branch"
+ },
  "001d8964": {
   "name": "ObjStat::getRot",
   "tag": "ror-inferred",
   "was": "FUN_001d8964",
   "why": "ObjStat::get_o_rot forwards to it: the actor's rotation from the scene table 0x6fe6f0 (stride 0x4d0) or +0x1a0"
+ },
+ "001d89c4": {
+  "name": "ACHRstat::setPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001d89c4",
+  "why": "pos into +0x190 and the scene actor's trans (+0x40, dirty +0x90), then a new secta cell; GamMan::setObjPos's achr branch"
+ },
+ "001d8a8c": {
+  "name": "ACHRstat::setRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001d8a8c",
+  "why": "rot into +0x1a0 and MagSystem::setActorRotate; GamMan::setObjDir's achr branch"
  },
  "001d8dc4": {
   "name": "ObjStat::syncActorPos",
@@ -7606,6 +7672,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001d9830",
   "why": "copies 0xb0 bytes to +0x100 (the inverse of ObjStat::save) and clears +0x10c..+0x114; returns 0xb0"
+ },
+ "001d9908": {
+  "name": "ACHRstat::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001d9908",
+  "why": "addChr's achr setup after construction: GamSysData::getRec(kind) into +0x424 / +0x400, flags +0x120 from the record +0x90 | 0x200040, the motion speed 1.0 +0x418"
+ },
+ "001d9b2c": {
+  "name": "ACHRstat::initParamFuncs",
+  "tag": "ror-inferred",
+  "was": "FUN_001d9b2c",
+  "why": "clears +0x280 for 0x109 bytes and fills method pointers 0x28f874.. (the ELF's inline accessors) into the param table +0x288..; addChr calls it after ACHRstat::init"
  },
  "001d9f10": {
   "name": "ObjStat::clearSecta",
@@ -7655,6 +7733,12 @@
   "was": "FUN_001db1b8",
   "why": "stores the speed at +0x418 (past FCHRstat's 0x2c0, so the achr) and MagScene::setActorMotionSpeed(speed, m_actor); native 106 case 2 calls it on getAchr"
  },
+ "001db1f0": {
+  "name": "FCHRstat::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001db1f0",
+  "why": "addChr / addVFchr's fchr setup: kind table 5 reads GamSysData::getRec into +0x280 / +0x288, flags from the record +0xb0; table 9 sets -1 words"
+ },
  "001db31c": {
   "name": "FCHRstat::getParam",
   "tag": "ror-inferred",
@@ -7667,11 +7751,29 @@
   "was": "FUN_001db520",
   "why": "getParam's counterpart (0x1db31c): stores *data into the field by which (0x34 +0x294, 0x21 +0x290, 0x1000 the model ...); addVFchr / setObjParam / readSaveData / seqFunc155 pass vfchr objects"
  },
+ "001db71c": {
+  "name": "FCHRstat::getPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001db71c",
+  "why": "ACHRstat::getPos's fchr twin; getObjPos's vfchr / fchr branches"
+ },
  "001db774": {
   "name": "FCHRstat::getRot",
   "tag": "ror-inferred",
   "was": "FUN_001db774",
   "why": "twin of ObjStat::getRot: the actor rotation (+0x50 of the actor) or +0x1a0"
+ },
+ "001db7cc": {
+  "name": "FCHRstat::setPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001db7cc",
+  "why": "ACHRstat::setPos's fchr twin (secta search even without an actor); setObjPos's vfchr / fchr branches"
+ },
+ "001db898": {
+  "name": "FCHRstat::setRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001db898",
+  "why": "ACHRstat::setRot's fchr twin; setObjDir's vfchr / fchr branches"
  },
  "001dba3c": {
   "name": "gamWrdConvPos",
@@ -8152,6 +8254,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001f438c",
   "why": "the constructor of class TskMovie (rtti, vtable 0x2e4c50), 0x80 bytes: sound 0x1d, SndMan::stopAll(8), name copied to +0x10 (0x40 chars), message sprite fade out, +8 = 100, S2dMovie::playMovie(name); native 253 case 1"
+ },
+ "001f47f0": {
+  "name": "TskSeqEvent::TskSeqEvent",
+  "tag": "ror-inferred",
+  "was": "FUN_001f47f0",
+  "why": "stores vtable 0x2e4c90 (TskSeqEvent per rtti.py), oid's achr at +0x1c, two words from the parameter block"
+ },
+ "001f4a24": {
+  "name": "TskMsgMan::TskMsgMan",
+  "tag": "ror-inferred",
+  "was": "FUN_001f4a24",
+  "why": "stores vtable 0x2e4c10 (TskMsgMan per rtti.py), two MsgMan objects at +0x224, copies the text after #C, opens a MagScene window; GamMan::openMsg news 0x9c0 bytes for it"
  },
  "001f5244": {
   "name": "TskAttach::TskAttach",
@@ -9646,6 +9760,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00215bb4",
   "why": "formats four floats (3 digits) into stack buffers and prints nothing, the four-float twin of dbgTraceVector3 0x215b5c"
+ },
+ "00217f10": {
+  "name": "utlAtan2",
+  "tag": "ror-inferred",
+  "was": "FUN_00217f10",
+  "why": "angle of (x, z): acos(x / len) signed by z, rotated by pi/2 and wrapped into -pi..pi; 0 for a zero vector; getObjDirTo's heading"
  },
  "00218470": {
   "name": "rorDebugPrintf",
