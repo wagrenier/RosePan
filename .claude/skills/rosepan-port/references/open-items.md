@@ -141,6 +141,16 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      start / stop and its live; likely mag/maglifefader.cpp, before mag/maglifefadekey.cpp), then
      the Punchline / Shirogumi logos (sprites 5 ..), CP_LOGO.PSS (RxMpeg, item 10). MsgMan is
      still a stub: the check's windows are empty (a PC card with no save answers without prompts).
+  9d. DONE 2026-10-25 (`done`): `mag/maglifefader.cpp` (pinned 0x12f008..0x12f298; 0x12f298..
+     0x12fca8 pinned as mag/maglifefadekey.cpp) -- MagLifeFader's constructor, start, stop, live,
+     render. The logo now fades in and out over 7 frames as it should, then the Atlus disclaimer
+     (MNUTITLE_00000800) fades in and out. It needed a native-module fix: SprMan::drawFrameCopy
+     (S2dMovie's layers 900 / 1000, every frame) writes TEX0 directly and rosepan_i3d replayed it
+     with the last bound texture -- the logo again, over the fader (also the "ti_06 sheet at the top
+     left" of item 9). Such primitives are now skipped (hazards.md). Next (queued first):
+     **`unassigned@001810f4`** -- RxMpeg::open 0x181150 / play 0x18154c / isEnd 0x18176c: execLogo
+     step 8 plays CP_LOGO.PSS and waits for isEnd. A host stand-in that reports the end unblocks the
+     Punchline / Shirogumi logos and the title.
   10. `snd/rxmpeg.cpp`, `unassigned@001810f4` -- RxMpeg: the title code calls it 13 times (background
      movie; the logo movie may come first in the W099 script). If the script waits on a movie, a
      host stand-in that reports "ended" unblocks the title before real MPEG playback.
@@ -593,6 +603,18 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- MagLifeFadeKey vs MagLifeFadeKeyHole (2026-10-25, found in the mag/maglifefader.cpp session): the
+  scene's +0x41890 object is built by 0x12f298, which stores `_vt$18MagLifeFadeKeyHole` 0x2e1cf8
+  (rtti.py: MagLifeFadeKeyHole : MagLife, slots 2 0x12f84c, 6 0x12f95c). The code names its
+  methods `MagLifeFadeKey::*` (ror-inferred, from the file name). Unless the file holds a second
+  class, the session that writes mag/maglifefadekey.cpp should rename the class (and its methods) to
+  MagLifeFadeKeyHole, the ELF's own name. Not changed yet.
+- Host frame-buffer copies (2026-10-25): rosepan_i3d now skips textured primitives with a direct
+  TEX0 (SprMan::drawFrameCopy, SPR_TEX_FRAME sprites). drawFrameCopy puts the other frame buffer
+  over the screen at alpha 0x80 every frame on S2dMovie's layer 1 -- on the PS2 a one-frame-late
+  copy, presumably for the movie / blur effects. If a screen later looks wrong where the ROM shows a
+  copy of the previous frame, the module needs to keep the last presented frame as a texture.
 
 - McdMan (mcd/mcdman.cpp, 2026-10-25): (1) cmdCreateSave skips the main file when it is already
   there (sub 200) and then writes any missing dtNN file from m_data, which only the main-file step

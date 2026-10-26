@@ -370,22 +370,6 @@ struct MagFadeParam
 static_assert(offsetof(MagFadeParam, m_level) == 0x14, "m_level");
 static_assert(sizeof(MagFadeParam) == 0x18, "MagFadeParam is 0x18 bytes on the EE");
 
-/* The screen fader (scene +0x41850, constructor 0x12f008, vtable 0x2e1ca8;
- * class name from rtti.py). layout: host -- a MagLife. */
-struct MagLifeFader : MagLife
-{
-    /* State m_mode, time m_time. */
-    void start(const MagFadeParam *p);                                   // ROR 0x0012f060
-    /* State 4, word 1 -1. */
-    void stop();                                                         // ROR 0x0012f080
-
-    u_char _28[0x30 - 0x28];
-    int    m_30;                // ROR 0x30: MagScene::getFaderWord30; role unknown
-    int    _34;
-    int    m_color;             // ROR 0x38: 0 for fade kind 0, 0xff for kind 4
-};
-static_assert(offsetof(MagLifeFader, m_30) >= 0x30, "m_30");
-static_assert(offsetof(MagLifeFader, m_color) >= 0x38, "m_color");
 /* The keyhole fade (scene +0x41890, mag/maglifefadekey.cpp: the
  * kagiana_tcc texture of data/evntex/EVNTEX.RPK). layout: host -- a
  * MagLife. */

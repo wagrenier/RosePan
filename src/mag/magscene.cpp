@@ -175,12 +175,12 @@ int MagScene::getFadeState()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// The fader's word +0x30 (role unknown).
+// The fader's frame counter (+0x30: frames since start, up to its time).
 // ROR 0x00131608
 
 int MagScene::getFaderWord30()
 {
-    return m_fader.m_30;
+    return m_fader.m_frame;
 }
 
 // ──────────────────────────────────────────────────────────────────────
