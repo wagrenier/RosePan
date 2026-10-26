@@ -1,6 +1,5 @@
 {
  "queue": [
-  "bed/bedpad.cpp",
   "unassigned@001a6830",
   "sequence/seqcall.cpp",
   "unassigned@0020ff34",
@@ -14,7 +13,7 @@
    "00215a30"
   ],
   "slice_bytes": 10240,
-  "smoke_pad": ""
+  "smoke_pad": "1800:START,2400:START"
  },
  "tus": {
   "bed/bedmemory.cpp": {
@@ -34,6 +33,24 @@
    ],
    "status": "verify",
    "why": "12 of 16 functions reference bed/bedmemory.cpp; 0x100320 and 0x101718 are unanchored neighbours, bed/bedsubmode.cpp below and bed/bedpfh.cpp above"
+  },
+  "bed/bedpad.cpp": {
+   "notes": "Visual test passed: the screenshot is the main menu (New Game / Load Game / Option over the title art), reached with smoke_pad 1800:START,2400:START (now in settings), which needs about a 75 s run (tus.py check TU --run 75); 15 s runs end on the Atlus disclaimer. A temporary trace confirmed Cross = 0x4000, Start = 0x0008, left stick left = direction 0x80, Up = 0x10. Next: a New Game press (Cross with the cursor on New Game, e.g. append 2700:CROSS) and queue the stubs it reaches. Seen once, not reproduced: a run pressing Start every 120 reads showed Now Loading early and failed to open data/options.txt every frame (open-items 10b). Names: scePad2CreateSocket / DeleteSocket / Read / GetState, sceVibSetActParam (lib-context); BedPad::getRightX/Y, getLeftX/Y, getDir, getDirChange, calcDirChange, updateDir (ror-inferred). For the references: architecture.md has a new section The pad, open-items 7 and 10b, hazards pad-script timing (all written in this commit).",
+   "ranges": [
+    [
+     "00101aec",
+     "00102490"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-25 22:50",
+     "status": "done",
+     "summary": "BedPad written whole (13 functions, pinned 0x101aec..0x102490): init / term / destructor over libpad2 sockets, update (held / triggered / repeated buttons, sticks), updateDir (d-pad or left stick to direction bits, vector, quadrant), calcDirChange, the stick and direction accessors, setVibration over libvib. Host libpad2 sockets and sceVibSetActParam backed by the libpad shim, so the scripted pad reaches the game. Real BedPad field names replace m_70 / m_78 / m_7a / m_7c / m_40.. in magscene, magsystem, maglifemenu, mnutitle, mnumcd, seqcall. The title menu is now on screen through real input: Start skips MV00_AD, Press START button shows, a second Start opens New Game / Load Game / Option."
+    }
+   ],
+   "status": "done",
+   "why": "BedPad methods 0x101aec..0x101e64 (ror-symbol names, bed/bedpad.cpp asserts) plus the eight helpers 0x101e64..0x102490 that read and write only BedPad fields (stick bytes 0x7e..0x81, direction 0x40..0x74) and are called by BedPad::update; 0x102490 calls GamSysData::getField (utl/utlgame.cpp side)"
   },
   "bed/bedpfh.cpp": {
    "notes": "Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the assert), and getFileName returns NULL without names. Not visible yet: the smoke run is black and no SprTexture / MagScene pack load reaches a real buffer, because fileGetSize 0x1be768 is still a stub returning 0 and FileReader::read 0x1be524 / 0x1be564 too. Write those next (see open-items Next up B.5); the first screenshot showing a texture loaded from a pack marks this done.",

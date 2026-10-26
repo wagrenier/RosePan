@@ -478,7 +478,7 @@ int MagLifeMenuBoard3D::processPad(BedPad *pad)
         return 1;
     if (m_step == 2)
     {
-        if (pad->m_7c >> 13 & 1)
+        if (pad->m_repeat >> 13 & 1)
         {
             m_step = 3;
             m_wait = -1;

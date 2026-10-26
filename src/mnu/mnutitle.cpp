@@ -637,7 +637,7 @@ int MnuTitle::execLogo(BedPad *pad)
             sprite(8).m_state = 1;
             t = 0x28;
         } else {
-            if ((pad->m_7a >> 3 & 1) == 0)
+            if ((pad->m_trig >> 3 & 1) == 0)
                 return 0;
             g_sndMan.fadeOut(0x14);
             m_step = 0x15;
@@ -676,7 +676,7 @@ int MnuTitle::execLogo(BedPad *pad)
             scene.fadeOut(7, 7, 0);
             return 0;
         }
-        if ((pad->m_7a >> 3 & 1) != 0) {
+        if ((pad->m_trig >> 3 & 1) != 0) {
             m_step = 0x1c;
             sprite(8).m_color[0] = 0x80;
             sprite(8).m_color[1] = 0x80;
@@ -753,12 +753,12 @@ int MnuTitle::execMain(BedPad *pad)
             break;
         }
         old = m_cursor[0];
-        if ((pad->m_70 & 0x10) != 0 && old > 0) {
+        if ((pad->m_dir_repeat & 0x10) != 0 && old > 0) {
             m_cursor[0] = old - 1;
             flags = 1;
             g_sndMan.playSe(1);
         }
-        if ((pad->m_70 & 0x40) != 0 && m_cursor[0] < m_cursor_num[0] - 1) {
+        if ((pad->m_dir_repeat & 0x40) != 0 && m_cursor[0] < m_cursor_num[0] - 1) {
             m_cursor[0]++;
             flags = 1;
             g_sndMan.playSe(1);
@@ -767,7 +767,7 @@ int MnuTitle::execMain(BedPad *pad)
             m_result = 1;
             m_step = 0x1c;
         }
-        if ((pad->m_7a >> 14 & 1) == 0)
+        if ((pad->m_trig >> 14 & 1) == 0)
             break;
         flags |= 2;
         switch (m_cursor[0]) {
@@ -879,12 +879,12 @@ int MnuTitle::execSelect(BedPad *pad)
         break;
     case 0xf:
         old = m_cursor[8];
-        if ((pad->m_70 & 0x10) != 0 && old > 0) {
+        if ((pad->m_dir_repeat & 0x10) != 0 && old > 0) {
             m_cursor[8] = old - 1;
             flags = 1;
             g_sndMan.playSe(1);
         }
-        if ((pad->m_70 & 0x40) != 0 && m_cursor[8] < m_cursor_num[8] - 1) {
+        if ((pad->m_dir_repeat & 0x40) != 0 && m_cursor[8] < m_cursor_num[8] - 1) {
             m_cursor[8]++;
             flags = 1;
             g_sndMan.playSe(1);
@@ -893,14 +893,14 @@ int MnuTitle::execSelect(BedPad *pad)
             m_result = 1;
             m_step = 0x1c;
         }
-        if ((pad->m_7a >> 14 & 1) != 0) {
+        if ((pad->m_trig >> 14 & 1) != 0) {
             flags |= 2;
             v[0] = m_cursor[8] == 0 ? 0 : m_cursor[8] == 2 ? 2 : 1;
             g_gamMan.setSysParam(0x1c, v);
             m_step = 0x1c;
             g_sndMan.playSe(4);
         }
-        if ((pad->m_7a >> 13 & 1) != 0) {
+        if ((pad->m_trig >> 13 & 1) != 0) {
             m_step = 0x1e;
             flags |= 2;
             g_sndMan.playSe(2);
@@ -989,17 +989,17 @@ int MnuTitle::execMovieTest(BedPad *pad)
         m_step = 0xf;
         break;
     case 0xf:
-        if ((pad->m_7c >> 11 & 1) != 0 && movie.getMovieStatus() == -1) {
+        if ((pad->m_repeat >> 11 & 1) != 0 && movie.getMovieStatus() == -1) {
             movie.playMovie("test000.pss");
             MagSystem::m_v_interval = 1;
         }
-        if ((pad->m_7c >> 9 & 1) != 0 && movie.getMovieStatus() == 0)
+        if ((pad->m_repeat >> 9 & 1) != 0 && movie.getMovieStatus() == 0)
             movie.stopMovie();
         if (movie.getMovieStatus() == 1) {
             movie.closeMovie();
             MagSystem::m_v_interval = 2;
         }
-        if ((pad->m_7a >> 3 & 1) != 0) {
+        if ((pad->m_trig >> 3 & 1) != 0) {
             m_step = 0x1c;
             m_spr.setAnim(8, 2);
             g_sndMan.playSe(4);
@@ -1134,7 +1134,7 @@ int MnuTitle::execMovie(BedPad *pad)
                 break;
             }
         }
-        if ((pad->m_7a >> 13 & 1) == 0)
+        if ((pad->m_trig >> 13 & 1) == 0)
             return 0;
         m_list.endSelect();
         m_list.processPad(pad);
@@ -1158,7 +1158,7 @@ int MnuTitle::execMovie(BedPad *pad)
             MagSystem::m_v_interval = 2;
             m_step = 1;
         }
-        if ((pad->m_7a >> 13 & 1) == 0)
+        if ((pad->m_trig >> 13 & 1) == 0)
             return 0;
         movie.closeMovie();
         if (mnuTitleMoviePage[page].m_size[sel][0] > 0x27f)

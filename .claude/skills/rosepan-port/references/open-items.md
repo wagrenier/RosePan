@@ -106,8 +106,8 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
   5. `unassigned@001fd424` -- sysInitManagers 0x204148, SysTimer::start / update (reached stubs).
   6. `unassigned@001e46b8` -- CmnTaskMan::exec / addTask and 0x1f688c that GamMan::update calls (the
      per-frame task runner; 253 functions: only what the title path reaches).
-  7. `bed/bedpad.cpp` -- BedPad::init / update: the menu needs pad input to "work"; extend
-     `settings.smoke_pad` to press through the title once it shows.
+  7. DONE 2026-10-25 (`done`, see 10b): `bed/bedpad.cpp` -- BedPad::init / update: the menu needs pad
+     input to "work"; `settings.smoke_pad` now presses through the title.
   8. DONE 2026-10-25 (`verify`, see 4e): `mag/maglifemenu.cpp` -- MagLifeMenuTitle's wrappers and the MagLifeMenuBase methods.
   9. DONE 2026-10-25 (`verify`, now `mnu/mnutitle.cpp` 0x1a90ec..0x1ab474; the rest of
      unassigned@001a6830 -- MnuOpt, MnuBoard2D, MnuMovie, MnuNow, MnuItem -- is still unassigned): `unassigned@001a6830` -- the title screen itself (init / pad / draw at 0x1a91f4.., mnuboard.rpk).
@@ -163,6 +163,19 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      blocker: `bed/bedpad.cpp` (queued first)** -- execLogo leaves MV00_AD on a Start press (BedPad
      m_7a bit 3) or after its five minutes; BedPad::update is a stub, so the title ("press start",
      then the main menu) waits for the film's end; then `settings.smoke_pad` presses Start.
+  10b. DONE 2026-10-25 (`done`): `bed/bedpad.cpp` (pinned 0x101aec..0x102490: BedPad and its stick /
+     direction helpers) over a host libpad2 + libvib (sockets backed by libpad's shim, so
+     ROSEPAN_AUTOPAD reaches it). **The title menu is on screen through real input**: Start during
+     MV00_AD skips it, "Press START button" shows, a second Start opens New Game / Load Game / Option
+     (progress/ of this commit; matches the forced-flag picture of item 9 minus its stray text
+     sheet). `settings.smoke_pad` = 1800:START,2400:START (pad *reads*, one per BedPad::update on
+     port 0) needs a ~75 s run (`tus.py check <TU> --run 75`); a 15 s run ends on the disclaimer.
+     Next: **a New Game press** (Cross, m_trig bit 14, with the cursor on New Game: append e.g.
+     2700:CROSS to smoke_pad) and queue the stubs it reaches, in order. Seen once, not reproduced:
+     a run pressing Start every 120 reads from read 240 showed "Now Loading" from frame 180 on and
+     failed to open data/options.txt every frame (rxfile) -- the New Game load path, or a boot that
+     raced; if a New Game press ends there, MagScene2's options.txt read (mag/magscene2.cpp) and
+     the stage load are the first suspects.
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

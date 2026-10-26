@@ -210,6 +210,29 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   block leaves next->m_prev at h, splitTail applies alignBlock's shift twice (-1 included). The host
   mends the first two (`// PC:`), keeps the third.
 
+## The pad (`bed/bedpad.cpp`, 0x101aec..0x102490, 2026-10-25)
+
+- `BedPad` (0x90, no vtable) is one libpad2 socket: `init(port)` opens it on the static DMA buffer
+  `zDmaBuf` 0x308280 (0x100 per port; scePad2SocketParam option 2, port, slot 0), `term` deletes it,
+  the destructor terms an inited pad. `update` 0x101ccc (MagSystem, twice per frame path) reads only on
+  `scePad2GetState == 1`, straight into the object (+0x00 buttons active-low, +0x02..+0x05 right X / Y,
+  left X / Y), and builds the views: +0x78 `m_hold`, +0x7a `m_trig` (pressed this frame), +0x7c
+  `m_repeat` (trig, plus `m_hold` every `m_repeat_interval` +0x38 frames once held `m_repeat_wait`
+  +0x34 frames; MagSystem sets 15 / 10), +0x28 last hold, +0x2c hold count, +0x30 frame count, +0x7e
+  the stick bytes (0x80 when disconnected). Bits are the report's: 0x1 select, 0x8 start, 0x10 up,
+  0x20 right, 0x40 down, 0x80 left, 0x2000 circle, 0x4000 cross.
+- `updateDir` 0x102188: d-pad, else left stick past 0.7 (dead zone 0x60..0xa0, scale 96 / 95) -> a
+  second view in d-pad bits, +0x68 held / +0x6c trig / +0x70 `m_dir_repeat` (menu cursors: MnuTitle,
+  MnuMcd), vector +0x4c / +0x50 (y negative up), length +0x54, quadrant +0x60 and a wiggle counter
+  +0x64 (quadrant changes < 15 frames apart). `calcDirChange` (+0x58) compares with the latched
+  direction +0x40..+0x48 (MagSystem::setPC clears it); update latches when it is >= 0.001.
+- Accessors other modules call: `getRightX/Y` 0x101e64 / 0x101eec, `getLeftX/Y` 0x101f74 / 0x101ffc,
+  `getDir(&x, &y)` 0x102084 (returns the length; the player / Brown control 0x11ac24.. and seqFunc019),
+  `getDirChange` 0x10209c.
+- `setVibration(small, big)` 0x101b50 -> libvib `sceVibSetActParam` 0x26bb10 (profile bit 0 small
+  on / off, bit 1 big 0..255; a negative argument leaves that motor out). libpad2 names placed:
+  scePad2CreateSocket 0x26b280, DeleteSocket 0x26b388, Read 0x26b3e0, GetState 0x26b588.
+
 ## The system object (`mag/magsystem.cpp`, 0x117654..0x1194b4, 2026-10-22)
 
 - `MagSystem` (bss 0x6e9840, EE 0x97a80): +0 frame count (bit 0 = draw buffer), +4 motor frames,
@@ -620,10 +643,10 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   sky billboards / rotation, the +0x853fc records) and 1 once the PC is bound; 1 walking (pad 0
   m_7c bit 3 the item menu 0x10000, bit 0 menu 0x10001, m_7a bits 8 / 9 changeCamera, the PC takes
   pad 0, Brown's command layer pad 1; the PC's state 0x17 goes to 6); 2 text windows (closes those
-  with m_wait_key 0, or > 0 on pad m_78 bit 14; back to 1 when none waits); 3 fade out
+  with m_wait_key 0, or > 0 on pad m_hold (+0x78) bit 14; back to 1 when none waits); 3 fade out
   (getMenuFadeOutTime, fade kind 0 mode 6) then openMenu -> 7; 7 the menu takes pad 0 until
   processPad returns non-zero, then closeMenu -> 4; 4 fade in (mode 2) -> 1; 5 the system message
-  (pad m_7c bits 13 / 14 close it); 6 the camera hangs from the PC and turns over 2400 counts; 8
+  (pad m_repeat (+0x7c) bits 13 / 14 close it); 6 the camera hangs from the PC and turns over 2400 counts; 8
   paused (lives of group 4 only); 9 the debug windows (magscenedebug.cpp). Lives run by group:
   MagLifeMan::update(mask) calls slot 2 of the lives whose level word has a bit of mask.
 - **MagLifeMan** (`mag/maglifeman.cpp`, 0x1194b4..0x119b34, 2026-10-22; scene +0x2330, EE 0x404):
@@ -851,7 +874,9 @@ Paths the ELF names (the disc dump has not been looked at yet: `ROSEPAN_DATA`):
 Created 2026-10-22 (host task `setup/platform_bootstrap.cpp`) from ReiPan's, renamed ReiPan -> RosePan
 throughout (identifiers, env variables, files, shader macros):
 - `src/sdk/` -- the PS2 SDK on the host: libgraph (V-blank pacing, `sceGsResetGraph` picks 50/60 Hz),
-  libdma / libvif / libvu0 (`vu0_lib.cpp`, `vu0_intrin.h`), libpad (+ `ROSEPAN_AUTOPAD`), libmc,
+  libdma / libvif / libvu0 (`vu0_lib.cpp`, `vu0_intrin.h`), libpad (+ `ROSEPAN_AUTOPAD`), libpad2 + libvib
+  (`libpad2.cpp`: a socket is a port; port 0 reads through libpad's shim minus its 2-byte header, so
+  the scripted smoke pad reaches BedPad; port 1 is never linked; vibration state re-sent each read), libmc,
   libcdvd, libmpeg (+ FFmpeg), libsd / libsdr, sif / sifrpc / sifdev / fileio, eekernel threads and
   semaphores, the host IOP (`iop_host`, `iop_sif`, `iop_libsd`, `iop_voice`, `iop_reverb`) and
   `pc_prefix.h` (force-included EE base types).

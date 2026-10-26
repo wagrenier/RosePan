@@ -648,7 +648,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
                 continue;
             if (w->m_wait_key == 0)
                 closeWindow(i);
-            else if (w->m_wait_key > 0 && (pad0->m_78 >> 14 & 1))
+            else if (w->m_wait_key > 0 && (pad0->m_hold >> 14 & 1))
                 closeWindow(i);
         }
         int waiting = 0;
@@ -672,7 +672,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
         FUN_0017772c(&m_837e0);
         m_life_man.update(1);
         ROR_ASSERT(m_pMenuBase == NULL); /* 1102 */
-        if (pad0->m_7c >> 3 & 1)
+        if (pad0->m_repeat >> 3 & 1)
         {
             if (canOpenItemMenu())
             {
@@ -681,12 +681,12 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
                 return;
             }
         }
-        else if ((pad0->m_7c & 1) && canOpenMenu10001())
+        else if ((pad0->m_repeat & 1) && canOpenMenu10001())
         {
             clearGamFlag25();
             requestMenu(0x10001, 0);
         }
-        u_int buttons = pad0->m_7a;
+        u_int buttons = pad0->m_trig;
         if ((buttons >> 8 & 1) || (buttons >> 9 & 1))
             changeCamera();
         if (m_pc.m_actor)
@@ -801,7 +801,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
         m_pc.live();
         updateActors(1);
         ROR_ASSERT(m_sys_msg_window >= 0); /* 1445 */
-        if ((pad0->m_7c >> 13 & 1) || (pad0->m_7c >> 14 & 1))
+        if ((pad0->m_repeat >> 13 & 1) || (pad0->m_repeat >> 14 & 1))
             closeSysMsgWindow(m_sys_msg_window);
         return;
 

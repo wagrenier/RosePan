@@ -505,7 +505,10 @@ public:
 - **A world-space debug line that draws nothing** may project through a camera the host never set: use
   the game's own camera matrices.
 - **Timing-driven pad scripts drift**: pad reads count frames, load times move the game's frames; pad
-  generously and confirm with a shot before blaming the code.
+  generously and confirm with a shot before blaming the code. In RoR the count is BedPad::update
+  calls on port 0 (scePad2Read -> libpad's scePadRead), and the same script landed at different shot
+  frames from run to run (2026-10-25: Start at read 2400 opened the menu by shot 2640 in a 70 s run;
+  a 50 s run had only reached shot 2160): give the run time to spare.
 
 ## Tools
 
