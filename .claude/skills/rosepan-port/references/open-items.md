@@ -6,30 +6,37 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
-**TOP PRIORITY (the user, 2026-10-26): get in game.** DONE first step (setup/newgame_crash.cpp,
-2026-10-26): the New Game access violation (items 10d..10l) was Sequence::addEntry keeping a script
-address in an int (hazards.md); fixed, plus a PORT guard in DogModel::getNodeIndexByName (no model
-while DogActor::load is a stub; GamMan::attachObj asked one). A New Game run (`settings.smoke_pad` is
-now 1800:START,2400:START,2700:CROSS; needs `--run 200`) now runs 200 s without a fault: the stage-2
-start, the map pack, lights, effects, then the opening's movie task and the picture book -- the screen
-is **black from frame ~2820** (nothing after New Game draws yet). DONE 2026-10-26 (task/tsk_chr.cpp,
-`partial`, was unassigned@001e7f28): TskMovie written -- **the New Game opening film now plays on
-screen to its end** (bus ceiling, Jennifer at the window, the dated card), then TskMsgMan::TskMsgMan
-0x1f4a24 (same TU), TskSnd::TskSnd 0x1f8fc0 (unassigned@001f82e4, the BGM fade back) and
-BedSubMode::push / pop are the reached stubs; one run of two still stalled black after the Atlus logo
-(the boot movie race, item 10e). Reached stubs in run order, queued
-in this order: ~~TskMovie::TskMovie 0x1f438c~~ (done; unassigned@001e7f28, the Tsk* classes: the opening
-film through S2dMovie::playMovie, likely the first picture), **scenePlayStart 0x1f83f4**
-(unassigned@001f82e4), **MnuPBook::setType 0x196e54 / MnuDiary::setType 0x198b04** (unassigned@00192ac0;
-MagLifeMenuPBook::init asserts when neither book takes the type), **DogModel::loadPack 0x1158ec /
-loadData 0x115790 / setupNodeFlags** (dog/dogmodel.cpp: no model loads, so no map or character can
-draw; DogActor::load 0x10cd5c / loadPackMotion in dog/dogactor.cpp go with it), MagScene::loadLight /
-setDefaultLight (mag/magscenelight.cpp), GamArea::addTrg / stopKind / clearKind (unassigned@001dd5e8),
-GamMan::relinkObj (unassigned@001d3b44). Also reached: MagScene::setFog 0x143d7c / loadTenkyuTex
-0x140030, EmyManager::resetWork, Obj176a3c::createEff (the effect manager), magBwnSeqCommand,
-chrMtnMove, DogActor::getRotY / resetShadow, MagLifePC / MagLifeBwn::reset, i3rCopyClipSphere /
-i3rReplaceStqMapEntity. The movie-start stall (item 10e/10f, rx/rxthread.cpp) was not seen in this
-session's three runs.
+**TOP PRIORITY (the user, 2026-10-26): get in game -- the first room on screen after New Game.**
+Supersedes everything below. Test: `tus.py check <TU> --run 200` (`settings.smoke_pad`
+1800:START,2400:START,2700:CROSS presses New Game); the picture decides.
+Done so far (2026-10-26): the New Game crash (setup/newgame_crash.cpp: Sequence::addEntry cut a script
+address to an int, hazards.md; plus a PORT guard in DogModel::getNodeIndexByName), and TskMovie
+(task/tsk_chr.cpp, `partial`): **the opening film plays to its end** ("Once upon a time...", the
+ceiling lamps, Jennifer at the window, a "March 1930" card; silent -- the IOP sound stand-in). After
+the film nothing draws: no model loads yet. **Priorities, in this order** (the queue in tus.json
+follows it; reached stubs in run order):
+  1. `task/tsk_chr.cpp` -- TskMsgMan::TskMsgMan 0x1f4a24, reached right after the film (the message
+     window task), then the rest of the TU's reached / frontier functions.
+  2. `unassigned@001f82e4` (task/tsk_scene.cpp's classes) -- TskSnd::TskSnd 0x1f8fc0 (the BGM fade
+     back after the film), **scenePlayStart 0x1f83f4** (event scenes: map / CHARA / THREAD sections).
+  3. `unassigned@00192ac0` -- MnuPBook::setType 0x196e54 / MnuDiary::setType 0x198b04
+     (MagLifeMenuPBook::init asserts when neither book takes the type).
+  4. **`dog/dogmodel.cpp`** -- DogModel::loadPack 0x1158ec / loadData 0x115790 / setupNodeFlags
+     0x11550c: the model loader. Without it no map or character exists, so **this is the gate to the
+     first 3D picture**.
+  5. **`dog/dogactor.cpp`** -- DogActor::load 0x10cd5c, loadPackMotion 0x10c17c, getRotY, resetShadow
+     (then the getNodeIndexByName PORT guard can go).
+  6. `mag/magscenelight.cpp` -- MagScene::loadLight 0x13f658 / setDefaultLight 0x13f8e4.
+  7. `unassigned@00140030` / `unassigned@00143d3c` -- MagScene::loadTenkyuTex 0x140030 (the sky) /
+     setFog 0x143d7c, magBwnSeqCommand 0x144ae0.
+  8. `unassigned@001dd5e8` -- GamArea::addTrg / stopKind / clearKind (room triggers).
+  9. `unassigned@001d3b44` -- GamMan::relinkObj 0x1d5da0.
+  Also reached, lower: EmyManager::resetWork, Obj176a3c::createEff (the effect manager in
+  unassigned@00164fc0), chrMtnMove, MagLifePC / MagLifeBwn::reset, i3rCopyClipSphere /
+  i3rReplaceStqMapEntity. Re-assess the order from the reached stubs after each of 4..6.
+  Risk: one New Game run of two stalled black after the Atlus logo (the boot movie race, item 10e /
+  10f, rx/rxthread.cpp): retry a stalled run before judging a TU; if it blocks the checks, the
+  rxthread lost wake-up becomes a host task ahead of the list.
 
 **TOP PRIORITY (the user, 2026-10-25): the title menu working and on screen.** This supersedes the
 render-first list below (most of it is written, `verify`). How the ROM gets there (traced 2026-10-25):
