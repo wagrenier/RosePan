@@ -2855,6 +2855,12 @@
   "was": "FUN_0013fa50",
   "why": "(type, idx, which, v != 0, no <= 7): reads from the light set +0x2050"
  },
+ "0013fb3c": {
+  "name": "MagScene::copyLightSet",
+  "tag": "ror-inferred",
+  "was": "FUN_0013fb3c",
+  "why": "asserts theD / theS in 0..7 and theD != theS (mag/magscenelight.cpp lines 0x146..0x148), then DogLightPool::copySet(+0x2050, theD, theS)"
+ },
  "0013fbe4": {
   "name": "MagScene::setShadowLight",
   "tag": "ror-inferred",
@@ -2986,6 +2992,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0014457c",
   "why": "MagLifeBwnCtrl 0x12b7cc with 1 when on, 0 when off"
+ },
+ "00144ae0": {
+  "name": "magBwnSeqCommand",
+  "tag": "ror-inferred",
+  "was": "FUN_00144ae0",
+  "why": "takes native 039's six script words as an array (op = word 0) and drives the scene's MagLifeBwnCtrl 0x727aa0 (scene +0x2bd20): ops 0x14 / 0x15 / 0x1f.. pass a vector to its 0x12a89c / 0x12a808 / 0x12aa70, op 0x23 waits (0xcccccccc) on 0x12ab10; native 039 for every op but 100 / 0x65"
  },
  "001634d4": {
   "name": "EmyManager::releaseObj",
@@ -6455,6 +6467,12 @@
   "was": "FUN_001c4f38",
   "why": "MagSystem::setActorAnim(m_pcActor, anim, 1); native 027 case 20"
  },
+ "001c4f70": {
+  "name": "GamMan::releasePcMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001c4f70",
+  "why": "MagSystem::releaseActorMotion(getPcChrNo +0x21fdc, a1): frees motion a1 of the PC's actor; native 028 case 0x14"
+ },
  "001c5094": {
   "name": "GamMan::showMesSprite",
   "tag": "ror-inferred",
@@ -6532,6 +6550,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001c5f70",
   "why": "part of resume(0x100000): S2dMes sprite 2 off after flags2 0x20, flags2 |= 8"
+ },
+ "001c6470": {
+  "name": "GamMan::pushFog",
+  "tag": "ror-inferred",
+  "was": "FUN_001c6470",
+  "why": "copies the scene's current fog (m_fog[0], 0x726860 = scene +0x2aae0, 0x20 bytes) into the first of three 0x20-byte slots at +0x22540 whose first float is -1 (free; initGameState sets all -1); native 012 case 0x190"
+ },
+ "001c651c": {
+  "name": "GamMan::popFog",
+  "tag": "ror-inferred",
+  "was": "FUN_001c651c",
+  "why": "the counterpart of pushFog: the last used slot of +0x22540 (2 down to 0, first float != -1) goes back through MagScene::setFog(slot, 0) and is marked free (-1.0); native 012 case 0x191"
  },
  "001c65e8": {
   "name": "GamMan::resume",
@@ -6905,6 +6935,18 @@
   "was": "FUN_001cdf5c",
   "why": "releaseStage2 calls it with (2, 0); not read yet"
  },
+ "001cf7d0": {
+  "name": "GamMan::setMsgParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001cf7d0",
+  "why": "copies 32 bytes (four ld / sd) from a1 into +0x22280..0x2229f, the eight words initGameState seeds 10, 10, 0xffff, 0x100, 0x100, 0, 0 next to the message task id +0x222a0; native 007 case 1 passes the script's a1"
+ },
+ "001cf95c": {
+  "name": "GamMan::killMsgTask",
+  "tag": "ror-inferred",
+  "was": "FUN_001cf95c",
+  "why": "CmnTaskMan::getTask / killTask on the message task id +0x222a0 (getMsgTaskID), sets it -1, clears the message mode +0x225d8 (chgMsgMode); native 009 case 1"
+ },
  "001cf9d4": {
   "name": "GamMan::isMsgBusy",
   "tag": "ror-inferred",
@@ -7042,6 +7084,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001d2428",
   "why": "achr / fchr: bits 5..6 of the scene's m_actor_flags[getActorNo(oid)] (0x724ea0) = mode & 3 (0x60 = bound / chapter model); native 151 case 0x29"
+ },
+ "001d2494": {
+  "name": "GamMan::saveLightSets",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2494",
+  "why": "MagScene::copyLightSet(7, 0) (modes 0 / 2) and (6, 1) (mode 1, mode 0 too when getSysFlg bit 0x4000000), marking getSysFlg 0x8000000 / 0x10000000 saved; native 012 cases 0xca / 0xcc / 0xce"
+ },
+ "001d25e4": {
+  "name": "GamMan::restoreLightSets",
+  "tag": "ror-inferred",
+  "was": "FUN_001d25e4",
+  "why": "the counterpart of saveLightSets: copyLightSet(0, 7) when 0x8000000 is set, (1, 6) when 0x10000000; native 012 cases 0xcb / 0xcd / 0xcf"
  },
  "001d2724": {
   "name": "GamMan::setLightFlag",
@@ -7492,6 +7546,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f4184",
   "why": "vtable 0x2e4cd0 (rtti.py TskSysFunc); kind 0..1 sets the defaults 100, 0x1e, 0xf, 0x1b"
+ },
+ "001f5244": {
+  "name": "TskAttach::TskAttach",
+  "tag": "ror-inferred",
+  "was": "FUN_001f5244",
+  "why": "stores vtable 0x2e4bd0 (_vt$9TskAttach; rtti.py lists it as the class's ctor), +4 the oid, +8 GamMan::getActorNo(oid), +0xc a3, +0x10 *a2; native 012 case 0x3c news 0x40 bytes for it"
  },
  "001f5e48": {
   "name": "chrChangeMotion",

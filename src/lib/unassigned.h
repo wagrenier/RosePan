@@ -30,6 +30,12 @@ struct SysTimer
     void update();                                                       // ROR 0x00204014
 };
 
+/* ---- the MagScene range after setFog (unassigned@00143d3c) ---- */
+/* Brown's script commands (native 039): args are the six script words, op
+ * first; drives the scene's MagLifeBwnCtrl; returns the script's v0 (or a
+ * SEQ_RET_* code). */
+intptr_t magBwnSeqCommand(const intptr_t *args);                         // ROR 0x00144ae0
+
 /* ---- the task framework (unassigned@001e46b8) ---- */
 
 /* The task interface 32 classes derive from (no vtable of its own in the
@@ -102,6 +108,13 @@ struct TskSnd : CmnITask
 struct TskFrameFunc : CmnITask
 {
     TskFrameFunc(int kind, intptr_t arg, int frames);                    // ROR 0x001f184c
+};
+
+/* TskAttach : CmnITask (vtable 0x2e4bd0, EE 0x40 bytes): +4 the oid, +8
+ * its actor, +0xc arg, +0x10 *value. layout: host -- no members. */
+struct TskAttach : CmnITask
+{
+    TskAttach(u_int oid, const int *value, int arg);                     // ROR 0x001f5244
 };
 
 /* TskSysFunc : CmnITask (vtable 0x2e4cd0, EE 0x80 bytes): kinds 0..1 set

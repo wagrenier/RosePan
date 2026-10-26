@@ -42,3 +42,9 @@ void MagScene::loadLight(const void *theData)
 {
     ROSEPAN_STUB("MagScene::loadLight", 0x0013f658);
 }
+
+// stub of ROR 0x0013fb3c
+void MagScene::copyLightSet(int theD, int theS)
+{
+    ROSEPAN_STUB("MagScene::copyLightSet", 0x0013fb3c);
+}

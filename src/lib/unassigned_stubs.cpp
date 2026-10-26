@@ -103,6 +103,12 @@ TskFrameFunc::TskFrameFunc(int kind, intptr_t arg, int frames)
     ROSEPAN_STUB("TskFrameFunc::TskFrameFunc", 0x001f184c);
 }
 
+// stub of ROR 0x001f5244 (a constructor: stubgen leaves it to hand)
+TskAttach::TskAttach(u_int oid, const int *value, int arg)
+{
+    ROSEPAN_STUB("TskAttach::TskAttach", 0x001f5244);
+}
+
 // stub of ROR 0x001f4184 (a constructor: stubgen leaves it to hand)
 TskSysFunc::TskSysFunc(int kind, int a, intptr_t arg)
 {
@@ -1405,4 +1411,11 @@ void GamSysData::setField(int id, int field, const void *data)
 void GamSysData::setFlags2(short id, int unused, u_int bits)
 {
     ROSEPAN_STUB("GamSysData::setFlags2", 0x001dd118);
+}
+
+// stub of ROR 0x00144ae0
+intptr_t magBwnSeqCommand(const intptr_t *args)
+{
+    ROSEPAN_STUB("magBwnSeqCommand", 0x00144ae0);
+    return {};
 }

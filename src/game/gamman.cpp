@@ -131,9 +131,9 @@ void GamMan::initGameState()
     m_findTargetItem = 0xa00;
     m_itemUseTaskId = -1;
     m_inuMode = 2;
-    m_22280[1] = 10;
-    m_22280[2] = 0xffff;
-    m_22280[4] = 0x100;
+    m_msgParam[1] = 10;
+    m_msgParam[2] = 0xffff;
+    m_msgParam[4] = 0x100;
     m_pcEquipItemOID = 0;
     m_equipItem = 0xa00;
     m_selItemNum = 0;
@@ -152,14 +152,14 @@ void GamMan::initGameState()
         m_seqPair[i].m_b = 0;
         m_seqPair[i].m_a = 0;
     }
-    m_22280[0] = 10;
-    m_22280[3] = 0x100;
-    m_22280[6] = 0;
-    m_22280[5] = 0;
+    m_msgParam[0] = 10;
+    m_msgParam[3] = 0x100;
+    m_msgParam[6] = 0;
+    m_msgParam[5] = 0;
     for (int i = 0; i < 4; i++)
         m_22470[i].m_id = -1;
     for (int i = 0; i < 3; i++)
-        m_22540[i].m_00 = -1.0f;
+        m_fogStack[i].m_color[0] = -1.0f;
     m_22530 = 0;
     m_21f70 = 0;
     m_pool1d240.clear();
@@ -660,6 +660,128 @@ int GamMan::isMsgBusy()
 void GamMan::setSysMsgHandle(int handle)
 {
     m_sysMsgHandle = handle;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cf7d0
+
+void GamMan::setMsgParam(const int *param)
+{
+    memcpy(m_msgParam, param, sizeof(m_msgParam));
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cf95c
+
+void GamMan::killMsgTask()
+{
+    if (g_taskMan.getTask(m_msgTaskId) != NULL)
+    {
+        g_taskMan.killTask(m_msgTaskId);
+        m_msgTaskId = -1;
+    }
+    m_msgMode = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c4f70
+
+void GamMan::releasePcMotion(int id)
+{
+    g_magSystem.releaseActorMotion(m_pcActor, id);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Marks light set theD in use in m_flags (0 0x2000000, 1 0x4000000, 6
+// 0x8000000, 7 0x10000000; others none) and copies set theS over it.
+// ROR 0x001d2724
+
+void GamMan::setLightFlag(int theD, int theS)
+{
+    if (theD == 1)
+        m_flags |= 0x4000000;
+    else if (theD == 0)
+        m_flags |= 0x2000000;
+    else if (theD == 6)
+        m_flags |= 0x8000000;
+    else if (theD == 7)
+        m_flags |= 0x10000000;
+    g_magSystem.m_scene.copyLightSet(theD, theS);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c6470
+
+void GamMan::pushFog()
+{
+    for (int i = 0; i < 3; i++)
+    {
+        if (m_fogStack[i].m_color[0] == -1.0f)
+        {
+            m_fogStack[i] = g_magSystem.m_scene.m_fog[0];
+            return;
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c651c
+
+void GamMan::popFog()
+{
+    for (int i = 2; i >= 0; i--)
+    {
+        if (m_fogStack[i].m_color[0] != -1.0f)
+        {
+            g_magSystem.m_scene.setFog(&m_fogStack[i], 0);
+            m_fogStack[i].m_color[0] = -1.0f;
+            return;
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// m_flags 0x8000000: set 0 is saved in 7; 0x10000000: set 1 is saved in 6.
+// Set 1 is saved only while m_flags has 0x4000000.
+// ROR 0x001d2494
+
+void GamMan::saveLightSets(int mode)
+{
+    MagScene &scene = g_magSystem.m_scene;
+    if (mode == 1)
+    {
+        if ((m_flags & 0x4000000) == 0)
+            return;
+        scene.copyLightSet(6, 1);
+        m_flags |= 0x10000000;
+        return;
+    }
+    if (mode == 0)
+    {
+        scene.copyLightSet(7, 0);
+        if ((m_flags & 0x4000000) != 0)
+        {
+            scene.copyLightSet(6, 1);
+            m_flags |= 0x10000000;
+        }
+    }
+    else if (mode == 2)
+        scene.copyLightSet(7, 0);
+    else
+        return;
+    m_flags |= 0x8000000;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d25e4
+
+void GamMan::restoreLightSets(int mode)
+{
+    MagScene &scene = g_magSystem.m_scene;
+    if ((mode == 0 || mode == 2) && (m_flags & 0x8000000) != 0)
+        scene.copyLightSet(0, 7);
+    if ((mode == 0 || mode == 1) && (m_flags & 0x10000000) != 0)
+        scene.copyLightSet(1, 6);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -2577,12 +2699,6 @@ u_int GamMan::createObjByName(u_int kind, const char *name, int group, u_int oid
 void GamMan::loadMapUnit(const char *name, int id, int mode)
 {
     ROSEPAN_STUB("GamMan::loadMapUnit", 0x001ca0dc);
-}
-
-// stub of ROR 0x001d2724
-void GamMan::setLightFlag(int which)
-{
-    ROSEPAN_STUB("GamMan::setLightFlag", 0x001d2724);
 }
 
 // stub of ROR 0x001cb424

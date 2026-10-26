@@ -13,8 +13,9 @@
 // same two instructions (return 0); one function stands for all of them.
 //
 // Written so far: the table, the empty and the return-code entries, 000,
-// 001, 002, 004 (wait until), 005, the system call 018, 021, 027, 029
-// (stage changes), 032, 033, 110 and 151 (object control). The others are
+// 001, 002, 004 (wait until), 005, 007, 009, 012 (lights, fog), 014, the system call 018, 019
+// (pad), 021, 027, 028, 029 (stage changes), 032, 033, 036, 038, 039, 110
+// and 151 (object control). The others are
 // stubs (seqcall.h lists them).
 
 #include "sequence/seqcall.h"
@@ -504,7 +505,7 @@ intptr_t seqFunc002(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
     scene.setLightParam(0, 0, 2, grey, 0);
     scene.setLightParam(1, 0, 1, dir, 0);
     scene.setLightParam(1, 0, 2, grey, 0);
-    g_gamMan.setLightFlag(1);
+    g_gamMan.setLightFlag(1, 0);
     return 0;
 }
 
@@ -863,6 +864,360 @@ static float seqWordFloat(intptr_t word)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Message window: a0 1 copies eight words from a1 over GamMan's message
+// parameters.
+// ROR 0x00205b18
+
+intptr_t seqFunc007(intptr_t op, intptr_t a1, intptr_t, intptr_t, intptr_t, intptr_t)
+{
+    if ((int)op == 1)
+        g_gamMan.setMsgParam((const int *)a1);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Message task: a0 1 kills it.
+// ROR 0x00205b44
+
+intptr_t seqFunc009(intptr_t op, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
+{
+    if ((int)op == 1)
+        g_gamMan.killMsgTask();
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Sky: a0 1 shows the first sky slot's model when a1 != 0, hides it when 0.
+// ROR 0x00206614
+
+intptr_t seqFunc014(intptr_t op, intptr_t a1, intptr_t, intptr_t, intptr_t, intptr_t)
+{
+    if ((int)op == 1)
+        g_magSystem.m_scene.m_tenkyu[0].m_model[0].m_hide = a1 == 0;
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Pad 0 queries: a0 0..0x1f one button bit (0..15 held m_hold, 16..31 the
+// auto-repeated m_repeat; 0x14..0x17 the repeated direction bits), 4..7 the
+// direction past half way (left, down, right, up), 0x40 / 0x41 all of a1's
+// bits held / pressed, 0x42 any button held, 0x80 the stick into a2's two
+// words (a1 0: the direction * 128, else the right stick, truncated, << 7).
+// Bits 13 and 14 swap places in the table (0xd reads bit 14, 0xe bit 13).
+// ROR 0x002076cc
+
+intptr_t seqFunc019(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t)
+{
+    const BedPad *pad = g_magSystem.m_pad_ref[0].m_pad;
+    float x, y;
+    pad->getDir(&x, &y);
+    u_int hold = pad->m_hold;
+    u_int repeat = pad->m_repeat;
+    u_int dir = pad->m_dir_repeat;
+
+    switch ((u_int)op)
+    {
+    case 0x00: case 0x01: case 0x02: case 0x03:
+        return (hold >> (u_int)op) & 1;
+    case 0x04: return x < -0.5f;
+    case 0x05: return 0.5f < y;
+    case 0x06: return 0.5f < x;
+    case 0x07: return y < -0.5f;
+    case 0x08: case 0x09: case 0x0a: case 0x0b: case 0x0c:
+        return (hold >> (u_int)op) & 1;
+    case 0x0d: return (hold >> 14) & 1;
+    case 0x0e: return (hold >> 13) & 1;
+    case 0x0f: return hold >> 15;
+    case 0x10: case 0x11: case 0x12: case 0x13:
+        return (repeat >> (u_int)(op - 0x10)) & 1;
+    case 0x14: case 0x15: case 0x16: case 0x17:
+        return (dir >> (u_int)(op - 0x10)) & 1;
+    case 0x18: case 0x19: case 0x1a: case 0x1b: case 0x1c:
+        return (repeat >> (u_int)(op - 0x10)) & 1;
+    case 0x1d: return (repeat >> 14) & 1;
+    case 0x1e: return (repeat >> 13) & 1;
+    case 0x1f: return repeat >> 15;
+    case 0x40: return ((u_int)pad->m_hold & (u_int)a1) == (u_int)a1;
+    case 0x41: return ((u_int)pad->m_trig & (u_int)a1) == (u_int)a1;
+    case 0x42:  // the ROM tests the sixteen bits one by one
+        return hold != 0;
+    case 0x80:
+    {
+        int *out = (int *)a2;
+        if (a1 != 0)
+        {
+            out[0] = (int)pad->getRightX() << 7;
+            out[1] = (int)pad->getRightY() << 7;
+        }
+        else
+        {
+            if (out == NULL)    // PC: the ROM reads word 0 of address 0
+                return 0;
+            out[0] = (int)(x * 128.0f);
+            out[1] = (int)(y * 128.0f);
+        }
+        return out[0] != 0 || out[1] != 0;
+    }
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Release: a0 1 / 2 / 10 the sky domes of kind 2 / 3 / 0, 3 the object a1,
+// 0x14 the PC's motion a1.
+// ROR 0x00208b10
+
+intptr_t seqFunc028(intptr_t op, intptr_t a1, intptr_t, intptr_t, intptr_t, intptr_t)
+{
+    GamMan &gam = g_gamMan;
+    switch ((u_int)op)
+    {
+    case 0x01: gam.releaseTenkyus(2);              break;
+    case 0x02: gam.releaseTenkyus(3);              break;
+    case 0x03: gam.releaseChr((u_int)a1);          break;
+    case 0x0a: gam.releaseTenkyus(0);              break;
+    case 0x14: gam.releasePcMotion((int)a1);       break;
+    default:                                       break;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// a0 1: the running thread's argument.
+// ROR 0x002090a0
+
+intptr_t seqFunc036(intptr_t op, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
+{
+    if ((int)op == 1)
+        return g_sequence.getThreadArg();
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Object table records (GamMan::ctlObjParam on the record of oid a1): a0 1 /
+// 2 set / clear flag bits a2, 3 tests them, 4 / 5 set / get word +0x0c, 6
+// sets +0x08; a2 points at the answer for 10 (+0x30), 12 (+0x20), 13 (+0x10),
+// 14 (+0x08); 11 writes the record's two words +0x28 / +0x2c to *a2 / *a3.
+// 99 runs op 5 with a3 as the alternative and drops the answer.
+// ROR 0x002090e0
+
+intptr_t seqFunc038(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t, intptr_t)
+{
+    GamMan &gam = g_gamMan;
+    u_int   oid = (u_int)a1;
+    int     value = (int)a2;    // the ROM's stack copy of a2
+
+    switch ((u_int)op)
+    {
+    case 0x01: gam.ctlObjParam(oid, 0x0, &value, 0);           break;
+    case 0x02: gam.ctlObjParam(oid, 0x1, &value, 0);           break;
+    case 0x03: return gam.ctlObjParam(oid, 0x2, &value, 0);
+    case 0x04: gam.ctlObjParam(oid, 0x4, &value, 0);           break;
+    case 0x05:
+    {
+        int word = 0;   // PC: unset in the ROM when no record matches
+        gam.ctlObjParam(oid, 0x5, &word, 0);
+        return word;
+    }
+    case 0x06: gam.ctlObjParam(oid, 0x9, &value, 0);           break;
+    case 0x0a: gam.ctlObjParam(oid, 0xb, (void *)a2, 0);       break;
+    case 0x0b:
+    {
+        int pair[2] = {0, 0};   // PC: unset in the ROM when no record matches
+        gam.ctlObjParam(oid, 0xc, pair, 0);
+        *(int *)a2 = pair[0];
+        *(int *)a3 = pair[1];
+        break;
+    }
+    case 0x0c: gam.ctlObjParam(oid, 0xd, (void *)a2, 0);       break;
+    case 0x0d: gam.ctlObjParam(oid, 0xe, (void *)a2, 0);       break;
+    case 0x0e: gam.ctlObjParam(oid, 0xf, (void *)a2, 0);       break;
+    case 0x0f: gam.ctlObjParam(oid, 0x10, (void *)a2, 0);      break;
+    case 0x63: gam.ctlObjParam(oid, 0x5, &value, (int)a3);     break;
+    default:                                                   break;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Brown: a0 'eqds' sets / clears GamMan flags2 bit 0x4000000 by a1 (and then
+// goes on as any other op), 100 sets the dog's mode a1, 0x65 reads it; the
+// others go to magBwnSeqCommand with the six words, whose answer the script
+// gets (a wait code too).
+// ROR 0x00209270
+
+intptr_t seqFunc039(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t t0, intptr_t t1)
+{
+    GamMan &gam = g_gamMan;
+    if ((int)op == 0x65716473)
+    {
+        if (a1 != 0)
+            gam.m_flags2 |= 0x4000000;
+        else
+            gam.m_flags2 &= ~0x4000000u;
+    }
+    if ((int)op == 100)
+    {
+        gam.setInuMode((int)a1);
+        return 0;
+    }
+    if ((int)op == 0x65)
+        return gam.m_inuMode;
+    intptr_t args[6] = {op, a1, a2, a3, t0, t1};
+    return magBwnSeqCommand(args);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Lights and fog (jump table data 0x2ff9e0, 501 entries). The light cases
+// come in three runs over the same (type, which) pairs: set from a1 (no 0),
+// set from a1 with no a2, get into a1; a light index is the script's t1
+// (type 0 has one light). Then 0x12c the actor light id, 0x190..0x195 the
+// fog (push, pop, get, set or fade over a2 frames, near / far pair), 0x3c a
+// TskAttach task, 0xc8 the scene's fog switch, 0xc9 GamMan::setLightFlag,
+// 0xca..0xcf save / restore light sets, 0x1f4 the scene flags from a1.
+
+/* layout: host -- a table of this file, not ROM data. */
+struct SeqLightOp
+{
+    u_char type, which;
+};
+
+static const SeqLightOp s_seqLightOps[15] = {
+    {0, 2},                                 // 1 / 0x46 / 0x64 (index 0)
+    {1, 1}, {1, 2},                         // 0x0a.. / 0x47.. / 0x6e..
+    {2, 0}, {2, 2},                         // 0x14..
+    {3, 1}, {3, 0}, {3, 2}, {3, 5},         // 0x1e..
+    {4, 1}, {4, 2}, {4, 3},                 // 0x28..
+    {5, 0}, {5, 2}, {5, 4},                 // 0x32..
+};
+
+// The light op of a case of the first run (1, 0xa, 0xb, 0x14, ... 0x34), -1
+// when it is none.
+static int seqLightOpOf(u_int op)
+{
+    static const u_char s_cases[15] = {
+        0x01, 0x0a, 0x0b, 0x14, 0x15, 0x1e, 0x1f, 0x20, 0x21, 0x28, 0x29, 0x2a, 0x32, 0x33, 0x34,
+    };
+    for (int i = 0; i < 15; i++)
+    {
+        if (s_cases[i] == op)
+            return i;
+    }
+    return -1;
+}
+
+static void seqAddTask(CmnITask *task)
+{
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, NULL, 1);
+}
+
+// ROR 0x00205b88
+
+intptr_t seqFunc012(intptr_t id, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t, intptr_t t1)
+{
+    MagScene &scene = g_magSystem.m_scene;
+    GamMan   &gam = g_gamMan;
+    u_int     op = (u_int)id;
+
+    if (op >= 0x1f5)
+        return 0;
+
+    // The three light runs: 1.. set, 0x46.. set with a frame count, 0x64.. get.
+    int run = -1, light = -1;
+    if (op < 0x46)
+        run = 0, light = seqLightOpOf(op);
+    else if (op < 0x64)
+        run = 1, light = seqLightOpOf(op - 0x45);
+    else if (op < 0xa0)
+        run = 2, light = seqLightOpOf(op - 0x63);
+    if (light >= 0)
+    {
+        const SeqLightOp &l = s_seqLightOps[light];
+        int idx = light == 0 ? 0 : (int)t1;
+        if (run == 0)
+            scene.setLightParam(l.type, idx, l.which, (const float *)a1, 0);
+        else if (run == 1)
+            scene.setLightParam(l.type, idx, l.which, (const float *)a1, (int)a2);
+        else
+            scene.getLightParam(l.type, idx, l.which, (float *)a1, 0);
+        return 0;
+    }
+
+    switch (op)
+    {
+    case 0xa0:
+        scene.getLightParam(0, 0, 2, (float *)a1, (int)a2);
+        break;
+    case 0x12c:
+        g_magSystem.setActorLightID(gam.getActorNo((u_int)a1), (int)a2);
+        break;
+    case 0x190:
+        gam.pushFog();
+        break;
+    case 0x191:
+        gam.popFog();
+        break;
+    case 0x192:
+        *(I3dFog *)a1 = scene.m_fog[0];
+        break;
+    case 0x193:
+    {
+        I3dFog fog = *(const I3dFog *)a1;
+        if (a2 == 0)
+        {
+            scene.setFog(&fog, 0);
+            break;
+        }
+        // The task gets the address of this stack copy, as in the ROM
+        // (TskFrameFunc kind 0xc reads it at once).
+        seqAddTask(new TskFrameFunc(0xc, (intptr_t)&fog, (int)a2));
+        break;
+    }
+    case 0x194:  // near distance and amount
+    {
+        I3dFog fog = scene.m_fog[0];
+        fog.m_param[0] = *(const float *)a1;
+        fog.m_param[1] = *(const float *)a2;
+        scene.setFog(&fog, 0);
+        break;
+    }
+    case 0x195:  // far distance and amount
+    {
+        I3dFog fog = scene.m_fog[0];
+        fog.m_param[2] = *(const float *)a1;
+        fog.m_param[3] = *(const float *)a2;
+        scene.setFog(&fog, 0);
+        break;
+    }
+    case 0x3c:
+        seqAddTask(new TskAttach((u_int)a1, (const int *)a2, (int)a3));  // callcheck: operator_new, addTask (new and seqAddTask)
+        break;
+    case 0xc8:
+        scene.m_2aa84 = a1 != 0 ? 1 : 0;
+        break;
+    case 0xc9:
+        gam.setLightFlag((int)a1, (int)a2);
+        break;
+    case 0xca: gam.saveLightSets(2);    break;
+    case 0xcb: gam.restoreLightSets(2); break;
+    case 0xcc: gam.saveLightSets(1);    break;
+    case 0xcd: gam.restoreLightSets(1); break;
+    case 0xce: gam.saveLightSets(0);    break;
+    case 0xcf: gam.restoreLightSets(0); break;
+    case 0x1f4:
+    {
+        const int *f = (const int *)a1;
+        g_magSystem.setSceneFlags(f[0], f[1], f[2], f[3], f[4], f[5], 0);
+        break;
+    }
+    default:
+        break;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Object control: a0 picks the operation (58 cases, jump table data
 // 0x300eb0) on object t1 -- nothing unless t1 is live. a1 / a2 are words,
 // float bits or pointers by case; cases 15..17 and 25 / 26 work on the
@@ -1162,45 +1517,10 @@ intptr_t seqFunc006(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
     return {};
 }
 
-// stub of ROR 0x00205b18
-intptr_t seqFunc007(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc007", 0x00205b18);
-    return {};
-}
-
-// stub of ROR 0x00205b44
-intptr_t seqFunc009(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc009", 0x00205b44);
-    return {};
-}
-
-// stub of ROR 0x00205b88
-intptr_t seqFunc012(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc012", 0x00205b88);
-    return {};
-}
-
-// stub of ROR 0x00206614
-intptr_t seqFunc014(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc014", 0x00206614);
-    return {};
-}
-
 // stub of ROR 0x00206640
 intptr_t seqFunc016(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
     ROSEPAN_STUB("seqFunc016", 0x00206640);
-    return {};
-}
-
-// stub of ROR 0x002076cc
-intptr_t seqFunc019(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc019", 0x002076cc);
     return {};
 }
 
@@ -1222,34 +1542,6 @@ intptr_t seqFunc023(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 intptr_t seqFunc026(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
     ROSEPAN_STUB("seqFunc026", 0x00208518);
-    return {};
-}
-
-// stub of ROR 0x00208b10
-intptr_t seqFunc028(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc028", 0x00208b10);
-    return {};
-}
-
-// stub of ROR 0x002090a0
-intptr_t seqFunc036(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc036", 0x002090a0);
-    return {};
-}
-
-// stub of ROR 0x002090e0
-intptr_t seqFunc038(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc038", 0x002090e0);
-    return {};
-}
-
-// stub of ROR 0x00209270
-intptr_t seqFunc039(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc039", 0x00209270);
     return {};
 }
 

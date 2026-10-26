@@ -984,6 +984,26 @@ throughout (identifiers, env variables, files, shader macros):
   40 bit 1, 41 actor bind bits, 50..54 the shape param 0x18 (GamObjColli: m_shape 0 none / 1 17 / 2 25 /
   3 45 / 4 m_radius), 53 a rotated box -> corners param 0x1003, 55..57 private collisions (segment, box,
   quad). Objects' getters / setters dispatch on the oid's list (bits 28..29: 1 achr, 0 vfchr, 2 fchr).
+- **Natives written 2026-10-26** (session 5): 007 a0 1 GamMan::setMsgParam 0x1cf7d0 (eight words over
+  +0x22280, the message window's 10, 10, 0xffff, 0x100, 0x100 ...); 009 a0 1 killMsgTask 0x1cf95c; 012
+  lights and fog (table data 0x2ff9e0, 501 entries, 63 cases): three runs over the same (light type,
+  which) pairs -- 1 / 0xa.. / 0x34 setLightParam(type, t1, which, a1, 0), 0x46..0x54 the same with
+  no = a2, 0x64..0x98 getLightParam -- 0x12c MagSystem::setActorLightID, 0x190 / 0x191 GamMan::pushFog /
+  popFog (a three-slot stack of I3dFog at +0x22540, m_color[0] -1 = free), 0x192 get the scene fog
+  (+0x2aae0), 0x193 set it or fade it over a2 frames (TskFrameFunc kind 0xc with the stack copy's
+  address), 0x194 / 0x195 the near / far pair, 0x3c a TskAttach task (vtable 0x2e4bd0, ctor 0x1f5244:
+  oid, its actor, arg, *value), 0xc8 scene +0x2aa84, 0xc9 setLightFlag, 0xca..0xcf GamMan::
+  saveLightSets / restoreLightSets 0x1d2494 / 0x1d25e4 (light set 0 <-> 7 under getSysFlg 0x8000000,
+  1 <-> 6 under 0x10000000, set 1 only while 0x4000000), 0x1f4 setSceneFlags(a1[0..5], 0); 014 a0 1
+  hides / shows the first sky slot's model (m_tenkyu[0].m_model[0].m_hide = a1 == 0); 019 pad 0
+  queries (table data 0x300290: m_hold bits, m_repeat bits, m_dir_repeat bits 4..7, the direction past
+  0.5, all-of-mask held / pressed, any held, the stick * 128); 028 releases (sky domes kind 2 / 3 / 0,
+  releaseChr, GamMan::releasePcMotion 0x1c4f70); 036 Sequence::getThreadArg; 038 object table records
+  through ctlObjParam (table data 0x300b00); 039 Brown: 'eqds' toggles flags2 0x4000000, 100 / 0x65
+  set / get the dog mode, the rest go to magBwnSeqCommand 0x144ae0 (a command switch on the scene's
+  MagLifeBwnCtrl, not written). **GamMan::setLightFlag 0x1d2724 takes (theD, theS)**: marks set theD in
+  getSysFlg (0 0x2000000, 1 0x4000000, 6 0x8000000, 7 0x10000000) and copies light set theS over it
+  (MagScene::copyLightSet 0x13fb3c, mag/magscenelight.cpp: asserts theD / theS < 8, theD != theS).
 
 ## The scene's menus (mag/maglifemenu.cpp, 0x12cf3c..0x12d9c8, 2026-10-25)
 

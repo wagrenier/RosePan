@@ -523,6 +523,17 @@ public:
   fault. Cause: unknown yet (timing, or a fault gdb passes as first-chance in a DLL). Fix so far: bisect
   by disabling the suspect (a temporary early return) in plain runs -- native 151 was cleared that way.
   Note the run log is not flushed at the fault: the last logged stub is not necessarily the last call.
+  2026-10-26 (session 5): the crash came back once (run 1 of 6) and never again; the other five plain
+  runs (and a gdbrun) instead **stalled black after the Atlus logo**: MV00_AD never shows a first
+  picture, so Start (read 1800) never skips it and the title never opens. The game's own logs
+  (%APPDATA%/Mikompilation/RosePan/rosepan.N.log, three kept) show the difference: a good run opens the
+  film's ADPCM ('open ADPCM 47') ~22 s after `rxSysUpdateDevices`, a stalled one logs nothing after it.
+  Not file speed (the 252 MB file reads in 0.5 s), not the memory card (unchanged), not the crash filter
+  (stalls with it off). A gdbrun later in the session got through (title, New Game, natives). Suspect a
+  race in the host movie start (snd/rxmpeg.cpp over sdk/libmpeg.cpp: first picture vs the demux / audio
+  open). **`ROSEPAN_CRASH_LOG=1`** (os/rosepan_host.cpp) now prints a fault's code, address and stack as
+  exe offsets to stderr (build.py keeps them in work/run_<config>.log); resolve them with MinGW's
+  addr2line -f -C -e RosePan.exe <0x140000000 + offset>. Pass it with build.py --env.
 - **Hidden functions inside GamMan bodies**: 0x1d1e88 (setObjScale) holds a float getter at 0x1d1f14,
   0x1d18c4 (clearObjAttr) one at 0x1d1958 (achr tail call 0x1d9f40); Ghidra's sizes include them.
 
