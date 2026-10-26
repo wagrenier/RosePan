@@ -3161,6 +3161,18 @@
   "was": "FUN_001443d8",
   "why": "dbgTraceVector4 then 0x12a89c on MagLifeBwnCtrl; storePcTransform passes the dog rotation"
  },
+ "00144418": {
+  "name": "gamGetBwnPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00144418",
+  "why": "counterpart of gamSetBwnPos 0x144398: 0x12a974 on Brown's controller 0x727aa0 into a vector, copies x y z out when out != NULL"
+ },
+ "0014448c": {
+  "name": "gamGetBwnRot",
+  "tag": "ror-inferred",
+  "was": "FUN_0014448c",
+  "why": "counterpart of gamSetBwnRot 0x1443d8: 0x12a9ec on Brown's controller 0x727aa0, copies x y z out when out != NULL"
+ },
  "00144500": {
   "name": "gamSetBwnItem",
   "tag": "ror-inferred",
@@ -8267,6 +8279,12 @@
   "was": "FUN_001d966c",
   "why": "MagScene::releaseActor(+0x108) when set, +0x108 = -1; type-5 objects also GamMan::ctlObj1cbb80"
  },
+ "001d96e0": {
+  "name": "ObjStat::clearSectaCells",
+  "tag": "ror-inferred",
+  "was": "FUN_001d96e0",
+  "why": "this +0x110 and +0x114 (setSecta's cell, the current cell) = 0; no direct callers, folded by Ghidra into the end of ObjStat::releaseActor; clearSectaPtrs also clears +0x10c"
+ },
  "001d96ec": {
   "name": "ObjStat::save",
   "tag": "ror-inferred",
@@ -8309,6 +8327,12 @@
   "was": "FUN_001d9f10",
   "why": "clears +0x110 / +0x114 (and +0x10c with the flag) then 0x1da07c"
  },
+ "001d9f40": {
+  "name": "ACHRstat::isMotionTaskEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001d9f40",
+  "why": "0 when m_task[2] (the motion task, +0x3dc) is gone, else tail-calls 0x1e8f88 on the word +0x3d0 (DogActor::isModeSet clear for that ref's actor no +0xc); unreferenced, folded by Ghidra after GamMan::clearObjAttr"
+ },
  "001d9f84": {
   "name": "ACHRstat::isMotionEnd",
   "tag": "ror-inferred",
@@ -8320,6 +8344,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001da05c",
   "why": "returns m_task[1] (+0x3d8, the turn task of chrRotStart) == -1"
+ },
+ "001da074": {
+  "name": "ACHRstat::empty1da074",
+  "tag": "ror-inferred",
+  "was": "FUN_001da074",
+  "why": "empty, between ACHRstat::isTurnDone and killTasks; 0x1fabd0 calls it on the object at its +0x18"
  },
  "001da07c": {
   "name": "ACHRstat::killTasks",
@@ -8447,11 +8477,41 @@
   "was": "FUN_001dba3c",
   "why": "op 0 / 1 tail-jump into the WRD table converters with the room GamMan +0x21f7c, op 2 copies the room's x, z offset; the inlines GamMan::cnvPosW2L / cnvPosL2W / getWrdOffset (0x28f300..) call it with GamMan+0x18c00 as an unused this"
  },
+ "001dbb38": {
+  "name": "gamGetPcMapPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001dbb38",
+  "why": "gamMapConvLocal of GamMan's PC position (+0x22020) for map area a1; this GamMan +0x18c00 like the gam*Wrd* functions; no callers"
+ },
+ "001dbb74": {
+  "name": "gamMapConvWorld",
+  "tag": "ror-inferred",
+  "was": "FUN_001dbb74",
+  "why": "world position plus the WRD room offset (gamGetWrdOfsX / Z) to map screen coordinates by the area's row of the 0x18-byte table 0x2fc748"
+ },
+ "001dbc5c": {
+  "name": "gamMapConvLocal",
+  "tag": "ror-inferred",
+  "was": "FUN_001dbc5c",
+  "why": "gamMapConvWorld without the room offset: x = mulX * -x / divX + addX, z = mulZ * z / divZ + addZ from the 0x2fc748 row"
+ },
  "001dbcf0": {
   "name": "gamSetWrdRoom",
   "tag": "ror-inferred",
   "was": "FUN_001dbcf0",
   "why": "WrdTable::get(getWrdNo): words 0x18 / 0x1c into this +0x1d0 / +0x1c0 (this = GamMan +0x18c00)"
+ },
+ "001dbd90": {
+  "name": "gamGetMapFloor",
+  "tag": "ror-inferred",
+  "was": "FUN_001dbd90",
+  "why": "the map screen's page (0x1949bc matches it with the area in a table at 0x29bfb8): 4 when the room word +0x18dd0 is 4; else 1 when GamMan flags2 0x40000, else 1/2/3 by script bits word 6 bits 0/1/2, else +0x18dd0"
+ },
+ "001dbdf0": {
+  "name": "gamGetMapMarkers",
+  "tag": "ror-inferred",
+  "was": "FUN_001dbdf0",
+  "why": "fills two 0x20-byte map markers (kind 1 the PC from GamMan +0x22020 / +0x22030, kind 2 Brown via 0x144418 / 0x14448c) in map coordinates with their rotation y; returns 2, 0 when GamMan flags2 0x40000"
  },
  "001dbef8": {
   "name": "GamSysData::set",
@@ -8950,6 +9010,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e7f28",
   "why": "stores vtable 0x2e4910 (rtti: TskMtnMove), 0xc0 bytes: actor no +0xc, motion +0x10, frames +0x68, oid +8, speed +0x78; starts the motion on the actor (changeMotion for an fchr oid)"
+ },
+ "001e8f88": {
+  "name": "chrMotionRefEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001e8f88",
+  "why": "returns !DogActor::isModeSet of actor no +0xc of its argument (ACHRstat +0x3d0 in isMotionTaskEnd)"
  },
  "001e8fc4": {
   "name": "TskMtnMove2::TskMtnMove2",

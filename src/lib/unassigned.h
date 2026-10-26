@@ -130,6 +130,17 @@ struct CmnTaskMan
 
 extern CmnTaskMan g_taskMan;    /* bss 0x7a3d80 */
 
+/* What ACHRstat +0x3d0 points at: only its actor no is read. EE layout
+ * (the rest unknown). */
+struct ChrMotionRef
+{
+    int _00[3];
+    int m_actor;                // ROR 0x0c: the DogActor no
+};
+static_assert(offsetof(ChrMotionRef, m_actor) == 0x0c, "ChrMotionRef m_actor");
+/* !DogActor::isModeSet of ref's actor (unassigned@001e6d54). */
+int chrMotionRefEnd(const ChrMotionRef *ref);                            // ROR 0x001e8f88
+
 /* The parameter block TskSnd's constructor copies (0x40 bytes on the EE;
  * only the words SndMan::playStream sets are named). layout: host. */
 struct TskSndParam
