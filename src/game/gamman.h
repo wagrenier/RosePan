@@ -1265,6 +1265,10 @@ void gamSetBwnWait(int on);                                              // ROR 
  * (0x12a808 / 0x12a89c; a debug trace of the vector first). */
 void gamSetBwnPos(const float *pos);                                     // ROR 0x00144398
 void gamSetBwnRot(const float *rot);                                     // ROR 0x001443d8
+/* Their counterparts: Brown's position / rotation (0x12a974 / 0x12a9ec)
+ * into out[0..2] when out != NULL. */
+void gamGetBwnPos(float *out);                                           // ROR 0x00144418
+void gamGetBwnRot(float *out);                                           // ROR 0x0014448c
 /* Changes the motion of oid's actor (an achr through a task in its slot
  * +0x3dc); rotY >= 32769 keeps the current rotation. */
 void *chrChangeMotion(u_int oid, int motion, int a2, int a3, float blend,

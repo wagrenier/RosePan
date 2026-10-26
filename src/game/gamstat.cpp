@@ -127,6 +127,15 @@ ObjStat::ObjStat(int a1, u_int oid, int actor, short kind)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The vptr store and the deleting flag's operator delete are the
+// compiler's.
+// ROR 0x001d88c8 // callcheck: operator_delete (the deleting destructor's, emitted by the compiler)
+
+ObjStat::~ObjStat()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Written ahead for GamMan::clearChrSectaPtrs.
 // ROR 0x001d88fc
 
@@ -509,6 +518,16 @@ void ObjStat::releaseActor()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Unreferenced: Ghidra folded it into the end of releaseActor.
+// ROR 0x001d96e0
+
+void ObjStat::clearSectaCells()
+{
+    m_110 = NULL;
+    m_secta = NULL;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // The ROM copies +0x100..+0x1b0 as 22 doublewords; the host writes the
 // same block field by field in its EE layout (ObjStatSave).
 // ROR 0x001d96ec
@@ -726,6 +745,16 @@ void ObjStat::clearSecta(int all)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d9f40
+
+int ACHRstat::isMotionTaskEnd()
+{
+    if (g_taskMan.getTask(m_task[2]) == NULL)
+        return 0;
+    return chrMotionRefEnd(m_motionRef);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001d9f84
 
 int ACHRstat::isMotionEnd()
@@ -751,6 +780,13 @@ int ACHRstat::isMotionEnd()
 int ACHRstat::isTurnDone()
 {
     return m_task[1] == -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001da074
+
+void ACHRstat::empty1da074()
+{
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1358,6 +1394,68 @@ void gamWrdConvPos(int op, float *a, float *b)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x001dbb38
+
+void gamGetPcMapPos(GamMan *gam, int area, float *out)
+{
+    float pos[4];
+    for (int i = 0; i < 4; i++)
+        pos[i] = g_gamMan.m_pcPos[i];
+    gamMapConvLocal(gam, area, pos, out);
+}
+
+/* data 0x2fc748: one row per map area (datadump.py; rows 3.. are not
+ * map areas). */
+static const GamMapScale s_mapScale[3] = {
+    { 38400.0f, 6400.0f, 3072.0f, 512.0f,  24.0f, 514.0f },  // 0x002fc748
+    {  6400.0f, 6400.0f,  512.0f, 512.0f, 128.0f, 354.0f },  // 0x002fc760
+    {  6400.0f, 6400.0f,  512.0f, 512.0f, 155.0f, 185.0f },  // 0x002fc778
+};
+
+/* PORT: the ROM indexes the table with any area (getMapArea's -1 reads
+ * before it); outside 0..2 the position is copied unchanged. */
+static void gamMapConv(int area, float x, float z, float *out)
+{
+    if ((u_int)area >= 3)
+    {
+        out[0] = x;
+        out[2] = z;
+        return;
+    }
+    const GamMapScale &row = s_mapScale[area];
+    out[0] = (row.m_mulX * -x) / row.m_divX + row.m_addX;
+    out[2] = (row.m_mulZ * z) / row.m_divZ + row.m_addZ;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001dbb74
+
+void gamMapConvWorld(GamMan *gam, int area, const float *pos, float *out)
+{
+    (void)gam;
+    float ofsX = gamGetWrdOfsX();
+    float ofsZ = gamGetWrdOfsZ();
+    float y = pos[1];
+    float w = pos[3];
+    gamMapConv(area, pos[0] + ofsX, pos[2] + ofsZ, out);
+    out[1] = y;
+    out[3] = w;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001dbc5c
+
+void gamMapConvLocal(GamMan *gam, int area, const float *pos, float *out)
+{
+    (void)gam;
+    float y = pos[1];
+    float w = pos[3];
+    gamMapConv(area, pos[0], pos[2], out);
+    out[1] = y;
+    out[3] = w;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001dbcf0
 
 void gamSetWrdRoom(GamMan *gam, const void *file)
@@ -1371,6 +1469,56 @@ void gamSetWrdRoom(GamMan *gam, const void *file)
     }
     gam->m_18dd0 = e->m_18;
     gam->m_18dc0 = e->m_mapArea;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001dbd90
+
+int gamGetMapFloor(GamMan *gam)
+{
+    int floor = 1;
+    if ((g_gamMan.m_flags2 & 0x40000) == 0)
+    {
+        u_int bits = g_sequence.m_bits[6];
+        if ((bits & 1) != 0)
+            floor = 1;
+        else if ((bits & 2) != 0)
+            floor = 2;
+        else if ((bits & 4) != 0)
+            floor = 3;
+        else
+            floor = gam->m_18dd0;
+    }
+    if (gam->m_18dd0 == 4)
+        return 4;
+    return floor;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001dbdf0
+
+int gamGetMapMarkers(GamMan *gam, int unused, GamMapMarker *out)
+{
+    (void)unused;
+    if ((g_gamMan.m_flags2 & 0x40000) != 0)
+        return 0;
+    int area = g_gamMan.getMapArea();
+    float pos[4];
+    float rot[4];
+    out[0].m_kind = 1;
+    for (int i = 0; i < 4; i++)
+    {
+        pos[i] = g_gamMan.m_pcPos[i];
+        rot[i] = g_gamMan.m_pcRot[i];
+    }
+    gamMapConvWorld(gam, area, pos, out[0].m_pos);
+    out[0].m_rotY = rot[1];
+    out[1].m_kind = 2;
+    gamGetBwnPos(pos);
+    gamGetBwnRot(rot);
+    gamMapConvWorld(gam, area, pos, out[1].m_pos);
+    out[1].m_rotY = rot[1];
+    return 2;
 }
 
 // ──────────────────────────────────────────────────────────────────────

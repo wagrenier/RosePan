@@ -1572,8 +1572,8 @@
 /* 00144388 00000010 */ FUN_00144388(){}
 /* 00144398 00000040 */ gamSetBwnPos(){}  // ror
 /* 001443d8 00000040 */ gamSetBwnRot(){}  // ror
-/* 00144418 00000074 */ FUN_00144418(){}
-/* 0014448c 00000074 */ FUN_0014448c(){}
+/* 00144418 00000074 */ gamGetBwnPos(){}  // ror
+/* 0014448c 00000074 */ gamGetBwnRot(){}  // ror
 /* 00144500 00000038 */ gamSetBwnItem(){}  // ror
 /* 00144538 00000040 */ FUN_00144538(){}
 /* 0014457c 0000004c */ gamSetBwnWait(){}  // ror
@@ -3860,7 +3860,8 @@
 /* 001d9044 000002e8 */ ObjStat::getParam(){}  // ror
 /* 001d932c 00000298 */ ObjStat::setParam(){}  // ror
 /* 001d95c4 000000a8 */ ObjStat::setHide(){}  // ror
-/* 001d966c 00000080 */ ObjStat::releaseActor(){}  // ror
+/* 001d966c 00000074 */ ObjStat::releaseActor(){}  // ror
+/* 001d96e0 0000000c */ ObjStat::clearSectaCells(){}  // ror
 /* 001d96ec 00000144 */ ObjStat::save(){}  // ror
 /* 001d9830 000000d8 */ ObjStat::load(){}  // ror
 /* 001d9908 00000224 */ ACHRstat::init(){}  // ror
@@ -3868,10 +3869,10 @@
 /* 001d9e9c 0000006c */ ACHRstat::release(){}  // ror
 /* 001d9f08 00000004 */ ACHRstat::empty1d9f08(){}  // ror
 /* 001d9f10 00000030 */ ObjStat::clearSecta(){}  // ror
-/* 001d9f40 00000044 */ FUN_001d9f40(){}
+/* 001d9f40 00000044 */ ACHRstat::isMotionTaskEnd(){}  // ror
 /* 001d9f84 000000d8 */ ACHRstat::isMotionEnd(){}  // ror
 /* 001da05c 00000014 */ ACHRstat::isTurnDone(){}  // ror
-/* 001da074 00000004 */ FUN_001da074(){}
+/* 001da074 00000004 */ ACHRstat::empty1da074(){}  // ror
 /* 001da07c 000000b4 */ ACHRstat::killTasks(){}  // ror
 /* 001da130 00000084 */ ACHRstat::pauseTasks(){}  // ror
 /* 001da1b4 00000074 */ ACHRstat::killMoveTasks(){}  // ror
@@ -3893,12 +3894,12 @@
 /* 001db9c4 0000003c */ gamGetWrdOfsX(){}  // ror
 /* 001dba00 0000003c */ gamGetWrdOfsZ(){}  // ror
 /* 001dba3c 000000fc */ gamWrdConvPos(){}  // ror
-/* 001dbb38 0000003c */ FUN_001dbb38(){}
-/* 001dbb74 000000e8 */ FUN_001dbb74(){}
-/* 001dbc5c 00000094 */ FUN_001dbc5c(){}
+/* 001dbb38 0000003c */ gamGetPcMapPos(){}  // ror
+/* 001dbb74 000000e8 */ gamMapConvWorld(){}  // ror
+/* 001dbc5c 00000094 */ gamMapConvLocal(){}  // ror
 /* 001dbcf0 000000a0 */ gamSetWrdRoom(){}  // ror
-/* 001dbd90 00000060 */ FUN_001dbd90(){}
-/* 001dbdf0 00000104 */ FUN_001dbdf0(){}
+/* 001dbd90 00000060 */ gamGetMapFloor(){}  // ror
+/* 001dbdf0 00000104 */ gamGetMapMarkers(){}  // ror
 /* 001dbef8 000000a8 */ GamSysData::set(){}  // ror
 /* 001dbfa0 000000d0 */ GamSysData::getRec(){}  // ror
 /* 001dc070 00000418 */ GamSysData::setField(){}  // ror
@@ -4054,7 +4055,7 @@
 /* 001e8478 00000158 */ FUN_001e8478(){}
 /* 001e85d0 000003f0 */ FUN_001e85d0(){}
 /* 001e89c0 000005c8 */ FUN_001e89c0(){}
-/* 001e8f88 0000003c */ FUN_001e8f88(){}
+/* 001e8f88 0000003c */ chrMotionRefEnd(){}  // ror
 /* 001e8fc4 00000260 */ TskMtnMove2::TskMtnMove2(){}  // ror
 /* 001e9224 00000004 */ FUN_001e9224(){}
 /* 001e922c 00000068 */ FUN_001e922c(){}

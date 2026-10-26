@@ -914,6 +914,15 @@ never asserts): sessions name them (`tus.py define --why`).
   0x70..0x72; 3: 0x75 / 0x76; 4..8: 0x1d / 0x1e; 5 also 0x31 / 0x42; 8 0x39) and for every table but
   1 copies the smell uids 0x10..0x12 (table 9 also 0x1d / 0x1e) *out* into data: shared read tails.
   GamIdMap 0x1d84c8..0x1d87f4 (invented name): a u_short key / value map, parallel arrays, value 0 free.
+  **Map screen helpers** 0x1dbb38..0x1dbef8 (slice 3; the menu 0x1949bc / 0x196878 calls them with
+  GamMan +0x18c00, the port passes GamMan): `gamMapConvWorld` 0x1dbb74 / `gamMapConvLocal` 0x1dbc5c turn
+  a room position (+ the WRD offset for World) into map pixels by GamMan::getMapArea's row of data
+  0x2fc748 (GamMapScale, 3 areas: x = mulX * -x / divX + addX, z = mulZ * z / divZ + addZ);
+  `gamGetMapFloor` 0x1dbd90 picks the map page (4 when the room word +0x18dd0 is 4, else 1 with flags2
+  0x40000, else 1/2/3 by script bits word 6 bits 0/1/2, else +0x18dd0); `gamGetMapMarkers` 0x1dbdf0
+  fills two 0x20-byte GamMapMarker (kind 1 the PC +0x22020/+0x22030, kind 2 Brown via gamGetBwnPos /
+  gamGetBwnRot 0x144418 / 0x14448c). ACHRstat +0x3d0 is a pointer whose +0xc is an actor no
+  (ChrMotionRef, writer not found; read by isMotionTaskEnd 0x1d9f40 through chrMotionRefEnd 0x1e8f88).
 - **Map units** (gamman session 5): `GamMan::loadMapUnit` 0x1ca0dc (native 027) reads the first
   0x1800 bytes of data/bg/mapunit.bin (an RTPK, one file per unit, named without extension), then
   the unit's file into a keep buffer (+0x225e8), `loadMapPack` 0x1ca38c checks the RTPK magic,

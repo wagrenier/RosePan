@@ -1656,3 +1656,22 @@ void GamMan::selectSectaList(int list)
 {
     ROSEPAN_STUB("GamMan::selectSectaList", 0x001d7eb8);
 }
+
+// stub of ROR 0x001e8f88
+int chrMotionRefEnd(const ChrMotionRef *ref)
+{
+    ROSEPAN_STUB("chrMotionRefEnd", 0x001e8f88);
+    return {};
+}
+
+// stub of ROR 0x00144418
+void gamGetBwnPos(float *out)
+{
+    ROSEPAN_STUB("gamGetBwnPos", 0x00144418);
+}
+
+// stub of ROR 0x0014448c
+void gamGetBwnRot(float *out)
+{
+    ROSEPAN_STUB("gamGetBwnRot", 0x0014448c);
+}

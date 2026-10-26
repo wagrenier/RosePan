@@ -22,6 +22,8 @@
 #include "sdk/eetypes.h"
 #include "sequence/sequence.h"
 
+struct ChrMotionRef;            /* lib/unassigned.h */
+
 /* The param ids, named after the ELF's accessors (get_o_* / get_a_*). */
 enum GamParam
 {
@@ -324,8 +326,9 @@ struct ObjStat
      * a1 into o_stat and the words +0x110 / +0x114 / +0x130 / +0x140
      * cleared. The ROM passes a node count (0x40 / 8) it never reads. */
     ObjStat(int a1, u_int oid, int actor, short kind);                   // ROR 0x001d87f4
-    /* EE slot 1 (+0x08): the deleting destructor. */
-    virtual ~ObjStat() {}                                                // ROR 0x001d88c8
+    /* EE slot 1 (+0x08): the deleting destructor (stores ObjStat's
+     * vtable, operator delete when bit 0 of its flag is set). */
+    virtual ~ObjStat();                                                  // ROR 0x001d88c8
     /* MagScene::releaseActor(m_actor) when it has one, m_actor = -1; a
      * type-5 object also drops its GamMan pool 0x20b00 records. */
     void releaseActor();                                                 // ROR 0x001d966c
@@ -375,6 +378,8 @@ struct ObjStat
     void clearSecta(int all);                                            // ROR 0x001d9f10
     /* The three cell pointers cleared (no list is touched). */
     void clearSectaPtrs();                                               // ROR 0x001d88fc
+    /* m_110 and m_secta = NULL (m_sectaLast kept). No direct callers. */
+    void clearSectaCells();                                              // ROR 0x001d96e0
     /* The base params (1..0x18, 0x1000..0x1005). */
     void getParam(int which, void *out);                                 // ROR 0x001d9044
     void setParam(int which, const void *data);                          // ROR 0x001d932c
@@ -503,6 +508,11 @@ struct ACHRstat : ObjStat
     int  isMotionEnd();                                                  // ROR 0x001d9f84
     /* m_task[1], the turn task, is -1. */
     int  isTurnDone();                                                   // ROR 0x001da05c
+    /* 0 without the motion task m_task[2], else chrMotionRefEnd(m_motionRef).
+     * Unreferenced (Ghidra folded it into GamMan::clearObjAttr). */
+    int  isMotionTaskEnd();                                              // ROR 0x001d9f40
+    /* Empty (0x1fabd0 calls it on the object at its +0x18). */
+    void empty1da074();                                                  // ROR 0x001da074
 
     /* The ELF's param accessors over the record. */
     // ROR 0x0028fbb4
@@ -548,7 +558,7 @@ struct ACHRstat : ObjStat
 
     ParamFunc m_paramFunc[0x22];    // ROR 0x280: 8 bytes each (GCC 2 {delta, index, pfn}); [0] and [9] none
     int       m_param[16];          // ROR 0x390: params 0x22..0x31, words
-    int       _3d0;
+    ChrMotionRef *m_motionRef;      // ROR 0x3d0: isMotionTaskEnd's ref, its +0xc an actor no (writer not found yet)
     int       m_task[4];            // ROR 0x3d4: task ids, -1 none; [0] a_move_type, [1] the turn task (chrRotStart)
     int       m_placeTask;          // ROR 0x3e4: startAchrPlaceTask's TskSeqEvent, -1 none
     int       m_taskId;             // ROR 0x3e8: resetObj kills it
@@ -636,5 +646,54 @@ float gamGetWrdOfsZ(void);                                               // ROR 
  * A%03d.ARA file as a second argument it does not read. */
 struct GamMan;
 void gamSetWrdRoom(GamMan *gam, const void *file);                      // ROR 0x001dbcf0
+
+
+/* ---- the map screen (the menu at 0x1949bc; this GamMan +0x18c00 in the
+ * ROM, which the port's gam*Map* functions take as GamMan) ---- */
+
+/* One row per map area (GamMan::getMapArea 0..2) of the table at data
+ * 0x2fc748: room coordinates to map screen pixels. EE layout (0x18). */
+struct GamMapScale
+{
+    float m_divX;               // ROR 0x00
+    float m_divZ;               // ROR 0x04
+    float m_mulX;               // ROR 0x08
+    float m_mulZ;               // ROR 0x0c
+    float m_addX;               // ROR 0x10: map x = mulX * -x / divX + addX
+    float m_addZ;               // ROR 0x14: map z = mulZ * z / divZ + addZ
+};
+static_assert(sizeof(GamMapScale) == 0x18, "GamMapScale EE size");
+static_assert(offsetof(GamMapScale, m_addX) == 0x10, "GamMapScale m_addX");
+static_assert(offsetof(GamMapScale, m_addZ) == 0x14, "GamMapScale m_addZ");
+
+/* A map marker as gamGetMapMarkers fills them (0x20 bytes on the EE, the
+ * menu's buffer holds 0x80). EE layout. */
+struct GamMapMarker
+{
+    int   m_00;                 // ROR 0x00
+    int   m_kind;               // ROR 0x04: 1 the PC, 2 Brown
+    int   m_08;                 // ROR 0x08
+    float m_rotY;               // ROR 0x0c
+    float m_pos[4];             // ROR 0x10: map coordinates (x, y kept, z)
+};
+static_assert(sizeof(GamMapMarker) == 0x20, "GamMapMarker EE size");
+static_assert(offsetof(GamMapMarker, m_kind) == 0x04, "GamMapMarker m_kind");
+static_assert(offsetof(GamMapMarker, m_rotY) == 0x0c, "GamMapMarker m_rotY");
+static_assert(offsetof(GamMapMarker, m_pos) == 0x10, "GamMapMarker m_pos");
+
+/* gamMapConvLocal of GamMan's PC position (+0x22020). No callers. */
+void gamGetPcMapPos(GamMan *gam, int area, float *out);                  // ROR 0x001dbb38
+/* pos plus the WRD room offset to map coordinates by area's row; y and w
+ * copied. */
+void gamMapConvWorld(GamMan *gam, int area, const float *pos, float *out); // ROR 0x001dbb74
+/* gamMapConvWorld without the room offset. */
+void gamMapConvLocal(GamMan *gam, int area, const float *pos, float *out); // ROR 0x001dbc5c
+/* The map page: 4 when the room's word (+0x18dd0) is 4; else 1 with
+ * GamMan flags2 0x40000, else 1 / 2 / 3 by the script's bits word 6 bits
+ * 0 / 1 / 2, else the room's word. */
+int  gamGetMapFloor(GamMan *gam);                                        // ROR 0x001dbd90
+/* The PC's and Brown's markers into out[0] / out[1]; returns 2, or 0
+ * (nothing written) with GamMan flags2 0x40000. */
+int  gamGetMapMarkers(GamMan *gam, int unused, GamMapMarker *out);       // ROR 0x001dbdf0
 
 #endif /* _GAME_GAMSTAT_H */
