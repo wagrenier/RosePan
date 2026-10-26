@@ -1598,3 +1598,86 @@ int Obj176a3c::createEff(const EffParam *param)
     ROSEPAN_STUB("Obj176a3c::createEff", 0x00176cc8);
     return {};
 }
+
+// stub of ROR 0x00163b20
+int EmyManager::getEmyWord3c(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::getEmyWord3c", 0x00163b20);
+    return {};
+}
+
+// stub of ROR 0x00164078
+int EmyManager::isEmyFlag30(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::isEmyFlag30", 0x00164078);
+    return {};
+}
+
+// stub of ROR 0x00163bb8
+void EmyManager::releaseEmyHold(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::releaseEmyHold", 0x00163bb8);
+}
+
+// stub of ROR 0x0016366c
+void EmyManager::setEmyActive(u_int oid, int on)
+{
+    ROSEPAN_STUB("EmyManager::setEmyActive", 0x0016366c);
+}
+
+// stub of ROR 0x00163b48
+int EmyManager::setEmyWord238(u_int oid, int v)
+{
+    ROSEPAN_STUB("EmyManager::setEmyWord238", 0x00163b48);
+    return {};
+}
+
+// stub of ROR 0x00162afc
+void EmyManager::setSlotWord24(int no, int v)
+{
+    ROSEPAN_STUB("EmyManager::setSlotWord24", 0x00162afc);
+}
+
+// stub of ROR 0x00163b80
+int EmyManager::testEmyView(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::testEmyView", 0x00163b80);
+    return {};
+}
+
+// stub of ROR 0x001f5d90
+int chrChangeMotionBySuffix(float blend, float rotY, u_int oid, const char *name, int a2,
+                             int a3)
+{
+    ROSEPAN_STUB("chrChangeMotionBySuffix", 0x001f5d90);
+    return {};
+}
+
+// stub of ROR 0x001f61ec
+void chrKillMotionTask(u_int oid)
+{
+    ROSEPAN_STUB("chrKillMotionTask", 0x001f61ec);
+}
+
+// stub of ROR 0x001f59b4
+CmnITask * chrMtnMove(float speed, float rotY, u_int oid, int motion, int p1d8, u_int flags,
+                     const char *name)
+{
+    ROSEPAN_STUB("chrMtnMove", 0x001f59b4);
+    return {};
+}
+
+// stub of ROR 0x001f5bdc
+CmnITask * chrMtnMove2(float speed, u_int oid, int motion, int p1d8, u_int flags,
+                      const char *name)
+{
+    ROSEPAN_STUB("chrMtnMove2", 0x001f5bdc);
+    return {};
+}
+
+// stub of ROR 0x001f6308
+void chrSetMotion(float speed, int no, int motion, int p1d8, u_int flags, u_int oid,
+                  const char *name)
+{
+    ROSEPAN_STUB("chrSetMotion", 0x001f6308);
+}

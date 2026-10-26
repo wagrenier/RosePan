@@ -3022,3 +3022,16 @@ void GamMan::pushCamera()
 {
     ROSEPAN_STUB("GamMan::pushCamera", 0x001c5ffc);
 }
+
+// stub of ROR 0x001d0758
+int GamMan::getObjRotY(u_int oid, float *out)
+{
+    ROSEPAN_STUB("GamMan::getObjRotY", 0x001d0758);
+    return {};
+}
+
+// stub of ROR 0x001c5a5c
+void GamMan::switchEnemies(int on)
+{
+    ROSEPAN_STUB("GamMan::switchEnemies", 0x001c5a5c);
+}
