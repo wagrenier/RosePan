@@ -922,10 +922,34 @@ int  chrIsNear(float range, u_int oid, u_int target);                    // ROR 
 /* 1 when object target (radius 50) is within range of node name of
  * oid's actor. */
 int  chrIsNearNode(float range, u_int oid, u_int target, const char *name); // ROR 0x001f5410
+/* An achr's limb part (0 neck, 1 / 2 right / left upper arm, 3 / 4
+ * right / left thigh) back: clears its bit in m_attr[0] and sets the node's
+ * DogActor::setNodeScale to 1.0. 0 when the bit was clear; a part above 4
+ * only calls setNodeScale(1.0, -1). */
+int  chrRestoreLimb(u_int oid, u_int part);                              // ROR 0x001f5680
+/* chrMtnMove2 for an achr only (NULL otherwise, and no name): its m_task[2]
+ * is killed (the slot not reset) and replaced by a new TskMtnMove2. */
+CmnITask *chrMtnMove2Achr(float speed, u_int oid, int motion, int p1d8, u_int flags); // ROR 0x001f603c
+/* An achr's running TskMtnMove2 gets step (no caller in the ROM). */
+void chrSetMtnMove2Step(float step, u_int oid);                          // ROR 0x001f616c
+/* chrSetMotion on oid's actor. */
+void chrSetMotionByOid(float speed, u_int oid, int motion, int p1d8, u_int flags,
+                       const char *name);                                // ROR 0x001f627c
+/* A new object no (an achr below 4, an fchr below 10) of scene model
+ * (0xffff: none, loaded by MagSystem::loadModel), placed at pos / rot when
+ * given; returns its oid. No caller in the ROM. */
+u_int chrCreateChr(short model, int no, const float *pos, const float *rot); // ROR 0x001f6694
+/* A model-less fchr of type 6 with params 0x32 (word) and 0x33 (value),
+ * placed at pos / rot when given; returns its oid. No caller in the ROM. */
+u_int chrCreateFchr6(float value, const float *pos, const float *rot, short word); // ROR 0x001f67a0
+/* Achr oid steps one unit away from object obj (a random diagonal when
+ * their directions cancel) unless testHitAt finds something ten ahead or
+ * the cell refuses; each obj once per frame (g_frameReq). No caller found. */
+void chrStepAwayFrom(u_int obj, u_int oid);                              // ROR 0x001f68bc
 /* gamOidType(oid) == 2 (TskMtnMove's test, inlined there). */
 int  chrIsOidType2(u_int oid);                                           // ROR 0x001f6878
 
-/* The objects 0x1f68bc pushed aside this frame (at most 32; GamMan::update
+/* The objects chrStepAwayFrom stepped away from this frame (at most 32; GamMan::update
  * clears them each frame). */
 #define GAM_FRAME_REQ_MAX 32
 extern int   g_frameReqNum;                     /* sdata 0x2d8f68 */

@@ -4532,6 +4532,32 @@ int chrIsNearNode(float range, u_int oid, u_int target, const char *name)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The limb nodes chrRestoreLimb puts back, by part (the bit in m_attr[0]).
+// ROR 0x001f5680 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (the inlined getNodeIndexByName: its assert handler and lookup)
+
+static const char *const s_limbNode[5] = {
+    "Bip01 Neck", "Bip01 R UpperArm", "Bip01 L UpperArm", "Bip01 R Thigh", "Bip01 L Thigh",
+};
+
+int chrRestoreLimb(u_int oid, u_int part)
+{
+    ACHRstat *chr = g_gamMan.getAchr(oid);
+    DogActor &actor = g_magSystem.m_scene.m_actors[chr->m_actor];
+    int       node = -1;
+
+    if (part < 5)
+    {
+        u_int bit = 1u << part;
+        if ((chr->m_attr[0] & bit) == 0)
+            return 0;
+        node = actor.getNodeIndexByName(s_limbNode[part]);
+        chr->m_attr[0] &= ~bit;
+    }
+    actor.setNodeScale(1.0f, node);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // A new TskMtnMove for oid: an achr's replaces its motion task m_task[2]
 // (rotY >= 32769 first sets the actor's rotation to its heading); other
 // objects get one with no actor.
@@ -4702,6 +4728,45 @@ void *chrChangeMotion(u_int oid, int motion, int a2, int a3, float blend, float 
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// chrMtnMove2's achr branch alone; the killed task's slot keeps its id
+// until addTask stores the new one.
+// ROR 0x001f603c
+
+CmnITask *chrMtnMove2Achr(float speed, u_int oid, int motion, int p1d8, u_int flags)
+{
+    if (gamOidList(oid) != 1)
+        return NULL;
+    ACHRstat *chr = g_gamMan.getAchr(oid);
+    if (chr == NULL)
+        return NULL;
+    int *id = &chr->m_task[2];
+    chr->m_13c = motion;
+    int no = chr->m_actor;
+    if (g_taskMan.getTask(*id) != 0)
+        g_taskMan.killTask(*id);
+    // callcheck: operator_new (the new expression)
+    TskMtnMove2 *task = new TskMtnMove2(speed, no, motion, p1d8, flags, oid);
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 1);
+    return task;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f616c
+
+void chrSetMtnMove2Step(float step, u_int oid)
+{
+    if (gamOidList(oid) != 1)
+        return;
+    ACHRstat *chr = g_gamMan.getAchr(oid);
+    if (chr == NULL)
+        return;
+    int *id = &chr->m_task[2];
+    if (g_taskMan.getTask(*id) == 0)
+        return;
+    static_cast<TskMtnMove2 *>(g_taskMan.findTask(*id))->m_step = step;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Kills an achr's motion task m_task[2].
 // ROR 0x001f61ec
 
@@ -4716,6 +4781,15 @@ void chrKillMotionTask(u_int oid)
         g_taskMan.killTask(*id);
         *id = -1;
     }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f627c
+
+void chrSetMotionByOid(float speed, u_int oid, int motion, int p1d8, u_int flags,
+                       const char *name)
+{
+    chrSetMotion(speed, g_gamMan.getActorNo(oid), motion, p1d8, flags, oid, name);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -4816,6 +4890,50 @@ u_int chrCreateItemObj(short id, const float *pos, const float *rot)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Objects 0..3 are achrs, 4..9 fchrs; makeOid gets -1 for the rest.
+// ROR 0x001f6694
+
+u_int chrCreateChr(short model, int no, const float *pos, const float *rot)
+{
+    int list = -1;
+    int id = (u_short)model == 0xffff ? -1 : g_magSystem.loadModel((u_short)model, -1);
+
+    if (no >= 0)
+    {
+        if (no < 4)
+            list = 1;
+        else if (no < 10)
+            list = 2;
+    }
+    u_int oid = g_gamMan.makeOid((u_int)list, (u_int)no, -1);
+    g_gamMan.addChr(id, oid, no & 0xffff, NULL, 0);
+    if (pos != NULL)
+        g_gamMan.setObjPos(oid, pos);
+    if (rot != NULL)
+        g_gamMan.setObjRot(oid, (float *)rot);
+    return oid;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f67a0
+
+u_int chrCreateFchr6(float value, const float *pos, const float *rot, short word)
+{
+    short w = word;
+    float v = value;
+    u_int oid = g_gamMan.makeOid(2, 6, -1);
+
+    g_gamMan.addChr(-1, oid, 0xffff, NULL, 0);
+    if (pos != NULL)
+        g_gamMan.setObjPos(oid, pos);
+    if (rot != NULL)
+        g_gamMan.setObjRot(oid, (float *)rot);
+    g_gamMan.setObjParam(oid, 0x32, &w);
+    g_gamMan.setObjParam(oid, 0x33, &v);
+    return oid;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001f6878
 
 int chrIsOidType2(u_int oid)
@@ -4832,6 +4950,49 @@ void gamClearFrameReq(void)
     // PC: the ROM clears 0x20 bytes, the first 8 of the 32 words.
     memset(g_frameReq, 0, 0x20);
     g_frameReqNum = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The direction from obj to the achr; |sin| + |cos| never reaches 0.2, so
+// the random diagonal is dead code kept as the ROM has it.
+// ROR 0x001f68bc
+
+void chrStepAwayFrom(u_int obj, u_int oid)
+{
+    sceVu0FVECTOR from, at, dir, to, probe;
+
+    if (g_gamMan.isObj(obj) == 0)
+        return;
+    if (g_frameReqNum > 0)
+    {
+        // The ROM scans all 32 slots once the list is not empty.
+        for (int i = 0; i < GAM_FRAME_REQ_MAX; i++)
+            if (g_frameReq[i] == obj)
+                return;
+    }
+    ACHRstat *chr = g_gamMan.getAchr(oid);
+    g_gamMan.getObjPos(obj, from);
+    chr->getPos(at);
+    float angle = utlAtan2(at[0] - from[0], at[2] - from[2]);
+    dir[0] = sinf(angle);
+    dir[1] = 0.0f;
+    dir[2] = cosf(angle);
+    dir[3] = 0.0f;  // PORT: not set by the ROM (only x and z are read back)
+    if (fabsf(dir[0]) + fabsf(dir[2]) <= 0x1.99999ap-3f)  /* 0x3e4ccccc */
+    {
+        dir[0] = (rand() & 1) ? 1.0f : -1.0f;
+        dir[2] = (rand() & 1) ? 1.0f : -1.0f;
+    }
+    sceVu0AddVector(to, at, dir);
+    dir[0] *= 10.0f;
+    dir[2] *= 10.0f;
+    sceVu0AddVector(probe, at, dir);
+    if (g_gamMan.testHitAt(probe, oid, 0, 1, NULL) == 0 && chr->trySetPos(to) != 0)
+    {
+        if (g_frameReqNum < GAM_FRAME_REQ_MAX)  // PORT: the ROM writes past the list
+            g_frameReq[g_frameReqNum] = obj;
+        g_frameReqNum++;
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────

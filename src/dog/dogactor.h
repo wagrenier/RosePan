@@ -22,6 +22,9 @@
 #include "dog/dogmodel.h"
 #include "dog/dogmotionblend.h"
 
+/* setNodeScale's list length. */
+#define DOG_SCALE_NODE_MAX 5
+
 /* EE 0x4d0. layout: host -- a DogModel (pointers); EE offsets in the
  * comments. */
 struct DogActor : DogModel
@@ -72,6 +75,10 @@ struct DogActor : DogModel
     /* EE slot 20 (+0xa0): the shadow model (or the model) into a shadow layer. */
     void drawShadow(I3dLayer *layer);                                    // ROR 0x0010e534
     /* The index of the motion record named theName, -1 when none. */
+    /* A 5-entry node / value list (a node scale, by chrRestoreLimb's 1.0;
+     * unverified): node's entry takes scale, 1.0 frees it; otherwise the
+     * first free entry, or one at 1.0, takes node and scale. */
+    void setNodeScale(float scale, int node);                            // ROR 0x0010eba0
     int  findMotionByName(const char *theName);                          // ROR 0x0010aa9c
     /* The motion record whose name after its first '_' is theName (any
      * case), -1 when none; getMotionNoBySuffix gives its word +0x14. */
@@ -148,7 +155,8 @@ struct DogActor : DogModel
     u_char        _3dc[0x3f0 - 0x3dc];
     int           m_motion_flags;       // ROR 0x3f0: setMotion's flags (0x80: start from the motion's length; 0x40 added by the motion record)
     int           m_motion_flags2;      // ROR 0x3f4: setMotion's second word; role unknown
-    u_char        _3f8[0x420 - 0x3f8];
+    int           m_scale_node[DOG_SCALE_NODE_MAX];  // ROR 0x3f8: setNodeScale's nodes, < 0 free
+    float         m_scale[DOG_SCALE_NODE_MAX];       // ROR 0x40c: their values (1.0 frees an entry)
     float         m_trans_ofs_y_save;   // ROR 0x420: saveTransOfsY copies m_trans_ofs[1]
     float         m_rot_ofs_y;          // ROR 0x424: clearRotOfsY / getRotOfsYSave
     u_char        _428[0x480 - 0x428];
@@ -167,6 +175,8 @@ static_assert(offsetof(DogActor, m_motion) >= 0x1e4, "m_motion");
 static_assert(offsetof(DogActor, m_base_rotate) >= 0x3c0, "m_base_rotate");
 static_assert(offsetof(DogActor, m_motion_flags2) >= 0x3f4, "m_motion_flags2");
 static_assert(offsetof(DogActor, m_rot_y_aar) >= 0x3d0, "m_rot_y_aar");
+static_assert(offsetof(DogActor, m_scale_node) >= 0x3f8, "m_scale_node");
+static_assert(offsetof(DogActor, m_scale) >= 0x40c, "m_scale");
 static_assert(offsetof(DogActor, m_rot_ofs_y) >= 0x424, "m_rot_ofs_y");
 static_assert(sizeof(DogActor) >= 0x4d0, "DogActor is 0x4d0 bytes on the EE");
 

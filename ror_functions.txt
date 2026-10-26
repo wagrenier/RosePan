@@ -380,7 +380,7 @@
 /* 0010e9ac 0000010c */ FUN_0010e9ac(){}
 /* 0010eab8 00000070 */ DogActor::getNodeWorldMatrix(){}  // ror
 /* 0010eb28 00000078 */ DogActor::getNodeWorldPos(){}  // ror
-/* 0010eba0 000000ac */ FUN_0010eba0(){}
+/* 0010eba0 000000ac */ DogActor::setNodeScale(){}  // ror
 /* 0010ec50 00000038 */ FUN_0010ec50(){}
 /* 0010ec8c 000000a0 */ FUN_0010ec8c(){}
 /* 0010ed2c 00000090 */ FUN_0010ed2c(){}
@@ -4209,21 +4209,22 @@
 /* 001f5350 000000c0 */ chrIsNear(){}  // ror
 /* 001f5410 00000148 */ chrIsNearNode(){}  // ror
 /* 001f5558 00000128 */ chrGetNodeWorldPos(){}  // ror
-/* 001f5680 00000330 */ FUN_001f5680(){}
+/* 001f5680 00000330 */ chrRestoreLimb(){}  // ror
 /* 001f59b4 00000228 */ chrMtnMove(){}  // ror
 /* 001f5bdc 000001b4 */ chrMtnMove2(){}  // ror
 /* 001f5d90 000000b8 */ chrChangeMotionBySuffix(){}  // ror
 /* 001f5e48 000001f4 */ chrChangeMotion(){}  // ror
-/* 001f603c 000001b0 */ FUN_001f603c(){}
+/* 001f603c 00000130 */ chrMtnMove2Achr(){}  // ror
+/* 001f616c 00000080 */ chrSetMtnMove2Step(){}  // ror
 /* 001f61ec 00000090 */ chrKillMotionTask(){}  // ror
-/* 001f627c 0000008c */ FUN_001f627c(){}
+/* 001f627c 0000008c */ chrSetMotionByOid(){}  // ror
 /* 001f6308 0000026c */ chrSetMotion(){}  // ror
 /* 001f6578 0000011c */ chrCreateItemObj(){}  // ror
-/* 001f6694 0000010c */ FUN_001f6694(){}
-/* 001f67a0 000000d8 */ FUN_001f67a0(){}
+/* 001f6694 0000010c */ chrCreateChr(){}  // ror
+/* 001f67a0 000000d8 */ chrCreateFchr6(){}  // ror
 /* 001f6878 00000014 */ chrIsOidType2(){}  // ror
 /* 001f688c 00000030 */ gamClearFrameReq(){}  // ror
-/* 001f68bc 0000026c */ FUN_001f68bc(){}
+/* 001f68bc 0000026c */ chrStepAwayFrom(){}  // ror
 /* 001f6b28 00000064 */ utlAddPolar(){}  // ror
 /* 001f6b8c 00000084 */ chrRotFrames(){}  // ror
 /* 001f6c14 00000050 */ chrRateForFrames(){}  // ror

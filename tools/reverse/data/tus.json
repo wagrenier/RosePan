@@ -1,6 +1,5 @@
 {
  "queue": [
-  "task/tsk_chr.cpp",
   "unassigned@001f82e4",
   "unassigned@00192ac0",
   "dog/dogmodel.cpp",
@@ -1119,7 +1118,7 @@
    "why": "SysTimer (ctor 0x203d94, dtor 0x203da8, init / start / stop / read / update / hold), sysInit/TermManagers, the host0 reboot 0x2041a0 and the static initializer pair 0x2041f8 / 0x20439c / 0x2043bc that constructs the global managers: the globals file before main.cpp (no source string; file name a guess)"
   },
   "task/tsk_chr.cpp": {
-   "notes": "Left in this TU: 0x1f5680 (called from unassigned@00164fc0), 0x1f603c (from 00143d3c and 00164fc0), 0x1f627c (from 00143d3c), 0x1f6694, 0x1f67a0 -- the chr* helpers between chrGetNodeWorldPos and chrIsOidType2; once written the TU is complete except the inline dtors / terms the brief lists as todo (they are written in tsk_chr.h). New frontier stubs: utlHitCheck 0x10456c (utl/utlbtl.cpp, sphere / sweep test; struct UtlHitCheck in utl/utlbtl.h, m_10 picks the second test) and scnChrRequest 0x1fac60 (unassigned@001f82e4, jump table 0x2fed40). DogActor gained m_1d8 (read only by TskMoveAdj). ChrHitRec in tsk_chr.h is the testHitAt record (+0x10 the object hit); TskAvoidMove ctor arguments are (oid, hit, frames, limit, to, byHit): GamMan passes 8, 30, NULL, 0. ROM garbage choices are in open-items Open questions. For the references: architecture.md -- TskAvoidMove vtable 0x2e4b50 kind 0, TskMovePhysic 0x2e4b10 kind 0, TskGenFrameFunc 0x2e4d10, TskMoveAdj 0x2e4990 kind 0xd and TskRotAdj 0x2e4950 kind 0xe have no callers.",
+   "notes": "All of task/tsk_chr.cpp is now written; the inline dtors and empty terms the brief still lists as todo are in tsk_chr.h. Status verify: nothing on screen reaches the script tasks yet (the smoke run stops at the boot disclaimer); the first session whose screenshot shows a script-driven character move or turn should mark it done. New stub: DogActor::setNodeScale 0x10eba0 (dog/dogactor.cpp, a 14-instruction leaf: node entry gets the value, 1.0 frees it, else first free or 1.0 entry takes it) -- write it with dogactor.cpp. chrStepAwayFrom guards the frame list against overflow (PORT); the ROM writes past 32. The setter of non-1.0 node scales (limb loss) is not found yet.",
    "ranges": [
     [
      "001e7f28",
@@ -1171,9 +1170,14 @@
      "date": "2026-10-26 19:27",
      "status": "partial",
      "summary": "Wrote TskAvoidMove whole (ctor 0x1ef184 replacing the hand stub, term, exec, aimAway / aimAwayHit / aimToward, stepAway / stepAwayHit / stepToward / stepNone: an achr pushed out of a testHitAt hit or toward a point), TskMovePhysic whole (a thrown fchr: height and speed curves chrThrowHeight / chrThrowSpeed, castRay bounce, PC or dog request 0x1fac60), TskGenFrameFunc (kind 1 plays a sound effect), the uncalled TskMoveAdj / TskRotAdj / chrMoveInFrames / chrRateForFrames / TskChrRot::isTurned / TskMsgMan::setText, chrCreateItemObj (stub deleted) and the range tests chrIsNear / chrIsNearNode over the new utl/utlbtl.h UtlHitCheck. Named 37 functions (batch tskchr_011), created two in Ghidra. 15 s smoke run unchanged: the boot disclaimer; none of these tasks is reached yet."
+    },
+    {
+     "date": "2026-10-26 19:35",
+     "status": "verify",
+     "summary": "Wrote the last chr helpers: chrRestoreLimb 0x1f5680 (limb attr bits 0..4 and Bip01 nodes, DogActor::setNodeScale 1.0), chrMtnMove2Achr 0x1f603c with the folded chrSetMtnMove2Step 0x1f616c (created in Ghidra), chrSetMotionByOid 0x1f627c, chrCreateChr 0x1f6694, chrCreateFchr6 0x1f67a0 and chrStepAwayFrom 0x1f68bc (the frame request list). Declared DogActor::setNodeScale 0x10eba0 with its node / value list at +0x3f8 / +0x40c (now a stub in dogactor.cpp). Named 8 functions (batch tskchr_012). 15 s smoke run unchanged: the boot disclaimer; no script reaches these helpers yet."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "Unanchored run between task/tsk_man.cpp and task/tsk_scene.cpp: the seq-driven character tasks (TskMtnMove*, TskMove*, TskRotAdj, TskChrRot, TskAttach) and their chr* starters, plus the generic script tasks (TskMovie, TskMsgMan, TskSeqEvent, TskSysFunc, TskFrameFunc). Ends at 0x1f6c64 where DisplayMessage / SeManager / VoiceManager / ScenePlay (tsk_scene.cpp's classes, used by 0x1f82e4..) begin; 0x1f6c14 is still called from TskChrRot code. Name descriptive (no source string)."
   },
   "task/tsk_man.cpp": {
