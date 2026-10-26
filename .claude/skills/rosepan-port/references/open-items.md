@@ -672,6 +672,11 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- MagSceneRayHit size (2026-10-26, sequence/seqcall.cpp session 9): native 156 copies castRay's hit
+  record out as 0x70 bytes (3 x 0x20 + 0x10 struct-copy code) while magscene.h asserts 0x60 (from
+  drawBlobShadows' clear). The extra 0x10 is never initialised in the ROM's frame, so the record is
+  likely 0x70 with an unused tail; seqcall.cpp wraps it in SeqRayHit (0x70) for now. Settle it when
+  MagScene::castRay's model code (DogModel::castRay 0x11440c) is written.
 - MagLifeFadeKey vs MagLifeFadeKeyHole (2026-10-25, found in the mag/maglifefader.cpp session): the
   scene's +0x41890 object is built by 0x12f298, which stores `_vt$18MagLifeFadeKeyHole` 0x2e1cf8
   (rtti.py: MagLifeFadeKeyHole : MagLife, slots 2 0x12f84c, 6 0x12f95c). The code names its

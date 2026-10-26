@@ -103,6 +103,42 @@ TskFrameFunc::TskFrameFunc(int kind, intptr_t arg, int frames)
     ROSEPAN_STUB("TskFrameFunc::TskFrameFunc", 0x001f184c);
 }
 
+// stub of ROR 0x001e9a3c (a constructor: stubgen leaves it to hand)
+TskMoveTypeGen::TskMoveTypeGen(u_int, int, intptr_t, int, float, float)
+{
+    ROSEPAN_STUB("TskMoveTypeGen::TskMoveTypeGen", 0x001e9a3c);
+}
+
+// stub of ROR 0x001eb63c (a constructor: stubgen leaves it to hand)
+TskMoveTypeRound::TskMoveTypeRound(u_int, int, intptr_t, int, float, float, float)
+{
+    ROSEPAN_STUB("TskMoveTypeRound::TskMoveTypeRound", 0x001eb63c);
+}
+
+// stub of ROR 0x001ec344 (a constructor: stubgen leaves it to hand)
+TskMovePointPath::TskMovePointPath(u_int, int, intptr_t, int, int, float, float)
+{
+    ROSEPAN_STUB("TskMovePointPath::TskMovePointPath", 0x001ec344);
+}
+
+// stub of ROR 0x001ec940 (a constructor: stubgen leaves it to hand)
+TskMoveSectaFindPath::TskMoveSectaFindPath(u_int, intptr_t, int, int, int, int, float, float)
+{
+    ROSEPAN_STUB("TskMoveSectaFindPath::TskMoveSectaFindPath", 0x001ec940);
+}
+
+// stub of ROR 0x001ed998 (a constructor: stubgen leaves it to hand)
+TskMoveSecta::TskMoveSecta(u_int, int, intptr_t, int, int, float, float)
+{
+    ROSEPAN_STUB("TskMoveSecta::TskMoveSecta", 0x001ed998);
+}
+
+// stub of ROR 0x001fbc0c (a constructor: stubgen leaves it to hand)
+TskCamera::TskCamera(intptr_t, intptr_t)
+{
+    ROSEPAN_STUB("TskCamera::TskCamera", 0x001fbc0c);
+}
+
 // stub of ROR 0x001f5244 (a constructor: stubgen leaves it to hand)
 TskAttach::TskAttach(u_int oid, const int *value, int arg)
 {
@@ -230,6 +266,20 @@ float DogCamera::getLensFov()
 {
     ROSEPAN_STUB("DogCamera::getLensFov", 0x0010fac0);
     return {};
+}
+
+// Written ahead for native 016 (leaves of unassigned@0010f944): the lens
+// angle as a scale of m_144.
+// ROR 0x0010fc08
+void DogCamera::setLensScale(float scale)
+{
+    m_angle = scale * m_144 * 0x1.cd94dep-1f;  // 0x3f66ca6f, 0.901526
+}
+
+// ROR 0x0010fbd4
+float DogCamera::getLensScale()
+{
+    return m_angle / m_144 / 0x1.cd94dep-1f;
 }
 
 // stub of ROR 0x00177830
@@ -1491,4 +1541,34 @@ void sectorClearFlags(Obj17c0f0 *obj, int key, u_int bits, int rec)
 void sectorSetFlags(Obj17c0f0 *obj, int key, u_int bits, int rec)
 {
     ROSEPAN_STUB("sectorSetFlags", 0x0017c45c);
+}
+
+// stub of ROR 0x001da07c
+void ACHRstat::killTasks()
+{
+    ROSEPAN_STUB("ACHRstat::killTasks", 0x001da07c);
+}
+
+// stub of ROR 0x001dd5e8
+void GamArea::addTrg(GamAreaTrg *trg, int newId)
+{
+    ROSEPAN_STUB("GamArea::addTrg", 0x001dd5e8);
+}
+
+// stub of ROR 0x001de6fc
+void GamArea::registFtb(int key, u_int value)
+{
+    ROSEPAN_STUB("GamArea::registFtb", 0x001de6fc);
+}
+
+// stub of ROR 0x001de4e4
+void GamArea::startTrgs()
+{
+    ROSEPAN_STUB("GamArea::startTrgs", 0x001de4e4);
+}
+
+// stub of ROR 0x001ddc80
+void GamArea::stopTrgs()
+{
+    ROSEPAN_STUB("GamArea::stopTrgs", 0x001ddc80);
 }

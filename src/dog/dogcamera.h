@@ -44,6 +44,9 @@ struct DogCamera : DogEntityEx
     /* The lens angle m_angle (radians) mapped through a 13-point curve in
      * 15-degree steps (0, 28, 57, 82 .. 172.75, 180 degrees); radians. */
     float getLensFov();                                                  // ROR 0x0010fac0
+    /* m_angle as scale * m_144 * 0.901526 (native 016 cases 5 / 6). */
+    void  setLensScale(float scale);                                     // ROR 0x0010fc08
+    float getLensScale();                                                // ROR 0x0010fbd4
 
     u_char        _e8[0xf0 - 0xe8];
     sceVu0FMATRIX m_view_matrix;    // ROR 0xf0: what getMatrix returns

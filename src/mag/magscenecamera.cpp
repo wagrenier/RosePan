@@ -38,3 +38,9 @@ void MagScene::changeCamera()
 {
     ROSEPAN_STUB("MagScene::changeCamera", 0x0013d5e4);
 }
+
+// stub of ROR 0x0013d240
+void MagScene::seekCameraPath(float pos)
+{
+    ROSEPAN_STUB("MagScene::seekCameraPath", 0x0013d240);
+}

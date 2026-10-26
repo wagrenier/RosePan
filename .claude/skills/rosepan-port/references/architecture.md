@@ -1013,6 +1013,25 @@ throughout (identifiers, env variables, files, shader macros):
   281 ops 200 / 201 go to seqSectorFlags 0x20de34 (sectorSetFlags 0x17c45c / sectorClearFlags 0x17c4f4
   on the scene's sector.sec object +0x8542c); seqGetIdPair 0x20dea8 reads the 50 signed byte pairs at
   data 0x3015e0.
+- **Natives 016 / 023 / 026 / 156 / 202 / 211** (session 9, 2026-10-26): 016 the camera (table data
+  0x3001c0, 52 cases) on MagScene::m_camera_entity +0x2ab70: 1 / 2 set m_trans / m_rotate (+dirty), 3 / 4
+  read them, 5 / 6 DogCamera::setLensScale 0x10fc08 / getLensScale 0x10fbd4 (m_angle = s * m_144 *
+  0.901526), 7 MagScene::seekCameraPath 0x13d240 (unless GamMan flags 0x20000), 8 m_21f70 =
+  getActorNo(a1) (the actor camera mode 2 follows), 10 / 11 setCameraMode, 20 / 21 GamMan::pushCamera
+  0x1c5ffc / popCamera 0x1c621c (a 3-deep stack of 0x30-byte records at +0x22470, count +0x22530), 50 /
+  51 a TskCamera (0xc0, ctor 0x1fbc0c) on m_camTaskId. 023 area triggers on GamMan::m_area: 1..5
+  GamArea::addTrg 0x1dd5e8 (a 0xb0-byte GamAreaTrg from the script image, flags |= 0x3000000, rect
+  corners ordered when flags & 0x103; 2..5 get a fresh oid makeOid(0, 0xd)), 10 startTrgs 0x1de4e4, 11
+  stopTrgs 0x1ddc80, 30 registFtb 0x1de6fc (key -> up to 8 values in the pool *(GamArea +0x18b40)). 026
+  a TskFrameFunc kind 8 over a1..t0 on m_frameTaskId (1) or m_selectTaskId (2). 156 ray tests via
+  MagScene::castRay(hit, p, q, 0): 1 p = a1, q = a2; 2 p = a1 - 10 y, q = p + (sin, cos)(*a2) * *a3 in
+  x / y; 3 from GamMan::getObjPos 0x1d05f4 + 10 y along getObjRot 0x1d06b8's y; returns 0 <= t <= 1,
+  copies 0x70 bytes of hit record out. 202 (table 0x301110, 26 cases) GamMan::moveAchr 0x1d2a14 (1 by a
+  vector, 2 by the float word a2 along the heading wrapped to -pi..pi in doubles) and TskMoveTypeGen
+  (0xc0, ctor 0x1e9a3c, vtable 0x2e4ad0) with mode 0..6 (+8 for achr flags 0x200000), rate 1/60
+  (0x3c888888). 211: TskMoveTypeRound 0x1eb63c, TskMovePointPath 0x1ec344, TskMoveSectaFindPath
+  0x1ec940, TskMoveSecta 0x1ed998 with script globals [13] kind, [14] rate x 10000, [15] mode shift; op
+  800 ACHRstat::killTasks 0x1da07c. Every movement task lives on ACHRstat::m_task[0] +0x3d4, killed first.
 - **Natives written 2026-10-26** (session 5): 007 a0 1 GamMan::setMsgParam 0x1cf7d0 (eight words over
   +0x22280, the message window's 10, 10, 0xffff, 0x100, 0x100 ...); 009 a0 1 killMsgTask 0x1cf95c; 012
   lights and fog (table data 0x2ff9e0, 501 entries, 63 cases): three runs over the same (light type,

@@ -420,8 +420,8 @@
 /* 0010f944 00000128 */ FUN_0010f944(){}
 /* 0010fa6c 00000054 */ DogEntity::getMatrix(){}  // ror
 /* 0010fac0 00000114 */ DogCamera::getLensFov(){}  // ror
-/* 0010fbd4 00000030 */ FUN_0010fbd4(){}
-/* 0010fc08 00000020 */ FUN_0010fc08(){}
+/* 0010fbd4 00000030 */ DogCamera::getLensScale(){}  // ror
+/* 0010fc08 00000020 */ DogCamera::setLensScale(){}  // ror
 /* 0010fc28 00000054 */ FUN_0010fc28(){}
 /* 0010fc7c 00000038 */ DogEntity::setRotate(){}  // ror
 /* 0010fcb4 00000064 */ FUN_0010fcb4(){}
@@ -1394,7 +1394,7 @@
 // *****************************************************************************
 
 /* 0013caf0 00000750 */ MagScene::setCameraMode(){}  // ror
-/* 0013d240 00000290 */ FUN_0013d240(){}
+/* 0013d240 00000290 */ MagScene::seekCameraPath(){}  // ror
 
 // *****************************************************************************
 // FILE -- (unassigned)
@@ -3618,8 +3618,8 @@
 /* 001c5d08 00000114 */ FUN_001c5d08(){}
 /* 001c5e1c 00000154 */ GamMan::pauseForMenu(){}  // ror
 /* 001c5f70 0000008c */ GamMan::resumeFromMenu(){}  // ror
-/* 001c5ffc 00000220 */ FUN_001c5ffc(){}
-/* 001c621c 00000254 */ FUN_001c621c(){}
+/* 001c5ffc 00000220 */ GamMan::pushCamera(){}  // ror
+/* 001c621c 00000254 */ GamMan::popCamera(){}  // ror
 /* 001c6470 000000a8 */ GamMan::pushFog(){}  // ror
 /* 001c651c 000000cc */ GamMan::popFog(){}  // ror
 /* 001c65e8 00000294 */ GamMan::resume(){}  // ror
@@ -3751,8 +3751,8 @@
 /* 001cfe78 000003d4 */ GamMan::setObjRot(){}  // ror
 /* 001d024c 00000220 */ GamMan::setObjDir(){}  // ror
 /* 001d046c 00000188 */ GamMan::isObj(){}  // ror
-/* 001d05f4 000000c4 */ FUN_001d05f4(){}
-/* 001d06b8 000000a0 */ FUN_001d06b8(){}
+/* 001d05f4 000000c4 */ GamMan::getObjPos(){}  // ror
+/* 001d06b8 000000a0 */ GamMan::getObjRot(){}  // ror
 /* 001d0758 000000b4 */ FUN_001d0758(){}
 /* 001d080c 00000110 */ GamMan::addObjColliSegment(){}  // ror
 /* 001d091c 00000348 */ GamMan::addObjColliBox(){}  // ror
@@ -3783,7 +3783,7 @@
 /* 001d25e4 00000140 */ GamMan::restoreLightSets(){}  // ror
 /* 001d2724 000000b8 */ GamMan::setLightFlag(){}  // ror
 /* 001d27dc 00000238 */ FUN_001d27dc(){}
-/* 001d2a14 00000098 */ FUN_001d2a14(){}
+/* 001d2a14 00000098 */ GamMan::moveAchr(){}  // ror
 /* 001d2aac 0000002c */ GamMan::isAchr(){}  // ror
 /* 001d2adc 00000030 */ GamMan::isFchr(){}  // ror
 /* 001d2b10 0000007c */ GamMan::isVFchr(){}  // ror
@@ -3887,7 +3887,7 @@
 /* 001d9f84 000000d8 */ FUN_001d9f84(){}
 /* 001da05c 00000014 */ FUN_001da05c(){}
 /* 001da074 00000004 */ FUN_001da074(){}
-/* 001da07c 000000b4 */ FUN_001da07c(){}
+/* 001da07c 000000b4 */ ACHRstat::killTasks(){}  // ror
 /* 001da130 00000084 */ ACHRstat::pauseTasks(){}  // ror
 /* 001da1b4 00000074 */ FUN_001da1b4(){}
 /* 001da228 00000518 */ ACHRstat::getParam(){}  // ror
@@ -3939,16 +3939,16 @@
 // FILE -- (unassigned)
 // *****************************************************************************
 
-/* 001dd5e8 000001d4 */ FUN_001dd5e8(){}
+/* 001dd5e8 000001d4 */ GamArea::addTrg(){}  // ror
 /* 001dd7bc 000002ec */ GamArea::stopKind(){}  // ror
 /* 001ddaa8 000001d8 */ FUN_001ddaa8(){}
-/* 001ddc80 0000012c */ FUN_001ddc80(){}
+/* 001ddc80 0000012c */ GamArea::stopTrgs(){}  // ror
 /* 001dddac 00000010 */ FUN_001dddac(){}
 /* 001dddbc 0000018c */ GamArea::clearKind(){}  // ror
 /* 001ddf48 000001bc */ FUN_001ddf48(){}
 /* 001de104 000003e0 */ FUN_001de104(){}
-/* 001de4e4 00000218 */ FUN_001de4e4(){}
-/* 001de6fc 000001b0 */ FUN_001de6fc(){}
+/* 001de4e4 00000218 */ GamArea::startTrgs(){}  // ror
+/* 001de6fc 000001b0 */ GamArea::registFtb(){}  // ror
 /* 001de8ac 00000194 */ FUN_001de8ac(){}
 /* 001dea40 0000006c */ GamArea::startPcAction(){}  // ror
 /* 001deaac 00000168 */ GamArea::checkPc(){}  // ror
@@ -4071,7 +4071,7 @@
 /* 001e9294 00000158 */ FUN_001e9294(){}
 /* 001e93ec 00000228 */ FUN_001e93ec(){}
 /* 001e9614 00000428 */ FUN_001e9614(){}
-/* 001e9a3c 0000023c */ FUN_001e9a3c(){}
+/* 001e9a3c 0000023c */ TskMoveTypeGen::TskMoveTypeGen(){}  // ror
 /* 001e9c78 00000034 */ FUN_001e9c78(){}
 /* 001e9cac 00000004 */ FUN_001e9cac(){}
 /* 001e9cb4 00000938 */ FUN_001e9cb4(){}
@@ -4083,21 +4083,21 @@
 /* 001eae7c 00000084 */ FUN_001eae7c(){}
 /* 001eaf00 000000b0 */ FUN_001eaf00(){}
 /* 001eafb0 0000068c */ FUN_001eafb0(){}
-/* 001eb63c 00000308 */ FUN_001eb63c(){}
+/* 001eb63c 00000308 */ TskMoveTypeRound::TskMoveTypeRound(){}  // ror
 /* 001eb944 00000034 */ FUN_001eb944(){}
 /* 001eb978 00000004 */ FUN_001eb978(){}
 /* 001eb980 00000200 */ FUN_001eb980(){}
 /* 001ebb80 00000268 */ FUN_001ebb80(){}
 /* 001ebde8 000002fc */ FUN_001ebde8(){}
 /* 001ec0e4 00000260 */ FUN_001ec0e4(){}
-/* 001ec344 00000258 */ FUN_001ec344(){}
+/* 001ec344 00000258 */ TskMovePointPath::TskMovePointPath(){}  // ror
 /* 001ec59c 00000034 */ FUN_001ec59c(){}
 /* 001ec5d0 00000004 */ FUN_001ec5d0(){}
 /* 001ec5d8 0000019c */ FUN_001ec5d8(){}
 /* 001ec774 00000074 */ FUN_001ec774(){}
 /* 001ec7e8 0000004c */ FUN_001ec7e8(){}
 /* 001ec834 0000010c */ FUN_001ec834(){}
-/* 001ec940 00000264 */ FUN_001ec940(){}
+/* 001ec940 00000264 */ TskMoveSectaFindPath::TskMoveSectaFindPath(){}  // ror
 /* 001ecba4 00000034 */ FUN_001ecba4(){}
 /* 001ecbd8 00000004 */ FUN_001ecbd8(){}
 /* 001ecbe0 000001f4 */ FUN_001ecbe0(){}
@@ -4106,7 +4106,7 @@
 /* 001ecf3c 000001c4 */ FUN_001ecf3c(){}
 /* 001ed100 000000d0 */ FUN_001ed100(){}
 /* 001ed1d0 000007c8 */ FUN_001ed1d0(){}
-/* 001ed998 00000370 */ FUN_001ed998(){}
+/* 001ed998 00000370 */ TskMoveSecta::TskMoveSecta(){}  // ror
 /* 001edd08 00000034 */ FUN_001edd08(){}
 /* 001edd3c 00000054 */ FUN_001edd3c(){}
 /* 001edd90 000005a0 */ FUN_001edd90(){}
@@ -4305,7 +4305,7 @@
 /* 001fbb04 000000a0 */ FUN_001fbb04(){}
 /* 001fbba4 0000002c */ FUN_001fbba4(){}
 /* 001fbbd0 0000003c */ gamStage2Loaded(){}  // ror
-/* 001fbc0c 00000060 */ FUN_001fbc0c(){}
+/* 001fbc0c 00000060 */ TskCamera::TskCamera(){}  // ror
 /* 001fbc6c 000000c0 */ FUN_001fbc6c(){}
 /* 001fbd2c 00000438 */ FUN_001fbd2c(){}
 /* 001fc164 00000004 */ FUN_001fc164(){}
