@@ -14,7 +14,7 @@
 //
 // Written so far: the table, the empty and the return-code entries, 000,
 // 001, 002, 004 (wait until), 005, 006 (messages), 007, 009, 012 (lights,
-// fog), 014, the system call 018, 019 (pad), 021, 027, 028, 029 (stage
+// fog), 014, the system call 018, 019 (pad), 020 (math), 021, 027, 028, 029 (stage
 // changes), 032, 033, 036, 038, 039, 106 (motion speed), 110, 151 (object
 // control), 152 (object queries), 155 (vfchr objects), 016 (camera), 023
 // (area triggers), 026, 156 (ray tests), 200 (turns), 202 / 211 (achr
@@ -32,6 +32,7 @@
 #include "game/gamman.h"
 #include "lib/unassigned.h"
 #include "mag/magsystem.h"
+#include "sdk/libvu0.h"
 #include "sequence/sequence.h"
 #include "snd/rxmpeg.h"
 #include "snd/sndman.h"
@@ -164,7 +165,7 @@ intptr_t seqFunc005(intptr_t, intptr_t a1, intptr_t, intptr_t, intptr_t, intptr_
     int range = 1;
     if (a1 != 0)
         range = (int)a1;
-    return rand() % range;
+    return RosePan_Rand() % range;  // callcheck: rand (RosePan_Rand keeps the ROM 31-bit range)
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -868,6 +869,145 @@ static float seqWordFloat(intptr_t word)
     float f;
     memcpy(&f, &bits, sizeof(f));
     return f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Script math: a0 picks the operation (62 cases, jump table data 0x3004a0;
+// 0, 6..9, 14..19, 22..29, 31..49 do nothing). Cases 1..4 take the angle
+// as float bits in a1 and store to a2; the others store to the float (or
+// vector) at a1 from the floats or vectors at a2, a3 and t0. The vector
+// cases copy xyz into a quadword with w = 0 for the VU0 library and store
+// all four words of its result.
+
+// A script vector as the ROM loads it for VU0: xyz, w = 0.
+static void seqLoadVec(sceVu0FVECTOR v, const float *p)
+{
+    v[0] = p[0];
+    v[1] = p[1];
+    v[2] = p[2];
+    v[3] = 0.0f;
+}
+
+// ROR 0x00207ae8
+// callcheck: fptodp, dpmul, dpdiv, dptofp (the soft-float double ops of cases 1 and 2)
+// callcheck: rand (RosePan_Rand keeps the ROM 31-bit range)
+
+intptr_t seqFunc020(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t t0, intptr_t)
+{
+    float        *out = (float *)a1;
+    const float  *p   = (const float *)a2;
+    const float  *q   = (const float *)a3;
+    sceVu0FVECTOR r, u, v;
+    float         ang, x, y, z;
+
+    switch ((u_int)op)
+    {
+    case 1:  // sin of degrees (in double, pi / 180 from data 0x300598)
+        *(float *)a2 = sinf((float)((double)seqWordFloat(a1) * 3.141592653589793 / 180.0));
+        break;
+    case 2:  // cos of degrees
+        *(float *)a2 = cosf((float)((double)seqWordFloat(a1) * 3.141592653589793 / 180.0));
+        break;
+    case 3:
+        *(float *)a2 = sinf(seqWordFloat(a1));
+        break;
+    case 4:
+        *(float *)a2 = cosf(seqWordFloat(a1));
+        break;
+    case 5:
+        *out = atan2f(p[0], q[0]);
+        break;
+    case 10:
+        *out = p[0] + q[0];
+        break;
+    case 11:
+        *out = p[0] - q[0];
+        break;
+    case 12:
+        *out = p[0] / q[0];
+        break;
+    case 13:
+        *out = p[0] * q[0];
+        break;
+    case 20:  // cvt.w.s: truncates
+        *(int *)a1 = (int)p[0];
+        break;
+    case 21:
+        *out = (float)*(const int *)a2;
+        break;
+    case 30:
+        *out = sqrtf(p[0] + q[0]);
+        break;
+    case 50:  // a2 + the offset a3 turned by the Y angle at t0
+        ang = *(const float *)t0;
+        x = cosf(ang) * q[0] + sinf(ang) * q[2] + p[0];
+        y = q[1] + p[1];
+        z = -sinf(ang) * q[0] + cosf(ang) * q[2] + p[2];
+        out[0] = x;
+        out[1] = y;
+        out[2] = z;
+        break;
+    case 51:
+        seqLoadVec(u, p);
+        seqLoadVec(v, q);
+        sceVu0AddVector(r, u, v);
+        memcpy(out, r, sizeof(r));
+        break;
+    case 52:
+        seqLoadVec(u, p);
+        seqLoadVec(v, q);
+        sceVu0SubVector(r, u, v);
+        memcpy(out, r, sizeof(r));
+        break;
+    case 53:
+        seqLoadVec(u, p);
+        sceVu0Normalize(r, u);
+        memcpy(out, r, sizeof(r));
+        break;
+    case 54:  // the dot product of a1 and a2, stored over a1's x
+        seqLoadVec(u, out);
+        seqLoadVec(v, p);
+        *out = sceVu0InnerProduct(u, v);
+        break;
+    case 55:
+        seqLoadVec(u, p);
+        seqLoadVec(v, q);
+        sceVu0OuterProduct(r, u, v);
+        memcpy(out, r, sizeof(r));
+        break;
+    case 56:
+        *out = sqrtf(p[0] * p[0] + p[1] * p[1] + p[2] * p[2]);
+        break;
+    case 57:
+        seqLoadVec(u, p);
+        r[3] = 0.0f;  // the ROM's vmulx.xyz keeps u's w; the host's leaves r's
+        sceVu0ScaleVectorXYZ(r, u, q[0]);
+        memcpy(out, r, sizeof(r));
+        break;
+    case 58:
+        memcpy(out, p, 4 * sizeof(float));
+        break;
+    case 59:
+        out[0] = p[0];
+        out[1] = q[0];
+        out[2] = *(const float *)t0;
+        out[3] = 0.0f;
+        break;
+    case 60:  // wrap by 2 pi as the ROM spells it (0x40c90fda)
+        *out = fmodf(p[0], 6.2831845f);
+        break;
+    case 61:  // a random unit vector (0x4e7fffff = 2^30 - 64 centres rand)
+        r[0] = (float)RosePan_Rand() - 1073741760.0f;
+        r[1] = (float)RosePan_Rand() - 1073741760.0f;
+        r[2] = (float)RosePan_Rand() - 1073741760.0f;
+        r[3] = 0.0f;
+        sceVu0Normalize(r, r);
+        memcpy(out, r, sizeof(r));
+        break;
+    default:
+        break;
+    }
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -2597,13 +2737,6 @@ const SeqFunc g_seqFuncTable[SEQ_FUNC_COUNT] = {
 };
 
 // ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x00207ae8
-intptr_t seqFunc020(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc020", 0x00207ae8);
-    return {};
-}
 
 // stub of ROR 0x0020c6fc
 intptr_t seqFunc252(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)

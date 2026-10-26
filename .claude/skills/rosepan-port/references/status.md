@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-26 06:58 at commit `fcfbbbe` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-26 07:18 at commit `d75810a` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -11,8 +11,8 @@ Generated 2026-10-26 06:58 at commit `fcfbbbe` by `tools/reverse/status.py` (`re
 ## Naming (game code; library ranges excluded)
 
 - game functions: **6660**, named **3908** (59%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 242, ror-inferred 2310
-- context-name ledger: 2552 entries; overrides of wrong library matches: 5
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 247, ror-inferred 2310
+- context-name ledger: 2557 entries; overrides of wrong library matches: 5
 - placed in a source file: 3257/6660 in 95 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **2035**; stubs: **440**
+- reconstructed RoR functions: **2036**; stubs: **439**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -88,7 +88,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/rx/rxsnd.cpp` | 222 | 0 |
 | `src/rx/rxsys.cpp` | 74 | 6 |
 | `src/rx/rxthread.cpp` | 53 | 0 |
-| `src/sequence/seqcall.cpp` | 41 | 2 |
+| `src/sequence/seqcall.cpp` | 42 | 1 |
 | `src/sequence/sequence.cpp` | 19 | 0 |
 | `src/sequence/seqvm.cpp` | 143 | 0 |
 | `src/snd/rxmpeg.cpp` | 67 | 0 |
@@ -110,7 +110,7 @@ Least-named game-code regions (64 KB blocks):
 - next: **sequence/seqcall.cpp** (pinned in the queue)
 - pinned queue: sequence/seqcall.cpp, unassigned@0020ff34, game/gamman.cpp, unassigned@001fd424, unassigned@001e46b8
 - partial: `game/gamman.cpp` 100/409 -- Screen still black: nothing in this slice draws, and boot stage 99 hits loadStageSnd's default (no packs, as in the ROM). The boot's blockers are the natives se
-- partial: `sequence/seqcall.cpp` 41/43 -- Left: handler stubs 020 and 252. 020 (table data 0x3004a0, 62 cases, VU0 and float math) is a jump-table dispatcher Ghidra cannot recover: read it with ghidra.p
+- partial: `sequence/seqcall.cpp` 42/43 -- Left: native 252 only (sound, jump table data 0x301280, 201 cases, 0xd2c bytes; about 20 GamSndMan callees FUN_001e1620..FUN_001e5e58 plus FUN_001c7500 / 75bc /
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
@@ -152,6 +152,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-26 07:18 `sequence/seqcall.cpp` partial: Script native 020 (script math, 62-case jump table data 0x3004a0: sin / cos of degrees and radians, atan2f, + - / *, float-int conversions, sqrtf, Y-rotated off
 - 2026-10-26 06:57 `sequence/seqcall.cpp` partial: Script natives 100 (actor motions, 33 cases: setActorMotion at 1/60, chrSetMotion, TskMtnMove / TskMtnMove2 tasks via chrMtnMove / chrMtnMove2, blends by name a
 - 2026-10-26 01:59 `sequence/seqcall.cpp` partial: Script natives 253 (movies over the TskMovie task on GamMan m_movieTaskId: start, kill, wait, frame count) and 281 (scene effects: focus lerps, actor eye ops, E
 - 2026-10-26 01:46 `sequence/seqcall.cpp` partial: Script natives 016 (camera: trans / rotate / lens / path position / follow actor / mode / push-pop / TskCamera), 023 (area triggers: GamArea addTrg / startTrgs 
@@ -159,7 +160,6 @@ Recent sessions:
 - 2026-10-26 01:03 `sequence/seqcall.cpp` partial: Script natives 152 (object queries, 51 cases: actor trans / rot / scale, object flags and work words, system record fields and flags, polar steps, attach / deta
 - 2026-10-26 00:43 `sequence/seqcall.cpp` partial: Script natives 007 (message params), 009 (kill message task), 012 (lights and fog, 63 cases), 014 (sky model hide), 019 (pad 0 queries), 028 (releases), 036 (th
 - 2026-10-26 00:11 `sequence/seqcall.cpp` partial: Script native 151 (object control, 58 cases, table data 0x300eb0), the first native a New Game press reaches; named and declared its 24 callees (GamMan setObjPo
-- 2026-10-25 23:33 `mnu/mnusvld.cpp` verify: MnuSvld, the memory card save / load screen, written whole (40 functions; pinned mnu/mnusvld.cpp 0x1a59b8..0x1a90ec, which absorbed the queue's unassigned@001a6
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|

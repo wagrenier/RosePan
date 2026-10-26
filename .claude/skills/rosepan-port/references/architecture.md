@@ -1013,6 +1013,14 @@ throughout (identifiers, env variables, files, shader macros):
   281 ops 200 / 201 go to seqSectorFlags 0x20de34 (sectorSetFlags 0x17c45c / sectorClearFlags 0x17c4f4
   on the scene's sector.sec object +0x8542c); seqGetIdPair 0x20dea8 reads the 50 signed byte pairs at
   data 0x3015e0.
+- **Native 020** (session 12, 2026-10-26): script math, jump table data 0x3004a0 (62 words; Ghidra
+  cannot recover it, read the asm). 1..4 take an angle as float bits in a1 and store to a2 (1 / 2 sin /
+  cos of degrees in double with pi and 180 from data 0x300598); the rest store to the float or vector
+  at a1 from a2, a3, t0: 5 atan2f, 10..13 + - / *, 20 float -> int (trunc), 21 int -> float, 30
+  sqrtf(a2 + a3), 50 a2 + a3 turned about Y by the angle at t0, 51..57 VU0 add / sub / normalize / dot
+  (into a1's x, from a1 and a2) / cross / length / scale-xyz, 58 copy, 59 build {a2, a3, t0, 0}, 60
+  fmodf(x, 0x40c90fda), 61 random unit vector (rand - 0x4e7fffff each axis). Library: sceVu0AddVector
+  0x25b878, sceVu0SubVector 0x25b890, newlib wrappers atan2f 0x26cb00, fmodf 0x26cb18, sqrtf 0x26cb48.
 - **Natives 100 / 212** (session 11, 2026-10-26): 100 actor motions (table data 0x300c90, 33 entries;
   a2 motion or name, a3 p1d8, t0 -> float speed, t1 bit 1 -> flag 0x100). The achr's motion task lives
   on ACHRstat m_task[2] +0x3dc: chrKillMotionTask 0x1f61ec kills it; chrMtnMove 0x1f59b4 / chrMtnMove2

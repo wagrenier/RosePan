@@ -15137,6 +15137,18 @@
   "was": "FUN_002599e8",
   "why": "libgraph: sceGsPutDispEnv(&db->disp[id & 1]) and sceGsPutDrawEnv(giftag0 or giftag1)"
  },
+ "0025b878": {
+  "name": "sceVu0AddVector",
+  "tag": "lib-context",
+  "was": "FUN_0025b878",
+  "why": "lqc2 vf4 (a1), vf5 (a2), vadd.xyzw vf6, sqc2 vf6 (a0): libvu0 sceVu0AddVector; native 020 case 51"
+ },
+ "0025b890": {
+  "name": "sceVu0SubVector",
+  "tag": "lib-context",
+  "was": "FUN_0025b890",
+  "why": "lqc2 vf4 (a1), vf5 (a2), vsub.xyzw vf6, sqc2 vf6 (a0): libvu0 sceVu0SubVector; native 020 case 52"
+ },
  "0025c340": {
   "name": "vif0ResetVu0",
   "tag": "lib-context",
@@ -15304,6 +15316,24 @@
   "tag": "lib-context",
   "was": "FUN_0026bb10",
   "why": "libvib: (socket, profile size, profile, data size, data) packed into a 0x103400b DBC request; BedPad::setVibration passes profile bit 0 small motor / bit 1 big motor"
+ },
+ "0026cb00": {
+  "name": "atan2f",
+  "tag": "lib-context",
+  "was": "FUN_0026cb00",
+  "why": "newlib wrapper (two float args) tail-jumping to 0x26d8e0, whose code tests x == 1.0 (0x3f80) and loads pi (0x4049): __ieee754_atan2f; native 020 case 5"
+ },
+ "0026cb18": {
+  "name": "fmodf",
+  "tag": "lib-context",
+  "was": "FUN_0026cb18",
+  "why": "newlib wrapper (two float args) tail-jumping to 0x26dac0; native 020 case 60 wraps an angle with fmodf(x, 2 pi)"
+ },
+ "0026cb48": {
+  "name": "sqrtf",
+  "tag": "lib-context",
+  "was": "FUN_0026cb48",
+  "why": "newlib wrapper tail-jumping to 0x26e820 (software __ieee754_sqrtf); GCC calls it only when the inline sqrt.s gives NaN (native 020 cases 30 / 56)"
  },
  "00279b70": {
   "name": "snprintf",

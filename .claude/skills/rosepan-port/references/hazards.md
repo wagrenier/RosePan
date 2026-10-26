@@ -336,6 +336,9 @@ public:
   text in `--notes` under "For the references:"), no `rm`, no shell loops, no `git -C`. A denied call
   is final: use the listed tools.
 - **No backticks in `--notes` / `--summary`**: the shell runs them.
+- **`work/shots/last.png` can come out 0 bytes** (seen 2026-10-26 07:15; the shot_*.png of the same
+  run were fine) and `finish` copies it to progress/ as is. Check its size after `check`; rerun the
+  check when it is empty.
 - **`tus.py queue <key> --task TEXT` makes `<key>` a host task** (its brief skips boundaries / names /
   code). Never use it to annotate a TU with code; write the reason in open-items.md. To undo:
   `tus.Model()`, pop the entry's `task`, `save()` (2026-10-22).
