@@ -374,6 +374,8 @@ struct GamMan
     void convertObjTable(GamObjTable *dst, const GamObjTable *src, int count); // ROR 0x001c1f84
     void loadStage(int stage);                                           // ROR 0x001c204c
     /* The stage's sound packs (data/snd/xv/....se). */
+    /* data/snd/xv/32NN.se of chapter into GamSndMan::loadSePack(.., arg). */
+    void loadChapterSe(int chapter, int arg);                            // ROR 0x001c2848
     void loadStageSnd(int chapter);                                      // ROR 0x001c2f50
     /* The PC's actor plays anim (MagSystem::setActorAnim(.., 1)). */
     void setPcAnim(int anim);                                            // ROR 0x001c4f38
@@ -442,7 +444,7 @@ struct GamMan
     /* m_playMinutes plus the minutes in m_vcount (1800 frames each). */
     int  getPlayMinutes();                                               // ROR 0x001c6c98
     /* Copies one status word to *out: 1 m_flags, 2 m_vcount, 3 the play
-     * minutes, 4 m_chapter (a short), 5 / 6 m_21f7c / m_21f80, 7
+     * minutes, 4 m_chapter (a short), 5 / 6 m_wrdNo / m_21f80, 7
      * m_21f68, 8 m_cameraMode, 9 m_pcActor, 10 m_dogChrNo, 11
      * m_murderChrNo, 12..14 the PC / dog / murderer ObjStat, 15 m_volume
      * (a short), 16 m_optBrightLevel, 17..20 m_optOutput ..
@@ -453,7 +455,19 @@ struct GamMan
      * camera no (below getMapCamNum). */
     void setCameraMode(int mode, u_int no);                              // ROR 0x001c7210
     /* The record count of the current sky slot's _c.bin (the cameras). */
+    /* The current room (WRD) number (an inline in the ELF). */
+    int  getWrdNo() const { return m_wrdNo; }                            // ROR 0x001c6c28
     int  getMapCamNum();                                                 // ROR 0x001c7494
+    /* The script's SE pack swaps (native 252 cases 48 / 100): every SE
+     * stopped, banks 0xb (the first only), 0x20 and 0x40 freed, name
+     * loaded, the empty item's pack reloaded, m_flags2 0x1000000 /
+     * 0x2000000 set. */
+    void loadScriptSePack(const char *name);                             // ROR 0x001c7500
+    void loadScriptSePack2(const char *name);                            // ROR 0x001c75bc
+    /* The chapter's pack again: bank 0x1f with flag 1 / bank 0xc with 0
+     * (initStage2, native 252 cases 101 / 102). */
+    void reloadChapterSe1f();                                            // ROR 0x001c766c
+    void reloadChapterSe0c();                                            // ROR 0x001c76cc
     /* A new object id: image (-1 = m_cur_stat) << 30, type << 23, list
      * << 28 for the types without their own counter, the stage word, and
      * a free number counted down from init's table +0x225f4... */
@@ -799,7 +813,7 @@ struct GamMan
     int          m_21f70;           // ROR 0x21f70: setCameraMode's third word
     u_int        m_21f74;           // ROR 0x21f74: the map camera mode 4 set last, -1 none
     u_int        m_21f78;           // ROR 0x21f78
-    int          m_21f7c;           // ROR 0x21f7c: to sequence global [1] on a stage change; -1 after resetStage
+    int          m_wrdNo;           // ROR 0x21f7c: getWrdNo, the room (WRD) number; to sequence global [1] on a stage change; -1 after resetStage
     int          m_21f80;           // ROR 0x21f80: ... global [2] (-1 for change kind 2)
     int          m_21f84;           // ROR 0x21f84: ... global [3]
     int          m_21f88;           // ROR 0x21f88: ... global [4]

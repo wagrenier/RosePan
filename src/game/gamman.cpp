@@ -22,6 +22,7 @@
 #include "mag/magsystem.h"
 #include "rx/rxsnd.h"
 #include "sequence/sequence.h"
+#include "snd/sndman.h"
 #include "utl/utlmisc.h"
 
 static const char s_file[] = "game/gamman.cpp";
@@ -543,6 +544,52 @@ void GamMan::setCameraMode(int mode, u_int no)
 int GamMan::getMapCamNum()
 {
     return g_magSystem.m_scene.getTenkyuCNum(m_mapModelNo);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The script's SE pack swaps (native 252 cases 48 / 100) and the chapter
+// pack reloads (cases 101 / 102, initStage2).
+// ROR 0x001c7500
+
+void GamMan::loadScriptSePack(const char *name)
+{
+    g_sndMan.stopAll(SND_TYPE_SE);
+    g_sndMan.freeBank(0xb);
+    g_sndMan.freeBank(0x20);
+    g_sndMan.freeBank(0x40);
+    m_sndMan.loadSePack(name, 0);
+    loadItemSe(0xa00, 1);
+    m_flags2 |= 0x1000000;
+}
+
+// ROR 0x001c75bc
+
+void GamMan::loadScriptSePack2(const char *name)
+{
+    g_sndMan.stopAll(SND_TYPE_SE);
+    g_sndMan.freeBank(0x20);
+    g_sndMan.freeBank(0x40);
+    m_sndMan.loadSePack(name, 0);
+    loadItemSe(0xa00, 1);
+    m_flags2 |= 0x2000000;
+}
+
+// ROR 0x001c766c
+
+void GamMan::reloadChapterSe1f()
+{
+    g_sndMan.stopAll(SND_TYPE_SE);
+    g_sndMan.freeBank(0x1f);
+    loadChapterSe(m_chapter, 1);
+}
+
+// ROR 0x001c76cc
+
+void GamMan::reloadChapterSe0c()
+{
+    g_sndMan.stopAll(SND_TYPE_SE);
+    g_sndMan.freeBank(0xc);
+    loadChapterSe(m_chapter, 0);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1278,7 +1325,7 @@ int GamMan::ctlObjParam(u_int oid, u_int op, void *data, int alt)
             float rot[3];
             chr->getRot(rot);
             GamObjInfo info;
-            info.m_alt = rec->m_28 != m_21f7c;
+            info.m_alt = rec->m_28 != m_wrdNo;
             const float *pos = info.m_alt ? rec->m_40 : rec->m_30;
             info.m_oid = chr->m_oid;
             info.m_rotY = rot[1];
@@ -1416,7 +1463,7 @@ void GamMan::requestStage(int kind, int room, int a3, int chapter, u_int word)
     }
     else
     {
-        if (kind == m_cur_stat && kind == 2 && m_21f7c == room)
+        if (kind == m_cur_stat && kind == 2 && m_wrdNo == room)
         {
             resume(0x100000);
             return;
@@ -1425,12 +1472,12 @@ void GamMan::requestStage(int kind, int room, int a3, int chapter, u_int word)
     }
     m_prev_stat = m_cur_stat;
     m_flags2 |= 2;
-    m_21f84 = m_21f7c;
+    m_21f84 = m_wrdNo;
     m_21f88 = m_21f80;
     m_cur_stat = kind;
     if (kind == 2)
     {
-        m_21f7c = room;
+        m_wrdNo = room;
     }
     else if (kind == 3)
     {
@@ -1439,7 +1486,7 @@ void GamMan::requestStage(int kind, int room, int a3, int chapter, u_int word)
     else
     {
         m_21f80 = -1;
-        m_21f7c = -1;
+        m_wrdNo = -1;
     }
     g_taskMan.pauseOthers(1);
 }
@@ -1524,7 +1571,7 @@ void GamMan::execStageReq()
     }
     g_sequence.m_global[3] = m_21f84;
     g_sequence.m_global[4] = m_21f88;
-    g_sequence.m_global[1] = m_21f7c;
+    g_sequence.m_global[1] = m_wrdNo;
     g_sequence.m_global[2] = m_stageReq != 2 ? m_21f80 : -1;
     resume(2);
     g_taskMan.pauseOthers(0);
@@ -1903,7 +1950,7 @@ void GamMan::getStatus(int which, void *out)
     case 2:    *word = (u_int)m_vcount; break;
     case 3:    *word = (u_int)getPlayMinutes(); break;
     case 4:    *(short *)out = (short)m_chapter; break;
-    case 5:    *word = (u_int)m_21f7c; break;
+    case 5:    *word = (u_int)m_wrdNo; break;
     case 6:    *word = (u_int)m_21f80; break;
     case 7:    *word = (u_int)m_21f68; break;
     case 8:    *word = (u_int)m_cameraMode; break;
@@ -1945,7 +1992,7 @@ u_int GamMan::makeOid(u_int list, u_int type, int image)
     u_int oid = 0;
     if (type < 0x10)
     {
-        u_int stage = (u_int)m_21f7c;
+        u_int stage = (u_int)m_wrdNo;
         u_int n;
         switch (type)
         {
@@ -2652,8 +2699,8 @@ void GamMan::releaseChr(u_int oid)
         }
         releaseVFchr(oid);
     }
-    m_sndMan.stopObjSe(oid);
-    m_sndMan.releaseObjSe(oid);
+    m_sndMan.del_se_3d_pos_chr(oid);
+    m_sndMan.del_str_3d_pos_chr(oid);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -3034,4 +3081,10 @@ int GamMan::getObjRotY(u_int oid, float *out)
 void GamMan::switchEnemies(int on)
 {
     ROSEPAN_STUB("GamMan::switchEnemies", 0x001c5a5c);
+}
+
+// stub of ROR 0x001c2848
+void GamMan::loadChapterSe(int chapter, int arg)
+{
+    ROSEPAN_STUB("GamMan::loadChapterSe", 0x001c2848);
 }

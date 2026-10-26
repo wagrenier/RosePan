@@ -1021,6 +1021,24 @@ throughout (identifiers, env variables, files, shader macros):
   (into a1's x, from a1 and a2) / cross / length / scale-xyz, 58 copy, 59 build {a2, a3, t0, 0}, 60
   fmodf(x, 0x40c90fda), 61 random unit vector (rand - 0x4e7fffff each axis). Library: sceVu0AddVector
   0x25b878, sceVu0SubVector 0x25b890, newlib wrappers atan2f 0x26cb00, fmodf 0x26cb18, sqrtf 0x26cb48.
+- **Native 252** (session 13, 2026-10-26): sound, jump table data 0x301280 (201 words, 67 handlers,
+  131 entries return 0); all into GamSndMan (GamMan +0x18e00), args a1 the SE / stream id or a name.
+  1 / 2 funcSnd 0xd, 6 / 7 0xe / 0xf (master volumes), 4 / 5 0x11 / 0x12, 42..44 0x1c..0x1e, 47 0x19 with
+  atoi of a1's first two characters, 8 setReverb, 3 sets GamSndMan +0 (the 3D centre mode); SEs 10..32
+  (10 / 12 / 13 / 14 play only while no movie task runs on GamMan m_movieTaskId), streams 52..92, 48 /
+  100 / 101 / 102 the GamMan SE pack swaps 0x1c7500 / 0x1c75bc / 0x1c766c / 0x1c76cc, 200 a stream
+  started with flag 0x100 then looped. 25 / 28 / 52 / 68 / 70 / 80 / 90 / 91 return the callee's value,
+  81 / 82 wait until / while funcStr(0x16) (a stream plays). **GamSndMan's method names** come from
+  GamMan's inline forwarders (ELF symbols 0x28e7a8..0x28ee48: this + 0x18e00, some add a trailing 0 in
+  t0 / t2): unpush_snd 0x1e1620, put/del_se_3d_pos(_chr) 0x1e239c / 0x1e2704 / 0x1e2aa0 / 0x1e2c40,
+  put/del_str_3d_pos(_chr) 0x1e2db4 / 0x1e3138 / 0x1e34ec / 0x1e3698, loadSePack(char*, int) 0x1e4540,
+  getStrNO 0x1e4ab8, setReverb 0x1e4cc4, get_se_oid 0x1e4d04, playSE 0x1e4ebc / 0x1e50c8, playStr
+  0x1e5250 / 0x1e5428, set_str/se_3d_snd_prm 0x1e5540 / 0x1e5de4, funcStr 0x1e5660, getStrNoByChan
+  0x1e5be0, funcSE 0x1e5e58 (a switch over the 0x30 SE records at +0xd40, 0x28 bytes: 1 / 8 stop, 2 / 3
+  / 5 / 0xb setSe, 4 loop, 0x13 / 0x14 / 0x15 a TskSnd(0, arg) over a TskSndParam whose words 3, 8, 9
+  it fills (task ids +0x1710 / +0x1714), 0x16 returns 1 when the SE plays), isPlayEnvStr 0x1e6cac.
+  GamMan::getWrdNo 0x1c6c28 is the inline read of +0x21f7c (m_wrdNo); loadChapterSe 0x1c2848 reads
+  data/snd/xv/32NN.se by chapter.
 - **Natives 100 / 212** (session 11, 2026-10-26): 100 actor motions (table data 0x300c90, 33 entries;
   a2 motion or name, a3 p1d8, t0 -> float speed, t1 bit 1 -> flag 0x100). The achr's motion task lives
   on ACHRstat m_task[2] +0x3dc: chrKillMotionTask 0x1f61ec kills it; chrMtnMove 0x1f59b4 / chrMtnMove2

@@ -1,6 +1,5 @@
 {
  "queue": [
-  "sequence/seqcall.cpp",
   "unassigned@0020ff34",
   "game/gamman.cpp",
   "unassigned@001fd424",
@@ -710,7 +709,7 @@
    "why": "rx middleware thread layer: kernel wrappers from 0x249b88 (CreateSema, CreateThread), rxThInit, dispatch semaphore, rxThRequest/rxThYield, rxthread/rxThread messages, vsync and DMA wait helpers to 0x24b48c; libcdvd sceCdCallback starts at 0x24b490"
   },
   "sequence/seqcall.cpp": {
-   "notes": "Left: native 252 only (sound, jump table data 0x301280, 201 cases, 0xd2c bytes; about 20 GamSndMan callees FUN_001e1620..FUN_001e5e58 plus FUN_001c7500 / 75bc / 766c / 76cc in game/gamman.cpp still unnamed): a whole session -- read it with ghidra.py asm 0x20c6fc 0x20d428 and group the table words with elf32.Elf(...).read(0x301280, 201*4). Native 020 is complete but no smoke run reaches it (boot shows Sony Presents and the disclaimer, as the game). Decisions: case 57 zeroes the result w first because the host sceVu0ScaleVectorXYZ leaves w untouched where the ROM vmulx.xyz keeps the source w (0); case 60 keeps the ROM constant 0x40c90fda (written 6.2831845f), case 61 the 0x4e7fffff centre (1073741760.0f); rand calls go through RosePan_Rand (callcheck comments explain rand and the soft-float dp ops). The first check of this session wrote an empty last.png (hazards.md); rerun fixed it. References updated: architecture.md native 020, hazards.md empty last.png.",
+   "notes": "TU complete: all 43 functions written; verify because no smoke run reaches native 252 (the boot pad stops at NowLoading) and sound has no picture. Decisions: stopObjSe / releaseObjSe renamed to the ELF forwarder names del_se_3d_pos_chr / del_str_3d_pos_chr; GamSndMan overloads keep the trailing 0 the forwarders add as an int arg; the funcSE / funcStr 0x13 block is a TskSndParam (words 0, 1, 2, 5 set; funcSE writes 3, 8, 9) and the 5 / 0xb block an int array (words 0, 1, 2, 4), zeroed where the ROM leaves stack garbage; cases 16 / 17 read the float at t0 but 59 / 60 take t0 itself (ROM difference kept). Trap: stubgen copies the first overload declaration and skips an overload whose name is defined, so playSE / playStr / loadSePack(char*,int) stubs were fixed by hand (hazards.md). Next for sound: game/gamsnd.cpp (funcSE 0x1e5e58, funcStr 0x1e5660, playSE, playStr) as its own TU once stage 2 runs. References updated: architecture.md native 252 and the GamSndMan name map, hazards.md stubgen overloads, open-items.md 10g.",
    "ranges": [
     [
      "002053f4",
@@ -772,9 +771,14 @@
      "date": "2026-10-26 07:18",
      "status": "partial",
      "summary": "Script native 020 (script math, 62-case jump table data 0x3004a0: sin / cos of degrees and radians, atan2f, + - / *, float-int conversions, sqrtf, Y-rotated offsets, VU0 add / sub / normalize / dot / cross / length / scale, vector copy and build, fmodf by 2 pi, random unit vectors); named sceVu0AddVector, sceVu0SubVector, atan2f, fmodf, sqrtf (batch seqcall_014); native 005 now uses RosePan_Rand for the ROM 31-bit rand range"
+    },
+    {
+     "date": "2026-10-26 07:46",
+     "status": "verify",
+     "summary": "Script native 252 (sound, jump table data 0x301280, 201 entries over 67 handlers): funcSnd volumes and reverb, SE play / stop / set / 3D position, stream play / stop / set / 3D position and waits, TskSnd tasks, SE pack swaps; every native table entry is now code. Named 28 functions (batch seqcall_015) from GamMan inline forwarders: GamSndMan unpush_snd, put/del_se_3d_pos(_chr), put/del_str_3d_pos(_chr), playSE x2, playStr x2, funcSE, funcStr, getStrNO, get_se_oid, setReverb, getStrNoByChan, set_se/str_3d_snd_prm, loadSePack(char*,int), isPlayEnvStr; GamMan loadScriptSePack / loadScriptSePack2 / reloadChapterSe1f / reloadChapterSe0c written ahead, getWrdNo inline (m_wrdNo +0x21f7c), loadChapterSe stubbed"
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "exactly the 512 script native functions of the table data 0x2d90f8 (the VM 0x214c24 calls entry (jal target - 0x144) / 0x40) plus the two helpers 0x20de34 / 0x20dea8 that entry 281 calls; the table's last entry is 0x20de2c and seqSetLanguage follows. File name invented (no source string): seq = sequence, call = what the script calls"
   },
   "sequence/sequence.cpp": {
