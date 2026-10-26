@@ -17,6 +17,7 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
 - Disc and data files
 - PC platform layer
 - The title screen (mnu/mnutitle.cpp)
+- The task manager (task/tsk_man.cpp)
 
 ## Binary and toolchain
 
@@ -825,7 +826,8 @@ never asserts): sessions name them (`tus.py define --why`).
 - Families by prefix: MagLife* / MagScene* 79, Eff* 43 (all `: Eff0`), Tsk* 30, and per-enemy state
   machines `<Type>Main : EmyMain` + `<Type>Out<State> : EmyOut` for the types Bdl, Bds, Clr, Dwf, Fsh,
   Got, Grg, Hfm, Mrt, Nor, Pig (EmyOut has 77 subclasses). `CmnITask` is the base of 32 classes but has
-  no vtable of its own in the ELF (a pure interface whose vtable was never emitted -- unverified).
+  no vtable of its own in the ELF (abstract; only its pause slot 0x28a694 has a body). Its six slots
+  are in "The task manager" below.
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00
@@ -863,7 +865,7 @@ never asserts): sessions name them (`tus.py define --why`).
 | 0x267798 | `_InitSys` | libmatch (FF2 initsys.c) |
 | 0x6e9840 | `MagSystem` (mag/magsystem.cpp): frame, V-blank semaphore `m_v_sema` (sdata 0x29619c), scene member at +0x12540 (0x6fbd80) | asserts; main |
 | 0x7812c0 | `GamMan` (game/gamman.cpp 0x1c05c0..0x1d3b44, `partial`; EE 0x22ab8, vptr +0x22ab4): common data and stage loads, per-frame game update. Fields are named from the ELF's ~180 inline accessors (sections.py --list GamMan; mipsdis shows each one's offset): +0x21f40 getCurStat, +0x21f48 getSysFlg, +0x21f4c chkSysFlg2, +0x21f50 getChapter (the stage), +0x21f60 getVCount, +0x21fdc / e8 / ec the PC / dog / murderer chr numbers, +0x22020 / 30 / 40 PC pos / rot, dog pos, +0x22090.. the three ObjStat pointers, +0x222a0..+0x222c0 the task ids, +0x22a80 getEvtPack. Members: GamArea +0x40, GamSndMan +0x18e00, the item vector +0x1a6c0 (12 slots) and nine node pools of sequence.h's template (item stock +0x1a7c0 x0x14e, Achr / Fchr / VFchr / AVFchr lists +0x1d340 / +0x1d980 / +0x1dcc0 / +0x1ef00). loadSystemData reads the seqMakeGlobalPath(1) pack whole (file 0 GamSysData, 1 / 2 SE packs 0000.se / 6400.se, 3 registSnd, 4 the system script image, 5 registStrSnd); loadStage reads data/SEQ/W%03d/W000.WRD (header <= 3 sectors, then whole: 0 the stage script image, 1 the object table GamObjTable (version +0x1c: 1 = 0x50-byte records, else 0x30), 2 -> +0x1a680, 4 -> the event pack) and sets the camera to (0, 1000, 0), rot x -pi/2. **Objects** (2026-10-25): an oid (OID_STATE) is list << 28 (0 vfchr, 1 achr, 2 fchr) | type << 23 | slot (0..0x1ff); achr pointers by slot at +0x21340 (0x80), fchr at +0x21540 (0x280, slots 1..0x27f), vfchr found by walking +0x1dcc0's list (getFchr tries it first for type 5); `isObj` 0x1d046c, `getActorNo` 0x1cbe38 (ObjStat +0x108). The object table's 0x50-byte records (GamObjRec) are read / written through `ctlObjParam` 0x1c9920 (20 ops, table 0x2fbba0). **Stage change**: the scripts set flags2 bit 2 (and +0x2221c the kind: 3 the stage-2 images, 5 a full reset 0x1cdbf0); `afterSeqExec` 0x1cd25c (end of Sequence::exec) runs it and `execStageReq` 0x1cd7c8 loads by getCurStat (1 loadStage(getChapter)) and copies +0x21f7c..+0x21f88 into the sequence globals [1..4]. pause / resume 0x1c6a40 / 0x1c65e8 clear / set running bits in getSysFlg by mask (0x100000 menus, 0x100004 PC and actor tasks, 0x100104 the dog, 0x80000 Brown's controller, 0x200000 the dog's hide) **Items** (slice 3): a slot / stock record is GamItemSlot {GamSysData record, oid, short id (0xa00 none), u_short count}; the system data record's flag 0x20000 marks a stacking item (count 1..99); addItem 0x1c7e40 also sets the sequence bit lookupFlagTable(2, id, 3) (table data 0x2fc1f8, 8-word rows) and GamSysData flag 4; the stock is a 0x14e-node pool (used list +0x1a7f0). New oids come from `makeOid` 0x1c6fe0: image << 30 | type << 23 | (+0x21f7c & 0x7f) << 16 | a number counted down from init's table +0x225f4 (types 2 / 0,1,3 / other / 10..15 each their counter). **Stage SE** `loadStageSnd` 0x1c2f50: by chapter one 1xxx.se pair (1000/1100, 1001/1102, 1001/1101, 1001/1103, 1002/1104) and 3200..3210.se from data/snd/xv/, loaded under the file name (boot stage 99 loads none); a held item's pack 640N.se by `loadItemSe` 0x1c772c. | vtable; main |
-| 0x7a3d80 | `CmnTaskMan` (name unverified): task list, its `SysTimer` at +0x40 | main; 66 addTask call sites |
+| 0x7a3d80 | `CmnTaskMan`: task list, its `SysTimer` at +0x40 (EE 0x6c0 bytes; task/tsk_man.cpp) | main; 66 addTask call sites |
 | 0x7a4440 | `Sequence` (sequence/sequence.cpp 0x20e3d8..0x20ff34, the VM sequence/seqvm.cpp 0x20ff34..0x2155a0): event sequences ("mst", "trg", "imdy", "single"). The scripts are **MIPS code** the VM 0x214c24 interprets: registers at bss 0x7b4700 (32 words, v0 0x7b4708, a0 0x7b4710), opcode tables data 0x2d9958 (primary) / 0x2d9a58 (SPECIAL), loads / stores on raw addresses; a jal below the image calls native function (target - 0x144) / 0x40 of the table data 0x2d90f8 (sequence/seqcall.cpp, 512 entries, 471 empty), jal targets >= 0x8160 are image offsets (base 0x7b47d0). Native returns 0xcccccccc rerun the call next frame, ..cd continue next frame, ..ce jump (Sequence::jumpTo 0x2113a4 sets the target 0x7b47b0), ..ca end the thread, ..c9 return to 0x7b4db0 + 4. Members: +0x0 images [4] (0 system G000.GRB 0x20000, 1 stage W.WRD 0x18000, 2 a second script 0x30000, [3] 0; game heap), +0x10 per-image thread pools [4] (new'd, 0x40 nodes of 0xc0), +0x40 the start list (startThread 0x211e84 queues, exec moves into the image pools), +0x6200 the ended list (runImage copies threads whose seqVmRun returned pc 0; reapThreads 0x20f4fc frees them next frame), +0xc3c0 a 0x100-entry pool of 0x10-byte entries; each pool = free list +0x0 / used list +0xd0 (sentinel node + count after it) / max +0x1a0 / nodes +0x1c0 (entries: +0x0 / +0x1c / +0x38 / +0x40), nodes {prev, next, data at +0x10}. Thread record 0xb0: flags +0 (0x40 pause 0x8000, 0x80 resume slot +0xc), id +4 (top two bits = image; main threads 0x04000000 / 0x44000000 / 0x84000000), pc +8, GamArea trigger id +0x20, arg +0x28, VM stack +0xac. +0xdc08 image bases [5] (index = current image 0x7b4dd0), +0xdc1c the global variables (0x800 bytes), +0xdc20 a bitset (0x800), +0xdc24 flags (1 = exec skips). VM state bss: 0x7b4640 / 0x7b4650 running node / end, 0x7b47d0 image + 0x30, 0x7b4910 globals, 0x7b4920 call save slots (0xcc), 0x7b4d20 stacks 0x10000 (32 x 2 KB, use words 0x7b4d30), data 0x2d9e08 image saves 3 x 0x780 | main |
 | 0x7b205c / 0x7b2060 | `g_sequence.m_global` / `m_bits` (Sequence 0x7a4440 + 0xdc1c / + 0xdc20, set by Sequence::init): GamMan, MagScene and the menus read the script globals ([1..4] stage-change words, [5] / [7] cleared by a stage load) and the flag bitset (word 0 bit 0x8000 chapter-6 start, word 1 bits 2 / 4 the dog follows, 0x100; word 2 bit 0x8000 the debug restart that restores the PC / dog) through these addresses | sequence |
 | 0x7b2580 | `SndMan` (`snd/sndman.cpp` 0x17f0d0..0x1810f4, `verify`; class name from the file): sound manager over rxSnd. 65 XVAB bank handles (+0x2c) and their source buffers (+0x130), 48 slots `SndInfo` of 0x84 bytes at +0x234 (type 1 ADPCM stream ids 0..1, type 8 SE ids 2..47; id bits at +0x24 / +0x28), master-volume fade +0x1af8..+0x1b10, TskSnd id +0x1b14; +0x4 holds argv[0]. Requests set a slot state (0 start, 2 play, 3 set, 4/5 pause, 6 resume, 7 stop, 10 reopen) that `SndMan::update` (each frame: slots, RxMpeg::update, rxSndUpdate, fade) acts on. Streams read `data/snd/xws/<name>` through an rx file ring (bss 0x668980 / 0x6a8d80, 0x40000 each; a looping stream has an end marker jumping to 0) into `rxSndAdpcmWrite`, 48000 Hz. Sound ids go through `GamSndMan` (GamMan +0x18e00 = 0x79a0c0, `game/gamsnd.h`: 0x38-byte entries {name[0x1c], id, bank, prog, note}) and `utlConvSndId` 0x106658 | asserts `strSndInfo->uniPtr.sndFStream.fStream / fd`; main |
@@ -1350,3 +1352,32 @@ throughout (identifiers, env variables, files, shader macros):
   execOption), 1 when g_sequence.m_bits[1] bit 0x80 is clear). Results 1 / 2 close the title: mode 6
   calls GamMan::resetPcStat and processPad returns m_result to MagLifeMenuTitle. Subs 2 (test000.pss
   test), 5 (movie viewer) and 6 are set by no retail code.
+
+## The task manager (task/tsk_man.cpp, 0x1e7094..0x1e7f28, 2026-10-26)
+
+- `CmnITask` slots (8-byte GCC 2 entries, the function word at +4 of each): 1 `get_task_type` (+0x08, the
+  kind), 2 `pause(on)` (+0x10), 3 `init` (+0x18, addTask), 4 `exec(id, time, arg)` (+0x20; time = the
+  timer's m_lastTime, +0x64; non-zero ends the task), 5 `term` (+0x28, when the node is freed), 6 dtor.
+  Kinds seen: 4 TskTest / TskLogger; pauseOthers spares 1, 2, 5, 7, 0xf, 0x11, 0x12, 0x17; killStageTasks
+  spares 1..3, 0x11; setNodePause only tells kinds 5, 0x10, 0x13, 0x14; GamMan kills 5 / 0x13 / 0x14.
+- `CmnTaskMan` (g_taskMan 0x7a3d80, EE 0x6c0): +0 the node list sorted by next-run frame, +4 a second list
+  findTask searches first (nothing in the file adds to it), +8 the next id (from 2), +0x40 SysTimer (its
+  m_updates +0x58 is the frame count addTask's start -1 means), +0x84 a kill queue of 128 ids with its end
+  pointer at +0x284, +0x288 the live id table (256 words, -1 ends, -2 removed; exec rewrites it every frame,
+  getTask reads it, addLiveId stops at 0xfe).
+- Node (0x40, operator new): +0 task, +4 next, +8 state (0 run / 1 paused / 2 dead), +0xc id, +0x10 the
+  caller's id word, +0x14 flags (bit 0: the node owns the task -- every caller passes 0x11 or 1; 0x10 is
+  never read here), +0x18 arg, +0x20 kind, +0x24 start, +0x28 period, +0x2c last frame (start + frames - 1,
+  0 forever), +0x30 last run, +0x34 next run.
+- `addTask(group, start, period, frames, task, arg, &id, flags)`: group (a1) is never read.
+- `exec` 0x1e7a20: hold the timer, step each due node (state 0: exec, next += period, ends on non-zero or
+  past its last frame; state 1: only moves on; state 2: freed), apply the kill queue (applyKillQueue
+  shortens the queue by its last word on a match, not the matched one -- a ROM quirk kept), sweep dead
+  nodes, rewrite the live table, `GamMan::execPauseReq`. `killTask` kills a node in the list at once
+  (killListed) and only queues ids it cannot find -- the node exec is stepping is out of the list then.
+- Freeing (freeNode / termNode): term, then a plain `operator delete` of an owned task (no destructor
+  call in the ROM; the host deletes through the virtual destructor).
+- **Host defaults**: task classes whose virtuals are not written yet get CmnITask's host defaults (kind
+  0, exec returns 1: the task ends on its first step, as when the manager was a stub), so a script that
+  waits on getTask(id) does not hang on a stub class. A class's real exec replaces that.
+

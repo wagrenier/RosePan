@@ -40,20 +40,6 @@ const char *g_versionNumber = "1.01";   /* data 0x2d9e18 -> 0x301720 */
 
 // ---- stubs (tools/reverse/stubgen.py) ----
 
-// stub of ROR 0x001e71fc
-int CmnTaskMan::addTask(int group, int start, int prio, int frames, CmnITask *task, int arg,
-                 int *id, int user)
-{
-    ROSEPAN_STUB("CmnTaskMan::addTask", 0x001e71fc);
-    return {};
-}
-
-// stub of ROR 0x001e7a20
-void CmnTaskMan::exec()
-{
-    ROSEPAN_STUB("CmnTaskMan::exec", 0x001e7a20);
-}
-
 // stub of ROR 0x002155a0
 void debugNop(void)
 {
@@ -436,13 +422,6 @@ int GamFont::setTarget(void *buf, u_int w, u_int h, int bits)
     return {};
 }
 
-// stub of ROR 0x001e7d7c
-void * CmnTaskMan::getTask(int id)
-{
-    ROSEPAN_STUB("CmnTaskMan::getTask", 0x001e7d7c);
-    return {};
-}
-
 // stub of ROR 0x001e4908
 int GamSndMan::findSnd(int id, GamSndEntry **entry, int arg)
 {
@@ -687,12 +666,6 @@ int i3rItemUnrelocate(I3rItem *item, I3rItem *base)
     return {};
 }
 
-// stub of ROR 0x001e7724
-void CmnTaskMan::killTask(int id)
-{
-    ROSEPAN_STUB("CmnTaskMan::killTask", 0x001e7724);
-}
-
 // stub of ROR 0x001deaac
 void GamArea::checkPc()
 {
@@ -788,24 +761,6 @@ void gamClearFrameReq(void)
 void gamSystemDataLoaded(void)
 {
     ROSEPAN_STUB("gamSystemDataLoaded", 0x001f8fb8);
-}
-
-// stub of ROR 0x001e747c
-void CmnTaskMan::pauseKinds(const int *kinds, int on)
-{
-    ROSEPAN_STUB("CmnTaskMan::pauseKinds", 0x001e747c);
-}
-
-// stub of ROR 0x001e7544
-void CmnTaskMan::pauseOthers(int on)
-{
-    ROSEPAN_STUB("CmnTaskMan::pauseOthers", 0x001e7544);
-}
-
-// stub of ROR 0x001e7414
-void CmnTaskMan::pauseTask(int id, int on)
-{
-    ROSEPAN_STUB("CmnTaskMan::pauseTask", 0x001e7414);
 }
 
 // stub of ROR 0x00163ab8
@@ -1413,13 +1368,6 @@ void GamArea::stopTrgs()
     ROSEPAN_STUB("GamArea::stopTrgs", 0x001ddc80);
 }
 
-// stub of ROR 0x001e79c0
-CmnITask * CmnTaskMan::findTask(int id)
-{
-    ROSEPAN_STUB("CmnTaskMan::findTask", 0x001e79c0);
-    return {};
-}
-
 // stub of ROR 0x0016aa04
 void Eff0::setVisible(bool on)
 {
@@ -1574,12 +1522,6 @@ void gamSetBwnRot(const float *rot)
     ROSEPAN_STUB("gamSetBwnRot", 0x001443d8);
 }
 
-// stub of ROR 0x001e7618
-void CmnTaskMan::killStageTasks()
-{
-    ROSEPAN_STUB("CmnTaskMan::killStageTasks", 0x001e7618);
-}
-
 // stub of ROR 0x001635e0
 void EmyManager::resetWork()
 {
@@ -1619,22 +1561,10 @@ GamSecta * GamMan::getSectaCell(int no, float *pos, int list)
     return {};
 }
 
-// stub of ROR 0x001e77b4
-void CmnTaskMan::killKind(int kind)
-{
-    ROSEPAN_STUB("CmnTaskMan::killKind", 0x001e77b4);
-}
-
 // stub of ROR 0x001d3b44
 void GamMan::checkMenuReq()
 {
     ROSEPAN_STUB("GamMan::checkMenuReq", 0x001d3b44);
-}
-
-// stub of ROR 0x001e7910
-void CmnTaskMan::killKinds(const int *kinds)
-{
-    ROSEPAN_STUB("CmnTaskMan::killKinds", 0x001e7910);
 }
 
 // stub of ROR 0x001d817c

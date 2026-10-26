@@ -1073,6 +1073,24 @@
    "status": "verify",
    "why": "SysTimer (ctor 0x203d94, dtor 0x203da8, init / start / stop / read / update / hold), sysInit/TermManagers, the host0 reboot 0x2041a0 and the static initializer pair 0x2041f8 / 0x20439c / 0x2043bc that constructs the global managers: the globals file before main.cpp (no source string; file name a guess)"
   },
+  "task/tsk_man.cpp": {
+   "notes": "Pinned 0x1e7094..0x1e7f28 out of unassigned@001e6d54 (file name a guess, open-items). CmnITask slots: 1 get_task_type, 2 pause, 3 init, 4 exec(id, time, arg) nonzero ends, 5 term, 6 dtor. Task classes whose virtuals are not written run host defaults (kind 0, exec returns 1 so the task ends on its first step, as when the manager was a stub); writing a class's exec/get_task_type replaces that. Smoke runs: 15 s boot shows the Sony logo then the Atlus disclaimer, an 80 s run with 1800:START,2400:START reaches Press START and the title menu exactly as before. Nothing draws through the manager yet, hence verify. Next in the old range: the Tsk* classes 0x1e7f28..0x1f8034 (TskMtnMove/2, TskMove*, TskFrameFunc, TskMsgMan, TskMovie...), in New Game order; 0x1e6d54/0x1e6e00 are GamSndMan 3D volume helpers for game/gamsnd.cpp.",
+   "ranges": [
+    [
+     "001e7094",
+     "001e7f28"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-26 14:26",
+     "status": "verify",
+     "summary": "CmnTaskMan, the per-frame task runner, all 25 functions (ctor/dtor, addTask, exec, pause/kill/find calls, node and live-id helpers) plus TskTest and TskLogger; CmnITask made polymorphic with its six EE slots; getTask returns int"
+    }
+   ],
+   "status": "verify",
+   "why": "CmnTaskMan (ctor 0x1e7094 .. getTask / live-id helpers 0x1e7e50) plus TskTest::exec 0x1e7ed0 and TskLogger 0x1e7ed8 / 0x1e7f18 before TskMtnMove; file name a guess after RoR's task/tsk_*.cpp (no source string). 0x1e6d54 / 0x1e6e00 before it are GamSndMan 3D-volume helpers (callers playSE / playStr), game/gamsnd.cpp."
+  },
   "unassigned@001056f8": {},
   "unassigned@0011262c": {},
   "unassigned@0012f008": {},
@@ -1083,6 +1101,7 @@
   "unassigned@001a6830": {},
   "unassigned@001bde58": {},
   "unassigned@001d859c": {},
+  "unassigned@001e6d54": {},
   "unassigned@001fd424": {},
   "unassigned@002053f4": {},
   "unassigned@0020eda4": {},

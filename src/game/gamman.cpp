@@ -695,7 +695,7 @@ int GamMan::setOption(u_int no, intptr_t arg)
 
 int GamMan::isMsgBusy()
 {
-    if (g_taskMan.getTask(m_msgTaskId) == NULL)
+    if (g_taskMan.getTask(m_msgTaskId) == 0)
     {
         if (m_sysMsgHandle == -1)
             return 0;
@@ -726,7 +726,7 @@ void GamMan::setMsgParam(const int *param)
 
 void GamMan::killMsgTask()
 {
-    if (g_taskMan.getTask(m_msgTaskId) != NULL)
+    if (g_taskMan.getTask(m_msgTaskId) != 0)
     {
         g_taskMan.killTask(m_msgTaskId);
         m_msgTaskId = -1;
@@ -1514,7 +1514,7 @@ void GamMan::afterSeqExec()
     {
         if ((f2 & 1) == 0)
             return;
-        if (g_taskMan.getTask(m_bgLoadTaskId) == NULL)
+        if (g_taskMan.getTask(m_bgLoadTaskId) == 0)
             return;
         keep = ~1u;
         f2 = m_flags2;
@@ -3187,7 +3187,7 @@ void GamMan::startAchrPlaceTask(float radius, ACHRstat *chr, int keep)
     placeAchr((int)chr->m_oid, place, 1);
     if ((chr->m_flags & 0x8000000) != 0)
         return;
-    if (chr->m_colPrm[0] != 2 || g_taskMan.getTask(chr->m_placeTask) != NULL)
+    if (chr->m_colPrm[0] != 2 || g_taskMan.getTask(chr->m_placeTask) != 0)
         return;
     chr->m_colPrm[1] = 4;
     chr->m_colPrm[4] = 0;
@@ -3196,7 +3196,7 @@ void GamMan::startAchrPlaceTask(float radius, ACHRstat *chr, int keep)
         int   m_frames;
         float m_radius;
     } param = {0x3c, radius};
-    if (g_taskMan.getTask(chr->m_placeTask) == NULL)
+    if (g_taskMan.getTask(chr->m_placeTask) == 0)
     {
         TskSeqEvent *task = new TskSeqEvent(chr->m_oid, 0, &param);
         g_taskMan.addTask(1, -1, 1, 0, task, 0, &chr->m_placeTask, 0x11);
@@ -3288,7 +3288,7 @@ int GamMan::getSelItemNum()
 
 void GamMan::openMsg(const char *text, int arg, int time)
 {
-    if (g_taskMan.getTask(m_msgTaskId) != NULL)
+    if (g_taskMan.getTask(m_msgTaskId) != 0)
     {
         g_taskMan.killTask(m_msgTaskId);
         m_msgTaskId = -1;
@@ -5534,7 +5534,7 @@ void GamMan::enterMenuPause(int clear)
     g_sequence.m_global[0x28] = -1;
     g_gamMan.pause(0x2000);
     g_gamMan.m_flags2 &= ~0x80u;
-    if ((m_flags2 & 0x80000) != 0 && g_taskMan.getTask(m_itemUseTaskId) == NULL)
+    if ((m_flags2 & 0x80000) != 0 && g_taskMan.getTask(m_itemUseTaskId) == 0)
     {
         TskFrameFunc *task = new TskFrameFunc(0x15, 0, 0);
         g_taskMan.addTask(1, -1, 1, 0, task, 0, &m_itemUseTaskId, 0x11);

@@ -26,11 +26,8 @@ intptr_t magBwnSeqCommand(const intptr_t *args);                         // ROR 
 
 /* ---- the task framework (unassigned@001e46b8) ---- */
 
-/* The task interface 32 classes derive from (no vtable of its own in the
- * ELF). layout: host -- no members reconstructed. */
-struct CmnITask
-{
-};
+/* CmnITask, CmnTaskMan, g_taskMan: task/tsk_man.h. */
+#include "task/tsk_man.h"
 
 /* One of EmyManager's 8 slots (EE 0x3c, at +0x148; init clears them).
  * Native 212 cases 24 / 30 store its two words; roles unknown. */
@@ -92,43 +89,6 @@ struct EmyManager : CmnITask
 
     EmySlot m_slot[8];          // ROR 0x148
 };
-
-/* The task manager, one global at bss 0x7a3d80. EE size at least 0x288.
- * layout: host -- only the timer member is placed (EE +0x40). */
-struct CmnTaskMan
-{
-    int  addTask(int group, int start, int prio, int frames, CmnITask *task, int arg,
-                 int *id, int user);                                     // ROR 0x001e71fc
-    void exec();                                                         // ROR 0x001e7a20
-    /* Non-zero while the task id still runs. */
-    void *getTask(int id);                                               // ROR 0x001e7d7c
-    /* Queues the task id for removal (once; -1 is ignored). */
-    void killTask(int id);                                               // ROR 0x001e7724
-    /* Pauses (on) / resumes the task id (-1 ignored). */
-    void pauseTask(int id, int on);                                      // ROR 0x001e7414
-    /* Pauses / resumes every task whose kind is in kinds (-1 ends the
-     * list; a list starting with -1 matches nothing). */
-    void pauseKinds(const int *kinds, int on);                           // ROR 0x001e747c
-    /* Pauses / resumes every task but those of kinds 1, 2, 5, 7, 0xf,
-     * 0x11, 0x12, 0x17. */
-    void pauseOthers(int on);                                            // ROR 0x001e7544
-    /* The task object of id (the list at +4, then +0), NULL when none. */
-    CmnITask *findTask(int id);                                          // ROR 0x001e79c0
-    /* Every task of the list at +0 is marked for removal (state 2) but
-     * those whose kind (virtual +0xc) is 1..3 or 0x11. */
-    void killStageTasks();                                               // ROR 0x001e7618
-    /* Every live task of the list at +0 whose kind (virtual +8) is kind
-     * marked for removal (state 2). */
-    void killKind(int kind);                                             // ROR 0x001e77b4
-    /* killTask for every task of the list at +0 whose kind (virtual +0xc)
-     * is in kinds (-1 ends it). The ROM's caller passes a third word it
-     * never reads. */
-    void killKinds(const int *kinds);                                    // ROR 0x001e7910
-
-    SysTimer m_timer;           // ROR 0x40 (bss 0x7a3dc0)
-};
-
-extern CmnTaskMan g_taskMan;    /* bss 0x7a3d80 */
 
 /* What ACHRstat +0x3d0 points at: only its actor no is read. EE layout
  * (the rest unknown). */

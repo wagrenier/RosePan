@@ -496,7 +496,7 @@ int SndMan::playStream(const char *name, int mode, int id, int arg)
             param.m_id = sid;
             param.m_arg = arg;
             param.m_id2 = sid;
-            if (g_taskMan.getTask(m_taskId) != NULL)
+            if (g_taskMan.getTask(m_taskId) != 0)
                 return sid;
 
             TskSnd *task = new TskSnd(7, &param);
