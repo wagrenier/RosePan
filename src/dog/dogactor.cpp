@@ -150,7 +150,7 @@ int DogActor::findMotionByName(const char *theName)
 }
 
 // stub of ROR 0x0010d0e8
-int DogActor::getMotionLength(int theID)
+float DogActor::getMotionLength(int theID)
 {
     ROSEPAN_STUB("DogActor::getMotionLength", 0x0010d0e8);
     return {};
@@ -238,4 +238,18 @@ void DogActor::eyeReset()
 void DogActor::setEyeTex(int state)
 {
     ROSEPAN_STUB("DogActor::setEyeTex", 0x0010f5e4);
+}
+
+// stub of ROR 0x0010aa5c
+int DogActor::getMotionNoBySuffix(const char *theName)
+{
+    ROSEPAN_STUB("DogActor::getMotionNoBySuffix", 0x0010aa5c);
+    return {};
+}
+
+// stub of ROR 0x0010d9ec
+float DogActor::getMotionTime()
+{
+    ROSEPAN_STUB("DogActor::getMotionTime", 0x0010d9ec);
+    return {};
 }

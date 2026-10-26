@@ -242,7 +242,7 @@ struct MagScene
                                  u_int flags);                           // ROR 0x00133324
     /* fps: motion frames per second (the actor keeps fps / 60). */
     void setActorMotionSpeed(float fps, int no);                         // ROR 0x001333c0
-    int  getActorMotionLength(int no, int motion);                       // ROR 0x001333e4
+    float getActorMotionLength(int no, int motion);                      // ROR 0x001333e4
     float getActorMotionSpeed(int no);                                   // ROR 0x00133440
     /* Sub mode 3: fade out, then openMenu(id) with arg. */
     void requestMenu(int id, int arg);                                   // ROR 0x001357b0

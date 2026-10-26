@@ -485,11 +485,29 @@
   "was": "FUN_0010a038",
   "why": "+0x40..+0x48 += a1[0..2], w = 1; f12 into +0x74 (the TransOfsY saveTransOfsY reads), f13 into +0x3d0 (clearRotYAAR's field), dirty"
  },
+ "0010a650": {
+  "name": "DogActor::getRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_0010a650",
+  "why": "the actor's Y heading: +0x54, or for a motion whose record word +8 is set the base rotate y (+0x3c4) + rotation y (+0x84) + 0x10a584, each asserted in -pi..pi and wrapped; GamMan::getObjRotY, chrMtnMove for rotY >= 32769"
+ },
  "0010a834": {
   "name": "DogActor::isModeSet",
   "tag": "ror-inferred",
   "was": "FUN_0010a834",
   "why": "returns +0xf0 (DogModel m_mode, getMode) != 0"
+ },
+ "0010a8b8": {
+  "name": "DogActor::findMotionBySuffix",
+  "tag": "ror-inferred",
+  "was": "FUN_0010a8b8",
+  "why": "asserts theName (dog/dogactor.cpp line 0x603); walks the motion records (+0x1c4, count +0x1c0, 0x20 each) comparing the part of each record name (+0x1c) after its first '_' with theName, case-insensitive; returns the record index or -1"
+ },
+ "0010aa5c": {
+  "name": "DogActor::getMotionNoBySuffix",
+  "tag": "ror-inferred",
+  "was": "FUN_0010aa5c",
+  "why": "findMotionBySuffix(name) then the record's word +0x14, -1 when none; native 100 case 8 returns it, chrChangeMotionBySuffix passes it as the motion to chrChangeMotion"
  },
  "0010aa9c": {
   "name": "DogActor::findMotionByName",
@@ -556,6 +574,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010d388",
   "why": "dog/dogactor.cpp asserts m_motion_cmd_idx < DOG_MAX_MOTION_CMD: the motion command list at +0x42c"
+ },
+ "0010d9ec": {
+  "name": "DogActor::getMotionTime",
+  "tag": "ror-inferred",
+  "was": "FUN_0010d9ec",
+  "why": "m_mode (+0xf0) == 2: (float)~m_f4, else m_motion.m_frame (+0x1ec); native 100 case 31 stores it to the script's float"
  },
  "0010da4c": {
   "name": "DogActor::getMotionFrame",
@@ -3065,17 +3089,65 @@
   "was": "FUN_00144ae0",
   "why": "takes native 039's six script words as an array (op = word 0) and drives the scene's MagLifeBwnCtrl 0x727aa0 (scene +0x2bd20): ops 0x14 / 0x15 / 0x1f.. pass a vector to its 0x12a89c / 0x12a808 / 0x12aa70, op 0x23 waits (0xcccccccc) on 0x12ab10; native 039 for every op but 100 / 0x65"
  },
+ "00162afc": {
+  "name": "EmyManager::setSlotWord24",
+  "tag": "ror-inferred",
+  "was": "FUN_00162afc",
+  "why": "word +0x24 of slot no of the 8 0x3c-byte slots at +0x148 (init clears 0x1e0 bytes there); native 212 case 30 (case 24 stores the slot's +0xc inline)"
+ },
  "001634d4": {
   "name": "EmyManager::releaseObj",
   "tag": "ror-inferred",
   "was": "FUN_001634d4",
   "why": "a0 = g_emyManager 0x7b2140: the object of its 0x40 slots (+4) whose first word is oid is deleted (vtable slot 1 with 3), the slot and +0x330 entry cleared; releaseChr for type-2 achrs"
  },
+ "0016366c": {
+  "name": "EmyManager::setEmyActive",
+  "tag": "ror-inferred",
+  "was": "FUN_0016366c",
+  "why": "findEmy(oid) then 0x166378(on): +8 = on; off pauses the achr's tasks and sets achr flags 0x400 | 0x2000, on clears them; native 212 case 10"
+ },
+ "001636a4": {
+  "name": "EmyManager::findEmy",
+  "tag": "ror-inferred",
+  "was": "FUN_001636a4",
+  "why": "the first of the 64 enemy pointers at +4 whose first word is oid, NULL when none; every EmyManager per-enemy wrapper calls it"
+ },
  "00163ab8": {
   "name": "EmyManager::getOids",
   "tag": "ror-inferred",
   "was": "FUN_00163ab8",
   "why": "copies +0x138 / +0x13c to its two out pointers"
+ },
+ "00163b20": {
+  "name": "EmyManager::getEmyWord3c",
+  "tag": "ror-inferred",
+  "was": "FUN_00163b20",
+  "why": "findEmy(oid)'s word +0x3c, 0 when none; native 212 case 20; role unknown"
+ },
+ "00163b48": {
+  "name": "EmyManager::setEmyWord238",
+  "tag": "ror-inferred",
+  "was": "FUN_00163b48",
+  "why": "findEmy(oid)'s word +0x238 = v; returns whether found; native 212 case 21; role unknown"
+ },
+ "00163b80": {
+  "name": "EmyManager::testEmyView",
+  "tag": "ror-inferred",
+  "was": "FUN_00163b80",
+  "why": "1 when no enemy oid, else 0x154734 -> 0x154668: two cone tests (angle pi, 0x169bac) from the enemy's achr against the objects of bss 0x7a3350 / 0x7a3354; native 212 case 22"
+ },
+ "00163bb8": {
+  "name": "EmyManager::releaseEmyHold",
+  "tag": "ror-inferred",
+  "was": "FUN_00163bb8",
+  "why": "findEmy(oid) then 0x154748: achr flags +0x120 lose 0x10000000 and 0x80, enemy +0x240 = 1; native 212 case 23"
+ },
+ "00164078": {
+  "name": "EmyManager::isEmyFlag30",
+  "tag": "ror-inferred",
+  "was": "FUN_00164078",
+  "why": "findEmy(oid) then 0x166a0c: word +0x30 bit 0; false when none; native 212 case 40"
  },
  "0016aa04": {
   "name": "Eff0::setVisible",
@@ -6623,6 +6695,12 @@
   "was": "FUN_001c58c0",
   "why": "walks the achr list (+0x1d350) pausing type-2 chars tasks, task kinds 0x13 / 0x14 and the EmyManager task; flags2 bit 0x10000 holds the state"
  },
+ "001c5a5c": {
+  "name": "GamMan::switchEnemies",
+  "tag": "ror-inferred",
+  "was": "FUN_001c5a5c",
+  "why": "for every achr of kind 2 (flags +0x100 >> 23): on calls its actor's virtual +0x44 with 1 and sets +0x3f4 bit 0; off, only where that bit is set, resets the object of its param 0x67, calls the virtual with 0, clears the bit; native 212 case 50"
+ },
  "001c5bf4": {
   "name": "GamMan::enterMenu",
   "tag": "ror-inferred",
@@ -7174,6 +7252,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d06b8",
   "why": "isObj, then ObjStat::getRot (achr) or FCHRstat::getRot (fchr) into out; 1 when the object exists"
+ },
+ "001d0758": {
+  "name": "GamMan::getObjRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_001d0758",
+  "why": "isObj(oid), then the actor of an achr (kind 1) or fchr (kind 2) (+0x108) and *out = DogActor::getRotY; returns 1, 0 for no object; native 100 cases 4 / 6 / 7 / 9"
  },
  "001d080c": {
   "name": "GamMan::addObjColliSegment",
@@ -7835,6 +7919,18 @@
   "was": "FUN_001e7d7c",
   "why": "non-zero when the task id still runs; playStream does not queue a second TskSnd"
  },
+ "001e7f28": {
+  "name": "TskMtnMove::TskMtnMove",
+  "tag": "ror-inferred",
+  "was": "FUN_001e7f28",
+  "why": "stores vtable 0x2e4910 (rtti: TskMtnMove), 0xc0 bytes: actor no +0xc, motion +0x10, frames +0x68, oid +8, speed +0x78; starts the motion on the actor (changeMotion for an fchr oid)"
+ },
+ "001e8fc4": {
+  "name": "TskMtnMove2::TskMtnMove2",
+  "tag": "ror-inferred",
+  "was": "FUN_001e8fc4",
+  "why": "stores vtable 0x2e48d0 (rtti: TskMtnMove2), 0x100 bytes: actor no +0xc, motion +0x10, frames +0x58, oid +8, speed +0x68, two unit quaternions +0x30 / +0x40"
+ },
  "001e9a3c": {
   "name": "TskMoveTypeGen::TskMoveTypeGen",
   "tag": "ror-inferred",
@@ -7907,11 +8003,41 @@
   "was": "FUN_001f5244",
   "why": "stores vtable 0x2e4bd0 (_vt$9TskAttach; rtti.py lists it as the class's ctor), +4 the oid, +8 GamMan::getActorNo(oid), +0xc a3, +0x10 *a2; native 012 case 0x3c news 0x40 bytes for it"
  },
+ "001f59b4": {
+  "name": "chrMtnMove",
+  "tag": "ror-inferred",
+  "was": "FUN_001f59b4",
+  "why": "for an achr: motion by name when name != NULL, kills the slot +0x3dc task (rotY >= 32769 first keeps the actor's heading), +0x13c = motion; news TskMtnMove(speed, rotY, actor no, motion, p1d8, flags, oid) and adds it with id slot +0x3dc; native 100 cases 4 / 6, TskMoveTypeRound"
+ },
+ "001f5bdc": {
+  "name": "chrMtnMove2",
+  "tag": "ror-inferred",
+  "was": "FUN_001f5bdc",
+  "why": "as chrMtnMove with TskMtnMove2 (0x100 bytes) and no rotation argument; native 100 case 9, GamArea::startPcAction, EmyOut::set_motion_looptypeA"
+ },
+ "001f5d90": {
+  "name": "chrChangeMotionBySuffix",
+  "tag": "ror-inferred",
+  "was": "FUN_001f5d90",
+  "why": "getActorNo(oid), motion = DogActor::getMotionNoBySuffix(name) (< 0: 0), then chrChangeMotion with the two floats and the two ints; native 100 case 7"
+ },
  "001f5e48": {
   "name": "chrChangeMotion",
   "tag": "ror-inferred",
   "was": "FUN_001f5e48",
   "why": "achr: kills the +0x3dc task and starts a new 0xc0-byte task; else MagScene::changeActorMotion"
+ },
+ "001f61ec": {
+  "name": "chrKillMotionTask",
+  "tag": "ror-inferred",
+  "was": "FUN_001f61ec",
+  "why": "for an achr oid: kills the task in its slot +0x3dc (the motion task chrMtnMove / chrMtnMove2 start) and sets it -1; native 100 before direct motion changes"
+ },
+ "001f6308": {
+  "name": "chrSetMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6308",
+  "why": "speed outside 0.0001..100 becomes 1/60 with p1d8 1, p1d8 < -1 or > 300 becomes 1; motion by name when name != NULL; MagScene::changeActorMotion then setActorRotate keeping the heading (an achr's running slot +0x3dc task gives it, and is killed); native 100 cases 3 / 5"
  },
  "001f6578": {
   "name": "chrCreateItemObj",

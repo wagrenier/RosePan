@@ -417,6 +417,10 @@ struct GamMan
      * the tasks of kinds 0x13 / 0x14 and EmyManager's; flags2 bit 0x10000
      * holds the state. Returns 0 when nothing changes. */
     int  pauseAchr(int on);                                              // ROR 0x001c58c0
+    /* Every type-2 achr: on calls its actor's virtual +0x44 with 1 and
+     * sets +0x3f4 bit 0; off undoes it where the bit is set (resetting
+     * the object of its param 0x67 first). Native 212 case 50. */
+    void switchEnemies(int on);                                          // ROR 0x001c5a5c
     /* Stops the stage sound and the tasks before a menu opens; kind 1 / 2
      * also sets Sequence flag 1. */
     void enterMenu(int kind);                                            // ROR 0x001c5bf4
@@ -615,6 +619,9 @@ struct GamMan
     void setSysMsgHandle(int handle);                                    // ROR 0x001cfb38
     /* 1 when oid names a live object of its list. */
     int  isObj(u_int oid);                                               // ROR 0x001d046c
+    /* *out = the Y heading of oid's actor (an achr or fchr); 0 when oid
+     * is no object. */
+    int  getObjRotY(u_int oid, float *out);                              // ROR 0x001d0758
     /* oid's rotation from an angle (normalised first). */
     void setObjDir(u_int oid, float dir);                                // ROR 0x001d024c
     /* By the oid's list, the object's position / rotation (each angle
@@ -893,5 +900,22 @@ void *chrChangeMotion(u_int oid, int motion, int a2, int a3, float blend,
 /* Creates item id's object (its chr no and model from the system data),
  * placed at pos / rot when given; returns its oid. */
 u_int chrCreateItemObj(short id, const float *pos, const float *rot);    // ROR 0x001f6578
+struct CmnITask;
+/* The motion helpers of native 100. name != NULL picks the motion by
+ * name. An achr's motion task lives in its slot +0x3dc (m_task[2]):
+ * chrKillMotionTask kills it; chrMtnMove / chrMtnMove2 replace it with a
+ * new TskMtnMove / TskMtnMove2 (rotY >= 32769 keeps the heading). */
+void chrKillMotionTask(u_int oid);                                       // ROR 0x001f61ec
+CmnITask *chrMtnMove(float speed, float rotY, u_int oid, int motion, int p1d8, u_int flags,
+                     const char *name);                                  // ROR 0x001f59b4
+CmnITask *chrMtnMove2(float speed, u_int oid, int motion, int p1d8, u_int flags,
+                      const char *name);                                 // ROR 0x001f5bdc
+/* chrChangeMotion to the motion DogActor::getMotionNoBySuffix(name) gives. */
+int  chrChangeMotionBySuffix(float blend, float rotY, u_int oid, const char *name, int a2,
+                             int a3);                                    // ROR 0x001f5d90
+/* MagScene::changeActorMotion on actor no keeping its heading; a speed
+ * outside 0.0001..100 becomes 1/60. */
+void chrSetMotion(float speed, int no, int motion, int p1d8, u_int flags, u_int oid,
+                  const char *name);                                     // ROR 0x001f6308
 
 #endif /* _GAME_GAMMAN_H */

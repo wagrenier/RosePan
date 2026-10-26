@@ -1013,6 +1013,17 @@ throughout (identifiers, env variables, files, shader macros):
   281 ops 200 / 201 go to seqSectorFlags 0x20de34 (sectorSetFlags 0x17c45c / sectorClearFlags 0x17c4f4
   on the scene's sector.sec object +0x8542c); seqGetIdPair 0x20dea8 reads the 50 signed byte pairs at
   data 0x3015e0.
+- **Natives 100 / 212** (session 11, 2026-10-26): 100 actor motions (table data 0x300c90, 33 entries;
+  a2 motion or name, a3 p1d8, t0 -> float speed, t1 bit 1 -> flag 0x100). The achr's motion task lives
+  on ACHRstat m_task[2] +0x3dc: chrKillMotionTask 0x1f61ec kills it; chrMtnMove 0x1f59b4 / chrMtnMove2
+  0x1f5bdc replace it with a TskMtnMove (0xc0, ctor 0x1e7f28, vtable 0x2e4910) / TskMtnMove2 (0x100,
+  ctor 0x1e8fc4, vtable 0x2e48d0); chrSetMotion 0x1f6308 is MagScene::changeActorMotion keeping the
+  heading; chrChangeMotionBySuffix 0x1f5d90 uses DogActor::getMotionNoBySuffix 0x10aa5c (record word
+  +0x14 of findMotionBySuffix 0x10a8b8: the name after its first '_', any case). GamMan::getObjRotY
+  0x1d0758 -> DogActor::getRotY 0x10a650. DogActor::getMotionLength 0x10d0e8 and
+  MagScene::getActorMotionLength 0x1333e4 return a float (f0; the i3m root's float +0x18 via 0x22e958).
+  212 enemies (table 0x3011b0, 51 entries) on g_emyManager: findEmy 0x1636a4 scans 64 enemy pointers at
+  +4 (first word = oid); 8 EmySlot records of 0x3c at +0x148; GamMan::switchEnemies 0x1c5a5c (case 50).
 - **Natives 253 / 281** (session 10, 2026-10-26): 253 movies (table data 0x3015b0, 11 cases) on the
   TskMovie task (0x80, ctor 0x1f438c, vtable 0x2e4c50: sound 0x1d, SndMan::stopAll(8), name at +0x10,
   m_state +8 = 100, S2dMovie::playMovie) kept in GamMan::m_movieTaskId +0x222b4: 1 start (yields), 2 kill

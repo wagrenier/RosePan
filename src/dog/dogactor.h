@@ -70,14 +70,22 @@ struct DogActor : DogModel
     void drawShadow(I3dLayer *layer);                                    // ROR 0x0010e534
     /* The index of the motion record named theName, -1 when none. */
     int  findMotionByName(const char *theName);                          // ROR 0x0010aa9c
+    /* The motion record whose name after its first '_' is theName (any
+     * case), -1 when none; getMotionNoBySuffix gives its word +0x14. */
+    int  findMotionBySuffix(const char *theName);                        // ROR 0x0010a8b8
+    int  getMotionNoBySuffix(const char *theName);                       // ROR 0x0010aa5c
+    /* m_mode 2: ~m_f4 as a float, else the motion frame. */
+    float getMotionTime();                                               // ROR 0x0010d9ec
+    /* The Y heading (-pi..pi), the motion's root turn included. */
+    float getRotY();                                                     // ROR 0x0010a650
     /* Starts motion theID at speed (frames per frame); flags / flags2 go to
      * +0x3f0 / +0x3f4, p1d8 < 0 takes the motion's own +0x1d8 value.
      * Returns the motion index, -1 when it has none. */
     int  setMotion(float speed, int theID, u_int flags, int flags2, int p1d8); // ROR 0x0010af18
     /* Blends to motion theNo (flag 4 with the same motion: only the speed). */
     int  changeMotion(float speed, int theNo, u_int flags, int flags2, int arg); // ROR 0x0010b1b0
-    /* Motion theID's i3m length (its root's word +0x18). */
-    int  getMotionLength(int theID);                                     // ROR 0x0010d0e8
+    /* Motion theID's i3m length (its root's float +0x18, in frames). */
+    float getMotionLength(int theID);                                    // ROR 0x0010d0e8
 
     // ROR 0x00281244
     void setBaseRotate(const float *v)

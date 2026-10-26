@@ -44,14 +44,48 @@ struct CmnITask
 {
 };
 
+/* One of EmyManager's 8 slots (EE 0x3c, at +0x148; init clears them).
+ * Native 212 cases 24 / 30 store its two words; roles unknown. */
+struct EmySlot
+{
+    int    _00[3];
+    int    m_0c;                // ROR 0x0c: native 212 case 24
+    u_char _10[0x24 - 0x10];
+    int    m_24;                // ROR 0x24: setSlotWord24 (native 212 case 30)
+    u_char _28[0x3c - 0x28];
+};
+static_assert(sizeof(EmySlot) == 0x3c, "EmySlot EE size");
+static_assert(offsetof(EmySlot, m_0c) == 0x0c, "EmySlot m_0c");
+static_assert(offsetof(EmySlot, m_24) == 0x24, "EmySlot m_24");
+
 /* EmyManager : CmnITask, one global at bss 0x7b2140 (constructor
- * 0x16265c). layout: host -- no members reconstructed. */
+ * 0x16265c, vtable 0x2e31a0). layout: host -- only m_slot placed; it
+ * holds 64 enemy pointers at +4, each enemy's first word its oid. The
+ * per-enemy wrappers do nothing (0 / false; testEmyView 1) when findEmy
+ * finds none. */
 struct EmyManager : CmnITask
 {
     /* Its two object ids (+0x138 / +0x13c). */
     void getOids(int *a, int *b);                                        // ROR 0x00163ab8
     /* Deletes its object whose first word is oid (a type-2 achr's). */
     void releaseObj(u_int oid);                                          // ROR 0x001634d4
+    /* The enemy whose oid this is, NULL when none. */
+    void *findEmy(u_int oid);                                            // ROR 0x001636a4
+    /* Enemy +8 = on; off pauses its achr's tasks and sets achr flags
+     * 0x400 | 0x2000, on clears them. */
+    void setEmyActive(u_int oid, int on);                                // ROR 0x0016366c
+    int  getEmyWord3c(u_int oid);                                        // ROR 0x00163b20
+    int  setEmyWord238(u_int oid, int v);                                // ROR 0x00163b48
+    /* Two cone tests (angle pi) from the enemy against the objects of
+     * bss 0x7a3350 / 0x7a3354. */
+    int  testEmyView(u_int oid);                                         // ROR 0x00163b80
+    /* Achr flags lose 0x10000000 and 0x80, enemy +0x240 = 1. */
+    void releaseEmyHold(u_int oid);                                      // ROR 0x00163bb8
+    void setSlotWord24(int no, int v);                                   // ROR 0x00162afc
+    /* Enemy word +0x30 bit 0. */
+    int  isEmyFlag30(u_int oid);                                         // ROR 0x00164078
+
+    EmySlot m_slot[8];          // ROR 0x148
 };
 
 /* The task manager, one global at bss 0x7a3d80. EE size at least 0x288.

@@ -937,7 +937,7 @@ void MagScene::setActorMotionSpeed(float fps, int no)
 // The length of motion (< 0: the current one) of actor no.
 // ROR 0x001333e4
 
-int MagScene::getActorMotionLength(int no, int motion)
+float MagScene::getActorMotionLength(int no, int motion)
 {
     if (motion < 0)
         motion = m_actors[no].m_motion.getNo();

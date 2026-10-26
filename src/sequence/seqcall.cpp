@@ -18,8 +18,9 @@
 // changes), 032, 033, 036, 038, 039, 106 (motion speed), 110, 151 (object
 // control), 152 (object queries), 155 (vfchr objects), 016 (camera), 023
 // (area triggers), 026, 156 (ray tests), 200 (turns), 202 / 211 (achr
-// moves), 253 (movies) and 281 (scene effects) with its helpers. The
-// others are stubs (seqcall.h lists them).
+// moves), 100 (actor motions), 212 (enemies), 253 (movies) and 281
+// (scene effects) with its helpers. The others are stubs (seqcall.h
+// lists them).
 
 #include "sequence/seqcall.h"
 
@@ -1670,6 +1671,108 @@ intptr_t seqFunc006(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Actor motions of object a1 (jump table data 0x300c90, a0 0..32). a2 is
+// the motion (a number, or a name where noted), a3 the p1d8 word, t0
+// points at the speed (frames per frame), t1 bit 1 gives motion flag
+// 0x100. 1 / 10 / 12 and 2 start the motion at 1/60 (2 with a3), killing
+// the achr's motion task first; 3 changes to it keeping the heading
+// (chrSetMotion); 4 / 9 run it as a TskMtnMove / TskMtnMove2 task on an
+// achr (else as 3); 5 is 3 by name; 6 is 4 by name (else a blend by
+// name); 7 blends to the motion named by suffix; 8 returns that motion's
+// number; 30 the current motion (~no while stopped); 31 / 32 store the
+// motion time / length at a2. The others return 0.
+// ROR 0x00209528
+
+static const float SEQ_MOTION_STEP = 0x1.11112Ep-6f;  // 0x3c888897, MagScene's 1/60
+
+intptr_t seqFunc100(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t t0, intptr_t t1)
+{
+    GamMan   &gam = g_gamMan;
+    MagScene &scene = g_magSystem.m_scene;
+    u_int     oid = (u_int)a1;
+    /* The ROM leaves its stack word unset when getObjRotY finds no actor
+     * (which cannot happen past isObj for the achrs it is called for). */
+    float     rotY = 0.0f;
+
+    if (!gam.isObj(oid))
+        return 0;
+    int   no = gam.getActorNo(oid);
+    u_int flags = (u_int)(t1 << 7) & 0x100;
+    bool  isAchr = (oid >> 28 & 3) == 1;
+    const float *speed = (const float *)t0;
+    switch ((u_int)op)
+    {
+    case 1: case 10: case 12:
+        chrKillMotionTask(oid);
+        scene.setActorMotion(SEQ_MOTION_STEP, no, (int)a2, 0, flags);
+        return 0;
+    case 2:
+        chrKillMotionTask(oid);
+        scene.setActorMotion(SEQ_MOTION_STEP, no, (int)a2, (int)a3, flags);
+        return 0;
+    case 4:
+        if (isAchr)
+        {
+            gam.getObjRotY(oid, &rotY);
+            chrMtnMove(*speed, rotY, oid, (int)a2, (int)a3, flags, NULL);
+            return 0;
+        }
+        break;
+    case 5:
+        chrSetMotion(*speed, no, 0, (int)a3, flags, oid, (const char *)a2);
+        return 0;
+    case 6:
+        if (isAchr)
+        {
+            gam.getObjRotY(oid, &rotY);
+            chrMtnMove(*speed, rotY, oid, 0, (int)a3, flags, (const char *)a2);
+        }
+        else
+        {
+            chrKillMotionTask(oid);
+            scene.changeActorMotionByName(*speed, no, (const char *)a2, (int)a3, flags);
+        }
+        return 0;
+    case 7:
+        gam.getObjRotY(oid, &rotY);
+        chrChangeMotionBySuffix(*speed, rotY, oid, (const char *)a2, (int)a3, (int)flags);
+        return 0;
+    case 8:
+    {
+        int n = gam.getActorNo(oid);
+        if (n == -1)
+            return 0;
+        return scene.m_actors[n].getMotionNoBySuffix((const char *)a2);
+    }
+    case 9:
+        if (isAchr)
+        {
+            /* The ROM passes the heading in f13 too; chrMtnMove2 has no
+             * use for it. */
+            gam.getObjRotY(oid, &rotY);
+            chrMtnMove2(*speed, oid, (int)a2, (int)a3, flags, NULL);
+            return 0;
+        }
+        break;
+    case 3:
+        break;
+    case 30:
+        return scene.getActorMotion(no);
+    case 31:
+        *(float *)a2 = scene.m_actors[no].getMotionTime();
+        return 0;
+    case 32:
+        *(float *)a2 = scene.getActorMotionLength(no, -1);
+        return 0;
+    default:
+        return 0;
+    }
+    /* 3, and 4 / 9 for an object that is no achr. */
+    chrSetMotion(*speed, no, (int)a2, (int)a3, flags, oid, NULL);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Motion speed of object a1's actor to the float at a2: a0 1 through the
 // scene only, 2 through the achr (which keeps it, +0x418).
 // ROR 0x002098e0
@@ -2126,6 +2229,50 @@ intptr_t seqFunc211(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Enemies over g_emyManager (jump table data 0x3011b0, a0 0..50), a1 the
+// enemy's oid: 10 (de)activates it by a2; 20 / 21 read its word +0x3c /
+// set +0x238 to a2; 22 its view test (1 when there is no such enemy);
+// 23 releases its hold flags; 24 / 30 set the words +0xc / +0x24 of
+// manager slot a1 (30 to a2 != 0); 40 its flag bit +0x30; 50 switches
+// every type-2 achr by a1 (GamMan::switchEnemies). The others return 0.
+// ROR 0x0020c4c8
+
+intptr_t seqFunc212(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t)
+{
+    EmyManager &emy = g_emyManager;
+    u_int       oid = (u_int)a1;
+
+    switch ((u_int)op)
+    {
+    case 10:
+        emy.setEmyActive(oid, a2 != 0);
+        break;
+    case 20:
+        return emy.getEmyWord3c(oid);
+    case 21:
+        emy.setEmyWord238(oid, (int)a2);
+        break;
+    case 22:
+        return emy.testEmyView(oid);
+    case 23:
+        emy.releaseEmyHold(oid);
+        break;
+    case 24:
+        emy.m_slot[a1].m_0c = (int)a2;
+        break;
+    case 30:
+        emy.setSlotWord24((int)a1, a2 != 0);
+        break;
+    case 40:
+        return emy.isEmyFlag30(oid) != 0;
+    case 50:
+        g_gamMan.switchEnemies(a1 != 0);
+        break;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Movies (jump table data 0x3015b0, a0 0..10) over the TskMovie task
 // GamMan::m_movieTaskId: 1 starts the movie a1 (a name) once no movie
 // task is listed, stopping the sound first, and yields; 2 kills it and
@@ -2455,20 +2602,6 @@ const SeqFunc g_seqFuncTable[SEQ_FUNC_COUNT] = {
 intptr_t seqFunc020(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
     ROSEPAN_STUB("seqFunc020", 0x00207ae8);
-    return {};
-}
-
-// stub of ROR 0x00209528
-intptr_t seqFunc100(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc100", 0x00209528);
-    return {};
-}
-
-// stub of ROR 0x0020c4c8
-intptr_t seqFunc212(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc212", 0x0020c4c8);
     return {};
 }
 
