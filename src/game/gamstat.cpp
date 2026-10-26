@@ -778,6 +778,106 @@ void ObjStat::setWork(int no, int value)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x001db19c
+
+void ObjStat::addWork(int no, int value)
+{
+    m_work[no] += value;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d8fec
+
+void ObjStat::placeAt(int where)
+{
+    float pos[4];
+    setSecta(g_gamMan.getSectaCell(where, pos, 0));
+    if (m_secta != NULL)
+        setPos(pos);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Param 6 adds into a copy and then stores data itself (the ROM's). Param
+// 7 copies the word, 0x5c adds a float into the word setParam stores as an
+// int. 0x4f..0x58 add into the system record's (table 2) fields.
+// ROR 0x001dac8c // callcheck: sceVu0AddVector (the vector adds, written out)
+
+void ACHRstat::addParam(int which, const void *data)
+{
+    const float *f = (const float *)data;
+    const u_short h = *(const u_short *)data;
+    float v[4];
+
+    if (which >= 0x22 && which <= 0x31)
+    {
+        m_param[which - 0x22] += *(const int *)data;
+        return;
+    }
+    if (which >= 0x34 && which <= 0x38)
+    {
+        m_42c[which - 0x34] += h;
+        return;
+    }
+    if (which >= 0x4f && which <= 0x58)
+    {
+        ((GamSysRec2 *)m_rec2)->m_98[which - 0x4f] += h;
+        return;
+    }
+    if (which >= 0x69 && which <= 0x6f)
+    {
+        m_468[which - 0x69] += h;
+        return;
+    }
+    switch (which)
+    {
+    case GAM_PRM_O_POS:
+        ObjStat::getPos(v);
+        v[0] += f[0];
+        v[1] += f[1];
+        v[2] += f[2];
+        v[3] += f[3];
+        ObjStat::setPos(v);
+        break;
+    case GAM_PRM_O_ROT:
+        ObjStat::getRot(v);
+        v[0] += f[0];
+        v[1] += f[1];
+        v[2] += f[2];
+        v[3] += f[3];
+        ObjStat::setRot(f);
+        break;
+    case GAM_PRM_O_STAT:
+        m_stat = *(const int *)data;
+        break;
+    case GAM_PRM_O_SCALE:
+        m_scale += f[0];
+        break;
+    case GAM_PRM_A_LP:
+        m_lp += h;
+        break;
+    case 0x33: m_42a += h; break;
+    case 0x5a: m_440 += h; break;
+    case 0x5b: m_444 += f[0]; break;
+    case 0x5c:
+    {
+        float w;
+        memcpy(&w, &m_448, sizeof(w));
+        w += f[0];
+        memcpy(&m_448, &w, sizeof(w));
+        break;
+    }
+    case 0x5d: m_44c += h; break;
+    case 0x5e: m_44e += h; break;
+    case 0x5f: m_450 += f[0]; break;
+    case 0x62: m_454[2] += h; break;
+    case 0x63: m_454[3] += h; break;
+    case 0x64: m_45c += h; break;
+    case 0x65: m_460 += f[0]; break;
+    case 0x68: m_466 += h; break;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001db1b8
 
 void ACHRstat::setMotionSpeed(float speed)

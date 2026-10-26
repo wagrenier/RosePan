@@ -924,6 +924,21 @@ never asserts): sessions name them (`tus.py define --why`).
   angle (+0x140), and for map cameras 3..5 the path point (MagScene 0x13d4d0 / 0x13d52c: the path
   record +0x20 int + +0x28 fraction). Pop sets modes 3..5 as setCameraMode(mode, +0x21f78, {-1, -1,
   number}).
+- **Private collisions** (gamman session 7, native 151): `addObjColliSegment` 0x1d080c / `Box`
+  0x1d091c / `Quad` 0x1d0c64 add walls with `MagScene::addPrivateColli` (p0 at the top y, p1 at top -
+  height - 1) and store {kind 5 one wall / 6 four, shape 0 / 4, -height, top y, radius, ids} as param
+  0x18 (GamObjColli); box / quad also put the four x / z corners in param 0x1003 and the position. The
+  radius word is (sx - sy + sz) / 3 for a box, (z1 - x3 + z3) / 3 for a quad -- the ROM's formula;
+  fitObjBounds 0x1d480c redoes it from the corners.
+- **Weapon ammo** (gamman session 7): the equipped item 0xa3e takes ammo 0xa42, 0xa43 takes 0xa3f;
+  m_selItemNum (+0x1d200) is the loaded count, 6 at most. `findReloadSlot` 0x1c8604 / `reloadEquip`
+  0x1c870c move counts from ammo slots into it (emptied slots `clearItemSlot` 0x1c8214).
+- **Map area**: the WRD entry's word 0x1c (`GamMan::getMapArea` 0x1c6c38; gamSetWrdRoom keeps it in
+  +0x18dc0). `canOpenMapMenu` 0x1c97f0 wants map item 0xad0 in area 0, 0xad1 in 2, 0xad2 in 1, and
+  `canOpenItemMenu` 0x1c97c8 (m_flags 4, m_flags2 0x800 clear).
+- **Attach** (`attachObj` 0x1d1a5c): MagSystem::setActorParent(actor, parent actor, node index by
+  name); an achr parent records the child in m_link (+0x254); `detachObj` 0x1d1bec undoes it.
+  `setActorBindMode` 0x1d2428 sets bits 5..6 of MagScene m_actor_flags[actor].
 - **Enemy groups** (`addChrGroup` 0x1cc560, native 100 case 8): EmyManager::setGroup 0x162b68 (group
   a < 9 at stride 0x3c), then count achrs built with oid 0: addEmy (0x162c88) makes their oids
   0x9100006f + n and stores them in GamMan's m_achr table itself.

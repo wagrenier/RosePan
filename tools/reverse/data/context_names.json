@@ -6761,6 +6761,12 @@
   "was": "FUN_001c4610",
   "why": "every avfchr list (+0x1ef10) actor gets MagScene::changeActorMotion(1/60, actor, 1)"
  },
+ "001c46c8": {
+  "name": "GamMan::freezePcMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001c46c8",
+  "why": "stores 1e-7 (0x33d6bf94) into the PC actor's (+0x21fe0) DogMotionBlend speed +0x1e8; GamArea::update"
+ },
  "001c46f4": {
   "name": "GamMan::setStagePack",
   "tag": "ror-inferred",
@@ -6844,6 +6850,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c541c",
   "why": "stores +0x21fd4 (the ELF's getInuMode) then per mode 1..4 pauses / resumes 0x200000 / 0x100 and shows / hides the dog"
+ },
+ "001c574c": {
+  "name": "GamMan::isFading",
+  "tag": "ror-inferred",
+  "was": "FUN_001c574c",
+  "why": "MagScene::getFadeState: 1 for states 1, 3, 4, 0 for 0, 2, 5"
  },
  "001c58b8": {
   "name": "GamMan::empty1c58b8",
@@ -6935,6 +6947,12 @@
   "was": "FUN_001c6c28",
   "why": "returns +0x21f7c, the number gamWrdConvPos hands WrdTable::get"
  },
+ "001c6c38": {
+  "name": "GamMan::getMapArea",
+  "tag": "ror-inferred",
+  "was": "FUN_001c6c38",
+  "why": "WrdTable::get(m_wrdNo) word +0x1c, -1 without room / flags2 0x2000; canOpenMapMenu pairs map items 0xad0..0xad2 with its values 0 / 2 / 1"
+ },
  "001c6c98": {
   "name": "GamMan::getPlayMinutes",
   "tag": "ror-inferred",
@@ -7007,6 +7025,12 @@
   "was": "FUN_001c7a4c",
   "why": "+0x2220c = the id (0xa00 = none), flag 0x200000 when it changes"
  },
+ "001c7d04": {
+  "name": "GamMan::listAndReleaseChr",
+  "tag": "ror-inferred",
+  "was": "FUN_001c7d04",
+  "why": "adds oid to the 0x169-word list +0x1f240 unless present, then releaseChr(oid)"
+ },
  "001c7da8": {
   "name": "GamMan::isInOidList",
   "tag": "ror-inferred",
@@ -7024,6 +7048,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001c7e40",
   "why": "sets the item's got-bit in the Sequence bitset, then puts the id into the item slots +0x1a6c0"
+ },
+ "001c812c": {
+  "name": "GamMan::setItemSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_001c812c",
+  "why": "stores a 16-byte item (by value) into slot a1 of the item vector +0x1a6c0; a stacking item (record +0xb0 & 0x20000) counts into its existing slot first (99 max)"
+ },
+ "001c8214": {
+  "name": "GamMan::clearItemSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8214",
+  "why": "unequips (equipItem 0xa00) / untargets the slot's item, then writes the empty item's record and id 0xa00 into slot a1"
  },
  "001c82f8": {
   "name": "GamMan::delItem",
@@ -7049,17 +7085,47 @@
   "was": "FUN_001c8508",
   "why": "the count short +0xa of the item slot whose id matches, 0 none; equipItem keeps it in +0x1d200 for items 0xa3e / 0xa43"
  },
+ "001c854c": {
+  "name": "GamMan::getEquipSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_001c854c",
+  "why": "index of the item slot whose id is the equipped item +0x2220c, -1 none"
+ },
  "001c8598": {
   "name": "GamMan::selectItem",
   "tag": "ror-inferred",
   "was": "FUN_001c8598",
   "why": "+0x1d204 = the slot holding the id, +0x1d200 = its count"
  },
+ "001c8604": {
+  "name": "GamMan::findReloadSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8604",
+  "why": "equipped 0xa3e / 0xa43 with m_selItemNum != 6: 1 + the lowest-count slot of 0xa42 / 0xa3f, count of such slots to *a1"
+ },
+ "001c870c": {
+  "name": "GamMan::reloadEquip",
+  "tag": "ror-inferred",
+  "was": "FUN_001c870c",
+  "why": "moves counts from ammo slots (findReloadSlot, or slot a1 holding 0xa3f) into m_selItemNum capped at 6, clearItemSlot on emptied ones, updates m_selItem's count"
+ },
  "001c898c": {
   "name": "GamMan::getSelItemNum",
   "tag": "ror-inferred",
   "was": "FUN_001c898c",
   "why": "returns +0x1d200 (m_selItemNum, set by selectItem)"
+ },
+ "001c899c": {
+  "name": "GamMan::decSelItemNum",
+  "tag": "ror-inferred",
+  "was": "FUN_001c899c",
+  "why": "m_selItemNum and the selected slot's count down by one when above 0"
+ },
+ "001c89e4": {
+  "name": "GamMan::countItems",
+  "tag": "ror-inferred",
+  "was": "FUN_001c89e4",
+  "why": "counts the 12 item slots with id != 0xa00"
  },
  "001c8a28": {
   "name": "GamMan::hasItem",
@@ -7085,11 +7151,41 @@
   "was": "FUN_001c8ca4",
   "why": "true when the id (0: the current one, 0x1d1c80) sits in a slot with count < 99 and its record allows stacking (0x1dd00c flag 0x20000)"
  },
+ "001c8dc8": {
+  "name": "GamMan::testFchr100000",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8dc8",
+  "why": "getFchr(oid) flags +0x120 & 0x100000 for oid type 5, else 0"
+ },
+ "001c8e1c": {
+  "name": "GamMan::markObjTaken",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8e1c",
+  "why": "GamSysData::setFlags(kind, 4), setObj(oid, 2), resetObj(oid, 1), ctlObj1cb8e4(oid, 0x32, 0) when isFchrActive"
+ },
+ "001c8eb4": {
+  "name": "GamMan::createItemObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001c8eb4",
+  "why": "GamSysData field 0xf of id -> MagSystem::loadModel, makeOid(2, 5), addChr, setObjPos(pos); no callers"
+ },
  "001c8f7c": {
   "name": "GamMan::addStock",
   "tag": "ror-inferred",
   "was": "FUN_001c8f7c",
   "why": "the stock list +0x1a7f0 (count +0x1a810 < 0x14e): adds count (0 = 1) to the id's node, capped at 99, else a new node"
+ },
+ "001c9198": {
+  "name": "GamMan::addStockItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001c9198",
+  "why": "copies a 16-byte item into the stock pool +0x1a7c0 (count +0x1a810 < 0x14e), stacking ones count into their record; 1 when full"
+ },
+ "001c9334": {
+  "name": "GamMan::delStockByOid",
+  "tag": "ror-inferred",
+  "was": "FUN_001c9334",
+  "why": "frees the stock record whose word +4 (the oid) is a1; 1 when found"
  },
  "001c94d8": {
   "name": "GamMan::delStock",
@@ -7108,6 +7204,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001c9784",
   "why": "stores +0x2220e (the ELF getFindTargetItem) and sends it (0 for 0xa00) to 0x144500"
+ },
+ "001c97c8": {
+  "name": "GamMan::canOpenItemMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_001c97c8",
+  "why": "(dword +0x21f48 & 0x80000000004) == 4: m_flags 4 set, m_flags2 0x800 clear; MagScene::canOpenItemMenu's test"
+ },
+ "001c97f0": {
+  "name": "GamMan::canOpenMapMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_001c97f0",
+  "why": "hasItem 0xad0 / 0xad1 / 0xad2 with getMapArea 0 / 2 / 1, then the item-menu flag test; MagScene::canOpenMenu10001"
  },
  "001c98b8": {
   "name": "GamMan::beforeMapMenu",
@@ -7235,6 +7343,24 @@
   "was": "FUN_001cb424",
   "why": "stores oid at +0x21fd8 and m_murderPtr (+0x22098, getMurderPtr) = getAchr(oid); the setPc / setDog sibling, native 021 case 4"
  },
+ "001cb460": {
+  "name": "GamMan::getPcParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb460",
+  "why": "ACHRstat::getParam on +0x22090 (getPCPtr) when set; setPcParam's twin"
+ },
+ "001cb490": {
+  "name": "GamMan::getDogParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb490",
+  "why": "ACHRstat::getParam on +0x22094 (getDogPtr) when set"
+ },
+ "001cb4c0": {
+  "name": "GamMan::getMurderParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb4c0",
+  "why": "ACHRstat::getParam on +0x22098 (getMurderPtr) when set"
+ },
  "001cb4f0": {
   "name": "GamMan::setPcParam",
   "tag": "ror-inferred",
@@ -7252,6 +7378,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001cb57c",
   "why": "PC ObjStat setRot, copy into +0x22030 (getPcRot)"
+ },
+ "001cb5d8": {
+  "name": "GamMan::setDogParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb5d8",
+  "why": "ACHRstat::setParam on +0x22094 when set"
+ },
+ "001cb608": {
+  "name": "GamMan::setMurderParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001cb608",
+  "why": "ACHRstat::setParam on +0x22098 when set"
  },
  "001cb8e4": {
   "name": "GamMan::ctlObj1cb8e4",
@@ -7306,6 +7444,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001cbe38",
   "why": "isObj then +0x108 of the object the inline find returns, -1 none"
+ },
+ "001cbedc": {
+  "name": "GamMan::getObjKind",
+  "tag": "ror-inferred",
+  "was": "FUN_001cbedc",
+  "why": "the object's ObjStat +0x128 (o_uid, the system data id) by oid list, 0xffff none"
  },
  "001cbfb0": {
   "name": "GamMan::allocVFchr",
@@ -7468,6 +7612,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001cfa5c",
   "why": "MagScene::openSysMsgWindow(text, 0, 0) into m_sysMsgHandle +0x2227c; native 006 case 3 passes four -1 the body never reads"
+ },
+ "001cfaa8": {
+  "name": "GamMan::closeSysMsg",
+  "tag": "ror-inferred",
+  "was": "FUN_001cfaa8",
+  "why": "MagScene::updateWindowFont / closeWindow on m_sysMsgHandle +0x2227c, then -1; message mode +0x225d8 = 0"
  },
  "001cfb38": {
   "name": "GamMan::setSysMsgHandle",
@@ -7655,6 +7805,12 @@
   "was": "FUN_001d2334",
   "why": "the object's 0x1db19c: word no of its work array +0x1b0 += value; native 151 case 0x1f"
  },
+ "001d23f8": {
+  "name": "GamMan::hideObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001d23f8",
+  "why": "setObj(oid, 1) when a2, else resetObj(oid, 1) (flag 1 = hidden)"
+ },
  "001d2428": {
   "name": "GamMan::setActorBindMode",
   "tag": "ror-inferred",
@@ -7799,6 +7955,12 @@
   "was": "FUN_001d8064",
   "why": "ObjStat's position setters call it with (pos, the current cell, oid type == 2): the cell of pos from 0x17c340 over the list 0x7811ac, NULL when none or its flags +8 bit 2 are set"
  },
+ "001d811c": {
+  "name": "GamMan::getSectaCell",
+  "tag": "ror-inferred",
+  "was": "FUN_001d811c",
+  "why": "cell a1 (stride 0x90) of secta list a3 (bss 0x7811b8 + 0x18 * n) and its +0x10..0x18 position into a2; ObjStat::placeAt"
+ },
  "001d83d0": {
   "name": "GamMan::lookupFlagTable",
   "tag": "ror-inferred",
@@ -7883,6 +8045,12 @@
   "was": "FUN_001d8f04",
   "why": "copies the actor's position into +0x190 and out, then moves the object to a new secta cell when it left +0x114's box"
  },
+ "001d8fec": {
+  "name": "ObjStat::placeAt",
+  "tag": "ror-inferred",
+  "was": "FUN_001d8fec",
+  "why": "setSecta(GamMan::getSectaCell(where, pos, 0)), setPos(pos) when the cell is set; GamMan::placeObjAt"
+ },
  "001d9044": {
   "name": "ObjStat::getParam",
   "tag": "ror-inferred",
@@ -7961,6 +8129,12 @@
   "was": "FUN_001da740",
   "why": "switch on which storing *data into the achr's words (0x26 +0x3a0, 0x2e +0x3c0, 0x37 the short +0x432 ...); GamMan::setPcParam calls it on the PC"
  },
+ "001dac8c": {
+  "name": "ACHRstat::addParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001dac8c",
+  "why": "switch over ACHRstat::setParam's ids adding *data into the same fields; GamMan::addObjParam"
+ },
  "001db17c": {
   "name": "ObjStat::getWork",
   "tag": "ror-inferred",
@@ -7972,6 +8146,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001db18c",
   "why": "setObjWork's per-list call, the setter of +0x1b0 words"
+ },
+ "001db19c": {
+  "name": "ObjStat::addWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001db19c",
+  "why": "work word +0x1b0 + no*4 += value; next to getWork / setWork; GamMan::addObjWork"
  },
  "001db1b8": {
   "name": "ACHRstat::setMotionSpeed",

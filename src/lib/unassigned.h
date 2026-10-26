@@ -629,7 +629,8 @@ struct WrdEntry
 {
     int         _00[4];
     const char *m_text;         // ROR 0x10: S2dMes::drawMapName's caption
-    int         _14[3];
+    int         _14[2];
+    int         m_mapArea;      // ROR 0x1c: GamMan::getMapArea (gamSetWrdRoom keeps it in GamMan +0x18dc0)
     float       m_ofs[3];       // ROR 0x20: the room's offset (cnvPosW2L / cnvPosL2W, gamWrdConvPos op 2)
 };
 

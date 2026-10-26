@@ -305,6 +305,11 @@ entries are marked **RoR** with the date.
   is a stub), so GCC folded the branch and no undefined reference -- hence no stub -- appeared. It shows
   up once the writer is real; stubgen handles it then (2026-10-22).
 
+- **A folded dead function shows as MISSING calls.** gamman's placeObjAt, clearObjAttr and setObjScale
+  each have an unreferenced function after them (0x1cfe1c, 0x1d1958, 0x1d1f14: no jal, j or data
+  word) that Ghidra counts in their body, so callcheck lists its callees (syncActorPos, FUN_001d9f40,
+  FUN_001d8c50) as missing. `ghidra.py asm` across the body and `ghidra.py refs` on the second entry
+  tell; explain it in the `// callcheck:` line rather than calling the dead code (2026-10-26).
 - **Your own helpers hide RoR's calls**: a `static inline` wrapper of a RoR callee makes every caller
   report it MISSING. Write the inlined code out as the ROM has it.
 - **`// callcheck:` syntax**: names first, separated by commas, one parenthesis last, all on the line

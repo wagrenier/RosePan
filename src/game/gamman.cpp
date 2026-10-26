@@ -4703,90 +4703,742 @@ int GamMan::testAchrFlag(u_int oid, u_int bits)
     return (chr->m_attr[bits >> 24] & bits & 0xffffff) != 0;
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+// ──────────────────────────────────────────────────────────────────────
+// Native 151. The private collision adders: the object's param 0x18
+// becomes {kind, shape, -height, base y, radius, ids}; the words the ROM
+// leaves to the stack are 0 here.
+// PORT: a vfchr oid (list 0) passes isObj and the ROM goes on through a
+// NULL object; the host returns before adding anything.
 
-// stub of ROR 0x001d091c
-void GamMan::addObjColliBox(u_int oid, const float *box)
-{
-    ROSEPAN_STUB("GamMan::addObjColliBox", 0x001d091c);
-}
+// One wall {seg[0..3], seg[4..7]}: the two points also become the object's
+// position and rotation params.
+// ROR 0x001d080c
 
-// stub of ROR 0x001d0c64
-void GamMan::addObjColliQuad(u_int oid, const float *quad)
-{
-    ROSEPAN_STUB("GamMan::addObjColliQuad", 0x001d0c64);
-}
-
-// stub of ROR 0x001d080c
 void GamMan::addObjColliSegment(u_int oid, const float *seg)
 {
-    ROSEPAN_STUB("GamMan::addObjColliSegment", 0x001d080c);
+    if (!isObj(oid))
+        return;
+    ObjStat *obj = NULL;
+    u_int list = gamOidList(oid);
+    if (list == 1)
+        obj = getAchr(oid);
+    else if (list == 2)
+        obj = getFchr(oid);
+    if (obj == NULL)
+        return;
+    obj->setParam(GAM_PRM_O_POS, seg);
+    obj->setParam(GAM_PRM_O_ROT, seg + 4);
+    queueObjUpdate(NULL, oid);
+
+    GamObjColli colli;
+    memset(&colli, 0, sizeof(colli));
+    colli.m_kind = 5;
+    colli.m_shape = 0;
+    colli.m_colli[0] = g_magSystem.m_scene.addPrivateColli(seg, seg + 4);
+    obj->setParam(GAM_PRM_COL_PRM, &colli);
 }
 
-// stub of ROR 0x001d1f74
+// box {x, y, z, sx, sy, sz, rot}: four walls round the sx x sz rectangle
+// turned by rot about (x, z), sy high down from y. The radius word is the
+// ROM's (sx - sy + sz) / 3.
+// ROR 0x001d091c
+
+void GamMan::addObjColliBox(u_int oid, const float *box)
+{
+    if (!isObj(oid))
+        return;
+    ObjStat *obj = NULL;
+    u_int list = gamOidList(oid);
+    if (list == 1)
+        obj = getAchr(oid);
+    else if (list == 2)
+        obj = getFchr(oid);
+    if (obj == NULL)
+        return;
+
+    GamObjColli colli;
+    memset(&colli, 0, sizeof(colli));
+    colli.m_kind = 6;
+    colli.m_shape = 4;
+    colli.m_08 = -box[4];
+    colli.m_0c = box[1];
+    colli.m_radius = ((box[3] - box[4]) + box[5]) / 3.0f;
+
+    float c = cosf(box[6]);
+    float s = sinf(box[6]);
+    float hx = box[3] * 0.5f;
+    float hz = box[5] * 0.5f;
+    float quad[8];
+    quad[0] = c * -hx - s * hz + box[0];
+    quad[1] = s * hx - c * hz + box[2];
+    quad[2] = c * hx - s * hz + box[0];
+    quad[3] = -s * hx - c * hz + box[2];
+    quad[4] = c * hx + s * hz + box[0];
+    quad[5] = -s * hx + c * hz + box[2];
+    quad[6] = -c * hx + s * hz + box[0];
+    quad[7] = s * hx + c * hz + box[2];
+    // The walls from corner i to i + 1, from the top y down height + 1.
+    for (int i = 0; i < 4; i++)
+    {
+        int j = (i + 1) & 3;
+        float p0[4] = {quad[i * 2], box[1], quad[i * 2 + 1], 0.0f};
+        float p1[4] = {quad[j * 2], box[1] - box[4] - 1.0f, quad[j * 2 + 1], 0.0f};
+        colli.m_colli[i] = g_magSystem.m_scene.addPrivateColli(p0, p1);
+    }
+
+    obj->setParam(0x1003, quad);
+    obj->setPos(box);
+    obj->setParam(GAM_PRM_COL_PRM, &colli);
+    queueObjUpdate(NULL, oid);
+}
+
+// quad {x0, z0, x1, z1, x3, z3, x2, z2, top, height}: the corners in the
+// order 0, 1, 2, 3 (the ROM's walls 0-1, 1-2, 2-3, 3-0); the position is
+// corner 0 at the top. The radius word is (z1 - x3 + z3) / 3, the ROM's.
+// ROR 0x001d0c64
+
+void GamMan::addObjColliQuad(u_int oid, const float *quad)
+{
+    if (!isObj(oid))
+        return;
+    ObjStat *obj = NULL;
+    u_int list = gamOidList(oid);
+    if (list == 1)
+        obj = getAchr(oid);
+    else if (list == 2)
+        obj = getFchr(oid);
+    if (obj == NULL)
+        return;
+
+    GamObjColli colli;
+    memset(&colli, 0, sizeof(colli));
+    colli.m_kind = 6;
+    colli.m_shape = 4;
+    colli.m_08 = -quad[9];
+    colli.m_0c = quad[8];
+    colli.m_radius = ((quad[3] - quad[4]) + quad[5]) / 3.0f;
+
+    float corners[8] = {quad[0], quad[1], quad[2], quad[3], quad[6], quad[7], quad[4], quad[5]};
+    for (int i = 0; i < 4; i++)
+    {
+        int j = (i + 1) & 3;
+        float p0[4] = {corners[i * 2], quad[8], corners[i * 2 + 1], 0.0f};
+        float p1[4] = {corners[j * 2], quad[8] - quad[9] - 1.0f, corners[j * 2 + 1], 0.0f};
+        colli.m_colli[i] = g_magSystem.m_scene.addPrivateColli(p0, p1);
+    }
+
+    obj->setParam(0x1003, corners);
+    float pos[4] = {corners[0], quad[8], corners[1], 0.0f};
+    obj->setPos(pos);
+    obj->setParam(GAM_PRM_COL_PRM, &colli);
+    queueObjUpdate(NULL, oid);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Native 151. Achr objects only.
+// ROR 0x001d1f74
+
 void GamMan::addObjParam(u_int oid, int which, const void *data)
 {
-    ROSEPAN_STUB("GamMan::addObjParam", 0x001d1f74);
+    if (gamOidList(oid) == 1)
+        getAchr(oid)->addParam(which, data);
 }
 
-// stub of ROR 0x001d2334
-void GamMan::addObjWork(u_int oid, int no, int value)
-{
-    ROSEPAN_STUB("GamMan::addObjWork", 0x001d2334);
-}
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d1838
 
-// stub of ROR 0x001d18c4
-void GamMan::clearObjAttr(u_int oid, u_int bits)
-{
-    ROSEPAN_STUB("GamMan::clearObjAttr", 0x001d18c4);
-}
-
-// stub of ROR 0x001cfda4
-void GamMan::placeObjAt(u_int oid, int where)
-{
-    ROSEPAN_STUB("GamMan::placeObjAt", 0x001cfda4);
-}
-
-// stub of ROR 0x001d2428
-void GamMan::setActorBindMode(u_int oid, int mode)
-{
-    ROSEPAN_STUB("GamMan::setActorBindMode", 0x001d2428);
-}
-
-// stub of ROR 0x001d1838
 void GamMan::setObjAttr(u_int oid, u_int bits)
 {
-    ROSEPAN_STUB("GamMan::setObjAttr", 0x001d1838);
+    u_int list = gamOidList(oid);
+    if (list == 1)
+        getAchr(oid)->m_attr[bits >> 24] |= bits & 0xffffff;
+    else if (list == 2)
+        getFchr(oid)->m_flags |= bits;
 }
 
-// stub of ROR 0x001d1e88
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d18c4 // callcheck: FUN_001d9f40 (the unreferenced function 0x1d1958 Ghidra folded into this body)
+
+void GamMan::clearObjAttr(u_int oid, u_int bits)
+{
+    u_int list = gamOidList(oid);
+    if (list == 1)
+        getAchr(oid)->m_attr[bits >> 24] &= ~(bits & 0xffffff);
+    else if (list == 2)
+        getFchr(oid)->m_flags &= ~bits;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Native 151.
+// ROR 0x001cfda4 // callcheck: syncActorPos (the unreferenced function 0x1cfe1c Ghidra folded into this body)
+
+void GamMan::placeObjAt(u_int oid, int where)
+{
+    u_int list = gamOidList(oid);
+    if (list == 1)
+        getAchr(oid)->placeAt(where);
+    else if (list == 2)
+        getFchr(oid)->placeAt(where);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The isObj answer is not read; an achr / fchr without an actor writes
+// actor -1 in the ROM (the host skips it).
+// ROR 0x001d1e88 // callcheck: FUN_001d8c50, getAchr, getFchr (the unreferenced function 0x1d1f14 Ghidra folded into this body)
+
 void GamMan::setObjScale(u_int oid, float scale)
 {
-    ROSEPAN_STUB("GamMan::setObjScale", 0x001d1e88);
+    isObj(oid);
+    u_int list = gamOidList(oid);
+    if (list >= 3 || list == 0)
+        return;
+    int no = getActorNo(oid);
+    if (no == -1) // PORT: the ROM indexes actor -1
+        return;
+    DogActor &actor = g_magSystem.m_scene.m_actors[no];
+    actor.m_dirty = 1;
+    actor.m_scale[0] = scale;
+    actor.m_scale[2] = scale;
+    actor.m_scale[1] = scale;
 }
 
-// stub of ROR 0x001d2270
-void GamMan::setObjWork(u_int oid, int no, int value)
-{
-    ROSEPAN_STUB("GamMan::setObjWork", 0x001d2270);
-}
+// ──────────────────────────────────────────────────────────────────────
+// Native 151. A list-3 oid answers 0.
+// ROR 0x001d217c
 
-// stub of ROR 0x001d1a5c
-void GamMan::attachObj(u_int oid, u_int parent, const char *node)
-{
-    ROSEPAN_STUB("GamMan::attachObj", 0x001d1a5c);
-}
-
-// stub of ROR 0x001d1bec
-void GamMan::detachObj(u_int oid, u_int parent)
-{
-    ROSEPAN_STUB("GamMan::detachObj", 0x001d1bec);
-}
-
-// stub of ROR 0x001d217c
 int GamMan::getObjWork(u_int oid, int no)
 {
-    ROSEPAN_STUB("GamMan::getObjWork", 0x001d217c);
-    return {};
+    if (!isObj(oid))
+        return -1;
+    u_int list = gamOidList(oid);
+    if (list == 1)
+        return getAchr(oid)->getWork(no);
+    if (list == 0)
+        return getVFchr(oid)->getWork(no);
+    if (list == 2)
+        return getFchr(oid)->getWork(no);
+    return 0;
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d2270
+
+void GamMan::setObjWork(u_int oid, int no, int value)
+{
+    if (!isObj(oid))
+        return;
+    u_int list = gamOidList(oid);
+    if (list == 1)
+        getAchr(oid)->setWork(no, value);
+    else if (list == 0)
+        getVFchr(oid)->setWork(no, value);
+    else if (list == 2)
+        getFchr(oid)->setWork(no, value);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d2334
+
+void GamMan::addObjWork(u_int oid, int no, int value)
+{
+    if (!isObj(oid))
+        return;
+    u_int list = gamOidList(oid);
+    if (list == 1)
+        getAchr(oid)->addWork(no, value);
+    else if (list == 0)
+        getVFchr(oid)->addWork(no, value);
+    else if (list == 2)
+        getFchr(oid)->addWork(no, value);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Native 151 / Brown's glue.
+// ROR 0x001d2428
+
+void GamMan::setActorBindMode(u_int oid, int mode)
+{
+    u_int list = gamOidList(oid);
+    if (list >= 3 || list == 0)
+        return;
+    int no = getActorNo(oid);
+    if (no == -1) // PORT: the ROM indexes actor -1
+        return;
+    unsigned &flags = g_magSystem.m_scene.m_actor_flags[no];
+    flags = (flags & ~0x60u) | (mode & 3) << 5;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// oid's position is cleared first (it becomes relative to the node).
+// ROR 0x001d1a5c // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName's asserts and call)
+
+void GamMan::attachObj(u_int oid, u_int parent, const char *node)
+{
+    if (!isObj(oid) || !isObj(parent))
+        return;
+    float zero[4];
+    memset(zero, 0, sizeof(zero));
+    int no = g_gamMan.getActorNo(oid);
+    int parentNo = g_gamMan.getActorNo(parent);
+    setObjPos(oid, zero);
+    // PORT: the ROM asks actor -1 too (out of the array); the host only a
+    // real one.
+    int nodeNo = -1;
+    if (parentNo != -1)
+        nodeNo = g_magSystem.m_scene.m_actors[parentNo].getNodeIndexByName(node);
+    if (no == -1 || parentNo == -1 || nodeNo == -1)
+    {
+        scePrintf("chr_id : %d , %d node %s invalid attach param. \n", no, parentNo, node);
+        return;
+    }
+    g_magSystem.setActorParent(no, parentNo, nodeNo);
+    if (gamOidList(parent) == 1)
+        getAchr(parent)->m_link = (int)oid;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d1bec
+
+void GamMan::detachObj(u_int oid, u_int parent)
+{
+    if (!isObj(oid))
+        return;
+    g_magSystem.setActorParent(g_gamMan.getActorNo(oid), -1, 0);
+    if (gamOidList(parent) == 1)
+        getAchr(parent)->m_link = -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d23f8
+
+void GamMan::hideObj(u_int oid, int hide)
+{
+    if (hide != 0)
+        setObj(oid, 1);
+    else
+        resetObj(oid, 1);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// 0x33d6bf94 = 1e-7 into the motion's speed word.
+// ROR 0x001c46c8
+
+void GamMan::freezePcMotion()
+{
+    if (m_pcActorPtr != NULL)
+        m_pcActorPtr->m_motion.m_speed = 1e-7f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c574c
+
+int GamMan::isFading()
+{
+    int state = g_magSystem.m_scene.getFadeState();
+    if (state == 0 || state == 5 || state == 2)
+        return 0;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c6c38
+
+int GamMan::getMapArea()
+{
+    if (m_wrdNo == -1 || (m_flags2 & 0x2000) != 0)
+        return -1;
+    WrdEntry *entry = g_wrdTable.get(m_wrdNo);
+    if (entry == NULL)
+        return -1;
+    return entry->m_mapArea;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The list is searched to its 0x169th word.
+// PORT: on a full list the ROM writes oid one word past it (0x5a4 bytes);
+// the host into its last word.
+// ROR 0x001c7d04
+
+void GamMan::listAndReleaseChr(u_int oid)
+{
+    int *list = (int *)m_1f240;
+    bool found = false;
+    for (int i = 0; i < 0x169 && !found; i++)
+    {
+        if (list[i] != 0 && list[i] == (int)oid)
+            found = true;
+    }
+    if (!found)
+    {
+        int i = 0;
+        while (list[i] != 0 && i < 0x168)
+            i++;
+        list[i] = (int)oid;
+    }
+    releaseChr(oid);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c812c
+
+void GamMan::setItemSlot(int slot, GamItemSlot item)
+{
+    const GamSysObjRec *rec = (const GamSysObjRec *)item.m_rec;
+    if ((rec->m_flags & 0x20000) != 0)
+    {
+        int i = 0;
+        for (GamItemSlot *it = m_itemHave.m_begin; it != m_itemHave.m_end; it++, i++)
+        {
+            if (it->m_id != item.m_id)
+                continue;
+            it->m_num += item.m_num;
+            if (it->m_num > 99)
+                it->m_num = 99;
+            if (slot == i)
+                return;
+            item.m_id = 0xa00;
+            break;
+        }
+    }
+    m_itemHave.m_begin[slot] = item;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The ROM writes stack garbage into the empty slot's oid, count and +0xc
+// words; the host zeroes them.
+// ROR 0x001c8214
+
+void GamMan::clearItemSlot(int slot)
+{
+    GamItemSlot *it = &m_itemHave.m_begin[slot];
+    if (it->m_id == m_equipItem)
+        equipItem(0xa00);
+    if (it->m_id == m_findTargetItem)
+        setFindTargetItem(0xa00);
+    it->m_rec = m_sysData.getRec(0xa00);
+    it->m_oid = 0;
+    it->m_id = 0xa00;
+    it->m_num = 0;
+    it->_c = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c854c
+
+int GamMan::getEquipSlot()
+{
+    for (int i = 0; i < 0xc; i++)
+    {
+        if (m_itemHave.m_begin[i].m_id == m_equipItem)
+            return i;
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c8604
+
+int GamMan::findReloadSlot(int *count)
+{
+    if (m_selItemNum == 6 || (m_equipItem != 0xa3e && m_equipItem != 0xa43))
+        return 0;
+    short ammo = m_equipItem == 0xa3e ? 0xa42 : 0xa3f;
+    int n = 0;
+    int best = 0;
+    u_short least = 1000;
+    for (int i = 0; i < 0xc; i++)
+    {
+        GamItemSlot *it = &m_itemHave.m_begin[i];
+        if (it->m_id != ammo)
+            continue;
+        n++;
+        if (it->m_num < least)
+        {
+            best = i;
+            least = it->m_num;
+        }
+    }
+    if (n == 0)
+        return 0;
+    if (count != NULL)
+        *count = n;
+    return best + 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Past 6 the count stops at 6 and the slot keeps the rest; slot -1 goes on
+// through every other ammo slot while the count is under 6 (the ROM keeps
+// looping after it reached 6, without effect).
+// ROR 0x001c870c
+
+int GamMan::reloadEquip(int slot)
+{
+    int count = 0;
+    int found = findReloadSlot(&count);
+    if (found == 0)
+        return 0;
+    short ammo = m_equipItem != 0xa3e ? 0xa3f : 0xa42;
+    GamItemSlot *have = m_itemHave.m_begin;
+    if (slot == -1)
+    {
+        int first = found - 1;
+        int n = m_selItemNum + have[first].m_num;
+        if (n < 7)
+        {
+            m_selItemNum = n;
+            clearItemSlot(first);
+            if (m_selItemNum < 6)
+            {
+                for (int i = 0; i < 0xc; i++)
+                {
+                    if (have[i].m_id != ammo)
+                        continue;
+                    n = m_selItemNum + have[i].m_num;
+                    if (n < 7)
+                    {
+                        m_selItemNum = n;
+                        clearItemSlot(i);
+                        break;
+                    }
+                    m_selItemNum = 6;
+                    have[i].m_num = (u_short)(n - 6);
+                }
+            }
+        }
+        else
+        {
+            m_selItemNum = 6;
+            have[first].m_num = (u_short)(n - 6);
+        }
+    }
+    else
+    {
+        if (have[slot].m_id != 0xa3f)
+            return 0;
+        int n = m_selItemNum + have[slot].m_num;
+        if (n < 7)
+        {
+            m_selItemNum = n;
+            clearItemSlot(slot);
+        }
+        else
+        {
+            m_selItemNum = 6;
+            have[slot].m_num = (u_short)(n - 6);
+        }
+    }
+    if (m_selItem != NULL)
+        m_selItem->m_num = (u_short)m_selItemNum;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c899c
+
+void GamMan::decSelItemNum()
+{
+    if (m_selItemNum <= 0)
+        return;
+    m_selItemNum--;
+    if (m_selItem != NULL)
+        m_selItem->m_num--;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c89e4
+
+int GamMan::countItems()
+{
+    int n = 0;
+    for (int i = 0; i < 0xc; i++)
+    {
+        if (m_itemHave.m_begin[i].m_id != 0xa00)
+            n++;
+    }
+    return n;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// getFchr runs before the type test (the ROM's).
+// ROR 0x001c8dc8
+
+int GamMan::testFchr100000(u_int oid)
+{
+    FCHRstat *chr = getFchr(oid);
+    if (gamOidType(oid) != 5)
+        return 0;
+    return (chr->m_flags & 0x100000) != 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c8e1c
+
+void GamMan::markObjTaken(u_int oid)
+{
+    m_sysData.setFlags(getObjKind(oid), 4);
+    setObj(oid, 2);
+    resetObj(oid, 1);
+    if (isFchrActive(oid))
+        ctlObj1cb8e4(oid, 0x32, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cbedc
+
+short GamMan::getObjKind(u_int oid)
+{
+    ObjStat *obj;
+    switch (gamOidList(oid))
+    {
+    case 1:  obj = getAchr(oid); break;
+    case 0:  obj = getVFchr(oid); break;
+    case 2:  obj = getFchr(oid); break;
+    default: return -1;
+    }
+    if (obj == NULL)
+        return -1;
+    return obj->m_kind;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Nothing calls it in the US build.
+// ROR 0x001c8eb4
+
+void GamMan::createItemObj(short id, const float *pos)
+{
+    u_short model[8];
+    m_sysData.getField(id, 0xf, model);
+    int actor = g_magSystem.loadModel(model[0], -1);
+    u_int oid = makeOid(2, 5, -1);
+    g_gamMan.addChr(actor, oid, id, NULL, 0);
+    g_gamMan.setObjPos(oid, pos);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The full test runs twice (the ROM's); a stacking count reaching 100 stops
+// at 99 and still answers 0.
+// ROR 0x001c9198
+
+int GamMan::addStockItem(GamItemSlot item)
+{
+    if ((u_int)m_itemStock.m_used.m_count >= 0x14e)
+        return 1;
+    const GamSysObjRec *rec = (const GamSysObjRec *)item.m_rec;
+    if ((rec->m_flags & 0x20000) != 0)
+    {
+        for (SeqNode<GamItemSlot> *node = m_itemStock.m_used.begin(); node != m_itemStock.m_used.end();
+             node = node->m_next)
+        {
+            if (node->m_data.m_id != item.m_id)
+                continue;
+            node->m_data.m_num += item.m_num;
+            if (node->m_data.m_num >= 100)
+                node->m_data.m_num = 99;
+            return 0;
+        }
+    }
+    if ((u_int)m_itemStock.m_used.m_count < 0x14e)
+        m_itemStock.add(item);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c9334
+
+int GamMan::delStockByOid(u_int oid)
+{
+    if (m_itemStock.m_used.m_count == 0)
+        return 0;
+    for (SeqNode<GamItemSlot> *node = m_itemStock.m_used.begin(); node != m_itemStock.m_used.end();
+         node = node->m_next)
+    {
+        if (node->m_data.m_oid == oid)
+        {
+            m_itemStock.remove(node);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// One 64-bit test over m_flags and m_flags2 in the ROM.
+// ROR 0x001c97c8
+
+int GamMan::canOpenItemMenu()
+{
+    return (m_flags & 4) != 0 && (m_flags2 & 0x800) == 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001c97f0
+
+int GamMan::canOpenMapMenu()
+{
+    if (!(hasItem(0xad0, 1) && getMapArea() == 0) &&
+        !(hasItem(0xad1, 1) && getMapArea() == 2) &&
+        !(hasItem(0xad2, 1) && getMapArea() == 1))
+        return 0;
+    return canOpenItemMenu();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cb460
+
+void GamMan::getPcParam(int which, void *out)
+{
+    if (m_pcPtr != NULL)
+        ((ACHRstat *)m_pcPtr)->getParam(which, out);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cb490
+
+void GamMan::getDogParam(int which, void *out)
+{
+    if (m_dogPtr != NULL)
+        ((ACHRstat *)m_dogPtr)->getParam(which, out);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cb4c0
+
+void GamMan::getMurderParam(int which, void *out)
+{
+    if (m_murderPtr != NULL)
+        ((ACHRstat *)m_murderPtr)->getParam(which, out);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cb5d8
+
+void GamMan::setDogParam(int which, const void *data)
+{
+    if (m_dogPtr != NULL)
+        ((ACHRstat *)m_dogPtr)->setParam(which, data);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cb608
+
+void GamMan::setMurderParam(int which, const void *data)
+{
+    if (m_murderPtr != NULL)
+        ((ACHRstat *)m_murderPtr)->setParam(which, data);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001cfaa8
+
+void GamMan::closeSysMsg()
+{
+    if (m_sysMsgHandle != -1)
+    {
+        g_magSystem.m_scene.updateWindowFont(m_sysMsgHandle);
+        g_magSystem.m_scene.closeWindow(m_sysMsgHandle);
+        m_sysMsgHandle = -1;
+    }
+    m_msgMode = 0;
+}
+
+// ---- stubs (tools/reverse/stubgen.py) ----
