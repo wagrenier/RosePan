@@ -103,7 +103,12 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      s100000.str stream); MnuTitle's constructor 0x1a90ec is not written (the object starts zeroed
      in the global scene -- write it as a real constructor when the class gets members, it runs
      before main). MnuTitle::processPad returns -1 (closes the menu) until init has set +0x4d6c.
-  5. `unassigned@001fd424` -- sysInitManagers 0x204148, SysTimer::start / update (reached stubs).
+  5. DONE 2026-10-26 (`verify`): `system/system.cpp` (pinned 0x203d94..0x2043dc, the tail of
+     unassigned@001fd424) -- SysTimer (all 8 methods), sysInit / TermManagers, sysExecHostElf; the six
+     global managers moved there from lib/unassigned_stubs.cpp. Nothing on screen shows the timer: its
+     reader is CmnTaskMan::exec (item 6, a stub). unassigned@001fd424 (now 0x1fd424..0x203d94, the
+     TskEnemyMove / TskEnemyTurn enemy tasks) was dropped from the queue: off the title / New Game
+     path. Doubt: the file name system/system.cpp is a guess (RoR has no source string for it).
   6. `unassigned@001e46b8` -- CmnTaskMan::exec / addTask and 0x1f688c that GamMan::update calls (the
      per-frame task runner; 253 functions: only what the title path reaches).
   7. DONE 2026-10-25 (`done`, see 10b): `bed/bedpad.cpp` -- BedPad::init / update: the menu needs pad

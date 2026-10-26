@@ -9065,11 +9065,35 @@
   "was": "FUN_001fbc0c",
   "why": "the constructor of class TskCamera (rtti); 0xc0 bytes, native 016 case 50 starts it on GamMan +0x222b8 with (a2, a1)"
  },
+ "00203d94": {
+  "name": "SysTimer::SysTimer",
+  "tag": "ror-inferred",
+  "was": "FUN_00203d94",
+  "why": "the task manager's constructor 0x1e7094 calls it on its +0x40 member; tail-calls SysTimer::reset"
+ },
+ "00203da8": {
+  "name": "SysTimer::~SysTimer",
+  "tag": "ror-inferred",
+  "was": "FUN_00203da8",
+  "why": "GCC 2 destructor with the delete flag (a1 & 1 -> operator delete), nothing else; the task manager's destructor 0x1e70dc calls it on +0x40"
+ },
+ "00203dd0": {
+  "name": "SysTimer::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_00203dd0",
+  "why": "clears the 11 words of the timer and seeds +4 / +8 / +0x10 with GamMan::getSysTime (inlined: m_vcount * 1000 / 25 into GamMan +0x22368); the constructor's body"
+ },
  "00203ea8": {
   "name": "SysTimer::start",
   "tag": "ror-inferred",
   "was": "FUN_00203ea8",
   "why": "object 0x7a3dc0 = the task manager 0x7a3d80 + 0x40: if not running, reads the counter (0x203f38) and adjusts +0x28 by the paused time, sets running"
+ },
+ "00203efc": {
+  "name": "SysTimer::stop",
+  "tag": "ror-inferred",
+  "was": "FUN_00203efc",
+  "why": "counterpart of start: when running, read and keep the elapsed time at +0x14 (start adds elapsed - +0x14 to the paused total +0x28), then running = 0; no callers"
  },
  "00203f38": {
   "name": "SysTimer::read",
@@ -9083,6 +9107,12 @@
   "was": "FUN_00204014",
   "why": "per frame: ++ +0x18, reads the counter, keeps the last two frame times at +0x1c/+0x24 and the elapsed at +0x20 while running"
  },
+ "00204090": {
+  "name": "SysTimer::hold",
+  "tag": "ror-inferred",
+  "was": "FUN_00204090",
+  "why": "when running, +0x24 = +0x20 (the last delta seen equals the current one); CmnTaskMan::exec calls it on its timer"
+ },
  "00204148": {
   "name": "sysInitManagers",
   "tag": "ror-inferred",
@@ -9094,6 +9124,30 @@
   "tag": "ror-inferred",
   "was": "FUN_00204174",
   "why": "pair of sysInitManagers: 0x20e664 on the sequence, 0x1c0d44 on GamMan; no callers"
+ },
+ "002041a0": {
+  "name": "sysExecHostElf",
+  "tag": "ror-inferred",
+  "was": "FUN_002041a0",
+  "why": "sprintf of host0:main.ee.elf, waits until sceOpen succeeds, rxThSync(0), LoadExecPS2 of it: restarts the game from the host (debug); no callers"
+ },
+ "002041f8": {
+  "name": "__static_initialization_and_destruction_0",
+  "tag": "ror-inferred",
+  "was": "FUN_002041f8",
+  "why": "GCC 2's per-file static init / destruction (initialize, priority 0xffff): constructs BedMemory 0x6e9800, MagSystem, GamMan, CmnTaskMan 0x7a3d80, Sequence, EmyManager 0x7b2140, SndMan, RxMpeg and destroys them in reverse"
+ },
+ "0020439c": {
+  "name": "_GLOBAL_$I$sysInitManagers",
+  "tag": "ror-inferred",
+  "was": "FUN_0020439c",
+  "why": "the file's global constructor entry: static init (1, 0xffff); GCC 2 names it after the file's first global symbol (a guess)"
+ },
+ "002043bc": {
+  "name": "_GLOBAL_$D$sysInitManagers",
+  "tag": "ror-inferred",
+  "was": "FUN_002043bc",
+  "why": "the file's global destructor entry: static init (0, 0xffff)"
  },
  "002043dc": {
   "name": "mainParseArgs",

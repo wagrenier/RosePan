@@ -93,11 +93,21 @@ Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
   per frame: RCNT0 = 0, `SysTimer::update`, `Sequence::exec` 0x20f98c, `GamMan::update` 0x1c526c,
   `CmnTaskMan::exec` 0x1e7a20, `MagSystem::update` 0x1182dc (the V-blank wait, draw, frame counter),
   `GamMan::postUpdate` (empty).
-- **The globals file** before main.cpp (ends with the static-init pair 0x20439c / 0x2043bc; 0x2041f8
-  constructs and destroys, in order): game heap `BedMemory` 0x6e9800, `MagSystem` 0x6e9840, `GamMan`
-  0x7812c0, `CmnTaskMan` 0x7a3d80, `Sequence` 0x7a4440, `EmyManager` 0x7b2140, `SndMan` 0x7b2580,
-  0x7b40c0 (ctor 0x1810f4, class unknown). In src these objects are defined in
-  `lib/unassigned_stubs.cpp` until that file is defined (the heap stays in utl/utlmisc.cpp).
+- **The globals file** before main.cpp: `system/system.cpp` (pinned 0x203d94..0x2043dc, written
+  2026-10-26; no source string, the file name is a guess). Its static initializer 0x2041f8 (entries
+  `_GLOBAL_$I$` 0x20439c / `$D$` 0x2043bc) constructs, in order, and destroys in reverse: game heap
+  `BedMemory` 0x6e9800, `MagSystem` 0x6e9840, `GamMan` 0x7812c0, `CmnTaskMan` 0x7a3d80, `Sequence`
+  0x7a4440, `EmyManager` 0x7b2140, `SndMan` 0x7b2580, `RxMpeg` 0x7b40c0. In src the six managers are
+  defined in system.cpp (the heap stays in utl/utlmisc.cpp, g_rxMpeg in snd/rxmpeg.cpp). Also there:
+  `sysInitManagers` 0x204148 / `sysTermManagers` 0x204174 (Sequence then GamMan), `sysExecHostElf`
+  0x2041a0 (debug restart from host0:main.ee.elf, no callers), and **SysTimer** (0x2c bytes, all words,
+  EE layout kept; the task manager's +0x40): a ms timer over `GamMan::getSysTime` (m_vcount x 1000 /
+  25, inlined): ctor 0x203d94 -> reset 0x203dd0, start 0x203ea8 (adds the stopped time to +0x28),
+  stop 0x203efc (no callers), read 0x203f38 (adds |now - prev| to +0xc), update 0x204014 (main, once a
+  frame: +0x18 count, +0x20 time = elapsed - paused, the old one to +0x1c / +0x24), hold 0x204090
+  (CmnTaskMan::exec: +0x24 = +0x20). The code before it, 0x1fd424..0x203d94 (still
+  unassigned@001fd424), is enemy behaviour tasks: TskEnemyMove (vtable 0x2e5040), TskEnemyTurn
+  (0x2e5080) and their motion / turn helpers -- a task/ file (or two).
 - The rx bring-up main runs, in order: `rxSysSetIopImage("IOPRP300.IMG")` 0x241b20,
   `rxSysSetBootPath("cdrom0:")` 0x241d68 (boot device CDROM, dir, name), `rxSysResetHardware` via
   `rxSysInit` 0x240eb8: VIF/VU/GS-path/DMA reset, `rxThInit`, memory hooks reset, boot device (more than

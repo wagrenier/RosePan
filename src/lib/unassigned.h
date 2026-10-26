@@ -15,20 +15,8 @@
 
 #include "sdk/vu0_intrin.h"
 
-/* ---- the globals file before main.cpp (unassigned@001fd424): its static
- * initializer 0x2041f8 constructs the heap, MagSystem, GamMan, the task
- * manager, the sequence, EmyManager, SndMan and 0x7b40c0 ---- */
-
-void sysInitManagers(void);                                              // ROR 0x00204148
-
-/* A frame timer (the task manager's member at +0x40). EE size at least
- * 0x2c. layout: host -- no members reconstructed. */
-struct SysTimer
-{
-    void start();                                                        // ROR 0x00203ea8
-    void read();                                                         // ROR 0x00203f38
-    void update();                                                       // ROR 0x00204014
-};
+/* SysTimer and sysInitManagers: system/system.cpp (the globals file). */
+#include "system/system.h"
 
 /* ---- the MagScene range after setFog (unassigned@00143d3c) ---- */
 /* Brown's script commands (native 039): args are the six script words, op
