@@ -830,6 +830,15 @@ to adapt when a TU reaches them:
 - TskChrRot::stepMotion (same session): with m_restore set it starts motion 1 through chrMtnMove2, then
   kills m_task[2] at once. That is the task it just started, so the motion change stays but the moving
   stops. The port does the same. If idle motions look frozen after a turn, look here first.
+- TskAvoidMove / TskMovePhysic / TskGenFrameFunc (2026-10-26, task/tsk_chr.cpp): ROM garbage made defined.
+  TskAvoidMove leaves m_achr unset for an oid that is not an achr, then ORs flag 0x4000 through it; the
+  port starts it at NULL and skips the write. With no hit record and no point it sets no step; the port
+  ends the task. TskMovePhysic counts m_count, m_flags and m_speed on from the heap words, and for
+  anything but an fchr reads an unset actor and sets no step; the port zeroes them and ends non-fchrs at
+  once. TskGenFrameFunc kinds other than 1 set no step; the port ends them. chrIsNear leaves
+  UtlHitCheck's fifth word (m_10) to the stack (0 here: the sphere test). Unconfirmed: aimAway and
+  stepAway start the push one eighth turn past the cell they found and keep m_dir at the first
+  heading. The port keeps this. If a pushed achr slides the wrong way, check here first.
 
 - task/tsk_man.cpp (2026-10-26): the file name is a guess (no source string; RoR's task/ files are
   tsk_scene, tsk_bg_load, naga_chunk). Rename freely if a string turns up. Also unknown: CmnTaskMan +0x0c..

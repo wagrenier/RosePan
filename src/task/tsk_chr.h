@@ -143,13 +143,178 @@ struct TskMtnMove2 : CmnITask
     StepFunc  m_stepFunc;       // ROR 0xcc: GCC 2 {delta, index, pfn}
 };
 
-/* TskAvoidMove : CmnITask (vtable 0x2e4b50, EE 0xc0 bytes): pushes an
- * achr out of what it stands in (hit the testHitAt record whose +0x10 is
- * the other object; a3 / a4 its two speeds). Not written: the constructor
- * is a hand stub. layout: host -- no members. */
+/* The testHitAt result record as the avoid task reads it (the rest is
+ * the test's own; 8 words on the EE). */
+struct ChrHitRec
+{
+    int   _00[4];
+    u_int m_oid;                // ROR 0x10: the object hit, 0 none
+    int   _14[3];
+};
+static_assert(offsetof(ChrHitRec, m_oid) == 0x10, "ChrHitRec m_oid");
+static_assert(sizeof(ChrHitRec) == 0x20, "ChrHitRec size");
+
+/* TskAvoidMove : CmnITask (vtable 0x2e4b50, EE 0xc0 bytes; kind 0): an
+ * achr pushed off what it stands in or walks into, on its m_taskId
+ * (GamMan::placeAchr / testHitAt and TskMtnMove2::stepMoveHit start it
+ * with frames 8, limit 30 or 16). From the hit record's object (hit !=
+ * NULL): byHit 0 -> away from it at half its distance / frames a frame
+ * (stepAway: round the cells, 8 directions, when no cell lies ahead;
+ * ends after frames frames once nothing is hit), byHit != 0 -> away at
+ * its distance / frames (stepAwayHit: ends when nothing is hit, refused
+ * for objects of kind 1 / 2); toward the point to (hit NULL) at most
+ * 1/30 a frame (stepToward: 9 frames on cells, faster each limit frames
+ * stuck). The PC, a GamMan m_flags2 0x3000 state, or an object flagged
+ * 0x4000 end it at once. While it runs the achr carries flag 0x4000.
+ * Each step also ends after limit frames. layout: host -- pointers and
+ * a member-function pointer; EE offsets in the comments. */
 struct TskAvoidMove : CmnITask
 {
-    TskAvoidMove(u_int oid, const void *hit, int a3, int a4, int a5, int a6); // ROR 0x001ef184
+    typedef int (TskAvoidMove::*StepFunc)();
+
+    TskAvoidMove(u_int oid, const void *hit, int frames, int limit, const float *to,
+                 int byHit);                                             // ROR 0x001ef184
+    ~TskAvoidMove() override {}                                          // ROR 0x001ef414
+
+    int  get_task_type() override { return 0; }                          // ROR 0x00290498
+    void init() override {}                                              // ROR 0x002904a0
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001f0398
+    void term() override;                                                // ROR 0x001ef448
+
+    /* The set-ups: away from object target (by half its distance; byHit
+     * 0), away by its distance (byHit != 0), toward the point to. */
+    void aimAway(u_int target, const float *pos, int frames);            // ROR 0x001efab8
+    void aimAwayHit(u_int target, const float *pos, int frames);         // ROR 0x001efeb8
+    void aimToward(u_int oid, const float *pos, const float *to, int frames); // ROR 0x001f0288
+    int  stepAway();                                                     // ROR 0x001ef498
+    int  stepAwayHit();                                                  // ROR 0x001ef888
+    int  stepToward();                                                   // ROR 0x001ef9cc
+    int  stepNone();                                                     // ROR 0x001efab0
+
+    ACHRstat     *m_achr;          // ROR 0x04
+    u_int         m_oid;           // ROR 0x0c
+    u_int         m_target;        // ROR 0x10: the object pushed from
+    int           m_actor;         // ROR 0x14: the achr's actor
+    sceVu0FVECTOR m_pos;           // ROR 0x20: the achr's position (the Bip01 Spine1 node at the start)
+    sceVu0FVECTOR m_vel;           // ROR 0x30: the push a frame
+    sceVu0FVECTOR m_ahead;         // ROR 0x40: stepAway's look-ahead (m_vel x 1.25)
+    int           m_frames;        // ROR 0x50
+    int           m_58;            // ROR 0x58: 0 (not read)
+    int           m_count;         // ROR 0x60: frames pushed
+    int           m_still;         // ROR 0x64: stepToward's frames on cells
+    int           m_limit;         // ROR 0x68
+    int           m_time;          // ROR 0x6c: the frames the set-ups get
+    int           m_tries;         // ROR 0x70: frames run, against m_limit
+    float         m_dir;           // ROR 0x74: the push heading
+    float         m_speed;         // ROR 0x78: the push length a frame
+    StepFunc      m_stepFunc;      // ROR 0x7c: GCC 2 {delta, index, pfn}
+};
+
+/* TskMoveAdj : CmnITask (vtable 0x2e4990; kind 0xd): scene actor actor
+ * eased to pos -- count frames at height ref[2] x (count / the actor's
+ * +0x1d8) - 7.5 above it, then at pos, and ends. No caller in the ROM.
+ * layout: host -- a pointer; EE offsets in the comments. */
+struct TskMoveAdj : CmnITask
+{
+    /* base: the object whose +0x10 vector m_ref is. a / b are not read. */
+    TskMoveAdj(float a, int actor, const float *base, int count, const float *pos,
+               int b);                                                   // ROR 0x001ee2fc
+    ~TskMoveAdj() override {}                                            // ROR 0x001ee330
+
+    int  get_task_type() override { return 0xd; }                        // ROR 0x00290378
+    void init() override {}                                              // ROR 0x00290380
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001ee36c
+    void term() override {}                                              // ROR 0x001ee364
+
+    sceVu0FVECTOR m_pos;           // ROR 0x10
+    int           m_actor;         // ROR 0x20
+    float         m_a;             // ROR 0x24: not read
+    const float  *m_ref;           // ROR 0x28: base + 4 floats
+    int           m_len;           // ROR 0x2c: the actor's +0x1d8 each frame
+    int           m_count;         // ROR 0x30: frames left
+    int           m_b;             // ROR 0x34: not read
+};
+
+/* TskRotAdj : CmnITask (vtable 0x2e4950; kind 0xe): scene actor actor
+ * turned by angle about y over frames frames (frames < 1: at once). No
+ * caller in the ROM. layout: host; EE offsets in the comments. */
+struct TskRotAdj : CmnITask
+{
+    TskRotAdj(float angle, int actor, int frames);                       // ROR 0x001ee4a8
+    ~TskRotAdj() override {}                                             // ROR 0x001ee6b0
+
+    int  get_task_type() override { return 0xe; }                        // ROR 0x002903d8
+    void init() override {}                                              // ROR 0x002903e0
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001ee6ec
+    void term() override {}                                              // ROR 0x001ee6e4
+
+    int           m_actor;         // ROR 0x04
+    float         m_angle;         // ROR 0x08: angle wrapped into -pi..pi (not read)
+    float         m_step;          // ROR 0x0c: angle / frames
+    int           m_count;         // ROR 0x10: frames left
+    int           m_frames;        // ROR 0x14
+    sceVu0FVECTOR m_rot;           // ROR 0x20: the actor's rotation (w not set)
+};
+
+/* TskMovePhysic : CmnITask (vtable 0x2e4b10, EE 0x80 bytes; kind 0): an
+ * fchr thrown along its heading (0x1fd9bc and two more item users): each
+ * frame t = frames / 30 moves it h(t) = 16t - 29.4t^2 up (y down) and
+ * 24 - 16t along (both as the change over the last half second after
+ * t 0.5; the along speed keeps its last value at 16 and below). A wall
+ * (MagScene::castRay) stops it there and turns the heading back at a
+ * quarter (stopped when the bounce hits too). Within 100 of the PC (or
+ * else the dog) it calls the character request 0x1fac60 (4, or 3) with
+ * 0x15, once. Ends below its cell's floor. layout: host -- pointers and
+ * a member-function pointer; EE offsets in the comments. */
+struct TskMovePhysic : CmnITask
+{
+    typedef int (TskMovePhysic::*StepFunc)();
+
+    TskMovePhysic(u_int oid);                                            // ROR 0x001eeaec
+    ~TskMovePhysic() override {}                                         // ROR 0x001eec08
+
+    int  get_task_type() override { return 0; }                          // ROR 0x00290438
+    void init() override {}                                              // ROR 0x00290440
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001ef11c
+    void term() override {}                                              // ROR 0x001eec3c
+
+    int  stepThrow();                                                    // ROR 0x001eec4c
+
+    FCHRstat     *m_fchr;          // ROR 0x08
+    u_int         m_oid;           // ROR 0x0c
+    int           m_actor;         // ROR 0x10
+    sceVu0FVECTOR m_pos;           // ROR 0x20
+    sceVu0FVECTOR m_rot;           // ROR 0x30: the actor's rotation
+    sceVu0FVECTOR m_dir;           // ROR 0x40: (sin, 1, cos) of the heading
+    int           m_58;            // ROR 0x58: 0 (not read)
+    u_int         m_flags;         // ROR 0x5c: 1 the character request is still to come
+    float         m_speed;         // ROR 0x60: the last along speed
+    int           m_count;         // ROR 0x64: frames run
+    StepFunc      m_stepFunc;      // ROR 0x70: GCC 2 {delta, index, pfn}
+};
+/* The throw's height 16t - 29.4t^2 and along speed 24 - 16t at t. */
+float chrThrowHeight(float t);                                           // ROR 0x001ef0d8
+float chrThrowSpeed(float t);                                            // ROR 0x001ef100
+
+/* TskGenFrameFunc : CmnITask (vtable 0x2e4d10; kind 0): a one-frame job,
+ * kind 1 plays sound effect value (0x1f97c8). Other kinds set no step
+ * (the ROM then calls a garbage pointer). layout: host -- a member-
+ * function pointer; EE offsets in the comments. */
+struct TskGenFrameFunc : CmnITask
+{
+    typedef int (TskGenFrameFunc::*StepFunc)();
+
+    TskGenFrameFunc(int kind, int value, int a3);                       // ROR 0x001f4088
+    ~TskGenFrameFunc() override {}                                       // ROR 0x001f40c0
+
+    void init() override {}                                              // ROR 0x002905c0
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001f40f4
+    void term() override {}                                              // ROR 0x002905c8
+
+    int  stepPlaySe();                                                   // ROR 0x001f415c
+
+    StepFunc m_stepFunc;        // ROR 0x08: GCC 2 {delta, index, pfn}
+    int      m_value;           // ROR 0x10
 };
 
 /* TskFrameFunc : CmnITask (vtable 0x2e4d50, EE 0x80 bytes; kind 0x11):
@@ -587,8 +752,13 @@ struct TskMsgMan : CmnITask
     int  exec(int id, int time, int arg) override;                       // ROR 0x001f4f5c
     void term() override;                                                // ROR 0x001f4d14
 
+    /* The window reopened from m_param showing text (no "#C"; m_textPtr
+     * becomes text itself). a3 is not read. No caller in the ROM. */
+    void setText(const char *text, int word, int a3, int fill);          // ROR 0x001f50b8
+
     char      m_text[0x200];    // ROR 0x004: "#C" + the text (strncpy 0x200 after the prefix)
     int       m_mode;           // ROR 0x204: exec's end rule 1..4; 0 after term
+    int       m_word;           // ROR 0x208: setText's word (not read)
     int       m_time;           // ROR 0x210: frames (modes 1 and 3)
     int       m_window;         // ROR 0x214: the scene window (MagScene::openWindow)
     int       m_count;          // ROR 0x21c: frames run
@@ -656,6 +826,9 @@ struct TskChrRot : CmnITask
 
     int  stepFrames();                                                   // ROR 0x001f090c
     int  stepMotion();                                                   // ROR 0x001f0b50
+    /* 1 when the actor's heading is within 0.1 of m_angle (unwrapped;
+     * no caller in the ROM). */
+    int  isTurned();                                                     // ROR 0x001f0e14
 
     float     m_rot[4];         // ROR 0x10: (0, heading, 0, -) for setObjRot / setActorRotate
     u_int     m_oid;            // ROR 0x20
@@ -704,6 +877,14 @@ void  chrRotToMotion(float dir, float speed, float rotY, u_int oid, int motion,
  * oid's actor. */
 int   chrMoveFrames(float dir, float dist, float rate, u_int oid, int no, CmnITask **task,
                     int motion);                                         // ROR 0x001ee7f0
+/* chrMoveFrames' other way round (no caller in the ROM): motion played
+ * on actor no at 1/60, then (when *task is NULL) a chrMtnMove of it at
+ * the rate that covers dist in frames frames (chrRateForFrames over the
+ * root move across 50 x the motion's length; 0 when it does not move). */
+void  chrMoveInFrames(float dir, float dist, u_int oid, int no, CmnITask **task, int motion,
+                      int frames);                                       // ROR 0x001ee954
+/* (ratio / frames) / 0.02778 (= x 36), 0 for frames 0. */
+float chrRateForFrames(float ratio, int frames);                         // ROR 0x001f6c14
 /* v.x += sinf(angle) * dist, v.z += cosf(angle) * dist. */
 void  utlAddPolar(float angle, float dist, float *v);                    // ROR 0x001f6b28
 
@@ -735,6 +916,12 @@ u_int chrCreateItemObj(short id, const float *pos, const float *rot);    // ROR 
 /* The world position of oid's actor's node name into out (x, y, z, 1):
  * 0 without an actor or node, or while GamMan::m_flags2 has 0x3000. */
 int  chrGetNodeWorldPos(u_int oid, float *out, const char *name);       // ROR 0x001f5558
+/* 1 when object target's sphere (its radius) meets range around oid's
+ * position (utlHitCheck). */
+int  chrIsNear(float range, u_int oid, u_int target);                    // ROR 0x001f5350
+/* 1 when object target (radius 50) is within range of node name of
+ * oid's actor. */
+int  chrIsNearNode(float range, u_int oid, u_int target, const char *name); // ROR 0x001f5410
 /* gamOidType(oid) == 2 (TskMtnMove's test, inlined there). */
 int  chrIsOidType2(u_int oid);                                           // ROR 0x001f6878
 

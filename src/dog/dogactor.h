@@ -136,7 +136,9 @@ struct DogActor : DogModel
     int           m_shadow_fade;        // ROR 0x168: frames since the light changed (0..59 fade out then in; 60 and up, or negative, steady)
     u_char        _16c[0x1a0 - 0x16c];
     int           m_id;                 // ROR 0x1a0: setId / getId (the character id it was loaded as)
-    u_char        _1a4[0x1e4 - 0x1a4];
+    u_char        _1a4[0x1d8 - 0x1a4];
+    int           m_1d8;                // ROR 0x1d8: read as a frame count by TskMoveAdj (no writer found yet)
+    u_char        _1dc[0x1e4 - 0x1dc];
     DogMotionBlend m_motion;            // ROR 0x1e4: the current motion (its number, speed, frame)
     u_char        _1f0[0x3c0 - 0x1f0];
     sceVu0FVECTOR m_base_rotate;        // ROR 0x3c0: getBaseRotateY reads y

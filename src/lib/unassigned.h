@@ -125,6 +125,13 @@ struct TskSnd : CmnITask
     int getVolume(int *volL, int *volR);                                 // ROR 0x001f9658
 };
 
+/* The per-character request of unassigned@001f82e4 (jump table data
+ * 0x2fed40 over chr 0..10; chr 11 takes it from object chrOid's kind:
+ * 4 for kind 0, 3 for kind 1, the system data field 0x72 for kind 2).
+ * Many callers; TskMovePhysic passes chr 4 (the PC) or 3 (the dog) with
+ * word 0x15. Role of the words unverified. */
+void scnChrRequest(int chr, u_int oid, int a2, int a3, int word, u_int chrOid, int a6); // ROR 0x001fac60
+
 /* TskCamera : CmnITask (EE 0xc0, unassigned@001f82e4): a scripted camera
  * move (native 016 case 50, on GamMan's m_camTaskId). layout: host. */
 struct TskCamera : CmnITask
