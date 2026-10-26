@@ -1487,7 +1487,7 @@ void GamSndMan::put_se_3d_pos(u_int se, float *pos, int wrd, u_int flags)
 {
     if (wrd == -1)
         wrd = g_gamMan.getWrdNo();
-    const WrdEntry *room = g_wrdTable.get(wrd);
+    const WrdEntry *room = g_wrdSrv.get(wrd);
     if (room == NULL)
         return;
 
@@ -1615,7 +1615,7 @@ void GamSndMan::put_str_3d_pos(int str, float *pos, int wrd, u_int flags)
 {
     if (wrd == -1)
         wrd = g_gamMan.getWrdNo();
-    const WrdEntry *room = g_wrdTable.get(wrd);
+    const WrdEntry *room = g_wrdSrv.get(wrd);
     if (room == NULL)
         return;
 
@@ -1817,7 +1817,7 @@ void GamSndMan::update3d(const float *pos)
     if ((int)g_gamMan.m_flags2 < 0)
         return;
     int wrd = g_gamMan.getWrdNo();
-    const WrdEntry *room = g_wrdTable.get(wrd);
+    const WrdEntry *room = g_wrdSrv.get(wrd);
     if (room == NULL)
         return;
 

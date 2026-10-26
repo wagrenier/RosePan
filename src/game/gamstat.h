@@ -640,7 +640,7 @@ const char *gamGetWrdString(int which, int wrd);                         // ROR 
  * ROM's this, GamMan +0x18c00, is not read). */
 float gamGetWrdOfsX(void);                                               // ROR 0x001db9c4
 float gamGetWrdOfsZ(void);                                               // ROR 0x001dba00
-/* The WRD table entry of GamMan's room (WrdTable::get): its words 0x18 /
+/* The WRD table entry of GamMan's room (WrdSrv::get): its words 0x18 /
  * 0x1c into GamMan +0x18dd0 / +0x18dc0, +0x18dd0 = 0 without an entry.
  * The ROM's this is GamMan +0x18c00; initStage2 passes the room's
  * A%03d.ARA file as a second argument it does not read. */

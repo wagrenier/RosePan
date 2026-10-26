@@ -269,7 +269,7 @@ void GamMan::loadStage(int stage)
     g_magSystem.clearScene22cc();
     snd->freeSePack(0xc);
     snd->freeSePack(0x1f);
-    g_wrdTable.load(stage);
+    g_wrdSrv.load(stage);
     m_flags2 |= 0x3800;
     snd->m_mode = 1;
     if (m_chapter == 6 && (g_sequence.m_bits[0] & 0x8000) != 0)
@@ -5047,7 +5047,7 @@ int GamMan::getMapArea()
 {
     if (m_wrdNo == -1 || (m_flags2 & 0x2000) != 0)
         return -1;
-    WrdEntry *entry = g_wrdTable.get(m_wrdNo);
+    WrdEntry *entry = g_wrdSrv.get(m_wrdNo);
     if (entry == NULL)
         return -1;
     return entry->m_mapArea;
@@ -5468,7 +5468,7 @@ void GamMan::clearVram(void *buf)
 void GamMan::showRoomName()
 {
     static char s_msg[0x200];   // bss 0x6e9640
-    if (g_wrdTable.get(m_wrdNo) == NULL)
+    if (g_wrdSrv.get(m_wrdNo) == NULL)
         return;
     sprintf(s_msg, "%s #f060 \n", gamGetWrdString(2, -1));
     // PORT: word 7 is stack garbage in the ROM; 0 here.

@@ -867,6 +867,14 @@ to adapt when a TU reaches them:
   0x2e3250 .. EffWater3, 0x16a914..~0x17c0f0; FUN_00176afc and FUN_00177830 are reached stubs from
   them), SctLayer 0x17c0f0..~0x17c8b8, unread code 0x17c8b8..0x17e3d8 (role not checked), WrdSrv / WrdTable (data/wrd/WRD.BIN,
   0x17e3d8..0x17f0d0). Define those files before porting from it.
+  2026-10-26: 0x17e540..0x17f0d0 is now `wrd/wrdsrv.cpp` (WrdSrv, verify: tested on WRD.BIN stages 1 and 13 by a temporary
+  self-test -- rooms, names, index, routes, conversions right -- but nothing on screen shows it until a
+  room caption draws; WrdTable renamed to the ELF's
+  WrdSrv). Doubts: the file name / directory is a guess (no source string); 0x17e3d8 / 0x17e464 /
+  0x17e4d0 (a strcmp lookup over 0x20-byte named records with member lists, setting / clearing bits
+  in each member's +8; called by sectorSetFlags / ClearFlags) were left with the sector code before
+  them. Next pick in the rest: the effect manager Obj176a3c (0x176a3c..~0x1788ec, scene +0x837e0)
+  -- its update / draw 0x17772c / 0x177830 and init 0x176afc are reached every frame.
 
 - (2026-10-22, the i3dmath session) **Naming of the vector module's two copies**: the older
   sessions gave five first-copy functions the plain names (i3dVecZero, i3dVecCopyW, i3dMatCopy,

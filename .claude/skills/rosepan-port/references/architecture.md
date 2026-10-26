@@ -653,11 +653,19 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   for pictures under 448: the movie is letterboxed 512 x 336 at y 64. On the host: the shim libmpeg
   (FFmpeg) decodes, the picture goes through `RosePan_I3dRecordMovie`, the decode loop runs on the
   main thread (rxMpegDecodePoll) -- see the banner of snd/rxmpeg.cpp. Disc: 40 movies in MOVIE/.
-- **Word table** 0x298ee0: data/wrd/WRD.BIN loaded by 0x17e5c0 (from GamMan::loadStage);
-  `WrdTable::get(n)` 0x17ea44 -> record n (count at the file's +8): four string pointers +0x08..+0x14
-  (gamGetWrdString 0x1db8e8 which 0, 1 / 4 the map name, 2 the caption S2dMes shows, 3; "<map_none>"
-  without a room or a record), +0x18 / +0x1c words gamSetWrdRoom 0x1dbcf0 copies to GamMan +0x18dd0 /
-  +0x18dc0, +0x20 the room offset. Class name invented from the file.
+- **Room table** `WrdSrv` g_wrdSrv 0x298ee0 (wrd/wrdsrv.cpp 0x17e540..0x17f0d0; the class is the ELF's,
+  vtable 0x2e4538, built by the file initializer 0x17f038): `load(stage)` 0x17e5c0 (from
+  GamMan::loadStage; 99 keeps what is loaded) reads file "%03d" of data/wrd/WRD.BIN (RTPK, 26 stage files
+  001..013, 098..) and `setup` 0x17e798 keeps a game-heap copy. Stage file: header {u16 0x101, u16 flags
+  (bit 0 = offsets not relocated), size, index count (247: room numbers 0..246), room count (49)}, the
+  index (u32 offsets, 0 = no room; padded to 16), then 0x40-byte rooms: +0 number, +4 id name
+  "o1_cway", +8 floor (Shift-JIS), +0xc floor ("First Floor"), +0x10 caption ("Hallway"), +0x14 second
+  caption ("Rickety Shed"), +0x18 floor number (0 outside, 1, 2, 3 attic), +0x1c map area, +0x20 the
+  room's world offset, +0x2c / +0x30 the linked room numbers, +0x34 its 0x10-byte search record.
+  `get(n)` 0x17ea44 by room number (gamGetWrdString 0x1db8e8: 0 / 1, 4 / 2 / 3 = +8 / +0xc / +0x10 /
+  +0x14; "<map_none>" without a room), cnvPosL2W / W2L add / subtract +0x20, `findRoute` 0x17ec1c a
+  breadth-first route over the links (one caller 0x127b28), `findByName` 0x17ea84 (no callers). The
+  host builds WrdEntry records with pointers beside the file instead of relocating it (wrdsrv.h).
 - `BedSubMode` (bed/bedsubmode.cpp asserts `m_depth < MAX_STACK` / `m_depth > 0`): a current qword
   at +0, a stack of 4 at +0x10, m_depth +0x50; push 0x100258 / pop 0x1002c0. The scene has one at
   +0x22d0 (`MagScene::pushSubMode` 0x132744 pushes and sets mode 8 / -1, `popSubMode` 0x132784): the

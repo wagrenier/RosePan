@@ -1152,6 +1152,24 @@
    ],
    "status": "verify",
    "why": "0x105650 asserts with utl/utlmisc.cpp line 22 (the file's first function, right after utltm2's last assert at 0x10559c); the run up to utlfile.cpp's first assert at 0x105e50 has no source string and is taken as the rest of utlmisc: text helpers, a param parser, the frame counter, operator new/delete and the game heap wrappers over BedMemory"
+  },
+  "wrd/wrdsrv.cpp": {
+   "notes": "Verified by a temporary self-test (not committed) loading WRD.BIN stages 1 and 13: 49 rooms of 247 index slots, names, floors, captions, offsets, get / findByName agree, findRoute 184 to 172 gives 184 183 171 172 along the file links, L2W / W2L invert. The boot never loads a table (stage 99 keeps none), so nothing on screen shows it until a stage loads and a room caption draws (S2dMes::drawMapName): mark done then. Room +0x18 is the floor number (0 outside, 1, 2, 3 attic). PORT choices: host records with pointers in one extra game-heap block (the ROM relocates in place); cnvPos with a missing room uses a zero offset (ROM reads low memory); the ROM never frees load's read buffer on success - kept. Left in unassigned@00164fc0: 0x17e3d8 / 0x17e464 / 0x17e4d0 (strcmp lookup over 0x20-byte named records, used by sectorSetFlags / ClearFlags) belong with the sector code before them; the effect manager Obj176a3c (0x176a3c..~0x1788ec) holds the remaining reached stubs 0x17772c / 0x177830 / 0x176afc. File name wrd/wrdsrv.cpp is a guess (no source string).",
+   "ranges": [
+    [
+     "0017e540",
+     "0017f0d0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-26 15:37",
+     "status": "verify",
+     "summary": "WrdSrv room table (was unassigned@00164fc0 0x17e540..0x17f0d0): all 14 functions - ctor / dtor, load of data/wrd/WRD.BIN, setup building host WrdEntry records beside the file, release, get, findByName, cnvPosL2W / W2L, findRoute (breadth-first over room links), clearSearch, the file initializer. WrdTable renamed to the ELF class WrdSrv (g_wrdSrv) in Ghidra and src."
+    }
+   ],
+   "status": "verify",
+   "why": "WrdSrv (ELF vtable 0x2e4538, ctor 0x17e540, the global 0x298ee0 built by the file initializer 0x17f038 / _GLOBAL_ 0x17f090 / 0x17f0b0): data/wrd/WRD.BIN rooms; ends at SndMan 0x17f0d0. 0x17e3d8..0x17e540 (strcmp lookup over 0x20-byte named records, called by sectorSetFlags / ClearFlags) belongs with the sector code before it. No source string: file name from the class and the data dir (guess)."
   }
  }
 }

@@ -27,7 +27,6 @@
 // ---- globals (hand-written) ----
 // (The global managers moved to system/system.cpp.)
 
-WrdTable   g_wrdTable;          /* data 0x298ee0: data/wrd/WRD.BIN's table */
 
 int g_emyManagerTaskId;         /* bss 0x7b45c0 */
 int g_bss_7a3d48;               /* bss 0x7a3d48 */
@@ -228,13 +227,6 @@ sceVu0FVECTOR * DogEntity::getMatrix()
     // PC: the unit matrix until the camera class that holds the +0xf0
     // matrix is written; i3dCtxCreateView copies what this returns.
     return i3dMatGetUnit();
-}
-
-// stub of ROR 0x0017ea44
-WrdEntry * WrdTable::get(int n)
-{
-    ROSEPAN_STUB("WrdTable::get", 0x0017ea44);
-    return {};
 }
 
 // stub of ROR 0x0010fac0
@@ -736,12 +728,6 @@ void GamArea::update(const float *pos, const float *rot)
 void MagLife130da4::setVolume(int volume)
 {
     ROSEPAN_STUB("MagLife130da4::setVolume", 0x00130de0);
-}
-
-// stub of ROR 0x0017e5c0
-void WrdTable::load(int stage)
-{
-    ROSEPAN_STUB("WrdTable::load", 0x0017e5c0);
 }
 
 // stub of ROR 0x001f688c
@@ -1477,18 +1463,6 @@ GamSecta * GamMan::findSectaCell(const float *pos, GamSecta *cur, int type2)
 {
     ROSEPAN_STUB("GamMan::findSectaCell", 0x001d8064);
     return {};
-}
-
-// stub of ROR 0x0017eb3c
-void WrdTable::cnvPosL2W(float *out, int no, const float *in)
-{
-    ROSEPAN_STUB("WrdTable::cnvPosL2W", 0x0017eb3c);
-}
-
-// stub of ROR 0x0017ebac
-void WrdTable::cnvPosW2L(float *out, const float *in, int no)
-{
-    ROSEPAN_STUB("WrdTable::cnvPosW2L", 0x0017ebac);
 }
 
 // stub of ROR 0x0017762c

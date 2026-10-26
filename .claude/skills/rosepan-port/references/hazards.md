@@ -218,6 +218,8 @@ entries are marked **RoR** with the date.
   Convention (i3rroot.h): a relocated field holds the signed distance from the field itself to its
   target (0 = NULL); read with `i3rPtr(&field)`, write with `i3rSetPtr`. Every reader of i3r data
   (the per-type accessors, i3rBuildPackets, DogModel) must go through it -- never cast a field.
+  For a small table one class owns and reads through its own methods, building host records with
+  pointers beside the untouched file is simpler (WrdSrv::setup, wrd/wrdsrv.cpp, 2026-10-26).
 
 ## Reconstruction bookkeeping
 
