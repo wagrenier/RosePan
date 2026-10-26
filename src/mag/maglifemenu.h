@@ -164,7 +164,7 @@ struct MagLifeMenuStock : MagLifeMenuBase
 /* The save screen, 0x10003 (vtable 0x2e1998). EE 0x27c0. */
 struct MagLifeMenuSave : MagLifeMenuBase
 {
-    // ROR 0x002843c8; callcheck: MnuSvld::MnuSvld (not written; the member starts zeroed)
+    // ROR 0x002843c8; callcheck: MnuSvld::MnuSvld (the member constructor, implicit)
     MagLifeMenuSave() { m_menu.m_save = 1; }
     // ROR 0x00284434; callcheck: MnuSvld::~MnuSvld (the member's)
     ~MagLifeMenuSave() {}
@@ -184,7 +184,7 @@ struct MagLifeMenuSave : MagLifeMenuBase
  * with m_save 0. EE 0x27c0. */
 struct MagLifeMenuLoad : MagLifeMenuBase
 {
-    // ROR 0x00284534; callcheck: MnuSvld::MnuSvld (not written; the member starts zeroed)
+    // ROR 0x00284534; callcheck: MnuSvld::MnuSvld (the member constructor, implicit)
     MagLifeMenuLoad() { m_menu.m_save = 0; }
     // ROR 0x00284598; callcheck: MnuSvld::~MnuSvld (the member's)
     ~MagLifeMenuLoad() {}

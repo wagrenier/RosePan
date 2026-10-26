@@ -1351,3 +1351,15 @@ const char * msgGetSysText(int no)
     ROSEPAN_STUB("msgGetSysText", 0x001832e8);
     return {};
 }
+
+// stub of ROR 0x001d68a0
+void GamMan::readSaveData(void *buf)
+{
+    ROSEPAN_STUB("GamMan::readSaveData", 0x001d68a0);
+}
+
+// stub of ROR 0x001d6078
+void GamMan::writeSaveData(void *buf)
+{
+    ROSEPAN_STUB("GamMan::writeSaveData", 0x001d6078);
+}

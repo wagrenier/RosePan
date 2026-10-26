@@ -1041,6 +1041,33 @@ throughout (identifiers, env variables, files, shader macros):
 - **MsgMan** (msg/msgman.cpp, 0x18330c..; EE 0x3bc; not written): a text in a scene window (m_strBuf,
   optional voice stream). **MsgManSet** 0x18741c..0x18761c: two of them found by window number.
 
+## The save / load screen (mnu/mnusvld.cpp, 0x1a59b8..0x1a90ec, 2026-10-25)
+
+- **MnuSvld** (EE 0x2780; MagLifeMenuSave / Load +0x40, MnuTitle +0x1400, MagScene has one): an
+  MnuMcd at +0 (its methods are called on this), open +0x1400, nine cursors +0x1404 ([1] slot, [2] row
+  on screen) with counts +0x1428 ([1] 12, [2] 5, [8] 36), m_step +0x144c, m_sub +0x1450, m_sub_step
+  +0x1454, SprMan +0x1474 (73 sprites, data/mnurpk/mnusvld.rpk: tex00..03, texmoji), MagSystem* +0x1d60,
+  layer +0x1d64, MsgManSet +0x1d68, m_save +0x24e8 (1 save, 0 load), 12 slot records MnuSvldSlot
+  +0x2508 (stride 0x2c: two flags, chapter, play hours / minutes, modify date y m d h m s; -1 = empty),
+  init +0x2734, decide +0x273c (1 decided, 2 cancelled), m_svldBuf +0x2740 (0x3000-byte save image,
+  the assert names it), scene window +0x2744, m_loaded +0x2754 (MnuTitle::execLoad). Data: texture
+  list 0x2a4530, pattern image 0x2a45c0..0x2a64e0 (move table 0x2a6438, fade colours 0x2a60d8 /
+  0x2a60e8), display list 0x2a64e0 (73 sprites), clear rects 0x2a7460 / 0x2a7470, text buffers bss
+  0x6e9450 (times), 0x6e94a0 (date), 0x6e9520 (title), 0x6e95a0 (corrupted).
+- **Card format**: one directory per slot, /BASLUS-21448/dtSSabCCHHMM (slot, flag a = 0, flag b =
+  sequence bits word 0 bit 31, chapter 0..12, play time; all zero while bits word 8 bit 0x1000);
+  makeSaveDir uses the existing dt<SS> directory's name or dtSS________. The save image is GamMan
+  0x1d6078 (writeSaveData) + MnuMcd::makeChecksum; loading hands it to GamMan 0x1d68a0 (readSaveData).
+  Chapter titles are system texts 0x1c6 + chapter; flag b puts them in brackets.
+- **Flow**: exec step 0 opens a 0x200 x 0xe0 window (text 0x19), backs up S2dMes sprites 0..13, 1..3
+  MnuMcd::init / setTextMode (2 load, 1 save), setDisp, button guides (S2dMes 4 / 5 via
+  GamMan::showMesSprite / setMesSpritePos), fade in; 4 runs m_sub: 1 execCheck (check mode 3 load / 2
+  save, then readSlots), 0 execList (check mode 4, cursor, decide = BedPad +0x7a bit 14, cancel bit
+  13), 2 execSave (check mode 5; sets sequence bits word 2 bit 0x10000), 3 execLoad (check mode 6,
+  readSaveData, m_loaded); 999 or a failed check fades out; closing sets m_global[0x15] = 7 (save) / 8
+  (load). On a PC card with no save, check mode 3 stops at the "no data" prompt (checkLoad step 0x28):
+  RIGHT + CROSS quits back to the title (seen 2026-10-25).
+
 ## The title screen (mnu/mnutitle.cpp, 0x1a90ec..0x1ab474, 2026-10-25)
 
 - **MnuTitle** (EE 0x5700, MagLifeMenuTitle +0x40): MnuMcd +0, MnuSvld +0x1400 (m_save 0: load),

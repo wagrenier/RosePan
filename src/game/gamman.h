@@ -332,6 +332,17 @@ struct GamMan
     /* Stage change kind 2's second half (stage 2 data). */
     void initStage2();                                                   // ROR 0x001c47c4
     void empty1c4f30();                                                  // ROR 0x001c4f30
+    /* The scene's S2dMes sprite no (the menus' button guides 4 / 5): show
+     * (process on, standard colour, anim - 1) or hide; its position in
+     * pixels; fade in / out over time frames. */
+    void showMesSprite(int no, int show, int anim);                      // ROR 0x001c5094
+    void setMesSpritePos(int no, int x, int y);                          // ROR 0x001c5168
+    void fadeInMesSprite(int no, int time);                              // ROR 0x001c51e0
+    void fadeOutMesSprite(int no, int time);                             // ROR 0x001c5240
+    /* The game into / out of the save screen's 0x3000-byte image
+     * (unassigned@001d3b44). */
+    void writeSaveData(void *buf);                                       // ROR 0x001d6078
+    void readSaveData(void *buf);                                        // ROR 0x001d68a0
     void update();                                                       // ROR 0x001c526c
     void postUpdate();                                                   // ROR 0x001c53d8
     /* The dog's mode (getInuMode): 1 follows the PC (shown, Brown's
