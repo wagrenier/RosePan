@@ -102,8 +102,13 @@ struct ACHRstat : ObjStat
     /* Stores *data into the param which (0x32 the equipped item ...). */
     void setParam(int which, const void *data);                          // ROR 0x001da740
 
-    int   m_task[4];            // ROR 0x3d4: task ids, -1 none
+    /* The motion speed into +0x418 and the actor's
+     * MagScene::setActorMotionSpeed (native 106). */
+    void setMotionSpeed(float speed);                                    // ROR 0x001db1b8
+
+    int   m_task[4];            // ROR 0x3d4: task ids, -1 none; [1] the turn task (chrRotStart)
     int   m_taskId;             // ROR 0x3e8: resetObj kills it
+    float m_motionSpeed;        // ROR 0x418: setMotionSpeed
 };
 
 /* A field character (vtable 0x2e47f8, EE 0x2c0 bytes). layout: host. */
@@ -630,6 +635,17 @@ struct GamMan
     void setMsgParam(const int *param);                                  // ROR 0x001cf7d0
     /* Kills the message task, clears the message mode (native 009). */
     void killMsgTask();                                                  // ROR 0x001cf95c
+    /* Restarts the message task (m_msgTaskId) on text with arg, m_msgParam,
+     * m_msgMode and time (native 006). */
+    void openMsg(const char *text, int arg, int time);                   // ROR 0x001cf854
+    /* MagScene::openSysMsgWindow(text, 0, 0) into m_sysMsgHandle; the
+     * four ints are never read (native 006 passes -1). */
+    void openSysMsg(const char *text, int a, int b, int c, int d);       // ROR 0x001cfa5c
+    /* S2dMes sprite 3: on with param {anim, x, y, fade in, fade out,
+     * off x, off y} (points * 16), or fades it out by param[4]. */
+    void showMsgSprite(int on, const int *param);                        // ROR 0x001cf6bc
+    /* The heading from oid's position to target's (0 unless both exist). */
+    float getObjDirTo(u_int oid, u_int target);                          // ROR 0x001cfb48
     /* Frees motion id of the PC's actor (native 028). */
     void releasePcMotion(int id);                                        // ROR 0x001c4f70
     /* Saves the scene's fog in the first free of three slots (native 012). */
