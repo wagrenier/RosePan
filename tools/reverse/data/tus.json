@@ -185,7 +185,7 @@
    "why": "game/gamman.cpp asserts and allocDebug tags in init, loadSystemData, loadStage; GamMan's constructor 0x1c05c0 starts it after GamFont, switchVolume 0x1d3ac8 ends it; ObjStat and GamArea code follows (unassigned@001d3b44)"
   },
   "game/gamsnd.cpp": {
-   "notes": "Left (stubs, none reached by the boot): update3d 0x1e3c24 and the 3D list calls put_*/del_*/set_*_3d_snd_prm with 0x1e2350 and 0x1e386c, setVolSEtrack and setVolSTRtrack, getStrNoByChan, the 7-argument playSE and playStr, loadSePack(name,arg), setReverb, stopObjSnds, 0x1e4970, 0x1e4b48, 0x1e4db0, 0x1e4e20, 0x1e5d1c. The 3D node fields in gamsnd.h (GamSnd3dNode) are only what update3d reads, unverified. Sound is not visible on screen: the boot SE packs 0000.se and 6400.se now load (SPU heap alloc in the log); the smoke run looks as before (logos, disclaimer, MV00_AD film). One run in five went black after the Shirogumi logo instead of the film (not reproduced; see open-items 6b). PC guards: records for a failed SndMan id (-1) are skipped; funcSE case 6 reads a pointer only case 5 sets. Next on the main road is the New Game path (open-items Next up).",
+   "notes": "Code complete; verify until a run reaches a room whose scripts put 3D sounds (native 252 put_*_3d_pos) -- the boot smoke run (logos, disclaimer, MV00_AD film, unchanged) never calls them, and no sound is audible on the host yet. Decisions: PC guards return when the free 3D list is empty (the ROM pops the sentinel) and skip records for SndMan id -1; GamSnd3d locals are zeroed (the ROM copies stack garbage into m_pos and +0x44..). Kept ROM behaviour: update3d keys object sounds by the sum dx+dy+dz, fixed ones by |dx|; set_str_3d_snd_prm's no-entry path changes nothing. The out-of-range stream fade sets TskSndParam m_snd to the stream (unset in the ROM). Ghidra names added in work/batches/gamsnd_003.json. For the next session on this file: confirm the 3D volumes against a room with ambient 3D SEs once the New Game road reaches one.",
    "ranges": [
     [
      "001e0df0",
@@ -197,9 +197,14 @@
      "date": "2026-10-26 15:04",
      "status": "partial",
      "summary": "GamSndMan: constructor and destructor, init, reset, update, master volumes (funcSnd, resetVolume), SE packs, the SE and stream tables, playSE and playStr with the 3D volume helpers, funcSE and funcStr, the BGM push and resume (pushSnd, stopBgm, resumeBgm, unpush_snd, setBgmRec, fadeOut3dSnds): 40 functions; TU pinned 0x1e0df0..0x1e7094; SndMan::loadBank takes XVAB data; TskSndParam fields named"
+    },
+    {
+     "date": "2026-10-26 15:21",
+     "status": "verify",
+     "summary": "GamSndMan finished: the 3D sounds (put_se/str_3d_pos and _chr, del_*, update3d, update3dVolume 0x1e386c, GamSnd3d::setPos 0x1e2350, stopObjSnds), the 7-argument playSE (delayed TskSnd kind 5) and playStr, setVolSEtrack / setVolSTRtrack, getStrNoByChan, stopStrTrack 0x1e5d1c, loadSePack(name, nowait) from data/snd/xv, setReverb, set_se/str_3d_snd_prm, setStrSnd 0x1e4b48, findSndByName 0x1e4970, the two playSEByName 0x1e4db0 / 0x1e4e20 and the ELF inlines (get_snd_prm, getMstVol*, getSndFileName, get_snd_tbl_addr, setSnd3DCnt, rmSnd): 34 functions, TU complete (74). The 3D lists now use sequence.h's SeqNode / SeqList template; GamSnd3d (0x50) payload, m_defEntry at +0x1550, m_bgmCur at +0x1630, reverb words, m_sePackName; TskSndParam +0x10 m_attr / +0x18 m_pitch."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "GamSndMan's methods 0x1e0df0..0x1e6d54 (two game/gamsnd.cpp assert strings) plus its two 3D volume helpers 0x1e6d54 / 0x1e6e00 (called only by playSE / playStr / the 3D list update), up to CmnTaskMan (task/tsk_man.cpp)"
   },
   "game/gamstat.cpp": {

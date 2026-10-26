@@ -8729,6 +8729,12 @@
   "was": "FUN_001e2178",
   "why": "frees the used nodes of the list +0x40 with flag 2 (funcStr stop when flag 1) or flag 4 (0x1e649c); releaseObjs"
  },
+ "001e2350": {
+  "name": "GamSnd3d::setPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001e2350",
+  "why": "this = a 3D sound node's data (+0x10): +0x38 = the float argument, +0 = pos - origin (xyz) or pos (4 words) when origin is NULL; only update3d calls it"
+ },
  "001e239c": {
   "name": "GamSndMan::put_se_3d_pos",
   "tag": "ror-inferred",
@@ -8776,6 +8782,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e3698",
   "why": "GamMan::del_str_3d_pos_chr(unsigned int) forwards to it (0x28ec80); was releaseObjSe (read from GamMan::releaseChr)"
+ },
+ "001e386c": {
+  "name": "GamSndMan::update3dVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_001e386c",
+  "why": "update3d's per-sound step: gamSnd3dVolume, easing against the record's volume, m_3dScale outside the room, restart through the 7-argument playSE / playStr or del_*_3d_pos for one-shots, then setVolSEtrack / setVolSTRtrack"
  },
  "001e3c24": {
   "name": "GamSndMan::update3d",
@@ -8855,6 +8867,12 @@
   "was": "FUN_001e4908",
   "why": "this = 0x79a0c0 (GamMan + 0x18e00); walks the 0x38-byte entries at *(+0x1540) for the id at +0x1c, 1 and the entry when found"
  },
+ "001e4970": {
+  "name": "GamSndMan::findSndByName",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4970",
+  "why": "findSnd's twin keyed by strcmp of the entry name (SE table +0x1540, 0x38-byte entries, to id 0 or 0x400 entries); no callers"
+ },
  "001e4a0c": {
   "name": "GamSndMan::getSeID",
   "tag": "ror-inferred",
@@ -8866,6 +8884,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e4ab8",
   "why": "GamMan::getStrNO(char *) and GamMan::get_str_no(char *) tail-jump to it (0x28e9b4 / 0x28ede0)"
+ },
+ "001e4b48": {
+  "name": "GamSndMan::setStrSnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4b48",
+  "why": "getStrSnd's hashed search ((str % 100000) / 2) of the stream table +0x1544, then copies the 0x38-byte argument over the entry with its id set to str; set_str_3d_snd_prm's no-entry path"
  },
  "001e4c1c": {
   "name": "GamSndMan::getStrSnd",
@@ -8896,6 +8920,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001e4d18",
   "why": "GamMan::stopSE(int) forwards here with this + 0x18e00"
+ },
+ "001e4db0": {
+  "name": "GamSndMan::playSEByName(char*,bool,float*)",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4db0",
+  "why": "get_se_oid(name), then tail-jumps to playSE(se, a2, a3, 0); -1 when the name has no SE"
+ },
+ "001e4e20": {
+  "name": "GamSndMan::playSEByName(char*,int,int,float,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_001e4e20",
+  "why": "get_se_oid(name), then tail-jumps to the 7-argument playSE(se, volL, volR, pitch, attr, 0, 0); -1 when the name has no SE"
  },
  "001e4ebc": {
   "name": "GamSndMan::playSE(unsignedint,bool,float*,int)",
@@ -8950,6 +8986,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e5c40",
   "why": "GamMan::setVolSTRtrack(u_int, int, int, int) tail-jumps to it"
+ },
+ "001e5d1c": {
+  "name": "GamSndMan::stopStrTrack",
+  "tag": "ror-inferred",
+  "was": "FUN_001e5d1c",
+  "why": "stopSeTrack's stream twin: track >= 0, getStreamState != -1 and record +0x14 == str -> SndMan::stopStream, record str / slot = -1, returns 1"
  },
  "001e5de4": {
   "name": "GamSndMan::set_se_3d_snd_prm",

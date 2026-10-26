@@ -18,7 +18,9 @@
 #include "game/gamsnd.h"
 
 #include "bed/bedmemory.h"
+#include "game/gamfile.h"
 #include "game/gamman.h"
+#include "game/gamstat.h"
 #include "i3d/i3dmath.h"
 #include "lib/unassigned.h"
 #include "mag/magsystem.h"
@@ -88,21 +90,21 @@ void GamSndMan::init()
     m_table = (GamSndEntry *)g_utlMemory.allocDebug(GAMSND_SE_MAX * sizeof(GamSndEntry),
                                                      s_file, 81, 0, 1);
     void *strTable = g_utlMemory.allocDebug(GAMSND_STR_MAX * sizeof(GamSndEntry), s_file, 82, 0, 1);
-    m_157a = 0x6a4;
-    m_157c = 100;
-    m_157e = 0x80;
+    m_defEntry.m_far = 0x6a4;
+    m_defEntry.m_near = 100;
+    m_defEntry.m_nearVol = 0x80;
     m_bgm[0].m_str = -1;
     m_3dScale = 0.5f;
-    m_1576 = 0x80;
-    m_1578 = 0x80;
-    m_163c = -1;
+    m_defEntry.m_vol = 0x80;
+    m_defEntry.m_pan = 0x80;
+    m_bgmCur.m_str = -1;
     m_mstTaskId = -1;
     m_seTaskId = -1;
     m_strTaskId = -1;
     m_pushDepth = -1;
     m_strTable = (GamSndEntry *)strTable;
-    m_1580 = 0;
-    m_1630 = 0;
+    m_defEntry.m_farVol = 0;
+    m_bgmCur.m_se = 0;
     m_bgm[0].m_se = 0;
     memset(m_bankId, -1, sizeof(m_bankId));
 }
@@ -131,9 +133,9 @@ void GamSndMan::update(const float *pos)
 
 void GamSndMan::resetVolume()
 {
-    m_171c = 4;
-    m_1720 = 0x80;
-    m_1724 = 0x80;
+    m_reverbMode = 4;
+    m_reverbDepthL = 0x80;
+    m_reverbDepthR = 0x80;
     m_mode = 0;
     funcSnd(0xd, 0x80, 0x80, 0, -1);
     m_mstVolStr[0] = 0x80;
@@ -1284,13 +1286,14 @@ void GamSndMan::fadeOut3dSnds()
 
     for (GamSnd3dNode *node = m_used.m_head.m_next; node != &m_used.m_head; node = node->m_next)
     {
-        int track = node->m_rec;
-        if ((node->m_flags & 1) == 0)
+        GamSnd3d *snd = &node->m_data;
+        int track = snd->m_rec;
+        if ((snd->m_flags & GAMSND_3D_STR) == 0)
         {
-            if (!getStatSEtrack(node->m_snd, track))
+            if (!getStatSEtrack(snd->m_snd, track))
                 continue;
             GamSndRec *rec = &m_rec[track];
-            fade.m_snd = node->m_snd;
+            fade.m_snd = snd->m_snd;
             fade.m_id = rec->m_slot;
             fade.m_curL = rec->m_volL;
             fade.m_curR = rec->m_volR;
@@ -1303,17 +1306,17 @@ void GamSndMan::fadeOut3dSnds()
         }
         else
         {
-            if (!getStatSTRtrack(node->m_snd, track))
+            if (!getStatSTRtrack(snd->m_snd, track))
                 continue;
             GamSndRec *rec = &m_rec[track];
-            fade.m_snd = node->m_snd;
+            fade.m_snd = snd->m_snd;
             fade.m_id = rec->m_slot;
             fade.m_curL = rec->m_volL;
             fade.m_curR = rec->m_volR;
             fade.m_frames = 0x1e;
             fade.m_volL = 0;
             fade.m_volR = 0;
-            m_bgm[m_pushDepth].m_str2 = node->m_snd;
+            m_bgm[m_pushDepth].m_str2 = snd->m_snd;
             m_bgm[m_pushDepth].m_str2VolL = rec->m_volL;
             m_bgm[m_pushDepth].m_str2VolR = rec->m_volR;
             funcStr(fade.m_snd, 0x15, &fade);
@@ -1418,123 +1421,854 @@ int GamSndMan::isPlayEnvStr()
     return 0;
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+// ---- the 3D sound list ----
 
-// stub of ROR 0x001e3698
-void GamSndMan::del_str_3d_pos_chr(u_int oid)
+/* The list template's inline steps the put_* / del_* functions repeat. */
+
+/* The distance of v (x, y, z) from the origin, as the ROM takes it: the
+ * xz length first. */
+static float gamSnd3dLength(const float *v)
 {
-    ROSEPAN_STUB("GamSndMan::del_str_3d_pos_chr", 0x001e3698);
+    float xz = sqrtf(v[0] * v[0] + v[2] * v[2]);
+    return sqrtf(v[1] * v[1] + xz * xz);
 }
 
-// stub of ROR 0x001e2c40
-void GamSndMan::del_se_3d_pos_chr(u_int oid)
+/* The first used node at least dist away (the head when none): the new
+ * sound goes before it, so the list stays sorted by m_dist. */
+static GamSnd3dNode *gamSnd3dFindSlot(GamSnd3dList &used, float dist)
 {
-    ROSEPAN_STUB("GamSndMan::del_se_3d_pos_chr", 0x001e2c40);
+    GamSnd3dNode *node = used.begin();
+    while (node != used.end() && !(dist <= node->m_data.m_dist))
+        node = node->m_next;
+    return node;
 }
 
-// stub of ROR 0x001e2aa0
-void GamSndMan::del_se_3d_pos(u_int se, int arg)
+/* The last free node gets a copy of snd and goes into the used list before
+ * at. The ROM does not check for a free node. */
+static void gamSnd3dAdd(GamSnd3dList &freeList, GamSnd3dList &used, GamSnd3dNode *at,
+                        const GamSnd3d &snd)
 {
-    ROSEPAN_STUB("GamSndMan::del_se_3d_pos", 0x001e2aa0);
+    GamSnd3dNode *node = freeList.popBack();
+    node->m_data = snd;
+    node->m_prev = at->m_prev;
+    at->m_prev->m_next = node;
+    node->m_next = at;
+    at->m_prev = node;
+    used.m_count++;
 }
 
-// stub of ROR 0x001e34ec
-void GamSndMan::del_str_3d_pos(int str, int arg)
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e2350
+
+void GamSnd3d::setPos(float dist, const float *pos, const float *origin)
 {
-    ROSEPAN_STUB("GamSndMan::del_str_3d_pos", 0x001e34ec);
+    m_dist = dist;
+    if (origin != NULL)
+    {
+        m_pos[0] = pos[0] - origin[0];
+        m_pos[1] = pos[1] - origin[1];
+        m_pos[2] = pos[2] - origin[2];
+        return;
+    }
+    m_pos[0] = pos[0];
+    m_pos[1] = pos[1];
+    m_pos[2] = pos[2];
+    m_pos[3] = pos[3];
 }
 
-// stub of ROR 0x001e5be0
-int GamSndMan::getStrNoByChan(int chan)
-{
-    ROSEPAN_STUB("GamSndMan::getStrNoByChan", 0x001e5be0);
-    return {};
-}
+// ──────────────────────────────────────────────────────────────────────
+// A 3D SE at pos in room wrd: m_src is pos moved by the room's WRD offset,
+// m_dist 3000 until update3d places it. Nothing without a WRD entry or an
+// SE entry; GAMSND_3D_START plays it now (at pos, unless it already plays)
+// and marks it a one-shot.
+// ROR 0x001e239c // callcheck: sqrtf (in gamSnd3dLength, the inline distance)
 
-// stub of ROR 0x001e50c8
-int GamSndMan::playSE(u_int se, int a, int b, float c, int d, int e, int arg)
-{
-    ROSEPAN_STUB("GamSndMan::playSE", 0x001e50c8);
-    return {};
-}
-
-// stub of ROR 0x001e5428
-int GamSndMan::playStr(int str, int a, int b, float c, int d, int e, int arg)
-{
-    ROSEPAN_STUB("GamSndMan::playStr", 0x001e5428);
-    return {};
-}
-
-// stub of ROR 0x001e239c
 void GamSndMan::put_se_3d_pos(u_int se, float *pos, int wrd, u_int flags)
 {
-    ROSEPAN_STUB("GamSndMan::put_se_3d_pos", 0x001e239c);
+    if (wrd == -1)
+        wrd = g_gamMan.getWrdNo();
+    const WrdEntry *room = g_wrdTable.get(wrd);
+    if (room == NULL)
+        return;
+
+    GamSnd3d snd = {};      /* PC: zeroed (m_pos and the tail are stack garbage in the ROM) */
+    snd.m_wrd = wrd;
+    snd.m_dist = 3000.0f;
+    snd.m_rec = -1;
+    snd.m_flags = flags;
+    snd.m_snd = se;
+    snd.m_oid = 0;
+    snd.m_volL = 0;
+    snd.m_volR = 0;
+    snd.m_src[0] = pos[0] + room->m_ofs[0];
+    snd.m_src[1] = pos[1] + room->m_ofs[1];
+    snd.m_src[2] = pos[2] + room->m_ofs[2];
+    float dist = gamSnd3dLength(snd.m_src);
+
+    GamSndEntry *entry = NULL;  /* PC: NULL (findSnd leaves it alone without a table) */
+    findSnd(se, &entry, 1);
+    snd.m_entry = entry;
+    if (entry == NULL)
+        return;
+
+    if ((flags & GAMSND_3D_START) != 0)
+    {
+        if (funcSE(se, 0x16, NULL) != 0)
+            return;
+        snd.m_flags |= GAMSND_3D_ONCE;
+        snd.m_rec = playSE(se, false, pos, 0x80);
+    }
+    if (m_free.m_count == 0)
+        return;             /* PC: the ROM pops the free list's head */
+    gamSnd3dAdd(m_free, m_used, gamSnd3dFindSlot(m_used, dist), snd);
 }
 
-// stub of ROR 0x001e2704
+// ──────────────────────────────────────────────────────────────────────
+// A 3D SE following character oid (GAMSND_3D_CHR): m_src is the room's
+// offset (gamWrdConvPos 2), once per oid and se.
+// ROR 0x001e2704 // callcheck: sqrtf (in gamSnd3dLength, the inline distance)
+
 void GamSndMan::put_se_3d_pos_chr(u_int se, u_int oid, u_int flags)
 {
-    ROSEPAN_STUB("GamSndMan::put_se_3d_pos_chr", 0x001e2704);
+    GamSnd3d snd = {};      /* PC: zeroed */
+    snd.m_dist = 3000.0f;
+    snd.m_flags = flags | GAMSND_3D_CHR;
+    snd.m_snd = se;
+    snd.m_oid = oid;
+    snd.m_wrd = g_gamMan.getWrdNo();
+    snd.m_rec = -1;
+    gamWrdConvPos(2, snd.m_src, NULL);
+
+    GamSndEntry *entry = NULL;  /* PC: NULL */
+    findSnd(se, &entry, 1);
+    snd.m_entry = entry;
+    float dist = gamSnd3dLength(snd.m_src);
+
+    if ((flags & GAMSND_3D_START) != 0)
+    {
+        if (funcSE(se, 0x16, NULL) != 0)
+            return;
+        snd.m_flags |= GAMSND_3D_ONCE;
+        snd.m_rec = playSE(se, 1, 1, 1.0f, 1, 0, 0x80);
+    }
+    for (GamSnd3dNode *node = m_used.begin(); node != m_used.end(); node = node->m_next)
+        if (node->m_data.m_oid == oid && node->m_data.m_snd == se)
+            return;
+    if (m_free.m_count == 0)
+        return;             /* PC: the ROM pops the free list's head */
+    gamSnd3dAdd(m_free, m_used, gamSnd3dFindSlot(m_used, dist), snd);
 }
 
-// stub of ROR 0x001e2db4
+// ──────────────────────────────────────────────────────────────────────
+// Every 3D entry of se (in room wrd, -1 any): stopped and freed.
+// ROR 0x001e2aa0
+
+void GamSndMan::del_se_3d_pos(u_int se, int wrd)
+{
+    GamSnd3dNode *node = m_used.begin();
+    while (node != m_used.end())
+    {
+        GamSnd3d *snd = &node->m_data;
+        if (snd->m_snd != se || (wrd != -1 && snd->m_wrd != wrd))
+        {
+            node = node->m_next;
+            continue;
+        }
+        stopSeTrack(snd->m_snd, snd->m_rec);
+        snd->m_rec = -1;
+        GamSnd3dNode *next = node->m_next;
+        m_used.erase(node);
+        m_free.pushBack(node);
+        node = next;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e2c40
+
+void GamSndMan::del_se_3d_pos_chr(u_int oid)
+{
+    GamSnd3dNode *node = m_used.begin();
+    while (node != m_used.end())
+    {
+        GamSnd3d *snd = &node->m_data;
+        if (snd->m_oid != oid)
+        {
+            node = node->m_next;
+            continue;
+        }
+        stopSeTrack(snd->m_snd, snd->m_rec);
+        snd->m_rec = -1;
+        GamSnd3dNode *next = node->m_next;
+        m_used.erase(node);
+        m_free.pushBack(node);
+        node = next;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// put_se_3d_pos for stream str (GAMSND_3D_STR); its entry may be missing
+// (m_defEntry then). GAMSND_3D_START plays it into SndMan id 1.
+// ROR 0x001e2db4 // callcheck: sqrtf (in gamSnd3dLength, the inline distance)
+
 void GamSndMan::put_str_3d_pos(int str, float *pos, int wrd, u_int flags)
 {
-    ROSEPAN_STUB("GamSndMan::put_str_3d_pos", 0x001e2db4);
+    if (wrd == -1)
+        wrd = g_gamMan.getWrdNo();
+    const WrdEntry *room = g_wrdTable.get(wrd);
+    if (room == NULL)
+        return;
+
+    GamSnd3d snd = {};      /* PC: zeroed */
+    snd.m_flags = flags | GAMSND_3D_STR;
+    snd.m_dist = 3000.0f;
+    snd.m_wrd = wrd;
+    snd.m_rec = -1;
+    snd.m_snd = (u_int)str;
+    snd.m_oid = 0;
+    snd.m_src[0] = pos[0] + room->m_ofs[0];
+    snd.m_src[1] = pos[1] + room->m_ofs[1];
+    snd.m_src[2] = pos[2] + room->m_ofs[2];
+    GamSndEntry *entry;
+    snd.m_entry = getStrSnd(str, &entry) != 0 ? entry : NULL;
+    float dist = gamSnd3dLength(snd.m_src);
+
+    if ((flags & GAMSND_3D_START) != 0)
+    {
+        if (funcStr(str, 0x16, NULL) != 0)
+            return;
+        snd.m_flags |= GAMSND_3D_ONCE;
+        snd.m_rec = playStr(str, 1, pos, false, 0x80);
+    }
+    if (m_free.m_count == 0)
+        return;             /* PC: the ROM pops the free list's head */
+    gamSnd3dAdd(m_free, m_used, gamSnd3dFindSlot(m_used, dist), snd);
 }
 
-// stub of ROR 0x001e3138
+// ──────────────────────────────────────────────────────────────────────
+// put_se_3d_pos_chr for stream str: no entry (m_defEntry), the room kept
+// only for an oid of class 2 (oid >> 30), the duplicate test before the
+// start.
+// ROR 0x001e3138 // callcheck: sqrtf (in gamSnd3dLength, the inline distance)
+
 void GamSndMan::put_str_3d_pos_chr(int str, u_int oid, u_int flags)
 {
-    ROSEPAN_STUB("GamSndMan::put_str_3d_pos_chr", 0x001e3138);
+    GamSnd3d snd = {};      /* PC: zeroed */
+    snd.m_flags = flags | GAMSND_3D_CHR | GAMSND_3D_STR;
+    snd.m_dist = 3000.0f;
+    snd.m_snd = (u_int)str;
+    snd.m_oid = oid;
+    snd.m_rec = -1;
+    snd.m_wrd = (oid >> 30) == 2 ? g_gamMan.getWrdNo() : -1;
+    gamWrdConvPos(2, snd.m_src, NULL);
+    snd.m_entry = NULL;
+    float dist = gamSnd3dLength(snd.m_src);
+
+    for (GamSnd3dNode *node = m_used.begin(); node != m_used.end(); node = node->m_next)
+        if (node->m_data.m_oid == oid && node->m_data.m_snd == (u_int)str)
+            return;
+    if ((flags & GAMSND_3D_START) != 0)
+    {
+        if (funcStr(str, 0x16, NULL) != 0)
+            return;
+        snd.m_flags |= GAMSND_3D_ONCE;
+        snd.m_rec = playStr(str, 1, 1, 1.0f, 0, 1, 0);
+    }
+    if (m_free.m_count == 0)
+        return;             /* PC: the ROM pops the free list's head */
+    gamSnd3dAdd(m_free, m_used, gamSnd3dFindSlot(m_used, dist), snd);
 }
 
-// stub of ROR 0x001e4cc4
-void GamSndMan::setReverb(int a, int b, int c)
+// ──────────────────────────────────────────────────────────────────────
+// Every 3D entry of stream str (in room wrd, -1 any): the stream's first
+// record stopped (funcStr 1), the entry freed.
+// ROR 0x001e34ec
+
+void GamSndMan::del_str_3d_pos(int str, int wrd)
 {
-    ROSEPAN_STUB("GamSndMan::setReverb", 0x001e4cc4);
+    GamSnd3dNode *node = m_used.begin();
+    while (node != m_used.end())
+    {
+        GamSnd3d *snd = &node->m_data;
+        if (snd->m_snd != (u_int)str || (wrd != -1 && snd->m_wrd != wrd))
+        {
+            node = node->m_next;
+            continue;
+        }
+        funcStr(str, 1, NULL);
+        GamSnd3dNode *next = node->m_next;
+        m_used.erase(node);
+        m_free.pushBack(node);
+        gamSndReturnZero();     /* the ROM passes (this, str): a removed debug print */
+        node = next;
+    }
 }
 
-// stub of ROR 0x001e5de4
-void GamSndMan::set_se_3d_snd_prm(u_int se, int a, int b, int c, int d)
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e3698
+
+void GamSndMan::del_str_3d_pos_chr(u_int oid)
 {
-    ROSEPAN_STUB("GamSndMan::set_se_3d_snd_prm", 0x001e5de4);
+    GamSnd3dNode *node = m_used.begin();
+    while (node != m_used.end())
+    {
+        GamSnd3d *snd = &node->m_data;
+        if (snd->m_oid != oid)
+        {
+            node = node->m_next;
+            continue;
+        }
+        funcStr((int)snd->m_snd, 1, NULL);
+        GamSnd3dNode *next = node->m_next;
+        m_used.erase(node);
+        m_free.pushBack(node);
+        node = next;
+    }
 }
 
-// stub of ROR 0x001e5540
-void GamSndMan::set_str_3d_snd_prm(int str, int a, int b, int c, int d)
+// ──────────────────────────────────────────────────────────────────────
+// One heard 3D sound: the listener volume (gamSnd3dVolume over its entry
+// or m_defEntry), eased towards the playing one ((new + old) * 0.75 when
+// new is 0 or more than 0x20 away), m_3dScale outside its room; an SE's
+// volume over 0xff is 0. When it no longer plays: a one-shot
+// (GAMSND_3D_ONCE, or START once restarted) is dropped, else it restarts.
+// ROR 0x001e386c
+
+void GamSndMan::update3dVolume(GamSnd3d *snd)
 {
-    ROSEPAN_STUB("GamSndMan::set_str_3d_snd_prm", 0x001e5540);
+    int prevL = 0, prevR = 0;
+    if (snd->m_rec != -1)
+    {
+        prevL = m_rec[snd->m_rec].m_volL;
+        prevR = m_rec[snd->m_rec].m_volR;
+    }
+    const GamSndEntry *entry = snd->m_entry != NULL ? snd->m_entry : &m_defEntry;
+
+    int volL, volR;
+    gamSnd3dVolume(m_mode, snd->m_pos, entry, &volL, &volR, snd->m_dist);
+    if (volL == 0 || abs(volL - prevL) > 0x20)
+        volL = (int)((float)(volL + prevL) * 0.75f);
+    if (volR == 0 || abs(volR - prevR) > 0x20)
+        volR = (int)((float)(volR + prevR) * 0.75f);
+    if (snd->m_wrd != g_gamMan.getWrdNo())
+    {
+        volL = (int)((float)volL * m_3dScale);
+        volR = (int)((float)volR * m_3dScale);
+    }
+    bool once = (snd->m_flags & (GAMSND_3D_START | GAMSND_3D_PLAYED))
+                    == (GAMSND_3D_START | GAMSND_3D_PLAYED)
+                || (snd->m_flags & GAMSND_3D_ONCE) != 0;
+
+    if ((snd->m_flags & GAMSND_3D_STR) != 0)
+    {
+        snd->m_volL = volL;
+        snd->m_volR = volR;
+        if (!getStatSTRtrack(snd->m_snd, snd->m_rec))
+        {
+            if (once)
+            {
+                /* The node is free now; the ROM still reads its words. */
+                del_str_3d_pos((int)snd->m_snd, -1);
+            }
+            else
+            {
+                snd->m_rec = playStr((int)snd->m_snd, volL, volR, 1.0f, 0, 1, 0x80);
+                snd->m_flags |= GAMSND_3D_PLAYED;
+            }
+        }
+        setVolSTRtrack(snd->m_snd, snd->m_rec, volL, volR);
+        return;
+    }
+
+    if ((u_int)volL > 0xff)
+        volL = 0;
+    if ((u_int)volR > 0xff)
+        volR = 0;
+    snd->m_volL = volL;
+    snd->m_volR = volR;
+    if (!getStatSEtrack(snd->m_snd, snd->m_rec))
+    {
+        if (once)
+        {
+            del_se_3d_pos(snd->m_snd, -1);
+        }
+        else
+        {
+            snd->m_rec = playSE(snd->m_snd, volL, volR, 1.0f, 1, 0, 0x80);
+            snd->m_flags |= GAMSND_3D_PLAYED;
+        }
+    }
+    setVolSEtrack(snd->m_snd, snd->m_rec, volL, volR);
 }
 
-// stub of ROR 0x001e4540
-void GamSndMan::loadSePack(const char *name, int arg)
-{
-    ROSEPAN_STUB("GamSndMan::loadSePack", 0x001e4540);
-}
+// ──────────────────────────────────────────────────────────────────────
+// Every frame with 3D sounds: each used one placed relative to the room
+// (a character's at its object position, skipped while the object is
+// missing or, GAMSND_3D_WRD, out of its room); one beyond 15000 of the
+// listener on x or z is stopped (a stream fades out over 10 frames), the
+// others are ranked by m_dist and the 3 nearest SEs / 4 nearest streams
+// get their volume.
+// ROR 0x001e3c24 // callcheck: operator_new (new TskSnd)
 
-// stub of ROR 0x001e2178
-void GamSndMan::stopObjSnds()
-{
-    ROSEPAN_STUB("GamSndMan::stopObjSnds", 0x001e2178);
-}
-
-// stub of ROR 0x001e63c0
-int GamSndMan::setVolSEtrack(u_int se, int track, int a, int b)
-{
-    ROSEPAN_STUB("GamSndMan::setVolSEtrack", 0x001e63c0);
-    return {};
-}
-
-// stub of ROR 0x001e5c40
-int GamSndMan::setVolSTRtrack(u_int str, int track, int a, int b)
-{
-    ROSEPAN_STUB("GamSndMan::setVolSTRtrack", 0x001e5c40);
-    return {};
-}
-
-// stub of ROR 0x001e3c24
 void GamSndMan::update3d(const float *pos)
 {
-    ROSEPAN_STUB("GamSndMan::update3d", 0x001e3c24);
+    if ((m_flags & 1) != 0)
+        return;
+    if ((int)g_gamMan.m_flags2 < 0)
+        return;
+    int wrd = g_gamMan.getWrdNo();
+    const WrdEntry *room = g_wrdTable.get(wrd);
+    if (room == NULL)
+        return;
+
+    GamSnd3d *nearest[4];
+    memset(nearest, 0, sizeof(nearest));
+    for (GamSnd3dNode *node = m_used.begin(); node != m_used.end(); node = node->m_next)
+    {
+        GamSnd3d *snd = &node->m_data;
+        float dist;
+        if (snd->m_oid != 0)
+        {
+            float obj[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+            if (g_gamMan.getObjPos(snd->m_oid, obj) == 0)
+                continue;
+            if ((snd->m_flags & GAMSND_3D_WRD) != 0 && snd->m_wrd != wrd)
+                continue;
+            /* The ROM's key here is the sum of the differences, not a
+             * distance. */
+            dist = (obj[0] - pos[0]) + (obj[1] - pos[1]) + (obj[2] - pos[2]);
+            snd->setPos(dist, obj, NULL);
+        }
+        else
+        {
+            /* The ROM also stores the y and z differences on its stack;
+             * nothing reads them. */
+            dist = fabsf(snd->m_src[0] - room->m_ofs[0] - pos[0]);
+            snd->setPos(dist, snd->m_src, room->m_ofs);
+        }
+
+        float dx = snd->m_pos[0] - pos[0];
+        float dz = snd->m_pos[2] - pos[2];
+        if (dx < -15000.0f || dx > 15000.0f || dz < -15000.0f || dz > 15000.0f)
+        {
+            if (snd->m_rec == -1)
+                continue;
+            if ((snd->m_flags & GAMSND_3D_STR) == 0)
+            {
+                stopSeTrack(snd->m_snd, snd->m_rec);
+            }
+            else
+            {
+                TskSndParam fade = {};  /* PC: zeroed */
+                fade.m_snd = (int)snd->m_snd; /* PC: the ROM leaves this word unset */
+                fade.m_volL = 0;
+                fade.m_volR = 0;
+                fade.m_id = snd->m_rec;
+                fade.m_frames = 10;
+                fade.m_curL = m_rec[snd->m_rec].m_volL;
+                fade.m_curR = m_rec[snd->m_rec].m_volR;
+                if (g_taskMan.getTask(m_strTaskId) != 0)
+                {
+                    g_taskMan.killTask(m_strTaskId);
+                    m_strTaskId = -1;
+                }
+                TskSnd *task = new TskSnd(1, &fade);
+                g_taskMan.addTask(1, -1, 1, 0, task, 0, &m_strTaskId, 0x11);
+            }
+            snd->m_rec = -1;
+            continue;
+        }
+
+        int n = (snd->m_flags & GAMSND_3D_STR) != 0 ? 4 : 3;
+        for (int i = 0; i < n; i++)
+        {
+            if (nearest[i] == NULL)
+            {
+                nearest[i] = snd;
+                break;
+            }
+            if (dist < nearest[i]->m_dist)
+            {
+                for (int j = n - 1; j > i; j--)
+                    if (nearest[j - 1] != NULL)
+                        nearest[j] = nearest[j - 1];
+                nearest[i] = snd;
+                break;
+            }
+        }
+    }
+
+    for (int i = 0; i < 4; i++)
+        if (nearest[i] != NULL)
+            update3dVolume(nearest[i]);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Reads data/snd/xv/<BBII>.se (0x80000 bytes into a 0x80040 buffer) and
+// loads it into bank BB through loadSePackData, nowait as SndMan::loadBank;
+// the name is kept in m_sePackName.
+// ROR 0x001e4540 // callcheck: FileReader, FileReadReq, ~FileReader (the locals' constructors and destructor)
+
+void GamSndMan::loadSePack(const char *name, int nowait)
+{
+    funcSnd(0x11, 0, 0, 0, -1);
+    FileReader reader;
+    void *buf = g_utlMemory.allocDebug(0x80040, s_file, 1558, 0, 1);
+    int bank, id;
+    parseSePackName(name, &bank, &id);
+    strcpy(m_sePackName, name);
+    m_sePackName[5] = 's';
+    m_sePackName[6] = 'e';
+    m_sePackName[4] = '.';
+    m_sePackName[7] = 0;
+
+    char path[0x40];
+    snprintf(path, sizeof(path), "data/snd/xv/%s", m_sePackName);
+    FileReadReq req;
+    req.m_close = 1;
+    req.m_08 = 1;
+    req.m_buf = buf;
+    req.m_size = 0x80000;
+    req.m_whence = 0;
+    req.m_offset = 0;
+    req.m_name = path;
+    reader.read(&req, 0);
+
+    loadSePackData(bank, id, buf, nowait);
+    m_bankId[bank] = id;
+    utlMemFree(buf);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e4970
+
+int GamSndMan::findSndByName(const char *name, GamSndEntry **entry)
+{
+    GamSndEntry *e = m_table;
+    if (e == NULL)
+        return 0;
+    for (int n = 1; e->m_id != 0; n++, e++)
+    {
+        if (strcmp(name, e->m_name) == 0)
+        {
+            *entry = e;
+            return 1;
+        }
+        if (n > GAMSND_SE_MAX - 1)
+            break;
+    }
+    *entry = NULL;
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// getStrSnd's search; the entry found is overwritten by entry.
+// ROR 0x001e4b48
+
+int GamSndMan::setStrSnd(int str, GamSndEntry *entry)
+{
+    int idx = (str % 100000) / 2;
+    for (int n = 0; n < GAMSND_STR_MAX; n++, idx++)
+    {
+        /* PC: the end test first (the ROM wraps after index 900, one past
+         * the table). */
+        if (idx >= GAMSND_STR_MAX || m_strTable[idx].m_id == -1)
+            idx = 0;
+        if (m_strTable[idx].m_id == str)
+        {
+            entry->m_id = str;
+            m_strTable[idx] = *entry;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e4cc4
+
+void GamSndMan::setReverb(int mode, int depthL, int depthR)
+{
+    m_reverbDepthL = depthL;
+    m_reverbDepthR = depthR;
+    m_reverbMode = mode;
+    rxSndSetEffectMode(mode);
+    rxSndSetEffectDepth(m_reverbDepthL, m_reverbDepthR);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e4db0
+
+int GamSndMan::playSEByName(const char *name, bool pan, float *pos)
+{
+    int se = get_se_oid(name);
+    if (se == 0)
+        return -1;
+    return playSE((u_int)se, pan, pos, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Without a delay the record is written whatever SndMan returned (the PC
+// skips id -1, as playSE does).
+// ROR 0x001e50c8 // callcheck: operator_new (new TskSnd)
+
+int GamSndMan::playSE(u_int se, int volL, int volR, float pitch, int attr, int delay, int flags)
+{
+    if (delay != 0)
+    {
+        TskSndParam prm = {};   /* PC: zeroed (the ROM sets only these) */
+        prm.m_volL = volL;
+        prm.m_snd = (int)se;
+        prm.m_volR = volR;
+        prm.m_pitch = pitch;
+        prm.m_attr = attr;
+        int start = g_taskMan.m_timer.m_updates + delay;
+        TskSnd *task = new TskSnd(5, &prm);
+        g_taskMan.addTask(1, start, 1, 0, task, 0, NULL, 1);
+        return -1;
+    }
+
+    if ((g_gamMan.m_flags2 & 1) != 0)
+        return -1;
+    int id = g_sndMan.playSe(se);
+    g_sndMan.setSe(id, volL, volR, pitch, attr);
+    if (id < 0)
+        return id;      /* PC: no record before m_recBuf */
+    GamSndRec *rec = &m_rec[id];
+    rec->m_flags = flags;
+    rec->m_se = se;
+    rec->m_slot = id;
+    rec->m_volL = volL;
+    rec->m_volR = volR;
+    return id;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e5428
+
+int GamSndMan::playStr(int str, int volL, int volR, float pitch, int loop, int id, int flags)
+{
+    int sid = playStr(str, id, NULL, false, (u_int)flags);
+    g_sndMan.setStream(sid, volL, volR, pitch, 0);
+    g_sndMan.setStreamLoop(sid, loop);
+    if (sid < 0)
+        return sid;     /* PC: no record before m_recBuf */
+    GamSndRec *rec = &m_rec[sid];
+    rec->m_flags = (u_int)flags | GAMSND_REC_STR;
+    rec->m_str = str;
+    rec->m_slot = sid;
+    rec->m_volL = volL;
+    rec->m_volR = volR;
+    return sid;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Without an entry for str a copy of m_defEntry with the four words goes
+// to setStrSnd -- which looks for str's entry again and so changes
+// nothing.
+// ROR 0x001e5540
+
+void GamSndMan::set_str_3d_snd_prm(int str, int farDist, int nearDist, int nearVol, int farVol)
+{
+    GamSndEntry *entry;
+    if (getStrSnd(str, &entry) == 0)
+    {
+        GamSndEntry def = m_defEntry;
+        def.m_far = (u_short)farDist;
+        def.m_near = (u_short)nearDist;
+        def.m_nearVol = (u_short)nearVol;
+        def.m_farVol = (u_short)farVol;
+        setStrSnd(str, &def);
+        return;
+    }
+    entry->m_far = (u_short)farDist;
+    entry->m_near = (u_short)nearDist;
+    entry->m_nearVol = (u_short)nearVol;
+    entry->m_farVol = (u_short)farVol;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e5be0
+
+int GamSndMan::getStrNoByChan(int chan)
+{
+    if (chan < 0)
+        return -1;
+    if (g_sndMan.getStreamState(chan) == -1)
+        return -1;
+    return m_rec[chan].m_str;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e5c40
+
+int GamSndMan::setVolSTRtrack(u_int str, int track, int volL, int volR)
+{
+    if (track < 0)
+        return 0;
+    if (g_sndMan.getStreamState(track) == -1)
+        return 0;
+    if ((u_int)m_rec[track].m_str != str)
+        return 0;
+    m_rec[track].m_volL = volL;
+    m_rec[track].m_volR = volR;
+    g_sndMan.setStream(track, volL, volR, GAMSND_PITCH_KEEP, 0);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e5de4
+
+void GamSndMan::set_se_3d_snd_prm(u_int se, int farDist, int nearDist, int nearVol, int farVol)
+{
+    GamSndEntry *entry;
+    if (findSnd((int)se, &entry, 1) == 0)
+        return;
+    entry->m_far = (u_short)farDist;
+    entry->m_near = (u_short)nearDist;
+    entry->m_nearVol = (u_short)nearVol;
+    entry->m_farVol = (u_short)farVol;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e63c0
+
+int GamSndMan::setVolSEtrack(u_int se, int track, int volL, int volR)
+{
+    if (track < 0 || m_rec[track].m_se != se)
+        return 0;
+    if (g_sndMan.getSeState(track) == -1)
+        return 0;
+    m_rec[track].m_volL = volL;
+    m_rec[track].m_volR = volR;
+    g_sndMan.setSe(track, volL, volR, GAMSND_PITCH_KEEP, 0);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0028fe20
+
+void GamSndMan::setSnd3DCnt(int type)
+{
+    m_mode = type;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0028fe64
+
+void GamSndMan::rmSnd(u_int id)
+{
+    (void)id;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e4e20
+
+int GamSndMan::playSEByName(const char *name, int volL, int volR, float pitch, int attr)
+{
+    int se = get_se_oid(name);
+    if (se == 0)
+        return -1;
+    return playSE((u_int)se, volL, volR, pitch, attr, 0, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e5d1c
+
+int GamSndMan::stopStrTrack(int str, int track)
+{
+    if (track < 0)
+        return 0;
+    if (g_sndMan.getStreamState(track) == -1)
+        return 0;
+    if (m_rec[track].m_str != str)
+        return 0;
+    g_sndMan.stopStream(track);
+    m_rec[track].m_str = -1;
+    m_rec[track].m_slot = -1;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e2178
+
+void GamSndMan::stopObjSnds()
+{
+    GamSnd3dNode *node = m_used.begin();
+    while (node != m_used.end())
+    {
+        GamSnd3d *snd = &node->m_data;
+        if ((snd->m_flags & GAMSND_3D_WRD) != 0)
+        {
+            if ((snd->m_flags & GAMSND_3D_STR) != 0)
+                funcStr((int)snd->m_snd, 1, NULL);
+        }
+        else if ((snd->m_flags & GAMSND_3D_CHR) != 0)
+        {
+            stopSeTrack(snd->m_snd, snd->m_rec);
+            snd->m_rec = -1;
+        }
+        else
+        {
+            node = node->m_next;
+            continue;
+        }
+        GamSnd3dNode *next = node->m_next;
+        m_used.erase(node);
+        m_free.pushBack(node);
+        node = next;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0028fdf8
+
+GamBgmRec *GamSndMan::get_snd_prm()
+{
+    if (m_pushDepth >= 0)
+        return &m_bgm[m_pushDepth];
+    return &m_bgmCur;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0028fe28
+
+void GamSndMan::getMstVolSE(int &volL, int &volR)
+{
+    volL = m_mstVolSe[0];
+    volR = m_mstVolSe[1];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0028fe3c
+
+void GamSndMan::getMstVolStr(int &volL, int &volR)
+{
+    volL = m_mstVolStr[0];
+    volR = m_mstVolStr[1];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0028fe50
+
+void GamSndMan::getMstVol(int &volL, int &volR)
+{
+    volL = m_mstVol[0];
+    volR = m_mstVol[1];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0028fe6c
+
+const char *GamSndMan::getSndFileName(int state) const
+{
+    return m_fileName[state];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0028fe7c
+
+GamSndEntry *GamSndMan::get_snd_tbl_addr()
+{
+    return m_table;
 }
