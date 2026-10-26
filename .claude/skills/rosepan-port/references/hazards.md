@@ -286,6 +286,13 @@ entries are marked **RoR** with the date.
 - **A class with members named `free` / `realloc` / `alloc`** (BedMemory): inside its members an
   unqualified `free(p)` calls the member, not the C library. Write `::malloc` / `::free` there.
 
+- **A record indexed by a failed id** (2026-10-26, GamSndMan::playSE / playStr): the ROM writes
+  m_rec[id] with id = SndMan's -1 on failure, i.e. into the padding before the inline records. On the
+  host that is the previous member: guard `id < 0` with a `// PC:` note. Look for the same pattern
+  wherever a slot id from SndMan / rx indexes an array.
+- **A pointer only another switch case sets** (GamSndMan::funcSE case 6 reads `set[4]`, set only by
+  case 5 of the same call, so always NULL): the PS2 reads low memory, the host faults; guard it.
+
 ## callcheck / stubgen
 
 - **A load loop spins on a stub.** The S2d inits (`S2dMes::loadTexture`, `S2dMovie::loadTexture`)

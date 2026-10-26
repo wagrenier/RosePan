@@ -2504,10 +2504,10 @@ intptr_t seqFunc252(intptr_t id, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
         snd.funcSE(se, id == 16 ? 5 : 0xb, prm);
         return 0;
     case 18:
-        task._00[0] = (int)a1;
-        task._00[1] = (int)a2;
-        task._00[2] = (int)a3;
-        task._10[1] = (int)t0;
+        task.m_snd = (int)a1;
+        task.m_volL = (int)a2;
+        task.m_volR = (int)a3;
+        task.m_frames = (int)t0;
         snd.funcSE(se, 0x13, &task);
         return 0;
     case 19:
@@ -2541,8 +2541,8 @@ intptr_t seqFunc252(intptr_t id, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
         snd.funcSE(se, 4, (void *)a2);
         return 0;
     case 30:
-        task._00[0] = (int)a1;
-        task._10[1] = (int)a2;
+        task.m_snd = (int)a1;
+        task.m_frames = (int)a2;
         seqAddTask(new TskSnd(6, &task));
         return 0;
     case 31:
@@ -2625,10 +2625,10 @@ intptr_t seqFunc252(intptr_t id, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
         snd.funcStr(str, id == 59 ? 5 : 0xb, prm);
         return 0;
     case 61:
-        task._00[0] = (int)a1;
-        task._00[1] = (int)a2;
-        task._00[2] = (int)a3;
-        task._10[1] = (int)t0;
+        task.m_snd = (int)a1;
+        task.m_volL = (int)a2;
+        task.m_volR = (int)a3;
+        task.m_frames = (int)t0;
         snd.funcStr(str, 0x13, &task);
         return 0;
     case 63:
@@ -2674,10 +2674,10 @@ intptr_t seqFunc252(intptr_t id, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
         int no = snd.getStrNoByChan((int)a1);
         if (no == -1)
             return 0;
-        task._00[0] = no;
-        task._00[1] = (int)a2;
-        task._00[2] = (int)a3;
-        task._10[1] = (int)t0;
+        task.m_snd = no;
+        task.m_volL = (int)a2;
+        task.m_volR = (int)a3;
+        task.m_frames = (int)t0;
         snd.funcStr(no, 0x13, &task);
         return 0;
     }

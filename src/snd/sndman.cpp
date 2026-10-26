@@ -811,14 +811,14 @@ int SndMan::updateStream(SndInfo *strSndInfo)
 /* ---- banks ---- */
 
 // ROR 0x001809d8
-int SndMan::loadBank(int bank, const char *name, int nowait)
+int SndMan::loadBank(int bank, const void *xvab, int nowait)
 {
     if (bank >= SND_BANK_MAX)
         return -1;
 
     if (m_bank[bank] >= 0)
         freeBank(bank);
-    int id = rxSndXvabLoad(-1, name, 0, 0);
+    int id = rxSndXvabLoad(-1, xvab, 0, 0);
     m_bank[bank] = id;
     if (id < 0)
         return -1;

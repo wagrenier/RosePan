@@ -34,7 +34,7 @@ static const char s_file[] = "game/gamman.cpp";
 // ──────────────────────────────────────────────────────────────────────
 // The rate word, the members' constructors (GamArea, GamSndMan), the item
 // vector empty over its 12 slots and every node pool linked free.
-// ROR 0x001c05c0 // callcheck: FUN_001dd1e8, FUN_001e0df0 (GamArea's and GamSndMan's constructors: the members' implicit constructors on the host)
+// ROR 0x001c05c0 // callcheck: FUN_001dd1e8, GamSndMan::GamSndMan (GamArea's and GamSndMan's constructors: the members' implicit constructors on the host)
 
 GamMan::GamMan()
 {
@@ -5446,7 +5446,7 @@ void GamMan::closeSysMsg()
 // empty element loop, GamSndMan's and GamArea's destructors with 2, then
 // operator delete for bit 0): on the host the members' destructors run
 // implicitly and delete is the caller's.
-// ROR 0x001c0c8c // callcheck: FUN_001e0eb8, FUN_001dd3ec, operator_delete (the members' implicit destructors and delete on the host)
+// ROR 0x001c0c8c // callcheck: GamSndMan::~GamSndMan, FUN_001dd3ec, operator_delete (the members' implicit destructors and delete on the host)
 
 GamMan::~GamMan()
 {

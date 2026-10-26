@@ -184,6 +184,24 @@
    "status": "verify",
    "why": "game/gamman.cpp asserts and allocDebug tags in init, loadSystemData, loadStage; GamMan's constructor 0x1c05c0 starts it after GamFont, switchVolume 0x1d3ac8 ends it; ObjStat and GamArea code follows (unassigned@001d3b44)"
   },
+  "game/gamsnd.cpp": {
+   "notes": "Left (stubs, none reached by the boot): update3d 0x1e3c24 and the 3D list calls put_*/del_*/set_*_3d_snd_prm with 0x1e2350 and 0x1e386c, setVolSEtrack and setVolSTRtrack, getStrNoByChan, the 7-argument playSE and playStr, loadSePack(name,arg), setReverb, stopObjSnds, 0x1e4970, 0x1e4b48, 0x1e4db0, 0x1e4e20, 0x1e5d1c. The 3D node fields in gamsnd.h (GamSnd3dNode) are only what update3d reads, unverified. Sound is not visible on screen: the boot SE packs 0000.se and 6400.se now load (SPU heap alloc in the log); the smoke run looks as before (logos, disclaimer, MV00_AD film). One run in five went black after the Shirogumi logo instead of the film (not reproduced; see open-items 6b). PC guards: records for a failed SndMan id (-1) are skipped; funcSE case 6 reads a pointer only case 5 sets. Next on the main road is the New Game path (open-items Next up).",
+   "ranges": [
+    [
+     "001e0df0",
+     "001e7094"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-26 15:04",
+     "status": "partial",
+     "summary": "GamSndMan: constructor and destructor, init, reset, update, master volumes (funcSnd, resetVolume), SE packs, the SE and stream tables, playSE and playStr with the 3D volume helpers, funcSE and funcStr, the BGM push and resume (pushSnd, stopBgm, resumeBgm, unpush_snd, setBgmRec, fadeOut3dSnds): 40 functions; TU pinned 0x1e0df0..0x1e7094; SndMan::loadBank takes XVAB data; TskSndParam fields named"
+    }
+   ],
+   "status": "partial",
+   "why": "GamSndMan's methods 0x1e0df0..0x1e6d54 (two game/gamsnd.cpp assert strings) plus its two 3D volume helpers 0x1e6d54 / 0x1e6e00 (called only by playSE / playStr / the 3D list update), up to CmnTaskMan (task/tsk_man.cpp)"
+  },
   "game/gamstat.cpp": {
    "notes": "All code of the TU is written; nothing in it draws at boot, so verify. The map helpers run when the map menu (0x1949bc / 0x196878, unassigned) opens: the first session that writes that menu and shows a map with the PC and Brown markers marks this TU done. PORT deviation: gamMapConv copies the position unchanged for an area outside 0..2 (the ROM indexes the table with -1 when getMapArea has no room). Stubs left in other TUs: gamGetBwnPos / gamGetBwnRot 0x144418 / 0x14448c (unassigned@00143d3c, Brown's controller 0x727aa0 via 0x12a974 / 0x12a9ec), chrMotionRefEnd 0x1e8f88 (unassigned@001e6d54). The writer of ACHRstat +0x3d0 is not found yet. Smoke run this session reached the Now Loading screen once (earlier run in the same session stopped at the Atlus disclaimer: timing, not this change).",
    "ranges": [
