@@ -6,7 +6,8 @@
  *  tsk_chr.h. Written so far: TskMtnMove / TskMtnMove2 and their starters
  *  (chrMtnMove, chrMtnMove2, chrChangeMotion, chrKillMotionTask,
  *  chrSetMotion, chrGetNodeWorldPos), TskMoveTypeRound (circling),
- *  TskMovePointPath (path walks) with chrMoveFrames, TskMovie (the film task),
+ *  TskMoveTypeGen (straight moves), TskMovePointPath (path walks) with
+ *  chrMoveFrames, chrChangeMotionBySuffix, TskMovie (the film task),
  *  TskMsgMan (the message window task), TskChrRot and chrRotStart / chrRotTo /
  *  chrRotToIn / chrRotFrames (turns), TskFrameFunc (the multi-frame
  *  jobs: fades, the door opening, game over, fog, items), the frame
@@ -609,6 +610,516 @@ static inline float chrQuarterTurn(float dir, float way)
     else
         r = (float)((double)dir - 1.5707963267948966);
     return chrWrapPi(r);
+}
+
+/* A float frame count as the ROM converts it to unsigned (cvt.w.s, with
+ * 2^31 taken off and put back as the top bit above it). */
+static inline int chrFloatToU(float f)
+{
+    if (f >= 2147483648.0f)
+        return (int)((u_int)(int)(f - 2147483648.0f) | 0x80000000u);
+    return (int)f;
+}
+
+/* The slide of speed a frame along dir (the y step 0). */
+static inline void chrSlideVel(float *vel, float dir, float speed)
+{
+    vel[1] = 0.0f;
+    vel[0] = sinf(dir) * speed;
+    vel[2] = cosf(dir) * speed;
+}
+
+/* TskMoveTypeGen's step after an aim: modes 0..7 slide (stepSlideHit for
+ * an achr off the secta lists: flag 0x40 without 0x80), 8.. walk by the
+ * motion (the member pointers data 0x2fdac0..). */
+static inline TskMoveTypeGen::StepFunc chrMoveGenStep(int mode, const ACHRstat *achr)
+{
+    if (mode >= 8)
+        return &TskMoveTypeGen::stepMotion;
+    if ((achr->m_flags & 0x40) == 0 || (achr->m_flags & 0x80) != 0)
+        return &TskMoveTypeGen::stepSlide;
+    return &TskMoveTypeGen::stepSlideHit;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The straight move: the achr's walk and turn params (the walk speed per
+// 60th, 1/60 for modes above 5 outside 0.0001..1), its actor's position
+// and heading, then the aim and the turn to it.
+// ROR 0x001e9a3c
+
+TskMoveTypeGen::TskMoveTypeGen(u_int oid, int mode, intptr_t arg, int kind, float frames,
+                               float rate)
+{
+    (void)rate;
+    m_oid = oid;
+    m_achr = g_gamMan.getAchr(oid);
+    m_actor = m_achr->m_actor;
+    m_mode = mode;
+    m_arg = arg;
+    m_value = frames;
+    m_kind = kind;
+    m_mtnTask = NULL;
+    m_stepFunc = NULL;
+    m_flags = 0;
+    m_every = 0;
+    // PORT: the ROM leaves these unset; the modes that do not write them
+    // read garbage (mode 15 slides by m_vel for m_frames frames).
+    m_targetOid = 0;
+    m_speed = m_dist = 0.0f;
+    m_frames = m_half = 0;
+    memset(m_target, 0, sizeof(m_target));
+    memset(m_vel, 0, sizeof(m_vel));
+    m_pos[3] = m_rot[3] = 0.0f;
+    m_achr->getParam(0x1100, &m_motion);
+    m_achr->getParam(0x1103, &m_rate);
+    m_achr->getParam(0x1101, &m_turnRight);
+    m_achr->getParam(0x1102, &m_turnLeft);
+    m_achr->getParam(0x1105, &m_turnBack);
+    m_achr->getParam(0x1104, &m_rotSpeed);
+    m_rate = m_rate * 0x1.11111p-6f;
+    if (m_mode > 5 && !(0.0001f < m_rate && m_rate < 1.0f))
+        m_rate = 0x1.11111p-6f;
+    if ((m_achr->m_flags & 0x400000) != 0)
+        m_flags |= 1;
+    // PORT: the ROM reads actor -1's slot too; an achr here has an actor.
+    if (m_actor >= 0)
+    {
+        DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+        m_pos[0] = actor.m_trans[0];
+        m_pos[1] = actor.m_trans[1];
+        m_pos[2] = actor.m_trans[2];
+        m_rot[0] = 0.0f;
+        m_rot[1] = actor.getRotY();
+        m_rot[2] = 0.0f;
+    }
+    turnTo(aim());
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001e9cac
+
+void TskMoveTypeGen::term()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The step while frames are left; then next (the end, or a new aim).
+// ROR 0x001eae7c
+
+int TskMoveTypeGen::exec(int id, int time, int arg)
+{
+    (void)id;
+    (void)time;
+    (void)arg;
+    if (m_frames > 0)
+        return (this->*m_stepFunc)();
+    return next();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Sets off by mode (jump table data 0x2ff6e0, 15 cases): the velocity and
+// frames of a slide (with the walk motion at m_rate), or for modes 8.. a
+// chrMtnMove of the walk motion. Returns the heading to turn to.
+// callcheck: sinf, cosf, fptodp, dpadd, dpcmp, dpsub, dptofp (chrSlideVel; libgcc soft double: chrWrapPi and the dir + pi)
+// ROR 0x001e9cb4
+
+float TskMoveTypeGen::aim()
+{
+    float dir = 0.0f;
+    float dist;
+
+    memcpy(m_lastPos, m_pos, sizeof(m_lastPos));
+    const float *p = (const float *)m_arg;
+    switch ((u_int)m_mode)
+    {
+    case 0:
+    case 8:
+        // By the vector p each frame.
+        m_vel[0] = p[0];
+        m_vel[1] = p[1];
+        m_vel[2] = p[2];
+        dir = utlAtan2(m_vel[0], m_vel[2]);
+        m_frames = chrFloatToU(m_value);
+        if (m_mode >= 8)
+        {
+            m_mtnTask = chrMtnMove(m_rate, dir, m_oid, m_motion, -1, 0x100, NULL);
+            m_half = 0;
+        }
+        else
+        {
+            chrSetMotion(m_rate, m_actor, m_motion, 0, 0x100, m_oid, NULL);
+        }
+        break;
+    case 1:
+    case 9:
+    case 2:
+    case 10:
+        // Along the heading: 1 at the speed *p, 2 the distance *p.
+        m_frames = chrFloatToU(m_value);
+        dir = m_rot[1];
+        if ((m_mode & 7) == 1)
+        {
+            m_speed = p[0];
+        }
+        else
+        {
+            m_dist = p[0];
+            m_speed = m_dist / (float)m_frames;
+        }
+        chrSlideVel(m_vel, dir, m_speed);
+        if (m_mode >= 8)
+        {
+            m_mtnTask = chrMtnMove(m_rate, CHR_ROT_KEEP, m_oid, m_motion, -1, 0x100, NULL);
+            m_half = 0;
+        }
+        else
+        {
+            chrSetMotion(m_rate, m_actor, m_motion, 0, 0x100, m_oid, NULL);
+        }
+        break;
+    case 3:
+    case 4:
+    case 11:
+    case 12:
+    {
+        // Toward the object p at the speed m_value (negative: backwards).
+        m_targetOid = (u_int)m_arg;
+        m_speed = m_value;
+        g_gamMan.getObjPos(m_targetOid, m_target);
+        dir = utlDirDist(m_target[0] - m_pos[0], m_target[2] - m_pos[2], &dist);
+        float speed = m_speed;
+        if (speed < 0.0f)
+            dir = (float)((double)dir + CHR_PI);
+        dir = chrWrapPi(dir);
+        m_mtnTask = NULL;
+        if (m_mode < 8)
+        {
+            if (speed == 0.0f)
+                m_speed = 1.0f;
+            m_frames = (int)(dist / m_speed);
+            dir = chrWrapPi(dir);
+            chrSlideVel(m_vel, dir, m_speed);
+            chrSetMotion(m_rate, m_actor, m_motion, 0, 0x100, m_oid, NULL);
+        }
+        else
+        {
+            m_frames = chrMoveFrames(dir, dist, m_rate, m_oid, (u_short)m_actor, &m_mtnTask,
+                                     m_motion);
+            m_half = m_frames / 2;
+        }
+        if (m_mode == 4 || m_mode == 12)
+        {
+            m_frames = m_kind;
+            m_every = m_kind;
+        }
+        break;
+    }
+    case 5:
+    case 13:
+    case 7:
+    case 6:
+    case 14:
+        // To the point p: 5 / 7 at the speed m_value, 6 in m_value frames.
+        if (m_mode != 6 && m_mode != 14)
+            m_speed = m_value;
+        m_target[0] = p[0];
+        m_target[1] = p[1];
+        m_target[2] = p[2];
+        m_target[3] = p[3];
+        dir = utlDirDist(m_target[0] - m_pos[0], m_target[2] - m_pos[2], &dist);
+        if (m_mode >= 8)
+        {
+            if (m_mode == 13)
+                m_mtnTask = NULL;
+            m_frames = chrMoveFrames(dir, dist, m_rate, m_oid, (u_short)m_actor, &m_mtnTask,
+                                     m_motion);
+            m_half = m_frames / 2;
+            break;
+        }
+        if (m_mode == 6)
+        {
+            m_frames = (int)m_value;
+            // PORT: frames 0 divides by 0 (the EE FPU gives the largest
+            // float, cvt.w.s then 0x7fffffff).
+            m_speed = m_frames != 0 ? (float)(int)(dist / (float)m_frames) : 2147483647.0f;
+        }
+        else
+        {
+            if (m_speed == 0.0f)
+                m_speed = 1.0f;
+            m_frames = (int)(dist / m_speed);
+        }
+        dir = chrWrapPi(dir);
+        chrSlideVel(m_vel, dir, m_speed);
+        chrSetMotion(m_rate, m_actor, m_motion, 0, 0x100, m_oid, NULL);
+        break;
+    default:
+        break;
+    }
+    m_stepFunc = chrMoveGenStep(m_mode, m_achr);
+    return dir;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Modes 3 / 4 / 11 / 12 aim again at the object from the actor's
+// position (the heading the motion task holds while one runs); modes 8..
+// start a new chrMtnMove with the heading kept.
+// callcheck: sinf, cosf, fptodp, dpadd, dpcmp, dpsub, dptofp (chrSlideVel; libgcc soft double: chrWrapPi and the dir + pi)
+// ROR 0x001ea5ec
+
+float TskMoveTypeGen::retarget()
+{
+    float dir = 0.0f;
+    float dist;
+
+    DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+    m_pos[0] = actor.m_trans[0];
+    m_pos[1] = actor.m_trans[1];
+    m_pos[2] = actor.m_trans[2];
+    int id = m_achr->m_task[2];
+    if (g_taskMan.getTask(id) == 0)
+    {
+        m_rot[0] = actor.m_rotate[0];
+        m_rot[1] = actor.m_rotate[1];
+        m_rot[2] = actor.m_rotate[2];
+    }
+    else
+    {
+        m_rot[1] = ((TskMtnMove *)g_taskMan.findTask(id))->m_rotY;
+    }
+    memcpy(m_lastPos, m_pos, sizeof(m_lastPos));
+    switch (m_mode)
+    {
+    case 3:
+    case 4:
+    case 11:
+    case 12:
+    {
+        m_targetOid = (u_int)m_arg;
+        m_speed = m_value;
+        g_gamMan.getObjPos(m_targetOid, m_target);
+        dir = utlDirDist(m_target[0] - m_pos[0], m_target[2] - m_pos[2], &dist);
+        float speed = m_speed;
+        if (speed < 0.0f)
+            dir = (float)((double)dir + CHR_PI);
+        dir = chrWrapPi(dir);
+        m_mtnTask = NULL;
+        if (m_mode < 8)
+        {
+            if (speed == 0.0f)
+                m_speed = 1.0f;
+            m_frames = (int)(dist / m_speed);
+            dir = chrWrapPi(dir);
+            chrSlideVel(m_vel, dir, m_speed);
+            chrSetMotion(m_rate, m_actor, m_motion, 0, 0x100, m_oid, NULL);
+        }
+        else
+        {
+            m_frames = chrMoveFrames(CHR_ROT_KEEP, dist, m_rate, m_oid, (u_short)m_actor,
+                                     &m_mtnTask, m_motion);
+            m_half = m_frames / 2;
+        }
+        if (m_mode == 4 || m_mode == 12)
+            m_frames = m_every;
+        break;
+    }
+    default:
+        break;
+    }
+    m_stepFunc = chrMoveGenStep(m_mode, m_achr);
+    return dir;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The turn to dir: with a turn motion and dir within m_turnBack of
+// straight behind, the turn motion by the side (dir - heading < 0 left)
+// and stepTurn waits for it; else a plain turn (chrRotTo; modes 8.. from
+// the task's heading).
+// callcheck: fptodp, dpadd, dpcmp, dpsub, dptofp (libgcc soft double: chrWrapPi and the heading + pi)
+// ROR 0x001eafb0
+
+void TskMoveTypeGen::turnTo(float dir)
+{
+    float rotY = m_rot[1];
+
+    if (m_turnLeft != -1 || m_turnRight != -1)
+    {
+        float back = chrWrapPi((float)((double)rotY + CHR_PI));
+        float off = chrWrapPi(dir - back);
+        if ((off < 0.0f ? -off : off) < m_turnBack)
+        {
+            int motion = dir - rotY < 0.0f ? m_turnLeft : m_turnRight;
+            if (m_mode < 8)
+                chrRotToMotion(dir, m_rotSpeed, CHR_ROT_KEEP, m_oid, motion, 1);
+            else
+                chrRotToMotion(dir, m_rotSpeed, rotY, m_oid, motion, 0);
+            m_frames = 1;
+            m_stepFunc = &TskMoveTypeGen::stepTurn;
+            return;
+        }
+    }
+    if (m_mode < 8)
+        chrRotTo(dir, m_rotSpeed, m_oid);
+    else
+        chrRotFromTo(rotY, dir, m_rotSpeed, m_oid);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Frames out: modes other than 3 / 4 / 11 / 12 kill the motion task and
+// end; those aim again (the actor re-read when the no is out of range) and
+// turn, every m_every frames for 4 / 12; no frames left stops the slide.
+// ROR 0x001eaf00
+
+int TskMoveTypeGen::next()
+{
+    switch (m_mode)
+    {
+    case 3:
+    case 4:
+    case 11:
+    case 12:
+        break;
+    default:
+        chrKillMotionTask(m_oid);
+        return 1;
+    }
+    if ((u_int)m_actor > 0x200)
+        m_actor = m_achr->m_actor;
+    turnTo(retarget());
+    if (m_every > 0)
+        m_frames = m_every;
+    if (m_frames == 0)
+    {
+        m_vel[2] = 0.0f;
+        m_vel[0] = 0.0f;
+        m_vel[1] = 0.0f;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Waits for the turn motion (the heading followed meanwhile); once the
+// turn task is gone (and not on the first frame), aims again from the
+// actor and turns the rest of the way.
+// ROR 0x001eaa38
+
+int TskMoveTypeGen::stepTurn()
+{
+    if (g_taskMan.getTask(m_achr->m_task[1]) == 0 && m_frames != 1)
+    {
+        m_mtnTask = NULL;
+        DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+        m_pos[0] = actor.m_trans[0];
+        m_pos[1] = actor.m_trans[1];
+        m_pos[2] = actor.m_trans[2];
+        m_rot[0] = actor.m_rotate[0];
+        m_rot[1] = actor.m_rotate[1];
+        m_rot[2] = actor.m_rotate[2];
+        m_rot[1] = actor.getRotY();
+        float dir = aim();
+        if (m_mode < 8)
+            chrRotTo(dir, m_rotSpeed, m_oid);
+        else
+            chrRotFromTo(m_rot[1], dir, m_rotSpeed, m_oid);
+    }
+    else
+    {
+        m_achr->ObjStat::getRot(m_rot);
+        m_frames = 2;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The slide of an achr off the secta lists: (held while turning when
+// flag 1) a hit keeps the last position and prints "HIT in moving task";
+// a position with no cell ends the move (next); else a frame is done.
+// callcheck: scePrintf (the hit message)
+// ROR 0x001eab54
+
+int TskMoveTypeGen::stepSlideHit()
+{
+    u_int hit[0x10];
+
+    if ((m_flags & 1) != 0 && g_taskMan.getTask(m_achr->m_task[1]) != 0)
+        return 0;
+    memset(hit, 0, sizeof(hit));  // PORT: placeAchr writes it only on a hit
+    if (g_gamMan.placeAchr((int)m_oid, hit, 0) != 0)
+    {
+        memcpy(m_pos, m_lastPos, sizeof(m_pos));
+        scePrintf("HIT in moving task ! oid 0x%x \n", hit[4]);
+        return 0;
+    }
+    sceVu0AddVector(m_pos, m_pos, m_vel);
+    if (!m_achr->trySetPos(m_pos))
+        return next();
+    m_frames--;
+    memcpy(m_lastPos, m_pos, sizeof(m_lastPos));
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The slide (held while turning when flag 1), set on the floor.
+// ROR 0x001eac38
+
+int TskMoveTypeGen::stepSlide()
+{
+    if ((m_flags & 1) == 0 || g_taskMan.getTask(m_achr->m_task[1]) == 0)
+    {
+        sceVu0AddVector(m_pos, m_pos, m_vel);
+        m_achr->setPosOnFloor(m_pos);
+        m_frames--;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Modes 8..: the motion walks the achr (with flag 1 its moving held while
+// a turn task runs); below half the frames the walk aims again at
+// m_target from where the actor stands (frames from chrMoveFrames, the
+// turn at speed 1), half of them till the next aim (none under 6).
+// ROR 0x001eacb8
+
+int TskMoveTypeGen::stepMotion()
+{
+    TskMtnMove *mtn = (TskMtnMove *)m_mtnTask;
+
+    // PORT: the ROM writes through the task pointer unchecked.
+    if ((m_flags & 1) != 0 && mtn != NULL)
+    {
+        int turning = g_taskMan.getTask(m_achr->m_task[1]) != 0;
+        if ((m_flags & 2) == 0)
+        {
+            if (turning)
+            {
+                m_flags |= 2;
+                mtn->m_flags |= 1;
+            }
+        }
+        else if (!turning)
+        {
+            m_flags &= ~2u;
+            mtn->m_flags &= ~1u;
+        }
+    }
+    if (m_frames < m_half)
+    {
+        float dist;
+        DogActor &actor = g_magSystem.m_scene.m_actors[m_actor];
+        m_pos[0] = actor.m_trans[0];
+        m_pos[1] = actor.m_trans[1];
+        m_pos[2] = actor.m_trans[2];
+        float dir = utlDirDist(m_target[0] - m_pos[0], m_target[2] - m_pos[2], &dist);
+        m_frames = chrMoveFrames(dir, dist, m_rate, m_oid, (u_short)m_actor, &m_mtnTask,
+                                 m_motion);
+        m_rot[0] = actor.m_rotate[0];
+        m_rot[1] = actor.m_rotate[1];
+        m_rot[2] = actor.m_rotate[2];
+        chrRotFromTo(m_rot[1], dir, 1.0f, m_oid);
+        m_half = m_frames < 6 ? 0 : m_frames / 2;
+    }
+    m_frames--;
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -2833,6 +3344,22 @@ CmnITask *chrMtnMove2(float speed, u_int oid, int motion, int p1d8, u_int flags,
         g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 1);
     }
     return task;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The motion named by its suffix (0 when the actor has none of that
+// name); nothing without an actor. Always 0.
+// ROR 0x001f5d90
+
+int chrChangeMotionBySuffix(float blend, float rotY, u_int oid, const char *name, int a2, int a3)
+{
+    int no = g_gamMan.getActorNo(oid);
+    if (no != -1)
+    {
+        int motion = g_magSystem.m_scene.m_actors[no].getMotionNoBySuffix(name);
+        chrChangeMotion(oid, motion < 0 ? 0 : motion, a2, a3, blend, rotY);
+    }
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
