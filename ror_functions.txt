@@ -224,7 +224,7 @@
 // FILE -- (unassigned)
 // *****************************************************************************
 
-/* 00106010 00000050 */ FUN_00106010(){}
+/* 00106010 00000050 */ utlStrEqualNoCase(){}  // ror
 /* 00106064 00000084 */ FUN_00106064(){}
 
 // *****************************************************************************
@@ -1508,21 +1508,21 @@
 // FILE -- mag/magloader.cpp
 // *****************************************************************************
 
-/* 00141e44 00000030 */ FUN_00141e44(){}
-/* 00141e78 00000018 */ FUN_00141e78(){}
-/* 00141e90 000000c4 */ FUN_00141e90(){}
-/* 00141f54 000001a4 */ FUN_00141f54(){}
-/* 001420f8 00000408 */ FUN_001420f8(){}
+/* 00141e44 00000030 */ MagLoaderIndex::dump(){}  // ror
+/* 00141e78 00000018 */ MagLoaderIndex::calcSize(){}  // ror
+/* 00141e90 000000c4 */ MagLoaderIndex::scanNames(){}  // ror
+/* 00141f54 000001a4 */ MagLoaderIndex::create(){}  // ror
+/* 001420f8 00000408 */ MagLoaderIndex::add(){}  // ror
 /* 00142500 0000007c */ MagLoaderIndex::find(){}  // ror
-/* 0014257c 00000020 */ FUN_0014257c(){}
-/* 0014259c 00000040 */ FUN_0014259c(){}
+/* 0014257c 00000020 */ MagLoaderIndex::clear(){}  // ror
+/* 0014259c 00000040 */ MagLoaderIndex::release(){}  // ror
 /* 001425dc 0000032c */ MagCharaLoader::init(){}  // ror
-/* 00142908 00000210 */ FUN_00142908(){}
+/* 00142908 00000210 */ MagCharaLoader::initFromPacks(){}  // ror
 /* 00142b18 00000114 */ MagCharaLoader::load(){}  // ror
-/* 00142c2c 0000005c */ FUN_00142c2c(){}
+/* 00142c2c 0000005c */ MagCharaLoader::getCategory(){}  // ror
 /* 00142c88 00000124 */ MagCharaLoader::getIndex(){}  // ror
 /* 00142dac 000000d8 */ MagCharaLoader::getId(){}  // ror
-/* 00142e84 00000054 */ FUN_00142e84(){}
+/* 00142e84 00000054 */ MagCharaLoader::MagCharaLoader(){}  // ror
 /* 00142ed8 000000f8 */ MagMapLoader::init(){}  // ror
 /* 00142fd0 00000168 */ MagMapLoader::loadByName(){}  // ror
 

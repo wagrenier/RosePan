@@ -240,6 +240,9 @@ struct TskSysFunc : CmnITask
 int  scenePlayStart(const char *name, intptr_t arg, int wait);           // ROR 0x001f83f4
 void scenePlayStartSimple(const char *name);                             // ROR 0x001f8cec
 
+/* 1 when the two strings are equal, a..z compared as A..Z, else 0
+ * (unassigned@00106010, after utl/utlfile.cpp). */
+int   utlStrEqualNoCase(const char *a, const char *b);                   // ROR 0x00106010
 /* Swaps a sound id 0x0a00xxxx..0x0a02xxxx for its twin in the column the
  * game's language / version picks (table data 0x295f08). Other ids pass. */
 u_int utlConvSndId(u_int id);                                            // ROR 0x00106658
