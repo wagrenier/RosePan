@@ -710,7 +710,7 @@
    "why": "rx middleware thread layer: kernel wrappers from 0x249b88 (CreateSema, CreateThread), rxThInit, dispatch semaphore, rxThRequest/rxThYield, rxthread/rxThread messages, vsync and DMA wait helpers to 0x24b48c; libcdvd sceCdCallback starts at 0x24b490"
   },
   "sequence/seqcall.cpp": {
-   "notes": "Left: 27 handler stubs (006, 007, 009, 012, 014, 016, 019, 020, 023, 026, 028, 036, 038, 039, 100, 106, 151..281); none is reached by the smoke run any more, write each when a script reaches it. Resolved the 4c question in open-items: a temporary printf in MagScene::requestMenu showed the script requests 0x10005 (the TITLE) once; the MagLifeMenuItem isInit / init / processPad stub hits come from the host placeholder MagLifeMenuBase (all embedded menus share it, its methods carry MagLifeMenuItem addresses). Next blocker, queued first: mag/maglifemenu.cpp -- virtual slots 6 / 9..12 on MagLifeMenuBase and m_menu_title as MagLifeMenuTitle (vtable 0x2e17d8, slots forward to the title object at +0x40), then unassigned@001a6830 (the title code). Quirks kept: native 004 case 9 bounds a1 below 0x11, so a1 = 16 tests bit 16 of a 16-bit word and waits for ever; case 3 leaves the task id unset in the ROM when getObjParam has nothing (0 on the host). Native 029 passes the TskFrameFunc four int words (pair m_b, m_a, room, word); TskFrameFunc is still a stub. Screen still black. Batch: work/batches/seqcall_005.json.",
+   "notes": "Left: 26 handler stubs (006, 007, 009, 012, 014, 016, 019, 020, 023, 026, 028, 036, 038, 039, 100, 106, 152, 155, 156, 200, 202, 211, 212, 252, 253, 281). Native 151 is called after New Game (pad 1800:START,2400:START,2700:CROSS, about 130 s run) with oids 0x50000001 / 0x50800002 / 0x62000003 / 0x51800005 and ops 1 / 5 / 10 / 40, but GamMan::isObj is false for all of them (createObjByModel / addChr are stubs), so nothing it does is visible yet; the screenshot stays the title menu (matches the reference as before). NEW BLOCKER: plain smoke runs crash with an access violation right after the New Game press (after GamMan::setPcAnim), 3 of 3 runs, also with native 151 disabled by a temporary early return, so it is not this code; under gdbrun the same pad does not crash and goes on to natives 155, 252, 039, 012, 152, 038, 019 and GamMan::initStage2 / startStage2 (write those natives next in this TU once the crash is found). The run log is not flushed at the fault. Callee stubs were generated in game/gamman.cpp, lib/unassigned_stubs.cpp, dog/dogmodel.cpp. Hidden functions: 0x1d1f14 inside setObjScale, 0x1d1958 inside clearObjAttr. Batch: work/batches/seqcall_006.json. References updated in this commit: architecture.md native 151, open-items.md 10d, hazards.md (gdb-hidden crash, hidden functions).",
    "ranges": [
     [
      "002053f4",
@@ -732,6 +732,11 @@
      "date": "2026-10-25 19:18",
      "status": "partial",
      "summary": "Script natives the G000 threads reach: seqFunc004 (wait until, 19 cases, table data 0x2ff930) and seqFunc029 (stage changes: rooms, chapter, the kind 0xb frame task of system call 0x34); written ahead for them GamMan::requestStage 0x1cd044, resetTenkyuFlags 0x1cb1c0, isMsgBusy 0x1cf9d4 (game/gamman.cpp), MagScene::isWindowOpen 0x13f444 (lib/unassigned_stubs.cpp), DogActor::isModeSet 0x10a834; new GamMan member m_prev_stat +0x21f44, GamTenkyuRec m_flags"
+    },
+    {
+     "date": "2026-10-26 00:11",
+     "status": "partial",
+     "summary": "Script native 151 (object control, 58 cases, table data 0x300eb0), the first native a New Game press reaches; named and declared its 24 callees (GamMan setObjPos / setObjRot / setObjScale / setObjParam / addObjParam / setObj / setObjAttr / clearObjAttr / placeObjAt / setKindFlags / setObjWork / addObjWork / setActorBindMode / fitObjBounds / queueObjUpdate / getObjRadius / addObjColliSegment / Box / Quad, GamSysData setField / clearFlags / setFlags2 / clearFlags2, DogModel::setFlag100Bits), GamObjColli gained m_shape / m_radius"
     }
    ],
    "status": "partial",

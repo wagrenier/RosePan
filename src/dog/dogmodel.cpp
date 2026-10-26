@@ -77,3 +77,9 @@ float DogModel::castSphere(float r, void *hit, const float *pos)
     ROSEPAN_STUB("DogModel::castSphere", 0x001145c0);
     return {};
 }
+
+// stub of ROR 0x0011531c
+void DogModel::setFlag100Bits(int v)
+{
+    ROSEPAN_STUB("DogModel::setFlag100Bits", 0x0011531c);
+}

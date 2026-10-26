@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-25 23:33 at commit `6ffac0d` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-26 00:11 at commit `7e24893` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-25 23:33 at commit `6ffac0d` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6660**, named **3789** (57%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 242, ror-inferred 2191
-- context-name ledger: 2433 entries; overrides of wrong library matches: 5
+- game functions: **6660**, named **3813** (57%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 242, ror-inferred 2215
+- context-name ledger: 2457 entries; overrides of wrong library matches: 5
 - placed in a source file: 3250/6660 in 95 files
 
 Least-named game-code regions (64 KB blocks):
@@ -26,11 +26,11 @@ Least-named game-code regions (64 KB blocks):
 | `00170000` | 35/251 (14%) | snd/sndman.cpp |
 | `001e0000` | 24/169 (14%) | game/gamsnd.cpp |
 | `00120000` | 73/283 (26%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
-| `001d0000` | 47/181 (26%) | game/gamman.cpp, game/gamstat.cpp, game/gamtrg.cpp |
+| `00100000` | 104/301 (35%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmisc.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **1985**; stubs: **379**
+- reconstructed RoR functions: **1986**; stubs: **402**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -41,11 +41,11 @@ Least-named game-code regions (64 KB blocks):
 | `src/dog/dogactor.cpp` | 1 | 24 |
 | `src/dog/dogentity.cpp` | 0 | 3 |
 | `src/dog/doglightpool.cpp` | 29 | 0 |
-| `src/dog/dogmodel.cpp` | 0 | 11 |
+| `src/dog/dogmodel.cpp` | 0 | 12 |
 | `src/dog/dogmotionblend.cpp` | 0 | 1 |
 | `src/dog/dogtexinfo.cpp` | 16 | 0 |
 | `src/game/gamfile.cpp` | 18 | 0 |
-| `src/game/gamman.cpp` | 87 | 23 |
+| `src/game/gamman.cpp` | 87 | 39 |
 | `src/game/gamsnd.cpp` | 0 | 14 |
 | `src/i3d/i3dctx.cpp` | 31 | 0 |
 | `src/i3d/i3denv.cpp` | 12 | 0 |
@@ -57,7 +57,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 2 | 198 |
+| `src/lib/unassigned_stubs.cpp` | 2 | 205 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
@@ -87,7 +87,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/rx/rxsnd.cpp` | 222 | 0 |
 | `src/rx/rxsys.cpp` | 74 | 6 |
 | `src/rx/rxthread.cpp` | 53 | 0 |
-| `src/sequence/seqcall.cpp` | 14 | 27 |
+| `src/sequence/seqcall.cpp` | 15 | 26 |
 | `src/sequence/sequence.cpp` | 19 | 0 |
 | `src/sequence/seqvm.cpp` | 143 | 0 |
 | `src/snd/rxmpeg.cpp` | 67 | 0 |
@@ -109,7 +109,7 @@ Least-named game-code regions (64 KB blocks):
 - next: **sequence/seqcall.cpp** (pinned in the queue)
 - pinned queue: sequence/seqcall.cpp, unassigned@0020ff34, game/gamman.cpp, unassigned@001fd424, unassigned@001e46b8
 - partial: `game/gamman.cpp` 86/409 -- Screen still black: nothing in this slice draws, and boot stage 99 hits loadStageSnd's default (no packs, as in the ROM). The boot's blockers are the natives se
-- partial: `sequence/seqcall.cpp` 14/43 -- Left: 27 handler stubs (006, 007, 009, 012, 014, 016, 019, 020, 023, 026, 028, 036, 038, 039, 100, 106, 151..281); none is reached by the smoke run any more, wr
+- partial: `sequence/seqcall.cpp` 15/43 -- Left: 26 handler stubs (006, 007, 009, 012, 014, 016, 019, 020, 023, 026, 028, 036, 038, 039, 100, 106, 152, 155, 156, 200, 202, 211, 212, 252, 253, 281). Nativ
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
@@ -151,6 +151,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-26 00:11 `sequence/seqcall.cpp` partial: Script native 151 (object control, 58 cases, table data 0x300eb0), the first native a New Game press reaches; named and declared its 24 callees (GamMan setObjPo
 - 2026-10-25 23:33 `mnu/mnusvld.cpp` verify: MnuSvld, the memory card save / load screen, written whole (40 functions; pinned mnu/mnusvld.cpp 0x1a59b8..0x1a90ec, which absorbed the queue's unassigned@001a6
 - 2026-10-25 22:50 `bed/bedpad.cpp` done: BedPad written whole (13 functions, pinned 0x101aec..0x102490): init / term / destructor over libpad2 sockets, update (held / triggered / repeated buttons, stic
 - 2026-10-25 22:19 `snd/rxmpeg.cpp` done: The movie player: RxMpeg (17 methods) and the C movie library (48 functions) over the host libmpeg, plus snd/unitque.cpp (9) and GamMan::getStatus / getPlayMinu
@@ -158,21 +159,20 @@ Recent sessions:
 - 2026-10-25 21:05 `mcd/mcdman.cpp` done: McdMan complete: request / update / getStatus, the 17 libmc command step machines, the composite commands (create save, read dir, write file via a marked temp n
 - 2026-10-25 20:41 `mnu/mnumcd.cpp` verify: MnuMcd, the memory card check, all 39 functions: exec state machine, the seven check modes (boot, boot debug, save check, load check, info, save, load), execCmd
 - 2026-10-25 20:20 `mnu/mnutitle.cpp` verify: MnuTitle, the title screen, written whole (20 functions, pinned mnu/mnutitle.cpp 0x1a90ec..0x1ab474 out of unassigned@001a6830): constructor / destructor, init 
-- 2026-10-25 19:53 `mag/maglifemenu.cpp` verify: MagLifeMenuBase polymorphic on the host (slots 9..12 pure, render slot 6); all 14 scene menu classes written (wrappers forwarding to the menu object at +0x40, i
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `game/gamsnd.cpp` | todo | 0/15/72 | 23.9 | 89 | 10 |
-| `unassigned@001d859c` | todo | 0/20/75 | 19.9 | 69 | 3 |
-| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 64 | 7 |
+| `unassigned@001d859c` | todo | 0/24/75 | 19.9 | 74 | 3 |
+| `game/gamman.cpp` | partial | 86/39/409 | 82.8 | 69 | 3 |
 | `unassigned@001e6cac` | todo | 0/12/220 | 68.8 | 62 | 5 |
-| `unassigned@00184f2c` | todo | 0/5/84 | 10.0 | 47 | 5 |
-| `game/gamman.cpp` | partial | 86/23/409 | 82.8 | 44 | 3 |
+| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
+| `unassigned@00184f2c` | todo | 0/5/84 | 10.0 | 37 | 3 |
 | `unassigned@00164fc0` | todo | 0/10/395 | 104.2 | 37 | 4 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 33 | 4 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
-| `unassigned@00143d3c` | todo | 0/7/602 | 129.5 | 30 | 2 |
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 30 | 3 |
+| `unassigned@00143d3c` | todo | 0/7/602 | 129.5 | 30 | 2 |
 | `mag/magscenelight.cpp` | todo | 0/5/8 | 2.3 | 28 | 3 |
 
 ## Frontier (called by reconstructed code, not written yet)
@@ -200,6 +200,7 @@ Recent sessions:
 | `001832e8` | msgGetSysText | 6 | ror | stub | - |
 | `001e71fc` | CmnTaskMan::addTask | 6 | ror | stub | - |
 | `001d5da0` | GamMan::relinkObj | 6 | ror | stub | - |
+| `001d1d5c` | GamMan::setObjParam | 6 | ror | stub | game/gamman.cpp |
 | `0011ade4` | MagLifePC::live | 5 | ror | stub | mag/maglifepc.cpp |
 | `001874f4` | MsgManSet::setMessage | 5 | ror | stub | - |
 | `001e0c2c` | GamArea::ctl_trg_flg | 5 | ror | stub | - |
@@ -218,5 +219,4 @@ Recent sessions:
 | `001e4908` | GamSndMan::findSnd | 4 | ror | stub | game/gamsnd.cpp |
 | `00114c54` | FUN_00114c54 | 3 | - | missing | dog/dogmodel.cpp |
 | `0010fa6c` | DogEntity::getMatrix | 3 | ror | stub | - |
-| `001d966c` | ObjStat::releaseActor | 3 | ror | stub | - |
 

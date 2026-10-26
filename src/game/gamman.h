@@ -111,16 +111,25 @@ struct FCHRstat : ObjStat
     void getParam(int which, void *out);                                 // ROR 0x001db31c
 };
 
-/* GamMan::getObjParam(0x18)'s answer: the object's private collisions
- * (kind 5 one in m_colli[0], kind 6 four). EE 0x28 at least; the ROM's
- * caller clears only m_kind. */
+/* GamMan::getObjParam(0x18)'s answer: the object's shape and private
+ * collisions (kind 5 one in m_colli[0], kind 6 four). EE 0x28; the ROM's
+ * callers clear only m_kind. */
 struct GamObjColli
 {
-    int m_kind;                 // ROR 0x00: -1 before the call
-    int _04[5];
-    int m_colli[4];             // ROR 0x18: MagScene private collision ids
+    int   m_kind;               // ROR 0x00: 5 a segment, 6 four walls; -1 before the call
+    int   m_shape;              // ROR 0x04: getObjRadius: 0 none, 1 17, 2 25, 3 45, 4 m_radius
+    float m_08;                 // ROR 0x08: the colli adders: -height
+    float m_0c;                 // ROR 0x0c: the colli adders: the base y
+    float m_radius;             // ROR 0x10: shape 4's radius
+    int   _14;
+    int   m_colli[4];           // ROR 0x18: MagScene private collision ids
 };
+static_assert(offsetof(GamObjColli, m_shape) == 0x04, "m_shape");
+static_assert(offsetof(GamObjColli, m_08) == 0x08, "m_08");
+static_assert(offsetof(GamObjColli, m_0c) == 0x0c, "m_0c");
+static_assert(offsetof(GamObjColli, m_radius) == 0x10, "m_radius");
 static_assert(offsetof(GamObjColli, m_colli) == 0x18, "m_colli");
+static_assert(sizeof(GamObjColli) == 0x28, "GamObjColli is 0x28 bytes on the EE");
 
 /* The system pack's file 0 (GamMan +0x22220; class name invented): ten
  * pointers past the 0x40-byte header from its offsets +0x10..+0x34, the
@@ -137,6 +146,14 @@ struct GamSysData
     /* Field field of record id into out (0xf: the record's model id, a
      * u_short, 0xffff none; others words or pointers). */
     void getField(int id, int field, void *out);                         // ROR 0x001dc48c
+    /* getField's counterpart: field of record id from *data (u_short
+     * fields; table 0 reads into data instead, as the ROM does). */
+    void setField(int id, int field, const void *data);                  // ROR 0x001dc070
+    /* Clears bits in the record's flag word (setFlags' counterpart). */
+    void clearFlags(short id, u_int bits);                               // ROR 0x001dce30
+    /* Table 2 records only: the second flag word +0x94 (a2 unused). */
+    void setFlags2(short id, int unused, u_int bits);                    // ROR 0x001dd118
+    void clearFlags2(short id, int unused, u_int bits);                  // ROR 0x001dd154
 };
 
 /* One item (EE 0x10, 16-aligned): the 12 slots at GamMan +0x1a700
@@ -518,6 +535,46 @@ struct GamMan
     int  isObj(u_int oid);                                               // ROR 0x001d046c
     /* oid's rotation from an angle (normalised first). */
     void setObjDir(u_int oid, float dir);                                // ROR 0x001d024c
+    /* By the oid's list, the object's position / rotation (each angle
+     * wrapped into -pi..pi in place) setters; setObjPos returns 1, 0 for
+     * no object. */
+    int  setObjPos(u_int oid, const float *pos);                         // ROR 0x001cfbe4
+    void setObjRot(u_int oid, float *rot);                               // ROR 0x001cfe78
+    /* An achr / fchr's scene actor gets one scale for x, y and z. */
+    void setObjScale(u_int oid, float scale);                            // ROR 0x001d1e88
+    /* getObjParam's counterpart; returns 1, 0 for no object. */
+    int  setObjParam(u_int oid, int which, const void *data);            // ROR 0x001d1d5c
+    /* Achr only: adds data to param which. */
+    void addObjParam(u_int oid, int which, const void *data);            // ROR 0x001d1f74
+    /* resetObj's counterpart: sets bits of the object's flags. */
+    int  setObj(u_int oid, u_int bits);                                  // ROR 0x001d10d0
+    /* Achr: word bits >> 24 of +0x3ec gets / loses bits & 0xffffff; fchr:
+     * +0x120 gets / loses bits. */
+    void setObjAttr(u_int oid, u_int bits);                              // ROR 0x001d1838
+    void clearObjAttr(u_int oid, u_int bits);                            // ROR 0x001d18c4
+    /* Achr / fchr: placed at the point where (0x1d811c) resolves to. */
+    void placeObjAt(u_int oid, int where);                               // ROR 0x001cfda4
+    /* GamSysData::setFlags(id, bits), then every live achr / fchr of
+     * system id gets bits set (on) or cleared. */
+    void setKindFlags(int id, u_int bits, int on);                       // ROR 0x001d1fd8
+    /* Word no of the object's work array (+0x1b0) = / += value. */
+    void setObjWork(u_int oid, int no, int value);                       // ROR 0x001d2270
+    void addObjWork(u_int oid, int no, int value);                       // ROR 0x001d2334
+    /* Bits 5..6 of the scene's m_actor_flags for oid's actor = mode & 3. */
+    void setActorBindMode(u_int oid, int mode);                          // ROR 0x001d2428
+    /* Param 0x18 becomes shape 4 sized to the corner quad (0x1003). */
+    void fitObjBounds(u_int oid);                                        // ROR 0x001d480c
+    /* {kind, oid} to the tail of the +0x2246c update list. */
+    void queueObjUpdate(int kind, u_int oid);                            // ROR 0x001d5bc8
+    /* The radius param 0x18's shape word picks (0, 17, 25, 45, or its
+     * own); word 0 to *out when out. */
+    float getObjRadius(u_int oid, int *out);                             // ROR 0x001d4a3c
+    /* Private collisions for the object: one segment {p0, p1}; four
+     * walls round a rotated box {x, y, z, sx, sy, sz, rot}; four walls
+     * round a quad of four x / z corners with heights [8] / [9]. */
+    void addObjColliSegment(u_int oid, const float *seg);                // ROR 0x001d080c
+    void addObjColliBox(u_int oid, const float *box);                    // ROR 0x001d091c
+    void addObjColliQuad(u_int oid, const float *quad);                  // ROR 0x001d0c64
     /* Clears bits of the object's flags; bits 0x40 / 0x10000000 / 1 / 0x10
      * also re-link, re-place, show and ... it. Returns 0 for no object. */
     int  resetObj(u_int oid, u_int bits);                                // ROR 0x001d1410
