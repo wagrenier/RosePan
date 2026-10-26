@@ -809,6 +809,12 @@ to adapt when a TU reaches them:
   would call garbage. The port uses stepOnce / stepPoint. GamMan::placeAchr now returns int (the ROM
   returns the hit flag; it is still a stub that returns 0).
 
+- TskSysFunc / TskSeqEvent / TskAttach (2026-10-26, task/tsk_chr.cpp): three ROM garbage reads made
+  defined -- TskSysFunc kinds outside 0..1 leave the step unset (the port ends the task); TskSeqEvent's
+  collision record leaves m_colPrm words 2, 3, 5..11 as stack garbage (the port keeps the achr's
+  values); TskAttach passes an untouched stack matrix when the node is missing (the port zeroes it).
+  TskAttach's third argument is the node name (seqcall 0x3c a3), no longer an int.
+
 - TskChrRot::stepFrames (2026-10-26, task/tsk_chr.cpp): each frame the ROM writes the heading into word
   +0x6c of whatever task runs in ACHRstat::m_task[2]. That is TskMtnMove's m_rotY, but TskMtnMove2's
   m_step (its speed / (1/60)). The port keeps the ROM's write for both classes (through dynamic_cast).

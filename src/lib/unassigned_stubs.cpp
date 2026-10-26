@@ -151,13 +151,6 @@ TskAvoidMove::TskAvoidMove(u_int, const void *, int, int, int, int)
     ROSEPAN_STUB("TskAvoidMove::TskAvoidMove", 0x001ef184);
 }
 
-// stub of ROR 0x001f47f0 (a constructor: stubgen leaves it to hand)
-TskSeqEvent::TskSeqEvent(u_int, int, const void *)
-{
-    ROSEPAN_STUB("TskSeqEvent::TskSeqEvent", 0x001f47f0);
-    m_radius = 0.0f;
-}
-
 // stub of ROR 0x001f8fc0 (a constructor: stubgen leaves it to hand)
 TskSnd::TskSnd(int kind, const TskSndParam *param)
 {
@@ -186,18 +179,6 @@ TskMoveSecta::TskMoveSecta(u_int, int, intptr_t, int, int, float, float)
 TskCamera::TskCamera(intptr_t, intptr_t)
 {
     ROSEPAN_STUB("TskCamera::TskCamera", 0x001fbc0c);
-}
-
-// stub of ROR 0x001f5244 (a constructor: stubgen leaves it to hand)
-TskAttach::TskAttach(u_int oid, const int *value, int arg)
-{
-    ROSEPAN_STUB("TskAttach::TskAttach", 0x001f5244);
-}
-
-// stub of ROR 0x001f4184 (a constructor: stubgen leaves it to hand)
-TskSysFunc::TskSysFunc(int kind, int a, intptr_t arg)
-{
-    ROSEPAN_STUB("TskSysFunc::TskSysFunc", 0x001f4184);
 }
 
 // stub of ROR 0x0010421c
