@@ -357,21 +357,54 @@ struct TskMoveSecta : CmnITask             // EE 0x80
     TskMoveSecta(u_int oid, int mode, intptr_t arg, int a3, int kind, float a, float rate); // ROR 0x001ed998
 };
 
-/* TskAttach : CmnITask (vtable 0x2e4bd0, EE 0x40 bytes): +4 the oid, +8
- * its actor, +0xc arg, +0x10 *value. layout: host -- no members. */
+/* TskAttach : CmnITask (vtable 0x2e4bd0, EE 0x40 bytes; kind 0): seqcall
+ * light case 0x3c -- each frame light *value of type 2 (MagScene::
+ * setLightParam, which 0) goes to the position of node name of oid's
+ * actor. Never ends by itself. layout: host -- a pointer; EE offsets in
+ * the comments. */
 struct TskAttach : CmnITask
 {
-    TskAttach(u_int oid, const int *value, int arg);                     // ROR 0x001f5244
+    TskAttach(u_int oid, const int *value, const char *name);            // ROR 0x001f5244
+    ~TskAttach() override {}                                             // ROR 0x001f52a8
+
+    void init() override {}                                              // ROR 0x002907d4
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001f52e4
+    void term() override {}                                              // ROR 0x001f52dc
+
+    u_int       m_oid;          // ROR 0x04
+    int         m_actor;        // ROR 0x08: GamMan::getActorNo(m_oid)
+    const char *m_name;         // ROR 0x0c: the node
+    int         m_light;        // ROR 0x10: *value, the light index
 };
 
-/* TskSeqEvent : CmnITask (vtable 0x2e4c90, EE 0x80 bytes): kind 0 reads
- * {frames, radius} from param and the achr of oid; GamMan::
- * startAchrPlaceTask's task (ACHRstat::m_placeTask). layout: host. */
+/* TskSeqEvent : CmnITask (vtable 0x2e4c90, EE 0x80 bytes; kind 0):
+ * GamMan::startAchrPlaceTask's task (ACHRstat::m_placeTask). Kind 0 reads
+ * {frames, radius} from param: with a radius above 1 the achr of oid
+ * grows its collision (m_colPrm kind 2, shape 4) to radius over frames
+ * frames, then the task ends; any other kind or radius ends at once.
+ * layout: host -- a pointer and a member-function pointer; EE offsets in
+ * the comments. */
 struct TskSeqEvent : CmnITask
 {
-    TskSeqEvent(u_int oid, int kind, const void *param);                 // ROR 0x001f47f0
+    typedef int (TskSeqEvent::*StepFunc)();
 
-    float m_radius;             // ROR 0x48: param word 1
+    TskSeqEvent(u_int oid, int kind, const void *param);                 // ROR 0x001f47f0
+    ~TskSeqEvent() override {}                                           // ROR 0x00290680
+
+    void init() override {}                                              // ROR 0x002906b4
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001f48a8
+    void term() override {}                                              // ROR 0x001f48a0
+
+    int  stepNone();                                                     // ROR 0x001f4910
+    int  stepGrow();                                                     // ROR 0x001f4918
+
+    StepFunc  m_stepFunc;       // ROR 0x04: GCC 2 {delta, index, pfn}
+    int       m_kind;           // ROR 0x0c
+    ACHRstat *m_achr;           // ROR 0x1c
+    int       m_frames;         // ROR 0x20: param word 0
+    int       m_count;          // ROR 0x3c: frames run
+    float     m_radius;         // ROR 0x48: param word 1
+    float     m_t;              // ROR 0x4c: m_count / m_frames
 };
 
 /* TskMsgMan : CmnITask (vtable 0x2e4c10, EE 0x9c0 bytes; kind 0x10): a
@@ -406,11 +439,35 @@ struct TskMsgMan : CmnITask
     int       m_param[8];       // ROR 0x99c: the window words as given (not read again)
 };
 
-/* TskSysFunc : CmnITask (vtable 0x2e4cd0, EE 0x80 bytes): kinds 0..1 set
- * the defaults 100, 0x1e, 0xf, 0x1b and keep arg. layout: host. */
+/* TskSysFunc : CmnITask (vtable 0x2e4cd0, EE 0x80 bytes; kind 0x17):
+ * seqcall case 0x22's map-name caption (GamMan::m_sysTaskId). Kinds 0..1
+ * show the caption of map arg (S2dMes::setMapNumber, setMapNameFadeIn
+ * over 30 frames), hold it 27 frames and fade it out over 15; term of
+ * kind 1 hides a caption still shown. Other kinds set no step (the ROM
+ * then calls a garbage pointer). a is not read. layout: host -- a
+ * member-function pointer; EE offsets in the comments. */
 struct TskSysFunc : CmnITask
 {
+    typedef int (TskSysFunc::*StepFunc)();
+
     TskSysFunc(int kind, int a, intptr_t arg);                           // ROR 0x001f4184
+    ~TskSysFunc() override {}                                            // ROR 0x001f41ec
+
+    int  get_task_type() override { return 0x17; }                      // ROR 0x00290620
+    void init() override {}                                              // ROR 0x00290628
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001f425c
+    void term() override;                                                // ROR 0x001f4220
+
+    int  stepMapName();                                                  // ROR 0x001f42c4
+
+    int      m_kind;            // ROR 0x04
+    StepFunc m_stepFunc;        // ROR 0x08: GCC 2 {delta, index, pfn}
+    int      m_state;           // ROR 0x10: 100 fade in, 0x65 hold then fade out
+    int      m_count;           // ROR 0x14: frames left to hold
+    int      m_map;             // ROR 0x18: arg, S2dMes::setMapNumber's
+    int      m_inTime;          // ROR 0x1c: 30
+    int      m_outTime;         // ROR 0x20: 15
+    int      m_holdTime;        // ROR 0x24: 27
 };
 
 /* TskChrRot : CmnITask (vtable 0x2e4b90, EE 0x80 bytes; kind 0xe): an
@@ -423,7 +480,7 @@ struct TskSysFunc : CmnITask
  * stepMotion waits until the actor's heading is within 0.1 of the
  * target, then (restore set) changes back to motion 1, kills the motion
  * task and sets the heading. Started by chrRotStart on ACHRstat::m_task[1]
- * and by 0x14d65c, 0x1f1298, 0x1f13a8, 0x1f14cc, 0x1f1670. layout: host --
+ * and by 0x14d65c and the chrRot* starters below. layout: host --
  * pointers and a member-function pointer; EE offsets in the comments. */
 struct TskChrRot : CmnITask
 {
@@ -469,6 +526,20 @@ void  chrRotStart(float angle, u_int oid, int frames);                   // ROR 
 void  chrRotTo(float dir, float speed, u_int oid);                       // ROR 0x001f0f9c
 void  chrRotToIn(float dir, u_int oid, int frames);                      // ROR 0x001f10a4
 int   chrRotFrames(float angle, float speed);                            // ROR 0x001f6b8c
+/* The TskChrRot starters the move tasks use, each replacing m_task[1]:
+ * chrRotFromTo turns from the heading from to to at speed; chrRotStartFrom
+ * is chrRotStart from the heading rotY; chrRotMotion / chrRotMotionBySign
+ * (motionNeg for a negative angle) turn by angle with a turn motion played
+ * at speed (restore: back to motion 1 at the end); chrRotToMotion turns to
+ * the heading dir that way (rotY >= 32769: the object's heading). */
+void  chrRotFromTo(float from, float to, float speed, u_int oid);        // ROR 0x001f11a0
+void  chrRotStartFrom(float angle, float rotY, u_int oid, int frames);   // ROR 0x001f1298
+void  chrRotMotion(float angle, float speed, float rotY, u_int oid, int motion,
+                   int restore);                                         // ROR 0x001f13a8
+void  chrRotMotionBySign(float angle, float speed, float rotY, u_int oid, int motionNeg,
+                         int motionPos, int restore);                    // ROR 0x001f14cc
+void  chrRotToMotion(float dir, float speed, float rotY, u_int oid, int motion,
+                     int restore);                                       // ROR 0x001f1670
 /* Starts (when *task is NULL) a chrMtnMove of motion at rate heading
  * dir and returns the frames its root move needs for dist: dist over the
  * move across 50 x the motion's length, times the length, x 25. no is

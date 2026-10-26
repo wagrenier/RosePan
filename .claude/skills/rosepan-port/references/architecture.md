@@ -1439,6 +1439,22 @@ TskSeqEvent, TskSysFunc, TskFrameFunc / TskGenFrameFunc.
   picture 0 in / out (inlined s2dBg* requests on +0x93c), 0x11 / 0x16 clear GamMan m_flags2 bits,
   0x12 nothing, 0x13 an item found (windows 0x11 / 0x13, item menu when 12 are held), 0x15 the PC
   state-class 5..7 message (windows 0xb / 0x16). Kinds 0, 1, 13, 20 set no step.
+- **TskSysFunc** (kind 0x17, EE 0x80, seqcall 0x22 on GamMan::m_sysTaskId): the **map-name caption**.
+  Kinds 0..1 store map no a3 (+0x18) and the times 30 / 15 / 27 (+0x1c in, +0x20 out, +0x24 hold);
+  the step 0x1f42c4 (folded into exec by Ghidra until split) calls the inlined S2dMes setMapNumber /
+  setMapNameFadeIn (MagScene +0x42bb0 + 0x93c / 0x944 / 0x94c), holds, then setMapNameFadeOut. term
+  of kind 1 clears a caption still shown. Written 2026-10-26.
+- **TskSeqEvent** (EE 0x80, GamMan::startAchrPlaceTask's ACHRstat::m_placeTask): kind 0 with radius
+  > 1 grows the achr's collision to radius over frames (m_colPrm [0] = 2, [1] = 4, [4] = radius * t;
+  the ROM writes the other nine words from an uninitialised stack record). PMF at +4; 0x1f4910 (its
+  stepNone) was folded into exec.
+- **TskAttach** (EE 0x40, seqcall light case 0x3c): each frame light *value of type 2 follows node
+  name (a3) of oid's actor: MagSystem::getActorNodeMatrixByName, the matrix's translation row to
+  MagScene::setLightParam(2, light, 0, v, 0). Never ends by itself.
+- **chrRot starters** (0x1f11a0..0x1f1670): chrRotFromTo, chrRotStartFrom (chrRotStart from a given
+  heading), chrRotMotion / chrRotMotionBySign / chrRotToMotion (a turn played by a turn motion through
+  TskChrRot's stepMotion). All replace ACHRstat::m_task[1]; their callers are the move tasks
+  (TskMoveTypeGen, TskMoveSecta*) and 0x14a860 / 0x14bf1c / 0x154fd8.
 - Frame request list: data 0x2d8f68 (count) / 0x2d8f70 (32 oids), filled by 0x1f68bc (an object
   pushed aside, table entry 0x2e50f4), cleared each frame by gamClearFrameReq (only 8 words).
 

@@ -9545,6 +9545,36 @@
   "was": "FUN_001f10a4",
   "why": "chrRotTo with a frame count instead of a speed"
  },
+ "001f11a0": {
+  "name": "chrRotFromTo",
+  "tag": "ror-inferred",
+  "was": "FUN_001f11a0",
+  "why": "wraps to - from into -pi..pi, chrRotFrames at speed, then 0x1f1298"
+ },
+ "001f1298": {
+  "name": "chrRotStartFrom",
+  "tag": "ror-inferred",
+  "was": "FUN_001f1298",
+  "why": "chrRotStart (0x1f0e90) with the start heading passed in f13 instead of 32769"
+ },
+ "001f13a8": {
+  "name": "chrRotMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001f13a8",
+  "why": "kills achr m_task[1], new TskChrRot(angle, rotY, speed, oid, 0, motion, restore, 1)"
+ },
+ "001f14cc": {
+  "name": "chrRotMotionBySign",
+  "tag": "ror-inferred",
+  "was": "FUN_001f14cc",
+  "why": "chrRotMotion picking a1 for a negative angle, a2 else; no callers"
+ },
+ "001f1670": {
+  "name": "chrRotToMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001f1670",
+  "why": "chrRotMotion to the heading dir (wrapped dir - rotY, rotY >= 32769 the object's)"
+ },
  "001f184c": {
   "name": "TskFrameFunc::TskFrameFunc",
   "tag": "ror-inferred",
@@ -9683,6 +9713,30 @@
   "was": "FUN_001f4184",
   "why": "vtable 0x2e4cd0 (rtti.py TskSysFunc); kind 0..1 sets the defaults 100, 0x1e, 0xf, 0x1b"
  },
+ "001f41ec": {
+  "name": "TskSysFunc::~TskSysFunc",
+  "tag": "ror-inferred",
+  "was": "FUN_001f41ec",
+  "why": "TskSysFunc vtable 0x2e4cd0 slot 6: the deleting destructor (operator_delete)"
+ },
+ "001f4220": {
+  "name": "TskSysFunc::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001f4220",
+  "why": "TskSysFunc vtable slot 5: kind 1 clears S2dMes m_map_name_on / m_fade_time"
+ },
+ "001f425c": {
+  "name": "TskSysFunc::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f425c",
+  "why": "TskSysFunc vtable slot 4: calls the member pointer at +8"
+ },
+ "001f42c4": {
+  "name": "TskSysFunc::stepMapName",
+  "tag": "ror-inferred",
+  "was": "TskSysFunc::stepMapName",
+  "why": "the member pointer TskSysFunc's ctor stores for kinds 0..1 (folded into 0x1f425c until split): S2dMes setMapNumber / setMapNameFadeIn / Out"
+ },
  "001f438c": {
   "name": "TskMovie::TskMovie",
   "tag": "ror-inferred",
@@ -9712,6 +9766,30 @@
   "tag": "ror-inferred",
   "was": "FUN_001f47f0",
   "why": "stores vtable 0x2e4c90 (TskSeqEvent per rtti.py), oid's achr at +0x1c, two words from the parameter block"
+ },
+ "001f48a0": {
+  "name": "TskSeqEvent::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001f48a0",
+  "why": "TskSeqEvent vtable 0x2e4c90 slot 5: empty"
+ },
+ "001f48a8": {
+  "name": "TskSeqEvent::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f48a8",
+  "why": "TskSeqEvent vtable slot 4: calls the member pointer at +4"
+ },
+ "001f4910": {
+  "name": "TskSeqEvent::stepNone",
+  "tag": "ror-inferred",
+  "was": "TskSeqEvent::stepNone",
+  "why": "TskSeqEvent's default step (folded into 0x1f48a8 until split): returns 1"
+ },
+ "001f4918": {
+  "name": "TskSeqEvent::stepGrow",
+  "tag": "ror-inferred",
+  "was": "FUN_001f4918",
+  "why": "the ctor's step for kind 0 with radius > 1: achr m_colPrm kind 2 shape 4 radius * count / frames"
  },
  "001f4a24": {
   "name": "TskMsgMan::TskMsgMan",
@@ -9748,6 +9826,24 @@
   "tag": "ror-inferred",
   "was": "FUN_001f5244",
   "why": "stores vtable 0x2e4bd0 (_vt$9TskAttach; rtti.py lists it as the class's ctor), +4 the oid, +8 GamMan::getActorNo(oid), +0xc a3, +0x10 *a2; native 012 case 0x3c news 0x40 bytes for it"
+ },
+ "001f52a8": {
+  "name": "TskAttach::~TskAttach",
+  "tag": "ror-inferred",
+  "was": "FUN_001f52a8",
+  "why": "TskAttach vtable 0x2e4bd0 slot 6: the deleting destructor"
+ },
+ "001f52dc": {
+  "name": "TskAttach::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001f52dc",
+  "why": "TskAttach vtable slot 5: empty"
+ },
+ "001f52e4": {
+  "name": "TskAttach::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f52e4",
+  "why": "TskAttach vtable slot 4: setLightParam(2, light, 0, node matrix translation)"
  },
  "001f5558": {
   "name": "chrGetNodeWorldPos",

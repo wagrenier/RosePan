@@ -1339,7 +1339,7 @@ intptr_t seqFunc012(intptr_t id, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
         break;
     }
     case 0x3c:
-        seqAddTask(new TskAttach((u_int)a1, (const int *)a2, (int)a3));  // callcheck: operator_new, addTask (new and seqAddTask)
+        seqAddTask(new TskAttach((u_int)a1, (const int *)a2, (const char *)a3));  // callcheck: operator_new, addTask (new and seqAddTask)
         break;
     case 0xc8:
         scene.m_2aa84 = a1 != 0 ? 1 : 0;

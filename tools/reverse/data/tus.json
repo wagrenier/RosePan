@@ -1119,7 +1119,7 @@
    "why": "SysTimer (ctor 0x203d94, dtor 0x203da8, init / start / stop / read / update / hold), sysInit/TermManagers, the host0 reboot 0x2041a0 and the static initializer pair 0x2041f8 / 0x20439c / 0x2043bc that constructs the global managers: the globals file before main.cpp (no source string; file name a guess)"
   },
   "task/tsk_chr.cpp": {
-   "notes": "TskMovePointPath and TskMoveTypeRound are complete but unseen (native 211 cases 10..23 run only in game scripts); mark them done the first time a screenshot shows an achr walking a path or circling. Ctor args now (speed f12, rate f13, oid, mode, count or arg, points, motion). Quirks kept and listed in open-items.md: TskMoveTypeRound::stepPoint pushes inward for mode 1; unknown modes get a default step (PORT). chrMoveFrames (0x1ee7f0) is shared by 7 move tasks: TskMoveTypeGen 0x1e9cb4 / 0x1ea5ec / 0x1eacb8, TskMoveSectaFindPath 0x1ecbe0 / 0x1ecf3c, 0x1ed1d0. Next in this TU: TskMoveTypeGen 0x1e9a3c (exec 0x1e9cb4 0x938 bytes, 0x1eafb0), TskMoveSectaFindPath 0x1ec940 (0x1ed1d0), TskMoveSecta 0x1ed998, the turn helpers 0x1f11a0 / 0x1f1298 / 0x1f13a8 / 0x1f14cc / 0x1f1670, TskRotAdj 0x1ee4a8, TskMoveAdj 0x1edd90, TskMovePhysic 0x1eeaec, TskSysFunc 0x1f4184, TskAttach 0x1f5244, TskAvoidMove 0x1ef184 (hand stub). GamMan::placeAchr 0x1d544c is a stub returning 0 (no hits yet).",
+   "notes": "All code written this session is complete but unseen (TskSysFunc shows a map-name caption on entering a room via seqcall 0x22; check it the first time a room is entered). ROM garbage reads made defined are listed in open-items.md. Next in this TU: TskMoveTypeGen 0x1e9a3c (exec 0x1e9cb4 0x938 bytes, 0x1eafb0 0x68c bytes; both call chrRotFromTo / chrRotToMotion now available), TskMoveSectaFindPath 0x1ec940 (0x1ed1d0 0x7c8), TskMoveSecta 0x1ed998, TskRotAdj 0x1ee4a8, TskMoveAdj 0x1edd90, TskMovePhysic 0x1eeaec, TskAvoidMove 0x1ef184 (hand stub), 0x1f0288, TskGenFrameFunc 0x1f4088.., chrChangeMotionBySuffix 0x1f5d90 and chrCreateItemObj 0x1f6578 (stubs in lib/unassigned_stubs.cpp). GamMan::placeAchr 0x1d544c is still a stub returning 0.",
    "ranges": [
     [
      "001e7f28",
@@ -1151,6 +1151,11 @@
      "date": "2026-10-26 18:27",
      "status": "partial",
      "summary": "Wrote TskMovePointPath (ctor, exec, term, aim 0x1ec834, stepOnce / stepLoop / stepRandom / stepRandomLoop) and TskMoveTypeRound (ctor, exec with the HIT in moving task placing, term, stepPoint / stepObjMotion / stepObj), chrMoveFrames 0x1ee7f0, and ahead utlDirDist 0x2180e4 in lib/unassigned_stubs.cpp. Deleted their two ctor stubs, fixed native 211's argument order (count a2, points a3), GamMan::placeAchr returns int. Named 16 functions (batch tskchr_006). 15 s smoke run unchanged: the boot disclaimer; no script reaches these tasks yet."
+    },
+    {
+     "date": "2026-10-26 18:35",
+     "status": "partial",
+     "summary": "Wrote TskSysFunc whole (ctor, exec, term, stepMapName 0x1f42c4: the seqcall 0x22 map-name caption through S2dMes setMapNumber / setMapNameFadeIn / Out), TskSeqEvent whole (ctor, exec, stepNone 0x1f4910, stepGrow 0x1f4918: the achr place task grows m_colPrm radius over frames), TskAttach whole (ctor, exec: a type-2 light follows an actor node; third argument is the node name, seqcall 0x3c fixed), and the five turn starters chrRotFromTo 0x1f11a0, chrRotStartFrom 0x1f1298, chrRotMotion 0x1f13a8, chrRotMotionBySign 0x1f14cc, chrRotToMotion 0x1f1670. Deleted three stubs, split the two folded step functions in Ghidra, named 16 functions (batches tskchr_007 / 008). 15 s smoke run unchanged: the boot disclaimer; none of these tasks is reached yet."
     }
    ],
    "status": "partial",

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-26 18:27 at commit `d033c6a` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-26 18:35 at commit `31bf69f` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-26 18:27 at commit `d033c6a` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6666**, named **4214** (63%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 247, ror-inferred 2616
-- context-name ledger: 2863 entries; overrides of wrong library matches: 5
-- placed in a source file: 3552/6666 in 99 files
+- game functions: **6668**, named **4230** (63%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 247, ror-inferred 2632
+- context-name ledger: 2879 entries; overrides of wrong library matches: 5
+- placed in a source file: 3554/6668 in 99 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -24,13 +24,13 @@ Least-named game-code regions (64 KB blocks):
 | `00140000` | 37/293 (13%) | mag/magloader.cpp, mag/magsceneif.cpp, mag/magscenefocus.cpp |
 | `00170000` | 52/251 (21%) | snd/sndman.cpp, wrd/wrdsrv.cpp |
 | `00120000` | 73/283 (26%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
-| `001f0000` | 62/224 (28%) | task/tsk_chr.cpp, task/naga_chunk.cpp, task/tsk_bg_load.cpp |
+| `001f0000` | 78/226 (35%) | task/tsk_chr.cpp, task/naga_chunk.cpp, task/tsk_bg_load.cpp |
 | `00100000` | 117/301 (39%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmisc.cpp |
 | `00220000` | 161/331 (49%) | i3d/i3dlayer.cpp, i3d/i3dvram.cpp, i3d/i3dview.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **2647**; stubs: **331**
+- reconstructed RoR functions: **2662**; stubs: **328**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -58,7 +58,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 213 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 210 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
@@ -100,7 +100,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/spr/sprtexture.cpp` | 21 | 0 |
 | `src/system/sysnowloading.cpp` | 8 | 0 |
 | `src/system/system.cpp` | 11 | 0 |
-| `src/task/tsk_chr.cpp` | 77 | 0 |
+| `src/task/tsk_chr.cpp` | 92 | 0 |
 | `src/task/tsk_man.cpp` | 25 | 0 |
 | `src/utl/utlfile.cpp` | 2 | 0 |
 | `src/utl/utlfind.cpp` | 0 | 1 |
@@ -114,7 +114,7 @@ Least-named game-code regions (64 KB blocks):
 - 160 TUs: todo 113, partial 12, verify 46, done 9
 - next: **task/tsk_chr.cpp** (pinned in the queue)
 - pinned queue: task/tsk_chr.cpp, unassigned@001f82e4, unassigned@00192ac0, dog/dogmodel.cpp, dog/dogactor.cpp, mag/magscenelight.cpp, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
-- partial: `task/tsk_chr.cpp` 76/164 -- TskMovePointPath and TskMoveTypeRound are complete but unseen (native 211 cases 10..23 run only in game scripts); mark them done the first time a screenshot sho
+- partial: `task/tsk_chr.cpp` 91/166 -- All code written this session is complete but unseen (TskSysFunc shows a map-name caption on entering a room via seqcall 0x22; check it the first time a room is
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
@@ -164,6 +164,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-26 18:35 `task/tsk_chr.cpp` partial: Wrote TskSysFunc whole (ctor, exec, term, stepMapName 0x1f42c4: the seqcall 0x22 map-name caption through S2dMes setMapNumber / setMapNameFadeIn / Out), TskSeqE
 - 2026-10-26 18:27 `task/tsk_chr.cpp` partial: Wrote TskMovePointPath (ctor, exec, term, aim 0x1ec834, stepOnce / stepLoop / stepRandom / stepRandomLoop) and TskMoveTypeRound (ctor, exec with the HIT in movi
 - 2026-10-26 18:14 `task/tsk_chr.cpp` partial: Wrote TskChrRot (ctor 0x1f0434, exec, term, dtor, stepFrames 0x1f090c, stepMotion 0x1f0b50; kind 0xe) and its starters chrRotStart, chrRotTo, chrRotToIn, chrRot
 - 2026-10-26 18:06 `task/tsk_chr.cpp` partial: Wrote TskFrameFunc whole: the constructor switch over all 23 kinds (read from the asm: Ghidra cannot recover the 0xe98-byte jump table), exec, term, and its 18 
@@ -171,13 +172,12 @@ Recent sessions:
 - 2026-10-26 17:12 `task/tsk_chr.cpp` partial: Pinned unassigned@001e7f28 as task/tsk_chr.cpp (0x1e7f28..0x1f6c64, the script tasks). Wrote TskMovie (ctor, exec state machine, term, dtor): the New Game openi
 - 2026-10-26 15:57 `setup/newgame_crash.cpp` done: New Game crash fixed: Sequence::addEntry kept a script address (a host pointer) in an int, so callEntry queued a thread at a cut pc and seqFindEntry faulted; Se
 - 2026-10-26 15:37 `wrd/wrdsrv.cpp` verify: WrdSrv room table (was unassigned@00164fc0 0x17e540..0x17f0d0): all 14 functions - ctor / dtor, load of data/wrd/WRD.BIN, setup building host WrdEntry records b
-- 2026-10-26 15:21 `game/gamsnd.cpp` verify: GamSndMan finished: the 3D sounds (put_se/str_3d_pos and _chr, del_*, update3d, update3dVolume 0x1e386c, GamSnd3d::setPos 0x1e2350, stopObjSnds), the 7-argument
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `dog/dogactor.cpp` | partial | 6/28/146 | 31.5 | 83 | 5 |
 | `unassigned@00143d3c` | todo | 0/22/602 | 129.5 | 57 | 2 |
-| `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 51 | 4 |
+| `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 52 | 4 |
 | `unassigned@001d3b44` | partial | 2/15/37 | 18.4 | 50 | 1 |
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 45 | 3 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
@@ -196,7 +196,7 @@ Recent sessions:
 | `002155f4` | FUN_002155f4 | 22 | - | missing | - |
 | `001be2dc` | FileReader::~FileReader | 21 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 18 | ror | missing | game/gamfile.cpp |
-| `0013f980` | MagScene::setLightParam | 14 | ror | stub | mag/magscenelight.cpp |
+| `0013f980` | MagScene::setLightParam | 15 | ror | stub | mag/magscenelight.cpp |
 | `0010aa9c` | DogActor::findMotionByName | 13 | ror | stub | dog/dogactor.cpp |
 | `001f8fc0` | TskSnd::TskSnd | 12 | ror | stub | - |
 | `001e0c2c` | GamArea::ctl_trg_flg | 10 | ror | stub | - |

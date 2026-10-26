@@ -1327,6 +1327,116 @@ void chrRotToIn(float dir, u_int oid, int frames)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// A turn from the heading from to the heading to at speed (chrRotFrames
+// frames).
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrWrapPi)
+// ROR 0x001f11a0
+
+void chrRotFromTo(float from, float to, float speed, u_int oid)
+{
+    if (from == to)
+        return;
+    float angle = chrWrapPi(to - from);
+    chrRotStartFrom(angle, from, oid, chrRotFrames(angle, speed));
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// chrRotStart from the heading rotY instead of the actor's.
+// ROR 0x001f1298
+
+void chrRotStartFrom(float angle, float rotY, u_int oid, int frames)
+{
+    ACHRstat *chr = g_gamMan.getAchr(oid);
+    int      *id = &chr->m_task[1];
+
+    if (g_taskMan.getTask(*id) != 0)
+    {
+        g_taskMan.killTask(*id);
+        *id = -1;
+    }
+    if (angle == 0.0f)
+        return;
+    // callcheck: operator_new (the new expression)
+    TskChrRot *task = new TskChrRot(angle, rotY, 1.0f, oid, frames, -1, 1, 1);
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 0x11);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A turn by angle from the heading rotY played by the turn motion.
+// ROR 0x001f13a8
+
+void chrRotMotion(float angle, float speed, float rotY, u_int oid, int motion, int restore)
+{
+    ACHRstat *chr = g_gamMan.getAchr(oid);
+    int      *id = &chr->m_task[1];
+
+    if (g_taskMan.getTask(*id) != 0)
+    {
+        g_taskMan.killTask(*id);
+        *id = -1;
+    }
+    if (angle == 0.0f)
+        return;
+    // callcheck: operator_new (the new expression)
+    TskChrRot *task = new TskChrRot(angle, rotY, speed, oid, 0, motion, restore, 1);
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 0x11);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// chrRotMotion with motionNeg for a negative angle, motionPos else. No
+// callers in the ROM.
+// ROR 0x001f14cc
+
+void chrRotMotionBySign(float angle, float speed, float rotY, u_int oid, int motionNeg,
+                        int motionPos, int restore)
+{
+    ACHRstat *chr = g_gamMan.getAchr(oid);
+    int      *id = &chr->m_task[1];
+
+    if (g_taskMan.getTask(*id) != 0)
+    {
+        g_taskMan.killTask(*id);
+        *id = -1;
+    }
+    if (angle == 0.0f)
+        return;
+    int motion = angle < 0.0f ? motionNeg : motionPos;
+    // callcheck: operator_new (the new expressions of both branches)
+    TskChrRot *task = new TskChrRot(angle, rotY, speed, oid, 0, motion, restore, 1);
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 0x11);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A turn to the heading dir from rotY (>= 32769: the object's) played by
+// the turn motion.
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrWrapPi)
+// ROR 0x001f1670
+
+void chrRotToMotion(float dir, float speed, float rotY, u_int oid, int motion, int restore)
+{
+    ACHRstat *chr = g_gamMan.getAchr(oid);
+    int      *id = &chr->m_task[1];
+
+    if (g_taskMan.getTask(*id) != 0)
+    {
+        g_taskMan.killTask(*id);
+        *id = -1;
+    }
+    if (rotY >= CHR_ROT_KEEP)
+    {
+        sceVu0FVECTOR rot;
+        g_gamMan.getObjRot(oid, rot);
+        rotY = rot[1];
+    }
+    float angle = chrWrapPi(dir - rotY);
+    if (angle == 0.0f)
+        return;
+    // callcheck: operator_new (the new expression)
+    TskChrRot *task = new TskChrRot(angle, rotY, speed, oid, 0, motion, restore, 1);
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, id, 0x11);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // TskFrameFunc: the constructor's switch on kind (jump table data
 // 0x2fe420) copies the job's words and picks its step (member pointers
 // data 0x2fe2c0..). Kind 7 (a door opening) does its work here: the PC's
@@ -2210,6 +2320,75 @@ int TskFrameFunc::stepGetItem()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Kinds 0..1: map arg's caption, 30 frames in, 27 held, 15 out.
+// ROR 0x001f4184
+
+TskSysFunc::TskSysFunc(int kind, int, intptr_t arg)
+{
+    m_state = 0;
+    m_kind = kind;
+    m_stepFunc = NULL;
+    if (kind < 2 && kind >= 0)
+    {
+        m_map = (int)arg;
+        m_state = 100;
+        m_inTime = 0x1e;
+        m_outTime = 0xf;
+        m_holdTime = 0x1b;
+        m_stepFunc = &TskSysFunc::stepMapName;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 1 hides a caption still shown.
+// ROR 0x001f4220
+
+void TskSysFunc::term()
+{
+    S2dMes &mes = g_magSystem.m_scene.m_mes;
+    if (m_kind == 1 && mes.m_map_name_on == 1)
+    {
+        mes.m_map_name_on = 0;
+        mes.m_fade_time = 0;
+    }
+}
+
+// ROR 0x001f425c
+
+int TskSysFunc::exec(int, int, int)
+{
+    if (m_stepFunc == NULL)
+        return 1;   /* PORT: the ROM calls an unset member pointer */
+    return (this->*m_stepFunc)();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// 100 shows the caption (setMapNumber, setMapNameFadeIn inlined), 0x65
+// holds it m_holdTime frames, then fades it out and ends.
+// ROR 0x001f42c4 (folded into the body of 0x1f425c by Ghidra)
+
+int TskSysFunc::stepMapName()
+{
+    S2dMes &mes = g_magSystem.m_scene.m_mes;
+    switch (m_state)
+    {
+    case 100:
+        mes.setMapNumber(m_map);
+        mes.setMapNameFadeIn(m_inTime);
+        m_state = 0x65;
+        m_count = m_holdTime;
+        return 0;
+    case 0x65:
+        if (m_count-- > 0)
+            return 0;
+        mes.setMapNameFadeOut(m_outTime);
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Stops the music, fades sprite 3 out and starts the film at 60 fps.
 // ROR 0x001f438c
 
@@ -2318,6 +2497,70 @@ void TskMovie::term()
     g_gamMan.killMsgTask();
     g_magSystem.m_scene.m_movie.closeMovie();
     MagSystem::m_v_interval = 2;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 0 with a radius above 1 grows the achr's collision; else the
+// task ends at once.
+// ROR 0x001f47f0
+
+TskSeqEvent::TskSeqEvent(u_int oid, int kind, const void *param)
+{
+    m_kind = kind;
+    m_achr = NULL;
+    m_frames = 0;
+    m_radius = 0.0f;
+    m_t = 0.0f;
+    if (kind == 0)
+    {
+        const int *p = (const int *)param;
+        m_count = 0;
+        m_frames = p[0];
+        memcpy(&m_radius, &p[1], sizeof(float));
+        m_achr = g_gamMan.getAchr(oid);
+        if (m_radius > 1.0f)
+        {
+            m_stepFunc = &TskSeqEvent::stepGrow;
+            return;
+        }
+    }
+    m_stepFunc = &TskSeqEvent::stepNone;
+}
+
+// ROR 0x001f48a8
+
+int TskSeqEvent::exec(int, int, int)
+{
+    return (this->*m_stepFunc)();
+}
+
+// ROR 0x001f4910 (folded into the body of 0x1f48a8 by Ghidra)
+
+int TskSeqEvent::stepNone()
+{
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Collision kind 2, shape 4, radius m_radius * count / frames while the
+// achr's object lives; 1 at the end or when it is gone.
+// ROR 0x001f4918
+
+int TskSeqEvent::stepGrow()
+{
+    int n = m_count++;
+    if (n >= m_frames)
+        return 1;
+    if (!g_gamMan.isObj(m_achr->m_oid))
+        return 1;
+    m_t = (float)m_count / (float)m_frames;
+    float radius = m_radius * m_t;
+    /* PORT: the ROM stores a stack record with only these three words set,
+     * the other nine are stack garbage; the host keeps them as they are. */
+    m_achr->m_colPrm[0] = 2;
+    m_achr->m_colPrm[1] = 4;
+    memcpy(&m_achr->m_colPrm[4], &radius, sizeof(float));
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -2449,6 +2692,32 @@ int TskMsgMan::exec(int id, int time, int arg)
     else
         m_msg.release(m_window);
     return done;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f5244
+
+TskAttach::TskAttach(u_int oid, const int *value, const char *name)
+{
+    m_oid = oid;
+    m_actor = g_gamMan.getActorNo(oid);
+    m_name = name;
+    m_light = *value;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Light m_light (type 2) to the node's world position (the matrix's
+// translation row).
+// ROR 0x001f52e4
+
+int TskAttach::exec(int, int, int)
+{
+    /* PORT: zeroed -- the ROM passes the stack matrix untouched when the
+     * node is missing. */
+    I3dMatrixF4x4 m = {};
+    g_magSystem.getActorNodeMatrixByName(m_actor, &m, m_name);
+    g_magSystem.m_scene.setLightParam(2, m_light, 0, m.m[3], 0);
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
