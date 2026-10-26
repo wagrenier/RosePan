@@ -14,8 +14,8 @@
 //
 // Written so far: the table, the empty and the return-code entries, 000,
 // 001, 002, 004 (wait until), 005, 007, 009, 012 (lights, fog), 014, the system call 018, 019
-// (pad), 021, 027, 028, 029 (stage changes), 032, 033, 036, 038, 039, 110
-// and 151 (object control). The others are
+// (pad), 021, 027, 028, 029 (stage changes), 032, 033, 036, 038, 039, 110,
+// 151 (object control), 152 (object queries) and 155 (vfchr objects). The others are
 // stubs (seqcall.h lists them).
 
 #include "sequence/seqcall.h"
@@ -1376,6 +1376,222 @@ intptr_t seqFunc151(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
     return 0;
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Object queries: a0 picks the question (51 cases, jump table data
+// 0x300fa0) about object t1 -- nothing unless t1 is live, except 0x19 /
+// 0x1a, which read the system data record t1. Answers go to a1 (vectors)
+// or v0. Cases 0x28..0x2a step the actor's position along an angle.
+// ROR 0x0020a368
+
+intptr_t seqFunc152(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t, intptr_t t1)
+{
+    GamMan   &gam = g_gamMan;
+    DogActor *actors = g_magSystem.m_scene.m_actors;
+    u_int     oid = (u_int)t1;
+    float    *out = (float *)a1;
+    int       no = 0;
+
+    if ((u_int)op - 0x19 >= 2)
+    {
+        if (!gam.isObj(oid))
+            return 0;
+        no = gam.getActorNo(oid);
+    }
+
+    float v[3];
+    float angle, dist;
+    switch ((u_int)op)
+    {
+    case 1:     // the actor's translation
+        out[0] = actors[no].m_trans[0];
+        out[1] = actors[no].m_trans[1];
+        out[2] = actors[no].m_trans[2];
+        return 0;
+    case 2:     // its rotation
+        out[0] = actors[no].m_rotate[0];
+        out[1] = actors[no].m_rotate[1];
+        out[2] = actors[no].m_rotate[2];
+        return 0;
+    case 3:     // its scale -- the ROM indexes the actors by t1 itself, not the actor number
+        if (oid < 128)  // PC: an oid past the 128 actors reads beyond the scene in the ROM; skipped
+        {
+            out[0] = actors[oid].m_scale[0];
+            out[1] = actors[oid].m_scale[1];
+            out[2] = actors[oid].m_scale[2];
+        }
+        return 0;
+    case 0x14:
+        gam.getObjParam(oid, (int)a1, (void *)a2);
+        return 0;
+    case 0x15:
+        return gam.testObjFlags(oid, (u_int)a1);
+    case 0x16:
+        return gam.testAchrFlag(oid, (u_int)a2);
+    case 0x19:  // field a1 of system record t1 into a2
+        gam.m_sysData.getField((int)(oid & 0xffff), (int)a1, (void *)a2);
+        return 0;
+    case 0x1a:  // system record t1's flags: a1 != 0 the second word
+        if (a1 != 0)
+            return gam.m_sysData.testFlags94((short)oid, (int)(a1 & 0xffff), (u_int)a2);
+        return gam.m_sysData.testFlags((short)oid, (u_int)a2);
+    case 0x1e:
+        return gam.getObjWork(oid, (int)a1);
+    case 0x28:  // a2 ahead of the translation, the angle its y + pi wrapped to -pi..pi
+    {
+        // The ROM reads the translation's y (+0x44), not the rotation's;
+        // kept. The wrap runs in double, as the ROM's dpadd / dpcmp do.
+        // callcheck: fptodp, dpadd, dpcmp, dpsub, dptofp (the double arithmetic below)
+        const double pi = 3.141592653589793;
+        v[0] = actors[no].m_trans[0];
+        v[1] = actors[no].m_trans[1];
+        v[2] = actors[no].m_trans[2];
+        angle = (float)((double)v[1] + pi);
+        if ((double)angle < -pi)
+            angle = (float)((double)angle + 2.0 * pi);
+        if ((double)angle > pi)
+            angle = (float)((double)angle - 2.0 * pi);
+        dist = seqWordFloat(a2);
+        break;
+    }
+    case 0x29:  // the same without the half turn
+        v[0] = actors[no].m_trans[0];
+        v[1] = actors[no].m_trans[1];
+        v[2] = actors[no].m_trans[2];
+        angle = v[1];
+        dist = seqWordFloat(a2);
+        break;
+    case 0x2a:  // angle a2, distance a3
+        v[0] = actors[no].m_trans[0];
+        v[1] = actors[no].m_trans[1];
+        v[2] = actors[no].m_trans[2];
+        angle = seqWordFloat(a2);
+        dist = seqWordFloat(a3);
+        break;
+    case 0x2b:  // t1 onto node a2 of object a1
+        gam.attachObj(oid, (u_int)a1, (const char *)a2);
+        return 0;
+    case 0x2c:
+        gam.detachObj(oid, (u_int)a1);
+        return 0;
+    case 0x32:
+        return g_sequence.hasThreadNamed((const char *)a1);
+    default:
+        return 0;
+    }
+    utlAddPolar(angle, dist, v);
+    out[0] = v[0];
+    out[1] = v[1];
+    out[2] = v[2];
+    out[3] = 1.0f;
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Vfchr objects (24 cases, jump table data 0x301090) -- the scripts'
+// placed characters: cases 2..5 add vfchr a2 unless it exists (4 / 5 load
+// its model when it belongs to the current WRD room, getStatus 5), 10 / 11
+// release, 20..22 are GamMan's WRD room inlines. Returns 0 but case 23.
+
+// FCHRstat::setParam on vfchr oid. PC: skipped when there is none (the
+// ROM writes through what getVFchr returns; addVFchr always makes one,
+// a stub does not).
+static void seqSetVFchrParam(u_int oid, int which, const void *data)
+{
+    FCHRstat *vf = g_gamMan.getVFchr(oid);
+    if (vf != NULL)
+        vf->setParam(which, data);
+}
+
+// ROR 0x0020a7d0
+
+intptr_t seqFunc155(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t t0, intptr_t t1)
+{
+    GamMan &gam = g_gamMan;
+    u_int   oid = (u_int)a2;
+    int     model = (int)a1;    // the ROM hands setParam the address of its a1 / t0 words
+    int     word = (int)t0;
+
+    switch ((u_int)op)
+    {
+    case 1:     // param a1 of vfchr t1 from a2; callcheck: setParam (inside seqSetVFchrParam)
+        seqSetVFchrParam((u_int)t1, (int)a1, (const void *)a2);
+        return 0;
+    case 2:     // vfchr a2 of model a1: arg t0, kind a3
+        if (gam.getVFchr(oid) != NULL)
+            return 0;
+        gam.addVFchr(-1, oid, (int)t0, (int)(a3 & 0xffff), t1);
+        seqSetVFchrParam(oid, 0x1000, &model);
+        return 0;
+    case 3:     // the same with t0 pointing at {arg, param 0x40}
+    {
+        const int *words = (const int *)t0;
+        if (gam.getVFchr(oid) != NULL)
+            return 0;
+        gam.addVFchr(-1, oid, words[0], (int)(a3 & 0xffff), t1);
+        seqSetVFchrParam(oid, 0x1000, &model);
+        seqSetVFchrParam(oid, 0x40, &words[1]);
+        return 0;
+    }
+    case 4:     // vfchr a2 of system record a1's model, room a3, unless listed
+    {
+        if (gam.getVFchr(oid) != NULL || gam.isInOidList((int)oid) != 0 ||
+            gam.isObjRecRef((int)a3) == 0)
+            return 0;
+        u_short rec[8];
+        gam.m_sysData.getField((int)(a1 & 0xffff), 0xf, rec);
+        int recModel = rec[0] == 0xffff ? 0x800 : rec[0];
+        gam.addVFchr(-1, oid, (int)a3, (int)(a1 & 0xffff), t1);
+        int room[4];
+        gam.getStatus(5, room);
+        if ((int)a3 == room[0])
+        {
+            gam.loadVFchrModel(recModel & 0xffff, oid, t1);
+            int param[4];
+            gam.getObjParam(oid, 3, param);  // the answer is not used
+        }
+        seqSetVFchrParam(oid, 0x1000, &recModel);
+        seqSetVFchrParam(oid, 0x40, &word);
+        return 0;
+    }
+    case 5:     // a new vfchr (image a3) of system record a1's model by name, room a2
+    {
+        int         id = (int)(a1 & 0xffff);
+        u_short     rec[8];
+        const char *name[2] = {NULL, NULL};
+        gam.m_sysData.getField(id, 0xf, rec);
+        gam.m_sysData.getField(id, 0xb, name);
+        u_int vfOid = gam.makeOid(0, 5, (int)a3);
+        gam.addVFchr(-1, vfOid, (int)a2, id, t0);
+        int room[4];
+        gam.getStatus(5, room);
+        if ((int)a2 == room[0])
+            gam.loadVFchrModelByName(rec[0], name[0], vfOid, t0);
+        int recModel = rec[0];
+        seqSetVFchrParam(vfOid, 0x1000, &recModel);
+        return 0;
+    }
+    case 10:
+        gam.releaseVFchrs(0);
+        return 0;
+    case 11:
+        gam.releaseVFchr(oid);
+        return 0;
+    case 20:    // callcheck: gamWrdConvPos (inside GamMan::cnvPosL2W / cnvPosW2L / getWrdOffset)
+        gam.cnvPosL2W((float *)a2, (float *)a1);
+        return 0;
+    case 21:
+        gam.cnvPosW2L((float *)a2, (float *)a1);
+        return 0;
+    case 22:
+        gam.getWrdOffset((float *)a1);
+        return 0;
+    case 23:    // is a vfchr's param 2 a1
+        return gam.hasVFchrParam(2, (int)a1);
+    default:
+        return 0;
+    }
+}
+
 // The table (data 0x2d90f8).
 const SeqFunc g_seqFuncTable[SEQ_FUNC_COUNT] = {
     /*   0 */ seqFunc000, seqFunc001, seqFunc002, seqFunc003,
@@ -1556,20 +1772,6 @@ intptr_t seqFunc100(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 intptr_t seqFunc106(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
 {
     ROSEPAN_STUB("seqFunc106", 0x002098e0);
-    return {};
-}
-
-// stub of ROR 0x0020a368
-intptr_t seqFunc152(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc152", 0x0020a368);
-    return {};
-}
-
-// stub of ROR 0x0020a7d0
-intptr_t seqFunc155(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("seqFunc155", 0x0020a7d0);
     return {};
 }
 

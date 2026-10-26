@@ -77,6 +77,9 @@ struct ObjStat
     int  load(const void *in);                                           // ROR 0x001d9830
     /* Clears the secta words (+0x10c too when all), then 0x1da07c. */
     void clearSecta(int all);                                            // ROR 0x001d9f10
+    /* Work word no (+0x1b0 + no * 4); setWork stores one. */
+    int  getWork(int no);                                                // ROR 0x001db17c
+    void setWork(int no, int value);                                     // ROR 0x001db18c
     /* +0x100, the object id (the ELF's inline). */
     // ROR 0x0028f92c
     int  getOID() const { return (int)m_oid; }
@@ -110,6 +113,9 @@ struct FCHRstat : ObjStat
     void getRot(float *out);                                             // ROR 0x001db774
     /* One of its params by which (0x41 the type-9 number, 0x18 ...). */
     void getParam(int which, void *out);                                 // ROR 0x001db31c
+    /* getParam's counterpart: *data into the field by which (0x1000 the
+     * model number, 0x1004 its name, 0x40, 3 the actor ...). */
+    void setParam(int which, const void *data);                          // ROR 0x001db520
 };
 
 /* GamMan::getObjParam(0x18)'s answer: the object's shape and private
@@ -155,7 +161,16 @@ struct GamSysData
     /* Table 2 records only: the second flag word +0x94 (a2 unused). */
     void setFlags2(short id, int unused, u_int bits);                    // ROR 0x001dd118
     void clearFlags2(short id, int unused, u_int bits);                  // ROR 0x001dd154
+    /* Table 2 records only: +0x94 & bits != 0 (a2 unused). */
+    int  testFlags94(short id, int unused, u_int bits);                  // ROR 0x001dd194
 };
+
+/* The WRD room coordinates (unassigned@001d859c; the ROM passes GamMan
+ * +0x18c00 as a this it never reads): op 0 world to local, 1 local to
+ * world (the WRD table's converters with the room GamMan +0x21f7c), 2 the
+ * room's x, 0, z offset into a. The ELF's inlines GamMan::cnvPosW2L /
+ * cnvPosL2W / getWrdOffset call it. */
+void gamWrdConvPos(int op, float *a, float *b);                          // ROR 0x001dba3c
 
 /* One item (EE 0x10, 16-aligned): the 12 slots at GamMan +0x1a700
  * (getItemHavePtr's vector) and the stock pool's records. addItem /
@@ -499,6 +514,39 @@ struct GamMan
     void clearVFchrSlot(u_int oid);                                      // ROR 0x001cc004
     /* Adds a vfchr object (an FCHRstat in the vfchr list) unless oid is one. */
     void addVFchr(int model, u_int oid, int arg, int kind, intptr_t pos); // ROR 0x001cc044
+    /* Loads model (MagSystem::loadModel) for vfchr oid: its params 3 (the
+     * actor) and 0x1000, position pos, motion 1, the avfchr list; model
+     * 0x800 gets a 1e-7 scale. */
+    void loadVFchrModel(int model, u_int oid, intptr_t pos);             // ROR 0x001caa14
+    /* loadVFchrModel by name (MagScene::loadModelByName, the pack of model
+     * >> 10); params 0x1000, 0x1004 (name) and 3. */
+    void loadVFchrModelByName(int model, const char *name, u_int oid, intptr_t pos); // ROR 0x001cabd4
+    /* Releases every vfchr's actor; keep 0 also clears their slots and
+     * frees them from the list. */
+    void releaseVFchrs(int keep);                                        // ROR 0x001cea44
+    /* 1 when id is one of the 0x169 words of m_1f240. */
+    int  isInOidList(int id);                                            // ROR 0x001c7da8
+    /* 1 when an object record (m_objTable) has id in m_28 or m_2c. */
+    int  isObjRecRef(int id);                                            // ROR 0x001c98c0
+    /* The object's m_flags & bits != 0; 0 for no object. */
+    int  testObjFlags(u_int oid, u_int bits);                            // ROR 0x001d1720
+    /* Achr objects only: word bits >> 24 of +0x3ec & the low 24 bits. */
+    int  testAchrFlag(u_int oid, u_int bits);                            // ROR 0x001d17c8
+    /* setObjWork's getter (ObjStat::getWork); -1 for no object. */
+    int  getObjWork(u_int oid, int no);                                  // ROR 0x001d217c
+    /* Parents oid's actor to node of parent's model (MagSystem::
+     * setActorParent), its position cleared; an achr parent links oid
+     * (+0x254). detachObj undoes it. */
+    void attachObj(u_int oid, u_int parent, const char *node);           // ROR 0x001d1a5c
+    void detachObj(u_int oid, u_int parent);                             // ROR 0x001d1bec
+    /* 1 when a vfchr's getParam(which) word 0 is value. */
+    int  hasVFchrParam(int which, int value);                            // ROR 0x001d2d7c
+    // ROR 0x0028f300
+    void cnvPosW2L(float *a, float *b) { gamWrdConvPos(0, a, b); }
+    // ROR 0x0028f334
+    void cnvPosL2W(float *a, float *b) { gamWrdConvPos(1, a, b); }
+    // ROR 0x0028f368
+    void getWrdOffset(float *out) { gamWrdConvPos(2, out, NULL); }
     /* Adds the object oid of scene model (-1 none) by its list: an achr
      * (ACHRstat) or an fchr (FCHRstat); kind is its system data id. */
     void addChr(int model, u_int oid, int kind, const void *pos, int place); // ROR 0x001cc250

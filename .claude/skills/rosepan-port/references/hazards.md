@@ -534,6 +534,17 @@ public:
   open). **`ROSEPAN_CRASH_LOG=1`** (os/rosepan_host.cpp) now prints a fault's code, address and stack as
   exe offsets to stderr (build.py keeps them in work/run_<config>.log); resolve them with MinGW's
   addr2line -f -C -e RosePan.exe <0x140000000 + offset>. Pass it with build.py --env.
+  2026-10-26 (session 6): a gdbrun stalled the same way; `gdbrun.py --break` then showed **it is not the
+  movie**: the main thread waits in MagSystem::waitVSync -> rxThVSync -> rxThYield -> WaitSema
+  (s_yieldSema), the vblank thread ticks, s_request = rxThVSyncRequest, s_threadCount 1, s_yielding 1,
+  and the dispatch alarm is live and re-arming (s_alarms[0] = rxThDispatchAlarm, id 7227; so dispatch
+  is not disabled). So rxThDispatchAlarm never signals s_yieldSema: either rxThSync(-1) stops moving,
+  s_requestSema's count is not 0, or iReferSemaStatus(s_yieldSema) reports no waiter (a host race
+  between WaitSema's waiter count and the alarm thread). Next: in a held game print the three semas'
+  status through the host sema table and rxThSync's counter (gdb could not evaluate the statics by
+  name in that session: use `p 's_yieldSema'` style quoting, it worked for s_alarm). Plain 170 s runs
+  can also freeze right after New Game (last log GamMan::setPcAnim, no frames after 2700) -- probably
+  the same lost wake-up.
 - **Hidden functions inside GamMan bodies**: 0x1d1e88 (setObjScale) holds a float getter at 0x1d1f14,
   0x1d18c4 (clearObjAttr) one at 0x1d1958 (achr tail call 0x1d9f40); Ghidra's sizes include them.
 

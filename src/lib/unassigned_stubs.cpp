@@ -652,6 +652,17 @@ int MagScene::isWindowOpen(int win)
     return m_window[win] != NULL;
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// A step along angle on the ground plane (unassigned@001e6cac, written
+// ahead for native 152).
+// ROR 0x001f6b28
+
+void utlAddPolar(float angle, float dist, float *v)
+{
+    v[0] = v[0] + sinf(angle) * dist;
+    v[2] = v[2] + cosf(angle) * dist;
+}
+
 // stub of ROR 0x0013f280
 int MagScene::openSysMsgWindow(int msg, const int *args, int arg)
 {
@@ -1418,4 +1429,23 @@ intptr_t magBwnSeqCommand(const intptr_t *args)
 {
     ROSEPAN_STUB("magBwnSeqCommand", 0x00144ae0);
     return {};
+}
+
+// stub of ROR 0x001db520
+void FCHRstat::setParam(int which, const void *data)
+{
+    ROSEPAN_STUB("FCHRstat::setParam", 0x001db520);
+}
+
+// stub of ROR 0x001dd194
+int GamSysData::testFlags94(short id, int unused, u_int bits)
+{
+    ROSEPAN_STUB("GamSysData::testFlags94", 0x001dd194);
+    return {};
+}
+
+// stub of ROR 0x001dba3c
+void gamWrdConvPos(int op, float *a, float *b)
+{
+    ROSEPAN_STUB("gamWrdConvPos", 0x001dba3c);
 }

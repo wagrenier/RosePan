@@ -984,6 +984,22 @@ throughout (identifiers, env variables, files, shader macros):
   40 bit 1, 41 actor bind bits, 50..54 the shape param 0x18 (GamObjColli: m_shape 0 none / 1 17 / 2 25 /
   3 45 / 4 m_radius), 53 a rotated box -> corners param 0x1003, 55..57 private collisions (segment, box,
   quad). Objects' getters / setters dispatch on the oid's list (bits 28..29: 1 achr, 0 vfchr, 2 fchr).
+- **Native 152 0x20a368, object queries** (table data 0x300fa0, 51 cases; nothing unless t1 is live,
+  except 0x19 / 0x1a on system record t1): 1 / 2 / 3 the actor's m_trans / m_rotate / m_scale into a1
+  (3 indexes the scene actors by t1 itself, a ROM slip), 0x14 getObjParam(t1, a1, a2), 0x15
+  testObjFlags 0x1d1720 (ObjStat +0x120), 0x16 testAchrFlag 0x1d17c8 (word bits >> 24 of +0x3ec), 0x19
+  getField, 0x1a testFlags / testFlags94 0x1dd194 (table 2 +0x94), 0x1e getObjWork 0x1d217c, 0x28..0x2a
+  utlAddPolar 0x1f6b28 from the translation (angle = its y + pi wrapped in double, a ROM slip for the
+  rotation?) into a1 with w 1, 0x2b / 0x2c attachObj / detachObj 0x1d1a5c / 0x1d1bec
+  (MagSystem::setActorParent to a named node), 0x32 Sequence::hasThreadNamed.
+- **Native 155 0x20a7d0, vfchr objects** (table data 0x301090, 24 cases): 1 FCHRstat::setParam 0x1db520
+  (getParam's counterpart) on vfchr t1, 2..5 addVFchr unless it exists (4 / 5 from a system record's
+  model field 0xf / name field 0xb; when the vfchr's room is the current one, getStatus 5 = +0x21f7c,
+  loadVFchrModel 0x1caa14 / loadVFchrModelByName 0x1cabd4 load it; 4 skips oids in the +0x1f240 list
+  and rooms no object record names), 10 releaseVFchrs 0x1cea44, 11 releaseVFchr, 20 / 21 / 22 GamMan's
+  inlines cnvPosL2W / cnvPosW2L / getWrdOffset (0x28f300..) over gamWrdConvPos 0x1dba3c (the WRD
+  table's room converters 0x17ebac / 0x17eb3c with the room +0x21f7c; this = GamMan+0x18c00 unused),
+  23 hasVFchrParam(2, a1) 0x1d2d7c.
 - **Natives written 2026-10-26** (session 5): 007 a0 1 GamMan::setMsgParam 0x1cf7d0 (eight words over
   +0x22280, the message window's 10, 10, 0xffff, 0x100, 0x100 ...); 009 a0 1 killMsgTask 0x1cf95c; 012
   lights and fog (table data 0x2ff9e0, 501 entries, 63 cases): three runs over the same (light type,
