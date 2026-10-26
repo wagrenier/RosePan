@@ -706,6 +706,10 @@ struct GamMan
     /* The radius param 0x18's shape word picks (0, 17, 25, 45, or its
      * own); word 0 to *out when out. */
     float getObjRadius(u_int oid, int *out);                             // ROR 0x001d4a3c
+    /* The hit test at pos for oid (radius 25 without one; nothing when oid
+     * has flag 0x80): non-zero when something is there. a3 / a4 / out are
+     * the test's mode words and its result (0x1f68bc passes a4 1). */
+    int  testHitAt(const float *pos, u_int oid, int a3, int a4, void *out); // ROR 0x001d5a0c
     /* Private collisions for the object: one segment {p0, p1}; four
      * walls round a rotated box {x, y, z, sx, sy, sz, rot}; four walls
      * round a quad of four x / z corners with heights [8] / [9]. */
@@ -1241,7 +1245,6 @@ struct GamMan
 extern GamMan g_gamMan;         /* bss 0x7812c0 */
 
 /* Outside GamMan (files not yet defined). */
-void gamClearFrameReq(void);                                             // ROR 0x001f688c
 void gamSystemDataLoaded(void);                                          // ROR 0x001f8fb8
 /* execStageReq's last call for change kind 2. */
 void gamStage2Loaded(void);                                              // ROR 0x001fbbd0
@@ -1269,29 +1272,7 @@ void gamSetBwnRot(const float *rot);                                     // ROR 
  * into out[0..2] when out != NULL. */
 void gamGetBwnPos(float *out);                                           // ROR 0x00144418
 void gamGetBwnRot(float *out);                                           // ROR 0x0014448c
-/* Changes the motion of oid's actor (an achr through a task in its slot
- * +0x3dc); rotY >= 32769 keeps the current rotation. */
-void *chrChangeMotion(u_int oid, int motion, int a2, int a3, float blend,
-                      float rotY);                                        // ROR 0x001f5e48
-/* Creates item id's object (its chr no and model from the system data),
- * placed at pos / rot when given; returns its oid. */
-u_int chrCreateItemObj(short id, const float *pos, const float *rot);    // ROR 0x001f6578
-struct CmnITask;
-/* The motion helpers of native 100. name != NULL picks the motion by
- * name. An achr's motion task lives in its slot +0x3dc (m_task[2]):
- * chrKillMotionTask kills it; chrMtnMove / chrMtnMove2 replace it with a
- * new TskMtnMove / TskMtnMove2 (rotY >= 32769 keeps the heading). */
-void chrKillMotionTask(u_int oid);                                       // ROR 0x001f61ec
-CmnITask *chrMtnMove(float speed, float rotY, u_int oid, int motion, int p1d8, u_int flags,
-                     const char *name);                                  // ROR 0x001f59b4
-CmnITask *chrMtnMove2(float speed, u_int oid, int motion, int p1d8, u_int flags,
-                      const char *name);                                 // ROR 0x001f5bdc
-/* chrChangeMotion to the motion DogActor::getMotionNoBySuffix(name) gives. */
-int  chrChangeMotionBySuffix(float blend, float rotY, u_int oid, const char *name, int a2,
-                             int a3);                                    // ROR 0x001f5d90
-/* MagScene::changeActorMotion on actor no keeping its heading; a speed
- * outside 0.0001..100 becomes 1/60. */
-void chrSetMotion(float speed, int no, int motion, int p1d8, u_int flags, u_int oid,
-                  const char *name);                                     // ROR 0x001f6308
+/* The chr* helpers (chrChangeMotion, chrMtnMove ...) and gamClearFrameReq. */
+#include "task/tsk_chr.h"
 
 #endif /* _GAME_GAMMAN_H */

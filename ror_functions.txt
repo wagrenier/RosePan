@@ -361,7 +361,7 @@
 /* 0010d9ec 0000002c */ DogActor::getMotionTime(){}  // ror
 /* 0010da18 00000034 */ FUN_0010da18(){}
 /* 0010da4c 00000034 */ DogActor::getMotionFrame(){}  // ror
-/* 0010da80 00000018 */ FUN_0010da80(){}
+/* 0010da80 00000018 */ DogActor::getMotionFrame120(){}  // ror
 /* 0010da98 00000040 */ FUN_0010da98(){}
 /* 0010dad8 0000003c */ DogActor::getMotionStep(){}  // ror
 /* 0010db18 0000001c */ FUN_0010db18(){}
@@ -3815,7 +3815,7 @@
 /* 001d5610 000000e4 */ FUN_001d5610(){}
 /* 001d56f4 000001e4 */ FUN_001d56f4(){}
 /* 001d58d8 00000134 */ FUN_001d58d8(){}
-/* 001d5a0c 000001bc */ FUN_001d5a0c(){}
+/* 001d5a0c 000001bc */ GamMan::testHitAt(){}  // ror
 /* 001d5bc8 000001d8 */ GamMan::queueObjUpdate(){}  // ror
 /* 001d5da0 00000124 */ GamMan::relinkObj(){}  // ror
 /* 001d5ec4 000001b4 */ FUN_001d5ec4(){}
@@ -4056,16 +4056,17 @@
 /* 001e7f18 00000010 */ TskLogger::exec(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- task/tsk_chr.cpp
 // *****************************************************************************
 
 /* 001e7f28 000004e0 */ TskMtnMove::TskMtnMove(){}  // ror
-/* 001e8408 00000004 */ FUN_001e8408(){}
-/* 001e8410 00000068 */ FUN_001e8410(){}
-/* 001e8478 00000158 */ FUN_001e8478(){}
-/* 001e85d0 000003f0 */ FUN_001e85d0(){}
-/* 001e89c0 000005c8 */ FUN_001e89c0(){}
-/* 001e8f88 0000003c */ chrMotionRefEnd(){}  // ror
+/* 001e8408 00000004 */ TskMtnMove::term(){}  // ror
+/* 001e8410 00000068 */ TskMtnMove::exec(){}  // ror
+/* 001e8478 00000158 */ TskMtnMove::pause(){}  // ror
+/* 001e85d0 000003f0 */ TskMtnMove::stepMove(){}  // ror
+/* 001e89c0 000005c8 */ TskMtnMove::stepMoveHit(){}  // ror
+/* 001e8f88 00000034 */ chrMotionRefEnd(){}  // ror
+/* 001e8fbc 00000008 */ TskMtnMove::stepNone(){}  // ror
 /* 001e8fc4 00000260 */ TskMtnMove2::TskMtnMove2(){}  // ror
 /* 001e9224 00000004 */ FUN_001e9224(){}
 /* 001e922c 00000068 */ FUN_001e922c(){}
@@ -4180,9 +4181,9 @@
 /* 001f4220 00000038 */ FUN_001f4220(){}
 /* 001f425c 0000012c */ FUN_001f425c(){}
 /* 001f438c 00000100 */ TskMovie::TskMovie(){}  // ror
-/* 001f448c 0000005c */ FUN_001f448c(){}
-/* 001f44e8 00000064 */ FUN_001f44e8(){}
-/* 001f454c 000002a4 */ FUN_001f454c(){}
+/* 001f448c 0000005c */ TskMovie::~TskMovie(){}  // ror
+/* 001f44e8 00000064 */ TskMovie::term(){}  // ror
+/* 001f454c 000002a4 */ TskMovie::exec(){}  // ror
 /* 001f47f0 000000b0 */ TskSeqEvent::TskSeqEvent(){}  // ror
 /* 001f48a0 00000004 */ FUN_001f48a0(){}
 /* 001f48a8 00000070 */ FUN_001f48a8(){}
@@ -4212,12 +4213,17 @@
 /* 001f6578 0000011c */ chrCreateItemObj(){}  // ror
 /* 001f6694 0000010c */ FUN_001f6694(){}
 /* 001f67a0 000000d8 */ FUN_001f67a0(){}
-/* 001f6878 00000014 */ FUN_001f6878(){}
+/* 001f6878 00000014 */ chrIsOidType2(){}  // ror
 /* 001f688c 00000030 */ gamClearFrameReq(){}  // ror
 /* 001f68bc 0000026c */ FUN_001f68bc(){}
 /* 001f6b28 00000064 */ utlAddPolar(){}  // ror
 /* 001f6b8c 00000084 */ chrRotFrames(){}  // ror
 /* 001f6c14 00000050 */ FUN_001f6c14(){}
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 001f6c64 00000020 */ FUN_001f6c64(){}
 /* 001f6c84 00000034 */ FUN_001f6c84(){}
 /* 001f6cb8 00000034 */ FUN_001f6cb8(){}

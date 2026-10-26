@@ -18,6 +18,7 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
 - PC platform layer
 - The title screen (mnu/mnutitle.cpp)
 - The task manager (task/tsk_man.cpp)
+- The script tasks (task/tsk_chr.cpp)
 
 ## Binary and toolchain
 
@@ -1388,6 +1389,32 @@ throughout (identifiers, env variables, files, shader macros):
 - **Host defaults**: task classes whose virtuals are not written yet get CmnITask's host defaults (kind
   0, exec returns 1: the task ends on its first step, as when the manager was a stub), so a script that
   waits on getTask(id) does not hang on a stub class. A class's real exec replaces that.
+
+## The script tasks (task/tsk_chr.cpp, 0x1e7f28..0x1f6c64, 2026-10-26)
+
+Unanchored (no source string): the run between tsk_man.cpp and tsk_scene.cpp, pinned by its classes.
+0x1f6c64.. (DisplayMessage, SeManager, VoiceManager, ScenePlaySingle, ScenePlay) belongs to
+tsk_scene.cpp with 0x1f82e4.. (scenePlayStart). Holds the achr motion / movement tasks (TskMtnMove,
+TskMtnMove2, TskMoveType*, TskMovePointPath, TskMoveSecta*, TskMoveAdj, TskRotAdj, TskMovePhysic,
+TskAvoidMove, TskChrRot, TskAttach) with their chr* starters, and the script tasks TskMovie, TskMsgMan,
+TskSeqEvent, TskSysFunc, TskFrameFunc / TskGenFrameFunc.
+- **Step functions as member-function pointers**: TskMtnMove keeps a GCC 2 PMF {short delta, short
+  index (-1 non-virtual), pfn} at +0x80, copied from data 0x2fd940.. by the constructor; exec calls it
+  and returns its result. Written as `int (TskMtnMove::*)()` on the host. The other Tsk* classes with a
+  table of step functions (TskFrameFunc 0x2fe420) use the same idiom.
+- **Achr task slots**: ACHRstat::m_task[2] (+0x3dc) is the motion task (chrMtnMove / chrChangeMotion
+  replace it, addTask flags 0x11 = owned); m_task[1] the turn task; m_task[0] the move type task.
+  Non-achr objects get a TskMtnMove with actor -1 whose step (0x1e8fbc) ends it at once.
+- **Angles**: the ROM wraps headings with an inline that compares in double against +-pi (the libgcc
+  fptodp / dpcmp / dpadd / dpsub calls): chrWrapPi / chrNormPi in the source. rotY >= 32769.0
+  (0x47000100) means "keep the actor's heading".
+- **TskMovie** (kind 0, native 253's film task): constructor fades the music (funcSnd 0x1d), stops
+  SndMan slots 8, fades S2dMes sprite 3, sets script bit word1 0x8000000, S2dMovie::playMovie, and
+  MagSystem::m_v_interval = 1 (60 fps while the film runs; 2 again at the end). START held skips
+  (pad m_hold bit 8 through MagSystem +0x97a40). Word 1 bit 0x80000000 set by the script suppresses
+  the final fade-in. Seen working 2026-10-26: the New Game opening film plays to its end.
+- Frame request list: data 0x2d8f68 (count) / 0x2d8f70 (32 oids), filled by 0x1f68bc (an object
+  pushed aside, table entry 0x2e50f4), cleared each frame by gamClearFrameReq (only 8 words).
 
 ## The sound state (game/gamsnd.cpp, 0x1e0df0..0x1e7094, 2026-10-26)
 
