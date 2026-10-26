@@ -245,6 +245,15 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      0xffff until getField is written). Still in gamman: loadMapUnit 0x1ca0dc with 0x1c9e20 /
      0x1ca38c, loadChapterSe 0x1c2848, 0x1c4610, the stage-2 start (initStage2 / startStage2 /
      resetStage / releaseObjs / clearPool20b00).
+  10i. DONE 2026-10-26 (`verify`): `mag/magloader.cpp` -- all 17 functions (MagLoaderIndex,
+     MagCharaLoader, MagMapLoader; utlStrEqualNoCase 0x106010 written ahead in
+     lib/unassigned_stubs.cpp). The New Game run no longer crashes in MagScene::loadModel: no loader
+     or loadActor assert fires, and the PC's model reaches **DogActor::load 0x10cd5c** (a stub) --
+     dog/dogactor.cpp is the next blocker for the actor, with `unassigned@001d859c` (ObjStat /
+     ACHRstat / GamSysData) next in the queue. A plain run then still dies with an access violation
+     right after GamMan::setPcAnim / ACHRstat::setParam (the 10d crash); under gdbrun it does not
+     crash and goes on to GamMan::initStage2 / startStage2 (stubs). Nothing past the title menu
+     draws yet, so the loader is not visible.
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

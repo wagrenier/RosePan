@@ -511,6 +511,29 @@ int GamSndMan::findSnd(int id, GamSndEntry **entry, int arg)
     return {};
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Equality without case: a..z fold to A..Z (unassigned@00106010, written
+// ahead for MagLoaderIndex::find).
+// ROR 0x00106010
+
+int utlStrEqualNoCase(const char *a, const char *b)
+{
+    char ca = *a;
+    for (;;) {
+        a++;
+        char cb = *b++;
+        if ((unsigned)(cb - 'a') < 26)
+            cb -= 0x20;
+        if ((unsigned)(ca - 'a') < 26)
+            ca -= 0x20;
+        if (ca != cb)
+            return 0;
+        if (ca == 0)
+            return 1;
+        ca = *a;
+    }
+}
+
 // stub of ROR 0x00106658
 u_int utlConvSndId(u_int id)
 {

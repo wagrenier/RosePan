@@ -425,6 +425,12 @@
   "was": "FUN_00105f0c",
   "why": "utl/utlfile.cpp, same asserts: copies a then b (either NULL = nothing) up to theSize - 1 chars in all; MagScene::load builds <name>_c.bin etc. with it"
  },
+ "00106010": {
+  "name": "utlStrEqualNoCase",
+  "tag": "ror-inferred",
+  "was": "FUN_00106010",
+  "why": "compares two strings folding a..z to upper case; 1 when equal, 0 otherwise; MagLoaderIndex::find uses it"
+ },
  "0010620c": {
   "name": "utlFindClear",
   "tag": "ror-inferred",
@@ -3005,11 +3011,53 @@
   "was": "FUN_00140e88",
   "why": "mag/magscenefocus.cpp neighbour; when +0x853c0 != -1 runs 0x140fdc / 0x141184 for the flags at +0x853bc (bit 1 twice, bit 0 once) with frame & 1 picking 0 or 0x70"
  },
+ "00141e44": {
+  "name": "MagLoaderIndex::dump",
+  "tag": "ror-inferred",
+  "was": "FUN_00141e44",
+  "why": "called after add by MagCharaLoader::initFromPacks; an empty loop over m_num: a debug print compiled out"
+ },
+ "00141e78": {
+  "name": "MagLoaderIndex::calcSize",
+  "tag": "ror-inferred",
+  "was": "FUN_00141e78",
+  "why": "num * 13 + nameBytes: the size of one block holding the size, offset and name-pointer words and a length byte per entry, then the names"
+ },
+ "00141e90": {
+  "name": "MagLoaderIndex::scanNames",
+  "tag": "ror-inferred",
+  "was": "FUN_00141e90",
+  "why": "magloader.cpp line 62 assert theNameBuf; walks theNum NUL-separated names storing each length and start offset, returns the bytes used"
+ },
+ "00141f54": {
+  "name": "MagLoaderIndex::create",
+  "tag": "ror-inferred",
+  "was": "FUN_00141f54",
+  "why": "magloader.cpp asserts 0 < theNum && theNum <= 1024 and m_data; allocates one block from the game heap and fills sizes, offsets plus base, names, lengths from a pack header's tables"
+ },
+ "001420f8": {
+  "name": "MagLoaderIndex::add",
+  "tag": "ror-inferred",
+  "was": "FUN_001420f8",
+  "why": "create when empty, else a new block with the old entries then the new ones (assert data), releases the old block; last argument sorts the new tail by name (strncmp 32)"
+ },
  "00142500": {
   "name": "MagLoaderIndex::find",
   "tag": "ror-inferred",
   "was": "FUN_00142500",
   "why": "index of the name in the table (+0x14) of m_num entries (case-insensitive compare 0x106010), -1 when none"
+ },
+ "0014257c": {
+  "name": "MagLoaderIndex::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_0014257c",
+  "why": "zeroes words 0..6 (m_num, m_data, m_data_size, the three tables, the lengths); MagScene ctor and every init call it"
+ },
+ "0014259c": {
+  "name": "MagLoaderIndex::release",
+  "tag": "ror-inferred",
+  "was": "FUN_0014259c",
+  "why": "frees m_data to the game heap 0x6e9800 then clear; MagScene dtor calls it for both loaders' indexes"
  },
  "001425dc": {
   "name": "MagCharaLoader::init",
@@ -3017,11 +3065,23 @@
   "was": "FUN_001425dc",
   "why": "mag/magloader.cpp: reads the header of data/ch/CHARA.RPK and fills the per-category character counts and the name index (+0xcc)"
  },
+ "00142908": {
+  "name": "MagCharaLoader::initFromPacks",
+  "tag": "ror-inferred",
+  "was": "FUN_00142908",
+  "why": "no callers; init's twin over the 20 loose packs data/ch/pc/PC.RPK .. data/ch/12/CHAP12.RPK (table 0x298d80) when they exist, assert 0 at lines 599 / 606"
+ },
  "00142b18": {
   "name": "MagCharaLoader::load",
   "tag": "ror-inferred",
   "was": "FUN_00142b18",
   "why": "mag/magloader.cpp asserts theIndex >= 0, size > 0, offset > 0, pbuf: allocates the entry and reads it from CHARA.RPK"
+ },
+ "00142c2c": {
+  "name": "MagCharaLoader::getCategory",
+  "tag": "ror-inferred",
+  "was": "FUN_00142c2c",
+  "why": "the 0..19 category (PC, BWN, ACTION ... CHAP12) whose m_num_chara / start range holds pack entry theIndex; the search getId inlines"
  },
  "00142c88": {
   "name": "MagCharaLoader::getIndex",
@@ -3034,6 +3094,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00142dac",
   "why": "the inverse of getIndex: the category holding the pack index, its id base (0x2000, 0x2400, 0, ...) plus the offset"
+ },
+ "00142e84": {
+  "name": "MagCharaLoader::MagCharaLoader",
+  "tag": "ror-inferred",
+  "was": "FUN_00142e84",
+  "why": "MagScene ctor calls it on +0x215c: FileReader ctor, index clear, the 20 counts and starts zeroed"
  },
  "00142ed8": {
   "name": "MagMapLoader::init",

@@ -575,7 +575,20 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     character id = (category << 10) + n, < 0x5800, 22 categories; getIndex 0x142c88 / getId
     0x142dac / load 0x142b18; name index `MagLoaderIndex` at +0xcc, find 0x142500 case-insensitive)
     and `MagMapLoader` at +0x224c (data/bg/mapunit.bin, loadByName 0x142fd0). Both start with a
-    `FileReader` (+0) and its `FileReadReq` (+8).
+    `FileReader` (+0) and its `FileReadReq` (+8). Written 2026-10-26 (all 17, 0x141e44..0x14313c):
+    CHARA.RPK is a pack of 20 packs named PC, BWN, ACTION, ITEM, FIX, ENEMY, DOOR, INST,
+    CHAP01..CHAP12 (table data 0x2eed80); init reads its 2048-byte header, then the first 0x2000
+    bytes of each sub-pack, and appends each header's entries with the sub-pack's offset added, so
+    `m_num_chara[20]` (+0x2c) / `m_chara_start[20]` (+0x7c) give each pack's entry range. Id
+    category -> pack: 8 PC, 9 BWN, 0 ACTION, 3 ITEM, 2 FIX, 5 ENEMY, 6 DOOR, 4 INST, 10..21
+    CHAP01..12 (1 and 7 none). The file stays open from init (m_close 0); load reads at the
+    entry's offset into a 64-aligned game-heap buffer. `MagLoaderIndex` (EE 0x24): m_num,
+    m_data (one heap block: sizes, offsets, name pointers, name-length bytes, then the names;
+    calcSize = num * 13 + name bytes on the EE), m_data_size, m_size, m_offset, m_name,
+    m_name_len, m_name_size, m_name_buf; create 0x141f54 (max 1024 entries), add 0x1420f8
+    (rebuilds the block, optional exchange sort of the new tail by strncmp 32), clear 0x14257c
+    (words 0..6 only), release 0x14259c. initFromPacks 0x142908 (no callers) reads the loose
+    packs data/ch/pc/PC.RPK .. data/ch/12/CHAP12.RPK (table data 0x298d80) instead.
   - `MagScene::load(ctx, id, data, copy)` 0x1377f0 takes a map unit pack into the first free sky
     slot (no check when all four are taken): file 0 is the model pack (its name minus the extension
     names the other files), loaded by DogModel slot 14 into m_model[0]; the model pack's file 2 is
