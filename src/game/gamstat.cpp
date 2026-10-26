@@ -15,11 +15,72 @@
 #include "lib/unassigned.h"
 #include "mag/magscene.h"
 #include "mag/magsystem.h"
+#include "bed/bedmemory.h"
+#include "utl/utlmisc.h"
 
 /* The scene actor an object drives (MagScene's array at bss 0x6fe6a0). */
 static inline DogActor &gamActor(int no)
 {
     return g_magSystem.m_scene.m_actors[no];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d84c8
+
+static const char s_file[] = "game/gamstat.cpp";
+
+void GamIdMap::init(int def, int count)
+{
+    int size = count * 2;
+    m_keys = (u_short *)g_utlMemory.allocDebug(size, s_file, 31, 0, 2);
+    m_values = (u_short *)g_utlMemory.allocDebug(size, s_file, 33, 0, 2);
+    memset(m_keys, 0, size);
+    memset(m_values, 0, size);
+    m_default = def;
+    m_count = count;
+    m_10 = 0;
+    m_14 = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d859c // callcheck: operator_delete (the deleting destructor's, emitted by the compiler)
+
+GamIdMap::~GamIdMap()
+{
+    utlMemFree(m_keys);
+    utlMemFree(m_values);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d85f8
+
+void GamIdMap::add(u_short key, u_short value)
+{
+    u_int i;
+    for (i = 0; i < m_count; i++)
+        if (m_values[i] == 0)
+            break;
+    if (i < m_count)
+    {
+        m_values[i] = value;
+        m_keys[i] = key;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d8778
+
+u_int GamIdMap::find(u_short key)
+{
+    u_int i;
+    for (i = 0; i < m_count; i++)
+    {
+        if (m_values[i] == 0)
+            return m_default;
+        if (m_keys[i] == key)
+            return m_values[i];
+    }
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -141,6 +202,63 @@ void ObjStat::setRot(const float *rot)
     m_rot[2] = rot[2];
     if (m_actor != -1)
         g_magSystem.setActorRotate(m_actor, m_rot);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d8adc
+
+int ObjStat::trySetPos(float *pos)
+{
+    GamSecta *cell = g_gamMan.findSectaCell(pos, m_secta, gamOidType(m_oid) == 2);
+    if (cell != NULL)
+    {
+        setSecta(cell);
+        pos[1] = m_pos[1];
+        setPos(pos);
+    }
+    return cell != NULL;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d8b5c
+
+int ObjStat::hasSectaAt(const float *pos)
+{
+    return g_gamMan.findSectaCell(pos, m_secta, gamOidType(m_oid) == 2) != NULL;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d8b9c
+
+void ObjStat::setPosOnFloor(float *pos)
+{
+    GamSecta *cell = g_gamMan.findSectaCell(pos, m_secta, gamOidType(m_oid) == 2);
+    setSecta(cell);
+    float y = g_gamMan.getSectaCellY(cell, pos, 0);
+    if (y != 100000.0f)
+        pos[1] = y;
+    setPos(pos);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// An object that already has a cell asks for the height of a NULL cell,
+// so it gets 100000 (the ROM: the cell register stays 0 on that path).
+// ROR 0x001d8c50 // callcheck: FUN_001f6878 (gamOidType inline)
+
+float ObjStat::getPosSectaY()
+{
+    GamSecta *cell = NULL;
+    if (m_secta == NULL)
+    {
+        g_gamMan.selectSectaList(gamOidType(m_oid) == 2);
+        cell = g_gamMan.pickSectaCell(m_pos, 0);
+        g_gamMan.selectSectaList(0);
+        if (cell == NULL)
+            return 0.0f;
+        setSecta(cell);
+    }
+    getPos(m_pos);
+    return g_gamMan.getSectaCellY(cell, m_pos, 0);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -575,6 +693,26 @@ void ACHRstat::initParamFuncs()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// No direct callers.
+// ROR 0x001d9e9c
+
+void ACHRstat::release()
+{
+    releaseActor();
+    if (g_taskMan.getTask(m_taskId) != NULL)
+        g_taskMan.killTask(m_taskId);
+    if (g_taskMan.getTask(m_placeTask) != NULL)
+        g_taskMan.killTask(m_placeTask);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d9f08
+
+void ACHRstat::empty1d9f08()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001d9f10
 
 void ObjStat::clearSecta(int all)
@@ -585,6 +723,34 @@ void ObjStat::clearSecta(int all)
         m_sectaLast = NULL;
     // The ROM calls ACHRstat::killTasks on this; every caller passes an achr.
     static_cast<ACHRstat *>(this)->killTasks();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d9f84
+
+int ACHRstat::isMotionEnd()
+{
+    int end = !gamActor(m_actor).isModeSet();
+    if ((m_flags & 0x100) != 0)
+    {
+        MagScene &scene = g_magSystem.m_scene;
+        if (scene.getActorMotionSpeed(m_actor) < 0.0f)
+        {
+            if (-1e-07f <= scene.getActorMotionSpeed(m_actor))
+                end = 0;
+        }
+        else if (scene.getActorMotionSpeed(m_actor) <= 1e-07f)
+            end = 0;
+    }
+    return end;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001da05c
+
+int ACHRstat::isTurnDone()
+{
+    return m_task[1] == -1;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -616,6 +782,20 @@ void ACHRstat::pauseTasks(int on, int all)
     g_taskMan.pauseTask(m_task[0], on);
     g_taskMan.pauseTask(m_task[3], on);
     g_taskMan.pauseTask(m_task[1], on);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// No direct callers.
+// ROR 0x001da1b4
+
+void ACHRstat::killMoveTasks()
+{
+    if (g_taskMan.getTask(m_task[0]) != NULL)
+        g_taskMan.killTask(m_task[0]);
+    if (g_taskMan.getTask(m_task[3]) != NULL)
+        g_taskMan.killTask(m_task[3]);
+    m_task[3] = -1;
+    m_task[0] = -1;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1104,6 +1284,29 @@ void FCHRstat::setRot(const float *rot)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x001db8e8
+
+static const char s_mapNone[] = "<map_none>";  /* data 0x2d8f60's string */
+
+const char *gamGetWrdString(int which, int wrd)
+{
+    if (g_gamMan.getWrdNo() == -1)
+        return s_mapNone;
+    const WrdEntry *e = g_wrdTable.get(wrd == -1 ? g_gamMan.getWrdNo() : wrd);
+    if (e == NULL)
+        return s_mapNone;
+    switch (which)
+    {
+    case 0:  return e->m_str0;
+    case 1:
+    case 4:  return e->m_mapName;
+    case 2:  return e->m_text;
+    case 3:  return e->m_str3;
+    default: return s_mapNone;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Written ahead for GamMan::startStage2.
 // ROR 0x001db9c4
 
@@ -1155,6 +1358,22 @@ void gamWrdConvPos(int op, float *a, float *b)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x001dbcf0
+
+void gamSetWrdRoom(GamMan *gam, const void *file)
+{
+    (void)file;
+    const WrdEntry *e = g_wrdTable.get(g_gamMan.getWrdNo());
+    if (e == NULL)
+    {
+        gam->m_18dd0 = 0;
+        return;
+    }
+    gam->m_18dd0 = e->m_18;
+    gam->m_18dc0 = e->m_mapArea;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001dbef8
 
 void GamSysData::set(u_char *data)
@@ -1203,9 +1422,104 @@ static u_int *sysFlagWord(GamSysData *sys, short id)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// getField's writer, as the ROM has it: only a few fields per table are
+// stored; the smell uids 0x10..0x12 are copied out of the record into
+// data for every table but 1, and so are table 9's 0x1d / 0x1e (its jump
+// tables share getField-like read tails). Other fields do nothing.
+// ROR 0x001dc070
+
+void GamSysData::setField(int id, int field, const void *data)
+{
+    u_short u = (u_short)id;
+    u_int   table = u >> 9;
+    // PORT: the read paths write through data (the ROM's pointer is not const).
+    u_short *io = (u_short *)data;
+    if (table > 9)
+        return;
+    GamSysRec *head = (GamSysRec *)getRec((short)u);
+
+    if (table == 1)
+    {
+        switch (field)
+        {
+        case GAM_PRM_O_SMELL_UID_1: head->m_smell_uid[0] = *io; break;
+        case GAM_PRM_O_SMELL_UID_2: head->m_smell_uid[1] = *io; break;
+        case GAM_PRM_O_SMELL_UID_3: head->m_smell_uid[2] = *io; break;
+        case GAM_PRM_A_MAX_LP: ((GamSysChrRec *)head)->m_stats.m_max_lp = *io; break;
+        }
+        return;
+    }
+
+    /* Every other table: the smell uids go the other way. */
+    switch (field)
+    {
+    case GAM_PRM_O_SMELL_UID_1: *io = head->m_smell_uid[0]; return;
+    case GAM_PRM_O_SMELL_UID_2: *io = head->m_smell_uid[1]; return;
+    case GAM_PRM_O_SMELL_UID_3: *io = head->m_smell_uid[2]; return;
+    }
+
+    switch (table)
+    {
+    case 2:
+    {
+        GamSysRec2 *r2 = (GamSysRec2 *)head;
+        if (field >= 0x4f && field <= 0x58)
+            r2->m_98[field - 0x4f] = *io;
+        else if (field >= 0x70 && field <= 0x72)
+            r2->m_ac[field - 0x70] = *io;
+        break;
+    }
+    case 3:
+    {
+        GamSysRec3 *r3 = (GamSysRec3 *)head;
+        if (field == 0x75)
+            r3->m_d4 = *io;
+        else if (field == 0x76)
+            r3->m_d6 = *io;
+        break;
+    }
+    case 5:
+    {
+        GamSysRec5 *r5 = (GamSysRec5 *)head;
+        switch (field)
+        {
+        case 0x1d: r5->m_a4 = *io; break;
+        case 0x1e: r5->m_a6 = *io; break;
+        case 0x31: r5->m_1d8 = *io; break;
+        case 0x42: r5->m_1fc = *(const int *)data; break;
+        }
+        break;
+    }
+    case 4:
+    case 6:
+    case 7:
+    case 8:
+    {
+        GamSysObjRec *rec = (GamSysObjRec *)head;
+        if (field == 0x1d)
+            rec->m_a4 = *io;
+        else if (field == 0x1e)
+            rec->m_a6 = *io;
+        else if (table == 8 && field == 0x39)
+            rec->m_b4 = *io;
+        break;
+    }
+    case 9:
+    {
+        GamSysObjRec *rec = (GamSysObjRec *)head;
+        if (field == 0x1d)
+            *io = rec->m_a4;
+        else if (field == 0x1e)
+            *io = rec->m_a6;
+        break;
+    }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Field field of record id into out. The record's id is its own table's
 // layout; fields outside a table's list leave out alone.
-// ROR 0x001dc48c
+// ROR 0x001dc48c // callcheck: dpdiv, dpmul, dptofp, fptodp (libgcc soft double: the neck range's degrees to radians)
 
 void GamSysData::getField(int id, int field, void *out)
 {
@@ -1432,52 +1746,4 @@ void ACHRstat::get_o_node_name(void *out)
 {
     if (m_rec != NULL)
         strcpy((char *)out, m_rec->m_head.m_node_name);
-}
-
-// ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x001dc070
-void GamSysData::setField(int id, int field, const void *data)
-{
-    ROSEPAN_STUB("GamSysData::setField", 0x001dc070);
-}
-
-// stub of ROR 0x001dbcf0
-void gamSetWrdRoom(GamMan *gam, const void *file)
-{
-    ROSEPAN_STUB("gamSetWrdRoom", 0x001dbcf0);
-}
-
-// stub of ROR 0x001d9f08
-void ACHRstat::empty1d9f08()
-{
-    ROSEPAN_STUB("ACHRstat::empty1d9f08", 0x001d9f08);
-}
-
-// stub of ROR 0x001d9f84
-int ACHRstat::isMotionEnd()
-{
-    ROSEPAN_STUB("ACHRstat::isMotionEnd", 0x001d9f84);
-    return {};
-}
-
-// stub of ROR 0x001da05c
-int ACHRstat::isTurnDone()
-{
-    ROSEPAN_STUB("ACHRstat::isTurnDone", 0x001da05c);
-    return {};
-}
-
-// stub of ROR 0x001db8e8
-const char * gamGetWrdString(int which, int wrd)
-{
-    ROSEPAN_STUB("gamGetWrdString", 0x001db8e8);
-    return {};
-}
-
-// stub of ROR 0x001d8c50
-float ObjStat::getPosSectaY()
-{
-    ROSEPAN_STUB("ObjStat::getPosSectaY", 0x001d8c50);
-    return {};
 }

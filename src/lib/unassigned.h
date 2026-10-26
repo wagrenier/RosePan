@@ -618,13 +618,16 @@ float i3dPointSegDist2(const float *p, const float *a, const float *d, float *t)
 
 /* ---- the word table (unassigned@00164fc0: 0x17e0a8..0x17eff4) ---- */
 
-/* A word-table record: the text at +0x10. layout: host -- the text is a
- * pointer; the file format is not read yet. */
+/* A word-table record: the strings +0x08..+0x14. layout: host -- the
+ * strings are pointers; the file format is not read yet. */
 struct WrdEntry
 {
-    int         _00[4];
-    const char *m_text;         // ROR 0x10: S2dMes::drawMapName's caption
-    int         _14[2];
+    int         _00[2];
+    const char *m_str0;         // ROR 0x08: gamGetWrdString 0
+    const char *m_mapName;      // ROR 0x0c: gamGetWrdString 1 / 4 (GamMan::getMapName)
+    const char *m_text;         // ROR 0x10: gamGetWrdString 2, S2dMes::drawMapName's caption
+    const char *m_str3;         // ROR 0x14: gamGetWrdString 3
+    int         m_18;           // ROR 0x18: gamSetWrdRoom keeps it in GamMan +0x18dd0
     int         m_mapArea;      // ROR 0x1c: GamMan::getMapArea (gamSetWrdRoom keeps it in GamMan +0x18dc0)
     float       m_ofs[3];       // ROR 0x20: the room's offset (cnvPosW2L / cnvPosL2W, gamWrdConvPos op 2)
 };

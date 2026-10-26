@@ -865,6 +865,13 @@ struct GamMan
      * at cur), NULL when none or its flags bit 2 is set; type2: the oid's
      * type is 2 (ObjStat's position setters). */
     GamSecta *findSectaCell(const float *pos, GamSecta *cur, int type2); // ROR 0x001d8064
+    /* The secta list later lookups use (+0x22ab0, through 0x1d83c0). */
+    void selectSectaList(int list);                                      // ROR 0x001d7eb8
+    /* The cell of pos in list from scratch (0x17c340, radius 40), NULL none. */
+    GamSecta *pickSectaCell(const float *pos, int list);                 // ROR 0x001d7f48
+    /* The floor height of cell under pos (0x17dd5c on list); 100000 for a
+     * NULL cell. */
+    float getSectaCellY(GamSecta *cell, const float *pos, int list);     // ROR 0x001d817c
     void placeAchr(int oid, void *out, int arg);                         // ROR 0x001d544c
     /* The table data 0x2fc1f8 (8-word rows, -1 ends): column col of the
      * row whose column keyCol is key (keyCol 99: row key). -1 none. */
