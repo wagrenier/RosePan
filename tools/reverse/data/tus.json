@@ -185,7 +185,7 @@
    "why": "game/gamman.cpp asserts and allocDebug tags in init, loadSystemData, loadStage; GamMan's constructor 0x1c05c0 starts it after GamFont, switchVolume 0x1d3ac8 ends it; ObjStat and GamArea code follows (unassigned@001d3b44)"
   },
   "game/gamstat.cpp": {
-   "notes": "Left: GamSysData::setField 0x1dc070 (stub, a tangled switch that reads into data for most fields), helpers 0x1d84c8..0x1d87f4, 0x1d88fc, 0x1d8adc..0x1d8c50, 0x1d8fec, 0x1d9e9c, 0x1d9f40..0x1da1b4, 0x1dac8c, 0x1db19c, 0x1db8e8..0x1dbdf0 and the hidden 0x1d96e0. 0x1dd1e8..0x1dd558 (GamMan member ctor, its deleting dtor, GamArea::init) belongs to game/gamtrg.cpp. Decisions: ObjStat got its virtual destructor; save / load go through the EE-layout ObjStatSave (cell pointers written 0); GamMan m_dogSave widened to 0xb0 (the ROM writes 0xb0); getField names / field 0x25 write host pointers. ACHRstat::setParam keeps the ROM fallthrough into param 0x32. New Game run (pad 1800:START,2400:START,2700:CROSS, 140 s) still hits the 10d access violation; entry traces showed it happens after the last ObjStat::setHide returns, outside this file. Every object has scene actor 0 because MagSystem::loadModel / DogActor::load are stubs. Boot screenshot unchanged (Atlus disclaimer). Next blockers on that road: the 10d crash, GamMan::findSectaCell 0x1d8064, queueObjUpdate, relinkObj (unassigned@001d3b44).",
+   "notes": "Left in this TU: FUN_001d9f40 (GamMan::clearObjAttr's folded function: getTask(m_task[2]) then tail-calls 0x1e8f88 with the word +0x3d0, a pointer whose +0xc is an actor number -- needs a host type for ACHRstat _3d0), FUN_001da074 (empty, caller 0x1fabd0, class unknown), the map-screen helpers 0x1dbb38 / 0x1dbb74 / 0x1dbc5c / 0x1dbd90 / 0x1dbdf0 (callers in mnu 0x1949bc / 0x196878; they read bss 0x7a320c, 0x7a32e0 and 0x7b2060 +0x18 and a 0x18-byte-row table at data 0x2fc748 indexed by GamMan::getMapArea), and the hidden 0x1d96e0. Decisions: setField keeps the ROM behaviour where the smell uids (and table 9 fields 0x1d / 0x1e) are copied out of the record into data; getPosSectaY returns 100000 for an object that already has a cell (the ROM passes a NULL cell). Screenshot unchanged (Atlus disclaimer); nothing here draws at boot. Next blockers on the New Game road: the 10d access violation, GamMan::findSectaCell 0x1d8064 and the new secta helpers 0x1d7eb8 / 0x1d7f48 / 0x1d817c, queueObjUpdate, relinkObj.",
    "ranges": [
     [
      "001d84c8",
@@ -197,6 +197,11 @@
      "date": "2026-10-26 09:06",
      "status": "partial",
      "summary": "game/gamstat.cpp pinned (0x1d84c8..0x1dd1e8, was unassigned@001d859c) with gamstat.h: ObjStat (ctor, pos / rot, secta cells, base params, setHide, releaseActor, save / load, clearSecta, work, the ELF accessors), ACHRstat (init, initParamFuncs, get / setParam, killTasks, pauseTasks, setMotionSpeed), FCHRstat (init, params, pos / rot), gamWrdConvPos, GamSysData (set, getRec, getField, flag functions). Param ids named from the ELF accessors (GamParam); ObjStat::setPos / getPos / setRot renamed from ACHRstat."
+    },
+    {
+     "date": "2026-10-26 14:02",
+     "status": "partial",
+     "summary": "game/gamstat.cpp slice 2: the seven frontier stubs written (ObjStat::getPosSectaY, ACHRstat::isMotionEnd / isTurnDone / empty1d9f08, gamGetWrdString, gamSetWrdRoom, GamSysData::setField with the ROM's read-back tails), plus ObjStat::trySetPos / hasSectaAt / setPosOnFloor, ACHRstat::release / killMoveTasks and GamIdMap (0x1d84c8..0x1d87f4, a u_short map). WrdEntry got its four string pointers; GamMan::selectSectaList / pickSectaCell / getSectaCellY declared (stubs in unassigned@001d3b44)."
     }
    ],
    "status": "partial",

@@ -59,6 +59,29 @@ enum GamParam
     GAM_PRM_A_NECK_ROT_RANGE   = 0x21,  // degrees in the record, radians from getField
 };
 
+/* A u_short to u_short map in two parallel arrays (EE 0x18 bytes; class
+ * name invented): a slot whose value is 0 is free. Built by 0x164364
+ * (unassigned@00164fc0). layout: host -- pointers. */
+struct GamIdMap
+{
+    /* count slots of each array (game heap, cleared), def the default. */
+    void init(int def, int count);                                       // ROR 0x001d84c8
+    /* Frees both arrays (the ROM's deleting destructor also frees this). */
+    ~GamIdMap();                                                         // ROR 0x001d859c
+    /* key / value into the first free slot (none: nothing). */
+    void add(u_short key, u_short value);                                // ROR 0x001d85f8
+    /* The value of key: the default when a free slot comes first, 0 when
+     * the full map lacks it. */
+    u_int find(u_short key);                                             // ROR 0x001d8778
+
+    u_int    m_count;               // ROR 0x00
+    u_short *m_keys;                // ROR 0x04
+    u_short *m_values;              // ROR 0x08: 0 a free slot
+    u_int    m_default;             // ROR 0x0c
+    int      m_10;                  // ROR 0x10: 0 after init
+    int      m_14;                  // ROR 0x14: 0 after init
+};
+
 /* ---- the system pack's records (file data, plain EE layout) ---- */
 
 /* The 0x80 bytes every record starts with. */
@@ -330,6 +353,14 @@ struct ObjStat
     float getPosSectaY();                                                // ROR 0x001d8c50
     /* The cell of +0x190 from scratch. */
     void findSecta();                                                    // ROR 0x001d8ea8
+    /* pos's cell (from the current one): when there is one, setSecta, keep
+     * its own height (pos[1] = +0x194) and setPos. Returns found. */
+    int  trySetPos(float *pos);                                          // ROR 0x001d8adc
+    /* pos has a secta cell (from the current one). */
+    int  hasSectaAt(const float *pos);                                   // ROR 0x001d8b5c
+    /* pos's cell into setSecta, pos[1] its floor height (when it has a
+     * cell), then setPos. */
+    void setPosOnFloor(float *pos);                                      // ROR 0x001d8b9c
     /* Hides (hide) / shows the actor through its setHide; with bit 0x40
      * of m_flags showing re-finds the cell, hiding re-links it. */
     void setHide(int hide);                                              // ROR 0x001d95c4
@@ -461,6 +492,10 @@ struct ACHRstat : ObjStat
     void setMotionSpeed(float speed);                                    // ROR 0x001db1b8
     /* Kills its four tasks (m_task[2], [0], [3], [1]) and sets them -1. */
     void killTasks();                                                    // ROR 0x001da07c
+    /* ObjStat::releaseActor, then kills m_taskId and m_placeTask. */
+    void release();                                                      // ROR 0x001d9e9c
+    /* Kills m_task[0] and m_task[3] and sets them -1. */
+    void killMoveTasks();                                                // ROR 0x001da1b4
     /* Empty (GamMan::emptyAchr1d3a14). */
     void empty1d9f08();                                                  // ROR 0x001d9f08
     /* The actor's motion ended (DogActor::isModeSet clear; with m_flags
@@ -588,8 +623,8 @@ struct FCHRstat : ObjStat
  * getWrdOffset call it. */
 void gamWrdConvPos(int op, float *a, float *b);                          // ROR 0x001dba3c
 /* One of the WRD entry strings of room wrd (-1: GamMan's room), which
- * 0..4 (2 the room name GamMan::showRoomName shows); "" without an
- * entry. The ROM's this is GamMan +0x18c00, not read. */
+ * 0..4 (2 the room name GamMan::showRoomName shows); "<map_none>"
+ * without a room or an entry. The ROM's this is GamMan +0x18c00, not read. */
 const char *gamGetWrdString(int which, int wrd);                         // ROR 0x001db8e8
 /* The room offset's x / z of GamMan's room, 0 without a WRD entry (the
  * ROM's this, GamMan +0x18c00, is not read). */

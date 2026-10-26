@@ -1636,3 +1636,23 @@ void CmnTaskMan::killKinds(const int *kinds)
 {
     ROSEPAN_STUB("CmnTaskMan::killKinds", 0x001e7910);
 }
+
+// stub of ROR 0x001d817c
+float GamMan::getSectaCellY(GamSecta *cell, const float *pos, int list)
+{
+    ROSEPAN_STUB("GamMan::getSectaCellY", 0x001d817c);
+    return {};
+}
+
+// stub of ROR 0x001d7f48
+GamSecta * GamMan::pickSectaCell(const float *pos, int list)
+{
+    ROSEPAN_STUB("GamMan::pickSectaCell", 0x001d7f48);
+    return {};
+}
+
+// stub of ROR 0x001d7eb8
+void GamMan::selectSectaList(int list)
+{
+    ROSEPAN_STUB("GamMan::selectSectaList", 0x001d7eb8);
+}
