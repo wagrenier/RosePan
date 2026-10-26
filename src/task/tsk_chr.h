@@ -243,15 +243,107 @@ struct TskMoveTypeGen : CmnITask           // EE 0xc0, vtable 0x2e4ad0
 {
     TskMoveTypeGen(u_int oid, int mode, intptr_t arg, int kind, float frames, float rate); // ROR 0x001e9a3c
 };
-/* layout: host */
-struct TskMoveTypeRound : CmnITask         // EE 0x80
+/* TskMoveTypeRound : CmnITask (vtable 0x2e4a90, EE 0x80 bytes; kind 9):
+ * native 211 cases 10 / 11 -- an achr circles a centre at radius (kept
+ * within 10 of it), walking at speed along the circle (dir -1 one way,
+ * +1 the other: a blocked move turns it round). By mode: 0 slides around
+ * the actor of object arg (chrSetMotion of motion at rate, facing the
+ * centre when off the ring), 1 slides around the point arg, 2 / 3 let a
+ * chrMtnMove of motion walk around the object / the point (its heading
+ * set each frame). exec places the achr (GamMan::placeAchr, then
+ * ObjStat::trySetPos); a refused move prints "HIT in moving task", keeps
+ * the last position and flags the achr 0x1000. Never ends by itself.
+ * layout: host -- pointers and a member-function pointer; EE offsets in
+ * the comments. */
+struct TskMoveTypeRound : CmnITask
 {
-    TskMoveTypeRound(u_int oid, int mode, intptr_t arg, int kind, float a, float b, float rate); // ROR 0x001eb63c
+    typedef void (TskMoveTypeRound::*StepFunc)();
+
+    TskMoveTypeRound(float radius, float speed, float rate, u_int oid, int mode, intptr_t arg,
+                     int motion);                                        // ROR 0x001eb63c
+    ~TskMoveTypeRound() override {}                                      // ROR 0x001eb944
+
+    int  get_task_type() override { return 9; }                         // ROR 0x002901f8
+    void init() override {}                                              // ROR 0x00290200
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001eb980
+    void term() override;                                                // ROR 0x001eb978
+
+    void stepPoint();                                                    // ROR 0x001ebb80
+    void stepObjMotion();                                                // ROR 0x001ebde8
+    void stepObj();                                                      // ROR 0x001ec0e4
+
+    ACHRstat     *m_achr;          // ROR 0x04
+    u_int         m_oid;           // ROR 0x08
+    int           m_actor;         // ROR 0x0c: the achr's actor
+    u_int         m_target;        // ROR 0x10: modes 0 / 2, the centre object
+    int           m_targetActor;   // ROR 0x14: its actor
+    u_int         m_flags;         // ROR 0x18: 1 blocked, 2 turned round (cleared each 60th frame), 4 aimed (each 180th)
+    float         m_radius;        // ROR 0x1c
+    float         m_dir;           // ROR 0x24: 1 or -1, the way round
+    float         m_speed;         // ROR 0x28
+    int           m_mode;          // ROR 0x2c
+    sceVu0FVECTOR m_center;        // ROR 0x30
+    sceVu0FVECTOR m_pos;           // ROR 0x40
+    sceVu0FVECTOR m_rot;           // ROR 0x50: [1] the heading
+    StepFunc      m_stepFunc;      // ROR 0x60: GCC 2 {delta, index, pfn}
+    TskMtnMove   *m_mtnTask;       // ROR 0x68: modes 2 / 3, chrMtnMove's
+    sceVu0FVECTOR m_lastPos;       // ROR 0x70: the last position placed
 };
-/* layout: host */
-struct TskMovePointPath : CmnITask         // EE 0xc0
+/* One point of a TskMovePointPath path (the script's x, z pairs). */
+struct ChrPathPoint
 {
-    TskMovePointPath(u_int oid, int mode, intptr_t path, int arg, int kind, float a, float rate); // ROR 0x001ec344
+    float x;                    // ROR 0x0
+    float z;                    // ROR 0x4
+};
+static_assert(sizeof(ChrPathPoint) == 8, "ChrPathPoint size");
+
+/* TskMovePointPath : CmnITask (vtable 0x2e4a50, EE 0xc0 bytes; kind 10):
+ * native 211 cases 20..23 -- an achr walks the count points of path
+ * from point to point. mode & 3 picks the order (member pointers data
+ * 0x2fdd60..): 0 each point once, 1 round and round, 2 count random
+ * points, 3 random points for ever. Modes 0..3 slide the achr at speed
+ * per frame (sceVu0AddVector + ObjStat::trySetPos, facing the point)
+ * while motion plays (chrSetMotion at rate); modes 4..7 let a
+ * chrMtnMove motion walk it there (chrMoveFrames gives the frames). At
+ * the end motion 1 plays. layout: host -- pointers and a member-function
+ * pointer; EE offsets in the comments. */
+struct TskMovePointPath : CmnITask
+{
+    typedef int (TskMovePointPath::*StepFunc)();
+
+    TskMovePointPath(float speed, float rate, u_int oid, int mode, int count,
+                     const ChrPathPoint *path, int motion);              // ROR 0x001ec344
+    ~TskMovePointPath() override {}                                      // ROR 0x001ec59c
+
+    int  get_task_type() override { return 0xa; }                        // ROR 0x00290258
+    void init() override {}                                              // ROR 0x00290260
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001ec5d8
+    void term() override;                                                // ROR 0x001ec5d0
+
+    /* Aims at m_point: the heading, the velocity and the frames to it. */
+    void aim();                                                          // ROR 0x001ec834
+    int  stepOnce();                                                     // ROR 0x001ec6e8
+    int  stepLoop();                                                     // ROR 0x001ec72c
+    int  stepRandom();                                                   // ROR 0x001ec774
+    int  stepRandomLoop();                                               // ROR 0x001ec7e8
+
+    ACHRstat           *m_achr;        // ROR 0x04
+    u_int               m_oid;         // ROR 0x08
+    const ChrPathPoint *m_path;        // ROR 0x0c
+    const ChrPathPoint *m_point;       // ROR 0x10: the point walked to
+    int                 m_actor;       // ROR 0x14: the achr's actor (ObjStat::m_actor)
+    int                 m_count;       // ROR 0x18
+    int                 m_index;       // ROR 0x1c: points reached
+    int                 m_frames;      // ROR 0x20: frames left to the point
+    float               m_speed;       // ROR 0x2c: the slide per frame (modes 0..3)
+    int                 m_mode;        // ROR 0x30
+    sceVu0FVECTOR       m_pos;         // ROR 0x40
+    sceVu0FVECTOR       m_rot;         // ROR 0x50: [1] the heading
+    sceVu0FVECTOR       m_vel;         // ROR 0x60: the slide (modes 0..3)
+    StepFunc            m_stepFunc;    // ROR 0x70: GCC 2 {delta, index, pfn}
+    CmnITask           *m_mtnTask;     // ROR 0x78: chrMoveFrames' chrMtnMove (modes 4..7)
+    int                 m_motion;      // ROR 0x7c
+    float               m_rate;        // ROR 0x80: the motion's speed
 };
 /* layout: host */
 struct TskMoveSectaFindPath : CmnITask     // EE 0x2c0
@@ -377,6 +469,12 @@ void  chrRotStart(float angle, u_int oid, int frames);                   // ROR 
 void  chrRotTo(float dir, float speed, u_int oid);                       // ROR 0x001f0f9c
 void  chrRotToIn(float dir, u_int oid, int frames);                      // ROR 0x001f10a4
 int   chrRotFrames(float angle, float speed);                            // ROR 0x001f6b8c
+/* Starts (when *task is NULL) a chrMtnMove of motion at rate heading
+ * dir and returns the frames its root move needs for dist: dist over the
+ * move across 50 x the motion's length, times the length, x 25. no is
+ * oid's actor. */
+int   chrMoveFrames(float dir, float dist, float rate, u_int oid, int no, CmnITask **task,
+                    int motion);                                         // ROR 0x001ee7f0
 /* v.x += sinf(angle) * dist, v.z += cosf(angle) * dist. */
 void  utlAddPolar(float angle, float dist, float *v);                    // ROR 0x001f6b28
 

@@ -2339,13 +2339,13 @@ intptr_t seqFunc211(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
     {
     case 10: case 11:
         seqKillTaskOn(id);
-        task = new TskMoveTypeRound(oid, shift * 2 + (int)(op - 10), a2, kind, seqWordFloat(a3),
-                                    seqWordFloat(t0), rate);
+        task = new TskMoveTypeRound(seqWordFloat(a3), seqWordFloat(t0), rate, oid,
+                                    shift * 2 + (int)(op - 10), a2, kind);
         break;
     case 20: case 21: case 22: case 23:
         seqKillTaskOn(id);
-        task = new TskMovePointPath(oid, shift * 4 + (int)(op - 20), a2, (int)a3, kind,
-                                    seqWordFloat(t0), rate);
+        task = new TskMovePointPath(seqWordFloat(t0), rate, oid, shift * 4 + (int)(op - 20),
+                                    (int)a2, (const ChrPathPoint *)a3, kind);
         break;
     case 30:
         seqKillTaskOn(id);

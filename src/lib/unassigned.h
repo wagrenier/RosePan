@@ -149,6 +149,9 @@ u_int utlConvSndId(u_int id);                                            // ROR 
 void  utlNormalize3(float *v);                                           // ROR 0x00106db0
 /* The heading of (x, z) in -pi..pi, 0 for a zero vector (unassigned@00216ad0). */
 float utlAtan2(float x, float z);                                        // ROR 0x00217f10
+/* The heading of (x, z) (pi/2 - acos(x / len), negative for z < 0) in
+ * -pi..pi and its length into *dist; 0 / 0 for a zero vector. */
+float utlDirDist(float x, float z, float *dist);                          // ROR 0x002180e4
 /* Copies src into dst, at most n chars; zero-terminates while room is
  * left (n = strlen: no terminator). */
 void  utlStrNCopy(char *dst, const char *src, int n);                    // ROR 0x0021838c

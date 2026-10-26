@@ -798,6 +798,17 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- TskMoveTypeRound (2026-10-26, task/tsk_chr.cpp): stepPoint (modes 1 / 3) computes its off-ring push
+  with the sign opposite to stepObj / stepObjMotion (inward when inside the ring). Mode 3 subtracts it
+  (so it pushes outward, as the others do); mode 1 adds it, so a mode-1 achr inside the ring is pulled
+  further in. Kept as the ROM does. The ROM also leaves m_flags (+0x18) and m_lastPos (+0x70) unset:
+  the port zeroes the flags and starts m_lastPos at the actor's position. Check both the first time a
+  script circles an achr on screen (native 211 cases 10 / 11).
+- TskMovePointPath / TskMoveTypeRound (same session): a mode the constructor's switch does not know
+  (TskMovePointPath >= 8, TskMoveTypeRound >= 4; from script global 15's shift) sets no step, so the ROM
+  would call garbage. The port uses stepOnce / stepPoint. GamMan::placeAchr now returns int (the ROM
+  returns the hit flag; it is still a stub that returns 0).
+
 - TskChrRot::stepFrames (2026-10-26, task/tsk_chr.cpp): each frame the ROM writes the heading into word
   +0x6c of whatever task runs in ACHRstat::m_task[2]. That is TskMtnMove's m_rotY, but TskMtnMove2's
   m_step (its speed / (1/60)). The port keeps the ROM's write for both classes (through dynamic_cast).

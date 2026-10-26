@@ -876,7 +876,9 @@ struct GamMan
     /* The floor height of cell under pos (0x17dd5c on list); 100000 for a
      * NULL cell. */
     float getSectaCellY(GamSecta *cell, const float *pos, int list);     // ROR 0x001d817c
-    void placeAchr(int oid, void *out, int arg);                         // ROR 0x001d544c
+    /* Non-zero when the achr hits something (out: the hit record, +0x10
+     * the other oid). */
+    int  placeAchr(int oid, void *out, int arg);                         // ROR 0x001d544c
     /* The table data 0x2fc1f8 (8-word rows, -1 ends): column col of the
      * row whose column keyCol is key (keyCol 99: row key). -1 none. */
     int  lookupFlagTable(int keyCol, int key, int col);                  // ROR 0x001d83d0

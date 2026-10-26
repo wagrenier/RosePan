@@ -9389,11 +9389,83 @@
   "was": "FUN_001eb63c",
   "why": "the constructor of class TskMoveTypeRound (rtti); 0x80 bytes, native 211 ops 10 / 11"
  },
+ "001eb944": {
+  "name": "TskMoveTypeRound::~TskMoveTypeRound",
+  "tag": "ror-inferred",
+  "was": "FUN_001eb944",
+  "why": "vtable 0x2e4a90 slot 6: stores the vtable, deletes on bit 0"
+ },
+ "001eb978": {
+  "name": "TskMoveTypeRound::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001eb978",
+  "why": "vtable 0x2e4a90 slot 5, empty"
+ },
+ "001eb980": {
+  "name": "TskMoveTypeRound::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001eb980",
+  "why": "vtable 0x2e4a90 slot 4: calls the step member pointer, placeAchr / trySetPos, HIT in moving task message, setRot"
+ },
+ "001ebb80": {
+  "name": "TskMoveTypeRound::stepPoint",
+  "tag": "ror-inferred",
+  "was": "FUN_001ebb80",
+  "why": "member pointer data 0x2fdcc0 (modes 1 / 3): quarter turn around the fixed centre +0x30, mode 3 writes the motion task's heading"
+ },
+ "001ebde8": {
+  "name": "TskMoveTypeRound::stepObjMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001ebde8",
+  "why": "member pointer data 0x2fdcc8 (mode 2): centre from the target actor, heading to the chrMtnMove task"
+ },
+ "001ec0e4": {
+  "name": "TskMoveTypeRound::stepObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001ec0e4",
+  "why": "member pointer data 0x2fdcb8 (mode 0): slides around the target actor"
+ },
  "001ec344": {
   "name": "TskMovePointPath::TskMovePointPath",
   "tag": "ror-inferred",
   "was": "FUN_001ec344",
   "why": "the constructor of class TskMovePointPath (rtti); 0xc0 bytes, native 211 ops 20..23"
+ },
+ "001ec59c": {
+  "name": "TskMovePointPath::~TskMovePointPath",
+  "tag": "ror-inferred",
+  "was": "FUN_001ec59c",
+  "why": "vtable 0x2e4a50 slot 6: stores the vtable, deletes on bit 0"
+ },
+ "001ec5d0": {
+  "name": "TskMovePointPath::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001ec5d0",
+  "why": "vtable 0x2e4a50 slot 5, empty"
+ },
+ "001ec5d8": {
+  "name": "TskMovePointPath::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001ec5d8",
+  "why": "vtable 0x2e4a50 slot 4: moves toward the point while frames are left, then the step member pointer; ends with chrMtnMove motion 1"
+ },
+ "001ec774": {
+  "name": "TskMovePointPath::stepRandom",
+  "tag": "ror-inferred",
+  "was": "FUN_001ec774",
+  "why": "member pointer data 0x2fdd70 (modes 2 / 6): count random points (rand % count), then ends"
+ },
+ "001ec7e8": {
+  "name": "TskMovePointPath::stepRandomLoop",
+  "tag": "ror-inferred",
+  "was": "FUN_001ec7e8",
+  "why": "member pointer data 0x2fdd78 (modes 3 / 7): random points for ever"
+ },
+ "001ec834": {
+  "name": "TskMovePointPath::aim",
+  "tag": "ror-inferred",
+  "was": "FUN_001ec834",
+  "why": "ctor tail call and exec: direction / distance to +0x10's point, sets velocity, heading and frames (or chrMoveFrames for modes >= 4)"
  },
  "001ec940": {
   "name": "TskMoveSectaFindPath::TskMoveSectaFindPath",
@@ -9406,6 +9478,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001ed998",
   "why": "the constructor of class TskMoveSecta (rtti); 0x80 bytes, native 211 ops 40..51"
+ },
+ "001ee7f0": {
+  "name": "chrMoveFrames",
+  "tag": "ror-inferred",
+  "was": "FUN_001ee7f0",
+  "why": "starts chrMtnMove into *a2 once, returns frames from the motion length and getActorMotionMove root move for the distance; 7 movement-task callers"
  },
  "001ef184": {
   "name": "TskAvoidMove::TskAvoidMove",
@@ -11236,6 +11314,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00217f10",
   "why": "angle of (x, z): acos(x / len) signed by z, rotated by pi/2 and wrapped into -pi..pi; 0 for a zero vector; getObjDirTo's heading"
+ },
+ "002180e4": {
+  "name": "utlDirDist",
+  "tag": "ror-inferred",
+  "was": "FUN_002180e4",
+  "why": "sqrt of x, z into *a0, returns pi/2 - acos(x/len) signed by z, wrapped to -pi..pi; next to utlAtan2"
  },
  "0021838c": {
   "name": "utlStrNCopy",
