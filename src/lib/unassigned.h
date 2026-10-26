@@ -111,9 +111,9 @@ struct TskSndParam
     int         m_volL;         // ROR 0x04
     int         m_volR;         // ROR 0x08
     int         m_id;           // ROR 0x0c: the SndMan id
-    int         _10;
+    int         m_attr;         // ROR 0x10: kind 5 (GamSndMan::playSE's delayed SE): the attribute
     int         m_frames;       // ROR 0x14
-    int         _18;
+    float       m_pitch;        // ROR 0x18: kind 5: the pitch
     const char *m_name;         // ROR 0x1c: kind 7 copies the name (0x1b chars)
     int         m_curL;         // ROR 0x20
     int         m_curR;         // ROR 0x24

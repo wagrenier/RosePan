@@ -1385,18 +1385,21 @@ throughout (identifiers, env variables, files, shader macros):
 
 - `GamSndMan` (GamMan +0x18e00 = 0x79a0c0, EE 0x1878, vptr +0x1874, one virtual: the destructor).
   +0 the listener mode (0 the PC: GamMan +0x22020 pos / +0x22030 rot; 1 the camera: MagScene +0x2ab70
-  m_trans / m_rotate; loadStage sets 1). +0x40 / +0xb0 two 3D sound lists (a 0x60-byte sentinel node and
-  a count at +0x60 each; prev at +0, next at +4), 32 nodes at +0x140 (node +0x30 the sound, +0x34 its
-  record, +0x38 bit 0 a stream). +0xd40 / +0xd44 / +0xd48 a record range {begin, end, 0x30} over 0x30
+  m_trans / m_rotate; loadStage sets 1). +0x40 / +0xb0 the free / used 3D sound lists of sequence.h's node-pool
+  template (+0x120 the node count 0x20, 32 nodes of 0x60 at +0x140, the sound `GamSnd3d` at node +0x10). +0xd40 / +0xd44 / +0xd48 a record range {begin, end, 0x30} over 0x30
   `GamSndRec` (0x28) at +0xd80, indexed by SndMan id: +0 flags (1 stream, 8 playStr's bool -- isPlayEnvStr,
   0x10 loop set, 0x80 kept, 0x100 a BGM stream), +4 / +8 volume, +0xc SE id, +0x14 stream number, +0x18
   SndMan id. +0x1540 the SE table (0x400 x 0x38, allocDebug line 81), +0x1544 the stream table (900,
-  line 82; hashed from (str % 100000) / 2, -1 free). +0x1588 / +0x1590 / +0x1598 the master / SE / stream
-  volume words; +0x15a0 four 0x24-byte BGM push levels (`GamBgmRec`: SE, stream, a second stream fadeOut3dSnds
+  line 82; hashed from (str % 100000) / 2, -1 free). +0x1550 `m_defEntry`, a GamSndEntry
+  with only the 3D words set (vol / pan 0x80, far 0x6a4, near 100, nearVol 0x80, farVol 0) for sounds
+  without an entry. +0x1588 / +0x1590 / +0x1598 the master / SE / stream
+  volume words; +0x15a0 four 0x24-byte BGM push levels and at +0x1630 a fifth, the record while nothing
+  is pushed (get_snd_prm 0x28fdf8) (`GamBgmRec`: SE, stream, a second stream fadeOut3dSnds
   keeps, each with volL / volR), +0x1654 a second SE per level, +0x1684 the push depth (-1 none; pushSnd
   only pushes from -1), +0x1688 eight looping SEs, count +0x1708; task ids +0x170c (master fade),
-  +0x1710 / +0x1714 (SE fades), +0x1718 (stream fade); +0x1728 the SE pack id loaded in each of the 65
-  banks; +0x186c the 3D scale (0.5); +0x1870 flags (bit 0 set by stopBgm, cleared by resumeBgm).
+  +0x1710 / +0x1714 (SE fades), +0x1718 (stream fade); +0x171c / +0x1720 / +0x1724 the reverb (setReverb: rxSndSetEffectMode / Depth; 4, 0x80,
+  0x80 at resetVolume); +0x1728 the SE pack id loaded in each of the 65 banks; +0x182c the last
+  loadSePack(name, nowait) name ("BBII.se", read from data/snd/xv/); +0x186c the 3D scale (0.5); +0x1870 flags (bit 0 set by stopBgm, cleared by resumeBgm).
 - SE packs are named "BBII.se": bank BB, pack id II (`parseSePackName` 0x1e43e0); `loadSePackData`
   0x1e44b4 stops SEs (funcSnd 0x11), `SndMan::loadBank(bank, data, nowait)` -- the second argument is the
   XVAB *data* (rxSndXvabLoad's), not a name.
@@ -1406,5 +1409,20 @@ throughout (identifiers, env variables, files, shader macros):
 - Fades are `TskSnd` tasks over a `TskSndParam` block (lib/unassigned.h): kind 0 SE, 1 stream, 2 / 3 / 4
   the master / SE / stream master volume; target +4 / +8, frames +0x14, current +0x20 / +0x24, +0x28 1
   stops a stream at the end (funcStr 0x15 / 0x1b). `TskSnd::getVolume` 0x1f9658 reads a fade's volume now.
+- **3D sounds** (2026-10-26): `GamSnd3d` (0x50): +0 m_pos (room coordinates, update3d), +0x10 m_src
+  (put_*_3d_pos: pos + the WRD room offset; _chr: the offset), +0x20 the SE / stream, +0x24 its record
+  (SndMan id), +0x28 flags (1 stream, 2 heard only in its room / dropped by stopObjSnds, 4 follows
+  object +0x2c, 0x20 start now, 0x40 restarted by update3dVolume, 0x200 one-shot), +0x2c oid (0 a fixed
+  position), +0x30 the room (WRD), +0x34 the entry (NULL: m_defEntry), +0x38 the sort key (3000 at
+  put), +0x3c / +0x40 the volume set. put_* sort the used list by the xz-then-y length of m_src; the
+  _chr forms are once per (oid, sound). `update3d` 0x1e3c24 (skipped while flags bit 0 or GamMan
+  m_flags2 bit 31): fixed sounds key |dx|, object ones the *sum* dx + dy + dz (as the ROM does); beyond
+  15000 on x or z an SE stops / a stream fades over 10 frames (m_strTaskId); the 3 nearest SEs or 4
+  nearest streams go to `update3dVolume` 0x1e386c: gamSnd3dVolume, eased ((new + old) * 0.75 when new
+  is 0 or > 0x20 off), times m_3dScale outside its room, SE volume > 0xff -> 0; an ended sound restarts
+  (playSE / playStr 7-argument forms) unless a one-shot (0x200, or 0x20 | 0x40), which is deleted.
+- The 7-argument playSE 0x1e50c8 is (se, volL, volR, pitch, attr, delay, flags): a delay hands it to a
+  TskSnd kind 5 (TskSndParam +0x10 attr, +0x18 pitch) starting at CmnTaskMan frame + delay; playStr
+  0x1e5428 is (str, volL, volR, pitch, loop, id, flags).
 - `gamSnd3dVolume` 0x1e6e00: the entry's distance fade (+0x2e up to distance +0x2c, +0x30 from +0x2a,
   linear between) times `gamSndEarGain` 0x1e6d54 per ear (+-pi/3 off the facing; 0.3 behind .. 1.0 ahead).

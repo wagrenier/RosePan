@@ -118,19 +118,17 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      0x1f8034 (unassigned@001e7f28: TskMtnMove / 2, TskMove*, TskFrameFunc, TskMsgMan, TskMovie ...),
      each class's get_task_type / exec, in the order the New Game road reaches them; 0x1e6d54 /
      0x1e6e00 are GamSndMan 3D-volume helpers (callers playSE / playStr) for game/gamsnd.cpp.
-  6b. PARTIAL 2026-10-26: `game/gamsnd.cpp` (pinned 0x1e0df0..0x1e7094 with the 3D volume helpers
-     0x1e6d54 / 0x1e6e00) -- GamSndMan's constructor / destructor, init, reset, update, the volumes
-     (funcSnd, resetVolume), the SE packs (loadSePack, free), the tables (registSnd, findSnd, getSeID,
-     getStrSnd, getStrNO), playSE / playStr (the 3D-volume forms), funcSE / funcStr, the BGM push and
-     resume (pushSnd, stopBgm, resumeBgm, unpush_snd, setBgmRec, fadeOut3dSnds) -- 40 functions. The
-     boot's SE packs 0000.se / 6400.se now load into the SPU heap. Left (stubs, not reached by the
-     boot): update3d 0x1e3c24 and the 3D list calls (put_* / del_* / set_*_3d_snd_prm, 0x1e2350,
-     0x1e386c), setVol*track, getStrNoByChan, the 7-argument playSE / playStr, loadSePack(name, arg),
-     setReverb, stopObjSnds, 0x1e4970 / 0x1e4b48 / 0x1e4db0 / 0x1e4e20 / 0x1e5d1c. Doubt: one smoke run
-     in five went black after the Shirogumi logo instead of playing MV00_AD (four played it, as the
-     baseline does); not reproduced -- if it recurs, suspect the SPU heap the banks now take or the
-     IOP sound stand-in. Also seen on the baseline: a 120 s run with 1800:START,2400:START still
-     shows the film at frame 6300 (no skip to the title) -- the pad reads may come later than frames.
+  6b. VERIFY 2026-10-26: `game/gamsnd.cpp` (pinned 0x1e0df0..0x1e7094 with the 3D volume helpers
+     0x1e6d54 / 0x1e6e00) -- all of GamSndMan written over two sessions (74 functions): the tables,
+     volumes, SE packs, playSE / playStr (both forms), funcSE / funcStr, the BGM push and resume, and
+     the 3D sounds (put_* / del_* / update3d / update3dVolume, stopObjSnds). Nothing in the boot reaches
+     the 3D code and no sound is audible, so it is `verify` until a run reaches a room with 3D sounds
+     (any put_*_3d_pos from the scripts' native 252). Doubts: update3d's object key is a sum of
+     differences (ROM behaviour kept); the out-of-range stream fade's TskSndParam m_snd is unset in
+     the ROM (the port sets the stream); set_str_3d_snd_prm's no-entry path changes nothing (setStrSnd
+     searches for the same missing entry). Earlier doubt: one smoke run in five went black after the
+     Shirogumi logo instead of playing MV00_AD; not seen in this session's runs (a 15 s run only reaches
+     frame 300, black between Now Loading and the disclaimer -- that is timing, not the bug).
   7. DONE 2026-10-25 (`done`, see 10b): `bed/bedpad.cpp` -- BedPad::init / update: the menu needs pad
      input to "work"; `settings.smoke_pad` now presses through the title.
   8. DONE 2026-10-25 (`verify`, see 4e): `mag/maglifemenu.cpp` -- MagLifeMenuTitle's wrappers and the MagLifeMenuBase methods.

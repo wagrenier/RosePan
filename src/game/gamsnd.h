@@ -13,6 +13,7 @@
 
 #include "sdk/eetypes.h"
 #include "sdk/libvu0.h"
+#include "sequence/sequence.h"
 #include "snd/sndman.h"
 
 /* One sound of the table (EE 0x38 bytes, an array at *(GamSndMan +
@@ -110,30 +111,52 @@ struct GamSndLoopSe
 };
 static_assert(sizeof(GamSndLoopSe) == 0x10, "GamSndLoopSe");
 
-/* A node of the 3D sound lists (EE 0x60, 32 at GamSndMan +0x140).
- * layout: host -- the links; only update3d's fields are named so far
- * (unverified until the 3D functions are written). */
-struct GamSnd3dNode
+/* GamSnd3d::m_flags (the put_* callers' flags, the low ones set by the
+ * put_* functions themselves). */
+enum
 {
-    GamSnd3dNode  *m_prev;      // ROR 0x00
-    GamSnd3dNode  *m_next;      // ROR 0x04
-    int            _08[2];
-    sceVu0FVECTOR  m_pos;       // ROR 0x10: relative to the room (update3d)
-    sceVu0FVECTOR  m_src;       // ROR 0x20
-    u_int          m_snd;       // ROR 0x30: the SE / stream
-    int            m_rec;       // ROR 0x34: its GamSndRec, -1 none
-    u_int          m_flags;     // ROR 0x38: bit 0 a stream
-    int            m_3c;        // ROR 0x3c
-    int            _40[8];
+    GAMSND_3D_STR    = 0x001,   /* a stream; else an SE */
+    GAMSND_3D_WRD    = 0x002,   /* a character's sound heard only in its room; stopObjSnds drops it */
+    GAMSND_3D_CHR    = 0x004,   /* follows character m_oid (put_*_3d_pos_chr) */
+    GAMSND_3D_START  = 0x020,   /* put_* starts it at once (unless it already plays) */
+    GAMSND_3D_PLAYED = 0x040,   /* update3dVolume (re)started it */
+    GAMSND_3D_ONCE   = 0x200,   /* started by put_*: dropped when it ends */
 };
 
-/* A 3D sound list: a sentinel node and the count (EE 0x70). layout: host. */
-struct GamSnd3dList
+/* One 3D sound (EE 0x50: the put_* functions build it on the stack and the
+ * list copies it into a free node). layout: host -- m_entry is a pointer;
+ * the offsets up to it are the EE's. */
+struct GamSnd3d
 {
-    GamSnd3dNode m_head;        // ROR 0x00
-    int          m_count;       // ROR 0x60
-    int          _64[3];
+    /* m_dist = dist; m_pos = pos - origin (x, y, z), or pos (4 floats)
+     * when there is no origin. */
+    void setPos(float dist, const float *pos, const float *origin);      // ROR 0x001e2350
+
+    sceVu0FVECTOR  m_pos;       // ROR 0x00: where it is heard from (room coordinates); update3d
+    sceVu0FVECTOR  m_src;       // ROR 0x10: put_*_3d_pos: pos + the room's WRD offset; _chr: the offset
+    u_int          m_snd;       // ROR 0x20: the SE / stream
+    int            m_rec;       // ROR 0x24: its GamSndRec (SndMan id), -1 none
+    u_int          m_flags;     // ROR 0x28: GAMSND_3D_*
+    u_int          m_oid;       // ROR 0x2c: the character (GamMan::getObjPos), 0 a fixed position
+    int            m_wrd;       // ROR 0x30: the room (WRD) it was put in, -1 none
+    const GamSndEntry *m_entry; // ROR 0x34: its table entry, NULL: GamSndMan::m_defEntry
+    float          m_dist;      // ROR 0x38: update3d's sort key (3000 until the first update)
+    int            m_volL;      // ROR 0x3c: the volume update3dVolume set
+    int            m_volR;      // ROR 0x40
+    int            _44[3];      /* never written (the ROM copies stack garbage) */
 };
+static_assert(offsetof(GamSnd3d, m_src) == 0x10, "m_src");
+static_assert(offsetof(GamSnd3d, m_snd) == 0x20, "m_snd");
+static_assert(offsetof(GamSnd3d, m_rec) == 0x24, "m_rec");
+static_assert(offsetof(GamSnd3d, m_flags) == 0x28, "m_flags");
+static_assert(offsetof(GamSnd3d, m_oid) == 0x2c, "m_oid");
+static_assert(offsetof(GamSnd3d, m_wrd) == 0x30, "m_wrd");
+
+/* The 3D sound lists are RoR's node-pool template (sequence/sequence.h):
+ * a node is EE 0x60 (prev, next, the sound at +0x10), a list 0x70 (the
+ * sentinel, the count at +0x60). layout: host. */
+typedef SeqNode<GamSnd3d> GamSnd3dNode;
+typedef SeqList<GamSnd3d> GamSnd3dList;
 
 #define GAMSND_NODE_MAX     0x20
 #define GAMSND_REC_MAX      0x30
@@ -179,8 +202,39 @@ struct GamSndMan
     void resetVolume();                                                  // ROR 0x001e107c
     /* Every frame (GamMan::update; pos unused: mode 1 takes the camera's). */
     void update(const float *pos);                                       // ROR 0x001e100c
-    /* The used 3D sounds' volumes from the listener at pos. */
+    /* The used 3D sounds placed relative to the listener at pos; those
+     * beyond 15000 on x or z stopped, the 3 nearest SEs or 4 nearest
+     * streams (by m_dist) get update3dVolume. Not while m_flags bit 0
+     * (stopBgm) or GamMan::m_flags2 bit 31 is set. */
     void update3d(const float *pos);                                     // ROR 0x001e3c24
+    /* snd's volume from the listener (eased against its record's, scaled
+     * by m_3dScale outside its room) into its record; an ended sound is
+     * restarted, or dropped when it was a one-shot. */
+    void update3dVolume(GamSnd3d *snd);                                  // ROR 0x001e386c
+    /* The SE table entry named name (to id 0 or 0x400 entries). */
+    int  findSndByName(const char *name, GamSndEntry **entry);           // ROR 0x001e4970
+    /* Overwrites stream str's entry of the hashed table with entry (its
+     * m_id set to str); 0 when str has none. */
+    int  setStrSnd(int str, GamSndEntry *entry);                         // ROR 0x001e4b48
+    /* playSE of the SE named name (unflagged); -1 when there is none. */
+    int  playSEByName(const char *name, bool pan, float *pos);           // ROR 0x001e4db0
+    /* playSE(se, volL, volR, pitch, attr) of the SE named name, now and
+     * unflagged; -1 when there is none. */
+    int  playSEByName(const char *name, int volL, int volR, float pitch, int attr); // ROR 0x001e4e20
+    /* stopSeTrack's twin: stops stream str in SndMan id track while it
+     * plays (its record cleared): 1, else 0. */
+    int  stopStrTrack(int str, int track);                               // ROR 0x001e5d1c
+    /* The ELF's inlines. */
+    /* The push level m_pushDepth, m_bgmCur when nothing is pushed. */
+    GamBgmRec *get_snd_prm();                                            // ROR 0x0028fdf8
+    void setSnd3DCnt(int type);                                          // ROR 0x0028fe20
+    void getMstVolSE(int &volL, int &volR);                              // ROR 0x0028fe28
+    void getMstVolStr(int &volL, int &volR);                             // ROR 0x0028fe3c
+    void getMstVol(int &volL, int &volR);                                // ROR 0x0028fe50
+    void rmSnd(u_int id);                                                // ROR 0x0028fe64
+    /* m_fileName[state] (OID_STATE). */
+    const char *getSndFileName(int state) const;                         // ROR 0x0028fe6c
+    GamSndEntry *get_snd_tbl_addr();                                     // ROR 0x0028fe7c
     /* Saves the playing BGM-class SEs (mode != 2), the GAMSND_REC_BGM
      * stream (mode != 1) and the looping SEs into a new push level --
      * only when none is pushed (m_pushDepth < 0). resumeBgm pops it. */
@@ -241,32 +295,51 @@ struct GamSndMan
     /* Clears the current BGM slot's pushed SE (mode 1) / stream id (2, -1
      * any) words. */
     void unpush_snd(int mode, u_int se, int str);                        // ROR 0x001e1620
+    /* A 3D SE at pos in room wrd (-1 GamMan's), sorted into the used list
+     * by its distance from the room origin; flags GAMSND_3D_START starts it
+     * now unless it already plays. Nothing without a WRD entry. */
     void put_se_3d_pos(u_int se, float *pos, int wrd, u_int flags);      // ROR 0x001e239c
+    /* A 3D SE following character oid (once per oid and se). */
     void put_se_3d_pos_chr(u_int se, u_int oid, u_int flags);            // ROR 0x001e2704
-    void del_se_3d_pos(u_int se, int arg);                               // ROR 0x001e2aa0
+    /* The 3D entries of se (in room wrd, -1 any) stopped and freed. */
+    void del_se_3d_pos(u_int se, int wrd);                               // ROR 0x001e2aa0
     void put_str_3d_pos(int str, float *pos, int wrd, u_int flags);      // ROR 0x001e2db4
     void put_str_3d_pos_chr(int str, u_int oid, u_int flags);            // ROR 0x001e3138
-    void del_str_3d_pos(int str, int arg);                               // ROR 0x001e34ec
-    void loadSePack(const char *name, int arg);                          // ROR 0x001e4540
+    void del_str_3d_pos(int str, int wrd);                               // ROR 0x001e34ec
+    /* Reads data/snd/xv/<name> (an "BBII" name, ".se" put on) and loads
+     * it into bank BB. */
+    void loadSePack(const char *name, int nowait);                       // ROR 0x001e4540
     int  getStrNO(const char *name);                                     // ROR 0x001e4ab8
-    void setReverb(int a, int b, int c);                                 // ROR 0x001e4cc4
+    /* The SPU effect (rxSndSetEffectMode / Depth), kept in m_reverb*. */
+    void setReverb(int mode, int depthL, int depthR);                    // ROR 0x001e4cc4
     int  get_se_oid(const char *name);                                   // ROR 0x001e4d04
     /* Plays se: at pos (3D volume), else panned by its entry (pan) or at
      * 100 / 100; flags into its record. SndMan's id, -1 when it cannot. */
     int  playSE(u_int se, bool pan, float *pos, int flags);              // ROR 0x001e4ebc
-    int  playSE(u_int se, int a, int b, float c, int d, int e, int arg); // ROR 0x001e50c8
+    /* Plays se at volL / volR, pitch, attr; flags into its record. With
+     * delay, a TskSnd (kind 5) plays it that many frames later and -1 is
+     * returned. */
+    int  playSE(u_int se, int volL, int volR, float pitch, int attr, int delay,
+                int flags);                                              // ROR 0x001e50c8
     /* Streams s<str>.str (ADPCM mode 1 above 99999) into SndMan id id (-1
      * any): at pos (3D volume, not looping), else at 0x80; flags (| 8 with
      * b) | 1 into its record. The id, -1 when no stream entry for pos. */
     int  playStr(int str, int id, float *pos, bool b, u_int flags);      // ROR 0x001e5250
-    int  playStr(int str, int a, int b, float c, int d, int e, int arg); // ROR 0x001e5428
-    void set_str_3d_snd_prm(int str, int a, int b, int c, int d);        // ROR 0x001e5540
+    /* playStr into SndMan id id (no position), then volL / volR, pitch and
+     * loop set; flags | 1 into its record. */
+    int  playStr(int str, int volL, int volR, float pitch, int loop, int id,
+                 int flags);                                             // ROR 0x001e5428
+    /* Sets the 3D distance words (m_far, m_near, m_nearVol, m_farVol) of
+     * str's entry; without one, setStrSnd of m_defEntry with them. */
+    void set_str_3d_snd_prm(int str, int farDist, int nearDist, int nearVol, int farVol); // ROR 0x001e5540
     /* Function no (SND_FUNC_NO) on the playing streams str: 1 / 8 stop,
      * 2 / 3 / 5 / 0xb set, 4 loop, 0x13 a TskSnd over the parameter block
      * arg (it writes words 3, 8 and 9 back), 0x16 non-zero while one plays. */
     int  funcStr(int str, int no, void *arg);                            // ROR 0x001e5660
+    /* The stream number playing in SndMan id chan, -1 none. */
     int  getStrNoByChan(int chan);                                       // ROR 0x001e5be0
-    void set_se_3d_snd_prm(u_int se, int a, int b, int c, int d);        // ROR 0x001e5de4
+    /* The same words of se's entry (nothing without one). */
+    void set_se_3d_snd_prm(u_int se, int farDist, int nearDist, int nearVol, int farVol); // ROR 0x001e5de4
     /* The same over the 0x30 SE records (+0xd40, 0x28 bytes each). */
     int  funcSE(u_int se, int no, void *arg);                            // ROR 0x001e5e58
     int  isPlayEnvStr();                                                 // ROR 0x001e6cac
@@ -274,17 +347,20 @@ struct GamSndMan
      * 0x40 freed. */
     void free_all_se_bank();                                             // ROR 0x001e4700
     bool getStatSEtrack(u_int se, int track);                            // ROR 0x001e6368
-    int  setVolSEtrack(u_int se, int track, int a, int b);               // ROR 0x001e63c0
+    /* The volume of SE se in SndMan id track (record and SPU) while it
+     * plays: 1, else 0. */
+    int  setVolSEtrack(u_int se, int track, int volL, int volR);         // ROR 0x001e63c0
     bool getStatSTRtrack(u_int str, int track);                          // ROR 0x001e5b60
-    int  setVolSTRtrack(u_int str, int track, int a, int b);             // ROR 0x001e5c40
+    int  setVolSTRtrack(u_int str, int track, int volL, int volR);       // ROR 0x001e5c40
     /* A stage reset: the BGM / stream records, the 0x30 sound records,
      * the three sound tasks killed, the 3D sound list emptied. */
     void reset();                                                        // ROR 0x001e1fa4
-    /* The 3D sound list's object entries freed: streams (flag 2) stopped
-     * when playing (flag 1), SEs (flag 4) through 0x1e649c. */
+    /* The 3D sounds of objects dropped (GamMan::releaseObjs): the
+     * GAMSND_3D_WRD ones (a stream stopped through funcStr 1) and the
+     * GAMSND_3D_CHR ones (stopSeTrack). */
     void stopObjSnds();                                                  // ROR 0x001e2178
 
-    int            m_mode;      // ROR 0x0000: the listener, gamSnd3dVolume's mode (loadStage sets 1: the camera)
+    int            m_mode;      // ROR 0x0000: the listener (the ELF's SND_3D_CENTER_TYPE, setSnd3DCnt), gamSnd3dVolume's mode (loadStage sets 1: the camera)
     int            _0004[15];
     GamSnd3dList   m_free;      // ROR 0x0040
     GamSnd3dList   m_used;      // ROR 0x00b0: update runs update3d while it has nodes
@@ -299,23 +375,13 @@ struct GamSndMan
     char           m_fileName[4][0x10]; // ROR 0x1500: GamMan::getSndFileName
     GamSndEntry   *m_table;     // ROR 0x1540: the SE table (GamMan::getSndParam)
     GamSndEntry   *m_strTable;  // ROR 0x1544: the stream table
-    int            _1548[11];
-    short          _1574;
-    short          m_1576;      // ROR 0x1576: 0x80 (init; unverified role)
-    short          m_1578;      // ROR 0x1578: 0x80
-    short          m_157a;      // ROR 0x157a: 0x6a4
-    short          m_157c;      // ROR 0x157c: 100
-    short          m_157e;      // ROR 0x157e: 0x80
-    short          m_1580;      // ROR 0x1580: 0
-    short          _1582[3];
+    int            _1548[2];
+    GamSndEntry    m_defEntry;  // ROR 0x1550: the 3D distances of a sound without an entry (init: vol, pan 0x80, far 0x6a4, near 100, nearVol 0x80, farVol 0)
     int            m_mstVol[2];    // ROR 0x1588: GamMan::getMstVol; funcSnd 0xd
     int            m_mstVolSe[2];  // ROR 0x1590: option 3's funcSnd(0xe) words
     int            m_mstVolStr[2]; // ROR 0x1598: GamMan::getMstVolStr, option 2's funcSnd(0xf) words
     GamBgmRec      m_bgm[4];       // ROR 0x15a0: the push levels
-    int            m_1630;         // ROR 0x1630: 0 (init)
-    int            _1634[2];
-    int            m_163c;         // ROR 0x163c: -1 (init)
-    int            _1640[5];
+    GamBgmRec      m_bgmCur;       // ROR 0x1630: get_snd_prm's record while nothing is pushed (init: no SE, no stream)
     GamSndPushSe   m_pushSe[4];    // ROR 0x1654
     int            m_pushDepth;    // ROR 0x1684: -1 nothing pushed
     GamSndLoopSe   m_loopSe[8];    // ROR 0x1688
@@ -324,11 +390,11 @@ struct GamSndMan
     int            m_seTaskId;     // ROR 0x1710: funcSnd 0xe's / funcSE 0x13's
     int            m_seTaskId2;    // ROR 0x1714: funcSE 0x14's
     int            m_strTaskId;    // ROR 0x1718: funcSnd 0xf's / funcStr 0x13's
-    int            m_171c;         // ROR 0x171c: 4 (resetVolume)
-    int            m_1720;         // ROR 0x1720: 0x80
-    int            m_1724;         // ROR 0x1724: 0x80
+    int            m_reverbMode;   // ROR 0x171c: setReverb; 4 (resetVolume)
+    int            m_reverbDepthL; // ROR 0x1720: 0x80
+    int            m_reverbDepthR; // ROR 0x1724: 0x80
     int            m_bankId[SND_BANK_MAX]; // ROR 0x1728: the SE pack id loaded in each bank, -1 none
-    int            _182c[16];
+    char           m_sePackName[0x40]; // ROR 0x182c: loadSePack(name, nowait)'s "BBII.se"
     float          m_3dScale;      // ROR 0x186c: funcSnd 0x1c (percent / 100), 0.5 at init
     u_int          m_flags;        // ROR 0x1870: bit 0 cleared by resumeBgm, 0x400 between funcSnd 0x1f and 0x20
 };
