@@ -156,6 +156,10 @@ struct RxMpeg
     /* The library's status word, -1 when not open (callers: 0 playing, 1 finished). */
     int  getStatus();                                                    // ROR 0x0018173c
     int  isEnd();                                                        // ROR 0x0018176c
+    /* Non-zero when the movie is to be skipped (0x182a60); then, once
+     * (+0x34), fades the scene out when it is not fading and bit 0x8000000
+     * of g_sequence.m_bits[1] is set. */
+    int  checkSkip();                                                    // ROR 0x00181780
     /* Once a frame from SndMan::update (frame parity and the decoder). */
     void update();                                                       // ROR 0x0018120c
     /* Empty in the ROM; SndMan::update calls it after rxSndUpdate. */
@@ -660,29 +664,46 @@ struct MnuMcd
     int  isInit();                                                       // ROR 0x001a140c
     int  processPad(BedPad *pad);                                        // ROR 0x001a1414
     void draw(I3dLayer *layer);                                          // ROR 0x001a1428
+    /* When the card state (+0x24) is 4: starts the check with arg and
+     * returns 1, else 0 (MnuTitle polls it after init). */
+    int  startCheck(int arg);                                            // ROR 0x001a1658
 
     u_char    _00[0x1400];
 };
 static_assert(sizeof(MnuMcd) == 0x1400, "EE 0x1400");
 
-/* The title screen: an MnuMcd at +0, an MnuSvld at +0x1400, an MnuOpt at
- * +0x3b80, SprMan at +0x4df0 (its constructor 0x1a90ec), data/mnurpk/
- * mnuboard.rpk, the s100000.str stream. EE 0x5700 (MagLifeMenuTitle
- * +0x40..+0x5740). */
-struct MnuTitle
-{
-    void init(DogTexInfo *tex);                                          // ROR 0x001a91f4
-    void term();                                                         // ROR 0x001a9258
-    int  isInit();                                                       // ROR 0x001a9298
-    /* -1 before init. */
-    int  processPad(BedPad *pad);                                        // ROR 0x001a92a0
-    void draw(I3dLayer *layer);                                          // ROR 0x001a972c
+/* The title screen MnuTitle: mnu/mnutitle.h. */
 
-    u_char    _00[0x56f0];
-    MagScene *m_scene;          // ROR 0x56f0: MagLifeMenuTitle::init stores the scene
-    u_char    _56f4[0x5700 - 0x56f4];
+/* The text list MnuTitle's movie viewer runs (MnuTitle +0x4c68; code
+ * 0x1a066c..0x1a0bb8 in unassigned@00192ac0). Class name invented. EE
+ * 0x104 (the next MnuTitle word is +0x4d6c). Its constructor 0x1a066c
+ * (clears m_open, calls 0x1a0860) is not written: the object lives in the
+ * global scene and starts zeroed. */
+struct MnuTextList
+{
+    /* m_open 1 and the defaults; -1 when already open. */
+    int  open();                                                         // ROR 0x001a06e8
+    /* 0x1a0950 and m_open 0; -1 when not open. */
+    int  close();                                                        // ROR 0x001a074c
+    void processPad(BedPad *pad);                                        // ROR 0x001a06d4
+    /* items: the labels, each followed by "#0#0"; mask: the enabled rows. */
+    void setItems(const char *items, u_int mask);                        // ROR 0x001a09b8
+    /* The chosen row (< 0 none yet); -2 when not open. */
+    int  getSelect();                                                    // ROR 0x001a0ba0
+    void endSelect();                                                    // ROR 0x001a0bb8
+
+    int    m_open;              // ROR 0x00
+    int    m_cur;               // ROR 0x04: MnuTitle::execMovie sets the row to start on (unverified)
+    u_char _08[0x54 - 0x08];
+    int    m_x;                 // ROR 0x54: open sets 100, MnuTitle 0x40 (unverified: position)
+    int    m_y;                 // ROR 0x58: open sets 100, MnuTitle 0x40
+    int    m_z;                 // ROR 0x5c: open sets 0x7fff, MnuTitle 2000
+    u_char _60[0x104 - 0x60];
 };
-static_assert(offsetof(MnuTitle, m_scene) == 0x56f0, "m_scene");
+static_assert(offsetof(MnuTextList, m_cur) == 0x04, "m_cur");
+static_assert(offsetof(MnuTextList, m_x) == 0x54, "m_x");
+static_assert(offsetof(MnuTextList, m_z) == 0x5c, "m_z");
+static_assert(sizeof(MnuTextList) == 0x104, "EE 0x104");
 
 /* The "now" (status) menu. EE 0x920 (MagLifeMenuNow +0x40..+0x960). */
 struct MnuNow

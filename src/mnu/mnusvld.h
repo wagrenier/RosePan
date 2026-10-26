@@ -34,9 +34,12 @@ struct MnuSvld
     int       m_save;           // ROR 0x24e8: 1 the save screen, 0 the load screen (the wrappers' constructors)
     u_char    _24ec[0x2730 - 0x24ec];
     MagScene *m_scene;          // ROR 0x2730: MagLifeMenuSave / Load::init store the scene
-    u_char    _2734[0x2780 - 0x2734];
+    u_char    _2734[0x2754 - 0x2734];
+    int       m_2754;           // ROR 0x2754: non-zero after the load screen loaded a game (MnuTitle::execLoad); unverified
+    u_char    _2758[0x2780 - 0x2758];
 };
 static_assert(offsetof(MnuSvld, m_save) == 0x24e8, "m_save");
 static_assert(offsetof(MnuSvld, m_scene) >= 0x2730, "m_scene");
+static_assert(offsetof(MnuSvld, m_2754) >= 0x2754, "m_2754");
 
 #endif /* _MNU_MNUSVLD_H */

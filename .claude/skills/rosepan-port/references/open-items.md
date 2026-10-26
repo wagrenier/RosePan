@@ -109,7 +109,19 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
   7. `bed/bedpad.cpp` -- BedPad::init / update: the menu needs pad input to "work"; extend
      `settings.smoke_pad` to press through the title once it shows.
   8. DONE 2026-10-25 (`verify`, see 4e): `mag/maglifemenu.cpp` -- MagLifeMenuTitle's wrappers and the MagLifeMenuBase methods.
-  9. `unassigned@001a6830` -- the title screen itself (init / pad / draw at 0x1a91f4.., mnuboard.rpk).
+  9. DONE 2026-10-25 (`verify`, now `mnu/mnutitle.cpp` 0x1a90ec..0x1ab474; the rest of
+     unassigned@001a6830 -- MnuOpt, MnuBoard2D, MnuMovie, MnuNow, MnuItem -- is still unassigned): `unassigned@001a6830` -- the title screen itself (init / pad / draw at 0x1a91f4.., mnuboard.rpk).
+     All 20 MnuTitle functions written, plus utlStrCopy / utlStrCopy2 / utlTm2GetPicture (their stubs
+     broke every SprTexture load: hazards.md). The plain boot stays black: execLogo waits on
+     **MnuMcd::init / processPad / startCheck / term** (unassigned@001a0950, the memory card check;
+     queued first). A run with the logo flag forced to 1 (data 0x2a8400, temporary, not committed)
+     showed the main menu right -- titlebg2 and New Game / Load Game / Option at their places
+     (progress/20261025-2016_mnu_mnutitle.cpp_menu-testflag.png) -- plus one wrong layer: the whole
+     ti_06 text sheet 1:1 at the top left, drawn by no MnuTitle sprite (all 15 dumped). Likely a
+     primitive whose TEX0 is written directly (a frame-buffer texture: SprMan::drawFrameCopy /
+     SPR_TEX_FRAME, or a scene effect) that rosepan_i3d replays with the last bound texture; find it
+     when the title shows for real. After MnuMcd: the logo movies need RxMpeg (item 10; isEnd /
+     getStatus must report the end or execLogo waits), then a smoke_pad start press.
   10. `snd/rxmpeg.cpp`, `unassigned@001810f4` -- RxMpeg: the title code calls it 13 times (background
      movie; the logo movie may come first in the W099 script). If the script waits on a movie, a
      host stand-in that reports "ended" unblocks the title before real MPEG playback.

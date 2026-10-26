@@ -84,3 +84,9 @@ void GamSndMan::stopObjSe(u_int oid)
 {
     ROSEPAN_STUB("GamSndMan::stopObjSe", 0x001e2c40);
 }
+
+// stub of ROR 0x001e107c
+void GamSndMan::resetVolume()
+{
+    ROSEPAN_STUB("GamSndMan::resetVolume", 0x001e107c);
+}

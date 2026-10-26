@@ -36,9 +36,11 @@ struct BedPad
     int  m_40;                  // ROR 0x40: MagSystem::setPC clears it; role unknown
     int  m_44;                  // ROR 0x44: idem
     int  m_48;                  // ROR 0x48: idem
-    unsigned char _4c[0x78 - 0x4c];
+    unsigned char _4c[0x70 - 0x4c];
+    unsigned int   m_70;        // ROR 0x70: button bits (0x10 up / 0x40 down move MnuTitle's cursors); which view (repeated?) is unverified
+    unsigned char _74[0x78 - 0x74];
     unsigned short m_78;        // ROR 0x78: button bits MagScene::update tests (bit 14 closes a waiting window); which view of the buttons (pressed / triggered / repeated) is unverified
-    unsigned short m_7a;        // ROR 0x7a: button bits (bits 8 / 9: MagScene::changeCamera); role unverified
+    unsigned short m_7a;        // ROR 0x7a: button bits (bits 8 / 9: MagScene::changeCamera; MnuTitle: bit 3 start, 13 circle = back, 14 cross = confirm, the libpad bit order); pressed-this-frame by its use, unverified
     unsigned short m_7c;        // ROR 0x7c: button bits (bit 3 the item menu, bit 0 menu 0x10001, bits 13 / 14 close the system message); role unverified
     unsigned char _7e[0x90 - 0x7e];
 };
@@ -51,6 +53,8 @@ static_assert(offsetof(BedPad, m_repeat_interval) == 0x38, "m_repeat_interval");
 static_assert(offsetof(BedPad, m_40) == 0x40, "m_40");
 static_assert(offsetof(BedPad, m_44) == 0x44, "m_44");
 static_assert(offsetof(BedPad, m_48) == 0x48, "m_48");
+static_assert(offsetof(BedPad, m_70) == 0x70, "m_70");
+static_assert(offsetof(BedPad, m_7a) == 0x7a, "m_7a");
 static_assert(offsetof(BedPad, m_7c) == 0x7c, "m_7c");
 
 #endif /* _BED_BEDPAD_H */

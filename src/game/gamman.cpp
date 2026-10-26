@@ -2526,3 +2526,9 @@ void GamMan::setSysParam(int which, const void *v)
 {
     ROSEPAN_STUB("GamMan::setSysParam", 0x001c6f08);
 }
+
+// stub of ROR 0x001c1378
+void GamMan::resetPcStat()
+{
+    ROSEPAN_STUB("GamMan::resetPcStat", 0x001c1378);
+}

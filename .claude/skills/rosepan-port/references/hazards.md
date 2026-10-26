@@ -221,6 +221,12 @@ entries are marked **RoR** with the date.
 
 ## Reconstruction bookkeeping
 
+- **A string-copy stub makes every texture the last one** (2026-10-25, mnu/mnutitle.cpp): with
+  utlStrCopy 0x105e50 a stub, DogTexInfo::addData never stored a name, so find / findFree handed out
+  the same free entry for every texture and each load overwrote it -- all seven title sprites drew the
+  disclaimer (the list's last file). Symptom: every sprite of a SprMan shows one picture. Check
+  SprTexture's m_tex_no[] (all equal = this) before suspecting the renderer.
+
 - **A stub that tolerated null becomes a member that does not.** When stubs turn into real members,
   check every caller the smoke run reaches for objects the host does not build yet; add `// PC:` guards.
 - **Stubs that return a buffer pointer return null**, invisible until the next consumer is real: when a

@@ -37,6 +37,9 @@ static_assert(offsetof(GamSndEntry, m_32) == 0x32, "m_32");
 struct GamSndMan
 {
     void init();                                                         // ROR 0x001e0f1c
+    /* The volume words back to 0x80 and funcSnd 0xd / 0xe / 0xf at 0x80
+     * (MnuTitle's first frame). */
+    void resetVolume();                                                  // ROR 0x001e107c
     /* Every frame (GamMan::update; pos unused: mode 1 takes the camera's). */
     void update(const float *pos);                                       // ROR 0x001e100c
     /* Frees bank slot n (SndMan::freeBank) and marks it -1. */

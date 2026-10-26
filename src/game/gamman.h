@@ -319,6 +319,10 @@ struct GamMan
     void setPcJnfc(int on);                                              // ROR 0x001c53e0
     /* which 0x11..0x1c: *v into an option / camera word (0x1b m_21f54). */
     void setSysParam(int which, const void *v);                          // ROR 0x001c6f08
+    /* The two ACHRstat pointers (+0x22090 / +0x22094): param 0x1c copied
+     * into 0x1b; then 0x1d84b0 and four words cleared. MnuTitle calls it
+     * when the title closes for a new game. */
+    void resetPcStat();                                                  // ROR 0x001c1378
     void setPcStartPos();                                                // ROR 0x001c3d38
     void setStagePack(void *buf);                                        // ROR 0x001c46f4
     /* Sequence::reapThreads' calls when thread 0x44000000 (the stage

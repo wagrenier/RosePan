@@ -3317,6 +3317,12 @@
   "was": "FUN_0018176c",
   "why": "tail call 0x182bfc: the rxmpeg library's end flag"
  },
+ "00181780": {
+  "name": "RxMpeg::checkSkip",
+  "tag": "ror-inferred",
+  "was": "FUN_00181780",
+  "why": "returns 0x182a60's result (non-zero: the movie is to be skipped) and, when it is set, the scene is not fading and bit 0x8000000 of the sequence bits word 1 is set, fades the scene out once (+0x34)"
+ },
  "00182118": {
   "name": "rxMpegSetVCount",
   "tag": "ror-inferred",
@@ -4463,6 +4469,54 @@
   "was": "FUN_0019a754",
   "why": "the menu object at +0x40 of MagLifeMenuStock: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
  },
+ "001a066c": {
+  "name": "MnuTextList::MnuTextList",
+  "tag": "ror-inferred",
+  "was": "FUN_001a066c",
+  "why": "constructor of the 0x104-byte list object MnuTitle keeps at +0x4c68: clears the open word and calls 0x1a0860; class name invented (a text list menu: setItems takes a #0#0-separated label string and an enable mask)"
+ },
+ "001a0684": {
+  "name": "MnuTextList::~MnuTextList",
+  "tag": "ror-inferred",
+  "was": "FUN_001a0684",
+  "why": "calls MnuTextList::close 0x1a074c, deletes when flags & 1 (GCC 2 destructor)"
+ },
+ "001a06d4": {
+  "name": "MnuTextList::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001a06d4",
+  "why": "forwards (this, pad) to 0x1a0788; MnuTitle::execMovie calls it every frame with the pad"
+ },
+ "001a06e8": {
+  "name": "MnuTextList::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001a06e8",
+  "why": "sets the open word to 1 and the defaults (+0x54 / +0x58 = 100, +0x5c = 0x7fff, +0x60 = -1), then 0x1a08d4; -1 when already open"
+ },
+ "001a074c": {
+  "name": "MnuTextList::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001a074c",
+  "why": "when open: 0x1a0950 and clears the open word; -1 when not open"
+ },
+ "001a09b8": {
+  "name": "MnuTextList::setItems",
+  "tag": "ror-inferred",
+  "was": "FUN_001a09b8",
+  "why": "MnuTitle::execMovie passes a page's #0#0-separated label string and a mask of the first count bits"
+ },
+ "001a0ba0": {
+  "name": "MnuTextList::getSelect",
+  "tag": "ror-inferred",
+  "was": "FUN_001a0ba0",
+  "why": "returns +0x64 (the chosen row, < 0 none) when open, else -2"
+ },
+ "001a0bb8": {
+  "name": "MnuTextList::endSelect",
+  "tag": "ror-inferred",
+  "was": "FUN_001a0bb8",
+  "why": "when open and +0x70 is 1, sets +0x44 to 4; MnuTitle::execMovie calls it after a choice or cancel"
+ },
  "001a1244": {
   "name": "MnuMcd::MnuMcd",
   "tag": "ror-inferred",
@@ -4504,6 +4558,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001a1428",
   "why": "the menu object at +0x40 of MagLifeMenuMcd: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a1658": {
+  "name": "MnuMcd::startCheck",
+  "tag": "ror-inferred",
+  "was": "FUN_001a1658",
+  "why": "when the card state +0x24 is 4 sets +0x30 = arg, +0x1390 = 0, +0x28 = 2 and returns 1; MnuTitle polls it after MnuMcd::init until the check can start"
  },
  "001a59b8": {
   "name": "MnuSvld::MnuSvld",
@@ -4588,6 +4648,84 @@
   "tag": "ror-inferred",
   "was": "FUN_001a972c",
   "why": "the menu object at +0x40 of MagLifeMenuTitle: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001a97b0": {
+  "name": "MnuTitle::loadTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_001a97b0",
+  "why": "SprTexture::setList of the SprMan at +0x4df8 with the list 0x2a7798 and data/mnurpk/mnutitle.rpk, then update until it returns non-zero"
+ },
+ "001a97f4": {
+  "name": "MnuTitle::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001a97f4",
+  "why": "sets the open word +0x4d6c to 1 and clears the mode / sub menu / step words (-1 when already open); MnuTitle::init calls it; the pair of MnuTitle::close 0x1a9828"
+ },
+ "001a9828": {
+  "name": "MnuTitle::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001a9828",
+  "why": "clears the open word +0x4d6c (-1 when not open); called by MnuTitle::term and the destructor"
+ },
+ "001a9844": {
+  "name": "MnuTitle::initCursors",
+  "tag": "ror-inferred",
+  "was": "FUN_001a9844",
+  "why": "clears the 9 cursor words +0x4d70..+0x4d90 and sets the item counts +0x4d94 = 3, +0x4d98 = 5, +0x4d9c = 2 (the main menu's cursor +0x4d70 is limited by +0x4d94 - 1); the constructor calls it"
+ },
+ "001a988c": {
+  "name": "MnuTitle::setDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_001a988c",
+  "why": "keeps MagSystem::m_current_system, points SprMan::m_pattern at the table image 0x2a7858, SprMan::setDispList(0x2a80c0) and sets SprMan::m_active"
+ },
+ "001a98dc": {
+  "name": "MnuTitle::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001a98dc",
+  "why": "SprMan::update of the SprMan at +0x4df0; the last call of every processPad frame"
+ },
+ "001a98fc": {
+  "name": "MnuTitle::execLogo",
+  "tag": "ror-inferred",
+  "was": "FUN_001a98fc",
+  "why": "sub menu 0 of MnuTitle::processPad: memory card check (MnuMcd), the logo pictures (sprite list 0x2a8408 with frame counts 0x2a8418), CP_LOGO.PSS and MV00_AD.PSS through RxMpeg, then press start (bit 3 of the pad's +0x7a) with the s100000.str stream; returns 1 on start"
+ },
+ "001aa248": {
+  "name": "MnuTitle::execMain",
+  "tag": "ror-inferred",
+  "was": "FUN_001aa248",
+  "why": "sub menu 1: the three title items (sprites 9..11, cursor +0x4d70 with up / down bits 0x10 / 0x40 of +0x70, confirm bit 14 of +0x7a), stores the choice 2 / 3 / 4 in +0x56ec; after 0x708 idle frames back to sub menu 0; returns 1 when a choice is made"
+ },
+ "001aa7d0": {
+  "name": "MnuTitle::execSelect",
+  "tag": "ror-inferred",
+  "was": "FUN_001aa7d0",
+  "why": "sub menu 6: a three-item choice (sprites 12..14, cursor +0x4d90) written as GamMan::setSysParam(0x1c, n); cancel (bit 13) returns 2, confirm returns 1; no caller sets sub menu 6 in the retail code"
+ },
+ "001aabb4": {
+  "name": "MnuTitle::execMovieTest",
+  "tag": "ror-inferred",
+  "was": "FUN_001aabb4",
+  "why": "sub menu 2: memory card check, then R1 (bit 11 of +0x7c) plays test000.pss through the scene's S2dMovie, R2 stops it, start leaves; a test mode no caller sets in the retail code"
+ },
+ "001aaed0": {
+  "name": "MnuTitle::execLoad",
+  "tag": "ror-inferred",
+  "was": "FUN_001aaed0",
+  "why": "sub menu 3: runs the MnuSvld at +0x1400 (load screen) until its processPad returns non-zero; returns 2 when its +0x2754 word is set (a game was loaded), else 1"
+ },
+ "001aaf98": {
+  "name": "MnuTitle::execOption",
+  "tag": "ror-inferred",
+  "was": "FUN_001aaf98",
+  "why": "sub menu 4: runs the MnuOpt at +0x3b80 until its processPad returns non-zero, then returns 1"
+ },
+ "001ab04c": {
+  "name": "MnuTitle::execMovie",
+  "tag": "ror-inferred",
+  "was": "FUN_001ab04c",
+  "why": "sub menu 5: a text-list movie viewer over the page table 0x2a8428 (8 pages of mov/*.PSS with front / next entries) played through the scene's S2dMovie; cancel (bit 13) returns 1"
  },
  "001ab474": {
   "name": "MnuOpt::MnuOpt",
@@ -5068,6 +5206,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c0d70",
   "why": "game/gamman.cpp, GamMan 0x7812c0: sets the state words at +0x21f48.. and allocates a 0x1840 list pool; called once by sysInitManagers"
+ },
+ "001c1378": {
+  "name": "GamMan::resetPcStat",
+  "tag": "ror-inferred",
+  "was": "FUN_001c1378",
+  "why": "for the two ACHRstat pointers +0x22090 / +0x22094 copies param 0x1c into 0x1b, calls 0x1d84b0 and clears +0x21ff0 / +0x21f60 / +0x22004 / +0x22008; MnuTitle::processPad calls it when the title closes for a new game"
  },
  "001c143c": {
   "name": "GamMan::initGameState",
@@ -5872,6 +6016,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001e100c",
   "why": "GamMan::update's call every frame; when +0x110 is set runs 0x1e3c24 with the camera position 0x726930 (mode 1)"
+ },
+ "001e107c": {
+  "name": "GamSndMan::resetVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_001e107c",
+  "why": "sets +0x171c = 4, +0x1720 / +0x1724 = 0x80, word 0 = 0, the four volume words +0x1590..+0x159c to 0x80 and calls funcSnd 0xd / 0xe / 0xf with 0x80, 0x80; the title's first frame"
  },
  "001e17b4": {
   "name": "GamSndMan::stopBgm",

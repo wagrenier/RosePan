@@ -1382,34 +1382,56 @@ void MnuStock::term()
     ROSEPAN_STUB("MnuStock::term", 0x0019a6b8);
 }
 
-// stub of ROR 0x001a972c
-void MnuTitle::draw(I3dLayer *layer)
-{
-    ROSEPAN_STUB("MnuTitle::draw", 0x001a972c);
-}
 
-// stub of ROR 0x001a91f4
-void MnuTitle::init(DogTexInfo *tex)
+// stub of ROR 0x001a1658
+int MnuMcd::startCheck(int arg)
 {
-    ROSEPAN_STUB("MnuTitle::init", 0x001a91f4);
-}
-
-// stub of ROR 0x001a9298
-int MnuTitle::isInit()
-{
-    ROSEPAN_STUB("MnuTitle::isInit", 0x001a9298);
+    ROSEPAN_STUB("MnuMcd::startCheck", 0x001a1658);
     return {};
 }
 
-// stub of ROR 0x001a92a0
-int MnuTitle::processPad(BedPad *pad)
+// stub of ROR 0x001a074c
+int MnuTextList::close()
 {
-    ROSEPAN_STUB("MnuTitle::processPad", 0x001a92a0);
+    ROSEPAN_STUB("MnuTextList::close", 0x001a074c);
     return {};
 }
 
-// stub of ROR 0x001a9258
-void MnuTitle::term()
+// stub of ROR 0x001a0bb8
+void MnuTextList::endSelect()
 {
-    ROSEPAN_STUB("MnuTitle::term", 0x001a9258);
+    ROSEPAN_STUB("MnuTextList::endSelect", 0x001a0bb8);
+}
+
+// stub of ROR 0x001a0ba0
+int MnuTextList::getSelect()
+{
+    ROSEPAN_STUB("MnuTextList::getSelect", 0x001a0ba0);
+    return {};
+}
+
+// stub of ROR 0x001a06e8
+int MnuTextList::open()
+{
+    ROSEPAN_STUB("MnuTextList::open", 0x001a06e8);
+    return {};
+}
+
+// stub of ROR 0x001a06d4
+void MnuTextList::processPad(BedPad *pad)
+{
+    ROSEPAN_STUB("MnuTextList::processPad", 0x001a06d4);
+}
+
+// stub of ROR 0x001a09b8
+void MnuTextList::setItems(const char *items, u_int mask)
+{
+    ROSEPAN_STUB("MnuTextList::setItems", 0x001a09b8);
+}
+
+// stub of ROR 0x00181780
+int RxMpeg::checkSkip()
+{
+    ROSEPAN_STUB("RxMpeg::checkSkip", 0x00181780);
+    return {};
 }
