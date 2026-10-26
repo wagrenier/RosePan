@@ -540,6 +540,9 @@ struct Obj176a3c                /* scene +0x837e0, constructor 0x176a3c */
     int  createEff(const EffParam *param);                               // ROR 0x00176cc8
     /* Deletes entry no of its table (GamMan::ctlObj1cbb80). */
     void release(int no);                                                // ROR 0x0017756c
+    /* Deletes every entry of the table and resets its state words
+     * (GamMan::clearPool20b00). */
+    void releaseAll();                                                   // ROR 0x0017762c
 
     int   _00;
     Eff0 *m_entry[0x110];       // ROR 0x04: the constructor clears 0x440 bytes

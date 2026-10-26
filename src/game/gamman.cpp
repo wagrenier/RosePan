@@ -10,7 +10,9 @@
 // pause masks, the script callbacks -- is written as the scripts reach it.
 
 #include <new>
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "common/rosepan_stub.h"
@@ -22,6 +24,7 @@
 #include "lib/unassigned.h"
 #include "mag/magsystem.h"
 #include "rx/rxsnd.h"
+#include "sdk/libvu0.h"
 #include "sequence/sequence.h"
 #include "snd/sndman.h"
 #include "utl/utlmisc.h"
@@ -83,7 +86,7 @@ void GamMan::init()
     m_objTable = (GamObjTable *)g_utlMemory.allocDebug(0x5020, s_file, 342, 0, 1);
     m_objRec = m_objTable->m_rec;
     m_18bc0 = g_utlMemory.allocDebug(0x600, s_file, 345, 0, 1);
-    m_18bc4 = g_utlMemory.allocDebug(0xc00, s_file, 347, 0, 1);
+    m_18bc4 = (GamObjSet *)g_utlMemory.allocDebug(0xc00, s_file, 347, 0, 1);
     m_1f240 = (u_char *)g_utlMemory.allocDebug(0x5a4, s_file, 350, 0, 1);
     m_evtPack = (u_char *)g_utlMemory.allocDebug(0xa0000, s_file, 351, 0, 1);
     m_wrdFile2 = (u_char *)g_utlMemory.allocDebug(0x4000, s_file, 353, 0, 1);
@@ -3318,37 +3321,744 @@ void GamMan::showMsgSprite(int on, const int *param)
     mes.setSpriteFadeIn(3, fade);
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+// ──────────────────────────────────────────────────────────────────────
+// The chapter's own SE pack read and registered again (reloadChapterSe1f /
+// 0c, after a script pack swap): 3xxx.se as loadStageSnd picks it, then
+// with withArea the 1xxx area pack of loadStageSnd's pair. Chapter 9 has
+// no 3xxx pack, chapter 9 and > 13 no area pack.
+// ROR 0x001c2848 // callcheck: FileReader, FileReadReq, read, ~FileReader (the reader local and the request in gamReadSe, inline in the ROM)
 
-// stub of ROR 0x001c3d38
-void GamMan::setPcStartPos()
+void GamMan::loadChapterSe(int chapter, int withArea)
 {
-    ROSEPAN_STUB("GamMan::setPcStartPos", 0x001c3d38);
+    GamSndMan *snd = &m_sndMan;
+    void *buf = g_utlMemory.allocDebug(0x101480, s_file, 1509, 0, 1);
+    FileReader reader;
+
+    switch (chapter)
+    {
+    case 1:  gamReadSe(reader, "data/snd/xv/3200.se", buf, 0x80000); snd->loadSePack("3200.se", buf, 0); break;
+    case 2:  gamReadSe(reader, "data/snd/xv/3201.se", buf, 0x80000); snd->loadSePack("3201.se", buf, 0); break;
+    case 3:  gamReadSe(reader, "data/snd/xv/3202.se", buf, 0x80000); snd->loadSePack("3202.se", buf, 0); break;
+    case 4:  gamReadSe(reader, "data/snd/xv/3203.se", buf, 0x80000); snd->loadSePack("3203.se", buf, 0); break;
+    case 5:
+    case 13: gamReadSe(reader, "data/snd/xv/3204.se", buf, 0x80000); snd->loadSePack("3204.se", buf, 0); break;
+    case 6:  gamReadSe(reader, "data/snd/xv/3205.se", buf, 0x80000); snd->loadSePack("3205.se", buf, 0); break;
+    case 7:  gamReadSe(reader, "data/snd/xv/3206.se", buf, 0x80000); snd->loadSePack("3206.se", buf, 0); break;
+    case 8:  gamReadSe(reader, "data/snd/xv/3207.se", buf, 0x80000); snd->loadSePack("3207.se", buf, 0); break;
+    case 10: gamReadSe(reader, "data/snd/xv/3208.se", buf, 0x80000); snd->loadSePack("3208.se", buf, 0); break;
+    case 11: gamReadSe(reader, "data/snd/xv/3209.se", buf, 0x80000); snd->loadSePack("3209.se", buf, 0); break;
+    case 12: gamReadSe(reader, "data/snd/xv/3210.se", buf, 0x80000); snd->loadSePack("3210.se", buf, 0); break;
+    default: break;
+    }
+
+    if (withArea != 0)
+    {
+        switch (chapter)
+        {
+        case 1:
+        case 7:
+        case 13:
+            gamReadSe(reader, "data/snd/xv/1102.se", buf, 0x80000);
+            snd->loadSePack("1102.se", buf, 0);
+            break;
+        case 2:
+        case 3:
+        case 4:
+        case 10:
+        case 11:
+        case 12:
+            gamReadSe(reader, "data/snd/xv/1100.se", buf, 0x80000);
+            snd->loadSePack("1100.se", buf, 0);
+            break;
+        case 5:
+            gamReadSe(reader, "data/snd/xv/1101.se", buf, 0x80000);
+            snd->loadSePack("1101.se", buf, 0);
+            break;
+        case 6:
+            gamReadSe(reader, "data/snd/xv/1103.se", buf, 0x80000);
+            snd->loadSePack("1103.se", buf, 0);
+            break;
+        case 8:
+            gamReadSe(reader, "data/snd/xv/1104.se", buf, 0x80000);
+            snd->loadSePack("1104.se", buf, 0);
+            break;
+        default:
+            break;
+        }
+    }
+    utlMemFree(buf);
 }
 
-// stub of ROR 0x001cd404
-void GamMan::storePcTransform()
+// ──────────────────────────────────────────────────────────────────────
+// Map units (the sky / room packs of data/bg/mapunit.bin, one scene sky
+// slot each, kept in the +0x1d240 records). A unit already loaded is only
+// shown by mode; otherwise the stage's units are released and the named
+// one (its name up to the first '.') is read from the pack into a
+// keep buffer and handed to loadMapPack.
+// ROR 0x001ca0dc // callcheck: rorDebugPrintf, BedPfh, FileReader, FileReadReq, ~FileReader (the empty debug print, left out; the locals' constructors and destructor)
+
+void GamMan::loadMapUnit(const char *name, int id, int mode)
 {
-    ROSEPAN_STUB("GamMan::storePcTransform", 0x001cd404);
+    for (SeqNode<GamTenkyuRec> *node = m_pool1d240.m_used.begin(); node != m_pool1d240.m_used.end();
+         node = node->m_next)
+    {
+        if (node->m_data.m_unit == id)
+        {
+            showMapUnits(mode);
+            return;
+        }
+    }
+    releaseTenkyus(2);
+
+    int unit;
+    void *buf;
+    {
+        FileReader reader;
+        FileReadReq req;
+        alignas(64) u_char head[0x1800];    /* the ROM aligns a stack buffer to 64 */
+        req.m_buf = head;
+        req.m_size = 0x1800;
+        req.m_08 = 1;
+        req.m_name = "data/bg/mapunit.bin";
+        reader.read(&req, 0);
+        BedPfh pfh(req.m_buf);
+
+        char unitName[0x40];
+        strncpy(unitName, name, 0x40);
+        *strstr(unitName, ".") = '\0';
+        unit = pfh.getFileIndex(unitName);
+        if (unit < 0)
+            return;     // PORT: the ROM reads the word before the size table
+        int size = pfh.getFileSize(unit);
+        if (size < 1)
+            return;
+        size = (size + 0x7ff) / 2048 * 2048;
+        buf = g_utlMemory.allocDebug(size, s_file, 6603, 0, 0x102);
+        req.m_offset = pfh.getFileOffset(unit);
+        req.m_whence = 0;
+        req.m_buf = buf;
+        req.m_size = size;
+        req.m_close = 1;
+        reader.read(&req, 0);
+    }
+    loadMapPack((u_short)unit, buf, mode);
+    m_keepBuf = buf;
+    // PORT: the ROM stores an uninitialised stack word (sp + 8) into
+    // m_mapModelNo here; loadMapPack's slot is kept.
+    showMapUnits(mode);
 }
 
-// stub of ROR 0x001c43f0
-void GamMan::onSubSeqEnd()
+// ROR 0x001c9e20
+
+void GamMan::showMapUnits(int mode)
 {
-    ROSEPAN_STUB("GamMan::onSubSeqEnd", 0x001c43f0);
+    for (SeqNode<GamTenkyuRec> *node = m_pool1d240.m_used.begin(); node != m_pool1d240.m_used.end();
+         node = node->m_next)
+    {
+        const GamTenkyuRec &rec = node->m_data;
+        DogModel &model = g_magSystem.m_scene.m_tenkyu[rec.m_no].m_model[0];
+        u_int kind = rec.m_flags >> 30;
+        if (mode == 1)
+        {
+            model.setHide(0);
+        }
+        else if (mode == 2 || mode == 3)
+        {
+            u_int shown = mode == 2 ? 2 : 3;
+            if (kind == shown)
+            {
+                model.setHide(0);
+                m_mapModelNo = rec.m_no;
+            }
+            else if (kind == 2 || kind == 3)
+            {
+                model.setHide(1);
+            }
+        }
+    }
 }
 
-// stub of ROR 0x001cbd0c
+// ──────────────────────────────────────────────────────────────────────
+// A unit's RTPK data into a scene sky slot: none when the unit is loaded
+// (only shown by mode); a bad magic stops the game.
+// ROR 0x001ca38c // callcheck: rorDebugPrintf (the empty debug prints, left out)
+
+void GamMan::loadMapPack(u_short unit, void *data, int mode)
+{
+    for (SeqNode<GamTenkyuRec> *node = m_pool1d240.m_used.begin(); node != m_pool1d240.m_used.end();
+         node = node->m_next)
+    {
+        if ((u_int)node->m_data.m_unit == unit)
+        {
+            showMapUnits(mode);
+            return;
+        }
+    }
+    const char *p = (const char *)data;
+    if (p[0] != 'R' || p[1] != 'T' || p[2] != 'P' || p[3] != 'K')
+    {
+        scePrintf("map binary magic error.\n");
+        abort();    /* break 0 in the ROM */
+    }
+    int no = g_magSystem.loadScene(unit, data, 0);
+    resetAVFchrMotions();
+    GamTenkyuRec rec;
+    rec.m_flags = (u_int)mode << 30;
+    rec.m_unit = unit;
+    rec.m_no = no;
+    rec._c = 0;
+    m_pool1d240.add(rec);
+    m_mapModelNo = no;
+    showMapUnits(mode);
+}
+
+// ROR 0x001c4610
+
+void GamMan::resetAVFchrMotions()
+{
+    for (SeqNode<FCHRstat *> *node = m_avfchrList.m_used.begin(); node != m_avfchrList.m_used.end();
+         node = node->m_next)
+        g_magSystem.m_scene.changeActorMotion(0.0166666936f, node->m_data->m_actor, 1, 0, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The murderer (native 021): its oid and achr.
+// ROR 0x001cb424
+
+void GamMan::setMurder(int oid)
+{
+    m_murderOid = oid;
+    m_murderPtr = getAchr((u_int)oid);
+}
+
+// ROR 0x001cb520
+
+void GamMan::setPcPos(const float *pos)
+{
+    if (m_pcPtr == NULL)
+        return;
+    m_pcPtr->setPos(pos);
+    m_pcPos[0] = pos[0];
+    m_pcPos[1] = pos[1];
+    m_pcPos[2] = pos[2];
+    m_pcPos[3] = pos[3];
+}
+
+// ROR 0x001cb57c
+
+void GamMan::setPcRot(const float *rot)
+{
+    if (m_pcPtr == NULL)
+        return;
+    m_pcPtr->setRot(rot);
+    m_pcRot[0] = rot[0];
+    m_pcRot[1] = rot[1];
+    m_pcRot[2] = rot[2];
+    m_pcRot[3] = rot[3];
+}
+
+// ROR 0x001c4f38
+
+void GamMan::setPcAnim(int anim)
+{
+    g_magSystem.setActorAnim(m_pcActor, anim, 1);
+}
+
+// ROR 0x001c53e0
+
+void GamMan::setPcJnfc(int on)
+{
+    m_pcJnfc = on;
+    g_magSystem.setPC(m_pcActor, on);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The title's new game: the PC's and the dog's param 0x1c copied into 0x1b,
+// the frame count and three words cleared.
+// ROR 0x001c1378
+
+void GamMan::resetPcStat()
+{
+    float param[4];
+    if (m_pcPtr != NULL)
+    {
+        ((ACHRstat *)m_pcPtr)->getParam(0x1c, param);
+        ((ACHRstat *)m_pcPtr)->setParam(0x1b, param);
+    }
+    if (m_dogPtr != NULL)
+    {
+        ((ACHRstat *)m_dogPtr)->getParam(0x1c, param);
+        ((ACHRstat *)m_dogPtr)->setParam(0x1b, param);
+    }
+    empty1d84b0();
+    m_pcJnfc = 0;
+    m_vcount = 0;
+    m_22004 = 0;
+    m_22008 = 0;
+}
+
+// ROR 0x001d84b0
+
+int GamMan::empty1d84b0()
+{
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// System ids below 0x800 are achrs, 0x800..0x13ff fchrs: every live one of
+// the id gets the bits.
+// ROR 0x001d1fd8
+
+void GamMan::setKindFlags(int id, u_int bits, int on)
+{
+    u_short kind = (u_short)id;
+    m_sysData.setFlags((short)kind, bits);
+    if ((kind >> 9) < 4)
+    {
+        for (SeqNode<ACHRstat *> *node = m_achrList.m_used.begin(); node != m_achrList.m_used.end();
+             node = node->m_next)
+        {
+            ACHRstat *chr = node->m_data;
+            if ((u_short)chr->m_kind == kind)
+                chr->m_flags = on != 0 ? chr->m_flags | bits : chr->m_flags & ~bits;
+        }
+    }
+    else if ((kind >> 9) < 10)
+    {
+        for (SeqNode<FCHRstat *> *node = m_fchrList.m_used.begin(); node != m_fchrList.m_used.end();
+             node = node->m_next)
+        {
+            FCHRstat *chr = node->m_data;
+            if ((u_short)chr->m_kind == kind)
+                chr->m_flags = on != 0 ? chr->m_flags | bits : chr->m_flags & ~bits;
+        }
+    }
+}
+
+// ROR 0x001d2a14
+
+void GamMan::moveAchr(u_int oid, const float *d)
+{
+    float dx = d[0];
+    float dz = d[2];
+    float dy = d[1];
+    if (gamOidList(oid) != 1)
+        return;
+    ACHRstat *chr = getAchr(oid);
+    float pos[4];
+    chr->getPos(pos);
+    pos[0] += dx;
+    pos[1] += dy;
+    pos[2] += dz;
+    chr->setPos(pos);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The scene's effect table emptied and every +0x20b00 record freed.
+// ROR 0x001cbd0c
+
 void GamMan::clearPool20b00(int kind)
 {
-    ROSEPAN_STUB("GamMan::clearPool20b00", 0x001cbd0c);
+    (void)kind;
+    g_magSystem.m_scene.m_837e0.releaseAll();
+    m_pool20b00.clear();
 }
 
-// stub of ROR 0x001c47c4
+// ──────────────────────────────────────────────────────────────────────
+// One wrap of *a into -pi..pi, in doubles as the ROM's soft-float code
+// does; 0 when it is still outside.
+static int gamWrapAngle(float *a)
+{
+    const double pi = 3.141592653589793;
+    if ((double)*a >= -pi && (double)*a <= pi)
+        return 1;
+    float v = *a;
+    if ((double)v < -pi)
+        v = (float)((double)v + 2.0 * pi);
+    if ((double)v > pi)
+        v = (float)((double)v - 2.0 * pi);
+    *a = v;
+    return (double)v >= -pi && (double)v <= pi;
+}
+
+// The same wrap without the check (setPcStartPos, storePcTransform).
+static float gamWrapAngleOnce(float v)
+{
+    const double pi = 3.141592653589793;
+    if ((double)v < -pi)
+        v = (float)((double)v + 2.0 * pi);
+    if ((double)v > pi)
+        v = (float)((double)v - 2.0 * pi);
+    return v;
+}
+
+// rot's three angles wrapped in place, one at a time: one still outside
+// -pi..pi leaves the object as it is (the angles before it stay wrapped).
+// ROR 0x001cfe78 // callcheck: dpadd, dpcmp, dpsub, dptofp, fptodp (the soft-float doubles, C doubles here)
+
+void GamMan::setObjRot(u_int oid, float *rot)
+{
+    if (!gamWrapAngle(&rot[0]) || !gamWrapAngle(&rot[1]) || !gamWrapAngle(&rot[2]))
+        return;
+    u_int list = gamOidList(oid);
+    if (list == 1)
+    {
+        getAchr(oid)->setRot(rot);
+    }
+    else if (list == 0)
+    {
+        FCHRstat *chr = getVFchr(oid);
+        if (chr != NULL)
+            chr->setRot(rot);
+    }
+    else if (list == 2)
+    {
+        FCHRstat *chr = getFchr(oid);
+        if (chr != NULL)
+            chr->setRot(rot);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A W000.WRD file 2 record (EE 0x20, ended by room -1): a PC start of a
+// room.
+struct GamStartRec
+{
+    int   m_wrd;                // ROR 0x00: the room
+    int   _04[3];
+    float m_pos[3];             // ROR 0x10
+    float m_rotY;               // ROR 0x1c
+};
+static_assert(sizeof(GamStartRec) == 0x20, "GamStartRec");
+
+// m_1a684 says where the PC starts: 0xcccccccc nowhere new; 0xcccccccb the
+// kept transforms of the PC and the dog; -n the n-th start of this room;
+// else an fchr oid of type 9: 50 units in front of it, facing as it does
+// (turned round when the object's param 12 room is this one). Bit 0x4000
+// of m_flags marks a start, 0x20 a placed PC.
+// ROR 0x001c3d38 // callcheck: memset, dpadd, dpcmp, dpsub, dptofp, fptodp (initializers; the soft-float doubles, C doubles here)
+
+void GamMan::setPcStartPos()
+{
+    float pos[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    float rot[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    u_int start = m_1a684;
+    m_flags2 &= 0x7fffffff;
+    if (start == 0xcccccccc)
+        return;
+    m_flags |= 0x4000;
+
+    if ((int)start < 0 && start != 0xcccccccb)
+    {
+        const GamStartRec *rec = (const GamStartRec *)m_wrdFile2;
+        int n = 0;
+        for (int i = 1; rec->m_wrd != -1; i++)
+        {
+            if (rec->m_wrd == m_wrdNo && ++n == -(int)start)
+            {
+                pos[0] = rec->m_pos[0];
+                pos[1] = rec->m_pos[1];
+                pos[2] = rec->m_pos[2];
+                rot[0] = 0.0f;
+                rot[1] = rec->m_rotY;
+                rot[2] = 0.0f;
+                setPcPos(pos);
+                setPcRot(rot);
+                storePcTransform();
+                m_flags |= 0x20;
+                return;
+            }
+            rec++;
+            if (i >= 0x200)
+                break;
+        }
+        return;
+    }
+
+    if (start == 0xcccccccb)
+    {
+        rot[1] = m_pcStart[3];
+        rot[0] = rot[2] = rot[3] = 0.0f;
+        setPcPos(m_pcStart);
+        setPcRot(rot);
+        rot[1] = m_dogStart[3];
+        rot[0] = rot[2] = rot[3] = 0.0f;
+        setObjPos((u_int)m_21fd0, m_dogStart);
+        setObjRot((u_int)m_21fd0, rot);
+    }
+    else
+    {
+        FCHRstat *obj = findFchrType9((int)start);
+        if (obj == NULL)
+            return;
+        obj->getPos(pos);
+        obj->getRot(rot);
+        float dir = gamWrapAngleOnce(rot[1]);
+        int info[4];
+        ctlObjParam(start, 0xc, info, 0);
+        if (info[1] == m_wrdNo)
+            dir = gamWrapAngleOnce((float)((double)dir + 3.141592653589793));
+        rot[1] = dir;
+        pos[0] += sinf(dir) * 50.0f;
+        pos[2] += cosf(rot[1]) * 50.0f;
+        setPcPos(pos);
+        setPcRot(rot);
+        storePcTransform();
+    }
+    m_flags |= 0x20;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The dog stands 35 units from the PC, at the PC's heading - pi/2, facing
+// as the PC does.
+// ROR 0x001cd404 // callcheck: dpadd, dpcmp, dpsub, dptofp, fptodp (the soft-float doubles, C doubles here)
+
+void GamMan::storePcTransform()
+{
+    m_pcPtr->getPos(m_pcPos);
+    m_pcPtr->getRot(m_pcRot);
+    float rot[4] = { m_pcRot[0], m_pcRot[1], m_pcRot[2], m_pcRot[3] };
+    float a = gamWrapAngleOnce((float)((double)rot[1] - 1.5707963267948966));
+    float off[4];
+    off[0] = sinf(a) * 35.0f;
+    off[2] = cosf(a) * 35.0f;
+    off[1] = 0.0f;
+    off[3] = 0.0f;
+    sceVu0AddVector(m_dogPos, m_pcPos, off);
+    m_dogPtr->setPos(m_dogPos);
+    m_dogPtr->setRot(rot);
+    float v[4] = { m_dogPos[0], m_dogPos[1], m_dogPos[2], m_dogPos[3] };
+    gamSetBwnPos(v);
+    v[0] = rot[0];
+    v[1] = rot[1];
+    v[2] = rot[2];
+    v[3] = rot[3];
+    gamSetBwnRot(v);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Image 2's main thread ended (Sequence::reapThreads): the held item again;
+// with flags2 0x40 the kept start transforms, the BGM record, and the bits
+// of the +0x18bc4 list on their objects.
+// ROR 0x001c43f0
+
+void GamMan::onSubSeqEnd()
+{
+    if (m_equipItem != 0xa00)
+        equipItem(m_equipItem);
+    if ((m_flags2 & 0x40) != 0)
+    {
+        m_flags2 &= ~0x40u;
+        m_1a684 = 0xcccccccb;
+        setPcStartPos();
+        m_sndMan.setBgmRec(&m_bgmRec);
+        m_sndMan.resumeBgm(1, 0, 0);
+
+        static const u_int s_bits[5] = { 4, 1, 0x40, 0x80, 0x10 };
+        const GamObjSet *rec = m_18bc4;
+        for (int i = 0; i < 0x180 && rec[i].m_oid != 0; i++)
+        {
+            u_int oid = rec[i].m_oid;
+            for (int b = 0; b < 5; b++)
+            {
+                if ((rec[i].m_flags & s_bits[b]) != 0)
+                    setObj(oid, s_bits[b]);
+                else
+                    resetObj(oid, s_bits[b]);
+            }
+        }
+    }
+    m_flags2 &= ~0x1800u;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Stage change kind 3: the PC / dog transforms parked far away, the kept
+// PC and dog set up again (flags2 0x10000000), the room's vfchr models, a
+// pending chapter SE reload, then the room's data/<dir>/W<ch>/A<room>/
+// A<room>.ARA: its file 0 lists the actor model ids (-1 ends it); from
+// the end, file n-4 is the stage-2 script image, n-2 the WRD room data,
+// and the actor files run down from n-5. Each actor is loaded hidden and
+// kept in the +0x1f880 records.
+// ROR 0x001c47c4 // callcheck: FUN_00215a30, BedPfh, FileReadReq, FileReader, ~FileReader (the assert handler inside BedPfh's inlines; the locals' constructors and destructor)
+
 void GamMan::initStage2()
 {
-    ROSEPAN_STUB("GamMan::initStage2", 0x001c47c4);
+    u_int flags2 = m_flags2;
+    m_225dc = 0;
+    m_dogPos[2] = -100000.0f;
+    m_flags2 = flags2 | 0x8001800;
+    m_pcPos[0] = -100000.0f;
+    m_pcPos[1] = -100000.0f;
+    m_pcPos[2] = -100000.0f;
+    m_pcPos[3] = 0.0f;
+    m_dogPos[0] = -100000.0f;
+    m_dogPos[1] = -100000.0f;
+    m_dogPos[3] = 0.0f;
+    if ((flags2 & 0x10000000) != 0)
+        setupPcDogStage2();
+    gamCreateEff1a();
+    reloadVFchrModels();
+    if ((m_flags2 & 0x1000000) != 0)
+    {
+        reloadChapterSe1f();
+        m_flags2 &= ~0x1000000u;
+    }
+    else if ((m_flags2 & 0x2000000) != 0)
+    {
+        reloadChapterSe0c();
+        m_flags2 &= ~0x2000000u;
+    }
+
+    FileReader reader;
+    empty1c1a88();
+    char path[0x40];
+    snprintf(path, 0x40, "data/%s/W%03d/A%03d/A%03d.ARA", seqGetDataDir(), m_chapter, m_wrdNo,
+             m_wrdNo);
+    alignas(64) u_char head[0x1800];    /* the ROM aligns a stack buffer to 64 */
+
+    FileReadReq req;
+    req.m_size = 0x1800;
+    req.m_08 = 1;
+    req.m_whence = 0;
+    req.m_offset = 0;
+    req.m_close = 1;
+    req.m_name = path;
+    req.m_buf = head;
+    reader.read(&req, 0);
+    BedPfh pfh1(req.m_buf);
+    int size = (pfh1.getTotalSize() + 0x7ff) / 2048 * 2048;
+    void *buf = g_utlMemory.allocDebug(size, s_file, 2572, 0, 0x101);
+    setStagePack(buf);
+
+    FileReadReq req2;
+    req2.m_close = 1;
+    req2.m_08 = 1;
+    req2.m_buf = buf;
+    req2.m_whence = 0;
+    req2.m_offset = 0;
+    req2.m_name = path;
+    req2.m_size = size;
+    reader.read(&req2, 0);
+    BedPfh pfh(req2.m_buf);
+
+    int num = pfh.getNumFile();
+    const short *ids = (const short *)pfh.getFile(0);
+    u_int count = 0;
+    while ((int)count < num && ids[count] != -1)
+        count++;
+    int base = (int)((u_int)(num - (int)count - 6) & 0xffff) + (int)count;
+    // PORT: loadSubImage copies 0x30000 bytes, the ARA's image is 12..31 KB
+    // near the end of the pack buffer: the PS2 reads what follows, the host
+    // faults past the heap block. The image goes through a zeroed full-size
+    // buffer.
+    static u_char s_subImage[0x30000];
+    int imageSize = pfh.getFileSize(base + 2);
+    if (imageSize < 0 || imageSize > (int)sizeof(s_subImage))
+        imageSize = sizeof(s_subImage);
+    memset(s_subImage, 0, sizeof(s_subImage));
+    memcpy(s_subImage, pfh.getFile(base + 2), imageSize);
+    g_sequence.loadSubImage(2, s_subImage);
+    gamSetWrdRoom(this, pfh.getFile(base + 4));
+
+    int file = base + 1;
+    while (count != 0)
+    {
+        short model = ids[count - 1];
+        GamActorRec rec;
+        rec.m_actor = g_magSystem.m_scene.loadActor(&g_magSystem.m_i3d, model,
+                                                    (void *)pfh.getFile(file), 1);
+        rec.m_flags = 1;
+        rec.m_model = model;
+        rec.m_8 = 0;
+        file--;
+        g_magSystem.m_scene.m_actors[rec.m_actor].setHide(1);
+        count--;
+        m_pool1f880.add(rec);
+    }
+    utlMemFree(buf);
+    gamStage2Loaded();
 }
+
+// ROR 0x001c387c
+
+void GamMan::reloadVFchrModels()
+{
+    m_avfchrList.clear();
+    for (SeqNode<FCHRstat *> *node = m_vfchrList.m_used.begin(); node != m_vfchrList.m_used.end();
+         node = node->m_next)
+    {
+        FCHRstat *chr = node->m_data;
+        u_int oid = chr->m_oid;
+        int room;
+        chr->getParam(8, &room);
+        if (room != m_wrdNo)
+            continue;
+        int model[2];
+        float pos[4];
+        chr->getParam(0x1000, model);
+        chr->getPos(pos);
+        if (model[0] == 0xffff || model[0] == 0)
+            continue;
+        loadVFchrModel((u_short)model[0], oid, (intptr_t)pos);
+        int actor;
+        chr->getParam(3, &actor);
+        if ((chr->m_flags & 1) != 0 || (chr->m_flags & 0x200000) != 0)
+            chr->setHide(1);
+    }
+}
+
+// ROR 0x001cd954
+
+void GamMan::setupPcDogStage2()
+{
+    m_flags2 = (m_flags2 & ~0x10000000u) | 0x20000000;
+    if ((u_int)(m_21ff4 - 0x2005) > 4)
+        m_21ff4 = 0x2000;
+    reloadAchrModel((u_short)m_21ff4, 0x50000001);
+    if ((u_int)(m_21ff8 - 0x2401) > 3)
+        m_21ff8 = 0x2400;
+    reloadAchrModel((u_short)m_21ff8, 0x50800002);
+    setPc(0x50000001);
+    setDog(0x50800002);
+    resetObj(0x50000001, 1);
+    if ((g_sequence.m_bits[1] & 4) == 0)
+        setObj(0x50800002, 1);
+    else
+        resetObj(0x50800002, 1);
+    switch (m_chapter)
+    {
+    case 1:  setPcAnim(4); break;
+    case 2:  setPcAnim(5); break;
+    case 3:  setPcAnim(6); break;
+    case 4:  setPcAnim(7); break;
+    case 5:  setPcAnim(8); break;
+    case 6:  setPcAnim(9); break;
+    case 7:  setPcAnim(6); break;
+    case 8:  setPcAnim(10); break;
+    case 10: setPcAnim(0xb); break;
+    case 11: setPcAnim(0xc); break;
+    case 12: setPcAnim(0xd); break;
+    default: break;
+    }
+    g_sequence.m_global[0x51] = m_21ff4;
+    g_sequence.m_global[0x52] = m_21ff8;
+}
+
+// ROR 0x001caf78
+
+int GamMan::reloadAchrModel(u_short model, u_int oid)
+{
+    u_int param = model;
+    ACHRstat *chr = getAchr(oid);
+    chr->releaseActor();
+    int actor = g_magSystem.loadModel(model, -1);
+    setObjLight(actor, oid);
+    chr->setParam(3, &actor);
+    chr->setParam(0x1000, &param);
+    return actor;
+}
+
+// ---- stubs (tools/reverse/stubgen.py) ----
 
 // stub of ROR 0x001cdf5c
 void GamMan::releaseObjs(int kind, int arg)
@@ -3380,36 +4090,6 @@ u_int GamMan::changeObjModel(u_int model, const char *name, u_int oid, int keepP
 {
     ROSEPAN_STUB("GamMan::changeObjModel", 0x001cad88);
     return {};
-}
-
-// stub of ROR 0x001ca0dc
-void GamMan::loadMapUnit(const char *name, int id, int mode)
-{
-    ROSEPAN_STUB("GamMan::loadMapUnit", 0x001ca0dc);
-}
-
-// stub of ROR 0x001cb424
-void GamMan::setMurder(int oid)
-{
-    ROSEPAN_STUB("GamMan::setMurder", 0x001cb424);
-}
-
-// stub of ROR 0x001c4f38
-void GamMan::setPcAnim(int anim)
-{
-    ROSEPAN_STUB("GamMan::setPcAnim", 0x001c4f38);
-}
-
-// stub of ROR 0x001c53e0
-void GamMan::setPcJnfc(int on)
-{
-    ROSEPAN_STUB("GamMan::setPcJnfc", 0x001c53e0);
-}
-
-// stub of ROR 0x001c1378
-void GamMan::resetPcStat()
-{
-    ROSEPAN_STUB("GamMan::resetPcStat", 0x001c1378);
 }
 
 // stub of ROR 0x001d091c
@@ -3460,22 +4140,10 @@ void GamMan::setActorBindMode(u_int oid, int mode)
     ROSEPAN_STUB("GamMan::setActorBindMode", 0x001d2428);
 }
 
-// stub of ROR 0x001d1fd8
-void GamMan::setKindFlags(int id, u_int bits, int on)
-{
-    ROSEPAN_STUB("GamMan::setKindFlags", 0x001d1fd8);
-}
-
 // stub of ROR 0x001d1838
 void GamMan::setObjAttr(u_int oid, u_int bits)
 {
     ROSEPAN_STUB("GamMan::setObjAttr", 0x001d1838);
-}
-
-// stub of ROR 0x001cfe78
-void GamMan::setObjRot(u_int oid, float *rot)
-{
-    ROSEPAN_STUB("GamMan::setObjRot", 0x001cfe78);
 }
 
 // stub of ROR 0x001d1e88
@@ -3540,12 +4208,6 @@ void GamMan::openSysMsg(const char *text, int a, int b, int c, int d)
     ROSEPAN_STUB("GamMan::openSysMsg", 0x001cfa5c);
 }
 
-// stub of ROR 0x001d2a14
-void GamMan::moveAchr(u_int oid, const float *d)
-{
-    ROSEPAN_STUB("GamMan::moveAchr", 0x001d2a14);
-}
-
 // stub of ROR 0x001c621c
 void GamMan::popCamera()
 {
@@ -3564,8 +4226,3 @@ void GamMan::switchEnemies(int on)
     ROSEPAN_STUB("GamMan::switchEnemies", 0x001c5a5c);
 }
 
-// stub of ROR 0x001c2848
-void GamMan::loadChapterSe(int chapter, int arg)
-{
-    ROSEPAN_STUB("GamMan::loadChapterSe", 0x001c2848);
-}

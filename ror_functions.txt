@@ -1570,8 +1570,8 @@
 /* 00144308 0000002c */ FUN_00144308(){}
 /* 00144334 00000054 */ gamSetBwnFollow(){}  // ror
 /* 00144388 00000010 */ FUN_00144388(){}
-/* 00144398 00000040 */ FUN_00144398(){}
-/* 001443d8 00000040 */ FUN_001443d8(){}
+/* 00144398 00000040 */ gamSetBwnPos(){}  // ror
+/* 001443d8 00000040 */ gamSetBwnRot(){}  // ror
 /* 00144418 00000074 */ FUN_00144418(){}
 /* 0014448c 00000074 */ FUN_0014448c(){}
 /* 00144500 00000038 */ gamSetBwnItem(){}  // ror
@@ -2378,7 +2378,7 @@
 /* 00172058 0000022c */ FUN_00172058(){}
 /* 00172284 000003b4 */ FUN_00172284(){}
 /* 00172638 00000040 */ FUN_00172638(){}
-/* 00172678 0000003c */ FUN_00172678(){}
+/* 00172678 0000003c */ gamCreateEff1a(){}  // ror
 /* 001726b4 00000138 */ FUN_001726b4(){}
 /* 001727ec 00000148 */ FUN_001727ec(){}
 /* 00172934 00000194 */ FUN_00172934(){}
@@ -2451,7 +2451,7 @@
 /* 00176cc8 00000818 */ Obj176a3c::createEff(){}  // ror
 /* 001774e0 0000008c */ FUN_001774e0(){}
 /* 0017756c 000000c0 */ Obj176a3c::release(){}  // ror
-/* 0017762c 00000098 */ FUN_0017762c(){}
+/* 0017762c 00000098 */ Obj176a3c::releaseAll(){}  // ror
 /* 001776c4 00000068 */ FUN_001776c4(){}
 /* 0017772c 00000104 */ FUN_0017772c(){}
 /* 00177830 00000188 */ FUN_00177830(){}
@@ -3576,12 +3576,12 @@
 /* 001c204c 000007fc */ GamMan::loadStage(){}  // ror
 /* 001c2848 00000708 */ GamMan::loadChapterSe(){}  // ror
 /* 001c2f50 0000092c */ GamMan::loadStageSnd(){}  // ror
-/* 001c387c 000001cc */ FUN_001c387c(){}
+/* 001c387c 000001cc */ GamMan::reloadVFchrModels(){}  // ror
 /* 001c3a48 000002f0 */ FUN_001c3a48(){}
 /* 001c3d38 00000430 */ GamMan::setPcStartPos(){}  // ror
 /* 001c4168 00000288 */ GamMan::onStageSeqEnd(){}  // ror
 /* 001c43f0 00000220 */ GamMan::onSubSeqEnd(){}  // ror
-/* 001c4610 000000b8 */ FUN_001c4610(){}
+/* 001c4610 000000b8 */ GamMan::resetAVFchrMotions(){}  // ror
 /* 001c46c8 00000028 */ FUN_001c46c8(){}
 /* 001c46f4 00000004 */ GamMan::setStagePack(){}  // ror
 /* 001c46fc 000000c8 */ FUN_001c46fc(){}
@@ -3666,10 +3666,10 @@
 /* 001c98c0 00000060 */ GamMan::isObjRecRef(){}  // ror
 /* 001c9920 000002fc */ GamMan::ctlObjParam(){}  // ror
 /* 001c9c1c 00000204 */ GamMan::setOption(){}  // ror
-/* 001c9e20 000002b0 */ FUN_001c9e20(){}
+/* 001c9e20 000002b0 */ GamMan::showMapUnits(){}  // ror
 /* 001ca0d4 00000004 */ GamMan::empty1ca0d4(){}  // ror
 /* 001ca0dc 000002b0 */ GamMan::loadMapUnit(){}  // ror
-/* 001ca38c 0000020c */ FUN_001ca38c(){}
+/* 001ca38c 0000020c */ GamMan::loadMapPack(){}  // ror
 /* 001ca598 0000006c */ GamMan::setObjLight(){}  // ror
 /* 001ca604 00000128 */ GamMan::getChrRpk(){}  // ror
 /* 001ca72c 000001bc */ GamMan::createObjByName(){}  // ror
@@ -3677,7 +3677,7 @@
 /* 001caa14 000001c0 */ GamMan::loadVFchrModel(){}  // ror
 /* 001cabd4 000001b4 */ GamMan::loadVFchrModelByName(){}  // ror
 /* 001cad88 000001f0 */ GamMan::changeObjModel(){}  // ror
-/* 001caf78 000000a4 */ FUN_001caf78(){}
+/* 001caf78 000000a4 */ GamMan::reloadAchrModel(){}  // ror
 /* 001cb01c 000001a4 */ GamMan::releaseTenkyus(){}  // ror
 /* 001cb1c0 0000008c */ GamMan::resetTenkyuFlags(){}  // ror
 /* 001cb24c 00000138 */ GamMan::setPc(){}  // ror
@@ -3687,8 +3687,8 @@
 /* 001cb490 00000030 */ FUN_001cb490(){}
 /* 001cb4c0 00000030 */ FUN_001cb4c0(){}
 /* 001cb4f0 00000030 */ GamMan::setPcParam(){}  // ror
-/* 001cb520 0000005c */ FUN_001cb520(){}
-/* 001cb57c 0000005c */ FUN_001cb57c(){}
+/* 001cb520 0000005c */ GamMan::setPcPos(){}  // ror
+/* 001cb57c 0000005c */ GamMan::setPcRot(){}  // ror
 /* 001cb5d8 00000030 */ FUN_001cb5d8(){}
 /* 001cb608 00000030 */ FUN_001cb608(){}
 /* 001cb638 00000114 */ FUN_001cb638(){}
@@ -3718,7 +3718,7 @@
 /* 001cd60c 000001b4 */ GamMan::startStage2(){}  // ror
 /* 001cd7c0 00000004 */ GamMan::empty1cd7c0(){}  // ror
 /* 001cd7c8 0000018c */ GamMan::execStageReq(){}  // ror
-/* 001cd954 0000029c */ FUN_001cd954(){}
+/* 001cd954 0000029c */ GamMan::setupPcDogStage2(){}  // ror
 /* 001cdbf0 0000036c */ GamMan::resetStage(){}  // ror
 /* 001cdf5c 00000ae8 */ GamMan::releaseObjs(){}  // ror
 /* 001cea44 000001b4 */ GamMan::releaseVFchrs(){}  // ror
@@ -3831,7 +3831,7 @@
 /* 001d83c0 00000010 */ FUN_001d83c0(){}
 /* 001d83d0 000000d8 */ GamMan::lookupFlagTable(){}  // ror
 /* 001d84a8 00000008 */ GamMan::resetExtra(){}  // ror
-/* 001d84b0 00000018 */ FUN_001d84b0(){}
+/* 001d84b0 00000018 */ GamMan::empty1d84b0(){}  // ror
 
 // *****************************************************************************
 // FILE -- game/gamstat.cpp
@@ -3896,7 +3896,7 @@
 /* 001dbb38 0000003c */ FUN_001dbb38(){}
 /* 001dbb74 000000e8 */ FUN_001dbb74(){}
 /* 001dbc5c 00000094 */ FUN_001dbc5c(){}
-/* 001dbcf0 000000a0 */ FUN_001dbcf0(){}
+/* 001dbcf0 000000a0 */ gamSetWrdRoom(){}  // ror
 /* 001dbd90 00000060 */ FUN_001dbd90(){}
 /* 001dbdf0 00000104 */ FUN_001dbdf0(){}
 /* 001dbef8 000000a8 */ GamSysData::set(){}  // ror
@@ -3958,7 +3958,7 @@
 /* 001e100c 00000070 */ GamSndMan::update(){}  // ror
 /* 001e107c 000000a0 */ GamSndMan::resetVolume(){}  // ror
 /* 001e111c 000004b4 */ FUN_001e111c(){}
-/* 001e15d0 00000050 */ FUN_001e15d0(){}
+/* 001e15d0 00000050 */ GamSndMan::setBgmRec(){}  // ror
 /* 001e1620 00000190 */ GamSndMan::unpush_snd(){}  // ror
 /* 001e17b4 0000016c */ GamSndMan::stopBgm(){}  // ror
 /* 001e1920 00000684 */ GamSndMan::resumeBgm(){}  // ror

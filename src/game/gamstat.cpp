@@ -1307,3 +1307,9 @@ void GamSysData::setField(int id, int field, const void *data)
 {
     ROSEPAN_STUB("GamSysData::setField", 0x001dc070);
 }
+
+// stub of ROR 0x001dbcf0
+void gamSetWrdRoom(GamMan *gam, const void *file)
+{
+    ROSEPAN_STUB("gamSetWrdRoom", 0x001dbcf0);
+}

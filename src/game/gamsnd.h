@@ -31,6 +31,14 @@ static_assert(sizeof(GamSndEntry) == 0x38, "GamSndEntry");
 static_assert(offsetof(GamSndEntry, m_bank) == 0x20, "m_bank");
 static_assert(offsetof(GamSndEntry, m_32) == 0x32, "m_32");
 
+/* A BGM state record GamMan keeps at +0x22a5c (EE 0x24, the words
+ * GamSndMan::setBgmRec copies to its +0x15a0). */
+struct GamBgmRec
+{
+    int m_word[9];              // ROR 0x00
+};
+static_assert(sizeof(GamBgmRec) == 0x24, "GamBgmRec");
+
 /* layout: host -- only the words GamMan reads. GamMan's same-named inline
  * methods (registSnd, funcSnd, clear_snd_lst, loadSePack, the ELF's
  * symbols) forward to these. */
@@ -66,6 +74,9 @@ struct GamSndMan
     /* GamMan::resume's call (0, 0, 1): restarts the BGM slot (+0x1684,
      * reset to 0 when reset is set). */
     void resumeBgm(int a, int mode, int reset);                          // ROR 0x001e1920
+    /* rec into +0x15a0, +0x1684 cleared (GamMan::onSubSeqEnd, before
+     * resumeBgm(1, 0, 0)). */
+    void setBgmRec(const GamBgmRec *rec);                                // ROR 0x001e15d0
 
     /* The script's sound API (native 252). Names and parameter types are
      * GamMan's inline forwarders' (ELF symbols 0x28e820..0x28ee48); the

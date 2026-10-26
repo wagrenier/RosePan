@@ -226,3 +226,9 @@ void GamSndMan::loadSePack(const char *name, int arg)
 {
     ROSEPAN_STUB("GamSndMan::loadSePack", 0x001e4540);
 }
+
+// stub of ROR 0x001e15d0
+void GamSndMan::setBgmRec(const GamBgmRec *rec)
+{
+    ROSEPAN_STUB("GamSndMan::setBgmRec", 0x001e15d0);
+}
