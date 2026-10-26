@@ -197,6 +197,21 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      GamMan::initStage2 / startStage2. Find the fault first (a crash handler / minidump in the
      platform layer would help, gdb hides it), then GamMan::createObjByModel 0x1ca8e8 / addChr so
      the stage objects exist, then those natives.
+  10e. PARTIAL 2026-10-26 (session 5 of `sequence/seqcall.cpp`): natives 007, 009, 012 (lights / fog,
+     63 cases), 014, 019 (pad), 028, 036, 038, 039 written, with GamMan setMsgParam / killMsgTask /
+     releasePcMotion / pushFog / popFog / saveLightSets / restoreLightSets / setLightFlag (now (theD,
+     theS)) in game/gamman.cpp. Under gdbrun (pad 1800:START,2400:START,2700:CROSS) the title menu shows
+     right and New Game runs 012 / 019 / 038 / 039 without stub hits; the screen is then black (stage 2
+     load, nothing drawn). **Reached stubs after New Game, in order**: seqFunc155, seqFunc252,
+     magBwnSeqCommand 0x144ae0 (native 039's Brown commands, unassigned@00143d3c), seqFunc152, GamArea::
+     stopKind / clearKind, GamMan clearPool20b00 / releaseObjs / initStage2 / startStage2 -- write 155,
+     252, 152 next in this TU, then GamMan's stage-2 start and createObjByModel / addChr (gamman).
+     **Boot blocker (environment / platform, not this TU)**: 5 of 6 plain runs this session stalled
+     black after the Atlus logo (MV00_AD never shows a first picture; hazards.md "A crash that gdbrun
+     does not reproduce"); the New Game crash of 10d was seen once. A smoke run that must reach New
+     Game may need several tries or gdbrun until the movie-start race is found (snd/rxmpeg.cpp /
+     sdk/libmpeg.cpp). Decision taken without the user: queue nothing new for it -- the user decides
+     whether the movie race goes before more natives.
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

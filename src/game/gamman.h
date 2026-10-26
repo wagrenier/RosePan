@@ -14,6 +14,7 @@
 #include <stdint.h>
 
 #include "game/gamsnd.h"
+#include "i3d/i3denv.h"
 #include "sequence/sequence.h"
 
 /* GamMan's member at +0x40 (bss 0x781300; its code is in
@@ -308,13 +309,6 @@ struct GamRec22470
 static_assert(sizeof(GamRec22470) == 0x30, "GamRec22470 stride");
 
 /* GamMan +0x22540: three records, -1.0 = unset (EE 0x20). */
-struct GamRec22540
-{
-    float m_00;                 // ROR 0x00
-    int   _04[7];
-};
-static_assert(sizeof(GamRec22540) == 0x20, "GamRec22540 stride");
-
 /* EE size 0x22ab8. layout: host -- EE offsets in the comments. Items are
  * short ids, 0xa00 = none. */
 struct GamMan
@@ -584,6 +578,19 @@ struct GamMan
     int  resetTenkyuFlags();                                             // ROR 0x001cb1c0
     /* 1 while the message task runs or the system message window is open. */
     int  isMsgBusy();                                                    // ROR 0x001cf9d4
+    /* Copies eight words over m_msgParam (native 007). */
+    void setMsgParam(const int *param);                                  // ROR 0x001cf7d0
+    /* Kills the message task, clears the message mode (native 009). */
+    void killMsgTask();                                                  // ROR 0x001cf95c
+    /* Frees motion id of the PC's actor (native 028). */
+    void releasePcMotion(int id);                                        // ROR 0x001c4f70
+    /* Saves the scene's fog in the first free of three slots (native 012). */
+    void pushFog();                                                      // ROR 0x001c6470
+    /* Puts the last saved fog back and frees its slot (native 012). */
+    void popFog();                                                       // ROR 0x001c651c
+    /* Light sets 0 / 1 into 7 / 6 by mode (0 both, 1 set 1, 2 set 0). */
+    void saveLightSets(int mode);                                        // ROR 0x001d2494
+    void restoreLightSets(int mode);                                     // ROR 0x001d25e4
     int  isAchr(u_int oid);                                              // ROR 0x001d2aac
     int  isFchr(u_int oid);                                              // ROR 0x001d2adc
     int  isVFchr(u_int oid);                                             // ROR 0x001d2b10
@@ -614,9 +621,8 @@ struct GamMan
      * row whose column keyCol is key (keyCol 99: row key). -1 none. */
     int  lookupFlagTable(int keyCol, int key, int col);                  // ROR 0x001d83d0
     void markReset();                                                    // ROR 0x001d3588
-    /* which 1 / 0 / 6 / 7 sets m_flags 0x4000000 / 0x2000000 / 0x8000000 /
-     * 0x10000000, then the scene's light update 0x13fb3c. */
-    void setLightFlag(int which);                                        // ROR 0x001d2724
+    /* Marks light set theD in m_flags, copies set theS over it. */
+    void setLightFlag(int theD, int theS);                               // ROR 0x001d2724
     /* 0: saves the volume in m_saved_volume and silences; 1: restores
      * the saved volume (when one is saved) and marks none saved. */
     void switchVolume(int on);                                           // ROR 0x001d3ac8
@@ -723,7 +729,7 @@ struct GamMan
     int          m_stageReq;        // ROR 0x2221c: afterSeqExec's change kind (3 the stage-2 images, 5 a full reset)
     GamSysData   m_sysData;         // ROR 0x22220: the system pack's file 0
     int          m_sysMsgHandle;    // ROR 0x2227c: getSysMsgHND
-    int          m_22280[7];        // ROR 0x22280: 10, 10, 0xffff, 0x100, 0x100, 0, 0 (initGameState)
+    int          m_msgParam[8];      // ROR 0x22280: the message window words, 10, 10, 0xffff, 0x100, 0x100, 0, 0 (initGameState), all eight from setMsgParam
     int          m_msgTaskId;       // ROR 0x222a0: getMsgTaskID
     int          m_selectTaskId;    // ROR 0x222a4: getSelectTaskID
     int          m_222a8;           // ROR 0x222a8: a task id
@@ -740,7 +746,7 @@ struct GamMan
     SeqFixedPool<GamRec16, 0x100> *m_pool2246c; // ROR 0x2246c: init's new (0x1840 bytes)
     GamRec22470  m_22470[4];        // ROR 0x22470: stride 0x30
     int          m_22530;           // ROR 0x22530
-    GamRec22540  m_22540[3];        // ROR 0x22540: stride 0x20
+    I3dFog       m_fogStack[3];     // ROR 0x22540: pushFog / popFog; m_color[0] -1 = a free slot
     int          m_msgMode;         // ROR 0x225d8: chgMsgMode
     int          m_225e4;           // ROR 0x225e4
     void        *m_keepBuf;         // ROR 0x225e8: dropMap's m_p_keep_buf (releaseTenkyus frees it)

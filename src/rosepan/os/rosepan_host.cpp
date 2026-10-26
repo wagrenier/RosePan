@@ -1,11 +1,39 @@
 #include "rosepan_host.h"
 
+#include <cstdint>
 #include <cstdlib>
 #include <deque>
 #include <mutex>
 #include <string>
 
 #include <SDL3/SDL.h>
+
+#if defined(_WIN32)
+#include <cstdio>
+/* Declared by hand rather than via <windows.h>, which collides with the EE
+ * prefix header (src/sdk/iop_host.cpp). */
+struct RosePanExceptionRecord
+{
+    unsigned long           code;
+    unsigned long           flags;
+    RosePanExceptionRecord *next;
+    void                   *address;
+    unsigned long           count;
+    uintptr_t               info[15];
+};
+struct RosePanExceptionPointers
+{
+    RosePanExceptionRecord *record;
+    void                   *context;
+};
+typedef long(__stdcall *RosePanExceptionFilter)(RosePanExceptionPointers *);
+extern "C" __declspec(dllimport) RosePanExceptionFilter __stdcall SetUnhandledExceptionFilter(
+    RosePanExceptionFilter filter);
+extern "C" __declspec(dllimport) unsigned short __stdcall RtlCaptureStackBackTrace(
+    unsigned long skip, unsigned long count, void **frames, unsigned long *hash);
+extern "C" __declspec(dllimport) void *__stdcall GetModuleHandleW(const wchar_t *name);
+#define ROSEPAN_CRASH_LOG 1
+#endif
 
 // See rosepan_host.h for the split.  Everything here is either main-thread
 // (HostMain's loop, Enqueue) or game-thread (PollEvent) code; the queue and
@@ -89,10 +117,49 @@ int SDLCALL GameThread(void *)
     return g_game_result;
 }
 
+#ifdef ROSEPAN_CRASH_LOG
+// A fault outside a debugger kills the process before the log is flushed,
+// and gdb's timing can hide it (hazards.md). Print the fault and the stack
+// (the filter runs on the faulting thread before any unwinding, so the
+// faulting frames are below the dispatcher's) as exe offsets to stderr:
+// build.py keeps it in work/run_<config>.log, and addr2line -f -C -e
+// RosePan.exe <image base + offset> names them.
+long __stdcall CrashFilter(RosePanExceptionPointers *info)
+{
+    const RosePanExceptionRecord *rec = info->record;
+    const uintptr_t base = (uintptr_t)GetModuleHandleW(nullptr);
+    fprintf(stderr, "[crash] code 0x%08lx at exe +0x%llx", rec->code,
+            (unsigned long long)((uintptr_t)rec->address - base));
+    if (rec->code == 0xc0000005ul && rec->count >= 2)
+    {
+        fprintf(stderr, " %s 0x%llx", rec->info[0] ? "writing" : "reading",
+                (unsigned long long)rec->info[1]);
+    }
+    fprintf(stderr, "\n");
+    void *frames[48];
+    unsigned short n = RtlCaptureStackBackTrace(0, 48, frames, nullptr);
+    for (unsigned short i = 0; i < n; i++)
+    {
+        fprintf(stderr, "[crash]   #%02u exe +0x%llx\n", i,
+                (unsigned long long)((uintptr_t)frames[i] - base));
+    }
+    fflush(stderr);
+    return 0;  /* EXCEPTION_CONTINUE_SEARCH */
+}
+#endif
+
 }  // namespace
 
 int RosePan_HostMain(int (*game_main)(void))
 {
+#ifdef ROSEPAN_CRASH_LOG
+    const char *crash_log = std::getenv("ROSEPAN_CRASH_LOG");
+    if (crash_log != nullptr && crash_log[0] == '1')
+    {
+        SetUnhandledExceptionFilter(CrashFilter);
+    }
+#endif
+
     const char *single = std::getenv("ROSEPAN_SINGLE_THREAD");
     if (single != nullptr && single[0] != '\0' && single[0] != '0')
     {

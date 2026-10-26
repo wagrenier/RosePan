@@ -321,6 +321,8 @@ struct MagScene
     void setLightFlags(const int *flags, int no);                        // ROR 0x0013f528
     void setLightParam(int type, int idx, int which, const float *v, int no); // ROR 0x0013f980
     void getLightParam(int type, int idx, int which, float *v, int no);  // ROR 0x0013fa50
+    /* Light set theS of the pool copied over set theD (0..7, different). */
+    void copyLightSet(int theD, int theS);                               // ROR 0x0013fb3c
     int  addLight(int type, unsigned int mask);                          // ROR 0x0013fe64
     void releaseTenkyuTex(int no);                                       // ROR 0x0013ff00
     void loadTenkyuTex(int no, const BedPfh *pfh, i3dContext *ctx);      // ROR 0x00140030
