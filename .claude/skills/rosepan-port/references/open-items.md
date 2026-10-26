@@ -131,6 +131,16 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      request / getStatus / update and the getInfo / getDir handlers over src/sdk/libmc.cpp, so that
      a PC with no card file answers "no card" or an empty formatted card. Then MsgMan / MsgManSet
      (msg/msgman.cpp 0x18330c.., 0x18741c..) for the texts, or the check runs with empty windows.
+  9c. DONE 2026-10-25 (`done`): `mcd/mcdman.cpp` (pinned 0x187724..0x18bb8c) -- all 42 McdMan
+     functions, plus sceMcGetSlotMax / Seek / Flush / Unformat / Chdir / Rename / GetEntSpace in
+     src/sdk/libmc.cpp. **The plain boot is no longer black**: the card check passes and execLogo
+     shows the "Sony Computer Entertainment Inc. Presents" logo, matching its texture
+     (work/ref/MNUTITLE/MNUTITLE_000c2000.png). It then stays on it: execLogo step 6 waits for
+     MagScene::getFadeState() >= 5, which reads m_fader.m_state, and **MagLifeFader::start 0x12f060**
+     is a stub. Next (queued first): **`unassigned@0012f008`** (0x12f008..0x12f2e8, MagLifeFader:
+     start / stop and its live; likely mag/maglifefader.cpp, before mag/maglifefadekey.cpp), then
+     the Punchline / Shirogumi logos (sprites 5 ..), CP_LOGO.PSS (RxMpeg, item 10). MsgMan is
+     still a stub: the check's windows are empty (a PC card with no save answers without prompts).
   10. `snd/rxmpeg.cpp`, `unassigned@001810f4` -- RxMpeg: the title code calls it 13 times (background
      movie; the logo movie may come first in the W099 script). If the script waits on a movie, a
      host stand-in that reports "ended" unblocks the title before real MPEG playback.
@@ -583,6 +593,14 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- McdMan (mcd/mcdman.cpp, 2026-10-25): (1) cmdCreateSave skips the main file when it is already
+  there (sub 200) and then writes any missing dtNN file from m_data, which only the main-file step
+  allocates: the ROM writes from NULL; the host sceMcWrite answers sceMcResNoEntry for a NULL buffer,
+  so such a save fails with NotOpen instead of crashing. Kept as the ROM; revisit if a real save hits
+  it. (2) hasSpace compares free KB (+0x84) with 0xed minus the byte sizes of the listed entries --
+  units look mixed; written as the ROM. (3) The host libmc has no current directory: sceMcChdir only
+  checks the directory and answers "/" (nothing calls McdMan's chdir command yet).
 
 - RESOLVED (2026-10-25, gamman session 2): **bss 0x7b2060 is `g_sequence.m_bits`** (0x7a4440 +
   0xdc20, stored by Sequence::init through the struct base, which a scan for offset 0x2060 cannot

@@ -5,9 +5,9 @@
  *  and the name from the class, between MnuTextList's mnu/mnuselect.cpp
  *  and mnu/mnudlg.cpp). See mnu/mnumcd.h.
  *
- *  PORT: McdMan (mcd/mcdman.cpp) and MsgMan (msg/msgman.cpp) are not
- *  written yet: until they are, McdMan::request takes no command and every
- *  check waits at its first card query with empty windows.
+ *  PORT: MsgMan (msg/msgman.cpp) is not written yet: until it is, the
+ *  check's windows stay empty. McdMan (mcd/mcdman.cpp) runs the card
+ *  commands over the host card directories of src/sdk/libmc.cpp.
  * ======================================================================== */
 #include "mnu/mnumcd.h"
 
