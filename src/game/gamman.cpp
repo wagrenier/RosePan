@@ -1719,6 +1719,66 @@ FCHRstat *GamMan::getVFchr(u_int oid)
     return NULL;
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Written ahead for natives 152 and 155 (sequence/seqcall.cpp).
+// ROR 0x001d2d7c
+
+int GamMan::hasVFchrParam(int which, int value)
+{
+    for (SeqNode<FCHRstat *> *node = m_vfchrList.m_used.begin(); node != m_vfchrList.m_used.end();
+         node = node->m_next)
+    {
+        int param[4];
+        node->m_data->getParam(which, param);
+        if (value == param[0])
+            return 1;
+    }
+    return 0;
+}
+
+// ROR 0x001c7da8
+
+int GamMan::isInOidList(int id)
+{
+    const int *list = (const int *)m_1f240;
+    for (int i = 0; i <= 0x168; i++)
+    {
+        if (list[i] == id)
+            return 1;
+    }
+    return 0;
+}
+
+// ROR 0x001c98c0
+
+int GamMan::isObjRecRef(int id)
+{
+    const GamObjRec *rec = m_objRec;
+    for (int i = 0; i < m_objTable->m_num; i++, rec++)
+    {
+        if (rec->m_28 == id || rec->m_2c == id)
+            return 1;
+    }
+    return 0;
+}
+
+// ROR 0x001d1720
+
+int GamMan::testObjFlags(u_int oid, u_int bits)
+{
+    if (!isObj(oid))
+        return 0;
+    ObjStat *obj;
+    switch (gamOidList(oid))
+    {
+    case 1:  obj = getAchr(oid); break;
+    case 0:  obj = getVFchr(oid); break;
+    case 2:  obj = getFchr(oid); break;
+    default: return 0;
+    }
+    return (obj->m_flags & bits) != 0;
+}
+
 // ════════════════════════════════════════════════════════════════════════
 // Slice 3: the stage sounds, the items and the stock, object ids and the
 // chr teardown.
@@ -2834,4 +2894,48 @@ void GamMan::setObjScale(u_int oid, float scale)
 void GamMan::setObjWork(u_int oid, int no, int value)
 {
     ROSEPAN_STUB("GamMan::setObjWork", 0x001d2270);
+}
+
+// stub of ROR 0x001d1a5c
+void GamMan::attachObj(u_int oid, u_int parent, const char *node)
+{
+    ROSEPAN_STUB("GamMan::attachObj", 0x001d1a5c);
+}
+
+// stub of ROR 0x001d1bec
+void GamMan::detachObj(u_int oid, u_int parent)
+{
+    ROSEPAN_STUB("GamMan::detachObj", 0x001d1bec);
+}
+
+// stub of ROR 0x001d217c
+int GamMan::getObjWork(u_int oid, int no)
+{
+    ROSEPAN_STUB("GamMan::getObjWork", 0x001d217c);
+    return {};
+}
+
+// stub of ROR 0x001caa14
+void GamMan::loadVFchrModel(int model, u_int oid, intptr_t pos)
+{
+    ROSEPAN_STUB("GamMan::loadVFchrModel", 0x001caa14);
+}
+
+// stub of ROR 0x001cabd4
+void GamMan::loadVFchrModelByName(int model, const char *name, u_int oid, intptr_t pos)
+{
+    ROSEPAN_STUB("GamMan::loadVFchrModelByName", 0x001cabd4);
+}
+
+// stub of ROR 0x001cea44
+void GamMan::releaseVFchrs(int keep)
+{
+    ROSEPAN_STUB("GamMan::releaseVFchrs", 0x001cea44);
+}
+
+// stub of ROR 0x001d17c8
+int GamMan::testAchrFlag(u_int oid, u_int bits)
+{
+    ROSEPAN_STUB("GamMan::testAchrFlag", 0x001d17c8);
+    return {};
 }

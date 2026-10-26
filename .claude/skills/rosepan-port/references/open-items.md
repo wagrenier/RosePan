@@ -212,6 +212,16 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      Game may need several tries or gdbrun until the movie-start race is found (snd/rxmpeg.cpp /
      sdk/libmpeg.cpp). Decision taken without the user: queue nothing new for it -- the user decides
      whether the movie race goes before more natives.
+  10f. PARTIAL 2026-10-26 (session 6): natives 152 (object queries, 51 cases) and 155 (vfchr objects,
+     24 cases) written; GamMan hasVFchrParam / isInOidList / isObjRecRef / testObjFlags and utlAddPolar
+     written ahead, the rest of their callees declared (stubs). Not seen running: two plain runs (100 /
+     170 s, pad 1800:START,2400:START,2700:CROSS) reached the title menu, then froze right after the
+     New Game press; a gdbrun stalled at boot. **The boot stall is a lost vsync wake-up in rx/
+     rxthread.cpp, not the movie** (hazards.md, "A crash that gdbrun does not reproduce", session 6).
+     Doubt recorded for the user: the stall now blocks every visual test past the title; a host task
+     for rxThDispatchAlarm / s_yieldSema (platform layer) probably belongs before more natives -- not
+     queued without the user. Next natives here: 252 (sound, 201 cases, ~40 unnamed GamSndMan callees:
+     a session of its own), then 156, 020, 100, 212.
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

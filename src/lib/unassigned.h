@@ -136,6 +136,8 @@ void scenePlayStartSimple(const char *name);                             // ROR 
 u_int utlConvSndId(u_int id);                                            // ROR 0x00106658
 /* v[3] = 0, then v normalised in place (sceVu0Normalize). */
 void  utlNormalize3(float *v);                                           // ROR 0x00106db0
+/* v.x += sinf(angle) * dist, v.z += cosf(angle) * dist (unassigned@001e6cac). */
+void  utlAddPolar(float angle, float dist, float *v);                    // ROR 0x001f6b28
 extern EmyManager g_emyManager; /* bss 0x7b2140 */
 extern int g_emyManagerTaskId;  /* bss 0x7b45c0: addTask's id for EmyManager (read by 0x1c58c0) */
 

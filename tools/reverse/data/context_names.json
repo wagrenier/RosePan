@@ -6587,6 +6587,12 @@
   "was": "FUN_001c6a40",
   "why": "sets halt flags by mask (0x100000, 0x100004, 0x100104, 0x80000 ...), counterpart of 0x1c65e8; the system call passes 0x100000 before every menu"
  },
+ "001c6c28": {
+  "name": "GamMan::getWrdNo",
+  "tag": "ror-inferred",
+  "was": "FUN_001c6c28",
+  "why": "returns +0x21f7c, the number gamWrdConvPos hands WrdTable::get"
+ },
  "001c6c98": {
   "name": "GamMan::getPlayMinutes",
   "tag": "ror-inferred",
@@ -6634,6 +6640,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c7a4c",
   "why": "+0x2220c = the id (0xa00 = none), flag 0x200000 when it changes"
+ },
+ "001c7da8": {
+  "name": "GamMan::isInOidList",
+  "tag": "ror-inferred",
+  "was": "FUN_001c7da8",
+  "why": "1 when id is one of the 0x169 words of the 0x5a4-byte buffer +0x1f240"
  },
  "001c7e40": {
   "name": "GamMan::addItem",
@@ -6725,6 +6737,12 @@
   "was": "FUN_001c98b8",
   "why": "empty in the US build; the system call runs it before the map menu 0x10001 only"
  },
+ "001c98c0": {
+  "name": "GamMan::isObjRecRef",
+  "tag": "ror-inferred",
+  "was": "FUN_001c98c0",
+  "why": "1 when an object record of W000.WRD file 1 (m_objTable->m_num records) has id in its +0x28 or +0x2c word"
+ },
  "001c9920": {
   "name": "GamMan::ctlObjParam",
   "tag": "ror-inferred",
@@ -6760,6 +6778,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001ca8e8",
   "why": "MagSystem::loadModel(model), binds it to oid, addChr when add != 0; returns the scene model number (-1 when oid already exists)"
+ },
+ "001caa14": {
+  "name": "GamMan::loadVFchrModel",
+  "tag": "ror-inferred",
+  "was": "FUN_001caa14",
+  "why": "MagSystem::loadModel(model), vfchr params 3 (actor) and 0x1000 (model), position, motion 1, links the object into the avfchr list; model 0x800 gets scale 1e-7"
+ },
+ "001cabd4": {
+  "name": "GamMan::loadVFchrModelByName",
+  "tag": "ror-inferred",
+  "was": "FUN_001cabd4",
+  "why": "loadVFchrModel's twin by name: MagScene::loadModelByName with the model's pack, params 0x1000 / 0x1004 (name) / 3, avfchr list"
  },
  "001cad88": {
   "name": "GamMan::changeObjModel",
@@ -6935,6 +6965,12 @@
   "was": "FUN_001cdf5c",
   "why": "releaseStage2 calls it with (2, 0); not read yet"
  },
+ "001cea44": {
+  "name": "GamMan::releaseVFchrs",
+  "tag": "ror-inferred",
+  "was": "FUN_001cea44",
+  "why": "walks the vfchr list releasing every actor; with 0 also clears the slot and unlinks the record"
+ },
  "001cf7d0": {
   "name": "GamMan::setMsgParam",
   "tag": "ror-inferred",
@@ -7019,6 +7055,18 @@
   "was": "FUN_001d1410",
   "why": "130 call sites with (oid, 1): loadStage passes the PC's and dog's ObjStat oid (+0x100); kills the object's tasks"
  },
+ "001d1720": {
+  "name": "GamMan::testObjFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_001d1720",
+  "why": "the object's ObjStat +0x120 word & bits != 0, 0 for no object"
+ },
+ "001d17c8": {
+  "name": "GamMan::testAchrFlag",
+  "tag": "ror-inferred",
+  "was": "FUN_001d17c8",
+  "why": "achr objects only: word bits >> 24 of the array +0x3ec & bits & 0xffffff != 0"
+ },
  "001d1838": {
   "name": "GamMan::setObjAttr",
   "tag": "ror-inferred",
@@ -7036,6 +7084,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001d1a48",
   "why": "returns MagScene m_menu_id (0x727bd0 = scene 0x6fbd80 + 0x2be50) != -1"
+ },
+ "001d1a5c": {
+  "name": "GamMan::attachObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001d1a5c",
+  "why": "parents oid's actor to node name of parent's actor (i3rGetNodeIndexByName, MagSystem::setActorParent), position cleared, achr parent gets +0x254 = oid; asserts the model and node name"
+ },
+ "001d1bec": {
+  "name": "GamMan::detachObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001d1bec",
+  "why": "attachObj's inverse: setActorParent(actor, -1, 0), achr parent +0x254 = -1"
  },
  "001d1c80": {
   "name": "GamMan::getObjParam",
@@ -7066,6 +7126,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d1fd8",
   "why": "GamSysData::setFlags(id, bits) (even when on is 0: the ROM's quirk), then every live achr (id >> 9 < 4) or fchr (< 10) whose system id +0x128 is id gets bits set (on) or cleared in +0x120; native 151 cases 0x19 / 0x1a"
+ },
+ "001d217c": {
+  "name": "GamMan::getObjWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001d217c",
+  "why": "setObjWork's getter: work word no (0x1db17c, +0x1b0) of the object, -1 for no object"
  },
  "001d2270": {
   "name": "GamMan::setObjWork",
@@ -7144,6 +7210,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d2d00",
   "why": "the object of the vfchr list with the oid; list 0 of find"
+ },
+ "001d2d7c": {
+  "name": "GamMan::hasVFchrParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001d2d7c",
+  "why": "walks the vfchr list (+0x1dcd0): 1 when one's FCHRstat::getParam(which) word 0 equals value"
  },
  "001d3588": {
   "name": "GamMan::markReset",
@@ -7289,17 +7361,41 @@
   "was": "FUN_001da740",
   "why": "switch on which storing *data into the achr's words (0x26 +0x3a0, 0x2e +0x3c0, 0x37 the short +0x432 ...); GamMan::setPcParam calls it on the PC"
  },
+ "001db17c": {
+  "name": "ObjStat::getWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001db17c",
+  "why": "returns word no of +0x1b0; getObjWork's per-list call"
+ },
+ "001db18c": {
+  "name": "ObjStat::setWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001db18c",
+  "why": "setObjWork's per-list call, the setter of +0x1b0 words"
+ },
  "001db31c": {
   "name": "FCHRstat::getParam",
   "tag": "ror-inferred",
   "was": "FUN_001db31c",
   "why": "GamMan::getObjParam's fchr and vfchr branch: (which, out)"
  },
+ "001db520": {
+  "name": "FCHRstat::setParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001db520",
+  "why": "getParam's counterpart (0x1db31c): stores *data into the field by which (0x34 +0x294, 0x21 +0x290, 0x1000 the model ...); addVFchr / setObjParam / readSaveData / seqFunc155 pass vfchr objects"
+ },
  "001db774": {
   "name": "FCHRstat::getRot",
   "tag": "ror-inferred",
   "was": "FUN_001db774",
   "why": "twin of ObjStat::getRot: the actor rotation (+0x50 of the actor) or +0x1a0"
+ },
+ "001dba3c": {
+  "name": "gamWrdConvPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001dba3c",
+  "why": "op 0 / 1 tail-jump into the WRD table converters with the room GamMan +0x21f7c, op 2 copies the room's x, z offset; the inlines GamMan::cnvPosW2L / cnvPosL2W / getWrdOffset (0x28f300..) call it with GamMan+0x18c00 as an unused this"
  },
  "001dbef8": {
   "name": "GamSysData::set",
@@ -7354,6 +7450,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001dd154",
   "why": "table 2 records only: clears a3 in the second flag word +0x94; native 151 case 0x11 a1 != 0, GamMan::unsetUnqFlg2"
+ },
+ "001dd194": {
+  "name": "GamSysData::testFlags94",
+  "tag": "ror-inferred",
+  "was": "FUN_001dd194",
+  "why": "table 2 records only: record +0x94 word & bits != 0 (testFlags reads +0x90 / +0xb0); the middle argument is unused"
  },
  "001dd414": {
   "name": "GamArea::init",
@@ -7570,6 +7672,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001f688c",
   "why": "GamMan::update's first call: memset(0x2d8f70, 0, 0x20) and 0x2d8f68 = 0"
+ },
+ "001f6b28": {
+  "name": "utlAddPolar",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6b28",
+  "why": "v.x += sinf(angle) * dist, v.z += cosf(angle) * dist"
  },
  "001f83f4": {
   "name": "scenePlayStart",
