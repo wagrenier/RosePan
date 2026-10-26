@@ -710,7 +710,7 @@
    "why": "rx middleware thread layer: kernel wrappers from 0x249b88 (CreateSema, CreateThread), rxThInit, dispatch semaphore, rxThRequest/rxThYield, rxthread/rxThread messages, vsync and DMA wait helpers to 0x24b48c; libcdvd sceCdCallback starts at 0x24b490"
   },
   "sequence/seqcall.cpp": {
-   "notes": "Left: handler stubs 020 and 252. 020 (table data 0x3004a0, 62 cases, VU0 and float math) is a jump-table dispatcher Ghidra cannot recover: read it with ghidra.py asm 0x207ae8 0x20810c and the table words (an ELF word dump: elf32.Elf read, or datadump.py). 252 is the sound native (201 cases, 0xd2c bytes, about 20 GamSndMan callees FUN_001e1620..FUN_001e5e58 still unnamed): a whole session. New stubs from this session: chrKillMotionTask, chrMtnMove, chrMtnMove2, chrChangeMotionBySuffix, chrSetMotion (lib/unassigned_stubs.cpp), GamMan::getObjRotY, GamMan::switchEnemies, DogActor findMotionBySuffix / getMotionNoBySuffix / getMotionTime / getRotY, the EmyManager wrappers findEmy / setEmyActive / getEmyWord3c / setEmyWord238 / testEmyView / releaseEmyHold / setSlotWord24 / isEmyFlag30. Decisions: native 100 keeps a local 1/60 constant 0x3c888897 (MagScene's, not SEQ_RATE_60 0x3c888888); rotY starts 0 where the ROM leaves the stack word unset; case 9 still calls getObjRotY though chrMtnMove2 ignores the heading (the ROM loads f13). EmyManager gained an EmySlot m_slot[8] member (EE +0x148, asserted 0x3c). The 15 s smoke run shows the Sony Presents and disclaimer screens (as the game) and reaches none of these natives; the lost vsync wake-up stall after New Game (hazards.md, open-items 10f) remains the blocker. References updated: architecture.md natives 100 / 212.",
+   "notes": "Left: native 252 only (sound, jump table data 0x301280, 201 cases, 0xd2c bytes; about 20 GamSndMan callees FUN_001e1620..FUN_001e5e58 plus FUN_001c7500 / 75bc / 766c / 76cc in game/gamman.cpp still unnamed): a whole session -- read it with ghidra.py asm 0x20c6fc 0x20d428 and group the table words with elf32.Elf(...).read(0x301280, 201*4). Native 020 is complete but no smoke run reaches it (boot shows Sony Presents and the disclaimer, as the game). Decisions: case 57 zeroes the result w first because the host sceVu0ScaleVectorXYZ leaves w untouched where the ROM vmulx.xyz keeps the source w (0); case 60 keeps the ROM constant 0x40c90fda (written 6.2831845f), case 61 the 0x4e7fffff centre (1073741760.0f); rand calls go through RosePan_Rand (callcheck comments explain rand and the soft-float dp ops). The first check of this session wrote an empty last.png (hazards.md); rerun fixed it. References updated: architecture.md native 020, hazards.md empty last.png.",
    "ranges": [
     [
      "002053f4",
@@ -767,6 +767,11 @@
      "date": "2026-10-26 06:57",
      "status": "partial",
      "summary": "Script natives 100 (actor motions, 33 cases: setActorMotion at 1/60, chrSetMotion, TskMtnMove / TskMtnMove2 tasks via chrMtnMove / chrMtnMove2, blends by name and by suffix, motion number / time / length queries) and 212 (enemies over g_emyManager: activate, words +0x3c / +0x238, view test, hold release, the 8 EmySlot records at +0x148, GamMan::switchEnemies); named 21 functions (batch seqcall_013); DogActor::getMotionLength and MagScene::getActorMotionLength return float (f0)"
+    },
+    {
+     "date": "2026-10-26 07:18",
+     "status": "partial",
+     "summary": "Script native 020 (script math, 62-case jump table data 0x3004a0: sin / cos of degrees and radians, atan2f, + - / *, float-int conversions, sqrtf, Y-rotated offsets, VU0 add / sub / normalize / dot / cross / length / scale, vector copy and build, fmodf by 2 pi, random unit vectors); named sceVu0AddVector, sceVu0SubVector, atan2f, fmodf, sqrtf (batch seqcall_014); native 005 now uses RosePan_Rand for the ROM 31-bit rand range"
     }
    ],
    "status": "partial",
