@@ -22,11 +22,13 @@
 #include <stdint.h>
 
 #include "sdk/eetypes.h"
+#include "i3d/i3denv.h"
 #include "msg/msgman.h"
 #include "task/tsk_man.h"
 
 struct ACHRstat;
 struct DogActor;
+struct MnuTextList;
 
 /* What ACHRstat +0x3d0 points at: only its actor no is read (it matches
  * TskMtnMove's m_actor; the writer is not found yet). EE layout (the rest
@@ -149,12 +151,61 @@ struct TskAvoidMove : CmnITask
     TskAvoidMove(u_int oid, const void *hit, int a3, int a4, int a5, int a6); // ROR 0x001ef184
 };
 
-/* TskFrameFunc : CmnITask (vtable 0x2e4d50, EE 0x80 bytes): kind < 0x17
- * picks its step function (table 0x2fe420); arg is a value or a pointer
- * to the caller's words, frames its length. layout: host -- no members. */
+/* TskFrameFunc : CmnITask (vtable 0x2e4d50, EE 0x80 bytes; kind 0x11):
+ * the script's and GamMan's multi-frame jobs. The constructor's switch
+ * on kind (jump table data 0x2fe420) copies what the job needs and picks
+ * the step exec calls each frame until it returns non-zero (member
+ * pointers data 0x2fe2c0..0x2fe418). arg, by kind: 2..5 -> int frames;
+ * 6, 14 a value; 7 -> {oid, angle, distance, height, camera rotX} words;
+ * 8 -> intptr_t {items, mask, x, y}; 11 -> int {thread, entry, room,
+ * word}; 12 -> an I3dFog; 15 -> a texture name; 19 -> int {item, word,
+ * mode}. frames: kinds 12, 15, 16, 18. Kinds 0, 1, 13, 20 and >= 23 set
+ * no step (the ROM then calls a garbage pointer). layout: host -- a
+ * member-function pointer; EE offsets in the comments. */
 struct TskFrameFunc : CmnITask
 {
+    typedef int (TskFrameFunc::*StepFunc)();
+
     TskFrameFunc(int kind, intptr_t arg, int frames);                    // ROR 0x001f184c
+    ~TskFrameFunc() override {}                                          // ROR 0x001f26e4
+
+    int  get_task_type() override { return 0x11; }                      // ROR 0x00290560
+    void init() override {}                                              // ROR 0x00290568
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001f2778
+    void term() override;                                                // ROR 0x001f2718
+
+    int  stepKeyIn1();                                                   // ROR 0x001f27e0
+    int  stepKeyOut1();                                                  // ROR 0x001f2920
+    int  stepKeyIn2();                                                   // ROR 0x001f2a84
+    int  stepKeyOut2();                                                  // ROR 0x001f2bcc
+    int  stepSysMsg();                                                   // ROR 0x001f2d38
+    int  stepWaitAchrMotion();                                           // ROR 0x001f2ec4
+    int  stepGameOver();                                                 // ROR 0x001f2f0c
+    int  stepBg();                                                       // ROR 0x001f34c8
+    int  stepTextList();                                                 // ROR 0x001f370c
+    int  stepMenuPause();                                                // ROR 0x001f3760
+    int  stepClearFlag100();                                             // ROR 0x001f3788
+    int  stepClearFlag400000();                                          // ROR 0x001f37b8
+    int  stepPcMsg();                                                    // ROR 0x001f3824
+    int  stepClearPcRot();                                               // ROR 0x001f3b3c
+    int  stepStageThread();                                              // ROR 0x001f3b74
+    int  stepFog();                                                      // ROR 0x001f3c44
+    int  stepNone();                                                     // ROR 0x001f3d90
+    int  stepGetItem();                                                  // ROR 0x001f3d98
+
+    int          m_kind;        // ROR 0x04
+    StepFunc     m_stepFunc;    // ROR 0x08: GCC 2 {delta, index, pfn}
+    int          m_state;       // ROR 0x10: the step's state (0 unless the kind sets one)
+    int          m_count;       // ROR 0x14: frames counted by the step
+    MnuTextList *m_list;        // ROR 0x18: kind 8's list
+    union
+    {
+        int    m_word[16];      // ROR 0x20: the kind's words (see the steps)
+        float  m_float[16];     // ROR 0x20
+        I3dFog m_fog[2];        // ROR 0x20: kind 12, the fog from / to
+        char   m_name[0x20];    // ROR 0x20: kind 15, S2dBg's texture name (m_word[8] ends it)
+    };
+    int          m_frames;      // ROR 0x60: kind 12's length
 };
 
 /* TskMovie : CmnITask (vtable 0x2e4c50, EE 0x80 bytes; kind 0): native

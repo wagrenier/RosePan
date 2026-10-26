@@ -6,7 +6,9 @@
  *  tsk_chr.h. Written so far: TskMtnMove / TskMtnMove2 and their starters
  *  (chrMtnMove, chrMtnMove2, chrChangeMotion, chrKillMotionTask,
  *  chrSetMotion, chrGetNodeWorldPos), TskMovie (the film task),
- *  TskMsgMan (the message window task), the frame request list.
+ *  TskMsgMan (the message window task), TskFrameFunc (the multi-frame
+ *  jobs: fades, the door opening, game over, fog, items), the frame
+ *  request list.
  * ======================================================================== */
 #include "task/tsk_chr.h"
 
@@ -14,9 +16,13 @@
 #include <string.h>
 
 #include "dog/dogactor.h"
+#include "dog/dogcamera.h"
 #include "game/gamman.h"
+#include "game/gamstat.h"
+#include "lib/unassigned.h"
 #include "mag/magscene.h"
 #include "mag/magsystem.h"
+#include "rx/rxsys.h"
 #include "sequence/sequence.h"
 #include "snd/rxmpeg.h"
 #include "snd/sndman.h"
@@ -587,6 +593,889 @@ int TskMtnMove2::stepMoveHit()
 int TskMtnMove2::stepNone()
 {
     return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// TskFrameFunc: the constructor's switch on kind (jump table data
+// 0x2fe420) copies the job's words and picks its step (member pointers
+// data 0x2fe2c0..). Kind 7 (a door opening) does its work here: the PC's
+// door motion by the side it stands on, the camera set out along the
+// door's heading and looking back, the PC placed in front of the door.
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrWrapPi and kind 7's angle - pi / 2, angle - pi)
+// callcheck: operator_new (new MnuTextList)
+// ROR 0x001f184c
+
+TskFrameFunc::TskFrameFunc(int kind, intptr_t arg, int frames)
+{
+    GamMan   &gam = g_gamMan;
+    MagScene &scene = g_magSystem.m_scene;
+
+    m_kind = kind;
+    m_state = 0;
+    m_count = 0;        /* PORT: the ROM leaves it to the kinds that use it */
+    m_stepFunc = NULL;  /* PORT: the ROM leaves it unset for the kinds without a step */
+    m_list = NULL;      /* PORT: only kind 8 sets it; term reads it for kind 8 only */
+    switch (kind)
+    {
+    case 2:
+        m_word[0] = *(const int *)arg;
+        m_stepFunc = &TskFrameFunc::stepKeyIn1;
+        break;
+    case 3:
+        m_word[0] = *(const int *)arg;
+        m_stepFunc = &TskFrameFunc::stepKeyOut1;
+        break;
+    case 4:
+        m_word[0] = *(const int *)arg;
+        m_stepFunc = &TskFrameFunc::stepKeyIn2;
+        break;
+    case 5:
+        m_word[0] = *(const int *)arg;
+        m_stepFunc = &TskFrameFunc::stepKeyOut2;
+        break;
+    case 6:
+        m_stepFunc = &TskFrameFunc::stepSysMsg;
+        gam.pause(0x100000);
+        m_state = arg != 0 ? 200 : 100;
+        g_sequence.m_global[0x15] = 0;
+        break;
+    case 7:
+    {
+        const int   *w = (const int *)arg;
+        const float *f = (const float *)arg;
+        DogActor    &pc = scene.m_actors[gam.m_pcActor];
+        int          mtnR, mtnO, mtnL, mtnT;
+
+        if (gam.m_pcJnfc == 2)
+        {
+            mtnR = pc.findMotionByName("jnfc_doorr_open__x");
+            mtnO = pc.findMotionByName("jnfc_dooro_open__y");
+            mtnL = pc.findMotionByName("jnfc_doorl_open__x");
+            mtnT = pc.findMotionByName("jnfc_doort_open__y");
+        }
+        else
+        {
+            mtnR = pc.findMotionByName("pc_doorr_open__x");
+            mtnO = pc.findMotionByName("pc_dooro_open__y");
+            mtnL = pc.findMotionByName("pc_doorl_open__x");
+            mtnT = pc.findMotionByName("pc_doort_open__y");
+        }
+
+        u_int oid = (u_int)w[0];
+        float angle = f[1];
+        float dist = f[2];
+        float height = f[3];
+        float rotX = f[4];
+        short objKind = gam.getObjKind(oid);
+        sceVu0FVECTOR pos;
+        gam.getObjPos(oid, pos);
+        float side = chrWrapPi((float)((double)angle - CHR_PI / 2));
+        float back = chrWrapPi((float)((double)angle - CHR_PI));
+        gam.setCameraMode(1, 0);
+
+        // The camera: dist out along angle, height up, turned to back.
+        float eyeX = pos[0] + sinf(angle) * dist;
+        float eyeZ = pos[2] + cosf(angle) * dist;
+        float eyeY = pos[1] + height;
+        DogCamera &cam = scene.m_camera_entity;
+        cam.m_dirty = 1;
+        cam.m_trans[1] = eyeY;
+        cam.m_trans[0] = eyeX;
+        cam.m_trans[2] = eyeZ;
+        cam.m_rotate[0] = rotX;
+        cam.m_rotate[1] = back;
+        cam.m_rotate[2] = 0.0f;
+        cam.normalizeRotate();
+        cam.m_dirty = 1;
+
+        sceVu0FVECTOR rot = {rotX, back, 0.0f, 0.0f};
+        gam.getObjRot(oid, rot);
+
+        // The side: the door's heading against back. (For kind 0x1201 the
+        // ROM first picks o / t by |back - rot| - 0.1 > pi and overwrites
+        // the choice at once; left out.)
+        sceVu0FVECTOR to;
+        float d = chrWrapPi(back - rot[1]);
+        int   near = d < 0.0f ? -0.1f < d : d < 0.1f;
+        if (objKind == 0x1201)
+        {
+            memcpy(to, pos, sizeof(to));
+            utlAddPolar(angle, -50.0f, to);
+            memcpy(gam.m_sysWord, to, sizeof(to));
+            if (near)
+            {
+                m_word[1] = mtnO;
+                rxSysPrintf("<<1>>\n");
+                to[0] = pos[0] + sinf(angle) * 50.0f;
+                to[0] -= sinf(side) * -25.0f;
+                to[2] = pos[2] + cosf(angle) * 50.0f;
+                to[2] -= cosf(side) * -25.0f;
+            }
+            else
+            {
+                m_word[1] = mtnT;
+                rxSysPrintf("<<2>>\n");
+                to[0] = pos[0] + sinf(angle) * 50.0f;
+                to[0] += sinf(side) * -25.0f;
+                to[2] = pos[2] + cosf(angle) * 50.0f;
+                to[2] += cosf(side) * -25.0f;
+            }
+        }
+        else
+        {
+            to[0] = pos[0];
+            to[1] = pos[1];
+            to[2] = pos[2];
+            to[3] = 0.0f;
+            memcpy(gam.m_sysWord, to, sizeof(to));
+            float off;
+            if (near)
+            {
+                m_word[1] = mtnR;
+                off = 25.0f;
+            }
+            else
+            {
+                m_word[1] = mtnL;
+                off = -25.0f;
+            }
+            to[0] = pos[0] + sinf(angle) * 50.0f;
+            to[0] += sinf(side) * off;
+            to[2] = pos[2] + cosf(angle) * 50.0f;
+            to[2] += cosf(side) * off;
+        }
+
+        // The PC turns to back, plays the door motion and stands at to;
+        // the door's actor plays its motion 2.
+        rot[0] = 0.0f;
+        rot[1] = back;
+        rot[2] = 0.0f;
+        rot[3] = 0.0f;
+        m_word[0] = gam.m_pcPtr != NULL ? gam.m_pcPtr->getOID() : 0;
+        gam.setPcRot(rot);
+        gam.setObj(gam.m_pcPtr != NULL ? (u_int)gam.m_pcPtr->getOID() : 0, 0x80);
+        chrSetMotion(0x1.11111p-6f /* 0x3c888888 */, gam.getActorNo(oid), 2, (int)oid, 0, 0, NULL);
+        // (The ROM also passes back in f13; chrMtnMove2 does not read it.)
+        chrMtnMove2(0x1.11111p-6f, (u_int)m_word[0], m_word[1], 0, 0, NULL);
+        to[1] = pos[1];
+        gam.setPcPos(to);
+        m_count = 0;
+        m_state = 100;
+        m_stepFunc = &TskFrameFunc::stepWaitAchrMotion;
+        break;
+    }
+    case 8:
+    {
+        const intptr_t *w = (const intptr_t *)arg;
+        m_list = new MnuTextList();
+        m_list->open();
+        m_list->m_x = (int)w[2];
+        m_list->m_y = (int)w[3];
+        m_list->m_z = 0x8001;
+        m_list->setItems((const char *)w[0], (u_int)w[1]);
+        m_stepFunc = &TskFrameFunc::stepTextList;
+        break;
+    }
+    case 9:
+        m_stepFunc = &TskFrameFunc::stepMenuPause;
+        break;
+    case 10:
+        m_stepFunc = &TskFrameFunc::stepClearPcRot;
+        break;
+    case 11:
+    {
+        const int *w = (const int *)arg;
+        m_word[0] = w[0];
+        m_word[1] = w[1];
+        m_word[2] = w[2];
+        m_word[3] = w[3];
+        m_stepFunc = &TskFrameFunc::stepStageThread;
+        break;
+    }
+    case 12:
+        m_fog[0] = scene.m_fog[0];
+        m_fog[1] = *(const I3dFog *)arg;
+        m_frames = frames;
+        m_count = 0;
+        m_stepFunc = &TskFrameFunc::stepFog;
+        break;
+    case 14:
+        m_word[2] = (int)arg;
+        m_state = 100;
+        m_stepFunc = &TskFrameFunc::stepGameOver;
+        break;
+    case 15:
+        m_word[9] = frames;
+        m_state = 100;
+        m_word[8] = 0;
+        // PORT: the ROM copies up to 0x100 chars over the task's words;
+        // the names are short, kept to the 0x20 bytes before m_word[8].
+        utlStrNCopy(m_name, (const char *)arg, (int)sizeof(m_name));
+        m_stepFunc = &TskFrameFunc::stepBg;
+        break;
+    case 16:
+        m_word[9] = frames;
+        m_state = 200;
+        m_stepFunc = &TskFrameFunc::stepBg;
+        break;
+    case 0x11:
+        m_stepFunc = &TskFrameFunc::stepClearFlag100;
+        break;
+    case 0x12:
+        m_word[0] = frames;
+        m_state = 100;
+        m_stepFunc = &TskFrameFunc::stepNone;
+        break;
+    case 0x13:
+    {
+        const int *w = (const int *)arg;
+        m_word[0] = w[0];
+        m_word[1] = w[1];
+        m_word[3] = w[2];
+        if (w[0] == 0xa64)
+            m_state = 300;
+        else if (gam.countItems() == 12)
+            m_state = m_word[3] == 0 ? 300 : 200;
+        else
+            m_state = m_word[3] != 0 ? 100 : 0x96;
+        m_stepFunc = &TskFrameFunc::stepGetItem;
+        break;
+    }
+    case 0x15:
+        m_stepFunc = &TskFrameFunc::stepPcMsg;
+        break;
+    case 0x16:
+        m_stepFunc = &TskFrameFunc::stepClearFlag400000;
+        break;
+    default:    // 0, 1, 13, 20, >= 23: no step
+        break;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// One step of the job; non-zero ends the task.
+// ROR 0x001f2778
+
+int TskFrameFunc::exec(int, int, int)
+{
+    if (m_stepFunc == NULL)
+        return 1;   /* PORT: the ROM calls an unset member pointer */
+    return (this->*m_stepFunc)();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 8 closes and frees its list.
+// callcheck: ~MnuTextList (delete m_list)
+// ROR 0x001f2718
+
+void TskFrameFunc::term()
+{
+    if (m_kind == 8 && m_list != NULL)
+    {
+        m_list->close();
+        delete m_list;
+        m_list = NULL;
+    }
+}
+
+/* MagScene::setFade with kind, mode, time (the ROM's stack record sets
+ * only these three words). */
+static void tskSetFade(int kind, int mode, int time)
+{
+    MagFadeParam p;
+    p.m_kind = kind;
+    p.m_mode = mode;
+    p.m_time = time;
+    p.m_0c = 0;
+    p.m_10 = 0;
+    p.m_level = 7;  /* PORT: an unset stack word in the ROM; 7 as MagScene::update passes */
+    g_magSystem.m_scene.setFade(&p);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 2: fades out over half the frames, then the keyhole (fade kind 1)
+// opens over the other half.
+// callcheck: setFade (in tskSetFade)
+// ROR 0x001f27e0
+
+int TskFrameFunc::stepKeyIn1()
+{
+    MagScene &scene = g_magSystem.m_scene;
+
+    if (m_state == 1)
+    {
+        if (--m_count != -1)
+            return 0;
+        scene.fadeIn(0, 7, 0);
+        m_count = m_word[0] / 2;
+        tskSetFade(1, 2, m_count);
+        m_state = 99;
+    }
+    else if (m_state == 99)
+    {
+        return --m_count == -1;
+    }
+    else if (m_state == 0)
+    {
+        m_count = m_word[0] / 2;
+        scene.fadeOut(m_count, 7, 0);
+        m_state++;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 3: the keyhole (kind 1) closes over a quarter of the frames; after
+// half of them it is taken off and the scene fades in.
+// callcheck: setFade (in tskSetFade)
+// ROR 0x001f2920
+
+int TskFrameFunc::stepKeyOut1()
+{
+    MagScene &scene = g_magSystem.m_scene;
+
+    if (m_state == 1)
+    {
+        if (m_count-- > 0)
+            return 0;
+        m_count = m_word[0] / 2;
+        tskSetFade(1, 0, 0);
+        scene.fadeIn(m_count, 7, 0);
+        m_state = 99;
+    }
+    else if (m_state == 99)
+    {
+        return m_count-- < 1;
+    }
+    else if (m_state == 0)
+    {
+        tskSetFade(1, 6, m_word[0] / 4);
+        m_state++;
+        m_count = m_word[0] / 2;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 4: kind 2 with the keyhole kind 2.
+// callcheck: setFade (in tskSetFade)
+// ROR 0x001f2a84
+
+int TskFrameFunc::stepKeyIn2()
+{
+    MagScene &scene = g_magSystem.m_scene;
+
+    if (m_state == 1)
+    {
+        if (m_count-- > 0)
+            return 0;
+        scene.fadeIn(0, 7, 0);
+        m_count = m_word[0] / 2;
+        tskSetFade(2, 2, m_count);
+        m_state = 99;
+    }
+    else if (m_state == 99)
+    {
+        return m_count-- < 1;
+    }
+    else if (m_state == 0)
+    {
+        m_count = m_word[0] / 2;
+        scene.fadeOut(m_count, 7, 0);
+        m_state++;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 5: kind 3 with the keyhole kind 2.
+// callcheck: setFade (in tskSetFade)
+// ROR 0x001f2bcc
+
+int TskFrameFunc::stepKeyOut2()
+{
+    MagScene &scene = g_magSystem.m_scene;
+
+    if (m_state == 1)
+    {
+        if (m_count-- > 0)
+            return 0;
+        m_count = m_word[0] / 2;
+        tskSetFade(2, 0, 0);
+        scene.fadeIn(m_count, 7, 0);
+        m_state = 99;
+    }
+    else if (m_state == 99)
+    {
+        return m_count-- < 1;
+    }
+    else if (m_state == 0)
+    {
+        tskSetFade(2, 6, m_word[0] / 4);
+        m_state++;
+        m_count = m_word[0] / 2;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 6: system message 0xd (state 100) or 0xe (200) over a fade in,
+// held until it is read; then the game resumes (0xd also pauses 0x8000).
+// ROR 0x001f2d38
+
+int TskFrameFunc::stepSysMsg()
+{
+    GamMan &gam = g_gamMan;
+
+    switch (m_state)
+    {
+    case 100:
+    case 200:
+        g_magSystem.m_scene.fadeIn(10, 7, 0);
+        gam.openSysMsg(m_state == 100 ? 0xd : 0xe, -1, -1, -1, -1);
+        if (gam.isMsgBusy())
+            m_state++;
+        return 0;
+    case 0x65:
+    case 0xc9:
+        if (gam.isMsgBusy() == 0)
+            m_state++;
+        return 0;
+    case 0x66:
+        gam.resume(0x100000);
+        gam.pause(0x8000);
+        return 1;
+    case 0xca:
+        gam.resume(0x100000);
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 7: until the PC's door motion is over.
+// ROR 0x001f2ec4
+
+int TskFrameFunc::stepWaitAchrMotion()
+{
+    if (m_state == 100)
+        return g_gamMan.isAchrMotionEnd((u_int)m_word[0]) != 0;
+    m_count++;
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 14, the game over: halt and fade out (100), turn the PC towards
+// open floor unless the cause m_word[2] is 0xb (0x65), after 0x77 frames
+// reset the game (0x66), fade in on the DEATH_J.PSS film (0x67), fade
+// out once it ends (0x68), then stage 99 -- the title (0x69).
+// callcheck: operator_new (new TskMovie), memset
+// callcheck: fptodp, dpcmp, dpadd, dpsub, dptofp (libgcc soft double: chrWrapPi)
+// ROR 0x001f2f0c
+
+int TskFrameFunc::stepGameOver()
+{
+    GamMan   &gam = g_gamMan;
+    MagScene &scene = g_magSystem.m_scene;
+    char      film[0x40];
+    char      other[0x40];
+
+    // Both names are built each step; only the first is used.
+    memset(film, 0, sizeof(film));
+    strcpy(film, "DEATH_J.PSS");
+    memset(other, 0, sizeof(other));
+    strcpy(other, "DEATH_B.PSS");
+    (void)other;
+
+    switch (m_state)
+    {
+    case 100:
+        gam.pause(0x100000);
+        m_count = 1;
+        scene.fadeOut(0x78, 7, 0);
+        m_state = 0x65;
+        return 0;
+    case 0x65:
+    {
+        m_count = 0x77;
+        m_state = 0x66;
+        ObjStat *pc = gam.m_pcPtr;
+        float    z = gam.m_pcPos[2];
+        if (pc == NULL || m_word[2] == 0xb)
+            return 0;
+        float x = gam.m_pcPos[0];
+        float dir = gam.m_pcRot[1];
+        chrMtnMove2(0x1.11111p-6f, (u_int)pc->getOID(), 0x2c, 0x1e, 0, NULL);
+        // No floor 50 and 140 ahead: turn to the first heading (steps of
+        // pi / 8) that has both.
+        sceVu0FVECTOR at;
+        at[1] = gam.m_pcPos[1];
+        at[3] = 0.0f;   /* PORT: not set by the ROM (hasSectaAt reads x, z) */
+        at[0] = x + sinf(dir) * 50.0f;
+        at[2] = z + cosf(dir) * 50.0f;
+        if (pc->hasSectaAt(at) != 0)
+            return 0;
+        at[0] = x + sinf(dir) * 140.0f;
+        at[2] = z + cosf(dir) * 140.0f;
+        if (pc->hasSectaAt(at) != 0)
+            return 0;
+        for (int i = 0; i < 15; i++)
+        {
+            dir = chrWrapPi(dir + 0.39269906f);
+            at[0] = x + sinf(dir) * 50.0f;
+            at[2] = z + cosf(dir) * 50.0f;
+            if (pc->hasSectaAt(at) == 0)
+                continue;
+            at[0] = x + sinf(dir) * 140.0f;
+            at[2] = z + cosf(dir) * 140.0f;
+            if (pc->hasSectaAt(at) != 0)
+            {
+                chrRotTo(dir, 1.0f, gam.m_pcPtr != NULL ? (u_int)gam.m_pcPtr->getOID() : 0);
+                return 0;
+            }
+        }
+        return 0;
+    }
+    case 0x66:
+        if (m_count-- > 0)
+            return 0;
+        g_taskMan.pauseOthers(1);
+        scene.m_837e0.releaseAll();
+        gam.resetGame();
+        m_count = 0;
+        m_state = 0x67;
+        return 0;
+    case 0x67:
+    {
+        if (m_count-- > 0)
+            return 0;
+        m_count = 0x28;
+        scene.setFocus(0);
+        scene.fadeIn(m_count, 7, 0);
+        TskMovie *task = new TskMovie(film);
+        g_taskMan.addTask(1, -1, 1, 0, task, 0, &m_word[0], 0x11);
+        m_state = 0x68;
+        return 0;
+    }
+    case 0x68:
+        if (g_taskMan.getTask(m_word[0]) != 0)
+            return 0;
+        m_count = 0x3c;
+        scene.fadeOut(0x3c, 7, 0);
+        m_state = 0x69;
+        return 0;
+    case 0x69:
+        if (m_count-- < 1)
+            return 0;
+        gam.requestStage(1, -1, -1, 99, 0xccccccccu);
+        m_state = 999;
+        return 0;
+    case 999:
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kinds 15 / 16: S2dBg picture 0. 15 walks its requests (init, the
+// texture name, load, display) and shows it over m_word[9] frames; 16
+// takes it off over m_word[9] frames and closes.
+// ROR 0x001f34c8
+
+int TskFrameFunc::stepBg()
+{
+    S2dBg &bg = g_magSystem.m_scene.m_bg;
+
+    switch (m_state)
+    {
+    case 100:
+        if (bg.s2dBgInit() == 0)
+            return 0;
+        m_state = 0x65;
+        return 0;
+    case 0x65:
+        if (!bg.s2dBgInitStat())
+            return 0;
+        bg.setTexName(0, m_name);
+        m_state = 0x66;
+        return 0;
+    case 0x66:
+        if (bg.s2dBgLoadStart() == 0)
+            return 0;
+        m_state = 0x67;
+        return 0;
+    case 0x67:
+        if (!bg.s2dBgLoadStat())
+            return 0;
+        m_state = 0x68;
+        return 0;
+    case 0x68:
+        bg.s2dBgDispStart();
+        bg.dispIn(0, m_word[9]);
+        return 1;
+    case 200:
+        bg.dispOut(0, m_word[9]);
+        m_state = 0xc9;
+        m_count = m_word[9];
+        return 0;
+    case 0xc9:
+        if (m_count-- >= 1)
+            return 0;
+        bg.s2dBgClose();
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 8: the list until a row is chosen; the row into script global
+// 0x2d.
+// ROR 0x001f370c
+
+int TskFrameFunc::stepTextList()
+{
+    int done = m_list->processPad(&MagSystem::m_current_system->m_pad[0]);
+    if (done != 0)
+        g_sequence.m_global[0x2d] = m_list->getSelect();
+    return done != 0;
+}
+
+// ROR 0x001f3760
+
+int TskFrameFunc::stepMenuPause()
+{
+    g_gamMan.enterMenuPause(1);
+    return 1;
+}
+
+// ROR 0x001f3788
+
+int TskFrameFunc::stepClearFlag100()
+{
+    g_gamMan.m_flags2 &= ~0x100u;
+    return 1;
+}
+
+// ROR 0x001f37b8
+
+int TskFrameFunc::stepClearFlag400000()
+{
+    GamMan &gam = g_gamMan;
+
+    if ((gam.m_flags & 4) != 0)
+        gam.m_flags2 &= ~0x800u;
+    gam.m_flags2 &= ~0x400000u;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 0x15 (GamMan::enterMenuPause, system call 0x14): with m_flags2
+// 0x80000 and the PC in state class 5..7, halt, PC motion 1 and system
+// window 0xb (0x16 with 0x40000) until it closes; the flags 0xc0000 are
+// cleared either way.
+// ROR 0x001f3824
+
+int TskFrameFunc::stepPcMsg()
+{
+    GamMan   &gam = g_gamMan;
+    MagScene &scene = g_magSystem.m_scene;
+    int       args[16];
+    u_int     cls;
+
+    switch (m_state)
+    {
+    case 0:
+        if ((gam.m_flags2 & 0x80000) == 0)
+            return 1;
+        cls = (u_int)g_magSystem.getPCStateClass();
+        if (cls - 5 > 2)
+        {
+            gam.m_flags2 &= 0xfff3ffffu;
+            return 1;
+        }
+        m_state = 1;
+        return 0;
+    case 1:
+        if (gam.isFading())
+            return 0;
+        cls = (u_int)g_magSystem.getPCStateClass();
+        if (cls - 5 > 2)
+        {
+            gam.m_flags2 &= 0xfff3ffffu;
+            return 1;
+        }
+        gam.pause(0x100000);
+        // (The ROM passes rotY 32769 -- keep -- in f13; chrMtnMove2 has none.)
+        chrMtnMove2(0x1.11111p-6f, gam.m_pcPtr != NULL ? (u_int)gam.m_pcPtr->getOID() : 0, 1,
+                    0x1e, 0, NULL);
+        memset(args, 0, sizeof(args));
+        m_word[2] = scene.openSysMsgWindow((gam.m_flags2 & 0x40000) != 0 ? 0x16 : 0xb, args, 1);
+        gam.m_flags2 &= 0xfff3ffffu;
+        m_state = 3;
+        m_count = 1;
+        return 0;
+    case 2:     // not reached: state 1 goes to 3
+        if (scene.isWindowOpen(m_word[2]))
+            m_state = 3;
+        return 0;
+    case 3:
+        if (m_count-- > 0)
+        {
+            scene.m_mes.setSpriteProcessOn(2);
+            scene.m_mes.setSpriteColorStd(2);
+            scene.m_mes.setSpriteState(2, 1);
+            scene.m_mes.setSpriteDisp(2, 1);
+            scene.m_mes.setSpriteAnim(2, 2);
+        }
+        if (scene.isWindowOpen(m_word[2]))
+            return 0;
+        m_state = 4;
+        return 0;
+    case 4:
+        if ((gam.m_flags2 & 8) != 0)
+            return 0;
+        gam.killMsgTask();
+        gam.resume(0x100000);
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+// ROR 0x001f3b3c
+
+int TskFrameFunc::stepClearPcRot()
+{
+    sceVu0FVECTOR rot;
+    memset(rot, 0, sizeof(rot));
+    g_gamMan.setPcRot(rot);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 11 (native 29 with a system call 0x34 pair): runs the pair's
+// thread and, once it ends, changes to room m_word[2]; the pair is used
+// up.
+// ROR 0x001f3b74
+
+int TskFrameFunc::stepStageThread()
+{
+    GamMan &gam = g_gamMan;
+
+    if (m_state == 0)
+    {
+        g_sequence.queueSingle((u_int)m_word[0], m_word[1], 0, 0);
+        m_state++;
+    }
+    else if (m_state == 1)
+    {
+        if (g_sequence.hasThread((u_int)m_word[0], 0) == 0)
+        {
+            gam.requestStage(2, m_word[2], 0, -1, (u_int)m_word[3]);
+            gam.m_seqPair[3].m_b = 0;
+            gam.m_seqPair[3].m_a = 0;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 12: the fog moves from m_fog[0] to m_fog[1] over m_frames frames.
+// ROR 0x001f3c44
+
+int TskFrameFunc::stepFog()
+{
+    int n = m_count;
+    int frames = m_frames;
+
+    if (n < frames)
+    {
+        float  t = (float)n / (float)frames;
+        float  u = 1.0f - t;
+        I3dFog fog;
+        for (int i = 0; i < 4; i++)
+            fog.m_color[i] = m_fog[1].m_color[i] * t + m_fog[0].m_color[i] * u;
+        for (int i = 0; i < 4; i++)
+            fog.m_param[i] = m_fog[1].m_param[i] * t + m_fog[0].m_param[i] * u;
+        g_magSystem.m_scene.setFog(&fog, 0);
+        m_count++;
+    }
+    return n >= frames;
+}
+
+// ROR 0x001f3d90
+
+int TskFrameFunc::stepNone()
+{
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 0x13, an item found: window 0x11, then the item is taken (100;
+// 0x96 takes it at once), or -- twelve items held -- window 0x13 and the
+// item menu before it is taken (200); 300 ends at once.
+// ROR 0x001f3d98
+
+int TskFrameFunc::stepGetItem()
+{
+    GamMan   &gam = g_gamMan;
+    MagScene &scene = g_magSystem.m_scene;
+    int       args[16];
+
+    switch (m_state)
+    {
+    case 100:
+        memset(args, 0, sizeof(args));
+        gam.m_sndMan.playSE(0x11, false, NULL, 0);
+        args[0] = (u_short)m_word[0];
+        args[1] = 1;
+        m_word[2] = scene.openSysMsgWindow(0x11, args, 1);
+        m_state = 0x65;
+        return 0;
+    case 0x65:
+        if (scene.isWindowOpen(m_word[2]))
+            return 0;
+        gam.addItem((short)m_word[0], 0);
+        return 1;
+    case 0x96:
+        gam.addItem((short)m_word[0], 0);
+        return 1;
+    case 200:
+        memset(args, 0, sizeof(args));
+        gam.m_sndMan.playSE(0x11, false, NULL, 0);
+        args[0] = (u_short)m_word[0];
+        m_word[2] = scene.openSysMsgWindow(0x13, args, 1);
+        m_state = 0xc9;
+        return 0;
+    case 0xc9:
+        if (scene.isWindowOpen(m_word[2]))
+            return 0;
+        scene.m_cine_sco.fadeOut(0);
+        g_sequence.m_bits[1] |= 0x10000000;
+        scene.requestMenu(0x10000, 0);
+        g_sequence.m_flags |= 1;
+        m_state = 0xca;
+        return 0;
+    case 0xca:
+        if (gam.isMenuOpen() == 0)
+            return 0;
+        m_state = 0xcb;
+        return 0;
+    case 0xcb:
+        if (gam.isMenuOpen() != 0)
+            return 0;
+        g_sequence.m_flags &= ~1u;
+        gam.addItem((short)m_word[0], 0);
+        return 1;
+    case 300:
+        return 1;
+    default:
+        return 0;
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────

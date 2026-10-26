@@ -359,7 +359,7 @@ intptr_t seqFunc018(intptr_t id, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
     // ---- tasks ----
     case 0x12:  // TskFrameFunc kind 0x13 over the words a1..a3
     {
-        intptr_t words[3] = {a1, a2, a3};
+        int words[3] = {(int)a1, (int)a2, (int)a3};
         seqStartFrameTask(0x13, (intptr_t)words, 0);
         return 0;
     }

@@ -37,6 +37,72 @@ int g_bss_780d04;               /* bss 0x780d04: GamMan option 0 (brightness) */
 
 const char *g_versionNumber = "1.01";   /* data 0x2d9e18 -> 0x301720 */
 
+// ---- MnuTextList (unassigned@00192ac0), written ahead for TskFrameFunc kind 8 ----
+
+// ROR 0x001a066c
+
+MnuTextList::MnuTextList()
+{
+    m_open = 0;
+    clear();
+}
+
+// ROR 0x001a0684
+
+MnuTextList::~MnuTextList()
+{
+    close();
+}
+
+// ROR 0x001a0860
+
+int MnuTextList::clear()
+{
+    m_cur = 0;
+    for (int i = 0; i < 6; i++)
+        m_08[i] = 0;
+    m_28 = 2;
+    m_6c = 0;
+    m_24 = 2;
+    m_70 = 0;
+    m_20 = 1;
+    m_60 = -1;
+    for (int i = 0; i < 0x20; i++)
+        m_84[i] = 0;
+    return 0;
+}
+
+// ---- utlStrNCopy (unassigned@00216ad0), written ahead for TskFrameFunc kind 15 ----
+
+// ROR 0x0021838c
+
+void utlStrNCopy(char *dst, const char *src, int n)
+{
+    int i = 0;
+
+    if (*src != '\0')
+    {
+        i = 1;
+        if (n > 0)
+        {
+            for (;;)
+            {
+                *dst++ = *src++;
+                if (*src == '\0')
+                    break;
+                int more = i < n;
+                i++;
+                if (!more)
+                    break;
+            }
+        }
+    }
+    if (i < n)
+        *dst++ = '\0';
+    if (i + 1 < n)
+        *dst = '\0';
+}
+
 // ---- stubs (tools/reverse/stubgen.py) ----
 
 // stub of ROR 0x002155a0
@@ -64,12 +130,6 @@ TskSeqEvent::TskSeqEvent(u_int, int, const void *)
 TskSnd::TskSnd(int kind, const TskSndParam *param)
 {
     ROSEPAN_STUB("TskSnd::TskSnd", 0x001f8fc0);
-}
-
-// stub of ROR 0x001f184c (a constructor: stubgen leaves it to hand)
-TskFrameFunc::TskFrameFunc(int kind, intptr_t arg, int frames)
-{
-    ROSEPAN_STUB("TskFrameFunc::TskFrameFunc", 0x001f184c);
 }
 
 // stub of ROR 0x001e9a3c (a constructor: stubgen leaves it to hand)
@@ -1179,9 +1239,10 @@ int MnuTextList::open()
 }
 
 // stub of ROR 0x001a06d4
-void MnuTextList::processPad(BedPad *pad)
+int MnuTextList::processPad(BedPad *pad)
 {
     ROSEPAN_STUB("MnuTextList::processPad", 0x001a06d4);
+    return {};
 }
 
 // stub of ROR 0x001a09b8
@@ -1536,3 +1597,4 @@ void MsgManSet::release(int window)
 {
     ROSEPAN_STUB("MsgManSet::release", 0x0018761c);
 }
+

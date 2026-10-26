@@ -149,6 +149,9 @@ u_int utlConvSndId(u_int id);                                            // ROR 
 void  utlNormalize3(float *v);                                           // ROR 0x00106db0
 /* The heading of (x, z) in -pi..pi, 0 for a zero vector (unassigned@00216ad0). */
 float utlAtan2(float x, float z);                                        // ROR 0x00217f10
+/* Copies src into dst, at most n chars; zero-terminates while room is
+ * left (n = strlen: no terminator). */
+void  utlStrNCopy(char *dst, const char *src, int n);                    // ROR 0x0021838c
 extern EmyManager g_emyManager; /* bss 0x7b2140 */
 extern int g_emyManagerTaskId;  /* bss 0x7b45c0: addTask's id for EmyManager (read by 0x1c58c0) */
 
@@ -656,17 +659,22 @@ static_assert(offsetof(MnuMovie, m_scene) == 0x968, "m_scene");
 /* The title screen MnuTitle: mnu/mnutitle.h. */
 
 /* The text list MnuTitle's movie viewer runs (MnuTitle +0x4c68; code
- * 0x1a066c..0x1a0bb8 in unassigned@00192ac0). Class name invented. EE
- * 0x104 (the next MnuTitle word is +0x4d6c). Its constructor 0x1a066c
- * (clears m_open, calls 0x1a0860) is not written: the object lives in the
- * global scene and starts zeroed. */
+ * 0x1a066c..0x1a0bb8 in unassigned@00192ac0) and TskFrameFunc kind 8
+ * (operator new). Class name invented. EE 0x104 (the next MnuTitle word
+ * is +0x4d6c). The constructor, destructor and clear are written ahead
+ * (lib/unassigned_stubs.cpp). */
 struct MnuTextList
 {
+    MnuTextList();                                                       // ROR 0x001a066c
+    ~MnuTextList();                                                      // ROR 0x001a0684
+    /* The words cleared and the defaults; returns 0. */
+    int  clear();                                                        // ROR 0x001a0860
     /* m_open 1 and the defaults; -1 when already open. */
     int  open();                                                         // ROR 0x001a06e8
     /* 0x1a0950 and m_open 0; -1 when not open. */
     int  close();                                                        // ROR 0x001a074c
-    void processPad(BedPad *pad);                                        // ROR 0x001a06d4
+    /* Non-zero once a row is chosen (0x1a0788's result). */
+    int  processPad(BedPad *pad);                                        // ROR 0x001a06d4
     /* items: the labels, each followed by "#0#0"; mask: the enabled rows. */
     void setItems(const char *items, u_int mask);                        // ROR 0x001a09b8
     /* The chosen row (< 0 none yet); -2 when not open. */
@@ -675,15 +683,30 @@ struct MnuTextList
 
     int    m_open;              // ROR 0x00
     int    m_cur;               // ROR 0x04: MnuTitle::execMovie sets the row to start on (unverified)
-    u_char _08[0x54 - 0x08];
+    int    m_08[6];             // ROR 0x08: cleared by clear (roles unknown)
+    int    m_20;                // ROR 0x20: clear sets 1
+    int    m_24;                // ROR 0x24: clear sets 2
+    int    m_28;                // ROR 0x28: clear sets 2
+    u_char _2c[0x54 - 0x2c];
     int    m_x;                 // ROR 0x54: open sets 100, MnuTitle 0x40 (unverified: position)
     int    m_y;                 // ROR 0x58: open sets 100, MnuTitle 0x40
     int    m_z;                 // ROR 0x5c: open sets 0x7fff, MnuTitle 2000
-    u_char _60[0x104 - 0x60];
+    int    m_60;                // ROR 0x60: clear sets -1
+    u_char _64[0x6c - 0x64];
+    int    m_6c;                // ROR 0x6c: clear sets 0
+    int    m_70;                // ROR 0x70: clear sets 0
+    u_char _74[0x84 - 0x74];
+    int    m_84[0x20];          // ROR 0x84: cleared by clear
 };
 static_assert(offsetof(MnuTextList, m_cur) == 0x04, "m_cur");
+static_assert(offsetof(MnuTextList, m_20) == 0x20, "m_20");
+static_assert(offsetof(MnuTextList, m_28) == 0x28, "m_28");
 static_assert(offsetof(MnuTextList, m_x) == 0x54, "m_x");
 static_assert(offsetof(MnuTextList, m_z) == 0x5c, "m_z");
+static_assert(offsetof(MnuTextList, m_60) == 0x60, "m_60");
+static_assert(offsetof(MnuTextList, m_6c) == 0x6c, "m_6c");
+static_assert(offsetof(MnuTextList, m_70) == 0x70, "m_70");
+static_assert(offsetof(MnuTextList, m_84) == 0x84, "m_84");
 static_assert(sizeof(MnuTextList) == 0x104, "EE 0x104");
 
 /* The "now" (status) menu. EE 0x920 (MagLifeMenuNow +0x40..+0x960). */

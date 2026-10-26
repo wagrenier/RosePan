@@ -5643,7 +5643,7 @@
   "name": "MnuTextList::~MnuTextList",
   "tag": "ror-inferred",
   "was": "FUN_001a0684",
-  "why": "calls MnuTextList::close 0x1a074c, deletes when flags & 1 (GCC 2 destructor)"
+  "why": "close, operator delete on flag 1; TskFrameFunc::term calls it with 3"
  },
  "001a06d4": {
   "name": "MnuTextList::processPad",
@@ -5662,6 +5662,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001a074c",
   "why": "when open: 0x1a0950 and clears the open word; -1 when not open"
+ },
+ "001a0860": {
+  "name": "MnuTextList::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_001a0860",
+  "why": "called by MnuTextList::MnuTextList: clears the words, +0x20 = 1, +0x24 / +0x28 = 2, +0x60 = -1"
  },
  "001a09b8": {
   "name": "MnuTextList::setItems",
@@ -9431,6 +9437,132 @@
   "was": "FUN_001f184c",
   "why": "vtable 0x2e4d50 (rtti.py TskFrameFunc); kind < 0x17 picks the step function (table 0x2fe420)"
  },
+ "001f26e4": {
+  "name": "TskFrameFunc::~TskFrameFunc",
+  "tag": "ror-inferred",
+  "was": "FUN_001f26e4",
+  "why": "vtable 0x2e4d50 slot 6: stores the vtable, operator delete on flag 1"
+ },
+ "001f2718": {
+  "name": "TskFrameFunc::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001f2718",
+  "why": "vtable slot 5: kind 8 closes and deletes its MnuTextList"
+ },
+ "001f2778": {
+  "name": "TskFrameFunc::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f2778",
+  "why": "vtable slot 4: calls the GCC 2 member-function pointer at +8"
+ },
+ "001f27e0": {
+  "name": "TskFrameFunc::stepKeyIn1",
+  "tag": "ror-inferred",
+  "was": "FUN_001f27e0",
+  "why": "kind 2 step (pmf 0x2fe2c0): fadeOut half the frames, then setFade {1, 2, frames/2}: keyhole fade kind 1 in"
+ },
+ "001f2920": {
+  "name": "TskFrameFunc::stepKeyOut1",
+  "tag": "ror-inferred",
+  "was": "FUN_001f2920",
+  "why": "kind 3 step: setFade {1, 6, frames/4}, then stops it and fades in"
+ },
+ "001f2a84": {
+  "name": "TskFrameFunc::stepKeyIn2",
+  "tag": "ror-inferred",
+  "was": "FUN_001f2a84",
+  "why": "kind 4 step: as kind 2 with keyhole kind 2"
+ },
+ "001f2bcc": {
+  "name": "TskFrameFunc::stepKeyOut2",
+  "tag": "ror-inferred",
+  "was": "FUN_001f2bcc",
+  "why": "kind 5 step: as kind 3 with keyhole kind 2"
+ },
+ "001f2d38": {
+  "name": "TskFrameFunc::stepSysMsg",
+  "tag": "ror-inferred",
+  "was": "FUN_001f2d38",
+  "why": "kind 6 step: openSysMsg 0xd (state 100) or 0xe (200), waits for the message, resumes"
+ },
+ "001f2ec4": {
+  "name": "TskFrameFunc::stepWaitAchrMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001f2ec4",
+  "why": "kind 7 step (door open): GamMan::isAchrMotionEnd(+0x20)"
+ },
+ "001f2f0c": {
+  "name": "TskFrameFunc::stepGameOver",
+  "tag": "ror-inferred",
+  "was": "FUN_001f2f0c",
+  "why": "kind 14 step: fade out, resetGame, DEATH_J.PSS film, requestStage(1, .., 99)"
+ },
+ "001f34c8": {
+  "name": "TskFrameFunc::stepBg",
+  "tag": "ror-inferred",
+  "was": "FUN_001f34c8",
+  "why": "kinds 15 / 16 step: S2dBg init / setTexName / load / dispIn, or dispOut / close"
+ },
+ "001f370c": {
+  "name": "TskFrameFunc::stepTextList",
+  "tag": "ror-inferred",
+  "was": "FUN_001f370c",
+  "why": "kind 8 step: MnuTextList::processPad, the choice into script global 0x2d"
+ },
+ "001f3760": {
+  "name": "TskFrameFunc::stepMenuPause",
+  "tag": "ror-inferred",
+  "was": "FUN_001f3760",
+  "why": "kind 9 step: GamMan::enterMenuPause(1)"
+ },
+ "001f3788": {
+  "name": "TskFrameFunc::stepClearFlag100",
+  "tag": "ror-inferred",
+  "was": "FUN_001f3788",
+  "why": "kind 0x11 step: GamMan m_flags2 &= ~0x100"
+ },
+ "001f37b8": {
+  "name": "TskFrameFunc::stepClearFlag400000",
+  "tag": "ror-inferred",
+  "was": "FUN_001f37b8",
+  "why": "kind 0x16 step: m_flags2 &= ~0x400000 (and ~0x800 when m_flags has 4)"
+ },
+ "001f3824": {
+  "name": "TskFrameFunc::stepPcMsg",
+  "tag": "ror-inferred",
+  "was": "FUN_001f3824",
+  "why": "kind 0x15 step: m_flags2 0x80000 with PC state class 5..7: PC motion 1, system window 0xb / 0x16, waits for it"
+ },
+ "001f3b3c": {
+  "name": "TskFrameFunc::stepClearPcRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001f3b3c",
+  "why": "kind 10 step: GamMan::setPcRot(0)"
+ },
+ "001f3b74": {
+  "name": "TskFrameFunc::stepStageThread",
+  "tag": "ror-inferred",
+  "was": "FUN_001f3b74",
+  "why": "kind 11 step: Sequence::queueSingle, waits for the thread, requestStage(2, room), clears m_seqPair[3]"
+ },
+ "001f3c44": {
+  "name": "TskFrameFunc::stepFog",
+  "tag": "ror-inferred",
+  "was": "FUN_001f3c44",
+  "why": "kind 12 step: lerps two I3dFog over +0x60 frames into MagScene::setFog"
+ },
+ "001f3d90": {
+  "name": "TskFrameFunc::stepNone",
+  "tag": "ror-inferred",
+  "was": "FUN_001f3d90",
+  "why": "kind 0x12 step: returns 1"
+ },
+ "001f3d98": {
+  "name": "TskFrameFunc::stepGetItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001f3d98",
+  "why": "kind 0x13 step: SE 0x11, system window 0x11 / 0x13 (item menu), GamMan::addItem"
+ },
  "001f4184": {
   "name": "TskSysFunc::TskSysFunc",
   "tag": "ror-inferred",
@@ -11068,6 +11200,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00217f10",
   "why": "angle of (x, z): acos(x / len) signed by z, rotated by pi/2 and wrapped into -pi..pi; 0 for a zero vector; getObjDirTo's heading"
+ },
+ "0021838c": {
+  "name": "utlStrNCopy",
+  "tag": "ror-inferred",
+  "was": "FUN_0021838c",
+  "why": "copies src into dst, at most n chars, zero-terminated while room is left"
  },
  "00218470": {
   "name": "rorDebugPrintf",
