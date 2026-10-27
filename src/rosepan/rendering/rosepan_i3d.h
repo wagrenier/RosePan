@@ -25,7 +25,13 @@
  *    (rosepan_draw2d's RosePan_Draw2dMakeTexture) into a GPU texture
  *    cached per object, dropped when i3dTexRelease / i3dClutRelease runs.
  *
- *  Not here yet: VU1 strips (the model / i3dPktDrawStrip path) -- see
+ *  - models: an i3r model draw (RosePan_I3dRecordModel) is recorded at its
+ *    packet address like a primitive and drawn at replay through the
+ *    renderer's mesh stream (rosepan_i3dmesh.*: the mesh items read the way
+ *    VU1 would read their VIF blocks), with the camera the last
+ *    RosePan_I3dRecordCamera before it set.
+ *
+ *  Not here yet: the VU1 strips i3dPktDrawStrip writes -- see
  *  RosePan_I3dRecordVu1 -- and CALLed channel state packets (fog / light,
  *  VU1 state only).
  * ======================================================================== */
@@ -35,6 +41,8 @@
 #include <stdint.h>
 
 struct i3dContext;
+struct I3rRoot;
+struct I3dTexEntry;
 
 /* A GIF-tagged primitive written at `pkt` by an i3d writer: pkt[2] the GIF
  * tag (REGLIST or PACKED), pkt[3] its register descriptors, the data from
@@ -55,6 +63,16 @@ void RosePan_I3dRecordTexRegs(const void *at, const uint64_t *regs);
  * primitives, so what draws after it (the fader) still covers it. */
 void RosePan_I3dRecordMovie(const void *at, int x0, int y0, int x1, int y1,
                             int frame_w, int frame_h, int pic_w, int pic_h);
+/* An i3r model draw at `at` (rosepan_i3dmesh.h RosePan_I3dMeshDraw's
+ * arguments): `world` is copied, `root`, `nodes` and `tex` must stay valid
+ * until the frame's replay. */
+void RosePan_I3dRecordModel(const void *at, const I3rRoot *root, const float *world,
+                            const float *nodes, const I3dTexEntry *tex, int tex_count);
+
+/* The camera the model records after `at` draw with: row-major 4x4s, p' =
+ * p * M (RosePan_RendererSet3DViewProjection's form; copied). */
+void RosePan_I3dRecordCamera(const void *at, const float *view, const float *projection);
+
 /* i3dTexRegsSet / i3dTexRegsSetNone: the objects `regs` describes (NULL
  * texture = no texture). */
 void RosePan_I3dBindTexRegs(const uint64_t *regs, const void *tex, const void *clut,
@@ -81,5 +99,13 @@ void RosePan_I3dRecordVu1(const void *at, const void *data, unsigned int qwc);
  * i3dPktTexSpriteUV), proving the module end to end before SprMan reaches
  * the writers.  Called from MagSystem::update after the scene draw. */
 void RosePan_I3dForcedTest(i3dContext *ctx);
+
+/* PC test (no ROM counterpart): with ROSEPAN_I3D_MESH_TEST=1, loads the
+ * first model of DATA/CH/CHARA.RPK (CHAP01, "elnb" -> amd.mdl: its TIM2
+ * pack and its i3r), relocates it and assigns its textures with the i3r library, and
+ * draws it each frame in a layer of its own through RosePan_I3dRecordModel
+ * with a fixed camera turning around it.  Called beside
+ * RosePan_I3dForcedTest. */
+void RosePan_I3dMeshForcedTest(i3dContext *ctx);
 
 #endif /* ROSEPAN_I3D_H */

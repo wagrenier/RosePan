@@ -27,7 +27,9 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      (the i3c casts DogModel calls; stubs) and i3d/i3dgeom.cpp (distance tests MagScene calls);
      neither is on the draw path, so neither is queued. Unverified on screen until utlDrawI3r draws.
   d. unassigned@00106658 (utlDrawI3r 0x106760, utlVecDist), then the host task
-     **setup/i3d_mesh_draw.cpp** (the native i3d module's 3D mesh path, forced-test first), then
+     **setup/i3d_mesh_draw.cpp** (the native i3d module's 3D mesh path, forced-test first --
+     WRITTEN 2026-10-27, verify: ROSEPAN_I3D_MESH_TEST=1 draws Amanda textured, skinned, upright;
+     see "Mesh draw" in Open questions for what it leaves), then
      unassigned@0021fb50 (i3rBuildMeshPacket / 0x21fe68: the mesh draw calls the module) and
      unassigned@0021c960 (i3dPktDrawStrip 0x21db18, the VU1 sprite packets).
   e. mag/magscenecamera.cpp (setCameraMode), unassigned@0013e2ec (updateCamera, gamEnterMenu),
@@ -984,6 +986,22 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- **Mesh draw** (2026-10-27, rosepan_i3dmesh.cpp, setup/i3d_mesh_draw.cpp verify). Left for the
+  session that writes i3rDrawModel 0x21fe68 (unassigned@0021fb50): (1) call
+  RosePan_I3dRecordModel from it at the layer's packet with its world / node arguments and the
+  context's texture table; (2) a camera record from the layer's I3dView (i3dPktCallView: m_camera
+  is the row-vector world -> camera, the projection must become the renderer's reverse-Z form;
+  RosePan_I3dRecordCamera takes the pair), and the host projection's y / handedness must be
+  rechecked against the game's own view (the forced test builds its own: up = -y); (3) lights and
+  fog: the colours are the strip colours x one fixed light (Shade), not mag/magscenelight.cpp's
+  lights nor the fog (magscenecmd.cpp); (4) the 0x45 part of a combined mesh (FUN_00220098) is not
+  drawn; (5) alpha: hair cards draw with the default ALPHA 0x44 blend and no alpha test (the
+  material's ALPHA / TEST pair at 0x22a638 is not read); (6) the per-layer cache 0x228f50 and the
+  i3rBuildMeshPacket VIF chains are not needed on the host -- i3d/i3rmesh.cpp can be written as
+  PC: comments or as the ROM does, the reader is indifferent (it rebases relative to the first
+  unpack, so patched streams read the same). Doubt: the strip colour block (0x17) is read as RGB
+  vertex colour; values are 0.98..1.0 on amd.mdl, which also fits a lighting factor.
 
 - utl/utlmath.cpp (2026-10-27) is the port's name for 0x106658..0x10737c: no source string names
   the run; most of it is vector math, but utlConvSndId and the i3r node display wrappers sit at its
