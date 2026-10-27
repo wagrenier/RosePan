@@ -6,7 +6,8 @@
  *  fades, delayed SEs, the stream switch), TskCamera (the script's stick /
  *  face-to-face cameras), gamSystemDataLoaded / gamStage2Loaded, the
  *  event scene player (ScenePlay with DisplayMessage / SeManager /
- *  VoiceManager / ScenePlaySingle, scenePlayStart).
+ *  VoiceManager / ScenePlaySingle, scenePlayStart), TskAttack and
+ *  TskDamage (setup, the reaction frames, kill) with scnChrRequest.
  * ======================================================================== */
 #include "task/tsk_scene.h"
 #include "common/rosepan_stub.h"
@@ -1210,6 +1211,219 @@ void scnAttackStart(u_int oid, const int *param)
 // ══════════════════════════════════════════════════════════════════════
 
 // ──────────────────────────────────────────────────────────────────────
+// The steps by chr word (EE pfns 0x1fe160 .. 0x2005b8); 3 and 4 set none.
+// ROR 0x001f9e58 // callcheck: dpadd, dpcmp, dpsub, dptofp, fptodp (the soft-float doubles, C doubles here)
+
+void TskDamage::setup(u_int oid, u_int attacker, const ScnDamageParam *param, int kind)
+{
+    const double pi = 3.141592653589793, twoPi = 6.283185307179586;
+
+    m_kind = (short)kind;
+    m_oid = oid;
+    m_flags = 0;
+    m_1c = 0;
+    m_frames = 0;
+    m_achr = NULL;
+    m_achr = g_gamMan.getAchr(oid);
+    m_actor = m_achr->m_actor;
+    m_damage = param->m_a2;
+    m_motion = g_magSystem.m_scene.getActorMotion(m_actor);
+    m_achr->getParam(0x1b, &m_lp);
+    /* The ROM traps (break 7) when the enemy word is 0. */
+    m_emy1d8 = (u_short)g_emyManager.getEmyWord1d8(m_oid);
+
+    if (g_sequence.m_global[0x173] != 0)
+        kind = 0;
+    m_40 = (kind == 0 || kind == 1) ? 2 : 1;
+
+    /* How far the attacker is off the achr's heading, 0..pi. */
+    float rot = g_magSystem.m_scene.m_actors[m_actor].getRotY();
+    float from[4], pos[4];
+    int front = 0;
+    g_gamMan.getObjPos(attacker, from);
+    m_achr->getPos(pos);
+    float off = rot - atan2f(pos[0] - from[0], pos[2] - from[2]);
+    if ((double)off < -pi)
+        off = (float)((double)off + twoPi);
+    if ((double)off > pi)
+        off = (float)((double)off - twoPi);
+    if (off < 0.0f)
+        off = -off;
+
+    if ((double)off < pi / 2)
+    {
+        front = 1;
+        g_emyManager.clearEmyWord18(m_oid);
+    }
+    else
+    {
+        g_emyManager.setEmyWord18(m_oid);
+    }
+    m_frames = getReactFrames(param->m_chr, &front);
+    if (m_frames == 0)
+    {
+        if (m_40 == 2)
+        {
+            g_emyManager.notifyEmy(m_oid, 4);
+            m_frames = front ? 10 : 0;
+        }
+        else
+        {
+            g_emyManager.notifyEmy(m_oid, 8);
+            m_frames = front ? 30 : 20;
+        }
+    }
+
+    if ((m_achr->m_flags & 0xc00) == 0)
+    {
+        if (m_damage < (int)m_lp)
+        {
+            m_lp -= (u_short)m_damage;
+            g_gamMan.setObjParam(m_oid, 0x1b, &m_lp);
+        }
+        else
+        {
+            kill();
+        }
+    }
+    g_emyManager.notifyEmy(m_oid, 1);
+    if (param->m_word == 6)
+        g_emyManager.notifyEmy(m_oid, 0x10);
+    m_motion0 = m_motion;
+    m_flags |= 4;
+    m_achr->m_flags |= 0x400;
+    m_achr->m_flags |= 0x200;
+
+    int se = 6;
+    switch (param->m_chr)
+    {
+    case 0:
+        m_step = &TskDamage::stepKind0;
+        break;
+    case 1:
+        m_step = &TskDamage::stepKind1;
+        break;
+    case 2:
+        m_step = &TskDamage::stepKind2;
+        break;
+    case 5:
+        m_step = &TskDamage::stepKind5;
+        break;
+    case 6:
+        m_step = &TskDamage::stepKind6;
+        break;
+    case 7:
+        if (g_emyManager.getEmyWord238(m_oid) != 0)
+            m_flags = (m_flags | 8) ^ 4;
+        m_step = &TskDamage::stepKind7;
+        break;
+    case 8:
+        m_step = &TskDamage::stepKind8;
+        break;
+    case 3:
+    case 4:
+        break;
+    case 9:
+        m_step = &TskDamage::stepKind9;
+        break;
+    case 10:
+        m_step = &TskDamage::stepKindA;
+        break;
+    default:
+        emyPlaySE(m_oid, se);
+        return;
+    }
+
+    switch (param->m_chr)
+    {
+    case 0:
+    case 1:
+    case 5:
+    case 6:
+        se = 10;
+        if ((m_flags & 0x100) == 0)
+        {
+            se = 8;
+            if (m_40 == 2)
+                se = utlRandRange(0, 99) > 0x31 ? 7 : 6;
+        }
+        break;
+    case 2:
+    case 3:
+    case 4:
+    case 8:
+        se = 6;
+        break;
+    case 7:
+        se = 0x29;
+        if ((m_flags & 0x100) == 0)
+        {
+            int r = utlRandRange(0, 100);
+            switch (param->m_word)
+            {
+            case 3:
+            case 4:
+            case 7:
+                se = r > 0x31 ? 0x2f : 0x2e;
+                break;
+            case 5:
+                se = r > 0x31 ? 0x31 : 0x30;
+                break;
+            case 6:
+                se = 0x23;
+                break;
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+                se = 0x32;
+                break;
+            default:
+                se = 0x16;
+                break;
+            }
+        }
+        break;
+    case 9:
+        se = 0x3a;
+        break;
+    case 10:
+        se = 0x5e;
+        if ((m_flags & 0x100) == 0)
+        {
+            utlRandRange(0, 100);       /* drawn and dropped, as the ROM does */
+            switch (param->m_word)
+            {
+            case 3:
+            case 4:
+            case 7:
+                se = 0x5b;
+                break;
+            case 5:
+                se = 0x5c;
+                break;
+            case 6:
+                se = 0x5d;
+                break;
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+                se = 0x52;
+                break;
+            default:
+                se = 0x57;
+                break;
+            }
+        }
+        break;
+    }
+    emyPlaySE(m_oid, se);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // callcheck: operator_new (the new expression)
 // ROR 0x001fa5bc
 
@@ -1247,6 +1461,101 @@ void scnDamageStart(u_int oid, u_int attacker, const ScnDamageParam *param, int 
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Jump table data 0x2fecb0 (chr 0..10; the others return 0). The motion
+// lists are the ROM's, negatives included.
+// ROR 0x001fa768
+
+int TskDamage::getReactFrames(int chr, int *front)
+{
+    if ((u_int)chr >= 11)
+        return 0;
+    switch (chr)
+    {
+    case 0:
+        if ((m_achr->m_attr[0] & 8) != 0 && (m_achr->m_attr[0] & 0x10) != 0)
+            return 0x50;
+        switch (m_motion)
+        {
+        case 0x28: case 0x29: case 0x2b: case 0x2c: case 0x2d:
+        case -0x29: case -0x2a: case -0x2c: case -0x2d: case -0x2e:
+            *front = 0;
+            g_emyManager.setEmyWord18(m_oid);
+            return 0x46;
+        case 0x2e: case 0x2f: case 0x31: case 0x32: case 0x33:
+        case -0x2f: case -0x30: case -0x32: case -0x33: case -0x34:
+            *front = 1;
+            g_emyManager.clearEmyWord18(m_oid);
+            return 0x3c;
+        default:
+            return 0;
+        }
+    case 1:
+        switch (m_motion)
+        {
+        case 0x1e: case 0x23: case 0x28: case 0x29:
+        case -0x1f: case -0x24: case -0x29: case -0x2a:
+            *front = 0;
+            g_emyManager.clearEmyWord18(m_oid);
+            return 0x46;
+        case 0x21: case 0x22: case 0x2a: case 0x2b: case 0x2c: case 0x2d:
+        case -0x22: case -0x23: case -0x2b: case -0x2c: case -0x2d: case -0x2e:
+            *front = 1;
+            g_emyManager.setEmyWord18(m_oid);
+            return 0x3c;
+        default:
+            return 0;
+        }
+    case 8:
+        switch (m_motion)
+        {
+        case 0x14: case 0x17: case -0x15: case -0x18:
+            return 0x46;
+        default:
+            return 0;
+        }
+    default:
+        return 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001fa9c4
+
+void TskDamage::kill()
+{
+    m_achr->m_flags |= 0x400;
+    m_achr->m_flags |= 0x2000;
+    m_achr->clearSecta(0);
+    m_achr->killTasks();
+    g_sequence.endThreadsWithArg((int)m_oid);
+    g_emyManager.notifyEmy(m_oid, 2);
+    m_lp = 0;
+    m_flags |= 0x100;
+    m_frames += 10000;
+    g_gamMan.setObjParam(m_oid, 0x1b, &m_lp);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001faa70
+
+int TskDamage::pickAttrBit()
+{
+    static const u_int s_bits[5] = { 1, 2, 4, 8, 0x10 };
+    u_int clear[8];
+    u_int n = 0;
+
+    for (int i = 0; i < 5; i++)
+        if ((m_achr->m_attr[0] & s_bits[i]) == 0)
+            clear[n++] = s_bits[i];
+    if (n == 0)
+        return 0;
+    m_attrBit = clear[utlRandRange(0, (int)n - 1)];
+    m_achr->m_attr[m_attrBit >> 24] |= m_attrBit & 0xffffff;
+    u_int attr = m_achr->m_attr[0];
+    return ((attr & 7) == 7 || (attr & 0x1e) == 0x1e || (attr & 0x19) == 0x19) ? 1 : 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001fabd0
 
 void TskDamage::term()
@@ -1256,7 +1565,6 @@ void TskDamage::term()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// The step, always set by setup in the ROM.
 // ROR 0x001fabf8
 
 int TskDamage::exec(int id, int time, int arg)
@@ -1264,7 +1572,7 @@ int TskDamage::exec(int id, int time, int arg)
     (void)id;
     (void)time;
     (void)arg;
-    if (m_step == NULL)                 /* PC: setup is still a stub; end the task */
+    if (m_step == NULL)                 /* PC: chr 3 / 4 set no step (the ROM calls heap garbage); end the task */
         return 1;
     return (this->*m_step)();
 }
@@ -1589,12 +1897,6 @@ void gamStage2Loaded(void)
 }
 
 // ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x001f9e58
-void TskDamage::setup(u_int oid, u_int attacker, const ScnDamageParam *param, int kind)
-{
-    ROSEPAN_STUB("TskDamage::setup", 0x001f9e58);
-}
 
 // stub of ROR 0x001fae14
 void scnChrRequestDog(u_int oid, int word)
