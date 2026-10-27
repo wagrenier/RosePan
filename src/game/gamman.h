@@ -1264,22 +1264,10 @@ extern int    g_bss_780d04;     /* bss 0x780d04: option 0's brightness word (32.
  * 0x7b205c are g_sequence.m_bits / m_global (Sequence +0xdc20 / +0xdc1c,
  * stored by Sequence::init): the script's flag bitset and globals. */
 
-/* ---- outside this file (unassigned@00143d3c: MagScene's Brown glue;
- * unassigned@001e6cac: the chr task helpers) ---- */
-/* Brown's controller mode: 0 when on, 2 when off. */
-void gamSetBwnFollow(int on);                                            // ROR 0x00144334
-/* The find-target item to Brown's controller (0 none). */
-void gamSetBwnItem(int item);                                            // ROR 0x00144500
-/* Brown's controller mode: 1 when on, 0 when off. */
-void gamSetBwnWait(int on);                                              // ROR 0x0014457c
-/* Brown's controller (MagScene +0x2bd20) gets the dog's position / rotation
- * (0x12a808 / 0x12a89c; a debug trace of the vector first). */
-void gamSetBwnPos(const float *pos);                                     // ROR 0x00144398
-void gamSetBwnRot(const float *rot);                                     // ROR 0x001443d8
-/* Their counterparts: Brown's position / rotation (0x12a974 / 0x12a9ec)
- * into out[0..2] when out != NULL. */
-void gamGetBwnPos(float *out);                                           // ROR 0x00144418
-void gamGetBwnRot(float *out);                                           // ROR 0x0014448c
+/* ---- outside this file (unassigned@001e6cac: the chr task helpers) ---- */
+/* gamSetBwnFollow / Item / Wait / Pos / Rot, gamGetBwnPos / Rot: Brown's
+ * glue in mag/magscenecmd.h. */
+#include "mag/magscenecmd.h"
 /* The chr* helpers (chrChangeMotion, chrMtnMove ...) and gamClearFrameReq. */
 #include "task/tsk_chr.h"
 

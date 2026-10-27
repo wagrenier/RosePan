@@ -18,3 +18,31 @@ void utlPlaySe3d(int id, const float *pos)
 {
     ROSEPAN_STUB("utlPlaySe3d", 0x0010254c);
 }
+
+// stub of ROR 0x001034e4
+int utlGetActorNo(unsigned int oid)
+{
+    ROSEPAN_STUB("utlGetActorNo", 0x001034e4);
+    return {};
+}
+
+// stub of ROR 0x00103e94
+int utlGetPcChrNo(void)
+{
+    ROSEPAN_STUB("utlGetPcChrNo", 0x00103e94);
+    return {};
+}
+
+// stub of ROR 0x00103e4c
+int utlGetPcEquipItemChrID(void)
+{
+    ROSEPAN_STUB("utlGetPcEquipItemChrID", 0x00103e4c);
+    return {};
+}
+
+// stub of ROR 0x00103de4
+int utlPauseForMenu(void)
+{
+    ROSEPAN_STUB("utlPauseForMenu", 0x00103de4);
+    return {};
+}

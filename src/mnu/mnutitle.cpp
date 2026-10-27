@@ -217,7 +217,7 @@ MnuTitle::~MnuTitle()
 
 void MnuTitle::init(DogTexInfo *tex)
 {
-    g_magSystem.m_scene.m_22cc = 0;
+    g_magSystem.m_scene.m_sepia = 0;
     m_spr.init(15);
     m_spr.m_tex.m_tex_info = tex;
     m_tex = tex;

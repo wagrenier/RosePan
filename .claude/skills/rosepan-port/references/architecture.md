@@ -651,7 +651,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   - Actors: findFreeActor / findActorById (DogActor id +0x1a0) / findActorByName; an actor whose
     model another actor already shows is *shared* (DogActor slot 21 `shareModel`: master +0x118,
     ref count +0x104) instead of loaded; `loadActor` 0x138ce8 loads with `DogActor::load(pfh,
-    textures, keep ? 2 : 1, m_22cc)`, then setId, 5 at +0x1d8, `ready()` (+0xf0 = 0, +0xf4 = -1).
+    textures, keep ? 2 : 1, m_sepia)`, then setId, 5 at +0x1d8, `ready()` (+0xf0 = 0, +0xf4 = -1).
     A second flag word per actor sits at +0x29320. `loadModel` / `loadModelByName` take the pack
     from CHARA.RPK; the rpk MagSystem passes is not read.
 - **Packs** (`bed/bedpfh.h`, BedPfh 0x101750..): magic "RTPK", 0x20-byte header (total size +4,
@@ -835,7 +835,7 @@ setLightParam / getLightParam forward to the pool's global (no < 0) or set-relat
 A map pack may hold `tenkyu.rpk`, a pack of its own: file 0 an `I3D_I3M` motion when its head
 says so (compared with libc `strncasecmp` 0x27a4e0, n 7), then the sky's i3r. `loadTenkyuTex`
 0x140030 (called by `MagScene::load` when a context is passed) copies the i3r to the game heap,
-relocates it, adds its textures to `m_tex_info` (sepia = `m_22cc`) and assigns them. With a motion,
+relocates it, adds its textures to `m_tex_info` (sepia = `m_sepia`) and assigns them. With a motion,
 one heap block of num_node x 0x44 holds the model matrices (+0x508) then one float per node
 (+0x50c): `initTenkyuSpin` 0x140390 poses the motion at 0 and at 2 x its length (pose flags 0x111;
 scratch = num x 0xb2 + 2: 0x30-byte poses, local, end matrices, u16 node map with the count first)
@@ -847,6 +847,28 @@ world = unit at the camera's x / z (y 0). ROM bug: its draw loop runs four slots
 first slot with a sky (reads past slot 3 when slot 0 is empty); the port stops at slot 3.
 0x140990 (a 4-qword GS packet helper for drawFocus) and `initRecords853bc` 0x140a84 (m_focus
 defaults) open the focus code, left as unassigned@00140030 for mag/magscenefocus.cpp.
+
+## Fog and Brown's command glue (`mag/magscenecmd.cpp`, 0x143d3c..0x145020, 2026-10-27)
+
+No source string names the run (the port named it): it follows `mag/magsceneif.cpp`'s asserts and
+ends where the Hfm enemy classes start. Fog: `MagScene::m_fog[4]` (+0x2aae0, I3dFog 0x20 each) --
+[0] the fog drawn, [2] / [3] a fade's from / to; `setFog` 0x143d7c with frames > 0 sets from =
+drawn, to = fog, `m_fog_frames` (+0x2ab64) = frames, `m_fog_frame` (+0x2ab60) = 0, else draws fog
+at once; `updateFog` 0x143fd0 (MagScene::update) blends linearly at frame / frames. Wrappers: a
+colour + four floats 0x143d3c, `addFog` 0x143eec (target + delta). Brown: every `gam*Bwn*` /
+`magBwn*` function forwards to the scene's MagLifeBwnCtrl (bss 0x727aa0 = scene +0x2bd20). Its
+states (m_state; the four-char codes op 3 returns): 0 NULL, 1 WAIT, 2 FOLW, 3 STAY, 4 FIND,
+5 FDED, 6 MOVE, 7 MVED, 8 ROTA, 9 RTED, 10 DAMG (requestHurt), 11 BARK (sub object at +0xf0),
+12 HUG; `setLevel` 0x12b7cc (+0x6c) takes MAG_BWNCTRL_LEVEL_AUTO 0 .. MANUAL 2 (gamSetBwnFollow:
+on 0 / off 2; gamSetBwnWait: on 1 / off 0). Script native 039 -> `magBwnSeqCommand` 0x144ae0:
+ops 3, 0x14 rot, 0x15 pos, 0x1f moveTo, 0x20 / 0x23 wait until +0x80 (SEQ_RET_WAIT), 0x21 /
+0x22 angle (+0x40, state 0 / 8), 0x24 returns 1; four-char ops ifsc / gfrs / gfit (find result,
++0x68 / +0x7c / +0x44), stfd / clfd (find item, again = AGIN/agin/1; cancel), amsb (an actor's
+suffix motion), eqds (show / hide the PC's equip item), sepo (MagScene +0x22cc `m_sepia`: the sepia
+flag texture and light loads pass), sepc (DogTexInfo::setSepiaColor, clamped 255), ilts / adlt
+(lights), spmn (special menus, table 0x2ef298: KLCK / SPM0 0x1000b, BVIL / SPM1 0x1000c, BLND
+0x1000d, BFML 0x1000e, BCPL 0x1000f, after utlPauseForMenu), whti / whto (white fades, level 7),
+rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
 
 ## The texture table (`dog/dogtexinfo.cpp`, 0x1161e4..0x11764c, 2026-10-22)
 

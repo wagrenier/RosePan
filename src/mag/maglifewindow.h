@@ -74,4 +74,14 @@ static_assert(offsetof(MagLifeWindow, m_84) >= 0x84, "m_84");
 static_assert(offsetof(MagLifeWindow, m_tex_no) >= 0xc0, "m_tex_no");
 static_assert(offsetof(MagLifeWindow, m_cc) >= 0xcc, "m_cc");
 
+/* MagLifeWindowDebug (vtable _vt$18MagLifeWindowDebug 0x2e1fe8): the
+ * scene's debug windows (MagScene::m_dbg_window, mag/magscenedebug.cpp).
+ * Only getName (slot 5, 0x285844) differs from MagLifeWindow's; the host
+ * has no getName slot. Constructor in mag/magscenecmd.cpp.
+ * layout: host -- MagLifeWindow's, nothing added (EE 0xe0). */
+struct MagLifeWindowDebug : MagLifeWindow
+{
+    MagLifeWindowDebug();                                                // ROR 0x00144214
+};
+
 #endif /* _MAG_MAGLIFEWINDOW_H */

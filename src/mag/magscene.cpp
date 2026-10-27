@@ -278,8 +278,8 @@ void MagScene::init()
     m_fog[3] = m_fog[0];
     m_fog[2] = m_fog[3];
     m_fog[1] = m_fog[2];
-    m_fog_2ab64 = 0;
-    m_fog_2ab60 = 0;
+    m_fog_frames = 0;
+    m_fog_frame = 0;
     setLightNo(-1);
     m_life_man.init();
     m_tex_info.init(0x100);
@@ -2061,7 +2061,7 @@ MagScene::MagScene()
     m_22b0 = 1.0f;
     m_22b4 = 1;
     m_22b8 = 0;
-    m_22cc = 0;
+    m_sepia = 0;
     m_sub_mode.m_mode = 0;
     m_sub_mode.m_step = 0;
     m_sub_mode.m_arg = 0;

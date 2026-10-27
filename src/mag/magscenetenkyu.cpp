@@ -77,7 +77,7 @@ void MagScene::releaseTenkyuTex(int no)
 // The pack's tenkyu.rpk into slot no (none: nothing). The rpk's file 0 is
 // the motion when it carries the I3D_I3M id, and the i3r follows it;
 // the i3r is copied to the game heap, relocated, its textures added to
-// the scene's table (sepia per m_22cc) and assigned. With a motion, one
+// the scene's table (sepia per m_sepia) and assigned. With a motion, one
 // block holds the node matrices and the spins initTenkyuSpin fills.
 // callcheck: FUN_00215a30, BedPfh, strncasecmp (the assert handler inside the inline BedPfh::getFile; the local pack's constructor; the host's tenkyuStrNCaseCmp)
 // ROR 0x00140030
@@ -104,7 +104,7 @@ void MagScene::loadTenkyuTex(int no, const BedPfh *pfh, i3dContext *ctx)
     t->m_sky = (I3rRoot *)g_utlMemory.alloc(size, -1);
     memcpy(t->m_sky, rpk.getFile(n), size);
     i3rRelocate(t->m_sky);
-    m_tex_info.addPfh(&rpk, t->m_sky, 1, m_22cc);
+    m_tex_info.addPfh(&rpk, t->m_sky, 1, m_sepia);
     m_tex_info.setTexTable(ctx);
     i3rAssignTex(t->m_sky, m_tex_info.m_tex_info, m_tex_info.m_num_tex);
 

@@ -397,6 +397,11 @@ struct MagScene
     void initTenkyuSpin(MagSceneTenkyu *t, I3mRoot *motion);             // ROR 0x00140390
     /* Fades to fog over frames (0: at once). */
     void setFog(const I3dFog *fog, int frames);                          // ROR 0x00143d7c
+    /* The same from a colour and the four params (I3dFog::m_param). */
+    void setFog(const float *color, float p0, float p1, float p2, float p3, int frames); // ROR 0x00143d3c
+    /* Fades to the target fog plus delta's eight floats. */
+    void addFog(const I3dFog *delta, int frames);                        // ROR 0x00143eec
+    /* One step of setFog's fade. */
     void updateFog();                                                    // ROR 0x00143fd0
     void updateDebug(BedPad *pad0, BedPad *pad1);                        // ROR 0x0014313c
     void updateCamera();                                                 // ROR 0x0013e548
@@ -536,7 +541,7 @@ struct MagScene
     int            m_22b4;              // ROR 0x22b4: sky path display: 0 off, 1 copy the points then 2, 2 draw the copy (the constructor's value: 1)
     int            m_22b8;              // ROR 0x22b8: the constructor clears it; role unknown
     int            m_22bc[4];           // ROR 0x22bc: the constructor sets -1; role unknown
-    int            m_22cc;              // ROR 0x22cc: MagSystem::clearScene22cc zeroes it; role unknown
+    int            m_sepia;             // ROR 0x22cc: sepia on (Brown op sepo); textures and lights load sepia by it; MagSystem::clearScene22cc zeroes it
     BedSubMode     m_sub_mode;          // ROR 0x22d0: update's mode (pushSubMode sets 8; getDrawFlags tests 7 and 8); m_step -1 on entry; m_arg the requested menu id, m_arg2 the PC's mode / number then
     MagLifeMan     m_life_man;          // ROR 0x2330
     MagLifeWindow *m_window[4];         // ROR 0x2734: MAX_WINDOW text windows (openWindow), NULL = free
@@ -561,9 +566,10 @@ struct MagScene
     float          m_2aa80;             // ROR 0x2aa80: the camera angle the frustum was built for (-1 after initRender: rebuild)
     int            m_2aa84;             // ROR 0x2aa84: load sets 1 with a map's fog; role unknown
     I3rStqMapEntity m_stq_map;          // ROR 0x2aa90: the sky's second model's STQ map (0x50; init sets +0x40 = 1, id 3)
-    I3dFog         m_fog[4];            // ROR 0x2aae0: init clears [0] and copies it to the others
-    int            m_fog_2ab60;         // ROR 0x2ab60: init zeroes it; role unknown
-    int            m_fog_2ab64;         // ROR 0x2ab64: init zeroes it; role unknown
+    I3dFog         m_fog[4];            // ROR 0x2aae0: init clears [0] and copies it to the others;
+                                        //   [0] the fog drawn, [2] / [3] setFog's fade from / to
+    int            m_fog_frame;         // ROR 0x2ab60: setFog's fade, frames done
+    int            m_fog_frames;        // ROR 0x2ab64: setFog's fade length (0: none)
     DogCamera      m_camera_entity;     // ROR 0x2ab70: the camera (m_trans +0x2abb0 and m_rotate +0x2abc0 are the eye actors are drawn for)
     int            m_camera_mode;       // ROR 0x2ad50: getCameraMode returns it
     int            m_camera_2ad58;      // ROR 0x2ad58: getCameraMode's second word out

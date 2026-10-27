@@ -200,12 +200,6 @@ int FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy)
 }
 
 
-// stub of ROR 0x00143d7c
-void MagScene::setFog(const I3dFog *fog, int frames)
-{
-    ROSEPAN_STUB("MagScene::setFog", 0x00143d7c);
-}
-
 // stub of ROR 0x00215bb4
 void dbgTraceVector4(const float *v)
 {
@@ -509,12 +503,6 @@ void MagScene::updateCamera()
     ROSEPAN_STUB("MagScene::updateCamera", 0x0013e548);
 }
 
-// stub of ROR 0x00143fd0
-void MagScene::updateFog()
-{
-    ROSEPAN_STUB("MagScene::updateFog", 0x00143fd0);
-}
-
 // stub of ROR 0x00140c68
 void MagScene::updateRecords853fc()
 {
@@ -687,24 +675,6 @@ int GamMan::placeAchr(int oid, void *out, int arg)
 void GamMan::relinkObj(u_int oid)
 {
     ROSEPAN_STUB("GamMan::relinkObj", 0x001d5da0);
-}
-
-// stub of ROR 0x00144334
-void gamSetBwnFollow(int on)
-{
-    ROSEPAN_STUB("gamSetBwnFollow", 0x00144334);
-}
-
-// stub of ROR 0x00144500
-void gamSetBwnItem(int item)
-{
-    ROSEPAN_STUB("gamSetBwnItem", 0x00144500);
-}
-
-// stub of ROR 0x0014457c
-void gamSetBwnWait(int on)
-{
-    ROSEPAN_STUB("gamSetBwnWait", 0x0014457c);
 }
 
 // stub of ROR 0x001634d4
@@ -1108,13 +1078,6 @@ void GamMan::queueObjUpdate(GamSecta *cell, u_int oid)
     ROSEPAN_STUB("GamMan::queueObjUpdate", 0x001d5bc8);
 }
 
-// stub of ROR 0x00144ae0
-intptr_t magBwnSeqCommand(const intptr_t *args)
-{
-    ROSEPAN_STUB("magBwnSeqCommand", 0x00144ae0);
-    return {};
-}
-
 // stub of ROR 0x0017c4f4
 void sectorClearFlags(Obj17c0f0 *obj, int key, u_int bits, int rec)
 {
@@ -1244,18 +1207,6 @@ void gamCreateEff1a(void)
     ROSEPAN_STUB("gamCreateEff1a", 0x00172678);
 }
 
-// stub of ROR 0x00144398
-void gamSetBwnPos(const float *pos)
-{
-    ROSEPAN_STUB("gamSetBwnPos", 0x00144398);
-}
-
-// stub of ROR 0x001443d8
-void gamSetBwnRot(const float *rot)
-{
-    ROSEPAN_STUB("gamSetBwnRot", 0x001443d8);
-}
-
 // stub of ROR 0x001635e0
 void EmyManager::resetWork()
 {
@@ -1319,18 +1270,6 @@ GamSecta * GamMan::pickSectaCell(const float *pos, int list)
 void GamMan::selectSectaList(int list)
 {
     ROSEPAN_STUB("GamMan::selectSectaList", 0x001d7eb8);
-}
-
-// stub of ROR 0x00144418
-void gamGetBwnPos(float *out)
-{
-    ROSEPAN_STUB("gamGetBwnPos", 0x00144418);
-}
-
-// stub of ROR 0x0014448c
-void gamGetBwnRot(float *out)
-{
-    ROSEPAN_STUB("gamGetBwnRot", 0x0014448c);
 }
 
 // stub of ROR 0x001d5a0c
@@ -1601,12 +1540,6 @@ void EmyManager::setEmyMode6(u_int oid)
 void EmyManager::stopEmyMove(u_int oid)
 {
     ROSEPAN_STUB("EmyManager::stopEmyMove", 0x00163e48);
-}
-
-// stub of ROR 0x0014426c
-void magBwnHurt(int react, int damage)
-{
-    ROSEPAN_STUB("magBwnHurt", 0x0014426c);
 }
 
 // stub of ROR 0x0010426c

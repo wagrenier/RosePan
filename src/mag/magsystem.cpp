@@ -347,7 +347,7 @@ void MagSystem::start()
 
 void MagSystem::clearScene22cc()
 {
-    m_scene.m_22cc = 0;
+    m_scene.m_sepia = 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
