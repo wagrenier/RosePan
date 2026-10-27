@@ -334,7 +334,6 @@ void MagLifeMenuMcd::render(I3dLayer *layer)
 // ──────────────────────────────────────────────────────────────────────
 // The MagLife0 / MagLife words, the two books, no book chosen.
 // ROR 0x0012d398
-// callcheck: MnuPBook, MnuDiary (member constructors, not written: the members start zeroed in the global scene)
 
 MagLifeMenuPBook::MagLifeMenuPBook()
 {

@@ -60,9 +60,19 @@ follows it; reached stubs in run order):
      / loadData 0x115790 / setupNodeFlags 0x11550c: the model loader. Without it no map or character exists, so **this is the gate to the
      first 3D picture**. Pinned first in the queue (the user, 2026-10-26: 3D rendering ahead of the
      menu fix below).
-  4. `unassigned@00192ac0` -- MnuPBook::setType 0x196e54 / MnuDiary::setType 0x198b04
-     (MagLifeMenuPBook::init asserts when neither book takes the type). If a run stops on that
-     assert before the first room, take this next.
+  4. **The picture book (mnu/, split 2026-10-26 from unassigned@00192ac0 into mnu/mnubase.cpp,
+     mnu/mnumap.cpp, mnu/mnupbook.cpp, mnu/mnustock.cpp).** mnu/mnupbook.cpp is `partial`: both
+     books' constructors, destructors, setType, init and term are written, so the assert is gone and
+     the 200 s New Game run now inits a picture book (after MagLifePC::setActor) -- and
+     stops there, black: MnuPBook::processPad / draw and the whole mnuBase loader are stubs, and
+     processPad returning 0 keeps the book open for ever. **This is the gate to the first room.**
+     Next: `mnu/mnubase.cpp` (queued ahead): the mnu pool FUN_001944d0 / mnuAlloc / mnuFree,
+     setupWork, addFile, openPack / closePack, term, the file loader 0x193a1c (i3r models, textures
+     into DogTexInfo), the layer draw helpers 0x192f68 / 0x193258 / 0x19368c (to the native i3d draw
+     module); then mnu/mnupbook.cpp's processPad 0x1976b8 / draw 0x197f70 and page helpers. The
+     reference: work/ref/MNUPBOOK and work/ref/PB010200 (tm2png --scan of the disc's
+     DATA/MNURPK/MNUPBOOK packs). Open: whether a held START (the smoke pad) closes the book once
+     processPad runs -- extend settings.smoke_pad if it needs CROSS / page turns.
   5. **`dog/dogactor.cpp`** -- DogActor::load 0x10cd5c, loadPackMotion 0x10c17c, getRotY, resetShadow
      (then the getNodeIndexByName PORT guard can go).
   6. `mag/magscenelight.cpp` -- MagScene::loadLight 0x13f658 / setDefaultLight 0x13f8e4.
