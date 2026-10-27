@@ -20,8 +20,12 @@ follows it; reached stubs in run order):
      and unassigned@00184f2c 0x18741c..0x18761c: queue them when the subtitles matter; they are not on
      the path to the first room), TskMtnMove2 / chrMtnMove2 / chrSetMotion written; then the rest of the
      TU's reached / frontier functions (TskFrameFunc 0x1f184c, TskMovePointPath, chrRotStart).
-  2. `unassigned@001f82e4` (task/tsk_scene.cpp's classes) -- TskSnd::TskSnd 0x1f8fc0 (the BGM fade
-     back after the film), **scenePlayStart 0x1f83f4** (event scenes: map / CHARA / THREAD sections).
+  2. `task/tsk_scene.cpp` (pinned 0x1f6c64..0x1fc4f0 2026-10-26; was unassigned@001f82e4 and
+     unassigned@001f6c64) -- PARTIAL 2026-10-26: TskSnd (all kinds), TskCamera, gamSystemDataLoaded /
+     gamStage2Loaded written (nothing on screen shows them: sound is the IOP stand-in). Left:
+     **scenePlayStart 0x1f83f4** (event scenes: map / CHARA / THREAD sections) with the ScenePlay class
+     0x1f6c64..0x1f82e4, scenePlayStartSimple / PLScenePlay, scnChrRequest, TskAttack / TskDamage. The
+     200 s New Game run reached none of them yet (it ends on the film's "March 1930" card).
   3. `unassigned@00192ac0` -- MnuPBook::setType 0x196e54 / MnuDiary::setType 0x198b04
      (MagLifeMenuPBook::init asserts when neither book takes the type).
   4. **`dog/dogmodel.cpp`** -- DogModel::loadPack 0x1158ec / loadData 0x115790 / setupNodeFlags

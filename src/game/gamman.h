@@ -1252,10 +1252,7 @@ struct GamMan
 
 extern GamMan g_gamMan;         /* bss 0x7812c0 */
 
-/* Outside GamMan (files not yet defined). */
-void gamSystemDataLoaded(void);                                          // ROR 0x001f8fb8
-/* execStageReq's last call for change kind 2. */
-void gamStage2Loaded(void);                                              // ROR 0x001fbbd0
+/* gamSystemDataLoaded / gamStage2Loaded (outside GamMan): task/tsk_scene.h. */
 /* Effect kind 0x1a created in the scene's +0x837e0 table (initStage2's
  * first call). */
 void gamCreateEff1a(void);                                               // ROR 0x00172678

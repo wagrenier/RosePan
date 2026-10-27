@@ -10349,11 +10349,89 @@
   "was": "FUN_001f8fc0",
   "why": "writes vtable 0x2e4e70 (TskSnd), copies a 0x40-byte parameter block, picks the step function by kind (7 copies the stream name)"
  },
+ "001f91dc": {
+  "name": "TskSnd::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f91dc",
+  "why": "TskSnd vtable 0x2e4e70 slot 4: calls the member-function pointer at +0x24 (always 0x1f92c8)"
+ },
+ "001f9244": {
+  "name": "TskSnd::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9244",
+  "why": "TskSnd vtable slot 5: kind 2 sets funcSnd 0xd (master volume) to the target volume"
+ },
+ "001f9294": {
+  "name": "TskSnd::getRate",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9294",
+  "why": "frames run (+0x3c) / frames (+0x38), 0 when no frames; the fade's progress"
+ },
+ "001f92c8": {
+  "name": "TskSnd::stepFade",
+  "tag": "ror-inferred",
+  "was": "FUN_001f92c8",
+  "why": "TskSnd's exec step (constructor stores it at +0x24): in state 100 calls the kind's step (+0x2c) with the volume blended from the current (+0xa0) to the target (+0x84) by getRate"
+ },
+ "001f93d8": {
+  "name": "TskSnd::stepSEVol",
+  "tag": "ror-inferred",
+  "was": "FUN_001f93d8",
+  "why": "kind 0 step: GamSndMan::setVolSEtrack of the SE, funcSE 1 (stop) at volume 0; done at the end of the frames"
+ },
+ "001f9484": {
+  "name": "TskSnd::stepStrVol",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9484",
+  "why": "kind 1 step: GamSndMan::setVolSTRtrack of the stream, funcStr 1 / 0x17 at volume 0"
+ },
+ "001f9550": {
+  "name": "TskSnd::stepMstVol",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9550",
+  "why": "kind 2 step: GamSndMan::funcSnd 0xd (the master volume)"
+ },
+ "001f95a8": {
+  "name": "TskSnd::stepMstVolSe",
+  "tag": "ror-inferred",
+  "was": "FUN_001f95a8",
+  "why": "kind 3 step: GamSndMan::funcSnd 0xe (the SE master volume)"
+ },
+ "001f9600": {
+  "name": "TskSnd::stepMstVolStr",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9600",
+  "why": "kind 4 step: GamSndMan::funcSnd 0xf (the stream master volume)"
+ },
  "001f9658": {
   "name": "TskSnd::getVolume",
   "tag": "ror-inferred",
   "was": "FUN_001f9658",
   "why": "returns the task's words +0x84 / +0x88 through two pointers; pushSnd reads a running fade's current volume through it"
+ },
+ "001f9670": {
+  "name": "TskSnd::stepPlaySE",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9670",
+  "why": "kind 5 step (GamSndMan::playSE's delayed SE): plays the SE once, ends"
+ },
+ "001f96c0": {
+  "name": "TskSnd::stepPlayStream",
+  "tag": "ror-inferred",
+  "was": "FUN_001f96c0",
+  "why": "kind 7 step: stops the old stream until SndMan::getStreamState is -1, then SndMan::playStream of the name at +4"
+ },
+ "001f974c": {
+  "name": "TskSnd::stepSEFadeOut",
+  "tag": "ror-inferred",
+  "was": "FUN_001f974c",
+  "why": "kind 6 step while the SE plays: after the frames funcSE 0x13 (a fade to 0 over 10 frames)"
+ },
+ "001f97c0": {
+  "name": "TskSnd::stepEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001f97c0",
+  "why": "kind 6 step when the SE does not play: returns 1 (hidden in 0x1f974c's body until split)"
  },
  "001fac60": {
   "name": "scnChrRequest",
@@ -10372,6 +10450,54 @@
   "tag": "ror-inferred",
   "was": "FUN_001fbc0c",
   "why": "the constructor of class TskCamera (rtti); 0xc0 bytes, native 016 case 50 starts it on GamMan +0x222b8 with (a2, a1)"
+ },
+ "001fbc6c": {
+  "name": "TskCamera::setupPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001fbc6c",
+  "why": "TskCamera constructor's kind 0: copies the centre, min / max angles and pad speed from the parameter words, zeroes the state"
+ },
+ "001fbd2c": {
+  "name": "TskCamera::setupFace",
+  "tag": "ror-inferred",
+  "was": "FUN_001fbd2c",
+  "why": "TskCamera constructor's kind 1: turns object 0 (and 1) to face each other and places the camera over object 0's shoulder (castRay pull-in)"
+ },
+ "001fc164": {
+  "name": "TskCamera::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc164",
+  "why": "TskCamera vtable 0x2e4f30 slot 3, empty"
+ },
+ "001fc16c": {
+  "name": "TskCamera::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc16c",
+  "why": "TskCamera vtable slot 5, empty"
+ },
+ "001fc174": {
+  "name": "TskCamera::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc174",
+  "why": "TskCamera vtable slot 4: kind 0 execPad, kind 1 execFace, else the step at +4"
+ },
+ "001fc210": {
+  "name": "TskCamera::execPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc210",
+  "why": "kind 0 exec: left stick turns the camera within min / max, a random drift, smoothed, into the scene camera's m_rotate"
+ },
+ "001fc46c": {
+  "name": "TskCamera::execFace",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc46c",
+  "why": "kind 1 exec: returns 0 (the camera stays where setupFace put it)"
+ },
+ "001fc474": {
+  "name": "TskCamera::stepNone",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc474",
+  "why": "the step setupPad stores at +4: returns 0 (hidden in 0x1fc46c's body until split)"
  },
  "00203d94": {
   "name": "SysTimer::SysTimer",
@@ -17494,6 +17620,12 @@
   "tag": "lib-context",
   "was": "FUN_0025b890",
   "why": "lqc2 vf4 (a1), vf5 (a2), vsub.xyzw vf6, sqc2 vf6 (a0): libvu0 sceVu0SubVector; native 020 case 52"
+ },
+ "0025b8c0": {
+  "name": "sceVu0ScaleVector",
+  "tag": "lib-context",
+  "was": "FUN_0025b8c0",
+  "why": "lqc2 vf4,(a1); qmtc2 f12; vmulx.xyzw; sqc2 (a0): the libvu0 function, after sceVu0MulVector"
  },
  "0025c340": {
   "name": "vif0ResetVu0",

@@ -93,58 +93,8 @@ struct EmyManager : CmnITask
 /* ChrMotionRef, the Tsk* script tasks, the chr* helpers: task/tsk_chr.h. */
 #include "task/tsk_chr.h"
 
-/* The parameter block TskSnd's constructor copies (0x40 bytes on the EE).
- * A fade (GamSndMan::funcSnd / funcSE / funcStr): m_snd the sound, m_id
- * its SndMan id, m_volL / m_volR the target, m_frames its length, m_curL /
- * m_curR the volume now. layout: host. */
-struct TskSndParam
-{
-    int         m_snd;          // ROR 0x00: the SE id / stream number
-    int         m_volL;         // ROR 0x04
-    int         m_volR;         // ROR 0x08
-    int         m_id;           // ROR 0x0c: the SndMan id
-    int         m_attr;         // ROR 0x10: kind 5 (GamSndMan::playSE's delayed SE): the attribute
-    int         m_frames;       // ROR 0x14
-    float       m_pitch;        // ROR 0x18: kind 5: the pitch
-    const char *m_name;         // ROR 0x1c: kind 7 copies the name (0x1b chars)
-    int         m_curL;         // ROR 0x20
-    int         m_curR;         // ROR 0x24
-    int         m_arg;          // ROR 0x28: playStream's arg; funcStr's fades: 1 stops the stream at the end (unverified)
-    int         m_mode;         // ROR 0x2c: playStream's mode
-    int         m_id2;          // ROR 0x30: the stream id again
-    int         _34[3];
-};
-
-/* TskSnd : CmnITask (vtable 0x2e4e70, EE 0xc0 bytes, unassigned@001f82e4):
- * a sound task; kind picks its step function (7: play the stream m_name
- * once the old one has stopped). layout: host -- no members. */
-struct TskSnd : CmnITask
-{
-    TskSnd(int kind, const TskSndParam *param);                          // ROR 0x001f8fc0
-    /* The fade's volume now (+0x84 / +0x88); returns 0. */
-    int getVolume(int *volL, int *volR);                                 // ROR 0x001f9658
-};
-
-/* The per-character request of unassigned@001f82e4 (jump table data
- * 0x2fed40 over chr 0..10; chr 11 takes it from object chrOid's kind:
- * 4 for kind 0, 3 for kind 1, the system data field 0x72 for kind 2).
- * Many callers; TskMovePhysic passes chr 4 (the PC) or 3 (the dog) with
- * word 0x15. Role of the words unverified. */
-void scnChrRequest(int chr, u_int oid, int a2, int a3, int word, u_int chrOid, int a6); // ROR 0x001fac60
-
-/* TskCamera : CmnITask (EE 0xc0, unassigned@001f82e4): a scripted camera
- * move (native 016 case 50, on GamMan's m_camTaskId). layout: host. */
-struct TskCamera : CmnITask
-{
-    TskCamera(intptr_t a, intptr_t b);                                   // ROR 0x001fbc0c
-};
-
-/* Event scenes (unassigned@001f82e4): data/evt/%02d/scene/<name> from
- * the stage pfh, played by a ScenePlay task (vtable 0x2e4dd0, 0x580
- * bytes). scenePlayStart also reads the map / CHARA / THREAD sections and
- * halts the game; wait is its third argument. */
-int  scenePlayStart(const char *name, intptr_t arg, int wait);           // ROR 0x001f83f4
-void scenePlayStartSimple(const char *name);                             // ROR 0x001f8cec
+/* TskSndParam, TskSnd, TskCamera, scnChrRequest, scenePlayStart: task/tsk_scene.h. */
+#include "task/tsk_scene.h"
 
 /* 1 when the two strings are equal, a..z compared as A..Z, else 0
  * (unassigned@00106010, after utl/utlfile.cpp). */
