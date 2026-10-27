@@ -435,6 +435,15 @@
    "status": "verify",
    "why": "0x1dd558 allocates its 0xb0 trigger copy with the source string game/gamtrg.cpp (0x2fd630, line 0x62); the run from GamArea's constructor 0x1dd1e8 to hasId ends where game/gamsnd.cpp begins (GamSndMan::GamSndMan 0x1e0df0)"
   },
+  "i3d/i3cquery.cpp": {
+   "ranges": [
+    [
+     "002312a0",
+     "00233628"
+    ]
+   ],
+   "why": "the i3c collision query: i3cCastSphere/Ray/Cylinder and their shared worker 0x232120 with its per-shape testers; boundary with the distance helpers at 0x233628 inferred from callers"
+  },
   "i3d/i3croot.cpp": {
    "notes": "Status verify: DogModel::loadData calls i3cRelocate, setupColliTbl and i3cSetBothFaceEnable, but no smoke run reaches a model load yet and no raw I3D_I3C exists on the disc to check offline (open-items Open questions). Decision (open-items Decisions): the host keeps the file offsets from the root and readers use i3cPtr(root, field); i3cRelocate only turns -1 into 0 and keeps the relocation byte, because the ROM's tree relocator only relocates values below the root address. The collision casts 0x2312a0..0x2337e0 (still unassigned@0022b4b8) must read through i3cPtr. Mark done when a cast or setupColliTbl shows correct results in a run.",
    "ranges": [
@@ -492,6 +501,15 @@
    ],
    "status": "verify",
    "why": "the frame environment records i3d hangs on layers (+0x82c light, +0x830 fog): i3dFogInit / i3dCtxSetFog / the fog VU1 packet 0x21a270, and the light descriptions and i3dCtxCreateLight with its five kind builders; both build packet-tail records. One file for both is a guess: the i3r helpers 0x21a3e8..0x21ac80 sit between them"
+  },
+  "i3d/i3dgeom.cpp": {
+   "ranges": [
+    [
+     "00233628",
+     "00236960"
+    ]
+   ],
+   "why": "point/segment/triangle distance tests (i3dPointSegDist2, i3dSegSegDist2 ...) up to i3d/i3dmath.cpp at 0x236960; inferred: leaf geometry the i3c query calls"
   },
   "i3d/i3dlayer.cpp": {
    "notes": "Every frame now builds real groups, layers and a sorted DMA chain; the smoke run is stable and still black: nothing on the i3d path reaches a host draw module (no GS emulation by decision), SprMan and i3dCtxCreateView are stubs. Next (queued): unassigned@00224de0 holds i3dCtxCreateView 0x226c58 and its view maths 0x226278..0x227a98 after the TIM2 helpers from 0x224de0; pin the view file (i3d/i3dview.cpp?) and the TIM2 one first. Then unassigned@00216ad0 (B.4): it must replace the bridges in lib/unassigned_stubs.cpp marked unassigned@00216ad0. The old key unassigned@0021fb50 now names only the model packet builders 0x21fb50..0x222f50 (removed from the queue). Unverified: I3rMaterial layout read by i3dLayerFindMaterialDrawSet (only reader 0x228f50), the base argument there (a draw set? it adds +0x20), the layer +0x414 table and +0x838 user pairs (no readers). Untested paths: the radix sort (32+ nodes per group) and the state nodes (only the model builders add them). Where a host i3d renderer can hook in is open (open-items B.3 note).",
@@ -618,6 +636,24 @@
    ],
    "status": "verify",
    "why": "i3d VRAM cache: a block heap of 0x44-byte nodes on six intrusive lists (address order, LRU, locked, evict, new, moved), embedded twice in i3dContext (+0x0 texture pages, +0x70 CLUT); 0x227a98 list unlink .. 0x228b50 coalesce, next function 0x228c08 calls the i3d system module 0x237180."
+  },
+  "i3d/i3mpose.cpp": {
+   "notes": "Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game calls is written and the 200 s New Game run plays through it without a fault, but nothing shows it yet: after the film the screen is black because utlDrawI3r (unassigned@00106658) is a stub; the first session that draws a model should look at the actor's pose and mark this verify/done. Decided: pose functions take void* (callers pass byte offsets) and cast to I3mPose; i3mFindKey takes the root instead of the float table (host keeps offsets); the VU0-register helpers 0x22f870/0x22fc38/0x230258 became pointer functions. Every disc i3m has flags 0x1f (packed pos/rot/scale, no scale, splines as linear), so only the step/lerp/slerp paths run. i3mQuatExp 0x230570 was folded into i3mQuatLog in Ghidra: created with mkfunc. Unreferenced hidden leaves 0x230370, 0x230378, 0x230638 not written. The stale queue entry unassigned@0022e840 is skipped by tus.py next; i3cquery/i3dgeom are not queued (not on the draw path).",
+   "ranges": [
+    [
+     "0022e840",
+     "002312a0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 18:07",
+     "status": "partial",
+     "summary": "i3m pose player: split unassigned@0022e840 into i3d/i3mpose.cpp, i3d/i3cquery.cpp, i3d/i3dgeom.cpp; wrote 37 i3mpose functions (key search and decode, step/lerp/Hermite/slerp/squad, pose samplers and blends, pose mixes, PoseToMatrices, quaternion ops); I3mRoot flags and value tables decoded"
+    }
+   ],
+   "status": "partial",
+   "why": "the i3m pose player: key search, key decode (I3mRoot +0x20/+0x28 tables), lerp/spline/slerp/squad, pose blends, PoseToMatrices, quaternion helpers; ends with i3mQuatFromEuler; 0x2312a0 starts the i3c query code"
   },
   "i3d/i3mroot.cpp": {
    "notes": "Pinned from unassigned@0022b4b8 to i3d/i3mroot.cpp. Host keeps root-relative offsets (i3mPtr), like i3c: the relocators walk with delta 0 and keep +0x16 at 1 (open-items Decisions). Not visible yet: callers DogActor::loadMotion / unpack / get_nNode / getNodeName / i3mGetNodeIndexByName, MagScene::loadTenkyuTex, 0x1782cc, 0x193a1c are not written. When they are, they must resolve i3m fields through i3mPtr. Unknown roles: root +0x10 (31 in BG/MAPUNIT.BIN), +0x20, +0x28, node +4; the curve code at 0x22e840.. should tell. Mark done when a motion plays on screen.",
@@ -1675,6 +1711,7 @@
   "unassigned@00224de0": {},
   "unassigned@00228c08": {},
   "unassigned@0022b4b8": {},
+  "unassigned@0022e840": {},
   "unassigned@00237ce8": {},
   "unassigned@002437f8": {},
   "utl/utlmisc.cpp": {

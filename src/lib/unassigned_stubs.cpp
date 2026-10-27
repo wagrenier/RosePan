@@ -1395,25 +1395,6 @@ u_long   * i3dPktVu1Sprite(u_long *pkt, const float *pos, const float *uv)
     return pkt;
 }
 
-// stub of ROR 0x0022e958
-float i3mGetLength(const I3mRoot *root)
-{
-    ROSEPAN_STUB("i3mGetLength", 0x0022e958);
-    return {};
-}
-
-// stub of ROR 0x0022e960
-void i3mGetPose(I3mRoot *root, void *pose, int flags, float t)
-{
-    ROSEPAN_STUB("i3mGetPose", 0x0022e960);
-}
-
-// stub of ROR 0x0022f7a0
-void i3mPoseToMatrices(const void *pose, sceVu0FMATRIX *mats, const u_short *map)
-{
-    ROSEPAN_STUB("i3mPoseToMatrices", 0x0022f7a0);
-}
-
 // stub of ROR 0x00106ad0
 float utlVecLength3(const float *v)
 {
@@ -1433,30 +1414,6 @@ void utlVecRotY(float angle, float *v)
     ROSEPAN_STUB("utlVecRotY", 0x00106bc8);
 }
 
-// stub of ROR 0x0022f610
-void i3mPoseLerp(float t, void *out, const void *a, const void *b)
-{
-    ROSEPAN_STUB("i3mPoseLerp", 0x0022f610);
-}
-
-// stub of ROR 0x00231198
-void i3mQuatFromEuler(float *out, const float *rot)
-{
-    ROSEPAN_STUB("i3mQuatFromEuler", 0x00231198);
-}
-
-// stub of ROR 0x00230470
-void i3mQuatMul(float *out, const float *a, const float *b)
-{
-    ROSEPAN_STUB("i3mQuatMul", 0x00230470);
-}
-
-// stub of ROR 0x00230660
-void i3mQuatNormalize(float *out, const float *in)
-{
-    ROSEPAN_STUB("i3mQuatNormalize", 0x00230660);
-}
-
 // stub of ROR 0x001068d4
 void * utlGetI3rNodeDisp(I3rRoot *root, int n)
 {
@@ -1469,12 +1426,6 @@ int utlSetI3rNodeDisp(I3rRoot *root, void *disp, int n)
 {
     ROSEPAN_STUB("utlSetI3rNodeDisp", 0x0010686c);
     return {};
-}
-
-// stub of ROR 0x0022eab0
-void i3mGetBlendPose(I3mRoot *root1, void *pose, I3mRoot *root2, int flags, float t1, float t2, float r)
-{
-    ROSEPAN_STUB("i3mGetBlendPose", 0x0022eab0);
 }
 
 // stub of ROR 0x0014b780
