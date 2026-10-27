@@ -1333,7 +1333,7 @@ throughout (identifiers, env variables, files, shader macros):
   popCamera 0x192e94 / 0x192f3c (GamMan camera stack, scene camera reset, view far), beginDraw
   0x192f68 / endDraw 0x1930f8 (layer set + a VU1 sprite packet: i3dPktBeginVu1Sprite 0x21e5a0,
   i3dPktVu1Color / Matrix / Sprite 0x21e488 / 0x21e428 / 0x21e690, end 0x21e688), useTex 0x193210,
-  drawSprite 0x193258 (a 0x34-byte rect: pivot, size, colour +0x10, uv +0x20, angle +0x30), drawModel
+  drawSprite 0x193258 (a 0x34-byte rect: pivot, size, uv +0x10, colour +0x20, angle +0x30; the books fixed the order), drawModel
   0x19368c (i3m pose 0x22e960 -> matrices 0x22f7a0 -> i3rConvertLocalToModel -> utlDrawI3r).
   **The mnu pool**: mnuInitPool 0x1944d0 allocates the 1 MB buffer (sdata 0x29bfb4, BedMemory heap
   0x6e9800; MagScene::initRender): 128 blocks {address, size, flags: 1 valid, 2 in use} at its start,
@@ -1341,6 +1341,26 @@ throughout (identifiers, env variables, files, shader macros):
   (marks free, no merge) / mnuMergeFree 0x1946e4 (setupWork); mnuTermPool 0x194548. MnuMap, MnuPBook, MnuDiary
   derive mnuBase (mnu/mnumap.cpp 0x1947a4.., mnu/mnupbook.cpp 0x196a9c..0x19a52c; MnuStock
   0x19a52c..0x1a066c is not a mnuBase).
+- **MnuPBook** (mnu/mnupbook.cpp, written 2026-10-27): processPad 0x1976b8 polls updateLoad and
+  updateSheets 0x197d28 every frame, then steps on m_step (m_10 = last step, draw runs for 2..4):
+  0 waits the base files (ehonbg / ehontex01_tcc from mnupbook.rpk) and the fade, closes that pack,
+  opens data/mnurpk/mnupbook/<row name>.rpk and queuePages 0x196efc; 1 startTurns 0x19722c
+  (pushCamera(512, pi/4), lowerVolume, poses the sheets) and fadeIn(15, 7, 0); 2 openWindows
+  0x1973fc (text window 512 x 256 at (0, 32), prompt window 64 x 32 at (246, 410) with sys text
+  0x1a, message sprite 4 at (220, 408)); 3 updatePad 0x197a74; 4 waits the fade out; 5 writes
+  global 0x11 = flag table column 2, global 0x65 = column 0 (+0x118), clears bit-word 1 bit 26, sets
+  bit 25 when GamMan::isSeqPair0Pending 0x1d44e4, clears the column-6 bit, popCamera, term, returns 1.
+  **Sheets** (0x20 records at +0x12c, (pages + 1) / 2 of them): flags (1 / 2 texture to apply, 4 / 8
+  side unwritten, 0x10 / 0x20 torn: pb_pagebrk), front / back texture slots (2..0x21; 0x20 / 0x21
+  are pb_pagedmy00 / 01), motion slot (2n = %s%d_turn_r, 2n + 1 = turn_l; model slot n =
+  %s%d_base.i3s), frame. Every loaded motion's m_frames is doubled (half speed). Row mode (+0x0c): 2 =
+  only the first global-col-4 pages are written, 1 = sheet 7 torn until that word is set. Pad: hold
+  Right (0x20) / Left (0x80) or the left stick past 0.75 turns (10-frame lock +0x124, se 8); Circle
+  (trig 0x2000) closes once flag 0x40000 (last page open) is set; se 2 on close. A sheet's texture goes
+  in through i3rGetChild52(root item, side) -> i3rGetChild25(.., 0): material data +0x1c = the
+  DogTexInfo record, side data +8 (u16) += 1. Draw: ehonbg full screen (uv 0..1 x 0..0.875), turn
+  arrows 28 x 16 at (100, 412) / (384, 412) from texture slot 0 rows v 48 / 0 (three cells cycle
+  while turning), TEST_1 0x503fd, then the sheet models at rot (-60 deg, 180 deg, 0), pos (25, 8, 220).
 - **MagLifeMenuPBook** (0x100000 / 0x200000 types): init looks the type up (getTypeValue) and asks
   MnuPBook (+0x50) then MnuDiary (+0x910) setType (page tables 0x29c0f8: 12 picture books {type
   0x1038.., ?, pages, 0/1/2, pack name pb*} / 0x29c368: 3 diaries {type 0x1000 / 0x1024 / 0x102a, ?,

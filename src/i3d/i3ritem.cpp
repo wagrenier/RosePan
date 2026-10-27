@@ -180,6 +180,12 @@ static void i3rUnrelocData25(u_char *) {}
 /* ROR 0x0022aab0 */
 static void i3rRelocData25(u_char *) {}
 
+/* ROR 0x0022aad0 */
+I3rItem *i3rGetChild25(const I3rItem *item, int n)
+{
+    return item->getChildren()[0].getChildren() + n;
+}
+
 /* ROR 0x0022ab18 */
 static void i3rUnrelocData2D(u_char *data)
 {
@@ -222,6 +228,12 @@ static void i3rRelocData52(u_char *data)
     i3rRelocField(data, 0x1c);
     i3rRelocField(data, 0x20);
     i3rRelocArray(data, 0x20, *(u_short *)(data + 0x2e));
+}
+
+/* ROR 0x0022aed8 */
+I3rItem *i3rGetChild52(const I3rItem *item, int n)
+{
+    return item->getChildren()[0].getChildren() + n;
 }
 
 // ──────────────────────────────────────────────────────────────────────

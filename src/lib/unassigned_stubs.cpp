@@ -781,19 +781,6 @@ void MnuMap::draw(I3dLayer *layer)
     ROSEPAN_STUB("MnuMap::draw", 0x00195e90);
 }
 
-// stub of ROR 0x001976b8
-int MnuPBook::processPad(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuPBook::processPad", 0x001976b8);
-    return {};
-}
-
-// stub of ROR 0x00197f70
-void MnuPBook::draw(I3dLayer *layer)
-{
-    ROSEPAN_STUB("MnuPBook::draw", 0x00197f70);
-}
-
 // stub of ROR 0x001990b0
 int MnuDiary::processPad(BedPad *pad)
 {
@@ -1119,7 +1106,9 @@ void MsgManSet::update()
 const char * msgGetSysText(int no)
 {
     ROSEPAN_STUB("msgGetSysText", 0x001832e8);
-    return {};
+    /* PC: "" not NULL -- MnuPBook::setPageText strlen()s it. The ROM reads
+     * 0x1d4 string pointers at data 0x298fe8 (datadump.py 298fe8 468 S:text). */
+    return "";
 }
 
 // stub of ROR 0x001d68a0
@@ -1741,35 +1730,45 @@ void i3rBuildMeshPacket(I3rItem *mesh, void *buf)
 u_long   * i3dPktBeginVu1Sprite(u_long *pkt, I3dLayer *layer, int mode)
 {
     ROSEPAN_STUB("i3dPktBeginVu1Sprite", 0x0021e5a0);
-    return {};
+    /* PC: the packet back unchanged, not NULL -- the menus' next real
+     * packet writer (i3dPktRefTexRegs, i3dPktSetReg) writes through it. */
+    return pkt;
 }
 
 // stub of ROR 0x0021e688
 u_long   * i3dPktEndVu1Sprite(u_long *pkt)
 {
     ROSEPAN_STUB("i3dPktEndVu1Sprite", 0x0021e688);
-    return {};
+    /* PC: the packet back unchanged, not NULL -- the menus' next real
+     * packet writer (i3dPktRefTexRegs, i3dPktSetReg) writes through it. */
+    return pkt;
 }
 
 // stub of ROR 0x0021e488
 u_long   * i3dPktVu1Color(u_long *pkt, const float *color)
 {
     ROSEPAN_STUB("i3dPktVu1Color", 0x0021e488);
-    return {};
+    /* PC: the packet back unchanged, not NULL -- the menus' next real
+     * packet writer (i3dPktRefTexRegs, i3dPktSetReg) writes through it. */
+    return pkt;
 }
 
 // stub of ROR 0x0021e428
 u_long   * i3dPktVu1Matrix(u_long *pkt, sceVu0FVECTOR *matrix)
 {
     ROSEPAN_STUB("i3dPktVu1Matrix", 0x0021e428);
-    return {};
+    /* PC: the packet back unchanged, not NULL -- the menus' next real
+     * packet writer (i3dPktRefTexRegs, i3dPktSetReg) writes through it. */
+    return pkt;
 }
 
 // stub of ROR 0x0021e690
 u_long   * i3dPktVu1Sprite(u_long *pkt, const float *pos, const float *uv)
 {
     ROSEPAN_STUB("i3dPktVu1Sprite", 0x0021e690);
-    return {};
+    /* PC: the packet back unchanged, not NULL -- the menus' next real
+     * packet writer (i3dPktRefTexRegs, i3dPktSetReg) writes through it. */
+    return pkt;
 }
 
 // stub of ROR 0x0022e958
@@ -1802,4 +1801,11 @@ float utlVecLength3(const float *v)
 void utlVecRotZ(float angle, float *out, const float *in)
 {
     ROSEPAN_STUB("utlVecRotZ", 0x00106a40);
+}
+
+// stub of ROR 0x001d44e4
+int GamMan::isSeqPair0Pending()
+{
+    ROSEPAN_STUB("GamMan::isSeqPair0Pending", 0x001d44e4);
+    return {};
 }

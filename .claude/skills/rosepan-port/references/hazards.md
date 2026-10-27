@@ -658,3 +658,13 @@ public:
 - **A bss word right after GamMan is GamMan.** 0x7a3208 / 0x7a320c are g_gamMan (0x7812c0) +
   0x21f48 / +0x21f4c, m_flags / m_flags2 reached through the global: check `addr - 0x7812c0` against
   GamMan's members before declaring a `g_bss_` stand-in.
+
+- **A packet-writer stub returning NULL crashes the next real writer** (2026-10-27, the picture book).
+  Symptom: access violation right after `i3dPktBeginVu1Sprite reached`. Cause: stubgen's `return {}`
+  hands mnuBase::beginDraw a NULL packet and the written i3dPktRefTexRegs / i3dPktSetReg write through
+  it. Fix: packet stubs on a written draw path return their `pkt` argument (the five VU1 sprite stubs
+  do now); likewise text getters return "" (msgGetSysText), never NULL, while their TU is unwritten.
+  Find such crashes fast with `gdbrun.py --pad SCRIPT` (the backtrace lands in work/gdb/log.txt).
+- **Never leave a stray `cat > file` in a shell command** (2026-10-27): with no stdin redirect it waits
+  for input and a background check hangs silently for its whole timeout. Pass `< /dev/null` to long
+  background runs.

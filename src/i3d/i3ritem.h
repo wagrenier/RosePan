@@ -25,6 +25,11 @@ int   i3rItemFindChild(const I3rItem *item, const char *name);           // ROR 
  * 0x24, 0x2c, 0x2e, 0x2f, 0x36, 0x3f, 0x40, 0x41, 0x48, 0x4e, 0x51), else
  * 1 -- types past 0x59 included (the relocators reject those with 3). */
 int   i3rIsItemType(u_int type);                                         // ROR 0x0022c2a0
+/* The n-th child of item's first child. Two accessors with one body, each
+ * after the fixup pair of its item type (0x25 / 0x52); MnuPBook reaches a
+ * page model's side (child 0 / 1 of the root) and its material through them. */
+I3rItem *i3rGetChild25(const I3rItem *item, int n);                      // ROR 0x0022aad0
+I3rItem *i3rGetChild52(const I3rItem *item, int n);                      // ROR 0x0022aed8
 /* The item tree's relocators: recursive over the children, base = the
  * root item. Relocate turns the item's offsets (from base) into pointers
  * and then fixes its data by type (unless the info word's bit 31 says the

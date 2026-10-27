@@ -3144,20 +3144,20 @@
 /* 00196d98 000000bc */ MnuPBook::term(){}  // ror
 /* 00196e54 00000050 */ MnuPBook::setType(){}  // ror
 /* 00196ea4 00000058 */ MnuPBook::addBgFiles(){}  // ror
-/* 00196efc 00000330 */ FUN_00196efc(){}
-/* 0019722c 000001d0 */ FUN_0019722c(){}
-/* 001973fc 000002bc */ FUN_001973fc(){}
+/* 00196efc 00000330 */ MnuPBook::queuePages(){}  // ror
+/* 0019722c 000001d0 */ MnuPBook::startTurns(){}  // ror
+/* 001973fc 000002bc */ MnuPBook::openWindows(){}  // ror
 /* 001976b8 000003bc */ MnuPBook::processPad(){}  // ror
-/* 00197a74 000002b4 */ FUN_00197a74(){}
-/* 00197d28 00000140 */ FUN_00197d28(){}
-/* 00197e68 000000b0 */ FUN_00197e68(){}
-/* 00197f18 00000058 */ FUN_00197f18(){}
+/* 00197a74 000002b4 */ MnuPBook::updatePad(){}  // ror
+/* 00197d28 00000140 */ MnuPBook::updateSheets(){}  // ror
+/* 00197e68 000000b0 */ MnuPBook::setSheetTex(){}  // ror
+/* 00197f18 00000058 */ MnuPBook::turnSheet(){}  // ror
 /* 00197f70 00000320 */ MnuPBook::draw(){}  // ror
-/* 00198290 00000088 */ FUN_00198290(){}
-/* 00198318 00000108 */ FUN_00198318(){}
-/* 00198420 0000002c */ FUN_00198420(){}
-/* 0019844c 00000164 */ FUN_0019844c(){}
-/* 001985b0 00000170 */ FUN_001985b0(){}
+/* 00198290 00000088 */ MnuPBook::setDrawSet(){}  // ror
+/* 00198318 00000108 */ MnuPBook::canTurn(){}  // ror
+/* 00198420 0000002c */ MnuPBook::isTurning(){}  // ror
+/* 0019844c 00000164 */ MnuPBook::queueSheetTex(){}  // ror
+/* 001985b0 00000170 */ MnuPBook::setPageText(){}  // ror
 /* 00198720 00000090 */ MnuDiary::MnuDiary(){}  // ror
 /* 001987b0 000000b0 */ MnuDiary::~MnuDiary(){}  // ror
 /* 00198860 000001d8 */ MnuDiary::init(){}  // ror
@@ -3827,7 +3827,7 @@
 
 /* 001d3b44 0000082c */ GamMan::checkMenuReq(){}  // ror
 /* 001d4370 00000174 */ FUN_001d4370(){}
-/* 001d44e4 0000005c */ FUN_001d44e4(){}
+/* 001d44e4 0000005c */ GamMan::isSeqPair0Pending(){}  // ror
 /* 001d4540 000001f0 */ FUN_001d4540(){}
 /* 001d4730 000000dc */ FUN_001d4730(){}
 /* 001d480c 000001c4 */ GamMan::fitObjBounds(){}  // ror
@@ -5290,7 +5290,7 @@
 /* 0022aaa8 00000004 */ i3rUnrelocData25(){}  // ror
 /* 0022aab0 00000004 */ i3rRelocData25(){}  // ror
 /* 0022aab8 00000014 */ FUN_0022aab8(){}
-/* 0022aad0 00000044 */ FUN_0022aad0(){}
+/* 0022aad0 00000044 */ i3rGetChild25(){}  // ror
 /* 0022ab18 00000058 */ i3rUnrelocData2D(){}  // ror
 /* 0022ab70 0000004c */ i3rRelocData2D(){}  // ror
 /* 0022abc0 00000008 */ FUN_0022abc0(){}
@@ -5306,7 +5306,7 @@
 /* 0022ad20 000000d8 */ i3rUnrelocData52(){}  // ror
 /* 0022adf8 000000c4 */ i3rRelocData52(){}  // ror
 /* 0022aec0 00000014 */ FUN_0022aec0(){}
-/* 0022aed8 00000014 */ FUN_0022aed8(){}
+/* 0022aed8 00000014 */ i3rGetChild52(){}  // ror
 /* 0022aef0 00000018 */ FUN_0022aef0(){}
 /* 0022af08 00000018 */ FUN_0022af08(){}
 /* 0022af20 00000038 */ FUN_0022af20(){}

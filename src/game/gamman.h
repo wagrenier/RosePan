@@ -888,6 +888,9 @@ struct GamMan
     /* The table data 0x2fc1f8 (8-word rows, -1 ends): column col of the
      * row whose column keyCol is key (keyCol 99: row key). -1 none. */
     int  lookupFlagTable(int keyCol, int key, int col);                  // ROR 0x001d83d0
+    /* 1 when m_seqPair[0] (system call 0x35) has both words, global 100
+     * equals global 0x65 and sys flag 0x8000 is clear (MnuPBook's close). */
+    int  isSeqPair0Pending();                                            // ROR 0x001d44e4
     void markReset();                                                    // ROR 0x001d3588
     /* Marks light set theD in m_flags, copies set theS over it. */
     void setLightFlag(int theD, int theS);                               // ROR 0x001d2724

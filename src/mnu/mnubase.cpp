@@ -268,9 +268,11 @@ void mnuBase::drawSprite(float x, float y, const MnuSprite *spr)
         scale[1] = utlVecLength3(v);
         i3dMatScaleXYZ(m, m, scale);
     }
-    m_pkt = i3dPktVu1Color(m_pkt, spr->m_color);
+    /* The ROM passes +0x10 (the rectangle) first and +0x20 (the colour)
+     * last: see MnuSprite. */
+    m_pkt = i3dPktVu1Color(m_pkt, spr->m_uv);
     m_pkt = i3dPktVu1Matrix(m_pkt, m);
-    m_pkt = i3dPktVu1Sprite(m_pkt, m[3], spr->m_uv);
+    m_pkt = i3dPktVu1Sprite(m_pkt, m[3], spr->m_color);
 }
 
 // ROR 0x001935c4
