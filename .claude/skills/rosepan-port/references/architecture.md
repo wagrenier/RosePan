@@ -1065,7 +1065,13 @@ never asserts): sessions name them (`tus.py define --why`).
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00
   world matrix, +0x40 translation, +0x50 rotation (radians, `normalizeRotate` 0x10ff74 wraps to
   [-pi, pi)), +0x60 scale, +0x70 offset (y = TransOfsY), +0x80 a (0,0,0,1) vector of unknown role,
-  +0x90 dirty flag, +0x94 vptr; DogEntityEx +0xe0 parent (`setParent` 0x1102b4 refuses cycles);
+  +0x90 dirty flag, +0x94 vptr; DogEntityEx +0xa0 local matrix, +0xe0 parent (`setParent` 0x1102b4
+  refuses cycles and clears the offset). dog/dogentity.cpp (2026-10-27) = 0x10fc7c..0x1103dc: the local
+  matrix is unit, scale, rotZ, rotX, rotY of m_rotate + m_80 (each wrapped to [-pi, pi)), translate
+  m_trans then m_trans_ofs; DogEntityEx::transform 0x11034c = the parent's slot 2, then parent * local
+  (row vectors). The host keeps the class in the vptr word (reconstruction.md, polymorphic classes).
+  Files link alphabetically here: dogactor, dogcamera (0x10f860), dogentity (0x10fc7c), doglightpool
+  (0x1103dc);
   DogModel +0x11c `m_i3r_root`, +0x124 i3c root, +0x128 colli table, +0x130 node matrices (0x40 each),
   +0x134 node flag, +0x138 attach node, +0x13c attention, +0x140 hide, +0x144 light id; DogActor +0x1a0
   id, +0x1c0 / +0x1c4 motion count / `m_motion_data` (0x20 each, banks 0..3), +0x3c0 base rotation,

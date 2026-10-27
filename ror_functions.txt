@@ -268,8 +268,8 @@
 /* 00106eb4 00000084 */ FUN_00106eb4(){}
 /* 00106f38 0000007c */ FUN_00106f38(){}
 /* 00106fb4 00000144 */ FUN_00106fb4(){}
-/* 001070f8 000000d0 */ FUN_001070f8(){}
-/* 001071c8 00000080 */ FUN_001071c8(){}
+/* 001070f8 000000d0 */ utlVecToRotY(){}  // ror
+/* 001071c8 00000080 */ utlVecToRotX(){}  // ror
 /* 00107248 00000134 */ utlVecToRot(){}  // ror
 
 // *****************************************************************************
@@ -402,31 +402,28 @@
 
 /* 0010f860 0000006c */ FUN_0010f860(){}
 /* 0010f8cc 00000078 */ FUN_0010f8cc(){}
-
-// *****************************************************************************
-// FILE -- (unassigned)
-// *****************************************************************************
-
 /* 0010f944 00000128 */ FUN_0010f944(){}
 /* 0010fa6c 00000054 */ DogEntity::getMatrix(){}  // ror
 /* 0010fac0 00000114 */ DogCamera::getLensFov(){}  // ror
 /* 0010fbd4 00000030 */ DogCamera::getLensScale(){}  // ror
 /* 0010fc08 00000020 */ DogCamera::setLensScale(){}  // ror
 /* 0010fc28 00000054 */ FUN_0010fc28(){}
-/* 0010fc7c 00000038 */ DogEntity::setRotate(){}  // ror
-/* 0010fcb4 00000064 */ DogEntity::setAddRotY(){}  // ror
-/* 0010fd18 0000025c */ DogEntity::makeLocalMatrix(){}  // ror
-/* 0010ff74 0000019c */ DogEntity::normalizeRotate(){}  // ror
-/* 00110114 00000030 */ DogEntity::getMatrixZ(){}  // ror
-/* 00110144 000000f8 */ FUN_00110144(){}
 
 // *****************************************************************************
 // FILE -- dog/dogentity.cpp
 // *****************************************************************************
 
-/* 0011023c 00000078 */ FUN_0011023c(){}
+/* 0010fc7c 00000038 */ DogEntity::setRotate(){}  // ror
+/* 0010fcb4 00000064 */ DogEntity::setAddRotY(){}  // ror
+/* 0010fd18 0000025c */ DogEntity::makeLocalMatrix(){}  // ror
+/* 0010ff74 0000019c */ DogEntity::normalizeRotate(){}  // ror
+/* 00110114 00000030 */ DogEntity::getMatrixZ(){}  // ror
+/* 00110144 000000ac */ DogEntity::lookAt(){}  // ror
+/* 001101f0 0000000c */ DogEntity::getMatrixPos(){}  // ror
+/* 001101fc 00000040 */ DogEntity::getMatrixRot(){}  // ror
+/* 0011023c 00000078 */ DogEntityEx::reset(){}  // ror
 /* 001102b4 00000098 */ DogEntityEx::setParent(){}  // ror
-/* 0011034c 00000090 */ FUN_0011034c(){}
+/* 0011034c 00000090 */ DogEntityEx::transform(){}  // ror
 
 // *****************************************************************************
 // FILE -- dog/doglightpool.cpp

@@ -1292,6 +1292,7 @@ void DogActor::savePosture()
 
 DogActor::DogActor()
 {
+    _ee_vptr = DOG_VT_ACTOR;
     m_base_trans[3] = 1.0f;
     m_base_trans[2] = 0.0f;
     m_base_trans[1] = 0.0f;

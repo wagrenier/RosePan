@@ -156,18 +156,6 @@ void utlRandReset(void)
     ROSEPAN_STUB("utlRandReset", 0x0010421c);
 }
 
-// stub of ROR 0x0010ff74
-void DogEntity::normalizeRotate()
-{
-    ROSEPAN_STUB("DogEntity::normalizeRotate", 0x0010ff74);
-}
-
-// stub of ROR 0x0010fc7c
-void DogEntity::setRotate(float x, float y, float z)
-{
-    ROSEPAN_STUB("DogEntity::setRotate", 0x0010fc7c);
-}
-
 // stub of ROR 0x00215b5c
 void dbgTraceVector3(float x, float y, float z)
 {
@@ -416,13 +404,6 @@ int utlStrEqualNoCase(const char *a, const char *b)
 u_int utlConvSndId(u_int id)
 {
     ROSEPAN_STUB("utlConvSndId", 0x00106658);
-    return {};
-}
-
-// stub of ROR 0x00110114
-float * DogEntity::getMatrixZ(float *out)
-{
-    ROSEPAN_STUB("DogEntity::getMatrixZ", 0x00110114);
     return {};
 }
 
@@ -1337,13 +1318,6 @@ int utlRandPeak(int lo, int hi, int peak, int n)
     return {};
 }
 
-// stub of ROR 0x0010fd18
-int DogEntity::makeLocalMatrix(sceVu0FVECTOR *out)
-{
-    ROSEPAN_STUB("DogEntity::makeLocalMatrix", 0x0010fd18);
-    return {};
-}
-
 // stub of ROR 0x0011764c
 void DogTexInfo::dump()
 {
@@ -1982,5 +1956,19 @@ void emyStartChase(float range, EmyOut *out, u_int target)
 float emyVecLength(const float *v)
 {
     ROSEPAN_STUB("emyVecLength", 0x00169a14);
+    return {};
+}
+
+// stub of ROR 0x001071c8
+float utlVecToRotX(const float *dir)
+{
+    ROSEPAN_STUB("utlVecToRotX", 0x001071c8);
+    return {};
+}
+
+// stub of ROR 0x001070f8
+float utlVecToRotY(const float *dir)
+{
+    ROSEPAN_STUB("utlVecToRotY", 0x001070f8);
     return {};
 }

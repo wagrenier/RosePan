@@ -13,9 +13,12 @@
  *    DogEntity    1 reset 0x280ec8, 2 transform 0x280f18, 3 ~DogEntity 0x280f34
  *    DogEntityEx  1 reset 0x11023c, 2 transform 0x11034c, 3 ~DogEntityEx
  *                 0x281c80, 4 getParent 0x281cb4
- *  PORT: not polymorphic on the host yet (no virtual is called through
- *  these classes by written code); the first dog/ TU that needs one makes
- *  them virtual in slot order and moves the vptr comment to a real one.
+ *  PORT: not polymorphic on the host. The EE vptr word (+0x94) is kept and
+ *  each constructor stores its class's EE vtable address there, as the ROM's
+ *  do (DOG_VT_*); the one virtual written code needs through a base pointer,
+ *  slot 2 transform (a parent's, the camera's), dispatches on it in
+ *  callTransform. Making the classes virtual would move every field off its
+ *  EE offset.
  * ======================================================================== */
 #ifndef _DOG_DOGENTITY_H
 #define _DOG_DOGENTITY_H
@@ -24,6 +27,17 @@
 
 #include "sdk/eetypes.h"
 #include "sdk/vu0_intrin.h"
+
+/* The EE vtable addresses the constructors store at +0x94: the host's
+ * class tag (see the file comment). */
+enum
+{
+    DOG_VT_ACTOR     = 0x002e0a80,  // _vt$8DogActor
+    DOG_VT_ENTITY    = 0x002e0b38,  // _vt$9DogEntity
+    DOG_VT_ENTITY_EX = 0x002e0b60,  // _vt$11DogEntityEx
+    DOG_VT_MODEL     = 0x002e0b90,  // _vt$8DogModel
+    DOG_VT_CAMERA    = 0x002e1fb8,  // _vt$9DogCamera
+};
 
 /* EE 0x98 + padding (data to +0x94, the vptr at +0x94). layout: host --
  * the EE vptr word is kept as padding so the data keeps its EE offsets
@@ -46,23 +60,34 @@ struct DogEntity
             m_scale[i] = 1.0f;
         }
         m_dirty = 1;
+        _ee_vptr = DOG_VT_ENTITY;
     }
 
-    /* EE slot 1 (+0x08): zero rotation / offset / translation (w 1), scale
-     * 1, dirty, no parent. */
-    void reset();                                                        // ROR 0x0011023c
+    /* EE slot 1 (+0x08): m_80, rotation, offset and translation
+     * (0, 0, 0, 1), scale 1, dirty. */
+    void reset();                                                        // ROR 0x00280ec8
+    /* EE slot 2 called through the vptr word: the transform of the class
+     * the object was built as (DogModel's for models and actors). */
+    void callTransform();
     /* Runs slot 2 (transform) and returns the matrix 0x237678 makes at
      * +0xf0 -- past DogEntity: the derived camera class holds it (the
-     * scene calls it on its camera, +0x2ab70). */
+     * scene calls it on its camera, +0x2ab70). dog/dogcamera.cpp. */
     sceVu0FVECTOR *getMatrix();                                          // ROR 0x0010fa6c
     void setRotate(float x, float y, float z);                          // ROR 0x0010fc7c
     /* Copies m_matrix's third row (the z axis) to out; returns out. */
     float *getMatrixZ(float *out);                                       // ROR 0x00110114
+    /* Copies m_matrix's fourth row (the position) to out. Unreferenced. */
+    void  getMatrixPos(float *out);                                      // ROR 0x001101f0
+    /* out = the rotation of m_matrix's z axis (utlVecToRot). Unreferenced. */
+    void  getMatrixRot(float *out);                                      // ROR 0x001101fc
+    /* Turns m_rotate towards pos (seen from m_trans): mode 0 x and y
+     * (z 0), odd mode y only, other modes x only. Dirty; not normalized. */
+    void  lookAt(const float *pos, u_int mode);                          // ROR 0x00110144
     void normalizeRotate();                                              // ROR 0x0010ff74
     /* m_80 y = r wrapped once to -pi..pi; dirty. */
     void setAddRotY(float r);                                            // ROR 0x0010fcb4
     /* When m_dirty: out = scale, rot z, x, y (m_rotate + m_80, each wrapped
-     * once to -pi..pi), translate m_trans and m_trans_ofs; clears m_dirty
+     * into -pi..pi), translate m_trans and m_trans_ofs; clears m_dirty
      * and returns 1, else 0 with out untouched. */
     int  makeLocalMatrix(sceVu0FVECTOR *out);                            // ROR 0x0010fd18
     /* EE slot 2 (+0x10): rebuilds m_matrix when m_dirty. */
@@ -93,11 +118,17 @@ static_assert(sizeof(DogEntity) == 0xa0, "DogEntity is 0x98 bytes of data, 16-al
 struct DogEntityEx : DogEntity
 {
     /* Inline in the ROM, as DogEntity's: no parent. */
-    DogEntityEx() : m_parent(NULL) {}
+    DogEntityEx() : m_parent(NULL) { _ee_vptr = DOG_VT_ENTITY_EX; }   // ROR 0x00281bc8
 
+    /* EE slot 1 (DogModel, DogActor and DogCamera keep it): DogEntity's
+     * reset, a unit local matrix and no parent. */
+    void reset();                                                        // ROR 0x0011023c
+    /* Hangs this under p (NULL: a root; asserts p's chain does not come
+     * back to p) and clears the offset to (0, 0, 0, 1). */
     void setParent(DogEntityEx *p);                                      // ROR 0x001102b4
     DogEntityEx *getParent() { return m_parent; }                        // ROR 0x00281cb4
-    /* EE slot 2 (+0x10): the transform with the parent's matrix. */
+    /* EE slot 2 (+0x10): m_matrix = the parent's matrix (after its own
+     * transform) * the local matrix, or the local matrix for a root. */
     void transform();                                                    // ROR 0x0011034c
 
     sceVu0FMATRIX m_local_matrix; // ROR 0xa0: DogModel::transform's local matrix (makeLocalMatrix)

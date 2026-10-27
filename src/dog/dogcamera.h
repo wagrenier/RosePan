@@ -28,6 +28,7 @@ struct DogCamera : DogEntityEx
         : m_130(0), m_134(-1), m_138(0), m_13c(0), m_angle(0x1.0c1524p+0f /* pi / 3 */),
           m_144(115.0f), m_180(0)
     {
+        _ee_vptr = DOG_VT_CAMERA;
         for (int i = 0; i < 4; i++)
         {
             float v = (i == 3) ? 1.0f : 0.0f;
