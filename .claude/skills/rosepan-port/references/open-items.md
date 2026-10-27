@@ -27,9 +27,10 @@ follows it; reached stubs in run order):
      unreferenced ScenePlay::loadCamera / loadFocus; a third session (2026-10-26) wrote
      scenePlayStartSimple, PLScenePlay, scnPlaySEDelayed, TskAttack (setup, exec, term, scnAttackStart;
      its six steps live in unassigned@001fd424 and are stubs), scnChrRequest, scnDamageStart and
-     TskDamage's exec / term. Left: TskDamage::setup 0x1f9e58 (0x764 bytes), scnChrRequestDog 0x1fae14,
-     scnChrRequestPC 0x1fb084, 0x1fb624 / 0x1fb5d4, 0x1fa768 / 0x1fa9c4 / 0x1faa70, 0x1fbb04 / 0x1fbba4,
-     0x1fc47c / 0x1fc490, loadCamera / loadFocus. The
+     TskDamage's exec / term; a fourth (2026-10-26) wrote TskDamage::setup with getReactFrames 0x1fa768,
+     kill 0x1fa9c4 and pickAttrBit 0x1faa70 (its nine steps live in unassigned@001fd424 and are stubs).
+     Left: scnChrRequestDog 0x1fae14, scnChrRequestPC 0x1fb084, the damage roll 0x1fb624 / 0x1fb5d4,
+     0x1fbb04 / 0x1fbba4, 0x1fc47c / 0x1fc490, loadCamera / loadFocus. The
      200 s New Game run reached none of them yet (it ends on the film's "March 1930" card).
      **scenePlayStart parses event packs with `task/naga_chunk.cpp`'s NagaChunk reader, stubbed
      (find returns 0, so a scene loads nothing and ends at once)**: queue task/naga_chunk.cpp (0x1fc4f0..
@@ -812,6 +813,11 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- TskDamage chr 3 / 4 (2026-10-26, task/tsk_scene.cpp): TskDamage::setup sets no step for chr words
+  3 and 4, and the ROM constructor does not clear m_step, so the ROM's exec calls whatever the heap
+  left there. scnChrRequest sends chr 3 / 4 to scnChrRequestDog / PC instead, so setup should never
+  see them; the PC keeps m_step NULL and ends the task. If a smoke run ever shows a TskDamage with chr
+  3 / 4, find who starts it.
 - scenePlayStartSimple (2026-10-26, task/tsk_scene.cpp): it reads no "frame" chunk and never calls
   ScenePlay::setFrames, so the ROM's ScenePlay runs on whatever word the heap left at m_frame (the
   ROM constructor does not write it). The PC constructor zeroes it, so the task ends on its first exec

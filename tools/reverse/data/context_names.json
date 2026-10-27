@@ -3257,6 +3257,12 @@
   "was": "FUN_001635e0",
   "why": "on 0x7b2140: clears bytes +0x134/+0x135, the object ids +0x138/+0x13c, +0x144 and 0x1e0 bytes at +0x148; releaseObjs"
  },
+ "00163624": {
+  "name": "EmyManager::notifyEmy",
+  "tag": "ror-inferred",
+  "was": "FUN_00163624",
+  "why": "findEmy(oid), then 0x1661dc(emy, bits); TskDamage passes 1 / 2 / 4 / 8 / 0x10"
+ },
  "0016366c": {
   "name": "EmyManager::setEmyActive",
   "tag": "ror-inferred",
@@ -3299,17 +3305,47 @@
   "was": "FUN_00163bb8",
   "why": "findEmy(oid) then 0x154748: achr flags +0x120 lose 0x10000000 and 0x80, enemy +0x240 = 1; native 212 case 23"
  },
+ "00163c24": {
+  "name": "EmyManager::setEmyWord18",
+  "tag": "ror-inferred",
+  "was": "FUN_00163c24",
+  "why": "findEmy(oid): enemy +0x18 = 1"
+ },
+ "00163c50": {
+  "name": "EmyManager::clearEmyWord18",
+  "tag": "ror-inferred",
+  "was": "FUN_00163c50",
+  "why": "findEmy(oid): enemy +0x18 = 0"
+ },
+ "00163d90": {
+  "name": "EmyManager::getEmyWord1d8",
+  "tag": "ror-inferred",
+  "was": "FUN_00163d90",
+  "why": "findEmy(oid): enemy +0x1d8, 0 when none; TskDamage::setup divides by it"
+ },
  "00163e10": {
   "name": "EmyManager::pauseEmy",
   "tag": "ror-inferred",
   "was": "FUN_00163e10",
   "why": "findEmy(oid), then 0x1664a4 on it: ACHRstat::pauseTasks(on) on the enemy's achr and two on/off calls on its +0x1f0 / +0x1f8"
  },
+ "00163f1c": {
+  "name": "EmyManager::getEmyWord238",
+  "tag": "ror-inferred",
+  "was": "FUN_00163f1c",
+  "why": "findEmy(oid): enemy +0x238, 0 when none (the getter of setEmyWord238)"
+ },
  "00164078": {
   "name": "EmyManager::isEmyFlag30",
   "tag": "ror-inferred",
   "was": "FUN_00164078",
   "why": "findEmy(oid) then 0x166a0c: word +0x30 bit 0; false when none; native 212 case 40"
+ },
+ "0016a8a4": {
+  "name": "emyPlaySE",
+  "tag": "ror-inferred",
+  "was": "FUN_0016a8a4",
+  "why": "0x16a594(oid, pos), the SE id from 0x163ea0(oid, no), GamSndMan::playSE(id, 0, pos, 0)"
  },
  "0016aa04": {
   "name": "Eff0::setVisible",
@@ -10745,6 +10781,24 @@
   "was": "FUN_001fa5bc",
   "why": "scnChrRequest's chr 0..2 / 5..10 case: pauses the enemy, replaces the achr's task +0x3e0 with a new TskDamage and creates effect kind 1 40 below the achr"
  },
+ "001fa768": {
+  "name": "TskDamage::getReactFrames",
+  "tag": "ror-inferred",
+  "was": "FUN_001fa768",
+  "why": "TskDamage::setup's call with the chr word and the front flag: jump table 0x2fecb0 on chr 0 / 1 / 8 checks the actor motion (m_24) against motion lists, rewrites the front flag, sets / clears the enemy word 0x18 and returns 0x46 / 0x3c / 0x50 frames or 0"
+ },
+ "001fa9c4": {
+  "name": "TskDamage::kill",
+  "tag": "ror-inferred",
+  "was": "FUN_001fa9c4",
+  "why": "setup's call when the damage reaches the hit points: achr flags 0x400 | 0x2000, clearSecta, killTasks, ends the oid's script threads, enemy notify 2, LP 0 stored, step flag 0x100 and +10000 frames"
+ },
+ "001faa70": {
+  "name": "TskDamage::pickAttrBit",
+  "tag": "ror-inferred",
+  "was": "FUN_001faa70",
+  "why": "collects the clear bits 1 / 2 / 4 / 8 / 0x10 of the achr's m_attr[0], sets a random one (kept at +0x44), 1 when bits 7, 0x1e or 0x19 are then all set; unreferenced"
+ },
  "001fabd0": {
   "name": "TskDamage::term",
   "tag": "ror-inferred",
@@ -10901,6 +10955,18 @@
   "was": "FUN_001fd9bc",
   "why": "TskAttack::setup's step for kind word 0x15"
  },
+ "001fe160": {
+  "name": "TskDamage::stepKind0",
+  "tag": "ror-inferred",
+  "was": "FUN_001fe160",
+  "why": "TskDamage::setup's step for chr word 0"
+ },
+ "001ff2e0": {
+  "name": "TskDamage::stepKind1",
+  "tag": "ror-inferred",
+  "was": "FUN_001ff2e0",
+  "why": "TskDamage::setup's step for chr word 1"
+ },
  "001ff494": {
   "name": "TskAttack::stepKind2e",
   "tag": "ror-inferred",
@@ -10919,11 +10985,53 @@
   "was": "FUN_001ff830",
   "why": "TskAttack::setup's step for kind word 0x30"
  },
+ "001ff9fc": {
+  "name": "TskDamage::stepKind9",
+  "tag": "ror-inferred",
+  "was": "FUN_001ff9fc",
+  "why": "TskDamage::setup's step for chr word 9"
+ },
+ "001ffbc0": {
+  "name": "TskDamage::stepKind2",
+  "tag": "ror-inferred",
+  "was": "FUN_001ffbc0",
+  "why": "TskDamage::setup's step for chr word 2"
+ },
  "001ffce0": {
   "name": "TskAttack::stepKind26",
   "tag": "ror-inferred",
   "was": "FUN_001ffce0",
   "why": "TskAttack::setup's step for kind words 0x26..0x28"
+ },
+ "001fffc0": {
+  "name": "TskDamage::stepKind7",
+  "tag": "ror-inferred",
+  "was": "FUN_001fffc0",
+  "why": "TskDamage::setup's step for chr word 7"
+ },
+ "0020014c": {
+  "name": "TskDamage::stepKind8",
+  "tag": "ror-inferred",
+  "was": "FUN_0020014c",
+  "why": "TskDamage::setup's step for chr word 8"
+ },
+ "002002cc": {
+  "name": "TskDamage::stepKindA",
+  "tag": "ror-inferred",
+  "was": "FUN_002002cc",
+  "why": "TskDamage::setup's step for chr word 10"
+ },
+ "00200444": {
+  "name": "TskDamage::stepKind5",
+  "tag": "ror-inferred",
+  "was": "FUN_00200444",
+  "why": "TskDamage::setup's step for chr word 5"
+ },
+ "002005b8": {
+  "name": "TskDamage::stepKind6",
+  "tag": "ror-inferred",
+  "was": "FUN_002005b8",
+  "why": "TskDamage::setup's step for chr word 6"
  },
  "00203d94": {
   "name": "SysTimer::SysTimer",

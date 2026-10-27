@@ -159,8 +159,11 @@ static_assert(sizeof(ScnDamageParam) == 0xc, "ScnDamageParam is 3 words");
 
 /* TskDamage : CmnITask (vtable 0x2e4ef0, EE 0x80; kind 0x16): an achr
  * hit by attacker's attack, started by scnDamageStart on the achr's task
- * slot m_task[3]. setup (0x1f9e58, 0x764 bytes: not written yet) fills
- * the rest and the step. layout: host -- a member-function pointer. */
+ * slot m_task[3]. setup takes the damage off the achr's LP (param 0x1b;
+ * kill when it reaches them), tells the enemy (EmyManager::notifyEmy),
+ * picks the reaction step by the chr word (param->m_chr; the steps live in
+ * unassigned@001fd424 after task/naga_chunk.cpp) and plays a hurt SE.
+ * layout: host -- a member-function pointer; EE offsets in the comments. */
 struct TskDamage : CmnITask
 {
     typedef int (TskDamage::*StepFunc)();
@@ -177,13 +180,42 @@ struct TskDamage : CmnITask
     void term() override;                                                // ROR 0x001fabd0
 
     void setup(u_int oid, u_int attacker, const ScnDamageParam *param, int kind); // ROR 0x001f9e58
+    /* The reaction's frames for chr 0 / 1 / 8 by the motion the actor was
+     * playing (m_motion), 0 for the rest; rewrites *front. */
+    int  getReactFrames(int chr, int *front);                            // ROR 0x001fa768
+    /* The hit took the last LP: the achr is stopped and LP 0 stored. */
+    void kill();                                                         // ROR 0x001fa9c4
+    /* Sets a random clear bit of the achr's m_attr[0] low five (into
+     * m_attrBit); 1 when bits 7, 0x1e or 0x19 are then all set.
+     * Unreferenced in the ROM. */
+    int  pickAttrBit();                                                  // ROR 0x001faa70
+    int  stepKind0();                                                    // ROR 0x001fe160
+    int  stepKind1();                                                    // ROR 0x001ff2e0
+    int  stepKind2();                                                    // ROR 0x001ffbc0
+    int  stepKind5();                                                    // ROR 0x00200444
+    int  stepKind6();                                                    // ROR 0x002005b8
+    int  stepKind7();                                                    // ROR 0x001fffc0
+    int  stepKind8();                                                    // ROR 0x0020014c
+    int  stepKind9();                                                    // ROR 0x001ff9fc
+    int  stepKindA();                                                    // ROR 0x002002cc
 
-    StepFunc  m_step = NULL;    // ROR 0x04: GCC 2 {delta, index, pfn}; PC: NULL until setup sets it
-    int       m_0c;             // ROR 0x0c: setup clears it
+    StepFunc  m_step = NULL;    // ROR 0x04: GCC 2 {delta, index, pfn}; PC: NULL for chr 3 / 4 (the ROM leaves it to the heap)
+    u_int     m_flags;          // ROR 0x0c: 4 set by setup (7: 8 instead when the enemy word 0x238 is set), 0x100 killed
     u_int     m_oid;            // ROR 0x10
     int       m_actor;          // ROR 0x14: the achr's scene actor
-    ACHRstat *m_achr = NULL;    // ROR 0x18: PC: NULL until setup sets it
-    u_char    _1c[0x80 - 0x1c]; // ROR 0x1c: setup's fields (to be placed)
+    ACHRstat *m_achr = NULL;    // ROR 0x18
+    int       m_1c;             // ROR 0x1c: 0
+    int       m_frames;         // ROR 0x20: getReactFrames, else 0 / 10 / 20 / 30; +10000 by kill
+    int       m_motion;         // ROR 0x24: the actor's motion when hit
+    int       m_motion0;        // ROR 0x28: m_motion
+    u_char    _2c[0x3c - 0x2c]; // ROR 0x2c
+    int       m_damage;         // ROR 0x3c: param->m_a2
+    int       m_40;             // ROR 0x40: 2 for kind 0 / 1 (or the global word 0x173 set), else 1
+    u_int     m_attrBit;        // ROR 0x44: pickAttrBit's bit
+    u_short   m_lp;             // ROR 0x48: the achr's param 0x1b
+    u_short   m_emy1d8;         // ROR 0x4a: EmyManager::getEmyWord1d8 (never 0: the ROM traps)
+    short     m_kind;           // ROR 0x4c: scnDamageStart's kind
+    u_char    _4e[0x80 - 0x4e]; // ROR 0x4e
 };
 
 /* TskCamera : CmnITask (vtable 0x2e4f30, EE 0xc0; kind 0): the scripted

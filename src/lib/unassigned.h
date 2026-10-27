@@ -85,6 +85,13 @@ struct EmyManager : CmnITask
      * resumed (0, ACHRstat::pauseTasks(on, 0)) and its +0x1f0 / +0x1f8
      * parts switched with them (0x1664a4). */
     void pauseEmy(u_int oid, int on);                                    // ROR 0x00163e10
+    /* The enemy of oid (none: nothing) gets 0x1661dc(bits); TskDamage
+     * sends 1 hit, 2 killed, 4 / 8 by its m_40, 0x10 for word 6. */
+    void notifyEmy(u_int oid, int bits);                                 // ROR 0x00163624
+    void setEmyWord18(u_int oid);                                        // ROR 0x00163c24
+    void clearEmyWord18(u_int oid);                                      // ROR 0x00163c50
+    int  getEmyWord1d8(u_int oid);                                       // ROR 0x00163d90
+    int  getEmyWord238(u_int oid);                                       // ROR 0x00163f1c
     /* Achr flags lose 0x10000000 and 0x80, enemy +0x240 = 1. */
     void releaseEmyHold(u_int oid);                                      // ROR 0x00163bb8
     void setSlotWord24(int no, int v);                                   // ROR 0x00162afc
@@ -120,6 +127,9 @@ float utlDirDist(float x, float z, float *dist);                          // ROR
  * left (n = strlen: no terminator). */
 void  utlStrNCopy(char *dst, const char *src, int n);                    // ROR 0x0021838c
 extern EmyManager g_emyManager; /* bss 0x7b2140 */
+/* The SE no of the enemy oid (0x163ea0) played at its position (0x16a594)
+ * (unassigned@00164fc0). */
+void emyPlaySE(u_int oid, int no);                                       // ROR 0x0016a8a4
 extern int g_emyManagerTaskId;  /* bss 0x7b45c0: addTask's id for EmyManager (read by 0x1c58c0) */
 
 /* Words main sets once the boot load is over; the game modes (0x19a824,

@@ -1624,3 +1624,104 @@ int utlRandRange(int lo, int hi)
     ROSEPAN_STUB("utlRandRange", 0x0010423c);
     return {};
 }
+
+// stub of ROR 0x00163c50
+void EmyManager::clearEmyWord18(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::clearEmyWord18", 0x00163c50);
+}
+
+// stub of ROR 0x00163d90
+int EmyManager::getEmyWord1d8(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::getEmyWord1d8", 0x00163d90);
+    return {};
+}
+
+// stub of ROR 0x00163f1c
+int EmyManager::getEmyWord238(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::getEmyWord238", 0x00163f1c);
+    return {};
+}
+
+// stub of ROR 0x00163624
+void EmyManager::notifyEmy(u_int oid, int bits)
+{
+    ROSEPAN_STUB("EmyManager::notifyEmy", 0x00163624);
+}
+
+// stub of ROR 0x00163c24
+void EmyManager::setEmyWord18(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::setEmyWord18", 0x00163c24);
+}
+
+// stub of ROR 0x001fe160
+int TskDamage::stepKind0()
+{
+    ROSEPAN_STUB("TskDamage::stepKind0", 0x001fe160);
+    return {};
+}
+
+// stub of ROR 0x001ff2e0
+int TskDamage::stepKind1()
+{
+    ROSEPAN_STUB("TskDamage::stepKind1", 0x001ff2e0);
+    return {};
+}
+
+// stub of ROR 0x001ffbc0
+int TskDamage::stepKind2()
+{
+    ROSEPAN_STUB("TskDamage::stepKind2", 0x001ffbc0);
+    return {};
+}
+
+// stub of ROR 0x00200444
+int TskDamage::stepKind5()
+{
+    ROSEPAN_STUB("TskDamage::stepKind5", 0x00200444);
+    return {};
+}
+
+// stub of ROR 0x002005b8
+int TskDamage::stepKind6()
+{
+    ROSEPAN_STUB("TskDamage::stepKind6", 0x002005b8);
+    return {};
+}
+
+// stub of ROR 0x001fffc0
+int TskDamage::stepKind7()
+{
+    ROSEPAN_STUB("TskDamage::stepKind7", 0x001fffc0);
+    return {};
+}
+
+// stub of ROR 0x0020014c
+int TskDamage::stepKind8()
+{
+    ROSEPAN_STUB("TskDamage::stepKind8", 0x0020014c);
+    return {};
+}
+
+// stub of ROR 0x001ff9fc
+int TskDamage::stepKind9()
+{
+    ROSEPAN_STUB("TskDamage::stepKind9", 0x001ff9fc);
+    return {};
+}
+
+// stub of ROR 0x002002cc
+int TskDamage::stepKindA()
+{
+    ROSEPAN_STUB("TskDamage::stepKindA", 0x002002cc);
+    return {};
+}
+
+// stub of ROR 0x0016a8a4
+void emyPlaySE(u_int oid, int no)
+{
+    ROSEPAN_STUB("emyPlaySE", 0x0016a8a4);
+}
