@@ -621,6 +621,16 @@ public:
 - Fix: before dropping an argument, read the callee's asm for the jal sites it reaches with that register
   unchanged (`ghidra.py asm`), and the callee's callees' parameter counts.
 
+## A list walk that frees the node it stands on (2026-10-27)
+
+- Symptom: GamArea::update 0x1dee78 moves a one-shot trigger (flag 0x40000000) from the active list to the free list
+  in the middle of its walk, then steps to the node's m_next -- now the free list's sentinel. The walk only ends at
+  the active list's sentinel, so the ROM would go round the free list (stale triggers included) for ever.
+- Cause: an inline SeqPool::remove inside a for loop that advances through the removed node. The ROM saves the
+  old next (sp+0xa0) but never reads it; presumably no retail script sets 0x40000000.
+- Fix: the port saves next before the body and goes on from it (PORT comment). Check every inlined pool remove
+  inside a walk the same way: read where the asm reloads the iterator (ghidra.py asm around the loop's branch).
+
 ## How to debug (the method that worked)
 
 - **The picture is the test.** Logs, stub hits and callcheck show the code ran, not that it is right.

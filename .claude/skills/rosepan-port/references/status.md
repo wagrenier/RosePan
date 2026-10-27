@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 15:45 at commit `c8e3798` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 16:23 at commit `596beae` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3431**; stubs: **406**
+- reconstructed RoR functions: **3433**; stubs: **405**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -53,7 +53,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/game/gamman2.cpp` | 35 | 0 |
 | `src/game/gamsnd.cpp` | 74 | 0 |
 | `src/game/gamstat.cpp` | 79 | 0 |
-| `src/game/gamtrg.cpp` | 21 | 1 |
+| `src/game/gamtrg.cpp` | 23 | 0 |
 | `src/i3d/i3croot.cpp` | 12 | 0 |
 | `src/i3d/i3dctx.cpp` | 31 | 0 |
 | `src/i3d/i3denv.cpp` | 12 | 0 |
@@ -126,11 +126,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 164 TUs: todo 109, partial 15, verify 60, done 9
-- next: **game/gamtrg.cpp** (continuing a partial TU)
+- 164 TUs: todo 109, partial 14, verify 61, done 9
+- next: **emy/emy_hfm.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0022b4b8, unassigned@0021a3e8, unassigned@00140030, unassigned@00145020, unassigned@001dd5e8, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
 - partial: `emy/emy_hfm.cpp` 21/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end of the file, return -1 from Exec): the Init/Exec/Term of HfmOutSlap 0x145d60.., HfmOutBreak 0x146378.., HfmOutWal
-- partial: `game/gamtrg.cpp` 21/22 -- Left: GamArea::update 0x1dee78 (0x1db4 bytes; stub at the end of gamtrg.cpp; decompilation saved in work/tu/game_gamtrg.cpp/update_dec.txt). It walks the active
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -144,6 +143,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `game/gamman2.cpp` 37/37 -- All 37 functions of the TU are written. Nothing on screen shows them: the smoke run never opens the save screen (boot disclaimer only). The first session that d
 - verify: `game/gamsnd.cpp` 74/75 -- Code complete; verify until a run reaches a room whose scripts put 3D sounds (native 252 put_*_3d_pos) -- the boot smoke run (logos, disclaimer, MV00_AD film, u
 - verify: `game/gamstat.cpp` 74/74 -- All code of the TU is written; nothing in it draws at boot, so verify. The map helpers run when the map menu (0x1949bc / 0x196878, unassigned) opens: the first 
+- verify: `game/gamtrg.cpp` 22/22 -- Status verify: all 22 GamArea functions are written. The 140 s New Game run calls update every frame to the end without a fault, but the stage does not draw (bl
 - verify: `i3d/i3croot.cpp` 12/12 -- Status verify: DogModel::loadData calls i3cRelocate, setupColliTbl and i3cSetBothFaceEnable, but no smoke run reaches a model load yet and no raw I3D_I3C exists
 - verify: `i3d/i3dctx.cpp` 31/31 -- Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the pa
 - verify: `i3d/i3denv.cpp` 12/12 -- Pinned 0x21a120..0x21a3e8 + 0x21ac80..0x21b220 as one file (a guess: the i3r helpers 0x21a3e8..0x21ac80 sit between; split into i3dfog / i3dlight if evidence ap
@@ -195,6 +195,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 16:22 `game/gamtrg.cpp` verify: GamArea::update 0x1dee78 written: every active trigger's condition bits (rect enter/leave, height, actor distance and direction, PC facing, Cross, timer, ftb sc
 - 2026-10-27 15:45 `game/gamman2.cpp` verify: Save image written: writeSaveData 0x1d6078 and readSaveData 0x1d68a0 (FEB_SAVE version 0x10, every section at its EE offset through memcpy, older versions read 
 - 2026-10-27 11:06 `game/gamman2.cpp` partial: Hit tests and checkMenuReq written: hitTestObjs 0x1d7c20 over the update list through the member pointer m_hitFunc (hitAtPoint 0x1d4b9c, hitAtSweep 0x1d50a8), t
 - 2026-10-27 10:50 `game/gamman2.cpp` partial: Pinned 0x1d3b44..0x1d84c8 as game/gamman2.cpp (GamMan methods past switchVolume, was unassigned@001d3b44). Written: the object update list (relinkObj, queueObjU
@@ -202,22 +203,21 @@ Recent sessions:
 - 2026-10-27 09:24 `emy/emy_hfm.cpp` partial: Split the enemy run: pinned emy/emy_hfm.cpp 0x145020..0x149d18 (HfmMain + its outs). Wrote HfmMain whole (initOut, dtor, initAfterParam, decide, exec, after, se
 - 2026-10-27 09:06 `emy/emy_manager.cpp` verify: Split EmyManager out of unassigned@00145020 as emy/emy_manager.cpp (0x16265c..0x164118) and wrote all 58 functions: ctor/dtor/clear/releaseAll, the task exec wi
 - 2026-10-27 08:42 `mag/magscenecmd.cpp` verify: Pinned 0x143d3c..0x145020 out of unassigned@00143d3c as mag/magscenecmd.cpp and wrote all 36 functions: MagScene fog fade (setFog and its two wrappers, addFog, 
-- 2026-10-27 08:20 `mag/magscenetenkyu.cpp` verify: The sky (tenkyu): releaseTenkyuTex, loadTenkyuTex (tenkyu.rpk: optional I3D_I3M motion then the i3r), initTenkyuSpin (per-node y spin from the motion, named 0x1
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00166a1c` | todo | 0/30/342 | 94.7 | 79 | 4 |
-| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 60 | 3 |
+| `unassigned@00166a1c` | todo | 0/30/342 | 94.7 | 99 | 8 |
+| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 70 | 5 |
+| `unassigned@0010f944` | partial | 3/6/12 | 2.2 | 55 | 6 |
+| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
 | `emy/emy_main.cpp` | partial | 1/22/88 | 11.0 | 50 | 0 |
-| `unassigned@0010f944` | partial | 3/6/12 | 2.2 | 45 | 4 |
-| `unassigned@0022e840` | todo | 0/13/99 | 32.1 | 45 | 3 |
-| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
-| `unassigned@00228c08` | partial | 22/1/72 | 9.3 | 37 | 1 |
-| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 35 | 0 |
-| `unassigned@00106658` | todo | 0/11/25 | 3.3 | 35 | 2 |
-| `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
-| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 34 | 3 |
-| `mag/maglifebwnctrl.cpp` | todo | 0/17/82 | 18.3 | 32 | 1 |
+| `unassigned@0022e840` | todo | 0/13/99 | 32.1 | 50 | 4 |
+| `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 49 | 6 |
+| `unassigned@00106658` | todo | 0/11/25 | 3.3 | 45 | 4 |
+| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
+| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 40 | 1 |
+| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
+| `unassigned@0021c960` | todo | 0/11/21 | 8.4 | 39 | 5 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -240,12 +240,12 @@ Recent sessions:
 | `001fcdb8` | NagaChunk::getData | 9 | ror | stub | - |
 | `00164508` | EmyMain::loadParam | 9 | ror | stub | emy/emy_main.cpp |
 | `00166a1c` | EmyOut::EmyOut | 9 | ror | stub | - |
+| `00217f10` | utlAtan2 | 8 | ror | stub | - |
 | `0022e958` | i3mGetLength | 8 | ror | stub | - |
 | `00106760` | utlDrawI3r | 8 | ror | stub | - |
 | `00176cc8` | Obj176a3c::createEff | 7 | ror | stub | - |
 | `001875c0` | MsgManSet::getState | 7 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 6 | ror | missing | - |
-| `00217f10` | utlAtan2 | 6 | ror | stub | - |
 | `001fca84` | NagaChunk::NagaChunk | 6 | ror | missing | task/naga_chunk.cpp |
 | `001fcbf8` | NagaChunk::rewind | 6 | ror | stub | - |
 | `001fcaac` | NagaChunk::~NagaChunk | 6 | ror | missing | task/naga_chunk.cpp |
