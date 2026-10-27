@@ -88,6 +88,9 @@ struct DogTexInfo
     /* Trims m_num_tex past the last record with a picture and hands the
      * table to the i3d context (i3dCtxSetTexTable). */
     void setTexTable(i3dContext *p);                                     // ROR 0x0011756c
+    /* Empty in retail (a debug listing); DogModel::loadPack calls it when
+     * a model's textures cannot be assigned. */
+    void dump();                                                         // ROR 0x0011764c
 
     int          m_max_tex;     // ROR 0x00: theMax
     int          m_num_tex;     // ROR 0x04: records in use (assert m_num_tex <= m_max_tex)

@@ -310,6 +310,78 @@ int   i3rCopyClipSphere(I3rRoot *root, float *center, float *radius);    // ROR 
 int   i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity);    // ROR 0x0021a938
 /* Steps the frame counter of every animated texture of the root; I3D_OK. */
 int   i3rUpdateTexAnim(I3rRoot *root);                                   // ROR 0x0021a8e0
+/* The root's textures from a name table of n records (DogTexInfo's);
+ * non-zero when one is missing. */
+int   i3rAssignTex(I3rRoot *root, const I3dTexEntry *tex, int n);        // ROR 0x0021a5b0
+/* The nodes' basic transforms into one matrix per node. */
+int   i3rCopyLocalBasicTransform(I3rRoot *root, I3dMatrixF4x4 *mat);     // ROR 0x0021a700
+/* Local node matrices to model matrices down the node tree. */
+int   i3rConvertLocalToModel(I3rRoot *root, I3dMatrixF4x4 *model,
+                             const I3dMatrixF4x4 *local);                // ROR 0x0021a760
+
+/* An i3d collision file (an "i3c": DogModel's m_i3c_root; unassigned@0022b4b8).
+ * From the file: plain EE layout, only the words DogModel's helpers read.
+ * PORT: i3cRelocate writes EE pointers into +0x18 / +0x1c and the node
+ * records; it needs i3rroot.h's relative-pointer scheme when written. */
+struct I3cRoot
+{
+    u_char  _00[0x10];
+    u_char  m_relocate;         // ROR 0x10: non-zero while the file holds offsets
+    u_char  _11;
+    u_char  m_both_face;        // ROR 0x12: i3cSetBothFaceEnable
+    u_char  _13;
+    u_short m_num_node;         // ROR 0x14: i3cGetNumNode (records of 12 bytes at +0x18)
+    u_short m_num_group;        // ROR 0x16: i3cGetNumGroup
+    u_int   m_node;             // ROR 0x18: the node records (name, a u_short, a pointer)
+    u_int   m_1c;               // ROR 0x1c: a table of m_num_group (?) pointers
+};
+static_assert(offsetof(I3cRoot, m_num_node) == 0x14, "m_num_node");
+static_assert(offsetof(I3cRoot, m_node) == 0x18, "m_node");
+
+struct I3cQuery;
+struct MagSceneRayHit;
+/* A cast's hit callback (dogModelHitNearest / dogModelHitCylinder);
+ * arguments past the query are the collision module's (roles unverified). */
+typedef int (*I3cHitFunc)(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5);
+/* A collision cast's request (built on the stack by DogModel's casts).
+ * layout: host -- pointers. */
+struct I3cQuery
+{
+    I3cRoot        *m_root;       // ROR 0x00: m_i3c_root
+    sceVu0FMATRIX  *m_mat;        // ROR 0x04: the model's node matrices (m_mat_model)
+    u_short        *m_colli_tbl;  // ROR 0x08: the collision node -> model node table
+    int             m_group;      // ROR 0x0c: the group cast (-1 all); the callbacks copy it to the hit's m_50
+    I3cHitFunc      m_func;       // ROR 0x10
+    int             m_14;         // ROR 0x14: 0
+    MagSceneRayHit *m_hit;        // ROR 0x18: the record the callback fills
+    int             _1c;          // ROR 0x1c: not set
+    int             m_20;         // ROR 0x20: 1 (castRayGroups leaves it unset)
+};
+static_assert(offsetof(I3cQuery, m_hit) >= 0x18, "m_hit");
+
+int   i3cRelocate(I3cRoot *root);                                        // ROR 0x0022bba0
+int   i3cGetNumNode(const I3cRoot *root);                                // ROR 0x0022bfd8
+/* The name of node i, NULL past the count. */
+const char *i3cGetNodeName(const I3cRoot *root, int i);                  // ROR 0x0022bfe0
+int   i3cGetNumGroup(const I3cRoot *root);                               // ROR 0x0022c010
+/* Sets the both-faces byte; whether it was 1. */
+int   i3cSetBothFaceEnable(I3cRoot *root, int flag);                     // ROR 0x0022c1d8
+/* The casts: a sphere (centre, w = radius), a ray (pos, dir) or a
+ * cylinder (centre, w = radius; dir) under the query, with up to 64 node
+ * matrices (DogModel passes unit ones). */
+int   i3cCastSphere(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats); // ROR 0x002324b8
+int   i3cCastRay(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats);    // ROR 0x00232508
+int   i3cCastCylinder(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats); // ROR 0x002325a8
+/* The hit callbacks (unassigned@00113ea8): keep the nearest hit. */
+int   dogModelHitNearest(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5); // ROR 0x00114034
+int   dogModelHitCylinder(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5); // ROR 0x001141c8
+
+/* Draws an i3r model into layer with its node matrices (NULL: none) and
+ * world matrix, the thread switch held off around it (0x21fe68). */
+int   utlDrawI3r(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
+                 int flags);                                             // ROR 0x00106760
+/* Points the first word of each of the root's materials at disp. */
+int   utlSetI3rDispControl(I3rRoot *root, void *disp);                   // ROR 0x001067d8
 
 /* Strips of count vertices with an optional matrix, STQ, colours and
  * positions (EE vectors); primitives unverified. */

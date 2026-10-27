@@ -799,6 +799,24 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   the model names (`i3rGetNumTex` 0x22b428 / `i3rGetTexName` 0x22b438, DogModel's inline get_nTex /
   getTexName) the pack file of that name; -3 when the pack lacks one.
 
+## The model (`dog/dogmodel.cpp`, 0x11440c..0x1160a8 + inlines 0x281cbc..0x2827c8, 2026-10-26)
+
+DogModel (EE 0x1a0) = DogEntityEx + an i3r model. Fields by the ROM's assert names: m_ref_count
++0x104, m_tex_info +0x10c, m_load_flag +0x110 (LOAD_NONE 0; 1 owns m_pack_file, 2 owns root + i3c,
+3 share of m_original +0x118, 4 = loadPack / loadData: caller's data), m_pack_file +0x114,
+m_i3r_root +0x11c, a second root from pack file 2 at +0x120, m_i3c_root +0x124 (collision, from
+loadData's third argument: the scene's <name>_col file), m_colli_tbl +0x128 (u_short model node per
+i3c node), one block m_mat_local +0x12c / m_mat_model +0x130 / m_mat_flag +0x134 (nNode * 0x84
+bytes from g_utlMemory), shadow light words +0x160.., a 0x30 display control at +0x170 whose address
+utlSetI3rDispControl 0x1067d8 writes into every material. Model packs: file 0 the TIM2 pack
+(DogTexInfo::addPfh with the sepia flag), file 1 the i3r, file 2 optional. DogEntityEx +0xa0 is the
+local matrix; DogEntity +0x80 is a rotation added to m_rotate (DogEntity::makeLocalMatrix 0x10fd18,
+order scale, Z, X, Y, translate, offset). A model hung from a parent node turns a fresh local matrix
+by (x -> -x, y <-> -z) first. Billboards: m_flag100 bits 1..3 (on / with X turn / towards a point),
+used by slot 11 transformBillboard. Casts build an I3cQuery (root, node matrices, colli table, group,
+hit callback 0x114034 / 0x1141c8, hit record) for i3cCastRay 0x232508 / Sphere 0x2324b8 / Cylinder
+0x2325a8 with 64 unit matrices; the hit record is MagSceneRayHit (t at +0x0c, m_50 group).
+
 ## Modules (RoR's own source files)
 
 73 `.cpp` paths survive in assert / error strings (export.py anchors on them), plus headers whose inline

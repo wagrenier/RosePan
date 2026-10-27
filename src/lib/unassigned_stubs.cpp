@@ -9,6 +9,7 @@
 #include "debug/motnamecnv0.h"
 #include "task/naga_chunk.h"
 #include "task/tsk_scene.h"
+#include "dog/dogtexinfo.h"
 
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
@@ -1769,5 +1770,125 @@ int utlRandMean(int lo, int hi, int n)
 int utlRandPeak(int lo, int hi, int peak, int n)
 {
     ROSEPAN_STUB("utlRandPeak", 0x00104438);
+    return {};
+}
+
+// stub of ROR 0x0010fd18
+int DogEntity::makeLocalMatrix(sceVu0FVECTOR *out)
+{
+    ROSEPAN_STUB("DogEntity::makeLocalMatrix", 0x0010fd18);
+    return {};
+}
+
+// stub of ROR 0x0011764c
+void DogTexInfo::dump()
+{
+    ROSEPAN_STUB("DogTexInfo::dump", 0x0011764c);
+}
+
+// stub of ROR 0x001141c8
+int dogModelHitCylinder(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5)
+{
+    ROSEPAN_STUB("dogModelHitCylinder", 0x001141c8);
+    return {};
+}
+
+// stub of ROR 0x00114034
+int dogModelHitNearest(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5)
+{
+    ROSEPAN_STUB("dogModelHitNearest", 0x00114034);
+    return {};
+}
+
+// stub of ROR 0x002325a8
+int i3cCastCylinder(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
+{
+    ROSEPAN_STUB("i3cCastCylinder", 0x002325a8);
+    return {};
+}
+
+// stub of ROR 0x00232508
+int i3cCastRay(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
+{
+    ROSEPAN_STUB("i3cCastRay", 0x00232508);
+    return {};
+}
+
+// stub of ROR 0x002324b8
+int i3cCastSphere(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
+{
+    ROSEPAN_STUB("i3cCastSphere", 0x002324b8);
+    return {};
+}
+
+// stub of ROR 0x0022bfe0
+const char * i3cGetNodeName(const I3cRoot *root, int i)
+{
+    ROSEPAN_STUB("i3cGetNodeName", 0x0022bfe0);
+    return {};
+}
+
+// stub of ROR 0x0022c010
+int i3cGetNumGroup(const I3cRoot *root)
+{
+    ROSEPAN_STUB("i3cGetNumGroup", 0x0022c010);
+    return {};
+}
+
+// stub of ROR 0x0022bfd8
+int i3cGetNumNode(const I3cRoot *root)
+{
+    ROSEPAN_STUB("i3cGetNumNode", 0x0022bfd8);
+    return {};
+}
+
+// stub of ROR 0x0022bba0
+int i3cRelocate(I3cRoot *root)
+{
+    ROSEPAN_STUB("i3cRelocate", 0x0022bba0);
+    return {};
+}
+
+// stub of ROR 0x0022c1d8
+int i3cSetBothFaceEnable(I3cRoot *root, int flag)
+{
+    ROSEPAN_STUB("i3cSetBothFaceEnable", 0x0022c1d8);
+    return {};
+}
+
+// stub of ROR 0x0021a5b0
+int i3rAssignTex(I3rRoot *root, const I3dTexEntry *tex, int n)
+{
+    ROSEPAN_STUB("i3rAssignTex", 0x0021a5b0);
+    return {};
+}
+
+// stub of ROR 0x0021a760
+int i3rConvertLocalToModel(I3rRoot *root, I3dMatrixF4x4 *model,
+                             const I3dMatrixF4x4 *local)
+{
+    ROSEPAN_STUB("i3rConvertLocalToModel", 0x0021a760);
+    return {};
+}
+
+// stub of ROR 0x0021a700
+int i3rCopyLocalBasicTransform(I3rRoot *root, I3dMatrixF4x4 *mat)
+{
+    ROSEPAN_STUB("i3rCopyLocalBasicTransform", 0x0021a700);
+    return {};
+}
+
+// stub of ROR 0x00106760
+int utlDrawI3r(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
+                 int flags)
+{
+    ROSEPAN_STUB("utlDrawI3r", 0x00106760);
+    return {};
+}
+
+// stub of ROR 0x001067d8
+int utlSetI3rDispControl(I3rRoot *root, void *disp)
+{
+    ROSEPAN_STUB("utlSetI3rDispControl", 0x001067d8);
     return {};
 }
