@@ -14,7 +14,12 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      real view matrix). Open: who starts a camera move (writes DogCamera +0x1d0 / +0x190..+0x1c0)
      is not found yet -- look in mag/magscenecamera.cpp / the camera natives when they are written.
      The queue entry unassigned@0010f944 is stale (tus.py next skips it: the run is now these two files).
-  b. unassigned@00228c08 (the i3dMat* library: i3dMatGetScaleTrans 0x228c38).
+  b. unassigned@00228c08 -- SPLIT 2026-10-27: i3d/i3rtype.cpp 0x22a6c0..0x22b1b0 (the per-type
+     accessors, written, verify) and i3d/i3rmesh.cpp 0x228c08..0x22a6c0 (the mesh packet builder with
+     the i3dMatGetScaleTrans bridge; queued right after unassigned@0021fb50, since it only feeds VIF /
+     GIF packets: the session that writes i3rBuildMeshPacket decides what of it the native mesh draw
+     keeps -- the per-layer packet cache 0x228f50, texture / light / fog choices -- and what becomes
+     a PC: comment).
   c. dog/dogmotionblend.cpp (getPose, getNodeRate, stepLoop ...), unassigned@0022e840 (the i3m pose
      player: i3mGetLength, i3mGetPose, i3mPoseLerp, i3mPoseToMatrices, i3mGetBlendPose).
   d. unassigned@00106658 (utlDrawI3r 0x106760, utlVecDist), then the host task
@@ -819,6 +824,10 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
   (types 0x25 0x26 0x29 0x2a 0x2d 0x4a 0x4d 0x52 0x59, inside unassigned@00228c08's Ghidra bodies)
   are written in i3ritem.cpp with the tables, not in their own file; the session that takes
   unassigned@00228c08 must not write them again (move them if that file turns out to own them).
+  2026-10-27: the run became i3d/i3rtype.cpp (accessors) + i3d/i3rmesh.cpp; the fixups stay in
+  i3ritem.cpp (static, beside their tables), the accessors i3rGetChild25 / i3rGetNumChild52 /
+  i3rGetChild52 / i3rGetChildName52 moved to i3rtype.cpp, and i3ritem.h includes i3rtype.h.
+  Doubt: the file names i3rtype / i3rmesh are guesses (no source string in the run).
 
 - 2026-10-25 (session decision, sequence/seqvm.cpp): **script memory words keep host pointers beside
   memory.** The VM's loads and stores move 32-bit words (as in the ROM), so a host pointer a script
