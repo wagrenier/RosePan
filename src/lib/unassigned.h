@@ -286,11 +286,7 @@ struct I3dMatrixF4x4
 };
 static_assert(sizeof(I3dMatrixF4x4) == 0x40, "I3dMatrixF4x4 is 0x40 bytes on the EE");
 
-/* The item tree's relocators (unassigned@0022b4b8): recursive over the
- * children, base = the root item; per-type data fixups from the tables
- * 0x2db4c8 / 0x2db360. I3D_OK, 3 type > 0x59, 4 an invalid type. */
-int   i3rItemRelocate(I3rItem *item, I3rItem *base);                     // ROR 0x0022c478
-int   i3rItemUnrelocate(I3rItem *item, I3rItem *base);                   // ROR 0x0022c328
+#include "i3d/i3ritem.h"
 /* i3rSetRelocate's hooks: build the root's model packets (0x21fb50 per
  * mesh) into the slots of its child 6, and clear those slots. */
 int   i3rBuildPackets(I3rRoot *root);                                    // ROR 0x0021a3e8
@@ -319,24 +315,7 @@ int   i3rCopyLocalBasicTransform(I3rRoot *root, I3dMatrixF4x4 *mat);     // ROR 
 int   i3rConvertLocalToModel(I3rRoot *root, I3dMatrixF4x4 *model,
                              const I3dMatrixF4x4 *local);                // ROR 0x0021a760
 
-/* An i3d collision file (an "i3c": DogModel's m_i3c_root; unassigned@0022b4b8).
- * From the file: plain EE layout, only the words DogModel's helpers read.
- * PORT: i3cRelocate writes EE pointers into +0x18 / +0x1c and the node
- * records; it needs i3rroot.h's relative-pointer scheme when written. */
-struct I3cRoot
-{
-    u_char  _00[0x10];
-    u_char  m_relocate;         // ROR 0x10: non-zero while the file holds offsets
-    u_char  _11;
-    u_char  m_both_face;        // ROR 0x12: i3cSetBothFaceEnable
-    u_char  _13;
-    u_short m_num_node;         // ROR 0x14: i3cGetNumNode (records of 12 bytes at +0x18)
-    u_short m_num_group;        // ROR 0x16: i3cGetNumGroup
-    u_int   m_node;             // ROR 0x18: the node records (name, a u_short, a pointer)
-    u_int   m_1c;               // ROR 0x1c: a table of m_num_group (?) pointers
-};
-static_assert(offsetof(I3cRoot, m_num_node) == 0x14, "m_num_node");
-static_assert(offsetof(I3cRoot, m_node) == 0x18, "m_node");
+#include "i3d/i3croot.h"
 
 struct I3cQuery;
 struct MagSceneRayHit;
@@ -359,13 +338,6 @@ struct I3cQuery
 };
 static_assert(offsetof(I3cQuery, m_hit) >= 0x18, "m_hit");
 
-int   i3cRelocate(I3cRoot *root);                                        // ROR 0x0022bba0
-int   i3cGetNumNode(const I3cRoot *root);                                // ROR 0x0022bfd8
-/* The name of node i, NULL past the count. */
-const char *i3cGetNodeName(const I3cRoot *root, int i);                  // ROR 0x0022bfe0
-int   i3cGetNumGroup(const I3cRoot *root);                               // ROR 0x0022c010
-/* Sets the both-faces byte; whether it was 1. */
-int   i3cSetBothFaceEnable(I3cRoot *root, int flag);                     // ROR 0x0022c1d8
 /* The casts: a sphere (centre, w = radius), a ray (pos, dir) or a
  * cylinder (centre, w = radius; dir) under the query, with up to 64 node
  * matrices (DogModel passes unit ones). */

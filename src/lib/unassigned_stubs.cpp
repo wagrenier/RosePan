@@ -660,20 +660,6 @@ int i3rClearPackets(I3rRoot *root)
     return {};
 }
 
-// stub of ROR 0x0022c478
-int i3rItemRelocate(I3rItem *item, I3rItem *base)
-{
-    ROSEPAN_STUB("i3rItemRelocate", 0x0022c478);
-    return {};
-}
-
-// stub of ROR 0x0022c328
-int i3rItemUnrelocate(I3rItem *item, I3rItem *base)
-{
-    ROSEPAN_STUB("i3rItemUnrelocate", 0x0022c328);
-    return {};
-}
-
 // stub of ROR 0x001deaac
 void GamArea::checkPc()
 {
@@ -1818,41 +1804,6 @@ int i3cCastRay(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
 int i3cCastSphere(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
 {
     ROSEPAN_STUB("i3cCastSphere", 0x002324b8);
-    return {};
-}
-
-// stub of ROR 0x0022bfe0
-const char * i3cGetNodeName(const I3cRoot *root, int i)
-{
-    ROSEPAN_STUB("i3cGetNodeName", 0x0022bfe0);
-    return {};
-}
-
-// stub of ROR 0x0022c010
-int i3cGetNumGroup(const I3cRoot *root)
-{
-    ROSEPAN_STUB("i3cGetNumGroup", 0x0022c010);
-    return {};
-}
-
-// stub of ROR 0x0022bfd8
-int i3cGetNumNode(const I3cRoot *root)
-{
-    ROSEPAN_STUB("i3cGetNumNode", 0x0022bfd8);
-    return {};
-}
-
-// stub of ROR 0x0022bba0
-int i3cRelocate(I3cRoot *root)
-{
-    ROSEPAN_STUB("i3cRelocate", 0x0022bba0);
-    return {};
-}
-
-// stub of ROR 0x0022c1d8
-int i3cSetBothFaceEnable(I3cRoot *root, int flag)
-{
-    ROSEPAN_STUB("i3cSetBothFaceEnable", 0x0022c1d8);
     return {};
 }
 

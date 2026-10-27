@@ -255,6 +255,24 @@
    "status": "verify",
    "why": "Between RoR's own source-path anchors: game/gamstat.cpp (string 0x2fc400, used by 0x1d84c8) and game/gamtrg.cpp (0x1dd558). The run is ObjStat / ACHRstat / FCHRstat / GamSysData (object state and system data). 0x1dd1e8.. (a GamMan member ctor called from GamMan::GamMan, its deleting dtor, GamArea::init) is GamArea code and left to game/gamtrg.cpp."
   },
+  "i3d/i3croot.cpp": {
+   "notes": "Status verify: DogModel::loadData calls i3cRelocate, setupColliTbl and i3cSetBothFaceEnable, but no smoke run reaches a model load yet and no raw I3D_I3C exists on the disc to check offline (open-items Open questions). Decision (open-items Decisions): the host keeps the file offsets from the root and readers use i3cPtr(root, field); i3cRelocate only turns -1 into 0 and keeps the relocation byte, because the ROM's tree relocator only relocates values below the root address. The collision casts 0x2312a0..0x2337e0 (still unassigned@0022b4b8) must read through i3cPtr. Mark done when a cast or setupColliTbl shows correct results in a run.",
+   "ranges": [
+    [
+     "0022ba20",
+     "0022c1f8"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-26 22:24",
+     "status": "verify",
+     "summary": "I3D_I3C collision root written whole in the i3ritem session (same slice): id check, i3cRelocate / i3cUnrelocate with the part-tree relocators, node / group counts, names and name lookups, i3cSetBothFaceEnable; header i3croot.h with I3cRoot / I3cNode / I3cPart / I3cTree at EE offsets."
+    }
+   ],
+   "status": "verify",
+   "why": "the I3D_I3C collision file root: its id check (0x303a70), relocators, node / group lookups; between the I3D_I3M code (0x22b4b8..) and the i3r item core"
+  },
   "i3d/i3dctx.cpp": {
    "notes": "Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the packet yet; smoke run boots, no asserts, i3dGroupInit / i3dCtxCloseFrame reached each frame. Host design (open-items.md, i3d packets on the host): i3dContext is layout host with host pointers, the ROM's 0x30000000 segment bits and 0x0fffffff masks dropped (PC:), DMA tag address words are the low 28 bits of host pointers (i3dDmaAddr) since the host sceDmaSend does not walk chains; objects from the packet tail are host-sized. Next: i3d/i3dvram.cpp (queued top; analysis of all 34 + 3 hidden functions in architecture.md i3d; its stubbed i3dVramInit leaves sentinel links NULL, which would crash i3dCtxMakeVramTransfer once layers draw). Then the draw-group module 0x2239b8..0x224d88 (still in unassigned@00216ad0), then MagScene::draw. Types for that module (I3dNode, I3dGroup, I3dLayer, I3dDrawSet, I3dTexEntry) are partial in i3d/i3dctx.h with EE offsets; I3dDrawSet+0x0c is a draw group (FlushTextures runs it).",
    "ranges": [
@@ -420,6 +438,24 @@
    ],
    "status": "verify",
    "why": "i3d VRAM cache: a block heap of 0x44-byte nodes on six intrusive lists (address order, LRU, locked, evict, new, moved), embedded twice in i3dContext (+0x0 texture pages, +0x70 CLUT); 0x227a98 list unlink .. 0x228b50 coalesce, next function 0x228c08 calls the i3d system module 0x237180."
+  },
+  "i3d/i3ritem.cpp": {
+   "notes": "Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's jr ra, e.g. 0x22d4a0..0x22d51c after i3rRelocData09; most call i3rItemFindChild; unreferenced by ported code so far -- read with ghidra.py asm, they take an item wrapper whose +8 is the item). Nothing on screen yet: two 200 / 240 s New Game runs reached the post-film setup but no model load (DogActor::load 0x10cd5c is a stub), so the relocator was verified offline instead; the screenshot is the black post-film frame. Each fixup was generated from its disassembly into field / array ops and cross-checked against its unrelocate twin; the unrelocators run arrays before fields. PORT: a NULL array with a count is skipped (the ROM would index it). The rest of unassigned@0022b4b8 (I3D_I3M 0x22b4b8..0x22ba20, curve maths 0x22e840..0x2312a0, collision casts and distance maths 0x2312a0..0x23695c) is still unassigned: define those files next time. Next on the 3D path: unassigned@0021a3e8 (i3rBuildPackets, i3rAssignTex, node transforms) and DogActor::load; then remove the PC node-count guards in DogModel once a run shows sane counts.",
+   "ranges": [
+    [
+     "0022c1f8",
+     "0022e840"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-26 22:24",
+     "status": "partial",
+     "summary": "Split unassigned@0022b4b8: pinned i3d/i3ritem.cpp 0x22c1f8..0x22e840 and i3d/i3croot.cpp 0x22ba20..0x22c1f8. i3ritem.cpp: i3rItemFindChild, i3rIsItemType, i3rItemRelocate / i3rItemUnrelocate and all 90 per-type data fixup pairs of tables 0x2db4c8 / 0x2db360 (152 Ghidra functions made at the table words and named i3rRelocDataXX / i3rUnrelocDataXX; nine pairs at 0x22a6c0..0x22aec0 written here too), on i3rroot.h relative pointers. i3croot.cpp written whole (verify, see its notes). Relocator checked offline by emulating it over the disc's 1602 RPK models (7.1 M pointers, all inside their files)."
+    }
+   ],
+   "status": "partial",
+   "why": "the i3r item tree core: i3rItemFindChild, i3rIsItemType, the item relocators and the per-type data fixups of tables 0x2db4c8 / 0x2db360 with the per-type accessors between them; ends where the motion math (0x22e840, sinf) starts. Nine fixup pairs sit at 0x22a6c0..0x22aec0 (unassigned@00228c08) and are written here with the table"
   },
   "i3d/i3rroot.cpp": {
    "notes": "Verify: no model loads in the smoke run yet, so nothing can show it (screen still black, as before). Port trap: the ROM relocates i3r files in place into absolute 32-bit pointers; on the host a relocated field holds the distance from the field to its target, so every reader must use i3rPtr (hazards.md). Next for models: the item tree core 0x22c1d8..0x22c5a0 (bisect 0x22c1f8, i3rItemRelocate / Unrelocate) with the 90-entry fixup tables 0x2db4c8 / 0x2db360, whose ~76 fixup pairs are hidden functions spread over 0x22a6c0..0x22e508 (one per item type; the root type 0x52 pair is 0x22ad20 / 0x22adf8). The rest of unassigned@00228c08 is mapped in architecture.md (mesh packet builder 0x228c08..0x22a7d0 with the bridge i3dMatGetScaleTrans, I3M from 0x22b4b8, I3C from 0x22ba20, curves, collision); the file split is a guess, see open-items.md Open questions.",
@@ -1268,6 +1304,7 @@
   "unassigned@0021fb50": {},
   "unassigned@00224de0": {},
   "unassigned@00228c08": {},
+  "unassigned@0022b4b8": {},
   "unassigned@00237ce8": {},
   "unassigned@002437f8": {},
   "utl/utlmisc.cpp": {

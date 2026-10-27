@@ -50,8 +50,12 @@ follows it; reached stubs in run order):
      tree relocator **i3rItemRelocate 0x22c478 and the type fixups (unassigned@0022b4b8)**,
      i3rBuildPackets 0x21a3e8 / i3rAssignTex 0x21a5b0 / i3rCopyLocalBasicTransform 0x21a700 /
      i3rConvertLocalToModel 0x21a760 (unassigned@0021a3e8), then the draw utlDrawI3r 0x106760 ->
-     0x21fe68. Until the relocator is written every loaded model has a garbage node count (allocMatrix
-     fails, PC guards skip). Queue those two runs next on the 3D path. Was: DogModel::loadPack 0x1158ec
+     0x21fe68. **2026-10-26: the relocator is written** -- i3d/i3ritem.cpp (i3rItemRelocate /
+     Unrelocate, all 90 type fixup pairs; partial: the per-type accessors are left) and
+     i3d/i3croot.cpp (i3cRelocate and the i3c lookups, verify), checked offline on the disc's 1602
+     models. Next on the 3D path: unassigned@0021a3e8 (i3rBuildPackets / i3rAssignTex / the node
+     transforms), and DogActor::load 0x10cd5c (dog/dogactor.cpp, item 5): two runs that session
+     reached the post-film setup but no model load, DogActor::load being a stub on that road. Was: DogModel::loadPack 0x1158ec
      / loadData 0x115790 / setupNodeFlags 0x11550c: the model loader. Without it no map or character exists, so **this is the gate to the
      first 3D picture**. Pinned first in the queue (the user, 2026-10-26: 3D rendering ahead of the
      menu fix below).
@@ -676,6 +680,17 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
 
 ## Decisions
 
+- 2026-10-26 (session decision, i3d/i3croot.cpp): **i3c collision files keep their file offsets on
+  the host** (from the root; `i3cPtr(root, field)` resolves them), unlike i3r's field-relative
+  pointers. i3cRelocate walks the file as the ROM does but only turns -1 into 0 and keeps the
+  relocation byte. Why: the ROM's tree relocator tests each value against the root's address (not
+  relocated yet), which a host address cannot mimic, and every i3c reader reaches the root (the
+  cast query's m_root). The casts (0x2312a0..0x2337e0) must follow this when written.
+- 2026-10-26 (session decision, i3d/i3ritem.cpp): **the nine fixup pairs at 0x22a6c0..0x22aec0**
+  (types 0x25 0x26 0x29 0x2a 0x2d 0x4a 0x4d 0x52 0x59, inside unassigned@00228c08's Ghidra bodies)
+  are written in i3ritem.cpp with the tables, not in their own file; the session that takes
+  unassigned@00228c08 must not write them again (move them if that file turns out to own them).
+
 - 2026-10-25 (session decision, sequence/seqvm.cpp): **script memory words keep host pointers beside
   memory.** The VM's loads and stores move 32-bit words (as in the ROM), so a host pointer a script
   stores (sw of a register, setupImage's m_global / m_bits slots) would lose its top half on Win64.
@@ -828,6 +843,14 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- CHARA.RPK + 0x5368980 (2026-10-26, i3d/i3ritem.cpp offline check): the one model of 1602 whose
+  item names do not land on strings (its tree and data offsets are fine). Probably a pack entry that
+  is not contiguous in the RPK (the next model starts 0x18d80 later); check when RPK entries are
+  parsed (DogModel::loadPack's pack reader) rather than scanned.
+- I3D_I3C data (2026-10-26): no raw "I3D_I3C" exists in the disc's RPK / ARA files, so
+  i3cRelocate could not be checked offline. Find which loader hands DogModel::loadData its i3c
+  (pack file 2 of a model pack? a decompressed area?) and check the layout in i3croot.h on it.
 
 - TskDamage chr 3 / 4 (2026-10-26, task/tsk_scene.cpp): TskDamage::setup sets no step for chr words
   3 and 4, and the ROM constructor does not clear m_step, so the ROM's exec calls whatever the heap
