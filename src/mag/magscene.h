@@ -360,6 +360,9 @@ struct MagScene
     /* mag/magscenefocus.cpp: mode 0 releases the efffocus texture, any
      * other adds it (once) and becomes the focus mode (+0x853bc). */
     void setFocus(int mode);                                             // ROR 0x00140b20
+    /* With data: setFocus(3) and the scene's focus track (an event pack's
+     * file 2) of size bytes, from its start. */
+    void setFocusData(const void *data, int size);                       // ROR 0x001417e4
     /* rec runs from -> to over frames; returns the value to show now
      * (from, or to at once when frames is 0). this is not read. */
     float startLerp(float from, float to, MagLerp *rec, int frames);     // ROR 0x00140e60

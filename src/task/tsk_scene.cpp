@@ -4,21 +4,714 @@
  *  The event scene player and the script tasks next to it (pinned
  *  0x1f6c64..0x1fc4f0); see tsk_scene.h. Written so far: TskSnd (sound
  *  fades, delayed SEs, the stream switch), TskCamera (the script's stick /
- *  face-to-face cameras), gamSystemDataLoaded / gamStage2Loaded.
+ *  face-to-face cameras), gamSystemDataLoaded / gamStage2Loaded, the
+ *  event scene player (ScenePlay with DisplayMessage / SeManager /
+ *  VoiceManager / ScenePlaySingle, scenePlayStart).
  * ======================================================================== */
 #include "task/tsk_scene.h"
 
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "bed/bedmemory.h"
 #include "bed/bedpad.h"
+#include "bed/bedpfh.h"
+#include "debug/motnamecnv0.h"
+#include "dog/dogactor.h"
+#include "game/gamfile.h"
 #include "game/gamman.h"
+#include "lib/unassigned.h"
 #include "mag/magscene.h"
 #include "mag/magsystem.h"
 #include "sdk/libvu0.h"
+#include "sequence/sequence.h"
 #include "snd/sndman.h"
+#include "task/naga_chunk.h"
 #include "utl/utlmisc.h"
+
+/* A record word read as the float it holds (kinds 1 and 2). */
+static float scnRecFloat(int word)
+{
+    float f;
+    memcpy(&f, &word, sizeof(f));
+    return f;
+}
+
+/* The sound position for an actor without a Bip01 node (bss 0x6e9780). */
+static sceVu0FVECTOR s_scnSndPos;
+
+/* The position play3d gives the sound: actor's Bip01 node in the world,
+ * or its translation copied into s_scnSndPos (the body SeManager::play3d
+ * and VoiceManager::play3d share in the ROM). */
+static float *scnActorSndPos(DogActor &actor, sceVu0FMATRIX mtx)
+{
+    u_int node = (u_int)actor.getNodeIndexByName("Bip01");
+    if (node < 100)
+    {
+        actor.getNodeWorldMatrix(mtx, (int)node);
+        return mtx[3];
+    }
+    s_scnSndPos[2] = actor.m_trans[2];
+    s_scnSndPos[0] = actor.m_trans[0];
+    s_scnSndPos[1] = actor.m_trans[1];
+    return s_scnSndPos;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  DisplayMessage
+// ══════════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f6cb8
+
+void DisplayMessage::tick()
+{
+    if (m_timer != 0 && --m_timer == 0)
+        g_gamMan.killMsgTask();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f6cec
+
+void DisplayMessage::reset()
+{
+    m_cur = -1;
+    m_timer = 0;
+    m_count = 0;
+    g_gamMan.killMsgTask();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f6d20
+
+void DisplayMessage::addLine(char *line)
+{
+    m_line[m_count] = line;
+    m_line[m_count][strlen(line)] = '\0';
+    m_count++;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: NagaChunk, ~NagaChunk (the local reader, inline)
+// ROR 0x001f6d8c
+
+void DisplayMessage::load(void *data)
+{
+    NagaChunk chunk(data);
+
+    m_count = 0;
+    m_timer = 0;
+    m_cur = -1;
+    while (chunk.find("strings"))
+        addLine((char *)chunk.getData());
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The message window at (0x20, 0x140), 0x1c0 x 0x50.
+// ROR 0x001f6dfc
+
+void DisplayMessage::show(int no, int frames)
+{
+    if (no < -1)
+        no = -1;
+    if (m_cur == no)
+        return;
+    g_gamMan.killMsgTask();
+    if (no < 0)
+    {
+        no = -1;
+    }
+    else if (no < m_count)
+    {
+        int param[8] = { 0x20, 0x140, 0xffff, 0x1c0, 0x50, 0, 0, 0 };
+        g_gamMan.setMsgParam(param);
+        g_gamMan.openMsg(m_line[no], 0, 0xb4);
+        m_timer = frames;
+    }
+    else
+    {
+        no = -1;
+    }
+    m_cur = no;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  SeManager
+// ══════════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: i3rGetNodeIndexByName, FUN_00215a30 (DogModel::getNodeIndexByName, inline in scnActorSndPos, with its m_i3r_root assert)
+// ROR 0x001f6f4c
+
+void SeManager::play3d(u_int se, int actor, int frames)
+{
+    sceVu0FMATRIX mtx;
+
+    m_entry[m_count].m_se = se;
+    m_entry[m_count].m_actor = actor;
+    m_entry[m_count].m_frames = frames;
+    g_gamMan.m_sndMan.m_mode = 1;   /* setSnd3DCnt(1), inline */
+    float *pos = scnActorSndPos(g_magSystem.m_scene.m_actors[actor], mtx);
+    g_gamMan.m_sndMan.playSE(se, false, pos, 0);
+    m_count++;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f70c8
+
+void SeManager::play(u_int se, int vol, int pan, int frames)
+{
+    int volL = vol;
+    int volR = vol;
+
+    m_entry[m_count].m_se = se;
+    m_entry[m_count].m_actor = 0;
+    m_entry[m_count].m_frames = frames;
+    if (pan >= 0)
+        volL = (0x3f - pan) * vol / 64;
+    if (pan < 1)
+        volR = (pan + 0x3f) * vol / 64;
+    g_gamMan.m_sndMan.playSE(se, volL, volR, 1.0f, 0, 0, 0);
+    m_count++;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f71b8
+
+void SeManager::tick()
+{
+    for (int i = 0; i < m_count; i++)
+    {
+        if (m_entry[i].m_frames != 0 && --m_entry[i].m_frames == 0)
+        {
+            stop(i);
+            i--;
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f723c
+
+void SeManager::stopAll()
+{
+    for (int n = m_count; n > 0; n--)
+        stop(0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f728c
+
+void SeManager::stop(int n)
+{
+    if (n >= m_count)
+        return;
+    g_gamMan.m_sndMan.funcSE(m_entry[n].m_se, 1, NULL);
+    if (--m_count != n)
+        m_entry[n] = m_entry[m_count];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Unreferenced. The ROM tests entry m_count (one past the last) on every
+// pass, not entry i.
+// ROR 0x001f7338
+
+void SeManager::stopSE(u_int se, int actor)
+{
+    for (int i = 0; i < m_count; i++)
+    {
+        if (m_count >= 0x40)        /* PC: entry m_count would be past the array */
+            break;
+        const Entry &e = m_entry[m_count];
+        if (e.m_actor == actor && e.m_se == se)
+        {
+            stop(i);
+            i--;
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  VoiceManager
+// ══════════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: i3rGetNodeIndexByName, FUN_00215a30 (DogModel::getNodeIndexByName, inline in scnActorSndPos, with its m_i3r_root assert)
+// ROR 0x001f7444
+
+void VoiceManager::play3d(int str, int actor, int frames)
+{
+    sceVu0FMATRIX mtx;
+
+    m_frames = frames;
+    m_str = str;
+    m_actor = actor;
+    g_gamMan.m_sndMan.m_mode = 1;   /* setSnd3DCnt(1), inline */
+    float *pos = scnActorSndPos(g_magSystem.m_scene.m_actors[actor], mtx);
+    g_gamMan.m_sndMan.playStr(str, -1, pos, false, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// SndMan id 1, not looping.
+// ROR 0x001f7570
+
+void VoiceManager::play(int str, int vol, int pan, int frames)
+{
+    int volL = vol;
+    int volR = vol;
+
+    m_frames = frames;
+    m_str = str;
+    m_actor = 0;
+    if (pan >= 0)
+        volL = (0x3f - pan) * vol / 64;
+    if (pan < 1)
+        volR = (pan + 0x3f) * vol / 64;
+    g_gamMan.m_sndMan.playStr(str, volL, volR, 1.0f, 0, 1, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f7610
+
+void VoiceManager::tick()
+{
+    if (m_frames != 0 && --m_frames == 0)
+        stop();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  ScenePlaySingle
+// ══════════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f764c
+
+ScenePlaySingle::ScenePlaySingle(int actor, ScenePlayRecord *data)
+{
+    m_oid = (u_int)-1;
+    m_active = 1;
+    m_data = data;
+    m_actor = actor;
+    m_frame = -1;
+    m_index = 0;
+    m_owner = NULL;                 /* PC: addSingle sets it */
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f76b0
+
+int ScenePlaySingle::exec()
+{
+    step();
+    move();
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f76e0
+
+bool ScenePlaySingle::step()
+{
+    if (m_active == 0)
+        return false;
+    m_frame++;
+    if (m_data[m_index].m_kind == 0)
+        return false;
+    while (m_data[m_index].m_frame <= m_frame && run(0))
+        ;
+    return m_active != 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Kind 1 wraps the angle once into -pi..pi with the ROM's constants
+// (0x40490fdc / 0x40c90fdc); kind 2 starts the motion at 1/60
+// (0x3c888897), then sets its speed to the record's frames a second.
+// ROR 0x001f7788
+
+bool ScenePlaySingle::run(int skip)
+{
+    const float kPi = 0x1.921fb8p+1f;
+    const float kTwoPi = 0x1.921fb8p+2f;
+    MagScene &scene = g_magSystem.m_scene;
+    DogActor &actor = scene.m_actors[m_actor];
+    const ScenePlayRecord &rec = m_data[m_index];
+
+    switch (rec.m_kind)
+    {
+    case 1:
+    {
+        actor.m_trans[1] = scnRecFloat(rec.m_0c);
+        actor.m_dirty = 1;
+        actor.m_trans[0] = scnRecFloat(rec.m_08);
+        actor.m_trans[2] = scnRecFloat(rec.m_10);
+        float ry = scnRecFloat(rec.m_14);
+        if (ry < -kPi)
+            ry += kTwoPi;
+        else if (ry >= kPi)
+            ry -= kTwoPi;
+        float rot[4] = { actor.m_rotate[0], ry, actor.m_rotate[2], 0.0f };
+        g_magSystem.setActorRotate(m_actor, rot);
+        actor.setBaseRotateY(ry);
+        break;
+    }
+    case 2:
+        actor.setParam1d8(rec.m_14);
+        actor.changeMotion(0x1.11112ep-6f, rec.m_08, 1, -1, -1);
+        actor.m_motion.m_speed = scnRecFloat(rec.m_10) / 60.0f;
+        break;
+    case 3:
+        if (skip == 0)
+        {
+            int se = g_gamMan.m_sndMan.get_se_oid(rec.m_name);
+            if (rec.m_10 == 0 && rec.m_14 != 0)
+                m_owner->m_se.play((u_int)se, rec.m_14, rec.m_pan, rec.m_frames);
+            else
+                m_owner->m_se.play3d((u_int)se, m_actor, rec.m_frames);
+        }
+        break;
+    case 4:
+        if (skip == 0)
+        {
+            int str = g_gamMan.m_sndMan.getStrNO(rec.m_name);
+            if (rec.m_10 == 0 && rec.m_14 != 0)
+                m_owner->m_voice.play(str, rec.m_14, rec.m_pan, 0);
+            else
+                m_owner->m_voice.play3d(str, m_actor, 0);
+        }
+        break;
+    case 5:
+        if (skip == 0)
+            m_owner->m_msg.show(rec.m_08, rec.m_0c);
+        break;
+    case 6:
+    {
+        int state = scene.getFadeState();
+        if (state != 3 && state != 5)
+            scene.fadeIn(rec.m_08, 7, 0);
+        break;
+    }
+    case 7:
+    {
+        int state = scene.getFadeState();
+        if (state != 4 && state != 6)
+            scene.fadeOut(rec.m_08, 7, 0);
+        break;
+    }
+    case 8:
+        if (m_oid != (u_int)-1)
+            g_gamMan.showLinked(m_oid);
+        actor.setHide(0);
+        break;
+    case 9:
+        if (m_oid != (u_int)-1 && (((int)m_oid >> 23) & 0x1f) == 0)
+            g_gamMan.getEmyOids();      /* the ROM passes m_oid in a1; not read */
+        actor.setHide(1);
+        break;
+    }
+
+    if (m_data[m_index + 1].m_kind == 0)
+    {
+        m_active = 0;
+        return false;
+    }
+    m_index++;
+    return true;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The motion's root move over this frame (twice the speed in 120 Hz
+// frames), turned by the actor's base Y rotation.
+// ROR 0x001f7c0c
+
+void ScenePlaySingle::move()
+{
+    MagScene &scene = g_magSystem.m_scene;
+    DogActor &actor = scene.m_actors[m_actor];
+    float rot[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    sceVu0FVECTOR d = { 0.0f, 0.0f, 0.0f, 1.0f };
+    sceVu0FVECTOR pos = { 0.0f, 0.0f, 0.0f, 1.0f };
+    sceVu0FMATRIX mtx;
+
+    float frame = actor.getMotionFrame120();
+    float speed = scene.getActorMotionSpeed(m_actor);
+    actor.getMotionMove(frame, frame + speed * 60.0f + speed * 60.0f, d, rot, pos);
+    float ry = actor.m_base_rotate[1];
+    d[1] = 0.0f;
+    d[3] = 1.0f;
+    sceVu0UnitMatrix(mtx);
+    sceVu0RotMatrixY(mtx, mtx, ry);
+    sceVu0ApplyMatrix(d, mtx, d);
+    actor.addTrans(d, pos[1], rot[0]);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  ScenePlay
+// ══════════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: DisplayMessage, SeManager, VoiceManager, ScenePlay::init (the member constructors and the empty slot-3 body, inline)
+// ROR 0x001f7d54
+
+ScenePlay::ScenePlay(int arg)
+{
+    memset(m_single, 0, sizeof(m_single));
+    m_frame = m_frames = 0;         /* PC: the ROM leaves them to setFrames */
+    memset(m_cameraPath, 0, sizeof(m_cameraPath));
+    memset(m_focusPath, 0, sizeof(m_focusPath));
+    memset(m_actor, 0, sizeof(m_actor));
+    memset(m_name, 0, sizeof(m_name));
+    init();
+    m_3c = arg;
+    m_focusData = NULL;
+    m_eff = -1;
+    m_numSingle = 0;
+    m_numActor = 0;
+    m_cameraData = NULL;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The SEs stopped, the loaded models released, the threads deleted, the
+// effect released and the message closed.
+// ROR 0x001f7e50
+
+void ScenePlay::term()
+{
+    MagScene &scene = g_magSystem.m_scene;
+
+    m_se.stopAll();
+    gamStage2Loaded();
+    for (int i = 0; i < m_numActor; i++)
+        scene.releaseActor((u_int)m_actor[i]);
+    m_numActor = 0;
+    for (int i = 0; i < m_numSingle; i++)
+    {
+        if (m_single[i] != NULL)
+            delete m_single[i];
+        m_single[i] = NULL;         /* PC: the destructor runs term again */
+    }
+    m_numSingle = 0;
+    if (m_eff != -1)
+    {
+        scene.m_837e0.release(m_eff);
+        m_eff = -1;
+    }
+    m_msg.show(-1, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: operator_new (the new expression)
+// ROR 0x001f7f68
+
+void ScenePlay::addSingle(int actor, ScenePlayRecord *data, u_int oid)
+{
+    ScenePlaySingle *single = new ScenePlaySingle(actor, data);
+
+    m_single[m_numSingle] = single;
+    m_single[m_numSingle]->m_owner = this;
+    m_single[m_numSingle]->m_oid = oid;
+    m_numSingle++;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f8028
+
+void ScenePlay::setFrames(int frames)
+{
+    m_frame = frames;
+    m_frames = frames;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Ends the task when the frames run out.
+// ROR 0x001f82e4
+
+int ScenePlay::exec(int id, int time, int arg)
+{
+    (void)id;
+    (void)time;
+    (void)arg;
+    for (int i = 0; i < m_numSingle; i++)
+        m_single[i]->exec();
+    if (--m_frame >= 1)
+    {
+        m_msg.tick();
+        m_se.tick();
+        m_voice.tick();
+    }
+    return m_frame < 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f836c
+
+void ScenePlay::setName(const char *name)
+{
+    strncpy(m_name, name, 0x1f);
+    m_name[0x1f] = '\0';
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f839c
+
+char *scnMakeScenePath(char *out, const char *name)
+{
+    char base[0x20];
+
+    strcpy(base, name);
+    char *dot = strstr(base, ".");
+    if (dot != NULL)                /* PC: the ROM stores through NULL without a '.' */
+        *dot = '\0';
+    sprintf(out, "%s/%s", base, base);
+    return out;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The file scnMakeScenePath(name) of GamMan's event pack: one
+// ScenePlaySingle per CHARA / THREAD (its model loaded unless oids gives
+// a live object; one oid a thread), the motion names converted once (the
+// "map" word becomes 0xcccc), then the frame count and the message lines.
+// withEff (native 0x46) adds the pack's effect (file 1) and focus track
+// (file 2). The FileReader is constructed and destroyed unused.
+// callcheck: FUN_00215a30, FileReader, ~FileReader, NagaChunk, ~NagaChunk, operator_new (BedPfh's inline asserts, the inline locals, the new expression)
+// ROR 0x001f83f4
+
+int scenePlayStart(const char *name, intptr_t oidsArg, int withEff)
+{
+    MagScene &scene = g_magSystem.m_scene;
+    const int *oids = (const int *)oidsArg;
+    FileReader reader;
+    int kinds[2] = { 5, -1 };
+    char path[0x20];
+    int frames = 0;
+    int converted = 0;
+    BedPfh pack;
+
+    g_gamMan.resume(0x10000);
+    g_gamMan.m_flags2 &= 0x7fffffff;
+    g_sequence.m_flags |= 0x400;
+    g_taskMan.killKinds(kinds);
+    pack.clear();
+    scnMakeScenePath(path, name);
+    BedPfh evt(g_gamMan.m_evtPack);
+    int n = evt.getFileIndex(path);
+    pack = BedPfh(evt.getFile(n));
+    void *top = pack.getFile(0);
+    ScenePlay *play = new ScenePlay(0);
+
+    NagaChunk chunk(top);
+    if (chunk.find("map"))
+        converted = chunk.getInt() == 0xcccc;
+    chunk.rewind();
+    if (chunk.find("CHARA"))
+    {
+        NagaChunk chara(chunk.getData());
+        while (chara.find("THREAD"))
+        {
+            const char *modelName = NULL;
+            ScenePlayRecord *data = NULL;
+            NagaChunk thread(chara.getData());
+            if (thread.find("name"))
+                modelName = (const char *)thread.getData();
+
+            int actor;
+            if (*oids == -1 || g_gamMan.isObj((u_int)*oids) == 0)
+            {
+                int arg = 0;
+                u_int oid = 0;
+                int cat = motNameGetCategory(motNameFindChara(modelName));
+                int num = cat < 8 ? 0 : cat - 7;
+                if (num < 1)
+                {
+                    switch (cat)
+                    {
+                    case 0: oid = g_gamMan.makeOid(1, 0, -1); arg = 0x2000; break;
+                    case 1: oid = g_gamMan.makeOid(1, 1, -1); arg = 0x2400; break;
+                    case 2: oid = g_gamMan.makeOid(1, 3, -1); break;
+                    case 3: oid = g_gamMan.makeOid(2, 5, -1); arg = 0xc00;  break;
+                    case 4: oid = g_gamMan.makeOid(2, 4, -1); arg = 0x800;  break;
+                    case 5: oid = g_gamMan.makeOid(1, 2, -1); arg = 0x1400; break;
+                    case 6: oid = g_gamMan.makeOid(2, 9, -1); arg = 0x1800; break;
+                    }
+                }
+                else
+                {
+                    arg = num * 0x400 + 0x2400;
+                    oid = g_gamMan.makeOid(1, 3, -1);
+                }
+                char lower[0x80];
+                utlStrToLower(lower, modelName);
+                actor = scene.loadModelByName(&g_magSystem.m_i3d, lower, arg, NULL);
+                g_gamMan.setObjLight(actor, oid);
+                play->m_actor[play->m_numActor++] = actor;
+            }
+            else
+            {
+                actor = g_gamMan.getActorNo((u_int)*oids);
+            }
+            if (actor < 0)                  /* PC: the ROM indexes the actors with -1 */
+            {
+                oids++;
+                continue;
+            }
+            scene.m_actors[actor].setHide(0);
+
+            thread.rewind();
+            if (thread.find("data"))
+            {
+                data = (ScenePlayRecord *)thread.getData();
+                play->addSingle(actor, data, (u_int)*oids);
+            }
+            thread.rewind();
+            if (thread.find("STR"))
+            {
+                intptr_t names[0x14][2];
+                int i = 0;
+                NagaChunk str(thread.getData());
+                while (str.next() && i < 0x13)
+                {
+                    names[i][0] = (intptr_t)str.getData();
+                    names[i][1] = (int)(*(u_int *)str.getEntry() & 0x7fffffff);
+                    i++;
+                }
+                names[i][0] = 0;
+                names[i][1] = 0;
+                (void)strcmp("PC2", modelName);     /* the ROM drops the result */
+                if (converted == 0)
+                    motNameConvert(actor, data, &names[0][0]);
+            }
+            oids++;
+        }
+    }
+
+    chunk.rewind();
+    if (chunk.find("map"))
+        *(int *)chunk.getData() = 0xcccc;
+    chunk.rewind();
+    if (chunk.find("frame"))
+    {
+        play->setFrames(chunk.getInt());
+        frames = chunk.getInt();
+    }
+    chunk.rewind();
+    play->m_msg.reset();
+    if (chunk.find("MESSAGE"))
+        play->m_msg.load(chunk.getData());
+
+    if (withEff != 0)
+    {
+        EffParam param;
+        memset(&param, 0, sizeof(param));
+        param.m_kind = 0xd;
+        param.m_08 = 0;
+        param.m_file = pack.getFile(1);
+        play->m_eff = scene.m_837e0.createEff(&param);
+        if (pack.getNumFile() > 2)
+            scene.setFocusData(pack.getFile(2), pack.getFileSize(2));
+    }
+    g_taskMan.addTask(1, -1, 1, 0, play, 0, &g_gamMan.m_frameTaskId, 0x11);
+    return frames;
+}
 
 // ══════════════════════════════════════════════════════════════════════
 //  TskSnd

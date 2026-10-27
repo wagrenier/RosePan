@@ -647,6 +647,12 @@
   "was": "FUN_0010eba0",
   "why": "5-entry list node +0x3f8 / float +0x40c: an entry for node gets the value, 1.0 frees it; else the first free (< 0) or 1.0 entry takes node and value. chrRestoreLimb passes 1.0; scale is a guess"
  },
+ "0010ed2c": {
+  "name": "DogActor::setBaseRotateY",
+  "tag": "ror-inferred",
+  "was": "FUN_0010ed2c",
+  "why": "wraps the angle to -pi..pi into +0x3c4 (m_base_rotate y), asserts the range"
+ },
  "0010f298": {
   "name": "DogActor::resetShadow",
   "tag": "ror-inferred",
@@ -3040,6 +3046,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00140e88",
   "why": "mag/magscenefocus.cpp neighbour; when +0x853c0 != -1 runs 0x140fdc / 0x141184 for the flags at +0x853bc (bit 1 twice, bit 0 once) with frame & 1 picking 0 or 0x70"
+ },
+ "001417e4": {
+  "name": "MagScene::setFocusData",
+  "tag": "ror-inferred",
+  "was": "FUN_001417e4",
+  "why": "mag/magscenefocus.cpp: with data, setFocus(3) and the focus data / size into +0x853d4 / +0x853d8"
  },
  "00141e44": {
   "name": "MagLoaderIndex::dump",
@@ -10325,6 +10337,234 @@
   "was": "FUN_001f6c14",
   "why": "(a / frames) / 0.02778, 0 for frames 0; chrMoveInFrames' rate"
  },
+ "001f6c64": {
+  "name": "DisplayMessage::DisplayMessage",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6c64",
+  "why": "stores DisplayMessage's vtable 0x2e4e58 at +0x8c; ScenePlay's constructor runs it on +0x1b0"
+ },
+ "001f6c84": {
+  "name": "DisplayMessage::~DisplayMessage",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6c84",
+  "why": "vtable 0x2e4e58 slot 1: resets the vptr, deletes with bit 1"
+ },
+ "001f6cb8": {
+  "name": "DisplayMessage::tick",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6cb8",
+  "why": "counts +0x88 down and kills the message task at 0; ScenePlay::exec's per-frame call"
+ },
+ "001f6cec": {
+  "name": "DisplayMessage::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6cec",
+  "why": "clears count / current (-1) / timer and kills the message task"
+ },
+ "001f6d20": {
+  "name": "DisplayMessage::addLine",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6d20",
+  "why": "stores the string in the table at +0, count +0x80 up"
+ },
+ "001f6d8c": {
+  "name": "DisplayMessage::load",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6d8c",
+  "why": "chunk reader over the MESSAGE data: every 'strings' chunk to addLine"
+ },
+ "001f6dfc": {
+  "name": "DisplayMessage::show",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6dfc",
+  "why": "opens line n with GamMan::setMsgParam / openMsg for the given frames, -1 closes"
+ },
+ "001f6edc": {
+  "name": "SeManager::SeManager",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6edc",
+  "why": "vtable 0x2e4e40 at +0x304, count +0x300 = 0"
+ },
+ "001f6ef0": {
+  "name": "SeManager::~SeManager",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6ef0",
+  "why": "vtable 0x2e4e40 slot 1: stopAll then delete"
+ },
+ "001f6f4c": {
+  "name": "SeManager::play3d",
+  "tag": "ror-inferred",
+  "was": "FUN_001f6f4c",
+  "why": "records se / actor / frames, plays the SE at the actor's Bip01 node (or its position) via GamSndMan::playSE(u_int,bool,float*,int)"
+ },
+ "001f70c8": {
+  "name": "SeManager::play",
+  "tag": "ror-inferred",
+  "was": "FUN_001f70c8",
+  "why": "records se / frames, plays the SE at a volume panned by -63..63 via GamSndMan::playSE(u_int,int,int,float,...)"
+ },
+ "001f71b8": {
+  "name": "SeManager::tick",
+  "tag": "ror-inferred",
+  "was": "FUN_001f71b8",
+  "why": "counts each entry's frames down and stops it at 0"
+ },
+ "001f723c": {
+  "name": "SeManager::stopAll",
+  "tag": "ror-inferred",
+  "was": "FUN_001f723c",
+  "why": "stop(0) count times"
+ },
+ "001f728c": {
+  "name": "SeManager::stop",
+  "tag": "ror-inferred",
+  "was": "FUN_001f728c",
+  "why": "funcSE(se, 1) on entry n, the last entry moved into its place"
+ },
+ "001f7338": {
+  "name": "SeManager::stopSE",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7338",
+  "why": "stop for entries matching se and actor (unreferenced; reads entry m_count, a ROM bug)"
+ },
+ "001f73d4": {
+  "name": "VoiceManager::VoiceManager",
+  "tag": "ror-inferred",
+  "was": "FUN_001f73d4",
+  "why": "vtable 0x2e4e28 at +0xc, frames +8 = 0"
+ },
+ "001f73e8": {
+  "name": "VoiceManager::~VoiceManager",
+  "tag": "ror-inferred",
+  "was": "FUN_001f73e8",
+  "why": "vtable 0x2e4e28 slot 1: stop then delete"
+ },
+ "001f7444": {
+  "name": "VoiceManager::play3d",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7444",
+  "why": "plays stream str at the actor's Bip01 node via GamSndMan::playStr(int,int,float*,bool,u_int)"
+ },
+ "001f7570": {
+  "name": "VoiceManager::play",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7570",
+  "why": "plays stream str at a panned volume via GamSndMan::playStr(int,int,int,float,...)"
+ },
+ "001f7610": {
+  "name": "VoiceManager::tick",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7610",
+  "why": "counts frames down, stop at 0"
+ },
+ "001f7644": {
+  "name": "VoiceManager::stop",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7644",
+  "why": "empty; called by tick and the destructor"
+ },
+ "001f764c": {
+  "name": "ScenePlaySingle::ScenePlaySingle",
+  "tag": "ror-inferred",
+  "was": "FUN_001f764c",
+  "why": "vtable 0x2e4e10 at +0x9c; actor, record data, frame -1, active 1"
+ },
+ "001f767c": {
+  "name": "ScenePlaySingle::~ScenePlaySingle",
+  "tag": "ror-inferred",
+  "was": "FUN_001f767c",
+  "why": "vtable 0x2e4e10 slot 1"
+ },
+ "001f76b0": {
+  "name": "ScenePlaySingle::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f76b0",
+  "why": "step then move, returns 0; ScenePlay::exec runs it for each THREAD"
+ },
+ "001f76e0": {
+  "name": "ScenePlaySingle::step",
+  "tag": "ror-inferred",
+  "was": "FUN_001f76e0",
+  "why": "frame +1, runs every record whose frame has come"
+ },
+ "001f7788": {
+  "name": "ScenePlaySingle::run",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7788",
+  "why": "one 0x48-byte record by kind: 1 place, 2 motion, 3 SE, 4 voice, 5 message, 6 / 7 fade, 8 / 9 show / hide"
+ },
+ "001f7c0c": {
+  "name": "ScenePlaySingle::move",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7c0c",
+  "why": "the motion's root move turned by the base Y rotation into DogActor::addTrans"
+ },
+ "001f7d54": {
+  "name": "ScenePlay::ScenePlay",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7d54",
+  "why": "vtable 0x2e4dd0; constructs DisplayMessage +0x1b0, SeManager +0x240, VoiceManager +0x548"
+ },
+ "001f7dc8": {
+  "name": "ScenePlay::~ScenePlay",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7dc8",
+  "why": "vtable 0x2e4dd0 slot 6: term, member destructors, delete"
+ },
+ "001f7e48": {
+  "name": "ScenePlay::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7e48",
+  "why": "vtable 0x2e4dd0 slot 3, empty"
+ },
+ "001f7e50": {
+  "name": "ScenePlay::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7e50",
+  "why": "vtable 0x2e4dd0 slot 5: stops the SEs, releases the loaded actors, the singles, the effect, the message"
+ },
+ "001f7f68": {
+  "name": "ScenePlay::addSingle",
+  "tag": "ror-inferred",
+  "was": "FUN_001f7f68",
+  "why": "new ScenePlaySingle (0xc0) for an actor's THREAD data, owner and oid set"
+ },
+ "001f8028": {
+  "name": "ScenePlay::setFrames",
+  "tag": "ror-inferred",
+  "was": "FUN_001f8028",
+  "why": "+0x34 and +0x38 = the 'frame' chunk's count"
+ },
+ "001f8034": {
+  "name": "ScenePlay::loadCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_001f8034",
+  "why": "reads data/evt/%02d/camera/<name> into a 0x20000 buffer and creates effect 0xd from it (unreferenced)"
+ },
+ "001f81a8": {
+  "name": "ScenePlay::loadFocus",
+  "tag": "ror-inferred",
+  "was": "FUN_001f81a8",
+  "why": "reads data/evt/%02d/focus/<name> and hands it to the scene's focus (unreferenced)"
+ },
+ "001f82e4": {
+  "name": "ScenePlay::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f82e4",
+  "why": "vtable 0x2e4dd0 slot 4: the singles, frame countdown, message / SE / voice ticks; ends at 0"
+ },
+ "001f836c": {
+  "name": "ScenePlay::setName",
+  "tag": "ror-inferred",
+  "was": "FUN_001f836c",
+  "why": "strncpy 0x1f into +0x110"
+ },
+ "001f839c": {
+  "name": "scnMakeScenePath",
+  "tag": "ror-inferred",
+  "was": "FUN_001f839c",
+  "why": "'name.ext' -> 'name/name' (strstr '.', sprintf '%s/%s'): scenePlayStart's pfh file name"
+ },
  "001f83f4": {
   "name": "scenePlayStart",
   "tag": "ror-inferred",
@@ -10498,6 +10738,60 @@
   "tag": "ror-inferred",
   "was": "FUN_001fc474",
   "why": "the step setupPad stores at +4: returns 0 (hidden in 0x1fc46c's body until split)"
+ },
+ "001fca84": {
+  "name": "NagaChunk::NagaChunk",
+  "tag": "ror-inferred",
+  "was": "FUN_001fca84",
+  "why": "task/naga_chunk.cpp: stores the table pointer, clears the owned / end / index words, rewinds"
+ },
+ "001fcaac": {
+  "name": "NagaChunk::~NagaChunk",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcaac",
+  "why": "frees the table when +4 (owned) is set; delete with bit 1"
+ },
+ "001fcbf8": {
+  "name": "NagaChunk::rewind",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcbf8",
+  "why": "index -1, end flag when the first entry's word is 0"
+ },
+ "001fcc20": {
+  "name": "NagaChunk::next",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcc20",
+  "why": "index +1 over the 16-byte entries; 0 and the end flag at a zero entry"
+ },
+ "001fcc68": {
+  "name": "NagaChunk::findTag",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcc68",
+  "why": "from the next entry on, the first whose two name words equal the tag's"
+ },
+ "001fccf4": {
+  "name": "NagaChunk::find",
+  "tag": "ror-inferred",
+  "was": "FUN_001fccf4",
+  "why": "the name zero-padded to 8 bytes, then findTag"
+ },
+ "001fcda4": {
+  "name": "NagaChunk::getEntry",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcda4",
+  "why": "the current 16-byte entry"
+ },
+ "001fcdb8": {
+  "name": "NagaChunk::getData",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcdb8",
+  "why": "table + the current entry's offset word (+8)"
+ },
+ "001fcdd4": {
+  "name": "NagaChunk::getInt",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcdd4",
+  "why": "the word at getData"
  },
  "00203d94": {
   "name": "SysTimer::SysTimer",
@@ -11945,6 +12239,24 @@
   "was": "FUN_00215bb4",
   "why": "formats four floats (3 digits) into stack buffers and prints nothing, the four-float twin of dbgTraceVector3 0x215b5c"
  },
+ "00216184": {
+  "name": "motNameConvert",
+  "tag": "ror-inferred",
+  "was": "FUN_00216184",
+  "why": "kind-2 records of a scene thread: their motion key (+8) looked up in a {name, key} list and replaced by the actor's motion number"
+ },
+ "0021628c": {
+  "name": "motNameFindChara",
+  "tag": "ror-inferred",
+  "was": "FUN_0021628c",
+  "why": "debug/motnamecnv0.cpp: asserts the name, MagLoaderIndex::find on the loader's character index (0x1436d4)"
+ },
+ "002162e0": {
+  "name": "motNameGetCategory",
+  "tag": "ror-inferred",
+  "was": "FUN_002162e0",
+  "why": "MagCharaLoader::getCategory of a character index (0x143750); scenePlayStart picks the oid type from it"
+ },
  "00217f10": {
   "name": "utlAtan2",
   "tag": "ror-inferred",
@@ -11956,6 +12268,12 @@
   "tag": "ror-inferred",
   "was": "FUN_002180e4",
   "why": "sqrt of x, z into *a0, returns pi/2 - acos(x/len) signed by z, wrapped to -pi..pi; next to utlAtan2"
+ },
+ "00218338": {
+  "name": "utlStrToLower",
+  "tag": "ror-inferred",
+  "was": "FUN_00218338",
+  "why": "copies a string, upper case (ctype bit 1) to lower"
  },
  "0021838c": {
   "name": "utlStrNCopy",

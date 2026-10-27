@@ -1542,3 +1542,19 @@ not identified yet.
   two objects turned to face each other (word 2: both), the camera mode 1 at pitch -0.2, 30 to the side
   of object 0 and 70 back from object 1's head (160 up), pulled 15 in when MagScene::castRay hits. Both
   run until killed (exec returns 0). 0x25b8c0 is `sceVu0ScaleVector` (lib-context).
+- Event scenes (written 2026-10-26): `scenePlayStart(name, oids, withEff)` (natives 0x46 returns it /
+  0x47) finds `name/name` (`scnMakeScenePath`: the name up to its '.') in GamMan's event pack (+0x22a80);
+  that file is a pfh: file 0 a NagaChunk table (16-byte entries {name[8], offset, ?}, zero-terminated;
+  `find` scans on from the cursor, so callers rewind), file 1 an effect (Obj176a3c kind 0xd, data
+  pointer at param +0x10; only withEff), file 2 the focus track (`MagScene::setFocusData`, size from the
+  pfh's size table). Chunks: "map" (int; 0xcccc once the motion names were converted -- written back
+  into the pack), "CHARA" -> "THREAD" per actor -> "name" (model; loaded with an oid / arg picked from
+  `motNameGetCategory`: 0 (1,0) 0x2000, 1 (1,1) 0x2400, 2 (1,3) 0, 3 (2,5) 0xc00, 4 (2,4) 0x800, 5 (1,2)
+  0x1400, 6 (2,9) 0x1800, 8+ (1,3) 0x400 * (cat - 7) + 0x2400, unless the oids array's entry is a live
+  object), "data" (0x48-byte `ScenePlayRecord`s run by a `ScenePlaySingle`), "STR" (up to 19 {name,
+  key} motion names for `motNameConvert`); "frame" (the length), "MESSAGE" -> "strings" (lines). Kills
+  kind-5 tasks first, clears GamMan m_flags2 bit 31, sets g_sequence.m_flags 0x400, and adds the
+  ScenePlay (kind 0xf) with flags 0x11 on GamMan::m_frameTaskId. Record kinds: 1 place + Y rotation, 2
+  motion (speed rec/60), 3 SE (panned volume or at the actor's Bip01 node; SeManager stops it after its
+  frames), 4 voice stream, 5 message line (window 0x20,0x140 0x1c0x0x50), 6 / 7 scene fade in / out
+  (skipped while one runs), 8 / 9 show / hide. ScenePlay::term releases the models it loaded.

@@ -139,6 +139,167 @@ struct TskCamera : CmnITask
     sceVu0FVECTOR m_driftSmooth;   // ROR 0x80: m_drift smoothed (0.85 / 0.1)
 };
 
+/* ──────────────────────────────────────────────────────────────────────
+ *  The event scene player. An event pack file (data/evt/.. inside the
+ *  stage's event pack, GamMan::m_evtPack) is a pfh: file 0 a NagaChunk
+ *  table -- "map" (0xcccc once its motion names are converted), "CHARA"
+ *  (a "THREAD" per actor: "name" the model, "data" the records, "STR" the
+ *  motion names), "frame" (the length), "MESSAGE" ("strings") --, file 1
+ *  an effect (kind 0xd), file 2 the focus track.
+ * ────────────────────────────────────────────────────────────────────── */
+
+struct ScenePlay;
+
+/* One timed record of a thread (0x48 bytes, EE layout: it comes from the
+ * pack). The thread runs on while the next record's kind is not 0. */
+struct ScenePlayRecord
+{
+    int   m_frame;              // ROR 0x00: the thread frame it runs at
+    int   m_kind;               // ROR 0x04: 1 place, 2 motion, 3 SE, 4 voice, 5 message, 6 fade in, 7 fade out, 8 show, 9 hide
+    int   m_08;                 // ROR 0x08: 1 x (float), 2 the motion number (motNameConvert), 5 the line, 6 / 7 the fade time
+    int   m_0c;                 // ROR 0x0c: 1 y (float), 5 the frames
+    int   m_10;                 // ROR 0x10: 1 z (float), 2 the speed in frames a second (float), 3 / 4 zero with a volume: panned, else at the actor
+    int   m_14;                 // ROR 0x14: 1 the Y rotation (float), 2 DogActor::setParam1d8, 3 / 4 the volume
+    int   m_pan;                // ROR 0x18: 3 / 4 the pan (-63..63)
+    int   m_frames;             // ROR 0x1c: 3 the SE's frames
+    int   _20[2];
+    char  m_name[0x20];         // ROR 0x28: 3 / 4 the SE / stream name
+};
+static_assert(sizeof(ScenePlayRecord) == 0x48, "ScenePlayRecord is 0x48 bytes");
+static_assert(offsetof(ScenePlayRecord, m_frames) == 0x1c, "m_frames");
+static_assert(offsetof(ScenePlayRecord, m_name) == 0x28, "m_name");
+
+/* The scene's message lines (EE 0x90 at ScenePlay +0x1b0; vtable
+ * 0x2e4e58, vptr at +0x8c). layout: host -- pointers and a vptr. */
+struct DisplayMessage
+{
+    DisplayMessage()                                                     // ROR 0x001f6c64
+        : m_count(0), m_cur(-1), m_timer(0) {}
+    virtual ~DisplayMessage() {}                                         // ROR 0x001f6c84
+
+    void tick();                                                         // ROR 0x001f6cb8
+    void reset();                                                        // ROR 0x001f6cec
+    void addLine(char *line);                                            // ROR 0x001f6d20
+    /* Every "strings" chunk of the MESSAGE table becomes a line. */
+    void load(void *data);                                               // ROR 0x001f6d8c
+    /* Line no in the message window for frames frames; -1 closes it. */
+    void show(int no, int frames);                                       // ROR 0x001f6dfc
+
+    char *m_line[0x20];         // ROR 0x00
+    int   m_count;              // ROR 0x80
+    int   m_cur;                // ROR 0x84: the line shown, -1 none
+    int   m_timer;              // ROR 0x88: frames left, 0 = until changed
+};
+
+/* A scene's SEs (EE 0x308 at ScenePlay +0x240; vtable 0x2e4e40, vptr at
+ * +0x304): stopped when their frames run out or the scene ends.
+ * layout: host -- a vptr. */
+struct SeManager
+{
+    struct Entry
+    {
+        u_int m_se;             // ROR 0x00
+        int   m_actor;          // ROR 0x04: play3d's actor, 0 for play
+        int   m_frames;         // ROR 0x08: frames left, 0 = until the scene ends
+    };
+
+    SeManager() : m_count(0) {}                                          // ROR 0x001f6edc
+    virtual ~SeManager() { stopAll(); }                                  // ROR 0x001f6ef0
+
+    /* At actor's Bip01 node (its position without one). */
+    void play3d(u_int se, int actor, int frames);                        // ROR 0x001f6f4c
+    /* At vol, panned by pan (-63 left .. 63 right). */
+    void play(u_int se, int vol, int pan, int frames);                   // ROR 0x001f70c8
+    void tick();                                                         // ROR 0x001f71b8
+    void stopAll();                                                      // ROR 0x001f723c
+    void stop(int n);                                                    // ROR 0x001f728c
+    void stopSE(u_int se, int actor);                                    // ROR 0x001f7338
+
+    Entry m_entry[0x40];        // ROR 0x000
+    int   m_count;              // ROR 0x300
+};
+static_assert(sizeof(SeManager::Entry) == 0xc, "SeManager::Entry is 12 bytes");
+static_assert(offsetof(SeManager::Entry, m_frames) == 0x8, "m_frames");
+
+/* A scene's voice stream (EE 0x10 at ScenePlay +0x548; vtable 0x2e4e28,
+ * vptr at +0xc). layout: host -- a vptr. */
+struct VoiceManager
+{
+    VoiceManager() : m_frames(0) {}                                      // ROR 0x001f73d4
+    virtual ~VoiceManager() { stop(); }                                  // ROR 0x001f73e8
+
+    void play3d(int str, int actor, int frames);                         // ROR 0x001f7444
+    void play(int str, int vol, int pan, int frames);                    // ROR 0x001f7570
+    void tick();                                                         // ROR 0x001f7610
+    /* Empty in the ROM. */
+    void stop() {}                                                       // ROR 0x001f7644
+
+    int m_str;                  // ROR 0x0
+    int m_actor;                // ROR 0x4
+    int m_frames;               // ROR 0x8: frames left, 0 = no end
+};
+
+/* One actor's thread (EE 0xc0, operator new; vtable 0x2e4e10, vptr at
+ * +0x9c). layout: host -- pointers and a vptr. */
+struct ScenePlaySingle
+{
+    ScenePlaySingle(int actor, ScenePlayRecord *data);                   // ROR 0x001f764c
+    virtual ~ScenePlaySingle() {}                                        // ROR 0x001f767c
+
+    int  exec();                                                         // ROR 0x001f76b0
+    /* The frame +1 and every record due; whether the thread still runs. */
+    bool step();                                                         // ROR 0x001f76e0
+    /* The current record (skip: SEs, voices and messages left out); true
+     * while the next one is set. */
+    bool run(int skip);                                                  // ROR 0x001f7788
+    /* The motion's root move this frame. */
+    void move();                                                         // ROR 0x001f7c0c
+
+    ScenePlayRecord *m_data;    // ROR 0x00
+    int              m_active;  // ROR 0x04
+    int              m_actor;   // ROR 0x08
+    int              m_frame;   // ROR 0x0c
+    int              m_index;   // ROR 0x10: the current record
+    u_int            m_oid;     // ROR 0x14: the scripted object, -1 for a model the scene loaded
+    ScenePlay       *m_owner;   // ROR 0x18
+};
+
+/* ScenePlay : CmnITask (vtable 0x2e4dd0, EE 0x580; kind 0xf): plays an
+ * event pack's threads for its "frame" count of frames. layout: host --
+ * pointers and members with vptrs; EE offsets in the comments. */
+struct ScenePlay : CmnITask
+{
+    ScenePlay(int arg);                                                  // ROR 0x001f7d54
+    ~ScenePlay() override { term(); }                                    // ROR 0x001f7dc8
+
+    int  get_task_type() override { return 0xf; }                        // ROR 0x0029093c
+    void init() override {}                                              // ROR 0x001f7e48
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001f82e4
+    void term() override;                                                // ROR 0x001f7e50
+
+    void addSingle(int actor, ScenePlayRecord *data, u_int oid);         // ROR 0x001f7f68
+    void setFrames(int frames);                                          // ROR 0x001f8028
+    void setName(const char *name);                                      // ROR 0x001f836c
+
+    ScenePlaySingle *m_single[0xb];   // ROR 0x04
+    int              m_numSingle;     // ROR 0x30
+    int              m_frame;         // ROR 0x34: frames left
+    int              m_frames;        // ROR 0x38
+    int              m_3c;            // ROR 0x3c: the constructor's arg (0 from scenePlayStart)
+    int              m_eff;           // ROR 0x40: the pack's effect (Obj176a3c), -1 none
+    void            *m_cameraData;    // ROR 0x44: loadCamera's buffer (unreferenced code, not written)
+    char             m_cameraPath[0x40]; // ROR 0x48
+    void            *m_focusData;     // ROR 0x88: loadFocus's buffer (unreferenced code, not written)
+    char             m_focusPath[0x40];  // ROR 0x8c
+    int              m_actor[0x10];   // ROR 0xcc: the models the scene loaded
+    int              m_numActor;      // ROR 0x10c
+    char             m_name[0x20];    // ROR 0x110
+    u_char           _130[0x1b0 - 0x130];
+    DisplayMessage   m_msg;           // ROR 0x1b0
+    SeManager        m_se;            // ROR 0x240
+    VoiceManager     m_voice;         // ROR 0x548
+};
+
 /* The per-character request (jump table data 0x2fed40 over chr 0..10;
  * chr 11 takes it from object chrOid's kind: 4 for kind 0, 3 for kind 1,
  * the system data field 0x72 for kind 2). Many callers; TskMovePhysic
@@ -146,11 +307,13 @@ struct TskCamera : CmnITask
  * unverified. */
 void scnChrRequest(int chr, u_int oid, int a2, int a3, int word, u_int chrOid, int a6); // ROR 0x001fac60
 
-/* Event scenes: data/evt/%02d/scene/<name> from the stage pfh, played by
- * a ScenePlay task (vtable 0x2e4dd0, 0x580 bytes). scenePlayStart also
- * reads the map / CHARA / THREAD sections and halts the game; wait is its
- * third argument. */
-int  scenePlayStart(const char *name, intptr_t arg, int wait);           // ROR 0x001f83f4
+/* "name.ext" -> "name/name" into out (the event pack's file name). */
+char *scnMakeScenePath(char *out, const char *name);                     // ROR 0x001f839c
+/* Starts the event scene name (natives 0x46 / 0x47): kills kind-5 tasks,
+ * loads the THREAD models not given in oids (one oid a thread, -1 = load
+ * "name"), queues a ScenePlay; withEff also creates the pack's effect and
+ * focus track. Returns the "frame" count. */
+int  scenePlayStart(const char *name, intptr_t oids, int withEff);       // ROR 0x001f83f4
 void scenePlayStartSimple(const char *name);                             // ROR 0x001f8cec
 
 /* GamMan::loadSystemData's last call: empty in the ROM. */

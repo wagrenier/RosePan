@@ -134,6 +134,8 @@ struct DogActor : DogModel
         m_f4 = -1;
         m_mode = 0;
     }
+    /* m_base_rotate y = r wrapped once into -pi..pi (asserted). */
+    void setBaseRotateY(float r);                                        // ROR 0x0010ed2c
     void clearRotYAAR() { m_rot_y_aar = 0.0f; }                          // ROR 0x0028128c
     void clearRotOfsY() { m_rot_ofs_y = 0.0f; }                          // ROR 0x00281294
 
