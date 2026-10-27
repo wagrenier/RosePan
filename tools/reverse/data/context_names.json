@@ -5999,17 +5999,89 @@
   "was": "FUN_00196ea4",
   "why": "sets flag 2 and adds ehonbg (kind 4, arg 1) and ehontex01_tcc (kind 4, arg 0) to the file list; MnuPBook::init's last call"
  },
+ "00196efc": {
+  "name": "MnuPBook::queuePages",
+  "tag": "ror-inferred",
+  "was": "FUN_00196efc",
+  "why": "step 0 after the book's pack opens: allocates (pages + 1) / 2 sheet records (+0x12c / +0x130), sets their flags from the row's mode, queues pb_pagedmy00/01, %s%d_base.i3s models and the resting turn motions and page textures"
+ },
+ "0019722c": {
+  "name": "MnuPBook::startTurns",
+  "tag": "ror-inferred",
+  "was": "FUN_0019722c",
+  "why": "step 1: pushCamera, lowerVolume, doubles the loaded motions' frame counts, poses every sheet at the end of its motion, queues the opposite turn motions"
+ },
+ "001973fc": {
+  "name": "MnuPBook::openWindows",
+  "tag": "ror-inferred",
+  "was": "FUN_001973fc",
+  "why": "step 2: queues the hidden page sides, doubles the second motions' frames, opens the page text window (+0x138, 512x256) and the close prompt window (+0x134, sys text 0x1a) and message sprite 4"
+ },
  "001976b8": {
   "name": "MnuPBook::processPad",
   "tag": "ror-inferred",
   "was": "FUN_001976b8",
   "why": "MnuPBook : mnuBase (rtti) processPad; MagLifeMenuPBook (+0x50)'s menu object"
  },
+ "00197a74": {
+  "name": "MnuPBook::updatePad",
+  "tag": "ror-inferred",
+  "was": "FUN_00197a74",
+  "why": "step 3's pad handler: right / left (hold 0x20 / 0x80 or the left stick) turn a sheet, Circle (trig 0x2000) closes once the last page was reached (flag 0x40000); returns 0 to close"
+ },
+ "00197d28": {
+  "name": "MnuPBook::updateSheets",
+  "tag": "ror-inferred",
+  "was": "FUN_00197d28",
+  "why": "processPad's first call each frame: advances every sheet's turn frame up to its motion's length and puts loaded page textures (sheet words 1 / 2, flags 1 / 2) on the sheet models"
+ },
+ "00197e68": {
+  "name": "MnuPBook::setSheetTex",
+  "tag": "ror-inferred",
+  "was": "FUN_00197e68",
+  "why": "(sheet, texture slot, side): writes the slot's DogTexInfo record (or dummy slot 0x20 / 0x21 for -1) into the sheet model's side material and bumps the item's change count"
+ },
+ "00197f18": {
+  "name": "MnuPBook::turnSheet",
+  "tag": "ror-inferred",
+  "was": "FUN_00197f18",
+  "why": "(sheet, right): motion slot sheet*2 (+1 right), frame 0, bindMotion, 10-frame countdown +0x124"
+ },
  "00197f70": {
   "name": "MnuPBook::draw",
   "tag": "ror-inferred",
   "was": "FUN_00197f70",
   "why": "MnuPBook : mnuBase (rtti) draw; MagLifeMenuPBook (+0x50)'s menu object"
+ },
+ "00198290": {
+  "name": "MnuPBook::setDrawSet",
+  "tag": "ror-inferred",
+  "was": "FUN_00198290",
+  "why": "MnuPBook vtable slot 7: the draw set of texture slots 0 and 1 only (ehontex01_tcc and ehonbg)"
+ },
+ "00198318": {
+  "name": "MnuPBook::canTurn",
+  "tag": "ror-inferred",
+  "was": "FUN_00198318",
+  "why": "(right): 1 when the sheet to turn exists, is not turning, and the next sheet's page textures are in"
+ },
+ "00198420": {
+  "name": "MnuPBook::isTurning",
+  "tag": "ror-inferred",
+  "was": "FUN_00198420",
+  "why": "(sheet): its frame is below its motion's frame count"
+ },
+ "0019844c": {
+  "name": "MnuPBook::queueSheetTex",
+  "tag": "ror-inferred",
+  "was": "FUN_0019844c",
+  "why": "(sheet, front, back): finds free texture slots 2..0x21 and queues pb_page%02d_tcc / pb_pagebrk%02d_tcc (flags 0x10 / 0x20) for the sheet's two pages"
+ },
+ "001985b0": {
+  "name": "MnuPBook::setPageText",
+  "tag": "ror-inferred",
+  "was": "FUN_001985b0",
+  "why": "(page): builds the text window's message: format header plus msgGetSysText(row +4 + page) and (+ page + 1) unless the sheet flags say the side is absent or broken"
  },
  "00198720": {
   "name": "MnuDiary::MnuDiary",
@@ -8584,6 +8656,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d3b44",
   "why": "execPauseReq's last call: switch on sequence global 0x54, sets m_flags 0x2000 / m_flags2 0x80000, lookupFlagTable and MagScene::requestMenu, then enterMenuPause"
+ },
+ "001d44e4": {
+  "name": "GamMan::isSeqPair0Pending",
+  "tag": "ror-inferred",
+  "was": "FUN_001d44e4",
+  "why": "1 when m_seqPair[0] (system call 0x35, +0x222c4) has both words, global 100 equals global 0x65, and sys flag 0x8000 is clear; MnuPBook::processPad's close sets bit 0x2000000 of bit word 1 from it"
  },
  "001d480c": {
   "name": "GamMan::fitObjBounds",
@@ -14825,6 +14903,12 @@
   "was": "FUN_0022aab0",
   "why": "slot 0x25 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x25 (offsets from the data start)"
  },
+ "0022aad0": {
+  "name": "i3rGetChild25",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aad0",
+  "why": "the n-th child of the item's first child; sits after the type 0x25 fixup pair (0x22aaa8 / 0x22aab0); same body as 0x22aed8"
+ },
  "0022ab18": {
   "name": "i3rUnrelocData2D",
   "tag": "ror-inferred",
@@ -14860,6 +14944,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0022adf8",
   "why": "slot 0x52 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x52 (offsets from the data start)"
+ },
+ "0022aed8": {
+  "name": "i3rGetChild52",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aed8",
+  "why": "the n-th child of the item's first child; sits after the type 0x52 fixup pair (0x22ad20 / 0x22adf8); its twin 0x22aad0 has the same body"
  },
  "0022b1b0": {
   "name": "i3rFindName",

@@ -61,23 +61,21 @@ follows it; reached stubs in run order):
      first 3D picture**. Pinned first in the queue (the user, 2026-10-26: 3D rendering ahead of the
      menu fix below).
   4. **The picture book (mnu/, split 2026-10-26 from unassigned@00192ac0 into mnu/mnubase.cpp,
-     mnu/mnumap.cpp, mnu/mnupbook.cpp, mnu/mnustock.cpp).** mnu/mnupbook.cpp is `partial`: both
-     books' constructors, destructors, setType, init and term are written, so the assert is gone and
-     the 200 s New Game run now inits a picture book (after MagLifePC::setActor) -- and
-     stops there, black: MnuPBook::processPad / draw and the whole mnuBase loader are stubs, and
-     processPad returning 0 keeps the book open for ever. **This is the gate to the first room.**
-     `mnu/mnubase.cpp` WRITTEN 2026-10-26 (all 38 functions, `verify`): the mnu pool, setupWork,
-     addFile, openPack / closePack, term, the loader updateLoad 0x193a1c and the draw helpers. The
-     200 s run inits the book through it (the pack opens) and stops in the stubs MnuPBook::processPad
-     / draw, still black. **Next: mnu/mnupbook.cpp's processPad 0x1976b8 (it polls updateLoad) / draw
-     0x197f70 and page helpers.** For the book to show, the native i3d draw module needs the **VU1
-     sprite packets** mnuBase::drawSprite writes (i3dPktBeginVu1Sprite 0x21e5a0, i3dPktVu1Color /
-     Matrix / Sprite 0x21e488 / 0x21e428 / 0x21e690, unassigned@0021c960, stubs: record them like
-     the 2D writers, a textured quad per sprite from the matrix and uv) and drawModel's i3m pose
-     player (i3mGetPose 0x22e960 / i3mPoseToMatrices 0x22f7a0, unassigned@0022e840, stubs). The
-     reference: work/ref/MNUPBOOK and work/ref/PB010200 (tm2png --scan of the disc's
-     DATA/MNURPK/MNUPBOOK packs). Open: whether a held START (the smoke pad) closes the book once
-     processPad runs -- extend settings.smoke_pad if it needs CROSS / page turns.
+     mnu/mnumap.cpp, mnu/mnupbook.cpp, mnu/mnustock.cpp).** mnu/mnubase.cpp WRITTEN (verify).
+     mnu/mnupbook.cpp: **all of MnuPBook WRITTEN 2026-10-27** (processPad's six steps, page queue,
+     sheet turns, pad, text, draw, setDrawSet) -- `partial` for MnuDiary's processPad / draw and
+     helpers 0x198b54..0x19a3c0. **The gate is open:** the 200 s run opens the book (~frame 3240),
+     turns pages (RIGHT held), Circle closes it (~frame 6000), and the game goes on to the narration
+     ("Suddenly, the girl was all alone...", TskMsgMan; its window frame shows, the text is blank:
+     MsgMan / MsgManSet stubs). `settings.smoke_pad` now ends `4200:RIGHT*1700,6000:CIRCLE,6300:CIRCLE`.
+     **Still black while the book is open:** the native i3d draw module needs the VU1 sprite packets
+     mnuBase::drawSprite writes (i3dPktBeginVu1Sprite 0x21e5a0, 0x21e488 / i3dPktVu1Matrix 0x21e428 /
+     0x21e690, end 0x21e688, unassigned@0021c960: stubs that now hand the packet back -- record a
+     textured quad per sprite from the matrix, uv and colour) and drawModel's pose player (i3mGetLength
+     0x22e958, i3mGetPose 0x22e960, i3mPoseToMatrices 0x22f7a0, unassigned@0022e840, stubs) and
+     utlDrawI3r 0x106760 (stub). GamMan::lookupFlagTable 0x1d83d0 is a stub returning 0, so every book
+     opens with the type's words read from global 0 (page state is not the real one). Reference:
+     work/ref/MNUPBOOK and work/ref/PB010200 (tm2png --scan of DATA/MNURPK/MNUPBOOK).
   5. **`dog/dogactor.cpp`** -- DogActor::load 0x10cd5c, loadPackMotion 0x10c17c, getRotY, resetShadow
      (then the getNodeIndexByName PORT guard can go).
   6. `mag/magscenelight.cpp` -- MagScene::loadLight 0x13f658 / setDefaultLight 0x13f8e4.
@@ -871,6 +869,13 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- MnuSprite / VU1 sprite names (2026-10-27, mnu/mnupbook.cpp): the picture book's sprite records hold
+  (0, 0, 1, 0.875) at +0x10 (a 512 x 448 page on a 512 x 512 texture) and (1, 1, 1, 1) at +0x20, so
+  +0x10 is the uv rectangle and +0x20 the colour (MnuSprite fixed). drawSprite hands +0x10 to
+  0x21e488 (named i3dPktVu1Color) and +0x20 to i3dPktVu1Sprite 0x21e690's third argument (named
+  uv): those names look swapped. Settle it when the native VU1 sprite path is written (read the VU1
+  sprite microprogram: which of VU addresses 0x3f1 / the per-sprite vector it uses for ST).
 
 - CHARA.RPK + 0x5368980 (2026-10-26, i3d/i3ritem.cpp offline check): the one model of 1602 whose
   item names do not land on strings (its tree and data offsets are fine). Probably a pack entry that
