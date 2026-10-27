@@ -15,61 +15,9 @@
 
 #include "game/gamsnd.h"
 #include "game/gamstat.h"
+#include "game/gamtrg.h"
 #include "i3d/i3denv.h"
 #include "sequence/sequence.h"
-
-/* An area trigger record (EE 0xb0, plain EE layout: the scripts pass it
- * from their image, native 023; GamArea copies it whole into a node).
- * Field roles beyond the ones named are unverified. */
-struct GamAreaTrg
-{
-    float m_rect[4];            // ROR 0x00: x0, z0, x1, z1; native 023 orders each pair when m_flags & 0x103
-    u_int _10[4];
-    u_int m_flags;              // ROR 0x20: native 023 sets 0x3000000; 0x1000000 registers it (0x1de104), 0x400000 set by addTrg when m_70
-    u_int _24[2];
-    u_int m_id;                 // ROR 0x2c: addTrg skips a listed id; newId replaces it with a fresh oid
-    u_int _30[16];
-    u_int m_70;                 // ROR 0x70: non-zero: addTrg sets m_flags 0x400000
-    u_int _74[15];
-};
-static_assert(sizeof(GamAreaTrg) == 0xb0, "GamAreaTrg is 0xb0 bytes on the EE");
-static_assert(offsetof(GamAreaTrg, m_flags) == 0x20, "m_flags");
-static_assert(offsetof(GamAreaTrg, m_id) == 0x2c, "m_id");
-static_assert(offsetof(GamAreaTrg, m_70) == 0x70, "m_70");
-
-/* GamMan's member at +0x40 (bss 0x781300; its code is in
- * unassigned@001dd5e8, class name invented): a list of rects at +0xc290
- * tested against the PC's position. layout: host -- no members. */
-struct GamArea
-{
-    void init();                                                         // ROR 0x001dd414
-    /* Every frame while m_flags bit 2 is set: the rects against the PC. */
-    void update(const float *pos, const float *rot);                     // ROR 0x001dee78
-    void checkPc();                                                      // ROR 0x001deaac
-    void startPcAction();                                                // ROR 0x001dea40
-    /* The trigger word of the rect whose id matches (0 = every rect): op
-     * 1 sets bits, 2 ors, 3 clears, 4 tests, 5 tests and clears
-     * 0x20000000 (with GamMan::pause(0x8000)). */
-    int  ctl_trg_flg(int op, int id, u_int bits);                        // ROR 0x001e0c2c
-    /* afterSeqExec's stage change kind 3: the rects / triggers of kind. */
-    void stopKind(int kind);                                             // ROR 0x001dd7bc
-    void clearKind(int kind);                                            // ROR 0x001dddbc
-    /* 1 when one of its rects (the list +0xd0) has id. */
-    int  hasId(u_int id);                                                // ROR 0x001e0d70
-    /* Copies trg into a node of its list +0xd0 unless a listed one has
-     * its id; newId != 0 first gives trg a fresh oid (GamMan::makeOid(0,
-     * 0xd)). The ROM's callers pass a fourth word it never reads. */
-    void addTrg(GamAreaTrg *trg, int newId);                             // ROR 0x001dd5e8
-    /* stopTrgs, then the listed triggers with flag 0x1000000 again. */
-    void startTrgs();                                                    // ROR 0x001de4e4
-    /* Empties the active list +0xc290 into its free list. */
-    void stopTrgs();                                                     // ROR 0x001ddc80
-    /* Empties its trigger lists (+0xc1c0 / +0x18b40's / +0xd0) into their
-     * free lists. */
-    void clear();                                                        // ROR 0x001ddaa8
-    /* Adds value to key's up-to-8 values in the pool *(+0x18b40). */
-    void registFtb(int key, u_int value);                                // ROR 0x001de6fc
-};
 
 struct DogActor;
 
@@ -1088,7 +1036,7 @@ struct GamMan
     void clear_call_jump_area_act();                                     // ROR 0x0028f4c0
     SeqPair *get_jump_area_act();                                        // ROR 0x0028f4dc
     /* The m_area forwarders (TRG_PRI is GamAreaTrg). */
-    void create_trg(GamAreaTrg &trg, bool newId, int unused);            // ROR 0x0028f4ec
+    void create_trg(GamAreaTrg &trg, bool newId, int image);             // ROR 0x0028f4ec
     void check_trg();                                                    // ROR 0x0028f508
     void clear_trg();                                                    // ROR 0x0028f544
     int  chg_trg_flg(u_int id, u_int bits);                              // ROR 0x0028f560

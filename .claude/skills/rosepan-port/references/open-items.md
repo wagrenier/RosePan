@@ -118,7 +118,10 @@ follows it; reached stubs in run order):
      pointer at +0xc (where the table comes from -- GamMan's image data or the ELF -- is not
      read; a file-loaded table needs a converter); utlRandRangeF 0x1044b8 returns 0.0, not lo,
      when the draw is 0 (kept as the ROM has it).
-  8. `unassigned@001dd5e8` -- GamArea::addTrg / stopKind / clearKind (room triggers).
+  8. PARTIAL 2026-10-27: `game/gamtrg.cpp` (pinned 0x1dd1e8..0x1e0df0, was unassigned@001dd5e8): all of
+     GamArea written but update 0x1dee78 (0x1db4 bytes, a stub in the file; its decompilation in
+     work/tu/game_gamtrg.cpp/update_dec.txt). The New Game run (140 s) now reaches GamArea::update and
+     GamMan::relinkObj and runs on to the end without the 10d access violation (black stage, the circle icon).
   9. `unassigned@001d3b44` -- GamMan::relinkObj 0x1d5da0.
   Also reached, lower: EmyManager::resetWork, Obj176a3c::createEff (the effect manager in
   unassigned@00164fc0), chrMtnMove, MagLifePC / MagLifeBwn::reset, i3rCopyClipSphere /
@@ -739,6 +742,10 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
   Also utlRandRange 0x10423c is a stub returning 0, so every eye blinks every 6 frames.
 
 ## Decisions
+
+- (2026-10-27, game/gamtrg.cpp) GamAreaTrg +0x54 holds a pointer to a registFtb entry in the ROM; the record stays
+  EE layout (the scripts pass it from their image), so the host keeps the entry's node index + 1 there
+  (GamArea::ftbOf). The class name GamArea stays (invented before the file was known; gamtrg.cpp suggests GamTrg).
 
 - 2026-10-27 (session decision, dog/dogactor.cpp): written beside the TU because its load path
   runs them: DogMotionBlend's constructor 0x108588, reset 0x10737c and getNo (dog/dogmotionblend.cpp;

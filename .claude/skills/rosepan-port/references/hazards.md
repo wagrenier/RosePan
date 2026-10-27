@@ -607,6 +607,15 @@ public:
   in __do_global_ctors at startup with an empty log. Cause: a broken object file. Fix: delete the
   touched .obj files and RosePan.exe under cmake-build-relwithdebinfo and rebuild.
 
+## A "never read" argument that passes through in a register (2026-10-27)
+
+- Symptom: callers pass a word the callee's decompilation never reads (seqFunc023 gave GamArea::addTrg a fourth
+  word -1, 0, 1, 2; the port dropped it as unused).
+- Cause: the callee leaves the register untouched and calls on with it: addTrg never touches a3, so it is
+  GamMan::makeOid's third argument (the image). Ghidra shows neither side.
+- Fix: before dropping an argument, read the callee's asm for the jal sites it reaches with that register
+  unchanged (`ghidra.py asm`), and the callee's callees' parameter counts.
+
 ## How to debug (the method that worked)
 
 - **The picture is the test.** Logs, stub hits and callcheck show the code ran, not that it is right.

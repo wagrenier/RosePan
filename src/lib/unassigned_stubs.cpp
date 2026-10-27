@@ -581,18 +581,6 @@ float i3dPointSegDist2(const float *p, const float *a, const float *d, float *t)
     return {};
 }
 
-// stub of ROR 0x001deaac
-void GamArea::checkPc()
-{
-    ROSEPAN_STUB("GamArea::checkPc", 0x001deaac);
-}
-
-// stub of ROR 0x001dea40
-void GamArea::startPcAction()
-{
-    ROSEPAN_STUB("GamArea::startPcAction", 0x001dea40);
-}
-
 // ──────────────────────────────────────────────────────────────────────
 // A text window slot is in use (unassigned@0013e2ec, written ahead for
 // GamMan::isMsgBusy and native 004).
@@ -621,42 +609,11 @@ int MagScene::openSysMsgWindow(int msg, const int *args, int arg)
     return {};
 }
 
-// stub of ROR 0x001e0c2c
-int GamArea::ctl_trg_flg(int op, int id, u_int bits)
-{
-    ROSEPAN_STUB("GamArea::ctl_trg_flg", 0x001e0c2c);
-    return {};
-}
-
-
-// stub of ROR 0x001dd414
-void GamArea::init()
-{
-    ROSEPAN_STUB("GamArea::init", 0x001dd414);
-}
-
-// stub of ROR 0x001dee78
-void GamArea::update(const float *pos, const float *rot)
-{
-    ROSEPAN_STUB("GamArea::update", 0x001dee78);
-}
 
 // stub of ROR 0x00130de0
 void MagLife130da4::setVolume(int volume)
 {
     ROSEPAN_STUB("MagLife130da4::setVolume", 0x00130de0);
-}
-
-// stub of ROR 0x001dddbc
-void GamArea::clearKind(int kind)
-{
-    ROSEPAN_STUB("GamArea::clearKind", 0x001dddbc);
-}
-
-// stub of ROR 0x001dd7bc
-void GamArea::stopKind(int kind)
-{
-    ROSEPAN_STUB("GamArea::stopKind", 0x001dd7bc);
 }
 
 // stub of ROR 0x001d544c
@@ -670,13 +627,6 @@ int GamMan::placeAchr(int oid, void *out, int arg)
 void GamMan::relinkObj(u_int oid)
 {
     ROSEPAN_STUB("GamMan::relinkObj", 0x001d5da0);
-}
-
-// stub of ROR 0x001e0d70
-int GamArea::hasId(u_int id)
-{
-    ROSEPAN_STUB("GamArea::hasId", 0x001e0d70);
-    return {};
 }
 
 // stub of ROR 0x001d83d0
@@ -1194,30 +1144,6 @@ void sectorSetFlags(Obj17c0f0 *obj, int key, u_int bits, int rec)
     ROSEPAN_STUB("sectorSetFlags", 0x0017c45c);
 }
 
-// stub of ROR 0x001dd5e8
-void GamArea::addTrg(GamAreaTrg *trg, int newId)
-{
-    ROSEPAN_STUB("GamArea::addTrg", 0x001dd5e8);
-}
-
-// stub of ROR 0x001de6fc
-void GamArea::registFtb(int key, u_int value)
-{
-    ROSEPAN_STUB("GamArea::registFtb", 0x001de6fc);
-}
-
-// stub of ROR 0x001de4e4
-void GamArea::startTrgs()
-{
-    ROSEPAN_STUB("GamArea::startTrgs", 0x001de4e4);
-}
-
-// stub of ROR 0x001ddc80
-void GamArea::stopTrgs()
-{
-    ROSEPAN_STUB("GamArea::stopTrgs", 0x001ddc80);
-}
-
 // stub of ROR 0x0016aa04
 void Eff0::setVisible(bool on)
 {
@@ -1255,12 +1181,6 @@ void Obj176a3c::releaseAll()
 void gamCreateEff1a(void)
 {
     ROSEPAN_STUB("gamCreateEff1a", 0x00172678);
-}
-
-// stub of ROR 0x001ddaa8
-void GamArea::clear()
-{
-    ROSEPAN_STUB("GamArea::clear", 0x001ddaa8);
 }
 
 // stub of ROR 0x0013d4d0
