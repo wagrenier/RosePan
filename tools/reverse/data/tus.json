@@ -1,7 +1,7 @@
 {
  "queue": [
-  "unassigned@00192ac0",
   "dog/dogmodel.cpp",
+  "unassigned@00192ac0",
   "dog/dogactor.cpp",
   "mag/magscenelight.cpp",
   "unassigned@00140030",
@@ -1241,6 +1241,10 @@
   "unassigned@00164fc0": {},
   "unassigned@001810f4": {},
   "unassigned@00190a78": {},
+  "unassigned@00192ac0": {
+   "claimed": "2026-10-26 21:09",
+   "status": "active"
+  },
   "unassigned@001a0950": {},
   "unassigned@001a6830": {},
   "unassigned@001bde58": {},
