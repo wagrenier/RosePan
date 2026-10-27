@@ -18395,6 +18395,12 @@
   "was": "FUN_0022e508",
   "why": "slot 0x21 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x21 (offsets from the data start)"
  },
+ "0022e840": {
+  "name": "i3mGetBlendNodePose",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e840",
+  "why": "one node of two motions: finds and samples both nodes' keys (t1, t2), lerps the second into the first at r; the copy when only the second has keys; i3mGetBlendPose's per-node worker"
+ },
  "0022e958": {
   "name": "i3mGetLength",
   "tag": "ror-inferred",
@@ -18407,11 +18413,101 @@
   "was": "FUN_0022e960",
   "why": "for each node of the motion, samples its keys at time f12 into 0x30-byte pose records (flags a2)"
  },
+ "0022ea08": {
+  "name": "i3mGetPoseTimes",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ea08",
+  "why": "i3mGetPose with a time per node (a float array walked with the nodes)"
+ },
  "0022eab0": {
   "name": "i3mGetBlendPose",
   "tag": "ror-inferred",
   "was": "FUN_0022eab0",
   "why": "DogActor::getBlendMotion's callee: two i3m roots, times t1 / t2 and rate r into one posture"
+ },
+ "0022eb78": {
+  "name": "i3mGetBlendPoseRates",
+  "tag": "ror-inferred",
+  "was": "FUN_0022eb78",
+  "why": "i3mGetBlendPose with a blend rate per node"
+ },
+ "0022ec48": {
+  "name": "i3mGetBlendPoseTimes",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ec48",
+  "why": "i3mGetBlendPose with times per node for both motions, one rate"
+ },
+ "0022ed28": {
+  "name": "i3mGetBlendPoseTimesRates",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ed28",
+  "why": "i3mGetBlendPose with per-node times for both motions and per-node rates"
+ },
+ "0022ee08": {
+  "name": "i3mBlendPose",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ee08",
+  "why": "samples each node at t into a temp record and lerps it into the existing pose at r (i3mPoseLerp)"
+ },
+ "0022eed8": {
+  "name": "i3mBlendPoseRates",
+  "tag": "ror-inferred",
+  "was": "FUN_0022eed8",
+  "why": "i3mBlendPose with a rate per node"
+ },
+ "0022efa0": {
+  "name": "i3mBlendPoseTimes",
+  "tag": "ror-inferred",
+  "was": "FUN_0022efa0",
+  "why": "i3mBlendPose with a time per node"
+ },
+ "0022f070": {
+  "name": "i3mBlendPoseTimesRates",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f070",
+  "why": "i3mBlendPose with a time and a rate per node"
+ },
+ "0022f160": {
+  "name": "i3mIsSameNodes",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f160",
+  "why": "1 when two motions have the same node count and every node name matches (strcmp), else 0"
+ },
+ "0022f220": {
+  "name": "i3mPoseClear",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f220",
+  "why": "memset of n 0x30-byte pose records"
+ },
+ "0022f240": {
+  "name": "i3mPoseAccum",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f240",
+  "why": "adds src * w into n pose records (the quaternion subtracted when it points away); i3mPoseMix's weighted sum"
+ },
+ "0022f358": {
+  "name": "i3mPoseAccumNodes",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f358",
+  "why": "i3mPoseAccum with a weight per node"
+ },
+ "0022f478": {
+  "name": "i3mPoseNormalizeRot",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f478",
+  "why": "normalizes the rotation quaternion of n pose records"
+ },
+ "0022f4d0": {
+  "name": "i3mPoseMix",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f4d0",
+  "why": "clear, accumulate count poses with one weight each, renormalize the rotations"
+ },
+ "0022f570": {
+  "name": "i3mPoseMixNodes",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f570",
+  "why": "i3mPoseMix with a weight array per pose"
  },
  "0022f610": {
   "name": "i3mPoseLerp",
@@ -18425,11 +18521,83 @@
   "was": "FUN_0022f7a0",
   "why": "turns 0x30-byte pose records (position, quaternion, scale) into 0x40-byte node matrices through a u16 node map (count first, 0xffff skip)"
  },
+ "0022f870": {
+  "name": "i3mHermite",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f870",
+  "why": "VU0-register helper: the cubic Hermite basis at vf3.x (rodata 0x303a80 rows 2,-2,1,1 / -3,3,-2,-1 / 0,0,1,0 / 1,0,0,0) applied to four vectors, result in vf1"
+ },
+ "0022f8d0": {
+  "name": "i3mDecodeKey",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f8d0",
+  "why": "one key's position, rotation, scale into a 0x30 pose record: float4 table (root +0x20) or s16x4 1.15 table (root +0x28) scaled by root +0x30/+0x40 or +0x50/+0x60, per root flags +0x10"
+ },
+ "0022f9d8": {
+  "name": "i3mDecodeKeyPair",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f9d8",
+  "why": "i3mDecodeKey of a key and the next one (root +0x12 u16 stride) into six records"
+ },
+ "0022fb90": {
+  "name": "i3mDecodeKeySpline",
+  "tag": "ror-inferred",
+  "was": "FUN_0022fb90",
+  "why": "i3mDecodeKeyPair, plus the two tangent records when the flags ask for a spline (0x222)"
+ },
+ "0022fc38": {
+  "name": "i3mQuatSlerpShort",
+  "tag": "ror-inferred",
+  "was": "FUN_0022fc38",
+  "why": "VU0-register helper: slerp of vf1 / vf2 by the shorter arc (vf1 negated when the dot is negative), normalized lerp past 0.9; result in vf1"
+ },
+ "0022fd58": {
+  "name": "i3mInterpKey",
+  "tag": "ror-inferred",
+  "was": "FUN_0022fd58",
+  "why": "a key pair interpolated at weight w per channel mode in the flags (0xf position, 0xf0 rotation, 0xf00 scale: 0 step, 1 linear/slerp, 2 hermite/squad)"
+ },
+ "00230160": {
+  "name": "i3mSampleKey",
+  "tag": "ror-inferred",
+  "was": "FUN_00230160",
+  "why": "the key's weight at t from its time and inverse length in the root's float table; decodes the key alone at weight 1, else i3mInterpKey (root flag 4 turns spline modes to linear)"
+ },
+ "00230258": {
+  "name": "i3mQuatSlerpNorm",
+  "tag": "ror-inferred",
+  "was": "FUN_00230258",
+  "why": "VU0-register helper: slerp of vf1 / vf2 at f12, normalized lerp when the dot is outside -0.9..0.9; result in vf1 (squad's outer step)"
+ },
+ "00230380": {
+  "name": "i3mFindKey",
+  "tag": "ror-inferred",
+  "was": "FUN_00230380",
+  "why": "binary search of a node's keys (u8 stride at node +4) for the key whose time span holds t; first / last key outside the range, NULL without keys"
+ },
  "00230470": {
   "name": "i3mQuatMul",
   "tag": "lib-context",
   "was": "FUN_00230470",
   "why": "quaternion product of a and b into out"
+ },
+ "002304e8": {
+  "name": "i3mQuatLog",
+  "tag": "ror-inferred",
+  "was": "FUN_002304e8",
+  "why": "axis * acos(w) / sin(acos(w)), w 0; zero vector when the sine is not positive"
+ },
+ "00230570": {
+  "name": "i3mQuatExp",
+  "tag": "ror-inferred",
+  "was": "i3mQuatExp",
+  "why": "split out of i3mQuatLog's body (no direct call; follows it): xyz * sin(len) / len, w cos(len), identity for a zero vector -- the inverse of i3mQuatLog"
+ },
+ "00230610": {
+  "name": "i3mQuatDot",
+  "tag": "ror-inferred",
+  "was": "FUN_00230610",
+  "why": "4-component dot product of two quaternions"
  },
  "00230660": {
   "name": "i3mQuatNormalize",
@@ -22480,6 +22648,12 @@
   "tag": "lib-context",
   "was": "FUN_0026c8e0",
   "why": "float modf: exponent test, integer part through the mantissa mask stored to *ip, fraction returned; libm"
+ },
+ "0026cad0": {
+  "name": "acosf",
+  "tag": "lib-context",
+  "was": "FUN_0026cad0",
+  "why": "wrapper that calls __ieee754_acosf; called with a quaternion dot before sinf in the slerps"
  },
  "0026cb00": {
   "name": "atan2f",

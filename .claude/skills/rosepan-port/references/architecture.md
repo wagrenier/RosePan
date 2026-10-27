@@ -359,8 +359,18 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     **I3D_I3M** motion files (`i3d/i3mroot.cpp` 0x22b4b8..0x22ba20, pinned 2026-10-26, verify; types
     in i3mroot.h): id "I3D_I3M " (0x303a68), +8 version 0x20001, +0x12 u16 per key, +0x14 node
     count, +0x16 relocation u16 (1 = offsets), +0x18 float length in frames, +0x1c nodes (12 bytes:
-    name, +6 u16 key count, +8 keys), +0x24 a float table (a key's first u16 indexes its time),
-    +0x20 / +0x28 offsets of unknown role. All offsets from the root, 0 = none. 14,647 raw I3D_I3M
+    name, +4 u8 key stride, +6 u16 key count, +8 keys), +0x10 u16 flags (1 packed rotations, 2 no
+    scale, 4 splines play linear, 8 packed positions, 0x10 packed scales; 0x1f in every file seen),
+    +0x20 a float4 table, +0x24 a float table, +0x28 an s16x4 1.15 table, +0x30/+0x40 packed
+    position scale/offset, +0x50/+0x60 packed scale scale/offset. A key is u16 indices: time and
+    inverse span length (float table), position, rotation quaternion, scale, then spline tangents.
+    The pose player is `i3d/i3mpose.cpp` 0x22e840..0x2312a0 (pinned 2026-10-27; i3mpose.h has the
+    key layout and the sample-flag modes: 0xf position, 0xf0 rotation, 0xf00 scale; 0 step, 1
+    lerp/slerp, 2 Hermite/squad; the game passes 0x111). A pose is 0x30 bytes per node: position,
+    quaternion, scale; i3mPoseToMatrices makes row-vector matrices (rows scaled, translation row 3).
+    The run after it was split by role (inferred, 2026-10-27): `i3d/i3cquery.cpp` 0x2312a0..0x233628
+    (i3cCastSphere / Ray / Cylinder and worker 0x232120) and `i3d/i3dgeom.cpp` 0x233628..0x236960
+    (point / segment / triangle distance tests). All offsets from the root, 0 = none. 14,647 raw I3D_I3M
     in the disc's DATA tree (BG/MAPUNIT.BIN ...), all version 0x20001 and in offset form; the host
     keeps the offsets (i3mPtr), as for i3c. **I3D_I3C** (`i3d/i3croot.cpp`
     0x22ba20..0x22c1f8, pinned 2026-10-26, verify): id "I3D_I3C\0" (0x303a70), +0x10 relocation
@@ -991,8 +1001,7 @@ m_time while fading, else 1). step 0x107e30 clamps (1 end, 2 start, 3 zero lengt
 stepLoop 0x1079d8 wraps (1 forward, also when speed is 0; 2 backward; +-1e-5 of the end snaps to 0)
 and stops a playing entry at its m_1c ratio; a fading entry (setBlendRate 0x108428) holds frame m_1c *
 length at speed 0 and counts m_count up to m_time; setBlendRate with the same rate 0 after the fade
-frees the entry. Still stubbed below: the i3m pose / quaternion ops (0x22e960, 0x22eab0, 0x22f610,
-0x231198, 0x230470, 0x230660).
+frees the entry. The i3m pose / quaternion ops below it are written (i3d/i3mpose.cpp, 2026-10-27).
 
 ## Modules (RoR's own source files)
 

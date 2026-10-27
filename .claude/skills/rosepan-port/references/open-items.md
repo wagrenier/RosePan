@@ -20,8 +20,12 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      GIF packets: the session that writes i3rBuildMeshPacket decides what of it the native mesh draw
      keeps -- the per-layer packet cache 0x228f50, texture / light / fog choices -- and what becomes
      a PC: comment).
-  c. dog/dogmotionblend.cpp (getPose, getNodeRate, stepLoop ...), unassigned@0022e840 (the i3m pose
-     player: i3mGetLength, i3mGetPose, i3mPoseLerp, i3mPoseToMatrices, i3mGetBlendPose).
+  c. dog/dogmotionblend.cpp (getPose, getNodeRate, stepLoop ...), and the i3m pose player --
+     WRITTEN 2026-10-27 as i3d/i3mpose.cpp (partial: everything the game calls is written; left are
+     0x230688 / 0x230df8, quaternion spline helpers with no direct callers -- not worth a session
+     before the draw path). The rest of the old unassigned@0022e840 run is now i3d/i3cquery.cpp
+     (the i3c casts DogModel calls; stubs) and i3d/i3dgeom.cpp (distance tests MagScene calls);
+     neither is on the draw path, so neither is queued. Unverified on screen until utlDrawI3r draws.
   d. unassigned@00106658 (utlDrawI3r 0x106760, utlVecDist), then the host task
      **setup/i3d_mesh_draw.cpp** (the native i3d module's 3D mesh path, forced-test first), then
      unassigned@0021fb50 (i3rBuildMeshPacket / 0x21fe68: the mesh draw calls the module) and

@@ -496,25 +496,8 @@ u_long   *i3dPktVu1Matrix(u_long *pkt, sceVu0FVECTOR *matrix);           // ROR 
 u_long   *i3dPktVu1Color(u_long *pkt, const float *color);               // ROR 0x0021e488
 u_long   *i3dPktVu1Sprite(u_long *pkt, const float *pos, const float *uv); // ROR 0x0021e690
 u_long   *i3dPktEndVu1Sprite(u_long *pkt);                               // ROR 0x0021e688
-/* The i3m motion player (unassigned@0022e840). */
-struct I3mRoot;
-/* The motion's length in frames (the root's m_length). */
-float     i3mGetLength(const I3mRoot *root);                             // ROR 0x0022e958
-/* Samples every node's keys at time t into 0x30-byte pose records. */
-void      i3mGetPose(I3mRoot *root, void *pose, int flags, float t);     // ROR 0x0022e960
-/* Two motions' poses (root1 at t1, root2 at t2) blended at rate r into pose. */
-void      i3mGetBlendPose(I3mRoot *root1, void *pose, I3mRoot *root2, int flags, float t1, float t2, float r); // ROR 0x0022eab0
-/* Pose records to 0x40-byte node matrices through map (u16 count, then a
- * model node per motion node, 0xffff = none). */
-void      i3mPoseToMatrices(const void *pose, sceVu0FMATRIX *mats, const u_short *map); // ROR 0x0022f7a0
-/* One 0x30-byte pose record: out = a * t + b * (1 - t) (the rotation
- * quaternion at +0x10 slerped). */
-void      i3mPoseLerp(float t, void *out, const void *a, const void *b); // ROR 0x0022f610
-/* Quaternions (x, y, z, w): from the euler angles rot (x, y, z), the
- * product a * b, normalized. */
-void      i3mQuatFromEuler(float *out, const float *rot);                // ROR 0x00231198
-void      i3mQuatMul(float *out, const float *a, const float *b);        // ROR 0x00230470
-void      i3mQuatNormalize(float *out, const float *in);                 // ROR 0x00230660
+/* The i3m pose player. */
+#include "i3d/i3mpose.h"
 
 /* Wire shapes as line strips (MagScene::drawStrips' debug records through
  * i3dLayerDrawWireSphere / Box / Shape). */

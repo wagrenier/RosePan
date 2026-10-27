@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 17:49 at commit `23fdd31` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 18:07 at commit `eb9597b` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-27 17:49 at commit `23fdd31` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6867**, named **5060** (74%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 254, ror-inferred 3458
-- context-name ledger: 3752 entries; overrides of wrong library matches: 5
-- placed in a source file: 4444/6867 in 113 files
+- game functions: **6868**, named **5088** (74%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 255, ror-inferred 3486
+- context-name ledger: 3781 entries; overrides of wrong library matches: 5
+- placed in a source file: 4544/6868 in 116 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3559**; stubs: **382**
+- reconstructed RoR functions: **3595**; stubs: **374**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -65,12 +65,13 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dtim2.cpp` | 7 | 0 |
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
+| `src/i3d/i3mpose.cpp` | 36 | 0 |
 | `src/i3d/i3mroot.cpp` | 12 | 0 |
 | `src/i3d/i3ritem.cpp` | 156 | 0 |
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 9 | 262 |
+| `src/lib/unassigned_stubs.cpp` | 9 | 254 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 17 |
@@ -128,10 +129,11 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 164 TUs: todo 109, partial 12, verify 65, done 9
-- next: **unassigned@0022e840** (pinned in the queue)
+- 166 TUs: todo 111, partial 13, verify 65, done 9
+- next: **unassigned@00106658** (pinned in the queue)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, setup/i3d_mesh_draw.cpp, unassigned@0021fb50, i3d/i3rmesh.cpp, unassigned@0021c960, mag/magscenecamera.cpp, unassigned@0013e2ec, unassigned@00140c68, unassigned@00140990, mag/maglifepc.cpp, task/naga_chunk.cpp, mag/maglifebwn.cpp, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
 - partial: `emy/emy_hfm.cpp` 46/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec
+- partial: `i3d/i3mpose.cpp` 36/38 -- Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game c
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -201,6 +203,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 18:07 `i3d/i3mpose.cpp` partial: i3m pose player: split unassigned@0022e840 into i3d/i3mpose.cpp, i3d/i3cquery.cpp, i3d/i3dgeom.cpp; wrote 37 i3mpose functions (key search and decode, step/lerp
 - 2026-10-27 17:49 `dog/dogmotionblend.cpp` verify: DogMotionBlend complete (11 of 11): getPose, getNodeRate, step, stepLoop, getTimeRatio, setTimeRatio, setBlendRate written from the ROM; blend entry fields m_no
 - 2026-10-27 17:41 `i3d/i3rtype.cpp` verify: Split unassigned@00228c08 into i3d/i3rtype.cpp 0x22a6c0-0x22b1b0 and i3d/i3rmesh.cpp 0x228c08-0x22a6c0 (both pinned). Wrote all 78 per-type i3r accessors of i3r
 - 2026-10-27 17:18 `dog/dogcamera.cpp` verify: DogCamera written, all 8 functions of 0x10f860..0x10fc7c: saveCamera / restoreCamera (one-level save of angle, translation, rotation, scale; asserts m_saved), u
@@ -208,22 +211,21 @@ Recent sessions:
 - 2026-10-27 16:34 `emy/emy_hfm.cpp` partial: Wrote HfmOutSlap (Init, Exec: chase, slaps 0x14/0x15/0x16 with hit windows and scnChrRequest on PC and dog, chaining, Term), HfmOutBreak, HfmOutWalk2 (Init, Exe
 - 2026-10-27 16:22 `game/gamtrg.cpp` verify: GamArea::update 0x1dee78 written: every active trigger's condition bits (rect enter/leave, height, actor distance and direction, PC facing, Cross, timer, ftb sc
 - 2026-10-27 15:45 `game/gamman2.cpp` verify: Save image written: writeSaveData 0x1d6078 and readSaveData 0x1d68a0 (FEB_SAVE version 0x10, every section at its EE offset through memcpy, older versions read 
-- 2026-10-27 11:06 `game/gamman2.cpp` partial: Hit tests and checkMenuReq written: hitTestObjs 0x1d7c20 over the update list through the member pointer m_hitFunc (hitAtPoint 0x1d4b9c, hitAtSweep 0x1d50a8), t
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00166a1c` | todo | 0/36/342 | 94.7 | 124 | 4 |
-| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 60 | 3 |
-| `unassigned@0022e840` | todo | 0/13/99 | 32.1 | 55 | 3 |
+| `unassigned@00166a1c` | todo | 0/36/342 | 94.7 | 144 | 8 |
+| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 75 | 6 |
+| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
 | `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
-| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
-| `unassigned@00106658` | partial | 1/13/25 | 3.3 | 41 | 2 |
-| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 35 | 0 |
+| `unassigned@00106658` | partial | 1/13/25 | 3.3 | 51 | 4 |
+| `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 49 | 6 |
+| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
+| `unassigned@0021c960` | todo | 0/11/21 | 8.4 | 44 | 6 |
+| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
+| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 40 | 1 |
+| `unassigned@00103edc` | todo | 0/5/23 | 1.6 | 38 | 2 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
-| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 34 | 3 |
-| `unassigned@00103edc` | todo | 0/5/23 | 1.6 | 33 | 1 |
-| `mag/maglifebwnctrl.cpp` | todo | 0/17/82 | 18.3 | 32 | 1 |
-| `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -234,7 +236,6 @@ Recent sessions:
 | `001be2cc` | FileReader::FileReader | 23 | ror | missing | game/gamfile.cpp |
 | `002155f4` | FUN_002155f4 | 22 | - | missing | - |
 | `0010423c` | FUN_0010423c | 20 | - | stub | - |
-| `0022e958` | i3mGetLength | 15 | ror | stub | - |
 | `001832e8` | msgGetSysText | 12 | ror | stub | - |
 | `00215bb4` | dbgTraceVector4 | 11 | ror | stub | - |
 | `001680a0` | EmyOut::setMotion | 11 | ror | stub | - |
@@ -255,7 +256,6 @@ Recent sessions:
 | `0016976c` | emyCanReach | 8 | ror | stub | - |
 | `001875c0` | MsgManSet::getState | 7 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 6 | ror | missing | - |
-| `0022e960` | i3mGetPose | 6 | ror | stub | - |
 | `00166da4` | EmyOut::selectTarget | 6 | ror | stub | - |
 | `001fca84` | NagaChunk::NagaChunk | 6 | ror | missing | task/naga_chunk.cpp |
 | `001fcbf8` | NagaChunk::rewind | 6 | ror | stub | - |
@@ -269,4 +269,6 @@ Recent sessions:
 | `00183b24` | MsgMan::~MsgMan | 5 | ror | missing | msg/msgman.cpp |
 | `0011ade4` | MagLifePC::live | 5 | ror | stub | mag/maglifepc.cpp |
 | `0013f280` | MagScene::openSysMsgWindow | 5 | ror | stub | - |
+| `00107248` | utlVecToRot | 4 | ror | stub | - |
+| `001bebec` | GamFont::setFont | 4 | ror | stub | - |
 

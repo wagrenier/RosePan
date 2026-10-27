@@ -155,6 +155,12 @@ entries are marked **RoR** with the date.
   linked; the decompile of the body before them is short and its size is not. `python hidden.py <lo>
   <hi>` over the TU's range lists them; mkfunc every one before naming. Ghidra also typed some of their
   targets `void f(void)` and dropped the arguments (0x243da8 -> 0x245078): read the asm.
+- **VU0 helpers that pass values in VU registers** (i3d/i3mpose.cpp, 2026-10-27): 0x22f870 (Hermite),
+  0x22fc38 / 0x230258 (slerps) take vf1 / vf2 / vf3.x and return vf1; Ghidra shows them as
+  `void f(float)` with `in_vf1` reads, and the caller's decompile drops the hand-off. Read the
+  caller's asm for which lqc2 fills vf1 / vf2 before the jal; write them as pointer functions with
+  a PC: note. Likewise the i3m float-argument functions (t, r in f12..f14, pointers in a0..t2):
+  Ghidra's parameter lists for them were wrong in every pose function -- take the order from the asm.
 - **A ROM read of the byte after a copy** (`rxFilePathNextElem` 0x248e98 tests `*out == '.'` after
   copying, i.e. the uninitialised next byte): keep the quirk with a comment, it only fires on stale
   buffer contents.
