@@ -301,8 +301,8 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     is out = in * R, which matches the platform's sceVu0RotMatrixX (row 1 = (0, c, s, 0)). Float
     arguments come first (f12). RotTransPers: p = v * m, xyz / w (1.0 at 0x303c00 / 0x303c50), x y
     in 12.4 (16.0 at 0x303c04 / 0x303c54), mode 0 z w in 12.4, mode 1 z w truncated. i3dPrintf
-    0x237c68 is vsprintf into 1 KB + rxSysPrintf + fflush(stdout). i3dMatGetScaleTrans 0x228c38 (just
-    before, still in unassigned@00228c08) stays a bridge.
+    0x237c68 is vsprintf into 1 KB + rxSysPrintf + fflush(stdout). i3dMatGetScaleTrans 0x228c38 (in
+    i3d/i3rmesh.cpp, the mesh packet builder, not written yet) stays a bridge.
   - **The i3r model files** (I3D_BIN / I3D_I3M / I3D_I3C; 0x228c08..0x22e840, 2026-10-25). An
     I3D_BIN file (`i3d/i3rroot.cpp` 0x22b1b0..0x22b4b8, written, verify; types in i3rroot.h): id
     "I3D_BIN\0" (rodata 0x3039d0), +8 version 0x00100001, +0xc relocated flag, +0x10 the root
@@ -329,7 +329,20 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     arrays of one count); the rest are `jr ra`. Checked offline on 1602 models in the disc's RPKs
     (7.1 M pointers, all in the file; names may be Shift-JIS). Nine pairs live at 0x22a6c0..0x22aec0
     (types 0x25 0x26 0x29 0x2a 0x2d 0x4a 0x4d 0x52 0x59) and are written in i3ritem.cpp too.
-    The accessors between the fixups (0x22c840.., most call i3rItemFindChild) are not written.
+    **The per-type accessors** (`i3d/i3rtype.cpp` 0x22a6c0..0x22b1b0, pinned and written 2026-10-27,
+    verify; 78 functions, 38 of them hidden ones created in Ghidra): per type, in the order 0x4d 0x29
+    0x4a 0x26 0x59 0x25 0x2d 0x2a 0x52, the fixup pair then one-line reads of the item's child slot k
+    (`item->m_children[k]`): the slot itself, data set, child count, n-th child, list begin / end,
+    find / name / by-name / has through i3rItemFindChild. Named `i3r<Op><type>[_<k>]` (i3rtype.h).
+    The layouts they show: 0x52 the root (slots 0..7; 0 materials, 2 meshes, 3 nodes with a count and
+    n-th child only, 6 the packet slot), 0x26 a layer (slots 0..3; 1 its entity slots, a type 0x29 with
+    slots 0..2), 0x2d a combined mesh (slots 0 / 1), 0x2a a node (slot 0 its data item, slot 1 a named
+    list), 0x4d (lists 0 / 1, slot 2) and 0x59 (list 0) for the packet builders. i3rRelocData26's
+    Ghidra body ran to 0x22a978; the function ends at 0x22a960. The mesh packet builder before it is
+    **`i3d/i3rmesh.cpp`** 0x228c08..0x22a6c0 (pinned 2026-10-27, not written; it ends with 0x22a638,
+    the ALPHA_1 / TEST_1 register pair).
+    The accessors between the fixups in i3ritem.cpp's own extent (0x22c840.., most call
+    i3rItemFindChild) are not written.
 
     **The model helpers** (`i3d/i3rmodel.cpp` 0x21a3e8..0x21ac80, pinned 2026-10-26, verify; types in
     i3rmodel.h): root data +0x00 the clip sphere (xyz centre, +0x0c radius), +0x10 one 0x40 basic

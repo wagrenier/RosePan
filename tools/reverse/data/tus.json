@@ -1,12 +1,12 @@
 {
  "queue": [
   "unassigned@0010f944",
-  "unassigned@00228c08",
   "dog/dogmotionblend.cpp",
   "unassigned@0022e840",
   "unassigned@00106658",
   "setup/i3d_mesh_draw.cpp",
   "unassigned@0021fb50",
+  "i3d/i3rmesh.cpp",
   "unassigned@0021c960",
   "mag/magscenecamera.cpp",
   "unassigned@0013e2ec",
@@ -638,6 +638,15 @@
    "status": "partial",
    "why": "the i3r item tree core: i3rItemFindChild, i3rIsItemType, the item relocators and the per-type data fixups of tables 0x2db4c8 / 0x2db360 with the per-type accessors between them; ends where the motion math (0x22e840, sinf) starts. Nine fixup pairs sit at 0x22a6c0..0x22aec0 (unassigned@00228c08) and are written here with the table"
   },
+  "i3d/i3rmesh.cpp": {
+   "ranges": [
+    [
+     "00228c08",
+     "0022a6c0"
+    ]
+   ],
+   "why": "the mesh packet builder between i3dvram.cpp and the i3r type accessors: 0x228f50 a per-layer cache of mesh packets (called from unassigned@0021fb50), 0x228ce8 the per-material packet loop (DMA / GIF tags, i3dDrawSetUseTex), 0x229380..0x22a448 state / vertex / light / fog packet parts, 0x22a638 the ALPHA / TEST register pair; i3dMatGetScaleTrans 0x228c38 and two list helpers 0x228f10 / 0x228f28 sit in it. Ends where type 0x4d's fixup pair starts"
+  },
   "i3d/i3rmodel.cpp": {
    "notes": "Verify: nothing on screen reaches it yet. The 200 s New Game run still ends black after the film; DogActor::load 0x10cd5c (dog/dogactor.cpp) is the stub that keeps any model from loading, so it is the next TU on the 3D path. The first run that loads a model exercises i3rBuildPackets / i3rAssignTex / the node transforms; mark this done then. i3rBuildMeshPacket 0x21fb50 (unassigned@0021fb50, the DMA packet builders 0x21fb50..0x222f50) is a stub: it writes VIF / DMA packets, which the host never consumes, so the native draw module should read the mesh items (root child 2 path in i3rmodel.h) rather than port those packets. The ROM passes the same buffer start to every mesh (Ghidra's decompilation wrongly chains a return value; hazards.md). PORT: counted loops instead of the ROM's do-while (empty lists do nothing); a NULL STQ slot is skipped; i3rSetFarPtr logs when an outside object is too far for a 32-bit relative slot (open-items.md). The per-type accessors 0x22a890.. / 0x22abc0.. / 0x22b170 are inlined as I3rItem reads with callcheck comments.",
    "ranges": [
@@ -673,6 +682,24 @@
    ],
    "status": "verify",
    "why": "The I3D_BIN model root API: the id check (memcmp with I3D_BIN at 0x3039d0, root item type 0x52), relocation driver and the root data lookups (textures, node names). Bounded by the per-type accessor / fixup pairs before 0x22b1b0 (the root type's own fixups 0x22ad20 / 0x22adf8 sit there) and the I3D_I3M root check from 0x22b4b8. No source string; named after I3rRoot (DogModel's tag_I3rRoot_s)."
+  },
+  "i3d/i3rtype.cpp": {
+   "notes": "Verify: complete code, nothing on screen can show it (the 15 s smoke run shows the boot disclaimer; no model draws yet). The nine fixup pairs inside this extent stay written in i3ritem.cpp beside their tables (open-items decision); i3ritem.h includes i3rtype.h so callers of the moved accessors still compile. i3rmodel.cpp keeps the accessors inlined as I3rItem reads (callcheck comments updated to the new names). i3rRelocData26 really ends at 0x22a960 (Ghidra fixed). i3d/i3rmesh.cpp (the mesh packet builder: per-layer packet cache 0x228f50 called from unassigned@0021fb50, per-material loop 0x228ce8, packet parts 0x2291c8..0x22a638, plus the i3dMatGetScaleTrans bridge and list helpers 0x228f10 / 0x228f28) is queued right after unassigned@0021fb50: it only feeds VIF / GIF packets, so write it once the native mesh draw decides what it keeps. File names i3rtype / i3rmesh are guesses (open-items). Next: the queue (dog/dogmotionblend.cpp).",
+   "ranges": [
+    [
+     "0022a6c0",
+     "0022b1b0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 17:41",
+     "status": "verify",
+     "summary": "Split unassigned@00228c08 into i3d/i3rtype.cpp 0x22a6c0-0x22b1b0 and i3d/i3rmesh.cpp 0x228c08-0x22a6c0 (both pinned). Wrote all 78 per-type i3r accessors of i3rtype.cpp (38 hidden ones created in Ghidra, 74 named i3r<Op><type>[_<k>]): slot, data set, count, n-th child, begin / end, find / name / by-name / has over each type's child slots, for types 0x4d 0x29 0x4a 0x26 0x59 0x25 0x2d 0x2a 0x52. Moved i3rGetChild25 / i3rGetNumChild52 / i3rGetChild52 / i3rGetChildName52 there from i3ritem.cpp; i3rmodel.cpp callcheck comments now name the accessors."
+    }
+   ],
+   "status": "verify",
+   "why": "the i3r per-type accessors before i3rroot.cpp: for each item type (0x4d 0x29 0x4a 0x26 0x59 0x25 0x2d 0x2a 0x52) its fixup pair then one-line accessors over its child slots (slot pointer, has data, count, n-th child, begin / end, find by name). The nine fixup pairs are written in i3ritem.cpp with the tables (open-items.md decision 2026-10-26)"
   },
   "mag/maglifefadekey.cpp": {
    "ranges": [

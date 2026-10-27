@@ -10,8 +10,9 @@
  *  from the data start becomes a pointer (and back), and an array of such
  *  fields of a count read from the data. Nine of the pairs (types 0x25,
  *  0x26, 0x29, 0x2a, 0x2d, 0x4a, 0x4d, 0x52, 0x59) sit at 0x22a6c0..
- *  0x22aec0, in the run unassigned@00228c08 before i3rroot.cpp; they are
- *  written here with the tables. Still to write in this file: the
+ *  0x22aec0, in i3d/i3rtype.cpp's extent before i3rroot.cpp; they are
+ *  written here with the tables (the accessors between them are in
+ *  i3rtype.cpp). Still to write in this file: the
  *  per-type accessors between the fixups (0x22c840.., most call
  *  i3rItemFindChild), unreferenced by the code ported so far.
  *
@@ -180,12 +181,6 @@ static void i3rUnrelocData25(u_char *) {}
 /* ROR 0x0022aab0 */
 static void i3rRelocData25(u_char *) {}
 
-/* ROR 0x0022aad0 */
-I3rItem *i3rGetChild25(const I3rItem *item, int n)
-{
-    return item->getChildren()[0].getChildren() + n;
-}
-
 /* ROR 0x0022ab18 */
 static void i3rUnrelocData2D(u_char *data)
 {
@@ -228,24 +223,6 @@ static void i3rRelocData52(u_char *data)
     i3rRelocField(data, 0x1c);
     i3rRelocField(data, 0x20);
     i3rRelocArray(data, 0x20, *(u_short *)(data + 0x2e));
-}
-
-/* ROR 0x0022aec0 (written with dog/dogactor.cpp, whose setupEye calls it) */
-int i3rGetNumChild52(const I3rItem *item)
-{
-    return item->getChildren()[0].getNumChild();
-}
-
-/* ROR 0x0022aed8 */
-I3rItem *i3rGetChild52(const I3rItem *item, int n)
-{
-    return item->getChildren()[0].getChildren() + n;
-}
-
-/* ROR 0x0022af08 (written with dog/dogactor.cpp) */
-const char *i3rGetChildName52(const I3rItem *item, int n)
-{
-    return item->getChildren()[0].getChildren()[n].getName();
 }
 
 // ──────────────────────────────────────────────────────────────────────

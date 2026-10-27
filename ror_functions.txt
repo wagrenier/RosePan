@@ -5224,7 +5224,7 @@
 /* 00228b50 000000b8 */ i3dVramCoalesce(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- i3d/i3rmesh.cpp
 // *****************************************************************************
 
 /* 00228c08 0000002c */ FUN_00228c08(){}
@@ -5241,64 +5241,107 @@
 /* 0022a050 000003f4 */ FUN_0022a050(){}
 /* 0022a448 000001f0 */ FUN_0022a448(){}
 /* 0022a638 00000088 */ FUN_0022a638(){}
+
+// *****************************************************************************
+// FILE -- i3d/i3rtype.cpp
+// *****************************************************************************
+
 /* 0022a6c0 0000006c */ i3rUnrelocData4D(){}  // ror
 /* 0022a730 0000009c */ i3rRelocData4D(){}  // ror
-/* 0022a7d0 0000000c */ FUN_0022a7d0(){}
-/* 0022a7e0 00000080 */ FUN_0022a7e0(){}
-/* 0022a860 00000020 */ FUN_0022a860(){}
+/* 0022a7d0 0000000c */ i3rGetChildBegin4D(){}  // ror
+/* 0022a7e0 0000001c */ i3rGetChildEnd4D(){}  // ror
+/* 0022a800 00000014 */ i3rGetNumChild4D_1(){}  // ror
+/* 0022a818 00000014 */ i3rGetChild4D_1(){}  // ror
+/* 0022a830 0000000c */ i3rGetChildBegin4D_1(){}  // ror
+/* 0022a840 00000020 */ i3rGetChildEnd4D_1(){}  // ror
+/* 0022a860 0000000c */ i3rGetSlot4D_2(){}  // ror
+/* 0022a870 00000010 */ i3rHasData4D_2(){}  // ror
 /* 0022a880 00000004 */ i3rUnrelocData29(){}  // ror
 /* 0022a888 00000004 */ i3rRelocData29(){}  // ror
-/* 0022a890 00000008 */ FUN_0022a890(){}
-/* 0022a898 00000010 */ FUN_0022a898(){}
-/* 0022a8a8 0000000c */ FUN_0022a8a8(){}
-/* 0022a8b8 00000010 */ FUN_0022a8b8(){}
-/* 0022a8c8 0000000c */ FUN_0022a8c8(){}
-/* 0022a8d8 00000010 */ FUN_0022a8d8(){}
+/* 0022a890 00000008 */ i3rGetSlot29(){}  // ror
+/* 0022a898 00000010 */ i3rHasData29(){}  // ror
+/* 0022a8a8 0000000c */ i3rGetSlot29_1(){}  // ror
+/* 0022a8b8 00000010 */ i3rHasData29_1(){}  // ror
+/* 0022a8c8 0000000c */ i3rGetSlot29_2(){}  // ror
+/* 0022a8d8 00000010 */ i3rHasData29_2(){}  // ror
 /* 0022a8e8 00000004 */ i3rUnrelocData4A(){}  // ror
 /* 0022a8f0 00000004 */ i3rRelocData4A(){}  // ror
-/* 0022a8f8 00000008 */ FUN_0022a8f8(){}
-/* 0022a900 00000010 */ FUN_0022a900(){}
+/* 0022a8f8 00000008 */ i3rGetSlot4A(){}  // ror
+/* 0022a900 00000010 */ i3rHasData4A(){}  // ror
 /* 0022a910 00000024 */ i3rUnrelocData26(){}  // ror
-/* 0022a938 00000040 */ i3rRelocData26(){}  // ror
-/* 0022a978 0000000c */ FUN_0022a978(){}
-/* 0022a988 00000010 */ FUN_0022a988(){}
-/* 0022a998 0000000c */ FUN_0022a998(){}
-/* 0022a9a8 00000070 */ FUN_0022a9a8(){}
+/* 0022a938 00000024 */ i3rRelocData26(){}  // ror
+/* 0022a960 00000008 */ i3rGetSlot26(){}  // ror
+/* 0022a968 00000010 */ i3rHasData26(){}  // ror
+/* 0022a978 0000000c */ i3rGetSlot26_1(){}  // ror
+/* 0022a988 00000010 */ i3rHasData26_1(){}  // ror
+/* 0022a998 0000000c */ i3rGetSlot26_2(){}  // ror
+/* 0022a9a8 00000010 */ i3rHasData26_2(){}  // ror
+/* 0022a9b8 00000014 */ i3rGetNumChild26_3(){}  // ror
+/* 0022a9d0 00000014 */ i3rGetChild26_3(){}  // ror
+/* 0022a9e8 0000000c */ i3rGetChildBegin26_3(){}  // ror
+/* 0022a9f8 00000020 */ i3rGetChildEnd26_3(){}  // ror
 /* 0022aa18 00000014 */ i3rUnrelocData59(){}  // ror
 /* 0022aa30 00000014 */ i3rRelocData59(){}  // ror
-/* 0022aa48 0000002c */ FUN_0022aa48(){}
-/* 0022aa78 0000000c */ FUN_0022aa78(){}
-/* 0022aa88 0000001c */ FUN_0022aa88(){}
+/* 0022aa48 00000014 */ i3rGetNumChild59(){}  // ror
+/* 0022aa60 00000014 */ i3rGetChild59(){}  // ror
+/* 0022aa78 0000000c */ i3rGetChildBegin59(){}  // ror
+/* 0022aa88 0000001c */ i3rGetChildEnd59(){}  // ror
 /* 0022aaa8 00000004 */ i3rUnrelocData25(){}  // ror
 /* 0022aab0 00000004 */ i3rRelocData25(){}  // ror
-/* 0022aab8 00000014 */ FUN_0022aab8(){}
-/* 0022aad0 00000044 */ i3rGetChild25(){}  // ror
+/* 0022aab8 00000014 */ i3rGetNumChild25(){}  // ror
+/* 0022aad0 00000014 */ i3rGetChild25(){}  // ror
+/* 0022aae8 0000000c */ i3rGetChildBegin25(){}  // ror
+/* 0022aaf8 0000001c */ i3rGetChildEnd25(){}  // ror
 /* 0022ab18 00000058 */ i3rUnrelocData2D(){}  // ror
 /* 0022ab70 0000004c */ i3rRelocData2D(){}  // ror
-/* 0022abc0 00000008 */ FUN_0022abc0(){}
-/* 0022abc8 00000010 */ FUN_0022abc8(){}
-/* 0022abd8 0000000c */ FUN_0022abd8(){}
-/* 0022abe8 00000010 */ FUN_0022abe8(){}
+/* 0022abc0 00000008 */ i3rGetSlot2D(){}  // ror
+/* 0022abc8 00000010 */ i3rHasData2D(){}  // ror
+/* 0022abd8 0000000c */ i3rGetSlot2D_1(){}  // ror
+/* 0022abe8 00000010 */ i3rHasData2D_1(){}  // ror
 /* 0022abf8 00000004 */ i3rUnrelocData2A(){}  // ror
 /* 0022ac00 00000004 */ i3rRelocData2A(){}  // ror
-/* 0022ac08 00000044 */ FUN_0022ac08(){}
-/* 0022ac50 00000038 */ FUN_0022ac50(){}
-/* 0022ac88 0000003c */ FUN_0022ac88(){}
-/* 0022acc8 00000058 */ FUN_0022acc8(){}
+/* 0022ac08 00000008 */ i3rGetSlot2A(){}  // ror
+/* 0022ac10 00000010 */ i3rHasData2A(){}  // ror
+/* 0022ac20 00000014 */ i3rGetNumChild2A_1(){}  // ror
+/* 0022ac38 00000014 */ i3rGetChild2A_1(){}  // ror
+/* 0022ac50 0000001c */ i3rFindChild2A_1(){}  // ror
+/* 0022ac70 00000018 */ i3rGetChildName2A_1(){}  // ror
+/* 0022ac88 0000003c */ i3rGetChildByName2A_1(){}  // ror
+/* 0022acc8 00000028 */ i3rHasChild2A_1(){}  // ror
+/* 0022acf0 0000000c */ i3rGetChildBegin2A_1(){}  // ror
+/* 0022ad00 00000020 */ i3rGetChildEnd2A_1(){}  // ror
 /* 0022ad20 000000d8 */ i3rUnrelocData52(){}  // ror
 /* 0022adf8 000000c4 */ i3rRelocData52(){}  // ror
 /* 0022aec0 00000014 */ i3rGetNumChild52(){}  // ror
 /* 0022aed8 00000014 */ i3rGetChild52(){}  // ror
-/* 0022aef0 00000018 */ FUN_0022aef0(){}
+/* 0022aef0 00000018 */ i3rFindChild52(){}  // ror
 /* 0022af08 00000018 */ i3rGetChildName52(){}  // ror
-/* 0022af20 00000038 */ FUN_0022af20(){}
-/* 0022af58 000000a4 */ FUN_0022af58(){}
-/* 0022b000 00000038 */ FUN_0022b000(){}
-/* 0022b038 0000003c */ FUN_0022b038(){}
-/* 0022b078 00000058 */ FUN_0022b078(){}
-/* 0022b0d0 00000014 */ FUN_0022b0d0(){}
-/* 0022b0e8 00000088 */ FUN_0022b0e8(){}
-/* 0022b170 00000040 */ FUN_0022b170(){}
+/* 0022af20 00000038 */ i3rGetChildByName52(){}  // ror
+/* 0022af58 00000024 */ i3rHasChild52(){}  // ror
+/* 0022af80 0000000c */ i3rGetChildBegin52(){}  // ror
+/* 0022af90 0000001c */ i3rGetChildEnd52(){}  // ror
+/* 0022afb0 0000000c */ i3rGetSlot52_1(){}  // ror
+/* 0022afc0 00000010 */ i3rHasData52_1(){}  // ror
+/* 0022afd0 00000014 */ i3rGetNumChild52_2(){}  // ror
+/* 0022afe8 00000014 */ i3rGetChild52_2(){}  // ror
+/* 0022b000 0000001c */ i3rFindChild52_2(){}  // ror
+/* 0022b020 00000018 */ i3rGetChildName52_2(){}  // ror
+/* 0022b038 0000003c */ i3rGetChildByName52_2(){}  // ror
+/* 0022b078 00000028 */ i3rHasChild52_2(){}  // ror
+/* 0022b0a0 0000000c */ i3rGetChildBegin52_2(){}  // ror
+/* 0022b0b0 00000020 */ i3rGetChildEnd52_2(){}  // ror
+/* 0022b0d0 00000014 */ i3rGetNumChild52_3(){}  // ror
+/* 0022b0e8 00000014 */ i3rGetChild52_3(){}  // ror
+/* 0022b100 0000000c */ i3rGetChildBegin52_3(){}  // ror
+/* 0022b110 00000020 */ i3rGetChildEnd52_3(){}  // ror
+/* 0022b130 0000000c */ i3rGetSlot52_4(){}  // ror
+/* 0022b140 00000010 */ i3rHasData52_4(){}  // ror
+/* 0022b150 0000000c */ i3rGetSlot52_5(){}  // ror
+/* 0022b160 00000010 */ i3rHasData52_5(){}  // ror
+/* 0022b170 0000000c */ i3rGetSlot52_6(){}  // ror
+/* 0022b180 00000010 */ i3rHasData52_6(){}  // ror
+/* 0022b190 0000000c */ i3rGetSlot52_7(){}  // ror
+/* 0022b1a0 00000010 */ i3rHasData52_7(){}  // ror
 
 // *****************************************************************************
 // FILE -- i3d/i3rroot.cpp

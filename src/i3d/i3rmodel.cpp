@@ -5,9 +5,10 @@
  *  texture assignment and animation, STQ map entities, the clip sphere and
  *  the node transforms. See i3rmodel.h for the item tree they walk.
  *
- *  The ROM reaches the children through tiny per-type accessors
- *  (0x22a890.. / 0x22abc0.. / 0x22b170: an item's child k, or whether its
- *  data is set); here they are I3rItem's getChildren() / m_data reads.
+ *  The ROM reaches the children through the per-type accessors of
+ *  i3rtype.cpp (i3rGetSlot29 .., i3rGetSlot2D .., i3rGetSlot52_6: an
+ *  item's child k, or whether its data is set); here they are inlined as
+ *  I3rItem's getChildren() / m_data reads.
  *
  *  PORT: the ROM walks most lists with do-while loops that assume at least
  *  one entry; the host uses counted loops (an empty list does nothing).
@@ -77,7 +78,7 @@ static void i3rBuildListPackets(const I3rItem *list, void *buf)
 }
 
 // ROR 0x0021a3e8
-// callcheck: FUN_0022b170, FUN_0022abc8, FUN_0022abc0, FUN_0022abe8, FUN_0022abd8, i3rBuildMeshPacket (the item accessors: getChildren / m_data reads; the mesh builder is called in i3rBuildListPackets)
+// callcheck: i3rGetSlot52_6, i3rHasData2D, i3rGetSlot2D, i3rHasData2D_1, i3rGetSlot2D_1, i3rBuildMeshPacket (the item accessors: getChildren / m_data reads; the mesh builder is called in i3rBuildListPackets)
 int i3rBuildPackets(I3rRoot *root)
 {
     I3rItem *child = root->m_item.getChildren();
@@ -100,7 +101,7 @@ int i3rBuildPackets(I3rRoot *root)
 }
 
 // ROR 0x0021a558
-// callcheck: FUN_0022b170 (the item accessor: child 6)
+// callcheck: i3rGetSlot52_6 (the item accessor: child 6)
 int i3rClearPackets(I3rRoot *root)
 {
     I3rPacketBuf *packets = (I3rPacketBuf *)root->m_item.getChildren()[6].getData();
@@ -257,7 +258,7 @@ static I3rItem *i3rMatEntitySlot(const I3rItem *mat, int n)
 }
 
 // ROR 0x0021aa10
-// callcheck: FUN_0022a988, FUN_0022a978, FUN_0022a898, FUN_0022a890 (the item accessors, in i3rMatEntitySlot)
+// callcheck: i3rHasData26_1, i3rGetSlot26_1, i3rHasData29, i3rGetSlot29 (the item accessors, in i3rMatEntitySlot)
 void *i3rGetMatEntity0(const I3rItem *mat)
 {
     I3rItem *slot = i3rMatEntitySlot(mat, 0);
@@ -266,7 +267,7 @@ void *i3rGetMatEntity0(const I3rItem *mat)
 }
 
 // ROR 0x0021aa70
-// callcheck: FUN_0022a988, FUN_0022a978, FUN_0022a8b8, FUN_0022a8a8 (the item accessors, in i3rMatEntitySlot)
+// callcheck: i3rHasData26_1, i3rGetSlot26_1, i3rHasData29_1, i3rGetSlot29_1 (the item accessors, in i3rMatEntitySlot)
 void *i3rGetMatEntity1(const I3rItem *mat)
 {
     I3rItem *slot = i3rMatEntitySlot(mat, 1);
@@ -275,7 +276,7 @@ void *i3rGetMatEntity1(const I3rItem *mat)
 }
 
 // ROR 0x0021aad0
-// callcheck: FUN_0022a988, FUN_0022a978, FUN_0022a8d8, FUN_0022a8c8 (the item accessors, in i3rMatEntitySlot)
+// callcheck: i3rHasData26_1, i3rGetSlot26_1, i3rHasData29_2, i3rGetSlot29_2 (the item accessors, in i3rMatEntitySlot)
 void *i3rGetMatEntity2(const I3rItem *mat)
 {
     I3rItem *slot = i3rMatEntitySlot(mat, 2);
@@ -284,7 +285,7 @@ void *i3rGetMatEntity2(const I3rItem *mat)
 }
 
 // ROR 0x0021ab30
-// callcheck: FUN_0022a988, FUN_0022a978, FUN_0022a898, FUN_0022a890 (the item accessors, in i3rMatEntitySlot)
+// callcheck: i3rHasData26_1, i3rGetSlot26_1, i3rHasData29, i3rGetSlot29 (the item accessors, in i3rMatEntitySlot)
 int i3rSetMatEntity0(I3rItem *mat, void *entity)
 {
     I3rItem *slot = i3rMatEntitySlot(mat, 0);
@@ -296,7 +297,7 @@ int i3rSetMatEntity0(I3rItem *mat, void *entity)
 }
 
 // ROR 0x0021aba0
-// callcheck: FUN_0022a988, FUN_0022a978, FUN_0022a8b8, FUN_0022a8a8 (the item accessors, in i3rMatEntitySlot)
+// callcheck: i3rHasData26_1, i3rGetSlot26_1, i3rHasData29_1, i3rGetSlot29_1 (the item accessors, in i3rMatEntitySlot)
 int i3rSetMatEntity1(I3rItem *mat, void *entity)
 {
     I3rItem *slot = i3rMatEntitySlot(mat, 1);
@@ -308,7 +309,7 @@ int i3rSetMatEntity1(I3rItem *mat, void *entity)
 }
 
 // ROR 0x0021ac10
-// callcheck: FUN_0022a988, FUN_0022a978, FUN_0022a8d8, FUN_0022a8c8 (the item accessors, in i3rMatEntitySlot)
+// callcheck: i3rHasData26_1, i3rGetSlot26_1, i3rHasData29_2, i3rGetSlot29_2 (the item accessors, in i3rMatEntitySlot)
 int i3rSetMatEntity2(I3rItem *mat, void *entity)
 {
     I3rItem *slot = i3rMatEntitySlot(mat, 2);

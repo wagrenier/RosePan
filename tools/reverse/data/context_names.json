@@ -16775,6 +16775,54 @@
   "was": "FUN_0022a730",
   "why": "slot 0x4d of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x4d (offsets from the data start)"
  },
+ "0022a7d0": {
+  "name": "i3rGetChildBegin4D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a7d0",
+  "why": "i3r type 0x4d accessor (after its fixup pair, before i3rroot.cpp): children[0].m_children"
+ },
+ "0022a7e0": {
+  "name": "i3rGetChildEnd4D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a7e0",
+  "why": "i3r type 0x4d accessor (after its fixup pair, before i3rroot.cpp): children[0].m_children + count * 0x10 (one past the last)"
+ },
+ "0022a800": {
+  "name": "i3rGetNumChild4D_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a800",
+  "why": "i3r type 0x4d accessor (after its fixup pair, before i3rroot.cpp): children[1].m_info & 0xffffff (sll 8 / srl 8)"
+ },
+ "0022a818": {
+  "name": "i3rGetChild4D_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a818",
+  "why": "i3r type 0x4d accessor (after its fixup pair, before i3rroot.cpp): children[1].m_children + n * 0x10"
+ },
+ "0022a830": {
+  "name": "i3rGetChildBegin4D_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a830",
+  "why": "i3r type 0x4d accessor (after its fixup pair, before i3rroot.cpp): children[1].m_children"
+ },
+ "0022a840": {
+  "name": "i3rGetChildEnd4D_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a840",
+  "why": "i3r type 0x4d accessor (after its fixup pair, before i3rroot.cpp): children[1].m_children + count * 0x10 (one past the last)"
+ },
+ "0022a860": {
+  "name": "i3rGetSlot4D_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a860",
+  "why": "i3r type 0x4d accessor (after its fixup pair, before i3rroot.cpp): returns item children + 2 (the item's child slot 2)"
+ },
+ "0022a870": {
+  "name": "i3rHasData4D_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a870",
+  "why": "i3r type 0x4d accessor (after its fixup pair, before i3rroot.cpp): children[2].m_data != 0 (sltu of the slot's data word)"
+ },
  "0022a880": {
   "name": "i3rUnrelocData29",
   "tag": "ror-inferred",
@@ -16786,6 +16834,42 @@
   "tag": "ror-inferred",
   "was": "FUN_0022a888",
   "why": "slot 0x29 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x29 (offsets from the data start)"
+ },
+ "0022a890": {
+  "name": "i3rGetSlot29",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a890",
+  "why": "i3r type 0x29 accessor (after its fixup pair, before i3rroot.cpp): returns item children + 0 (the item's child slot 0)"
+ },
+ "0022a898": {
+  "name": "i3rHasData29",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a898",
+  "why": "i3r type 0x29 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_data != 0 (sltu of the slot's data word)"
+ },
+ "0022a8a8": {
+  "name": "i3rGetSlot29_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a8a8",
+  "why": "i3r type 0x29 accessor (after its fixup pair, before i3rroot.cpp): returns item children + 1 (the item's child slot 1)"
+ },
+ "0022a8b8": {
+  "name": "i3rHasData29_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a8b8",
+  "why": "i3r type 0x29 accessor (after its fixup pair, before i3rroot.cpp): children[1].m_data != 0 (sltu of the slot's data word)"
+ },
+ "0022a8c8": {
+  "name": "i3rGetSlot29_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a8c8",
+  "why": "i3r type 0x29 accessor (after its fixup pair, before i3rroot.cpp): returns item children + 2 (the item's child slot 2)"
+ },
+ "0022a8d8": {
+  "name": "i3rHasData29_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a8d8",
+  "why": "i3r type 0x29 accessor (after its fixup pair, before i3rroot.cpp): children[2].m_data != 0 (sltu of the slot's data word)"
  },
  "0022a8e8": {
   "name": "i3rUnrelocData4A",
@@ -16799,6 +16883,18 @@
   "was": "FUN_0022a8f0",
   "why": "slot 0x4a of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x4a (offsets from the data start)"
  },
+ "0022a8f8": {
+  "name": "i3rGetSlot4A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a8f8",
+  "why": "i3r type 0x4a accessor (after its fixup pair, before i3rroot.cpp): returns item children + 0 (the item's child slot 0)"
+ },
+ "0022a900": {
+  "name": "i3rHasData4A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a900",
+  "why": "i3r type 0x4a accessor (after its fixup pair, before i3rroot.cpp): children[0].m_data != 0 (sltu of the slot's data word)"
+ },
  "0022a910": {
   "name": "i3rUnrelocData26",
   "tag": "ror-inferred",
@@ -16810,6 +16906,66 @@
   "tag": "ror-inferred",
   "was": "FUN_0022a938",
   "why": "slot 0x26 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x26 (offsets from the data start)"
+ },
+ "0022a960": {
+  "name": "i3rGetSlot26",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a960",
+  "why": "i3r type 0x26 accessor (after its fixup pair, before i3rroot.cpp): returns item children + 0 (the item's child slot 0)"
+ },
+ "0022a968": {
+  "name": "i3rHasData26",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a968",
+  "why": "i3r type 0x26 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_data != 0 (sltu of the slot's data word)"
+ },
+ "0022a978": {
+  "name": "i3rGetSlot26_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a978",
+  "why": "i3r type 0x26 accessor (after its fixup pair, before i3rroot.cpp): returns item children + 1 (the item's child slot 1)"
+ },
+ "0022a988": {
+  "name": "i3rHasData26_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a988",
+  "why": "i3r type 0x26 accessor (after its fixup pair, before i3rroot.cpp): children[1].m_data != 0 (sltu of the slot's data word)"
+ },
+ "0022a998": {
+  "name": "i3rGetSlot26_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a998",
+  "why": "i3r type 0x26 accessor (after its fixup pair, before i3rroot.cpp): returns item children + 2 (the item's child slot 2)"
+ },
+ "0022a9a8": {
+  "name": "i3rHasData26_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a9a8",
+  "why": "i3r type 0x26 accessor (after its fixup pair, before i3rroot.cpp): children[2].m_data != 0 (sltu of the slot's data word)"
+ },
+ "0022a9b8": {
+  "name": "i3rGetNumChild26_3",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a9b8",
+  "why": "i3r type 0x26 accessor (after its fixup pair, before i3rroot.cpp): children[3].m_info & 0xffffff (sll 8 / srl 8)"
+ },
+ "0022a9d0": {
+  "name": "i3rGetChild26_3",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a9d0",
+  "why": "i3r type 0x26 accessor (after its fixup pair, before i3rroot.cpp): children[3].m_children + n * 0x10"
+ },
+ "0022a9e8": {
+  "name": "i3rGetChildBegin26_3",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a9e8",
+  "why": "i3r type 0x26 accessor (after its fixup pair, before i3rroot.cpp): children[3].m_children"
+ },
+ "0022a9f8": {
+  "name": "i3rGetChildEnd26_3",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a9f8",
+  "why": "i3r type 0x26 accessor (after its fixup pair, before i3rroot.cpp): children[3].m_children + count * 0x10 (one past the last)"
  },
  "0022aa18": {
   "name": "i3rUnrelocData59",
@@ -16823,6 +16979,30 @@
   "was": "FUN_0022aa30",
   "why": "slot 0x59 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x59 (offsets from the data start)"
  },
+ "0022aa48": {
+  "name": "i3rGetNumChild59",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aa48",
+  "why": "i3r type 0x59 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_info & 0xffffff (sll 8 / srl 8)"
+ },
+ "0022aa60": {
+  "name": "i3rGetChild59",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aa60",
+  "why": "i3r type 0x59 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_children + n * 0x10"
+ },
+ "0022aa78": {
+  "name": "i3rGetChildBegin59",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aa78",
+  "why": "i3r type 0x59 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_children"
+ },
+ "0022aa88": {
+  "name": "i3rGetChildEnd59",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aa88",
+  "why": "i3r type 0x59 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_children + count * 0x10 (one past the last)"
+ },
  "0022aaa8": {
   "name": "i3rUnrelocData25",
   "tag": "ror-inferred",
@@ -16835,11 +17015,29 @@
   "was": "FUN_0022aab0",
   "why": "slot 0x25 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x25 (offsets from the data start)"
  },
+ "0022aab8": {
+  "name": "i3rGetNumChild25",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aab8",
+  "why": "i3r type 0x25 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_info & 0xffffff (sll 8 / srl 8)"
+ },
  "0022aad0": {
   "name": "i3rGetChild25",
   "tag": "ror-inferred",
   "was": "FUN_0022aad0",
   "why": "the n-th child of the item's first child; sits after the type 0x25 fixup pair (0x22aaa8 / 0x22aab0); same body as 0x22aed8"
+ },
+ "0022aae8": {
+  "name": "i3rGetChildBegin25",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aae8",
+  "why": "i3r type 0x25 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_children"
+ },
+ "0022aaf8": {
+  "name": "i3rGetChildEnd25",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aaf8",
+  "why": "i3r type 0x25 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_children + count * 0x10 (one past the last)"
  },
  "0022ab18": {
   "name": "i3rUnrelocData2D",
@@ -16853,6 +17051,30 @@
   "was": "FUN_0022ab70",
   "why": "slot 0x2d of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x2d (offsets from the data start)"
  },
+ "0022abc0": {
+  "name": "i3rGetSlot2D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022abc0",
+  "why": "i3r type 0x2d accessor (after its fixup pair, before i3rroot.cpp): returns item children + 0 (the item's child slot 0)"
+ },
+ "0022abc8": {
+  "name": "i3rHasData2D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022abc8",
+  "why": "i3r type 0x2d accessor (after its fixup pair, before i3rroot.cpp): children[0].m_data != 0 (sltu of the slot's data word)"
+ },
+ "0022abd8": {
+  "name": "i3rGetSlot2D_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022abd8",
+  "why": "i3r type 0x2d accessor (after its fixup pair, before i3rroot.cpp): returns item children + 1 (the item's child slot 1)"
+ },
+ "0022abe8": {
+  "name": "i3rHasData2D_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022abe8",
+  "why": "i3r type 0x2d accessor (after its fixup pair, before i3rroot.cpp): children[1].m_data != 0 (sltu of the slot's data word)"
+ },
  "0022abf8": {
   "name": "i3rUnrelocData2A",
   "tag": "ror-inferred",
@@ -16864,6 +17086,66 @@
   "tag": "ror-inferred",
   "was": "FUN_0022ac00",
   "why": "slot 0x2a of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x2a (offsets from the data start)"
+ },
+ "0022ac08": {
+  "name": "i3rGetSlot2A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ac08",
+  "why": "i3r type 0x2a accessor (after its fixup pair, before i3rroot.cpp): returns item children + 0 (the item's child slot 0)"
+ },
+ "0022ac10": {
+  "name": "i3rHasData2A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ac10",
+  "why": "i3r type 0x2a accessor (after its fixup pair, before i3rroot.cpp): children[0].m_data != 0 (sltu of the slot's data word)"
+ },
+ "0022ac20": {
+  "name": "i3rGetNumChild2A_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ac20",
+  "why": "i3r type 0x2a accessor (after its fixup pair, before i3rroot.cpp): children[1].m_info & 0xffffff (sll 8 / srl 8)"
+ },
+ "0022ac38": {
+  "name": "i3rGetChild2A_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ac38",
+  "why": "i3r type 0x2a accessor (after its fixup pair, before i3rroot.cpp): children[1].m_children + n * 0x10"
+ },
+ "0022ac50": {
+  "name": "i3rFindChild2A_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ac50",
+  "why": "i3r type 0x2a accessor (after its fixup pair, before i3rroot.cpp): tail call i3rItemFindChild(children + 1, name)"
+ },
+ "0022ac70": {
+  "name": "i3rGetChildName2A_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ac70",
+  "why": "i3r type 0x2a accessor (after its fixup pair, before i3rroot.cpp): the name word (+0xc) of children[1].m_children[n]"
+ },
+ "0022ac88": {
+  "name": "i3rGetChildByName2A_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ac88",
+  "why": "i3r type 0x2a accessor (after its fixup pair, before i3rroot.cpp): children[1].m_children + i3rItemFindChild(children + 1, name) * 0x10"
+ },
+ "0022acc8": {
+  "name": "i3rHasChild2A_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022acc8",
+  "why": "i3r type 0x2a accessor (after its fixup pair, before i3rroot.cpp): i3rItemFindChild(children + 1, name) != -1"
+ },
+ "0022acf0": {
+  "name": "i3rGetChildBegin2A_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022acf0",
+  "why": "i3r type 0x2a accessor (after its fixup pair, before i3rroot.cpp): children[1].m_children"
+ },
+ "0022ad00": {
+  "name": "i3rGetChildEnd2A_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ad00",
+  "why": "i3r type 0x2a accessor (after its fixup pair, before i3rroot.cpp): children[1].m_children + count * 0x10 (one past the last)"
  },
  "0022ad20": {
   "name": "i3rUnrelocData52",
@@ -16889,11 +17171,173 @@
   "was": "FUN_0022aed8",
   "why": "the n-th child of the item's first child; sits after the type 0x52 fixup pair (0x22ad20 / 0x22adf8); its twin 0x22aad0 has the same body"
  },
+ "0022aef0": {
+  "name": "i3rFindChild52",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aef0",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): tail call i3rItemFindChild(children + 0, name)"
+ },
  "0022af08": {
   "name": "i3rGetChildName52",
   "tag": "ror-inferred",
   "was": "FUN_0022af08",
   "why": "name word of the n-th child of item's first child; DogActor::setupEye strstr's it"
+ },
+ "0022af20": {
+  "name": "i3rGetChildByName52",
+  "tag": "ror-inferred",
+  "was": "FUN_0022af20",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_children + i3rItemFindChild(children + 0, name) * 0x10"
+ },
+ "0022af58": {
+  "name": "i3rHasChild52",
+  "tag": "ror-inferred",
+  "was": "FUN_0022af58",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): i3rItemFindChild(children + 0, name) != -1"
+ },
+ "0022af80": {
+  "name": "i3rGetChildBegin52",
+  "tag": "ror-inferred",
+  "was": "FUN_0022af80",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_children"
+ },
+ "0022af90": {
+  "name": "i3rGetChildEnd52",
+  "tag": "ror-inferred",
+  "was": "FUN_0022af90",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[0].m_children + count * 0x10 (one past the last)"
+ },
+ "0022afb0": {
+  "name": "i3rGetSlot52_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022afb0",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): returns item children + 1 (the item's child slot 1)"
+ },
+ "0022afc0": {
+  "name": "i3rHasData52_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022afc0",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[1].m_data != 0 (sltu of the slot's data word)"
+ },
+ "0022afd0": {
+  "name": "i3rGetNumChild52_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022afd0",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[2].m_info & 0xffffff (sll 8 / srl 8)"
+ },
+ "0022afe8": {
+  "name": "i3rGetChild52_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022afe8",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[2].m_children + n * 0x10"
+ },
+ "0022b000": {
+  "name": "i3rFindChild52_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b000",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): tail call i3rItemFindChild(children + 2, name)"
+ },
+ "0022b020": {
+  "name": "i3rGetChildName52_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b020",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): the name word (+0xc) of children[2].m_children[n]"
+ },
+ "0022b038": {
+  "name": "i3rGetChildByName52_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b038",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[2].m_children + i3rItemFindChild(children + 2, name) * 0x10"
+ },
+ "0022b078": {
+  "name": "i3rHasChild52_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b078",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): i3rItemFindChild(children + 2, name) != -1"
+ },
+ "0022b0a0": {
+  "name": "i3rGetChildBegin52_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b0a0",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[2].m_children"
+ },
+ "0022b0b0": {
+  "name": "i3rGetChildEnd52_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b0b0",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[2].m_children + count * 0x10 (one past the last)"
+ },
+ "0022b0d0": {
+  "name": "i3rGetNumChild52_3",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b0d0",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[3].m_info & 0xffffff (sll 8 / srl 8)"
+ },
+ "0022b0e8": {
+  "name": "i3rGetChild52_3",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b0e8",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[3].m_children + n * 0x10"
+ },
+ "0022b100": {
+  "name": "i3rGetChildBegin52_3",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b100",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[3].m_children"
+ },
+ "0022b110": {
+  "name": "i3rGetChildEnd52_3",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b110",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[3].m_children + count * 0x10 (one past the last)"
+ },
+ "0022b130": {
+  "name": "i3rGetSlot52_4",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b130",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): returns item children + 4 (the item's child slot 4)"
+ },
+ "0022b140": {
+  "name": "i3rHasData52_4",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b140",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[4].m_data != 0 (sltu of the slot's data word)"
+ },
+ "0022b150": {
+  "name": "i3rGetSlot52_5",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b150",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): returns item children + 5 (the item's child slot 5)"
+ },
+ "0022b160": {
+  "name": "i3rHasData52_5",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b160",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[5].m_data != 0 (sltu of the slot's data word)"
+ },
+ "0022b170": {
+  "name": "i3rGetSlot52_6",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b170",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): returns item children + 6 (the item's child slot 6)"
+ },
+ "0022b180": {
+  "name": "i3rHasData52_6",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b180",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[6].m_data != 0 (sltu of the slot's data word)"
+ },
+ "0022b190": {
+  "name": "i3rGetSlot52_7",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b190",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): returns item children + 7 (the item's child slot 7)"
+ },
+ "0022b1a0": {
+  "name": "i3rHasData52_7",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b1a0",
+  "why": "i3r type 0x52 accessor (after its fixup pair, before i3rroot.cpp): children[7].m_data != 0 (sltu of the slot's data word)"
  },
  "0022b1b0": {
   "name": "i3rFindName",
