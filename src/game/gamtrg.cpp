@@ -9,15 +9,17 @@
 // tables. The pools are sequence.h's node pool, inline in the ROM wherever
 // they are used.
 
+#include <math.h>
 #include <string.h>
 
-#include "common/rosepan_stub.h"
 #include "game/gamtrg.h"
 
 #include "bed/bedmemory.h"
 #include "bed/bedpad.h"
 #include "game/gamman.h"
 #include "game/gamstat.h"
+#include "lib/unassigned.h"
+#include "mag/magscenecmd.h"
 #include "mag/magsystem.h"
 #include "sequence/sequence.h"
 #include "system/system.h"
@@ -433,10 +435,406 @@ int GamArea::canCheckPc(void *unused, u_int *flags)
     return 1;
 }
 
-// stub of ROR 0x001dee78
+// ──────────────────────────────────────────────────────────────────────
+// update's helpers (inline in the ROM).
+
+/* The angle of the last flag 8 / 0x2000 / 0x4000 trigger that held; a flag
+ * 1 trigger that fires leaves it in m_global[8]. */
+static float s_trgAngle;        // ROR 0x002d8f64 (sdata, 0.0)
+
+/* GamMan m_flags2 0x8000000 holds most tests off. */
+static bool gamTrgFrozen()
+{
+    return (g_gamMan.m_flags2 & 0x8000000) != 0;
+}
+
+/* |d| after one wrap into -pi..pi (in doubles, as the ROM does). */
+static float gamTrgAngleOff(float d)
+{
+    const double pi = 3.141592653589793;
+    if ((double)d < -pi)
+        d = (float)((double)d + 2.0 * pi);
+    if ((double)d > pi)
+        d = (float)((double)d - 2.0 * pi);
+    return d < 0.0f ? -d : d;
+}
+
+/* The trigger's actor number, looked up (and kept) while it is -1; false
+ * when oid is no object or has no actor. */
+static bool gamTrgActor(int &actor, u_int oid)
+{
+    if (actor != -1)
+        return true;
+    if (g_gamMan.isObj(oid) == 0)
+        return false;
+    actor = g_gamMan.getActorNo(oid);
+    return actor != -1;
+}
+
+static const float *gamTrgActorPos(int actor)
+{
+    return g_magSystem.m_scene.m_actors[actor].m_trans;
+}
+
+/* q within r of p on xz, their heights less than 150 apart. */
+static bool gamTrgNear(const float *p, const float *q, float r)
+{
+    float dx = p[0] < q[0] ? q[0] - p[0] : p[0] - q[0];
+    float dy = q[1] - p[1];
+    if (dy < 0.0f ? dy <= -150.0f : 150.0f <= dy)
+        return false;
+    if (dx > r)
+        return false;
+    float dz = p[2] < q[2] ? q[2] - p[2] : p[2] - q[2];
+    return dz <= r && sqrtf(dx * dx + dz * dz) < r;
+}
+
+/* Bit n of the script flags (g_sequence.m_bits). */
+static bool gamTrgBit(u_int n)
+{
+    return (g_sequence.m_bits[n >> 5] & (1u << (n & 0x1f))) != 0;
+}
+
+/* Flag 0x20: every value of the ftb entry (up to eight, to the first 0)
+ * holds: a positive one names a script flag that must be set, a negative
+ * one (its low 16 bits) one that must be clear. */
+static bool gamTrgFtbHolds(const GamAreaFtb *ftb)
+{
+    for (int i = 0; i < 8 && ftb->m_value[i] != 0; i++) {
+        u_int v = ftb->m_value[i];
+        if ((int)v < 0) {
+            if (gamTrgBit(v & 0xffff))
+                return false;
+        } else if (!gamTrgBit(v)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/* Flag 0x8000: the script global m_cmpGlobal against m_cmpValue (ops 2..5
+ * unsigned; 6 / 7 the signed short range lo = the low half, hi = the
+ * high half). Other ops hold. */
+static bool gamTrgCompare(const GamAreaTrg &trg)
+{
+    int g = g_sequence.m_global[trg.m_cmpGlobal];
+    u_int ug = (u_int)g;
+    u_int v = (u_int)trg.m_cmpValue;
+    int lo = (short)(v & 0xffff);
+    int hi = (short)(v >> 16);
+    switch (trg.m_cmpOp) {
+    case 0:
+        return v == ug;
+    case 1:
+        return v != ug;
+    case 2:
+        return ug > v;
+    case 3:
+        return v > ug;
+    case 4:
+        return ug >= v;
+    case 5:
+        return v >= ug;
+    case 6:
+        return lo <= g && g <= hi;
+    case 7:
+        return g < lo || hi < g;
+    }
+    return true;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Each active trigger collects the bits of its conditions that hold in pass
+// (from 0x3000000); one whose low 0xc31fffff flags equal pass (and, with
+// flag 0x400000, whose Brown conditions all held) is copied to m_fired.
+// Flags 1 / 2 (enter / leave the rect) and 0x100 / 0x40000 / 0x800 /
+// 0x80000 add 0x80000000 while bit 0x10000000 (and 0x800000 for leaving)
+// is clear: the edge bits ctl_trg_flg sets when the trigger fires, cleared
+// again on the opposite side. A failed test ends the trigger's turn.
+// The fired ones then start their "trg" threads (m_fired in order, not
+// while a menu is open), the first that does not keep the game running
+// (no 0x8000000) setting 0x20000000, resuming 0x8000 and ending the walk.
+// The PC's rect entries counted in inside keep a second 0x4000000 trigger
+// from starting while m_18b5c (the last start's count) is set.
+// ROR 0x001dee78 // callcheck: dpadd, dpcmp, dpsub, dptofp, fptodp, sqrtf, isObj, getActorNo, operator_new (the soft-float doubles, C doubles here; new TskFrameFunc; the rest in the helpers above)
+
 void GamArea::update(const float *pos, const float *rot)
 {
-    ROSEPAN_STUB("GamArea::update", 0x001dee78);
+    int inside = 0;
+    /* The ROM keeps the Brown bits across the triggers (never reset). */
+    u_int bwnPass = 0;
+    u_int bwn = 0;
+
+    if (m_fired.m_used.m_count != 0)
+        m_fired.clear();
+
+    SeqList<GamAreaTrg> &used = m_active.m_used;
+    if (used.m_count != 0) {
+        SeqNode<GamAreaTrg> *next;
+        for (SeqNode<GamAreaTrg> *it = used.begin(); it != used.end(); it = next) {
+            /* PORT: the ROM goes on from the node's m_next after a 0x40000000
+             * trigger left the list (the free list's sentinel: it would walk
+             * the free list for ever); the host from the saved next, which
+             * the ROM also keeps (sp+0xa0) but never reads. */
+            next = it->m_next;
+            GamAreaTrg &trg = it->m_data;
+            u_int f = trg.m_flags;
+            u_int pass = 0x3000000;
+
+            if ((f & 3) != 0) {
+                if (gamTrgFrozen())
+                    continue;
+                if (!gamTrgHolds(trg, pos)) {
+                    if ((f & 2) != 0) {
+                        pass = 0x3000002;
+                        if ((f & 0x80800000) == 0x80000000)
+                            pass = 0x83000002;
+                    }
+                    trg.m_flags &= ~0x10000000u;
+                } else {
+                    if ((f & 1) != 0) {
+                        if ((f & 0x4010000) == 0x4000000)
+                            inside++;
+                        pass = 0x3000001;
+                        if ((f & 0x90000000) == 0x80000000)
+                            pass = 0x83000001;
+                    }
+                    trg.m_flags &= ~0x800000u;
+                }
+                if (pass == 0x3000000)
+                    continue;
+            }
+
+            if ((f & 0x100) != 0) {
+                if (gamTrgFrozen())
+                    continue;
+                if (gamTrgHolds(trg, pos) && trg.m_y - 200.0f <= pos[1] && pos[1] <= trg.m_y + 200.0f) {
+                    pass |= 0x100;
+                    if ((f & 0x90000000) == 0x80000000)
+                        pass |= 0x80000000;
+                } else if ((f & 0x90000000) == 0x90000000) {
+                    trg.m_flags &= ~0x10000000u;
+                }
+            }
+
+            if ((f & 0x1000) != 0) {
+                if (gamTrgFrozen() || !gamTrgActor(trg.m_actor, trg.m_oid))
+                    continue;
+                if (!gamTrgNear(pos, gamTrgActorPos(trg.m_actor), trg.m_radius))
+                    continue;
+                pass |= 0x1000;
+            }
+
+            if ((f & 0x400) != 0) {
+                if (gamTrgFrozen() || !gamTrgActor(trg.m_actor, trg.m_oid) ||
+                    !gamTrgActor(trg.m_actor2, trg.m_oid2))
+                    continue;
+                if (!gamTrgNear(gamTrgActorPos(trg.m_actor), gamTrgActorPos(trg.m_actor2), trg.m_radius))
+                    continue;
+                pass |= 0x400;
+            }
+
+            if ((f & 0x80800) != 0) {
+                if (!gamTrgActor(trg.m_actor, trg.m_oid) || !gamTrgActor(trg.m_actor2, trg.m_oid2))
+                    continue;
+                if (gamTrgNear(gamTrgActorPos(trg.m_actor), gamTrgActorPos(trg.m_actor2), trg.m_radius)) {
+                    if ((f & 0x800) != 0) {
+                        pass |= 0x800;
+                        if ((f & 0x90000000) == 0x80000000)
+                            pass |= 0x80000000;
+                    }
+                    trg.m_flags &= ~0x800000u;
+                } else {
+                    if ((f & 0x80000) != 0) {
+                        pass |= 0x80000;
+                        if ((f & 0x80800000) == 0x80000000)
+                            pass |= 0x80000000;
+                    }
+                    trg.m_flags &= ~0x10000000u;
+                }
+            }
+
+            if ((f & 8) != 0) {
+                if (!(gamTrgAngleOff(trg.m_angle - rot[1]) < trg.m_angleTol))
+                    continue;
+                pass |= 8;
+                s_trgAngle = trg.m_angle;
+            }
+
+            if ((f & 0x2000) != 0) {
+                if (gamTrgFrozen() || !gamTrgActor(trg.m_actor, trg.m_oid) ||
+                    !gamTrgActor(trg.m_actor2, trg.m_oid2))
+                    continue;
+                const float *a = gamTrgActorPos(trg.m_actor);
+                const float *b = gamTrgActorPos(trg.m_actor2);
+                float ang = utlAtan2(b[0] - a[0], b[2] - a[2]);
+                if (!(gamTrgAngleOff(ang - rot[1]) < trg.m_angleTol))
+                    continue;
+                pass |= 0x2000;
+                s_trgAngle = ang;
+            }
+
+            if ((f & 0x4000) != 0) {
+                if (gamTrgFrozen() || !gamTrgActor(trg.m_actor, trg.m_oid))
+                    continue;
+                const float *a = gamTrgActorPos(trg.m_actor);
+                float ang = utlAtan2(a[0] - pos[0], a[2] - pos[2]);
+                if (!(gamTrgAngleOff(ang - rot[1]) < trg.m_angleTol))
+                    continue;
+                pass |= 0x4000;
+                s_trgAngle = ang;
+            }
+
+            if ((f & 0x10) != 0)
+                canCheckPc(it, &pass);
+
+            if ((f & 4) != 0) {
+                u_int now = (u_int)g_taskMan.m_timer.m_updates;
+                if (now < (u_int)trg.m_time)
+                    continue;
+                trg.m_time = trg.m_delay + (int)now;
+                pass |= 4;
+            }
+
+            if ((f & 0x20) != 0) {
+                const GamAreaFtb *ftb = ftbOf(trg);
+                if (ftb == NULL || !gamTrgFtbHolds(ftb))
+                    continue;
+                pass |= 0x20;
+            }
+
+            if ((f & 0x8000) != 0) {
+                if (!gamTrgCompare(trg))
+                    continue;
+                pass |= 0x8000;
+            }
+
+            if ((f & 0x10000) != 0) {
+                if (!gamTrgBit(trg.m_ftb))
+                    continue;
+                pass |= 0x10000;
+            }
+
+            if ((f & 0x40) != 0) {
+                if ((g_gamMan.m_flags & 0x2000) == 0 ||
+                    (trg.m_kind != 0xffff && (u_int)g_sequence.m_global[0x11] != trg.m_kind))
+                    continue;
+                pass |= 0x40;
+            }
+
+            if ((f & 0x80) != 0) {
+                if ((g_gamMan.m_flags2 & 0x80) == 0 ||
+                    (trg.m_kind != 0xffff && (u_int)g_sequence.m_global[0x29] != trg.m_kind))
+                    continue;
+                pass |= 0x80;
+            }
+
+            if ((f & 0x200) != 0) {
+                u_int oid = findFchrOid(pos, (short)trg.m_kind);
+                if (oid == 0)
+                    continue;
+                g_gamMan.releaseChr(oid);
+                pass |= 0x200;
+            }
+
+            if ((f & 0x40000) != 0) {
+                if (gamTrgFrozen())
+                    continue;
+                /* The rect's corners (x0, z0), (x1, z1), then m_pt2, m_pt3,
+                 * closed on (x0, z0). */
+                const float *pts[6] = { &trg.m_rect[0], &trg.m_rect[2], trg.m_pt2, trg.m_pt3, &trg.m_rect[0], NULL };
+                if (isInPolygon(pos, pts) == 0) {
+                    if ((f & 0x90000000) == 0x90000000)
+                        trg.m_flags &= ~0x10000000u;
+                    continue;
+                }
+                if ((f & 0x90000000) == 0x80000000)
+                    pass |= 0x80000000;
+                pass |= 0x40000;
+            }
+
+            if ((f & 0x400000) != 0) {
+                bwn = trg.m_70;
+                if ((bwn & 0x40000) != 0) {
+                    u_int found = (u_int)magBwnGetFoundOid() & 0xffff;
+                    if (found == 0 || (u_int)trg.m_bwnA != found)
+                        continue;
+                    bwnPass |= 0x40000;
+                }
+                if ((bwn & 0x80000) != 0)
+                    continue;
+                if ((bwn & 0x100000) != 0) {
+                    if (trg.m_bwnA != magBwnReturn0b())
+                        continue;
+                    bwnPass |= 0x100000;
+                }
+                if ((bwn & 0x200000) != 0) {
+                    int b = magBwnReturn0b();
+                    int c = magBwnReturn0c();
+                    if (trg.m_bwnA != b || trg.m_bwnB != c)
+                        continue;
+                    bwnPass |= 0x200000;
+                }
+                if ((bwn & 4) != 0) {
+                    if (gamTrgFrozen() || !(trg.m_y - 200.0f <= pos[1] && pos[1] <= trg.m_y + 200.0f))
+                        continue;
+                    bwnPass |= 4;
+                }
+            }
+
+            if ((f & 0xc31fffff) != pass)
+                continue;
+            if ((f & 0x400000) != 0 && (bwn & ~2u) != bwnPass)
+                continue;
+
+            if ((f & 0x40000000) != 0) {
+                m_active.remove(it);
+                trg.m_flags &= ~0x1000000u;
+            }
+            if ((f & 0x4000000) != 0 && (g_gamMan.m_flags & 0x10000) != 0)
+                continue;
+            if ((f & 1) != 0)
+                memcpy(&g_sequence.m_global[8], &s_trgAngle, sizeof(float));
+            m_cursor = it;
+            m_fired.add(trg);
+        }
+    }
+
+    if (m_fired.m_used.m_count == 0)
+        return;
+    bool paused = false;
+    for (SeqNode<GamAreaTrg> *it = m_fired.m_used.begin(); it != m_fired.m_used.end() && !paused; it = it->m_next) {
+        const GamAreaTrg &trg = it->m_data;
+        u_int f = trg.m_flags;
+        if ((f & 0x4000000) != 0 && inside >= 2 && m_18b5c != 0)
+            continue;
+        if ((f & 0x8000000) == 0 && (f & 0x4000000) == 0 && (g_gamMan.m_flags & 0x8000) != 0)
+            continue;
+        if (g_gamMan.isMenuOpen() != 0 || trg.m_entry == 0)
+            continue;
+
+        if ((f & 0x40901) != 0)
+            ctl_trg_flg(2, (int)trg.m_id, 0x10000000);
+        if ((f & 0x80002) != 0)
+            ctl_trg_flg(2, (int)trg.m_id, 0x800000);
+        if ((f & 0x8000000) == 0) {
+            ctl_trg_flg(2, (int)trg.m_id, 0x20000000);
+            paused = true;
+            g_gamMan.resume(0x8000);
+        }
+        if ((f & 0x40) != 0)
+            g_gamMan.m_flags2 &= ~0x80000u;
+        if ((f & 0x280) != 0)
+            g_gamMan.freezePcMotion();
+        if ((f & 0x4000000) == 0) {
+            g_gamMan.m_flags2 |= 0x400800;
+            int start = g_taskMan.m_timer.m_updates + 0x10;
+            TskFrameFunc *task = new TskFrameFunc(0x16, 0, 0);
+            g_taskMan.addTask(1, start, 1, 0, task, 0, NULL, 1);
+        }
+        g_sequence.execThread(trg.m_thread, trg.m_entry, (int)trg.m_oid, 2, 0, (int)trg.m_id, "trg");
+        m_18b5c = inside;
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────

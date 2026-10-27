@@ -24,8 +24,13 @@
 struct GamAreaTrg
 {
     float  m_rect[4];           // ROR 0x00: x0, z0, x1, z1; native 023 orders each pair when m_flags & 0x103
-    u_int  _10[4];
-    u_int  m_flags;             // ROR 0x20: native 023 sets 0x3000000; 0x1000000 activates it, 0x4000001 checkPc's, 0x20 m_ftbKey, 4 m_delay
+                                //           (also the polygon's first two points, flag 0x40000)
+    u_int  _10;
+    float  m_y;                 // ROR 0x14: flags 0x100 / m_70 4: the PC's height within 200 of it
+    float  m_angle;             // ROR 0x18: flag 8: the PC's facing (rot y) within m_angleTol of it
+    float  m_angleTol;          // ROR 0x1c: flags 8 / 0x2000 / 0x4000: the angle tolerance
+    u_int  m_flags;             // ROR 0x20: native 023 sets 0x3000000; 0x1000000 activates it, 0x4000001 checkPc's, 0x20 m_ftbKey, 4 m_delay;
+                                //           update's condition bits are the low 0xc31fffff (see GamArea::update)
     int    m_ftbKey;            // ROR 0x24: flag 0x20: the registFtb key activateTrg resolves into m_ftb
     int    m_delay;             // ROR 0x28: flag 4: activateTrg sets m_time = frame count + m_delay
     u_int  m_id;                // ROR 0x2c: addTrg skips a listed id; newId replaces it with a fresh oid
@@ -33,17 +38,27 @@ struct GamAreaTrg
     int    m_entry;             // ROR 0x34: the thread's entry, an address in that image
     u_short m_pri;              // ROR 0x38: the active list's order (ascending, a new one after its equals)
     u_short _3a;
-    int    _3c;
+    float  m_radius;            // ROR 0x3c: flags 0x1000 / 0x400 / 0x80800: the actor distance (xz, |dy| < 150)
     int    m_time;              // ROR 0x40: see m_delay
     u_int  m_oid;               // ROR 0x44: flags 0x82c00 / 0x5000: an object; the thread's arg
     u_int  m_oid2;              // ROR 0x48: flag 0x82c00: a second object
     int    m_actor;             // ROR 0x4c: activateTrg: getActorNo(m_oid), -1 when not an object (0x5000)
     int    m_actor2;            // ROR 0x50: activateTrg: getActorNo(m_oid2)
     u_int  m_ftb;               // ROR 0x54: the ROM keeps a pointer to the ftb entry's data, 0 none.
-                                //          PORT: the host keeps the entry's node index + 1 (GamArea::ftbOf)
-    u_int  _58[6];
-    u_int  m_70;                // ROR 0x70: non-zero: addTrg sets m_flags 0x400000; bit 2 flagPcTrg's
-    u_int  _74[15];
+                                //          PORT: the host keeps the entry's node index + 1 (GamArea::ftbOf).
+                                //          Flag 0x10000 (no 0x20): a bit number of g_sequence.m_bits
+    int    m_cmpValue;          // ROR 0x58: flag 0x8000: compared with m_global[m_cmpGlobal]; ops 6 / 7 a short range (lo, hi)
+    int    m_cmpGlobal;         // ROR 0x5c: flag 0x8000: the global's index
+    int    m_cmpOp;             // ROR 0x60: flag 0x8000: 0 ==, 1 !=, 2 >, 3 <, 4 >=, 5 <=, 6 in, 7 out (the global against m_cmpValue)
+    u_short m_kind;             // ROR 0x64: flags 0x40 / 0x80 (0xffff any): m_global[0x11] / [0x29]; 0x200 the fchr kind
+    u_short _66;
+    int    m_bwnA;              // ROR 0x68: m_70 0x40000 / 0x100000 / 0x200000: Brown's found oid / magBwnReturn0b
+    int    m_bwnB;              // ROR 0x6c: m_70 0x200000: magBwnReturn0c
+    u_int  m_70;                // ROR 0x70: non-zero: addTrg sets m_flags 0x400000; bit 2 flagPcTrg's; update's Brown conditions
+    u_int  _74[3];
+    float  m_pt2[2];            // ROR 0x80: flag 0x40000: the polygon's third (x, z) point
+    float  m_pt3[2];            // ROR 0x88: ... and its fourth
+    u_int  _90[8];
 };
 static_assert(sizeof(GamAreaTrg) == 0xb0, "GamAreaTrg is 0xb0 bytes on the EE");
 static_assert(offsetof(GamAreaTrg, m_flags) == 0x20, "m_flags");
@@ -59,7 +74,19 @@ static_assert(offsetof(GamAreaTrg, m_oid2) == 0x48, "m_oid2");
 static_assert(offsetof(GamAreaTrg, m_actor) == 0x4c, "m_actor");
 static_assert(offsetof(GamAreaTrg, m_actor2) == 0x50, "m_actor2");
 static_assert(offsetof(GamAreaTrg, m_ftb) == 0x54, "m_ftb");
+static_assert(offsetof(GamAreaTrg, m_y) == 0x14, "m_y");
+static_assert(offsetof(GamAreaTrg, m_angle) == 0x18, "m_angle");
+static_assert(offsetof(GamAreaTrg, m_angleTol) == 0x1c, "m_angleTol");
+static_assert(offsetof(GamAreaTrg, m_radius) == 0x3c, "m_radius");
+static_assert(offsetof(GamAreaTrg, m_cmpValue) == 0x58, "m_cmpValue");
+static_assert(offsetof(GamAreaTrg, m_cmpGlobal) == 0x5c, "m_cmpGlobal");
+static_assert(offsetof(GamAreaTrg, m_cmpOp) == 0x60, "m_cmpOp");
+static_assert(offsetof(GamAreaTrg, m_kind) == 0x64, "m_kind");
+static_assert(offsetof(GamAreaTrg, m_bwnA) == 0x68, "m_bwnA");
+static_assert(offsetof(GamAreaTrg, m_bwnB) == 0x6c, "m_bwnB");
 static_assert(offsetof(GamAreaTrg, m_70) == 0x70, "m_70");
+static_assert(offsetof(GamAreaTrg, m_pt2) == 0x80, "m_pt2");
+static_assert(offsetof(GamAreaTrg, m_pt3) == 0x88, "m_pt3");
 
 /* A registFtb table entry (EE 0x30, the data of a 0x40-byte node): a key
  * and up to nine values. layout: host -- ints only, EE offsets. */
@@ -130,8 +157,12 @@ struct GamArea
      * task, CROSS pressed and SQUARE / TRIANGLE / CIRCLE / START not held:
      * *flags |= 0x10 and 1. update passes a stack word it never reads. */
     int  canCheckPc(void *unused, u_int *flags);                         // ROR 0x001ded70
-    /* Every frame while m_flags bit 2 is set: the triggers against the
-     * PC. */
+    /* Every frame while m_flags bit 2 is set: each active trigger's
+     * condition bits (the low 0xc31fffff of m_flags) tested against the PC
+     * (pos, rot y), the actors, the script globals and Brown; the ones
+     * that all hold go into m_fired (0x40000000 also leaves the active
+     * list), then the fired ones start their "trg" threads, the walk
+     * ending after the first that pauses the game (no 0x8000000). */
     void update(const float *pos, const float *rot);                     // ROR 0x001dee78
     /* The trigger word of the active trigger whose id matches (0 = every
      * one): op 1 sets bits, 2 ors, 3 clears, 4 tests (the first match), 5

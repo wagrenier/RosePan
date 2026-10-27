@@ -118,10 +118,10 @@ follows it; reached stubs in run order):
      pointer at +0xc (where the table comes from -- GamMan's image data or the ELF -- is not
      read; a file-loaded table needs a converter); utlRandRangeF 0x1044b8 returns 0.0, not lo,
      when the draw is 0 (kept as the ROM has it).
-  8. PARTIAL 2026-10-27: `game/gamtrg.cpp` (pinned 0x1dd1e8..0x1e0df0, was unassigned@001dd5e8): all of
-     GamArea written but update 0x1dee78 (0x1db4 bytes, a stub in the file; its decompilation in
-     work/tu/game_gamtrg.cpp/update_dec.txt). The New Game run (140 s) now reaches GamArea::update and
-     GamMan::relinkObj and runs on to the end without the 10d access violation (black stage, the circle icon).
+  8. VERIFY 2026-10-27: `game/gamtrg.cpp` (pinned 0x1dd1e8..0x1e0df0, was unassigned@001dd5e8): all of
+     GamArea written, update 0x1dee78 included. The New Game run (140 s) runs update every frame to the end
+     without a fault (black stage, the circle icon); no trigger fires that the screen could show yet. Mark done
+     when a stage draws and a trg thread starts (walk into a rect). Doubt: the one-shot walk fix (hazards.md).
   9. PARTIAL 2026-10-27: `game/gamman2.cpp` (pinned 0x1d3b44..0x1d84c8, was unassigned@001d3b44):
      the object update list (relinkObj, queueObjUpdate), lookupFlagTable with the real table (the
      picture book now reads row 0x1038; closing it adds item 0xa17, bit 0x29), isSeqPair0Pending, the
