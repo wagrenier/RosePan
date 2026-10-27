@@ -585,6 +585,23 @@ public:
   DogActor::load 0x10cd5c is a stub; the i3ritem session checked the relocator offline instead,
   emulating it over the disc's 1602 RPK models.)
 
+## A stub that starts writing exposes bad indices (2026-10-27)
+
+- Symptom: once DogActor::loadPackMotion was written, the 200 s New Game run crashed (call to
+  address 0) in MnuPBook::openWindows; the narration had opened window 3, the book found no free
+  window. Cause: GamMan::setPcAnim passes m_pcActor, still -1 while MagLifePC::setActor is a stub;
+  MagScene::setActorAnim then ran on m_actors[-1], which on the host lies over MagScene::m_window,
+  and DogMotionBlend::reset's clears wrote 0xffffffff into the window slots. Fix: a PORT range
+  guard in MagScene::setActorAnim. Lesson: when a stub becomes real code, look for callers that
+  index arrays with values other stubs leave at -1.
+- How it was found: compare against a HEAD baseline run (git stash the sources), trace the
+  suspect calls, then a gdb hardware watchpoint on the corrupted word. **On Windows gdb arms a
+  watchpoint only on the thread that set it**: break in game code first (tbreak MagScene::update),
+  then watch -l, not from starti.
+- Symptom: right after a build that was killed part-way (a stopped tus.py check), the exe faults
+  in __do_global_ctors at startup with an empty log. Cause: a broken object file. Fix: delete the
+  touched .obj files and RosePan.exe under cmake-build-relwithdebinfo and rebuild.
+
 ## How to debug (the method that worked)
 
 - **The picture is the test.** Logs, stub hits and callcheck show the code ran, not that it is right.

@@ -503,6 +503,12 @@
   "was": "FUN_00106ad0",
   "why": "sqrt(x*x + y*y + z*z), sqrtf on a NaN"
  },
+ "00106bc8": {
+  "name": "utlVecRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_00106bc8",
+  "why": "sceVu0UnitMatrix, RotMatrixY(angle wrapped once), ApplyMatrix in place; beside utlVecRotZ"
+ },
  "00106db0": {
   "name": "utlNormalize3",
   "tag": "ror-inferred",
@@ -521,11 +527,71 @@
   "was": "FUN_00107248",
   "why": "a direction to pitch / yaw angles (atan of -y, atan2 x / z, roll 0)"
  },
+ "0010737c": {
+  "name": "DogMotionBlend::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_0010737c",
+  "why": "on the 0xe0 motion state: without records (+0x1c) clears all, else drops the motion and blend entries whose record lost its i3m; setMaxMotion calls it on +0x1e4 / +0x2c4"
+ },
  "001081a8": {
   "name": "DogMotionBlend::getNo",
   "tag": "ror-inferred",
   "was": "FUN_001081a8",
   "why": "returns the first word of DogActor's m_motion (+0x1e4; dog/dogmotionblend.h asserts name m_motion), the current motion number"
+ },
+ "00108588": {
+  "name": "DogMotionBlend::DogMotionBlend",
+  "tag": "ror-inferred",
+  "was": "FUN_00108588",
+  "why": "the DogActor constructor calls it on +0x1e4 and +0x2c4: no motion, 1/60, the four entries cleared"
+ },
+ "00108674": {
+  "name": "DogActor::allocPosture",
+  "tag": "ror-inferred",
+  "was": "FUN_00108674",
+  "why": "allocates nNode*0x62+2 bytes into +0x1cc (assert m_posture != __null), splits it at +0x1d0 / +0x1d4, calls the node map builder, makes motion n current"
+ },
+ "00108814": {
+  "name": "DogActor::freePosture",
+  "tag": "ror-inferred",
+  "was": "FUN_00108814",
+  "why": "frees +0x1cc (m_posture) and clears it"
+ },
+ "00108850": {
+  "name": "DogActor::trimMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00108850",
+  "why": "asserts m_max_motion > 0, finds the last record with an i3m and calls setMaxMotion with its count"
+ },
+ "001088fc": {
+  "name": "DogActor::getTrackNumFrame",
+  "tag": "ror-inferred",
+  "was": "FUN_001088fc",
+  "why": "track word 0 as int (float when above 0x7ff); getRootMove's numframe (assert frno <= numframe-2)"
+ },
+ "0010893c": {
+  "name": "DogActor::getTrackType",
+  "tag": "ror-inferred",
+  "was": "FUN_0010893c",
+  "why": "track word 4 as int (float when above 0xff); getRootMove switches on it"
+ },
+ "0010897c": {
+  "name": "DogActor::getTrackStride",
+  "tag": "ror-inferred",
+  "was": "FUN_0010897c",
+  "why": "floats per frame by track type (4, 6, 2, 3, 1)"
+ },
+ "00108a14": {
+  "name": "DogActor::getTrackKey",
+  "tag": "ror-inferred",
+  "was": "FUN_00108a14",
+  "why": "frame n of a track into x y z w by type; (0,0,0,1) without one"
+ },
+ "00108c90": {
+  "name": "DogActor::getRootMove",
+  "tag": "ror-inferred",
+  "was": "FUN_00108c90",
+  "why": "interpolates the current motion's record +8 track at t (utlFtoi15), wraps with loopflag; asserts theResult.m_w in -DOG_PI..DOG_PI"
  },
  "00109348": {
   "name": "DogActor::getMotionMove",
@@ -533,11 +599,41 @@
   "was": "FUN_00109348",
   "why": "dog/dogactor.h asserts m_motion_data; samples the current motion's root (0x108c90) at f12 and f13 (clamped to the motion length), writes the difference to a1, the end position to a3 when set, a rotation to a2; returns 0, 1 or 2"
  },
+ "00109714": {
+  "name": "DogActor::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_00109714",
+  "why": "DogModel::clear then every DogActor word to its unloaded value; called by the constructor and releaseModel"
+ },
+ "00109860": {
+  "name": "DogActor::setMaxMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00109860",
+  "why": "asserts theN >= 0 / m_max_motion != 0 / m_max_motion > 0; resizes the 0x20-byte records at +0x1c4 and points both DogMotionBlends at them"
+ },
+ "00109b48": {
+  "name": "DogActor::freeMotionData",
+  "tag": "ror-inferred",
+  "was": "FUN_00109b48",
+  "why": "frees +0x1c4 (m_motion_data), m_max_motion = 0"
+ },
  "00109b88": {
   "name": "DogActor::releaseMotion",
   "tag": "ror-inferred",
   "was": "FUN_00109b88",
   "why": "dog/dogactor.cpp asserts theId >= 0 && theId < (4) and pm->m_i3m_root; frees / clears the motion entries whose id is theId"
+ },
+ "00109dec": {
+  "name": "DogActor::releaseSubMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00109dec",
+  "why": "releaseMotion(+0x1bc) when > 0, then -1"
+ },
+ "00109e28": {
+  "name": "DogActor::releaseAll",
+  "tag": "ror-inferred",
+  "was": "FUN_00109e28",
+  "why": "releaseMotion 0..3, frees the records, the posture, DogModel::release(1), frees the pack copy +0x1a4"
  },
  "00109ed0": {
   "name": "DogActor::releaseModel",
@@ -545,11 +641,23 @@
   "was": "FUN_00109ed0",
   "why": "releases the actor's model (master / ref count at +0x118 / +0x104) with the scene DogTexInfo; MagScene::releaseActor calls it"
  },
+ "00109fb4": {
+  "name": "DogActor::releaseShared",
+  "tag": "ror-inferred",
+  "was": "FUN_00109fb4",
+  "why": "asserts m_original == __null; on the last reference releaseAll and clear (releaseModel calls it on m_original)"
+ },
  "0010a038": {
   "name": "DogActor::addTrans",
   "tag": "ror-inferred",
   "was": "FUN_0010a038",
   "why": "+0x40..+0x48 += a1[0..2], w = 1; f12 into +0x74 (the TransOfsY saveTransOfsY reads), f13 into +0x3d0 (clearRotYAAR's field), dirty"
+ },
+ "0010a584": {
+  "name": "DogActor::getRootRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_0010a584",
+  "why": "getRootMove at twice the motion frame, returns w (asserts v.m_w in -DOG_PI..DOG_PI); getRotY adds it"
  },
  "0010a650": {
   "name": "DogActor::getRotY",
@@ -562,6 +670,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010a834",
   "why": "returns +0xf0 (DogModel m_mode, getMode) != 0"
+ },
+ "0010a874": {
+  "name": "DogActor::findMotionById",
+  "tag": "ror-inferred",
+  "was": "FUN_0010a874",
+  "why": "the record index whose +0x14 equals the id, -1; setMotion / getMotionLength look ids up with it"
  },
  "0010a8b8": {
   "name": "DogActor::findMotionBySuffix",
@@ -580,6 +694,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010aa9c",
   "why": "asserts theName; strcmp over the m_motion_data records (+0x1c4, stride 0x20, name at +0x1c), returns the index or -1"
+ },
+ "0010ae58": {
+  "name": "DogActor::startMotionMode",
+  "tag": "ror-inferred",
+  "was": "FUN_0010ae58",
+  "why": "m_mode = (m_mode & 8) | 4 | bits from m_1d8 and flag 0x40 of +0x3f0, m_f4 = 0; setMotion's last call"
  },
  "0010af18": {
   "name": "DogActor::setMotion",
@@ -604,6 +724,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010bf00",
   "why": "stores its argument at +0x1d8; MagScene::loadActor sets 5 after a load; role unverified"
+ },
+ "0010bf08": {
+  "name": "DogActor::setupAssignTbl",
+  "tag": "ror-inferred",
+  "was": "FUN_0010bf08",
+  "why": "asserts m_assign_tbl; writes the motion's node count and each node's getNodeIndexByName (0xffff none)"
  },
  "0010c17c": {
   "name": "DogActor::loadPackMotion",
@@ -665,6 +791,12 @@
   "was": "FUN_0010dad8",
   "why": "the motion speed +0x1e8 in frames per frame (0 while a sequence is not on its last entry)"
  },
+ "0010db38": {
+  "name": "DogActor::isBlendIn",
+  "tag": "ror-inferred",
+  "was": "FUN_0010db38",
+  "why": "(m_mode >> 1) & 1, the bit startMotionMode sets when m_1d8 > 0; role unverified"
+ },
  "0010e3ac": {
   "name": "DogActor::drawModel",
   "tag": "ror-inferred",
@@ -682,6 +814,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0010e5c0",
   "why": "DogActor's slot 12: asserts the layer and m_i3r_root, steps the motion every +0x45c frames, culls (slot 11), transforms, calls slot 19, applies m_rot_y_aar"
+ },
+ "0010e7b4": {
+  "name": "DogActor::saveRotOfsY",
+  "tag": "ror-inferred",
+  "was": "FUN_0010e7b4",
+  "why": "+0x424 (m_rot_ofs_y) = getRootRotY"
+ },
+ "0010e930": {
+  "name": "DogActor::saveRootOffset",
+  "tag": "ror-inferred",
+  "was": "FUN_0010e930",
+  "why": "+0x420 = trans_ofs y (or the root move y while blending in), then saveRotOfsY; changeMotion"
  },
  "0010eab8": {
   "name": "DogActor::getNodeWorldMatrix",
@@ -701,11 +845,47 @@
   "was": "FUN_0010eba0",
   "why": "5-entry list node +0x3f8 / float +0x40c: an entry for node gets the value, 1.0 frees it; else the first free (< 0) or 1.0 entry takes node and value. chrRestoreLimb passes 1.0; scale is a guess"
  },
+ "0010ec50": {
+  "name": "DogActor::clearNodeScale",
+  "tag": "ror-inferred",
+  "was": "FUN_0010ec50",
+  "why": "setNodeScale's 5 nodes -1, scales 1.0"
+ },
  "0010ed2c": {
   "name": "DogActor::setBaseRotateY",
   "tag": "ror-inferred",
   "was": "FUN_0010ed2c",
   "why": "wraps the angle to -pi..pi into +0x3c4 (m_base_rotate y), asserts the range"
+ },
+ "0010edbc": {
+  "name": "DogActor::copyPosture",
+  "tag": "ror-inferred",
+  "was": "FUN_0010edbc",
+  "why": "memcpy +0x1d0 <- +0x1cc, nNode * 0x30"
+ },
+ "0010edec": {
+  "name": "DogActor::savePosture",
+  "tag": "ror-inferred",
+  "was": "FUN_0010edec",
+  "why": "copyPosture then the 0xe0-byte motion state +0x1e4 into +0x2c4"
+ },
+ "0010eebc": {
+  "name": "DogActor::DogActor",
+  "tag": "ror-inferred",
+  "was": "FUN_0010eebc",
+  "why": "stores vtables DogEntity, DogModel, DogActor at +0x94 in turn; MagScene::MagScene calls it per actor"
+ },
+ "0010f1f0": {
+  "name": "DogActor::loadData",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f1f0",
+  "why": "vtable slot 15 of _vt$8DogActor: DogModel::loadData, clears 0x470..0x49f, setupEye"
+ },
+ "0010f244": {
+  "name": "DogActor::loadPack",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f244",
+  "why": "vtable slot 14 of _vt$8DogActor: DogModel::loadPack, clears 0x470..0x49f, setupEye"
  },
  "0010f298": {
   "name": "DogActor::resetShadow",
@@ -718,6 +898,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010f2dc",
   "why": "dog/dogactor.cpp asserts theName; true when the actor's model name matches (MagScene::findActorByName)"
+ },
+ "0010f3a4": {
+  "name": "DogActor::setupEye",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f3a4",
+  "why": "strstr of the model node names with \"eye\" -> +0x484 node, +0x480 its material; resets the eye words, eyeHold"
  },
  "0010f5e4": {
   "name": "DogActor::setEyeTex",
@@ -15041,11 +15227,23 @@
   "was": "FUN_0022adf8",
   "why": "slot 0x52 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x52 (offsets from the data start)"
  },
+ "0022aec0": {
+  "name": "i3rGetNumChild52",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aec0",
+  "why": "child count of item's first child, next to i3rGetChild52; DogActor::setupEye's loop bound"
+ },
  "0022aed8": {
   "name": "i3rGetChild52",
   "tag": "ror-inferred",
   "was": "FUN_0022aed8",
   "why": "the n-th child of the item's first child; sits after the type 0x52 fixup pair (0x22ad20 / 0x22adf8); its twin 0x22aad0 has the same body"
+ },
+ "0022af08": {
+  "name": "i3rGetChildName52",
+  "tag": "ror-inferred",
+  "was": "FUN_0022af08",
+  "why": "name word of the n-th child of item's first child; DogActor::setupEye strstr's it"
  },
  "0022b1b0": {
   "name": "i3rFindName",

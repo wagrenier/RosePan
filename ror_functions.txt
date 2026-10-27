@@ -256,7 +256,7 @@
 /* 00106a40 00000090 */ utlVecRotZ(){}  // ror
 /* 00106ad0 00000054 */ utlVecLength3(){}  // ror
 /* 00106b24 000000a4 */ FUN_00106b24(){}
-/* 00106bc8 000000a4 */ FUN_00106bc8(){}
+/* 00106bc8 000000a4 */ utlVecRotY(){}  // ror
 /* 00106c6c 000000a4 */ FUN_00106c6c(){}
 /* 00106d10 00000014 */ FUN_00106d10(){}
 /* 00106d24 0000001c */ FUN_00106d24(){}
@@ -271,7 +271,7 @@
 /* 001070f8 000000d0 */ FUN_001070f8(){}
 /* 001071c8 00000080 */ FUN_001071c8(){}
 /* 00107248 00000134 */ utlVecToRot(){}  // ror
-/* 0010737c 000001e4 */ FUN_0010737c(){}
+/* 0010737c 000001e4 */ DogMotionBlend::reset(){}  // ror
 
 // *****************************************************************************
 // FILE -- dog/dogmotionblend.cpp
@@ -291,42 +291,42 @@
 // FILE -- (unassigned)
 // *****************************************************************************
 
-/* 00108588 000000d4 */ FUN_00108588(){}
+/* 00108588 000000d4 */ DogMotionBlend::DogMotionBlend(){}  // ror
 /* 00108660 00000014 */ FUN_00108660(){}
 
 // *****************************************************************************
 // FILE -- dog/dogactor.cpp
 // *****************************************************************************
 
-/* 00108674 000001a0 */ FUN_00108674(){}
-/* 00108814 0000003c */ FUN_00108814(){}
-/* 00108850 000000ac */ FUN_00108850(){}
-/* 001088fc 00000040 */ FUN_001088fc(){}
-/* 0010893c 00000040 */ FUN_0010893c(){}
-/* 0010897c 00000098 */ FUN_0010897c(){}
-/* 00108a14 0000019c */ FUN_00108a14(){}
+/* 00108674 000001a0 */ DogActor::allocPosture(){}  // ror
+/* 00108814 0000003c */ DogActor::freePosture(){}  // ror
+/* 00108850 000000ac */ DogActor::trimMotion(){}  // ror
+/* 001088fc 00000040 */ DogActor::getTrackNumFrame(){}  // ror
+/* 0010893c 00000040 */ DogActor::getTrackType(){}  // ror
+/* 0010897c 00000098 */ DogActor::getTrackStride(){}  // ror
+/* 00108a14 0000019c */ DogActor::getTrackKey(){}  // ror
 /* 00108bb0 000000e0 */ FUN_00108bb0(){}
-/* 00108c90 000005f4 */ FUN_00108c90(){}
+/* 00108c90 000005f4 */ DogActor::getRootMove(){}  // ror
 /* 00109284 000000c4 */ FUN_00109284(){}
 /* 00109348 000002ec */ DogActor::getMotionMove(){}  // ror
 /* 00109634 000000e0 */ FUN_00109634(){}
-/* 00109714 0000014c */ FUN_00109714(){}
-/* 00109860 000002e8 */ FUN_00109860(){}
-/* 00109b48 00000040 */ FUN_00109b48(){}
+/* 00109714 0000014c */ DogActor::clear(){}  // ror
+/* 00109860 000002e8 */ DogActor::setMaxMotion(){}  // ror
+/* 00109b48 00000040 */ DogActor::freeMotionData(){}  // ror
 /* 00109b88 00000264 */ DogActor::releaseMotion(){}  // ror
-/* 00109dec 0000003c */ FUN_00109dec(){}
-/* 00109e28 000000a8 */ FUN_00109e28(){}
+/* 00109dec 0000003c */ DogActor::releaseSubMotion(){}  // ror
+/* 00109e28 000000a8 */ DogActor::releaseAll(){}  // ror
 /* 00109ed0 000000e4 */ DogActor::releaseModel(){}  // ror
-/* 00109fb4 00000084 */ FUN_00109fb4(){}
+/* 00109fb4 00000084 */ DogActor::releaseShared(){}  // ror
 /* 0010a038 00000058 */ DogActor::addTrans(){}  // ror
 /* 0010a090 00000138 */ FUN_0010a090(){}
 /* 0010a1c8 00000108 */ FUN_0010a1c8(){}
 /* 0010a2d0 00000178 */ FUN_0010a2d0(){}
 /* 0010a448 0000013c */ FUN_0010a448(){}
-/* 0010a584 000000cc */ FUN_0010a584(){}
+/* 0010a584 000000cc */ DogActor::getRootRotY(){}  // ror
 /* 0010a650 000001e4 */ DogActor::getRotY(){}  // ror
 /* 0010a834 0000003c */ DogActor::isModeSet(){}  // ror
-/* 0010a874 00000040 */ FUN_0010a874(){}
+/* 0010a874 00000040 */ DogActor::findMotionById(){}  // ror
 /* 0010a8b8 000001a4 */ DogActor::findMotionBySuffix(){}  // ror
 /* 0010aa5c 00000040 */ DogActor::getMotionNoBySuffix(){}  // ror
 /* 0010aa9c 000000a4 */ DogActor::findMotionByName(){}  // ror
@@ -335,7 +335,7 @@
 /* 0010ac98 00000074 */ FUN_0010ac98(){}
 /* 0010ad0c 00000104 */ FUN_0010ad0c(){}
 /* 0010ae10 00000048 */ FUN_0010ae10(){}
-/* 0010ae58 00000038 */ FUN_0010ae58(){}
+/* 0010ae58 00000038 */ DogActor::startMotionMode(){}  // ror
 /* 0010ae90 00000088 */ FUN_0010ae90(){}
 /* 0010af18 00000298 */ DogActor::setMotion(){}  // ror
 /* 0010b1b0 00000178 */ DogActor::changeMotion(){}  // ror
@@ -350,7 +350,7 @@
 /* 0010be80 00000050 */ FUN_0010be80(){}
 /* 0010bed0 00000030 */ FUN_0010bed0(){}
 /* 0010bf00 00000008 */ DogActor::setParam1d8(){}  // ror
-/* 0010bf08 00000274 */ FUN_0010bf08(){}
+/* 0010bf08 00000274 */ DogActor::setupAssignTbl(){}  // ror
 /* 0010c17c 000003ec */ DogActor::loadPackMotion(){}  // ror
 /* 0010c568 000007f4 */ DogActor::loadMotion(){}  // ror
 /* 0010cd5c 000002a0 */ DogActor::load(){}  // ror
@@ -365,7 +365,7 @@
 /* 0010da98 00000040 */ FUN_0010da98(){}
 /* 0010dad8 0000003c */ DogActor::getMotionStep(){}  // ror
 /* 0010db18 0000001c */ FUN_0010db18(){}
-/* 0010db38 00000010 */ FUN_0010db38(){}
+/* 0010db38 00000010 */ DogActor::isBlendIn(){}  // ror
 /* 0010db48 000001e8 */ FUN_0010db48(){}
 /* 0010dd30 00000224 */ FUN_0010dd30(){}
 /* 0010df54 000003d4 */ FUN_0010df54(){}
@@ -373,27 +373,27 @@
 /* 0010e3ac 00000188 */ DogActor::drawModel(){}  // ror
 /* 0010e534 0000008c */ DogActor::drawShadow(){}  // ror
 /* 0010e5c0 000001f4 */ DogActor::draw(){}  // ror
-/* 0010e7b4 00000028 */ FUN_0010e7b4(){}
+/* 0010e7b4 00000028 */ DogActor::saveRotOfsY(){}  // ror
 /* 0010e7dc 00000068 */ FUN_0010e7dc(){}
 /* 0010e848 000000e8 */ FUN_0010e848(){}
-/* 0010e930 0000007c */ FUN_0010e930(){}
+/* 0010e930 0000007c */ DogActor::saveRootOffset(){}  // ror
 /* 0010e9ac 0000010c */ FUN_0010e9ac(){}
 /* 0010eab8 00000070 */ DogActor::getNodeWorldMatrix(){}  // ror
 /* 0010eb28 00000078 */ DogActor::getNodeWorldPos(){}  // ror
 /* 0010eba0 000000ac */ DogActor::setNodeScale(){}  // ror
-/* 0010ec50 00000038 */ FUN_0010ec50(){}
+/* 0010ec50 00000038 */ DogActor::clearNodeScale(){}  // ror
 /* 0010ec8c 000000a0 */ FUN_0010ec8c(){}
 /* 0010ed2c 00000090 */ DogActor::setBaseRotateY(){}  // ror
-/* 0010edbc 00000030 */ FUN_0010edbc(){}
-/* 0010edec 000000d0 */ FUN_0010edec(){}
-/* 0010eebc 0000014c */ FUN_0010eebc(){}
+/* 0010edbc 00000030 */ DogActor::copyPosture(){}  // ror
+/* 0010edec 000000d0 */ DogActor::savePosture(){}  // ror
+/* 0010eebc 0000014c */ DogActor::DogActor(){}  // ror
 /* 0010f008 00000164 */ FUN_0010f008(){}
 /* 0010f16c 00000084 */ FUN_0010f16c(){}
-/* 0010f1f0 00000054 */ FUN_0010f1f0(){}
-/* 0010f244 00000054 */ FUN_0010f244(){}
+/* 0010f1f0 00000054 */ DogActor::loadData(){}  // ror
+/* 0010f244 00000054 */ DogActor::loadPack(){}  // ror
 /* 0010f298 00000044 */ DogActor::resetShadow(){}  // ror
 /* 0010f2dc 000000c8 */ DogActor::checkName(){}  // ror
-/* 0010f3a4 000000dc */ FUN_0010f3a4(){}
+/* 0010f3a4 000000dc */ DogActor::setupEye(){}  // ror
 /* 0010f480 00000164 */ FUN_0010f480(){}
 /* 0010f5e4 00000128 */ DogActor::setEyeTex(){}  // ror
 /* 0010f70c 0000002c */ DogActor::eyeHold(){}  // ror
@@ -5305,10 +5305,10 @@
 /* 0022acc8 00000058 */ FUN_0022acc8(){}
 /* 0022ad20 000000d8 */ i3rUnrelocData52(){}  // ror
 /* 0022adf8 000000c4 */ i3rRelocData52(){}  // ror
-/* 0022aec0 00000014 */ FUN_0022aec0(){}
+/* 0022aec0 00000014 */ i3rGetNumChild52(){}  // ror
 /* 0022aed8 00000014 */ i3rGetChild52(){}  // ror
 /* 0022aef0 00000018 */ FUN_0022aef0(){}
-/* 0022af08 00000018 */ FUN_0022af08(){}
+/* 0022af08 00000018 */ i3rGetChildName52(){}  // ror
 /* 0022af20 00000038 */ FUN_0022af20(){}
 /* 0022af58 000000a4 */ FUN_0022af58(){}
 /* 0022b000 00000038 */ FUN_0022b000(){}

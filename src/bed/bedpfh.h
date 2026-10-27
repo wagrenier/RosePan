@@ -76,6 +76,13 @@ struct BedPfh
     }
     int getFileSize(int n) const { return m_size ? m_size[n] : -1; }
     int getFileOffset(int n) const { return m_offset ? m_offset[n] : -1; }
+    /* The ROM's line-81 inline: file n's attribute word (its member is
+     * m_user_data; DogActor::loadMotion takes motion ids from it). */
+    int getUserData(int n) const
+    {
+        ROR_ASSERT(m_attr); /* 81: m_user_data */
+        return m_attr[n];
+    }
     void *getFile(int n) const
     {
         ROR_ASSERT(m_top); /* 85 */

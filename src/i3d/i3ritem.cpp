@@ -230,10 +230,22 @@ static void i3rRelocData52(u_char *data)
     i3rRelocArray(data, 0x20, *(u_short *)(data + 0x2e));
 }
 
+/* ROR 0x0022aec0 (written with dog/dogactor.cpp, whose setupEye calls it) */
+int i3rGetNumChild52(const I3rItem *item)
+{
+    return item->getChildren()[0].getNumChild();
+}
+
 /* ROR 0x0022aed8 */
 I3rItem *i3rGetChild52(const I3rItem *item, int n)
 {
     return item->getChildren()[0].getChildren() + n;
+}
+
+/* ROR 0x0022af08 (written with dog/dogactor.cpp) */
+const char *i3rGetChildName52(const I3rItem *item, int n)
+{
+    return item->getChildren()[0].getChildren()[n].getName();
 }
 
 // ──────────────────────────────────────────────────────────────────────

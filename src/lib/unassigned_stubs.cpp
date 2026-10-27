@@ -1796,3 +1796,9 @@ int GamMan::isSeqPair0Pending()
     ROSEPAN_STUB("GamMan::isSeqPair0Pending", 0x001d44e4);
     return {};
 }
+
+// stub of ROR 0x00106bc8
+void utlVecRotY(float angle, float *v)
+{
+    ROSEPAN_STUB("utlVecRotY", 0x00106bc8);
+}

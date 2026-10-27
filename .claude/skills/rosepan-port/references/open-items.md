@@ -76,8 +76,13 @@ follows it; reached stubs in run order):
      utlDrawI3r 0x106760 (stub). GamMan::lookupFlagTable 0x1d83d0 is a stub returning 0, so every book
      opens with the type's words read from global 0 (page state is not the real one). Reference:
      work/ref/MNUPBOOK and work/ref/PB010200 (tm2png --scan of DATA/MNURPK/MNUPBOOK).
-  5. **`dog/dogactor.cpp`** -- DogActor::load 0x10cd5c, loadPackMotion 0x10c17c, getRotY, resetShadow
-     (then the getNodeIndexByName PORT guard can go).
+  5. **`dog/dogactor.cpp`** -- PARTIAL 2026-10-27: load, loadPackMotion, loadMotion, the record
+     table, posture, release paths, root track / getRotY, setMotion / changeMotion, resetShadow
+     written (the 200 s run passes them with no DogActor assert and still reaches frame 6840).
+     Left, in run order: DogActor::draw 0x10e5c0 / drawModel 0x10e3ac / drawShadow (the model
+     draw, with utlDrawI3r 0x106760 and the i3m pose player unassigned@0022e840), runMotionCmd
+     0x10d388, checkName 0x10f2dc, getMotionMove / getMotionEvent, setEyeTex, shareModel. The
+     getNodeIndexByName PORT guard stays (GamMan::attachObj asks unloaded actors).
   6. `mag/magscenelight.cpp` -- MagScene::loadLight 0x13f658 / setDefaultLight 0x13f8e4.
   7. `unassigned@00140030` / `unassigned@00143d3c` -- MagScene::loadTenkyuTex 0x140030 (the sky) /
      setFog 0x143d7c, magBwnSeqCommand 0x144ae0.
@@ -698,6 +703,17 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
   the slots need a side table. Also: i3rUnrelocate would turn such a slot into a bogus offset (the ROM does the same).
 
 ## Decisions
+
+- 2026-10-27 (session decision, dog/dogactor.cpp): written beside the TU because its load path
+  runs them: DogMotionBlend's constructor 0x108588, reset 0x10737c and getNo (dog/dogmotionblend.cpp;
+  0x108588 / 0x10737c lie in unassigned@00108588 / unassigned@00106658, the class is that file's --
+  the next session on those ranges should pin dog/dogmotionblend.cpp to start at 0x10737c if the
+  functions between fit), i3rGetNumChild52 0x22aec0 / i3rGetChildName52 0x22af08 (i3d/i3ritem.cpp),
+  BedPfh::getUserData (line 81 inline). DogActor now has a constructor (0x10eebc) that ends in clear:
+  unloaded actors start with m_mode -1 (isModeSet true) as in the ROM, no longer 0. PORT guard in
+  MagScene::setActorAnim for m_pcActor -1 (hazards.md); remove it when MagLifePC::setActor sets the
+  PC actor. DogModel::getNodeIndexByName's PORT guard stays: GamMan::attachObj still asks actors with
+  no model. utlVecRotY 0x106bc8 is a stub (only looping type-4 root tracks use it).
 
 - 2026-10-26 (session decision, i3d/i3mroot.cpp): **i3m motion files keep their file offsets on
   the host** too (from the root; `i3mPtr(root, field)`), like the i3c files. i3mRelocate /

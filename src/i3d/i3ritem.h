@@ -30,6 +30,10 @@ int   i3rIsItemType(u_int type);                                         // ROR 
  * page model's side (child 0 / 1 of the root) and its material through them. */
 I3rItem *i3rGetChild25(const I3rItem *item, int n);                      // ROR 0x0022aad0
 I3rItem *i3rGetChild52(const I3rItem *item, int n);                      // ROR 0x0022aed8
+/* The same type's neighbours: the child count / the n-th child's name of
+ * item's first child (DogActor::setupEye walks the model's nodes with them). */
+int   i3rGetNumChild52(const I3rItem *item);                             // ROR 0x0022aec0
+const char *i3rGetChildName52(const I3rItem *item, int n);               // ROR 0x0022af08
 /* The item tree's relocators: recursive over the children, base = the
  * root item. Relocate turns the item's offsets (from base) into pointers
  * and then fixes its data by type (unless the info word's bit 31 says the

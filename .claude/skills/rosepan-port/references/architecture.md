@@ -852,6 +852,28 @@ used by slot 11 transformBillboard. Casts build an I3cQuery (root, node matrices
 hit callback 0x114034 / 0x1141c8, hit record) for i3cCastRay 0x232508 / Sphere 0x2324b8 / Cylinder
 0x2325a8 with 64 unit matrices; the hit record is MagSceneRayHit (t at +0x0c, m_50 group).
 
+## The actor's motions (`dog/dogactor.cpp`, 0x108674..0x10f860, 2026-10-27, partial)
+
+DogActor (EE 0x4d0) = DogModel + motions. Names from the ROM's asserts: m_flag_motion_data +0x1a8
+(-1 none, 0 records point into packs, 1 FLAG_MOTION_EACH: each i3m its own block),
+m_pack_motion[4] +0x1ac (bank 0 = the model pack's file 1, never released by pointer; 1..3 =
+loadPackMotion's heap blocks), m_max_motion +0x1c0, m_motion_data +0x1c4 (0x20-byte records: i3m
++0, param words +4, root track +8, m_tag_data +0xc, +0x10 a byte flag, id +0x14, bank +0x18, name
++0x1c), m_posture +0x1cc (one block of nNode * 0x62 + 2: current pose records, previous ones at
++0x1d0, m_assign_tbl +0x1d4 = count + model node per motion node). Two 0xe0 DogMotionBlend states:
+m_motion +0x1e4 (no, speed, frame, the view m_max_motion +0x18 / m_motion +0x1c, four 0x30 blend
+entries at +0x20) and the previous one +0x2c4 (savePosture). A motion pack file is either an i3m
+(i3m word +0xc is its size; when the pack file is longer a root track follows) or an RTPK of parts
+(0 i3m, 1 params: word 0 to +0x10, the rest to +4, 2 root track, 3 tag track); flag 0x10 packs
+carry the ids in the files' user data (& 0xfff). Root tracks: numframe, type (stride by type: 0/4
+four floats, 1 six, 2 two, 3 three, 5/6 one), 8 bytes, then frames; getRootMove samples one at a
+15-bit fixed-point time and adds the whole track's move once past either end. getRotY = m_base_rot
+y (+0x3c4) + m_rot_offset y (DogEntity +0x84, our m_80) + the root track's turn, unless m_mode bit
+1 (isBlendIn) gives m_rotate y. load: reset, mode 2 copies the pack (m_model_copy +0x1a4), slot 14
+loadPack(file 0) then allocMatrix, loadMotion(file 1, bank -1). The two loads (slots 14 / 15) end in
+setupEye (the first node named *eye*). Still stubbed: draw / drawModel / drawShadow, getMotionMove,
+getMotionEvent, runMotionCmd, setEyeTex, shareModel, checkName.
+
 ## Modules (RoR's own source files)
 
 73 `.cpp` paths survive in assert / error strings (export.py anchors on them), plus headers whose inline
