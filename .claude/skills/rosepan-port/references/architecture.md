@@ -312,7 +312,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     offsets from that data. i3rRelocate 0x22b330 (DogModel::loadPack and 9 more callers) ->
     i3rSetRelocate 0x22b280 -> i3rItemRelocate 0x22c478 (recursive; per-type data fixups in the
     90-entry table 0x2db4c8, unfixups 0x2db360 for i3rItemUnrelocate 0x22c328; i3rIsItemType
-    0x22c2a0 rejects 13 ids) then i3rBuildPackets 0x21a3e8 (0x21fb50 per mesh into child 6's slots).
+    0x22c2a0 rejects 13 ids) then i3rBuildPackets 0x21a3e8 (i3rBuildMeshPacket 0x21fb50 per mesh into child 6's buffer).
     Root data (type 0x52, fixups 0x22ad20 / 0x22adf8): +0x10 / +0x14 tables of 0x40-byte records,
     +0x18 texture names (count u16 +0x2c), +0x1c u16 node indices and +0x20 their names (count
     u16 +0x2e), +0x24 a plain value. Root child 3 = the nodes (i3rGetNumNode), child 2 the meshes,
@@ -329,7 +329,19 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     arrays of one count); the rest are `jr ra`. Checked offline on 1602 models in the disc's RPKs
     (7.1 M pointers, all in the file; names may be Shift-JIS). Nine pairs live at 0x22a6c0..0x22aec0
     (types 0x25 0x26 0x29 0x2a 0x2d 0x4a 0x4d 0x52 0x59) and are written in i3ritem.cpp too.
-    The accessors between the fixups (0x22c840.., most call i3rItemFindChild) are not written.
+    The accessors between the fixups (0x22c840.., most call i3rItemFindChild) are not written.
+    **The model helpers** (`i3d/i3rmodel.cpp` 0x21a3e8..0x21ac80, pinned 2026-10-26, verify; types in
+    i3rmodel.h): root data +0x00 the clip sphere (xyz centre, +0x0c radius), +0x10 one 0x40 basic
+    local matrix per node; root child 0 = materials (type 0x25: +8 s16 texture frame, +0xc
+    animated flag) -> [0] -> layers (0x26: +0x18 texture name, +0x1c its index set by i3rAssignTex;
+    the layer's child 3 holds STQ entity slots, entity +0x41 the id i3rReplaceStqMapEntity
+    matches, EE 0x50); child 2 = meshes (0x2d combined mesh -> [0] 0x46 via its child 0 / [1] 0x45
+    via its child 1 -> 0x4c entries -> child 0's children = what i3rBuildMeshPacket 0x21fb50 takes);
+    child 3 = nodes (0x2a, data = s16 parent index, always below the node's own); child 6 = type
+    0x53 {buffer, qwc}. i3rConvertLocalToModel multiplies parent x local with VU0 micro 0 (the
+    i3dVu0MatMul convention). A material's child 1 holds three entity slots (i3rGet/SetMatEntity0..2;
+    DogActor::setEyeTex sets slot 0 to its own record at +0x470). Checked offline on all 2565
+    models on the disc (2026-10-26).
     **I3D_I3M** motion files (`i3d/i3mroot.cpp` 0x22b4b8..0x22ba20, pinned 2026-10-26, verify; types
     in i3mroot.h): id "I3D_I3M " (0x303a68), +8 version 0x20001, +0x12 u16 per key, +0x14 node
     count, +0x16 relocation u16 (1 = offsets), +0x18 float length in frames, +0x1c nodes (12 bytes:

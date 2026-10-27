@@ -229,20 +229,6 @@ void dbgTraceVector4(const float *v)
     ROSEPAN_STUB("dbgTraceVector4", 0x00215bb4);
 }
 
-// stub of ROR 0x0021a828
-int i3rCopyClipSphere(I3rRoot *root, float *center, float *radius)
-{
-    ROSEPAN_STUB("i3rCopyClipSphere", 0x0021a828);
-    return {};
-}
-
-// stub of ROR 0x0021a938
-int i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity)
-{
-    ROSEPAN_STUB("i3rReplaceStqMapEntity", 0x0021a938);
-    return {};
-}
-
 // stub of ROR 0x0010fa6c
 sceVu0FVECTOR * DogEntity::getMatrix()
 {
@@ -317,13 +303,6 @@ u_long   * i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matri
     ROSEPAN_STUB("i3dPktDrawStripCtx", 0x0021dd10);
     // PC: the packet cursor stays valid for the i3d groups (i3d/i3dlayer.cpp).
     return pkt;
-}
-
-// stub of ROR 0x0021a8e0
-int i3rUpdateTexAnim(I3rRoot *root)
-{
-    ROSEPAN_STUB("i3rUpdateTexAnim", 0x0021a8e0);
-    return {};
 }
 
 // stub of ROR 0x00106e70
@@ -643,20 +622,6 @@ void GamFont::setFillMsb(int on)
 float i3dPointSegDist2(const float *p, const float *a, const float *d, float *t)
 {
     ROSEPAN_STUB("i3dPointSegDist2", 0x002337e0);
-    return {};
-}
-
-// stub of ROR 0x0021a3e8
-int i3rBuildPackets(I3rRoot *root)
-{
-    ROSEPAN_STUB("i3rBuildPackets", 0x0021a3e8);
-    return {};
-}
-
-// stub of ROR 0x0021a558
-int i3rClearPackets(I3rRoot *root)
-{
-    ROSEPAN_STUB("i3rClearPackets", 0x0021a558);
     return {};
 }
 
@@ -1807,28 +1772,6 @@ int i3cCastSphere(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
     return {};
 }
 
-// stub of ROR 0x0021a5b0
-int i3rAssignTex(I3rRoot *root, const I3dTexEntry *tex, int n)
-{
-    ROSEPAN_STUB("i3rAssignTex", 0x0021a5b0);
-    return {};
-}
-
-// stub of ROR 0x0021a760
-int i3rConvertLocalToModel(I3rRoot *root, I3dMatrixF4x4 *model,
-                             const I3dMatrixF4x4 *local)
-{
-    ROSEPAN_STUB("i3rConvertLocalToModel", 0x0021a760);
-    return {};
-}
-
-// stub of ROR 0x0021a700
-int i3rCopyLocalBasicTransform(I3rRoot *root, I3dMatrixF4x4 *mat)
-{
-    ROSEPAN_STUB("i3rCopyLocalBasicTransform", 0x0021a700);
-    return {};
-}
-
 // stub of ROR 0x00106760
 int utlDrawI3r(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
                  int flags)
@@ -1842,4 +1785,10 @@ int utlSetI3rDispControl(I3rRoot *root, void *disp)
 {
     ROSEPAN_STUB("utlSetI3rDispControl", 0x001067d8);
     return {};
+}
+
+// stub of ROR 0x0021fb50
+void i3rBuildMeshPacket(I3rItem *mesh, void *buf)
+{
+    ROSEPAN_STUB("i3rBuildMeshPacket", 0x0021fb50);
 }

@@ -12989,6 +12989,42 @@
   "was": "FUN_0021a938",
   "why": "i3d: the body of the inline DogModel::replaceStqMapEntity (dogmodel.h line 313); returns I3D_OK (0) on success"
  },
+ "0021aa10": {
+  "name": "i3rGetMatEntity0",
+  "tag": "ror-inferred",
+  "was": "FUN_0021aa10",
+  "why": "hidden after i3rReplaceStqMapEntity's jr ra (no references): reads the item's child 1's child 0 data word (0x22a988 / 0x22a978 / 0x22a898 / 0x22a890), 0 when a slot is empty; slot 0 of the getters i3rGetMatEntity1 / 2"
+ },
+ "0021aa70": {
+  "name": "i3rGetMatEntity1",
+  "tag": "ror-inferred",
+  "was": "FUN_0021aa70",
+  "why": "reads the item's child 1's child 1 data word (accessors 0x22a988 / 0x22a978 / 0x22a8b8 / 0x22a8a8), 0 when either is empty; the material's second STQ entity slot, sibling of i3rSetMatEntity0 that DogActor::setEyeTex calls"
+ },
+ "0021aad0": {
+  "name": "i3rGetMatEntity2",
+  "tag": "ror-inferred",
+  "was": "FUN_0021aad0",
+  "why": "as i3rGetMatEntity1 for child 1's child 2 (0x22a8d8 / 0x22a8c8)"
+ },
+ "0021ab30": {
+  "name": "i3rSetMatEntity0",
+  "tag": "ror-inferred",
+  "was": "FUN_0021ab30",
+  "why": "stores a pointer into the item's child 1's child 0 data, 0 on success, 1 when a slot is empty; DogActor::setEyeTex passes the eye material and its own UV record at +0x470"
+ },
+ "0021aba0": {
+  "name": "i3rSetMatEntity1",
+  "tag": "ror-inferred",
+  "was": "FUN_0021aba0",
+  "why": "as i3rSetMatEntity0 for child 1's child 1"
+ },
+ "0021ac10": {
+  "name": "i3rSetMatEntity2",
+  "tag": "ror-inferred",
+  "was": "FUN_0021ac10",
+  "why": "as i3rSetMatEntity0 for child 1's child 2"
+ },
  "0021ac80": {
   "name": "i3dLightDescInit",
   "tag": "lib-context",
@@ -13588,6 +13624,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0021f9c8",
   "why": "collects a batch non-static textures and CLUTs (up to 0x200 each) from the texture table and reserves them in the two VRAM heaps (0x228650); returns 0xf when they do not fit, else queues the batch on ctx+0x1211c"
+ },
+ "0021fb50": {
+  "name": "i3rBuildMeshPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_0021fb50",
+  "why": "called by i3rBuildPackets for every mesh item with the root's packet buffer; writes VIF UNPACK / DMA tags (0x30000000, 0x60000000, 0x6c02800001000101) for the mesh's strips into it"
  },
  "00222f50": {
   "name": "i3dPktLayerState",

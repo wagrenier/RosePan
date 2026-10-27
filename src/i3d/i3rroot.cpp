@@ -149,7 +149,7 @@ u_int i3rGetRootParam24(const I3rRoot *root)
 /* ROR 0x0022b488 */
 void *i3rGetRootMatrix10(const I3rRoot *root, int i)
 {
-    return (u_char *)i3rPtr(&i3rRootData(root)->m_matrix10) + i * 0x40;
+    return (u_char *)i3rPtr(&i3rRootData(root)->m_local_basic) + i * 0x40;
 }
 
 /* ROR 0x0022b4a0 */
