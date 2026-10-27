@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-26 21:55 at commit `f874d67` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-26 22:24 at commit `f0caa63` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-26 21:55 at commit `f874d67` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6674**, named **4417** (66%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 248, ror-inferred 2819
-- context-name ledger: 3107 entries; overrides of wrong library matches: 5
-- placed in a source file: 3654/6674 in 99 files
+- game functions: **6826**, named **4577** (67%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 248, ror-inferred 2979
+- context-name ledger: 3267 entries; overrides of wrong library matches: 5
+- placed in a source file: 3834/6826 in 101 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -25,12 +25,12 @@ Least-named game-code regions (64 KB blocks):
 | `00170000` | 52/251 (21%) | snd/sndman.cpp, wrd/wrdsrv.cpp |
 | `00120000` | 75/283 (27%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
 | `00100000` | 127/301 (42%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmisc.cpp |
-| `00220000` | 166/331 (50%) | i3d/i3dlayer.cpp, i3d/i3dvram.cpp, i3d/i3dview.cpp |
 | `001b0000` | 41/81 (51%) | game/gamfile.cpp, mnu/mnuSelectLanguage.cpp |
+| `00190000` | 123/227 (54%) | spr/s2d.cpp, spr/sprtexture.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **2820**; stubs: **366**
+- reconstructed RoR functions: **2988**; stubs: **359**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -49,6 +49,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/game/gamman.cpp` | 411 | 0 |
 | `src/game/gamsnd.cpp` | 74 | 0 |
 | `src/game/gamstat.cpp` | 79 | 0 |
+| `src/i3d/i3croot.cpp` | 12 | 0 |
 | `src/i3d/i3dctx.cpp` | 31 | 0 |
 | `src/i3d/i3denv.cpp` | 12 | 0 |
 | `src/i3d/i3dlayer.cpp` | 80 | 0 |
@@ -58,8 +59,9 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dtim2.cpp` | 7 | 0 |
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
+| `src/i3d/i3ritem.cpp` | 156 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 255 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 248 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
@@ -114,9 +116,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 160 TUs: todo 111, partial 11, verify 49, done 9
+- 163 TUs: todo 111, partial 13, verify 50, done 9
 - next: **unassigned@0022b4b8** (pinned in the queue)
 - pinned queue: unassigned@0022b4b8, unassigned@0021a3e8, unassigned@00192ac0, dog/dogactor.cpp, mag/magscenelight.cpp, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
+- partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
@@ -126,6 +129,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `game/gamman.cpp` 409/409 -- All 409 gamman functions are written; status verify because nothing in the TU draws in the 15 s boot, which still ends on the Atlus disclaimer (correct for that
 - verify: `game/gamsnd.cpp` 74/75 -- Code complete; verify until a run reaches a room whose scripts put 3D sounds (native 252 put_*_3d_pos) -- the boot smoke run (logos, disclaimer, MV00_AD film, u
 - verify: `game/gamstat.cpp` 74/74 -- All code of the TU is written; nothing in it draws at boot, so verify. The map helpers run when the map menu (0x1949bc / 0x196878, unassigned) opens: the first 
+- verify: `i3d/i3croot.cpp` 12/12 -- Status verify: DogModel::loadData calls i3cRelocate, setupColliTbl and i3cSetBothFaceEnable, but no smoke run reaches a model load yet and no raw I3D_I3C exists
 - verify: `i3d/i3dctx.cpp` 31/31 -- Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the pa
 - verify: `i3d/i3denv.cpp` 12/12 -- Pinned 0x21a120..0x21a3e8 + 0x21ac80..0x21b220 as one file (a guess: the i3r helpers 0x21a3e8..0x21ac80 sit between; split into i3dfog / i3dlight if evidence ap
 - verify: `i3d/i3dlayer.cpp` 80/80 -- Every frame now builds real groups, layers and a sorted DMA chain; the smoke run is stable and still black: nothing on the i3d path reaches a host draw module (
@@ -169,14 +173,14 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-26 22:24 `i3d/i3croot.cpp` verify: I3D_I3C collision root written whole in the i3ritem session (same slice): id check, i3cRelocate / i3cUnrelocate with the part-tree relocators, node / group coun
+- 2026-10-26 22:24 `i3d/i3ritem.cpp` partial: Split unassigned@0022b4b8: pinned i3d/i3ritem.cpp 0x22c1f8..0x22e840 and i3d/i3croot.cpp 0x22ba20..0x22c1f8. i3ritem.cpp: i3rItemFindChild, i3rIsItemType, i3rIt
 - 2026-10-26 21:55 `dog/dogmodel.cpp` verify: DogModel written whole: clear, setRoot, loadPack (texture pack, model, optional second root, sepia display control), loadData (i3r plus optional i3c collision w
 - 2026-10-26 21:07 `task/tsk_scene.cpp` verify: Wrote the rest of task/tsk_scene.cpp: scnChrRequestDog 0x1fae14 and scnChrRequestPC 0x1fb084 (stubs replaced), the damage roll scnCalcDamage 0x1fb624 with scnCa
 - 2026-10-26 20:54 `task/tsk_scene.cpp` partial: Wrote TskDamage::setup 0x1f9e58 (LP damage and kill, the facing test against the attacker, the enemy notifications, the step and hurt SE by chr word) with TskDa
 - 2026-10-26 20:39 `task/tsk_scene.cpp` partial: Wrote scenePlayStartSimple, PLScenePlay, scnPlaySEDelayed 0x1f97c8, TskAttack (constructor, setup over the kind words 0x12..0x30, exec, term) with scnAttackStar
 - 2026-10-26 20:23 `task/tsk_scene.cpp` partial: Wrote scenePlayStart 0x1f83f4 and the ScenePlay family 0x1f6c64..0x1f83f4: DisplayMessage (tick, reset, addLine, load, show), SeManager (play3d, play, tick, sto
 - 2026-10-26 20:00 `task/tsk_scene.cpp` partial: Pinned task/tsk_scene.cpp 0x1f6c64..0x1fc4f0 (merging unassigned@001f6c64 and unassigned@001f82e4: source strings at 0x1f8034 / 0x1f81a8, ScenePlay's slots on b
-- 2026-10-26 19:35 `task/tsk_chr.cpp` verify: Wrote the last chr helpers: chrRestoreLimb 0x1f5680 (limb attr bits 0..4 and Bip01 nodes, DogActor::setNodeScale 1.0), chrMtnMove2Achr 0x1f603c with the folded 
-- 2026-10-26 19:27 `task/tsk_chr.cpp` partial: Wrote TskAvoidMove whole (ctor 0x1ef184 replacing the hand stub, term, exec, aimAway / aimAwayHit / aimToward, stepAway / stepAwayHit / stepToward / stepNone: a
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -188,10 +192,10 @@ Recent sessions:
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 58 | 5 |
 | `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 57 | 5 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
-| `unassigned@0010f944` | partial | 2/6/12 | 2.2 | 44 | 5 |
+| `unassigned@0021a3e8` | todo | 0/8/13 | 2.1 | 44 | 6 |
 | `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 44 | 5 |
+| `unassigned@0010f944` | partial | 2/6/12 | 2.2 | 44 | 5 |
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
-| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -235,6 +239,6 @@ Recent sessions:
 | `001d7b08` | GamMan::getObjSectaNo | 6 | ror | stub | - |
 | `0010a038` | DogActor::addTrans | 6 | ror | stub | dog/dogactor.cpp |
 | `001dd5e8` | GamArea::addTrg | 5 | ror | stub | - |
-| `0022bfd8` | i3cGetNumNode | 5 | ror | stub | - |
 | `001d544c` | GamMan::placeAchr | 5 | ror | stub | - |
+| `0011ade4` | MagLifePC::live | 5 | ror | stub | mag/maglifepc.cpp |
 

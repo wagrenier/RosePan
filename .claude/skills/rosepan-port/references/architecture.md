@@ -318,11 +318,27 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     u16 +0x2e), +0x24 a plain value. Root child 3 = the nodes (i3rGetNumNode), child 2 the meshes,
     child 6 the packet slots. The rest of the run is per-type code, each type a cluster of small
     accessors (`*(item+8)` = its children) plus its fixup pair -- ~450 functions Ghidra folded
-    (hidden.py), e.g. type 77's fixups 0x22a6c0 / 0x22a730 sit inside the mesh packet builder
+    (hidden.py), e.g. type 0x4d's fixups 0x22a6c0 / 0x22a730 sit inside the mesh packet builder
     0x228c08..0x22a7d0 (0x228f50: a per-layer cache of mesh packets hashed on mesh / light / fog
-    / view). I3D_I3M roots from 0x22b4b8 (id check 0x22b4b8), I3D_I3C from 0x22ba20, curve /
-    interpolation maths 0x22e840..0x231198, collision (i3dPointSegDist2, i3dSegSegDist2)
-    0x231198..0x23695c. Host pointers in these files: hazards.md "Types and layouts".
+    / view). **The item core** (`i3d/i3ritem.cpp` 0x22c1f8..0x22e840, pinned 2026-10-26): i3rItemFindChild
+    0x22c1f8, i3rIsItemType, the relocators, and all 90 fixup pairs (`i3rRelocDataXX` /
+    `i3rUnrelocDataXX`, Ghidra functions made at every table word 2026-10-26; 0x22c320 / 0x22c318
+    the shared no-op). Every fixup is one of: a field at +off holding an offset from the data start,
+    or an array of such entries (array pointer at +a, count a u_int / u_short / u_char at +c). Only
+    25 types have pointers (0x08 / 0x1d / 0x38 / 0x2d / 0x46 / 0x4d / 0x52 have arrays; 0x38 two
+    arrays of one count); the rest are `jr ra`. Checked offline on 1602 models in the disc's RPKs
+    (7.1 M pointers, all in the file; names may be Shift-JIS). Nine pairs live at 0x22a6c0..0x22aec0
+    (types 0x25 0x26 0x29 0x2a 0x2d 0x4a 0x4d 0x52 0x59) and are written in i3ritem.cpp too.
+    The accessors between the fixups (0x22c840.., most call i3rItemFindChild) are not written.
+    I3D_I3M roots from 0x22b4b8 (id check 0x22b4b8, rodata 0x303a68). **I3D_I3C** (`i3d/i3croot.cpp`
+    0x22ba20..0x22c1f8, pinned 2026-10-26, verify): id "I3D_I3C\0" (0x303a70), +0x10 relocation
+    byte (1 = offsets), +0x12 both-faces, +0x14 node count, +0x16 group count, +0x18 nodes (12 bytes:
+    name, u16 part count, parts), +0x1c group names; a part is 0x30 bytes with +0x24 / +0x2c
+    offsets and +0x28 a tree of 12-byte nodes (u16 count, bit 15 leaf; +8 children or leaf data).
+    All offsets from the root, -1 = none. No raw I3D_I3C exists in the disc's RPK / ARA files
+    (compressed somewhere). Curve / interpolation maths 0x22e840..0x231198, collision casts
+    0x2312a0..0x2337e0 (i3cCastRay 0x232508 ...), distance maths (i3dPointSegDist2, i3dSegSegDist2)
+    ..0x23695c. Host pointers in these files: hazards.md "Types and layouts".
   - **Texture and CLUT objects** (`i3d/i3dtex.cpp`, 0x2184c0..0x21a120, written 2026-10-22, verify;
     33 functions incl. 4 hidden TEX1 setters 0x219dd0..0x219e30). Both start with their
     I3dVramHandle (+0 m_image = the object, +4 size: texture pages / CLUT 4-block units, +0x10 kind

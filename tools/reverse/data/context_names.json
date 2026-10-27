@@ -14453,6 +14453,114 @@
   "was": "FUN_00228c38",
   "why": "out[0] = (m00, m11, m22, 0), out[1] = m row 3 (i3dVecCopy); i3dCtxCreateView's view +0x80 from its viewport +0xa0"
  },
+ "0022a6c0": {
+  "name": "i3rUnrelocData4D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a6c0",
+  "why": "slot 0x4d of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x4d (offsets from the data start)"
+ },
+ "0022a730": {
+  "name": "i3rRelocData4D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a730",
+  "why": "slot 0x4d of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x4d (offsets from the data start)"
+ },
+ "0022a880": {
+  "name": "i3rUnrelocData29",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a880",
+  "why": "slot 0x29 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x29 (offsets from the data start)"
+ },
+ "0022a888": {
+  "name": "i3rRelocData29",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a888",
+  "why": "slot 0x29 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x29 (offsets from the data start)"
+ },
+ "0022a8e8": {
+  "name": "i3rUnrelocData4A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a8e8",
+  "why": "slot 0x4a of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x4a (offsets from the data start)"
+ },
+ "0022a8f0": {
+  "name": "i3rRelocData4A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a8f0",
+  "why": "slot 0x4a of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x4a (offsets from the data start)"
+ },
+ "0022a910": {
+  "name": "i3rUnrelocData26",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a910",
+  "why": "slot 0x26 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x26 (offsets from the data start)"
+ },
+ "0022a938": {
+  "name": "i3rRelocData26",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a938",
+  "why": "slot 0x26 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x26 (offsets from the data start)"
+ },
+ "0022aa18": {
+  "name": "i3rUnrelocData59",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aa18",
+  "why": "slot 0x59 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x59 (offsets from the data start)"
+ },
+ "0022aa30": {
+  "name": "i3rRelocData59",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aa30",
+  "why": "slot 0x59 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x59 (offsets from the data start)"
+ },
+ "0022aaa8": {
+  "name": "i3rUnrelocData25",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aaa8",
+  "why": "slot 0x25 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x25 (offsets from the data start)"
+ },
+ "0022aab0": {
+  "name": "i3rRelocData25",
+  "tag": "ror-inferred",
+  "was": "FUN_0022aab0",
+  "why": "slot 0x25 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x25 (offsets from the data start)"
+ },
+ "0022ab18": {
+  "name": "i3rUnrelocData2D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ab18",
+  "why": "slot 0x2d of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x2d (offsets from the data start)"
+ },
+ "0022ab70": {
+  "name": "i3rRelocData2D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ab70",
+  "why": "slot 0x2d of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x2d (offsets from the data start)"
+ },
+ "0022abf8": {
+  "name": "i3rUnrelocData2A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022abf8",
+  "why": "slot 0x2a of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x2a (offsets from the data start)"
+ },
+ "0022ac00": {
+  "name": "i3rRelocData2A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ac00",
+  "why": "slot 0x2a of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x2a (offsets from the data start)"
+ },
+ "0022ad20": {
+  "name": "i3rUnrelocData52",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ad20",
+  "why": "slot 0x52 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x52 (offsets from the data start)"
+ },
+ "0022adf8": {
+  "name": "i3rRelocData52",
+  "tag": "ror-inferred",
+  "was": "FUN_0022adf8",
+  "why": "slot 0x52 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x52 (offsets from the data start)"
+ },
  "0022b1b0": {
   "name": "i3rFindName",
   "tag": "ror-inferred",
@@ -14537,11 +14645,35 @@
   "was": "FUN_0022b4a0",
   "why": "(root, i): root data table +0x14 + i * 0x40, the twin of 0x22b488; no callers, role unknown"
  },
+ "0022ba20": {
+  "name": "I3cRoot__CheckIdString",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ba20",
+  "why": "memcmp of the file against \"I3D_I3C\" (0x303a70), 3 on mismatch: the i3c counterpart of I3rRoot__CheckIdString"
+ },
+ "0022ba50": {
+  "name": "i3cTreeRelocate",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ba50",
+  "why": "recursive over 12-byte tree nodes (u_short count, bit 15 leaf, +8 children): adds the i3c root to +8 when it is below it; i3cRelocate calls it on each part's +0x28"
+ },
+ "0022bae8": {
+  "name": "i3cTreeUnrelocate",
+  "tag": "ror-inferred",
+  "was": "FUN_0022bae8",
+  "why": "the reverse of 0x22ba50: children first, then subtracts the root from +8; called by 0x22bdb0"
+ },
  "0022bba0": {
   "name": "i3cRelocate",
   "tag": "ror-inferred",
   "was": "FUN_0022bba0",
   "why": "relocates a collision file (byte +0x10 set = offsets): the node table +0x18 (12-byte records) and the table +0x1c; loadData's m_i3c_root"
+ },
+ "0022bdb0": {
+  "name": "i3cUnrelocate",
+  "tag": "ror-inferred",
+  "was": "FUN_0022bdb0",
+  "why": "mirror of i3cRelocate: runs while the root byte +0x10 is not 1, subtracts the root from every pointer i3cRelocate added, sets +0x10 to 1"
  },
  "0022bfd8": {
   "name": "i3cGetNumNode",
@@ -14561,17 +14693,53 @@
   "was": "FUN_0022c010",
   "why": "u_short +0x16 of the collision root; the body of DogModel::get_nGroup"
  },
+ "0022c018": {
+  "name": "i3cGetGroupName",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c018",
+  "why": "entry i of the +0x1c table below the +0x16 count (i3cGetNumGroup), NULL past it; 0x22c0d8 strcmps a name against the same entries"
+ },
+ "0022c048": {
+  "name": "i3cGetNodeIndexByName",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c048",
+  "why": "linear strcmp over the +0x18 node records' names (12 bytes each, +0x14 count), the index or -1"
+ },
+ "0022c0d8": {
+  "name": "i3cGetGroupIndexByName",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c0d8",
+  "why": "linear strcmp over the +0x1c group names (+0x16 count), the index or -1"
+ },
  "0022c1d8": {
   "name": "i3cSetBothFaceEnable",
   "tag": "ror-inferred",
   "was": "FUN_0022c1d8",
   "why": "the body of DogModel::setBothFaceEnable: byte +0x12 = flag, returns whether it was 1"
  },
+ "0022c1f8": {
+  "name": "i3rItemFindChild",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c1f8",
+  "why": "bisects an i3r item's children (16-byte items, name at +0xc) with strcmp and returns the index or -1; 39 per-type accessors call it"
+ },
  "0022c2a0": {
   "name": "i3rIsItemType",
   "tag": "ror-inferred",
   "was": "FUN_0022c2a0",
   "why": "0 for the item type ids with no fixup pair (4, 0x16, 0x24, 0x2c, 0x2e, 0x2f, 0x36, 0x3f, 0x40, 0x41, 0x48, 0x4e, 0x51), 1 otherwise; both item relocators fail with 4 on 0"
+ },
+ "0022c318": {
+  "name": "i3rUnrelocDataNone",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c318",
+  "why": "shared no-op (jr ra) of table 0x2db360 for item types 0x0, 0x1, 0x4, 0x16, 0x24, 0x2c, 0x2e, 0x2f, 0x36, 0x3f, 0x40, 0x41, 0x48, 0x4e, 0x51"
+ },
+ "0022c320": {
+  "name": "i3rRelocDataNone",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c320",
+  "why": "shared no-op (jr ra) of table 0x2db4c8 for item types 0x0, 0x1, 0x4, 0x16, 0x24, 0x2c, 0x2e, 0x2f, 0x36, 0x3f, 0x40, 0x41, 0x48, 0x4e, 0x51"
  },
  "0022c328": {
   "name": "i3rItemUnrelocate",
@@ -14584,6 +14752,798 @@
   "tag": "ror-inferred",
   "was": "FUN_0022c478",
   "why": "(item, base): recursive; data / children / name offsets + base, then the type's fixup from table 0x2db4c8 on the data (bit 31 of +4 clear, type <= 0x59 else 3), then the children (16 bytes each, count = low 24 bits of +4)"
+ },
+ "0022c5a0": {
+  "name": "i3rUnrelocData02",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c5a0",
+  "why": "slot 0x2 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x2 (offsets from the data start)"
+ },
+ "0022c5a8": {
+  "name": "i3rRelocData02",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c5a8",
+  "why": "slot 0x2 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x2 (offsets from the data start)"
+ },
+ "0022c5b0": {
+  "name": "i3rUnrelocData03",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c5b0",
+  "why": "slot 0x3 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x3 (offsets from the data start)"
+ },
+ "0022c5b8": {
+  "name": "i3rRelocData03",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c5b8",
+  "why": "slot 0x3 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x3 (offsets from the data start)"
+ },
+ "0022c5c0": {
+  "name": "i3rUnrelocData35",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c5c0",
+  "why": "slot 0x35 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x35 (offsets from the data start)"
+ },
+ "0022c5c8": {
+  "name": "i3rRelocData35",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c5c8",
+  "why": "slot 0x35 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x35 (offsets from the data start)"
+ },
+ "0022c5d0": {
+  "name": "i3rUnrelocData34",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c5d0",
+  "why": "slot 0x34 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x34 (offsets from the data start)"
+ },
+ "0022c608": {
+  "name": "i3rRelocData34",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c608",
+  "why": "slot 0x34 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x34 (offsets from the data start)"
+ },
+ "0022c658": {
+  "name": "i3rUnrelocData33",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c658",
+  "why": "slot 0x33 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x33 (offsets from the data start)"
+ },
+ "0022c670": {
+  "name": "i3rRelocData33",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c670",
+  "why": "slot 0x33 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x33 (offsets from the data start)"
+ },
+ "0022c6e8": {
+  "name": "i3rUnrelocData37",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c6e8",
+  "why": "slot 0x37 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x37 (offsets from the data start)"
+ },
+ "0022c6f0": {
+  "name": "i3rRelocData37",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c6f0",
+  "why": "slot 0x37 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x37 (offsets from the data start)"
+ },
+ "0022c6f8": {
+  "name": "i3rUnrelocData50",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c6f8",
+  "why": "slot 0x50 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x50 (offsets from the data start)"
+ },
+ "0022c730": {
+  "name": "i3rRelocData50",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c730",
+  "why": "slot 0x50 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x50 (offsets from the data start)"
+ },
+ "0022c7e0": {
+  "name": "i3rUnrelocData47",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c7e0",
+  "why": "slot 0x47 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x47 (offsets from the data start)"
+ },
+ "0022c7f8": {
+  "name": "i3rRelocData47",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c7f8",
+  "why": "slot 0x47 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x47 (offsets from the data start)"
+ },
+ "0022ca00": {
+  "name": "i3rUnrelocData30",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ca00",
+  "why": "slot 0x30 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x30 (offsets from the data start)"
+ },
+ "0022ca08": {
+  "name": "i3rRelocData30",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ca08",
+  "why": "slot 0x30 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x30 (offsets from the data start)"
+ },
+ "0022ca70": {
+  "name": "i3rUnrelocData4F",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ca70",
+  "why": "slot 0x4f of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x4f (offsets from the data start)"
+ },
+ "0022ca78": {
+  "name": "i3rRelocData4F",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ca78",
+  "why": "slot 0x4f of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x4f (offsets from the data start)"
+ },
+ "0022cae0": {
+  "name": "i3rUnrelocData31",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cae0",
+  "why": "slot 0x31 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x31 (offsets from the data start)"
+ },
+ "0022caf8": {
+  "name": "i3rRelocData31",
+  "tag": "ror-inferred",
+  "was": "FUN_0022caf8",
+  "why": "slot 0x31 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x31 (offsets from the data start)"
+ },
+ "0022cb10": {
+  "name": "i3rUnrelocData56",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cb10",
+  "why": "slot 0x56 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x56 (offsets from the data start)"
+ },
+ "0022cb28": {
+  "name": "i3rRelocData56",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cb28",
+  "why": "slot 0x56 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x56 (offsets from the data start)"
+ },
+ "0022cf20": {
+  "name": "i3rUnrelocData55",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cf20",
+  "why": "slot 0x55 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x55 (offsets from the data start)"
+ },
+ "0022cf38": {
+  "name": "i3rRelocData55",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cf38",
+  "why": "slot 0x55 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x55 (offsets from the data start)"
+ },
+ "0022cfd0": {
+  "name": "i3rUnrelocData32",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cfd0",
+  "why": "slot 0x32 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x32 (offsets from the data start)"
+ },
+ "0022cfd8": {
+  "name": "i3rRelocData32",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cfd8",
+  "why": "slot 0x32 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x32 (offsets from the data start)"
+ },
+ "0022cff8": {
+  "name": "i3rUnrelocData58",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cff8",
+  "why": "slot 0x58 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x58 (offsets from the data start)"
+ },
+ "0022d030": {
+  "name": "i3rRelocData58",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d030",
+  "why": "slot 0x58 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x58 (offsets from the data start)"
+ },
+ "0022d080": {
+  "name": "i3rUnrelocData49",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d080",
+  "why": "slot 0x49 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x49 (offsets from the data start)"
+ },
+ "0022d098": {
+  "name": "i3rRelocData49",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d098",
+  "why": "slot 0x49 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x49 (offsets from the data start)"
+ },
+ "0022d0b0": {
+  "name": "i3rUnrelocData28",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d0b0",
+  "why": "slot 0x28 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x28 (offsets from the data start)"
+ },
+ "0022d0b8": {
+  "name": "i3rRelocData28",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d0b8",
+  "why": "slot 0x28 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x28 (offsets from the data start)"
+ },
+ "0022d0f8": {
+  "name": "i3rUnrelocData57",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d0f8",
+  "why": "slot 0x57 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x57 (offsets from the data start)"
+ },
+ "0022d100": {
+  "name": "i3rRelocData57",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d100",
+  "why": "slot 0x57 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x57 (offsets from the data start)"
+ },
+ "0022d120": {
+  "name": "i3rUnrelocData4C",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d120",
+  "why": "slot 0x4c of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x4c (offsets from the data start)"
+ },
+ "0022d138": {
+  "name": "i3rRelocData4C",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d138",
+  "why": "slot 0x4c of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x4c (offsets from the data start)"
+ },
+ "0022d1b0": {
+  "name": "i3rUnrelocData4B",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d1b0",
+  "why": "slot 0x4b of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x4b (offsets from the data start)"
+ },
+ "0022d1b8": {
+  "name": "i3rRelocData4B",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d1b8",
+  "why": "slot 0x4b of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x4b (offsets from the data start)"
+ },
+ "0022d220": {
+  "name": "i3rUnrelocData27",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d220",
+  "why": "slot 0x27 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x27 (offsets from the data start)"
+ },
+ "0022d228": {
+  "name": "i3rRelocData27",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d228",
+  "why": "slot 0x27 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x27 (offsets from the data start)"
+ },
+ "0022d230": {
+  "name": "i3rUnrelocData2B",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d230",
+  "why": "slot 0x2b of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x2b (offsets from the data start)"
+ },
+ "0022d238": {
+  "name": "i3rRelocData2B",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d238",
+  "why": "slot 0x2b of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x2b (offsets from the data start)"
+ },
+ "0022d240": {
+  "name": "i3rUnrelocData46",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d240",
+  "why": "slot 0x46 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x46 (offsets from the data start)"
+ },
+ "0022d2b8": {
+  "name": "i3rRelocData46",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d2b8",
+  "why": "slot 0x46 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x46 (offsets from the data start)"
+ },
+ "0022d388": {
+  "name": "i3rUnrelocData45",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d388",
+  "why": "slot 0x45 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x45 (offsets from the data start)"
+ },
+ "0022d390": {
+  "name": "i3rRelocData45",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d390",
+  "why": "slot 0x45 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x45 (offsets from the data start)"
+ },
+ "0022d410": {
+  "name": "i3rUnrelocData53",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d410",
+  "why": "slot 0x53 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x53 (offsets from the data start)"
+ },
+ "0022d428": {
+  "name": "i3rRelocData53",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d428",
+  "why": "slot 0x53 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x53 (offsets from the data start)"
+ },
+ "0022d440": {
+  "name": "i3rUnrelocData54",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d440",
+  "why": "slot 0x54 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x54 (offsets from the data start)"
+ },
+ "0022d458": {
+  "name": "i3rRelocData54",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d458",
+  "why": "slot 0x54 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x54 (offsets from the data start)"
+ },
+ "0022d470": {
+  "name": "i3rUnrelocData23",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d470",
+  "why": "slot 0x23 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x23 (offsets from the data start)"
+ },
+ "0022d478": {
+  "name": "i3rRelocData23",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d478",
+  "why": "slot 0x23 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x23 (offsets from the data start)"
+ },
+ "0022d480": {
+  "name": "i3rUnrelocData0A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d480",
+  "why": "slot 0xa of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0xa (offsets from the data start)"
+ },
+ "0022d488": {
+  "name": "i3rRelocData0A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d488",
+  "why": "slot 0xa of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0xa (offsets from the data start)"
+ },
+ "0022d490": {
+  "name": "i3rUnrelocData09",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d490",
+  "why": "slot 0x9 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x9 (offsets from the data start)"
+ },
+ "0022d498": {
+  "name": "i3rRelocData09",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d498",
+  "why": "slot 0x9 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x9 (offsets from the data start)"
+ },
+ "0022d520": {
+  "name": "i3rUnrelocData0E",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d520",
+  "why": "slot 0xe of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0xe (offsets from the data start)"
+ },
+ "0022d538": {
+  "name": "i3rRelocData0E",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d538",
+  "why": "slot 0xe of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0xe (offsets from the data start)"
+ },
+ "0022d550": {
+  "name": "i3rUnrelocData0D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d550",
+  "why": "slot 0xd of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0xd (offsets from the data start)"
+ },
+ "0022d568": {
+  "name": "i3rRelocData0D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d568",
+  "why": "slot 0xd of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0xd (offsets from the data start)"
+ },
+ "0022d600": {
+  "name": "i3rUnrelocData0C",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d600",
+  "why": "slot 0xc of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0xc (offsets from the data start)"
+ },
+ "0022d608": {
+  "name": "i3rRelocData0C",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d608",
+  "why": "slot 0xc of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0xc (offsets from the data start)"
+ },
+ "0022d610": {
+  "name": "i3rUnrelocData0B",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d610",
+  "why": "slot 0xb of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0xb (offsets from the data start)"
+ },
+ "0022d618": {
+  "name": "i3rRelocData0B",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d618",
+  "why": "slot 0xb of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0xb (offsets from the data start)"
+ },
+ "0022d6a0": {
+  "name": "i3rUnrelocData15",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d6a0",
+  "why": "slot 0x15 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x15 (offsets from the data start)"
+ },
+ "0022d6a8": {
+  "name": "i3rRelocData15",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d6a8",
+  "why": "slot 0x15 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x15 (offsets from the data start)"
+ },
+ "0022d6b0": {
+  "name": "i3rUnrelocData08",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d6b0",
+  "why": "slot 0x8 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x8 (offsets from the data start)"
+ },
+ "0022d710": {
+  "name": "i3rRelocData08",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d710",
+  "why": "slot 0x8 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x8 (offsets from the data start)"
+ },
+ "0022d808": {
+  "name": "i3rUnrelocData10",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d808",
+  "why": "slot 0x10 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x10 (offsets from the data start)"
+ },
+ "0022d810": {
+  "name": "i3rRelocData10",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d810",
+  "why": "slot 0x10 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x10 (offsets from the data start)"
+ },
+ "0022d818": {
+  "name": "i3rUnrelocData1B",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d818",
+  "why": "slot 0x1b of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x1b (offsets from the data start)"
+ },
+ "0022d820": {
+  "name": "i3rRelocData1B",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d820",
+  "why": "slot 0x1b of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1b (offsets from the data start)"
+ },
+ "0022d888": {
+  "name": "i3rUnrelocData44",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d888",
+  "why": "slot 0x44 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x44 (offsets from the data start)"
+ },
+ "0022d890": {
+  "name": "i3rRelocData44",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d890",
+  "why": "slot 0x44 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x44 (offsets from the data start)"
+ },
+ "0022d898": {
+  "name": "i3rUnrelocData39",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d898",
+  "why": "slot 0x39 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x39 (offsets from the data start)"
+ },
+ "0022d8a0": {
+  "name": "i3rRelocData39",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d8a0",
+  "why": "slot 0x39 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x39 (offsets from the data start)"
+ },
+ "0022d8a8": {
+  "name": "i3rUnrelocData18",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d8a8",
+  "why": "slot 0x18 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x18 (offsets from the data start)"
+ },
+ "0022d8b0": {
+  "name": "i3rRelocData18",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d8b0",
+  "why": "slot 0x18 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x18 (offsets from the data start)"
+ },
+ "0022d8f0": {
+  "name": "i3rUnrelocData19",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d8f0",
+  "why": "slot 0x19 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x19 (offsets from the data start)"
+ },
+ "0022d8f8": {
+  "name": "i3rRelocData19",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d8f8",
+  "why": "slot 0x19 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x19 (offsets from the data start)"
+ },
+ "0022d958": {
+  "name": "i3rUnrelocData05",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d958",
+  "why": "slot 0x5 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x5 (offsets from the data start)"
+ },
+ "0022d960": {
+  "name": "i3rRelocData05",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d960",
+  "why": "slot 0x5 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x5 (offsets from the data start)"
+ },
+ "0022d980": {
+  "name": "i3rUnrelocData0F",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d980",
+  "why": "slot 0xf of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0xf (offsets from the data start)"
+ },
+ "0022d988": {
+  "name": "i3rRelocData0F",
+  "tag": "ror-inferred",
+  "was": "FUN_0022d988",
+  "why": "slot 0xf of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0xf (offsets from the data start)"
+ },
+ "0022da10": {
+  "name": "i3rUnrelocData20",
+  "tag": "ror-inferred",
+  "was": "FUN_0022da10",
+  "why": "slot 0x20 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x20 (offsets from the data start)"
+ },
+ "0022da18": {
+  "name": "i3rRelocData20",
+  "tag": "ror-inferred",
+  "was": "FUN_0022da18",
+  "why": "slot 0x20 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x20 (offsets from the data start)"
+ },
+ "0022da80": {
+  "name": "i3rUnrelocData12",
+  "tag": "ror-inferred",
+  "was": "FUN_0022da80",
+  "why": "slot 0x12 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x12 (offsets from the data start)"
+ },
+ "0022da88": {
+  "name": "i3rRelocData12",
+  "tag": "ror-inferred",
+  "was": "FUN_0022da88",
+  "why": "slot 0x12 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x12 (offsets from the data start)"
+ },
+ "0022daa8": {
+  "name": "i3rUnrelocData14",
+  "tag": "ror-inferred",
+  "was": "FUN_0022daa8",
+  "why": "slot 0x14 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x14 (offsets from the data start)"
+ },
+ "0022dab0": {
+  "name": "i3rRelocData14",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dab0",
+  "why": "slot 0x14 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x14 (offsets from the data start)"
+ },
+ "0022dad0": {
+  "name": "i3rUnrelocData11",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dad0",
+  "why": "slot 0x11 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x11 (offsets from the data start)"
+ },
+ "0022dad8": {
+  "name": "i3rRelocData11",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dad8",
+  "why": "slot 0x11 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x11 (offsets from the data start)"
+ },
+ "0022dae0": {
+  "name": "i3rUnrelocData42",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dae0",
+  "why": "slot 0x42 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x42 (offsets from the data start)"
+ },
+ "0022dae8": {
+  "name": "i3rRelocData42",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dae8",
+  "why": "slot 0x42 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x42 (offsets from the data start)"
+ },
+ "0022daf0": {
+  "name": "i3rUnrelocData1A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022daf0",
+  "why": "slot 0x1a of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x1a (offsets from the data start)"
+ },
+ "0022daf8": {
+  "name": "i3rRelocData1A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022daf8",
+  "why": "slot 0x1a of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1a (offsets from the data start)"
+ },
+ "0022db18": {
+  "name": "i3rUnrelocData06",
+  "tag": "ror-inferred",
+  "was": "FUN_0022db18",
+  "why": "slot 0x6 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x6 (offsets from the data start)"
+ },
+ "0022db20": {
+  "name": "i3rRelocData06",
+  "tag": "ror-inferred",
+  "was": "FUN_0022db20",
+  "why": "slot 0x6 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x6 (offsets from the data start)"
+ },
+ "0022db28": {
+  "name": "i3rUnrelocData43",
+  "tag": "ror-inferred",
+  "was": "FUN_0022db28",
+  "why": "slot 0x43 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x43 (offsets from the data start)"
+ },
+ "0022db30": {
+  "name": "i3rRelocData43",
+  "tag": "ror-inferred",
+  "was": "FUN_0022db30",
+  "why": "slot 0x43 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x43 (offsets from the data start)"
+ },
+ "0022db38": {
+  "name": "i3rUnrelocData3E",
+  "tag": "ror-inferred",
+  "was": "FUN_0022db38",
+  "why": "slot 0x3e of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x3e (offsets from the data start)"
+ },
+ "0022db40": {
+  "name": "i3rRelocData3E",
+  "tag": "ror-inferred",
+  "was": "FUN_0022db40",
+  "why": "slot 0x3e of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x3e (offsets from the data start)"
+ },
+ "0022dba0": {
+  "name": "i3rUnrelocData13",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dba0",
+  "why": "slot 0x13 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x13 (offsets from the data start)"
+ },
+ "0022dba8": {
+  "name": "i3rRelocData13",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dba8",
+  "why": "slot 0x13 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x13 (offsets from the data start)"
+ },
+ "0022dbc8": {
+  "name": "i3rUnrelocData07",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dbc8",
+  "why": "slot 0x7 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x7 (offsets from the data start)"
+ },
+ "0022dbd0": {
+  "name": "i3rRelocData07",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dbd0",
+  "why": "slot 0x7 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x7 (offsets from the data start)"
+ },
+ "0022dc10": {
+  "name": "i3rUnrelocData22",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dc10",
+  "why": "slot 0x22 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x22 (offsets from the data start)"
+ },
+ "0022dc18": {
+  "name": "i3rRelocData22",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dc18",
+  "why": "slot 0x22 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x22 (offsets from the data start)"
+ },
+ "0022dc58": {
+  "name": "i3rUnrelocData17",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dc58",
+  "why": "slot 0x17 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x17 (offsets from the data start)"
+ },
+ "0022dc60": {
+  "name": "i3rRelocData17",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dc60",
+  "why": "slot 0x17 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x17 (offsets from the data start)"
+ },
+ "0022dec0": {
+  "name": "i3rUnrelocData38",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dec0",
+  "why": "slot 0x38 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x38 (offsets from the data start)"
+ },
+ "0022df38": {
+  "name": "i3rRelocData38",
+  "tag": "ror-inferred",
+  "was": "FUN_0022df38",
+  "why": "slot 0x38 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x38 (offsets from the data start)"
+ },
+ "0022dfc8": {
+  "name": "i3rUnrelocData1F",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dfc8",
+  "why": "slot 0x1f of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x1f (offsets from the data start)"
+ },
+ "0022dfd0": {
+  "name": "i3rRelocData1F",
+  "tag": "ror-inferred",
+  "was": "FUN_0022dfd0",
+  "why": "slot 0x1f of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1f (offsets from the data start)"
+ },
+ "0022e0f0": {
+  "name": "i3rUnrelocData3D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e0f0",
+  "why": "slot 0x3d of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x3d (offsets from the data start)"
+ },
+ "0022e0f8": {
+  "name": "i3rRelocData3D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e0f8",
+  "why": "slot 0x3d of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x3d (offsets from the data start)"
+ },
+ "0022e100": {
+  "name": "i3rUnrelocData3B",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e100",
+  "why": "slot 0x3b of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x3b (offsets from the data start)"
+ },
+ "0022e108": {
+  "name": "i3rRelocData3B",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e108",
+  "why": "slot 0x3b of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x3b (offsets from the data start)"
+ },
+ "0022e110": {
+  "name": "i3rUnrelocData1C",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e110",
+  "why": "slot 0x1c of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x1c (offsets from the data start)"
+ },
+ "0022e118": {
+  "name": "i3rRelocData1C",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e118",
+  "why": "slot 0x1c of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1c (offsets from the data start)"
+ },
+ "0022e180": {
+  "name": "i3rUnrelocData1D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e180",
+  "why": "slot 0x1d of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x1d (offsets from the data start)"
+ },
+ "0022e1e0": {
+  "name": "i3rRelocData1D",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e1e0",
+  "why": "slot 0x1d of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1d (offsets from the data start)"
+ },
+ "0022e2a0": {
+  "name": "i3rUnrelocData1E",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e2a0",
+  "why": "slot 0x1e of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x1e (offsets from the data start)"
+ },
+ "0022e2b8": {
+  "name": "i3rRelocData1E",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e2b8",
+  "why": "slot 0x1e of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1e (offsets from the data start)"
+ },
+ "0022e3e0": {
+  "name": "i3rUnrelocData3C",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e3e0",
+  "why": "slot 0x3c of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x3c (offsets from the data start)"
+ },
+ "0022e3e8": {
+  "name": "i3rRelocData3C",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e3e8",
+  "why": "slot 0x3c of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x3c (offsets from the data start)"
+ },
+ "0022e470": {
+  "name": "i3rUnrelocData3A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e470",
+  "why": "slot 0x3a of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x3a (offsets from the data start)"
+ },
+ "0022e478": {
+  "name": "i3rRelocData3A",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e478",
+  "why": "slot 0x3a of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x3a (offsets from the data start)"
+ },
+ "0022e500": {
+  "name": "i3rUnrelocData21",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e500",
+  "why": "slot 0x21 of i3rItemUnrelocate's per-type table 0x2db360: turns the pointers back into offsets in an item's data of type 0x21 (offsets from the data start)"
+ },
+ "0022e508": {
+  "name": "i3rRelocData21",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e508",
+  "why": "slot 0x21 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x21 (offsets from the data start)"
  },
  "002324b8": {
   "name": "i3cCastSphere",

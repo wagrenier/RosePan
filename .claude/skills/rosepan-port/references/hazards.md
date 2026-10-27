@@ -229,6 +229,11 @@ entries are marked **RoR** with the date.
   (the per-type accessors, i3rBuildPackets, DogModel) must go through it -- never cast a field.
   For a small table one class owns and reads through its own methods, building host records with
   pointers beside the untouched file is simpler (WrdSrv::setup, wrd/wrdsrv.cpp, 2026-10-26).
+  The i3c collision files take a third way (i3croot.h, 2026-10-26): the host keeps the file's
+  offsets (from the root) and every reader resolves them with `i3cPtr(root, field)`; i3cRelocate
+  only turns -1 into 0. Its tree relocator adds the root only to values below the root's address
+  (an already-relocated guard) -- a test with no host meaning. The casts (0x2312a0..) must read
+  through i3cPtr; the query carries the root.
 
 ## Reconstruction bookkeeping
 
@@ -563,9 +568,13 @@ public:
   MagScene "pmat" asserts. Cause: DogModel's loader is written but i3rItemRelocate (0x22c478) is a
   stub, so the i3r item tree keeps file offsets and i3rGetNumNode returns garbage; allocMatrix's
   alloc fails and later code walks NULL node arrays. Fix in place: PC guards in allocMatrix,
-  setupNodeFlags and MagScene's node billboard loop. Remove nothing; write the relocator.
+  setupNodeFlags and MagScene's node billboard loop. The relocator is written (i3d/i3ritem.cpp,
+  2026-10-26); remove the guards once a run that reaches the load shows sane node counts.
 - Only some New Game runs reach the model loads (two of four 200 s runs did, by timing); judge a
   load-path change on a run whose log shows i3rAssignTex.
+  (2026-10-26: two more 200 / 240 s runs reached none -- the post-film setup runs, then
+  DogActor::load 0x10cd5c is a stub; the i3ritem session checked the relocator offline instead,
+  emulating it over the disc's 1602 RPK models.)
 
 ## How to debug (the method that worked)
 
