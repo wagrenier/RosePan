@@ -545,6 +545,18 @@
   "was": "FUN_0010737c",
   "why": "on the 0xe0 motion state: without records (+0x1c) clears all, else drops the motion and blend entries whose record lost its i3m; setMaxMotion calls it on +0x1e4 / +0x2c4"
  },
+ "00107560": {
+  "name": "DogMotionBlend::getTimeRatio",
+  "tag": "ror-inferred",
+  "was": "FUN_00107560",
+  "why": "m_frame / i3mGetLength of the current record, clamped 0..1 (dogmotionblend.h asserts)"
+ },
+ "00107678": {
+  "name": "DogMotionBlend::setTimeRatio",
+  "tag": "ror-inferred",
+  "was": "FUN_00107678",
+  "why": "assert r 0..1; m_frame = i3mGetLength * r; DogActor::setMotionTimeRatio calls it"
+ },
  "001078dc": {
   "name": "DogMotionBlend::getNodeRate",
   "tag": "ror-inferred",
@@ -580,6 +592,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001081b0",
   "why": "i3mGetPose of the current motion at m_frame into the pose, then each entry's motion over the nodes of its 128-bit mask (lerp weight 0)"
+ },
+ "00108428": {
+  "name": "DogMotionBlend::setBlendRate",
+  "tag": "ror-inferred",
+  "was": "FUN_00108428",
+  "why": "asserts theS <= 3, theR 0..1, theTime < 1000; entry +0x1c target rate, +0x24 = 2, +0x28 time, +0x2c 0"
  },
  "00108588": {
   "name": "DogMotionBlend::DogMotionBlend",
@@ -635,6 +653,12 @@
   "was": "FUN_00108a14",
   "why": "frame n of a track into x y z w by type; (0,0,0,1) without one"
  },
+ "00108bb0": {
+  "name": "DogActor::getTrackKeyRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_00108bb0",
+  "why": "the turn of key n of a root track by its type (k[3] / k[1] / k[0]), getMotionMove's last-key turn"
+ },
  "00108c90": {
   "name": "DogActor::getRootMove",
   "tag": "ror-inferred",
@@ -652,6 +676,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00109348",
   "why": "dog/dogactor.h asserts m_motion_data; samples the current motion's root (0x108c90) at f12 and f13 (clamped to the motion length), writes the difference to a1, the end position to a3 when set, a rotation to a2; returns 0, 1 or 2"
+ },
+ "00109634": {
+  "name": "DogActor::getRootTrackEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00109634",
+  "why": "current motion's root track frame count, its last key via getTrackKey"
  },
  "00109714": {
   "name": "DogActor::clear",
@@ -707,6 +737,30 @@
   "was": "FUN_0010a038",
   "why": "+0x40..+0x48 += a1[0..2], w = 1; f12 into +0x74 (the TransOfsY saveTransOfsY reads), f13 into +0x3d0 (clearRotYAAR's field), dirty"
  },
+ "0010a090": {
+  "name": "DogActor::addTransRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_0010a090",
+  "why": "m_trans += d, m_trans_ofs y, heading = rot_y less the root turn into m_rotate and m_base_rotate"
+ },
+ "0010a1c8": {
+  "name": "DogActor::setTransRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_0010a1c8",
+  "why": "as addTransRotY with m_trans = d"
+ },
+ "0010a2d0": {
+  "name": "DogActor::getRootBase",
+  "tag": "ror-inferred",
+  "was": "FUN_0010a2d0",
+  "why": "m_trans / base rotate plus the root turn now; m_base_trans before the start; resetRootBase's writer"
+ },
+ "0010a448": {
+  "name": "DogActor::getRootRotate",
+  "tag": "ror-inferred",
+  "was": "FUN_0010a448",
+  "why": "m_base_rotate plus the root turn at the current frame, m_rotate without a track"
+ },
  "0010a584": {
   "name": "DogActor::getRootRotY",
   "tag": "ror-inferred",
@@ -749,11 +803,47 @@
   "was": "FUN_0010aa9c",
   "why": "asserts theName; strcmp over the m_motion_data records (+0x1c4, stride 0x20, name at +0x1c), returns the index or -1"
  },
+ "0010ab40": {
+  "name": "DogActor::getMotionNoByName",
+  "tag": "ror-inferred",
+  "was": "FUN_0010ab40",
+  "why": "assert theName; the record whose m_name strcmp-matches returns its +0x14 id"
+ },
+ "0010abf4": {
+  "name": "DogActor::setMotionCmd",
+  "tag": "ror-inferred",
+  "was": "FUN_0010abf4",
+  "why": "asserts theCmd / theLength <= DOG_MAX_MOTION_CMD; copies into m_motion_cmd, idx 0"
+ },
+ "0010ac98": {
+  "name": "DogActor::resetRootBase",
+  "tag": "ror-inferred",
+  "was": "FUN_0010ac98",
+  "why": "saveRootOffset, m_rotate y = getRotY, m_80 cleared, getRootBase(m_base_trans, m_base_rotate)"
+ },
+ "0010ad0c": {
+  "name": "DogActor::setMotionInterpolation",
+  "tag": "ror-inferred",
+  "was": "FUN_0010ad0c",
+  "why": "asserts theN; theTime < 0 takes the record's m_param word (getMotionLinkTime); setParam1d8"
+ },
+ "0010ae10": {
+  "name": "DogActor::resetMotionTime",
+  "tag": "ror-inferred",
+  "was": "FUN_0010ae10",
+  "why": "m_motion.m_frame = 0, or getMotionLength(a1) when m_speed0 (0x1dc) < 0"
+ },
  "0010ae58": {
   "name": "DogActor::startMotionMode",
   "tag": "ror-inferred",
   "was": "FUN_0010ae58",
   "why": "m_mode = (m_mode & 8) | 4 | bits from m_1d8 and flag 0x40 of +0x3f0, m_f4 = 0; setMotion's last call"
+ },
+ "0010ae90": {
+  "name": "DogActor::setMotionNo",
+  "tag": "ror-inferred",
+  "was": "FUN_0010ae90",
+  "why": "asserts theN; m_motion.m_no = theN; startMotionMode"
  },
  "0010af18": {
   "name": "DogActor::setMotion",
@@ -767,11 +857,53 @@
   "was": "FUN_0010b1b0",
   "why": "asserts theNo >= 0; with flag 4 and the same motion only updates the speed +0x1e8, else blends to the motion"
  },
+ "0010b328": {
+  "name": "DogActor::setMotionSub",
+  "tag": "ror-inferred",
+  "was": "FUN_0010b328",
+  "why": "blend entry theS: findMotionById, node mask from the name list via i3mGetNodeIndexByName, entry reset; -1/-2/-3"
+ },
+ "0010b620": {
+  "name": "DogActor::setMotionSubBySuffix",
+  "tag": "ror-inferred",
+  "was": "FUN_0010b620",
+  "why": "as setMotionSub with findMotionBySuffix"
+ },
+ "0010b918": {
+  "name": "DogActor::setMotionTimeRatioSub",
+  "tag": "ror-inferred",
+  "was": "FUN_0010b918",
+  "why": "entry n (getMotionNoSub inline) m_1c = r, m_frame = i3mGetLength * r"
+ },
+ "0010ba20": {
+  "name": "DogActor::setMotionRateSub",
+  "tag": "ror-inferred",
+  "was": "FUN_0010ba20",
+  "why": "asserts theS >= 0, theR 0..1; entry theS +0x1c = theR"
+ },
+ "0010bac4": {
+  "name": "DogActor::fadeMotionRateSub",
+  "tag": "ror-inferred",
+  "was": "FUN_0010bac4",
+  "why": "asserts theS, theR, theTime <= 1000; DogMotionBlend::setBlendRate"
+ },
+ "0010bbac": {
+  "name": "DogActor::getMotionTimeRatioSub",
+  "tag": "ror-inferred",
+  "was": "FUN_0010bbac",
+  "why": "entry n m_frame / i3mGetLength"
+ },
  "0010bcc8": {
   "name": "DogActor::getMotionEvent",
   "tag": "ror-inferred",
   "was": "FUN_0010bcc8",
   "why": "the event bits of a motion (-1: the current one) between two frames; asserts m_motion_data"
+ },
+ "0010be1c": {
+  "name": "DogActor::getMotionEventNow",
+  "tag": "ror-inferred",
+  "was": "FUN_0010be1c",
+  "why": "getMotionEvent(frame, frame + 1, -1)"
  },
  "0010be80": {
   "name": "DogActor::stepMotionLoop",
@@ -845,6 +977,12 @@
   "was": "FUN_0010d9ec",
   "why": "m_mode (+0xf0) == 2: (float)~m_f4, else m_motion.m_frame (+0x1ec); native 100 case 31 stores it to the script's float"
  },
+ "0010da18": {
+  "name": "DogActor::getMotionTimeRatio",
+  "tag": "ror-inferred",
+  "was": "FUN_0010da18",
+  "why": "mode != 2: DogMotionBlend::getTimeRatio, else 0"
+ },
  "0010da4c": {
   "name": "DogActor::getMotionFrame",
   "tag": "ror-inferred",
@@ -857,11 +995,23 @@
   "was": "FUN_0010da80",
   "why": "m_motion.m_frame * 60 * 2 (getMotionFrame is * 60); TskMtnMove compares it with the length * 120"
  },
+ "0010da98": {
+  "name": "DogActor::getMotionName",
+  "tag": "ror-inferred",
+  "was": "FUN_0010da98",
+  "why": "findMotionById, record +0x1c name"
+ },
  "0010dad8": {
   "name": "DogActor::getMotionStep",
   "tag": "ror-inferred",
   "was": "FUN_0010dad8",
   "why": "the motion speed +0x1e8 in frames per frame (0 while a sequence is not on its last entry)"
+ },
+ "0010db18": {
+  "name": "DogActor::getModeArg",
+  "tag": "ror-inferred",
+  "was": "FUN_0010db18",
+  "why": "m_mode == 2 ? m_f4 : -1; role unverified"
  },
  "0010db38": {
   "name": "DogActor::isBlendIn",
@@ -886,6 +1036,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010df54",
   "why": "getPose into m_posture, per-node pose lerp with the previous pose, control node quaternion, i3mPoseToMatrices into m_mat_local, node scales, convertLocalToModel"
+ },
+ "0010e328": {
+  "name": "DogActor::resetMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0010e328",
+  "why": "clears m_rot_y_aar / m_80 / trans_ofs y, interpolation 0, setMotionNo, frame 0"
  },
  "0010e3ac": {
   "name": "DogActor::drawModel",
@@ -929,6 +1085,12 @@
   "was": "FUN_0010e930",
   "why": "+0x420 = trans_ofs y (or the root move y while blending in), then saveRotOfsY; changeMotion"
  },
+ "0010e9ac": {
+  "name": "DogActor::setControlNode",
+  "tag": "ror-inferred",
+  "was": "FUN_0010e9ac",
+  "why": "m_control_node = i3mGetNodeIndexByName of the current motion, -1 without name or motion"
+ },
  "0010eab8": {
   "name": "DogActor::getNodeWorldMatrix",
   "tag": "ror-inferred",
@@ -953,6 +1115,12 @@
   "was": "FUN_0010ec50",
   "why": "setNodeScale's 5 nodes -1, scales 1.0"
  },
+ "0010ec8c": {
+  "name": "DogActor::checkNodeScale",
+  "tag": "ror-inferred",
+  "was": "FUN_0010ec8c",
+  "why": "asserts m_scale_node_no[i] == -1 and m_scale_node_val[i] == 1.0f"
+ },
  "0010ed2c": {
   "name": "DogActor::setBaseRotateY",
   "tag": "ror-inferred",
@@ -976,6 +1144,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0010eebc",
   "why": "stores vtables DogEntity, DogModel, DogActor at +0x94 in turn; MagScene::MagScene calls it per actor"
+ },
+ "0010f008": {
+  "name": "DogActor::DogActor(int)",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f008",
+  "why": "second constructor: vptrs DogEntity -> DogModel -> DogActor, both DogMotionBlends, clear, setMaxMotion(a1)"
+ },
+ "0010f16c": {
+  "name": "DogActor::~DogActor",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f16c",
+  "why": "deleting destructor: releaseModel(0), DogModel::release(1), operator delete when bit 0"
  },
  "0010f1f0": {
   "name": "DogActor::loadData",
@@ -16432,6 +16612,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0022e960",
   "why": "for each node of the motion, samples its keys at time f12 into 0x30-byte pose records (flags a2)"
+ },
+ "0022eab0": {
+  "name": "i3mGetBlendPose",
+  "tag": "ror-inferred",
+  "was": "FUN_0022eab0",
+  "why": "DogActor::getBlendMotion's callee: two i3m roots, times t1 / t2 and rate r into one posture"
  },
  "0022f610": {
   "name": "i3mPoseLerp",

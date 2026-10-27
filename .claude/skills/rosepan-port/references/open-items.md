@@ -83,9 +83,13 @@ follows it; reached stubs in run order):
      runMotionCmd and its helpers, checkName, setEyeTex / updateEye written (no assert in the
      200 s run; still black: utlDrawI3r 0x106760, DogMotionBlend::getPose 0x1081b0 and the i3m
      pose player unassigned@0022e840 are stubs -- **those are now the gate to an actor on screen**,
-     with the native i3d draw module). Left in the TU: getMotionMove, getMotionEvent, shareModel,
-     setNodeScale, getNodeWorldMatrix / Pos and the dog/dogmotionblend.cpp steps. The
-     getNodeIndexByName PORT guard stays (GamMan::attachObj asks unloaded actors).
+     with the native i3d draw module). **Third session 2026-10-27: the TU is written (147 of 147,
+     `verify`)** -- getMotionMove / getMotionEvent, the root base readers, the blend entry starts
+     (setMotionSub*), the node scales and matrices, shareModel, DogActor(int), and the ELF's inline
+     accessors out of line. Left on the actor path, in dog/dogmotionblend.cpp (stubs): getPose,
+     getNodeRate, step, stepLoop, getTimeRatio 0x107560, setTimeRatio 0x107678, setBlendRate
+     0x108428; then the i3m pose player (unassigned@0022e840, incl. i3mGetBlendPose 0x22eab0) and
+     utlDrawI3r. The getNodeIndexByName PORT guard stays (GamMan::attachObj asks unloaded actors).
   6. `mag/magscenelight.cpp` -- MagScene::loadLight 0x13f658 / setDefaultLight 0x13f8e4.
   7. `unassigned@00140030` / `unassigned@00143d3c` -- MagScene::loadTenkyuTex 0x140030 (the sky) /
      setFog 0x143d7c, magBwnSeqCommand 0x144ae0.

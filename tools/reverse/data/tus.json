@@ -2,7 +2,6 @@
  "queue": [
   "unassigned@0022b4b8",
   "unassigned@0021a3e8",
-  "dog/dogactor.cpp",
   "mag/magscenelight.cpp",
   "unassigned@00140030",
   "unassigned@00143d3c",
@@ -76,7 +75,7 @@
    "why": "the four BedPfh methods between BedMemory (0x101718 clears 7 words, not BedPfh's 5) and BedPad::~BedPad 0x101aec; bed/bedpfh.cpp / bedpfh.h assert strings in the ctor and getFileName"
   },
   "dog/dogactor.cpp": {
-   "notes": "200 s New Game run: no DogActor assert, same path as before, screen still black after the film because everything below the draw is a stub: utlDrawI3r 0x106760 (now takes an opt record pointer as its fifth argument, DogActor::drawModel passes one for m_16c models), DogMotionBlend::getPose 0x1081b0 / getNodeRate 0x1078dc / step 0x107e30 / stepLoop 0x1079d8 (dog/dogmotionblend.cpp, decompiled and described in the batch dogactor_002.json), and the i3m pose player unassigned@0022e840 (i3mGetPose, i3mPoseLerp 0x22f610, i3mPoseToMatrices, the quaternion ops 0x231198 / 0x230470 / 0x230660). Next for an actor on screen: those, then the native i3d draw module for utlDrawI3r. Left in this TU: getMotionMove 0x109348, getMotionEvent 0x10bcc8, shareModel 0x10cffc, setNodeScale 0x10eba0, getNodeWorldMatrix / Pos and the unnamed 0x10a090..0x10ba20 functions in the brief. Trap: the far-pointer case the open item predicted now shows (setEyeTex stores m_eye_uv of the global actor array into a heap model's material slot); i3rSetFarPtr leaves such a slot NULL and logs once (open-items.md). utlRandRange is a stub returning 0, so eyes blink every 6 frames. runMotionCmd has a PC loop guard: the ROM spins on ops 0 / 5..15 and on a jump to itself. References updated in this commit: architecture.md (the per-frame player), open-items.md (item 5, the far-pointer item).",
+   "notes": "Status verify: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run stays black after the film because the pose and draw path below DogActor is stubbed. Next for an actor on screen: dog/dogmotionblend.cpp (getPose 0x1081b0, getNodeRate 0x1078dc, step 0x107e30, stepLoop 0x1079d8, and the three declared this session: getTimeRatio 0x107560, setTimeRatio 0x107678, setBlendRate 0x108428, all decompiled in dogactor_003.json whys), then the i3m pose player unassigned@0022e840 (i3mGetPose 0x22e960, i3mGetBlendPose 0x22eab0, i3mPoseLerp, i3mPoseToMatrices, quaternion ops) and utlDrawI3r 0x106760 into the native i3d draw module. Decisions: ~DogActor 0x10f16c is not a host destructor (same policy as ~DogModel; comment-only annotation); DogActor::__tf comment-only; getMotion / getBlendMotion take the posture as void* and I3M_INTER as int until those types exist. Field renames: m_3b0 to m_base_trans, m_1dc to m_speed0, 0x1e0 m_time0, 0x458 m_speed_ratio, DogMotionBlend 0x14 m_14. The blend entry layout and the tag track layout are in architecture.md. References updated in this commit: architecture.md, hazards.md (member hiding), open-items.md item 5.",
    "sessions": [
     {
      "date": "2026-10-27 07:05",
@@ -87,9 +86,14 @@
      "date": "2026-10-27 07:37",
      "status": "partial",
      "summary": "DogActor per-frame player: draw / drawModel / drawShadow, the posture update 0x10df54 (blend rates, control node quaternion, node scales, local and model matrices), runMotionCmd with startMotionCmd / stepMotion / stepMotionLoop / getRootEndKey / getBlendInOffset, checkName, setEyeTex and updateEye; DogMotionBlend::stop, DogEntity::setAddRotY, DogModel::stepAnim written beside it; fields renamed from the asserts (m_interpolation, m_motion_cmd, m_motion_cmd_idx)"
+    },
+    {
+     "date": "2026-10-27 07:56",
+     "status": "verify",
+     "summary": "DogActor complete (147 of 147): getMotionMove, getMotionEvent / getMotionEventNow, the root base readers (getRootBase, getRootRotate, resetRootBase, addTransRotY / setTransRotY, getRootTrackEnd, getTrackKeyRotY), the blend entry starts setMotionSub / setMotionSubBySuffix and their time / rate setters, setMotionCmd, setMotionInterpolation, setMotionNo, resetMotion, resetMotionTime, setControlNode, setNodeScale / checkNodeScale, getNodeWorldMatrix / Pos, shareModel, the DogActor(int) constructor, and every ELF inline accessor out of line (i3mGetNodeIndexByName, getMotion, getBlendMotion among them). Fixed a shadowing bug: DogActor::m_scale hid DogEntity::m_scale, so gamman.cpp and seqcall.cpp scaled the wrong field; renamed to the ROM's m_scale_node_no / m_scale_node_val."
     }
    ],
-   "status": "partial"
+   "status": "verify"
   },
   "dog/doglightpool.cpp": {
    "notes": "TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark done when a screenshot shows a lit stage. Decisions: DogLightPool got a host constructor calling init (the ROM MagScene ctor calls it), no destructor (g_magSystem is static, the heap is gone by static destruction; ~MagScene calls term in the ROM). doglightpool.h lines 129..132 are the non-const getters, 140..143 their const twins, so createLight and getLightParam are const. DogLightBuffer::setupDesc 0x110578 in the ROM reads the counts from +0x5e0 / +0x600, past m_num at +0x5c0; nothing calls it, the port uses m_num (open-items.md). Spot cone angles use the ROM pi 0x40490fdc. Still left near this file: unassigned@00112b08 (three small light-desc helpers) belongs to dog/doglight.cpp.",

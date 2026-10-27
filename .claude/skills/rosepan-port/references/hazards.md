@@ -666,6 +666,13 @@ public:
   0x1d18c4 (clearObjAttr) one at 0x1d1958 (achr tail call 0x1d9f40); Ghidra's sizes include them.
 
 
+- **A derived member with a base member's name hides it silently.** Symptom: gamman.cpp's actor
+  shrink / scale (gamShrinkActor, the oid scale setter) and seqcall.cpp's scale query wrote and read
+  DogActor's node scale values (0x40c) instead of DogEntity::m_scale (0x60); the build stayed green.
+  Cause: DogActor declared its own m_scale. Fix: name fields after the ROM's asserts
+  (m_scale_node_no / m_scale_node_val), and before adding a field to a derived class grep the bases
+  for the name. Same trap for methods: DogActor::getNodeIndexByName(int, const char *) hid
+  DogModel's one-argument version (build error) -- the ELF calls it i3mGetNodeIndexByName.
 - **Header inline definitions do not count as reconstructed.** Symptom: a TU's ELF inlines (GamMan
   0x28e254, getWrdNo 0x1c6c28) stayed `todo` in the brief though written inline in the header with
   their `ROR 0x...` comment. Cause: `rosepan.reconstructed()` scans only .c / .cpp (headers carry an

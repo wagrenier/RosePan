@@ -71,6 +71,13 @@ struct DogMotionBlend
     int  step();                                                         // ROR 0x00107e30
     /* The same, wrapping: 1 / 2 when it wrapped. */
     int  stepLoop();                                                     // ROR 0x001079d8
+    /* m_frame / the motion's length, in 0..1 (0 without a motion). */
+    float getTimeRatio();                                                // ROR 0x00107560
+    /* m_frame = the motion's length * r (r in 0..1). 0. */
+    int  setTimeRatio(float r);                                          // ROR 0x00107678
+    /* Entry theS (0..3) fades to rate theR over theTime frames (state 2 in
+     * its word +0x24); rate 0 again at the end of a fade frees it. */
+    void setBlendRate(float theR, int theS, int theTime);                // ROR 0x00108428
 
     /* The record of motion n (the header's lines 122 / 123: two inlines
      * with the same checks; DogActor::setMotion uses both). Defined in
@@ -88,7 +95,7 @@ struct DogMotionBlend
     float m_frame;              // ROR 0x08: setMotion clears it (or the motion's length with flag 0x80)
     float m_0c;                 // ROR 0x0c: the constructor's 1.0
     int   m_10;                 // ROR 0x10: the constructor's -1
-    u_char _14[0x18 - 0x14];
+    int   m_14;                 // ROR 0x14: DogActor::setMotionTickTime clears it (with m_10 the tick time)
     int   m_max_motion;         // ROR 0x18: the owner's record count (DogActor::setMaxMotion)
     DogMotionData *m_motion;    // ROR 0x1c: the owner's records
     DogMotionBlendEntry m_blend[DOG_MOTION_BLEND_MAX]; // ROR 0x20

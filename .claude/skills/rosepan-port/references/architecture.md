@@ -896,9 +896,26 @@ for the draw; a model with m_16c (a DogModelAnim: value stepping between bounds)
 draws m_i3r_root2 (the pack's file 2: the shadow model) when present. updateEye blinks: texture
 state 2 for 4 frames, 1, 0, then a new 60..90 frame period; setEyeTex points the eye material's
 entity 0 at m_eye_uv with v = {0, 0.3203, 0.6484}. checkName compares theName with the model pack's
-file 0 name up to its '.'. Still stubbed: getMotionMove, getMotionEvent, shareModel, setNodeScale,
-getNodeWorldMatrix / Pos; the DogMotionBlend sampler / steps (0x1081b0, 0x1078dc, 0x107e30,
-0x1079d8) and the i3m pose / quaternion ops (0x22f610, 0x231198, 0x230470, 0x230660).
+file 0 name up to its '.'.
+
+The rest of DogActor (third session, 2026-10-27; the TU is complete): `getMotionMove` 0x109348 is the
+root move between two frames (non-looping motions clamp to the last key; a looping one returns 2 and
+the track's whole turn when the step crossed the end, or its negation going backwards); only a track
+type with bit 0x10 keeps the y move. The **tag track** (record +0x0c) is not a DogMotionTrack: word 0
+the frame count | 0x80000000, then one u_int of event bits per frame; `getMotionEvent` 0x10bcc8 ORs the
+words after frame t0 up to t1, wrapping (the argument: < 0 the current motion, < 0x10000 an id, else a
+record index). m_base_trans 0x3b0 / m_base_rotate 0x3c0 are where the root track started
+(`resetRootBase` 0x10ac98 via `getRootBase` 0x10a2d0); addTransRotY / setTransRotY 0x10a090 / 0x10a1c8
+set the position and a heading net of the root's current turn. Blend entries (DogMotionBlend +0x20,
+four of 0x30): +0x00..0x0f a 128-bit node mask, +0x10 speed, +0x14 frame, +0x1c a rate in 0..1
+(-1 none), +0x20 motion record, +0x24 a state (2 = fading), +0x28 the fade time, +0x2c its count;
+`setMotionSub` / `setMotionSubBySuffix` 0x10b328 / 0x10b620 start one over the nodes named in a
+NULL-terminated list, keeping their current pose as the previous one. The ELF names the class body's
+inlines: getMotion(int, tag_I3mPosture_s *, float, I3M_INTER) wraps i3mGetPose, getBlendMotion wraps
+i3mGetBlendPose 0x22eab0, i3mGetNodeIndexByName(int, char const *) the i3m lookup. Still stubbed below
+it: the DogMotionBlend sampler / steps (0x1081b0, 0x1078dc, 0x107e30, 0x1079d8, 0x107560, 0x107678,
+0x108428) and the i3m pose / quaternion ops (0x22e960, 0x22eab0, 0x22f610, 0x231198, 0x230470,
+0x230660).
 
 ## Modules (RoR's own source files)
 

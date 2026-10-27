@@ -162,10 +162,72 @@ struct DogActor : DogModel
     int  shareModel(DogActor *src);                                      // ROR 0x0010cffc
     /* True when the actor's model is named theName. */
     int  checkName(const char *theName);                                 // ROR 0x0010f2dc
+    /* The root move from frame t0 to t1 into move (x, y, z, turn; y only
+     * on a 0x10 track type), pos the absolute root at t1 (y the first
+     * key's on a 0x10 type), rot the whole track's turn when a looping
+     * motion wrapped between the two: 0 no track, 1, 2 wrapped. */
     int  getMotionMove(float t0, float t1, float *move, float *rot, float *pos); // ROR 0x00109348
-    /* The event bits of motion (-1: the current one) between frames t0
-     * and t1 (bit 0: a footstep). */
+    /* The event bits of motion (< 0: the current one; < 0x10000 an id,
+     * else a record index) from frame t0 (exclusive) to t1 (inclusive),
+     * wrapping; 0 when either is outside the tag track. */
     u_int getMotionEvent(float t0, float t1, int motion);                // ROR 0x0010bcc8
+    /* The current motion's events over the next frame. */
+    u_int getMotionEventNow();                                           // ROR 0x0010be1c
+    /* The turn of frame n of trk (0 for a track without one). */
+    float getTrackKeyRotY(const DogMotionTrack *trk, int n);             // ROR 0x00108bb0
+    /* The current motion's root track frame count, its last key into end
+     * (may be NULL); 0 and (0, 0, 0, 1) without a track. */
+    int  getRootTrackEnd(float *end);                                    // ROR 0x00109634
+    /* m_trans += d (or = d), m_trans_ofs y; the heading becomes rot_y less
+     * the root's turn now, in m_rotate and m_base_rotate. */
+    void addTransRotY(const float *d, float trans_ofs_y, float rot_y);   // ROR 0x0010a090
+    void setTransRotY(const float *d, float trans_ofs_y, float rot_y);   // ROR 0x0010a1c8
+    /* Where the root track started: the entity's position and the base
+     * heading plus the root turn now (m_trans / m_rotate without a track,
+     * m_base_trans / m_base_rotate before the motion's start). */
+    void getRootBase(float *trans, float *rot);                          // ROR 0x0010a2d0
+    /* The heading the root has now (m_rotate without a track). */
+    void getRootRotate(float *rot);                                      // ROR 0x0010a448
+    /* The root base taken from where the actor stands now (m_80 cleared). */
+    void resetRootBase();                                                // ROR 0x0010ac98
+    /* The id (word +0x14) of the motion record named theName, -1 none. */
+    int  getMotionNoByName(const char *theName);                         // ROR 0x0010ab40
+    /* The command list (runMotionCmd) from theCmd, run from its start. */
+    void setMotionCmd(const int *theCmd, int theLength);                 // ROR 0x0010abf4
+    /* m_interpolation = theTime, or (< 0) motion theN's own link time. */
+    void setMotionInterpolation(int theN, int theTime);                  // ROR 0x0010ad0c
+    /* The motion frame: the end of motion theID with m_speed0 < 0, else 0. */
+    void resetMotionTime(int theID);                                     // ROR 0x0010ae10
+    /* Record theN becomes the current motion (startMotionMode). */
+    void setMotionNo(int theN);                                          // ROR 0x0010ae90
+    /* Blend entry theS: motion theID (< 0: none) over the nodes named in
+     * the NULL-terminated theNodes (their previous pose kept). The record
+     * index; -1 cleared, -2 no such motion, -3 a free record. */
+    int  setMotionSub(int theS, int theID, const char **theNodes);       // ROR 0x0010b328
+    /* The same by name suffix (findMotionBySuffix; NULL clears). */
+    int  setMotionSubBySuffix(int theS, const char *theName, const char **theNodes); // ROR 0x0010b620
+    /* Blend entry n's frame at ratio r of its motion's length (its m_1c
+     * takes r too) / the ratio its frame is at now. */
+    void  setMotionTimeRatioSub(float r, int n);                         // ROR 0x0010b918
+    float getMotionTimeRatioSub(int n);                                  // ROR 0x0010bbac
+    /* Blend entry theS's rate theR (0..1): at once / over theTime frames. */
+    void setMotionRateSub(float theR, int theS);                         // ROR 0x0010ba20
+    void fadeMotionRateSub(float theR, int theS, int theTime);           // ROR 0x0010bac4
+    /* The motion's time ratio (0..1), 0 in mode 2. */
+    float getMotionTimeRatio();                                          // ROR 0x0010da18
+    /* The name of the motion with id theID, NULL none. */
+    const char *getMotionName(int theID);                                // ROR 0x0010da98
+    /* m_f4 in mode 2, else -1. */
+    int  getModeArg();                                                   // ROR 0x0010db18
+    /* Motion theN at frame 0 without blending; the offsets cleared. */
+    void resetMotion(int theN);                                          // ROR 0x0010e328
+    /* The control node: the current motion's node named theName (NULL or
+     * no motion: -1). */
+    int  setControlNode(const char *theName);                            // ROR 0x0010e9ac
+    /* Asserts every node scale entry free. */
+    void checkNodeScale();                                               // ROR 0x0010ec8c
+    /* The constructor with theN motion records. */
+    explicit DogActor(int theN);                                         // ROR 0x0010f008
     /* Once a frame (MagScene::updateActors): runs the motion command list
      * from m_motion_cmd_idx (each word: op in bits 28..31, flags in 22..27,
      * a motion id in 0..9, a chance in 12..21), or steps the motion alone
@@ -253,25 +315,11 @@ struct DogActor : DogModel
     /* Motion theID's i3m length (its root's float +0x18, in frames). */
     float getMotionLength(int theID);                                    // ROR 0x0010d0e8
 
-    // ROR 0x00281244
-    void setBaseRotate(const float *v)
-    {
-        m_base_rotate[0] = v[0];
-        m_base_rotate[1] = v[1];
-        m_base_rotate[2] = v[2];
-        m_base_rotate[3] = v[3];
-    }
-    // ROR 0x0028126c
-    void setBaseRotate(float x, float y, float z)
-    {
-        m_base_rotate[0] = x;
-        m_base_rotate[3] = 1.0f;
-        m_base_rotate[1] = y;
-        m_base_rotate[2] = z;
-    }
-    void setId(int id) { m_id = id; }                                    // ROR 0x00280fd4
-    int  getId() const { return m_id; }                                  // ROR 0x00280fdc
-    int  getMode() const { return m_mode; }                              // ROR 0x00280fe4
+    void setBaseRotate(const float *v);                                  // ROR 0x00281244
+    void setBaseRotate(float x, float y, float z);                      // ROR 0x0028126c
+    void setId(int id);                                                  // ROR 0x00280fd4
+    int  getId() const;                                                  // ROR 0x00280fdc
+    int  getMode() const;                                                // ROR 0x00280fe4
     /* m_mode != 0 (the actor is in a mode; GamMan::pause tests the dog's). */
     bool isModeSet() const;                                              // ROR 0x0010a834
     /* The eye texture (the model node named "eye" and its material):
@@ -284,17 +332,13 @@ struct DogActor : DogModel
     void eyeStart();                                                     // ROR 0x0010f73c
     void eyeStep();                                                      // ROR 0x0010f7a0
     void eyeReset();                                                     // ROR 0x0010f808
-    // ROR 0x00280fec
-    void ready()
-    {
-        m_f4 = -1;
-        m_mode = 0;
-    }
+    /* Leaves the mode: m_f4 -1, m_mode 0. */
+    void ready();                                                        // ROR 0x00280fec
     /* m_base_rotate y = r wrapped once into -pi..pi (asserted). */
     void setBaseRotateY(float r);                                        // ROR 0x0010ed2c
-    void clearRotYAAR() { m_rot_y_aar = 0.0f; }                          // ROR 0x0028128c
-    void saveTransOfsY() { m_trans_ofs_y_save = m_trans_ofs[1]; }        // ROR 0x00280fb8
-    float getTransOfsYSave() const { return m_trans_ofs_y_save; }        // ROR 0x00280fc4
+    void clearRotYAAR();                                                 // ROR 0x0028128c
+    void saveTransOfsY();                                                // ROR 0x00280fb8
+    float getTransOfsYSave() const;                                      // ROR 0x00280fc4
 
     /* The record inlines (this header's lines 345, 368..370). */
     DogMotionTrack *getRootTrack(int n)
@@ -337,7 +381,55 @@ struct DogActor : DogModel
         ROR_ASSERT(0<=i); /* 370 */
         return i3mGetNodeName(m_motion_data[n].m_i3m_root, (u_short)i);
     }
-    void clearRotOfsY() { m_rot_ofs_y = 0.0f; }                          // ROR 0x00281294
+    void clearRotOfsY();                                                 // ROR 0x00281294
+    /* Motion n's node named p (the header's line 372). */
+    int  i3mGetNodeIndexByName(int n, const char *p);                    // ROR 0x00281778
+    /* Motion n's pose at frame t into p (the header's line 374). */
+    void getMotion(int n, void *p, float t, int inter);                  // ROR 0x00281860
+    /* Motions m1 at t1 and m2 at t2 blended at r into p (lines 377..383). */
+    void getBlendMotion(int m1, void *p, float t1, int m2, float t2, float r, int inter); // ROR 0x00281990
+
+    /* The rest of the class body's inlines (the ELF's linkonce symbols),
+     * defined out of line in dogactor.cpp so they count as written. */
+    float getRotOfsYSave() const;                                        // ROR 0x00280fcc
+    int   getMotionLoopTrig() const;                                     // ROR 0x00281000
+    int   getMotionNo();                                                 // ROR 0x00281008
+    void  setMotionSpeed(float s);                                       // ROR 0x00281020
+    float getMotionSpeed() const;                                        // ROR 0x00281028
+    /* Blend entry n's speed (n 0..4: the header's lines 233 / 234). */
+    void  setMotionSpeedSub(float s, int n);                             // ROR 0x00281030
+    float getMotionSpeedSub(int n);                                      // ROR 0x0028109c
+    void  setMotionSpeed0(float s);                                      // ROR 0x002810fc
+    void  setMotionTime0(float t);                                       // ROR 0x00281104
+    int   getInterpolation() const;                                      // ROR 0x0028110c
+    /* Motion n's link time: its m_param's first word. */
+    int   getMotionLinkTime(int n);                                      // ROR 0x00281114
+    /* Blend entry n's motion (the header's line 257). */
+    int   getMotionNoSub(int n);                                         // ROR 0x002811a4
+    int   getNumMotion() const;                                          // ROR 0x00281204
+    void  setMotionTime(float t);                                        // ROR 0x0028120c
+    void  setMotionTimeRatio(float r);                                   // ROR 0x00281214
+    void  setMotionFlag(int flags, int flags2);                          // ROR 0x00281230
+    float getBaseRotateY() const;                                        // ROR 0x0028123c
+    void  setControlNodeFlg(int f);                                      // ROR 0x0028129c
+    int   getControlNode() const;                                        // ROR 0x002812a4
+    int   getControlNodeFlg() const;                                     // ROR 0x002812ac
+    /* EE slot 7 (+0x40): node n's model matrix. */
+    sceVu0FMATRIX *getNodeMatrixPtr(int n);                              // ROR 0x002812b4
+    /* Motion n's i3m (the header's line 342). */
+    I3mRoot *GetI3mRootPtr(int n);                                       // ROR 0x0028130c
+    /* Motion n's root track / tag track (n < 0: none; lines 345 / 346). */
+    DogMotionTrack *getMotionAuxData(int n);                             // ROR 0x002813b4
+    const u_int *getMotionTagData(int n);                                // ROR 0x0028141c
+    /* Motion n's length in frames (the header's line 360). */
+    float getMaxTime0(int n);                                            // ROR 0x00281484
+    int  unpack(int n);                                                  // ROR 0x00281518
+    int  get_nNode(int n);                                               // ROR 0x002815d4
+    const char *getNodeName(int n, int i);                               // ROR 0x00281690
+    /* m_speed_ratio and m_motion.m_0c (the step's speed factor). */
+    void setMotionSpeedRatio(float r);                                   // ROR 0x00281b54
+    /* m_motion's tick count (m_10), the step count (m_45c / m_460). */
+    void setMotionTickTime(int t);                                       // ROR 0x00281b60
 
     /* ROR 0x148..0x1a0: DogModel's (the shadow light words at 0x160..) */
     int           m_id;                 // ROR 0x1a0: setId / getId (the character id it was loaded as)
@@ -352,12 +444,12 @@ struct DogActor : DogModel
     u_char       *m_posture_prev;       // ROR 0x1d0: the previous pose records (savePosture),
     u_short      *m_assign_tbl;         // ROR 0x1d4: then the node map (setupAssignTbl)
     int           m_interpolation;      // ROR 0x1d8: the blend-in length in frames (the ROM's assert name; m_f4 counts up to it); setParam1d8
-    float         m_1dc;                // ROR 0x1dc: < 0 starts a motion from its end (0x10ae10)
-    u_char        _1e0[0x1e4 - 0x1e0];
+    float         m_speed0;             // ROR 0x1dc: setMotionSpeed0; < 0 starts a motion from its end (resetMotionTime)
+    float         m_time0;              // ROR 0x1e0: setMotionTime0
     DogMotionBlend m_motion;            // ROR 0x1e4: the current motion (its number, speed, frame)
     DogMotionBlend m_motion_prev;       // ROR 0x2c4: the one before (savePosture)
     u_char        _3a4[0x3b0 - 0x3a4];
-    sceVu0FVECTOR m_3b0;                // ROR 0x3b0: the constructor's (0, 0, 0, 1)
+    sceVu0FVECTOR m_base_trans;         // ROR 0x3b0: where the motion root started (resetRootBase); the constructor's (0, 0, 0, 1)
     sceVu0FVECTOR m_base_rotate;        // ROR 0x3c0: getBaseRotateY reads y
     float         m_rot_y_aar;          // ROR 0x3d0: clearRotYAAR; addTrans's second float
     int           m_control_node;       // ROR 0x3d4: getControlNode
@@ -366,8 +458,10 @@ struct DogActor : DogModel
     sceVu0FVECTOR m_3e0;                // ROR 0x3e0: the control node's rotation (x, y, z; updatePosture's quaternion); the constructor's (0, 0, 0, 1)
     int           m_motion_flags;       // ROR 0x3f0: setMotion's flags (0x80: start from the motion's length; 0x40 added by the motion record; 1 loop, 2 then m_motion_flags2)
     int           m_motion_flags2;      // ROR 0x3f4: setMotion's second word: the motion runMotionCmd changes to at the end (flag 2), -1 after
-    int           m_scale_node[DOG_SCALE_NODE_MAX];  // ROR 0x3f8: setNodeScale's nodes, < 0 free
-    float         m_scale[DOG_SCALE_NODE_MAX];       // ROR 0x40c: their values (1.0 frees an entry)
+    /* The ROM's names (checkNodeScale's asserts). Not m_scale: that would
+     * hide DogEntity::m_scale (0x60) from every DogActor user. */
+    int           m_scale_node_no[DOG_SCALE_NODE_MAX];  // ROR 0x3f8: setNodeScale's nodes, -1 free
+    float         m_scale_node_val[DOG_SCALE_NODE_MAX]; // ROR 0x40c: their values (1.0 frees an entry)
     float         m_trans_ofs_y_save;   // ROR 0x420: saveTransOfsY copies m_trans_ofs[1]
     float         m_rot_ofs_y;          // ROR 0x424: clearRotOfsY / getRotOfsYSave
     int           m_motion_result;      // ROR 0x428: the last motion step's result (0 running; 1 / 2 ended or wrapped)
@@ -375,7 +469,7 @@ struct DogActor : DogModel
     int           m_motion_cmd_idx;     // ROR 0x44c: the running command, -1 none (clear)
     int           m_motion_cmd_run;     // ROR 0x450: 1 once the running command started its motion
     int           m_454;                // ROR 0x454: clear 0
-    u_char        _458[0x45c - 0x458];
+    float         m_speed_ratio;        // ROR 0x458: setMotionSpeedRatio (with m_motion.m_0c)
     int           m_45c;                // ROR 0x45c: getMotionStep: a count (> 0: the step only at its last entry)
     int           m_460;                // ROR 0x460: and the current entry
     u_char        _464[0x470 - 0x464];
@@ -411,10 +505,12 @@ static_assert(offsetof(DogActor, m_posture) >= 0x1cc, "m_posture");
 static_assert(offsetof(DogActor, m_posture_prev) >= 0x1d0, "m_posture_prev");
 static_assert(offsetof(DogActor, m_assign_tbl) >= 0x1d4, "m_assign_tbl");
 static_assert(offsetof(DogActor, m_interpolation) >= 0x1d8, "m_interpolation");
-static_assert(offsetof(DogActor, m_1dc) >= 0x1dc, "m_1dc");
+static_assert(offsetof(DogActor, m_speed0) >= 0x1dc, "m_speed0");
+static_assert(offsetof(DogActor, m_time0) >= 0x1e0, "m_time0");
+static_assert(offsetof(DogActor, m_speed_ratio) >= 0x458, "m_speed_ratio");
 static_assert(offsetof(DogActor, m_motion) >= 0x1e4, "m_motion");
 static_assert(offsetof(DogActor, m_motion_prev) >= 0x2c4, "m_motion_prev");
-static_assert(offsetof(DogActor, m_3b0) >= 0x3b0, "m_3b0");
+static_assert(offsetof(DogActor, m_base_trans) >= 0x3b0, "m_base_trans");
 static_assert(offsetof(DogActor, m_3e0) >= 0x3e0, "m_3e0");
 static_assert(offsetof(DogActor, m_motion_flags) >= 0x3f0, "m_motion_flags");
 static_assert(offsetof(DogActor, m_trans_ofs_y_save) >= 0x420, "m_trans_ofs_y_save");
@@ -440,8 +536,8 @@ static_assert(offsetof(DogActor, m_4c5) >= 0x4c5, "m_4c5");
 static_assert(offsetof(DogActor, m_base_rotate) >= 0x3c0, "m_base_rotate");
 static_assert(offsetof(DogActor, m_motion_flags2) >= 0x3f4, "m_motion_flags2");
 static_assert(offsetof(DogActor, m_rot_y_aar) >= 0x3d0, "m_rot_y_aar");
-static_assert(offsetof(DogActor, m_scale_node) >= 0x3f8, "m_scale_node");
-static_assert(offsetof(DogActor, m_scale) >= 0x40c, "m_scale");
+static_assert(offsetof(DogActor, m_scale_node_no) >= 0x3f8, "m_scale_node_no");
+static_assert(offsetof(DogActor, m_scale_node_val) >= 0x40c, "m_scale_node_val");
 static_assert(offsetof(DogActor, m_rot_ofs_y) >= 0x424, "m_rot_ofs_y");
 static_assert(sizeof(DogActor) >= 0x4d0, "DogActor is 0x4d0 bytes on the EE");
 
