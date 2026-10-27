@@ -6,6 +6,28 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**TOP PRIORITY, RE-PINNED (the user, 2026-10-27): the TUs missing to be in game and render in 3D lead the
+queue, ahead of everything else (the enemy split, menus, subtitles).** The pinned queue in tus.json is
+the stubs the 140 s New Game run reaches on the 3D path, in the order they block a picture:
+  a. dog/dogentity.cpp, unassigned@0010f944 (DogEntity::reset / normalizeRotate / getMatrix /
+     makeLocalMatrix, DogEntityEx::transform, DogCamera::getLensFov): the entity and camera matrices.
+  b. unassigned@00228c08 (the i3dMat* library: i3dMatGetScaleTrans 0x228c38).
+  c. dog/dogmotionblend.cpp (getPose, getNodeRate, stepLoop ...), unassigned@0022e840 (the i3m pose
+     player: i3mGetLength, i3mGetPose, i3mPoseLerp, i3mPoseToMatrices, i3mGetBlendPose).
+  d. unassigned@00106658 (utlDrawI3r 0x106760, utlVecDist), then the host task
+     **setup/i3d_mesh_draw.cpp** (the native i3d module's 3D mesh path, forced-test first), then
+     unassigned@0021fb50 (i3rBuildMeshPacket / 0x21fe68: the mesh draw calls the module) and
+     unassigned@0021c960 (i3dPktDrawStrip 0x21db18, the VU1 sprite packets).
+  e. mag/magscenecamera.cpp (setCameraMode), unassigned@0013e2ec (updateCamera, gamEnterMenu),
+     unassigned@00140c68 + unassigned@00140990 (drawFocus and its records: define them together as
+     mag/magscenefocus.cpp).
+  f. In game: mag/maglifepc.cpp (MagLifePC::live), task/naga_chunk.cpp (event packs, so scenes
+     play), mag/maglifebwn.cpp + unassigned@001258a4 (renderPostProcess) + mag/maglifebwnctrl.cpp
+     (Brown), unassigned@00166a1c (the effect objects: Obj176a3c, FUN_00177830 in MagScene::draw).
+Re-assess from the run's reached stubs (work/run_relwithdebinfo.log) once the first model draws.
+emy/emy_hfm.cpp was mid-session when this was set; it finishes first (an active claim goes before the
+queue), then the queue rules.
+
 **TOP PRIORITY (the user, 2026-10-26): get in game -- the first room on screen after New Game.**
 **3D first (the user, 2026-10-26):** the 3D path leads the queue -- model load (dog/dogmodel.cpp,
 dog/dogactor.cpp), lights, sky / fog, then the draw side: MagScene::draw's reached stubs
