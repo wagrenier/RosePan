@@ -205,12 +205,6 @@ void MagScene::loadTenkyuTex(int no, const BedPfh *pfh, i3dContext *ctx)
     ROSEPAN_STUB("MagScene::loadTenkyuTex", 0x00140030);
 }
 
-// stub of ROR 0x0013f8e4
-void MagScene::setDefaultLight()
-{
-    ROSEPAN_STUB("MagScene::setDefaultLight", 0x0013f8e4);
-}
-
 // stub of ROR 0x00143d7c
 void MagScene::setFog(const I3dFog *fog, int frames)
 {
