@@ -3938,38 +3938,28 @@
 /* 001dd194 00000050 */ GamSysData::testFlags94(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
-// *****************************************************************************
-
-/* 001dd1e8 00000204 */ FUN_001dd1e8(){}
-/* 001dd3ec 00000028 */ FUN_001dd3ec(){}
-/* 001dd414 00000144 */ GamArea::init(){}  // ror
-
-// *****************************************************************************
 // FILE -- game/gamtrg.cpp
 // *****************************************************************************
 
-/* 001dd558 00000090 */ FUN_001dd558(){}
-
-// *****************************************************************************
-// FILE -- (unassigned)
-// *****************************************************************************
-
+/* 001dd1e8 00000204 */ GamArea::GamArea(){}  // ror
+/* 001dd3ec 00000028 */ GamArea::~GamArea(){}  // ror
+/* 001dd414 00000144 */ GamArea::init(){}  // ror
+/* 001dd558 00000090 */ GamArea::cloneTrg(){}  // ror
 /* 001dd5e8 000001d4 */ GamArea::addTrg(){}  // ror
 /* 001dd7bc 000002ec */ GamArea::stopKind(){}  // ror
 /* 001ddaa8 000001d8 */ GamArea::clear(){}  // ror
 /* 001ddc80 0000012c */ GamArea::stopTrgs(){}  // ror
-/* 001dddac 00000010 */ FUN_001dddac(){}
+/* 001dddac 00000010 */ GamArea::resetCursor(){}  // ror
 /* 001dddbc 0000018c */ GamArea::clearKind(){}  // ror
-/* 001ddf48 000001bc */ FUN_001ddf48(){}
-/* 001de104 000003e0 */ FUN_001de104(){}
+/* 001ddf48 000001bc */ GamArea::findFchrOid(){}  // ror
+/* 001de104 000003e0 */ GamArea::activateTrg(){}  // ror
 /* 001de4e4 00000218 */ GamArea::startTrgs(){}  // ror
 /* 001de6fc 000001b0 */ GamArea::registFtb(){}  // ror
-/* 001de8ac 00000194 */ FUN_001de8ac(){}
+/* 001de8ac 00000194 */ GamArea::isInPolygon(){}  // ror
 /* 001dea40 0000006c */ GamArea::startPcAction(){}  // ror
 /* 001deaac 00000168 */ GamArea::checkPc(){}  // ror
-/* 001dec14 0000015c */ FUN_001dec14(){}
-/* 001ded70 00000108 */ FUN_001ded70(){}
+/* 001dec14 0000015c */ GamArea::flagPcTrg(){}  // ror
+/* 001ded70 00000108 */ GamArea::canCheckPc(){}  // ror
 /* 001dee78 00001db4 */ GamArea::update(){}  // ror
 /* 001e0c2c 00000144 */ GamArea::ctl_trg_flg(){}  // ror
 /* 001e0d70 00000080 */ GamArea::hasId(){}  // ror

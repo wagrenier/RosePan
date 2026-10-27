@@ -10697,11 +10697,29 @@
   "was": "FUN_001dd194",
   "why": "table 2 records only: record +0x94 word & bits != 0 (testFlags reads +0x90 / +0xb0); the middle argument is unused"
  },
+ "001dd1e8": {
+  "name": "GamArea::GamArea",
+  "tag": "ror-inferred",
+  "was": "FUN_001dd1e8",
+  "why": "builds GamMan +0x40's three inline node pools (0x100 / 0x100 / 8 nodes of 0xc0) and clears +0x18b58; GamMan's constructor calls it for its member"
+ },
+ "001dd3ec": {
+  "name": "GamArea::~GamArea",
+  "tag": "ror-inferred",
+  "was": "FUN_001dd3ec",
+  "why": "GCC 2 deleting destructor shape: empty body, operator delete when the flag bit 0 is set; follows the constructor"
+ },
  "001dd414": {
   "name": "GamArea::init",
   "tag": "ror-inferred",
   "was": "FUN_001dd414",
   "why": "GamMan::init's call on its +0x40 member; allocates with operator new / new[]"
+ },
+ "001dd558": {
+  "name": "GamArea::cloneTrg",
+  "tag": "ror-inferred",
+  "was": "FUN_001dd558",
+  "why": "allocDebug(0xb0, game/gamtrg.cpp line 0x62) and a whole copy of a 0xb0 GamAreaTrg; no callers found"
  },
  "001dd5e8": {
   "name": "GamArea::addTrg",
@@ -10727,11 +10745,29 @@
   "was": "FUN_001ddc80",
   "why": "empties the active list +0xc290 back into its free list +0xc1c0 (count +0xc350); native 023 case 11, GamMan::stop_trg / releaseObjs / resetStage"
  },
+ "001dddac": {
+  "name": "GamArea::resetCursor",
+  "tag": "ror-inferred",
+  "was": "FUN_001dddac",
+  "why": "clears +0x18b5c, after stopTrgs / clearKind empty the active list (activateTrg sets +0x18b58 to the list's last node)"
+ },
  "001dddbc": {
   "name": "GamArea::clearKind",
   "tag": "ror-inferred",
   "was": "FUN_001dddbc",
   "why": "afterSeqExec kind 3, after stopKind; not read yet"
+ },
+ "001ddf48": {
+  "name": "GamArea::findFchrOid",
+  "tag": "ror-inferred",
+  "was": "FUN_001ddf48",
+  "why": "collectFchrsNear(pos, 50, 8-node pool, 5, 0x8000, 0x4000001) and returns the oid (+0x100) of the first whose short +0x4a equals the argument, among the first 9 with +0x4a != -1"
+ },
+ "001de104": {
+  "name": "GamArea::activateTrg",
+  "tag": "ror-inferred",
+  "was": "FUN_001de104",
+  "why": "copies a trigger, resolves its oids to actor numbers and its ftb key to the pool entry, inserts it in the active list +0xc290 ordered by the ushort +0x38; addTrg (flag 0x1000000) and startTrgs call it"
  },
  "001de4e4": {
   "name": "GamArea::startTrgs",
@@ -10745,6 +10781,12 @@
   "was": "FUN_001de6fc",
   "why": "adds value to the up-to-8 values of key in the pool *(+0x18b40), a new record when key is not there; native 023 case 30, GamMan::regist_ftb"
  },
+ "001de8ac": {
+  "name": "GamArea::isInPolygon",
+  "tag": "ror-inferred",
+  "was": "FUN_001de8ac",
+  "why": "crossing-number test of pos (x, z) against a NULL-terminated list of (x, z) point pointers; returns the parity"
+ },
  "001dea40": {
   "name": "GamArea::startPcAction",
   "tag": "ror-inferred",
@@ -10756,6 +10798,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001deaac",
   "why": "on GamMan +0x40 (class name invented): reads the PC's position (0x1d05f4) and walks the rect list +0xc290 for entries with flags 0x4000001 whose x / z bounds contain it"
+ },
+ "001dec14": {
+  "name": "GamArea::flagPcTrg",
+  "tag": "ror-inferred",
+  "was": "FUN_001dec14",
+  "why": "the first active trigger with flag 1, word +0x70 bit 2 and a thread whose rect holds the PC gets ctl_trg_flg(2, id, 0x10000000); no callers found"
+ },
+ "001ded70": {
+  "name": "GamArea::canCheckPc",
+  "tag": "ror-inferred",
+  "was": "FUN_001ded70",
+  "why": "with GamMan flags bit 4, PC state class 5..7, no item-use task and the 0x781280 record's +0x7a == 0x4000 and +0x78 bits clear: sets *out |= 0x10 and returns 1"
  },
  "001dee78": {
   "name": "GamArea::update",

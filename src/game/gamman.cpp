@@ -34,7 +34,7 @@ static const char s_file[] = "game/gamman.cpp";
 // ──────────────────────────────────────────────────────────────────────
 // The rate word, the members' constructors (GamArea, GamSndMan), the item
 // vector empty over its 12 slots and every node pool linked free.
-// ROR 0x001c05c0 // callcheck: FUN_001dd1e8, GamSndMan::GamSndMan (GamArea's and GamSndMan's constructors: the members' implicit constructors on the host)
+// ROR 0x001c05c0 // callcheck: GamArea::GamArea, GamSndMan::GamSndMan (GamArea's and GamSndMan's constructors: the members' implicit constructors on the host)
 
 GamMan::GamMan()
 {
@@ -6407,10 +6407,9 @@ void GamMan::clear_call_jump_area_act()
 GamMan::SeqPair *GamMan::get_jump_area_act() { return &m_seqPair[3]; }
 
 // ROR 0x0028f4ec
-void GamMan::create_trg(GamAreaTrg &trg, bool newId, int unused)
+void GamMan::create_trg(GamAreaTrg &trg, bool newId, int image)
 {
-    (void)unused;
-    m_area.addTrg(&trg, newId);
+    m_area.addTrg(&trg, newId, image);
 }
 
 // ROR 0x0028f508

@@ -2066,8 +2066,8 @@ intptr_t seqFunc016(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
 
 // ──────────────────────────────────────────────────────────────────────
 // Area triggers (GamMan's GamArea): a0 1..5 add the trigger record at a1
-// (1 keeps its id, 2..5 give it a new one; the ROM passes 2..5 a fourth
-// word -1, 0, 1, 2 addTrg never reads), 10 / 11 start / stop them, 30
+// (1 keeps its id, 2..5 give it a new one of image -1 (the current stat),
+// 0, 1, 2: GamMan::makeOid's), 10 / 11 start / stop them, 30
 // registers a2 under key a1. The record is flagged 0x3000000 first, and
 // with flags 0x103 its rect's corners are ordered. Jump tables data
 // 0x300640 (31 cases) and 0x3006c0.
@@ -2096,7 +2096,7 @@ intptr_t seqFunc023(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
                 }
             }
         }
-        area.addTrg(trg, op != 1);
+        area.addTrg(trg, op != 1, op <= 2 ? -1 : (int)op - 3);
         break;
     }
     case 10:

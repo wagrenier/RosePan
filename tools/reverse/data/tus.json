@@ -309,6 +309,24 @@
    "status": "verify",
    "why": "Between RoR's own source-path anchors: game/gamstat.cpp (string 0x2fc400, used by 0x1d84c8) and game/gamtrg.cpp (0x1dd558). The run is ObjStat / ACHRstat / FCHRstat / GamSysData (object state and system data). 0x1dd1e8.. (a GamMan member ctor called from GamMan::GamMan, its deleting dtor, GamArea::init) is GamArea code and left to game/gamtrg.cpp."
   },
+  "game/gamtrg.cpp": {
+   "notes": "Left: GamArea::update 0x1dee78 (0x1db4 bytes; stub at the end of gamtrg.cpp; decompilation saved in work/tu/game_gamtrg.cpp/update_dec.txt). It walks the active list (m_active used, flags 0x4000000 / 0x40000 / 1 ...), copies triggers to start into m_fired (8 nodes, +0x18380), sets m_cursor (+0x18b58) and m_18b5c, and at the end runs each fired trigger: ctl_trg_flg 0x10000000 / 0x800000 / 0x20000000, GamMan::resume(0x8000), GamMan +0x21f4c bits, freezePcMotion, a TskFrameFunc 0x16 and execThread with the name trg. It calls canCheckPc, findFchrOid(pos, short +0x74 of the trigger) and isInPolygon. GamAreaTrg +0x54 keeps the ftb entry as node index + 1 on the host (ftbOf). Picture: the 15 s run shows the Atlus disclaimer as before; the 140 s New Game run reaches GamArea::update and GamMan::relinkObj and runs to the end without the access violation (black stage with a small circle icon; no stage draws yet).",
+   "ranges": [
+    [
+     "001dd1e8",
+     "001e0df0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 09:41",
+     "status": "partial",
+     "summary": "GamArea (GamMan +0x40, the area triggers) written in game/gamtrg.cpp: constructor, init, cloneTrg, addTrg, stopKind, clear, stopTrgs, clearKind, findFchrOid, activateTrg, startTrgs, registFtb, isInPolygon, startPcAction, checkPc, flagPcTrg, canCheckPc, ctl_trg_flg, hasId; GamAreaTrg fields named; addTrg's fourth word is makeOid's image (seqFunc023 and create_trg fixed)"
+    }
+   ],
+   "status": "partial",
+   "why": "0x1dd558 allocates its 0xb0 trigger copy with the source string game/gamtrg.cpp (0x2fd630, line 0x62); the run from GamArea's constructor 0x1dd1e8 to hasId ends where game/gamsnd.cpp begins (GamSndMan::GamSndMan 0x1e0df0)"
+  },
   "i3d/i3croot.cpp": {
    "notes": "Status verify: DogModel::loadData calls i3cRelocate, setupColliTbl and i3cSetBothFaceEnable, but no smoke run reaches a model load yet and no raw I3D_I3C exists on the disc to check offline (open-items Open questions). Decision (open-items Decisions): the host keeps the file offsets from the root and readers use i3cPtr(root, field); i3cRelocate only turns -1 into 0 and keeps the relocation byte, because the ROM's tree relocator only relocates values below the root address. The collision casts 0x2312a0..0x2337e0 (still unassigned@0022b4b8) must read through i3cPtr. Mark done when a cast or setupColliTbl shows correct results in a run.",
    "ranges": [
@@ -1505,6 +1523,7 @@
   "unassigned@001a6830": {},
   "unassigned@001bde58": {},
   "unassigned@001d859c": {},
+  "unassigned@001dd5e8": {},
   "unassigned@001e6d54": {},
   "unassigned@001e7f28": {},
   "unassigned@001fd424": {},
