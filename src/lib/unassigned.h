@@ -618,8 +618,9 @@ struct EffParam
             int   m_1c;         // ROR 0x1c: 0
             float m_20;         // ROR 0x20: -1
             int   m_24;         // ROR 0x24: 0
-            float m_scale;      // ROR 0x28: 1, 1.75 for a kind-2 damage
-        } m_hit;                // kind 1 (scnDamageStart)
+            float m_scale;      // ROR 0x28: 1, 1.75 for a kind-2 damage; 100 for kind 3
+            int   m_2c;         // ROR 0x2c: kind 3 (HfmOutDead::Init): 90
+        } m_hit;                // kind 1 (scnDamageStart); kind 3 the same words
     };
 };
 struct Obj176a3c                /* scene +0x837e0, constructor 0x176a3c */
