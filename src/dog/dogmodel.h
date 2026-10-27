@@ -74,6 +74,21 @@ static_assert(offsetof(DogDispControl, m_20) == 0x20, "m_20");
 static_assert(offsetof(DogDispControl, m_24) == 0x24, "m_24");
 static_assert(sizeof(DogDispControl) == 0x30, "DogDispControl is 0x30 bytes on the EE");
 
+/* m_16c's record: a value stepping between two bounds once a frame
+ * (DogModel::stepAnim; DogActor::drawModel hands m_value to utlDrawI3r).
+ * Plain EE layout, at least 0x18 bytes; names from the code. */
+struct DogModelAnim
+{
+    int   m_00;                 // ROR 0x00: not read here
+    float m_start;              // ROR 0x04: where a looping value restarts
+    float m_end;                // ROR 0x08: the bound
+    float m_value;              // ROR 0x0c: the current value
+    float m_step;               // ROR 0x10: added per frame
+    int   m_loop;               // ROR 0x14: 0 stops at m_end, else wraps back by m_end - m_start
+};
+static_assert(offsetof(DogModelAnim, m_value) == 0x0c, "m_value");
+static_assert(offsetof(DogModelAnim, m_loop) == 0x14, "m_loop");
+
 /* EE 0x1a0 (MagScene's model array stride). layout: host -- holds the i3d
  * pointers. */
 struct DogModel : DogEntityEx
@@ -132,6 +147,8 @@ struct DogModel : DogEntityEx
     /* Billboard bits 1..3 of m_flag100 = v & 7 (1 on, 2 with the x turn,
      * 4 towards a point). */
     void setFlag100Bits(int v);                                          // ROR 0x0011531c
+    /* m_16c's value one step on (DogActor::updatePosture). */
+    void stepAnim();                                                     // ROR 0x00116130
     /* The ray pos + t dir against the collision groups (asserts
      * m_i3c_root, m_colli_tbl); hit->t (+0x0c) of the nearest, -1 none. */
     float castRay(MagSceneRayHit *hit, const float *pos, const float *dir); // ROR 0x0011440c
@@ -344,7 +361,7 @@ struct DogModel : DogEntityEx
     BedPfhHead     *m_pack_file;    // ROR 0x114: loadPack's pack
     DogModel       *m_original;     // ROR 0x118: LOAD_SHARE's model (set by the caller after share)
     I3rRoot        *m_i3r_root;     // ROR 0x11c: the model
-    I3rRoot        *m_i3r_root2;    // ROR 0x120: the pack's file 2 when it has one (relocated); its reader is not known
+    I3rRoot        *m_i3r_root2;    // ROR 0x120: the pack's file 2 when it has one (relocated): the shadow model (DogActor::drawShadow)
     I3cRoot        *m_i3c_root;     // ROR 0x124: loadData's collision file
     u_short        *m_colli_tbl;    // ROR 0x128: the model node of each i3c node, 0xffff none (setupColliTbl)
     sceVu0FMATRIX  *m_mat_local;    // ROR 0x12c: nNode local matrices, then m_mat_model and m_mat_flag (one block)
@@ -358,7 +375,7 @@ struct DogModel : DogEntityEx
     int             m_shadow_light;       // ROR 0x160: the point light its projected shadow comes from (MagScene::makeActorShadow), clear -1
     int             m_shadow_light_prev;  // ROR 0x164: the one before (getShadowLightOld), faded out over the first 30 frames of a change
     int             m_shadow_fade;        // ROR 0x168: frames since the light changed (getShadowCount; 0..59 fade out then in; 60 and up, or negative, steady)
-    void           *m_16c;          // ROR 0x16c: freed by release (its allocator is not known yet)
+    void           *m_16c;          // ROR 0x16c: a DogModelAnim (its allocator is not known yet), freed by release; DogActor steps and draws with it
     DogDispControl  m_disp_control; // ROR 0x170: utlSetI3rDispControl's record
 };
 static_assert(offsetof(DogModel, m_mode) >= 0xf0, "m_mode");

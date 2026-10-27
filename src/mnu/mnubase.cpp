@@ -294,7 +294,7 @@ void mnuBase::drawModel(I3dLayer *layer, sceVu0FVECTOR *world, int n, int motion
 {
     MnuModel *mdl = &m_models[n];
     if (motion == -1) {
-        utlDrawI3r(layer, mdl->m_root, NULL, world, 0);
+        utlDrawI3r(layer, mdl->m_root, NULL, world, NULL);
         return;
     }
     MnuMotion *mo = &m_motions[motion];
@@ -302,7 +302,7 @@ void mnuBase::drawModel(I3dLayer *layer, sceVu0FVECTOR *world, int n, int motion
     i3mGetPose(mo->m_root, mdl->m_pose, 0x111, (length * (float)frame) / (float)mo->m_frames);
     i3mPoseToMatrices(mdl->m_pose, (sceVu0FMATRIX *)mdl->m_local, mdl->m_map);
     i3rConvertLocalToModel(mdl->m_root, mdl->m_model, mdl->m_local);
-    utlDrawI3r(layer, mdl->m_root, (sceVu0FMATRIX *)mdl->m_model, world, 0);
+    utlDrawI3r(layer, mdl->m_root, (sceVu0FMATRIX *)mdl->m_model, world, NULL);
 }
 
 // ROR 0x001937c0

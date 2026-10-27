@@ -2147,7 +2147,7 @@ int TskMoveAdj::exec(int, int, int)
     else
     {
         sceVu0FVECTOR v;
-        m_len = actor.m_1d8;
+        m_len = actor.m_interpolation;
         v[0] = 0.0f;
         v[1] = m_ref[2] * ((float)count / (float)m_len) - 7.5f;
         v[2] = 0.0f;

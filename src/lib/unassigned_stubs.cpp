@@ -1694,7 +1694,7 @@ int i3cCastSphere(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
 
 // stub of ROR 0x00106760
 int utlDrawI3r(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
-                 int flags)
+                 const void *opt)
 {
     ROSEPAN_STUB("utlDrawI3r", 0x00106760);
     return {};
@@ -1801,4 +1801,42 @@ int GamMan::isSeqPair0Pending()
 void utlVecRotY(float angle, float *v)
 {
     ROSEPAN_STUB("utlVecRotY", 0x00106bc8);
+}
+
+// stub of ROR 0x0022f610
+void i3mPoseLerp(float t, void *out, const void *a, const void *b)
+{
+    ROSEPAN_STUB("i3mPoseLerp", 0x0022f610);
+}
+
+// stub of ROR 0x00231198
+void i3mQuatFromEuler(float *out, const float *rot)
+{
+    ROSEPAN_STUB("i3mQuatFromEuler", 0x00231198);
+}
+
+// stub of ROR 0x00230470
+void i3mQuatMul(float *out, const float *a, const float *b)
+{
+    ROSEPAN_STUB("i3mQuatMul", 0x00230470);
+}
+
+// stub of ROR 0x00230660
+void i3mQuatNormalize(float *out, const float *in)
+{
+    ROSEPAN_STUB("i3mQuatNormalize", 0x00230660);
+}
+
+// stub of ROR 0x001068d4
+void * utlGetI3rNodeDisp(I3rRoot *root, int n)
+{
+    ROSEPAN_STUB("utlGetI3rNodeDisp", 0x001068d4);
+    return {};
+}
+
+// stub of ROR 0x0010686c
+int utlSetI3rNodeDisp(I3rRoot *root, void *disp, int n)
+{
+    ROSEPAN_STUB("utlSetI3rNodeDisp", 0x0010686c);
+    return {};
 }

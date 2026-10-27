@@ -27,6 +27,8 @@ struct I3rItem;
 
 /* setNodeScale's list length. */
 #define DOG_SCALE_NODE_MAX 5
+/* The motion command list's length (runMotionCmd's asserts). */
+#define DOG_MAX_MOTION_CMD 8
 /* The motion banks (m_pack_motion): 0 the model pack's own, 1..3 loaded
  * packs. */
 #define DOG_MOTION_LEVEL_MAX 4
@@ -61,7 +63,7 @@ static_assert(offsetof(DogMotionTrack, m_data) == 0x10, "m_data");
 struct DogMotionData
 {
     I3mRoot        *m_i3m_root; // ROR 0x00: the motion, NULL = a free record
-    int            *m_param;    // ROR 0x04: a nested pack's file 1 past its first word; *m_param is setMotion's default m_1d8
+    int            *m_param;    // ROR 0x04: a nested pack's file 1 past its first word; *m_param is setMotion's default m_interpolation
     DogMotionTrack *m_root;     // ROR 0x08: the root move track (getRootMove), NULL none
     DogMotionTrack *m_tag_data; // ROR 0x0c: the tag track after it, NULL none
     int             m_10;       // ROR 0x10: a nested pack's file 1 first word (setMotion tests its low byte)
@@ -142,11 +144,11 @@ struct DogActor : DogModel
     int  getRootMove(float t, float *out);                               // ROR 0x00108c90
     /* The root track's turn at the current frame (-m_80 y while blending in). */
     float getRootRotY();                                                 // ROR 0x0010a584
-    /* Bit 1 of m_mode: set by a motion start with m_1d8 > 0 (role unverified). */
+    /* Bit 1 of m_mode: set by a motion start with m_interpolation > 0 (role unverified). */
     int  isBlendIn();                                                    // ROR 0x0010db38
     /* The index of the record with id theID, -1 none. */
     int  findMotionById(int theID);                                      // ROR 0x0010a874
-    /* m_mode for a started motion (bit 4; bit 2 with m_1d8 > 0; bit 1
+    /* m_mode for a started motion (bit 4; bit 2 with m_interpolation > 0; bit 1
      * without, or with flag 0x40), m_f4 = 0. */
     void startMotionMode();                                              // ROR 0x0010ae58
     /* The pose records into the previous ones; the motion state too. */
@@ -164,8 +166,44 @@ struct DogActor : DogModel
     /* The event bits of motion (-1: the current one) between frames t0
      * and t1 (bit 0: a footstep). */
     u_int getMotionEvent(float t0, float t1, int motion);                // ROR 0x0010bcc8
-    /* Runs the motion command list (asserts m_motion_cmd_idx < DOG_MAX_MOTION_CMD). */
+    /* Once a frame (MagScene::updateActors): runs the motion command list
+     * from m_motion_cmd_idx (each word: op in bits 28..31, flags in 22..27,
+     * a motion id in 0..9, a chance in 12..21), or steps the motion alone
+     * (loop / stop / change to m_motion_flags2 at its end); a wrapped root
+     * turn goes into the heading; then the blend-in offsets and the eye. */
     void runMotionCmd();                                                 // ROR 0x0010d388
+    /* A command's motion start: motion theID (flags 1: not when it is
+     * already current; 4: at the current motion time, 8 scaled to the new
+     * length). The id, -1 when not started. */
+    int  startMotionCmd(int theID, u_int flags);                         // ROR 0x0010d1d0
+    /* The motion one frame on: DogMotionBlend::step's result (1 at the
+     * end, 2 at the start, 3 zero length), 0 without records. */
+    int  stepMotion();                                                   // ROR 0x0010bed0
+    /* The same, looping (DogMotionBlend::stepLoop: 1 / 2 when it wrapped). */
+    int  stepMotionLoop();                                               // ROR 0x0010be80
+    /* The current motion's root track's last key (zeros without one). */
+    void getRootEndKey(float *out);                                      // ROR 0x00109284
+    /* While blending in: the Y offset and the turn still to apply (the
+     * saved ones fading out); 1, else 0 with both 0. */
+    int  getBlendInOffset(float *trans_y, float *rot_y);                 // ROR 0x0010e848
+    /* The eye: counts m_eye_count to m_eye_period, then plays the blink
+     * texture sequence and picks the next period (60..90 frames). */
+    void updateEye();                                                    // ROR 0x0010f480
+    /* m_base_rotate y += r, wrapped once to -pi..pi. */
+    void addBaseRotY(float r);                                           // ROR 0x0010e7dc
+    /* The blend-in progress (m_f4 + 1) / m_interpolation in 0..1, or the
+     * motion's own curve (m_param: m_interpolation, then a percentage per
+     * frame); 1.0 when not blending in. */
+    float getBlendInRate();                                              // ROR 0x0010db48
+    /* The same for node theNode, after the blend entries' rate (< 1.0). */
+    float getNodeBlendRate(int theNode);                                 // ROR 0x0010dd30
+    /* Samples the current motion into m_posture, blends it with the
+     * previous pose node by node, sets the control node's rotation, then
+     * the local and model matrices (with the node scales). 0 without a
+     * motion; count set: m_f4 steps too. */
+    int  updatePosture(int count);                                       // ROR 0x0010df54
+    /* m_f4 + 1: one more blend-in frame. */
+    void countBlendFrame();                                              // ROR 0x00108660
     /* The motion time in 60 Hz frames. */
     float getMotionFrame();                                              // ROR 0x0010da4c
     /* m_motion.m_frame * 60 * 2 (TskMtnMove compares it with the motion's
@@ -267,6 +305,16 @@ struct DogActor : DogModel
             return NULL;
         return m_motion_data[n].m_root;
     }
+    /* The header's line 360 (startMotionCmd). */
+    I3mRoot *getMotionRoot(int no)
+    {
+        ROR_ASSERT(no>=0 && no < m_max_motion); /* 360 */
+        /* PC: the ROM hangs in the assert; no record, no motion. */
+        if (no < 0 || no >= m_max_motion || m_motion_data == NULL)
+            return NULL;
+        ROR_ASSERT(m_motion_data[no].m_i3m_root); /* 360 */
+        return m_motion_data[no].m_i3m_root;
+    }
     int relocateMotion(int n)
     {
         ROR_ASSERT(n>=0 & n<m_max_motion); /* 368 */
@@ -303,7 +351,7 @@ struct DogActor : DogModel
     u_char       *m_posture;            // ROR 0x1cc: one block: a 0x30-byte pose record per node,
     u_char       *m_posture_prev;       // ROR 0x1d0: the previous pose records (savePosture),
     u_short      *m_assign_tbl;         // ROR 0x1d4: then the node map (setupAssignTbl)
-    int           m_1d8;                // ROR 0x1d8: setParam1d8; read as a frame count by TskMoveAdj (a blend-in length?)
+    int           m_interpolation;      // ROR 0x1d8: the blend-in length in frames (the ROM's assert name; m_f4 counts up to it); setParam1d8
     float         m_1dc;                // ROR 0x1dc: < 0 starts a motion from its end (0x10ae10)
     u_char        _1e0[0x1e4 - 0x1e0];
     DogMotionBlend m_motion;            // ROR 0x1e4: the current motion (its number, speed, frame)
@@ -315,17 +363,17 @@ struct DogActor : DogModel
     int           m_control_node;       // ROR 0x3d4: getControlNode
     int           m_control_node_flg;   // ROR 0x3d8: setControlNodeFlg / getControlNodeFlg
     u_char        _3dc[0x3e0 - 0x3dc];
-    sceVu0FVECTOR m_3e0;                // ROR 0x3e0: the constructor's (0, 0, 0, 1)
-    int           m_motion_flags;       // ROR 0x3f0: setMotion's flags (0x80: start from the motion's length; 0x40 added by the motion record)
-    int           m_motion_flags2;      // ROR 0x3f4: setMotion's second word; role unknown
+    sceVu0FVECTOR m_3e0;                // ROR 0x3e0: the control node's rotation (x, y, z; updatePosture's quaternion); the constructor's (0, 0, 0, 1)
+    int           m_motion_flags;       // ROR 0x3f0: setMotion's flags (0x80: start from the motion's length; 0x40 added by the motion record; 1 loop, 2 then m_motion_flags2)
+    int           m_motion_flags2;      // ROR 0x3f4: setMotion's second word: the motion runMotionCmd changes to at the end (flag 2), -1 after
     int           m_scale_node[DOG_SCALE_NODE_MAX];  // ROR 0x3f8: setNodeScale's nodes, < 0 free
     float         m_scale[DOG_SCALE_NODE_MAX];       // ROR 0x40c: their values (1.0 frees an entry)
     float         m_trans_ofs_y_save;   // ROR 0x420: saveTransOfsY copies m_trans_ofs[1]
     float         m_rot_ofs_y;          // ROR 0x424: clearRotOfsY / getRotOfsYSave
-    u_char        _428[0x42c - 0x428];
-    int           m_42c[8];             // ROR 0x42c: clear -1
-    int           m_44c;                // ROR 0x44c: clear -1
-    u_char        _450[0x454 - 0x450];
+    int           m_motion_result;      // ROR 0x428: the last motion step's result (0 running; 1 / 2 ended or wrapped)
+    int           m_motion_cmd[DOG_MAX_MOTION_CMD]; // ROR 0x42c: the command list (runMotionCmd), clear -1
+    int           m_motion_cmd_idx;     // ROR 0x44c: the running command, -1 none (clear)
+    int           m_motion_cmd_run;     // ROR 0x450: 1 once the running command started its motion
     int           m_454;                // ROR 0x454: clear 0
     u_char        _458[0x45c - 0x458];
     int           m_45c;                // ROR 0x45c: getMotionStep: a count (> 0: the step only at its last entry)
@@ -339,8 +387,11 @@ struct DogActor : DogModel
     int           m_eye_count;          // ROR 0x490
     int           m_eye_period;         // ROR 0x494
     u_char        _498[0x4a0 - 0x498];
+    /* 0x4a0..0x4d0: the attention display record (a DogDispControl's
+     * shape): drawModel points the m_attention node's material at it,
+     * m_4b0 pulsing 1.0..4.75 with the frame counter. */
     float         m_4a0[4];             // ROR 0x4a0: clear 0
-    float         m_4b0[4];             // ROR 0x4b0: clear 1.0
+    float         m_4b0[4];             // ROR 0x4b0: clear 1.0; drawModel's pulse scale (x, y, z)
     float         m_4c0;                // ROR 0x4c0: clear 0.1
     u_char        m_4c4;                // ROR 0x4c4: clear 1
     u_char        m_4c5;                // ROR 0x4c5: clear 1
@@ -359,7 +410,7 @@ static_assert(offsetof(DogActor, m_num_posture_node) >= 0x1c8, "m_num_posture_no
 static_assert(offsetof(DogActor, m_posture) >= 0x1cc, "m_posture");
 static_assert(offsetof(DogActor, m_posture_prev) >= 0x1d0, "m_posture_prev");
 static_assert(offsetof(DogActor, m_assign_tbl) >= 0x1d4, "m_assign_tbl");
-static_assert(offsetof(DogActor, m_1d8) >= 0x1d8, "m_1d8");
+static_assert(offsetof(DogActor, m_interpolation) >= 0x1d8, "m_interpolation");
 static_assert(offsetof(DogActor, m_1dc) >= 0x1dc, "m_1dc");
 static_assert(offsetof(DogActor, m_motion) >= 0x1e4, "m_motion");
 static_assert(offsetof(DogActor, m_motion_prev) >= 0x2c4, "m_motion_prev");
@@ -367,8 +418,12 @@ static_assert(offsetof(DogActor, m_3b0) >= 0x3b0, "m_3b0");
 static_assert(offsetof(DogActor, m_3e0) >= 0x3e0, "m_3e0");
 static_assert(offsetof(DogActor, m_motion_flags) >= 0x3f0, "m_motion_flags");
 static_assert(offsetof(DogActor, m_trans_ofs_y_save) >= 0x420, "m_trans_ofs_y_save");
-static_assert(offsetof(DogActor, m_42c) >= 0x42c, "m_42c");
-static_assert(offsetof(DogActor, m_44c) >= 0x44c, "m_44c");
+static_assert(offsetof(DogActor, m_motion_cmd) >= 0x42c, "m_motion_cmd");
+static_assert(offsetof(DogActor, m_motion_cmd_idx) >= 0x44c, "m_motion_cmd_idx");
+static_assert(offsetof(DogActor, m_motion_result) >= 0x428, "m_motion_result");
+static_assert(offsetof(DogActor, m_motion_cmd_run) >= 0x450, "m_motion_cmd_run");
+static_assert(offsetof(DogActor, m_control_node) >= 0x3d4, "m_control_node");
+static_assert(offsetof(DogActor, m_control_node_flg) >= 0x3d8, "m_control_node_flg");
 static_assert(offsetof(DogActor, m_454) >= 0x454, "m_454");
 static_assert(offsetof(DogActor, m_45c) >= 0x45c, "m_45c");
 static_assert(offsetof(DogActor, m_460) >= 0x460, "m_460");

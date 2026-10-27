@@ -26,13 +26,23 @@ static inline I3rRootData *i3rModelData(const I3rRoot *root)
 }
 
 /* PORT: an STQ slot may point outside the file (an entity the game owns);
- * the host field still holds the distance, so it must fit in 32 bits. */
+ * the host field still holds the distance, so it must fit in 32 bits.
+ * One that does not (DogActor::setEyeTex's m_eye_uv in the global actor
+ * array against a heap model) is left NULL -- a truncated distance would
+ * be a wild pointer for the reader -- and logged once; a side table is
+ * the real fix (open-items.md). */
 static void i3rSetFarPtr(u_int *field, const void *p)
 {
+    static int s_logged;
     ptrdiff_t d = p != NULL ? (const u_char *)p - (const u_char *)field : 0;
 
     if (d != (ptrdiff_t)(int)d)
-        printf("[i3r] %p is too far from the model slot %p for a 32-bit field\n", p, (void *)field);
+    {
+        if (!s_logged)
+            printf("[i3r] %p is too far from the model slot %p for a 32-bit field (left NULL)\n", p, (void *)field);
+        s_logged = 1;
+        p = NULL;
+    }
     i3rSetPtr(field, p);
 }
 

@@ -79,9 +79,12 @@ follows it; reached stubs in run order):
   5. **`dog/dogactor.cpp`** -- PARTIAL 2026-10-27: load, loadPackMotion, loadMotion, the record
      table, posture, release paths, root track / getRotY, setMotion / changeMotion, resetShadow
      written (the 200 s run passes them with no DogActor assert and still reaches frame 6840).
-     Left, in run order: DogActor::draw 0x10e5c0 / drawModel 0x10e3ac / drawShadow (the model
-     draw, with utlDrawI3r 0x106760 and the i3m pose player unassigned@0022e840), runMotionCmd
-     0x10d388, checkName 0x10f2dc, getMotionMove / getMotionEvent, setEyeTex, shareModel. The
+     Second session 2026-10-27: draw / drawModel / drawShadow, the posture update 0x10df54,
+     runMotionCmd and its helpers, checkName, setEyeTex / updateEye written (no assert in the
+     200 s run; still black: utlDrawI3r 0x106760, DogMotionBlend::getPose 0x1081b0 and the i3m
+     pose player unassigned@0022e840 are stubs -- **those are now the gate to an actor on screen**,
+     with the native i3d draw module). Left in the TU: getMotionMove, getMotionEvent, shareModel,
+     setNodeScale, getNodeWorldMatrix / Pos and the dog/dogmotionblend.cpp steps. The
      getNodeIndexByName PORT guard stays (GamMan::attachObj asks unloaded actors).
   6. `mag/magscenelight.cpp` -- MagScene::loadLight 0x13f658 / setDefaultLight 0x13f8e4.
   7. `unassigned@00140030` / `unassigned@00143d3c` -- MagScene::loadTenkyuTex 0x140030 (the sky) /
@@ -701,6 +704,11 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
   and i3rSetMatEntity0..2 point model slots at objects the game owns (MagScene +0x2aa90, DogActor +0x470), so the
   distance must fit in 32 bits: i3rSetFarPtr logs "[i3r] ... too far" when it does not. If that line ever shows,
   the slots need a side table. Also: i3rUnrelocate would turn such a slot into a bogus offset (the ROM does the same).
+  **2026-10-27: it shows** -- DogActor::setEyeTex points the eye material's entity 0 at m_eye_uv inside
+  the global MagScene actor array (image .bss, 0x7ff6...) while the model sits on the heap. i3rSetFarPtr now
+  leaves such a slot NULL and logs once; the eye texture offset is lost until a side table (or the draw
+  module reading the actor's record directly) exists. Decide before the renderer reads material entities.
+  Also utlRandRange 0x10423c is a stub returning 0, so every eye blinks every 6 frames.
 
 ## Decisions
 

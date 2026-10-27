@@ -59,6 +59,8 @@ struct DogEntity
     /* Copies m_matrix's third row (the z axis) to out; returns out. */
     float *getMatrixZ(float *out);                                       // ROR 0x00110114
     void normalizeRotate();                                              // ROR 0x0010ff74
+    /* m_80 y = r wrapped once to -pi..pi; dirty. */
+    void setAddRotY(float r);                                            // ROR 0x0010fcb4
     /* When m_dirty: out = scale, rot z, x, y (m_rotate + m_80, each wrapped
      * once to -pi..pi), translate m_trans and m_trans_ofs; clears m_dirty
      * and returns 1, else 0 with out untouched. */
