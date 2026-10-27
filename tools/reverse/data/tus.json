@@ -672,6 +672,24 @@
    "status": "verify",
    "why": "I3D_I3M motion file root (id 0x303a68): id/version checks, relocators, node and key accessors; between i3rroot.cpp and i3croot.cpp, which it mirrors"
   },
+  "i3d/i3rdraw.cpp": {
+   "notes": "Left: the VU1 packet writers 0x220098..0x222ce0 (i3rDrawMesh45 / i3rDrawMesh46 / i3rDrawSetupBlend / i3rDrawGroupSkinned / i3rDrawGroupRigid and their strip writers) are not ported on purpose; what the host still lacks from them goes into rosepan_i3dmesh.cpp: the type-0x59 blend weights (opt), the 0x45 part, the per-part bone-box cull (the host counts a part with data as drawn). Picture: frames ~3300..4200 show the book cover correctly; after the page turn only the left page stack shows, the right page and the dark MNUPBOOK background are missing (VU1 sprite packets unassigned@0021c960 and the offscreen pass, not this TU). After the book closes the screen stays black (camera / room stubs). Extra screenshots progress/20261027-1900_i3d_i3rdraw_book_cover.png and _book_open.png. open-items.md Mesh draw updated.",
+   "ranges": [
+    [
+     "0021fb50",
+     "00222f50"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 19:00",
+     "status": "partial",
+     "summary": "i3d/i3rdraw.cpp pinned 0x21fb50..0x222f50 (was unassigned@0021fb50). i3rDrawModel written: the model box cull against the layer's view, the ROM's node / entry / part walk for its result, then the camera (m_camera plus m_rect_proj remade as reverse Z, y negated) and the model recorded at a layer packet for the native i3d mesh module. i3rBuildMeshPacket is a PC no-op (the host reads the mesh items). The 200 s New Game run now draws the picture book's 3D cover model, The Little Princess, upright and matching PB010200_00000800, and the opened book's page stack."
+    }
+   ],
+   "status": "partial",
+   "why": "the i3r model draw run between i3d/i3dctx.cpp (ends 0x21fb50) and i3d/i3dlayer.cpp (i3dPktLayerState 0x222f50): i3rBuildMeshPacket, i3rDrawModel and the VIF / VU1 mesh packet writers it calls; no source string names it, named after its role"
+  },
   "i3d/i3ritem.cpp": {
    "notes": "Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's jr ra, e.g. 0x22d4a0..0x22d51c after i3rRelocData09; most call i3rItemFindChild; unreferenced by ported code so far -- read with ghidra.py asm, they take an item wrapper whose +8 is the item). Nothing on screen yet: two 200 / 240 s New Game runs reached the post-film setup but no model load (DogActor::load 0x10cd5c is a stub), so the relocator was verified offline instead; the screenshot is the black post-film frame. Each fixup was generated from its disassembly into field / array ops and cross-checked against its unrelocate twin; the unrelocators run arrays before fields. PORT: a NULL array with a count is skipped (the ROM would index it). The rest of unassigned@0022b4b8 (I3D_I3M 0x22b4b8..0x22ba20, curve maths 0x22e840..0x2312a0, collision casts and distance maths 0x2312a0..0x23695c) is still unassigned: define those files next time. Next on the 3D path: unassigned@0021a3e8 (i3rBuildPackets, i3rAssignTex, node transforms) and DogActor::load; then remove the PC node-count guards in DogModel once a run shows sane counts.",
    "ranges": [

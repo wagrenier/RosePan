@@ -1303,12 +1303,6 @@ int i3cCastSphere(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
     return {};
 }
 
-// stub of ROR 0x0021fb50
-void i3rBuildMeshPacket(I3rItem *mesh, void *buf)
-{
-    ROSEPAN_STUB("i3rBuildMeshPacket", 0x0021fb50);
-}
-
 // stub of ROR 0x0021e5a0
 u_long   * i3dPktBeginVu1Sprite(u_long *pkt, I3dLayer *layer, int mode)
 {
@@ -1807,10 +1801,3 @@ float emyVecLength(const float *v)
 }
 
 
-// stub of ROR 0x0021fe68
-int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
-                   const void *opt)
-{
-    ROSEPAN_STUB("i3rDrawModel", 0x0021fe68);
-    return {};
-}
