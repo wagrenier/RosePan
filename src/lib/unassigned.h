@@ -150,31 +150,8 @@ public:
     void initOut();                                                      // ROR 0x0014b3bc
 };
 
-/* Type 6 (vtable from rtti.py; EE 0x240). layout: host -- polymorphic. */
-class HfmMain : public EmyMain
-{
-public:
-    HfmMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x0028589c
-            const _tagEnemyTransition *trans, float *pos)
-        : EmyMain(oid, name, param, prm, trans, pos)
-    {
-        initOut();
-    }
-    ~HfmMain();                                                         // EE slot 1 (+0x08), ROR 0x0014529c
-    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x00145680
-    int  GetType() { return 6; }                                       // EE slot 3 (+0x18), ROR 0x002858d4
-    void decide();                                                       // EE slot 4 (+0x20), ROR 0x001453c0
-    void exec();                                                         // EE slot 5 (+0x28), ROR 0x00145560
-    void after();                                                        // EE slot 6 (+0x30), ROR 0x00145604
-    void initOut();                                                      // ROR 0x00145020
-    /* createEmy, after loadParam. */
-    void initAfterParam();                                               // ROR 0x001452fc
-    /* m_free_cnt - n, at least 0 (EmyManager::subEmyFreeCnt). */
-    void subFreeCnt(int n);                                              // ROR 0x0014582c
-
-    int m_free_cnt;             // ROR 0x234: SetFreeCnt
-    int m_23c;                  // ROR 0x23c: EmyManager::getEmyHoldWord23c
-};
+/* Type 6, HfmMain: emy/emy_hfm.h. */
+#include "emy/emy_hfm.h"
 
 /* Type 7 (vtable from rtti.py; EE 0x23c). layout: host -- polymorphic. */
 class MrtMain : public EmyMain
@@ -386,6 +363,9 @@ static_assert(offsetof(GamFont, m_00) == 0x00, "m_00");
 void utlRandReset(void);                                                 // ROR 0x0010421c
 /* A random integer in lo..hi (lo + 0x1041e4(hi - lo + 1)). */
 int  utlRandRange(int lo, int hi);                                       // ROR 0x0010423c
+/* A random float in lo..hi in steps of (hi - lo) / 65536 -- 0.0 (not lo)
+ * when the integer draw is 0. */
+float utlRandRangeF(float lo, float hi);                                 // ROR 0x001044b8
 /* lo + the mean of n draws over 0..hi - lo. */
 int  utlRandMean(int lo, int hi, int n);                                 // ROR 0x0010426c
 /* lo..hi, peaking at peak (the mean of n draws, folded). */

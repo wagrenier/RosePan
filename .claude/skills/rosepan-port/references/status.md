@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 09:06 at commit `61aeab6` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 09:24 at commit `92bb7e0` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-27 09:06 at commit `61aeab6` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6827**, named **4877** (71%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 253, ror-inferred 3275
-- context-name ledger: 3568 entries; overrides of wrong library matches: 5
-- placed in a source file: 4185/6827 in 109 files
+- game functions: **6827**, named **4912** (72%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 253, ror-inferred 3310
+- context-name ledger: 3603 entries; overrides of wrong library matches: 5
+- placed in a source file: 4260/6827 in 110 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -21,16 +21,16 @@ Least-named game-code regions (64 KB blocks):
 |---|---|---|
 | `00150000` | 8/272 (3%) | - |
 | `00170000` | 52/251 (21%) | snd/sndman.cpp, wrd/wrdsrv.cpp |
-| `00140000` | 71/293 (24%) | mag/magscenecmd.cpp, mag/magloader.cpp, mag/magsceneif.cpp |
-| `00160000` | 73/268 (27%) | emy/emy_manager.cpp, emy/emy_main.cpp |
+| `00140000` | 89/293 (30%) | emy/emy_hfm.cpp, mag/magscenecmd.cpp, mag/magloader.cpp |
 | `00120000` | 90/283 (32%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
+| `00160000` | 89/268 (33%) | emy/emy_manager.cpp, emy/emy_main.cpp |
 | `001b0000` | 41/81 (51%) | game/gamfile.cpp, mnu/mnuSelectLanguage.cpp |
 | `00110000` | 150/255 (59%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglifepc.cpp |
 | `001a0000` | 142/214 (66%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnutitle.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3354**; stubs: **402**
+- reconstructed RoR functions: **3375**; stubs: **434**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -45,7 +45,8 @@ Least-named game-code regions (64 KB blocks):
 | `src/dog/dogmodel.cpp` | 24 | 0 |
 | `src/dog/dogmotionblend.cpp` | 4 | 7 |
 | `src/dog/dogtexinfo.cpp` | 16 | 0 |
-| `src/emy/emy_main.cpp` | 0 | 18 |
+| `src/emy/emy_hfm.cpp` | 21 | 26 |
+| `src/emy/emy_main.cpp` | 0 | 20 |
 | `src/emy/emy_manager.cpp` | 59 | 0 |
 | `src/game/gamfile.cpp` | 18 | 0 |
 | `src/game/gamman.cpp` | 411 | 0 |
@@ -65,7 +66,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3ritem.cpp` | 160 | 0 |
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 285 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 289 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 17 |
@@ -123,9 +124,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 165 TUs: todo 109, partial 14, verify 59, done 9
-- next: **unassigned@00145020** (pinned in the queue)
+- 166 TUs: todo 110, partial 15, verify 59, done 9
+- next: **unassigned@001dd5e8** (pinned in the queue)
 - pinned queue: unassigned@0022b4b8, unassigned@0021a3e8, unassigned@00140030, unassigned@00145020, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
+- partial: `emy/emy_hfm.cpp` 21/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end of the file, return -1 from Exec): the Init/Exec/Term of HfmOutSlap 0x145d60.., HfmOutBreak 0x146378.., HfmOutWal
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -189,6 +191,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 09:24 `emy/emy_hfm.cpp` partial: Split the enemy run: pinned emy/emy_hfm.cpp 0x145020..0x149d18 (HfmMain + its outs). Wrote HfmMain whole (initOut, dtor, initAfterParam, decide, exec, after, se
 - 2026-10-27 09:06 `emy/emy_manager.cpp` verify: Split EmyManager out of unassigned@00145020 as emy/emy_manager.cpp (0x16265c..0x164118) and wrote all 58 functions: ctor/dtor/clear/releaseAll, the task exec wi
 - 2026-10-27 08:42 `mag/magscenecmd.cpp` verify: Pinned 0x143d3c..0x145020 out of unassigned@00143d3c as mag/magscenecmd.cpp and wrote all 36 functions: MagScene fog fade (setFog and its two wrappers, addFog, 
 - 2026-10-27 08:20 `mag/magscenetenkyu.cpp` verify: The sky (tenkyu): releaseTenkyuTex, loadTenkyuTex (tenkyu.rpk: optional I3D_I3M motion then the i3r), initTenkyuSpin (per-node y spin from the motion, named 0x1
@@ -196,22 +199,21 @@ Recent sessions:
 - 2026-10-27 07:56 `dog/dogactor.cpp` verify: DogActor complete (147 of 147): getMotionMove, getMotionEvent / getMotionEventNow, the root base readers (getRootBase, getRootRotate, resetRootBase, addTransRot
 - 2026-10-27 07:37 `dog/dogactor.cpp` partial: DogActor per-frame player: draw / drawModel / drawShadow, the posture update 0x10df54 (blend rates, control node quaternion, node scales, local and model matric
 - 2026-10-27 07:05 `dog/dogactor.cpp` partial: DogActor load path: load, loadPack/loadData overrides with setupEye, loadPackMotion, loadMotion, the motion records (setMaxMotion, trimMotion, findMotionById/By
-- 2026-10-27 01:24 `mnu/mnupbook.cpp` verify: All of MnuDiary: processPad and its six steps, queueFiles, startTurns, openWindows, updatePad, updateSheets, setSheetTex, setBaseTex, turnSheet, draw, setDrawSe
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@001d3b44` | partial | 2/19/37 | 18.4 | 81 | 0 |
-| `emy/emy_main.cpp` | partial | 1/20/88 | 11.0 | 47 | 0 |
-| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 45 | 0 |
-| `unassigned@001dd5e8` | todo | 0/12/18 | 14.0 | 35 | 0 |
+| `unassigned@001d3b44` | partial | 2/19/37 | 18.4 | 86 | 1 |
+| `unassigned@00166a1c` | todo | 0/27/342 | 94.7 | 67 | 3 |
+| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 60 | 3 |
+| `emy/emy_main.cpp` | partial | 1/22/88 | 11.0 | 50 | 0 |
+| `unassigned@0022e840` | todo | 0/13/99 | 32.1 | 45 | 3 |
+| `unassigned@0010f944` | partial | 3/6/12 | 2.2 | 45 | 4 |
+| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
+| `unassigned@00228c08` | partial | 22/1/72 | 9.3 | 37 | 1 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 35 | 0 |
-| `unassigned@00228c08` | partial | 22/1/72 | 9.3 | 32 | 0 |
-| `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
-| `unassigned@0022e840` | todo | 0/13/99 | 32.1 | 30 | 0 |
-| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 30 | 0 |
-| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 29 | 0 |
-| `unassigned@00166a1c` | todo | 0/16/342 | 94.7 | 28 | 0 |
-| `mag/maglifebwnctrl.cpp` | todo | 0/17/82 | 18.3 | 27 | 0 |
+| `unassigned@00106658` | todo | 0/11/25 | 3.3 | 35 | 2 |
+| `unassigned@001dd5e8` | todo | 0/12/18 | 14.0 | 35 | 0 |
+| `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -221,8 +223,8 @@ Recent sessions:
 | `001be2dc` | FileReader::~FileReader | 27 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 23 | ror | missing | game/gamfile.cpp |
 | `002155f4` | FUN_002155f4 | 22 | - | missing | - |
+| `0010423c` | FUN_0010423c | 16 | - | stub | - |
 | `0010ff74` | DogEntity::normalizeRotate | 13 | ror | stub | - |
-| `0010423c` | FUN_0010423c | 13 | - | stub | - |
 | `001832e8` | msgGetSysText | 12 | ror | stub | - |
 | `001d83d0` | GamMan::lookupFlagTable | 12 | ror | stub | - |
 | `001d4a3c` | GamMan::getObjRadius | 12 | ror | stub | - |
@@ -237,6 +239,7 @@ Recent sessions:
 | `001fcdb8` | NagaChunk::getData | 9 | ror | stub | - |
 | `001d5da0` | GamMan::relinkObj | 9 | ror | stub | - |
 | `00164508` | EmyMain::loadParam | 9 | ror | stub | emy/emy_main.cpp |
+| `00166a1c` | EmyOut::EmyOut | 9 | ror | stub | - |
 | `0022e958` | i3mGetLength | 8 | ror | stub | - |
 | `00106760` | utlDrawI3r | 8 | ror | stub | - |
 | `001d8064` | GamMan::findSectaCell | 8 | ror | stub | - |
@@ -256,5 +259,4 @@ Recent sessions:
 | `001dd5e8` | GamArea::addTrg | 5 | ror | stub | - |
 | `001d544c` | GamMan::placeAchr | 5 | ror | stub | - |
 | `001874ac` | MsgManSet::update | 5 | ror | stub | - |
-| `0018330c` | MsgMan::MsgMan | 5 | ror | missing | msg/msgman.cpp |
 

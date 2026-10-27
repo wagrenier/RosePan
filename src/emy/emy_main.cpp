@@ -118,3 +118,17 @@ void EmyMain::updateOut()
 {
     ROSEPAN_STUB("EmyMain::updateOut", 0x00165038);
 }
+
+// stub of ROR 0x00166108
+bool EmyMain::isLowLife()
+{
+    ROSEPAN_STUB("EmyMain::isLowLife", 0x00166108);
+    return {};
+}
+
+// stub of ROR 0x00165734
+bool EmyMain::isPCSameArea()
+{
+    ROSEPAN_STUB("EmyMain::isPCSameArea", 0x00165734);
+    return {};
+}
