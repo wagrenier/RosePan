@@ -38,10 +38,12 @@ static_assert(sizeof(I3dMatrixF4x4) == 0x40, "I3dMatrixF4x4 is 0x40 bytes on the
  * the fields this file touches. */
 struct I3rMaterialData
 {
-    u_char  m_00[8];            // ROR 0x00: not read here
+    float   m_depth;            // ROR 0x00: the draw set's depth (i3dLayerFindMaterialDrawSet)
+    u_int   m_sort_param;       // ROR 0x04: the draw set's sort parameter
     short   m_tex_frame;        // ROR 0x08: the texture animation's frame (i3rUpdateTexAnim steps it)
-    u_char  m_0a[2];            // ROR 0x0a: not read here
-    u_char  m_tex_anim;         // ROR 0x0c: non-zero = animated (i3rReplaceStqMapEntity sets 1)
+    u_char  m_sort_func;        // ROR 0x0a: the draw set's sort function
+    u_char  m_sort_order;       // ROR 0x0b: the draw set's sort order
+    u_char  m_tex_anim;        // ROR 0x0c: non-zero = animated (i3rReplaceStqMapEntity sets 1)
     u_char  m_0d[3];            // ROR 0x0d: not read here
 };
 static_assert(offsetof(I3rMaterialData, m_tex_frame) == 0x08, "I3rMaterialData::m_tex_frame");
@@ -49,17 +51,47 @@ static_assert(offsetof(I3rMaterialData, m_tex_anim) == 0x0c, "I3rMaterialData::m
 static_assert(sizeof(I3rMaterialData) == 0x10, "I3rMaterialData is 0x10 bytes on the EE");
 
 /* A material layer's data (item type 0x26). From the file: plain EE
- * layout; the fixup relocates +0x14 and +0x18. */
+ * layout; the fixup relocates +0x14 and +0x18. The bytes from +0x24 are
+ * read by the material packets (i3d/i3rmesh.cpp), which map them to GS
+ * TEST / ALPHA fields. Its children: [0] / [1] the uv tracks (offset and
+ * scale; pivot, scale and rotation), [2] the register overrides (type
+ * 0x4a), [3] the STQ map entities. */
 struct I3rLayerData
 {
-    u_char  m_00[0x14];         // ROR 0x00: not read here
+    float   m_specular[4];      // ROR 0x00: to VU1 when m_shade is 2 (role from that use)
+    float   m_alpha_ref;        // ROR 0x10: AREF / 128
     u_int   m_14;               // ROR 0x14: a relocated pointer (not read here)
     u_int   m_tex_name;         // ROR 0x18: the texture's name
     int     m_tex_index;        // ROR 0x1c: its index in the assigned table, -1 none (i3rAssignTex)
+    u_char  m_20[4];            // ROR 0x20: not read
+    int     m_blend;            // ROR 0x24: ALPHA_1 (i3rPktLayerAlpha); 0 = not written
+    u_char  m_28[4];            // ROR 0x28: not read
+    u_char  m_afail;            // ROR 0x2c: AFAIL of the alpha test (i3rAlphaFailMode)
+    u_char  m_atst;             // ROR 0x2d: the alpha test, an index into 0x2db350; 0 = off
+    u_char  m_2e;               // ROR 0x2e: not read
+    u_char  m_ztst;             // ROR 0x2f: 1 NEVER, 2 ALWAYS, 0x13 GREATER, 0x14 GEQUAL; else not written
+    u_char  m_cull;             // ROR 0x30: 1 / 2 the VU1 cull sign -1 / +1, 3 flat (no IIP)
+    u_char  m_31;               // ROR 0x31: not read
+    u_char  m_shade;            // ROR 0x32: 0 unlit, 1 lights, 2 lights with specular
+    u_char  m_fail_only;        // ROR 0x33: non-zero = the test always fails with this AFAIL
+    u_char  m_34;               // ROR 0x34: not read
+    u_char  m_date;             // ROR 0x35: 2 DATE off, 9 / 10 DATE on (DATM 1 / 0)
+    u_char  m_ambient;          // ROR 0x36: non-zero = the light's ambient, else black (lit layers)
+    u_char  m_37;               // ROR 0x37: not read
 };
+static_assert(offsetof(I3rLayerData, m_alpha_ref) == 0x10, "I3rLayerData::m_alpha_ref");
 static_assert(offsetof(I3rLayerData, m_tex_name) == 0x18, "I3rLayerData::m_tex_name");
 static_assert(offsetof(I3rLayerData, m_tex_index) == 0x1c, "I3rLayerData::m_tex_index");
-static_assert(sizeof(I3rLayerData) == 0x20, "I3rLayerData: the 0x20 bytes known");
+static_assert(offsetof(I3rLayerData, m_blend) == 0x24, "I3rLayerData::m_blend");
+static_assert(offsetof(I3rLayerData, m_afail) == 0x2c, "I3rLayerData::m_afail");
+static_assert(offsetof(I3rLayerData, m_atst) == 0x2d, "I3rLayerData::m_atst");
+static_assert(offsetof(I3rLayerData, m_ztst) == 0x2f, "I3rLayerData::m_ztst");
+static_assert(offsetof(I3rLayerData, m_cull) == 0x30, "I3rLayerData::m_cull");
+static_assert(offsetof(I3rLayerData, m_shade) == 0x32, "I3rLayerData::m_shade");
+static_assert(offsetof(I3rLayerData, m_fail_only) == 0x33, "I3rLayerData::m_fail_only");
+static_assert(offsetof(I3rLayerData, m_date) == 0x35, "I3rLayerData::m_date");
+static_assert(offsetof(I3rLayerData, m_ambient) == 0x36, "I3rLayerData::m_ambient");
+static_assert(sizeof(I3rLayerData) == 0x38, "I3rLayerData: the 0x38 bytes known");
 
 /* A node's data (item type 0x2a): the parent node's index first, < 0 for
  * a root node. Node records are 2 bytes apart in the file. */

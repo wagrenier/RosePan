@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 19:01 at commit `1f20e26` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 19:26 at commit `0eda3b0` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-27 19:01 at commit `1f20e26` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6868**, named **5105** (74%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 258, ror-inferred 3503
-- context-name ledger: 3801 entries; overrides of wrong library matches: 5
+- game functions: **6868**, named **5119** (75%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 258, ror-inferred 3517
+- context-name ledger: 3815 entries; overrides of wrong library matches: 5
 - placed in a source file: 4588/6868 in 118 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3621**; stubs: **360**
+- reconstructed RoR functions: **3639**; stubs: **360**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -69,6 +69,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3mroot.cpp` | 12 | 0 |
 | `src/i3d/i3rdraw.cpp` | 2 | 0 |
 | `src/i3d/i3ritem.cpp` | 156 | 0 |
+| `src/i3d/i3rmesh.cpp` | 18 | 0 |
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
@@ -131,9 +132,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 166 TUs: todo 111, partial 13, verify 67, done 9
-- next: **i3d/i3rmesh.cpp** (pinned in the queue)
-- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, i3d/i3rmesh.cpp, unassigned@0021c960, mag/magscenecamera.cpp, unassigned@0013e2ec, unassigned@00140c68, unassigned@00140990, mag/maglifepc.cpp, task/naga_chunk.cpp, mag/maglifebwn.cpp, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
+- 166 TUs: todo 110, partial 13, verify 68, done 9
+- next: **unassigned@0021c960** (pinned in the queue)
+- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, mag/magscenecamera.cpp, unassigned@0013e2ec, unassigned@00140c68, unassigned@00140990, mag/maglifepc.cpp, task/naga_chunk.cpp, mag/maglifebwn.cpp, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
 - partial: `emy/emy_hfm.cpp` 46/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec
 - partial: `i3d/i3mpose.cpp` 36/38 -- Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game c
 - partial: `i3d/i3rdraw.cpp` 2/19 -- Left: the VU1 packet writers 0x220098..0x222ce0 (i3rDrawMesh45 / i3rDrawMesh46 / i3rDrawSetupBlend / i3rDrawGroupSkinned / i3rDrawGroupRigid and their strip wri
@@ -165,6 +166,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `i3d/i3dview.cpp` 19/19 -- Status verify: views are built every frame (host test: screen centre 2047.5, frustum corner on the rectangle corner, depth 4094.6..1.06, scissor 0..511 x 0..447
 - verify: `i3d/i3dvram.cpp` 37/37 -- Complete; nothing on screen shows it yet (screen black: the draw path is stubbed). A host test (init, reserve x3 frames with eviction, compact, end frame, reset
 - verify: `i3d/i3mroot.cpp` 12/12 -- Pinned from unassigned@0022b4b8 to i3d/i3mroot.cpp. Host keeps root-relative offsets (i3mPtr), like i3c: the relocators walk with delta 0 and keep +0x16 at 1 (o
+- verify: `i3d/i3rmesh.cpp` 14/14 -- Verify: the packet builder's callers (i3rDrawGroupSkinned / Rigid, 0x220838) are not ported, so only i3rPktLayerTest / i3rPktLayerAlpha run, through rosepan_i3d
 - verify: `i3d/i3rmodel.cpp` 14/14 -- Verify: nothing on screen reaches it yet. The 200 s New Game run still ends black after the film; DogActor::load 0x10cd5c (dog/dogactor.cpp) is the stub that ke
 - verify: `i3d/i3rroot.cpp` 14/14 -- Verify: no model loads in the smoke run yet, so nothing can show it (screen still black, as before). Port trap: the ROM relocates i3r files in place into absolu
 - verify: `i3d/i3rtype.cpp` 96/96 -- Verify: complete code, nothing on screen can show it (the 15 s smoke run shows the boot disclaimer; no model draws yet). The nine fixup pairs inside this extent
@@ -208,6 +210,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 19:26 `i3d/i3rmesh.cpp` verify: i3d/i3rmesh.cpp written whole (14 functions): the material packet cache i3rGetMaterialPacket 0x228f50 with its list helpers, i3rBuildMaterialPacket and the per-
 - 2026-10-27 19:00 `i3d/i3rdraw.cpp` partial: i3d/i3rdraw.cpp pinned 0x21fb50..0x222f50 (was unassigned@0021fb50). i3rDrawModel written: the model box cull against the layer's view, the ROM's node / entry /
 - 2026-10-27 18:45 `setup/i3d_mesh_draw.cpp` verify: Native i3d mesh path: i3r models drawn on the host (rosepan_i3dmesh.cpp) -- the i3rDrawModel walk, a VIF1 unpack interpreter into host VU1 memory, strips with t
 - 2026-10-27 18:21 `utl/utlmath.cpp` verify: utl/utlmath.cpp pinned (0x106658..0x10737c, was unassigned@00106658) and all 25 functions written: utlConvSndId with the 54-row map-area sound id table 0x295f08
@@ -215,7 +218,6 @@ Recent sessions:
 - 2026-10-27 17:49 `dog/dogmotionblend.cpp` verify: DogMotionBlend complete (11 of 11): getPose, getNodeRate, step, stepLoop, getTimeRatio, setTimeRatio, setBlendRate written from the ROM; blend entry fields m_no
 - 2026-10-27 17:41 `i3d/i3rtype.cpp` verify: Split unassigned@00228c08 into i3d/i3rtype.cpp 0x22a6c0-0x22b1b0 and i3d/i3rmesh.cpp 0x228c08-0x22a6c0 (both pinned). Wrote all 78 per-type i3r accessors of i3r
 - 2026-10-27 17:18 `dog/dogcamera.cpp` verify: DogCamera written, all 8 functions of 0x10f860..0x10fc7c: saveCamera / restoreCamera (one-level save of angle, translation, rotation, scale; asserts m_saved), u
-- 2026-10-27 17:03 `dog/dogentity.cpp` verify: DogEntity / DogEntityEx written: setRotate, setAddRotY, makeLocalMatrix, normalizeRotate, getMatrixZ, lookAt 0x110144, getMatrixPos / getMatrixRot (two unrefere
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -226,8 +228,8 @@ Recent sessions:
 | `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 49 | 6 |
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
 | `unassigned@0021c960` | todo | 0/11/21 | 8.4 | 44 | 6 |
-| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 40 | 1 |
+| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
 | `unassigned@00103edc` | todo | 0/5/23 | 1.6 | 38 | 2 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
 | `mag/maglifebwnctrl.cpp` | todo | 0/17/82 | 18.3 | 32 | 1 |
@@ -266,6 +268,7 @@ Recent sessions:
 | `001fcaac` | NagaChunk::~NagaChunk | 6 | ror | missing | task/naga_chunk.cpp |
 | `00202f10` | TskEnemyMove::stop | 6 | ror | stub | - |
 | `00140c68` | MagScene::updateRecords853fc | 6 | ror | stub | - |
+| `002251f0` | i3rTrackGetValue | 5 | ror | stub | - |
 | `0017c340` | FUN_0017c340 | 5 | - | stub | - |
 | `001044b8` | utlRandRangeF | 5 | ror | stub | - |
 | `001874ac` | MsgManSet::update | 5 | ror | stub | - |
@@ -275,5 +278,4 @@ Recent sessions:
 | `0013f280` | MagScene::openSysMsgWindow | 5 | ror | stub | - |
 | `001bebec` | GamFont::setFont | 4 | ror | stub | - |
 | `0012b7cc` | MagLifeBwnCtrl::setLevel | 4 | ror | stub | mag/maglifebwnctrl.cpp |
-| `001a074c` | MnuTextList::close | 4 | ror | stub | mnu/mnuselect.cpp |
 

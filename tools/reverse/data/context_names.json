@@ -16523,6 +16523,12 @@
   "was": "FUN_00224ff0",
   "why": "picture + header size + image size: the CLUT data, NULL when ClutColors is 0"
  },
+ "002251f0": {
+  "name": "i3rTrackGetValue",
+  "tag": "ror-inferred",
+  "was": "FUN_002251f0",
+  "why": "an item's vector at time f12: its data vector when child 0 has no data, else 0x225148 interpolates child 0's keys; 0x22a050 reads the uv tracks with it"
+ },
  "00226278": {
   "name": "i3dViewMakePlanes",
   "tag": "ror-inferred",
@@ -16859,11 +16865,89 @@
   "was": "FUN_00228b50",
   "why": "absorbs free address-order neighbours on both sides into a block"
  },
+ "00228c08": {
+  "name": "i3rMeshOptClear",
+  "tag": "ror-inferred",
+  "was": "FUN_00228c08",
+  "why": "clears the two vectors at +0x10 and +0x00 of its argument, the uv scale / offset pair 0x22a050 reads from the mesh option record; no callers found"
+ },
  "00228c38": {
   "name": "i3dMatGetScaleTrans",
   "tag": "lib-context",
   "was": "FUN_00228c38",
   "why": "out[0] = (m00, m11, m22, 0), out[1] = m row 3 (i3dVecCopy); i3dCtxCreateView's view +0x80 from its viewport +0xa0"
+ },
+ "00228c78": {
+  "name": "i3rAlphaFailMode",
+  "tag": "ror-inferred",
+  "was": "FUN_00228c78",
+  "why": "maps a layer byte 0x10 / 0x0f / 0x18 to 1 / 2 / 3 (else 0), the GS TEST AFAIL field i3rPktLayerTest shifts to bit 12"
+ },
+ "00228ce8": {
+  "name": "i3rBuildMaterialPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00228ce8",
+  "why": "per material layer: texture REF via i3dDrawSetUseTex and the state / light / STQ map / uv packets at the context head; records each layer's DMA address in the cache entry"
+ },
+ "00228f10": {
+  "name": "i3rMeshPacketInsert",
+  "tag": "ror-inferred",
+  "was": "FUN_00228f10",
+  "why": "links a cache entry into a circular list before another (+4 / +8 links)"
+ },
+ "00228f28": {
+  "name": "i3rMeshPacketMoveBefore",
+  "tag": "ror-inferred",
+  "was": "FUN_00228f28",
+  "why": "unlinks a cache entry and relinks it before another: 0x228f50 moves a hit to the bucket front"
+ },
+ "00228f50": {
+  "name": "i3rGetMaterialPacket",
+  "tag": "ror-inferred",
+  "was": "FUN_00228f50",
+  "why": "hashes material, frame, light, fog and view into a 256-bucket cache at layer +0x414, returns a hit or builds a new entry (i3dLayerFindMaterialDrawSet, i3rBuildMaterialPacket); called from i3rDrawGroupSkinned / Rigid and 0x220838"
+ },
+ "002291c8": {
+  "name": "i3rPktMeshEnv",
+  "tag": "ror-inferred",
+  "was": "FUN_002291c8",
+  "why": "the view's SCISSOR, the fog colour and state, and the view matrices (world screen, world clip, scale, offset) unpacked to VU1 at the head of a material packet"
+ },
+ "00229380": {
+  "name": "i3rPktLayerState",
+  "tag": "ror-inferred",
+  "was": "FUN_00229380",
+  "why": "a layer's GS registers: TEST and ALPHA (0x22a448 / 0x22a638), the 0x4a register overrides masked with the layer's user words, then the PRIM / colour scale / ambient / specular block for VU1"
+ },
+ "00229678": {
+  "name": "i3rPktLayerLights",
+  "tag": "ror-inferred",
+  "was": "FUN_00229678",
+  "why": "unpacks the layer light set's five lists (parallel transposed in fours, point, spot, two 0x30 kinds) for VU1 when the layer's shading byte +0x32 is 1 or 2 (2: half vectors with the view's eye direction)"
+ },
+ "00229b70": {
+  "name": "i3rPktLayerStqMaps",
+  "tag": "ror-inferred",
+  "was": "FUN_00229b70",
+  "why": "per STQ map entity of a layer (child 3, I3rStqMapEntity +0x40 / +0x41): its texture matrix, kind 1 from the view camera times the 0x303800 bias, to VU1 0x3ed..; sets the caller's flag when one was written"
+ },
+ "0022a050": {
+  "name": "i3rPktLayerUvXform",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a050",
+  "why": "a layer's cull sign (+0x30) and its uv offset / scale (child 0 tracks) and rotation matrix (child 1 tracks, sinf / cosf about a pivot) unpacked to VU1, then the strip program's flags word"
+ },
+ "0022a448": {
+  "name": "i3rPktLayerTest",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a448",
+  "why": "builds a TEST_1 (0x47) value from the layer's alpha test bytes +0x2c / +0x2d / +0x33, AREF from float +0x10 * 128, DATE +0x35 and ZTST +0x2f"
+ },
+ "0022a638": {
+  "name": "i3rPktLayerAlpha",
+  "tag": "ror-inferred",
+  "was": "FUN_0022a638",
+  "why": "maps the layer's blend mode +0x24 to an ALPHA_1 (0x42) value: 0x10 = 0x44 alpha blend, 0x11 add, 0x12 subtract, 0x2x the same with Ad"
  },
  "0022a6c0": {
   "name": "i3rUnrelocData4D",

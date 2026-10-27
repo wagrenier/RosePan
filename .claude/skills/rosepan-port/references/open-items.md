@@ -14,7 +14,8 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      real view matrix). Open: who starts a camera move (writes DogCamera +0x1d0 / +0x190..+0x1c0)
      is not found yet -- look in mag/magscenecamera.cpp / the camera natives when they are written.
      The queue entry unassigned@0010f944 is stale (tus.py next skips it: the run is now these two files).
-  b. unassigned@00228c08 -- SPLIT 2026-10-27: i3d/i3rtype.cpp 0x22a6c0..0x22b1b0 (the per-type
+  b. i3d/i3rmesh.cpp WRITTEN 2026-10-27 (verify; all 14 functions, the layer TEST / ALPHA feed the
+     native mesh draw). Was: unassigned@00228c08 -- SPLIT 2026-10-27: i3d/i3rtype.cpp 0x22a6c0..0x22b1b0 (the per-type
      accessors, written, verify) and i3d/i3rmesh.cpp 0x228c08..0x22a6c0 (the mesh packet builder with
      the i3dMatGetScaleTrans bridge; queued right after unassigned@0021fb50, since it only feeds VIF /
      GIF packets: the session that writes i3rBuildMeshPacket decides what of it the native mesh draw
@@ -1007,11 +1008,15 @@ to adapt when a TU reaches them:
   rechecked against the game's own view (the forced test builds its own: up = -y); (3) lights and
   fog: the colours are the strip colours x one fixed light (Shade), not mag/magscenelight.cpp's
   lights nor the fog (magscenecmd.cpp); (4) the 0x45 part of a combined mesh (FUN_00220098) is not
-  drawn; (5) alpha: hair cards draw with the default ALPHA 0x44 blend and no alpha test (the
-  material's ALPHA / TEST pair at 0x22a638 is not read); (6) the per-layer cache 0x228f50 and the
-  i3rBuildMeshPacket VIF chains are not needed on the host -- i3d/i3rmesh.cpp can be written as
-  PC: comments or as the ROM does, the reader is indifferent (it rebases relative to the first
-  unpack, so patched streams read the same). Doubt: the strip colour block (0x17) is read as RGB
+  drawn; (5) alpha: DONE 2026-10-27 (i3d/i3rmesh.cpp): the host sets each material's TEST /
+  ALPHA from its first layer through i3rPktLayerTest / i3rPktLayerAlpha (chain defaults 0x5000d /
+  0x44 where the layer writes none; the ROM would keep the previous layer's value instead). Every
+  amd.mdl layer is blend 0x10 (= 0x44) with no alpha test, so Amanda's picture is unchanged; a
+  model whose layers set m_atst / m_blend will show it. Only layer 0 is read (materials seen so far
+  have one). (6) i3d/i3rmesh.cpp is written as the ROM does (the material packet cache and VIF
+  chains, verify: its callers are the unported VU1 writers). For (3): amd.mdl's layers are
+  m_shade 1 (lit) with m_ambient 1, so the scene light set (I3dLayer m_light, i3rPktLayerLights'
+  five lists) is what the ROM shades them with. Doubt: the strip colour block (0x17) is read as RGB
   vertex colour; values are 0.98..1.0 on amd.mdl, which also fits a lighting factor.
 
 - utl/utlmath.cpp (2026-10-27) is the port's name for 0x106658..0x10737c: no source string names

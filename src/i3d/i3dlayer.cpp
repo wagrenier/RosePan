@@ -15,6 +15,8 @@
  * ======================================================================== */
 #include "i3d/i3dlayer.h"
 #include "i3d/i3dtex.h"
+#include "i3d/i3rmesh.h"
+#include "i3d/i3rmodel.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -364,22 +366,24 @@ u_long i3dLayerGetUser2(I3dLayer *layer, int n)
 // when given) and sort words.
 // ROR 0x002234a8
 
-I3dDrawSet *i3dLayerFindMaterialDrawSet(I3dLayer *layer, const I3rMaterial *mat, const I3dDrawSet *base)
+I3dDrawSet *i3dLayerFindMaterialDrawSet(I3dLayer *layer, const I3rItem *mat, const void *base)
 {
     int tex_no[16];
     I3dTexSetDesc desc;
     u_int n = 0;
-    u_int count = mat->m_tex->m_count & 0xffffff;
-    const I3rMatParam *param = mat->m_param;
+    const I3rItem *layers = mat->getChildren();
+    u_int count = layers->getNumChild();
+    const I3rMaterialData *param = (const I3rMaterialData *)mat->getData();
 
     if (count != 0)
     {
-        const I3rTexRefEntry *e = mat->m_tex->m_entry;
-        const I3rTexRefEntry *end = e + count;
+        const I3rItem *e = layers->getChildren();
+        const I3rItem *end = e + count;
         do
         {
-            if (e->m_tex->m_tex_no != -1)
-                tex_no[n++] = e->m_tex->m_tex_no;
+            const I3rLayerData *data = (const I3rLayerData *)e->getData();
+            if (data->m_tex_index != -1)
+                tex_no[n++] = data->m_tex_index;
             e++;
         } while (e != end);
     }
@@ -390,7 +394,7 @@ I3dDrawSet *i3dLayerFindMaterialDrawSet(I3dLayer *layer, const I3rMaterial *mat,
     desc.m_sort_order = param->m_sort_order;
     desc.m_sort_param = param->m_sort_param;
     if (base != NULL)
-        desc.m_depth = param->m_depth + base->m_depth;
+        desc.m_depth = param->m_depth + ((const I3rMeshOpt *)base)->m_depth;
     return i3dLayerFindDrawSet(layer, &desc);
 }
 
@@ -518,7 +522,7 @@ int i3dLayerInit(I3dLayer *layer, i3dContext *ctx)
     for (u_int i = 0; i < 0x100; i++)
         layer->m_sets[i] = NULL;
     for (u_int i = 0; i < 0x100; i++)
-        layer->m_414[i] = 0;
+        layer->m_mesh_cache[i] = NULL;
     layer->m_ctx = ctx;
     layer->m_group = group;
     layer->m_sub_group = NULL;
