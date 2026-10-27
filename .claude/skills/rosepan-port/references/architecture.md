@@ -1146,8 +1146,18 @@ never asserts): sessions name them (`tus.py define --why`).
   book of lookupFlagTable(2, item, 0); 0xad0..0xad2 the map 0x10001 when the map area is 0 / 2 / 1);
   m_22a84 is the open menu (2 book, 1 map, -1 none). GamMan +0x21ffc / +0x22000 are motion speeds
   restoreAfterMenu 0x1d4370 puts back (DogActor +0x1e8 = m_motion.m_speed). bss 0x7a3208 / 0x7a320c
-  are g_gamMan.m_flags / m_flags2, 0x7b2064 is Sequence::m_flags. Left: writeSaveData 0x1d6078 /
-  readSaveData 0x1d68a0 (0x1264), the save block.
+  are g_gamMan.m_flags / m_flags2, 0x7b2064 is Sequence::m_flags. **The save image** (MnuSvld's 0x3000
+  bytes; writeSaveData 0x1d6078 / readSaveData 0x1d68a0, written 2026-10-27): header "FEB_SAVE", +0x8
+  g_versionNumber, +0x10 chapter, +0x14 inuMode, +0x18 0x2d10, +0x1c play minutes, +0x20 / +0x24 equip /
+  find-target item, +0x28 version 0x10 (reader: nothing below 7; older versions have shorter sections);
+  +0x40 saveGlobals, saveBits, 8 bytes, PC and dog ObjStat::save (0xb0 each); then from that point:
+  +0x0 12 item words (id | num << 16), +0x30 stock count, +0x38 stock words, +0x56c 'N', +0x57c
+  m_1f240 (0x169 words), +0xb20 object resets (6-byte {oid, flags, m_0c} from the object table ->
+  +0x18bc0), +0xee8 0x26 vfchrs of image 1 (0x20 each: oid, kind, flags, param 8, 0x1000, 0x43 pos),
+  +0x13a8 every vfchr's {oid, flags} (-> +0x18bc4), +0x1fa8 the 12 option words +0x21f8c.., +0x1fd8 the
+  GamSndMan get_snd_prm BGM record (-> GamMan +0x22a5c: its writer), +0x1ffc 0x1c7 item records' flag
+  bytes (& 0xd5; the reader loads them signed). Sequence bits word 8 bit 0x1000 turns the read into a
+  New Game reset. findSectaCellFrom 0x1d7fb8 (no callers) searches a list from a cell via 0x17ded0.
 - **game/gamstat.cpp** (pinned 0x1d84c8..0x1dd1e8, 2026-10-26; game/gamstat.h): ObjStat / ACHRstat /
   FCHRstat code and GamSysData. ObjStat's fields are named by the ELF's accessor inlines 0x28f874..
   0x28fdb8 (ror-symbol): +0x100 o_oid, +0x104 o_stat, +0x108 o_chr_id (actor), +0x114 the secta cell

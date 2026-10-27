@@ -1081,18 +1081,6 @@ const char * msgGetSysText(int no)
     return "";
 }
 
-// stub of ROR 0x001d68a0
-void GamMan::readSaveData(void *buf)
-{
-    ROSEPAN_STUB("GamMan::readSaveData", 0x001d68a0);
-}
-
-// stub of ROR 0x001d6078
-void GamMan::writeSaveData(void *buf)
-{
-    ROSEPAN_STUB("GamMan::writeSaveData", 0x001d6078);
-}
-
 // stub of ROR 0x0017c4f4
 void sectorClearFlags(Obj17c0f0 *obj, int key, u_int bits, int rec)
 {
@@ -1947,5 +1935,12 @@ int FUN_0017d298(MagSectaList *list, MagSectaPathReq *req)
 float FUN_0017dd5c(MagSectaList *list, int id, const float *pos, float h)
 {
     ROSEPAN_STUB("FUN_0017dd5c", 0x0017dd5c);
+    return {};
+}
+
+// stub of ROR 0x0017ded0
+int FUN_0017ded0(MagSectaList *list, int id, const float *pos, float r)
+{
+    ROSEPAN_STUB("FUN_0017ded0", 0x0017ded0);
     return {};
 }

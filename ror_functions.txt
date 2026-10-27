@@ -3847,7 +3847,7 @@
 /* 001d7eb8 0000001c */ GamMan::selectSectaList(){}  // ror
 /* 001d7ed4 00000074 */ GamMan::getSectaCellPtr(){}  // ror
 /* 001d7f48 00000070 */ GamMan::pickSectaCell(){}  // ror
-/* 001d7fb8 000000ac */ FUN_001d7fb8(){}
+/* 001d7fb8 000000ac */ GamMan::findSectaCellFrom(){}  // ror
 /* 001d8064 000000b4 */ GamMan::findSectaCell(){}  // ror
 /* 001d811c 00000060 */ GamMan::getSectaCell(){}  // ror
 /* 001d817c 00000048 */ GamMan::getSectaCellY(){}  // ror

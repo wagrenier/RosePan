@@ -5,7 +5,6 @@
   "unassigned@00140030",
   "unassigned@00145020",
   "unassigned@001dd5e8",
-  "game/gamman2.cpp",
   "unassigned@001d859c",
   "unassigned@0020ff34",
   "unassigned@001e46b8"
@@ -259,7 +258,7 @@
    "why": "game/gamman.cpp asserts and allocDebug tags in init, loadSystemData, loadStage; GamMan's constructor 0x1c05c0 starts it after GamFont, switchVolume 0x1d3ac8 ends it; ObjStat and GamArea code follows (unassigned@001d3b44)"
   },
   "game/gamman2.cpp": {
-   "notes": "Left in this TU: writeSaveData 0x1d6078 and readSaveData 0x1d68a0 (the 0x1264 save block; stubs in lib/unassigned_stubs.cpp, caller mnu/mnusvld.cpp), and 0x1d7fb8 (0x17ded0 cell lookup) if still unwritten. Nothing here draws: the 200 s New Game run ran to the end without the earlier intermittent crash (one run), black after the film as before (last.png ~6780); the book closes and the narration starts through the real checkMenuReq tail now. The secta library 0x17c340 / 0x17dd5c / 0x17d298 (unassigned@00166a1c) is still stubs, so findSectaCell answers NULL; the hit walk works without it. hitAtPoint / hitAtSweep kind 4 can never hit (as in the ROM). emyCanReach (stub) should call countSectaPath(from, to, list) where the ROM passes list as its 7th argument. Knowledge in architecture.md (game/gamman2.cpp entry) and hazards.md (sqrtf unreachable blocks; inline python heredocs).",
+   "notes": "All 37 functions of the TU are written. Nothing on screen shows them: the smoke run never opens the save screen (boot disclaimer only). The first session that drives MnuSvld save/load should check a save round-trip and mark this done. The readSaveData BGM copy is the writer of GamMan m_bgmRec (+0x22a5c) that onSubSeqEnd uses. ROM quirks kept: the item flag bytes are loaded signed (lb), so a saved 0x80 sets the high bits; the vfchr and object-reset end records keep the last record's other words; GamItemSlot m_oid is left as it was on load (stack garbage in the ROM). readSaveData calls m_pcPtr / m_dogPtr load without NULL checks, as the ROM does. 0x17ded0 (unassigned@00166a1c) is still a stub. For the references: architecture.md game/gamman2.cpp entry has the save layout (already copied in).",
    "ranges": [
     [
      "001d3b44",
@@ -276,9 +275,14 @@
      "date": "2026-10-27 11:06",
      "status": "partial",
      "summary": "Hit tests and checkMenuReq written: hitTestObjs 0x1d7c20 over the update list through the member pointer m_hitFunc (hitAtPoint 0x1d4b9c, hitAtSweep 0x1d50a8), testHitAt, placeAchr, testAchrHit 0x1d5610, testPcHitAt 0x1d56f4, setupDogSweep 0x1d58d8, clearObjUpdates 0x1d5ec4, countSectaPath 0x1d81c4; checkMenuReq 0x1d3b44 (switch on global 0x15 has only case 3, jump table 0x2fc100) with restoreAfterMenu 0x1d4370 and endPcAction 0x1d4540. ChrHitRec gained m_depth / m_far; GamMan +0x21ffc / +0x22000 are float motion speeds."
+    },
+    {
+     "date": "2026-10-27 15:45",
+     "status": "verify",
+     "summary": "Save image written: writeSaveData 0x1d6078 and readSaveData 0x1d68a0 (FEB_SAVE version 0x10, every section at its EE offset through memcpy, older versions read as the ROM does, the New Game branch on sequence bits word 8 bit 0x1000), plus findSectaCellFrom 0x1d7fb8 (no callers, over 0x17ded0). GamMan gained m_21fac[4] (saved with the options); both save functions now return the ROM's length value. Stubs removed from lib/unassigned_stubs.cpp."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "All 37 functions are GamMan methods (21 named GamMan::, the rest called only from GamMan / gamstat / tsk_chr), contiguous after game/gamman.cpp's pinned end 0x1d3b44 and before game/gamstat.cpp's GamIdMap::init 0x1d84c8; no source-path string. A second GamMan file in RoR's magscene2.cpp / maglifepc2.cpp style: gamman.cpp is pinned and verify, and its asserts end before 0x1d3b44."
   },
   "game/gamsnd.cpp": {

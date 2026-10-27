@@ -690,6 +690,9 @@ void  FUN_0017c340(Obj17c0f0 *obj, const float *pos, GamSecta **hit, int arg,
 /* The height of cell id of list under pos (GamMan::getSectaCellY; the ROM
  * passes 0 in f12). */
 float FUN_0017dd5c(MagSectaList *list, int id, const float *pos, float h); // ROR 0x0017dd5c
+/* The cell of list holding pos, searched from cell id (GamMan::
+ * findSectaCellFrom passes 40 in f12); its index, -1 none. */
+int   FUN_0017ded0(MagSectaList *list, int id, const float *pos, float r); // ROR 0x0017ded0
 /* GamMan::findSectaPath's request: the list, the start and goal cells
  * (four-entry arrays, the list's entry set) and the answer. layout: host. */
 struct MagSectaPathReq

@@ -343,10 +343,12 @@ struct GamMan
     void setMesSpritePos(int no, int x, int y);                          // ROR 0x001c5168
     void fadeInMesSprite(int no, int time);                              // ROR 0x001c51e0
     void fadeOutMesSprite(int no, int time);                             // ROR 0x001c5240
-    /* The game into / out of the save screen's 0x3000-byte image
-     * (unassigned@001d3b44). */
-    void writeSaveData(void *buf);                                       // ROR 0x001d6078
-    void readSaveData(void *buf);                                        // ROR 0x001d68a0
+    /* The game into / out of the save screen's 0x3000-byte image (EE
+     * layout, "FEB_SAVE" version 0x10; game/gamman2.cpp). Both return the
+     * image's length + 0x39 (no caller reads it); readSaveData returns 0
+     * for a version below 7. */
+    int  writeSaveData(void *buf);                                       // ROR 0x001d6078
+    int  readSaveData(const void *buf);                                  // ROR 0x001d68a0
     void update();                                                       // ROR 0x001c526c
     void postUpdate();                                                   // ROR 0x001c53d8
     /* The dog's mode (getInuMode): 1 follows the PC (shown, Brown's
@@ -870,6 +872,9 @@ struct GamMan
     GamSecta *getSectaCellPtr(int no, int list);                         // ROR 0x001d7ed4
     /* The cell of pos in list from scratch (0x17c340, radius 40), NULL none. */
     GamSecta *pickSectaCell(const float *pos, int list);                 // ROR 0x001d7f48
+    /* The cell of pos in list starting from cell *cur (0x17ded0, radius
+     * 40), NULL none (no callers). */
+    GamSecta *findSectaCellFrom(const float *pos, const int *cur, int list); // ROR 0x001d7fb8
     /* The floor height of cell under pos (0x17dd5c on list); 100000 for a
      * NULL cell. */
     float getSectaCellY(GamSecta *cell, const float *pos, int list);     // ROR 0x001d817c
@@ -1190,6 +1195,7 @@ struct GamMan
     int          m_masterVolume;    // ROR 0x21fa0: option 1's level scaled to 32..224
     int          m_optSeLevel;      // ROR 0x21fa4: option 3 / 5
     int          m_optStrLevel;     // ROR 0x21fa8: option 2 / 4
+    int          m_21fac[4];        // ROR 0x21fac: saved with the options (writeSaveData's 0x30 bytes from +0x21f8c)
     float        m_21fbc[3];        // ROR 0x21fbc: 35, 40, 55
     int          m_21fcc;           // ROR 0x21fcc: releaseChr's argument for the PC
     int          m_21fd0;           // ROR 0x21fd0: ... for the dog
