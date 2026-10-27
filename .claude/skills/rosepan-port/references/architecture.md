@@ -1393,6 +1393,16 @@ throughout (identifiers, env variables, files, shader macros):
   0, exec returns 1: the task ends on its first step, as when the manager was a stub), so a script that
   waits on getTask(id) does not hang on a stub class. A class's real exec replaces that.
 
+## Attack / damage tasks (task/tsk_scene.cpp, 2026-10-26)
+
+- Achr attacks and hits run as tasks on the achr's `m_task[3]` (ACHRstat +0x3e0): `scnAttackStart`
+  0x1f9d90 (killTasks, then TskAttack kind 0x15) and `scnDamageStart` 0x1fa5bc (pauses the enemy, then
+  TskDamage kind 0x16 and effect kind 1 40 below the achr). `scnChrRequest` 0x1fac60 dispatches on chr
+  (0..10, or 11 = from the oid's kind): 3 the dog (0x1fae14), 4 the PC (0x1fb084), the rest damage.
+- TskAttack's steps (picked by the kind word param[2]: 0x12..0x14, 0x15, 0x26..0x28, 0x2e..0x30) and
+  most of TskDamage's live in the file after task/naga_chunk.cpp (unassigned@001fd424, 0x1fd424..
+  0x200000), not in tsk_scene.cpp; they call scnChrRequest back.
+
 ## The script tasks (task/tsk_chr.cpp, 0x1e7f28..0x1f6c64, 2026-10-26)
 
 Unanchored (no source string): the run between tsk_man.cpp and tsk_scene.cpp, pinned by its classes.

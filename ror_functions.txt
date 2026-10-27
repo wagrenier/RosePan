@@ -144,7 +144,7 @@
 /* 001041c4 00000020 */ utlRandStep(){}  // ror
 /* 001041e4 00000038 */ utlRand(){}  // ror
 /* 0010421c 00000020 */ utlRandReset(){}  // ror
-/* 0010423c 00000030 */ FUN_0010423c(){}
+/* 0010423c 00000030 */ utlRandRange(){}  // ror
 /* 0010426c 00000080 */ FUN_0010426c(){}
 /* 001042ec 000000a8 */ FUN_001042ec(){}
 /* 00104394 000000a4 */ FUN_00104394(){}
@@ -2153,7 +2153,7 @@
 /* 00163c74 0000011c */ FUN_00163c74(){}
 /* 00163d90 00000028 */ FUN_00163d90(){}
 /* 00163db8 00000058 */ FUN_00163db8(){}
-/* 00163e10 00000038 */ FUN_00163e10(){}
+/* 00163e10 00000038 */ EmyManager::pauseEmy(){}  // ror
 /* 00163e48 0000002c */ FUN_00163e48(){}
 /* 00163e74 0000002c */ FUN_00163e74(){}
 /* 00163ea0 00000044 */ FUN_00163ea0(){}
@@ -4283,7 +4283,7 @@
 /* 001f839c 00000058 */ scnMakeScenePath(){}  // ror
 /* 001f83f4 000008f8 */ scenePlayStart(){}  // ror
 /* 001f8cec 00000298 */ scenePlayStartSimple(){}  // ror
-/* 001f8f84 00000034 */ FUN_001f8f84(){}
+/* 001f8f84 00000034 */ PLScenePlay::~PLScenePlay(){}  // ror
 /* 001f8fb8 00000004 */ gamSystemDataLoaded(){}  // ror
 /* 001f8fc0 0000021c */ TskSnd::TskSnd(){}  // ror
 /* 001f91dc 00000068 */ TskSnd::exec(){}  // ror
@@ -4300,23 +4300,23 @@
 /* 001f96c0 0000008c */ TskSnd::stepPlayStream(){}  // ror
 /* 001f974c 00000074 */ TskSnd::stepSEFadeOut(){}  // ror
 /* 001f97c0 00000008 */ TskSnd::stepEnd(){}  // ror
-/* 001f97c8 00000094 */ FUN_001f97c8(){}
-/* 001f985c 00000064 */ FUN_001f985c(){}
-/* 001f98c0 00000428 */ FUN_001f98c0(){}
-/* 001f9ce8 00000004 */ FUN_001f9ce8(){}
-/* 001f9cf0 000000a0 */ FUN_001f9cf0(){}
-/* 001f9d90 000000a8 */ FUN_001f9d90(){}
-/* 001f9e38 00000020 */ FUN_001f9e38(){}
-/* 001f9e58 00000764 */ FUN_001f9e58(){}
-/* 001fa5bc 000001ac */ FUN_001fa5bc(){}
+/* 001f97c8 00000094 */ scnPlaySEDelayed(){}  // ror
+/* 001f985c 00000064 */ TskAttack::TskAttack(){}  // ror
+/* 001f98c0 00000428 */ TskAttack::setup(){}  // ror
+/* 001f9ce8 00000004 */ TskAttack::term(){}  // ror
+/* 001f9cf0 000000a0 */ TskAttack::exec(){}  // ror
+/* 001f9d90 000000a8 */ scnAttackStart(){}  // ror
+/* 001f9e38 00000020 */ TskDamage::TskDamage(){}  // ror
+/* 001f9e58 00000764 */ TskDamage::setup(){}  // ror
+/* 001fa5bc 000001ac */ scnDamageStart(){}  // ror
 /* 001fa768 0000025c */ FUN_001fa768(){}
 /* 001fa9c4 000000ac */ FUN_001fa9c4(){}
 /* 001faa70 00000160 */ FUN_001faa70(){}
-/* 001fabd0 00000028 */ FUN_001fabd0(){}
-/* 001fabf8 00000068 */ FUN_001fabf8(){}
+/* 001fabd0 00000028 */ TskDamage::term(){}  // ror
+/* 001fabf8 00000068 */ TskDamage::exec(){}  // ror
 /* 001fac60 000001b4 */ scnChrRequest(){}  // ror
-/* 001fae14 00000270 */ FUN_001fae14(){}
-/* 001fb084 00000550 */ FUN_001fb084(){}
+/* 001fae14 00000270 */ scnChrRequestDog(){}  // ror
+/* 001fb084 00000550 */ scnChrRequestPC(){}  // ror
 /* 001fb5d4 00000050 */ FUN_001fb5d4(){}
 /* 001fb624 000004e0 */ FUN_001fb624(){}
 /* 001fbb04 000000a0 */ FUN_001fbb04(){}
@@ -4388,8 +4388,8 @@
 // *****************************************************************************
 
 /* 001fd424 00000298 */ FUN_001fd424(){}
-/* 001fd6bc 00000300 */ FUN_001fd6bc(){}
-/* 001fd9bc 000003fc */ FUN_001fd9bc(){}
+/* 001fd6bc 00000300 */ TskAttack::stepKind12(){}  // ror
+/* 001fd9bc 000003fc */ TskAttack::stepKind15(){}  // ror
 /* 001fddb8 000001d4 */ FUN_001fddb8(){}
 /* 001fdf8c 000001d4 */ FUN_001fdf8c(){}
 /* 001fe160 0000071c */ FUN_001fe160(){}
@@ -4397,12 +4397,12 @@
 /* 001feb38 00000724 */ FUN_001feb38(){}
 /* 001ff25c 00000084 */ FUN_001ff25c(){}
 /* 001ff2e0 000001b4 */ FUN_001ff2e0(){}
-/* 001ff494 000001d0 */ FUN_001ff494(){}
-/* 001ff664 000001cc */ FUN_001ff664(){}
-/* 001ff830 000001cc */ FUN_001ff830(){}
+/* 001ff494 000001d0 */ TskAttack::stepKind2e(){}  // ror
+/* 001ff664 000001cc */ TskAttack::stepKind2f(){}  // ror
+/* 001ff830 000001cc */ TskAttack::stepKind30(){}  // ror
 /* 001ff9fc 000001c4 */ FUN_001ff9fc(){}
 /* 001ffbc0 00000120 */ FUN_001ffbc0(){}
-/* 001ffce0 000002e0 */ FUN_001ffce0(){}
+/* 001ffce0 000002e0 */ TskAttack::stepKind26(){}  // ror
 /* 001fffc0 0000018c */ FUN_001fffc0(){}
 /* 0020014c 00000180 */ FUN_0020014c(){}
 /* 002002cc 00000178 */ FUN_002002cc(){}

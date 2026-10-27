@@ -8,6 +8,7 @@
 #include "msg/msgman.h"
 #include "debug/motnamecnv0.h"
 #include "task/naga_chunk.h"
+#include "task/tsk_scene.h"
 
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
@@ -710,12 +711,6 @@ int MagScene::openSysMsgWindow(int msg, const int *args, int arg)
 {
     ROSEPAN_STUB("MagScene::openSysMsgWindow", 0x0013f280);
     return {};
-}
-
-// stub of ROR 0x001f8cec
-void scenePlayStartSimple(const char *name)
-{
-    ROSEPAN_STUB("scenePlayStartSimple", 0x001f8cec);
 }
 
 // stub of ROR 0x001e0c2c
@@ -1515,12 +1510,6 @@ int GamMan::getObjSectaNo(u_int oid, int list)
     return {};
 }
 
-// stub of ROR 0x001fac60
-void scnChrRequest(int chr, u_int oid, int a2, int a3, int word, u_int chrOid, int a6)
-{
-    ROSEPAN_STUB("scnChrRequest", 0x001fac60);
-}
-
 // stub of ROR 0x001417e4
 void MagScene::setFocusData(const void *data, int size)
 {
@@ -1579,4 +1568,59 @@ int motNameGetCategory(int chara)
 void utlStrToLower(char *dst, const char *src)
 {
     ROSEPAN_STUB("utlStrToLower", 0x00218338);
+}
+
+// stub of ROR 0x00163e10
+void EmyManager::pauseEmy(u_int oid, int on)
+{
+    ROSEPAN_STUB("EmyManager::pauseEmy", 0x00163e10);
+}
+
+// stub of ROR 0x001fd6bc
+int TskAttack::stepKind12()
+{
+    ROSEPAN_STUB("TskAttack::stepKind12", 0x001fd6bc);
+    return {};
+}
+
+// stub of ROR 0x001fd9bc
+int TskAttack::stepKind15()
+{
+    ROSEPAN_STUB("TskAttack::stepKind15", 0x001fd9bc);
+    return {};
+}
+
+// stub of ROR 0x001ffce0
+int TskAttack::stepKind26()
+{
+    ROSEPAN_STUB("TskAttack::stepKind26", 0x001ffce0);
+    return {};
+}
+
+// stub of ROR 0x001ff494
+int TskAttack::stepKind2e()
+{
+    ROSEPAN_STUB("TskAttack::stepKind2e", 0x001ff494);
+    return {};
+}
+
+// stub of ROR 0x001ff664
+int TskAttack::stepKind2f()
+{
+    ROSEPAN_STUB("TskAttack::stepKind2f", 0x001ff664);
+    return {};
+}
+
+// stub of ROR 0x001ff830
+int TskAttack::stepKind30()
+{
+    ROSEPAN_STUB("TskAttack::stepKind30", 0x001ff830);
+    return {};
+}
+
+// stub of ROR 0x0010423c
+int utlRandRange(int lo, int hi)
+{
+    ROSEPAN_STUB("utlRandRange", 0x0010423c);
+    return {};
 }

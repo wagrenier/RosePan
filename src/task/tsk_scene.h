@@ -97,6 +97,95 @@ struct TskSnd : CmnITask
     TskSndParam m_param;        // ROR 0x80
 };
 
+struct ACHRstat;
+
+/* TskAttack : CmnITask (vtable 0x2e4eb0, EE 0x80; kind 0x15): an achr's
+ * attack, started by scnAttackStart on the achr's task slot m_task[3].
+ * setup picks the motion and the step from the parameter words' kind
+ * (param[2]): 0x12..0x14, 0x15, 0x26..0x28, 0x2e, 0x2f, 0x30; other kinds
+ * set no step and the task idles. The steps live in the file after
+ * task/naga_chunk.cpp (unassigned@001fd424) and call scnChrRequest.
+ * layout: host -- a member-function pointer; EE offsets in the comments. */
+struct TskAttack : CmnITask
+{
+    typedef int (TskAttack::*StepFunc)();
+
+    /* param: the caller's words ([0], [2] the kind, [3] / [4] kind 0x15,
+     * [5] the target oid (0x13 / 0x14), [6] the motion and [10] a float
+     * (0x2e..0x30)). */
+    TskAttack(u_int oid, const int *param);                              // ROR 0x001f985c
+    ~TskAttack() override {}                                             // ROR 0x00290ac0
+
+    int  get_task_type() override { return 0x15; }                       // ROR 0x00290afc
+    void init() override {}                                              // ROR 0x00290af4
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001f9cf0
+    void term() override;                                                // ROR 0x001f9ce8
+
+    void setup(u_int oid, const int *param);                             // ROR 0x001f98c0
+    int  stepKind12();                                                   // ROR 0x001fd6bc
+    int  stepKind15();                                                   // ROR 0x001fd9bc
+    int  stepKind26();                                                   // ROR 0x001ffce0
+    int  stepKind2e();                                                   // ROR 0x001ff494
+    int  stepKind2f();                                                   // ROR 0x001ff664
+    int  stepKind30();                                                   // ROR 0x001ff830
+
+    StepFunc  m_step;           // ROR 0x04: GCC 2 {delta, index, pfn}; cleared by the constructor
+    u_int     m_oid;            // ROR 0x10
+    int       m_actor;          // ROR 0x14: the achr's scene actor
+    ACHRstat *m_achr;           // ROR 0x18
+    int       m_1c;             // ROR 0x1c: 0
+    int       m_20;             // ROR 0x20: 0
+    int       m_motion;         // ROR 0x24: the attack's motion number
+    int       m_34;             // ROR 0x34: param[0]
+    int       m_kind;           // ROR 0x3c: param[2]
+    float     m_40;             // ROR 0x40: 0x15: 70 / 50 / 20 by system field 0x1b; 0x26..0x28: 110 / 110 / 120; 0x2e..0x30: param[10]
+    int       m_44;             // ROR 0x44: a frame of the motion (role unverified)
+    int       m_48;             // ROR 0x48: a later frame (role unverified)
+    int       m_4c;             // ROR 0x4c: 0x15: object param 0x67
+    u_int     m_target;         // ROR 0x50: 0x13 / 0x14: param[5], the object whose actor plays motion 9 / 10
+    int       m_54;             // ROR 0x54: 0x15: param[3]
+    int       m_58;             // ROR 0x58: 0x15: param[4]
+};
+
+/* scnDamageStart's parameter words (EE stack, scnChrRequest's a2 / word
+ * / chr). */
+struct ScnDamageParam
+{
+    int m_a2;                   // ROR 0x00: TskDamage::setup keeps it at +0x3c
+    int m_word;                 // ROR 0x04
+    int m_chr;                  // ROR 0x08: scnChrRequest's resolved chr
+};
+static_assert(sizeof(ScnDamageParam) == 0xc, "ScnDamageParam is 3 words");
+
+/* TskDamage : CmnITask (vtable 0x2e4ef0, EE 0x80; kind 0x16): an achr
+ * hit by attacker's attack, started by scnDamageStart on the achr's task
+ * slot m_task[3]. setup (0x1f9e58, 0x764 bytes: not written yet) fills
+ * the rest and the step. layout: host -- a member-function pointer. */
+struct TskDamage : CmnITask
+{
+    typedef int (TskDamage::*StepFunc)();
+
+    TskDamage(u_int oid, u_int attacker, const ScnDamageParam *param, int kind) // ROR 0x001f9e38
+    {
+        setup(oid, attacker, param, kind);
+    }
+    ~TskDamage() override {}                                             // ROR 0x00290b54
+
+    int  get_task_type() override { return 0x16; }                       // ROR 0x00290b90
+    void init() override {}                                              // ROR 0x00290b88
+    int  exec(int id, int time, int arg) override;                       // ROR 0x001fabf8
+    void term() override;                                                // ROR 0x001fabd0
+
+    void setup(u_int oid, u_int attacker, const ScnDamageParam *param, int kind); // ROR 0x001f9e58
+
+    StepFunc  m_step = NULL;    // ROR 0x04: GCC 2 {delta, index, pfn}; PC: NULL until setup sets it
+    int       m_0c;             // ROR 0x0c: setup clears it
+    u_int     m_oid;            // ROR 0x10
+    int       m_actor;          // ROR 0x14: the achr's scene actor
+    ACHRstat *m_achr = NULL;    // ROR 0x18: PC: NULL until setup sets it
+    u_char    _1c[0x80 - 0x1c]; // ROR 0x1c: setup's fields (to be placed)
+};
+
 /* TskCamera : CmnITask (vtable 0x2e4f30, EE 0xc0; kind 0): the scripted
  * camera native 016 case 50 starts on GamMan's m_camTaskId. Kind 0 looks
  * around with the left stick: the scene camera's rotation is m_center
@@ -300,12 +389,42 @@ struct ScenePlay : CmnITask
     VoiceManager     m_voice;         // ROR 0x548
 };
 
-/* The per-character request (jump table data 0x2fed40 over chr 0..10;
- * chr 11 takes it from object chrOid's kind: 4 for kind 0, 3 for kind 1,
- * the system data field 0x72 for kind 2). Many callers; TskMovePhysic
- * passes chr 4 (the PC) or 3 (the dog) with word 0x15. Role of the words
- * unverified. */
+/* PLScenePlay : CmnITask (vtable 0x2e4d90, EE 8 bytes; kind 0xf): a task
+ * that does nothing. Its constructor (0x1f8f70, hidden after
+ * scenePlayStartSimple) has no callers. layout: host -- a vptr. */
+struct PLScenePlay : CmnITask
+{
+    PLScenePlay() : m_04(0) {}                                           // ROR 0x001f8f70
+    ~PLScenePlay() override {}                                           // ROR 0x001f8f84
+
+    int  get_task_type() override { return 0xf; }                        // ROR 0x002909bc
+    void init() override {}                                              // ROR 0x002909c4
+    int  exec(int, int, int) override { return 0; }                      // ROR 0x002909cc
+    void term() override {}                                              // ROR 0x002909d4
+
+    int m_04;                   // ROR 0x04
+};
+
+/* The per-character request (jump tables data 0x2fece0 / 0x2fed10 /
+ * 0x2fed40). chr 11 takes chr from object chrOid's kind (oid bits 23..27):
+ * 4 for kind 0 (the PC), 3 for kind 1 (the dog), for kind 2 its system
+ * field 0x72 (0..2 -> 0, 3 -> 1, 4..8 -> 5..9, 9 -> 2, 10 -> 10), other
+ * kinds nothing. Then chr 3 -> scnChrRequestDog(oid, word), 4 ->
+ * scnChrRequestPC(oid, word), 0..2 / 5..10 -> scnDamageStart(chrOid,
+ * oid, {a2, word, chr}, a6). a3 is not read. TskMovePhysic passes chr 4
+ * or 3 with word 0x15. */
 void scnChrRequest(int chr, u_int oid, int a2, int a3, int word, u_int chrOid, int a6); // ROR 0x001fac60
+void scnChrRequestDog(u_int oid, int word);                              // ROR 0x001fae14
+void scnChrRequestPC(u_int oid, int word);                               // ROR 0x001fb084
+/* Unless the achr of oid has flag 0x400: pauses its enemy, replaces its
+ * task m_task[3] with a new TskDamage(oid, attacker, param, kind) and
+ * creates effect kind 1 40 below it (scale 1.75 for kind 2, else 1). */
+void scnDamageStart(u_int oid, u_int attacker, const ScnDamageParam *param, int kind); // ROR 0x001fa5bc
+/* Kills the achr's tasks and starts TskAttack(oid, param) on its
+ * m_task[3]. */
+void scnAttackStart(u_int oid, const int *param);                        // ROR 0x001f9d90
+/* SE se delay frames from now (a TskGenFrameFunc of kind 1). */
+void scnPlaySEDelayed(u_int se, int delay);                              // ROR 0x001f97c8
 
 /* "name.ext" -> "name/name" into out (the event pack's file name). */
 char *scnMakeScenePath(char *out, const char *name);                     // ROR 0x001f839c
@@ -314,6 +433,9 @@ char *scnMakeScenePath(char *out, const char *name);                     // ROR 
  * "name"), queues a ScenePlay; withEff also creates the pack's effect and
  * focus track. Returns the "frame" count. */
 int  scenePlayStart(const char *name, intptr_t oids, int withEff);       // ROR 0x001f83f4
+/* Starts the event scene name's effect only (seqcall's native 0x18): a
+ * ScenePlay without threads, frames or messages, its m_eff the pack's
+ * file 1 (kind 0xd). */
 void scenePlayStartSimple(const char *name);                             // ROR 0x001f8cec
 
 /* GamMan::loadSystemData's last call: empty in the ROM. */

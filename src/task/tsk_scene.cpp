@@ -9,6 +9,7 @@
  *  VoiceManager / ScenePlaySingle, scenePlayStart).
  * ======================================================================== */
 #include "task/tsk_scene.h"
+#include "common/rosepan_stub.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -713,6 +714,43 @@ int scenePlayStart(const char *name, intptr_t oidsArg, int withEff)
     return frames;
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// scenePlayStart's pack lookup without its threads: the ScenePlay only
+// carries the pack's effect (file 1) and the name. It reads no "frame"
+// chunk, so the ScenePlay's frame count is the constructor's (the PC's
+// 0: the task ends on its first exec and releases the effect; the ROM
+// leaves the word to the heap -- see open-items.md). The FileReader and
+// the NagaChunk over file 0 are constructed and destroyed unused.
+// callcheck: FUN_00215a30, FileReader, ~FileReader, NagaChunk, ~NagaChunk, operator_new (BedPfh's inline asserts, the inline locals, the new expression)
+// ROR 0x001f8cec
+
+void scenePlayStartSimple(const char *name)
+{
+    MagScene &scene = g_magSystem.m_scene;
+    FileReader reader;
+    char path[0x20];
+    BedPfh pack;
+
+    pack.clear();
+    scnMakeScenePath(path, name);
+    BedPfh evt(g_gamMan.m_evtPack);
+    int n = evt.getFileIndex(path);
+    pack = BedPfh(evt.getFile(n));
+    void *top = pack.getFile(0);
+    ScenePlay *play = new ScenePlay(0);
+    NagaChunk chunk(top);
+    (void)chunk;
+
+    EffParam param;
+    memset(&param, 0, sizeof(param));   /* PC: zeroed (the ROM sets these three) */
+    param.m_kind = 0xd;
+    param.m_08 = 0;
+    param.m_file = pack.getFile(1);
+    play->m_eff = scene.m_837e0.createEff(&param);
+    play->setName(name);
+    g_taskMan.addTask(1, -1, 1, 0, play, 0, &g_gamMan.m_frameTaskId, 0x11);
+}
+
 // ══════════════════════════════════════════════════════════════════════
 //  TskSnd
 // ══════════════════════════════════════════════════════════════════════
@@ -963,6 +1001,324 @@ int TskSnd::stepEnd(int volL, int volR)
     (void)volL;
     (void)volR;
     return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: operator_new (the new expression)
+// ROR 0x001f97c8
+
+void scnPlaySEDelayed(u_int se, int delay)
+{
+    int start = g_taskMan.m_timer.m_updates + delay;
+    TskGenFrameFunc *task = new TskGenFrameFunc(1, (int)se, 0);
+    g_taskMan.addTask(1, start, 1, 0, task, 0, NULL, 1);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  TskAttack
+// ══════════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: memset (clearing the step pointer: m_step = NULL)
+// ROR 0x001f985c
+
+TskAttack::TskAttack(u_int oid, const int *param)
+{
+    m_step = NULL;
+    m_oid = oid;
+    setup(oid, param);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The achr, the kind's motion and frames, and the step. Kinds 0x13 /
+// 0x14 also start motion 9 / 10 on the target's actor at once.
+// ROR 0x001f98c0
+
+void TskAttack::setup(u_int oid, const int *param)
+{
+    MagScene &scene = g_magSystem.m_scene;
+    /* data 0x3c888897, a hair above 1/60 */
+    const float speed = scnRecFloat(0x3c888897);
+    float rot[4];
+
+    (void)oid;
+    m_1c = 0;
+    m_20 = 0;
+    m_achr = g_gamMan.getAchr(m_oid);
+    m_actor = m_achr->m_actor;
+    m_kind = param[2];
+    m_34 = param[0];
+    g_gamMan.getObjRot(m_oid, rot);     /* the ROM drops the rotation */
+
+    switch (m_kind)
+    {
+    case 0x12:
+    {
+        u_short kind;
+        short type;
+        g_gamMan.getObjParam(m_oid, 0x66, &kind);
+        g_gamMan.m_sysData.getField(kind, 0x28, &type);
+        if (type == 4)
+        {
+            if (utlRandRange(0, 100) < 0x32)
+            {
+                m_motion = 0x42;
+                m_44 = 0x10;
+                m_48 = 0x14;
+            }
+            else
+            {
+                m_motion = 0x43;
+                m_44 = 0x1e;
+                m_48 = 0x2b;
+            }
+        }
+        else
+        {
+            m_motion = 0x44;
+            m_44 = 0x14;
+            m_48 = 0x17;
+        }
+        m_step = &TskAttack::stepKind12;
+        break;
+    }
+    case 0x13:
+        m_44 = 0x1c;
+        m_motion = 0x51;
+        m_48 = 0x21;
+        m_target = (u_int)param[5];
+        /* The ROM passes m_target in a sixth register setActorMotion does not read. */
+        scene.setActorMotion(speed, g_gamMan.getActorNo((u_int)param[5]), 9, 0, 0);
+        m_step = &TskAttack::stepKind12;
+        break;
+    case 0x14:
+        m_44 = 0x20;
+        m_motion = 0x52;
+        m_48 = 0x26;
+        m_target = (u_int)param[5];
+        scene.setActorMotion(speed, g_gamMan.getActorNo((u_int)param[5]), 10, 0, 0);
+        m_step = &TskAttack::stepKind12;
+        break;
+    case 0x15:
+    {
+        u_short kind;
+        u_short type;
+        int size;
+        g_gamMan.getObjParam(m_oid, 0x66, &kind);
+        g_gamMan.getObjParam(m_oid, 0x67, &m_4c);
+        g_gamMan.m_sysData.getField(kind, 0x28, &type);  /* not read */
+        m_motion = 0x45;
+        m_44 = 0x2e;
+        g_gamMan.m_sysData.getField(kind, 0x1b, &size);
+        if (size == 3)
+            m_40 = 70.0f;
+        else if (size == 2)
+            m_40 = 50.0f;
+        else
+            m_40 = 20.0f;
+        m_54 = param[3];
+        m_58 = param[4];
+        m_step = &TskAttack::stepKind15;
+        break;
+    }
+    case 0x26:
+    case 0x27:
+    case 0x28:
+        if (m_kind == 0x26)
+        {
+            m_motion = 0x14;
+            m_40 = 110.0f;
+            m_44 = 0xe;
+            m_48 = 0x11;
+        }
+        else if (m_kind == 0x27)
+        {
+            m_motion = 0x15;
+            m_40 = 110.0f;
+            m_44 = 8;
+            m_48 = 0xb;
+        }
+        else
+        {
+            m_motion = 0x16;
+            m_40 = 120.0f;
+            m_44 = 0x4b;
+            m_48 = 0x4e;
+        }
+        m_step = &TskAttack::stepKind26;
+        break;
+    case 0x2e:
+        m_40 = scnRecFloat(param[10]);
+        m_44 = 0x18;
+        m_motion = param[6];
+        m_48 = 0x2b;
+        m_step = &TskAttack::stepKind2e;
+        break;
+    case 0x2f:
+        m_40 = scnRecFloat(param[10]);
+        m_44 = 0x23;
+        m_motion = param[6];
+        m_48 = 0x37;
+        m_step = &TskAttack::stepKind2f;
+        break;
+    case 0x30:
+        m_40 = scnRecFloat(param[10]);
+        m_44 = 0x23;
+        m_motion = param[6];
+        m_48 = 0x86;
+        m_step = &TskAttack::stepKind30;
+        break;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001f9ce8
+
+void TskAttack::term()
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The step while one is set and the oid is not -1, else 0.
+// ROR 0x001f9cf0
+
+int TskAttack::exec(int id, int time, int arg)
+{
+    (void)id;
+    (void)time;
+    (void)arg;
+    if (m_step == NULL || m_oid == (u_int)-1)
+        return 0;
+    return (this->*m_step)();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: operator_new (the new expression)
+// ROR 0x001f9d90
+
+void scnAttackStart(u_int oid, const int *param)
+{
+    ACHRstat *achr = g_gamMan.getAchr(oid);
+
+    achr->killTasks();
+    TskAttack *task = new TskAttack(oid, param);
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, &achr->m_task[3], 0x11);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  TskDamage
+// ══════════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: operator_new (the new expression)
+// ROR 0x001fa5bc
+
+void scnDamageStart(u_int oid, u_int attacker, const ScnDamageParam *param, int kind)
+{
+    MagScene &scene = g_magSystem.m_scene;
+    ACHRstat *achr = g_gamMan.getAchr(oid);
+    int *slot = &achr->m_task[3];
+
+    if ((achr->m_flags & 0x400) != 0)
+        return;
+    g_emyManager.pauseEmy(oid, 1);
+    if (g_taskMan.getTask(*slot) != 0)
+    {
+        g_taskMan.killTask(*slot);
+        *slot = -1;
+    }
+    TskDamage *task = new TskDamage(oid, attacker, param, kind);
+    g_taskMan.addTask(1, -1, 1, 0, task, 0, slot, 0x11);
+
+    float pos[4];
+    achr->getPos(pos);
+    EffParam eff;
+    memset(&eff, 0, sizeof(eff));       /* PC: zeroed (the ROM sets the words below) */
+    eff.m_kind = 1;
+    eff.m_08 = 0;
+    eff.m_hit.m_pos[0] = pos[0];
+    eff.m_hit.m_pos[1] = pos[1] - 40.0f;
+    eff.m_hit.m_pos[2] = pos[2];
+    eff.m_hit.m_1c = 0;
+    eff.m_hit.m_20 = -1.0f;
+    eff.m_hit.m_24 = 0;
+    eff.m_hit.m_scale = kind == 2 ? 1.75f : 1.0f;
+    scene.m_837e0.createEff(&eff);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001fabd0
+
+void TskDamage::term()
+{
+    if (m_achr != NULL)
+        m_achr->empty1da074();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The step, always set by setup in the ROM.
+// ROR 0x001fabf8
+
+int TskDamage::exec(int id, int time, int arg)
+{
+    (void)id;
+    (void)time;
+    (void)arg;
+    if (m_step == NULL)                 /* PC: setup is still a stub; end the task */
+        return 1;
+    return (this->*m_step)();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// chr 11's chr from object chrOid's kind 2 system field 0x72 (0x2fed10).
+static const u_char s_scnChrOfType[11] = { 0, 0, 0, 1, 5, 6, 7, 8, 9, 2, 10 };
+
+// ROR 0x001fac60
+
+void scnChrRequest(int chr, u_int oid, int a2, int a3, int word, u_int chrOid, int a6)
+{
+    (void)a3;
+    if (chr == 11)
+    {
+        switch ((chrOid >> 23) & 0x1f)
+        {
+        case 0:
+            chr = 4;
+            break;
+        case 1:
+            chr = 3;
+            break;
+        case 2:
+        {
+            u_short type;
+            g_gamMan.m_sysData.getField(g_gamMan.getObjKind(chrOid), 0x72, &type);
+            chr = type < 11 ? s_scnChrOfType[type] : 0;
+            break;
+        }
+        default:
+            break;
+        }
+    }
+    if ((u_int)chr > 10)
+        return;
+
+    switch (chr)
+    {
+    case 3:
+        scnChrRequestDog(oid, word);
+        break;
+    case 4:
+        scnChrRequestPC(oid, word);
+        break;
+    default:
+    {
+        float pos[4];
+        g_gamMan.getObjPos(chrOid, pos);    /* the ROM drops the position */
+        ScnDamageParam param = { a2, word, chr };
+        scnDamageStart(chrOid, oid, &param, a6);
+        break;
+    }
+    }
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1230,4 +1586,24 @@ void gamStage2Loaded(void)
     BEDMEMINFO info;
     g_utlMemory.getInfo(&info);   // the ROM passes a third word 0
     (void)info;
+}
+
+// ---- stubs (tools/reverse/stubgen.py) ----
+
+// stub of ROR 0x001f9e58
+void TskDamage::setup(u_int oid, u_int attacker, const ScnDamageParam *param, int kind)
+{
+    ROSEPAN_STUB("TskDamage::setup", 0x001f9e58);
+}
+
+// stub of ROR 0x001fae14
+void scnChrRequestDog(u_int oid, int word)
+{
+    ROSEPAN_STUB("scnChrRequestDog", 0x001fae14);
+}
+
+// stub of ROR 0x001fb084
+void scnChrRequestPC(u_int oid, int word)
+{
+    ROSEPAN_STUB("scnChrRequestPC", 0x001fb084);
 }

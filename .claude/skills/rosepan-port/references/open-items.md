@@ -24,8 +24,12 @@ follows it; reached stubs in run order):
      unassigned@001f6c64) -- PARTIAL 2026-10-26: TskSnd (all kinds), TskCamera, gamSystemDataLoaded /
      gamStage2Loaded written (nothing on screen shows them: sound is the IOP stand-in); second session
      (2026-10-26) wrote scenePlayStart and the whole ScenePlay family 0x1f6c64..0x1f83f4 except the
-     unreferenced ScenePlay::loadCamera / loadFocus. Left: scenePlayStartSimple / PLScenePlay,
-     scnChrRequest, TskAttack / TskDamage, 0x1fae14 / 0x1fb084 / 0x1fb624, 0x1fc47c / 0x1fc490. The
+     unreferenced ScenePlay::loadCamera / loadFocus; a third session (2026-10-26) wrote
+     scenePlayStartSimple, PLScenePlay, scnPlaySEDelayed, TskAttack (setup, exec, term, scnAttackStart;
+     its six steps live in unassigned@001fd424 and are stubs), scnChrRequest, scnDamageStart and
+     TskDamage's exec / term. Left: TskDamage::setup 0x1f9e58 (0x764 bytes), scnChrRequestDog 0x1fae14,
+     scnChrRequestPC 0x1fb084, 0x1fb624 / 0x1fb5d4, 0x1fa768 / 0x1fa9c4 / 0x1faa70, 0x1fbb04 / 0x1fbba4,
+     0x1fc47c / 0x1fc490, loadCamera / loadFocus. The
      200 s New Game run reached none of them yet (it ends on the film's "March 1930" card).
      **scenePlayStart parses event packs with `task/naga_chunk.cpp`'s NagaChunk reader, stubbed
      (find returns 0, so a scene loads nothing and ends at once)**: queue task/naga_chunk.cpp (0x1fc4f0..
@@ -807,6 +811,17 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- scenePlayStartSimple (2026-10-26, task/tsk_scene.cpp): it reads no "frame" chunk and never calls
+  ScenePlay::setFrames, so the ROM's ScenePlay runs on whatever word the heap left at m_frame (the
+  ROM constructor does not write it). The PC constructor zeroes it, so the task ends on its first exec
+  and releases the pack's effect at once. When seqcall's native 0x18 is reached, check whether the
+  effect must outlive the task (then give the simple ScenePlay a large frame count or keep the
+  effect alive) -- the screenshot decides.
+- scnChrRequest (2026-10-26): the chr 0..2 / 5..10 path reads object chrOid's position into a stack
+  vector and never uses it; TskDamage::setup (0x1f9e58) gets a pointer to the words {a2, word, chr}
+  right after it -- check whether setup reads below the pointer (the position) before trusting
+  ScnDamageParam's three words.
 
 - TskMoveSectaFindPath (2026-10-26, task/tsk_chr.cpp): only aim (0x1ed1d0) writes a step pointer,
   and only stepTurn; the constructor overwrites it after its first aim, but an aim from exec or
