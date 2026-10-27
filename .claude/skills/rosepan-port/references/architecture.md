@@ -1072,6 +1072,14 @@ never asserts): sessions name them (`tus.py define --why`).
   (row vectors). The host keeps the class in the vptr word (reconstruction.md, polymorphic classes).
   Files link alphabetically here: dogactor, dogcamera (0x10f860), dogentity (0x10fc7c), doglightpool
   (0x1103dc);
+  dog/dogcamera.cpp (2026-10-27) = 0x10f860..0x10fc7c: DogCamera +0xf0 view matrix (getMatrix
+  0x10fa6c, filed under DogEntity by its symbol: slot 2 transform, then i3dMatInverse of the world
+  matrix), +0x134 move frame / +0x1d0 move length (updateMove 0x10f944 lerps translation +0x1b0 ->
+  +0x190 and rotation +0x1c0 -> +0x1a0 by frame / length, utlLerp4 0x106d40), +0x140 lens angle /
+  +0x144 its scale unit, +0x148 / +0x150 / +0x160 / +0x170 the saved angle, translation, rotation,
+  scale with +0x180 m_saved (saveCamera 0x10f860 / restoreCamera 0x10f8cc, one level, asserted);
+  getRotY 0x10fc28 = utlVecToRotY of the world z axis laid flat; getLensFov 0x10fac0 maps the angle
+  through 15-degree steps of a 13-entry degree table with modff 0x26c8e0.
   DogModel +0x11c `m_i3r_root`, +0x124 i3c root, +0x128 colli table, +0x130 node matrices (0x40 each),
   +0x134 node flag, +0x138 attach node, +0x13c attention, +0x140 hide, +0x144 light id; DogActor +0x1a0
   id, +0x1c0 / +0x1c4 motion count / `m_motion_data` (0x20 each, banks 0..3), +0x3c0 base rotation,

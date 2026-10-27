@@ -9,11 +9,11 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 **TOP PRIORITY, RE-PINNED (the user, 2026-10-27): the TUs missing to be in game and render in 3D lead the
 queue, ahead of everything else (the enemy split, menus, subtitles).** The pinned queue in tus.json is
 the stubs the 140 s New Game run reaches on the 3D path, in the order they block a picture:
-  a. dog/dogentity.cpp -- WRITTEN 2026-10-27 (verify; pinned 0x10fc7c..0x1103dc + linkonce). The
-     rest of unassigned@0010f944 is dog/dogcamera.cpp, pinned 0x10f860..0x10fc7c and queued first:
-     DogEntity::getMatrix 0x10fa6c (really DogCamera's: the +0xf0 inverse; call callTransform) and
-     DogCamera::getLensFov 0x10fac0 are reached stubs, plus the save / restore pair 0x10f860 /
-     0x10f8cc (m_saved +0x180), the interpolation 0x10f944 and the yaw 0x10fc28.
+  a. dog/dogentity.cpp -- WRITTEN 2026-10-27 (verify; pinned 0x10fc7c..0x1103dc + linkonce), and
+     dog/dogcamera.cpp -- WRITTEN 2026-10-27 (verify; all 8 functions: getMatrix now returns the
+     real view matrix). Open: who starts a camera move (writes DogCamera +0x1d0 / +0x190..+0x1c0)
+     is not found yet -- look in mag/magscenecamera.cpp / the camera natives when they are written.
+     The queue entry unassigned@0010f944 is stale (tus.py next skips it: the run is now these two files).
   b. unassigned@00228c08 (the i3dMat* library: i3dMatGetScaleTrans 0x228c38).
   c. dog/dogmotionblend.cpp (getPose, getNodeRate, stepLoop ...), unassigned@0022e840 (the i3m pose
      player: i3mGetLength, i3mGetPose, i3mPoseLerp, i3mPoseToMatrices, i3mGetBlendPose).

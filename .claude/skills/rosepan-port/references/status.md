@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 17:03 at commit `5c6d62b` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 17:18 at commit `5694a29` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-27 17:03 at commit `5c6d62b` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6829**, named **4981** (73%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 253, ror-inferred 3379
-- context-name ledger: 3672 entries; overrides of wrong library matches: 5
-- placed in a source file: 4332/6829 in 111 files
+- game functions: **6829**, named **4986** (73%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 254, ror-inferred 3384
+- context-name ledger: 3678 entries; overrides of wrong library matches: 5
+- placed in a source file: 4334/6829 in 111 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3471**; stubs: **391**
+- reconstructed RoR functions: **3478**; stubs: **389**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -40,6 +40,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/bed/bedsubmode.cpp` | 0 | 2 |
 | `src/debug/motnamecnv0.cpp` | 0 | 2 |
 | `src/dog/dogactor.cpp` | 147 | 0 |
+| `src/dog/dogcamera.cpp` | 8 | 0 |
 | `src/dog/dogentity.cpp` | 13 | 0 |
 | `src/dog/doglightpool.cpp` | 29 | 0 |
 | `src/dog/dogmodel.cpp` | 24 | 0 |
@@ -68,7 +69,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3ritem.cpp` | 160 | 0 |
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 264 |
+| `src/lib/unassigned_stubs.cpp` | 9 | 262 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 17 |
@@ -126,14 +127,15 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 163 TUs: todo 108, partial 14, verify 62, done 9
-- next: **dog/dogcamera.cpp** (pinned in the queue)
-- pinned queue: dog/dogcamera.cpp, unassigned@0010f944, unassigned@00228c08, dog/dogmotionblend.cpp, unassigned@0022e840, unassigned@00106658, setup/i3d_mesh_draw.cpp, unassigned@0021fb50, unassigned@0021c960, mag/magscenecamera.cpp, unassigned@0013e2ec, unassigned@00140c68, unassigned@00140990, mag/maglifepc.cpp, task/naga_chunk.cpp, mag/maglifebwn.cpp, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
+- 163 TUs: todo 107, partial 14, verify 63, done 9
+- next: **unassigned@00228c08** (pinned in the queue)
+- pinned queue: unassigned@0010f944, unassigned@00228c08, dog/dogmotionblend.cpp, unassigned@0022e840, unassigned@00106658, setup/i3d_mesh_draw.cpp, unassigned@0021fb50, unassigned@0021c960, mag/magscenecamera.cpp, unassigned@0013e2ec, unassigned@00140c68, unassigned@00140990, mag/maglifepc.cpp, task/naga_chunk.cpp, mag/maglifebwn.cpp, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
 - partial: `emy/emy_hfm.cpp` 46/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/dogactor.cpp` 147/147 -- Status verify: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run stays black after the film because the pose and draw path below DogActo
+- verify: `dog/dogcamera.cpp` 8/10 -- Status verify: the 200 s New Game run (second try; the first looped the boot logos, the known boot race) plays the opening film to Once upon a time, then ends b
 - verify: `dog/dogentity.cpp` 11/16 -- Status verify: the 200 s New Game run ends black (one small ring at the bottom) with no assert or crash; the DogEntity stubs no longer appear, the camera (paren
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
 - verify: `dog/dogmodel.cpp` 24/69 -- Status verify: nothing on screen can show a model yet. On New Game the loader runs (loadPack, setRoot, i3rRelocate, i3rAssignTex) but i3rItemRelocate 0x22c478 i
@@ -196,6 +198,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 17:18 `dog/dogcamera.cpp` verify: DogCamera written, all 8 functions of 0x10f860..0x10fc7c: saveCamera / restoreCamera (one-level save of angle, translation, rotation, scale; asserts m_saved), u
 - 2026-10-27 17:03 `dog/dogentity.cpp` verify: DogEntity / DogEntityEx written: setRotate, setAddRotY, makeLocalMatrix, normalizeRotate, getMatrixZ, lookAt 0x110144, getMatrixPos / getMatrixRot (two unrefere
 - 2026-10-27 16:34 `emy/emy_hfm.cpp` partial: Wrote HfmOutSlap (Init, Exec: chase, slaps 0x14/0x15/0x16 with hit windows and scnChrRequest on PC and dog, chaining, Term), HfmOutBreak, HfmOutWalk2 (Init, Exe
 - 2026-10-27 16:22 `game/gamtrg.cpp` verify: GamArea::update 0x1dee78 written: every active trigger's condition bits (rect enter/leave, height, actor distance and direction, PC facing, Cross, timer, ftb sc
@@ -203,7 +206,6 @@ Recent sessions:
 - 2026-10-27 11:06 `game/gamman2.cpp` partial: Hit tests and checkMenuReq written: hitTestObjs 0x1d7c20 over the update list through the member pointer m_hitFunc (hitAtPoint 0x1d4b9c, hitAtSweep 0x1d50a8), t
 - 2026-10-27 10:50 `game/gamman2.cpp` partial: Pinned 0x1d3b44..0x1d84c8 as game/gamman2.cpp (GamMan methods past switchVolume, was unassigned@001d3b44). Written: the object update list (relinkObj, queueObjU
 - 2026-10-27 09:41 `game/gamtrg.cpp` partial: GamArea (GamMan +0x40, the area triggers) written in game/gamtrg.cpp: constructor, init, cloneTrg, addTrg, stopKind, clear, stopTrgs, clearKind, findFchrOid, ac
-- 2026-10-27 09:24 `emy/emy_hfm.cpp` partial: Split the enemy run: pinned emy/emy_hfm.cpp 0x145020..0x149d18 (HfmMain + its outs). Wrote HfmMain whole (initOut, dtor, initAfterParam, decide, exec, after, se
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -211,11 +213,11 @@ Recent sessions:
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 70 | 5 |
 | `unassigned@0022e840` | todo | 0/13/99 | 32.1 | 55 | 5 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
+| `unassigned@00106658` | partial | 1/13/25 | 3.3 | 51 | 4 |
 | `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
-| `unassigned@00106658` | todo | 0/13/25 | 3.3 | 49 | 4 |
 | `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 49 | 6 |
-| `unassigned@0021c960` | todo | 0/11/21 | 8.4 | 44 | 6 |
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
+| `unassigned@0021c960` | todo | 0/11/21 | 8.4 | 44 | 6 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 40 | 1 |
 | `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
 | `unassigned@00103edc` | todo | 0/5/23 | 1.6 | 38 | 2 |

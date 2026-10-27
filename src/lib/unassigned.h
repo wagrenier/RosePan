@@ -258,6 +258,8 @@ int   utlStrEqualNoCase(const char *a, const char *b);                   // ROR 
 /* Swaps a sound id 0x0a00xxxx..0x0a02xxxx for its twin in the column the
  * game's language / version picks (table data 0x295f08). Other ids pass. */
 u_int utlConvSndId(u_int id);                                            // ROR 0x00106658
+/* out[i] = a[i] * (1 - t) + b[i] * t, four floats. */
+void  utlLerp4(float t, float *out, const float *a, const float *b);      // ROR 0x00106d40
 /* v[3] = 0, then v normalised in place (sceVu0Normalize). */
 void  utlNormalize3(float *v);                                           // ROR 0x00106db0
 /* The heading of (x, z) in -pi..pi, 0 for a zero vector (unassigned@00216ad0). */
