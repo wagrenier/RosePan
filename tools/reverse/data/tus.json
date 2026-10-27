@@ -146,6 +146,24 @@
    "status": "verify",
    "why": "11 of 16 functions assert with dog/dogtexinfo.cpp; the rest are DogTexInfo members (clear, term, findFree, setSepiaColor, releaseModel, releasePfh) taking the table in a0; DogModel code ends at 0x1161e4 (unassigned 0x1160a8 run before), MagSystem starts at 0x117654 after the 8-byte 0x11764c"
   },
+  "emy/emy_hfm.cpp": {
+   "notes": "Left in emy/emy_hfm.cpp (hand stubs at the end of the file, return -1 from Exec): the Init/Exec/Term of HfmOutSlap 0x145d60.., HfmOutBreak 0x146378.., HfmOutWalk2 0x14647c.., HfmOutRide 0x1469e8..0x146d88..0x1484ec (the biggest, with helpers 0x146ae4 / 0x146bf0 / 0x146c8c / 0x147760 / 0x148450), HfmOutDead 0x148d30, HfmOutWin 0x148e6c, HfmOutBitten 0x148f50, HfmOutCounter 0x149184, HfmOutTest 0x1494c8 / 0x149500. Start with brief: python tus.py brief emy/emy_hfm.cpp. Each out's own data starts at EE +0x38 (HfmOutWalk keeps its frame count in m_cnt; give each class its own fields, EmyOut's m_38 / m_3c stay for EmyManager). The outs call EmyOut helpers in unassigned@00166a1c (termCommon, setMotion, selectTarget, emyStartMove, emyChkInSight: now stubs in lib/unassigned_stubs.cpp) -- nothing moves until those and EmyMain's ctor 0x164118 / setStartState 0x164364 are written. No enemy is created in the smoke run, so nothing on screen shows this TU (15 s run: the Atlus disclaimer, as before). The other enemy files each start at their XxxMain::initOut (list in open-items.md item 7); pin them the same way. Doubts recorded in open-items.md: _tagEnemyTransition keeps a host pointer at +0xc; utlRandRangeF returns 0.0 on a zero draw (ROM behaviour).",
+   "ranges": [
+    [
+     "00145020",
+     "00149d18"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 09:24",
+     "status": "partial",
+     "summary": "Split the enemy run: pinned emy/emy_hfm.cpp 0x145020..0x149d18 (HfmMain + its outs). Wrote HfmMain whole (initOut, dtor, initAfterParam, decide, exec, after, selectOut, the free counters, subFreeCnt, slot 7) and HfmOutWalk (Init, Exec, getRoamPos, startIdle, Term, setStep). Grew EmyMain (state map +0x1c, request +0x24, decide switch +0x28, motion input +0x2c, changed +0x40, m_out[40] +0x48, trans +0xe8, motion list +0xec, agl +0x1c4) and EmyOut (ctor, Init/Exec/Term slots, base fields, helpers); defined _tagEnemyTransition and EmyStateMap. HfmMain moved from lib/unassigned.h to emy/emy_hfm.h."
+    }
+   ],
+   "status": "partial",
+   "why": "HfmMain + its ten HfmOut* classes: HfmMain::initOut (first, as every XxxMain::initOut opens its file) up to BdsMain::initOut 0x149d18 which opens the Bds file; no source string, named like emy_main.cpp / emy_manager.cpp"
+  },
   "emy/emy_manager.cpp": {
    "notes": "Verify: the 15 s smoke run shows the boot disclaimer as before (EmyManager now runs its exec every frame with no enemies; no crash); no enemy is created on the New Game path yet, so the first run that spawns one should look at it. Resolved the open item on addEmy's extra stack word: it is createEmy's makeOid, passed as 1 by addEmy. Callers updated: gamman.cpp addChr/addChrGroup pass typed param/transition/pos, seqcall native 212 case 24 is the inline SetGrpMotion. Doubts (open-items.md item 7): the file name; createEmy's transition table is GamMan m_image[place] as the callers pass it; EmyMain keeps the derived word +0x238 on the host; the host has a ninth group for setGroup a=8. Left: EmyMain itself (ctor 0x164118 / dtor 0x164208 now unassigned@00164118, belongs with emy/emy_main.cpp 0x164364..; its methods 0x164fc0.. in unassigned@00164fc0) and the eleven enemy files in unassigned@00145020; their virtual slots and initOut are stubs, ctor/dtors hand stubs in lib/unassigned_stubs.cpp (the EmyMain ctor stub sets the fields EmyManager reads).",
    "ranges": [

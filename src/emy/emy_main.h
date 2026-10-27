@@ -16,9 +16,34 @@
 #include "sdk/eetypes.h"
 #include "game/gamstat.h"
 
-struct _tagEnemyTransition;     /* the state transition table EmyMain is built with; layout not read yet */
 struct TskEnemyMove;
 struct TskEnemyTurn;
+class  EmyMain;
+
+/* The state transition table an enemy is built with (createEmy's trans;
+ * EmyMain::setStartState builds its EmyStateMap from it, the classes'
+ * selectOut read the current state's row). A row per state, a column per
+ * decide input; a byte is the state the input leads to, 0 none.
+ * layout: host -- the pointer; EE offsets in the comments. */
+struct _tagEnemyTransition
+{
+    u_char      m_states;       // ROR 0x00: rows
+    u_char      m_inputs;       // ROR 0x01: columns
+    const char *m_table;        // ROR 0x0c: m_states x m_inputs
+};
+
+/* The enemy's state graph (EE 0xa8, newed by setStartState; unassigned@00166a1c):
+ * a GamIdMap per state from the transition table and the current state.
+ * layout: host -- only the word the classes use is placed. */
+struct EmyStateMap
+{
+    EmyStateMap(int state);                                              // ROR 0x00169538
+    /* The current state's map finds input: the state it leads to becomes
+     * current and is returned; 0 when there is none. */
+    int  next(int input);                                                // ROR 0x0016968c
+
+    int m_cur;                  // ROR 0xa4: the current state
+};
 
 /* The enemy's parameter block (GamMan::setEmyParam's word, script data).
  * Only the start state is read so far; the rest is EmyMain::loadParam's. */
@@ -30,17 +55,72 @@ struct _tagEnemyParam
 static_assert(offsetof(_tagEnemyParam, m_start_state) == 0x10, "m_start_state");
 
 /* An enemy's behaviour for one state (EE: data to 0x34, vptr at +0x34,
- * vtable 0x2e3220; constructor 0x166a1c, destructor 0x166a74).
- * layout: host -- polymorphic; EE offsets in the comments. Only the words
- * EmyManager reads are placed. */
+ * vtable 0x2e3220; constructor 0x166a1c, destructor 0x166a74; its methods
+ * 0x166a1c.. are unassigned@00166a1c). The classes' outs (HfmOutWalk ...)
+ * are built by XxxMain::initOut; the class's after() runs the current
+ * one: Init when its state starts, Exec every frame (its result is the
+ * next decide input, -1 none), Term when the state ends.
+ * layout: host -- polymorphic; EE offsets in the comments. */
 class EmyOut
 {
 public:
+    EmyOut(u_int oid, ACHRstat *achr, EmyMain *emy);                    // ROR 0x00166a1c
     virtual ~EmyOut();                                                   // EE slot 1 (+0x08), ROR 0x00166a74
+    virtual void Init() = 0;                                             // EE slot 2 (+0x10)
+    virtual int  Exec() = 0;                                             // EE slot 3 (+0x18)
+    virtual void Term() = 0;                                             // EE slot 4 (+0x20)
 
+    /* The common Term: decide on, resetObj(0x400), the move task stopped,
+     * the turn task off, the achr's tasks killed, motion input on, the
+     * looping SE m_se stopped. */
+    void termCommon();                                                   // ROR 0x00166ad0
+    /* A node of the enemy's actor (x / z) at the object's height. */
+    void getBasePos(float *pos);                                         // ROR 0x00166b74
+    /* m_target = the PC or (by sight within 60 and rate %) the dog;
+     * m_target_dog says which. */
+    void selectTarget(int rate);                                         // ROR 0x00166da4
+    /* chrMtnMove2Achr at the emy's speed (m_agl / 60); flags 0 clears the
+     * emy's motion input word. */
+    void setMotion(int motion, int flags);                               // ROR 0x001680a0
+    /* The walk motion: the motion list's [0], or [1] with achr +0x3ec bits
+     * 8 and 0x10 both set. */
+    void setWalkMotion();                                                // ROR 0x001682b0
+
+    /* The ELF's linkonce accessors. */
+    u_int get_target_oid() { return m_target; }                          // ROR 0x0028aac8
+    void  ClearBittenFlg() { m_bitten = 0; }                             // ROR 0x0028ab2c
+
+    u_int     m_oid;            // ROR 0x00: the enemy's oid
+    int       m_step;           // ROR 0x04: the out's own step
+    ACHRstat *m_achr;           // ROR 0x08
+    EmyMain  *m_emy;            // ROR 0x0c
+    int       m_target_dog;     // ROR 0x10: selectTarget picked the dog
+    u_int     m_target;         // ROR 0x14: get_target_oid
+    int       m_bitten;         // ROR 0x1c: ClearBittenFlg
+    int       m_20;             // ROR 0x20
+    int       m_move_done;      // ROR 0x24: the move task sets it (emyStartMove)
+    int       m_se;             // ROR 0x2c: a looping SE, -1 none (termCommon stops it)
+    int       m_30;             // ROR 0x30: utlRandRange(8, 24) at construction
+
+    /* PC: words of the derived outs (EE data after the vptr); EmyManager
+     * reads them on any out, so the host keeps them in the base. */
     u_int m_38;                 // ROR 0x38: an oid its state 0xc works on (EmyManager::isEmyTarget)
     u_int m_3c;                 // ROR 0x3c: an oid its state 0xb works on
 };
+
+/* Free helpers of the out code (unassigned@00166a1c). */
+/* Fills the type's move record (data 0x2f1c90..) and starts the enemy's
+ * TskEnemyMove to pos; out->m_move_done is set when it arrives. */
+void emyStartMove(int mode, EmyOut *out, const float *pos);              // ROR 0x001670dc
+/* 1 when to is reachable from from over the secta cells (same cell, or
+ * the cell path test), 0 when either is off the cells. */
+int  emyCanReach(const float *from, const float *to);                    // ROR 0x0016976c
+/* Hands the held item object item to the enemy oid. */
+int  emyAttachItem(u_int oid, u_int item);                               // ROR 0x00169810
+/* The enemy achr sees target: the two actors' nodes within range and,
+ * with useAngle, within angle of the actor's facing. */
+int  emyChkInSight(float range, float angle, int useAngle, u_int target,
+                   ACHRstat *achr);                                      // ROR 0x00169bac
 
 /* The enemy base (vtable 0x2e31e0, vptr at +0x200 after EmyMain's data).
  * One per enemy, newed by EmyManager::createEmy as the class of its type.
@@ -89,12 +169,23 @@ public:
     void countDamageEnd();                                               // ROR 0x00166534
     u_int getSE(int no);                                                 // ROR 0x001665b8
     bool testNotifyHit();                                                // ROR 0x00166a0c
+    /* Param 8 (the area) of the PC (GamMan::m_pcPtr) is the enemy's; 0 without a PC. */
+    bool isPCSameArea();                                                 // ROR 0x00165734
+    /* The achr's a_lp is under a quarter of m_lp. */
+    bool isLowLife();                                                    // ROR 0x00166108
+    /* m_decide_sw: the classes' decide does nothing while it is 0. */
+    void setDecideSw(int on);                                            // ROR 0x0016649c
 
     /* The ELF's linkonce accessors (inline in the class body). */
     u_int    GetOid() { return m_oid; }                                  // ROR 0x0028a86c
     int      GetManageSw() { return m_manage_sw; }                       // ROR 0x0028a864
     ACHRstat *GetParamAddr() { return m_param; }                         // ROR 0x0028a874
     EmyOut  *GetEmyOut() { return m_emy_out; }                           // ROR 0x0028a87c
+    int      GetMotionList(int no) { return m_motion_list[no]; }         // ROR 0x0028a8b0
+    void     SetMotionList(int no, int motion) { m_motion_list[no] = motion; } // ROR 0x0028a8c0
+    void     SetInputFlgMotion(int v) { m_input_flg_motion = v; }        // ROR 0x0028a8d0
+    void     set_agl(float agl) { m_agl = agl; }                         // ROR 0x0028a85c
+    float    RefAGL() { return m_agl; }                                  // ROR 0x0028a8d8
     int      GetDamageEnd() { return m_damage_end; }                     // ROR 0x0028a89c
     void     SetDamageEnd() { m_damage_end = 6; }                        // ROR 0x0028a8a4
     int      RefLP() { return m_lp; }                                    // ROR 0x0028a8e0
@@ -121,11 +212,21 @@ public:
     int           m_down_flg;       // ROR 0x10: SetDownFlg
     int           m_damage;         // ROR 0x14: GetDamage
     int           m_down_supine;    // ROR 0x18: SetDownSupine / SetDownProne
+    EmyStateMap  *m_map;            // ROR 0x1c: setStartState's state graph
     ACHRstat     *m_param;          // ROR 0x20: GetParamAddr (its achr)
+    int           m_req;            // ROR 0x24: the decide input to apply, -1 none
+    int           m_decide_sw;      // ROR 0x28: setDecideSw (1 at construction)
+    int           m_input_flg_motion; // ROR 0x2c: SetInputFlgMotion; 1 when the out's motion ended (decide tests & 0x11)
     u_int         m_notify;         // ROR 0x30: notify's bits (1 hit, 2 killed ...)
     int           m_state;          // ROR 0x3c: GetState
+    int           m_changed;        // ROR 0x40: exec changed the state (after() then switches outs)
     EmyOut       *m_emy_out;        // ROR 0x44: GetEmyOut (the current state's out)
+    EmyOut       *m_out[40];        // ROR 0x48: the out of each state (initOut)
+    const _tagEnemyTransition *m_trans; // ROR 0xe8
+    int           m_motion_list[15];  // ROR 0xec: GetMotionList / SetMotionList (initOut fills them per class)
+    u_char        m_motion_flg[16];   // ROR 0x128: a byte per motion-list entry (initOut sets them; role not read)
     int           m_state2;         // ROR 0x150: GetState2 / SetState2
+    float         m_agl;            // ROR 0x1c4: set_agl / RefAGL (the motion speed x 60; 0 = 1)
     int           m_grp_no;         // ROR 0x1c8: GetGrpNo (0 = no group; GetGroupPtr points here)
     int           m_grp_state;      // ROR 0x1cc: 0 idle, 1 waiting, 3 out, 4 respawning, 5 gone (updateGroup)
     short         m_grp_wait;       // ROR 0x1d0: frames until it appears

@@ -10,6 +10,7 @@
 #include "task/naga_chunk.h"
 #include "task/tsk_scene.h"
 #include "dog/dogtexinfo.h"
+#include "emy/emy_main.h"
 
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
@@ -734,6 +735,12 @@ EmyMain::~EmyMain()
     ROSEPAN_STUB("EmyMain::~EmyMain", 0x00164208);
 }
 
+// stub of ROR 0x00166a1c
+EmyOut::EmyOut(u_int oid, ACHRstat *achr, EmyMain *emy)
+{
+    ROSEPAN_STUB("EmyOut::EmyOut", 0x00166a1c);
+}
+
 // stub of ROR 0x00166a74
 EmyOut::~EmyOut()
 {
@@ -774,12 +781,6 @@ BdsMain::~BdsMain()
 BdlMain::~BdlMain()
 {
     ROSEPAN_STUB("BdlMain::~BdlMain", 0x0014b554);
-}
-
-// stub of ROR 0x0014529c
-HfmMain::~HfmMain()
-{
-    ROSEPAN_STUB("HfmMain::~HfmMain", 0x0014529c);
 }
 
 // stub of ROR 0x0014cef8
@@ -1961,48 +1962,6 @@ int GrgMain::testView()
     return {};
 }
 
-// stub of ROR 0x00145604
-void HfmMain::after()
-{
-    ROSEPAN_STUB("HfmMain::after", 0x00145604);
-}
-
-// stub of ROR 0x001453c0
-void HfmMain::decide()
-{
-    ROSEPAN_STUB("HfmMain::decide", 0x001453c0);
-}
-
-// stub of ROR 0x00145560
-void HfmMain::exec()
-{
-    ROSEPAN_STUB("HfmMain::exec", 0x00145560);
-}
-
-// stub of ROR 0x001452fc
-void HfmMain::initAfterParam()
-{
-    ROSEPAN_STUB("HfmMain::initAfterParam", 0x001452fc);
-}
-
-// stub of ROR 0x00145020
-void HfmMain::initOut()
-{
-    ROSEPAN_STUB("HfmMain::initOut", 0x00145020);
-}
-
-// stub of ROR 0x00145680
-void HfmMain::selectOut()
-{
-    ROSEPAN_STUB("HfmMain::selectOut", 0x00145680);
-}
-
-// stub of ROR 0x0014582c
-void HfmMain::subFreeCnt(int n)
-{
-    ROSEPAN_STUB("HfmMain::subFreeCnt", 0x0014582c);
-}
-
 // stub of ROR 0x0014d1c4
 void MrtMain::after()
 {
@@ -2097,4 +2056,76 @@ void PigMain::selectOut()
 void TskEnemyMove::stop()
 {
     ROSEPAN_STUB("TskEnemyMove::stop", 0x00202f10);
+}
+
+// stub of ROR 0x00166b74
+void EmyOut::getBasePos(float *pos)
+{
+    ROSEPAN_STUB("EmyOut::getBasePos", 0x00166b74);
+}
+
+// stub of ROR 0x00166da4
+void EmyOut::selectTarget(int rate)
+{
+    ROSEPAN_STUB("EmyOut::selectTarget", 0x00166da4);
+}
+
+// stub of ROR 0x001680a0
+void EmyOut::setMotion(int motion, int flags)
+{
+    ROSEPAN_STUB("EmyOut::setMotion", 0x001680a0);
+}
+
+// stub of ROR 0x001682b0
+void EmyOut::setWalkMotion()
+{
+    ROSEPAN_STUB("EmyOut::setWalkMotion", 0x001682b0);
+}
+
+// stub of ROR 0x00166ad0
+void EmyOut::termCommon()
+{
+    ROSEPAN_STUB("EmyOut::termCommon", 0x00166ad0);
+}
+
+// stub of ROR 0x0016968c
+int EmyStateMap::next(int input)
+{
+    ROSEPAN_STUB("EmyStateMap::next", 0x0016968c);
+    return {};
+}
+
+// stub of ROR 0x00169810
+int emyAttachItem(u_int oid, u_int item)
+{
+    ROSEPAN_STUB("emyAttachItem", 0x00169810);
+    return {};
+}
+
+// stub of ROR 0x0016976c
+int emyCanReach(const float *from, const float *to)
+{
+    ROSEPAN_STUB("emyCanReach", 0x0016976c);
+    return {};
+}
+
+// stub of ROR 0x00169bac
+int emyChkInSight(float range, float angle, int useAngle, u_int target,
+                   ACHRstat *achr)
+{
+    ROSEPAN_STUB("emyChkInSight", 0x00169bac);
+    return {};
+}
+
+// stub of ROR 0x001670dc
+void emyStartMove(int mode, EmyOut *out, const float *pos)
+{
+    ROSEPAN_STUB("emyStartMove", 0x001670dc);
+}
+
+// stub of ROR 0x001044b8
+float utlRandRangeF(float lo, float hi)
+{
+    ROSEPAN_STUB("utlRandRangeF", 0x001044b8);
+    return {};
 }

@@ -110,6 +110,14 @@ follows it; reached stubs in run order):
      (setEmyWord238 writes it on any type); setGroup accepts group 8, which the ROM writes over +0x328
      (the host has a ninth group). EmyMain's ctor / dtor (0x164118 / 0x164208, now unassigned@00164118)
      belong to emy/emy_main.cpp with 0x164364.. -- define them together when that file is written.
+     **2026-10-27: the enemy split began** -- `emy/emy_hfm.cpp` pinned 0x145020..0x149d18 (HfmMain and
+     its outs; PARTIAL: HfmMain whole and HfmOutWalk written, the other eight outs' Init / Exec /
+     Term stubbed in the file). Each enemy file opens with its XxxMain::initOut (Bds 0x149d18,
+     Bdl 0x14b3bc, Mrt 0x14cde4, Clr 0x14dc7c, Nor 0x150b24, Grg 0x153e40, Fsh 0x156620,
+     Got 0x1583d4, Pig 0x15a17c, Dwf 0x15c304?). Doubts: `_tagEnemyTransition` keeps a host
+     pointer at +0xc (where the table comes from -- GamMan's image data or the ELF -- is not
+     read; a file-loaded table needs a converter); utlRandRangeF 0x1044b8 returns 0.0, not lo,
+     when the draw is 0 (kept as the ROM has it).
   8. `unassigned@001dd5e8` -- GamArea::addTrg / stopKind / clearKind (room triggers).
   9. `unassigned@001d3b44` -- GamMan::relinkObj 0x1d5da0.
   Also reached, lower: EmyManager::resetWork, Obj176a3c::createEff (the effect manager in
