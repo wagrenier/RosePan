@@ -181,6 +181,12 @@ entries are marked **RoR** with the date.
 
 ## Types and layouts
 
+- **A game pointer stored into an i3r file word** (2026-10-27, utl/utlmath.cpp): the EE writes an
+  address straight into a relocated field (a node slot's m_data = &DogModel::m_disp_control). On the
+  host relocated fields are self-relative (i3rroot.h), so a raw store would truncate a 64-bit pointer
+  and the reader would add it to the field address. Fix: store with i3rSetPtr, read with getData();
+  the target must lie within 2 GB of the file (game-heap objects do; a static global may not).
+
 - **Lower-bound asserts need the fields before them** (2026-10-27, EmyMain): a host-layout class that
   places only the members its code reads (EmyMain: 25 of ~0x200 bytes) fails `offsetof(...) >= 0x1c8`
   for late fields. Assert lower bounds only where the members before are complete; leave the rest to

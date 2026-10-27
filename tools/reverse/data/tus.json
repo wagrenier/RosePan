@@ -1684,6 +1684,7 @@
    "why": "source strings task/tsk_scene.cpp at 0x1f8034 / 0x1f81a8 (assert lines 790 / 852); ScenePlay's vtable slots span 0x1f7d54..0x1f82e4; ends after TskCamera::stepNone 0x1fc474: 0x1fc47c / 0x1fc490 are the inline ctor / dtor of the chunk writer whose fields (+0x400 count, +0x504 buffer, +0x50c offset) task/naga_chunk.cpp's 0x1fc4f0 uses"
   },
   "unassigned@001056f8": {},
+  "unassigned@00106658": {},
   "unassigned@0011262c": {},
   "unassigned@0012f008": {},
   "unassigned@00140030": {},
@@ -1714,6 +1715,24 @@
   "unassigned@0022e840": {},
   "unassigned@00237ce8": {},
   "unassigned@002437f8": {},
+  "utl/utlmath.cpp": {
+   "notes": "Nothing on screen can show this yet: after the film the stage stays black (a ring indicator only) because utlDrawI3r ends in the i3rDrawModel stub 0x21fe68; the first session whose screenshot shows a model through it marks this done. Renames: 0x1069b0 is utlVecRotY (copy form), 0x106bc8 is utlVecRotMatY (DogActor::getRootMove updated). utlVecToRot now takes a non-const dir (it normalises it in place, as the ROM does). The node display word is stored self-relative with i3rSetPtr: i3rDrawModel must read it with getData (hazards.md). Copy-form rotations: the ROM leaves out[3] as an unset stack word; the host copies in[3]. Next: i3rDrawModel 0x21fe68 and the mesh packet writers in unassigned@0021fb50 feeding the native i3d module.",
+   "ranges": [
+    [
+     "00106658",
+     "0010737c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 18:21",
+     "status": "verify",
+     "summary": "utl/utlmath.cpp pinned (0x106658..0x10737c, was unassigned@00106658) and all 25 functions written: utlConvSndId with the 54-row map-area sound id table 0x295f08, utlDrawI3r over i3rDrawModel 0x21fe68 (stubbed, unassigned@0021fb50), the i3r node display set/get, copy and matrix vector rotations, dot/cross/lengths/distances, utlVecToRot/X/Y with the ROM's pi constants. atanf/asinf/__ieee754_asinf named."
+    }
+   ],
+   "status": "verify",
+   "why": "the utl run between utl/utlfind.cpp and dog/dogmotionblend.cpp: utlConvSndId, the utlDrawI3r / I3r node display wrappers and the vector helpers (rotations, dot / cross, lengths, distances, direction to angles); no source-path string, file named for its majority (vector math)"
+  },
   "utl/utlmisc.cpp": {
    "notes": "Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and installs utlMemAlloc twice, utlMemRealloc and utlMemFree as rxSysSetMemFunc0..3 hooks; bed/bedmemory.cpp (0x100354..) is only stubs (alloc returns NULL), so reconstruct BedMemory right after main, before anything allocates. Decided without the user: the ROM's operator new/delete are written as utlOperatorNew/utlOperatorDelete(+Array, +Debug) and do NOT replace the host's global operator new (open-items Decisions). BedMemory field names (m_top, m_last, m_buffer, m_size, m_id, m_owner) are from create/format/destroy and partly guessed; check them against the assert texts (m_size, m_buffer, m_next, m_chunk_size, m_header_size, m_flag, m_filename) when bedmemory is read. utlParseParam leaves the record type unchanged for a value that is not a quote, dollar or digit, as the ROM does. Hazard recorded: stubgen copies an access label (public:) into the next stub.",
    "ranges": [

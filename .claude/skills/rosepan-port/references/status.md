@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 18:07 at commit `eb9597b` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 18:21 at commit `533a6e9` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-27 18:07 at commit `eb9597b` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6868**, named **5088** (74%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 255, ror-inferred 3486
-- context-name ledger: 3781 entries; overrides of wrong library matches: 5
-- placed in a source file: 4544/6868 in 116 files
+- game functions: **6868**, named **5100** (74%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 258, ror-inferred 3498
+- context-name ledger: 3796 entries; overrides of wrong library matches: 5
+- placed in a source file: 4569/6868 in 117 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3595**; stubs: **374**
+- reconstructed RoR functions: **3619**; stubs: **362**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -71,7 +71,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 9 | 254 |
+| `src/lib/unassigned_stubs.cpp` | 8 | 242 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 17 |
@@ -123,14 +123,15 @@ Least-named game-code regions (64 KB blocks):
 | `src/utl/utlfile.cpp` | 2 | 0 |
 | `src/utl/utlfind.cpp` | 0 | 1 |
 | `src/utl/utlgame.cpp` | 0 | 6 |
+| `src/utl/utlmath.cpp` | 25 | 0 |
 | `src/utl/utlmisc.cpp` | 24 | 0 |
 | `src/utl/utltm2.cpp` | 1 | 1 |
 | `src/wrd/wrdsrv.cpp` | 11 | 0 |
 
 ## Translation units (one session each: `tus.py`)
 
-- 166 TUs: todo 111, partial 13, verify 65, done 9
-- next: **unassigned@00106658** (pinned in the queue)
+- 166 TUs: todo 112, partial 12, verify 66, done 9
+- next: **setup/i3d_mesh_draw.cpp** (pinned in the queue)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, setup/i3d_mesh_draw.cpp, unassigned@0021fb50, i3d/i3rmesh.cpp, unassigned@0021c960, mag/magscenecamera.cpp, unassigned@0013e2ec, unassigned@00140c68, unassigned@00140990, mag/maglifepc.cpp, task/naga_chunk.cpp, mag/maglifebwn.cpp, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
 - partial: `emy/emy_hfm.cpp` 46/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec
 - partial: `i3d/i3mpose.cpp` 36/38 -- Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game c
@@ -198,11 +199,13 @@ Least-named game-code regions (64 KB blocks):
 - verify: `task/tsk_chr.cpp` 150/169 -- All of task/tsk_chr.cpp is now written; the inline dtors and empty terms the brief still lists as todo are in tsk_chr.h. Status verify: nothing on screen reache
 - verify: `task/tsk_man.cpp` 25/25 -- Pinned 0x1e7094..0x1e7f28 out of unassigned@001e6d54 (file name a guess, open-items). CmnITask slots: 1 get_task_type, 2 pause, 3 init, 4 exec(id, time, arg) no
 - verify: `task/tsk_scene.cpp` 76/93 -- Visual test: the 15 s smoke run ends on the disclaimer screen as before; nothing in this TU is reached yet (hits need the first room and an attack), so the TU i
+- verify: `utl/utlmath.cpp` 25/25 -- Nothing on screen can show this yet: after the film the stage stays black (a ring indicator only) because utlDrawI3r ends in the i3rDrawModel stub 0x21fe68; the
 - verify: `utl/utlmisc.cpp` 24/24 -- Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and i
 - verify: `wrd/wrdsrv.cpp` 11/14 -- Verified by a temporary self-test (not committed) loading WRD.BIN stages 1 and 13: 49 rooms of 247 index slots, names, floors, captions, offsets, get / findByNa
 
 Recent sessions:
 
+- 2026-10-27 18:21 `utl/utlmath.cpp` verify: utl/utlmath.cpp pinned (0x106658..0x10737c, was unassigned@00106658) and all 25 functions written: utlConvSndId with the 54-row map-area sound id table 0x295f08
 - 2026-10-27 18:07 `i3d/i3mpose.cpp` partial: i3m pose player: split unassigned@0022e840 into i3d/i3mpose.cpp, i3d/i3cquery.cpp, i3d/i3dgeom.cpp; wrote 37 i3mpose functions (key search and decode, step/lerp
 - 2026-10-27 17:49 `dog/dogmotionblend.cpp` verify: DogMotionBlend complete (11 of 11): getPose, getNodeRate, step, stepLoop, getTimeRatio, setTimeRatio, setBlendRate written from the ROM; blend entry fields m_no
 - 2026-10-27 17:41 `i3d/i3rtype.cpp` verify: Split unassigned@00228c08 into i3d/i3rtype.cpp 0x22a6c0-0x22b1b0 and i3d/i3rmesh.cpp 0x228c08-0x22a6c0 (both pinned). Wrote all 78 per-type i3r accessors of i3r
@@ -210,22 +213,21 @@ Recent sessions:
 - 2026-10-27 17:03 `dog/dogentity.cpp` verify: DogEntity / DogEntityEx written: setRotate, setAddRotY, makeLocalMatrix, normalizeRotate, getMatrixZ, lookAt 0x110144, getMatrixPos / getMatrixRot (two unrefere
 - 2026-10-27 16:34 `emy/emy_hfm.cpp` partial: Wrote HfmOutSlap (Init, Exec: chase, slaps 0x14/0x15/0x16 with hit windows and scnChrRequest on PC and dog, chaining, Term), HfmOutBreak, HfmOutWalk2 (Init, Exe
 - 2026-10-27 16:22 `game/gamtrg.cpp` verify: GamArea::update 0x1dee78 written: every active trigger's condition bits (rect enter/leave, height, actor distance and direction, PC facing, Cross, timer, ftb sc
-- 2026-10-27 15:45 `game/gamman2.cpp` verify: Save image written: writeSaveData 0x1d6078 and readSaveData 0x1d68a0 (FEB_SAVE version 0x10, every section at its EE offset through memcpy, older versions read 
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `unassigned@00166a1c` | todo | 0/36/342 | 94.7 | 144 | 8 |
-| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 75 | 6 |
+| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 70 | 5 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
 | `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
-| `unassigned@00106658` | partial | 1/13/25 | 3.3 | 51 | 4 |
 | `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 49 | 6 |
-| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
 | `unassigned@0021c960` | todo | 0/11/21 | 8.4 | 44 | 6 |
-| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
+| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 40 | 1 |
+| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
 | `unassigned@00103edc` | todo | 0/5/23 | 1.6 | 38 | 2 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
+| `mag/maglifebwnctrl.cpp` | todo | 0/17/82 | 18.3 | 32 | 1 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -251,7 +253,6 @@ Recent sessions:
 | `00176cc8` | Obj176a3c::createEff | 8 | ror | stub | - |
 | `00217f10` | utlAtan2 | 8 | ror | stub | - |
 | `00166ad0` | EmyOut::termCommon | 8 | ror | stub | - |
-| `00106760` | utlDrawI3r | 8 | ror | stub | - |
 | `001694cc` | EmyOut::playSE | 8 | ror | stub | - |
 | `0016976c` | emyCanReach | 8 | ror | stub | - |
 | `001875c0` | MsgManSet::getState | 7 | ror | stub | - |
@@ -269,6 +270,7 @@ Recent sessions:
 | `00183b24` | MsgMan::~MsgMan | 5 | ror | missing | msg/msgman.cpp |
 | `0011ade4` | MagLifePC::live | 5 | ror | stub | mag/maglifepc.cpp |
 | `0013f280` | MagScene::openSysMsgWindow | 5 | ror | stub | - |
-| `00107248` | utlVecToRot | 4 | ror | stub | - |
 | `001bebec` | GamFont::setFont | 4 | ror | stub | - |
+| `0012b7cc` | MagLifeBwnCtrl::setLevel | 4 | ror | stub | mag/maglifebwnctrl.cpp |
+| `001a074c` | MnuTextList::close | 4 | ror | stub | mnu/mnuselect.cpp |
 

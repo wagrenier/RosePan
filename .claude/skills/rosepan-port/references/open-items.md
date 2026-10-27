@@ -985,6 +985,14 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- utl/utlmath.cpp (2026-10-27) is the port's name for 0x106658..0x10737c: no source string names
+  the run; most of it is vector math, but utlConvSndId and the i3r node display wrappers sit at its
+  start and could be a separate object. utlVecRotY is now the copy form 0x1069b0 and the in-place
+  matrix form 0x106bc8 is utlVecRotMatY (DogActor::getRootMove calls the latter). The node display
+  word (utlSetI3rNodeDisp / utlSetI3rDispControl) holds a pointer to a DogModel / DogActor record;
+  on the host it is self-relative (i3rSetPtr), so i3rDrawModel 0x21fe68 must read it with
+  getData() when it is written.
+
 - mag/magscenecmd.cpp (2026-10-27) is the port's name for 0x143d3c..0x145020: no source string
   names the run (fog fade, the debug window ctor, Brown's glue). magsceneif.cpp's asserts end right
   before it but its 13 functions serve debug/motnamecnv only; rename if a better anchor turns up.
