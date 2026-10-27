@@ -1725,3 +1725,49 @@ void emyPlaySE(u_int oid, int no)
 {
     ROSEPAN_STUB("emyPlaySE", 0x0016a8a4);
 }
+
+// stub of ROR 0x00163f9c
+int EmyManager::getEmyHoldWord23c(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::getEmyHoldWord23c", 0x00163f9c);
+    return {};
+}
+
+// stub of ROR 0x00163f44
+int EmyManager::getEmyHoldWord24c(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::getEmyHoldWord24c", 0x00163f44);
+    return {};
+}
+
+// stub of ROR 0x00163e74
+void EmyManager::setEmyMode6(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::setEmyMode6", 0x00163e74);
+}
+
+// stub of ROR 0x00163e48
+void EmyManager::stopEmyMove(u_int oid)
+{
+    ROSEPAN_STUB("EmyManager::stopEmyMove", 0x00163e48);
+}
+
+// stub of ROR 0x0014426c
+void magBwnHurt(int react, int damage)
+{
+    ROSEPAN_STUB("magBwnHurt", 0x0014426c);
+}
+
+// stub of ROR 0x0010426c
+int utlRandMean(int lo, int hi, int n)
+{
+    ROSEPAN_STUB("utlRandMean", 0x0010426c);
+    return {};
+}
+
+// stub of ROR 0x00104438
+int utlRandPeak(int lo, int hi, int peak, int n)
+{
+    ROSEPAN_STUB("utlRandPeak", 0x00104438);
+    return {};
+}

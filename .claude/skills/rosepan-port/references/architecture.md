@@ -1402,6 +1402,18 @@ throughout (identifiers, env variables, files, shader macros):
 - TskAttack's steps (picked by the kind word param[2]: 0x12..0x14, 0x15, 0x26..0x28, 0x2e..0x30) and
   most of TskDamage's live in the file after task/naga_chunk.cpp (unassigned@001fd424, 0x1fd424..
   0x200000), not in tsk_scene.cpp; they call scnChrRequest back.
+- The damage roll `scnCalcDamage` 0x1fb624 (attacker, target, attack word): attacker's ST (param 0x1d,
+  PC via getPcParam) x the word's percent (fixed or utlRandRange per word; 4 / 5 / 0xb use utlRandMean /
+  utlRandPeak) / 100 x the weapon's system field 0x2b, + field 0x2a, - target kind's DEF (field 0x1e) x
+  90..110 / 100, floored at 0. The weapon: the PC's equipped item (GamMan +0x2220c, none 0xa00 or word
+  7), a kind-2 object's param 0x66 (none 0 / 0xa00); kind-5 attackers return field 0x2b x 70..100% x
+  field 0x2a. Hits on the dog (`scnChrRequestDog`, only in inu mode 1) take LP and send Brown a hurt
+  request (magBwnHurt -> MagLifeBwnCtrl state 10); hits on the PC (`scnChrRequestPC`) take LP and pick
+  the PC state from data 0x2feea0 by word (2: front 5 / back 4; 9 / 10 become 0xb / 0xc while the
+  attacking enemy holds), 0 LP -> state 3 and a TskFrameFunc kind 0xe on GamMan::m_frameTaskId.
+- 0x1fc47c / 0x1fc490 (unreferenced) are the inline ctor / dtor of the chunk writer that
+  task/naga_chunk.cpp's 0x1fc4f0 fills (+0x400 count, +0x504 buffer, +0x50c offset): naga_chunk.cpp
+  starts at 0x1fc47c, not 0x1fc4f0.
 
 ## The script tasks (task/tsk_chr.cpp, 0x1e7f28..0x1f6c64, 2026-10-26)
 

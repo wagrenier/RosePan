@@ -257,6 +257,30 @@
   "was": "FUN_0010423c",
   "why": "lo + 0x1041e4(hi - lo + 1): a random integer in lo..hi"
  },
+ "0010426c": {
+  "name": "utlRandMean",
+  "tag": "ror-inferred",
+  "was": "FUN_0010426c",
+  "why": "(lo, hi, n): lo + the mean of n utlRand(hi - lo + 1) draws (traps on n 0)"
+ },
+ "001042ec": {
+  "name": "utlRandPeakLo",
+  "tag": "ror-inferred",
+  "was": "FUN_001042ec",
+  "why": "(lo, hi, n): lo + |mean of n draws over 0..2(hi-lo) - (hi-lo)|: peaks at lo"
+ },
+ "00104394": {
+  "name": "utlRandPeakHi",
+  "tag": "ror-inferred",
+  "was": "FUN_00104394",
+  "why": "(lo, hi, n): the mean of n draws over 0..2(hi-lo) folded at hi-lo, plus lo: peaks at hi"
+ },
+ "00104438": {
+  "name": "utlRandPeak",
+  "tag": "ror-inferred",
+  "was": "FUN_00104438",
+  "why": "(lo, hi, peak, n): utlRandRange(lo, hi) above peak -> 0x104394(lo, peak, n), else 0x1042ec(peak, hi, n): a distribution peaking at peak"
+ },
  "0010456c": {
   "name": "utlHitCheck",
   "tag": "ror-inferred",
@@ -1577,6 +1601,12 @@
   "was": "FUN_001259e8",
   "why": "MagLifeBwn vtable slot 15 (MagLifeControlChara::renderPostProcess in the base): updateMotionSeq when m_actor is set and +0xce4 is 0"
  },
+ "0012a56c": {
+  "name": "MagLifeBwnCtrl::requestState",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a56c",
+  "why": "asserts state >= 0 (line 0xc0b), then unless busy sets +0 state, +8 arg, +4 -1 and runs 0x12a394; force (a3) re-sets the same state"
+ },
  "0012a61c": {
   "name": "MagLifeBwnCtrl::live",
   "tag": "ror-inferred",
@@ -1588,6 +1618,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0012a6a0",
   "why": "MagLifeBwnCtrl vtable slot 9, empty, called with the second pad"
+ },
+ "0012a6a8": {
+  "name": "MagLifeBwnCtrl::requestHurt",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a6a8",
+  "why": "requestState(10, arg, 0); magBwnHurt's call"
  },
  "0012ab18": {
   "name": "MagLifeBwnCtrl::reset",
@@ -3179,6 +3215,12 @@
   "was": "FUN_00143fd0",
   "why": "steps the fog fade setFog started: m_fog[0] = lerp(m_fog[2], m_fog[3]) over +0x2ab64 frames"
  },
+ "0014426c": {
+  "name": "magBwnHurt",
+  "tag": "ror-inferred",
+  "was": "FUN_0014426c",
+  "why": "(react, damage): MagScene's MagLifeBwnCtrl (+0x2bd20) gets 0x12a6a8(react); scnChrRequestDog's reaction to a hit (the damage word is passed and dropped)"
+ },
  "00144334": {
   "name": "gamSetBwnFollow",
   "tag": "ror-inferred",
@@ -3329,11 +3371,35 @@
   "was": "FUN_00163e10",
   "why": "findEmy(oid), then 0x1664a4 on it: ACHRstat::pauseTasks(on) on the enemy's achr and two on/off calls on its +0x1f0 / +0x1f8"
  },
+ "00163e48": {
+  "name": "EmyManager::stopEmyMove",
+  "tag": "ror-inferred",
+  "was": "FUN_00163e48",
+  "why": "findEmy(oid): 0x202f10 on its +0x1f0 (clears its word 4, stops its SE +0xab8); TskDamage::endReact for a killed enemy"
+ },
+ "00163e74": {
+  "name": "EmyManager::setEmyMode6",
+  "tag": "ror-inferred",
+  "was": "FUN_00163e74",
+  "why": "findEmy(oid): enemy +0x1e4 = 6; TskDamage::endReact's resume"
+ },
  "00163f1c": {
   "name": "EmyManager::getEmyWord238",
   "tag": "ror-inferred",
   "was": "FUN_00163f1c",
   "why": "findEmy(oid): enemy +0x238, 0 when none (the getter of setEmyWord238)"
+ },
+ "00163f44": {
+  "name": "EmyManager::getEmyHoldWord24c",
+  "tag": "ror-inferred",
+  "was": "FUN_00163f44",
+  "why": "findEmy(oid); when the enemy's state (+0x200 virtual 0x1c) is 10, its word +0x24c, else 0; scnChrRequestPC picks PC state 0xb over 9 by it"
+ },
+ "00163f9c": {
+  "name": "EmyManager::getEmyHoldWord23c",
+  "tag": "ror-inferred",
+  "was": "FUN_00163f9c",
+  "why": "findEmy(oid); when the enemy's state (+0x200 virtual 0x1c) is 6, its word +0x23c, else 0; scnChrRequestPC picks PC state 0xc over 10 by it"
  },
  "00164078": {
   "name": "EmyManager::isEmyFlag30",
@@ -10829,6 +10895,30 @@
   "was": "FUN_001fb084",
   "why": "scnChrRequest's chr 4 case (chr 11 with an oid of kind 0, the PC); calls MagSystem::getPCStateClass"
  },
+ "001fb5d4": {
+  "name": "scnCalcPcDamage",
+  "tag": "ror-inferred",
+  "was": "FUN_001fb5d4",
+  "why": "scnCalcDamage with the PC (getPcParam 1, its oid) as the attacker; called from mag/maglifepc2.cpp"
+ },
+ "001fb624": {
+  "name": "scnCalcDamage",
+  "tag": "ror-inferred",
+  "was": "FUN_001fb624",
+  "why": "(attacker, target, word): the attacker's ST (param 0x1d) scaled by a per-word percent (switch on the attack word, utlRandRange ranges), times the weapon's system field 0x2b plus field 0x2a, less the target kind's DEF (field 0x1e) times 90..110 percent, floored at 0; called by scnChrRequestDog / PC and 0x1fb5d4"
+ },
+ "001fbb04": {
+  "name": "TskDamage::endReact",
+  "tag": "ror-inferred",
+  "was": "FUN_001fbb04",
+  "why": "called by every TskDamage step: when step flag 8 is set clears achr flag 0x200 and resumes the enemy (frames < 10000) or stops it and kills the achr's tasks (killed), returning 1; else 0"
+ },
+ "001fbba4": {
+  "name": "scnGetMaxFreeMem",
+  "tag": "ror-inferred",
+  "was": "FUN_001fbba4",
+  "why": "BedMemory::getInfo of the game heap, returns BEDMEMINFO m_max_free; unreferenced"
+ },
  "001fbbd0": {
   "name": "gamStage2Loaded",
   "tag": "ror-inferred",
@@ -10888,6 +10978,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001fc474",
   "why": "the step setupPad stores at +4: returns 0 (hidden in 0x1fc46c's body until split)"
+ },
+ "001fc47c": {
+  "name": "NagaChunkWriter::NagaChunkWriter",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc47c",
+  "why": "zeroes +0x400 (entry count), +0x504 (buffer), +0x508, +0x50c (data offset) -- the fields 0x1fc4f0 (naga_chunk.cpp's add-entry) uses; unreferenced inline copy"
+ },
+ "001fc490": {
+  "name": "NagaChunkWriter::~NagaChunkWriter",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc490",
+  "why": "GCC 2 deleting destructor: utlMemFree(+0x504), operator delete when bit 0; the same class as 0x1fc47c"
  },
  "001fca84": {
   "name": "NagaChunk::NagaChunk",

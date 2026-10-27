@@ -23,6 +23,9 @@
  * first; drives the scene's MagLifeBwnCtrl; returns the script's v0 (or a
  * SEQ_RET_* code). */
 intptr_t magBwnSeqCommand(const intptr_t *args);                         // ROR 0x00144ae0
+/* Brown's reaction to a hit: the scene's MagLifeBwnCtrl requestHurt(react)
+ * (state 10). damage is passed and not read. */
+void magBwnHurt(int react, int damage);                                  // ROR 0x0014426c
 
 /* ---- the task framework (unassigned@001e46b8) ---- */
 
@@ -97,6 +100,15 @@ struct EmyManager : CmnITask
     void setSlotWord24(int no, int v);                                   // ROR 0x00162afc
     /* Enemy word +0x30 bit 0. */
     int  isEmyFlag30(u_int oid);                                         // ROR 0x00164078
+    /* The enemy's word +0x24c while its state (+0x200's slot 0x1c) is
+     * 10, else 0 (none: 0). */
+    int  getEmyHoldWord24c(u_int oid);                                   // ROR 0x00163f44
+    /* The enemy's word +0x23c while its state is 6, else 0. */
+    int  getEmyHoldWord23c(u_int oid);                                   // ROR 0x00163f9c
+    /* Enemy +0x1e4 = 6. */
+    void setEmyMode6(u_int oid);                                         // ROR 0x00163e74
+    /* 0x202f10 on the enemy's +0x1f0: its word 4 cleared, its SE stopped. */
+    void stopEmyMove(u_int oid);                                         // ROR 0x00163e48
 
     EmySlot m_slot[8];          // ROR 0x148
 };
@@ -219,6 +231,10 @@ static_assert(offsetof(GamFont, m_00) == 0x00, "m_00");
 void utlRandReset(void);                                                 // ROR 0x0010421c
 /* A random integer in lo..hi (lo + 0x1041e4(hi - lo + 1)). */
 int  utlRandRange(int lo, int hi);                                       // ROR 0x0010423c
+/* lo + the mean of n draws over 0..hi - lo. */
+int  utlRandMean(int lo, int hi, int n);                                 // ROR 0x0010426c
+/* lo..hi, peaking at peak (the mean of n draws, folded). */
+int  utlRandPeak(int lo, int hi, int peak, int n);                       // ROR 0x00104438
 
 /* ---- the i3d library (unassigned@00216ad0 .. 0x237d80; its version string
  * "i3d_package_version 050121-stable-050826") ---- */
