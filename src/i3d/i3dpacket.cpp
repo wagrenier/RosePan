@@ -179,6 +179,7 @@ u_long *i3dPktCallView(u_long *pkt, I3dLayer *layer)
     // PC: the view packet's SCISSOR_1, for the native i3d module (the
     // CALLed packet itself is VU1 setup).
     RosePan_I3dRecordReg(pkt, 0x40, layer->m_view->m_scissor);
+    i3dVu1SetView(layer->m_view);                  // PC: the host VU1 writers' view
     pkt[1] = 0;
     pkt[0] = ((u_long)layer->m_view->m_packet << 32) | I3D_DMA_CALL;
     return pkt + 2;

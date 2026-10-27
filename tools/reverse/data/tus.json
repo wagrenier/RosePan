@@ -635,6 +635,24 @@
    "status": "verify",
    "why": "i3d VRAM cache: a block heap of 0x44-byte nodes on six intrusive lists (address order, LRU, locked, evict, new, moved), embedded twice in i3dContext (+0x0 texture pages, +0x70 CLUT); 0x227a98 list unlink .. 0x228b50 coalesce, next function 0x228c08 calls the i3d system module 0x237180."
   },
+  "i3d/i3dvu1pkt.cpp": {
+   "notes": "Left in this TU: i3dPktDrawStripCtx 0x21dd10 and i3dPktDrawLineStrip 0x21e1d8 (clipped strips, use i3dClipSegment 0x21db90 / i3dVu0ClipPair 0x21db60, named), the wire shapes 0x21e6f8..0x21eb24 (stubs now return pkt instead of NULL), and 0x21cfb0..0x21db18 (four functions with no callers: likely dead, check before writing). Host design: i3dPktCallView mirrors its view into i3dVu1SetView; sprites use the view their Begin CALLs (exact), strips the last CALLed view (an approximation: the ROM uses whatever VU1 0x3e2 holds; strips take no layer). Depth: VU1 vertices carry clip z from the view m_world_clip, clamped to -1..1; textured strips honour TEST_1 ZTE + GEQUAL via RosePan_RendererDrawImageTriangles2DDepth (rosepan_renderer.cpp), untextured strips still draw without depth. Sprite ST corner mapping ((-0.5,-0.5) = u0,v0) confirmed on screen (the page is upright). Smoke run 200 s: book cover frames ~3300..4200 and the opened page stack match work/ref/MNUPBOOK; the title screen is unchanged. Next on the queue: mag/magscenecamera.cpp and the focus files (open-items Next up e).",
+   "ranges": [
+    [
+     "0021c960",
+     "0021eb28"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 19:57",
+     "status": "partial",
+     "summary": "i3d/i3dvu1pkt.cpp pinned 0x21c960..0x21eb28 (was unassigned@0021c960): the VU1 sprite family (BeginVu1Sprite, Vu1Rect renamed from Vu1Color, Vu1Matrix, Vu1Sprite, End, the two view-matrix helpers) and the strip body 0x21c960 with i3dPktDrawStrip / i3dPktDrawStripColor written with the ROM packet words; each records what its VU1 microprogram kicks (sprite program 0x712, strips) as screen-space strips in the native i3d module, Z-tested through a new renderer call. The picture book now shows the MNUPBOOK page behind the cover model and the arrow / circle prompts, matching the reference."
+    }
+   ],
+   "status": "partial",
+   "why": "the i3d VU1 packet writers: strip uploaders 0x21c960 (UNPACK to VU1 0x1dc and MSCAL), their clip helpers, i3dPktDrawStripCtx / LineStrip, the VU1 sprite family 0x21e428..0x21e6f8 and the wire shapes; bounded by i3dPackXYZ 0x21c940 (i3d/i3dpacket.cpp) and i3dInitHardware 0x21eb28 (i3d/i3dctx.cpp). No source string; named after its i3dPkt*Vu1* API"
+  },
   "i3d/i3mpose.cpp": {
    "notes": "Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game calls is written and the 200 s New Game run plays through it without a fault, but nothing shows it yet: after the film the screen is black because utlDrawI3r (unassigned@00106658) is a stub; the first session that draws a model should look at the actor's pose and mark this verify/done. Decided: pose functions take void* (callers pass byte offsets) and cast to I3mPose; i3mFindKey takes the root instead of the float table (host keeps offsets); the VU0-register helpers 0x22f870/0x22fc38/0x230258 became pointer functions. Every disc i3m has flags 0x1f (packed pos/rot/scale, no scale, splines as linear), so only the step/lerp/slerp paths run. i3mQuatExp 0x230570 was folded into i3mQuatLog in Ghidra: created with mkfunc. Unreferenced hidden leaves 0x230370, 0x230378, 0x230638 not written. The stale queue entry unassigned@0022e840 is skipped by tus.py next; i3cquery/i3dgeom are not queued (not on the draw path).",
    "ranges": [
@@ -1742,6 +1760,7 @@
   "unassigned@0020ff34": {},
   "unassigned@00216ad0": {},
   "unassigned@0021a3e8": {},
+  "unassigned@0021c960": {},
   "unassigned@0021fb50": {},
   "unassigned@00224de0": {},
   "unassigned@00228c08": {},

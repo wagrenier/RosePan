@@ -4952,24 +4952,24 @@
 /* 0021c940 0000001c */ i3dPackXYZ(){}  // lib-ctx
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- i3d/i3dvu1pkt.cpp
 // *****************************************************************************
 
-/* 0021c960 0000064c */ FUN_0021c960(){}
+/* 0021c960 0000064c */ i3dPktDrawStripImpl(){}  // ror
 /* 0021cfb0 00000038 */ FUN_0021cfb0(){}
 /* 0021cfe8 00000328 */ FUN_0021cfe8(){}
 /* 0021d310 00000060 */ FUN_0021d310(){}
 /* 0021d378 0000079c */ FUN_0021d378(){}
 /* 0021db18 00000028 */ i3dPktDrawStrip(){}  // lib-ctx
-/* 0021db40 00000020 */ FUN_0021db40(){}
-/* 0021db60 0000002c */ FUN_0021db60(){}
-/* 0021db90 0000017c */ FUN_0021db90(){}
+/* 0021db40 00000020 */ i3dPktDrawStripColor(){}  // ror
+/* 0021db60 0000002c */ i3dVu0ClipPair(){}  // ror
+/* 0021db90 0000017c */ i3dClipSegment(){}  // ror
 /* 0021dd10 000004c8 */ i3dPktDrawStripCtx(){}  // lib-ctx
 /* 0021e1d8 0000024c */ i3dPktDrawLineStrip(){}  // lib-ctx
 /* 0021e428 0000005c */ i3dPktVu1Matrix(){}  // ror
-/* 0021e488 0000005c */ i3dPktVu1Color(){}  // ror
-/* 0021e4e8 00000038 */ FUN_0021e4e8(){}
-/* 0021e520 00000080 */ FUN_0021e520(){}
+/* 0021e488 0000005c */ i3dPktVu1Rect(){}  // ror
+/* 0021e4e8 00000038 */ i3dPktVu1ViewMatrix(){}  // ror
+/* 0021e520 00000080 */ i3dPktVu1ViewMatrixScaled(){}  // ror
 /* 0021e5a0 000000e8 */ i3dPktBeginVu1Sprite(){}  // ror
 /* 0021e688 00000008 */ i3dPktEndVu1Sprite(){}  // ror
 /* 0021e690 00000068 */ i3dPktVu1Sprite(){}  // ror

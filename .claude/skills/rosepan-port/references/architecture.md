@@ -459,9 +459,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     textured * 128 (data 0x3026c0 / 0x3026b0); UV ftoi4), and REGLIST writers 0x21c140..0x21c8c4 on
     values from i3dPackXYZ / RGBAQ / UV / ST (PRIM first; some leave a NOP slot unwritten). Every
     primitive sets ABE; the GIF tag's PRIM decides the name (Flat / Gouraud, Tex UV (FST) / ST).
-    0x21c960.. is a different module: VU1 strip uploaders (VIF UNPACK 0x6c.. codes, i3dPktDrawStrip*,
-    i3dPktDrawLineStrip, the wire shapes, matrix / vector uploads 0x21e428 / 0x21e488, the layer
-    header 0x21e5a0, 0x21e690).
+    0x21c960.. is `i3d/i3dvu1pkt.cpp` (VU1 packets, below).
   - **VU0 microprogram** (data 0x2949f0, `python vudis.py 2949f0 9c <addr>`): 0 the 4x4 multiply
     (vf4..7 = a, vf8..11 = b, result in vf8..11); 0xc8 a subroutine: vf12..15 = box rows (vf8..11)
     x matrix (vf4..7); 0x96 box culling (corners = vf15 +- vf12 +- vf13 +- vf14, CLIP each, vi2 =
@@ -548,6 +546,24 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     0x130, then i3dVramHandleInit 0x227c90; release 0x219a98 / 0x219c70 -> i3dVramHandleRelease).
   - **Hardware**: i3dInitHardware sends REFs of the VU1 microprogram (data 0x2912b0, 0x354 qwords,
     plus STCOL 1.0 / STROW 0) on VIF1 and the VU0 one (data 0x2949f0, 0x9c qwords) on VIF0.
+  - **VU1 packets** (`i3d/i3dvu1pkt.cpp` 0x21c960..0x21eb28, 2026-10-27): the VU1 image's entry 8
+    (MSCAL 8) is a dispatcher: it jumps to the address in TOPS+0.x (a writer puts it there with
+    UNPACK S-32); MSCAL 1 runs a command list at TOPS (qwords: program, args; program 400 = 0x190
+    copies state, 0 ends). Permanent state: the CALLed view's world -> screen at 0x3e2..0x3e5,
+    world -> clip 0x3e6... **Sprites** (mnuBase): i3dPktBeginVu1Sprite 0x21e5a0 (view, fog CALLs;
+    GIF template to 0x3f4: NREG 4 FOG / ST / RGBAQ / XYZ2, PRIM 0x4d fan | TME << 4 | FGE << 5;
+    colour scale to 0x3f5 = data 0x3026b0 (128) textured / 0x3026c0 (255, 128 alpha)),
+    i3dPktVu1Rect 0x21e488 (u0, v0, u1, v1 to 0x3f1), i3dPktVu1Matrix 0x21e428 (three rows to
+    0x3ee), i3dPktVu1Sprite 0x21e690 (colour TOPS+1, centre TOPS+2, 0x712 to TOPS+0, MSCAL 8):
+    microprogram 0x712 = corners centre +- 0.5 row 0 +- 0.5 row 1 (loi 0.5), through 0x3e2,
+    Q divide, ST = rectangle corners, colour * scale ftoi0; (-0.5, -0.5) takes (u0, v0). Unreferenced
+    helpers 0x21e4e8 / 0x21e520 upload the view inverse (scaled) as a billboard matrix. **Strips**:
+    i3dPktDrawStrip 0x21db18 (pkt, matrix, count, stq, colours, xyz, adc) and i3dPktDrawStripColor
+    0x21db40 (one colour instead) shuffle registers and jump to 0x21c960: set-up (matrix to 0x3d2,
+    GIF template, scale), chunks of <= 0x50 positions inline to 0x1dc, STQ / colours inline behind a
+    NEXT tag and REF'd 20 at a time (two shared), ADC as vertex indices (bit 15 = no kick; default
+    lists data 0x3026d0), then a REF of the 4-qword command 0x302970 / 0x3029b0 whose GIF tag is a
+    triangle strip (PRIM 0x4c / 0x5c with STQ).
 - The scene's first 0x2000 bytes are 256 **wall segments** (two (x, y, z, w) ends each):
   `MagScene::castWalls` 0x133a0c tests a level ray against those whose height range covers the ray's
   y with `i3dSegSegDist2` 0x234050 (squared segment distance 0 = a hit) before `castRay` 0x133454

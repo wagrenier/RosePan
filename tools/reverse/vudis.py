@@ -123,7 +123,11 @@ def main(argv):
         return 1
     code = load(Elf(rosepan.ELF), int(argv[0], 16), int(argv[1], 16))
     if argv[2] == '--all':
-        show(code, min(code), follow=False)
+        # every loaded run (the images leave gaps between MPG blocks)
+        for a in sorted(code):
+            if a - 1 not in code:
+                show(code, a, follow=False)
+                print('---')
         return 0
     for s in argv[2:]:
         show(code, int(s, 16))

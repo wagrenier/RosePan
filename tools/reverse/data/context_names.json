@@ -15707,11 +15707,35 @@
   "was": "FUN_0021c940",
   "why": "x | y << 16 | z << 32"
  },
+ "0021c960": {
+  "name": "i3dPktDrawStripImpl",
+  "tag": "ror-inferred",
+  "was": "FUN_0021c960",
+  "why": "body of i3dPktDrawStrip / i3dPktDrawStripColor (both re-order their args and jump here): DMA CNT packets UNPACKing a matrix, GIF template and up to 0x50 xyz per chunk to VU1 0x1dc, STQ / colour REFs and ADC flags, MSCAL 1"
+ },
  "0021db18": {
   "name": "i3dPktDrawStrip",
   "tag": "lib-context",
   "was": "FUN_0021db18",
   "why": "tail-calls 0x21c960; drawStrips type 0 and the blob shadow pass (pkt, matrix, count, stq, colours, xyz, flags); primitive role unverified"
+ },
+ "0021db40": {
+  "name": "i3dPktDrawStripColor",
+  "tag": "ror-inferred",
+  "was": "FUN_0021db40",
+  "why": "jumps to 0x21c960 with t0 as the single colour and no per-vertex colours (i3dPktDrawStrip passes t0 = 0 and its colours in t1)"
+ },
+ "0021db60": {
+  "name": "i3dVu0ClipPair",
+  "tag": "ror-inferred",
+  "was": "FUN_0021db60",
+  "why": "vclip of two vectors against their own w, returns the clip flags (vc2)"
+ },
+ "0021db90": {
+  "name": "i3dClipSegment",
+  "tag": "ror-inferred",
+  "was": "FUN_0021db90",
+  "why": "clips a segment's two clip-space ends plane by plane (5..0) with i3dVu0ClipPair, interpolating position and optional +0x10 / +0x20 attributes; 0 = all outside one plane"
  },
  "0021dd10": {
   "name": "i3dPktDrawStripCtx",
@@ -15732,10 +15756,22 @@
   "why": "DMA tag + UNPACK of 3 qwords at VU1 0x3ee: a matrix copy (i3dMatCopy2)"
  },
  "0021e488": {
-  "name": "i3dPktVu1Color",
+  "name": "i3dPktVu1Rect",
   "tag": "ror-inferred",
   "was": "FUN_0021e488",
-  "why": "DMA tag + UNPACK of 1 qword at VU1 0x3f1: a vector copy (the sprite colour)"
+  "why": "UNPACKs one qword to VU1 0x3f1, which the sprite microprogram 0x712 reads as the texture rectangle (u0, v0, u1, v1); mnuBase::drawSprite hands it MnuSprite +0x10 (renamed from i3dPktVu1Color)"
+ },
+ "0021e4e8": {
+  "name": "i3dPktVu1ViewMatrix",
+  "tag": "ror-inferred",
+  "was": "FUN_0021e4e8",
+  "why": "i3dPktVu1Matrix of the layer's view inverse (camera -> world): a billboard sprite matrix; no caller"
+ },
+ "0021e520": {
+  "name": "i3dPktVu1ViewMatrixScaled",
+  "tag": "ror-inferred",
+  "was": "FUN_0021e520",
+  "why": "as 0x21e4e8 with rows 0 and 1 of the inverse scaled by f12 / f13; no caller"
  },
  "0021e5a0": {
   "name": "i3dPktBeginVu1Sprite",

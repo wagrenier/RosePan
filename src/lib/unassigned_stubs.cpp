@@ -217,15 +217,6 @@ u_long   * i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matr
     return pkt;
 }
 
-// stub of ROR 0x0021db18
-u_long   * i3dPktDrawStrip(u_long *pkt, sceVu0FVECTOR *matrix, int count, const void *stq,
-                          const void *colors, const void *xyz, int flags)
-{
-    ROSEPAN_STUB("i3dPktDrawStrip", 0x0021db18);
-    // PC: the packet cursor stays valid for the i3d groups (i3d/i3dlayer.cpp).
-    return pkt;
-}
-
 // stub of ROR 0x0021dd10
 u_long   * i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
                              const void *stq, const void *colors, const void *xyz,
@@ -241,14 +232,16 @@ u_long   * i3dPktDrawWireBox(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix
                             const float *center, const void *extent, const void *color)
 {
     ROSEPAN_STUB("i3dPktDrawWireBox", 0x0021e8f8);
-    return {};
+    // PC: the packet cursor stays valid for the i3d groups.
+    return pkt;
 }
 
 // stub of ROR 0x0021e9f8
 u_long   * i3dPktDrawWireShape(u_long *pkt, I3dLayer *layer, void *a, void *b, void *c)
 {
     ROSEPAN_STUB("i3dPktDrawWireShape", 0x0021e9f8);
-    return {};
+    // PC: the packet cursor stays valid for the i3d groups.
+    return pkt;
 }
 
 // stub of ROR 0x0021e6f8
@@ -256,7 +249,8 @@ u_long   * i3dPktDrawWireSphere(float radius, u_long *pkt, I3dLayer *layer, sceV
                                const float *center)
 {
     ROSEPAN_STUB("i3dPktDrawWireSphere", 0x0021e6f8);
-    return {};
+    // PC: the packet cursor stays valid for the i3d groups.
+    return pkt;
 }
 
 // ---- bridge: utlTm2GetSize (2026-10-22, the dogtexinfo session) ----
@@ -1290,51 +1284,6 @@ int i3cCastSphere(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
 {
     ROSEPAN_STUB("i3cCastSphere", 0x002324b8);
     return {};
-}
-
-// stub of ROR 0x0021e5a0
-u_long   * i3dPktBeginVu1Sprite(u_long *pkt, I3dLayer *layer, int mode)
-{
-    ROSEPAN_STUB("i3dPktBeginVu1Sprite", 0x0021e5a0);
-    /* PC: the packet back unchanged, not NULL -- the menus' next real
-     * packet writer (i3dPktRefTexRegs, i3dPktSetReg) writes through it. */
-    return pkt;
-}
-
-// stub of ROR 0x0021e688
-u_long   * i3dPktEndVu1Sprite(u_long *pkt)
-{
-    ROSEPAN_STUB("i3dPktEndVu1Sprite", 0x0021e688);
-    /* PC: the packet back unchanged, not NULL -- the menus' next real
-     * packet writer (i3dPktRefTexRegs, i3dPktSetReg) writes through it. */
-    return pkt;
-}
-
-// stub of ROR 0x0021e488
-u_long   * i3dPktVu1Color(u_long *pkt, const float *color)
-{
-    ROSEPAN_STUB("i3dPktVu1Color", 0x0021e488);
-    /* PC: the packet back unchanged, not NULL -- the menus' next real
-     * packet writer (i3dPktRefTexRegs, i3dPktSetReg) writes through it. */
-    return pkt;
-}
-
-// stub of ROR 0x0021e428
-u_long   * i3dPktVu1Matrix(u_long *pkt, sceVu0FVECTOR *matrix)
-{
-    ROSEPAN_STUB("i3dPktVu1Matrix", 0x0021e428);
-    /* PC: the packet back unchanged, not NULL -- the menus' next real
-     * packet writer (i3dPktRefTexRegs, i3dPktSetReg) writes through it. */
-    return pkt;
-}
-
-// stub of ROR 0x0021e690
-u_long   * i3dPktVu1Sprite(u_long *pkt, const float *pos, const float *uv)
-{
-    ROSEPAN_STUB("i3dPktVu1Sprite", 0x0021e690);
-    /* PC: the packet back unchanged, not NULL -- the menus' next real
-     * packet writer (i3dPktRefTexRegs, i3dPktSetReg) writes through it. */
-    return pkt;
 }
 
 // stub of ROR 0x0014b780

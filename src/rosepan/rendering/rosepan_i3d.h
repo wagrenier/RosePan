@@ -31,9 +31,11 @@
  *    VU1 would read their VIF blocks), with the camera the last
  *    RosePan_I3dRecordCamera before it set.
  *
- *  Not here yet: the VU1 strips i3dPktDrawStrip writes -- see
- *  RosePan_I3dRecordVu1 -- and CALLed channel state packets (fog / light,
- *  VU1 state only).
+ *  - VU1 primitives: the VU1 writers (i3d/i3dvu1pkt.cpp: strips, sprites)
+ *    compute on the CPU what their microprogram would kick and record it
+ *    as screen-space vertices (RosePan_I3dRecordVu1Strip).
+ *
+ *  Not here yet: CALLed channel state packets (fog / light, VU1 state only).
  * ======================================================================== */
 #ifndef ROSEPAN_I3D_H
 #define ROSEPAN_I3D_H
@@ -88,10 +90,24 @@ void RosePan_I3dBeginFrame(void);
 /* Draws the records written in [start, end), in address order. */
 void RosePan_I3dReplay(const void *start, const void *end);
 
-/* The named hook for VU1 strips (i3dPktDrawStrip and the model packets):
- * not drawn yet; counts and logs once so a smoke run shows when the path
- * is reached. */
-void RosePan_I3dRecordVu1(const void *at, const void *data, unsigned int qwc);
+/* A vertex a VU1 microprogram would send: GS screen x / y in pixels (the
+ * 2048-centred space XYZ2 holds, before ftoi4), its clip-space depth z / w
+ * (near -1, far +1: the view's camera * projection), ST and Q (s / q is the
+ * texture coordinate), RGBAQ's colour on the PS2 scale, and whether its XYZ2
+ * kicks (ADC clear). */
+struct RosePanI3dVu1Vertex
+{
+    float   x, y, z;
+    float   s, t, q;
+    uint8_t rgba[4];
+    int     kick;
+};
+
+/* A triangle strip of `count` such vertices at `at` (copied), drawn with the
+ * GS PRIM bits `prim` (TME, ABE...) and the replay's register state; textured
+ * ones honour TEST_1's Z test (GEQUAL) against the meshes. */
+void RosePan_I3dRecordVu1Strip(const void *at, unsigned int prim, const RosePanI3dVu1Vertex *v,
+                               int count);
 
 /* PC test (no ROM counterpart): with ROSEPAN_I3D_TEST=1, draws two TIM2
  * pictures of DATA/MNURPK/S2DMAN.RPK each frame through the i3d library

@@ -37,7 +37,14 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      model now draws in game** ("The Little Princess", upright, matching PB010200_00000800; the 200 s
      run, frames ~3300..4200), and the opened book's page stack; left: the right-hand page and the
      dark MNUPBOOK background, both other paths) and
-     unassigned@0021c960 (i3dPktDrawStrip 0x21db18, the VU1 sprite packets).
+     unassigned@0021c960 -- WRITTEN 2026-10-27 as i3d/i3dvu1pkt.cpp (partial): the VU1 sprites
+     and i3dPktDrawStrip / Color draw through the native module (screen-space strips computed on
+     the CPU). **The picture book now matches the reference**: the MNUPBOOK page behind the cover
+     model, the arrow / circle prompts (progress/20261027-2000_i3d_i3dvu1pkt_book_cover.png).
+     Left: i3dPktDrawStripCtx / LineStrip and their clip helpers, the wire shapes, the
+     unreferenced 0x21cfb0..0x21db18. Doubts: a strip transforms with the view the last
+     i3dPktCallView named (the ROM uses whatever the layer's CALLed view left in VU1 0x3e2; strips
+     have no layer argument); untextured strips draw without depth.
   e. mag/magscenecamera.cpp (setCameraMode), unassigned@0013e2ec (updateCamera, gamEnterMenu),
      unassigned@00140c68 + unassigned@00140990 (drawFocus and its records: define them together as
      mag/magscenefocus.cpp).
