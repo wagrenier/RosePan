@@ -15971,6 +15971,36 @@
   "was": "FUN_0021fe68",
   "why": "utlDrawI3r's body: layer +0x834 view, i3dVu0MatMul / i3dViewTestBox cull (returns 0xd off screen), mesh packets 0x220670.., sceDmaSync"
  },
+ "00220098": {
+  "name": "i3rDrawMesh45",
+  "tag": "ror-inferred",
+  "was": "FUN_00220098",
+  "why": "i3rDrawModel calls it when the combined mesh's child 1 (type 0x45) has data; box test then a VU1 matrix packet and 0x220838 per group, returns the clip result"
+ },
+ "00220290": {
+  "name": "i3rDrawMesh46",
+  "tag": "ror-inferred",
+  "was": "FUN_00220290",
+  "why": "i3rDrawModel calls it when the combined mesh's child 0 (type 0x46) has data; i3dViewTestBoneBox, then per 0x4c group a VU1 matrix packet and 0x220b58 (skinned, flag 8 clear) or 0x220cf8 (rigid, flag 8 set); returns the clip result"
+ },
+ "00220670": {
+  "name": "i3rDrawSetupBlend",
+  "tag": "ror-inferred",
+  "was": "FUN_00220670",
+  "why": "i3rDrawModel calls it per node entry with the opt words and the work block: walks the entry's type-0x59 children (float weights) and writes the non-zero (index, weight) pairs to work +0xf0 with their count at +0x134 per slot, an opt bit selecting 0x225108's computed weight instead"
+ },
+ "00220b58": {
+  "name": "i3rDrawGroupSkinned",
+  "tag": "ror-inferred",
+  "was": "FUN_00220b58",
+  "why": "i3rDrawMesh46's branch for a 0x4c group without flag 8 (skinned batches)"
+ },
+ "00220cf8": {
+  "name": "i3rDrawGroupRigid",
+  "tag": "ror-inferred",
+  "was": "FUN_00220cf8",
+  "why": "i3rDrawMesh46's branch for a 0x4c group with flag 8 (one node), after loading the node matrix into work +0x40"
+ },
  "00222f50": {
   "name": "i3dPktLayerState",
   "tag": "ror-inferred",

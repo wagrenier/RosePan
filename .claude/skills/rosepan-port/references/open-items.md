@@ -30,7 +30,12 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      **setup/i3d_mesh_draw.cpp** (the native i3d module's 3D mesh path, forced-test first --
      WRITTEN 2026-10-27, verify: ROSEPAN_I3D_MESH_TEST=1 draws Amanda textured, skinned, upright;
      see "Mesh draw" in Open questions for what it leaves), then
-     unassigned@0021fb50 (i3rBuildMeshPacket / 0x21fe68: the mesh draw calls the module) and
+     unassigned@0021fb50 -- WRITTEN 2026-10-27 as i3d/i3rdraw.cpp (partial: i3rDrawModel records
+     the model and a camera made from the layer's I3dView for the native module; i3rBuildMeshPacket
+     is a PC: no-op; the VU1 writers 0x220098..0x222ce0 are not ported. **The picture book's cover
+     model now draws in game** ("The Little Princess", upright, matching PB010200_00000800; the 200 s
+     run, frames ~3300..4200), and the opened book's page stack; left: the right-hand page and the
+     dark MNUPBOOK background, both other paths) and
      unassigned@0021c960 (i3dPktDrawStrip 0x21db18, the VU1 sprite packets).
   e. mag/magscenecamera.cpp (setCameraMode), unassigned@0013e2ec (updateCamera, gamEnterMenu),
      unassigned@00140c68 + unassigned@00140990 (drawFocus and its records: define them together as
@@ -987,8 +992,14 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
-- **Mesh draw** (2026-10-27, rosepan_i3dmesh.cpp, setup/i3d_mesh_draw.cpp verify). Left for the
-  session that writes i3rDrawModel 0x21fe68 (unassigned@0021fb50): (1) call
+- **Mesh draw** (2026-10-27, rosepan_i3dmesh.cpp, setup/i3d_mesh_draw.cpp verify). i3d/i3rdraw.cpp
+  (2026-10-27) did (1) and (2): i3rDrawModel records at a 2-qword packet of the layer, the camera
+  is m_camera plus m_rect_proj remade as reverse Z with y negated (the rect viewport's y diagonal is
+  positive: NDC y runs down); the book cover shows upright and unmirrored, so the y / handedness
+  question is settled for this view. Still open: (3)..(5) below, the blend weights (opt /
+  i3rDrawSetupBlend 0x220670: type-0x59 children, the module reads none), and the per-part bone-box
+  cull (i3rDrawMesh46 0x220290: i3dViewTestBoneBox; the host counts a part with data as drawn).
+  Was: left for the session that writes i3rDrawModel 0x21fe68 (unassigned@0021fb50): (1) call
   RosePan_I3dRecordModel from it at the layer's packet with its world / node arguments and the
   context's texture table; (2) a camera record from the layer's I3dView (i3dPktCallView: m_camera
   is the row-vector world -> camera, the projection must become the renderer's reverse-Z form;

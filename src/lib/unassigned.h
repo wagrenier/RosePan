@@ -413,15 +413,8 @@ struct MagViewParam;
 /* The model helpers (packets, textures, STQ entities, node transforms)
  * and I3dMatrixF4x4 have their own file. */
 #include "i3d/i3rmodel.h"
-/* unassigned@0021fb50: writes the VIF / DMA packets of one mesh item (a
- * type 0x4c entry's child 0 child) into buf. i3rBuildPackets passes the
- * same buffer start for every mesh. */
-void  i3rBuildMeshPacket(I3rItem *mesh, void *buf);                     // ROR 0x0021fb50
-/* utlDrawI3r's body (unassigned@0021fb50): culls the model against the
- * layer's view (layer +0x834; 0xd when off screen), then writes its mesh
- * packets (0x220670..) and waits on DMA. */
-int   i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
-                   const void *opt);                                     // ROR 0x0021fe68
+/* The model draw (i3rBuildMeshPacket, i3rDrawModel) has its own file. */
+#include "i3d/i3rdraw.h"
 
 #include "i3d/i3croot.h"
 
