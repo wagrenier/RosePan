@@ -450,6 +450,9 @@ public:
   failure line each). A race in the rx file layer around the missing file (fileExists flags 1,
   then FileReader's 0x8001 = NOWAIT | retry read); rerun before suspecting your change, and look
   at rxFileOpenEx's state / pending handling if it comes back.
+  Seen again 2026-10-26 (task/tsk_scene.cpp session, a `--run 200` New Game run): stuck on the black
+  "Now Loading" with 1.6M such lines from log line 73; the rerun of the same build went through New
+  Game to the film's end. Two sightings in two days: if a third comes, make it a host task.
   2026-10-26 (gamman session 5): two of eight runs of one tree hung this way (one under gdb, 2.8M
   lines), so it is not rare any more; it also makes gdbrun runs useless. Worth its own host task.
 - **Sequence::loadSubImage copies 0x30000 bytes whatever the image's size** (as the ROM does). The

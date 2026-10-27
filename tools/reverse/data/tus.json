@@ -1,6 +1,6 @@
 {
  "queue": [
-  "unassigned@001f82e4",
+  "task/tsk_scene.cpp",
   "unassigned@00192ac0",
   "dog/dogmodel.cpp",
   "dog/dogactor.cpp",
@@ -1197,6 +1197,24 @@
    ],
    "status": "verify",
    "why": "CmnTaskMan (ctor 0x1e7094 .. getTask / live-id helpers 0x1e7e50) plus TskTest::exec 0x1e7ed0 and TskLogger 0x1e7ed8 / 0x1e7f18 before TskMtnMove; file name a guess after RoR's task/tsk_*.cpp (no source string). 0x1e6d54 / 0x1e6e00 before it are GamSndMan 3D-volume helpers (callers playSE / playStr), game/gamsnd.cpp."
+  },
+  "task/tsk_scene.cpp": {
+   "notes": "Left in the TU (53 functions): scenePlayStart 0x1f83f4 and scenePlayStartSimple 0x1f8cec with the ScenePlay class 0x1f6c64..0x1f82e4 (DisplayMessage, SeManager, VoiceManager, ScenePlaySingle helpers; ScenePlay vtable 0x2e4dd0, EE 0x580; 0x1f8034 / 0x1f81a8 load evt camera / focus files), PLScenePlay, TskAttack 0x1f985c.., TskDamage 0x1f9e38.., scnChrRequest 0x1fac60 (jump table 0x2fed40) and 0x1fae14 / 0x1fb084 / 0x1fb624 around it, 0x1fc47c / 0x1fc490 (an unidentified class freeing +0x504). Start with scenePlayStart: the scripts call it through native 281 (seqcall.cpp). Visual test: the 200 s New Game run plays the film to its March 1930 card as before; nothing on screen shows TskSnd (sound is the IOP stand-in) or TskCamera (native 016 case 50 not reached yet), and none of this TU's remaining stubs were reached. One 200 s run stalled on Now Loading retrying data/options.txt (hazards.md, second sighting); the rerun passed. Decisions: TskSnd m_state 100 / 101 kept as in the ROM though nothing found writes 101; PC guards give kinds above 7 (TskSnd) and above 1 (TskCamera) a do-nothing step where the ROM leaves it unset; m_name zeroed before strncpy.",
+   "ranges": [
+    [
+     "001f6c64",
+     "001fc4f0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-26 20:00",
+     "status": "partial",
+     "summary": "Pinned task/tsk_scene.cpp 0x1f6c64..0x1fc4f0 (merging unassigned@001f6c64 and unassigned@001f82e4: source strings at 0x1f8034 / 0x1f81a8, ScenePlay's slots on both sides). Wrote TskSnd complete (constructor, exec, term, getRate, stepFade and the eight kind steps, getVolume), TskCamera complete (constructor, setupPad / setupFace, init / exec / term, execPad / execFace / stepNone), gamSystemDataLoaded and gamStage2Loaded; new src/task/tsk_scene.h takes TskSndParam / TskSnd / TskCamera / scnChrRequest / scenePlayStart from lib/unassigned.h and the two hooks from gamman.h. Split hidden functions 0x1f97c0, 0x1fc474, 0x1fc47c in Ghidra; named 0x25b8c0 sceVu0ScaleVector."
+    }
+   ],
+   "status": "partial",
+   "why": "source strings task/tsk_scene.cpp at 0x1f8034 / 0x1f81a8 (assert lines 790 / 852); ScenePlay's vtable slots span 0x1f7d54..0x1f82e4 so the run before and after the anchors is one file; task/tsk_chr.cpp ends at 0x1f6c64, task/naga_chunk.cpp starts at 0x1fc4f0; classes ScenePlay, ScenePlaySingle, PLScenePlay, TskSnd, TskAttack, TskDamage, TskCamera"
   },
   "unassigned@001056f8": {},
   "unassigned@0011262c": {},

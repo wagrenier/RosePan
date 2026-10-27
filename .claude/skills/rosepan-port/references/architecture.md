@@ -1500,9 +1500,13 @@ TskSeqEvent, TskSysFunc, TskFrameFunc / TskGenFrameFunc.
 - SE ids: id >> 24 == 0xb are BGM-class SEs (pushed with the music); 0xb030352 is special-cased (looped
   on resume, never pushed). The option levels 0..8 scale the SE / stream master volume to 10..100..128
   (funcSnd 0xe / 0xf, at least 10).
-- Fades are `TskSnd` tasks over a `TskSndParam` block (lib/unassigned.h): kind 0 SE, 1 stream, 2 / 3 / 4
-  the master / SE / stream master volume; target +4 / +8, frames +0x14, current +0x20 / +0x24, +0x28 1
-  stops a stream at the end (funcStr 0x15 / 0x1b). `TskSnd::getVolume` 0x1f9658 reads a fade's volume now.
+- Fades are `TskSnd` tasks over a `TskSndParam` block (task/tsk_scene.h, written 2026-10-26): kind 0 SE,
+  1 stream, 2 / 3 / 4 the master / SE / stream master volume (funcSnd 0xd / 0xe / 0xf), 5 a delayed
+  playSE, 6 an SE faded out (funcSE 0x13, 10 frames) after +0x14 frames, 7 play stream +0x1c's name once
+  the old one stopped; target +4 / +8, frames +0x14, start volume +0x20 / +0x24; +0x28 on a stream fade
+  at 0 / 0: funcStr 0x17 instead of 1. The exec step (stepFade) blends start -> target by frame / frames
+  and runs only while TskSnd +0x40 is 100 (101 ends; nothing found writes it). `TskSnd::getVolume`
+  0x1f9658 returns the fade's *target* (+0x84 / +0x88), not the volume now. Task kind 0x12.
 - **3D sounds** (2026-10-26): `GamSnd3d` (0x50): +0 m_pos (room coordinates, update3d), +0x10 m_src
   (put_*_3d_pos: pos + the WRD room offset; _chr: the offset), +0x20 the SE / stream, +0x24 its record
   (SndMan id), +0x28 flags (1 stream, 2 heard only in its room / dropped by stopObjSnds, 4 follows
@@ -1520,3 +1524,21 @@ TskSeqEvent, TskSysFunc, TskFrameFunc / TskGenFrameFunc.
   0x1e5428 is (str, volL, volR, pitch, loop, id, flags).
 - `gamSnd3dVolume` 0x1e6e00: the entry's distance fade (+0x2e up to distance +0x2c, +0x30 from +0x2a,
   linear between) times `gamSndEarGain` 0x1e6d54 per ear (+-pi/3 off the facing; 0.3 behind .. 1.0 ahead).
+
+## task/tsk_scene.cpp (0x1f6c64..0x1fc4f0, pinned 2026-10-26)
+
+Anchored by "task/tsk_scene.cpp" at 0x1f8034 / 0x1f81a8 (assert lines 790 / 852, the scene's camera and
+focus file loads); ScenePlay's vtable slots sit on both sides (0x1f7d54..0x1f82e4), so the run from
+tsk_chr.cpp's end to naga_chunk.cpp is one file. Classes: DisplayMessage, SeManager, VoiceManager,
+ScenePlaySingle, ScenePlay (0x2e4dd0), PLScenePlay (0x2e4d90), TskSnd (0x2e4e70), TskAttack (0x2e4eb0),
+TskDamage (0x2e4ef0), TskCamera (0x2e4f30); free functions scenePlayStart 0x1f83f4, scenePlayStartSimple
+0x1f8cec, scnChrRequest 0x1fac60, gamSystemDataLoaded 0x1f8fb8 (empty), gamStage2Loaded 0x1fbbd0 (a
+free-memory debug print). 0x1fc47c / 0x1fc490 (a reset and a destructor freeing +0x504) belong to a class
+not identified yet.
+- `TskCamera` (kind 0 of the task list; native 016 case 50 builds it as `TskCamera(a2, a1)`, a1 the
+  script's words): kind 0 = look around with the left stick (words 1..3 the centre rotation, 4..6 / 7..9
+  min / max, 10 the speed; plus a random drift, both smoothed 0.9 / 0.1 and 0.85 / 0.1) written into the
+  scene camera (MagScene +0x2ab70 = bss 0x7268f0) m_rotate each frame; kind 1 = one set-up: words 0 / 1
+  two objects turned to face each other (word 2: both), the camera mode 1 at pitch -0.2, 30 to the side
+  of object 0 and 70 back from object 1's head (160 up), pulled 15 in when MagScene::castRay hits. Both
+  run until killed (exec returns 0). 0x25b8c0 is `sceVu0ScaleVector` (lib-context).

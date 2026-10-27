@@ -145,18 +145,6 @@ void debugNop(void)
 
 // ---- bridges (hand-written) ----
 
-// stub of ROR 0x001f8fc0 (a constructor: stubgen leaves it to hand)
-TskSnd::TskSnd(int kind, const TskSndParam *param)
-{
-    ROSEPAN_STUB("TskSnd::TskSnd", 0x001f8fc0);
-}
-
-// stub of ROR 0x001fbc0c (a constructor: stubgen leaves it to hand)
-TskCamera::TskCamera(intptr_t, intptr_t)
-{
-    ROSEPAN_STUB("TskCamera::TskCamera", 0x001fbc0c);
-}
-
 // stub of ROR 0x0010421c
 void utlRandReset(void)
 {
@@ -761,12 +749,6 @@ void MagLife130da4::setVolume(int volume)
     ROSEPAN_STUB("MagLife130da4::setVolume", 0x00130de0);
 }
 
-// stub of ROR 0x001f8fb8
-void gamSystemDataLoaded(void)
-{
-    ROSEPAN_STUB("gamSystemDataLoaded", 0x001f8fb8);
-}
-
 // stub of ROR 0x00163ab8
 void EmyManager::getOids(int *a, int *b)
 {
@@ -814,12 +796,6 @@ void gamSetBwnItem(int item)
 void gamSetBwnWait(int on)
 {
     ROSEPAN_STUB("gamSetBwnWait", 0x0014457c);
-}
-
-// stub of ROR 0x001fbbd0
-void gamStage2Loaded(void)
-{
-    ROSEPAN_STUB("gamStage2Loaded", 0x001fbbd0);
 }
 
 // stub of ROR 0x001634d4
@@ -1514,13 +1490,6 @@ void gamGetBwnPos(float *out)
 void gamGetBwnRot(float *out)
 {
     ROSEPAN_STUB("gamGetBwnRot", 0x0014448c);
-}
-
-// stub of ROR 0x001f9658
-int TskSnd::getVolume(int *volL, int *volR)
-{
-    ROSEPAN_STUB("TskSnd::getVolume", 0x001f9658);
-    return {};
 }
 
 // stub of ROR 0x001d5a0c
