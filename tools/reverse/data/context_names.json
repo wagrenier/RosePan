@@ -233,6 +233,30 @@
   "was": "FUN_00103484",
   "why": "asks GamMan 0x1c6ccc for option 0x12 and returns it != 0; MagSystem::setPlayer stores it as the switch that gates BedPad::setVibration"
  },
+ "001034e4": {
+  "name": "utlGetActorNo",
+  "tag": "ror-inferred",
+  "was": "FUN_001034e4",
+  "why": "GamMan::getActorNo(a0)"
+ },
+ "00103de4": {
+  "name": "utlPauseForMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_00103de4",
+  "why": "GamMan::isMenuOpen false -> GamMan::pause(0x100000), bss 0x7a3208 |= 0x400; returns whether it paused"
+ },
+ "00103e4c": {
+  "name": "utlGetPcEquipItemChrID",
+  "tag": "ror-inferred",
+  "was": "FUN_00103e4c",
+  "why": "GamMan +0x2200c (m_pcEquipItemChrID) with assert id < 128 (utl/utlgame.cpp line 0x4d9)"
+ },
+ "00103e94": {
+  "name": "utlGetPcChrNo",
+  "tag": "ror-inferred",
+  "was": "FUN_00103e94",
+  "why": "GamMan +0x21fdc (m_pcActor) with assert id < 128 (utl/utlgame.cpp line 0x4e3)"
+ },
  "001041c4": {
   "name": "utlRandStep",
   "tag": "ror-inferred",
@@ -2219,11 +2243,101 @@
   "was": "FUN_0012a6a8",
   "why": "requestState(10, arg, 0); magBwnHurt's call"
  },
+ "0012a6cc": {
+  "name": "MagLifeBwnCtrl::isHurt",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a6cc",
+  "why": "m_state == 10, the state requestHurt requests"
+ },
+ "0012a6dc": {
+  "name": "MagLifeBwnCtrl::barkQuery",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a6dc",
+  "why": "state 11: 0x129f50 on the sub object at +0xf0; else -1"
+ },
+ "0012a71c": {
+  "name": "MagLifeBwnCtrl::barkSet",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a71c",
+  "why": "state 11: 0x129f78 on the sub object at +0xf0 (m_0c = a1, m_08 = 12)"
+ },
+ "0012a758": {
+  "name": "MagLifeBwnCtrl::setFindItem",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a758",
+  "why": "+0x44 = item, UtlFind at +0x48 set for item >= 0, request != 0 -> requestState(4 FIND), else +0x78 = 0"
+ },
+ "0012a7cc": {
+  "name": "MagLifeBwnCtrl::cancelFind",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a7cc",
+  "why": "state 4 / 5 (FIND / FDED): +0x78 = 0, requestState(1 WAIT)"
+ },
+ "0012a808": {
+  "name": "MagLifeBwnCtrl::setPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a808",
+  "why": "Brown's actor (m_bwn slot 11) position +0x40 = v, +0x90 = 1, requestState(0)"
+ },
+ "0012a89c": {
+  "name": "MagLifeBwnCtrl::setRot",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a89c",
+  "why": "gamSetBwnRot's callee; the rotation counterpart of setPos"
+ },
+ "0012a974": {
+  "name": "MagLifeBwnCtrl::getPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a974",
+  "why": "gamGetBwnPos's callee: Brown's position into a1"
+ },
+ "0012a9ec": {
+  "name": "MagLifeBwnCtrl::getRot",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a9ec",
+  "why": "gamGetBwnRot's callee: Brown's rotation into a1"
+ },
+ "0012aa70": {
+  "name": "MagLifeBwnCtrl::moveTo",
+  "tag": "ror-inferred",
+  "was": "FUN_0012aa70",
+  "why": "+0x30 = xyz, w 1, requestState(6 MOVE)"
+ },
+ "0012aac0": {
+  "name": "MagLifeBwnCtrl::setAngle",
+  "tag": "ror-inferred",
+  "was": "FUN_0012aac0",
+  "why": "+0x40 = f12, requestState(0); op 0x21"
+ },
+ "0012aae8": {
+  "name": "MagLifeBwnCtrl::rotateTo",
+  "tag": "ror-inferred",
+  "was": "FUN_0012aae8",
+  "why": "+0x40 = f12, requestState(8 ROTA); op 0x22"
+ },
+ "0012ab10": {
+  "name": "MagLifeBwnCtrl::isStateDone",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ab10",
+  "why": "returns +0x80; ops 0x20 / 0x23 wait on it (0xcccccccc while 0)"
+ },
  "0012ab18": {
   "name": "MagLifeBwnCtrl::reset",
   "tag": "ror-inferred",
   "was": "FUN_0012ab18",
   "why": "an empty function (jr ra) MagScene::resetEntities calls on Brown's controller after the PC's and Brown's reset"
+ },
+ "0012b7cc": {
+  "name": "MagLifeBwnCtrl::setLevel",
+  "tag": "ror-inferred",
+  "was": "FUN_0012b7cc",
+  "why": "assert theLevel >= MAG_BWNCTRL_LEVEL_AUTO && theLevel <= MAG_BWNCTRL_LEVEL_MANUAL (maglifebwnctrl.cpp line 0xf52); +0x6c"
+ },
+ "0012ba54": {
+  "name": "MagLifeBwnCtrl::isBarkPhase3",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ba54",
+  "why": "m_state == 11 and m_08 == 3"
  },
  "0012c9c0": {
   "name": "MagLifePC::setState14",
@@ -3809,11 +3923,29 @@
   "was": "FUN_00143d7c",
   "why": "copies the current fog record (+0x2aae0) and the new one into a fade at +0x2ab20 / +0x2ab40 with a frame count (+0x2ab64) when frames > 0; MagScene::load passes m_fog[1] and 0"
  },
+ "00143eec": {
+  "name": "MagScene::addFog",
+  "tag": "ror-inferred",
+  "was": "FUN_00143eec",
+  "why": "target fog (+0x2ab40) plus the eight floats of a1, into setFog with frames passed through; called by 0x172934 / 0x17b0a4"
+ },
  "00143fd0": {
   "name": "MagScene::updateFog",
   "tag": "ror-inferred",
   "was": "FUN_00143fd0",
   "why": "steps the fog fade setFog started: m_fog[0] = lerp(m_fog[2], m_fog[3]) over +0x2ab64 frames"
+ },
+ "00144214": {
+  "name": "MagLifeWindowDebug::MagLifeWindowDebug",
+  "tag": "ror-inferred",
+  "was": "FUN_00144214",
+  "why": "MagLifeWindow ctor then vptr +0x14 = _vt$18MagLifeWindowDebug 0x2e1fe8"
+ },
+ "00144244": {
+  "name": "magBwnIsBarkPhase3",
+  "tag": "ror-inferred",
+  "was": "FUN_00144244",
+  "why": "forwards the scene MagLifeBwnCtrl (0x727aa0) to 0x12ba54: state 11 and m_08 == 3"
  },
  "0014426c": {
   "name": "magBwnHurt",
@@ -3821,11 +3953,47 @@
   "was": "FUN_0014426c",
   "why": "(react, damage): MagScene's MagLifeBwnCtrl (+0x2bd20) gets 0x12a6a8(react); scnChrRequestDog's reaction to a hit (the damage word is passed and dropped)"
  },
+ "001442a4": {
+  "name": "magBwnIsHurt",
+  "tag": "ror-inferred",
+  "was": "FUN_001442a4",
+  "why": "forwards MagLifeBwnCtrl 0x727aa0 to 0x12a6cc: state == 10 (requestHurt's state)"
+ },
+ "001442cc": {
+  "name": "magBwnNop",
+  "tag": "ror-inferred",
+  "was": "FUN_001442cc",
+  "why": "empty function between the Brown glue wrappers; one caller 0x157230"
+ },
+ "001442d4": {
+  "name": "magBwnReturn0",
+  "tag": "ror-inferred",
+  "was": "FUN_001442d4",
+  "why": "returns 0; three callers in the effect manager range 0x165a68.."
+ },
+ "001442dc": {
+  "name": "magBwnBarkQuery",
+  "tag": "ror-inferred",
+  "was": "FUN_001442dc",
+  "why": "forwards a1 to MagLifeBwnCtrl 0x12a6dc: in state 11 asks the bark sub object at +0xf0 whether its +0x24 equals a1 (1 / -1); -1 otherwise"
+ },
+ "00144308": {
+  "name": "magBwnBarkSet",
+  "tag": "ror-inferred",
+  "was": "FUN_00144308",
+  "why": "forwards a1 to MagLifeBwnCtrl 0x12a71c: in state 11 stores a1 at +0x0c and sets +0x08 = 12"
+ },
  "00144334": {
   "name": "gamSetBwnFollow",
   "tag": "ror-inferred",
   "was": "FUN_00144334",
   "why": "MagLifeBwnCtrl (scene +0x2bd20) 0x12b7cc with 0 when on, 2 when off"
+ },
+ "00144388": {
+  "name": "magBwnIsLevelAuto",
+  "tag": "ror-inferred",
+  "was": "FUN_00144388",
+  "why": "MagLifeBwnCtrl +0x6c (the MAG_BWNCTRL_LEVEL word setLevel 0x12b7cc writes) == 0"
  },
  "00144398": {
   "name": "gamSetBwnPos",
@@ -3857,11 +4025,101 @@
   "was": "FUN_00144500",
   "why": "MagLifeBwnCtrl 0x12a758(item, 0, 0)"
  },
+ "00144538": {
+  "name": "magBwnReset",
+  "tag": "ror-inferred",
+  "was": "FUN_00144538",
+  "why": "MagLifeBwnCtrl::reset on 0x727aa0; no callers"
+ },
  "0014457c": {
   "name": "gamSetBwnWait",
   "tag": "ror-inferred",
   "was": "FUN_0014457c",
   "why": "MagLifeBwnCtrl 0x12b7cc with 1 when on, 0 when off"
+ },
+ "001445c8": {
+  "name": "magBwnReturn0b",
+  "tag": "ror-inferred",
+  "was": "FUN_001445c8",
+  "why": "returns 0; called by GamArea::update"
+ },
+ "001445d0": {
+  "name": "magBwnReturn0c",
+  "tag": "ror-inferred",
+  "was": "FUN_001445d0",
+  "why": "returns 0; called by GamArea::update"
+ },
+ "001445d8": {
+  "name": "magBwnGetStateCode",
+  "tag": "ror-inferred",
+  "was": "FUN_001445d8",
+  "why": "MagSystem::getBwnState mapped to a four-char code (NULL WAIT FOLW STAY FIND FDED MOVE MVED ROTA RTED DAMG BARK HUG); magBwnSeqCommand op 3"
+ },
+ "001446b8": {
+  "name": "magBwnCmdSpecialMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_001446b8",
+  "why": "op spmn: utlPauseForMenu, then requestMenu(table 0x2ef298 lookup of a1, a2): KLCK / BVIL / BLND / BFML / BCPL / SPM0 / SPM1 to 0x1000b..0x1000f"
+ },
+ "00144820": {
+  "name": "magBwnCmdEquipDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_00144820",
+  "why": "op eqds: disp / DISP / 1 shows the PC equip item actor (setHide 0), else hides it and resets the PC actor's suffix motion"
+ },
+ "00144924": {
+  "name": "magBwnCmdWhiteIn",
+  "tag": "ror-inferred",
+  "was": "FUN_00144924",
+  "why": "op whti: MagScene::fadeIn(a1, 7, 1)"
+ },
+ "00144960": {
+  "name": "magBwnCmdWhiteOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00144960",
+  "why": "op whto: MagScene::fadeOut(a1, 7, 1)"
+ },
+ "0014499c": {
+  "name": "magBwnCmdLightFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_0014499c",
+  "why": "op ilts: MagScene::setLightFlags({a2, a3, t0, 0, 0, 0}, a1)"
+ },
+ "001449fc": {
+  "name": "magBwnCmdAddLight",
+  "tag": "ror-inferred",
+  "was": "FUN_001449fc",
+  "why": "op adlt: MagSystem 0x6e9840 addLight(a1..a4)"
+ },
+ "00144a34": {
+  "name": "magBwnGetFindResult",
+  "tag": "ror-inferred",
+  "was": "FUN_00144a34",
+  "why": "op gfrs: MagLifeBwnCtrl +0x7c"
+ },
+ "00144a40": {
+  "name": "magBwnGetFoundOid",
+  "tag": "ror-inferred",
+  "was": "FUN_00144a40",
+  "why": "op ifsc and GamArea::update: MagLifeBwnCtrl +0x68 when +0x7c is set, else 0"
+ },
+ "00144a6c": {
+  "name": "magBwnGetFindItem",
+  "tag": "ror-inferred",
+  "was": "FUN_00144a6c",
+  "why": "op gfit: MagLifeBwnCtrl +0x44 (setFindItem's item)"
+ },
+ "00144a78": {
+  "name": "magBwnCmdCancelFind",
+  "tag": "ror-inferred",
+  "was": "FUN_00144a78",
+  "why": "op clfd: MagLifeBwnCtrl 0x12a7cc (state 4/5 back to 1)"
+ },
+ "00144aa8": {
+  "name": "magBwnCmdResetPC",
+  "tag": "ror-inferred",
+  "was": "FUN_00144aa8",
+  "why": "op rcst: MagScene::commandPC(0x14, NULL)"
  },
  "00144ae0": {
   "name": "magBwnSeqCommand",

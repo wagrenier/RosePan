@@ -18,14 +18,8 @@
 /* SysTimer and sysInitManagers: system/system.cpp (the globals file). */
 #include "system/system.h"
 
-/* ---- the MagScene range after setFog (unassigned@00143d3c) ---- */
-/* Brown's script commands (native 039): args are the six script words, op
- * first; drives the scene's MagLifeBwnCtrl; returns the script's v0 (or a
- * SEQ_RET_* code). */
-intptr_t magBwnSeqCommand(const intptr_t *args);                         // ROR 0x00144ae0
-/* Brown's reaction to a hit: the scene's MagLifeBwnCtrl requestHurt(react)
- * (state 10). damage is passed and not read. */
-void magBwnHurt(int react, int damage);                                  // ROR 0x0014426c
+/* magBwnSeqCommand, magBwnHurt and Brown's other glue: mag/magscenecmd.h. */
+#include "mag/magscenecmd.h"
 
 /* ---- the task framework (unassigned@001e46b8) ---- */
 

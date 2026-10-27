@@ -98,8 +98,12 @@ follows it; reached stubs in run order):
   7. `mag/magscenetenkyu.cpp` -- VERIFY 2026-10-27 (the sky: load / spin / rotate / drawSkyDome;
      cannot show until utlDrawI3r 0x106760 draws). Left: `unassigned@00140030` now 0x140990..0x140b20
      (initRecords853bc, the drawFocus packet helper) belongs to mag/magscenefocus.cpp with
-     unassigned@00140c68 -- define them together; `unassigned@00143d3c` -- setFog 0x143d7c,
-     magBwnSeqCommand 0x144ae0.
+     unassigned@00140c68 -- define them together. 2026-10-27: `unassigned@00143d3c`'s first
+     0x12e4 bytes are pinned and WRITTEN as `mag/magscenecmd.cpp` (verify: fog fade, Brown's glue
+     and magBwnSeqCommand; nothing on screen shows fog until a model draws, and the
+     MagLifeBwnCtrl methods it calls are stubs in mag/maglifebwnctrl.cpp). The rest is now
+     `unassigned@00145020` (the enemy classes Hfm..Pig, EmyManager 0x16265c.. with the reached
+     EmyManager::resetWork 0x1635e0): split it per enemy file (emy/) and EmyManager first.
   8. `unassigned@001dd5e8` -- GamArea::addTrg / stopKind / clearKind (room triggers).
   9. `unassigned@001d3b44` -- GamMan::relinkObj 0x1d5da0.
   Also reached, lower: EmyManager::resetWork, Obj176a3c::createEff (the effect manager in
@@ -904,6 +908,11 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- mag/magscenecmd.cpp (2026-10-27) is the port's name for 0x143d3c..0x145020: no source string
+  names the run (fog fade, the debug window ctor, Brown's glue). magsceneif.cpp's asserts end right
+  before it but its 13 functions serve debug/motnamecnv only; rename if a better anchor turns up.
+  The tiny wrappers magBwnReturn0 / 0b / 0c and magBwnNop are named by position, not role.
 
 - MnuSprite / VU1 sprite names (2026-10-27, mnu/mnupbook.cpp): the picture book's sprite records hold
   (0, 0, 1, 0.875) at +0x10 (a 512 x 448 page on a 512 x 512 texture) and (1, 1, 1, 1) at +0x20, so

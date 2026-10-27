@@ -978,7 +978,7 @@ void MagScene::draw(i3dContext *ctx, sceGsDBuff *dbuff, int frame)
     for (int i = 0; i < 8; i++)
     {
         float scale = ((u_int)(i - 1) < 2) ? m_22a8 : 1.0f;
-        lightstatus[i] = m_light_pool.createLight(ctx, i, m_22cc, scale);
+        lightstatus[i] = m_light_pool.createLight(ctx, i, m_sepia, scale);
         ROR_ASSERT(lightstatus[i] != NULL); /* 2282 */
         renderstage[i] = i3dCtxCreateLayer(ctx, 500.0f);
         ROR_ASSERT(renderstage[i] != NULL); /* 2286 */

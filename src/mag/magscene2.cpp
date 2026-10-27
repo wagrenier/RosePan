@@ -182,7 +182,7 @@ int MagScene::load(i3dContext *ctx, int id, void *data, int copy)
 
     float center[4];
     float radius;
-    if (t->m_model[0].loadPack(&m_tex_info, BedPfh(model_file), m_22cc, 0) != 0)
+    if (t->m_model[0].loadPack(&m_tex_info, BedPfh(model_file), m_sepia, 0) != 0)
     {
         ROR_ASSERT(0); /* 456 */
         return -5;
@@ -540,7 +540,7 @@ int MagScene::loadActor(i3dContext *ctx, int theID, void *thePtr, int keep)
 
     ROR_ASSERT(thePtr); /* 1222 */
     BedPfh pfh(thePtr);
-    if (a->load(pfh, &m_tex_info, keep ? 2 : 1, m_22cc) != 0)
+    if (a->load(pfh, &m_tex_info, keep ? 2 : 1, m_sepia) != 0)
         return -4;
     m_actor_flags[n] = 0;
     m_actor_snd[n] = NULL;
