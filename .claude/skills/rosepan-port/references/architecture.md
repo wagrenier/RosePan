@@ -1024,7 +1024,7 @@ functions assert (`.h`). Directories and files:
 | `spr/` | sprman (+.h), sprtexture |
 | `system/` | sysnowloading |
 | `task/` | naga_chunk, tsk_bg_load, tsk_scene |
-| `utl/` | utlbtl, utlfile, utlfind, utlgame, utlmisc (0x105650..0x105e50: text helpers, `utlParseParam` name/value lines, the frame counter, operator new/delete, the game heap), utltm2 |
+| `utl/` | utlbtl, utlfile, utlfind, utlgame, utlmath (0x106658..0x10737c: `utlConvSndId` -- a sound id 0x0a0Nxxxx swapped for its twin of the current map area, `GamMan::getMapArea` column of the 54-row table 0x295f08; `utlDrawI3r` = `i3rDrawModel` 0x21fe68 with dispatch held off; node display words; vector rotations / dot / cross / lengths / distances / direction to angles with the ROM's pi 0x40490fdc and pi/2 0x3fc90fda), utlmisc (0x105650..0x105e50: text helpers, `utlParseParam` name/value lines, the frame counter, operator new/delete, the game heap), utltm2 |
 
 Files without an assert are not named by the binary (`main`, the rx middleware, every file whose code
 never asserts): sessions name them (`tus.py define --why`).

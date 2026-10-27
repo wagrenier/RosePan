@@ -533,6 +533,18 @@
   "was": "FUN_001068d4",
   "why": "node n's material (0x22b0e8 / 0x22ac08) first word"
  },
+ "00106920": {
+  "name": "utlVecRotX",
+  "tag": "ror-inferred",
+  "was": "FUN_00106920",
+  "why": "out = (x, y cos - z sin, y sin + z cos) of in for angle (cosf / sinf); the copy-form sibling of utlVecRotZ 0x106a40"
+ },
+ "001069b0": {
+  "name": "utlVecRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_001069b0",
+  "why": "out = (x cos - z sin, y, x sin + z cos) of in for angle; copy form like utlVecRotZ (the matrix form 0x106bc8 becomes utlVecRotMatY)"
+ },
  "00106a40": {
   "name": "utlVecRotZ",
   "tag": "ror-inferred",
@@ -545,11 +557,35 @@
   "was": "FUN_00106ad0",
   "why": "sqrt(x*x + y*y + z*z), sqrtf on a NaN"
  },
+ "00106b24": {
+  "name": "utlVecRotMatX",
+  "tag": "ror-inferred",
+  "was": "FUN_00106b24",
+  "why": "v in place by sceVu0RotMatrixX of angle wrapped once to -pi..pi, sceVu0ApplyMatrix"
+ },
  "00106bc8": {
-  "name": "utlVecRotY",
+  "name": "utlVecRotMatY",
   "tag": "ror-inferred",
   "was": "FUN_00106bc8",
-  "why": "sceVu0UnitMatrix, RotMatrixY(angle wrapped once), ApplyMatrix in place; beside utlVecRotZ"
+  "why": "v in place by sceVu0RotMatrixY of angle wrapped once to -pi..pi (renamed from utlVecRotY: 0x1069b0 is the copy form)"
+ },
+ "00106c6c": {
+  "name": "utlVecRotMatZ",
+  "tag": "ror-inferred",
+  "was": "FUN_00106c6c",
+  "why": "v in place by sceVu0RotMatrixZ of angle wrapped once to -pi..pi"
+ },
+ "00106d10": {
+  "name": "utlVecDot",
+  "tag": "ror-inferred",
+  "was": "FUN_00106d10",
+  "why": "tail call of sceVu0InnerProduct with its arguments"
+ },
+ "00106d24": {
+  "name": "utlVecCross",
+  "tag": "ror-inferred",
+  "was": "FUN_00106d24",
+  "why": "calls sceVu0OuterProduct(out, a, b) with its arguments"
  },
  "00106d40": {
   "name": "utlLerp4",
@@ -563,11 +599,41 @@
   "was": "FUN_00106db0",
   "why": "clears v[3] and runs sceVu0Normalize(v, v)"
  },
+ "00106dd0": {
+  "name": "utlVecLength",
+  "tag": "ror-inferred",
+  "was": "FUN_00106dd0",
+  "why": "sqrtf(sceVu0InnerProduct(v, v)); utlVecLength3 0x106ad0 is the scalar-FPU twin"
+ },
+ "00106e14": {
+  "name": "utlVecDistSq",
+  "tag": "ror-inferred",
+  "was": "FUN_00106e14",
+  "why": "sceVu0InnerProduct of (a - b, w 0) with itself; utlVecDist 0x106e70 takes its sqrt"
+ },
  "00106e70": {
   "name": "utlVecDist",
   "tag": "ror-inferred",
   "was": "FUN_00106e70",
   "why": "sqrt of 0x106e14 (the squared distance of two vectors); collectActors keys actors by it from the camera"
+ },
+ "00106eb4": {
+  "name": "utlVecDistInline",
+  "tag": "ror-inferred",
+  "was": "FUN_00106eb4",
+  "why": "same result as utlVecDist (sqrt of the squared distance of a - b) with utlVecDistSq inlined"
+ },
+ "00106f38": {
+  "name": "utlVecDistXZ",
+  "tag": "ror-inferred",
+  "was": "FUN_00106f38",
+  "why": "sqrt of the inner product of (a.x - b.x, 0, a.z - b.z): the distance on the ground plane"
+ },
+ "00106fb4": {
+  "name": "utlVecDistRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_00106fb4",
+  "why": "distance from a to b returned, *rot = the y rotation of b - a (atanf(x / z), the utlVecToRotY rules)"
  },
  "001070f8": {
   "name": "utlVecToRotY",
@@ -15899,6 +15965,12 @@
   "was": "FUN_0021fb50",
   "why": "called by i3rBuildPackets for every mesh item with the root's packet buffer; writes VIF UNPACK / DMA tags (0x30000000, 0x60000000, 0x6c02800001000101) for the mesh's strips into it"
  },
+ "0021fe68": {
+  "name": "i3rDrawModel",
+  "tag": "ror-inferred",
+  "was": "FUN_0021fe68",
+  "why": "utlDrawI3r's body: layer +0x834 view, i3dVu0MatMul / i3dViewTestBox cull (returns 0xd off screen), mesh packets 0x220670.., sceDmaSync"
+ },
  "00222f50": {
   "name": "i3dPktLayerState",
   "tag": "ror-inferred",
@@ -22643,6 +22715,12 @@
   "was": "FUN_0026bb10",
   "why": "libvib: (socket, profile size, profile, data size, data) packed into a 0x103400b DBC request; BedPad::setVibration passes profile bit 0 small motor / bit 1 big motor"
  },
+ "0026c550": {
+  "name": "atanf",
+  "tag": "lib-context",
+  "was": "FUN_0026c550",
+  "why": "newlib s_atanf: |x| >= 0x50800000 (2^34) returns +-pi/2 first; utlVecToRotY's atan(x / z)"
+ },
  "0026c8e0": {
   "name": "modff",
   "tag": "lib-context",
@@ -22654,6 +22732,12 @@
   "tag": "lib-context",
   "was": "FUN_0026cad0",
   "why": "wrapper that calls __ieee754_acosf; called with a quaternion dot before sinf in the slerps"
+ },
+ "0026cae8": {
+  "name": "asinf",
+  "tag": "lib-context",
+  "was": "FUN_0026cae8",
+  "why": "newlib w_asinf: tail-jumps to 0x26d540, whose |x| == 1.0 case returns x * pio2_hi + x * pio2_lo (__ieee754_asinf)"
  },
  "0026cb00": {
   "name": "atan2f",
@@ -22672,6 +22756,12 @@
   "tag": "lib-context",
   "was": "FUN_0026cb48",
   "why": "newlib wrapper tail-jumping to 0x26e820 (software __ieee754_sqrtf); GCC calls it only when the inline sqrt.s gives NaN (native 020 cases 30 / 56)"
+ },
+ "0026d540": {
+  "name": "__ieee754_asinf",
+  "tag": "lib-context",
+  "was": "FUN_0026d540",
+  "why": "newlib e_asinf: |x| == 0x3f800000 -> x * pio2_hi (0x3fc90fda) + x * pio2_lo (0x33a22168)"
  },
  "00279b70": {
   "name": "snprintf",

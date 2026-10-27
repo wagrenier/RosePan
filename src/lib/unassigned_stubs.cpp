@@ -236,13 +236,6 @@ u_long   * i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matri
     return pkt;
 }
 
-// stub of ROR 0x00106e70
-float utlVecDist(const float *a, const float *b)
-{
-    ROSEPAN_STUB("utlVecDist", 0x00106e70);
-    return {};
-}
-
 // bridge of ROR 0x00228c38
 void i3dMatGetScaleTrans(sceVu0FVECTOR *out, sceVu0FVECTOR *m)
 {
@@ -370,13 +363,6 @@ int utlStrEqualNoCase(const char *a, const char *b)
     }
 }
 
-// stub of ROR 0x00106658
-u_int utlConvSndId(u_int id)
-{
-    ROSEPAN_STUB("utlConvSndId", 0x00106658);
-    return {};
-}
-
 // stub of ROR 0x0017772c
 void FUN_0017772c(Obj176a3c *obj)
 {
@@ -461,12 +447,6 @@ void MagScene::updateRecords853fc()
     ROSEPAN_STUB("MagScene::updateRecords853fc", 0x00140c68);
 }
 
-// stub of ROR 0x00107248
-void utlVecToRot(const float *dir, float *rot)
-{
-    ROSEPAN_STUB("utlVecToRot", 0x00107248);
-}
-
 // stub of ROR 0x001beeb4
 int GamFont::clear()
 {
@@ -499,12 +479,6 @@ float i3dSegSegDist2(const float *p0, const float *d0, const float *p1, const fl
 {
     ROSEPAN_STUB("i3dSegSegDist2", 0x00234050);
     return {};
-}
-
-// stub of ROR 0x00106db0
-void utlNormalize3(float *v)
-{
-    ROSEPAN_STUB("utlNormalize3", 0x00106db0);
 }
 
 // stub of ROR 0x001bfe30
@@ -1329,21 +1303,6 @@ int i3cCastSphere(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
     return {};
 }
 
-// stub of ROR 0x00106760
-int utlDrawI3r(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
-                 const void *opt)
-{
-    ROSEPAN_STUB("utlDrawI3r", 0x00106760);
-    return {};
-}
-
-// stub of ROR 0x001067d8
-int utlSetI3rDispControl(I3rRoot *root, void *disp)
-{
-    ROSEPAN_STUB("utlSetI3rDispControl", 0x001067d8);
-    return {};
-}
-
 // stub of ROR 0x0021fb50
 void i3rBuildMeshPacket(I3rItem *mesh, void *buf)
 {
@@ -1393,39 +1352,6 @@ u_long   * i3dPktVu1Sprite(u_long *pkt, const float *pos, const float *uv)
     /* PC: the packet back unchanged, not NULL -- the menus' next real
      * packet writer (i3dPktRefTexRegs, i3dPktSetReg) writes through it. */
     return pkt;
-}
-
-// stub of ROR 0x00106ad0
-float utlVecLength3(const float *v)
-{
-    ROSEPAN_STUB("utlVecLength3", 0x00106ad0);
-    return {};
-}
-
-// stub of ROR 0x00106a40
-void utlVecRotZ(float angle, float *out, const float *in)
-{
-    ROSEPAN_STUB("utlVecRotZ", 0x00106a40);
-}
-
-// stub of ROR 0x00106bc8
-void utlVecRotY(float angle, float *v)
-{
-    ROSEPAN_STUB("utlVecRotY", 0x00106bc8);
-}
-
-// stub of ROR 0x001068d4
-void * utlGetI3rNodeDisp(I3rRoot *root, int n)
-{
-    ROSEPAN_STUB("utlGetI3rNodeDisp", 0x001068d4);
-    return {};
-}
-
-// stub of ROR 0x0010686c
-int utlSetI3rNodeDisp(I3rRoot *root, void *disp, int n)
-{
-    ROSEPAN_STUB("utlSetI3rNodeDisp", 0x0010686c);
-    return {};
 }
 
 // stub of ROR 0x0014b780
@@ -1880,28 +1806,11 @@ float emyVecLength(const float *v)
     return {};
 }
 
-// stub of ROR 0x001071c8
-float utlVecToRotX(const float *dir)
+
+// stub of ROR 0x0021fe68
+int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
+                   const void *opt)
 {
-    ROSEPAN_STUB("utlVecToRotX", 0x001071c8);
+    ROSEPAN_STUB("i3rDrawModel", 0x0021fe68);
     return {};
-}
-
-// stub of ROR 0x001070f8
-float utlVecToRotY(const float *dir)
-{
-    ROSEPAN_STUB("utlVecToRotY", 0x001070f8);
-    return {};
-}
-
-// Written ahead for dog/dogcamera.cpp (DogCamera::updateMove).
-// ROR 0x00106d40
-void utlLerp4(float t, float *out, const float *a, const float *b)
-{
-    float u = 1.0f - t;
-
-    out[0] = b[0] * t + a[0] * u;
-    out[1] = b[1] * t + a[1] * u;
-    out[2] = b[2] * t + a[2] * u;
-    out[3] = b[3] * t + a[3] * u;
 }

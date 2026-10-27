@@ -331,7 +331,7 @@ int DogActor::getRootMove(float t, float *out)
             {
                 ROR_ASSERT(loopflag == 1); /* 451 */
                 float turn = last[3] - first[3];
-                utlVecRotY(turn, out);
+                utlVecRotMatY(turn, out);
                 out[0] += last[0] - first[0];
                 out[1] += last[1] - first[1];
                 out[3] += turn;

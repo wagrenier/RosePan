@@ -255,13 +255,8 @@ struct TskEnemyMove : CmnITask
 /* 1 when the two strings are equal, a..z compared as A..Z, else 0
  * (unassigned@00106010, after utl/utlfile.cpp). */
 int   utlStrEqualNoCase(const char *a, const char *b);                   // ROR 0x00106010
-/* Swaps a sound id 0x0a00xxxx..0x0a02xxxx for its twin in the column the
- * game's language / version picks (table data 0x295f08). Other ids pass. */
-u_int utlConvSndId(u_int id);                                            // ROR 0x00106658
-/* out[i] = a[i] * (1 - t) + b[i] * t, four floats. */
-void  utlLerp4(float t, float *out, const float *a, const float *b);      // ROR 0x00106d40
-/* v[3] = 0, then v normalised in place (sceVu0Normalize). */
-void  utlNormalize3(float *v);                                           // ROR 0x00106db0
+/* The vector helpers, utlConvSndId and the i3r wrappers: utl/utlmath.h. */
+#include "utl/utlmath.h"
 /* The heading of (x, z) in -pi..pi, 0 for a zero vector (unassigned@00216ad0). */
 float utlAtan2(float x, float z);                                        // ROR 0x00217f10
 /* Copies src to dst with upper case letters (the ctype table's bit 1)
@@ -422,6 +417,11 @@ struct MagViewParam;
  * type 0x4c entry's child 0 child) into buf. i3rBuildPackets passes the
  * same buffer start for every mesh. */
 void  i3rBuildMeshPacket(I3rItem *mesh, void *buf);                     // ROR 0x0021fb50
+/* utlDrawI3r's body (unassigned@0021fb50): culls the model against the
+ * layer's view (layer +0x834; 0xd when off screen), then writes its mesh
+ * packets (0x220670..) and waits on DMA. */
+int   i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
+                   const void *opt);                                     // ROR 0x0021fe68
 
 #include "i3d/i3croot.h"
 
@@ -456,25 +456,6 @@ int   i3cCastCylinder(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats); // 
 int   dogModelHitNearest(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5); // ROR 0x00114034
 int   dogModelHitCylinder(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5); // ROR 0x001141c8
 
-/* Draws an i3r model into layer with its node matrices (NULL: none) and
- * world matrix, the thread switch held off around it (0x21fe68). opt is
- * NULL or a record of a mask and five floats (DogActor::drawModel's
- * {0x1f, v x5} for a model with an animated value; role unverified). */
-int   utlDrawI3r(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
-                 const void *opt);                                       // ROR 0x00106760
-/* out.xy = in.xy turned by angle about z, out.z = in.z (unassigned@00106658). */
-void  utlVecRotZ(float angle, float *out, const float *in);              // ROR 0x00106a40
-/* v (4 floats) in place by a y rotation matrix of angle (wrapped once to
- * -pi..pi; sceVu0RotMatrixY / ApplyMatrix). DogActor::getRootMove. */
-void  utlVecRotY(float angle, float *v);                                 // ROR 0x00106bc8
-/* sqrt(x * x + y * y + z * z) of v. */
-float utlVecLength3(const float *v);                                     // ROR 0x00106ad0
-/* Points the first word of each of the root's materials at disp. */
-int   utlSetI3rDispControl(I3rRoot *root, void *disp);                   // ROR 0x001067d8
-/* Node n's material's display record (its first word), NULL none; the
- * set returns 0, 1 when the node has no material. */
-void *utlGetI3rNodeDisp(I3rRoot *root, int n);                           // ROR 0x001068d4
-int   utlSetI3rNodeDisp(I3rRoot *root, void *disp, int n);               // ROR 0x0010686c
 
 /* Strips of count vertices with an optional matrix, STQ, colours and
  * positions (EE vectors); primitives unverified. */
@@ -507,14 +488,6 @@ u_long   *i3dPktDrawWireBox(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
                             const float *center, const void *extent, const void *color); // ROR 0x0021e8f8
 u_long   *i3dPktDrawWireShape(u_long *pkt, I3dLayer *layer, void *a, void *b, void *c); // ROR 0x0021e9f8
 
-/* The distance of two points (sqrt of 0x106e14). */
-float utlVecDist(const float *a, const float *b);                        // ROR 0x00106e70
-/* The y rotation of a direction: atan(x / z), turned half a turn when z < 0. */
-float utlVecToRotY(const float *dir);                                    // ROR 0x001070f8
-/* The x rotation of a direction (from -y). */
-float utlVecToRotX(const float *dir);                                    // ROR 0x001071c8
-/* A direction to angles: rot x (pitch, from -y), y (yaw, atan2 x / z), z 0. */
-void  utlVecToRot(const float *dir, float *rot);                         // ROR 0x00107248
 
 /* bss 0x7812ac, just below GamMan: mainInitGame passes it to
  * seqSetLanguage (which ignores it). Role not known yet. */
