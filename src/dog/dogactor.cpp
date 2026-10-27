@@ -9,7 +9,9 @@
 // nodes. Written 2026-10-27: the load / release paths, the record lookups,
 // the root track and the motion starts; then (same day) the per-frame
 // player: runMotionCmd, the posture update, draw / drawModel / drawShadow,
-// checkName and the eye. getMotionMove / getMotionEvent are still stubbed.
+// checkName and the eye; then (a third session) the root track readers
+// (getMotionMove, getMotionEvent, the root base), the blend entry starts,
+// the node scales and matrices, shareModel and the second constructor.
 
 #include <ctype.h>
 #include <stdint.h>
@@ -24,6 +26,7 @@
 #include "i3d/i3rmodel.h"
 #include "i3d/i3rroot.h"
 #include "i3d/i3dmath.h"
+#include "lib/unassigned.h"
 #include "mag/magsystem.h"
 #include "utl/utlmisc.h"
 
@@ -1247,8 +1250,8 @@ void DogActor::clearNodeScale()
 {
     for (int i = 0; i < DOG_SCALE_NODE_MAX; i++)
     {
-        m_scale_node[i] = -1;
-        m_scale[i] = 1.0f;
+        m_scale_node_no[i] = -1;
+        m_scale_node_val[i] = 1.0f;
     }
 }
 
@@ -1289,10 +1292,10 @@ void DogActor::savePosture()
 
 DogActor::DogActor()
 {
-    m_3b0[3] = 1.0f;
-    m_3b0[2] = 0.0f;
-    m_3b0[1] = 0.0f;
-    m_3b0[0] = 0.0f;
+    m_base_trans[3] = 1.0f;
+    m_base_trans[2] = 0.0f;
+    m_base_trans[1] = 0.0f;
+    m_base_trans[0] = 0.0f;
     m_base_rotate[3] = 1.0f;
     m_base_rotate[2] = 0.0f;
     m_base_rotate[1] = 0.0f;
@@ -1590,7 +1593,7 @@ int DogActor::startMotionCmd(int theID, u_int flags)
 // command; 3 loop motion op1 (the command holds); 4 as 2 with the chance.
 // Without a list the motion steps alone by m_motion_flags (1 loop; else at
 // its end 2 changes to m_motion_flags2, none of 1, 2, 4 stops).
-// callcheck: FUN_00215a30, FUN_0010423c, FUN_00109284, FUN_0010e7dc (the assert handler; utlRandRange; getRootEndKey and addBaseRotY inside dogActorTurnWrap / dogActorTurn)
+// callcheck: FUN_00215a30, FUN_0010423c, getRootEndKey, addBaseRotY (the assert handler; utlRandRange; getRootEndKey and addBaseRotY inside dogActorTurnWrap / dogActorTurn)
 // ROR 0x0010d388
 
 void DogActor::runMotionCmd()
@@ -1871,11 +1874,11 @@ int DogActor::updatePosture(int count)
     for (int i = 0; i < DOG_SCALE_NODE_MAX; i++)
     {
         /* Node 0 is never scaled (the ROM tests > 0). */
-        int node = m_scale_node[i];
+        int node = m_scale_node_no[i];
         if (node > 0)
         {
             for (int row = 0; row < 4; row++)
-                i3dVecScaleXYZ(m_scale[i], m_mat_local[node][row], m_mat_local[node][row]);
+                i3dVecScaleXYZ(m_scale_node_val[i], m_mat_local[node][row], m_mat_local[node][row]);
         }
     }
     convertLocalToModel((I3dMatrixF4x4 *)m_mat_model, (const I3dMatrixF4x4 *)m_mat_local);
@@ -1891,7 +1894,7 @@ int DogActor::updatePosture(int count)
 // frame when 0); a frame without it draws with the model matrices as
 // they are. The root's turn (m_rot_y_aar) goes into the heading after the
 // draw.
-// callcheck: FUN_00215a30, FUN_0010df54, FUN_0010e7dc, FUN_00108660 (the assert handler; updatePosture, addBaseRotY inside dogActorTurn, countBlendFrame); transformBillboard / transform / drawModel are vtable slots 11 / 2 / 19
+// callcheck: FUN_00215a30, FUN_0010df54, addBaseRotY, FUN_00108660 (the assert handler; updatePosture, addBaseRotY inside dogActorTurn, countBlendFrame); transformBillboard / transform / drawModel are vtable slots 11 / 2 / 19
 // ROR 0x0010e5c0
 
 void DogActor::draw(I3dLayer *theRenderStage, const float *cam_rotate, const float *cam_trans)
@@ -2125,43 +2128,957 @@ void DogActor::setEyeTex(int state)
     m_eye_state = state;
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+// ──────────────────────────────────────────────────────────────────────
+// The root track, read for the callers that move the actor themselves.
 
-// stub of ROR 0x00109348
+static void dogCopy4(float *dst, const float *src)
+{
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+    dst[3] = src[3];
+}
+
+// callcheck: FUN_00215a30 (the assert handler)
+// ROR 0x00108bb0
+
+float DogActor::getTrackKeyRotY(const DogMotionTrack *trk, int n)
+{
+    if (trk == NULL)
+        return 0.0f;
+    const float *k = trk->m_data + n * getTrackStride(trk);
+    switch (getTrackType(trk))
+    {
+    case 0:
+        ROR_ASSERT(0); /* 288 */
+        break;
+    case 1:
+    case 4:
+    case 0x14:
+        return k[3];
+    case 2:
+    case 0x12:
+        return k[1];
+    case 3:
+    case 5:
+    case 0x13:
+    case 0x15:
+        break;
+    case 6:
+        return k[0];
+    default:
+        ROR_ASSERT(0); /* 308 */
+        break;
+    }
+    return 0.0f;
+}
+
+// callcheck: FUN_00215a30, DogMotionBlend::getNo (the assert handler; getMotionAuxData inline, getNo called)
+// ROR 0x00109634
+
+int DogActor::getRootTrackEnd(float *end)
+{
+    DogMotionTrack *trk = getMotionAuxData(m_motion.getNo());
+    if (trk == NULL)
+    {
+        if (end != NULL)
+        {
+            end[0] = 0.0f;
+            end[3] = 1.0f;
+            end[2] = 0.0f;
+            end[1] = 0.0f;
+        }
+        return 0;
+    }
+    int n = getTrackNumFrame(trk);
+    if (end != NULL)
+        getTrackKey(trk, end, n - 1);
+    return n;
+}
+
+// A non-looping motion clamps both frames to the last key. A looping one
+// reports the track's whole turn in rot when the step crossed the end
+// (forward) or the start (backward), so the caller can carry it over.
+// callcheck: FUN_00215a30, DogMotionBlend::getNo (the assert handler; getMotionAuxData inline, getNo called)
+// ROR 0x00109348
+
 int DogActor::getMotionMove(float t0, float t1, float *move, float *rot, float *pos)
 {
-    ROSEPAN_STUB("DogActor::getMotionMove", 0x00109348);
-    return {};
+    DogMotionTrack *trk = getMotionAuxData(m_motion.getNo());
+    if (trk == NULL)
+    {
+        *rot = 0.0f;
+        move[3] = 1.0f;
+        move[0] = 0.0f;
+        move[2] = 0.0f;
+        move[1] = 0.0f;
+        return 0;
+    }
+    u_int flags = m_motion_flags;
+    if ((flags & 1) == 0)
+    {
+        float last = (float)(getTrackNumFrame(trk) - 1);
+        if (last < t0)
+            t0 = last;
+        if (last < t1)
+            t1 = last;
+    }
+    float start[4];
+    start[2] = 0.0f;
+    start[1] = 0.0f;
+    start[0] = 0.0f;
+    start[3] = 1.0f;
+    getRootMove(t0, start);
+    getRootMove(t1, move);
+    if (pos != NULL)
+        dogCopy4(pos, move);
+    move[0] -= start[0];
+    move[1] -= start[1];
+    move[2] -= start[2];
+    move[3] -= start[3];
+    if ((getTrackType(trk) & 0x10) == 0)
+    {
+        move[1] = 0.0f;
+    }
+    else
+    {
+        float first[4];
+        first[2] = 0.0f;
+        first[1] = 0.0f;
+        first[0] = 0.0f;
+        first[3] = 1.0f;
+        getRootMove(0.0f, first);
+        if (pos != NULL)
+            pos[1] = first[1];
+    }
+    *rot = 0.0f;
+    if ((flags & 1) == 0)
+        return 1;
+    float speed = m_motion.m_speed;
+    int n = getTrackNumFrame(trk);
+    float turn = getTrackKeyRotY(trk, n - 1);
+    if (speed > 0.0f)
+    {
+        if ((float)n - 1.0f <= t0 || t1 < (float)n - 1.0f)
+        {
+            /* Not across the end: wrapped only when t1 came round below t0. */
+            if (t0 < 0.0f || t1 < 0.0f || t0 <= t1)
+                return 1;
+        }
+        *rot = turn;
+        return 2;
+    }
+    if (speed < 0.0f && t0 >= 0.0f && t1 < 0.0f)
+    {
+        *rot = -turn;
+        return 2;
+    }
+    return 1;
 }
 
-// stub of ROR 0x0010eab8
-void DogActor::getNodeWorldMatrix(sceVu0FMATRIX out, int n)
-{
-    ROSEPAN_STUB("DogActor::getNodeWorldMatrix", 0x0010eab8);
-}
+// The tag track: word 0 the frame count (bit 31 set), then one word of
+// event bits per frame.
+// callcheck: FUN_00215a30, DogMotionBlend::getNo, DogActor::findMotionById, utlFtoi15 (the assert handler; getMotionTagData inline)
+// ROR 0x0010bcc8
 
-// stub of ROR 0x0010cffc
-int DogActor::shareModel(DogActor *src)
-{
-    ROSEPAN_STUB("DogActor::shareModel", 0x0010cffc);
-    return {};
-}
-
-// stub of ROR 0x0010eb28
-void DogActor::getNodeWorldPos(float *out, int n)
-{
-    ROSEPAN_STUB("DogActor::getNodeWorldPos", 0x0010eb28);
-}
-
-// stub of ROR 0x0010bcc8
 u_int DogActor::getMotionEvent(float t0, float t1, int motion)
 {
-    ROSEPAN_STUB("DogActor::getMotionEvent", 0x0010bcc8);
-    return {};
+    if (motion < 0)
+        motion = m_motion.getNo();
+    else if (motion < 0x10000)
+        motion = findMotionById(motion);
+    const u_int *tag = getMotionTagData(motion);
+    if (tag == NULL)
+        return 0;
+    int i0 = utlFtoi15(t0) >> 15;
+    int n = (int)(tag[0] & 0x7fffffff);
+    if (i0 < 0 || i0 >= n)
+        return 0;
+    int i1 = utlFtoi15(t1) >> 15;
+    if (i1 < 0 || i1 >= n)
+        return 0;
+    if (i0 == i1)
+        return 0;
+    u_int bits = 0;
+    do
+    {
+        i0++;
+        if (i0 >= n)
+            i0 -= n;
+        bits |= tag[i0 + 1];
+    } while (i0 != i1);
+    return bits;
 }
 
-// stub of ROR 0x0010eba0
+// ROR 0x0010be1c
+
+u_int DogActor::getMotionEventNow()
+{
+    float t = getMotionFrame();
+    if (t < 0.0f)
+        return 0;
+    return getMotionEvent(t, t + 1.0f, -1);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Placing the actor against its root track.
+// The heading both take: rot_y less the root's turn at the current frame.
+
+static void dogActorSetHeading(DogActor *a, float rot_y)
+{
+    float v[4];
+    v[3] = 1.0f;
+    v[0] = 0.0f;
+    v[2] = 0.0f;
+    v[1] = 0.0f;
+    float t = a->getMotionFrame();
+    a->getRootMove(t + t, v);
+    float r = rot_y - v[3];
+    if (r < -DOG_PI)
+        r += DOG_PI2;
+    else if (r >= DOG_PI)
+        r -= DOG_PI2;
+    a->m_rotate[1] = r;
+    a->normalizeRotate();
+    a->m_dirty = 1;
+    a->m_base_rotate[1] = r;
+    a->setAddRotY(0.0f);
+}
+
+// callcheck: getMotionFrame, getRootMove, normalizeRotate, setAddRotY (in dogActorSetHeading)
+// ROR 0x0010a090
+
+void DogActor::addTransRotY(const float *d, float trans_ofs_y, float rot_y)
+{
+    m_trans[0] += d[0];
+    m_trans[1] += d[1];
+    m_trans[3] = 1.0f;
+    m_trans[2] += d[2];
+    m_trans_ofs[1] = trans_ofs_y;
+    m_dirty = 1;
+    m_trans_ofs[3] = 1.0f;
+    dogActorSetHeading(this, rot_y);
+}
+
+// callcheck: getMotionFrame, getRootMove, normalizeRotate, setAddRotY (in dogActorSetHeading)
+// ROR 0x0010a1c8
+
+void DogActor::setTransRotY(const float *d, float trans_ofs_y, float rot_y)
+{
+    m_trans_ofs[3] = 1.0f;
+    m_trans_ofs[1] = trans_ofs_y;
+    dogCopy4(m_trans, d);
+    m_dirty = 1;
+    dogActorSetHeading(this, rot_y);
+}
+
+// trans is the root move's scratch before it takes m_trans (resetRootBase
+// passes m_base_trans / m_base_rotate themselves: rot reads the base
+// before it writes it). The wrap here is <= -pi / > pi, unlike the others.
+// callcheck: FUN_00215a30, DogMotionBlend::getNo (the assert handler; getMotionAuxData inline, getNo called)
+// ROR 0x0010a2d0
+
+void DogActor::getRootBase(float *trans, float *rot)
+{
+    DogMotionTrack *trk = getMotionAuxData(m_motion.getNo());
+    if (trk == NULL)
+    {
+        dogCopy4(trans, m_trans);
+        dogCopy4(rot, m_rotate);
+        return;
+    }
+    float t = getMotionFrame();
+    if (t + t < 0.0f)
+    {
+        dogCopy4(trans, m_base_trans);
+        dogCopy4(rot, m_base_rotate);
+        return;
+    }
+    getRootMove(t + t, trans);
+    float base[4];
+    dogCopy4(base, m_base_rotate);
+    float y = trans[3] + base[1];
+    rot[3] = 1.0f;
+    rot[1] = y;
+    rot[0] = base[0] + 0.0f;
+    rot[2] = base[2] + 0.0f;
+    if (y <= -DOG_PI)
+        rot[1] = y + DOG_PI2;
+    else if (y > DOG_PI)
+        rot[1] = y - DOG_PI2;
+    dogCopy4(trans, m_trans);
+}
+
+// callcheck: FUN_00215a30, DogMotionBlend::getNo (the assert handler; getMotionAuxData inline, getNo called)
+// ROR 0x0010a448
+
+void DogActor::getRootRotate(float *rot)
+{
+    DogMotionTrack *trk = getMotionAuxData(m_motion.getNo());
+    if (trk == NULL)
+    {
+        dogCopy4(rot, m_rotate);
+        return;
+    }
+    dogCopy4(rot, m_base_rotate);
+    float t = getMotionFrame();
+    if (t + t >= 0.0f)
+    {
+        float v[4];
+        v[0] = 0.0f;
+        v[3] = 1.0f;
+        v[2] = 0.0f;
+        v[1] = 0.0f;
+        getRootMove(t + t, v);
+        rot[1] += v[3];
+        if (rot[1] < -DOG_PI)
+            rot[1] += DOG_PI2;
+        if (rot[1] >= DOG_PI)
+            rot[1] -= DOG_PI2;
+    }
+}
+
+// ROR 0x0010ac98
+
+void DogActor::resetRootBase()
+{
+    saveRootOffset();
+    m_rotate[1] = getRotY();
+    normalizeRotate();
+    m_dirty = 1;
+    m_80[3] = 1.0f;
+    m_80[0] = 0.0f;
+    m_80[2] = 0.0f;
+    m_80[1] = 0.0f;
+    m_dirty = 1;
+    getRootBase(m_base_trans, m_base_rotate);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Motion records and starts.
+// callcheck: FUN_00215a30, strcmp (the assert handler)
+// ROR 0x0010ab40
+
+int DogActor::getMotionNoByName(const char *theName)
+{
+    ROR_ASSERT(theName); /* 1635 */
+    for (int i = 0; i < m_max_motion; i++)
+    {
+        const char *name = m_motion_data[i].m_name;
+        if (name != NULL && strcmp(name, theName) == 0)
+            return m_motion_data[i].m_no;
+    }
+    return -1;
+}
+
+// callcheck: FUN_00215a30 (the assert handler)
+// ROR 0x0010abf4
+
+void DogActor::setMotionCmd(const int *theCmd, int theLength)
+{
+    ROR_ASSERT(theCmd); /* 1659 */
+    ROR_ASSERT(theLength > 0 && theLength <= DOG_MAX_MOTION_CMD); /* 1660 */
+    for (int i = 0; i < theLength; i++)
+        m_motion_cmd[i] = theCmd[i];
+    m_motion_cmd_idx = 0;
+}
+
+// callcheck: FUN_00215a30 (the assert handler; m_motion.getData inline)
+// ROR 0x0010ad0c
+
+void DogActor::setMotionInterpolation(int theN, int theTime)
+{
+    ROR_ASSERT(m_max_motion > 0); /* 1700 */
+    ROR_ASSERT(theN >= 0 && theN < m_max_motion); /* 1701 */
+    if (theTime < 0)
+    {
+        int *param = m_motion.getData(theN).m_param;
+        theTime = 0;
+        if (param != NULL)
+            theTime = *param;
+    }
+    setParam1d8(theTime);
+}
+
+// a1 (theID) passes straight through to getMotionLength.
+// ROR 0x0010ae10
+
+void DogActor::resetMotionTime(int theID)
+{
+    if (m_speed0 >= 0.0f)
+        m_motion.m_frame = 0.0f;
+    else
+        m_motion.m_frame = getMotionLength(theID);
+}
+
+// callcheck: FUN_00215a30 (the assert handler)
+// ROR 0x0010ae90
+
+void DogActor::setMotionNo(int theN)
+{
+    ROR_ASSERT(m_max_motion > 0); /* 1780 */
+    ROR_ASSERT(theN >= 0 && theN < m_max_motion); /* 1781 */
+    m_motion.m_no = theN;
+    startMotionMode();
+}
+
+// The two blend entry starts share this body (inline in the ROM): the
+// entry's node mask from the names, each named node's pose kept as the
+// previous one, then the entry restarts on record no.
+static int dogActorStartSub(DogActor *a, int theS, int no, const char **theNodes)
+{
+    if (no < 0 || no >= a->m_max_motion)
+        return -2;
+    if (a->m_motion_data[no].m_i3m_root == NULL)
+        return -3;
+    DogMotionBlendEntry &e = a->m_motion.m_blend[theS];
+    for (int i = 0; i < 4; i++)
+        e.m_00[i] = 0;
+    for (; *theNodes != NULL; theNodes++)
+    {
+        int i = a->i3mGetNodeIndexByName(no, *theNodes);
+        ROR_ASSERT(i >= 0); /* 1993 */
+        if (i < 0)
+            continue;   // PC: the ROM sets a bit before the mask and copies pose -1
+        e.m_00[i / 32] |= 1 << (i & 31);
+        memcpy(a->m_posture_prev + i * 0x30, a->m_posture + i * 0x30, 0x30);
+    }
+    e.m_no = no;
+    e.m_frame = 0.0f;
+    e.m_speed = 0x1.11112Ep-6f; /* 0x3c888897 */
+    e.m_1c = -1.0f;
+    return no;
+}
+
+static int dogActorClearSub(DogActor *a, int theS)
+{
+    DogMotionBlendEntry &e = a->m_motion.m_blend[theS];
+    e.m_no = -1;
+    e.m_frame = 0.0f;
+    e.m_speed = 0x1.11112Ep-6f; /* 0x3c888897 */
+    e.m_1c = -1.0f;
+    return -1;
+}
+
+// callcheck: FUN_00215a30, i3mGetNodeIndexByName (the assert handler; i3mGetNodeIndexByName inline)
+// ROR 0x0010b328
+
+int DogActor::setMotionSub(int theS, int theID, const char **theNodes)
+{
+    if (theID < 0)
+        return dogActorClearSub(this, theS);
+    return dogActorStartSub(this, theS, findMotionById(theID), theNodes);
+}
+
+// callcheck: FUN_00215a30, i3mGetNodeIndexByName (the assert handler; i3mGetNodeIndexByName inline)
+// ROR 0x0010b620
+
+int DogActor::setMotionSubBySuffix(int theS, const char *theName, const char **theNodes)
+{
+    if (theName == NULL)
+        return dogActorClearSub(this, theS);
+    return dogActorStartSub(this, theS, findMotionBySuffix(theName), theNodes);
+}
+
+// callcheck: FUN_00215a30, i3mGetLength (the assert handler; getBlendNo / getMotionRoot inline)
+// ROR 0x0010b918
+
+void DogActor::setMotionTimeRatioSub(float r, int n)
+{
+    I3mRoot *root = getMotionRoot(m_motion.getBlendNo(n));
+    float len = root != NULL ? i3mGetLength(root) : 0.0f;  // PC: NULL only where the ROM hangs in the assert
+    DogMotionBlendEntry &e = m_motion.m_blend[n];
+    e.m_1c = r;
+    e.m_frame = len * r;
+}
+
+// callcheck: FUN_00215a30 (the assert handler)
+// ROR 0x0010ba20
+
+void DogActor::setMotionRateSub(float theR, int theS)
+{
+    ROR_ASSERT(theS >= 0); /* 2083 */
+    ROR_ASSERT(theR >= 0.0f && theR <= 1.0f); /* 2084 */
+    m_motion.m_blend[theS].m_1c = theR;
+}
+
+// callcheck: FUN_00215a30 (the assert handler)
+// ROR 0x0010bac4
+
+void DogActor::fadeMotionRateSub(float theR, int theS, int theTime)
+{
+    ROR_ASSERT(theS >= 0); /* 2093 */
+    ROR_ASSERT(theR >= 0.0f && theR <= 1.0f); /* 2094 */
+    ROR_ASSERT(theTime >= 0.0f && theTime <= 1000); /* 2095 */
+    m_motion.setBlendRate(theR, theS, theTime);
+}
+
+// callcheck: FUN_00215a30, i3mGetLength (the assert handler; getBlendNo / getMotionRoot inline)
+// ROR 0x0010bbac
+
+float DogActor::getMotionTimeRatioSub(int n)
+{
+    I3mRoot *root = getMotionRoot(m_motion.getBlendNo(n));
+    float len = root != NULL ? i3mGetLength(root) : 0.0f;
+    if (len > 0.0f)
+    {
+        float frame = m_motion.m_blend[n].m_frame;
+        if (frame > 0.0f)
+            return frame / len;
+    }
+    return 0.0f;
+}
+
+// ROR 0x0010da18
+
+float DogActor::getMotionTimeRatio()
+{
+    if (m_mode != 2)
+        return m_motion.getTimeRatio();
+    return 0.0f;
+}
+
+// ROR 0x0010da98
+
+const char *DogActor::getMotionName(int theID)
+{
+    int i = findMotionById(theID);
+    if (i < 0)
+        return NULL;
+    return m_motion_data[i].m_name;
+}
+
+// ROR 0x0010db18
+
+int DogActor::getModeArg()
+{
+    if (m_mode == 2)
+        return m_f4;
+    return -1;
+}
+
+// ROR 0x0010e328
+
+void DogActor::resetMotion(int theN)
+{
+    m_rot_y_aar = 0.0f;
+    m_80[3] = 1.0f;
+    m_80[2] = 0.0f;
+    m_80[1] = 0.0f;
+    m_80[0] = 0.0f;
+    m_trans_ofs[3] = 1.0f;
+    m_dirty = 1;
+    m_trans_ofs[1] = 0.0f;
+    setParam1d8(0);
+    setMotionNo(theN);  /* the ROM passes a third word 0; setMotionNo takes one */
+    m_motion.m_frame = 0.0f;
+}
+
+// callcheck: FUN_00215a30, i3mGetNodeIndexByName, DogMotionBlend::getNo (the assert handler; i3mGetNodeIndexByName inline)
+// ROR 0x0010e9ac
+
+int DogActor::setControlNode(const char *theName)
+{
+    int no;
+    if (theName == NULL || (no = m_motion.getNo()) < 0)
+    {
+        m_control_node = -1;
+        return -1;
+    }
+    m_control_node = i3mGetNodeIndexByName(no, theName);
+    return m_control_node;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Nodes.
+// callcheck: FUN_00215a30, i3dMatMul (the assert handler)
+// ROR 0x0010eab8
+
+void DogActor::getNodeWorldMatrix(sceVu0FMATRIX out, int n)
+{
+    ROR_ASSERT(m_mat_model); /* 4088 */
+    i3dMatMul(out, m_matrix, m_mat_model[n]);
+}
+
+// callcheck: FUN_00215a30, i3dMatMul (the assert handler)
+// ROR 0x0010eb28
+
+void DogActor::getNodeWorldPos(float *out, int n)
+{
+    ROR_ASSERT(m_mat_model); /* 4112 */
+    sceVu0FMATRIX m;
+    i3dMatMul(m, m_matrix, m_mat_model[n]);
+    dogCopy4(out, m[3]);
+}
+
+// ROR 0x0010eba0
+
 void DogActor::setNodeScale(float scale, int node)
 {
-    ROSEPAN_STUB("DogActor::setNodeScale", 0x0010eba0);
+    for (int i = 0; i < DOG_SCALE_NODE_MAX; i++)
+    {
+        if (m_scale_node_no[i] == node)
+        {
+            if (scale == 1.0f)
+                m_scale_node_no[i] = -1;
+            else
+                m_scale_node_val[i] = scale;
+            return;
+        }
+    }
+    for (int i = 0; i < DOG_SCALE_NODE_MAX; i++)
+    {
+        if (m_scale_node_no[i] < 0 || m_scale_node_val[i] == 1.0f)
+        {
+            m_scale_node_no[i] = node;
+            m_scale_node_val[i] = scale;
+            return;
+        }
+    }
+}
+
+// callcheck: FUN_00215a30 (the assert handler)
+// ROR 0x0010ec8c
+
+void DogActor::checkNodeScale()
+{
+    for (int i = 0; i < DOG_SCALE_NODE_MAX; i++)
+    {
+        ROR_ASSERT(m_scale_node_no[i] == -1); /* 4174 */
+        ROR_ASSERT(m_scale_node_val[i] == 1.0f); /* 4175 */
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Sharing, construction.
+// The master's model and records, reference counted (releaseModel /
+// releaseShared undo it).
+// callcheck: FUN_00215a30, memcpy (the assert handler; the copy is sized for the host records)
+// ROR 0x0010cffc
+
+int DogActor::shareModel(DogActor *src)
+{
+    clear();
+    int n = src->m_max_motion;
+    ROR_ASSERT(n>=0); /* 2782 */
+    setMaxMotion(n);
+    DogActor *orig = static_cast<DogActor *>(src->m_original);
+    if (orig == NULL)
+        orig = src;
+    m_load_flag = LOAD_SHARE;
+    m_original = orig;
+    m_id = src->m_id;
+    m_i3r_root = orig->m_i3r_root;
+    allocMatrix();
+    if (orig->m_motion_data != NULL && n > 0)
+    {
+        memcpy(m_motion_data, orig->m_motion_data, n * sizeof(DogMotionData));
+        allocPosture(0);
+    }
+    orig->m_ref_count++;
+    m_f4 = -1;
+    m_mode = 0;
+    return 0;
+}
+
+// The second constructor: the first one's body (the entity and model
+// words inline, both motion states, the three vectors, clear), then the
+// records. Delegating gives the same order on the host.
+// callcheck: DogMotionBlend, clear (run by the delegated constructor)
+// ROR 0x0010f008
+
+DogActor::DogActor(int theN) : DogActor()
+{
+    setMaxMotion(theN);
+}
+
+// ~DogActor (ROR 0x0010f16c: releaseModel(NULL), DogModel::release(1),
+// operator delete when flagged) is not a host destructor, as ~DogModel is
+// not: the scene's actors are global and the scene releases them itself.
+
+// ──────────────────────────────────────────────────────────────────────
+// The ELF's inline accessors (linkonce copies of the class body's
+// inlines), defined out of line.
+// DogActor::__tf (ROR 0x00280f68) is the GCC 2 type_info function: the
+// host has its own RTTI.
+// ROR 0x00280fb8
+
+void DogActor::saveTransOfsY() { m_trans_ofs_y_save = m_trans_ofs[1]; }
+
+// ROR 0x00280fc4
+
+float DogActor::getTransOfsYSave() const { return m_trans_ofs_y_save; }
+
+// ROR 0x00280fcc
+
+float DogActor::getRotOfsYSave() const { return m_rot_ofs_y; }
+
+// ROR 0x00280fd4
+
+void DogActor::setId(int id) { m_id = id; }
+
+// ROR 0x00280fdc
+
+int DogActor::getId() const { return m_id; }
+
+// ROR 0x00280fe4
+
+int DogActor::getMode() const { return m_mode; }
+
+// ROR 0x00280fec
+
+void DogActor::ready()
+{
+    m_f4 = -1;
+    m_mode = 0;
+}
+
+// ROR 0x00281000
+
+int DogActor::getMotionLoopTrig() const { return m_motion_result; }
+
+// ROR 0x00281008
+
+int DogActor::getMotionNo() { return m_motion.getNo(); }
+
+// ROR 0x00281020
+
+void DogActor::setMotionSpeed(float s) { m_motion.m_speed = s; }
+
+// ROR 0x00281028
+
+float DogActor::getMotionSpeed() const { return m_motion.m_speed; }
+
+// callcheck: FUN_00215a30 (the assert handler)
+// ROR 0x00281030
+
+void DogActor::setMotionSpeedSub(float s, int n)
+{
+    ROR_ASSERT(n>=0 && n<=4); /* 233 */
+    m_motion.m_blend[n].m_speed = s;
+}
+
+// callcheck: FUN_00215a30 (the assert handler)
+// ROR 0x0028109c
+
+float DogActor::getMotionSpeedSub(int n)
+{
+    ROR_ASSERT(n>=0 && n<=4); /* 234 */
+    return m_motion.m_blend[n].m_speed;
+}
+
+// ROR 0x002810fc
+
+void DogActor::setMotionSpeed0(float s) { m_speed0 = s; }
+
+// ROR 0x00281104
+
+void DogActor::setMotionTime0(float t) { m_time0 = t; }
+
+// ROR 0x0028110c
+
+int DogActor::getInterpolation() const { return m_interpolation; }
+
+// callcheck: FUN_00215a30 (the assert handler; m_motion.getData inline)
+// ROR 0x00281114
+
+int DogActor::getMotionLinkTime(int n) { return *m_motion.getData(n).m_param; }
+
+// callcheck: FUN_00215a30 (the assert handler; getBlendNo inline)
+// ROR 0x002811a4
+
+int DogActor::getMotionNoSub(int n) { return m_motion.getBlendNo(n); }
+
+// ROR 0x00281204
+
+int DogActor::getNumMotion() const { return m_max_motion; }
+
+// ROR 0x0028120c
+
+void DogActor::setMotionTime(float t) { m_motion.m_frame = t; }
+
+// ROR 0x00281214
+
+void DogActor::setMotionTimeRatio(float r) { m_motion.setTimeRatio(r); }
+
+// ROR 0x00281230
+
+void DogActor::setMotionFlag(int flags, int flags2)
+{
+    m_motion_flags2 = flags2;
+    m_motion_flags = flags;
+}
+
+// ROR 0x0028123c
+
+float DogActor::getBaseRotateY() const { return m_base_rotate[1]; }
+
+// ROR 0x00281244
+
+void DogActor::setBaseRotate(const float *v)
+{
+    m_base_rotate[0] = v[0];
+    m_base_rotate[1] = v[1];
+    m_base_rotate[2] = v[2];
+    m_base_rotate[3] = v[3];
+}
+
+// ROR 0x0028126c
+
+void DogActor::setBaseRotate(float x, float y, float z)
+{
+    m_base_rotate[0] = x;
+    m_base_rotate[3] = 1.0f;
+    m_base_rotate[1] = y;
+    m_base_rotate[2] = z;
+}
+
+// ROR 0x0028128c
+
+void DogActor::clearRotYAAR() { m_rot_y_aar = 0.0f; }
+
+// ROR 0x00281294
+
+void DogActor::clearRotOfsY() { m_rot_ofs_y = 0.0f; }
+
+// ROR 0x0028129c
+
+void DogActor::setControlNodeFlg(int f) { m_control_node_flg = f; }
+
+// ROR 0x002812a4
+
+int DogActor::getControlNode() const { return m_control_node; }
+
+// ROR 0x002812ac
+
+int DogActor::getControlNodeFlg() const { return m_control_node_flg; }
+
+// callcheck: FUN_00215a30 (the assert handler)
+// ROR 0x002812b4
+
+sceVu0FMATRIX *DogActor::getNodeMatrixPtr(int n)
+{
+    ROR_ASSERT(m_mat_model); /* 322 */
+    return m_mat_model + n;
+}
+
+// callcheck: FUN_00215a30 (the assert handler)
+// ROR 0x0028130c
+
+I3mRoot *DogActor::GetI3mRootPtr(int n)
+{
+    ROR_ASSERT(n>=0); /* 342 */
+    ROR_ASSERT(m_motion_data); /* 342 */
+    ROR_ASSERT(m_motion_data[n].m_i3m_root); /* 342 */
+    return m_motion_data[n].m_i3m_root;
+}
+
+// callcheck: FUN_00215a30 (the assert handler; getRootTrack inline)
+// ROR 0x002813b4
+
+DogMotionTrack *DogActor::getMotionAuxData(int n)
+{
+    if (n < 0)
+        return NULL;
+    return getRootTrack(n);
+}
+
+// The tag track's layout is not DogMotionTrack's (see getMotionEvent).
+// callcheck: FUN_00215a30 (the assert handler)
+// ROR 0x0028141c
+
+const u_int *DogActor::getMotionTagData(int n)
+{
+    if (n < 0)
+        return NULL;
+    ROR_ASSERT(m_motion_data); /* 346 */
+    if (m_motion_data == NULL)  // PC: the ROM hangs in the assert
+        return NULL;
+    return (const u_int *)m_motion_data[n].m_tag_data;
+}
+
+// callcheck: FUN_00215a30 (the assert handler; getMotionRoot inline)
+// ROR 0x00281484
+
+float DogActor::getMaxTime0(int n)
+{
+    I3mRoot *root = getMotionRoot(n);
+    return root != NULL ? i3mGetLength(root) : 0.0f;  // PC: NULL only where the ROM hangs in the assert
+}
+
+// callcheck: FUN_00215a30, i3mRelocate (the assert handler; relocateMotion inline)
+// ROR 0x00281518
+
+int DogActor::unpack(int n) { return relocateMotion(n); }
+
+// callcheck: FUN_00215a30, i3mGetNumNode (the assert handler; getMotionNumNode inline)
+// ROR 0x002815d4
+
+int DogActor::get_nNode(int n) { return getMotionNumNode(n); }
+
+// callcheck: FUN_00215a30, i3mGetNodeName (the assert handler; getMotionNodeName inline)
+// ROR 0x00281690
+
+const char *DogActor::getNodeName(int n, int i) { return getMotionNodeName(n, i); }
+
+// ROR 0x00281b54
+
+void DogActor::setMotionSpeedRatio(float r)
+{
+    m_speed_ratio = r;
+    m_motion.m_0c = r;
+}
+
+// ROR 0x00281b60
+
+void DogActor::setMotionTickTime(int t)
+{
+    m_motion.m_14 = 0;
+    m_motion.m_10 = t;
+    m_45c = t;
+    m_460 = 0;
+}
+
+// The pose readers (the class body's inlines at lines 372..383).
+// callcheck: FUN_00215a30, i3mGetNodeIndexByName (the assert handler)
+// ROR 0x00281778
+
+int DogActor::i3mGetNodeIndexByName(int n, const char *p)
+{
+    ROR_ASSERT(n>=0 & n<m_max_motion); /* 372 */
+    ROR_ASSERT(m_motion_data); /* 372 */
+    ROR_ASSERT(m_motion_data[n].m_i3m_root); /* 372 */
+    ROR_ASSERT(p); /* 372 */
+    return ::i3mGetNodeIndexByName(m_motion_data[n].m_i3m_root, p);
+}
+
+// The ELF's signature: getMotion(int, tag_I3mPosture_s *, float, I3M_INTER).
+// callcheck: FUN_00215a30, i3mGetPose (the assert handler)
+// ROR 0x00281860
+
+void DogActor::getMotion(int n, void *p, float t, int inter)
+{
+    ROR_ASSERT(n>=0 & n<m_max_motion); /* 374 */
+    ROR_ASSERT(m_motion_data); /* 374 */
+    ROR_ASSERT(m_motion_data[n].m_i3m_root); /* 374 */
+    ROR_ASSERT(p); /* 374 */
+    ROR_ASSERT(t>=0); /* 374 */
+    i3mGetPose(m_motion_data[n].m_i3m_root, p, inter, t);
+}
+
+// The ELF's signature: getBlendMotion(int, tag_I3mPosture_s *, float, int,
+// float, float, I3M_INTER).
+// callcheck: FUN_00215a30, FUN_0022eab0 (the assert handler; i3mGetBlendPose)
+// ROR 0x00281990
+
+void DogActor::getBlendMotion(int m1, void *p, float t1, int m2, float t2, float r, int inter)
+{
+    ROR_ASSERT(m_motion_data); /* 377 */
+    ROR_ASSERT(m_motion_data[m1].m_i3m_root); /* 378 */
+    ROR_ASSERT(m_motion_data[m2].m_i3m_root); /* 379 */
+    ROR_ASSERT(p); /* 380 */
+    ROR_ASSERT(t1>=0.0f); /* 381 */
+    ROR_ASSERT(t2>=0.0f); /* 382 */
+    ROR_ASSERT(r >= 0.0f && r <= 1.0f); /* 383 */
+    i3mGetBlendPose(m_motion_data[m1].m_i3m_root, p, m_motion_data[m2].m_i3m_root, inter, t1, t2, r);
 }

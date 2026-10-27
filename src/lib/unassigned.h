@@ -365,6 +365,8 @@ struct I3mRoot;
 float     i3mGetLength(const I3mRoot *root);                             // ROR 0x0022e958
 /* Samples every node's keys at time t into 0x30-byte pose records. */
 void      i3mGetPose(I3mRoot *root, void *pose, int flags, float t);     // ROR 0x0022e960
+/* Two motions' poses (root1 at t1, root2 at t2) blended at rate r into pose. */
+void      i3mGetBlendPose(I3mRoot *root1, void *pose, I3mRoot *root2, int flags, float t1, float t2, float r); // ROR 0x0022eab0
 /* Pose records to 0x40-byte node matrices through map (u16 count, then a
  * model node per motion node, 0xffff = none). */
 void      i3mPoseToMatrices(const void *pose, sceVu0FMATRIX *mats, const u_short *map); // ROR 0x0022f7a0

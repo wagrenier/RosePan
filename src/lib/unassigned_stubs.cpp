@@ -1840,3 +1840,9 @@ int utlSetI3rNodeDisp(I3rRoot *root, void *disp, int n)
     ROSEPAN_STUB("utlSetI3rNodeDisp", 0x0010686c);
     return {};
 }
+
+// stub of ROR 0x0022eab0
+void i3mGetBlendPose(I3mRoot *root1, void *pose, I3mRoot *root2, int flags, float t1, float t2, float r)
+{
+    ROSEPAN_STUB("i3mGetBlendPose", 0x0022eab0);
+}

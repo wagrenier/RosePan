@@ -102,3 +102,23 @@ int DogMotionBlend::stepLoop()
     ROSEPAN_STUB("DogMotionBlend::stepLoop", 0x001079d8);
     return {};
 }
+
+// stub of ROR 0x00107560
+float DogMotionBlend::getTimeRatio()
+{
+    ROSEPAN_STUB("DogMotionBlend::getTimeRatio", 0x00107560);
+    return {};
+}
+
+// stub of ROR 0x00108428
+void DogMotionBlend::setBlendRate(float theR, int theS, int theTime)
+{
+    ROSEPAN_STUB("DogMotionBlend::setBlendRate", 0x00108428);
+}
+
+// stub of ROR 0x00107678
+int DogMotionBlend::setTimeRatio(float r)
+{
+    ROSEPAN_STUB("DogMotionBlend::setTimeRatio", 0x00107678);
+    return {};
+}
