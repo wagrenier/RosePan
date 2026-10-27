@@ -4127,11 +4127,149 @@
   "was": "FUN_00144ae0",
   "why": "takes native 039's six script words as an array (op = word 0) and drives the scene's MagLifeBwnCtrl 0x727aa0 (scene +0x2bd20): ops 0x14 / 0x15 / 0x1f.. pass a vector to its 0x12a89c / 0x12a808 / 0x12aa70, op 0x23 waits (0xcccccccc) on 0x12ab10; native 039 for every op but 100 / 0x65"
  },
+ "00145020": {
+  "name": "HfmMain::initOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00145020",
+  "why": "called right after the vtable store in the ELF's inline HfmMain::HfmMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "001452fc": {
+  "name": "HfmMain::initAfterParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001452fc",
+  "why": "createEmy type 6 only, after EmyMain::loadParam"
+ },
+ "0014582c": {
+  "name": "HfmMain::subFreeCnt",
+  "tag": "ror-inferred",
+  "was": "FUN_0014582c",
+  "why": "+0x234 -= n, floored at 0"
+ },
+ "00149d18": {
+  "name": "BdsMain::initOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00149d18",
+  "why": "called right after the vtable store in the ELF's inline BdsMain::BdsMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "0014b3bc": {
+  "name": "BdlMain::initOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b3bc",
+  "why": "called right after the vtable store in the ELF's inline BdlMain::BdlMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "0014cde4": {
+  "name": "MrtMain::initOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0014cde4",
+  "why": "called right after the vtable store in the ELF's inline MrtMain::MrtMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "0014dc7c": {
+  "name": "ClrMain::initOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0014dc7c",
+  "why": "called right after the vtable store in the ELF's inline ClrMain::ClrMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "00150b24": {
+  "name": "NorMain::initOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00150b24",
+  "why": "called right after the vtable store in the ELF's inline NorMain::NorMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "00153e40": {
+  "name": "GrgMain::initOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00153e40",
+  "why": "called right after the vtable store in the ELF's inline GrgMain::GrgMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "00154734": {
+  "name": "GrgMain::testView",
+  "tag": "ror-inferred",
+  "was": "FUN_00154734",
+  "why": "forwards to 0x154668"
+ },
+ "00154748": {
+  "name": "GrgMain::releaseHold",
+  "tag": "ror-inferred",
+  "was": "FUN_00154748",
+  "why": "param flags lose 0x10000000 and 0x80, +0x240 = 1"
+ },
+ "00156620": {
+  "name": "FshMain::initOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00156620",
+  "why": "called right after the vtable store in the ELF's inline FshMain::FshMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "001583d4": {
+  "name": "GotMain::initOut",
+  "tag": "ror-inferred",
+  "was": "FUN_001583d4",
+  "why": "called right after the vtable store in the ELF's inline GotMain::GotMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "0015a17c": {
+  "name": "PigMain::initOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0015a17c",
+  "why": "called right after the vtable store in the ELF's inline PigMain::PigMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "0015c304": {
+  "name": "DwfMain::initOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0015c304",
+  "why": "called right after the vtable store in the ELF's inline DwfMain::DwfMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "0016265c": {
+  "name": "EmyManager::EmyManager",
+  "tag": "ror-inferred",
+  "was": "FUN_0016265c",
+  "why": "stores EmyManager's vtable 0x2e31a0, clears the work, fills the per-type limits with byte 100"
+ },
+ "00162698": {
+  "name": "EmyManager::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_00162698",
+  "why": "zeroes the 64 enemy pointers, the 64 work words, the oid pair, level, oid count and the 8 groups"
+ },
+ "00162700": {
+  "name": "EmyManager::~EmyManager",
+  "tag": "ror-inferred",
+  "was": "FUN_00162700",
+  "why": "vtable slot 6 destructor: re-stores the vtable, releaseAll, deletes on flags & 1"
+ },
+ "0016275c": {
+  "name": "EmyManager::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0016275c",
+  "why": "vtable slot 4 (CmnITask::exec): spawnGroups then updateEmys, returns 0"
+ },
+ "0016278c": {
+  "name": "EmyManager::spawnGroups",
+  "tag": "ror-inferred",
+  "was": "FUN_0016278c",
+  "why": "groups 1..7: wakes an idle member (state 0 -> 1, random wait from the group interval) or respawns a state-5 member (state 4)"
+ },
+ "001629c0": {
+  "name": "EmyManager::updateEmys",
+  "tag": "ror-inferred",
+  "was": "FUN_001629c0",
+  "why": "per enemy: its function pointer, the group step, then while managed and not damaged slots 4, 5, 6"
+ },
  "00162afc": {
   "name": "EmyManager::setSlotWord24",
   "tag": "ror-inferred",
   "was": "FUN_00162afc",
   "why": "word +0x24 of slot no of the 8 0x3c-byte slots at +0x148 (init clears 0x1e0 bytes there); native 212 case 30 (case 24 stores the slot's +0xc inline)"
+ },
+ "00162b14": {
+  "name": "EmyManager::countGrpDead",
+  "tag": "ror-inferred",
+  "was": "FUN_00162b14",
+  "why": "group no: +0x38 + 1, alive count +0x30 - 1"
+ },
+ "00162b50": {
+  "name": "EmyManager::clearGrpBusy",
+  "tag": "ror-inferred",
+  "was": "FUN_00162b50",
+  "why": "group no: +0x28 = 0 (spawnGroups waits on it)"
  },
  "00162b68": {
   "name": "EmyManager::setGroup",
@@ -4145,11 +4283,29 @@
   "was": "FUN_00162c2c",
   "why": "this = 0x7b2140 (EmyManager); forwards to 0x162c88; addChr calls it for type-2 achr objects with the chr no from GamSysData field 0x72, the kind, the ACHRstat, GamMan +0x22364, an image slot, the position and the oid"
  },
+ "00162c5c": {
+  "name": "EmyManager::addEmyAlt",
+  "tag": "ror-inferred",
+  "was": "FUN_00162c5c",
+  "why": "unreferenced twin of addEmy: createEmy with group 0, no oid making, the carried item word"
+ },
+ "00162c88": {
+  "name": "EmyManager::createEmy",
+  "tag": "ror-inferred",
+  "was": "FUN_00162c88",
+  "why": "news the enemy class of type 0..10 (inline XxxMain ctors: EmyMain ctor + vtable + init), state, param, group, footstep table"
+ },
  "001634d4": {
   "name": "EmyManager::releaseObj",
   "tag": "ror-inferred",
   "was": "FUN_001634d4",
   "why": "a0 = g_emyManager 0x7b2140: the object of its 0x40 slots (+4) whose first word is oid is deleted (vtable slot 1 with 3), the slot and +0x330 entry cleared; releaseChr for type-2 achrs"
+ },
+ "00163570": {
+  "name": "EmyManager::releaseAll",
+  "tag": "ror-inferred",
+  "was": "FUN_00163570",
+  "why": "deletes every enemy through its virtual destructor (flags 3), then clear"
  },
  "001635e0": {
   "name": "EmyManager::resetWork",
@@ -4175,11 +4331,101 @@
   "was": "FUN_001636a4",
   "why": "the first of the 64 enemy pointers at +4 whose first word is oid, NULL when none; every EmyManager per-enemy wrapper calls it"
  },
+ "001636e4": {
+  "name": "EmyManager::hasOid",
+  "tag": "ror-inferred",
+  "was": "FUN_001636e4",
+  "why": "which ? byte +0x135 : +0x134"
+ },
+ "00163700": {
+  "name": "EmyManager::setOid",
+  "tag": "ror-inferred",
+  "was": "FUN_00163700",
+  "why": "which ? +0x13c : +0x138 = oid, its byte = 1"
+ },
+ "00163720": {
+  "name": "EmyManager::clearOid",
+  "tag": "ror-inferred",
+  "was": "FUN_00163720",
+  "why": "which ? +0x13c : +0x138 = 0 and its byte"
+ },
+ "0016373c": {
+  "name": "EmyManager::testEmyHittable",
+  "tag": "ror-inferred",
+  "was": "FUN_0016373c",
+  "why": "findEmy then EmyMain::testHittable"
+ },
+ "00163770": {
+  "name": "EmyManager::testEmyStateFlag",
+  "tag": "ror-inferred",
+  "was": "FUN_00163770",
+  "why": "findEmy then EmyMain::testStateFlag"
+ },
+ "001637a4": {
+  "name": "EmyManager::isEmyVisible",
+  "tag": "ror-inferred",
+  "was": "FUN_001637a4",
+  "why": "EmyMain::IsVisible (+0xc) of the oid's enemy"
+ },
+ "001637cc": {
+  "name": "EmyManager::isEmyTarget",
+  "tag": "ror-inferred",
+  "was": "FUN_001637cc",
+  "why": "any enemy of type 0..2 in state 0xb / 0xc whose out's +0x3c / +0x38 is oid"
+ },
+ "001638fc": {
+  "name": "EmyManager::getEmyTypeDist",
+  "tag": "ror-inferred",
+  "was": "FUN_001638fc",
+  "why": "per-type float table 0x2f1360 by GetType"
+ },
+ "00163958": {
+  "name": "EmyManager::getEmyTypeDist2",
+  "tag": "ror-inferred",
+  "was": "FUN_00163958",
+  "why": "per-type float table 0x2f1390 by GetType"
+ },
+ "001639b4": {
+  "name": "EmyManager::getEmyTypeRate",
+  "tag": "ror-inferred",
+  "was": "FUN_001639b4",
+  "why": "per-type float table 0x2f13c0 by GetType"
+ },
+ "00163a10": {
+  "name": "EmyManager::isEmyDamaging",
+  "tag": "ror-inferred",
+  "was": "FUN_00163a10",
+  "why": "EmyMain::IsDamaging (param flags 0x200)"
+ },
+ "00163a44": {
+  "name": "EmyManager::cancelEmyDamage",
+  "tag": "ror-inferred",
+  "was": "FUN_00163a44",
+  "why": "EmyMain::CancelDamage (param flags &= ~0x400)"
+ },
+ "00163a8c": {
+  "name": "EmyManager::isEmyState2",
+  "tag": "ror-inferred",
+  "was": "FUN_00163a8c",
+  "why": "EmyMain::GetState2 (+0x150) != 0"
+ },
  "00163ab8": {
   "name": "EmyManager::getOids",
   "tag": "ror-inferred",
   "was": "FUN_00163ab8",
   "why": "copies +0x138 / +0x13c to its two out pointers"
+ },
+ "00163acc": {
+  "name": "EmyManager::setEmyDownFlg",
+  "tag": "ror-inferred",
+  "was": "FUN_00163acc",
+  "why": "EmyMain::SetDownFlg (+0x10)"
+ },
+ "00163af8": {
+  "name": "EmyManager::getEmyDamage",
+  "tag": "ror-inferred",
+  "was": "FUN_00163af8",
+  "why": "EmyMain::GetDamage (+0x14)"
  },
  "00163b20": {
   "name": "EmyManager::getEmyWord3c",
@@ -4205,6 +4451,12 @@
   "was": "FUN_00163bb8",
   "why": "findEmy(oid) then 0x154748: achr flags +0x120 lose 0x10000000 and 0x80, enemy +0x240 = 1; native 212 case 23"
  },
+ "00163be4": {
+  "name": "EmyManager::getEmyType",
+  "tag": "ror-inferred",
+  "was": "FUN_00163be4",
+  "why": "GetType (slot 3) of the oid's enemy"
+ },
  "00163c24": {
   "name": "EmyManager::setEmyWord18",
   "tag": "ror-inferred",
@@ -4217,11 +4469,23 @@
   "was": "FUN_00163c50",
   "why": "findEmy(oid): enemy +0x18 = 0"
  },
+ "00163c74": {
+  "name": "EmyManager::getEmyVoiceSE",
+  "tag": "ror-inferred",
+  "was": "FUN_00163c74",
+  "why": "types 0..3: SE id by kind 0..7 and the enemy's voice byte +7 (tables 0x2f13f0..)"
+ },
  "00163d90": {
   "name": "EmyManager::getEmyWord1d8",
   "tag": "ror-inferred",
   "was": "FUN_00163d90",
   "why": "findEmy(oid): enemy +0x1d8, 0 when none; TskDamage::setup divides by it"
+ },
+ "00163db8": {
+  "name": "EmyManager::getEmyTypeFlag",
+  "tag": "ror-inferred",
+  "was": "FUN_00163db8",
+  "why": "per-type word table 0x2f1470 (all 1) by GetType"
  },
  "00163e10": {
   "name": "EmyManager::pauseEmy",
@@ -4241,6 +4505,18 @@
   "was": "FUN_00163e74",
   "why": "findEmy(oid): enemy +0x1e4 = 6; TskDamage::endReact's resume"
  },
+ "00163ea0": {
+  "name": "EmyManager::getEmySE",
+  "tag": "ror-inferred",
+  "was": "FUN_00163ea0",
+  "why": "EmyMain::getSE(no) of the oid's enemy (used by emyPlaySE)"
+ },
+ "00163ee4": {
+  "name": "EmyManager::subEmyFreeCnt",
+  "tag": "ror-inferred",
+  "was": "FUN_00163ee4",
+  "why": "HfmMain::subFreeCnt on the oid's enemy (no type check)"
+ },
  "00163f1c": {
   "name": "EmyManager::getEmyWord238",
   "tag": "ror-inferred",
@@ -4259,11 +4535,155 @@
   "was": "FUN_00163f9c",
   "why": "findEmy(oid); when the enemy's state (+0x200 virtual 0x1c) is 6, its word +0x23c, else 0; scnChrRequestPC picks PC state 0xc over 10 by it"
  },
+ "00163ff4": {
+  "name": "EmyManager::getEmyHoldWord248",
+  "tag": "ror-inferred",
+  "was": "FUN_00163ff4",
+  "why": "+0x248 while GetType is 8 (ClrMain)"
+ },
+ "0016404c": {
+  "name": "EmyManager::resetEmyOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0016404c",
+  "why": "EmyMain::resetOut of the oid's enemy"
+ },
  "00164078": {
   "name": "EmyManager::isEmyFlag30",
   "tag": "ror-inferred",
   "was": "FUN_00164078",
   "why": "findEmy(oid) then 0x166a0c: word +0x30 bit 0; false when none; native 212 case 40"
+ },
+ "001640ac": {
+  "name": "EmyManager::setEmyWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001640ac",
+  "why": "work word +0x330[i] = v for the enemy slot of oid (TskEnemyMove::stop clears it)"
+ },
+ "001640e8": {
+  "name": "EmyManager::countEmyWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001640e8",
+  "why": "non-zero words of the 64 at +0x330"
+ },
+ "00164118": {
+  "name": "EmyMain::EmyMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00164118",
+  "why": "EmyMain(u_int, u_short, ACHRstat *, _tagEnemyParam const *, _tagEnemyTransition const *, float *) per the ELF's inline XxxMain ctors; stores vtable 0x2e31e0 at +0x200"
+ },
+ "00164208": {
+  "name": "EmyMain::~EmyMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00164208",
+  "why": "EmyMain vtable slot 1"
+ },
+ "00164364": {
+  "name": "EmyMain::setStartState",
+  "tag": "ror-inferred",
+  "was": "FUN_00164364",
+  "why": "createEmy: (state from the param's +0x10 or 4, transition)"
+ },
+ "00164508": {
+  "name": "EmyMain::loadParam",
+  "tag": "ror-inferred",
+  "was": "FUN_00164508",
+  "why": "createEmy: (the _tagEnemyParam)"
+ },
+ "00164fc0": {
+  "name": "EmyMain::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00164fc0",
+  "why": "EmyMain vtable slot 5 default; updateEmys calls slot 5 each frame"
+ },
+ "00165038": {
+  "name": "EmyMain::updateOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00165038",
+  "why": "out (+0x44) present -> 0x168520 on it"
+ },
+ "00165060": {
+  "name": "EmyMain::stopOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00165060",
+  "why": "out (+0x44) present -> its +0x1c = 0"
+ },
+ "00165074": {
+  "name": "EmyMain::updateGroup",
+  "tag": "ror-inferred",
+  "was": "FUN_00165074",
+  "why": "switch on the group state +0x1cc (hide, wait, appear ...), args the group's float, motion, position"
+ },
+ "001656b4": {
+  "name": "EmyMain::testHittable",
+  "tag": "ror-inferred",
+  "was": "FUN_001656b4",
+  "why": "!(GetType 3 && state 3) && down flag +0x10 == 0"
+ },
+ "00165710": {
+  "name": "EmyMain::testStateFlag",
+  "tag": "ror-inferred",
+  "was": "FUN_00165710",
+  "why": "down flag 0 and the byte +0x128[state]"
+ },
+ "001661dc": {
+  "name": "EmyMain::notify",
+  "tag": "ror-inferred",
+  "was": "FUN_001661dc",
+  "why": "+0x30 |= bits; bits 1, 2, 4, 8 also set the damage word +0x14"
+ },
+ "0016621c": {
+  "name": "EmyMain::createHeldItem",
+  "tag": "ror-inferred",
+  "was": "FUN_0016621c",
+  "why": "param 0x66 item kind (0xa00 none): makes an oid of kind 5 and its object, param 0x67"
+ },
+ "00166364": {
+  "name": "EmyMain::setGroup",
+  "tag": "ror-inferred",
+  "was": "FUN_00166364",
+  "why": "+0x1c8 = no, group state / respawn / wait cleared"
+ },
+ "00166378": {
+  "name": "EmyMain::setManageSw",
+  "tag": "ror-inferred",
+  "was": "FUN_00166378",
+  "why": "+8 = on; off pauses tasks and move, sets param flags 0x400 | 0x2000"
+ },
+ "00166434": {
+  "name": "EmyMain::callFunc",
+  "tag": "ror-inferred",
+  "was": "FUN_00166434",
+  "why": "calls the member function pointer at +0x1dc (GCC 2 ptmf)"
+ },
+ "001664a4": {
+  "name": "EmyMain::pauseMove",
+  "tag": "ror-inferred",
+  "was": "FUN_001664a4",
+  "why": "ACHRstat::pauseTasks(on, 0) and the move / turn tasks paused or resumed"
+ },
+ "00166518": {
+  "name": "EmyMain::resetOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00166518",
+  "why": "0x16913c on the out (+0x44)"
+ },
+ "00166534": {
+  "name": "EmyMain::countDamageEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00166534",
+  "why": "+0x1e4 - 1; at 0 clears param flag 0x400"
+ },
+ "001665b8": {
+  "name": "EmyMain::getSE",
+  "tag": "ror-inferred",
+  "was": "FUN_001665b8",
+  "why": "SE id by no (0..0xe switch by GetType, above from table 0x2f171c)"
+ },
+ "00166a0c": {
+  "name": "EmyMain::testNotifyHit",
+  "tag": "ror-inferred",
+  "was": "FUN_00166a0c",
+  "why": "+0x30 bit 0"
  },
  "0016a8a4": {
   "name": "emyPlaySE",
@@ -9563,6 +9983,12 @@
   "was": "FUN_001d7b08",
   "why": "achr / fchr position into 0x17c340 over secta list bss 0x7811ac (radius 40), returns the found cell's word 0 (its id) or -1; list = chrIsOidType2"
  },
+ "001d7de4": {
+  "name": "GamMan::getFloorY",
+  "tag": "ror-inferred",
+  "was": "FUN_001d7de4",
+  "why": "0x17c340 secta query at pos, then getSectaCellY of the first hit"
+ },
  "001d7eb8": {
   "name": "GamMan::selectSectaList",
   "tag": "ror-inferred",
@@ -12382,6 +12808,12 @@
   "tag": "ror-inferred",
   "was": "FUN_002005b8",
   "why": "TskDamage::setup's step for chr word 6"
+ },
+ "00202f10": {
+  "name": "TskEnemyMove::stop",
+  "tag": "ror-inferred",
+  "was": "FUN_00202f10",
+  "why": "+4 = 0, stops its SE +0xab8, clears EmyManager's work word of its oid +8"
  },
  "00203d94": {
   "name": "SysTimer::SysTimer",

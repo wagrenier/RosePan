@@ -2399,7 +2399,7 @@ intptr_t seqFunc212(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
         emy.releaseEmyHold(oid);
         break;
     case 24:
-        emy.m_slot[a1].m_0c = (int)a2;
+        emy.SetGrpMotion((int)a1, (int)a2);
         break;
     case 30:
         emy.setSlotWord24((int)a1, a2 != 0);
