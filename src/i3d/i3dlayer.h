@@ -42,6 +42,8 @@ struct I3dNode;
 struct I3dGroup;
 struct I3dLight;
 struct I3dView;
+struct I3rItem;
+struct I3rMeshPacket;
 
 /* A call node's callback: 0 = go on with the next node. */
 typedef int (*I3dNodeFunc)(i3dContext *ctx, I3dNode *node);
@@ -148,7 +150,7 @@ struct I3dLayer
     I3dNode    *m_last;             // ROR 0x0c
     u_int       m_count;            // ROR 0x10
     I3dDrawSet *m_sets[0x100];      // ROR 0x14: hash buckets of draw sets
-    u_int       m_414[0x100];       // ROR 0x414: cleared by i3dLayerInit; no reader found
+    I3rMeshPacket *m_mesh_cache[0x100]; // ROR 0x414: hash buckets of material packets (i3rGetMaterialPacket)
     i3dContext *m_ctx;              // ROR 0x814
     I3dGroup   *m_set_group;        // ROR 0x818: the current draw set's group (Begin / EndSet)
     I3dGroup   *m_group;            // ROR 0x81c: the layer's group in its parent
@@ -178,44 +180,6 @@ static_assert(offsetof(I3dTexSetDesc, m_depth) == 0, "I3dTexSetDesc::m_depth");
 
 /* The texture and CLUT objects i3dTexRegsSet reads (I3dTexture, I3dClut)
  * are in i3d/i3dtex.h. */
-
-/* A model material as i3dLayerFindMaterialDrawSet reads it (the model code
- * at 0x228f50 passes it). Roles from that one reader; unverified.
- * layout: host -- pointers. */
-struct I3rTexRef
-{
-    u_char _00[0x1c];
-    int    m_tex_no;            // ROR 0x1c: -1 = none
-};
-/* layout: host -- a pointer. */
-struct I3rTexRefEntry
-{
-    I3rTexRef *m_tex;           // ROR 0x00
-    u_int      _04[3];          // ROR 0x04
-};
-/* layout: host -- a pointer. */
-struct I3rTexList
-{
-    u_int           _00;        // ROR 0x00
-    u_int           m_count;    // ROR 0x04: low 24 bits
-    I3rTexRefEntry *m_entry;    // ROR 0x08
-};
-/* layout: host -- plain words (the EE offsets in the comments). */
-struct I3rMatParam
-{
-    float  m_depth;             // ROR 0x00
-    u_int  m_sort_param;        // ROR 0x04
-    u_char _08[2];              // ROR 0x08
-    u_char m_sort_func;         // ROR 0x0a
-    u_char m_sort_order;        // ROR 0x0b
-};
-/* layout: host -- pointers. */
-struct I3rMaterial
-{
-    I3rMatParam *m_param;       // ROR 0x00
-    void        *_04;           // ROR 0x04
-    I3rTexList  *m_tex;         // ROR 0x08
-};
 
 /* ---- layers ---- */
 
@@ -257,8 +221,11 @@ int      i3dLayerSetUser(I3dLayer *layer, int n, u_long value);                 
 int      i3dLayerSetUser2(I3dLayer *layer, int n, u_long value);                   // ROR 0x00223470
 u_long   i3dLayerGetUser(I3dLayer *layer, int n);                                  // ROR 0x00223488
 u_long   i3dLayerGetUser2(I3dLayer *layer, int n);                                 // ROR 0x00223498
-I3dDrawSet *i3dLayerFindMaterialDrawSet(I3dLayer *layer, const I3rMaterial *mat,
-                                        const I3dDrawSet *base);                   // ROR 0x002234a8
+/* The draw set of a material item (type 0x25: its data's depth and sort
+ * words, its layers' texture numbers); base: an I3rMeshOpt, NULL or its
+ * depth offset (+0x20) added. */
+I3dDrawSet *i3dLayerFindMaterialDrawSet(I3dLayer *layer, const I3rItem *mat,
+                                        const void *base);                   // ROR 0x002234a8
 I3dDrawSet *i3dLayerFindDrawSet(I3dLayer *layer, const I3dTexSetDesc *desc);       // ROR 0x00223558
 I3dLayer *i3dLayerCreateSubLayer(I3dLayer *layer, float key);                      // ROR 0x00223768
 int      i3dLayerAddVramReset(I3dLayer *layer, float key);                         // ROR 0x00223808

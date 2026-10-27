@@ -18,7 +18,10 @@
 #include <string.h>
 
 #include "i3d/i3dctx.h"
+#include "i3d/i3dpacket.h"
 #include "i3d/i3dtex.h"
+#include "i3d/i3rmesh.h"
+#include "i3d/i3rmodel.h"
 #include "i3d/i3rroot.h"
 #include "rosepan/io/rosepan_log.h"
 #include "rosepan/rendering/rosepan_renderer.h"
@@ -32,6 +35,9 @@ constexpr unsigned kVuNormals = 0x22c;
 constexpr unsigned kVuColours = 0x017;
 constexpr unsigned kVuStq = 0x02b;
 constexpr unsigned kVuSize = 1024;
+/* The GS state a material chain opens with (i3dPktOpenChain). */
+constexpr u_long kDefaultAlpha = 0x44;
+constexpr u_long kDefaultTest = 0x5000d;
 
 /* Item types the walk checks. */
 constexpr unsigned kTypeVertexBatch = 0x56;
@@ -351,6 +357,39 @@ const void *MaterialTexture(const I3rItem *materials, unsigned num_mat, int inde
     return RosePan_I3dTextureFor(e.pPicture, e.m_clut, e.m_0c, 1);
 }
 
+/* The GS state of material `index` as its first layer's packet sets it
+ * (i3rPktLayerTest / i3rPktLayerAlpha, i3d/i3rmesh.cpp), over the chain's
+ * defaults (i3dPktOpenChain: ALPHA 0x44, TEST 0x5000d) where the layer
+ * writes none. The ROM keeps the previous layer's register instead; the
+ * host starts each material from the defaults. */
+void ApplyMaterialState(const I3rItem *materials, unsigned num_mat, int index)
+{
+    u_long test = kDefaultTest;
+    u_long alpha = kDefaultAlpha;
+    if (materials != nullptr && index >= 0 && (unsigned)index < num_mat)
+    {
+        const I3rItem &mat = materials[index];
+        if (mat.getNumChild() != 0 && mat.getChildren()[0].getNumChild() != 0)
+        {
+            const I3rLayerData *layer = (const I3rLayerData *)mat.getChildren()[0].getChildren()[0].getData();
+            if (layer != nullptr)
+            {
+                u_long regs[4][2];
+                u_long *end = i3rPktLayerAlpha(i3rPktLayerTest(regs[0], layer), layer);
+                for (const u_long *r = regs[0]; r < end; r += 2)
+                {
+                    if (r[1] == I3D_GS_TEST_1)
+                        test = r[0];
+                    else if (r[1] == I3D_GS_ALPHA_1)
+                        alpha = r[0];
+                }
+            }
+        }
+    }
+    RosePan_RendererSetGsTestRegister(test);
+    RosePan_RendererSetGsAlphaRegister(alpha);
+}
+
 /* A fixed light for the host colours until the scene lights are read:
  * from above and in front, in world space. */
 float Shade(const float *m, const float n[3])
@@ -537,6 +576,7 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
                     short mat;
                     memcpy(&mat, md + 0x0c, sizeof(mat));
                     const void *texture = MaterialTexture(materials, num_mat, mat, tex, tex_count);
+                    ApplyMaterialState(materials, num_mat, mat);
                     const I3rItem &batches = mesh4d[m].getChildren()[0];
                     for (u_int b = 0; b < batches.getNumChild(); b++)
                         DrawBatch(batches.getChildren()[b], local_world, texture, rigid ? nullptr : skinned);
@@ -544,4 +584,8 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
             }
         }
     }
+    /* PC: the next draws (the 2D replay sets ALPHA but not TEST) start
+     * from the chain defaults again. */
+    RosePan_RendererSetGsTestRegister(kDefaultTest);
+    RosePan_RendererSetGsAlphaRegister(kDefaultAlpha);
 }

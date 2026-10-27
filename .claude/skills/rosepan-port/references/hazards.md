@@ -752,3 +752,13 @@ public:
 - **The Bash tool rejects a long inline `python - <<'EOF'` script** whose body has unbalanced quotes
   in comments (2026-10-27: "unexpected EOF while looking for matching"); write big edits with the
   Edit tool or a script file instead.
+
+## i3r items described with host pointers (2026-10-27)
+
+- Symptom: i3dLayerFindMaterialDrawSet took an `I3rMaterial` struct with `I3rTexList *` /
+  `I3rTexRefEntry *` members -- it compiled, but on the host those words are self-relative u32
+  offsets in the file, so any call would have read garbage.
+- Cause: the struct was written from one reader's offsets (`mat+8`, `+4`, `+8`) without noticing
+  they are I3rItem fields (m_children, m_info, m_children of the child).
+- Fix: when a reader walks +0 / +4 / +8 of model data, it is an I3rItem: use getData() /
+  getChildren() / getNumChild() and the type's data struct (i3rmodel.h), never a pointer struct.

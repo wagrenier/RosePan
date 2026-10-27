@@ -388,8 +388,10 @@ int  utlRandPeak(int lo, int hi, int peak, int n);                       // ROR 
  * own file. */
 #include "i3d/i3dpacket.h"
 
-/* out[0] = (m00, m11, m22, 0), out[1] = m[3]. */
-void  i3dMatGetScaleTrans(sceVu0FVECTOR *out, sceVu0FVECTOR *m);         // ROR 0x00228c38
+/* An i3r item's vector at time t (unassigned@00225018): its data when its
+ * child 0 has no data, else child 0's keys interpolated (0x225148). */
+struct I3rItem;
+void  i3rTrackGetValue(const I3rItem *track, float *out, float t);       // ROR 0x002251f0
 
 /* A layer's light set, fog and view (EE layer +0x82c / +0x830 / +0x834).
  * Opaque: built by 0x11262c over the scene light pool, i3dCtxSetFog and
@@ -415,6 +417,9 @@ struct MagViewParam;
 #include "i3d/i3rmodel.h"
 /* The model draw (i3rBuildMeshPacket, i3rDrawModel) has its own file. */
 #include "i3d/i3rdraw.h"
+/* The material packets (i3rGetMaterialPacket, the layer TEST / ALPHA,
+ * i3dMatGetScaleTrans) have their own file. */
+#include "i3d/i3rmesh.h"
 
 #include "i3d/i3croot.h"
 

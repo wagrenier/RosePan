@@ -339,8 +339,21 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     slots 0..2), 0x2d a combined mesh (slots 0 / 1), 0x2a a node (slot 0 its data item, slot 1 a named
     list), 0x4d (lists 0 / 1, slot 2) and 0x59 (list 0) for the packet builders. i3rRelocData26's
     Ghidra body ran to 0x22a978; the function ends at 0x22a960. The mesh packet builder before it is
-    **`i3d/i3rmesh.cpp`** 0x228c08..0x22a6c0 (pinned 2026-10-27, not written; it ends with 0x22a638,
-    the ALPHA_1 / TEST_1 register pair).
+    **`i3d/i3rmesh.cpp`** 0x228c08..0x22a6c0 (written 2026-10-27, verify): i3rGetMaterialPacket
+    0x228f50 caches a material's packet per layer (I3dLayer +0x414 = 256 buckets of I3rMeshPacket,
+    key material + texture frame + light + fog + view; an I3rMeshOpt with a uv override or a depth
+    offset is never cached) and builds it at the context head: view / fog (0x2291c8), then per
+    material layer (type 0x26, I3rLayerData now 0x38 bytes known) its texture REF, GS state
+    0x229380 (TEST from 0x22a448: m_atst via the ATST table 0x2db350 {1,0,1,4,7,2,3,6,5}, AREF =
+    m_alpha_ref * 128, AFAIL codes 0x10 / 0x0f / 0x18 -> 1 / 2 / 3, m_date, m_ztst; ALPHA from
+    0x22a638: m_blend 0x10 / 0x11 / 0x12 = 0x44 / 0x48 / 0x42, 0x2x the same with Ad), the layer's
+    0x4a register overrides (masked with I3dLayer::m_user of the same register), the light set
+    0x229678 (I3dLightDesc's five lists; m_shade 2 = half vectors with the view's eye direction),
+    the STQ map matrices 0x229b70 (I3rStqMapEntity +0x41 kind, +0x40 slot; kind 1 projects through
+    the view camera and the bias matrix 0x303800) and the uv transform 0x22a050 (layer children 0 /
+    1: offset / scale and pivot / scale / rotation tracks read with i3rTrackGetValue 0x2251f0 at
+    time 0). The material data (type 0x25) is I3rMaterialData: +0 depth, +4 sort param, +8 texture
+    frame, +0xa sort func, +0xb sort order -- i3dLayerFindMaterialDrawSet reads the same item.
     **The mesh data** (read 2026-10-27 from i3rBuildMeshPacket 0x21fb50, i3rDrawModel 0x21fe68,
     0x220290 / 0x222560 / 0x225670 / 0x225ec8 and checked on amd.mdl; the host reader is
     rosepan_i3dmesh.cpp): node (0x2a) [1] = entries (0x59: +0 -> u16 bone table, +4 s16 mesh

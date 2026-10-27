@@ -236,17 +236,6 @@ u_long   * i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matri
     return pkt;
 }
 
-// bridge of ROR 0x00228c38
-void i3dMatGetScaleTrans(sceVu0FVECTOR *out, sceVu0FVECTOR *m)
-{
-    ROSEPAN_BRIDGE("i3dMatGetScaleTrans", 0x00228c38);
-    out[0][3] = 0.0f;
-    out[0][0] = m[0][0];
-    out[0][1] = m[1][1];
-    out[0][2] = m[2][2];
-    i3dVecCopyW(out[1], m[3]);
-}
-
 // stub of ROR 0x0021e8f8
 u_long   * i3dPktDrawWireBox(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
                             const float *center, const void *extent, const void *color)
@@ -1801,3 +1790,9 @@ float emyVecLength(const float *v)
 }
 
 
+
+// stub of ROR 0x002251f0
+void i3rTrackGetValue(const I3rItem *track, float *out, float t)
+{
+    ROSEPAN_STUB("i3rTrackGetValue", 0x002251f0);
+}
