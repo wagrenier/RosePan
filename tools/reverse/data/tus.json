@@ -1,6 +1,5 @@
 {
  "queue": [
-  "task/tsk_scene.cpp",
   "unassigned@00192ac0",
   "dog/dogmodel.cpp",
   "dog/dogactor.cpp",
@@ -1199,11 +1198,11 @@
    "why": "CmnTaskMan (ctor 0x1e7094 .. getTask / live-id helpers 0x1e7e50) plus TskTest::exec 0x1e7ed0 and TskLogger 0x1e7ed8 / 0x1e7f18 before TskMtnMove; file name a guess after RoR's task/tsk_*.cpp (no source string). 0x1e6d54 / 0x1e6e00 before it are GamSndMan 3D-volume helpers (callers playSE / playStr), game/gamsnd.cpp."
   },
   "task/tsk_scene.cpp": {
-   "notes": "Visual test: the 15 s smoke run still ends on the disclaimer screen, drawn as before; nothing in this TU is reached yet (damage needs the first room and an attack). Left in this TU: scnChrRequestDog 0x1fae14 and scnChrRequestPC 0x1fb084 (stubs; both call the damage roll 0x1fb624, 0x4e0 bytes, which reads object params 2 / 0x1d / 0x66, GamSysData fields 0x2a / 0x2b / 0x1e and switches on the word with utlRandRange and FUN_0010426c), 0x1fb5d4 (called from mag/maglifepc2.cpp, wraps 0x1fb624), 0x1fbb04 (called by the TskDamage steps), 0x1fbba4 / 0x1fc47c / 0x1fc490 (unreferenced), and the unreferenced ScenePlay::loadCamera / loadFocus. Decisions: TskDamage chr 3 / 4 set no step, the PC keeps m_step NULL and exec ends the task (open-items.md question); the ROM's break 7 on a zero enemy word 0x1d8 is a comment, not an assert; the heading difference is wrapped in double precision like seqWrapPi and taken absolute. The TskDamage steps (stepKind0..stepKindA, 0x1fe160..0x2005b8) belong to unassigned@001fd424 with TskAttack's six.",
+   "notes": "Visual test: the 15 s smoke run ends on the disclaimer screen as before; nothing in this TU is reached yet (hits need the first room and an attack), so the TU is verify. The brief still lists the class constructors / destructors and linkonce accessors as todo: they are written inline in tsk_scene.h (the tracker counts .cpp annotations only); CmnITask / ScenePlay __tf are RTTI, not ported. Decisions: the max-LP divide guards 0 (the ROM traps); the attack-word percent switch is split into scnAttackPercent (callcheck note); scnChrRequestPC bounds the word table 0x2feea0 at 0x34 words. Brown's reaction mapping (share < 26 percent -> magBwnHurt 0, 26..50 -> inu mode, above -> 1) is read as the ROM does, flagged in open-items.md. Next: task/naga_chunk.cpp now starts at 0x1fc47c (writer ctor / dtor there); the stubs this TU calls out to are magBwnHurt, utlRandMean / utlRandPeak, the four EmyManager helpers and the TskDamage steps in unassigned@001fd424.",
    "ranges": [
     [
      "001f6c64",
-     "001fc4f0"
+     "001fc47c"
     ]
    ],
    "sessions": [
@@ -1226,10 +1225,15 @@
      "date": "2026-10-26 20:54",
      "status": "partial",
      "summary": "Wrote TskDamage::setup 0x1f9e58 (LP damage and kill, the facing test against the attacker, the enemy notifications, the step and hurt SE by chr word) with TskDamage::getReactFrames 0x1fa768 (jump table 0x2fecb0 over the motion lists), TskDamage::kill 0x1fa9c4 and TskDamage::pickAttrBit 0x1faa70; TskDamage gets its EE fields (host layout). Named 18 functions (batch tskscene_005): the nine TskDamage steps in unassigned@001fd424 (stubs), EmyManager notifyEmy / setEmyWord18 / clearEmyWord18 / getEmyWord1d8 / getEmyWord238, emyPlaySE."
+    },
+    {
+     "date": "2026-10-26 21:07",
+     "status": "verify",
+     "summary": "Wrote the rest of task/tsk_scene.cpp: scnChrRequestDog 0x1fae14 and scnChrRequestPC 0x1fb084 (stubs replaced), the damage roll scnCalcDamage 0x1fb624 with scnCalcPcDamage 0x1fb5d4, TskDamage::endReact 0x1fbb04, scnGetMaxFreeMem 0x1fbba4, ScenePlay::loadCamera / loadFocus and the inline add_imd_load_chr_id / set_camera_eff_id. Re-pinned the TU to 0x1f6c64..0x1fc47c: 0x1fc47c / 0x1fc490 are the chunk writer's inline ctor / dtor (task/naga_chunk.cpp). Named 17 functions (batch tskscene_006): magBwnHurt, MagLifeBwnCtrl requestHurt / requestState, EmyManager getEmyHoldWord24c / 23c, setEmyMode6, stopEmyMove, utlRandMean / utlRandPeak / PeakHi / PeakLo."
     }
    ],
-   "status": "partial",
-   "why": "source strings task/tsk_scene.cpp at 0x1f8034 / 0x1f81a8 (assert lines 790 / 852); ScenePlay's vtable slots span 0x1f7d54..0x1f82e4 so the run before and after the anchors is one file; task/tsk_chr.cpp ends at 0x1f6c64, task/naga_chunk.cpp starts at 0x1fc4f0; classes ScenePlay, ScenePlaySingle, PLScenePlay, TskSnd, TskAttack, TskDamage, TskCamera"
+   "status": "verify",
+   "why": "source strings task/tsk_scene.cpp at 0x1f8034 / 0x1f81a8 (assert lines 790 / 852); ScenePlay's vtable slots span 0x1f7d54..0x1f82e4; ends after TskCamera::stepNone 0x1fc474: 0x1fc47c / 0x1fc490 are the inline ctor / dtor of the chunk writer whose fields (+0x400 count, +0x504 buffer, +0x50c offset) task/naga_chunk.cpp's 0x1fc4f0 uses"
   },
   "unassigned@001056f8": {},
   "unassigned@0011262c": {},

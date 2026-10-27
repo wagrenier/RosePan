@@ -32,6 +32,9 @@
 #include "task/naga_chunk.h"
 #include "utl/utlmisc.h"
 
+/* allocDebug's file name (data 0x2fe858). */
+static const char s_file[] = "task/tsk_scene.cpp";
+
 /* A record word read as the float it holds (kinds 1 and 2). */
 static float scnRecFloat(int word)
 {
@@ -522,6 +525,84 @@ void ScenePlay::setFrames(int frames)
 {
     m_frame = frames;
     m_frames = frames;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The event number is script global 0x1f.
+// callcheck: FileReader, ~FileReader, FileReadReq (the inline locals)
+// ROR 0x001f8034
+
+void ScenePlay::loadCamera(const char *name)
+{
+    int evt = g_sequence.m_global[0x1f];
+
+    if (m_cameraData != NULL)
+    {
+        utlMemFree(m_cameraData);
+        m_cameraData = NULL;
+    }
+    if (name == NULL || strlen(name) == 0)
+        return;
+
+    FileReader reader;
+    char *path = m_cameraPath;
+    strcpy(path, "data/");
+    char base[0x40];                    /* PC: the ROM prints the path over itself */
+    strcpy(base, path);
+    snprintf(path, 0x40, "%sevt/%02d/camera/", base, evt);
+    strcpy(path + strlen(path), name);
+    m_cameraData = g_utlMemory.allocDebug(0x20000, s_file, 790, 0, 1);
+
+    FileReadReq req;
+    req.m_buf = m_cameraData;
+    req.m_close = 1;
+    req.m_08 = 1;
+    req.m_size = 0x20000;
+    req.m_whence = 0;
+    req.m_offset = 0;
+    req.m_name = path;
+    reader.read(&req, 0);
+
+    EffParam eff;
+    memset(&eff, 0, sizeof(eff));       /* PC: zeroed (the ROM sets the words below) */
+    eff.m_kind = 0xd;
+    eff.m_08 = 0;
+    eff.m_file = m_cameraData;
+    m_eff = g_magSystem.m_scene.m_837e0.createEff(&eff);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: FileReader, ~FileReader, FileReadReq (the inline locals)
+// ROR 0x001f81a8
+
+void ScenePlay::loadFocus(const char *name)
+{
+    int evt = g_sequence.m_global[0x1f];
+
+    if (m_focusData != NULL)
+    {
+        utlMemFree(m_focusData);
+        m_focusData = NULL;
+    }
+    if (name == NULL || strlen(name) == 0)
+        return;
+
+    FileReader reader;
+    char *path = m_focusPath;
+    snprintf(path, 0x40, "data/evt/%02d/focus/%s", evt, name);
+    int size = fileGetSize(path);
+    m_focusData = g_utlMemory.allocDebug(size, s_file, 852, 0, 1);
+
+    FileReadReq req;
+    req.m_buf = m_focusData;
+    req.m_close = 1;
+    req.m_08 = 1;
+    req.m_whence = 0;
+    req.m_offset = 0;
+    req.m_size = size;
+    req.m_name = path;
+    reader.read(&req, 0);
+    g_magSystem.m_scene.setFocusData(m_focusData, size);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1424,7 +1505,7 @@ void TskDamage::setup(u_int oid, u_int attacker, const ScnDamageParam *param, in
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: operator_new (the new expression)
+// callcheck: operator_new, FUN_001f9e38 (the new expression; TskDamage's inline constructor)
 // ROR 0x001fa5bc
 
 void scnDamageStart(u_int oid, u_int attacker, const ScnDamageParam *param, int kind)
@@ -1627,6 +1708,289 @@ void scnChrRequest(int chr, u_int oid, int a2, int a3, int word, u_int chrOid, i
         break;
     }
     }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The heading of the attacker as seen from the dog is computed and
+// dropped. inu mode 1 is also the 26..50 percent reaction.
+// ROR 0x001fae14 // callcheck: utlAtan2 (its result unused)
+
+void scnChrRequestDog(u_int oid, int word)
+{
+    int inuMode = g_gamMan.m_inuMode;
+
+    if (inuMode != 1 || g_magSystem.getBwnState() == 10)
+        return;
+    ObjStat *dog = g_gamMan.m_dogPtr;
+    u_int dogOid = dog->m_oid;
+    int damage = scnCalcDamage(oid, dogOid, word);
+    u_short maxLp, lp;
+    g_gamMan.getObjParam(dogOid, 0x1c, &maxLp);
+    g_gamMan.getObjParam(dogOid, 0x1b, &lp);
+    DogActor &actor = g_magSystem.m_scene.m_actors[g_gamMan.getActorNo(oid)];
+    float pos[4];
+    g_gamMan.getObjPos(dogOid, pos);
+    utlAtan2(pos[0] - actor.m_trans[0], pos[2] - actor.m_trans[2]);
+
+    /* The ROM traps (break 7) on a max LP of 0. */
+    int share = maxLp != 0 ? damage * 100 / (int)maxLp : 0;
+    int react = 0;
+    if (share < 51)
+        react = share < 26 ? 2 : inuMode;
+    if (word == 0x25 || word == 0x2d)
+        react = -1;
+
+    u_int locked = dog->m_flags & 0x400;
+    if (damage < (int)lp)
+    {
+        if (locked == 0)
+        {
+            lp -= (u_short)damage;
+            g_gamMan.setObjParam(dogOid, 0x1b, &lp);
+        }
+        if (react >= 0)
+        {
+            if (react < 2)
+                magBwnHurt(1, damage);
+            else if (react == 2)
+                magBwnHurt(0, damage);
+        }
+    }
+    else if (locked == 0)
+    {
+        lp = 0;
+        g_gamMan.setObjParam(dogOid, 0x1b, &lp);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The PC's hurt state by attack word (data 0x2feea0).
+static const u_char s_scnPcStateOfWord[0x34] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 7,
+    7, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 2,
+    2, 2, 9, 2, 2, 2, 2, 2, 2, 13, 14, 10, 2, 2, 2, 2,
+    2, 2, 1, 2,
+};
+
+// The heading difference is wrapped once into -pi..pi in double precision
+// (like seqWrapPi) and taken absolute.
+// callcheck: dpadd, dpcmp, dpsub, dptofp, fptodp, operator_new (the soft-float doubles, C doubles here; the new expression)
+// ROR 0x001fb084
+
+void scnChrRequestPC(u_int oid, int word)
+{
+    const double pi = 3.141592653589793, twoPi = 6.283185307179586;
+    MagScene &scene = g_magSystem.m_scene;
+    ObjStat *pc = g_gamMan.m_pcPtr;
+
+    if (g_magSystem.getPCStateClass() == 9)
+        return;
+    int damage = scnCalcDamage(oid, pc->m_oid, word);
+    u_short lp;
+    g_gamMan.getPcParam(0x1b, &lp);
+    DogActor &actor = scene.m_actors[g_gamMan.getActorNo(oid)];
+    float dir = atan2f(actor.m_trans[0] - g_gamMan.m_pcPos[0],
+                       actor.m_trans[2] - g_gamMan.m_pcPos[2]);
+    float rot;
+    g_gamMan.getObjRotY(g_gamMan.m_pcPtr != NULL ? g_gamMan.m_pcPtr->m_oid : 0, &rot);
+    u_int flags = pc->m_flags;
+    int front = (flags & 0x800) == 0;
+
+    if (damage >= (int)lp)
+    {
+        if ((flags & 0x400) == 0)
+        {
+            lp = 0;
+            g_gamMan.setPcParam(0x1b, &lp);
+        }
+        int cls = g_magSystem.getPCStateClass();
+        scene.setPCState14(3, front);
+        if (g_taskMan.getTask(g_gamMan.m_frameTaskId) == 0)
+        {
+            TskFrameFunc *task = new TskFrameFunc(0xe, cls, 0);
+            g_taskMan.addTask(1, -1, 1, 0, task, 0, &g_gamMan.m_frameTaskId, 0x11);
+        }
+        return;
+    }
+
+    if ((flags & 0x400) == 0)
+    {
+        lp -= (u_short)damage;
+        g_gamMan.setPcParam(0x1b, &lp);
+    }
+    int state = (u_int)word < 0x34 ? s_scnPcStateOfWord[word] : 0;   /* PC: the ROM reads past the table */
+    switch (state)
+    {
+    case 9:
+        scene.setPCState14(g_emyManager.getEmyHoldWord24c(oid) != 0 ? 0xb : 9, front);
+        break;
+    case 10:
+        scene.setPCState14(g_emyManager.getEmyHoldWord23c(oid) != 0 ? 0xc : 10, front);
+        break;
+    case 2:
+    {
+        float off = dir - rot;
+        if ((double)off < -pi)
+            off = (float)((double)off + twoPi);
+        if ((double)off > pi)
+            off = (float)((double)off - twoPi);
+        if (off < 0.0f)
+            off = -off;
+        scene.setPCState14((double)off <= pi / 2 ? 5 : 4, front);
+        break;
+    }
+    default:
+        scene.setPCState14(state, front);
+        break;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001fb5d4
+
+int scnCalcPcDamage(u_int target, int word)
+{
+    u_int pcOid;
+    g_gamMan.getPcParam(1, &pcOid);
+    return scnCalcDamage(pcOid, target, word);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The attack word's percent of the attacker's ST (scnCalcDamage's switch,
+// its own jump table): fixed for some words, else a random range.
+static int scnAttackPercent(int word)
+{
+    int lo, hi;
+
+    switch (word)
+    {
+    case 1: case 2:             lo = 5;   hi = 20;  break;
+    case 3:                     lo = 130; hi = 170; break;
+    case 4:                     return utlRandMean(90, 110, 3);
+    case 5:                     return utlRandPeak(70, 160, 100, 8);
+    case 6: case 0xc: case 0x15: case 0x16:
+                                return 0;
+    case 7:                     lo = 200; hi = 250; break;
+    case 8:                     lo = 60;  hi = 140; break;
+    case 9:                     lo = 80;  hi = 160; break;
+    case 0xb:                   return utlRandPeak(100, 400, 300, 8);
+    case 0xd:                   lo = 80;  hi = 90;  break;
+    case 0xf: case 0x10: case 0x21: case 0x2e: case 0x33:
+                                lo = 80;  hi = 120; break;
+    case 0x11:                  lo = 75;  hi = 85;  break;
+    case 0x13:                  lo = 90;  hi = 110; break;
+    case 0x14:                  lo = 140; hi = 160; break;
+    case 0x17:                  lo = 80;  hi = 150; break;
+    case 0x18:                  lo = 200; hi = 260; break;
+    case 0x1a:                  return 150;
+    case 0x1b:                  return 400;
+    case 0x1c:                  return 75;
+    case 0x1d: case 0x1f:       lo = 100; hi = 120; break;
+    case 0x1e: case 0x20:       lo = 80;  hi = 90;  break;
+    case 0x22: case 0x2b:       lo = 90;  hi = 100; break;
+    case 0x23:                  lo = 180; hi = 220; break;
+    case 0x24: case 0x2c:       lo = 70;  hi = 80;  break;
+    case 0x25: case 0x2d:       return 200;
+    case 0x26:                  lo = 90;  hi = 110; break;
+    case 0x27:                  lo = 90;  hi = 120; break;
+    case 0x28:                  lo = 150; hi = 180; break;
+    case 0x29: case 0x2a:       lo = 60;  hi = 70;  break;
+    case 0x2f: case 0x30:       lo = 40;  hi = 100; break;
+    case 0x31:                  lo = 60;  hi = 80;  break;
+    case 0x32:                  lo = 30;  hi = 40;  break;
+    default:                    return 100;
+    }
+    return utlRandRange(lo, hi);
+}
+
+// The weapon's fields: 0x2a the bonus, 0x2b the multiplier. The PC's is
+// its equipped item (none for 0xa00 or word 7), a kind-2 object's its
+// param 0x66 (none for 0 / 0xa00).
+// callcheck: utlRandMean, utlRandPeak (in scnAttackPercent, the switch split out)
+// ROR 0x001fb624
+
+int scnCalcDamage(u_int attacker, u_int target, int word)
+{
+    GamSysData &sys = g_gamMan.m_sysData;
+    short targetKind, attackerKind;
+    u_short st = 0, def = 0;
+    short weapon;
+    int bonus = 0;
+    float mult = 1.0f;
+
+    g_gamMan.getObjParam(target, 2, &targetKind);
+    g_gamMan.getObjParam(attacker, 2, &attackerKind);   /* dropped */
+    (void)attackerKind;
+    switch ((attacker >> 23) & 0x1f)
+    {
+    case 0:
+        g_gamMan.getPcParam(0x1d, &st);
+        weapon = g_gamMan.m_equipItem;
+        if (weapon != 0xa00 && word != 7)
+        {
+            sys.getField(weapon, 0x2a, &bonus);
+            sys.getField(weapon, 0x2b, &mult);
+        }
+        break;
+    case 2:
+        g_gamMan.getObjParam(attacker, 0x1d, &st);
+        g_gamMan.getObjParam(attacker, 0x66, &weapon);
+        if (weapon != 0xa00 && weapon != 0)
+        {
+            sys.getField(weapon, 0x2a, &bonus);
+            sys.getField(weapon, 0x2b, &mult);
+        }
+        break;
+    case 5:
+    {
+        short kind;
+        g_gamMan.getObjParam(attacker, 2, &kind);
+        sys.getField(kind, 0x2a, &bonus);
+        sys.getField(kind, 0x2b, &mult);
+        int r = utlRandRange(70, 100);
+        return (int)(mult * (float)r / 100.0f) * bonus;
+    }
+    default:
+        g_gamMan.getObjParam(attacker, 0x1d, &st);
+        break;
+    }
+
+    sys.getField((u_short)targetKind, 0x1e, &def);
+    int r = utlRandRange(90, 110);
+    float pct = (float)scnAttackPercent(word);
+    int damage = (int)((float)st * pct / 100.0f * mult) + bonus - (int)((float)def * (float)r / 100.0f);
+    return damage < 0 ? 0 : damage;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001fbb04
+
+int TskDamage::endReact()
+{
+    if ((m_flags & 8) == 0)
+        return 0;
+    m_achr->m_flags &= ~0x200u;
+    if (m_frames < 10000)
+    {
+        g_emyManager.pauseEmy(m_oid, 0);
+        g_emyManager.setEmyMode6(m_oid);
+    }
+    else
+    {
+        g_emyManager.stopEmyMove(m_oid);
+        m_achr->killTasks();
+    }
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001fbba4
+
+int scnGetMaxFreeMem(void)
+{
+    BEDMEMINFO info;
+    g_utlMemory.getInfo(&info);   // the ROM passes a third word 0
+    return info.m_max_free;
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1894,18 +2258,4 @@ void gamStage2Loaded(void)
     BEDMEMINFO info;
     g_utlMemory.getInfo(&info);   // the ROM passes a third word 0
     (void)info;
-}
-
-// ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x001fae14
-void scnChrRequestDog(u_int oid, int word)
-{
-    ROSEPAN_STUB("scnChrRequestDog", 0x001fae14);
-}
-
-// stub of ROR 0x001fb084
-void scnChrRequestPC(u_int oid, int word)
-{
-    ROSEPAN_STUB("scnChrRequestPC", 0x001fb084);
 }

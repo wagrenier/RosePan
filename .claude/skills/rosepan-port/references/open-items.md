@@ -29,8 +29,9 @@ follows it; reached stubs in run order):
      its six steps live in unassigned@001fd424 and are stubs), scnChrRequest, scnDamageStart and
      TskDamage's exec / term; a fourth (2026-10-26) wrote TskDamage::setup with getReactFrames 0x1fa768,
      kill 0x1fa9c4 and pickAttrBit 0x1faa70 (its nine steps live in unassigned@001fd424 and are stubs).
-     Left: scnChrRequestDog 0x1fae14, scnChrRequestPC 0x1fb084, the damage roll 0x1fb624 / 0x1fb5d4,
-     0x1fbb04 / 0x1fbba4, 0x1fc47c / 0x1fc490, loadCamera / loadFocus. The
+     A fifth (2026-10-26) wrote the rest: scnChrRequestDog / PC, the damage roll scnCalcDamage
+     0x1fb624 / scnCalcPcDamage 0x1fb5d4, TskDamage::endReact 0x1fbb04, scnGetMaxFreeMem 0x1fbba4,
+     loadCamera / loadFocus; the TU is verify (0x1fc47c / 0x1fc490 moved to task/naga_chunk.cpp). The
      200 s New Game run reached none of them yet (it ends on the film's "March 1930" card).
      **scenePlayStart parses event packs with `task/naga_chunk.cpp`'s NagaChunk reader, stubbed
      (find returns 0, so a scene loads nothing and ends at once)**: queue task/naga_chunk.cpp (0x1fc4f0..
@@ -824,6 +825,10 @@ to adapt when a TU reaches them:
   and releases the pack's effect at once. When seqcall's native 0x18 is reached, check whether the
   effect must outlive the task (then give the simple ScenePlay a large frame count or keep the
   effect alive) -- the screenshot decides.
+- scnChrRequestDog (2026-10-26, task/tsk_scene.cpp): Brown's reaction is magBwnHurt(1) for damage of
+  26..100+ percent of his max LP and magBwnHurt(0) below 26 percent -- read off the ROM as written
+  (react 2 for share < 26, inu mode 1 for 26..50, 0 above). If Brown's hurt reaction looks inverted
+  in play, recheck 0x1fae14's compares (slti 0x33 / 0x1a) before changing it.
 - scnChrRequest (2026-10-26): the chr 0..2 / 5..10 path reads object chrOid's position into a stack
   vector and never uses it; TskDamage::setup (0x1f9e58) gets a pointer to the words {a2, word, chr}
   right after it -- check whether setup reads below the pointer (the position) before trusting

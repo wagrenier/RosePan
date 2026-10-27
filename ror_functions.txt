@@ -144,11 +144,11 @@
 /* 001041c4 00000020 */ utlRandStep(){}  // ror
 /* 001041e4 00000038 */ utlRand(){}  // ror
 /* 0010421c 00000020 */ utlRandReset(){}  // ror
-/* 0010423c 00000030 */ utlRandRange(){}  // ror
-/* 0010426c 00000080 */ FUN_0010426c(){}
-/* 001042ec 000000a8 */ FUN_001042ec(){}
-/* 00104394 000000a4 */ FUN_00104394(){}
-/* 00104438 00000080 */ FUN_00104438(){}
+/* 0010423c 00000030 */ FUN_0010423c(){}
+/* 0010426c 00000080 */ utlRandMean(){}  // ror
+/* 001042ec 000000a8 */ utlRandPeakLo(){}  // ror
+/* 00104394 000000a4 */ utlRandPeakHi(){}  // ror
+/* 00104438 00000080 */ utlRandPeak(){}  // ror
 /* 001044b8 00000074 */ FUN_001044b8(){}
 /* 0010452c 00000020 */ FUN_0010452c(){}
 /* 0010454c 00000020 */ FUN_0010454c(){}
@@ -997,10 +997,10 @@
 /* 0012a21c 000000cc */ FUN_0012a21c(){}
 /* 0012a2e8 000000ac */ FUN_0012a2e8(){}
 /* 0012a394 000001d8 */ FUN_0012a394(){}
-/* 0012a56c 000000b0 */ FUN_0012a56c(){}
+/* 0012a56c 000000b0 */ MagLifeBwnCtrl::requestState(){}  // ror
 /* 0012a61c 00000084 */ MagLifeBwnCtrl::live(){}  // ror
 /* 0012a6a0 00000004 */ MagLifeBwnCtrl::processPad(){}  // ror
-/* 0012a6a8 00000024 */ FUN_0012a6a8(){}
+/* 0012a6a8 00000024 */ MagLifeBwnCtrl::requestHurt(){}  // ror
 /* 0012a6cc 00000010 */ FUN_0012a6cc(){}
 /* 0012a6dc 00000040 */ FUN_0012a6dc(){}
 /* 0012a71c 0000003c */ FUN_0012a71c(){}
@@ -1572,7 +1572,7 @@
 /* 00143fd0 00000244 */ MagScene::updateFog(){}  // ror
 /* 00144214 00000030 */ FUN_00144214(){}
 /* 00144244 00000028 */ FUN_00144244(){}
-/* 0014426c 00000038 */ FUN_0014426c(){}
+/* 0014426c 00000038 */ magBwnHurt(){}  // ror
 /* 001442a4 00000028 */ FUN_001442a4(){}
 /* 001442cc 00000004 */ FUN_001442cc(){}
 /* 001442d4 00000008 */ FUN_001442d4(){}
@@ -2124,7 +2124,7 @@
 /* 001634d4 0000009c */ EmyManager::releaseObj(){}  // ror
 /* 00163570 00000070 */ FUN_00163570(){}
 /* 001635e0 00000044 */ EmyManager::resetWork(){}  // ror
-/* 00163624 00000048 */ EmyManager::notifyEmy(){}  // ror
+/* 00163624 00000048 */ FUN_00163624(){}
 /* 0016366c 00000038 */ EmyManager::setEmyActive(){}  // ror
 /* 001636a4 0000003c */ EmyManager::findEmy(){}  // ror
 /* 001636e4 0000001c */ FUN_001636e4(){}
@@ -2148,19 +2148,19 @@
 /* 00163b80 00000038 */ EmyManager::testEmyView(){}  // ror
 /* 00163bb8 0000002c */ EmyManager::releaseEmyHold(){}  // ror
 /* 00163be4 00000040 */ FUN_00163be4(){}
-/* 00163c24 0000002c */ EmyManager::setEmyWord18(){}  // ror
-/* 00163c50 00000024 */ EmyManager::clearEmyWord18(){}  // ror
+/* 00163c24 0000002c */ FUN_00163c24(){}
+/* 00163c50 00000024 */ FUN_00163c50(){}
 /* 00163c74 0000011c */ FUN_00163c74(){}
-/* 00163d90 00000028 */ EmyManager::getEmyWord1d8(){}  // ror
+/* 00163d90 00000028 */ FUN_00163d90(){}
 /* 00163db8 00000058 */ FUN_00163db8(){}
-/* 00163e10 00000038 */ EmyManager::pauseEmy(){}  // ror
-/* 00163e48 0000002c */ FUN_00163e48(){}
-/* 00163e74 0000002c */ FUN_00163e74(){}
+/* 00163e10 00000038 */ FUN_00163e10(){}
+/* 00163e48 0000002c */ EmyManager::stopEmyMove(){}  // ror
+/* 00163e74 0000002c */ EmyManager::setEmyMode6(){}  // ror
 /* 00163ea0 00000044 */ FUN_00163ea0(){}
 /* 00163ee4 00000038 */ FUN_00163ee4(){}
-/* 00163f1c 00000028 */ EmyManager::getEmyWord238(){}  // ror
-/* 00163f44 00000058 */ FUN_00163f44(){}
-/* 00163f9c 00000058 */ FUN_00163f9c(){}
+/* 00163f1c 00000028 */ FUN_00163f1c(){}
+/* 00163f44 00000058 */ EmyManager::getEmyHoldWord24c(){}  // ror
+/* 00163f9c 00000058 */ EmyManager::getEmyHoldWord23c(){}  // ror
 /* 00163ff4 00000058 */ FUN_00163ff4(){}
 /* 0016404c 0000002c */ FUN_0016404c(){}
 /* 00164078 00000034 */ EmyManager::isEmyFlag30(){}  // ror
@@ -2276,7 +2276,7 @@
 /* 0016a594 00000120 */ FUN_0016a594(){}
 /* 0016a6b4 000000f8 */ FUN_0016a6b4(){}
 /* 0016a7ac 000000f8 */ FUN_0016a7ac(){}
-/* 0016a8a4 00000070 */ emyPlaySE(){}  // ror
+/* 0016a8a4 00000070 */ FUN_0016a8a4(){}
 /* 0016a914 0000003c */ FUN_0016a914(){}
 /* 0016a950 0000005c */ FUN_0016a950(){}
 /* 0016a9ac 00000034 */ FUN_0016a9ac(){}
@@ -4283,7 +4283,7 @@
 /* 001f839c 00000058 */ scnMakeScenePath(){}  // ror
 /* 001f83f4 000008f8 */ scenePlayStart(){}  // ror
 /* 001f8cec 00000298 */ scenePlayStartSimple(){}  // ror
-/* 001f8f84 00000034 */ PLScenePlay::~PLScenePlay(){}  // ror
+/* 001f8f84 00000034 */ FUN_001f8f84(){}
 /* 001f8fb8 00000004 */ gamSystemDataLoaded(){}  // ror
 /* 001f8fc0 0000021c */ TskSnd::TskSnd(){}  // ror
 /* 001f91dc 00000068 */ TskSnd::exec(){}  // ror
@@ -4300,27 +4300,27 @@
 /* 001f96c0 0000008c */ TskSnd::stepPlayStream(){}  // ror
 /* 001f974c 00000074 */ TskSnd::stepSEFadeOut(){}  // ror
 /* 001f97c0 00000008 */ TskSnd::stepEnd(){}  // ror
-/* 001f97c8 00000094 */ scnPlaySEDelayed(){}  // ror
-/* 001f985c 00000064 */ TskAttack::TskAttack(){}  // ror
-/* 001f98c0 00000428 */ TskAttack::setup(){}  // ror
-/* 001f9ce8 00000004 */ TskAttack::term(){}  // ror
-/* 001f9cf0 000000a0 */ TskAttack::exec(){}  // ror
-/* 001f9d90 000000a8 */ scnAttackStart(){}  // ror
-/* 001f9e38 00000020 */ TskDamage::TskDamage(){}  // ror
-/* 001f9e58 00000764 */ TskDamage::setup(){}  // ror
-/* 001fa5bc 000001ac */ scnDamageStart(){}  // ror
-/* 001fa768 0000025c */ TskDamage::getReactFrames(){}  // ror
-/* 001fa9c4 000000ac */ TskDamage::kill(){}  // ror
-/* 001faa70 00000160 */ TskDamage::pickAttrBit(){}  // ror
-/* 001fabd0 00000028 */ TskDamage::term(){}  // ror
-/* 001fabf8 00000068 */ TskDamage::exec(){}  // ror
+/* 001f97c8 00000094 */ FUN_001f97c8(){}
+/* 001f985c 00000064 */ FUN_001f985c(){}
+/* 001f98c0 00000428 */ FUN_001f98c0(){}
+/* 001f9ce8 00000004 */ FUN_001f9ce8(){}
+/* 001f9cf0 000000a0 */ FUN_001f9cf0(){}
+/* 001f9d90 000000a8 */ FUN_001f9d90(){}
+/* 001f9e38 00000020 */ FUN_001f9e38(){}
+/* 001f9e58 00000764 */ FUN_001f9e58(){}
+/* 001fa5bc 000001ac */ FUN_001fa5bc(){}
+/* 001fa768 0000025c */ FUN_001fa768(){}
+/* 001fa9c4 000000ac */ FUN_001fa9c4(){}
+/* 001faa70 00000160 */ FUN_001faa70(){}
+/* 001fabd0 00000028 */ FUN_001fabd0(){}
+/* 001fabf8 00000068 */ FUN_001fabf8(){}
 /* 001fac60 000001b4 */ scnChrRequest(){}  // ror
-/* 001fae14 00000270 */ scnChrRequestDog(){}  // ror
-/* 001fb084 00000550 */ scnChrRequestPC(){}  // ror
-/* 001fb5d4 00000050 */ FUN_001fb5d4(){}
-/* 001fb624 000004e0 */ FUN_001fb624(){}
-/* 001fbb04 000000a0 */ FUN_001fbb04(){}
-/* 001fbba4 0000002c */ FUN_001fbba4(){}
+/* 001fae14 00000270 */ FUN_001fae14(){}
+/* 001fb084 00000550 */ FUN_001fb084(){}
+/* 001fb5d4 00000050 */ scnCalcPcDamage(){}  // ror
+/* 001fb624 000004e0 */ scnCalcDamage(){}  // ror
+/* 001fbb04 000000a0 */ TskDamage::endReact(){}  // ror
+/* 001fbba4 0000002c */ scnGetMaxFreeMem(){}  // ror
 /* 001fbbd0 0000003c */ gamStage2Loaded(){}  // ror
 /* 001fbc0c 00000060 */ TskCamera::TskCamera(){}  // ror
 /* 001fbc6c 000000c0 */ TskCamera::setupPad(){}  // ror
@@ -4331,8 +4331,13 @@
 /* 001fc210 0000025c */ TskCamera::execPad(){}  // ror
 /* 001fc46c 00000008 */ TskCamera::execFace(){}  // ror
 /* 001fc474 00000008 */ TskCamera::stepNone(){}  // ror
-/* 001fc47c 00000014 */ FUN_001fc47c(){}
-/* 001fc490 00000060 */ FUN_001fc490(){}
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
+/* 001fc47c 00000014 */ NagaChunkWriter::NagaChunkWriter(){}  // ror
+/* 001fc490 00000060 */ NagaChunkWriter::~NagaChunkWriter(){}  // ror
 
 // *****************************************************************************
 // FILE -- task/naga_chunk.cpp
@@ -4388,26 +4393,26 @@
 // *****************************************************************************
 
 /* 001fd424 00000298 */ FUN_001fd424(){}
-/* 001fd6bc 00000300 */ TskAttack::stepKind12(){}  // ror
-/* 001fd9bc 000003fc */ TskAttack::stepKind15(){}  // ror
+/* 001fd6bc 00000300 */ FUN_001fd6bc(){}
+/* 001fd9bc 000003fc */ FUN_001fd9bc(){}
 /* 001fddb8 000001d4 */ FUN_001fddb8(){}
 /* 001fdf8c 000001d4 */ FUN_001fdf8c(){}
-/* 001fe160 0000071c */ TskDamage::stepKind0(){}  // ror
+/* 001fe160 0000071c */ FUN_001fe160(){}
 /* 001fe87c 000002bc */ FUN_001fe87c(){}
 /* 001feb38 00000724 */ FUN_001feb38(){}
 /* 001ff25c 00000084 */ FUN_001ff25c(){}
-/* 001ff2e0 000001b4 */ TskDamage::stepKind1(){}  // ror
-/* 001ff494 000001d0 */ TskAttack::stepKind2e(){}  // ror
-/* 001ff664 000001cc */ TskAttack::stepKind2f(){}  // ror
-/* 001ff830 000001cc */ TskAttack::stepKind30(){}  // ror
-/* 001ff9fc 000001c4 */ TskDamage::stepKind9(){}  // ror
-/* 001ffbc0 00000120 */ TskDamage::stepKind2(){}  // ror
-/* 001ffce0 000002e0 */ TskAttack::stepKind26(){}  // ror
-/* 001fffc0 0000018c */ TskDamage::stepKind7(){}  // ror
-/* 0020014c 00000180 */ TskDamage::stepKind8(){}  // ror
-/* 002002cc 00000178 */ TskDamage::stepKindA(){}  // ror
-/* 00200444 00000174 */ TskDamage::stepKind5(){}  // ror
-/* 002005b8 000000c4 */ TskDamage::stepKind6(){}  // ror
+/* 001ff2e0 000001b4 */ FUN_001ff2e0(){}
+/* 001ff494 000001d0 */ FUN_001ff494(){}
+/* 001ff664 000001cc */ FUN_001ff664(){}
+/* 001ff830 000001cc */ FUN_001ff830(){}
+/* 001ff9fc 000001c4 */ FUN_001ff9fc(){}
+/* 001ffbc0 00000120 */ FUN_001ffbc0(){}
+/* 001ffce0 000002e0 */ FUN_001ffce0(){}
+/* 001fffc0 0000018c */ FUN_001fffc0(){}
+/* 0020014c 00000180 */ FUN_0020014c(){}
+/* 002002cc 00000178 */ FUN_002002cc(){}
+/* 00200444 00000174 */ FUN_00200444(){}
+/* 002005b8 000000c4 */ FUN_002005b8(){}
 /* 0020067c 00000004 */ FUN_0020067c(){}
 /* 00200684 0000002c */ FUN_00200684(){}
 /* 002006b0 0000001c */ FUN_002006b0(){}
@@ -9472,7 +9477,7 @@
 /* 00283cc8 00000008 */ MagLifeBwnCtrlModeHug::setMode(){}  // sym
 
 // *****************************************************************************
-// FILE -- (satellite) MagLifeBwnCtrl
+// FILE -- mag/maglifebwnctrl.cpp
 // *****************************************************************************
 
 /* 00283cd0 00000034 */ MagLifeBwnCtrl::~MagLifeBwnCtrl(){}  // sym

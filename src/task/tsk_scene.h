@@ -189,6 +189,10 @@ struct TskDamage : CmnITask
      * m_attrBit); 1 when bits 7, 0x1e or 0x19 are then all set.
      * Unreferenced in the ROM. */
     int  pickAttrBit();                                                  // ROR 0x001faa70
+    /* Every step's end test: with step flag 8 clears achr flag 0x200 and
+     * resumes the enemy (setEmyMode6), or for a killed one (frames >=
+     * 10000) stops it and kills the achr's tasks; 1 then, else 0. */
+    int  endReact();                                                     // ROR 0x001fbb04
     int  stepKind0();                                                    // ROR 0x001fe160
     int  stepKind1();                                                    // ROR 0x001ff2e0
     int  stepKind2();                                                    // ROR 0x001ffbc0
@@ -401,6 +405,15 @@ struct ScenePlay : CmnITask
     void addSingle(int actor, ScenePlayRecord *data, u_int oid);         // ROR 0x001f7f68
     void setFrames(int frames);                                          // ROR 0x001f8028
     void setName(const char *name);                                      // ROR 0x001f836c
+    /* Unreferenced: the event's camera track data/evt/<event>/camera/<name>
+     * (0x20000 bytes at most) read into m_cameraData and created as an
+     * effect of kind 0xd into m_eff; NULL or "" only frees the old one. */
+    void loadCamera(const char *name);                                   // ROR 0x001f8034
+    /* Unreferenced: the focus track data/evt/<event>/focus/<name> read
+     * whole into m_focusData and handed to MagScene::setFocusData. */
+    void loadFocus(const char *name);                                    // ROR 0x001f81a8
+    void add_imd_load_chr_id(int id) { m_actor[m_numActor++] = id; }     // ROR 0x00290944
+    void set_camera_eff_id(int id) { m_eff = id; }                       // ROR 0x00290964
 
     ScenePlaySingle *m_single[0xb];   // ROR 0x04
     int              m_numSingle;     // ROR 0x30
@@ -408,10 +421,10 @@ struct ScenePlay : CmnITask
     int              m_frames;        // ROR 0x38
     int              m_3c;            // ROR 0x3c: the constructor's arg (0 from scenePlayStart)
     int              m_eff;           // ROR 0x40: the pack's effect (Obj176a3c), -1 none
-    void            *m_cameraData;    // ROR 0x44: loadCamera's buffer (unreferenced code, not written)
-    char             m_cameraPath[0x40]; // ROR 0x48
-    void            *m_focusData;     // ROR 0x88: loadFocus's buffer (unreferenced code, not written)
-    char             m_focusPath[0x40];  // ROR 0x8c
+    void            *m_cameraData;    // ROR 0x44: loadCamera's buffer
+    char             m_cameraPath[0x40]; // ROR 0x48: loadCamera's path
+    void            *m_focusData;     // ROR 0x88: loadFocus's buffer
+    char             m_focusPath[0x40];  // ROR 0x8c: loadFocus's path
     int              m_actor[0x10];   // ROR 0xcc: the models the scene loaded
     int              m_numActor;      // ROR 0x10c
     char             m_name[0x20];    // ROR 0x110
@@ -446,8 +459,24 @@ struct PLScenePlay : CmnITask
  * oid, {a2, word, chr}, a6). a3 is not read. TskMovePhysic passes chr 4
  * or 3 with word 0x15. */
 void scnChrRequest(int chr, u_int oid, int a2, int a3, int word, u_int chrOid, int a6); // ROR 0x001fac60
+/* Attacker oid hits the dog (only while the dog follows, inu mode 1, and
+ * Brown is not in state 10): LP less the damage, Brown's reaction by the
+ * damage's share of his max LP; words 0x25 / 0x2d react not. */
 void scnChrRequestDog(u_int oid, int word);                              // ROR 0x001fae14
+/* Attacker oid hits the PC (not in state class 9): LP less the damage and
+ * the hurt state by word (data 0x2feea0; 2: front 5 / back 4 by the
+ * attacker's side), or state 3 and a TskFrameFunc kind 0xe at 0 LP. */
 void scnChrRequestPC(u_int oid, int word);                               // ROR 0x001fb084
+/* The damage attacker deals target with attack word: the attacker's ST
+ * (param 0x1d) times the word's percent (random ranges per word), times
+ * its weapon's field 0x2b plus field 0x2a, less the target's DEF (field
+ * 0x1e) times 90..110 percent; at least 0. Kind 5 attackers deal field
+ * 0x2b times 70..100 percent times field 0x2a. */
+int  scnCalcDamage(u_int attacker, u_int target, int word);              // ROR 0x001fb624
+/* scnCalcDamage with the PC as the attacker (mag/maglifepc2.cpp). */
+int  scnCalcPcDamage(u_int target, int word);                            // ROR 0x001fb5d4
+/* The game heap's largest free chunk. Unreferenced. */
+int  scnGetMaxFreeMem(void);                                             // ROR 0x001fbba4
 /* Unless the achr of oid has flag 0x400: pauses its enemy, replaces its
  * task m_task[3] with a new TskDamage(oid, attacker, param, kind) and
  * creates effect kind 1 40 below it (scale 1.75 for kind 2, else 1). */
