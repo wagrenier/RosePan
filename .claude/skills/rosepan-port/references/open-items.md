@@ -122,7 +122,18 @@ follows it; reached stubs in run order):
      GamArea written but update 0x1dee78 (0x1db4 bytes, a stub in the file; its decompilation in
      work/tu/game_gamtrg.cpp/update_dec.txt). The New Game run (140 s) now reaches GamArea::update and
      GamMan::relinkObj and runs on to the end without the 10d access violation (black stage, the circle icon).
-  9. `unassigned@001d3b44` -- GamMan::relinkObj 0x1d5da0.
+  9. PARTIAL 2026-10-27: `game/gamman2.cpp` (pinned 0x1d3b44..0x1d84c8, was unassigned@001d3b44):
+     the object update list (relinkObj, queueObjUpdate), lookupFlagTable with the real table (the
+     picture book now reads row 0x1038; closing it adds item 0xa17, bit 0x29), isSeqPair0Pending, the
+     radius / bounds helpers and every secta query written. Left: checkMenuReq (+0x1d4370, 0x1d4540),
+     the hit walk 0x1d7c20 with 0x1d4b9c / 0x1d50a8 / testHitAt / placeAchr / 0x1d5610..0x1d5ec4, and
+     writeSaveData / readSaveData. **Open: 2 of 6 200 s runs this session died with an access violation
+     right after the book closes (~frame 6060; the last first-hit stubs are i3cCastRay and
+     i3dPktDrawStrip): one with the full table, one with only the book's lookups forced to 0. The
+     other four reached the end (~6780), three of them with the full table.** Intermittent and seen
+     with both variants, so likely an older race, not this TU; the two ROSEPAN_CRASH_LOG=1 runs did
+     not crash, and gdbrun never boots here (the options.txt loop from the start). Next time it
+     happens, rerun with build.py --env ROSEPAN_CRASH_LOG=1 until it faults and addr2line the stack.
   Also reached, lower: EmyManager::resetWork, Obj176a3c::createEff (the effect manager in
   unassigned@00164fc0), chrMtnMove, MagLifePC / MagLifeBwn::reset, i3rCopyClipSphere /
   i3rReplaceStqMapEntity. Re-assess the order from the reached stubs after each of 4..6.

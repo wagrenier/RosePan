@@ -10139,17 +10139,35 @@
   "was": "FUN_001d44e4",
   "why": "1 when m_seqPair[0] (system call 0x35, +0x222c4) has both words, global 100 equals global 0x65, and sys flag 0x8000 is clear; MnuPBook::processPad's close sets bit 0x2000000 of bit word 1 from it"
  },
+ "001d4730": {
+  "name": "GamMan::sortQuadCorners",
+  "tag": "ror-inferred",
+  "was": "FUN_001d4730",
+  "why": "fitObjBounds' helper: swaps x/z corner pairs of the param 0x1003 quad when both x and z are smaller, then swaps corners 2 and 3"
+ },
  "001d480c": {
   "name": "GamMan::fitObjBounds",
   "tag": "ror-inferred",
   "was": "FUN_001d480c",
   "why": "the object's corner quad (param 0x1003) recentred (0x1d05f4 / 0x1d4730), the position moved to its centre, then param 0x18 set to shape 4 with the radius = the larger x / z extent; native 151 case 0x34 when the shape word is 1"
  },
+ "001d49d0": {
+  "name": "GamMan::setObjRadius",
+  "tag": "ror-inferred",
+  "was": "FUN_001d49d0",
+  "why": "getObjParam(oid, 0x18), shape word = 4, radius +0x10 = f12, setObjParam(oid, 0x18) on g_gamMan: the setter of getObjRadius's shape 4"
+ },
  "001d4a3c": {
   "name": "GamMan::getObjRadius",
   "tag": "ror-inferred",
   "was": "FUN_001d4a3c",
   "why": "param 0x18's shape word picks the radius: 0 -> 0, 1 -> 17, 2 -> 25, 3 -> 45, 4 -> its own float (+0x10); word 0 to *out when out; returns a float; native 151 case 0x36"
+ },
+ "001d4aec": {
+  "name": "GamMan::getObjKeepRadius",
+  "tag": "ror-inferred",
+  "was": "FUN_001d4aec",
+  "why": "getObjRadius's body over param 0x1005 (ObjStat::getColPrmKeep) instead of 0x18"
  },
  "001d544c": {
   "name": "GamMan::placeAchr",
@@ -10205,6 +10223,12 @@
   "was": "FUN_001d7eb8",
   "why": "tail-calls 0x1d83c0, which stores the list number into GamMan +0x22ab0; ObjStat::getPosSectaY selects the oid type 2 list around a cell lookup, then 0"
  },
+ "001d7ed4": {
+  "name": "GamMan::getSectaCellPtr",
+  "tag": "ror-inferred",
+  "was": "FUN_001d7ed4",
+  "why": "setSectaList(list), then cell no (0x90 each) of secta list list at bss 0x7811ac, NULL when the list is not loaded; getSectaCell without the position"
+ },
  "001d7f48": {
   "name": "GamMan::pickSectaCell",
   "tag": "ror-inferred",
@@ -10234,6 +10258,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d81f0",
   "why": "cells from / to (no * 0x90) of list into 0x17d298 with the out buffer a3; returns buffer +0x1fc (the cell count) or 0"
+ },
+ "001d83c0": {
+  "name": "GamMan::setSectaList",
+  "tag": "ror-inferred",
+  "was": "FUN_001d83c0",
+  "why": "stores a1 at GamMan +0x22ab0, the secta list index every secta query (findSectaCell, pickSectaCell, getObjSectaNo) sets before 0x17c340"
  },
  "001d83d0": {
   "name": "GamMan::lookupFlagTable",

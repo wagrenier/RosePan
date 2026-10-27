@@ -180,6 +180,11 @@ entries are marked **RoR** with the date.
   for late fields. Assert lower bounds only where the members before are complete; leave the rest to
   the EE offsets in the comments.
 
+- **A param struct smaller than what the getter copies** (2026-10-27): GamObjColli was declared 0x28
+  bytes (the fields the callers read), but ObjStat::getParam(0x18 / 0x1005) copies m_colPrm, 12 words
+  (0x30): five host callers overflowed their stack local by 8 bytes. Fix: size a getter's out struct
+  from the copy in the getter (memcpy size / the member's array), not from the fields used; GamObjColli
+  is 0x30 now.
 - **Ghidra's `ptr + n` on an `int *` is n words, not n bytes.** Symptom: a table walk reads
   `piVar1 = *(int **)(this + 0x110) + 0xc;` and the row size is taken as 12. Cause: the decompiler
   prints typed pointer arithmetic; on `int *` + 0xc is 0x30 bytes. Fix: read the row size from the

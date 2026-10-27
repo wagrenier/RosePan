@@ -11,6 +11,7 @@
  *  and the constructor. The destructor and openMenu are still stubs.
  * ======================================================================== */
 #include "mag/magscene.h"
+#include "game/gamstat.h"
 
 #include <math.h>
 #include <string.h>
@@ -508,15 +509,15 @@ void MagScene::playActorFootstep(int theNo)
     pos[1] = actor->m_trans[1];
     pos[2] = actor->m_trans[2];
     pos[3] = actor->m_trans[3];
-    MagSectorHit *hit[4] = {NULL, NULL, NULL, NULL};
+    GamSecta *hit[4] = {NULL, NULL, NULL, NULL};
     FUN_0017c340(&m_8542c, pos, hit, 0, 40.0f, 0.0f);
 
     int sndid = -1;
     if (hit[0])
     {
         MagSectorRec *sec = NULL;
-        if (m_8542c.m_0c && m_8542c.m_sectors)
-            sec = &m_8542c.m_sectors[hit[0]->m_sector];
+        if (m_8542c.m_list[0].m_num && m_8542c.m_list[0].m_sectors)
+            sec = &m_8542c.m_list[0].m_sectors[hit[0]->m_sector];
         if (sec)
             sndid = sec->m_snd;
     }
