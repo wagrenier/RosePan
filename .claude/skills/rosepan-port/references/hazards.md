@@ -53,6 +53,17 @@ entries are marked **RoR** with the date.
   carry `"dog/dogactor.h"`, `"bed/bedpfh.h"`: they say which headers a file includes, not which file the
   function is in. Only `.cpp` / `.c` strings anchor.
 
+- **Register-shuffling tail calls lose their arguments** (2026-10-27, i3dPktDrawStrip 0x21db18):
+  a stub that moves t0..t2 around and `j`s into a body decompiles as `void f(void) { body(); }`.
+  Read the asm (`ghidra.py asm`) of the wrapper and of a call site for the real argument list.
+- **vudis.py: MSCAL n is an instruction index, and entry 8 of the i3d VU1 image only dispatches**
+  to the address in TOPS+0.x; find the real program in the writer's UNPACK S-32 word (0x712 for
+  sprites). `--all` now prints every loaded run (it used to stop at the first gap).
+- **A 2D draw on the host hides a mesh the PS2 kept in front** (2026-10-27, the picture book):
+  symptom, the menu page sprite covers the book model; cause, the ROM Z-tests the page (TEST_1
+  0x5000d, GEQUAL) at the far plane while the replay order draws it after the model; fix, VU1
+  strips carry clip z (rosepan_i3d DrawStrip -> RosePan_RendererDrawImageTriangles2DDepth).
+
 ## Ghidra / GhidraMCP (HTTP on 127.0.0.1:8089)
 
 - **`program` must be in the query string.** In a POST body it is ignored and the write lands on the

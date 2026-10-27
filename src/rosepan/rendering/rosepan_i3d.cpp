@@ -65,7 +65,8 @@ enum RecordKind
     REC_TEXREGS,
     REC_MOVIE,
     REC_MODEL,
-    REC_CAMERA
+    REC_CAMERA,
+    REC_STRIP
 };
 
 struct Record
@@ -77,7 +78,8 @@ struct Record
     uint64_t        reg, value;     /* REC_REG */
     const uint64_t *regs;           /* REC_TEXREGS */
     int             movie[8];       /* REC_MOVIE: x0, y0, x1, y1, frame w / h, picture w / h */
-    size_t          index;          /* REC_MODEL / REC_CAMERA: into s_models / s_cameras */
+    size_t          index;          /* REC_MODEL / REC_CAMERA / REC_STRIP: into s_models /
+                                       s_cameras / s_strips */
 };
 
 struct ModelDraw
@@ -137,8 +139,8 @@ std::unordered_map<const uint64_t *, Binding> s_bindings;
 std::map<TexKey, const void *> s_textures;
 std::vector<ModelDraw> s_models;
 std::vector<Camera> s_cameras;
+std::vector<std::vector<RosePanI3dVu1Vertex>> s_strips;
 GsState s_state;
-unsigned s_vu1_count;
 bool s_logged_offscreen;
 bool s_logged_notex;
 bool s_logged_direct_tex0;
@@ -234,6 +236,57 @@ bool DrawsColour(const GsState &gs)
     return true;
 }
 
+/* The texture a primitive with TME draws with (the draw set's TEX
+ * registers); false when it cannot be drawn. */
+bool PrimTexture(const GsState &gs, bool tme, const void **out_texture, float *out_tw,
+                 float *out_th, int *out_decal, int *out_linear)
+{
+    const void *texture = nullptr;
+    float tw = 1.0f, th = 1.0f;
+    int decal = 0, linear = 1;
+    if (tme && gs.direct_tex0)
+    {
+        /* Drawn with the last bound texture it would paint that texture over
+         * the frame (the title's logo over the fader); left out until the
+         * module keeps frame-buffer copies. */
+        if (!s_logged_direct_tex0)
+        {
+            RosePan_LogPrintf("rosepan_i3d: textured primitive with a direct TEX0 (frame buffer) not drawn yet\n");
+            s_logged_direct_tex0 = true;
+        }
+        return false;
+    }
+    if (tme)
+    {
+        auto it = gs.tex_regs ? s_bindings.find(gs.tex_regs) : s_bindings.end();
+        if (it == s_bindings.end() || it->second.tex == nullptr)
+        {
+            if (!s_logged_notex)
+            {
+                RosePan_LogPrintf("rosepan_i3d: textured primitive without a texture object\n");
+                s_logged_notex = true;
+            }
+            return false;
+        }
+        const uint64_t tex0 = gs.tex_regs[2];
+        const uint64_t tex1 = gs.tex_regs[4];
+        texture = TextureFor(it->second, (int)((tex0 >> 34) & 1));
+        if (texture == nullptr)
+            return false;
+        tw = (float)(1u << ((tex0 >> 26) & 0xf));
+        th = (float)(1u << ((tex0 >> 30) & 0xf));
+        decal = ((tex0 >> 35) & 3) == 1;
+        linear = (int)((tex1 >> 5) & 1);
+    }
+
+    *out_texture = texture;
+    *out_tw = tw;
+    *out_th = th;
+    *out_decal = decal;
+    *out_linear = linear;
+    return true;
+}
+
 void DrawPrim(const Record &r)
 {
     const GsState &gs = s_state;
@@ -259,40 +312,8 @@ void DrawPrim(const Record &r)
     const void *texture = nullptr;
     float tw = 1.0f, th = 1.0f;
     int decal = 0, linear = 1;
-    if (tme && gs.direct_tex0)
-    {
-        /* Drawn with the last bound texture it would paint that texture over
-         * the frame (the title's logo over the fader); left out until the
-         * module keeps frame-buffer copies. */
-        if (!s_logged_direct_tex0)
-        {
-            RosePan_LogPrintf("rosepan_i3d: textured primitive with a direct TEX0 (frame buffer) not drawn yet\n");
-            s_logged_direct_tex0 = true;
-        }
+    if (!PrimTexture(gs, tme, &texture, &tw, &th, &decal, &linear))
         return;
-    }
-    if (tme)
-    {
-        auto it = gs.tex_regs ? s_bindings.find(gs.tex_regs) : s_bindings.end();
-        if (it == s_bindings.end() || it->second.tex == nullptr)
-        {
-            if (!s_logged_notex)
-            {
-                RosePan_LogPrintf("rosepan_i3d: textured primitive without a texture object\n");
-                s_logged_notex = true;
-            }
-            return;
-        }
-        const uint64_t tex0 = gs.tex_regs[2];
-        const uint64_t tex1 = gs.tex_regs[4];
-        texture = TextureFor(it->second, (int)((tex0 >> 34) & 1));
-        if (texture == nullptr)
-            return;
-        tw = (float)(1u << ((tex0 >> 26) & 0xf));
-        th = (float)(1u << ((tex0 >> 30) & 0xf));
-        decal = ((tex0 >> 35) & 3) == 1;
-        linear = (int)((tex1 >> 5) & 1);
-    }
 
     float xy[8], uv[8];
     uint8_t rgba[16];
@@ -370,6 +391,55 @@ void DrawPrim(const Record &r)
     default:
         break;
     }
+}
+
+/* A VU1 strip: its kicked vertices' triangles, in one draw. */
+void DrawStrip(const Record &r)
+{
+    const GsState &gs = s_state;
+    if (r.index >= s_strips.size() || !DrawsColour(gs) || (gs.offx == 0 && gs.offy == 0))
+        return;
+    const std::vector<RosePanI3dVu1Vertex> &v = s_strips[r.index];
+    const bool tme = (r.prim & 0x10) != 0;
+    const bool iip = (r.prim & 0x08) != 0;
+    const void *texture = nullptr;
+    float tw = 1.0f, th = 1.0f;
+    int decal = 0, linear = 1;
+    if (!PrimTexture(gs, tme, &texture, &tw, &th, &decal, &linear))
+        return;
+
+    std::vector<float> xy, uv, z;
+    std::vector<uint8_t> rgba;
+    for (size_t i = 2; i < v.size(); i++)
+    {
+        if (!v[i].kick)
+            continue;
+        for (size_t k = i - 2; k <= i; k++)
+        {
+            const RosePanI3dVu1Vertex &p = v[k];
+            const RosePanI3dVu1Vertex &c = iip ? p : v[i];
+            xy.push_back((p.x - (float)gs.offx / 16.0f) * kScaleX);
+            xy.push_back((p.y - (float)gs.offy / 16.0f) * kScaleY);
+            const float q = p.q != 0.0f ? p.q : 1.0f;
+            uv.push_back(p.s / q);
+            uv.push_back(p.t / q);
+            z.push_back(p.z);
+            for (int j = 0; j < 4; j++)
+                rgba.push_back(decal && j < 3 ? 0x80 : c.rgba[j]);
+        }
+    }
+    if (xy.empty())
+        return;
+    const int n = (int)(xy.size() / 2);
+    ApplyState(gs);
+    /* TEST_1: ZTE with ZTST GEQUAL / GREATER (mnuBase's 0x5000d puts its
+     * page on the far plane behind the book's models this way). */
+    const bool ztest = ((gs.test >> 16) & 1) != 0 && ((gs.test >> 17) & 3) >= 2;
+    if (tme)
+        RosePan_RendererDrawImageTriangles2DDepth(texture, xy.data(), uv.data(), rgba.data(),
+                                                  z.data(), n, linear, ztest);
+    else
+        RosePan_RendererDrawSolidTriangles2D(xy.data(), rgba.data(), n);   /* no depth yet */
 }
 
 /* The smallest power of two exponent covering n. */
@@ -604,6 +674,7 @@ void RosePan_I3dBeginFrame(void)
     s_bindings.clear();
     s_models.clear();
     s_cameras.clear();
+    s_strips.clear();
     s_state = GsState();
 }
 
@@ -623,6 +694,7 @@ void RosePan_I3dReplay(const void *start, const void *end)
         case REC_PRIM:    DrawPrim(r); drew = true; break;
         case REC_MOVIE:   DrawMovie(r); drew = true; break;
         case REC_MODEL:   DrawModel(r); drew = true; break;
+        case REC_STRIP:   DrawStrip(r); drew = true; break;
         case REC_CAMERA:
             if (r.index < s_cameras.size())
                 RosePan_RendererSet3DViewProjection(s_cameras[r.index].view,
@@ -634,13 +706,17 @@ void RosePan_I3dReplay(const void *start, const void *end)
         RestoreState();
 }
 
-void RosePan_I3dRecordVu1(const void *at, const void *data, unsigned int qwc)
+void RosePan_I3dRecordVu1Strip(const void *at, unsigned int prim, const RosePanI3dVu1Vertex *v,
+                               int count)
 {
-    (void)at;
-    (void)data;
-    (void)qwc;
-    if (s_vu1_count++ == 0)
-        RosePan_LogPrintf("rosepan_i3d: VU1 strips reached; not drawn yet\n");
+    if (count < 3)
+        return;
+    Record r = {};
+    r.kind = REC_STRIP;
+    r.prim = prim & 0x7ff;
+    r.index = s_strips.size();
+    s_strips.emplace_back(v, v + count);
+    s_records[(uintptr_t)at] = r;
 }
 
 /* ---- the forced test ---- */

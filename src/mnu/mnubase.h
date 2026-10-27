@@ -137,11 +137,9 @@ struct MnuSprite
 {
     float m_x, m_y;             // ROR 0x00: the pivot within the picture
     float m_w, m_h;             // ROR 0x08: its size in screen pixels
-    /* The books' tables settle the order: +0x10 holds (0, 0, 1, 0.875) for
-     * a 512 x 448 page on a 512 x 512 texture, +0x20 (1, 1, 1, 1). The ROM
-     * hands +0x10 to 0x21e488 and +0x20 to 0x21e690, so those two names
-     * (i3dPktVu1Color / i3dPktVu1Sprite's uv) are likely swapped
-     * (open-items.md). */
+    /* The books' tables: +0x10 holds (0, 0, 1, 0.875) for a 512 x 448 page
+     * on a 512 x 512 texture, +0x20 (1, 1, 1, 1); the sprite microprogram
+     * reads +0x10 (i3dPktVu1Rect, VU1 0x3f1) as the rectangle. */
     float m_uv[4];              // ROR 0x10: its texture rectangle u0, v0, u1, v1
     float m_color[4];           // ROR 0x20: the sprite colour
     float m_angle;              // ROR 0x30: about z, radians

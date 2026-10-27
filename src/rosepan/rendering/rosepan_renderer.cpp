@@ -13250,6 +13250,50 @@ void RosePan_RendererDrawImageTriangles2D(const void *texture,
     (void)linear; /* QueueTriangleList always filters linearly (TEX1 0x60). */
 }
 
+void RosePan_RendererDrawImageTriangles2DDepth(const void *texture,
+                                              const float *xy,
+                                              const float *uv,
+                                              const unsigned char *rgba,
+                                              const float *ndc_z,
+                                              int vertex_count,
+                                              int linear,
+                                              int depth_test)
+{
+    const TextureEntry *entry = static_cast<const TextureEntry *>(texture);
+    std::vector<SpriteVertex> vertices;
+
+    if (entry == nullptr || entry->texture == nullptr || xy == nullptr ||
+        uv == nullptr || rgba == nullptr || ndc_z == nullptr || vertex_count <= 0 ||
+        (vertex_count % 3) != 0 || !g_frame_active || !EnsureRenderer())
+    {
+        return;
+    }
+
+    vertices.resize((size_t)vertex_count);
+    for (int i = 0; i < vertex_count; i++)
+    {
+        SpriteVertex &vertex = vertices[(size_t)i];
+
+        vertex.uv[0] = uv[i * 2 + 0];
+        vertex.uv[1] = uv[i * 2 + 1];
+        vertex.colour[0] = Ps2ColorToFloat(rgba[i * 4 + 0]);
+        vertex.colour[1] = Ps2ColorToFloat(rgba[i * 4 + 1]);
+        vertex.colour[2] = Ps2ColorToFloat(rgba[i * 4 + 2]);
+        vertex.colour[3] = Ps2AlphaToFloat(rgba[i * 4 + 3]);
+        vertex.position[0] = ScreenXToClip(xy[i * 2 + 0]);
+        vertex.position[1] = ScreenYToClip(xy[i * 2 + 1]);
+        /* Symmetric clip z (near -1, far +1): sprite.vert's MikuPanFixClipZ()
+         * turns it into the host's reversed Z, so far lands on the cleared
+         * depth and GEQUAL keeps whatever was drawn nearer. */
+        vertex.position[2] = ndc_z[i];
+        vertex.position[3] = 1.0f;
+    }
+
+    QueueTriangleList(entry->texture, entry->width, entry->height,
+                      vertices.data(), vertex_count, depth_test != 0, false);
+    (void)linear; /* QueueTriangleList always filters linearly (TEX1 0x60). */
+}
+
 static void BuildSolidVertex(SpriteVertex *vertex,
                              const float *position,
                              const unsigned char *rgba)

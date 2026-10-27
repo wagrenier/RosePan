@@ -455,36 +455,11 @@ int   dogModelHitNearest(I3cQuery *q, void *a1, const u_short *a2, int a3, float
 int   dogModelHitCylinder(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5); // ROR 0x001141c8
 
 
-/* Strips of count vertices with an optional matrix, STQ, colours and
- * positions (EE vectors); primitives unverified. */
-u_long   *i3dPktDrawStrip(u_long *pkt, sceVu0FVECTOR *matrix, int count, const void *stq,
-                          const void *colors, const void *xyz, int flags); // ROR 0x0021db18
-u_long   *i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
-                             const void *stq, const void *colors, const void *xyz,
-                             int flags);                                 // ROR 0x0021dd10
-u_long   *i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
-                              const void *color, const void *xyz, int flags); // ROR 0x0021e1d8
-/* The VU1 sprite packets (mnuBase's menu draw): the begin calls the
- * layer's view (and fog) and writes the sprite GIF template (mode 1 / 0:
- * 0x3026b0 / 0x3026c0); then per sprite a colour, a matrix and the
- * sprite's uv and position, each UNPACKed to VU1 (the sprite MSCALs its
- * microprogram); the end returns pkt. Not drawn on the host yet (the
- * native i3d module has no VU1 path). */
-u_long   *i3dPktBeginVu1Sprite(u_long *pkt, I3dLayer *layer, int mode);   // ROR 0x0021e5a0
-u_long   *i3dPktVu1Matrix(u_long *pkt, sceVu0FVECTOR *matrix);           // ROR 0x0021e428
-u_long   *i3dPktVu1Color(u_long *pkt, const float *color);               // ROR 0x0021e488
-u_long   *i3dPktVu1Sprite(u_long *pkt, const float *pos, const float *uv); // ROR 0x0021e690
-u_long   *i3dPktEndVu1Sprite(u_long *pkt);                               // ROR 0x0021e688
+/* The i3d VU1 packet writers (strips, sprites, wire shapes). */
+#include "i3d/i3dvu1pkt.h"
 /* The i3m pose player. */
 #include "i3d/i3mpose.h"
 
-/* Wire shapes as line strips (MagScene::drawStrips' debug records through
- * i3dLayerDrawWireSphere / Box / Shape). */
-u_long   *i3dPktDrawWireSphere(float radius, u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
-                               const float *center);                    // ROR 0x0021e6f8
-u_long   *i3dPktDrawWireBox(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
-                            const float *center, const void *extent, const void *color); // ROR 0x0021e8f8
-u_long   *i3dPktDrawWireShape(u_long *pkt, I3dLayer *layer, void *a, void *b, void *c); // ROR 0x0021e9f8
 
 
 /* bss 0x7812ac, just below GamMan: mainInitGame passes it to

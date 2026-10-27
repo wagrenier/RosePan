@@ -781,6 +781,18 @@ void RosePan_RendererDrawImageTriangles2D(const void *texture,
                                          const unsigned char *rgba,
                                          int vertex_count,
                                          int linear);
+/* As RosePan_RendererDrawImageTriangles2D with a depth per vertex in the
+ * symmetric clip convention (near -1, far +1) and the GS ZTST GEQUAL when
+ * `depth_test`: the native i3d module's VU1 primitives, which the PS2
+ * Z-tests against the meshes (rosepan_i3d.cpp DrawStrip). */
+void RosePan_RendererDrawImageTriangles2DDepth(const void *texture,
+                                              const float *xy,
+                                              const float *uv,
+                                              const unsigned char *rgba,
+                                              const float *ndc_z,
+                                              int vertex_count,
+                                              int linear,
+                                              int depth_test);
 void RosePan_RendererDrawLine2D(const float *xy,
                                const unsigned char *rgba,
                                float width);
