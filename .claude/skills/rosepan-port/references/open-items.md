@@ -95,8 +95,11 @@ follows it; reached stubs in run order):
      passes setLightNo / setLightFlags / setLightParam / copyLightSet with no assert; nothing on screen
      can show a light until a model draws (utlDrawI3r 0x106760, the i3m pose player). Open: addLight's
      loop walks nine sets (bit 8 would assert in addToSet) -- kept as the ROM has it.
-  7. `unassigned@00140030` / `unassigned@00143d3c` -- MagScene::loadTenkyuTex 0x140030 (the sky) /
-     setFog 0x143d7c, magBwnSeqCommand 0x144ae0.
+  7. `mag/magscenetenkyu.cpp` -- VERIFY 2026-10-27 (the sky: load / spin / rotate / drawSkyDome;
+     cannot show until utlDrawI3r 0x106760 draws). Left: `unassigned@00140030` now 0x140990..0x140b20
+     (initRecords853bc, the drawFocus packet helper) belongs to mag/magscenefocus.cpp with
+     unassigned@00140c68 -- define them together; `unassigned@00143d3c` -- setFog 0x143d7c,
+     magBwnSeqCommand 0x144ae0.
   8. `unassigned@001dd5e8` -- GamArea::addTrg / stopKind / clearKind (room triggers).
   9. `unassigned@001d3b44` -- GamMan::relinkObj 0x1d5da0.
   Also reached, lower: EmyManager::resetWork, Obj176a3c::createEff (the effect manager in

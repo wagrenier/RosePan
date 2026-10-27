@@ -715,6 +715,24 @@
    "status": "verify",
    "why": "Anchored by mag/magscenerender.cpp asserts from 0x139664 to MagScene::draw 0x13bcc0; starts where mag/magscene2.cpp's pin ends (0x139540: the tex-info wrappers and the draw-env/render-mode helpers draw calls) and ends before MagScene::parseOption 0x13c328 (mag/magsceneoption.cpp string); postDraw / setCameraTarget already live here."
   },
+  "mag/magscenetenkyu.cpp": {
+   "notes": "Verify: the 200 s run passes the film with no assert; the frame after it is black as before (no model draws: utlDrawI3r 0x106760 and the i3m pose player i3mGetPose / i3mPoseToMatrices / i3mGetLength are stubs), so the sky cannot show yet. First session whose screenshot shows a sky marks this done. PC deviations: drawSkyDome's ROM draw loop runs 4 slots from the first slot with a sky (reads past slot 3 when slot 0 is empty), the port stops at slot 3; the node block is sized from host types (ROM num x 0x44, scratch num x 0xb2 + 2 with 0x30-byte poses kept). unassigned@00140030 now covers only 0x140990..0x140b20 (initRecords853bc and the drawFocus packet helper FUN_00140990): define it together with unassigned@00140c68 as mag/magscenefocus.cpp.",
+   "ranges": [
+    [
+     "0013ff00",
+     "00140990"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 08:20",
+     "status": "verify",
+     "summary": "The sky (tenkyu): releaseTenkyuTex, loadTenkyuTex (tenkyu.rpk: optional I3D_I3M motion then the i3r), initTenkyuSpin (per-node y spin from the motion, named 0x140390), rotateTenkyu, drawSkyDome (layer 490, ambient-only light, far view, camera x/z). Pinned 0x13ff00..0x140990; MagSceneTenkyu +0x504..0x510 renamed m_sky / m_sky_mats / m_sky_spin / m_sky_num_node; 0x27a4e0 named strncasecmp."
+    }
+   ],
+   "status": "verify",
+   "why": "releaseTenkyuTex anchors the file; loadTenkyuTex (tenkyu.rpk), its node-rotation helper, rotateTenkyu and drawSkyDome all work on m_tenkyu (+0x29540, stride 0x520) slots 0x504..0x510; 0x140990 starts the focus code (packet helper for drawFocus, initRecords853bc fills m_focus +0x853bc)"
+  },
   "mag/magsystem.cpp": {
    "notes": "All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes are NOT polymorphic on the host: the EE vptr word at +0x94 is kept as padding (_ee_vptr) and setAttachNode (slot 10) / getNodeWorldMatrix (slot 17) are plain members; the first dog/ TU needing a virtual makes them virtual in the slot order listed in the header comments. DogEntity::setRotate / normalizeRotate sit in unassigned@0010f944 (stubs in lib/unassigned_stubs.cpp) but are dog code: define that range when a dog TU starts. Next reached stubs: MagScene ctor/init/start/initRender/update/draw, i3d (unassigned@00216ad0), BedPad, SndMan::update.",
    "ranges": [
@@ -1422,6 +1440,7 @@
   "unassigned@001056f8": {},
   "unassigned@0011262c": {},
   "unassigned@0012f008": {},
+  "unassigned@00140030": {},
   "unassigned@00164fc0": {},
   "unassigned@001810f4": {},
   "unassigned@00190a78": {},

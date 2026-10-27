@@ -199,11 +199,6 @@ int FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy)
     return {};
 }
 
-// stub of ROR 0x00140030
-void MagScene::loadTenkyuTex(int no, const BedPfh *pfh, i3dContext *ctx)
-{
-    ROSEPAN_STUB("MagScene::loadTenkyuTex", 0x00140030);
-}
 
 // stub of ROR 0x00143d7c
 void MagScene::setFog(const I3dFog *fog, int frames)
@@ -259,11 +254,6 @@ void MagScene::drawFocus(i3dContext *ctx, int frame)
     ROSEPAN_STUB("MagScene::drawFocus", 0x00140e88);
 }
 
-// stub of ROR 0x001406b8
-void MagScene::drawSkyDome(i3dContext *ctx)
-{
-    ROSEPAN_STUB("MagScene::drawSkyDome", 0x001406b8);
-}
 
 // stub of ROR 0x0021e1d8
 u_long   * i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
@@ -506,11 +496,6 @@ int MagScene::getMenuFadeOutTime()
     return {};
 }
 
-// stub of ROR 0x0014062c
-void MagScene::rotateTenkyu()
-{
-    ROSEPAN_STUB("MagScene::rotateTenkyu", 0x0014062c);
-}
 
 // stub of ROR 0x0013f130
 void MagScene::setGamWord54()
