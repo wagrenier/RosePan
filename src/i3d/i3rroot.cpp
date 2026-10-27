@@ -5,7 +5,7 @@
  *  relocation driver, and the root data's texture and node name lookups.
  *  See i3rroot.h for the file layout and the host's relative pointers.
  *  The item relocators and the per-type accessors / fixups around this
- *  file are still unassigned (unassigned@00228c08, unassigned@0022b4b8).
+ *  file are still unassigned (unassigned@00228c08; the I3D_I3M root is i3d/i3mroot.cpp).
  * ======================================================================== */
 #include "i3d/i3rroot.h"
 

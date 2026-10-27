@@ -14645,6 +14645,78 @@
   "was": "FUN_0022b4a0",
   "why": "(root, i): root data table +0x14 + i * 0x40, the twin of 0x22b488; no callers, role unknown"
  },
+ "0022b4b8": {
+  "name": "I3mRoot__CheckIdString",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b4b8",
+  "why": "memcmp of 8 bytes with I3D_I3M (rodata 0x303a68): 0 or 3, the twin of I3cRoot__CheckIdString 0x22ba20"
+ },
+ "0022b4e8": {
+  "name": "i3mRelocField",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b4e8",
+  "why": "adds a delta to a word unless it is 0; used by the i3m relocators with +root / -root"
+ },
+ "0022b500": {
+  "name": "I3mRoot__CheckVersion",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b500",
+  "why": "root word +8 == 0x20001 (every disc I3D_I3M has it)"
+ },
+ "0022b518": {
+  "name": "i3mRelocate",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b518",
+  "why": "id + version check, then while u16 +0x16 is nonzero adds the root to +0x1c..+0x28 and each node's name and keys; called by DogActor::loadMotion / unpack"
+ },
+ "0022b5f8": {
+  "name": "i3mUnrelocate",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b5f8",
+  "why": "the reverse of i3mRelocate: subtracts the root, sets u16 +0x16 to 1"
+ },
+ "0022b6f8": {
+  "name": "i3mGetNumNode",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b6f8",
+  "why": "u16 +0x14 after the id check, -1 otherwise; DogActor::get_nNode"
+ },
+ "0022b730": {
+  "name": "i3mGetNodeName",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b730",
+  "why": "word +0 of the 12-byte node i of the +0x1c table; DogActor::getNodeName"
+ },
+ "0022b790": {
+  "name": "i3mGetNodeIndexByName",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b790",
+  "why": "strcmp over the node names, -1 when absent; DogActor::i3mGetNodeIndexByName"
+ },
+ "0022b820": {
+  "name": "i3mGetNode",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b820",
+  "why": "the address of node i in the +0x1c table, 0 past the count"
+ },
+ "0022b878": {
+  "name": "i3mGetNodeNumKey",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b878",
+  "why": "u16 +6 of node i, 0xffff on failure; the key count (disc files: key times run 0..length)"
+ },
+ "0022b8d8": {
+  "name": "i3mGetNodeKeyTime",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b8d8",
+  "why": "float table +0x24 indexed by the first u16 of key k (stride root u16 +0x12) of node i; 0.0 on failure"
+ },
+ "0022b970": {
+  "name": "i3mGetNodeKeyTimes",
+  "tag": "ror-inferred",
+  "was": "FUN_0022b970",
+  "why": "writes every key time of node i to the output array; returns i, 0xffff on failure"
+ },
  "0022ba20": {
   "name": "I3cRoot__CheckIdString",
   "tag": "ror-inferred",
