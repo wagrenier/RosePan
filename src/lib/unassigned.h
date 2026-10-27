@@ -320,9 +320,11 @@ int   dogModelHitNearest(I3cQuery *q, void *a1, const u_short *a2, int a3, float
 int   dogModelHitCylinder(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5); // ROR 0x001141c8
 
 /* Draws an i3r model into layer with its node matrices (NULL: none) and
- * world matrix, the thread switch held off around it (0x21fe68). */
+ * world matrix, the thread switch held off around it (0x21fe68). opt is
+ * NULL or a record of a mask and five floats (DogActor::drawModel's
+ * {0x1f, v x5} for a model with an animated value; role unverified). */
 int   utlDrawI3r(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
-                 int flags);                                             // ROR 0x00106760
+                 const void *opt);                                       // ROR 0x00106760
 /* out.xy = in.xy turned by angle about z, out.z = in.z (unassigned@00106658). */
 void  utlVecRotZ(float angle, float *out, const float *in);              // ROR 0x00106a40
 /* v (4 floats) in place by a y rotation matrix of angle (wrapped once to
@@ -332,6 +334,10 @@ void  utlVecRotY(float angle, float *v);                                 // ROR 
 float utlVecLength3(const float *v);                                     // ROR 0x00106ad0
 /* Points the first word of each of the root's materials at disp. */
 int   utlSetI3rDispControl(I3rRoot *root, void *disp);                   // ROR 0x001067d8
+/* Node n's material's display record (its first word), NULL none; the
+ * set returns 0, 1 when the node has no material. */
+void *utlGetI3rNodeDisp(I3rRoot *root, int n);                           // ROR 0x001068d4
+int   utlSetI3rNodeDisp(I3rRoot *root, void *disp, int n);               // ROR 0x0010686c
 
 /* Strips of count vertices with an optional matrix, STQ, colours and
  * positions (EE vectors); primitives unverified. */
@@ -362,6 +368,14 @@ void      i3mGetPose(I3mRoot *root, void *pose, int flags, float t);     // ROR 
 /* Pose records to 0x40-byte node matrices through map (u16 count, then a
  * model node per motion node, 0xffff = none). */
 void      i3mPoseToMatrices(const void *pose, sceVu0FMATRIX *mats, const u_short *map); // ROR 0x0022f7a0
+/* One 0x30-byte pose record: out = a * t + b * (1 - t) (the rotation
+ * quaternion at +0x10 slerped). */
+void      i3mPoseLerp(float t, void *out, const void *a, const void *b); // ROR 0x0022f610
+/* Quaternions (x, y, z, w): from the euler angles rot (x, y, z), the
+ * product a * b, normalized. */
+void      i3mQuatFromEuler(float *out, const float *rot);                // ROR 0x00231198
+void      i3mQuatMul(float *out, const float *a, const float *b);        // ROR 0x00230470
+void      i3mQuatNormalize(float *out, const float *in);                 // ROR 0x00230660
 
 /* Wire shapes as line strips (MagScene::drawStrips' debug records through
  * i3dLayerDrawWireSphere / Box / Shape). */

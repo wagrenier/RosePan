@@ -4,6 +4,24 @@
 #include "common/rosepan_stub.h"
 #include "dog/dogentity.h"
 
+#include "dog/dogactor.h"
+
+// ──────────────────────────────────────────────────────────────────────
+// Written with dog/dogactor.cpp (2026-10-27; 0x10fcb4 is in
+// unassigned@0010f944, DogEntity's methods): DogActor::runMotionCmd's
+// blend-in turn.
+// ROR 0x0010fcb4
+
+void DogEntity::setAddRotY(float r)
+{
+    m_80[1] = r;
+    if (r < -DOG_PI)
+        m_80[1] = r + DOG_PI2;
+    if (m_80[1] >= DOG_PI)
+        m_80[1] -= DOG_PI2;
+    m_dirty = 1;
+}
+
 // ---- stubs (tools/reverse/stubgen.py) ----
 
 // stub of ROR 0x001102b4

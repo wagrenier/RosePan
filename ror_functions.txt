@@ -249,8 +249,8 @@
 /* 00106658 00000108 */ utlConvSndId(){}  // ror
 /* 00106760 00000078 */ utlDrawI3r(){}  // ror
 /* 001067d8 00000094 */ utlSetI3rDispControl(){}  // ror
-/* 0010686c 00000068 */ FUN_0010686c(){}
-/* 001068d4 0000004c */ FUN_001068d4(){}
+/* 0010686c 00000068 */ utlSetI3rNodeDisp(){}  // ror
+/* 001068d4 0000004c */ utlGetI3rNodeDisp(){}  // ror
 /* 00106920 00000090 */ FUN_00106920(){}
 /* 001069b0 00000090 */ FUN_001069b0(){}
 /* 00106a40 00000090 */ utlVecRotZ(){}  // ror
@@ -271,33 +271,28 @@
 /* 001070f8 000000d0 */ FUN_001070f8(){}
 /* 001071c8 00000080 */ FUN_001071c8(){}
 /* 00107248 00000134 */ utlVecToRot(){}  // ror
-/* 0010737c 000001e4 */ DogMotionBlend::reset(){}  // ror
 
 // *****************************************************************************
 // FILE -- dog/dogmotionblend.cpp
 // *****************************************************************************
 
+/* 0010737c 000001e4 */ DogMotionBlend::reset(){}  // ror
 /* 00107560 00000118 */ FUN_00107560(){}
 /* 00107678 00000264 */ FUN_00107678(){}
-/* 001078dc 000000f8 */ FUN_001078dc(){}
-/* 001079d8 00000458 */ FUN_001079d8(){}
-/* 00107e30 00000348 */ FUN_00107e30(){}
-/* 00108178 0000002c */ FUN_00108178(){}
+/* 001078dc 000000f8 */ DogMotionBlend::getNodeRate(){}  // ror
+/* 001079d8 00000458 */ DogMotionBlend::stepLoop(){}  // ror
+/* 00107e30 00000348 */ DogMotionBlend::step(){}  // ror
+/* 00108178 0000002c */ DogMotionBlend::stop(){}  // ror
 /* 001081a8 00000008 */ DogMotionBlend::getNo(){}  // ror
-/* 001081b0 00000278 */ FUN_001081b0(){}
+/* 001081b0 00000278 */ DogMotionBlend::getPose(){}  // ror
 /* 00108428 00000160 */ FUN_00108428(){}
-
-// *****************************************************************************
-// FILE -- (unassigned)
-// *****************************************************************************
-
 /* 00108588 000000d4 */ DogMotionBlend::DogMotionBlend(){}  // ror
-/* 00108660 00000014 */ FUN_00108660(){}
 
 // *****************************************************************************
 // FILE -- dog/dogactor.cpp
 // *****************************************************************************
 
+/* 00108660 00000014 */ DogActor::countBlendFrame(){}  // ror
 /* 00108674 000001a0 */ DogActor::allocPosture(){}  // ror
 /* 00108814 0000003c */ DogActor::freePosture(){}  // ror
 /* 00108850 000000ac */ DogActor::trimMotion(){}  // ror
@@ -307,7 +302,7 @@
 /* 00108a14 0000019c */ DogActor::getTrackKey(){}  // ror
 /* 00108bb0 000000e0 */ FUN_00108bb0(){}
 /* 00108c90 000005f4 */ DogActor::getRootMove(){}  // ror
-/* 00109284 000000c4 */ FUN_00109284(){}
+/* 00109284 000000c4 */ DogActor::getRootEndKey(){}  // ror
 /* 00109348 000002ec */ DogActor::getMotionMove(){}  // ror
 /* 00109634 000000e0 */ FUN_00109634(){}
 /* 00109714 0000014c */ DogActor::clear(){}  // ror
@@ -347,8 +342,8 @@
 /* 0010bbac 0000011c */ FUN_0010bbac(){}
 /* 0010bcc8 00000154 */ DogActor::getMotionEvent(){}  // ror
 /* 0010be1c 00000060 */ FUN_0010be1c(){}
-/* 0010be80 00000050 */ FUN_0010be80(){}
-/* 0010bed0 00000030 */ FUN_0010bed0(){}
+/* 0010be80 00000050 */ DogActor::stepMotionLoop(){}  // ror
+/* 0010bed0 00000030 */ DogActor::stepMotion(){}  // ror
 /* 0010bf00 00000008 */ DogActor::setParam1d8(){}  // ror
 /* 0010bf08 00000274 */ DogActor::setupAssignTbl(){}  // ror
 /* 0010c17c 000003ec */ DogActor::loadPackMotion(){}  // ror
@@ -356,7 +351,7 @@
 /* 0010cd5c 000002a0 */ DogActor::load(){}  // ror
 /* 0010cffc 000000ec */ DogActor::shareModel(){}  // ror
 /* 0010d0e8 000000e8 */ DogActor::getMotionLength(){}  // ror
-/* 0010d1d0 000001b8 */ FUN_0010d1d0(){}
+/* 0010d1d0 000001b8 */ DogActor::startMotionCmd(){}  // ror
 /* 0010d388 00000664 */ DogActor::runMotionCmd(){}  // ror
 /* 0010d9ec 0000002c */ DogActor::getMotionTime(){}  // ror
 /* 0010da18 00000034 */ FUN_0010da18(){}
@@ -366,16 +361,16 @@
 /* 0010dad8 0000003c */ DogActor::getMotionStep(){}  // ror
 /* 0010db18 0000001c */ FUN_0010db18(){}
 /* 0010db38 00000010 */ DogActor::isBlendIn(){}  // ror
-/* 0010db48 000001e8 */ FUN_0010db48(){}
-/* 0010dd30 00000224 */ FUN_0010dd30(){}
-/* 0010df54 000003d4 */ FUN_0010df54(){}
+/* 0010db48 000001e8 */ DogActor::getBlendInRate(){}  // ror
+/* 0010dd30 00000224 */ DogActor::getNodeBlendRate(){}  // ror
+/* 0010df54 000003d4 */ DogActor::updatePosture(){}  // ror
 /* 0010e328 00000084 */ FUN_0010e328(){}
 /* 0010e3ac 00000188 */ DogActor::drawModel(){}  // ror
 /* 0010e534 0000008c */ DogActor::drawShadow(){}  // ror
 /* 0010e5c0 000001f4 */ DogActor::draw(){}  // ror
 /* 0010e7b4 00000028 */ DogActor::saveRotOfsY(){}  // ror
-/* 0010e7dc 00000068 */ FUN_0010e7dc(){}
-/* 0010e848 000000e8 */ FUN_0010e848(){}
+/* 0010e7dc 00000068 */ DogActor::addBaseRotY(){}  // ror
+/* 0010e848 000000e8 */ DogActor::getBlendInOffset(){}  // ror
 /* 0010e930 0000007c */ DogActor::saveRootOffset(){}  // ror
 /* 0010e9ac 0000010c */ FUN_0010e9ac(){}
 /* 0010eab8 00000070 */ DogActor::getNodeWorldMatrix(){}  // ror
@@ -394,7 +389,7 @@
 /* 0010f298 00000044 */ DogActor::resetShadow(){}  // ror
 /* 0010f2dc 000000c8 */ DogActor::checkName(){}  // ror
 /* 0010f3a4 000000dc */ DogActor::setupEye(){}  // ror
-/* 0010f480 00000164 */ FUN_0010f480(){}
+/* 0010f480 00000164 */ DogActor::updateEye(){}  // ror
 /* 0010f5e4 00000128 */ DogActor::setEyeTex(){}  // ror
 /* 0010f70c 0000002c */ DogActor::eyeHold(){}  // ror
 /* 0010f73c 00000060 */ DogActor::eyeStart(){}  // ror
@@ -419,7 +414,7 @@
 /* 0010fc08 00000020 */ DogCamera::setLensScale(){}  // ror
 /* 0010fc28 00000054 */ FUN_0010fc28(){}
 /* 0010fc7c 00000038 */ DogEntity::setRotate(){}  // ror
-/* 0010fcb4 00000064 */ FUN_0010fcb4(){}
+/* 0010fcb4 00000064 */ DogEntity::setAddRotY(){}  // ror
 /* 0010fd18 0000025c */ DogEntity::makeLocalMatrix(){}  // ror
 /* 0010ff74 0000019c */ DogEntity::normalizeRotate(){}  // ror
 /* 00110114 00000030 */ DogEntity::getMatrixZ(){}  // ror
@@ -517,13 +512,13 @@
 /* 00115c60 0000008c */ DogModel::share(){}  // ror
 /* 00115cec 0000034c */ DogModel::release(){}  // ror
 /* 00116038 00000070 */ DogModel::getClipRadius(){}  // ror
+/* 001160a8 00000088 */ FUN_001160a8(){}
+/* 00116130 00000058 */ DogModel::stepAnim(){}  // ror
 
 // *****************************************************************************
 // FILE -- (unassigned)
 // *****************************************************************************
 
-/* 001160a8 00000088 */ FUN_001160a8(){}
-/* 00116130 00000058 */ FUN_00116130(){}
 /* 0011618c 00000058 */ FUN_0011618c(){}
 
 // *****************************************************************************
@@ -5567,7 +5562,7 @@
 /* 0022f478 00000054 */ FUN_0022f478(){}
 /* 0022f4d0 000000a0 */ FUN_0022f4d0(){}
 /* 0022f570 000000a0 */ FUN_0022f570(){}
-/* 0022f610 0000018c */ FUN_0022f610(){}
+/* 0022f610 0000018c */ i3mPoseLerp(){}  // lib-ctx
 /* 0022f7a0 000000cc */ i3mPoseToMatrices(){}  // ror
 /* 0022f870 0000005c */ FUN_0022f870(){}
 /* 0022f8d0 00000104 */ FUN_0022f8d0(){}
@@ -5578,13 +5573,13 @@
 /* 00230160 000000f4 */ FUN_00230160(){}
 /* 00230258 00000128 */ FUN_00230258(){}
 /* 00230380 000000ec */ FUN_00230380(){}
-/* 00230470 00000074 */ FUN_00230470(){}
+/* 00230470 00000074 */ i3mQuatMul(){}  // lib-ctx
 /* 002304e8 00000128 */ FUN_002304e8(){}
 /* 00230610 0000004c */ FUN_00230610(){}
-/* 00230660 00000028 */ FUN_00230660(){}
+/* 00230660 00000028 */ i3mQuatNormalize(){}  // lib-ctx
 /* 00230688 0000076c */ FUN_00230688(){}
 /* 00230df8 000003a0 */ FUN_00230df8(){}
-/* 00231198 00000104 */ FUN_00231198(){}
+/* 00231198 00000104 */ i3mQuatFromEuler(){}  // lib-ctx
 /* 002312a0 00000040 */ FUN_002312a0(){}
 /* 002312e0 000001e4 */ FUN_002312e0(){}
 /* 002314c8 00000a04 */ FUN_002314c8(){}

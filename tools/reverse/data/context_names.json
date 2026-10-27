@@ -491,6 +491,18 @@
   "was": "FUN_001067d8",
   "why": "points the first word of every material of the root at disp (0x22b0d0 count, 0x22b0e8 item, 0x22ac08 data); DogModel::loadPack passes its display control at +0x170"
  },
+ "0010686c": {
+  "name": "utlSetI3rNodeDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_0010686c",
+  "why": "stores disp into node n's material's first word; 0, 1 none"
+ },
+ "001068d4": {
+  "name": "utlGetI3rNodeDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_001068d4",
+  "why": "node n's material (0x22b0e8 / 0x22ac08) first word"
+ },
  "00106a40": {
   "name": "utlVecRotZ",
   "tag": "ror-inferred",
@@ -533,17 +545,53 @@
   "was": "FUN_0010737c",
   "why": "on the 0xe0 motion state: without records (+0x1c) clears all, else drops the motion and blend entries whose record lost its i3m; setMaxMotion calls it on +0x1e4 / +0x2c4"
  },
+ "001078dc": {
+  "name": "DogMotionBlend::getNodeRate",
+  "tag": "ror-inferred",
+  "was": "FUN_001078dc",
+  "why": "the first entry with a motion whose mask has the node: kind 2 gives (count + 1) / length, else 1.0"
+ },
+ "001079d8": {
+  "name": "DogMotionBlend::stepLoop",
+  "tag": "ror-inferred",
+  "was": "FUN_001079d8",
+  "why": "the wrapping twin of step (runMotionCmd's loop ops)"
+ },
+ "00107e30": {
+  "name": "DogMotionBlend::step",
+  "tag": "ror-inferred",
+  "was": "FUN_00107e30",
+  "why": "m_frame += speed * m_0c against i3mGetLength: 1 past the end, 2 before 0, 3 zero length; steps the entries"
+ },
+ "00108178": {
+  "name": "DogMotionBlend::stop",
+  "tag": "ror-inferred",
+  "was": "FUN_00108178",
+  "why": "speed +4 = 0 and each blend entry's speed (+0x30, 0x60, 0x90, 0xc0) = 0"
+ },
  "001081a8": {
   "name": "DogMotionBlend::getNo",
   "tag": "ror-inferred",
   "was": "FUN_001081a8",
   "why": "returns the first word of DogActor's m_motion (+0x1e4; dog/dogmotionblend.h asserts name m_motion), the current motion number"
  },
+ "001081b0": {
+  "name": "DogMotionBlend::getPose",
+  "tag": "ror-inferred",
+  "was": "FUN_001081b0",
+  "why": "i3mGetPose of the current motion at m_frame into the pose, then each entry's motion over the nodes of its 128-bit mask (lerp weight 0)"
+ },
  "00108588": {
   "name": "DogMotionBlend::DogMotionBlend",
   "tag": "ror-inferred",
   "was": "FUN_00108588",
   "why": "the DogActor constructor calls it on +0x1e4 and +0x2c4: no motion, 1/60, the four entries cleared"
+ },
+ "00108660": {
+  "name": "DogActor::countBlendFrame",
+  "tag": "ror-inferred",
+  "was": "FUN_00108660",
+  "why": "m_f4 + 1; draw / updatePosture call it after the posture, the blend-in rate reads m_f4 + 1"
  },
  "00108674": {
   "name": "DogActor::allocPosture",
@@ -592,6 +640,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00108c90",
   "why": "interpolates the current motion's record +8 track at t (utlFtoi15), wraps with loopflag; asserts theResult.m_w in -DOG_PI..DOG_PI"
+ },
+ "00109284": {
+  "name": "DogActor::getRootEndKey",
+  "tag": "ror-inferred",
+  "was": "FUN_00109284",
+  "why": "the current motion's root track (asserts m_motion_data), getTrackKey at getTrackNumFrame - 1, zeros without a track"
  },
  "00109348": {
   "name": "DogActor::getMotionMove",
@@ -719,6 +773,18 @@
   "was": "FUN_0010bcc8",
   "why": "the event bits of a motion (-1: the current one) between two frames; asserts m_motion_data"
  },
+ "0010be80": {
+  "name": "DogActor::stepMotionLoop",
+  "tag": "ror-inferred",
+  "was": "FUN_0010be80",
+  "why": "with records and a current motion calls 0x1079d8 on m_motion; runMotionCmd turns the heading on results 1 / 2 (a loop wrap)"
+ },
+ "0010bed0": {
+  "name": "DogActor::stepMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0010bed0",
+  "why": "with records calls 0x107e30 (clamped step, 1 end / 2 start / 3 zero length) on m_motion"
+ },
  "0010bf00": {
   "name": "DogActor::setParam1d8",
   "tag": "ror-inferred",
@@ -761,6 +827,12 @@
   "was": "FUN_0010d0e8",
   "why": "asserts theID >= 0 and m_motion_data[n].m_i3m_root; returns 0x22e958 of the motion's i3m root (its word +0x18)"
  },
+ "0010d1d0": {
+  "name": "DogActor::startMotionCmd",
+  "tag": "ror-inferred",
+  "was": "FUN_0010d1d0",
+  "why": "asserts theID >= 0, findMotionById, flags 1/4/8 (skip current, keep time, scale time), changeMotion at 1/60, sets +0x450"
+ },
  "0010d388": {
   "name": "DogActor::runMotionCmd",
   "tag": "ror-inferred",
@@ -797,6 +869,24 @@
   "was": "FUN_0010db38",
   "why": "(m_mode >> 1) & 1, the bit startMotionMode sets when m_1d8 > 0; role unverified"
  },
+ "0010db48": {
+  "name": "DogActor::getBlendInRate",
+  "tag": "ror-inferred",
+  "was": "FUN_0010db48",
+  "why": "m_mode bit 1: (m_f4 + 1) / m_interpolation clamped (asserts m_interpolation > 0, 0.0f <= r && r <= 1.0f) or the record's percentage curve; else 1.0"
+ },
+ "0010dd30": {
+  "name": "DogActor::getNodeBlendRate",
+  "tag": "ror-inferred",
+  "was": "FUN_0010dd30",
+  "why": "asserts theNode <= 128, the blend entries' node rate 0x1078dc, then the blend-in rate when it is 1.0"
+ },
+ "0010df54": {
+  "name": "DogActor::updatePosture",
+  "tag": "ror-inferred",
+  "was": "FUN_0010df54",
+  "why": "getPose into m_posture, per-node pose lerp with the previous pose, control node quaternion, i3mPoseToMatrices into m_mat_local, node scales, convertLocalToModel"
+ },
  "0010e3ac": {
   "name": "DogActor::drawModel",
   "tag": "ror-inferred",
@@ -820,6 +910,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0010e7b4",
   "why": "+0x424 (m_rot_ofs_y) = getRootRotY"
+ },
+ "0010e7dc": {
+  "name": "DogActor::addBaseRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_0010e7dc",
+  "why": "+0x3c4 (m_base_rotate y) += r wrapped once to -pi..pi"
+ },
+ "0010e848": {
+  "name": "DogActor::getBlendInOffset",
+  "tag": "ror-inferred",
+  "was": "FUN_0010e848",
+  "why": "isBlendIn: blends +0x420 (trans y save) into the root move's y and fades -+0x424 (rot ofs y) by 1 - rate; returns 1"
  },
  "0010e930": {
   "name": "DogActor::saveRootOffset",
@@ -905,6 +1007,12 @@
   "was": "FUN_0010f3a4",
   "why": "strstr of the model node names with \"eye\" -> +0x484 node, +0x480 its material; resets the eye words, eyeHold"
  },
+ "0010f480": {
+  "name": "DogActor::updateEye",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f480",
+  "why": "eye flag bit 0: counts +0x490 to +0x494, then the {3,2, 1,1, 1,0} setEyeTex sequence and a new utlRandRange(60, 90) period"
+ },
  "0010f5e4": {
   "name": "DogActor::setEyeTex",
   "tag": "ror-inferred",
@@ -964,6 +1072,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010fc7c",
   "why": "f12..f14 into +0x50..+0x58, wraps them (0x10ff74), dirty +0x90"
+ },
+ "0010fcb4": {
+  "name": "DogEntity::setAddRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_0010fcb4",
+  "why": "+0x84 (m_80 y) = r wrapped once, +0x90 dirty"
  },
  "0010fd18": {
   "name": "DogEntity::makeLocalMatrix",
@@ -1300,6 +1414,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00116038",
   "why": "returns +0x108, filling it from i3rCopyClipSphere when negative (dog/dogmodel.h assert)"
+ },
+ "00116130": {
+  "name": "DogModel::stepAnim",
+  "tag": "ror-inferred",
+  "was": "FUN_00116130",
+  "why": "+0x16c record: value +0xc += step +0x10, past +8 clamps or wraps by +8 - +4 per +0x14"
  },
  "001161e4": {
   "name": "DogTexInfo::getTexInfo",
@@ -16313,11 +16433,35 @@
   "was": "FUN_0022e960",
   "why": "for each node of the motion, samples its keys at time f12 into 0x30-byte pose records (flags a2)"
  },
+ "0022f610": {
+  "name": "i3mPoseLerp",
+  "tag": "lib-context",
+  "was": "FUN_0022f610",
+  "why": "VU0: dot of the two quaternions at +0x10, slerp (sin) or nlerp above 0.9, the rest lerped; weight t"
+ },
  "0022f7a0": {
   "name": "i3mPoseToMatrices",
   "tag": "ror-inferred",
   "was": "FUN_0022f7a0",
   "why": "turns 0x30-byte pose records (position, quaternion, scale) into 0x40-byte node matrices through a u16 node map (count first, 0xffff skip)"
+ },
+ "00230470": {
+  "name": "i3mQuatMul",
+  "tag": "lib-context",
+  "was": "FUN_00230470",
+  "why": "quaternion product of a and b into out"
+ },
+ "00230660": {
+  "name": "i3mQuatNormalize",
+  "tag": "lib-context",
+  "was": "FUN_00230660",
+  "why": "VU0 rsqrt of the dot, scale"
+ },
+ "00231198": {
+  "name": "i3mQuatFromEuler",
+  "tag": "lib-context",
+  "was": "FUN_00231198",
+  "why": "half-angle sin / cos of x, y, z into a quaternion"
  },
  "002324b8": {
   "name": "i3cCastSphere",

@@ -459,7 +459,7 @@ void DogModel::draw(I3dLayer *layer, const float *cam_rotate, const float *cam_t
     if (m_hide == 0)
     {
         ROR_ASSERT(I3D_OK == I3rRoot__CheckIdString( m_i3r_root )); /* 899 */
-        utlDrawI3r(layer, m_i3r_root, m_mat_model, m_matrix, 0);
+        utlDrawI3r(layer, m_i3r_root, m_mat_model, m_matrix, NULL);
     }
 }
 
@@ -472,7 +472,28 @@ void DogModel::drawUnitMatrix(I3dLayer *layer)
     sceVu0FMATRIX m;
     i3dMatUnit(m);
     ROR_ASSERT(I3D_OK == I3rRoot__CheckIdString( m_i3r_root )); /* 924 */
-    utlDrawI3r(layer, m_i3r_root, NULL, m, 0);
+    utlDrawI3r(layer, m_i3r_root, NULL, m, NULL);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Written with dog/dogactor.cpp (2026-10-27; 0x116130 sits in
+// unassigned@001160a8, past this file's last function, and reads only
+// DogModel's m_16c).
+// ROR 0x00116130
+
+void DogModel::stepAnim()
+{
+    DogModelAnim *anim = (DogModelAnim *)m_16c;
+    if (anim == NULL)
+        return;
+    anim->m_value += anim->m_step;
+    if (anim->m_end < anim->m_value)
+    {
+        if (anim->m_loop == 0)
+            anim->m_value = anim->m_end;
+        else
+            anim->m_value -= anim->m_end - anim->m_start;
+    }
 }
 
 // ROR 0x0011531c

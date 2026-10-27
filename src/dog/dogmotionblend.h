@@ -59,6 +59,18 @@ struct DogMotionBlend
     /* Without records: no motion, every entry cleared. With them: the
      * current motion and each entry whose record has no i3m any more. */
     void reset();                                                        // ROR 0x0010737c
+    /* The motion and every entry stopped (speed 0). */
+    void stop();                                                         // ROR 0x00108178
+    /* The current motion's pose at m_frame into pose (0x30-byte records),
+     * each entry's motion over the nodes of its mask; the node count. */
+    int  getPose(void *pose);                                            // ROR 0x001081b0
+    /* The entries' blend rate for node theNode (1.0 without one). */
+    float getNodeRate(int theNode);                                      // ROR 0x001078dc
+    /* m_frame += m_speed * m_0c, clamped: 1 at the end, 2 at the start,
+     * 3 zero length; the entries step too. */
+    int  step();                                                         // ROR 0x00107e30
+    /* The same, wrapping: 1 / 2 when it wrapped. */
+    int  stepLoop();                                                     // ROR 0x001079d8
 
     /* The record of motion n (the header's lines 122 / 123: two inlines
      * with the same checks; DogActor::setMotion uses both). Defined in

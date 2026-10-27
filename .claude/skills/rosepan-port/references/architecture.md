@@ -871,8 +871,34 @@ four floats, 1 six, 2 two, 3 three, 5/6 one), 8 bytes, then frames; getRootMove 
 y (+0x3c4) + m_rot_offset y (DogEntity +0x84, our m_80) + the root track's turn, unless m_mode bit
 1 (isBlendIn) gives m_rotate y. load: reset, mode 2 copies the pack (m_model_copy +0x1a4), slot 14
 loadPack(file 0) then allocMatrix, loadMotion(file 1, bank -1). The two loads (slots 14 / 15) end in
-setupEye (the first node named *eye*). Still stubbed: draw / drawModel / drawShadow, getMotionMove,
-getMotionEvent, runMotionCmd, setEyeTex, shareModel, checkName.
+setupEye (the first node named *eye*).
+
+The per-frame player (written 2026-10-27, second session): `runMotionCmd` 0x10d388 (MagScene::updateActors)
+runs the command list m_motion_cmd[8] +0x42c from m_motion_cmd_idx +0x44c (DOG_MAX_MOTION_CMD 8,
+asserted; +0x450 = the command started its motion, +0x428 = the last step's result). A word: op =
+bits 28..31 (1 jump to command op1, 2 play once then next, 3 loop and hold, 4 as 2 with a chance of
+bits 12..21 out of 1000), flags = bits 22..27 (1 look up first, 4 start at the current time, 8 scale
+it to the new length, 0x20 stop at the end and hold), op1 = bits 0..9 (a motion id or index). Ops
+0 / 5..15 do nothing, so a list must end in a jump or 0x20 (the ROM spins otherwise; the host gives up
+after a pass). Without a list, m_mode bit 0 steps the motion alone by m_motion_flags +0x3f0 (1 loop;
+else at the end 2 changes to the motion in +0x3f4, none of 1 / 2 / 4 stops). A loop wrap turns the
+heading by the root track's last key w (forward +, backward -). m_interpolation +0x1d8 (assert name)
+is the blend-in length: m_f4 +0xf4 counts frames, the rate is (m_f4 + 1) / m_interpolation, or a
+percentage per frame from the record's m_param curve when its first word equals m_interpolation;
+getBlendInOffset fades the saved trans-Y +0x420 and rot +0x424 into the new root. `draw` (slot 12)
+updates the posture every m_45c-th frame: DogMotionBlend::getPose into m_posture, per node a pose
+lerp with the previous pose by getNodeBlendRate, the control node (+0x3d4, flag +0x3d8) quaternion
+from the euler m_3e0 (set, or multiplied in), i3mPoseToMatrices into m_mat_local, setNodeScale's
+nodes (> 0) scaled, convertLocalToModel; then billboard / transform, `drawModel` (slot 19:
+utlDrawI3r with m_mat_model; the m_attention node's material points at the pulsing record +0x4a0
+for the draw; a model with m_16c (a DogModelAnim: value stepping between bounds) passes utlDrawI3r a
+{0x1f, value x5} record), and the root turn m_rot_y_aar into the heading. `drawShadow` (slot 20)
+draws m_i3r_root2 (the pack's file 2: the shadow model) when present. updateEye blinks: texture
+state 2 for 4 frames, 1, 0, then a new 60..90 frame period; setEyeTex points the eye material's
+entity 0 at m_eye_uv with v = {0, 0.3203, 0.6484}. checkName compares theName with the model pack's
+file 0 name up to its '.'. Still stubbed: getMotionMove, getMotionEvent, shareModel, setNodeScale,
+getNodeWorldMatrix / Pos; the DogMotionBlend sampler / steps (0x1081b0, 0x1078dc, 0x107e30,
+0x1079d8) and the i3m pose / quaternion ops (0x22f610, 0x231198, 0x230470, 0x230660).
 
 ## Modules (RoR's own source files)
 
