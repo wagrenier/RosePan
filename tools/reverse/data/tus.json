@@ -75,6 +75,17 @@
    "status": "verify",
    "why": "the four BedPfh methods between BedMemory (0x101718 clears 7 words, not BedPfh's 5) and BedPad::~BedPad 0x101aec; bed/bedpfh.cpp / bedpfh.h assert strings in the ctor and getFileName"
   },
+  "dog/dogactor.cpp": {
+   "notes": "Status partial: the 200 s New Game run passes the new load path with no DogActor assert and reaches frame 6840 like the HEAD baseline, but the screen is black after the film: DogActor::draw 0x10e5c0, drawModel 0x10e3ac and drawShadow are stubs, as are utlDrawI3r 0x106760 and the i3m pose player (unassigned@0022e840). Start there next (in run order: draw, runMotionCmd 0x10d388, checkName 0x10f2dc), then getMotionMove, getMotionEvent, setEyeTex, shareModel. Decisions: DogMotionBlend::DogMotionBlend 0x108588 / reset 0x10737c / getNo written in dog/dogmotionblend.cpp although their addresses sit in unassigned ranges; DogActor now has its ROM constructor 0x10eebc (unloaded actors start with m_mode -1); utlVecRotY 0x106bc8 is a stub. Trap fixed: GamMan::setPcAnim passed m_pcActor -1 (MagLifePC::setActor is a stub) and loadPackMotion on m_actors[-1] overwrote MagScene::m_window, crashing MnuPBook::openWindows; PORT guard in MagScene::setActorAnim (hazards.md). Names: batch work/batches/dogactor_001.json (33 ror-inferred). The references were updated in this commit (architecture.md actor motions, hazards.md, open-items.md Decisions and Next up item 5).",
+   "sessions": [
+    {
+     "date": "2026-10-27 07:05",
+     "status": "partial",
+     "summary": "DogActor load path: load, loadPack/loadData overrides with setupEye, loadPackMotion, loadMotion, the motion records (setMaxMotion, trimMotion, findMotionById/ByName/BySuffix), posture block and node map, release paths (releaseModel, releaseMotion, releaseAll, releaseShared), root track sampler getRootMove and getRotY, setMotion/changeMotion, resetShadow, constructor and clear; DogMotionBlend constructor/reset/getNo and two i3r type-0x52 accessors written beside it; PORT guard in MagScene::setActorAnim for an unset PC actor"
+    }
+   ],
+   "status": "partial"
+  },
   "dog/doglightpool.cpp": {
    "notes": "TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark done when a screenshot shows a lit stage. Decisions: DogLightPool got a host constructor calling init (the ROM MagScene ctor calls it), no destructor (g_magSystem is static, the heap is gone by static destruction; ~MagScene calls term in the ROM). doglightpool.h lines 129..132 are the non-const getters, 140..143 their const twins, so createLight and getLightParam are const. DogLightBuffer::setupDesc 0x110578 in the ROM reads the counts from +0x5e0 / +0x600, past m_num at +0x5c0; nothing calls it, the port uses m_num (open-items.md). Spot cone angles use the ROM pi 0x40490fdc. Still left near this file: unassigned@00112b08 (three small light-desc helpers) belongs to dog/doglight.cpp.",
    "ranges": [

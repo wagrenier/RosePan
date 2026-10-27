@@ -601,6 +601,11 @@ void MagScene::releaseActor(u_int theN)
 
 void MagScene::setActorAnim(int no, int a, int b)
 {
+    /* PORT: GamMan::setPcAnim passes m_pcActor, still -1 while
+     * MagLifePC::setActor is a stub; m_actors[-1] lies over the text
+     * windows (loadPackMotion's clears filled m_window, hazards.md). */
+    if (no < 0 || no >= 128)
+        return;
     m_actors[no].loadPackMotion("data/ch/pc/pc/MOTIONPK.RPK", b, a);
 }
 

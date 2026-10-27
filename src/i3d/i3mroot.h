@@ -40,7 +40,7 @@ struct I3mRoot
 {
     char    m_id[8];            // ROR 0x00: "I3D_I3M\0"
     u_int   m_version;          // ROR 0x08: I3M_VERSION
-    u_char  _0c[4];             // ROR 0x0c: not read here
+    int     m_size;             // ROR 0x0c: the i3m's own size (DogActor::loadMotion: a root track follows when its pack file is longer)
     u_short m_10;               // ROR 0x10: not read here (31 in the files seen)
     u_short m_key_stride;       // ROR 0x12: u16 per key in a node's key array
     u_short m_num_node;         // ROR 0x14: i3mGetNumNode

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 01:24 at commit `ac4bce6` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 07:05 at commit `9bff920` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-27 01:24 at commit `ac4bce6` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6827**, named **4673** (68%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 248, ror-inferred 3075
-- context-name ledger: 3363 entries; overrides of wrong library matches: 5
+- game functions: **6827**, named **4706** (69%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 248, ror-inferred 3108
+- context-name ledger: 3396 entries; overrides of wrong library matches: 5
 - placed in a source file: 3994/6827 in 107 files
 
 Least-named game-code regions (64 KB blocks):
@@ -24,13 +24,13 @@ Least-named game-code regions (64 KB blocks):
 | `00140000` | 39/293 (13%) | mag/magloader.cpp, mag/magsceneif.cpp, mag/magscenefocus.cpp |
 | `00170000` | 52/251 (21%) | snd/sndman.cpp, wrd/wrdsrv.cpp |
 | `00120000` | 75/283 (27%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
-| `00100000` | 129/301 (43%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmisc.cpp |
 | `001b0000` | 41/81 (51%) | game/gamfile.cpp, mnu/mnuSelectLanguage.cpp |
+| `00100000` | 160/301 (53%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmisc.cpp |
 | `00110000` | 149/255 (58%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglifepc.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3095**; stubs: **350**
+- reconstructed RoR functions: **3147**; stubs: **332**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -39,11 +39,11 @@ Least-named game-code regions (64 KB blocks):
 | `src/bed/bedpfh.cpp` | 4 | 0 |
 | `src/bed/bedsubmode.cpp` | 0 | 2 |
 | `src/debug/motnamecnv0.cpp` | 0 | 2 |
-| `src/dog/dogactor.cpp` | 6 | 30 |
+| `src/dog/dogactor.cpp` | 53 | 12 |
 | `src/dog/dogentity.cpp` | 0 | 3 |
 | `src/dog/doglightpool.cpp` | 29 | 0 |
 | `src/dog/dogmodel.cpp` | 23 | 0 |
-| `src/dog/dogmotionblend.cpp` | 0 | 1 |
+| `src/dog/dogmotionblend.cpp` | 3 | 0 |
 | `src/dog/dogtexinfo.cpp` | 16 | 0 |
 | `src/game/gamfile.cpp` | 18 | 0 |
 | `src/game/gamman.cpp` | 411 | 0 |
@@ -60,10 +60,10 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
 | `src/i3d/i3mroot.cpp` | 12 | 0 |
-| `src/i3d/i3ritem.cpp` | 158 | 0 |
+| `src/i3d/i3ritem.cpp` | 160 | 0 |
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 239 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 240 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
@@ -120,9 +120,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 166 TUs: todo 113, partial 13, verify 54, done 9
+- 166 TUs: todo 110, partial 16, verify 54, done 9
 - next: **dog/dogactor.cpp** (pinned in the queue)
 - pinned queue: unassigned@0022b4b8, unassigned@0021a3e8, dog/dogactor.cpp, mag/magscenelight.cpp, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
+- partial: `dog/dogactor.cpp` 53/146 -- Status partial: the 200 s New Game run passes the new load path with no DogActor assert and reaches frame 6840 like the HEAD baseline, but the screen is black a
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -181,6 +182,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 07:05 `dog/dogactor.cpp` partial: DogActor load path: load, loadPack/loadData overrides with setupEye, loadPackMotion, loadMotion, the motion records (setMaxMotion, trimMotion, findMotionById/By
 - 2026-10-27 01:24 `mnu/mnupbook.cpp` verify: All of MnuDiary: processPad and its six steps, queueFiles, startTurns, openWindows, updatePad, updateSheets, setSheetTex, setBaseTex, turnSheet, draw, setDrawSe
 - 2026-10-27 00:52 `mnu/mnupbook.cpp` partial: All of MnuPBook: processPad and its six steps, queuePages, startTurns, openWindows, updatePad, updateSheets, setSheetTex, turnSheet, canTurn, isTurning, queueSh
 - 2026-10-26 23:48 `mnu/mnubase.cpp` verify: mnuBase and the mnu pool written: all 38 functions (pool init/term/alloc/free/merge, setupWork, term, addFile, openPack/closePack, the loader updateLoad for i3r
@@ -188,11 +190,9 @@ Recent sessions:
 - 2026-10-26 22:59 `i3d/i3rmodel.cpp` verify: Pinned unassigned@0021a3e8 as i3d/i3rmodel.cpp 0x21a3e8..0x21ac80 and wrote all 14 functions: i3rBuildPackets / i3rClearPackets, i3rAssignTex, i3rCopyLocalBasic
 - 2026-10-26 22:40 `i3d/i3mroot.cpp` verify: I3D_I3M motion file root written (12 functions, 0x22b4b8..0x22ba20): id and version checks, relocators, node count / name / index-by-name, node and key-time loo
 - 2026-10-26 22:24 `i3d/i3croot.cpp` verify: I3D_I3C collision root written whole in the i3ritem session (same slice): id check, i3cRelocate / i3cUnrelocate with the part-tree relocators, node / group coun
-- 2026-10-26 22:24 `i3d/i3ritem.cpp` partial: Split unassigned@0022b4b8: pinned i3d/i3ritem.cpp 0x22c1f8..0x22e840 and i3d/i3croot.cpp 0x22ba20..0x22c1f8. i3ritem.cpp: i3rItemFindChild, i3rIsItemType, i3rIt
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `dog/dogactor.cpp` | partial | 6/30/146 | 31.5 | 116 | 9 |
 | `unassigned@001d3b44` | partial | 2/18/37 | 18.4 | 105 | 5 |
 | `unassigned@00143d3c` | todo | 0/33/602 | 129.5 | 96 | 6 |
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 75 | 6 |
@@ -200,31 +200,30 @@ Recent sessions:
 | `unassigned@00164fc0` | todo | 0/15/381 | 101.3 | 63 | 7 |
 | `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 57 | 5 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
-| `unassigned@0010f944` | partial | 2/6/12 | 2.2 | 50 | 6 |
+| `unassigned@0010f944` | partial | 2/6/12 | 2.2 | 51 | 6 |
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
 | `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 44 | 5 |
+| `unassigned@0021c960` | todo | 0/11/21 | 8.4 | 44 | 6 |
 | `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
 | RoR addr | name | call sites | provenance | state | inferred file |
 |---|---|---|---|---|---|
-| `001be734` | FileReadReq::FileReadReq | 60 | ror | missing | game/gamfile.cpp |
-| `001be2dc` | FileReader::~FileReader | 25 | ror | missing | game/gamfile.cpp |
-| `001be2cc` | FileReader::FileReader | 22 | ror | missing | game/gamfile.cpp |
+| `001be734` | FileReadReq::FileReadReq | 61 | ror | missing | game/gamfile.cpp |
+| `001be2dc` | FileReader::~FileReader | 27 | ror | missing | game/gamfile.cpp |
+| `001be2cc` | FileReader::FileReader | 23 | ror | missing | game/gamfile.cpp |
 | `002155f4` | FUN_002155f4 | 22 | - | missing | - |
 | `0013f980` | MagScene::setLightParam | 15 | ror | stub | mag/magscenelight.cpp |
-| `0010aa9c` | DogActor::findMotionByName | 13 | ror | stub | dog/dogactor.cpp |
-| `0010a650` | DogActor::getRotY | 13 | ror | stub | dog/dogactor.cpp |
 | `001832e8` | msgGetSysText | 12 | ror | stub | - |
 | `001d83d0` | GamMan::lookupFlagTable | 12 | ror | stub | - |
 | `001d4a3c` | GamMan::getObjRadius | 12 | ror | stub | - |
 | `001874f4` | MsgManSet::setMessage | 11 | ror | stub | - |
 | `00187464` | MsgManSet::close | 11 | ror | stub | - |
+| `0010ff74` | DogEntity::normalizeRotate | 10 | ror | stub | - |
 | `001fccf4` | NagaChunk::find | 10 | ror | stub | - |
 | `0018741c` | MsgManSet::open | 10 | ror | stub | - |
 | `001e0c2c` | GamArea::ctl_trg_flg | 10 | ror | stub | - |
-| `0010ff74` | DogEntity::normalizeRotate | 9 | ror | stub | - |
 | `001fcdb8` | NagaChunk::getData | 9 | ror | stub | - |
 | `0013fb3c` | MagScene::copyLightSet | 9 | ror | stub | mag/magscenelight.cpp |
 | `001d5da0` | GamMan::relinkObj | 9 | ror | stub | - |
@@ -247,6 +246,8 @@ Recent sessions:
 | `001d7b08` | GamMan::getObjSectaNo | 6 | ror | stub | - |
 | `0022a988` | FUN_0022a988 | 6 | - | missing | - |
 | `0022a978` | FUN_0022a978 | 6 | - | missing | - |
-| `0010a038` | DogActor::addTrans | 6 | ror | stub | dog/dogactor.cpp |
 | `001dd5e8` | GamArea::addTrg | 5 | ror | stub | - |
+| `001d544c` | GamMan::placeAchr | 5 | ror | stub | - |
+| `001874ac` | MsgManSet::update | 5 | ror | stub | - |
+| `0018330c` | MsgMan::MsgMan | 5 | ror | missing | msg/msgman.cpp |
 

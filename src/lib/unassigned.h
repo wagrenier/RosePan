@@ -325,6 +325,9 @@ int   utlDrawI3r(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
                  int flags);                                             // ROR 0x00106760
 /* out.xy = in.xy turned by angle about z, out.z = in.z (unassigned@00106658). */
 void  utlVecRotZ(float angle, float *out, const float *in);              // ROR 0x00106a40
+/* v (4 floats) in place by a y rotation matrix of angle (wrapped once to
+ * -pi..pi; sceVu0RotMatrixY / ApplyMatrix). DogActor::getRootMove. */
+void  utlVecRotY(float angle, float *v);                                 // ROR 0x00106bc8
 /* sqrt(x * x + y * y + z * z) of v. */
 float utlVecLength3(const float *v);                                     // ROR 0x00106ad0
 /* Points the first word of each of the root's materials at disp. */
