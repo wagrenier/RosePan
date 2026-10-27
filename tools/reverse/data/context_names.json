@@ -491,6 +491,18 @@
   "was": "FUN_001067d8",
   "why": "points the first word of every material of the root at disp (0x22b0d0 count, 0x22b0e8 item, 0x22ac08 data); DogModel::loadPack passes its display control at +0x170"
  },
+ "00106a40": {
+  "name": "utlVecRotZ",
+  "tag": "ror-inferred",
+  "was": "FUN_00106a40",
+  "why": "out.xy = in.xy rotated by angle f12 (cos/sin), out.z = in.z"
+ },
+ "00106ad0": {
+  "name": "utlVecLength3",
+  "tag": "ror-inferred",
+  "was": "FUN_00106ad0",
+  "why": "sqrt(x*x + y*y + z*z), sqrtf on a NaN"
+ },
  "00106db0": {
   "name": "utlNormalize3",
   "tag": "ror-inferred",
@@ -5711,6 +5723,66 @@
   "was": "FUN_00192d60",
   "why": "mnuBase (vtable 0x2e4640, vptr +0x10c) term"
  },
+ "00192e94": {
+  "name": "mnuBase::pushCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_00192e94",
+  "why": "GamMan::pushCamera, resets the scene camera (dirty, zero translation and rotation), sets its lens angle (f13), keeps the view far at +0x108 and sets a new one (f12); popCamera undoes it"
+ },
+ "00192f3c": {
+  "name": "mnuBase::popCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_00192f3c",
+  "why": "MagScene::setViewFar(+0x108) then GamMan::popCamera: undoes pushCamera"
+ },
+ "00192f68": {
+  "name": "mnuBase::beginDraw",
+  "tag": "ror-inferred",
+  "was": "FUN_00192f68",
+  "why": "copies the transformed camera matrix to +0xc0, the far-plane screen size to +0x100/+0x104, runs vslot 7 (draw set), opens a layer set and starts a VU1 sprite packet at +0xb0; called first by every menu draw"
+ },
+ "001930f8": {
+  "name": "mnuBase::endDraw",
+  "tag": "ror-inferred",
+  "was": "FUN_001930f8",
+  "why": "ends the VU1 sprite packet at +0xb0 and the layer set, clears +0xb0/+0xac; called last by every menu draw"
+ },
+ "00193140": {
+  "name": "mnuBase::setDrawSet",
+  "tag": "ror-inferred",
+  "was": "FUN_00193140",
+  "why": "vslot 7: numbers the loaded texture slots, finds/sets the layer draw set for them (+0xac)"
+ },
+ "00193210": {
+  "name": "mnuBase::useTex",
+  "tag": "ror-inferred",
+  "was": "FUN_00193210",
+  "why": "i3dDrawSetUseTex(+0xac, texture slot n's draw-set index) then i3dPktRefTexRegs into the packet at +0xb0"
+ },
+ "00193258": {
+  "name": "mnuBase::drawSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_00193258",
+  "why": "builds a matrix from a 2D rect (x, y, w, h, colour +0x10, uv +0x20, angle +0x30) at screen x/y in f12/f13 and writes a VU1 sprite into +0xb0"
+ },
+ "001935c4": {
+  "name": "mnuBase::drawModelRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001935c4",
+  "why": "builds a matrix from rotation (ZXY), scale and a position, then drawModel"
+ },
+ "0019368c": {
+  "name": "mnuBase::drawModel",
+  "tag": "ror-inferred",
+  "was": "FUN_0019368c",
+  "why": "draws model slot n with utlDrawI3r; with a motion slot, poses it at a frame first (i3m pose, matrices, local-to-model)"
+ },
+ "001937c0": {
+  "name": "mnuBase::toView",
+  "tag": "ror-inferred",
+  "was": "FUN_001937c0",
+  "why": "screen (512x448, centre 256/224) to view-plane coordinates through +0x100/+0x104"
+ },
  "0019381c": {
   "name": "mnuBase::lowerVolume",
   "tag": "ror-inferred",
@@ -5741,11 +5813,101 @@
   "was": "FUN_0019397c",
   "why": "appends (name, kind, arg) to the 0x30-byte file list at +0x18 unless an entry with the same kind & 0xf and arg is there or the list is full"
  },
+ "00193a1c": {
+  "name": "mnuBase::updateLoad",
+  "tag": "ror-inferred",
+  "was": "FUN_00193a1c",
+  "why": "the file loader each processPad polls: finishes the read of the head file row (kind 1 i3r model, 2 i3m motion, 4 TIM2 texture into slots), pops it, starts the next row's read from the pack"
+ },
+ "00193d1c": {
+  "name": "mnuBase::cancelFile",
+  "tag": "ror-inferred",
+  "was": "FUN_00193d1c",
+  "why": "removes the queued file row of kind/arg; the head row (being read) is flagged 8 instead"
+ },
+ "00193dfc": {
+  "name": "mnuBase::cancelLoad",
+  "tag": "ror-inferred",
+  "was": "FUN_00193dfc",
+  "why": "drops all queued file rows but the head one and flags it 8 (discard when read)"
+ },
+ "00193e20": {
+  "name": "mnuBase::clearFile",
+  "tag": "ror-inferred",
+  "was": "FUN_00193e20",
+  "why": "frees file row n's buffer and empties the row (arg -1)"
+ },
+ "00193e7c": {
+  "name": "mnuBase::readFile",
+  "tag": "ror-inferred",
+  "was": "FUN_00193e7c",
+  "why": "reads a named file of the open pack into a new pool block (waiting) and returns it, its size to *size"
+ },
  "00193f74": {
   "name": "mnuBase::freeData",
   "tag": "ror-inferred",
   "was": "FUN_00193f74",
   "why": "mnuFree of the argument when it is not NULL; the slot release helpers call it"
+ },
+ "00193f98": {
+  "name": "mnuBase::freeModel",
+  "tag": "ror-inferred",
+  "was": "FUN_00193f98",
+  "why": "frees model slot n (the i3r data and its work block) and zeroes the 0x20-byte slot"
+ },
+ "00193fec": {
+  "name": "mnuBase::bindMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00193fec",
+  "why": "fills model slot's node map: for each motion node the model node index by name (-1 none), count first"
+ },
+ "001940a4": {
+  "name": "mnuBase::findFreeModel",
+  "tag": "ror-inferred",
+  "was": "FUN_001940a4",
+  "why": "first model slot in lo..hi that is empty and not queued as a kind-1 file row, -1 none"
+ },
+ "00194148": {
+  "name": "mnuBase::copyModel",
+  "tag": "ror-inferred",
+  "was": "FUN_00194148",
+  "why": "copies model slot src's i3r data into free slot dst (unrelocate, copy, relocate both) with new work matrices and textures; 1 done"
+ },
+ "00194280": {
+  "name": "mnuBase::freeMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00194280",
+  "why": "frees motion slot n (kind-2 i3m data) and zeroes the 0x10-byte slot"
+ },
+ "00194370": {
+  "name": "mnuBase::freeTex",
+  "tag": "ror-inferred",
+  "was": "FUN_00194370",
+  "why": "releases texture slot n's DogTexInfo record and frees its TIM2"
+ },
+ "001943d8": {
+  "name": "mnuBase::isTexLoaded",
+  "tag": "ror-inferred",
+  "was": "FUN_001943d8",
+  "why": "texture slot n has data and a DogTexInfo record"
+ },
+ "00194404": {
+  "name": "mnuBase::findFreeTex",
+  "tag": "ror-inferred",
+  "was": "FUN_00194404",
+  "why": "first texture slot in lo..hi not loaded and not queued as a kind-4 file row, -1 none"
+ },
+ "001944d0": {
+  "name": "mnuInitPool",
+  "tag": "ror-inferred",
+  "was": "FUN_001944d0",
+  "why": "allocates the 0x100800-byte mnu pool from g_utlMemory into 0x29bfb4: a 128-entry block table, one free 1 MB block after it"
+ },
+ "00194548": {
+  "name": "mnuTermPool",
+  "tag": "ror-inferred",
+  "was": "FUN_00194548",
+  "why": "frees the mnu pool (0x29bfb4) back to g_utlMemory"
  },
  "00194588": {
   "name": "mnuAlloc",
@@ -5758,6 +5920,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00194688",
   "why": "clears the in-use bit of the 0x29bfb4 block whose address is the argument"
+ },
+ "001946e4": {
+  "name": "mnuMergeFree",
+  "tag": "ror-inferred",
+  "was": "FUN_001946e4",
+  "why": "merges adjacent free blocks of the mnu pool table; setupWork runs it before its allocation"
  },
  "001947a4": {
   "name": "MnuMap::MnuMap",
@@ -13481,6 +13649,36 @@
   "was": "FUN_0021e1d8",
   "why": "drawStrips type 2 and the sky packs' path records (pkt, layer, matrix, count, colour, xyz, flags); primitive role unverified"
  },
+ "0021e428": {
+  "name": "i3dPktVu1Matrix",
+  "tag": "ror-inferred",
+  "was": "FUN_0021e428",
+  "why": "DMA tag + UNPACK of 3 qwords at VU1 0x3ee: a matrix copy (i3dMatCopy2)"
+ },
+ "0021e488": {
+  "name": "i3dPktVu1Color",
+  "tag": "ror-inferred",
+  "was": "FUN_0021e488",
+  "why": "DMA tag + UNPACK of 1 qword at VU1 0x3f1: a vector copy (the sprite colour)"
+ },
+ "0021e5a0": {
+  "name": "i3dPktBeginVu1Sprite",
+  "tag": "ror-inferred",
+  "was": "FUN_0021e5a0",
+  "why": "calls the layer view (and fog), then a GIF tag template for sprites at VU1 0x3f4 (mode 1 / 0 picks 0x3026b0 / 0x3026c0); mnuBase::beginDraw"
+ },
+ "0021e688": {
+  "name": "i3dPktEndVu1Sprite",
+  "tag": "ror-inferred",
+  "was": "FUN_0021e688",
+  "why": "returns pkt unchanged; mnuBase::endDraw's pair to i3dPktBeginVu1Sprite"
+ },
+ "0021e690": {
+  "name": "i3dPktVu1Sprite",
+  "tag": "ror-inferred",
+  "was": "FUN_0021e690",
+  "why": "a DMA cnt of uv and position qwords UNPACKed to VU1 plus MSCAL 0x14: one VU1 sprite"
+ },
  "0021e6f8": {
   "name": "i3dPktDrawWireSphere",
   "tag": "ror-inferred",
@@ -15718,6 +15916,24 @@
   "tag": "ror-inferred",
   "was": "FUN_0022e508",
   "why": "slot 0x21 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x21 (offsets from the data start)"
+ },
+ "0022e958": {
+  "name": "i3mGetLength",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e958",
+  "why": "returns the i3m root's float at +0x18 (m_length)"
+ },
+ "0022e960": {
+  "name": "i3mGetPose",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e960",
+  "why": "for each node of the motion, samples its keys at time f12 into 0x30-byte pose records (flags a2)"
+ },
+ "0022f7a0": {
+  "name": "i3mPoseToMatrices",
+  "tag": "ror-inferred",
+  "was": "FUN_0022f7a0",
+  "why": "turns 0x30-byte pose records (position, quaternion, scale) into 0x40-byte node matrices through a u16 node map (count first, 0xffff skip)"
  },
  "002324b8": {
   "name": "i3cCastSphere",

@@ -2,7 +2,6 @@
  "queue": [
   "unassigned@0022b4b8",
   "unassigned@0021a3e8",
-  "mnu/mnubase.cpp",
   "mnu/mnupbook.cpp",
   "dog/dogactor.cpp",
   "mag/magscenelight.cpp",
@@ -740,12 +739,21 @@
    "why": "McdMan ctor 0x187724 .. hasSpace 0x18bb28 is one class; mcd/mcdman.cpp string at 0x187a28; 0x18761c calls MsgMan code (msg/), 0x18bb8c is SprMan::SprMan (spr/sprman.cpp)"
   },
   "mnu/mnubase.cpp": {
+   "notes": "Verify: the 200 s New Game run inits the picture book through this loader (setupWork, addFile, openPack read the pack with no file error) and stops in the stubs MnuPBook::processPad 0x1976b8 / draw 0x197f70, still black; nothing here can show until they are written. updateLoad is what processPad polls each frame. Host layouts: MnuFile/MnuModel/MnuMotion/MnuTex slots are host structs (pointers) carved from the pool by sizeof, MnuPoolBlock stays 16 bytes; mnuAlloc/mnuFree refuse a NULL pool (PORT), mnuFindPackFile answers -1 for a name the pack lacks (PORT). Draw path: drawSprite writes the ROM VU1 sprite packets (i3dPktBeginVu1Sprite 0x21e5a0, i3dPktVu1Color/Matrix/Sprite 0x21e488/0x21e428/0x21e690, end 0x21e688 in unassigned@0021c960, stubs) which the native i3d module cannot draw yet - it needs a VU1 sprite record (textured quad from the matrix and uv) before the book shows; drawModel needs i3mGetPose 0x22e960 / i3mPoseToMatrices 0x22f7a0 (unassigned@0022e840, stubs) and utlDrawI3r. MagScene::initRender/term now call mnuInitPool/mnuTermPool (were FUN_001944d0/FUN_00194548).",
    "ranges": [
     [
      "00192ac0",
      "001947a4"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-26 23:48",
+     "status": "verify",
+     "summary": "mnuBase and the mnu pool written: all 38 functions (pool init/term/alloc/free/merge, setupWork, term, addFile, openPack/closePack, the loader updateLoad for i3r/i3m/TIM2 rows, cancel/clear/readFile, model/motion/texture slot helpers, copyModel, bindMotion, camera push/pop, beginDraw/endDraw/setDrawSet/useTex/drawSprite/drawModel); 26 functions and 10 callees named (VU1 sprite packets, i3m pose, utlVecRotZ/Length3)"
+    }
+   ],
+   "status": "verify",
    "why": "mnuBase ctor/dtor/term and the shared menu helpers (2D buffer, file/texture slots, layer draw) every Mnu* class calls; ends where MnuMap::MnuMap starts"
   },
   "mnu/mnumap.cpp": {
