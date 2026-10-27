@@ -80,6 +80,10 @@ entries are marked **RoR** with the date.
 
 ## Functions Ghidra got wrong (the most common time sink in ReiPan)
 
+- **Ghidra chains a void callee's v0** (2026-10-26): i3rBuildPackets' decompilation feeds each
+  0x21fb50 call's "return" into the next, but the asm passes the same saved s2 (the buffer start)
+  every time and 0x21fb50 never sets v0. When a decompiled loop threads a value through calls,
+  read the asm for the argument register before porting the chain.
 - **The brief's class role can be wrong for an unnamed function; rtti.py is the authority**
   (2026-10-26): the tsk_chr.cpp brief listed FUN_001edd90 as TskMoveAdj's constructor, but
   `rtti.py --class TskMoveSecta` shows it is TskMoveSecta's exec (slot 4). Check the vtable slots

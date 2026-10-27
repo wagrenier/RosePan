@@ -508,9 +508,7 @@ struct MagScene
     MagViewParam   m_view[2];           // ROR 0x2aa10
     float          m_2aa80;             // ROR 0x2aa80: the camera angle the frustum was built for (-1 after initRender: rebuild)
     int            m_2aa84;             // ROR 0x2aa84: load sets 1 with a map's fog; role unknown
-    I3rStqMapEntity m_stq_map;          // ROR 0x2aa90: the sky's second model's STQ map
-    u_char         m_2aad0;             // ROR 0x2aad0: init sets 1; role unknown
-    u_char         m_2aad1;             // ROR 0x2aad1: init sets 3; role unknown
+    I3rStqMapEntity m_stq_map;          // ROR 0x2aa90: the sky's second model's STQ map (0x50; init sets +0x40 = 1, id 3)
     I3dFog         m_fog[4];            // ROR 0x2aae0: init clears [0] and copies it to the others
     int            m_fog_2ab60;         // ROR 0x2ab60: init zeroes it; role unknown
     int            m_fog_2ab64;         // ROR 0x2ab64: init zeroes it; role unknown

@@ -284,8 +284,8 @@ void MagScene::init()
     m_life_man.init();
     m_tex_info.init(0x100);
     m_tex_info.add((const I3dTexDesc *)s_shadow01_image, "shadow01");
-    m_2aad1 = 3;
-    m_2aad0 = 1;
+    m_stq_map.m_id = 3;                 /* ROR +0x2aad1 */
+    m_stq_map.m_40 = 1;                 /* ROR +0x2aad0 */
     for (int i = 0; i < 4; i++)
     {
         MagSceneTenkyu *t = &m_tenkyu[i];

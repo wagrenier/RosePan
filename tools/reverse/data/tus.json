@@ -475,6 +475,24 @@
    "status": "partial",
    "why": "the i3r item tree core: i3rItemFindChild, i3rIsItemType, the item relocators and the per-type data fixups of tables 0x2db4c8 / 0x2db360 with the per-type accessors between them; ends where the motion math (0x22e840, sinf) starts. Nine fixup pairs sit at 0x22a6c0..0x22aec0 (unassigned@00228c08) and are written here with the table"
   },
+  "i3d/i3rmodel.cpp": {
+   "notes": "Verify: nothing on screen reaches it yet. The 200 s New Game run still ends black after the film; DogActor::load 0x10cd5c (dog/dogactor.cpp) is the stub that keeps any model from loading, so it is the next TU on the 3D path. The first run that loads a model exercises i3rBuildPackets / i3rAssignTex / the node transforms; mark this done then. i3rBuildMeshPacket 0x21fb50 (unassigned@0021fb50, the DMA packet builders 0x21fb50..0x222f50) is a stub: it writes VIF / DMA packets, which the host never consumes, so the native draw module should read the mesh items (root child 2 path in i3rmodel.h) rather than port those packets. The ROM passes the same buffer start to every mesh (Ghidra's decompilation wrongly chains a return value; hazards.md). PORT: counted loops instead of the ROM's do-while (empty lists do nothing); a NULL STQ slot is skipped; i3rSetFarPtr logs when an outside object is too far for a 32-bit relative slot (open-items.md). The per-type accessors 0x22a890.. / 0x22abc0.. / 0x22b170 are inlined as I3rItem reads with callcheck comments.",
+   "ranges": [
+    [
+     "0021a3e8",
+     "0021ac80"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-26 22:59",
+     "status": "verify",
+     "summary": "Pinned unassigned@0021a3e8 as i3d/i3rmodel.cpp 0x21a3e8..0x21ac80 and wrote all 14 functions: i3rBuildPackets / i3rClearPackets, i3rAssignTex, i3rCopyLocalBasicTransform, i3rConvertLocalToModel (parent x local as VU0 micro 0), i3rCopyClipSphere, i3rUpdateTexAnim, i3rReplaceStqMapEntity, and the material entity slot accessors i3rGetMatEntity0..2 / i3rSetMatEntity0..2 (slot 0 getter 0x21aa10 was hidden after ReplaceStq's return: mkfunc). New header i3rmodel.h with the EE layouts of the material, layer, node, packet buffer and STQ entity data; I3dMatrixF4x4 moved there. I3rRootData gained the clip sphere and m_local_basic. MagScene m_2aad0 / m_2aad1 were the STQ entity's +0x40 / id: folded into I3rStqMapEntity (0x50). Tree paths checked offline on all 2565 models on the disc."
+    }
+   ],
+   "status": "verify",
+   "why": "the i3r model helpers between i3denv's fog (to 0x21a3e8) and lights (from 0x21ac80): packets of the root, texture assignment, texture animation, STQ entities, node transforms; one object file as a contiguous run, named after the I3D_BIN model operations it serves"
+  },
   "i3d/i3rroot.cpp": {
    "notes": "Verify: no model loads in the smoke run yet, so nothing can show it (screen still black, as before). Port trap: the ROM relocates i3r files in place into absolute 32-bit pointers; on the host a relocated field holds the distance from the field to its target, so every reader must use i3rPtr (hazards.md). Next for models: the item tree core 0x22c1d8..0x22c5a0 (bisect 0x22c1f8, i3rItemRelocate / Unrelocate) with the 90-entry fixup tables 0x2db4c8 / 0x2db360, whose ~76 fixup pairs are hidden functions spread over 0x22a6c0..0x22e508 (one per item type; the root type 0x52 pair is 0x22ad20 / 0x22adf8). The rest of unassigned@00228c08 is mapped in architecture.md (mesh packet builder 0x228c08..0x22a7d0 with the bridge i3dMatGetScaleTrans, I3M from 0x22b4b8, I3C from 0x22ba20, curves, collision); the file split is a guess, see open-items.md Open questions.",
    "ranges": [
@@ -1319,6 +1337,7 @@
   "unassigned@0020eda4": {},
   "unassigned@0020ff34": {},
   "unassigned@00216ad0": {},
+  "unassigned@0021a3e8": {},
   "unassigned@0021fb50": {},
   "unassigned@00224de0": {},
   "unassigned@00228c08": {},

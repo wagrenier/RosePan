@@ -90,8 +90,10 @@ static_assert(sizeof(I3rRoot) == 0x20, "I3rRoot is 0x20 bytes on the EE");
  * not +0x24. The record may be longer (unverified). */
 struct I3rRootData
 {
-    u_char m_00[0x10];          // ROR 0x00: not read here
-    u_int  m_matrix10;          // ROR 0x10: records of 0x40 (i3rGetRootMatrix10; role unknown)
+    float  m_clip_center[3];    // ROR 0x00: the clip sphere's centre (i3rCopyClipSphere)
+    float  m_clip_radius;       // ROR 0x0c: and its radius
+    u_int  m_local_basic;       // ROR 0x10: one 0x40 matrix per node, the basic local transforms
+                                //           (i3rCopyLocalBasicTransform, i3rGetRootMatrix10)
     u_int  m_matrix14;          // ROR 0x14: records of 0x40 (i3rGetRootMatrix14; role unknown)
     u_int  m_tex_name;          // ROR 0x18: m_num_tex name pointers (the TIM2 names)
     u_int  m_node_index;        // ROR 0x1c: m_num_node_name u_short node indices
@@ -101,7 +103,8 @@ struct I3rRootData
     u_short m_num_tex;          // ROR 0x2c
     u_short m_num_node_name;    // ROR 0x2e
 };
-static_assert(offsetof(I3rRootData, m_matrix10) == 0x10, "I3rRootData::m_matrix10");
+static_assert(offsetof(I3rRootData, m_clip_radius) == 0x0c, "I3rRootData::m_clip_radius");
+static_assert(offsetof(I3rRootData, m_local_basic) == 0x10, "I3rRootData::m_local_basic");
 static_assert(offsetof(I3rRootData, m_matrix14) == 0x14, "I3rRootData::m_matrix14");
 static_assert(offsetof(I3rRootData, m_tex_name) == 0x18, "I3rRootData::m_tex_name");
 static_assert(offsetof(I3rRootData, m_node_index) == 0x1c, "I3rRootData::m_node_index");

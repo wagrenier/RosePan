@@ -277,43 +277,14 @@ struct MagViewParam;
  * its item tree have their own file. */
 #include "i3d/i3rroot.h"
 
-/* i3d's matrix struct (tag_I3dMatrixF4x4_s in DogModel's symbols): the
- * same 16 floats as an sceVu0FMATRIX, but the ROM copies it with
- * unaligned ldl / sdl, so it is only 4-aligned. EE 0x40. */
-struct I3dMatrixF4x4
-{
-    float m[4][4];
-};
-static_assert(sizeof(I3dMatrixF4x4) == 0x40, "I3dMatrixF4x4 is 0x40 bytes on the EE");
-
 #include "i3d/i3ritem.h"
-/* i3rSetRelocate's hooks: build the root's model packets (0x21fb50 per
- * mesh) into the slots of its child 6, and clear those slots. */
-int   i3rBuildPackets(I3rRoot *root);                                    // ROR 0x0021a3e8
-int   i3rClearPackets(I3rRoot *root);                                    // ROR 0x0021a558
-
-/* An i3d STQ map entity (tag_I3rStqMapEntity_s in DogModel's symbols).
- * The scene keeps one at +0x2aa90 (less than 0x40 bytes before +0x2aad0).
- * layout: host -- placeholder, fields not known. */
-struct I3rStqMapEntity
-{
-    u_char _00[0x40];
-};
-static_assert(sizeof(I3rStqMapEntity) >= 0x40, "placeholder");
-
-/* The model's clip sphere: centre (w = 1) and radius. */
-int   i3rCopyClipSphere(I3rRoot *root, float *center, float *radius);    // ROR 0x0021a828
-int   i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity);    // ROR 0x0021a938
-/* Steps the frame counter of every animated texture of the root; I3D_OK. */
-int   i3rUpdateTexAnim(I3rRoot *root);                                   // ROR 0x0021a8e0
-/* The root's textures from a name table of n records (DogTexInfo's);
- * non-zero when one is missing. */
-int   i3rAssignTex(I3rRoot *root, const I3dTexEntry *tex, int n);        // ROR 0x0021a5b0
-/* The nodes' basic transforms into one matrix per node. */
-int   i3rCopyLocalBasicTransform(I3rRoot *root, I3dMatrixF4x4 *mat);     // ROR 0x0021a700
-/* Local node matrices to model matrices down the node tree. */
-int   i3rConvertLocalToModel(I3rRoot *root, I3dMatrixF4x4 *model,
-                             const I3dMatrixF4x4 *local);                // ROR 0x0021a760
+/* The model helpers (packets, textures, STQ entities, node transforms)
+ * and I3dMatrixF4x4 have their own file. */
+#include "i3d/i3rmodel.h"
+/* unassigned@0021fb50: writes the VIF / DMA packets of one mesh item (a
+ * type 0x4c entry's child 0 child) into buf. i3rBuildPackets passes the
+ * same buffer start for every mesh. */
+void  i3rBuildMeshPacket(I3rItem *mesh, void *buf);                     // ROR 0x0021fb50
 
 #include "i3d/i3croot.h"
 

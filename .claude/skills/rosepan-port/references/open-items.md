@@ -53,7 +53,8 @@ follows it; reached stubs in run order):
      0x21fe68. **2026-10-26: the relocator is written** -- i3d/i3ritem.cpp (i3rItemRelocate /
      Unrelocate, all 90 type fixup pairs; partial: the per-type accessors are left) and
      i3d/i3croot.cpp (i3cRelocate and the i3c lookups, verify), checked offline on the disc's 1602
-     models. Next on the 3D path: unassigned@0021a3e8 (i3rBuildPackets / i3rAssignTex / the node
+     models. **2026-10-26: unassigned@0021a3e8 is written as i3d/i3rmodel.cpp (verify)** -- packets, textures, STQ entities, node transforms;
+     the packet builder i3rBuildMeshPacket 0x21fb50 (unassigned@0021fb50) is a stub (DMA packets: the host draw module should read the mesh items instead). Was: Next on the 3D path: unassigned@0021a3e8 (i3rBuildPackets / i3rAssignTex / the node
      transforms), and DogActor::load 0x10cd5c (dog/dogactor.cpp, item 5): two runs that session
      reached the post-film setup but no model load, DogActor::load being a stub on that road. Was: DogModel::loadPack 0x1158ec
      / loadData 0x115790 / setupNodeFlags 0x11550c: the model loader. Without it no map or character exists, so **this is the gate to the
@@ -677,6 +678,11 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
    session: the MagScene constructor stub clears the 0x2000 strip records as the ROM's loop at
    0x136ab4 does; drawStrips' path buffer (bss 0x6646f0) holds 64 records (unbounded in the ROM).
    magscene2.cpp's load now copies mapparam word 10 as a float (it is lwc1 / swc1 in the ROM).
+
+- (2026-10-26, i3d/i3rmodel.cpp) The host keeps i3r pointers as 32-bit distances from the field; i3rReplaceStqMapEntity
+  and i3rSetMatEntity0..2 point model slots at objects the game owns (MagScene +0x2aa90, DogActor +0x470), so the
+  distance must fit in 32 bits: i3rSetFarPtr logs "[i3r] ... too far" when it does not. If that line ever shows,
+  the slots need a side table. Also: i3rUnrelocate would turn such a slot into a bogus offset (the ROM does the same).
 
 ## Decisions
 
