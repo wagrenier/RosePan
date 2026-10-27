@@ -7,6 +7,10 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
 **TOP PRIORITY (the user, 2026-10-26): get in game -- the first room on screen after New Game.**
+**3D first (the user, 2026-10-26):** the 3D path leads the queue -- model load (dog/dogmodel.cpp,
+dog/dogactor.cpp), lights, sky / fog, then the draw side: MagScene::draw's reached stubs
+(drawSkyDome 0x1406b8, drawFocus 0x140e88, DogCamera::getLensFov) and the VU1 strip writer
+i3dPktDrawStrip 0x21db18 into the native i3d draw module, which grows 3D meshes (never the emulated GS).
 Supersedes everything below. Test: `tus.py check <TU> --run 200` (`settings.smoke_pad`
 1800:START,2400:START,2700:CROSS presses New Game); the picture decides.
 Done so far (2026-10-26): the New Game crash (setup/newgame_crash.cpp: Sequence::addEntry cut a script
@@ -38,11 +42,13 @@ follows it; reached stubs in run order):
      0x1fce1c; seven tiny reader functions plus the writers) before any scene must play, together with
      debug/motnamecnv0.cpp (motNameFindChara / GetCategory / Convert, stubbed) and
      DogActor::setBaseRotateY 0x10ed2c / utlStrToLower 0x218338 / MagScene::setFocusData 0x1417e4 (stubs).
-  3. `unassigned@00192ac0` -- MnuPBook::setType 0x196e54 / MnuDiary::setType 0x198b04
-     (MagLifeMenuPBook::init asserts when neither book takes the type).
-  4. **`dog/dogmodel.cpp`** -- DogModel::loadPack 0x1158ec / loadData 0x115790 / setupNodeFlags
+  3. **`dog/dogmodel.cpp`** -- DogModel::loadPack 0x1158ec / loadData 0x115790 / setupNodeFlags
      0x11550c: the model loader. Without it no map or character exists, so **this is the gate to the
-     first 3D picture**.
+     first 3D picture**. Pinned first in the queue (the user, 2026-10-26: 3D rendering ahead of the
+     menu fix below).
+  4. `unassigned@00192ac0` -- MnuPBook::setType 0x196e54 / MnuDiary::setType 0x198b04
+     (MagLifeMenuPBook::init asserts when neither book takes the type). If a run stops on that
+     assert before the first room, take this next.
   5. **`dog/dogactor.cpp`** -- DogActor::load 0x10cd5c, loadPackMotion 0x10c17c, getRotY, resetShadow
      (then the getNodeIndexByName PORT guard can go).
   6. `mag/magscenelight.cpp` -- MagScene::loadLight 0x13f658 / setDefaultLight 0x13f8e4.
