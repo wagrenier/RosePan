@@ -10133,11 +10133,23 @@
   "was": "FUN_001d3b44",
   "why": "execPauseReq's last call: switch on sequence global 0x54, sets m_flags 0x2000 / m_flags2 0x80000, lookupFlagTable and MagScene::requestMenu, then enterMenuPause"
  },
+ "001d4370": {
+  "name": "GamMan::restoreAfterMenu",
+  "tag": "ror-inferred",
+  "was": "FUN_001d4370",
+  "why": "checkMenuReq's end: GamSndMan::resumeBgm, resumes task kind 5 (flags2 0x100000), restores the PC and dog actors' motion speed (+0x1e8) from +0x21ffc / +0x22000 (flags2 0x40000000)"
+ },
  "001d44e4": {
   "name": "GamMan::isSeqPair0Pending",
   "tag": "ror-inferred",
   "was": "FUN_001d44e4",
   "why": "1 when m_seqPair[0] (system call 0x35, +0x222c4) has both words, global 100 equals global 0x65, and sys flag 0x8000 is clear; MnuPBook::processPad's close sets bit 0x2000000 of bit word 1 from it"
+ },
+ "001d4540": {
+  "name": "GamMan::endPcAction",
+  "tag": "ror-inferred",
+  "was": "FUN_001d4540",
+  "why": "MagLifePC 0x11cc14's: global 0x28 == 0x13 sets the fchr's param-0x40 flag bit, releases it (listAndReleaseChr), TskFrameFunc 0x11 next frame, queues m_seqPair[2]'s script"
  },
  "001d4730": {
   "name": "GamMan::sortQuadCorners",
@@ -10169,11 +10181,41 @@
   "was": "FUN_001d4aec",
   "why": "getObjRadius's body over param 0x1005 (ObjStat::getColPrmKeep) instead of 0x18"
  },
+ "001d4b9c": {
+  "name": "GamMan::hitAtPoint",
+  "tag": "ror-inferred",
+  "was": "FUN_001d4b9c",
+  "why": "member pointer target set by testHitAt / placeAchr: box then circle / quad (GamArea::isInPolygon) / Bip01 Neck test of an object against +0x225b0 and radius +0x225a0, fills the 0x20-byte hit record"
+ },
+ "001d50a8": {
+  "name": "GamMan::hitAtSweep",
+  "tag": "ror-inferred",
+  "was": "FUN_001d50a8",
+  "why": "member pointer target set by 0x1d58d8: the same test against two positions +0x225b0 / +0x225c0 with radii +0x225a0 / +0x225a4"
+ },
  "001d544c": {
   "name": "GamMan::placeAchr",
   "tag": "ror-inferred",
   "was": "FUN_001d544c",
   "why": "resume calls it (pc oid, a 0x20-byte local, 1) unless flags2 0x1000; not read yet"
+ },
+ "001d5610": {
+  "name": "GamMan::testAchrHit",
+  "tag": "ror-inferred",
+  "was": "FUN_001d5610",
+  "why": "isObj, then hitAtPoint at the achr's own position with its radius, no result record"
+ },
+ "001d56f4": {
+  "name": "GamMan::testPcHitAt",
+  "tag": "ror-inferred",
+  "was": "FUN_001d56f4",
+  "why": "hit test for the PC oid +0x21fcc at pos excluding the dog +0x21fd0; a type-2 achr hit starts a TskAvoidMove on it (caller MagLifePC 0x11ccd4)"
+ },
+ "001d58d8": {
+  "name": "GamMan::setupDogSweep",
+  "tag": "ror-inferred",
+  "was": "FUN_001d58d8",
+  "why": "sets the sweep from pos to pos + (sin, cos)(angle) * +0x21fc4 with radii +0x21fbc / +0x21fc0 and member pointer hitAtSweep for the dog (+0x22094); no callers"
  },
  "001d5a0c": {
   "name": "GamMan::testHitAt",
@@ -10193,6 +10235,12 @@
   "was": "FUN_001d5da0",
   "why": "ObjStat::setHide and resetObj (bit 0x40) call it with GamMan and the oid; not read yet"
  },
+ "001d5ec4": {
+  "name": "GamMan::clearObjUpdates",
+  "tag": "ror-inferred",
+  "was": "FUN_001d5ec4",
+  "why": "mode 0..2 moves every +0x2246c used record to the free list, mode 3 only oids with bits 30..31 set; no callers"
+ },
  "001d6078": {
   "name": "GamMan::writeSaveData",
   "tag": "ror-inferred",
@@ -10210,6 +10258,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d7b08",
   "why": "achr / fchr position into 0x17c340 over secta list bss 0x7811ac (radius 40), returns the found cell's word 0 (its id) or -1; list = chrIsOidType2"
+ },
+ "001d7c20": {
+  "name": "GamMan::hitTestObjs",
+  "tag": "ror-inferred",
+  "was": "FUN_001d7c20",
+  "why": "walks the GamMan +0x2246c update list calling the member pointer at +0x225d0 per oid, skipping the caller's oid and a second one; 1 at the first hit, 0x400 record cap (data 0x2d8f58)"
  },
  "001d7de4": {
   "name": "GamMan::getFloorY",
@@ -10252,6 +10306,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001d817c",
   "why": "(cell, pos, list): 0x17dd5c on list +8 with the cell's id: the floor height under pos (flat, x or z slope); 100000 for a NULL cell"
+ },
+ "001d81c4": {
+  "name": "GamMan::countSectaPath",
+  "tag": "ror-inferred",
+  "was": "FUN_001d81c4",
+  "why": "findSectaPath(list = 7th arg t2, from, to) into a 0x200-byte stack path; emyCanReach's"
  },
  "001d81f0": {
   "name": "GamMan::findSectaPath",

@@ -176,6 +176,7 @@ struct GamRec16 { u_int _0[4]; };
 /* A record of the object update list GamMan +0x2246c (EE 0x10: oid +0x0,
  * cell +0x4; queueObjUpdate leaves +0x8..+0xf as stack garbage). The hit
  * walk 0x1d7c20 reads m_oid. layout: host -- a cell pointer. */
+struct ChrHitRec;
 struct GamObjUpdate
 {
     u_int     m_oid;                // ROR 0x0
@@ -286,8 +287,11 @@ struct GamMan
     int  isAchrTurnDone(u_int oid);                                      // ROR 0x001d19f8
     /* getAchr(oid) and its empty method. No callers. */
     void emptyAchr1d3a14(u_int oid);                                     // ROR 0x001d3a14
-    /* After a menu pause: the menu the script asked for (sequence global
-     * 0x54) opened through MagScene::requestMenu (unassigned@001d3b44). */
+    /* After a menu pause (execPauseReq): in sequence state 3 (global
+     * 0x15) with no menu open (m_22a84 -1), the item / map menu global
+     * 0x11 asks for opened through MagScene::requestMenu (m_22a84 2 / 1,
+     * and nothing else this frame); otherwise m_seqPair[0] / [1]'s
+     * script queued, a TskFrameFunc 9 next frame and restoreAfterMenu. */
     void checkMenuReq();                                                 // ROR 0x001d3b44
     void init();                                                         // ROR 0x001c0d70
     /* Resets the game state: items, task ids, callbacks, the chr pools. */
@@ -667,6 +671,29 @@ struct GamMan
      * has flag 0x80): non-zero when something is there. a3 / a4 / out are
      * the test's mode words and its result (0x1f68bc passes a4 1). */
     int  testHitAt(const float *pos, u_int oid, int a3, int a4, void *out); // ROR 0x001d5a0c
+    /* The hit walk: m_hitFunc over every oid on the update list but oid
+     * and skip (and type-1 objects while Brown's state is 0xd); 1 at the
+     * first hit, 0 none or past 0x400 records. cell is not read. */
+    int  hitTestObjs(GamSecta *cell, u_int oid, ChrHitRec *out, u_int skip); // ROR 0x001d7c20
+    /* m_hitFunc's two tests of one object against m_hitPos / m_hitRadius:
+     * a point (by the object's kind: 1 its corner quad, 2 / 3 a circle,
+     * 3 also round its Bip01 Neck), and a sweep that also takes
+     * m_hitPos2 / m_hitRadius2. */
+    int  hitAtPoint(u_int oid, ChrHitRec *out);                          // ROR 0x001d4b9c
+    int  hitAtSweep(u_int oid, ChrHitRec *out);                          // ROR 0x001d50a8
+    /* placeAchr's test at the achr's own position, no result record. */
+    int  testAchrHit(u_int oid);                                         // ROR 0x001d5610
+    /* The PC's test at pos (the dog not counted): a type-1 object is no
+     * hit; a type-2 achr hit is pushed away by a TskAvoidMove. */
+    int  testPcHitAt(const float *pos, ChrHitRec *out);                  // ROR 0x001d56f4
+    /* Sets up the dog's sweep from pos (moved m_21fbc[2] along angle in
+     * place) for hitAtSweep; runs nothing, returns 0. No callers. */
+    int  setupDogSweep(float *pos, float angle);                         // ROR 0x001d58d8
+    /* mode 0..2 empties the update list; 3 drops its oids with both top
+     * bits set. No callers. */
+    void clearObjUpdates(int mode);                                      // ROR 0x001d5ec4
+    /* findSectaPath's count into a scratch path (emyCanReach). */
+    int  countSectaPath(int from, int to, int list);                     // ROR 0x001d81c4
     /* Private collisions for the object: one segment {p0, p1}; four
      * walls round a rotated box {x, y, z, sx, sy, sz, rot}; four walls
      * round a quad of four x / z corners with heights [8] / [9]. */
@@ -858,6 +885,15 @@ struct GamMan
     /* 1 when m_seqPair[0] (system call 0x35) has both words, global 100
      * equals global 0x65 and sys flag 0x8000 is clear (MnuPBook's close). */
     int  isSeqPair0Pending();                                            // ROR 0x001d44e4
+    /* checkMenuReq's end: the BGM back (bgm), the kind-5 tasks resumed
+     * (flags2 0x100000), the PC's and dog's motion speeds back (flags2
+     * 0x40000000). */
+    void restoreAfterMenu(int bgm);                                      // ROR 0x001d4370
+    /* MagLifePC's (0x11cc14): with sequence global 0x28 0x13, the fchr of
+     * global 0x2a has its param-0x40 flag set and is released (flags2
+     * 0x100); a TskFrameFunc 0x11 next frame; m_seqPair[2]'s script
+     * queued. */
+    void endPcAction();                                                  // ROR 0x001d4540
     /* Param 0x18 of oid becomes shape 4 with radius r (through the global
      * g_gamMan, as the ROM does). */
     void setObjRadius(u_int oid, float r);                               // ROR 0x001d49d0
@@ -1167,8 +1203,8 @@ struct GamMan
     int          m_pcJnfc;          // ROR 0x21ff0: is_pc_jnfc
     int          m_21ff4;           // ROR 0x21ff4
     int          m_21ff8;           // ROR 0x21ff8
-    int          m_21ffc;           // ROR 0x21ffc: 0x1d4370 copies it to the PC actor's +0x1e8 (flags2 0x40000000)
-    int          m_22000;           // ROR 0x22000: ... and to the dog actor's word (scene actor + 0x2b08)
+    float        m_pcMotionSpeed;   // ROR 0x21ffc: restoreAfterMenu puts it back as the PC actor's motion speed (flags2 0x40000000)
+    float        m_dogMotionSpeed;  // ROR 0x22000: ... and the dog actor's (MagScene m_actors[m_dogChrNo])
     int          m_22004;           // ROR 0x22004: EmyManager's object id (getEmyOids)
     int          m_22008;           // ROR 0x22008: ... its second
     int          m_pcEquipItemChrID;// ROR 0x2200c: getPcEquipItemChrID
@@ -1214,6 +1250,12 @@ struct GamMan
     GamCamRec    m_camStack[4];     // ROR 0x22470: pushCamera / popCamera (three used)
     int          m_camDepth;        // ROR 0x22530: the records pushed
     I3dFog       m_fogStack[3];     // ROR 0x22540: pushFog / popFog; m_color[0] -1 = a free slot
+    float        m_hitRadius;       // ROR 0x225a0: the hit test's own radius
+    float        m_hitRadius2;      // ROR 0x225a4: ... the sweep end's (hitAtSweep)
+    float        m_hitPos[4];       // ROR 0x225b0: the hit test's position
+    float        m_hitPos2[4];      // ROR 0x225c0: ... the sweep end (hitAtSweep)
+    typedef int (GamMan::*HitFunc)(u_int oid, ChrHitRec *out);
+    HitFunc      m_hitFunc;         // ROR 0x225d0: GCC 2 {delta, index -1, pfn}: hitAtPoint or hitAtSweep
     int          m_msgMode;         // ROR 0x225d8: chgMsgMode
     int          m_225dc;           // ROR 0x225dc: get_real_mem_size / reveal_mem_size; initStage2 clears it
     int          m_225e4;           // ROR 0x225e4

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 10:50 at commit `884766f` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 11:06 at commit `e0abd43` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-27 10:50 at commit `884766f` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6827**, named **4926** (72%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 253, ror-inferred 3324
-- context-name ledger: 3617 entries; overrides of wrong library matches: 5
+- game functions: **6827**, named **4936** (72%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 253, ror-inferred 3334
+- context-name ledger: 3627 entries; overrides of wrong library matches: 5
 - placed in a source file: 4318/6827 in 111 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3415**; stubs: **410**
+- reconstructed RoR functions: **3428**; stubs: **407**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -50,7 +50,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/emy/emy_manager.cpp` | 59 | 0 |
 | `src/game/gamfile.cpp` | 18 | 0 |
 | `src/game/gamman.cpp` | 411 | 0 |
-| `src/game/gamman2.cpp` | 19 | 0 |
+| `src/game/gamman2.cpp` | 32 | 0 |
 | `src/game/gamsnd.cpp` | 74 | 0 |
 | `src/game/gamstat.cpp` | 79 | 0 |
 | `src/game/gamtrg.cpp` | 21 | 1 |
@@ -68,7 +68,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3ritem.cpp` | 160 | 0 |
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 264 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 261 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 17 |
@@ -130,7 +130,7 @@ Least-named game-code regions (64 KB blocks):
 - next: **game/gamman2.cpp** (pinned in the queue)
 - pinned queue: unassigned@0022b4b8, unassigned@0021a3e8, unassigned@00140030, unassigned@00145020, unassigned@001dd5e8, game/gamman2.cpp, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
 - partial: `emy/emy_hfm.cpp` 21/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end of the file, return -1 from Exec): the Init/Exec/Term of HfmOutSlap 0x145d60.., HfmOutBreak 0x146378.., HfmOutWal
-- partial: `game/gamman2.cpp` 21/37 -- Left in this TU (stubs in lib/unassigned_stubs.cpp): checkMenuReq 0x1d3b44 (its switch on sequence global 0x15 is a jump table Ghidra lost: read the asm at 0x1d
+- partial: `game/gamman2.cpp` 34/37 -- Left in this TU: writeSaveData 0x1d6078 and readSaveData 0x1d68a0 (the 0x1264 save block; stubs in lib/unassigned_stubs.cpp, caller mnu/mnusvld.cpp), and 0x1d7f
 - partial: `game/gamtrg.cpp` 21/22 -- Left: GamArea::update 0x1dee78 (0x1db4 bytes; stub at the end of gamtrg.cpp; decompilation saved in work/tu/game_gamtrg.cpp/update_dec.txt). It walks the active
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
@@ -195,6 +195,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 11:06 `game/gamman2.cpp` partial: Hit tests and checkMenuReq written: hitTestObjs 0x1d7c20 over the update list through the member pointer m_hitFunc (hitAtPoint 0x1d4b9c, hitAtSweep 0x1d50a8), t
 - 2026-10-27 10:50 `game/gamman2.cpp` partial: Pinned 0x1d3b44..0x1d84c8 as game/gamman2.cpp (GamMan methods past switchVolume, was unassigned@001d3b44). Written: the object update list (relinkObj, queueObjU
 - 2026-10-27 09:41 `game/gamtrg.cpp` partial: GamArea (GamMan +0x40, the area triggers) written in game/gamtrg.cpp: constructor, init, cloneTrg, addTrg, stopKind, clear, stopTrgs, clearKind, findFchrOid, ac
 - 2026-10-27 09:24 `emy/emy_hfm.cpp` partial: Split the enemy run: pinned emy/emy_hfm.cpp 0x145020..0x149d18 (HfmMain + its outs). Wrote HfmMain whole (initOut, dtor, initAfterParam, decide, exec, after, se
@@ -202,20 +203,19 @@ Recent sessions:
 - 2026-10-27 08:42 `mag/magscenecmd.cpp` verify: Pinned 0x143d3c..0x145020 out of unassigned@00143d3c as mag/magscenecmd.cpp and wrote all 36 functions: MagScene fog fade (setFog and its two wrappers, addFog, 
 - 2026-10-27 08:20 `mag/magscenetenkyu.cpp` verify: The sky (tenkyu): releaseTenkyuTex, loadTenkyuTex (tenkyu.rpk: optional I3D_I3M motion then the i3r), initTenkyuSpin (per-node y spin from the motion, named 0x1
 - 2026-10-27 08:07 `mag/magscenelight.cpp` verify: All 10 MagScene light functions written (pinned 0x13f49c..0x13ff00): loadLight from a map _l.bin (MagLightFile in magscene.h), setDefaultLight, setShadowLight w
-- 2026-10-27 07:56 `dog/dogactor.cpp` verify: DogActor complete (147 of 147): getMotionMove, getMotionEvent / getMotionEventNow, the root base readers (getRootBase, getRootRotate, resetRootBase, addTransRot
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `unassigned@00166a1c` | todo | 0/29/342 | 94.7 | 98 | 8 |
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 75 | 6 |
-| `unassigned@0022e840` | todo | 0/13/99 | 32.1 | 55 | 5 |
 | `unassigned@0010f944` | partial | 3/6/12 | 2.2 | 55 | 6 |
+| `unassigned@0022e840` | todo | 0/13/99 | 32.1 | 55 | 5 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
 | `emy/emy_main.cpp` | partial | 1/22/88 | 11.0 | 50 | 0 |
 | `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 49 | 6 |
 | `unassigned@00106658` | todo | 0/11/25 | 3.3 | 45 | 4 |
-| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
 | `unassigned@0021c960` | todo | 0/11/21 | 8.4 | 44 | 6 |
+| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
 | `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 40 | 1 |
 
@@ -244,7 +244,6 @@ Recent sessions:
 | `00106760` | utlDrawI3r | 8 | ror | stub | - |
 | `00176cc8` | Obj176a3c::createEff | 7 | ror | stub | - |
 | `001875c0` | MsgManSet::getState | 7 | ror | stub | - |
-| `001d5a0c` | GamMan::testHitAt | 7 | ror | stub | game/gamman2.cpp |
 | `00218470` | rorDebugPrintf | 6 | ror | missing | - |
 | `00217f10` | utlAtan2 | 6 | ror | stub | - |
 | `001fca84` | NagaChunk::NagaChunk | 6 | ror | missing | task/naga_chunk.cpp |
@@ -254,7 +253,6 @@ Recent sessions:
 | `0022a988` | FUN_0022a988 | 6 | - | missing | - |
 | `0022a978` | FUN_0022a978 | 6 | - | missing | - |
 | `0017c340` | FUN_0017c340 | 5 | - | stub | - |
-| `001d544c` | GamMan::placeAchr | 5 | ror | stub | game/gamman2.cpp |
 | `001874ac` | MsgManSet::update | 5 | ror | stub | - |
 | `0018330c` | MsgMan::MsgMan | 5 | ror | missing | msg/msgman.cpp |
 | `00183b24` | MsgMan::~MsgMan | 5 | ror | missing | msg/msgman.cpp |
@@ -263,4 +261,6 @@ Recent sessions:
 | `0013f280` | MagScene::openSysMsgWindow | 5 | ror | stub | - |
 | `001bebec` | GamFont::setFont | 4 | ror | stub | - |
 | `0012b7cc` | MagLifeBwnCtrl::setLevel | 4 | ror | stub | mag/maglifebwnctrl.cpp |
+| `0022e960` | i3mGetPose | 4 | ror | stub | - |
+| `0022f7a0` | i3mPoseToMatrices | 4 | ror | stub | - |
 

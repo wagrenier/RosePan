@@ -711,3 +711,11 @@ public:
 - **Never leave a stray `cat > file` in a shell command** (2026-10-27): with no stdin redirect it waits
   for input and a background check hangs silently for its whole timeout. Pass `< /dev/null` to long
   background runs.
+- **"Removing unreachable block" around sqrtf is harmless** (2026-10-27): the inline `sqrt.S` is
+  followed by a `c.eq.S f, f` NaN check and a `jal 0x26cb48` (sqrtf's errno path) Ghidra drops; the
+  decompiled branches are complete. A comparison that looks impossible (GamMan::hitAtPoint kind 4: the
+  x / z distance must exceed the radius and the 3D one stay below it) is the ROM's, not Ghidra's:
+  confirm in the asm, then reproduce it.
+- **The Bash tool rejects a long inline `python - <<'EOF'` script** whose body has unbalanced quotes
+  in comments (2026-10-27: "unexpected EOF while looking for matching"); write big edits with the
+  Edit tool or a script file instead.

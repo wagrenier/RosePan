@@ -143,15 +143,19 @@ struct TskMtnMove2 : CmnITask
     StepFunc  m_stepFunc;       // ROR 0xcc: GCC 2 {delta, index, pfn}
 };
 
-/* The testHitAt result record as the avoid task reads it (the rest is
- * the test's own; 8 words on the EE). */
+/* The hit tests' result record (GamMan::hitAtPoint / hitAtSweep clear
+ * it and fill +0x10..+0x18; 8 words on the EE). */
 struct ChrHitRec
 {
     int   _00[4];
     u_int m_oid;                // ROR 0x10: the object hit, 0 none
-    int   _14[3];
+    float m_depth;              // ROR 0x14: how far inside its radius (10 for a quad)
+    int   m_far;                // ROR 0x18: 1 hit round the sweep end / the Bip01 Neck
+    int   _1c;
 };
 static_assert(offsetof(ChrHitRec, m_oid) == 0x10, "ChrHitRec m_oid");
+static_assert(offsetof(ChrHitRec, m_depth) == 0x14, "ChrHitRec m_depth");
+static_assert(offsetof(ChrHitRec, m_far) == 0x18, "ChrHitRec m_far");
 static_assert(sizeof(ChrHitRec) == 0x20, "ChrHitRec size");
 
 /* TskAvoidMove : CmnITask (vtable 0x2e4b50, EE 0xc0 bytes; kind 0): an

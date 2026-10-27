@@ -616,13 +616,6 @@ void MagLife130da4::setVolume(int volume)
     ROSEPAN_STUB("MagLife130da4::setVolume", 0x00130de0);
 }
 
-// stub of ROR 0x001d544c
-int GamMan::placeAchr(int oid, void *out, int arg)
-{
-    ROSEPAN_STUB("GamMan::placeAchr", 0x001d544c);
-    return 0;
-}
-
 // stub of ROR 0x0017756c
 void Obj176a3c::release(int no)
 {
@@ -1155,19 +1148,6 @@ float MagScene::getCameraPathPos()
 void MagScene::setCameraPathPos(float pos)
 {
     ROSEPAN_STUB("MagScene::setCameraPathPos", 0x0013d52c);
-}
-
-// stub of ROR 0x001d3b44
-void GamMan::checkMenuReq()
-{
-    ROSEPAN_STUB("GamMan::checkMenuReq", 0x001d3b44);
-}
-
-// stub of ROR 0x001d5a0c
-int GamMan::testHitAt(const float *pos, u_int oid, int a3, int a4, void *out)
-{
-    ROSEPAN_STUB("GamMan::testHitAt", 0x001d5a0c);
-    return {};
 }
 
 // stub of ROR 0x0018761c
