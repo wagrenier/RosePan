@@ -12,7 +12,10 @@ dog/dogactor.cpp), lights, sky / fog, then the draw side: MagScene::draw's reach
 (drawSkyDome 0x1406b8, drawFocus 0x140e88, DogCamera::getLensFov) and the VU1 strip writer
 i3dPktDrawStrip 0x21db18 into the native i3d draw module, which grows 3D meshes (never the emulated GS).
 Supersedes everything below. Test: `tus.py check <TU> --run 200` (`settings.smoke_pad`
-1800:START,2400:START,2700:CROSS presses New Game); the picture decides.
+1800:START,2400:START,2700:CROSS,3100:START*900 presses New Game, then holds START through the
+opening film: TskMovie state 0x67 fades the film out when START is held -- the user, 2026-10-26: skip
+cinematics so runs do not rewatch them; the film is cut at about frame 3600 and the run reaches the
+post-film stage setup, MagLifePC::initMotion / setActor, about two minutes sooner); the picture decides.
 Done so far (2026-10-26): the New Game crash (setup/newgame_crash.cpp: Sequence::addEntry cut a script
 address to an int, hazards.md; plus a PORT guard in DogModel::getNodeIndexByName), and TskMovie
 (task/tsk_chr.cpp, `partial`): **the opening film plays to its end** ("Once upon a time...", the
@@ -42,8 +45,14 @@ follows it; reached stubs in run order):
      0x1fce1c; seven tiny reader functions plus the writers) before any scene must play, together with
      debug/motnamecnv0.cpp (motNameFindChara / GetCategory / Convert, stubbed) and
      DogActor::setBaseRotateY 0x10ed2c / utlStrToLower 0x218338 / MagScene::setFocusData 0x1417e4 (stubs).
-  3. **`dog/dogmodel.cpp`** -- DogModel::loadPack 0x1158ec / loadData 0x115790 / setupNodeFlags
-     0x11550c: the model loader. Without it no map or character exists, so **this is the gate to the
+  3. **`dog/dogmodel.cpp`** -- WRITTEN 2026-10-26 (all 66 functions, `verify`). The New Game load
+     path now runs loadPack -> setRoot -> i3rRelocate, and stops in the i3r library stubs: the item
+     tree relocator **i3rItemRelocate 0x22c478 and the type fixups (unassigned@0022b4b8)**,
+     i3rBuildPackets 0x21a3e8 / i3rAssignTex 0x21a5b0 / i3rCopyLocalBasicTransform 0x21a700 /
+     i3rConvertLocalToModel 0x21a760 (unassigned@0021a3e8), then the draw utlDrawI3r 0x106760 ->
+     0x21fe68. Until the relocator is written every loaded model has a garbage node count (allocMatrix
+     fails, PC guards skip). Queue those two runs next on the 3D path. Was: DogModel::loadPack 0x1158ec
+     / loadData 0x115790 / setupNodeFlags 0x11550c: the model loader. Without it no map or character exists, so **this is the gate to the
      first 3D picture**. Pinned first in the queue (the user, 2026-10-26: 3D rendering ahead of the
      menu fix below).
   4. `unassigned@00192ac0` -- MnuPBook::setType 0x196e54 / MnuDiary::setType 0x198b04

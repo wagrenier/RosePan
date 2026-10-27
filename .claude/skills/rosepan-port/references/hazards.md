@@ -557,6 +557,16 @@ public:
   tme, rgba, texture pointer) and of each RosePan_I3dReplay range, against MagLifeMan::draw's life
   order -- the same texture pointer twice per frame, once before and once after the fader.
 
+## Half-written model loads (2026-10-26)
+
+- Symptom: New Game crashes (access violation) right after "NULL != m_mat_local" / "m_mat_flag" /
+  MagScene "pmat" asserts. Cause: DogModel's loader is written but i3rItemRelocate (0x22c478) is a
+  stub, so the i3r item tree keeps file offsets and i3rGetNumNode returns garbage; allocMatrix's
+  alloc fails and later code walks NULL node arrays. Fix in place: PC guards in allocMatrix,
+  setupNodeFlags and MagScene's node billboard loop. Remove nothing; write the relocator.
+- Only some New Game runs reach the model loads (two of four 200 s runs did, by timing); judge a
+  load-path change on a run whose log shows i3rAssignTex.
+
 ## How to debug (the method that worked)
 
 - **The picture is the test.** Logs, stub hits and callcheck show the code ran, not that it is right.

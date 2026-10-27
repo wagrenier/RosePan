@@ -59,6 +59,10 @@ struct DogEntity
     /* Copies m_matrix's third row (the z axis) to out; returns out. */
     float *getMatrixZ(float *out);                                       // ROR 0x00110114
     void normalizeRotate();                                              // ROR 0x0010ff74
+    /* When m_dirty: out = scale, rot z, x, y (m_rotate + m_80, each wrapped
+     * once to -pi..pi), translate m_trans and m_trans_ofs; clears m_dirty
+     * and returns 1, else 0 with out untouched. */
+    int  makeLocalMatrix(sceVu0FVECTOR *out);                            // ROR 0x0010fd18
     /* EE slot 2 (+0x10): rebuilds m_matrix when m_dirty. */
     void transform();                                                    // ROR 0x00280f18
 
@@ -67,7 +71,7 @@ struct DogEntity
     sceVu0FVECTOR m_rotate;     // ROR 0x50: rotation x, y, z in radians, wrapped by normalizeRotate
     sceVu0FVECTOR m_scale;      // ROR 0x60: (1, 1, 1, 1) after reset
     sceVu0FVECTOR m_trans_ofs;  // ROR 0x70: an offset; y is DogActor's TransOfsY (saveTransOfsY)
-    sceVu0FVECTOR m_80;         // ROR 0x80: (0, 0, 0, 1) after reset and setActorRotate; role unverified
+    sceVu0FVECTOR m_80;         // ROR 0x80: a rotation added to m_rotate (makeLocalMatrix); (0, 0, 0, 1) after reset and setActorRotate
     int           m_dirty;      // ROR 0x90: set by every setter, 1 = the matrix needs a transform
     u_int         _ee_vptr;     // ROR 0x94: the EE vptr (see the file comment)
     /* PC: the 16-byte tail padding as a field. With a constructor the class
@@ -94,7 +98,7 @@ struct DogEntityEx : DogEntity
     /* EE slot 2 (+0x10): the transform with the parent's matrix. */
     void transform();                                                    // ROR 0x0011034c
 
-    u_char       _a0[0xe0 - 0xa0];
+    sceVu0FMATRIX m_local_matrix; // ROR 0xa0: DogModel::transform's local matrix (makeLocalMatrix)
     DogEntityEx *m_parent;      // ROR 0xe0: NULL = a root; setParent refuses cycles (assert p != m_parent)
 };
 static_assert(offsetof(DogEntityEx, m_parent) == 0xe0, "m_parent");

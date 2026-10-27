@@ -434,6 +434,10 @@ void MagScene::updateTenkyuBillboards()
         int *flag = model->getNodeFlag();
         sceVu0FMATRIX *pmat = model->getModelMatrix();
         ROR_ASSERT(pmat); /* 813 */
+        /* PC: a model whose node block could not be allocated (the ROM
+         * hangs in the assert). */
+        if (pmat == NULL || flag == NULL)
+            return;
         for (; n > 0; n--, flag++, pmat++)
         {
             sceVu0FVECTOR pos;

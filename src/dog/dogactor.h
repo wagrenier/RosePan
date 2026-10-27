@@ -139,11 +139,7 @@ struct DogActor : DogModel
     void clearRotYAAR() { m_rot_y_aar = 0.0f; }                          // ROR 0x0028128c
     void clearRotOfsY() { m_rot_ofs_y = 0.0f; }                          // ROR 0x00281294
 
-    u_char        _148[0x160 - 0x148];
-    int           m_shadow_light;       // ROR 0x160: the point light its projected shadow comes from (MagScene::makeActorShadow)
-    int           m_shadow_light_prev;  // ROR 0x164: the one before, faded out over the first 30 frames of a change
-    int           m_shadow_fade;        // ROR 0x168: frames since the light changed (0..59 fade out then in; 60 and up, or negative, steady)
-    u_char        _16c[0x1a0 - 0x16c];
+    /* ROR 0x148..0x1a0: DogModel's (the shadow light words at 0x160..) */
     int           m_id;                 // ROR 0x1a0: setId / getId (the character id it was loaded as)
     u_char        _1a4[0x1d8 - 0x1a4];
     int           m_1d8;                // ROR 0x1d8: read as a frame count by TskMoveAdj (no writer found yet)

@@ -479,6 +479,18 @@
   "was": "FUN_00106658",
   "why": "ids 0x0a00xxxx..0x0a02xxxx are swapped through the table 0x295f08 by the index GamMan 0x1c6c38 reports (a language / version column)"
  },
+ "00106760": {
+  "name": "utlDrawI3r",
+  "tag": "ror-inferred",
+  "was": "FUN_00106760",
+  "why": "draws an i3r model (0x21fe68) into a layer with the node and world matrices, thread dispatch disabled around it; DogModel::draw / drawUnitMatrix"
+ },
+ "001067d8": {
+  "name": "utlSetI3rDispControl",
+  "tag": "ror-inferred",
+  "was": "FUN_001067d8",
+  "why": "points the first word of every material of the root at disp (0x22b0d0 count, 0x22b0e8 item, 0x22ac08 data); DogModel::loadPack passes its display control at +0x170"
+ },
  "00106db0": {
   "name": "utlNormalize3",
   "tag": "ror-inferred",
@@ -755,6 +767,12 @@
   "was": "FUN_0010fc7c",
   "why": "f12..f14 into +0x50..+0x58, wraps them (0x10ff74), dirty +0x90"
  },
+ "0010fd18": {
+  "name": "DogEntity::makeLocalMatrix",
+  "tag": "ror-inferred",
+  "was": "FUN_0010fd18",
+  "why": "when m_dirty (+0x90): scale, rot z/x/y of m_rotate + m_80 wrapped to -pi..pi, translate m_trans and m_trans_ofs into out; clears m_dirty, returns 1"
+ },
  "0010ff74": {
   "name": "DogEntity::normalizeRotate",
   "tag": "ror-inferred",
@@ -947,6 +965,18 @@
   "was": "FUN_001129cc",
   "why": "(pool, light set, pos): walks the set's point-light mask at pool +0x50 + set * 0x18 and returns the index of the point light (m_light[DOG_LIGHT_POINT], stride 0x20, position first) nearest to pos, -1 when none; doglightpool.h line 131 asserts"
  },
+ "00114034": {
+  "name": "dogModelHitNearest",
+  "tag": "ror-inferred",
+  "was": "FUN_00114034",
+  "why": "hit callback castRay / castSphere / castRayGroups put in the query: keeps the nearest hit in the query's hit record (writes its m_50 from the query's group)"
+ },
+ "001141c8": {
+  "name": "dogModelHitCylinder",
+  "tag": "ror-inferred",
+  "was": "FUN_001141c8",
+  "why": "hit callback castCylinder puts in the query"
+ },
  "0011440c": {
   "name": "DogModel::castRay",
   "tag": "ror-inferred",
@@ -959,11 +989,47 @@
   "was": "FUN_001145c0",
   "why": "asserts the model's collision root (+0x124); f12 r, a1 hit, a2 pos: the sphere against the collision tables; MagScene::castSphere's sky model test"
  },
+ "00114758": {
+  "name": "DogModel::castRayGroups",
+  "tag": "ror-inferred",
+  "was": "FUN_00114758",
+  "why": "casts the ray thePos / theDir against every collision group (ng from get_nGroup) and returns the hit record's word +4; same asserts as castRay; no callers"
+ },
  "001149d4": {
   "name": "DogModel::castCylinder",
   "tag": "ror-inferred",
   "was": "FUN_001149d4",
   "why": "f12 r, a1 pos, a2 dir, a3 hit: the cylinder test against the collision tables; MagScene::castCylinder's sky model test"
+ },
+ "00114c54": {
+  "name": "DogModel::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_00114c54",
+  "why": "zeroes every DogModel field (load flag, ref count, roots, matrices) and sets -1 / 1.0 defaults; called by both constructors, release and the actor / scene constructors"
+ },
+ "00114d04": {
+  "name": "DogModel::setRoot",
+  "tag": "ror-inferred",
+  "was": "FUN_00114d04",
+  "why": "slot 5: asserts I3D_OK == I3rRoot__CheckIdString( p ), stores p at m_i3r_root (+0x11c), clears the matrix / collision fields and relocates p; DogModel(tag_I3rRoot_s*) calls it"
+ },
+ "00114d8c": {
+  "name": "DogModel::getWorldPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00114d8c",
+  "why": "copies the translation row of the model's world matrix (own trans when no parent, the parent's matrix row 3, or parent x node matrix of m_attach_node) into out"
+ },
+ "00114e38": {
+  "name": "DogModel::transformBillboard",
+  "tag": "ror-inferred",
+  "was": "FUN_00114e38",
+  "why": "slot 11: when bit 1 of +0x100 is set builds m_matrix itself turned to the camera (theDir) or towards thePos, returns 1 so draw skips transform"
+ },
+ "001150c0": {
+  "name": "DogModel::transform",
+  "tag": "ror-inferred",
+  "was": "FUN_001150c0",
+  "why": "slot 2: local matrix at +0xa0 from DogEntity's makeLocalMatrix, then the world matrix with the parent's matrix or its node matrix m_attach_node"
  },
  "001151f4": {
   "name": "DogModel::draw",
@@ -983,11 +1049,29 @@
   "was": "FUN_0011531c",
   "why": "bits 1..3 of the word +0x100 = v & 7; native 151 case 0x2a on the scene actor of an oid"
  },
+ "0011533c": {
+  "name": "DogModel::allocMatrix",
+  "tag": "ror-inferred",
+  "was": "FUN_0011533c",
+  "why": "allocates nNode * 0x84 (asserts __null != m_mat_local): local matrices, m_mat_model, m_mat_flag; fills them with copyLocalBasicTransform / convertLocalToModel"
+ },
+ "001154cc": {
+  "name": "DogModel::freeMatrix",
+  "tag": "ror-inferred",
+  "was": "FUN_001154cc",
+  "why": "frees m_mat_local (+0x12c) and clears it and m_mat_model; DogActor::releaseModel"
+ },
  "0011550c": {
   "name": "DogModel::setupNodeFlags",
   "tag": "ror-inferred",
   "was": "FUN_0011550c",
   "why": "for each node of the i3r model whose name starts b_a / b_y sets that node's flag to 1 / 2 (asserts m_node_flag); MagScene::load calls it after loading the sky model"
+ },
+ "00115694": {
+  "name": "DogModel::setupColliTbl",
+  "tag": "ror-inferred",
+  "was": "FUN_00115694",
+  "why": "asserts m_colli_tbl == __null, allocates one u_short per i3c node: the model node index of the i3c node's name (-1 when none)"
  },
  "00115790": {
   "name": "DogModel::loadData",
@@ -1000,6 +1084,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001158ec",
   "why": "DogModel vtable slot 14: asserts m_pack_file == __null; loads the model from a BedPfh with the scene textures and a light id"
+ },
+ "00115c60": {
+  "name": "DogModel::share",
+  "tag": "ror-inferred",
+  "was": "FUN_00115c60",
+  "why": "slot 16: asserts theOriginal, counts a reference on it, load flag 3 (m_original kept at +0x118), resets"
  },
  "00115cec": {
   "name": "DogModel::release",
@@ -1108,6 +1198,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0011756c",
   "why": "asserts p and m_tex_info; trims m_num_tex past the last used record and hands the table to i3dCtxSetTexTable(p, m_tex_info)"
+ },
+ "0011764c": {
+  "name": "DogTexInfo::dump",
+  "tag": "ror-inferred",
+  "was": "FUN_0011764c",
+  "why": "empty in retail (a debug print); DogModel::loadPack calls it with the texture table when the model's textures cannot be assigned"
  },
  "00117654": {
   "name": "MagSystem::vSyncCallback",
@@ -12857,6 +12953,24 @@
   "was": "FUN_0021a558",
   "why": "i3rSetRelocate's unrelocate hook: zeroes the 16-byte records in child 6's data table (the packet slots i3rBuildPackets fills)"
  },
+ "0021a5b0": {
+  "name": "i3rAssignTex",
+  "tag": "ror-inferred",
+  "was": "FUN_0021a5b0",
+  "why": "DogModel::assignTex(DogTexInfo*) passes the root, tex->m_tex_info and tex->m_num_tex (asserts p, n>0 in the other overload); non-zero when a texture is missing"
+ },
+ "0021a700": {
+  "name": "i3rCopyLocalBasicTransform",
+  "tag": "ror-inferred",
+  "was": "FUN_0021a700",
+  "why": "the body of DogModel::copyLocalBasicTransform: the root's node basic transforms into a matrix array"
+ },
+ "0021a760": {
+  "name": "i3rConvertLocalToModel",
+  "tag": "ror-inferred",
+  "was": "FUN_0021a760",
+  "why": "the body of DogModel::convertLocalToModel (asserts a, c): local node matrices to model matrices down the node tree"
+ },
  "0021a828": {
   "name": "i3rCopyClipSphere",
   "tag": "lib-context",
@@ -14423,6 +14537,36 @@
   "was": "FUN_0022b4a0",
   "why": "(root, i): root data table +0x14 + i * 0x40, the twin of 0x22b488; no callers, role unknown"
  },
+ "0022bba0": {
+  "name": "i3cRelocate",
+  "tag": "ror-inferred",
+  "was": "FUN_0022bba0",
+  "why": "relocates a collision file (byte +0x10 set = offsets): the node table +0x18 (12-byte records) and the table +0x1c; loadData's m_i3c_root"
+ },
+ "0022bfd8": {
+  "name": "i3cGetNumNode",
+  "tag": "ror-inferred",
+  "was": "FUN_0022bfd8",
+  "why": "u_short +0x14 of the collision root; the casts assert nNode >= 0 and nNode <= 64 on it"
+ },
+ "0022bfe0": {
+  "name": "i3cGetNodeName",
+  "tag": "ror-inferred",
+  "was": "FUN_0022bfe0",
+  "why": "first word of node record i (12 bytes at +0x18) when i < the node count, else NULL; setupColliTbl looks its names up in the model"
+ },
+ "0022c010": {
+  "name": "i3cGetNumGroup",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c010",
+  "why": "u_short +0x16 of the collision root; the body of DogModel::get_nGroup"
+ },
+ "0022c1d8": {
+  "name": "i3cSetBothFaceEnable",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c1d8",
+  "why": "the body of DogModel::setBothFaceEnable: byte +0x12 = flag, returns whether it was 1"
+ },
  "0022c2a0": {
   "name": "i3rIsItemType",
   "tag": "ror-inferred",
@@ -14440,6 +14584,24 @@
   "tag": "ror-inferred",
   "was": "FUN_0022c478",
   "why": "(item, base): recursive; data / children / name offsets + base, then the type's fixup from table 0x2db4c8 on the data (bit 31 of +4 clear, type <= 0x59 else 3), then the children (16 bytes each, count = low 24 bits of +4)"
+ },
+ "002324b8": {
+  "name": "i3cCastSphere",
+  "tag": "ror-inferred",
+  "was": "FUN_002324b8",
+  "why": "DogModel::castSphere's collision query (query, sphere, node matrices)"
+ },
+ "00232508": {
+  "name": "i3cCastRay",
+  "tag": "ror-inferred",
+  "was": "FUN_00232508",
+  "why": "DogModel::castRay's collision query (query, ray, node matrices)"
+ },
+ "002325a8": {
+  "name": "i3cCastCylinder",
+  "tag": "ror-inferred",
+  "was": "FUN_002325a8",
+  "why": "DogModel::castCylinder's collision query (query, cylinder, node matrices)"
  },
  "002337e0": {
   "name": "i3dPointSegDist2",
