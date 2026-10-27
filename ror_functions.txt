@@ -3817,18 +3817,18 @@
 /* 001d3ac8 0000007c */ GamMan::switchVolume(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- game/gamman2.cpp
 // *****************************************************************************
 
 /* 001d3b44 0000082c */ GamMan::checkMenuReq(){}  // ror
 /* 001d4370 00000174 */ FUN_001d4370(){}
 /* 001d44e4 0000005c */ GamMan::isSeqPair0Pending(){}  // ror
 /* 001d4540 000001f0 */ FUN_001d4540(){}
-/* 001d4730 000000dc */ FUN_001d4730(){}
+/* 001d4730 000000dc */ GamMan::sortQuadCorners(){}  // ror
 /* 001d480c 000001c4 */ GamMan::fitObjBounds(){}  // ror
-/* 001d49d0 0000006c */ FUN_001d49d0(){}
+/* 001d49d0 0000006c */ GamMan::setObjRadius(){}  // ror
 /* 001d4a3c 000000b0 */ GamMan::getObjRadius(){}  // ror
-/* 001d4aec 000000b0 */ FUN_001d4aec(){}
+/* 001d4aec 000000b0 */ GamMan::getObjKeepRadius(){}  // ror
 /* 001d4b9c 0000050c */ FUN_001d4b9c(){}
 /* 001d50a8 000003a0 */ FUN_001d50a8(){}
 /* 001d544c 000001c4 */ GamMan::placeAchr(){}  // ror
@@ -3845,7 +3845,7 @@
 /* 001d7c20 000001c4 */ FUN_001d7c20(){}
 /* 001d7de4 000000d4 */ GamMan::getFloorY(){}  // ror
 /* 001d7eb8 0000001c */ GamMan::selectSectaList(){}  // ror
-/* 001d7ed4 00000074 */ FUN_001d7ed4(){}
+/* 001d7ed4 00000074 */ GamMan::getSectaCellPtr(){}  // ror
 /* 001d7f48 00000070 */ GamMan::pickSectaCell(){}  // ror
 /* 001d7fb8 000000ac */ FUN_001d7fb8(){}
 /* 001d8064 000000b4 */ GamMan::findSectaCell(){}  // ror
@@ -3853,7 +3853,7 @@
 /* 001d817c 00000048 */ GamMan::getSectaCellY(){}  // ror
 /* 001d81c4 0000002c */ FUN_001d81c4(){}
 /* 001d81f0 000001d0 */ GamMan::findSectaPath(){}  // ror
-/* 001d83c0 00000010 */ FUN_001d83c0(){}
+/* 001d83c0 00000010 */ GamMan::setSectaList(){}  // ror
 /* 001d83d0 000000d8 */ GamMan::lookupFlagTable(){}  // ror
 /* 001d84a8 00000008 */ GamMan::resetExtra(){}  // ror
 /* 001d84b0 00000018 */ GamMan::empty1d84b0(){}  // ror

@@ -263,12 +263,13 @@ struct GamSysData
     u_char *m_data;                 // ROR 0x58: the file
 };
 
-/* A secta cell (GamMan::findSectaCell's answer; built by 0x17c340, not
- * reconstructed): plain EE layout. */
+/* A secta cell (EE 0x90; GamMan::findSectaCell's answer, the cells of a
+ * MagSectaList; built by the 0x17c1f4 loader, not reconstructed): plain EE
+ * layout. */
 struct GamSecta
 {
     int   m_id;                     // ROR 0x00: ObjStat::get_o_secta_id
-    int   _04;
+    int   m_sector;                 // ROR 0x04: its sector record (MagScene's footstep sound)
     u_int m_flags;                  // ROR 0x08: bit 2, findSectaCell refuses it
     int   _0c;
     float m_pos[3];                 // ROR 0x10: the cell's point (x, y, z): TskMoveSectaFindPath walks to it
@@ -276,11 +277,14 @@ struct GamSecta
     float m_z0;                     // ROR 0x20
     float m_x1;                     // ROR 0x24
     float m_z1;                     // ROR 0x28
+    u_char _2c[0x90 - 0x2c];
 };
 static_assert(offsetof(GamSecta, m_flags) == 0x08, "m_flags");
 static_assert(offsetof(GamSecta, m_x0) == 0x1c, "m_x0");
 static_assert(offsetof(GamSecta, m_pos) == 0x10, "m_pos");
 static_assert(offsetof(GamSecta, m_z1) == 0x28, "m_z1");
+static_assert(offsetof(GamSecta, m_sector) == 0x04, "m_sector");
+static_assert(sizeof(GamSecta) == 0x90, "GamSecta is 0x90 bytes on the EE (GamMan indexes the cells)");
 
 /* GamMan::findSectaPath's answer: the cells from the start to the goal (at
  * most 127). layout: host -- cell pointers; EE offsets in the comments. */

@@ -79,7 +79,7 @@ void GamMan::init()
     m_pcPtr = NULL;
     m_dogPtr = NULL;
 
-    m_pool2246c = new SeqFixedPool<GamRec16, 0x100>;
+    m_pool2246c = new SeqFixedPool<GamObjUpdate, 0x100>;
     m_pool2246c->build(m_pool2246c->m_storage, 0x100);
     m_pool2246c->clear();
 
@@ -190,7 +190,7 @@ void GamMan::initGameState()
     markReset();
     clearItemHave();
     m_itemStock.clear();
-    m_22ab0 = 0;
+    m_sectaList = 0;
     resetExtra();
 }
 

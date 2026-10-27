@@ -40,13 +40,14 @@ struct GamObjColli
     float m_radius;             // ROR 0x10: shape 4's radius
     int   _14;
     int   m_colli[4];           // ROR 0x18: MagScene private collision ids
+    int   _28[2];               // ROR 0x28: ObjStat copies 12 words (m_colPrm)
 };
 static_assert(offsetof(GamObjColli, m_shape) == 0x04, "m_shape");
 static_assert(offsetof(GamObjColli, m_08) == 0x08, "m_08");
 static_assert(offsetof(GamObjColli, m_0c) == 0x0c, "m_0c");
 static_assert(offsetof(GamObjColli, m_radius) == 0x10, "m_radius");
 static_assert(offsetof(GamObjColli, m_colli) == 0x18, "m_colli");
-static_assert(sizeof(GamObjColli) == 0x28, "GamObjColli is 0x28 bytes on the EE");
+static_assert(sizeof(GamObjColli) == 0x30, "GamObjColli: ObjStat::getParam(0x18 / 0x1005) copies 0x30 bytes");
 
 /* One item (EE 0x10, 16-aligned): the 12 slots at GamMan +0x1a700
  * (getItemHavePtr's vector) and the stock pool's records. addItem /
@@ -172,6 +173,14 @@ static_assert(sizeof(GamObjTable) == 0x5020, "GamObjTable is 0x5020 bytes (init'
 struct GamRec4  { u_int _0; };
 struct GamRec8  { u_int _0[2]; };
 struct GamRec16 { u_int _0[4]; };
+/* A record of the object update list GamMan +0x2246c (EE 0x10: oid +0x0,
+ * cell +0x4; queueObjUpdate leaves +0x8..+0xf as stack garbage). The hit
+ * walk 0x1d7c20 reads m_oid. layout: host -- a cell pointer. */
+struct GamObjUpdate
+{
+    u_int     m_oid;                // ROR 0x0
+    GamSecta *m_cell;               // ROR 0x4
+};
 static_assert(sizeof(GamRec4) == 4, "GamRec4");
 static_assert(sizeof(GamRec8) == 8, "GamRec8");
 static_assert(sizeof(GamRec16) == 0x10, "GamRec16");
@@ -808,40 +817,55 @@ struct GamMan
     void closeSysMsg();                                                  // ROR 0x001cfaa8
     /* setObj(oid, 1) when hide, else resetObj(oid, 1). */
     void hideObj(u_int oid, int hide);                                   // ROR 0x001d23f8
-    /* In unassigned@001d3b44 (GamMan methods past switchVolume). */
+    /* ---- game/gamman2.cpp (0x1d3b44..0x1d84c8) ---- */
     /* Cell no of secta list list (bss 0x7811ac, 0x18 per list, 0x90 per
      * cell) and its position (+0x10) into pos. */
     GamSecta *getSectaCell(int no, float *pos, int list);                // ROR 0x001d811c
+    /* Takes oid off the object update list (+0x2246c) when it is there. */
     void relinkObj(u_int oid);                                           // ROR 0x001d5da0
     /* The floor height under pos: the secta query 0x17c340 (radius 40)
-     * picks a cell, getSectaCellY its height (EmyManager::spawnGroups). */
+     * picks a cell (the current list's, else the first list with one),
+     * getSectaCellY its height; 0 when no list has a cell. */
     float getFloorY(const float *pos);                                   // ROR 0x001d7de4
-    /* The secta cell of pos (0x17c340 over the list bss 0x7811ac, starting
-     * at cur), NULL when none or its flags bit 2 is set; type2: the oid's
-     * type is 2 (ObjStat's position setters). */
-    GamSecta *findSectaCell(const float *pos, GamSecta *cur, int type2); // ROR 0x001d8064
+    /* The secta cell of pos in list (0x17c340 radius 200 over bss 0x7811ac,
+     * starting at cur), NULL when none or its flags bit 2 is set. ObjStat's
+     * position setters pass list 1 for type-2 objects, else 0. */
+    GamSecta *findSectaCell(const float *pos, GamSecta *cur, int list);  // ROR 0x001d8064
     /* The id of the cell oid stands in, in list (an achr's or fchr's
      * position through 0x17c340, radius 40), -1 none. */
     int  getObjSectaNo(u_int oid, int list);                             // ROR 0x001d7b08
     /* The cells of list from cell no from to cell no to into path
      * (0x17d298); path->m_num, 0 when there is no way. */
     int  findSectaPath(int list, int from, int to, GamSectaPath *path);  // ROR 0x001d81f0
-    /* The secta list later lookups use (+0x22ab0, through 0x1d83c0). */
+    /* setSectaList(list): the ELF's other entry point. */
     void selectSectaList(int list);                                      // ROR 0x001d7eb8
+    /* Cell no of list, NULL when the list is not loaded (no callers). */
+    GamSecta *getSectaCellPtr(int no, int list);                         // ROR 0x001d7ed4
     /* The cell of pos in list from scratch (0x17c340, radius 40), NULL none. */
     GamSecta *pickSectaCell(const float *pos, int list);                 // ROR 0x001d7f48
     /* The floor height of cell under pos (0x17dd5c on list); 100000 for a
      * NULL cell. */
     float getSectaCellY(GamSecta *cell, const float *pos, int list);     // ROR 0x001d817c
+    /* m_sectaList = list. */
+    void setSectaList(int list);                                         // ROR 0x001d83c0
     /* Non-zero when the achr hits something (out: the hit record, +0x10
      * the other oid). */
     int  placeAchr(int oid, void *out, int arg);                         // ROR 0x001d544c
     /* The table data 0x2fc1f8 (8-word rows, -1 ends): column col of the
-     * row whose column keyCol is key (keyCol 99: row key). -1 none. */
+     * row whose column keyCol is key (keyCol 99: row key; keyCol 5 and
+     * anything outside 0..7: -1). -1 none. */
     int  lookupFlagTable(int keyCol, int key, int col);                  // ROR 0x001d83d0
     /* 1 when m_seqPair[0] (system call 0x35) has both words, global 100
      * equals global 0x65 and sys flag 0x8000 is clear (MnuPBook's close). */
     int  isSeqPair0Pending();                                            // ROR 0x001d44e4
+    /* Param 0x18 of oid becomes shape 4 with radius r (through the global
+     * g_gamMan, as the ROM does). */
+    void setObjRadius(u_int oid, float r);                               // ROR 0x001d49d0
+    /* getObjRadius over the kept shape (param 0x1005). */
+    float getObjKeepRadius(u_int oid, int *out);                         // ROR 0x001d4aec
+    /* Orders the four x / z corners of a quad (a corner before another
+     * when both its x and z are smaller), then swaps corners 2 and 3. */
+    void sortQuadCorners(float *quad);                                   // ROR 0x001d4730
     void markReset();                                                    // ROR 0x001d3588
     /* Marks light set theD in m_flags, copies set theS over it. */
     void setLightFlag(int theD, int theS);                               // ROR 0x001d2724
@@ -1143,6 +1167,8 @@ struct GamMan
     int          m_pcJnfc;          // ROR 0x21ff0: is_pc_jnfc
     int          m_21ff4;           // ROR 0x21ff4
     int          m_21ff8;           // ROR 0x21ff8
+    int          m_21ffc;           // ROR 0x21ffc: 0x1d4370 copies it to the PC actor's +0x1e8 (flags2 0x40000000)
+    int          m_22000;           // ROR 0x22000: ... and to the dog actor's word (scene actor + 0x2b08)
     int          m_22004;           // ROR 0x22004: EmyManager's object id (getEmyOids)
     int          m_22008;           // ROR 0x22008: ... its second
     int          m_pcEquipItemChrID;// ROR 0x2200c: getPcEquipItemChrID
@@ -1184,7 +1210,7 @@ struct GamMan
     intptr_t     m_seqWord;         // ROR 0x22364: setEmyParam; system call 0x15 stores its a1
     u_int        m_sysTime;         // ROR 0x22368: getSysTime's last value
     char         m_2236c[4][0x40];  // ROR 0x2236c: four strings, emptied by initGameState
-    SeqFixedPool<GamRec16, 0x100> *m_pool2246c; // ROR 0x2246c: init's new (0x1840 bytes)
+    SeqFixedPool<GamObjUpdate, 0x100> *m_pool2246c; // ROR 0x2246c: init's new (0x1840 bytes): the object update list (queueObjUpdate / relinkObj)
     GamCamRec    m_camStack[4];     // ROR 0x22470: pushCamera / popCamera (three used)
     int          m_camDepth;        // ROR 0x22530: the records pushed
     I3dFog       m_fogStack[3];     // ROR 0x22540: pushFog / popFog; m_color[0] -1 = a free slot
@@ -1201,7 +1227,7 @@ struct GamMan
     int          m_cursolInitStock; // ROR 0x22a8c: get / setCursolInitFlg_Stock
     int          m_playTimeHH;      // ROR 0x22aa0: getPlayTime_HH
     int          m_playTimeMM;      // ROR 0x22aa4: getPlayTime_MM
-    int          m_22ab0;           // ROR 0x22ab0
+    int          m_sectaList;       // ROR 0x22ab0: the secta list the last query used (setSectaList)
 };
 
 extern GamMan g_gamMan;         /* bss 0x7812c0 */

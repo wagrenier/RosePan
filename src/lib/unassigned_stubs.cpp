@@ -433,7 +433,7 @@ void FUN_0017772c(Obj176a3c *obj)
 }
 
 // stub of ROR 0x0017c340
-void FUN_0017c340(Obj17c0f0 *obj, const float *pos, MagSectorHit **hit, int arg,
+void FUN_0017c340(Obj17c0f0 *obj, const float *pos, GamSecta **hit, int arg,
                    float r, float h)
 {
     ROSEPAN_STUB("FUN_0017c340", 0x0017c340);
@@ -621,19 +621,6 @@ int GamMan::placeAchr(int oid, void *out, int arg)
 {
     ROSEPAN_STUB("GamMan::placeAchr", 0x001d544c);
     return 0;
-}
-
-// stub of ROR 0x001d5da0
-void GamMan::relinkObj(u_int oid)
-{
-    ROSEPAN_STUB("GamMan::relinkObj", 0x001d5da0);
-}
-
-// stub of ROR 0x001d83d0
-int GamMan::lookupFlagTable(int keyCol, int key, int col)
-{
-    ROSEPAN_STUB("GamMan::lookupFlagTable", 0x001d83d0);
-    return {};
 }
 
 // stub of ROR 0x0017756c
@@ -1113,25 +1100,6 @@ void GamMan::writeSaveData(void *buf)
     ROSEPAN_STUB("GamMan::writeSaveData", 0x001d6078);
 }
 
-// stub of ROR 0x001d480c
-void GamMan::fitObjBounds(u_int oid)
-{
-    ROSEPAN_STUB("GamMan::fitObjBounds", 0x001d480c);
-}
-
-// stub of ROR 0x001d4a3c
-float GamMan::getObjRadius(u_int oid, int *out)
-{
-    ROSEPAN_STUB("GamMan::getObjRadius", 0x001d4a3c);
-    return {};
-}
-
-// stub of ROR 0x001d5bc8
-void GamMan::queueObjUpdate(GamSecta *cell, u_int oid)
-{
-    ROSEPAN_STUB("GamMan::queueObjUpdate", 0x001d5bc8);
-}
-
 // stub of ROR 0x0017c4f4
 void sectorClearFlags(Obj17c0f0 *obj, int key, u_int bits, int rec)
 {
@@ -1164,13 +1132,6 @@ float utlAtan2(float x, float z)
     return {};
 }
 
-// stub of ROR 0x001d8064
-GamSecta * GamMan::findSectaCell(const float *pos, GamSecta *cur, int type2)
-{
-    ROSEPAN_STUB("GamMan::findSectaCell", 0x001d8064);
-    return {};
-}
-
 // stub of ROR 0x0017762c
 void Obj176a3c::releaseAll()
 {
@@ -1196,37 +1157,10 @@ void MagScene::setCameraPathPos(float pos)
     ROSEPAN_STUB("MagScene::setCameraPathPos", 0x0013d52c);
 }
 
-// stub of ROR 0x001d811c
-GamSecta * GamMan::getSectaCell(int no, float *pos, int list)
-{
-    ROSEPAN_STUB("GamMan::getSectaCell", 0x001d811c);
-    return {};
-}
-
 // stub of ROR 0x001d3b44
 void GamMan::checkMenuReq()
 {
     ROSEPAN_STUB("GamMan::checkMenuReq", 0x001d3b44);
-}
-
-// stub of ROR 0x001d817c
-float GamMan::getSectaCellY(GamSecta *cell, const float *pos, int list)
-{
-    ROSEPAN_STUB("GamMan::getSectaCellY", 0x001d817c);
-    return {};
-}
-
-// stub of ROR 0x001d7f48
-GamSecta * GamMan::pickSectaCell(const float *pos, int list)
-{
-    ROSEPAN_STUB("GamMan::pickSectaCell", 0x001d7f48);
-    return {};
-}
-
-// stub of ROR 0x001d7eb8
-void GamMan::selectSectaList(int list)
-{
-    ROSEPAN_STUB("GamMan::selectSectaList", 0x001d7eb8);
 }
 
 // stub of ROR 0x001d5a0c
@@ -1242,20 +1176,6 @@ void MsgManSet::release(int window)
     ROSEPAN_STUB("MsgManSet::release", 0x0018761c);
 }
 
-
-// stub of ROR 0x001d81f0
-int GamMan::findSectaPath(int list, int from, int to, GamSectaPath *path)
-{
-    ROSEPAN_STUB("GamMan::findSectaPath", 0x001d81f0);
-    return {};
-}
-
-// stub of ROR 0x001d7b08
-int GamMan::getObjSectaNo(u_int oid, int list)
-{
-    ROSEPAN_STUB("GamMan::getObjSectaNo", 0x001d7b08);
-    return {};
-}
 
 // stub of ROR 0x001417e4
 void MagScene::setFocusData(const void *data, int size)
@@ -1595,13 +1515,6 @@ void utlVecRotZ(float angle, float *out, const float *in)
     ROSEPAN_STUB("utlVecRotZ", 0x00106a40);
 }
 
-// stub of ROR 0x001d44e4
-int GamMan::isSeqPair0Pending()
-{
-    ROSEPAN_STUB("GamMan::isSeqPair0Pending", 0x001d44e4);
-    return {};
-}
-
 // stub of ROR 0x00106bc8
 void utlVecRotY(float angle, float *v)
 {
@@ -1800,13 +1713,6 @@ void FshMain::initOut()
 void FshMain::selectOut()
 {
     ROSEPAN_STUB("FshMain::selectOut", 0x001561bc);
-}
-
-// stub of ROR 0x001d7de4
-float GamMan::getFloorY(const float *pos)
-{
-    ROSEPAN_STUB("GamMan::getFloorY", 0x001d7de4);
-    return {};
 }
 
 // stub of ROR 0x00158d5c
@@ -2047,5 +1953,19 @@ void emyStartMove(int mode, EmyOut *out, const float *pos)
 float utlRandRangeF(float lo, float hi)
 {
     ROSEPAN_STUB("utlRandRangeF", 0x001044b8);
+    return {};
+}
+
+// stub of ROR 0x0017d298
+int FUN_0017d298(MagSectaList *list, MagSectaPathReq *req)
+{
+    ROSEPAN_STUB("FUN_0017d298", 0x0017d298);
+    return {};
+}
+
+// stub of ROR 0x0017dd5c
+float FUN_0017dd5c(MagSectaList *list, int id, const float *pos, float h)
+{
+    ROSEPAN_STUB("FUN_0017dd5c", 0x0017dd5c);
     return {};
 }

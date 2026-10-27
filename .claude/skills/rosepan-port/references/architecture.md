@@ -1120,6 +1120,21 @@ never asserts): sessions name them (`tus.py define --why`).
   4 / 9 (`setObjLight` 0x1ca598).
 - Markers: `ctlObj1cb8e4` 0x1cb8e4 -> `addObjMarker` 0x1cb970: an Obj176a3c effect 0x32 {x, y, z, 50}
   bound to the oid in the pool +0x20b00 (released by ctlObj1cbb80).
+- **game/gamman2.cpp** (pinned 0x1d3b44..0x1d84c8, 2026-10-27; declared in game/gamman.h): GamMan's
+  methods past switchVolume. The **object update list** +0x2246c (a 0x100-node pool, record {oid, cell}):
+  queueObjUpdate 0x1d5bc8 moves an oid to its tail, relinkObj 0x1d5da0 takes it off; the hit walk
+  0x1d7c20 iterates it and calls a GCC 2 pointer-to-member at +0x225d0 ({0, -1, fn}: 0x1d4b9c or
+  0x1d50a8, data 0x2fc1d8) with the query position +0x225b0 and radius +0x225a0 (testHitAt / placeAchr
+  set them). The **flag table** data 0x2fc1f8 (15 rows of 8 words, -1 row ends): col 0 the 0x2000xx /
+  0x1000xx book id, 1 the MnuPBook / MnuDiary type (0x1038 = pb010200, the opening book), 2 its item id
+  (0xa17..), 3 the item's sequence bit (addItem), 4 / 7 sequence globals the book reads, 6 a sequence
+  bit; lookupFlagTable 0x1d83d0 (keyCol 99 = row number, keyCol 5 always -1). The **secta world** is
+  MagScene +0x8542c (bss 0x7811ac, Obj17c0f0): a flag word, a buffer and four lists of 0x18 bytes at
+  +0x08 (MagSectaList: +0x4 loaded count, +0x8 the 0x80-byte sector records, +0xc the 0x90-byte cells
+  GamSecta); 0x17c340 answers one cell per list (radius 40, findSectaCell 200), GamMan +0x22ab0 the
+  list the last query used; cell heights 0x17dd5c, paths 0x17d298 (request {list, from[4], to[4],
+  path}). Bookmarks for the rest: checkMenuReq's switch on global 0x15 is a jump table Ghidra lost
+  (read the asm); writeSaveData 0x1d6078 / readSaveData 0x1d68a0 (0x1264) are the save block.
 - **game/gamstat.cpp** (pinned 0x1d84c8..0x1dd1e8, 2026-10-26; game/gamstat.h): ObjStat / ACHRstat /
   FCHRstat code and GamSysData. ObjStat's fields are named by the ELF's accessor inlines 0x28f874..
   0x28fdb8 (ror-symbol): +0x100 o_oid, +0x104 o_stat, +0x108 o_chr_id (actor), +0x114 the secta cell
