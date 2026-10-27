@@ -10,20 +10,25 @@
 // +0x8542c).
 //
 // Written so far: the update list, the flag table, the radius / bounds
-// helpers and the secta queries. Still stubs (lib/unassigned_stubs.cpp):
-// checkMenuReq with 0x1d4370, 0x1d4540; the hit walk 0x1d7c20 with its
-// callbacks 0x1d4b9c / 0x1d50a8, testHitAt, placeAchr, 0x1d5610..0x1d5ec4;
-// writeSaveData / readSaveData.
+// helpers, the secta queries, the hit tests (the walk over the update
+// list through the member pointer m_hitFunc: hitAtPoint / hitAtSweep) and
+// checkMenuReq with restoreAfterMenu / endPcAction. Still stubs
+// (lib/unassigned_stubs.cpp): writeSaveData / readSaveData.
 
+#include <math.h>
 #include <string.h>
 
 #include "game/gamman.h"
 
 #include "lib/unassigned.h"
 #include "mag/magsystem.h"
+#include "task/tsk_man.h"
 
 /* The scene's secta lists (bss 0x7811ac). */
 static inline Obj17c0f0 &gamSectaWorld() { return g_magSystem.m_scene.m_8542c; }
+
+/* The hit walk's record count (data 0x2d8f58). */
+static int s_hitWalkCount;
 
 /* The flag table (data 0x2fc1f8): one row per picture book / diary, the
  * columns as MnuPBook, MnuDiary, MnuItem, addItem and checkMenuReq read
@@ -48,6 +53,129 @@ static const int s_flagTable[][8] = {
 };
 
 // ──────────────────────────────────────────────────────────────────────
+// The menus global 0x11 can ask for: items 0xa17..0xa19, 0xa1b..0xa21,
+// 0xab6, 0xacc..0xace open their book (lookupFlagTable's column 2 ->
+// column 0), 0xad0..0xad2 the map when they match the map area (0, 2, 1).
+// Any other request collects the achrs and fchrs within 150 of the PC into
+// scratch lists and drops them (nothing reads them). The ROM's switch on
+// global 0x15 (jump table 0x2fc100, 11 cases) has only case 3.
+// ROR 0x001d3b44
+
+void GamMan::checkMenuReq()
+{
+    u_short req = (u_short)g_sequence.m_global[0x11];
+    int bgm = (g_sequence.m_bits[1] & 0x4000000) == 0;
+
+    if (g_sequence.m_global[0x15] == 3 && m_22a84 == -1)
+    {
+        m_flags |= 0x2000;
+        if ((g_sequence.m_bits[1] & 0x20000000) == 0)
+            m_flags2 |= 0x80000;
+
+        int book = req == 0xab6 || (req >= 0xa17 && req < 0xa1a) || (req >= 0xa1b && req < 0xa22)
+                || (req >= 0xacc && req < 0xacf);
+        if (book)
+        {
+            if ((g_sequence.m_bits[1] & 0x20000000) == 0)
+            {
+                g_gamMan.m_flags |= 0x400;
+                g_magSystem.m_scene.requestMenu(lookupFlagTable(2, req, 0), 0);
+                enterMenuPause(0);
+                m_22a84 = 2;
+                m_flags2 &= ~0x80000u;
+                return;
+            }
+        }
+        else if (req >= 0xad0 && req < 0xad3)
+        {
+            if ((getMapArea() == 0 && req == 0xad0) || (getMapArea() == 1 && req == 0xad2)
+                || (getMapArea() == 2 && req == 0xad1))
+            {
+                if (canOpenMapMenu() != 0)
+                {
+                    g_gamMan.m_flags |= 0x400;
+                    g_magSystem.m_scene.requestMenu(0x10001, 0);
+                    enterMenuPause(0);
+                    m_22a84 = 1;
+                    m_flags2 &= ~0x80000u;
+                    return;
+                }
+            }
+            else
+            {
+                m_flags2 |= 0x40000;
+            }
+        }
+        else
+        {
+            // callcheck: operator_new[] (the node arrays)
+            SeqPool<ACHRstat *> achrs;
+            achrs.build(new SeqNode<ACHRstat *>[0x10], 0x10);
+            SeqPool<FCHRstat *> fchrs;
+            fchrs.build(new SeqNode<FCHRstat *>[0x20], 0x20);
+            /* The ROM walks both lists to their ends and does nothing. */
+            collectAchrsNear(m_pcPos, 150.0f, &achrs, -1, 0, 0);
+            collectFchrsNear(m_pcPos, 150.0f, &fchrs, -1, 0, 0);
+            // callcheck: operator_delete[] (the node arrays)
+            delete[] fchrs.m_node;
+            delete[] achrs.m_node;
+        }
+    }
+
+    if (m_seqPair[0].m_b != 0 && m_seqPair[0].m_a != 0
+        && g_sequence.m_global[100] == g_sequence.m_global[0x65] && (m_flags & 0x8000) == 0)
+    {
+        g_sequence.queueSingle(m_seqPair[0].m_b, m_seqPair[0].m_a, 0, 0x40);
+        g_gamMan.resume(0x8000);
+    }
+    else if (m_seqPair[1].m_b != 0 && m_seqPair[1].m_a != 0 && (m_flags & 0x8000) == 0)
+    {
+        g_sequence.queueSingle(m_seqPair[1].m_b, m_seqPair[1].m_a, 0, 0x40);
+        g_gamMan.resume(0x8000);
+    }
+    m_flags |= 2;
+    if (g_sequence.m_global[0x28] == 0x13)
+    {
+        m_flags2 |= 0x80;
+        g_sequence.m_global[0x28] = -1;
+    }
+    g_sequence.m_bits[1] &= ~0x10000000u;
+    g_sequence.m_bits[1] &= ~0x20000000u;
+    int start = g_taskMan.m_timer.m_updates + 1;
+    // callcheck: operator_new (the new expression)
+    TskFrameFunc *task = new TskFrameFunc(9, 0, 0);
+    g_taskMan.addTask(1, start, 1, 0, task, 0, NULL, 1);
+    restoreAfterMenu(bgm && (m_flags2 & 0x80000) == 0);
+    if ((m_flags & 4) != 0)
+        resume(0x100);
+    m_22a84 = -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d4370
+
+void GamMan::restoreAfterMenu(int bgm)
+{
+    if (bgm)
+        m_sndMan.resumeBgm(0, 0, 1);
+    if ((g_gamMan.m_flags2 & 0x100000) != 0)
+    {
+        int kinds[2] = {5, -1};
+        g_sequence.m_flags &= ~1u;
+        g_taskMan.pauseKinds(kinds, 0);
+        g_gamMan.m_flags2 &= ~0x100000u;
+    }
+    if ((m_flags2 & 0x40000000) != 0)
+    {
+        m_pcActorPtr->m_motion.m_speed = m_pcMotionSpeed;
+        /* PORT: no dog (-1) skipped; the ROM writes before the actors. */
+        if (m_dogChrNo >= 0)
+            g_magSystem.m_scene.m_actors[m_dogChrNo].m_motion.m_speed = m_dogMotionSpeed;
+        m_flags2 &= ~0x40000000u;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001d44e4
 
 int GamMan::isSeqPair0Pending()
@@ -57,6 +185,40 @@ int GamMan::isSeqPair0Pending()
     if (g_sequence.m_global[100] != g_sequence.m_global[0x65])
         return 0;
     return (m_flags & 0x8000) == 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d4540
+
+void GamMan::endPcAction()
+{
+    int b = m_seqPair[2].m_b;
+    int a = m_seqPair[2].m_a;
+    if (g_sequence.m_global[0x28] == 0x13)
+    {
+        u_int oid = (u_int)g_sequence.m_global[0x2a];
+        FCHRstat *fchr = getVFchr(oid);
+        if (fchr != NULL)
+        {
+            u_int flag[4];
+            fchr->getParam(0x40, flag);
+            if (flag[0] != 0)
+                g_sequence.m_bits[flag[0] >> 5] |= 1u << (flag[0] & 0x1f);
+        }
+        if (m_pcActor != -1)
+            m_pcMotion = g_magSystem.m_scene.getActorMotion(m_pcActor);
+        listAndReleaseChr(oid);
+        m_flags2 |= 0x100;
+    }
+    int start = g_taskMan.m_timer.m_updates + 1;
+    // callcheck: operator_new (the new expression)
+    TskFrameFunc *task = new TskFrameFunc(0x11, 0, 0);
+    g_taskMan.addTask(1, start, 1, 0, task, 0, NULL, 1);
+    if (b != 0 && a != 0 && (m_flags & 0x8000) == 0)
+    {
+        g_sequence.queueSingle(b, a, 0, 0x40);
+        g_gamMan.resume(0x8000);
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -189,6 +351,333 @@ void GamMan::fitObjBounds(u_int oid)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// m_hitFunc's point test: oid's box (its radius plus m_hitRadius, three
+// radii for kind 3) round m_hitPos within 150 of height, then by kind: 1
+// m_hitPos inside its corner quad (depth 10), 2 / 3 within the radii of
+// its Bip01 Spine1 (kind 2) or its position, 3 also of its Bip01 Neck
+// (m_far 1). Kind 4's test asks for a point outside the radius in x / z
+// and inside it in 3D, which never holds (as in the ROM); 5 / 6 are
+// never hit.
+// ROR 0x001d4b9c
+
+int GamMan::hitAtPoint(u_int oid, ChrHitRec *out)
+{
+    int kind;
+    float r = getObjRadius(oid, &kind);
+    if (out)
+        memset(out, 0, sizeof(*out));
+
+    float pos[4];
+    float e;
+    if (kind == 3)
+    {
+        /* The node's position is replaced by the object's either way. */
+        chrGetNodeWorldPos(oid, pos, "Bip01 Spine1");
+        if (getObjPos(oid, pos) == 0)
+            return 0;
+        e = r * 3.0f + m_hitRadius;
+    }
+    else
+    {
+        if (kind != 2 || chrGetNodeWorldPos(oid, pos, "Bip01 Spine1") == 0)
+        {
+            if (getObjPos(oid, pos) == 0)
+                return 0;
+        }
+        e = r + m_hitRadius;
+    }
+
+    float dy = m_hitPos[1] - pos[1];
+    if (dy < 0.0f ? dy <= -150.0f : 150.0f <= dy)
+        return 0;
+    float x = m_hitPos[0];
+    float z = m_hitPos[2];
+    if (!(pos[0] - e <= x) || !(x <= pos[0] + e) || !(pos[2] - e <= z) || !(z <= pos[2] + e))
+        return 0;
+
+    float d;
+    switch (kind)
+    {
+    case 1: {
+        float quad[8];
+        getObjParam(oid, 0x1003, quad);
+        const float *pts[6] = {&quad[0], &quad[2], &quad[4], &quad[6], &quad[0], NULL};
+        if (m_area.isInPolygon(m_hitPos, pts) == 0)
+            return 0;
+        if (out == NULL)
+            return 1;
+        out->m_oid = oid;
+        out->m_depth = 10.0f;
+        out->m_far = 0;
+        return 1;
+    }
+    case 2:
+        d = sqrtf((pos[0] - x) * (pos[0] - x) + (pos[2] - z) * (pos[2] - z));
+        if (!(d < r + m_hitRadius))
+            return 0;
+        break;
+    case 3:
+        d = sqrtf((pos[0] - x) * (pos[0] - x) + (pos[2] - z) * (pos[2] - z));
+        if (d < r + m_hitRadius)
+            break;
+        if (chrGetNodeWorldPos(oid, pos, "Bip01 Neck") == 0)
+            return 0;
+        pos[0] -= m_hitPos[0];
+        pos[2] -= m_hitPos[2];
+        d = sqrtf(pos[0] * pos[0] + pos[2] * pos[2]);
+        if (!(d < r + m_hitRadius))
+            return 0;
+        if (out == NULL)
+            return 1;
+        out->m_far = 1;
+        out->m_oid = oid;
+        out->m_depth = r - d;
+        return 1;
+    case 4: {
+        d = sqrtf((pos[0] - x) * (pos[0] - x) + (pos[2] - z) * (pos[2] - z));
+        if (!(r < d))
+            return 0;
+        float h = pos[1] - m_hitPos[1];
+        d = sqrtf(d * d + h * h);
+        if (!(d < r))
+            return 0;
+        break;
+    }
+    default:
+        return 0;
+    }
+    if (out == NULL)
+        return 1;
+    out->m_oid = oid;
+    out->m_far = 0;
+    out->m_depth = r - d;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// m_hitFunc's sweep test: as hitAtPoint, but an object round the sweep
+// end m_hitPos2 (its radius plus m_hitRadius2) is tested there (m_far 1).
+// Kind 1 hits on the box alone (depth 0); kind 4 measures from the other
+// end than kinds 2 / 3 and, as in hitAtPoint, can never hit.
+// ROR 0x001d50a8
+
+int GamMan::hitAtSweep(u_int oid, ChrHitRec *out)
+{
+    int kind;
+    float r = getObjRadius(oid, &kind);
+    float pos[4];
+    getObjPos(oid, pos);
+
+    float e = r + m_hitRadius;
+    float e2 = r + m_hitRadius2;
+    int atEnd = pos[0] - e2 <= m_hitPos2[0] && m_hitPos2[0] <= pos[0] + e2
+             && pos[2] - e2 <= m_hitPos2[2] && m_hitPos2[2] <= pos[2] + e2;
+    if (!atEnd)
+    {
+        if (m_hitPos[0] < pos[0] - e || pos[0] + e < m_hitPos[0]
+            || m_hitPos[2] < pos[2] - e || pos[2] + e < m_hitPos[2])
+            return 0;
+    }
+
+    float d;
+    switch (kind)
+    {
+    case 1:
+        if (out == NULL)
+            return 1;
+        out->m_oid = oid;
+        out->m_depth = 0.0f;
+        out->m_far = atEnd;
+        return 1;
+    case 2:
+    case 3: {
+        float cx, cz;
+        if (atEnd)
+        {
+            cx = m_hitPos2[0];
+            cz = m_hitPos2[2];
+            r += m_hitRadius2;
+        }
+        else
+        {
+            cx = m_hitPos[0];
+            cz = m_hitPos[2];
+            r += m_hitRadius;
+        }
+        d = sqrtf((pos[0] - cx) * (pos[0] - cx) + (pos[2] - cz) * (pos[2] - cz));
+        break;
+    }
+    case 4: {
+        const float *c = atEnd ? m_hitPos : m_hitPos2;
+        float dx = pos[0] - c[0];
+        float dz = pos[2] - c[2];
+        d = sqrtf(dx * dx + dz * dz);
+        if (!(r < d))
+            return 0;
+        float dy = pos[1] - c[1];
+        d = sqrtf(d * d + dy * dy);
+        break;
+    }
+    default:
+        return 0;
+    }
+    if (!(d < r))
+        return 0;
+    if (out == NULL)
+        return 1;
+    out->m_oid = oid;
+    out->m_depth = r - d;
+    out->m_far = atEnd;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The achr's hit test from its Bip01 Spine1 (or its position). Without
+// arg, an achr of type 2 it hits is pushed away by a TskAvoidMove on its
+// own task id (out's oid becomes this one's).
+// ROR 0x001d544c
+
+int GamMan::placeAchr(int oid, void *out, int arg)
+{
+    ACHRstat *achr = getAchr(oid);
+    GamSecta *cell = achr->m_secta;
+    if ((achr->m_flags & 0x80) != 0)
+        return 0;
+    if (chrGetNodeWorldPos(oid, m_hitPos, "Bip01 Spine1") == 0)
+        achr->getPos(m_hitPos);
+    m_hitRadius = getObjRadius(oid, NULL);
+    m_hitFunc = &GamMan::hitAtPoint;
+    ChrHitRec *hit = (ChrHitRec *)out;
+    int ret = hitTestObjs(cell, oid, hit, 0);
+    if (ret != 0 && hit != NULL)
+    {
+        u_int other = hit->m_oid;
+        if (arg == 0 && gamOidType(other) == 2)
+        {
+            ACHRstat *chr = getAchr(other);
+            hit->m_oid = oid;
+            if (g_taskMan.getTask(chr->m_taskId) == 0)
+            {
+                // callcheck: operator_new (the new expression)
+                TskAvoidMove *task = new TskAvoidMove(other, hit, 8, 0x1e, NULL, 0);
+                g_taskMan.addTask(1, -1, 1, 0, task, 0, &chr->m_taskId, 0x11);
+            }
+        }
+    }
+    return ret;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d5610
+
+int GamMan::testAchrHit(u_int oid)
+{
+    if (isObj(oid) == 0)
+        return 0;
+    ACHRstat *achr = getAchr(oid);
+    GamSecta *cell = achr->m_secta;
+    if ((achr->m_flags & 0x80) != 0)
+        return 0;
+    float pos[4];
+    achr->getPos(pos);
+    memcpy(m_hitPos, pos, sizeof(m_hitPos));
+    m_hitRadius = getObjRadius(oid, NULL);
+    m_hitFunc = &GamMan::hitAtPoint;
+    return hitTestObjs(cell, oid, NULL, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d56f4
+
+int GamMan::testPcHitAt(const float *pos, ChrHitRec *out)
+{
+    if ((m_pcPtr->m_flags & 0x80) != 0)
+        return 0;
+    GamSecta *cell = findSectaCell(pos, m_pcPtr->m_secta, 0);
+    memcpy(m_hitPos, pos, sizeof(m_hitPos));
+    m_hitRadius = getObjRadius(m_21fcc, NULL);
+    m_hitFunc = &GamMan::hitAtPoint;
+    int ret = hitTestObjs(cell, m_21fcc, out, m_21fd0);
+    if (ret == 0 || out == NULL)
+        return ret;
+    u_int other = out->m_oid;
+    switch (gamOidType(other))
+    {
+    case 1:
+        return 0;
+    case 2: {
+        ACHRstat *chr = getAchr(other);
+        out->m_oid = m_21fcc;
+        if (chr != NULL && g_taskMan.getTask(chr->m_taskId) == 0)
+        {
+            // callcheck: operator_new (the new expression)
+            TskAvoidMove *task = new TskAvoidMove(other, out, 8, 0x1e, NULL, 0);
+            g_taskMan.addTask(1, -1, 1, 0, task, 0, &chr->m_taskId, 0x11);
+        }
+        break;
+    }
+    }
+    return ret;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d58d8
+
+int GamMan::setupDogSweep(float *pos, float angle)
+{
+    ObjStat *dog = m_dogPtr;
+    if (dog == NULL || (dog->m_flags & 0x80) != 0)
+        return 0;
+    findSectaCell(pos, dog->m_secta, 0);
+    memcpy(m_hitPos, pos, sizeof(m_hitPos));
+    pos[0] += sinf(angle) * m_21fbc[2];
+    pos[2] += cosf(angle) * m_21fbc[2];
+    memcpy(m_hitPos2, pos, sizeof(m_hitPos2));
+    m_hitRadius = m_21fbc[0];
+    m_hitRadius2 = m_21fbc[1];
+    m_hitFunc = &GamMan::hitAtSweep;
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The hit test at pos for oid (radius 25 without one); a3 is a second oid
+// not tested, a4 is not read. A hit copies the record to out; a type-2
+// achr hit is pushed away (out's oid becomes oid).
+// ROR 0x001d5a0c
+
+int GamMan::testHitAt(const float *pos, u_int oid, int a3, int a4, void *out)
+{
+    (void)a4;
+    if (testObjFlags(oid, 0x80) != 0)
+        return 0;
+    memcpy(m_hitPos, pos, sizeof(m_hitPos));
+    m_hitRadius = oid != 0 ? getObjRadius(oid, NULL) : 25.0f;
+    m_hitFunc = &GamMan::hitAtPoint;
+    /* PORT: cleared; hitAtPoint fills it only when it is reached. */
+    ChrHitRec hit;
+    memset(&hit, 0, sizeof(hit));
+    int ret = hitTestObjs(NULL, oid, &hit, (u_int)a3);
+    if (out != NULL && ret != 0)
+    {
+        ChrHitRec *rec = (ChrHitRec *)out;
+        *rec = hit;
+        u_int other = rec->m_oid;
+        if (gamOidType(other) == 2)
+        {
+            ACHRstat *chr = getAchr(other);
+            rec->m_oid = oid;
+            if (g_taskMan.getTask(chr->m_taskId) == 0)
+            {
+                // callcheck: operator_new (the new expression)
+                TskAvoidMove *task = new TskAvoidMove(other, rec, 8, 0x1e, NULL, 0);
+                g_taskMan.addTask(1, -1, 1, 0, task, 0, &chr->m_taskId, 0x11);
+            }
+        }
+    }
+    return ret;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // A record for oid already on the list goes back to the free list first,
 // so the oid ends up once, at the tail, with the new cell.
 // ROR 0x001d5bc8
@@ -231,6 +720,33 @@ void GamMan::relinkObj(u_int oid)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The ROM pushes the dropped records at the free list's head; the host's
+// remove appends them (only which free node is reused next differs).
+// ROR 0x001d5ec4
+
+void GamMan::clearObjUpdates(int mode)
+{
+    SeqPool<GamObjUpdate> *pool = m_pool2246c;
+    if (pool->m_used.m_count == 0 || mode < 0)
+        return;
+    if (mode < 3)
+    {
+        pool->clear();
+        return;
+    }
+    if (mode != 3)
+        return;
+    SeqNode<GamObjUpdate> *node = pool->m_used.begin();
+    while (node != pool->m_used.end())
+    {
+        SeqNode<GamObjUpdate> *next = node->m_next;
+        if (node->m_data.m_oid >> 0x1e == 3)
+            m_pool2246c->remove(node);
+        node = next;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001d7b08
 
 int GamMan::getObjSectaNo(u_int oid, int list)
@@ -257,6 +773,32 @@ int GamMan::getObjSectaNo(u_int oid, int list)
         return -1;
     setSectaList(0);
     return hit[list]->m_id;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d7c20
+
+int GamMan::hitTestObjs(GamSecta *cell, u_int oid, ChrHitRec *out, u_int skip)
+{
+    (void)cell;
+    SeqPool<GamObjUpdate> *pool = m_pool2246c;
+    if (pool->m_used.m_count == 0)
+        return 0;
+    s_hitWalkCount = 0;
+    for (SeqNode<GamObjUpdate> *node = pool->m_used.begin(); node != pool->m_used.end();
+         node = node->m_next)
+    {
+        if (s_hitWalkCount++ > 0x400)
+            return 0;
+        u_int other = node->m_data.m_oid;
+        if (other == oid || (skip != 0 && other == skip))
+            continue;
+        if (gamOidType(other) == 1 && g_magSystem.getBwnState() == 0xd)
+            continue;
+        if ((this->*m_hitFunc)(other, out) != 0)
+            return 1;
+    }
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -356,6 +898,16 @@ float GamMan::getSectaCellY(GamSecta *cell, const float *pos, int list)
     if (cell == NULL)
         return 100000.0f;
     return FUN_0017dd5c(&gamSectaWorld().m_list[list], cell->m_id, pos, 0.0f);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The ROM takes list as its seventh argument (t2).
+// ROR 0x001d81c4
+
+int GamMan::countSectaPath(int from, int to, int list)
+{
+    GamSectaPath path;
+    return findSectaPath(list, from, to, &path);
 }
 
 // ──────────────────────────────────────────────────────────────────────

@@ -3821,28 +3821,28 @@
 // *****************************************************************************
 
 /* 001d3b44 0000082c */ GamMan::checkMenuReq(){}  // ror
-/* 001d4370 00000174 */ FUN_001d4370(){}
+/* 001d4370 00000174 */ GamMan::restoreAfterMenu(){}  // ror
 /* 001d44e4 0000005c */ GamMan::isSeqPair0Pending(){}  // ror
-/* 001d4540 000001f0 */ FUN_001d4540(){}
+/* 001d4540 000001f0 */ GamMan::endPcAction(){}  // ror
 /* 001d4730 000000dc */ GamMan::sortQuadCorners(){}  // ror
 /* 001d480c 000001c4 */ GamMan::fitObjBounds(){}  // ror
 /* 001d49d0 0000006c */ GamMan::setObjRadius(){}  // ror
 /* 001d4a3c 000000b0 */ GamMan::getObjRadius(){}  // ror
 /* 001d4aec 000000b0 */ GamMan::getObjKeepRadius(){}  // ror
-/* 001d4b9c 0000050c */ FUN_001d4b9c(){}
-/* 001d50a8 000003a0 */ FUN_001d50a8(){}
+/* 001d4b9c 0000050c */ GamMan::hitAtPoint(){}  // ror
+/* 001d50a8 000003a0 */ GamMan::hitAtSweep(){}  // ror
 /* 001d544c 000001c4 */ GamMan::placeAchr(){}  // ror
-/* 001d5610 000000e4 */ FUN_001d5610(){}
-/* 001d56f4 000001e4 */ FUN_001d56f4(){}
-/* 001d58d8 00000134 */ FUN_001d58d8(){}
+/* 001d5610 000000e4 */ GamMan::testAchrHit(){}  // ror
+/* 001d56f4 000001e4 */ GamMan::testPcHitAt(){}  // ror
+/* 001d58d8 00000134 */ GamMan::setupDogSweep(){}  // ror
 /* 001d5a0c 000001bc */ GamMan::testHitAt(){}  // ror
 /* 001d5bc8 000001d8 */ GamMan::queueObjUpdate(){}  // ror
 /* 001d5da0 00000124 */ GamMan::relinkObj(){}  // ror
-/* 001d5ec4 000001b4 */ FUN_001d5ec4(){}
+/* 001d5ec4 000001b4 */ GamMan::clearObjUpdates(){}  // ror
 /* 001d6078 00000828 */ GamMan::writeSaveData(){}  // ror
 /* 001d68a0 00001264 */ GamMan::readSaveData(){}  // ror
 /* 001d7b08 00000118 */ GamMan::getObjSectaNo(){}  // ror
-/* 001d7c20 000001c4 */ FUN_001d7c20(){}
+/* 001d7c20 000001c4 */ GamMan::hitTestObjs(){}  // ror
 /* 001d7de4 000000d4 */ GamMan::getFloorY(){}  // ror
 /* 001d7eb8 0000001c */ GamMan::selectSectaList(){}  // ror
 /* 001d7ed4 00000074 */ GamMan::getSectaCellPtr(){}  // ror
@@ -3851,7 +3851,7 @@
 /* 001d8064 000000b4 */ GamMan::findSectaCell(){}  // ror
 /* 001d811c 00000060 */ GamMan::getSectaCell(){}  // ror
 /* 001d817c 00000048 */ GamMan::getSectaCellY(){}  // ror
-/* 001d81c4 0000002c */ FUN_001d81c4(){}
+/* 001d81c4 0000002c */ GamMan::countSectaPath(){}  // ror
 /* 001d81f0 000001d0 */ GamMan::findSectaPath(){}  // ror
 /* 001d83c0 00000010 */ GamMan::setSectaList(){}  // ror
 /* 001d83d0 000000d8 */ GamMan::lookupFlagTable(){}  // ror

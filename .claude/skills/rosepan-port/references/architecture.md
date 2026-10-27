@@ -1133,8 +1133,21 @@ never asserts): sessions name them (`tus.py define --why`).
   +0x08 (MagSectaList: +0x4 loaded count, +0x8 the 0x80-byte sector records, +0xc the 0x90-byte cells
   GamSecta); 0x17c340 answers one cell per list (radius 40, findSectaCell 200), GamMan +0x22ab0 the
   list the last query used; cell heights 0x17dd5c, paths 0x17d298 (request {list, from[4], to[4],
-  path}). Bookmarks for the rest: checkMenuReq's switch on global 0x15 is a jump table Ghidra lost
-  (read the asm); writeSaveData 0x1d6078 / readSaveData 0x1d68a0 (0x1264) are the save block.
+  path}). **The hit tests** (written 2026-10-27): hitTestObjs 0x1d7c20 skips the caller's oid, a second
+  oid and type-1 objects while getBwnState is 0xd; m_hitFunc is hitAtPoint 0x1d4b9c (testHitAt,
+  placeAchr, testAchrHit 0x1d5610, testPcHitAt 0x1d56f4) or hitAtSweep 0x1d50a8 (set only by
+  setupDogSweep 0x1d58d8, which has no callers). The object's kind is param 0x18's word 0: 1 its corner
+  quad (param 0x1003, GamArea::isInPolygon, depth 10), 2 / 3 circles (2 from its Bip01 Spine1, 3 also
+  round its Bip01 Neck: result +0x18 = 1), 4 a test that can never pass, 5 / 6 never hit. The result
+  record (ChrHitRec, 0x20) gets +0x10 oid, +0x14 depth, +0x18 the far flag; a type-2 achr hit gets a
+  TskAvoidMove(8, 30) on its m_taskId and the record's oid becomes the tester's. **checkMenuReq**
+  0x1d3b44: the switch on global 0x15 (jump table 0x2fc100, 11 entries) has only case 3; global
+  0x11's low half is the requested item (0xa17..0xa19, 0xa1b..0xa21, 0xab6, 0xacc..0xace open the
+  book of lookupFlagTable(2, item, 0); 0xad0..0xad2 the map 0x10001 when the map area is 0 / 2 / 1);
+  m_22a84 is the open menu (2 book, 1 map, -1 none). GamMan +0x21ffc / +0x22000 are motion speeds
+  restoreAfterMenu 0x1d4370 puts back (DogActor +0x1e8 = m_motion.m_speed). bss 0x7a3208 / 0x7a320c
+  are g_gamMan.m_flags / m_flags2, 0x7b2064 is Sequence::m_flags. Left: writeSaveData 0x1d6078 /
+  readSaveData 0x1d68a0 (0x1264), the save block.
 - **game/gamstat.cpp** (pinned 0x1d84c8..0x1dd1e8, 2026-10-26; game/gamstat.h): ObjStat / ACHRstat /
   FCHRstat code and GamSysData. ObjStat's fields are named by the ELF's accessor inlines 0x28f874..
   0x28fdb8 (ror-symbol): +0x100 o_oid, +0x104 o_stat, +0x108 o_chr_id (actor), +0x114 the secta cell
