@@ -106,6 +106,9 @@ u_int utlConvSndId(u_int id);                                            // ROR 
 void  utlNormalize3(float *v);                                           // ROR 0x00106db0
 /* The heading of (x, z) in -pi..pi, 0 for a zero vector (unassigned@00216ad0). */
 float utlAtan2(float x, float z);                                        // ROR 0x00217f10
+/* Copies src to dst with upper case letters (the ctype table's bit 1)
+ * lowered. */
+void  utlStrToLower(char *dst, const char *src);                         // ROR 0x00218338
 /* The heading of (x, z) (pi/2 - acos(x / len), negative for z < 0) in
  * -pi..pi and its length into *dist; 0 / 0 for a zero vector. */
 float utlDirDist(float x, float z, float *dist);                          // ROR 0x002180e4
@@ -382,6 +385,7 @@ struct EffParam
             DogActor *m_actor;  // ROR 0x10
             int       m_args[12]; // ROR 0x14
         } m_achr;               // kind 0x15 (native 281 op 38)
+        const void *m_file;     // ROR 0x10: kind 0xd, an event pack's effect file (scenePlayStart)
     };
 };
 struct Obj176a3c                /* scene +0x837e0, constructor 0x176a3c */

@@ -277,3 +277,9 @@ void DogActor::setNodeScale(float scale, int node)
 {
     ROSEPAN_STUB("DogActor::setNodeScale", 0x0010eba0);
 }
+
+// stub of ROR 0x0010ed2c
+void DogActor::setBaseRotateY(float r)
+{
+    ROSEPAN_STUB("DogActor::setBaseRotateY", 0x0010ed2c);
+}

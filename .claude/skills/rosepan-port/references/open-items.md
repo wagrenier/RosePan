@@ -22,10 +22,16 @@ follows it; reached stubs in run order):
      TU's reached / frontier functions (TskFrameFunc 0x1f184c, TskMovePointPath, chrRotStart).
   2. `task/tsk_scene.cpp` (pinned 0x1f6c64..0x1fc4f0 2026-10-26; was unassigned@001f82e4 and
      unassigned@001f6c64) -- PARTIAL 2026-10-26: TskSnd (all kinds), TskCamera, gamSystemDataLoaded /
-     gamStage2Loaded written (nothing on screen shows them: sound is the IOP stand-in). Left:
-     **scenePlayStart 0x1f83f4** (event scenes: map / CHARA / THREAD sections) with the ScenePlay class
-     0x1f6c64..0x1f82e4, scenePlayStartSimple / PLScenePlay, scnChrRequest, TskAttack / TskDamage. The
+     gamStage2Loaded written (nothing on screen shows them: sound is the IOP stand-in); second session
+     (2026-10-26) wrote scenePlayStart and the whole ScenePlay family 0x1f6c64..0x1f83f4 except the
+     unreferenced ScenePlay::loadCamera / loadFocus. Left: scenePlayStartSimple / PLScenePlay,
+     scnChrRequest, TskAttack / TskDamage, 0x1fae14 / 0x1fb084 / 0x1fb624, 0x1fc47c / 0x1fc490. The
      200 s New Game run reached none of them yet (it ends on the film's "March 1930" card).
+     **scenePlayStart parses event packs with `task/naga_chunk.cpp`'s NagaChunk reader, stubbed
+     (find returns 0, so a scene loads nothing and ends at once)**: queue task/naga_chunk.cpp (0x1fc4f0..
+     0x1fce1c; seven tiny reader functions plus the writers) before any scene must play, together with
+     debug/motnamecnv0.cpp (motNameFindChara / GetCategory / Convert, stubbed) and
+     DogActor::setBaseRotateY 0x10ed2c / utlStrToLower 0x218338 / MagScene::setFocusData 0x1417e4 (stubs).
   3. `unassigned@00192ac0` -- MnuPBook::setType 0x196e54 / MnuDiary::setType 0x198b04
      (MagLifeMenuPBook::init asserts when neither book takes the type).
   4. **`dog/dogmodel.cpp`** -- DogModel::loadPack 0x1158ec / loadData 0x115790 / setupNodeFlags

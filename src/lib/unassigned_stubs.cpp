@@ -6,6 +6,8 @@
 #include "rx/rxsnd.h"
 #include "mnu/mnuSelectLanguage.h"
 #include "msg/msgman.h"
+#include "debug/motnamecnv0.h"
+#include "task/naga_chunk.h"
 
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
@@ -707,13 +709,6 @@ void utlAddPolar(float angle, float dist, float *v)
 int MagScene::openSysMsgWindow(int msg, const int *args, int arg)
 {
     ROSEPAN_STUB("MagScene::openSysMsgWindow", 0x0013f280);
-    return {};
-}
-
-// stub of ROR 0x001f83f4
-int scenePlayStart(const char *name, intptr_t arg, int wait)
-{
-    ROSEPAN_STUB("scenePlayStart", 0x001f83f4);
     return {};
 }
 
@@ -1524,4 +1519,64 @@ int GamMan::getObjSectaNo(u_int oid, int list)
 void scnChrRequest(int chr, u_int oid, int a2, int a3, int word, u_int chrOid, int a6)
 {
     ROSEPAN_STUB("scnChrRequest", 0x001fac60);
+}
+
+// stub of ROR 0x001417e4
+void MagScene::setFocusData(const void *data, int size)
+{
+    ROSEPAN_STUB("MagScene::setFocusData", 0x001417e4);
+}
+
+// stub of ROR 0x001fccf4
+int NagaChunk::find(const char *name)
+{
+    ROSEPAN_STUB("NagaChunk::find", 0x001fccf4);
+    return {};
+}
+
+// stub of ROR 0x001fcdb8
+void * NagaChunk::getData()
+{
+    ROSEPAN_STUB("NagaChunk::getData", 0x001fcdb8);
+    return {};
+}
+
+// stub of ROR 0x001fcda4
+NagaChunkEntry * NagaChunk::getEntry()
+{
+    ROSEPAN_STUB("NagaChunk::getEntry", 0x001fcda4);
+    return {};
+}
+
+// stub of ROR 0x001fcdd4
+int NagaChunk::getInt()
+{
+    ROSEPAN_STUB("NagaChunk::getInt", 0x001fcdd4);
+    return {};
+}
+
+// stub of ROR 0x001fcc20
+int NagaChunk::next()
+{
+    ROSEPAN_STUB("NagaChunk::next", 0x001fcc20);
+    return {};
+}
+
+// stub of ROR 0x001fcbf8
+void NagaChunk::rewind()
+{
+    ROSEPAN_STUB("NagaChunk::rewind", 0x001fcbf8);
+}
+
+// stub of ROR 0x002162e0
+int motNameGetCategory(int chara)
+{
+    ROSEPAN_STUB("motNameGetCategory", 0x002162e0);
+    return {};
+}
+
+// stub of ROR 0x00218338
+void utlStrToLower(char *dst, const char *src)
+{
+    ROSEPAN_STUB("utlStrToLower", 0x00218338);
 }
