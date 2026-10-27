@@ -1319,13 +1319,26 @@ throughout (identifiers, env variables, files, shader macros):
   +4 flags (bit 0 = inited, mnuBase::isInit; 2, 0x10 = volume lowered, 0x40000), +8 scene, +0xc tex,
   +0x10 -1, +0x14 step (-1 idle), +0x18 file list (MnuFile 0x30-byte rows {.., kind +8, arg +0xc,
   name +0x10}; max +0x1c, count +0x20), +0x24 pack path (0x40), +0x64 the pack's first 0x1000 bytes,
-  FileReader +0x68, FileReadReq +0x70, slots: models +0x94 (0x20 each, count +0x98), data +0x9c
-  (0x10, +0xa0), textures +0xa4 (0x10, +0xa8). Slots 2 init, 3 term, 4 isInit, 5 processPad, 6 draw,
-  7 0x193140, 8 getType, 9 getFlags, 10 openPack 0x1938a8, 11 closePack 0x193920. setupWork 0x192ba4
-  (tex, files, models, data, textures) carves one mnuAlloc block; addFile 0x19397c queues a file.
-  **The mnu pool**: FUN_001944d0 allocates the 1 MB buffer (data 0x29bfb4, BedMemory heap 0x6e9800):
-  128 blocks {address, size, flags: 1 free, 2 in use} at its start, the first covering +0x800..;
-  mnuAlloc 0x194588 (best fit, 16-byte granules) / mnuFree 0x194688. MnuMap, MnuPBook, MnuDiary
+  FileReader +0x68, FileReadReq +0x70, slots: models +0x94 (0x20 each, count +0x98), motions +0x9c
+  (0x10, +0xa0), textures +0xa4 (0x10, +0xa8), draw set +0xac, packet +0xb0, camera matrix +0xc0,
+  view size at the far plane +0x100 / +0x104, saved view far +0x108. Slots 2 init, 3 term, 4 isInit,
+  5 processPad, 6 draw, 7 setDrawSet 0x193140, 8 getType, 9 getFlags, 10 openPack 0x1938a8, 11
+  closePack 0x193920. setupWork 0x192ba4 carves one mnuAlloc block; addFile 0x19397c queues a file.
+  **Written 2026-10-26 (all 38 functions).** File kinds (row +8 & 0xf): 1 i3r model -> model slot
+  {root, work block nodes*0xb2+2 = pose 0x30 + local 0x40 + model 0x40 matrices + u16 node map, size},
+  2 i3m motion -> motion slot {root, length*30}, 4 TIM2 -> texture slot {tm2, size, DogTexInfo
+  record, draw-set index}; bit 0x10 reads waiting. flags 4 = the head row is being read, 8 = drop it
+  when read. **updateLoad 0x193a1c is the loader the books' processPad polls** (finishes the head
+  row, pops it, starts the next read at the pack directory's offset). Draw helpers: pushCamera /
+  popCamera 0x192e94 / 0x192f3c (GamMan camera stack, scene camera reset, view far), beginDraw
+  0x192f68 / endDraw 0x1930f8 (layer set + a VU1 sprite packet: i3dPktBeginVu1Sprite 0x21e5a0,
+  i3dPktVu1Color / Matrix / Sprite 0x21e488 / 0x21e428 / 0x21e690, end 0x21e688), useTex 0x193210,
+  drawSprite 0x193258 (a 0x34-byte rect: pivot, size, colour +0x10, uv +0x20, angle +0x30), drawModel
+  0x19368c (i3m pose 0x22e960 -> matrices 0x22f7a0 -> i3rConvertLocalToModel -> utlDrawI3r).
+  **The mnu pool**: mnuInitPool 0x1944d0 allocates the 1 MB buffer (sdata 0x29bfb4, BedMemory heap
+  0x6e9800; MagScene::initRender): 128 blocks {address, size, flags: 1 valid, 2 in use} at its start,
+  the first covering +0x800..; mnuAlloc 0x194588 (best fit, 16-byte granules) / mnuFree 0x194688
+  (marks free, no merge) / mnuMergeFree 0x1946e4 (setupWork); mnuTermPool 0x194548. MnuMap, MnuPBook, MnuDiary
   derive mnuBase (mnu/mnumap.cpp 0x1947a4.., mnu/mnupbook.cpp 0x196a9c..0x19a52c; MnuStock
   0x19a52c..0x1a066c is not a mnuBase).
 - **MagLifeMenuPBook** (0x100000 / 0x200000 types): init looks the type up (getTypeValue) and asks

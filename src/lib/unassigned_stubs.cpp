@@ -186,12 +186,6 @@ void FUN_0017c2c0(Obj17c0f0 *obj)
     ROSEPAN_STUB("FUN_0017c2c0", 0x0017c2c0);
 }
 
-// stub of ROR 0x001944d0
-void FUN_001944d0(void)
-{
-    ROSEPAN_STUB("FUN_001944d0", 0x001944d0);
-}
-
 // stub of ROR 0x001259e8
 void MagLifeBwn::renderPostProcess()
 {
@@ -580,12 +574,6 @@ void FUN_00176c50(Obj176a3c *obj)
     ROSEPAN_STUB("FUN_00176c50", 0x00176c50);
 }
 
-// stub of ROR 0x00194548
-void FUN_00194548(void)
-{
-    ROSEPAN_STUB("FUN_00194548", 0x00194548);
-}
-
 // stub of ROR 0x00234050
 float i3dSegSegDist2(const float *p0, const float *d0, const float *p1, const float *d1,
                      float *s, float *t)
@@ -767,12 +755,6 @@ void Obj176a3c::release(int no)
 }
 
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
-
-// stub of ROR 0x00192d60
-void mnuBase::term()
-{
-    ROSEPAN_STUB("mnuBase::term", 0x00192d60);
-}
 
 // stub of ROR 0x00194908
 void MnuMap::init(DogTexInfo *tex)
@@ -1753,4 +1735,71 @@ int utlSetI3rDispControl(I3rRoot *root, void *disp)
 void i3rBuildMeshPacket(I3rItem *mesh, void *buf)
 {
     ROSEPAN_STUB("i3rBuildMeshPacket", 0x0021fb50);
+}
+
+// stub of ROR 0x0021e5a0
+u_long   * i3dPktBeginVu1Sprite(u_long *pkt, I3dLayer *layer, int mode)
+{
+    ROSEPAN_STUB("i3dPktBeginVu1Sprite", 0x0021e5a0);
+    return {};
+}
+
+// stub of ROR 0x0021e688
+u_long   * i3dPktEndVu1Sprite(u_long *pkt)
+{
+    ROSEPAN_STUB("i3dPktEndVu1Sprite", 0x0021e688);
+    return {};
+}
+
+// stub of ROR 0x0021e488
+u_long   * i3dPktVu1Color(u_long *pkt, const float *color)
+{
+    ROSEPAN_STUB("i3dPktVu1Color", 0x0021e488);
+    return {};
+}
+
+// stub of ROR 0x0021e428
+u_long   * i3dPktVu1Matrix(u_long *pkt, sceVu0FVECTOR *matrix)
+{
+    ROSEPAN_STUB("i3dPktVu1Matrix", 0x0021e428);
+    return {};
+}
+
+// stub of ROR 0x0021e690
+u_long   * i3dPktVu1Sprite(u_long *pkt, const float *pos, const float *uv)
+{
+    ROSEPAN_STUB("i3dPktVu1Sprite", 0x0021e690);
+    return {};
+}
+
+// stub of ROR 0x0022e958
+float i3mGetLength(const I3mRoot *root)
+{
+    ROSEPAN_STUB("i3mGetLength", 0x0022e958);
+    return {};
+}
+
+// stub of ROR 0x0022e960
+void i3mGetPose(I3mRoot *root, void *pose, int flags, float t)
+{
+    ROSEPAN_STUB("i3mGetPose", 0x0022e960);
+}
+
+// stub of ROR 0x0022f7a0
+void i3mPoseToMatrices(const void *pose, sceVu0FMATRIX *mats, const u_short *map)
+{
+    ROSEPAN_STUB("i3mPoseToMatrices", 0x0022f7a0);
+}
+
+// stub of ROR 0x00106ad0
+float utlVecLength3(const float *v)
+{
+    ROSEPAN_STUB("utlVecLength3", 0x00106ad0);
+    return {};
+}
+
+// stub of ROR 0x00106a40
+void utlVecRotZ(float angle, float *out, const float *in)
+{
+    ROSEPAN_STUB("utlVecRotZ", 0x00106a40);
 }

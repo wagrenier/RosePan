@@ -323,6 +323,10 @@ int   dogModelHitCylinder(I3cQuery *q, void *a1, const u_short *a2, int a3, floa
  * world matrix, the thread switch held off around it (0x21fe68). */
 int   utlDrawI3r(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
                  int flags);                                             // ROR 0x00106760
+/* out.xy = in.xy turned by angle about z, out.z = in.z (unassigned@00106658). */
+void  utlVecRotZ(float angle, float *out, const float *in);              // ROR 0x00106a40
+/* sqrt(x * x + y * y + z * z) of v. */
+float utlVecLength3(const float *v);                                     // ROR 0x00106ad0
 /* Points the first word of each of the root's materials at disp. */
 int   utlSetI3rDispControl(I3rRoot *root, void *disp);                   // ROR 0x001067d8
 
@@ -335,6 +339,27 @@ u_long   *i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix
                              int flags);                                 // ROR 0x0021dd10
 u_long   *i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
                               const void *color, const void *xyz, int flags); // ROR 0x0021e1d8
+/* The VU1 sprite packets (mnuBase's menu draw): the begin calls the
+ * layer's view (and fog) and writes the sprite GIF template (mode 1 / 0:
+ * 0x3026b0 / 0x3026c0); then per sprite a colour, a matrix and the
+ * sprite's uv and position, each UNPACKed to VU1 (the sprite MSCALs its
+ * microprogram); the end returns pkt. Not drawn on the host yet (the
+ * native i3d module has no VU1 path). */
+u_long   *i3dPktBeginVu1Sprite(u_long *pkt, I3dLayer *layer, int mode);   // ROR 0x0021e5a0
+u_long   *i3dPktVu1Matrix(u_long *pkt, sceVu0FVECTOR *matrix);           // ROR 0x0021e428
+u_long   *i3dPktVu1Color(u_long *pkt, const float *color);               // ROR 0x0021e488
+u_long   *i3dPktVu1Sprite(u_long *pkt, const float *pos, const float *uv); // ROR 0x0021e690
+u_long   *i3dPktEndVu1Sprite(u_long *pkt);                               // ROR 0x0021e688
+/* The i3m motion player (unassigned@0022e840). */
+struct I3mRoot;
+/* The motion's length in frames (the root's m_length). */
+float     i3mGetLength(const I3mRoot *root);                             // ROR 0x0022e958
+/* Samples every node's keys at time t into 0x30-byte pose records. */
+void      i3mGetPose(I3mRoot *root, void *pose, int flags, float t);     // ROR 0x0022e960
+/* Pose records to 0x40-byte node matrices through map (u16 count, then a
+ * model node per motion node, 0xffff = none). */
+void      i3mPoseToMatrices(const void *pose, sceVu0FMATRIX *mats, const u_short *map); // ROR 0x0022f7a0
+
 /* Wire shapes as line strips (MagScene::drawStrips' debug records through
  * i3dLayerDrawWireSphere / Box / Shape). */
 u_long   *i3dPktDrawWireSphere(float radius, u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
@@ -500,12 +525,7 @@ int   FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy);               // ROR 0
  * passes 40 and 0 in f12 / f13). */
 void  FUN_0017c340(Obj17c0f0 *obj, const float *pos, MagSectorHit **hit, int arg,
                    float r, float h);                                    // ROR 0x0017c340
-/* Allocates the 1 MB 2D packet buffer (data 0x29bfb4); mnuBase::initSystem
- * calls it too. */
-void  FUN_001944d0(void);                                                // ROR 0x001944d0
-/* Frees the buffer FUN_001944d0 allocates (sdata 0x29bfb4); MagScene::term
- * and mnuBase::termSystem. */
-void  FUN_00194548(void);                                                // ROR 0x00194548
+/* mnuInitPool 0x1944d0 / mnuTermPool 0x194548 (the mnu pool): mnu/mnubase.h. */
 /* m_837e0's teardown (frees its buffer, closes its FileReader). */
 void  FUN_00176c50(Obj176a3c *obj);                                      // ROR 0x00176c50
 /* The closest points of segments p0 + s d0 and p1 + t d1 (s, t in 0..1,

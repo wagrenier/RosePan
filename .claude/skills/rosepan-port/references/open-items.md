@@ -66,10 +66,15 @@ follows it; reached stubs in run order):
      the 200 s New Game run now inits a picture book (after MagLifePC::setActor) -- and
      stops there, black: MnuPBook::processPad / draw and the whole mnuBase loader are stubs, and
      processPad returning 0 keeps the book open for ever. **This is the gate to the first room.**
-     Next: `mnu/mnubase.cpp` (queued ahead): the mnu pool FUN_001944d0 / mnuAlloc / mnuFree,
-     setupWork, addFile, openPack / closePack, term, the file loader 0x193a1c (i3r models, textures
-     into DogTexInfo), the layer draw helpers 0x192f68 / 0x193258 / 0x19368c (to the native i3d draw
-     module); then mnu/mnupbook.cpp's processPad 0x1976b8 / draw 0x197f70 and page helpers. The
+     `mnu/mnubase.cpp` WRITTEN 2026-10-26 (all 38 functions, `verify`): the mnu pool, setupWork,
+     addFile, openPack / closePack, term, the loader updateLoad 0x193a1c and the draw helpers. The
+     200 s run inits the book through it (the pack opens) and stops in the stubs MnuPBook::processPad
+     / draw, still black. **Next: mnu/mnupbook.cpp's processPad 0x1976b8 (it polls updateLoad) / draw
+     0x197f70 and page helpers.** For the book to show, the native i3d draw module needs the **VU1
+     sprite packets** mnuBase::drawSprite writes (i3dPktBeginVu1Sprite 0x21e5a0, i3dPktVu1Color /
+     Matrix / Sprite 0x21e488 / 0x21e428 / 0x21e690, unassigned@0021c960, stubs: record them like
+     the 2D writers, a textured quad per sprite from the matrix and uv) and drawModel's i3m pose
+     player (i3mGetPose 0x22e960 / i3mPoseToMatrices 0x22f7a0, unassigned@0022e840, stubs). The
      reference: work/ref/MNUPBOOK and work/ref/PB010200 (tm2png --scan of the disc's
      DATA/MNURPK/MNUPBOOK packs). Open: whether a held START (the smoke pad) closes the book once
      processPad runs -- extend settings.smoke_pad if it needs CROSS / page turns.

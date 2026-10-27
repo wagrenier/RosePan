@@ -365,7 +365,7 @@ int MagScene::initRender(i3dContext *ctx)
     m_sub_mode.m_step = -1;
     m_sub_mode.m_mode = 0;
     m_fade.m_kind = -1;
-    FUN_001944d0();
+    mnuInitPool();
     m_229c = 0;
     return 1;
 }
@@ -399,7 +399,7 @@ void MagScene::term()
     m_life_man.remove(&m_bg);
     m_life_man.remove(&m_mes);
     m_life_man.deleteAll();
-    FUN_00194548();
+    mnuTermPool();
 }
 
 // ──────────────────────────────────────────────────────────────────────

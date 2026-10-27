@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-26 23:29 at commit `a7a32b2` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-26 23:48 at commit `109756e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-26 23:29 at commit `a7a32b2` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6827**, named **4606** (67%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 248, ror-inferred 3008
-- context-name ledger: 3296 entries; overrides of wrong library matches: 5
+- game functions: **6827**, named **4642** (68%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 248, ror-inferred 3044
+- context-name ledger: 3332 entries; overrides of wrong library matches: 5
 - placed in a source file: 3994/6827 in 107 files
 
 Least-named game-code regions (64 KB blocks):
@@ -24,13 +24,13 @@ Least-named game-code regions (64 KB blocks):
 | `00140000` | 39/293 (13%) | mag/magloader.cpp, mag/magsceneif.cpp, mag/magscenefocus.cpp |
 | `00170000` | 52/251 (21%) | snd/sndman.cpp, wrd/wrdsrv.cpp |
 | `00120000` | 75/283 (27%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
-| `00100000` | 127/301 (42%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmisc.cpp |
+| `00100000` | 129/301 (43%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmisc.cpp |
 | `001b0000` | 41/81 (51%) | game/gamfile.cpp, mnu/mnuSelectLanguage.cpp |
 | `00110000` | 149/255 (58%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglifepc.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3025**; stubs: **353**
+- reconstructed RoR functions: **3061**; stubs: **353**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -63,7 +63,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3ritem.cpp` | 156 | 0 |
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 235 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 242 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
@@ -87,7 +87,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/magsystem.cpp` | 55 | 0 |
 | `src/main.cpp` | 11 | 0 |
 | `src/mcd/mcdman.cpp` | 42 | 0 |
-| `src/mnu/mnubase.cpp` | 0 | 7 |
+| `src/mnu/mnubase.cpp` | 36 | 0 |
 | `src/mnu/mnumcd.cpp` | 39 | 0 |
 | `src/mnu/mnupbook.cpp` | 11 | 0 |
 | `src/mnu/mnusvld.cpp` | 41 | 0 |
@@ -120,9 +120,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 166 TUs: todo 114, partial 14, verify 52, done 9
-- next: **mnu/mnubase.cpp** (pinned in the queue)
-- pinned queue: unassigned@0022b4b8, unassigned@0021a3e8, mnu/mnubase.cpp, mnu/mnupbook.cpp, dog/dogactor.cpp, mag/magscenelight.cpp, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
+- 166 TUs: todo 113, partial 14, verify 53, done 9
+- next: **mnu/mnupbook.cpp** (pinned in the queue)
+- pinned queue: unassigned@0022b4b8, unassigned@0021a3e8, mnu/mnupbook.cpp, dog/dogactor.cpp, mag/magscenelight.cpp, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - partial: `mnu/mnupbook.cpp` 11/43 -- Screen: the film plays as before; after it the picture book inits and the screen stays black (reference: the dark ehonbg page background plus page models, work/
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
@@ -155,6 +155,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/magscenerender.cpp` 20/20 -- All 20 functions written; verify because nothing on screen can show it: no boot actor has the 0x60 shadow flags and all i3d layer / view / light functions are s
 - verify: `mag/magsystem.cpp` 55/55 -- All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes ar
 - verify: `main.cpp` 11/11 -- Status verify: the smoke run boots for real (iopconf.cnf, eight IOP modules and system.ini read from the disc folder through host0:), runs mainInitGame and loop
+- verify: `mnu/mnubase.cpp` 36/38 -- Verify: the 200 s New Game run inits the picture book through this loader (setupWork, addFile, openPack read the pack with no file error) and stops in the stubs
 - verify: `mnu/mnumcd.cpp` 39/39 -- Status verify: code complete, nothing on screen yet. The boot (MnuTitle::execLogo, check mode 0) now runs MnuMcd::exec, opens its two windows and waits at check
 - verify: `mnu/mnusvld.cpp` 41/41 -- Status verify: a Load Game press (pad 1800:START,2400:START,2700:DOWN,2800:CROSS, about 100 s) opens the screen and it matches work/ref/mnusvld (background, Loa
 - verify: `mnu/mnutitle.cpp` 20/20 -- Status verify: the code is complete but the plain boot stays black because execLogo waits at step 1 on MnuMcd::startCheck (a stub returning 0; MnuMcd init / pro
@@ -180,6 +181,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-26 23:48 `mnu/mnubase.cpp` verify: mnuBase and the mnu pool written: all 38 functions (pool init/term/alloc/free/merge, setupWork, term, addFile, openPack/closePack, the loader updateLoad for i3r
 - 2026-10-26 23:29 `mnu/mnupbook.cpp` partial: Split unassigned@00192ac0 into mnu/mnubase.cpp, mnu/mnumap.cpp, mnu/mnupbook.cpp, mnu/mnustock.cpp (pinned). mnu/mnupbook.cpp: MnuPBook and MnuDiary constructor
 - 2026-10-26 22:59 `i3d/i3rmodel.cpp` verify: Pinned unassigned@0021a3e8 as i3d/i3rmodel.cpp 0x21a3e8..0x21ac80 and wrote all 14 functions: i3rBuildPackets / i3rClearPackets, i3rAssignTex, i3rCopyLocalBasic
 - 2026-10-26 22:40 `i3d/i3mroot.cpp` verify: I3D_I3M motion file root written (12 functions, 0x22b4b8..0x22ba20): id and version checks, relocators, node count / name / index-by-name, node and key-time loo
@@ -187,7 +189,6 @@ Recent sessions:
 - 2026-10-26 22:24 `i3d/i3ritem.cpp` partial: Split unassigned@0022b4b8: pinned i3d/i3ritem.cpp 0x22c1f8..0x22e840 and i3d/i3croot.cpp 0x22ba20..0x22c1f8. i3ritem.cpp: i3rItemFindChild, i3rIsItemType, i3rIt
 - 2026-10-26 21:55 `dog/dogmodel.cpp` verify: DogModel written whole: clear, setRoot, loadPack (texture pack, model, optional second root, sepia display control), loadData (i3r plus optional i3c collision w
 - 2026-10-26 21:07 `task/tsk_scene.cpp` verify: Wrote the rest of task/tsk_scene.cpp: scnChrRequestDog 0x1fae14 and scnChrRequestPC 0x1fb084 (stubs replaced), the damage roll scnCalcDamage 0x1fb624 with scnCa
-- 2026-10-26 20:54 `task/tsk_scene.cpp` partial: Wrote TskDamage::setup 0x1f9e58 (LP damage and kill, the facing test against the attacker, the enemy notifications, the step and hurt SE by chr word) with TskDa
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -199,16 +200,16 @@ Recent sessions:
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 60 | 5 |
 | `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 57 | 5 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
-| `mnu/mnubase.cpp` | todo | 0/10/38 | 7.2 | 49 | 5 |
-| `unassigned@0010f944` | partial | 2/6/12 | 2.2 | 44 | 5 |
+| `unassigned@0010f944` | partial | 2/6/12 | 2.2 | 45 | 5 |
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
 | `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 44 | 5 |
+| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
 | RoR addr | name | call sites | provenance | state | inferred file |
 |---|---|---|---|---|---|
-| `001be734` | FileReadReq::FileReadReq | 59 | ror | missing | game/gamfile.cpp |
+| `001be734` | FileReadReq::FileReadReq | 60 | ror | missing | game/gamfile.cpp |
 | `001be2dc` | FileReader::~FileReader | 25 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 22 | ror | missing | game/gamfile.cpp |
 | `002155f4` | FUN_002155f4 | 22 | - | missing | - |
