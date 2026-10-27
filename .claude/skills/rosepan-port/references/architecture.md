@@ -517,8 +517,8 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   Scene map from the constructor 0x1360a0 (magscene2 session, 2026-10-22; word index x 4 = offset):
   +0x2330 `MagLifeMan` (64 x 16-byte entries + head, priority-sorted), +0x29520 `DogTexInfo`
   (256 textures, shadow01 from rodata 0x2ed500 first), +0x29540 four sky ("tenkyu") slots of 0x520
-  (buffer +0, three DogModels at +0x10 stride 0x1a0, id +0x4f0 (-1 free), texture list +0x504,
-  data +0x508; released by 0x1386d4 / 0x13ff00), +0x2aa10 two 0x38-byte view records (near 5,
+  (buffer +0, three DogModels at +0x10 stride 0x1a0, id +0x4f0 (-1 free), sky i3r +0x504, its
+  node matrices +0x508, spins +0x50c, node count +0x510; released by 0x1386d4 / 0x13ff00), +0x2aa10 two 0x38-byte view records (near 5,
   far 2000, +-5.12 x +-4.48, z 65530..1, screen 0..511 x 0..447, offset 1792 / 1824), +0x2aae0
   four 0x20-byte i3d fog records (colour vector + four floats; i3dCtxSetFog 0x21a158), camera
   target pos / at at +0x2ada0 / +0x2adb0, `MagLifePC` +0x2adc0 (<= 0x220), `MagLifeBwn` +0x2afe0
@@ -829,6 +829,24 @@ its one spot light (src = point / spot light n), other kinds src NULL. `setLight
 0x13f528 = buildSet, and for set 0 the shadow kind by the first kind present: point, spot, 5,
 directional. `addLight(type, mask)` 0x13fe64 walks nine mask bits (0..8; the pool has 8 sets).
 setLightParam / getLightParam forward to the pool's global (no < 0) or set-relative accessors.
+
+## The scene's skies (`mag/magscenetenkyu.cpp`, 0x13ff00..0x140990, 2026-10-27)
+
+A map pack may hold `tenkyu.rpk`, a pack of its own: file 0 an `I3D_I3M` motion when its head
+says so (compared with libc `strncasecmp` 0x27a4e0, n 7), then the sky's i3r. `loadTenkyuTex`
+0x140030 (called by `MagScene::load` when a context is passed) copies the i3r to the game heap,
+relocates it, adds its textures to `m_tex_info` (sepia = `m_22cc`) and assigns them. With a motion,
+one heap block of num_node x 0x44 holds the model matrices (+0x508) then one float per node
+(+0x50c): `initTenkyuSpin` 0x140390 poses the motion at 0 and at 2 x its length (pose flags 0x111;
+scratch = num x 0xb2 + 2: 0x30-byte poses, local, end matrices, u16 node map with the count first)
+and stores each node's turn (acos of the normalized row-1 vectors, signed by the cross product's y)
+divided by 2 x length x 30 -- radians per frame. `rotateTenkyu` 0x14062c applies it with
+`i3dMatRotY` every update; `drawSkyDome` 0x1406b8 draws at layer 490 with a white ambient-only
+light, view 0 with far 100000 and zmin = zmax = 0, ALPHA_1 0x44 / FBA 0 / CLAMP 0 / TEST_1 0x13001,
+world = unit at the camera's x / z (y 0). ROM bug: its draw loop runs four slots starting at the
+first slot with a sky (reads past slot 3 when slot 0 is empty); the port stops at slot 3.
+0x140990 (a 4-qword GS packet helper for drawFocus) and `initRecords853bc` 0x140a84 (m_focus
+defaults) open the focus code, left as unassigned@00140030 for mag/magscenefocus.cpp.
 
 ## The texture table (`dog/dogtexinfo.cpp`, 0x1161e4..0x11764c, 2026-10-22)
 

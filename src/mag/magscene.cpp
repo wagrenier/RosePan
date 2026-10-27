@@ -2105,10 +2105,11 @@ MagScene::MagScene()
         t->m_c_num = 0;
         t->m_path_data = NULL;
         t->m_light_data = NULL;
-        /* the ROM clears 0x10 bytes from m_tex_list */
-        t->m_tex_list = NULL;
-        t->m_data = NULL;
-        memset(t->_50c, 0, 8);
+        /* the ROM clears 0x10 bytes from m_sky */
+        t->m_sky = NULL;
+        t->m_sky_mats = NULL;
+        t->m_sky_spin = NULL;
+        t->m_sky_num_node = 0;
     }
     initRecords853bc();
     m_854a4 = 0;

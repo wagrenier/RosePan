@@ -69,9 +69,11 @@ struct MagSceneTenkyu
     int      m_c_num;           // ROR 0x4f8: its record count
     MagSceneCRec **m_path_data; // ROR 0x4fc: its records (the ROM turns the file's offsets into pointers in place; drawStrips' assert names it pmd->m_path_data)
     void    *m_light_data;      // ROR 0x500: <name>_l.bin, NULL when the pack has none
-    void    *m_tex_list;        // ROR 0x504: i3r texture list (releaseTenkyuTex)
-    void    *m_data;            // ROR 0x508: freed by releaseTenkyuTex
-    u_char   _50c[0x520 - 0x50c];
+    I3rRoot *m_sky;             // ROR 0x504: the pack's tenkyu.rpk sky model (loadTenkyuTex), NULL = none
+    sceVu0FMATRIX *m_sky_mats;  // ROR 0x508: its node matrices (drawSkyDome draws by them), one game-heap block with m_sky_spin
+    float   *m_sky_spin;        // ROR 0x50c: per node the y turn per frame (initTenkyuSpin; rotateTenkyu applies it)
+    int      m_sky_num_node;    // ROR 0x510: the node count, 0 when the pack has no motion
+    u_char   _514[0x520 - 0x514];
 };
 static_assert(offsetof(MagSceneTenkyu, m_model) >= 0x10, "m_model");
 /* No bound on m_id: the host DogModel is smaller than the EE's 0x1a0. */
@@ -388,13 +390,18 @@ struct MagScene
      * in mask (bits 0..8); its id, < 0 when none is free. */
     int  addLight(int type, unsigned int mask);                          // ROR 0x0013fe64
     void releaseTenkyuTex(int no);                                       // ROR 0x0013ff00
+    /* The pack's sky (tenkyu.rpk: an optional I3D_I3M motion, then the
+     * i3r) into slot no: its textures into m_tex_info, and with a motion
+     * the node spin initTenkyuSpin derives from it. */
     void loadTenkyuTex(int no, const BedPfh *pfh, i3dContext *ctx);      // ROR 0x00140030
+    void initTenkyuSpin(MagSceneTenkyu *t, I3mRoot *motion);             // ROR 0x00140390
     /* Fades to fog over frames (0: at once). */
     void setFog(const I3dFog *fog, int frames);                          // ROR 0x00143d7c
     void updateFog();                                                    // ROR 0x00143fd0
     void updateDebug(BedPad *pad0, BedPad *pad1);                        // ROR 0x0014313c
     void updateCamera();                                                 // ROR 0x0013e548
     void changeCamera();                                                 // ROR 0x0013d5e4
+    /* Turns every sky node about y by its spin (once a frame). */
     void rotateTenkyu();                                                 // ROR 0x0014062c
     void updateRecords853fc();                                           // ROR 0x00140c68
     /* The constructor's: clears the records at +0x853bc and sets their
@@ -506,6 +513,8 @@ struct MagScene
     void openFadeKey(const char *theTexName);                            // ROR 0x00135cac
     void setFadeKeyMagnify(float theMagnify, int time);                  // ROR 0x00135d58
     void clearStrip(int no);                                             // ROR 0x00134698
+    /* The skies at layer 490: ambient-only white light, the first view
+     * pushed out to 100000 at depth 0, centred under the camera in x / z. */
     void drawSkyDome(i3dContext *ctx);                                   // ROR 0x001406b8
     void drawFocus(i3dContext *ctx, int frame);                          // ROR 0x00140e88
 

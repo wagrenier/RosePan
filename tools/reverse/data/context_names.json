@@ -3635,6 +3635,12 @@
   "was": "FUN_00140030",
   "why": "after releaseTenkyuTex (0x13ff00): MagScene::load passes the sky slot number, the pack and the i3d context when a context is given"
  },
+ "00140390": {
+  "name": "MagScene::initTenkyuSpin",
+  "tag": "ror-inferred",
+  "was": "FUN_00140390",
+  "why": "loadTenkyuTex's only callee after the slot's node buffers: poses the sky motion at 0 and at twice its length, and stores per node the y-turn between the two (acos of the normalized row-1 vectors, sign from the cross product's y) over 2*len*30 frames into slot +0x50c, which rotateTenkyu applies each frame"
+ },
  "0014062c": {
   "name": "MagScene::rotateTenkyu",
   "tag": "ror-inferred",
@@ -20704,5 +20710,11 @@
   "tag": "lib-context",
   "was": "FUN_00279b70",
   "why": "newlib: a string FILE (flags 0x208, size n-1) through vfiprintf, NUL-terminates when n != 0"
+ },
+ "0027a4e0": {
+  "name": "strncasecmp",
+  "tag": "lib-context",
+  "was": "FUN_0027a4e0",
+  "why": "byte loop over n characters folding through the ctype table (+0x20 on upper case), stops at NUL; loadTenkyuTex compares the sky file's head to I3D_I3M with n 7"
  }
 }
