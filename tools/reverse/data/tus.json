@@ -146,6 +146,24 @@
    "status": "verify",
    "why": "11 of 16 functions assert with dog/dogtexinfo.cpp; the rest are DogTexInfo members (clear, term, findFree, setSepiaColor, releaseModel, releasePfh) taking the table in a0; DogModel code ends at 0x1161e4 (unassigned 0x1160a8 run before), MagSystem starts at 0x117654 after the 8-byte 0x11764c"
   },
+  "emy/emy_manager.cpp": {
+   "notes": "Verify: the 15 s smoke run shows the boot disclaimer as before (EmyManager now runs its exec every frame with no enemies; no crash); no enemy is created on the New Game path yet, so the first run that spawns one should look at it. Resolved the open item on addEmy's extra stack word: it is createEmy's makeOid, passed as 1 by addEmy. Callers updated: gamman.cpp addChr/addChrGroup pass typed param/transition/pos, seqcall native 212 case 24 is the inline SetGrpMotion. Doubts (open-items.md item 7): the file name; createEmy's transition table is GamMan m_image[place] as the callers pass it; EmyMain keeps the derived word +0x238 on the host; the host has a ninth group for setGroup a=8. Left: EmyMain itself (ctor 0x164118 / dtor 0x164208 now unassigned@00164118, belongs with emy/emy_main.cpp 0x164364..; its methods 0x164fc0.. in unassigned@00164fc0) and the eleven enemy files in unassigned@00145020; their virtual slots and initOut are stubs, ctor/dtors hand stubs in lib/unassigned_stubs.cpp (the EmyMain ctor stub sets the fields EmyManager reads).",
+   "ranges": [
+    [
+     "0016265c",
+     "00164118"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 09:06",
+     "status": "verify",
+     "summary": "Split EmyManager out of unassigned@00145020 as emy/emy_manager.cpp (0x16265c..0x164118) and wrote all 58 functions: ctor/dtor/clear/releaseAll, the task exec with spawnGroups and updateEmys, setGroup and the group helpers, addEmy/addEmyAlt/createEmy (the eleven inline XxxMain constructors, start state, param, held item, footstep tables), findEmy and the 40 oid wrappers, the per-type data tables 0x2f12a0..0x2f14a0. New emy/emy_main.h (EmyMain, EmyOut, _tagEnemyParam) and the eleven enemy class declarations in lib/unassigned.h."
+    }
+   ],
+   "status": "verify",
+   "why": "EmyManager (CmnITask; vtable 0x2e31a0, ctor 0x16265c, dtor 0x162700) and its findEmy-based accessors run 0x16265c..0x164118; 0x162630 before it is an EmyOut method (param+8 -> EmyMain) of the previous enemy, 0x164118 is EmyMain's ctor (emy/emy_main.cpp). No source string: file name after the class, emy_main.cpp style."
+  },
   "game/gamfile.cpp": {
    "notes": "Black screen, as before: the code is complete but no boot path shows it yet; every FileReader::read caller that runs in the boot (GamMan::loadSystemData / loadStage, MagScene loaders behind MagScene::start) is a stub, and SprTexture's loads now get real sizes but stop at BedPfh::BedPfh / getFileIndex (stubs, bed/bedpfh.cpp). The first run whose loads go through FileReader with g_nowLoading up should show LOADING.BIN frames: mark this done then. The file name game/gamfile.cpp is a guess (no source string; game/ by link order). What remains of unassigned@001bde58: 0x1bde58..0x1be2cc is the language-select menu (mnusllg.rpk; belongs to mnu/mnuSelectLanguage.cpp from about 0x1bd028) and GamFont 0x1beb70..0x1c05c0 (game/gamfont.cpp). The ROM's month table 0x2b8da8 has 0 for December; kept.",
    "ranges": [
@@ -1460,6 +1478,7 @@
   "unassigned@0012f008": {},
   "unassigned@00140030": {},
   "unassigned@00143d3c": {},
+  "unassigned@00145020": {},
   "unassigned@00164fc0": {},
   "unassigned@001810f4": {},
   "unassigned@00190a78": {},

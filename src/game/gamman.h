@@ -865,6 +865,9 @@ struct GamMan
      * cell) and its position (+0x10) into pos. */
     GamSecta *getSectaCell(int no, float *pos, int list);                // ROR 0x001d811c
     void relinkObj(u_int oid);                                           // ROR 0x001d5da0
+    /* The floor height under pos: the secta query 0x17c340 (radius 40)
+     * picks a cell, getSectaCellY its height (EmyManager::spawnGroups). */
+    float getFloorY(const float *pos);                                   // ROR 0x001d7de4
     /* The secta cell of pos (0x17c340 over the list bss 0x7811ac, starting
      * at cur), NULL when none or its flags bit 2 is set; type2: the oid's
      * type is 2 (ObjStat's position setters). */

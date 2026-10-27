@@ -1012,6 +1012,23 @@ never asserts): sessions name them (`tus.py define --why`).
   Got, Grg, Hfm, Mrt, Nor, Pig (EmyOut has 77 subclasses). `CmnITask` is the base of 32 classes but has
   no vtable of its own in the ELF (abstract; only its pause slot 0x28a694 has a body). Its six slots
   are in "The task manager" below.
+- **Enemies (emy/, 2026-10-27).** `EmyManager` (emy/emy_manager.cpp 0x16265c..0x164118, global
+  0x7b2140, a CmnITask of kind 3 added by main; EE 0x430): m_emy[64] at +4, per-type limits +0x104
+  (filled with bytes of 100: no limit), an oid pair +0x134..+0x13c, level +0x140, made-oid count
+  +0x144, EmyGroup[8] (0x3c) at +0x148, a work word per slot +0x330. Its exec (slot 4) runs
+  spawnGroups (groups 1..7: wake an idle member or respawn a gone one) and updateEmys (per enemy: the
+  ptmf at +0x1dc, the group step 0x165074, then slots 4, 5, 6 while managed (+8) and not damaged).
+  `createEmy` 0x162c88 news the class by type -- 0 Dwf 0x274, 1 Pig 0x270, 2 Got 0x270, 3 Fsh 0x25c,
+  4 Bds 0x228, 5 Bdl 0x228, 6 Hfm 0x240, 7 Mrt 0x23c, 8 Clr 0xa80, 9 Grg 0x244, 10 Nor 0x258 (EE
+  sizes) -- through the ELF's inline `XxxMain::XxxMain(u_int oid, u_short name, ACHRstat *,
+  _tagEnemyParam const *, _tagEnemyTransition const *, float *)` = EmyMain ctor 0x164118 + vtable +
+  `XxxMain::initOut` (builds the EmyOut objects; Nor's takes the param; Clr's is its slot 7), then
+  setStartState 0x164364 (param +0x10), loadParam 0x164508, footstep tables (data 0x2f12a0..) into
+  MagScene::m_actor_snd. EmyMain's slots: 1 dtor, 2 selectOut (current state's out), 3 GetType, 4
+  decide, 5 exec (default 0x164fc0), 6 after; fields from the ELF's accessors (oid +0, name +4,
+  manage sw +8, param achr +0x20, state +0x3c, out +0x44, group +0x1c8.., damage end +0x1e4, move /
+  turn tasks +0x1f0 / +0x1f8, vptr +0x200). The oid wrappers (0x163624..0x164078) do no type checks
+  except the hold words (+0x23c type 6, +0x248 type 8, +0x24c type 10).
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00
@@ -1069,7 +1086,7 @@ never asserts): sessions name them (`tus.py define --why`).
   actor +0x108, kind +0x128), the class's inline constructor (achr: task ids +0x3d4..+0x3e8 = -1), then
   `ACHRstat::init` 0x1d9908 + `initParamFuncs` 0x1d9b2c or `FCHRstat::init` 0x1db1f0 (system data record
   by kind), `setPos` 0x1d89c4 / 0x1db7cc. Type-2 achr objects (enemies) also get
-  `EmyManager::addEmy` 0x162c2c with the chr no from system data field 0x72.
+  `EmyManager::addEmy` 0x162c2c with the enemy type (0..10) from system data field 0x72.
 - Models: `createObjByModel` 0x1ca8e8 (`MagSystem::loadModel`, which returns the actor number) and
   `createObjByName` 0x1ca72c (`MagScene::loadModelByName` from the archive of group kind >> 10:
   table 0x2fbed0 -> data/ch/action/ACTION.RPK, target/TRG, fix/FIX, item/ITEM, inst/INST,
@@ -1156,8 +1173,9 @@ never asserts): sessions name them (`tus.py define --why`).
   name); an achr parent records the child in m_link (+0x254); `detachObj` 0x1d1bec undoes it.
   `setActorBindMode` 0x1d2428 sets bits 5..6 of MagScene m_actor_flags[actor].
 - **Enemy groups** (`addChrGroup` 0x1cc560, native 100 case 8): EmyManager::setGroup 0x162b68 (group
-  a < 9 at stride 0x3c), then count achrs built with oid 0: addEmy (0x162c88) makes their oids
-  0x9100006f + n and stores them in GamMan's m_achr table itself.
+  a < 9 at stride 0x3c), then count achrs built with oid 0: addEmy -> createEmy 0x162c88 makes their
+  oids 0x9100006f + n (addEmy passes makeOid 1; the twin addEmyAlt 0x162c5c, unreferenced, 0) and
+  stores them with the inline GamMan::set_achr.
 - **Object queries** (gamman session 9): `collectAchrs` 0x1d2e2c / `collectFchrs` 0x1d327c count the
   objects of a type (-1 any) whose ObjStat m_flags (+0x120) has a bit of need and none of exclude,
   copying them into a caller's SeqPool when given (the fchr one walks the fchr and avfchr lists);
@@ -1373,7 +1391,7 @@ throughout (identifiers, env variables, files, shader macros):
   0x1d0758 -> DogActor::getRotY 0x10a650. DogActor::getMotionLength 0x10d0e8 and
   MagScene::getActorMotionLength 0x1333e4 return a float (f0; the i3m root's float +0x18 via 0x22e958).
   212 enemies (table 0x3011b0, 51 entries) on g_emyManager: findEmy 0x1636a4 scans 64 enemy pointers at
-  +4 (first word = oid); 8 EmySlot records of 0x3c at +0x148; GamMan::switchEnemies 0x1c5a5c (case 50).
+  +4 (first word = oid); 8 EmyGroup records of 0x3c at +0x148 (case 24 is the inline SetGrpMotion); GamMan::switchEnemies 0x1c5a5c (case 50).
 - **Natives 253 / 281** (session 10, 2026-10-26): 253 movies (table data 0x3015b0, 11 cases) on the
   TskMovie task (0x80, ctor 0x1f438c, vtable 0x2e4c50: sound 0x1d, SndMan::stopAll(8), name at +0x10,
   m_state +8 = 100, S2dMovie::playMovie) kept in GamMan::m_movieTaskId +0x222b4: 1 start (yields), 2 kill

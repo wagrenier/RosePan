@@ -26,85 +26,247 @@
 /* CmnITask, CmnTaskMan, g_taskMan: task/tsk_man.h. */
 #include "task/tsk_man.h"
 
-/* One of EmyManager's 8 slots (EE 0x3c, at +0x148; init clears them).
- * Native 212 cases 24 / 30 store its two words; roles unknown. */
-struct EmySlot
+/* EmyManager, EmyGroup, g_emyManager: emy/emy_manager.h (EmyMain, EmyOut:
+ * emy/emy_main.h). */
+#include "emy/emy_manager.h"
+
+/* ---- the enemy classes (unassigned@00145020, one file each, not split yet) ----
+ * EmyMain's eleven derived classes, newed by EmyManager::createEmy by type.
+ * Their constructors are the ELF's linkonce XxxMain::XxxMain: EmyMain's
+ * constructor, the vtable store, then the class's own init (initOut: it
+ * builds the per-state EmyOut objects). layout: host -- polymorphic; the
+ * EE sizes (createEmy's operator new) and offsets are in the comments. */
+/* Type 0 (vtable from rtti.py; EE 0x274). layout: host -- polymorphic. */
+class DwfMain : public EmyMain
 {
-    int    _00[3];
-    int    m_0c;                // ROR 0x0c: native 212 case 24
-    u_char _10[0x24 - 0x10];
-    int    m_24;                // ROR 0x24: setSlotWord24 (native 212 case 30)
-    u_char _28[0x3c - 0x28];
+public:
+    DwfMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00289810
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut();
+    }
+    ~DwfMain();                                                         // EE slot 1 (+0x08), ROR 0x0015c2a4
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x0015cdac
+    int  GetType() { return 0; }                                       // EE slot 3 (+0x18), ROR 0x00289848
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x0015c710
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0015cc84
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x0015cd30
+    void initOut();                                                      // ROR 0x0015c304
 };
-static_assert(sizeof(EmySlot) == 0x3c, "EmySlot EE size");
-static_assert(offsetof(EmySlot, m_0c) == 0x0c, "EmySlot m_0c");
-static_assert(offsetof(EmySlot, m_24) == 0x24, "EmySlot m_24");
 
-/* EmyManager : CmnITask, one global at bss 0x7b2140 (constructor
- * 0x16265c, vtable 0x2e31a0). layout: host -- only m_slot placed; it
- * holds 64 enemy pointers at +4, each enemy's first word its oid. The
- * per-enemy wrappers do nothing (0 / false; testEmyView 1) when findEmy
- * finds none. */
-struct EmyManager : CmnITask
+/* Type 1 (vtable from rtti.py; EE 0x270). layout: host -- polymorphic. */
+class PigMain : public EmyMain
 {
-    /* A new enemy for the type-2 achr chr (forwards to 0x162c88): chrNo
-     * from the kind's system data field 0x72, GamMan's script word
-     * +0x22364, the image slot the caller picked, the position. */
-    /* oid 0 (addChrGroup's achrs): one is made, 0x9100006f + a count
-     * (when a further stack word the callers leave unset is non-zero),
-     * set in GamMan's achr slot table and the achr's param 1. group is
-     * EmyManager's group (addChr passes 0). Returns the oid, 0 when no
-     * enemy was added. */
-    u_int addEmy(int chrNo, short kind, void *chr, intptr_t seqWord, void *image,
-                 const void *pos, u_int oid, int group = 0);             // ROR 0x00162c2c
-    /* Group a (< 9) set up: b (< 0x11), c (at least 60), count (< 0x11),
-     * d, the position and f; on. */
-    void setGroup(float f, int a, int b, int c, int count, int d,
-                  const void *pos);                                      // ROR 0x00162b68
-    /* Clears its stage work: bytes +0x134 / +0x135, the two object ids,
-     * +0x144 and the 0x1e0 bytes at +0x148. */
-    void resetWork();                                                    // ROR 0x001635e0
-    /* Its two object ids (+0x138 / +0x13c). */
-    void getOids(int *a, int *b);                                        // ROR 0x00163ab8
-    /* Deletes its object whose first word is oid (a type-2 achr's). */
-    void releaseObj(u_int oid);                                          // ROR 0x001634d4
-    /* The enemy whose oid this is, NULL when none. */
-    void *findEmy(u_int oid);                                            // ROR 0x001636a4
-    /* Enemy +8 = on; off pauses its achr's tasks and sets achr flags
-     * 0x400 | 0x2000, on clears them. */
-    void setEmyActive(u_int oid, int on);                                // ROR 0x0016366c
-    int  getEmyWord3c(u_int oid);                                        // ROR 0x00163b20
-    int  setEmyWord238(u_int oid, int v);                                // ROR 0x00163b48
-    /* Two cone tests (angle pi) from the enemy against the objects of
-     * bss 0x7a3350 / 0x7a3354. */
-    int  testEmyView(u_int oid);                                         // ROR 0x00163b80
-    /* The enemy of oid (none: nothing): its achr's tasks paused (on 1) or
-     * resumed (0, ACHRstat::pauseTasks(on, 0)) and its +0x1f0 / +0x1f8
-     * parts switched with them (0x1664a4). */
-    void pauseEmy(u_int oid, int on);                                    // ROR 0x00163e10
-    /* The enemy of oid (none: nothing) gets 0x1661dc(bits); TskDamage
-     * sends 1 hit, 2 killed, 4 / 8 by its m_40, 0x10 for word 6. */
-    void notifyEmy(u_int oid, int bits);                                 // ROR 0x00163624
-    void setEmyWord18(u_int oid);                                        // ROR 0x00163c24
-    void clearEmyWord18(u_int oid);                                      // ROR 0x00163c50
-    int  getEmyWord1d8(u_int oid);                                       // ROR 0x00163d90
-    int  getEmyWord238(u_int oid);                                       // ROR 0x00163f1c
-    /* Achr flags lose 0x10000000 and 0x80, enemy +0x240 = 1. */
-    void releaseEmyHold(u_int oid);                                      // ROR 0x00163bb8
-    void setSlotWord24(int no, int v);                                   // ROR 0x00162afc
-    /* Enemy word +0x30 bit 0. */
-    int  isEmyFlag30(u_int oid);                                         // ROR 0x00164078
-    /* The enemy's word +0x24c while its state (+0x200's slot 0x1c) is
-     * 10, else 0 (none: 0). */
-    int  getEmyHoldWord24c(u_int oid);                                   // ROR 0x00163f44
-    /* The enemy's word +0x23c while its state is 6, else 0. */
-    int  getEmyHoldWord23c(u_int oid);                                   // ROR 0x00163f9c
-    /* Enemy +0x1e4 = 6. */
-    void setEmyMode6(u_int oid);                                         // ROR 0x00163e74
-    /* 0x202f10 on the enemy's +0x1f0: its word 4 cleared, its SE stopped. */
-    void stopEmyMove(u_int oid);                                         // ROR 0x00163e48
+public:
+    PigMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00289470
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut();
+    }
+    ~PigMain();                                                         // EE slot 1 (+0x08), ROR 0x0015a580
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x0015abc4
+    int  GetType() { return 1; }                                       // EE slot 3 (+0x18), ROR 0x002894a8
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x0015a5e0
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0015aa8c
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x0015ab48
+    void initOut();                                                      // ROR 0x0015a17c
+};
 
-    EmySlot m_slot[8];          // ROR 0x148
+/* Type 2 (vtable from rtti.py; EE 0x270). layout: host -- polymorphic. */
+class GotMain : public EmyMain
+{
+public:
+    GotMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x002891b0
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut();
+    }
+    ~GotMain();                                                         // EE slot 1 (+0x08), ROR 0x00158798
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x00158dd8
+    int  GetType() { return 2; }                                       // EE slot 3 (+0x18), ROR 0x002891e8
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x001587f8
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x00158ca4
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x00158d5c
+    void initOut();                                                      // ROR 0x001583d4
+};
+
+/* Type 3 (vtable from rtti.py; EE 0x25c). layout: host -- polymorphic. */
+class FshMain : public EmyMain
+{
+public:
+    FshMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00288668
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut();
+    }
+    ~FshMain();                                                         // EE slot 1 (+0x08), ROR 0x00155d54
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x001561bc
+    int  GetType() { return 3; }                                       // EE slot 3 (+0x18), ROR 0x002886a0
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x00155db4
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x00156048
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x00156140
+    void initOut();                                                      // ROR 0x00156620
+};
+
+/* Type 4 (vtable from rtti.py; EE 0x228). layout: host -- polymorphic. */
+class BdsMain : public EmyMain
+{
+public:
+    BdsMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x0028621c
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut();
+    }
+    ~BdsMain();                                                         // EE slot 1 (+0x08), ROR 0x00149eb0
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x0014a158
+    int  GetType() { return 4; }                                       // EE slot 3 (+0x18), ROR 0x00286254
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x00149f10
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0014a034
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x0014a0dc
+    void initOut();                                                      // ROR 0x00149d18
+};
+
+/* Type 5 (vtable from rtti.py; EE 0x228). layout: host -- polymorphic. */
+class BdlMain : public EmyMain
+{
+public:
+    BdlMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x002867ec
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut();
+    }
+    ~BdlMain();                                                         // EE slot 1 (+0x08), ROR 0x0014b554
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x0014b7fc
+    int  GetType() { return 5; }                                       // EE slot 3 (+0x18), ROR 0x00286824
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x0014b5b4
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0014b6d8
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x0014b780
+    void initOut();                                                      // ROR 0x0014b3bc
+};
+
+/* Type 6 (vtable from rtti.py; EE 0x240). layout: host -- polymorphic. */
+class HfmMain : public EmyMain
+{
+public:
+    HfmMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x0028589c
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut();
+    }
+    ~HfmMain();                                                         // EE slot 1 (+0x08), ROR 0x0014529c
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x00145680
+    int  GetType() { return 6; }                                       // EE slot 3 (+0x18), ROR 0x002858d4
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x001453c0
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x00145560
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x00145604
+    void initOut();                                                      // ROR 0x00145020
+    /* createEmy, after loadParam. */
+    void initAfterParam();                                               // ROR 0x001452fc
+    /* m_free_cnt - n, at least 0 (EmyManager::subEmyFreeCnt). */
+    void subFreeCnt(int n);                                              // ROR 0x0014582c
+
+    int m_free_cnt;             // ROR 0x234: SetFreeCnt
+    int m_23c;                  // ROR 0x23c: EmyManager::getEmyHoldWord23c
+};
+
+/* Type 7 (vtable from rtti.py; EE 0x23c). layout: host -- polymorphic. */
+class MrtMain : public EmyMain
+{
+public:
+    MrtMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00286e34
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut();
+    }
+    ~MrtMain();                                                         // EE slot 1 (+0x08), ROR 0x0014cef8
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x0014d240
+    int  GetType() { return 7; }                                       // EE slot 3 (+0x18), ROR 0x00286e6c
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x0014cf58
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0014d13c
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x0014d1c4
+    void initOut();                                                      // ROR 0x0014cde4
+};
+
+/* Type 8 (vtable from rtti.py; EE 0xa80). layout: host -- polymorphic. */
+class ClrMain : public EmyMain
+{
+public:
+    ClrMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00287244
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut();
+    }
+    ~ClrMain();                                                         // EE slot 1 (+0x08), ROR 0x0014de54
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x0014e224
+    int  GetType() { return 8; }                                       // EE slot 3 (+0x18), ROR 0x0028727c
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x0014deb4
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0014e0b4
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x0014e16c
+    virtual void initOut();                                              // EE slot 7 (+0x38), ROR 0x0014dc7c
+    int m_248;                  // ROR 0x248: EmyManager::getEmyHoldWord248
+};
+
+/* Type 9 (vtable from rtti.py; EE 0x244). layout: host -- polymorphic. */
+class GrgMain : public EmyMain
+{
+public:
+    GrgMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00288058
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut();
+    }
+    ~GrgMain();                                                         // EE slot 1 (+0x08), ROR 0x00154030
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x00154340
+    int  GetType() { return 9; }                                       // EE slot 3 (+0x18), ROR 0x00288090
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x00154090
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x00154208
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x00154270
+    void initOut();                                                      // ROR 0x00153e40
+    /* Forwards to 0x154668 (EmyManager::testEmyView). */
+    int  testView();                                                     // ROR 0x00154734
+    /* The achr loses flags 0x10000000 and 0x80; m_240 = 1. */
+    void releaseHold();                                                  // ROR 0x00154748
+
+    int m_240;                  // ROR 0x240
+};
+
+/* Type 10 (vtable from rtti.py; EE 0x258). layout: host -- polymorphic. */
+class NorMain : public EmyMain
+{
+public:
+    NorMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00287868
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut(prm);
+    }
+    ~NorMain();                                                         // EE slot 1 (+0x08), ROR 0x00150df8
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x00151158
+    int  GetType() { return 10; }                                       // EE slot 3 (+0x18), ROR 0x002878b0
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x00150e58
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0015102c
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x001510dc
+    void initOut(const _tagEnemyParam *prm);                             // ROR 0x00150b24
+    int m_24c;                  // ROR 0x24c: EmyManager::getEmyHoldWord24c
+};
+
+/* The enemy move task (vtable 0x2e5040; unassigned@001fd424). layout: host --
+ * polymorphic; nothing placed yet. */
+struct TskEnemyMove : CmnITask
+{
+    /* Stops it: +4 = 0, its SE stopped, EmyManager's work word of its
+     * oid cleared (EmyMain::InactiveMove). */
+    void stop();                                                         // ROR 0x00202f10
 };
 
 /* ChrMotionRef, the Tsk* script tasks, the chr* helpers: task/tsk_chr.h. */
@@ -132,7 +294,6 @@ float utlDirDist(float x, float z, float *dist);                          // ROR
 /* Copies src into dst, at most n chars; zero-terminates while room is
  * left (n = strlen: no terminator). */
 void  utlStrNCopy(char *dst, const char *src, int n);                    // ROR 0x0021838c
-extern EmyManager g_emyManager; /* bss 0x7b2140 */
 /* The SE no of the enemy oid (0x163ea0) played at its position (0x16a594)
  * (unassigned@00164fc0). */
 void emyPlaySE(u_int oid, int no);                                       // ROR 0x0016a8a4

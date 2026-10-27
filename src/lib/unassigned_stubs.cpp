@@ -646,12 +646,6 @@ void MagLife130da4::setVolume(int volume)
     ROSEPAN_STUB("MagLife130da4::setVolume", 0x00130de0);
 }
 
-// stub of ROR 0x00163ab8
-void EmyManager::getOids(int *a, int *b)
-{
-    ROSEPAN_STUB("EmyManager::getOids", 0x00163ab8);
-}
-
 // stub of ROR 0x001dddbc
 void GamArea::clearKind(int kind)
 {
@@ -677,12 +671,6 @@ void GamMan::relinkObj(u_int oid)
     ROSEPAN_STUB("GamMan::relinkObj", 0x001d5da0);
 }
 
-// stub of ROR 0x001634d4
-void EmyManager::releaseObj(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::releaseObj", 0x001634d4);
-}
-
 // stub of ROR 0x001e0d70
 int GamArea::hasId(u_int id)
 {
@@ -701,6 +689,121 @@ int GamMan::lookupFlagTable(int keyCol, int key, int col)
 void Obj176a3c::release(int no)
 {
     ROSEPAN_STUB("Obj176a3c::release", 0x0017756c);
+}
+
+// ---- stubs (hand-written: EmyMain / EmyOut and the enemy classes' constructors and destructors, which stubgen does not write) ----
+
+// stub of ROR 0x00164118
+EmyMain::EmyMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,
+                 const _tagEnemyTransition *trans, float *pos)
+{
+    ROSEPAN_STUB("EmyMain::EmyMain", 0x00164118);
+    (void)prm;
+    (void)trans;
+    (void)pos;
+    // PORT: the fields EmyManager reads, until the constructor is written.
+    m_oid = oid;
+    m_name = name;
+    m_parsonality = 0;
+    m_voice = 0;
+    m_manage_sw = 0;
+    m_visible = 0;
+    m_down_flg = 0;
+    m_damage = 0;
+    m_down_supine = 0;
+    m_param = param;
+    m_notify = 0;
+    m_state = 0;
+    m_emy_out = NULL;
+    m_state2 = 0;
+    m_grp_no = 0;
+    m_grp_state = 0;
+    m_grp_wait = 0;
+    m_grp_1d2 = 0;
+    m_grp_respawn = 0;
+    m_lp = 0;
+    m_damage_end = 0;
+    m_move = NULL;
+    m_turn = NULL;
+    m_238 = 0;
+}
+
+// stub of ROR 0x00164208
+EmyMain::~EmyMain()
+{
+    ROSEPAN_STUB("EmyMain::~EmyMain", 0x00164208);
+}
+
+// stub of ROR 0x00166a74
+EmyOut::~EmyOut()
+{
+    ROSEPAN_STUB("EmyOut::~EmyOut", 0x00166a74);
+}
+
+// stub of ROR 0x0015c2a4
+DwfMain::~DwfMain()
+{
+    ROSEPAN_STUB("DwfMain::~DwfMain", 0x0015c2a4);
+}
+
+// stub of ROR 0x0015a580
+PigMain::~PigMain()
+{
+    ROSEPAN_STUB("PigMain::~PigMain", 0x0015a580);
+}
+
+// stub of ROR 0x00158798
+GotMain::~GotMain()
+{
+    ROSEPAN_STUB("GotMain::~GotMain", 0x00158798);
+}
+
+// stub of ROR 0x00155d54
+FshMain::~FshMain()
+{
+    ROSEPAN_STUB("FshMain::~FshMain", 0x00155d54);
+}
+
+// stub of ROR 0x00149eb0
+BdsMain::~BdsMain()
+{
+    ROSEPAN_STUB("BdsMain::~BdsMain", 0x00149eb0);
+}
+
+// stub of ROR 0x0014b554
+BdlMain::~BdlMain()
+{
+    ROSEPAN_STUB("BdlMain::~BdlMain", 0x0014b554);
+}
+
+// stub of ROR 0x0014529c
+HfmMain::~HfmMain()
+{
+    ROSEPAN_STUB("HfmMain::~HfmMain", 0x0014529c);
+}
+
+// stub of ROR 0x0014cef8
+MrtMain::~MrtMain()
+{
+    ROSEPAN_STUB("MrtMain::~MrtMain", 0x0014cef8);
+}
+
+// stub of ROR 0x0014de54
+ClrMain::~ClrMain()
+{
+    ROSEPAN_STUB("ClrMain::~ClrMain", 0x0014de54);
+}
+
+// stub of ROR 0x00154030
+GrgMain::~GrgMain()
+{
+    ROSEPAN_STUB("GrgMain::~GrgMain", 0x00154030);
+}
+
+// stub of ROR 0x00150df8
+NorMain::~NorMain()
+{
+    ROSEPAN_STUB("NorMain::~NorMain", 0x00150df8);
 }
 
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
@@ -1127,60 +1230,6 @@ int Obj176a3c::createEff(const EffParam *param)
     return {};
 }
 
-// stub of ROR 0x00163b20
-int EmyManager::getEmyWord3c(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::getEmyWord3c", 0x00163b20);
-    return {};
-}
-
-// stub of ROR 0x00164078
-int EmyManager::isEmyFlag30(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::isEmyFlag30", 0x00164078);
-    return {};
-}
-
-// stub of ROR 0x00163bb8
-void EmyManager::releaseEmyHold(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::releaseEmyHold", 0x00163bb8);
-}
-
-// stub of ROR 0x0016366c
-void EmyManager::setEmyActive(u_int oid, int on)
-{
-    ROSEPAN_STUB("EmyManager::setEmyActive", 0x0016366c);
-}
-
-// stub of ROR 0x00163b48
-int EmyManager::setEmyWord238(u_int oid, int v)
-{
-    ROSEPAN_STUB("EmyManager::setEmyWord238", 0x00163b48);
-    return {};
-}
-
-// stub of ROR 0x00162afc
-void EmyManager::setSlotWord24(int no, int v)
-{
-    ROSEPAN_STUB("EmyManager::setSlotWord24", 0x00162afc);
-}
-
-// stub of ROR 0x00163b80
-int EmyManager::testEmyView(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::testEmyView", 0x00163b80);
-    return {};
-}
-
-// stub of ROR 0x00162c2c
-u_int EmyManager::addEmy(int chrNo, short kind, void *chr, intptr_t seqWord, void *image,
-                const void *pos, u_int oid, int group)
-{
-    ROSEPAN_STUB("EmyManager::addEmy", 0x00162c2c);
-    return {};
-}
-
 // stub of ROR 0x00217f10
 float utlAtan2(float x, float z)
 {
@@ -1205,19 +1254,6 @@ void Obj176a3c::releaseAll()
 void gamCreateEff1a(void)
 {
     ROSEPAN_STUB("gamCreateEff1a", 0x00172678);
-}
-
-// stub of ROR 0x001635e0
-void EmyManager::resetWork()
-{
-    ROSEPAN_STUB("EmyManager::resetWork", 0x001635e0);
-}
-
-// stub of ROR 0x00162b68
-void EmyManager::setGroup(float f, int a, int b, int c, int count, int d,
-                  const void *pos)
-{
-    ROSEPAN_STUB("EmyManager::setGroup", 0x00162b68);
 }
 
 // stub of ROR 0x001ddaa8
@@ -1360,12 +1396,6 @@ void utlStrToLower(char *dst, const char *src)
     ROSEPAN_STUB("utlStrToLower", 0x00218338);
 }
 
-// stub of ROR 0x00163e10
-void EmyManager::pauseEmy(u_int oid, int on)
-{
-    ROSEPAN_STUB("EmyManager::pauseEmy", 0x00163e10);
-}
-
 // stub of ROR 0x001fd6bc
 int TskAttack::stepKind12()
 {
@@ -1413,38 +1443,6 @@ int utlRandRange(int lo, int hi)
 {
     ROSEPAN_STUB("utlRandRange", 0x0010423c);
     return {};
-}
-
-// stub of ROR 0x00163c50
-void EmyManager::clearEmyWord18(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::clearEmyWord18", 0x00163c50);
-}
-
-// stub of ROR 0x00163d90
-int EmyManager::getEmyWord1d8(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::getEmyWord1d8", 0x00163d90);
-    return {};
-}
-
-// stub of ROR 0x00163f1c
-int EmyManager::getEmyWord238(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::getEmyWord238", 0x00163f1c);
-    return {};
-}
-
-// stub of ROR 0x00163624
-void EmyManager::notifyEmy(u_int oid, int bits)
-{
-    ROSEPAN_STUB("EmyManager::notifyEmy", 0x00163624);
-}
-
-// stub of ROR 0x00163c24
-void EmyManager::setEmyWord18(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::setEmyWord18", 0x00163c24);
 }
 
 // stub of ROR 0x001fe160
@@ -1514,32 +1512,6 @@ int TskDamage::stepKindA()
 void emyPlaySE(u_int oid, int no)
 {
     ROSEPAN_STUB("emyPlaySE", 0x0016a8a4);
-}
-
-// stub of ROR 0x00163f9c
-int EmyManager::getEmyHoldWord23c(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::getEmyHoldWord23c", 0x00163f9c);
-    return {};
-}
-
-// stub of ROR 0x00163f44
-int EmyManager::getEmyHoldWord24c(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::getEmyHoldWord24c", 0x00163f44);
-    return {};
-}
-
-// stub of ROR 0x00163e74
-void EmyManager::setEmyMode6(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::setEmyMode6", 0x00163e74);
-}
-
-// stub of ROR 0x00163e48
-void EmyManager::stopEmyMove(u_int oid)
-{
-    ROSEPAN_STUB("EmyManager::stopEmyMove", 0x00163e48);
 }
 
 // stub of ROR 0x0010426c
@@ -1757,4 +1729,372 @@ int utlSetI3rNodeDisp(I3rRoot *root, void *disp, int n)
 void i3mGetBlendPose(I3mRoot *root1, void *pose, I3mRoot *root2, int flags, float t1, float t2, float r)
 {
     ROSEPAN_STUB("i3mGetBlendPose", 0x0022eab0);
+}
+
+// stub of ROR 0x0014b780
+void BdlMain::after()
+{
+    ROSEPAN_STUB("BdlMain::after", 0x0014b780);
+}
+
+// stub of ROR 0x0014b5b4
+void BdlMain::decide()
+{
+    ROSEPAN_STUB("BdlMain::decide", 0x0014b5b4);
+}
+
+// stub of ROR 0x0014b6d8
+void BdlMain::exec()
+{
+    ROSEPAN_STUB("BdlMain::exec", 0x0014b6d8);
+}
+
+// stub of ROR 0x0014b3bc
+void BdlMain::initOut()
+{
+    ROSEPAN_STUB("BdlMain::initOut", 0x0014b3bc);
+}
+
+// stub of ROR 0x0014b7fc
+void BdlMain::selectOut()
+{
+    ROSEPAN_STUB("BdlMain::selectOut", 0x0014b7fc);
+}
+
+// stub of ROR 0x0014a0dc
+void BdsMain::after()
+{
+    ROSEPAN_STUB("BdsMain::after", 0x0014a0dc);
+}
+
+// stub of ROR 0x00149f10
+void BdsMain::decide()
+{
+    ROSEPAN_STUB("BdsMain::decide", 0x00149f10);
+}
+
+// stub of ROR 0x0014a034
+void BdsMain::exec()
+{
+    ROSEPAN_STUB("BdsMain::exec", 0x0014a034);
+}
+
+// stub of ROR 0x00149d18
+void BdsMain::initOut()
+{
+    ROSEPAN_STUB("BdsMain::initOut", 0x00149d18);
+}
+
+// stub of ROR 0x0014a158
+void BdsMain::selectOut()
+{
+    ROSEPAN_STUB("BdsMain::selectOut", 0x0014a158);
+}
+
+// stub of ROR 0x0014e16c
+void ClrMain::after()
+{
+    ROSEPAN_STUB("ClrMain::after", 0x0014e16c);
+}
+
+// stub of ROR 0x0014deb4
+void ClrMain::decide()
+{
+    ROSEPAN_STUB("ClrMain::decide", 0x0014deb4);
+}
+
+// stub of ROR 0x0014e0b4
+void ClrMain::exec()
+{
+    ROSEPAN_STUB("ClrMain::exec", 0x0014e0b4);
+}
+
+// stub of ROR 0x0014dc7c
+void ClrMain::initOut()
+{
+    ROSEPAN_STUB("ClrMain::initOut", 0x0014dc7c);
+}
+
+// stub of ROR 0x0014e224
+void ClrMain::selectOut()
+{
+    ROSEPAN_STUB("ClrMain::selectOut", 0x0014e224);
+}
+
+// stub of ROR 0x0015cd30
+void DwfMain::after()
+{
+    ROSEPAN_STUB("DwfMain::after", 0x0015cd30);
+}
+
+// stub of ROR 0x0015c710
+void DwfMain::decide()
+{
+    ROSEPAN_STUB("DwfMain::decide", 0x0015c710);
+}
+
+// stub of ROR 0x0015cc84
+void DwfMain::exec()
+{
+    ROSEPAN_STUB("DwfMain::exec", 0x0015cc84);
+}
+
+// stub of ROR 0x0015c304
+void DwfMain::initOut()
+{
+    ROSEPAN_STUB("DwfMain::initOut", 0x0015c304);
+}
+
+// stub of ROR 0x0015cdac
+void DwfMain::selectOut()
+{
+    ROSEPAN_STUB("DwfMain::selectOut", 0x0015cdac);
+}
+
+// stub of ROR 0x00156140
+void FshMain::after()
+{
+    ROSEPAN_STUB("FshMain::after", 0x00156140);
+}
+
+// stub of ROR 0x00155db4
+void FshMain::decide()
+{
+    ROSEPAN_STUB("FshMain::decide", 0x00155db4);
+}
+
+// stub of ROR 0x00156048
+void FshMain::exec()
+{
+    ROSEPAN_STUB("FshMain::exec", 0x00156048);
+}
+
+// stub of ROR 0x00156620
+void FshMain::initOut()
+{
+    ROSEPAN_STUB("FshMain::initOut", 0x00156620);
+}
+
+// stub of ROR 0x001561bc
+void FshMain::selectOut()
+{
+    ROSEPAN_STUB("FshMain::selectOut", 0x001561bc);
+}
+
+// stub of ROR 0x001d7de4
+float GamMan::getFloorY(const float *pos)
+{
+    ROSEPAN_STUB("GamMan::getFloorY", 0x001d7de4);
+    return {};
+}
+
+// stub of ROR 0x00158d5c
+void GotMain::after()
+{
+    ROSEPAN_STUB("GotMain::after", 0x00158d5c);
+}
+
+// stub of ROR 0x001587f8
+void GotMain::decide()
+{
+    ROSEPAN_STUB("GotMain::decide", 0x001587f8);
+}
+
+// stub of ROR 0x00158ca4
+void GotMain::exec()
+{
+    ROSEPAN_STUB("GotMain::exec", 0x00158ca4);
+}
+
+// stub of ROR 0x001583d4
+void GotMain::initOut()
+{
+    ROSEPAN_STUB("GotMain::initOut", 0x001583d4);
+}
+
+// stub of ROR 0x00158dd8
+void GotMain::selectOut()
+{
+    ROSEPAN_STUB("GotMain::selectOut", 0x00158dd8);
+}
+
+// stub of ROR 0x00154270
+void GrgMain::after()
+{
+    ROSEPAN_STUB("GrgMain::after", 0x00154270);
+}
+
+// stub of ROR 0x00154090
+void GrgMain::decide()
+{
+    ROSEPAN_STUB("GrgMain::decide", 0x00154090);
+}
+
+// stub of ROR 0x00154208
+void GrgMain::exec()
+{
+    ROSEPAN_STUB("GrgMain::exec", 0x00154208);
+}
+
+// stub of ROR 0x00153e40
+void GrgMain::initOut()
+{
+    ROSEPAN_STUB("GrgMain::initOut", 0x00153e40);
+}
+
+// stub of ROR 0x00154748
+void GrgMain::releaseHold()
+{
+    ROSEPAN_STUB("GrgMain::releaseHold", 0x00154748);
+}
+
+// stub of ROR 0x00154340
+void GrgMain::selectOut()
+{
+    ROSEPAN_STUB("GrgMain::selectOut", 0x00154340);
+}
+
+// stub of ROR 0x00154734
+int GrgMain::testView()
+{
+    ROSEPAN_STUB("GrgMain::testView", 0x00154734);
+    return {};
+}
+
+// stub of ROR 0x00145604
+void HfmMain::after()
+{
+    ROSEPAN_STUB("HfmMain::after", 0x00145604);
+}
+
+// stub of ROR 0x001453c0
+void HfmMain::decide()
+{
+    ROSEPAN_STUB("HfmMain::decide", 0x001453c0);
+}
+
+// stub of ROR 0x00145560
+void HfmMain::exec()
+{
+    ROSEPAN_STUB("HfmMain::exec", 0x00145560);
+}
+
+// stub of ROR 0x001452fc
+void HfmMain::initAfterParam()
+{
+    ROSEPAN_STUB("HfmMain::initAfterParam", 0x001452fc);
+}
+
+// stub of ROR 0x00145020
+void HfmMain::initOut()
+{
+    ROSEPAN_STUB("HfmMain::initOut", 0x00145020);
+}
+
+// stub of ROR 0x00145680
+void HfmMain::selectOut()
+{
+    ROSEPAN_STUB("HfmMain::selectOut", 0x00145680);
+}
+
+// stub of ROR 0x0014582c
+void HfmMain::subFreeCnt(int n)
+{
+    ROSEPAN_STUB("HfmMain::subFreeCnt", 0x0014582c);
+}
+
+// stub of ROR 0x0014d1c4
+void MrtMain::after()
+{
+    ROSEPAN_STUB("MrtMain::after", 0x0014d1c4);
+}
+
+// stub of ROR 0x0014cf58
+void MrtMain::decide()
+{
+    ROSEPAN_STUB("MrtMain::decide", 0x0014cf58);
+}
+
+// stub of ROR 0x0014d13c
+void MrtMain::exec()
+{
+    ROSEPAN_STUB("MrtMain::exec", 0x0014d13c);
+}
+
+// stub of ROR 0x0014cde4
+void MrtMain::initOut()
+{
+    ROSEPAN_STUB("MrtMain::initOut", 0x0014cde4);
+}
+
+// stub of ROR 0x0014d240
+void MrtMain::selectOut()
+{
+    ROSEPAN_STUB("MrtMain::selectOut", 0x0014d240);
+}
+
+// stub of ROR 0x001510dc
+void NorMain::after()
+{
+    ROSEPAN_STUB("NorMain::after", 0x001510dc);
+}
+
+// stub of ROR 0x00150e58
+void NorMain::decide()
+{
+    ROSEPAN_STUB("NorMain::decide", 0x00150e58);
+}
+
+// stub of ROR 0x0015102c
+void NorMain::exec()
+{
+    ROSEPAN_STUB("NorMain::exec", 0x0015102c);
+}
+
+// stub of ROR 0x00150b24
+void NorMain::initOut(const _tagEnemyParam *prm)
+{
+    ROSEPAN_STUB("NorMain::initOut", 0x00150b24);
+}
+
+// stub of ROR 0x00151158
+void NorMain::selectOut()
+{
+    ROSEPAN_STUB("NorMain::selectOut", 0x00151158);
+}
+
+// stub of ROR 0x0015ab48
+void PigMain::after()
+{
+    ROSEPAN_STUB("PigMain::after", 0x0015ab48);
+}
+
+// stub of ROR 0x0015a5e0
+void PigMain::decide()
+{
+    ROSEPAN_STUB("PigMain::decide", 0x0015a5e0);
+}
+
+// stub of ROR 0x0015aa8c
+void PigMain::exec()
+{
+    ROSEPAN_STUB("PigMain::exec", 0x0015aa8c);
+}
+
+// stub of ROR 0x0015a17c
+void PigMain::initOut()
+{
+    ROSEPAN_STUB("PigMain::initOut", 0x0015a17c);
+}
+
+// stub of ROR 0x0015abc4
+void PigMain::selectOut()
+{
+    ROSEPAN_STUB("PigMain::selectOut", 0x0015abc4);
+}
+
+// stub of ROR 0x00202f10
+void TskEnemyMove::stop()
+{
+    ROSEPAN_STUB("TskEnemyMove::stop", 0x00202f10);
 }

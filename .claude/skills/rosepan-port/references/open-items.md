@@ -102,8 +102,14 @@ follows it; reached stubs in run order):
      0x12e4 bytes are pinned and WRITTEN as `mag/magscenecmd.cpp` (verify: fog fade, Brown's glue
      and magBwnSeqCommand; nothing on screen shows fog until a model draws, and the
      MagLifeBwnCtrl methods it calls are stubs in mag/maglifebwnctrl.cpp). The rest is now
-     `unassigned@00145020` (the enemy classes Hfm..Pig, EmyManager 0x16265c.. with the reached
-     EmyManager::resetWork 0x1635e0): split it per enemy file (emy/) and EmyManager first.
+     `unassigned@00145020` (the enemy classes Hfm..Pig): split it per enemy file (emy/). **EmyManager
+     is done 2026-10-27**: emy/emy_manager.cpp (0x16265c..0x164118, all 58, `verify` -- no enemy is
+     created in the New Game run yet). Doubts: the file name (no source string; emy_main.cpp style);
+     createEmy's transition table is GamMan's m_image[place] as the callers pass it (check addChr's t1
+     when EmyMain::setStartState is written); EmyMain keeps the derived word +0x238 on the host
+     (setEmyWord238 writes it on any type); setGroup accepts group 8, which the ROM writes over +0x328
+     (the host has a ninth group). EmyMain's ctor / dtor (0x164118 / 0x164208, now unassigned@00164118)
+     belong to emy/emy_main.cpp with 0x164364.. -- define them together when that file is written.
   8. `unassigned@001dd5e8` -- GamArea::addTrg / stopKind / clearKind (room triggers).
   9. `unassigned@001d3b44` -- GamMan::relinkObj 0x1d5da0.
   Also reached, lower: EmyManager::resetWork, Obj176a3c::createEff (the effect manager in
@@ -417,9 +423,8 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      openSysMsg (its first argument is a message number, not text: seqcall fixed), testAchrFlag;
      ACHRstat +0x3ec is a word array m_attr[4]. New Game now runs resetStage (GamSndMan::reset,
      GamArea::clear reached) and still dies after GamMan::relinkObj 0x1d5da0 (unassigned@001d3b44,
-     the next thing to write or debug with gdbrun.py). Open: EmyManager::addEmy (0x162c88) reads a
-     stack word after the group that neither addChr nor addChrGroup writes (oid 0 needs it non-zero
-     to make an oid); its host signature (group default 0) waits for the EmyManager TU.
+     the next thing to write or debug with gdbrun.py). Resolved 2026-10-27 (emy/emy_manager.cpp): that stack
+     word is createEmy's makeOid, which EmyManager::addEmy 0x162c2c itself passes as 1.
   Unknown until the VM runs: what W099's script does before system call 0x16 (logo movie, language
   select `mnu/mnuSelectLanguage.cpp`, waits on pad). Decode it with the VM when item 2 is written and
   queue what it reaches. The test is the picture: the title menu on screen matching its textures

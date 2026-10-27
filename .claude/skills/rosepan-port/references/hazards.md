@@ -175,6 +175,11 @@ entries are marked **RoR** with the date.
 
 ## Types and layouts
 
+- **Lower-bound asserts need the fields before them** (2026-10-27, EmyMain): a host-layout class that
+  places only the members its code reads (EmyMain: 25 of ~0x200 bytes) fails `offsetof(...) >= 0x1c8`
+  for late fields. Assert lower bounds only where the members before are complete; leave the rest to
+  the EE offsets in the comments.
+
 - **Ghidra's `ptr + n` on an `int *` is n words, not n bytes.** Symptom: a table walk reads
   `piVar1 = *(int **)(this + 0x110) + 0xc;` and the row size is taken as 12. Cause: the decompiler
   prints typed pointer arithmetic; on `int *` + 0xc is 0x30 bytes. Fix: read the row size from the

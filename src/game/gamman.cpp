@@ -2804,9 +2804,9 @@ void GamMan::addVFchr(int model, u_int oid, int arg, int kind, intptr_t pos)
 
 // ──────────────────────────────────────────────────────────────────────
 // Model 0xffff means none. An achr (list 1) gets its slot and list node; a
-// type-2 achr (an enemy) also an EmyManager enemy with the chr no of its
-// kind's field 0x72, the image slot place and the script word, placed again
-// at pos. An fchr (list 2) gets its slot and node. Other lists add nothing.
+// type-2 achr (an enemy) also an EmyManager enemy of the type in its
+// kind's field 0x72 (createEmy's switch), with the script's enemy param word
+// and the image slot place as its tables, placed again at pos. An fchr (list 2) gets its slot and node. Other lists add nothing.
 // ROR 0x001cc250 // callcheck: operator_new, ObjStat (new ACHRstat / FCHRstat: their constructors are inline over ObjStat::ObjStat)
 
 void GamMan::addChr(int model, u_int oid, int kind, const void *pos, int place)
@@ -2827,7 +2827,8 @@ void GamMan::addChr(int model, u_int oid, int kind, const void *pos, int place)
         {
             u_short chrNo[8] = {0};     // the ROM's stack words
             m_sysData.getField((u_short)kind, 0x72, chrNo);
-            g_emyManager.addEmy(chrNo[0], (short)kind, chr, m_seqWord, m_image[place], pos, oid);
+            g_emyManager.addEmy(chrNo[0], (short)kind, chr, (const _tagEnemyParam *)m_seqWord,
+                                (const _tagEnemyTransition *)m_image[place], (float *)pos, oid);
             if (pos != NULL)
                 setObjPos(oid, (const float *)pos);
         }
@@ -4294,7 +4295,7 @@ void GamMan::addChrGroup(int model, u_int oid, int a, int b, int c, int count, i
     u_short id = (u_short)kind;
     u_short chrNo[8] = {0};     // the ROM's stack words
     m_sysData.getField(id, 0x72, chrNo);
-    g_emyManager.setGroup(f, a, b, c, count, d, pos);
+    g_emyManager.setGroup(f, a, b, c, count, d, (const float *)pos);
     for (int i = count; i > 0; i--)
     {
         u_short chrModel[8] = {0};
@@ -4304,8 +4305,10 @@ void GamMan::addChrGroup(int model, u_int oid, int a, int b, int c, int count, i
         ACHRstat *chr = new ACHRstat(0, actor, (short)id);
         chr->init((short)id);
         chr->initParamFuncs();
-        u_int newOid = g_emyManager.addEmy(chrNo[0], (short)id, chr, m_seqWord, m_image[place],
-                                           pos, 0, a);
+        u_int newOid = g_emyManager.addEmy(chrNo[0], (short)id, chr,
+                                           (const _tagEnemyParam *)m_seqWord,
+                                           (const _tagEnemyTransition *)m_image[place],
+                                           (float *)pos, 0, a);
         if (pos != NULL)
             setObjPos(newOid, (const float *)pos);
         m_achrList.add(chr);
