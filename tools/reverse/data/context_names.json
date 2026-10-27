@@ -4259,6 +4259,186 @@
   "was": "FUN_00145d44",
   "why": "+4 = step and +0x38 frame count = 0 when the step changes"
  },
+ "00145d60": {
+  "name": "HfmOutSlap::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00145d60",
+  "why": "slot 2 of HfmOutSlap's vtable 0x2e20d0: clears its counters, selectTarget, chases the target"
+ },
+ "00145dc0": {
+  "name": "HfmOutSlap::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00145dc0",
+  "why": "slot 3 of vtable 0x2e20d0: chase, slap motions 0x14/0x15/0x16 with a hit window, scnChrRequest on the PC / dog"
+ },
+ "0014635c": {
+  "name": "HfmOutSlap::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014635c",
+  "why": "slot 4 of vtable 0x2e20d0: termCommon"
+ },
+ "00146378": {
+  "name": "HfmOutBreak::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00146378",
+  "why": "slot 2 of vtable 0x2e2100"
+ },
+ "001463b8": {
+  "name": "HfmOutBreak::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001463b8",
+  "why": "slot 3 of vtable 0x2e2100: motion 0x30 with SE 0x2a, then input 7"
+ },
+ "00146460": {
+  "name": "HfmOutBreak::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00146460",
+  "why": "slot 4 of vtable 0x2e2100: termCommon"
+ },
+ "0014647c": {
+  "name": "HfmOutWalk2::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014647c",
+  "why": "slot 2 of vtable 0x2e2130, as HfmOutWalk::Init"
+ },
+ "001464cc": {
+  "name": "HfmOutWalk2::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001464cc",
+  "why": "slot 3 of vtable 0x2e2130: HfmOutWalk::Exec with a length test instead of the sight test"
+ },
+ "00146628": {
+  "name": "HfmOutWalk2::getRoamPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00146628",
+  "why": "a copy of HfmOutWalk::getRoamPos 0x145a10 called from HfmOutWalk2::Exec"
+ },
+ "001468e0": {
+  "name": "HfmOutWalk2::startIdle",
+  "tag": "ror-inferred",
+  "was": "FUN_001468e0",
+  "why": "as HfmOutWalk::startIdle, with its own walk-motion helper"
+ },
+ "00146944": {
+  "name": "HfmOutWalk2::setWalkMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00146944",
+  "why": "chrMtnMove2Achr(m_agl/60, oid, motion, -1, 0x100) for HfmOutWalk2::startIdle"
+ },
+ "001469b0": {
+  "name": "HfmOutWalk2::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_001469b0",
+  "why": "slot 4 of vtable 0x2e2130: termCommon"
+ },
+ "001469cc": {
+  "name": "HfmOutWalk2::setStep",
+  "tag": "ror-inferred",
+  "was": "FUN_001469cc",
+  "why": "as HfmOutWalk::setStep: m_step and the +0x38 count reset"
+ },
+ "001469e8": {
+  "name": "HfmOutRide::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_001469e8",
+  "why": "slot 2 of vtable 0x2e2160"
+ },
+ "00146a20": {
+  "name": "HfmOutRide::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00146a20",
+  "why": "slot 3 of vtable 0x2e2160: switch on the +0x40 phase into four phase functions"
+ },
+ "00146ab8": {
+  "name": "HfmOutRide::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00146ab8",
+  "why": "slot 4 of vtable 0x2e2160: termCommon and the emy's +0x238 (SetMissing) cleared"
+ },
+ "00146ae4": {
+  "name": "HfmOutRide::start",
+  "tag": "ror-inferred",
+  "was": "FUN_00146ae4",
+  "why": "called only by HfmOutRide::Init"
+ },
+ "00146d88": {
+  "name": "HfmOutRide::execPhase0",
+  "tag": "ror-inferred",
+  "was": "FUN_00146d88",
+  "why": "HfmOutRide::Exec's phase 0"
+ },
+ "001473e4": {
+  "name": "HfmOutRide::execPhase1",
+  "tag": "ror-inferred",
+  "was": "FUN_001473e4",
+  "why": "HfmOutRide::Exec's phase 1"
+ },
+ "00147840": {
+  "name": "HfmOutRide::execPhase2",
+  "tag": "ror-inferred",
+  "was": "FUN_00147840",
+  "why": "HfmOutRide::Exec's phase 2"
+ },
+ "001484ec": {
+  "name": "HfmOutRide::execPhase3",
+  "tag": "ror-inferred",
+  "was": "FUN_001484ec",
+  "why": "HfmOutRide::Exec's phase 3"
+ },
+ "00148d30": {
+  "name": "HfmOutDead::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00148d30",
+  "why": "slot 2 of vtable 0x2e2190: effect kind 3 at the enemy, hidden, motion 0x31, sounds stopped"
+ },
+ "00148e48": {
+  "name": "HfmOutDead::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00148e48",
+  "why": "slot 3 of vtable 0x2e2190: returns -1"
+ },
+ "00148e50": {
+  "name": "HfmOutDead::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00148e50",
+  "why": "slot 4 of vtable 0x2e2190: termCommon"
+ },
+ "00148e6c": {
+  "name": "HfmOutWin::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00148e6c",
+  "why": "slot 2 of vtable 0x2e21c0: chase the target to a random range 115..172.5"
+ },
+ "00148ed4": {
+  "name": "HfmOutWin::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00148ed4",
+  "why": "slot 3 of vtable 0x2e21c0: on arrival motion 0x16"
+ },
+ "00148f34": {
+  "name": "HfmOutWin::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00148f34",
+  "why": "slot 4 of vtable 0x2e21c0: termCommon"
+ },
+ "00148f50": {
+  "name": "HfmOutBitten::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00148f50",
+  "why": "slot 2 of vtable 0x2e21f0: motion 0xd"
+ },
+ "00148f74": {
+  "name": "HfmOutBitten::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00148f74",
+  "why": "slot 3 of vtable 0x2e21f0: while the dog bites (magBwnBarkQuery) voice; free-left out -> shake off, scnChrRequest 0x2d on the dog"
+ },
+ "00149168": {
+  "name": "HfmOutBitten::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00149168",
+  "why": "slot 4 of vtable 0x2e21f0: termCommon"
+ },
  "00149d18": {
   "name": "BdsMain::initOut",
   "tag": "ror-inferred",
@@ -4727,6 +4907,12 @@
   "was": "FUN_00165074",
   "why": "switch on the group state +0x1cc (hide, wait, appear ...), args the group's float, motion, position"
  },
+ "00165570": {
+  "name": "EmyMain::stopAllSE",
+  "tag": "ror-inferred",
+  "was": "FUN_00165570",
+  "why": "the four sound records at +0x154 (0x1c each): funcSE / funcStr op 8 by kind, then cleared"
+ },
  "001656b4": {
   "name": "EmyMain::testHittable",
   "tag": "ror-inferred",
@@ -4847,6 +5033,12 @@
   "was": "FUN_00166da4",
   "why": "+0x14 = the PC's or the dog's oid (GamMan +0x22090 / +0x22094) by sight within 60 and a rate, +0x10 = 1 when the dog"
  },
+ "00166f50": {
+  "name": "emyStartChase",
+  "tag": "ror-inferred",
+  "was": "FUN_00166f50",
+  "why": "fills the move record from the type tables 0x2f1c90.. like emyStartMove but with a target oid and a stop range (f12), starts the emy's TskEnemyMove"
+ },
  "001670dc": {
   "name": "emyStartMove",
   "tag": "ror-inferred",
@@ -4864,6 +5056,24 @@
   "tag": "ror-inferred",
   "was": "FUN_001682b0",
   "why": "chrMtnMove2Achr with motion list [0] or [1] by achr +0x3ec bits 8 / 0x10, flags 0x100"
+ },
+ "001693ec": {
+  "name": "EmyOut::tickVoice",
+  "tag": "ror-inferred",
+  "was": "FUN_001693ec",
+  "why": "with no SE at +0x2c counts +0x30 down; below 0 restarts it utlRandRange(lo, hi) and plays SE se into +0x2c"
+ },
+ "0016947c": {
+  "name": "EmyOut::stopVoice",
+  "tag": "ror-inferred",
+  "was": "FUN_0016947c",
+  "why": "SndMan::stopSe(+0x2c), +0x2c = -1, +0x30 = utlRandRange(8, 24) (as the constructor)"
+ },
+ "001694cc": {
+  "name": "EmyOut::playSE",
+  "tag": "ror-inferred",
+  "was": "FUN_001694cc",
+  "why": "a0 the out: GamSndMan::playSE of EmyMain::getSE(no) at getBasePos; returns the SE handle"
  },
  "00169538": {
   "name": "EmyStateMap::EmyStateMap",
@@ -4889,11 +5099,23 @@
   "was": "FUN_00169810",
   "why": "(enemy oid, item oid) after HfmMain::initAfterParam creates the held item: GamMan::isObj / getFchr / testObjFlags ..."
  },
+ "00169a14": {
+  "name": "emyVecLength",
+  "tag": "ror-inferred",
+  "was": "FUN_00169a14",
+  "why": "sqrt(x*x + y*y + z*z) of a0"
+ },
  "00169bac": {
   "name": "emyChkInSight",
   "tag": "ror-inferred",
   "was": "FUN_00169bac",
   "why": "(range, angle, use angle, target oid, achr): distance between the two actors' nodes (0x2f1e38) within range and, with the flag, the angle off the actor's rotY within angle"
+ },
+ "00169f94": {
+  "name": "emyChkHitReach",
+  "tag": "ror-inferred",
+  "was": "FUN_00169f94",
+  "why": "the first n hit nodes (p_hit table 0x298de8) of oid's actor within range + the target's radius of the target's node"
  },
  "0016a8a4": {
   "name": "emyPlaySE",

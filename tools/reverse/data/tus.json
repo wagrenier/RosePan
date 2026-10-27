@@ -1,24 +1,13 @@
 {
  "queue": [
-  "dog/dogentity.cpp",
-  "unassigned@0010f944",
-  "unassigned@00228c08",
-  "dog/dogmotionblend.cpp",
-  "unassigned@0022e840",
-  "unassigned@00106658",
-  "setup/i3d_mesh_draw.cpp",
-  "unassigned@0021fb50",
-  "unassigned@0021c960",
-  "mag/magscenecamera.cpp",
-  "unassigned@0013e2ec",
-  "unassigned@00140c68",
-  "unassigned@00140990",
-  "mag/maglifepc.cpp",
-  "task/naga_chunk.cpp",
-  "mag/maglifebwn.cpp",
-  "unassigned@001258a4",
-  "mag/maglifebwnctrl.cpp",
-  "unassigned@00166a1c"
+  "unassigned@0022b4b8",
+  "unassigned@0021a3e8",
+  "unassigned@00140030",
+  "unassigned@00145020",
+  "unassigned@001dd5e8",
+  "unassigned@001d859c",
+  "unassigned@0020ff34",
+  "unassigned@001e46b8"
  ],
  "settings": {
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
@@ -157,9 +146,7 @@
    "why": "11 of 16 functions assert with dog/dogtexinfo.cpp; the rest are DogTexInfo members (clear, term, findFree, setSepiaColor, releaseModel, releasePfh) taking the table in a0; DogModel code ends at 0x1161e4 (unassigned 0x1160a8 run before), MagSystem starts at 0x117654 after the 8-byte 0x11764c"
   },
   "emy/emy_hfm.cpp": {
-   "claimed": "2026-10-27 16:24",
-   "notes": "Left in emy/emy_hfm.cpp (hand stubs at the end of the file, return -1 from Exec): the Init/Exec/Term of HfmOutSlap 0x145d60.., HfmOutBreak 0x146378.., HfmOutWalk2 0x14647c.., HfmOutRide 0x1469e8..0x146d88..0x1484ec (the biggest, with helpers 0x146ae4 / 0x146bf0 / 0x146c8c / 0x147760 / 0x148450), HfmOutDead 0x148d30, HfmOutWin 0x148e6c, HfmOutBitten 0x148f50, HfmOutCounter 0x149184, HfmOutTest 0x1494c8 / 0x149500. Start with brief: python tus.py brief emy/emy_hfm.cpp. Each out's own data starts at EE +0x38 (HfmOutWalk keeps its frame count in m_cnt; give each class its own fields, EmyOut's m_38 / m_3c stay for EmyManager). The outs call EmyOut helpers in unassigned@00166a1c (termCommon, setMotion, selectTarget, emyStartMove, emyChkInSight: now stubs in lib/unassigned_stubs.cpp) -- nothing moves until those and EmyMain's ctor 0x164118 / setStartState 0x164364 are written. No enemy is created in the smoke run, so nothing on screen shows this TU (15 s run: the Atlus disclaimer, as before). The other enemy files each start at their XxxMain::initOut (list in open-items.md item 7); pin them the same way. Doubts recorded in open-items.md: _tagEnemyTransition keeps a host pointer at +0xc; utlRandRangeF returns 0.0 on a zero draw (ROM behaviour).",
-   "prev_status": "partial",
+   "notes": "Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec) with their helpers 0x146bf0 / 0x146c8c / 0x147760 / 0x147a28 / 0x147e04.. 0x148450 (Ride's own fields after +0x40 m_phase still to place, EE size 0x98), HfmOutCounter 0x149184 / 0x1491ec / 0x1494ac, HfmOutTest 0x1494c8 / 0x149500. Start with python tus.py brief emy/emy_hfm.cpp. The new EmyOut helpers (emyStartChase, playSE, tickVoice, stopVoice, emyChkHitReach, emyVecLength, stopAllSE) are stubs in lib/unassigned_stubs.cpp and emy/emy_main.cpp; nothing moves until those plus setMotion/termCommon/selectTarget and the EmyMain ctor are written. Decisions: HfmOutWalk2::Exec tests the length of the roam point itself (ROM, not a distance); a chained slap keeps m_hit_pc/m_hit_dog/m_se_done from the previous slap so it cannot hit (ROM); HfmOutBitten reads the dog object without a NULL test (ROM); EffParam m_hit gained m_2c for kind 3. No enemy is created in the smoke run: the 15 s screenshot is the Atlus disclaimer as before.",
    "ranges": [
     [
      "00145020",
@@ -171,9 +158,14 @@
      "date": "2026-10-27 09:24",
      "status": "partial",
      "summary": "Split the enemy run: pinned emy/emy_hfm.cpp 0x145020..0x149d18 (HfmMain + its outs). Wrote HfmMain whole (initOut, dtor, initAfterParam, decide, exec, after, selectOut, the free counters, subFreeCnt, slot 7) and HfmOutWalk (Init, Exec, getRoamPos, startIdle, Term, setStep). Grew EmyMain (state map +0x1c, request +0x24, decide switch +0x28, motion input +0x2c, changed +0x40, m_out[40] +0x48, trans +0xe8, motion list +0xec, agl +0x1c4) and EmyOut (ctor, Init/Exec/Term slots, base fields, helpers); defined _tagEnemyTransition and EmyStateMap. HfmMain moved from lib/unassigned.h to emy/emy_hfm.h."
+    },
+    {
+     "date": "2026-10-27 16:34",
+     "status": "partial",
+     "summary": "Wrote HfmOutSlap (Init, Exec: chase, slaps 0x14/0x15/0x16 with hit windows and scnChrRequest on PC and dog, chaining, Term), HfmOutBreak, HfmOutWalk2 (Init, Exec, getRoamPos, startIdle, setWalkMotion, setStep, Term), HfmOutDead (effect kind 3, hide, motion 0x31), HfmOutWin, HfmOutBitten, and HfmOutRide's Init/Exec/Term dispatch. Named and declared the EmyOut helpers emyStartChase, EmyOut::playSE/tickVoice/stopVoice, emyChkHitReach, emyVecLength, EmyMain::stopAllSE; wrote EmyMain::setDecideSw."
     }
    ],
-   "status": "active",
+   "status": "partial",
    "why": "HfmMain + its ten HfmOut* classes: HfmMain::initOut (first, as every XxxMain::initOut opens its file) up to BdsMain::initOut 0x149d18 which opens the Bds file; no source string, named like emy_main.cpp / emy_manager.cpp"
   },
   "emy/emy_manager.cpp": {
@@ -1270,9 +1262,6 @@
    ],
    "status": "verify",
    "task": "Create the native i3d draw module src/rosepan/rendering/rosepan_i3d.h / .cpp: the host consumer of the i3d path (no GS emulation, open-items Decisions). Today every frame builds real i3d groups, layers, draw sets, views, packets and texture objects (i3dlayer, i3dpacket, i3dview, i3dtex, i3dtim2, i3dvram: all verify) but nothing reaches the host renderer, so the screen is black. Steps: (1) Choose the hook and record it in open-items.md Decisions. Recommended: the 2D packet writers in i3d/i3dpacket.cpp (sprite / line / point / triangle REGLIST and F writers, each one GS primitive with its PRIM word) also append a host primitive to the open layer, and the sorted layer / draw-set walk in i3dCtxRunGroup (i3d/i3dlayer.cpp) replays them through the module in the ROM's order; keep the GS packet words as they are. VU1 strips are out of scope: leave a named hook for them. (2) Textures: the I3dTexture / I3dClut objects (i3d/i3dtex.cpp: level data, width, height, psm, filled by i3dTexSetTim2 / i3dClutSetTim2 through i3dTim2*) become GPU textures decoded on the host, cached per object and released with it; extend rosepan_draw2d for PSMT4, PSMCT32 / 24 / 16 and CLUT CSM1 / CSM2. The TEX0 a draw set references picks the texture. (3) Alpha blend, alpha test, scissor and draw offset from i3dPktSetAlphaMode and the layer / view state, mapped to the renderer's modes. (4) Prove it on screen: the boot may not reach a writer while spr/sprtexture.cpp, dog/dogtexinfo.cpp and spr/sprman.cpp are stubs, so add a forced test as system/sysnowloading.cpp did (an env switch drawing a TIM2 from the disc, e.g. S2DMAN or loading.tm2, through i3dTexSetTim2 and an i3dPktSprite into a layer) and compare its screenshot with tm2png.py output in work/ref. Finish verify when only the forced draw shows it, done when a boot screenshot does."
-  },
-  "setup/i3d_mesh_draw.cpp": {
-   "task": "Grow the native i3d draw module (src/rosepan/rendering/rosepan_i3d.*) a 3D mesh path: the hook named for VU1 strips in setup/i3d_draw_module.cpp becomes a host mesh draw. Input: an i3r model's mesh items (i3d/i3rmodel.cpp, i3d/i3ritem.cpp: vertices, normals, STQ, strips, textures from i3rAssignTex) with the node matrices i3mPoseToMatrices / DogEntity produce, the view and projection from I3dView / MagScene's camera (DogCamera::getLensFov), the scene lights (mag/magscenelight.cpp) and fog (magscenecmd.cpp). Never through the emulated GS. Prove it with a forced test (an env switch that loads one disc model, e.g. the first room's map pack, and draws it with a fixed camera) and a screenshot; finish verify when only the forced draw shows it, done when the New Game run shows the first room. Then utlDrawI3r 0x106760 / 0x21fe68 (unassigned@00106658, unassigned@0021fb50) call it."
   },
   "setup/newgame_crash.cpp": {
    "notes": "Found with ROSEPAN_CRASH_LOG=1 and addr2line in one run (hazards.md). After the fix the run passes the stage-2 start, the map pack, lights, effects, the opening movie task and the picture book, but the screen is black from frame ~2820: nothing after New Game draws. smoke_pad is now 1800:START,2400:START,2700:CROSS (needs --run 200). Queued in run order: unassigned@001e7f28 (TskMovie::TskMovie 0x1f438c, the opening film), unassigned@001f82e4 (scenePlayStart), unassigned@00192ac0 (MnuPBook / MnuDiary setType), dog/dogmodel.cpp (loadPack / loadData: no model loads yet), mag/magscenelight.cpp, unassigned@001dd5e8 (GamArea triggers), unassigned@001d3b44 (relinkObj). The last.png of this commit is black (after New Game).",

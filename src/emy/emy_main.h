@@ -85,6 +85,13 @@ public:
     /* The walk motion: the motion list's [0], or [1] with achr +0x3ec bits
      * 8 and 0x10 both set. */
     void setWalkMotion();                                                // ROR 0x001682b0
+    /* With no SE in m_se, counts m_30 down; below 0 it restarts at
+     * utlRandRange(lo, hi) and plays SE se into m_se (1 then). */
+    int  tickVoice(int lo, int hi, int se);                              // ROR 0x001693ec
+    /* m_se stopped (-1), m_30 = utlRandRange(8, 24) again. */
+    void stopVoice();                                                    // ROR 0x0016947c
+    /* The emy's SE no (EmyMain::getSE) at getBasePos; the SE's handle. */
+    int  playSE(int no);                                                 // ROR 0x001694cc
 
     /* The ELF's linkonce accessors. */
     u_int get_target_oid() { return m_target; }                          // ROR 0x0028aac8
@@ -121,6 +128,14 @@ int  emyAttachItem(u_int oid, u_int item);                               // ROR 
  * with useAngle, within angle of the actor's facing. */
 int  emyChkInSight(float range, float angle, int useAngle, u_int target,
                    ACHRstat *achr);                                      // ROR 0x00169bac
+/* emyStartMove's record with a target oid: the TskEnemyMove follows
+ * target until within range (the achr's tasks are killed first). */
+void emyStartChase(float range, EmyOut *out, u_int target);              // ROR 0x00166f50
+/* sqrt(x*x + y*y + z*z). */
+float emyVecLength(const float *v);                                      // ROR 0x00169a14
+/* One of the first nodes "p_hit" .. (table 0x298de8; fewer than 9) of
+ * oid's actor is within range + target's radius of target's node. */
+int  emyChkHitReach(float range, u_int oid, int nodes, u_int target);    // ROR 0x00169f94
 
 /* The enemy base (vtable 0x2e31e0, vptr at +0x200 after EmyMain's data).
  * One per enemy, newed by EmyManager::createEmy as the class of its type.
@@ -157,6 +172,9 @@ public:
     bool testStateFlag();                                                // ROR 0x00165710
     /* m_notify |= bits; 1, 2, 4 and 8 also set m_damage. */
     void notify(int bits);                                               // ROR 0x001661dc
+    /* The four sound records at +0x154 (EE 0x1c each): each playing one is
+     * stopped (funcSE, or funcStr from kind 3) and cleared. */
+    void stopAllSE();                                                    // ROR 0x00165570
     /* The item the enemy carries (param 0x66; 0xa00 none) as an object. */
     void createHeldItem();                                               // ROR 0x0016621c
     void setGroup(int no);                                               // ROR 0x00166364

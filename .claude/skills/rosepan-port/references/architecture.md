@@ -1047,7 +1047,14 @@ never asserts): sessions name them (`tus.py define --why`).
   (unassigned@00166a1c): `emyChkInSight` 0x169bac (a0 useAngle, a1 target oid, a2 achr, f12 range,
   f13 angle), `emyCanReach` 0x16976c (secta cells), `emyStartMove` 0x1670dc (mode, out, pos: the
   enemy's TskEnemyMove), `EmyOut::setMotion` 0x1680a0 / `setWalkMotion` 0x1682b0 (chrMtnMove2Achr),
-  `selectTarget` 0x166da4 (PC or dog). **HfmMain** (type 6): states 1 Walk, 2 Slap, 3 Bitten, 4 Break,
+  `selectTarget` 0x166da4 (PC or dog), `emyStartChase` 0x166f50 (f12 stop range, out, target oid: the
+  move task follows an object), `EmyOut::playSE` 0x1694cc (EmyMain::getSE(no) at getBasePos, returns
+  the handle) / `tickVoice` 0x1693ec (lo, hi, se: a voice every lo..hi frames into +0x2c) /
+  `stopVoice` 0x16947c, `emyChkHitReach` 0x169f94 (f12 range, oid, n p_hit nodes, target: the attack
+  hit test), `emyVecLength` 0x169a14, `EmyMain::stopAllSE` 0x165570. The outs' attacks land through
+  `scnChrRequest(0xb, emy oid, 0, 0, word, victim oid, 0)` (Hfm slap words 0x26 / 0x27 chained /
+  0x28 close; 0x2d the dog thrown off), after `getPCStateClass() != 9` (PC) or `getBwnState()` not
+  10 / 0xd (dog). Hfm Exec results: 7 the state is over, 8 the chase gave up. **HfmMain** (type 6): states 1 Walk, 2 Slap, 3 Bitten, 4 Break,
   5 Counter, 6 Ride, 7 Dead, 8 Win, 9 Test; inputs 1 the dog barked (magBwnBarkQuery; also 60..120
   frames into +0x234), 2 slap chance on motion end (0/10/30/50/70/100 % by try), 3 / 4 the PC came
   into / left sight (param 0x5f range, pi), 5 a_lp under a quarter, 6 PC state class 4. Its words:

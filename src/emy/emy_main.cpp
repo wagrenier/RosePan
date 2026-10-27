@@ -132,3 +132,15 @@ bool EmyMain::isPCSameArea()
     ROSEPAN_STUB("EmyMain::isPCSameArea", 0x00165734);
     return {};
 }
+
+// ROR 0x0016649c
+void EmyMain::setDecideSw(int on)
+{
+    m_decide_sw = on;
+}
+
+// stub of ROR 0x00165570
+void EmyMain::stopAllSE()
+{
+    ROSEPAN_STUB("EmyMain::stopAllSE", 0x00165570);
+}

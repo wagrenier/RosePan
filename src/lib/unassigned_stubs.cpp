@@ -1944,3 +1944,43 @@ int FUN_0017ded0(MagSectaList *list, int id, const float *pos, float r)
     ROSEPAN_STUB("FUN_0017ded0", 0x0017ded0);
     return {};
 }
+
+// stub of ROR 0x001694cc
+int EmyOut::playSE(int no)
+{
+    ROSEPAN_STUB("EmyOut::playSE", 0x001694cc);
+    return {};
+}
+
+// stub of ROR 0x0016947c
+void EmyOut::stopVoice()
+{
+    ROSEPAN_STUB("EmyOut::stopVoice", 0x0016947c);
+}
+
+// stub of ROR 0x001693ec
+int EmyOut::tickVoice(int lo, int hi, int se)
+{
+    ROSEPAN_STUB("EmyOut::tickVoice", 0x001693ec);
+    return {};
+}
+
+// stub of ROR 0x00169f94
+int emyChkHitReach(float range, u_int oid, int nodes, u_int target)
+{
+    ROSEPAN_STUB("emyChkHitReach", 0x00169f94);
+    return {};
+}
+
+// stub of ROR 0x00166f50
+void emyStartChase(float range, EmyOut *out, u_int target)
+{
+    ROSEPAN_STUB("emyStartChase", 0x00166f50);
+}
+
+// stub of ROR 0x00169a14
+float emyVecLength(const float *v)
+{
+    ROSEPAN_STUB("emyVecLength", 0x00169a14);
+    return {};
+}

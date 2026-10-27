@@ -16,6 +16,8 @@
 #include "lib/unassigned.h"
 #include "mag/magscenecmd.h"
 #include "mag/magsystem.h"
+#include "task/tsk_chr.h"
+#include "task/tsk_scene.h"
 
 // ──────────────────────────────────────────────────────────────────────
 // ROR 0x00145020 // callcheck: operator_new, EmyOut (new HfmOutXxx: the inline constructors call EmyOut::EmyOut)
@@ -423,139 +425,603 @@ void HfmOutWalk::setStep(int step)
     }
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+// ──── HfmOutSlap ──────────────────────────────────────────────────────
 
-// stub of ROR 0x00145d60
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00145d60
+
 void HfmOutSlap::Init()
 {
-    ROSEPAN_STUB("HfmOutSlap::Init", 0x00145d60);
+    m_chase_cnt = 45;
+    m_combo     = 0;
+    m_close     = 0;
+    m_motion    = 0;
+    m_cnt       = 0;
+    selectTarget(100);
+    emyStartChase(10.0f, this, m_target);
+    m_emy->m_state2 = 0;
+    m_step = 0;
 }
 
-// stub of ROR 0x00145dc0
+// ──────────────────────────────────────────────────────────────────────
+// The scene request word of a slap that hit: 0x28 the close one, 0x27 a
+// chained one, 0x26 the first (inline in the ROM's Exec).
+
+static int hfmSlapWord(const HfmOutSlap *out)
+{
+    if (out->m_close)
+        return 0x28;
+    return out->m_combo ? 0x27 : 0x26;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00145dc0
+// Steps: 0 chase the target (8 when the move gives up), 1 the slap, 2 / 3
+// until its motion ends (2 may chain another slap), then 7 or a new chase.
+
 int HfmOutSlap::Exec()
 {
-    ROSEPAN_STUB("HfmOutSlap::Exec", 0x00145dc0);
+    switch (m_step) {
+    case 0:
+        m_chase_cnt++;
+        if (m_move_done == 0)
+            return -1;
+        m_emy->m_move->stop();
+        if (m_move_done != 1)
+            return 8;
+        m_se_done = 0;
+        if (m_chase_cnt < 46) {
+            m_close    = 1;
+            m_motion   = 0x16;
+            m_hit_from = 0x4b;
+            m_hit_to   = 0x4e;
+            m_se_frame = 0x46;
+            m_reach    = 105.0f;
+        } else {
+            m_close = 0;
+            if ((m_combo == 0 || m_motion != 0x15) && utlRandRange(0, 99) > 49) {
+                m_motion   = 0x15;
+                m_hit_from = 8;
+                m_hit_to   = 0xb;
+                m_reach    = 85.0f;
+            } else {
+                m_motion   = 0x14;
+                m_hit_from = 0xe;
+                m_hit_to   = 0x11;
+                m_reach    = 90.0f;
+            }
+            m_se_frame = 0;
+        }
+        playSE(0x13);
+        setMotion(m_motion, 0);
+        m_chase_cnt = 0;
+        m_hit_dog   = 0;
+        m_step      = 1;
+        m_hit_pc    = 0;
+        return -1;
+
+    case 1:
+    {
+        int end = 0;            // PORT: the ROM leaves it unset for other motions (none are used)
+        m_cnt++;
+        if (m_motion == 0x14)
+            end = 0xd;
+        else if (m_motion == 0x16)
+            end = 0x3a;
+        if (end < m_cnt) {
+            m_emy->setDecideSw(0);
+            g_gamMan.setObj(m_oid, 0x400);
+        }
+        if (m_se_frame < m_cnt && !m_se_done) {
+            playSE(0x38);
+            m_se_done = 1;
+        }
+        if (m_hit_from <= m_cnt && m_cnt <= m_hit_to) {
+            if (!m_hit_pc && g_magSystem.getPCStateClass() != 9) {
+                m_hit_pc = 1;
+                ObjStat *pcObj = g_gamMan.m_pcPtr;
+                u_int pc = 0;
+                if (pcObj != NULL)
+                    pc = pcObj->m_oid;
+                if (emyChkHitReach(m_reach, m_oid, 1, pc)) {
+                    int word = hfmSlapWord(this);
+                    playSE(0x10);
+                    scnChrRequest(0xb, m_oid, 0, 0, word, pc, 0);
+                }
+            }
+            if (!m_hit_dog && g_magSystem.getBwnState() != 10 && g_magSystem.getBwnState() != 0xd) {
+                m_hit_dog = 1;
+                ObjStat *dogObj = g_gamMan.m_dogPtr;
+                u_int dog = 0;
+                if (dogObj != NULL)
+                    dog = dogObj->m_oid;
+                if (emyChkHitReach(m_reach, m_oid, 1, dog)) {
+                    int word = hfmSlapWord(this);
+                    playSE(0x10);
+                    scnChrRequest(0xb, m_oid, 0, 0, word, dog, 0);
+                }
+            }
+        }
+        if (m_cnt == m_hit_to) {
+            m_emy->setDecideSw(1);
+            g_gamMan.resetObj(m_oid, 0x400);
+            m_cnt  = 0;
+            m_step = m_close ? 3 : 2;
+        }
+        return -1;
+    }
+
+    case 2:
+        if (!g_gamMan.isAchrMotionEnd(m_oid))
+            return -1;
+        m_emy->m_input_flg_motion = 1;
+        if (emyChkInSight(0x1.6ffffep+6f /* 0x42b7ffff, 92 */, 0x1.0c1522p+0f /* 0x3f860a91, pi / 3 */,
+                          1, m_target, m_achr)
+            && utlRandRange(0, 99) < 50) {
+            /* Chain the other slap. The ROM keeps m_hit_pc / m_hit_dog /
+             * m_se_done from the last one, so a chained slap neither
+             * tests a hit nor plays SE 0x38 again. */
+            m_combo++;
+            if (m_motion == 0x15) {
+                m_motion   = 0x14;
+                m_hit_from = 0xe;
+                m_hit_to   = 0x11;
+                m_reach    = 90.0f;
+            } else {
+                m_motion   = 0x15;
+                m_hit_from = 8;
+                m_hit_to   = 0xb;
+                m_reach    = 85.0f;
+            }
+            playSE(0x13);
+            playSE(0x38);
+            setMotion(m_motion, 0);
+            m_chase_cnt = 0;
+            m_step      = 1;
+            return -1;
+        }
+        m_combo = 0;
+        break;
+
+    case 3:
+        if (!g_gamMan.isAchrMotionEnd(m_oid))
+            return -1;
+        m_emy->m_input_flg_motion = 1;
+        break;
+
+    default:
+        return -1;
+    }
+
+    if (utlRandRange(0, 99) < 50)
+        return 7;
+    emyStartChase(10.0f, this, m_target);
+    m_step = 0;
     return -1;
 }
 
-// stub of ROR 0x0014635c
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0014635c
+
 void HfmOutSlap::Term()
 {
-    ROSEPAN_STUB("HfmOutSlap::Term", 0x0014635c);
+    termCommon();
 }
 
-// stub of ROR 0x00146378
+// ──── HfmOutBreak ─────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00146378
+
 void HfmOutBreak::Init()
 {
-    ROSEPAN_STUB("HfmOutBreak::Init", 0x00146378);
+    selectTarget(100);
+    m_step = 0;
+    m_emy->setDecideSw(0);
+    m_emy->m_state2 = 0;
 }
 
-// stub of ROR 0x001463b8
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001463b8
+
 int HfmOutBreak::Exec()
 {
-    ROSEPAN_STUB("HfmOutBreak::Exec", 0x001463b8);
+    if (m_step == 0) {
+        setMotion(0x30, 0);
+        playSE(0x2a);
+        m_step = 1;
+    } else if (m_step == 1) {
+        if (!g_gamMan.isAchrMotionEnd(m_oid))
+            return -1;
+        m_emy->m_input_flg_motion = 1;
+        m_emy->setDecideSw(1);
+        return 7;
+    }
     return -1;
 }
 
-// stub of ROR 0x00146460
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00146460
+
 void HfmOutBreak::Term()
 {
-    ROSEPAN_STUB("HfmOutBreak::Term", 0x00146460);
+    termCommon();
 }
 
-// stub of ROR 0x0014647c
+// ──── HfmOutWalk2 (vtable only: initOut never builds it) ──────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0014647c
+
 void HfmOutWalk2::Init()
 {
-    ROSEPAN_STUB("HfmOutWalk2::Init", 0x0014647c);
+    selectTarget(100);
+    setMotion(0xc, 0);
+    m_step = 0;
+    setStep(3);
+    m_emy->m_state2 = 0;
 }
 
-// stub of ROR 0x001464cc
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001464cc
+// HfmOutWalk::Exec, but step 0 roams when the point lies 115 or more from
+// the world origin (the ROM measures the point itself, not a distance).
+
 int HfmOutWalk2::Exec()
 {
-    ROSEPAN_STUB("HfmOutWalk2::Exec", 0x001464cc);
+    int cnt = m_cnt++;
+    switch (m_step) {
+    case 0:
+    {
+        int r = utlRandRange(1, 95);
+        if (r <= 80) {
+            float pos[4];
+            getRoamPos(pos);
+            if (emyVecLength(pos) >= 0x1.cbfffep+6f /* 0x42e5ffff, 115 */) {
+                emyStartMove(0, this, pos);
+                setStep(1);
+                return -1;
+            }
+        }
+        startIdle(r);
+        return -1;
+    }
+    case 1:
+        if (m_move_done == 0)
+            return -1;
+        m_emy->m_move->stop();
+        break;
+    case 2:
+        if (cnt + 1 < 30)
+            return -1;
+        break;
+    case 3:
+        if (!g_gamMan.isAchrMotionEnd(m_oid))
+            return -1;
+        m_emy->m_input_flg_motion = 1;
+        break;
+    default:
+        return -1;
+    }
+    setStep(0);
     return -1;
 }
 
-// stub of ROR 0x001469b0
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00146628
+// HfmOutWalk::getRoamPos's code (its own copy in the ROM).
+
+void HfmOutWalk2::getRoamPos(float *pos)
+{
+    static const float s_scale[4] = {
+        1.0f, 0x1.666666p-1f /* 0.7 */, 0x1.999998p-2f /* 0.4 */, 0x1.999998p-4f /* 0.1 */,
+    };
+    float from[4];
+    float home[4];
+    float p[4];
+
+    getBasePos(from);
+    m_achr->getParam(0x59, home);
+    float dx = utlRandRangeF(-0x1.1f7ffep+9f, 0x1.1f7ffep+9f);           // +-575 (0x440fbfff)
+    float dz = utlRandRangeF(-0x1.1f7ffep+9f, 0x1.1f7ffep+9f);
+    for (int i = 0; i < 4; i++) {
+        float ox = dx * s_scale[i];
+        float oz = dz * s_scale[i];
+        for (int j = 0; j < 4; j++)
+            p[j] = home[j];
+        p[0] = home[0] + ox;
+        p[2] = home[2] + oz;
+        if (emyCanReach(from, p))
+            goto found;
+        p[0] = home[0] - ox;
+        if (emyCanReach(from, p))
+            goto found;
+        p[2] = home[2] - oz;
+        if (emyCanReach(from, p))
+            goto found;
+        p[0] = home[0] + ox;
+        if (emyCanReach(from, p))
+            goto found;
+    }
+    for (int j = 0; j < 4; j++)
+        pos[j] = home[j];
+    return;
+
+found:
+    for (int j = 0; j < 4; j++)
+        pos[j] = p[j];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001468e0
+
+void HfmOutWalk2::startIdle(int r)
+{
+    if (r < 91) {
+        setWalkMotion(1);
+        setStep(2);
+        return;
+    }
+    setMotion(0xc, 0);
+    setStep(3);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00146944
+// The ROM also passes 32768.5 (0x47000100) in f13 and 1 in t0, which
+// chrMtnMove2Achr does not read.
+
+void HfmOutWalk2::setWalkMotion(int motion)
+{
+    float agl = m_emy->m_agl;
+    float speed = agl == 0.0f ? 0x1.111110p-6f /* 0x3c888888, 1 / 60 */ : agl * 0x1.111110p-6f;
+    chrMtnMove2Achr(speed, m_oid, motion, -1, 0x100);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001469b0
+
 void HfmOutWalk2::Term()
 {
-    ROSEPAN_STUB("HfmOutWalk2::Term", 0x001469b0);
+    termCommon();
 }
 
-// stub of ROR 0x001469e8
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001469cc
+
+void HfmOutWalk2::setStep(int step)
+{
+    if (m_step != step) {
+        m_step = step;
+        m_cnt = 0;
+    }
+}
+
+// ──── HfmOutRide ──────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001469e8
+
 void HfmOutRide::Init()
 {
-    ROSEPAN_STUB("HfmOutRide::Init", 0x001469e8);
+    selectTarget(100);
+    m_emy->m_state2 = 0;
+    start();
 }
 
-// stub of ROR 0x00146a20
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00146a20
+
 int HfmOutRide::Exec()
 {
-    ROSEPAN_STUB("HfmOutRide::Exec", 0x00146a20);
+    switch (m_phase) {
+    case 0:
+        return execPhase0();
+    case 1:
+        return execPhase1();
+    case 2:
+        return execPhase2();
+    case 3:
+        return execPhase3();
+    }
     return -1;
 }
 
-// stub of ROR 0x00146ab8
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00146ab8
+
 void HfmOutRide::Term()
 {
-    ROSEPAN_STUB("HfmOutRide::Term", 0x00146ab8);
+    termCommon();
+    m_emy->m_238 = 0;           // SetMissing(false)
 }
 
-// stub of ROR 0x00148d30
+// ──── HfmOutDead ──────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00148d30
+// Effect kind 3 at the enemy, hidden and out of the hit tests, the death
+// motion 0x31, its sounds stopped.
+
 void HfmOutDead::Init()
 {
-    ROSEPAN_STUB("HfmOutDead::Init", 0x00148d30);
+    float pos[3];
+    m_achr->getParam(5, pos);
+    EffParam eff = {};          // PORT: the ROM leaves the words it does not set as they were
+    eff.m_kind = 3;
+    eff.m_08   = 0;
+    eff.m_hit.m_pos[0] = pos[0];
+    eff.m_hit.m_pos[1] = pos[1];
+    eff.m_hit.m_pos[2] = pos[2];
+    eff.m_hit.m_1c    = 0;
+    eff.m_hit.m_20    = -1.0f;
+    eff.m_hit.m_24    = 0;
+    eff.m_hit.m_scale = 100.0f;
+    eff.m_hit.m_2c    = 0x5a;
+    g_magSystem.m_scene.m_837e0.createEff(&eff);
+    m_emy->m_visible = 0;
+    g_gamMan.resetObj(m_oid, 0x40);
+    g_gamMan.setObj(m_oid, 0x10000000);
+    g_gamMan.setObj(m_oid, 0x400);
+    setMotion(0x31, 0x100);
+    m_emy->stopAllSE();
+    m_emy->m_state2 = 0;
+    m_achr->m_flags |= 0x400;
+    m_achr->m_flags |= 0x2000;
 }
 
-// stub of ROR 0x00148e48
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00148e48
+
 int HfmOutDead::Exec()
 {
-    ROSEPAN_STUB("HfmOutDead::Exec", 0x00148e48);
     return -1;
 }
 
-// stub of ROR 0x00148e50
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00148e50
+
 void HfmOutDead::Term()
 {
-    ROSEPAN_STUB("HfmOutDead::Term", 0x00148e50);
+    termCommon();
 }
 
-// stub of ROR 0x00148e6c
+// ──── HfmOutWin ───────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00148e6c
+
 void HfmOutWin::Init()
 {
-    ROSEPAN_STUB("HfmOutWin::Init", 0x00148e6c);
+    m_range = utlRandRangeF(0x1.cbfffep+6f /* 0x42e5ffff, 115 */, 0x1.58fffep+7f /* 0x432c7fff, 172.5 */);
+    selectTarget(100);
+    emyStartChase(m_range, this, m_target);
+    m_step = 0;
+    m_emy->m_state2 = 0;
 }
 
-// stub of ROR 0x00148ed4
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00148ed4
+
 int HfmOutWin::Exec()
 {
-    ROSEPAN_STUB("HfmOutWin::Exec", 0x00148ed4);
+    if (m_step == 0 && m_move_done != 0) {
+        m_emy->m_move->stop();
+        setMotion(0x16, 0x100);
+        m_step = 1;
+    }
     return -1;
 }
 
-// stub of ROR 0x00148f34
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00148f34
+
 void HfmOutWin::Term()
 {
-    ROSEPAN_STUB("HfmOutWin::Term", 0x00148f34);
+    termCommon();
 }
 
-// stub of ROR 0x00148f50
+// ──── HfmOutBitten ────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00148f50
+
 void HfmOutBitten::Init()
 {
-    ROSEPAN_STUB("HfmOutBitten::Init", 0x00148f50);
+    m_step = 0;
+    setMotion(0xd, 0x100);
 }
 
-// stub of ROR 0x00148f74
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00148f74
+// Steps: 0 bitten (voice; the dog letting go ends it with 7, the free
+// count running out shakes it off), 1 25 frames to the throw, 2 until the
+// motion ends.
+
 int HfmOutBitten::Exec()
 {
-    ROSEPAN_STUB("HfmOutBitten::Exec", 0x00148f74);
+    if (magBwnBarkQuery(m_oid) == -1 && m_step == 0) {
+        magBwnBarkSet(1);
+        return 7;
+    }
+    switch (m_step) {
+    case 0:
+        tickVoice(10, 25, 0x32);
+        if (!static_cast<HfmMain *>(m_emy)->tickFreeLeft()) {
+            stopVoice();
+            m_emy->setDecideSw(0);
+            g_gamMan.setObj(m_oid, 0x400);
+            setMotion(0xe, 0);
+            m_cnt = 25;
+            playSE(0x12);
+            m_step = 1;
+        }
+        break;
+    case 1:
+        m_emy->setDecideSw(0);
+        g_gamMan.setObj(m_oid, 0x400);
+        if (--m_cnt == 0) {
+            /* The ROM reads the dog object without a NULL test. */
+            scnChrRequest(0xb, m_oid, 0, 0, 0x2d, g_gamMan.m_dogPtr->m_oid, 0);
+            magBwnBarkSet(0);
+            m_step = 2;
+        }
+        break;
+    case 2:
+        m_emy->setDecideSw(0);
+        g_gamMan.setObj(m_oid, 0x400);
+        if (!g_gamMan.isAchrMotionEnd(m_oid))
+            return -1;
+        m_emy->m_input_flg_motion = 1;
+        m_emy->setDecideSw(1);
+        g_gamMan.resetObj(m_oid, 0x400);
+        return 7;
+    }
     return -1;
 }
 
-// stub of ROR 0x00149168
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00149168
+
 void HfmOutBitten::Term()
 {
-    ROSEPAN_STUB("HfmOutBitten::Term", 0x00149168);
+    termCommon();
+}
+
+// ---- stubs (tools/reverse/stubgen.py) ----
+
+// stub of ROR 0x00146ae4
+void HfmOutRide::start()
+{
+    ROSEPAN_STUB("HfmOutRide::start", 0x00146ae4);
+}
+
+// stub of ROR 0x00146d88
+int HfmOutRide::execPhase0()
+{
+    ROSEPAN_STUB("HfmOutRide::execPhase0", 0x00146d88);
+    return -1;
+}
+
+// stub of ROR 0x001473e4
+int HfmOutRide::execPhase1()
+{
+    ROSEPAN_STUB("HfmOutRide::execPhase1", 0x001473e4);
+    return -1;
+}
+
+// stub of ROR 0x00147840
+int HfmOutRide::execPhase2()
+{
+    ROSEPAN_STUB("HfmOutRide::execPhase2", 0x00147840);
+    return -1;
+}
+
+// stub of ROR 0x001484ec
+int HfmOutRide::execPhase3()
+{
+    ROSEPAN_STUB("HfmOutRide::execPhase3", 0x001484ec);
+    return -1;
 }
 
 // stub of ROR 0x00149184

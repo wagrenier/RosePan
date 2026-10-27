@@ -106,6 +106,19 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x00145d60
     int  Exec();                                                         // EE slot 3, ROR 0x00145dc0
     void Term();                                                         // EE slot 4, ROR 0x0014635c
+
+    int   m_combo;              // ROR 0x38: slaps chained at the target in sight
+    int   m_close;              // ROR 0x3c: reached it within 45 frames: motion 0x16
+    int   m_motion;             // ROR 0x40: the slap's motion, 0x14 / 0x15 / 0x16
+    u_int m_chase_cnt;          // ROR 0x44: frames chasing (Init 45: the first chase is never close)
+    int   m_cnt;                // ROR 0x48: frames in the slap
+    int   m_hit_from;           // ROR 0x4c: the slap's hit frames, from ..
+    int   m_hit_to;             // ROR 0x50: .. to (the slap ends there)
+    int   m_se_frame;           // ROR 0x54: SE 0x38 after this frame
+    float m_reach;              // ROR 0x58: emyChkHitReach's range
+    int   m_hit_pc;             // ROR 0x5c: the PC was tested this slap
+    int   m_hit_dog;            // ROR 0x60: the dog was tested
+    int   m_se_done;            // ROR 0x64: SE 0x38 played
 };
 
 /* State 4 (vtable 0x2e2100, EE 0x38). layout: host -- polymorphic. */
@@ -128,6 +141,15 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x0014647c
     int  Exec();                                                         // EE slot 3, ROR 0x001464cc
     void Term();                                                         // EE slot 4, ROR 0x001469b0
+    /* HfmOutWalk::getRoamPos's code again. */
+    void getRoamPos(float *pos);                                         // ROR 0x00146628
+    /* r < 91: motion 1 in place (step 2), else motion 0xc (step 3). */
+    void startIdle(int r);                                               // ROR 0x001468e0
+    /* chrMtnMove2Achr of motion at the emy's speed, flags 0x100. */
+    void setWalkMotion(int motion);                                      // ROR 0x00146944
+    void setStep(int step);                                              // ROR 0x001469cc
+
+    int m_cnt;                  // ROR 0x38: frames in the step
 };
 
 /* State 6 (vtable 0x2e2160, EE 0x98). layout: host -- polymorphic. */
@@ -139,6 +161,15 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x001469e8
     int  Exec();                                                         // EE slot 3, ROR 0x00146a20
     void Term();                                                         // EE slot 4, ROR 0x00146ab8
+    /* Init's start of the ride. */
+    void start();                                                        // ROR 0x00146ae4
+    /* Exec's phases by m_phase. */
+    int  execPhase0();                                                   // ROR 0x00146d88
+    int  execPhase1();                                                   // ROR 0x001473e4
+    int  execPhase2();                                                   // ROR 0x00147840
+    int  execPhase3();                                                   // ROR 0x001484ec
+
+    int m_phase;                // ROR 0x40: Exec's switch (0..3)
 };
 
 /* State 7 (vtable 0x2e2190, EE 0x38). layout: host -- polymorphic. */
@@ -161,6 +192,8 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x00148e6c
     int  Exec();                                                         // EE slot 3, ROR 0x00148ed4
     void Term();                                                         // EE slot 4, ROR 0x00148f34
+
+    float m_range;              // ROR 0x38: the chase's stop range, 115..172.5
 };
 
 /* State 3 (vtable 0x2e21f0, EE 0x3c). layout: host -- polymorphic. */
@@ -172,6 +205,8 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x00148f50
     int  Exec();                                                         // EE slot 3, ROR 0x00148f74
     void Term();                                                         // EE slot 4, ROR 0x00149168
+
+    int m_cnt;                  // ROR 0x38: frames until the dog is shaken off
 };
 
 /* State 5 (vtable 0x2e2220, EE 0x44). layout: host -- polymorphic. */
