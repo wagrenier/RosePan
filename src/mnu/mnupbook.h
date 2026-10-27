@@ -144,8 +144,36 @@ static_assert(offsetof(MnuPBook, m_msg) >= 0x140, "m_msg");
 static_assert(offsetof(MnuPBook, m_blink) >= 0x8b8, "m_blink");
 static_assert(sizeof(MnuPBook) >= 0x8c0, "EE 0x8c0");
 
+/* MnuDiarySheet::m_flags. */
+enum
+{
+    MNU_DSHEET_USED  = 0x01,    /* the record holds a sheet (m_sheet) */
+    MNU_DSHEET_SHOWN = 0x02,    /* draw draws it */
+};
+
+/* One of the diary's five sheet records (EE 0x20, queueFiles' pool block):
+ * record r poses model slot r (sheet model 0 copied to 1..4). Sheet n
+ * carries page 2n + 1 on its front and 2n + 2 on its back; motion 0 is
+ * turn_r, 1 turn_l. */
+struct MnuDiarySheet
+{
+    u_int m_flags;              // ROR 0x00: MNU_DSHEET_*
+    int   _04[2];               // ROR 0x04: queueFiles -1, unused
+    int   m_motion;             // ROR 0x0c: 0 or 1
+    int   m_frame;              // ROR 0x10: up to the motion's m_frames
+    int   m_sheet;              // ROR 0x14: the sheet it is
+    int   _18[2];
+};
+static_assert(sizeof(MnuDiarySheet) == 0x20, "EE 0x20");
+static_assert(offsetof(MnuDiarySheet, m_sheet) == 0x14, "m_sheet");
+
 /* The diary (vtable 0x2e4778). EE 0x8f0 (MagLifeMenuPBook +0x910..
- * +0x1200). layout: host -- polymorphic, EE offsets in comments. */
+ * +0x1200). layout: host -- polymorphic, EE offsets in comments. Its
+ * processPad has MnuPBook's six steps (and MnuPBook's m_flags bits), but
+ * the pages lie on a fixed base model (slot 5: the open spread) and only
+ * the sheets next to it are posed, from five records and five copies of
+ * one sheet model; page textures load and unload as the spread moves.
+ * The open spread is pages m_curPage (left, even) and m_curPage + 1. */
 struct MnuDiary : mnuBase
 {
     MnuDiary();                                                          // ROR 0x00198720
@@ -155,29 +183,54 @@ struct MnuDiary : mnuBase
     void term() override;                                                // ROR 0x00198a38
     int  processPad(BedPad *pad) override;                               // ROR 0x001990b0
     void draw(I3dLayer *layer) override;                                 // ROR 0x00199c94
+    /* EE slot 7: a draw set of texture slots 0 and 1 only. */
+    void setDrawSet(I3dLayer *layer) override;                           // ROR 0x00199fcc
     /* 1 when type has a row in the page table (kept, with type), else 0. */
     int  setType(int type);                                              // ROR 0x00198b04
 
+    void queueFiles();                                                   // ROR 0x00198b54
+    void startTurns();                                                   // ROR 0x00198ca8
+    void openWindows();                                                  // ROR 0x00198eb4
+    /* 0 when Circle closed the diary, else 1. */
+    int  updatePad(BedPad *pad);                                         // ROR 0x0019946c
+    void updateSheets();                                                 // ROR 0x00199714
+    /* Page page's texture on side back of the model posing sheet n. */
+    void setSheetTex(int n, int page, int back);                         // ROR 0x00199a08
+    /* ... on the base model's. */
+    void setBaseTex(int page, int back);                                 // ROR 0x00199ab4
+    void turnSheet(int n, int right);                                    // ROR 0x00199b3c
+    int  canTurn(int right);                                             // ROR 0x0019a054
+    int  isTurning(int n);                                               // ROR 0x0019a174
+    /* A record not in use, -1 none. */
+    int  findFreeSheet();                                                // ROR 0x0019a1d0
+    /* The record holding sheet n, -1 none. */
+    int  findSheet(int n);                                               // ROR 0x0019a20c
+    /* The texture slot holding page, -1 none. */
+    int  findPageTex(int page);                                          // ROR 0x0019a24c
+    /* Sheet n's two pages queued where no slot holds them. */
+    void queueSheetTex(int n);                                           // ROR 0x0019a290
+    void setPageText(int page);                                          // ROR 0x0019a3c0
+
     const MnuDiaryPage *m_page; // ROR 0x110: setType's row, NULL before
     int       m_bookType;       // ROR 0x114: its type, -1 none
-    int       m_118;            // ROR 0x118: flag table column 0 of the type
-    int       m_11c;            // ROR 0x11c: the sequence word of column 4
-    int       m_120;            // ROR 0x120: init 0
-    int       m_lastPage;       // ROR 0x124: the word of column 7, made even
-    void     *m_128;            // ROR 0x128: a pool block term frees
+    int       m_118;            // ROR 0x118: flag table column 0 of the type (global 0x65 on close)
+    int       m_11c;            // ROR 0x11c: the sequence word of column 4: pages written
+    int       m_turnWait;       // ROR 0x120: frames left of a turn's input lock
+    int       m_curPage;        // ROR 0x124: the left page open: the word of column 7, made even
+    MnuDiarySheet *m_sheets;    // ROR 0x128: queueFiles' pool block (5 records), term frees
     int       m_numSheets;      // ROR 0x12c: the row's page count / 2 + 1
-    int       m_window0;        // ROR 0x130: scene windows, -1 none
-    int       m_window1;        // ROR 0x134
-    void     *m_work;           // ROR 0x138: a 0x4c8-byte pool block
+    int       m_promptWindow;   // ROR 0x130: scene windows, -1 none: the close prompt
+    int       m_textWindow;     // ROR 0x134: the page text
+    char     *m_text;           // ROR 0x138: a 0x4c8-byte pool block, the text window's message
     MsgManSet m_msg;            // ROR 0x13c..0x8b4
-    int       m_8b4;            // ROR 0x8b4: init 0
-    int      *m_slots;          // ROR 0x8b8: 0x4c bytes (19 words) of -1
+    int       m_blink;          // ROR 0x8b4: 0..299, the turn arrows' animation
+    int      *m_texPage;        // ROR 0x8b8: 19 words, the page each texture slot holds, -1 none
     u_char    _8bc[0x8f0 - 0x8bc];
 };
 static_assert(offsetof(MnuDiary, m_page) >= 0x110, "m_page");
-static_assert(offsetof(MnuDiary, m_window0) >= 0x130, "m_window0");
+static_assert(offsetof(MnuDiary, m_promptWindow) >= 0x130, "m_promptWindow");
 static_assert(offsetof(MnuDiary, m_msg) >= 0x13c, "m_msg");
-static_assert(offsetof(MnuDiary, m_slots) >= 0x8b8, "m_slots");
+static_assert(offsetof(MnuDiary, m_texPage) >= 0x8b8, "m_texPage");
 static_assert(sizeof(MnuDiary) >= 0x8f0, "EE 0x8f0");
 
 #endif /* _MNU_MNUPBOOK_H */

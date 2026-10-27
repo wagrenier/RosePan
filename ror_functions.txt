@@ -3163,24 +3163,24 @@
 /* 00198860 000001d8 */ MnuDiary::init(){}  // ror
 /* 00198a38 000000cc */ MnuDiary::term(){}  // ror
 /* 00198b04 00000050 */ MnuDiary::setType(){}  // ror
-/* 00198b54 00000154 */ FUN_00198b54(){}
-/* 00198ca8 0000020c */ FUN_00198ca8(){}
-/* 00198eb4 000001fc */ FUN_00198eb4(){}
+/* 00198b54 00000154 */ MnuDiary::queueFiles(){}  // ror
+/* 00198ca8 0000020c */ MnuDiary::startTurns(){}  // ror
+/* 00198eb4 000001fc */ MnuDiary::openWindows(){}  // ror
 /* 001990b0 000003bc */ MnuDiary::processPad(){}  // ror
-/* 0019946c 000002a8 */ FUN_0019946c(){}
-/* 00199714 000002f4 */ FUN_00199714(){}
-/* 00199a08 000000ac */ FUN_00199a08(){}
-/* 00199ab4 00000088 */ FUN_00199ab4(){}
-/* 00199b3c 00000158 */ FUN_00199b3c(){}
+/* 0019946c 000002a8 */ MnuDiary::updatePad(){}  // ror
+/* 00199714 000002f4 */ MnuDiary::updateSheets(){}  // ror
+/* 00199a08 000000ac */ MnuDiary::setSheetTex(){}  // ror
+/* 00199ab4 00000088 */ MnuDiary::setBaseTex(){}  // ror
+/* 00199b3c 00000158 */ MnuDiary::turnSheet(){}  // ror
 /* 00199c94 00000338 */ MnuDiary::draw(){}  // ror
-/* 00199fcc 00000088 */ FUN_00199fcc(){}
-/* 0019a054 00000120 */ FUN_0019a054(){}
-/* 0019a174 0000005c */ FUN_0019a174(){}
-/* 0019a1d0 00000038 */ FUN_0019a1d0(){}
-/* 0019a20c 0000003c */ FUN_0019a20c(){}
-/* 0019a24c 00000040 */ FUN_0019a24c(){}
-/* 0019a290 00000130 */ FUN_0019a290(){}
-/* 0019a3c0 0000016c */ FUN_0019a3c0(){}
+/* 00199fcc 00000088 */ MnuDiary::setDrawSet(){}  // ror
+/* 0019a054 00000120 */ MnuDiary::canTurn(){}  // ror
+/* 0019a174 0000005c */ MnuDiary::isTurning(){}  // ror
+/* 0019a1d0 00000038 */ MnuDiary::findFreeSheet(){}  // ror
+/* 0019a20c 0000003c */ MnuDiary::findSheet(){}  // ror
+/* 0019a24c 00000040 */ MnuDiary::findPageTex(){}  // ror
+/* 0019a290 00000130 */ MnuDiary::queueSheetTex(){}  // ror
+/* 0019a3c0 0000016c */ MnuDiary::setPageText(){}  // ror
 
 // *****************************************************************************
 // FILE -- mnu/mnustock.cpp

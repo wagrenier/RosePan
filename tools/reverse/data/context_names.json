@@ -6113,17 +6113,113 @@
   "was": "FUN_00198b04",
   "why": "MnuDiary: finds type in its page table (0x29c0f8 / 0x29c368, 12-byte rows), keeps it at +0x114, 1 when found; MagLifeMenuPBook::init picks the book that knows the type"
  },
+ "00198b54": {
+  "name": "MnuDiary::queueFiles",
+  "tag": "ror-inferred",
+  "was": "FUN_00198b54",
+  "why": "processPad step 0 after the base files: allocs the 5 0x20-byte sheet records at +0x128, queues a_diary, <name>_base.i3s, the open spread's page textures, <name>01_base.i3s and the turn_r / turn_l motions"
+ },
+ "00198ca8": {
+  "name": "MnuDiary::startTurns",
+  "tag": "ror-inferred",
+  "was": "FUN_00198ca8",
+  "why": "step 1: pushCamera, lowerVolume, copies sheet model 0 to 1..4, doubles motion lengths, poses the sheets either side of the open spread, base model page textures, queues the next sheets' pages; MnuPBook::startTurns counterpart"
+ },
+ "00198eb4": {
+  "name": "MnuDiary::openWindows",
+  "tag": "ror-inferred",
+  "was": "FUN_00198eb4",
+  "why": "step 2: opens the 512x256 text window (+0x134) and the close prompt window (+0x130, sys text 0x1a), mes sprite 4; same calls as MnuPBook::openWindows"
+ },
  "001990b0": {
   "name": "MnuDiary::processPad",
   "tag": "ror-inferred",
   "was": "FUN_001990b0",
   "why": "MnuDiary : mnuBase (rtti) processPad; MagLifeMenuPBook (+0x910)'s menu object"
  },
+ "0019946c": {
+  "name": "MnuDiary::updatePad",
+  "tag": "ror-inferred",
+  "was": "FUN_0019946c",
+  "why": "step 3 input: right / left turn a sheet when canTurn, Circle closes at the last page; returns 0 to close; MnuPBook::updatePad counterpart"
+ },
+ "00199714": {
+  "name": "MnuDiary::updateSheets",
+  "tag": "ror-inferred",
+  "was": "FUN_00199714",
+  "why": "every frame: advances the sheet records' turn frames, shows / frees neighbour sheets at frame 4 / end - 4, frees page textures beyond the sheets in use"
+ },
+ "00199a08": {
+  "name": "MnuDiary::setSheetTex",
+  "tag": "ror-inferred",
+  "was": "FUN_00199a08",
+  "why": "(sheet, page, back): the page's texture slot onto side back of the sheet record's model (i3rGetChild52 / i3rGetChild25 +0x1c, change count +8)"
+ },
+ "00199ab4": {
+  "name": "MnuDiary::setBaseTex",
+  "tag": "ror-inferred",
+  "was": "FUN_00199ab4",
+  "why": "(page, back): as setSheetTex on model slot 5, the diary's base model"
+ },
+ "00199b3c": {
+  "name": "MnuDiary::turnSheet",
+  "tag": "ror-inferred",
+  "was": "FUN_00199b3c",
+  "why": "(sheet, right): binds the sheet's turn motion from frame 0, input lock 10, base page texture, queues the pages two sheets on, poses the next sheet at its end; MnuPBook::turnSheet counterpart"
+ },
  "00199c94": {
   "name": "MnuDiary::draw",
   "tag": "ror-inferred",
   "was": "FUN_00199c94",
   "why": "MnuDiary : mnuBase (rtti) draw; MagLifeMenuPBook (+0x910)'s menu object"
+ },
+ "00199fcc": {
+  "name": "MnuDiary::setDrawSet",
+  "tag": "ror-inferred",
+  "was": "FUN_00199fcc",
+  "why": "vtable 0x2e4778 slot 7: draw set of texture slots 0 and 1, identical to MnuPBook::setDrawSet"
+ },
+ "0019a054": {
+  "name": "MnuDiary::canTurn",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a054",
+  "why": "(right): a free sheet record, the sheet not turning, and the page coming into view loaded (findPageTex + isTexLoaded)"
+ },
+ "0019a174": {
+  "name": "MnuDiary::isTurning",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a174",
+  "why": "(sheet): its record's frame below its motion's length; 0 when no record holds the sheet"
+ },
+ "0019a1d0": {
+  "name": "MnuDiary::findFreeSheet",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a1d0",
+  "why": "the first of the 5 records at +0x128 without bit 1, -1 none"
+ },
+ "0019a20c": {
+  "name": "MnuDiary::findSheet",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a20c",
+  "why": "(sheet): the record in use (bit 1) whose +0x14 is sheet, -1 none"
+ },
+ "0019a24c": {
+  "name": "MnuDiary::findPageTex",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a24c",
+  "why": "(page): the texture slot whose entry in the +0x8b8 table is page, -1 none"
+ },
+ "0019a290": {
+  "name": "MnuDiary::queueSheetTex",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a290",
+  "why": "(sheet): queues dy_page%02d_tcc for pages 2n+1 and 2n+2 into free texture slots 3..0x12 unless already held"
+ },
+ "0019a3c0": {
+  "name": "MnuDiary::setPageText",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a3c0",
+  "why": "(page): header #r#L#T#[50#]50#f00#w001#F20 then sys texts row+4 + page - 1 (skipped when ##) and + page into the text window; MnuPBook::setPageText counterpart"
  },
  "0019a52c": {
   "name": "MnuStock::MnuStock",

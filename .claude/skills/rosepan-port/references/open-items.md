@@ -63,8 +63,8 @@ follows it; reached stubs in run order):
   4. **The picture book (mnu/, split 2026-10-26 from unassigned@00192ac0 into mnu/mnubase.cpp,
      mnu/mnumap.cpp, mnu/mnupbook.cpp, mnu/mnustock.cpp).** mnu/mnubase.cpp WRITTEN (verify).
      mnu/mnupbook.cpp: **all of MnuPBook WRITTEN 2026-10-27** (processPad's six steps, page queue,
-     sheet turns, pad, text, draw, setDrawSet) -- `partial` for MnuDiary's processPad / draw and
-     helpers 0x198b54..0x19a3c0. **The gate is open:** the 200 s run opens the book (~frame 3240),
+     sheet turns, pad, text, draw, setDrawSet); **all of MnuDiary WRITTEN 2026-10-27** (`verify`: New
+     Game's smoke run never opens a diary; types 0x1000 / 0x1024 / 0x102a).**The gate is open:** the 200 s run opens the book (~frame 3240),
      turns pages (RIGHT held), Circle closes it (~frame 6000), and the game goes on to the narration
      ("Suddenly, the girl was all alone...", TskMsgMan; its window frame shows, the text is blank:
      MsgMan / MsgManSet stubs). `settings.smoke_pad` now ends `4200:RIGHT*1700,6000:CIRCLE,6300:CIRCLE`.
