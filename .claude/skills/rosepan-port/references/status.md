@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 00:52 at commit `aa58c0e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 01:24 at commit `ac4bce6` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-27 00:52 at commit `aa58c0e` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6827**, named **4657** (68%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 248, ror-inferred 3059
-- context-name ledger: 3347 entries; overrides of wrong library matches: 5
+- game functions: **6827**, named **4673** (68%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 248, ror-inferred 3075
+- context-name ledger: 3363 entries; overrides of wrong library matches: 5
 - placed in a source file: 3994/6827 in 107 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3077**; stubs: **352**
+- reconstructed RoR functions: **3095**; stubs: **350**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -63,7 +63,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3ritem.cpp` | 158 | 0 |
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 241 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 239 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
@@ -89,7 +89,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mcd/mcdman.cpp` | 42 | 0 |
 | `src/mnu/mnubase.cpp` | 36 | 0 |
 | `src/mnu/mnumcd.cpp` | 39 | 0 |
-| `src/mnu/mnupbook.cpp` | 25 | 0 |
+| `src/mnu/mnupbook.cpp` | 43 | 0 |
 | `src/mnu/mnusvld.cpp` | 41 | 0 |
 | `src/mnu/mnutitle.cpp` | 20 | 0 |
 | `src/rx/rxfile.cpp` | 168 | 0 |
@@ -120,11 +120,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 166 TUs: todo 113, partial 14, verify 53, done 9
-- next: **mnu/mnupbook.cpp** (pinned in the queue)
-- pinned queue: unassigned@0022b4b8, unassigned@0021a3e8, mnu/mnupbook.cpp, dog/dogactor.cpp, mag/magscenelight.cpp, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
+- 166 TUs: todo 113, partial 13, verify 54, done 9
+- next: **dog/dogactor.cpp** (pinned in the queue)
+- pinned queue: unassigned@0022b4b8, unassigned@0021a3e8, dog/dogactor.cpp, mag/magscenelight.cpp, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
-- partial: `mnu/mnupbook.cpp` 25/43 -- Gate open: the 200 s run opens the book at about frame 3240, RIGHT held turns pages, CIRCLE at 6000 closes it (step 5 runs, isSeqPair0Pending reached), then Tsk
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
@@ -157,6 +156,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `main.cpp` 11/11 -- Status verify: the smoke run boots for real (iopconf.cnf, eight IOP modules and system.ini read from the disc folder through host0:), runs mainInitGame and loop
 - verify: `mnu/mnubase.cpp` 36/38 -- Verify: the 200 s New Game run inits the picture book through this loader (setupWork, addFile, openPack read the pack with no file error) and stops in the stubs
 - verify: `mnu/mnumcd.cpp` 39/39 -- Status verify: code complete, nothing on screen yet. The boot (MnuTitle::execLogo, check mode 0) now runs MnuMcd::exec, opens its two windows and waits at check
+- verify: `mnu/mnupbook.cpp` 43/43 -- Nothing left to write in this TU. verify: the smoke run never opens a diary (types 0x1000 / 0x1024 / 0x102a), and the picture book on the same path is still bla
 - verify: `mnu/mnusvld.cpp` 41/41 -- Status verify: a Load Game press (pad 1800:START,2400:START,2700:DOWN,2800:CROSS, about 100 s) opens the screen and it matches work/ref/mnusvld (background, Loa
 - verify: `mnu/mnutitle.cpp` 20/20 -- Status verify: the code is complete but the plain boot stays black because execLogo waits at step 1 on MnuMcd::startCheck (a stub returning 0; MnuMcd init / pro
 - verify: `rx/rxfile.cpp` 168/168 -- Status verify: every function in 0x2437f8..0x249b88 is written, but nothing can show it: main 0x2045a8 is still the placeholder (black screen), and the rxthread
@@ -181,6 +181,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 01:24 `mnu/mnupbook.cpp` verify: All of MnuDiary: processPad and its six steps, queueFiles, startTurns, openWindows, updatePad, updateSheets, setSheetTex, setBaseTex, turnSheet, draw, setDrawSe
 - 2026-10-27 00:52 `mnu/mnupbook.cpp` partial: All of MnuPBook: processPad and its six steps, queuePages, startTurns, openWindows, updatePad, updateSheets, setSheetTex, turnSheet, canTurn, isTurning, queueSh
 - 2026-10-26 23:48 `mnu/mnubase.cpp` verify: mnuBase and the mnu pool written: all 38 functions (pool init/term/alloc/free/merge, setupWork, term, addFile, openPack/closePack, the loader updateLoad for i3r
 - 2026-10-26 23:29 `mnu/mnupbook.cpp` partial: Split unassigned@00192ac0 into mnu/mnubase.cpp, mnu/mnumap.cpp, mnu/mnupbook.cpp, mnu/mnustock.cpp (pinned). mnu/mnupbook.cpp: MnuPBook and MnuDiary constructor
@@ -188,21 +189,20 @@ Recent sessions:
 - 2026-10-26 22:40 `i3d/i3mroot.cpp` verify: I3D_I3M motion file root written (12 functions, 0x22b4b8..0x22ba20): id and version checks, relocators, node count / name / index-by-name, node and key-time loo
 - 2026-10-26 22:24 `i3d/i3croot.cpp` verify: I3D_I3C collision root written whole in the i3ritem session (same slice): id check, i3cRelocate / i3cUnrelocate with the part-tree relocators, node / group coun
 - 2026-10-26 22:24 `i3d/i3ritem.cpp` partial: Split unassigned@0022b4b8: pinned i3d/i3ritem.cpp 0x22c1f8..0x22e840 and i3d/i3croot.cpp 0x22ba20..0x22c1f8. i3ritem.cpp: i3rItemFindChild, i3rIsItemType, i3rIt
-- 2026-10-26 21:55 `dog/dogmodel.cpp` verify: DogModel written whole: clear, setRoot, loadPack (texture pack, model, optional second root, sepia display control), loadData (i3r plus optional i3c collision w
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `dog/dogactor.cpp` | partial | 6/30/146 | 31.5 | 116 | 9 |
-| `unassigned@001d3b44` | partial | 2/18/37 | 18.4 | 102 | 5 |
+| `unassigned@001d3b44` | partial | 2/18/37 | 18.4 | 105 | 5 |
 | `unassigned@00143d3c` | todo | 0/33/602 | 129.5 | 96 | 6 |
-| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 70 | 6 |
+| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 75 | 6 |
 | `unassigned@001dd5e8` | todo | 0/12/18 | 14.0 | 70 | 7 |
 | `unassigned@00164fc0` | todo | 0/15/381 | 101.3 | 63 | 7 |
 | `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 57 | 5 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
 | `unassigned@0010f944` | partial | 2/6/12 | 2.2 | 50 | 6 |
-| `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 44 | 5 |
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
+| `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 44 | 5 |
 | `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
 
 ## Frontier (called by reconstructed code, not written yet)
@@ -216,19 +216,19 @@ Recent sessions:
 | `0013f980` | MagScene::setLightParam | 15 | ror | stub | mag/magscenelight.cpp |
 | `0010aa9c` | DogActor::findMotionByName | 13 | ror | stub | dog/dogactor.cpp |
 | `0010a650` | DogActor::getRotY | 13 | ror | stub | dog/dogactor.cpp |
+| `001832e8` | msgGetSysText | 12 | ror | stub | - |
+| `001d83d0` | GamMan::lookupFlagTable | 12 | ror | stub | - |
 | `001d4a3c` | GamMan::getObjRadius | 12 | ror | stub | - |
+| `001874f4` | MsgManSet::setMessage | 11 | ror | stub | - |
 | `00187464` | MsgManSet::close | 11 | ror | stub | - |
 | `001fccf4` | NagaChunk::find | 10 | ror | stub | - |
-| `001d83d0` | GamMan::lookupFlagTable | 10 | ror | stub | - |
+| `0018741c` | MsgManSet::open | 10 | ror | stub | - |
 | `001e0c2c` | GamArea::ctl_trg_flg | 10 | ror | stub | - |
 | `0010ff74` | DogEntity::normalizeRotate | 9 | ror | stub | - |
 | `001fcdb8` | NagaChunk::getData | 9 | ror | stub | - |
 | `0013fb3c` | MagScene::copyLightSet | 9 | ror | stub | mag/magscenelight.cpp |
-| `001832e8` | msgGetSysText | 9 | ror | stub | - |
-| `001874f4` | MsgManSet::setMessage | 9 | ror | stub | - |
 | `001d5da0` | GamMan::relinkObj | 9 | ror | stub | - |
 | `00144334` | gamSetBwnFollow | 8 | ror | stub | - |
-| `0018741c` | MsgManSet::open | 8 | ror | stub | - |
 | `001d8064` | GamMan::findSectaCell | 8 | ror | stub | - |
 | `0010423c` | FUN_0010423c | 8 | - | stub | - |
 | `00176cc8` | Obj176a3c::createEff | 7 | ror | stub | - |

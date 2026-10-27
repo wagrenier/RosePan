@@ -2,7 +2,6 @@
  "queue": [
   "unassigned@0022b4b8",
   "unassigned@0021a3e8",
-  "mnu/mnupbook.cpp",
   "dog/dogactor.cpp",
   "mag/magscenelight.cpp",
   "unassigned@00140030",
@@ -784,7 +783,7 @@
    "why": "MnuMcd: ctor 0x1a1244 / dtor 0x1a12a8 .. the check dialogs and 0x1a47f0; every function uses MnuMcd's members and the memory card manager, the strings are the memory card messages; 0x1a4bd8.. is another class (no callers, vtable-only, next to mnu/mnudlg.cpp)"
   },
   "mnu/mnupbook.cpp": {
-   "notes": "Gate open: the 200 s run opens the book at about frame 3240, RIGHT held turns pages, CIRCLE at 6000 closes it (step 5 runs, isSeqPair0Pending reached), then TskMsgMan narration (Suddenly, the girl was all alone...) whose window frame shows with blank text. settings.smoke_pad now ends 4200:RIGHT*1700,6000:CIRCLE,6300:CIRCLE. Picture wrong: the book is black while open (reference work/ref/MNUPBOOK, PB010200 shows the ehonbg page and page models) because the VU1 sprite packets (0x21e5a0, 0x21e488, 0x21e428, 0x21e690, 0x21e688, unassigned@0021c960) have no native draw yet, and the pose player i3mGetLength / i3mGetPose / i3mPoseToMatrices and utlDrawI3r are stubs. Stub hazard fixes in lib/unassigned_stubs.cpp: the five VU1 sprite stubs return pkt (a NULL packet crashed i3dPktRefTexRegs) and msgGetSysText returns an empty string (setPageText strlens it; the real table is 468 pointers at 0x298fe8, datadump.py 298fe8 468 S:text). GamMan::lookupFlagTable is a stub returning 0, so the book's page state comes from global 0. Left in this TU: MnuDiary processPad 0x1990b0, draw 0x199c94 and helpers 0x198b54..0x19a3c0 (same shape as the book: base / turn files a_diary, dy_page%02d_tcc, text header with #[50#]50). Naming doubt: 0x21e488 / 0x21e690 names look swapped (open-items Open questions). References updated in this commit (architecture MnuPBook, open-items item 4, hazards packet stubs).",
+   "notes": "Nothing left to write in this TU. verify: the smoke run never opens a diary (types 0x1000 / 0x1024 / 0x102a), and the picture book on the same path is still black while open (shot_04500 shows only the prompt sprite; work/ref/MNUPBOOK has the reference): the VU1 sprite packets of mnuBase::drawSprite (0x21e5a0, 0x21e488, 0x21e428, 0x21e690, 0x21e688, unassigned@0021c960) and the pose player (i3mGetLength / i3mGetPose / i3mPoseToMatrices) are stubs, see open-items item 4. The first session whose screenshot shows the book or diary drawn marks this done. PC guards added where the ROM would index texture slot -1 (setSheetTex, setBaseTex, queueSheetTex). setPageText(-1) while turning is the ROM's (asm li a1,-1), unlike MnuPBook's -99. References updated in this commit (architecture MnuDiary, open-items item 4).",
    "ranges": [
     [
      "00196a9c",
@@ -801,9 +800,14 @@
      "date": "2026-10-27 00:52",
      "status": "partial",
      "summary": "All of MnuPBook: processPad and its six steps, queuePages, startTurns, openWindows, updatePad, updateSheets, setSheetTex, turnSheet, canTurn, isTurning, queueSheetTex, setPageText, draw, setDrawSet (16 functions); i3rGetChild25 / i3rGetChild52 in i3d/i3ritem.cpp; MnuSprite uv and colour order fixed (+0x10 uv, +0x20 colour). The New Game run now opens the picture book, turns its pages and closes it with Circle, and the game goes on to the narration."
+    },
+    {
+     "date": "2026-10-27 01:24",
+     "status": "verify",
+     "summary": "All of MnuDiary: processPad and its six steps, queueFiles, startTurns, openWindows, updatePad, updateSheets, setSheetTex, setBaseTex, turnSheet, draw, setDrawSet (vtable slot 7), canTurn, isTurning, findFreeSheet, findSheet, findPageTex, queueSheetTex, setPageText (18 functions, named ror-inferred). MnuDiarySheet records (5 x 0x20) and the renamed MnuDiary fields in mnu/mnupbook.h; its two stubs removed. The TU is now complete."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "MnuPBook and MnuDiary: both load data/mnurpk/mnupbook/, both serve MagLifeMenuPBook (one file assumed); ends at MnuStock::MnuStock"
   },
   "mnu/mnuselect.cpp": {

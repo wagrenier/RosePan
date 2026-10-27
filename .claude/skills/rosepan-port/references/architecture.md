@@ -1361,6 +1361,20 @@ throughout (identifiers, env variables, files, shader macros):
   DogTexInfo record, side data +8 (u16) += 1. Draw: ehonbg full screen (uv 0..1 x 0..0.875), turn
   arrows 28 x 16 at (100, 412) / (384, 412) from texture slot 0 rows v 48 / 0 (three cells cycle
   while turning), TEST_1 0x503fd, then the sheet models at rot (-60 deg, 180 deg, 0), pos (25, 8, 220).
+- **MnuDiary** (mnu/mnupbook.cpp, written 2026-10-27): MnuPBook's six processPad steps and flag
+  bits with its own helpers (queueFiles 0x198b54, startTurns 0x198ca8, openWindows 0x198eb4 which also
+  calls setWindowSize, updatePad 0x19946c, updateSheets 0x199714). The open spread (m_curPage +0x124,
+  even, = global col 7 & ~1) lies on a fixed **base model** (slot 5, <name>_base.i3s); only the sheets
+  next to it are posed, from **five 0x20-byte records** at +0x128 {flags 1 used / 2 shown, -1, -1,
+  motion 0 = <name>01_turn_r / 1 = turn_l, frame, sheet} over model slots 0..4 (<name>01_base.i3s in
+  slot 0, copyModel'd to 1..4). Sheet n carries pages 2n + 1 / 2n + 2 (dy_page%02d_tcc, texture slots
+  3..0x12; +0x8b8 holds the page each slot has, -1 none); a_diary goes to slot 2. updateSheets: a
+  turning record's 4th frame shows the sheet it uncovers, end - 4 frees the one it covers, the end
+  writes the laid page onto the base model; page textures beyond the first unposed sheet each side
+  are freed. Text: header #r#L#T#[50#]50#f00#w001#F20 + sys texts row+4 + page - 1 (skipped when "##")
+  and + page, 0x4c8-byte buffer +0x138; setPageText(-1) while turning. Draw as MnuPBook's but the
+  diary sits at (21, 8, 220) and draws the base model then the shown records. Slot 7 setDrawSet is
+  MnuPBook's.
 - **MagLifeMenuPBook** (0x100000 / 0x200000 types): init looks the type up (getTypeValue) and asks
   MnuPBook (+0x50) then MnuDiary (+0x910) setType (page tables 0x29c0f8: 12 picture books {type
   0x1038.., ?, pages, 0/1/2, pack name pb*} / 0x29c368: 3 diaries {type 0x1000 / 0x1024 / 0x102a, ?,

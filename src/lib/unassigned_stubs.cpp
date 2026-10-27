@@ -781,19 +781,6 @@ void MnuMap::draw(I3dLayer *layer)
     ROSEPAN_STUB("MnuMap::draw", 0x00195e90);
 }
 
-// stub of ROR 0x001990b0
-int MnuDiary::processPad(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuDiary::processPad", 0x001990b0);
-    return {};
-}
-
-// stub of ROR 0x00199c94
-void MnuDiary::draw(I3dLayer *layer)
-{
-    ROSEPAN_STUB("MnuDiary::draw", 0x00199c94);
-}
-
 // stub of ROR 0x0013ca10
 void MagScene::restoreCamera()
 {
