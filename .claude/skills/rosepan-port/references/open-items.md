@@ -680,6 +680,13 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
 
 ## Decisions
 
+- 2026-10-26 (session decision, i3d/i3mroot.cpp): **i3m motion files keep their file offsets on
+  the host** too (from the root; `i3mPtr(root, field)`), like the i3c files. i3mRelocate /
+  i3mUnrelocate keep the ROM's walk with a delta of 0 and leave the relocation u16 at 1. Whoever
+  writes DogActor::loadMotion / unpack, MagScene::loadTenkyuTex, 0x1782cc, 0x193a1c and the curve
+  code that reads i3m keys (0x22e840.., e.g. 0x22e958 reads the length) must resolve i3m fields
+  through i3mPtr, never treat them as pointers. The roles of +0x10, +0x20, +0x28 and the node's +4
+  are unknown (the curve code should tell).
 - 2026-10-26 (session decision, i3d/i3croot.cpp): **i3c collision files keep their file offsets on
   the host** (from the root; `i3cPtr(root, field)` resolves them), unlike i3r's field-relative
   pointers. i3cRelocate walks the file as the ROM does but only turns -1 into 0 and keeps the

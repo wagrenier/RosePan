@@ -330,7 +330,13 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     (7.1 M pointers, all in the file; names may be Shift-JIS). Nine pairs live at 0x22a6c0..0x22aec0
     (types 0x25 0x26 0x29 0x2a 0x2d 0x4a 0x4d 0x52 0x59) and are written in i3ritem.cpp too.
     The accessors between the fixups (0x22c840.., most call i3rItemFindChild) are not written.
-    I3D_I3M roots from 0x22b4b8 (id check 0x22b4b8, rodata 0x303a68). **I3D_I3C** (`i3d/i3croot.cpp`
+    **I3D_I3M** motion files (`i3d/i3mroot.cpp` 0x22b4b8..0x22ba20, pinned 2026-10-26, verify; types
+    in i3mroot.h): id "I3D_I3M " (0x303a68), +8 version 0x20001, +0x12 u16 per key, +0x14 node
+    count, +0x16 relocation u16 (1 = offsets), +0x18 float length in frames, +0x1c nodes (12 bytes:
+    name, +6 u16 key count, +8 keys), +0x24 a float table (a key's first u16 indexes its time),
+    +0x20 / +0x28 offsets of unknown role. All offsets from the root, 0 = none. 14,647 raw I3D_I3M
+    in the disc's DATA tree (BG/MAPUNIT.BIN ...), all version 0x20001 and in offset form; the host
+    keeps the offsets (i3mPtr), as for i3c. **I3D_I3C** (`i3d/i3croot.cpp`
     0x22ba20..0x22c1f8, pinned 2026-10-26, verify): id "I3D_I3C\0" (0x303a70), +0x10 relocation
     byte (1 = offsets), +0x12 both-faces, +0x14 node count, +0x16 group count, +0x18 nodes (12 bytes:
     name, u16 part count, parts), +0x1c group names; a part is 0x30 bytes with +0x24 / +0x2c
