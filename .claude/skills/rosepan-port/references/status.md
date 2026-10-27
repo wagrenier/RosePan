@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 07:56 at commit `8724679` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 08:07 at commit `d741940` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -13,7 +13,7 @@ Generated 2026-10-27 07:56 at commit `8724679` by `tools/reverse/status.py` (`re
 - game functions: **6827**, named **4761** (70%); library functions: 1017
 - by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 252, ror-inferred 3159
 - context-name ledger: 3451 entries; overrides of wrong library matches: 5
-- placed in a source file: 3999/6827 in 107 files
+- placed in a source file: 4001/6827 in 107 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3244**; stubs: **334**
+- reconstructed RoR functions: **3254**; stubs: **326**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -63,7 +63,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3ritem.cpp` | 160 | 0 |
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 247 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 246 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 1 |
@@ -80,7 +80,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/magscenecamera.cpp` | 2 | 3 |
 | `src/mag/magscenedebug.cpp` | 0 | 1 |
 | `src/mag/magscenefocus.cpp` | 2 | 1 |
-| `src/mag/magscenelight.cpp` | 0 | 7 |
+| `src/mag/magscenelight.cpp` | 10 | 0 |
 | `src/mag/magsceneoption.cpp` | 0 | 1 |
 | `src/mag/magscenerender.cpp` | 20 | 0 |
 | `src/mag/magscenetenkyu.cpp` | 0 | 1 |
@@ -120,9 +120,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 165 TUs: todo 111, partial 13, verify 55, done 9
-- next: **mag/magscenelight.cpp** (pinned in the queue)
-- pinned queue: unassigned@0022b4b8, unassigned@0021a3e8, mag/magscenelight.cpp, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
+- 163 TUs: todo 108, partial 13, verify 56, done 9
+- next: **unassigned@00140030** (pinned in the queue)
+- pinned queue: unassigned@0022b4b8, unassigned@0021a3e8, unassigned@00140030, unassigned@00143d3c, unassigned@001dd5e8, unassigned@001d3b44, unassigned@001d859c, unassigned@0020ff34, unassigned@001e46b8
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -152,6 +152,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/magloader.cpp` 17/17 -- Status verify: all 17 functions written, nothing past the title menu draws yet. A New Game run (build.py --run 140 --pad 1800:START,2400:START,2700:CROSS) no lo
 - verify: `mag/magscene.cpp` 89/89 -- Screen still black (textures never load; game/gamfile.cpp callers GamMan::loadSystemData / loadStage are stubs), and nothing calls this slice's new code in the 
 - verify: `mag/magscene2.cpp` 19/19 -- Complete but unseen: MagScene::start (magscene.cpp) and the GamMan loads are stubs, so no loader runs and the screen stays black (MagScene::draw is a stub too).
+- verify: `mag/magscenelight.cpp` 10/10 -- Build, callcheck and layoutcheck green. The 200 s New Game run passes the four previously reached stubs (setLightNo, setLightFlags, setLightParam, copyLightSet)
 - verify: `mag/magscenerender.cpp` 20/20 -- All 20 functions written; verify because nothing on screen can show it: no boot actor has the 0x60 shadow flags and all i3d layer / view / light functions are s
 - verify: `mag/magsystem.cpp` 55/55 -- All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes ar
 - verify: `main.cpp` 11/11 -- Status verify: the smoke run boots for real (iopconf.cnf, eight IOP modules and system.ini read from the disc folder through host0:), runs mainInitGame and loop
@@ -182,6 +183,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 08:07 `mag/magscenelight.cpp` verify: All 10 MagScene light functions written (pinned 0x13f49c..0x13ff00): loadLight from a map _l.bin (MagLightFile in magscene.h), setDefaultLight, setShadowLight w
 - 2026-10-27 07:56 `dog/dogactor.cpp` verify: DogActor complete (147 of 147): getMotionMove, getMotionEvent / getMotionEventNow, the root base readers (getRootBase, getRootRotate, resetRootBase, addTransRot
 - 2026-10-27 07:37 `dog/dogactor.cpp` partial: DogActor per-frame player: draw / drawModel / drawShadow, the posture update 0x10df54 (blend rates, control node quaternion, node scales, local and model matric
 - 2026-10-27 07:05 `dog/dogactor.cpp` partial: DogActor load path: load, loadPack/loadData overrides with setupEye, loadPackMotion, loadMotion, the motion records (setMaxMotion, trimMotion, findMotionById/By
@@ -189,22 +191,21 @@ Recent sessions:
 - 2026-10-27 00:52 `mnu/mnupbook.cpp` partial: All of MnuPBook: processPad and its six steps, queuePages, startTurns, openWindows, updatePad, updateSheets, setSheetTex, turnSheet, canTurn, isTurning, queueSh
 - 2026-10-26 23:48 `mnu/mnubase.cpp` verify: mnuBase and the mnu pool written: all 38 functions (pool init/term/alloc/free/merge, setupWork, term, addFile, openPack/closePack, the loader updateLoad for i3r
 - 2026-10-26 23:29 `mnu/mnupbook.cpp` partial: Split unassigned@00192ac0 into mnu/mnubase.cpp, mnu/mnumap.cpp, mnu/mnupbook.cpp, mnu/mnustock.cpp (pinned). mnu/mnupbook.cpp: MnuPBook and MnuDiary constructor
-- 2026-10-26 22:59 `i3d/i3rmodel.cpp` verify: Pinned unassigned@0021a3e8 as i3d/i3rmodel.cpp 0x21a3e8..0x21ac80 and wrote all 14 functions: i3rBuildPackets / i3rClearPackets, i3rAssignTex, i3rCopyLocalBasic
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@001d3b44` | partial | 2/18/37 | 18.4 | 85 | 1 |
-| `unassigned@00143d3c` | todo | 0/33/602 | 129.5 | 76 | 2 |
-| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 60 | 3 |
-| `mag/magscenelight.cpp` | todo | 0/6/8 | 2.3 | 52 | 4 |
-| `unassigned@0010f944` | partial | 3/6/12 | 2.2 | 44 | 4 |
-| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
-| `unassigned@00164fc0` | todo | 0/15/381 | 101.3 | 43 | 3 |
-| `unassigned@0022e840` | todo | 0/13/99 | 32.1 | 40 | 3 |
-| `unassigned@00228c08` | partial | 22/1/72 | 9.3 | 37 | 1 |
-| `unassigned@001dd5e8` | todo | 0/12/18 | 14.0 | 35 | 0 |
-| `unassigned@00106658` | todo | 0/11/25 | 3.3 | 34 | 2 |
-| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 34 | 3 |
+| `unassigned@001d3b44` | partial | 2/18/37 | 18.4 | 105 | 5 |
+| `unassigned@00143d3c` | todo | 0/33/602 | 129.5 | 96 | 6 |
+| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 75 | 6 |
+| `unassigned@001dd5e8` | todo | 0/12/18 | 14.0 | 70 | 7 |
+| `unassigned@00164fc0` | todo | 0/15/381 | 101.3 | 63 | 7 |
+| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
+| `unassigned@0010f944` | partial | 3/6/12 | 2.2 | 54 | 6 |
+| `unassigned@0022e840` | todo | 0/13/99 | 32.1 | 50 | 5 |
+| `unassigned@00106658` | todo | 0/11/25 | 3.3 | 44 | 4 |
+| `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
+| `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 44 | 5 |
+| `unassigned@0021c960` | todo | 0/11/21 | 8.4 | 44 | 6 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -214,7 +215,6 @@ Recent sessions:
 | `001be2dc` | FileReader::~FileReader | 27 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 23 | ror | missing | game/gamfile.cpp |
 | `002155f4` | FUN_002155f4 | 22 | - | missing | - |
-| `0013f980` | MagScene::setLightParam | 15 | ror | stub | mag/magscenelight.cpp |
 | `0010ff74` | DogEntity::normalizeRotate | 13 | ror | stub | - |
 | `001832e8` | msgGetSysText | 12 | ror | stub | - |
 | `001d83d0` | GamMan::lookupFlagTable | 12 | ror | stub | - |
@@ -226,7 +226,6 @@ Recent sessions:
 | `0018741c` | MsgManSet::open | 10 | ror | stub | - |
 | `001e0c2c` | GamArea::ctl_trg_flg | 10 | ror | stub | - |
 | `001fcdb8` | NagaChunk::getData | 9 | ror | stub | - |
-| `0013fb3c` | MagScene::copyLightSet | 9 | ror | stub | mag/magscenelight.cpp |
 | `001d5da0` | GamMan::relinkObj | 9 | ror | stub | - |
 | `00144334` | gamSetBwnFollow | 8 | ror | stub | - |
 | `001d8064` | GamMan::findSectaCell | 8 | ror | stub | - |
@@ -248,6 +247,8 @@ Recent sessions:
 | `001d7b08` | GamMan::getObjSectaNo | 6 | ror | stub | - |
 | `0022a988` | FUN_0022a988 | 6 | - | missing | - |
 | `0022a978` | FUN_0022a978 | 6 | - | missing | - |
+| `00215bb4` | dbgTraceVector4 | 6 | ror | stub | - |
 | `001dd5e8` | GamArea::addTrg | 5 | ror | stub | - |
 | `001d544c` | GamMan::placeAchr | 5 | ror | stub | - |
+| `001874ac` | MsgManSet::update | 5 | ror | stub | - |
 

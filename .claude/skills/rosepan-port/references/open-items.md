@@ -90,7 +90,11 @@ follows it; reached stubs in run order):
      getNodeRate, step, stepLoop, getTimeRatio 0x107560, setTimeRatio 0x107678, setBlendRate
      0x108428; then the i3m pose player (unassigned@0022e840, incl. i3mGetBlendPose 0x22eab0) and
      utlDrawI3r. The getNodeIndexByName PORT guard stays (GamMan::attachObj asks unloaded actors).
-  6. `mag/magscenelight.cpp` -- MagScene::loadLight 0x13f658 / setDefaultLight 0x13f8e4.
+  6. `mag/magscenelight.cpp` -- WRITTEN 2026-10-27 (all 10, `verify`; pinned 0x13f49c..0x13ff00):
+     loadLight, setDefaultLight, setShadowLight, the set / param front ends, addLight. The 200 s run
+     passes setLightNo / setLightFlags / setLightParam / copyLightSet with no assert; nothing on screen
+     can show a light until a model draws (utlDrawI3r 0x106760, the i3m pose player). Open: addLight's
+     loop walks nine sets (bit 8 would assert in addToSet) -- kept as the ROM has it.
   7. `unassigned@00140030` / `unassigned@00143d3c` -- MagScene::loadTenkyuTex 0x140030 (the sky) /
      setFog 0x143d7c, magBwnSeqCommand 0x144ae0.
   8. `unassigned@001dd5e8` -- GamArea::addTrg / stopKind / clearKind (room triggers).

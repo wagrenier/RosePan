@@ -157,6 +157,34 @@ static_assert(offsetof(MagViewParam, m_zmax) == 0x18, "m_zmax");
 static_assert(offsetof(MagViewParam, m_offy) == 0x34, "m_offy");
 static_assert(sizeof(MagViewParam) == 0x38, "MagViewParam is 0x38 bytes on the EE");
 
+/* A light of a map's _l.bin (MagLightFile; EE 0x20, plain floats). */
+struct MagLightFileLight
+{
+    float m_color[3];           // ROR 0x00: point lights: scaled by m_vec[3]
+    float m_vec[4];             // ROR 0x0c: directional: the direction (setLightParam reads w too); point: the position, w the intensity
+    float _1c;
+};
+static_assert(offsetof(MagLightFileLight, m_vec) == 0x0c, "m_vec");
+static_assert(sizeof(MagLightFileLight) == 0x20, "MagLightFileLight is 0x20 bytes on the EE");
+
+/* A map's _l.bin (MagSceneTenkyu::m_light_data), loadLight's input: the
+ * counts, the ambient colour, then one directional light when
+ * m_direct_num > 0 and m_point_num point lights. EE layout, plain words. */
+struct MagLightFile
+{
+    int   m_direct_num;         // ROR 0x00: > 0: one directional light follows (only one is read)
+    int   m_point_num;          // ROR 0x04
+    int   m_shadow_no;          // ROR 0x08: the light (directional first, then the points) that casts the projected shadows
+    int   _0c;
+    float m_ambient[3];         // ROR 0x10
+    float _1c;
+    MagLightFileLight m_light[1]; // ROR 0x20: m_direct_num ? 1 : 0 directional, then the point lights
+};
+static_assert(offsetof(MagLightFile, m_point_num) == 0x04, "m_point_num");
+static_assert(offsetof(MagLightFile, m_shadow_no) == 0x08, "m_shadow_no");
+static_assert(offsetof(MagLightFile, m_ambient) == 0x10, "m_ambient");
+static_assert(offsetof(MagLightFile, m_light) == 0x20, "m_light");
+
 /* The i3d light record the projected shadows are lit by (scene +0x2000;
  * setShadowLight 0x13fbe4 hangs it in m_shadow_light as its one
  * directional light for mode 1, its one spot light for modes 2 and 3).
@@ -333,16 +361,31 @@ struct MagScene
      * (GamMan::pushCamera / popCamera). */
     float getCameraPathPos();                                            // ROR 0x0013d4d0
     void setCameraPathPos(float pos);                                    // ROR 0x0013d52c
+    /* Empties light set theNo of the pool (resetSet; < 0 starts over). */
     void setLightNo(int theNo);                                          // ROR 0x0013f4d0
     /* Only asserts theNo < 8 (the destructor passes -1). */
     void checkLightNo(int theNo);                                        // ROR 0x0013f49c
+    /* A new pool from a map's _l.bin (MagLightFile): its ambient light in
+     * sets 0 and 1, its first directional light and its point lights in
+     * set 1; the light m_shadow_no counts to casts the projected shadows. */
     void loadLight(const void *theData);                                 // ROR 0x0013f658
+    /* A grey ambient light (0.75) in light set 6. */
     void setDefaultLight();                                              // ROR 0x0013f8e4
-    void setLightFlags(const int *flags, int no);                        // ROR 0x0013f528
+    /* Light set no gets theNum[kind] free lights of each kind; set 0 also
+     * picks the shadow mode by the first kind it has (point, spot, 5,
+     * directional), light 0. */
+    void setLightFlags(const int *theNum, int no);                       // ROR 0x0013f528
+    /* DogLightPool::setLightParam / getLightParam, or the set-relative
+     * twins when no >= 0. */
     void setLightParam(int type, int idx, int which, const float *v, int no); // ROR 0x0013f980
     void getLightParam(int type, int idx, int which, float *v, int no);  // ROR 0x0013fa50
     /* Light set theS of the pool copied over set theD (0..7, different). */
     void copyLightSet(int theD, int theS);                               // ROR 0x0013fb3c
+    /* m_shadow_light from light theNo of kind theLight (1 directional, 2
+     * point, 3 spot; other kinds: no source light). */
+    void setShadowLight(int theLight, int theNo);                        // ROR 0x0013fbe4
+    /* A free light of kind type, added to every light set whose bit is set
+     * in mask (bits 0..8); its id, < 0 when none is free. */
     int  addLight(int type, unsigned int mask);                          // ROR 0x0013fe64
     void releaseTenkyuTex(int no);                                       // ROR 0x0013ff00
     void loadTenkyuTex(int no, const BedPfh *pfh, i3dContext *ctx);      // ROR 0x00140030

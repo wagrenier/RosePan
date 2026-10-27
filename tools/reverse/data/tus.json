@@ -2,7 +2,6 @@
  "queue": [
   "unassigned@0022b4b8",
   "unassigned@0021a3e8",
-  "mag/magscenelight.cpp",
   "unassigned@00140030",
   "unassigned@00143d3c",
   "unassigned@001dd5e8",
@@ -674,6 +673,24 @@
    ],
    "status": "verify",
    "why": "Every function from 0x137330 to 0x139308 that has a source string names mag/magscene2.cpp; magscene.cpp strings end at 0x135f44 and magscenerender.cpp starts at 0x139664. 0x137300 and 0x137318 are helpers only 0x137330 calls. The ctor/dtor 0x1360a0/0x136d14 and setPC..initRender (0x1316b8..) lie in magscene.cpp's span, not here."
+  },
+  "mag/magscenelight.cpp": {
+   "notes": "Build, callcheck and layoutcheck green. The 200 s New Game run passes the four previously reached stubs (setLightNo, setLightFlags, setLightParam, copyLightSet) with no assert and still ends black after the narration, as before: no model draws yet (utlDrawI3r 0x106760, DogMotionBlend::getPose and the i3m pose player unassigned@0022e840 are stubs), so lights cannot be seen; the first session whose screenshot shows a lit model marks this done. Decisions: addLight walks nine sets (0..8) as the ROM does; setShadowLight uses the const pool accessors (assert lines 141..143) and reinterprets m_shadow_lightrec as I3dParallelLight / I3dSpotLight (all floats, same layout); the unreachable ShadowAmbient alignment assert is a comment. loadLight reads only one directional light even when the count is larger (ROM behaviour). Next on the 3D path: item 7, unassigned@00140030 (sky) / setFog.",
+   "ranges": [
+    [
+     "0013f49c",
+     "0013ff00"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 08:07",
+     "status": "verify",
+     "summary": "All 10 MagScene light functions written (pinned 0x13f49c..0x13ff00): loadLight from a map _l.bin (MagLightFile in magscene.h), setDefaultLight, setShadowLight with ShadowAmbient, setLightNo / setLightFlags / checkLightNo, setLightParam / getLightParam, copyLightSet, addLight; setDefaultLight stub removed from lib/unassigned_stubs.cpp"
+    }
+   ],
+   "status": "verify",
+   "why": "Asserts naming mag/magscenelight.cpp anchor 0x13f49c..0x13fe64 (8 of 8 staged functions); setDefaultLight 0x13f8e4 sits between loadLight and setLightParam with no strings; addLight 0x13fe64 is the last light function before magscenetenkyu.cpp's releaseTenkyuTex 0x13ff00 (no strings: link-order guess)"
   },
   "mag/magscenerender.cpp": {
    "notes": "All 20 functions written; verify because nothing on screen can show it: no boot actor has the 0x60 shadow flags and all i3d layer / view / light functions are stubs (screen black). The first session whose screenshot shows projected shadows marks it done. Open points in open-items.md (Projected shadow open points): the up vector at data 0x298cf0 reads (1, -1, 1, 0); the constructor's +0x2040 value (likely -1, the host stub leaves 0); the light-set mask layout in DogLightPool. Next for any picture is unchanged: the draw-group / layer module unassigned@0021fb50 (queue B.3), then i3dCtxCreateView, i3dCtxCreateLight, DogLightPool::createLight.",

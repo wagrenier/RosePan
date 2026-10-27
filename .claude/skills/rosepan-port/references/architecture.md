@@ -813,6 +813,23 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   count units (`decodeRtcm` 0x190904). When the list is done and +0x418 (an i3dContext) is set,
   DogTexInfo::setTexTable(ctx).
 
+## The scene's lights (`mag/magscenelight.cpp`, 0x13f49c..0x13ff00, 2026-10-27)
+
+MagScene's front end to its DogLightPool (+0x2050). **A map's `_l.bin`** (MagSceneTenkyu +0x500,
+`MagLightFile`): +0 direct count, +4 point count, +8 the shadow light's index (counting the
+directional light first, then the points), +0x10 ambient rgb, +0x20 0x20-byte lights (rgb, then a
+vec4: directional = direction; point = position with w = intensity, which scales the rgb). Only
+**one** directional light is read even when the count is larger. `loadLight` 0x13f658 restarts
+the pool (term + create): ambient (alpha 1) into sets 0 and 1, the directional and point lights
+into set 1. MagScene::load then calls `setDefaultLight` 0x13f8e4: a 0.75 grey ambient into set 6
+(the movie / 2D layer's set). `setShadowLight(kind, n)` 0x13fbe4: m_shadow_light = empty
+description, ambient `ShadowAmbient` (data 0x2eea80, zero, asserted 16-aligned), m_shadow_mode =
+kind; 1 hangs +0x2000 as its one parallel light (src = the pool's directional light n), 2 / 3 as
+its one spot light (src = point / spot light n), other kinds src NULL. `setLightFlags(theNum, set)`
+0x13f528 = buildSet, and for set 0 the shadow kind by the first kind present: point, spot, 5,
+directional. `addLight(type, mask)` 0x13fe64 walks nine mask bits (0..8; the pool has 8 sets).
+setLightParam / getLightParam forward to the pool's global (no < 0) or set-relative accessors.
+
 ## The texture table (`dog/dogtexinfo.cpp`, 0x1161e4..0x11764c, 2026-10-22)
 
 - **DogTexInfo** (EE 0x20; the scene's at +0x29520, 256 entries): +0 m_max_tex, +4 m_num_tex,
