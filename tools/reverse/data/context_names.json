@@ -251,6 +251,12 @@
   "was": "FUN_0010421c",
   "why": "stores the seed 0xc45330af into bss 0x308484, the state 0x1041c4 steps (x * 0x769 + 0x7cf9) and 0x1041e4 scales; MagSystem's constructor calls it"
  },
+ "0010423c": {
+  "name": "utlRandRange",
+  "tag": "ror-inferred",
+  "was": "FUN_0010423c",
+  "why": "lo + 0x1041e4(hi - lo + 1): a random integer in lo..hi"
+ },
  "0010456c": {
   "name": "utlHitCheck",
   "tag": "ror-inferred",
@@ -3292,6 +3298,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00163bb8",
   "why": "findEmy(oid) then 0x154748: achr flags +0x120 lose 0x10000000 and 0x80, enemy +0x240 = 1; native 212 case 23"
+ },
+ "00163e10": {
+  "name": "EmyManager::pauseEmy",
+  "tag": "ror-inferred",
+  "was": "FUN_00163e10",
+  "why": "findEmy(oid), then 0x1664a4 on it: ACHRstat::pauseTasks(on) on the enemy's achr and two on/off calls on its +0x1f0 / +0x1f8"
  },
  "00164078": {
   "name": "EmyManager::isEmyFlag30",
@@ -10577,6 +10589,12 @@
   "was": "FUN_001f8cec",
   "why": "like scenePlayStart without the map / CHARA / THREAD sections: news a ScenePlay, adds its task on GamMan +0x222ac"
  },
+ "001f8f84": {
+  "name": "PLScenePlay::~PLScenePlay",
+  "tag": "ror-inferred",
+  "was": "FUN_001f8f84",
+  "why": "PLScenePlay vtable 0x2e4d90 slot 6: stores the vtable, operator delete on bit 0 (GCC 2 deleting destructor)"
+ },
  "001f8fb8": {
   "name": "gamSystemDataLoaded",
   "tag": "ror-inferred",
@@ -10673,11 +10691,89 @@
   "was": "FUN_001f97c0",
   "why": "kind 6 step when the SE does not play: returns 1 (hidden in 0x1f974c's body until split)"
  },
+ "001f97c8": {
+  "name": "scnPlaySEDelayed",
+  "tag": "ror-inferred",
+  "was": "FUN_001f97c8",
+  "why": "news TskGenFrameFunc(1, se) and adds it to start at the task clock + delay: the SE plays delay frames later"
+ },
+ "001f985c": {
+  "name": "TskAttack::TskAttack",
+  "tag": "ror-inferred",
+  "was": "FUN_001f985c",
+  "why": "stores TskAttack vtable 0x2e4eb0, clears the step pointer, keeps the oid, tail-calls the setup"
+ },
+ "001f98c0": {
+  "name": "TskAttack::setup",
+  "tag": "ror-inferred",
+  "was": "FUN_001f98c0",
+  "why": "TskAttack constructor's tail call: reads the achr and the parameter words and picks the motion and step by the kind word"
+ },
+ "001f9ce8": {
+  "name": "TskAttack::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9ce8",
+  "why": "TskAttack vtable slot 5 (term), empty"
+ },
+ "001f9cf0": {
+  "name": "TskAttack::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9cf0",
+  "why": "TskAttack vtable slot 4 (exec): calls the member-function step while one is set and the oid is not -1"
+ },
+ "001f9d90": {
+  "name": "scnAttackStart",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9d90",
+  "why": "kills the achr's tasks, news a TskAttack(oid, param) and adds it on the achr's task slot +0x3e0"
+ },
+ "001f9e38": {
+  "name": "TskDamage::TskDamage",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9e38",
+  "why": "stores TskDamage vtable 0x2e4ef0 and tail-calls the setup 0x1f9e58"
+ },
+ "001f9e58": {
+  "name": "TskDamage::setup",
+  "tag": "ror-inferred",
+  "was": "FUN_001f9e58",
+  "why": "TskDamage constructor's tail call"
+ },
+ "001fa5bc": {
+  "name": "scnDamageStart",
+  "tag": "ror-inferred",
+  "was": "FUN_001fa5bc",
+  "why": "scnChrRequest's chr 0..2 / 5..10 case: pauses the enemy, replaces the achr's task +0x3e0 with a new TskDamage and creates effect kind 1 40 below the achr"
+ },
+ "001fabd0": {
+  "name": "TskDamage::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001fabd0",
+  "why": "TskDamage vtable slot 5 (term): ACHRstat::empty1da074 on the achr at +0x18"
+ },
+ "001fabf8": {
+  "name": "TskDamage::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001fabf8",
+  "why": "TskDamage vtable slot 4 (exec): calls the member-function step"
+ },
  "001fac60": {
   "name": "scnChrRequest",
   "tag": "ror-inferred",
   "was": "FUN_001fac60",
   "why": "jump table 0x2fed40 over chr 0..10, chr 11 from object t1's kind (4 / 3 / system field 0x72); many callers, TskMovePhysic passes 4 / 3 with 0x15"
+ },
+ "001fae14": {
+  "name": "scnChrRequestDog",
+  "tag": "ror-inferred",
+  "was": "FUN_001fae14",
+  "why": "scnChrRequest's chr 3 case (chr 11 with an oid of kind 1, the dog)"
+ },
+ "001fb084": {
+  "name": "scnChrRequestPC",
+  "tag": "ror-inferred",
+  "was": "FUN_001fb084",
+  "why": "scnChrRequest's chr 4 case (chr 11 with an oid of kind 0, the PC); calls MagSystem::getPCStateClass"
  },
  "001fbbd0": {
   "name": "gamStage2Loaded",
@@ -10792,6 +10888,42 @@
   "tag": "ror-inferred",
   "was": "FUN_001fcdd4",
   "why": "the word at getData"
+ },
+ "001fd6bc": {
+  "name": "TskAttack::stepKind12",
+  "tag": "ror-inferred",
+  "was": "FUN_001fd6bc",
+  "why": "TskAttack::setup's step for kind words 0x12..0x14"
+ },
+ "001fd9bc": {
+  "name": "TskAttack::stepKind15",
+  "tag": "ror-inferred",
+  "was": "FUN_001fd9bc",
+  "why": "TskAttack::setup's step for kind word 0x15"
+ },
+ "001ff494": {
+  "name": "TskAttack::stepKind2e",
+  "tag": "ror-inferred",
+  "was": "FUN_001ff494",
+  "why": "TskAttack::setup's step for kind word 0x2e"
+ },
+ "001ff664": {
+  "name": "TskAttack::stepKind2f",
+  "tag": "ror-inferred",
+  "was": "FUN_001ff664",
+  "why": "TskAttack::setup's step for kind word 0x2f"
+ },
+ "001ff830": {
+  "name": "TskAttack::stepKind30",
+  "tag": "ror-inferred",
+  "was": "FUN_001ff830",
+  "why": "TskAttack::setup's step for kind word 0x30"
+ },
+ "001ffce0": {
+  "name": "TskAttack::stepKind26",
+  "tag": "ror-inferred",
+  "was": "FUN_001ffce0",
+  "why": "TskAttack::setup's step for kind words 0x26..0x28"
  },
  "00203d94": {
   "name": "SysTimer::SysTimer",

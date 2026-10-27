@@ -81,6 +81,10 @@ struct EmyManager : CmnITask
     /* Two cone tests (angle pi) from the enemy against the objects of
      * bss 0x7a3350 / 0x7a3354. */
     int  testEmyView(u_int oid);                                         // ROR 0x00163b80
+    /* The enemy of oid (none: nothing): its achr's tasks paused (on 1) or
+     * resumed (0, ACHRstat::pauseTasks(on, 0)) and its +0x1f0 / +0x1f8
+     * parts switched with them (0x1664a4). */
+    void pauseEmy(u_int oid, int on);                                    // ROR 0x00163e10
     /* Achr flags lose 0x10000000 and 0x80, enemy +0x240 = 1. */
     void releaseEmyHold(u_int oid);                                      // ROR 0x00163bb8
     void setSlotWord24(int no, int v);                                   // ROR 0x00162afc
@@ -203,6 +207,8 @@ static_assert(offsetof(GamFont, m_00) == 0x00, "m_00");
 /* ---- the utl range after utl/utlgame.cpp (unassigned@00103edc) ---- */
 
 void utlRandReset(void);                                                 // ROR 0x0010421c
+/* A random integer in lo..hi (lo + 0x1041e4(hi - lo + 1)). */
+int  utlRandRange(int lo, int hi);                                       // ROR 0x0010423c
 
 /* ---- the i3d library (unassigned@00216ad0 .. 0x237d80; its version string
  * "i3d_package_version 050121-stable-050826") ---- */
@@ -386,6 +392,14 @@ struct EffParam
             int       m_args[12]; // ROR 0x14
         } m_achr;               // kind 0x15 (native 281 op 38)
         const void *m_file;     // ROR 0x10: kind 0xd, an event pack's effect file (scenePlayStart)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10
+            int   m_1c;         // ROR 0x1c: 0
+            float m_20;         // ROR 0x20: -1
+            int   m_24;         // ROR 0x24: 0
+            float m_scale;      // ROR 0x28: 1, 1.75 for a kind-2 damage
+        } m_hit;                // kind 1 (scnDamageStart)
     };
 };
 struct Obj176a3c                /* scene +0x837e0, constructor 0x176a3c */
