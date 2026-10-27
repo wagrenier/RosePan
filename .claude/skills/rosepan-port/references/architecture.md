@@ -341,6 +341,25 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     Ghidra body ran to 0x22a978; the function ends at 0x22a960. The mesh packet builder before it is
     **`i3d/i3rmesh.cpp`** 0x228c08..0x22a6c0 (pinned 2026-10-27, not written; it ends with 0x22a638,
     the ALPHA_1 / TEST_1 register pair).
+    **The mesh data** (read 2026-10-27 from i3rBuildMeshPacket 0x21fb50, i3rDrawModel 0x21fe68,
+    0x220290 / 0x222560 / 0x225670 / 0x225ec8 and checked on amd.mdl; the host reader is
+    rosepan_i3dmesh.cpp): node (0x2a) [1] = entries (0x59: +0 -> u16 bone table, +4 s16 mesh
+    index, +6 u16 bone count, +8 enable byte); node [0] data +0x25 = shown (no data = shown).
+    Mesh 0x2d [0] 0x46 (data +0 -> per-slot offset (inverse bind) matrices, +0xc u16 count) -> [0]
+    -> 0x4c groups (data +0 -> the u16 bone slot, +5 flags: 8 = rigid: drawn with world x
+    nodes[bones[slot]] in i3d order, i.e. p * node * world; otherwise skinned) -> [0] -> 0x4d
+    (+0xc s16 material) -> [0] -> 0x56 batches: [4] positions (VU1 0x1dc), [2] normals (0x22c),
+    up to 80 each; [5] bone records (0x31: +0 -> {s32 pool byte offset, f32 weight} pairs, +4 u16
+    slot, +6 u16 pair count padded with zero weights): skinned pool = sum of w * (p * offset[slot] *
+    nodes[bones[slot]]), normals through that matrix's normalised rows; [0] -> 0x30 -> [0] ->
+    0x47 strips (data +0 -> V2-16 list unpacked at 3, +4 qwc, +5 vertex count 3..20 = the row of
+    the 0x302c40 table whose qwords set VU1 0..2 and MSCAL 1; list element x = pool index with
+    bit 15 = no triangle at this vertex, y bit 15 = (n-2, n-1, n) faces front, else reversed --
+    1 exception in 6,000 triangles), strip [0] colours V3/V4 at 0x17 and [1] STQ V2-32 at 0x2b
+    (q from STCOL 1.0), both TOPS-relative. Blocks (0x33): {+0 -> data, +4 u16 qwc, +6 u16
+    count, +8 kind: 0 V4-32 qwords, 1 a VIF stream}; 0x226060 rebases the stream's unpack
+    addresses in place once (first = base, the rest + base). root data +0x14 = per-node
+    model-space bind matrices (i3rDrawModel's default node table), +0x10 the local ones.
     The accessors between the fixups in i3ritem.cpp's own extent (0x22c840.., most call
     i3rItemFindChild) are not written.
 
@@ -1391,6 +1410,15 @@ throughout (identifiers, env variables, files, shader macros):
     decoded from main memory on first use. `ROSEPAN_I3D_TEST=1` (MagSystem::update, PC) draws two
     S2DMAN.RPK pictures through i3dTexSetTim2 / a texture table / a layer / a draw set /
     i3dPktTexSpriteUV. Details and gaps: open-items.md Decisions "The native i3d hook".
+  - **The mesh path** (`rosepan_i3dmesh.*`, 2026-10-27, setup/i3d_mesh_draw.cpp): an i3r model
+    draw is a record like a 2D primitive (`RosePan_I3dRecordModel(at, root, world, nodes, tex,
+    n)`, the camera before it `RosePan_I3dRecordCamera`: renderer row-major view + reverse-Z
+    projection) and replays through the renderer's mesh stream. It walks i3rDrawModel 0x21fe68's
+    tree and unpacks each mesh block into a host VU1 memory as VIF1 would (STCYCL / STMASK /
+    STROW / STCOL / UNPACK with mask and fill), then reads the strips from there; the CPU skinning
+    of 0x225670 is redone on the host. `ROSEPAN_I3D_MESH_TEST=1` (MagSystem::update) draws
+    CHARA.RPK CHAP01's first model (amd.mdl, Amanda) with a turning camera: textured, skinned,
+    depth-tested, right side up (progress/ screenshot of 2026-10-27).
   - The emulated GS path remains only as a fallback for something not bridged yet; anything that
     lands there is a known performance debt to list in open-items.md.
 - Data root: the disc's root copied file by file (the folder holding `DATA/`); `LooksLikeDataRoot`

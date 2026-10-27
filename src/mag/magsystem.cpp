@@ -531,6 +531,7 @@ void MagSystem::update()
     beginPacket();
     m_scene.draw(&m_i3d, &m_dbuff, m_frame);
     RosePan_I3dForcedTest(&m_i3d);  // PC: ROSEPAN_I3D_TEST=1 draws a TIM2 through i3d (rosepan_i3d.h)
+    RosePan_I3dMeshForcedTest(&m_i3d);  // PC: ROSEPAN_I3D_MESH_TEST=1 draws a CHARA.RPK model (rosepan_i3d.h)
     m_scene.postDraw();
     m_info.m_t_cpu = (int)REG_RCNT0_COUNT - t0;
     int r = i3dCtxGetRest(&m_i3d);

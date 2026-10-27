@@ -643,6 +643,17 @@ public:
 - Fix: the port saves next before the body and goes on from it (PORT comment). Check every inlined pool remove
   inside a walk the same way: read where the asm reloads the iterator (ghidra.py asm around the loop's branch).
 
+## i3r mesh data: pointers where a value is expected (2026-10-27)
+
+- Symptom: a skinned model drew as scattered limbs, then every rigid part on one bone.
+- Cause: the 0x4c group's bone slot is not its data's first word but what that word points at
+  (`*(u16 *)*data` in 0x220290; the word is a relocated pointer, 8 = "data + 8"), and the
+  non-flag-8 groups are CPU-skinned per batch (0x225670), not drawn with the world matrix.
+- Fix: read every first word of an i3r data record as a candidate pointer (i3rPtr) and check
+  the decompiler's double dereference. Model packs nest: CHARA.RPK -> chapter -> model entry
+  (".mdl" + ".MOT") -> .mdl (TIM2 pack, i3r, collision); flags 0x8002 packs have offsets and no
+  sizes (getFileSize returns -1).
+
 ## How to debug (the method that worked)
 
 - **The picture is the test.** Logs, stub hits and callcheck show the code ran, not that it is right.

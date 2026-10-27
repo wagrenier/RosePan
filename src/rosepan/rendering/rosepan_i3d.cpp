@@ -3,6 +3,7 @@
  * ======================================================================== */
 #include "rosepan/rendering/rosepan_i3d.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,9 +16,13 @@
 #include "i3d/i3dlayer.h"
 #include "i3d/i3dpacket.h"
 #include "i3d/i3dtex.h"
+#include "i3d/i3rmodel.h"
+#include "i3d/i3rroot.h"
+#include "bed/bedpfh.h"
 #include "rosepan/io/rosepan_log.h"
 #include "rosepan/io/rosepan_paths.h"
 #include "rosepan/rendering/rosepan_draw2d.h"
+#include "rosepan/rendering/rosepan_i3dmesh.h"
 #include "rosepan/rendering/rosepan_renderer.h"
 
 namespace
@@ -58,7 +63,9 @@ enum RecordKind
     REC_PRIM,
     REC_REG,
     REC_TEXREGS,
-    REC_MOVIE
+    REC_MOVIE,
+    REC_MODEL,
+    REC_CAMERA
 };
 
 struct Record
@@ -70,6 +77,22 @@ struct Record
     uint64_t        reg, value;     /* REC_REG */
     const uint64_t *regs;           /* REC_TEXREGS */
     int             movie[8];       /* REC_MOVIE: x0, y0, x1, y1, frame w / h, picture w / h */
+    size_t          index;          /* REC_MODEL / REC_CAMERA: into s_models / s_cameras */
+};
+
+struct ModelDraw
+{
+    const I3rRoot     *root;
+    float              world[16];
+    const float       *nodes;
+    const I3dTexEntry *tex;
+    int                tex_count;
+};
+
+struct Camera
+{
+    float view[16];
+    float projection[16];
 };
 
 struct Binding
@@ -112,6 +135,8 @@ struct GsState
 std::map<uintptr_t, Record> s_records;
 std::unordered_map<const uint64_t *, Binding> s_bindings;
 std::map<TexKey, const void *> s_textures;
+std::vector<ModelDraw> s_models;
+std::vector<Camera> s_cameras;
 GsState s_state;
 unsigned s_vu1_count;
 bool s_logged_offscreen;
@@ -377,6 +402,16 @@ void DrawMovie(const Record &r)
     RosePan_RendererDrawImageQuad(texture, xy, uv, 0x80, 0x80, 0x80, 0x80, 1);
 }
 
+void DrawModel(const Record &r)
+{
+    if (r.index >= s_models.size())
+        return;
+    const ModelDraw &m = s_models[r.index];
+    /* The mesh path's own state: opaque, depth tested, the whole frame. */
+    RestoreState();
+    RosePan_I3dMeshDraw(m.root, m.world, m.nodes, m.tex, m.tex_count);
+}
+
 void ApplyReg(uint64_t reg, uint64_t value)
 {
     switch (reg)
@@ -511,6 +546,41 @@ void RosePan_I3dRecordMovie(const void *at, int x0, int y0, int x1, int y1,
     s_records[(uintptr_t)at] = r;
 }
 
+void RosePan_I3dRecordModel(const void *at, const I3rRoot *root, const float *world,
+                            const float *nodes, const I3dTexEntry *tex, int tex_count)
+{
+    ModelDraw m = {};
+    m.root = root;
+    memcpy(m.world, world, sizeof(m.world));
+    m.nodes = nodes;
+    m.tex = tex;
+    m.tex_count = tex_count;
+    Record r = {};
+    r.kind = REC_MODEL;
+    r.index = s_models.size();
+    s_models.push_back(m);
+    s_records[(uintptr_t)at] = r;
+}
+
+void RosePan_I3dRecordCamera(const void *at, const float *view, const float *projection)
+{
+    Camera c;
+    memcpy(c.view, view, sizeof(c.view));
+    memcpy(c.projection, projection, sizeof(c.projection));
+    Record r = {};
+    r.kind = REC_CAMERA;
+    r.index = s_cameras.size();
+    s_cameras.push_back(c);
+    s_records[(uintptr_t)at] = r;
+}
+
+const void *RosePan_I3dTextureFor(const void *tex, const void *clut, unsigned clut_index, int tcc)
+{
+    if (tex == nullptr)
+        return nullptr;
+    return TextureFor(Binding{(const I3dTexture *)tex, (const I3dClut *)clut, clut_index}, tcc);
+}
+
 void RosePan_I3dBindTexRegs(const uint64_t *regs, const void *tex, const void *clut,
                             unsigned int clut_index)
 {
@@ -532,6 +602,8 @@ void RosePan_I3dBeginFrame(void)
 {
     s_records.clear();
     s_bindings.clear();
+    s_models.clear();
+    s_cameras.clear();
     s_state = GsState();
 }
 
@@ -550,6 +622,12 @@ void RosePan_I3dReplay(const void *start, const void *end)
         case REC_TEXREGS: s_state.tex_regs = r.regs; s_state.direct_tex0 = false; break;
         case REC_PRIM:    DrawPrim(r); drew = true; break;
         case REC_MOVIE:   DrawMovie(r); drew = true; break;
+        case REC_MODEL:   DrawModel(r); drew = true; break;
+        case REC_CAMERA:
+            if (r.index < s_cameras.size())
+                RosePan_RendererSet3DViewProjection(s_cameras[r.index].view,
+                                                    s_cameras[r.index].projection);
+            break;
         }
     }
     if (drew)
@@ -651,4 +729,159 @@ void RosePan_I3dForcedTest(i3dContext *ctx)
                                 i3dPackRGBAQ(1.0f, 0x80, 0x80, 0x80, 0x80));
         i3dLayerEndSet(layer, pkt);
     }
+}
+
+/* ---- the forced mesh test ---- */
+
+namespace
+{
+/* `size` bytes of `path` from `offset` into `out` (8-byte aligned). */
+bool ReadSpan(FILE *f, long offset, size_t size, std::vector<uint64_t> &out)
+{
+    out.assign((size + 7) / 8, 0);
+    return fseek(f, offset, SEEK_SET) == 0 && fread(out.data(), 1, size, f) == size;
+}
+
+/* A turning camera at `dist` from `c`, RoR's world being y-down: row-major
+ * view (x right, y up, z forward) and a reverse-Z perspective (depth w at
+ * the near plane, 0 at the far one), the forms the renderer takes. */
+void OrbitCamera(const float *c, float dist, float angle, float *view, float *proj)
+{
+    const float eye[3] = {c[0] + sinf(angle) * dist, c[1] - dist * 0.25f, c[2] + cosf(angle) * dist};
+    float f[3] = {c[0] - eye[0], c[1] - eye[1], c[2] - eye[2]};
+    float len = sqrtf(f[0] * f[0] + f[1] * f[1] + f[2] * f[2]);
+    for (float &v : f)
+        v /= len;
+    const float up[3] = {0.0f, -1.0f, 0.0f};
+    float r[3] = {up[1] * f[2] - up[2] * f[1], up[2] * f[0] - up[0] * f[2], up[0] * f[1] - up[1] * f[0]};
+    len = sqrtf(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
+    for (float &v : r)
+        v /= len;
+    const float u[3] = {f[1] * r[2] - f[2] * r[1], f[2] * r[0] - f[0] * r[2], f[0] * r[1] - f[1] * r[0]};
+    const float v16[16] = {
+        r[0], u[0], f[0], 0.0f,
+        r[1], u[1], f[1], 0.0f,
+        r[2], u[2], f[2], 0.0f,
+        -(r[0] * eye[0] + r[1] * eye[1] + r[2] * eye[2]),
+        -(u[0] * eye[0] + u[1] * eye[1] + u[2] * eye[2]),
+        -(f[0] * eye[0] + f[1] * eye[1] + f[2] * eye[2]), 1.0f};
+    memcpy(view, v16, sizeof(v16));
+    const float n = dist * 0.05f, fa = dist * 4.0f;
+    const float sy = 1.0f / tanf(0.5f * 0.75f);                /* 43 degrees vertical */
+    const float sx = sy * 448.0f / 640.0f;
+    const float p16[16] = {
+        sx, 0.0f, 0.0f, 0.0f,
+        0.0f, sy, 0.0f, 0.0f,
+        0.0f, 0.0f, -n / (fa - n), 1.0f,
+        0.0f, 0.0f, fa * n / (fa - n), 0.0f};
+    memcpy(proj, p16, sizeof(p16));
+}
+}
+
+void RosePan_I3dMeshForcedTest(i3dContext *ctx)
+{
+    static int s_enabled = -1;
+    static std::vector<uint64_t> s_pack;
+    static std::vector<I3dTexture> s_tex;
+    static std::vector<I3dClut> s_clut;
+    static std::vector<I3dTexEntry> s_table;
+    static I3rRoot *s_root;
+    static unsigned s_frame;
+
+    if (s_enabled < 0)
+    {
+        const char *env = getenv("ROSEPAN_I3D_MESH_TEST");
+        s_enabled = env != NULL && env[0] == '1';
+        if (!s_enabled)
+            return;
+        s_enabled = 0;
+        char path[1024];
+        FILE *f = NULL;
+        if (RosePan_PathResolveData("DATA/CH/CHARA.RPK", path, sizeof(path)))
+            f = fopen(path, "rb");
+        if (f == NULL)
+        {
+            RosePan_LogPrintf("rosepan_i3d mesh test: DATA/CH/CHARA.RPK not found\n");
+            return;
+        }
+        /* CHARA.RPK -> its first chapter pack -> that pack's first model:
+         * the headers' first 2048 bytes hold the offset tables. */
+        std::vector<uint64_t> head;
+        bool ok = ReadSpan(f, 0, 2048, head);
+        const long chap = ok ? BedPfh(head.data()).getFileOffset(0) : -1;
+        ok = ok && chap > 0 && ReadSpan(f, chap, 2048, head);
+        BedPfh chap_pfh(head.data());
+        const long model = ok ? chap + chap_pfh.getFileOffset(0) : -1;
+        const int model_size = ok ? chap_pfh.getFileSize(0) : -1;
+        ok = ok && model_size > 0 && ReadSpan(f, model, (size_t)model_size, s_pack);
+        fclose(f);
+        if (!ok)
+        {
+            RosePan_LogPrintf("rosepan_i3d mesh test: CHARA.RPK's first model not read\n");
+            return;
+        }
+        /* The model's pack: its .mdl (the TIM2 pack, the i3r, an optional
+         * collision file) and its .MOT. */
+        BedPfh entry(s_pack.data());
+        if (!entry.checkID() || entry.getNumFile() < 1)
+            return;
+        BedPfh pack(entry.getFile(0));
+        if (!pack.checkID() || pack.getNumFile() < 2)
+            return;
+        s_root = (I3rRoot *)pack.getFile(1);
+        if (I3rRoot__CheckIdString(s_root) != I3D_OK || i3rRelocate(s_root) != I3D_OK)
+        {
+            RosePan_LogPrintf("rosepan_i3d mesh test: the model's i3r did not relocate\n");
+            s_root = NULL;
+            return;
+        }
+        BedPfh tims(pack.getFile(0));
+        const int n = i3rGetNumTex(s_root);
+        s_tex.resize((size_t)n);
+        s_clut.resize((size_t)n);
+        s_table.resize((size_t)n);
+        int found = 0;
+        for (int i = 0; i < n; i++)
+        {
+            const char *name = i3rGetTexName(s_root, i);
+            const int k = tims.checkID() && name != NULL ? tims.getFileIndex(name) : -1;
+            I3dTexEntry &e = s_table[(size_t)i];
+            e.pszTexName = name;
+            e.pPicture = NULL;
+            e.m_clut = NULL;
+            e.m_0c = 0;
+            if (k < 0)
+            {
+                RosePan_LogPrintf("rosepan_i3d mesh test: texture %s not in the model's TIM2 pack\n",
+                                  name != NULL ? name : "(null)");
+                continue;
+            }
+            i3dTexInit(&s_tex[(size_t)i]);
+            i3dClutInit(&s_clut[(size_t)i]);
+            i3dTexSetTim2(&s_tex[(size_t)i], tims.getFile(k), 0, 0);
+            i3dClutSetTim2(&s_clut[(size_t)i], tims.getFile(k), 0, 0);
+            e.pPicture = &s_tex[(size_t)i].m_handle;
+            e.m_clut = &s_clut[(size_t)i].m_handle;
+            found++;
+        }
+        i3rAssignTex(s_root, s_table.data(), n);
+        RosePan_LogPrintf("rosepan_i3d mesh test: %s, %d nodes, %d of %d textures\n",
+                          chap_pfh.getFileName(0), i3rGetNumNode(s_root), found, n);
+        s_enabled = 1;
+    }
+    if (!s_enabled || s_root == NULL)
+        return;
+
+    const I3rRootData *rd = (const I3rRootData *)s_root->m_item.getData();
+    float view[16], proj[16];
+    OrbitCamera(rd->m_clip_center, rd->m_clip_radius * 3.2f, (float)s_frame++ * 0.02f, view, proj);
+    static const float s_world[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
+    I3dLayer *layer = i3dCtxCreateLayer(ctx, 2000.0f);
+    u_long *pkt = i3dLayerBeginPacket(layer);
+    u_long *p = i3dPktDmaTag(pkt, 2, 0x10, NULL, 0, 0);
+    RosePan_I3dRecordCamera(p, view, proj);
+    RosePan_I3dRecordModel(p + 2, s_root, s_world, NULL, s_table.data(), (int)s_table.size());
+    p[0] = p[1] = p[2] = p[3] = 0;
+    i3dLayerEndPacket(layer, p + 4);
 }

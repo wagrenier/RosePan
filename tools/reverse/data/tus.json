@@ -3,7 +3,6 @@
   "unassigned@0010f944",
   "unassigned@0022e840",
   "unassigned@00106658",
-  "setup/i3d_mesh_draw.cpp",
   "unassigned@0021fb50",
   "i3d/i3rmesh.cpp",
   "unassigned@0021c960",
@@ -1398,6 +1397,15 @@
    "task": "Create the native i3d draw module src/rosepan/rendering/rosepan_i3d.h / .cpp: the host consumer of the i3d path (no GS emulation, open-items Decisions). Today every frame builds real i3d groups, layers, draw sets, views, packets and texture objects (i3dlayer, i3dpacket, i3dview, i3dtex, i3dtim2, i3dvram: all verify) but nothing reaches the host renderer, so the screen is black. Steps: (1) Choose the hook and record it in open-items.md Decisions. Recommended: the 2D packet writers in i3d/i3dpacket.cpp (sprite / line / point / triangle REGLIST and F writers, each one GS primitive with its PRIM word) also append a host primitive to the open layer, and the sorted layer / draw-set walk in i3dCtxRunGroup (i3d/i3dlayer.cpp) replays them through the module in the ROM's order; keep the GS packet words as they are. VU1 strips are out of scope: leave a named hook for them. (2) Textures: the I3dTexture / I3dClut objects (i3d/i3dtex.cpp: level data, width, height, psm, filled by i3dTexSetTim2 / i3dClutSetTim2 through i3dTim2*) become GPU textures decoded on the host, cached per object and released with it; extend rosepan_draw2d for PSMT4, PSMCT32 / 24 / 16 and CLUT CSM1 / CSM2. The TEX0 a draw set references picks the texture. (3) Alpha blend, alpha test, scissor and draw offset from i3dPktSetAlphaMode and the layer / view state, mapped to the renderer's modes. (4) Prove it on screen: the boot may not reach a writer while spr/sprtexture.cpp, dog/dogtexinfo.cpp and spr/sprman.cpp are stubs, so add a forced test as system/sysnowloading.cpp did (an env switch drawing a TIM2 from the disc, e.g. S2DMAN or loading.tm2, through i3dTexSetTim2 and an i3dPktSprite into a layer) and compare its screenshot with tm2png.py output in work/ref. Finish verify when only the forced draw shows it, done when a boot screenshot does."
   },
   "setup/i3d_mesh_draw.cpp": {
+   "notes": "Verify: only the forced test (ROSEPAN_I3D_MESH_TEST=1, MagSystem::update) shows it; the screenshot shows Amanda in bind pose, the dress and hair textures matching her own TIM2s (work/ref/amd_tims via tm2png). Next: unassigned@0021fb50 -- write i3rDrawModel 0x21fe68 to call RosePan_I3dRecordModel at its layer packet (world, node matrices, the context texture table) and add a camera record from the layer I3dView (m_camera is row-vector world to camera; convert the projection to the renderer reverse-Z form; recheck y and handedness, the forced test uses up = -y). Not done: scene lights and fog (one fixed light in Shade), the 0x45 part of a combined mesh (FUN_00220098), the material ALPHA and TEST pair (hair cards are blended without alpha test). Format facts are in architecture.md (The mesh data), traps in hazards.md (i3r mesh data: pointers where a value is expected), the list in open-items.md (Mesh draw).",
+   "sessions": [
+    {
+     "date": "2026-10-27 18:45",
+     "status": "verify",
+     "summary": "Native i3d mesh path: i3r models drawn on the host (rosepan_i3dmesh.cpp) -- the i3rDrawModel walk, a VIF1 unpack interpreter into host VU1 memory, strips with their skip and winding flags, rigid and CPU-skinned bone groups, layer textures; model and camera records replayed in layer order; ROSEPAN_I3D_MESH_TEST=1 draws CHARA.RPK CHAP01 amd.mdl (Amanda) textured, skinned and upright"
+    }
+   ],
+   "status": "verify",
    "task": "Grow the native i3d draw module (src/rosepan/rendering/rosepan_i3d.*) a 3D mesh path: the hook named for VU1 strips in setup/i3d_draw_module.cpp becomes a host mesh draw. Input: an i3r model's mesh items (i3d/i3rmodel.cpp, i3d/i3ritem.cpp: vertices, normals, STQ, strips, textures from i3rAssignTex) with the node matrices i3mPoseToMatrices / DogEntity produce, the view and projection from I3dView / MagScene's camera (DogCamera::getLensFov), the scene lights (mag/magscenelight.cpp) and fog (magscenecmd.cpp). Never through the emulated GS. Prove it with a forced test (an env switch that loads one disc model, e.g. the first room's map pack, and draws it with a fixed camera) and a screenshot; finish verify when only the forced draw shows it, done when the New Game run shows the first room. Then utlDrawI3r 0x106760 / 0x21fe68 (unassigned@00106658, unassigned@0021fb50) call it."
   },
   "setup/newgame_crash.cpp": {
