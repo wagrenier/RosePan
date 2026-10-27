@@ -802,6 +802,7 @@ float DogModel::getClipRadius()
 
 DogModel::DogModel()
 {
+    _ee_vptr = DOG_VT_MODEL;
     m_mode = 0;
     m_f4 = 0;
     m_f8 = 0;
@@ -813,6 +814,7 @@ DogModel::DogModel()
 
 DogModel::DogModel(I3rRoot *p)
 {
+    _ee_vptr = DOG_VT_MODEL;
     m_mode = 0;
     m_f4 = 0;
     m_f8 = 0;

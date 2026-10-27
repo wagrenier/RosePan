@@ -1,6 +1,6 @@
 {
  "queue": [
-  "dog/dogentity.cpp",
+  "dog/dogcamera.cpp",
   "unassigned@0010f944",
   "unassigned@00228c08",
   "dog/dogmotionblend.cpp",
@@ -103,6 +103,41 @@
     }
    ],
    "status": "verify"
+  },
+  "dog/dogcamera.cpp": {
+   "ranges": [
+    [
+     "0010f860",
+     "0010fc7c"
+    ]
+   ],
+   "why": "dog/dogcamera.cpp source strings at 0x10f860 / 0x10f8cc (asserts m_saved==0, m_saved != 0); DogCamera::getMatrix (the +0xf0 inverse), getLensFov / getLensScale / setLensScale and the camera interpolation 0x10f944 (+0x134 / +0x1d0) up to DogEntity::setRotate 0x10fc7c; starts after DogActor::eyeReset (dogactor.cpp)"
+  },
+  "dog/dogentity.cpp": {
+   "notes": "Status verify: the 200 s New Game run ends black (one small ring at the bottom) with no assert or crash; the DogEntity stubs no longer appear, the camera (parented to the PC actor) now transforms through DogModel::transform. Nothing 3D can show until utlDrawI3r / i3rBuildMeshPacket draw. Next: dog/dogcamera.cpp (queued first): DogEntity::getMatrix 0x10fa6c is DogCamera's (callTransform, then i3dMatInverse into +0xf0), getLensFov 0x10fac0 (13-point table, FUN_0026c8e0 is modff), save / restore 0x10f860 / 0x10f8cc (m_saved +0x180 copies m_angle and m_trans / m_rotate to +0x148 / +0x150 / +0x160 / +0x170), the interpolation 0x10f944 (+0x134 step, +0x1d0 count, lerps +0x190..+0x1c0 with FUN_00106d40), the yaw 0x10fc28. getLensScale / setLensScale are already written in lib/unassigned_stubs.cpp; move them. New stubs: utlVecToRotX 0x1071c8 / utlVecToRotY 0x1070f8 (lookAt, unassigned@00106658). Open: DogModel::transform / getWorldPos still call parent->transform() as DogModel's; switch to callTransform when a model hangs from a camera (open-items Decisions). References updated in this commit (architecture, reconstruction, open-items).",
+   "ranges": [
+    [
+     "0010fc7c",
+     "001103dc"
+    ],
+    [
+     "00280e88",
+     "00280f68"
+    ],
+    [
+     "00281b78",
+     "00281cbc"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 17:03",
+     "status": "verify",
+     "summary": "DogEntity / DogEntityEx written: setRotate, setAddRotY, makeLocalMatrix, normalizeRotate, getMatrixZ, lookAt 0x110144, getMatrixPos / getMatrixRot (two unreferenced functions folded into 0x110144, now Ghidra functions), DogEntityEx::reset / setParent / transform, linkonce DogEntity::reset / transform. Pinned 0x10fc7c..0x1103dc plus linkonce 0x280e88..0x280f68 and 0x281b78..0x281cbc; dog/dogcamera.cpp pinned 0x10f860..0x10fc7c and queued first. Slot-2 dispatch on the host: constructors store their EE vtable address in the +0x94 word, DogEntity::callTransform switches on it. 7 names (dogentity_001.json)."
+    }
+   ],
+   "status": "verify",
+   "why": "dog/dogentity.cpp source string at DogEntityEx::setParent 0x1102b4 (assert p != m_parent); files link alphabetically (dogactor, dogcamera, dogentity, doglightpool): 0x10f860..0x10fc7c carries dog/dogcamera.cpp strings and camera members (+0x134, +0x140, +0x180, +0x1d0, the +0xf0 view matrix), so dogentity starts at DogEntity::setRotate 0x10fc7c and ends where doglightpool.cpp's strings start (0x1103dc); plus the DogEntity / DogEntityEx linkonce methods 0x280e88..0x280f68 and 0x281b78..0x281cbc"
   },
   "dog/doglightpool.cpp": {
    "notes": "TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark done when a screenshot shows a lit stage. Decisions: DogLightPool got a host constructor calling init (the ROM MagScene ctor calls it), no destructor (g_magSystem is static, the heap is gone by static destruction; ~MagScene calls term in the ROM). doglightpool.h lines 129..132 are the non-const getters, 140..143 their const twins, so createLight and getLightParam are const. DogLightBuffer::setupDesc 0x110578 in the ROM reads the counts from +0x5e0 / +0x600, past m_num at +0x5c0; nothing calls it, the port uses m_num (open-items.md). Spot cone angles use the ROM pi 0x40490fdc. Still left near this file: unassigned@00112b08 (three small light-desc helpers) belongs to dog/doglight.cpp.",

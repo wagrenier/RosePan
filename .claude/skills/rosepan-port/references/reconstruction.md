@@ -149,6 +149,10 @@ touches it, and make the compilers prove its layout.
   their EE offsets in comments, `layout: host` above it, and `static_assert(offsetof(...) >= ...)` lower
   bounds where useful. Data that must keep EE bytes (a file image, a DMA packet) never lives inside such
   a class: give it a plain struct with exact asserts.
+  Exception, the Dog* layer (dog/dogentity.h, 2026-10-27): it keeps EE offsets, non-polymorphic, with
+  the EE vptr word as a class tag the constructors set to their EE vtable address; a virtual called
+  through a base pointer becomes a `call<Slot>()` member that switches on the tag
+  (DogEntity::callTransform). Use the same pattern for other EE-layout class families.
 - **Host types** (the EE is GCC 2.9x MIPS; the hosts are MinGW GCC and MSVC on x64, both LLP64):
   - `long` is 64-bit on the EE, 32-bit on both hosts: EE `long` / `u_long` -> `int64_t` / `u_long`
     (uint64_t); never plain `long` (layoutcheck flags it).

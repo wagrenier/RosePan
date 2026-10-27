@@ -563,6 +563,18 @@
   "was": "FUN_00106e70",
   "why": "sqrt of 0x106e14 (the squared distance of two vectors); collectActors keys actors by it from the camera"
  },
+ "001070f8": {
+  "name": "utlVecToRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_001070f8",
+  "why": "returns the y rotation of a direction: atan(x/z), +pi when z < 0 wrapped to [-pi, pi), +-pi/2 when z == 0; utlVecToRot's second half"
+ },
+ "001071c8": {
+  "name": "utlVecToRotX",
+  "tag": "ror-inferred",
+  "was": "FUN_001071c8",
+  "why": "returns the x rotation of a direction (FUN_0026cae8 of -y, pi/2 for z == x == 0); utlVecToRot's first half"
+ },
  "00107248": {
   "name": "utlVecToRot",
   "tag": "ror-inferred",
@@ -1307,11 +1319,41 @@
   "was": "FUN_00110114",
   "why": "copies m_matrix row 2 (+0x20..+0x2c) to out and returns out"
  },
+ "00110144": {
+  "name": "DogEntity::lookAt",
+  "tag": "ror-inferred",
+  "was": "FUN_00110144",
+  "why": "turns m_rotate towards a point minus m_trans: mode 0 utlVecToRot into m_rotate, odd mode only y (utlVecToRotY), even only x (utlVecToRotX); sets m_dirty; called by MagScene::seekCameraPath / updateCamera"
+ },
+ "001101f0": {
+  "name": "DogEntity::getMatrixPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001101f0",
+  "why": "folded into 0x110144's body, unreferenced: lq 0x30(a0), sq 0(a1) -- copies m_matrix row 3 (the position), like getMatrixZ copies row 2"
+ },
+ "001101fc": {
+  "name": "DogEntity::getMatrixRot",
+  "tag": "ror-inferred",
+  "was": "FUN_001101fc",
+  "why": "folded into 0x110144's body, unreferenced: utlVecToRot(m_matrix row 2, a1) -- the rotation of the z axis"
+ },
+ "0011023c": {
+  "name": "DogEntityEx::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_0011023c",
+  "why": "DogEntityEx vtable slot 1 (also DogModel, DogActor, DogCamera): DogEntity::reset 0x280ec8's body plus i3dMatUnit(+0xa0) and m_parent (+0xe0) = 0"
+ },
  "001102b4": {
   "name": "DogEntityEx::setParent",
   "tag": "ror-inferred",
   "was": "FUN_001102b4",
   "why": "dog/dogentity.cpp line 302 assert p != m_parent while walking the parent chain at +0xe0 (DogEntityEx::getParent's field); resets +0x70 to (0,0,0,1), dirty"
+ },
+ "0011034c": {
+  "name": "DogEntityEx::transform",
+  "tag": "ror-inferred",
+  "was": "FUN_0011034c",
+  "why": "DogEntityEx vtable slot 2 (DogEntity's is transform 0x280f18): makeLocalMatrix into +0xa0, then the parent's slot 2 and i3dMatMul(this, parent, local), or i3dMatCopy2 with no parent"
  },
  "001103dc": {
   "name": "DogLightBuffer::copyLights",

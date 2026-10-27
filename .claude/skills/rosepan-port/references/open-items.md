@@ -9,8 +9,11 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 **TOP PRIORITY, RE-PINNED (the user, 2026-10-27): the TUs missing to be in game and render in 3D lead the
 queue, ahead of everything else (the enemy split, menus, subtitles).** The pinned queue in tus.json is
 the stubs the 140 s New Game run reaches on the 3D path, in the order they block a picture:
-  a. dog/dogentity.cpp, unassigned@0010f944 (DogEntity::reset / normalizeRotate / getMatrix /
-     makeLocalMatrix, DogEntityEx::transform, DogCamera::getLensFov): the entity and camera matrices.
+  a. dog/dogentity.cpp -- WRITTEN 2026-10-27 (verify; pinned 0x10fc7c..0x1103dc + linkonce). The
+     rest of unassigned@0010f944 is dog/dogcamera.cpp, pinned 0x10f860..0x10fc7c and queued first:
+     DogEntity::getMatrix 0x10fa6c (really DogCamera's: the +0xf0 inverse; call callTransform) and
+     DogCamera::getLensFov 0x10fac0 are reached stubs, plus the save / restore pair 0x10f860 /
+     0x10f8cc (m_saved +0x180), the interpolation 0x10f944 and the yaw 0x10fc28.
   b. unassigned@00228c08 (the i3dMat* library: i3dMatGetScaleTrans 0x228c38).
   c. dog/dogmotionblend.cpp (getPose, getNodeRate, stepLoop ...), unassigned@0022e840 (the i3m pose
      player: i3mGetLength, i3mGetPose, i3mPoseLerp, i3mPoseToMatrices, i3mGetBlendPose).
@@ -775,6 +778,14 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
   Also utlRandRange 0x10423c is a stub returning 0, so every eye blinks every 6 frames.
 
 ## Decisions
+
+- 2026-10-27 (session decision, dog/dogentity.cpp; no answer could come): the Dog classes stay
+  non-polymorphic on the host and every constructor stores its class's EE vtable address in the +0x94
+  word (DOG_VT_* in dogentity.h), which DogEntity::callTransform switches on for slot 2. Real C++
+  virtuals would move every field off its EE offset. Open: DogModel::transform / getWorldPos still call
+  parent->transform() as DogModel's (dogmodel.cpp); switch them to callTransform when a model hangs
+  from a camera or a plain entity. A further slot needed through a base pointer gets its own call*
+  dispatcher the same way.
 
 - (2026-10-27, game/gamtrg.cpp) GamAreaTrg +0x54 holds a pointer to a registFtb entry in the ROM; the record stays
   EE layout (the scripts pass it from their image), so the host keeps the entry's node index + 1 there

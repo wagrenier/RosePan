@@ -524,6 +524,10 @@ u_long   *i3dPktDrawWireShape(u_long *pkt, I3dLayer *layer, void *a, void *b, vo
 
 /* The distance of two points (sqrt of 0x106e14). */
 float utlVecDist(const float *a, const float *b);                        // ROR 0x00106e70
+/* The y rotation of a direction: atan(x / z), turned half a turn when z < 0. */
+float utlVecToRotY(const float *dir);                                    // ROR 0x001070f8
+/* The x rotation of a direction (from -y). */
+float utlVecToRotX(const float *dir);                                    // ROR 0x001071c8
 /* A direction to angles: rot x (pitch, from -y), y (yaw, atan2 x / z), z 0. */
 void  utlVecToRot(const float *dir, float *rot);                         // ROR 0x00107248
 
