@@ -10289,6 +10289,12 @@
   "was": "FUN_001d7f48",
   "why": "(pos, list): 0x17c340 over the secta lists bss 0x7811ac with radius 40 and no start cell, returns the hit of list; findSectaCell's twin without a current cell or the flag-4 refusal"
  },
+ "001d7fb8": {
+  "name": "GamMan::findSectaCellFrom",
+  "tag": "ror-inferred",
+  "was": "FUN_001d7fb8",
+  "why": "setSectaList(a3), then 0x17ded0(&secta list a3, *a2 the current cell id, a1 the position, 40) answers a cell index; returns that cell of the list (0x90 each) or NULL; between pickSectaCell and findSectaCell, no callers"
+ },
  "001d8064": {
   "name": "GamMan::findSectaCell",
   "tag": "ror-inferred",

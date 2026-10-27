@@ -12,8 +12,8 @@
 // Written so far: the update list, the flag table, the radius / bounds
 // helpers, the secta queries, the hit tests (the walk over the update
 // list through the member pointer m_hitFunc: hitAtPoint / hitAtSweep) and
-// checkMenuReq with restoreAfterMenu / endPcAction. Still stubs
-// (lib/unassigned_stubs.cpp): writeSaveData / readSaveData.
+// checkMenuReq with restoreAfterMenu / endPcAction, the save image's
+// writer / reader, and findSectaCellFrom (no callers).
 
 #include <math.h>
 #include <string.h>
@@ -747,6 +747,360 @@ void GamMan::clearObjUpdates(int mode)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The save image (MnuSvld's 0x3000 bytes, EE layout): a 0x40-byte header,
+// the sequence globals and bits (variable length), 8 bytes, the PC's and
+// the dog's ObjStat blocks (0xb0 each), then the sections below at fixed
+// offsets from there (version 0x10). Nothing past the header is aligned
+// for the host's types: every word goes through memcpy.
+
+enum
+{
+    SAVE_VERSION      = 0x10,
+    SAVE_HDR_CHAPTER  = 0x10,   /* m_chapter */
+    SAVE_HDR_INU      = 0x14,   /* m_inuMode */
+    SAVE_HDR_18       = 0x18,   /* 0x2d10 (nothing reads it back) */
+    SAVE_HDR_MINUTES  = 0x1c,   /* getPlayMinutes */
+    SAVE_HDR_EQUIP    = 0x20,   /* m_equipItem */
+    SAVE_HDR_FIND     = 0x24,   /* m_findTargetItem */
+    SAVE_HDR_VERSION  = 0x28,
+    SAVE_HDR_SIZE     = 0x40,
+    /* From the item block (after the two ObjStat blocks): */
+    SAVE_ITEM         = 0x000,  /* 12 words: id | num << 16 */
+    SAVE_STOCK_NUM    = 0x030,
+    SAVE_STOCK        = 0x038,  /* up to 0x14e words */
+    SAVE_MARK         = 0x56c,  /* the byte 'N' */
+    SAVE_OIDS         = 0x57c,  /* m_1f240's 0x169 words */
+    SAVE_OBJRESET     = 0xb20,  /* 6-byte GamObjReset records (0x3c0 + 8) */
+    SAVE_VFCHR        = 0xee8,  /* 0x26 SaveVFchr records */
+    SAVE_OBJSET       = 0x13a8, /* 8-byte GamObjSet records (0xc00) */
+    SAVE_OPTIONS      = 0x1fa8, /* 12 words from m_optOutput */
+    SAVE_BGM          = 0x1fd8, /* the GamBgmRec */
+    SAVE_ITEMFLAGS    = 0x1ffc, /* the item records' flag bytes */
+    SAVE_ITEMFLAG_NUM = 0x1c7,
+};
+
+/* A vfchr object of the save image (EE 0x20). */
+struct SaveVFchr
+{
+    u_int   m_oid;              // ROR 0x00: 0 ends the list
+    short   m_kind;             // ROR 0x04: FCHRstat m_kind
+    u_short m_flags;            // ROR 0x06: FCHRstat m_flags' low half
+    int     m_wrd;              // ROR 0x08: param 8 (addVFchr's arg)
+    int     m_model;            // ROR 0x0c: param 0x1000
+    float   m_pos[4];           // ROR 0x10: param 0x43
+};
+static_assert(sizeof(SaveVFchr) == 0x20, "SaveVFchr");
+static_assert(offsetof(SaveVFchr, m_kind) == 0x04, "m_kind");
+static_assert(offsetof(SaveVFchr, m_flags) == 0x06, "m_flags");
+static_assert(offsetof(SaveVFchr, m_wrd) == 0x08, "m_wrd");
+static_assert(offsetof(SaveVFchr, m_model) == 0x0c, "m_model");
+static_assert(offsetof(SaveVFchr, m_pos) == 0x10, "m_pos");
+
+static inline void saveWord(u_char *p, u_int v) { memcpy(p, &v, 4); }
+static inline u_int loadWord(const u_char *p) { u_int v; memcpy(&v, p, 4); return v; }
+
+/* The options block (+0x21f8c..+0x21fbc, 12 words). */
+static int *gamOptionWord(GamMan *gam, int i)
+{
+    int *word[12] = {
+        &gam->m_optOutput, &gam->m_optVibration, &gam->m_21f94, &gam->m_optMasterLevel,
+        &gam->m_optBrightLevel, &gam->m_masterVolume, &gam->m_optSeLevel, &gam->m_optStrLevel,
+        &gam->m_21fac[0], &gam->m_21fac[1], &gam->m_21fac[2], &gam->m_21fac[3],
+    };
+    return word[i];
+}
+
+/* The item word id | num << 16 (the slot's EE +0x8 word). */
+static inline u_int gamItemWord(const GamItemSlot &slot)
+{
+    return (u_short)slot.m_id | (u_int)slot.m_num << 16;
+}
+
+static inline void gamSetItemWord(GamSysData &sys, GamItemSlot &slot, u_int word)
+{
+    slot.m_rec = sys.getRec((short)word);
+    slot.m_id = (short)word;
+    slot.m_num = (u_short)(word >> 16);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d6078
+
+int GamMan::writeSaveData(void *buf)
+{
+    u_char *out = (u_char *)buf;
+    memcpy(out, "FEB_SAVE", 8);
+    saveWord(out + SAVE_HDR_CHAPTER, (u_int)m_chapter);
+    saveWord(out + SAVE_HDR_INU, (u_int)m_inuMode);
+    int minutes = getPlayMinutes();
+    saveWord(out + SAVE_HDR_18, 0x2d10);
+    saveWord(out + SAVE_HDR_MINUTES, (u_int)minutes);
+    saveWord(out + SAVE_HDR_EQUIP, (u_short)m_equipItem);
+    saveWord(out + SAVE_HDR_FIND, (u_short)m_findTargetItem);
+    utlStrNCopy((char *)out + 8, g_versionNumber, 8);
+    saveWord(out + SAVE_HDR_VERSION, SAVE_VERSION);
+    if ((m_flags2 & 0x20000000) != 0)
+        g_sequence.m_bits[0] |= 0x8000;
+
+    u_char *p = out + SAVE_HDR_SIZE;
+    g_sequence.m_global[0x26] = m_chapter;
+    g_sequence.m_global[0x31] = m_wrdNo;
+    g_sequence.m_global[0x32] = m_21f80;
+    p += g_sequence.saveGlobals(p);
+    p += g_sequence.saveBits(p);
+    p += 8;
+    p += m_pcPtr->save(p);
+    p += m_dogPtr->save(p);
+
+    /* The 12 items and the stock. */
+    for (int i = 0; i < 12; i++)
+        saveWord(p + SAVE_ITEM + i * 4, gamItemWord(m_itemHave.m_begin[i]));
+    saveWord(p + SAVE_STOCK_NUM, (u_int)m_itemStock.m_used.m_count);
+    u_char *q = p + SAVE_STOCK;
+    int n = 1;
+    for (SeqNode<GamItemSlot> *node = m_itemStock.m_used.begin(); node != m_itemStock.m_used.end();
+         node = node->m_next)
+    {
+        saveWord(q, gamItemWord(node->m_data));
+        q += 4;
+        if (n++ >= 0x14e)
+            break;
+    }
+    p[SAVE_MARK] = 'N';
+    memcpy(p + SAVE_OIDS, m_1f240, 0x5a4);
+
+    /* The object table's reset words, ended by oid 0 (the ROM leaves the
+     * last record's m_0c in the end marker). */
+    q = p + SAVE_OBJRESET;
+    u_short last0c = 0;
+    for (int i = 0; i < m_objTable->m_num; i++)
+    {
+        GamObjReset rec;
+        rec.m_oid = (short)m_objRec[i].m_oid;
+        rec.m_flags = (u_short)m_objRec[i].m_flags;
+        rec.m_0c = (u_short)m_objRec[i].m_0c;
+        last0c = rec.m_0c;
+        memcpy(q, &rec, sizeof(rec));
+        q += sizeof(rec);
+    }
+    GamObjReset resetEnd = {0, 0, last0c};
+    memcpy(q, &resetEnd, sizeof(resetEnd));
+
+    /* The vfchrs of image 1 (oid >> 30), at most 0x26, ended by oid 0
+     * (the ROM's end record keeps the last one's other words). */
+    SaveVFchr rec;
+    memset(&rec, 0, sizeof(rec));
+    q = p + SAVE_VFCHR;
+    int count = 0;
+    for (SeqNode<FCHRstat *> *node = m_vfchrList.m_used.begin();
+         node != m_vfchrList.m_used.end() && count < 0x26; node = node->m_next)
+    {
+        FCHRstat *chr = node->m_data;
+        if (chr->m_oid >> 30 != 1)
+            continue;
+        count++;
+        rec.m_oid = chr->m_oid;
+        rec.m_kind = chr->m_kind;
+        rec.m_flags = (u_short)chr->m_flags;
+        chr->getParam(8, &rec.m_wrd);
+        chr->getParam(0x1000, &rec.m_model);
+        chr->getParam(0x43, rec.m_pos);
+        memcpy(q, &rec, sizeof(rec));
+        q += sizeof(rec);
+    }
+    rec.m_oid = 0;
+    rec.m_flags = 0;
+    memcpy(q, &rec, sizeof(rec));
+
+    /* Every vfchr's oid and flags, ended by a zero record. */
+    q = p + SAVE_OBJSET;
+    for (SeqNode<FCHRstat *> *node = m_vfchrList.m_used.begin(); node != m_vfchrList.m_used.end();
+         node = node->m_next)
+    {
+        GamObjSet set = {node->m_data->m_oid, node->m_data->m_flags};
+        memcpy(q, &set, sizeof(set));
+        q += sizeof(set);
+    }
+    memset(q, 0, sizeof(GamObjSet));
+
+    for (int i = 0; i < 12; i++)
+        saveWord(p + SAVE_OPTIONS + i * 4, (u_int)*gamOptionWord(this, i));
+    memcpy(p + SAVE_BGM, m_sndMan.get_snd_prm(), sizeof(GamBgmRec));
+
+    /* The item records' flag bytes (bits 0x01, 0x04, 0x10, 0x40, 0x80). */
+    const GamSysRec5 *item = (const GamSysRec5 *)m_sysData.getRec(0xa00);
+    for (int i = 0; i < SAVE_ITEMFLAG_NUM; i++)
+        p[SAVE_ITEMFLAGS + i] = (u_char)(item[i].m_flags & 0xd5);
+    return (int)(p + SAVE_ITEMFLAGS + SAVE_ITEMFLAG_NUM - 1 - out) + 0x3a;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The reader follows the image's version (header +0x28): below 7 nothing
+// is read; older images have shorter sections (m_1f240 0x80 / 0x140 /
+// 0x14e words, the object resets 0x600 / 0x280 bytes, 0x40 / 0x30 / 0x2a
+// vfchrs). Bit 0x1000 of sequence bits word 8 makes it a New Game from
+// the save: globals, items, stock, the oid list and the item flags
+// cleared instead of loaded.
+// ROR 0x001d68a0; callcheck: fptodp, dpcmp (the soft-float double compare of the rotation with pi)
+
+int GamMan::readSaveData(const void *buf)
+{
+    const u_char *in = (const u_char *)buf;
+    int version = (int)loadWord(in + SAVE_HDR_VERSION);
+    if (version <= 6)
+        return 0;
+
+    m_chapter = (int)loadWord(in + SAVE_HDR_CHAPTER);
+    m_inuMode = (int)loadWord(in + SAVE_HDR_INU);
+    m_playMinutes = (int)loadWord(in + SAVE_HDR_MINUTES);
+    m_equipItem = (short)loadWord(in + SAVE_HDR_EQUIP);
+    m_flags2 |= 0x200000;
+    m_findTargetItem = (short)loadWord(in + SAVE_HDR_FIND);
+
+    const u_char *p = in + SAVE_HDR_SIZE;
+    p += g_sequence.loadGlobals(p);
+    p += g_sequence.loadBits(p);
+    p += 8;
+    m_21f80 = -1;
+    m_chapter = -1;
+    m_wrdNo = -1;
+    memcpy(m_pcSave, p, sizeof(m_pcSave));
+    p += m_pcPtr->load(p);
+    memcpy(m_dogSave, p, sizeof(m_dogSave));
+    p += m_dogPtr->load(p);
+    m_flags2 |= 0x40;
+    memcpy(m_pcStart, m_pcPtr->m_pos, sizeof(m_pcStart));
+    memcpy(m_dogStart, m_dogPtr->m_pos, sizeof(m_dogStart));
+    float rotY = m_pcPtr->m_rot[1];
+    if ((double)rotY < -3.141592653589793 || (double)rotY > 3.141592653589793)
+        rotY = 0.0f;
+    m_pcStart[3] = rotY;
+    m_dogStart[3] = m_dogPtr->m_rot[1];
+
+    /* The items: a slot's m_oid and +0xc keep what they held (stack
+     * garbage in the ROM). */
+    clearItemHave();
+    for (int i = 0; i < 12; i++)
+        gamSetItemWord(m_sysData, m_itemHave.m_begin[i], loadWord(p + SAVE_ITEM + i * 4));
+    const u_char *stockBase = version < 0xd ? NULL : p + SAVE_STOCK_NUM;
+    int stockNum = (int)loadWord(p + SAVE_STOCK_NUM);
+    const u_char *q = p + SAVE_STOCK;
+    m_itemStock.clear();
+    for (int i = 0; i < stockNum; i++, q += 4)
+    {
+        GamItemSlot item;
+        memset(&item, 0, sizeof(item));
+        gamSetItemWord(m_sysData, item, loadWord(q));
+        m_itemStock.add(item);
+    }
+    if (version > 0xc)
+        q = stockBase + 300 * 4;
+    if (version > 0xe)
+        q = stockBase + 0x14e * 4;
+
+    /* The oid list m_1f240 and its count. */
+    int oids;
+    if (version >= 0x10)
+    {
+        oids = 0x169;
+        q += 5 * 4;
+    }
+    else if (version == 0xf)
+    {
+        oids = 0x14e;
+        q += 5 * 4;
+    }
+    else
+    {
+        oids = (signed char)*q;
+        q += 4 * 4;
+    }
+    m_1f244 = oids;
+    int words = version >= 0x10 ? 0x169 : version == 0xf ? 0x14e : version >= 0xb ? 0x140 : 0x80;
+    memcpy(m_1f240, q, words * 4);
+    q += words * 4;
+
+    int resetBytes = version >= 0xd ? 0x3c0 : version == 0xc ? 0x280 : 0x600;
+    memcpy(m_18bc0, q, resetBytes);
+    q += resetBytes;
+
+    releaseVFchrs(0);
+    q += 8;
+    if (version > 9)
+    {
+        int max = version >= 0x10 ? 0x26 : version == 0xf ? 0x2a : version >= 0xc ? 0x30 : 0x40;
+        for (int i = 0; i < max; i++)
+        {
+            SaveVFchr rec;
+            memcpy(&rec, q + i * sizeof(rec), sizeof(rec));
+            if (rec.m_oid == 0)
+                break;
+            addVFchr(-1, rec.m_oid, rec.m_wrd, rec.m_kind, (intptr_t)rec.m_pos);
+            int actor = -1;
+            FCHRstat *chr = getVFchr(rec.m_oid);
+            if (chr == NULL)
+                continue;   // PORT: the ROM goes on with NULL (no free vfchr slot)
+            static const u_int kept[] = {4, 1, 0x40, 0x80};
+            for (u_int bit : kept)
+            {
+                if ((rec.m_flags & bit) != 0)
+                    chr->m_flags |= bit;
+                else
+                    chr->m_flags &= ~bit;
+            }
+            chr->setParam(3, &actor);
+            chr->setParam(0x1000, &rec.m_model);
+            chr->setParam(0x43, rec.m_pos);
+            if (m_sysData.testFlags(rec.m_kind, 0x200000))
+                chr->m_flags |= 1;
+        }
+        q += max * sizeof(SaveVFchr);
+    }
+
+    memcpy(m_18bc4, q, 0xc00);
+    if ((m_flags2 & 0x400) == 0)
+        for (int i = 0; i < 12; i++)
+            *gamOptionWord(this, i) = (int)loadWord(q + 0xc00 + i * 4);
+    memcpy(&m_bgmRec, q + 0xc30, sizeof(m_bgmRec));
+    q += 0xc54;
+
+    GamSysRec5 *item = (GamSysRec5 *)m_sysData.getRec(0xa00);
+    if ((g_sequence.m_bits[8] & 0x1000) == 0)
+    {
+        /* The ROM loads the byte signed (lb): a saved 0x80 sets every bit
+         * above it too. */
+        for (int i = 0; i < SAVE_ITEMFLAG_NUM; i++)
+            item[i].m_flags = (item[i].m_flags & 0xffffff2a) | (u_int)(int)(signed char)q[i];
+        g_sequence.m_bits[7] |= 0x80000000;
+    }
+    else
+    {
+        g_sequence.clearGlobals();
+        clearItemHave();
+        m_itemStock.clear();
+        g_sequence.m_bits[0] |= 0x80000000;
+        g_sequence.m_global[0x26] = 1;
+        g_sequence.m_bits[0] &= ~0x8000u;
+        memset(m_1f240, 0, 0x5a4);
+        m_playMinutes = 0;
+        m_flags2 &= ~0x40u;
+        for (int i = 0; i < SAVE_ITEMFLAG_NUM; i++)
+            item[i].m_flags &= 0xffffff2a;
+    }
+    q += SAVE_ITEMFLAG_NUM - 1;
+
+    int mode = g_sequence.m_global[0x1f];
+    if ((g_sequence.m_bits[0] & 0x8000) != 0 && mode != 1 && mode != 5 && mode != 7)
+    {
+        m_flags2 |= 0x10000000;
+        g_sequence.m_bits[0] &= ~0x8000u;
+        m_21ff4 = g_sequence.m_global[0x51];
+        m_21ff8 = g_sequence.m_global[0x52];
+    }
+    return (int)(q - in) + 0x3a;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001d7b08
 
 int GamMan::getObjSectaNo(u_int oid, int list)
@@ -850,6 +1204,19 @@ GamSecta *GamMan::pickSectaCell(const float *pos, int list)
     GamSecta *hit[4] = {NULL, NULL, NULL, NULL};
     FUN_0017c340(&gamSectaWorld(), pos, hit, 0, 40.0f, 0.0f);
     return hit[list];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001d7fb8
+
+GamSecta *GamMan::findSectaCellFrom(const float *pos, const int *cur, int list)
+{
+    setSectaList(list);
+    MagSectaList &l = gamSectaWorld().m_list[list];
+    int no = FUN_0017ded0(&l, *cur, pos, 40.0f);
+    if (no == -1 || l.m_num == 0 || l.m_cells == NULL)
+        return NULL;
+    return &l.m_cells[no];
 }
 
 // ──────────────────────────────────────────────────────────────────────
