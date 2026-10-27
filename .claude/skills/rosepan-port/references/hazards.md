@@ -175,6 +175,11 @@ entries are marked **RoR** with the date.
 
 ## Types and layouts
 
+- **Ghidra's `ptr + n` on an `int *` is n words, not n bytes.** Symptom: a table walk reads
+  `piVar1 = *(int **)(this + 0x110) + 0xc;` and the row size is taken as 12. Cause: the decompiler
+  prints typed pointer arithmetic; on `int *` + 0xc is 0x30 bytes. Fix: read the row size from the
+  asm (`addiu v, v, 0x30`) or a raw dump of the table (`datadump.py --words`) before declaring the
+  row struct (2026-10-26: MnuPBook / MnuDiary page tables, first written down as 12-byte rows).
 - **A bss global with "no writer" may be a member of a global struct.** Symptom: loads of
   `lui at, 0x7b; lw v, 0x2060(at)` everywhere, and a .text scan for stores with offset 0x2060 finds
   none. Cause: the word is a member (Sequence +0xdc20 at 0x7a4440) stored through the struct's base

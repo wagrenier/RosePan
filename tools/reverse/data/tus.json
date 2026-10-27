@@ -2,7 +2,8 @@
  "queue": [
   "unassigned@0022b4b8",
   "unassigned@0021a3e8",
-  "unassigned@00192ac0",
+  "mnu/mnubase.cpp",
+  "mnu/mnupbook.cpp",
   "dog/dogactor.cpp",
   "mag/magscenelight.cpp",
   "unassigned@00140030",
@@ -738,6 +739,24 @@
    "status": "done",
    "why": "McdMan ctor 0x187724 .. hasSpace 0x18bb28 is one class; mcd/mcdman.cpp string at 0x187a28; 0x18761c calls MsgMan code (msg/), 0x18bb8c is SprMan::SprMan (spr/sprman.cpp)"
   },
+  "mnu/mnubase.cpp": {
+   "ranges": [
+    [
+     "00192ac0",
+     "001947a4"
+    ]
+   ],
+   "why": "mnuBase ctor/dtor/term and the shared menu helpers (2D buffer, file/texture slots, layer draw) every Mnu* class calls; ends where MnuMap::MnuMap starts"
+  },
+  "mnu/mnumap.cpp": {
+   "ranges": [
+    [
+     "001947a4",
+     "00196a9c"
+    ]
+   ],
+   "why": "MnuMap ctor..draw and its helpers (map01_tcc, mnumap.rpk); ends at MnuPBook::MnuPBook"
+  },
   "mnu/mnumcd.cpp": {
    "notes": "Status verify: code complete, nothing on screen yet. The boot (MnuTitle::execLogo, check mode 0) now runs MnuMcd::exec, opens its two windows and waits at checkBoot step 2 because McdMan::request 0x187e08 is a stub returning 0, so execCmd never gets a command through; screenshot still black (progress/ shot). Next: mcd/mcdman.cpp, queued first. Its extent is not pinned: McdMan is 0x187724..about 0x18bb88 (file string mcd/mcdman.cpp at 0x187a28) but ror_functions puts 0x187724..0x187c30 in unassigned@00184f2c, so define it first. Write request / getStatus / update and the getInfo (cmd 0) and getDir (0x12) handlers over src/sdk/libmc.cpp; result codes MnuMcd expects are in architecture.md (The memory card check). Then MsgMan / MsgManSet (msg/msgman.cpp 0x18330c.., 0x18741c..0x18761c) or the check shows empty windows. Decisions: MnuMcd now has a real constructor (m_open 0, resetCursors) and destructor (close), running before main inside the global scene; McdMan / MsgMan have none (zeroed). McdDirEntry copies sceMcTblGetDir without its alignas(64), which would spread into MagScene. Hidden functions found and created: MnuMcd::getFileName 0x1a1c94, getFileSize 0x1a1cbc (folded into getFileNum). Names invented (ror-inferred): all MnuMcd helpers, McdMan / MsgMan / MsgManSet and their methods, msgGetSysText. Slot state meanings in mnumcd.h are read from use, unverified. m_both (+0x88) is only cleared here: find who sets it in the save screen code (unassigned@001a6830).",
    "ranges": [
@@ -756,6 +775,24 @@
    "status": "verify",
    "why": "MnuMcd: ctor 0x1a1244 / dtor 0x1a12a8 .. the check dialogs and 0x1a47f0; every function uses MnuMcd's members and the memory card manager, the strings are the memory card messages; 0x1a4bd8.. is another class (no callers, vtable-only, next to mnu/mnudlg.cpp)"
   },
+  "mnu/mnupbook.cpp": {
+   "notes": "Screen: the film plays as before; after it the picture book inits and the screen stays black (reference: the dark ehonbg page background plus page models, work/ref/MNUPBOOK and work/ref/PB010200 from tm2png --scan of DATA/MNURPK/MNUPBOOK). The run now stops on the book: MnuPBook::processPad 0x1976b8 is a stub returning 0, so the menu never closes -- this is the gate to the first room. Queued mnu/mnubase.cpp ahead of this TU: the mnu pool FUN_001944d0 (also MagScene::initRender) / FUN_00194548 / mnuAlloc / mnuFree, setupWork 0x192ba4, addFile 0x19397c, openPack / closePack, mnuBase::term 0x192d60 (still a stub in lib/unassigned_stubs.cpp: move it), the loader 0x193a1c (FileReader steps, i3rRelocate models, textures) and the layer draw helpers 0x192f68 / 0x1930f8 / 0x193210 / 0x193258 / 0x19368c (native i3d draw module, never the emulated GS). Then here: processPad 0x1976b8 and its steps 0x196efc (page files, sprintf pb_page%02d_tcc via 0x19844c), 0x19722c (turn models), 0x1973fc (windows, MsgManSet), 0x197a74 (pad), 0x197d28 / 0x197e68 / 0x197f18, draw 0x197f70, slot 7 0x198290, text 0x1985b0; the diary's set 0x198b54..0x19a3c0 after. Unknown fields keep EE-offset names (m_118, m_120, m_12c ...): rename when processPad shows them. The smoke pad holds START over the book; whether START or CROSS turns / closes it is open (open-items item 4). For the references: architecture.md, open-items.md and hazards.md are updated in this commit.",
+   "ranges": [
+    [
+     "00196a9c",
+     "0019a52c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-26 23:29",
+     "status": "partial",
+     "summary": "Split unassigned@00192ac0 into mnu/mnubase.cpp, mnu/mnumap.cpp, mnu/mnupbook.cpp, mnu/mnustock.cpp (pinned). mnu/mnupbook.cpp: MnuPBook and MnuDiary constructors, destructors, setType (page tables 0x29c0f8 / 0x29c368 as host data, 0x30-byte rows), init, term, addBgFiles; mnu/mnubase.h gives mnuBase its EE fields (file list, pack reader, model/data/texture slots), the inline constructor / destructor, openPack / closePack (slots 10 / 11), setupWork, addFile, lowerVolume / restoreVolume, mnuAlloc / mnuFree. The MagLifeMenuPBook assert is gone; the New Game run now inits a picture book after MagLifePC::setActor."
+    }
+   ],
+   "status": "partial",
+   "why": "MnuPBook and MnuDiary: both load data/mnurpk/mnupbook/, both serve MagLifeMenuPBook (one file assumed); ends at MnuStock::MnuStock"
+  },
   "mnu/mnuselect.cpp": {
    "ranges": [
     [
@@ -764,6 +801,15 @@
     ]
    ],
    "why": "MnuTextList (ctor 0x1a066c .. list draw 0x1a0be4); its allocator 0x1a08d4 passes the source path mnu/mnuselect.cpp to BedMemory::allocDebug"
+  },
+  "mnu/mnustock.cpp": {
+   "ranges": [
+    [
+     "0019a52c",
+     "001a066c"
+    ]
+   ],
+   "why": "MnuStock (mnustock.rpk) and its item-box helpers up to mnu/mnuselect.cpp's MnuTextList"
   },
   "mnu/mnusvld.cpp": {
    "notes": "Status verify: a Load Game press (pad 1800:START,2400:START,2700:DOWN,2800:CROSS, about 100 s) opens the screen and it matches work/ref/mnusvld (background, Load Game title, list frame; progress/ of this commit). Not visible yet, not from this TU: the slot rows need a save on the PC card (there is none, so MnuMcd::checkLoad waits at its no-data prompt; RIGHT then CROSS quits back to the title menu, seen), and every window text is blank because MsgMan / MsgManSet (msg/msgman.cpp 0x18330c.., 0x18741c..) are stubs. Saving needs GamMan::writeSaveData 0x1d6078 and readSaveData 0x1d68a0 (unassigned@001d3b44, stubs now). Mark done when a screenshot shows the list rows and texts. Decisions: MnuSvld holds its MnuMcd as member m_mcd at +0 (the ROM calls MnuMcd methods on this); the save buffer member is m_svldBuf (the assert text); MnuSvld now has a real constructor (runs before main in the global scene; sets m_save 1, the wrappers then set 0 for load). Names invented: all MnuSvld methods but the five ror ones, mnuBcdToInt / mnuIntToBcd / mnuSvldMakeTitle, the GamMan MesSprite helpers and write/readSaveData. Removed the stale unassigned@001a6830 from the queue; unassigned@0020ff34 in the queue looks stale too (pinned as sequence/seqvm.cpp).",

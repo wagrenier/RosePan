@@ -799,18 +799,6 @@ void MnuMap::draw(I3dLayer *layer)
     ROSEPAN_STUB("MnuMap::draw", 0x00195e90);
 }
 
-// stub of ROR 0x00196bdc
-void MnuPBook::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("MnuPBook::init", 0x00196bdc);
-}
-
-// stub of ROR 0x00196d98
-void MnuPBook::term()
-{
-    ROSEPAN_STUB("MnuPBook::term", 0x00196d98);
-}
-
 // stub of ROR 0x001976b8
 int MnuPBook::processPad(BedPad *pad)
 {
@@ -822,18 +810,6 @@ int MnuPBook::processPad(BedPad *pad)
 void MnuPBook::draw(I3dLayer *layer)
 {
     ROSEPAN_STUB("MnuPBook::draw", 0x00197f70);
-}
-
-// stub of ROR 0x00198860
-void MnuDiary::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("MnuDiary::init", 0x00198860);
-}
-
-// stub of ROR 0x00198a38
-void MnuDiary::term()
-{
-    ROSEPAN_STUB("MnuDiary::term", 0x00198a38);
 }
 
 // stub of ROR 0x001990b0
@@ -891,13 +867,6 @@ int MnuBoard2D::processPad(BedPad *pad)
 void MnuBoard2D::term()
 {
     ROSEPAN_STUB("MnuBoard2D::term", 0x001ad870);
-}
-
-// stub of ROR 0x00198b04
-int MnuDiary::setType(int type)
-{
-    ROSEPAN_STUB("MnuDiary::setType", 0x00198b04);
-    return {};
 }
 
 // stub of ROR 0x001aed08
@@ -1026,13 +995,6 @@ int MnuOpt::processPad(BedPad *pad)
 void MnuOpt::term()
 {
     ROSEPAN_STUB("MnuOpt::term", 0x001ab5e4);
-}
-
-// stub of ROR 0x00196e54
-int MnuPBook::setType(int type)
-{
-    ROSEPAN_STUB("MnuPBook::setType", 0x00196e54);
-    return {};
 }
 
 // stub of ROR 0x001bdfe0

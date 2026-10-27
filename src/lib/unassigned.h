@@ -523,45 +523,18 @@ float i3dPointSegDist2(const float *p, const float *a, const float *d, float *t)
  * each MagLifeMenu* wrapper (mag/maglifemenu.h) holds one at its +0x40 and
  * forwards init / term / isInit / processPad / render to it. Class names
  * from the wrappers (ror-inferred) except mnuBase, MnuMap, MnuPBook and
- * MnuDiary (the ELF's vtables). Their constructors are not written: the
- * objects live in the global scene and start zeroed (a stub constructor
- * would log before main). EE sizes from the scene's member spacing.
+ * MnuDiary (the ELF's vtables). Constructors not written (MnuMap's and
+ * the plain objects'): the objects live in the global scene and start
+ * zeroed (a stub constructor would log before main). EE sizes from the scene's member spacing.
  * MnuSvld (mnu/mnusvld.h) and MnuSelectLanguage (mnu/mnuSelectLanguage.h)
  * have their files' headers. ---- */
 
 struct BedPad;
 struct I3dLayer;
 
-/* The polymorphic menu base (vtable 0x2e4640, vptr +0x10c; constructor
- * 0x192ac0 also builds a FileReader at +0x68). layout: host -- polymorphic.
- * EE slots: 1 ~dtor 0x192b3c, 2 init (pure), 3 term 0x192d60, 4 isInit,
- * 5 processPad (pure), 6 draw (pure), 7 0x193140, 8 getType, 9 getFlags,
- * 10 0x1938a8, 11 0x193920; 7.. are declared when a TU needs them. */
-struct mnuBase
-{
-    /* EE slot 1 (+0x08); 0x192b3c is not written (nothing to release in a
-     * zeroed object). */
-    virtual ~mnuBase() {}
-    /* EE slot 2 (+0x10) */
-    virtual void init(DogTexInfo *tex) = 0;
-    /* EE slot 3 (+0x18) */
-    virtual void term();                                                 // ROR 0x00192d60
-    /* EE slot 4 (+0x20): bit 0 of the flags. */
-    // ROR 0x0028dec0
-    virtual int  isInit() { return m_flags & 1; }
-    /* EE slot 5 (+0x28) */
-    virtual int  processPad(BedPad *pad) = 0;
-    /* EE slot 6 (+0x30) */
-    virtual void draw(I3dLayer *layer) = 0;
-
-    int       m_type;           // ROR 0x00: mnuBase::getType 0x28dee0
-    u_int     m_flags;          // ROR 0x04: bit 0 set once init has run
-    MagScene *m_scene;          // ROR 0x08: MagLifeMenuPBook::init stores the wrapper's scene
-    u_char    _0c[0x10c - 0x0c];
-    /* ROR 0x10c: the EE vptr (the host's is at 0) */
-};
-static_assert(offsetof(mnuBase, m_flags) >= 0x04, "m_flags");
-static_assert(offsetof(mnuBase, m_scene) >= 0x08, "m_scene");
+/* mnuBase and the two books: their files' headers. */
+#include "mnu/mnubase.h"
+#include "mnu/mnupbook.h"
 
 /* The map menu (vtable 0x2e46a8). EE 0x8e0 (MagLifeMenuMap +0x40..+0x920).
  * layout: host -- polymorphic. */
@@ -575,37 +548,6 @@ struct MnuMap : mnuBase
     u_char    _110[0x8e0 - 0x110];
 };
 static_assert(sizeof(MnuMap) >= 0x8e0, "EE 0x8e0");
-
-/* The two books MagLifeMenuPBook switches between (vtables 0x2e4710 /
- * 0x2e4778). setType keeps the row of its page table (0x29c0f8 /
- * 0x29c368, 12-byte rows, -1 ends) whose first word is type. layout: host
- * -- polymorphic. EE 0x8c0 (MagLifeMenuPBook +0x50..+0x910). */
-struct MnuPBook : mnuBase
-{
-    void init(DogTexInfo *tex) override;                                 // ROR 0x00196bdc
-    void term() override;                                                // ROR 0x00196d98
-    int  processPad(BedPad *pad) override;                               // ROR 0x001976b8
-    void draw(I3dLayer *layer) override;                                 // ROR 0x00197f70
-    /* 1 when type is one of its pages (kept at +0x114), else 0. */
-    int  setType(int type);                                              // ROR 0x00196e54
-
-    u_char    _110[0x8c0 - 0x110];
-};
-static_assert(sizeof(MnuPBook) >= 0x8c0, "EE 0x8c0");
-
-/* EE 0x8f0 (MagLifeMenuPBook +0x910..+0x1200). layout: host -- polymorphic. */
-struct MnuDiary : mnuBase
-{
-    void init(DogTexInfo *tex) override;                                 // ROR 0x00198860
-    void term() override;                                                // ROR 0x00198a38
-    int  processPad(BedPad *pad) override;                               // ROR 0x001990b0
-    void draw(I3dLayer *layer) override;                                 // ROR 0x00199c94
-    /* 1 when type is one of its pages (kept at +0x114), else 0. */
-    int  setType(int type);                                              // ROR 0x00198b04
-
-    u_char    _110[0x8f0 - 0x110];
-};
-static_assert(sizeof(MnuDiary) >= 0x8f0, "EE 0x8f0");
 
 /* The plain menu objects: the same five calls, not polymorphic. Each
  * keeps the wrapper's scene at the offset its init wrapper writes.

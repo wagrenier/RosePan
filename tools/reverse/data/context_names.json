@@ -5699,11 +5699,65 @@
   "was": "FUN_00192b3c",
   "why": "mnuBase (vtable 0x2e4640, vptr +0x10c) dtor"
  },
+ "00192ba4": {
+  "name": "mnuBase::setupWork",
+  "tag": "ror-inferred",
+  "was": "FUN_00192ba4",
+  "why": "every Mnu*::init calls it first with (tex, files, models, datas, texs): stores tex at +0xc, carves one mnu pool block into the file list (0x30 rows at +0x18), model (0x20, +0x94), data (0x10, +0x9c) and texture (0x10, +0xa4) slots"
+ },
  "00192d60": {
   "name": "mnuBase::term",
   "tag": "ror-inferred",
   "was": "FUN_00192d60",
   "why": "mnuBase (vtable 0x2e4640, vptr +0x10c) term"
+ },
+ "0019381c": {
+  "name": "mnuBase::lowerVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_0019381c",
+  "why": "when 0x7a34d4 is -1 sets flag 0x10 and calls GamMan::switchVolume(0)"
+ },
+ "00193868": {
+  "name": "mnuBase::restoreVolume",
+  "tag": "ror-inferred",
+  "was": "FUN_00193868",
+  "why": "undoes lowerVolume: clears flag 0x10 and calls GamMan::switchVolume(1); every Mnu*::term calls it"
+ },
+ "001938a8": {
+  "name": "mnuBase::openPack",
+  "tag": "ror-inferred",
+  "was": "FUN_001938a8",
+  "why": "vtable slot 10: reads the first 0x1000 bytes of the pack named at +0x24 into a mnu pool buffer (+0x64) through the FileReader at +0x68 / FileReadReq at +0x70"
+ },
+ "00193920": {
+  "name": "mnuBase::closePack",
+  "tag": "ror-inferred",
+  "was": "FUN_00193920",
+  "why": "vtable slot 11: closes the pack's file (FileReadReq close 1) and frees the +0x64 buffer; mnuBase::term calls it"
+ },
+ "0019397c": {
+  "name": "mnuBase::addFile",
+  "tag": "ror-inferred",
+  "was": "FUN_0019397c",
+  "why": "appends (name, kind, arg) to the 0x30-byte file list at +0x18 unless an entry with the same kind & 0xf and arg is there or the list is full"
+ },
+ "00193f74": {
+  "name": "mnuBase::freeData",
+  "tag": "ror-inferred",
+  "was": "FUN_00193f74",
+  "why": "mnuFree of the argument when it is not NULL; the slot release helpers call it"
+ },
+ "00194588": {
+  "name": "mnuAlloc",
+  "tag": "ror-inferred",
+  "was": "FUN_00194588",
+  "why": "best-fit allocator over the 128 blocks of the 2D buffer at 0x29bfb4 (16-byte granules); returns the block address or 0"
+ },
+ "00194688": {
+  "name": "mnuFree",
+  "tag": "ror-inferred",
+  "was": "FUN_00194688",
+  "why": "clears the in-use bit of the 0x29bfb4 block whose address is the argument"
  },
  "001947a4": {
   "name": "MnuMap::MnuMap",
@@ -5770,6 +5824,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00196e54",
   "why": "MnuPBook: finds type in its page table (0x29c0f8 / 0x29c368, 12-byte rows), keeps it at +0x114, 1 when found; MagLifeMenuPBook::init picks the book that knows the type"
+ },
+ "00196ea4": {
+  "name": "MnuPBook::addBgFiles",
+  "tag": "ror-inferred",
+  "was": "FUN_00196ea4",
+  "why": "sets flag 2 and adds ehonbg (kind 4, arg 1) and ehontex01_tcc (kind 4, arg 0) to the file list; MnuPBook::init's last call"
  },
  "001976b8": {
   "name": "MnuPBook::processPad",

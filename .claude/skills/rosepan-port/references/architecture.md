@@ -329,7 +329,8 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     arrays of one count); the rest are `jr ra`. Checked offline on 1602 models in the disc's RPKs
     (7.1 M pointers, all in the file; names may be Shift-JIS). Nine pairs live at 0x22a6c0..0x22aec0
     (types 0x25 0x26 0x29 0x2a 0x2d 0x4a 0x4d 0x52 0x59) and are written in i3ritem.cpp too.
-    The accessors between the fixups (0x22c840.., most call i3rItemFindChild) are not written.
+    The accessors between the fixups (0x22c840.., most call i3rItemFindChild) are not written.
+
     **The model helpers** (`i3d/i3rmodel.cpp` 0x21a3e8..0x21ac80, pinned 2026-10-26, verify; types in
     i3rmodel.h): root data +0x00 the clip sphere (xyz centre, +0x0c radius), +0x10 one 0x40 basic
     local matrix per node; root child 0 = materials (type 0x25: +8 s16 texture frame, +0xc
@@ -865,7 +866,7 @@ functions assert (`.h`). Directories and files:
 | `game/` | gamman, gamsnd, gamstat, gamtrg |
 | `mag/` | maglife, maglifebwn (+.h), maglifebwnctrl (+.h), maglifebwnmode, maglifefadekey, maglifeman, maglifemenu, maglifemenusp, maglifepc, maglifepc2, maglifepc3, maglifepcbtl, maglifepceff, maglifepcmode, maglifepcmove, maglifepcmsg, maglifetest, maglifewindow, magloader, magscene (+.h), magscene2, magscenecamera, magscenedebug, magscenefocus, magsceneif, magscenelight, magsceneoption, magscenerender, magscenetenkyu, magsystem (+.h) |
 | `mcd/` | mcdman |
-| `mnu/` | mnuSelectLanguage, mnudlg, mnuselect, mnusvld |
+| `mnu/` | mnuSelectLanguage, mnudlg, mnuselect, mnusvld (named by class: mnubase, mnumap, mnupbook, mnustock, mnumcd, mnutitle) |
 | `msg/` | msgman |
 | `sequence/` | sequence |
 | `snd/` | rxmpeg, sndman, unitque |
@@ -1314,11 +1315,27 @@ throughout (identifiers, env variables, files, shader macros):
   MnuMovie 0x1adfb0.., MnuTitle 0x1a91f4.. (contains an MnuMcd +0, MnuSvld +0x1400, MnuOpt +0x3b80,
   SprMan +0x4df0), MnuMcd 0x1a134c.., MnuNow 0x1ae520.., MnuBoard2D 0x1ad824.., MnuSelectLanguage
   0x1bdc00... Their EE sizes come from the scene's member spacing (+0x2be60..0x41850).
-- **mnuBase** (vtable 0x2e4640, vptr +0x10c): +0 type, +4 flags (bit 0 = inited, mnuBase::isInit),
-  +8 scene; slots 2 init, 3 term, 4 isInit, 5 processPad, 6 draw. MnuMap, MnuPBook, MnuDiary derive it.
+- **mnuBase** (mnu/mnubase.cpp 0x192ac0..0x1947a4; vtable 0x2e4640, vptr +0x10c, EE 0x110): +0 type,
+  +4 flags (bit 0 = inited, mnuBase::isInit; 2, 0x10 = volume lowered, 0x40000), +8 scene, +0xc tex,
+  +0x10 -1, +0x14 step (-1 idle), +0x18 file list (MnuFile 0x30-byte rows {.., kind +8, arg +0xc,
+  name +0x10}; max +0x1c, count +0x20), +0x24 pack path (0x40), +0x64 the pack's first 0x1000 bytes,
+  FileReader +0x68, FileReadReq +0x70, slots: models +0x94 (0x20 each, count +0x98), data +0x9c
+  (0x10, +0xa0), textures +0xa4 (0x10, +0xa8). Slots 2 init, 3 term, 4 isInit, 5 processPad, 6 draw,
+  7 0x193140, 8 getType, 9 getFlags, 10 openPack 0x1938a8, 11 closePack 0x193920. setupWork 0x192ba4
+  (tex, files, models, data, textures) carves one mnuAlloc block; addFile 0x19397c queues a file.
+  **The mnu pool**: FUN_001944d0 allocates the 1 MB buffer (data 0x29bfb4, BedMemory heap 0x6e9800):
+  128 blocks {address, size, flags: 1 free, 2 in use} at its start, the first covering +0x800..;
+  mnuAlloc 0x194588 (best fit, 16-byte granules) / mnuFree 0x194688. MnuMap, MnuPBook, MnuDiary
+  derive mnuBase (mnu/mnumap.cpp 0x1947a4.., mnu/mnupbook.cpp 0x196a9c..0x19a52c; MnuStock
+  0x19a52c..0x1a066c is not a mnuBase).
 - **MagLifeMenuPBook** (0x100000 / 0x200000 types): init looks the type up (getTypeValue) and asks
-  MnuPBook (+0x50) then MnuDiary (+0x910) setType (page tables 0x29c0f8 / 0x29c368, 12-byte rows);
-  the one that knows the page becomes +0x40 and runs through mnuBase's virtuals.
+  MnuPBook (+0x50) then MnuDiary (+0x910) setType (page tables 0x29c0f8: 12 picture books {type
+  0x1038.., ?, pages, 0/1/2, pack name pb*} / 0x29c368: 3 diaries {type 0x1000 / 0x1024 / 0x102a, ?,
+  pages, name dy*}, 0x30-byte rows, -1 ends); the one that knows the page becomes +0x40 and runs
+  through mnuBase's virtuals. Both books open data/mnurpk/mnupbook/mnupbook.rpk (ehonbg,
+  ehontex01_tcc) then <name>.rpk; init reads GamMan::lookupFlagTable(1, type, 0 / 4 / 6 / 7) (4 and
+  7 index the sequence globals, 6 a sequence flag bit). **The New Game run shows a picture book after
+  the post-film setup (2026-10-26)**: its processPad is the gate to the first room.
 - **MagLifeMenuBoard3D** (0x80000 types): loads model getTypeValue(type) (0x10c5..) as a scene actor,
   saves the scene camera (MagScene::saveCamera 0x13c930 / restoreCamera 0x13ca10), puts the camera at
   (0, -200, 500) rotated (-0.1, pi, 0) and the actor at the origin, fades in 30 frames, closes on pad
