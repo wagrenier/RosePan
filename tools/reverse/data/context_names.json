@@ -551,6 +551,12 @@
   "was": "FUN_00106bc8",
   "why": "sceVu0UnitMatrix, RotMatrixY(angle wrapped once), ApplyMatrix in place; beside utlVecRotZ"
  },
+ "00106d40": {
+  "name": "utlLerp4",
+  "tag": "ror-inferred",
+  "was": "FUN_00106d40",
+  "why": "out[i] = a[i] * (1 - t) + b[i] * t for 4 floats; next to utlNormalize3 0x106db0"
+ },
  "00106db0": {
   "name": "utlNormalize3",
   "tag": "ror-inferred",
@@ -1265,6 +1271,24 @@
   "was": "FUN_0010f808",
   "why": "setEyeTex(2), count +0x490 and period +0x494 zero, eye flags +0x488 bits 0..1 cleared; native 281 op 21 a2 = 3"
  },
+ "0010f860": {
+  "name": "DogCamera::saveCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f860",
+  "why": "dogcamera.cpp assert m_saved==0; copies lens angle +0x140 and translation/rotation/scale +0x40..0x6c to +0x148..0x17c, m_saved++; called only by MagScene::saveCamera on its camera"
+ },
+ "0010f8cc": {
+  "name": "DogCamera::restoreCamera",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f8cc",
+  "why": "dogcamera.cpp assert m_saved != 0; the inverse copy of saveCamera, m_saved--, dirty; called only by MagScene::restoreCamera"
+ },
+ "0010f944": {
+  "name": "DogCamera::updateMove",
+  "tag": "ror-inferred",
+  "was": "FUN_0010f944",
+  "why": "steps a timed camera move: while frame +0x134 < count +0x1d0, translation = lerp(+0x190, +0x1b0) and rotation = lerp(+0x1a0, +0x1c0) by frame/count, then normalizeRotate; resets at the end; called by MagScene::updateCamera"
+ },
  "0010fa6c": {
   "name": "DogEntity::getMatrix",
   "tag": "ror-inferred",
@@ -1288,6 +1312,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0010fc08",
   "why": "m_angle (+0x140) = scale * m_144 * 0.901526; native 016 case 5"
+ },
+ "0010fc28": {
+  "name": "DogCamera::getRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_0010fc28",
+  "why": "transforms, then returns utlVecToRotY of the world matrix z axis flattened (y = 0) and normalized; maglifepc adds it to the pad stick heading"
  },
  "0010fc7c": {
   "name": "DogEntity::setRotate",
@@ -22000,6 +22030,12 @@
   "tag": "lib-context",
   "was": "FUN_0026bb10",
   "why": "libvib: (socket, profile size, profile, data size, data) packed into a 0x103400b DBC request; BedPad::setVibration passes profile bit 0 small motor / bit 1 big motor"
+ },
+ "0026c8e0": {
+  "name": "modff",
+  "tag": "lib-context",
+  "was": "FUN_0026c8e0",
+  "why": "float modf: exponent test, integer part through the mantissa mask stored to *ip, fraction returned; libm"
  },
  "0026cb00": {
   "name": "atan2f",

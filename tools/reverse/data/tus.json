@@ -1,6 +1,5 @@
 {
  "queue": [
-  "dog/dogcamera.cpp",
   "unassigned@0010f944",
   "unassigned@00228c08",
   "dog/dogmotionblend.cpp",
@@ -105,12 +104,21 @@
    "status": "verify"
   },
   "dog/dogcamera.cpp": {
+   "notes": "Status verify: the 200 s New Game run (second try; the first looped the boot logos, the known boot race) plays the opening film to Once upon a time, then ends black with the small ring at the bottom, the same picture as dog/dogentity.cpp: no mesh draws yet (utlDrawI3r / i3rBuildMeshPacket stubs), so the view matrix and the lens cannot show. getMatrix and getLensFov no longer appear as reached stubs; MagScene::setCameraMode 0x13caf0 and MagScene::updateCamera 0x13e548 are now reached stubs (updateCamera calls DogCamera::updateMove). Open: who starts a camera move (writes +0x1d0 and +0x190..+0x1c0) is unknown; look in mag/magscenecamera.cpp and the camera natives. getMatrix casts this to DogCamera (the ROM writes this+0xf0; all callers pass the camera). getLensFov pads the table to 16 entries with 180 so the 180-degree case does not read past it (the ROM reads uninitialised stack times 0). Next: the queue (unassigned@00228c08, the i3dMat library). References updated in this commit (architecture, open-items).",
    "ranges": [
     [
      "0010f860",
      "0010fc7c"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-27 17:18",
+     "status": "verify",
+     "summary": "DogCamera written, all 8 functions of 0x10f860..0x10fc7c: saveCamera / restoreCamera (one-level save of angle, translation, rotation, scale; asserts m_saved), updateMove (timed lerp of translation and rotation), DogEntity::getMatrix (slot 2 transform then i3dMatInverse into the +0xf0 view matrix; the real camera now replaces the unit-matrix stub), getLensFov (13-entry degree table, modff), getLensScale / setLensScale (moved from lib/unassigned_stubs.cpp), getRotY. Header fields named (m_saved_*, m_saved, m_move_*). utlLerp4 0x106d40 written ahead in lib/unassigned_stubs.cpp. 6 names (dogcamera_001.json)."
+    }
+   ],
+   "status": "verify",
    "why": "dog/dogcamera.cpp source strings at 0x10f860 / 0x10f8cc (asserts m_saved==0, m_saved != 0); DogCamera::getMatrix (the +0xf0 inverse), getLensFov / getLensScale / setLensScale and the camera interpolation 0x10f944 (+0x134 / +0x1d0) up to DogEntity::setRotate 0x10fc7c; starts after DogActor::eyeReset (dogactor.cpp)"
   },
   "dog/dogentity.cpp": {

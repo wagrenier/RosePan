@@ -195,36 +195,6 @@ void dbgTraceVector4(const float *v)
     ROSEPAN_STUB("dbgTraceVector4", 0x00215bb4);
 }
 
-// stub of ROR 0x0010fa6c
-sceVu0FVECTOR * DogEntity::getMatrix()
-{
-    ROSEPAN_STUB("DogEntity::getMatrix", 0x0010fa6c);
-    // PC: the unit matrix until the camera class that holds the +0xf0
-    // matrix is written; i3dCtxCreateView copies what this returns.
-    return i3dMatGetUnit();
-}
-
-// stub of ROR 0x0010fac0
-float DogCamera::getLensFov()
-{
-    ROSEPAN_STUB("DogCamera::getLensFov", 0x0010fac0);
-    return {};
-}
-
-// Written ahead for native 016 (leaves of unassigned@0010f944): the lens
-// angle as a scale of m_144.
-// ROR 0x0010fc08
-void DogCamera::setLensScale(float scale)
-{
-    m_angle = scale * m_144 * 0x1.cd94dep-1f;  // 0x3f66ca6f, 0.901526
-}
-
-// ROR 0x0010fbd4
-float DogCamera::getLensScale()
-{
-    return m_angle / m_144 / 0x1.cd94dep-1f;
-}
-
 // stub of ROR 0x00177830
 void FUN_00177830(Obj176a3c *obj, i3dContext *ctx)
 {
@@ -1971,4 +1941,16 @@ float utlVecToRotY(const float *dir)
 {
     ROSEPAN_STUB("utlVecToRotY", 0x001070f8);
     return {};
+}
+
+// Written ahead for dog/dogcamera.cpp (DogCamera::updateMove).
+// ROR 0x00106d40
+void utlLerp4(float t, float *out, const float *a, const float *b)
+{
+    float u = 1.0f - t;
+
+    out[0] = b[0] * t + a[0] * u;
+    out[1] = b[1] * t + a[1] * u;
+    out[2] = b[2] * t + a[2] * u;
+    out[3] = b[3] * t + a[3] * u;
 }
