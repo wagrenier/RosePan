@@ -982,10 +982,17 @@ four of 0x30): +0x00..0x0f a 128-bit node mask, +0x10 speed, +0x14 frame, +0x1c 
 `setMotionSub` / `setMotionSubBySuffix` 0x10b328 / 0x10b620 start one over the nodes named in a
 NULL-terminated list, keeping their current pose as the previous one. The ELF names the class body's
 inlines: getMotion(int, tag_I3mPosture_s *, float, I3M_INTER) wraps i3mGetPose, getBlendMotion wraps
-i3mGetBlendPose 0x22eab0, i3mGetNodeIndexByName(int, char const *) the i3m lookup. Still stubbed below
-it: the DogMotionBlend sampler / steps (0x1081b0, 0x1078dc, 0x107e30, 0x1079d8, 0x107560, 0x107678,
-0x108428) and the i3m pose / quaternion ops (0x22e960, 0x22eab0, 0x22f610, 0x231198, 0x230470,
-0x230660).
+i3mGetBlendPose 0x22eab0, i3mGetNodeIndexByName(int, char const *) the i3m lookup.
+DogMotionBlend (dog/dogmotionblend.cpp, written 2026-10-27): the asserts call the motion fields m_main
+and the entries m_sub[4], m_frame m_main.m_time. getPose 0x1081b0 samples the main motion (i3mGetPose
+flags 0x111) and then each entry's into a 128-node stack block and copies it over the masked nodes
+(i3mPoseLerp with t 0) -- the fade itself is the actor's, through getNodeRate 0x1078dc ((m_count + 1) /
+m_time while fading, else 1). step 0x107e30 clamps (1 end, 2 start, 3 zero length or speed 0);
+stepLoop 0x1079d8 wraps (1 forward, also when speed is 0; 2 backward; +-1e-5 of the end snaps to 0)
+and stops a playing entry at its m_1c ratio; a fading entry (setBlendRate 0x108428) holds frame m_1c *
+length at speed 0 and counts m_count up to m_time; setBlendRate with the same rate 0 after the fade
+frees the entry. Still stubbed below: the i3m pose / quaternion ops (0x22e960, 0x22eab0, 0x22f610,
+0x231198, 0x230470, 0x230660).
 
 ## Modules (RoR's own source files)
 

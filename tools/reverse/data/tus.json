@@ -1,7 +1,6 @@
 {
  "queue": [
   "unassigned@0010f944",
-  "dog/dogmotionblend.cpp",
   "unassigned@0022e840",
   "unassigned@00106658",
   "setup/i3d_mesh_draw.cpp",
@@ -180,6 +179,24 @@
     }
    ],
    "status": "verify"
+  },
+  "dog/dogmotionblend.cpp": {
+   "notes": "Verify: the smoke run stays on the disclaimer screen and no actor is drawn yet, because the i3m pose player (unassigned@0022e840: i3mGetPose 0x22e960, i3mGetBlendPose 0x22eab0, i3mPoseLerp 0x22f610, i3mPoseToMatrices 0x22f7a0) and utlDrawI3r 0x106760 are stubs. Those are the next gate to an actor on screen. The first session whose screenshot shows an animated actor marks this done. No DogMotionBlend assert fired in the run. Facts: getPose copies each entry pose over its masked nodes with i3mPoseLerp t 0 (the ROM really passes 0.0, mtc1 zero f12); the actual fade is DogActor's via getNodeRate. stepLoop returns 1 when speed is 0 (checked in the asm). PC guards: NULL m_motion or a NULL i3m root returns or skips where the ROM hangs in its assert. Knowledge recorded in architecture.md (DogMotionBlend paragraph) and open-items.md Next up item 5.",
+   "ranges": [
+    [
+     "0010737c",
+     "00108660"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 17:49",
+     "status": "verify",
+     "summary": "DogMotionBlend complete (11 of 11): getPose, getNodeRate, step, stepLoop, getTimeRatio, setTimeRatio, setBlendRate written from the ROM; blend entry fields m_node_mask, m_state, m_time, m_count named and asserted; range pinned 0x10737c-0x108660"
+    }
+   ],
+   "status": "verify",
+   "why": "Every DogMotionBlend method, reset 0x10737c through the constructor 0x108588; six carry the dog/dogmotionblend.cpp source string; utlVecToRot before and DogActor::countBlendFrame after belong to other files"
   },
   "dog/dogtexinfo.cpp": {
    "notes": "Pinned 0x1161e4..0x11764c, all 16 functions written. Smoke run: MagScene::init's init / add run without asserts; screen still black (SprMan::draw and the scene layers draw nothing yet). addData / setTexTable are not reached: SprTexture's lists end in error because fileGetSize 0x1be768 is a stub returning 0 and BedPfh::BedPfh / getFileIndex (bed/bedpfh.cpp) are stubs -- write those (and FileReader::read 0x1be524 / 0x1be564) next to see textures arrive. PC guards: release stops when the record's picture is NULL, copy and setTexFlag return on a bad index (the ROM writes on after the assert). term frees m_tex_data before terming the textures in it, as the ROM does (the heap keeps the bytes). The shadow01 rodata at 0x2ed500 is an I3dTexDesc: 256x256 CT32 at block 0x2300. Next on the queue: spr/sprman.cpp.",

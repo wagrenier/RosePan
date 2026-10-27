@@ -2534,14 +2534,14 @@ static int dogActorStartSub(DogActor *a, int theS, int no, const char **theNodes
         return -3;
     DogMotionBlendEntry &e = a->m_motion.m_blend[theS];
     for (int i = 0; i < 4; i++)
-        e.m_00[i] = 0;
+        e.m_node_mask[i] = 0;
     for (; *theNodes != NULL; theNodes++)
     {
         int i = a->i3mGetNodeIndexByName(no, *theNodes);
         ROR_ASSERT(i >= 0); /* 1993 */
         if (i < 0)
             continue;   // PC: the ROM sets a bit before the mask and copies pose -1
-        e.m_00[i / 32] |= 1 << (i & 31);
+        e.m_node_mask[i / 32] |= 1 << (i & 31);
         memcpy(a->m_posture_prev + i * 0x30, a->m_posture + i * 0x30, 0x30);
     }
     e.m_no = no;

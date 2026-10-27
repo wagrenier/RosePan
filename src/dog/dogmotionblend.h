@@ -18,17 +18,20 @@
 
 struct DogMotionData;
 
-/* One blend entry. EE 0x30, plain words. Roles beyond what the reset
- * writes are unverified. */
+/* One blend entry (the asserts' m_sub[i]): a second motion over the
+ * nodes of its mask. EE 0x30, plain words. */
 struct DogMotionBlendEntry
 {
-    int   m_00[4];              // ROR 0x00: reset 0
-    float m_speed;              // ROR 0x10: reset 1/60 (as DogMotionBlend::m_speed)
+    int   m_node_mask[4];       // ROR 0x00: bit n = node n takes this motion's pose (getPose, getNodeRate)
+    float m_speed;              // ROR 0x10: reset 1/60 (as DogMotionBlend::m_speed); a fade sets 0
     float m_frame;              // ROR 0x14: reset 0
-    float m_18;                 // ROR 0x18: reset 1.0
-    float m_1c;                 // ROR 0x1c: reset -1.0
+    float m_18;                 // ROR 0x18: reset 1.0; unused by this file
+    float m_1c;                 // ROR 0x1c: reset -1.0 (none): a ratio of the length -- the stop frame
+                                //   while playing (stepLoop), the held frame while fading, the fade's rate
     int   m_no;                 // ROR 0x20: a motion index, -1 none (DogActor::releaseMotion drops gone ones)
-    u_char _24[0x30 - 0x24];
+    int   m_state;              // ROR 0x24: 0 playing, 2 fading (setBlendRate)
+    int   m_time;               // ROR 0x28: the fade's frames
+    int   m_count;              // ROR 0x2c: frames of the fade done (step counts up to m_time)
 
     /* Inline in the ROM (the constructor and reset repeat it). */
     void clear()
@@ -39,11 +42,15 @@ struct DogMotionBlendEntry
         m_1c = -1.0f;
         m_18 = 1.0f;
         for (int i = 0; i < 4; i++)
-            m_00[i] = 0;
+            m_node_mask[i] = 0;
     }
 };
 static_assert(offsetof(DogMotionBlendEntry, m_speed) == 0x10, "m_speed");
+static_assert(offsetof(DogMotionBlendEntry, m_1c) == 0x1c, "m_1c");
 static_assert(offsetof(DogMotionBlendEntry, m_no) == 0x20, "m_no");
+static_assert(offsetof(DogMotionBlendEntry, m_state) == 0x24, "m_state");
+static_assert(offsetof(DogMotionBlendEntry, m_time) == 0x28, "m_time");
+static_assert(offsetof(DogMotionBlendEntry, m_count) == 0x2c, "m_count");
 static_assert(sizeof(DogMotionBlendEntry) == 0x30, "DogMotionBlendEntry is 0x30 bytes on the EE");
 
 #define DOG_MOTION_BLEND_MAX 4
@@ -61,23 +68,26 @@ struct DogMotionBlend
     void reset();                                                        // ROR 0x0010737c
     /* The motion and every entry stopped (speed 0). */
     void stop();                                                         // ROR 0x00108178
-    /* The current motion's pose at m_frame into pose (0x30-byte records),
-     * each entry's motion over the nodes of its mask; the node count. */
-    int  getPose(void *pose);                                            // ROR 0x001081b0
-    /* The entries' blend rate for node theNode (1.0 without one). */
+    /* The current motion's pose at m_frame into thePosture (0x30-byte
+     * records), then each entry's motion replaces the nodes of its mask;
+     * the node count (0 without a motion). */
+    int  getPose(void *thePosture);                                            // ROR 0x001081b0
+    /* The blend rate of the first entry whose mask has node theNode:
+     * (m_count + 1) / m_time while it fades, else (or none) 1.0. */
     float getNodeRate(int theNode);                                      // ROR 0x001078dc
     /* m_frame += m_speed * m_0c, clamped: 1 at the end, 2 at the start,
-     * 3 zero length; the entries step too. */
+     * 3 zero length or stopped; the entries step too (wrapping). */
     int  step();                                                         // ROR 0x00107e30
-    /* The same, wrapping: 1 / 2 when it wrapped. */
+    /* The same, wrapping: 1 when it wrapped forward (or is stopped), 2
+     * backward; the entries stop at their m_1c ratio. */
     int  stepLoop();                                                     // ROR 0x001079d8
     /* m_frame / the motion's length, in 0..1 (0 without a motion). */
     float getTimeRatio();                                                // ROR 0x00107560
     /* m_frame = the motion's length * r (r in 0..1). 0. */
-    int  setTimeRatio(float r);                                          // ROR 0x00107678
-    /* Entry theS (0..3) fades to rate theR over theTime frames (state 2 in
-     * its word +0x24); rate 0 again at the end of a fade frees it. */
-    void setBlendRate(float theR, int theS, int theTime);                // ROR 0x00108428
+    int  setTimeRatio(float theRatio);                                          // ROR 0x00107678
+    /* Entry theS (0..3) fades to rate theR over theTime frames (m_state
+     * 2); rate 0 again at the end of a fade frees it. */
+    void setBlendRate(float theRatio, int theNo, int theTime);                // ROR 0x00108428
 
     /* The record of motion n (the header's lines 122 / 123: two inlines
      * with the same checks; DogActor::setMotion uses both). Defined in

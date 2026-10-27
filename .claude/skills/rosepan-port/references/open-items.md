@@ -116,9 +116,8 @@ follows it; reached stubs in run order):
      with the native i3d draw module). **Third session 2026-10-27: the TU is written (147 of 147,
      `verify`)** -- getMotionMove / getMotionEvent, the root base readers, the blend entry starts
      (setMotionSub*), the node scales and matrices, shareModel, DogActor(int), and the ELF's inline
-     accessors out of line. Left on the actor path, in dog/dogmotionblend.cpp (stubs): getPose,
-     getNodeRate, step, stepLoop, getTimeRatio 0x107560, setTimeRatio 0x107678, setBlendRate
-     0x108428; then the i3m pose player (unassigned@0022e840, incl. i3mGetBlendPose 0x22eab0) and
+     accessors out of line. dog/dogmotionblend.cpp written 2026-10-27 (`verify`: getPose, getNodeRate,
+     step, stepLoop, the time ratios, setBlendRate). Left on the actor path: the i3m pose player (unassigned@0022e840, incl. i3mGetBlendPose 0x22eab0) and
      utlDrawI3r. The getNodeIndexByName PORT guard stays (GamMan::attachObj asks unloaded actors).
   6. `mag/magscenelight.cpp` -- WRITTEN 2026-10-27 (all 10, `verify`; pinned 0x13f49c..0x13ff00):
      loadLight, setDefaultLight, setShadowLight, the set / param front ends, addLight. The 200 s run
