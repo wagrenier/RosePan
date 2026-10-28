@@ -21299,6 +21299,18 @@
   "was": "FUN_0022c608",
   "why": "slot 0x34 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x34 (offsets from the data start)"
  },
+ "0022c640": {
+  "name": "i3rGetSlot34",
+  "tag": "ror-inferred",
+  "was": "i3rItem34GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x34 fixups, shape slot of child slot 0"
+ },
+ "0022c648": {
+  "name": "i3rHasData34",
+  "tag": "ror-inferred",
+  "was": "i3rItem34HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x34 fixups, shape hasdata of child slot 0"
+ },
  "0022c658": {
   "name": "i3rUnrelocData33",
   "tag": "ror-inferred",
@@ -21310,6 +21322,30 @@
   "tag": "ror-inferred",
   "was": "FUN_0022c670",
   "why": "slot 0x33 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x33 (offsets from the data start)"
+ },
+ "0022c688": {
+  "name": "i3rGetNumChild33",
+  "tag": "ror-inferred",
+  "was": "i3rItem33GetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x33 fixups, shape num of child slot 0"
+ },
+ "0022c6a0": {
+  "name": "i3rGetChild33",
+  "tag": "ror-inferred",
+  "was": "i3rItem33GetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x33 fixups, shape child of child slot 0"
+ },
+ "0022c6b8": {
+  "name": "i3rGetChildBegin33",
+  "tag": "ror-inferred",
+  "was": "i3rItem33GetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x33 fixups, shape begin of child slot 0"
+ },
+ "0022c6c8": {
+  "name": "i3rGetChildEnd33",
+  "tag": "ror-inferred",
+  "was": "i3rItem33GetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x33 fixups, shape end of child slot 0"
  },
  "0022c6e8": {
   "name": "i3rUnrelocData37",
@@ -21335,6 +21371,54 @@
   "was": "FUN_0022c730",
   "why": "slot 0x50 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x50 (offsets from the data start)"
  },
+ "0022c768": {
+  "name": "i3rGetSlot50",
+  "tag": "ror-inferred",
+  "was": "i3rItem50GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x50 fixups, shape slot of child slot 0"
+ },
+ "0022c770": {
+  "name": "i3rHasData50",
+  "tag": "ror-inferred",
+  "was": "i3rItem50HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x50 fixups, shape hasdata of child slot 0"
+ },
+ "0022c780": {
+  "name": "i3rGetSlot50_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem50GetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x50 fixups, shape slot of child slot 1"
+ },
+ "0022c790": {
+  "name": "i3rHasData50_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem50HasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x50 fixups, shape hasdata of child slot 1"
+ },
+ "0022c7a0": {
+  "name": "i3rGetSlot50_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem50GetSlot2",
+  "why": "i3racc.py: unreferenced accessor after type 0x50 fixups, shape slot of child slot 2"
+ },
+ "0022c7b0": {
+  "name": "i3rHasData50_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem50HasData2",
+  "why": "i3racc.py: unreferenced accessor after type 0x50 fixups, shape hasdata of child slot 2"
+ },
+ "0022c7c0": {
+  "name": "i3rGetSlot50_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem50GetSlot3",
+  "why": "i3racc.py: unreferenced accessor after type 0x50 fixups, shape slot of child slot 3"
+ },
+ "0022c7d0": {
+  "name": "i3rHasData50_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem50HasData3",
+  "why": "i3racc.py: unreferenced accessor after type 0x50 fixups, shape hasdata of child slot 3"
+ },
  "0022c7e0": {
   "name": "i3rUnrelocData47",
   "tag": "ror-inferred",
@@ -21346,6 +21430,102 @@
   "tag": "ror-inferred",
   "was": "FUN_0022c7f8",
   "why": "slot 0x47 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x47 (offsets from the data start)"
+ },
+ "0022c810": {
+  "name": "i3rGetNumChild47",
+  "tag": "ror-inferred",
+  "was": "i3rItem47GetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape num of child slot 0"
+ },
+ "0022c828": {
+  "name": "i3rGetChild47",
+  "tag": "ror-inferred",
+  "was": "i3rItem47GetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape child of child slot 0"
+ },
+ "0022c840": {
+  "name": "i3rFindChild47",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c840",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape find of child slot 0"
+ },
+ "0022c858": {
+  "name": "i3rGetChildName47",
+  "tag": "ror-inferred",
+  "was": "i3rItem47GetChildName0",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape name of child slot 0"
+ },
+ "0022c870": {
+  "name": "i3rGetChildByName47",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c870",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape byname of child slot 0"
+ },
+ "0022c8a8": {
+  "name": "i3rHasChild47",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c8a8",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape haschild of child slot 0"
+ },
+ "0022c8d0": {
+  "name": "i3rGetChildBegin47",
+  "tag": "ror-inferred",
+  "was": "i3rItem47GetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape begin of child slot 0"
+ },
+ "0022c8e0": {
+  "name": "i3rGetChildEnd47",
+  "tag": "ror-inferred",
+  "was": "i3rItem47GetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape end of child slot 0"
+ },
+ "0022c900": {
+  "name": "i3rGetNumChild47_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem47GetNumChild1",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape num of child slot 1"
+ },
+ "0022c918": {
+  "name": "i3rGetChild47_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem47GetChild1",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape child of child slot 1"
+ },
+ "0022c930": {
+  "name": "i3rFindChild47_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c930",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape find of child slot 1"
+ },
+ "0022c950": {
+  "name": "i3rGetChildName47_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem47GetChildName1",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape name of child slot 1"
+ },
+ "0022c968": {
+  "name": "i3rGetChildByName47_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c968",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape byname of child slot 1"
+ },
+ "0022c9a8": {
+  "name": "i3rHasChild47_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022c9a8",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape haschild of child slot 1"
+ },
+ "0022c9d0": {
+  "name": "i3rGetChildBegin47_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem47GetChildBegin1",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape begin of child slot 1"
+ },
+ "0022c9e0": {
+  "name": "i3rGetChildEnd47_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem47GetChildEnd1",
+  "why": "i3racc.py: unreferenced accessor after type 0x47 fixups, shape end of child slot 1"
  },
  "0022ca00": {
   "name": "i3rUnrelocData30",
@@ -21359,6 +21539,30 @@
   "was": "FUN_0022ca08",
   "why": "slot 0x30 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x30 (offsets from the data start)"
  },
+ "0022ca10": {
+  "name": "i3rGetNumChild30",
+  "tag": "ror-inferred",
+  "was": "i3rItem30GetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x30 fixups, shape num of child slot 0"
+ },
+ "0022ca28": {
+  "name": "i3rGetChild30",
+  "tag": "ror-inferred",
+  "was": "i3rItem30GetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x30 fixups, shape child of child slot 0"
+ },
+ "0022ca40": {
+  "name": "i3rGetChildBegin30",
+  "tag": "ror-inferred",
+  "was": "i3rItem30GetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x30 fixups, shape begin of child slot 0"
+ },
+ "0022ca50": {
+  "name": "i3rGetChildEnd30",
+  "tag": "ror-inferred",
+  "was": "i3rItem30GetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x30 fixups, shape end of child slot 0"
+ },
  "0022ca70": {
   "name": "i3rUnrelocData4F",
   "tag": "ror-inferred",
@@ -21370,6 +21574,30 @@
   "tag": "ror-inferred",
   "was": "FUN_0022ca78",
   "why": "slot 0x4f of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x4f (offsets from the data start)"
+ },
+ "0022ca80": {
+  "name": "i3rGetNumChild4F",
+  "tag": "ror-inferred",
+  "was": "i3rItem4FGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4F fixups, shape num of child slot 0"
+ },
+ "0022ca98": {
+  "name": "i3rGetChild4F",
+  "tag": "ror-inferred",
+  "was": "i3rItem4FGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4F fixups, shape child of child slot 0"
+ },
+ "0022cab0": {
+  "name": "i3rGetChildBegin4F",
+  "tag": "ror-inferred",
+  "was": "i3rItem4FGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4F fixups, shape begin of child slot 0"
+ },
+ "0022cac0": {
+  "name": "i3rGetChildEnd4F",
+  "tag": "ror-inferred",
+  "was": "i3rItem4FGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4F fixups, shape end of child slot 0"
  },
  "0022cae0": {
   "name": "i3rUnrelocData31",
@@ -21395,6 +21623,210 @@
   "was": "FUN_0022cb28",
   "why": "slot 0x56 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x56 (offsets from the data start)"
  },
+ "0022cb40": {
+  "name": "i3rGetNumChild56",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape num of child slot 0"
+ },
+ "0022cb58": {
+  "name": "i3rGetChild56",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape child of child slot 0"
+ },
+ "0022cb70": {
+  "name": "i3rGetChildBegin56",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape begin of child slot 0"
+ },
+ "0022cb80": {
+  "name": "i3rGetChildEnd56",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape end of child slot 0"
+ },
+ "0022cba0": {
+  "name": "i3rGetNumChild56_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetNumChild1",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape num of child slot 1"
+ },
+ "0022cbb8": {
+  "name": "i3rGetChild56_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChild1",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape child of child slot 1"
+ },
+ "0022cbd0": {
+  "name": "i3rFindChild56_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cbd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape find of child slot 1"
+ },
+ "0022cbf0": {
+  "name": "i3rGetChildName56_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildName1",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape name of child slot 1"
+ },
+ "0022cc08": {
+  "name": "i3rGetChildByName56_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cc08",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape byname of child slot 1"
+ },
+ "0022cc48": {
+  "name": "i3rHasChild56_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cc48",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape haschild of child slot 1"
+ },
+ "0022cc70": {
+  "name": "i3rGetChildBegin56_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildBegin1",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape begin of child slot 1"
+ },
+ "0022cc80": {
+  "name": "i3rGetChildEnd56_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildEnd1",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape end of child slot 1"
+ },
+ "0022cca0": {
+  "name": "i3rGetNumChild56_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetNumChild2",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape num of child slot 2"
+ },
+ "0022ccb8": {
+  "name": "i3rGetChild56_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChild2",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape child of child slot 2"
+ },
+ "0022ccd0": {
+  "name": "i3rFindChild56_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ccd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape find of child slot 2"
+ },
+ "0022ccf0": {
+  "name": "i3rGetChildName56_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildName2",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape name of child slot 2"
+ },
+ "0022cd08": {
+  "name": "i3rGetChildByName56_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cd08",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape byname of child slot 2"
+ },
+ "0022cd48": {
+  "name": "i3rHasChild56_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cd48",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape haschild of child slot 2"
+ },
+ "0022cd70": {
+  "name": "i3rGetChildBegin56_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildBegin2",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape begin of child slot 2"
+ },
+ "0022cd80": {
+  "name": "i3rGetChildEnd56_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildEnd2",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape end of child slot 2"
+ },
+ "0022cda0": {
+  "name": "i3rGetSlot56_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetSlot3",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape slot of child slot 3"
+ },
+ "0022cdb0": {
+  "name": "i3rHasData56_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem56HasData3",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape hasdata of child slot 3"
+ },
+ "0022cdc0": {
+  "name": "i3rGetNumChild56_4",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetNumChild4",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape num of child slot 4"
+ },
+ "0022cdd8": {
+  "name": "i3rGetChild56_4",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChild4",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape child of child slot 4"
+ },
+ "0022cdf0": {
+  "name": "i3rFindChild56_4",
+  "tag": "ror-inferred",
+  "was": "FUN_0022cdf0",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape find of child slot 4"
+ },
+ "0022ce10": {
+  "name": "i3rGetChildName56_4",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildName4",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape name of child slot 4"
+ },
+ "0022ce28": {
+  "name": "i3rGetChildByName56_4",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ce28",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape byname of child slot 4"
+ },
+ "0022ce68": {
+  "name": "i3rHasChild56_4",
+  "tag": "ror-inferred",
+  "was": "FUN_0022ce68",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape haschild of child slot 4"
+ },
+ "0022ce90": {
+  "name": "i3rGetChildBegin56_4",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildBegin4",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape begin of child slot 4"
+ },
+ "0022cea0": {
+  "name": "i3rGetChildEnd56_4",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildEnd4",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape end of child slot 4"
+ },
+ "0022cec0": {
+  "name": "i3rGetNumChild56_5",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetNumChild5",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape num of child slot 5"
+ },
+ "0022ced8": {
+  "name": "i3rGetChild56_5",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChild5",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape child of child slot 5"
+ },
+ "0022cef0": {
+  "name": "i3rGetChildBegin56_5",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildBegin5",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape begin of child slot 5"
+ },
+ "0022cf00": {
+  "name": "i3rGetChildEnd56_5",
+  "tag": "ror-inferred",
+  "was": "i3rItem56GetChildEnd5",
+  "why": "i3racc.py: unreferenced accessor after type 0x56 fixups, shape end of child slot 5"
+ },
  "0022cf20": {
   "name": "i3rUnrelocData55",
   "tag": "ror-inferred",
@@ -21406,6 +21838,42 @@
   "tag": "ror-inferred",
   "was": "FUN_0022cf38",
   "why": "slot 0x55 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x55 (offsets from the data start)"
+ },
+ "0022cf50": {
+  "name": "i3rGetNumChild55",
+  "tag": "ror-inferred",
+  "was": "i3rItem55GetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x55 fixups, shape num of child slot 0"
+ },
+ "0022cf68": {
+  "name": "i3rGetChild55",
+  "tag": "ror-inferred",
+  "was": "i3rItem55GetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x55 fixups, shape child of child slot 0"
+ },
+ "0022cf80": {
+  "name": "i3rGetChildBegin55",
+  "tag": "ror-inferred",
+  "was": "i3rItem55GetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x55 fixups, shape begin of child slot 0"
+ },
+ "0022cf90": {
+  "name": "i3rGetChildEnd55",
+  "tag": "ror-inferred",
+  "was": "i3rItem55GetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x55 fixups, shape end of child slot 0"
+ },
+ "0022cfb0": {
+  "name": "i3rGetSlot55_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem55GetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x55 fixups, shape slot of child slot 1"
+ },
+ "0022cfc0": {
+  "name": "i3rHasData55_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem55HasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x55 fixups, shape hasdata of child slot 1"
  },
  "0022cfd0": {
   "name": "i3rUnrelocData32",
@@ -21419,6 +21887,18 @@
   "was": "FUN_0022cfd8",
   "why": "slot 0x32 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x32 (offsets from the data start)"
  },
+ "0022cfe0": {
+  "name": "i3rGetSlot32",
+  "tag": "ror-inferred",
+  "was": "i3rItem32GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x32 fixups, shape slot of child slot 0"
+ },
+ "0022cfe8": {
+  "name": "i3rHasData32",
+  "tag": "ror-inferred",
+  "was": "i3rItem32HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x32 fixups, shape hasdata of child slot 0"
+ },
  "0022cff8": {
   "name": "i3rUnrelocData58",
   "tag": "ror-inferred",
@@ -21430,6 +21910,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0022d030",
   "why": "slot 0x58 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x58 (offsets from the data start)"
+ },
+ "0022d068": {
+  "name": "i3rGetSlot58",
+  "tag": "ror-inferred",
+  "was": "i3rItem58GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x58 fixups, shape slot of child slot 0"
+ },
+ "0022d070": {
+  "name": "i3rHasData58",
+  "tag": "ror-inferred",
+  "was": "i3rItem58HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x58 fixups, shape hasdata of child slot 0"
  },
  "0022d080": {
   "name": "i3rUnrelocData49",
@@ -21455,6 +21947,30 @@
   "was": "FUN_0022d0b8",
   "why": "slot 0x28 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x28 (offsets from the data start)"
  },
+ "0022d0c0": {
+  "name": "i3rGetSlot28",
+  "tag": "ror-inferred",
+  "was": "i3rItem28GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x28 fixups, shape slot of child slot 0"
+ },
+ "0022d0c8": {
+  "name": "i3rHasData28",
+  "tag": "ror-inferred",
+  "was": "i3rItem28HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x28 fixups, shape hasdata of child slot 0"
+ },
+ "0022d0d8": {
+  "name": "i3rGetSlot28_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem28GetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x28 fixups, shape slot of child slot 1"
+ },
+ "0022d0e8": {
+  "name": "i3rHasData28_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem28HasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x28 fixups, shape hasdata of child slot 1"
+ },
  "0022d0f8": {
   "name": "i3rUnrelocData57",
   "tag": "ror-inferred",
@@ -21466,6 +21982,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0022d100",
   "why": "slot 0x57 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x57 (offsets from the data start)"
+ },
+ "0022d108": {
+  "name": "i3rGetSlot57",
+  "tag": "ror-inferred",
+  "was": "i3rItem57GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x57 fixups, shape slot of child slot 0"
+ },
+ "0022d110": {
+  "name": "i3rHasData57",
+  "tag": "ror-inferred",
+  "was": "i3rItem57HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x57 fixups, shape hasdata of child slot 0"
  },
  "0022d120": {
   "name": "i3rUnrelocData4C",
@@ -21479,6 +22007,30 @@
   "was": "FUN_0022d138",
   "why": "slot 0x4c of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x4c (offsets from the data start)"
  },
+ "0022d150": {
+  "name": "i3rGetNumChild4C",
+  "tag": "ror-inferred",
+  "was": "i3rItem4CGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4C fixups, shape num of child slot 0"
+ },
+ "0022d168": {
+  "name": "i3rGetChild4C",
+  "tag": "ror-inferred",
+  "was": "i3rItem4CGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4C fixups, shape child of child slot 0"
+ },
+ "0022d180": {
+  "name": "i3rGetChildBegin4C",
+  "tag": "ror-inferred",
+  "was": "i3rItem4CGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4C fixups, shape begin of child slot 0"
+ },
+ "0022d190": {
+  "name": "i3rGetChildEnd4C",
+  "tag": "ror-inferred",
+  "was": "i3rItem4CGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4C fixups, shape end of child slot 0"
+ },
  "0022d1b0": {
   "name": "i3rUnrelocData4B",
   "tag": "ror-inferred",
@@ -21490,6 +22042,30 @@
   "tag": "ror-inferred",
   "was": "FUN_0022d1b8",
   "why": "slot 0x4b of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x4b (offsets from the data start)"
+ },
+ "0022d1c0": {
+  "name": "i3rGetNumChild4B",
+  "tag": "ror-inferred",
+  "was": "i3rItem4BGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4B fixups, shape num of child slot 0"
+ },
+ "0022d1d8": {
+  "name": "i3rGetChild4B",
+  "tag": "ror-inferred",
+  "was": "i3rItem4BGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4B fixups, shape child of child slot 0"
+ },
+ "0022d1f0": {
+  "name": "i3rGetChildBegin4B",
+  "tag": "ror-inferred",
+  "was": "i3rItem4BGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4B fixups, shape begin of child slot 0"
+ },
+ "0022d200": {
+  "name": "i3rGetChildEnd4B",
+  "tag": "ror-inferred",
+  "was": "i3rItem4BGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x4B fixups, shape end of child slot 0"
  },
  "0022d220": {
   "name": "i3rUnrelocData27",
@@ -21527,6 +22103,30 @@
   "was": "FUN_0022d2b8",
   "why": "slot 0x46 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x46 (offsets from the data start)"
  },
+ "0022d328": {
+  "name": "i3rGetNumChild46",
+  "tag": "ror-inferred",
+  "was": "i3rItem46GetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x46 fixups, shape num of child slot 0"
+ },
+ "0022d340": {
+  "name": "i3rGetChild46",
+  "tag": "ror-inferred",
+  "was": "i3rItem46GetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x46 fixups, shape child of child slot 0"
+ },
+ "0022d358": {
+  "name": "i3rGetChildBegin46",
+  "tag": "ror-inferred",
+  "was": "i3rItem46GetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x46 fixups, shape begin of child slot 0"
+ },
+ "0022d368": {
+  "name": "i3rGetChildEnd46",
+  "tag": "ror-inferred",
+  "was": "i3rItem46GetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x46 fixups, shape end of child slot 0"
+ },
  "0022d388": {
   "name": "i3rUnrelocData45",
   "tag": "ror-inferred",
@@ -21538,6 +22138,42 @@
   "tag": "ror-inferred",
   "was": "FUN_0022d390",
   "why": "slot 0x45 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x45 (offsets from the data start)"
+ },
+ "0022d398": {
+  "name": "i3rGetSlot45",
+  "tag": "ror-inferred",
+  "was": "i3rItem45GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x45 fixups, shape slot of child slot 0"
+ },
+ "0022d3a0": {
+  "name": "i3rHasData45",
+  "tag": "ror-inferred",
+  "was": "i3rItem45HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x45 fixups, shape hasdata of child slot 0"
+ },
+ "0022d3b0": {
+  "name": "i3rGetNumChild45_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem45GetNumChild1",
+  "why": "i3racc.py: unreferenced accessor after type 0x45 fixups, shape num of child slot 1"
+ },
+ "0022d3c8": {
+  "name": "i3rGetChild45_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem45GetChild1",
+  "why": "i3racc.py: unreferenced accessor after type 0x45 fixups, shape child of child slot 1"
+ },
+ "0022d3e0": {
+  "name": "i3rGetChildBegin45_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem45GetChildBegin1",
+  "why": "i3racc.py: unreferenced accessor after type 0x45 fixups, shape begin of child slot 1"
+ },
+ "0022d3f0": {
+  "name": "i3rGetChildEnd45_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem45GetChildEnd1",
+  "why": "i3racc.py: unreferenced accessor after type 0x45 fixups, shape end of child slot 1"
  },
  "0022d410": {
   "name": "i3rUnrelocData53",
@@ -21599,6 +22235,42 @@
   "was": "FUN_0022d498",
   "why": "slot 0x9 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x9 (offsets from the data start)"
  },
+ "0022d4a0": {
+  "name": "i3rGetNumChild09",
+  "tag": "ror-inferred",
+  "was": "i3rItem09GetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x09 fixups, shape num of child slot 0"
+ },
+ "0022d4b8": {
+  "name": "i3rGetChild09",
+  "tag": "ror-inferred",
+  "was": "i3rItem09GetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x09 fixups, shape child of child slot 0"
+ },
+ "0022d4d0": {
+  "name": "i3rGetChildBegin09",
+  "tag": "ror-inferred",
+  "was": "i3rItem09GetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x09 fixups, shape begin of child slot 0"
+ },
+ "0022d4e0": {
+  "name": "i3rGetChildEnd09",
+  "tag": "ror-inferred",
+  "was": "i3rItem09GetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x09 fixups, shape end of child slot 0"
+ },
+ "0022d500": {
+  "name": "i3rGetSlot09_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem09GetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x09 fixups, shape slot of child slot 1"
+ },
+ "0022d510": {
+  "name": "i3rHasData09_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem09HasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x09 fixups, shape hasdata of child slot 1"
+ },
  "0022d520": {
   "name": "i3rUnrelocData0E",
   "tag": "ror-inferred",
@@ -21622,6 +22294,42 @@
   "tag": "ror-inferred",
   "was": "FUN_0022d568",
   "why": "slot 0xd of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0xd (offsets from the data start)"
+ },
+ "0022d580": {
+  "name": "i3rGetNumChild0D",
+  "tag": "ror-inferred",
+  "was": "i3rItem0DGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0D fixups, shape num of child slot 0"
+ },
+ "0022d598": {
+  "name": "i3rGetChild0D",
+  "tag": "ror-inferred",
+  "was": "i3rItem0DGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0D fixups, shape child of child slot 0"
+ },
+ "0022d5b0": {
+  "name": "i3rGetChildBegin0D",
+  "tag": "ror-inferred",
+  "was": "i3rItem0DGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0D fixups, shape begin of child slot 0"
+ },
+ "0022d5c0": {
+  "name": "i3rGetChildEnd0D",
+  "tag": "ror-inferred",
+  "was": "i3rItem0DGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0D fixups, shape end of child slot 0"
+ },
+ "0022d5e0": {
+  "name": "i3rGetSlot0D_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem0DGetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x0D fixups, shape slot of child slot 1"
+ },
+ "0022d5f0": {
+  "name": "i3rHasData0D_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem0DHasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x0D fixups, shape hasdata of child slot 1"
  },
  "0022d600": {
   "name": "i3rUnrelocData0C",
@@ -21647,6 +22355,42 @@
   "was": "FUN_0022d618",
   "why": "slot 0xb of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0xb (offsets from the data start)"
  },
+ "0022d620": {
+  "name": "i3rGetNumChild0B",
+  "tag": "ror-inferred",
+  "was": "i3rItem0BGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0B fixups, shape num of child slot 0"
+ },
+ "0022d638": {
+  "name": "i3rGetChild0B",
+  "tag": "ror-inferred",
+  "was": "i3rItem0BGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0B fixups, shape child of child slot 0"
+ },
+ "0022d650": {
+  "name": "i3rGetChildBegin0B",
+  "tag": "ror-inferred",
+  "was": "i3rItem0BGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0B fixups, shape begin of child slot 0"
+ },
+ "0022d660": {
+  "name": "i3rGetChildEnd0B",
+  "tag": "ror-inferred",
+  "was": "i3rItem0BGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0B fixups, shape end of child slot 0"
+ },
+ "0022d680": {
+  "name": "i3rGetSlot0B_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem0BGetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x0B fixups, shape slot of child slot 1"
+ },
+ "0022d690": {
+  "name": "i3rHasData0B_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem0BHasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x0B fixups, shape hasdata of child slot 1"
+ },
  "0022d6a0": {
   "name": "i3rUnrelocData15",
   "tag": "ror-inferred",
@@ -21671,6 +22415,66 @@
   "was": "FUN_0022d710",
   "why": "slot 0x8 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x8 (offsets from the data start)"
  },
+ "0022d770": {
+  "name": "i3rGetSlot08",
+  "tag": "ror-inferred",
+  "was": "i3rItem08GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x08 fixups, shape slot of child slot 0"
+ },
+ "0022d778": {
+  "name": "i3rHasData08",
+  "tag": "ror-inferred",
+  "was": "i3rItem08HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x08 fixups, shape hasdata of child slot 0"
+ },
+ "0022d788": {
+  "name": "i3rGetSlot08_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem08GetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x08 fixups, shape slot of child slot 1"
+ },
+ "0022d798": {
+  "name": "i3rHasData08_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem08HasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x08 fixups, shape hasdata of child slot 1"
+ },
+ "0022d7a8": {
+  "name": "i3rGetSlot08_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem08GetSlot2",
+  "why": "i3racc.py: unreferenced accessor after type 0x08 fixups, shape slot of child slot 2"
+ },
+ "0022d7b8": {
+  "name": "i3rHasData08_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem08HasData2",
+  "why": "i3racc.py: unreferenced accessor after type 0x08 fixups, shape hasdata of child slot 2"
+ },
+ "0022d7c8": {
+  "name": "i3rGetSlot08_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem08GetSlot3",
+  "why": "i3racc.py: unreferenced accessor after type 0x08 fixups, shape slot of child slot 3"
+ },
+ "0022d7d8": {
+  "name": "i3rHasData08_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem08HasData3",
+  "why": "i3racc.py: unreferenced accessor after type 0x08 fixups, shape hasdata of child slot 3"
+ },
+ "0022d7e8": {
+  "name": "i3rGetSlot08_4",
+  "tag": "ror-inferred",
+  "was": "i3rItem08GetSlot4",
+  "why": "i3racc.py: unreferenced accessor after type 0x08 fixups, shape slot of child slot 4"
+ },
+ "0022d7f8": {
+  "name": "i3rHasData08_4",
+  "tag": "ror-inferred",
+  "was": "i3rItem08HasData4",
+  "why": "i3racc.py: unreferenced accessor after type 0x08 fixups, shape hasdata of child slot 4"
+ },
  "0022d808": {
   "name": "i3rUnrelocData10",
   "tag": "ror-inferred",
@@ -21694,6 +22498,30 @@
   "tag": "ror-inferred",
   "was": "FUN_0022d820",
   "why": "slot 0x1b of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1b (offsets from the data start)"
+ },
+ "0022d828": {
+  "name": "i3rGetNumChild1B",
+  "tag": "ror-inferred",
+  "was": "i3rItem1BGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1B fixups, shape num of child slot 0"
+ },
+ "0022d840": {
+  "name": "i3rGetChild1B",
+  "tag": "ror-inferred",
+  "was": "i3rItem1BGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1B fixups, shape child of child slot 0"
+ },
+ "0022d858": {
+  "name": "i3rGetChildBegin1B",
+  "tag": "ror-inferred",
+  "was": "i3rItem1BGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1B fixups, shape begin of child slot 0"
+ },
+ "0022d868": {
+  "name": "i3rGetChildEnd1B",
+  "tag": "ror-inferred",
+  "was": "i3rItem1BGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1B fixups, shape end of child slot 0"
  },
  "0022d888": {
   "name": "i3rUnrelocData44",
@@ -21731,6 +22559,30 @@
   "was": "FUN_0022d8b0",
   "why": "slot 0x18 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x18 (offsets from the data start)"
  },
+ "0022d8b8": {
+  "name": "i3rGetSlot18",
+  "tag": "ror-inferred",
+  "was": "i3rItem18GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x18 fixups, shape slot of child slot 0"
+ },
+ "0022d8c0": {
+  "name": "i3rHasData18",
+  "tag": "ror-inferred",
+  "was": "i3rItem18HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x18 fixups, shape hasdata of child slot 0"
+ },
+ "0022d8d0": {
+  "name": "i3rGetSlot18_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem18GetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x18 fixups, shape slot of child slot 1"
+ },
+ "0022d8e0": {
+  "name": "i3rHasData18_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem18HasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x18 fixups, shape hasdata of child slot 1"
+ },
  "0022d8f0": {
   "name": "i3rUnrelocData19",
   "tag": "ror-inferred",
@@ -21742,6 +22594,42 @@
   "tag": "ror-inferred",
   "was": "FUN_0022d8f8",
   "why": "slot 0x19 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x19 (offsets from the data start)"
+ },
+ "0022d900": {
+  "name": "i3rGetSlot19",
+  "tag": "ror-inferred",
+  "was": "i3rItem19GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x19 fixups, shape slot of child slot 0"
+ },
+ "0022d908": {
+  "name": "i3rHasData19",
+  "tag": "ror-inferred",
+  "was": "i3rItem19HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x19 fixups, shape hasdata of child slot 0"
+ },
+ "0022d918": {
+  "name": "i3rGetSlot19_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem19GetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x19 fixups, shape slot of child slot 1"
+ },
+ "0022d928": {
+  "name": "i3rHasData19_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem19HasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x19 fixups, shape hasdata of child slot 1"
+ },
+ "0022d938": {
+  "name": "i3rGetSlot19_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem19GetSlot2",
+  "why": "i3racc.py: unreferenced accessor after type 0x19 fixups, shape slot of child slot 2"
+ },
+ "0022d948": {
+  "name": "i3rHasData19_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem19HasData2",
+  "why": "i3racc.py: unreferenced accessor after type 0x19 fixups, shape hasdata of child slot 2"
  },
  "0022d958": {
   "name": "i3rUnrelocData05",
@@ -21755,6 +22643,18 @@
   "was": "FUN_0022d960",
   "why": "slot 0x5 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x5 (offsets from the data start)"
  },
+ "0022d968": {
+  "name": "i3rGetSlot05",
+  "tag": "ror-inferred",
+  "was": "i3rItem05GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x05 fixups, shape slot of child slot 0"
+ },
+ "0022d970": {
+  "name": "i3rHasData05",
+  "tag": "ror-inferred",
+  "was": "i3rItem05HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x05 fixups, shape hasdata of child slot 0"
+ },
  "0022d980": {
   "name": "i3rUnrelocData0F",
   "tag": "ror-inferred",
@@ -21766,6 +22666,42 @@
   "tag": "ror-inferred",
   "was": "FUN_0022d988",
   "why": "slot 0xf of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0xf (offsets from the data start)"
+ },
+ "0022d990": {
+  "name": "i3rGetNumChild0F",
+  "tag": "ror-inferred",
+  "was": "i3rItem0FGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0F fixups, shape num of child slot 0"
+ },
+ "0022d9a8": {
+  "name": "i3rGetChild0F",
+  "tag": "ror-inferred",
+  "was": "i3rItem0FGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0F fixups, shape child of child slot 0"
+ },
+ "0022d9c0": {
+  "name": "i3rGetChildBegin0F",
+  "tag": "ror-inferred",
+  "was": "i3rItem0FGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0F fixups, shape begin of child slot 0"
+ },
+ "0022d9d0": {
+  "name": "i3rGetChildEnd0F",
+  "tag": "ror-inferred",
+  "was": "i3rItem0FGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x0F fixups, shape end of child slot 0"
+ },
+ "0022d9f0": {
+  "name": "i3rGetSlot0F_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem0FGetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x0F fixups, shape slot of child slot 1"
+ },
+ "0022da00": {
+  "name": "i3rHasData0F_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem0FHasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x0F fixups, shape hasdata of child slot 1"
  },
  "0022da10": {
   "name": "i3rUnrelocData20",
@@ -21779,6 +22715,30 @@
   "was": "FUN_0022da18",
   "why": "slot 0x20 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x20 (offsets from the data start)"
  },
+ "0022da20": {
+  "name": "i3rGetNumChild20",
+  "tag": "ror-inferred",
+  "was": "i3rItem20GetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x20 fixups, shape num of child slot 0"
+ },
+ "0022da38": {
+  "name": "i3rGetChild20",
+  "tag": "ror-inferred",
+  "was": "i3rItem20GetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x20 fixups, shape child of child slot 0"
+ },
+ "0022da50": {
+  "name": "i3rGetChildBegin20",
+  "tag": "ror-inferred",
+  "was": "i3rItem20GetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x20 fixups, shape begin of child slot 0"
+ },
+ "0022da60": {
+  "name": "i3rGetChildEnd20",
+  "tag": "ror-inferred",
+  "was": "i3rItem20GetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x20 fixups, shape end of child slot 0"
+ },
  "0022da80": {
   "name": "i3rUnrelocData12",
   "tag": "ror-inferred",
@@ -21791,6 +22751,18 @@
   "was": "FUN_0022da88",
   "why": "slot 0x12 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x12 (offsets from the data start)"
  },
+ "0022da90": {
+  "name": "i3rGetSlot12",
+  "tag": "ror-inferred",
+  "was": "i3rItem12GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x12 fixups, shape slot of child slot 0"
+ },
+ "0022da98": {
+  "name": "i3rHasData12",
+  "tag": "ror-inferred",
+  "was": "i3rItem12HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x12 fixups, shape hasdata of child slot 0"
+ },
  "0022daa8": {
   "name": "i3rUnrelocData14",
   "tag": "ror-inferred",
@@ -21802,6 +22774,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0022dab0",
   "why": "slot 0x14 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x14 (offsets from the data start)"
+ },
+ "0022dab8": {
+  "name": "i3rGetSlot14",
+  "tag": "ror-inferred",
+  "was": "i3rItem14GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x14 fixups, shape slot of child slot 0"
+ },
+ "0022dac0": {
+  "name": "i3rHasData14",
+  "tag": "ror-inferred",
+  "was": "i3rItem14HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x14 fixups, shape hasdata of child slot 0"
  },
  "0022dad0": {
   "name": "i3rUnrelocData11",
@@ -21839,6 +22823,18 @@
   "was": "FUN_0022daf8",
   "why": "slot 0x1a of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1a (offsets from the data start)"
  },
+ "0022db00": {
+  "name": "i3rGetSlot1A",
+  "tag": "ror-inferred",
+  "was": "i3rItem1AGetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1A fixups, shape slot of child slot 0"
+ },
+ "0022db08": {
+  "name": "i3rHasData1A",
+  "tag": "ror-inferred",
+  "was": "i3rItem1AHasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1A fixups, shape hasdata of child slot 0"
+ },
  "0022db18": {
   "name": "i3rUnrelocData06",
   "tag": "ror-inferred",
@@ -21875,6 +22871,42 @@
   "was": "FUN_0022db40",
   "why": "slot 0x3e of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x3e (offsets from the data start)"
  },
+ "0022db48": {
+  "name": "i3rGetSlot3E",
+  "tag": "ror-inferred",
+  "was": "i3rItem3EGetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x3E fixups, shape slot of child slot 0"
+ },
+ "0022db50": {
+  "name": "i3rHasData3E",
+  "tag": "ror-inferred",
+  "was": "i3rItem3EHasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x3E fixups, shape hasdata of child slot 0"
+ },
+ "0022db60": {
+  "name": "i3rGetSlot3E_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem3EGetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x3E fixups, shape slot of child slot 1"
+ },
+ "0022db70": {
+  "name": "i3rHasData3E_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem3EHasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x3E fixups, shape hasdata of child slot 1"
+ },
+ "0022db80": {
+  "name": "i3rGetSlot3E_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem3EGetSlot2",
+  "why": "i3racc.py: unreferenced accessor after type 0x3E fixups, shape slot of child slot 2"
+ },
+ "0022db90": {
+  "name": "i3rHasData3E_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem3EHasData2",
+  "why": "i3racc.py: unreferenced accessor after type 0x3E fixups, shape hasdata of child slot 2"
+ },
  "0022dba0": {
   "name": "i3rUnrelocData13",
   "tag": "ror-inferred",
@@ -21886,6 +22918,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0022dba8",
   "why": "slot 0x13 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x13 (offsets from the data start)"
+ },
+ "0022dbb0": {
+  "name": "i3rGetSlot13",
+  "tag": "ror-inferred",
+  "was": "i3rItem13GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x13 fixups, shape slot of child slot 0"
+ },
+ "0022dbb8": {
+  "name": "i3rHasData13",
+  "tag": "ror-inferred",
+  "was": "i3rItem13HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x13 fixups, shape hasdata of child slot 0"
  },
  "0022dbc8": {
   "name": "i3rUnrelocData07",
@@ -21899,6 +22943,30 @@
   "was": "FUN_0022dbd0",
   "why": "slot 0x7 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x7 (offsets from the data start)"
  },
+ "0022dbd8": {
+  "name": "i3rGetSlot07",
+  "tag": "ror-inferred",
+  "was": "i3rItem07GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x07 fixups, shape slot of child slot 0"
+ },
+ "0022dbe0": {
+  "name": "i3rHasData07",
+  "tag": "ror-inferred",
+  "was": "i3rItem07HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x07 fixups, shape hasdata of child slot 0"
+ },
+ "0022dbf0": {
+  "name": "i3rGetSlot07_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem07GetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x07 fixups, shape slot of child slot 1"
+ },
+ "0022dc00": {
+  "name": "i3rHasData07_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem07HasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x07 fixups, shape hasdata of child slot 1"
+ },
  "0022dc10": {
   "name": "i3rUnrelocData22",
   "tag": "ror-inferred",
@@ -21910,6 +22978,30 @@
   "tag": "ror-inferred",
   "was": "FUN_0022dc18",
   "why": "slot 0x22 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x22 (offsets from the data start)"
+ },
+ "0022dc20": {
+  "name": "i3rGetSlot22",
+  "tag": "ror-inferred",
+  "was": "i3rItem22GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x22 fixups, shape slot of child slot 0"
+ },
+ "0022dc28": {
+  "name": "i3rHasData22",
+  "tag": "ror-inferred",
+  "was": "i3rItem22HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x22 fixups, shape hasdata of child slot 0"
+ },
+ "0022dc38": {
+  "name": "i3rGetSlot22_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem22GetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x22 fixups, shape slot of child slot 1"
+ },
+ "0022dc48": {
+  "name": "i3rHasData22_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem22HasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x22 fixups, shape hasdata of child slot 1"
  },
  "0022dc58": {
   "name": "i3rUnrelocData17",
@@ -21923,6 +23015,222 @@
   "was": "FUN_0022dc60",
   "why": "slot 0x17 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x17 (offsets from the data start)"
  },
+ "0022dc68": {
+  "name": "i3rGetSlot17",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 0"
+ },
+ "0022dc70": {
+  "name": "i3rHasData17",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 0"
+ },
+ "0022dc80": {
+  "name": "i3rGetSlot17_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 1"
+ },
+ "0022dc90": {
+  "name": "i3rHasData17_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 1"
+ },
+ "0022dca0": {
+  "name": "i3rGetSlot17_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot2",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 2"
+ },
+ "0022dcb0": {
+  "name": "i3rHasData17_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData2",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 2"
+ },
+ "0022dcc0": {
+  "name": "i3rGetSlot17_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot3",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 3"
+ },
+ "0022dcd0": {
+  "name": "i3rHasData17_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData3",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 3"
+ },
+ "0022dce0": {
+  "name": "i3rGetSlot17_4",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot4",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 4"
+ },
+ "0022dcf0": {
+  "name": "i3rHasData17_4",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData4",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 4"
+ },
+ "0022dd00": {
+  "name": "i3rGetSlot17_5",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot5",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 5"
+ },
+ "0022dd10": {
+  "name": "i3rHasData17_5",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData5",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 5"
+ },
+ "0022dd20": {
+  "name": "i3rGetSlot17_6",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot6",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 6"
+ },
+ "0022dd30": {
+  "name": "i3rHasData17_6",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData6",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 6"
+ },
+ "0022dd40": {
+  "name": "i3rGetSlot17_7",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot7",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 7"
+ },
+ "0022dd50": {
+  "name": "i3rHasData17_7",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData7",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 7"
+ },
+ "0022dd60": {
+  "name": "i3rGetSlot17_8",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot8",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 8"
+ },
+ "0022dd70": {
+  "name": "i3rHasData17_8",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData8",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 8"
+ },
+ "0022dd80": {
+  "name": "i3rGetSlot17_9",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot9",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 9"
+ },
+ "0022dd90": {
+  "name": "i3rHasData17_9",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData9",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 9"
+ },
+ "0022dda0": {
+  "name": "i3rGetSlot17_10",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot10",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 10"
+ },
+ "0022ddb0": {
+  "name": "i3rHasData17_10",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData10",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 10"
+ },
+ "0022ddc0": {
+  "name": "i3rGetSlot17_11",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot11",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 11"
+ },
+ "0022ddd0": {
+  "name": "i3rHasData17_11",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData11",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 11"
+ },
+ "0022dde0": {
+  "name": "i3rGetSlot17_12",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot12",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 12"
+ },
+ "0022ddf0": {
+  "name": "i3rHasData17_12",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData12",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 12"
+ },
+ "0022de00": {
+  "name": "i3rGetSlot17_13",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot13",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 13"
+ },
+ "0022de10": {
+  "name": "i3rHasData17_13",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData13",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 13"
+ },
+ "0022de20": {
+  "name": "i3rGetSlot17_14",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot14",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 14"
+ },
+ "0022de30": {
+  "name": "i3rHasData17_14",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData14",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 14"
+ },
+ "0022de40": {
+  "name": "i3rGetNumChild17_15",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetNumChild15",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape num of child slot 15"
+ },
+ "0022de58": {
+  "name": "i3rGetChild17_15",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetChild15",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape child of child slot 15"
+ },
+ "0022de70": {
+  "name": "i3rGetChildBegin17_15",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetChildBegin15",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape begin of child slot 15"
+ },
+ "0022de80": {
+  "name": "i3rGetChildEnd17_15",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetChildEnd15",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape end of child slot 15"
+ },
+ "0022dea0": {
+  "name": "i3rGetSlot17_16",
+  "tag": "ror-inferred",
+  "was": "i3rItem17GetSlot16",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape slot of child slot 16"
+ },
+ "0022deb0": {
+  "name": "i3rHasData17_16",
+  "tag": "ror-inferred",
+  "was": "i3rItem17HasData16",
+  "why": "i3racc.py: unreferenced accessor after type 0x17 fixups, shape hasdata of child slot 16"
+ },
  "0022dec0": {
   "name": "i3rUnrelocData38",
   "tag": "ror-inferred",
@@ -21935,6 +23243,18 @@
   "was": "FUN_0022df38",
   "why": "slot 0x38 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x38 (offsets from the data start)"
  },
+ "0022dfb0": {
+  "name": "i3rGetSlot38",
+  "tag": "ror-inferred",
+  "was": "i3rItem38GetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x38 fixups, shape slot of child slot 0"
+ },
+ "0022dfb8": {
+  "name": "i3rHasData38",
+  "tag": "ror-inferred",
+  "was": "i3rItem38HasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x38 fixups, shape hasdata of child slot 0"
+ },
  "0022dfc8": {
   "name": "i3rUnrelocData1F",
   "tag": "ror-inferred",
@@ -21946,6 +23266,66 @@
   "tag": "ror-inferred",
   "was": "FUN_0022dfd0",
   "why": "slot 0x1f of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1f (offsets from the data start)"
+ },
+ "0022dfd8": {
+  "name": "i3rGetSlot1F",
+  "tag": "ror-inferred",
+  "was": "i3rItem1FGetSlot0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1F fixups, shape slot of child slot 0"
+ },
+ "0022dfe0": {
+  "name": "i3rHasData1F",
+  "tag": "ror-inferred",
+  "was": "i3rItem1FHasData0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1F fixups, shape hasdata of child slot 0"
+ },
+ "0022dff0": {
+  "name": "i3rGetNumChild1F_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem1FGetNumChild1",
+  "why": "i3racc.py: unreferenced accessor after type 0x1F fixups, shape num of child slot 1"
+ },
+ "0022e008": {
+  "name": "i3rGetChild1F_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem1FGetChild1",
+  "why": "i3racc.py: unreferenced accessor after type 0x1F fixups, shape child of child slot 1"
+ },
+ "0022e020": {
+  "name": "i3rFindChild1F_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e020",
+  "why": "i3racc.py: unreferenced accessor after type 0x1F fixups, shape find of child slot 1"
+ },
+ "0022e040": {
+  "name": "i3rGetChildName1F_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem1FGetChildName1",
+  "why": "i3racc.py: unreferenced accessor after type 0x1F fixups, shape name of child slot 1"
+ },
+ "0022e058": {
+  "name": "i3rGetChildByName1F_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e058",
+  "why": "i3racc.py: unreferenced accessor after type 0x1F fixups, shape byname of child slot 1"
+ },
+ "0022e098": {
+  "name": "i3rHasChild1F_1",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e098",
+  "why": "i3racc.py: unreferenced accessor after type 0x1F fixups, shape haschild of child slot 1"
+ },
+ "0022e0c0": {
+  "name": "i3rGetChildBegin1F_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem1FGetChildBegin1",
+  "why": "i3racc.py: unreferenced accessor after type 0x1F fixups, shape begin of child slot 1"
+ },
+ "0022e0d0": {
+  "name": "i3rGetChildEnd1F_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem1FGetChildEnd1",
+  "why": "i3racc.py: unreferenced accessor after type 0x1F fixups, shape end of child slot 1"
  },
  "0022e0f0": {
   "name": "i3rUnrelocData3D",
@@ -21983,6 +23363,30 @@
   "was": "FUN_0022e118",
   "why": "slot 0x1c of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1c (offsets from the data start)"
  },
+ "0022e120": {
+  "name": "i3rGetNumChild1C",
+  "tag": "ror-inferred",
+  "was": "i3rItem1CGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1C fixups, shape num of child slot 0"
+ },
+ "0022e138": {
+  "name": "i3rGetChild1C",
+  "tag": "ror-inferred",
+  "was": "i3rItem1CGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1C fixups, shape child of child slot 0"
+ },
+ "0022e150": {
+  "name": "i3rGetChildBegin1C",
+  "tag": "ror-inferred",
+  "was": "i3rItem1CGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1C fixups, shape begin of child slot 0"
+ },
+ "0022e160": {
+  "name": "i3rGetChildEnd1C",
+  "tag": "ror-inferred",
+  "was": "i3rItem1CGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1C fixups, shape end of child slot 0"
+ },
  "0022e180": {
   "name": "i3rUnrelocData1D",
   "tag": "ror-inferred",
@@ -21994,6 +23398,30 @@
   "tag": "ror-inferred",
   "was": "FUN_0022e1e0",
   "why": "slot 0x1d of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1d (offsets from the data start)"
+ },
+ "0022e240": {
+  "name": "i3rGetNumChild1D",
+  "tag": "ror-inferred",
+  "was": "i3rItem1DGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1D fixups, shape num of child slot 0"
+ },
+ "0022e258": {
+  "name": "i3rGetChild1D",
+  "tag": "ror-inferred",
+  "was": "i3rItem1DGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1D fixups, shape child of child slot 0"
+ },
+ "0022e270": {
+  "name": "i3rGetChildBegin1D",
+  "tag": "ror-inferred",
+  "was": "i3rItem1DGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1D fixups, shape begin of child slot 0"
+ },
+ "0022e280": {
+  "name": "i3rGetChildEnd1D",
+  "tag": "ror-inferred",
+  "was": "i3rItem1DGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1D fixups, shape end of child slot 0"
  },
  "0022e2a0": {
   "name": "i3rUnrelocData1E",
@@ -22007,6 +23435,66 @@
   "was": "FUN_0022e2b8",
   "why": "slot 0x1e of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x1e (offsets from the data start)"
  },
+ "0022e2d0": {
+  "name": "i3rGetNumChild1E",
+  "tag": "ror-inferred",
+  "was": "i3rItem1EGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1E fixups, shape num of child slot 0"
+ },
+ "0022e2e8": {
+  "name": "i3rGetChild1E",
+  "tag": "ror-inferred",
+  "was": "i3rItem1EGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1E fixups, shape child of child slot 0"
+ },
+ "0022e300": {
+  "name": "i3rFindChild1E",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e300",
+  "why": "i3racc.py: unreferenced accessor after type 0x1E fixups, shape find of child slot 0"
+ },
+ "0022e318": {
+  "name": "i3rGetChildName1E",
+  "tag": "ror-inferred",
+  "was": "i3rItem1EGetChildName0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1E fixups, shape name of child slot 0"
+ },
+ "0022e330": {
+  "name": "i3rGetChildByName1E",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e330",
+  "why": "i3racc.py: unreferenced accessor after type 0x1E fixups, shape byname of child slot 0"
+ },
+ "0022e368": {
+  "name": "i3rHasChild1E",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e368",
+  "why": "i3racc.py: unreferenced accessor after type 0x1E fixups, shape haschild of child slot 0"
+ },
+ "0022e390": {
+  "name": "i3rGetChildBegin1E",
+  "tag": "ror-inferred",
+  "was": "i3rItem1EGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1E fixups, shape begin of child slot 0"
+ },
+ "0022e3a0": {
+  "name": "i3rGetChildEnd1E",
+  "tag": "ror-inferred",
+  "was": "i3rItem1EGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x1E fixups, shape end of child slot 0"
+ },
+ "0022e3c0": {
+  "name": "i3rGetSlot1E_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem1EGetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x1E fixups, shape slot of child slot 1"
+ },
+ "0022e3d0": {
+  "name": "i3rHasData1E_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem1EHasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x1E fixups, shape hasdata of child slot 1"
+ },
  "0022e3e0": {
   "name": "i3rUnrelocData3C",
   "tag": "ror-inferred",
@@ -22018,6 +23506,42 @@
   "tag": "ror-inferred",
   "was": "FUN_0022e3e8",
   "why": "slot 0x3c of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x3c (offsets from the data start)"
+ },
+ "0022e3f0": {
+  "name": "i3rGetNumChild3C",
+  "tag": "ror-inferred",
+  "was": "i3rItem3CGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x3C fixups, shape num of child slot 0"
+ },
+ "0022e408": {
+  "name": "i3rGetChild3C",
+  "tag": "ror-inferred",
+  "was": "i3rItem3CGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x3C fixups, shape child of child slot 0"
+ },
+ "0022e420": {
+  "name": "i3rGetChildBegin3C",
+  "tag": "ror-inferred",
+  "was": "i3rItem3CGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x3C fixups, shape begin of child slot 0"
+ },
+ "0022e430": {
+  "name": "i3rGetChildEnd3C",
+  "tag": "ror-inferred",
+  "was": "i3rItem3CGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x3C fixups, shape end of child slot 0"
+ },
+ "0022e450": {
+  "name": "i3rGetSlot3C_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem3CGetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x3C fixups, shape slot of child slot 1"
+ },
+ "0022e460": {
+  "name": "i3rHasData3C_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem3CHasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x3C fixups, shape hasdata of child slot 1"
  },
  "0022e470": {
   "name": "i3rUnrelocData3A",
@@ -22031,6 +23555,42 @@
   "was": "FUN_0022e478",
   "why": "slot 0x3a of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x3a (offsets from the data start)"
  },
+ "0022e480": {
+  "name": "i3rGetNumChild3A",
+  "tag": "ror-inferred",
+  "was": "i3rItem3AGetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x3A fixups, shape num of child slot 0"
+ },
+ "0022e498": {
+  "name": "i3rGetChild3A",
+  "tag": "ror-inferred",
+  "was": "i3rItem3AGetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x3A fixups, shape child of child slot 0"
+ },
+ "0022e4b0": {
+  "name": "i3rGetChildBegin3A",
+  "tag": "ror-inferred",
+  "was": "i3rItem3AGetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x3A fixups, shape begin of child slot 0"
+ },
+ "0022e4c0": {
+  "name": "i3rGetChildEnd3A",
+  "tag": "ror-inferred",
+  "was": "i3rItem3AGetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x3A fixups, shape end of child slot 0"
+ },
+ "0022e4e0": {
+  "name": "i3rGetSlot3A_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem3AGetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x3A fixups, shape slot of child slot 1"
+ },
+ "0022e4f0": {
+  "name": "i3rHasData3A_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem3AHasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x3A fixups, shape hasdata of child slot 1"
+ },
  "0022e500": {
   "name": "i3rUnrelocData21",
   "tag": "ror-inferred",
@@ -22042,6 +23602,174 @@
   "tag": "ror-inferred",
   "was": "FUN_0022e508",
   "why": "slot 0x21 of i3rItemRelocate's per-type table 0x2db4c8: turns the offsets in an item's data of type 0x21 (offsets from the data start)"
+ },
+ "0022e510": {
+  "name": "i3rGetNumChild21",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetNumChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape num of child slot 0"
+ },
+ "0022e528": {
+  "name": "i3rGetChild21",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChild0",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape child of child slot 0"
+ },
+ "0022e540": {
+  "name": "i3rFindChild21",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e540",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape find of child slot 0"
+ },
+ "0022e558": {
+  "name": "i3rGetChildName21",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChildName0",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape name of child slot 0"
+ },
+ "0022e570": {
+  "name": "i3rGetChildByName21",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e570",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape byname of child slot 0"
+ },
+ "0022e5a8": {
+  "name": "i3rHasChild21",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e5a8",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape haschild of child slot 0"
+ },
+ "0022e5d0": {
+  "name": "i3rGetChildBegin21",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChildBegin0",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape begin of child slot 0"
+ },
+ "0022e5e0": {
+  "name": "i3rGetChildEnd21",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChildEnd0",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape end of child slot 0"
+ },
+ "0022e600": {
+  "name": "i3rGetSlot21_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetSlot1",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape slot of child slot 1"
+ },
+ "0022e610": {
+  "name": "i3rHasData21_1",
+  "tag": "ror-inferred",
+  "was": "i3rItem21HasData1",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape hasdata of child slot 1"
+ },
+ "0022e620": {
+  "name": "i3rGetNumChild21_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetNumChild2",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape num of child slot 2"
+ },
+ "0022e638": {
+  "name": "i3rGetChild21_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChild2",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape child of child slot 2"
+ },
+ "0022e650": {
+  "name": "i3rFindChild21_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e650",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape find of child slot 2"
+ },
+ "0022e670": {
+  "name": "i3rGetChildName21_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChildName2",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape name of child slot 2"
+ },
+ "0022e688": {
+  "name": "i3rGetChildByName21_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e688",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape byname of child slot 2"
+ },
+ "0022e6c8": {
+  "name": "i3rHasChild21_2",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e6c8",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape haschild of child slot 2"
+ },
+ "0022e6f0": {
+  "name": "i3rGetChildBegin21_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChildBegin2",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape begin of child slot 2"
+ },
+ "0022e700": {
+  "name": "i3rGetChildEnd21_2",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChildEnd2",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape end of child slot 2"
+ },
+ "0022e720": {
+  "name": "i3rGetNumChild21_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetNumChild3",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape num of child slot 3"
+ },
+ "0022e738": {
+  "name": "i3rGetChild21_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChild3",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape child of child slot 3"
+ },
+ "0022e750": {
+  "name": "i3rFindChild21_3",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e750",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape find of child slot 3"
+ },
+ "0022e770": {
+  "name": "i3rGetChildName21_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChildName3",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape name of child slot 3"
+ },
+ "0022e788": {
+  "name": "i3rGetChildByName21_3",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e788",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape byname of child slot 3"
+ },
+ "0022e7c8": {
+  "name": "i3rHasChild21_3",
+  "tag": "ror-inferred",
+  "was": "FUN_0022e7c8",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape haschild of child slot 3"
+ },
+ "0022e7f0": {
+  "name": "i3rGetChildBegin21_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChildBegin3",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape begin of child slot 3"
+ },
+ "0022e800": {
+  "name": "i3rGetChildEnd21_3",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetChildEnd3",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape end of child slot 3"
+ },
+ "0022e820": {
+  "name": "i3rGetSlot21_4",
+  "tag": "ror-inferred",
+  "was": "i3rItem21GetSlot4",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape slot of child slot 4"
+ },
+ "0022e830": {
+  "name": "i3rHasData21_4",
+  "tag": "ror-inferred",
+  "was": "i3rItem21HasData4",
+  "why": "i3racc.py: unreferenced accessor after type 0x21 fixups, shape hasdata of child slot 4"
  },
  "0022e840": {
   "name": "i3mGetBlendNodePose",
