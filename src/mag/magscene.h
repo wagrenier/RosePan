@@ -383,6 +383,7 @@ struct MagScene
     int  loadTexture(const char *theFile, const char *theName);          // ROR 0x00139308
     void draw(i3dContext *ctx, sceGsDBuff *dbuff, int frame);            // ROR 0x0013bcc0
     void postDraw();                                                     // ROR 0x0013c29c
+    void testCamera();                                                   // PC: debug (ROSEPAN_TEST_CAM)
     void parseOption(char *text);                                        // ROR 0x0013c328
     void setCameraTarget(const float *pos, const float *at);             // ROR 0x0013c2ec
     void initCamera();                                                   // ROR 0x0013c928

@@ -834,3 +834,17 @@ blocked, so it is game logic, not a lock.
   TEST (RosePan_I3dRecordReg, PC: comment). Lesson: an untextured model may be a pass whose target is
   not the screen -- check the layer's FRAME / XYOFFSET before chasing textures. Found by logging, in
   MaterialTexture, the misses with the layer's texture name and comparing with DogTexInfo::addPfh's names.
+
+## A black 3D scene that is a camera nobody placed (2026-10-28)
+
+- Symptom: after the picture book every frame was black, though MagScene::draw ran with the world
+  flag and the actors and map were alive and textured.
+- Cause: i3rDrawModel culled every model (I3R_DRAW_CULLED 0xd) because the scene camera was still
+  its default -- mode 0, no parent, at (0, 1000, 0) looking along +y. Neither the script nor a PC
+  bind had placed it yet. The shadow passes, which have their own views, did draw.
+- Fix / method: log utlDrawI3r's result per model and the camera (mode, parent, world position,
+  view matrix) every 60 frames before chasing textures or the mesh module. ROSEPAN_TEST_CAM=1
+  (MagScene::testCamera) aims such a camera at actor 0, which shows whether the draw path works on
+  its own. Note: a smoke run can take a different path from run to run. One of four 200 s runs went
+  black at the title (frame ~1860) and never reached the book, so compare against a second run before
+  reading anything into a single black run.
