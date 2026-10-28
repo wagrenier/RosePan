@@ -361,10 +361,13 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     Mesh 0x2d [0] 0x46 (data +0 -> per-slot offset (inverse bind) matrices, +0xc u16 count) -> [0]
     -> 0x4c groups (data +0 -> the u16 bone slot, +5 flags: 8 = rigid: drawn with world x
     nodes[bones[slot]] in i3d order, i.e. p * node * world; otherwise skinned) -> [0] -> 0x4d
-    (+0xc s16 material) -> [0] -> 0x56 batches: [4] positions (VU1 0x1dc), [2] normals (0x22c),
+    (+0xc s16 material; +0x08 -> one byte per material layer = the batch's [0] group that layer
+    draws, -1 none -- i3rPktCallStrips 0x221080; the layer count is the material's layer list
+    child count) -> [0] -> 0x56 batches: [4] positions (VU1 0x1dc), [2] normals (0x22c),
     up to 80 each; [5] bone records (0x31: +0 -> {s32 pool byte offset, f32 weight} pairs, +4 u16
     slot, +6 u16 pair count padded with zero weights): skinned pool = sum of w * (p * offset[slot] *
-    nodes[bones[slot]]), normals through that matrix's normalised rows; [0] -> 0x30 -> [0] ->
+    nodes[bones[slot]]), normals through that matrix's normalised rows; [0] -> 0x30 groups (one per
+    layer byte) -> [0] ->
     0x47 strips (data +0 -> V2-16 list unpacked at 3, +4 qwc, +5 vertex count 3..20 = the row of
     the 0x302c40 table whose qwords set VU1 0..2 and MSCAL 1; list element x = pool index with
     bit 15 = no triangle at this vertex, y bit 15 = (n-2, n-1, n) faces front, else reversed --

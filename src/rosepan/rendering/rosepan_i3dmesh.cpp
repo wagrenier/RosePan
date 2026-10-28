@@ -117,6 +117,7 @@ struct HostVu
 HostVu s_vu;
 bool s_logged_vif;
 bool s_logged_kind;
+bool s_logged_group;
 
 float AsFloat(uint32_t bits)
 {
@@ -369,20 +370,26 @@ void SkinBatch(const I3rItem &records, const Skin &skin)
     }
 }
 
-/* The layer texture of material `index` (root [0]): its first layer's
- * m_tex_index into the texture table. */
-const void *MaterialTexture(const I3rItem *materials, unsigned num_mat, int index,
-                            const I3dTexEntry *tex, int tex_count)
+/* Material `index`'s layer list (root [0]: the material's child 0), or
+ * NULL. Its child count is the writers' layer count (i3rDrawGroup45 reads
+ * it from the list item's m_info). */
+const I3rItem *MaterialLayers(const I3rItem *materials, unsigned num_mat, int index)
 {
-    if (materials == nullptr || index < 0 || (unsigned)index >= num_mat || tex == nullptr)
+    if (materials == nullptr || index < 0 || (unsigned)index >= num_mat)
         return nullptr;
     const I3rItem &mat = materials[index];
-    if (mat.getNumChild() == 0)
+    return mat.getNumChild() != 0 ? &mat.getChildren()[0] : nullptr;
+}
+
+/* The texture of material `index`'s layer `u`: its m_tex_index into the
+ * texture table. */
+const void *MaterialTexture(const I3rItem *materials, unsigned num_mat, int index, unsigned u,
+                            const I3dTexEntry *tex, int tex_count)
+{
+    const I3rItem *layers = MaterialLayers(materials, num_mat, index);
+    if (layers == nullptr || u >= layers->getNumChild() || tex == nullptr)
         return nullptr;
-    const I3rItem &layers = mat.getChildren()[0];
-    if (layers.getNumChild() == 0)
-        return nullptr;
-    const u_char *layer = (const u_char *)layers.getChildren()[0].getData();
+    const u_char *layer = (const u_char *)layers->getChildren()[u].getData();
     if (layer == nullptr)
         return nullptr;
     int tex_index;
@@ -393,33 +400,29 @@ const void *MaterialTexture(const I3rItem *materials, unsigned num_mat, int inde
     return RosePan_I3dTextureFor(e.pPicture, e.m_clut, e.m_0c, 1);
 }
 
-/* The GS state of material `index` as its first layer's packet sets it
+/* The GS state of material `index` as its layer `u`'s packet sets it
  * (i3rPktLayerTest / i3rPktLayerAlpha, i3d/i3rmesh.cpp), over the chain's
  * defaults (i3dPktOpenChain: ALPHA 0x44, TEST 0x5000d) where the layer
  * writes none. The ROM keeps the previous layer's register instead; the
- * host starts each material from the defaults. */
-void ApplyMaterialState(const I3rItem *materials, unsigned num_mat, int index)
+ * host starts each layer from the defaults. */
+void ApplyMaterialState(const I3rItem *materials, unsigned num_mat, int index, unsigned u)
 {
     u_long test = kDefaultTest;
     u_long alpha = kDefaultAlpha;
-    if (materials != nullptr && index >= 0 && (unsigned)index < num_mat)
+    const I3rItem *layers = MaterialLayers(materials, num_mat, index);
+    const I3rLayerData *layer = layers != nullptr && u < layers->getNumChild()
+                                    ? (const I3rLayerData *)layers->getChildren()[u].getData()
+                                    : nullptr;
+    if (layer != nullptr)
     {
-        const I3rItem &mat = materials[index];
-        if (mat.getNumChild() != 0 && mat.getChildren()[0].getNumChild() != 0)
+        u_long regs[4][2];
+        u_long *end = i3rPktLayerAlpha(i3rPktLayerTest(regs[0], layer), layer);
+        for (const u_long *r = regs[0]; r < end; r += 2)
         {
-            const I3rLayerData *layer = (const I3rLayerData *)mat.getChildren()[0].getChildren()[0].getData();
-            if (layer != nullptr)
-            {
-                u_long regs[4][2];
-                u_long *end = i3rPktLayerAlpha(i3rPktLayerTest(regs[0], layer), layer);
-                for (const u_long *r = regs[0]; r < end; r += 2)
-                {
-                    if (r[1] == I3D_GS_TEST_1)
-                        test = r[0];
-                    else if (r[1] == I3D_GS_ALPHA_1)
-                        alpha = r[0];
-                }
-            }
+            if (r[1] == I3D_GS_TEST_1)
+                test = r[0];
+            else if (r[1] == I3D_GS_ALPHA_1)
+                alpha = r[0];
         }
     }
     RosePan_RendererSetGsTestRegister(test);
@@ -441,22 +444,23 @@ float Shade(const float *m, const float n[3])
     return 0.55f + 0.45f * (d > 0.0f ? d : 0.0f);
 }
 
-/* One 0x56 batch: its pools, then every strip as triangles. */
-void DrawBatch(const I3rItem &batch, const float *local_world, const void *texture, const Skin *skin,
-               const Blend *blend)
+/* What a 0x4d mesh draws its batches with: its material and, per material
+ * layer, the batch strip group that layer draws (0xff = none). */
+struct MeshLayers
 {
-    if (batch.getType() != kTypeVertexBatch || batch.getNumChild() < 5)
-        return;
-    const I3rItem *slot = batch.getChildren();
-    /* Blended first, then skinned (i3rDrawMeshBlend's 0x225670 skins the
-     * blended pools). */
-    LoadChannel(slot[4], kVuPositions, blend, I3R_BLEND_POSITION);
-    LoadChannel(slot[2], kVuNormals, blend, I3R_BLEND_NORMAL);
-    if (skin != nullptr && batch.getNumChild() >= 6 && slot[5].getNumChild() != 0)
-        SkinBatch(slot[5], *skin);
-    if (slot[0].getNumChild() == 0)
-        return;
-    const I3rItem &group = slot[0].getChildren()[0];            /* 0x30 */
+    const I3rItem     *materials;
+    unsigned           num_mat;
+    int                mat;
+    const u_char      *group;           /* the mesh data's +0x08 list; NULL = layer 0 draws group 0 */
+    unsigned           count;           /* the material's layers */
+    const I3dTexEntry *tex;
+    int                tex_count;
+};
+
+/* One 0x30 strip group of a batch (its child 0 list) as triangles, over the
+ * pools DrawBatch loaded. */
+void DrawStripGroup(const I3rItem &group, const float *local_world, const void *texture, const Blend *blend)
+{
     if (group.getNumChild() == 0)
         return;
     const I3rItem &list = group.getChildren()[0];
@@ -534,8 +538,46 @@ void DrawBatch(const I3rItem &batch, const float *local_world, const void *textu
     RosePan_RendererCommitMeshStream(stream);
 }
 
+/* One 0x56 batch: its pools, then per material layer the strip group the
+ * mesh names for it, with that layer's texture and GS state -- the CALL
+ * pairs i3rPktCallStrips 0x221080 writes (the layer's packet, then the
+ * batch's chain of group mesh->group[u]). */
+void DrawBatch(const I3rItem &batch, const float *local_world, const MeshLayers &ml, const Skin *skin,
+               const Blend *blend)
+{
+    if (batch.getType() != kTypeVertexBatch || batch.getNumChild() < 5)
+        return;
+    const I3rItem *slot = batch.getChildren();
+    /* Blended first, then skinned (i3rDrawMeshBlend's 0x225670 skins the
+     * blended pools). */
+    LoadChannel(slot[4], kVuPositions, blend, I3R_BLEND_POSITION);
+    LoadChannel(slot[2], kVuNormals, blend, I3R_BLEND_NORMAL);
+    if (skin != nullptr && batch.getNumChild() >= 6 && slot[5].getNumChild() != 0)
+        SkinBatch(slot[5], *skin);
+    const unsigned num_group = slot[0].getNumChild();
+    const unsigned count = ml.group != nullptr ? ml.count : 1;
+    for (unsigned u = 0; u < count; u++)
+    {
+        const unsigned g = ml.group != nullptr ? ml.group[u] : 0;
+        if (g == 0xff)
+            continue;                                           /* the ROM's -1: this layer draws nothing here */
+        if (g >= num_group)
+        {
+            if (!s_logged_group)
+            {
+                RosePan_LogPrintf("rosepan_i3dmesh: layer %u names group %u of %u\n", u, g, num_group);
+                s_logged_group = true;
+            }
+            continue;
+        }
+        ApplyMaterialState(ml.materials, ml.num_mat, ml.mat, u);
+        DrawStripGroup(slot[0].getChildren()[g], local_world,
+                       MaterialTexture(ml.materials, ml.num_mat, ml.mat, u, ml.tex, ml.tex_count), blend);
+    }
+}
+
 /* One group's 0x4d meshes (the group's child 0 list): per mesh its
- * material's texture and state, then its batches. */
+ * material and layer list, then its batches. */
 void DrawMeshList(const I3rItem &list, const I3rItem *materials, unsigned num_mat, const I3dTexEntry *tex,
                   int tex_count, const float *local_world, const Skin *skin, const Blend *blend)
 {
@@ -545,13 +587,16 @@ void DrawMeshList(const I3rItem &list, const I3rItem *materials, unsigned num_ma
         const u_char *md = (const u_char *)mesh4d[m].getData();
         if (md == nullptr || mesh4d[m].getNumChild() == 0)
             continue;
+        MeshLayers ml = {materials, num_mat, 0, nullptr, 0, tex, tex_count};
         short mat;
         memcpy(&mat, md + 0x0c, sizeof(mat));
-        const void *texture = MaterialTexture(materials, num_mat, mat, tex, tex_count);
-        ApplyMaterialState(materials, num_mat, mat);
+        ml.mat = mat;
+        const I3rItem *layers = MaterialLayers(materials, num_mat, mat);
+        ml.count = layers != nullptr ? layers->getNumChild() : 0;
+        ml.group = ml.count != 0 ? (const u_char *)i3rPtr((const u_int *)(md + 0x08)) : nullptr;
         const I3rItem &batches = mesh4d[m].getChildren()[0];
         for (u_int b = 0; b < batches.getNumChild(); b++)
-            DrawBatch(batches.getChildren()[b], local_world, texture, skin, blend);
+            DrawBatch(batches.getChildren()[b], local_world, ml, skin, blend);
     }
 }
 }
