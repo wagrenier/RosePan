@@ -87,7 +87,7 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      (Brown; WRITTEN 2026-10-28, partial: the controller, its orders and 11 of 14 modes; left Follow::live
      0x127150 (+0x127558), Find::init / live 0x127b28 / 0x127e68 (+0x128724, 0x128854), FindEnd::live
      0x128970, Bark::live 0x129028 (+0x128e6c). Doubt: MISSION_3 has no reader yet; requestState /
-     Null::live / applyMode / setLevel carry PC: guards for an unbound m_bwn that the ROM reads through), eff/effman.cpp (the effect manager EffMan, formerly Obj176a3c: WRITTEN 2026-10-28, partial -- init / term / live / draw / packs / table written; left createEff 0x176cc8, which needs the Eff class hierarchy first: eff/eff0.cpp 0x16a914..0x16ac84 + 0x16ac84 / 0x16add8, then one file per Eff class from unassigned@0016a914 -- and EffFindItem1 0x176694..0x176a3c).
+     Null::live / applyMode / setLevel carry PC: guards for an unbound m_bwn that the ROM reads through), eff/effman.cpp (the effect manager EffMan, formerly Obj176a3c: WRITTEN 2026-10-28, verify -- all 32 functions incl. createEff and EffFindItem1; the run creates EffLight1 (kind 0x21) and EffCameraAnim1 (0xd) in the picture-book stretch, and every class's init is a stub, so createEff deletes them again. Next for effects to live: eff/eff0.cpp 0x16a914..~0x16ade0 (Eff0's ctor / dtor / init / term / live / render / createPacketEntry, effInitRandTable, effClearDrawSets; its ctor and dtor are hand stubs in src/lib/unassigned_stubs.cpp), then the reached classes EffLight1 0x174dd8 and EffCameraAnim1 0x16f71c, then one file per Eff class from unassigned@0016a914 in link order, moving each class out of src/eff/effclasses.h).
 Re-assess from the run's reached stubs (work/run_relwithdebinfo.log) once the first model draws.
 emy/emy_hfm.cpp was mid-session when this was set; it finishes first (an active claim goes before the
 queue), then the queue rules.
@@ -1045,6 +1045,13 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-28, eff/effman.cpp createEff) **Decided without the user:** (1) the Eff classes createEff
+  news are declared in one header, src/eff/effclasses.h (ctor / dtor / the overridden slots, the EE size
+  as an undecoded m_body), because their files are not defined yet; each moves to its own file's header
+  when written. (2) PC deviations: for a kind with no class the ROM calls through NULL, and when init or
+  addEff fails it reads the deleted object's flags (pushWeak on stale data) and returns the pack slot
+  number left in s0 (stored as m_no_1a / m_no_1f for those kinds); the host returns -1 in all three
+  cases. If a caller turns out to rely on the stale number, revisit.
 - (2026-10-28, eff/effman.cpp) **A stream file left open stops the boot after the title.** The ROM
   keeps data/eff/eff.bin open from EffMan::loadIndex to term (FileReadReq m_close 0). On the host,
   with it open (rx fd 1, held for the whole run) the 200 s New Game run stays black after the title:

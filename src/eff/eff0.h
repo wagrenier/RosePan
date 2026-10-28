@@ -79,6 +79,14 @@ public:
     int      m_delay;           // ROR 0x1c: frames before it renders (EffParam +8)
 };
 
+struct DogCamera;
+
+/* The depth of pos along cam's view axis: the camera's transform, then
+ * dot(matrix row 2, pos - row 3). */
+float effCalcViewDepth(DogCamera *cam, const float *pos);                // ROR 0x0016ff18
+/* out = from + normalize(to - from) * d. */
+void  effMoveToward(float d, float *out, const float *from, const float *to); // ROR 0x0016ff78
+
 /* Clears the per-kind draw-set cache 0x8282a0[54] that renderPreMain fills
  * (EffMan::draw, once a frame). */
 void effClearDrawSets();                                                 // ROR 0x0016add8

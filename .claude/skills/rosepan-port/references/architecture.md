@@ -1307,6 +1307,21 @@ slots 1 dtor, 2 init(param), 3 term, 4 live, 5 liveMain (pure), 6 render, 7 rend
 renderMain (pure), 9 createPacketEntry, 10 setVisible, 11 liveActivateExec, 12 updateZDepth.
 0x8282a0[54] is the per-kind draw-set cache (cleared each frame by effClearDrawSets 0x16add8);
 0x828378[256] a random permutation (effInitRandTable 0x16ac84).
+**createEff's kinds -> classes** (0x176cc8; EE object sizes in src/eff/effclasses.h): 1 BloodSpray1,
+2 BloodSpray2, 3 BloodStay1, 4 BloodStay2, 5 BloodStay3, 6 BloodStay3Prim, 8 Breath1, 9 Breath1Space,
+0xa Breath2, 0xb Breath2Prim, 0xc Breath2Ground, 0xd CameraAnim1, 0x11 Cloud1, 0x12 Dust2, 0x13 Dust2Prim,
+0x14 Fire1, 0x15 Fire1Ex (: Fire1), 0x16 Fire2, 0x17 Fog1, 0x18 Fog2, 0x19 Fog2Prim, 0x1a Fog3 (singleton),
+0x1b Fog3Dark, 0x1c Fog3WeakUp, 0x1d Foot1, 0x1e Foot1Prim, 0x1f Foot2 (singleton), 0x20 Foot2Prim,
+0x21 Light1, 0x22 Light2, 0x23 Light3, 0x26 MuzzleFlash1, 0x27 Reload1, 0x29 / 0x2d Steam1, 0x2a / 0x2e
+Steam1Prim, 0x2b Steam2, 0x2c Steam2Prim, 0x2f Water1, 0x31 Water3, 0x32 FindItem1, 0x33 Generic1, 0x34
+Bg1 (: Generic1); 7, 0xe..0x10, 0x24, 0x25, 0x28, 0x30 have none. Out-of-line constructors: BloodSpray1 /
+2, Light3, Reload1, Water1, Water3, Generic1, Bg1; the rest are linkonce (Eff0::Eff0 + the vtable) and
+inlined. Every class's slot functions are named `EffX::init / liveMain / render / renderPreMain /
+renderMain / createPacketEntry / liveActivateExec / updateZDepth` from its vtable (batch effman_002).
+Shared helpers: effCalcViewDepth 0x16ff18 (dot(camera row 2, pos - row 3)), effMoveToward 0x16ff78
+(from + normalize(to - from) * d). **EffFindItem1** (kind 0x32, EE 0x50; +0x30 pos, +0x40 pull toward
+the camera, +0x44 frame 0..44): a 40 x 40 VU1 sprite, colour (1,1,1,0.5), ALPHA_1 0x48, shown frames
+0..14 of 45 with textures 0,1,2,3,2,1,0 (frame ends 2,3,4,8,10,12,14).
 
 ## Modules (RoR's own source files)
 

@@ -7091,11 +7091,689 @@
   "was": "FUN_0016add8",
   "why": "clears the per-kind draw-set cache 0x8282a0[54] that Eff0::renderPreMain fills; EffMan::draw calls it each frame"
  },
+ "0016afcc": {
+  "name": "EffBg1::EffBg1",
+  "tag": "ror-inferred",
+  "was": "FUN_0016afcc",
+  "why": "stores _vt$6EffBg1 0x2e32c0 at +0x20 after the base constructor; EffMan::createEff news it (constructor)"
+ },
+ "0016affc": {
+  "name": "EffBg1::~EffBg1",
+  "tag": "ror-inferred",
+  "was": "FUN_0016affc",
+  "why": "vtable _vt$6EffBg1 0x2e32c0 slot 1 (Eff0 slot destructor)"
+ },
+ "0016b060": {
+  "name": "EffBg1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016b060",
+  "why": "vtable _vt$6EffBg1 0x2e32c0 slot 2 (Eff0 slot init)"
+ },
+ "0016b348": {
+  "name": "EffBg1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016b348",
+  "why": "vtable _vt$6EffBg1 0x2e32c0 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016b444": {
+  "name": "EffBg1::renderPreMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016b444",
+  "why": "vtable _vt$6EffBg1 0x2e32c0 slot 7 (Eff0 slot renderPreMain)"
+ },
+ "0016b62c": {
+  "name": "EffBloodSpray1::EffBloodSpray1",
+  "tag": "ror-inferred",
+  "was": "FUN_0016b62c",
+  "why": "stores _vt$14EffBloodSpray1 0x2e33a0 at +0x20 after the base constructor; EffMan::createEff news it (constructor)"
+ },
+ "0016b668": {
+  "name": "EffBloodSpray1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016b668",
+  "why": "vtable _vt$14EffBloodSpray1 0x2e33a0 slot 2 (Eff0 slot init)"
+ },
+ "0016b978": {
+  "name": "EffBloodSpray1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016b978",
+  "why": "vtable _vt$14EffBloodSpray1 0x2e33a0 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016ba7c": {
+  "name": "EffBloodSpray1::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016ba7c",
+  "why": "vtable _vt$14EffBloodSpray1 0x2e33a0 slot 8 (Eff0 slot renderMain)"
+ },
+ "0016bdd4": {
+  "name": "EffBloodSpray1::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_0016bdd4",
+  "why": "vtable _vt$14EffBloodSpray1 0x2e33a0 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "0016be14": {
+  "name": "EffBloodSpray2::EffBloodSpray2",
+  "tag": "ror-inferred",
+  "was": "FUN_0016be14",
+  "why": "stores _vt$14EffBloodSpray2 0x2e3330 at +0x20 after the base constructor; EffMan::createEff news it (constructor)"
+ },
+ "0016be70": {
+  "name": "EffBloodSpray2::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016be70",
+  "why": "vtable _vt$14EffBloodSpray2 0x2e3330 slot 2 (Eff0 slot init)"
+ },
+ "0016c258": {
+  "name": "EffBloodSpray2::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016c258",
+  "why": "vtable _vt$14EffBloodSpray2 0x2e3330 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016c400": {
+  "name": "EffBloodSpray2::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016c400",
+  "why": "vtable _vt$14EffBloodSpray2 0x2e3330 slot 8 (Eff0 slot renderMain)"
+ },
+ "0016c748": {
+  "name": "EffBloodSpray2::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_0016c748",
+  "why": "vtable _vt$14EffBloodSpray2 0x2e3330 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "0016c7c0": {
+  "name": "EffBloodStay1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016c7c0",
+  "why": "vtable _vt$13EffBloodStay1 0x2e3560 slot 2 (Eff0 slot init)"
+ },
+ "0016ca00": {
+  "name": "EffBloodStay1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016ca00",
+  "why": "vtable _vt$13EffBloodStay1 0x2e3560 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016cac0": {
+  "name": "EffBloodStay1::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016cac0",
+  "why": "vtable _vt$13EffBloodStay1 0x2e3560 slot 8 (Eff0 slot renderMain)"
+ },
+ "0016d01c": {
+  "name": "EffBloodStay2::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016d01c",
+  "why": "vtable _vt$13EffBloodStay2 0x2e34f0 slot 2 (Eff0 slot init)"
+ },
+ "0016d0d0": {
+  "name": "EffBloodStay2::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016d0d0",
+  "why": "vtable _vt$13EffBloodStay2 0x2e34f0 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016d4bc": {
+  "name": "EffBloodStay2::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016d4bc",
+  "why": "vtable _vt$13EffBloodStay2 0x2e34f0 slot 8 (Eff0 slot renderMain)"
+ },
+ "0016d804": {
+  "name": "EffBloodStay3::~EffBloodStay3",
+  "tag": "ror-inferred",
+  "was": "FUN_0016d804",
+  "why": "vtable _vt$13EffBloodStay3 0x2e3480 slot 1 (Eff0 slot destructor)"
+ },
+ "0016d870": {
+  "name": "EffBloodStay3::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016d870",
+  "why": "vtable _vt$13EffBloodStay3 0x2e3480 slot 2 (Eff0 slot init)"
+ },
+ "0016d8ac": {
+  "name": "EffBloodStay3::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016d8ac",
+  "why": "vtable _vt$13EffBloodStay3 0x2e3480 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016d9a8": {
+  "name": "EffBloodStay3Prim::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016d9a8",
+  "why": "vtable _vt$17EffBloodStay3Prim 0x2e3410 slot 2 (Eff0 slot init)"
+ },
+ "0016da30": {
+  "name": "EffBloodStay3Prim::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016da30",
+  "why": "vtable _vt$17EffBloodStay3Prim 0x2e3410 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016da44": {
+  "name": "EffBloodStay3Prim::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016da44",
+  "why": "vtable _vt$17EffBloodStay3Prim 0x2e3410 slot 8 (Eff0 slot renderMain)"
+ },
+ "0016dcc8": {
+  "name": "EffBreath1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016dcc8",
+  "why": "vtable _vt$10EffBreath1 0x2e3720 slot 2 (Eff0 slot init)"
+ },
+ "0016de40": {
+  "name": "EffBreath1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016de40",
+  "why": "vtable _vt$10EffBreath1 0x2e3720 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016df38": {
+  "name": "EffBreath1::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016df38",
+  "why": "vtable _vt$10EffBreath1 0x2e3720 slot 8 (Eff0 slot renderMain)"
+ },
+ "0016e3ec": {
+  "name": "EffBreath1::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_0016e3ec",
+  "why": "vtable _vt$10EffBreath1 0x2e3720 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "0016e6e4": {
+  "name": "EffBreath1Space::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016e6e4",
+  "why": "vtable _vt$15EffBreath1Space 0x2e3790 slot 2 (Eff0 slot init)"
+ },
+ "0016e7cc": {
+  "name": "EffBreath1Space::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016e7cc",
+  "why": "vtable _vt$15EffBreath1Space 0x2e3790 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016eb00": {
+  "name": "EffBreath2::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016eb00",
+  "why": "vtable _vt$10EffBreath2 0x2e36b0 slot 2 (Eff0 slot init)"
+ },
+ "0016eb98": {
+  "name": "EffBreath2::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016eb98",
+  "why": "vtable _vt$10EffBreath2 0x2e36b0 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016edc0": {
+  "name": "EffBreath2Prim::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016edc0",
+  "why": "vtable _vt$14EffBreath2Prim 0x2e3640 slot 2 (Eff0 slot init)"
+ },
+ "0016eeb4": {
+  "name": "EffBreath2Prim::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016eeb4",
+  "why": "vtable _vt$14EffBreath2Prim 0x2e3640 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016ef74": {
+  "name": "EffBreath2Prim::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016ef74",
+  "why": "vtable _vt$14EffBreath2Prim 0x2e3640 slot 8 (Eff0 slot renderMain)"
+ },
+ "0016f160": {
+  "name": "EffBreath2Prim::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_0016f160",
+  "why": "vtable _vt$14EffBreath2Prim 0x2e3640 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "0016f1a0": {
+  "name": "EffBreath2Ground::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016f1a0",
+  "why": "vtable _vt$16EffBreath2Ground 0x2e35d0 slot 2 (Eff0 slot init)"
+ },
+ "0016f380": {
+  "name": "EffBreath2Ground::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016f380",
+  "why": "vtable _vt$16EffBreath2Ground 0x2e35d0 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016f3c8": {
+  "name": "EffBreath2Ground::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016f3c8",
+  "why": "vtable _vt$16EffBreath2Ground 0x2e35d0 slot 8 (Eff0 slot renderMain)"
+ },
+ "0016f71c": {
+  "name": "EffCameraAnim1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016f71c",
+  "why": "vtable _vt$14EffCameraAnim1 0x2e3800 slot 2 (Eff0 slot init)"
+ },
+ "0016faa0": {
+  "name": "EffCameraAnim1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016faa0",
+  "why": "vtable _vt$14EffCameraAnim1 0x2e3800 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016ff18": {
+  "name": "effCalcViewDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_0016ff18",
+  "why": "(camera, pos): camera transform, then dot(camera matrix row 2, pos - row 3): the depth along the view axis (EffFindItem1::updateZDepth)"
+ },
+ "0016ff78": {
+  "name": "effMoveToward",
+  "tag": "ror-inferred",
+  "was": "FUN_0016ff78",
+  "why": "(f12 d, out, from, to): out = from + normalize(to - from) * d (EffFindItem1::renderMain pulls its sprite toward the camera)"
+ },
+ "001704a4": {
+  "name": "EffDust2::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001704a4",
+  "why": "vtable _vt$8EffDust2 0x2e38e0 slot 2 (Eff0 slot init)"
+ },
+ "00170594": {
+  "name": "EffDust2::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00170594",
+  "why": "vtable _vt$8EffDust2 0x2e38e0 slot 5 (Eff0 slot liveMain)"
+ },
+ "0017093c": {
+  "name": "EffDust2Prim::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0017093c",
+  "why": "vtable _vt$12EffDust2Prim 0x2e3870 slot 2 (Eff0 slot init)"
+ },
+ "001709c8": {
+  "name": "EffDust2Prim::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_001709c8",
+  "why": "vtable _vt$12EffDust2Prim 0x2e3870 slot 5 (Eff0 slot liveMain)"
+ },
+ "001709f4": {
+  "name": "EffDust2Prim::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_001709f4",
+  "why": "vtable _vt$12EffDust2Prim 0x2e3870 slot 8 (Eff0 slot renderMain)"
+ },
+ "00170c64": {
+  "name": "EffDust2Prim::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_00170c64",
+  "why": "vtable _vt$12EffDust2Prim 0x2e3870 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "00170ca4": {
+  "name": "EffFire1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00170ca4",
+  "why": "vtable _vt$8EffFire1 0x2e3a30 slot 2 (Eff0 slot init)"
+ },
+ "00170d44": {
+  "name": "EffFire1Ex::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00170d44",
+  "why": "vtable _vt$10EffFire1Ex 0x2e39c0 slot 5 (Eff0 slot liveMain)"
+ },
+ "00170e14": {
+  "name": "EffFire1Ex::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00170e14",
+  "why": "vtable _vt$10EffFire1Ex 0x2e39c0 slot 8 (Eff0 slot renderMain)"
+ },
+ "001711fc": {
+  "name": "EffFire1::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_001711fc",
+  "why": "vtable _vt$8EffFire1 0x2e3a30 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "00171278": {
+  "name": "EffFire1Ex::liveActivateExec",
+  "tag": "ror-inferred",
+  "was": "FUN_00171278",
+  "why": "vtable _vt$10EffFire1Ex 0x2e39c0 slot 11 (Eff0 slot liveActivateExec)"
+ },
+ "001712bc": {
+  "name": "EffFire1Ex::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001712bc",
+  "why": "vtable _vt$10EffFire1Ex 0x2e39c0 slot 2 (Eff0 slot init)"
+ },
+ "00171378": {
+  "name": "EffFire1Ex::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_00171378",
+  "why": "vtable _vt$10EffFire1Ex 0x2e39c0 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "0017145c": {
+  "name": "EffFire2::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0017145c",
+  "why": "vtable _vt$8EffFire2 0x2e3950 slot 2 (Eff0 slot init)"
+ },
+ "00171534": {
+  "name": "EffFire2::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00171534",
+  "why": "vtable _vt$8EffFire2 0x2e3950 slot 5 (Eff0 slot liveMain)"
+ },
+ "00171548": {
+  "name": "EffFire2::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00171548",
+  "why": "vtable _vt$8EffFire2 0x2e3950 slot 8 (Eff0 slot renderMain)"
+ },
+ "0017167c": {
+  "name": "EffFire2::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_0017167c",
+  "why": "vtable _vt$8EffFire2 0x2e3950 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "001716bc": {
+  "name": "EffFog1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001716bc",
+  "why": "vtable _vt$7EffFog1 0x2e3cd0 slot 2 (Eff0 slot init)"
+ },
+ "001717b8": {
+  "name": "EffFog1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_001717b8",
+  "why": "vtable _vt$7EffFog1 0x2e3cd0 slot 5 (Eff0 slot liveMain)"
+ },
+ "001717f4": {
+  "name": "EffFog1::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_001717f4",
+  "why": "vtable _vt$7EffFog1 0x2e3cd0 slot 8 (Eff0 slot renderMain)"
+ },
+ "00171bbc": {
+  "name": "EffFog1::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_00171bbc",
+  "why": "vtable _vt$7EffFog1 0x2e3cd0 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "00171bfc": {
+  "name": "EffFog2::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00171bfc",
+  "why": "vtable _vt$7EffFog2 0x2e3c60 slot 2 (Eff0 slot init)"
+ },
+ "00171c94": {
+  "name": "EffFog2::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00171c94",
+  "why": "vtable _vt$7EffFog2 0x2e3c60 slot 5 (Eff0 slot liveMain)"
+ },
+ "00171e28": {
+  "name": "EffFog2Prim::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00171e28",
+  "why": "vtable _vt$11EffFog2Prim 0x2e3bf0 slot 2 (Eff0 slot init)"
+ },
+ "00172058": {
+  "name": "EffFog2Prim::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00172058",
+  "why": "vtable _vt$11EffFog2Prim 0x2e3bf0 slot 5 (Eff0 slot liveMain)"
+ },
+ "00172284": {
+  "name": "EffFog2Prim::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00172284",
+  "why": "vtable _vt$11EffFog2Prim 0x2e3bf0 slot 8 (Eff0 slot renderMain)"
+ },
+ "00172638": {
+  "name": "EffFog2Prim::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_00172638",
+  "why": "vtable _vt$11EffFog2Prim 0x2e3bf0 slot 12 (Eff0 slot updateZDepth)"
+ },
  "00172678": {
   "name": "gamCreateEff1a",
   "tag": "ror-inferred",
   "was": "FUN_00172678",
   "why": "Obj176a3c::createEff on scene +0x837e0 with kind 0x1a; initStage2's call"
+ },
+ "00172ac8": {
+  "name": "EffFog3::~EffFog3",
+  "tag": "ror-inferred",
+  "was": "FUN_00172ac8",
+  "why": "vtable _vt$7EffFog3 0x2e3b80 slot 1 (Eff0 slot destructor)"
+ },
+ "00172b30": {
+  "name": "EffFog3::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00172b30",
+  "why": "vtable _vt$7EffFog3 0x2e3b80 slot 2 (Eff0 slot init)"
+ },
+ "00172cb8": {
+  "name": "EffFog3::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00172cb8",
+  "why": "vtable _vt$7EffFog3 0x2e3b80 slot 5 (Eff0 slot liveMain)"
+ },
+ "00172d98": {
+  "name": "EffFog3Dark::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00172d98",
+  "why": "vtable _vt$11EffFog3Dark 0x2e3b10 slot 2 (Eff0 slot init)"
+ },
+ "00172de8": {
+  "name": "EffFog3WeakUp::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00172de8",
+  "why": "vtable _vt$13EffFog3WeakUp 0x2e3aa0 slot 2 (Eff0 slot init)"
+ },
+ "00172e08": {
+  "name": "EffFog3WeakUp::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00172e08",
+  "why": "vtable _vt$13EffFog3WeakUp 0x2e3aa0 slot 5 (Eff0 slot liveMain)"
+ },
+ "00172e4c": {
+  "name": "EffFoot1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00172e4c",
+  "why": "vtable _vt$8EffFoot1 0x2e3e90 slot 2 (Eff0 slot init)"
+ },
+ "00172f4c": {
+  "name": "EffFoot1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00172f4c",
+  "why": "vtable _vt$8EffFoot1 0x2e3e90 slot 5 (Eff0 slot liveMain)"
+ },
+ "001731f0": {
+  "name": "EffFoot1Prim::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001731f0",
+  "why": "vtable _vt$12EffFoot1Prim 0x2e3e20 slot 2 (Eff0 slot init)"
+ },
+ "00173274": {
+  "name": "EffFoot1Prim::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00173274",
+  "why": "vtable _vt$12EffFoot1Prim 0x2e3e20 slot 5 (Eff0 slot liveMain)"
+ },
+ "001732d8": {
+  "name": "EffFoot1Prim::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_001732d8",
+  "why": "vtable _vt$12EffFoot1Prim 0x2e3e20 slot 8 (Eff0 slot renderMain)"
+ },
+ "00173340": {
+  "name": "EffFoot1Prim::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_00173340",
+  "why": "vtable _vt$12EffFoot1Prim 0x2e3e20 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "00173630": {
+  "name": "EffFoot2::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00173630",
+  "why": "vtable _vt$8EffFoot2 0x2e3db0 slot 2 (Eff0 slot init)"
+ },
+ "00173688": {
+  "name": "EffFoot2::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00173688",
+  "why": "vtable _vt$8EffFoot2 0x2e3db0 slot 5 (Eff0 slot liveMain)"
+ },
+ "00173a90": {
+  "name": "EffFoot2Prim::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00173a90",
+  "why": "vtable _vt$12EffFoot2Prim 0x2e3d40 slot 2 (Eff0 slot init)"
+ },
+ "00173b2c": {
+  "name": "EffFoot2Prim::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00173b2c",
+  "why": "vtable _vt$12EffFoot2Prim 0x2e3d40 slot 5 (Eff0 slot liveMain)"
+ },
+ "00173b68": {
+  "name": "EffFoot2Prim::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00173b68",
+  "why": "vtable _vt$12EffFoot2Prim 0x2e3d40 slot 8 (Eff0 slot renderMain)"
+ },
+ "00173df8": {
+  "name": "EffGeneric1::EffGeneric1",
+  "tag": "ror-inferred",
+  "was": "FUN_00173df8",
+  "why": "stores _vt$11EffGeneric1 0x2e3f00 at +0x20 after the base constructor; EffMan::createEff news it (constructor)"
+ },
+ "00173e48": {
+  "name": "EffGeneric1::~EffGeneric1",
+  "tag": "ror-inferred",
+  "was": "FUN_00173e48",
+  "why": "vtable _vt$11EffGeneric1 0x2e3f00 slot 1 (Eff0 slot destructor)"
+ },
+ "00173f3c": {
+  "name": "EffGeneric1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00173f3c",
+  "why": "vtable _vt$11EffGeneric1 0x2e3f00 slot 2 (Eff0 slot init)"
+ },
+ "00174438": {
+  "name": "EffGeneric1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00174438",
+  "why": "vtable _vt$11EffGeneric1 0x2e3f00 slot 5 (Eff0 slot liveMain)"
+ },
+ "00174534": {
+  "name": "EffGeneric1::renderPreMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00174534",
+  "why": "vtable _vt$11EffGeneric1 0x2e3f00 slot 7 (Eff0 slot renderPreMain)"
+ },
+ "00174dd8": {
+  "name": "EffLight1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00174dd8",
+  "why": "vtable _vt$9EffLight1 0x2e40c0 slot 2 (Eff0 slot init)"
+ },
+ "00174e9c": {
+  "name": "EffLight1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00174e9c",
+  "why": "vtable _vt$9EffLight1 0x2e40c0 slot 5 (Eff0 slot liveMain)"
+ },
+ "00174eb0": {
+  "name": "EffLight1::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00174eb0",
+  "why": "vtable _vt$9EffLight1 0x2e40c0 slot 8 (Eff0 slot renderMain)"
+ },
+ "0017512c": {
+  "name": "EffLight1::liveActivateExec",
+  "tag": "ror-inferred",
+  "was": "FUN_0017512c",
+  "why": "vtable _vt$9EffLight1 0x2e40c0 slot 11 (Eff0 slot liveActivateExec)"
+ },
+ "00175170": {
+  "name": "EffLight2::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00175170",
+  "why": "vtable _vt$9EffLight2 0x2e4050 slot 2 (Eff0 slot init)"
+ },
+ "00175254": {
+  "name": "EffLight2::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00175254",
+  "why": "vtable _vt$9EffLight2 0x2e4050 slot 5 (Eff0 slot liveMain)"
+ },
+ "00175268": {
+  "name": "EffLight2::render",
+  "tag": "ror-inferred",
+  "was": "FUN_00175268",
+  "why": "vtable _vt$9EffLight2 0x2e4050 slot 6 (Eff0 slot render)"
+ },
+ "00175378": {
+  "name": "EffLight2::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00175378",
+  "why": "vtable _vt$9EffLight2 0x2e4050 slot 8 (Eff0 slot renderMain)"
+ },
+ "001755e8": {
+  "name": "EffLight2::liveActivateExec",
+  "tag": "ror-inferred",
+  "was": "FUN_001755e8",
+  "why": "vtable _vt$9EffLight2 0x2e4050 slot 11 (Eff0 slot liveActivateExec)"
+ },
+ "0017562c": {
+  "name": "EffLight3::EffLight3",
+  "tag": "ror-inferred",
+  "was": "FUN_0017562c",
+  "why": "stores _vt$9EffLight3 0x2e3fe0 at +0x20 after the base constructor; EffMan::createEff news it (constructor)"
+ },
+ "00175664": {
+  "name": "EffLight3::~EffLight3",
+  "tag": "ror-inferred",
+  "was": "FUN_00175664",
+  "why": "vtable _vt$9EffLight3 0x2e3fe0 slot 1 (Eff0 slot destructor)"
+ },
+ "00175804": {
+  "name": "EffLight3::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00175804",
+  "why": "vtable _vt$9EffLight3 0x2e3fe0 slot 2 (Eff0 slot init)"
+ },
+ "00175dc4": {
+  "name": "EffLight3::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00175dc4",
+  "why": "vtable _vt$9EffLight3 0x2e3fe0 slot 5 (Eff0 slot liveMain)"
+ },
+ "00176694": {
+  "name": "EffFindItem1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00176694",
+  "why": "vtable _vt$12EffFindItem1 0x2e3f70 slot 2 (Eff0 slot init)"
+ },
+ "00176700": {
+  "name": "EffFindItem1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00176700",
+  "why": "vtable _vt$12EffFindItem1 0x2e3f70 slot 5 (Eff0 slot liveMain)"
+ },
+ "00176728": {
+  "name": "EffFindItem1::render",
+  "tag": "ror-inferred",
+  "was": "FUN_00176728",
+  "why": "vtable _vt$12EffFindItem1 0x2e3f70 slot 6 (Eff0 slot render)"
+ },
+ "00176754": {
+  "name": "EffFindItem1::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00176754",
+  "why": "vtable _vt$12EffFindItem1 0x2e3f70 slot 8 (Eff0 slot renderMain)"
+ },
+ "001769ec": {
+  "name": "EffFindItem1::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_001769ec",
+  "why": "vtable _vt$12EffFindItem1 0x2e3f70 slot 12 (Eff0 slot updateZDepth)"
  },
  "00176a3c": {
   "name": "EffMan::EffMan",
@@ -7258,6 +7936,222 @@
   "tag": "ror-inferred",
   "was": "FUN_00178894",
   "why": "releasePack(n, force) for the 16 slots"
+ },
+ "001788ec": {
+  "name": "EffMuzzleFlash1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001788ec",
+  "why": "vtable _vt$15EffMuzzleFlash1 0x2e41a0 slot 2 (Eff0 slot init)"
+ },
+ "00178ac0": {
+  "name": "EffMuzzleFlash1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00178ac0",
+  "why": "vtable _vt$15EffMuzzleFlash1 0x2e41a0 slot 5 (Eff0 slot liveMain)"
+ },
+ "00178c84": {
+  "name": "EffMuzzleFlash1::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00178c84",
+  "why": "vtable _vt$15EffMuzzleFlash1 0x2e41a0 slot 8 (Eff0 slot renderMain)"
+ },
+ "001790a4": {
+  "name": "EffMuzzleFlash1::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_001790a4",
+  "why": "vtable _vt$15EffMuzzleFlash1 0x2e41a0 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "001790e4": {
+  "name": "EffReload1::EffReload1",
+  "tag": "ror-inferred",
+  "was": "FUN_001790e4",
+  "why": "stores _vt$10EffReload1 0x2e4130 at +0x20 after the base constructor; EffMan::createEff news it (constructor)"
+ },
+ "0017911c": {
+  "name": "EffReload1::~EffReload1",
+  "tag": "ror-inferred",
+  "was": "FUN_0017911c",
+  "why": "vtable _vt$10EffReload1 0x2e4130 slot 1 (Eff0 slot destructor)"
+ },
+ "001791ac": {
+  "name": "EffReload1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001791ac",
+  "why": "vtable _vt$10EffReload1 0x2e4130 slot 2 (Eff0 slot init)"
+ },
+ "00179324": {
+  "name": "EffReload1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00179324",
+  "why": "vtable _vt$10EffReload1 0x2e4130 slot 5 (Eff0 slot liveMain)"
+ },
+ "00179390": {
+  "name": "EffReload1::renderPreMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00179390",
+  "why": "vtable _vt$10EffReload1 0x2e4130 slot 7 (Eff0 slot renderPreMain)"
+ },
+ "00179428": {
+  "name": "EffSteam1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00179428",
+  "why": "vtable _vt$9EffSteam1 0x2e43d0 slot 2 (Eff0 slot init)"
+ },
+ "0017955c": {
+  "name": "EffSteam1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0017955c",
+  "why": "vtable _vt$9EffSteam1 0x2e43d0 slot 5 (Eff0 slot liveMain)"
+ },
+ "001797d8": {
+  "name": "EffSteam1Prim::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001797d8",
+  "why": "vtable _vt$13EffSteam1Prim 0x2e4360 slot 2 (Eff0 slot init)"
+ },
+ "001798d8": {
+  "name": "EffSteam1Prim::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_001798d8",
+  "why": "vtable _vt$13EffSteam1Prim 0x2e4360 slot 5 (Eff0 slot liveMain)"
+ },
+ "00179998": {
+  "name": "EffSteam1Prim::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00179998",
+  "why": "vtable _vt$13EffSteam1Prim 0x2e4360 slot 8 (Eff0 slot renderMain)"
+ },
+ "00179b5c": {
+  "name": "EffSteam1Prim::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_00179b5c",
+  "why": "vtable _vt$13EffSteam1Prim 0x2e4360 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "00179b9c": {
+  "name": "EffSteam2::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00179b9c",
+  "why": "vtable _vt$9EffSteam2 0x2e42f0 slot 2 (Eff0 slot init)"
+ },
+ "00179c30": {
+  "name": "EffSteam2::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00179c30",
+  "why": "vtable _vt$9EffSteam2 0x2e42f0 slot 5 (Eff0 slot liveMain)"
+ },
+ "00179dfc": {
+  "name": "EffSteam2Prim::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00179dfc",
+  "why": "vtable _vt$13EffSteam2Prim 0x2e4280 slot 2 (Eff0 slot init)"
+ },
+ "00179e70": {
+  "name": "EffSteam2Prim::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00179e70",
+  "why": "vtable _vt$13EffSteam2Prim 0x2e4280 slot 5 (Eff0 slot liveMain)"
+ },
+ "00179ed0": {
+  "name": "EffSteam2Prim::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00179ed0",
+  "why": "vtable _vt$13EffSteam2Prim 0x2e4280 slot 8 (Eff0 slot renderMain)"
+ },
+ "0017a2bc": {
+  "name": "EffSteam2Prim::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_0017a2bc",
+  "why": "vtable _vt$13EffSteam2Prim 0x2e4280 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "0017a2fc": {
+  "name": "EffCloud1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0017a2fc",
+  "why": "vtable _vt$9EffCloud1 0x2e4210 slot 2 (Eff0 slot init)"
+ },
+ "0017a534": {
+  "name": "EffCloud1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0017a534",
+  "why": "vtable _vt$9EffCloud1 0x2e4210 slot 5 (Eff0 slot liveMain)"
+ },
+ "0017a5ec": {
+  "name": "EffCloud1::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0017a5ec",
+  "why": "vtable _vt$9EffCloud1 0x2e4210 slot 8 (Eff0 slot renderMain)"
+ },
+ "0017a8d8": {
+  "name": "EffCloud1::updateZDepth",
+  "tag": "ror-inferred",
+  "was": "FUN_0017a8d8",
+  "why": "vtable _vt$9EffCloud1 0x2e4210 slot 12 (Eff0 slot updateZDepth)"
+ },
+ "0017a918": {
+  "name": "EffWater1::EffWater1",
+  "tag": "ror-inferred",
+  "was": "FUN_0017a918",
+  "why": "stores _vt$9EffWater1 0x2e44b0 at +0x20 after the base constructor; EffMan::createEff news it (constructor)"
+ },
+ "0017a94c": {
+  "name": "EffWater1::~EffWater1",
+  "tag": "ror-inferred",
+  "was": "FUN_0017a94c",
+  "why": "vtable _vt$9EffWater1 0x2e44b0 slot 1 (Eff0 slot destructor)"
+ },
+ "0017a9c8": {
+  "name": "EffWater1::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0017a9c8",
+  "why": "vtable _vt$9EffWater1 0x2e44b0 slot 2 (Eff0 slot init)"
+ },
+ "0017ac5c": {
+  "name": "EffWater1::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0017ac5c",
+  "why": "vtable _vt$9EffWater1 0x2e44b0 slot 5 (Eff0 slot liveMain)"
+ },
+ "0017adc0": {
+  "name": "EffWater1::liveActivateExec",
+  "tag": "ror-inferred",
+  "was": "FUN_0017adc0",
+  "why": "vtable _vt$9EffWater1 0x2e44b0 slot 11 (Eff0 slot liveActivateExec)"
+ },
+ "0017ae04": {
+  "name": "EffWater1::renderPreMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0017ae04",
+  "why": "vtable _vt$9EffWater1 0x2e44b0 slot 7 (Eff0 slot renderPreMain)"
+ },
+ "0017afd8": {
+  "name": "EffWater3::EffWater3",
+  "tag": "ror-inferred",
+  "was": "FUN_0017afd8",
+  "why": "stores _vt$9EffWater3 0x2e4440 at +0x20 after the base constructor; EffMan::createEff news it (constructor)"
+ },
+ "0017b010": {
+  "name": "EffWater3::~EffWater3",
+  "tag": "ror-inferred",
+  "was": "FUN_0017b010",
+  "why": "vtable _vt$9EffWater3 0x2e4440 slot 1 (Eff0 slot destructor)"
+ },
+ "0017b0a4": {
+  "name": "EffWater3::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0017b0a4",
+  "why": "vtable _vt$9EffWater3 0x2e4440 slot 2 (Eff0 slot init)"
+ },
+ "0017b5e0": {
+  "name": "EffWater3::liveMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0017b5e0",
+  "why": "vtable _vt$9EffWater3 0x2e4440 slot 5 (Eff0 slot liveMain)"
+ },
+ "0017b6d4": {
+  "name": "EffWater3::renderMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0017b6d4",
+  "why": "vtable _vt$9EffWater3 0x2e4440 slot 8 (Eff0 slot renderMain)"
  },
  "0017c0f0": {
   "name": "SctWorld::SctWorld",

@@ -2,7 +2,7 @@
  *  eff/effman.cpp
  *
  *  The scene's effect manager EffMan (MagScene +0x837e0; 0x176a3c..0x1788ec,
- *  the file also holds EffFindItem1 0x176694..0x176a3c, not written yet):
+ *  after EffFindItem1 0x176694..0x176a3c, the item-found sparkle):
  *  its table of Eff objects, their per-frame live and draw, and the effect
  *  packs it reads from data/eff/eff.bin. See eff/effman.h.
  * ======================================================================== */
@@ -13,13 +13,17 @@
 #include "bed/bedpfh.h"
 #include "common/ror_assert.h"
 #include "common/rosepan_stub.h"
+#include "dog/dogcamera.h"
 #include "dog/doglightpool.h"
+#include "eff/effclasses.h"
 #include "dog/dogtexinfo.h"
 #include "i3d/i3dctx.h"
 #include "i3d/i3denv.h"
 #include "i3d/i3dlayer.h"
+#include "i3d/i3dmath.h"
 #include "i3d/i3dpacket.h"
 #include "i3d/i3dview.h"
+#include "i3d/i3dvu1pkt.h"
 #include "i3d/i3mroot.h"
 #include "i3d/i3rmodel.h"
 #include "i3d/i3rroot.h"
@@ -49,6 +53,95 @@ static const char *const s_pack_name[54] =
     "",             "water3",       "finditem1",    "gr1",          /* 0x30 */
     "bg1",          "",
 };
+
+// ──────────────────────────────────────────────────────────────────────
+// The param's position (w 1) and pull toward the camera, the blink from
+// its first frame.
+// ROR 0x00176694
+
+int EffFindItem1::init(const EffParam *param)
+{
+    int ok = Eff0::init(param);
+    if (ok)
+    {
+        m_pos[0] = param->m_find.m_pos[0];
+        m_pos[1] = param->m_find.m_pos[1];
+        m_pos[2] = param->m_find.m_pos[2];
+        m_pos[3] = 1.0f;
+        m_near = param->m_find.m_near;
+        m_frame = 0;
+    }
+    return ok != 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A 45-frame cycle; it never ends by itself.
+// ROR 0x00176700
+
+int EffFindItem1::liveMain()
+{
+    m_frame = (u_char)((m_frame + 1) % 45);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Drawn during the first 15 frames of the cycle.
+// ROR 0x00176728
+
+void EffFindItem1::render(RENDERPARAM *param)
+{
+    if (m_frame < 15)
+        Eff0::render(param);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// One camera-facing sprite (40 x 40, half transparent, ALPHA_1 0x48) at
+// m_pos pulled m_near toward the eye. The texture follows the frame: the
+// first entry whose end the frame has not passed (the ROM builds both
+// tables on the stack).
+// ROR 0x00176754
+
+u_long *EffFindItem1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    static const u_int s_end[8] = { 2, 3, 4, 8, 10, 12, 14, 0 };
+    static const int   s_tex[8] = { 0, 1, 2, 3, 2, 1, 0, -1 };
+    static const float s_scale[4] = { 40.0f, 40.0f, 1.0f, 1.0f };   // 0x2f2a60
+    static const float s_color[4] = { 1.0f, 1.0f, 1.0f, 0.5f };     // 0x2f2a70
+
+    int i = 0;
+    if (m_frame > 2)
+    {
+        for (i = 1; s_tex[i] != -1 && s_end[i] < m_frame; i++)
+            ;
+    }
+    pkt = i3dPktSetReg(pkt, SCE_GS_ALPHA_1, 0x48);
+    pkt = i3dPktCallView(pkt, param->m_cur);
+    pkt = i3dPktRefTexRegs(pkt, i3dDrawSetUseTex(const_cast<I3dDrawSet *>(set), s_tex[i]));
+
+    /* The rectangle, then the sprite's centre (the ROM reuses the buffer). */
+    float pos[4] = { 0.0f, 0.0f, 1.0f, 1.0f };
+    pkt = i3dPktBeginVu1Sprite(pkt, param->m_cur, 1);
+    pkt = i3dPktVu1Rect(pkt, pos);
+
+    DogCamera *cam = &g_effScene->m_camera_entity;
+    cam->callTransform();
+    sceVu0FMATRIX m;
+    memcpy(m, cam->m_matrix, sizeof(m));
+    effMoveToward(m_near, pos, m_pos, m[3]);
+    i3dMatScale(m, m, s_scale);
+    pkt = i3dPktVu1Matrix(pkt, m);
+    pkt = i3dPktVu1Sprite(pkt, pos, s_color);
+    return i3dPktEndVu1Sprite(pkt);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Sorted by its depth less the pull toward the camera.
+// ROR 0x001769ec
+
+void EffFindItem1::updateZDepth()
+{
+    m_z = effCalcViewDepth(&g_effScene->m_camera_entity, m_pos) - m_near;
+}
 
 // ──────────────────────────────────────────────────────────────────────
 // The member constructor (MagScene::MagScene): an empty table and draw
@@ -131,6 +224,107 @@ void EffMan::term()
     m_reader.read(&m_req, 0);   // PC: the file is closed already; this closes nothing
     m_scene = NULL;
     g_effScene = NULL;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// News the class of param->m_kind (eff/effclasses.h), hands it its pack
+// (kinds 0x33 / 0x34 name theirs with the param's suffix), then init and
+// a table entry; weak effects join the eviction FIFO. Kinds 0x1a and 0x1f
+// are singletons: while one lives its number is returned instead.
+// PC: the ROM goes on with NULL for a kind without a class (a crash), and
+// when init or addEff fails it reads the deleted object's flags and
+// returns the pack slot number left in the register (pushing it on the
+// weak FIFO when the stale flags say weak); the host returns -1 for all
+// three and touches nothing.
+// callcheck: operator_new, Eff0, EffBloodSpray1, EffBloodSpray2, EffLight3, EffReload1, EffWater1, EffWater3, EffGeneric1, EffBg1 (new X runs its constructor; the inline ones run Eff0's)
+// ROR 0x00176cc8
+
+int EffMan::createEff(EffParam *param)
+{
+    Eff0 *eff = NULL;
+    switch (param->m_kind)
+    {
+    case 0x01: eff = new EffBloodSpray1;    break;
+    case 0x02: eff = new EffBloodSpray2;    break;
+    case 0x03: eff = new EffBloodStay1;     break;
+    case 0x04: eff = new EffBloodStay2;     break;
+    case 0x05: eff = new EffBloodStay3;     break;
+    case 0x06: eff = new EffBloodStay3Prim; break;
+    case 0x08: eff = new EffBreath1;        break;
+    case 0x09: eff = new EffBreath1Space;   break;
+    case 0x0a: eff = new EffBreath2;        break;
+    case 0x0b: eff = new EffBreath2Prim;    break;
+    case 0x0c: eff = new EffBreath2Ground;  break;
+    case 0x0d: eff = new EffCameraAnim1;    break;
+    case 0x11: eff = new EffCloud1;         break;
+    case 0x12: eff = new EffDust2;          break;
+    case 0x13: eff = new EffDust2Prim;      break;
+    case 0x14: eff = new EffFire1;          break;
+    case 0x15: eff = new EffFire1Ex;        break;
+    case 0x16: eff = new EffFire2;          break;
+    case 0x17: eff = new EffFog1;           break;
+    case 0x18: eff = new EffFog2;           break;
+    case 0x19: eff = new EffFog2Prim;       break;
+    case 0x1a:
+        if (m_no_1a != -1)
+            return m_no_1a;
+        eff = new EffFog3;
+        break;
+    case 0x1b: eff = new EffFog3Dark;       break;
+    case 0x1c: eff = new EffFog3WeakUp;     break;
+    case 0x1d: eff = new EffFoot1;          break;
+    case 0x1e: eff = new EffFoot1Prim;      break;
+    case 0x1f:
+        if (m_no_1f != -1)
+            return m_no_1f;
+        eff = new EffFoot2;
+        break;
+    case 0x20: eff = new EffFoot2Prim;      break;
+    case 0x21: eff = new EffLight1;         break;
+    case 0x22: eff = new EffLight2;         break;
+    case 0x23: eff = new EffLight3;         break;
+    case 0x26: eff = new EffMuzzleFlash1;   break;
+    case 0x27: eff = new EffReload1;        break;
+    case 0x29:
+    case 0x2d: eff = new EffSteam1;         break;
+    case 0x2a:
+    case 0x2e: eff = new EffSteam1Prim;     break;
+    case 0x2b: eff = new EffSteam2;         break;
+    case 0x2c: eff = new EffSteam2Prim;     break;
+    case 0x2f: eff = new EffWater1;         break;
+    case 0x31: eff = new EffWater3;         break;
+    case 0x32: eff = new EffFindItem1;      break;
+    case 0x33: eff = new EffGeneric1;       break;
+    case 0x34: eff = new EffBg1;            break;
+    }
+    if (eff == NULL)
+        return -1;
+
+    int pack;
+    if (param->m_kind == 0x33 || param->m_kind == 0x34)
+        pack = loadPack(param->m_kind, param->m_suffix, 0);
+    else
+        pack = loadPack(param->m_kind, NULL, 0);
+    param->m_pack = pack == -1 ? NULL : &m_pack[pack];
+
+    if (eff->init(param) == 0)
+    {
+        delete eff;
+        return -1;
+    }
+    int no = addEff(eff);
+    if (no == -1)
+    {
+        delete eff;
+        return -1;
+    }
+    if (eff->m_flags & EFF_FLAG_WEAK)
+        pushWeak(no);
+    if (param->m_kind == 0x1a)
+        m_no_1a = no;
+    else if (param->m_kind == 0x1f)
+        m_no_1f = no;
+    return no;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -686,18 +880,4 @@ void EffMan::releasePacks(int force)
 {
     for (int i = 0; i < EFF_MAX_PACK; i++)
         releasePack(i, force);
-}
-
-// ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x00176cc8: news the class of param->m_kind (43 Eff
-// classes, eff/eff0.h; none is written yet), writes its pack to
-// param->m_pack (loadPack, kinds 0x33 / 0x34 with param->m_suffix), init,
-// addEff; the weak ones go on the FIFO, kinds 0x1a / 0x1f are singletons
-// (m_no_1a / m_no_1f returned while one lives).
-int EffMan::createEff(EffParam *param)
-{
-    ROSEPAN_STUB("EffMan::createEff", 0x00176cc8);
-    (void)param;
-    return -1;
 }
