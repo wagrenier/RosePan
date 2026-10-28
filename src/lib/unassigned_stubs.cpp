@@ -1723,3 +1723,9 @@ int utlTestDogHitAt(const float *pos, u_int *hit, float r)
     ROSEPAN_STUB("utlTestDogHitAt", 0x00104004);
     return {};
 }
+
+// stub of ROR 0x00104150
+void utlSetBwnObjFlag(int on)
+{
+    ROSEPAN_STUB("utlSetBwnObjFlag", 0x00104150);
+}

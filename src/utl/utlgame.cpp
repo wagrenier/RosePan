@@ -98,3 +98,31 @@ void utlPlaySe(int id, int a, int b)
 {
     ROSEPAN_STUB("utlPlaySe", 0x001026b0);
 }
+
+// stub of ROR 0x0010376c
+int utlCollectEmyInfoAt(UtlEmyInfoBuf *eib, const float *pos, int kind, int flag,
+                        float rot, float radius)
+{
+    ROSEPAN_STUB("utlCollectEmyInfoAt", 0x0010376c);
+    return {};
+}
+
+// stub of ROR 0x00103ccc
+int utlCollectItemInfo(UtlEmyInfoBuf *eib, int flag)
+{
+    ROSEPAN_STUB("utlCollectItemInfo", 0x00103ccc);
+    return {};
+}
+
+// stub of ROR 0x0010344c
+int utlIsObj(unsigned int oid)
+{
+    ROSEPAN_STUB("utlIsObj", 0x0010344c);
+    return {};
+}
+
+// stub of ROR 0x00103428
+void utlMarkObjTaken(unsigned int oid)
+{
+    ROSEPAN_STUB("utlMarkObjTaken", 0x00103428);
+}

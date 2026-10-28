@@ -84,7 +84,10 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      are stubs in src/lib/unassigned_stubs.cpp (calcHealth divides 0 by 0 until then: health 2).
      Then task/naga_chunk.cpp (event packs, so scenes
      play), mag/maglifebwn.cpp + unassigned@001258a4 (renderPostProcess) + mag/maglifebwnctrl.cpp
-     (Brown), unassigned@00166a1c (the effect objects: Obj176a3c, FUN_00177830 in MagScene::draw).
+     (Brown; WRITTEN 2026-10-28, partial: the controller, its orders and 11 of 14 modes; left Follow::live
+     0x127150 (+0x127558), Find::init / live 0x127b28 / 0x127e68 (+0x128724, 0x128854), FindEnd::live
+     0x128970, Bark::live 0x129028 (+0x128e6c). Doubt: MISSION_3 has no reader yet; requestState /
+     Null::live / applyMode / setLevel carry PC: guards for an unbound m_bwn that the ROM reads through), unassigned@00166a1c (the effect objects: Obj176a3c, FUN_00177830 in MagScene::draw).
 Re-assess from the run's reached stubs (work/run_relwithdebinfo.log) once the first model draws.
 emy/emy_hfm.cpp was mid-session when this was set; it finishes first (an active claim goes before the
 queue), then the queue rules.

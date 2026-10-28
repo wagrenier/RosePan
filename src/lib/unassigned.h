@@ -371,6 +371,9 @@ float utlGetDogRadius(void);                                             // ROR 
 void utlRandReset(void);                                                 // ROR 0x0010421c
 /* A random integer in lo..hi (lo + 0x1041e4(hi - lo + 1)). */
 int  utlRandRange(int lo, int hi);                                       // ROR 0x0010423c
+/* GamMan::setObj(the object at GamMan +0x22094, 0x40); both values of on
+ * do the same in the ROM. */
+void utlSetBwnObjFlag(int on);                                           // ROR 0x00104150
 /* A random float in lo..hi in steps of (hi - lo) / 65536 -- 0.0 (not lo)
  * when the integer draw is 0. */
 float utlRandRangeF(float lo, float hi);                                 // ROR 0x001044b8

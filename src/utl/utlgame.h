@@ -48,7 +48,9 @@ struct UtlEmyInfo
     int          m_24;          // ROR 0x24: the object's u16 +0x128
     int          m_actor_no;    // ROR 0x28: the object's actor number (+0x108)
     float        m_radius;      // ROR 0x2c: EmyManager::getEmyTypeDist
-    int          _30[3];
+    float        m_dist;        // ROR 0x30: utlCollectEmyInfoAt: the distance from its pos
+    float        m_rot;         // ROR 0x34: utlCollectEmyInfoAt: the angle from pos less rot
+    int          _38;
     unsigned int m_flags;       // ROR 0x3c: the object's word +0x120 (0x400 / 0x2000 skip it)
 };
 static_assert(sizeof(UtlEmyInfo) == 0x40, "UtlEmyInfo is 0x40 bytes on the EE");
@@ -67,5 +69,18 @@ static_assert(offsetof(UtlEmyInfoBuf, m_num) == 0x800, "m_num");
 /* The live enemies (flag 0: those without 0x400, else without 0x2000),
  * at most 32, into eib; returns the count. */
 int utlCollectEmyInfo(UtlEmyInfoBuf *eib, int flag);                     // ROR 0x00103a90
+/* utlCollectEmyInfo seen from pos: each one's distance (m_info +0x30) and
+ * angle less rot (+0x34) by utlVecDistRotY, keeping those within radius
+ * (radius <= 0: none); kind 0 no type distance, 1 / 2
+ * EmyManager::getEmyTypeDist / Dist2 into m_radius. */
+int utlCollectEmyInfoAt(UtlEmyInfoBuf *eib, const float *pos, int kind, int flag,
+                        float rot, float radius);                      // ROR 0x0010376c
+/* The items (list 0x7a01d0; flag: not those with 0x20 in +0x120), at
+ * most 32, into an UtlEmyInfoBuf: position, m_obj_id, m_24. Returns the
+ * count (m_num untouched). */
+int utlCollectItemInfo(UtlEmyInfoBuf *eib, int flag);                    // ROR 0x00103ccc
+/* GamMan::isObj / markObjTaken on the global GamMan. */
+int  utlIsObj(unsigned int oid);                                         // ROR 0x0010344c
+void utlMarkObjTaken(unsigned int oid);                                  // ROR 0x00103428
 
 #endif /* _UTL_UTLGAME_H */

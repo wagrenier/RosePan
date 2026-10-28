@@ -257,6 +257,18 @@
   "was": "FUN_00102adc",
   "why": "asserts theOID != 0 (utl/utlgame.cpp 0x23f), tail-calls EmyManager::isEmyDamaging on the global manager"
  },
+ "00103428": {
+  "name": "utlMarkObjTaken",
+  "tag": "ror-inferred",
+  "was": "FUN_00103428",
+  "why": "GamMan::markObjTaken(oid) on the global GamMan"
+ },
+ "0010344c": {
+  "name": "utlIsObj",
+  "tag": "ror-inferred",
+  "was": "FUN_0010344c",
+  "why": "GamMan::isObj(oid) on the global GamMan"
+ },
  "0010346c": {
   "name": "utlTestSeqBit34",
   "tag": "ror-inferred",
@@ -281,11 +293,23 @@
   "was": "FUN_001034e4",
   "why": "GamMan::getActorNo(a0)"
  },
+ "0010376c": {
+  "name": "utlCollectEmyInfoAt",
+  "tag": "ror-inferred",
+  "was": "FUN_0010376c",
+  "why": "like utlCollectEmyInfo, with each enemy distance / angle from pos (utlVecDistRotY), keeping those within radius; type dist kind 0..2"
+ },
  "00103a90": {
   "name": "utlCollectEmyInfo",
   "tag": "ror-inferred",
   "was": "FUN_00103a90",
   "why": "walks the actor list for type-2 objects (oid bits 23..27 == 2) not masked by 0x400 / 0x2000, fills up to 32 records of 0x40 (spine pos, trans, oid, word 0x128, actor no, EmyManager::getEmyTypeDist) and the count at +0x800; Attacking::live's eib"
+ },
+ "00103ccc": {
+  "name": "utlCollectItemInfo",
+  "tag": "ror-inferred",
+  "was": "FUN_00103ccc",
+  "why": "the item list at 0x7a01d0 into an UtlEmyInfoBuf-shaped buffer: oid, u16 +0x128, FCHRstat::getPos; flag skips items with 0x20"
  },
  "00103de4": {
   "name": "utlPauseForMenu",
@@ -334,6 +358,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001040a0",
   "why": "GamMan::getObjRadius of the dog (m_dogPtr +0x100), 0 without one"
+ },
+ "00104150": {
+  "name": "utlSetBwnObjFlag",
+  "tag": "ror-inferred",
+  "was": "FUN_00104150",
+  "why": "GamMan::setObj on the object at GamMan +0x22094 with 0x40 (both branches); MagLifeBwnCtrl::requestState calls it with 1"
  },
  "001041c4": {
   "name": "utlRandStep",
@@ -580,6 +610,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0010620c",
   "why": "utl/utlfind.cpp: sets four words to -1 and the next two to 0 (a 0x18-byte search record); MagLifeBwnCtrl::termWorld and MagScene::clearPC call it"
+ },
+ "00106240": {
+  "name": "utlFindHasAny",
+  "tag": "ror-inferred",
+  "was": "FUN_00106240",
+  "why": "1 when one of the UtlFind m_num ids is positive"
+ },
+ "00106280": {
+  "name": "utlFindSetItem",
+  "tag": "ror-inferred",
+  "was": "FUN_00106280",
+  "why": "UtlFind +0x14 = arg, +0x10 = 0x103240(find, 4, item)"
  },
  "00106658": {
   "name": "utlConvSndId",
@@ -2357,6 +2399,12 @@
   "was": "FUN_00119b34",
   "why": "+0x70 = -1, the vector +0x60 cleared (role from reset4MapJump; unconfirmed)"
  },
+ "00119cec": {
+  "name": "MagLifeControlChara::testFloor",
+  "tag": "ror-inferred",
+  "was": "FUN_00119cec",
+  "why": "the secta query (radius 40) at the actor (+ ahead along its heading, into out): -1 no actor or no cell, 2 a cell with flag 0x20000, else 0"
+ },
  "00119e1c": {
   "name": "MagLifeControlChara::followGround",
   "tag": "ror-inferred",
@@ -2404,6 +2452,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0011a054",
   "why": "returns m_48 > 1: the sequence phase past playing (updateMotionSeq, MagLifePCMode::live changes state 0 on it)"
+ },
+ "0011a064": {
+  "name": "MagLifeControlChara::isMotionStateEndless",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a064",
+  "why": "assert text !theBwnCtrl.m_bwn->isMotionStateEndless() in MagLifeBwnCtrlModeDamage::live; walks the sequence rows alternatives"
  },
  "0011a130": {
   "name": "MagLifeControlChara::clearMotionSeq",
@@ -3497,6 +3551,222 @@
   "was": "FUN_0012668c",
   "why": "_vt$20MagLifeBwnModeRotate slot 2"
  },
+ "001267f4": {
+  "name": "MagLifeBwnCtrlMode::countEmyAround",
+  "tag": "ror-inferred",
+  "was": "FUN_001267f4",
+  "why": "enemies within radius (f12) of Brown via 0x10376c, 0 when Brown health is 3 or more; called by the Null and Wait modes"
+ },
+ "001268b4": {
+  "name": "MagLifeBwnCtrlMode::checkBark",
+  "tag": "ror-inferred",
+  "was": "FUN_001268b4",
+  "why": "an enemy within 200 of a healthy Brown requests state 11 (BARK); 1 then"
+ },
+ "00126928": {
+  "name": "MagLifeBwnCtrlMode::turnToAngle",
+  "tag": "ror-inferred",
+  "was": "FUN_00126928",
+  "why": "Rot mode live: Brown message 7 with a turn class by the angle to +0x40 (sixths of pi), state 9 within 2 degrees"
+ },
+ "00126ba0": {
+  "name": "MagLifeBwnCtrlModeNull::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00126ba0",
+  "why": "vtable 0x2e15f8 slot 1: runs its live when Brown is bound"
+ },
+ "00126bd8": {
+  "name": "MagLifeBwnCtrlModeNull::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00126bd8",
+  "why": "vtable 0x2e15f8 slot 2: picks the next state from the mission +0x78 / health in level AUTO"
+ },
+ "00126ccc": {
+  "name": "MagLifeBwnCtrlModeWait::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00126ccc",
+  "why": "vtable 0x2e15d8 slot 1"
+ },
+ "00126e68": {
+  "name": "MagLifeBwnCtrlModeWait::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00126e68",
+  "why": "vtable 0x2e15d8 slot 2: follow past 170, bark, idle actions every 300 frames, sit at 1801, lie down at 3601"
+ },
+ "0012712c": {
+  "name": "MagLifeBwnCtrlModeFollow::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012712c",
+  "why": "vtable 0x2e1598 slot 1"
+ },
+ "00127150": {
+  "name": "MagLifeBwnCtrlModeFollow::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00127150",
+  "why": "vtable 0x2e1598 slot 2"
+ },
+ "00127a74": {
+  "name": "MagLifeBwnCtrlModeStay::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00127a74",
+  "why": "vtable 0x2e1578 slot 1"
+ },
+ "00127a90": {
+  "name": "MagLifeBwnCtrlModeStay::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00127a90",
+  "why": "vtable 0x2e1578 slot 2"
+ },
+ "00127b28": {
+  "name": "MagLifeBwnCtrlModeFind::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00127b28",
+  "why": "vtable 0x2e1558 slot 1"
+ },
+ "00127e68": {
+  "name": "MagLifeBwnCtrlModeFind::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00127e68",
+  "why": "vtable 0x2e1558 slot 2"
+ },
+ "0012890c": {
+  "name": "MagLifeBwnCtrlModeFindEnd::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012890c",
+  "why": "vtable 0x2e1538 slot 1"
+ },
+ "00128970": {
+  "name": "MagLifeBwnCtrlModeFindEnd::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00128970",
+  "why": "vtable 0x2e1538 slot 2"
+ },
+ "00128b8c": {
+  "name": "MagLifeBwnCtrlModeMove::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00128b8c",
+  "why": "vtable 0x2e1518 slot 1"
+ },
+ "00128bf0": {
+  "name": "MagLifeBwnCtrlModeMove::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00128bf0",
+  "why": "vtable 0x2e1518 slot 2"
+ },
+ "00128c4c": {
+  "name": "MagLifeBwnCtrlModeMoveEnd::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00128c4c",
+  "why": "vtable 0x2e14f8 slot 1"
+ },
+ "00128c80": {
+  "name": "MagLifeBwnCtrlModeMoveEnd::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00128c80",
+  "why": "vtable 0x2e14f8 slot 2 (empty)"
+ },
+ "00128c88": {
+  "name": "MagLifeBwnCtrlModeRot::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00128c88",
+  "why": "vtable 0x2e14d8 slot 1"
+ },
+ "00128c94": {
+  "name": "MagLifeBwnCtrlModeRot::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00128c94",
+  "why": "vtable 0x2e14d8 slot 2"
+ },
+ "00128cb0": {
+  "name": "MagLifeBwnCtrlModeRotEnd::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00128cb0",
+  "why": "vtable 0x2e14b8 slot 1"
+ },
+ "00128ce4": {
+  "name": "MagLifeBwnCtrlModeRotEnd::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00128ce4",
+  "why": "vtable 0x2e14b8 slot 2 (empty)"
+ },
+ "00128cec": {
+  "name": "MagLifeBwnCtrlModeDamage::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00128cec",
+  "why": "vtable 0x2e1498 slot 1"
+ },
+ "00128dbc": {
+  "name": "MagLifeBwnCtrlModeDamage::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00128dbc",
+  "why": "vtable 0x2e1498 slot 2"
+ },
+ "00128e20": {
+  "name": "MagLifeBwnCtrlModeBark::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00128e20",
+  "why": "vtable 0x2e1458 slot 1"
+ },
+ "00129028": {
+  "name": "MagLifeBwnCtrlModeBark::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00129028",
+  "why": "vtable 0x2e1458 slot 2"
+ },
+ "00129f50": {
+  "name": "MagLifeBwnCtrlModeBark::query",
+  "tag": "ror-inferred",
+  "was": "FUN_00129f50",
+  "why": "barkQuery helper on the Bark object: 1 when the phase is 11 and +0x24 equals v, else -1"
+ },
+ "00129f78": {
+  "name": "MagLifeBwnCtrlModeBark::set",
+  "tag": "ror-inferred",
+  "was": "FUN_00129f78",
+  "why": "barkSet helper: ctrl +0xc = v, phase 12"
+ },
+ "00129f88": {
+  "name": "MagLifeBwnCtrlModeSitOut::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00129f88",
+  "why": "vtable 0x2e1478 slot 1 (empty)"
+ },
+ "00129f90": {
+  "name": "MagLifeBwnCtrlModeSitOut::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00129f90",
+  "why": "vtable 0x2e1478 slot 2 (empty)"
+ },
+ "00129f98": {
+  "name": "MagLifeBwnCtrlModeHug::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00129f98",
+  "why": "vtable 0x2e1438 slot 1"
+ },
+ "0012a03c": {
+  "name": "MagLifeBwnCtrlModeHug::live",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a03c",
+  "why": "vtable 0x2e1438 slot 2"
+ },
+ "0012a21c": {
+  "name": "MagLifeBwnCtrlModeWound::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a21c",
+  "why": "vtable 0x2e15b8 slot 1 (asserts actor, motion dmgl_wait)"
+ },
+ "0012a2e8": {
+  "name": "MagLifeBwnCtrlModeWound::live",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a2e8",
+  "why": "vtable 0x2e15b8 slot 2"
+ },
+ "0012a394": {
+  "name": "MagLifeBwnCtrl::applyMode",
+  "tag": "ror-inferred",
+  "was": "FUN_0012a394",
+  "why": "switch on m_state picks the embedded mode object into +0x88, clears the frame count +0x84, sets the neck control of Brown and runs the mode init (slot 1)"
+ },
  "0012a56c": {
   "name": "MagLifeBwnCtrl::requestState",
   "tag": "ror-inferred",
@@ -3605,6 +3875,48 @@
   "was": "FUN_0012ab18",
   "why": "an empty function (jr ra) MagScene::resetEntities calls on Brown's controller after the PC's and Brown's reset"
  },
+ "0012ab20": {
+  "name": "MagLifeBwnCtrl::findItemAhead",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ab20",
+  "why": "collects objects (0x103ccc), keeps the nearest within 0.7 of the PC heading (assert dv), stores its position at +0x30 and its ids at +0x64/+0x68; asserts m_pc"
+ },
+ "0012adec": {
+  "name": "MagLifeBwnCtrl::findFloorAhead",
+  "tag": "ror-inferred",
+  "was": "FUN_0012adec",
+  "why": "steps 300 along the PC heading up to 10 times while the secta query finds floor; the last such point into +0x30"
+ },
+ "0012af70": {
+  "name": "MagLifeBwnCtrl::isEmyAheadOfPC",
+  "tag": "ror-inferred",
+  "was": "FUN_0012af70",
+  "why": "counts enemies within 500 of the point 500 ahead of the PC (0x10376c); Brown health below 3"
+ },
+ "0012b0d0": {
+  "name": "MagLifeBwnCtrl::isEmyNearPC",
+  "tag": "ror-inferred",
+  "was": "FUN_0012b0d0",
+  "why": "counts enemies within 500 of the PC (0x10376c); Brown health below 3"
+ },
+ "0012b19c": {
+  "name": "MagLifeBwnCtrl::aimAtPC",
+  "tag": "ror-inferred",
+  "was": "FUN_0012b19c",
+  "why": "Brown heading against the direction to the PC: off by more than 3 degrees stores that direction in +0x40 and returns 1"
+ },
+ "0012b300": {
+  "name": "MagLifeBwnCtrl::isFarFromPC",
+  "tag": "ror-inferred",
+  "was": "FUN_0012b300",
+  "why": "1 unless Brown is within 100 in y and 130 of the PC"
+ },
+ "0012b3d0": {
+  "name": "MagLifeBwnCtrl::isAwayFromPC",
+  "tag": "ror-inferred",
+  "was": "FUN_0012b3d0",
+  "why": "1 unless Brown is within 100 in y and closer than 95 to the PC"
+ },
  "0012b4a0": {
   "name": "MagLifeBwnCtrl::orderCome",
   "tag": "ror-inferred",
@@ -3652,6 +3964,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0012ba54",
   "why": "m_state == 11 and m_08 == 3"
+ },
+ "0012ba80": {
+  "name": "MagLifeBwnCtrl::MagLifeBwnCtrl",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ba80",
+  "why": "stores _vt$14MagLifeBwnCtrl at +0x14 and the 14 mode vtables at +0x8c..+0x128; called from the MagScene constructor"
  },
  "0012bc98": {
   "name": "MagLifePC::getWeaponHitPos",
