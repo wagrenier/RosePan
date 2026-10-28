@@ -2748,13 +2748,13 @@ intptr_t seqFunc253(intptr_t id, intptr_t a1, intptr_t, intptr_t, intptr_t, intp
 // key of the scene's sector.sec object, all four records.
 // ROR 0x0020de34
 
-intptr_t seqSectorFlags(int op, int key, u_int bits)
+intptr_t seqSectorFlags(int op, const char *key, u_int bits)
 {
-    Obj17c0f0 *sector = &g_magSystem.m_scene.m_8542c;
+    SctWorld *sector = &g_magSystem.m_scene.m_8542c;
     if (op == 200)
-        sectorSetFlags(sector, key, bits, -1);
+        sector->setFlags(key, bits, -1);
     else if (op == 201)
-        sectorClearFlags(sector, key, bits, -1);
+        sector->clearFlags(key, bits, -1);
     return 0;
 }
 
@@ -2809,7 +2809,7 @@ intptr_t seqFunc281(intptr_t a0, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
     EffParam     param;
 
     if (op / 100 == 2)
-        return seqSectorFlags((int)op, (int)a1, (u_int)a2);
+        return seqSectorFlags((int)op, (const char *)a1, (u_int)a2);
 
     memset(&param, 0, sizeof(param));   // PC: the ROM's stack words it does not set are garbage
     switch (op)

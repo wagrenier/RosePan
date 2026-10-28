@@ -713,7 +713,7 @@ struct MagScene
     int            m_bwn_no;            // ROR 0x853b4: setBwn's actor number, -1 = none
     int            m_pc_no;             // ROR 0x853b8: setPC's actor number, -1 = none
     MagSceneFocus  m_focus;             // ROR 0x853bc: the focus effect (mag/magscenefocus.cpp)
-    Obj17c0f0      m_8542c;             // ROR 0x8542c: reset by releaseTenkyu, sector.sec by load
+    SctWorld      m_8542c;             // ROR 0x8542c: reset by releaseTenkyu, sector.sec by load
     int            m_mirror_axis;       // ROR 0x85494: mapparam.bbb word 9 (files over 0x20 bytes): 0 none, 1 z, 2 y (floor), 3 x
     float          m_mirror_plane;      // ROR 0x85498: mapparam.bbb word 10 (a float): the mirror plane's coordinate
     int            m_854a4;             // ROR 0x854a4: mapparam.bbb word 8: the map's default footstep sound slot

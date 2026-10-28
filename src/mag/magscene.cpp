@@ -510,13 +510,13 @@ void MagScene::playActorFootstep(int theNo)
     pos[2] = actor->m_trans[2];
     pos[3] = actor->m_trans[3];
     GamSecta *hit[4] = {NULL, NULL, NULL, NULL};
-    FUN_0017c340(&m_8542c, pos, hit, 0, 40.0f, 0.0f);
+    m_8542c.findCells(pos, hit, 0, 40.0f, 0.0f);
 
     int sndid = -1;
     if (hit[0])
     {
-        MagSectorRec *sec = NULL;
-        if (m_8542c.m_list[0].m_num && m_8542c.m_list[0].m_sectors)
+        SctSector *sec = NULL;
+        if (m_8542c.m_list[0].m_head && m_8542c.m_list[0].m_sectors)
             sec = &m_8542c.m_list[0].m_sectors[hit[0]->m_sector];
         if (sec)
             sndid = sec->m_snd;
@@ -2042,7 +2042,7 @@ void MagScene::clearPC()
 // that exist as C++ constructors (GamFont, DogEntity / DogCamera, S2d*),
 // the rest start zeroed as part of g_magSystem until their TUs write them.
 // ROR 0x001360a0
-// callcheck: FUN_00100320, FUN_0010eebc, FUN_00110a94, FUN_00114c54, FUN_0011bf0c, FUN_00125aa4, FUN_0012ba80, FUN_0012d398, FUN_0012d58c, MagLifeMenuPBook, MagLifeMenuBoard3D, FUN_0012f008, FUN_0012f298, FUN_00130da4, FUN_0014257c, FUN_00142e84, FUN_00176a3c, FUN_0017c0f0, FUN_001947a4, FUN_0019a52c, FUN_001a1244, FUN_001a59b8, FUN_001a90ec, FUN_001ab474, FUN_001ad6b4, FUN_001adf04, FUN_001ae474, FUN_001ae954, FUN_001bdae4, FileReader, GamFont, S2dBg, S2dCineSco, S2dMes, S2dMovie, memset (member constructors: the host runs the C++ ones itself, the others are not written yet; the memsets are the field clears below)
+// callcheck: FUN_00100320, FUN_0010eebc, FUN_00110a94, FUN_00114c54, FUN_0011bf0c, FUN_00125aa4, FUN_0012ba80, FUN_0012d398, FUN_0012d58c, MagLifeMenuPBook, MagLifeMenuBoard3D, FUN_0012f008, FUN_0012f298, FUN_00130da4, FUN_0014257c, FUN_00142e84, FUN_00176a3c, SctWorld, FUN_001947a4, FUN_0019a52c, FUN_001a1244, FUN_001a59b8, FUN_001a90ec, FUN_001ab474, FUN_001ad6b4, FUN_001adf04, FUN_001ae474, FUN_001ae954, FUN_001bdae4, FileReader, GamFont, S2dBg, S2dCineSco, S2dMes, S2dMovie, memset (member constructors: the host runs the C++ ones itself, the others are not written yet; the memsets are the field clears below)
 
 MagScene::MagScene()
 {
@@ -2143,7 +2143,7 @@ MagScene::MagScene()
 // static teardown reaches it, with the game threads still running, and
 // releasing the sky models there races their drawing (open-items.md
 // Decisions).
-// ROR 0x00136d14 // callcheck: checkLightNo, releaseTenkyuAll, FUN_00110b78, FUN_0012d5e0, FUN_0014259c, FUN_00176aa0, FUN_0017c14c, FUN_00194858, FUN_00196b2c, FUN_001987b0, FUN_0019a598, FUN_001a12a8, FUN_001a5a34, FUN_001a9150, FUN_001ab4e0, FUN_001ad72c, FUN_001adf3c, FUN_001ae4ac, FUN_001ae9f4, FUN_001bdb4c, deleteAll, operator_delete, release, term, ~FileReader, ~GamFont, ~S2dBg, ~S2dCineSco, ~S2dMes, ~S2dMovie (the explicit part left out on the host, see above; the member destructors run by the host)
+// ROR 0x00136d14 // callcheck: checkLightNo, releaseTenkyuAll, FUN_00110b78, FUN_0012d5e0, FUN_0014259c, FUN_00176aa0, ~SctWorld, FUN_00194858, FUN_00196b2c, FUN_001987b0, FUN_0019a598, FUN_001a12a8, FUN_001a5a34, FUN_001a9150, FUN_001ab4e0, FUN_001ad72c, FUN_001adf3c, FUN_001ae4ac, FUN_001ae9f4, FUN_001bdb4c, deleteAll, operator_delete, release, term, ~FileReader, ~GamFont, ~S2dBg, ~S2dCineSco, ~S2dMes, ~S2dMovie (the explicit part left out on the host, see above; the member destructors run by the host)
 MagScene::~MagScene()
 {
 }

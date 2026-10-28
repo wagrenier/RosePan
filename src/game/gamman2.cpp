@@ -25,7 +25,7 @@
 #include "task/tsk_man.h"
 
 /* The scene's secta lists (bss 0x7811ac). */
-static inline Obj17c0f0 &gamSectaWorld() { return g_magSystem.m_scene.m_8542c; }
+static inline SctWorld &gamSectaWorld() { return g_magSystem.m_scene.m_8542c; }
 
 /* The hit walk's record count (data 0x2d8f58). */
 static int s_hitWalkCount;
@@ -1122,7 +1122,7 @@ int GamMan::getObjSectaNo(u_int oid, int list)
         break;
     }
     GamSecta *hit[4] = {NULL, NULL, NULL, NULL};
-    FUN_0017c340(&gamSectaWorld(), pos, hit, 0, 40.0f, 0.0f);
+    gamSectaWorld().findCells(pos, hit, 0, 40.0f, 0.0f);
     if (hit[list] == NULL)
         return -1;
     setSectaList(0);
@@ -1161,7 +1161,7 @@ int GamMan::hitTestObjs(GamSecta *cell, u_int oid, ChrHitRec *out, u_int skip)
 float GamMan::getFloorY(const float *pos)
 {
     GamSecta *hit[4] = {NULL, NULL, NULL, NULL};
-    FUN_0017c340(&gamSectaWorld(), pos, hit, 0, 40.0f, 0.0f);
+    gamSectaWorld().findCells(pos, hit, 0, 40.0f, 0.0f);
     int list = m_sectaList;
     if (hit[list] != NULL)
         return getSectaCellY(hit[list], pos, list);
@@ -1187,8 +1187,8 @@ void GamMan::selectSectaList(int list)
 GamSecta *GamMan::getSectaCellPtr(int no, int list)
 {
     setSectaList(list);
-    MagSectaList &l = gamSectaWorld().m_list[list];
-    if (l.m_num == 0 || l.m_cells == NULL)
+    SctLayer &l = gamSectaWorld().m_list[list];
+    if (l.m_head == NULL || l.m_cells == NULL)
         return NULL;
     return &l.m_cells[no];
 }
@@ -1202,7 +1202,7 @@ GamSecta *GamMan::pickSectaCell(const float *pos, int list)
     /* PORT: cleared; the ROM leaves the answer array as stack garbage and
      * lets 0x17c340 fill it (its a3 0: no starting cells). */
     GamSecta *hit[4] = {NULL, NULL, NULL, NULL};
-    FUN_0017c340(&gamSectaWorld(), pos, hit, 0, 40.0f, 0.0f);
+    gamSectaWorld().findCells(pos, hit, 0, 40.0f, 0.0f);
     return hit[list];
 }
 
@@ -1212,9 +1212,9 @@ GamSecta *GamMan::pickSectaCell(const float *pos, int list)
 GamSecta *GamMan::findSectaCellFrom(const float *pos, const int *cur, int list)
 {
     setSectaList(list);
-    MagSectaList &l = gamSectaWorld().m_list[list];
-    int no = FUN_0017ded0(&l, *cur, pos, 40.0f);
-    if (no == -1 || l.m_num == 0 || l.m_cells == NULL)
+    SctLayer &l = gamSectaWorld().m_list[list];
+    int no = l.findNextCell(*cur, pos, 40.0f);
+    if (no == -1 || l.m_head == NULL || l.m_cells == NULL)
         return NULL;
     return &l.m_cells[no];
 }
@@ -1228,7 +1228,7 @@ GamSecta *GamMan::findSectaCell(const float *pos, GamSecta *cur, int list)
     GamSecta *hit[4];
     memset(hit, 0, sizeof(hit));
     hit[list] = cur;
-    FUN_0017c340(&gamSectaWorld(), pos, hit, cur != NULL, 200.0f, 0.0f);
+    gamSectaWorld().findCells(pos, hit, cur != NULL, 200.0f, 0.0f);
     GamSecta *cell = hit[list];
     if (cell != NULL && (cell->m_flags & 4) != 0)
         return NULL;
@@ -1240,9 +1240,9 @@ GamSecta *GamMan::findSectaCell(const float *pos, GamSecta *cur, int list)
 
 GamSecta *GamMan::getSectaCell(int no, float *pos, int list)
 {
-    MagSectaList &l = gamSectaWorld().m_list[list];
+    SctLayer &l = gamSectaWorld().m_list[list];
     GamSecta *cell = NULL;
-    if (l.m_num != 0 && l.m_cells != NULL)
+    if (l.m_head != NULL && l.m_cells != NULL)
         cell = &l.m_cells[no];
     if (cell == NULL)
     {
@@ -1264,7 +1264,7 @@ float GamMan::getSectaCellY(GamSecta *cell, const float *pos, int list)
 {
     if (cell == NULL)
         return 100000.0f;
-    return FUN_0017dd5c(&gamSectaWorld().m_list[list], cell->m_id, pos, 0.0f);
+    return gamSectaWorld().m_list[list].getCellY(cell->m_id, pos, 0.0f);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1288,15 +1288,15 @@ int GamMan::findSectaPath(int list, int from, int to, GamSectaPath *path)
     GamSecta *toCell[4];
     memset(fromCell, 0, sizeof(fromCell));
     memset(toCell, 0, sizeof(toCell));
-    MagSectaList &l = gamSectaWorld().m_list[list];
-    fromCell[list] = (l.m_num != 0 && l.m_cells != NULL) ? &l.m_cells[from] : NULL;
-    toCell[list] = (l.m_num != 0 && l.m_cells != NULL) ? &l.m_cells[to] : NULL;
-    MagSectaPathReq req;
+    SctLayer &l = gamSectaWorld().m_list[list];
+    fromCell[list] = (l.m_head != NULL && l.m_cells != NULL) ? &l.m_cells[from] : NULL;
+    toCell[list] = (l.m_head != NULL && l.m_cells != NULL) ? &l.m_cells[to] : NULL;
+    SctPathReq req;
     req.m_list = list;
     req.m_from = fromCell;
     req.m_to = toCell;
     req.m_path = path;
-    if (FUN_0017d298(&l, &req) == 0)
+    if (l.searchPath(&req) == 0)
         return 0;
     return path->m_num;
 }

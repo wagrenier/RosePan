@@ -1481,6 +1481,24 @@
    "status": "verify",
    "why": "rx middleware thread layer: kernel wrappers from 0x249b88 (CreateSema, CreateThread), rxThInit, dispatch semaphore, rxThRequest/rxThYield, rxthread/rxThread messages, vsync and DMA wait helpers to 0x24b48c; libcdvd sceCdCallback starts at 0x24b490"
   },
+  "sct/sctlayer.cpp": {
+   "notes": "verify: a temporary self-test on two MAPUNIT.BIN packs (not committed) found every flat and sloped cell at its point, gave neighbour-chain paths both ways and set / cleared group bits; the 200 s New Game run ends on the book and never loads a room, so no screenshot shows the floor yet (the first in-room run with the PC walking marks it done). Host: file offsets stay offsets (getSectorCells / getGroupCell), cell +0x88 holds a direction index, findGroup guards a layer with no data, setup guards a layer with no sectors. seqSectorFlags now takes the key as const char pointer (was truncated to int). The DogActor asserts at dogactor.cpp 875 / 1753 / 1773 in the 200 s run predate this TU (same 85 in a baseline run without it). Doubt: the file name sct/ (no source string). Some triangle cells store a point outside their own bounds (data, not port). Next in the old run: the effect manager Obj176a3c 0x176a3c..0x1788ec (unassigned@00166a1c stays pinned).",
+   "ranges": [
+    [
+     "0017c0f0",
+     "0017e540"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-28 08:24",
+     "status": "verify",
+     "summary": "The secta world (floor cells) split out of unassigned@00166a1c as sct/sctlayer.cpp 0x17c0f0..0x17e540 and written in full: SctWorld (scene +0x8542c, sector.sec setup / release, findCells, group flags) and SctLayer (the ELF class: setup, findCell / findCellNear, getCellY with slopes and triangle halves, findNextCell, searchPath = sector BFS plus the cell cost walk, canWalkStraight). Placeholders Obj17c0f0 / MagSectaList / MagSectorRec / MagSectaPathReq replaced in src; GamSecta moved to sct/sctlayer.h with its full layout; 9 stubs removed."
+    }
+   ],
+   "status": "verify",
+   "why": "the secta (floor cell) module: SctLayer (the ELF's vtable _vt$8SctLayer, vptr +0x14, 0x18 bytes) and its four-layer owner (scene +0x8542c) that loads a sky pack's sector.sec; ends where WrdSrv begins. No source string: file name from the class"
+  },
   "sequence/seqcall.cpp": {
    "notes": "TU complete: all 43 functions written; verify because no smoke run reaches native 252 (the boot pad stops at NowLoading) and sound has no picture. Decisions: stopObjSe / releaseObjSe renamed to the ELF forwarder names del_se_3d_pos_chr / del_str_3d_pos_chr; GamSndMan overloads keep the trailing 0 the forwarders add as an int arg; the funcSE / funcStr 0x13 block is a TskSndParam (words 0, 1, 2, 5 set; funcSE writes 3, 8, 9) and the 5 / 0xb block an int array (words 0, 1, 2, 4), zeroed where the ROM leaves stack garbage; cases 16 / 17 read the float at t0 but 59 / 60 take t0 itself (ROM difference kept). Trap: stubgen copies the first overload declaration and skips an overload whose name is defined, so playSE / playStr / loadSePack(char*,int) stubs were fixed by hand (hazards.md). Next for sound: game/gamsnd.cpp (funcSE 0x1e5e58, funcStr 0x1e5660, playSE, playStr) as its own TU once stage 2 runs. References updated: architecture.md native 252 and the GamSndMan name map, hazards.md stubgen overloads, open-items.md 10g.",
    "ranges": [
@@ -1941,6 +1959,7 @@
   "unassigned@00143d3c": {},
   "unassigned@00145020": {},
   "unassigned@00164fc0": {},
+  "unassigned@00166a1c": {},
   "unassigned@001810f4": {},
   "unassigned@00190a78": {},
   "unassigned@00192ac0": {},

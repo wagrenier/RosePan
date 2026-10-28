@@ -594,79 +594,16 @@ struct Obj176a3c                /* scene +0x837e0, constructor 0x176a3c */
     int   _00;
     Eff0 *m_entry[0x110];       // ROR 0x04: the constructor clears 0x440 bytes
 };
-/* layout: host -- placeholder. */
-/* A floor sector of a sky pack's sector.sec (EE 0x80, file data). */
-struct MagSectorRec
-{
-    u_char _00[0x48];
-    int    m_snd;               // ROR 0x48: the footstep sound slot (1..11), < 0 = the map's default
-    u_char _4c[0x80 - 0x4c];
-};
-static_assert(offsetof(MagSectorRec, m_snd) == 0x48, "m_snd");
-static_assert(sizeof(MagSectorRec) == 0x80, "MagSectorRec is 0x80 bytes on the EE");
-/* FUN_0017c340 answers with secta cells (GamSecta, game/gamstat.h: one per
- * list, m_sector at +0x04). */
-struct GamSecta;
-struct GamSectaPath;
-/* layout: host -- placeholder. */
-/* One of the four secta lists (EE 0x18): GamMan's secta queries index the
- * cells (0x90 each) and hand &list to 0x17dd5c / 0x17ded0 / 0x17d298.
- * layout: host -- pointers. */
-struct MagSectaList
-{
-    int           _00;          // ROR 0x00
-    int           m_num;        // ROR 0x04: non-zero when the list is loaded (GamMan tests it before m_cells)
-    MagSectorRec *m_sectors;    // ROR 0x08: the sector records
-    GamSecta     *m_cells;      // ROR 0x0c: the cells, 0x90 each
-    int           _10[2];
-};
-/* layout: host -- pointers in the lists. */
-struct Obj17c0f0                /* scene +0x8542c (bss 0x7811ac), constructor 0x17c0f0: a flag word, a buffer, four secta lists */
-{
-    int           _00[2];
-    MagSectaList  m_list[4];    // ROR 0x08: list 0 is the floor (MagScene's footsteps)
-};
-static_assert(sizeof(Obj176a3c) >= 4 && sizeof(Obj17c0f0) >= 4, "placeholders");
+/* The secta world (SctWorld at scene +0x8542c, its SctLayers, GamSecta):
+ * sct/sctlayer.h. */
+#include "sct/sctlayer.h"
+static_assert(sizeof(Obj176a3c) >= 4, "placeholders");
 
 int   FUN_00176afc(Obj176a3c *obj, i3dContext *ctx, MagScene *scene);    // ROR 0x00176afc
 void  FUN_00177830(Obj176a3c *obj, i3dContext *ctx);  /* MagScene::draw's world pass */ // ROR 0x00177830
 /* MagScene::update's step: runs a check slot of each of its objects and
  * deletes the finished ones. */
 void  FUN_0017772c(Obj176a3c *obj);                                      // ROR 0x0017772c
-void  FUN_0017c2c0(Obj17c0f0 *obj);  /* frees the buffer and the records */ // ROR 0x0017c2c0
-/* Bits into (set) / out of (clear) the entries of the group key finds,
- * in record rec or all four when rec < 0 (native 281 ops 200 / 201). */
-void  sectorSetFlags(Obj17c0f0 *obj, int key, u_int bits, int rec);      // ROR 0x0017c45c
-void  sectorClearFlags(Obj17c0f0 *obj, int key, u_int bits, int rec);    // ROR 0x0017c4f4
-/* Takes a sky pack's sector.sec (copied to the game heap when copy is
- * set); non-zero on success. */
-int   FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy);               // ROR 0x0017c1f4
-/* The sector under pos (hit[0], NULL when none) within r / h (the ROM
- * passes 40 and 0 in f12 / f13). */
-void  FUN_0017c340(Obj17c0f0 *obj, const float *pos, GamSecta **hit, int arg,
-                   float r, float h);                                    // ROR 0x0017c340
-/* The height of cell id of list under pos (GamMan::getSectaCellY; the ROM
- * passes 0 in f12). */
-float FUN_0017dd5c(MagSectaList *list, int id, const float *pos, float h); // ROR 0x0017dd5c
-/* The cell of list holding pos, searched from cell id (GamMan::
- * findSectaCellFrom passes 40 in f12); its index, -1 none. */
-int   FUN_0017ded0(MagSectaList *list, int id, const float *pos, float r); // ROR 0x0017ded0
-/* GamMan::findSectaPath's request: the list, the start and goal cells
- * (four-entry arrays, the list's entry set) and the answer. layout: host. */
-struct MagSectaPathReq
-{
-    int           m_list;       // ROR 0x00
-    GamSecta    **m_from;       // ROR 0x04
-    GamSecta    **m_to;         // ROR 0x08
-    GamSectaPath *m_path;       // ROR 0x0c
-};
-/* Non-zero when a way through list's cells from req->m_from to req->m_to
- * exists; the cells go into req->m_path. */
-int   FUN_0017d298(MagSectaList *list, MagSectaPathReq *req);            // ROR 0x0017d298
-/* Non-zero when the segment from -> to stays inside list's cells (within
- * r; the cells under both ends found by 0x17c8b8); MagLifeBwn::searchPath
- * asks it for a way inside one cell. */
-int   FUN_0017e0a8(float r, MagSectaList *list, const float *from, const float *to); // ROR 0x0017e0a8
 /* mnuInitPool 0x1944d0 / mnuTermPool 0x194548 (the mnu pool): mnu/mnubase.h. */
 /* m_837e0's teardown (frees its buffer, closes its FileReader). */
 void  FUN_00176c50(Obj176a3c *obj);                                      // ROR 0x00176c50

@@ -1309,6 +1309,14 @@ to adapt when a TU reaches them:
   in each member's +8; called by sectorSetFlags / ClearFlags) were left with the sector code before
   them. Next pick in the rest: the effect manager Obj176a3c (0x176a3c..~0x1788ec, scene +0x837e0)
   -- its update / draw 0x17772c / 0x177830 and init 0x176afc are reached every frame.
+  2026-10-28: 0x17c0f0..0x17e540 is now `sct/sctlayer.cpp` (verify: the secta world, SctLayer /
+  SctWorld; Obj17c0f0 / MagSectaList / MagSectorRec / MagSectaPathReq renamed SctWorld / SctLayer /
+  SctSector / SctPathReq in src; GamSecta moved to sct/sctlayer.h with its full layout). Tested on disc
+  data by a temporary self-test, but the 200 s New Game run never loads a room, so nothing on screen
+  shows it yet. Doubts: the file / directory name (no source string; from the class); seqSectorFlags
+  now takes the script's key as const char * (it was truncated to int on the host). Still unread in
+  the run: 0x17c0f0 back to the effect classes (EffWater3 ends ~0x17c0f0) -- the effect manager
+  Obj176a3c 0x176a3c..0x1788ec stays the next pick there (unassigned@00166a1c, still pinned).
 
 - (2026-10-22, the i3dmath session) **Naming of the vector module's two copies**: the older
   sessions gave five first-copy functions the plain names (i3dVecZero, i3dVecCopyW, i3dMatCopy,
