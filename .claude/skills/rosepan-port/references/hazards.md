@@ -819,3 +819,18 @@ blocked, so it is game logic, not a lock.
   hand stubs. Also: a `// callcheck:` comment cannot name `A::B` (its regex stops at the colon) -- write
   the bare names (`Eff0`, `EffBg1` for constructors).
 
+
+## A render-target pass drawn on the screen (2026-10-28)
+
+- Symptom: after the picture book (the 200 s run, frames 6180+) a big untextured white figure filled
+  the screen, seen from above; the scene's other 2D layers stayed black.
+- Cause: it was Brown's shadow model (his pack's file 2, DogModel m_i3r_root2: materials bwn1, one
+  unnamed, bwn3_tcc, never i3rAssignTex'd, so every layer reads m_tex_index -1). MagScene::makeActorShadow
+  draws it from the light into the 256 x 256 shadow target (FRAME fbp 0x118, XYOFFSET 0); the host
+  replay skipped XYOFFSET 0 for prims and strips but not for model records. And MagScene::putDrawEnv
+  restores the display env by DMA reference, which the replay never saw, so after any off-screen pass
+  XYOFFSET stayed 0 and the rest of the frame's 2D was skipped.
+- Fix: rosepan_i3d's DrawModel skips XYOFFSET 0 too; putDrawEnv records the env's XYOFFSET / SCISSOR /
+  TEST (RosePan_I3dRecordReg, PC: comment). Lesson: an untextured model may be a pass whose target is
+  not the screen -- check the layer's FRAME / XYOFFSET before chasing textures. Found by logging, in
+  MaterialTexture, the misses with the layer's texture name and comparing with DogTexInfo::addPfh's names.

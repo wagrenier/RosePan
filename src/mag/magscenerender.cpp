@@ -26,6 +26,7 @@
 #include "common/ror_assert.h"
 #include "common/rosepan_stub.h"
 #include "sdk/libgraph.h"
+#include "rosepan/rendering/rosepan_i3d.h"
 
 /* data 0x298c40: the close-up view (a 256 x 256 target); drawCloseUp
  * writes its frustum. */
@@ -99,14 +100,24 @@ void MagScene::copyTexture(const char *dst, const char *src)
 
 void MagScene::putDrawEnv(I3dLayer *layer, sceGsDBuff *dbuff, int frame)
 {
-    u_long *pkt = i3dLayerBeginPacket(layer);
-    pkt = i3dPktDmaTag(pkt, 1, 0x10, NULL, 0x11000000, 0x50000001);
+    u_long *start = i3dLayerBeginPacket(layer);
+    u_long *pkt = i3dPktDmaTag(start, 1, 0x10, NULL, 0x11000000, 0x50000001);
     pkt[0] = 0x1000000000008008UL;  /* NLOOP 8, EOP, one A+D register */
     pkt[1] = 0xe;
-    const void *env = &dbuff->draw0;
+    const sceGsDrawEnv1 *env = &dbuff->draw0;
     if (frame & 1)
         env = &dbuff->draw1;
     pkt = i3dPktDmaTag(pkt + 2, 8, 0x30, env, 0, 0x50000008);
+    /* PC: the env goes by DMA reference, which the native i3d module's
+     * replay does not read: record the registers it uses (XYOFFSET ends an
+     * off-screen pass's XYOFFSET 0), one per qword of the packet. */
+    u_long xyoffset, scissor, test;
+    memcpy(&xyoffset, &env->xyoffset1, sizeof(xyoffset));
+    memcpy(&scissor, &env->scissor1, sizeof(scissor));
+    memcpy(&test, &env->test1, sizeof(test));
+    RosePan_I3dRecordReg(start, SCE_GS_XYOFFSET_1, xyoffset);
+    RosePan_I3dRecordReg(start + 1, SCE_GS_SCISSOR_1, scissor);
+    RosePan_I3dRecordReg(start + 2, SCE_GS_TEST_1, test);
     i3dLayerEndPacket(layer, pkt);
 }
 
