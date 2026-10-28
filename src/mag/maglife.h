@@ -109,6 +109,15 @@ struct MagLifeControlChara : MagLife
     void updateMotionSeq();                                              // ROR 0x0011a14c
     /* m_seq_no = no, the phase words cleared. */
     void setMotionSeqNo(int no);                                         // ROR 0x0011a010
+    /* The secta query (radius 40) at the actor, ahead along its heading
+     * when ahead != 0 (that point into out when given): -1 without an
+     * actor or a cell, 2 on a cell flagged 0x20000, else 0. */
+    int  testFloor(float ahead, float *out);                             // ROR 0x00119cec
+    /* 1 when a row along m_seq_no's alternatives (+0x12) loops (+0x0a <
+     * 0), 0 when the chain ends. */
+    int  isMotionStateEndless();                                         // ROR 0x0011a064
+    /* utlPlaySe(se) at the actor (nothing without one). */
+    void playSe(int se);                                                 // ROR 0x0011a704
     /* m_seq_no. */
     int  getMotionSeq();                                                 // ROR 0x0011a028
     /* m_48 > 1: the row's motion has ended. */

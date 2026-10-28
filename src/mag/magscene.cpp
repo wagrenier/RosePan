@@ -2028,7 +2028,7 @@ void MagScene::resetEntities()
 
 void MagScene::clearPC()
 {
-    m_bwn_ctrl.m_78 = 0;
+    m_bwn_ctrl.m_mission = MISSION_NONE;
     utlFindClear(&m_bwn_ctrl.m_find);
     m_pc.termWorld();
 }

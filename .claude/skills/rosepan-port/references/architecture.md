@@ -1102,6 +1102,21 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   +0xcf4 One(1), +0xcf8 Wait(2), +0xd04 Sit(3), +0xd08 Fuse(4), +0xd0c Move(5), +0xd18 Path(6),
   +0xd28 Turn(7), +0xd30 Rotate(8), +0xd2c Wall(9). The shared live 0x125bd4 = stepMotion, then
   state 0 when the motion sequence ends.
+- `MagLifeBwnCtrl` (mag/maglifebwnctrl.cpp, 0x1267c0..0x12bc20, EE 0x130, scene +0x2bd20): what Brown
+  decides. `requestState(theMode, arg, force)` 0x12a56c enters a state at once (refused while the cell
+  under Brown has flag 0x20000, `MagLifeControlChara::testFloor` 0x119cec, except state 13) and
+  `applyMode` 0x12a394 points +0x88 at the embedded mode and runs its init; live (slot 2) runs the
+  mode's live each frame unless the level (+0x6c) is MANUAL (2). Modes: base `MagLifeBwnCtrlMode`, two
+  slots (1 init, 2 live, both `MagLifeBwnCtrl &theBwnCtrl`), embedded at +0x8c Null(0) +0x90 Wait(1)
+  +0x94 Follow(2) +0x9c Stay(3) +0xa0 Find(4) +0xd0 FindEnd(5) +0xd4 Move(6) +0xd8 MoveEnd(7) +0xdc
+  Rot(8) +0xe0 RotEnd(9) +0xe4 Damage(10) +0xf0 Bark(11) +0x120 Hug(12) +0x128 Wound(13); SitOut has
+  a vtable and nothing else. The modes drive Brown through `MagLifeBwn::message` (1 one-shot motion
+  with the motion id, 2 wait, 3 sit, 4 fuse, 6 path, 7 turn class) and request the next state
+  themselves; +0x08 is the state's phase, +0x78 the mission (setMission 0..4: 1 find, 2 stay, 4 hug),
+  +0x84 frames in the mode. Null picks: health 4 -> Wound, mission, bark (enemy within 200), else
+  Wait; Wait follows past 170 from the PC, idles every 300 frames (table 0x2ebe10), sits at 1801,
+  lies down at 3601. Orders: come (follow / turn / back off / action table 0x2ec448), stay (state 3),
+  go (pending find, enemies ahead -> bark, item ahead -> find, floor ahead -> move, else follow).
 - Fields named by the ELF's linkonce accessors: +0xca0 m_num_search_line (< 127, asserted in
   mag/maglifebwn.h:213), +0xcac getUnmovableCount, +0xcb8 getHealthStatus (0..4 by dog params
   0x1b / 0x1c: 0.8 / 0.4 / 0.2 / 0), +0xcc0 isPathMoveEnd = isActionEnd, +0xcc4 getMoveResult /

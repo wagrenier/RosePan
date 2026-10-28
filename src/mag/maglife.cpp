@@ -192,3 +192,23 @@ float MagLifeControlChara::followGround()
     ROSEPAN_STUB("MagLifeControlChara::followGround", 0x00119e1c);
     return {};
 }
+
+// stub of ROR 0x0011a064
+int MagLifeControlChara::isMotionStateEndless()
+{
+    ROSEPAN_STUB("MagLifeControlChara::isMotionStateEndless", 0x0011a064);
+    return {};
+}
+
+// stub of ROR 0x0011a704
+void MagLifeControlChara::playSe(int se)
+{
+    ROSEPAN_STUB("MagLifeControlChara::playSe", 0x0011a704);
+}
+
+// stub of ROR 0x00119cec
+int MagLifeControlChara::testFloor(float ahead, float *out)
+{
+    ROSEPAN_STUB("MagLifeControlChara::testFloor", 0x00119cec);
+    return {};
+}

@@ -21,5 +21,9 @@ static_assert(offsetof(UtlFind, m_14) == 0x14, "m_14");
 static_assert(sizeof(UtlFind) == 0x18, "UtlFind is 0x18 bytes on the EE");
 
 void utlFindClear(UtlFind *p);                                           // ROR 0x0010620c
+/* 1 when one of the first m_10 ids is positive. */
+int  utlFindHasAny(UtlFind *p);                                          // ROR 0x00106240
+/* m_14 = arg, m_10 = 0x103240(p, 4, item) (the ids found for item). */
+void utlFindSetItem(UtlFind *p, int item, int arg);                      // ROR 0x00106280
 
 #endif /* _UTL_UTLFIND_H */
