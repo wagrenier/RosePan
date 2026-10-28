@@ -16,6 +16,7 @@
 #include "i3d/i3dlayer.h"
 #include "i3d/i3dpacket.h"
 #include "i3d/i3dtex.h"
+#include "i3d/i3rdraw.h"
 #include "i3d/i3rmodel.h"
 #include "i3d/i3rroot.h"
 #include "bed/bedpfh.h"
@@ -89,6 +90,8 @@ struct ModelDraw
     const float       *nodes;
     const I3dTexEntry *tex;
     int                tex_count;
+    bool               has_opt;
+    I3rBlendOpt        opt;
 };
 
 struct Camera
@@ -479,7 +482,7 @@ void DrawModel(const Record &r)
     const ModelDraw &m = s_models[r.index];
     /* The mesh path's own state: opaque, depth tested, the whole frame. */
     RestoreState();
-    RosePan_I3dMeshDraw(m.root, m.world, m.nodes, m.tex, m.tex_count);
+    RosePan_I3dMeshDraw(m.root, m.world, m.nodes, m.tex, m.tex_count, m.has_opt ? &m.opt : NULL);
 }
 
 void ApplyReg(uint64_t reg, uint64_t value)
@@ -617,7 +620,8 @@ void RosePan_I3dRecordMovie(const void *at, int x0, int y0, int x1, int y1,
 }
 
 void RosePan_I3dRecordModel(const void *at, const I3rRoot *root, const float *world,
-                            const float *nodes, const I3dTexEntry *tex, int tex_count)
+                            const float *nodes, const I3dTexEntry *tex, int tex_count,
+                            const I3rBlendOpt *opt)
 {
     ModelDraw m = {};
     m.root = root;
@@ -625,6 +629,9 @@ void RosePan_I3dRecordModel(const void *at, const I3rRoot *root, const float *wo
     m.nodes = nodes;
     m.tex = tex;
     m.tex_count = tex_count;
+    m.has_opt = opt != NULL;
+    if (opt != NULL)
+        m.opt = *opt;
     Record r = {};
     r.kind = REC_MODEL;
     r.index = s_models.size();
@@ -957,7 +964,7 @@ void RosePan_I3dMeshForcedTest(i3dContext *ctx)
     u_long *pkt = i3dLayerBeginPacket(layer);
     u_long *p = i3dPktDmaTag(pkt, 2, 0x10, NULL, 0, 0);
     RosePan_I3dRecordCamera(p, view, proj);
-    RosePan_I3dRecordModel(p + 2, s_root, s_world, NULL, s_table.data(), (int)s_table.size());
+    RosePan_I3dRecordModel(p + 2, s_root, s_world, NULL, s_table.data(), (int)s_table.size(), NULL);
     p[0] = p[1] = p[2] = p[3] = 0;
     i3dLayerEndPacket(layer, p + 4);
 }

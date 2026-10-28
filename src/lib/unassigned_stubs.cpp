@@ -2954,3 +2954,18 @@ int utlRandPeakHi(int lo, int hi, int n)
     ROSEPAN_STUB("utlRandPeakHi", 0x00104394);
     return {};
 }
+
+// stub of ROR 0x00225108
+float i3rBlendGetWeight(float t, const I3rItem *target)
+{
+    ROSEPAN_STUB("i3rBlendGetWeight", 0x00225108);
+    return {};
+}
+
+// stub of ROR 0x00225498
+float * i3rBlendVertices(float t, I3rVertexRef *ref, float *buf, const I3rItem *blocks, u_int num_blocks,
+                        const I3rBlendList *list, u_int flags)
+{
+    ROSEPAN_STUB("i3rBlendVertices", 0x00225498);
+    return {};
+}

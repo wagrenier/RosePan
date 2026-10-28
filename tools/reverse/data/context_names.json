@@ -19973,11 +19973,23 @@
   "was": "FUN_00224ff0",
   "why": "picture + header size + image size: the CLUT data, NULL when ClutColors is 0"
  },
+ "00225108": {
+  "name": "i3rBlendGetWeight",
+  "tag": "ror-inferred",
+  "was": "FUN_00225108",
+  "why": "i3rDrawSetupBlend's weight per 0x59 child when opt's mask has the channel: child 0's type 0x58 curve at the time in f12 (0x225080), else the child's own float"
+ },
  "002251f0": {
   "name": "i3rTrackGetValue",
   "tag": "ror-inferred",
   "was": "FUN_002251f0",
   "why": "an item's vector at time f12: its data vector when child 0 has no data, else 0x225148 interpolates child 0's keys; 0x22a050 reads the uv tracks with it"
+ },
+ "00225498": {
+  "name": "i3rBlendVertices",
+  "tag": "ror-inferred",
+  "was": "FUN_00225498",
+  "why": "i3rDrawMeshBlend's per-slot vertex block: group flags & 2 sums the weighted target blocks (0x2253e0 / 0x2252a8), & 1 evaluates per-vertex curves (0x225230), else copies the own 0x33 block's descriptor; returns the packet end"
  },
  "00226278": {
   "name": "i3dViewMakePlanes",

@@ -20,9 +20,11 @@
 #include "i3d/i3dctx.h"
 #include "i3d/i3dpacket.h"
 #include "i3d/i3dtex.h"
+#include "i3d/i3rdraw.h"
 #include "i3d/i3rmesh.h"
 #include "i3d/i3rmodel.h"
 #include "i3d/i3rroot.h"
+#include "lib/unassigned.h"
 #include "rosepan/io/rosepan_log.h"
 #include "rosepan/rendering/rosepan_renderer.h"
 
@@ -90,6 +92,16 @@ struct Skin
     unsigned       num_bone;
     unsigned       num_node;
     const float   *offsets;
+};
+
+/* What a group blends with (i3rDrawMeshBlend 0x2210f0): i3rDrawModel's
+ * opt, the entry's weight lists (i3rDrawSetupBlend) and the group's flags
+ * (& 3 set, or the group is not blended). */
+struct Blend
+{
+    const I3rBlendOpt  *opt;
+    const I3rBlendList *list;
+    u_int               flags;
 };
 
 /* The host copy of VU1 data memory and the VIF1 registers a block uses. */
@@ -258,6 +270,30 @@ void LoadSlot(const I3rItem &slot, unsigned base)
     }
 }
 
+/* The slot of blend channel `ch` at base: through i3rBlendVertices when
+ * the opt names the channel (i3rDrawMeshBlend: positions bit 0, normals
+ * bit 1, strip colours bit 3, STQ bit 4), else its own block -- also when
+ * i3rBlendVertices leaves the own block (group flags without 1 / 2). */
+void LoadChannel(const I3rItem &slot, unsigned base, const Blend *blend, int ch)
+{
+    if (blend != nullptr && (blend->opt->m_mask & (1u << ch)) != 0 && slot.getNumChild() != 0)
+    {
+        static float buf[kVuSize][4];
+        I3rVertexRef ref = {};
+        i3rBlendVertices(blend->opt->m_time[ch], &ref, buf[0], slot.getChildren(), slot.getNumChild(),
+                         &blend->list[ch], blend->flags);
+        if (ref.m_blended != 0 && ref.m_data != nullptr)
+        {
+            /* The ROM UNPACKs them as V4-32 to the pool (0x2261b8). */
+            const float *q = (const float *)ref.m_data;
+            for (unsigned i = 0; i < ref.m_count && i < kVuSize; i++)
+                memcpy(s_vu.mem[(base + i) % kVuSize], q + i * 4, 16);
+            return;
+        }
+    }
+    LoadSlot(slot, base);
+}
+
 void VuVec3(unsigned addr, float out[3])
 {
     const uint32_t *q = s_vu.mem[addr % kVuSize];
@@ -406,13 +442,16 @@ float Shade(const float *m, const float n[3])
 }
 
 /* One 0x56 batch: its pools, then every strip as triangles. */
-void DrawBatch(const I3rItem &batch, const float *local_world, const void *texture, const Skin *skin)
+void DrawBatch(const I3rItem &batch, const float *local_world, const void *texture, const Skin *skin,
+               const Blend *blend)
 {
     if (batch.getType() != kTypeVertexBatch || batch.getNumChild() < 5)
         return;
     const I3rItem *slot = batch.getChildren();
-    LoadSlot(slot[4], kVuPositions);
-    LoadSlot(slot[2], kVuNormals);
+    /* Blended first, then skinned (i3rDrawMeshBlend's 0x225670 skins the
+     * blended pools). */
+    LoadChannel(slot[4], kVuPositions, blend, I3R_BLEND_POSITION);
+    LoadChannel(slot[2], kVuNormals, blend, I3R_BLEND_NORMAL);
     if (skin != nullptr && batch.getNumChild() >= 6 && slot[5].getNumChild() != 0)
         SkinBatch(slot[5], *skin);
     if (slot[0].getNumChild() == 0)
@@ -444,8 +483,8 @@ void DrawBatch(const I3rItem &batch, const float *local_world, const void *textu
         const u_char *idx = (const u_char *)i3rPtr(&s->m_list);
         if (idx == nullptr)
             continue;
-        LoadSlot(item.getChildren()[0], kVuColours);
-        LoadSlot(item.getChildren()[1], kVuStq);
+        LoadChannel(item.getChildren()[0], kVuColours, blend, I3R_BLEND_COLOUR);
+        LoadChannel(item.getChildren()[1], kVuStq, blend, I3R_BLEND_STQ);
         float pos[20][3], nrm[20][3], rgb[20][3];
         float st[20][2];
         uint16_t ix[20][2];
@@ -498,7 +537,7 @@ void DrawBatch(const I3rItem &batch, const float *local_world, const void *textu
 /* One group's 0x4d meshes (the group's child 0 list): per mesh its
  * material's texture and state, then its batches. */
 void DrawMeshList(const I3rItem &list, const I3rItem *materials, unsigned num_mat, const I3dTexEntry *tex,
-                  int tex_count, const float *local_world, const Skin *skin)
+                  int tex_count, const float *local_world, const Skin *skin, const Blend *blend)
 {
     const I3rItem *mesh4d = list.getChildren();
     for (u_int m = 0; m < list.getNumChild(); m++)
@@ -512,13 +551,13 @@ void DrawMeshList(const I3rItem &list, const I3rItem *materials, unsigned num_ma
         ApplyMaterialState(materials, num_mat, mat);
         const I3rItem &batches = mesh4d[m].getChildren()[0];
         for (u_int b = 0; b < batches.getNumChild(); b++)
-            DrawBatch(batches.getChildren()[b], local_world, texture, skin);
+            DrawBatch(batches.getChildren()[b], local_world, texture, skin, blend);
     }
 }
 }
 
 void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *nodes,
-                         const I3dTexEntry *tex, int tex_count)
+                         const I3dTexEntry *tex, int tex_count, const I3rBlendOpt *opt)
 {
     if (root == nullptr || world == nullptr || root->m_item.getNumChild() < 4)
         return;
@@ -557,6 +596,13 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
                 continue;
             const u_short *bones = (const u_short *)i3rPtr(&ne->m_bones);
             const I3rItem &mesh = meshes[ne->m_mesh];
+            /* The entry's blend weights (i3rDrawModel's i3rDrawSetupBlend);
+             * a group blends when its flags & 3 is set and there is an opt
+             * (the group writers' test). */
+            I3rBlendList lists[I3R_BLEND_CHANNELS];
+            memset(lists, 0, sizeof(lists));
+            if (opt != nullptr)
+                i3rDrawSetupBlend(&entry[e], opt, lists);
             /* Child 1, type 0x45: rigid, every group with the node's own
              * matrix (i3rDrawMesh45 / 0x220838); drawn first, as the ROM. */
             if (mesh.getNumChild() >= 2 && mesh.getChildren()[1].m_data != 0 && nodes != nullptr)
@@ -570,9 +616,13 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
                     for (u_int g = 0; g < groups.getNumChild(); g++)
                     {
                         const I3rItem &group = groups.getChildren()[g];
+                        const u_char *gd = (const u_char *)group.getData();
+                        /* The 0x45 group's flags: its data's first byte. */
+                        const Blend blend = {opt, lists, gd != nullptr ? gd[0] : 0u};
                         if (group.getNumChild() != 0)
                             DrawMeshList(group.getChildren()[0], materials, num_mat, tex, tex_count,
-                                         node_world, nullptr);
+                                         node_world, nullptr,
+                                         opt != nullptr && (blend.flags & 3) != 0 ? &blend : nullptr);
                     }
                 }
             }
@@ -606,8 +656,9 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
                     if (slot_no < ne->m_num_bone && bones[slot_no] < num_node)
                         MatMul(local_world, nodes + (size_t)bones[slot_no] * 16, world);
                 }
+                const Blend blend = {opt, lists, gd[5]};
                 DrawMeshList(group[g].getChildren()[0], materials, num_mat, tex, tex_count, local_world,
-                             rigid ? nullptr : skinned);
+                             rigid ? nullptr : skinned, opt != nullptr && (gd[5] & 3) != 0 ? &blend : nullptr);
             }
         }
     }

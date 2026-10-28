@@ -38,6 +38,46 @@ static_assert(offsetof(I3rNodeEntryData, m_mesh) == 0x04, "I3rNodeEntryData::m_m
 static_assert(offsetof(I3rNodeEntryData, m_num_bone) == 0x06, "I3rNodeEntryData::m_num_bone");
 static_assert(offsetof(I3rNodeEntryData, m_enable) == 0x08, "I3rNodeEntryData::m_enable");
 
+/* The blend channels: a mesh batch's position and normal pools (batch
+ * children [4] / [2]) and a strip's colours and STQ (strip children [0] /
+ * [1]); channel 2 gets weights but no block reads them. Each of those
+ * slots lists its blocks: [0] the mesh's own, [k] blend target k. */
+#define I3R_BLEND_POSITION  0
+#define I3R_BLEND_NORMAL    1
+#define I3R_BLEND_COLOUR    3
+#define I3R_BLEND_STQ       4
+#define I3R_BLEND_CHANNELS  5
+
+/* i3rDrawModel's opt (DogActor::drawModel builds one from its animation):
+ * the channels whose weights follow their curves at a time (bit n =
+ * channel n), and the time per channel. Plain EE layout. */
+struct I3rBlendOpt
+{
+    u_int   m_mask;             // ROR 0x00
+    float   m_time[I3R_BLEND_CHANNELS]; // ROR 0x04
+};
+static_assert(offsetof(I3rBlendOpt, m_time) == 0x04, "I3rBlendOpt::m_time");
+static_assert(sizeof(I3rBlendOpt) == 0x18, "I3rBlendOpt is 0x18 bytes on the EE");
+
+/* One channel's non-zero blend weights (i3rDrawSetupBlend fills them into
+ * i3rDrawModel's work block at +0xf4, one list per channel, 0x44 apart).
+ * Plain EE layout. */
+struct I3rBlendEntry
+{
+    int     m_index;            // ROR 0x00: the blend target (the entry's 0x59 child)
+    float   m_weight;           // ROR 0x04
+};
+static_assert(offsetof(I3rBlendEntry, m_weight) == 0x04, "I3rBlendEntry::m_weight");
+static_assert(sizeof(I3rBlendEntry) == 0x08, "I3rBlendEntry is 0x08 bytes on the EE");
+
+struct I3rBlendList
+{
+    I3rBlendEntry m_entry[8];   // ROR 0x00
+    int     m_num;              // ROR 0x40
+};
+static_assert(offsetof(I3rBlendList, m_num) == 0x40, "I3rBlendList::m_num");
+static_assert(sizeof(I3rBlendList) == 0x44, "I3rBlendList is 0x44 bytes on the EE");
+
 /* A node's display record (child 0's data; utlSetI3rNodeDisp points it at
  * a DogModel / DogActor record): only the byte i3rDrawModel reads. */
 #define I3R_NODE_DISP_SHOWN 0x25    /* u_char: 0 = the node is hidden */
@@ -56,5 +96,14 @@ void  i3rBuildMeshPacket(I3rItem *mesh, void *buf);                     // ROR 0
  * I3R_DRAW_CULLED when nothing was drawn. */
 int   i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVECTOR *world,
                    const void *opt);                                     // ROR 0x0021fe68
+
+/* ROR 0x00220670: the blend weights of a node entry (an item of type 0x59)
+ * per channel: the weight of each of its 0x59 children -- the child's
+ * curve at opt's time where opt's mask has the channel, else the child's
+ * own weight -- and blend[ch] lists those that are not 0. Nothing when the
+ * entry has no 0x59 children. PC: the native mesh module calls it at
+ * replay (rosepan_i3dmesh.cpp), as the ROM's packet writers read it. */
+void  i3rDrawSetupBlend(const I3rItem *entry, const I3rBlendOpt *opt,
+                        I3rBlendList blend[I3R_BLEND_CHANNELS]);         // ROR 0x00220670
 
 #endif /* _I3D_I3RDRAW_H */
