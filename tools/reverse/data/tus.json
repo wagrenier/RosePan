@@ -231,7 +231,7 @@
    "why": "Obj176a3c (scene +0x837e0, the Eff* factory) is the effect manager: data/eff/eff.bin loader, the 0x110-entry table, draw sort. Code sits between EffLight3 and EffMuzzleFlash1 in alphabetical class link order (EffMan); EffFindItem1 code 0x176694..0x176a3c and its linkonce come from the same object (linkonce order Light3, FindItem1, MuzzleFlash1), so it joins this file. No source string names it."
   },
   "emy/emy_hfm.cpp": {
-   "notes": "Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec) with their helpers 0x146bf0 / 0x146c8c / 0x147760 / 0x147a28 / 0x147e04.. 0x148450 (Ride's own fields after +0x40 m_phase still to place, EE size 0x98), HfmOutCounter 0x149184 / 0x1491ec / 0x1494ac, HfmOutTest 0x1494c8 / 0x149500. Start with python tus.py brief emy/emy_hfm.cpp. The new EmyOut helpers (emyStartChase, playSE, tickVoice, stopVoice, emyChkHitReach, emyVecLength, stopAllSE) are stubs in lib/unassigned_stubs.cpp and emy/emy_main.cpp; nothing moves until those plus setMotion/termCommon/selectTarget and the EmyMain ctor are written. Decisions: HfmOutWalk2::Exec tests the length of the roam point itself (ROM, not a distance); a chained slap keeps m_hit_pc/m_hit_dog/m_se_done from the previous slap so it cannot hit (ROM); HfmOutBitten reads the dog object without a NULL test (ROM); EffParam m_hit gained m_2c for kind 3. No enemy is created in the smoke run: the 15 s screenshot is the Atlus disclaimer as before.",
+   "notes": "Left: HfmOutTest::Exec 0x149500 (0x818 bytes, a 0x2d-step motion walk-through, the last stub of the TU); then the TU is done once an Hfm enemy is seen on screen. Ride's own fields placed (+0x38..+0x94, EE 0x98); m_44 is never written by the ROM's Ride but read by phase 0 for the slap end frame: the port zero-initialises it (open-items.md). The shared hit test, decide switch and motion-end idioms are file-static helpers hfmHitTest / hfmSetDecide / hfmMotionEnd with callcheck notes. New EmyOut stubs to write in emy_out: getFrontPos 0x167d88, getTargetNodePos 0x166c8c (same code as getBasePos on m_target), getTargetAngle 0x167e38. Nothing moves until the EmyOut helpers (setMotion, termCommon, selectTarget, emyStartChase, playSE, tickVoice, stopVoice, emyChkHitReach) and the EmyMain ctor are written; the smoke run still creates no enemy, the 15 s screenshot is the Atlus disclaimer.",
    "ranges": [
     [
      "00145020",
@@ -248,6 +248,11 @@
      "date": "2026-10-27 16:34",
      "status": "partial",
      "summary": "Wrote HfmOutSlap (Init, Exec: chase, slaps 0x14/0x15/0x16 with hit windows and scnChrRequest on PC and dog, chaining, Term), HfmOutBreak, HfmOutWalk2 (Init, Exec, getRoamPos, startIdle, setWalkMotion, setStep, Term), HfmOutDead (effect kind 3, hide, motion 0x31), HfmOutWin, HfmOutBitten, and HfmOutRide's Init/Exec/Term dispatch. Named and declared the EmyOut helpers emyStartChase, EmyOut::playSE/tickVoice/stopVoice, emyChkHitReach, emyVecLength, EmyMain::stopAllSE; wrote EmyMain::setDecideSw."
+    },
+    {
+     "date": "2026-10-28 10:14",
+     "status": "partial",
+     "summary": "Wrote HfmOutRide whole: start, restart, placePC, phases 0..3, phase 2's ten steps (jump table 0x2ef3c0: grab, mount, ride, hits, thrown, struggle, grip, nextHold, release) and phase 3's hug steps; HfmOutCounter (Init, Exec, Term) and HfmOutTest::Init. Named 23 slice functions and EmyOut::getFrontPos / getTargetNodePos / getTargetAngle (stubs in emy/emy_out.cpp). MagScene::commandPC now returns m_pc.message's int; utlRandPeakHi declared."
     }
    ],
    "status": "partial",

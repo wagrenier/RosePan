@@ -353,6 +353,11 @@ entries are marked **RoR** with the date.
 
 ## callcheck / stubgen
 
+- **A callcheck note stops at its first parenthesis** (2026-10-28, emy/emy_hfm.cpp): in
+  `// callcheck: a, b (why), c` only a and b count, so c stays MISSING. List every name first, then
+  one parenthesised reason. Calls folded into a file-static helper (hfmHitTest) need such a note on
+  every caller.
+
 - **"undefined reference to vtable for X" that stubgen skips** (2026-10-27, mag/maglifepc.cpp):
   a new polymorphic class whose out-of-line virtuals live in an unwritten TU. GCC emits the vtable
   with the first non-inline virtual (the key function); none defined means no vtable, and the linker

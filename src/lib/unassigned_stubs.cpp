@@ -2947,3 +2947,10 @@ void EffCloud1::updateZDepth()
 {
     ROSEPAN_STUB("EffCloud1::updateZDepth", 0x0017a8d8);
 }
+
+// stub of ROR 0x00104394
+int utlRandPeakHi(int lo, int hi, int n)
+{
+    ROSEPAN_STUB("utlRandPeakHi", 0x00104394);
+    return {};
+}

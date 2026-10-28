@@ -302,7 +302,8 @@ struct MagScene
     void removeFadeKey();                                                // ROR 0x00135dcc
     /* The scene's PC (m_pc). */
     bool isPCWordDcSet();                                                // ROR 0x0013164c
-    void commandPC(int cmd, const float *arg);                           // ROR 0x0013166c
+    /* m_pc.message (0x15: 1 when the PC moved; 0x16: 1 riding or hurt). */
+    int  commandPC(int cmd, const float *arg);                           // ROR 0x0013166c
     void setPCState14(int arg, int word);                                // ROR 0x00131690
     /* The actors' motions (no = the actor number). setActorMotion packs
      * the second flag word into flags' low byte (flags >> 8 the first). */

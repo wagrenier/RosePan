@@ -1562,29 +1562,29 @@
 /* 00146a20 00000098 */ HfmOutRide::Exec(){}  // ror
 /* 00146ab8 0000002c */ HfmOutRide::Term(){}  // ror
 /* 00146ae4 0000010c */ HfmOutRide::start(){}  // ror
-/* 00146bf0 0000009c */ FUN_00146bf0(){}
-/* 00146c8c 000000fc */ FUN_00146c8c(){}
+/* 00146bf0 0000009c */ HfmOutRide::restart(){}  // ror
+/* 00146c8c 000000fc */ HfmOutRide::placePC(){}  // ror
 /* 00146d88 0000065c */ HfmOutRide::execPhase0(){}  // ror
 /* 001473e4 0000037c */ HfmOutRide::execPhase1(){}  // ror
-/* 00147760 000000e0 */ FUN_00147760(){}
+/* 00147760 000000e0 */ HfmOutRide::release(){}  // ror
 /* 00147840 000001e8 */ HfmOutRide::execPhase2(){}  // ror
-/* 00147a28 000003dc */ FUN_00147a28(){}
-/* 00147e04 00000090 */ FUN_00147e04(){}
-/* 00147e94 0000006c */ FUN_00147e94(){}
-/* 00147f00 00000160 */ FUN_00147f00(){}
-/* 00148060 00000080 */ FUN_00148060(){}
-/* 001480e0 000000d8 */ FUN_001480e0(){}
-/* 001481b8 000000c4 */ FUN_001481b8(){}
-/* 0014827c 00000088 */ FUN_0014827c(){}
-/* 00148304 00000078 */ FUN_00148304(){}
-/* 0014837c 000000d4 */ FUN_0014837c(){}
-/* 00148450 0000009c */ FUN_00148450(){}
+/* 00147a28 000003dc */ HfmOutRide::execGrab(){}  // ror
+/* 00147e04 00000090 */ HfmOutRide::execMount(){}  // ror
+/* 00147e94 0000006c */ HfmOutRide::execRideEnd(){}  // ror
+/* 00147f00 00000160 */ HfmOutRide::execRide(){}  // ror
+/* 00148060 00000080 */ HfmOutRide::execHit(){}  // ror
+/* 001480e0 000000d8 */ HfmOutRide::execHitNext(){}  // ror
+/* 001481b8 000000c4 */ HfmOutRide::execThrown(){}  // ror
+/* 0014827c 00000088 */ HfmOutRide::execStep8(){}  // ror
+/* 00148304 00000078 */ HfmOutRide::execStruggle(){}  // ror
+/* 0014837c 000000d4 */ HfmOutRide::execGrip(){}  // ror
+/* 00148450 0000009c */ HfmOutRide::nextHold(){}  // ror
 /* 001484ec 00000134 */ HfmOutRide::execPhase3(){}  // ror
-/* 00148620 000003e0 */ FUN_00148620(){}
-/* 00148a00 000000f0 */ FUN_00148a00(){}
-/* 00148af0 000000e0 */ FUN_00148af0(){}
-/* 00148bd0 000000e4 */ FUN_00148bd0(){}
-/* 00148cb4 0000007c */ FUN_00148cb4(){}
+/* 00148620 000003e0 */ HfmOutRide::execHug(){}  // ror
+/* 00148a00 000000f0 */ HfmOutRide::releaseHug(){}  // ror
+/* 00148af0 000000e0 */ HfmOutRide::execHugHold(){}  // ror
+/* 00148bd0 000000e4 */ HfmOutRide::execHugHit(){}  // ror
+/* 00148cb4 0000007c */ HfmOutRide::execHugEnd(){}  // ror
 /* 00148d30 00000118 */ HfmOutDead::Init(){}  // ror
 /* 00148e48 00000008 */ HfmOutDead::Exec(){}  // ror
 /* 00148e50 0000001c */ HfmOutDead::Term(){}  // ror
@@ -1594,11 +1594,11 @@
 /* 00148f50 00000024 */ HfmOutBitten::Init(){}  // ror
 /* 00148f74 000001f4 */ HfmOutBitten::Exec(){}  // ror
 /* 00149168 0000001c */ HfmOutBitten::Term(){}  // ror
-/* 00149184 00000068 */ FUN_00149184(){}
-/* 001491ec 000002c0 */ FUN_001491ec(){}
-/* 001494ac 0000001c */ FUN_001494ac(){}
-/* 001494c8 00000038 */ FUN_001494c8(){}
-/* 00149500 00000818 */ FUN_00149500(){}
+/* 00149184 00000068 */ HfmOutCounter::Init(){}  // ror
+/* 001491ec 000002c0 */ HfmOutCounter::Exec(){}  // ror
+/* 001494ac 0000001c */ HfmOutCounter::Term(){}  // ror
+/* 001494c8 00000038 */ HfmOutTest::Init(){}  // ror
+/* 00149500 00000818 */ HfmOutTest::Exec(){}  // ror
 
 // *****************************************************************************
 // FILE -- (unassigned)
@@ -2155,7 +2155,7 @@
 /* 00166a74 0000005c */ EmyOut::~EmyOut(){}  // ror
 /* 00166ad0 000000a4 */ EmyOut::termCommon(){}  // ror
 /* 00166b74 00000118 */ EmyOut::getBasePos(){}  // ror
-/* 00166c8c 00000118 */ FUN_00166c8c(){}
+/* 00166c8c 00000118 */ EmyOut::getTargetNodePos(){}  // ror
 /* 00166da4 00000110 */ EmyOut::selectTarget(){}  // ror
 /* 00166eb4 0000009c */ FUN_00166eb4(){}
 /* 00166f50 0000018c */ emyStartChase(){}  // ror
@@ -2166,8 +2166,8 @@
 /* 001677d0 000001e4 */ FUN_001677d0(){}
 /* 001679b4 000000b0 */ FUN_001679b4(){}
 /* 00167a64 00000320 */ FUN_00167a64(){}
-/* 00167d88 000000b0 */ FUN_00167d88(){}
-/* 00167e38 00000268 */ FUN_00167e38(){}
+/* 00167d88 000000b0 */ EmyOut::getFrontPos(){}  // ror
+/* 00167e38 00000268 */ EmyOut::getTargetAngle(){}  // ror
 /* 001680a0 00000128 */ EmyOut::setMotion(){}  // ror
 /* 001681c8 000000e8 */ FUN_001681c8(){}
 /* 001682b0 0000009c */ EmyOut::setWalkMotion(){}  // ror

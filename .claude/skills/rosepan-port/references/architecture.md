@@ -1418,6 +1418,16 @@ never asserts): sessions name them (`tus.py define --why`).
   into / left sight (param 0x5f range, pi), 5 a_lp under a quarter, 6 PC state class 4. Its words:
   +0x22c / +0x230 a counter and limit (SetFreeCnt is +0x230), +0x234 the count subFreeCnt lowers,
   +0x238 IsMissing, +0x23c ChkRideSide.
+  **HfmOutRide** (state 6, 2026-10-28): start 0x146ae4 picks phase 0 two slaps, 1 the long slap, 2
+  the ride (jumps on the PC's back), 3 the hug; 2 / 3 only while `MagScene::commandPC(0x16)` is 0 (the PC
+  not riding / hurt). Phase 2's steps 1..10 are separate functions through jump table 0x2ef3c0. While
+  holding on it moves the PC each frame with commandPC 0x15 (x, y, z, rot y: 1 when moved; placePC
+  0x146c8c retries at 30 then moves the enemy instead); the PC commands 2 / 7 (ride from the front /
+  behind), 6 / 9 (thrown off), 10 / 12 and 0xb / 0xd (hug, let go) pick by the ride side
+  (`getTargetAngle` 0x167e38 >= pi / 2, kept in HfmMain +0x23c). Ride hits are scene request word 0x2b,
+  hug squeezes 0x29 / 0x2a, the counter blow (HfmOutCounter) 0x2c; the PC in state class 3 counts
+  `countFree` (startFree(40)) to struggle free. EmyOut helpers: `getFrontPos` 0x167d88 (f12 dist: base
+  pos plus dist along the actor's rot y), `getTargetNodePos` 0x166c8c (the target's Bip01 Spine1).
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00

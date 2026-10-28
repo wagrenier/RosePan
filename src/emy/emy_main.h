@@ -76,6 +76,14 @@ public:
     void termCommon();                                                   // ROR 0x00166ad0
     /* A node of the enemy's actor (x / z) at the object's height. */
     void getBasePos(float *pos);                                         // ROR 0x00166b74
+    /* The target actor's node "Bip01 Spine1" (x, z) at the target
+     * object's height. */
+    void getTargetNodePos(float *pos);                                   // ROR 0x00166c8c
+    /* getBasePos plus dist along the enemy actor's rot y. */
+    void getFrontPos(float dist, float *pos);                            // ROR 0x00167d88
+    /* |the angle from the target actor's facing to the enemy|, 0..pi:
+     * pi / 2 and more means the enemy is behind it. */
+    float getTargetAngle();                                              // ROR 0x00167e38
     /* m_target = the PC or (by sight within 60 and rate %) the dog;
      * m_target_dog says which. */
     void selectTarget(int rate);                                         // ROR 0x00166da4

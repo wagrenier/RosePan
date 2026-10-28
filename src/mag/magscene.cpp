@@ -208,9 +208,9 @@ bool MagScene::isPCWordDcSet()
 // Passes an event command to the player's controller.
 // ROR 0x0013166c
 
-void MagScene::commandPC(int cmd, const float *arg)
+int MagScene::commandPC(int cmd, const float *arg)
 {
-    m_pc.message(cmd, arg);
+    return m_pc.message(cmd, arg);
 }
 
 // ──────────────────────────────────────────────────────────────────────

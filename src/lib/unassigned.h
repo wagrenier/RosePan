@@ -379,6 +379,9 @@ int  utlGetObjKind(u_int oid);                                           // ROR 
 void utlRandReset(void);                                                 // ROR 0x0010421c
 /* A random integer in lo..hi (lo + 0x1041e4(hi - lo + 1)). */
 int  utlRandRange(int lo, int hi);                                       // ROR 0x0010423c
+/* (lo, hi, n): the mean of n draws over 0..2 (hi - lo) folded at hi - lo,
+ * plus lo: values peak at hi. */
+int  utlRandPeakHi(int lo, int hi, int n);                               // ROR 0x00104394
 /* GamMan::setObj(the object at GamMan +0x22094, 0x40); both values of on
  * do the same in the ROM. */
 void utlSetBwnObjFlag(int on);                                           // ROR 0x00104150

@@ -1045,6 +1045,10 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- HfmOutRide phase 0 reads +0x44 (HfmOutSlap's motion slot) for its slaps' end frame, but nothing in
+  the Ride writes it; the port zero-initialises it (end frame 0: decide off from frame 1). Phase 2 step 8
+  has no writer either. Check once an Hfm enemy appears in a run (2026-10-28).
+
 - (2026-10-28, i3d/i3dvu1pkt.cpp) **Intermittent access violation** in the plain 200 s smoke run: one
   run died just after frame 6240 (after 6000:CIRCLE, i3cCastRay stub reached, dogactor.cpp asserts
   1753 / 1773 flooding); the next plain run and a gdbrun with the same pad went through (frame ~11940,

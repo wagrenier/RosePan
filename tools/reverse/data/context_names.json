@@ -6263,6 +6263,18 @@
   "was": "FUN_00146ae4",
   "why": "called only by HfmOutRide::Init"
  },
+ "00146bf0": {
+  "name": "HfmOutRide::restart",
+  "tag": "ror-inferred",
+  "was": "FUN_00146bf0",
+  "why": "start's reset without the PC test: phase 0 (75%) or 1 with a utlRandPeakHi chase time, then emyStartChase; called by phases 2/3 when the grab point is off the cells"
+ },
+ "00146c8c": {
+  "name": "HfmOutRide::placePC",
+  "tag": "ror-inferred",
+  "was": "FUN_00146c8c",
+  "why": "(dist): commandPC 0x15 (move the PC) to getFrontPos(dist) with rot +0x94, then at 30, else the enemy to the target's spine node when on the cells"
+ },
  "00146d88": {
   "name": "HfmOutRide::execPhase0",
   "tag": "ror-inferred",
@@ -6275,17 +6287,119 @@
   "was": "FUN_001473e4",
   "why": "HfmOutRide::Exec's phase 1"
  },
+ "00147760": {
+  "name": "HfmOutRide::release",
+  "tag": "ror-inferred",
+  "was": "FUN_00147760",
+  "why": "the PC shakes it off: commandPC 6 / 9 by ride side, motion 0x2f, m_238 = 1, SE 0x39, phase 2 step 7"
+ },
  "00147840": {
   "name": "HfmOutRide::execPhase2",
   "tag": "ror-inferred",
   "was": "FUN_00147840",
   "why": "HfmOutRide::Exec's phase 2"
  },
+ "00147a28": {
+  "name": "HfmOutRide::execGrab",
+  "tag": "ror-inferred",
+  "was": "FUN_00147a28",
+  "why": "phase 2 step 1 (jump table 0x2ef3c0): frames 27..32 with the PC in sight and free: startFree(40), the ride side from getTargetAngle, commandPC 2 / 7, motion 0x1d / 0x1e, step 2"
+ },
+ "00147e04": {
+  "name": "HfmOutRide::execMount",
+  "tag": "ror-inferred",
+  "was": "FUN_00147e04",
+  "why": "phase 2 step 2: placePC(-3) until the motion ends, then the ride motion 0x24 / 0x25 and nextHold"
+ },
+ "00147e94": {
+  "name": "HfmOutRide::execRideEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00147e94",
+  "why": "phase 2 step 3 (after the last hit): the ride motion 0x24 / 0x25 and nextHold at the motion end"
+ },
+ "00147f00": {
+  "name": "HfmOutRide::execRide",
+  "tag": "ror-inferred",
+  "was": "FUN_00147f00",
+  "why": "phase 2 step 4: voice, placePC(-3), the wait +0x68 down then 1..3 hits (motion 0x26 / 0x28, SE table 0x2ef418), PC state class 3 -> step 9"
+ },
+ "00148060": {
+  "name": "HfmOutRide::execHit",
+  "tag": "ror-inferred",
+  "was": "FUN_00148060",
+  "why": "phase 2 step 5: at frame +0x4c scnChrRequest 0x2b on the target, hits left -> step 6 else 3"
+ },
+ "001480e0": {
+  "name": "HfmOutRide::execHitNext",
+  "tag": "ror-inferred",
+  "was": "FUN_001480e0",
+  "why": "phase 2 step 6: at the motion end the other hit motion (0x26 / 0x28) or step 9 when the PC state class is 3"
+ },
+ "001481b8": {
+  "name": "HfmOutRide::execThrown",
+  "tag": "ror-inferred",
+  "was": "FUN_001481b8",
+  "why": "phase 2 step 7 (release): SE 0x37 after 40 frames, at the motion end the object flags back and start"
+ },
+ "0014827c": {
+  "name": "HfmOutRide::execStep8",
+  "tag": "ror-inferred",
+  "was": "FUN_0014827c",
+  "why": "phase 2 step 8 (no writer of step 8 found): execThrown without the object flags"
+ },
+ "00148304": {
+  "name": "HfmOutRide::execStruggle",
+  "tag": "ror-inferred",
+  "was": "FUN_00148304",
+  "why": "phase 2 step 9: PC state class 3 counts countFree to release, otherwise back to the ride motion and nextHold"
+ },
+ "0014837c": {
+  "name": "HfmOutRide::execGrip",
+  "tag": "ror-inferred",
+  "was": "FUN_0014837c",
+  "why": "phase 2 step 10: motion 0x23 for +0x6c frames with voice, then scnChrRequest 0x2b and nextHold; class 3 struggles free"
+ },
+ "00148450": {
+  "name": "HfmOutRide::nextHold",
+  "tag": "ror-inferred",
+  "was": "FUN_00148450",
+  "why": "30%: step 10 (motion 0x23, 20..40 frames), else step 4 with a wait of 20 / 45 / 75"
+ },
  "001484ec": {
   "name": "HfmOutRide::execPhase3",
   "tag": "ror-inferred",
   "was": "FUN_001484ec",
   "why": "HfmOutRide::Exec's phase 3"
+ },
+ "00148620": {
+  "name": "HfmOutRide::execHug",
+  "tag": "ror-inferred",
+  "was": "FUN_00148620",
+  "why": "phase 3 step 1: frames 15..19 with the PC in sight: the target's actor moved to getFrontPos(26.5), commandPC 10 / 12, motion 0x1a, SE 0x2a kept in m_se, step 2"
+ },
+ "00148a00": {
+  "name": "HfmOutRide::releaseHug",
+  "tag": "ror-inferred",
+  "was": "FUN_00148a00",
+  "why": "phase 3: commandPC 0xb / 0xd, motion 0x19, SE 0x37, object flags back, step 4"
+ },
+ "00148af0": {
+  "name": "HfmOutRide::execHugHold",
+  "tag": "ror-inferred",
+  "was": "FUN_00148af0",
+  "why": "phase 3 step 2: the dog's bark or countFree releases; the wait +0x68 down -> motion 0x35, step 3"
+ },
+ "00148bd0": {
+  "name": "HfmOutRide::execHugHit",
+  "tag": "ror-inferred",
+  "was": "FUN_00148bd0",
+  "why": "phase 3 step 3: frame 18 stops m_se, scnChrRequest 0x29 / 0x2a, a new wait; back to step 2 at the motion end"
+ },
+ "00148cb4": {
+  "name": "HfmOutRide::execHugEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00148cb4",
+  "why": "phase 3 step 4: SE 0x37 once, start at the motion end"
  },
  "00148d30": {
   "name": "HfmOutDead::Init",
@@ -6340,6 +6454,36 @@
   "tag": "ror-inferred",
   "was": "FUN_00149168",
   "why": "slot 4 of vtable 0x2e21f0: termCommon"
+ },
+ "00149184": {
+  "name": "HfmOutCounter::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00149184",
+  "why": "vtable 0x2e2220 slot 2: motion 0x34, SE 0x13, decide off, selectTarget(100)"
+ },
+ "001491ec": {
+  "name": "HfmOutCounter::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001491ec",
+  "why": "vtable 0x2e2220 slot 3: hit window 8..23 at 126.5 (word 0x2c), then until the motion ends -> 7"
+ },
+ "001494ac": {
+  "name": "HfmOutCounter::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_001494ac",
+  "why": "vtable 0x2e2220 slot 4: termCommon"
+ },
+ "001494c8": {
+  "name": "HfmOutTest::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_001494c8",
+  "why": "vtable 0x2e2250 slot 2: step 0, motion 0x10, state2 0"
+ },
+ "00149500": {
+  "name": "HfmOutTest::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00149500",
+  "why": "vtable 0x2e2250 slot 3: a 0x2d-step motion walk-through"
  },
  "00149d18": {
   "name": "BdsMain::initOut",
@@ -6929,6 +7073,12 @@
   "was": "FUN_00166b74",
   "why": "a node of the enemy's actor (name 0x2f19e0) x / z with the object's y"
  },
+ "00166c8c": {
+  "name": "EmyOut::getTargetNodePos",
+  "tag": "ror-inferred",
+  "was": "FUN_00166c8c",
+  "why": "the target actor's node Bip01 Spine1 (x, z) at the target object's height"
+ },
  "00166da4": {
   "name": "EmyOut::selectTarget",
   "tag": "ror-inferred",
@@ -6946,6 +7096,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001670dc",
   "why": "(mode, out, pos): fills the per-type move record (tables 0x2f1c90..) and starts the enemy's TskEnemyMove (0x200700) to pos; done flag out +0x24"
+ },
+ "00167d88": {
+  "name": "EmyOut::getFrontPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00167d88",
+  "why": "(dist, pos): getBasePos plus dist along the enemy actor's rot y (sin, cos)"
+ },
+ "00167e38": {
+  "name": "EmyOut::getTargetAngle",
+  "tag": "ror-inferred",
+  "was": "FUN_00167e38",
+  "why": "|the angle from the target's facing to the enemy|, 0..pi (atan2 of the target-to-base vector minus the target's rot y)"
  },
  "001680a0": {
   "name": "EmyOut::setMotion",
