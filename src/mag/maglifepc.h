@@ -35,7 +35,8 @@ struct MagLifePCItemData
 {
     float m_pos[4];             // ROR 0x00
     int   m_obj_id;             // ROR 0x10: asserted != 0 for the nearest
-    int   _14[3];
+    int   m_item_id;            // ROR 0x14: the item (MagLifePCModeItem::live's message argument)
+    int   _18[2];
 };
 static_assert(sizeof(MagLifePCItemData) == 0x20, "MagLifePCItemData is 0x20 bytes on the EE");
 static_assert(offsetof(MagLifePCItemData, m_obj_id) == 0x10, "m_obj_id");
@@ -129,6 +130,21 @@ struct MagLifePC : MagLifeControlChara
     /* 0..3: the equipped item's weapon class (m_weapon_override first). */
     int  getWeaponType(int item);                                        // ROR 0x0011cb70
     int  canReload();                                                    // ROR 0x0011d044
+    /* Damages oid by the combo step (kind != 0: weapon class 7) through
+     * scnChrRequest(0xb). */
+    void hitTarget(u_int oid, int combo, int kind);                      // ROR 0x0011c974
+    /* oid's 'Bip01 Spine1' node into out; returns its EmyManager distance
+     * (flag 0: getEmyTypeDist2). */
+    float getTargetSpinePos(float *out, u_int oid, int flag);            // ROR 0x0011ce5c
+    /* The hit sound id for theHeight 0..4 and theCombo 0..2. */
+    int  getAttackSeNo(int theHeight, int theCombo, int kind);           // ROR 0x0011d1cc
+    /* GamMan::canAddItem of oid. */
+    int  canTakeItem(u_int oid);                                         // ROR 0x0011cbf4
+    /* Picks oid up (addItem, the sequence's pick-up words, releaseChr);
+     * -1 when it cannot. */
+    int  takeItem(u_int oid);                                            // ROR 0x0011cc14
+    /* GamMan::reloadEquip, the shell effect and the item's 'reload'. */
+    void reload();                                                       // ROR 0x0011d06c
 
     /* ---- mag/maglifepc3.cpp: motions ---- */
     /* DogActor::getMotionStep scaled by m_health (1, 1, 1, 0, 0). */
@@ -168,6 +184,24 @@ struct MagLifePC : MagLifeControlChara
     void applyMotionMove();                                              // ROR 0x00120668
     /* The PC moved by a root-motion step (mag/maglifepcmove.cpp). */
     void moveBy(const float *move, float trans_ofs_y, float rot);        // ROR 0x0011ee00
+    /* The stance walk by the stick (16 directions). */
+    int  moveAttackStance(BedPad *pad);                                  // ROR 0x0011ff10
+    /* ---- mag/maglifepcbtl.cpp ---- */
+    /* The weapon's hit node hitNo for theHeight into out; returns its
+     * radius, 0 without one. */
+    float getWeaponHitPos(float *out, int theHeight, int hitNo);         // ROR 0x0012bc98
+    /* The yaw / pitch from the actor to pos; returns the yaw less the
+     * actor's heading in [-pi, pi]. */
+    float calcTargetAngle(float *roty, float *rotx, const float *pos);   // ROR 0x0012bedc
+    /* The current attack's hit window in motion frames (default 0..1000). */
+    void getHitFrameRange(float *from, float *to);                       // ROR 0x0012c014
+    /* Starts the attack motion for combo step combo; returns the height
+     * (0..4, 4 the kick) in the low half and 1 in the high half when the
+     * attack has no hit test. */
+    u_int startAttack(int combo);                                        // ROR 0x0012c31c
+    /* 0..4: the target's height class (m_target_no), else message 0x17's
+     * low half (>= 0). */
+    int  getAttackHeight();                                              // ROR 0x0012ca28
     /* State 11: picks the attack target, then state 5. */
     void beginAttack();                                                  // ROR 0x0012cb50
     /* State 0xe with arg (mag/maglifepcbtl.cpp), word +0x0c = word. */

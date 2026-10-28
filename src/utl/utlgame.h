@@ -7,6 +7,8 @@
 #ifndef _UTL_UTLGAME_H
 #define _UTL_UTLGAME_H
 
+#include <stddef.h>
+
 /* GamMan's option 0x12 (asked through 0x1c6ccc) != 0: the controller
  * vibration switch MagSystem gates BedPad::setVibration on. */
 int utlIsVibrationOn(void);                                              // ROR 0x00103484
@@ -29,5 +31,41 @@ void utlPlaySeRand4(int a, int b, int c, int d);                         // ROR 
 /* g_sequence.m_bits[1] & 4: script flag 34 (MagLifePC::processPad's dog
  * commands need it). */
 int utlTestSeqBit34(void);                                               // ROR 0x0010346c
+/* Plays sound id without a position: a > 0 through 0x1f97c8(se, a), else
+ * GamSndMan::playSE(se, 1, b) (b != 0: a position). */
+void utlPlaySe(int id, int a, int b);                                    // ROR 0x001026b0
+/* EmyManager::isEmyDamaging(theOID) (asserts theOID != 0). */
+int utlIsEmyDamaging(unsigned int theOID);                               // ROR 0x00102adc
+/* GamMan::getObjPos(oid, out). */
+void utlGetObjPos(float *out, unsigned int oid);                         // ROR 0x00102ab8
+
+/* One enemy of utlCollectEmyInfo (EE 0x40 bytes). */
+struct UtlEmyInfo
+{
+    float        m_pos[4];      // ROR 0x00: the 'Bip01 Spine1' node, else m_trans
+    float        m_trans[4];    // ROR 0x10: the actor's m_trans
+    unsigned int m_obj_id;      // ROR 0x20: the object's oid (type bits 23..27 == 2)
+    int          m_24;          // ROR 0x24: the object's u16 +0x128
+    int          m_actor_no;    // ROR 0x28: the object's actor number (+0x108)
+    float        m_radius;      // ROR 0x2c: EmyManager::getEmyTypeDist
+    int          _30[3];
+    unsigned int m_flags;       // ROR 0x3c: the object's word +0x120 (0x400 / 0x2000 skip it)
+};
+static_assert(sizeof(UtlEmyInfo) == 0x40, "UtlEmyInfo is 0x40 bytes on the EE");
+static_assert(offsetof(UtlEmyInfo, m_obj_id) == 0x20, "m_obj_id");
+static_assert(offsetof(UtlEmyInfo, m_radius) == 0x2c, "m_radius");
+static_assert(offsetof(UtlEmyInfo, m_flags) == 0x3c, "m_flags");
+
+/* The asserts' eib (EE 0x804 bytes on the caller's stack). */
+struct UtlEmyInfoBuf
+{
+    UtlEmyInfo m_info[32];      // ROR 0x000
+    int        m_num;           // ROR 0x800: utlCollectEmyInfo's count
+};
+static_assert(offsetof(UtlEmyInfoBuf, m_num) == 0x800, "m_num");
+
+/* The live enemies (flag 0: those without 0x400, else without 0x2000),
+ * at most 32, into eib; returns the count. */
+int utlCollectEmyInfo(UtlEmyInfoBuf *eib, int flag);                     // ROR 0x00103a90
 
 #endif /* _UTL_UTLGAME_H */

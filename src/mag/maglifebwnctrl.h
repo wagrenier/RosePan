@@ -65,6 +65,13 @@ struct MagLifeBwnCtrl : MagLife
     void orderCome(int a1);                                              // ROR 0x0012b4a0
     void orderStay(int a1);                                              // ROR 0x0012b5f8
     void orderGo(int a1);                                                // ROR 0x0012b65c
+    /* requestState(12 HUG, arg, 1); word +0x124 = arg when arg >= 0. */
+    void requestHug(int arg);                                            // ROR 0x0012b788
+    /* > 0 when the hug can go on: phase 0 (start) or 1 / 2 (Brown's
+     * distance and heading to the PC); -3 without Brown, -2 in state 3. */
+    int  checkHug(int phase);                                            // ROR 0x0012b870
+    /* Brown's position into out (untouched while Brown is unbound). */
+    void getBwnPosition(float *out);                                     // ROR 0x0012ba2c
 
     u_char      _28[0x44 - 0x28];
     int         m_find_item;    // ROR 0x44: setFindItem's item (op gfit reads it)

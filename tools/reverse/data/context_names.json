@@ -227,6 +227,12 @@
   "was": "FUN_0010254c",
   "why": "sound id at a position (NULL: none) through 0x1e4ebc on the sound object 0x79a0c0"
  },
+ "001026b0": {
+  "name": "utlPlaySe",
+  "tag": "ror-inferred",
+  "was": "FUN_001026b0",
+  "why": "(id, a, b): sound id via 0x1025c0, then GamSndMan::playSE(se, 1, b) or 0x1f97c8(se, a) when a > 0; the no-position sibling of utlPlaySe3d, used by utlPlaySeRand3/4"
+ },
  "00102918": {
   "name": "utlPlaySeRand3",
   "tag": "ror-inferred",
@@ -238,6 +244,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001029c4",
   "why": "plays one of four sound ids at random"
+ },
+ "00102ab8": {
+  "name": "utlGetObjPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00102ab8",
+  "why": "(out, oid) -> GamMan::getObjPos(g_gamMan, oid, out)"
+ },
+ "00102adc": {
+  "name": "utlIsEmyDamaging",
+  "tag": "ror-inferred",
+  "was": "FUN_00102adc",
+  "why": "asserts theOID != 0 (utl/utlgame.cpp 0x23f), tail-calls EmyManager::isEmyDamaging on the global manager"
  },
  "0010346c": {
   "name": "utlTestSeqBit34",
@@ -262,6 +280,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001034e4",
   "why": "GamMan::getActorNo(a0)"
+ },
+ "00103a90": {
+  "name": "utlCollectEmyInfo",
+  "tag": "ror-inferred",
+  "was": "FUN_00103a90",
+  "why": "walks the actor list for type-2 objects (oid bits 23..27 == 2) not masked by 0x400 / 0x2000, fills up to 32 records of 0x40 (spine pos, trans, oid, word 0x128, actor no, EmyManager::getEmyTypeDist) and the count at +0x800; Attacking::live's eib"
  },
  "00103de4": {
   "name": "utlPauseForMenu",
@@ -2579,11 +2603,29 @@
   "was": "FUN_0011c64c",
   "why": "in mag/maglifepc2.cpp (assert theRange >= 5.0f): items within range into 0x20-byte records, count returned"
  },
+ "0011c974": {
+  "name": "MagLifePC::hitTarget",
+  "tag": "ror-inferred",
+  "was": "FUN_0011c974",
+  "why": "(oid, combo, kind): damage by scnCalcPcDamage of the weapon class (0x11caf8 of the equipped item, 7 when kind != 0), then scnChrRequest(0xb, ...) at the PC's position; Attacking::live on a hit"
+ },
  "0011cb70": {
   "name": "MagLifePC::getWeaponType",
   "tag": "ror-inferred",
   "was": "FUN_0011cb70",
   "why": "m_1ac override, else the item's attack type (0x11caf8) 5 -> 3, 4 -> 2, 6 -> 1, other 0; indexes the sude_in motion table"
+ },
+ "0011cbf4": {
+  "name": "MagLifePC::canTakeItem",
+  "tag": "ror-inferred",
+  "was": "FUN_0011cbf4",
+  "why": "(oid) -> GamMan::canAddItem(g_gamMan, oid, 0)"
+ },
+ "0011cc14": {
+  "name": "MagLifePC::takeItem",
+  "tag": "ror-inferred",
+  "was": "FUN_0011cc14",
+  "why": "(oid): canTakeItem, then the object's param 2 (item id) addItem, the sequence's pick-up event words, endPcAction and releaseChr; -1 when it cannot"
  },
  "0011ce50": {
   "name": "MagLifePC::getEquipItemChrNo",
@@ -2591,11 +2633,29 @@
   "was": "FUN_0011ce50",
   "why": "the short g_gamMan +0x2200c (m_pcEquipItemChrID); reset4MapJump changes that actor's motion"
  },
+ "0011ce5c": {
+  "name": "MagLifePC::getTargetSpinePos",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ce5c",
+  "why": "(out, oid, flag): the 'Bip01 Spine1' node (fallback 'p_fuckme') of oid's actor into out, returns EmyManager::getEmyTypeDist2 (flag 0) / getEmyTypeDist"
+ },
  "0011d044": {
   "name": "MagLifePC::canReload",
   "tag": "ror-inferred",
   "was": "FUN_0011d044",
   "why": "GamMan::findReloadSlot(0) != 0"
+ },
+ "0011d06c": {
+  "name": "MagLifePC::reload",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d06c",
+  "why": "GamMan::reloadEquip(-1), the shell effect when +0x118 > 0, and the equipped item's 'reload' motion; MagLifePCModeReload::init"
+ },
+ "0011d1cc": {
+  "name": "MagLifePC::getAttackSeNo",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d1cc",
+  "why": "(theHeight 0..4, theCombo 0..2, kind) asserts both, returns a sound id by equipped item (0x1c kick, 0x41 / 0x43 bare hand, 0x7f / 0x80 ...); Attacking::live plays it through utlPlaySe on a hit"
  },
  "0011d720": {
   "name": "MagLifePC::getHealthMotionStep",
@@ -2692,6 +2752,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0011ee00",
   "why": "(pc, move, f12, f13): DogActor::addTrans / sweepMove of the PC by a root-motion vector; called by MagLifePCMode::moveBy"
+ },
+ "0011ff10": {
+  "name": "MagLifePC::moveAttackStance",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ff10",
+  "why": "(pad): the stance walk by the stick in 16 directions (asserts m_attack_stat != ATK_STAT_NONE, ay / py < 8*2); AtkMove2D::pad while the stance is held and the stick is out"
  },
  "00120668": {
   "name": "MagLifePC::applyMotionMove",
@@ -2836,6 +2902,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001214b4",
   "why": "vtable _vt$...MagLifePCModeAtkWait2D slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121604": {
+  "name": "MagLifePCModeAtkWait2D::getTurnStep",
+  "tag": "ror-inferred",
+  "was": "FUN_00121604",
+  "why": "(this, f12 delta yaw): 0 outside (-pi/2, pi/2] or inside +-0.05, else +-0.1; AtkWait2D::live adds it to the actor's heading toward the target"
  },
  "001216a4": {
   "name": "MagLifePCModeAtkWait2D::live",
@@ -3185,11 +3257,29 @@
   "was": "FUN_0012b65c",
   "why": "orderDog state 15 (com_go)"
  },
+ "0012b788": {
+  "name": "MagLifeBwnCtrl::requestHug",
+  "tag": "ror-inferred",
+  "was": "FUN_0012b788",
+  "why": "requestState(12 HUG, arg, 1) and word +0x124 = arg when arg >= 0; MagLifePCModeHug init (0) and live (1 / 2)"
+ },
  "0012b7cc": {
   "name": "MagLifeBwnCtrl::setLevel",
   "tag": "ror-inferred",
   "was": "FUN_0012b7cc",
   "why": "assert theLevel >= MAG_BWNCTRL_LEVEL_AUTO && theLevel <= MAG_BWNCTRL_LEVEL_MANUAL (maglifebwnctrl.cpp line 0xf52); +0x6c"
+ },
+ "0012b870": {
+  "name": "MagLifeBwnCtrl::checkHug",
+  "tag": "ror-inferred",
+  "was": "FUN_0012b870",
+  "why": "-3 without Brown (+0x70), -2 in state 3; phase 0 tests 0x12b300 / 0x12b19c, phases 1 / 2 Brown's distance and heading to the PC; > 0 lets DogCome::init enter state 18 and Hug::live start the hug motion"
+ },
+ "0012ba2c": {
+  "name": "MagLifeBwnCtrl::getBwnPosition",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ba2c",
+  "why": "(out): MagLifeControlChara::getPosition of m_bwn (+0x70) when bound"
  },
  "0012ba54": {
   "name": "MagLifeBwnCtrl::isBarkPhase3",
@@ -3197,11 +3287,41 @@
   "was": "FUN_0012ba54",
   "why": "m_state == 11 and m_08 == 3"
  },
+ "0012bc98": {
+  "name": "MagLifePC::getWeaponHitPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0012bc98",
+  "why": "(out, height, hitNo): the hit node of the weapon (Bip01 R Toe0 for the kick, gun_mazzle, p_hit table) into out, returns its radius (50 / 1 / 5 / 10); 0 without one; asserts theHitNo < MAX_WEAPON_NODE"
+ },
+ "0012bedc": {
+  "name": "MagLifePC::calcTargetAngle",
+  "tag": "ror-inferred",
+  "was": "FUN_0012bedc",
+  "why": "(out roty, out rotx, pos): utlVecToRot of pos minus the actor, returns roty minus the actor's heading wrapped to [-pi, pi]"
+ },
+ "0012c014": {
+  "name": "MagLifePC::getHitFrameRange",
+  "tag": "ror-inferred",
+  "was": "FUN_0012c014",
+  "why": "(out from, out to): the attack's hit window by word +0x128 (combo) and +0x124 / +0x12c from tables 0x2ec9d0..; default 0..1000"
+ },
+ "0012c31c": {
+  "name": "MagLifePC::startAttack",
+  "tag": "ror-inferred",
+  "was": "FUN_0012c31c",
+  "why": "asserts the sub mode is ATK_WAIT / ...; picks and starts the attack motion; returns height in the low half (4 = kick), Attacking reads the high half (1 = no hit test)"
+ },
  "0012c9c0": {
   "name": "MagLifePC::setState14",
   "tag": "ror-inferred",
   "was": "FUN_0012c9c0",
   "why": "with an actor and not already in state 0xe (or its step > 7): changes to state 0xe with a1 through 0x11c1e8 and stores a2 in word +0x0c (mag/maglifepcbtl.cpp)"
+ },
+ "0012ca28": {
+  "name": "MagLifePC::getAttackHeight",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ca28",
+  "why": "0..4 (AtkWait2D::init asserts 0 <= hhh && hhh < 5): with a target (m_target_no +0x1f0) 0x12caa4 of its spine position, else message 0x17's low half m_1b0 (>= 0)"
  },
  "0012cb50": {
   "name": "MagLifePC::beginAttack",

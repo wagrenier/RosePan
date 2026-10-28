@@ -19,3 +19,10 @@ float MagLifePC::sweepMove(float range, float radius, const float *from, const f
     ROSEPAN_STUB("MagLifePC::sweepMove", 0x0011ea04);
     return {};
 }
+
+// stub of ROR 0x0011ff10
+int MagLifePC::moveAttackStance(BedPad *pad)
+{
+    ROSEPAN_STUB("MagLifePC::moveAttackStance", 0x0011ff10);
+    return {};
+}

@@ -72,3 +72,29 @@ int utlGetWrdNo(void)
     ROSEPAN_STUB("utlGetWrdNo", 0x001034b8);
     return {};
 }
+
+// stub of ROR 0x00103a90
+int utlCollectEmyInfo(UtlEmyInfoBuf *eib, int flag)
+{
+    ROSEPAN_STUB("utlCollectEmyInfo", 0x00103a90);
+    return {};
+}
+
+// stub of ROR 0x00102ab8
+void utlGetObjPos(float *out, unsigned int oid)
+{
+    ROSEPAN_STUB("utlGetObjPos", 0x00102ab8);
+}
+
+// stub of ROR 0x00102adc
+int utlIsEmyDamaging(unsigned int theOID)
+{
+    ROSEPAN_STUB("utlIsEmyDamaging", 0x00102adc);
+    return {};
+}
+
+// stub of ROR 0x001026b0
+void utlPlaySe(int id, int a, int b)
+{
+    ROSEPAN_STUB("utlPlaySe", 0x001026b0);
+}

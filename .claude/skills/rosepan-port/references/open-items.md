@@ -12,9 +12,10 @@ character needs to animate and move lead the pinned queue, ahead of Brown and th
      (loadWeaponMotion 0x11dc64, MOTIONPK.RPK), the setMotionSub helpers, getSubStateClass,
      isMoveState.
   2. mag/maglifepcmode.cpp (pinned 0x120788..0x1233d8, 70 functions; several sessions): the modes'
-     init / live / pad, now hand-written stubs. PARTIAL 2026-10-27: the standing-and-walking path is
-     written (applyRootMotion, Null, Wait + updateIdle, Walk2D, Run2D, Turn, steer); left: AtkWait2D
-     .. Hug (0x1214b4..0x1233d8). The 200 s New Game run binds no actor to the PC, so none of it runs
+     init / live / pad, now hand-written stubs. WRITTEN 2026-10-27 (verify): every mode's init / live / pad
+     (Null .. Hug, Ride::message); the attack / item / Brown helpers they call are named and stubbed
+     (MagLifePC::startAttack 0x12c31c, getWeaponHitPos, getHitFrameRange, hitTarget, takeItem, reload,
+     MagLifeBwnCtrl::checkHug / requestHug, utlPlaySe 0x1026b0, utlCollectEmyInfo 0x103a90). The 200 s New Game run binds no actor to the PC, so none of it runs
      yet. **Not in any queued TU but needed for the PC to animate:**
      MagLifeControlChara::changeMotionSeq 0x11a320 / changeMotionSeqAlt 0x11a27c / updateMotionSeq
      0x11a14c (mag/maglife.cpp, stubs; the modes start every motion through them).
