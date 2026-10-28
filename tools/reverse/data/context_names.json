@@ -251,6 +251,12 @@
   "was": "FUN_00103484",
   "why": "asks GamMan 0x1c6ccc for option 0x12 and returns it != 0; MagSystem::setPlayer stores it as the switch that gates BedPad::setVibration"
  },
+ "001034b8": {
+  "name": "utlGetWrdNo",
+  "tag": "ror-inferred",
+  "was": "FUN_001034b8",
+  "why": "GamMan::getStatus(g_gamMan, 5, buf) returns buf[0] = m_wrdNo, the current room; Wait::updateIdle compares it with 0x35"
+ },
  "001034e4": {
   "name": "utlGetActorNo",
   "tag": "ror-inferred",
@@ -2297,11 +2303,47 @@
   "was": "FUN_00119b34",
   "why": "+0x70 = -1, the vector +0x60 cleared (role from reset4MapJump; unconfirmed)"
  },
+ "00119f88": {
+  "name": "MagLifeControlChara::getPosition",
+  "tag": "ror-inferred",
+  "was": "FUN_00119f88",
+  "why": "copies the bound actor's m_trans (+0x40 quad) into out when there is an actor"
+ },
+ "00119fb0": {
+  "name": "MagLifeControlChara::getRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_00119fb0",
+  "why": "DogActor::getRotY of the bound actor, 0 without one"
+ },
  "00119fe0": {
   "name": "MagLifeControlChara::setState",
   "tag": "ror-inferred",
   "was": "FUN_00119fe0",
   "why": "EE slot 9: saves the state quad to +0x30 when m_state != 0, m_08 = arg, m_state = state, m_04 = -1"
+ },
+ "0011a010": {
+  "name": "MagLifeControlChara::setMotionSeqNo",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a010",
+  "why": "+0x40 = no, +0x44 / +0x48 / +0x4c cleared; changeMotionSeq's first step"
+ },
+ "0011a028": {
+  "name": "MagLifeControlChara::getMotionSeq",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a028",
+  "why": "returns +0x40, the motion sequence row changeMotionSeq set"
+ },
+ "0011a030": {
+  "name": "MagLifeControlChara::endMotionSeqPhase",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a030",
+  "why": "sets +0x48 = 1; called once by changeMotionSeq"
+ },
+ "0011a054": {
+  "name": "MagLifeControlChara::isMotionSeqEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a054",
+  "why": "returns m_48 > 1: the sequence phase past playing (updateMotionSeq, MagLifePCMode::live changes state 0 on it)"
  },
  "0011a130": {
   "name": "MagLifeControlChara::clearMotionSeq",
@@ -2320,6 +2362,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0011a14c",
   "why": "mag/maglife.cpp assert m_actor; steps a frame counter (+0x44) through a motion table of 0x18-byte entries (+0x5c) and jumps to the next entry; MagLifeControlChara::renderPostProcess calls it when m_actor is set"
+ },
+ "0011a27c": {
+  "name": "MagLifeControlChara::changeMotionSeqAlt",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a27c",
+  "why": "changeMotionSeq of the row's +0x12 alternative when >= 0, else theState itself (asserts theState >= 0)"
+ },
+ "0011a320": {
+  "name": "MagLifeControlChara::changeMotionSeq",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a320",
+  "why": "asserts theState >= 0 and m_tbl_motion_state[theState].m_state_id == theState (the 0x18-byte table at +0x5c), sets the row in +0x40 and starts its motion; blend -1 = the row's own"
  },
  "0011a704": {
   "name": "MagLifeControlChara::playSe",
@@ -2633,11 +2687,29 @@
   "was": "FUN_0011ea04",
   "why": "collision sweep of a move (radius, height from +0x210 / +0x214); negative = free (message 0x15)"
  },
+ "0011ee00": {
+  "name": "MagLifePC::moveBy",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ee00",
+  "why": "(pc, move, f12, f13): DogActor::addTrans / sweepMove of the PC by a root-motion vector; called by MagLifePCMode::moveBy"
+ },
  "00120668": {
   "name": "MagLifePC::applyMotionMove",
   "tag": "ror-inferred",
   "was": "FUN_00120668",
   "why": "moves the actor by its motion's root movement (getMotionMove) unless a mode arg is set"
+ },
+ "00120788": {
+  "name": "MagLifePCMode::moveBy",
+  "tag": "ror-inferred",
+  "was": "FUN_00120788",
+  "why": "(this, pc, move, f12 trans_ofs_y, f13 rot) forwards to MagLifePC::moveBy 0x11ee00; only caller is applyRootMotion"
+ },
+ "001207a8": {
+  "name": "MagLifePCMode::applyRootMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001207a8",
+  "why": "the actor's root move over this frame (getMotionMove from frame*2 to (frame+health step)*2) rotated by the heading, handed to moveBy; MagLifePCMode::live and most modes' live run it"
  },
  "001208b8": {
   "name": "MagLifePCMode::live",
@@ -2663,6 +2735,12 @@
   "was": "FUN_001209e0",
   "why": "vtable _vt$...MagLifePCModeWait slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
  },
+ "00120a54": {
+  "name": "MagLifePCModeWait::updateIdle",
+  "tag": "ror-inferred",
+  "was": "FUN_00120a54",
+  "why": "Wait::pad with the stick idle: tired_out / base on a health change, and every 5400 frames one of the free_a..free_e motions (0x9f..0xa3) by utlRandRange"
+ },
  "00120b9c": {
   "name": "MagLifePCModeWait::live",
   "tag": "ror-inferred",
@@ -2675,11 +2753,23 @@
   "was": "FUN_00120bdc",
   "why": "vtable _vt$...MagLifePCModeWait slot 3; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
  },
+ "00120dec": {
+  "name": "MagLifePCModeMove::steer",
+  "tag": "ror-inferred",
+  "was": "FUN_00120dec",
+  "why": "turns the actor toward the stick heading by at most 0.2 (0.14 when health 2) radians, addBaseRotY, then applyRootMotion; called by the Walk2D / Run2D move thunks"
+ },
  "00120f60": {
   "name": "MagLifePCModeWalk2D::init",
   "tag": "ror-inferred",
   "was": "FUN_00120f60",
   "why": "vtable _vt$...MagLifePCModeWalk2D slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121054": {
+  "name": "MagLifePCModeWalk2D::move",
+  "tag": "ror-inferred",
+  "was": "FUN_00121054",
+  "why": "thunk (this, pc, pad) to MagLifePCModeMove::steer, Walk2D::pad calls it while walking"
  },
  "00121070": {
   "name": "MagLifePCModeWalk2D::live",
@@ -2699,6 +2789,12 @@
   "was": "FUN_00121168",
   "why": "vtable _vt$...MagLifePCModeRun2D slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
  },
+ "001211ac": {
+  "name": "MagLifePCModeRun2D::move",
+  "tag": "ror-inferred",
+  "was": "FUN_001211ac",
+  "why": "thunk (this, pc, pad) to MagLifePCModeMove::steer, Run2D::pad calls it while running"
+ },
  "001211c8": {
   "name": "MagLifePCModeRun2D::live",
   "tag": "ror-inferred",
@@ -2716,6 +2812,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001212c8",
   "why": "vtable _vt$...MagLifePCModeTurn slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121348": {
+  "name": "MagLifePCModeTurn::move",
+  "tag": "ror-inferred",
+  "was": "FUN_00121348",
+  "why": "thunk (this, pc, pad) to applyRootMotion, Turn::pad calls it while the turn plays"
  },
  "00121364": {
   "name": "MagLifePCModeTurn::live",

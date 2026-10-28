@@ -65,3 +65,10 @@ int utlTestSeqBit34(void)
     ROSEPAN_STUB("utlTestSeqBit34", 0x0010346c);
     return {};
 }
+
+// stub of ROR 0x001034b8
+int utlGetWrdNo(void)
+{
+    ROSEPAN_STUB("utlGetWrdNo", 0x001034b8);
+    return {};
+}

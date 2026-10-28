@@ -1629,3 +1629,9 @@ void MagLifePC::setState14(int arg, int word)
 {
     ROSEPAN_STUB("MagLifePC::setState14", 0x0012c9c0);
 }
+
+// stub of ROR 0x0011ee00
+void MagLifePC::moveBy(const float *move, float trans_ofs_y, float rot)
+{
+    ROSEPAN_STUB("MagLifePC::moveBy", 0x0011ee00);
+}

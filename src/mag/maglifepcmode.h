@@ -37,11 +37,22 @@ struct MagLifePCMode
     /* EE slot 3 (+0x18): MagLifePC::padMode; MagLifePC::processPad
      * repeats it while it returns more than 1. */
     virtual int  pad(MagLifePC *pc, BedPad *thePad) { return 0; }        // ROR 0x00282c20
+
+    /* MagLifePC::moveBy (move rotated into the world; trans_ofs_y the
+     * root's height, rot the root track's turn). */
+    void moveBy(MagLifePC *pc, const float *move, float trans_ofs_y, float rot); // ROR 0x00120788
+    /* The root motion of this frame (from the motion frame to the frame a
+     * health-scaled step on) turned by the heading, then moveBy. Nothing
+     * moves while the actor's mode argument is >= 0. */
+    void applyRootMotion(MagLifePC *pc);                                 // ROR 0x001207a8
 };
 
 /* The moving modes' base (no vtable of its own in the ROM). layout: host. */
 struct MagLifePCModeMove : MagLifePCMode
 {
+    /* Turns the actor toward the stick by at most 0.2 radians a frame
+     * (0.14 at health 2), then applyRootMotion. */
+    void steer(MagLifePC *pc);                                           // ROR 0x00120dec
 };
 
 /* layout: host (EE 4 bytes, at MagLifePC +0x138). */
@@ -57,6 +68,9 @@ struct MagLifePCModeWait : MagLifePCMode
     void init(MagLifePC *pc) override;                                   // ROR 0x001209e0
     void live(MagLifePC *pc) override;                                   // ROR 0x00120b9c
     int  pad(MagLifePC *pc, BedPad *thePad) override;                    // ROR 0x00120bdc
+    /* The stick at rest: tired_out / base when the health changed, and
+     * every 5400 frames at health 0 one of the free_a..free_e idles. */
+    void updateIdle(MagLifePC *pc);                                      // ROR 0x00120a54
 };
 
 /* layout: host (EE 4 bytes, +0x140). */
@@ -65,6 +79,7 @@ struct MagLifePCModeWalk2D : MagLifePCModeMove
     void init(MagLifePC *pc) override;                                   // ROR 0x00120f60
     void live(MagLifePC *pc) override;                                   // ROR 0x00121070
     int  pad(MagLifePC *pc, BedPad *thePad) override;                    // ROR 0x00121078
+    void move(MagLifePC *pc, BedPad *thePad);                            // ROR 0x00121054
 };
 
 /* layout: host (EE 4 bytes, +0x144). */
@@ -73,6 +88,7 @@ struct MagLifePCModeRun2D : MagLifePCModeMove
     void init(MagLifePC *pc) override;                                   // ROR 0x00121168
     void live(MagLifePC *pc) override;                                   // ROR 0x001211c8
     int  pad(MagLifePC *pc, BedPad *thePad) override;                    // ROR 0x001211e4
+    void move(MagLifePC *pc, BedPad *thePad);                            // ROR 0x001211ac
 };
 
 /* layout: host (EE 8 bytes, +0x148). */
@@ -81,8 +97,9 @@ struct MagLifePCModeTurn : MagLifePCModeMove
     void init(MagLifePC *pc) override;                                   // ROR 0x001212c8
     void live(MagLifePC *pc) override;                                   // ROR 0x00121364
     int  pad(MagLifePC *pc, BedPad *thePad) override;                    // ROR 0x0012136c
+    void move(MagLifePC *pc, BedPad *thePad);                            // ROR 0x00121348
 
-    int m_04;                   // ROR 0x04 (PC +0x14c): the constructor leaves it
+    float m_start_roty;         // ROR 0x04 (PC +0x14c): init's stick heading; pad turns until the stick leaves it by pi/10
 };
 
 /* layout: host (EE 4 bytes, +0x150). */

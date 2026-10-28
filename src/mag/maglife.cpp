@@ -6,6 +6,8 @@
 
 #include <string.h>
 
+#include "dog/dogactor.h"
+
 /* PC: written by the mag/maglifepc.cpp session (2026-10-27) because
  * MagLifePC cannot hold a state without them: the constructor and the
  * four small state helpers below. The rest of the file is still stubs. */
@@ -80,6 +82,52 @@ void MagLifeControlChara::setMotionSeqTable(const MagLifeMotionSeq *table)
     m_motion_seq = table;
 }
 
+/* PC: the motion sequence's small accessors, written by the
+ * mag/maglifepcmode.cpp session (2026-10-27) with the modes that ask them;
+ * changeMotionSeq itself is still a stub. */
+
+// ROR 0x00119f88
+void MagLifeControlChara::getPosition(float *out)
+{
+    DogActor *actor = m_actor;
+    if (actor)
+    {
+        out[0] = actor->m_trans[0];
+        out[1] = actor->m_trans[1];
+        out[2] = actor->m_trans[2];
+        out[3] = actor->m_trans[3];
+    }
+}
+
+// ROR 0x00119fb0
+float MagLifeControlChara::getRotY()
+{
+    if (m_actor)
+        return m_actor->getRotY();
+    return 0.0f;
+}
+
+// ROR 0x0011a010
+void MagLifeControlChara::setMotionSeqNo(int no)
+{
+    m_seq_no = no;
+    m_seq_count = 0;
+    m_48 = 0;
+    m_4c = 0;
+}
+
+// ROR 0x0011a028
+int MagLifeControlChara::getMotionSeq()
+{
+    return m_seq_no;
+}
+
+// ROR 0x0011a054
+int MagLifeControlChara::isMotionSeqEnd()
+{
+    return 1 < m_48;
+}
+
 // ---- stubs (tools/reverse/stubgen.py) ----
 
 // stub of ROR 0x0011a14c
@@ -92,4 +140,10 @@ void MagLifeControlChara::updateMotionSeq()
 void MagLifeControlChara::playStepSe(const int *table)
 {
     ROSEPAN_STUB("MagLifeControlChara::playStepSe", 0x0011a738);
+}
+
+// stub of ROR 0x0011a320
+void MagLifeControlChara::changeMotionSeq(int theState, int blend)
+{
+    ROSEPAN_STUB("MagLifeControlChara::changeMotionSeq", 0x0011a320);
 }
