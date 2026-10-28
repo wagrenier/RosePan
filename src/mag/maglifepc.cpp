@@ -331,7 +331,7 @@ void MagLifePC::processPad(BedPad *pad)
     updatePadStatus(pad);
     if (m_stance_prev != m_stance)
     {
-        m_f4 = -1;
+        m_action_motion = -1;
         initMotion();
         if (m_stance_prev == 0)
         {
@@ -703,7 +703,7 @@ MagLifePC::MagLifePC()
     m_84 = 0;
     memset(m_submode_stack, 0, sizeof(m_submode_stack));
     m_stamina = 1000;
-    m_f4 = -1;
+    m_action_motion = -1;
     m_fc = -1;
     m_100 = -1;
     m_stamina_tick = 0;

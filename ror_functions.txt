@@ -745,18 +745,18 @@
 // FILE -- mag/maglifepc3.cpp
 // *****************************************************************************
 
-/* 0011d720 00000070 */ FUN_0011d720(){}
-/* 0011d790 00000030 */ FUN_0011d790(){}
-/* 0011d7c0 000001d0 */ FUN_0011d7c0(){}
-/* 0011d990 000002d4 */ FUN_0011d990(){}
-/* 0011dc64 000000dc */ FUN_0011dc64(){}
+/* 0011d720 00000070 */ MagLifePC::getHealthMotionStep(){}  // ror
+/* 0011d790 00000030 */ MagLifePC::changeMotion(int)(){}  // ror
+/* 0011d7c0 000001d0 */ MagLifePC::changeMotion(const_char*)(){}  // ror
+/* 0011d990 000002d4 */ MagLifePC::loadMotion(){}  // ror
+/* 0011dc64 000000dc */ MagLifePC::loadWeaponMotion(){}  // ror
 /* 0011dd40 000000b4 */ MagLifePC::initMotion(){}  // ror
-/* 0011ddf4 00000084 */ FUN_0011ddf4(){}
-/* 0011de78 0000009c */ FUN_0011de78(){}
-/* 0011df14 00000068 */ FUN_0011df14(){}
-/* 0011df7c 00000054 */ FUN_0011df7c(){}
-/* 0011dfd0 00000028 */ FUN_0011dfd0(){}
-/* 0011dff8 00000088 */ FUN_0011dff8(){}
+/* 0011ddf4 00000084 */ MagLifePC::playActionMotion(int)(){}  // ror
+/* 0011de78 0000009c */ MagLifePC::playActionMotion(const_char*)(){}  // ror
+/* 0011df14 00000068 */ MagLifePC::isActionMotionEnd(){}  // ror
+/* 0011df7c 00000054 */ MagLifePC::setStanceSubMotion(){}  // ror
+/* 0011dfd0 00000028 */ MagLifePC::clearSubMotion(){}  // ror
+/* 0011dff8 00000088 */ MagLifePC::setWaitSubMotion(){}  // ror
 /* 0011e080 00000028 */ MagLifePC::getSubStateClass(){}  // ror
 /* 0011e0ac 0000002c */ MagLifePC::isMoveState(){}  // ror
 
@@ -9294,7 +9294,7 @@
 /* 00282ae4 00000050 */ MagLife::__tf(){}  // sym
 
 // *****************************************************************************
-// FILE -- mag/maglifepc.cpp
+// FILE -- mag/maglifepc3.cpp
 // *****************************************************************************
 
 /* 00282b34 00000034 */ MagLifePC::~MagLifePC(){}  // sym
