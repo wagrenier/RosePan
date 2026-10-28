@@ -11,6 +11,7 @@
 #include "task/tsk_scene.h"
 #include "dog/dogtexinfo.h"
 #include "emy/emy_main.h"
+#include "mag/maglifepc.h"
 
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
@@ -1614,4 +1615,78 @@ float emyVecLength(const float *v)
 void i3rTrackGetValue(const I3rItem *track, float *out, float t)
 {
     ROSEPAN_STUB("i3rTrackGetValue", 0x002251f0);
+}
+
+// stub of ROR 0x0011d044
+int MagLifePC::canReload()
+{
+    ROSEPAN_STUB("MagLifePC::canReload", 0x0011d044);
+    return {};
+}
+
+// stub of ROR 0x0011c520
+int MagLifePC::getEquipItem()
+{
+    ROSEPAN_STUB("MagLifePC::getEquipItem", 0x0011c520);
+    return {};
+}
+
+// stub of ROR 0x0011ce50
+int MagLifePC::getEquipItemChrNo()
+{
+    ROSEPAN_STUB("MagLifePC::getEquipItemChrNo", 0x0011ce50);
+    return {};
+}
+
+// stub of ROR 0x0011c464
+int MagLifePC::getPcParam1b()
+{
+    ROSEPAN_STUB("MagLifePC::getPcParam1b", 0x0011c464);
+    return {};
+}
+
+// stub of ROR 0x0011c4c0
+int MagLifePC::getPcParam1c()
+{
+    ROSEPAN_STUB("MagLifePC::getPcParam1c", 0x0011c4c0);
+    return {};
+}
+
+// stub of ROR 0x0011e080
+int MagLifePC::getSubStateClass()
+{
+    ROSEPAN_STUB("MagLifePC::getSubStateClass", 0x0011e080);
+    return {};
+}
+
+// stub of ROR 0x0011cb70
+int MagLifePC::getWeaponType(int item)
+{
+    ROSEPAN_STUB("MagLifePC::getWeaponType", 0x0011cb70);
+    return {};
+}
+
+// stub of ROR 0x0011dd40
+void MagLifePC::initMotion()
+{
+    ROSEPAN_STUB("MagLifePC::initMotion", 0x0011dd40);
+}
+
+// stub of ROR 0x0011e0ac
+int MagLifePC::isMoveState()
+{
+    ROSEPAN_STUB("MagLifePC::isMoveState", 0x0011e0ac);
+    return {};
+}
+
+// stub of ROR 0x0012ce34
+void MagLifePC::message17()
+{
+    ROSEPAN_STUB("MagLifePC::message17", 0x0012ce34);
+}
+
+// stub of ROR 0x0012c9c0
+void MagLifePC::setState14(int arg, int word)
+{
+    ROSEPAN_STUB("MagLifePC::setState14", 0x0012c9c0);
 }

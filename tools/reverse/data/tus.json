@@ -6,7 +6,6 @@
   "unassigned@0021fb50",
   "unassigned@0021c960",
   "unassigned@0013e2ec",
-  "mag/maglifepc.cpp",
   "task/naga_chunk.cpp",
   "mag/maglifebwn.cpp",
   "unassigned@001258a4",
@@ -864,6 +863,24 @@
    ],
    "status": "verify",
    "why": "source string mag/maglifemenu.cpp anchors 0x12cf3c..0x12d788 (asserts m_type, m_scene, theRenderStage, actor); every function is a MagLifeMenu* vtable slot; maglifemenusp.cpp starts at 0x12d9c8; plus the PBook / Board3D / Base linkonce symbols the brief placed here"
+  },
+  "mag/maglifepc.cpp": {
+   "notes": "Verify: the 200 s New Game run binds the PC after the film (setActor -> changeState(0) -> MagLifePCModeNull::init reached) and ends on the picture book's page stack as before, no crash; the PC's room does not draw yet, so nothing on screen shows this code. Next on the PC path: mag/maglifepc3.cpp (initMotion 0x11dd40 and the motion loads), mag/maglifepcmode.cpp (the modes' init / live / pad: all hand-written stubs there, Null / Wait / Walk2D / Run2D first), mag/maglifepcmove.cpp (applyMotionMove, sweepMove). initMotion, getSubStateClass, setState14, getEquipItem, getEquipItemChrNo, getPcParam1b / 1c, getWeaponType, canReload, isMoveState are stubs in src/lib/unassigned_stubs.cpp (their runs are not pinned: 0x11c464..0x11c64c and 0x11dd40 / 0x11e080 sit in maglifepc2 / maglifepc3 territory, 0x12c9c0 beside maglifepcbtl). calcHealth divides two stubbed zeros (NaN, health class 2) until getPcParam1b / 1c are written. The PC motion sequence table 0x2961e0 (0x18-byte rows) is not on the host: the constructor passes NULL; it arrives with MagLifeControlChara::updateMotionSeq. message's int arguments travel in the pointer (intptr_t cast, PC: comment). Polymorphic classes with unwritten virtuals need hand stubs (hazards.md).",
+   "ranges": [
+    [
+     "0011ab40",
+     "0011c464"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 21:09",
+     "status": "verify",
+     "summary": "MagLifePC, the player controller: all 33 functions of 0x11ab40..0x11c464 (pinned) written - the constructor, changeState / selectMode over the 20 embedded MagLifePCMode objects, live, processPad (health / move level / stance, attack, reload, dog orders), message (was command), reset4MapJump (was reset), setActor, termWorld, setParam, the sub-mode stack, stamina; mag/maglifepcmode.h declares the modes. Also MagLifeControlChara's constructor, setState, clearMotionSeq, setMotionSeqTable and clearGoal in mag/maglife.cpp."
+    }
+   ],
+   "status": "verify",
+   "why": "the file's asserts (mag/maglifepc.cpp, lines 1046..2340) run 0x11af30..0x11c1e8 in line order; 0x11ab40..0x11ade4 (restoreState, calcHealth, readStick, readStance, updatePadStatus) and termWorld use only MagLifePC fields; 0x11c464.. are GamMan PC-param getters before maglifepc2.cpp's first anchor 0x11c64c. initMotion 0x11dd40 / getSubStateClass 0x11e080 sit in maglifepc3.cpp's run, setState14 0x12c9c0 beside maglifepcbtl.cpp"
   },
   "mag/magloader.cpp": {
    "notes": "Status verify: all 17 functions written, nothing past the title menu draws yet. A New Game run (build.py --run 140 --pad 1800:START,2400:START,2700:CROSS) no longer crashes in MagScene::loadModel: no loader or loadActor assert fires and the PC model reaches DogActor::load 0x10cd5c (a stub), the next blocker for actors (dog/dogactor.cpp). The screenshot (last.png) is the title menu, the last frame before the New Game fade; a plain run then dies with an access violation right after GamMan::setPcAnim / ACHRstat::setParam (the open-items 10d crash, not this TU); under gdbrun it does not crash and reaches GamMan::initStage2 / startStage2 (stubs). Mark done when a screenshot shows a character or map unit loaded through these loaders. Decisions: MagLoaderIndex is 0x24 bytes on the EE (the old header said 0x1c); calcSize uses host pointer size (EE num*13); both loaders got inline destructors releasing the index (the ROM's MagScene destructor does it inline) and MagMapLoader an inline constructor clearing it; PC guards return NULL / -1 after the index asserts. Names: MagLoaderIndex::dump/calcSize/scanNames/create/add/clear/release, MagCharaLoader::MagCharaLoader/initFromPacks/getCategory, utlStrEqualNoCase (ror-inferred). For the references: architecture.md loaders paragraph and open-items 10i written in this commit.",

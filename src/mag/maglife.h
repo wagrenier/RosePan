@@ -65,9 +65,30 @@ static_assert(offsetof(MagLife, m_level) >= 0x10, "m_level");
 static_assert(offsetof(MagLife, m_scene) >= 0x20, "m_scene");
 static_assert(offsetof(MagLife, m_hide) >= 0x24, "m_hide");
 
-/* EE at least 0x60. layout: host -- holds the actor pointer. */
+/* One row of a controller's motion sequence table (0x18 bytes; the PC's
+ * is at 0x2961e0: "base", "run_out", "wait" ...). Read by
+ * updateMotionSeq; declared when that TU writes it. */
+struct MagLifeMotionSeq;
+
+/* EE at least 0x7c. layout: host -- holds the actor pointer. */
 struct MagLifeControlChara : MagLife
 {
+    /* m_level 1, m_04 / m_no -1, the rest cleared; the derived
+     * constructors set m_motion_seq. */
+    MagLifeControlChara();                                               // ROR 0x0011a888
+
+    /* EE slot 9 (+0x48): the state quad m_state..m_0c into m_prev_state
+     * (when m_state != 0), then m_state = state, m_08 = arg, m_04 = -1.
+     * Called on the known class (MagLifePC::changeState). */
+    void setState(int state, int arg);                                   // ROR 0x00119fe0
+    /* m_seq_no / m_seq_count = -1. */
+    void clearMotionSeq();                                               // ROR 0x0011a130
+    void setMotionSeqTable(const MagLifeMotionSeq *table);               // ROR 0x0011a144
+    /* m_70 = -1, m_goal cleared. */
+    void clearGoal();                                                    // ROR 0x00119b34
+    /* On the motion's event bit 1: the sound table[floor kind] (+ the
+     * frame count's parity / 13) at the actor (playSe). */
+    void playStepSe(const int *table);                                   // ROR 0x0011a738
     /* EE slot 15 (+0x78), inline in the class (linkonce). */
     // ROR 0x00282938
     void renderPostProcess()
@@ -77,12 +98,26 @@ struct MagLifeControlChara : MagLife
     }
     void updateMotionSeq();                                              // ROR 0x0011a14c
 
-    u_char    _28[0x50 - 0x28];
+    u_char    _28[0x30 - 0x28];
+    int       m_prev_state[4];  // ROR 0x30: setState saves m_state, m_04, m_08, m_0c here
+    int       m_seq_no;         // ROR 0x40: the motion sequence row (clearMotionSeq: -1)
+    int       m_seq_count;      // ROR 0x44: its frame count (clearMotionSeq: -1)
+    int       m_48;             // ROR 0x48: 0x11a054 tests > 1; the constructor clears it
+    int       m_4c;             // ROR 0x4c: the constructor clears it
     int       m_no;             // ROR 0x50: the actor's number (setActor)
     int       m_mode;           // ROR 0x54: setActor's third argument
     DogActor *m_actor;          // ROR 0x58: the bound actor, NULL = none (asserted in mag/maglife.cpp)
+    const MagLifeMotionSeq *m_motion_seq; // ROR 0x5c: setMotionSeqTable
+    float     m_goal[4];        // ROR 0x60: clearGoal clears it (the constructor clears +0x60)
+    int       m_70;             // ROR 0x70: clearGoal sets -1
+    int       m_74;             // ROR 0x74: the constructor clears it
+    int       m_78;             // ROR 0x78: MagLifePC::setActor: 0 while the fade state is 5, else 1
 };
+static_assert(offsetof(MagLifeControlChara, m_prev_state) >= 0x30, "m_prev_state");
+static_assert(offsetof(MagLifeControlChara, m_seq_no) >= 0x40, "m_seq_no");
 static_assert(offsetof(MagLifeControlChara, m_no) >= 0x50, "m_no");
 static_assert(offsetof(MagLifeControlChara, m_actor) >= 0x58, "m_actor");
+static_assert(offsetof(MagLifeControlChara, m_motion_seq) >= 0x5c, "m_motion_seq");
+static_assert(offsetof(MagLifeControlChara, m_78) >= 0x78, "m_78");
 
 #endif /* _MAG_MAGLIFE_H */

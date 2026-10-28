@@ -61,6 +61,10 @@ struct MagLifeBwnCtrl : MagLife
     /* theLevel MAG_BWNCTRL_LEVEL_AUTO (0) .. MAG_BWNCTRL_LEVEL_MANUAL (2). */
     void setLevel(int theLevel);                                         // ROR 0x0012b7cc
     int  isBarkPhase3();                                                 // ROR 0x0012ba54
+    /* The PC's dog orders (MagLifePC::orderDog passes 0). */
+    void orderCome(int a1);                                              // ROR 0x0012b4a0
+    void orderStay(int a1);                                              // ROR 0x0012b5f8
+    void orderGo(int a1);                                                // ROR 0x0012b65c
 
     u_char      _28[0x44 - 0x28];
     int         m_find_item;    // ROR 0x44: setFindItem's item (op gfit reads it)

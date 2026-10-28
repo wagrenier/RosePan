@@ -921,7 +921,7 @@ void MagSystem::setCameraTarget(const float *pos, const float *at)
 
 int MagSystem::getPCWordE4()
 {
-    return m_scene.m_pc.m_e4;
+    return m_scene.m_pc.m_health;
 }
 
 // ──────────────────────────────────────────────────────────────────────

@@ -227,6 +227,24 @@
   "was": "FUN_0010254c",
   "why": "sound id at a position (NULL: none) through 0x1e4ebc on the sound object 0x79a0c0"
  },
+ "00102918": {
+  "name": "utlPlaySeRand3",
+  "tag": "ror-inferred",
+  "was": "FUN_00102918",
+  "why": "plays one of three sound ids at random (0x10423c(0, 300))"
+ },
+ "001029c4": {
+  "name": "utlPlaySeRand4",
+  "tag": "ror-inferred",
+  "was": "FUN_001029c4",
+  "why": "plays one of four sound ids at random"
+ },
+ "0010346c": {
+  "name": "utlTestSeqBit34",
+  "tag": "ror-inferred",
+  "was": "FUN_0010346c",
+  "why": "g_sequence.m_bits[1] & 4 (script flag 34): processPad's dog commands need it"
+ },
  "00103484": {
   "name": "utlIsVibrationOn",
   "tag": "ror-inferred",
@@ -2273,11 +2291,83 @@
   "was": "FUN_00119a38",
   "why": "walks m_top's entries; for those whose priority & 0xc000 == group and whose life's slot 8 returns 0, calls its slot 6 with the layer (asserts in maglifeman.cpp)"
  },
+ "00119b34": {
+  "name": "MagLifeControlChara::clearGoal",
+  "tag": "ror-inferred",
+  "was": "FUN_00119b34",
+  "why": "+0x70 = -1, the vector +0x60 cleared (role from reset4MapJump; unconfirmed)"
+ },
+ "00119fe0": {
+  "name": "MagLifeControlChara::setState",
+  "tag": "ror-inferred",
+  "was": "FUN_00119fe0",
+  "why": "EE slot 9: saves the state quad to +0x30 when m_state != 0, m_08 = arg, m_state = state, m_04 = -1"
+ },
+ "0011a130": {
+  "name": "MagLifeControlChara::clearMotionSeq",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a130",
+  "why": "the motion sequence words +0x40 / +0x44 = -1 (updateMotionSeq reads them)"
+ },
+ "0011a144": {
+  "name": "MagLifeControlChara::setMotionSeqTable",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a144",
+  "why": "+0x5c = the 0x18-byte motion sequence rows updateMotionSeq walks (the PC's at 0x2961e0)"
+ },
  "0011a14c": {
   "name": "MagLifeControlChara::updateMotionSeq",
   "tag": "ror-inferred",
   "was": "FUN_0011a14c",
   "why": "mag/maglife.cpp assert m_actor; steps a frame counter (+0x44) through a motion table of 0x18-byte entries (+0x5c) and jumps to the next entry; MagLifeControlChara::renderPostProcess calls it when m_actor is set"
+ },
+ "0011a704": {
+  "name": "MagLifeControlChara::playSe",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a704",
+  "why": "0x1026b0(id, 0, the actor's position)"
+ },
+ "0011a738": {
+  "name": "MagLifeControlChara::playStepSe",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a738",
+  "why": "on a motion event bit 1: the floor kind (0..11) under the actor indexes a sound table, + the frame parity /13, playSe"
+ },
+ "0011a888": {
+  "name": "MagLifeControlChara::MagLifeControlChara",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a888",
+  "why": "constructor: vptr _vt$19MagLifeControlChara 0x2e0ca8, level 1, words cleared / -1"
+ },
+ "0011ab40": {
+  "name": "MagLifePC::restoreState",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ab40",
+  "why": "unreferenced: moves the saved state block +0x30..+0x3f back to m_state..m_0c, clears it, reselects the mode (selectMode(0))"
+ },
+ "0011ab88": {
+  "name": "MagLifePC::calcHealth",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ab88",
+  "why": "0..4 health class from m_1b4 (override), m_mode 1/3, the PC param ratio > 0.3 and stamina m_d0 < 301; setActor / updatePadStatus store it in m_e4 (getHealth, ror-symbol 0x282bc0, returns m_e4)"
+ },
+ "0011ac24": {
+  "name": "MagLifePC::readStick",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ac24",
+  "why": "BedPad::getDir into m_108/m_10c, getDirChange into m_114; 0 below the dead zone m_1f8, 1 walk, 2 run above 0.97"
+ },
+ "0011acf4": {
+  "name": "MagLifePC::readStance",
+  "tag": "ror-inferred",
+  "was": "FUN_0011acf4",
+  "why": "the pad's held bit 0x800 gives m_21c+1 (the weapon type + 1), 0 otherwise, -1 in state 10 (keep the last); updatePadStatus stores it in m_dc"
+ },
+ "0011ad6c": {
+  "name": "MagLifePC::updatePadStatus",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ad6c",
+  "why": "per pad frame: m_e4 health (old in m_f0), m_e0 move level from readStick (old in m_ec), m_dc stance from readStance (old in m_e8)"
  },
  "0011ade4": {
   "name": "MagLifePC::live",
@@ -2297,6 +2387,36 @@
   "was": "FUN_0011af10",
   "why": "returns word 1 when the state word is 0x17, else -1; update spins the camera with it (sub mode 6)"
  },
+ "0011af30": {
+  "name": "MagLifePC::orderDog",
+  "tag": "ror-inferred",
+  "was": "FUN_0011af30",
+  "why": "state 15/16/17 (com_go/come/stay): flags&1 plays one of the PC's voice lines, flags&2 tells MagLifeBwnCtrl (scene +0x2bd20) go / come / stay; asserts on other states"
+ },
+ "0011b07c": {
+  "name": "MagLifePC::pickUpNearItem",
+  "tag": "ror-inferred",
+  "was": "FUN_0011b07c",
+  "why": "collects up to 10 items within 50 (collectNearItems), asserts itemdata[0].m_obj_id != 0, changeState(19 = Item, obj id)"
+ },
+ "0011b128": {
+  "name": "MagLifePC::getStickRotY",
+  "tag": "ror-inferred",
+  "was": "FUN_0011b128",
+  "why": "while the stick change m_114 exceeds m_20c: m_110 = the stick direction's Y angle plus the camera's, wrapped to -pi..pi; returns m_110"
+ },
+ "0011b204": {
+  "name": "MagLifePC::canTurnDirect",
+  "tag": "ror-inferred",
+  "was": "FUN_0011b204",
+  "why": "1 while the actor blends in, else whether the angle from a to b is within +-153 degrees"
+ },
+ "0011b2c4": {
+  "name": "MagLifePC::padMode",
+  "tag": "ror-inferred",
+  "was": "FUN_0011b2c4",
+  "why": "the current mode's slot 3 pad(this, pad), 0 without a mode"
+ },
  "0011b30c": {
   "name": "MagLifePC::processPad",
   "tag": "ror-inferred",
@@ -2304,10 +2424,28 @@
   "why": "MagLifePC vtable slot 16, called with the first pad"
  },
  "0011b5e0": {
-  "name": "MagLifePC::command",
+  "name": "MagLifePC::message",
   "tag": "ror-inferred",
   "was": "FUN_0011b5e0",
-  "why": "switch on a command number (0..0xe) that sets PC states through 0x11c1e8 (8, 9, 0xd ...), counts word +0x188 for 0 / 1, asserts on unknown commands; returns 0xfffffe93 without an actor"
+  "why": "overrides EE slot 14, whose MagLifeControlChara entry is the ror-symbol message (MagScene::commandPC)"
+ },
+ "0011b964": {
+  "name": "MagLifePC::setParam",
+  "tag": "ror-inferred",
+  "was": "FUN_0011b964",
+  "why": "MagScene::parseOption's PC tuning words 6..14 into +0x1f8..+0x218 with theValue range asserts (cos of degrees for 7 / 8, /180 for 10)"
+ },
+ "0011bc64": {
+  "name": "MagLifePC::pushSubMode",
+  "tag": "ror-inferred",
+  "was": "FUN_0011bc64",
+  "why": "asserts m_submode_level >= 0 && < 4; pushes the state quad m_state..m_0c onto the stack at +0x90"
+ },
+ "0011bcd8": {
+  "name": "MagLifePC::popSubMode",
+  "tag": "ror-inferred",
+  "was": "FUN_0011bcd8",
+  "why": "asserts m_submode_level > 0 && <= 4; pops the state quad back"
  },
  "0011bd4c": {
   "name": "MagLifePC::setActor",
@@ -2315,17 +2453,95 @@
   "was": "FUN_0011bd4c",
   "why": "MagLifePC vtable slot 10: stores the actor at +0x58 (m_actor in mag/maglife.cpp asserts), its number +0x50 and mode +0x54; MagScene::setPC calls it with the actor or NULL"
  },
+ "0011bdc0": {
+  "name": "MagLifePC::drainStamina",
+  "tag": "ror-inferred",
+  "was": "FUN_0011bdc0",
+  "why": "every 11th call stamina m_d0 -= 10 (floor 0); counter m_d4"
+ },
+ "0011be00": {
+  "name": "MagLifePC::recoverStamina",
+  "tag": "ror-inferred",
+  "was": "FUN_0011be00",
+  "why": "stamina m_d0 + 1, clamped 0..1000"
+ },
+ "0011be30": {
+  "name": "MagLifePC::isBlendIn",
+  "tag": "ror-inferred",
+  "was": "FUN_0011be30",
+  "why": "DogActor::isBlendIn of the bound actor, 0 without one"
+ },
  "0011be60": {
-  "name": "MagLifePC::reset",
+  "name": "MagLifePC::reset4MapJump",
   "tag": "ror-inferred",
   "was": "FUN_0011be60",
-  "why": "MagLifeControlChara slot 12 (rtti), MagLifePC's override; MagScene::resetEntities calls it after a map load ('wait2' motion)"
+  "why": "overrides EE slot 12, whose MagLifeControlChara entry is the ror-symbol reset4MapJump"
+ },
+ "0011bf0c": {
+  "name": "MagLifePC::MagLifePC",
+  "tag": "ror-inferred",
+  "was": "FUN_0011bf0c",
+  "why": "constructor: MagLifeControlChara's, vptr _vt$9MagLifePC, the 20 embedded MagLifePCMode* vptrs, tuning defaults; MagScene::MagScene calls it for +0x2adc0"
+ },
+ "0011c1e8": {
+  "name": "MagLifePC::changeState",
+  "tag": "ror-inferred",
+  "was": "FUN_0011c1e8",
+  "why": "asserts theMode >= 0; unless the same non-zero state without force: clearMotionSeq, slot 9 setState(state, arg), selectMode(1)"
+ },
+ "0011c2ac": {
+  "name": "MagLifePC::selectMode",
+  "tag": "ror-inferred",
+  "was": "FUN_0011c2ac",
+  "why": "m_114 = 9999, m_130 = 0, m_134 = the embedded mode object for m_state (0..20), then its init(this) when asked"
  },
  "0011c418": {
   "name": "MagLifePC::termWorld",
   "tag": "ror-inferred",
   "was": "FUN_0011c418",
   "why": "MagLifePC vtable slot 13 (MagLifeBwn has MagLifeControlChara::termWorld there); virtual call slot 9 (-1, 0), +0x134 = 0, +0xd0 = 1000; MagScene::clearPC calls it"
+ },
+ "0011c464": {
+  "name": "MagLifePC::getPcParam1b",
+  "tag": "ror-inferred",
+  "was": "FUN_0011c464",
+  "why": "GamMan::getPcParam(0x1b); calcHealth divides it by getPcParam1c (the PC's current / maximum value, likely life)"
+ },
+ "0011c4c0": {
+  "name": "MagLifePC::getPcParam1c",
+  "tag": "ror-inferred",
+  "was": "FUN_0011c4c0",
+  "why": "GamMan::getPcParam(0x1c); calcHealth's divisor"
+ },
+ "0011c520": {
+  "name": "MagLifePC::getEquipItem",
+  "tag": "ror-inferred",
+  "was": "FUN_0011c520",
+  "why": "the short g_gamMan +0x2220c (GamMan m_equipItem)"
+ },
+ "0011c64c": {
+  "name": "MagLifePC::collectNearItems",
+  "tag": "ror-inferred",
+  "was": "FUN_0011c64c",
+  "why": "in mag/maglifepc2.cpp (assert theRange >= 5.0f): items within range into 0x20-byte records, count returned"
+ },
+ "0011cb70": {
+  "name": "MagLifePC::getWeaponType",
+  "tag": "ror-inferred",
+  "was": "FUN_0011cb70",
+  "why": "m_1ac override, else the item's attack type (0x11caf8) 5 -> 3, 4 -> 2, 6 -> 1, other 0; indexes the sude_in motion table"
+ },
+ "0011ce50": {
+  "name": "MagLifePC::getEquipItemChrNo",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ce50",
+  "why": "the short g_gamMan +0x2200c (m_pcEquipItemChrID); reset4MapJump changes that actor's motion"
+ },
+ "0011d044": {
+  "name": "MagLifePC::canReload",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d044",
+  "why": "GamMan::findReloadSlot(0) != 0"
  },
  "0011dd40": {
   "name": "MagLifePC::initMotion",
@@ -2338,6 +2554,318 @@
   "tag": "ror-inferred",
   "was": "FUN_0011e080",
   "why": "on the MagLifePC (MagSystem::getPCStateClass passes scene +0x2adc0): +0xec 1 -> 6, 2 -> 7, else 5"
+ },
+ "0011e0ac": {
+  "name": "MagLifePC::isMoveState",
+  "tag": "ror-inferred",
+  "was": "FUN_0011e0ac",
+  "why": "m_state 1..10 or 14"
+ },
+ "0011ea04": {
+  "name": "MagLifePC::sweepMove",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ea04",
+  "why": "collision sweep of a move (radius, height from +0x210 / +0x214); negative = free (message 0x15)"
+ },
+ "00120668": {
+  "name": "MagLifePC::applyMotionMove",
+  "tag": "ror-inferred",
+  "was": "FUN_00120668",
+  "why": "moves the actor by its motion's root movement (getMotionMove) unless a mode arg is set"
+ },
+ "001208b8": {
+  "name": "MagLifePCMode::live",
+  "tag": "ror-inferred",
+  "was": "FUN_001208b8",
+  "why": "base EE slot 2 (MagLifePCModeHold::live is the ror-symbol name of this slot)"
+ },
+ "00120900": {
+  "name": "MagLifePCModeNull::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00120900",
+  "why": "vtable _vt$...MagLifePCModeNull slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001209b0": {
+  "name": "MagLifePCModeNull::live",
+  "tag": "ror-inferred",
+  "was": "FUN_001209b0",
+  "why": "vtable _vt$...MagLifePCModeNull slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001209e0": {
+  "name": "MagLifePCModeWait::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001209e0",
+  "why": "vtable _vt$...MagLifePCModeWait slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00120b9c": {
+  "name": "MagLifePCModeWait::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00120b9c",
+  "why": "vtable _vt$...MagLifePCModeWait slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00120bdc": {
+  "name": "MagLifePCModeWait::pad",
+  "tag": "ror-inferred",
+  "was": "FUN_00120bdc",
+  "why": "vtable _vt$...MagLifePCModeWait slot 3; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00120f60": {
+  "name": "MagLifePCModeWalk2D::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00120f60",
+  "why": "vtable _vt$...MagLifePCModeWalk2D slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121070": {
+  "name": "MagLifePCModeWalk2D::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00121070",
+  "why": "vtable _vt$...MagLifePCModeWalk2D slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121078": {
+  "name": "MagLifePCModeWalk2D::pad",
+  "tag": "ror-inferred",
+  "was": "FUN_00121078",
+  "why": "vtable _vt$...MagLifePCModeWalk2D slot 3; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121168": {
+  "name": "MagLifePCModeRun2D::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00121168",
+  "why": "vtable _vt$...MagLifePCModeRun2D slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001211c8": {
+  "name": "MagLifePCModeRun2D::live",
+  "tag": "ror-inferred",
+  "was": "FUN_001211c8",
+  "why": "vtable _vt$...MagLifePCModeRun2D slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001211e4": {
+  "name": "MagLifePCModeRun2D::pad",
+  "tag": "ror-inferred",
+  "was": "FUN_001211e4",
+  "why": "vtable _vt$...MagLifePCModeRun2D slot 3; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001212c8": {
+  "name": "MagLifePCModeTurn::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001212c8",
+  "why": "vtable _vt$...MagLifePCModeTurn slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121364": {
+  "name": "MagLifePCModeTurn::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00121364",
+  "why": "vtable _vt$...MagLifePCModeTurn slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "0012136c": {
+  "name": "MagLifePCModeTurn::pad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012136c",
+  "why": "vtable _vt$...MagLifePCModeTurn slot 3; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001214b4": {
+  "name": "MagLifePCModeAtkWait2D::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001214b4",
+  "why": "vtable _vt$...MagLifePCModeAtkWait2D slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001216a4": {
+  "name": "MagLifePCModeAtkWait2D::live",
+  "tag": "ror-inferred",
+  "was": "FUN_001216a4",
+  "why": "vtable _vt$...MagLifePCModeAtkWait2D slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001217c0": {
+  "name": "MagLifePCModeAtkWait2D::pad",
+  "tag": "ror-inferred",
+  "was": "FUN_001217c0",
+  "why": "vtable _vt$...MagLifePCModeAtkWait2D slot 3; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121858": {
+  "name": "MagLifePCModeAtkMove2D::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00121858",
+  "why": "vtable _vt$...MagLifePCModeAtkMove2D slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121890": {
+  "name": "MagLifePCModeAtkMove2D::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00121890",
+  "why": "vtable _vt$...MagLifePCModeAtkMove2D slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121898": {
+  "name": "MagLifePCModeAtkMove2D::pad",
+  "tag": "ror-inferred",
+  "was": "FUN_00121898",
+  "why": "vtable _vt$...MagLifePCModeAtkMove2D slot 3; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001218fc": {
+  "name": "MagLifePCModeAttacking::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001218fc",
+  "why": "vtable _vt$...MagLifePCModeAttacking slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121934": {
+  "name": "MagLifePCModeAttacking::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00121934",
+  "why": "vtable _vt$...MagLifePCModeAttacking slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121c64": {
+  "name": "MagLifePCModeAttacking::pad",
+  "tag": "ror-inferred",
+  "was": "FUN_00121c64",
+  "why": "vtable _vt$...MagLifePCModeAttacking slot 3; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121cd8": {
+  "name": "MagLifePCModeDamage::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00121cd8",
+  "why": "vtable _vt$...MagLifePCModeDamage slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00121fc8": {
+  "name": "MagLifePCModeDamage::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00121fc8",
+  "why": "vtable _vt$...MagLifePCModeDamage slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001220f0": {
+  "name": "MagLifePCModeItem::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001220f0",
+  "why": "vtable _vt$...MagLifePCModeItem slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001221ec": {
+  "name": "MagLifePCModeItem::live",
+  "tag": "ror-inferred",
+  "was": "FUN_001221ec",
+  "why": "vtable _vt$...MagLifePCModeItem slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122338": {
+  "name": "MagLifePCModeDogGo::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00122338",
+  "why": "vtable _vt$...MagLifePCModeDogGo slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001223c0": {
+  "name": "MagLifePCModeDogGo::live",
+  "tag": "ror-inferred",
+  "was": "FUN_001223c0",
+  "why": "vtable _vt$...MagLifePCModeDogGo slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "0012245c": {
+  "name": "MagLifePCModeDogCome::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012245c",
+  "why": "vtable _vt$...MagLifePCModeDogCome slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122668": {
+  "name": "MagLifePCModeDogCome::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00122668",
+  "why": "vtable _vt$...MagLifePCModeDogCome slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001226d0": {
+  "name": "MagLifePCModeDogStay::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001226d0",
+  "why": "vtable _vt$...MagLifePCModeDogStay slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122758": {
+  "name": "MagLifePCModeDogStay::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00122758",
+  "why": "vtable _vt$...MagLifePCModeDogStay slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001227e4": {
+  "name": "MagLifePCModeHold::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001227e4",
+  "why": "vtable _vt$...MagLifePCModeHold slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122828": {
+  "name": "MagLifePCModeHold::pad",
+  "tag": "ror-inferred",
+  "was": "FUN_00122828",
+  "why": "vtable _vt$...MagLifePCModeHold slot 3; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001228fc": {
+  "name": "MagLifePCModeHoldAttack::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001228fc",
+  "why": "vtable _vt$...MagLifePCModeHoldAttack slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122930": {
+  "name": "MagLifePCModeUnhold::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00122930",
+  "why": "vtable _vt$...MagLifePCModeUnhold slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122954": {
+  "name": "MagLifePCModeRide::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00122954",
+  "why": "vtable _vt$...MagLifePCModeRide slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122ad4": {
+  "name": "MagLifePCModeRide::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00122ad4",
+  "why": "vtable _vt$...MagLifePCModeRide slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122bd4": {
+  "name": "MagLifePCModeRide::pad",
+  "tag": "ror-inferred",
+  "was": "FUN_00122bd4",
+  "why": "vtable _vt$...MagLifePCModeRide slot 3; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122c9c": {
+  "name": "MagLifePCModeRide::message",
+  "tag": "ror-inferred",
+  "was": "FUN_00122c9c",
+  "why": "messages 6 / 9 / 0xb / 0xd go to the Ride mode (+0x194) with the PC"
+ },
+ "00122d70": {
+  "name": "MagLifePCModeRoped::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00122d70",
+  "why": "vtable _vt$...MagLifePCModeRoped slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122dec": {
+  "name": "MagLifePCModeRoped::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00122dec",
+  "why": "vtable _vt$...MagLifePCModeRoped slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122e2c": {
+  "name": "MagLifePCModeRoped::pad",
+  "tag": "ror-inferred",
+  "was": "FUN_00122e2c",
+  "why": "vtable _vt$...MagLifePCModeRoped slot 3; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00122fc4": {
+  "name": "MagLifePCModeReload::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00122fc4",
+  "why": "vtable _vt$...MagLifePCModeReload slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "00123004": {
+  "name": "MagLifePCModeReload::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00123004",
+  "why": "vtable _vt$...MagLifePCModeReload slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001230a8": {
+  "name": "MagLifePCModeHug::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001230a8",
+  "why": "vtable _vt$...MagLifePCModeHug slot 1; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
+ },
+ "001230fc": {
+  "name": "MagLifePCModeHug::live",
+  "tag": "ror-inferred",
+  "was": "FUN_001230fc",
+  "why": "vtable _vt$...MagLifePCModeHug slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
  },
  "00124e40": {
   "name": "MagLifeBwn::live",
@@ -2471,6 +2999,24 @@
   "was": "FUN_0012ab18",
   "why": "an empty function (jr ra) MagScene::resetEntities calls on Brown's controller after the PC's and Brown's reset"
  },
+ "0012b4a0": {
+  "name": "MagLifeBwnCtrl::orderCome",
+  "tag": "ror-inferred",
+  "was": "FUN_0012b4a0",
+  "why": "orderDog state 16 (com_come)"
+ },
+ "0012b5f8": {
+  "name": "MagLifeBwnCtrl::orderStay",
+  "tag": "ror-inferred",
+  "was": "FUN_0012b5f8",
+  "why": "orderDog state 17 (com_stay)"
+ },
+ "0012b65c": {
+  "name": "MagLifeBwnCtrl::orderGo",
+  "tag": "ror-inferred",
+  "was": "FUN_0012b65c",
+  "why": "orderDog state 15 (com_go)"
+ },
  "0012b7cc": {
   "name": "MagLifeBwnCtrl::setLevel",
   "tag": "ror-inferred",
@@ -2488,6 +3034,36 @@
   "tag": "ror-inferred",
   "was": "FUN_0012c9c0",
   "why": "with an actor and not already in state 0xe (or its step > 7): changes to state 0xe with a1 through 0x11c1e8 and stores a2 in word +0x0c (mag/maglifepcbtl.cpp)"
+ },
+ "0012cb50": {
+  "name": "MagLifePC::beginAttack",
+  "tag": "ror-inferred",
+  "was": "FUN_0012cb50",
+  "why": "state 11: picks a target (range 500, 90 degrees) into +0x1c0 / +0x1f0, then changeState(5)"
+ },
+ "0012cdb0": {
+  "name": "MagLifePC::message14",
+  "tag": "ror-inferred",
+  "was": "FUN_0012cdb0",
+  "why": "message 0xe: an assert(0) in mag/maglifepc*.cpp (unimplemented)"
+ },
+ "0012cddc": {
+  "name": "MagLifePC::message15",
+  "tag": "ror-inferred",
+  "was": "FUN_0012cddc",
+  "why": "message 0xf: assert(0)"
+ },
+ "0012ce08": {
+  "name": "MagLifePC::message16",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ce08",
+  "why": "message 0x10: assert(0)"
+ },
+ "0012ce34": {
+  "name": "MagLifePC::message17",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ce34",
+  "why": "message 0x11: empty"
  },
  "0012cf3c": {
   "name": "MagLifeMenuBase::getTypeValue",

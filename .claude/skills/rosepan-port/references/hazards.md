@@ -353,6 +353,13 @@ entries are marked **RoR** with the date.
 
 ## callcheck / stubgen
 
+- **"undefined reference to vtable for X" that stubgen skips** (2026-10-27, mag/maglifepc.cpp):
+  a new polymorphic class whose out-of-line virtuals live in an unwritten TU. GCC emits the vtable
+  with the first non-inline virtual (the key function); none defined means no vtable, and the linker
+  names the vtable, not the functions, so stubgen ("data symbol: define it by hand") writes nothing.
+  Fix: hand-write `ROSEPAN_STUB` bodies for every out-of-line virtual in the class's own file (a
+  script over the header's `// ROR 0x...` lines does it; see mag/maglifepcmode.cpp).
+
 - **A load loop spins on a stub.** The S2d inits (`S2dMes::loadTexture`, `S2dMovie::loadTexture`)
   `while (!SprTexture::update())`: a generated stub's 0 would hang MagScene::initRender for ever.
   spr/sprtexture.cpp has a hand-written `ROSEPAN_BRIDGE` returning 1 until the loader is written

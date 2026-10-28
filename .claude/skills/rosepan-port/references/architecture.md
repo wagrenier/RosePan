@@ -998,6 +998,39 @@ flag texture and light loads pass), sepc (DogTexInfo::setSepiaColor, clamped 255
 0x1000d, BFML 0x1000e, BCPL 0x1000f, after utlPauseForMenu), whti / whto (white fades, level 7),
 rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
 
+## The player's controller (`mag/maglifepc.cpp`, 0x11ab40..0x11c464, 2026-10-27)
+
+- `MagLifePC` (EE 0x220, scene +0x2adc0) is a state machine: `m_state` (MagLife0 +0) picks one of 20
+  mode objects embedded at +0x138..+0x1a8 (`mag/maglifepcmode.h`: each is only a vptr, a few carry
+  words; three EE slots init(pc) / live(pc) / pad(pc, pad), names from the ror-symbols
+  `MagLifePCMode::init` / `::pad` and `MagLifePCModeHold::live`). States: 0 Null, 1 Wait, 2 Walk2D,
+  3 Run2D, 4 Turn, 5 AtkWait2D, 6 AtkMove2D, 7 Roped, 8 Hold, 9 Ride, 10 Attacking, 11 (no mode:
+  `beginAttack` picks a target, then 5), 12 HoldAttack, 13 Unhold, 14 Damage, 15 DogGo, 16 DogCome,
+  17 DogStay, 18 Hug, 19 Item, 20 Reload.
+- `changeState(theMode, arg, force)` 0x11c1e8 (45 callers, most in the modes): clearMotionSeq, the
+  base's slot 9 `MagLifeControlChara::setState` 0x119fe0 (saves the state quad at +0x30 when
+  m_state != 0; m_08 = arg, m_04 = -1), `selectMode(1)` 0x11c2ac (current mode + its init).
+- MagLifeControlChara's slot names are ror-symbols: slot 12 `reset4MapJump`, 14 `message` -- so
+  MagLifePC's overrides are `reset4MapJump` 0x11be60 and `message` 0x11b5e0 (renamed from reset /
+  command). Messages: 0/1 hold, 2/7/10/12 ride, 6/9/11/13 to the Ride mode, 0x12..0x14 stamina,
+  0x15 move the actor (sweep), 0x16 riding / hurt query, 0x17 weapon override, 0x18 health override.
+- processPad (states 1..11): status words via updatePadStatus -- health class m_health (+0xe4,
+  calcHealth: override, mode 1 -> 3, 3 -> 4, PC param 0x1b / 0x1c ratio <= 0.3 -> 2, stamina),
+  move level m_move_level (+0xe0, readStick: dead zone +0x1f8, run above 0.97), stance m_stance
+  (+0xdc, R1 0x800 held -> weapon type + 1). A stance change arms (state 11) or disarms (0); cross
+  (0x4000) in 5 / 6 attacks; L1 (0x400) reloads; triangle / circle / square order Brown (states
+  15 / 16 / 17, needs script flag 34 and MagLifeBwnCtrl level 0); else the mode's pad until it
+  returns 0 or 1.
+- live: the shadow blend scene +0x22b0 (0.1 in mode 3, else back to 1 by 0.05), footsteps
+  (`playStepSe` with the 12 floor-kind sound ids at 0x2e9ef8), the mode's live, root motion outside
+  the moving states (`isMoveState`: 1..10, 14).
+- The PC's motion sequence table (0x18-byte rows at 0x2961e0: "base", "run_out", "wait", "tired",
+  "w_wait", "hold_in" ... "sude_in_ml", 60+ rows) is passed to MagLifeControlChara +0x5c; it is not
+  on the host yet (NULL) -- it comes with updateMotionSeq's TU.
+- Tuning words (MagScene::parseOption options 6..14 -> `setParam`): +0x1f8 stick dead zone 0.1,
+  +0x1fc / +0x200 cos 5 / 89 degrees, +0x204 0.07, +0x208 0.9, +0x20c 0.001 (stick change),
+  +0x210 / +0x214 45 / 20 (move sweep range / radius).
+
 ## The texture table (`dog/dogtexinfo.cpp`, 0x1161e4..0x11764c, 2026-10-22)
 
 - **DogTexInfo** (EE 0x20; the scene's at +0x29520, 256 entries): +0 m_max_tex, +4 m_num_tex,
