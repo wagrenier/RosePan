@@ -494,6 +494,27 @@ void DrawBatch(const I3rItem &batch, const float *local_world, const void *textu
     }
     RosePan_RendererCommitMeshStream(stream);
 }
+
+/* One group's 0x4d meshes (the group's child 0 list): per mesh its
+ * material's texture and state, then its batches. */
+void DrawMeshList(const I3rItem &list, const I3rItem *materials, unsigned num_mat, const I3dTexEntry *tex,
+                  int tex_count, const float *local_world, const Skin *skin)
+{
+    const I3rItem *mesh4d = list.getChildren();
+    for (u_int m = 0; m < list.getNumChild(); m++)
+    {
+        const u_char *md = (const u_char *)mesh4d[m].getData();
+        if (md == nullptr || mesh4d[m].getNumChild() == 0)
+            continue;
+        short mat;
+        memcpy(&mat, md + 0x0c, sizeof(mat));
+        const void *texture = MaterialTexture(materials, num_mat, mat, tex, tex_count);
+        ApplyMaterialState(materials, num_mat, mat);
+        const I3rItem &batches = mesh4d[m].getChildren()[0];
+        for (u_int b = 0; b < batches.getNumChild(); b++)
+            DrawBatch(batches.getChildren()[b], local_world, texture, skin);
+    }
+}
 }
 
 void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *nodes,
@@ -536,8 +557,27 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
                 continue;
             const u_short *bones = (const u_short *)i3rPtr(&ne->m_bones);
             const I3rItem &mesh = meshes[ne->m_mesh];
+            /* Child 1, type 0x45: rigid, every group with the node's own
+             * matrix (i3rDrawMesh45 / 0x220838); drawn first, as the ROM. */
+            if (mesh.getNumChild() >= 2 && mesh.getChildren()[1].m_data != 0 && nodes != nullptr)
+            {
+                const I3rItem &m45 = mesh.getChildren()[1];
+                if (m45.getNumChild() >= 2)
+                {
+                    float node_world[16];
+                    MatMul(node_world, nodes + (size_t)i * 16, world);
+                    const I3rItem &groups = m45.getChildren()[1];
+                    for (u_int g = 0; g < groups.getNumChild(); g++)
+                    {
+                        const I3rItem &group = groups.getChildren()[g];
+                        if (group.getNumChild() != 0)
+                            DrawMeshList(group.getChildren()[0], materials, num_mat, tex, tex_count,
+                                         node_world, nullptr);
+                    }
+                }
+            }
             if (mesh.getNumChild() < 1 || mesh.getChildren()[0].m_data == 0)
-                continue;                                       /* 0x45 (the other part): not drawn yet */
+                continue;
             const I3rItem &m46 = mesh.getChildren()[0];
             if (m46.getNumChild() == 0)
                 continue;
@@ -566,21 +606,8 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
                     if (slot_no < ne->m_num_bone && bones[slot_no] < num_node)
                         MatMul(local_world, nodes + (size_t)bones[slot_no] * 16, world);
                 }
-                const I3rItem &list = group[g].getChildren()[0];
-                const I3rItem *mesh4d = list.getChildren();
-                for (u_int m = 0; m < list.getNumChild(); m++)
-                {
-                    const u_char *md = (const u_char *)mesh4d[m].getData();
-                    if (md == nullptr || mesh4d[m].getNumChild() == 0)
-                        continue;
-                    short mat;
-                    memcpy(&mat, md + 0x0c, sizeof(mat));
-                    const void *texture = MaterialTexture(materials, num_mat, mat, tex, tex_count);
-                    ApplyMaterialState(materials, num_mat, mat);
-                    const I3rItem &batches = mesh4d[m].getChildren()[0];
-                    for (u_int b = 0; b < batches.getNumChild(); b++)
-                        DrawBatch(batches.getChildren()[b], local_world, texture, rigid ? nullptr : skinned);
-                }
+                DrawMeshList(group[g].getChildren()[0], materials, num_mat, tex, tex_count, local_world,
+                             rigid ? nullptr : skinned);
             }
         }
     }

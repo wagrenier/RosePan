@@ -1113,9 +1113,17 @@ to adapt when a TU reaches them:
   (2026-10-27) did (1) and (2): i3rDrawModel records at a 2-qword packet of the layer, the camera
   is m_camera plus m_rect_proj remade as reverse Z with y negated (the rect viewport's y diagonal is
   positive: NDC y runs down); the book cover shows upright and unmirrored, so the y / handedness
-  question is settled for this view. Still open: (3)..(5) below, the blend weights (opt /
-  i3rDrawSetupBlend 0x220670: type-0x59 children, the module reads none), and the per-part bone-box
-  cull (i3rDrawMesh46 0x220290: i3dViewTestBoneBox; the host counts a part with data as drawn).
+  question is settled for this view. 2026-10-28 (i3d/i3rdraw.cpp): the per-part culls are written
+  (i3rDrawMesh45 box, i3rDrawMesh46 i3dViewTestBoneBox; I3dBoneBoxes is now the file's EE layout)
+  and decide i3rDrawModel's result; the native module now draws the 0x45 rigid part with the node's
+  matrix (seen drawing during the prologue at frame ~2860; no visible change there or on the book,
+  A/B-checked). The VU1 writers are named and listed at the end of i3rdraw.cpp with their host
+  replacements. Still open: (3)..(4) below; the blend path (opt / i3rDrawSetupBlend 0x220670 /
+  i3rDrawMeshBlend 0x2210f0: type-0x59 children and group flags & 3, drawn unblended); the
+  depth-keyed batches (material packet +0x14 set: the ROM keys them with i3dViewGetDepth, the host
+  draws in walk order with the depth buffer); and the untextured model after the book (the 200 s
+  run's frames 6180+ show a skinned figure lit but white: its textures do not bind --
+  MaterialTexture / the context's texture table, not the walk).
   Was: left for the session that writes i3rDrawModel 0x21fe68 (unassigned@0021fb50): (1) call
   RosePan_I3dRecordModel from it at the layer's packet with its world / node arguments and the
   context's texture table; (2) a camera record from the layer's I3dView (i3dPktCallView: m_camera

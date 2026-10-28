@@ -12,10 +12,13 @@
  *  i3rDrawGroupSkinned 0x220b58, i3rDrawGroupRigid 0x220cf8 and their
  *  strip / batch writers to 0x222ce0) into the layer's draw-set groups.
  *  None of that reaches a GS on the host. i3rDrawModel keeps the ROM's
- *  walk for the model cull and its result, and records the model once at
- *  its layer's packet for the native module (RosePan_I3dRecordModel),
- *  which walks the same nodes, entries and parts and draws them through
- *  the renderer, with the camera made from the layer's view.
+ *  walk for the model cull and its result (i3rDrawMesh45 / 46 keep their
+ *  part culls), and records the model once at its layer's packet for the
+ *  native module (RosePan_I3dRecordModel), which walks the same nodes,
+ *  entries and parts and draws them through the renderer, with the camera
+ *  made from the layer's view.
+ *
+ *  The writers below the parts: see the end of this file.
  * ======================================================================== */
 #include "i3d/i3rdraw.h"
 
@@ -85,6 +88,78 @@ void i3rBuildMeshPacket(I3rItem *mesh, void *buf)
     (void)buf;
 }
 
+/* i3rDrawModel's work block (EE 0x2b0 on its stack, passed to the part
+ * writers and their group / strip writers): the fields the cull reads.
+ * layout: host -- pointers; the EE offsets are in the comments. */
+struct I3rDrawWork
+{
+    sceVu0FMATRIX           m_node_world;   // ROR 0x00: world * the node's matrix
+    /* ROR 0x40: the 0x46 rigid group's bone matrix; 0x80: the 0x45 data's
+     * first qword; 0x90: the matrix packet's address (writers only). */
+    sceVu0FVECTOR          *m_world;        // ROR 0x94: i3rDrawModel's world
+    sceVu0FMATRIX          *m_nodes;        // ROR 0x98: the node matrices
+    const I3rItem          *m_root;         // ROR 0x9c: the root item (materials: child 0)
+    const I3rNodeEntryData *m_entry;        // ROR 0xa0: the entry being drawn
+    /* ROR 0xa4: the 0x46 part's data (i3rDrawMesh46 stores it). */
+    const u_char           *m_disp;         // ROR 0xa8: the node's display record
+    const void             *m_opt;          // ROR 0xac: the blend words
+};
+static_assert(offsetof(I3rDrawWork, m_world) >= 0x40, "I3rDrawWork::m_world");
+
+// ──────────────────────────────────────────────────────────────────────
+// The rigid part of a combined mesh (type 0x45): child 0's data is a box
+// in the node's space, tested when the model crosses the guard band; then
+// per group (child 1's children, data byte 0 = flags) the 0x4d meshes of
+// its child 0 are written with the node matrix (0x220838, which also
+// box-tests each mesh with its own box when clipping). Returns the clip
+// state it drew with, I3D_VIEW_OUT when culled.
+// ROR 0x00220098
+// PC: only the cull and the result; the native module draws the part
+// (RosePan_I3dRecordModel, rosepan_i3dmesh.cpp), so the matrix packet
+// (an UNPACK to VU1 0x3d2: the matrix, its inverse, the normalised axes
+// and their transpose) and the group writers have no host form.
+
+static int i3rDrawMesh45(I3dLayer *layer, const I3rItem *part, int clip, I3rDrawWork *work)
+{
+    if (clip == I3D_VIEW_CLIP)
+    {
+        sceVu0FMATRIX box;
+
+        i3dVu0MatMul(box, work->m_node_world, (sceVu0FVECTOR *)part->getChildren()[0].getData());
+        clip = i3dViewTestBox(layer->m_view, box);
+        if (clip == I3D_VIEW_OUT)
+            return I3D_VIEW_OUT;
+    }
+    // callcheck: i3dCtxGetHead, i3dPktDmaTag, i3dVecNormalize, i3dMatCopy, i3dVu0MatInverse, i3dVu0MatTranspose, i3dCtxSetHead, i3rDrawGroup45 (the VU1 matrix packet and group writers: PC, above)
+    return clip;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The skinned part of a combined mesh (type 0x46): its data is the bone
+// boxes (I3dBoneBoxes), tested through the entry's bone slots when the
+// model crosses the guard band. Entries of up to 0x40 bones get their
+// bone matrices pre-multiplied into the scratchpad (0x225ec8: offsets[i]
+// * nodes[bones[i]]; work +0x250 says so); then per group a matrix packet
+// and i3rDrawGroupSkinned, or for a rigid group (flag 8) the slot's bone
+// matrix times the world through VU0 and i3rDrawGroupRigid. Returns the
+// clip state it drew with, I3D_VIEW_OUT when culled.
+// ROR 0x00220290
+// PC: only the cull and the result, as i3rDrawMesh45; the native module
+// skins the batches itself (rosepan_i3dmesh.cpp SkinBatch).
+
+static int i3rDrawMesh46(I3dLayer *layer, const I3rItem *part, int clip, I3rDrawWork *work)
+{
+    if (clip == I3D_VIEW_CLIP)
+    {
+        clip = i3dViewTestBoneBox(layer->m_view, &work->m_entry->m_bones, (const I3dBoneBoxes *)part->getData(),
+                                  work->m_world, work->m_nodes);
+        if (clip == I3D_VIEW_OUT)
+            return I3D_VIEW_OUT;
+    }
+    // callcheck: FUN_00225ec8, i3dCtxGetHead, i3dPktDmaTag, i3dVecNormalize, i3dMatCopy, i3dVu0MatInverse, i3dVu0MatTranspose, i3dCtxSetHead, i3rDrawGroupRigid, i3rDrawGroupSkinned (the scratchpad bone matrices and the VU1 writers: PC, above)
+    return clip;
+}
+
 // ──────────────────────────────────────────────────────────────────────
 // ROR 0x0021fe68
 
@@ -97,7 +172,6 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
     int clip = I3D_VIEW_CLIP;
     int drawn = 0;
 
-    (void)opt;      // PC: i3rDrawSetupBlend's input; the host module reads no blend weights yet
     if (nodes == NULL)
     {
         /* Root child 4's data: the model's box (three half axes and the
@@ -116,6 +190,11 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
      * hidden; each enabled entry draws its combined mesh's parts (child 1:
      * type 0x45, child 0: type 0x46) when they have data, and the model
      * counts as drawn when a part's writer did not cull it. */
+    I3rDrawWork work;
+    work.m_world = world;
+    work.m_nodes = nodes;
+    work.m_root = &root->m_item;
+    work.m_opt = opt;
     const I3rItem *meshes = child[2].getChildren();
     const I3rItem *node = child[3].getChildren();
     for (u_int i = 0; i < child[3].getNumChild(); i++)
@@ -125,6 +204,10 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
 
         if (disp != NULL && disp[I3R_NODE_DISP_SHOWN] == 0)
             continue;
+        work.m_disp = disp;
+        if (part[1].getNumChild() == 0)
+            continue;
+        i3dVu0MatMul(work.m_node_world, world, nodes[i]);
         const I3rItem *entry = part[1].getChildren();
         for (u_int e = 0; e < part[1].getNumChild(); e++)
         {
@@ -132,16 +215,13 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
 
             if (ne->m_enable == 0)
                 continue;
-            /* PC: i3rDrawSetupBlend(&entry[e], opt, work) and the node
-             * matrix world * nodes[i] feed the part writers; the host
-             * module multiplies its own. */
+            work.m_entry = ne;
+            /* PC: i3rDrawSetupBlend(&entry[e], opt, &work) loads the blend
+             * words for the writers; the host module reads none yet. */
             const I3rItem *parts = meshes[ne->m_mesh].getChildren();
-            /* PC: i3rDrawMesh45 / i3rDrawMesh46 bone-box test each part
-             * (clip 2 only) and return 0 when it is off screen; the host
-             * counts a part with data as drawn. */
-            if (parts[1].m_data != 0)
+            if (parts[1].m_data != 0 && i3rDrawMesh45(layer, &parts[1], clip, &work) != I3D_VIEW_OUT)
                 drawn = 1;
-            if (parts[0].m_data != 0)
+            if (parts[0].m_data != 0 && i3rDrawMesh46(layer, &parts[0], clip, &work) != I3D_VIEW_OUT)
                 drawn = 1;
         }
     }
@@ -164,8 +244,36 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
         i3dLayerEndPacket(layer, p + 4);
     }
 
-    // callcheck: i3rDrawMesh45, i3rDrawMesh46, i3rDrawSetupBlend, sceDmaSync (the VU1 packet writers and their DMA wait: the native module draws the model, PORT: in the file header)
+    // callcheck: i3rDrawSetupBlend, sceDmaSync (the blend words for the VU1 writers and their DMA wait: the native module draws the model, PORT: in the file header)
     // PC: sceDmaSync on fromSPR (0x1000d000): the packet writers' scratchpad
     // transfers; the host made none.
     return drawn ? I3R_DRAW_OK : I3R_DRAW_CULLED;
 }
+
+// ──────────────────────────────────────────────────────────────────────
+//  The writers below the parts, and what the native module
+//  (rosepan_i3dmesh.cpp) does in their place:
+//  - ROR 0x00220838 i3rDrawGroup45: the 0x45 part's groups; per 0x4d mesh
+//    a box test at clip 2, the material packet, then one of the writers
+//    below. Host: the 0x45 branch of RosePan_I3dMeshDraw -> DrawMeshList
+//    with the node's matrix (no per-mesh cull: off-screen meshes are
+//    clipped by the renderer).
+//  - ROR 0x00220b58 i3rDrawGroupSkinned, ROR 0x00220cf8 i3rDrawGroupRigid:
+//    the 0x46 part's groups (flag 8 = rigid). Host: the 0x46 branch, the
+//    rigid slot's bone matrix or SkinBatch.
+//  - ROR 0x00220fb0 i3rPktDrawHeader, ROR 0x00221080 i3rPktCallStrips: a
+//    batch's VU1 header (the +0x80 vector, MSCAL 0x15) and the DMA CALLs of
+//    its strips' prebuilt chains. Host: DrawBatch reads the strips.
+//  - ROR 0x00221ab0 i3rDrawMesh45Clip, ROR 0x00221d18 i3rDrawMesh45Sorted,
+//    ROR 0x00221f50 i3rDrawMesh45SortedClip, ROR 0x002221e8
+//    i3rDrawMeshSkinned, ROR 0x00222560 i3rDrawMeshSkinnedSorted,
+//    ROR 0x00222850 i3rDrawMeshRigidClip, ROR 0x00222aa0
+//    i3rDrawMeshRigidSorted, ROR 0x00222ce0 i3rDrawMeshRigidSortedClip:
+//    the per-batch variants -- clip 2 box-tests each batch, a material
+//    whose packet +0x14 is set gets a depth key per batch
+//    (i3dViewGetDepth). Host: DrawBatch draws every batch with the
+//    renderer's depth buffer; no depth-keyed order yet (open-items.md
+//    "Mesh draw").
+//  Not written: i3rDrawSetupBlend 0x220670 and i3rDrawMeshBlend 0x2210f0,
+//  the blend-word path (group flags & 3 with i3rDrawModel's opt); the host
+//  draws those groups unblended.
