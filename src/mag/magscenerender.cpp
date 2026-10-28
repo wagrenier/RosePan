@@ -646,13 +646,13 @@ void MagScene::drawStrips(I3dLayer *layer)
         {
             ROR_ASSERT(pmd->m_path_data[k]); /* 1684 */
             const MagSceneCRec *rec = pmd->m_path_data[k];
-            if (rec->m_00 < 2)
+            if (rec->m_pos_num < 2)
                 continue;
             if (k >= MAX_PATH_REC)  /* PC: the ROM's buffer has no bound */
                 break;
             if (m_22b4 == 1)
             {
-                for (int j = 0; j < rec->m_00; j++)
+                for (int j = 0; j < rec->m_pos_num; j++)
                 {
                     const float *p = pathPoint(rec, j);
                     s_path_xyz[k][j][0] = p[0];
@@ -661,7 +661,7 @@ void MagScene::drawStrips(I3dLayer *layer)
                     s_path_xyz[k][j][3] = 1.0f;
                 }
             }
-            pkt = i3dPktDrawLineStrip(pkt, layer, NULL, rec->m_00, s_path_color, s_path_xyz[k], 0);
+            pkt = i3dPktDrawLineStrip(pkt, layer, NULL, rec->m_pos_num, s_path_color, s_path_xyz[k], 0);
         }
     }
     i3dLayerEndSet(layer, pkt);

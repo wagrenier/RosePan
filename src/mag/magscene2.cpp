@@ -225,12 +225,12 @@ int MagScene::load(i3dContext *ctx, int id, void *data, int copy)
         {
             MagSceneCRec *rec = (MagSceneCRec *)((u_char *)c + c[1 + i]);
             t->m_path_data[i] = rec;
-            rec->m_2c = 0;
-            rec->m_02 = (u_char)(head >> 16);
-            rec->m_03 = 0;
-            rec->m_20 = rec->m_00 >> 1;
-            rec->m_24 = 0;
-            rec->m_28 = 0;
+            rec->m_goal_t = 0.0f;
+            rec->m_alt = (u_char)(head >> 16);
+            rec->m_alt_side = 0;
+            rec->m_seg = rec->m_pos_num >> 1;
+            rec->m_goal_seg = 0;
+            rec->m_seg_t = 0.0f;
         }
     }
 

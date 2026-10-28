@@ -672,18 +672,6 @@ void MnuMap::draw(I3dLayer *layer)
     ROSEPAN_STUB("MnuMap::draw", 0x00195e90);
 }
 
-// stub of ROR 0x0013ca10
-void MagScene::restoreCamera()
-{
-    ROSEPAN_STUB("MagScene::restoreCamera", 0x0013ca10);
-}
-
-// stub of ROR 0x0013c930
-void MagScene::saveCamera()
-{
-    ROSEPAN_STUB("MagScene::saveCamera", 0x0013c930);
-}
-
 // stub of ROR 0x001ad8e0
 void MnuBoard2D::draw(I3dLayer *layer)
 {
@@ -1031,19 +1019,6 @@ void Obj176a3c::releaseAll()
 void gamCreateEff1a(void)
 {
     ROSEPAN_STUB("gamCreateEff1a", 0x00172678);
-}
-
-// stub of ROR 0x0013d4d0
-float MagScene::getCameraPathPos()
-{
-    ROSEPAN_STUB("MagScene::getCameraPathPos", 0x0013d4d0);
-    return {};
-}
-
-// stub of ROR 0x0013d52c
-void MagScene::setCameraPathPos(float pos)
-{
-    ROSEPAN_STUB("MagScene::setCameraPathPos", 0x0013d52c);
 }
 
 // stub of ROR 0x0018761c

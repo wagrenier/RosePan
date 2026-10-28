@@ -5,7 +5,6 @@
   "unassigned@00106658",
   "unassigned@0021fb50",
   "unassigned@0021c960",
-  "mag/magscenecamera.cpp",
   "unassigned@0013e2ec",
   "unassigned@00140c68",
   "unassigned@00140990",
@@ -941,6 +940,24 @@
    ],
    "status": "verify",
    "why": "Every function from 0x137330 to 0x139308 that has a source string names mag/magscene2.cpp; magscene.cpp strings end at 0x135f44 and magscenerender.cpp starts at 0x139664. 0x137300 and 0x137318 are helpers only 0x137330 calls. The ctor/dtor 0x1360a0/0x136d14 and setPC..initRender (0x1316b8..) lie in magscene.cpp's span, not here."
+  },
+  "mag/magscenecamera.cpp": {
+   "notes": "200 s New Game run: no assert, ends at frame 6060 on the open picture book, the same picture as progress/20261027-1957 (book page stack, arrow and circle prompts); nothing on screen can show a path camera until a map draws, so verify. Next on this road: unassigned@0013e2ec (updateCamera 0x13e548 plays out the move bit 0x10 changeCamera sets and calls scoreCameraPath with flags 1; it is the likely writer of DogCamera's move words +0x190..+0x1d0; also gamEnterMenu). Doubt kept as the ROM has it: scoreCameraPath's castRay gets the target position as its dir (open-items.md Open questions, Path camera ray). m_camera_2ad54 role unknown (changeCamera clears it; likely updateCamera's frame counter).",
+   "ranges": [
+    [
+     "0013c664",
+     "0013e2ec"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 20:15",
+     "status": "verify",
+     "summary": "MagScene camera written, all 13 functions (pinned 0x13c664..0x13e2ec): setCameraMode with its six modes, the map path camera (getCameraPathWork, scoreCameraPath, findCameraPathStart, setCameraOnPath, seekCameraPath, changeCamera), save / restoreCamera, get / setCameraPathPos. MagSceneCRec fields named (m_pos_num, m_loop, m_alt, m_fov, m_tag, m_seg / m_seg_t and their goals), the camera words named after the asserts (m_cam_map_no, m_cam_path_no, m_cam_actor_no, distance band, saved copies), getTenkyuCNum renamed getCameraMaxPath (the ROM's name)."
+    }
+   ],
+   "status": "verify",
+   "why": "every function from 0x13c664 to 0x13e2ec asserts with mag/magscenecamera.cpp or is a MagScene camera method (initCamera, save/restoreCamera, get/setCameraPathPos, getCameraMode) between them; 0x13c328 parseOption is magsceneoption.cpp, 0x13e2ec starts the unassigned updateCamera run"
   },
   "mag/magscenecmd.cpp": {
    "notes": "Verify: the 200 s run reaches gamSetBwnFollow (MagLifeBwnCtrl::setLevel stub hit) and still ends black after the narration frame (~6000) as before; fog shows only once a model draws (utlDrawI3r 0x106760, i3m pose player). One run of two stalled black after the Atlus logo (the known boot race); the retry was normal. Callees left as stubs: MagLifeBwnCtrl requestState / requestHurt / setFindItem / setPos / setRot / getPos / getRot / moveTo / setAngle / rotateTo / setLevel / cancelFind / barkQuery / barkSet / isBarkPhase3 / isHurt / isStateDone (mag/maglifebwnctrl.cpp) and utlPauseForMenu / utlGetPcEquipItemChrID / utlGetPcChrNo / utlGetActorNo (utl/utlgame.cpp; stubs return 0, so op spmn never opens its menu and eqds touches actor 0 until they are written). The rest of the old run is unassigned@00145020 (enemy classes Hfm..Pig, then EmyManager 0x16265c.. with the reached resetWork 0x1635e0): queued in its place; split it per emy/ file, EmyManager first. File name is the port's (open-items.md Open questions).",
