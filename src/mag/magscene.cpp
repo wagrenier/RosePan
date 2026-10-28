@@ -638,7 +638,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
         m_camera_entity.transform();
         updateTenkyuBillboards();
         rotateTenkyu();
-        updateRecords853fc();
+        updateFocus();
         next = 1;
         if (!m_pc.m_actor)
             return;
@@ -712,7 +712,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
         m_camera_entity.transform();
         updateTenkyuBillboards();
         rotateTenkyu();
-        updateRecords853fc();
+        updateFocus();
         return;
     }
 
@@ -722,7 +722,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
         updateFog();
         m_life_man.update(1);
         rotateTenkyu();
-        updateRecords853fc();
+        updateFocus();
         if (m_sub_mode.m_arg == 0x10007)
             go = true;
         else if (m_sub_mode.m_step < 1)
@@ -793,7 +793,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
         m_camera_entity.transform();
         updateTenkyuBillboards();
         rotateTenkyu();
-        updateRecords853fc();
+        updateFocus();
         return;
     }
 
@@ -802,7 +802,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
         FUN_0017772c(&m_837e0);
         m_life_man.update(1);
         rotateTenkyu();
-        updateRecords853fc();
+        updateFocus();
         m_pc.live();
         updateActors(1);
         ROR_ASSERT(m_sys_msg_window >= 0); /* 1445 */
@@ -819,7 +819,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
         updateBwn();
         updateActors(0);
         rotateTenkyu();
-        updateRecords853fc();
+        updateFocus();
         if (m_sub_mode.m_arg == 0x10007)
             go = true;
         else if (m_sub_mode.m_step < 1)
@@ -2112,7 +2112,7 @@ MagScene::MagScene()
         t->m_sky_spin = NULL;
         t->m_sky_num_node = 0;
     }
-    initRecords853bc();
+    initFocus();
     m_854a4 = 0;
     m_focus_actor = -1;
     m_2a9c8 = 3;

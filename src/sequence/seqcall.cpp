@@ -2819,8 +2819,8 @@ intptr_t seqFunc281(intptr_t a0, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
         {
             float from = fword[0];
             if (from < 0.0f)
-                from = scene.m_focus_val[0];
-            scene.m_focus_val[0] = scene.startLerp(from, fword[1], &scene.m_focus_lerp[0], word[2]);
+                from = scene.m_focus.m_val[0];
+            scene.m_focus.m_val[0] = scene.startLerp(from, fword[1], &scene.m_focus.m_lerp[0], word[2]);
         }
         else if (a1 == 0)
         {

@@ -3953,11 +3953,17 @@
   "was": "FUN_001406b8",
   "why": "when a sky slot has a texture list (+0x504): a layer at 490, white light, the camera view with far 100000, and each list drawn by 0x106760 at the camera's x/z"
  },
+ "00140990": {
+  "name": "magPktUVSprite",
+  "tag": "ror-inferred",
+  "was": "FUN_00140990",
+  "why": "writes a DIRECT tag and a one-loop REGLIST GIF tag (PRIM sprite TME FST with ABE from a1, UV XYZ2 UV XYZ2) from its u/v/x/y arguments; only the focus frame shrink calls it"
+ },
  "00140a84": {
-  "name": "MagScene::initRecords853bc",
+  "name": "MagScene::initFocus",
   "tag": "ror-inferred",
   "was": "FUN_00140a84",
-  "why": "the constructor's last call: clears 0x70 bytes at +0x853bc and sets +0x853c0 -1, +0x853c8 1.0, +0x853cc 300, +0x853d0 600 (next to updateRecords853fc 0x140c68)"
+  "why": "the constructor's: clears the 0x70-byte focus block at +0x853bc, texindex -1, alpha 1, far1 300, far2 600"
  },
  "00140b20": {
   "name": "MagScene::setFocus",
@@ -3966,10 +3972,16 @@
   "why": "mag/magscenefocus.cpp (assert m_focus.m_texindex != -1): mode 0 releases the efffocus texture (+0x853c0) and clears +0x853bc / +0x853d4 / +0x853dc; else adds the texture once and stores the mode at +0x853bc; native 281 op 13 a1 = 0"
  },
  "00140c68": {
-  "name": "MagScene::updateRecords853fc",
+  "name": "MagScene::updateFocus",
   "tag": "ror-inferred",
   "was": "FUN_00140c68",
-  "why": "updates the three records at +0x853fc / +0x8540c / +0x8541c into +0x853c8.. and runs 0x14186c when +0x853d4 is set; roles unknown"
+  "why": "once a frame: steps the three focus lerps (+0x853fc) into the three focus values (+0x853c8) and runs the focus text track when one is set (+0x853d4)"
+ },
+ "00140d40": {
+  "name": "MagScene::stepLerp",
+  "tag": "ror-inferred",
+  "was": "FUN_00140d40",
+  "why": "one frame of a MagLerp: frame+1, frames cleared when reached, returns from + (to - from) * frame / frames; startLerp's partner"
  },
  "00140d94": {
   "name": "MagScene::setFocusLerp",
@@ -3989,11 +4001,53 @@
   "was": "FUN_00140e88",
   "why": "mag/magscenefocus.cpp neighbour; when +0x853c0 != -1 runs 0x140fdc / 0x141184 for the flags at +0x853bc (bit 1 twice, bit 0 once) with frame & 1 picking 0 or 0x70"
  },
+ "00140fdc": {
+  "name": "MagScene::shrinkFocusFrame",
+  "tag": "ror-inferred",
+  "was": "FUN_00140fdc",
+  "why": "layer at 860 + bias: FRAME fbp 0x138 width 256, TEX0 the frame buffer (block arg, 512x512 CT32), bilinear, one 512x448 -> 256x256 sprite: the frame shrunk into the efffocus work buffer"
+ },
+ "00141184": {
+  "name": "MagScene::drawFocusPlane",
+  "tag": "ror-inferred",
+  "was": "FUN_00141184",
+  "why": "layer at 860 + bias with the scene view and a white ambient light, draw set of efffocus, a VU1 sprite the size of the view frustum at distance f12 along the camera's z, alpha the focus value 0, z-tested: blurs what lies beyond that distance"
+ },
+ "0014159c": {
+  "name": "magStrIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_0014159c",
+  "why": "returns the first index of a1 in a0 (strncmp at every position), -1 when absent; finds the CR LF of the focus track"
+ },
+ "00141634": {
+  "name": "magStrSplit",
+  "tag": "ror-inferred",
+  "was": "FUN_00141634",
+  "why": "splits a0 at any character of a1 into NUL-terminated words packed at a2, skipping empty ones; returns the word count (the focus command's num)"
+ },
+ "00141770": {
+  "name": "magFocusTarget",
+  "tag": "ror-inferred",
+  "was": "FUN_00141770",
+  "why": "far1far2 -> 3, far1 -> 1, far2 -> 2, else 0: the focus mode / lerp index of a focus command word"
+ },
  "001417e4": {
   "name": "MagScene::setFocusData",
   "tag": "ror-inferred",
   "was": "FUN_001417e4",
   "why": "mag/magscenefocus.cpp: with data, setFocus(3) and the focus data / size into +0x853d4 / +0x853d8"
+ },
+ "0014186c": {
+  "name": "MagScene::runFocusTrack",
+  "tag": "ror-inferred",
+  "was": "FUN_0014186c",
+  "why": "counts frames (+0x853e0) up to the wait (+0x853e4), then executes the track's CR LF lines from +0x853dc (lowercased) until one waits or the track ends (empty line: setFocus 0)"
+ },
+ "001419d8": {
+  "name": "MagScene::execFocusCommand",
+  "tag": "ror-inferred",
+  "was": "FUN_001419d8",
+  "why": "one focus track line 'frame command args': waits when frame is ahead, else start / term / setalpha / setdist / movealpha / movedist (asserts num>=(2+n) with mag/magscenefocus.cpp)"
  },
  "00141e44": {
   "name": "MagLoaderIndex::dump",
@@ -22961,11 +23015,23 @@
   "was": "FUN_0026d540",
   "why": "newlib e_asinf: |x| == 0x3f800000 -> x * pio2_hi (0x3fc90fda) + x * pio2_lo (0x33a22168)"
  },
+ "00278288": {
+  "name": "atof",
+  "tag": "lib-context",
+  "was": "FUN_00278288",
+  "why": "returns strtod(a0, NULL) (0x27b920)"
+ },
  "00279b70": {
   "name": "snprintf",
   "tag": "lib-context",
   "was": "FUN_00279b70",
   "why": "newlib: a string FILE (flags 0x208, size n-1) through vfiprintf, NUL-terminates when n != 0"
+ },
+ "0027a490": {
+  "name": "strlwr",
+  "tag": "lib-context",
+  "was": "FUN_0027a490",
+  "why": "lowercases a string in place through the ctype table (bit 1 = upper) and returns it"
  },
  "0027a4e0": {
   "name": "strncasecmp",

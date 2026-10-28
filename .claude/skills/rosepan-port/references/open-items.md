@@ -149,9 +149,9 @@ follows it; reached stubs in run order):
      can show a light until a model draws (utlDrawI3r 0x106760, the i3m pose player). Open: addLight's
      loop walks nine sets (bit 8 would assert in addToSet) -- kept as the ROM has it.
   7. `mag/magscenetenkyu.cpp` -- VERIFY 2026-10-27 (the sky: load / spin / rotate / drawSkyDome;
-     cannot show until utlDrawI3r 0x106760 draws). Left: `unassigned@00140030` now 0x140990..0x140b20
-     (initRecords853bc, the drawFocus packet helper) belongs to mag/magscenefocus.cpp with
-     unassigned@00140c68 -- define them together. 2026-10-27: `unassigned@00143d3c`'s first
+     cannot show until utlDrawI3r 0x106760 draws). 2026-10-27: 0x140990..0x141e44 pinned and WRITTEN
+     as `mag/magscenefocus.cpp` (verify: the focus / depth-of-field effect and its text track; needs
+     the render-target item in Open questions before it can show). 2026-10-27: `unassigned@00143d3c`'s first
      0x12e4 bytes are pinned and WRITTEN as `mag/magscenecmd.cpp` (verify: fog fade, Brown's glue
      and magBwnSeqCommand; nothing on screen shows fog until a model draws, and the
      MagLifeBwnCtrl methods it calls are stubs in mag/maglifebwnctrl.cpp). The rest is now
@@ -1004,6 +1004,15 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- **Render targets in the native i3d module** (2026-10-27, mag/magscenefocus.cpp): the focus effect
+  (efffocus, FRAME 0x138), the actor shadows / close-up (shadow01, FRAME 0x118) and any other
+  FRAME_1-retargeted layer draw into a VRAM work buffer and read it back as a texture with no
+  main-memory image, and the focus shrink samples the frame buffer itself (a direct TEX0; the module
+  logs "textured primitive with a direct TEX0 (frame buffer) not drawn yet"). The module records
+  neither, so these effects draw nothing on PC. A host task should map FRAME_1 fbp to off-screen
+  render targets and VRAM-only textures (I3dTexture block, no m_data) to them, plus a frame-buffer copy
+  for the shrink. A platform-layer change: the user's call when to queue it.
 
 - **Path camera ray** (2026-10-27, mag/magscenecamera.cpp): scoreCameraPath 0x13d8f8 with flags bit 1
   calls castRay(hit, camera point, target, -1) -- the target position itself as the ray's dir, and
