@@ -480,6 +480,10 @@ void DrawModel(const Record &r)
     if (r.index >= s_models.size())
         return;
     const ModelDraw &m = s_models[r.index];
+    /* XYOFFSET 0: an off-screen pass (makeActorShadow's shadow model into
+     * the 256 x 256 shadow target, drawCloseUp), not the display. */
+    if (s_state.offx == 0 && s_state.offy == 0)
+        return;
     /* The mesh path's own state: opaque, depth tested, the whole frame. */
     RestoreState();
     RosePan_I3dMeshDraw(m.root, m.world, m.nodes, m.tex, m.tex_count, m.has_opt ? &m.opt : NULL);

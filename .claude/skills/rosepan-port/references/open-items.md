@@ -1127,9 +1127,14 @@ to adapt when a TU reaches them:
   every channel's time); the 200 s run reaches none. Also: the host's DrawBatch draws only the
   first 0x30 group of a batch's slot [0] (the ROM's writers loop all of them). Still open: the
   depth-keyed batches (material packet +0x14 set: the ROM keys them with i3dViewGetDepth, the host
-  draws in walk order with the depth buffer); and the untextured model after the book (the 200 s
-  run's frames 6180+ show a skinned figure lit but white: its textures do not bind --
-  MaterialTexture / the context's texture table, not the walk).
+  draws in walk order with the depth buffer). The untextured white figure after the book was
+  RESOLVED 2026-10-28: Brown's shadow model drawn by makeActorShadow into the off-screen shadow
+  target, which the replay put on screen (hazards.md "A render-target pass drawn on the screen").
+  Now the frames after the book are black: Brown's own model (bwn1 textures) and the room never
+  reach the native mesh module (no MaterialTexture lookup for them in the run) -- find out whether
+  DogActor::drawModel / the map draw runs there, or i3rDrawModel culls them. Also open: the
+  shadow itself (render the shadow model into a host target and project it through the STQ map
+  on the 705 + 10 n layer: a renderer render-target feature, not yet in the platform layer).
   Was: left for the session that writes i3rDrawModel 0x21fe68 (unassigned@0021fb50): (1) call
   RosePan_I3dRecordModel from it at the layer's packet with its world / node arguments and the
   context's texture table; (2) a camera record from the layer's I3dView (i3dPktCallView: m_camera

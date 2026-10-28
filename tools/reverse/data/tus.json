@@ -735,7 +735,7 @@
    "why": "I3D_I3M motion file root (id 0x303a68): id/version checks, relocators, node and key accessors; between i3rroot.cpp and i3croot.cpp, which it mirrors"
   },
   "i3d/i3rdraw.cpp": {
-   "notes": "The blend is inert until unassigned@00225018 is written: i3rBlendGetWeight 0x225108 (scalar 0x58 curve via 0x225080 / bisect 0x225018) and i3rBlendVertices 0x225498 (sum of weighted target blocks 0x2253e0, curve targets 0x2252a8, per-vertex curves 0x225230 / 0x225148, zero 0x225378) are stubs; the host prototype of 0x225498 takes an I3rBlendList and fills an I3rVertexRef (m_blended 1 = V4-32 qwords in buf), see lib/unassigned.h. Layouts are in architecture.md Blending. Only DogActor::drawModel passes an opt and the 200 s run reaches no such actor, so the blend cannot be seen yet. Left in this TU: the depth-keyed batches (material packet +0x14, i3dViewGetDepth) and per-batch box culls, both renderer-covered on purpose. Picture still wrong after the book: the 200 s run ends on a skinned figure drawn untextured white (frames 6180+) -- MaterialTexture / the context texture table in rosepan_i3dmesh.cpp, not the walk; that is the next thing to fix for this TU to be done. Also noticed: DrawBatch draws only the first 0x30 group of slot 0, the ROM loops all (open-items Mesh draw).",
+   "notes": "Left for this TU: the frames after the book (200 s run, 6180+) are black. A diagnostic run showed no MaterialTexture lookup for Brown's own model (bwn1 textures at DogTexInfo slots 35..37, assigned fine) nor the room, only the book and sora3: find out whether DogActor::drawModel and the map draw run there, or whether i3rDrawModel culls them (log RosePan_I3dRecordModel roots per frame). Also still open: depth-keyed batches (material packet +0x14), DrawBatch draws only the first 0x30 group of slot 0, and the shadow itself (render the shadow model into a host render target and project it through the STQ map on the 705 + 10 n layer; needs a renderer render-target feature). Debug method that found it: log MaterialTexture misses with the layer texture name, compare with DogTexInfo::addPfh names. Two of six 200 s runs this session died with an access violation (0xC0000005) before the end; the final check run and the baseline did not, so it looks timing-dependent and not from this change; check with ROSEPAN_CRASH_LOG=1 if it recurs. For the references: hazards.md has A render-target pass drawn on the screen; open-items Mesh draw updated (both written in this commit).",
    "ranges": [
     [
      "0021fb50",
@@ -757,6 +757,11 @@
      "date": "2026-10-28 11:19",
      "status": "partial",
      "summary": "Blend path wired: i3rDrawSetupBlend 0x220670 written (per channel the non-zero weights of the entry's 0x59 targets, curve at opt's time or static weight); i3rDrawModel records opt with the model; the native mesh module calls i3rDrawSetupBlend per entry and, for groups with flags & 3, LoadChannel runs i3rBlendVertices 0x225498 for positions / normals / strip colours / STQ before skinning (i3rDrawMeshBlend 0x2210f0's host form). 0x225108 / 0x225498 named i3rBlendGetWeight / i3rBlendVertices and stubbed in unassigned@00225018. 200 s run: book cover unchanged and matching; no blended model reached."
+    },
+    {
+     "date": "2026-10-28 12:48",
+     "status": "partial",
+     "summary": "The white figure after the book was Brown's shadow model (pack file 2, never texture-assigned) drawn by MagScene::makeActorShadow into the off-screen 256x256 shadow target (FRAME fbp 0x118, XYOFFSET 0); the native i3d replay put it on screen. DrawModel now skips XYOFFSET 0 like prims and strips, and MagScene::putDrawEnv records the display env XYOFFSET / SCISSOR / TEST for the replay (PC: hook), so 2D after an off-screen pass draws again: the picture book now shows its scratched backdrop (MNUPBOOK_00000800) and the page arrow. Frames after the book are black now instead of the stray shadow."
     }
    ],
    "status": "partial",
