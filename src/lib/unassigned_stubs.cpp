@@ -12,6 +12,7 @@
 #include "dog/dogtexinfo.h"
 #include "emy/emy_main.h"
 #include "mag/maglifepc.h"
+#include "eff/eff0.h"
 
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
@@ -163,24 +164,11 @@ void dbgTraceVector3(float x, float y, float z)
     ROSEPAN_STUB("dbgTraceVector3", 0x00215b5c);
 }
 
-// stub of ROR 0x00176afc
-int FUN_00176afc(Obj176a3c *obj, i3dContext *ctx, MagScene *scene)
-{
-    ROSEPAN_STUB("FUN_00176afc", 0x00176afc);
-    return {};
-}
-
 
 // stub of ROR 0x00215bb4
 void dbgTraceVector4(const float *v)
 {
     ROSEPAN_STUB("dbgTraceVector4", 0x00215bb4);
-}
-
-// stub of ROR 0x00177830
-void FUN_00177830(Obj176a3c *obj, i3dContext *ctx)
-{
-    ROSEPAN_STUB("FUN_00177830", 0x00177830);
 }
 
 
@@ -322,12 +310,6 @@ int utlStrEqualNoCase(const char *a, const char *b)
     }
 }
 
-// stub of ROR 0x0017772c
-void FUN_0017772c(Obj176a3c *obj)
-{
-    ROSEPAN_STUB("FUN_0017772c", 0x0017772c);
-}
-
 
 // stub of ROR 0x001beeb4
 int GamFont::clear()
@@ -341,12 +323,6 @@ int GamFont::getTextWidth(const char *text)
 {
     ROSEPAN_STUB("GamFont::getTextWidth", 0x001c047c);
     return {};
-}
-
-// stub of ROR 0x00176c50
-void FUN_00176c50(Obj176a3c *obj)
-{
-    ROSEPAN_STUB("FUN_00176c50", 0x00176c50);
 }
 
 // stub of ROR 0x00234050
@@ -398,12 +374,6 @@ void utlAddPolar(float angle, float dist, float *v)
 void MagLife130da4::setVolume(int volume)
 {
     ROSEPAN_STUB("MagLife130da4::setVolume", 0x00130de0);
-}
-
-// stub of ROR 0x0017756c
-void Obj176a3c::release(int no)
-{
-    ROSEPAN_STUB("Obj176a3c::release", 0x0017756c);
 }
 
 // ---- stubs (hand-written: EmyMain / EmyOut and the enemy classes' constructors and destructors, which stubgen does not write) ----
@@ -853,30 +823,11 @@ const char * msgGetSysText(int no)
     return "";
 }
 
-// stub of ROR 0x0016aa04
-void Eff0::setVisible(bool on)
-{
-    ROSEPAN_STUB("Eff0::setVisible", 0x0016aa04);
-}
-
-// stub of ROR 0x00176cc8
-int Obj176a3c::createEff(const EffParam *param)
-{
-    ROSEPAN_STUB("Obj176a3c::createEff", 0x00176cc8);
-    return {};
-}
-
 // stub of ROR 0x00217f10
 float utlAtan2(float x, float z)
 {
     ROSEPAN_STUB("utlAtan2", 0x00217f10);
     return {};
-}
-
-// stub of ROR 0x0017762c
-void Obj176a3c::releaseAll()
-{
-    ROSEPAN_STUB("Obj176a3c::releaseAll", 0x0017762c);
 }
 
 // stub of ROR 0x00172678
@@ -1703,4 +1654,16 @@ int utlIsEmyState7(u_int oid)
 {
     ROSEPAN_STUB("utlIsEmyState7", 0x00103fac);
     return {};
+}
+
+// stub of ROR 0x0016add8
+void effClearDrawSets()
+{
+    ROSEPAN_STUB("effClearDrawSets", 0x0016add8);
+}
+
+// stub of ROR 0x0016ac84
+void effInitRandTable()
+{
+    ROSEPAN_STUB("effInitRandTable", 0x0016ac84);
 }

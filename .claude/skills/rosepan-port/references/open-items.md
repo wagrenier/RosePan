@@ -87,7 +87,7 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      (Brown; WRITTEN 2026-10-28, partial: the controller, its orders and 11 of 14 modes; left Follow::live
      0x127150 (+0x127558), Find::init / live 0x127b28 / 0x127e68 (+0x128724, 0x128854), FindEnd::live
      0x128970, Bark::live 0x129028 (+0x128e6c). Doubt: MISSION_3 has no reader yet; requestState /
-     Null::live / applyMode / setLevel carry PC: guards for an unbound m_bwn that the ROM reads through), unassigned@00166a1c (the effect objects: Obj176a3c, FUN_00177830 in MagScene::draw).
+     Null::live / applyMode / setLevel carry PC: guards for an unbound m_bwn that the ROM reads through), eff/effman.cpp (the effect manager EffMan, formerly Obj176a3c: WRITTEN 2026-10-28, partial -- init / term / live / draw / packs / table written; left createEff 0x176cc8, which needs the Eff class hierarchy first: eff/eff0.cpp 0x16a914..0x16ac84 + 0x16ac84 / 0x16add8, then one file per Eff class from unassigned@0016a914 -- and EffFindItem1 0x176694..0x176a3c).
 Re-assess from the run's reached stubs (work/run_relwithdebinfo.log) once the first model draws.
 emy/emy_hfm.cpp was mid-session when this was set; it finishes first (an active claim goes before the
 queue), then the queue rules.
@@ -1045,6 +1045,15 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-28, eff/effman.cpp) **A stream file left open stops the boot after the title.** The ROM
+  keeps data/eff/eff.bin open from EffMan::loadIndex to term (FileReadReq m_close 0). On the host,
+  with it open (rx fd 1, held for the whole run) the 200 s New Game run stays black after the title:
+  the intro's ADPCM never opens and New Game never starts, though no thread is blocked (gdb: game
+  thread in its vsync wait, file thread idle). Opening and closing eff.bin per read (a PC: in
+  loadIndex / readPack) fixes it. Root cause not found: look for host code that treats fd 1, or
+  "some slot is open", specially (rx/rxfile.cpp slots, the sound driver's stream opens, the boot
+  movie / ADPCM path) -- the ROM's behaviour should then be restored.
+
 - **MagLifeBwn's vtable slots 14 / 16** (2026-10-27, mag/maglifebwn.cpp): MagLifePC has
   message(msg, const float *) / processPad(BedPad *) in these slots, MagLifeBwn takes (mode, a, b)
   in both (message 0x1247c8, requestState 0x1233d8). Same C++ virtual with a looser signature, or
@@ -1317,6 +1326,14 @@ to adapt when a TU reaches them:
   now takes the script's key as const char * (it was truncated to int on the host). Still unread in
   the run: 0x17c0f0 back to the effect classes (EffWater3 ends ~0x17c0f0) -- the effect manager
   Obj176a3c 0x176a3c..0x1788ec stays the next pick there (unassigned@00166a1c, still pinned).
+  2026-10-28: split again -- 0x166a1c..0x16a914 is `emy/emy_out.cpp` (EmyOut and the emy* helpers,
+  not written) and 0x176694..0x1788ec is `eff/effman.cpp` (EffMan, partial). Left unassigned:
+  0x16a914..0x176694 and 0x1788ec..0x17c0f0, the Eff* classes (now unassigned@0016a914): define
+  eff/eff0.cpp (0x16a914..~0x16ade0, the base and the two free helpers) first, then one file per
+  class in link order (alphabetical: effbg1, effbloodspray1 ...). Doubt: EffFindItem1 (0x176694..)
+  was put in effman.cpp because its linkonce comes from the same object as EffMan's neighbours
+  (linkonce order EffLight3, EffFindItem1, EffMuzzleFlash1); it may be its own file. The class name
+  EffMan is inferred from its link position between EffLight3 and EffMuzzleFlash1.
 
 - (2026-10-22, the i3dmath session) **Naming of the vector module's two copies**: the older
   sessions gave five first-copy functions the plain names (i3dVecZero, i3dVecCopyW, i3dMatCopy,

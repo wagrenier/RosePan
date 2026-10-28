@@ -1031,7 +1031,7 @@ void MagScene::draw(i3dContext *ctx, sceGsDBuff *dbuff, int frame)
             drawShadows(ctx, dbuff, frame);
         else
             drawFocusActor(ctx, dbuff, frame);
-        FUN_00177830(&m_837e0, ctx);
+        m_eff_man.draw(ctx);
     }
 
     m_movie.drawMovie(ctx, lightstatus[0], pViewStatus);

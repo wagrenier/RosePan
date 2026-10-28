@@ -1285,6 +1285,29 @@ and stops a playing entry at its m_1c ratio; a fading entry (setBlendRate 0x1084
 length at speed 0 and counts m_count up to m_time; setBlendRate with the same rate 0 after the fade
 frees the entry. The i3m pose / quaternion ops below it are written (i3d/i3mpose.cpp, 2026-10-27).
 
+## The effect manager (`eff/effman.cpp`, 0x176694..0x1788ec, 2026-10-28)
+
+`EffMan` (scene +0x837e0, EE 0x12c8; formerly Obj176a3c; the name is inferred from its link position
+between EffLight3 and EffMuzzleFlash1): +0 scene, +4 `Eff0 *m_eff[0x110]` (0..0xff live, the numbers
+createEff returns; 0x100..0x10f retired effects that run until their live returns 0), +0x444
+findFreeNo's round-robin start, +0x448 live count, +0x44c draw order (entry numbers, sorted by Eff +0x10
+descending each frame: packDrawOrder + insertion sort with a binary insert), +0x88c weak FIFO
+(EFF_FLAG_WEAK 0x10 entries, oldest first: evicted by retireEff when all 0x100 are used) and its count
++0xc8c, +0xc90 eff.bin's 0x800-byte RTPK index, +0xc94 16 packs of 0x60 {kind, name[32], keep, data,
+ref, file[8], nI3r, nI3m, nTex}, +0x1294 / +0x1298 the singleton kinds 0x1a / 0x1f, +0x129c FileReader,
++0x12a4 FileReadReq. Globals 0x298e08 scene, 0x298e0c context. init preloads (kept) kinds 1, 2, 3, 4,
+0x32, 0x1f, 0x26, 0x27, 0x1a. A pack is a sub-RTPK of data/eff/eff.bin (33 packs, <= 8 files): I3D_BIN
+models, then I3D_I3M motions, then TIM2 textures (added to the scene's DogTexInfo), then the effect's
+parameter file. The kind -> pack name table is 0x2f2cd0 (54 entries; 0x33 "gr1" and 0x34 "bg1" take a
+suffix from the param). draw: layers 850 (TEST_1 0x5000d, z GEQUAL) and 855 (0x3000d, z ALWAYS) at the
+camera with light set 0, fog record 0 when +0x2aa84, view 0; Eff0::RENDERPARAM {layer[2], cur}.
+**Eff0** (vtable 0x2e3250, EE 0x24): +0 flags (2 finished, 4 hidden, 8 activation pending, 0x10 weak),
++4 finish countdown, +0x10 depth, +0x14 pack (its ref counted), +0x18 kind, +0x1c delay, vptr +0x20;
+slots 1 dtor, 2 init(param), 3 term, 4 live, 5 liveMain (pure), 6 render, 7 renderPreMain, 8
+renderMain (pure), 9 createPacketEntry, 10 setVisible, 11 liveActivateExec, 12 updateZDepth.
+0x8282a0[54] is the per-kind draw-set cache (cleared each frame by effClearDrawSets 0x16add8);
+0x828378[256] a random permutation (effInitRandTable 0x16ac84).
+
 ## Modules (RoR's own source files)
 
 73 `.cpp` paths survive in assert / error strings (export.py anchors on them), plus headers whose inline
@@ -1450,7 +1473,7 @@ never asserts): sessions name them (`tus.py define --why`).
   enemy/ENEMY, door/DOOR, (7 none), pc/PC, bwn/BWN, 01/CHAP01 .. 12/CHAP12.RPK). Model 0x800 and the
   model named "target" get scale 9.9999994e-8 (hidden markers). Light id: 1 for types 0..3 / 5, 0 for
   4 / 9 (`setObjLight` 0x1ca598).
-- Markers: `ctlObj1cb8e4` 0x1cb8e4 -> `addObjMarker` 0x1cb970: an Obj176a3c effect 0x32 {x, y, z, 50}
+- Markers: `ctlObj1cb8e4` 0x1cb8e4 -> `addObjMarker` 0x1cb970: an EffMan effect 0x32 {x, y, z, 50}
   bound to the oid in the pool +0x20b00 (released by ctlObj1cbb80).
 - **game/gamman2.cpp** (pinned 0x1d3b44..0x1d84c8, 2026-10-27; declared in game/gamman.h): GamMan's
   methods past switchVolume. The **object update list** +0x2246c (a 0x100-node pool, record {oid, cell}):
@@ -1804,7 +1827,7 @@ throughout (identifiers, env variables, files, shader macros):
   setFocus 0x140b20, startLerp 0x140e60 fills a MagLerp {from, to, frame, frames}, setFocusLerp 0x140d94;
   values +0x853c8[3], lerps +0x853fc[3]); 21 DogActor eye ops 0x10f70c / 73c / 7a0 / 808 on +0x480..0x494
   (setEyeTex 0x10f5e4 finds the model node named "eye"); 38 / 0..49 via seqGetIdPair build a 0x80-byte
-  EffParam for Obj176a3c::createEff 0x176cc8 (scene +0x837e0, the Eff* factory, 0x110 entries at +4) and
+  EffParam for EffMan::createEff 0x176cc8 (scene +0x837e0, the Eff* factory, 0x110 entries at +4) and
   GamMan::addObjFx 0x1cba0c enters {oid, no} in pool +0x20b00 (findObjFx 0x1cbafc reads it back); 98
   Eff0::setVisible 0x16aa04 (slot 10, shared by all 43 Eff classes); 100 / 101 ctlObj1cb8e4 / ctlObj1cbb80.
 - **Natives 016 / 023 / 026 / 156 / 202 / 211** (session 9, 2026-10-26): 016 the camera (table data
@@ -2233,7 +2256,7 @@ not identified yet.
 - Event scenes (written 2026-10-26): `scenePlayStart(name, oids, withEff)` (natives 0x46 returns it /
   0x47) finds `name/name` (`scnMakeScenePath`: the name up to its '.') in GamMan's event pack (+0x22a80);
   that file is a pfh: file 0 a NagaChunk table (16-byte entries {name[8], offset, ?}, zero-terminated;
-  `find` scans on from the cursor, so callers rewind), file 1 an effect (Obj176a3c kind 0xd, data
+  `find` scans on from the cursor, so callers rewind), file 1 an effect (EffMan kind 0xd, data
   pointer at param +0x10; only withEff), file 2 the focus track (`MagScene::setFocusData`, size from the
   pfh's size table). Chunks: "map" (int; 0xcccc once the motion names were converted -- written back
   into the pack), "CHARA" -> "THREAD" per actor -> "name" (model; loaded with an oid / arg picked from

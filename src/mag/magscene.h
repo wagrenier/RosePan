@@ -708,7 +708,7 @@ struct MagScene
     MagFadeParam   m_fade;              // ROR 0x43700: the current fade (m_kind -1 = none; setFade)
     int            m_sys_msg_window;    // ROR 0x43718: the system message's window (asserted >= 0 in sub mode 5)
     MagSceneStrip  m_strip[0x2000];     // ROR 0x437e0: drawStrips' records
-    Obj176a3c      m_837e0;             // ROR 0x837e0
+    EffMan         m_eff_man;           // ROR 0x837e0: the effects (eff/effman.h)
     S2dMovie       m_movie;             // ROR 0x84aa8
     int            m_bwn_no;            // ROR 0x853b4: setBwn's actor number, -1 = none
     int            m_pc_no;             // ROR 0x853b8: setPC's actor number, -1 = none

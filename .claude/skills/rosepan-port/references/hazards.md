@@ -672,6 +672,15 @@ public:
   (".mdl" + ".MOT") -> .mdl (TIM2 pack, i3r, collision); flags 0x8002 packs have offsets and no
   sizes (getFileSize returns -1).
 
+## A file kept open changes the boot (2026-10-28)
+
+Symptom: after a TU that opens a file and keeps it open (as the ROM does), the New Game run stays
+black after the title with no new stubs, no assert and no crash. Cause: unknown host-side effect of
+a long-held rx stream slot (open-items.md Open questions, eff/effman.cpp). Fix for now: close after
+each read (PC: comment). How it was found: bisect with an environment switch around the new code
+(getenv in init, build.py --run 90), then gdbrun --break + "thread apply all bt" showed no thread
+blocked, so it is game logic, not a lock.
+
 ## How to debug (the method that worked)
 
 - **The picture is the test.** Logs, stub hits and callcheck show the code ran, not that it is right.

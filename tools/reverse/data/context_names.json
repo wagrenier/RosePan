@@ -7025,11 +7025,71 @@
   "was": "FUN_0016a8a4",
   "why": "0x16a594(oid, pos), the SE id from 0x163ea0(oid, no), GamSndMan::playSE(id, 0, pos, 0)"
  },
+ "0016a914": {
+  "name": "Eff0::Eff0",
+  "tag": "ror-inferred",
+  "was": "FUN_0016a914",
+  "why": "base constructor: vtable 0x2e3250, +4 -1, +0x10 0x7fffffff, the rest 0; createEff calls it before storing each class's vptr"
+ },
+ "0016a950": {
+  "name": "Eff0::~Eff0",
+  "tag": "ror-inferred",
+  "was": "FUN_0016a950",
+  "why": "vtable 0x2e3250 slot 1: term, delete on flag 1"
+ },
+ "0016a9ac": {
+  "name": "Eff0::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016a9ac",
+  "why": "slot 2 (createEff checks its result): kind, delay from the param, takes a reference on the param's pack"
+ },
+ "0016a9e0": {
+  "name": "Eff0::term",
+  "tag": "ror-inferred",
+  "was": "FUN_0016a9e0",
+  "why": "slot 3: clears kind and flags, drops the pack reference"
+ },
  "0016aa04": {
   "name": "Eff0::setVisible",
   "tag": "ror-inferred",
   "was": "FUN_0016aa04",
   "why": "vtable slot 10 of Eff0 and of all 43 Eff classes (never overridden): flag word bit 4 set for false, cleared for true, bit 8 set; native 281 op 98 calls it with a2[0] != 0"
+ },
+ "0016aa2c": {
+  "name": "Eff0::live",
+  "tag": "ror-inferred",
+  "was": "FUN_0016aa2c",
+  "why": "slot 4 (EffMan::live): delay countdown, liveActivateExec on flag 8, the finish countdown, then slot 5"
+ },
+ "0016aacc": {
+  "name": "Eff0::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0016aacc",
+  "why": "slot 6 (EffMan::draw, RENDERPARAM): past its delay, current layer = main layer, renderPreMain (slot 7, the ELF symbol EffLight3::renderPreMain names it)"
+ },
+ "0016ab10": {
+  "name": "Eff0::renderPreMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016ab10",
+  "why": "slot 7 (symbol name of the overrides): the kind's cached draw set at 0x8282a0, BeginSet, renderMain (slot 8), EndSet"
+ },
+ "0016abe4": {
+  "name": "Eff0::createPacketEntry",
+  "tag": "ror-inferred",
+  "was": "FUN_0016abe4",
+  "why": "slot 9 (symbol name of the overrides EffLight3 / EffBloodStay3::createPacketEntry)"
+ },
+ "0016ac84": {
+  "name": "effInitRandTable",
+  "tag": "ror-inferred",
+  "was": "FUN_0016ac84",
+  "why": "fills 0x828378[256] with a random permutation of 0..255 and clears the index 0x308050; EffMan::init calls it"
+ },
+ "0016add8": {
+  "name": "effClearDrawSets",
+  "tag": "ror-inferred",
+  "was": "FUN_0016add8",
+  "why": "clears the per-kind draw-set cache 0x8282a0[54] that Eff0::renderPreMain fills; EffMan::draw calls it each frame"
  },
  "00172678": {
   "name": "gamCreateEff1a",
@@ -7037,23 +7097,167 @@
   "was": "FUN_00172678",
   "why": "Obj176a3c::createEff on scene +0x837e0 with kind 0x1a; initStage2's call"
  },
+ "00176a3c": {
+  "name": "EffMan::EffMan",
+  "tag": "ror-inferred",
+  "was": "FUN_00176a3c",
+  "why": "constructor of the scene's +0x837e0 member (formerly Obj176a3c): FileReader +0x129c, clears the 0x110-entry table, the draw order, the 16 packs; link position between EffLight3 and EffMuzzleFlash1 gives the class name"
+ },
+ "00176aa0": {
+  "name": "EffMan::~EffMan",
+  "tag": "ror-inferred",
+  "was": "FUN_00176aa0",
+  "why": "GCC 2 destructor (flag bit 1 deletes): term, ~FileReader"
+ },
+ "00176afc": {
+  "name": "EffMan::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00176afc",
+  "why": "MagScene::init passes (ctx, scene): stores the scene and ctx globals, fills the draw order 0..0x10f, seeds the random table, reads data/eff/eff.bin's index and preloads packs 1 2 3 4 0x32 0x1f 0x26 0x27 0x1a kept"
+ },
+ "00176c50": {
+  "name": "EffMan::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00176c50",
+  "why": "MagScene::term: releaseAll, releasePacks(1), frees the index buffer, closes eff.bin"
+ },
  "00176cc8": {
-  "name": "Obj176a3c::createEff",
+  "name": "EffMan::createEff",
   "tag": "ror-inferred",
   "was": "FUN_00176cc8",
-  "why": "a switch on the parameter block's first word (1..0x34) that news one of the Eff* classes (their ctors run here) and enters it in the table +4 (0x110 entries); returns the entry number; scenePlayStart, native 281"
+  "why": "news the Eff class of param kind, loads its pack, init(param), enters it in the table"
+ },
+ "001774e0": {
+  "name": "EffMan::addEff",
+  "tag": "ror-inferred",
+  "was": "FUN_001774e0",
+  "why": "puts an Eff in a free entry (evicting the oldest weak one when full); returns its number, -1"
  },
  "0017756c": {
-  "name": "Obj176a3c::release",
+  "name": "EffMan::release",
   "tag": "ror-inferred",
   "was": "FUN_0017756c",
-  "why": "a0 = MagScene +0x837e0: entry no of its table (+4) deleted, count +0x448 down, +0x1294 / +0x1298 = -1 when they named it; GamMan::ctlObj1cbb80 passes the pool record's second word"
+  "why": "deletes entry no (drops it from the weak list, forgets the singleton kinds 0x1a / 0x1f)"
  },
  "0017762c": {
-  "name": "Obj176a3c::releaseAll",
+  "name": "EffMan::releaseAll",
   "tag": "ror-inferred",
   "was": "FUN_0017762c",
-  "why": "deletes all 0x110 table entries through their vtable slot 1, resets +0x448 / +0x1294 / +0x1298 / +0xc8c; GamMan::clearPool20b00 calls it on scene +0x837e0"
+  "why": "deletes all 0x110 entries, clears the counters, releasePacks(0)"
+ },
+ "001776c4": {
+  "name": "EffMan::findFreeNo",
+  "tag": "ror-inferred",
+  "was": "FUN_001776c4",
+  "why": "round robin from +0x444 over entries 0..0xff for an empty one; -1 when full"
+ },
+ "0017772c": {
+  "name": "EffMan::live",
+  "tag": "ror-inferred",
+  "was": "FUN_0017772c",
+  "why": "MagScene::update: runs slot 4 live of every entry, deletes retired ones (0x100..0x10f) and releases live ones whose live returns 0"
+ },
+ "00177830": {
+  "name": "EffMan::draw",
+  "tag": "ror-inferred",
+  "was": "FUN_00177830",
+  "why": "MagScene::draw's world pass: two layers 850 / 855, z depths, sorts the draw order far to near, renders every entry"
+ },
+ "001779b8": {
+  "name": "EffMan::sortDrawOrder",
+  "tag": "ror-inferred",
+  "was": "FUN_001779b8",
+  "why": "compacts the draw order then insertion-sorts it by Eff +0x10 descending; returns the count"
+ },
+ "00177a8c": {
+  "name": "EffMan::packDrawOrder",
+  "tag": "ror-inferred",
+  "was": "FUN_00177a8c",
+  "why": "moves draw-order runs of empty entries to the end; returns the used count"
+ },
+ "00177c00": {
+  "name": "EffMan::insertDrawOrder",
+  "tag": "ror-inferred",
+  "was": "FUN_00177c00",
+  "why": "binary-searches order[0..n) for order[n]'s depth and moves it there"
+ },
+ "00177d20": {
+  "name": "EffMan::createLayer",
+  "tag": "ror-inferred",
+  "was": "FUN_00177d20",
+  "why": "i3dCtxCreateLayer(key) with the scene's light set 0, its fog when +0x2aa84, view 0 at the camera"
+ },
+ "00177e04": {
+  "name": "EffMan::pushWeak",
+  "tag": "ror-inferred",
+  "was": "FUN_00177e04",
+  "why": "appends an entry number to the weak FIFO +0x88c (count +0xc8c)"
+ },
+ "00177e24": {
+  "name": "EffMan::removeWeak",
+  "tag": "ror-inferred",
+  "was": "FUN_00177e24",
+  "why": "removes an entry number from the weak FIFO"
+ },
+ "00177e9c": {
+  "name": "EffMan::popWeak",
+  "tag": "ror-inferred",
+  "was": "FUN_00177e9c",
+  "why": "takes the oldest weak entry number, -1 when empty"
+ },
+ "00177ef8": {
+  "name": "EffMan::retireEff",
+  "tag": "ror-inferred",
+  "was": "FUN_00177ef8",
+  "why": "moves entry no into the first empty retired slot 0x100..0x10f (its +4 cleared) so a new effect can use the number"
+ },
+ "00177f54": {
+  "name": "EffMan::makePackName",
+  "tag": "ror-inferred",
+  "was": "FUN_00177f54",
+  "why": "pack name of kind (54-entry string table 0x2f2cd0) plus an optional suffix"
+ },
+ "001780c0": {
+  "name": "EffMan::loadIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_001780c0",
+  "why": "reads the first 0x800 bytes of data/eff/eff.bin (its RTPK index) into +0xc90, file left open"
+ },
+ "00178148": {
+  "name": "EffMan::findPack",
+  "tag": "ror-inferred",
+  "was": "FUN_00178148",
+  "why": "the loaded pack whose name prefixes the given name, -1"
+ },
+ "001781d0": {
+  "name": "EffMan::findFreePack",
+  "tag": "ror-inferred",
+  "was": "FUN_001781d0",
+  "why": "first of the 16 pack slots with kind 0, -1"
+ },
+ "0017820c": {
+  "name": "EffMan::loadPack",
+  "tag": "ror-inferred",
+  "was": "FUN_0017820c",
+  "why": "(kind, suffix, keep): the pack's slot number, loading it into a free slot when not loaded; -1"
+ },
+ "001782cc": {
+  "name": "EffMan::readPack",
+  "tag": "ror-inferred",
+  "was": "FUN_001782cc",
+  "why": "reads a pack from eff.bin and sorts its files: I3D_BIN relocated, I3D_I3M relocated, TIM2 added to the scene's DogTexInfo, then i3rAssignTex"
+ },
+ "001787b0": {
+  "name": "EffMan::releasePack",
+  "tag": "ror-inferred",
+  "was": "FUN_001787b0",
+  "why": "(n, force): frees pack n unless kept and not forced: its textures, its buffer"
+ },
+ "00178894": {
+  "name": "EffMan::releasePacks",
+  "tag": "ror-inferred",
+  "was": "FUN_00178894",
+  "why": "releasePack(n, force) for the 16 slots"
  },
  "0017c0f0": {
   "name": "SctWorld::SctWorld",

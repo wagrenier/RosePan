@@ -498,7 +498,7 @@ void ScenePlay::term()
     m_numSingle = 0;
     if (m_eff != -1)
     {
-        scene.m_837e0.release(m_eff);
+        scene.m_eff_man.release(m_eff);
         m_eff = -1;
     }
     m_msg.show(-1, 0);
@@ -568,7 +568,7 @@ void ScenePlay::loadCamera(const char *name)
     eff.m_kind = 0xd;
     eff.m_08 = 0;
     eff.m_file = m_cameraData;
-    m_eff = g_magSystem.m_scene.m_837e0.createEff(&eff);
+    m_eff = g_magSystem.m_scene.m_eff_man.createEff(&eff);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -788,7 +788,7 @@ int scenePlayStart(const char *name, intptr_t oidsArg, int withEff)
         param.m_kind = 0xd;
         param.m_08 = 0;
         param.m_file = pack.getFile(1);
-        play->m_eff = scene.m_837e0.createEff(&param);
+        play->m_eff = scene.m_eff_man.createEff(&param);
         if (pack.getNumFile() > 2)
             scene.setFocusData(pack.getFile(2), pack.getFileSize(2));
     }
@@ -828,7 +828,7 @@ void scenePlayStartSimple(const char *name)
     param.m_kind = 0xd;
     param.m_08 = 0;
     param.m_file = pack.getFile(1);
-    play->m_eff = scene.m_837e0.createEff(&param);
+    play->m_eff = scene.m_eff_man.createEff(&param);
     play->setName(name);
     g_taskMan.addTask(1, -1, 1, 0, play, 0, &g_gamMan.m_frameTaskId, 0x11);
 }
@@ -1538,7 +1538,7 @@ void scnDamageStart(u_int oid, u_int attacker, const ScnDamageParam *param, int 
     eff.m_hit.m_20 = -1.0f;
     eff.m_hit.m_24 = 0;
     eff.m_hit.m_scale = kind == 2 ? 1.75f : 1.0f;
-    scene.m_837e0.createEff(&eff);
+    scene.m_eff_man.createEff(&eff);
 }
 
 // ──────────────────────────────────────────────────────────────────────

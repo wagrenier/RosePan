@@ -3666,7 +3666,7 @@ int TskFrameFunc::stepGameOver()
         if (m_count-- > 0)
             return 0;
         g_taskMan.pauseOthers(1);
-        scene.m_837e0.releaseAll();
+        scene.m_eff_man.releaseAll();
         gam.resetGame();
         m_count = 0;
         m_state = 0x67;

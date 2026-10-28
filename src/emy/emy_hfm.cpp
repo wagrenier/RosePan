@@ -858,7 +858,7 @@ void HfmOutDead::Init()
     eff.m_hit.m_24    = 0;
     eff.m_hit.m_scale = 100.0f;
     eff.m_hit.m_2c    = 0x5a;
-    g_magSystem.m_scene.m_837e0.createEff(&eff);
+    g_magSystem.m_scene.m_eff_man.createEff(&eff);
     m_emy->m_visible = 0;
     g_gamMan.resetObj(m_oid, 0x40);
     g_gamMan.setObj(m_oid, 0x10000000);
