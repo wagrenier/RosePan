@@ -1126,6 +1126,14 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   turns, slides through (door kind 0) or waits; errors ERR_CANNOT_FIND_ITEM 0 .. ERR_END 7 in the
   controller's m_0c pick Brown's answer motion (table 0x2ec028: 132..137). MagLifeBwn::message 8
   takes the rotate heading as a float's bits in the int argument.
+  Bark (+0xf0: bark point +0x10, distance +0x20, m_bite_target_oid +0x24, its kind +0x28 = the
+  UtlEmyInfo +0x24 word) live 0x129028 runs 18 phases (MODE_START .. MODE_MOVING4ENEMY, names at
+  0x2ec230): the nearest enemy within 500 (of Brown, or 500 ahead of the PC from init's arg = phase
+  14); kinds 0x401 / 0x421 are barked at from 135 / 110 (walk there, turn within 3 degrees, motion
+  0x76, then each frame turn by at most a degree and edge to the distance less 20: phase 11 =
+  barkQuery), others get a turn plus growl 0x1c (200 away) or bite 0x2a (SE 13 every 20 frames,
+  again on a 9 in 10 roll), and are walked to beyond 200. barkSet (phase 12) plays 0x71 (m_0c 0) or
+  0x79. EmyManager word +0x3c 4 (0x401) / 7 (0x421), or a cleared state flag, ends the target.
 - Fields named by the ELF's linkonce accessors: +0xca0 m_num_search_line (< 127, asserted in
   mag/maglifebwn.h:213), +0xcac getUnmovableCount, +0xcb8 getHealthStatus (0..4 by dog params
   0x1b / 0x1c: 0.8 / 0.4 / 0.2 / 0), +0xcc0 isPathMoveEnd = isActionEnd, +0xcc4 getMoveResult /
