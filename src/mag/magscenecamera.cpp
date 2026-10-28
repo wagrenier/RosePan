@@ -1,14 +1,16 @@
 /* ==========================================================================
  *  mag/magscenecamera.cpp
  *
- *  The scene's camera (RoR's "mag/magscenecamera.cpp", 0x13c664..0x13e2ec):
+ *  The scene's camera (RoR's "mag/magscenecamera.cpp", 0x13c664..0x13f07c):
  *  MagScene's camera modes over its DogCamera (+0x2ab70) -- free, tied to
  *  an actor, or a map camera standing on one of a sky pack's _c.bin paths
  *  (MagSceneCRec) and looking at the actor. A path camera slides along its
  *  path so that the actor stays between m_cam_dist_min and m_cam_dist_max
  *  (scoreCameraPath); changeCamera sets the path's goal and the move bit
- *  0x10 that updateCamera (0x13e548, next file) plays out. Saving and
- *  restoring the camera brackets a menu's own camera.
+ *  0x10 that updateCamera plays out over 30 frames. A path record's look
+ *  letter turns the camera within limits of its own rotation instead of
+ *  looking straight at the actor. Saving and restoring the camera brackets
+ *  a menu's own camera.
  * ======================================================================== */
 #include <math.h>
 
@@ -360,7 +362,7 @@ int MagScene::getCameraMode(int *out)
 // A path camera's next goal (MagScene::update): a one-point path with
 // m_alt == 1 flips its view; a longer one projects the actor onto the
 // camera's segment and aims two segment lengths of that ahead. A new goal
-// sets the move bit 0x10 and clears m_camera_2ad54.
+// sets the move bit 0x10 and clears m_cam_move_frame.
 // callcheck: FUN_00215a30, I3rRoot__CheckIdString, modff (the assert handler; inside the inline DogModel::isAlive; modff inside camModf)
 // ROR 0x0013d5e4
 
@@ -410,7 +412,7 @@ void MagScene::changeCamera()
         path->m_goal_t = frac;
         path->m_goal_seg = seg;
     }
-    m_camera_2ad54 = 0;
+    m_cam_move_frame = 0;
     m_camera_mode |= 0x10;
 }
 
@@ -627,4 +629,238 @@ void MagScene::setCameraOnPath(float theF, const float *thePos, int theI, int th
     m_camera_entity.m_trans[0] = x;
     m_camera_entity.m_trans[1] = y;
     m_camera_entity.m_trans[2] = z;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The rotation rot wrapped to within pi of base and kept within lim of it.
+// Inlined twice in clampCameraLook.
+static float camLimitRot(float rot, float base, float lim)
+{
+    float d = rot - base;
+    if (d < -CAM_PI)
+        d += 2.0f * CAM_PI;
+    if (CAM_PI <= d)
+        d -= 2.0f * CAM_PI;
+    if (d < -lim)
+        return base - lim;
+    if (lim < d)
+        return base + lim;
+    return rot;
+}
+
+// The ROM normalises target itself, the actor's position in the world, not
+// its direction from the camera (kept as it is; open-items.md "Path camera
+// look").
+// ROR 0x0013e2ec
+
+void MagScene::clampCameraLook(float limX, float limY, const float *target, const float *base)
+{
+    sceVu0FVECTOR v = { target[0], target[1], target[2], target[3] };
+    utlNormalize3(v);
+
+    float rot;
+    if (0.0f < limX)
+        rot = camLimitRot(utlVecToRotX(v), base[0], limX);
+    else
+        rot = base[0];
+    m_camera_entity.m_rotate[0] = rot;
+    m_camera_entity.normalizeRotate();
+    m_camera_entity.m_dirty = 1;
+
+    if (0.0f < limY)
+        rot = camLimitRot(utlVecToRotY(v), base[1], limY);
+    else
+        rot = base[1];
+    m_camera_entity.m_rotate[1] = rot;
+    m_camera_entity.normalizeRotate();
+    m_camera_entity.m_dirty = 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// n / 8 in steps of 30 degrees, n % 8 in steps of 10.
+// ROR 0x0013e4c0
+
+void MagScene::getCameraLookLimit(int n, float *limX, float *limY)
+{
+    if (n == 0)
+    {
+        *limY = 0.0f;
+        *limX = 0.0f;
+        return;
+    }
+    *limX = ((float)(n / 8) * 1.5707963f) / 3.0f;
+    *limY = ((float)(n % 8) * 1.5707963f) / 9.0f;
+}
+
+/* A one-point path with two views (m_alt 1) is two records back to back,
+ * each its header and its point (0x40): the second is the view while
+ * m_alt_side is set. scoreCameraPath reads the second point the same way. */
+static MagSceneCRec *camViewRec(MagSceneCRec *path)
+{
+    if (path->m_pos_num == 1 && path->m_alt == 1 && path->m_alt_side != 0)
+        return (MagSceneCRec *)((u_char *)path + 0x40);
+    return path;
+}
+
+/* The camera's actor has a live model. PORT: the ROM reads actor -1's
+ * words before m_actors when m_cam_actor_no is -1 (harmless on the EE,
+ * a stray pointer on the host); none counts as not alive. */
+static bool camActorAlive(MagScene *s)
+{
+    return s->m_cam_actor_no >= 0 && s->m_actors[s->m_cam_actor_no].isAlive();
+}
+
+/* Sky slots 0..3 hold a camera path at all. */
+static bool camAnyPath(const MagScene *s)
+{
+    int total = 0;
+    for (int i = 0; i < MagScene::MAX_MAP_MODEL; i++)
+        total += s->m_tenkyu[i].m_c_num;
+    return total > 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// callcheck: FUN_00215a30, I3rRoot__CheckIdString, modff (the assert handler; inside the inline DogModel::isAlive; modff inside camModf)
+// ROR 0x0013e548
+
+void MagScene::updateCamera()
+{
+    int mode = m_camera_mode;
+    int map_no = m_cam_map_no;
+    int path_no = m_cam_path_no;
+    sceVu0FVECTOR target;
+
+    if (mode & 0x10)
+    {
+        /* A move to the path's goal (changeCamera): 30 frames from
+         * (m_seg, m_seg_t) to (m_goal_seg, m_goal_t). */
+        int base = mode & 0xf;
+        if (base > 4 || base < 3)
+        {
+            ROR_ASSERT(0); /* 1157 */
+            return;
+        }
+        MagSceneCRec *path = m_tenkyu[m_cam_map_no].m_path_data[m_cam_path_no];
+        if (path->m_pos_num == 1)
+        {
+            m_camera_mode = base;
+            m_cam_move_frame = 0;
+            return;
+        }
+        m_cam_move_frame++;
+        if (camActorAlive(this))
+        {
+            camTarget(m_actors[m_cam_actor_no], target);
+            scoreCameraPath(path, target, 0);
+            float f = (float)m_cam_move_frame / 30.0f;
+            float t = ((float)path->m_seg + path->m_seg_t) * (1.0f - f)
+                    + ((float)path->m_goal_seg + path->m_goal_t) * f;
+            int seg;
+            float frac = camModf(t, &seg);
+            setCameraOnPath(frac, path->points(), seg, path->m_pos_num);
+            m_camera_entity.lookAt(target, 0);
+        }
+        if (m_cam_move_frame < 30)
+            return;
+        path->m_seg = path->m_goal_seg;
+        path->m_seg_t = path->m_goal_t;
+        m_cam_move_frame = 0;
+        m_camera_mode &= 0xf;
+        return;
+    }
+
+    switch (mode)
+    {
+    case 1:
+        if (camActorAlive(this))
+        {
+            camTarget(m_actors[m_cam_actor_no], target);
+            m_camera_entity.lookAt(target, 0);
+        }
+        break;
+
+    case 3:
+    {
+        if (!camAnyPath(this) || !camActorAlive(this))
+            break;
+        camTarget(m_actors[m_cam_actor_no], target);
+
+        /* Every path's score goes into its m_goal_t (the ROM reuses the
+         * word), the current path's raised by 200000 to keep it. */
+        for (int i = 0; i < MAX_MAP_MODEL; i++)
+        {
+            for (int j = 0; j < m_tenkyu[i].m_c_num; j++)
+            {
+                MagSceneCRec *p = m_tenkyu[i].m_path_data[j];
+                p->m_goal_t = scoreCameraPath(p, target, 0);
+                if (j == m_cam_path_no && i == m_cam_map_no)
+                    p->m_goal_t += 200000.0f;
+            }
+        }
+        /* The highest score wins; the ROM starts from a NaN, so the first
+         * path (and any NaN score) always takes the lead. */
+        int best = -1;
+        int bestMap = -1;
+        float bestScore = NAN;
+        for (int i = 0; i < MAX_MAP_MODEL; i++)
+        {
+            for (int j = 0; j < m_tenkyu[i].m_c_num; j++)
+            {
+                float score = m_tenkyu[i].m_path_data[j]->m_goal_t;
+                if (!(score <= bestScore))
+                {
+                    bestScore = score;
+                    best = j;
+                    bestMap = i;
+                }
+            }
+        }
+        if (best >= 0)
+        {
+            m_cam_path_no = best;
+            m_cam_map_no = bestMap;
+        }
+        MagSceneCRec *path = m_tenkyu[m_cam_map_no].m_path_data[m_cam_path_no];
+        setCameraOnPath(path->m_seg_t, path->points(), path->m_seg, path->m_pos_num);
+        m_camera_entity.lookAt(target, 0);
+        break;
+    }
+
+    case 4:
+    case 5:
+    {
+        if (!camAnyPath(this) || !camActorAlive(this))
+            break;
+        camTarget(m_actors[m_cam_actor_no], target);
+
+        /* 4 slides along the path (scoreCameraPath steps m_seg / m_seg_t),
+         * 5 stays where it was placed. */
+        MagSceneCRec *path = camViewRec(m_tenkyu[m_cam_map_no].m_path_data[m_cam_path_no]);
+        if (mode == 4)
+            scoreCameraPath(path, target, 0);
+        setCameraOnPath(path->m_seg_t, path->points(), path->m_seg, path->m_pos_num);
+        if (path->m_look_tag != 0)
+        {
+            float limX, limY;
+            getCameraLookLimit(path->m_look_tag - 'a', &limX, &limY);
+            clampCameraLook(limX, limY, target, path->m_look_rot);
+        }
+        else
+            m_camera_entity.lookAt(target, 0);
+        break;
+    }
+
+    case 6:
+        m_camera_entity.updateMove();
+        break;
+
+    default:
+        break;
+    }
+
+    /* A path camera that changed paths takes the new path's lens angle. */
+    if (m_camera_mode < 6 && 2 < m_camera_mode
+        && (map_no != m_cam_map_no || path_no != m_cam_path_no))
+        m_camera_entity.m_angle =
+            m_tenkyu[m_cam_map_no].m_path_data[m_cam_path_no]->m_fov * CAM_PI / 180.0f;
 }

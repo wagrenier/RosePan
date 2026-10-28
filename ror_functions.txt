@@ -1379,14 +1379,14 @@
 /* 0013d8f8 000006e8 */ MagScene::scoreCameraPath(){}  // ror
 /* 0013dfe0 000001b0 */ MagScene::findCameraPathStart(){}  // ror
 /* 0013e190 0000015c */ MagScene::setCameraOnPath(){}  // ror
-
-// *****************************************************************************
-// FILE -- (unassigned)
-// *****************************************************************************
-
-/* 0013e2ec 000001d4 */ FUN_0013e2ec(){}
-/* 0013e4c0 00000088 */ FUN_0013e4c0(){}
+/* 0013e2ec 000001d4 */ MagScene::clampCameraLook(){}  // ror
+/* 0013e4c0 00000088 */ MagScene::getCameraLookLimit(){}  // ror
 /* 0013e548 00000b34 */ MagScene::updateCamera(){}  // ror
+
+// *****************************************************************************
+// FILE -- mag/magscenemenu.cpp
+// *****************************************************************************
+
 /* 0013f07c 00000020 */ MagScene::gamEnterMenu(){}  // ror
 /* 0013f09c 00000024 */ MagScene::gamLeaveMenu(){}  // ror
 /* 0013f0c0 00000054 */ MagScene::canOpenItemMenu(){}  // ror
@@ -1395,7 +1395,7 @@
 /* 0013f144 0000004c */ MagScene::getMenuFadeOutTime(){}  // ror
 /* 0013f194 0000004c */ MagScene::getMenuFadeInTime(){}  // ror
 /* 0013f1e4 00000028 */ MagScene::clearGamFlag25(){}  // ror
-/* 0013f210 00000070 */ FUN_0013f210(){}
+/* 0013f210 00000070 */ MagScene::pulseMenu1000a(){}  // ror
 /* 0013f280 000001c4 */ MagScene::openSysMsgWindow(){}  // ror
 /* 0013f444 00000014 */ MagScene::isWindowOpen(){}  // ror
 /* 0013f458 00000044 */ MagScene::closeSysMsgWindow(){}  // ror
@@ -2716,7 +2716,7 @@
 /* 00184008 00000040 */ FUN_00184008(){}
 /* 00184048 00000050 */ FUN_00184048(){}
 /* 00184098 00000090 */ FUN_00184098(){}
-/* 00184128 0000039c */ FUN_00184128(){}
+/* 00184128 0000039c */ MsgMan::expandText(){}  // ror
 /* 001844c4 00000088 */ FUN_001844c4(){}
 /* 0018454c 0000002c */ FUN_0018454c(){}
 /* 00184578 00000088 */ FUN_00184578(){}

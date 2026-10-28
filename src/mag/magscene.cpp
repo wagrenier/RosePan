@@ -1787,7 +1787,7 @@ void MagScene::requestMenu(int id, int arg)
     m_menu_arg = arg;
     m_sub_mode.m_arg = id;
     m_sub_mode.m_arg2 = (int)(((u_int)m_pc_mode << 16) | ((u_int)m_pc_no & 0xffff));
-    gamEnterMenu();
+    gamEnterMenu(id);
 }
 
 // ──────────────────────────────────────────────────────────────────────
