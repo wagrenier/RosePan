@@ -144,3 +144,10 @@ void EmyMain::stopAllSE()
 {
     ROSEPAN_STUB("EmyMain::stopAllSE", 0x00165570);
 }
+
+// stub of ROR 0x001669a4
+const EmyKindMoveParam * EmyMain::getMoveParam()
+{
+    ROSEPAN_STUB("EmyMain::getMoveParam", 0x001669a4);
+    return {};
+}
