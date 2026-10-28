@@ -1130,9 +1130,18 @@ to adapt when a TU reaches them:
   draws in walk order with the depth buffer). The untextured white figure after the book was
   RESOLVED 2026-10-28: Brown's shadow model drawn by makeActorShadow into the off-screen shadow
   target, which the replay put on screen (hazards.md "A render-target pass drawn on the screen").
-  Now the frames after the book are black: Brown's own model (bwn1 textures) and the room never
-  reach the native mesh module (no MaterialTexture lookup for them in the run) -- find out whether
-  DogActor::drawModel / the map draw runs there, or i3rDrawModel culls them. Also open: the
+  The black frames after the book were RESOLVED 2026-10-28 as a camera problem, not a draw one:
+  MagScene::draw runs there (flags 0x101, sub mode 1; 2 actors, the forest map) and i3rDrawModel
+  rightly culls everything in the main layer, because the scene camera is still the default --
+  mode 0, no parent, world (0, 1000, 0) looking along +y, away from the scene (actor 0 at
+  (-700, -88, 70)). No PC is bound (m_pc_no -1, so GamMan::setPC's setCameraMode(m_cameraMode)
+  never runs) and the script calls no camera native (seqFunc016 0x206640: zero calls in the run).
+  With the PC debug switch ROSEPAN_TEST_CAM=1 (MagScene::testCamera: a parentless mode-0 camera
+  aimed at actor 0 on frames that draw the world) the frames show Jennifer textured and lit in the
+  forest on the leaf-covered path (progress/ shot of 2026-10-28, i3d/i3rdraw.cpp). NEXT BLOCKER
+  (not this TU): who places the camera / binds the PC after the book -- GamMan::setPC from the
+  script's PC native, or the opening's TskCamera / map-camera path (setCameraMode 3..5); see the PC
+  bind item in Next up (setActor binds the PC after the film). Also open: the
   shadow itself (render the shadow model into a host target and project it through the STQ map
   on the 705 + 10 n layer: a renderer render-target feature, not yet in the platform layer).
   Was: left for the session that writes i3rDrawModel 0x21fe68 (unassigned@0021fb50): (1) call

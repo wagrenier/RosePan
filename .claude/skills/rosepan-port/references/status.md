@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 12:48 at commit `45645e0` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-28 13:18 at commit `0c5b331` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -149,7 +149,7 @@ Least-named game-code regions (64 KB blocks):
 - 163 TUs: todo 100, partial 8, verify 83, done 9
 - next: **i3d/i3rdraw.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
-- partial: `i3d/i3rdraw.cpp` 19/19 -- Left for this TU: the frames after the book (200 s run, 6180+) are black. A diagnostic run showed no MaterialTexture lookup for Brown's own model (bwn1 textures
+- partial: `i3d/i3rdraw.cpp` 19/19 -- Left for this TU: depth-keyed batches (material packet +0x14), DrawBatch draws only the first 0x30 group of slot 0, and the shadow itself (render the shadow mod
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -237,6 +237,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-28 13:17 `i3d/i3rdraw.cpp` partial: The black frames after the picture book are a camera problem, not a draw one: MagScene::draw runs with the world flag (2 actors and the forest map alive) and i3
 - 2026-10-28 12:48 `i3d/i3rdraw.cpp` partial: The white figure after the book was Brown's shadow model (pack file 2, never texture-assigned) drawn by MagScene::makeActorShadow into the off-screen 256x256 sh
 - 2026-10-28 12:00 `i3d/i3mpose.cpp` verify: i3m pose player complete: the last 10 functions, a quaternion kit Ghidra had folded into 0x230688 and 0x230df8 (shorter-arc slerp memory and GPR forms, shorter-
 - 2026-10-28 11:36 `emy/emy_hfm.cpp` verify: Wrote HfmOutTest::Exec 0x149500, the last stub of the TU: a 0x2d-step motion walk-through (ROM switch via jump table 0x2ef4b0) written as a step-to-motion table
@@ -244,7 +245,6 @@ Recent sessions:
 - 2026-10-28 11:05 `i3d/i3rdraw.cpp` partial: i3rDrawMesh45 / i3rDrawMesh46 part culls written (box test, i3dViewTestBoneBox through the entry's bone slots) and now decide i3rDrawModel's result; I3dBoneBoxe
 - 2026-10-28 10:14 `emy/emy_hfm.cpp` partial: Wrote HfmOutRide whole: start, restart, placePC, phases 0..3, phase 2's ten steps (jump table 0x2ef3c0: grab, mount, ride, hits, thrown, struggle, grip, nextHol
 - 2026-10-28 10:01 `i3d/i3dvu1pkt.cpp` verify: i3d/i3dvu1pkt.cpp: the clipped line strips and wire shapes written -- i3dVu0ClipPair 0x21db60 (VCLIP flags), i3dClipSegment 0x21db90 (six-plane clip with STQ / 
-- 2026-10-28 09:18 `eff/effman.cpp` verify: EffMan::createEff written (the kind to class switch over 41 Eff classes, pack hand-off, init, addEff, weak FIFO, the 0x1a / 0x1f singletons) and EffFindItem1 (k
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -252,7 +252,7 @@ Recent sessions:
 | `mag/maglife.cpp` | partial | 13/8/49 | 4.6 | 89 | 0 |
 | `unassigned@00103edc` | todo | 0/17/23 | 1.6 | 87 | 4 |
 | `unassigned@0016a914` | todo | 0/120/172 | 47.3 | 76 | 6 |
-| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 75 | 6 |
+| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 70 | 5 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 51 | 1 |
 | `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |

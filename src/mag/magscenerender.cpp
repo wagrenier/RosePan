@@ -21,6 +21,7 @@
 #include "mag/magscene.h"
 
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "common/ror_assert.h"
@@ -945,6 +946,29 @@ void MagScene::drawActorMirror(DogActor *actor, I3dLayer *stage)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// PC: debug, no ROM counterpart (see draw).
+
+void MagScene::testCamera()
+{
+    static int s_on = -1;
+    if (s_on < 0)
+    {
+        const char *e = getenv("ROSEPAN_TEST_CAM");
+        s_on = e != NULL && *e == '1';
+    }
+    if (!s_on || m_camera_mode != 0 || m_camera_entity.getParent() != NULL || !m_actors[0].isAlive())
+        return;
+    const float *a = m_actors[0].m_trans;
+    m_camera_entity.m_trans[0] = a[0] + 250.0f;
+    m_camera_entity.m_trans[1] = a[1] - 160.0f;
+    m_camera_entity.m_trans[2] = a[2] + 250.0f;
+    m_camera_entity.m_dirty = 1;
+    float target[4] = { a[0], a[1] - 60.0f, a[2], 1.0f };
+    m_camera_entity.lookAt(target, 0);
+    m_camera_entity.transform();
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // One frame of the scene into the i3d context (see the file comment).
 // dbuff and frame pick the draw environment the full-screen passes put
 // back.
@@ -953,6 +977,11 @@ void MagScene::drawActorMirror(DogActor *actor, I3dLayer *stage)
 
 void MagScene::draw(i3dContext *ctx, sceGsDBuff *dbuff, int frame)
 {
+    /* PC: debug -- ROSEPAN_TEST_CAM=1 aims a camera nobody placed (mode 0,
+     * no parent) at actor 0 on frames that draw the world, so a scene can
+     * be looked at before the script or the PC sets the camera up. */
+    if (getDrawFlags() & 1)
+        testCamera();
     I3dLayer *renderstage[8];
     I3dLight *lightstatus[8];
     MagSceneDrawEntry entries[128];
