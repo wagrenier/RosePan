@@ -1180,6 +1180,11 @@ to adapt when a TU reaches them:
   five lists) is what the ROM shades them with. Doubt: the strip colour block (0x17) is read as RGB
   vertex colour; values are 0.98..1.0 on amd.mdl, which also fits a lighting factor.
 
+- utl/utlrand.cpp (2026-10-28) is the port's name for 0x1041c4..0x10452c (the PRNG and its draws):
+  no source string. Its split from utl/utlgame.cpp is a guess too: the one-call wrappers
+  0x103edc..0x1041c4 were pinned to utlgame.cpp (same family as its asserting accessors), and
+  0x10452c / 0x10454c (memset 0x28 / 0x14 record clears) to utl/utlbtl.cpp. If RoR turns out to
+  keep the random numbers inside utlgame.cpp, merge the file there.
 - utl/utlmath.cpp (2026-10-27) is the port's name for 0x106658..0x10737c: no source string names
   the run; most of it is vector math, but utlConvSndId and the i3r node display wrappers sit at its
   start and could be a separate object. utlVecRotY is now the copy form 0x1069b0 and the in-place

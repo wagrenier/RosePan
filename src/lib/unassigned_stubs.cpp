@@ -153,12 +153,6 @@ void debugNop(void)
 
 // ---- bridges (hand-written) ----
 
-// stub of ROR 0x0010421c
-void utlRandReset(void)
-{
-    ROSEPAN_STUB("utlRandReset", 0x0010421c);
-}
-
 // stub of ROR 0x00215b5c
 void dbgTraceVector3(float x, float y, float z)
 {
@@ -841,13 +835,6 @@ int TskAttack::stepKind30()
     return {};
 }
 
-// stub of ROR 0x0010423c
-int utlRandRange(int lo, int hi)
-{
-    ROSEPAN_STUB("utlRandRange", 0x0010423c);
-    return {};
-}
-
 // stub of ROR 0x001fe160
 int TskDamage::stepKind0()
 {
@@ -908,20 +895,6 @@ int TskDamage::stepKind9()
 int TskDamage::stepKindA()
 {
     ROSEPAN_STUB("TskDamage::stepKindA", 0x002002cc);
-    return {};
-}
-
-// stub of ROR 0x0010426c
-int utlRandMean(int lo, int hi, int n)
-{
-    ROSEPAN_STUB("utlRandMean", 0x0010426c);
-    return {};
-}
-
-// stub of ROR 0x00104438
-int utlRandPeak(int lo, int hi, int peak, int n)
-{
-    ROSEPAN_STUB("utlRandPeak", 0x00104438);
     return {};
 }
 
@@ -1283,13 +1256,6 @@ void PigMain::selectOut()
 void TskEnemyMove::stop()
 {
     ROSEPAN_STUB("TskEnemyMove::stop", 0x00202f10);
-}
-
-// stub of ROR 0x001044b8
-float utlRandRangeF(float lo, float hi)
-{
-    ROSEPAN_STUB("utlRandRangeF", 0x001044b8);
-    return {};
 }
 
 
@@ -2823,13 +2789,6 @@ u_long * EffCloud1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long
 void EffCloud1::updateZDepth()
 {
     ROSEPAN_STUB("EffCloud1::updateZDepth", 0x0017a8d8);
-}
-
-// stub of ROR 0x00104394
-int utlRandPeakHi(int lo, int hi, int n)
-{
-    ROSEPAN_STUB("utlRandPeakHi", 0x00104394);
-    return {};
 }
 
 // stub of ROR 0x00225108

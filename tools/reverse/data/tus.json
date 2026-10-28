@@ -2078,6 +2078,7 @@
    "status": "verify",
    "why": "source strings task/tsk_scene.cpp at 0x1f8034 / 0x1f81a8 (assert lines 790 / 852); ScenePlay's vtable slots span 0x1f7d54..0x1f82e4; ends after TskCamera::stepNone 0x1fc474: 0x1fc47c / 0x1fc490 are the inline ctor / dtor of the chunk writer whose fields (+0x400 count, +0x504 buffer, +0x50c offset) task/naga_chunk.cpp's 0x1fc4f0 uses"
   },
+  "unassigned@00103edc": {},
   "unassigned@001056f8": {},
   "unassigned@00106658": {},
   "unassigned@0011262c": {},
@@ -2113,6 +2114,24 @@
   "unassigned@0022e840": {},
   "unassigned@00237ce8": {},
   "unassigned@002437f8": {},
+  "utl/utlbtl.cpp": {
+   "ranges": [
+    [
+     "0010452c",
+     "00104970"
+    ]
+   ],
+   "why": "utlHitCheck 0x10456c and 0x1046b4 assert with utl/utlbtl.cpp; the two memset clears before them (0x10452c: 0x28 bytes, the record of 0x1046b4's m_pos_self / m_pos_aim / m_pos_target; 0x10454c: 0x14 bytes = UtlHitCheck, called from MagLifePC::startAttack before a hit check) are the records' inline clears; ends where unassigned@00104970 starts"
+  },
+  "utl/utlgame.cpp": {
+   "ranges": [
+    [
+     "001024d0",
+     "001041c4"
+    ]
+   ],
+   "why": "utlgame.cpp asserts (12) span 0x1024d0..0x103e94; the run 0x103edc..0x1041c4 is the same family of one-call GamMan / EmyManager wrappers on the dog / enemy oid (utlSetDogParam1b .. utlSetBwnObjFlag), so it is taken as the file's tail; starts after bed/bedpfh's helpers end 0x1024d0"
+  },
   "utl/utlmath.cpp": {
    "notes": "Nothing on screen can show this yet: after the film the stage stays black (a ring indicator only) because utlDrawI3r ends in the i3rDrawModel stub 0x21fe68; the first session whose screenshot shows a model through it marks this done. Renames: 0x1069b0 is utlVecRotY (copy form), 0x106bc8 is utlVecRotMatY (DogActor::getRootMove updated). utlVecToRot now takes a non-const dir (it normalises it in place, as the ROM does). The node display word is stored self-relative with i3rSetPtr: i3rDrawModel must read it with getData (hazards.md). Copy-form rotations: the ROM leaves out[3] as an unset stack word; the host copies in[3]. Next: i3rDrawModel 0x21fe68 and the mesh packet writers in unassigned@0021fb50 feeding the native i3d module.",
    "ranges": [
@@ -2148,6 +2167,24 @@
    ],
    "status": "verify",
    "why": "0x105650 asserts with utl/utlmisc.cpp line 22 (the file's first function, right after utltm2's last assert at 0x10559c); the run up to utlfile.cpp's first assert at 0x105e50 has no source string and is taken as the rest of utlmisc: text helpers, a param parser, the frame counter, operator new/delete and the game heap wrappers over BedMemory"
+  },
+  "utl/utlrand.cpp": {
+   "notes": "Verify: the 15 s smoke run ends on the boot disclaimer as before; utlRandReset now runs from MagSystem's constructor (no stub hit) but no random draw shows on screen until enemies, Brown or the battle rolls run. The first session whose run reaches a fight or the dog blinking (DogActor::updateEye uses utlRandRange) can mark it done. Decisions: n == 0 in the mean / peak draws returns lo (the ROM traps with break 7); utlRand multiplies the zero-extended seed by the sign-extended n and keeps the high word, as lwu + __muldi3 + dsra32 do. The utlgame.cpp tail 0x103edc..0x1041c4 (dog param, enemy and object wrappers, still stubs declared in lib/unassigned.h) is now part of the utl/utlgame.cpp TU; the 0x10452c / 0x10454c clears are part of utl/utlbtl.cpp. File name utlrand.cpp is the port's (open-items.md Open questions).",
+   "ranges": [
+    [
+     "001041c4",
+     "0010452c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-28 19:15",
+     "status": "verify",
+     "summary": "Split unassigned@00103edc: pinned 0x1041c4..0x10452c as utl/utlrand.cpp and wrote it whole (utlRandStep, utlRand, utlRandReset, utlRandSeed 0x104230 created in Ghidra, utlRandRange named for 0x10423c, utlRandMean, utlRandPeakLo / PeakHi / Peak, utlRandRangeF; seed g_utl_rand_seed 0x308484); 0x103edc..0x1041c4 joined utl/utlgame.cpp (pinned 0x1024d0..0x1041c4) and the two memset record clears 0x10452c / 0x10454c went to utl/utlbtl.cpp (pinned 0x10452c..0x104970). Six rand stubs deleted; declarations moved from lib/unassigned.h to utl/utlrand.h."
+    }
+   ],
+   "status": "verify",
+   "why": "the game's PRNG and its distributions over one seed word 0x308484 (step, draw, reset, seed, range, mean, peak lo / hi, peak, float range); no source-path string: the file name is the port's, cut where the wrappers before it and utlbtl's record clears after it end"
   },
   "wrd/wrdsrv.cpp": {
    "notes": "Verified by a temporary self-test (not committed) loading WRD.BIN stages 1 and 13: 49 rooms of 247 index slots, names, floors, captions, offsets, get / findByName agree, findRoute 184 to 172 gives 184 183 171 172 along the file links, L2W / W2L invert. The boot never loads a table (stage 99 keeps none), so nothing on screen shows it until a stage loads and a room caption draws (S2dMes::drawMapName): mark done then. Room +0x18 is the floor number (0 outside, 1, 2, 3 attic). PORT choices: host records with pointers in one extra game-heap block (the ROM relocates in place); cnvPos with a missing room uses a zero offset (ROM reads low memory); the ROM never frees load's read buffer on success - kept. Left in unassigned@00164fc0: 0x17e3d8 / 0x17e464 / 0x17e4d0 (strcmp lookup over 0x20-byte named records, used by sectorSetFlags / ClearFlags) belong with the sector code before them; the effect manager Obj176a3c (0x176a3c..~0x1788ec) holds the remaining reached stubs 0x17772c / 0x177830 / 0x176afc. File name wrd/wrdsrv.cpp is a guess (no source string).",

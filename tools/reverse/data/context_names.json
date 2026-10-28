@@ -425,11 +425,17 @@
   "was": "FUN_0010421c",
   "why": "stores the seed 0xc45330af into bss 0x308484, the state 0x1041c4 steps (x * 0x769 + 0x7cf9) and 0x1041e4 scales; MagSystem's constructor calls it"
  },
+ "00104230": {
+  "name": "utlRandSeed",
+  "tag": "ror-inferred",
+  "was": "utlRandSeed",
+  "why": "stores a0 into the PRNG seed word 0x308484 that utlRandReset sets to 0xc45330af; no callers (folded after utlRandReset, function created)"
+ },
  "0010423c": {
   "name": "utlRandRange",
   "tag": "ror-inferred",
   "was": "FUN_0010423c",
-  "why": "lo + 0x1041e4(hi - lo + 1): a random integer in lo..hi"
+  "why": "lo + utlRand(hi - lo + 1): an integer in lo..hi; 99 callers pass (0, 99) chance rolls and (60, 90) style frame counts"
  },
  "0010426c": {
   "name": "utlRandMean",
