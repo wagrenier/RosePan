@@ -152,7 +152,11 @@ public:
     int m_cnt;                  // ROR 0x38: frames in the step
 };
 
-/* State 6 (vtable 0x2e2160, EE 0x98). layout: host -- polymorphic. */
+/* State 6 (vtable 0x2e2160, EE 0x98): the ride. start picks a phase:
+ * 0 two chained slaps, 1 the long slap, 2 jump on the PC's back (the ride:
+ * hold, hits, the PC struggles free), 3 the hug from the front. Each phase
+ * chases the target first; phases 2 and 3 move the PC with
+ * MagScene::commandPC 0x15 while it holds on. layout: host -- polymorphic. */
 class HfmOutRide : public EmyOut
 {
 public:
@@ -161,15 +165,64 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x001469e8
     int  Exec();                                                         // EE slot 3, ROR 0x00146a20
     void Term();                                                         // EE slot 4, ROR 0x00146ab8
-    /* Init's start of the ride. */
+    /* A phase by chance (2 and 3 only while the PC is not riding /
+     * hurt: commandPC 0x16), its chase time, the chase. */
     void start();                                                        // ROR 0x00146ae4
+    /* start limited to phases 0 / 1 (the grab point was off the cells). */
+    void restart();                                                      // ROR 0x00146bf0
+    /* The PC to getFrontPos(dist) facing m_pc_pos[3] (commandPC 0x15),
+     * else at 30, else the enemy to the target's spine. */
+    void placePC(float dist);                                            // ROR 0x00146c8c
     /* Exec's phases by m_phase. */
     int  execPhase0();                                                   // ROR 0x00146d88
     int  execPhase1();                                                   // ROR 0x001473e4
     int  execPhase2();                                                   // ROR 0x00147840
     int  execPhase3();                                                   // ROR 0x001484ec
+    /* Phase 2's steps (jump table 0x2ef3c0; step 0 is inline). */
+    void execGrab();                                                     // ROR 0x00147a28 (step 1)
+    void execMount();                                                    // ROR 0x00147e04 (step 2)
+    void execRideEnd();                                                  // ROR 0x00147e94 (step 3)
+    void execRide();                                                     // ROR 0x00147f00 (step 4)
+    void execHit();                                                      // ROR 0x00148060 (step 5)
+    void execHitNext();                                                  // ROR 0x001480e0 (step 6)
+    void execThrown();                                                   // ROR 0x001481b8 (step 7)
+    void execStep8();                                                    // ROR 0x0014827c (step 8)
+    void execStruggle();                                                 // ROR 0x00148304 (step 9)
+    void execGrip();                                                     // ROR 0x0014837c (step 10)
+    /* The PC got free: step 7. */
+    void release();                                                      // ROR 0x00147760
+    /* 30 %: step 10 (grip 20..40 frames), else step 4 with a wait. */
+    void nextHold();                                                     // ROR 0x00148450
+    /* Phase 3's steps. */
+    void execHug();                                                      // ROR 0x00148620 (step 1)
+    void execHugHold();                                                  // ROR 0x00148af0 (step 2)
+    void execHugHit();                                                   // ROR 0x00148bd0 (step 3)
+    void execHugEnd();                                                   // ROR 0x00148cb4 (step 4)
+    void releaseHug();                                                   // ROR 0x00148a00
 
-    int m_phase;                // ROR 0x40: Exec's switch (0..3)
+    u_int m_chase_max;          // ROR 0x38: phases 0 / 1: frames chasing before the slap anyway
+    u_int m_chase_cnt;          // ROR 0x3c
+    int   m_phase;              // ROR 0x40: Exec's switch (0..3)
+    /* PC: never written by the ROM's Ride (HfmOutSlap's m_motion slot);
+     * phase 0 reads it for the slap's end frame. */
+    int   m_44 = 0;             // ROR 0x44
+    int   m_cnt;                // ROR 0x48: frames in the step
+    int   m_hit_at;             // ROR 0x4c: phase 2 step 5: the hit's frame (12)
+    int   m_50;                 // ROR 0x50
+    int   m_se_frame;           // ROR 0x54: phase 1: SE 0x38 after this frame
+    int   m_58;                 // ROR 0x58: start / execHugHold clear it (no reader here)
+    int   m_5c;                 // ROR 0x5c: start: utlRandRange(60, 90) (no reader here)
+    int   m_side;               // ROR 0x60: getTargetAngle >= pi / 2 (HfmMain's m_23c, SetRideSide)
+    int   m_64;                 // ROR 0x64: execRide counts it down (no reader)
+    int   m_wait;               // ROR 0x68: frames to the next hit (phase 2 step 4, phase 3 step 2)
+    int   m_grip;               // ROR 0x6c: step 10's frames
+    int   m_hits;               // ROR 0x70: hits left in the series (1..3)
+    int   m_hit_alt;            // ROR 0x74: the next hit's motion: 1 0x28 was last
+    int   m_reached;            // ROR 0x78: phase 0: the chase arrived (1) or timed out (0)
+    int   m_hit_pc;             // ROR 0x7c: the PC was tested this slap
+    int   m_hit_dog;            // ROR 0x80: the dog was tested
+    int   m_se_done;            // ROR 0x84: the step's SE played
+    float m_pc_pos[4];          // ROR 0x88: getFrontPos's grab point; [3] the PC's rot y (placePC)
 };
 
 /* State 7 (vtable 0x2e2190, EE 0x38). layout: host -- polymorphic. */
@@ -209,7 +262,8 @@ public:
     int m_cnt;                  // ROR 0x38: frames until the dog is shaken off
 };
 
-/* State 5 (vtable 0x2e2220, EE 0x44). layout: host -- polymorphic. */
+/* State 5 (vtable 0x2e2220, EE 0x44): the counter blow (motion 0x34).
+ * layout: host -- polymorphic. */
 class HfmOutCounter : public EmyOut
 {
 public:
@@ -218,6 +272,10 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x00149184
     int  Exec();                                                         // EE slot 3, ROR 0x001491ec
     void Term();                                                         // EE slot 4, ROR 0x001494ac
+
+    int m_cnt;                  // ROR 0x38: frames in the step
+    int m_hit_pc;               // ROR 0x3c: the PC was tested
+    int m_hit_dog;              // ROR 0x40: the dog was tested
 };
 
 /* State 9 (vtable 0x2e2250, EE 0x38). layout: host -- polymorphic. */
