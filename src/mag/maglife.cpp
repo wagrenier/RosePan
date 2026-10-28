@@ -101,6 +101,13 @@ void MagLifeControlChara::getPosition(float *out)
     }
 }
 
+// Written by the mag/maglifebwnctrl.cpp session (MagLifeBwnCtrlModeFind::init).
+// ROR 0x00119fa4
+float *MagLifeControlChara::getTransPtr()
+{
+    return m_actor->m_trans;
+}
+
 // ROR 0x00119fb0
 float MagLifeControlChara::getRotY()
 {

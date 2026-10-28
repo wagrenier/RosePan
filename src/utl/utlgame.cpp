@@ -126,3 +126,10 @@ void utlMarkObjTaken(unsigned int oid)
 {
     ROSEPAN_STUB("utlMarkObjTaken", 0x00103428);
 }
+
+// stub of ROR 0x00102dc0
+int utlFindDoorBetween(UtlDoorInfo *out, int a, int b, const float *pos)
+{
+    ROSEPAN_STUB("utlFindDoorBetween", 0x00102dc0);
+    return {};
+}

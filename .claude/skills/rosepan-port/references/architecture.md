@@ -1117,6 +1117,15 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   Wait; Wait follows past 170 from the PC, idles every 300 frames (table 0x2ebe10), sits at 1801,
   lies down at 3601. Orders: come (follow / turn / back off / action table 0x2ec448), stay (state 3),
   go (pending find, enemies ahead -> bark, item ahead -> find, floor ahead -> move, else follow).
+  Follow (+0x94, its +0x04 = phase << 1 | step) walks straight at the PC while 0x17e0a8 (a 40-wide
+  line over the scene's sector list) is clear, else paths; Wait again within 105. Find (+0xa0: door
+  point +0x10, heading +0x20, kind s16 +0x24, sides +0x26 / +0x27) picks the item with utlFindBest
+  0x106344 (FCHRstat objects whose uid u16 +0x128 is one of the UtlFind's ids; the current room's
+  first, else weight +0x118 over distance); another room: WrdSrv::findRoute, then utlFindDoorBetween
+  0x102dc0 (kind-9 objects linking two rooms, ctlObjParam 0xc) and Brown goes 95 before the door,
+  turns, slides through (door kind 0) or waits; errors ERR_CANNOT_FIND_ITEM 0 .. ERR_END 7 in the
+  controller's m_0c pick Brown's answer motion (table 0x2ec028: 132..137). MagLifeBwn::message 8
+  takes the rotate heading as a float's bits in the int argument.
 - Fields named by the ELF's linkonce accessors: +0xca0 m_num_search_line (< 127, asserted in
   mag/maglifebwn.h:213), +0xcac getUnmovableCount, +0xcb8 getHealthStatus (0..4 by dog params
   0x1b / 0x1c: 0.8 / 0.4 / 0.2 / 0), +0xcc0 isPathMoveEnd = isActionEnd, +0xcc4 getMoveResult /

@@ -257,6 +257,12 @@
   "was": "FUN_00102adc",
   "why": "asserts theOID != 0 (utl/utlgame.cpp 0x23f), tail-calls EmyManager::isEmyDamaging on the global manager"
  },
+ "00102dc0": {
+  "name": "utlFindDoorBetween",
+  "tag": "ror-inferred",
+  "was": "FUN_00102dc0",
+  "why": "over the object list, kind-9 objects whose ctlObjParam 0xc rooms are (a, b) either way: the nearest to pos fills pos, rooms, rotY (+0x1a4 wrapped), the object and a kind 0..3 from three ctlObjParam 2 tests; 1 found"
+ },
  "00103428": {
   "name": "utlMarkObjTaken",
   "tag": "ror-inferred",
@@ -605,6 +611,30 @@
   "was": "FUN_00106010",
   "why": "compares two strings folding a..z to upper case; 1 when equal, 0 otherwise; MagLoaderIndex::find uses it"
  },
+ "001060e8": {
+  "name": "utlFindObjWrdNo",
+  "tag": "ror-inferred",
+  "was": "FUN_001060e8",
+  "why": "asserts obj (utl/utlfind.cpp 22); FCHRstat::getParam(obj, 8) = the object's room number"
+ },
+ "00106138": {
+  "name": "utlFindObjUid",
+  "tag": "ror-inferred",
+  "was": "FUN_00106138",
+  "why": "asserts obj (utl/utlfind.cpp 36); the u16 at +0x128 (getFoundTargetUID's value)"
+ },
+ "00106178": {
+  "name": "utlFindObjId",
+  "tag": "ror-inferred",
+  "was": "FUN_00106178",
+  "why": "asserts obj (utl/utlfind.cpp 48); the word at +0x100 (the object id utlIsObj takes)"
+ },
+ "001061b8": {
+  "name": "utlFindObjPos",
+  "tag": "ror-inferred",
+  "was": "FUN_001061b8",
+  "why": "asserts obj (utl/utlfind.cpp 60); FCHRstat::getPos(obj, out)"
+ },
  "0010620c": {
   "name": "utlFindClear",
   "tag": "ror-inferred",
@@ -622,6 +652,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00106280",
   "why": "UtlFind +0x14 = arg, +0x10 = 0x103240(find, 4, item)"
+ },
+ "001062b4": {
+  "name": "utlFindMatchObj",
+  "tag": "ror-inferred",
+  "was": "FUN_001062b4",
+  "why": "0x102b6c(obj, find ids, find->m_10): nonzero when obj is one of the find's ids"
+ },
+ "00106344": {
+  "name": "utlFindBest",
+  "tag": "ror-inferred",
+  "was": "FUN_00106344",
+  "why": "pos NULL: 0x1062d8; else over the object list, objects whose uid is one of the find's ids: the first in room wrd wins, else the best +0x118 weight over the world distance / 100"
  },
  "00106658": {
   "name": "utlConvSndId",
@@ -2417,6 +2459,12 @@
   "was": "FUN_00119f88",
   "why": "copies the bound actor's m_trans (+0x40 quad) into out when there is an actor"
  },
+ "00119fa4": {
+  "name": "MagLifeControlChara::getTransPtr",
+  "tag": "ror-inferred",
+  "was": "FUN_00119fa4",
+  "why": "returns m_actor + 0x40 (DogActor::m_trans) without a NULL check"
+ },
  "00119fb0": {
   "name": "MagLifeControlChara::getRotY",
   "tag": "ror-inferred",
@@ -3551,6 +3599,18 @@
   "was": "FUN_0012668c",
   "why": "_vt$20MagLifeBwnModeRotate slot 2"
  },
+ "001267c0": {
+  "name": "MagLifeBwnCtrlModeFind::isFindTarget",
+  "tag": "ror-inferred",
+  "was": "FUN_001267c0",
+  "why": "Find-mode member wrapper (this, obj, find) tail-jumping utlFindMatchObj(find, obj); no callers"
+ },
+ "001267d8": {
+  "name": "MagLifeBwnCtrlModeFind::findBest",
+  "tag": "ror-inferred",
+  "was": "FUN_001267d8",
+  "why": "Find-mode member wrapper (this, find, wrd, pos) tail-jumping utlFindBest(find, pos, wrd); Find::init's item pick"
+ },
  "001267f4": {
   "name": "MagLifeBwnCtrlMode::countEmyAround",
   "tag": "ror-inferred",
@@ -3605,6 +3665,12 @@
   "was": "FUN_00127150",
   "why": "vtable 0x2e1598 slot 2"
  },
+ "00127558": {
+  "name": "MagLifeBwnCtrlModeFollow::followPC",
+  "tag": "ror-inferred",
+  "was": "FUN_00127558",
+  "why": "Follow::live's walk: stops at 105 from the PC (state 1), walk message 5 within pi/80 or pi/40 of the heading, turn message 7 by sixths of pi; asserts m_60 == 0 (line 789)"
+ },
  "00127a74": {
   "name": "MagLifeBwnCtrlModeStay::init",
   "tag": "ror-inferred",
@@ -3628,6 +3694,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00127e68",
   "why": "vtable 0x2e1558 slot 2"
+ },
+ "00128724": {
+  "name": "MagLifeBwnCtrlModeFind::isAtDoor",
+  "tag": "ror-inferred",
+  "was": "FUN_00128724",
+  "why": "pos minus the mode's door point in the door's frame (rotY -m_20): within 50 in y, 30 across, 76..100 on the door side m_27"
+ },
+ "00128854": {
+  "name": "MagLifeBwnCtrlModeFind::searchDoorSide",
+  "tag": "ror-inferred",
+  "was": "FUN_00128854",
+  "why": "out = door point + 95 (side) or -95 along the door's heading, then tail-calls MagLifeBwn::searchPath(out)"
  },
  "0012890c": {
   "name": "MagLifeBwnCtrlModeFindEnd::init",
@@ -3706,6 +3784,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00128e20",
   "why": "vtable 0x2e1458 slot 1"
+ },
+ "00128e6c": {
+  "name": "MagLifeBwnCtrlModeBark::findNearestEmy",
+  "tag": "ror-inferred",
+  "was": "FUN_00128e6c",
+  "why": "utlCollectEmyInfoAt within 500 of Brown (0), the PC (1) or 500 ahead of the PC (2); index of the smallest m_dist, -1 none (assert line 2129 on another where)"
  },
  "00129028": {
   "name": "MagLifeBwnCtrlModeBark::live",

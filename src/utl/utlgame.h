@@ -79,6 +79,22 @@ int utlCollectEmyInfoAt(UtlEmyInfoBuf *eib, const float *pos, int kind, int flag
  * most 32, into an UtlEmyInfoBuf: position, m_obj_id, m_24. Returns the
  * count (m_num untouched). */
 int utlCollectItemInfo(UtlEmyInfoBuf *eib, int flag);                    // ROR 0x00103ccc
+struct FCHRstat;
+
+/* utlFindDoorBetween's answer. EE 0x24. layout: host -- m_obj is a
+ * pointer; EE offsets in the comments. */
+struct UtlDoorInfo
+{
+    float     m_pos[4];         // ROR 0x00: the door object's position
+    int       m_room[2];        // ROR 0x10: the two rooms it links (ctlObjParam 0xc)
+    float     m_rot_y;          // ROR 0x18: its heading (+0x1a4), wrapped into -pi .. pi
+    FCHRstat *m_obj;            // ROR 0x1c
+    int       m_kind;           // ROR 0x20: 0..3 from three ctlObjParam 2 tests (3 turns the heading by pi)
+};
+
+/* The door object (kind 9) linking rooms a and b, the nearest to pos;
+ * 1 found. */
+int utlFindDoorBetween(UtlDoorInfo *out, int a, int b, const float *pos); // ROR 0x00102dc0
 /* GamMan::isObj / markObjTaken on the global GamMan. */
 int  utlIsObj(unsigned int oid);                                         // ROR 0x0010344c
 void utlMarkObjTaken(unsigned int oid);                                  // ROR 0x00103428
