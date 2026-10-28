@@ -318,7 +318,7 @@ int HfmOutWalk::Exec()
                 pc = pcObj->m_oid;
             if (!emyChkInSight(0x1.cbfffep+6f /* 0x42e5ffff, 115 */, 0x1.921fb4p+2f /* 0x40c90fda, 2 pi */,
                                0, pc, m_achr)) {
-                emyStartMove(0, this, pos);
+                emyStartMove(0.0f, this, pos);
                 setStep(1);
                 return -1;
             }
@@ -679,7 +679,7 @@ int HfmOutWalk2::Exec()
             float pos[4];
             getRoamPos(pos);
             if (emyVecLength(pos) >= 0x1.cbfffep+6f /* 0x42e5ffff, 115 */) {
-                emyStartMove(0, this, pos);
+                emyStartMove(0.0f, this, pos);
                 setStep(1);
                 return -1;
             }

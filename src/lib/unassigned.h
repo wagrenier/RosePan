@@ -237,13 +237,60 @@ public:
     int m_24c;                  // ROR 0x24c: EmyManager::getEmyHoldWord24c
 };
 
+/* TskEnemyMove::start's record (EE 0x60 on emyStartMove's stack; the word
+ * index the task reads in the comments). layout: host -- the pointer. */
+struct EmyMoveParam
+{
+    u_int  m_oid;               // [0]: the enemy
+    int   *m_done;              // [1]: cleared, then the result (EmyOut::m_move_done)
+    int    m_mode;              // [2]: the type's (0x2f1d50: 1 for types 6..10)
+    float  m_agl;               // [3]: EmyMain::m_agl
+    float  m_walk;              // [4]: the type's speed (0x2f1c90), times m_agl
+    float  m_run;               // [5]: the chase's second speed (0x2f1c94; 0 for a move)
+    float  m_dist;              // [6]: the type's pair (0x2f1d80: 45 / 60)
+    float  m_angle;             // [7]: ... and 0.3 pi
+    int    m_parsonality;       // [8]: EmyMain::m_parsonality (the task keeps it + 3)
+    int    m_carry;             // [9]: a Got (type 2) carrying kind 0xa2e (chase only)
+    u_int  m_target;            // [10]: the oid followed (chase), 0
+    float  m_pos[3];            // [11]: the goal (move)
+    int    _0e;                 // [14]: not set
+    float  m_turn;              // [15]: the type's turn rate (0x2f1c98)
+    int    _10;                 // [16]: not set
+    u_int  m_kind[4];           // [17]: EmyMain::getMoveParam's words 0..3
+    int    m_type;              // [21]: EmyMain::GetType
+    u_int  m_kind4;             // [22]: ... and word 4
+    float  m_range;             // [23]: added to the two radii (the stop distance)
+};
+
+/* TskEnemyTurn::start's record (emyStartTurn). layout: host -- the pointer. */
+struct EmyTurnParam
+{
+    u_int  m_oid;               // [0]: the enemy
+    u_int  m_target;            // [1]: the PC's or the dog's oid, 0 none
+    int   *m_done;              // [2]: cleared, then the result (EmyOut::m_turn_done)
+    int    m_type;              // [3]: EmyMain::GetType
+    float  m_agl;               // [4]: EmyMain::m_agl
+    float  m_arg;               // [5]: emyStartTurn's float (task +0x28)
+};
+
 /* The enemy move task (vtable 0x2e5040; unassigned@001fd424). layout: host --
  * polymorphic; nothing placed yet. */
 struct TskEnemyMove : CmnITask
 {
+    /* Active (+4 = 1) toward the record's goal or target. */
+    void start(const EmyMoveParam *prm);                                 // ROR 0x00200700
     /* Stops it: +4 = 0, its SE stopped, EmyManager's work word of its
      * oid cleared (EmyMain::InactiveMove). */
     void stop();                                                         // ROR 0x00202f10
+};
+
+/* The enemy turn task (unassigned@001fd424). layout: host -- polymorphic. */
+struct TskEnemyTurn : CmnITask
+{
+    /* Active (+4 = 1) toward the record's target. */
+    void start(const EmyTurnParam *prm);                                 // ROR 0x0020350c
+
+    int m_active;               // ROR 0x04: start sets 1, EmyOut::termCommon 0
 };
 
 /* ChrMotionRef, the Tsk* script tasks, the chr* helpers: task/tsk_chr.h. */

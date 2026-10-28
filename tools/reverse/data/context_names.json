@@ -7043,6 +7043,12 @@
   "was": "FUN_001665b8",
   "why": "SE id by no (0..0xe switch by GetType, above from table 0x2f171c)"
  },
+ "001669a4": {
+  "name": "EmyMain::getMoveParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001669a4",
+  "why": "system data field 0x20 of the enemy object's kind picks a 0x18-byte record of 0x2f18b8; emyStartMove / emyStartChase copy five of its words into the move record"
+ },
  "00166a0c": {
   "name": "EmyMain::testNotifyHit",
   "tag": "ror-inferred",
@@ -7085,6 +7091,12 @@
   "was": "FUN_00166da4",
   "why": "+0x14 = the PC's or the dog's oid (GamMan +0x22090 / +0x22094) by sight within 60 and a rate, +0x10 = 1 when the dog"
  },
+ "00166eb4": {
+  "name": "EmyOut::selectNearTarget",
+  "tag": "ror-inferred",
+  "was": "FUN_00166eb4",
+  "why": "getBasePos, the PC (0x16a6b4) and dog (0x16a7ac) spine positions; the PC nearer in x/z forces rate 100, then selectTarget(rate)"
+ },
  "00166f50": {
   "name": "emyStartChase",
   "tag": "ror-inferred",
@@ -7096,6 +7108,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001670dc",
   "why": "(mode, out, pos): fills the per-type move record (tables 0x2f1c90..) and starts the enemy's TskEnemyMove (0x200700) to pos; done flag out +0x24"
+ },
+ "00167230": {
+  "name": "emyStartTurn",
+  "tag": "ror-inferred",
+  "was": "FUN_00167230",
+  "why": "fills a record {oid, the PC or dog oid by a2, &out+0x28, GetType, m_agl, f12} and starts the enemy's turn task (EmyMain +0x1f8) after killTasks, like emyStartMove does the move task"
+ },
+ "001679b4": {
+  "name": "emyChkChase",
+  "tag": "ror-inferred",
+  "was": "FUN_001679b4",
+  "why": "2 when target is no object or out+0x24 (the move result) is 2, 1 when emyChkInSight(range, angle, useAngle, target, achr) holds; both stop the move task; else 0"
  },
  "00167d88": {
   "name": "EmyOut::getFrontPos",
@@ -7145,6 +7169,24 @@
   "was": "FUN_00169538",
   "why": "setStartState's new(0xa8): count 0, 40 GamIdMap pointers cleared, +0xa4 = the start state"
  },
+ "0016957c": {
+  "name": "EmyStateMap::~EmyStateMap",
+  "tag": "ror-inferred",
+  "was": "FUN_0016957c",
+  "why": "deletes each of the 40 state maps (GamIdMap deleting destructor, flags 3), then operator_delete on bit 0: the deleting destructor of the graph EmyStateMap::EmyStateMap builds"
+ },
+ "00169604": {
+  "name": "EmyStateMap::getMap",
+  "tag": "ror-inferred",
+  "was": "FUN_00169604",
+  "why": "returns word [state + 1]: the GamIdMap of a state (EmyStateMap::next calls it with m_cur)"
+ },
+ "00169614": {
+  "name": "EmyStateMap::addMap",
+  "tag": "ror-inferred",
+  "was": "FUN_00169614",
+  "why": "word [state + 1] = map and word 0 (the count) + 1; emy_main's setStartState builds the graph with it"
+ },
  "0016968c": {
   "name": "EmyStateMap::next",
   "tag": "ror-inferred",
@@ -7169,6 +7211,18 @@
   "was": "FUN_00169a14",
   "why": "sqrt(x*x + y*y + z*z) of a0"
  },
+ "00169a98": {
+  "name": "emyChkNearXZ",
+  "tag": "ror-inferred",
+  "was": "FUN_00169a98",
+  "why": "|dx| and |dz| under r and dx*dx + dz*dz < r*r between two vectors: emyChkInSight's range test"
+ },
+ "00169b0c": {
+  "name": "emyChkNearXZY",
+  "tag": "ror-inferred",
+  "was": "FUN_00169b0c",
+  "why": "emyChkNearXZ plus |dy| < 100: emyChkHitReach's test of a hit node against the target's spine"
+ },
  "00169bac": {
   "name": "emyChkInSight",
   "tag": "ror-inferred",
@@ -7181,11 +7235,29 @@
   "was": "FUN_00169f94",
   "why": "the first n hit nodes (p_hit table 0x298de8) of oid's actor within range + the target's radius of the target's node"
  },
+ "0016a594": {
+  "name": "emyGetSEPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0016a594",
+  "why": "GamMan::getObjPos, and for an achr oid (bits 28..29 = 1) x/z from its Bip01 Spine1 node; emyPlaySE's position"
+ },
+ "0016a6b4": {
+  "name": "emyGetPCPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0016a6b4",
+  "why": "Bip01 Spine1 x/z of GamMan::m_pcPtr's actor, y 0"
+ },
+ "0016a7ac": {
+  "name": "emyGetDogPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0016a7ac",
+  "why": "Bip01 Spine1 x/z of GamMan::m_dogPtr's actor, y 0"
+ },
  "0016a8a4": {
   "name": "emyPlaySE",
   "tag": "ror-inferred",
   "was": "FUN_0016a8a4",
-  "why": "0x16a594(oid, pos), the SE id from 0x163ea0(oid, no), GamSndMan::playSE(id, 0, pos, 0)"
+  "why": "EmyManager::getEmySE(oid, no) played by GamSndMan::playSE at emyGetSEPos; the name the project header already uses"
  },
  "0016a914": {
   "name": "Eff0::Eff0",
@@ -16871,11 +16943,23 @@
   "was": "FUN_002005b8",
   "why": "TskDamage::setup's step for chr word 6"
  },
+ "00200700": {
+  "name": "TskEnemyMove::start",
+  "tag": "ror-inferred",
+  "was": "FUN_00200700",
+  "why": "this+4 = 1 and copies the move record emyStartMove / emyStartChase build (oid, done flag pointer, speeds by m_agl, target, position, radii) into the task"
+ },
  "00202f10": {
   "name": "TskEnemyMove::stop",
   "tag": "ror-inferred",
   "was": "FUN_00202f10",
   "why": "+4 = 0, stops its SE +0xab8, clears EmyManager's work word of its oid +8"
+ },
+ "0020350c": {
+  "name": "TskEnemyTurn::start",
+  "tag": "ror-inferred",
+  "was": "FUN_0020350c",
+  "why": "emyStartTurn's record into the turn task (EmyMain +0x1f8)"
  },
  "00203d94": {
   "name": "SysTimer::SysTimer",

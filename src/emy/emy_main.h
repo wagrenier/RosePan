@@ -18,6 +18,7 @@
 
 struct TskEnemyMove;
 struct TskEnemyTurn;
+struct GamIdMap;
 class  EmyMain;
 
 /* The state transition table an enemy is built with (createEmy's trans;
@@ -32,17 +33,35 @@ struct _tagEnemyTransition
     const char *m_table;        // ROR 0x0c: m_states x m_inputs
 };
 
-/* The enemy's state graph (EE 0xa8, newed by setStartState; unassigned@00166a1c):
+/* A row of the kind move table (data 0x2f18b8, EE 0x18; EmyMain::getMoveParam):
+ * emyStartMove / emyStartChase copy words 0..4 into the move record
+ * (TskEnemyMove +0xa98 / +0xaa0 / +0xaa8 / +0xab0 / +0xab4). Roles not read yet. */
+struct EmyKindMoveParam
+{
+    u_int m_w[6];               // ROR 0x00
+};
+static_assert(sizeof(EmyKindMoveParam) == 0x18, "EmyKindMoveParam");
+
+/* The enemy's state graph (EE 0xa8, newed by setStartState; emy/emy_out.cpp):
  * a GamIdMap per state from the transition table and the current state.
- * layout: host -- only the word the classes use is placed. */
+ * layout: host -- the map pointers; EE offsets in the comments. */
 struct EmyStateMap
 {
+    /* No maps; state current. */
     EmyStateMap(int state);                                              // ROR 0x00169538
+    /* Deletes every state's map. */
+    ~EmyStateMap();                                                      // ROR 0x0016957c
+    /* The map of state (NULL none). */
+    GamIdMap *getMap(int state);                                         // ROR 0x00169604
+    /* map becomes state's; m_count + 1. */
+    void addMap(int state, GamIdMap *map);                               // ROR 0x00169614
     /* The current state's map finds input: the state it leads to becomes
      * current and is returned; 0 when there is none. */
     int  next(int input);                                                // ROR 0x0016968c
 
-    int m_cur;                  // ROR 0xa4: the current state
+    int       m_count;          // ROR 0x00: addMap's count
+    GamIdMap *m_map[40];        // ROR 0x04: a map per state
+    int       m_cur;            // ROR 0xa4: the current state
 };
 
 /* The enemy's parameter block (GamMan::setEmyParam's word, script data).
@@ -87,6 +106,9 @@ public:
     /* m_target = the PC or (by sight within 60 and rate %) the dog;
      * m_target_dog says which. */
     void selectTarget(int rate);                                         // ROR 0x00166da4
+    /* selectTarget(rate), or (100) the PC when its spine is nearer in x / z
+     * than the dog's. */
+    void selectNearTarget(int rate);                                     // ROR 0x00166eb4
     /* chrMtnMove2Achr at the emy's speed (m_agl / 60); flags 0 clears the
      * emy's motion input word. */
     void setMotion(int motion, int flags);                               // ROR 0x001680a0
@@ -113,7 +135,8 @@ public:
     u_int     m_target;         // ROR 0x14: get_target_oid
     int       m_bitten;         // ROR 0x1c: ClearBittenFlg
     int       m_20;             // ROR 0x20
-    int       m_move_done;      // ROR 0x24: the move task sets it (emyStartMove)
+    int       m_move_done;      // ROR 0x24: the move task's result (emyStartMove clears it; 2 ends emyChkChase)
+    int       m_turn_done;      // ROR 0x28: the turn task's result (emyStartTurn clears it)
     int       m_se;             // ROR 0x2c: a looping SE, -1 none (termCommon stops it)
     int       m_30;             // ROR 0x30: utlRandRange(8, 24) at construction
 
@@ -125,8 +148,26 @@ public:
 
 /* Free helpers of the out code (unassigned@00166a1c). */
 /* Fills the type's move record (data 0x2f1c90..) and starts the enemy's
- * TskEnemyMove to pos; out->m_move_done is set when it arrives. */
-void emyStartMove(int mode, EmyOut *out, const float *pos);              // ROR 0x001670dc
+ * TskEnemyMove to pos (range: the record's last word, which the task adds
+ * to the radii); out->m_move_done is set when it arrives. */
+void emyStartMove(float range, EmyOut *out, const float *pos);           // ROR 0x001670dc
+/* Starts the enemy's TskEnemyTurn toward the PC (dog 0) or the dog;
+ * out->m_turn_done is set when it is done. */
+void emyStartTurn(float arg, EmyOut *out, int dog);                      // ROR 0x00167230
+/* The chase's end test: 2 when target is gone or the move ended
+ * (m_move_done 2), 1 when the enemy sees it (emyChkInSight); both stop the
+ * move task. 0 otherwise. */
+int  emyChkChase(float range, float angle, EmyOut *out, u_int target,
+                 int useAngle);                                          // ROR 0x001679b4
+/* a and b within r of each other in x / z. */
+int  emyChkNearXZ(float r, const float *a, const float *b);              // ROR 0x00169a98
+/* emyChkNearXZ and less than 100 apart in y. */
+int  emyChkNearXZY(float r, const float *a, const float *b);             // ROR 0x00169b0c
+/* oid's position; an achr's x / z from its Bip01 Spine1. */
+void emyGetSEPos(u_int oid, float *pos);                                 // ROR 0x0016a594
+/* The PC's / the dog's Bip01 Spine1 x / z, y 0. */
+void emyGetPCPos(float *pos);                                            // ROR 0x0016a6b4
+void emyGetDogPos(float *pos);                                           // ROR 0x0016a7ac
 /* 1 when to is reachable from from over the secta cells (same cell, or
  * the cell path test), 0 when either is off the cells. */
 int  emyCanReach(const float *from, const float *to);                    // ROR 0x0016976c
@@ -194,6 +235,9 @@ public:
     /* m_damage_end - 1; at 0 the param loses flag 0x400. */
     void countDamageEnd();                                               // ROR 0x00166534
     u_int getSE(int no);                                                 // ROR 0x001665b8
+    /* The move record of the enemy object's kind (system data field 0x20
+     * picks a row of the table at 0x2f18b8). */
+    const EmyKindMoveParam *getMoveParam();                              // ROR 0x001669a4
     bool testNotifyHit();                                                // ROR 0x00166a0c
     /* Param 8 (the area) of the PC (GamMan::m_pcPtr) is the enemy's; 0 without a PC. */
     bool isPCSameArea();                                                 // ROR 0x00165734

@@ -1418,7 +1418,7 @@ never asserts): sessions name them (`tus.py define --why`).
   (slot 4) writes a transition-table input into `m_req` +0x24 (-1 none; nothing while `m_decide_sw`
   +0x28 is 0 or a request is pending), testing only inputs the current state's row has (`m_input[]`
   at +0x204 of the derived class, filled by `selectOut`); `exec` (slot 5) moves the state graph
-  `EmyStateMap` +0x1c (EE 0xa8, a GamIdMap per state, current state +0xa4; `next` 0x16968c) --
+  `EmyStateMap` +0x1c (EE 0xa8: count +0, a GamIdMap per state +4 (40), current state +0xa4; `addMap` 0x169614, `getMap` 0x169604, `next` 0x16968c) --
   notify bit 2 (killed) forces the class's dead state, bit 1 (hit) restarts the state -- and sets
   `m_changed` +0x40; `after` (slot 6) calls the old out's Term, `selectOut` (slot 2: `m_out[state]`
   +0x48, 40 pointers, and its Init) and stores the out's Exec result in `m_req`. `_tagEnemyTransition`:
@@ -1427,9 +1427,12 @@ never asserts): sessions name them (`tus.py define --why`).
   motion-ended input word +0x2c (SetInputFlgMotion) and `m_agl` +0x1c4 (set_agl: the motion speed x 60).
   **EmyOut** (ctor 0x166a1c `(oid, achr, emy)`): oid +0, step +4, achr +8, emy +0xc, target-is-dog
   +0x10, target oid +0x14, bitten +0x1c, move done +0x24 (the move task's flag), looping SE +0x2c (-1),
-  +0x30 = utlRandRange(8, 24); vptr +0x34, slots 2 Init, 3 Exec (returns the next input, -1 none),
+  turn done +0x28 (emyStartTurn), +0x30 = utlRandRange(8, 24); vptr +0x34, slots 2 Init, 3 Exec (returns the next input, -1 none),
   4 Term (the ELF's `HfmOutTest::Term`); the common Term is `termCommon` 0x166ad0. Helpers
-  (unassigned@00166a1c): `emyChkInSight` 0x169bac (a0 useAngle, a1 target oid, a2 achr, f12 range,
+  (emy/emy_out.cpp; the move record emyStartMove / emyStartChase hand TskEnemyMove::start 0x200700 is
+  24 words, per-type speeds 0x2f1c90 / modes 0x2f1d50 / pairs 0x2f1d80 and five words of the kind's
+  0x2f18b8 row (EmyMain::getMoveParam 0x1669a4); emyStartTurn 0x167230 -> TskEnemyTurn::start 0x20350c):
+  `emyChkInSight` 0x169bac (a0 useAngle, a1 target oid, a2 achr, f12 range,
   f13 angle), `emyCanReach` 0x16976c (secta cells), `emyStartMove` 0x1670dc (mode, out, pos: the
   enemy's TskEnemyMove), `EmyOut::setMotion` 0x1680a0 / `setWalkMotion` 0x1682b0 (chrMtnMove2Achr),
   `selectTarget` 0x166da4 (PC or dog), `emyStartChase` 0x166f50 (f12 stop range, out, target oid: the

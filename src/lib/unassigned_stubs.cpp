@@ -374,18 +374,6 @@ EmyMain::~EmyMain()
     ROSEPAN_STUB("EmyMain::~EmyMain", 0x00164208);
 }
 
-// stub of ROR 0x00166a1c
-EmyOut::EmyOut(u_int oid, ACHRstat *achr, EmyMain *emy)
-{
-    ROSEPAN_STUB("EmyOut::EmyOut", 0x00166a1c);
-}
-
-// stub of ROR 0x00166a74
-EmyOut::~EmyOut()
-{
-    ROSEPAN_STUB("EmyOut::~EmyOut", 0x00166a74);
-}
-
 // stub of ROR 0x0015c2a4
 DwfMain::~DwfMain()
 {
@@ -923,12 +911,6 @@ int TskDamage::stepKindA()
     return {};
 }
 
-// stub of ROR 0x0016a8a4
-void emyPlaySE(u_int oid, int no)
-{
-    ROSEPAN_STUB("emyPlaySE", 0x0016a8a4);
-}
-
 // stub of ROR 0x0010426c
 int utlRandMean(int lo, int hi, int n)
 {
@@ -1303,115 +1285,10 @@ void TskEnemyMove::stop()
     ROSEPAN_STUB("TskEnemyMove::stop", 0x00202f10);
 }
 
-// stub of ROR 0x00166b74
-void EmyOut::getBasePos(float *pos)
-{
-    ROSEPAN_STUB("EmyOut::getBasePos", 0x00166b74);
-}
-
-// stub of ROR 0x00166da4
-void EmyOut::selectTarget(int rate)
-{
-    ROSEPAN_STUB("EmyOut::selectTarget", 0x00166da4);
-}
-
-// stub of ROR 0x001680a0
-void EmyOut::setMotion(int motion, int flags)
-{
-    ROSEPAN_STUB("EmyOut::setMotion", 0x001680a0);
-}
-
-// stub of ROR 0x001682b0
-void EmyOut::setWalkMotion()
-{
-    ROSEPAN_STUB("EmyOut::setWalkMotion", 0x001682b0);
-}
-
-// stub of ROR 0x00166ad0
-void EmyOut::termCommon()
-{
-    ROSEPAN_STUB("EmyOut::termCommon", 0x00166ad0);
-}
-
-// stub of ROR 0x0016968c
-int EmyStateMap::next(int input)
-{
-    ROSEPAN_STUB("EmyStateMap::next", 0x0016968c);
-    return {};
-}
-
-// stub of ROR 0x00169810
-int emyAttachItem(u_int oid, u_int item)
-{
-    ROSEPAN_STUB("emyAttachItem", 0x00169810);
-    return {};
-}
-
-// stub of ROR 0x0016976c
-int emyCanReach(const float *from, const float *to)
-{
-    ROSEPAN_STUB("emyCanReach", 0x0016976c);
-    return {};
-}
-
-// stub of ROR 0x00169bac
-int emyChkInSight(float range, float angle, int useAngle, u_int target,
-                   ACHRstat *achr)
-{
-    ROSEPAN_STUB("emyChkInSight", 0x00169bac);
-    return {};
-}
-
-// stub of ROR 0x001670dc
-void emyStartMove(int mode, EmyOut *out, const float *pos)
-{
-    ROSEPAN_STUB("emyStartMove", 0x001670dc);
-}
-
 // stub of ROR 0x001044b8
 float utlRandRangeF(float lo, float hi)
 {
     ROSEPAN_STUB("utlRandRangeF", 0x001044b8);
-    return {};
-}
-
-// stub of ROR 0x001694cc
-int EmyOut::playSE(int no)
-{
-    ROSEPAN_STUB("EmyOut::playSE", 0x001694cc);
-    return {};
-}
-
-// stub of ROR 0x0016947c
-void EmyOut::stopVoice()
-{
-    ROSEPAN_STUB("EmyOut::stopVoice", 0x0016947c);
-}
-
-// stub of ROR 0x001693ec
-int EmyOut::tickVoice(int lo, int hi, int se)
-{
-    ROSEPAN_STUB("EmyOut::tickVoice", 0x001693ec);
-    return {};
-}
-
-// stub of ROR 0x00169f94
-int emyChkHitReach(float range, u_int oid, int nodes, u_int target)
-{
-    ROSEPAN_STUB("emyChkHitReach", 0x00169f94);
-    return {};
-}
-
-// stub of ROR 0x00166f50
-void emyStartChase(float range, EmyOut *out, u_int target)
-{
-    ROSEPAN_STUB("emyStartChase", 0x00166f50);
-}
-
-// stub of ROR 0x00169a14
-float emyVecLength(const float *v)
-{
-    ROSEPAN_STUB("emyVecLength", 0x00169a14);
     return {};
 }
 
@@ -2968,4 +2845,16 @@ float * i3rBlendVertices(float t, I3rVertexRef *ref, float *buf, const I3rItem *
 {
     ROSEPAN_STUB("i3rBlendVertices", 0x00225498);
     return {};
+}
+
+// stub of ROR 0x00200700
+void TskEnemyMove::start(const EmyMoveParam *prm)
+{
+    ROSEPAN_STUB("TskEnemyMove::start", 0x00200700);
+}
+
+// stub of ROR 0x0020350c
+void TskEnemyTurn::start(const EmyTurnParam *prm)
+{
+    ROSEPAN_STUB("TskEnemyTurn::start", 0x0020350c);
 }
