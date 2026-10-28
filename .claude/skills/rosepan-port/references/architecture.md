@@ -916,8 +916,29 @@ divided by 2 x length x 30 -- radians per frame. `rotateTenkyu` 0x14062c applies
 light, view 0 with far 100000 and zmin = zmax = 0, ALPHA_1 0x44 / FBA 0 / CLAMP 0 / TEST_1 0x13001,
 world = unit at the camera's x / z (y 0). ROM bug: its draw loop runs four slots starting at the
 first slot with a sky (reads past slot 3 when slot 0 is empty); the port stops at slot 3.
-0x140990 (a 4-qword GS packet helper for drawFocus) and `initRecords853bc` 0x140a84 (m_focus
-defaults) open the focus code, left as unassigned@00140030 for mag/magscenefocus.cpp.
+0x140990 opens the focus code (mag/magscenefocus.cpp, next section).
+
+## The scene's focus effect (`mag/magscenefocus.cpp`, 0x140990..0x141e44, 2026-10-27)
+
+A depth-of-field pass. `MagSceneFocus m_focus` at MagScene +0x853bc (EE 0x70; the assert text names
+`m_focus.m_texindex`): +0 mode (bit 0 far1 plane, bit 1 far2 plane; setFocusData sets 3), +4 the
+`efffocus` texture index (-1 = off; drawFocus returns), +8 the layer-key bias, +0xc val[3] = alpha
+(1), far1 (300), far2 (600), +0x18 the track text, +0x1c size, +0x20 next line offset, +0x24 frame
+counter, +0x28 wait frame, +0x40 three MagLerp. `efffocus` is a VRAM-only I3dTexDesc (256 x 256 CT32
+at block 0x2700 = FRAME 0x138, bilinear), like shadow01 (block 0x2300 = FRAME 0x118, the shadow /
+close-up target). drawFocus (last thing of MagScene::draw before the movie) runs, per plane, a
+**shrink** (`shrinkFocusFrame` 0x140fdc: layer 860 + bias, FRAME 0x138, TEX0 the frame being drawn
+-- block 0 on odd frames, 0x70 << 5 on even ones -- one hand-written REGLIST sprite 512 x 448 ->
+256 x 256 by `magPktUVSprite` 0x140990) and a **plane** (`drawFocusPlane` 0x141184: the scene view
+m_view[0], ambient-white light, efffocus draw set, one VU1 sprite at the camera's eye + dist along
+its z, scaled to the frustum's size at dist, colour (1,1,1,alpha), TEST 0x5000d (z GEQUAL) so only
+what lies beyond dist is overlaid). far2 is drawn twice (mode bit 1), far1 once. **The focus track**
+(setFocusData: an event pack's file 2, tsk_scene) is text, CR LF lines `frame command args`,
+lowercased, split at spaces / tabs: `start far1|far2|far1far2`, `term`, `setalpha FROM TO N` (FROM < 0
+= where it is), `setdist PLANE FROM TO N`, `movealpha TO N`, `movedist PLANE TO N`; a line whose frame
+is ahead becomes the wait; an empty line ends the effect (setFocus 0). Native 281 op 13 drives the
+same values. PC: neither pass draws on the host yet (no FRAME_1 targets / VRAM-only textures in the
+native i3d module).
 
 ## The scene's camera (`mag/magscenecamera.cpp`, 0x13c664..0x13f07c, 2026-10-27)
 

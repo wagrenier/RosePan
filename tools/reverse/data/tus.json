@@ -6,8 +6,6 @@
   "unassigned@0021fb50",
   "unassigned@0021c960",
   "unassigned@0013e2ec",
-  "unassigned@00140c68",
-  "unassigned@00140990",
   "mag/maglifepc.cpp",
   "task/naga_chunk.cpp",
   "mag/maglifebwn.cpp",
@@ -981,6 +979,24 @@
    ],
    "status": "verify",
    "why": "No source string in 0x143d3c..0x145020; mag/magsceneif.cpp asserts end at 0x143d3c (its 13 functions serve debug/motnamecnv) and the Hfm enemy classes start at 0x145020. The run is MagScene fog (setFog 0x143d7c and its two wrappers, updateFog), MagLifeWindowDebug's ctor and the Brown control interface over g_magSystem's MagLifeBwnCtrl (magBwnHurt, gamSetBwn*, gamGetBwn*, magBwnSeqCommand) called from gamman, seqcall, tsk_scene: one scene-command file, name chosen by the session (open-items.md)."
+  },
+  "mag/magscenefocus.cpp": {
+   "notes": "Verify: the 15 s smoke run shows the disclaimer screen as before; nothing on that path turns focus on (setFocusData runs from an event pack with a file 2, seqFunc281 op 13 from scripts). Even once a scene turns it on, the PC draws nothing: the native i3d module models neither FRAME_1 render targets nor VRAM-only textures (efffocus block 0x2700, like shadow01 at 0x2300), and the shrink's hand-written GIF packet is deliberately not recorded (its TEX0 is the frame buffer). open-items Open questions has the render-target host task this needs; the first session whose screenshot shows a blurred background behind a focus track marks this done. PC deviations: the track line copy is clipped to the ROM's 128-byte buffer; strlwr is a local helper (focusStrLwr). Renamed updateRecords853fc -> updateFocus, initRecords853bc -> initFocus (magscene.cpp callers updated); seqcall op 13 now uses m_focus.m_val / m_lerp. Removed the stale queue entries unassigned@00140c68 / unassigned@00140990.",
+   "ranges": [
+    [
+     "00140990",
+     "00141e44"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 20:44",
+     "status": "verify",
+     "summary": "The focus (depth-of-field) effect: pinned mag/magscenefocus.cpp 0x140990..0x141e44 (merging unassigned@00140990 / 00140c68 / 0014159c) and wrote all 16 functions: initFocus, setFocus (efffocus VRAM texture), updateFocus / stepLerp, drawFocus with shrinkFocusFrame (frame -> 256x256 work buffer, magPktUVSprite) and drawFocusPlane (VU1 sprite filling the view at far1 / far2, z GEQUAL), setFocusData, runFocusTrack and execFocusCommand (the text track: start, term, setalpha, setdist, movealpha, movedist) with magStrIndex / magStrSplit / magFocusTarget. MagScene +0x853bc is now MagSceneFocus m_focus; strlwr 0x27a490 and atof 0x278288 named."
+    }
+   ],
+   "status": "verify",
+   "why": "The focus effect file: setFocus 0x140b20 asserts m_focus.m_texindex != -1 with mag/magscenefocus.cpp; 0x140990..0x141e44 all work on the focus block +0x853bc..+0x8542c (packet helper and initRecords853bc before it, the lerps, drawFocus and its layer setup, the focus draw 0x141184, then setFocusData and its text-track parser 0x14159c..0x1419d8); mag/magloader.cpp starts at 0x141e44"
   },
   "mag/magscenelight.cpp": {
    "notes": "Build, callcheck and layoutcheck green. The 200 s New Game run passes the four previously reached stubs (setLightNo, setLightFlags, setLightParam, copyLightSet) with no assert and still ends black after the narration, as before: no model draws yet (utlDrawI3r 0x106760, DogMotionBlend::getPose and the i3m pose player unassigned@0022e840 are stubs), so lights cannot be seen; the first session whose screenshot shows a lit model marks this done. Decisions: addLight walks nine sets (0..8) as the ROM does; setShadowLight uses the const pool accessors (assert lines 141..143) and reinterprets m_shadow_lightrec as I3dParallelLight / I3dSpotLight (all floats, same layout); the unreachable ShadowAmbient alignment assert is a comment. loadLight reads only one directional light even when the count is larger (ROM behaviour). Next on the 3D path: item 7, unassigned@00140030 (sky) / setFog.",

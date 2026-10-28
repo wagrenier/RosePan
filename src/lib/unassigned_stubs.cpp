@@ -201,12 +201,6 @@ void FUN_00177830(Obj176a3c *obj, i3dContext *ctx)
     ROSEPAN_STUB("FUN_00177830", 0x00177830);
 }
 
-// stub of ROR 0x00140e88
-void MagScene::drawFocus(i3dContext *ctx, int frame)
-{
-    ROSEPAN_STUB("MagScene::drawFocus", 0x00140e88);
-}
-
 
 // stub of ROR 0x0021e1d8
 u_long   * i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
@@ -360,12 +354,6 @@ void FUN_0017c340(Obj17c0f0 *obj, const float *pos, GamSecta **hit, int arg,
 }
 
 
-// stub of ROR 0x00140c68
-void MagScene::updateRecords853fc()
-{
-    ROSEPAN_STUB("MagScene::updateRecords853fc", 0x00140c68);
-}
-
 // stub of ROR 0x001beeb4
 int GamFont::clear()
 {
@@ -378,12 +366,6 @@ int GamFont::getTextWidth(const char *text)
 {
     ROSEPAN_STUB("GamFont::getTextWidth", 0x001c047c);
     return {};
-}
-
-// stub of ROR 0x00140a84
-void MagScene::initRecords853bc()
-{
-    ROSEPAN_STUB("MagScene::initRecords853bc", 0x00140a84);
 }
 
 // stub of ROR 0x00176c50
@@ -946,12 +928,6 @@ void MsgManSet::release(int window)
     ROSEPAN_STUB("MsgManSet::release", 0x0018761c);
 }
 
-
-// stub of ROR 0x001417e4
-void MagScene::setFocusData(const void *data, int size)
-{
-    ROSEPAN_STUB("MagScene::setFocusData", 0x001417e4);
-}
 
 // stub of ROR 0x001fccf4
 int NagaChunk::find(const char *name)

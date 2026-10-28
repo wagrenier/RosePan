@@ -150,6 +150,25 @@ struct MagLerp
 static_assert(sizeof(MagLerp) == 0x10, "MagLerp is 0x10 bytes on the EE");
 static_assert(offsetof(MagLerp, m_frames) == 0xc, "m_frames");
 
+/* The scene's focus effect (mag/magscenefocus.cpp; the assert text's
+ * m_focus), EE 0x70 at MagScene +0x853bc: the frame shrunk into the
+ * efffocus work buffer and laid back over everything beyond a distance.
+ * layout: host -- the track pointer. */
+struct MagSceneFocus
+{
+    int         m_mode;         // ROR 0x00: bit 0 draws the far1 plane, bit 1 the far2 plane (twice); 0 = off
+    int         m_texindex;     // ROR 0x04: efffocus in m_tex_info, -1 = not added
+    float       m_bias;         // ROR 0x08: the next layer's key above 860 (+0.01 per layer, 0 at each drawFocus)
+    float       m_val[3];       // ROR 0x0c: [0] the planes' alpha (1), [1] far1 (300), [2] far2 (600); native 281 op 13 drives them too
+    const char *m_track;        // ROR 0x18: the focus track's text (setFocusData), NULL = none
+    int         m_track_size;   // ROR 0x1c: its size in bytes
+    int         m_track_pos;    // ROR 0x20: the next line's offset
+    int         m_frame;        // ROR 0x24: frames since the track started (-1 before the first)
+    int         m_wait;         // ROR 0x28: the frame the pending line runs at (-1 = none)
+    int         _2c[5];         // ROR 0x2c: cleared by initFocus only
+    MagLerp     m_lerp[3];      // ROR 0x40: m_val's lerps (startLerp, stepLerp)
+};
+
 /* An entry of the actor draw list collectActors fills (EE 0x10). */
 struct MagSceneDrawEntry
 {
@@ -455,10 +474,24 @@ struct MagScene
     void changeCamera();                                                 // ROR 0x0013d5e4
     /* Turns every sky node about y by its spin (once a frame). */
     void rotateTenkyu();                                                 // ROR 0x0014062c
-    void updateRecords853fc();                                           // ROR 0x00140c68
-    /* The constructor's: clears the records at +0x853bc and sets their
-     * defaults. */
-    void initRecords853bc();                                             // ROR 0x00140a84
+    /* ---- mag/magscenefocus.cpp ---- */
+    /* Once a frame: steps the focus lerps and runs the focus track. */
+    void updateFocus();                                                  // ROR 0x00140c68
+    /* The constructor's: clears m_focus and sets its defaults. */
+    void initFocus();                                                    // ROR 0x00140a84
+    /* One frame of rec; returns the value to show. this is not read. */
+    float stepLerp(MagLerp *rec);                                        // ROR 0x00140d40
+    /* A layer that shrinks the frame buffer at block fbp (0 or 0x70 pages)
+     * into the 256 x 256 work buffer (FRAME 0x138) efffocus reads. */
+    void shrinkFocusFrame(i3dContext *ctx, u_int fbp);                   // ROR 0x00140fdc
+    /* A layer that lays the work buffer over the frame at fbp as a sprite
+     * filling the view at distance dist (z-tested: only what lies
+     * further is covered), alpha m_focus.m_val[0]. */
+    void drawFocusPlane(float dist, i3dContext *ctx, u_int fbp);         // ROR 0x00141184
+    /* Runs the track's lines once their frame comes. */
+    void runFocusTrack();                                                // ROR 0x0014186c
+    /* One track line; 0 = stop for now (a later frame or term), 1 = go on. */
+    int  execFocusCommand(char *line);                                   // ROR 0x001419d8
     /* mag/magscenefocus.cpp: mode 0 releases the efffocus texture, any
      * other adds it (once) and becomes the focus mode (+0x853bc). */
     void setFocus(int mode);                                             // ROR 0x00140b20
@@ -679,8 +712,7 @@ struct MagScene
     S2dMovie       m_movie;             // ROR 0x84aa8
     int            m_bwn_no;            // ROR 0x853b4: setBwn's actor number, -1 = none
     int            m_pc_no;             // ROR 0x853b8: setPC's actor number, -1 = none
-    float          m_focus_val[3];      // ROR 0x853c8: the focus values the lerps below drive (native 281 op 13)
-    MagLerp        m_focus_lerp[3];     // ROR 0x853fc: their lerps (startLerp; updateRecords853fc steps them)
+    MagSceneFocus  m_focus;             // ROR 0x853bc: the focus effect (mag/magscenefocus.cpp)
     Obj17c0f0      m_8542c;             // ROR 0x8542c: reset by releaseTenkyu, sector.sec by load
     int            m_mirror_axis;       // ROR 0x85494: mapparam.bbb word 9 (files over 0x20 bytes): 0 none, 1 z, 2 y (floor), 3 x
     float          m_mirror_plane;      // ROR 0x85498: mapparam.bbb word 10 (a float): the mirror plane's coordinate
