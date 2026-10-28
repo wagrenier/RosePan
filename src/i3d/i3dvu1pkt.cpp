@@ -5,11 +5,11 @@
  *  and sprites UNPACKed to VU1 and drawn by its microprograms. See
  *  i3dvu1pkt.h.
  *
- *  Written so far: the strip body and its two entries, the sprite family
- *  and the view-matrix helpers. Still stubs (lib/unassigned_stubs.cpp):
- *  the clipped strips i3dPktDrawStripCtx 0x21dd10, i3dPktDrawLineStrip
- *  0x21e1d8, their clip helpers 0x21db60 / 0x21db90, the unreferenced
- *  0x21cfb0..0x21db18 and the wire shapes 0x21e6f8..0x21eb24.
+ *  Written: the strip body and its two entries, the clip helpers and the
+ *  CPU-side line strips, the sprite family, the view-matrix helpers and
+ *  the wire shapes. Not written: 0x21cfb0..0x21d378, four functions no
+ *  code or data references (a REF-tag helper, an index-list builder and
+ *  two strip writers that use them) -- dead in the retail ROM.
  *
  *  PORT: each writer writes the ROM's packet words (DMA tags address host
  *  memory by i3dDmaAddr; nothing on the host follows them) and records the
@@ -18,6 +18,8 @@
  * ======================================================================== */
 #include "i3d/i3dvu1pkt.h"
 
+#include <math.h>
+#include <stddef.h>
 #include <string.h>
 
 #include "i3d/i3dctx.h"
@@ -348,6 +350,189 @@ u_long *i3dPktDrawStripColor(u_long *pkt, sceVu0FVECTOR *matrix, int count, cons
     return i3dPktDrawStripImpl(pkt, matrix, count, stq, color, NULL, xyz, adc);
 }
 
+// ROR 0x0021db60
+
+u_int i3dVu0ClipPair(const float *a, const float *b)
+{
+    /* VCLIP a then b: each shifts the CLIP flags up 6 and sets +x -x +y -y
+     * +z -z where the component lies outside +-|w|. */
+    u_int clip = 0;
+    const float *v[2] = { a, b };
+    for (int i = 0; i < 2; i++)
+    {
+        const float w = fabsf(v[i][3]);
+        u_int f = 0;
+        for (int k = 0; k < 3; k++)
+        {
+            if (v[i][k] > w)
+                f |= 1u << (k * 2);
+            if (v[i][k] < -w)
+                f |= 2u << (k * 2);
+        }
+        clip = (clip << 6) | f;
+    }
+    return clip;
+}
+
+// ROR 0x0021db90
+
+int i3dClipSegment(float *a, float *b, int stq, int color)
+{
+    /* Plane k = axis k / 2, the +w side for even k, -w for odd: the end
+     * outside it moves to the crossing; both outside rejects. */
+    for (int k = 5; k >= 0; k--)
+    {
+        const float sign = (k & 1) != 0 ? 1.0f : -1.0f;
+        const u_int clip = i3dVu0ClipPair(a, b);
+        float *out = (clip & (1u << k)) != 0 ? b : NULL;
+        if ((clip & (0x40u << k)) != 0)
+        {
+            out = a;
+            if ((clip & (1u << k)) != 0)
+                return 0;
+        }
+        if (out != NULL)
+        {
+            const int axis = k / 2;
+            const float da = a[axis] + a[3] * sign;
+            const float t = fabsf(da / ((b[axis] + b[3] * sign) - da));
+            i3dVu0VecInterp(t, out, b, a);
+            if (stq)
+                i3dVu0VecInterp(t, out + 4, b + 4, a + 4);
+            if (color)
+                i3dVu0VecInterp(t, out + 8, b + 8, a + 8);
+        }
+    }
+    return 1;
+}
+
+// ROR 0x0021dd10
+
+u_long *i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
+                           const void *stq, const void *colors, const void *xyz,
+                           const u_char *adc)
+{
+    /* Each end: clip-space position, STQ, scaled colour (i3dClipSegment's
+     * +0x00 / +0x10 / +0x20). */
+    struct End { sceVu0FVECTOR pos, stq, color; } e[2];
+    static_assert(sizeof(End) == 0x30, "End");
+    static_assert(offsetof(End, stq) == 0x10 && offsetof(End, color) == 0x20, "End");
+    const float *scale = stq == NULL ? s_colorScale : s_texColorScale;
+
+    I3dView *view = i3dLayerGetView(layer);
+    sceVu0FVECTOR *camera = i3dViewGetCamera(view);
+    sceVu0FVECTOR *proj = i3dViewGetRectProj(view);
+    sceVu0FVECTOR *viewport = i3dViewGetRectViewport(view);
+    sceVu0FMATRIX m;
+    if (matrix != NULL)
+    {
+        i3dVu0MatMul(m, camera, matrix);
+        camera = m;
+    }
+    i3dVu0MatMul(m, proj, camera);
+
+    for (int i = 0; i < count - 1; i++)
+    {
+        const float *p = (const float *)xyz + i * 4;
+        i3dVu0MatApply(e[0].pos, m, p);
+        i3dVu0MatApply(e[1].pos, m, p + 4);
+        if (stq != NULL)
+        {
+            const float *t = (const float *)stq + i * 4;
+            i3dVecCopyW(e[0].stq, t);
+            i3dVecCopyW(e[1].stq, t + 4);
+        }
+        if (colors != NULL)
+        {
+            /* Clamped to 0..1, times the scale. */
+            const float *c = (const float *)colors + i * 4;
+            for (int j = 0; j < 2; j++)
+                for (int k = 0; k < 4; k++)
+                {
+                    float v = c[j * 4 + k];
+                    v = v < 0.0f ? 0.0f : v;
+                    v = v > 1.0f ? 1.0f : v;
+                    e[j].color[k] = v * scale[k];
+                }
+        }
+        if ((adc != NULL && adc[i + 1] != 0) || (e[0].pos[3] < 0.0f && e[1].pos[3] < 0.0f))
+            continue;
+        if (!i3dClipSegment(e[0].pos, e[1].pos, stq != NULL, colors != NULL))
+            continue;
+
+        int s0[4], s1[4];
+        i3dVu0RotTransPers(s0, viewport, e[0].pos, 0);
+        i3dVu0RotTransPers(s1, viewport, e[1].pos, 0);
+        const u_long xyz0 = i3dPackXYZ(s0[0], s0[1], s0[2]);
+        const u_long xyz1 = i3dPackXYZ(s1[0], s1[1], s1[2]);
+        if (colors == NULL)
+        {
+            if (stq != NULL)
+                pkt = i3dPktGouraudTexLineST(pkt, xyz0, xyz1, i3dPackST(e[0].stq[0], e[0].stq[1]),
+                                             i3dPackST(e[1].stq[0], e[1].stq[1]),
+                                             i3dPackRGBAQ(e[0].stq[2], 0xff, 0xff, 0xff, 0x80),
+                                             i3dPackRGBAQ(e[1].stq[2], 0xff, 0xff, 0xff, 0x80));
+            else
+                pkt = i3dPktLine(pkt, xyz0, xyz1, i3dPackRGBAQ(1.0f, 0xff, 0xff, 0xff, 0x80));
+        }
+        else
+        {
+            int c0[4], c1[4];
+            i3dVu0VecFtoi0(c0, e[0].color);
+            i3dVu0VecFtoi0(c1, e[1].color);
+            if (stq == NULL)
+                pkt = i3dPktGouraudLine(pkt, xyz0, xyz1,
+                                        i3dPackRGBAQ(1.0f, c0[0], c0[1], c0[2], c0[3]),
+                                        i3dPackRGBAQ(1.0f, c1[0], c1[1], c1[2], c1[3]));
+            else
+                pkt = i3dPktGouraudTexLineST(pkt, xyz0, xyz1, i3dPackST(e[0].stq[0], e[0].stq[1]),
+                                             i3dPackST(e[1].stq[0], e[1].stq[1]),
+                                             i3dPackRGBAQ(e[0].stq[2], c0[0], c0[1], c0[2], c0[3]),
+                                             i3dPackRGBAQ(e[1].stq[2], c1[0], c1[1], c1[2], c1[3]));
+        }
+    }
+    return pkt;
+}
+
+// ROR 0x0021e1d8
+
+u_long *i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
+                            const void *color, const void *xyz, const u_char *adc)
+{
+    const float *c = (const float *)color;
+    const u_long rgbaq = i3dPackRGBAQ(1.0f, (int)(c[0] * 255.0f), (int)(c[1] * 255.0f),
+                                      (int)(c[2] * 255.0f), (int)(c[3] * 128.0f));
+    I3dView *view = i3dLayerGetView(layer);
+    sceVu0FVECTOR *camera = i3dViewGetCamera(view);
+    sceVu0FVECTOR *proj = i3dViewGetRectProj(view);
+    sceVu0FVECTOR *viewport = i3dViewGetRectViewport(view);
+    sceVu0FMATRIX m;
+    if (matrix != NULL)
+    {
+        i3dVu0MatMul(m, camera, matrix);
+        camera = m;
+    }
+    i3dVu0MatMul(m, proj, camera);
+
+    for (int i = 0; i < count - 1; i++)
+    {
+        sceVu0FVECTOR a, b;
+        const float *p = (const float *)xyz + i * 4;
+        i3dVu0MatApply(a, m, p);
+        i3dVu0MatApply(b, m, p + 4);
+        if ((adc != NULL && adc[i + 1] != 0) || (a[3] < 0.0f && b[3] < 0.0f))
+            continue;
+        if (!i3dClipSegment(a, b, 0, 0))
+            continue;
+        int s0[4], s1[4];
+        i3dVu0RotTransPers(s0, viewport, a, 0);
+        i3dVu0RotTransPers(s1, viewport, b, 0);
+        pkt = i3dPktLine(pkt, i3dPackXYZ(s0[0], s0[1], s0[2]), i3dPackXYZ(s1[0], s1[1], s1[2]),
+                         rgbaq);
+    }
+    return pkt;
+}
+
 // ROR 0x0021e428
 
 u_long *i3dPktVu1Matrix(u_long *pkt, sceVu0FVECTOR *matrix)
@@ -460,4 +645,97 @@ u_long *i3dPktVu1Sprite(u_long *pkt, const float *pos, const float *color)
     w[1] = 0x712;
     w[3] = 0;
     return pkt + 8;
+}
+
+/* The wire shapes' data: the sphere circles' colours (data 0x302a30), the
+ * cube's corners in strip order and the ADC flags that skip its three
+ * jumps (0x302a68 / 0x302aa8), the corner signs (0x302ab8: bit 0 picks
+ * entry 0 / 1, bit 1 entry 0 / 2, bit 2 entry 0 / 4). */
+static const float s_wireColor[3][4] = {
+    { 1.0f, 0.25f, 0.25f, 1.0f }, { 0.25f, 1.0f, 0.25f, 1.0f }, { 0.25f, 0.25f, 1.0f, 1.0f },
+};
+static const int s_cubePath[16] = { 0, 1, 3, 2, 0, 4, 5, 7, 6, 4, 2, 6, 3, 7, 1, 5 };
+static const u_char s_cubeAdc[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0 };
+static const float s_cubeSign[5] = { -1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+
+// ROR 0x0021e6f8
+
+u_long *i3dPktDrawWireSphere(float radius, u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
+                             const float *center)
+{
+    /* Ten points: the centre, then the circle at 0, 45 .. 360 degrees. */
+    sceVu0FVECTOR v[10];
+    i3dVecCopyW(v[0], center);
+    v[0][3] = 1.0f;
+    for (int axis = 0; axis < 3; axis++)
+    {
+        for (int i = 1; i < 10; i++)
+        {
+            const float a = (float)(i - 1) * 0.7853982f;
+            if (axis == 0)
+            {
+                v[i][0] = center[0] + cosf(a) * radius;
+                v[i][1] = center[1];
+                v[i][2] = center[2] + sinf(a) * radius;
+            }
+            else if (axis == 1)
+            {
+                v[i][0] = center[0] + sinf(a) * radius;
+                v[i][1] = center[1] + cosf(a) * radius;
+                v[i][2] = center[2];
+            }
+            else
+            {
+                v[i][0] = center[0];
+                v[i][1] = center[1] + sinf(a) * radius;
+                v[i][2] = center[2] + cosf(a) * radius;
+            }
+            v[i][3] = 1.0f;
+        }
+        pkt = i3dPktDrawLineStrip(pkt, layer, matrix, 10, s_wireColor[axis], v, NULL);
+    }
+    return pkt;
+}
+
+/* The eight corners sign * extent + centre, laid out in the strip's order
+ * (inline in both callers in the ROM). */
+static void wireCube(sceVu0FVECTOR *out, const float *center, const float *extent)
+{
+    sceVu0FVECTOR corner[8];
+    for (int i = 0; i < 8; i++)
+    {
+        corner[i][0] = extent[0] * s_cubeSign[i & 1] + center[0];
+        corner[i][1] = extent[1] * s_cubeSign[i & 2] + center[1];
+        corner[i][2] = extent[2] * s_cubeSign[i & 4] + center[2];
+        corner[i][3] = 1.0f;
+    }
+    for (int i = 0; i < 16; i++)
+        memcpy(out[i], corner[s_cubePath[i]], sizeof(sceVu0FVECTOR));
+}
+
+// ROR 0x0021e8f8
+
+u_long *i3dPktDrawWireBox(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
+                          const float *center, const void *extent, const void *color)
+{
+    sceVu0FVECTOR v[16];
+    wireCube(v, center, (const float *)extent);
+    return i3dPktDrawLineStrip(pkt, layer, matrix, 16, color, v, s_cubeAdc);
+}
+
+// ROR 0x0021e9f8
+
+u_long *i3dPktDrawWireShape(u_long *pkt, I3dLayer *layer, void *a, void *b, void *c)
+{
+    /* The unit cube through b, or b then a. */
+    static const float s_zero[3] = { 0.0f, 0.0f, 0.0f };
+    static const float s_one[3] = { 1.0f, 1.0f, 1.0f };
+    sceVu0FVECTOR v[16];
+    wireCube(v, s_zero, s_one);
+    sceVu0FMATRIX m;
+    if (a != NULL)
+        i3dVu0MatMul(m, (sceVu0FVECTOR *)b, (sceVu0FVECTOR *)a);
+    else
+        i3dMatCopy(m, (sceVu0FVECTOR *)b);
+    return i3dPktDrawLineStrip(pkt, layer, m, 16, c, v, s_cubeAdc);
 }

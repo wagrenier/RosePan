@@ -564,6 +564,15 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     NEXT tag and REF'd 20 at a time (two shared), ADC as vertex indices (bit 15 = no kick; default
     lists data 0x3026d0), then a REF of the 4-qword command 0x302970 / 0x3029b0 whose GIF tag is a
     triangle strip (PRIM 0x4c / 0x5c with STQ).
+    **Clipped line strips** are not VU1: i3dPktDrawStripCtx 0x21dd10 (pkt, layer, matrix, count,
+    stq, colours, xyz, adc) and i3dPktDrawLineStrip 0x21e1d8 (one colour, 255 / 128 alpha scale)
+    transform each segment by matrix * view camera * RectProj on the CPU, skip it when adc[i + 1] is
+    set or both w < 0, clip it with i3dClipSegment 0x21db90 (six planes against +-|w|, VCLIP flags
+    from i3dVu0ClipPair 0x21db60; STQ / colour at +0x10 / +0x20 interpolated), RotTransPers through
+    RectViewport and write GIF lines (i3dPktLine / GouraudLine / GouraudTexLineST). Wire shapes
+    0x21e6f8 / 0x21e8f8 / 0x21e9f8 feed them: sphere = three 8-step circles from the centre (colours
+    data 0x302a30), box / shape = 16-point cube path 0x302a68 with ADC 0x302aa8 skipping 3 jumps.
+    0x21cfb0..0x21db18 (four functions) have no code or data references: dead.
 - The scene's first 0x2000 bytes are 256 **wall segments** (two (x, y, z, w) ends each):
   `MagScene::castWalls` 0x133a0c tests a level ray against those whose height range covers the ray's
   y with `i3dSegSegDist2` 0x234050 (squared segment distance 0 = a hit) before `castRay` 0x133454

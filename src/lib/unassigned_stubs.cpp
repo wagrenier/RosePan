@@ -172,52 +172,6 @@ void dbgTraceVector4(const float *v)
     ROSEPAN_STUB("dbgTraceVector4", 0x00215bb4);
 }
 
-
-// stub of ROR 0x0021e1d8
-u_long   * i3dPktDrawLineStrip(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
-                              const void *color, const void *xyz, int flags)
-{
-    ROSEPAN_STUB("i3dPktDrawLineStrip", 0x0021e1d8);
-    // PC: the packet cursor stays valid for the i3d groups (i3d/i3dlayer.cpp).
-    return pkt;
-}
-
-// stub of ROR 0x0021dd10
-u_long   * i3dPktDrawStripCtx(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix, int count,
-                             const void *stq, const void *colors, const void *xyz,
-                             int flags)
-{
-    ROSEPAN_STUB("i3dPktDrawStripCtx", 0x0021dd10);
-    // PC: the packet cursor stays valid for the i3d groups (i3d/i3dlayer.cpp).
-    return pkt;
-}
-
-// stub of ROR 0x0021e8f8
-u_long   * i3dPktDrawWireBox(u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
-                            const float *center, const void *extent, const void *color)
-{
-    ROSEPAN_STUB("i3dPktDrawWireBox", 0x0021e8f8);
-    // PC: the packet cursor stays valid for the i3d groups.
-    return pkt;
-}
-
-// stub of ROR 0x0021e9f8
-u_long   * i3dPktDrawWireShape(u_long *pkt, I3dLayer *layer, void *a, void *b, void *c)
-{
-    ROSEPAN_STUB("i3dPktDrawWireShape", 0x0021e9f8);
-    // PC: the packet cursor stays valid for the i3d groups.
-    return pkt;
-}
-
-// stub of ROR 0x0021e6f8
-u_long   * i3dPktDrawWireSphere(float radius, u_long *pkt, I3dLayer *layer, sceVu0FVECTOR *matrix,
-                               const float *center)
-{
-    ROSEPAN_STUB("i3dPktDrawWireSphere", 0x0021e6f8);
-    // PC: the packet cursor stays valid for the i3d groups.
-    return pkt;
-}
-
 // ---- bridge: utlTm2GetSize (2026-10-22, the dogtexinfo session) ----
 // The ROM's code, until utl/utltm2.cpp (unassigned@00104970) is written:
 // DogTexInfo::addData sizes its TIM2 copy with it, and a stub's 0 would

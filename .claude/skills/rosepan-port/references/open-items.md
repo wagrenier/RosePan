@@ -1045,6 +1045,14 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-28, i3d/i3dvu1pkt.cpp) **Intermittent access violation** in the plain 200 s smoke run: one
+  run died just after frame 6240 (after 6000:CIRCLE, i3cCastRay stub reached, dogactor.cpp asserts
+  1753 / 1773 flooding); the next plain run and a gdbrun with the same pad went through (frame ~11940,
+  story intro, Now Loading). Run-to-run timing differs (shot_03600 already Now Loading in the second
+  run). Likely the known 10d access violation that hides under gdb; not traced to the new CPU line
+  strips. Next session that sees it: python gdbrun.py --pad with the smoke pad several times, or a
+  plain run and read the fault address.
+
 - (2026-10-28, eff/effman.cpp createEff) **Decided without the user:** (1) the Eff classes createEff
   news are declared in one header, src/eff/effclasses.h (ctor / dtor / the overridden slots, the EE size
   as an undecoded m_body), because their files are not defined yet; each moves to its own file's header
