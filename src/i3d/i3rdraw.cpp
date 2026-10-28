@@ -29,6 +29,7 @@
 #include "i3d/i3dmath.h"
 #include "i3d/i3dpacket.h"
 #include "i3d/i3dview.h"
+#include "i3d/i3rtype.h"
 #include "lib/unassigned.h"
 #include "rosepan/rendering/rosepan_i3d.h"
 
@@ -103,6 +104,8 @@ struct I3rDrawWork
     /* ROR 0xa4: the 0x46 part's data (i3rDrawMesh46 stores it). */
     const u_char           *m_disp;         // ROR 0xa8: the node's display record
     const void             *m_opt;          // ROR 0xac: the blend words
+    /* ROR 0xf4: I3rBlendList[5], i3rDrawSetupBlend's (PC: the native
+     * module's own, at replay). */
 };
 static_assert(offsetof(I3rDrawWork, m_world) >= 0x40, "I3rDrawWork::m_world");
 
@@ -132,6 +135,52 @@ static int i3rDrawMesh45(I3dLayer *layer, const I3rItem *part, int clip, I3rDraw
     }
     // callcheck: i3dCtxGetHead, i3dPktDmaTag, i3dVecNormalize, i3dMatCopy, i3dVu0MatInverse, i3dVu0MatTranspose, i3dCtxSetHead, i3rDrawGroup45 (the VU1 matrix packet and group writers: PC, above)
     return clip;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00220670
+// PC: the ROM calls it from i3rDrawModel's entry walk into the work block
+// (+0xf4) for the packet writers; the host's writers are the native mesh
+// module, which calls it per entry at replay with the recorded opt.
+
+void i3rDrawSetupBlend(const I3rItem *entry, const I3rBlendOpt *opt, I3rBlendList blend[I3R_BLEND_CHANNELS])
+{
+    if (i3rGetNumChild59(entry) == 0)
+        return;
+    const I3rItem *begin = i3rGetChildBegin59(entry);
+    const I3rItem *end = i3rGetChildEnd59(entry);
+    u_int mask = 0;
+    float time[I3R_BLEND_CHANNELS];
+
+    if (opt != NULL)
+    {
+        mask = opt->m_mask;
+        for (int ch = 0; ch < I3R_BLEND_CHANNELS; ch++)
+            time[ch] = opt->m_time[ch];
+    }
+    for (u_int ch = 0; ch < I3R_BLEND_CHANNELS; ch++)
+    {
+        I3rBlendList *list = &blend[ch];
+        int num = 0;
+        int index = 0;
+
+        for (const I3rItem *it = begin; it != end; it++, index++)
+        {
+            float w = (mask & (1u << ch)) != 0 ? i3rBlendGetWeight(time[ch], it) : *(const float *)it->getData();
+
+            if (w != 0.0f)
+            {
+                /* PC: the ROM has room for 8 and does not check. */
+                if (num < 8)
+                {
+                    list->m_entry[num].m_index = index;
+                    list->m_entry[num].m_weight = w;
+                }
+                num++;
+            }
+        }
+        list->m_num = num < 8 ? num : 8;
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -216,8 +265,9 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
             if (ne->m_enable == 0)
                 continue;
             work.m_entry = ne;
-            /* PC: i3rDrawSetupBlend(&entry[e], opt, &work) loads the blend
-             * words for the writers; the host module reads none yet. */
+            /* PC: i3rDrawSetupBlend(&entry[e], opt, work + 0xf4) loads the
+             * blend weights for the writers; the native module calls it at
+             * replay with the opt recorded below. */
             const I3rItem *parts = meshes[ne->m_mesh].getChildren();
             if (parts[1].m_data != 0 && i3rDrawMesh45(layer, &parts[1], clip, &work) != I3D_VIEW_OUT)
                 drawn = 1;
@@ -239,12 +289,12 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
         u_long *p = i3dPktDmaTag(pkt, 2, 0x10, NULL, 0, 0);
         RosePan_I3dRecordCamera(p, host_view, host_proj);
         RosePan_I3dRecordModel(p + 2, root, (const float *)world, (const float *)nodes,
-                               ctx->m_tex_table, (int)ctx->m_tex_table_count);
+                               ctx->m_tex_table, (int)ctx->m_tex_table_count, (const I3rBlendOpt *)opt);
         p[0] = p[1] = p[2] = p[3] = 0;
         i3dLayerEndPacket(layer, p + 4);
     }
 
-    // callcheck: i3rDrawSetupBlend, sceDmaSync (the blend words for the VU1 writers and their DMA wait: the native module draws the model, PORT: in the file header)
+    // callcheck: i3rDrawSetupBlend, sceDmaSync (the blend weights are set up by the native module at replay, from the recorded opt; the DMA wait: no packets, PORT: in the file header)
     // PC: sceDmaSync on fromSPR (0x1000d000): the packet writers' scratchpad
     // transfers; the host made none.
     return drawn ? I3R_DRAW_OK : I3R_DRAW_CULLED;
@@ -274,6 +324,15 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
 //    (i3dViewGetDepth). Host: DrawBatch draws every batch with the
 //    renderer's depth buffer; no depth-keyed order yet (open-items.md
 //    "Mesh draw").
-//  Not written: i3rDrawSetupBlend 0x220670 and i3rDrawMeshBlend 0x2210f0,
-//  the blend-word path (group flags & 3 with i3rDrawModel's opt); the host
-//  draws those groups unblended.
+//  - ROR 0x002210f0 i3rDrawMeshBlend: the writers' choice for a group with
+//    flags & 3 when i3rDrawModel has an opt. Per batch it builds the pools
+//    on the EE: the positions (opt mask bit 0) and normals (bit 1) through
+//    i3rBlendVertices with the work block's lists 0 / 1, then for a
+//    skinned group (flags & 0xc == 4) 0x225670 skins them; per strip the
+//    colours (bit 3) and STQ (bit 4) the same way with lists 3 / 4; a
+//    channel without its bit gets the slot's own block (0x225460). Then
+//    UNPACKs of those to VU1 0x1dc / 0x22c / 0x17 / 0x2b, the batch header
+//    and the strips' MSCALs -- or, with a depth-keyed material, one state
+//    packet per batch keyed by i3dViewGetDepth. Host: DrawBatch's
+//    LoadChannel calls i3rBlendVertices for the channels opt names and
+//    writes the result into the host VU memory; SkinBatch then skins it.

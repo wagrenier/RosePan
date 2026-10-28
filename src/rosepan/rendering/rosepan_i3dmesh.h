@@ -32,14 +32,18 @@
 
 struct I3rRoot;
 struct I3dTexEntry;
+struct I3rBlendOpt;
 
 /* Draws `root` with `world` (its local -> world matrix, i3d row-vector
  * 4x4: p' = p * M) and `nodes` (one 4x4 per node, model space; NULL = the
  * root data's own table, i3rDrawModel's default), its layers' textures
  * from `tex` (`tex_count` entries; the context's texture table, which
- * i3rAssignTex indexed).  The renderer's camera must be set. */
+ * i3rAssignTex indexed).  `opt`: i3rDrawModel's blend words (NULL: none);
+ * with them, groups whose flags & 3 is set blend their pools and strips
+ * the way i3rDrawMeshBlend 0x2210f0 does.  The renderer's camera must be
+ * set. */
 void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *nodes,
-                         const I3dTexEntry *tex, int tex_count);
+                         const I3dTexEntry *tex, int tex_count, const I3rBlendOpt *opt);
 
 /* The GPU texture for an i3d texture object (rosepan_i3d.cpp's cache). */
 const void *RosePan_I3dTextureFor(const void *tex, const void *clut, unsigned clut_index, int tcc);

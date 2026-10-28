@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 11:05 at commit `0f28ac0` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-28 11:19 at commit `8064805` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-28 11:05 at commit `0f28ac0` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6872**, named **5694** (83%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 4092
-- context-name ledger: 4392 entries; overrides of wrong library matches: 5
+- game functions: **6872**, named **5696** (83%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 4094
+- context-name ledger: 4394 entries; overrides of wrong library matches: 5
 - placed in a source file: 4809/6872 in 123 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4098**; stubs: **552**
+- reconstructed RoR functions: **4100**; stubs: **554**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -70,13 +70,13 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dvu1pkt.cpp` | 17 | 0 |
 | `src/i3d/i3mpose.cpp` | 36 | 0 |
 | `src/i3d/i3mroot.cpp` | 12 | 0 |
-| `src/i3d/i3rdraw.cpp` | 17 | 0 |
+| `src/i3d/i3rdraw.cpp` | 19 | 0 |
 | `src/i3d/i3ritem.cpp` | 156 | 0 |
 | `src/i3d/i3rmesh.cpp` | 18 | 0 |
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 416 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 418 |
 | `src/mag/maglife.cpp` | 13 | 8 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -147,11 +147,11 @@ Least-named game-code regions (64 KB blocks):
 ## Translation units (one session each: `tus.py`)
 
 - 163 TUs: todo 100, partial 10, verify 81, done 9
-- next: **i3d/i3rdraw.cpp** (continuing a partial TU)
+- next: **emy/emy_hfm.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - partial: `emy/emy_hfm.cpp` 74/75 -- Left: HfmOutTest::Exec 0x149500 (0x818 bytes, a 0x2d-step motion walk-through, the last stub of the TU); then the TU is done once an Hfm enemy is seen on screen
 - partial: `i3d/i3mpose.cpp` 36/38 -- Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game c
-- partial: `i3d/i3rdraw.cpp` 17/19 -- Left in this TU: the blend path, i3rDrawSetupBlend 0x220670 (type-0x59 children of the entry, i3rDrawModel's opt words) and i3rDrawMeshBlend 0x2210f0 (group fla
+- partial: `i3d/i3rdraw.cpp` 19/19 -- The blend is inert until unassigned@00225018 is written: i3rBlendGetWeight 0x225108 (scalar 0x58 curve via 0x225080 / bisect 0x225018) and i3rBlendVertices 0x22
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -237,6 +237,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-28 11:19 `i3d/i3rdraw.cpp` partial: Blend path wired: i3rDrawSetupBlend 0x220670 written (per channel the non-zero weights of the entry's 0x59 targets, curve at opt's time or static weight); i3rDr
 - 2026-10-28 11:05 `i3d/i3rdraw.cpp` partial: i3rDrawMesh45 / i3rDrawMesh46 part culls written (box test, i3dViewTestBoneBox through the entry's bone slots) and now decide i3rDrawModel's result; I3dBoneBoxe
 - 2026-10-28 10:14 `emy/emy_hfm.cpp` partial: Wrote HfmOutRide whole: start, restart, placePC, phases 0..3, phase 2's ten steps (jump table 0x2ef3c0: grab, mount, ride, hits, thrown, struggle, grip, nextHol
 - 2026-10-28 10:01 `i3d/i3dvu1pkt.cpp` verify: i3d/i3dvu1pkt.cpp: the clipped line strips and wire shapes written -- i3dVu0ClipPair 0x21db60 (VCLIP flags), i3dClipSegment 0x21db90 (six-plane clip with STQ / 
@@ -244,7 +245,6 @@ Recent sessions:
 - 2026-10-28 09:02 `eff/effman.cpp` partial: The effect manager EffMan (formerly Obj176a3c, scene +0x837e0) split out of unassigned@00166a1c as eff/effman.cpp 0x176694..0x1788ec and written except createEf
 - 2026-10-28 08:24 `sct/sctlayer.cpp` verify: The secta world (floor cells) split out of unassigned@00166a1c as sct/sctlayer.cpp 0x17c0f0..0x17e540 and written in full: SctWorld (scene +0x8542c, sector.sec 
 - 2026-10-28 07:32 `mag/maglifebwnctrl.cpp` verify: MagLifeBwnCtrlModeBark::live 0x129028 written (18 phases: the nearest enemy, walk to 135 / 110 for kinds 0x401 / 0x421, turn, bark 0x76 with the per-frame face 
-- 2026-10-28 07:24 `mag/maglifebwnctrl.cpp` partial: MagLifeBwnCtrl modes: Follow::live with followPC 0x127558, Find::init / live with isAtDoor 0x128724, searchDoorSide 0x128854, findBest / isFindTarget wrappers, 
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -257,9 +257,9 @@ Recent sessions:
 | `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 51 | 1 |
 | `utl/utlgame.cpp` | todo | 0/20/35 | 6.5 | 50 | 2 |
+| `unassigned@00225018` | todo | 0/3/18 | 4.5 | 45 | 0 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
-| `unassigned@00225018` | todo | 0/1/18 | 4.5 | 30 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -276,6 +276,8 @@ Recent sessions:
 | `00215bb4` | dbgTraceVector4 | 22 | ror | stub | - |
 | `002155f4` | FUN_002155f4 | 22 | - | missing | - |
 | `001832e8` | msgGetSysText | 13 | ror | stub | - |
+| `00225460` | FUN_00225460 | 12 | - | missing | - |
+| `002261b8` | FUN_002261b8 | 12 | - | missing | - |
 | `00202f10` | TskEnemyMove::stop | 12 | ror | stub | - |
 | `0011a704` | MagLifeControlChara::playSe | 12 | ror | stub | mag/maglife.cpp |
 | `001026b0` | utlPlaySe | 11 | ror | stub | utl/utlgame.cpp |
@@ -290,8 +292,6 @@ Recent sessions:
 | `00164508` | EmyMain::loadParam | 9 | ror | stub | emy/emy_main.cpp |
 | `00166a1c` | EmyOut::EmyOut | 9 | ror | stub | emy/emy_out.cpp |
 | `00217f10` | utlAtan2 | 8 | ror | stub | - |
-| `00225460` | FUN_00225460 | 8 | - | missing | - |
-| `002261b8` | FUN_002261b8 | 8 | - | missing | - |
 | `0016976c` | emyCanReach | 8 | ror | stub | emy/emy_out.cpp |
 | `0016947c` | EmyOut::stopVoice | 7 | ror | stub | emy/emy_out.cpp |
 | `00166da4` | EmyOut::selectTarget | 7 | ror | stub | emy/emy_out.cpp |

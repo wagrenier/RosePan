@@ -45,6 +45,7 @@
 struct i3dContext;
 struct I3rRoot;
 struct I3dTexEntry;
+struct I3rBlendOpt;
 
 /* A GIF-tagged primitive written at `pkt` by an i3d writer: pkt[2] the GIF
  * tag (REGLIST or PACKED), pkt[3] its register descriptors, the data from
@@ -66,10 +67,12 @@ void RosePan_I3dRecordTexRegs(const void *at, const uint64_t *regs);
 void RosePan_I3dRecordMovie(const void *at, int x0, int y0, int x1, int y1,
                             int frame_w, int frame_h, int pic_w, int pic_h);
 /* An i3r model draw at `at` (rosepan_i3dmesh.h RosePan_I3dMeshDraw's
- * arguments): `world` is copied, `root`, `nodes` and `tex` must stay valid
- * until the frame's replay. */
+ * arguments): `world` and `opt` (i3rDrawModel's blend words, NULL for
+ * none) are copied, `root`, `nodes` and `tex` must stay valid until the
+ * frame's replay. */
 void RosePan_I3dRecordModel(const void *at, const I3rRoot *root, const float *world,
-                            const float *nodes, const I3dTexEntry *tex, int tex_count);
+                            const float *nodes, const I3dTexEntry *tex, int tex_count,
+                            const I3rBlendOpt *opt);
 
 /* The camera the model records after `at` draw with: row-major 4x4s, p' =
  * p * M (RosePan_RendererSet3DViewProjection's form; copied). */

@@ -373,6 +373,18 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     count, +8 kind: 0 V4-32 qwords, 1 a VIF stream}; 0x226060 rebases the stream's unpack
     addresses in place once (first = base, the rest + base). root data +0x14 = per-node
     model-space bind matrices (i3rDrawModel's default node table), +0x10 the local ones.
+    **Blending** (read 2026-10-28 from 0x220670 / 0x2210f0 / 0x225018..0x2254f8): an entry (0x59)
+    [0] lists blend targets; each target's data -> f32 weight, its [0] data a type 0x58 curve (+0 f32
+    after the last key, +4 f32 before the first, +0xc -> {slope, intercept} f32 pairs, +0x10 -> key
+    times, +0x18 u16 key count; value = slope * t + intercept of the key bisected at t). Per channel
+    (0 positions, 1 normals, 3 strip colours, 4 STQ; 2 is weighted but unread) i3rDrawSetupBlend
+    keeps the non-zero weights as {index, weight} (up to 8, work +0xf4, 0x44 apart), with opt's
+    mask bit: the curve at opt's time, else the static weight. A group blends when flags & 3 and opt
+    (0x46 groups: data +5; 0x45 groups: data byte 0). The channel's slot children are [0] the own
+    block and [k] target k: flags & 2 sums w x target k's V4-32 qwords (flags & 1: target k's [0]
+    children are type 0x34 vector curves per vertex: +0 after, +0x10 before, +0x24 -> slope /
+    intercept qword pairs, +0x28 -> times, +0x30 u16 count); flags & 1 alone: the own block's
+    per-vertex curves. Skinned groups skin the blended pools after (0x225670).
     The accessors between the fixups in i3ritem.cpp's own extent (0x22c840.., most call
     i3rItemFindChild) are not written.
 

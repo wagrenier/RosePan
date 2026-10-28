@@ -725,7 +725,7 @@
    "why": "I3D_I3M motion file root (id 0x303a68): id/version checks, relocators, node and key accessors; between i3rroot.cpp and i3croot.cpp, which it mirrors"
   },
   "i3d/i3rdraw.cpp": {
-   "notes": "Left in this TU: the blend path, i3rDrawSetupBlend 0x220670 (type-0x59 children of the entry, i3rDrawModel's opt words) and i3rDrawMeshBlend 0x2210f0 (group flags and 3 with opt set); the host draws those groups unblended -- write the blend as a host-module colour input (rosepan_i3dmesh.cpp) and annotate both. Not done on purpose: depth-keyed batches (material packet +0x14: the ROM keys each batch with i3dViewGetDepth; the host relies on the depth buffer) and the per-mesh / per-batch box culls (renderer clips). Picture: the last frame of the 200 s run is a skinned figure drawn white -- its textures do not bind (look at MaterialTexture and the context texture table for that model, not the node walk); the reference is the game's textured character. Runs are timing-flaky: one 200 s run stalled black after the title (frame 1680 on) and never reached New Game; a rerun was fine. Use --run 200 to reach the book (frames 3300..4400) and the figure (6180+). For the references: hazards.md (callcheck binds a ROR list in a header comment to the next function; I3dBoneBoxes host-pointer trap) and open-items.md Mesh draw are updated in this commit.",
+   "notes": "The blend is inert until unassigned@00225018 is written: i3rBlendGetWeight 0x225108 (scalar 0x58 curve via 0x225080 / bisect 0x225018) and i3rBlendVertices 0x225498 (sum of weighted target blocks 0x2253e0, curve targets 0x2252a8, per-vertex curves 0x225230 / 0x225148, zero 0x225378) are stubs; the host prototype of 0x225498 takes an I3rBlendList and fills an I3rVertexRef (m_blended 1 = V4-32 qwords in buf), see lib/unassigned.h. Layouts are in architecture.md Blending. Only DogActor::drawModel passes an opt and the 200 s run reaches no such actor, so the blend cannot be seen yet. Left in this TU: the depth-keyed batches (material packet +0x14, i3dViewGetDepth) and per-batch box culls, both renderer-covered on purpose. Picture still wrong after the book: the 200 s run ends on a skinned figure drawn untextured white (frames 6180+) -- MaterialTexture / the context texture table in rosepan_i3dmesh.cpp, not the walk; that is the next thing to fix for this TU to be done. Also noticed: DrawBatch draws only the first 0x30 group of slot 0, the ROM loops all (open-items Mesh draw).",
    "ranges": [
     [
      "0021fb50",
@@ -742,6 +742,11 @@
      "date": "2026-10-28 11:05",
      "status": "partial",
      "summary": "i3rDrawMesh45 / i3rDrawMesh46 part culls written (box test, i3dViewTestBoneBox through the entry's bone slots) and now decide i3rDrawModel's result; I3dBoneBoxes fixed to the i3r file's EE layout (it had a host pointer); the native mesh module draws the 0x45 rigid part with the node's matrix; the 12 unnamed VU1 writers named (ror-inferred) and listed with their host replacements at the end of i3rdraw.cpp. 200 s run: book cover and page turn unchanged (A/B pixel-identical with and without the 0x45 path); after the book (frames 6180+) a skinned figure draws lit but untextured white."
+    },
+    {
+     "date": "2026-10-28 11:19",
+     "status": "partial",
+     "summary": "Blend path wired: i3rDrawSetupBlend 0x220670 written (per channel the non-zero weights of the entry's 0x59 targets, curve at opt's time or static weight); i3rDrawModel records opt with the model; the native mesh module calls i3rDrawSetupBlend per entry and, for groups with flags & 3, LoadChannel runs i3rBlendVertices 0x225498 for positions / normals / strip colours / STQ before skinning (i3rDrawMeshBlend 0x2210f0's host form). 0x225108 / 0x225498 named i3rBlendGetWeight / i3rBlendVertices and stubbed in unassigned@00225018. 200 s run: book cover unchanged and matching; no blended model reached."
     }
    ],
    "status": "partial",

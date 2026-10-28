@@ -1118,8 +1118,14 @@ to adapt when a TU reaches them:
   and decide i3rDrawModel's result; the native module now draws the 0x45 rigid part with the node's
   matrix (seen drawing during the prologue at frame ~2860; no visible change there or on the book,
   A/B-checked). The VU1 writers are named and listed at the end of i3rdraw.cpp with their host
-  replacements. Still open: (3)..(4) below; the blend path (opt / i3rDrawSetupBlend 0x220670 /
-  i3rDrawMeshBlend 0x2210f0: type-0x59 children and group flags & 3, drawn unblended); the
+  replacements. 2026-10-28 (later): the blend path is wired -- i3rDrawSetupBlend 0x220670 written,
+  opt recorded with the model, the native module's LoadChannel calls i3rBlendVertices 0x225498 for
+  the channels opt names (i3rDrawMeshBlend 0x2210f0's host form) -- but i3rBlendGetWeight 0x225108
+  and i3rBlendVertices are stubs of unassigned@00225018 (with 0x225018 / 0x225080 / 0x225148 /
+  0x225230 / 0x2252a8 / 0x225378 / 0x2253e0 / 0x225460): until that TU is written blended groups
+  draw their own blocks. Only DogActor::drawModel passes an opt (mask 0x1f, its animation value as
+  every channel's time); the 200 s run reaches none. Also: the host's DrawBatch draws only the
+  first 0x30 group of a batch's slot [0] (the ROM's writers loop all of them). Still open: the
   depth-keyed batches (material packet +0x14 set: the ROM keys them with i3dViewGetDepth, the host
   draws in walk order with the depth buffer); and the untextured model after the book (the 200 s
   run's frames 6180+ show a skinned figure lit but white: its textures do not bind --
