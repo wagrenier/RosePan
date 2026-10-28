@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 09:02 at commit `2a9f6a9` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-28 09:18 at commit `a09c8a4` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-28 09:02 at commit `2a9f6a9` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6872**, named **5506** (80%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 3904
-- context-name ledger: 4204 entries; overrides of wrong library matches: 5
+- game functions: **6872**, named **5655** (82%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 4053
+- context-name ledger: 4353 entries; overrides of wrong library matches: 5
 - placed in a source file: 4809/6872 in 123 files
 
 Least-named game-code regions (64 KB blocks):
@@ -20,17 +20,17 @@ Least-named game-code regions (64 KB blocks):
 | block | named | inferred files |
 |---|---|---|
 | `00150000` | 8/272 (3%) | - |
-| `00160000` | 106/268 (40%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
-| `00170000` | 109/251 (43%) | sct/sctlayer.cpp, eff/effman.cpp, snd/sndman.cpp |
 | `00140000` | 128/293 (44%) | emy/emy_hfm.cpp, mag/magscenecmd.cpp, mag/magloader.cpp |
 | `001b0000` | 41/81 (51%) | game/gamfile.cpp, mnu/mnuSelectLanguage.cpp |
+| `00160000` | 152/268 (57%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `001a0000` | 142/214 (66%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnutitle.cpp |
 | `00180000` | 218/312 (70%) | snd/rxmpeg.cpp, spr/sprman.cpp, mcd/mcdman.cpp |
 | `00200000` | 100/143 (70%) | sequence/seqcall.cpp, sequence/sequence.cpp, system/system.cpp |
+| `001f0000` | 190/234 (81%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4041**; stubs: **365**
+- reconstructed RoR functions: **4047**; stubs: **562**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -46,7 +46,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/dog/dogmodel.cpp` | 24 | 0 |
 | `src/dog/dogmotionblend.cpp` | 11 | 0 |
 | `src/dog/dogtexinfo.cpp` | 16 | 0 |
-| `src/eff/effman.cpp` | 26 | 1 |
+| `src/eff/effman.cpp` | 32 | 0 |
 | `src/emy/emy_hfm.cpp` | 46 | 10 |
 | `src/emy/emy_main.cpp` | 1 | 21 |
 | `src/emy/emy_manager.cpp` | 59 | 0 |
@@ -75,7 +75,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 222 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 420 |
 | `src/mag/maglife.cpp` | 13 | 8 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -145,10 +145,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 163 TUs: todo 100, partial 12, verify 79, done 9
-- next: **eff/effman.cpp** (continuing a partial TU)
+- 163 TUs: todo 100, partial 11, verify 80, done 9
+- next: **i3d/i3dvu1pkt.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
-- partial: `eff/effman.cpp` 26/32 -- Left in eff/effman.cpp: createEff 0x176cc8 (a stub returning -1; it news one of 43 Eff classes per kind, so write eff/eff0.cpp first: Eff0 0x16a914..0x16ac84 pl
 - partial: `emy/emy_hfm.cpp` 46/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec
 - partial: `i3d/i3dvu1pkt.cpp` 10/21 -- Left in this TU: i3dPktDrawStripCtx 0x21dd10 and i3dPktDrawLineStrip 0x21e1d8 (clipped strips, use i3dClipSegment 0x21db90 / i3dVu0ClipPair 0x21db60, named), th
 - partial: `i3d/i3mpose.cpp` 36/38 -- Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game c
@@ -163,6 +162,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `dog/dogmodel.cpp` 24/69 -- Status verify: nothing on screen can show a model yet. On New Game the loader runs (loadPack, setRoot, i3rRelocate, i3rAssignTex) but i3rItemRelocate 0x22c478 i
 - verify: `dog/dogmotionblend.cpp` 11/11 -- Verify: the smoke run stays on the disclaimer screen and no actor is drawn yet, because the i3m pose player (unassigned@0022e840: i3mGetPose 0x22e960, i3mGetBle
 - verify: `dog/dogtexinfo.cpp` 16/16 -- Pinned 0x1161e4..0x11764c, all 16 functions written. Smoke run: MagScene::init's init / add run without asserts; screen still black (SprMan::draw and the scene 
+- verify: `eff/effman.cpp` 32/32 -- Verify: the 200 s run creates EffLight1 (kind 0x21) and EffCameraAnim1 (kind 0xd) during the picture book; their init is a stub returning 0, so createEff delete
 - verify: `emy/emy_manager.cpp` 58/58 -- Verify: the 15 s smoke run shows the boot disclaimer as before (EmyManager now runs its exec every frame with no enemies; no crash); no enemy is created on the 
 - verify: `game/gamfile.cpp` 18/21 -- Black screen, as before: the code is complete but no boot path shows it yet; every FileReader::read caller that runs in the boot (GamMan::loadSystemData / loadS
 - verify: `game/gamman.cpp` 409/409 -- All 409 gamman functions are written; status verify because nothing in the TU draws in the 15 s boot, which still ends on the Atlus disclaimer (correct for that
@@ -236,6 +236,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-28 09:18 `eff/effman.cpp` verify: EffMan::createEff written (the kind to class switch over 41 Eff classes, pack hand-off, init, addEff, weak FIFO, the 0x1a / 0x1f singletons) and EffFindItem1 (k
 - 2026-10-28 09:02 `eff/effman.cpp` partial: The effect manager EffMan (formerly Obj176a3c, scene +0x837e0) split out of unassigned@00166a1c as eff/effman.cpp 0x176694..0x1788ec and written except createEf
 - 2026-10-28 08:24 `sct/sctlayer.cpp` verify: The secta world (floor cells) split out of unassigned@00166a1c as sct/sctlayer.cpp 0x17c0f0..0x17e540 and written in full: SctWorld (scene +0x8542c, sector.sec 
 - 2026-10-28 07:32 `mag/maglifebwnctrl.cpp` verify: MagLifeBwnCtrlModeBark::live 0x129028 written (18 phases: the nearest enemy, walk to 135 / 110 for kinds 0x401 / 0x421, turn, bark 0x76 with the per-frame face 
@@ -243,22 +244,21 @@ Recent sessions:
 - 2026-10-28 07:02 `mag/maglifebwnctrl.cpp` partial: MagLifeBwnCtrl, the command layer over Brown: pinned 0x1267c0..0x12bc20; the constructor, requestState / applyMode / live over the 14 embedded mode objects, eve
 - 2026-10-27 22:54 `mag/maglifebwn.cpp` verify: MagLifeBwn, Brown's controller, written in full (pinned 0x1233d8..0x125bd4 plus the linkonce accessors): requestState / changeMode / applyState over the ten emb
 - 2026-10-27 22:32 `mag/maglifepcmove.cpp` verify: mag/maglifepcmove.cpp: pinned 0x11e4c4..0x120788 (moveBy 0x11ee00 included) and wrote all 12 functions: sweepMove (object test, cylinder sweep, wall slide), swe
-- 2026-10-27 21:53 `mag/maglifepcmode.cpp` verify: The rest of the PC modes: AtkWait2D (with getTurnStep and the 0x2ead98 weapon x height table), AtkMove2D, Attacking (combo chain and the weapon hit spheres agai
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `mag/maglife.cpp` | partial | 13/8/49 | 4.6 | 89 | 0 |
+| `unassigned@0016a914` | todo | 0/120/172 | 47.3 | 76 | 6 |
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 75 | 6 |
 | `unassigned@00103edc` | todo | 0/16/23 | 1.6 | 72 | 4 |
 | `emy/emy_out.cpp` | todo | 0/19/58 | 15.7 | 69 | 0 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
-| `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 51 | 1 |
+| `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
 | `utl/utlgame.cpp` | todo | 0/20/35 | 6.5 | 50 | 2 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
 | `unassigned@001832e8` | todo | 0/1/1 | 0.0 | 18 | 1 |
-| `unassigned@00225018` | todo | 0/1/18 | 4.5 | 17 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -266,6 +266,7 @@ Recent sessions:
 |---|---|---|---|---|---|
 | `001be734` | FileReadReq::FileReadReq | 63 | ror | missing | game/gamfile.cpp |
 | `0011a320` | MagLifeControlChara::changeMotionSeq | 56 | ror | stub | mag/maglife.cpp |
+| `0016a914` | Eff0::Eff0 | 34 | ror | stub | - |
 | `001be2dc` | FileReader::~FileReader | 30 | ror | missing | game/gamfile.cpp |
 | `0010423c` | FUN_0010423c | 28 | - | stub | - |
 | `001be2cc` | FileReader::FileReader | 25 | ror | missing | game/gamfile.cpp |
@@ -283,7 +284,6 @@ Recent sessions:
 | `00119cec` | MagLifeControlChara::testFloor | 9 | ror | stub | mag/maglife.cpp |
 | `00164508` | EmyMain::loadParam | 9 | ror | stub | emy/emy_main.cpp |
 | `00166a1c` | EmyOut::EmyOut | 9 | ror | stub | emy/emy_out.cpp |
-| `00176cc8` | EffMan::createEff | 8 | ror | stub | eff/effman.cpp |
 | `00217f10` | utlAtan2 | 8 | ror | stub | - |
 | `00166ad0` | EmyOut::termCommon | 8 | ror | stub | emy/emy_out.cpp |
 | `001694cc` | EmyOut::playSE | 8 | ror | stub | emy/emy_out.cpp |

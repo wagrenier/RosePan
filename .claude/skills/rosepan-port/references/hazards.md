@@ -789,3 +789,16 @@ blocked, so it is game logic, not a lock.
   they are I3rItem fields (m_children, m_info, m_children of the child).
 - Fix: when a reader walks +0 / +4 / +8 of model data, it is an I3rItem: use getData() /
   getChildren() / getNumChild() and the type's data struct (i3rmodel.h), never a pointer struct.
+
+## A class whose virtuals are all unwritten links as "vtable for X" (2026-10-28)
+
+- Symptom: after declaring the Eff classes with out-of-line virtual overrides, the link failed with
+  33 "undefined reference to vtable for EffX", and stubgen skipped every one ("data symbol: define it
+  by hand"); no member stubs were written.
+- Cause: GCC emits a class's vtable with its key function (the first non-inline virtual); while that is
+  undefined the linker only names the vtable, never the members, so --from-build has no names.
+- Fix: pass the members to stubgen by name: `python stubgen.py EffX::init() EffX::liveMain() ...`
+  (generate the list from the header's class bodies). Out-of-line constructors / destructors still need
+  hand stubs. Also: a `// callcheck:` comment cannot name `A::B` (its regex stops at the colon) -- write
+  the bare names (`Eff0`, `EffBg1` for constructors).
+

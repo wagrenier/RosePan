@@ -13,6 +13,7 @@
 #include "emy/emy_main.h"
 #include "mag/maglifepc.h"
 #include "eff/eff0.h"
+#include "eff/effclasses.h"
 
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
@@ -1666,4 +1667,1329 @@ void effClearDrawSets()
 void effInitRandTable()
 {
     ROSEPAN_STUB("effInitRandTable", 0x0016ac84);
+}
+
+// ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----
+
+// stub of ROR 0x0016a914
+Eff0::Eff0()
+{
+    ROSEPAN_STUB("Eff0::Eff0", 0x0016a914);
+}
+
+// stub of ROR 0x0016a950
+Eff0::~Eff0()
+{
+    ROSEPAN_STUB("Eff0::~Eff0", 0x0016a950);
+}
+
+// stub of ROR 0x0016b62c
+EffBloodSpray1::EffBloodSpray1()
+{
+    ROSEPAN_STUB("EffBloodSpray1::EffBloodSpray1", 0x0016b62c);
+}
+
+// stub of ROR 0x0016be14
+EffBloodSpray2::EffBloodSpray2()
+{
+    ROSEPAN_STUB("EffBloodSpray2::EffBloodSpray2", 0x0016be14);
+}
+
+// stub of ROR 0x0016d804
+EffBloodStay3::~EffBloodStay3()
+{
+    ROSEPAN_STUB("EffBloodStay3::~EffBloodStay3", 0x0016d804);
+}
+
+// stub of ROR 0x00172ac8
+EffFog3::~EffFog3()
+{
+    ROSEPAN_STUB("EffFog3::~EffFog3", 0x00172ac8);
+}
+
+// stub of ROR 0x00173df8
+EffGeneric1::EffGeneric1()
+{
+    ROSEPAN_STUB("EffGeneric1::EffGeneric1", 0x00173df8);
+}
+
+// stub of ROR 0x00173e48
+EffGeneric1::~EffGeneric1()
+{
+    ROSEPAN_STUB("EffGeneric1::~EffGeneric1", 0x00173e48);
+}
+
+// stub of ROR 0x0016afcc
+EffBg1::EffBg1()
+{
+    ROSEPAN_STUB("EffBg1::EffBg1", 0x0016afcc);
+}
+
+// stub of ROR 0x0016affc
+EffBg1::~EffBg1()
+{
+    ROSEPAN_STUB("EffBg1::~EffBg1", 0x0016affc);
+}
+
+// stub of ROR 0x0017562c
+EffLight3::EffLight3()
+{
+    ROSEPAN_STUB("EffLight3::EffLight3", 0x0017562c);
+}
+
+// stub of ROR 0x00175664
+EffLight3::~EffLight3()
+{
+    ROSEPAN_STUB("EffLight3::~EffLight3", 0x00175664);
+}
+
+// stub of ROR 0x001790e4
+EffReload1::EffReload1()
+{
+    ROSEPAN_STUB("EffReload1::EffReload1", 0x001790e4);
+}
+
+// stub of ROR 0x0017911c
+EffReload1::~EffReload1()
+{
+    ROSEPAN_STUB("EffReload1::~EffReload1", 0x0017911c);
+}
+
+// stub of ROR 0x0017a918
+EffWater1::EffWater1()
+{
+    ROSEPAN_STUB("EffWater1::EffWater1", 0x0017a918);
+}
+
+// stub of ROR 0x0017a94c
+EffWater1::~EffWater1()
+{
+    ROSEPAN_STUB("EffWater1::~EffWater1", 0x0017a94c);
+}
+
+// stub of ROR 0x0017afd8
+EffWater3::EffWater3()
+{
+    ROSEPAN_STUB("EffWater3::EffWater3", 0x0017afd8);
+}
+
+// stub of ROR 0x0017b010
+EffWater3::~EffWater3()
+{
+    ROSEPAN_STUB("EffWater3::~EffWater3", 0x0017b010);
+}
+
+// stub of ROR 0x0016abe4
+I3dDrawSet * Eff0::createPacketEntry(I3dLayer *layer)
+{
+    ROSEPAN_STUB("Eff0::createPacketEntry", 0x0016abe4);
+    return {};
+}
+
+// stub of ROR 0x0016a9ac
+int Eff0::init(const EffParam *param)
+{
+    ROSEPAN_STUB("Eff0::init", 0x0016a9ac);
+    return {};
+}
+
+// stub of ROR 0x0016aa2c
+int Eff0::live()
+{
+    ROSEPAN_STUB("Eff0::live", 0x0016aa2c);
+    return {};
+}
+
+// stub of ROR 0x0028adf8
+void Eff0::liveActivateExec()
+{
+    ROSEPAN_STUB("Eff0::liveActivateExec", 0x0028adf8);
+}
+
+// stub of ROR 0x0016aacc
+void Eff0::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("Eff0::render", 0x0016aacc);
+}
+
+// stub of ROR 0x0016ab10
+void Eff0::renderPreMain(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("Eff0::renderPreMain", 0x0016ab10);
+}
+
+// stub of ROR 0x0016aa04
+void Eff0::setVisible(bool on)
+{
+    ROSEPAN_STUB("Eff0::setVisible", 0x0016aa04);
+}
+
+// stub of ROR 0x0016a9e0
+void Eff0::term()
+{
+    ROSEPAN_STUB("Eff0::term", 0x0016a9e0);
+}
+
+// stub of ROR 0x0028ae18
+void Eff0::updateZDepth()
+{
+    ROSEPAN_STUB("Eff0::updateZDepth", 0x0028ae18);
+}
+
+// stub of ROR 0x0016b060
+int EffBg1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBg1::init", 0x0016b060);
+    return {};
+}
+
+// stub of ROR 0x0016b348
+int EffBg1::liveMain()
+{
+    ROSEPAN_STUB("EffBg1::liveMain", 0x0016b348);
+    return {};
+}
+
+// stub of ROR 0x0028ae70
+u_long * EffBg1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBg1::renderMain", 0x0028ae70);
+    return {};
+}
+
+// stub of ROR 0x0016b444
+void EffBg1::renderPreMain(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffBg1::renderPreMain", 0x0016b444);
+}
+
+// stub of ROR 0x0028b218
+I3dDrawSet * EffBloodStay3::createPacketEntry(I3dLayer *layer)
+{
+    ROSEPAN_STUB("EffBloodStay3::createPacketEntry", 0x0028b218);
+    return {};
+}
+
+// stub of ROR 0x0016d870
+int EffBloodStay3::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBloodStay3::init", 0x0016d870);
+    return {};
+}
+
+// stub of ROR 0x0016d8ac
+int EffBloodStay3::liveMain()
+{
+    ROSEPAN_STUB("EffBloodStay3::liveMain", 0x0016d8ac);
+    return {};
+}
+
+// stub of ROR 0x0028b230
+void EffBloodStay3::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffBloodStay3::render", 0x0028b230);
+}
+
+// stub of ROR 0x0028b238
+u_long * EffBloodStay3::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBloodStay3::renderMain", 0x0028b238);
+    return {};
+}
+
+// stub of ROR 0x0028c050
+I3dDrawSet * EffFog3::createPacketEntry(I3dLayer *layer)
+{
+    ROSEPAN_STUB("EffFog3::createPacketEntry", 0x0028c050);
+    return {};
+}
+
+// stub of ROR 0x00172b30
+int EffFog3::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFog3::init", 0x00172b30);
+    return {};
+}
+
+// stub of ROR 0x00172cb8
+int EffFog3::liveMain()
+{
+    ROSEPAN_STUB("EffFog3::liveMain", 0x00172cb8);
+    return {};
+}
+
+// stub of ROR 0x0028c058
+void EffFog3::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffFog3::render", 0x0028c058);
+}
+
+// stub of ROR 0x0028c060
+u_long * EffFog3::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFog3::renderMain", 0x0028c060);
+    return {};
+}
+
+// stub of ROR 0x00173f3c
+int EffGeneric1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffGeneric1::init", 0x00173f3c);
+    return {};
+}
+
+// stub of ROR 0x00174438
+int EffGeneric1::liveMain()
+{
+    ROSEPAN_STUB("EffGeneric1::liveMain", 0x00174438);
+    return {};
+}
+
+// stub of ROR 0x0028c648
+u_long * EffGeneric1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffGeneric1::renderMain", 0x0028c648);
+    return {};
+}
+
+// stub of ROR 0x00174534
+void EffGeneric1::renderPreMain(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffGeneric1::renderPreMain", 0x00174534);
+}
+
+// stub of ROR 0x0028c860
+I3dDrawSet * EffLight3::createPacketEntry(I3dLayer *layer)
+{
+    ROSEPAN_STUB("EffLight3::createPacketEntry", 0x0028c860);
+    return {};
+}
+
+// stub of ROR 0x00175804
+int EffLight3::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffLight3::init", 0x00175804);
+    return {};
+}
+
+// stub of ROR 0x00175dc4
+int EffLight3::liveMain()
+{
+    ROSEPAN_STUB("EffLight3::liveMain", 0x00175dc4);
+    return {};
+}
+
+// stub of ROR 0x0028c870
+u_long * EffLight3::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffLight3::renderMain", 0x0028c870);
+    return {};
+}
+
+// stub of ROR 0x0028c868
+void EffLight3::renderPreMain(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffLight3::renderPreMain", 0x0028c868);
+}
+
+// stub of ROR 0x001791ac
+int EffReload1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffReload1::init", 0x001791ac);
+    return {};
+}
+
+// stub of ROR 0x00179324
+int EffReload1::liveMain()
+{
+    ROSEPAN_STUB("EffReload1::liveMain", 0x00179324);
+    return {};
+}
+
+// stub of ROR 0x0028ca88
+u_long * EffReload1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffReload1::renderMain", 0x0028ca88);
+    return {};
+}
+
+// stub of ROR 0x00179390
+void EffReload1::renderPreMain(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffReload1::renderPreMain", 0x00179390);
+}
+
+// stub of ROR 0x0017a9c8
+int EffWater1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffWater1::init", 0x0017a9c8);
+    return {};
+}
+
+// stub of ROR 0x0017adc0
+void EffWater1::liveActivateExec()
+{
+    ROSEPAN_STUB("EffWater1::liveActivateExec", 0x0017adc0);
+}
+
+// stub of ROR 0x0017ac5c
+int EffWater1::liveMain()
+{
+    ROSEPAN_STUB("EffWater1::liveMain", 0x0017ac5c);
+    return {};
+}
+
+// stub of ROR 0x0028cf70
+u_long * EffWater1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffWater1::renderMain", 0x0028cf70);
+    return {};
+}
+
+// stub of ROR 0x0017ae04
+void EffWater1::renderPreMain(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffWater1::renderPreMain", 0x0017ae04);
+}
+
+// stub of ROR 0x0017b0a4
+int EffWater3::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffWater3::init", 0x0017b0a4);
+    return {};
+}
+
+// stub of ROR 0x0017b5e0
+int EffWater3::liveMain()
+{
+    ROSEPAN_STUB("EffWater3::liveMain", 0x0017b5e0);
+    return {};
+}
+
+// stub of ROR 0x0017b6d4
+u_long * EffWater3::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffWater3::renderMain", 0x0017b6d4);
+    return {};
+}
+
+// stub of ROR 0x0016ff18
+float effCalcViewDepth(DogCamera *cam, const float *pos)
+{
+    ROSEPAN_STUB("effCalcViewDepth", 0x0016ff18);
+    return {};
+}
+
+// stub of ROR 0x0016ff78
+void effMoveToward(float d, float *out, const float *from, const float *to)
+{
+    ROSEPAN_STUB("effMoveToward", 0x0016ff78);
+}
+
+// stub of ROR 0x0016b668
+int EffBloodSpray1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBloodSpray1::init", 0x0016b668);
+    return {};
+}
+
+// stub of ROR 0x0016b978
+int EffBloodSpray1::liveMain()
+{
+    ROSEPAN_STUB("EffBloodSpray1::liveMain", 0x0016b978);
+    return {};
+}
+
+// stub of ROR 0x0016ba7c
+u_long * EffBloodSpray1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBloodSpray1::renderMain", 0x0016ba7c);
+    return {};
+}
+
+// stub of ROR 0x0016bdd4
+void EffBloodSpray1::updateZDepth()
+{
+    ROSEPAN_STUB("EffBloodSpray1::updateZDepth", 0x0016bdd4);
+}
+
+// stub of ROR 0x0016be70
+int EffBloodSpray2::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBloodSpray2::init", 0x0016be70);
+    return {};
+}
+
+// stub of ROR 0x0016c258
+int EffBloodSpray2::liveMain()
+{
+    ROSEPAN_STUB("EffBloodSpray2::liveMain", 0x0016c258);
+    return {};
+}
+
+// stub of ROR 0x0016c400
+u_long * EffBloodSpray2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBloodSpray2::renderMain", 0x0016c400);
+    return {};
+}
+
+// stub of ROR 0x0016c748
+void EffBloodSpray2::updateZDepth()
+{
+    ROSEPAN_STUB("EffBloodSpray2::updateZDepth", 0x0016c748);
+}
+
+// stub of ROR 0x0016c7c0
+int EffBloodStay1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBloodStay1::init", 0x0016c7c0);
+    return {};
+}
+
+// stub of ROR 0x0016ca00
+int EffBloodStay1::liveMain()
+{
+    ROSEPAN_STUB("EffBloodStay1::liveMain", 0x0016ca00);
+    return {};
+}
+
+// stub of ROR 0x0016cac0
+u_long * EffBloodStay1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBloodStay1::renderMain", 0x0016cac0);
+    return {};
+}
+
+// stub of ROR 0x0016d01c
+int EffBloodStay2::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBloodStay2::init", 0x0016d01c);
+    return {};
+}
+
+// stub of ROR 0x0016d0d0
+int EffBloodStay2::liveMain()
+{
+    ROSEPAN_STUB("EffBloodStay2::liveMain", 0x0016d0d0);
+    return {};
+}
+
+// stub of ROR 0x0016d4bc
+u_long * EffBloodStay2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBloodStay2::renderMain", 0x0016d4bc);
+    return {};
+}
+
+// stub of ROR 0x0016d9a8
+int EffBloodStay3Prim::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBloodStay3Prim::init", 0x0016d9a8);
+    return {};
+}
+
+// stub of ROR 0x0016da30
+int EffBloodStay3Prim::liveMain()
+{
+    ROSEPAN_STUB("EffBloodStay3Prim::liveMain", 0x0016da30);
+    return {};
+}
+
+// stub of ROR 0x0016da44
+u_long * EffBloodStay3Prim::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBloodStay3Prim::renderMain", 0x0016da44);
+    return {};
+}
+
+// stub of ROR 0x0016dcc8
+int EffBreath1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBreath1::init", 0x0016dcc8);
+    return {};
+}
+
+// stub of ROR 0x0016de40
+int EffBreath1::liveMain()
+{
+    ROSEPAN_STUB("EffBreath1::liveMain", 0x0016de40);
+    return {};
+}
+
+// stub of ROR 0x0016df38
+u_long * EffBreath1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBreath1::renderMain", 0x0016df38);
+    return {};
+}
+
+// stub of ROR 0x0016e3ec
+void EffBreath1::updateZDepth()
+{
+    ROSEPAN_STUB("EffBreath1::updateZDepth", 0x0016e3ec);
+}
+
+// stub of ROR 0x0016e6e4
+int EffBreath1Space::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBreath1Space::init", 0x0016e6e4);
+    return {};
+}
+
+// stub of ROR 0x0016e7cc
+int EffBreath1Space::liveMain()
+{
+    ROSEPAN_STUB("EffBreath1Space::liveMain", 0x0016e7cc);
+    return {};
+}
+
+// stub of ROR 0x0028b408
+void EffBreath1Space::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffBreath1Space::render", 0x0028b408);
+}
+
+// stub of ROR 0x0028b410
+u_long * EffBreath1Space::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBreath1Space::renderMain", 0x0028b410);
+    return {};
+}
+
+// stub of ROR 0x0028b400
+I3dDrawSet * EffBreath1Space::createPacketEntry(I3dLayer *layer)
+{
+    ROSEPAN_STUB("EffBreath1Space::createPacketEntry", 0x0028b400);
+    return {};
+}
+
+// stub of ROR 0x0016eb00
+int EffBreath2::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBreath2::init", 0x0016eb00);
+    return {};
+}
+
+// stub of ROR 0x0016eb98
+int EffBreath2::liveMain()
+{
+    ROSEPAN_STUB("EffBreath2::liveMain", 0x0016eb98);
+    return {};
+}
+
+// stub of ROR 0x0028b5d8
+void EffBreath2::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffBreath2::render", 0x0028b5d8);
+}
+
+// stub of ROR 0x0028b5e0
+u_long * EffBreath2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBreath2::renderMain", 0x0028b5e0);
+    return {};
+}
+
+// stub of ROR 0x0016edc0
+int EffBreath2Prim::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBreath2Prim::init", 0x0016edc0);
+    return {};
+}
+
+// stub of ROR 0x0016eeb4
+int EffBreath2Prim::liveMain()
+{
+    ROSEPAN_STUB("EffBreath2Prim::liveMain", 0x0016eeb4);
+    return {};
+}
+
+// stub of ROR 0x0016ef74
+u_long * EffBreath2Prim::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBreath2Prim::renderMain", 0x0016ef74);
+    return {};
+}
+
+// stub of ROR 0x0016f160
+void EffBreath2Prim::updateZDepth()
+{
+    ROSEPAN_STUB("EffBreath2Prim::updateZDepth", 0x0016f160);
+}
+
+// stub of ROR 0x0016f1a0
+int EffBreath2Ground::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffBreath2Ground::init", 0x0016f1a0);
+    return {};
+}
+
+// stub of ROR 0x0016f380
+int EffBreath2Ground::liveMain()
+{
+    ROSEPAN_STUB("EffBreath2Ground::liveMain", 0x0016f380);
+    return {};
+}
+
+// stub of ROR 0x0016f3c8
+u_long * EffBreath2Ground::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffBreath2Ground::renderMain", 0x0016f3c8);
+    return {};
+}
+
+// stub of ROR 0x0016f71c
+int EffCameraAnim1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffCameraAnim1::init", 0x0016f71c);
+    return {};
+}
+
+// stub of ROR 0x0016faa0
+int EffCameraAnim1::liveMain()
+{
+    ROSEPAN_STUB("EffCameraAnim1::liveMain", 0x0016faa0);
+    return {};
+}
+
+// stub of ROR 0x0028b890
+void EffCameraAnim1::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffCameraAnim1::render", 0x0028b890);
+}
+
+// stub of ROR 0x0028b898
+u_long * EffCameraAnim1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffCameraAnim1::renderMain", 0x0028b898);
+    return {};
+}
+
+// stub of ROR 0x0028b888
+I3dDrawSet * EffCameraAnim1::createPacketEntry(I3dLayer *layer)
+{
+    ROSEPAN_STUB("EffCameraAnim1::createPacketEntry", 0x0028b888);
+    return {};
+}
+
+// stub of ROR 0x001704a4
+int EffDust2::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffDust2::init", 0x001704a4);
+    return {};
+}
+
+// stub of ROR 0x00170594
+int EffDust2::liveMain()
+{
+    ROSEPAN_STUB("EffDust2::liveMain", 0x00170594);
+    return {};
+}
+
+// stub of ROR 0x0028b988
+void EffDust2::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffDust2::render", 0x0028b988);
+}
+
+// stub of ROR 0x0028b990
+u_long * EffDust2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffDust2::renderMain", 0x0028b990);
+    return {};
+}
+
+// stub of ROR 0x0028b980
+I3dDrawSet * EffDust2::createPacketEntry(I3dLayer *layer)
+{
+    ROSEPAN_STUB("EffDust2::createPacketEntry", 0x0028b980);
+    return {};
+}
+
+// stub of ROR 0x0017093c
+int EffDust2Prim::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffDust2Prim::init", 0x0017093c);
+    return {};
+}
+
+// stub of ROR 0x001709c8
+int EffDust2Prim::liveMain()
+{
+    ROSEPAN_STUB("EffDust2Prim::liveMain", 0x001709c8);
+    return {};
+}
+
+// stub of ROR 0x001709f4
+u_long * EffDust2Prim::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffDust2Prim::renderMain", 0x001709f4);
+    return {};
+}
+
+// stub of ROR 0x00170c64
+void EffDust2Prim::updateZDepth()
+{
+    ROSEPAN_STUB("EffDust2Prim::updateZDepth", 0x00170c64);
+}
+
+// stub of ROR 0x00170ca4
+int EffFire1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFire1::init", 0x00170ca4);
+    return {};
+}
+
+// stub of ROR 0x00170d44
+int EffFire1::liveMain()
+{
+    ROSEPAN_STUB("EffFire1::liveMain", 0x00170d44);
+    return {};
+}
+
+// stub of ROR 0x00170e14
+u_long * EffFire1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFire1::renderMain", 0x00170e14);
+    return {};
+}
+
+// stub of ROR 0x00171278
+void EffFire1::liveActivateExec()
+{
+    ROSEPAN_STUB("EffFire1::liveActivateExec", 0x00171278);
+}
+
+// stub of ROR 0x001711fc
+void EffFire1::updateZDepth()
+{
+    ROSEPAN_STUB("EffFire1::updateZDepth", 0x001711fc);
+}
+
+// stub of ROR 0x001712bc
+int EffFire1Ex::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFire1Ex::init", 0x001712bc);
+    return {};
+}
+
+// stub of ROR 0x00171378
+void EffFire1Ex::updateZDepth()
+{
+    ROSEPAN_STUB("EffFire1Ex::updateZDepth", 0x00171378);
+}
+
+// stub of ROR 0x0017145c
+int EffFire2::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFire2::init", 0x0017145c);
+    return {};
+}
+
+// stub of ROR 0x00171534
+int EffFire2::liveMain()
+{
+    ROSEPAN_STUB("EffFire2::liveMain", 0x00171534);
+    return {};
+}
+
+// stub of ROR 0x00171548
+u_long * EffFire2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFire2::renderMain", 0x00171548);
+    return {};
+}
+
+// stub of ROR 0x0017167c
+void EffFire2::updateZDepth()
+{
+    ROSEPAN_STUB("EffFire2::updateZDepth", 0x0017167c);
+}
+
+// stub of ROR 0x001716bc
+int EffFog1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFog1::init", 0x001716bc);
+    return {};
+}
+
+// stub of ROR 0x001717b8
+int EffFog1::liveMain()
+{
+    ROSEPAN_STUB("EffFog1::liveMain", 0x001717b8);
+    return {};
+}
+
+// stub of ROR 0x001717f4
+u_long * EffFog1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFog1::renderMain", 0x001717f4);
+    return {};
+}
+
+// stub of ROR 0x00171bbc
+void EffFog1::updateZDepth()
+{
+    ROSEPAN_STUB("EffFog1::updateZDepth", 0x00171bbc);
+}
+
+// stub of ROR 0x00171bfc
+int EffFog2::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFog2::init", 0x00171bfc);
+    return {};
+}
+
+// stub of ROR 0x00171c94
+int EffFog2::liveMain()
+{
+    ROSEPAN_STUB("EffFog2::liveMain", 0x00171c94);
+    return {};
+}
+
+// stub of ROR 0x0028bee0
+void EffFog2::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffFog2::render", 0x0028bee0);
+}
+
+// stub of ROR 0x0028bee8
+u_long * EffFog2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFog2::renderMain", 0x0028bee8);
+    return {};
+}
+
+// stub of ROR 0x0028bed8
+I3dDrawSet * EffFog2::createPacketEntry(I3dLayer *layer)
+{
+    ROSEPAN_STUB("EffFog2::createPacketEntry", 0x0028bed8);
+    return {};
+}
+
+// stub of ROR 0x00171e28
+int EffFog2Prim::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFog2Prim::init", 0x00171e28);
+    return {};
+}
+
+// stub of ROR 0x00172058
+int EffFog2Prim::liveMain()
+{
+    ROSEPAN_STUB("EffFog2Prim::liveMain", 0x00172058);
+    return {};
+}
+
+// stub of ROR 0x00172284
+u_long * EffFog2Prim::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFog2Prim::renderMain", 0x00172284);
+    return {};
+}
+
+// stub of ROR 0x00172638
+void EffFog2Prim::updateZDepth()
+{
+    ROSEPAN_STUB("EffFog2Prim::updateZDepth", 0x00172638);
+}
+
+// stub of ROR 0x00172d98
+int EffFog3Dark::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFog3Dark::init", 0x00172d98);
+    return {};
+}
+
+// stub of ROR 0x0028c148
+int EffFog3Dark::liveMain()
+{
+    ROSEPAN_STUB("EffFog3Dark::liveMain", 0x0028c148);
+    return {};
+}
+
+// stub of ROR 0x0028c150
+void EffFog3Dark::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffFog3Dark::render", 0x0028c150);
+}
+
+// stub of ROR 0x0028c158
+u_long * EffFog3Dark::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFog3Dark::renderMain", 0x0028c158);
+    return {};
+}
+
+// stub of ROR 0x00172de8
+int EffFog3WeakUp::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFog3WeakUp::init", 0x00172de8);
+    return {};
+}
+
+// stub of ROR 0x00172e08
+int EffFog3WeakUp::liveMain()
+{
+    ROSEPAN_STUB("EffFog3WeakUp::liveMain", 0x00172e08);
+    return {};
+}
+
+// stub of ROR 0x0028c240
+void EffFog3WeakUp::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffFog3WeakUp::render", 0x0028c240);
+}
+
+// stub of ROR 0x0028c248
+u_long * EffFog3WeakUp::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFog3WeakUp::renderMain", 0x0028c248);
+    return {};
+}
+
+// stub of ROR 0x00172e4c
+int EffFoot1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFoot1::init", 0x00172e4c);
+    return {};
+}
+
+// stub of ROR 0x00172f4c
+int EffFoot1::liveMain()
+{
+    ROSEPAN_STUB("EffFoot1::liveMain", 0x00172f4c);
+    return {};
+}
+
+// stub of ROR 0x0028c330
+void EffFoot1::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffFoot1::render", 0x0028c330);
+}
+
+// stub of ROR 0x0028c338
+u_long * EffFoot1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFoot1::renderMain", 0x0028c338);
+    return {};
+}
+
+// stub of ROR 0x001731f0
+int EffFoot1Prim::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFoot1Prim::init", 0x001731f0);
+    return {};
+}
+
+// stub of ROR 0x00173274
+int EffFoot1Prim::liveMain()
+{
+    ROSEPAN_STUB("EffFoot1Prim::liveMain", 0x00173274);
+    return {};
+}
+
+// stub of ROR 0x001732d8
+u_long * EffFoot1Prim::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFoot1Prim::renderMain", 0x001732d8);
+    return {};
+}
+
+// stub of ROR 0x00173340
+void EffFoot1Prim::updateZDepth()
+{
+    ROSEPAN_STUB("EffFoot1Prim::updateZDepth", 0x00173340);
+}
+
+// stub of ROR 0x00173630
+int EffFoot2::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFoot2::init", 0x00173630);
+    return {};
+}
+
+// stub of ROR 0x00173688
+int EffFoot2::liveMain()
+{
+    ROSEPAN_STUB("EffFoot2::liveMain", 0x00173688);
+    return {};
+}
+
+// stub of ROR 0x0028c508
+void EffFoot2::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffFoot2::render", 0x0028c508);
+}
+
+// stub of ROR 0x0028c510
+u_long * EffFoot2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFoot2::renderMain", 0x0028c510);
+    return {};
+}
+
+// stub of ROR 0x0028c500
+I3dDrawSet * EffFoot2::createPacketEntry(I3dLayer *layer)
+{
+    ROSEPAN_STUB("EffFoot2::createPacketEntry", 0x0028c500);
+    return {};
+}
+
+// stub of ROR 0x00173a90
+int EffFoot2Prim::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffFoot2Prim::init", 0x00173a90);
+    return {};
+}
+
+// stub of ROR 0x00173b2c
+int EffFoot2Prim::liveMain()
+{
+    ROSEPAN_STUB("EffFoot2Prim::liveMain", 0x00173b2c);
+    return {};
+}
+
+// stub of ROR 0x00173b68
+u_long * EffFoot2Prim::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffFoot2Prim::renderMain", 0x00173b68);
+    return {};
+}
+
+// stub of ROR 0x00174dd8
+int EffLight1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffLight1::init", 0x00174dd8);
+    return {};
+}
+
+// stub of ROR 0x00174e9c
+int EffLight1::liveMain()
+{
+    ROSEPAN_STUB("EffLight1::liveMain", 0x00174e9c);
+    return {};
+}
+
+// stub of ROR 0x00174eb0
+u_long * EffLight1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffLight1::renderMain", 0x00174eb0);
+    return {};
+}
+
+// stub of ROR 0x0017512c
+void EffLight1::liveActivateExec()
+{
+    ROSEPAN_STUB("EffLight1::liveActivateExec", 0x0017512c);
+}
+
+// stub of ROR 0x00175170
+int EffLight2::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffLight2::init", 0x00175170);
+    return {};
+}
+
+// stub of ROR 0x00175254
+int EffLight2::liveMain()
+{
+    ROSEPAN_STUB("EffLight2::liveMain", 0x00175254);
+    return {};
+}
+
+// stub of ROR 0x00175268
+void EffLight2::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffLight2::render", 0x00175268);
+}
+
+// stub of ROR 0x00175378
+u_long * EffLight2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffLight2::renderMain", 0x00175378);
+    return {};
+}
+
+// stub of ROR 0x001755e8
+void EffLight2::liveActivateExec()
+{
+    ROSEPAN_STUB("EffLight2::liveActivateExec", 0x001755e8);
+}
+
+// stub of ROR 0x001788ec
+int EffMuzzleFlash1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffMuzzleFlash1::init", 0x001788ec);
+    return {};
+}
+
+// stub of ROR 0x00178ac0
+int EffMuzzleFlash1::liveMain()
+{
+    ROSEPAN_STUB("EffMuzzleFlash1::liveMain", 0x00178ac0);
+    return {};
+}
+
+// stub of ROR 0x00178c84
+u_long * EffMuzzleFlash1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffMuzzleFlash1::renderMain", 0x00178c84);
+    return {};
+}
+
+// stub of ROR 0x001790a4
+void EffMuzzleFlash1::updateZDepth()
+{
+    ROSEPAN_STUB("EffMuzzleFlash1::updateZDepth", 0x001790a4);
+}
+
+// stub of ROR 0x00179428
+int EffSteam1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffSteam1::init", 0x00179428);
+    return {};
+}
+
+// stub of ROR 0x0017955c
+int EffSteam1::liveMain()
+{
+    ROSEPAN_STUB("EffSteam1::liveMain", 0x0017955c);
+    return {};
+}
+
+// stub of ROR 0x0028cb78
+void EffSteam1::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffSteam1::render", 0x0028cb78);
+}
+
+// stub of ROR 0x0028cb80
+u_long * EffSteam1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffSteam1::renderMain", 0x0028cb80);
+    return {};
+}
+
+// stub of ROR 0x0028cb70
+I3dDrawSet * EffSteam1::createPacketEntry(I3dLayer *layer)
+{
+    ROSEPAN_STUB("EffSteam1::createPacketEntry", 0x0028cb70);
+    return {};
+}
+
+// stub of ROR 0x001797d8
+int EffSteam1Prim::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffSteam1Prim::init", 0x001797d8);
+    return {};
+}
+
+// stub of ROR 0x001798d8
+int EffSteam1Prim::liveMain()
+{
+    ROSEPAN_STUB("EffSteam1Prim::liveMain", 0x001798d8);
+    return {};
+}
+
+// stub of ROR 0x00179998
+u_long * EffSteam1Prim::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffSteam1Prim::renderMain", 0x00179998);
+    return {};
+}
+
+// stub of ROR 0x00179b5c
+void EffSteam1Prim::updateZDepth()
+{
+    ROSEPAN_STUB("EffSteam1Prim::updateZDepth", 0x00179b5c);
+}
+
+// stub of ROR 0x00179b9c
+int EffSteam2::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffSteam2::init", 0x00179b9c);
+    return {};
+}
+
+// stub of ROR 0x00179c30
+int EffSteam2::liveMain()
+{
+    ROSEPAN_STUB("EffSteam2::liveMain", 0x00179c30);
+    return {};
+}
+
+// stub of ROR 0x0028cd50
+void EffSteam2::render(RENDERPARAM *param)
+{
+    ROSEPAN_STUB("EffSteam2::render", 0x0028cd50);
+}
+
+// stub of ROR 0x0028cd58
+u_long * EffSteam2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffSteam2::renderMain", 0x0028cd58);
+    return {};
+}
+
+// stub of ROR 0x0028cd48
+I3dDrawSet * EffSteam2::createPacketEntry(I3dLayer *layer)
+{
+    ROSEPAN_STUB("EffSteam2::createPacketEntry", 0x0028cd48);
+    return {};
+}
+
+// stub of ROR 0x00179dfc
+int EffSteam2Prim::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffSteam2Prim::init", 0x00179dfc);
+    return {};
+}
+
+// stub of ROR 0x00179e70
+int EffSteam2Prim::liveMain()
+{
+    ROSEPAN_STUB("EffSteam2Prim::liveMain", 0x00179e70);
+    return {};
+}
+
+// stub of ROR 0x00179ed0
+u_long * EffSteam2Prim::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffSteam2Prim::renderMain", 0x00179ed0);
+    return {};
+}
+
+// stub of ROR 0x0017a2bc
+void EffSteam2Prim::updateZDepth()
+{
+    ROSEPAN_STUB("EffSteam2Prim::updateZDepth", 0x0017a2bc);
+}
+
+// stub of ROR 0x0017a2fc
+int EffCloud1::init(const EffParam *param)
+{
+    ROSEPAN_STUB("EffCloud1::init", 0x0017a2fc);
+    return {};
+}
+
+// stub of ROR 0x0017a534
+int EffCloud1::liveMain()
+{
+    ROSEPAN_STUB("EffCloud1::liveMain", 0x0017a534);
+    return {};
+}
+
+// stub of ROR 0x0017a5ec
+u_long * EffCloud1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
+{
+    ROSEPAN_STUB("EffCloud1::renderMain", 0x0017a5ec);
+    return {};
+}
+
+// stub of ROR 0x0017a8d8
+void EffCloud1::updateZDepth()
+{
+    ROSEPAN_STUB("EffCloud1::updateZDepth", 0x0017a8d8);
 }

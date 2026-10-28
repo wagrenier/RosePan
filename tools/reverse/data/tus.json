@@ -208,7 +208,7 @@
    "why": "11 of 16 functions assert with dog/dogtexinfo.cpp; the rest are DogTexInfo members (clear, term, findFree, setSepiaColor, releaseModel, releasePfh) taking the table in a0; DogModel code ends at 0x1161e4 (unassigned 0x1160a8 run before), MagSystem starts at 0x117654 after the 8-byte 0x11764c"
   },
   "eff/effman.cpp": {
-   "notes": "Left in eff/effman.cpp: createEff 0x176cc8 (a stub returning -1; it news one of 43 Eff classes per kind, so write eff/eff0.cpp first: Eff0 0x16a914..0x16ac84 plus effInitRandTable 0x16ac84 and effClearDrawSets 0x16add8, then the classes from unassigned@0016a914 in link order) and EffFindItem1 0x176694..0x176a3c (doubt: may be its own file). PC deviation: eff.bin is opened and closed per read; keeping it open as the ROM does stops the New Game run after the title (open-items Open questions, hazards.md). releasePack skips the m_file words the ROM passes as texture numbers (pointers, ignored by release's range check). Screen: no effect is ever created yet (createEff stub), so nothing new draws; the 200 s run is unchanged (title, picture book with page turn at frames 3480..6060). For the references: written in architecture.md (The effect manager), open-items.md (Next up item, split note, open question), hazards.md.",
+   "notes": "Verify: the 200 s run creates EffLight1 (kind 0x21) and EffCameraAnim1 (kind 0xd) during the picture book; their init is a stub returning 0, so createEff deletes them and nothing new draws. Screen unchanged from the last session (title, picture book with page turns, black at the end as before). PC deviation: the ROM returns the stale pack slot number and reads the deleted object when init or addEff fails, and calls through NULL for a kind with no class; the host returns -1 (open-items Open questions). Next: eff/eff0.cpp 0x16a914..0x16ade0 (Eff0 and effInitRandTable / effClearDrawSets; effCalcViewDepth 0x16ff18 and effMoveToward 0x16ff78 are stubs too), then EffLight1 and EffCameraAnim1, moving each class out of effclasses.h into its own file header. EffFindItem1 shows once a kind-0x32 effect is created with Eff0 written. References updated: architecture.md (kind to class map), open-items.md, hazards.md (vtable-only undefined references, callcheck colon).",
    "ranges": [
     [
      "00176694",
@@ -220,9 +220,14 @@
      "date": "2026-10-28 09:02",
      "status": "partial",
      "summary": "The effect manager EffMan (formerly Obj176a3c, scene +0x837e0) split out of unassigned@00166a1c as eff/effman.cpp 0x176694..0x1788ec and written except createEff: init (scene / ctx globals, draw order, eff.bin index, the nine kept packs), term, live (retired and live entries), draw (layers 850 / 855 at the camera, z depths, far-to-near sort, render), the 0x110-entry table with its weak FIFO and retired bank, the pack loader (I3D_BIN / I3D_I3M relocated, TIM2 into the scene DogTexInfo, i3rAssignTex) and releasePack. Eff0 declared with its 12 virtual slots in eff/eff0.h; EffParam moved to eff/effman.h; emy/emy_out.cpp 0x166a1c..0x16a914 pinned (not written). 37 functions named (batch effman_001)."
+    },
+    {
+     "date": "2026-10-28 09:18",
+     "status": "verify",
+     "summary": "EffMan::createEff written (the kind to class switch over 41 Eff classes, pack hand-off, init, addEff, weak FIFO, the 0x1a / 0x1f singletons) and EffFindItem1 (kind 0x32: init, liveMain, render, renderMain as a VU1 sprite, updateZDepth); all 32 functions of the TU done. Eff classes declared in src/eff/effclasses.h with their overridden slots and EE sizes; 149 slot functions named (batch effman_002); their overrides, out-of-line ctors / dtors and Eff0 are stubs in src/lib/unassigned_stubs.cpp."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "Obj176a3c (scene +0x837e0, the Eff* factory) is the effect manager: data/eff/eff.bin loader, the 0x110-entry table, draw sort. Code sits between EffLight3 and EffMuzzleFlash1 in alphabetical class link order (EffMan); EffFindItem1 code 0x176694..0x176a3c and its linkonce come from the same object (linkonce order Light3, FindItem1, MuzzleFlash1), so it joins this file. No source string names it."
   },
   "emy/emy_hfm.cpp": {

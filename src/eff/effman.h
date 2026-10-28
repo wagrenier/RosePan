@@ -20,6 +20,7 @@
 
 #include "eff/eff0.h"
 #include "game/gamfile.h"
+#include "sdk/libvu0.h"
 
 struct DogActor;
 struct MagScene;
@@ -53,7 +54,32 @@ struct EffParam
             int   m_2c;         // ROR 0x2c: kind 3 (HfmOutDead::Init): 90
         } m_hit;                // kind 1 (scnDamageStart); kind 3 the same words
         char m_suffix[0x70];    // ROR 0x10: kinds 0x33 / 0x34, the pack name's suffix (createEff)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10
+            float m_near;       // ROR 0x1c: EffFindItem1::m_near
+        } m_find;               // kind 0x32 (EffFindItem1::init)
     };
+};
+
+/* Kind 0x32 (pack finditem1): a blinking sprite at m_pos, pulled m_near
+ * toward the camera -- shown 15 frames out of every 45, its texture
+ * stepping 0, 1, 2, 3, 2, 1, 0 while shown. Its code opens
+ * eff/effman.cpp (0x176694..0x176a3c). EE 0x50. layout: host. */
+class EffFindItem1 : public Eff0
+{
+public:
+    EffFindItem1() {}                                   // ROR 0x0028c928 (linkonce; inlined in createEff)
+    virtual ~EffFindItem1() {}                          // ROR 0x0028c878 (linkonce)
+    virtual int  init(const EffParam *param);                                // ROR 0x00176694
+    virtual int  liveMain();                                                 // ROR 0x00176700
+    virtual void render(RENDERPARAM *param);                                 // ROR 0x00176728
+    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x00176754
+    virtual void updateZDepth();                                             // ROR 0x001769ec
+
+    sceVu0FVECTOR m_pos;        // ROR 0x30: w 1
+    float         m_near;       // ROR 0x40: how far the sprite is pulled toward the camera
+    u_char        m_frame;      // ROR 0x44: 0..44, rendered while < 15
 };
 
 /* One entry of a pack: a model or motion (relocated in place) or a
