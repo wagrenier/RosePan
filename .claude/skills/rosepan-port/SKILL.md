@@ -143,7 +143,7 @@ above, since lower effort reconstructs worse). Keep that line when editing the f
 | map code | `modview.py range\|tree`, `ror_functions.txt`, `stage.py class:Name` |
 | name | `ctxcard.py`, `name_ctx.py`; one-time seeding `sections.py --apply`, `libmatch.py --apply` |
 | symbols | `gcc2.py` (demangle / mangle GCC 2 names), `sections.py --list FILTER` |
-| read code | `stage.py` (bundles), `dec.py`, `ghidra.py` (asm, refs, mkfunc), `hidden.py` (functions folded into the body before them), `mipsdis.py` (offline asm), `vudis.py` (VU microprograms), `mipsemu.py` (run a leaf function over every input), `sinit.py` (tables a static initializer fills) |
+| read code | `stage.py` (bundles), `dec.py`, `ghidra.py` (asm, refs, mkfunc), `hidden.py` (functions folded into the body before them), `mipsdis.py` (offline asm), `vudis.py` (VU microprograms), `mipsemu.py` (run a leaf function over every input), `sinit.py` (tables a static initializer fills), `i3racc.py` (classify / name / generate a family of one-line accessors by exact shape) |
 | classes | `rtti.py` (`--class NAME`, `--vtable ADDR`): bases, slots, ctors/dtors, vptr offset |
 | TU identity | `tuid.py <TU>` (also in the brief) |
 | game data | `datadump.py` (an ELF table -> C++ initializers), `tm2png.py` (TIM2 -> PNG references, `--scan` an archive) |

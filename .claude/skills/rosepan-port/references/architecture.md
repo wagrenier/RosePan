@@ -329,6 +329,10 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     arrays of one count); the rest are `jr ra`. Checked offline on 1602 models in the disc's RPKs
     (7.1 M pointers, all in the file; names may be Shift-JIS). Nine pairs live at 0x22a6c0..0x22aec0
     (types 0x25 0x26 0x29 0x2a 0x2d 0x4a 0x4d 0x52 0x59) and are written in i3ritem.cpp too.
+    After each of the other types' fixup pairs sit that type's accessors (2026-10-28, verify): 288
+    over 42 types in 0x22c5a0..0x22e840, i3rtype.cpp's ten shapes and naming, none called in the ROM;
+    258 were hidden (Ghidra functions made by `i3racc.py mkfunc`). The widest: type 0x17 (36 over
+    slots 0..16), 0x56 (34 over slots 0..5), 0x47 (16, two named child lists).
     **The per-type accessors** (`i3d/i3rtype.cpp` 0x22a6c0..0x22b1b0, pinned and written 2026-10-27,
     verify; 78 functions, 38 of them hidden ones created in Ghidra): per type, in the order 0x4d 0x29
     0x4a 0x26 0x59 0x25 0x2d 0x2a 0x52, the fixup pair then one-line reads of the item's child slot k
