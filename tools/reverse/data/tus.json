@@ -694,7 +694,7 @@
    "why": "the i3d VU1 packet writers: strip uploaders 0x21c960 (UNPACK to VU1 0x1dc and MSCAL), their clip helpers, i3dPktDrawStripCtx / LineStrip, the VU1 sprite family 0x21e428..0x21e6f8 and the wire shapes; bounded by i3dPackXYZ 0x21c940 (i3d/i3dpacket.cpp) and i3dInitHardware 0x21eb28 (i3d/i3dctx.cpp). No source string; named after its i3dPkt*Vu1* API"
   },
   "i3d/i3mpose.cpp": {
-   "notes": "Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game calls is written and the 200 s New Game run plays through it without a fault, but nothing shows it yet: after the film the screen is black because utlDrawI3r (unassigned@00106658) is a stub; the first session that draws a model should look at the actor's pose and mark this verify/done. Decided: pose functions take void* (callers pass byte offsets) and cast to I3mPose; i3mFindKey takes the root instead of the float table (host keeps offsets); the VU0-register helpers 0x22f870/0x22fc38/0x230258 became pointer functions. Every disc i3m has flags 0x1f (packed pos/rot/scale, no scale, splines as linear), so only the step/lerp/slerp paths run. i3mQuatExp 0x230570 was folded into i3mQuatLog in Ghidra: created with mkfunc. Unreferenced hidden leaves 0x230370, 0x230378, 0x230638 not written. The stale queue entry unassigned@0022e840 is skipped by tus.py next; i3cquery/i3dgeom are not queued (not on the draw path).",
+   "notes": "Whole TU written. Nothing in the ROM reaches 0x230688..0x231198 (no jal, j, data word or lui/addiu pair), so no picture can show it; the rest of the TU (key decode, pose blends, PoseToMatrices) is the first thing to check when a session draws an animated model: look at the actor's pose and mark this done. Decided: the GPR-quadword forms (names ending in Q) take pointers on the host like the memory forms; i3mQuatSlerpShort, ...Mem and ...Q share one inline body. i3mQuatSquadMem skips its second slerp when c and d are the same pointer with no NaN component, as the ROM does. hidden.py found only 1 of the 8 hidden entries here (recorded in hazards.md). 15 s smoke run ends on the Atlus disclaimer as before.",
    "ranges": [
     [
      "0022e840",
@@ -706,9 +706,14 @@
      "date": "2026-10-27 18:07",
      "status": "partial",
      "summary": "i3m pose player: split unassigned@0022e840 into i3d/i3mpose.cpp, i3d/i3cquery.cpp, i3d/i3dgeom.cpp; wrote 37 i3mpose functions (key search and decode, step/lerp/Hermite/slerp/squad, pose samplers and blends, pose mixes, PoseToMatrices, quaternion ops); I3mRoot flags and value tables decoded"
+    },
+    {
+     "date": "2026-10-28 12:00",
+     "status": "verify",
+     "summary": "i3m pose player complete: the last 10 functions, a quaternion kit Ghidra had folded into 0x230688 and 0x230df8 (shorter-arc slerp memory and GPR forms, shorter-arc lerp, normalized slerp memory and GPR forms, squad both forms, quaternion to matrix, matrix to quaternion, squad control point); created and named in Ghidra (batch i3mpose_003)"
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "the i3m pose player: key search, key decode (I3mRoot +0x20/+0x28 tables), lerp/spline/slerp/squad, pose blends, PoseToMatrices, quaternion helpers; ends with i3mQuatFromEuler; 0x2312a0 starts the i3c query code"
   },
   "i3d/i3mroot.cpp": {

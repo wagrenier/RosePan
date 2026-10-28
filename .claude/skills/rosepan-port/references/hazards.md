@@ -123,6 +123,9 @@ entries are marked **RoR** with the date.
   7 functions (unreferenced setters, the default end hook, a layer callback), i3dvram 3 more. Run it
   on every pinned range before naming; a callback's body is also where Ghidra puts "From <addr> [no
   function]" xrefs.
+  hidden.py misses entries that follow a `b` (not `jr ra`) or sit after a lone padding nop: in
+  i3mpose 0x230688..0x231198 it reported 1 of 8 hidden quaternion functions (2026-10-28). Over a
+  body far bigger than its decompile, `mipsdis.py` it and look for every `addiu sp,sp,-N` prologue.
 - **Tail calls are not calls to Ghidra.** `j <func>` at a function's end is missing from Ghidra's callee
   list ("0 callers"); features.py records it as a tail jump and callcheck counts it. A `j` to an
   address with its own prologue inside a body is a separate function: mkfunc it. A run of tiny tail-call

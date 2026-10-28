@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 11:36 at commit `b12fb49` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-28 12:00 at commit `3fb1318` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-28 11:36 at commit `b12fb49` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6872**, named **5696** (83%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 4094
-- context-name ledger: 4394 entries; overrides of wrong library matches: 5
-- placed in a source file: 4809/6872 in 123 files
+- game functions: **6880**, named **5706** (83%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 4104
+- context-name ledger: 4404 entries; overrides of wrong library matches: 5
+- placed in a source file: 4817/6880 in 123 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4101**; stubs: **553**
+- reconstructed RoR functions: **4111**; stubs: **553**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -68,7 +68,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
 | `src/i3d/i3dvu1pkt.cpp` | 17 | 0 |
-| `src/i3d/i3mpose.cpp` | 36 | 0 |
+| `src/i3d/i3mpose.cpp` | 46 | 0 |
 | `src/i3d/i3mroot.cpp` | 12 | 0 |
 | `src/i3d/i3rdraw.cpp` | 19 | 0 |
 | `src/i3d/i3ritem.cpp` | 156 | 0 |
@@ -146,10 +146,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 163 TUs: todo 100, partial 9, verify 82, done 9
-- next: **i3d/i3mpose.cpp** (continuing a partial TU)
+- 163 TUs: todo 100, partial 8, verify 83, done 9
+- next: **i3d/i3rdraw.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
-- partial: `i3d/i3mpose.cpp` 36/38 -- Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game c
 - partial: `i3d/i3rdraw.cpp` 19/19 -- The blend is inert until unassigned@00225018 is written: i3rBlendGetWeight 0x225108 (scalar 0x58 curve via 0x225080 / bisect 0x225018) and i3rBlendVertices 0x22
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
@@ -181,6 +180,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `i3d/i3dview.cpp` 19/19 -- Status verify: views are built every frame (host test: screen centre 2047.5, frustum corner on the rectangle corner, depth 4094.6..1.06, scissor 0..511 x 0..447
 - verify: `i3d/i3dvram.cpp` 37/37 -- Complete; nothing on screen shows it yet (screen black: the draw path is stubbed). A host test (init, reserve x3 frames with eviction, compact, end frame, reset
 - verify: `i3d/i3dvu1pkt.cpp` 17/21 -- Complete except 0x21cfb0..0x21d378 (four functions: a REF-tag helper, an ADC index builder, two strip writers): no code or data references in the ROM, left unwr
+- verify: `i3d/i3mpose.cpp` 46/46 -- Whole TU written. Nothing in the ROM reaches 0x230688..0x231198 (no jal, j, data word or lui/addiu pair), so no picture can show it; the rest of the TU (key dec
 - verify: `i3d/i3mroot.cpp` 12/12 -- Pinned from unassigned@0022b4b8 to i3d/i3mroot.cpp. Host keeps root-relative offsets (i3mPtr), like i3c: the relocators walk with delta 0 and keep +0x16 at 1 (o
 - verify: `i3d/i3rmesh.cpp` 14/14 -- Verify: the packet builder's callers (i3rDrawGroupSkinned / Rigid, 0x220838) are not ported, so only i3rPktLayerTest / i3rPktLayerAlpha run, through rosepan_i3d
 - verify: `i3d/i3rmodel.cpp` 14/14 -- Verify: nothing on screen reaches it yet. The 200 s New Game run still ends black after the film; DogActor::load 0x10cd5c (dog/dogactor.cpp) is the stub that ke
@@ -237,6 +237,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-28 12:00 `i3d/i3mpose.cpp` verify: i3m pose player complete: the last 10 functions, a quaternion kit Ghidra had folded into 0x230688 and 0x230df8 (shorter-arc slerp memory and GPR forms, shorter-
 - 2026-10-28 11:36 `emy/emy_hfm.cpp` verify: Wrote HfmOutTest::Exec 0x149500, the last stub of the TU: a 0x2d-step motion walk-through (ROM switch via jump table 0x2ef4b0) written as a step-to-motion table
 - 2026-10-28 11:19 `i3d/i3rdraw.cpp` partial: Blend path wired: i3rDrawSetupBlend 0x220670 written (per channel the non-zero weights of the entry's 0x59 targets, curve at opt's time or static weight); i3rDr
 - 2026-10-28 11:05 `i3d/i3rdraw.cpp` partial: i3rDrawMesh45 / i3rDrawMesh46 part culls written (box test, i3dViewTestBoneBox through the entry's bone slots) and now decide i3rDrawModel's result; I3dBoneBoxe
@@ -244,7 +245,6 @@ Recent sessions:
 - 2026-10-28 10:01 `i3d/i3dvu1pkt.cpp` verify: i3d/i3dvu1pkt.cpp: the clipped line strips and wire shapes written -- i3dVu0ClipPair 0x21db60 (VCLIP flags), i3dClipSegment 0x21db90 (six-plane clip with STQ / 
 - 2026-10-28 09:18 `eff/effman.cpp` verify: EffMan::createEff written (the kind to class switch over 41 Eff classes, pack hand-off, init, addEff, weak FIFO, the 0x1a / 0x1f singletons) and EffFindItem1 (k
 - 2026-10-28 09:02 `eff/effman.cpp` partial: The effect manager EffMan (formerly Obj176a3c, scene +0x837e0) split out of unassigned@00166a1c as eff/effman.cpp 0x176694..0x1788ec and written except createEf
-- 2026-10-28 08:24 `sct/sctlayer.cpp` verify: The secta world (floor cells) split out of unassigned@00166a1c as sct/sctlayer.cpp 0x17c0f0..0x17e540 and written in full: SctWorld (scene +0x8542c, sector.sec 
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|

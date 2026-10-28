@@ -126,6 +126,22 @@ void  i3mQuatLog(float *out, const float *q);                            // ROR 
 void  i3mQuatExp(float *out, const float *v);                            // ROR 0x00230570
 float i3mQuatDot(const float *a, const float *b);                        // ROR 0x00230610
 void  i3mQuatNormalize(float *out, const float *in);                     // ROR 0x00230660
+/* Unreferenced in the ROM; the ...Q forms pass quadwords in GPRs there. */
+void  i3mQuatSlerpShortMem(float w, float *out, const float *a, const float *b); // ROR 0x00230688
+void  i3mQuatSlerpShortQ(float w, float *out, const float *a, const float *b);   // ROR 0x002307c0
+void  i3mQuatLerpShort(float w, float *out, const float *a, const float *b);     // ROR 0x002308f0
+void  i3mQuatSlerpNormMem(float w, float *out, const float *a, const float *b);  // ROR 0x00230998
+void  i3mQuatSlerpNormQ(float w, float *out, const float *a, const float *b);    // ROR 0x00230ae8
+/* slerp(slerp(w, c, d), slerp(w, a, b), 2w(1 - w)). */
+void  i3mQuatSquadMem(float w, float *out, const float *a, const float *b, const float *c,
+                      const float *d);                                   // ROR 0x00230c10
+void  i3mQuatSquadQ(float w, float *out, const float *a, const float *b, const float *c,
+                    const float *d);                                     // ROR 0x00230cf8
+/* Rotation rows from q, row 3 = trans. */
+void  i3mQuatToMatrix(sceVu0FVECTOR *m, const float *q, const float *trans); // ROR 0x00230d70
+void  i3mQuatFromMatrix(float *out, const sceVu0FVECTOR *m);             // ROR 0x00230df8
+/* The squad control point at q from its neighbours. */
+void  i3mQuatSquadCtrl(float *out, const float *prev, const float *q, const float *next); // ROR 0x00231098
 /* From the euler angles rot (x, y, z). */
 void  i3mQuatFromEuler(float *out, const float *rot);                    // ROR 0x00231198
 
