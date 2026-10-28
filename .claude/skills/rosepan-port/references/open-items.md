@@ -1045,6 +1045,12 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-28, emy/emy_out.cpp) Two ROM oddities ported as they are: `EmyOut::slideToTarget` 0x168a30
+  (no callers found) sets the achr's position and rotation to 0 on its last frame, and
+  `EmyOut::setGotMotion` 0x1685c0 passes an unset register (the caller's s3) as the scissors' motion for
+  enemy motion 0x4e (the port uses 2, the default). `getAttackMotion` 0x1677d0 writes its two outs and
+  then -1 over both on every path. Look again if a Got or a grab state shows them on screen.
+
 - HfmOutRide phase 0 reads +0x44 (HfmOutSlap's motion slot) for its slaps' end frame, but nothing in
   the Ride writes it; the port zero-initialises it (end frame 0: decide off from frame 1). Phase 2 step 8
   has no writer either. Check once an Hfm enemy appears in a run (2026-10-28).

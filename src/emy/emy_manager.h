@@ -71,7 +71,8 @@ struct EmyManager : CmnITask
     void setGroup(float f, int a, int b, int c, int count, int d,
                   const float *pos);                                     // ROR 0x00162b68
     void setSlotWord24(int no, int v);                                   // ROR 0x00162afc
-    void countGrpDead(int no);                                           // ROR 0x00162b14
+    /* One more dead (m_dead + 1, m_alive - 1); the dead count before it. */
+    int  countGrpDead(int no);                                           // ROR 0x00162b14
     void clearGrpBusy(int no);                                           // ROR 0x00162b50
     /* A new enemy of type (0..10) for the achr chr: its name (the system
      * data kind), its param and transition tables, the position. oid 0

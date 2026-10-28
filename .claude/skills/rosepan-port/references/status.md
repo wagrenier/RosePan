@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 16:44 at commit `1c67687` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-28 16:56 at commit `dcb69bc` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-28 16:44 at commit `1c67687` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7138**, named **6009** (84%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 4407
-- context-name ledger: 4706 entries; overrides of wrong library matches: 5
+- game functions: **7138**, named **6033** (85%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 4431
+- context-name ledger: 4730 entries; overrides of wrong library matches: 5
 - placed in a source file: 5075/7138 in 123 files
 
 Least-named game-code regions (64 KB blocks):
@@ -22,15 +22,15 @@ Least-named game-code regions (64 KB blocks):
 | `00150000` | 8/272 (3%) | - |
 | `001b0000` | 41/81 (51%) | game/gamfile.cpp, mnu/mnuSelectLanguage.cpp |
 | `00140000` | 152/293 (52%) | emy/emy_hfm.cpp, mag/magscenecmd.cpp, mag/magloader.cpp |
-| `00160000` | 168/268 (63%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `001a0000` | 142/214 (66%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnutitle.cpp |
 | `00180000` | 218/312 (70%) | snd/rxmpeg.cpp, spr/sprman.cpp, mcd/mcdman.cpp |
 | `00200000` | 102/143 (71%) | sequence/seqcall.cpp, sequence/sequence.cpp, system/system.cpp |
+| `00160000` | 192/268 (72%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `001f0000` | 190/234 (81%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4433**; stubs: **534**
+- reconstructed RoR functions: **4457**; stubs: **534**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -50,7 +50,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/emy/emy_hfm.cpp` | 76 | 0 |
 | `src/emy/emy_main.cpp` | 1 | 22 |
 | `src/emy/emy_manager.cpp` | 59 | 0 |
-| `src/emy/emy_out.cpp` | 34 | 0 |
+| `src/emy/emy_out.cpp` | 58 | 0 |
 | `src/game/gamfile.cpp` | 18 | 0 |
 | `src/game/gamman.cpp` | 411 | 0 |
 | `src/game/gamman2.cpp` | 35 | 0 |
@@ -146,10 +146,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 163 TUs: todo 99, partial 7, verify 85, done 9
-- next: **emy/emy_out.cpp** (continuing a partial TU)
+- 163 TUs: todo 99, partial 6, verify 86, done 9
+- next: **mag/maglife.cpp** (frontier score 89)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
-- partial: `emy/emy_out.cpp` 34/58 -- Left in the pinned range: 0x16768c, 0x1677d0, 0x167a64 (no callers known, unnamed), 0x16898c (a thunk to setMotion), FUN_0016a1dc (walks the p_hit table s_hitNo
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/dogactor.cpp` 147/147 -- Status verify: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run stays black after the film because the pose and draw path below DogActo
@@ -162,6 +161,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `eff/effman.cpp` 32/32 -- Verify: the 200 s run creates EffLight1 (kind 0x21) and EffCameraAnim1 (kind 0xd) during the picture book; their init is a stub returning 0, so createEff delete
 - verify: `emy/emy_hfm.cpp` 75/75 -- Whole TU written (75 functions, no stubs left in this file). Status verify: the 15 s smoke run still ends on the Atlus disclaimer and creates no enemy, so no Hf
 - verify: `emy/emy_manager.cpp` 58/58 -- Verify: the 15 s smoke run shows the boot disclaimer as before (EmyManager now runs its exec every frame with no enemies; no crash); no enemy is created on the 
+- verify: `emy/emy_out.cpp` 58/58 -- No code left in the pinned range. Status verify: no enemy runs in the 15 s smoke run (boot disclaimer only, same picture as before), so nothing on screen shows 
 - verify: `game/gamfile.cpp` 18/21 -- Black screen, as before: the code is complete but no boot path shows it yet; every FileReader::read caller that runs in the boot (GamMan::loadSystemData / loadS
 - verify: `game/gamman.cpp` 409/409 -- All 409 gamman functions are written; status verify because nothing in the TU draws in the 15 s boot, which still ends on the Atlus disclaimer (correct for that
 - verify: `game/gamman2.cpp` 37/37 -- All 37 functions of the TU are written. Nothing on screen shows them: the smoke run never opens the save screen (boot disclaimer only). The first session that d
@@ -238,6 +238,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-28 16:56 `emy/emy_out.cpp` verify: EmyOut and the emy helpers complete (all 58 functions of 0x166a1c..0x16a914): the last 24 written -- emyChkInAngle, isSameSecta, getAttackMotion, getTargetDir, 
 - 2026-10-28 16:44 `emy/emy_out.cpp` partial: EmyOut base and the emy helpers: ctor/dtor, termCommon, getBasePos/getTargetNodePos/getFrontPos/getTargetAngle, selectTarget/selectNearTarget, setMotion/setWalk
 - 2026-10-28 16:30 `i3d/i3ritem.cpp` verify: i3ritem.cpp complete: the 288 per-type item accessors after the fixup pairs (42 types, 0x22c5a0..0x22e840), 258 of them hidden and now Ghidra functions, named i
 - 2026-10-28 16:16 `i3d/i3rdraw.cpp` verify: Projected actor shadows drawn: rosepan_i3d follows FRAME_1 and hands the models of the shadow target pass (fbp 0x118, XYOFFSET 0) to the renderer's shadow atlas
@@ -245,7 +246,6 @@ Recent sessions:
 - 2026-10-28 13:57 `i3d/i3rdraw.cpp` partial: Native mesh module draws every material layer of a batch: DrawBatch follows i3rPktCallStrips 0x221080 -- per layer of the mesh's material, the byte in the 0x4d 
 - 2026-10-28 13:17 `i3d/i3rdraw.cpp` partial: The black frames after the picture book are a camera problem, not a draw one: MagScene::draw runs with the world flag (2 actors and the forest map alive) and i3
 - 2026-10-28 12:48 `i3d/i3rdraw.cpp` partial: The white figure after the book was Brown's shadow model (pack file 2, never texture-assigned) drawn by MagScene::makeActorShadow into the off-screen 256x256 sh
-- 2026-10-28 12:00 `i3d/i3mpose.cpp` verify: i3m pose player complete: the last 10 functions, a quaternion kit Ghidra had folded into 0x230688 and 0x230df8 (shorter-arc slerp memory and GPR forms, shorter-
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|

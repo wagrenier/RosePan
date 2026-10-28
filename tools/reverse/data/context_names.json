@@ -7115,11 +7115,35 @@
   "was": "FUN_00167230",
   "why": "fills a record {oid, the PC or dog oid by a2, &out+0x28, GetType, m_agl, f12} and starts the enemy's turn task (EmyMain +0x1f8) after killTasks, like emyStartMove does the move task"
  },
+ "001672e8": {
+  "name": "emyChkInAngle",
+  "tag": "ror-inferred",
+  "was": "FUN_001672e8",
+  "why": "(angle, out, target): |the angle from the enemy's spine to the target's spine minus the enemy actor's rot y| (wrapped to -pi..pi) < angle; the angle half of emyChkInSight"
+ },
+ "0016768c": {
+  "name": "EmyOut::isSameSecta",
+  "tag": "ror-inferred",
+  "was": "FUN_0016768c",
+  "why": "getBasePos and the target oid's spine (height from the node), pickSectaCell of both; non-zero when both cells exist with the same id; no callers"
+ },
+ "001677d0": {
+  "name": "EmyOut::getAttackMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001677d0",
+  "why": "returns a motion-list word picked by achr attr bits 8 / 0x10 and GetType (Dwf/Pig/Got: table 0x2f1de0 by parsonality, the Got's scissors get motion 4), writes list [11]/[12] or [13]/[14] to the two outs and then -1 over both; no callers, role a guess"
+ },
  "001679b4": {
   "name": "emyChkChase",
   "tag": "ror-inferred",
   "was": "FUN_001679b4",
   "why": "2 when target is no object or out+0x24 (the move result) is 2, 1 when emyChkInSight(range, angle, useAngle, target, achr) holds; both stop the move task; else 0"
+ },
+ "00167a64": {
+  "name": "EmyOut::getTargetDir",
+  "tag": "ror-inferred",
+  "was": "FUN_00167a64",
+  "why": "2 (achr tasks killed) when the move task (achr +0x3d4) is gone or m_target is no object; else vec = target spine - getBasePos and the signed angle from the enemy's facing to it, 0"
  },
  "00167d88": {
   "name": "EmyOut::getFrontPos",
@@ -7139,11 +7163,101 @@
   "was": "FUN_001680a0",
   "why": "chrMtnMove2Achr(agl / 60, rotY or 0x47000100, oid, motion, -1, flags, 1); flags 0 clears the emy's motion input +0x2c"
  },
+ "001681c8": {
+  "name": "EmyOut::setMotionSpeed",
+  "tag": "ror-inferred",
+  "was": "FUN_001681c8",
+  "why": "setMotion with the speed passed in f12 instead of the emy's m_agl / 60"
+ },
  "001682b0": {
   "name": "EmyOut::setWalkMotion",
   "tag": "ror-inferred",
   "was": "FUN_001682b0",
   "why": "chrMtnMove2Achr with motion list [0] or [1] by achr +0x3ec bits 8 / 0x10, flags 0x100"
+ },
+ "0016834c": {
+  "name": "EmyOut::resetWalkMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0016834c",
+  "why": "same body as setWalkMotion (list [0], or [1] with attr bits 8 and 0x10, flags 0x100); tickBitten's reset for Dwf, Pig and Fsh"
+ },
+ "001683e8": {
+  "name": "EmyOut::setBaseMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001683e8",
+  "why": "chrMtnMove2Achr of motion 2 (10 with achr attr bits 8 and 0x10) at the emy's speed, flags 0"
+ },
+ "00168478": {
+  "name": "EmyOut::startBitten",
+  "tag": "ror-inferred",
+  "was": "FUN_00168478",
+  "why": "once (m_18): unless the achr is already damaged (flag 0x400), motion list [8/9/10] by magBwnBarkQuery and flag 0x400 set; m_bitten (ClearBittenFlg's word) = 1"
+ },
+ "00168520": {
+  "name": "EmyOut::tickBitten",
+  "tag": "ror-inferred",
+  "was": "FUN_00168520",
+  "why": "EmyMain::updateOut's per-frame call: when m_bitten, clears it and restores the walk motion by GetType; m_18 = 0"
+ },
+ "001685c0": {
+  "name": "EmyOut::setGotMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001685c0",
+  "why": "setMotion, then when the achr carries the scissors (kind 0xa2e, if_goat_scissor) their actor gets a motion matching the enemy's (10 -> 3, 11 -> 4, 0x4c -> 6 ...)"
+ },
+ "001687bc": {
+  "name": "EmyOut::changeMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001687bc",
+  "why": "setGotMotion for GetType 2 (Got), setMotion otherwise; 45 call sites in the enemy classes"
+ },
+ "00168844": {
+  "name": "EmyOut::setGotWalkMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00168844",
+  "why": "setWalkMotion, but with the scissors carried motion 10 and the scissors' motion 3; tickBitten's reset for type 2"
+ },
+ "0016898c": {
+  "name": "EmyOut::startMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0016898c",
+  "why": "a tail call of setMotion with the same arguments; no callers"
+ },
+ "001689a8": {
+  "name": "EmyOut::testMotionEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001689a8",
+  "why": "out-of-line body of the linkonce chk_motion_end: isAchrMotionEnd sets the emy's m_input_flg_motion; no callers"
+ },
+ "001689e8": {
+  "name": "EmyOut::leaveGroup",
+  "tag": "ror-inferred",
+  "was": "FUN_001689e8",
+  "why": "with a group (m_grp_no): m_grp_state 5 and m_grp_respawn = EmyManager::countGrpDead's old dead count"
+ },
+ "00168a30": {
+  "name": "EmyOut::slideToTarget",
+  "tag": "ror-inferred",
+  "was": "FUN_00168a30",
+  "why": "moves the achr 1/(frames-count) of the way to m_target's p_sp_f (front, facing it) or p_sp_b node and turns it as far; the last frame sets pos and rot 0; no callers"
+ },
+ "00168ea0": {
+  "name": "EmyOut::snapToTarget",
+  "tag": "ror-inferred",
+  "was": "FUN_00168ea0",
+  "why": "puts the achr on m_target's p_sp_f / p_sp_b node (floor y), rot y the target's (+ pi at the front)"
+ },
+ "0016913c": {
+  "name": "EmyOut::dropItem",
+  "tag": "ror-inferred",
+  "was": "FUN_0016913c",
+  "why": "ReleaseItem's body: the item in param 0x67 unparented, motion 1, put on the floor under the p_hn_r node; the scissors restore four motion-list words; params 0x66 = 0xa00, 0x67 = 0"
+ },
+ "001693a4": {
+  "name": "EmyOut::getSelectRate",
+  "tag": "ror-inferred",
+  "was": "FUN_001693a4",
+  "why": "achr param 0x5a (0..5, else 0) through the table 0x2f1df0 {0,25,50,75,100,0}: a percent like selectTarget's rate; no callers"
  },
  "001693ec": {
   "name": "EmyOut::tickVoice",
@@ -7187,11 +7301,23 @@
   "was": "FUN_00169614",
   "why": "word [state + 1] = map and word 0 (the count) + 1; emy_main's setStartState builds the graph with it"
  },
+ "00169630": {
+  "name": "EmyStateMap::removeMap",
+  "tag": "ror-inferred",
+  "was": "FUN_00169630",
+  "why": "addMap's counterpart: deletes m_map[state], clears it, m_count - 1"
+ },
  "0016968c": {
   "name": "EmyStateMap::next",
   "tag": "ror-inferred",
   "was": "FUN_0016968c",
   "why": "the GamIdMap of the current state (+0xa4) finds the input; the found state becomes current and is returned, 0 none"
+ },
+ "001696fc": {
+  "name": "EmyStateMap::peek",
+  "tag": "ror-inferred",
+  "was": "FUN_001696fc",
+  "why": "next without the move: the current state's map find(input), 0 (and m_cur 0 without a map); the classes' check_trans"
  },
  "0016976c": {
   "name": "emyCanReach",
@@ -7210,6 +7336,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00169a14",
   "why": "sqrt(x*x + y*y + z*z) of a0"
+ },
+ "00169a68": {
+  "name": "emyVecDistance",
+  "tag": "ror-inferred",
+  "was": "FUN_00169a68",
+  "why": "emyVecLength(a - b)"
  },
  "00169a98": {
   "name": "emyChkNearXZ",
@@ -7234,6 +7366,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00169f94",
   "why": "the first n hit nodes (p_hit table 0x298de8) of oid's actor within range + the target's radius of the target's node"
+ },
+ "0016a1dc": {
+  "name": "emyChkHitReachXZ",
+  "tag": "ror-inferred",
+  "was": "FUN_0016a1dc",
+  "why": "emyChkHitReach with emyChkNearXZ (no height limit)"
+ },
+ "0016a424": {
+  "name": "emyChkPointReach",
+  "tag": "ror-inferred",
+  "was": "FUN_0016a424",
+  "why": "(range, points, n, target): one of n xyz points (stride 0xc) within range + the target's radius of its spine in x / z"
  },
  "0016a594": {
   "name": "emyGetSEPos",

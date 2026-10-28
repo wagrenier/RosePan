@@ -58,6 +58,11 @@ struct EmyStateMap
     /* The current state's map finds input: the state it leads to becomes
      * current and is returned; 0 when there is none. */
     int  next(int input);                                                // ROR 0x0016968c
+    /* Deletes state's map; m_count - 1. */
+    void removeMap(int state);                                           // ROR 0x00169630
+    /* next without the move: the state input leads to, 0 none (and with
+     * no map for the current state it becomes 0). */
+    int  peek(int input);                                                // ROR 0x001696fc
 
     int       m_count;          // ROR 0x00: addMap's count
     GamIdMap *m_map[40];        // ROR 0x04: a map per state
@@ -122,10 +127,61 @@ public:
     void stopVoice();                                                    // ROR 0x0016947c
     /* The emy's SE no (EmyMain::getSE) at getBasePos; the SE's handle. */
     int  playSE(int no);                                                 // ROR 0x001694cc
+    /* Both the enemy's base and target's spine are on the secta cells and
+     * in the same one. */
+    int  isSameSecta(u_int target);                                      // ROR 0x0016768c
+    /* A motion-list word by the achr's attr bits 8 / 0x10 and the type
+     * (Dwf / Pig / Got: [3..5] by the parsonality, the scissors get motion
+     * 4); a and b end -1 (the ROM overwrites what it wrote there). */
+    int  getAttackMotion(int *a, int *b);                                // ROR 0x001677d0
+    /* 2 (the achr's tasks killed) when the move task is gone or m_target
+     * no object; else vec = the target's spine - getBasePos, *angle the
+     * signed angle from the enemy's facing to it, 0. */
+    int  getTargetDir(float *vec, float *angle);                         // ROR 0x00167a64
+    /* setMotion at speed instead of the emy's. */
+    void setMotionSpeed(float speed, int motion, int flags);             // ROR 0x001681c8
+    /* setWalkMotion's body again (tickBitten's reset for Dwf, Pig, Fsh). */
+    void resetWalkMotion();                                              // ROR 0x0016834c
+    /* Motion 2 (10 with attr bits 8 and 0x10) at the emy's speed. */
+    void setBaseMotion();                                                // ROR 0x001683e8
+    /* The dog's bite: once (m_18), unless already damaged (achr flag
+     * 0x400), motion list [8..10] by magBwnBarkQuery and flag 0x400;
+     * m_bitten 1. */
+    void startBitten();                                                  // ROR 0x00168478
+    /* Every frame (EmyMain::updateOut): after a bite, the walk motion
+     * back by type; m_18 0. */
+    void tickBitten();                                                   // ROR 0x00168520
+    /* setMotion, and the carried scissors (kind 0xa2e) follow with their
+     * own motion. */
+    void setGotMotion(int motion, int flags);                            // ROR 0x001685c0
+    /* setGotMotion for the Got (type 2), setMotion otherwise. */
+    void changeMotion(int motion, int flags);                            // ROR 0x001687bc
+    /* setWalkMotion; with the scissors carried motion 10 and theirs 3. */
+    void setGotWalkMotion();                                             // ROR 0x00168844
+    void startMotion(int motion, int flags);                             // ROR 0x0016898c
+    /* chk_motion_end's body: the achr's motion ended sets the emy's
+     * m_input_flg_motion. */
+    void testMotionEnd();                                                // ROR 0x001689a8
+    /* With a group: m_grp_state 5, m_grp_respawn the group's dead count
+     * before this one. */
+    void leaveGroup();                                                   // ROR 0x001689e8
+    /* One frame of the slide to m_target's p_sp_f (back 0) or p_sp_b
+     * node: 1 / (frames - *count) of the way and of the turn (to face the
+     * target at the front, its facing at the back); *node gets the node.
+     * 1 on the last frame. */
+    int  slideToTarget(int *node, const int *back, int *count, int frames); // ROR 0x00168a30
+    /* The achr on m_target's p_sp_f / p_sp_b node (floor y), turned like
+     * slideToTarget's end. */
+    void snapToTarget(int *node, const int *back);                       // ROR 0x00168ea0
+    /* The held item (param 0x67) dropped on the floor under p_hn_r. */
+    void dropItem();                                                     // ROR 0x0016913c
+    /* Achr param 0x5a (0..5) as 0, 25, 50, 75, 100, 0 percent. */
+    int  getSelectRate();                                                // ROR 0x001693a4
 
     /* The ELF's linkonce accessors. */
     u_int get_target_oid() { return m_target; }                          // ROR 0x0028aac8
     void  ClearBittenFlg() { m_bitten = 0; }                             // ROR 0x0028ab2c
+    void  ReleaseItem() { dropItem(); }                                  // ROR 0x0028ab34
 
     u_int     m_oid;            // ROR 0x00: the enemy's oid
     int       m_step;           // ROR 0x04: the out's own step
@@ -133,7 +189,8 @@ public:
     EmyMain  *m_emy;            // ROR 0x0c
     int       m_target_dog;     // ROR 0x10: selectTarget picked the dog
     u_int     m_target;         // ROR 0x14: get_target_oid
-    int       m_bitten;         // ROR 0x1c: ClearBittenFlg
+    int       m_18;             // ROR 0x18: startBitten ran this frame (tickBitten clears it)
+    int       m_bitten;         // ROR 0x1c: ClearBittenFlg; startBitten sets it, tickBitten resets the motion
     int       m_20;             // ROR 0x20
     int       m_move_done;      // ROR 0x24: the move task's result (emyStartMove clears it; 2 ends emyChkChase)
     int       m_turn_done;      // ROR 0x28: the turn task's result (emyStartTurn clears it)
@@ -185,6 +242,16 @@ float emyVecLength(const float *v);                                      // ROR 
 /* One of the first nodes "p_hit" .. (table 0x298de8; fewer than 9) of
  * oid's actor is within range + target's radius of target's node. */
 int  emyChkHitReach(float range, u_int oid, int nodes, u_int target);    // ROR 0x00169f94
+/* The enemy out's target is within angle of its facing (the angle half
+ * of emyChkInSight). */
+int  emyChkInAngle(float angle, EmyOut *out, u_int target);              // ROR 0x001672e8
+/* emyVecLength(a - b). */
+float emyVecDistance(const float *a, const float *b);                    // ROR 0x00169a68
+/* emyChkHitReach in x / z only. */
+int  emyChkHitReachXZ(float range, u_int oid, int nodes, u_int target);  // ROR 0x0016a1dc
+/* One of n points (xyz, stride 0xc) within range + target's radius of
+ * its spine in x / z. */
+int  emyChkPointReach(float range, const float *points, int n, u_int target); // ROR 0x0016a424
 
 /* The enemy base (vtable 0x2e31e0, vptr at +0x200 after EmyMain's data).
  * One per enemy, newed by EmyManager::createEmy as the class of its type.

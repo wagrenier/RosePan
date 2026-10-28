@@ -19,8 +19,11 @@
 #include "game/gamman.h"
 #include "game/gamstat.h"
 #include "lib/unassigned.h"
+#include "mag/magscenecmd.h"
 #include "mag/magsystem.h"
 #include "snd/sndman.h"
+#include "task/tsk_chr.h"
+#include "task/tsk_man.h"
 
 /* The move record's per-type data (EmyMain::GetType 0..10). */
 struct EmyMoveSpeed
@@ -76,14 +79,28 @@ static void emyGetNodePos(int no, const char *name, float *pos)
     pos[2] = m[3][2];
 }
 
-/* PC: the angle wrap the ROM inlines (in double, as the constants are):
- * d into -pi..pi, then its size. */
-static float emyAbsAngle(float d)
+/* PC: the wrap of an angle into -pi..pi the ROM inlines (in double). */
+static float emyWrapAngle(float d)
 {
     if ((double)d < -3.141592653589793)
         d = (float)((double)d + 6.283185307179586);
     if ((double)d > 3.141592653589793)
         d = (float)((double)d - 6.283185307179586);
+    return d;
+}
+
+/* PC: EmyOut::mot_speed (linkonce 0x28acac) inlined: m_agl / 60, 1 / 60
+ * for 0. */
+static float emyMotSpeed(const EmyMain *emy)
+{
+    float agl = emy->m_agl;
+    return agl == 0.0f ? 0x1.111110p-6f /* 0x3c888888, 1 / 60 */ : agl * 0x1.111110p-6f;
+}
+
+/* PC: the angle wrap the ROM inlines, then its size. */
+static float emyAbsAngle(float d)
+{
+    d = emyWrapAngle(d);
     return d < 0.0f ? -d : d;
 }
 
@@ -286,6 +303,75 @@ void emyStartTurn(float arg, EmyOut *out, int dog)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x001672e8 // callcheck: FUN_00215a30, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the double wrap in emyAbsAngle)
+
+int emyChkInAngle(float angle, EmyOut *out, u_int target)
+{
+    float to[4], from[4];
+    emyGetNodePos(g_gamMan.getActorNo(target), "Bip01 Spine1", to);
+    emyGetNodePos(g_gamMan.getActorNo(out->m_oid), "Bip01 Spine1", from);
+    float a = atan2f(to[0] - from[0], to[2] - from[2]);
+    float rot = g_magSystem.m_scene.m_actors[g_gamMan.getActorNo(out->m_oid)].getRotY();
+    return emyAbsAngle(a - rot) < angle;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0016768c // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+
+int EmyOut::isSameSecta(u_int target)
+{
+    float base[4], to[4];
+    getBasePos(base);
+    emyGetNodePos(g_gamMan.getActorNo(target), "Bip01 Spine1", to);
+    GamSecta *a = g_gamMan.pickSectaCell(base, 0);
+    GamSecta *b = g_gamMan.pickSectaCell(to, 0);
+    return a != NULL && b != NULL && a->m_id == b->m_id;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001677d0
+
+/* The Dwf / Pig / Got motion by m_parsonality (0..2). */
+static const int s_attackMotion[3] = { 3, 4, 5 };   /* 0x2f1de0 */
+
+int EmyOut::getAttackMotion(int *a, int *b)
+{
+    int motion;
+    u_int attr = m_achr->m_attr[0];
+    if ((attr & 8) && (attr & 0x10)) {
+        motion = m_emy->m_motion_list[4];
+        *a = m_emy->m_motion_list[13];
+        *b = m_emy->m_motion_list[14];
+    } else if ((attr & 8) || (attr & 0x10)) {
+        motion = m_emy->m_motion_list[5];
+    } else {
+        int type = m_emy->GetType();
+        if (type == 0 || type == 2 || type == 1) {
+            int p = m_emy->m_parsonality;
+            if (p >= 3)
+                p = 0;
+            motion = s_attackMotion[p];
+            int item;
+            m_achr->getParam(0x67, &item);
+            if (g_gamMan.getObjKind(item) == 0xa2e) {
+                int scissors;
+                m_achr->getParam(0x67, &scissors);
+                g_magSystem.m_scene.setActorMotion(0x1.11112ep-6f /* 0x3c888897 */,
+                                                   g_gamMan.getActorNo(scissors), 4, 0, 0x100);
+            }
+        } else {
+            motion = m_emy->m_motion_list[2];
+        }
+        *a = m_emy->m_motion_list[11];
+        *b = m_emy->m_motion_list[12];
+    }
+    /* The ROM overwrites both on every path. */
+    *a = -1;
+    *b = -1;
+    return motion;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001679b4
 
 int emyChkChase(float range, float angle, EmyOut *out, u_int target, int useAngle)
@@ -298,6 +384,27 @@ int emyChkChase(float range, float angle, EmyOut *out, u_int target, int useAngl
         return 0;
     out->m_emy->m_move->stop();
     return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00167a64 // callcheck: FUN_00215a30, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the wrap in double)
+
+int EmyOut::getTargetDir(float *vec, float *angle)
+{
+    if (g_taskMan.getTask(m_achr->m_task[0]) == 0 || !g_gamMan.isObj(m_target)) {
+        m_achr->killTasks();
+        return 2;
+    }
+    float to[4], base[4];
+    emyGetNodePos(g_gamMan.getActorNo(m_target), "Bip01 Spine1", to);
+    to[3] = 0.0f;   /* PC: the ROM leaves the w word unset */
+    getBasePos(base);
+    base[3] = 0.0f;
+    sceVu0SubVector(vec, to, base);
+    float a = atan2f(vec[0], vec[2]);
+    float rot = g_magSystem.m_scene.m_actors[g_gamMan.getActorNo(m_oid)].getRotY();
+    *angle = emyWrapAngle(a - rot);
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -344,6 +451,16 @@ void EmyOut::setMotion(int motion, int flags)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x001681c8 // callcheck: getTask, getActorNo, getRotY (they only pick the f13 word chrMtnMove2Achr does not read)
+
+void EmyOut::setMotionSpeed(float speed, int motion, int flags)
+{
+    if (flags == 0)
+        m_emy->m_input_flg_motion = 0;
+    chrMtnMove2Achr(speed, m_oid, motion, -1, flags);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001682b0
 // The ROM also passes 32768.5 (0x47000100) in f13 and 1 in t0, which
 // chrMtnMove2Achr does not read.
@@ -358,6 +475,271 @@ void EmyOut::setWalkMotion()
     float agl = m_emy->m_agl;
     float speed = agl == 0.0f ? 0x1.111110p-6f /* 0x3c888888, 1 / 60 */ : agl * 0x1.111110p-6f;
     chrMtnMove2Achr(speed, m_oid, motion, -1, 0x100);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0016834c
+// setWalkMotion's body (the ROM has it twice).
+
+void EmyOut::resetWalkMotion()
+{
+    int motion;
+    if ((m_achr->m_attr[0] & 8) && (m_achr->m_attr[0] & 0x10))
+        motion = m_emy->m_motion_list[1];
+    else
+        motion = m_emy->m_motion_list[0];
+    chrMtnMove2Achr(emyMotSpeed(m_emy), m_oid, motion, -1, 0x100);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001683e8
+
+void EmyOut::setBaseMotion()
+{
+    int motion = 2;
+    if ((m_achr->m_attr[0] & 8) && (m_achr->m_attr[0] & 0x10))
+        motion = 10;
+    chrMtnMove2Achr(emyMotSpeed(m_emy), m_oid, motion, -1, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00168478
+
+void EmyOut::startBitten()
+{
+    if (m_18 != 0)
+        return;
+    if (!(m_achr->m_flags & 0x400)) {
+        int bark = magBwnBarkQuery(m_oid);
+        int no = bark == 1 ? 9 : bark == 0 ? 8 : 10;
+        setMotion(m_emy->m_motion_list[no], 0x100);
+        m_achr->m_flags |= 0x400;
+    }
+    m_bitten = 1;
+    m_18 = 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00168520
+
+void EmyOut::tickBitten()
+{
+    if (m_bitten != 0) {
+        m_bitten = 0;
+        switch (m_emy->GetType()) {
+        case 0: case 1: case 3:
+            resetWalkMotion();
+            break;
+        case 2:
+            setGotWalkMotion();
+            break;
+        case 4: case 5: case 6: case 7: case 8: case 9: case 10:
+            setWalkMotion();
+            break;
+        }
+    }
+    m_18 = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001685c0 // callcheck: chrMtnMove2Achr, getTask, getActorNo, getRotY (setMotion inlined in the ROM, its f13 word)
+
+void EmyOut::setGotMotion(int motion, int flags)
+{
+    setMotion(motion, flags);
+    int item;
+    m_achr->getParam(0x67, &item);
+    if (g_gamMan.getObjKind(item) != 0xa2e)
+        return;
+    int sm;
+    switch (motion) {
+    case 10:   sm = 3; break;
+    case 11:   sm = 4; break;
+    case 0x4c: sm = 6; break;
+    case 0x4d: sm = 7; break;
+    case 0x4e: sm = 2; break;   /* PC: the ROM passes its caller's s3 here (unset) */
+    case 0x4f: sm = 8; break;
+    case 0x50: sm = 12; break;
+    default:   sm = 2; break;
+    }
+    int scissors;
+    m_achr->getParam(0x67, &scissors);
+    g_magSystem.m_scene.setActorMotion(0x1.11112ep-6f /* 0x3c888897 */,
+                                       g_gamMan.getActorNo(scissors), sm, 0, 0x100);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001687bc
+
+void EmyOut::changeMotion(int motion, int flags)
+{
+    if (m_emy->GetType() == 2) {
+        setGotMotion(motion, flags);
+        return;
+    }
+    setMotion(motion, flags);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00168844
+
+void EmyOut::setGotWalkMotion()
+{
+    int motion;
+    u_int attr = m_achr->m_attr[0];
+    if ((attr & 8) && (attr & 0x10)) {
+        motion = m_emy->m_motion_list[1];
+    } else {
+        int item;
+        m_achr->getParam(0x67, &item);
+        if (g_gamMan.getObjKind(item) == 0xa2e) {
+            motion = 10;
+            int scissors;
+            m_achr->getParam(0x67, &scissors);
+            g_magSystem.m_scene.setActorMotion(0x1.11112ep-6f /* 0x3c888897 */,
+                                               g_gamMan.getActorNo(scissors), 3, 0, 0x100);
+        } else {
+            motion = m_emy->m_motion_list[0];
+        }
+    }
+    chrMtnMove2Achr(emyMotSpeed(m_emy), m_oid, motion, -1, 0x100);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0016898c
+
+void EmyOut::startMotion(int motion, int flags)
+{
+    setMotion(motion, flags);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001689a8
+
+void EmyOut::testMotionEnd()
+{
+    if (g_gamMan.isAchrMotionEnd(m_oid))
+        m_emy->m_input_flg_motion = 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001689e8
+
+void EmyOut::leaveGroup()
+{
+    EmyMain *emy = m_emy;
+    if (emy->m_grp_no != 0) {
+        emy->m_grp_state = 5;
+        emy->m_grp_respawn = g_emyManager.countGrpDead(emy->m_grp_no);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00168a30 // callcheck: FUN_00215a30, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the wraps in double)
+
+int EmyOut::slideToTarget(int *node, const int *back, int *count, int frames)
+{
+    int no = g_gamMan.getActorNo(m_target);
+    DogActor &target = g_magSystem.m_scene.m_actors[no];
+    float turn = *back == 0 ? -0x1.921fb4p+1f /* 0xc0490fda */ : 0.0f;
+    *node = target.getNodeIndexByName(*back == 0 ? "p_sp_f" : "p_sp_b");
+    sceVu0FMATRIX m;
+    target.getNodeWorldMatrix(m, *node);
+
+    /* The ROM sets the end frame's position and rotation to 0. */
+    float pos[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    float rot[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    int done;
+    if (++*count == frames) {
+        done = 1;
+    } else {
+        float t = 1.0f / (float)(frames - *count);
+        done = 0;
+        getBasePos(pos);
+        pos[0] += (m[3][0] - pos[0]) * t;
+        pos[1] += (m[3][1] - pos[1]) * t;
+        pos[2] += (m[3][2] - pos[2]) * t;
+        float want = emyWrapAngle(target.getRotY() + turn);
+        float cur = g_magSystem.m_scene.m_actors[g_gamMan.getActorNo(m_oid)].getRotY();
+        rot[1] = emyWrapAngle(cur + emyWrapAngle(want - cur) * t);
+    }
+    m_achr->setPos(pos);
+    m_achr->setRot(rot);
+    return done;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00168ea0 // callcheck: FUN_00215a30, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the wrap in double)
+
+void EmyOut::snapToTarget(int *node, const int *back)
+{
+    int no = g_gamMan.getActorNo(m_target);
+    DogActor &target = g_magSystem.m_scene.m_actors[no];
+    float turn = *back == 0 ? 0.0f : 0x1.921fb4p+1f /* 0x40490fda */;
+    *node = target.getNodeIndexByName(*back == 0 ? "p_sp_f" : "p_sp_b");
+    sceVu0FMATRIX m;
+    target.getNodeWorldMatrix(m, *node);
+    float pos[4] = { m[3][0], m[3][1], m[3][2], 0.0f };
+    pos[1] = g_gamMan.getFloorY(pos);
+    m_achr->setPos(pos);
+    float rot[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    rot[1] = emyWrapAngle((float)((double)(target.getRotY() + turn) + 3.141592653589793));
+    m_achr->setRot(rot);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0016913c // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+
+void EmyOut::dropItem()
+{
+    int no = g_gamMan.getActorNo(m_oid);
+    int item;
+    m_achr->getParam(0x67, &item);
+    if (item == 0)
+        return;
+    DogActor &actor = g_magSystem.m_scene.m_actors[no];
+    int node = actor.getNodeIndexByName("p_hn_r");
+    g_gamMan.resetObj(item, 0x4000000);
+    int itemNo = g_gamMan.getActorNo(item);
+    g_magSystem.setActorParent(itemNo, -1, 0);
+    g_magSystem.m_scene.setActorMotion(0x1.11112ep-6f /* 0x3c888897 */, itemNo, 1, 0, 0x100);
+    float ofs[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    sceVu0FMATRIX m;
+    actor.getNodeWorldMatrix(m, node);
+    float pos[4];
+    pos[0] = m[3][0] + ofs[0];
+    pos[2] = m[3][2] + ofs[2];
+    pos[1] = m[3][1];
+    pos[3] = 0.0f;
+    pos[1] = g_gamMan.getFloorY(pos) + ofs[1];
+    g_gamMan.setObjPos(item, pos);
+    if (g_gamMan.getObjKind(item) == 0xa2e) {
+        /* The scissors put down: emyAttachItem's four motions back. */
+        m_emy->m_motion_list[0]  = 1;
+        m_emy->m_motion_list[2]  = 3;
+        m_emy->m_motion_list[11] = 8;
+        m_emy->m_motion_list[12] = 9;
+    }
+    if (g_gamMan.testFchr100000(item))
+        g_gamMan.setObj(item, 0x10);
+    u_short none = 0xa00;
+    m_achr->setParam(0x66, &none);
+    item = 0;
+    m_achr->setParam(0x67, &item);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001693a4
+
+static const int s_selectRate[6] = { 0, 25, 50, 75, 100, 0 };   /* 0x2f1df0 */
+
+int EmyOut::getSelectRate()
+{
+    u_short v[8];
+    m_achr->getParam(0x5a, v);
+    if (v[0] > 5)
+        v[0] = 0;
+    return s_selectRate[v[0]];
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -437,6 +819,17 @@ void EmyStateMap::addMap(int state, GamIdMap *map)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x00169630 // callcheck: ~GamIdMap, operator_delete (delete m_map[state])
+
+void EmyStateMap::removeMap(int state)
+{
+    if (m_map[state] != NULL)
+        delete m_map[state];
+    m_map[state] = NULL;
+    m_count--;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x0016968c
 
 int EmyStateMap::next(int input)
@@ -452,6 +845,21 @@ int EmyStateMap::next(int input)
     if (state != 0)
         m_cur = state;
     return state;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001696fc
+
+int EmyStateMap::peek(int input)
+{
+    if (m_cur == 0)
+        return 0;
+    GamIdMap *map = getMap(m_cur);
+    if (map == NULL) {
+        m_cur = 0;
+        return 0;
+    }
+    return (int)map->find((u_short)input);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -507,6 +915,15 @@ int emyAttachItem(u_int oid, u_int item)
 float emyVecLength(const float *v)
 {
     return sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00169a68 // callcheck: sceVu0SubVector (the difference written out)
+
+float emyVecDistance(const float *a, const float *b)
+{
+    float d[4] = { a[0] - b[0], a[1] - b[1], a[2] - b[2], 0.0f };
+    return emyVecLength(d);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -575,6 +992,42 @@ int emyChkHitReach(float range, u_int oid, int nodes, u_int target)
         float hit[4];
         emyGetNodePos(g_gamMan.getActorNo(oid), s_hitNodes[i], hit);
         if (emyChkNearXZY(range + r, hit, to))
+            return 1;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0016a1dc // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+
+int emyChkHitReachXZ(float range, u_int oid, int nodes, u_int target)
+{
+    if (nodes >= 9)
+        return 0;
+    float to[4];
+    emyGetNodePos(g_gamMan.getActorNo(target), "Bip01 Spine1", to);
+    float r = g_gamMan.getObjRadius(target, NULL);
+    for (int i = 0; i < nodes; i++) {
+        float hit[4];
+        emyGetNodePos(g_gamMan.getActorNo(oid), s_hitNodes[i], hit);
+        if (emyChkNearXZ(range + r, hit, to))
+            return 1;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0016a424 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+
+int emyChkPointReach(float range, const float *points, int n, u_int target)
+{
+    if (n >= 9)
+        return 0;
+    float to[4];
+    emyGetNodePos(g_gamMan.getActorNo(target), "Bip01 Spine1", to);
+    float r = g_gamMan.getObjRadius(target, NULL);
+    for (int i = 0; i < n; i++, points += 3) {
+        if (emyChkNearXZ(range + r, points, to))
             return 1;
     }
     return 0;

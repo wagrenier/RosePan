@@ -1439,7 +1439,16 @@ never asserts): sessions name them (`tus.py define --why`).
   move task follows an object), `EmyOut::playSE` 0x1694cc (EmyMain::getSE(no) at getBasePos, returns
   the handle) / `tickVoice` 0x1693ec (lo, hi, se: a voice every lo..hi frames into +0x2c) /
   `stopVoice` 0x16947c, `emyChkHitReach` 0x169f94 (f12 range, oid, n p_hit nodes, target: the attack
-  hit test), `emyVecLength` 0x169a14, `EmyMain::stopAllSE` 0x165570. The outs' attacks land through
+  hit test), `emyVecLength` 0x169a14, `EmyMain::stopAllSE` 0x165570. The dog's bite: `EmyOut::startBitten` 0x168478
+  (once per frame via +0x18: motion list [8/9/10] by magBwnBarkQuery, achr flag 0x400, bitten +0x1c = 1)
+  and `tickBitten` 0x168520 (EmyMain::updateOut's per-frame call: the walk motion back by type).
+  Achr param 0x67 is the carried item oid (0 none; 0x66 its kind, 0xa00 none); kind 0xa2e is the Got's
+  scissors (the linkonce `if_goat_scissor`): emyAttachItem / `dropItem` 0x16913c (ReleaseItem) swap four
+  motion-list words, `setGotMotion` 0x1685c0 / `changeMotion` 0x1687bc drive the scissors' actor
+  alongside. `EmyManager::countGrpDead` returns the dead count before the increment (`leaveGroup`
+  0x1689e8 keeps it in m_grp_respawn). Nodes p_sp_f / p_sp_b on the target are the front / back grab
+  points (`slideToTarget` 0x168a30, `snapToTarget` 0x168ea0); `EmyStateMap::peek` 0x1696fc is the
+  classes' check_trans (next without moving). The outs' attacks land through
   `scnChrRequest(0xb, emy oid, 0, 0, word, victim oid, 0)` (Hfm slap words 0x26 / 0x27 chained /
   0x28 close; 0x2d the dog thrown off), after `getPCStateClass() != 9` (PC) or `getBwnState()` not
   10 / 0xd (dog). Hfm Exec results: 7 the state is over, 8 the chase gave up. **HfmMain** (type 6): states 1 Walk, 2 Slap, 3 Bitten, 4 Break,
