@@ -6,6 +6,19 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**PC BLOCKERS FIRST (the user, 2026-10-27, after mag/maglifepc.cpp): the three TUs the player
+character needs to animate and move lead the pinned queue, ahead of Brown and the rest:**
+  1. mag/maglifepc3.cpp (pinned 0x11d720..0x11e0d8): initMotion 0x11dd40 and the motion loads
+     (loadWeaponMotion 0x11dc64, MOTIONPK.RPK), the setMotionSub helpers, getSubStateClass,
+     isMoveState.
+  2. mag/maglifepcmode.cpp (pinned 0x120788..0x1233d8, 70 functions; several sessions): the modes'
+     init / live / pad, now hand-written stubs. Null, Wait, Walk2D, Run2D, Turn first: they are the
+     standing-and-walking path.
+  3. mag/maglifepcmove.cpp: applyMotionMove 0x120668 (root motion), sweepMove 0x11ea04 (collision).
+  The small getters in mag/maglifepc2.cpp territory (getEquipItem, getPcParam1b / 1c,
+  getWeaponType, canReload; stubs in src/lib/unassigned_stubs.cpp) are not queued; write them
+  when a session's run needs real values (calcHealth gives class 2 until then).
+
 **TOP PRIORITY, RE-PINNED (the user, 2026-10-27): the TUs missing to be in game and render in 3D lead the
 queue, ahead of everything else (the enemy split, menus, subtitles).** The pinned queue in tus.json is
 the stubs the 140 s New Game run reaches on the 3D path, in the order they block a picture:
