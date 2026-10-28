@@ -402,7 +402,9 @@ struct GamFont
 };
 static_assert(offsetof(GamFont, m_00) == 0x00, "m_00");
 
-/* ---- the utl range after utl/utlgame.cpp (unassigned@00103edc) ---- */
+/* ---- the tail of utl/utlgame.cpp (0x103edc..0x1041c4), not written yet;
+ * the random numbers after it are utl/utlrand.cpp ---- */
+#include "utl/utlrand.h"
 
 /* The dog's params 0x1b / 0x1c through GamMan::get/setDogParam
  * (MagLifeBwn::calcHealth's ratio; reset tops 0x1b up). */
@@ -423,22 +425,9 @@ float utlGetDogRadius(void);                                             // ROR 
 
 /* GamMan::getObjParam(oid, 2): the object's kind (0x401 / 0x421 ...). */
 int  utlGetObjKind(u_int oid);                                           // ROR 0x0010411c
-void utlRandReset(void);                                                 // ROR 0x0010421c
-/* A random integer in lo..hi (lo + 0x1041e4(hi - lo + 1)). */
-int  utlRandRange(int lo, int hi);                                       // ROR 0x0010423c
-/* (lo, hi, n): the mean of n draws over 0..2 (hi - lo) folded at hi - lo,
- * plus lo: values peak at hi. */
-int  utlRandPeakHi(int lo, int hi, int n);                               // ROR 0x00104394
 /* GamMan::setObj(the object at GamMan +0x22094, 0x40); both values of on
  * do the same in the ROM. */
 void utlSetBwnObjFlag(int on);                                           // ROR 0x00104150
-/* A random float in lo..hi in steps of (hi - lo) / 65536 -- 0.0 (not lo)
- * when the integer draw is 0. */
-float utlRandRangeF(float lo, float hi);                                 // ROR 0x001044b8
-/* lo + the mean of n draws over 0..hi - lo. */
-int  utlRandMean(int lo, int hi, int n);                                 // ROR 0x0010426c
-/* lo..hi, peaking at peak (the mean of n draws, folded). */
-int  utlRandPeak(int lo, int hi, int peak, int n);                       // ROR 0x00104438
 
 /* ---- the i3d library (unassigned@00216ad0 .. 0x237d80; its version string
  * "i3d_package_version 050121-stable-050826") ---- */
