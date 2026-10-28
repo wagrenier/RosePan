@@ -7,6 +7,8 @@
 #include <string.h>
 
 #include "dog/dogactor.h"
+#include "lib/unassigned.h"
+#include "mag/magscene.h"
 
 /* PC: written by the mag/maglifepc.cpp session (2026-10-27) because
  * MagLifePC cannot hold a state without them: the constructor and the
@@ -35,7 +37,7 @@ MagLifeControlChara::MagLifeControlChara()
     m_48 = 0;
     m_4c = 0;
     m_no = -1;
-    m_goal[0] = 0.0f;
+    m_secta[0] = NULL;
     m_mode = 0;
     m_actor = NULL;
     m_74 = 0;
@@ -66,7 +68,7 @@ void MagLifeControlChara::setState(int state, int arg)
 void MagLifeControlChara::clearGoal()
 {
     m_70 = -1;
-    memset(m_goal, 0, sizeof(m_goal));
+    memset(m_secta, 0, sizeof(m_secta));
 }
 
 // ROR 0x0011a130
@@ -128,6 +130,36 @@ int MagLifeControlChara::isMotionSeqEnd()
     return 1 < m_48;
 }
 
+// PC: the two secta helpers below were written by the mag/maglifebwn.cpp
+// session (2026-10-27): Brown's path search and the PC's moveBy need them.
+
+// ──────────────────────────────────────────────────────────────────────
+// The secta cells under the actor (radius 40), searched from the cells
+// held when the first one is set.
+// ROR 0x0011a6b0
+void MagLifeControlChara::updateSectaCells()
+{
+    float pos[4];
+    for (int i = 0; i < 4; i++)
+        pos[i] = m_actor->m_trans[i];
+    FUN_0017c340(&m_scene->m_8542c, pos, m_secta, m_secta[0] != NULL, 40.0f, 0.0f);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// m_secta, queried first when it holds no cell.
+// ROR 0x0011a64c
+GamSecta **MagLifeControlChara::getSectaCells()
+{
+    if (m_secta[0] == NULL)
+    {
+        float pos[4];
+        for (int i = 0; i < 4; i++)
+            pos[i] = m_actor->m_trans[i];
+        FUN_0017c340(&m_scene->m_8542c, pos, m_secta, 0, 40.0f, 0.0f);
+    }
+    return m_secta;
+}
+
 // ---- stubs (tools/reverse/stubgen.py) ----
 
 // stub of ROR 0x0011a14c
@@ -159,10 +191,4 @@ float MagLifeControlChara::followGround()
 {
     ROSEPAN_STUB("MagLifeControlChara::followGround", 0x00119e1c);
     return {};
-}
-
-// stub of ROR 0x0011a6b0
-void MagLifeControlChara::updateSectaCells()
-{
-    ROSEPAN_STUB("MagLifeControlChara::updateSectaCells", 0x0011a6b0);
 }

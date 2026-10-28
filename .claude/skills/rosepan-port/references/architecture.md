@@ -1088,6 +1088,34 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   +0x1fc / +0x200 cos 5 / 89 degrees, +0x204 0.07, +0x208 0.9, +0x20c 0.001 (stick change),
   +0x210 / +0x214 45 / 20 (move sweep range / radius).
 
+## Brown's controller (`mag/maglifebwn.cpp`, 0x1233d8..0x125bd4, 2026-10-27)
+
+- `MagLifeBwn` (EE 0xd40, scene +0x2afe0): Brown's state machine as MagLifePC's, but requested and
+  applied in two steps: vtable slot 16 0x1233d8 `requestState` writes the pending quad +0x80
+  (mode, -1, a, b; linkonce `getNextMode`), `applyState` 0x125704 enters it when the current mode's
+  `term(bwn, force)` returns non-zero (state 0 always), saving the old quad at +0x30 as setState does,
+  then the mode's `init`. `changeMode` 0x1233f4 = request + apply; slot 14 0x1247c8 (`message`) is the
+  0..9 front door (-2 when already pending). live runs `applyState(1)` and only when nothing changed
+  the mode's `live`.
+- Modes (mag/maglifebwnmode.cpp, 0x125bd4.., stubs): base `MagLifeBwnMode` slots 1 init 2 live 3
+  setParam 4 term, all taking `MagLifeBwn &` (the linkonce symbols); embedded at +0xcf0 Null(0),
+  +0xcf4 One(1), +0xcf8 Wait(2), +0xd04 Sit(3), +0xd08 Fuse(4), +0xd0c Move(5), +0xd18 Path(6),
+  +0xd28 Turn(7), +0xd30 Rotate(8), +0xd2c Wall(9). The shared live 0x125bd4 = stepMotion, then
+  state 0 when the motion sequence ends.
+- Fields named by the ELF's linkonce accessors: +0xca0 m_num_search_line (< 127, asserted in
+  mag/maglifebwn.h:213), +0xcac getUnmovableCount, +0xcb8 getHealthStatus (0..4 by dog params
+  0x1b / 0x1c: 0.8 / 0.4 / 0.2 / 0), +0xcc0 isPathMoveEnd = isActionEnd, +0xcc4 getMoveResult /
+  resetMove, +0xcd4 getNeckControl (1 smell, 2 look at +0x90), +0xcdc / +0xce0
+  setNeckMotionTarget (neckblend octant, rate).
+- The path: `searchPath` 0x12349c asks 0x17d298 (as GamMan::findSectaPath) for the cells from
+  MagLifeControlChara's +0x60 cells (`getSectaCells` 0x11a64c, the assert's nowsct) to the target's
+  (+0xa8c), and lays out the search line +0xa0 (127 points, w = segment length) and widths +0x890;
+  `followPath` walks it by a 16.16 index +0xca8 (`advancePathIndex`), steering with the motion's
+  root step. Bend motion rows 0x2eb980 / 0x2eb988, turn rows 0x2b..0x30 (`turnToPath`).
+- MagLifeControlChara +0x60 is four `GamSecta *` (the cells under the actor, FUN_0017c340 radius
+  40 / 100), not a goal vector; `updateSectaCells` 0x11a6b0 refreshes it.
+- Brown's motion sequence table is 0x297418 (constructor 0x125aa4); NULL on the host like the PC's.
+
 ## The texture table (`dog/dogtexinfo.cpp`, 0x1161e4..0x11764c, 2026-10-22)
 
 - **DogTexInfo** (EE 0x20; the scene's at +0x29520, 256 entries): +0 m_max_tex, +4 m_num_tex,

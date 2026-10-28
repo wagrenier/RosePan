@@ -1042,6 +1042,15 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- **MagLifeBwn's vtable slots 14 / 16** (2026-10-27, mag/maglifebwn.cpp): MagLifePC has
+  message(msg, const float *) / processPad(BedPad *) in these slots, MagLifeBwn takes (mode, a, b)
+  in both (message 0x1247c8, requestState 0x1233d8). Same C++ virtual with a looser signature, or
+  the PC's names are wrong? Written as plain members on the known class until a caller through a
+  base pointer shows up.
+- **MagLifeBwn::setActor(NULL)** stores the NULL actor before clearNeckMotion, which then calls
+  DogActor::setMotionSub on NULL (a ROM bug that the PS2 survives). The host skips the call. A real
+  unbind therefore leaves the old actor's neck sub motion on.
+
 - **Render targets in the native i3d module** (2026-10-27, mag/magscenefocus.cpp): the focus effect
   (efffocus, FRAME 0x138), the actor shadows / close-up (shadow01, FRAME 0x118) and any other
   FRAME_1-retargeted layer draw into a VRAM work buffer and read it back as a texture with no

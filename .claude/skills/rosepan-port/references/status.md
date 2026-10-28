@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 22:32 at commit `7bbc11a` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 22:54 at commit `6cf2a84` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-27 22:32 at commit `7bbc11a` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6872**, named **5317** (77%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 3715
-- context-name ledger: 4015 entries; overrides of wrong library matches: 5
-- placed in a source file: 4661/6872 in 120 files
+- game functions: **6872**, named **5366** (78%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 3764
+- context-name ledger: 4064 entries; overrides of wrong library matches: 5
+- placed in a source file: 4672/6872 in 120 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -24,13 +24,13 @@ Least-named game-code regions (64 KB blocks):
 | `00160000` | 96/268 (36%) | emy/emy_manager.cpp, emy/emy_main.cpp |
 | `00140000` | 128/293 (44%) | emy/emy_hfm.cpp, mag/magscenecmd.cpp, mag/magloader.cpp |
 | `001b0000` | 41/81 (51%) | game/gamfile.cpp, mnu/mnuSelectLanguage.cpp |
-| `00120000` | 166/283 (59%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
 | `001a0000` | 142/214 (66%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnutitle.cpp |
 | `00180000` | 218/312 (70%) | snd/rxmpeg.cpp, spr/sprman.cpp, mcd/mcdman.cpp |
+| `00200000` | 100/143 (70%) | sequence/seqcall.cpp, sequence/sequence.cpp, system/system.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3869**; stubs: **360**
+- reconstructed RoR functions: **3906**; stubs: **379**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -74,10 +74,11 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 226 |
-| `src/mag/maglife.cpp` | 10 | 6 |
-| `src/mag/maglifebwn.cpp` | 0 | 3 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 231 |
+| `src/mag/maglife.cpp` | 12 | 5 |
+| `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 23 |
+| `src/mag/maglifebwnmode.cpp` | 0 | 18 |
 | `src/mag/maglifefadekey.cpp` | 0 | 6 |
 | `src/mag/maglifefader.cpp` | 5 | 0 |
 | `src/mag/maglifeman.cpp` | 12 | 0 |
@@ -142,9 +143,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 160 TUs: todo 100, partial 11, verify 76, done 9
-- next: **mag/maglifebwn.cpp** (pinned in the queue)
-- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, mag/maglifebwn.cpp, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
+- 159 TUs: todo 98, partial 11, verify 77, done 9
+- next: **mag/maglifebwnctrl.cpp** (pinned in the queue)
+- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
 - partial: `emy/emy_hfm.cpp` 46/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec
 - partial: `i3d/i3dvu1pkt.cpp` 10/21 -- Left in this TU: i3dPktDrawStripCtx 0x21dd10 and i3dPktDrawLineStrip 0x21e1d8 (clipped strips, use i3dClipSegment 0x21db90 / i3dVu0ClipPair 0x21db60, named), th
 - partial: `i3d/i3mpose.cpp` 36/38 -- Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game c
@@ -181,6 +182,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `i3d/i3rmodel.cpp` 14/14 -- Verify: nothing on screen reaches it yet. The 200 s New Game run still ends black after the film; DogActor::load 0x10cd5c (dog/dogactor.cpp) is the stub that ke
 - verify: `i3d/i3rroot.cpp` 14/14 -- Verify: no model loads in the smoke run yet, so nothing can show it (screen still black, as before). Port trap: the ROM relocates i3r files in place into absolu
 - verify: `i3d/i3rtype.cpp` 96/96 -- Verify: complete code, nothing on screen can show it (the 15 s smoke run shows the boot disclaimer; no model draws yet). The nine fixup pairs inside this extent
+- verify: `mag/maglifebwn.cpp` 29/42 -- Brown's live now runs in the smoke boot (MagLifeBwnModeWait::init and MagLifeBwnMode::live reached) but nothing on screen shows him yet: the screenshot is the b
 - verify: `mag/maglifeman.cpp` 12/12 -- Status verify: the S2d layers now run live and render every frame (one i3d primitive reaches rosepan_i3d without a texture object), but the screenshot stays bla
 - verify: `mag/maglifemenu.cpp` 45/53 -- Complete, nothing on screen yet: the smoke run now opens the title (MagScene::openMenu 0x10005 -> MagLifeMenuTitle) and reaches MnuTitle::isInit / init / draw /
 - verify: `mag/maglifepc.cpp` 27/27 -- Verify: the 200 s New Game run binds the PC after the film (setActor -> changeState(0) -> MagLifePCModeNull::init reached) and ends on the picture book's page s
@@ -229,6 +231,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 22:54 `mag/maglifebwn.cpp` verify: MagLifeBwn, Brown's controller, written in full (pinned 0x1233d8..0x125bd4 plus the linkonce accessors): requestState / changeMode / applyState over the ten emb
 - 2026-10-27 22:32 `mag/maglifepcmove.cpp` verify: mag/maglifepcmove.cpp: pinned 0x11e4c4..0x120788 (moveBy 0x11ee00 included) and wrote all 12 functions: sweepMove (object test, cylinder sweep, wall slide), swe
 - 2026-10-27 21:53 `mag/maglifepcmode.cpp` verify: The rest of the PC modes: AtkWait2D (with getTurnStep and the 0x2ead98 weapon x height table), AtkMove2D, Attacking (combo chain and the weapon hit spheres agai
 - 2026-10-27 21:41 `mag/maglifepcmode.cpp` partial: The standing-and-walking modes: MagLifePCMode::applyRootMotion / moveBy / live, Null, Wait (init, live, pad, updateIdle), Walk2D, Run2D, Turn (init, live, pad, 
@@ -236,18 +239,17 @@ Recent sessions:
 - 2026-10-27 21:17 `task/naga_chunk.cpp` verify: NagaChunk reader (ctors, dtor, load, rewind, next, findTag, find, setIndex, getName, getEntry, getData, getInt, getSize) and NagaChunkWriter (ctor, dtor, addEnt
 - 2026-10-27 21:09 `mag/maglifepc.cpp` verify: MagLifePC, the player controller: all 33 functions of 0x11ab40..0x11c464 (pinned) written - the constructor, changeState / selectMode over the 20 embedded MagLi
 - 2026-10-27 20:44 `mag/magscenefocus.cpp` verify: The focus (depth-of-field) effect: pinned mag/magscenefocus.cpp 0x140990..0x141e44 (merging unassigned@00140990 / 00140c68 / 0014159c) and wrote all 16 function
-- 2026-10-27 20:33 `mag/magscenecamera.cpp` verify: MagScene::updateCamera written with its look helpers clampCameraLook (was FUN_0013e2ec) and getCameraLookLimit (was FUN_0013e4c0); magscenecamera.cpp re-pinned 
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00166a1c` | todo | 0/36/342 | 94.7 | 124 | 4 |
+| `unassigned@00166a1c` | todo | 0/37/342 | 94.7 | 135 | 4 |
+| `mag/maglife.cpp` | partial | 12/5/49 | 4.6 | 76 | 2 |
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 60 | 3 |
-| `mag/maglife.cpp` | partial | 10/6/49 | 4.6 | 59 | 0 |
+| `unassigned@00103edc` | todo | 0/10/23 | 1.6 | 54 | 3 |
 | `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
+| `mag/maglifebwnctrl.cpp` | todo | 0/23/82 | 18.3 | 46 | 2 |
+| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 44 | 0 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
-| `mag/maglifebwnctrl.cpp` | todo | 0/23/82 | 18.3 | 41 | 1 |
-| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 39 | 0 |
-| `unassigned@00103edc` | todo | 0/5/23 | 1.6 | 37 | 1 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
 | `utl/utlgame.cpp` | todo | 0/14/35 | 6.5 | 26 | 0 |
@@ -258,12 +260,13 @@ Recent sessions:
 | RoR addr | name | call sites | provenance | state | inferred file |
 |---|---|---|---|---|---|
 | `001be734` | FileReadReq::FileReadReq | 62 | ror | missing | game/gamfile.cpp |
-| `0011a320` | MagLifeControlChara::changeMotionSeq | 53 | ror | stub | mag/maglife.cpp |
+| `0011a320` | MagLifeControlChara::changeMotionSeq | 56 | ror | stub | mag/maglife.cpp |
 | `001be2dc` | FileReader::~FileReader | 29 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 24 | ror | missing | game/gamfile.cpp |
 | `0010423c` | FUN_0010423c | 24 | - | stub | - |
 | `002155f4` | FUN_002155f4 | 22 | - | missing | - |
-| `00215bb4` | dbgTraceVector4 | 15 | ror | stub | - |
+| `00215bb4` | dbgTraceVector4 | 20 | ror | stub | - |
+| `0017c340` | FUN_0017c340 | 14 | - | stub | - |
 | `001832e8` | msgGetSysText | 13 | ror | stub | - |
 | `001026b0` | utlPlaySe | 11 | ror | stub | utl/utlgame.cpp |
 | `001680a0` | EmyOut::setMotion | 11 | ror | stub | - |
@@ -286,9 +289,9 @@ Recent sessions:
 | `0018330c` | MsgMan::MsgMan | 6 | ror | missing | msg/msgman.cpp |
 | `00183b24` | MsgMan::~MsgMan | 6 | ror | missing | msg/msgman.cpp |
 | `002251f0` | i3rTrackGetValue | 5 | ror | stub | - |
-| `0017c340` | FUN_0017c340 | 5 | - | stub | - |
 | `001044b8` | utlRandRangeF | 5 | ror | stub | - |
 | `001874ac` | MsgManSet::update | 5 | ror | stub | - |
+| `00119e1c` | MagLifeControlChara::followGround | 4 | ror | stub | mag/maglife.cpp |
 | `001bebec` | GamFont::setFont | 4 | ror | stub | - |
 | `0012b7cc` | MagLifeBwnCtrl::setLevel | 4 | ror | stub | mag/maglifebwnctrl.cpp |
 | `001a074c` | MnuTextList::close | 4 | ror | stub | mnu/mnuselect.cpp |
@@ -296,5 +299,4 @@ Recent sessions:
 | `001c0254` | GamFont::getGlyphWidth | 4 | ror | stub | - |
 | `001a06d4` | MnuTextList::processPad | 4 | ror | stub | mnu/mnuselect.cpp |
 | `00225460` | FUN_00225460 | 4 | - | missing | - |
-| `00226060` | FUN_00226060 | 4 | - | missing | - |
 

@@ -129,15 +129,15 @@
 // FILE -- (unassigned)
 // *****************************************************************************
 
-/* 00103edc 0000002c */ FUN_00103edc(){}
-/* 00103f08 00000030 */ FUN_00103f08(){}
-/* 00103f38 00000030 */ FUN_00103f38(){}
+/* 00103edc 0000002c */ utlSetDogParam1b(){}  // ror
+/* 00103f08 00000030 */ utlGetDogParam1b(){}  // ror
+/* 00103f38 00000030 */ utlGetDogParam1c(){}  // ror
 /* 00103f68 00000020 */ FUN_00103f68(){}
 /* 00103f88 00000024 */ FUN_00103f88(){}
 /* 00103fac 0000002c */ FUN_00103fac(){}
 /* 00103fd8 0000002c */ FUN_00103fd8(){}
-/* 00104004 0000009c */ FUN_00104004(){}
-/* 001040a0 0000003c */ FUN_001040a0(){}
+/* 00104004 0000009c */ utlTestDogHitAt(){}  // ror
+/* 001040a0 0000003c */ utlGetDogRadius(){}  // ror
 /* 001040dc 00000040 */ FUN_001040dc(){}
 /* 0010411c 00000034 */ FUN_0010411c(){}
 /* 00104150 00000074 */ FUN_00104150(){}
@@ -647,7 +647,7 @@
 /* 0011a27c 000000a4 */ MagLifeControlChara::changeMotionSeqAlt(){}  // ror
 /* 0011a320 000001cc */ MagLifeControlChara::changeMotionSeq(){}  // ror
 /* 0011a4ec 00000160 */ FUN_0011a4ec(){}
-/* 0011a64c 00000064 */ FUN_0011a64c(){}
+/* 0011a64c 00000064 */ MagLifeControlChara::getSectaCells(){}  // ror
 /* 0011a6b0 00000054 */ MagLifeControlChara::updateSectaCells(){}  // ror
 /* 0011a704 00000034 */ MagLifeControlChara::playSe(){}  // ror
 /* 0011a738 00000150 */ MagLifeControlChara::playStepSe(){}  // ror
@@ -856,77 +856,72 @@
 /* 001230fc 000002dc */ MagLifePCModeHug::live(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
-// *****************************************************************************
-
-/* 001233d8 0000001c */ FUN_001233d8(){}
-
-// *****************************************************************************
 // FILE -- mag/maglifebwn.cpp
 // *****************************************************************************
 
-/* 001233f4 000000a8 */ FUN_001233f4(){}
-/* 0012349c 00000480 */ FUN_0012349c(){}
-/* 0012391c 0000029c */ FUN_0012391c(){}
-/* 00123bb8 000003c0 */ FUN_00123bb8(){}
-/* 00123f78 00000090 */ FUN_00123f78(){}
-/* 00124008 00000148 */ FUN_00124008(){}
-/* 00124150 00000678 */ FUN_00124150(){}
-/* 001247c8 00000054 */ FUN_001247c8(){}
-/* 0012481c 00000170 */ FUN_0012481c(){}
-/* 0012498c 00000028 */ FUN_0012498c(){}
-/* 001249b4 000003c8 */ FUN_001249b4(){}
-/* 00124d7c 0000009c */ FUN_00124d7c(){}
-/* 00124e18 00000028 */ FUN_00124e18(){}
+/* 001233d8 0000001c */ MagLifeBwn::requestState(){}  // ror
+/* 001233f4 000000a8 */ MagLifeBwn::changeMode(){}  // ror
+/* 0012349c 00000480 */ MagLifeBwn::searchPath(){}  // ror
+/* 0012391c 0000029c */ MagLifeBwn::checkBodyHit(){}  // ror
+/* 00123bb8 000003c0 */ MagLifeBwn::stepMotion(){}  // ror
+/* 00123f78 00000090 */ MagLifeBwn::testObjAt(){}  // ror
+/* 00124008 00000148 */ MagLifeBwn::advancePathIndex(){}  // ror
+/* 00124150 00000678 */ MagLifeBwn::followPath(){}  // ror
+/* 001247c8 00000054 */ MagLifeBwn::message(){}  // ror
+/* 0012481c 00000170 */ MagLifeBwn::setNeckMotion(){}  // ror
+/* 0012498c 00000028 */ MagLifeBwn::clearNeckMotion(){}  // ror
+/* 001249b4 000003c8 */ MagLifeBwn::updateLook(){}  // ror
+/* 00124d7c 0000009c */ MagLifeBwn::updateLimp(){}  // ror
+/* 00124e18 00000028 */ MagLifeBwn::clearLegMotion(){}  // ror
 /* 00124e40 000000f8 */ MagLifeBwn::live(){}  // ror
 /* 00124f38 000000dc */ MagLifeBwn::reset(){}  // ror
-/* 00125014 000000f0 */ FUN_00125014(){}
-/* 00125104 000001c0 */ FUN_00125104(){}
-/* 001252c4 000000a4 */ FUN_001252c4(){}
-/* 00125368 0000036c */ FUN_00125368(){}
+/* 00125014 000000f0 */ MagLifeBwn::aimAtPath(){}  // ror
+/* 00125104 000001c0 */ MagLifeBwn::turnToPath(){}  // ror
+/* 001252c4 000000a4 */ MagLifeBwn::calcHealth(){}  // ror
+/* 00125368 0000036c */ MagLifeBwn::escapeNoFloor(){}  // ror
 /* 001256d4 00000030 */ MagLifeBwn::setActor(){}  // ror
-/* 00125704 000001a0 */ FUN_00125704(){}
+/* 00125704 000001a0 */ MagLifeBwn::applyState(){}  // ror
+/* 001258a4 000000dc */ MagLifeBwn::suspend(){}  // ror
+/* 00125980 00000068 */ MagLifeBwn::resume(){}  // ror
+/* 001259e8 00000038 */ MagLifeBwn::renderPostProcess(){}  // ror
+/* 00125a20 00000018 */ MagLifeBwn::setLookMode(){}  // ror
+/* 00125a3c 00000050 */ MagLifeBwn::setLookPos(){}  // ror
+/* 00125a90 00000014 */ MagLifeBwn::clearMode(){}  // ror
+/* 00125aa4 00000130 */ MagLifeBwn::MagLifeBwn(){}  // ror
 
 // *****************************************************************************
 // FILE -- (unassigned)
 // *****************************************************************************
 
-/* 001258a4 000000dc */ FUN_001258a4(){}
-/* 00125980 00000068 */ FUN_00125980(){}
-/* 001259e8 00000038 */ MagLifeBwn::renderPostProcess(){}  // ror
-/* 00125a20 00000018 */ FUN_00125a20(){}
-/* 00125a3c 00000050 */ FUN_00125a3c(){}
-/* 00125a90 00000014 */ FUN_00125a90(){}
+/* 00125bd4 00000050 */ MagLifeBwnMode::live(){}  // ror
+/* 00125c24 00000004 */ MagLifeBwnModeNull::init(){}  // ror
+/* 00125c2c 0000008c */ MagLifeBwnModeWait::init(){}  // ror
+/* 00125cb8 00000080 */ MagLifeBwnModeSit::init(){}  // ror
+/* 00125d38 0000007c */ MagLifeBwnModeSit::term(){}  // ror
+/* 00125db4 00000080 */ MagLifeBwnModeFuse::init(){}  // ror
+/* 00125e34 0000007c */ MagLifeBwnModeFuse::term(){}  // ror
+/* 00125eb0 00000098 */ MagLifeBwnModeMove::init(){}  // ror
+/* 00125f48 000000c0 */ MagLifeBwnModeMove::live(){}  // ror
 
 // *****************************************************************************
 // FILE -- mag/maglifebwnmode.cpp
 // *****************************************************************************
 
-/* 00125aa4 00000130 */ FUN_00125aa4(){}
-/* 00125bd4 00000050 */ FUN_00125bd4(){}
-/* 00125c24 00000004 */ FUN_00125c24(){}
-/* 00125c2c 0000008c */ FUN_00125c2c(){}
-/* 00125cb8 00000080 */ FUN_00125cb8(){}
-/* 00125d38 0000007c */ FUN_00125d38(){}
-/* 00125db4 00000080 */ FUN_00125db4(){}
-/* 00125e34 0000007c */ FUN_00125e34(){}
-/* 00125eb0 00000098 */ FUN_00125eb0(){}
-/* 00125f48 000000c0 */ FUN_00125f48(){}
-/* 00126008 0000003c */ FUN_00126008(){}
-/* 00126044 00000260 */ FUN_00126044(){}
-/* 001262a4 000000c0 */ FUN_001262a4(){}
-/* 00126364 0000003c */ FUN_00126364(){}
-/* 001263a0 0000004c */ FUN_001263a0(){}
-/* 001263ec 00000064 */ FUN_001263ec(){}
-/* 00126450 00000088 */ FUN_00126450(){}
-/* 001264d8 00000020 */ FUN_001264d8(){}
+/* 00126008 0000003c */ MagLifeBwnModePath::init(){}  // ror
+/* 00126044 00000260 */ MagLifeBwnModePath::live(){}  // ror
+/* 001262a4 000000c0 */ MagLifeBwnModePath::term(){}  // ror
+/* 00126364 0000003c */ MagLifeBwnModeTurn::init(){}  // ror
+/* 001263a0 0000004c */ MagLifeBwnModeOne::init(){}  // ror
+/* 001263ec 00000064 */ MagLifeBwnModeOne::live(){}  // ror
+/* 00126450 00000088 */ MagLifeBwnModeWall::init(){}  // ror
+/* 001264d8 00000020 */ MagLifeBwnModeRotate::init(){}  // ror
 /* 001264f8 00000194 */ FUN_001264f8(){}
 
 // *****************************************************************************
 // FILE -- (unassigned)
 // *****************************************************************************
 
-/* 0012668c 00000134 */ FUN_0012668c(){}
+/* 0012668c 00000134 */ MagLifeBwnModeRotate::live(){}  // ror
 /* 001267c0 00000018 */ FUN_001267c0(){}
 /* 001267d8 0000001c */ FUN_001267d8(){}
 /* 001267f4 000000c0 */ FUN_001267f4(){}
@@ -9459,7 +9454,7 @@
 /* 002832f4 00000050 */ MagLifePCModeMove::__tf(){}  // sym
 
 // *****************************************************************************
-// FILE -- (satellite) MagLifeBwn
+// FILE -- mag/maglifebwn.cpp
 // *****************************************************************************
 
 /* 00283344 00000034 */ MagLifeBwn::~MagLifeBwn(){}  // sym
