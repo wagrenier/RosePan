@@ -227,10 +227,11 @@ void EmyManager::setSlotWord24(int no, int v)
 // ──────────────────────────────────────────────────────────────────────
 // ROR 0x00162b14
 
-void EmyManager::countGrpDead(int no)
+int EmyManager::countGrpDead(int no)
 {
-    m_grp[no].m_dead++;
+    int dead = m_grp[no].m_dead++;
     m_grp[no].m_alive--;
+    return dead;
 }
 
 // ──────────────────────────────────────────────────────────────────────

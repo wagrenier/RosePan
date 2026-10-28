@@ -282,7 +282,7 @@
    "why": "EmyManager (CmnITask; vtable 0x2e31a0, ctor 0x16265c, dtor 0x162700) and its findEmy-based accessors run 0x16265c..0x164118; 0x162630 before it is an EmyOut method (param+8 -> EmyMain) of the previous enemy, 0x164118 is EmyMain's ctor (emy/emy_main.cpp). No source string: file name after the class, emy_main.cpp style."
   },
   "emy/emy_out.cpp": {
-   "notes": "Left in the pinned range: 0x16768c, 0x1677d0, 0x167a64 (no callers known, unnamed), 0x16898c (a thunk to setMotion), FUN_0016a1dc (walks the p_hit table s_hitNodes too) and the rest tus.py brief lists. emyStartMove's first argument is a float (f12, the stop range added to the radii), not an int mode: header and the two HfmOut calls fixed. EmyMain::getMoveParam 0x1669a4 (emy_main.cpp) is a stub returning NULL; the move starts guard it (PC comment) until it is written with its table 0x2f18b8. TskEnemyMove::start 0x200700 and TskEnemyTurn::start 0x20350c are stubs (unassigned@001fd424). No enemy runs in the 15 s smoke run (boot disclaimer only), so nothing on screen shows this code yet. For the references: architecture.md updated (EmyStateMap layout, EmyOut +0x28, the move record).",
+   "notes": "No code left in the pinned range. Status verify: no enemy runs in the 15 s smoke run (boot disclaimer only, same picture as before), so nothing on screen shows this code yet; the first session whose run shows an enemy (walk, bite, Got carrying the scissors) marks it done. The callers are still stubs: EmyMain::updateOut 0x165038 (calls tickBitten) and EmyMain::resetOut 0x166518 (calls dropItem) in emy/emy_main.cpp, and the per-class outs in unassigned@00149d18. The ROM's setMotion family also passes the actor rot y in f13 and 1 in t0, which chrMtnMove2Achr does not read; the port drops them (comments say so). Two ROM oddities kept as they are (open-items.md Open questions): slideToTarget zeroes pos and rot on its last frame, setGotMotion's motion 0x4e passes an unset register (port: 2).",
    "ranges": [
     [
      "00166a1c",
@@ -294,9 +294,14 @@
      "date": "2026-10-28 16:44",
      "status": "partial",
      "summary": "EmyOut base and the emy helpers: ctor/dtor, termCommon, getBasePos/getTargetNodePos/getFrontPos/getTargetAngle, selectTarget/selectNearTarget, setMotion/setWalkMotion, tickVoice/stopVoice/playSE, EmyStateMap (ctor, dtor, getMap, addMap, next), emyStartMove/Chase/Turn with the TskEnemyMove/Turn records and the per-type tables, emyChkChase/InSight/HitReach/NearXZ/NearXZY, emyCanReach, emyAttachItem, emyVecLength, emyGetSEPos/PCPos/DogPos, emyPlaySE. 37 functions written, 19 stubs removed."
+    },
+    {
+     "date": "2026-10-28 16:56",
+     "status": "verify",
+     "summary": "EmyOut and the emy helpers complete (all 58 functions of 0x166a1c..0x16a914): the last 24 written -- emyChkInAngle, isSameSecta, getAttackMotion, getTargetDir, setMotionSpeed, resetWalkMotion, setBaseMotion, the dog's bite startBitten / tickBitten (EmyMain::updateOut's call), the Got's scissors motions setGotMotion / changeMotion / setGotWalkMotion, startMotion, testMotionEnd, leaveGroup, slideToTarget / snapToTarget (p_sp_f / p_sp_b grab points), dropItem (ReleaseItem), getSelectRate, EmyStateMap::removeMap / peek, emyVecDistance, emyChkHitReachXZ, emyChkPointReach. EmyManager::countGrpDead now returns the old dead count as the ROM does."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "The EmyOut base class (ctor 0x166a1c, vptr +0x34) and the emy* helpers its 77 subclasses call (emyStartMove, emyChkInSight, emyCanReach, emyChkHitReach); ends where Eff0 (0x16a914) starts. No source string; named after the class like emy_main / emy_hfm."
   },
   "game/gamfile.cpp": {
