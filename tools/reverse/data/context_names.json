@@ -3695,6 +3695,12 @@
   "was": "FUN_0013c328",
   "why": "mag/magsceneoption.cpp: utlParseParam over the text into 16 buckets at scene +0x4371c (asserts m_option_bucket[i].m_type); loadSystemData passes data/options.txt"
  },
+ "0013c664": {
+  "name": "MagScene::getCameraPathWork",
+  "tag": "ror-inferred",
+  "was": "FUN_0013c664",
+  "why": "fills a path work record (theWork: position on the path at m_20 + m_28, unit direction of the segment, m_distance = the next point's w) from a _c.bin path record; asserts numpos / pa / pb; callers changeCamera and 0x13d8f8 pass the scene in a0"
+ },
  "0013c928": {
   "name": "MagScene::initCamera",
   "tag": "ror-inferred",
@@ -3748,6 +3754,24 @@
   "tag": "ror-inferred",
   "was": "FUN_0013d5e4",
   "why": "pad bits 8 / 9; magscenecamera.cpp asserts m_cam_map_no / m_cam_path_no"
+ },
+ "0013d8f8": {
+  "name": "MagScene::scoreCameraPath",
+  "tag": "ror-inferred",
+  "was": "FUN_0013d8f8",
+  "why": "steps the path position toward keeping the target within the min / max camera distance (+0x2ad60 / +0x2ad5c, overridden by the record's tag letters), returns 1e6 less the squared distance error, +1e6 when flag 1 and castRay hits between camera and target; seekCameraPath iterates it, updateCamera calls it"
+ },
+ "0013dfe0": {
+  "name": "MagScene::findCameraPathStart",
+  "tag": "ror-inferred",
+  "was": "FUN_0013dfe0",
+  "why": "a path point index: pos 0..100 picks pos percent of the path, otherwise the nearest point farther than 500 from the target; only seekCameraPath calls it"
+ },
+ "0013e190": {
+  "name": "MagScene::setCameraOnPath",
+  "tag": "ror-inferred",
+  "was": "FUN_0013e190",
+  "why": "camera entity m_trans (+0x2abb0) = thePos[theI] lerped toward thePos[(theI+1) % theMax] by theF, m_dirty (+0x2ac00) = 1; asserts thePos, theI, theF"
  },
  "0013e548": {
   "name": "MagScene::updateCamera",

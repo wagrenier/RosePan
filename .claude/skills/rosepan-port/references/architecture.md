@@ -919,6 +919,26 @@ first slot with a sky (reads past slot 3 when slot 0 is empty); the port stops a
 0x140990 (a 4-qword GS packet helper for drawFocus) and `initRecords853bc` 0x140a84 (m_focus
 defaults) open the focus code, left as unassigned@00140030 for mag/magscenefocus.cpp.
 
+## The scene's camera (`mag/magscenecamera.cpp`, 0x13c664..0x13e2ec, 2026-10-27)
+
+MagScene's camera words +0x2ad50..+0x2ad98 (the assert texts name m_cam_map_no +0x2ad68 and
+m_cam_path_no +0x2ad64): mode +0x2ad50, +0x2ad54 (changeCamera clears it), target actor +0x2ad58,
+distance band max / min +0x2ad5c / +0x2ad60 (600 / 500), saveCamera's count +0x2ad80 and copies
++0x2ad84..+0x2ad98. `setCameraMode(mode, arg, param)` 0x13caf0 (jump table 0x2ee750): 0 free, 1 free
+with a target actor, 2 the camera a child of actor arg at (0, -50, -50) tilted -0.5, 3..5 a map camera
+on a path of a sky pack's _c.bin (MagSceneTenkyu +0x4fc) -- 3 slot 0's path 0, 4 arg = map << 8 | path
+(checked against getCameraMaxPath, the magscene.h line-816 inline), 5 the same plus param[0] / [1] /
+1000 as the path position; the path's float +4 (degrees) becomes DogCamera +0x140. With no path in
+slot 0, modes 3..5 make the camera a child of the actor at (0, -150, -500) tilted -0.17. A path record
+(`MagSceneCRec`): +0 m_pos_num, +1 loop, +2 alt (one-point paths with two views, +3 the side, the
+second view's point 4 on), +4 fov, +0x1c..0x1e tag letters (step speed, distance, band), +0x20 / +0x28
+the camera's segment and fraction, +0x24 / +0x2c changeCamera's goal, points from +0x30 (x, y, z, w =
+length of the segment ending there). The target is the actor's m_trans 120 up. seekCameraPath
+(native 016 case 7) places the camera and iterates scoreCameraPath 0x13d8f8 (one step toward the
+distance band, 1e6 - squared error) until it settles; changeCamera 0x13d5e4 (pad m_7a bits 8 / 9)
+sets the goal two projected lengths ahead and ORs 0x10 into the mode, which updateCamera 0x13e548
+(unassigned@0013e2ec) plays out -- the likely writer of DogCamera's move words.
+
 ## Fog and Brown's command glue (`mag/magscenecmd.cpp`, 0x143d3c..0x145020, 2026-10-27)
 
 No source string names the run (the port named it): it follows `mag/magsceneif.cpp`'s asserts and

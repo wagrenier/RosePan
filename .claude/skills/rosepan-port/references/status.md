@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 19:57 at commit `5c85947` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 20:15 at commit `6b00281` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-27 19:57 at commit `5c85947` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6868**, named **5125** (75%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 258, ror-inferred 3523
-- context-name ledger: 3821 entries; overrides of wrong library matches: 5
-- placed in a source file: 4609/6868 in 119 files
+- game functions: **6868**, named **5129** (75%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 258, ror-inferred 3527
+- context-name ledger: 3825 entries; overrides of wrong library matches: 5
+- placed in a source file: 4615/6868 in 119 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3649**; stubs: **354**
+- reconstructed RoR functions: **3660**; stubs: **347**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -74,7 +74,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 8 | 234 |
+| `src/lib/unassigned_stubs.cpp` | 8 | 230 |
 | `src/mag/maglife.cpp` | 0 | 1 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 17 |
@@ -88,7 +88,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/magloader.cpp` | 17 | 0 |
 | `src/mag/magscene.cpp` | 89 | 0 |
 | `src/mag/magscene2.cpp` | 19 | 0 |
-| `src/mag/magscenecamera.cpp` | 2 | 3 |
+| `src/mag/magscenecamera.cpp` | 13 | 0 |
 | `src/mag/magscenecmd.cpp` | 36 | 0 |
 | `src/mag/magscenedebug.cpp` | 0 | 1 |
 | `src/mag/magscenefocus.cpp` | 2 | 1 |
@@ -133,9 +133,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 166 TUs: todo 110, partial 14, verify 68, done 9
-- next: **mag/magscenecamera.cpp** (pinned in the queue)
-- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, mag/magscenecamera.cpp, unassigned@0013e2ec, unassigned@00140c68, unassigned@00140990, mag/maglifepc.cpp, task/naga_chunk.cpp, mag/maglifebwn.cpp, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
+- 164 TUs: todo 109, partial 12, verify 69, done 9
+- next: **unassigned@0013e2ec** (pinned in the queue)
+- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@00140c68, unassigned@00140990, mag/maglifepc.cpp, task/naga_chunk.cpp, mag/maglifebwn.cpp, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
 - partial: `emy/emy_hfm.cpp` 46/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec
 - partial: `i3d/i3dvu1pkt.cpp` 10/21 -- Left in this TU: i3dPktDrawStripCtx 0x21dd10 and i3dPktDrawLineStrip 0x21e1d8 (clipped strips, use i3dClipSegment 0x21db90 / i3dVu0ClipPair 0x21db60, named), th
 - partial: `i3d/i3mpose.cpp` 36/38 -- Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game c
@@ -177,6 +177,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/magloader.cpp` 17/17 -- Status verify: all 17 functions written, nothing past the title menu draws yet. A New Game run (build.py --run 140 --pad 1800:START,2400:START,2700:CROSS) no lo
 - verify: `mag/magscene.cpp` 89/89 -- Screen still black (textures never load; game/gamfile.cpp callers GamMan::loadSystemData / loadStage are stubs), and nothing calls this slice's new code in the 
 - verify: `mag/magscene2.cpp` 19/19 -- Complete but unseen: MagScene::start (magscene.cpp) and the GamMan loads are stubs, so no loader runs and the screen stays black (MagScene::draw is a stub too).
+- verify: `mag/magscenecamera.cpp` 13/13 -- 200 s New Game run: no assert, ends at frame 6060 on the open picture book, the same picture as progress/20261027-1957 (book page stack, arrow and circle prompt
 - verify: `mag/magscenecmd.cpp` 36/36 -- Verify: the 200 s run reaches gamSetBwnFollow (MagLifeBwnCtrl::setLevel stub hit) and still ends black after the narration frame (~6000) as before; fog shows on
 - verify: `mag/magscenelight.cpp` 10/10 -- Build, callcheck and layoutcheck green. The 200 s New Game run passes the four previously reached stubs (setLightNo, setLightFlags, setLightParam, copyLightSet)
 - verify: `mag/magscenerender.cpp` 20/20 -- All 20 functions written; verify because nothing on screen can show it: no boot actor has the 0x60 shadow flags and all i3d layer / view / light functions are s
@@ -212,6 +213,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 20:15 `mag/magscenecamera.cpp` verify: MagScene camera written, all 13 functions (pinned 0x13c664..0x13e2ec): setCameraMode with its six modes, the map path camera (getCameraPathWork, scoreCameraPath
 - 2026-10-27 19:57 `i3d/i3dvu1pkt.cpp` partial: i3d/i3dvu1pkt.cpp pinned 0x21c960..0x21eb28 (was unassigned@0021c960): the VU1 sprite family (BeginVu1Sprite, Vu1Rect renamed from Vu1Color, Vu1Matrix, Vu1Sprit
 - 2026-10-27 19:26 `i3d/i3rmesh.cpp` verify: i3d/i3rmesh.cpp written whole (14 functions): the material packet cache i3rGetMaterialPacket 0x228f50 with its list helpers, i3rBuildMaterialPacket and the per-
 - 2026-10-27 19:00 `i3d/i3rdraw.cpp` partial: i3d/i3rdraw.cpp pinned 0x21fb50..0x222f50 (was unassigned@0021fb50). i3rDrawModel written: the model box cull against the layer's view, the ROM's node / entry /
@@ -219,7 +221,6 @@ Recent sessions:
 - 2026-10-27 18:21 `utl/utlmath.cpp` verify: utl/utlmath.cpp pinned (0x106658..0x10737c, was unassigned@00106658) and all 25 functions written: utlConvSndId with the 54-row map-area sound id table 0x295f08
 - 2026-10-27 18:07 `i3d/i3mpose.cpp` partial: i3m pose player: split unassigned@0022e840 into i3d/i3mpose.cpp, i3d/i3cquery.cpp, i3d/i3dgeom.cpp; wrote 37 i3mpose functions (key search and decode, step/lerp
 - 2026-10-27 17:49 `dog/dogmotionblend.cpp` verify: DogMotionBlend complete (11 of 11): getPose, getNodeRate, step, stepLoop, getTimeRatio, setTimeRatio, setBlendRate written from the ROM; blend entry fields m_no
-- 2026-10-27 17:41 `i3d/i3rtype.cpp` verify: Split unassigned@00228c08 into i3d/i3rtype.cpp 0x22a6c0-0x22b1b0 and i3d/i3rmesh.cpp 0x228c08-0x22a6c0 (both pinned). Wrote all 78 per-type i3r accessors of i3r
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -229,8 +230,8 @@ Recent sessions:
 | `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
 | `mag/maglifepc.cpp` | todo | 0/11/31 | 6.1 | 49 | 6 |
 | `unassigned@0013e2ec` | partial | 1/11/15 | 4.4 | 44 | 5 |
-| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 40 | 1 |
+| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
 | `unassigned@00103edc` | todo | 0/5/23 | 1.6 | 38 | 2 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
 | `mag/maglifebwnctrl.cpp` | todo | 0/17/82 | 18.3 | 32 | 1 |

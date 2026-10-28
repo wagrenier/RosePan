@@ -780,7 +780,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
             if (count == 0)
             {
                 m_camera_entity.setParent(&m_actors[m_pc_no]);
-                m_camera_2ad58 = m_pc_no;
+                m_cam_actor_no = m_pc_no;
             }
             m_camera_entity.m_dirty = 1;
             m_camera_entity.m_trans[0] = 0.0f;
@@ -2091,13 +2091,13 @@ MagScene::MagScene()
     m_sub_mode.m_mode = 0;
     m_pc_no = 0;
     clearStrip(-1); /* inlined in the ROM */
-    m_camera_2ad60 = 500.0f;
-    m_camera_2ad5c = 600.0f;
+    m_cam_dist_min = 500.0f;
+    m_cam_dist_max = 600.0f;
     m_font_data = NULL;
     m_pMenuBase = NULL;
-    m_camera_2ad64 = 0;
-    m_camera_2ad68 = 0;
-    m_camera_2ad80 = 0;
+    m_cam_path_no = 0;
+    m_cam_map_no = 0;
+    m_cam_save_count = 0;
     for (int i = 0; i < 4; i++)
     {
         MagSceneTenkyu *t = &m_tenkyu[i];

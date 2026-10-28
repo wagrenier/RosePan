@@ -37,23 +37,44 @@
 #include "sdk/sce_gs.h"
 #include "spr/s2d.h"
 
-/* A record of a sky pack's <name>_c.bin (MagScene::load initialises the
- * words below; the rest is file data). EE size at least 0x30; roles
- * unverified. */
+/* A record of a sky pack's <name>_c.bin: a map camera path (the asserts
+ * call it ppath / thePath) -- m_pos_num points from +0x30, each (x, y, z,
+ * w = the length of the segment that ends there). The camera stands on
+ * the path at point m_seg plus the fraction m_seg_t and looks at the
+ * target actor (mag/magscenecamera.cpp). MagScene::load initialises the
+ * words after the file data. EE 0x30 plus the points. */
 struct MagSceneCRec
 {
-    u_char m_00;                // ROR 0x00: load copies m_00 >> 1 into m_20
-    u_char m_01;                // ROR 0x01
-    u_char m_02;                // ROR 0x02: load stores the file's head word >> 16
-    u_char m_03;                // ROR 0x03: load clears it
-    u_char _04[0x20 - 0x04];
-    int    m_20;                // ROR 0x20
-    int    m_24;                // ROR 0x24: load clears it
-    int    m_28;                // ROR 0x28: load clears it
-    int    m_2c;                // ROR 0x2c: load clears it
+    u_char m_pos_num;           // ROR 0x00: the point count (asserted 1..255); load starts m_seg at the middle
+    u_char m_loop;              // ROR 0x01: non-zero: the path closes (the last point leads to the first)
+    u_char m_alt;               // ROR 0x02: load stores the file's head word >> 16; 1 with one point: changeCamera flips m_alt_side
+    u_char m_alt_side;          // ROR 0x03: a one-point path's view (0 the first point, 1 the point 4 on); load clears it
+    float  m_fov;               // ROR 0x04: the lens angle in degrees (setCameraMode)
+    u_char _08[0x1c - 0x08];
+    char   m_tag[3];            // ROR 0x1c: letters 'a'.. tuning scoreCameraPath: [0] the step speed, [1] the distance, [2] the band
+    u_char _1f;
+    int    m_seg;               // ROR 0x20: the point the camera's segment starts at (pa)
+    int    m_goal_seg;          // ROR 0x24: changeCamera's goal for m_seg; load clears it
+    float  m_seg_t;             // ROR 0x28: the fraction along the segment, 0 <= pb < 1; load clears it
+    float  m_goal_t;            // ROR 0x2c: changeCamera's goal for m_seg_t; load clears it
+
+    float       *points()       { return (float *)(this + 1); }
+    const float *points() const { return (const float *)(this + 1); }
 };
-static_assert(offsetof(MagSceneCRec, m_20) == 0x20, "m_20");
-static_assert(offsetof(MagSceneCRec, m_2c) == 0x2c, "m_2c");
+static_assert(offsetof(MagSceneCRec, m_fov) == 0x04, "m_fov");
+static_assert(offsetof(MagSceneCRec, m_tag) == 0x1c, "m_tag");
+static_assert(offsetof(MagSceneCRec, m_seg) == 0x20, "m_seg");
+static_assert(offsetof(MagSceneCRec, m_goal_t) == 0x2c, "m_goal_t");
+
+/* getCameraPathWork's result (the assert names it theWork): the camera's
+ * point on a path, its segment's unit direction and length. EE 0x24. */
+struct MagCameraPathWork
+{
+    sceVu0FVECTOR m_pos;        // ROR 0x00: (0, 0, 0, 1) until a path of two or more points fills it
+    sceVu0FVECTOR m_dir;        // ROR 0x10: w 0
+    float         m_distance;   // ROR 0x20: the segment's length (its end point's w), asserted > 0
+};
+static_assert(offsetof(MagCameraPathWork, m_distance) == 0x20, "m_distance");
 
 /* A sky ("tenkyu", celestial sphere) slot: the map unit MagScene::load
  * took -- a model, a second model with the STQ map, a collision model,
@@ -342,24 +363,37 @@ struct MagScene
     void setCameraTarget(const float *pos, const float *at);             // ROR 0x0013c2ec
     void initCamera();                                                   // ROR 0x0013c928
     /* Saves the camera entity and the six camera words +0x2ad50.. (a
-     * menu's own camera goes over them), counting in m_camera_2ad80;
+     * menu's own camera goes over them), counting in m_cam_save_count;
      * restoreCamera puts them back. */
     void saveCamera();                                                   // ROR 0x0013c930
     void restoreCamera();                                                // ROR 0x0013ca10
     void setCameraMode(int mode, int arg, const int *param);             // ROR 0x0013caf0
-    /* The ROM's line-816 inline (mag/magscene.h; GamMan::getMapCamNum):
-     * sky slot no's _c.bin record count. */
-    int  getTenkyuCNum(int no)
+    /* The ROM's line-816 inline (mag/magscene.h; the name from
+     * setCameraMode's assert; GamMan::getMapCamNum): sky slot no's camera
+     * path count. */
+    int  getCameraMaxPath(int no)
     {
         ROR_ASSERT(no >= 0 && no < MAX_MAP_MODEL); /* 816 */
         return m_tenkyu[no].m_c_num;
     }
     int  getCameraMode(int *out);                                        // ROR 0x0013d5ac
-    /* Camera modes 3 / 4 (a map camera's path): the camera to the path
-     * point at distance pos (native 016 case 7). */
+    /* Camera modes 3 / 4 (a map camera's path): the camera placed on the
+     * path -- pos 0..100 starts pos percent along it, other values at the
+     * point nearest the actor beyond 500 -- then stepped until the
+     * actor's distance settles, looking at the actor (native 016 case 7). */
     void seekCameraPath(float pos);                                      // ROR 0x0013d240
-    /* The current map camera path's point (sky slot m_camera_2ad68, path
-     * m_camera_2ad64): its int +0x20 plus its fraction +0x28, and back
+    /* theWork for path's m_seg / m_seg_t (paths of one point leave it). */
+    void getCameraPathWork(MagCameraPathWork *theWork, MagSceneCRec *path); // ROR 0x0013c664
+    /* One step of path's m_seg / m_seg_t toward the distance band to
+     * target; 1e6 less the squared distance error (+1e6 when flags bit 1
+     * and a ray from the camera point hits something). */
+    float scoreCameraPath(MagSceneCRec *thePath, const float *target, u_int flags); // ROR 0x0013d8f8
+    int  findCameraPathStart(float pos, const MagSceneCRec *path, const float *target); // ROR 0x0013dfe0
+    /* The camera's position thePos[theI] lerped by theF toward the next
+     * point (modulo theMax). */
+    void setCameraOnPath(float theF, const float *thePos, int theI, int theMax); // ROR 0x0013e190
+    /* The current map camera path's point (sky slot m_cam_map_no, path
+     * m_cam_path_no): its m_seg plus its fraction m_seg_t, and back
      * (GamMan::pushCamera / popCamera). */
     float getCameraPathPos();                                            // ROR 0x0013d4d0
     void setCameraPathPos(float pos);                                    // ROR 0x0013d52c
@@ -571,14 +605,26 @@ struct MagScene
     int            m_fog_frame;         // ROR 0x2ab60: setFog's fade, frames done
     int            m_fog_frames;        // ROR 0x2ab64: setFog's fade length (0: none)
     DogCamera      m_camera_entity;     // ROR 0x2ab70: the camera (m_trans +0x2abb0 and m_rotate +0x2abc0 are the eye actors are drawn for)
+    /* setCameraMode's modes: 0 free, 1 free with a target actor, 2 behind
+     * the actor (its child), 3..5 a map camera path looking at the actor
+     * (3 sky slot 0's first path, 4 a path by number, 5 the same placed
+     * by param); changeCamera adds 0x10 while a move to the path's goal is
+     * pending (updateCamera). */
     int            m_camera_mode;       // ROR 0x2ad50: getCameraMode returns it
-    int            m_camera_2ad58;      // ROR 0x2ad58: getCameraMode's second word out
-    float          m_camera_2ad5c;      // ROR 0x2ad5c: 600 from the constructor; role unknown
-    float          m_camera_2ad60;      // ROR 0x2ad60: 500 from the constructor; role unknown
-    int            m_camera_2ad64;      // ROR 0x2ad64: the constructor clears it; role unknown
-    int            m_camera_2ad68;      // ROR 0x2ad68: idem
+    int            m_camera_2ad54;      // ROR 0x2ad54: changeCamera clears it with each new goal (updateCamera's move counter?)
+    int            m_cam_actor_no;      // ROR 0x2ad58: the actor the camera follows or looks at (-1 none); getCameraMode's second word out
+    float          m_cam_dist_max;      // ROR 0x2ad5c: a path camera's farthest distance to the actor (600 from the constructor; setCameraMode param[1])
+    float          m_cam_dist_min;      // ROR 0x2ad60: its nearest (500; param[0])
+    int            m_cam_path_no;       // ROR 0x2ad64: the path in m_tenkyu[m_cam_map_no].m_path_data (modes 3..5)
+    int            m_cam_map_no;        // ROR 0x2ad68: the sky slot of that path
     int            _2ad6c[5];
-    int            m_camera_2ad80;      // ROR 0x2ad80: the constructor clears it; role unknown
+    int            m_cam_save_count;    // ROR 0x2ad80: saveCamera counts up, restoreCamera down
+    int            m_saved_mode;        // ROR 0x2ad84: saveCamera's copies of +0x2ad50, +0x2ad58..+0x2ad68
+    int            m_saved_actor_no;    // ROR 0x2ad88
+    float          m_saved_dist_max;    // ROR 0x2ad8c
+    float          m_saved_dist_min;    // ROR 0x2ad90
+    int            m_saved_path_no;     // ROR 0x2ad94
+    int            m_saved_map_no;      // ROR 0x2ad98
     int            m_camera_target_set; // ROR 0x2ad9c: setCameraTarget sets 1
     sceVu0FVECTOR  m_camera_pos;        // ROR 0x2ada0: setCameraTarget's position
     sceVu0FVECTOR  m_camera_at;         // ROR 0x2adb0: setCameraTarget's look-at point

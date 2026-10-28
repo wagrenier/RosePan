@@ -45,7 +45,9 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      unreferenced 0x21cfb0..0x21db18. Doubts: a strip transforms with the view the last
      i3dPktCallView named (the ROM uses whatever the layer's CALLed view left in VU1 0x3e2; strips
      have no layer argument); untextured strips draw without depth.
-  e. mag/magscenecamera.cpp (setCameraMode), unassigned@0013e2ec (updateCamera, gamEnterMenu),
+  e. mag/magscenecamera.cpp WRITTEN 2026-10-27 (verify; all 13 functions, pinned 0x13c664..0x13e2ec:
+     setCameraMode's six modes, the path camera, save / restoreCamera; the book screen is unchanged
+     and no map draws yet to show a path camera). Next: unassigned@0013e2ec (updateCamera, gamEnterMenu),
      unassigned@00140c68 + unassigned@00140990 (drawFocus and its records: define them together as
      mag/magscenefocus.cpp).
   f. In game: mag/maglifepc.cpp (MagLifePC::live), task/naga_chunk.cpp (event packs, so scenes
@@ -999,6 +1001,12 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- **Path camera ray** (2026-10-27, mag/magscenecamera.cpp): scoreCameraPath 0x13d8f8 with flags bit 1
+  calls castRay(hit, camera point, target, -1) -- the target position itself as the ray's dir, and
+  counts a hit at t in 0..1. Kept as the ROM has it; check against castRay's callers when
+  updateCamera (the only flags-1 caller) is written: if dir is meant as target - camera, the ROM
+  has a bug (its hit test is then a ray toward the world origin's direction).
 
 - **Mesh draw** (2026-10-27, rosepan_i3dmesh.cpp, setup/i3d_mesh_draw.cpp verify). i3d/i3rdraw.cpp
   (2026-10-27) did (1) and (2): i3rDrawModel records at a 2-qword packet of the layer, the camera

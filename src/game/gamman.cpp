@@ -543,11 +543,11 @@ void GamMan::setCameraMode(int mode, u_int no)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x001c7494 // callcheck: FUN_00215a30 (the assert handler, inside MagScene::getTenkyuCNum)
+// ROR 0x001c7494 // callcheck: FUN_00215a30 (the assert handler, inside MagScene::getCameraMaxPath)
 
 int GamMan::getMapCamNum()
 {
-    return g_magSystem.m_scene.getTenkyuCNum(m_mapModelNo);
+    return g_magSystem.m_scene.getCameraMaxPath(m_mapModelNo);
 }
 
 // ──────────────────────────────────────────────────────────────────────
