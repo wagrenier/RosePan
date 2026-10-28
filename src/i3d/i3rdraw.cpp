@@ -313,7 +313,12 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
 //    rigid slot's bone matrix or SkinBatch.
 //  - ROR 0x00220fb0 i3rPktDrawHeader, ROR 0x00221080 i3rPktCallStrips: a
 //    batch's VU1 header (the +0x80 vector, MSCAL 0x15) and the DMA CALLs of
-//    its strips' prebuilt chains. Host: DrawBatch reads the strips.
+//    its strips' prebuilt chains: per material layer u (the layer list's
+//    child count) whose byte in the 0x4d mesh's +0x08 list is not -1, a
+//    CALL of the layer's packet (the material packet's m_layer_pkt[u]) and
+//    one of the batch's strip group of that byte. Host: DrawBatch the same
+//    per layer -- the layer's TEST / ALPHA and texture, then the group's
+//    strips (DrawStripGroup).
 //  - ROR 0x00221ab0 i3rDrawMesh45Clip, ROR 0x00221d18 i3rDrawMesh45Sorted,
 //    ROR 0x00221f50 i3rDrawMesh45SortedClip, ROR 0x002221e8
 //    i3rDrawMeshSkinned, ROR 0x00222560 i3rDrawMeshSkinnedSorted,

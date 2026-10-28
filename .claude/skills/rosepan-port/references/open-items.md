@@ -1124,8 +1124,12 @@ to adapt when a TU reaches them:
   and i3rBlendVertices are stubs of unassigned@00225018 (with 0x225018 / 0x225080 / 0x225148 /
   0x225230 / 0x2252a8 / 0x225378 / 0x2253e0 / 0x225460): until that TU is written blended groups
   draw their own blocks. Only DogActor::drawModel passes an opt (mask 0x1f, its animation value as
-  every channel's time); the 200 s run reaches none. Also: the host's DrawBatch draws only the
-  first 0x30 group of a batch's slot [0] (the ROM's writers loop all of them). Still open: the
+  every channel's time); the 200 s run reaches none. DrawBatch now draws every material layer's
+  strip group (2026-10-28: i3rPktCallStrips' loop -- the 0x4d mesh's +0x08 byte per layer names
+  the group of the batch's slot [0], -1 none; per layer its own texture and TEST / ALPHA). Every
+  mesh the 200 s run draws (248,064 with ROSEPAN_TEST_CAM=1: book, forest, Jennifer) has one layer
+  naming group 0, so the multi-layer path is unseen: the first map or model with a two-layer
+  material verifies it (expect a second, blended pass). Still open: the
   depth-keyed batches (material packet +0x14 set: the ROM keys them with i3dViewGetDepth, the host
   draws in walk order with the depth buffer). The untextured white figure after the book was
   RESOLVED 2026-10-28: Brown's shadow model drawn by makeActorShadow into the off-screen shadow
