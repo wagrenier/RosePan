@@ -129,3 +129,22 @@ void MagLifeBwnCtrl::orderStay(int a1)
 {
     ROSEPAN_STUB("MagLifeBwnCtrl::orderStay", 0x0012b5f8);
 }
+
+// stub of ROR 0x0012b870
+int MagLifeBwnCtrl::checkHug(int phase)
+{
+    ROSEPAN_STUB("MagLifeBwnCtrl::checkHug", 0x0012b870);
+    return {};
+}
+
+// stub of ROR 0x0012ba2c
+void MagLifeBwnCtrl::getBwnPosition(float *out)
+{
+    ROSEPAN_STUB("MagLifeBwnCtrl::getBwnPosition", 0x0012ba2c);
+}
+
+// stub of ROR 0x0012b788
+void MagLifeBwnCtrl::requestHug(int arg)
+{
+    ROSEPAN_STUB("MagLifeBwnCtrl::requestHug", 0x0012b788);
+}

@@ -1635,3 +1635,49 @@ void MagLifePC::moveBy(const float *move, float trans_ofs_y, float rot)
 {
     ROSEPAN_STUB("MagLifePC::moveBy", 0x0011ee00);
 }
+
+// stub of ROR 0x0012bedc
+float MagLifePC::calcTargetAngle(float *roty, float *rotx, const float *pos)
+{
+    ROSEPAN_STUB("MagLifePC::calcTargetAngle", 0x0012bedc);
+    return {};
+}
+
+// stub of ROR 0x0011cbf4
+int MagLifePC::canTakeItem(u_int oid)
+{
+    ROSEPAN_STUB("MagLifePC::canTakeItem", 0x0011cbf4);
+    return {};
+}
+
+// stub of ROR 0x0012ca28
+int MagLifePC::getAttackHeight()
+{
+    ROSEPAN_STUB("MagLifePC::getAttackHeight", 0x0012ca28);
+    return {};
+}
+
+// stub of ROR 0x0012c014
+void MagLifePC::getHitFrameRange(float *from, float *to)
+{
+    ROSEPAN_STUB("MagLifePC::getHitFrameRange", 0x0012c014);
+}
+
+// stub of ROR 0x0011c974
+void MagLifePC::hitTarget(u_int oid, int combo, int kind)
+{
+    ROSEPAN_STUB("MagLifePC::hitTarget", 0x0011c974);
+}
+
+// stub of ROR 0x0011d06c
+void MagLifePC::reload()
+{
+    ROSEPAN_STUB("MagLifePC::reload", 0x0011d06c);
+}
+
+// stub of ROR 0x0011cc14
+int MagLifePC::takeItem(u_int oid)
+{
+    ROSEPAN_STUB("MagLifePC::takeItem", 0x0011cc14);
+    return {};
+}

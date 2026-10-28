@@ -1039,6 +1039,18 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   the row column (0 normal, 1 tired, 2 w_ wounded; 3 / 4 the ev201 / ev501 poses Wait::pad drives
   with the stick). Wait plays a free_* idle every 5400 frames at health 0 (free_e only in room 0x35
   from x 1000, `utlGetWrdNo` 0x1034b8 = GamMan status 5 m_wrdNo).
+- The other modes (written 2026-10-27): AtkWait2D picks its row from 0x2ead98 [weapon class (+4 at
+  health 2)][height class 0..4, `MagLifePC::getAttackHeight` 0x12ca28] and turns 0.1 rad a frame to
+  the target's spine; Attacking runs `MagLifePC::startAttack` 0x12c31c (low half height, 4 = kick;
+  high half 1 = no hit test), tests the weapon's up to 8 hit spheres (`getWeaponHitPos` 0x12bc98)
+  against `utlCollectEmyInfo` 0x103a90 (32 records of 0x40 + count at 0x800) inside
+  `getHitFrameRange` 0x12c014, and chains up to 3 steps on cross + R1 after 70 % of the swing;
+  Damage types 1..17 (0x11 replays the last row) shake the pad 6 frames; Item reaches by the
+  item's height (0x81 / 0x83 / 0x85 / 0x87 < 50 / 100 / 160) and opens system message 0x11 / 0x12
+  (item 0xa64: `MagScene::pulseMenu1000a`); Hold breaks free on 16 stick quadrant flips
+  (BedPad +0x64) into HoldAttack; DogCome becomes Hug when Brown is 100..130 ahead within 45
+  degrees and `MagLifeBwnCtrl::checkHug` 0x12b870 agrees; Ride's pc m_0c is the phase (2 = the
+  dismount Ride::message starts).
 - processPad (states 1..11): status words via updatePadStatus -- health class m_health (+0xe4,
   calcHealth: override, mode 1 -> 3, 3 -> 4, PC param 0x1b / 0x1c ratio <= 0.3 -> 2, stamina),
   move level m_move_level (+0xe0, readStick: dead zone +0x1f8, run above 0.97), stance m_stance

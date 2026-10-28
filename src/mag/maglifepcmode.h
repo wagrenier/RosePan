@@ -108,6 +108,9 @@ struct MagLifePCModeAtkWait2D : MagLifePCMode
     void init(MagLifePC *pc) override;                                   // ROR 0x001214b4
     void live(MagLifePC *pc) override;                                   // ROR 0x001216a4
     int  pad(MagLifePC *pc, BedPad *thePad) override;                    // ROR 0x001217c0
+    /* The heading step toward a target d radians off: 0 beyond pi/2 or
+     * within 0.05, else 0.1 toward it. */
+    float getTurnStep(float d);                                          // ROR 0x00121604
 };
 
 /* layout: host (EE 4 bytes, +0x154). */
@@ -128,9 +131,9 @@ struct MagLifePCModeAttacking : MagLifePCModeMove
     void live(MagLifePC *pc) override;                                   // ROR 0x00121934
     int  pad(MagLifePC *pc, BedPad *thePad) override;                    // ROR 0x00121c64
 
-    int m_04;                   // ROR 0x04 (PC +0x15c)
-    int m_08;                   // ROR 0x08 (PC +0x160)
-    int m_0c;                   // ROR 0x0c (PC +0x164)
+    int m_04;                   // ROR 0x04 (PC +0x15c): the combo step 0..2
+    int m_08;                   // ROR 0x08 (PC +0x160): pad asked for the next step
+    int m_0c;                   // ROR 0x0c (PC +0x164): MagLifePC::startAttack's word (low half the height, high half 1 = no hit test)
 };
 
 /* layout: host (EE 0xc bytes, +0x168). */
@@ -139,8 +142,8 @@ struct MagLifePCModeDamage : MagLifePCMode
     void init(MagLifePC *pc) override;                                   // ROR 0x00121cd8
     void live(MagLifePC *pc) override;                                   // ROR 0x00121fc8
 
-    int m_04;                   // ROR 0x04 (PC +0x16c)
-    int m_08;                   // ROR 0x08 (PC +0x170)
+    int m_04;                   // ROR 0x04 (PC +0x16c): the damage type (1..16) of the last init
+    int m_08;                   // ROR 0x08 (PC +0x170): its motion row (-1 none); type 0x11 replays it
 };
 
 /* layout: host (EE 4 bytes, +0x174). */
@@ -207,8 +210,8 @@ struct MagLifePCModeRide : MagLifePCMode
     /* MagLifePC::message 6 / 9 / 0xb / 0xd. */
     void message(MagLifePC *pc, int msg);                                // ROR 0x00122c9c
 
-    int m_04;                   // ROR 0x04 (PC +0x198): the PC's constructor and reset4MapJump clear it
-    int m_08;                   // ROR 0x08 (PC +0x19c)
+    int m_04;                   // ROR 0x04 (PC +0x198): riding (init 1, message 0); the PC's constructor and reset4MapJump clear it
+    int m_08;                   // ROR 0x08 (PC +0x19c): the ride kind 1..4 (the riding rows 0x8a / 0x91 / 0x98 / 0x9c)
 };
 
 /* layout: host (EE 4 bytes, +0x1a0). */

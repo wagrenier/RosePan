@@ -18,7 +18,10 @@
 #include "common/rosepan_stub.h"
 #include "dog/dogactor.h"
 #include "lib/unassigned.h"
+#include "mag/maglifebwnctrl.h"
 #include "mag/maglifepc.h"
+#include "mag/magscene.h"
+#include "mag/magsystem.h"
 #include "utl/utlgame.h"
 #include "utl/utlmath.h"
 
@@ -36,6 +39,19 @@ static const int s_walk_cont_motion[3] = { 44, 45, 46 };                 // ROR 
 static const int s_event_motion[2][5] = {                                // ROR 0x002973e0
     { 116, 117, 118, 119, 120 },        /* ev201_wait, _l, _r, _up, _dwn */
     { 121, 122, 123, 124, 125 },        /* ev501_wait, _l, _r, _up, _dwn */
+};
+
+/* AtkWait2D::init by weapon class (+ 4 at health 2) and the target's
+ * height class 0..4: the weapon in / wait rows 56..115. */
+static const int s_atk_wait_motion[8][5] = {                             // ROR 0x002ead98
+    { 0x38, 0x39, 0x3a, 0x3b, 0x3c },
+    { 0x42, 0x43, 0x44, 0x45, 0x46 },
+    { 0x4c, 0x4d, 0x4e, 0x4f, 0x50 },
+    { 0x56, 0x57, 0x58, 0x59, 0x5a },
+    { 0x60, 0x61, 0x62, 0x63, 0x64 },
+    { 0x65, 0x66, 0x67, 0x68, 0x69 },
+    { 0x6a, 0x6b, 0x6c, 0x6d, 0x6e },
+    { 0x6f, 0x70, 0x71, 0x72, 0x73 },
 };
 
 /* ---- the shared step ---- */
@@ -440,217 +456,888 @@ int MagLifePCModeTurn::pad(MagLifePC *pc, BedPad *thePad)
     return 2;
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+/* ---- AtkWait2D (state 5): the stance held, turning to the target ---- */
 
-// stub of ROR 0x00122c9c
-void MagLifePCModeRide::message(MagLifePC *pc, int msg)
-{
-    ROSEPAN_STUB("MagLifePCModeRide::message", 0x00122c9c);
-}
-
-// ---- the modes' virtuals (hand-written stubs: their vtables need every
-// out-of-line slot defined, which stubgen cannot see) ----
-
-// stub of ROR 0x001214b4
+// ROR 0x001214b4
 void MagLifePCModeAtkWait2D::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeAtkWait2D::init", 0x001214b4);
+    int height = pc->getAttackHeight();
+    int hhh = height;
+    if (height < 0)
+    {
+        pc->m_target_no = 0;
+        hhh = 0;
+    }
+    ROR_ASSERT(0 <= hhh && hhh < 5);    /* 844 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    int wc = pc->m_weapon_type;
+    ROR_ASSERT(0 <= wc && wc < 4);      /* 846 */
+    int prev = pc->m_prev_state[0];
+    if (pc->m_health == 2)
+        wc += 4;
+    /* back from an attack, a dog order or the stance walk: the row's
+     * alternative (no in-motion) */
+    if (prev == 10 || prev == 15 || prev == 16 || prev == 17 || prev == 6)
+        pc->changeMotionSeqAlt(s_atk_wait_motion[wc][hhh], -1);
+    else
+        pc->changeMotionSeq(s_atk_wait_motion[wc][hhh], -1);
+    pc->clearSubMotion();
+    pc->m_08 = 0;
 }
 
-// stub of ROR 0x001216a4
+// ROR 0x00121604
+float MagLifePCModeAtkWait2D::getTurnStep(float d)
+{
+    if (-0x1.921fb6p+0f < d && d <= 0x1.921fb6p+0f)     /* +-pi/2 */
+    {
+        if (0x1.999998p-5f < d || d < -0x1.999998p-5f)  /* 0.05 */
+            return 0.0f <= d ? 0x1.999998p-4f : -0x1.999998p-4f;    /* 0.1 */
+        return 0.0f;
+    }
+    return 0.0f;
+}
+
+// ROR 0x001216a4
 void MagLifePCModeAtkWait2D::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeAtkWait2D::live", 0x001216a4);
+    /* m_08: the turn to the target is over */
+    if (pc->m_08 != 0)
+        return;
+    if (pc->m_target_no == 0)
+    {
+        pc->m_08 = 1;
+        return;
+    }
+    float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    pc->getTargetSpinePos(pos, pc->m_target_no, 0);
+    float roty, rotx;
+    float step = getTurnStep(pc->calcTargetAngle(&roty, &rotx, pos));
+    if (step == 0.0f)
+    {
+        pc->m_08 = 1;
+        return;
+    }
+    DogActor *actor = pc->m_actor;
+    float r = actor->m_rotate[1] + step;
+    actor->m_rotate[1] = r;
+    if (r < -DOG_PI)
+        actor->m_rotate[1] = r + DOG_PI2;
+    else if (DOG_PI <= r)
+        actor->m_rotate[1] = r - DOG_PI2;
+    actor->m_dirty = 1;
+    pc->m_actor->addBaseRotY(step);
 }
 
-// stub of ROR 0x001217c0
+// ROR 0x001217c0
 int MagLifePCModeAtkWait2D::pad(MagLifePC *pc, BedPad *thePad)
 {
-    ROSEPAN_STUB("MagLifePCModeAtkWait2D::pad", 0x001217c0);
-    return {};
+    /* nothing until the in-motion has played */
+    if (0.0f <= pc->m_actor->getMotionTime())
+    {
+        int state;
+        if (pc->m_stance == 0)
+            state = 0;
+        else if (pc->m_stick_mag <= 0.0f)
+        {
+            applyRootMotion(pc);
+            return 0;
+        }
+        else
+            state = 6;
+        pc->changeState(state, 0, 0);
+        return 2;
+    }
+    applyRootMotion(pc);
+    return 0;
 }
 
-// stub of ROR 0x00121858
+/* ---- AtkMove2D (state 6): walking with the stance held ---- */
+
+// ROR 0x00121858
 void MagLifePCModeAtkMove2D::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeAtkMove2D::init", 0x00121858);
+    pc->setStanceSubMotion();
+    pc->m_action_motion = -1;
 }
 
-// stub of ROR 0x00121890
+// ROR 0x00121890
 void MagLifePCModeAtkMove2D::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeAtkMove2D::live", 0x00121890);
 }
 
-// stub of ROR 0x00121898
+// ROR 0x00121898
 int MagLifePCModeAtkMove2D::pad(MagLifePC *pc, BedPad *thePad)
 {
-    ROSEPAN_STUB("MagLifePCModeAtkMove2D::pad", 0x00121898);
-    return {};
+    int state = 1;
+    if (pc->m_stance != 0)
+    {
+        if (0.0f < pc->m_stick_mag)
+        {
+            pc->moveAttackStance(thePad);
+            return 0;
+        }
+        state = 5;
+    }
+    pc->changeState(state, 0, 0);
+    return 2;
 }
 
-// stub of ROR 0x001218fc
+/* ---- Attacking (state 10): the swing, its hit test, the combo ---- */
+
+// ROR 0x001218fc
 void MagLifePCModeAttacking::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeAttacking::init", 0x001218fc);
+    m_04 = 0;
+    m_08 = 0;
+    m_0c = (int)pc->startAttack(0);
 }
 
-// stub of ROR 0x00121934
+// ROR 0x00121934
 void MagLifePCModeAttacking::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeAttacking::live", 0x00121934);
+    if (!pc->m_actor->isModeSet())
+    {
+        /* the swing ended: the next combo step when one was asked for */
+        if (m_08 != 0)
+        {
+            m_08 = 0;
+            if (m_04 < 2)
+            {
+                m_04++;
+                m_0c = (int)pc->startAttack(m_04);
+                if ((m_0c & 0xffff) == 4)   /* the kick ends the combo */
+                {
+                    m_08 = 0;
+                    m_04 = 1;
+                }
+                return;
+            }
+        }
+        else
+            m_08 = 0;
+        m_04 = 0;
+        pc->changeState(5, 2, 0);
+        return;
+    }
+    applyRootMotion(pc);
+    if ((short)(m_0c >> 16) == 1)
+        return;
+    float from, to;
+    pc->getHitFrameRange(&from, &to);
+    float frame = pc->m_actor->getMotionFrame();
+    if (frame < from || to < frame)
+        return;
+    float hit_pos[8][4];
+    float hit_radius[8];
+    for (int i = 0; i < 8; i++)
+    {
+        hit_pos[i][0] = 0.0f;
+        hit_pos[i][3] = 1.0f;
+        hit_pos[i][2] = 0.0f;
+        hit_pos[i][1] = 0.0f;
+    }
+    for (int i = 0; i < 8; i++)
+        hit_radius[i] = pc->getWeaponHitPos(hit_pos[i], m_0c & 0xffff, i);
+    UtlEmyInfoBuf eib;
+    for (int i = 0; i < 32; i++)
+    {
+        UtlEmyInfo &e = eib.m_info[i];
+        e.m_pos[2] = 0.0f;
+        e.m_pos[1] = 0.0f;
+        e.m_pos[0] = 0.0f;
+        e.m_pos[3] = 1.0f;
+        e.m_trans[3] = 1.0f;
+        e.m_trans[0] = 0.0f;
+        e.m_trans[2] = 0.0f;
+        e.m_trans[1] = 0.0f;
+    }
+    eib.m_num = 0;
+    int num = utlCollectEmyInfo(&eib, 0);
+    for (int i = 0; i < num; i++)
+    {
+        ROR_ASSERT(eib.m_info[i].m_obj_id != 0);   /* 1161 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        if (utlIsEmyDamaging(eib.m_info[i].m_obj_id))
+            continue;
+        dbgTraceVector4(eib.m_info[i].m_pos);
+        /* the weapon's hit spheres against the enemy's, the first hit counts */
+        for (int j = 0; j < 8 && 0.0f < hit_radius[j]; j++)
+        {
+            if (utlVecDist(eib.m_info[i].m_pos, hit_pos[j]) < eib.m_info[i].m_radius + hit_radius[j])
+            {
+                pc->hitTarget(eib.m_info[i].m_obj_id, m_04, 0);
+                int se = pc->getAttackSeNo(m_0c & 0xffff, m_04, 1);
+                if (0 < se)
+                    utlPlaySe(se, 0, 0);
+                break;
+            }
+        }
+    }
 }
 
-// stub of ROR 0x00121c64
+// ROR 0x00121c64
 int MagLifePCModeAttacking::pad(MagLifePC *pc, BedPad *thePad)
 {
-    ROSEPAN_STUB("MagLifePCModeAttacking::pad", 0x00121c64);
-    return {};
+    /* cross with the stance held late in the swing asks for the next step */
+    if ((thePad->m_trig & 0x4000) && (thePad->m_hold & 0x800) &&
+        0x1.666666p-1f <= pc->m_actor->getMotionTimeRatio())    /* 0.7 */
+        m_08 = 1;
+    return 1;
 }
 
-// stub of ROR 0x00121cd8
+/* ---- Damage (state 14) ---- */
+
+enum
+{
+    MAG_DAMAGE_NONE = 0,
+    MAG_MAX_DAMAGE = 18,
+};
+
+// ROR 0x00121cd8
 void MagLifePCModeDamage::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeDamage::init", 0x00121cd8);
+    int type = pc->m_08;
+    /* 0x11 replays the last damage (MagLifePCModeNull::init's arg) */
+    if (type != 0x11)
+        m_04 = type;
+    ROR_ASSERT(MAG_DAMAGE_NONE < type && type < MAG_MAX_DAMAGE);   /* 1259 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    pc->clearSubMotion();
+    switch (type)
+    {
+    case 1:
+        utlPlaySe(0x1e, 0, 0);
+        pc->changeMotionSeq(0x1c, -1);
+        m_08 = 0x1c;
+        break;
+    case 2:
+        utlPlaySe(0x1f, 0, 0);
+        if (pc->m_health == 2)
+        {
+            pc->changeMotionSeq(0x1e, -1);
+            m_08 = 0x1e;
+        }
+        else
+        {
+            pc->changeMotionSeq(0x1d, -1);
+            m_08 = 0x1d;
+        }
+        break;
+    case 3:
+        utlPlaySe(0x22, 0, 0);
+        m_08 = -1;
+        break;
+    case 4:
+        utlPlaySe(0x20, 0, 0);
+        utlPlaySe(1, 0, 0);
+        pc->changeMotionSeq(0x20, -1);
+        m_08 = 0x20;
+        break;
+    case 5:
+        utlPlaySe(0x20, 0, 0);
+        utlPlaySe(1, 0, 0);
+        pc->changeMotionSeq(0x23, -1);
+        m_08 = 0x23;
+        break;
+    case 7:
+        pc->changeMotionSeq(0xb, -1);
+        m_08 = 0xb;
+        break;
+    case 9:
+        pc->changeMotionSeq(0x8b, -1);
+        m_08 = 0x8b;
+        break;
+    case 10:
+        pc->changeMotionSeq(0x8c, -1);
+        m_08 = 0x8c;
+        break;
+    case 0xb:
+        pc->changeMotionSeq(0x92, -1);
+        m_08 = 0x92;
+        break;
+    case 0xc:
+        pc->changeMotionSeq(0x8d, -1);
+        m_08 = 0x8d;
+        break;
+    case 0xd:
+        pc->changeMotionSeq(0x97, -1);
+        m_08 = 0x97;
+        break;
+    case 0xe:
+        pc->changeMotionSeq(0x9b, -1);
+        m_08 = 0x9b;
+        break;
+    case 0xf:
+        pc->changeMotionSeq(0x95, -1);
+        m_08 = 0x95;
+        break;
+    case 0x10:
+        pc->changeMotionSeq(0x96, -1);
+        m_08 = 0x96;
+        break;
+    case 0x11:
+        if (0 <= m_08)
+            pc->changeMotionSeqAlt(m_08, -1);
+        break;
+    default:
+        m_08 = -1;
+        ROR_ASSERT(0);  /* 1395 */
+        break;
+    }
+    g_magSystem.startVibration(6);
 }
 
-// stub of ROR 0x00121fc8
+// ROR 0x00121fc8
 void MagLifePCModeDamage::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeDamage::live", 0x00121fc8);
+    applyRootMotion(pc);
+    if (!pc->isMotionSeqEnd())
+    {
+        if (pc->m_actor && pc->m_actor->m_motion.getNo() < 2)
+            pc->changeState(1, 0, 0);
+        return;
+    }
+    if (pc->m_mode == 1 || pc->m_mode == 3)
+        pc->changeState(7, 0, 0);
+    else if (pc->m_mode_hold.m_04)
+        pc->changeState(8, 0, 0);
+    else if (pc->m_mode_ride.m_04)
+        pc->changeState(9, 3, 0);
+    else if (pc->m_stance == 0)
+        pc->changeState(1, 0, 0);
+    else
+        pc->changeState(5, 0, 0);
 }
 
-// stub of ROR 0x001220f0
+/* ---- Item (state 19): reach for an item at its height, take it ---- */
+
+// ROR 0x001220f0
 void MagLifePCModeItem::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeItem::init", 0x001220f0);
+    u_int oid = (u_int)pc->m_08;
+    ROR_ASSERT(oid != 0);           /* 1486 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    utlGetObjPos(pos, oid);
+    DogActor *actor = pc->m_actor;
+    ROR_ASSERT(actor != NULL);      /* 1492 */
+    /* y grows downward: how far above the feet the item is */
+    float height = -(pos[1] - actor->m_trans[1]);
+    int motion = 0x81;
+    if (50.0f <= height)
+    {
+        motion = 0x83;
+        if (100.0f <= height)
+        {
+            motion = 0x85;
+            if (160.0f <= height)
+                motion = 0x87;
+        }
+    }
+    pc->m_0c = motion;
+    pc->changeMotionSeq(motion, -1);
 }
 
-// stub of ROR 0x001221ec
+// ROR 0x001221ec
 void MagLifePCModeItem::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeItem::live", 0x001221ec);
+    int end = pc->isMotionSeqEnd();
+    MagScene *scene = pc->m_scene;
+    /* m_0c 0x81 / 0x83 / 0x85 / 0x87 reach, + 1 the rise after it */
+    if (((pc->m_0c - 0x81) & 1) != 0)
+    {
+        if (end)
+            pc->changeState(1, 0, 0);
+        return;
+    }
+    if (!end)
+        return;
+    pc->m_0c++;
+    pc->changeMotionSeq(pc->m_0c, -1);
+    MagLifePCItemData items[10];
+    for (int i = 0; i < 10; i++)
+    {
+        items[i].m_pos[0] = 0.0f;
+        items[i].m_pos[3] = 1.0f;
+        items[i].m_pos[2] = 0.0f;
+        items[i].m_pos[1] = 0.0f;
+    }
+    if (pc->collectNearItems(50.0f, items, 10) <= 0)
+        return;
+    int msg;
+    int args[16];
+    const int *argp = NULL;
+    if (!pc->canTakeItem(items[0].m_obj_id))
+        msg = 0x12;
+    else
+    {
+        utlPlaySe(3, 0, 0);
+        pc->takeItem(items[0].m_obj_id);
+        argp = args;
+        args[0] = items[0].m_item_id;
+        if (items[0].m_item_id == 0xa64)
+        {
+            /* the EE passes (0x11, args, 1) too; pulseMenu1000a reads none */
+            scene->pulseMenu1000a();
+            return;
+        }
+        msg = 0x11;
+    }
+    scene->openSysMsgWindow(msg, argp, 1);
 }
 
-// stub of ROR 0x00122338
+/* ---- the dog orders (states 15 go, 16 come, 17 stay) ---- */
+
+// ROR 0x00122338
 void MagLifePCModeDogGo::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeDogGo::init", 0x00122338);
+    bool armed = pc->isWordDcSet();
+    int motion;
+    if (pc->m_mode == 3)
+        motion = 0x7e;
+    else if (!armed)
+        motion = pc->m_health == 2 ? 0x15 : 0xf;
+    else
+        motion = 0x12;
+    pc->changeMotionSeq(motion, -1);
+    pc->orderDog(15, 1);
+    pc->m_08 = 1;
 }
 
-// stub of ROR 0x001223c0
+// ROR 0x001223c0
 void MagLifePCModeDogGo::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeDogGo::live", 0x001223c0);
+    int work = pc->m_08;
+    int end = pc->isMotionSeqEnd();
+    if (work == 1)
+    {
+        if (end)
+        {
+            pc->orderDog(15, 2);
+            pc->changeState(0, 0, 0);
+        }
+    }
+    else if (work == 2 && end)
+        pc->changeState(0, 0, 0);
 }
 
-// stub of ROR 0x0012245c
+// ROR 0x0012245c
 void MagLifePCModeDogCome::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeDogCome::init", 0x0012245c);
+    pc->m_move_level_prev = 0;
+    pc->m_move_level = 0;
+    if (pc->m_weapon_type != 3)
+    {
+        /* Brown 100..130 ahead within 45 degrees: a hug instead */
+        MagLifeBwnCtrl *ctrl = &pc->m_scene->m_bwn_ctrl;
+        float bwn[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        ctrl->getBwnPosition(bwn);
+        float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        pc->getPosition(pos);
+        float rot[4];
+        float dist = utlVecDistRotY(pos, rot, bwn);
+        float d = pc->getRotY() - rot[0];
+        if (d < -DOG_PI)
+            d += DOG_PI2;
+        else if (DOG_PI <= d)
+            d -= DOG_PI2;
+        const float lim = 0x1.921fb6p-1f;   /* pi / 4 */
+        if (-lim <= d && d < lim && 100.0f <= dist && dist < 130.0f && 0 < ctrl->checkHug(0))
+        {
+            pc->changeState(18, 0, 0);
+            return;
+        }
+    }
+    bool armed = pc->isWordDcSet();
+    int motion;
+    if (pc->m_mode == 3)
+        motion = 0x7f;
+    else if (!armed)
+        motion = pc->m_health == 2 ? 0x16 : 0x10;
+    else
+        motion = 0x13;
+    pc->changeMotionSeq(motion, -1);
+    pc->orderDog(16, 1);
+    pc->m_08 = 1;
 }
 
-// stub of ROR 0x00122668
+// ROR 0x00122668
 void MagLifePCModeDogCome::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeDogCome::live", 0x00122668);
+    if ((u_int)(pc->m_08 - 1) < 2 && pc->isMotionSeqEnd())
+    {
+        pc->orderDog(16, 2);
+        pc->changeState(0, 0, 0);
+    }
 }
 
-// stub of ROR 0x001226d0
+// ROR 0x001226d0
 void MagLifePCModeDogStay::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeDogStay::init", 0x001226d0);
+    pc->orderDog(17, 3);
+    bool armed = pc->isWordDcSet();
+    int motion;
+    if (pc->m_mode == 3)
+        motion = 0x80;
+    else if (!armed)
+        motion = pc->m_health == 2 ? 0x17 : 0x11;
+    else
+        motion = 0x14;
+    pc->changeMotionSeq(motion, -1);
+    pc->m_08 = 1;
 }
 
-// stub of ROR 0x00122758
+// ROR 0x00122758
 void MagLifePCModeDogStay::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeDogStay::live", 0x00122758);
+    int work = pc->m_08;
+    int end = pc->isMotionSeqEnd();
+    if (work == 1)
+    {
+        if (end)
+            pc->changeState(0, 0, 0);
+    }
+    else if (work == 2 && end)
+        pc->changeState(0, 0, 0);
 }
 
-// stub of ROR 0x001227e4
+/* ---- Hold (state 8): held by an enemy; wiggling the stick breaks free ---- */
+
+// ROR 0x001227e4
 void MagLifePCModeHold::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeHold::init", 0x001227e4);
+    pc->m_move_level_prev = 0;
+    pc->m_move_level = 0;
+    pc->clearSubMotion();
+    pc->changeMotionSeq(10, -1);
+    pc->m_08 = 0;
 }
 
-// stub of ROR 0x00122828
+// ROR 0x00122828
 int MagLifePCModeHold::pad(MagLifePC *pc, BedPad *thePad)
 {
-    ROSEPAN_STUB("MagLifePCModeHold::pad", 0x00122828);
-    return {};
+    int work = pc->m_08;
+    int end = pc->isMotionSeqEnd();
+    if (16 <= thePad->m_quad_flips)
+    {
+        pc->changeState(12, 0, 0);
+        return 2;
+    }
+    if (work == 0)
+    {
+        if (pc->m_stick_mag <= 0.0f)
+            pc->changeMotionSeq(10, -1);
+        else
+        {
+            pc->changeMotionSeq(12, -1);    /* the struggle */
+            pc->m_08 = 1;
+        }
+        return 1;
+    }
+    if (end)
+    {
+        pc->changeMotionSeq(10, -1);
+        pc->m_08 = 0;
+    }
+    return 1;
 }
 
-// stub of ROR 0x001228fc
+// ROR 0x001228fc
 void MagLifePCModeHoldAttack::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeHoldAttack::init", 0x001228fc);
+    pc->changeMotionSeq(13, -1);
+    utlPlaySe(0x2e, 0, 0);
 }
 
-// stub of ROR 0x00122930
+// ROR 0x00122930
 void MagLifePCModeUnhold::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeUnhold::init", 0x00122930);
+    pc->changeMotionSeq(14, -1);
 }
 
-// stub of ROR 0x00122954
+/* ---- Ride (state 9). pc->m_08 is the state's arg, pc->m_0c the phase
+ * (0 riding, | 1 the stick's motion, 2 getting off). ---- */
+
+// ROR 0x00122954
 void MagLifePCModeRide::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeRide::init", 0x00122954);
+    switch (pc->m_08)
+    {
+    case 2:
+        pc->changeMotionSeq(0x89, -1);
+        m_08 = 1;
+        break;
+    case 3:
+    {
+        /* back on after a damage: the kind's riding row */
+        int motion;
+        switch (m_08)
+        {
+        case 1: motion = 0x8a; break;
+        case 2: motion = 0x91; break;
+        case 3: motion = 0x98; break;
+        case 4: motion = 0x9c; break;
+        default:
+            ROR_ASSERT(0);  /* 2077 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+            motion = -1;
+            break;
+        }
+        if (0 <= motion)
+            pc->changeMotionSeq(motion, -1);
+        break;
+    }
+    case 7:
+        pc->changeMotionSeq(0x90, -1);
+        m_08 = 2;
+        break;
+    case 10:
+        pc->changeMotionSeq(0x98, -1);
+        m_08 = 3;
+        break;
+    case 12:
+        pc->changeMotionSeq(0x9c, -1);
+        m_08 = 4;
+        break;
+    default:
+        ROR_ASSERT(0);  /* 2082 */
+        break;
+    }
+    m_04 = 1;
+    pc->m_0c = 0;
 }
 
-// stub of ROR 0x00122ad4
+// ROR 0x00122ad4
 void MagLifePCModeRide::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeRide::live", 0x00122ad4);
+    applyRootMotion(pc);
+    if (2 <= pc->m_0c)
+    {
+        if (pc->isMotionSeqEnd())
+            pc->changeState(0, 0, 0);
+        return;
+    }
+    if (pc->m_0c <= 0 || !pc->isMotionSeqEnd())
+        return;
+    switch (m_08)
+    {
+    case 1: pc->changeMotionSeq(0x8a, -1); break;
+    case 2: pc->changeMotionSeq(0x91, -1); break;
+    case 3: pc->changeMotionSeq(0x98, -1); break;
+    case 4: pc->changeMotionSeq(0x9c, -1); break;
+    }
+    pc->m_0c = 0;
 }
 
-// stub of ROR 0x00122bd4
+// ROR 0x00122bd4
 int MagLifePCModeRide::pad(MagLifePC *pc, BedPad *thePad)
 {
-    ROSEPAN_STUB("MagLifePCModeRide::pad", 0x00122bd4);
-    return {};
+    if (pc->m_0c < 1 && 0.0f < pc->m_stick_mag)
+    {
+        int seq = pc->getMotionSeq();
+        int motion;
+        if ((u_int)(seq - 0x8a) < 4)
+            motion = 0x8e;
+        else if ((u_int)(seq - 0x91) < 2)
+            motion = 0x93;
+        else if (seq == 0x98)
+            motion = 0x99;
+        else if (seq == 0x9c)
+            motion = 0x9d;
+        else
+            return 1;
+        pc->changeMotionSeq(motion, -1);
+        pc->m_0c |= 1;
+    }
+    return 1;
 }
 
-// stub of ROR 0x00122d70
+// ROR 0x00122c9c
+void MagLifePCModeRide::message(MagLifePC *pc, int msg)
+{
+    if (1 < pc->m_0c)
+        return;
+    pc->m_08 = msg;
+    int motion;
+    switch (msg)
+    {
+    case 6:   motion = 0x8f; break;
+    case 9:   motion = 0x94; break;
+    case 0xb: motion = 0x9a; break;
+    case 0xd: motion = 0x9e; break;
+    default:
+        ROR_ASSERT(0);  /* 2225 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        return;
+    }
+    pc->changeMotionSeq(motion, -1);
+    pc->m_0c = 2;
+    m_04 = 0;
+}
+
+/* ---- Roped (state 7): tied up in m_mode 1 / 3, the stick struggles ---- */
+
+enum { MAG_CTRL_PC_ROPED5 = 3 };
+
+// ROR 0x00122d70
 void MagLifePCModeRoped::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeRoped::init", 0x00122d70);
+    int motion = 0;
+    if (pc->m_mode == 1)
+        motion = 0x74;
+    else if (pc->m_mode == 3)
+        motion = 0x79;
+    else
+        ROR_ASSERT(0);  /* 2249 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    pc->changeMotionSeq(motion, -1);
 }
 
-// stub of ROR 0x00122dec
+// ROR 0x00122dec
 void MagLifePCModeRoped::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeRoped::live", 0x00122dec);
+    pc->recoverStamina();
+    applyRootMotion(pc);
 }
 
-// stub of ROR 0x00122e2c
+// ROR 0x00122e2c
 int MagLifePCModeRoped::pad(MagLifePC *pc, BedPad *thePad)
 {
-    ROSEPAN_STUB("MagLifePCModeRoped::pad", 0x00122e2c);
-    return {};
+    if (pc->m_stance != 0)
+    {
+        pc->changeState(5, 0, 0);
+        return 2;
+    }
+    int base = 0x74;
+    if (pc->m_mode != 1)
+    {
+        int flag = pc->m_mode;
+        ROR_ASSERT(flag == MAG_CTRL_PC_ROPED5);    /* 2295 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        base = 0x79;
+    }
+    /* a new pose only from the rest pose or once the last one ended */
+    if (!pc->isMotionSeqEnd() && pc->getMotionSeq() != base)
+        return 1;
+    const float lim = 0x1.333332p-2f;   /* 0.3 */
+    int dir = 0;
+    if (0.0f < pc->m_stick_mag)
+    {
+        if (lim < pc->m_stick_x)
+            dir = 2;
+        else if (pc->m_stick_x < -lim)
+            dir = 1;
+        else if (lim < pc->m_stick_y)
+            dir = 4;
+        else if (pc->m_stick_y < -lim)
+            dir = 3;
+    }
+    pc->changeMotionSeq(base + dir, -1);
+    if (dir != 0)
+    {
+        int r = utlRandRange(0, 99);
+        int se;
+        if (r < 15)
+            se = 0x3f;
+        else if (r < 35)
+            se = 0x32;
+        else if (r < 55)
+            se = 0x33;
+        else if (r < 70)
+            se = 0x2e;
+        else if (r < 85)
+            se = 0x34;
+        else
+            se = -1;
+        if (0 <= se)
+            utlPlaySe(se, 15, 0);
+    }
+    return 1;
 }
 
-// stub of ROR 0x00122fc4
+/* ---- Reload (state 20) ---- */
+
+// ROR 0x00122fc4
 void MagLifePCModeReload::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeReload::init", 0x00122fc4);
+    pc->clearSubMotion();
+    pc->changeMotionSeq(4, -1);
+    pc->reload();
 }
 
-// stub of ROR 0x00123004
+// ROR 0x00123004
 void MagLifePCModeReload::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeReload::live", 0x00123004);
+    if (!pc->isMotionSeqEnd())
+        return;
+    u_int chr = (u_int)pc->getEquipItemChrNo();
+    if (chr < 0x80)
+    {
+        DogActor *item = &pc->m_scene->m_actors[chr];
+        int no = item->getMotionNoBySuffix("wait2");
+        item->changeMotion(0x1.11112Ep-6f, no, 1, -1, -1); /* 0x3c888897 */
+    }
+    pc->changeState(0, 0, 0);
 }
 
-// stub of ROR 0x001230a8
+/* ---- Hug (state 18): turn to Brown, then one of the two hugs ---- */
+
+// ROR 0x001230a8
 void MagLifePCModeHug::init(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeHug::init", 0x001230a8);
+    pc->m_08 = 0;
+    pc->changeMotionSeq(5, -1);
+    pc->m_move_level_prev = 0;
+    pc->m_move_level = 0;
+    pc->m_scene->m_bwn_ctrl.requestHug(0);
 }
 
-// stub of ROR 0x001230fc
+// ROR 0x001230fc
 void MagLifePCModeHug::live(MagLifePC *pc)
 {
-    ROSEPAN_STUB("MagLifePCModeHug::live", 0x001230fc);
+    /* m_08: 0 turning, 1 / 2 the hug picked, 3 hugging */
+    int work = pc->m_08;
+    MagLifeBwnCtrl *ctrl = &pc->m_scene->m_bwn_ctrl;
+    if (work != 0)
+    {
+        if ((u_int)(work - 1) < 2)
+        {
+            if (ctrl->checkHug(work) < 1)
+                return;
+            pc->changeMotionSeq(work + 0x18, -1);
+            ctrl->requestHug(work);
+            pc->m_08 = 3;
+            return;
+        }
+        if (pc->isMotionSeqEnd())
+            pc->changeState(0, 0, 0);
+        return;
+    }
+    float dir[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    ctrl->getBwnPosition(dir);
+    float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    pc->getPosition(pos);
+    dir[0] -= pos[0];
+    dir[1] -= pos[1];
+    dir[2] -= pos[2];
+    dir[3] = 1.0f;
+    float d = utlVecToRotY(dir) - pc->getRotY();
+    if (d < -DOG_PI)
+        d += DOG_PI2;
+    else if (DOG_PI <= d)
+        d -= DOG_PI2;
+    if (d == 0.0f)
+    {
+        work = utlRandRange(1, 2);
+        pc->m_08 = work;
+        ROR_ASSERT(work == 1 || work == 2);    /* 2522 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        return;
+    }
+    const float lim = 0x1.999998p-5f;   /* 0.05 */
+    if (lim < d)
+        d = lim;
+    if (d < -lim)
+        d = -lim;
+    /* the EE reads the actor through the vtable's getActor (slot 11) */
+    DogActor *actor = pc->m_actor;
+    float r = actor->m_rotate[1] + d;
+    actor->m_rotate[1] = r;
+    if (r < -DOG_PI)
+        actor->m_rotate[1] = r + DOG_PI2;
+    else if (DOG_PI <= r)
+        actor->m_rotate[1] = r - DOG_PI2;
+    actor->m_dirty = 1;
+    pc->m_actor->addBaseRotY(d);
 }
