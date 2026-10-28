@@ -19367,6 +19367,12 @@
   "was": "FUN_00220670",
   "why": "i3rDrawModel calls it per node entry with the opt words and the work block: walks the entry's type-0x59 children (float weights) and writes the non-zero (index, weight) pairs to work +0xf0 with their count at +0x134 per slot, an opt bit selecting 0x225108's computed weight instead"
  },
+ "00220838": {
+  "name": "i3rDrawGroup45",
+  "tag": "ror-inferred",
+  "was": "FUN_00220838",
+  "why": "i3rDrawMesh45 calls it per group of the 0x45 part with the group's 0x4d mesh range, clip and flags; per mesh: box test (clip 2), i3rGetMaterialPacket, then the blend / plain / clip / sorted writer like i3rDrawGroupRigid"
+ },
  "00220b58": {
   "name": "i3rDrawGroupSkinned",
   "tag": "ror-inferred",
@@ -19378,6 +19384,72 @@
   "tag": "ror-inferred",
   "was": "FUN_00220cf8",
   "why": "i3rDrawMesh46's branch for a 0x4c group with flag 8 (one node), after loading the node matrix into work +0x40"
+ },
+ "00220fb0": {
+  "name": "i3rPktDrawHeader",
+  "tag": "ror-inferred",
+  "was": "FUN_00220fb0",
+  "why": "writes a 4-qword VIF unpack to VU1 0x3f2: the work block's +0x80 vector, a 0x8000 flag when its byte argument is set, the GIF tag word, MSCAL 0x15; returns the next qword; used before every batch's CALLs"
+ },
+ "00221080": {
+  "name": "i3rPktCallStrips",
+  "tag": "ror-inferred",
+  "was": "FUN_00221080",
+  "why": "for each of n index bytes not 0xff writes two DMA CALL tags (0x50000000 | addr << 32): the strip's prebuilt chain and the material's colour chain picked by the byte"
+ },
+ "002210f0": {
+  "name": "i3rDrawMeshBlend",
+  "tag": "ror-inferred",
+  "was": "FUN_002210f0",
+  "why": "the writers' branch when the group flags & 3 and the blend words (work +0xac, i3rDrawModel's opt) are set; 0x9c0 bytes of per-batch packets with the blended colours"
+ },
+ "00221ab0": {
+  "name": "i3rDrawMesh45Clip",
+  "tag": "ror-inferred",
+  "was": "FUN_00221ab0",
+  "why": "i3rDrawGroup45's writer for a plain material at clip 2: per batch i3dVu0MatMul + i3dViewTestBox before its header and CALLs"
+ },
+ "00221d18": {
+  "name": "i3rDrawMesh45Sorted",
+  "tag": "ror-inferred",
+  "was": "FUN_00221d18",
+  "why": "i3rDrawGroup45's writer at clip 1 when the material packet +0x14 is set: per batch i3dVu0MatApply + i3dViewGetDepth (a depth-keyed packet)"
+ },
+ "00221f50": {
+  "name": "i3rDrawMesh45SortedClip",
+  "tag": "ror-inferred",
+  "was": "FUN_00221f50",
+  "why": "i3rDrawGroup45's writer at clip 2 when the material packet +0x14 is set: box test, then depth as i3rDrawMesh45Sorted"
+ },
+ "002221e8": {
+  "name": "i3rDrawMeshSkinned",
+  "tag": "ror-inferred",
+  "was": "FUN_002221e8",
+  "why": "i3rDrawGroupSkinned's writer for a plain material (packet +0x14 clear): per batch the skinning program's header and CALLs"
+ },
+ "00222560": {
+  "name": "i3rDrawMeshSkinnedSorted",
+  "tag": "ror-inferred",
+  "was": "FUN_00222560",
+  "why": "i3rDrawGroupSkinned's writer when the material packet +0x14 is set: VU0 skinning (0x225460 / 0x225670 / 0x225fd8), then i3dVu0MatApply + i3dViewGetDepth per batch"
+ },
+ "00222850": {
+  "name": "i3rDrawMeshRigidClip",
+  "tag": "ror-inferred",
+  "was": "FUN_00222850",
+  "why": "i3rDrawGroupRigid's writer for a plain material at clip 2: per batch box test before its header and CALLs"
+ },
+ "00222aa0": {
+  "name": "i3rDrawMeshRigidSorted",
+  "tag": "ror-inferred",
+  "was": "FUN_00222aa0",
+  "why": "i3rDrawGroupRigid's writer at clip 1 when the material packet +0x14 is set: per batch depth (i3dViewGetDepth)"
+ },
+ "00222ce0": {
+  "name": "i3rDrawMeshRigidSortedClip",
+  "tag": "ror-inferred",
+  "was": "FUN_00222ce0",
+  "why": "i3rDrawGroupRigid's writer at clip 2 when the material packet +0x14 is set: box test and depth per batch"
  },
  "00222f50": {
   "name": "i3dPktLayerState",

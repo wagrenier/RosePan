@@ -725,7 +725,7 @@
    "why": "I3D_I3M motion file root (id 0x303a68): id/version checks, relocators, node and key accessors; between i3rroot.cpp and i3croot.cpp, which it mirrors"
   },
   "i3d/i3rdraw.cpp": {
-   "notes": "Left: the VU1 packet writers 0x220098..0x222ce0 (i3rDrawMesh45 / i3rDrawMesh46 / i3rDrawSetupBlend / i3rDrawGroupSkinned / i3rDrawGroupRigid and their strip writers) are not ported on purpose; what the host still lacks from them goes into rosepan_i3dmesh.cpp: the type-0x59 blend weights (opt), the 0x45 part, the per-part bone-box cull (the host counts a part with data as drawn). Picture: frames ~3300..4200 show the book cover correctly; after the page turn only the left page stack shows, the right page and the dark MNUPBOOK background are missing (VU1 sprite packets unassigned@0021c960 and the offscreen pass, not this TU). After the book closes the screen stays black (camera / room stubs). Extra screenshots progress/20261027-1900_i3d_i3rdraw_book_cover.png and _book_open.png. open-items.md Mesh draw updated.",
+   "notes": "Left in this TU: the blend path, i3rDrawSetupBlend 0x220670 (type-0x59 children of the entry, i3rDrawModel's opt words) and i3rDrawMeshBlend 0x2210f0 (group flags and 3 with opt set); the host draws those groups unblended -- write the blend as a host-module colour input (rosepan_i3dmesh.cpp) and annotate both. Not done on purpose: depth-keyed batches (material packet +0x14: the ROM keys each batch with i3dViewGetDepth; the host relies on the depth buffer) and the per-mesh / per-batch box culls (renderer clips). Picture: the last frame of the 200 s run is a skinned figure drawn white -- its textures do not bind (look at MaterialTexture and the context texture table for that model, not the node walk); the reference is the game's textured character. Runs are timing-flaky: one 200 s run stalled black after the title (frame 1680 on) and never reached New Game; a rerun was fine. Use --run 200 to reach the book (frames 3300..4400) and the figure (6180+). For the references: hazards.md (callcheck binds a ROR list in a header comment to the next function; I3dBoneBoxes host-pointer trap) and open-items.md Mesh draw are updated in this commit.",
    "ranges": [
     [
      "0021fb50",
@@ -737,6 +737,11 @@
      "date": "2026-10-27 19:00",
      "status": "partial",
      "summary": "i3d/i3rdraw.cpp pinned 0x21fb50..0x222f50 (was unassigned@0021fb50). i3rDrawModel written: the model box cull against the layer's view, the ROM's node / entry / part walk for its result, then the camera (m_camera plus m_rect_proj remade as reverse Z, y negated) and the model recorded at a layer packet for the native i3d mesh module. i3rBuildMeshPacket is a PC no-op (the host reads the mesh items). The 200 s New Game run now draws the picture book's 3D cover model, The Little Princess, upright and matching PB010200_00000800, and the opened book's page stack."
+    },
+    {
+     "date": "2026-10-28 11:05",
+     "status": "partial",
+     "summary": "i3rDrawMesh45 / i3rDrawMesh46 part culls written (box test, i3dViewTestBoneBox through the entry's bone slots) and now decide i3rDrawModel's result; I3dBoneBoxes fixed to the i3r file's EE layout (it had a host pointer); the native mesh module draws the 0x45 rigid part with the node's matrix; the 12 unnamed VU1 writers named (ror-inferred) and listed with their host replacements at the end of i3rdraw.cpp. 200 s run: book cover and page turn unchanged (A/B pixel-identical with and without the 0x45 path); after the book (frames 6180+) a skinned figure draws lit but untextured white."
     }
    ],
    "status": "partial",

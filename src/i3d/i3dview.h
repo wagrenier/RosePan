@@ -74,19 +74,19 @@ static_assert(offsetof(I3dView, m_scissor) == 0x3f0, "m_scissor");
 static_assert(offsetof(I3dView, m_packet) == 0x3f8, "m_packet");
 static_assert(sizeof(I3dView) == 0x400, "I3dView is 0x400 bytes on the EE");
 
-/* The bones i3dViewTestBoneBox bounds: count boxes (EE 0x40 each, rows =
- * three half axes and the centre) in the space of the matrix each one's
- * index picks. Only the two fields it reads are known. layout: host -- a
- * pointer; the EE offsets are in the comments. */
+/* The bones i3dViewTestBoneBox bounds: a skinned (type 0x46) part's data,
+ * from the i3r file: plain EE layout, relocated fields read through
+ * i3rPtr. m_count boxes (0x40 each, rows = three half axes and the centre)
+ * in the space of the matrix each one's index picks. */
 struct I3dBoneBoxes
 {
-    u_int          _00;                 // ROR 0x00: unverified
-    sceVu0FVECTOR *m_boxes;             // ROR 0x04: count * 4 rows
+    u_int          m_offsets;           // ROR 0x00: relocated: the per-slot offset matrices (0x225ec8)
+    u_int          m_boxes;             // ROR 0x04: relocated: m_count * 4 rows
     u_char         _08[6];              // ROR 0x08: unverified
     u_short        m_count;             // ROR 0x0e
 };
-static_assert(offsetof(I3dBoneBoxes, m_boxes) >= 0x04, "m_boxes");
-static_assert(offsetof(I3dBoneBoxes, m_count) >= 0x0e, "m_count");
+static_assert(offsetof(I3dBoneBoxes, m_boxes) == 0x04, "I3dBoneBoxes::m_boxes");
+static_assert(offsetof(I3dBoneBoxes, m_count) == 0x0e, "I3dBoneBoxes::m_count");
 
 /* The culling tests' answers. */
 #define I3D_VIEW_OUT    0   /* outside: nothing to draw */
@@ -111,7 +111,7 @@ void     i3dViewMakeOrtho(const float *min, const float *max, const float *ndc_m
                           const float *ndc_max, const float *scr_min, const float *scr_max,
                           sceVu0FVECTOR *proj, sceVu0FVECTOR *viewport); // ROR 0x002267e8
 int      i3dViewTestBox(I3dView *view, sceVu0FVECTOR *box);              // ROR 0x002268b0
-int      i3dViewTestBoneBox(I3dView *view, const u_short *const *index, const I3dBoneBoxes *bones,
+int      i3dViewTestBoneBox(I3dView *view, const u_int *index, const I3dBoneBoxes *bones,
                             sceVu0FVECTOR *space, sceVu0FMATRIX *matrices);  // ROR 0x00226920
 int      i3dViewTestSphere(I3dView *view, const float *center, float radius, float *depth); // ROR 0x00226ad8
 float    i3dViewGetDepth(I3dView *view, const float *point);             // ROR 0x00226c18

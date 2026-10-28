@@ -4981,20 +4981,20 @@
 /* 00220098 000001f4 */ i3rDrawMesh45(){}  // ror
 /* 00220290 000003e0 */ i3rDrawMesh46(){}  // ror
 /* 00220670 000001c8 */ i3rDrawSetupBlend(){}  // ror
-/* 00220838 00000320 */ FUN_00220838(){}
+/* 00220838 00000320 */ i3rDrawGroup45(){}  // ror
 /* 00220b58 0000019c */ i3rDrawGroupSkinned(){}  // ror
 /* 00220cf8 000002b4 */ i3rDrawGroupRigid(){}  // ror
-/* 00220fb0 000000cc */ FUN_00220fb0(){}
-/* 00221080 0000006c */ FUN_00221080(){}
-/* 002210f0 000009c0 */ FUN_002210f0(){}
-/* 00221ab0 00000264 */ FUN_00221ab0(){}
-/* 00221d18 00000234 */ FUN_00221d18(){}
-/* 00221f50 00000294 */ FUN_00221f50(){}
-/* 002221e8 00000374 */ FUN_002221e8(){}
-/* 00222560 000002ec */ FUN_00222560(){}
-/* 00222850 0000024c */ FUN_00222850(){}
-/* 00222aa0 00000240 */ FUN_00222aa0(){}
-/* 00222ce0 00000270 */ FUN_00222ce0(){}
+/* 00220fb0 000000cc */ i3rPktDrawHeader(){}  // ror
+/* 00221080 0000006c */ i3rPktCallStrips(){}  // ror
+/* 002210f0 000009c0 */ i3rDrawMeshBlend(){}  // ror
+/* 00221ab0 00000264 */ i3rDrawMesh45Clip(){}  // ror
+/* 00221d18 00000234 */ i3rDrawMesh45Sorted(){}  // ror
+/* 00221f50 00000294 */ i3rDrawMesh45SortedClip(){}  // ror
+/* 002221e8 00000374 */ i3rDrawMeshSkinned(){}  // ror
+/* 00222560 000002ec */ i3rDrawMeshSkinnedSorted(){}  // ror
+/* 00222850 0000024c */ i3rDrawMeshRigidClip(){}  // ror
+/* 00222aa0 00000240 */ i3rDrawMeshRigidSorted(){}  // ror
+/* 00222ce0 00000270 */ i3rDrawMeshRigidSortedClip(){}  // ror
 
 // *****************************************************************************
 // FILE -- i3d/i3dlayer.cpp

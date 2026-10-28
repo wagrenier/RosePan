@@ -21,6 +21,7 @@
 #include <math.h>
 #include <stdint.h>
 
+#include "i3d/i3rroot.h"
 #include "lib/unassigned.h"
 #include "mag/magscene.h"
 
@@ -358,11 +359,13 @@ int i3dViewTestBox(I3dView *view, sceVu0FVECTOR *box)
 // then i3dViewTestBox.
 // ROR 0x00226920
 
-int i3dViewTestBoneBox(I3dView *view, const u_short *const *index, const I3dBoneBoxes *bones,
+int i3dViewTestBoneBox(I3dView *view, const u_int *index, const I3dBoneBoxes *bones,
                        sceVu0FVECTOR *space, sceVu0FMATRIX *matrices)
 {
-    const u_short *idx = *index;
-    sceVu0FVECTOR *boxes = bones->m_boxes;
+    // PC: index is the entry's relocated bone-slot word (I3rNodeEntryData
+    // m_bones), the boxes a relocated field of the part's data.
+    const u_short *idx = (const u_short *)i3rPtr(index);
+    sceVu0FVECTOR *boxes = (sceVu0FVECTOR *)i3rPtr(&bones->m_boxes);
     // PC: with no boxes the ROM bounds whatever vf12..vf15 held; the host
     // bounds the origin.
     float mn[3] = { 0.0f, 0.0f, 0.0f }, mx[3] = { 0.0f, 0.0f, 0.0f };

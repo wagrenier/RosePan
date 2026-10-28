@@ -358,6 +358,11 @@ entries are marked **RoR** with the date.
   one parenthesised reason. Calls folded into a file-static helper (hfmHitTest) need such a note on
   every caller.
 
+- **A `ROR 0x...` inside a comment block counts as the next function's annotation** (2026-10-28,
+  i3d/i3rdraw.cpp): a list of host-replaced ROM functions in the file header made callcheck check the
+  first function below it (a PC helper) against the last listed address. Put such lists after the
+  last function of the file.
+
 - **"undefined reference to vtable for X" that stubgen skips** (2026-10-27, mag/maglifepc.cpp):
   a new polymorphic class whose out-of-line virtuals live in an unwritten TU. GCC emits the vtable
   with the first non-inline virtual (the key function); none defined means no vtable, and the linker
@@ -794,6 +799,10 @@ blocked, so it is game logic, not a lock.
   they are I3rItem fields (m_children, m_info, m_children of the child).
 - Fix: when a reader walks +0 / +4 / +8 of model data, it is an I3rItem: use getData() /
   getChildren() / getNumChild() and the type's data struct (i3rmodel.h), never a pointer struct.
+- Again 2026-10-28: I3dBoneBoxes (i3dViewTestBoneBox's bones, a 0x46 part's data) was declared
+  `layout: host` with an `sceVu0FVECTOR *` at +4, and the index as `u_short **`; on the 64-bit host
+  m_count moved to +0x16. Data that comes from an i3r file is always plain EE layout with u_int
+  relocated fields read through i3rPtr, even when only one ROM function reads it.
 
 ## A class whose virtuals are all unwritten links as "vtable for X" (2026-10-28)
 
