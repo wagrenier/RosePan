@@ -577,13 +577,17 @@ void DrawBatch(const I3rItem &batch, const float *local_world, const MeshLayers 
 }
 
 /* One group's 0x4d meshes (the group's child 0 list): per mesh its
- * material and layer list, then its batches. */
+ * material and layer list, then its batches. `ref`: only its mesh (and
+ * batch); NULL = all. */
 void DrawMeshList(const I3rItem &list, const I3rItem *materials, unsigned num_mat, const I3dTexEntry *tex,
-                  int tex_count, const float *local_world, const Skin *skin, const Blend *blend)
+                  int tex_count, const float *local_world, const Skin *skin, const Blend *blend,
+                  const RosePanI3dMeshRef *ref)
 {
     const I3rItem *mesh4d = list.getChildren();
     for (u_int m = 0; m < list.getNumChild(); m++)
     {
+        if (ref != nullptr && m != ref->mesh)
+            continue;
         const u_char *md = (const u_char *)mesh4d[m].getData();
         if (md == nullptr || mesh4d[m].getNumChild() == 0)
             continue;
@@ -596,13 +600,14 @@ void DrawMeshList(const I3rItem &list, const I3rItem *materials, unsigned num_ma
         ml.group = ml.count != 0 ? (const u_char *)i3rPtr((const u_int *)(md + 0x08)) : nullptr;
         const I3rItem &batches = mesh4d[m].getChildren()[0];
         for (u_int b = 0; b < batches.getNumChild(); b++)
-            DrawBatch(batches.getChildren()[b], local_world, ml, skin, blend);
+            if (ref == nullptr || ref->batch < 0 || b == (u_int)ref->batch)
+                DrawBatch(batches.getChildren()[b], local_world, ml, skin, blend);
     }
 }
-}
 
-void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *nodes,
-                         const I3dTexEntry *tex, int tex_count, const I3rBlendOpt *opt)
+/* The walk of RosePan_I3dMeshDraw; `ref` limits it to one mesh. */
+void DrawModel(const I3rRoot *root, const float *world, const float *nodes, const I3dTexEntry *tex,
+               int tex_count, const I3rBlendOpt *opt, const RosePanI3dMeshRef *ref)
 {
     if (root == nullptr || world == nullptr || root->m_item.getNumChild() < 4)
         return;
@@ -627,6 +632,8 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
     const unsigned num_node = child[3].getNumChild();
     for (unsigned i = 0; i < num_node; i++)
     {
+        if (ref != nullptr && i != ref->node)
+            continue;
         if (node[i].getNumChild() < 2)
             continue;
         const I3rItem *part = node[i].getChildren();
@@ -636,6 +643,8 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
         const I3rItem *entry = part[1].getChildren();
         for (u_int e = 0; e < part[1].getNumChild(); e++)
         {
+            if (ref != nullptr && e != ref->entry)
+                continue;
             const NodeEntry *ne = (const NodeEntry *)entry[e].getData();
             if (ne == nullptr || ne->m_enable == 0 || ne->m_mesh < 0 || (unsigned)ne->m_mesh >= num_mesh)
                 continue;
@@ -650,7 +659,8 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
                 i3rDrawSetupBlend(&entry[e], opt, lists);
             /* Child 1, type 0x45: rigid, every group with the node's own
              * matrix (i3rDrawMesh45 / 0x220838); drawn first, as the ROM. */
-            if (mesh.getNumChild() >= 2 && mesh.getChildren()[1].m_data != 0 && nodes != nullptr)
+            if (mesh.getNumChild() >= 2 && mesh.getChildren()[1].m_data != 0 && nodes != nullptr &&
+                (ref == nullptr || ref->part == 0x45))
             {
                 const I3rItem &m45 = mesh.getChildren()[1];
                 if (m45.getNumChild() >= 2)
@@ -660,6 +670,8 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
                     const I3rItem &groups = m45.getChildren()[1];
                     for (u_int g = 0; g < groups.getNumChild(); g++)
                     {
+                        if (ref != nullptr && g != ref->group)
+                            continue;
                         const I3rItem &group = groups.getChildren()[g];
                         const u_char *gd = (const u_char *)group.getData();
                         /* The 0x45 group's flags: its data's first byte. */
@@ -667,11 +679,12 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
                         if (group.getNumChild() != 0)
                             DrawMeshList(group.getChildren()[0], materials, num_mat, tex, tex_count,
                                          node_world, nullptr,
-                                         opt != nullptr && (blend.flags & 3) != 0 ? &blend : nullptr);
+                                         opt != nullptr && (blend.flags & 3) != 0 ? &blend : nullptr, ref);
                     }
                 }
             }
-            if (mesh.getNumChild() < 1 || mesh.getChildren()[0].m_data == 0)
+            if (mesh.getNumChild() < 1 || mesh.getChildren()[0].m_data == 0 ||
+                (ref != nullptr && ref->part != 0x46))
                 continue;
             const I3rItem &m46 = mesh.getChildren()[0];
             if (m46.getNumChild() == 0)
@@ -685,6 +698,8 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
             const I3rItem *group = groups.getChildren();
             for (u_int g = 0; g < groups.getNumChild(); g++)
             {
+                if (ref != nullptr && g != ref->group)
+                    continue;
                 const u_char *gd = (const u_char *)group[g].getData();
                 if (gd == nullptr || group[g].getNumChild() == 0)
                     continue;
@@ -703,7 +718,7 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
                 }
                 const Blend blend = {opt, lists, gd[5]};
                 DrawMeshList(group[g].getChildren()[0], materials, num_mat, tex, tex_count, local_world,
-                             rigid ? nullptr : skinned, opt != nullptr && (gd[5] & 3) != 0 ? &blend : nullptr);
+                             rigid ? nullptr : skinned, opt != nullptr && (gd[5] & 3) != 0 ? &blend : nullptr, ref);
             }
         }
     }
@@ -711,4 +726,19 @@ void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *n
      * from the chain defaults again. */
     RosePan_RendererSetGsTestRegister(kDefaultTest);
     RosePan_RendererSetGsAlphaRegister(kDefaultAlpha);
+}
+}
+
+void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *nodes,
+                         const I3dTexEntry *tex, int tex_count, const I3rBlendOpt *opt)
+{
+    DrawModel(root, world, nodes, tex, tex_count, opt, nullptr);
+}
+
+void RosePan_I3dMeshDrawRef(const I3rRoot *root, const float *world, const float *nodes,
+                            const I3dTexEntry *tex, int tex_count, const I3rBlendOpt *opt,
+                            const RosePanI3dMeshRef *ref)
+{
+    if (ref != nullptr)
+        DrawModel(root, world, nodes, tex, tex_count, opt, ref);
 }

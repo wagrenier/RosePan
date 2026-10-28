@@ -574,8 +574,11 @@ static u_long *i3rPktLayerStqMaps(u_long *pkt, const I3rItem *lay, I3dView *view
             do
             {
                 const I3rStqMapEntity *e = (const I3rStqMapEntity *)maps.getChildren()[i].getData();
-                u_char kind = e->m_id;
-                u_char mode = e->m_40;
+                /* PORT: an entity with no data yet (i3rReplaceStqMapEntity
+                 * sets it at run time) has m_data 0; the ROM reads EE
+                 * address 0 there, zeros: kind 0, skipped. */
+                u_char kind = e != NULL ? e->m_id : 0;
+                u_char mode = e != NULL ? e->m_40 : 0;
                 if (kind != 0 && mode != 0)
                 {
                     any = 1;

@@ -1129,9 +1129,16 @@ to adapt when a TU reaches them:
   the group of the batch's slot [0], -1 none; per layer its own texture and TEST / ALPHA). Every
   mesh the 200 s run draws (248,064 with ROSEPAN_TEST_CAM=1: book, forest, Jennifer) has one layer
   naming group 0, so the multi-layer path is unseen: the first map or model with a two-layer
-  material verifies it (expect a second, blended pass). Still open: the
-  depth-keyed batches (material packet +0x14 set: the ROM keys them with i3dViewGetDepth, the host
-  draws in walk order with the depth buffer). The untextured white figure after the book was
+  material verifies it (expect a second, blended pass). The depth-keyed
+  batches are DONE 2026-10-28: i3rDrawModel no longer records the whole model at a layer packet;
+  i3rDrawMesh45 / 46 file one state packet per 0x4d mesh in its material's draw-set group
+  (i3rGetMaterialPacket now runs on the host; key 0, or per 0x56 batch the view depth of the
+  batch's child-3 box centre), each holding a camera and a mesh record (RosePan_I3dRecordMesh ->
+  RosePan_I3dMeshDrawRef), so meshes replay by draw set (layer list keyed by the material's
+  m_depth: 0 opaque first, 2000 later) and sorted sets back to front. Materials with depth 2000 /
+  sort 1 / order 2 occur in the book models and Jennifer's model (the book she holds). Doubt: the
+  skinned sorted writers key by the centroid of the skinned positions; the host keys by the box
+  centre through the model world. The untextured white figure after the book was
   RESOLVED 2026-10-28: Brown's shadow model drawn by makeActorShadow into the off-screen shadow
   target, which the replay put on screen (hazards.md "A render-target pass drawn on the screen").
   The black frames after the book were RESOLVED 2026-10-28 as a camera problem, not a draw one:
