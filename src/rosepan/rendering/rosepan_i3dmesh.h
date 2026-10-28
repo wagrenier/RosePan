@@ -45,6 +45,23 @@ struct I3rBlendOpt;
 void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *nodes,
                          const I3dTexEntry *tex, int tex_count, const I3rBlendOpt *opt);
 
+/* One 0x4d mesh of a model as i3rDrawModel's part writers file it into
+ * its material's draw-set group (i3d/i3rdraw.cpp): node `node`'s entry
+ * `entry`, its combined mesh's part `part` (0x45 rigid, 0x46 skinned),
+ * that part's group `group`, the group's mesh `mesh`; `batch` one of the
+ * mesh's 0x56 batches (a depth-keyed material's per-batch packet), or -1
+ * for all of them. */
+struct RosePanI3dMeshRef
+{
+    unsigned node, entry, part, group, mesh;
+    int      batch;
+};
+
+/* RosePan_I3dMeshDraw for the one mesh (or batch) `ref` names. */
+void RosePan_I3dMeshDrawRef(const I3rRoot *root, const float *world, const float *nodes,
+                            const I3dTexEntry *tex, int tex_count, const I3rBlendOpt *opt,
+                            const RosePanI3dMeshRef *ref);
+
 /* The GPU texture for an i3d texture object (rosepan_i3d.cpp's cache). */
 const void *RosePan_I3dTextureFor(const void *tex, const void *clut, unsigned clut_index, int tcc);
 

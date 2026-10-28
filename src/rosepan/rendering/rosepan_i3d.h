@@ -25,7 +25,10 @@
  *    (rosepan_draw2d's RosePan_Draw2dMakeTexture) into a GPU texture
  *    cached per object, dropped when i3dTexRelease / i3dClutRelease runs.
  *
- *  - models: an i3r model draw (RosePan_I3dRecordModel) is recorded at its
+ *  - models: i3rDrawModel files one mesh record (RosePan_I3dRecordMesh)
+ *    per 0x4d mesh in its material's draw-set group, so meshes replay in
+ *    the ROM's draw-set and depth order; the forced tests record a whole
+ *    model (RosePan_I3dRecordModel). Either is recorded at its
  *    packet address like a primitive and drawn at replay through the
  *    renderer's mesh stream (rosepan_i3dmesh.*: the mesh items read the way
  *    VU1 would read their VIF blocks), with the camera the last
@@ -46,6 +49,7 @@ struct i3dContext;
 struct I3rRoot;
 struct I3dTexEntry;
 struct I3rBlendOpt;
+struct RosePanI3dMeshRef;
 
 /* A GIF-tagged primitive written at `pkt` by an i3d writer: pkt[2] the GIF
  * tag (REGLIST or PACKED), pkt[3] its register descriptors, the data from
@@ -73,6 +77,15 @@ void RosePan_I3dRecordMovie(const void *at, int x0, int y0, int x1, int y1,
 void RosePan_I3dRecordModel(const void *at, const I3rRoot *root, const float *world,
                             const float *nodes, const I3dTexEntry *tex, int tex_count,
                             const I3rBlendOpt *opt);
+
+/* One mesh of an i3r model draw at `at` (rosepan_i3dmesh.h
+ * RosePan_I3dMeshDrawRef): i3rDrawModel's part writers file one per 0x4d
+ * mesh (one per batch for a depth-keyed material) in the material's
+ * draw-set group, so the replay draws them in the ROM's draw-set and
+ * depth order. Copies and lifetimes as RosePan_I3dRecordModel. */
+void RosePan_I3dRecordMesh(const void *at, const I3rRoot *root, const float *world,
+                           const float *nodes, const I3dTexEntry *tex, int tex_count,
+                           const I3rBlendOpt *opt, const RosePanI3dMeshRef *ref);
 
 /* The camera the model records after `at` draw with: row-major 4x4s, p' =
  * p * M (RosePan_RendererSet3DViewProjection's form; copied). */

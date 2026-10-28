@@ -13,10 +13,14 @@
  *  strip / batch writers to 0x222ce0) into the layer's draw-set groups.
  *  None of that reaches a GS on the host. i3rDrawModel keeps the ROM's
  *  walk for the model cull and its result (i3rDrawMesh45 / 46 keep their
- *  part culls), and records the model once at its layer's packet for the
- *  native module (RosePan_I3dRecordModel), which walks the same nodes,
- *  entries and parts and draws them through the renderer, with the camera
- *  made from the layer's view.
+ *  part culls), and the parts keep the writers' filing: per 0x4d mesh the
+ *  material's packet and a state packet in its draw-set group, keyed 0 or,
+ *  for a depth-keyed material, per batch by the batch's view depth
+ *  (i3rHostFileMeshes). The packet holds a record for the native module
+ *  (RosePan_I3dRecordMesh), which draws that mesh through the renderer
+ *  with the camera made from the layer's view, so the replay draws the
+ *  meshes in the ROM's order: draw sets by depth, sorted sets back to
+ *  front.
  *
  *  The writers below the parts: see the end of this file.
  * ======================================================================== */
@@ -29,9 +33,11 @@
 #include "i3d/i3dmath.h"
 #include "i3d/i3dpacket.h"
 #include "i3d/i3dview.h"
+#include "i3d/i3rmesh.h"
 #include "i3d/i3rtype.h"
 #include "lib/unassigned.h"
 #include "rosepan/rendering/rosepan_i3d.h"
+#include "rosepan/rendering/rosepan_i3dmesh.h"
 
 /* PC: the host camera of a view -- RosePan_I3dRecordCamera's pair: the
  * view's camera matrix as is (world -> camera, row-vector; camera z is the
@@ -106,8 +112,92 @@ struct I3rDrawWork
     const void             *m_opt;          // ROR 0xac: the blend words
     /* ROR 0xf4: I3rBlendList[5], i3rDrawSetupBlend's (PC: the native
      * module's own, at replay). */
+    /* PC: what the mesh records carry (i3rHostFileMeshes). */
+    I3rRoot                *m_model;
+    u_int                   m_node_no;
+    u_int                   m_entry_no;
+    float                   m_host_view[16];
+    float                   m_host_proj[16];
 };
 static_assert(offsetof(I3rDrawWork, m_world) >= 0x40, "I3rDrawWork::m_world");
+
+// ──────────────────────────────────────────────────────────────────────
+// PC: one state packet of a material's draw-set group (the writers'
+// i3dGroupBeginStatePacketUnaligned with the material packet's view / fog
+// packet as the channel 0 state), holding the camera and the mesh record
+// instead of the VU1 header and the strip CALLs.
+
+static void i3rHostFile(I3dLayer *layer, I3rMeshPacket *pkt, u_int key, const I3rDrawWork *work,
+                        const RosePanI3dMeshRef *ref)
+{
+    i3dContext *ctx = layer->m_ctx;
+    u_long *p = i3dGroupBeginStatePacketUnaligned(pkt->m_group, key, 0, pkt->m_pkt);
+
+    RosePan_I3dRecordCamera(p, work->m_host_view, work->m_host_proj);
+    RosePan_I3dRecordMesh(p + 2, work->m_model, (const float *)work->m_world, (const float *)work->m_nodes,
+                          ctx->m_tex_table, (int)ctx->m_tex_table_count, (const I3rBlendOpt *)work->m_opt, ref);
+    p[0] = p[1] = p[2] = p[3] = 0;
+    i3dGroupEndStatePacketUnaligned(pkt->m_group, p + 4);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// PC: the group writers' filing of a group's 0x4d meshes (`list`) --
+// 0x220838 for the 0x45 part, i3rDrawGroupSkinned 0x220b58 /
+// i3rDrawGroupRigid 0x220cf8 for the 0x46 part: per mesh the packet of its
+// material (the 0x4d data's +0xc index into root child 0;
+// i3rGetMaterialPacket with the node's display record as the mesh option,
+// work +0xa8), filed at key 0, or for a depth-keyed material (packet
+// +0x14) per 0x56 batch at the view depth of the batch's centre (its
+// child 3's box, +0x30) through `depth_m`, as i3rDrawMesh45Sorted
+// 0x221d18 keys them (the float's bits made to sort as unsigned).
+// PC: the skinned sorted writers (0x222560, 0x222aa0) take the centre of
+// the skinned positions; the host takes the box centre through the
+// model's world (no skinning at filing time).
+
+static void i3rHostFileMeshes(I3dLayer *layer, const I3rItem *list, I3rDrawWork *work, sceVu0FVECTOR *depth_m,
+                              u_int part, u_int group)
+{
+    const I3rItem *mats = work->m_root->getChildren();
+    const I3rItem *mesh = list->getChildren();
+
+    for (u_int m = 0; m < list->getNumChild(); m++)
+    {
+        const u_char *md = (const u_char *)mesh[m].getData();
+        if (md == NULL || mesh[m].getNumChild() == 0)
+            continue;
+        short mat;
+        memcpy(&mat, md + 0x0c, sizeof(mat));
+        if (mat < 0 || (u_int)mat >= mats[0].getNumChild())
+            continue;
+        I3rMeshPacket *pkt = i3rGetMaterialPacket(layer, &mats[0].getChildren()[mat],
+                                                  (const I3rMeshOpt *)work->m_disp);
+        RosePanI3dMeshRef ref = {work->m_node_no, work->m_entry_no, part, group, m, -1};
+
+        if (!pkt->m_sort)
+        {
+            i3rHostFile(layer, pkt, 0, work, &ref);
+            continue;
+        }
+        const I3rItem &batches = mesh[m].getChildren()[0];
+        for (u_int b = 0; b < batches.getNumChild(); b++)
+        {
+            const I3rItem &batch = batches.getChildren()[b];
+            if (batch.getNumChild() < 4)
+                continue;
+            /* PORT: a batch whose child 3 has no data (m_data 0): the ROM
+             * reads EE 0x30, zeros; the host takes the local origin. */
+            static const sceVu0FVECTOR s_origin = {0.0f, 0.0f, 0.0f, 1.0f};
+            const u_char *box = (const u_char *)batch.getChildren()[3].getData();
+            sceVu0FVECTOR centre;
+            i3dVu0MatApply(centre, depth_m, box != NULL ? (const float *)(box + 0x30) : s_origin);
+            float depth = i3dViewGetDepth(layer->m_view, centre);
+            u_int bits;
+            memcpy(&bits, &depth, sizeof(bits));
+            ref.batch = (int)b;
+            i3rHostFile(layer, pkt, bits ^ ((u_int)((int)bits >> 31) | 0x80000000u), work, &ref);
+        }
+    }
+}
 
 // ──────────────────────────────────────────────────────────────────────
 // The rigid part of a combined mesh (type 0x45): child 0's data is a box
@@ -117,10 +207,10 @@ static_assert(offsetof(I3rDrawWork, m_world) >= 0x40, "I3rDrawWork::m_world");
 // box-tests each mesh with its own box when clipping). Returns the clip
 // state it drew with, I3D_VIEW_OUT when culled.
 // ROR 0x00220098
-// PC: only the cull and the result; the native module draws the part
-// (RosePan_I3dRecordModel, rosepan_i3dmesh.cpp), so the matrix packet
-// (an UNPACK to VU1 0x3d2: the matrix, its inverse, the normalised axes
-// and their transpose) and the group writers have no host form.
+// PC: the cull, the result and the groups' filing (i3rHostFileMeshes);
+// the native module draws the meshes (rosepan_i3dmesh.cpp), so the matrix
+// packet (an UNPACK to VU1 0x3d2: the matrix, its inverse, the normalised
+// axes and their transpose) has no host form.
 
 static int i3rDrawMesh45(I3dLayer *layer, const I3rItem *part, int clip, I3rDrawWork *work)
 {
@@ -134,6 +224,12 @@ static int i3rDrawMesh45(I3dLayer *layer, const I3rItem *part, int clip, I3rDraw
             return I3D_VIEW_OUT;
     }
     // callcheck: i3dCtxGetHead, i3dPktDmaTag, i3dVecNormalize, i3dMatCopy, i3dVu0MatInverse, i3dVu0MatTranspose, i3dCtxSetHead, i3rDrawGroup45 (the VU1 matrix packet and group writers: PC, above)
+    const I3rItem *groups = part->getChildren();
+    if (part->getNumChild() >= 2)
+        for (u_int g = 0; g < groups[1].getNumChild(); g++)
+            if (groups[1].getChildren()[g].getNumChild() != 0)
+                i3rHostFileMeshes(layer, &groups[1].getChildren()[g].getChildren()[0], work, work->m_node_world,
+                                  0x45, g);
     return clip;
 }
 
@@ -193,8 +289,8 @@ void i3rDrawSetupBlend(const I3rItem *entry, const I3rBlendOpt *opt, I3rBlendLis
 // matrix times the world through VU0 and i3rDrawGroupRigid. Returns the
 // clip state it drew with, I3D_VIEW_OUT when culled.
 // ROR 0x00220290
-// PC: only the cull and the result, as i3rDrawMesh45; the native module
-// skins the batches itself (rosepan_i3dmesh.cpp SkinBatch).
+// PC: the cull, the result and the groups' filing, as i3rDrawMesh45; the
+// native module skins the batches itself (rosepan_i3dmesh.cpp SkinBatch).
 
 static int i3rDrawMesh46(I3dLayer *layer, const I3rItem *part, int clip, I3rDrawWork *work)
 {
@@ -206,6 +302,16 @@ static int i3rDrawMesh46(I3dLayer *layer, const I3rItem *part, int clip, I3rDraw
             return I3D_VIEW_OUT;
     }
     // callcheck: FUN_00225ec8, i3dCtxGetHead, i3dPktDmaTag, i3dVecNormalize, i3dMatCopy, i3dVu0MatInverse, i3dVu0MatTranspose, i3dCtxSetHead, i3rDrawGroupRigid, i3rDrawGroupSkinned (the scratchpad bone matrices and the VU1 writers: PC, above)
+    if (part->getNumChild() != 0)
+    {
+        const I3rItem &groups = part->getChildren()[0];
+        for (u_int g = 0; g < groups.getNumChild(); g++)
+        {
+            const I3rItem &group = groups.getChildren()[g];
+            if (group.getData() != NULL && group.getNumChild() != 0)
+                i3rHostFileMeshes(layer, &group.getChildren()[0], work, work->m_world, 0x46, g);
+        }
+    }
     return clip;
 }
 
@@ -244,6 +350,8 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
     work.m_nodes = nodes;
     work.m_root = &root->m_item;
     work.m_opt = opt;
+    work.m_model = root;
+    i3rHostCamera(view, work.m_host_view, work.m_host_proj);
     const I3rItem *meshes = child[2].getChildren();
     const I3rItem *node = child[3].getChildren();
     for (u_int i = 0; i < child[3].getNumChild(); i++)
@@ -254,6 +362,7 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
         if (disp != NULL && disp[I3R_NODE_DISP_SHOWN] == 0)
             continue;
         work.m_disp = disp;
+        work.m_node_no = i;
         if (part[1].getNumChild() == 0)
             continue;
         i3dVu0MatMul(work.m_node_world, world, nodes[i]);
@@ -265,6 +374,7 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
             if (ne->m_enable == 0)
                 continue;
             work.m_entry = ne;
+            work.m_entry_no = e;
             /* PC: i3rDrawSetupBlend(&entry[e], opt, work + 0xf4) loads the
              * blend weights for the writers; the native module calls it at
              * replay with the opt recorded below. */
@@ -274,24 +384,6 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
             if (parts[0].m_data != 0 && i3rDrawMesh46(layer, &parts[0], clip, &work) != I3D_VIEW_OUT)
                 drawn = 1;
         }
-    }
-
-    if (drawn)
-    {
-        /* PC: the native i3d module -- the camera and the model recorded
-         * at a small packet of the layer, so the replay draws the model in
-         * the layer's order. */
-        float host_view[16], host_proj[16];
-        i3dContext *ctx = layer->m_ctx;
-
-        i3rHostCamera(view, host_view, host_proj);
-        u_long *pkt = i3dLayerBeginPacket(layer);
-        u_long *p = i3dPktDmaTag(pkt, 2, 0x10, NULL, 0, 0);
-        RosePan_I3dRecordCamera(p, host_view, host_proj);
-        RosePan_I3dRecordModel(p + 2, root, (const float *)world, (const float *)nodes,
-                               ctx->m_tex_table, (int)ctx->m_tex_table_count, (const I3rBlendOpt *)opt);
-        p[0] = p[1] = p[2] = p[3] = 0;
-        i3dLayerEndPacket(layer, p + 4);
     }
 
     // callcheck: i3rDrawSetupBlend, sceDmaSync (the blend weights are set up by the native module at replay, from the recorded opt; the DMA wait: no packets, PORT: in the file header)
@@ -326,9 +418,9 @@ int i3rDrawModel(I3dLayer *layer, I3rRoot *root, sceVu0FMATRIX *nodes, sceVu0FVE
 //    i3rDrawMeshRigidSorted, ROR 0x00222ce0 i3rDrawMeshRigidSortedClip:
 //    the per-batch variants -- clip 2 box-tests each batch, a material
 //    whose packet +0x14 is set gets a depth key per batch
-//    (i3dViewGetDepth). Host: DrawBatch draws every batch with the
-//    renderer's depth buffer; no depth-keyed order yet (open-items.md
-//    "Mesh draw").
+//    (i3dViewGetDepth). Host: i3rHostFileMeshes keys the same way (one
+//    record per batch) and DrawBatch draws the one the record names; no
+//    per-batch box cull (the renderer clips).
 //  - ROR 0x002210f0 i3rDrawMeshBlend: the writers' choice for a group with
 //    flags & 3 when i3rDrawModel has an opt. Per batch it builds the pools
 //    on the EE: the positions (opt mask bit 0) and normals (bit 1) through

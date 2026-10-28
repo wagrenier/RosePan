@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 13:57 at commit `1fc06ab` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-28 15:08 at commit `35e5fb7` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -149,7 +149,7 @@ Least-named game-code regions (64 KB blocks):
 - 163 TUs: todo 100, partial 8, verify 83, done 9
 - next: **i3d/i3rdraw.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
-- partial: `i3d/i3rdraw.cpp` 19/19 -- Left for this TU: depth-keyed batches (material packet m_sort +0x14: the ROM keys each batch with i3dViewGetDepth; the host draws in walk order with the depth b
+- partial: `i3d/i3rdraw.cpp` 19/19 -- Left for this TU: the shadow (render the shadow model into a host render target and project it through the STQ map; needs a renderer render-target feature). Mul
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -237,6 +237,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-28 15:08 `i3d/i3rdraw.cpp` partial: Depth-keyed batches: i3rDrawModel no longer records the whole model at a layer packet; i3rDrawMesh45 / 46 file one state packet per 0x4d mesh in its material's 
 - 2026-10-28 13:57 `i3d/i3rdraw.cpp` partial: Native mesh module draws every material layer of a batch: DrawBatch follows i3rPktCallStrips 0x221080 -- per layer of the mesh's material, the byte in the 0x4d 
 - 2026-10-28 13:17 `i3d/i3rdraw.cpp` partial: The black frames after the picture book are a camera problem, not a draw one: MagScene::draw runs with the world flag (2 actors and the forest map alive) and i3
 - 2026-10-28 12:48 `i3d/i3rdraw.cpp` partial: The white figure after the book was Brown's shadow model (pack file 2, never texture-assigned) drawn by MagScene::makeActorShadow into the off-screen 256x256 sh
@@ -244,7 +245,6 @@ Recent sessions:
 - 2026-10-28 11:36 `emy/emy_hfm.cpp` verify: Wrote HfmOutTest::Exec 0x149500, the last stub of the TU: a 0x2d-step motion walk-through (ROM switch via jump table 0x2ef4b0) written as a step-to-motion table
 - 2026-10-28 11:19 `i3d/i3rdraw.cpp` partial: Blend path wired: i3rDrawSetupBlend 0x220670 written (per channel the non-zero weights of the entry's 0x59 targets, curve at opt's time or static weight); i3rDr
 - 2026-10-28 11:05 `i3d/i3rdraw.cpp` partial: i3rDrawMesh45 / i3rDrawMesh46 part culls written (box test, i3dViewTestBoneBox through the entry's bone slots) and now decide i3rDrawModel's result; I3dBoneBoxe
-- 2026-10-28 10:14 `emy/emy_hfm.cpp` partial: Wrote HfmOutRide whole: start, restart, placePC, phases 0..3, phase 2's ten steps (jump table 0x2ef3c0: grab, mount, ride, hits, thrown, struggle, grip, nextHol
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -254,10 +254,10 @@ Recent sessions:
 | `unassigned@0016a914` | todo | 0/120/172 | 47.3 | 76 | 6 |
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 70 | 5 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
-| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 51 | 1 |
 | `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
+| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 51 | 1 |
+| `unassigned@00225018` | todo | 0/3/18 | 4.5 | 50 | 1 |
 | `utl/utlgame.cpp` | todo | 0/20/35 | 6.5 | 50 | 2 |
-| `unassigned@00225018` | todo | 0/3/18 | 4.5 | 45 | 0 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
 

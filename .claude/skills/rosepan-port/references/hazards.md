@@ -694,6 +694,16 @@ each read (PC: comment). How it was found: bisect with an environment switch aro
 (getenv in init, build.py --run 90), then gdbrun --break + "thread apply all bt" showed no thread
 blocked, so it is game logic, not a lock.
 
+## Data words that are 0 in the i3r file (2026-10-28)
+
+Symptom: a crash in i3rBuildMaterialPacket (null read at +0x41) the first time it ran on the host,
+in MagScene::drawActorShadow; then, once guarded, the book in Jennifer's hand vanished.
+Cause: items whose m_data is 0 -- an STQ map entity that i3rReplaceStqMapEntity fills at run time,
+a 0x56 batch's child 3 (the box) -- give getData() NULL on the host; the ROM reads EE address 0
+(zeros) and goes on, so the code never tests for it. The host skipped the batch, dropping the mesh.
+Fix: read such data as the ROM's zeros (kind 0 = skipped; the box centre = the local origin), with
+a PORT comment, never skip the draw.
+
 ## How to debug (the method that worked)
 
 - **The picture is the test.** Logs, stub hits and callcheck show the code ran, not that it is right.

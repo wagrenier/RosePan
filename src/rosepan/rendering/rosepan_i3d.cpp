@@ -67,7 +67,8 @@ enum RecordKind
     REC_MOVIE,
     REC_MODEL,
     REC_CAMERA,
-    REC_STRIP
+    REC_STRIP,
+    REC_MESH
 };
 
 struct Record
@@ -79,8 +80,8 @@ struct Record
     uint64_t        reg, value;     /* REC_REG */
     const uint64_t *regs;           /* REC_TEXREGS */
     int             movie[8];       /* REC_MOVIE: x0, y0, x1, y1, frame w / h, picture w / h */
-    size_t          index;          /* REC_MODEL / REC_CAMERA / REC_STRIP: into s_models /
-                                       s_cameras / s_strips */
+    size_t          index;          /* REC_MODEL / REC_CAMERA / REC_STRIP / REC_MESH: into
+                                       s_models / s_cameras / s_strips / s_meshes */
 };
 
 struct ModelDraw
@@ -92,6 +93,14 @@ struct ModelDraw
     int                tex_count;
     bool               has_opt;
     I3rBlendOpt        opt;
+};
+
+/* A model's one mesh (or batch), filed in its material's draw-set group
+ * by i3rDrawModel's part writers. */
+struct MeshDraw
+{
+    ModelDraw         model;
+    RosePanI3dMeshRef ref;
 };
 
 struct Camera
@@ -141,6 +150,7 @@ std::map<uintptr_t, Record> s_records;
 std::unordered_map<const uint64_t *, Binding> s_bindings;
 std::map<TexKey, const void *> s_textures;
 std::vector<ModelDraw> s_models;
+std::vector<MeshDraw> s_meshes;
 std::vector<Camera> s_cameras;
 std::vector<std::vector<RosePanI3dVu1Vertex>> s_strips;
 GsState s_state;
@@ -489,6 +499,18 @@ void DrawModel(const Record &r)
     RosePan_I3dMeshDraw(m.root, m.world, m.nodes, m.tex, m.tex_count, m.has_opt ? &m.opt : NULL);
 }
 
+void DrawMesh(const Record &r)
+{
+    if (r.index >= s_meshes.size())
+        return;
+    const MeshDraw &d = s_meshes[r.index];
+    const ModelDraw &m = d.model;
+    if (s_state.offx == 0 && s_state.offy == 0)
+        return;                                 /* an off-screen pass, as DrawModel */
+    RestoreState();
+    RosePan_I3dMeshDrawRef(m.root, m.world, m.nodes, m.tex, m.tex_count, m.has_opt ? &m.opt : NULL, &d.ref);
+}
+
 void ApplyReg(uint64_t reg, uint64_t value)
 {
     switch (reg)
@@ -643,6 +665,27 @@ void RosePan_I3dRecordModel(const void *at, const I3rRoot *root, const float *wo
     s_records[(uintptr_t)at] = r;
 }
 
+void RosePan_I3dRecordMesh(const void *at, const I3rRoot *root, const float *world,
+                           const float *nodes, const I3dTexEntry *tex, int tex_count,
+                           const I3rBlendOpt *opt, const RosePanI3dMeshRef *ref)
+{
+    MeshDraw d = {};
+    d.model.root = root;
+    memcpy(d.model.world, world, sizeof(d.model.world));
+    d.model.nodes = nodes;
+    d.model.tex = tex;
+    d.model.tex_count = tex_count;
+    d.model.has_opt = opt != NULL;
+    if (opt != NULL)
+        d.model.opt = *opt;
+    d.ref = *ref;
+    Record r = {};
+    r.kind = REC_MESH;
+    r.index = s_meshes.size();
+    s_meshes.push_back(d);
+    s_records[(uintptr_t)at] = r;
+}
+
 void RosePan_I3dRecordCamera(const void *at, const float *view, const float *projection)
 {
     Camera c;
@@ -684,6 +727,7 @@ void RosePan_I3dBeginFrame(void)
     s_records.clear();
     s_bindings.clear();
     s_models.clear();
+    s_meshes.clear();
     s_cameras.clear();
     s_strips.clear();
     s_state = GsState();
@@ -705,6 +749,7 @@ void RosePan_I3dReplay(const void *start, const void *end)
         case REC_PRIM:    DrawPrim(r); drew = true; break;
         case REC_MOVIE:   DrawMovie(r); drew = true; break;
         case REC_MODEL:   DrawModel(r); drew = true; break;
+        case REC_MESH:    DrawMesh(r); drew = true; break;
         case REC_STRIP:   DrawStrip(r); drew = true; break;
         case REC_CAMERA:
             if (r.index < s_cameras.size())

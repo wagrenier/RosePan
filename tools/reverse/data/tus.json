@@ -735,7 +735,7 @@
    "why": "I3D_I3M motion file root (id 0x303a68): id/version checks, relocators, node and key accessors; between i3rroot.cpp and i3croot.cpp, which it mirrors"
   },
   "i3d/i3rdraw.cpp": {
-   "notes": "Left for this TU: depth-keyed batches (material packet m_sort +0x14: the ROM keys each batch with i3dViewGetDepth; the host draws in walk order with the depth buffer -- needs the native module to defer and sort batch streams), and the shadow (render the shadow model into a host render target and project it through the STQ map on the 705 + 10 n layer; needs a renderer render-target feature). The multi-layer path is written but unseen: no material in the 200 s run has more than one layer; the first two-layer material verifies it (expect a second blended pass over the first). Screenshot taken with ROSEPAN_TEST_CAM=1; without it the frames after the book are black (camera, outside this TU: nobody places the scene camera or binds the PC after the book; see open-items.md Mesh draw). Method used: a counter in DrawMeshList over layer count and group bytes, logged every 256 meshes (removed).",
+   "notes": "Left for this TU: the shadow (render the shadow model into a host render target and project it through the STQ map; needs a renderer render-target feature). Multi-layer materials still unseen. Doubt: skinned sorted writers 0x222560 / 0x222aa0 key by the centroid of the skinned positions; the host keys by the batch box centre through the model world. No per-mesh or per-batch box cull on the host (the renderer clips). Materials with depth 2000, sort 1, order 2 occur in the book models and Jennifer's model; nothing on screen changed visibly with the new order. Run note: the 200 s smoke run sometimes ends with an access violation after frame 6240 (seen before this change too, with only a log probe added); one run reached 6780 clean and a gdbrun had no fault, so it is intermittent and unlocated. Rerun gdbrun.py with the smoke pad to catch it. Traps recorded in hazards.md: Data words that are 0 in the i3r file. Screenshot taken with ROSEPAN_TEST_CAM=1.",
    "ranges": [
     [
      "0021fb50",
@@ -772,6 +772,11 @@
      "date": "2026-10-28 13:57",
      "status": "partial",
      "summary": "Native mesh module draws every material layer of a batch: DrawBatch follows i3rPktCallStrips 0x221080 -- per layer of the mesh's material, the byte in the 0x4d mesh's +0x08 list names the batch's slot 0 strip group (-1 none), drawn with that layer's texture and TEST / ALPHA (was: group 0 with layer 0 only). Forest (ROSEPAN_TEST_CAM=1) and book cover unchanged; all 248064 meshes drawn in the run are one layer naming group 0."
+    },
+    {
+     "date": "2026-10-28 15:08",
+     "status": "partial",
+     "summary": "Depth-keyed batches: i3rDrawModel no longer records the whole model at a layer packet; i3rDrawMesh45 / 46 file one state packet per 0x4d mesh in its material's draw-set group (i3rGetMaterialPacket now runs on the host), key 0 or per 0x56 batch the view depth of the batch box centre, holding a camera and a mesh record (RosePan_I3dRecordMesh, RosePan_I3dMeshDrawRef), so meshes replay by draw set and sorted sets back to front. PORT guards for zero data words (STQ map entity, batch box). 200 s run with ROSEPAN_TEST_CAM=1: book cover pixel-identical, forest with Jennifer and the book she holds matches the previous progress shot."
     }
    ],
    "status": "partial",
