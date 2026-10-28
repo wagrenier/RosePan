@@ -1,5 +1,6 @@
 {
  "queue": [
+  "fix/ingame_camera.cpp",
   "unassigned@0010f944",
   "unassigned@0022e840",
   "unassigned@00106658",
@@ -303,6 +304,9 @@
    ],
    "status": "verify",
    "why": "The EmyOut base class (ctor 0x166a1c, vptr +0x34) and the emy* helpers its 77 subclasses call (emyStartMove, emyChkInSight, emyCanReach, emyChkHitReach); ends where Eff0 (0x16a914) starts. No source string; named after the class like emy_main / emy_hfm."
+  },
+  "fix/ingame_camera.cpp": {
+   "task": "TOP PRIORITY (the user, 2026-10-28): get the game on screen in 3D after New Game; the user thinks the camera is the issue. Known (open-items.md Open questions, 2026-10-28 i3d/i3rdraw.cpp note): after the picture book MagScene::draw runs (flags 0x101, 2 actors, forest map) but i3rDrawModel culls everything because the scene camera is still the default -- mode 0, no parent, world (0, 1000, 0) looking along +y, away from actor 0 at (-700, -88, 70). No PC is bound (m_pc_no -1, so GamMan::setPC never calls setCameraMode(m_cameraMode)) and the script calls no camera native (seqFunc016 0x206640). With ROSEPAN_TEST_CAM=1 (MagScene::testCamera debug hack) Jennifer draws textured and lit in the forest, so the draw path works. Do: find and write (as real ROR code, in the files they belong to) whatever places the camera or binds the PC after the book -- GamMan::setPC from the script's PC native, MagLifePC::setActor, the opening's TskCamera, setCameraMode 3..5 / the map camera path, and who writes DogCamera +0x1d0 / +0x190..+0x1c0 -- until the 200 s smoke run (tus.py check fix/ingame_camera.cpp --run 200) shows the first room in 3D without ROSEPAN_TEST_CAM. The picture decides. Never fix it by forcing the test camera on; a PC: workaround only with a note why. If it splits over several sessions, finish partial with the next step in the notes; when the room shows, finish done and re-assess the queue."
   },
   "game/gamfile.cpp": {
    "notes": "Black screen, as before: the code is complete but no boot path shows it yet; every FileReader::read caller that runs in the boot (GamMan::loadSystemData / loadStage, MagScene loaders behind MagScene::start) is a stub, and SprTexture's loads now get real sizes but stop at BedPfh::BedPfh / getFileIndex (stubs, bed/bedpfh.cpp). The first run whose loads go through FileReader with g_nowLoading up should show LOADING.BIN frames: mark this done then. The file name game/gamfile.cpp is a guess (no source string; game/ by link order). What remains of unassigned@001bde58: 0x1bde58..0x1be2cc is the language-select menu (mnusllg.rpk; belongs to mnu/mnuSelectLanguage.cpp from about 0x1bd028) and GamFont 0x1beb70..0x1c05c0 (game/gamfont.cpp). The ROM's month table 0x2b8da8 has 0 for December; kept.",
