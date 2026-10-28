@@ -1148,6 +1148,33 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   40 / 100), not a goal vector; `updateSectaCells` 0x11a6b0 refreshes it.
 - Brown's motion sequence table is 0x297418 (constructor 0x125aa4); NULL on the host like the PC's.
 
+## The secta world (`sct/sctlayer.cpp`, 0x17c0f0..0x17e540, 2026-10-28)
+
+Where the floor is, per room: a sky pack's `sector.sec` (MagScene::loadTenkyu hands it to
+`SctWorld::setup` 0x17c1f4; the world is MagScene +0x8542c, bss 0x7811ac). Class `SctLayer` is the
+ELF's (vtable 0x2e4520, vptr +0x14, EE 0x18); the owner `SctWorld` (0x68: flags, data, 4 layers at +8)
+and all method names are ror-inferred (batch sctlayer_001). Format (checked on MAPUNIT.BIN's 245 packs):
+- file: 0x20-byte head {0x100, 4 layer offsets (0 none), pad}; layer: {no, sectors, cells, groups}
+  then sectors (0x80), cells (0x90, `GamSecta`), groups (0x20), the groups' member words.
+- sector: id, 16 linked sector ids (-1 ends), +0x44 cell count, +0x48 footstep sound, +0x4c bounds
+  x0 z0 x1 z1, +0x5c flags (bit 0 = +0x60 is an offset from the sector -- always on the disc; the
+  ROM relocates in place and leaves the bit set), +0x60 first cell, +0x64 / +0x68 route-search marks.
+- cell: id, sector, +8 flags (0x2 z slope from +0x34 at z0 to +0x2c at z1, 0x8 x slope from +0x30 at
+  x0, both = the z slope plus the x rise; 0x4 blocked; 0xf0 one triangle half 0x10 / 0x20 / 0x40 /
+  0x80, see isInCell), +0x10 point, +0x1c bounds, +0x3c eight neighbour cells by direction (0..3 the
+  edges +z +x -z -x, 4..7 the corners), +0x5c their costs, +0x7c..+0x88 the cell walk's marks.
+- group: name (0x14, strcmp key of native 281 ops 200 / 201), member offset, count, flag bit 0.
+Queries: findCells 0x17c340 (per layer: findCell -- start cell, its sector, the sectors holding pos,
+floor within f12 of pos y -- then with f13 > 0 the nearest within that radius); getCellY 0x17dd5c
+(100000 outside); searchPath 0x17d298 (sector BFS from the goal 0x17cf0c, then a cost spread sector
+by sector 0x17d62c and in the last sector 0x17d9ac; direction orders data 0x298e20; a blocked cell
+ends the path at the cheapest cell beside it); canWalkStraight 0x17e0a8 (edge table data 0x2f30c8).
+Host: offsets stay offsets (SctLayer::getSectorCells / getGroupCell resolve them), cell +0x88 holds a
+direction index instead of the EE pointer. Tested 2026-10-28 by a temporary self-test on two packs
+(paths are neighbour chains both ways, slopes match the stored points, group bits set / clear).
+Some triangle cells' stored point lies outside their own bounds (5 of 48 in MAPUNIT's first pack), so
+a cell is not always found at its own point -- the data, not the port (isInCell tests the bounds).
+
 ## The texture table (`dog/dogtexinfo.cpp`, 0x1161e4..0x11764c, 2026-10-22)
 
 - **DogTexInfo** (EE 0x20; the scene's at +0x29520, 256 entries): +0 m_max_tex, +4 m_num_tex,

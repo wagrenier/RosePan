@@ -117,7 +117,7 @@ int MagLifeBwn::searchPath(const float *target)
     float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     getPosition(pos);
     m_goal_dist = utlVecDist(pos, target);
-    FUN_0017c340(&m_scene->m_8542c, target, m_goal_secta, 0, 100.0f, 0.0f);
+    m_scene->m_8542c.findCells(target, m_goal_secta, 0, 100.0f, 0.0f);
     if (m_goal_secta[0] == NULL)
         return -3;
     GamSecta **nowsct = getSectaCells();
@@ -125,12 +125,12 @@ int MagLifeBwn::searchPath(const float *target)
         ROR_ASSERT(nowsct); /* 338 */
     else if (nowsct[0] == NULL)
         return -2;
-    MagSectaPathReq req;
+    SctPathReq req;
     req.m_list = 0;
     req.m_from = nowsct;
     req.m_to = m_goal_secta;
     req.m_path = &m_search_path;
-    if (FUN_0017d298(&m_scene->m_8542c.m_list[0], &req) == 0)
+    if (m_scene->m_8542c.m_list[0].searchPath(&req) == 0)
         return -1;
     /* (The ROM counts up to m_search_path.m_num here and uses nothing.) */
     ROR_ASSERT(m_search_path.m_num > 0); /* 400 */
@@ -149,7 +149,7 @@ int MagLifeBwn::searchPath(const float *target)
         float *last = m_search_line[num];
         if (num < 2)
         {
-            if (FUN_0017e0a8(40.0f, &m_scene->m_8542c.m_list[0], pos, target) == 0)
+            if (m_scene->m_8542c.m_list[0].canWalkStraight(pos, target, 40.0f) == 0)
                 return -100;
             for (int k = 0; k < 4; k++)
                 last[k] = target[k];
@@ -257,7 +257,7 @@ int MagLifeBwn::stepMotion()
             pos[3] = 1.0f;
             for (int i = 0; i < 4; i++)
                 cells[i] = m_secta[i];
-            FUN_0017c340(&m_scene->m_8542c, pos, cells, m_secta[0] != NULL, 100.0f, 0.0f);
+            m_scene->m_8542c.findCells(pos, cells, m_secta[0] != NULL, 100.0f, 0.0f);
             if (cells[0] != NULL && testObjAt(back) == 0)
             {
                 a = m_actor;
@@ -298,7 +298,7 @@ int MagLifeBwn::stepMotion()
     pos[3] = 1.0f;
     for (int i = 0; i < 4; i++)
         cells[i] = m_secta[i];
-    FUN_0017c340(&m_scene->m_8542c, pos, cells, m_secta[0] != NULL, 100.0f, 0.0f);
+    m_scene->m_8542c.findCells(pos, cells, m_secta[0] != NULL, 100.0f, 0.0f);
     int result;
     if (cells[0] == NULL)
     {
@@ -449,7 +449,7 @@ void MagLifeBwn::followPath()
     float now[4];
     for (int k = 0; k < 4; k++)
         now[k] = m_actor->m_trans[k];
-    FUN_0017c340(&m_scene->m_8542c, now, m_secta, m_secta[0] != NULL, 100.0f, 0.0f);
+    m_scene->m_8542c.findCells(now, m_secta, m_secta[0] != NULL, 100.0f, 0.0f);
 
     u_int cur = (u_int)m_pos_index;
     float width = m_search_width[(int)cur >> 16];
@@ -870,7 +870,7 @@ void MagLifeBwn::escapeNoFloor()
         pos[k] = a->m_trans[k];
     if (m_escape < 0)
     {
-        FUN_0017c340(&m_scene->m_8542c, pos, m_secta, 0, 100.0f, 0.0f);
+        m_scene->m_8542c.findCells(pos, m_secta, 0, 100.0f, 0.0f);
         m_escape = 0;
     }
     u_int v = (u_int)m_escape;
@@ -895,7 +895,7 @@ void MagLifeBwn::escapeNoFloor()
         pos[1] += 0.0f;
         pos[3] = 1.0f;
         GamSecta *cells[4];
-        FUN_0017c340(&m_scene->m_8542c, pos, cells, 0, 100.0f, 0.0f);
+        m_scene->m_8542c.findCells(pos, cells, 0, 100.0f, 0.0f);
         if (cells[0] == NULL)
         {
             m_escape++;
@@ -911,7 +911,7 @@ void MagLifeBwn::escapeNoFloor()
         ROR_ASSERT(0); /* 1895 */
         return;
     }
-    FUN_0017c340(&m_scene->m_8542c, pos, m_secta, 0, 100.0f, 0.0f);
+    m_scene->m_8542c.findCells(pos, m_secta, 0, 100.0f, 0.0f);
     if (m_secta[0] != NULL)
     {
         m_escape = 0;

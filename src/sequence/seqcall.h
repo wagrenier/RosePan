@@ -76,7 +76,7 @@ intptr_t seqFunc253(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t);
 intptr_t seqFunc281(intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t); // ROR 0x0020df98
 
 /* Native 281's helpers. */
-intptr_t seqSectorFlags(int op, int key, unsigned int bits);             // ROR 0x0020de34
+intptr_t seqSectorFlags(int op, const char *key, unsigned int bits);             // ROR 0x0020de34
 int seqGetIdPair(unsigned int no, int *id, int *flag);                   // ROR 0x0020dea8
 
 #endif /* _SEQUENCE_SEQCALL_H */

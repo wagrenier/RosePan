@@ -154,7 +154,7 @@ struct MagLifeControlChara : MagLife
     int       m_mode;           // ROR 0x54: setActor's third argument
     DogActor *m_actor;          // ROR 0x58: the bound actor, NULL = none (asserted in mag/maglife.cpp)
     const MagLifeMotionSeq *m_motion_seq; // ROR 0x5c: setMotionSeqTable (the asserts' m_tbl_motion_state)
-    GamSecta *m_secta[4];       // ROR 0x60: the secta cells under the actor, one per list (FUN_0017c340); clearGoal clears them, the constructor the first
+    GamSecta *m_secta[4];       // ROR 0x60: the secta cells under the actor, one per list (SctWorld::findCells); clearGoal clears them, the constructor the first
     int       m_70;             // ROR 0x70: clearGoal sets -1
     int       m_74;             // ROR 0x74: the constructor clears it
     int       m_78;             // ROR 0x78: MagLifePC::setActor: 0 while the fade state is 5, else 1

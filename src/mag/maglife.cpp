@@ -149,7 +149,7 @@ void MagLifeControlChara::updateSectaCells()
     float pos[4];
     for (int i = 0; i < 4; i++)
         pos[i] = m_actor->m_trans[i];
-    FUN_0017c340(&m_scene->m_8542c, pos, m_secta, m_secta[0] != NULL, 40.0f, 0.0f);
+    m_scene->m_8542c.findCells(pos, m_secta, m_secta[0] != NULL, 40.0f, 0.0f);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -162,7 +162,7 @@ GamSecta **MagLifeControlChara::getSectaCells()
         float pos[4];
         for (int i = 0; i < 4; i++)
             pos[i] = m_actor->m_trans[i];
-        FUN_0017c340(&m_scene->m_8542c, pos, m_secta, 0, 40.0f, 0.0f);
+        m_scene->m_8542c.findCells(pos, m_secta, 0, 40.0f, 0.0f);
     }
     return m_secta;
 }

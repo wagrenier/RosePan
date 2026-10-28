@@ -2458,41 +2458,46 @@
 /* 0017b918 0000013c */ FUN_0017b918(){}
 /* 0017ba54 000000fc */ FUN_0017ba54(){}
 /* 0017bb50 000005a0 */ FUN_0017bb50(){}
-/* 0017c0f0 0000005c */ FUN_0017c0f0(){}
-/* 0017c14c 000000a8 */ FUN_0017c14c(){}
-/* 0017c1f4 000000cc */ FUN_0017c1f4(){}
-/* 0017c2c0 00000080 */ FUN_0017c2c0(){}
-/* 0017c340 000000b0 */ FUN_0017c340(){}
-/* 0017c3f0 0000006c */ FUN_0017c3f0(){}
-/* 0017c45c 00000098 */ sectorSetFlags(){}  // ror
-/* 0017c4f4 00000098 */ sectorClearFlags(){}  // ror
-/* 0017c58c 00000024 */ FUN_0017c58c(){}
-/* 0017c5b0 0000005c */ FUN_0017c5b0(){}
-/* 0017c60c 00000148 */ FUN_0017c60c(){}
-/* 0017c754 0000005c */ FUN_0017c754(){}
-/* 0017c7b0 00000064 */ FUN_0017c7b0(){}
-/* 0017c814 0000002c */ FUN_0017c814(){}
-/* 0017c844 00000070 */ FUN_0017c844(){}
-/* 0017c8b8 000000dc */ FUN_0017c8b8(){}
-/* 0017c994 00000114 */ FUN_0017c994(){}
-/* 0017caa8 000000a8 */ FUN_0017caa8(){}
-/* 0017cb50 00000118 */ FUN_0017cb50(){}
-/* 0017cc68 00000080 */ FUN_0017cc68(){}
-/* 0017cce8 0000018c */ FUN_0017cce8(){}
-/* 0017ce74 00000094 */ FUN_0017ce74(){}
-/* 0017cf0c 0000038c */ FUN_0017cf0c(){}
-/* 0017d298 000000c4 */ FUN_0017d298(){}
-/* 0017d35c 000002d0 */ FUN_0017d35c(){}
-/* 0017d62c 00000380 */ FUN_0017d62c(){}
-/* 0017d9ac 000003b0 */ FUN_0017d9ac(){}
-/* 0017dd5c 00000174 */ FUN_0017dd5c(){}
-/* 0017ded0 000000d8 */ FUN_0017ded0(){}
-/* 0017dfa8 00000044 */ FUN_0017dfa8(){}
-/* 0017dff0 000000b4 */ FUN_0017dff0(){}
-/* 0017e0a8 00000330 */ FUN_0017e0a8(){}
-/* 0017e3d8 0000008c */ FUN_0017e3d8(){}
-/* 0017e464 0000006c */ FUN_0017e464(){}
-/* 0017e4d0 00000070 */ FUN_0017e4d0(){}
+
+// *****************************************************************************
+// FILE -- sct/sctlayer.cpp
+// *****************************************************************************
+
+/* 0017c0f0 0000005c */ SctWorld::SctWorld(){}  // ror
+/* 0017c14c 000000a8 */ SctWorld::~SctWorld(){}  // ror
+/* 0017c1f4 000000cc */ SctWorld::setup(){}  // ror
+/* 0017c2c0 00000080 */ SctWorld::release(){}  // ror
+/* 0017c340 000000b0 */ SctWorld::findCells(){}  // ror
+/* 0017c3f0 0000006c */ SctWorld::calcSize(){}  // ror
+/* 0017c45c 00000098 */ SctWorld::setFlags(){}  // ror
+/* 0017c4f4 00000098 */ SctWorld::clearFlags(){}  // ror
+/* 0017c58c 00000024 */ SctLayer::SctLayer(){}  // ror
+/* 0017c5b0 0000005c */ SctLayer::~SctLayer(){}  // ror
+/* 0017c60c 00000148 */ SctLayer::setup(){}  // ror
+/* 0017c754 0000005c */ SctLayer::release(){}  // ror
+/* 0017c7b0 00000064 */ SctLayer::calcSize(){}  // ror
+/* 0017c814 0000002c */ SctLayer::relocSector(){}  // ror
+/* 0017c844 00000070 */ SctLayer::relocGroup(){}  // ror
+/* 0017c8b8 000000dc */ SctLayer::findCell(){}  // ror
+/* 0017c994 00000114 */ SctLayer::findCellNear(){}  // ror
+/* 0017caa8 000000a8 */ SctLayer::findCellInSector(){}  // ror
+/* 0017cb50 00000118 */ SctLayer::findNearCellInSector(){}  // ror
+/* 0017cc68 00000080 */ SctLayer::testCell(){}  // ror
+/* 0017cce8 0000018c */ SctLayer::isInCell(){}  // ror
+/* 0017ce74 00000094 */ SctLayer::findSector(){}  // ror
+/* 0017cf0c 0000038c */ SctLayer::searchSectorRoute(){}  // ror
+/* 0017d298 000000c4 */ SctLayer::searchPath(){}  // ror
+/* 0017d35c 000002d0 */ SctLayer::searchCellPath(){}  // ror
+/* 0017d62c 00000380 */ SctLayer::expandCellPath(){}  // ror
+/* 0017d9ac 000003b0 */ SctLayer::finishCellPath(){}  // ror
+/* 0017dd5c 00000174 */ SctLayer::getCellY(){}  // ror
+/* 0017ded0 000000d8 */ SctLayer::findNextCell(){}  // ror
+/* 0017dfa8 00000044 */ SctLayer::clearSectorMarks(){}  // ror
+/* 0017dff0 000000b4 */ SctLayer::clearCellMarks(){}  // ror
+/* 0017e0a8 00000330 */ SctLayer::canWalkStraight(){}  // ror
+/* 0017e3d8 0000008c */ SctLayer::findGroup(){}  // ror
+/* 0017e464 0000006c */ SctLayer::setGroupFlags(){}  // ror
+/* 0017e4d0 00000070 */ SctLayer::clearGroupFlags(){}  // ror
 
 // *****************************************************************************
 // FILE -- wrd/wrdsrv.cpp

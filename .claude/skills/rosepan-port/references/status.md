@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 07:32 at commit `a9c27f0` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-28 08:24 at commit `bf15009` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,17 +10,17 @@ Generated 2026-10-28 07:32 at commit `a9c27f0` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6872**, named **5439** (79%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 3837
-- context-name ledger: 4137 entries; overrides of wrong library matches: 5
-- placed in a source file: 4684/6872 in 120 files
+- game functions: **6872**, named **5472** (80%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 3870
+- context-name ledger: 4170 entries; overrides of wrong library matches: 5
+- placed in a source file: 4719/6872 in 121 files
 
 Least-named game-code regions (64 KB blocks):
 
 | block | named | inferred files |
 |---|---|---|
 | `00150000` | 8/272 (3%) | - |
-| `00170000` | 52/251 (21%) | snd/sndman.cpp, wrd/wrdsrv.cpp |
+| `00170000` | 85/251 (34%) | sct/sctlayer.cpp, snd/sndman.cpp, wrd/wrdsrv.cpp |
 | `00160000` | 96/268 (36%) | emy/emy_manager.cpp, emy/emy_main.cpp |
 | `00140000` | 128/293 (44%) | emy/emy_hfm.cpp, mag/magscenecmd.cpp, mag/magloader.cpp |
 | `001b0000` | 41/81 (51%) | game/gamfile.cpp, mnu/mnuSelectLanguage.cpp |
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3980**; stubs: **379**
+- reconstructed RoR functions: **4015**; stubs: **370**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -74,7 +74,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 237 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 228 |
 | `src/mag/maglife.cpp` | 13 | 8 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -117,6 +117,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/rx/rxsnd.cpp` | 222 | 0 |
 | `src/rx/rxsys.cpp` | 74 | 6 |
 | `src/rx/rxthread.cpp` | 53 | 0 |
+| `src/sct/sctlayer.cpp` | 35 | 0 |
 | `src/sequence/seqcall.cpp` | 43 | 0 |
 | `src/sequence/sequence.cpp` | 19 | 0 |
 | `src/sequence/seqvm.cpp` | 143 | 0 |
@@ -143,7 +144,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 159 TUs: todo 97, partial 11, verify 78, done 9
+- 160 TUs: todo 97, partial 11, verify 79, done 9
 - next: **unassigned@00166a1c** (pinned in the queue)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - partial: `emy/emy_hfm.cpp` 46/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec
@@ -211,6 +212,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `rx/rxsnd.cpp` 222/222 -- Complete apart from two unreferenced trivia (0x2384b0 empty, 0x23a910 returns its argument). Screen black as before: sound has no picture and the boot reaches n
 - verify: `rx/rxsys.cpp` 74/119 -- Status verify: nothing calls rxSysInit yet - main 0x2045a8 is still the placeholder in src/main.cpp, so the screenshot is the black placeholder frame. Next: mai
 - verify: `rx/rxthread.cpp` 53/53 -- Complete; verify because main (unassigned@001fd424) is still the placeholder, so nothing calls rxThInit in the smoke run (black frame as before). A temporary ca
+- verify: `sct/sctlayer.cpp` 35/35 -- verify: a temporary self-test on two MAPUNIT.BIN packs (not committed) found every flat and sloped cell at its point, gave neighbour-chain paths both ways and s
 - verify: `sequence/seqcall.cpp` 43/43 -- TU complete: all 43 functions written; verify because no smoke run reaches native 252 (the boot pad stops at NowLoading) and sound has no picture. Decisions: st
 - verify: `sequence/sequence.cpp` 19/19 -- All 19 functions written; the smoke run executes Sequence::exec every frame with empty pools (screen black as before: no image is loaded because GamMan::loadSys
 - verify: `sequence/seqvm.cpp` 143/143 -- Status verify: complete code, screen still black. New in the boot: the registered threads run and reach seqFunc004 0x205570 and seqFunc029 0x208b98 (stubs in se
@@ -232,6 +234,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-28 08:24 `sct/sctlayer.cpp` verify: The secta world (floor cells) split out of unassigned@00166a1c as sct/sctlayer.cpp 0x17c0f0..0x17e540 and written in full: SctWorld (scene +0x8542c, sector.sec 
 - 2026-10-28 07:32 `mag/maglifebwnctrl.cpp` verify: MagLifeBwnCtrlModeBark::live 0x129028 written (18 phases: the nearest enemy, walk to 135 / 110 for kinds 0x401 / 0x421, turn, bark 0x76 with the per-frame face 
 - 2026-10-28 07:24 `mag/maglifebwnctrl.cpp` partial: MagLifeBwnCtrl modes: Follow::live with followPC 0x127558, Find::init / live with isAtDoor 0x128724, searchDoorSide 0x128854, findBest / isFindTarget wrappers, 
 - 2026-10-28 07:02 `mag/maglifebwnctrl.cpp` partial: MagLifeBwnCtrl, the command layer over Brown: pinned 0x1267c0..0x12bc20; the constructor, requestState / applyMode / live over the 14 embedded mode objects, eve
@@ -239,11 +242,10 @@ Recent sessions:
 - 2026-10-27 22:32 `mag/maglifepcmove.cpp` verify: mag/maglifepcmove.cpp: pinned 0x11e4c4..0x120788 (moveBy 0x11ee00 included) and wrote all 12 functions: sweepMove (object test, cylinder sweep, wall slide), swe
 - 2026-10-27 21:53 `mag/maglifepcmode.cpp` verify: The rest of the PC modes: AtkWait2D (with getTurnStep and the 0x2ead98 weapon x height table), AtkMove2D, Attacking (combo chain and the weapon hit spheres agai
 - 2026-10-27 21:41 `mag/maglifepcmode.cpp` partial: The standing-and-walking modes: MagLifePCMode::applyRootMotion / moveBy / live, Null, Wait (init, live, pad, updateIdle), Walk2D, Run2D, Turn (init, live, pad, 
-- 2026-10-27 21:27 `mag/maglifepc3.cpp` verify: MagLifePC motions reconstructed: all 14 functions of 0x11d720..0x11e0d8 (initMotion, changeMotion by name and the unimplemented by-number overload, loadMotion, 
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00166a1c` | todo | 0/37/342 | 94.7 | 137 | 4 |
+| `unassigned@00166a1c` | todo | 0/28/307 | 85.6 | 105 | 3 |
 | `mag/maglife.cpp` | partial | 13/8/49 | 4.6 | 89 | 0 |
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 60 | 3 |
 | `unassigned@00103edc` | todo | 0/16/23 | 1.6 | 57 | 1 |
@@ -267,7 +269,6 @@ Recent sessions:
 | `001be2cc` | FileReader::FileReader | 24 | ror | missing | game/gamfile.cpp |
 | `00215bb4` | dbgTraceVector4 | 22 | ror | stub | - |
 | `002155f4` | FUN_002155f4 | 22 | - | missing | - |
-| `0017c340` | FUN_0017c340 | 15 | - | stub | - |
 | `001832e8` | msgGetSysText | 13 | ror | stub | - |
 | `0011a704` | MagLifeControlChara::playSe | 12 | ror | stub | mag/maglife.cpp |
 | `001026b0` | utlPlaySe | 11 | ror | stub | utl/utlgame.cpp |
@@ -300,4 +301,5 @@ Recent sessions:
 | `00104150` | utlSetBwnObjFlag | 4 | ror | stub | - |
 | `001a074c` | MnuTextList::close | 4 | ror | stub | mnu/mnuselect.cpp |
 | `0010376c` | utlCollectEmyInfoAt | 4 | ror | stub | utl/utlgame.cpp |
+| `001bedc0` | GamFont::setTarget | 4 | ror | stub | - |
 

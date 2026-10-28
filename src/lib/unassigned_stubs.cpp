@@ -170,19 +170,6 @@ int FUN_00176afc(Obj176a3c *obj, i3dContext *ctx, MagScene *scene)
     return {};
 }
 
-// stub of ROR 0x0017c2c0
-void FUN_0017c2c0(Obj17c0f0 *obj)
-{
-    ROSEPAN_STUB("FUN_0017c2c0", 0x0017c2c0);
-}
-
-// stub of ROR 0x0017c1f4
-int FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy)
-{
-    ROSEPAN_STUB("FUN_0017c1f4", 0x0017c1f4);
-    return {};
-}
-
 
 // stub of ROR 0x00215bb4
 void dbgTraceVector4(const float *v)
@@ -339,13 +326,6 @@ int utlStrEqualNoCase(const char *a, const char *b)
 void FUN_0017772c(Obj176a3c *obj)
 {
     ROSEPAN_STUB("FUN_0017772c", 0x0017772c);
-}
-
-// stub of ROR 0x0017c340
-void FUN_0017c340(Obj17c0f0 *obj, const float *pos, GamSecta **hit, int arg,
-                   float r, float h)
-{
-    ROSEPAN_STUB("FUN_0017c340", 0x0017c340);
 }
 
 
@@ -871,18 +851,6 @@ const char * msgGetSysText(int no)
     /* PC: "" not NULL -- MnuPBook::setPageText strlen()s it. The ROM reads
      * 0x1d4 string pointers at data 0x298fe8 (datadump.py 298fe8 468 S:text). */
     return "";
-}
-
-// stub of ROR 0x0017c4f4
-void sectorClearFlags(Obj17c0f0 *obj, int key, u_int bits, int rec)
-{
-    ROSEPAN_STUB("sectorClearFlags", 0x0017c4f4);
-}
-
-// stub of ROR 0x0017c45c
-void sectorSetFlags(Obj17c0f0 *obj, int key, u_int bits, int rec)
-{
-    ROSEPAN_STUB("sectorSetFlags", 0x0017c45c);
 }
 
 // stub of ROR 0x0016aa04
@@ -1501,27 +1469,6 @@ float utlRandRangeF(float lo, float hi)
     return {};
 }
 
-// stub of ROR 0x0017d298
-int FUN_0017d298(MagSectaList *list, MagSectaPathReq *req)
-{
-    ROSEPAN_STUB("FUN_0017d298", 0x0017d298);
-    return {};
-}
-
-// stub of ROR 0x0017dd5c
-float FUN_0017dd5c(MagSectaList *list, int id, const float *pos, float h)
-{
-    ROSEPAN_STUB("FUN_0017dd5c", 0x0017dd5c);
-    return {};
-}
-
-// stub of ROR 0x0017ded0
-int FUN_0017ded0(MagSectaList *list, int id, const float *pos, float r)
-{
-    ROSEPAN_STUB("FUN_0017ded0", 0x0017ded0);
-    return {};
-}
-
 // stub of ROR 0x001694cc
 int EmyOut::playSE(int no)
 {
@@ -1680,13 +1627,6 @@ void MagLifePC::slideOffObj(float *out, const float *delta, u_int oid)
 int MagLifePC::testObjHit(const float *pos, u_int *oid)
 {
     ROSEPAN_STUB("MagLifePC::testObjHit", 0x0011ccd4);
-    return {};
-}
-
-// stub of ROR 0x0017e0a8
-int FUN_0017e0a8(float r, MagSectaList *list, const float *from, const float *to)
-{
-    ROSEPAN_STUB("FUN_0017e0a8", 0x0017e0a8);
     return {};
 }
 

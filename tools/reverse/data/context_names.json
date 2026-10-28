@@ -7055,17 +7055,215 @@
   "was": "FUN_0017762c",
   "why": "deletes all 0x110 table entries through their vtable slot 1, resets +0x448 / +0x1294 / +0x1298 / +0xc8c; GamMan::clearPool20b00 calls it on scene +0x837e0"
  },
+ "0017c0f0": {
+  "name": "SctWorld::SctWorld",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c0f0",
+  "why": "constructs the four SctLayers at +8 (stride 0x18), clears +0/+4; owner of sector.sec world (scene +0x8542c, 4 SctLayers at +8)"
+ },
+ "0017c14c": {
+  "name": "SctWorld::~SctWorld",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c14c",
+  "why": "release() then the four SctLayer destructors through their vtable, deleting variant on bit 1"
+ },
+ "0017c1f4": {
+  "name": "SctWorld::setup",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c1f4",
+  "why": "takes sector.sec (heap copy when a2), m_flags|=2, sets up each layer at its header offset; MagScene's loader asserts it"
+ },
+ "0017c2c0": {
+  "name": "SctWorld::release",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c2c0",
+  "why": "releases the four layers, frees its heap copy when flag 2"
+ },
+ "0017c340": {
+  "name": "SctWorld::findCells",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c340",
+  "why": "for each layer: hit[i] = findCellNear(pos, hit[i], f12, f13); a3 0 clears hit first"
+ },
+ "0017c3f0": {
+  "name": "SctWorld::calcSize",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c3f0",
+  "why": "0x20 + calcSize of each layer the header names: the copy size setup allocates"
+ },
  "0017c45c": {
-  "name": "sectorSetFlags",
+  "name": "SctWorld::setFlags",
   "tag": "ror-inferred",
   "was": "FUN_0017c45c",
-  "why": "on the scene's +0x8542c (sector.sec) object: record rec (or all four 0x18-byte records at +8 when rec < 0) gets 0x17e464(key, bits), which ORs bits into each entry +8 of the group key finds; native 281 op 200"
+  "why": "setGroupFlags on layer a3 or all four when a3 < 0 (native 281 op 200)"
  },
  "0017c4f4": {
-  "name": "sectorClearFlags",
+  "name": "SctWorld::clearFlags",
   "tag": "ror-inferred",
   "was": "FUN_0017c4f4",
-  "why": "sectorSetFlags' inverse (0x17e4d0 clears the bits); native 281 op 201"
+  "why": "clearGroupFlags on layer a3 or all four when a3 < 0 (native 281 op 201)"
+ },
+ "0017c58c": {
+  "name": "SctLayer::SctLayer",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c58c",
+  "why": "stores _vt$8SctLayer at +0x14, clears +0..+0x10"
+ },
+ "0017c5b0": {
+  "name": "SctLayer::~SctLayer",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c5b0",
+  "why": "vtable slot 1 of _vt$8SctLayer: release(), deleting variant"
+ },
+ "0017c60c": {
+  "name": "SctLayer::setup",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c60c",
+  "why": "takes one layer of sector.sec: sectors at +0x10 (0x80 each), cells (0x90), groups (0x20), relocates them"
+ },
+ "0017c754": {
+  "name": "SctLayer::release",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c754",
+  "why": "frees the heap copy when flag 2, clears the five words"
+ },
+ "0017c7b0": {
+  "name": "SctLayer::calcSize",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c7b0",
+  "why": "layer byte size: 0x10 + sectors*0x80 + cells*0x90 + groups*0x20 + each group's member words"
+ },
+ "0017c814": {
+  "name": "SctLayer::relocSector",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c814",
+  "why": "turns sector +0x60 (cells offset from the sector) into a pointer when flag bit 0"
+ },
+ "0017c844": {
+  "name": "SctLayer::relocGroup",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c844",
+  "why": "turns group +0x14 into a pointer and its member cell indices into cell pointers when flag bit 0"
+ },
+ "0017c8b8": {
+  "name": "SctLayer::findCell",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c8b8",
+  "why": "the cell under pos within f12 vertically: start, start's sector, then every sector whose bounds hold pos"
+ },
+ "0017c994": {
+  "name": "SctLayer::findCellNear",
+  "tag": "ror-inferred",
+  "was": "FUN_0017c994",
+  "why": "findCell, then with radius f13: the nearest cell within it (start, its sector, every sector near pos)"
+ },
+ "0017caa8": {
+  "name": "SctLayer::findCellInSector",
+  "tag": "ror-inferred",
+  "was": "FUN_0017caa8",
+  "why": "first cell of sector a1 that testCell accepts with radius 0"
+ },
+ "0017cb50": {
+  "name": "SctLayer::findNearCellInSector",
+  "tag": "ror-inferred",
+  "was": "FUN_0017cb50",
+  "why": "the cell of sector a1 closest to pos among those testCell accepts with radius f13"
+ },
+ "0017cc68": {
+  "name": "SctLayer::testCell",
+  "tag": "ror-inferred",
+  "was": "FUN_0017cc68",
+  "why": "getCellY(cell, pos, f13) not 100000 and within +-f12 of pos y"
+ },
+ "0017cce8": {
+  "name": "SctLayer::isInCell",
+  "tag": "ror-inferred",
+  "was": "FUN_0017cce8",
+  "why": "pos inside cell id's x/z bounds grown by f12, and inside its triangle half (flags 0xf0)"
+ },
+ "0017ce74": {
+  "name": "SctLayer::findSector",
+  "tag": "ror-inferred",
+  "was": "FUN_0017ce74",
+  "why": "first sector from a2 whose bounds grown by f12 hold pos x/z, -1 none"
+ },
+ "0017cf0c": {
+  "name": "SctLayer::searchSectorRoute",
+  "tag": "ror-inferred",
+  "was": "FUN_0017cf0c",
+  "why": "breadth first over the sector links from goal a2 to start a1 (marks +0x5c bit 31, +0x64 links, +0x68 prev); writes the route start..goal"
+ },
+ "0017d298": {
+  "name": "SctLayer::searchPath",
+  "tag": "ror-inferred",
+  "was": "FUN_0017d298",
+  "why": "the request's cells in its layer, the sector route, then searchCellPath into the request's path (GamMan::findSectaPath)"
+ },
+ "0017d35c": {
+  "name": "SctLayer::searchCellPath",
+  "tag": "ror-inferred",
+  "was": "FUN_0017d35c",
+  "why": "cell walk along the sector route (expand per sector, finish in the last), then the path from the start cell"
+ },
+ "0017d62c": {
+  "name": "SctLayer::expandCellPath",
+  "tag": "ror-inferred",
+  "was": "FUN_0017d62c",
+  "why": "spreads costs over the cells of the current sector into the next sector's border cells; false at a dead end (blocked cells)"
+ },
+ "0017d9ac": {
+  "name": "SctLayer::finishCellPath",
+  "tag": "ror-inferred",
+  "was": "FUN_0017d9ac",
+  "why": "spreads costs over the last sector toward the goal cell; false when unreached (nearest cell then)"
+ },
+ "0017dd5c": {
+  "name": "SctLayer::getCellY",
+  "tag": "ror-inferred",
+  "was": "FUN_0017dd5c",
+  "why": "the floor height of cell id at pos (flat, z slope, x slope or both by flags 0xa), 100000 outside"
+ },
+ "0017ded0": {
+  "name": "SctLayer::findNextCell",
+  "tag": "ror-inferred",
+  "was": "FUN_0017ded0",
+  "why": "the first of cell id's 8 neighbours (+0x3c) testCell accepts, -1 none"
+ },
+ "0017dfa8": {
+  "name": "SctLayer::clearSectorMarks",
+  "tag": "ror-inferred",
+  "was": "FUN_0017dfa8",
+  "why": "clears bit 31 of every sector's +0x5c"
+ },
+ "0017dff0": {
+  "name": "SctLayer::clearCellMarks",
+  "tag": "ror-inferred",
+  "was": "FUN_0017dff0",
+  "why": "clears bit 31 of +0x7c in the cells of the route's sectors (all cells when no route)"
+ },
+ "0017e0a8": {
+  "name": "SctLayer::canWalkStraight",
+  "tag": "ror-inferred",
+  "was": "FUN_0017e0a8",
+  "why": "walks the segment from -> to across cell edges (table 0x2f30c8 by direction): true when it ends in to's cell without a blocked cell or a missing neighbour"
+ },
+ "0017e3d8": {
+  "name": "SctLayer::findGroup",
+  "tag": "ror-inferred",
+  "was": "FUN_0017e3d8",
+  "why": "strcmp over the 0x20-byte named groups, NULL none"
+ },
+ "0017e464": {
+  "name": "SctLayer::setGroupFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_0017e464",
+  "why": "ors a2 into +8 of every cell of group findGroup(a1)"
+ },
+ "0017e4d0": {
+  "name": "SctLayer::clearGroupFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_0017e4d0",
+  "why": "clears a2 from +8 of every cell of group findGroup(a1)"
  },
  "0017e540": {
   "name": "WrdSrv::WrdSrv",

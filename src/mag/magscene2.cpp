@@ -290,7 +290,7 @@ int MagScene::load(i3dContext *ctx, int id, void *data, int copy)
     idx = pfh.getFileIndex("sector.sec");
     if (idx >= 0 && pfh.getFileSize(idx) > 0)
     {
-        int i = FUN_0017c1f4(&m_8542c, pfh.getFile(idx), copy != 0);
+        int i = m_8542c.setup(pfh.getFile(idx), copy != 0);
         ROR_ASSERT(i != 0); /* 651 */
     }
 
@@ -392,7 +392,7 @@ void MagScene::releaseTenkyu(int no)
     }
     t->m_id = -1;
     releaseTenkyuTex(no);
-    FUN_0017c2c0(&m_8542c);
+    m_8542c.release();
 }
 
 // ──────────────────────────────────────────────────────────────────────

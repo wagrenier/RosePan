@@ -400,7 +400,7 @@ void MagLifeBwnCtrlModeFollow::live(MagLifeBwnCtrl &theBwnCtrl)
         if (step == 0)
         {
             theBwnCtrl.m_08 = 0;
-            if (FUN_0017e0a8(40.0f, &theBwnCtrl.m_scene->m_8542c.m_list[0], pos, pc) != 0)
+            if (theBwnCtrl.m_scene->m_8542c.m_list[0].canWalkStraight(pos, pc, 40.0f) != 0)
             {
                 m_04 = 3;
                 return;
@@ -1965,7 +1965,7 @@ int MagLifeBwnCtrl::findFloorAhead()
         float d = (float)i * 300.0f;
         float p[4] = { dir[0] * d + pos[0], dir[1] * d + pos[1], dir[2] * d + pos[2], 1.0f };
         GamSecta *hit[4];
-        FUN_0017c340(&m_scene->m_8542c, p, hit, 0, 100.0f, 0.0f);
+        m_scene->m_8542c.findCells(p, hit, 0, 100.0f, 0.0f);
         if (hit[0] == NULL)
             return result;
         result = 1;
