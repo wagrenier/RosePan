@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 09:18 at commit `a09c8a4` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-28 10:01 at commit `bd8410b` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4047**; stubs: **562**
+- reconstructed RoR functions: **4054**; stubs: **557**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -66,7 +66,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3dtim2.cpp` | 7 | 0 |
 | `src/i3d/i3dview.cpp` | 19 | 0 |
 | `src/i3d/i3dvram.cpp` | 37 | 0 |
-| `src/i3d/i3dvu1pkt.cpp` | 10 | 0 |
+| `src/i3d/i3dvu1pkt.cpp` | 17 | 0 |
 | `src/i3d/i3mpose.cpp` | 36 | 0 |
 | `src/i3d/i3mroot.cpp` | 12 | 0 |
 | `src/i3d/i3rdraw.cpp` | 2 | 0 |
@@ -75,7 +75,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 420 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 415 |
 | `src/mag/maglife.cpp` | 13 | 8 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -145,11 +145,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 163 TUs: todo 100, partial 11, verify 80, done 9
-- next: **i3d/i3dvu1pkt.cpp** (continuing a partial TU)
+- 163 TUs: todo 100, partial 10, verify 81, done 9
+- next: **emy/emy_hfm.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - partial: `emy/emy_hfm.cpp` 46/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec
-- partial: `i3d/i3dvu1pkt.cpp` 10/21 -- Left in this TU: i3dPktDrawStripCtx 0x21dd10 and i3dPktDrawLineStrip 0x21e1d8 (clipped strips, use i3dClipSegment 0x21db90 / i3dVu0ClipPair 0x21db60, named), th
 - partial: `i3d/i3mpose.cpp` 36/38 -- Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game c
 - partial: `i3d/i3rdraw.cpp` 2/19 -- Left: the VU1 packet writers 0x220098..0x222ce0 (i3rDrawMesh45 / i3rDrawMesh46 / i3rDrawSetupBlend / i3rDrawGroupSkinned / i3rDrawGroupRigid and their strip wri
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
@@ -180,6 +179,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `i3d/i3dtim2.cpp` 7/7 -- Complete code; the smoke screenshot stays black because no host draw module consumes the i3d texture objects yet, so nothing on screen shows TIM2 decoding. The 
 - verify: `i3d/i3dview.cpp` 19/19 -- Status verify: views are built every frame (host test: screen centre 2047.5, frustum corner on the rectangle corner, depth 4094.6..1.06, scissor 0..511 x 0..447
 - verify: `i3d/i3dvram.cpp` 37/37 -- Complete; nothing on screen shows it yet (screen black: the draw path is stubbed). A host test (init, reserve x3 frames with eviction, compact, end frame, reset
+- verify: `i3d/i3dvu1pkt.cpp` 17/21 -- Complete except 0x21cfb0..0x21d378 (four functions: a REF-tag helper, an ADC index builder, two strip writers): no code or data references in the ROM, left unwr
 - verify: `i3d/i3mroot.cpp` 12/12 -- Pinned from unassigned@0022b4b8 to i3d/i3mroot.cpp. Host keeps root-relative offsets (i3mPtr), like i3c: the relocators walk with delta 0 and keep +0x16 at 1 (o
 - verify: `i3d/i3rmesh.cpp` 14/14 -- Verify: the packet builder's callers (i3rDrawGroupSkinned / Rigid, 0x220838) are not ported, so only i3rPktLayerTest / i3rPktLayerAlpha run, through rosepan_i3d
 - verify: `i3d/i3rmodel.cpp` 14/14 -- Verify: nothing on screen reaches it yet. The 200 s New Game run still ends black after the film; DogActor::load 0x10cd5c (dog/dogactor.cpp) is the stub that ke
@@ -236,6 +236,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-28 10:01 `i3d/i3dvu1pkt.cpp` verify: i3d/i3dvu1pkt.cpp: the clipped line strips and wire shapes written -- i3dVu0ClipPair 0x21db60 (VCLIP flags), i3dClipSegment 0x21db90 (six-plane clip with STQ / 
 - 2026-10-28 09:18 `eff/effman.cpp` verify: EffMan::createEff written (the kind to class switch over 41 Eff classes, pack hand-off, init, addEff, weak FIFO, the 0x1a / 0x1f singletons) and EffFindItem1 (k
 - 2026-10-28 09:02 `eff/effman.cpp` partial: The effect manager EffMan (formerly Obj176a3c, scene +0x837e0) split out of unassigned@00166a1c as eff/effman.cpp 0x176694..0x1788ec and written except createEf
 - 2026-10-28 08:24 `sct/sctlayer.cpp` verify: The secta world (floor cells) split out of unassigned@00166a1c as sct/sctlayer.cpp 0x17c0f0..0x17e540 and written in full: SctWorld (scene +0x8542c, sector.sec 
@@ -243,22 +244,21 @@ Recent sessions:
 - 2026-10-28 07:24 `mag/maglifebwnctrl.cpp` partial: MagLifeBwnCtrl modes: Follow::live with followPC 0x127558, Find::init / live with isAtDoor 0x128724, searchDoorSide 0x128854, findBest / isFindTarget wrappers, 
 - 2026-10-28 07:02 `mag/maglifebwnctrl.cpp` partial: MagLifeBwnCtrl, the command layer over Brown: pinned 0x1267c0..0x12bc20; the constructor, requestState / applyMode / live over the 14 embedded mode objects, eve
 - 2026-10-27 22:54 `mag/maglifebwn.cpp` verify: MagLifeBwn, Brown's controller, written in full (pinned 0x1233d8..0x125bd4 plus the linkonce accessors): requestState / changeMode / applyState over the ten emb
-- 2026-10-27 22:32 `mag/maglifepcmove.cpp` verify: mag/maglifepcmove.cpp: pinned 0x11e4c4..0x120788 (moveBy 0x11ee00 included) and wrote all 12 functions: sweepMove (object test, cylinder sweep, wall slide), swe
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `mag/maglife.cpp` | partial | 13/8/49 | 4.6 | 89 | 0 |
-| `unassigned@0016a914` | todo | 0/120/172 | 47.3 | 76 | 6 |
-| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 75 | 6 |
-| `unassigned@00103edc` | todo | 0/16/23 | 1.6 | 72 | 4 |
 | `emy/emy_out.cpp` | todo | 0/19/58 | 15.7 | 69 | 0 |
-| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
-| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 51 | 1 |
+| `unassigned@00103edc` | todo | 0/16/23 | 1.6 | 57 | 1 |
 | `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
-| `utl/utlgame.cpp` | todo | 0/20/35 | 6.5 | 50 | 2 |
-| `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
+| `unassigned@0016a914` | todo | 0/120/172 | 47.3 | 46 | 0 |
+| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 46 | 0 |
+| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 45 | 0 |
+| `utl/utlgame.cpp` | todo | 0/20/35 | 6.5 | 40 | 0 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
-| `unassigned@001832e8` | todo | 0/1/1 | 0.0 | 18 | 1 |
+| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 29 | 0 |
+| `unassigned@00225018` | todo | 0/1/18 | 4.5 | 17 | 0 |
+| `mnu/mnuselect.cpp` | partial | 3/6/14 | 3.0 | 16 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 

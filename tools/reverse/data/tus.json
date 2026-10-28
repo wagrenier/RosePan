@@ -661,7 +661,7 @@
    "why": "i3d VRAM cache: a block heap of 0x44-byte nodes on six intrusive lists (address order, LRU, locked, evict, new, moved), embedded twice in i3dContext (+0x0 texture pages, +0x70 CLUT); 0x227a98 list unlink .. 0x228b50 coalesce, next function 0x228c08 calls the i3d system module 0x237180."
   },
   "i3d/i3dvu1pkt.cpp": {
-   "notes": "Left in this TU: i3dPktDrawStripCtx 0x21dd10 and i3dPktDrawLineStrip 0x21e1d8 (clipped strips, use i3dClipSegment 0x21db90 / i3dVu0ClipPair 0x21db60, named), the wire shapes 0x21e6f8..0x21eb24 (stubs now return pkt instead of NULL), and 0x21cfb0..0x21db18 (four functions with no callers: likely dead, check before writing). Host design: i3dPktCallView mirrors its view into i3dVu1SetView; sprites use the view their Begin CALLs (exact), strips the last CALLed view (an approximation: the ROM uses whatever VU1 0x3e2 holds; strips take no layer). Depth: VU1 vertices carry clip z from the view m_world_clip, clamped to -1..1; textured strips honour TEST_1 ZTE + GEQUAL via RosePan_RendererDrawImageTriangles2DDepth (rosepan_renderer.cpp), untextured strips still draw without depth. Sprite ST corner mapping ((-0.5,-0.5) = u0,v0) confirmed on screen (the page is upright). Smoke run 200 s: book cover frames ~3300..4200 and the opened page stack match work/ref/MNUPBOOK; the title screen is unchanged. Next on the queue: mag/magscenecamera.cpp and the focus files (open-items Next up e).",
+   "notes": "Complete except 0x21cfb0..0x21d378 (four functions: a REF-tag helper, an ADC index builder, two strip writers): no code or data references in the ROM, left unwritten as dead. Nothing on screen draws these line strips yet (MagScene::drawStrips types 1 / 2 and the i3dLayerDrawWire* debug shapes), so verify: the first session whose screenshot shows a debug line or wire shape marks it done. Screen unchanged: title, picture book cover and pages, then Now Loading. One plain 200 s run hit an intermittent access violation after frame 6240; a repeat plain run and a gdbrun with the same pad did not (open-items Open questions, likely the known 10d crash). For the references: architecture.md VU1 packets gained the clipped line strip paragraph.",
    "ranges": [
     [
      "0021c960",
@@ -673,9 +673,14 @@
      "date": "2026-10-27 19:57",
      "status": "partial",
      "summary": "i3d/i3dvu1pkt.cpp pinned 0x21c960..0x21eb28 (was unassigned@0021c960): the VU1 sprite family (BeginVu1Sprite, Vu1Rect renamed from Vu1Color, Vu1Matrix, Vu1Sprite, End, the two view-matrix helpers) and the strip body 0x21c960 with i3dPktDrawStrip / i3dPktDrawStripColor written with the ROM packet words; each records what its VU1 microprogram kicks (sprite program 0x712, strips) as screen-space strips in the native i3d module, Z-tested through a new renderer call. The picture book now shows the MNUPBOOK page behind the cover model and the arrow / circle prompts, matching the reference."
+    },
+    {
+     "date": "2026-10-28 10:01",
+     "status": "verify",
+     "summary": "i3d/i3dvu1pkt.cpp: the clipped line strips and wire shapes written -- i3dVu0ClipPair 0x21db60 (VCLIP flags), i3dClipSegment 0x21db90 (six-plane clip with STQ / colour interpolation), i3dPktDrawStripCtx 0x21dd10 and i3dPktDrawLineStrip 0x21e1d8 (CPU transform by matrix, camera and RectProj, clip, RotTransPers through RectViewport, GIF lines / gouraud / textured lines), i3dPktDrawWireSphere / Box / Shape 0x21e6f8..0x21eb24 with their data tables 0x302a30..0x302acc. Stubs removed from lib/unassigned_stubs.cpp; adc parameters typed as byte pointers."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "the i3d VU1 packet writers: strip uploaders 0x21c960 (UNPACK to VU1 0x1dc and MSCAL), their clip helpers, i3dPktDrawStripCtx / LineStrip, the VU1 sprite family 0x21e428..0x21e6f8 and the wire shapes; bounded by i3dPackXYZ 0x21c940 (i3d/i3dpacket.cpp) and i3dInitHardware 0x21eb28 (i3d/i3dctx.cpp). No source string; named after its i3dPkt*Vu1* API"
   },
   "i3d/i3mpose.cpp": {
