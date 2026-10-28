@@ -6,12 +6,11 @@
  *  natives' setters (position, rotation, find, bark, level), the PC's dog
  *  orders (come / stay / go, with the tests they make around the PC) and
  *  the hug check; the modes: Null (picks the next state), Wait (idles,
- *  follows, barks), Stay, FindEnd, Move / MoveEnd, Rot / RotEnd, Damage,
- *  Hug, Wound and the small Bark helpers.
+ *  follows, barks), Follow, Stay, Find (to the item, through the doors on
+ *  the way to its room) / FindEnd, Move / MoveEnd, Rot / RotEnd, Damage,
+ *  Hug, Wound and the Bark helpers.
  *  0x1267c0..0x12bc20 (pinned 2026-10-28; the asserts name this file).
- *  Left as stubs: Follow::live, Find::init / live, FindEnd::live,
- *  Bark::live and their helpers (0x127558, 0x128724, 0x128854, 0x128e6c,
- *  0x1267c0, 0x1267d8).
+ *  Left as a stub: Bark::live (0x129028).
  * ======================================================================== */
 
 #include "mag/maglifebwnctrl.h"
@@ -25,6 +24,9 @@
 #include "mag/magscene.h"
 #include "utl/utlgame.h"
 #include "utl/utlmath.h"
+#include "wrd/wrdsrv.h"
+
+#include <string.h>
 
 /* The angle wrapped into -pi .. pi (one step, as the ROM does). */
 static inline float wrapAngle(float a)
@@ -34,6 +36,15 @@ static inline float wrapAngle(float a)
     else if (DOG_PI <= a)
         a -= 6.283186f;
     return a;
+}
+
+/* MagLifeBwn::message's int argument carrying a float's bits (mode 8, the
+ * rotate's heading: the ROM passes the float in a GPR). */
+static inline int floatArg(float f)
+{
+    int i;
+    memcpy(&i, &f, sizeof i);
+    return i;
 }
 
 /* The collectors' buffer as the ROM's callers set it up: every entry's
@@ -59,6 +70,10 @@ static void clearEmyInfoBuf(UtlEmyInfoBuf &eib)
 // ROR 0x002ebe10
 static const int s_waitActions[5] = { 18, 3, 4, 5, 6 };
 
+/* Brown's answer to each Find error (ERR_CANNOT_FIND_ITEM .. ERR_STUCK). */
+// ROR 0x002ec028
+static const int s_findErrMotion[ERR_END] = { 132, 133, 134, 135, 136, 137, 132 };
+
 /* orderCome's answers when Brown is already at the PC. */
 // ROR 0x002ec448
 static const int s_comeActions[6] = { 3, 4, 5, 6, 39, 18 };
@@ -66,6 +81,18 @@ static const int s_comeActions[6] = { 3, 4, 5, 6, 39, 18 };
 // ──────────────────────────────────────────────────────────────────────
 // MagLifeBwnCtrlMode helpers
 // ──────────────────────────────────────────────────────────────────────
+
+// ROR 0x001267c0
+int MagLifeBwnCtrlModeFind::isFindTarget(FCHRstat *obj, UtlFind *find)
+{
+    return utlFindMatchObj(find, obj);
+}
+
+// ROR 0x001267d8
+FCHRstat *MagLifeBwnCtrlModeFind::findBest(UtlFind *find, int wrd, const float *pos)
+{
+    return utlFindBest(find, pos, wrd);
+}
 
 // ROR 0x001267f4
 int MagLifeBwnCtrlMode::countEmyAround(MagLifeBwnCtrl &theBwnCtrl, float radius)
@@ -302,6 +329,250 @@ void MagLifeBwnCtrlModeFollow::init(MagLifeBwnCtrl &theBwnCtrl)
     m_04 = 0;
 }
 
+// Phase 0 sorts out flagged cells (MagLifeBwn::testFloor): Brown on one
+// and the PC not, he paths to the PC; both on one, he waits. Phase 2 walks
+// straight at the PC while the line to him is clear (40 wide), phase 4 by
+// path; Wait again within 105 / once the path ends.
+// ROR 0x00127150
+void MagLifeBwnCtrlModeFollow::live(MagLifeBwnCtrl &theBwnCtrl)
+{
+    float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float pc[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    if (theBwnCtrl.m_bwn == NULL)
+        return;
+    theBwnCtrl.m_bwn->getPosition(pos);
+    theBwnCtrl.m_pc->getPosition(pc);
+    float dist = utlVecDistXZ(pos, pc);
+    int step = m_04 & 1;
+    switch (m_04 & 0xfe)
+    {
+    case 0:
+        if (step == 0)
+        {
+            int pcFloor = theBwnCtrl.m_pc->testFloor(0.0f, NULL);
+            if (theBwnCtrl.m_bwn->testFloor(0.0f, NULL) != 0)
+            {
+                if (pcFloor == 0)
+                {
+                    if (theBwnCtrl.m_pc->testFloor(50.0f, pc) != 0 &&
+                        theBwnCtrl.m_pc->testFloor(-50.0f, pc) != 0)
+                        theBwnCtrl.m_pc->getPosition(pc);
+                    theBwnCtrl.m_target[0] = pc[0];
+                    theBwnCtrl.m_target[1] = pc[1];
+                    theBwnCtrl.m_target[2] = pc[2];
+                    theBwnCtrl.m_target[3] = pc[3];
+                    if (theBwnCtrl.m_bwn->searchPath(pc) >= 0)
+                    {
+                        theBwnCtrl.m_bwn->message(6, 0, 0); /* EE slot 14: Path */
+                        m_04 = 5;
+                        return;
+                    }
+                }
+                theBwnCtrl.m_bwn->message(1, 2, 0);
+                m_04 = 1;
+                return;
+            }
+            if (pcFloor != 0)
+            {
+                theBwnCtrl.m_bwn->message(1, 2, 0);
+                return;
+            }
+        }
+        else
+        {
+            if (dist < 105.0f)
+            {
+                theBwnCtrl.requestState(1, 0, 0);
+                return;
+            }
+            if (theBwnCtrl.m_pc->testFloor(0.0f, NULL) != 0)
+                return;
+            if (500.0f < dist)
+            {
+                m_04 = 4;
+                return;
+            }
+            if (dist <= 170.0f)
+                return;
+        }
+        m_04 = 2;
+        return;
+    case 2:
+        if (step == 0)
+        {
+            theBwnCtrl.m_08 = 0;
+            if (FUN_0017e0a8(40.0f, &theBwnCtrl.m_scene->m_8542c.m_list[0], pos, pc) != 0)
+            {
+                m_04 = 3;
+                return;
+            }
+        }
+        else if (theBwnCtrl.m_bwn->m_unmovable_count == 0)
+        {
+            int pcFloor = theBwnCtrl.m_pc->testFloor(0.0f, NULL);
+            if (pcFloor == 0)
+            {
+                if (500.0f < dist)
+                {
+                    m_04 = 4;
+                    return;
+                }
+            }
+            else if (theBwnCtrl.m_bwn->testFloor(75.0f, NULL) != pcFloor)
+            {
+                m_04 = 0;
+                return;
+            }
+            followPC(theBwnCtrl);
+            return;
+        }
+        m_04 = 4;
+        return;
+    case 4:
+        if (step == 0)
+        {
+            theBwnCtrl.m_target[0] = pc[0];
+            theBwnCtrl.m_target[1] = pc[1];
+            theBwnCtrl.m_target[2] = pc[2];
+            theBwnCtrl.m_target[3] = pc[3];
+            if (theBwnCtrl.m_bwn->searchPath(pc) < 0)
+            {
+                m_04 = 0;
+                return;
+            }
+            theBwnCtrl.m_bwn->m_state = -1;
+            theBwnCtrl.m_bwn->m_04 = -1;
+            theBwnCtrl.m_bwn->message(6, 4, 0);
+            m_04 = 5;
+            return;
+        }
+        if (theBwnCtrl.m_bwn->m_path_end == 0 && theBwnCtrl.m_bwn->m_unmovable_count == 0 &&
+            170.0f < dist)
+            return;
+        theBwnCtrl.requestState(1, 0, 0);
+        return;
+    default:
+        ROR_ASSERT(0); /* 735 */  // callcheck: FUN_00215a30 (the assert handler)
+        return;
+    }
+}
+
+// Step 0 picks: Wait within 105, else a walk (MagLifeBwn mode 5: 0
+// straight, 1 / 4 bearing left / right within 20 degrees) or a turn by
+// sixths of pi (mode 7). Step 1 walks until the PC is near, the heading
+// drifts past 60 degrees (36 when farther than 157.5) once a motion step
+// ended, or Brown leaves the walk (his state 5); step 2 turns until he
+// faces the PC within pi/80 (pi/40 while moving).
+// ROR 0x00127558
+void MagLifeBwnCtrlModeFollow::followPC(MagLifeBwnCtrl &theBwnCtrl)
+{
+    if (theBwnCtrl.m_bwn == NULL)
+        return;
+    int still = theBwnCtrl.m_bwn->m_move_result == 0;
+    if (still)
+        theBwnCtrl.m_08 = 0;
+    float reach = 0.0f;
+    int next = 0;
+    float tol = 0.0f;
+    float to[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    if (theBwnCtrl.m_60 == 0)
+    {
+        if (theBwnCtrl.m_pc == NULL)
+            return;
+        reach = 105.0f;
+        next = 1;
+        theBwnCtrl.m_pc->getPosition(theBwnCtrl.m_target);
+        to[0] = theBwnCtrl.m_target[0];
+        to[1] = theBwnCtrl.m_target[1];
+        to[2] = theBwnCtrl.m_target[2];
+        to[3] = theBwnCtrl.m_target[3];
+        tol = still ? 0.03926991f : 0.07853982f;
+    }
+    else
+        ROR_ASSERT(0); /* 789 */  // callcheck: FUN_00215a30 (the assert handler)
+    float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    theBwnCtrl.m_bwn->getPosition(pos);
+    float dist = utlVecDistXZ(pos, to);
+    to[0] -= pos[0];
+    to[2] -= pos[2];
+    to[3] = 1.0f;
+    to[1] -= pos[1];
+    float d = wrapAngle(utlVecToRotY(to) - theBwnCtrl.m_bwn->getRotY());
+    MagLifeBwn *bwn = theBwnCtrl.m_bwn;
+    int bwnState = bwn->m_state;
+    switch (theBwnCtrl.m_08)
+    {
+    case 0:
+    {
+        if (dist < reach)
+        {
+            theBwnCtrl.requestState(next, 0, 0);
+            return;
+        }
+        int walk;
+        if (-tol < d && d < tol)
+            walk = 0;
+        else if (-0.34906587f < d && d < 0.0f)
+            walk = 1;
+        else if (0.0f < d && d < 0.34906587f)
+            walk = 4;
+        else
+        {
+            int turn;
+            if (-1.0471976f < d && d < 0.0f)
+                turn = 0;
+            else if (-2.0943952f < d && d < 0.0f)
+                turn = 1;
+            else if (d < 0.0f)
+                turn = 2;
+            else if (0.0f < d && d < 1.0471976f)
+                turn = 3;
+            else if (0.0f < d && d < 2.0943952f)
+                turn = 4;
+            else
+                turn = 5;
+            bwn->message(7, 0, turn); /* EE slot 14 */
+            theBwnCtrl.m_08 = 2;
+            return;
+        }
+        bwn->message(5, 0, walk);
+        theBwnCtrl.m_08 = 1;
+        return;
+    }
+    case 1:
+        if (dist < reach)
+        {
+            theBwnCtrl.m_08 = 0;
+            return;
+        }
+        if (bwn->m_actor->m_motion_result != 0) /* EE slot 11 getActor */
+        {
+            if (d < -1.0471976f || 1.0471976f < d)
+            {
+                theBwnCtrl.m_08 = 0;
+                return;
+            }
+            if (reach * 1.5f < dist && (d < -0.62831855f || 0.62831855f < d))
+            {
+                theBwnCtrl.m_08 = 0;
+                return;
+            }
+        }
+        if (bwnState != 5)
+            theBwnCtrl.m_08 = 0;
+        return;
+    case 2:
+        if (-tol < d && d < tol)
+        {
+            bwn->message(5, 0, 0);
+            theBwnCtrl.m_08 = 1;
+        }
+        if (theBwnCtrl.m_bwn->m_state == 0)
+            theBwnCtrl.m_08 = 0;
+        return;
+    }
+}
+
 // ROR 0x00127a74
 void MagLifeBwnCtrlModeStay::init(MagLifeBwnCtrl &theBwnCtrl)
 {
@@ -322,6 +593,371 @@ void MagLifeBwnCtrlModeStay::live(MagLifeBwnCtrl &theBwnCtrl)
         theBwnCtrl.requestState(13, 0, 0);
 }
 
+/* MagLifeBwn::searchPath's failures as Find errors. */
+static int findErrOfPath(int r)
+{
+    if (r == -1)
+        return ERR_NO_PATH;
+    if (r == -2)
+        return ERR_NO_CELL;
+    return ERR_STUCK;
+}
+
+// Arg 0 (the controller's m_08) picks the item (utlFindBest from Brown's
+// world position): in this room Brown paths to it (m_0c -1 / -2: phase 0);
+// in another the first door on the route there (phase 2). Arg 1 (orderGo's
+// findItemAhead) paths to m_target. Failures leave the error in m_0c and
+// phase 12.
+// ROR 0x00127b28
+void MagLifeBwnCtrlModeFind::init(MagLifeBwnCtrl &theBwnCtrl)
+{
+    theBwnCtrl.m_mission = MISSION_FIND;
+    theBwnCtrl.m_find_result = 0;
+    int r;
+    if (theBwnCtrl.m_08 == 0)
+    {
+        theBwnCtrl.m_state_done = 0;
+        theBwnCtrl.m_found_obj = 0;
+        theBwnCtrl.m_found_oid = -1;
+        int wrd = utlGetWrdNo();
+        float world[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        const float *t = theBwnCtrl.m_bwn->getTransPtr();
+        float local[4] = { t[0], t[1], t[2], t[3] };
+        g_wrdSrv.cnvPosL2W(world, wrd, local);
+        FCHRstat *obj = findBest(&theBwnCtrl.m_find, wrd, world);
+        if (obj == NULL)
+        {
+            theBwnCtrl.m_0c = ERR_CANNOT_FIND_ITEM;
+            theBwnCtrl.m_08 = 12;
+            return;
+        }
+        int objWrd = utlFindObjWrdNo(obj);
+        if (objWrd != wrd)
+        {
+            WrdRoute areapath;
+            if (g_wrdSrv.findRoute(wrd, objWrd, &areapath) == 0)
+            {
+                theBwnCtrl.m_0c = ERR_NO_ROUTE;
+                theBwnCtrl.m_08 = 12;
+                return;
+            }
+            ROR_ASSERT(areapath.m_num >= 2); /* 1147 */  // callcheck: FUN_00215a30 (the assert handler)
+            /* (an empty loop over areapath's rooms 1 .. m_num - 1: a debug
+             * print compiled out) */
+            UtlDoorInfo door;
+            door.m_pos[2] = 0.0f;
+            door.m_pos[1] = 0.0f;
+            door.m_pos[0] = 0.0f;
+            door.m_pos[3] = 1.0f;
+            if (utlFindDoorBetween(&door, wrd, areapath.m_room[1]->m_id, local) == 0)
+            {
+                theBwnCtrl.m_0c = ERR_NO_DOOR;
+                theBwnCtrl.m_08 = 12;
+                return;
+            }
+            m_pos[0] = door.m_pos[0];
+            m_pos[1] = door.m_pos[1];
+            m_pos[2] = door.m_pos[2];
+            m_pos[3] = door.m_pos[3];
+            m_door_kind = (short)door.m_kind;
+            m_door_rot = door.m_rot_y;
+            m_side = door.m_room[0] == wrd;
+            m_side_to = door.m_room[0] == wrd;
+            theBwnCtrl.m_08 = 2;
+            return;
+        }
+        theBwnCtrl.m_found_obj = utlFindObjId(obj);
+        theBwnCtrl.m_found_oid = utlFindObjUid(obj);
+        utlFindObjPos(obj, theBwnCtrl.m_target);
+        r = theBwnCtrl.m_bwn->searchPath(theBwnCtrl.m_target);
+        if (r < 0)
+        {
+            theBwnCtrl.m_0c = findErrOfPath(r);
+            theBwnCtrl.m_08 = 12;
+            return;
+        }
+        theBwnCtrl.m_bwn->playSe(0xb);
+        theBwnCtrl.m_bwn->message(6, 3, 0); /* EE slot 14: Path */
+        theBwnCtrl.m_0c = r != 0 ? -1 : -2;
+    }
+    else
+    {
+        r = theBwnCtrl.m_bwn->searchPath(theBwnCtrl.m_target);
+        if (r < 0)
+        {
+            theBwnCtrl.m_0c = findErrOfPath(r);
+            theBwnCtrl.m_08 = 12;
+            return;
+        }
+        theBwnCtrl.m_bwn->playSe(0xb);
+        theBwnCtrl.m_bwn->message(6, 3, 0);
+        theBwnCtrl.m_0c = -1;
+    }
+    theBwnCtrl.m_08 = 0;
+}
+
+// The controller's m_08 is phase << 1 | step:
+//  0 path to the item: within 100 (y -150 .. 50 ignored) turn to it (8);
+//    the path's end short of it: sniff (motion 0x26) and wait (16);
+//  2 a door on the way: path to 95 before / behind it (3), at it: 6;
+//  4 a sniff (motion 0x42) between door tries, back to 2;
+//  6 turn to the door's heading (7), then 10 with the door's kind;
+//  8 turn to the item (9), then 10 with -1;
+// 10 the result in m_0c: < 0 FindEnd; 0 through the door (14, motion
+//    0x1f); else Wait's motion and wait (16);
+// 12 give up (m_0c the error): Brown's answer, then Wait or Follow;
+// 14 slide through the door to 95 past it (1 a frame), 15 once there;
+// 16.. wait out 1800 frames. 30 frames without a move give up (ERR_STUCK).
+// ROR 0x00127e68
+void MagLifeBwnCtrlModeFind::live(MagLifeBwnCtrl &theBwnCtrl)
+{
+    float d[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    theBwnCtrl.m_bwn->getPosition(pos);
+    int step = theBwnCtrl.m_08 & 1;
+    MagLifeBwn *bwn;
+    switch (theBwnCtrl.m_08 & 0xfe)
+    {
+    case 0:
+    {
+        float to[4] = { theBwnCtrl.m_target[0] - pos[0], theBwnCtrl.m_target[1] - pos[1],
+                        theBwnCtrl.m_target[2] - pos[2], 1.0f };
+        if (-150.0f <= to[1] && to[1] <= 50.0f)
+            to[1] = 0.0f;
+        if (utlVecLength(to) < 100.0f)
+        {
+            theBwnCtrl.m_08 = 8;
+            return;
+        }
+        bwn = theBwnCtrl.m_bwn;
+        if (bwn->m_path_end != 0)
+        {
+            bwn->message(1, 0x26, 0); /* EE slot 14 */
+            theBwnCtrl.m_08 = 16;
+            break;
+        }
+        goto stuck;
+    }
+    case 2:
+        if (step == 0)
+        {
+            theBwnCtrl.m_bwn->playSe(0xb);
+            m_side &= 1;
+            if (searchDoorSide(theBwnCtrl, theBwnCtrl.m_target, m_side) < 0)
+            {
+                if (searchDoorSide(theBwnCtrl, theBwnCtrl.m_target, m_side != 1) < 0)
+                {
+                    theBwnCtrl.m_0c = ERR_DOOR_SIDE;
+                    theBwnCtrl.m_08 = 12;
+                    return;
+                }
+                m_side_to = m_side ^ 1;
+            }
+            else
+                m_side_to = m_side;
+            if (isAtDoor(pos) == 0)
+            {
+                theBwnCtrl.m_bwn->message(6, 3, 0);
+                theBwnCtrl.m_08 = 3;
+                return;
+            }
+            theBwnCtrl.m_08 = 6;
+            return;
+        }
+        if (isAtDoor(pos) != 0 || theBwnCtrl.m_bwn->m_path_end != 0)
+        {
+            theBwnCtrl.m_08 = 6;
+            return;
+        }
+        bwn = theBwnCtrl.m_bwn;
+        goto stuck;
+    case 4:
+        bwn = theBwnCtrl.m_bwn;
+        if (step == 0)
+        {
+            bwn->message(1, 0x42, 0);
+            theBwnCtrl.m_08 = 5;
+        }
+        else if (bwn->m_path_end != 0 || 30 < bwn->m_unmovable_count || bwn->isMotionSeqEnd())
+            theBwnCtrl.m_08 = 2;
+        break;
+    case 6:
+        bwn = theBwnCtrl.m_bwn;
+        if (step != 0)
+        {
+            if (bwn->m_path_end != 0)
+            {
+                theBwnCtrl.m_0c = m_door_kind;
+                theBwnCtrl.m_08 = 10;
+                break;
+            }
+            if (30 < bwn->m_unmovable_count || bwn->getMotionSeq() == 2)
+                theBwnCtrl.m_08 = 4;
+            break;
+        }
+        {
+            float rot = m_door_rot;
+            if (m_side != 0)
+                rot -= DOG_PI;
+            rot = wrapAngle(rot);
+            bwn->message(8, floatArg(rot), 0); /* the rotate's heading */
+        }
+        theBwnCtrl.m_08 = 7;
+        break;
+    case 8:
+        if (step == 0)
+        {
+            d[0] = theBwnCtrl.m_target[0] - pos[0];
+            d[3] = 1.0f;
+            d[1] = theBwnCtrl.m_target[1] - pos[1];
+            d[2] = theBwnCtrl.m_target[2] - pos[2];
+            theBwnCtrl.m_bwn->message(8, floatArg(utlVecToRotY(d)), 0);
+            theBwnCtrl.m_08 = 9;
+            break;
+        }
+        bwn = theBwnCtrl.m_bwn;
+        if (bwn->m_path_end != 0)
+        {
+            theBwnCtrl.m_0c = -1;
+            theBwnCtrl.m_08 = 10;
+            break;
+        }
+    stuck:
+        if (30 < bwn->m_unmovable_count)
+        {
+            theBwnCtrl.m_0c = ERR_STUCK;
+            theBwnCtrl.m_08 = 12;
+            return;
+        }
+        break;
+    case 10:
+        bwn = theBwnCtrl.m_bwn;
+        bwn->m_state = -1;
+        bwn->m_04 = -1;
+        if (theBwnCtrl.m_0c == 0)
+        {
+            theBwnCtrl.m_bwn->setNeckControl(0);
+            theBwnCtrl.m_bwn->clearNeckMotion();
+            theBwnCtrl.m_bwn->message(1, 0x1f, 0);
+            theBwnCtrl.m_08 = 14;
+        }
+        else if (theBwnCtrl.m_0c < 0)
+            theBwnCtrl.requestState(5, 0, 0);
+        else
+        {
+            theBwnCtrl.m_bwn->message(1, 2, 0);
+            theBwnCtrl.m_08 = 16;
+        }
+        theBwnCtrl.m_mode_count = 0;
+        break;
+    case 12:
+        bwn = theBwnCtrl.m_bwn;
+        if (step == 0)
+        {
+            bwn->playSe(8);
+            theBwnCtrl.m_find_result = -1;
+            theBwnCtrl.m_mission = MISSION_NONE;
+            u_int work2 = (u_int)theBwnCtrl.m_0c;
+            ROR_ASSERT(ERR_CANNOT_FIND_ITEM <= work2 && work2 < ERR_END); /* 1521 */  // callcheck: FUN_00215a30 (the assert handler)
+            theBwnCtrl.m_bwn->m_state = -1;
+            theBwnCtrl.m_bwn->m_04 = -1;
+            theBwnCtrl.m_bwn->message(1, s_findErrMotion[work2], 1);
+            theBwnCtrl.m_08 = 13;
+            break;
+        }
+        {
+            int state = 1;
+            if (bwn->m_path_end == 0 && theBwnCtrl.m_mode_count < 901)
+            {
+                if (bwn->getMotionSeq() != 2)
+                {
+                    float pc[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+                    theBwnCtrl.m_pc->getPosition(pc);
+                    if (utlVecDist(pos, pc) <= 300.0f)
+                        break;
+                    state = 2;
+                }
+            }
+            theBwnCtrl.requestState(state, 0, 0);
+        }
+        break;
+    case 14:
+        if (step == 0)
+        {
+            d[0] = pos[0] - m_pos[0];
+            d[3] = 1.0f;
+            d[1] = pos[1] - m_pos[1];
+            d[2] = pos[2] - m_pos[2];
+            utlVecRotMatY(-m_door_rot, d);
+            float move = (m_side_to == 0 ? -95.0f : 95.0f) - d[2];
+            if (move < -1.0f)
+                move = -1.0f;
+            if (1.0f < move)
+                move = 1.0f;
+            d[0] = 0.0f;
+            d[1] = 0.0f;
+            d[2] = move;
+            d[3] = 1.0f;
+            utlVecRotMatY(m_door_rot, d);
+            DogActor *actor = theBwnCtrl.m_bwn->m_actor; /* EE slot 11 getActor */
+            actor->m_trans[0] += d[0];
+            actor->m_trans[1] += d[1];
+            actor->m_trans[3] = 1.0f;
+            actor->m_trans[2] += d[2];
+            actor->m_dirty = 1;
+            if (move != 1.0f && move != -1.0f)
+                theBwnCtrl.m_08 = 15;
+        }
+        if (theBwnCtrl.m_mode_count < 1801)
+            break;
+        theBwnCtrl.m_mission = MISSION_NONE;
+        theBwnCtrl.requestState(1, 0, 0);
+        break;
+    default:
+        if (1800 < theBwnCtrl.m_mode_count)
+        {
+            theBwnCtrl.m_mission = MISSION_NONE;
+            theBwnCtrl.requestState(1, 0, 0);
+        }
+        break;
+    }
+    /* The sniff's footfalls (motion sequence 0x20, frames 0 and 10). */
+    if (theBwnCtrl.m_bwn->getMotionSeq() != 0x20)
+        return;
+    float f = theBwnCtrl.m_bwn->m_actor->getMotionFrame(); /* EE slot 11 getActor */
+    if ((0.0f <= f && f < 1.0f) || (10.0f <= f && f < 11.0f))
+        theBwnCtrl.m_bwn->playSe(0x13);
+}
+
+// ROR 0x00128724
+int MagLifeBwnCtrlModeFind::isAtDoor(const float *pos)
+{
+    float d[4] = { pos[0] - m_pos[0], pos[1] - m_pos[1], pos[2] - m_pos[2], 1.0f };
+    if (d[1] < -50.0f || 50.0f < d[1])
+        return 0;
+    utlVecRotMatY(-m_door_rot, d);
+    if (d[0] < -30.0f || 30.0f < d[0])
+        return 0;
+    if (m_side_to != 0)
+        return 76.0f < d[2] && d[2] <= 100.0f;
+    return -100.0f <= d[2] && d[2] < -76.0f;
+}
+
+// ROR 0x00128854
+int MagLifeBwnCtrlModeFind::searchDoorSide(MagLifeBwnCtrl &theBwnCtrl, float *out, int side)
+{
+    out[2] = side != 0 ? 95.0f : -95.0f;
+    out[3] = 1.0f;
+    out[0] = 0.0f;
+    out[1] = 0.0f;
+    utlVecRotMatY(m_door_rot, out);
+    out[0] += m_pos[0];
+    out[1] += m_pos[1];
+    out[3] = 1.0f;
+    out[2] += m_pos[2];
+    return theBwnCtrl.m_bwn->searchPath(out);
+}
+
 // The found object still there: taken (m_find_result 1), else back to
 // Wait (-1).
 // ROR 0x0012890c
@@ -337,6 +973,42 @@ void MagLifeBwnCtrlModeFindEnd::init(MagLifeBwnCtrl &theBwnCtrl)
     theBwnCtrl.m_find_result = 1;
     utlMarkObjTaken(theBwnCtrl.m_found_obj);
     theBwnCtrl.m_08 = 0;
+}
+
+// Phase 0 plays the pick-up by the item's height (motion 0x28 from 40
+// below Brown up, 0x26 to 80 below, 0x29 lower) and marks the state done;
+// phase 1 gives up when the object went, the footfalls at frames 10, 25
+// and 42.
+// ROR 0x00128970
+void MagLifeBwnCtrlModeFindEnd::live(MagLifeBwnCtrl &theBwnCtrl)
+{
+    if (theBwnCtrl.m_08 == 0)
+    {
+        float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        theBwnCtrl.m_bwn->getPosition(pos);
+        float dy = theBwnCtrl.m_target[1] - pos[1];
+        theBwnCtrl.m_bwn->m_state = -1;
+        theBwnCtrl.m_bwn->m_04 = -1;
+        int motion = 0x26;
+        if (-40.0f <= dy)
+            motion = 0x28;
+        else if (dy <= -80.0f)
+            motion = 0x29;
+        theBwnCtrl.m_bwn->message(1, motion, 0); /* EE slot 14 */
+        theBwnCtrl.m_state_done = 1;
+        theBwnCtrl.m_08 = 1;
+        return;
+    }
+    if (theBwnCtrl.m_08 != 1)
+    {
+        ROR_ASSERT(0); /* 1916 */  // callcheck: FUN_00215a30 (the assert handler)
+        return;
+    }
+    if (utlIsObj(theBwnCtrl.m_found_obj) == 0)
+        theBwnCtrl.requestState(1, 0, 0);
+    float f = theBwnCtrl.m_bwn->m_actor->getMotionFrame(); /* EE slot 11 getActor */
+    if ((10.0f <= f && f < 11.0f) || (25.0f <= f && f < 26.0f) || (42.0f <= f && f < 43.0f))
+        theBwnCtrl.m_bwn->playSe(0xb);
 }
 
 // ROR 0x00128b8c
@@ -434,6 +1106,54 @@ void MagLifeBwnCtrlModeBark::init(MagLifeBwnCtrl &theBwnCtrl)
         theBwnCtrl.m_08 = 0;
     else
         theBwnCtrl.m_08 = 14;
+}
+
+// ROR 0x00128e6c
+int MagLifeBwnCtrlModeBark::findNearestEmy(MagLifeBwnCtrl &theBwnCtrl, UtlEmyInfoBuf *eib, int where)
+{
+    float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    if (theBwnCtrl.m_pc == NULL || theBwnCtrl.m_bwn == NULL)
+        return 0;
+    switch (where)
+    {
+    case 0:
+        theBwnCtrl.m_bwn->getPosition(pos);
+        break;
+    case 1:
+        theBwnCtrl.m_pc->getPosition(pos);
+        break;
+    case 2:
+    {
+        theBwnCtrl.m_pc->getPosition(pos);
+        float ahead[4] = { 0.0f, 0.0f, 500.0f, 1.0f };
+        utlVecRotMatY(theBwnCtrl.m_pc->getRotY(), ahead);
+        pos[0] += ahead[0];
+        pos[2] += ahead[2];
+        pos[3] = 1.0f;
+        pos[1] += ahead[1];
+        break;
+    }
+    default:
+        ROR_ASSERT(0); /* 2129 */  // callcheck: FUN_00215a30 (the assert handler)
+        break;
+    }
+    int num = utlCollectEmyInfoAt(eib, pos, 0, 1, 0.0f, 500.0f);
+    if (num < 1)
+        return -1;
+    if (num == 1)
+        return 0;
+    int found = -1;
+    float best = 100000.0f;
+    for (int i = 0; i < num; i++)
+    {
+        float dist = eib->m_info[i].m_dist;
+        if (dist < best)
+        {
+            best = dist;
+            found = i;
+        }
+    }
+    return found;
 }
 
 // ROR 0x00129f50
@@ -1133,30 +1853,6 @@ void MagLifeBwnCtrl::setMission(int m)
 }
 
 // ---- stubs (not reconstructed yet) ----
-
-// stub of ROR 0x00127150
-void MagLifeBwnCtrlModeFollow::live(MagLifeBwnCtrl &theBwnCtrl)
-{
-    ROSEPAN_STUB("MagLifeBwnCtrlModeFollow::live", 0x00127150);
-}
-
-// stub of ROR 0x00127b28
-void MagLifeBwnCtrlModeFind::init(MagLifeBwnCtrl &theBwnCtrl)
-{
-    ROSEPAN_STUB("MagLifeBwnCtrlModeFind::init", 0x00127b28);
-}
-
-// stub of ROR 0x00127e68
-void MagLifeBwnCtrlModeFind::live(MagLifeBwnCtrl &theBwnCtrl)
-{
-    ROSEPAN_STUB("MagLifeBwnCtrlModeFind::live", 0x00127e68);
-}
-
-// stub of ROR 0x00128970
-void MagLifeBwnCtrlModeFindEnd::live(MagLifeBwnCtrl &theBwnCtrl)
-{
-    ROSEPAN_STUB("MagLifeBwnCtrlModeFindEnd::live", 0x00128970);
-}
 
 // stub of ROR 0x00129028
 void MagLifeBwnCtrlModeBark::live(MagLifeBwnCtrl &theBwnCtrl)

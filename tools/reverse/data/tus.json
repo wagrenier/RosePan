@@ -810,7 +810,7 @@
    "why": "MagLifeBwn's own code: requestState 0x1233d8 (vtable slot 16) through the constructor 0x125aa4 (stores _vt$10MagLifeBwn); the asserts name mag/maglifebwn.cpp; 0x125bd4.. are the mode classes' methods (mag/maglifebwnmode.cpp)"
   },
   "mag/maglifebwnctrl.cpp": {
-   "notes": "Left (stubs in this file): MagLifeBwnCtrlModeFollow::live 0x127150 with its helper 0x127558, MagLifeBwnCtrlModeFind::init 0x127b28 / live 0x127e68 with 0x128724 / 0x128854, MagLifeBwnCtrlModeFindEnd::live 0x128970, MagLifeBwnCtrlModeBark::live 0x129028 (970 instructions) with 0x128e6c; 0x1267c0 / 0x1267d8 are UtlFind wrappers only those call. Outgoing stubs now named: MagLifeControlChara::testFloor 0x119cec / isMotionStateEndless 0x11a064 / playSe 0x11a704 (mag/maglife.cpp), utlSetBwnObjFlag 0x104150, utlIsObj, utlMarkObjTaken, utlCollectEmyInfoAt 0x10376c, utlCollectItemInfo 0x103ccc, utlFindHasAny, utlFindSetItem. Decisions: PC guards for an unbound m_bwn in requestState, Null::live, applyMode and setLevel (the ROM reads through NULL); UtlEmyInfo +0x30 / +0x34 named m_dist / m_rot; ctrl +0x78 is m_mission (MISSION_3 has no reader yet). Screen: the 130 s New Game run reaches the black stage after the book (frame 7260, no asserts), so Brown cannot be seen yet; one 200 s run hit the known intermittent access violation at frame ~6250 right after i3cCastRay (open-items item 9), the rerun with ROSEPAN_CRASH_LOG=1 did not fault. Next: Follow::live, the state Wait requests once the PC walks away.",
+   "notes": "Left: MagLifeBwnCtrlModeBark::live 0x129028 (970 instructions, the only stub in this file); findNearestEmy is its helper (where 0 Brown, 1 PC, 2 500 ahead of the PC). Decisions: MagLifeBwn::message 8 gets the heading as a float's bits (floatArg) since the ROM passes the float in a GPR; Find mode fields at +0x20 heading, +0x24 door kind (s16), +0x26 / +0x27 sides; the controller's m_0c holds the Find error ERR_* (assert line 1521). The Find path needs the utl/utlfind.cpp stubs (utlFindSetItem, utlFindBest, the obj accessors) and utlFindDoorBetween 0x102dc0 before it can work on the host. Screen: the 15 s smoke run shows the boot disclaimer only; Brown is not reachable yet (the 130 s New Game run ends on the black stage after the book), so nothing written here was seen.",
    "ranges": [
     [
      "001267c0",
@@ -826,6 +826,11 @@
      "date": "2026-10-28 07:02",
      "status": "partial",
      "summary": "MagLifeBwnCtrl, the command layer over Brown: pinned 0x1267c0..0x12bc20; the constructor, requestState / applyMode / live over the 14 embedded mode objects, every script setter and getter, the orders come / stay / go with their tests around the PC (findItemAhead, findFloorAhead, isEmyAheadOfPC, aimAtPC ...), checkHug / requestHug, setLevel, the linkonce accessors; modes Null, Wait, Stay, FindEnd init, Move, MoveEnd, Rot, RotEnd, Damage, Bark init and helpers, Hug, Wound written; 53 functions named (batch maglifebwnctrl_001)."
+    },
+    {
+     "date": "2026-10-28 07:24",
+     "status": "partial",
+     "summary": "MagLifeBwnCtrl modes: Follow::live with followPC 0x127558, Find::init / live with isAtDoor 0x128724, searchDoorSide 0x128854, findBest / isFindTarget wrappers, FindEnd::live, Bark::findNearestEmy 0x128e6c; ERR_ enum and the error motion table 0x2ec028; utlfind object accessors, utlFindBest, utlFindDoorBetween and MagLifeControlChara::getTransPtr declared (getTransPtr written); 14 functions named (batch maglifebwnctrl_002)."
     }
    ],
    "status": "partial",

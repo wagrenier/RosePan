@@ -28,9 +28,11 @@
 #include "utl/utlfind.h"
 
 struct BedPad;
+struct FCHRstat;
 struct MagLifeBwn;
 struct MagLifeBwnCtrl;
 struct MagLifePC;
+struct UtlEmyInfoBuf;
 
 /* setLevel's levels (the assert's names; 1 has no name in the ROM). */
 enum
@@ -49,6 +51,20 @@ enum
     MISSION_STAY = 2,           // -> state 3 STAY
     MISSION_3 = 3,              // never read by the modes written so far
     MISSION_HUG = 4,            // -> state 12 HUG
+};
+
+/* Why the Find mode gave up (the controller's m_0c in phase 12; the
+ * assert names the ends): Brown's answer is s_findErrMotion[err]. */
+enum
+{
+    ERR_CANNOT_FIND_ITEM = 0,   // utlFindBest: nothing to fetch
+    ERR_NO_ROUTE = 1,           // WrdSrv::findRoute to the item's room
+    ERR_NO_DOOR = 2,            // utlFindDoorBetween towards the route's next room
+    ERR_NO_PATH = 3,            // MagLifeBwn::searchPath -1
+    ERR_DOOR_SIDE = 4,          // no way to either side of the door
+    ERR_NO_CELL = 5,            // searchPath -2 (no cell under Brown)
+    ERR_STUCK = 6,              // searchPath -3 / -100, or 30 frames without a move
+    ERR_END = 7,
 };
 
 /* EE 4 bytes (the vptr). layout: host -- polymorphic. */
@@ -86,8 +102,11 @@ struct MagLifeBwnCtrlModeFollow : MagLifeBwnCtrlMode
 {
     void init(MagLifeBwnCtrl &theBwnCtrl) override;                      // ROR 0x0012712c
     void live(MagLifeBwnCtrl &theBwnCtrl) override;                      // ROR 0x00127150
+    /* Walks / turns Brown towards the PC (the controller's m_08 is the
+     * step: 0 pick, 1 walking, 2 turning); state 1 within 105. */
+    void followPC(MagLifeBwnCtrl &theBwnCtrl);                           // ROR 0x00127558
 
-    int m_04;                   // ROR 0x04: init clears it
+    int m_04;                   // ROR 0x04: phase << 1 | step: 0 start, 2 straight at the PC, 4 by path; init clears it
 };
 
 /* layout: host (EE 4 bytes, +0x9c). */
@@ -102,10 +121,24 @@ struct MagLifeBwnCtrlModeFind : MagLifeBwnCtrlMode
 {
     void init(MagLifeBwnCtrl &theBwnCtrl) override;                      // ROR 0x00127b28
     void live(MagLifeBwnCtrl &theBwnCtrl) override;                      // ROR 0x00127e68
+    /* Unused: utlFindMatchObj(find, obj). */
+    int  isFindTarget(FCHRstat *obj, UtlFind *find);                     // ROR 0x001267c0
+    /* utlFindBest(find, pos, wrd). */
+    FCHRstat *findBest(UtlFind *find, int wrd, const float *pos);        // ROR 0x001267d8
+    /* 1 when pos stands before the door on side m_27 (in the door's frame:
+     * within 50 in y and 30 across, 76..100 out). */
+    int  isAtDoor(const float *pos);                                     // ROR 0x00128724
+    /* out = 95 before (side 1) or behind (0) the door; Brown's
+     * MagLifeBwn::searchPath there. */
+    int  searchDoorSide(MagLifeBwnCtrl &theBwnCtrl, float *out, int side); // ROR 0x00128854
 
     int   _04[3];
-    float m_pos[4];             // ROR 0x10: the constructor sets (0, 0, 0, 1)
-    int   _20[4];
+    float m_pos[4];             // ROR 0x10: the door's position (init); the constructor sets (0, 0, 0, 1)
+    float m_door_rot;           // ROR 0x20: the door's heading
+    short m_door_kind;          // ROR 0x24: utlFindDoorBetween's m_kind (0 Brown goes through)
+    char  m_side;               // ROR 0x26: Brown starts on the door's first room's side
+    char  m_side_to;            // ROR 0x27: the side searchDoorSide found a way to
+    int   _28[2];
 };
 
 /* layout: host (EE 4 bytes, +0xd0). */
@@ -164,6 +197,9 @@ struct MagLifeBwnCtrlModeBark : MagLifeBwnCtrlMode
     int  query(MagLifeBwnCtrl &theBwnCtrl, int v);                       // ROR 0x00129f50
     /* barkSet: the controller's m_0c = v, phase 12. */
     void set(MagLifeBwnCtrl &theBwnCtrl, int v);                         // ROR 0x00129f78
+    /* The enemies within 500 of Brown (where 0), the PC (1) or the point
+     * 500 ahead of the PC (2) into eib: the nearest one's index, -1 none. */
+    int  findNearestEmy(MagLifeBwnCtrl &theBwnCtrl, UtlEmyInfoBuf *eib, int where); // ROR 0x00128e6c
 
     int   _04[3];
     float m_pos[4];             // ROR 0x10: the constructor sets (0, 0, 0, 1)

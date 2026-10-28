@@ -132,6 +132,8 @@ struct MagLifeControlChara : MagLife
     void getPosition(float *out);                                        // ROR 0x00119f88
     /* DogActor::getRotY, 0 without an actor. */
     float getRotY();                                                     // ROR 0x00119fb0
+    /* The actor's m_trans itself (no actor check). */
+    float *getTransPtr();                                                // ROR 0x00119fa4
     /* A ray from 60 above the actor over 120: m_trans.y follows the floor
      * by (t - 0.5) * 60, at most 7 a call; returns the step. */
     float followGround();                                                // ROR 0x00119e1c
