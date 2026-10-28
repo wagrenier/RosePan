@@ -6,7 +6,6 @@
   "unassigned@0021fb50",
   "unassigned@0021c960",
   "unassigned@0013e2ec",
-  "task/naga_chunk.cpp",
   "mag/maglifebwn.cpp",
   "unassigned@001258a4",
   "mag/maglifebwnctrl.cpp",
@@ -1688,6 +1687,24 @@
    ],
    "status": "verify",
    "why": "SysTimer (ctor 0x203d94, dtor 0x203da8, init / start / stop / read / update / hold), sysInit/TermManagers, the host0 reboot 0x2041a0 and the static initializer pair 0x2041f8 / 0x20439c / 0x2043bc that constructs the global managers: the globals file before main.cpp (no source string; file name a guess)"
+  },
+  "task/naga_chunk.cpp": {
+   "notes": "Complete code, nothing on screen yet: the 15 s smoke run shows the boot disclaimer (unchanged) and no event scene is reached before the film ends. First session whose run plays a scene (scenePlayStart, DisplayMessage::load) should confirm the reader and mark this done. Entry +0x0c is the data size (was m_0c). The writer and NagaChunk::load are host-device debug tools, unreferenced in retail. NagaChunk ctor and dtor moved out of the header into the cpp (real calls, as in RoR). Still stubbed before scenes play: debug/motnamecnv0.cpp, DogActor::setBaseRotateY 0x10ed2c, utlStrToLower 0x218338, MagScene::setFocusData 0x1417e4.",
+   "ranges": [
+    [
+     "001fc47c",
+     "001fce0c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-27 21:17",
+     "status": "verify",
+     "summary": "NagaChunk reader (ctors, dtor, load, rewind, next, findTag, find, setIndex, getName, getEntry, getData, getInt, getSize) and NagaChunkWriter (ctor, dtor, addEntry, the ten add overloads, align, build, save) written; pinned 0x1fc47c..0x1fce0c; four folded functions created in Ghidra; the reader stubs removed"
+    }
+   ],
+   "status": "verify",
+   "why": "source strings anchor 0x1fc4f0/0x1fc89c/0x1fcb14; 0x1fc47c/0x1fc490 are the writer's inline ctor/dtor (fields +0x400..+0x50c the writers use); the NagaChunk reader 0x1fcbf8..0x1fce0c follows; 0x1fce0c.. are vtable slots (0x2e4f8c..) of task/tsk_bg_load.cpp classes"
   },
   "task/tsk_chr.cpp": {
    "notes": "All of task/tsk_chr.cpp is now written; the inline dtors and empty terms the brief still lists as todo are in tsk_chr.h. Status verify: nothing on screen reaches the script tasks yet (the smoke run stops at the boot disclaimer); the first session whose screenshot shows a script-driven character move or turn should mark it done. New stub: DogActor::setNodeScale 0x10eba0 (dog/dogactor.cpp, a 14-instruction leaf: node entry gets the value, 1.0 frees it, else first free or 1.0 entry takes it) -- write it with dogactor.cpp. chrStepAwayFrom guards the frame list against overflow (PORT); the ROM writes past 32. The setter of non-1.0 node scales (limb loss) is not found yet.",

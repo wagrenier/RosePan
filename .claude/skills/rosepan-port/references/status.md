@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-27 21:09 at commit `1d2b1dd` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-27 21:17 at commit `d120af9` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-27 21:09 at commit `1d2b1dd` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **6868**, named **5238** (76%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 3636
-- context-name ledger: 3936 entries; overrides of wrong library matches: 5
-- placed in a source file: 4639/6868 in 120 files
+- game functions: **6872**, named **5257** (76%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 3655
+- context-name ledger: 3955 entries; overrides of wrong library matches: 5
+- placed in a source file: 4653/6872 in 120 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **3722**; stubs: **395**
+- reconstructed RoR functions: **3752**; stubs: **389**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -74,7 +74,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 226 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 220 |
 | `src/mag/maglife.cpp` | 5 | 2 |
 | `src/mag/maglifebwn.cpp` | 0 | 3 |
 | `src/mag/maglifebwnctrl.cpp` | 0 | 20 |
@@ -126,6 +126,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/spr/sprtexture.cpp` | 21 | 0 |
 | `src/system/sysnowloading.cpp` | 8 | 0 |
 | `src/system/system.cpp` | 11 | 0 |
+| `src/task/naga_chunk.cpp` | 30 | 0 |
 | `src/task/tsk_chr.cpp` | 151 | 0 |
 | `src/task/tsk_man.cpp` | 25 | 0 |
 | `src/task/tsk_scene.cpp` | 76 | 0 |
@@ -140,9 +141,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 161 TUs: todo 105, partial 11, verify 72, done 9
-- next: **task/naga_chunk.cpp** (pinned in the queue)
-- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, task/naga_chunk.cpp, mag/maglifebwn.cpp, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
+- 160 TUs: todo 103, partial 11, verify 73, done 9
+- next: **mag/maglifebwn.cpp** (pinned in the queue)
+- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, mag/maglifebwn.cpp, unassigned@001258a4, mag/maglifebwnctrl.cpp, unassigned@00166a1c
 - partial: `emy/emy_hfm.cpp` 46/75 -- Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec
 - partial: `i3d/i3dvu1pkt.cpp` 10/21 -- Left in this TU: i3dPktDrawStripCtx 0x21dd10 and i3dPktDrawLineStrip 0x21e1d8 (clipped strips, use i3dClipSegment 0x21db90 / i3dVu0ClipPair 0x21db60, named), th
 - partial: `i3d/i3mpose.cpp` 36/38 -- Left: 0x230688 and 0x230df8 (quaternion spline helpers around i3mQuatLog/Exp, no direct callers; Ghidra decompile unusable, read the asm). Everything the game c
@@ -214,6 +215,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `spr/sprtexture.cpp` 21/21 -- Pinned 0x18f5b0..0x190a78. The code is complete; the smoke run reaches it (S2dMes / S2dMovie loadTexture) but every list ends in the error state because fileGet
 - verify: `system/sysnowloading.cpp` 8/8 -- Code complete, nothing on the boot path shows it yet: draw 0x2051cc is called only by the pfh loader 0x1be564 (GamMan load path, unassigned@001bde58), a stub, s
 - verify: `system/system.cpp` 11/14 -- Complete except the three static-init functions 0x2041f8 / 0x20439c / 0x2043bc, which the host compiler generates (the globals' definition order in system.cpp r
+- verify: `task/naga_chunk.cpp` 30/30 -- Complete code, nothing on screen yet: the 15 s smoke run shows the boot disclaimer (unchanged) and no event scene is reached before the film ends. First session
 - verify: `task/tsk_chr.cpp` 150/169 -- All of task/tsk_chr.cpp is now written; the inline dtors and empty terms the brief still lists as todo are in tsk_chr.h. Status verify: nothing on screen reache
 - verify: `task/tsk_man.cpp` 25/25 -- Pinned 0x1e7094..0x1e7f28 out of unassigned@001e6d54 (file name a guess, open-items). CmnITask slots: 1 get_task_type, 2 pause, 3 init, 4 exec(id, time, arg) no
 - verify: `task/tsk_scene.cpp` 76/93 -- Visual test: the 15 s smoke run ends on the disclaimer screen as before; nothing in this TU is reached yet (hits need the first room and an attack), so the TU i
@@ -223,6 +225,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-27 21:17 `task/naga_chunk.cpp` verify: NagaChunk reader (ctors, dtor, load, rewind, next, findTag, find, setIndex, getName, getEntry, getData, getInt, getSize) and NagaChunkWriter (ctor, dtor, addEnt
 - 2026-10-27 21:09 `mag/maglifepc.cpp` verify: MagLifePC, the player controller: all 33 functions of 0x11ab40..0x11c464 (pinned) written - the constructor, changeState / selectMode over the 20 embedded MagLi
 - 2026-10-27 20:44 `mag/magscenefocus.cpp` verify: The focus (depth-of-field) effect: pinned mag/magscenefocus.cpp 0x140990..0x141e44 (merging unassigned@00140990 / 00140c68 / 0014159c) and wrote all 16 function
 - 2026-10-27 20:33 `mag/magscenecamera.cpp` verify: MagScene::updateCamera written with its look helpers clampCameraLook (was FUN_0013e2ec) and getCameraLookLimit (was FUN_0013e4c0); magscenecamera.cpp re-pinned 
@@ -230,22 +233,21 @@ Recent sessions:
 - 2026-10-27 20:15 `mag/magscenecamera.cpp` verify: MagScene camera written, all 13 functions (pinned 0x13c664..0x13e2ec): setCameraMode with its six modes, the map path camera (getCameraPathWork, scoreCameraPath
 - 2026-10-27 19:57 `i3d/i3dvu1pkt.cpp` partial: i3d/i3dvu1pkt.cpp pinned 0x21c960..0x21eb28 (was unassigned@0021c960): the VU1 sprite family (BeginVu1Sprite, Vu1Rect renamed from Vu1Color, Vu1Matrix, Vu1Sprit
 - 2026-10-27 19:26 `i3d/i3rmesh.cpp` verify: i3d/i3rmesh.cpp written whole (14 functions): the material packet cache i3rGetMaterialPacket 0x228f50 with its list helpers, i3rBuildMaterialPacket and the per-
-- 2026-10-27 19:00 `i3d/i3rdraw.cpp` partial: i3d/i3rdraw.cpp pinned 0x21fb50..0x222f50 (was unassigned@0021fb50). i3rDrawModel written: the model box cull against the layer's view, the ROM's node / entry /
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00166a1c` | todo | 0/36/342 | 94.7 | 144 | 8 |
-| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 70 | 5 |
-| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
+| `unassigned@00166a1c` | todo | 0/36/342 | 94.7 | 124 | 4 |
+| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 60 | 3 |
 | `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
-| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 42 | 1 |
-| `unassigned@001fcbf8` | todo | 0/6/12 | 0.7 | 40 | 2 |
-| `unassigned@00103edc` | todo | 0/5/23 | 1.6 | 38 | 2 |
+| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
+| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 37 | 0 |
 | `mag/maglifebwnctrl.cpp` | todo | 0/20/82 | 18.3 | 35 | 1 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
+| `unassigned@00103edc` | todo | 0/5/23 | 1.6 | 33 | 1 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
-| `utl/utlgame.cpp` | todo | 0/9/35 | 6.5 | 21 | 2 |
-| `unassigned@001832e8` | todo | 0/1/1 | 0.0 | 18 | 1 |
+| `unassigned@00225018` | todo | 0/1/18 | 4.5 | 17 | 0 |
+| `mnu/mnuselect.cpp` | partial | 3/6/14 | 3.0 | 16 | 0 |
+| `unassigned@00216ad0` | partial | 2/2/16 | 6.5 | 15 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -262,10 +264,8 @@ Recent sessions:
 | `001874f4` | MsgManSet::setMessage | 11 | ror | stub | - |
 | `00187464` | MsgManSet::close | 11 | ror | stub | - |
 | `00164118` | EmyMain::EmyMain | 11 | ror | stub | emy/emy_main.cpp |
-| `001fccf4` | NagaChunk::find | 10 | ror | stub | - |
 | `0018741c` | MsgManSet::open | 10 | ror | stub | - |
 | `00164364` | EmyMain::setStartState | 10 | ror | stub | emy/emy_main.cpp |
-| `001fcdb8` | NagaChunk::getData | 9 | ror | stub | - |
 | `00164508` | EmyMain::loadParam | 9 | ror | stub | emy/emy_main.cpp |
 | `00166a1c` | EmyOut::EmyOut | 9 | ror | stub | - |
 | `00176cc8` | Obj176a3c::createEff | 8 | ror | stub | - |
@@ -276,9 +276,6 @@ Recent sessions:
 | `001875c0` | MsgManSet::getState | 7 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 6 | ror | missing | - |
 | `00166da4` | EmyOut::selectTarget | 6 | ror | stub | - |
-| `001fca84` | NagaChunk::NagaChunk | 6 | ror | missing | task/naga_chunk.cpp |
-| `001fcbf8` | NagaChunk::rewind | 6 | ror | stub | - |
-| `001fcaac` | NagaChunk::~NagaChunk | 6 | ror | missing | task/naga_chunk.cpp |
 | `00202f10` | TskEnemyMove::stop | 6 | ror | stub | - |
 | `0018330c` | MsgMan::MsgMan | 6 | ror | missing | msg/msgman.cpp |
 | `00183b24` | MsgMan::~MsgMan | 6 | ror | missing | msg/msgman.cpp |
@@ -291,4 +288,9 @@ Recent sessions:
 | `001a074c` | MnuTextList::close | 4 | ror | stub | mnu/mnuselect.cpp |
 | `0011dd40` | MagLifePC::initMotion | 4 | ror | stub | - |
 | `001bedc0` | GamFont::setTarget | 4 | ror | stub | - |
+| `001c0254` | GamFont::getGlyphWidth | 4 | ror | stub | - |
+| `001a06d4` | MnuTextList::processPad | 4 | ror | stub | mnu/mnuselect.cpp |
+| `00225460` | FUN_00225460 | 4 | - | missing | - |
+| `00226060` | FUN_00226060 | 4 | - | missing | - |
+| `002261b8` | FUN_002261b8 | 4 | - | missing | - |
 

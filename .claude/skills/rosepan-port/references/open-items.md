@@ -102,8 +102,8 @@ follows it; reached stubs in run order):
      loadCamera / loadFocus; the TU is verify (0x1fc47c / 0x1fc490 moved to task/naga_chunk.cpp). The
      200 s New Game run reached none of them yet (it ends on the film's "March 1930" card).
      **scenePlayStart parses event packs with `task/naga_chunk.cpp`'s NagaChunk reader, stubbed
-     (find returns 0, so a scene loads nothing and ends at once)**: queue task/naga_chunk.cpp (0x1fc4f0..
-     0x1fce1c; seven tiny reader functions plus the writers) before any scene must play, together with
+     (find returned 0, so a scene loaded nothing and ended at once)**: task/naga_chunk.cpp WRITTEN
+     2026-10-27 (verify, pinned 0x1fc47c..0x1fce0c: reader and writer). Still before any scene plays:
      debug/motnamecnv0.cpp (motNameFindChara / GetCategory / Convert, stubbed) and
      DogActor::setBaseRotateY 0x10ed2c / utlStrToLower 0x218338 / MagScene::setFocusData 0x1417e4 (stubs).
   3. **`dog/dogmodel.cpp`** -- WRITTEN 2026-10-26 (all 66 functions, `verify`). The New Game load

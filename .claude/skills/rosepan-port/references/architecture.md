@@ -1927,9 +1927,15 @@ throughout (identifiers, env variables, files, shader macros):
   request (magBwnHurt -> MagLifeBwnCtrl state 10); hits on the PC (`scnChrRequestPC`) take LP and pick
   the PC state from data 0x2feea0 by word (2: front 5 / back 4; 9 / 10 become 0xb / 0xc while the
   attacking enemy holds), 0 LP -> state 3 and a TskFrameFunc kind 0xe on GamMan::m_frameTaskId.
-- 0x1fc47c / 0x1fc490 (unreferenced) are the inline ctor / dtor of the chunk writer that
-  task/naga_chunk.cpp's 0x1fc4f0 fills (+0x400 count, +0x504 buffer, +0x50c offset): naga_chunk.cpp
-  starts at 0x1fc47c, not 0x1fc4f0.
+- task/naga_chunk.cpp is pinned 0x1fc47c..0x1fce0c (written 2026-10-27). A chunk table is 16-byte
+  entries {name[8], offset from the table start, size}, ended by a zero entry. NagaChunk (EE 0x20:
+  top, owned, end, cur, name[12] for getName) reads one; NagaChunkWriter (EE 0x510: entries[64],
+  count +0x400, per-entry data blocks +0x404[64], built buffer +0x504, size +0x508, running offset
+  +0x50c) adds ints / floats (aligned to 4), strings (strlen + 1, unaligned), blobs and nested
+  writers by name or 8-byte tag, build() lays table + data out in one buffer (size rounded to 16),
+  save() / NagaChunk::load() use "host:%s" -- a debug tool, unreferenced in retail. Four functions
+  were folded into the body before them (align 0x1fc880, NagaChunk() 0x1fca70, setIndex 0x1fcd4c,
+  getSize 0x1fcdf4; created in Ghidra). 0x1fce0c.. are tsk_bg_load.cpp vtable slots (0x2e4f8c..).
 
 ## The script tasks (task/tsk_chr.cpp, 0x1e7f28..0x1f6c64, 2026-10-26)
 
