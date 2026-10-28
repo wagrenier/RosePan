@@ -627,7 +627,7 @@
 // *****************************************************************************
 
 /* 00119b34 0000002c */ MagLifeControlChara::clearGoal(){}  // ror
-/* 00119b60 0000018c */ FUN_00119b60(){}
+/* 00119b60 0000018c */ MagLifeControlChara::testFloorStep(){}  // ror
 /* 00119cec 00000130 */ MagLifeControlChara::testFloor(){}  // ror
 /* 00119e1c 0000016c */ MagLifeControlChara::followGround(){}  // ror
 /* 00119f88 00000018 */ MagLifeControlChara::getPosition(){}  // ror
@@ -637,8 +637,8 @@
 /* 0011a010 00000018 */ MagLifeControlChara::setMotionSeqNo(){}  // ror
 /* 0011a028 00000008 */ MagLifeControlChara::getMotionSeq(){}  // ror
 /* 0011a030 0000000c */ MagLifeControlChara::endMotionSeqPhase(){}  // ror
-/* 0011a03c 0000000c */ FUN_0011a03c(){}
-/* 0011a048 0000000c */ FUN_0011a048(){}
+/* 0011a03c 0000000c */ MagLifeControlChara::setMotionSeqEnd(){}  // ror
+/* 0011a048 0000000c */ MagLifeControlChara::isMotionSeqStarted(){}  // ror
 /* 0011a054 00000010 */ MagLifeControlChara::isMotionSeqEnd(){}  // ror
 /* 0011a064 000000cc */ MagLifeControlChara::isMotionStateEndless(){}  // ror
 /* 0011a130 00000014 */ MagLifeControlChara::clearMotionSeq(){}  // ror
@@ -646,13 +646,13 @@
 /* 0011a14c 00000130 */ MagLifeControlChara::updateMotionSeq(){}  // ror
 /* 0011a27c 000000a4 */ MagLifeControlChara::changeMotionSeqAlt(){}  // ror
 /* 0011a320 000001cc */ MagLifeControlChara::changeMotionSeq(){}  // ror
-/* 0011a4ec 00000160 */ FUN_0011a4ec(){}
+/* 0011a4ec 00000160 */ MagLifeControlChara::changeMotion(){}  // ror
 /* 0011a64c 00000064 */ MagLifeControlChara::getSectaCells(){}  // ror
 /* 0011a6b0 00000054 */ MagLifeControlChara::updateSectaCells(){}  // ror
 /* 0011a704 00000034 */ MagLifeControlChara::playSe(){}  // ror
 /* 0011a738 00000150 */ MagLifeControlChara::playStepSe(){}  // ror
 /* 0011a888 0000006c */ MagLifeControlChara::MagLifeControlChara(){}  // ror
-/* 0011a8f4 0000024c */ FUN_0011a8f4(){}
+/* 0011a8f4 0000024c */ MagLifeBillboard::live(){}  // ror
 
 // *****************************************************************************
 // FILE -- mag/maglifepc.cpp
