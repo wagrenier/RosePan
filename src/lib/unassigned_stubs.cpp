@@ -930,47 +930,6 @@ void MsgManSet::release(int window)
 }
 
 
-// stub of ROR 0x001fccf4
-int NagaChunk::find(const char *name)
-{
-    ROSEPAN_STUB("NagaChunk::find", 0x001fccf4);
-    return {};
-}
-
-// stub of ROR 0x001fcdb8
-void * NagaChunk::getData()
-{
-    ROSEPAN_STUB("NagaChunk::getData", 0x001fcdb8);
-    return {};
-}
-
-// stub of ROR 0x001fcda4
-NagaChunkEntry * NagaChunk::getEntry()
-{
-    ROSEPAN_STUB("NagaChunk::getEntry", 0x001fcda4);
-    return {};
-}
-
-// stub of ROR 0x001fcdd4
-int NagaChunk::getInt()
-{
-    ROSEPAN_STUB("NagaChunk::getInt", 0x001fcdd4);
-    return {};
-}
-
-// stub of ROR 0x001fcc20
-int NagaChunk::next()
-{
-    ROSEPAN_STUB("NagaChunk::next", 0x001fcc20);
-    return {};
-}
-
-// stub of ROR 0x001fcbf8
-void NagaChunk::rewind()
-{
-    ROSEPAN_STUB("NagaChunk::rewind", 0x001fcbf8);
-}
-
 // stub of ROR 0x002162e0
 int motNameGetCategory(int chara)
 {

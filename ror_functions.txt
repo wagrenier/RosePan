@@ -4280,45 +4280,44 @@
 /* 001fc474 00000008 */ TskCamera::stepNone(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- task/naga_chunk.cpp
 // *****************************************************************************
 
 /* 001fc47c 00000014 */ NagaChunkWriter::NagaChunkWriter(){}  // ror
 /* 001fc490 00000060 */ NagaChunkWriter::~NagaChunkWriter(){}  // ror
-
-// *****************************************************************************
-// FILE -- task/naga_chunk.cpp
-// *****************************************************************************
-
-/* 001fc4f0 000000f4 */ FUN_001fc4f0(){}
-/* 001fc5e4 0000001c */ FUN_001fc5e4(){}
-/* 001fc600 00000078 */ FUN_001fc600(){}
-/* 001fc678 0000003c */ FUN_001fc678(){}
-/* 001fc6b4 0000003c */ FUN_001fc6b4(){}
-/* 001fc6f0 00000054 */ FUN_001fc6f0(){}
-/* 001fc744 00000038 */ FUN_001fc744(){}
-/* 001fc77c 0000003c */ FUN_001fc77c(){}
-/* 001fc7b8 0000003c */ FUN_001fc7b8(){}
-/* 001fc7f4 00000054 */ FUN_001fc7f4(){}
-/* 001fc848 00000054 */ FUN_001fc848(){}
-/* 001fc89c 0000014c */ FUN_001fc89c(){}
-/* 001fc9e8 0000009c */ FUN_001fc9e8(){}
+/* 001fc4f0 000000f4 */ NagaChunkWriter::addEntry(){}  // ror
+/* 001fc5e4 0000001c */ NagaChunkWriter::add(NagaChunkTag*,void*,int)(){}  // ror
+/* 001fc600 00000078 */ NagaChunkWriter::add(char*,void*,int)(){}  // ror
+/* 001fc678 0000003c */ NagaChunkWriter::add(char*,int)(){}  // ror
+/* 001fc6b4 0000003c */ NagaChunkWriter::add(char*,float)(){}  // ror
+/* 001fc6f0 00000054 */ NagaChunkWriter::add(char*,char*)(){}  // ror
+/* 001fc744 00000038 */ NagaChunkWriter::add(char*,NagaChunkWriter*)(){}  // ror
+/* 001fc77c 0000003c */ NagaChunkWriter::add(NagaChunkTag*,int)(){}  // ror
+/* 001fc7b8 0000003c */ NagaChunkWriter::add(NagaChunkTag*,float)(){}  // ror
+/* 001fc7f4 00000054 */ NagaChunkWriter::add(NagaChunkTag*,char*)(){}  // ror
+/* 001fc848 00000038 */ NagaChunkWriter::add(NagaChunkTag*,NagaChunkWriter*)(){}  // ror
+/* 001fc880 0000001c */ NagaChunkWriter::align(){}  // ror
+/* 001fc89c 0000014c */ NagaChunkWriter::build(){}  // ror
+/* 001fc9e8 00000088 */ NagaChunkWriter::save(){}  // ror
+/* 001fca70 00000014 */ NagaChunk::NagaChunk(void)(){}  // ror
 /* 001fca84 00000028 */ NagaChunk::NagaChunk(){}  // ror
 /* 001fcaac 00000068 */ NagaChunk::~NagaChunk(){}  // ror
-/* 001fcb14 000000e4 */ FUN_001fcb14(){}
+/* 001fcb14 000000e4 */ NagaChunk::load(){}  // ror
+/* 001fcbf8 00000024 */ NagaChunk::rewind(){}  // ror
+/* 001fcc20 00000044 */ NagaChunk::next(){}  // ror
+/* 001fcc68 0000008c */ NagaChunk::findTag(){}  // ror
+/* 001fccf4 00000058 */ NagaChunk::find(){}  // ror
+/* 001fcd4c 00000008 */ NagaChunk::setIndex(){}  // ror
+/* 001fcd54 00000050 */ NagaChunk::getName(){}  // ror
+/* 001fcda4 00000014 */ NagaChunk::getEntry(){}  // ror
+/* 001fcdb8 0000001c */ NagaChunk::getData(){}  // ror
+/* 001fcdd4 00000020 */ NagaChunk::getInt(){}  // ror
+/* 001fcdf4 00000018 */ NagaChunk::getSize(){}  // ror
 
 // *****************************************************************************
 // FILE -- (unassigned)
 // *****************************************************************************
 
-/* 001fcbf8 00000024 */ NagaChunk::rewind(){}  // ror
-/* 001fcc20 00000044 */ NagaChunk::next(){}  // ror
-/* 001fcc68 0000008c */ NagaChunk::findTag(){}  // ror
-/* 001fccf4 00000060 */ NagaChunk::find(){}  // ror
-/* 001fcd54 00000050 */ FUN_001fcd54(){}
-/* 001fcda4 00000014 */ NagaChunk::getEntry(){}  // ror
-/* 001fcdb8 0000001c */ NagaChunk::getData(){}  // ror
-/* 001fcdd4 00000038 */ NagaChunk::getInt(){}  // ror
 /* 001fce0c 00000004 */ FUN_001fce0c(){}
 /* 001fce14 00000004 */ FUN_001fce14(){}
 /* 001fce1c 00000024 */ FUN_001fce1c(){}

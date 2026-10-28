@@ -14063,6 +14063,96 @@
   "was": "FUN_001fc490",
   "why": "GCC 2 deleting destructor: utlMemFree(+0x504), operator delete when bit 0; the same class as 0x1fc47c"
  },
+ "001fc4f0": {
+  "name": "NagaChunkWriter::addEntry",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc4f0",
+  "why": "appends {tag, m_offset, size} to the 16-byte entry table at +0, copies the data into a fresh allocDebug block (+0x404[count]), count +0x400 ++, offset +0x50c += size"
+ },
+ "001fc5e4": {
+  "name": "NagaChunkWriter::add(NagaChunkTag*,void*,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc5e4",
+  "why": "forwards its arguments unchanged to addEntry; the 8-byte tag overload the int/float/string/writer tag adds call"
+ },
+ "001fc600": {
+  "name": "NagaChunkWriter::add(char*,void*,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc600",
+  "why": "builds a zero-padded 8-byte tag from a name (memset + strncpy 8) and calls addEntry"
+ },
+ "001fc678": {
+  "name": "NagaChunkWriter::add(char*,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc678",
+  "why": "aligns m_offset to 4, adds the int a2 as 4 bytes by name"
+ },
+ "001fc6b4": {
+  "name": "NagaChunkWriter::add(char*,float)",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc6b4",
+  "why": "aligns m_offset to 4, stores f12 (swc1) and adds 4 bytes by name"
+ },
+ "001fc6f0": {
+  "name": "NagaChunkWriter::add(char*,char*)",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc6f0",
+  "why": "adds a string by name with strlen + 1 bytes"
+ },
+ "001fc744": {
+  "name": "NagaChunkWriter::add(char*,NagaChunkWriter*)",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc744",
+  "why": "aligns to 4 and adds another writer's built buffer (+0x504, size +0x508) by name: nested chunks"
+ },
+ "001fc77c": {
+  "name": "NagaChunkWriter::add(NagaChunkTag*,int)",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc77c",
+  "why": "tag overload of add(char*,int)"
+ },
+ "001fc7b8": {
+  "name": "NagaChunkWriter::add(NagaChunkTag*,float)",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc7b8",
+  "why": "tag overload of add(char*,float)"
+ },
+ "001fc7f4": {
+  "name": "NagaChunkWriter::add(NagaChunkTag*,char*)",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc7f4",
+  "why": "tag overload of add(char*,char*)"
+ },
+ "001fc848": {
+  "name": "NagaChunkWriter::add(NagaChunkTag*,NagaChunkWriter*)",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc848",
+  "why": "tag overload of add(char*,NagaChunkWriter*)"
+ },
+ "001fc880": {
+  "name": "NagaChunkWriter::align",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc880",
+  "why": "unreferenced (was folded after add(NagaChunkTag*,NagaChunkWriter*)): m_offset = (m_offset + a - 1) & ~(a - 1)"
+ },
+ "001fc89c": {
+  "name": "NagaChunkWriter::build",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc89c",
+  "why": "once: allocates (count+1)*16 + m_offset rounded to 16, copies the entries with offsets moved past the table, copies and frees each data block, zero terminator entry"
+ },
+ "001fc9e8": {
+  "name": "NagaChunkWriter::save",
+  "tag": "ror-inferred",
+  "was": "FUN_001fc9e8",
+  "why": "writes the built buffer to host:%s (sceOpen 0x602), size rounded to 16; 1 on success"
+ },
+ "001fca70": {
+  "name": "NagaChunk::NagaChunk(void)",
+  "tag": "ror-inferred",
+  "was": "FUN_001fca70",
+  "why": "unreferenced (folded after save): zeroes m_top, m_owned, m_end, m_cur without rewinding; the empty reader load() fills"
+ },
  "001fca84": {
   "name": "NagaChunk::NagaChunk",
   "tag": "ror-inferred",
@@ -14074,6 +14164,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001fcaac",
   "why": "frees the table when +4 (owned) is set; delete with bit 1"
+ },
+ "001fcb14": {
+  "name": "NagaChunk::load",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcb14",
+  "why": "when m_top is null: reads host:%s whole into an allocDebug block (sceLseek end for the size), sets m_owned, rewinds; 1 on success"
  },
  "001fcbf8": {
   "name": "NagaChunk::rewind",
@@ -14099,6 +14195,18 @@
   "was": "FUN_001fccf4",
   "why": "the name zero-padded to 8 bytes, then findTag"
  },
+ "001fcd4c": {
+  "name": "NagaChunk::setIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcd4c",
+  "why": "unreferenced (folded after find): m_cur (+0x0c) = a1"
+ },
+ "001fcd54": {
+  "name": "NagaChunk::getName",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcd54",
+  "why": "unreferenced: copies the current entry's 8-byte name into the zeroed 12-byte buffer at +0x10 and returns it"
+ },
  "001fcda4": {
   "name": "NagaChunk::getEntry",
   "tag": "ror-inferred",
@@ -14116,6 +14224,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001fcdd4",
   "why": "the word at getData"
+ },
+ "001fcdf4": {
+  "name": "NagaChunk::getSize",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcdf4",
+  "why": "unreferenced (folded after getInt): the current entry's +0x0c, the size addEntry stores"
  },
  "001fd6bc": {
   "name": "TskAttack::stepKind12",
