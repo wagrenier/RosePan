@@ -735,7 +735,7 @@
    "why": "I3D_I3M motion file root (id 0x303a68): id/version checks, relocators, node and key accessors; between i3rroot.cpp and i3croot.cpp, which it mirrors"
   },
   "i3d/i3rdraw.cpp": {
-   "notes": "Left for this TU: the shadow (render the shadow model into a host render target and project it through the STQ map; needs a renderer render-target feature). Multi-layer materials still unseen. Doubt: skinned sorted writers 0x222560 / 0x222aa0 key by the centroid of the skinned positions; the host keys by the batch box centre through the model world. No per-mesh or per-batch box cull on the host (the renderer clips). Materials with depth 2000, sort 1, order 2 occur in the book models and Jennifer's model; nothing on screen changed visibly with the new order. Run note: the 200 s smoke run sometimes ends with an access violation after frame 6240 (seen before this change too, with only a log probe added); one run reached 6780 clean and a gdbrun had no fault, so it is intermittent and unlocated. Rerun gdbrun.py with the smoke pad to catch it. Traps recorded in hazards.md: Data words that are 0 in the i3r file. Screenshot taken with ROSEPAN_TEST_CAM=1.",
+   "notes": "Verify: mark done once the forest shadow is compared with real-game footage (direction, darkness, softness). Doubts in open-items.md Projected shadow, host: the empty STQ slot match (check EE byte 0x41 = 3), strength 0.4 = light alpha clamped (the ROM VU1 lighting may scale it), no receiver culling (have_projector false), shadow filter is the renderer default. Unrelocate 0x22c328 does not know I3R_FAR_PTR. Still open from before: multi-layer materials unseen; skinned sorted writers 0x222560 / 0x222aa0 key by skinned centroid vs host box centre; no per-mesh box cull on the host. The intermittent access violation after frame 6240 of the 200 s run is still there (seen this session too); rerun gdbrun.py with the smoke pad to locate it. Also recorded this session at the user's request: architecture.md PC platform layer now requires any aspect ratio from the window or renderer size (a manual aspect setting is planned).",
    "ranges": [
     [
      "0021fb50",
@@ -777,9 +777,14 @@
      "date": "2026-10-28 15:08",
      "status": "partial",
      "summary": "Depth-keyed batches: i3rDrawModel no longer records the whole model at a layer packet; i3rDrawMesh45 / 46 file one state packet per 0x4d mesh in its material's draw-set group (i3rGetMaterialPacket now runs on the host), key 0 or per 0x56 batch the view depth of the batch box centre, holding a camera and a mesh record (RosePan_I3dRecordMesh, RosePan_I3dMeshDrawRef), so meshes replay by draw set and sorted sets back to front. PORT guards for zero data words (STQ map entity, batch box). 200 s run with ROSEPAN_TEST_CAM=1: book cover pixel-identical, forest with Jennifer and the book she holds matches the previous progress shot."
+    },
+    {
+     "date": "2026-10-28 16:16",
+     "status": "verify",
+     "summary": "Projected actor shadows drawn: rosepan_i3d follows FRAME_1 and hands the models of the shadow target pass (fbp 0x118, XYOFFSET 0) to the renderer's shadow atlas as one caster episode per pass, closed when XYOFFSET returns to the display; rosepan_i3dmesh draws mesh layers whose STQ slot is the scene's kind-3 entity (the map pack's shadow model) as projective receivers, strength from makeActorShadow's light alpha. Three blockers fixed on the way: sceGsSetDefDBuff was a memset stub, so putDrawEnv re-sent XYOFFSET / SCISSOR 0 (now filled as the SDK does, FRAME recorded too); i3rReplaceStqMapEntity now matches the file's empty slot (the ROM compares EE byte 0x41); MagScene's entity was over 2 GB from the model heap for the 32-bit relative field (new I3R_FAR_PTR side table). 200 s run with ROSEPAN_TEST_CAM=1: a soft shadow falls from Jennifer's feet across the forest path; the picture book is unchanged; letterbox bars and a message window that the zeroed env hid now draw."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "the i3r model draw run between i3d/i3dctx.cpp (ends 0x21fb50) and i3d/i3dlayer.cpp (i3dPktLayerState 0x222f50): i3rBuildMeshPacket, i3rDrawModel and the VIF / VU1 mesh packet writers it calls; no source string names it, named after its role"
   },
   "i3d/i3ritem.cpp": {

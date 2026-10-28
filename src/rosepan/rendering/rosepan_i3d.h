@@ -38,6 +38,9 @@
  *    compute on the CPU what their microprogram would kick and record it
  *    as screen-space vertices (RosePan_I3dRecordVu1Strip).
  *
+ *  - shadows: the shadow target pass feeds the renderer's projected
+ *    shadow atlas (RosePan_I3dSetShadowStrength below).
+ *
  *  Not here yet: CALLed channel state packets (fog / light, VU1 state only).
  * ======================================================================== */
 #ifndef ROSEPAN_I3D_H
@@ -90,6 +93,17 @@ void RosePan_I3dRecordMesh(const void *at, const I3rRoot *root, const float *wor
 /* The camera the model records after `at` draw with: row-major 4x4s, p' =
  * p * M (RosePan_RendererSet3DViewProjection's form; copied). */
 void RosePan_I3dRecordCamera(const void *at, const float *view, const float *projection);
+
+/* Projected shadows (MagScene::makeActorShadow / drawActorShadow): the
+ * replay hands the renderer's shadow map (RosePan_RendererShadow*) the
+ * models drawn into the shadow target (FRAME fbp 0x118, XYOFFSET 0) as one
+ * caster episode per pass, from the light's camera; the receivers -- mesh
+ * layers whose STQ map is the scene's shadow entity (kind 3) -- project it
+ * after their pass.  SetShadowStrength: pass n's darkness (makeActorShadow's
+ * shadow light alpha, 0..1 after clamping); ReceiverReady: non-zero while
+ * a receiver may draw (its pass drew a caster). */
+void RosePan_I3dSetShadowStrength(int n, float strength);
+int  RosePan_I3dShadowReceiverReady(void);
 
 /* i3dTexRegsSet / i3dTexRegsSetNone: the objects `regs` describes (NULL
  * texture = no texture). */

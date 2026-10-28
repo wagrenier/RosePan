@@ -111,7 +111,8 @@ void MagScene::putDrawEnv(I3dLayer *layer, sceGsDBuff *dbuff, int frame)
     pkt = i3dPktDmaTag(pkt + 2, 8, 0x30, env, 0, 0x50000008);
     /* PC: the env goes by DMA reference, which the native i3d module's
      * replay does not read: record the registers it uses (XYOFFSET ends an
-     * off-screen pass's XYOFFSET 0), one per qword of the packet. */
+     * off-screen pass's XYOFFSET 0; FRAME its target), one per word of
+     * the packet. */
     u_long xyoffset, scissor, test;
     memcpy(&xyoffset, &env->xyoffset1, sizeof(xyoffset));
     memcpy(&scissor, &env->scissor1, sizeof(scissor));
@@ -119,6 +120,9 @@ void MagScene::putDrawEnv(I3dLayer *layer, sceGsDBuff *dbuff, int frame)
     RosePan_I3dRecordReg(start, SCE_GS_XYOFFSET_1, xyoffset);
     RosePan_I3dRecordReg(start + 1, SCE_GS_SCISSOR_1, scissor);
     RosePan_I3dRecordReg(start + 2, SCE_GS_TEST_1, test);
+    u_long frame1;
+    memcpy(&frame1, &env->frame1, sizeof(frame1));
+    RosePan_I3dRecordReg(start + 3, SCE_GS_FRAME_1, frame1);
     i3dLayerEndPacket(layer, pkt);
 }
 
@@ -411,6 +415,7 @@ void MagScene::makeActorShadow(int theCount, i3dContext *ctx, DogActor *actor, I
             inner = 0.0f;
         m_shadow_lightrec.m_cone_inner = inner;
     }
+    RosePan_I3dSetShadowStrength(theCount, color[3] < 1.0f ? color[3] : 1.0f);  // PC: the receivers' darkness (rosepan_i3d.h)
 }
 
 // ──────────────────────────────────────────────────────────────────────

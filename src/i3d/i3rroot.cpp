@@ -11,12 +11,30 @@
 
 #include <string.h>
 
+#include <unordered_map>
+
 #include "lib/unassigned.h"
 
 /* The root item's data. */
 static inline I3rRootData *i3rRootData(const I3rRoot *root)
 {
     return (I3rRootData *)root->m_item.getData();
+}
+
+// PC: the far pointer side table (i3rroot.h I3R_FAR_PTR). Entries are
+// only read while their field holds the marker, so a stale one is harmless.
+static std::unordered_map<const u_int *, void *> s_far_ptrs;
+
+void *i3rFarPtrGet(const u_int *field)
+{
+    auto it = s_far_ptrs.find(field);
+    return it != s_far_ptrs.end() ? it->second : NULL;
+}
+
+void i3rFarPtrSet(u_int *field, const void *p)
+{
+    s_far_ptrs[field] = (void *)p;
+    *field = I3R_FAR_PTR;
 }
 
 /* ROR 0x0022b1b0 */

@@ -26,6 +26,7 @@
 #include "i3d/i3rroot.h"
 #include "lib/unassigned.h"
 #include "rosepan/io/rosepan_log.h"
+#include "rosepan/rendering/rosepan_i3d.h"
 #include "rosepan/rendering/rosepan_renderer.h"
 
 namespace
@@ -400,6 +401,25 @@ const void *MaterialTexture(const I3rItem *materials, unsigned num_mat, int inde
     return RosePan_I3dTextureFor(e.pPicture, e.m_clut, e.m_0c, 1);
 }
 
+/* Whether material `index`'s layer `u` maps STQ through the scene's shadow
+ * entity: an STQ map slot (the layer's child 3) of kind 3, the one
+ * MagScene's +0x2aa90 replaces (i3rPktLayerStqMaps: kind 3 brings its own
+ * matrix, makeActorShadow's texture matrix x light view). */
+bool LayerHasShadowStq(const I3rItem *materials, unsigned num_mat, int index, unsigned u)
+{
+    const I3rItem *layers = MaterialLayers(materials, num_mat, index);
+    if (layers == nullptr || u >= layers->getNumChild() || layers->getChildren()[u].getNumChild() < 4)
+        return false;
+    const I3rItem &maps = layers->getChildren()[u].getChildren()[3];
+    for (u_int i = 0; i < maps.getNumChild(); i++)
+    {
+        const I3rStqMapEntity *e = (const I3rStqMapEntity *)maps.getChildren()[i].getData();
+        if (e != nullptr && e->m_id == 3 && e->m_40 != 0)
+            return true;
+    }
+    return false;
+}
+
 /* The GS state of material `index` as its layer `u`'s packet sets it
  * (i3rPktLayerTest / i3rPktLayerAlpha, i3d/i3rmesh.cpp), over the chain's
  * defaults (i3dPktOpenChain: ALPHA 0x44, TEST 0x5000d) where the layer
@@ -570,9 +590,27 @@ void DrawBatch(const I3rItem &batch, const float *local_world, const MeshLayers 
             }
             continue;
         }
+        /* A shadow receiver layer (the map's shadow model, drawn after
+         * makeActorShadow's pass): the renderer projects the pass's map
+         * over it instead of the layer's texture. */
+        const bool receiver = LayerHasShadowStq(ml.materials, ml.num_mat, ml.mat, u);
+        if (receiver && !RosePan_I3dShadowReceiverReady())
+            continue;
         ApplyMaterialState(ml.materials, ml.num_mat, ml.mat, u);
+        if (receiver)
+        {
+            static bool s_logged_receiver;
+            if (!s_logged_receiver)
+            {
+                RosePan_LogPrintf("rosepan_i3dmesh: shadow receiver layer drawn\n");
+                s_logged_receiver = true;
+            }
+            RosePan_RendererShadowBeginReceiver();
+        }
         DrawStripGroup(slot[0].getChildren()[g], local_world,
                        MaterialTexture(ml.materials, ml.num_mat, ml.mat, u, ml.tex, ml.tex_count), blend);
+        if (receiver)
+            RosePan_RendererShadowEndReceiver();
     }
 }
 

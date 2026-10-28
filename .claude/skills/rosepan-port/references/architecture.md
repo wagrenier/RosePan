@@ -668,6 +668,14 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   m_rotate (+0x2abc0) and m_trans (+0x2abb0). Dog vtable slots seen here: DogModel 2 transform,
   4 getParent, 8 / 9 setHide / isHide, 11 cull 0x114e38, 12 draw (0x1151f4; DogActor 0x10e5c0),
   13 drawUnitMatrix 0x1152a8; DogActor 18 getNodeWorldPos, 19 drawModel, 20 drawShadow.
+- **Projected shadows on the host** (2026-10-28): rosepan_i3d follows FRAME_1; the models replayed in
+  the shadow target (fbp 0x118, XYOFFSET 0) are one renderer shadow caster episode per pass (the
+  atlas in rosepan_renderer.cpp, inherited from ReiPan / MioPan's gra3dShadow host), closed when
+  XYOFFSET returns to the display (drawActorShadow's putDrawEnv), so the episode matrix is the
+  light's camera. The receivers are the map pack's file 2 (MagSceneTenkyu m_model[1]), whose one
+  material layer has an STQ slot replaced by MagScene +0x2aa90 (kind 3); rosepan_i3dmesh draws such
+  layers as shadow receivers only after a pass that cast, with strength from
+  RosePan_I3dSetShadowStrength (makeActorShadow's light alpha).
 - **Projected shadows** (`MagScene::makeActorShadow` 0x139b4c): per shadowed actor a layer at 700 +
   10 n drawn into the 256 x 256 target at fbp 0x118 (sprite clear to black, FBA 1, the actor's
   DogActor::drawShadow under an ambient-only light (0, 0, 1, 0), then a post packet
@@ -1679,6 +1687,13 @@ Paths the ELF names (the disc dump has not been looked at yet: `ROSEPAN_DATA`):
   `%s_%02d.tm2`): `tm2png.py` converts them, `--scan` carves them out of archives.
 
 ## PC platform layer
+
+**Requirement: any aspect ratio** (the user, 2026-10-28). The PC port must display correctly at any
+aspect ratio, taking it from the window's dimensions or the renderer's output size -- never a fixed
+4:3 / 640x448 assumption in new host draw code (2D placement, 3D projections, render targets,
+screen-space effects). A future feature will let the player set the aspect ratio by hand, so read it
+from one renderer-owned source rather than recomputing it per module. Existing fixed-frame paths
+(rosepan_i3d's 640x448 frame scale, the 512-wide RoR frame buffer stretch) are debts to move onto it.
 
 Created 2026-10-22 (host task `setup/platform_bootstrap.cpp`) from ReiPan's, renamed ReiPan -> RosePan
 throughout (identifiers, env variables, files, shader macros):

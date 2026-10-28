@@ -704,6 +704,24 @@ a 0x56 batch's child 3 (the box) -- give getData() NULL on the host; the ROM rea
 Fix: read such data as the ROM's zeros (kind 0 = skipped; the box centre = the local origin), with
 a PORT comment, never skip the draw.
 
+## The double buffer's draw envs were all zero (2026-10-28)
+
+Symptom: after MagScene's off-screen shadow pass the receivers (and any 2D) replayed with XYOFFSET 0
+and SCISSOR 0, so the native i3d module skipped them as off-screen; the map's shadow model drew
+white once the offset was forced. Cause: src/sdk/libgraph.cpp sceGsSetDefDBuff was a memset stub;
+MagSystem only overrides the FBPs, so putDrawEnv re-sent an env of zeros. Fix: the stub now fills
+draw0 / draw1 as the SDK does (FRAME, ZBUF, XYOFFSET centred on 2048, SCISSOR, PRMODECONT,
+COLCLAMP, DTHE, TEST); putDrawEnv also records FRAME. Side effect, expected: the letterbox bars and
+message windows drawn after a pass now show.
+
+## An STQ slot too far for a 32-bit relative field (2026-10-28)
+
+Symptom: i3rReplaceStqMapEntity ran but the slot read back NULL; stdout (not the log) had
+"[i3r] ... too far from the model slot". Cause: i3r fields hold the distance from the field (32
+bits); MagScene (a global) is more than 2 GB from the model heap. Fix: I3R_FAR_PTR marker + side
+table keyed by the field address (i3rroot.h / i3rroot.cpp), used by i3rSetFarPtr. The unrelocate
+path (0x22c328) does not know the marker; a model unrelocated with a far slot needs it.
+
 ## How to debug (the method that worked)
 
 - **The picture is the test.** Logs, stub hits and callcheck show the code ran, not that it is right.

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 15:08 at commit `35e5fb7` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-28 16:16 at commit `35770a5` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -146,10 +146,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 163 TUs: todo 100, partial 8, verify 83, done 9
-- next: **i3d/i3rdraw.cpp** (continuing a partial TU)
+- 163 TUs: todo 100, partial 7, verify 84, done 9
+- next: **i3d/i3ritem.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
-- partial: `i3d/i3rdraw.cpp` 19/19 -- Left for this TU: the shadow (render the shadow model into a host render target and project it through the STQ map; needs a renderer render-target feature). Mul
 - partial: `i3d/i3ritem.cpp` 138/168 -- Status partial: left in i3ritem.cpp are the per-type accessors between the fixups (FUN_0022c840 .. FUN_0022e7c8 and the small getters hidden after each fixup's 
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -182,6 +181,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `i3d/i3dvu1pkt.cpp` 17/21 -- Complete except 0x21cfb0..0x21d378 (four functions: a REF-tag helper, an ADC index builder, two strip writers): no code or data references in the ROM, left unwr
 - verify: `i3d/i3mpose.cpp` 46/46 -- Whole TU written. Nothing in the ROM reaches 0x230688..0x231198 (no jal, j, data word or lui/addiu pair), so no picture can show it; the rest of the TU (key dec
 - verify: `i3d/i3mroot.cpp` 12/12 -- Pinned from unassigned@0022b4b8 to i3d/i3mroot.cpp. Host keeps root-relative offsets (i3mPtr), like i3c: the relocators walk with delta 0 and keep +0x16 at 1 (o
+- verify: `i3d/i3rdraw.cpp` 19/19 -- Verify: mark done once the forest shadow is compared with real-game footage (direction, darkness, softness). Doubts in open-items.md Projected shadow, host: the
 - verify: `i3d/i3rmesh.cpp` 14/14 -- Verify: the packet builder's callers (i3rDrawGroupSkinned / Rigid, 0x220838) are not ported, so only i3rPktLayerTest / i3rPktLayerAlpha run, through rosepan_i3d
 - verify: `i3d/i3rmodel.cpp` 14/14 -- Verify: nothing on screen reaches it yet. The 200 s New Game run still ends black after the film; DogActor::load 0x10cd5c (dog/dogactor.cpp) is the stub that ke
 - verify: `i3d/i3rroot.cpp` 14/14 -- Verify: no model loads in the smoke run yet, so nothing can show it (screen still black, as before). Port trap: the ROM relocates i3r files in place into absolu
@@ -237,6 +237,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-28 16:16 `i3d/i3rdraw.cpp` verify: Projected actor shadows drawn: rosepan_i3d follows FRAME_1 and hands the models of the shadow target pass (fbp 0x118, XYOFFSET 0) to the renderer's shadow atlas
 - 2026-10-28 15:08 `i3d/i3rdraw.cpp` partial: Depth-keyed batches: i3rDrawModel no longer records the whole model at a layer packet; i3rDrawMesh45 / 46 file one state packet per 0x4d mesh in its material's 
 - 2026-10-28 13:57 `i3d/i3rdraw.cpp` partial: Native mesh module draws every material layer of a batch: DrawBatch follows i3rPktCallStrips 0x221080 -- per layer of the mesh's material, the byte in the 0x4d 
 - 2026-10-28 13:17 `i3d/i3rdraw.cpp` partial: The black frames after the picture book are a camera problem, not a draw one: MagScene::draw runs with the world flag (2 actors and the forest map alive) and i3
@@ -244,7 +245,6 @@ Recent sessions:
 - 2026-10-28 12:00 `i3d/i3mpose.cpp` verify: i3m pose player complete: the last 10 functions, a quaternion kit Ghidra had folded into 0x230688 and 0x230df8 (shorter-arc slerp memory and GPR forms, shorter-
 - 2026-10-28 11:36 `emy/emy_hfm.cpp` verify: Wrote HfmOutTest::Exec 0x149500, the last stub of the TU: a 0x2d-step motion walk-through (ROM switch via jump table 0x2ef4b0) written as a step-to-motion table
 - 2026-10-28 11:19 `i3d/i3rdraw.cpp` partial: Blend path wired: i3rDrawSetupBlend 0x220670 written (per channel the non-zero weights of the entry's 0x59 targets, curve at opt's time or static weight); i3rDr
-- 2026-10-28 11:05 `i3d/i3rdraw.cpp` partial: i3rDrawMesh45 / i3rDrawMesh46 part culls written (box test, i3dViewTestBoneBox through the entry's bone slots) and now decide i3rDrawModel's result; I3dBoneBoxe
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
@@ -254,10 +254,10 @@ Recent sessions:
 | `unassigned@0016a914` | todo | 0/120/172 | 47.3 | 76 | 6 |
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 70 | 5 |
 | `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
-| `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 51 | 1 |
-| `unassigned@00225018` | todo | 0/3/18 | 4.5 | 50 | 1 |
+| `emy/emy_main.cpp` | partial | 2/23/88 | 11.0 | 51 | 0 |
 | `utl/utlgame.cpp` | todo | 0/20/35 | 6.5 | 50 | 2 |
+| `unassigned@00225018` | todo | 0/3/18 | 4.5 | 50 | 1 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
 
