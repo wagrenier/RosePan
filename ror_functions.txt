@@ -5567,8 +5567,16 @@
 /* 00230570 000000a0 */ i3mQuatExp(){}  // ror
 /* 00230610 0000004c */ i3mQuatDot(){}  // ror
 /* 00230660 00000028 */ i3mQuatNormalize(){}  // lib-ctx
-/* 00230688 0000076c */ FUN_00230688(){}
-/* 00230df8 000003a0 */ FUN_00230df8(){}
+/* 00230688 00000138 */ i3mQuatSlerpShortMem(){}  // ror
+/* 002307c0 00000130 */ i3mQuatSlerpShortQ(){}  // ror
+/* 002308f0 000000a4 */ i3mQuatLerpShort(){}  // ror
+/* 00230998 00000150 */ i3mQuatSlerpNormMem(){}  // ror
+/* 00230ae8 00000124 */ i3mQuatSlerpNormQ(){}  // ror
+/* 00230c10 000000e8 */ i3mQuatSquadMem(){}  // ror
+/* 00230cf8 00000078 */ i3mQuatSquadQ(){}  // ror
+/* 00230d70 00000084 */ i3mQuatToMatrix(){}  // ror
+/* 00230df8 000002a0 */ i3mQuatFromMatrix(){}  // ror
+/* 00231098 00000100 */ i3mQuatSquadCtrl(){}  // ror
 /* 00231198 00000104 */ i3mQuatFromEuler(){}  // lib-ctx
 
 // *****************************************************************************

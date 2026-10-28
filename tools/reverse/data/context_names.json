@@ -22253,6 +22253,66 @@
   "was": "FUN_00230660",
   "why": "VU0 rsqrt of the dot, scale"
  },
+ "00230688": {
+  "name": "i3mQuatSlerpShortMem",
+  "tag": "ror-inferred",
+  "was": "FUN_00230688",
+  "why": "the shorter-arc slerp of i3mQuatSlerpShort 0x22fc38 (dot < 0 negates a, lerp+normalize past 0.9) with in-memory a1/a2 and out a0; unreferenced"
+ },
+ "002307c0": {
+  "name": "i3mQuatSlerpShortQ",
+  "tag": "ror-inferred",
+  "was": "FUN_002307c0",
+  "why": "same shorter-arc slerp with a and b passed as 128-bit GPRs a0/a1 (qmtc2) and the result returned in v0; unreferenced"
+ },
+ "002308f0": {
+  "name": "i3mQuatLerpShort",
+  "tag": "ror-inferred",
+  "was": "FUN_002308f0",
+  "why": "i3mQuatDot < 0 scales a by -1, then i3dVecInterp(w, out, a, b); no normalize; unreferenced"
+ },
+ "00230998": {
+  "name": "i3mQuatSlerpNormMem",
+  "tag": "ror-inferred",
+  "was": "FUN_00230998",
+  "why": "i3mQuatSlerpNorm 0x230258 in memory form: lerp outside -0.9..0.9 else acos/sin slerp via i3dVecScale/i3dVecAdd, always i3mQuatNormalize; called by the squad 0x230c10"
+ },
+ "00230ae8": {
+  "name": "i3mQuatSlerpNormQ",
+  "tag": "ror-inferred",
+  "was": "FUN_00230ae8",
+  "why": "same normalized slerp with 128-bit GPR operands and v0 result; called by the squad 0x230cf8"
+ },
+ "00230c10": {
+  "name": "i3mQuatSquadMem",
+  "tag": "ror-inferred",
+  "was": "FUN_00230c10",
+  "why": "slerp(w, a, b) and slerp(w, c, d) mixed by slerp at 2w(1-w): the squad; the second slerp skipped when c and d are one non-NaN quaternion"
+ },
+ "00230cf8": {
+  "name": "i3mQuatSquadQ",
+  "tag": "ror-inferred",
+  "was": "FUN_00230cf8",
+  "why": "the squad over i3mQuatSlerpNormQ with 128-bit GPR operands, tail-calls the last slerp"
+ },
+ "00230d70": {
+  "name": "i3mQuatToMatrix",
+  "tag": "ror-inferred",
+  "was": "FUN_00230d70",
+  "why": "VU0 rotation matrix rows from quaternion a1 (1-2y2-2z2, 2xy+2zw ...), w 0, row 3 copied from a2"
+ },
+ "00230df8": {
+  "name": "i3mQuatFromMatrix",
+  "tag": "ror-inferred",
+  "was": "FUN_00230df8",
+  "why": "the inverse of i3mQuatToMatrix: w from the trace unless w2 < 0.01, then the largest of x2 y2 z2; w kept non-negative, normalized"
+ },
+ "00231098": {
+  "name": "i3mQuatSquadCtrl",
+  "tag": "ror-inferred",
+  "was": "FUN_00231098",
+  "why": "q * exp(-(log(q* next) + log(q* prev)) / 4): the squad inner control point from prev, q, next"
+ },
  "00231198": {
   "name": "i3mQuatFromEuler",
   "tag": "lib-context",

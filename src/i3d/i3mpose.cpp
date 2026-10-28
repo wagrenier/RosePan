@@ -489,7 +489,9 @@ void i3mDecodeKeySpline(I3mPose *out, const u_short *key, const I3mRoot *root, u
 // ROR 0x0022fc38
 // callcheck: acosf, sinf (in slerp4)
 
-void i3mQuatSlerpShort(float w, float *out, const float *a, const float *b)
+/* The body of the three shorter-arc slerps (0x22fc38, 0x230688,
+ * 0x2307c0): copies that differ only in how the operands travel. */
+static inline void slerpShort4(float w, float *out, const float *a, const float *b)
 {
     float qa[4];
     float d = dot4(a, b);
@@ -509,6 +511,11 @@ void i3mQuatSlerpShort(float w, float *out, const float *a, const float *b)
         lerp4(w, out, qa, b);
         normalize4(out, out);
     }
+}
+
+void i3mQuatSlerpShort(float w, float *out, const float *a, const float *b)
+{
+    slerpShort4(w, out, a, b);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -729,6 +736,226 @@ float i3mQuatDot(const float *a, const float *b)
 void i3mQuatNormalize(float *out, const float *in)
 {
     normalize4(out, in);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// 0x230688..0x231098: a quaternion kit nothing in the game calls (no
+// jal, pointer or lui/addiu pair reaches it); Ghidra had it folded into
+// two bodies. The ...Q forms take and return their quaternions in
+// 128-bit GPRs (qmtc2 / qmfc2); on the host they take pointers like the
+// memory forms.
+
+/* ROR 0x00230688: i3mQuatSlerpShort with a and b in memory. */
+// callcheck: acosf, sinf (in slerp4)
+void i3mQuatSlerpShortMem(float w, float *out, const float *a, const float *b)
+{
+    slerpShort4(w, out, a, b);
+}
+
+/* ROR 0x002307c0 */
+// callcheck: acosf, sinf (in slerp4)
+void i3mQuatSlerpShortQ(float w, float *out, const float *a, const float *b)
+{
+    slerpShort4(w, out, a, b);
+}
+
+/* ROR 0x002308f0: lerp by the shorter arc, not normalized. */
+void i3mQuatLerpShort(float w, float *out, const float *a, const float *b)
+{
+    float na[4];
+
+    if (i3mQuatDot(a, b) < 0.0f)
+    {
+        i3dVecScale(-1.0f, na, a);
+        i3dVecInterp(w, out, na, b);
+    }
+    else
+        i3dVecInterp(w, out, a, b);
+}
+
+/* ROR 0x00230998: i3mQuatSlerpNorm through the i3dVec calls (each side
+ * scaled by its sine over sin(th) before the add). */
+void i3mQuatSlerpNormMem(float w, float *out, const float *a, const float *b)
+{
+    float d = i3mQuatDot(a, b);
+
+    if (d < -s_slerp_max || s_slerp_max < d)
+        i3dVecInterp(w, out, a, b);
+    else
+    {
+        float sa[4], sb[4];
+        float th = acosf(d);
+        float inv = 1.0f / sinf(th);
+        float ka = sinf(th * w) * inv;
+        float kb = sinf(th * (1.0f - w)) * inv;
+
+        i3dVecScale(ka, sa, a);
+        i3dVecScale(kb, sb, b);
+        i3dVecAdd(out, sa, sb);
+    }
+    i3mQuatNormalize(out, out);
+}
+
+/* ROR 0x00230ae8: the VU0 copy of i3mQuatSlerpNorm 0x230258. */
+// callcheck: acosf, sinf (in slerp4)
+void i3mQuatSlerpNormQ(float w, float *out, const float *a, const float *b)
+{
+    float d = dot4(a, b);
+    float q[4];
+
+    if (d < -s_slerp_max || s_slerp_max < d)
+        lerp4(w, q, a, b);
+    else
+        slerp4(w, d, q, a, b);
+    normalize4(out, q);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Squad: slerp(w, a, b) and slerp(w, c, d) mixed by a slerp at 2w(1 - w)
+// (w = 1 gives a). When c and d are the same quaternion without a NaN
+// the second slerp is skipped and c used as it is.
+// ROR 0x00230c10
+
+void i3mQuatSquadMem(float w, float *out, const float *a, const float *b, const float *c,
+                     const float *d)
+{
+    float ab[4], cd[4];
+    const float *p = cd;
+
+    i3mQuatSlerpNormMem(w, ab, a, b);
+    if (c == d && c[3] == c[3] && c[0] == c[0] && c[1] == c[1] && c[2] == c[2])
+        p = c;
+    else
+        i3mQuatSlerpNormMem(w, cd, c, d);
+    i3mQuatSlerpNormMem((w + w) * (1.0f - w), out, p, ab);
+}
+
+/* ROR 0x00230cf8 */
+void i3mQuatSquadQ(float w, float *out, const float *a, const float *b, const float *c,
+                   const float *d)
+{
+    float ab[4], cd[4];
+
+    i3mQuatSlerpNormQ(w, ab, a, b);
+    i3mQuatSlerpNormQ(w, cd, c, d);
+    i3mQuatSlerpNormQ((w + w) * (1.0f - w), out, cd, ab);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Rotation rows of the unit quaternion q (w of each row 0), row 3 copied
+// from trans. Sums in the VU0's order: 1 - 2zz - 2yy etc.
+// ROR 0x00230d70
+
+void i3mQuatToMatrix(sceVu0FVECTOR *m, const float *q, const float *trans)
+{
+    float x2 = q[0] + q[0], y2 = q[1] + q[1], z2 = q[2] + q[2];
+    float xx = x2 * q[0], xy = x2 * q[1], xz = x2 * q[2];
+    float yy = y2 * q[1], yz = y2 * q[2];
+    float zz = z2 * q[2];
+    float xw = x2 * q[3], yw = y2 * q[3], zw = z2 * q[3];
+    float one_zz = 1.0f - zz;
+
+    m[0][0] = one_zz - yy;
+    m[0][1] = xy + zw;
+    m[0][2] = xz - yw;
+    m[0][3] = 0.0f;
+    m[1][0] = xy - zw;
+    m[1][1] = one_zz - xx;
+    m[1][2] = yz + xw;
+    m[1][3] = 0.0f;
+    m[2][0] = xz + yw;
+    m[2][1] = yz - xw;
+    m[2][2] = (1.0f - xx) - yy;
+    m[2][3] = 0.0f;
+    for (int i = 0; i < 4; i++)
+        m[3][i] = trans[i];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The rotation of m as a unit quaternion with w >= 0: from the trace
+// while w^2 >= 0.01, else from the largest of x^2, y^2, z^2 (ties go
+// to z, then y).
+// ROR 0x00230df8
+
+void i3mQuatFromMatrix(float *out, const sceVu0FVECTOR *m)
+{
+    float m00 = m[0][0], m11 = m[1][1], m22 = m[2][2], m33 = m[3][3];
+    float ww = (((m00 + m11) + m22) + m33) * 0.25f;
+    float xx = (((m00 - m11) - m22) + m33) * 0.25f;
+    float yy = (((m11 - m00) - m22) + m33) * 0.25f;
+    float zz = (((-m00 - m11) + m22) + m33) * 0.25f;
+    float q[4];
+    float s, k;
+    int big = 0;
+
+    if (ww < 0.01f)
+    {
+        if (yy < xx)
+            big = zz < xx ? 1 : 3;
+        else
+            big = zz < yy ? 2 : 3;
+    }
+    switch (big)
+    {
+    case 0:
+        s = sqrtf(ww);
+        k = 0.25f / s;
+        q[3] = s;
+        q[2] = (m[0][1] - m[1][0]) * k;
+        q[0] = (m[1][2] - m[2][1]) * k;
+        q[1] = (m[2][0] - m[0][2]) * k;
+        break;
+    case 1:
+        s = sqrtf(xx);
+        k = 0.25f / s;
+        q[0] = s;
+        q[3] = (m[1][2] - m[2][1]) * k;
+        q[1] = (m[0][1] + m[1][0]) * k;
+        q[2] = (m[2][0] + m[0][2]) * k;
+        break;
+    case 2:
+        s = sqrtf(yy);
+        k = 0.25f / s;
+        q[1] = s;
+        q[3] = (m[2][0] - m[0][2]) * k;
+        q[0] = (m[0][1] + m[1][0]) * k;
+        q[2] = (m[1][2] + m[2][1]) * k;
+        break;
+    default:
+        s = sqrtf(zz);
+        k = 0.25f / s;
+        q[2] = s;
+        q[3] = (m[0][1] - m[1][0]) * k;
+        q[0] = (m[0][2] + m[2][0]) * k;
+        q[1] = (m[2][1] + m[1][2]) * k;
+        break;
+    }
+    if (q[3] < 0.0f)
+        i3dVecNeg(q, q);
+    i3mQuatNormalize(out, q);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The squad's inner control point at q between prev and next:
+// q * exp(-(log(q* next) + log(q* prev)) / 4), q* the conjugate.
+// ROR 0x00231098
+
+void i3mQuatSquadCtrl(float *out, const float *prev, const float *q, const float *next)
+{
+    float conj[4], t[4], lp[4], ln[4];
+
+    conj[0] = q[0] * -1.0f;
+    conj[1] = q[1] * -1.0f;
+    conj[2] = q[2] * -1.0f;
+    conj[3] = q[3];
+    i3mQuatMul(t, conj, prev);
+    i3mQuatLog(lp, t);
+    i3mQuatMul(t, conj, next);
+    i3mQuatLog(ln, t);
+    i3dVecAdd(t, ln, lp);
+    i3dVecScale(-0.25f, t, t);
+    i3mQuatExp(t, t);
+    i3mQuatMul(out, q, t);
 }
 
 // ──────────────────────────────────────────────────────────────────────
