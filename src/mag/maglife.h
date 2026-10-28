@@ -113,6 +113,12 @@ struct MagLifeControlChara : MagLife
     void getPosition(float *out);                                        // ROR 0x00119f88
     /* DogActor::getRotY, 0 without an actor. */
     float getRotY();                                                     // ROR 0x00119fb0
+    /* A ray from 60 above the actor over 120: m_trans.y follows the floor
+     * by (t - 0.5) * 60, at most 7 a call; returns the step. */
+    float followGround();                                                // ROR 0x00119e1c
+    /* The secta query (radius 40) at the actor into the four cells at
+     * +0x60 (m_goal's words), kept when the first is set. */
+    void updateSectaCells();                                             // ROR 0x0011a6b0
 
     u_char    _28[0x30 - 0x28];
     int       m_prev_state[4];  // ROR 0x30: setState saves m_state, m_04, m_08, m_0c here

@@ -1051,6 +1051,26 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   (BedPad +0x64) into HoldAttack; DogCome becomes Hug when Brown is 100..130 ahead within 45
   degrees and `MagLifeBwnCtrl::checkHug` 0x12b870 agrees; Ride's pc m_0c is the phase (2 = the
   dismount Ride::message starts).
+- PC movement (`mag/maglifepcmove.cpp` 0x11e4c4..0x120788, written 2026-10-27): `moveBy` 0x11ee00
+  is every moving mode's step. Health >= 3 adds a zero move; MagScene +0x22b8 set skips collision;
+  else `sweepMove` 0x11ea04 (`testObjHit` 0x11ccd4 = GamMan::testPcHitAt at pos + move, the object
+  slide `slideOffObj` 0x11cd20; then `MagScene::castCylinder` of radius m_sweep_range - m_sweep_radius
+  (45 - 20) pushed m_sweep_radius ahead, from 50 + range above, height 50) -- blocked: the slide
+  along the wall normal (turned a quarter to the move's side, the move's length) is swept again; if
+  that is blocked and the slide is within 0.8 (dot) of the move, `sweepSides` 0x11e4c4 casts two
+  rays from +-90 degrees (castRay, length range) and slides away from the nearer hit; else stand.
+  Then `MagLifeControlChara::followGround` 0x119e1c (castRay from y - 60 over 120: y += (t - 0.5) *
+  60, clamped +-7) and `updateSectaCells` 0x11a6b0 (secta query radius 40 into +0x60's four cells:
+  m_goal is the cells). `applyMotionMove` 0x120668 (live, outside move states) adds the root step
+  from frame 2f to 2(f + 1) turned by m_base_rotate.y. The stance walk (`moveAttackStance`
+  0x11ff10, AtkMove2D::pad) turns the stick by the camera's level z axis (DogCamera slot 2
+  transform, m_matrix row 2), takes its 16-sector minus the heading's into 8 atk_walk / atk_step_*
+  motions (0x2973b0, offsets 0x2eacc0) and `moveStanceStep` 0x11f884 (flags 0x45, arg 5). The ROM
+  asserts call m_stance m_attack_stat (ATK_STAT_NONE 0) and m_move_level m_move_stat
+  (MOV_STAT_WAIT 0, _RUN 2). Unreferenced older pad set: `movePad` 0x1205dc -> `moveDowned`
+  0x1203a0 (health 3 / 4 ev201 crawl), `moveFree` 0x11f9f8 (camera-relative walk / run rows of
+  0x297240 through `moveToward` 0x11f4a8: <= 0.2 rad a frame, the *_turn_r180 motion within
+  0.003 of pi), `moveTank` 0x11f0b4 (tank control).
 - processPad (states 1..11): status words via updatePadStatus -- health class m_health (+0xe4,
   calcHealth: override, mode 1 -> 3, 3 -> 4, PC param 0x1b / 0x1c ratio <= 0.3 -> 2, stamina),
   move level m_move_level (+0xe0, readStick: dead zone +0x1f8, run above 0.97), stance m_stance

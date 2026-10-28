@@ -153,3 +153,16 @@ void MagLifeControlChara::changeMotionSeqAlt(int theState, int blend)
 {
     ROSEPAN_STUB("MagLifeControlChara::changeMotionSeqAlt", 0x0011a27c);
 }
+
+// stub of ROR 0x00119e1c
+float MagLifeControlChara::followGround()
+{
+    ROSEPAN_STUB("MagLifeControlChara::followGround", 0x00119e1c);
+    return {};
+}
+
+// stub of ROR 0x0011a6b0
+void MagLifeControlChara::updateSectaCells()
+{
+    ROSEPAN_STUB("MagLifeControlChara::updateSectaCells", 0x0011a6b0);
+}

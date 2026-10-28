@@ -2327,6 +2327,12 @@
   "was": "FUN_00119b34",
   "why": "+0x70 = -1, the vector +0x60 cleared (role from reset4MapJump; unconfirmed)"
  },
+ "00119e1c": {
+  "name": "MagLifeControlChara::followGround",
+  "tag": "ror-inferred",
+  "was": "FUN_00119e1c",
+  "why": "castRay down from the actor's position 60 up over 120: moves m_trans.y by (t - 0.5) * 60 clamped to +-7; moveBy calls it after every collision-tested step"
+ },
  "00119f88": {
   "name": "MagLifeControlChara::getPosition",
   "tag": "ror-inferred",
@@ -2398,6 +2404,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0011a320",
   "why": "asserts theState >= 0 and m_tbl_motion_state[theState].m_state_id == theState (the 0x18-byte table at +0x5c), sets the row in +0x40 and starts its motion; blend -1 = the row's own"
+ },
+ "0011a6b0": {
+  "name": "MagLifeControlChara::updateSectaCells",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a6b0",
+  "why": "the secta query 0x17c340 (radius 40) over the scene's m_8542c at the actor's position into the four cells at +0x60 (kept when +0x60 is set); the end of every moveBy"
  },
  "0011a704": {
   "name": "MagLifeControlChara::playSe",
@@ -2627,6 +2639,18 @@
   "was": "FUN_0011cc14",
   "why": "(oid): canTakeItem, then the object's param 2 (item id) addItem, the sequence's pick-up event words, endPcAction and releaseChr; -1 when it cannot"
  },
+ "0011ccd4": {
+  "name": "MagLifePC::testObjHit",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ccd4",
+  "why": "GamMan::testPcHitAt(g_gamMan, pos) and the hit record's word +0x10 (the object id) into *oid when given; sweepMove's first test"
+ },
+ "0011cd20": {
+  "name": "MagLifePC::slideOffObj",
+  "tag": "ror-inferred",
+  "was": "FUN_0011cd20",
+  "why": "out = delta less its part along the level direction from the actor to object oid (utlGetObjPos), normalised when shorter than 1; sweepMove's object slide"
+ },
  "0011ce50": {
   "name": "MagLifePC::getEquipItemChrNo",
   "tag": "ror-inferred",
@@ -2741,6 +2765,12 @@
   "was": "FUN_0011e0ac",
   "why": "m_state 1..10 or 14"
  },
+ "0011e4c4": {
+  "name": "MagLifePC::sweepSides",
+  "tag": "ror-inferred",
+  "was": "FUN_0011e4c4",
+  "why": "same arguments as sweepMove; casts two rays along the move from both sides (turned +-90 degrees, range - radius out) and writes the free side's direction scaled to the move length; 0 = a side found, -1 neither ray hits; moveBy calls it on a head-on wall"
+ },
  "0011ea04": {
   "name": "MagLifePC::sweepMove",
   "tag": "ror-inferred",
@@ -2753,11 +2783,53 @@
   "was": "FUN_0011ee00",
   "why": "(pc, move, f12, f13): DogActor::addTrans / sweepMove of the PC by a root-motion vector; called by MagLifePCMode::moveBy"
  },
+ "0011f0b4": {
+  "name": "MagLifePC::moveTank",
+  "tag": "ror-inferred",
+  "was": "FUN_0011f0b4",
+  "why": "unreferenced: stick y walks forward / back (walk / walk_b rows of 0x297240) turning by stick x * m_204, a sideways stick turns in place (turn_l / turn_r, atk_step_l / _r in a stance); then the root motion through moveBy"
+ },
+ "0011f4a0": {
+  "name": "MagLifePC::isKeepMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0011f4a0",
+  "why": "returns 0; moveToward asks it with the current motion number before restarting the motion"
+ },
+ "0011f4a8": {
+  "name": "MagLifePC::moveToward",
+  "tag": "ror-inferred",
+  "was": "FUN_0011f4a8",
+  "why": "asserts theRotY / thePlyY (its own assert names); turns the actor towards theRotY by at most 0.2 a frame, near 180 degrees plays the turn motion instead (flags 2), then the root motion rotated into the world through moveBy"
+ },
+ "0011f884": {
+  "name": "MagLifePC::moveStanceStep",
+  "tag": "ror-inferred",
+  "was": "FUN_0011f884",
+  "why": "asserts theRotY; plays the stance step motion (flags 0x45, the stance sub motion) and moves by its root motion turned by theRotY (moveAttackStance's only callee of its kind)"
+ },
+ "0011f9f8": {
+  "name": "MagLifePC::moveFree",
+  "tag": "ror-inferred",
+  "was": "FUN_0011f9f8",
+  "why": "asserts m_attack_stat == ATK_STAT_NONE; the stick turned by the camera's heading (static 0x297380) picks walk / run rows of 0x297240 and moveToward, a stance falls back to the atk_walk eight directions"
+ },
  "0011ff10": {
   "name": "MagLifePC::moveAttackStance",
   "tag": "ror-inferred",
   "was": "FUN_0011ff10",
   "why": "(pad): the stance walk by the stick in 16 directions (asserts m_attack_stat != ATK_STAT_NONE, ay / py < 8*2); AtkMove2D::pad while the stance is held and the stick is out"
+ },
+ "001203a0": {
+  "name": "MagLifePC::moveDowned",
+  "tag": "ror-inferred",
+  "was": "FUN_001203a0",
+  "why": "health 3 / 4 (movePad): the stick sector against the heading sector picks ev201_dwn / _l / _up / _r (0x2973d0)"
+ },
+ "001205dc": {
+  "name": "MagLifePC::movePad",
+  "tag": "ror-inferred",
+  "was": "FUN_001205dc",
+  "why": "unreferenced dispatcher: m_move_stat 0 does nothing, health 3..4 moveDowned, a stance moveAttackStance, else moveFree (during an action motion only the stance case)"
  },
  "00120668": {
   "name": "MagLifePC::applyMotionMove",
