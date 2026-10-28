@@ -6,6 +6,18 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**TOP PRIORITY, NEWEST (the user, 2026-10-28): get the game to show up in 3D -- the user thinks the
+camera is the issue.** Host task `fix/ingame_camera.cpp`, first in the pinned queue (its brief has
+the full text). What is known: after the picture book MagScene::draw runs and the forest map and
+Jennifer are loaded, but the scene camera is still the default (mode 0, no parent, (0, 1000, 0)
+looking along +y, away from the scene), so i3rDrawModel culls everything. ROSEPAN_TEST_CAM=1 shows
+Jennifer textured and lit, so the draw path works and the camera placement is the gap: no PC is
+bound (GamMan::setPC never runs setCameraMode) and no camera native is called. Write the real code
+that places the camera / binds the PC (GamMan::setPC and the script PC native, MagLifePC::setActor,
+TskCamera, setCameraMode 3..5 / map camera, the writer of DogCamera +0x1d0 / +0x190..+0x1c0) until
+the 200 s smoke run shows the first room without the test switch. Supersedes the lists below until
+then.
+
 **PC BLOCKERS FIRST (the user, 2026-10-27, after mag/maglifepc.cpp): the three TUs the player
 character needs to animate and move lead the pinned queue, ahead of Brown and the rest:**
   1. mag/maglifepc3.cpp (pinned 0x11d720..0x11e0d8): initMotion 0x11dd40 and the motion loads
