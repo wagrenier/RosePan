@@ -1,6 +1,5 @@
 {
  "queue": [
-  "mag/maglifepc3.cpp",
   "mag/maglifepcmode.cpp",
   "mag/maglifepcmove.cpp",
   "unassigned@0010f944",
@@ -885,12 +884,21 @@
    "why": "the file's asserts (mag/maglifepc.cpp, lines 1046..2340) run 0x11af30..0x11c1e8 in line order; 0x11ab40..0x11ade4 (restoreState, calcHealth, readStick, readStance, updatePadStatus) and termWorld use only MagLifePC fields; 0x11c464.. are GamMan PC-param getters before maglifepc2.cpp's first anchor 0x11c64c. initMotion 0x11dd40 / getSubStateClass 0x11e080 sit in maglifepc3.cpp's run, setState14 0x12c9c0 beside maglifepcbtl.cpp"
   },
   "mag/maglifepc3.cpp": {
+   "notes": "Status verify: the smoke run ends on the boot disclaimer screen, before MagScene::setPC binds the player, so nothing on screen shows these motions yet; the first session whose run reaches a room with Jennifer should check she stands in the weapon wait pose and mark this done. Names (batch maglifepc_003): overloads changeMotion(int)/(const_char*) and playActionMotion(int)/(const_char*) in Ghidra. loadMotion 0x11d990 and playActionMotion/isActionMotionEnd have no callers in the ROM (kept, written). changeMotion(name) uses MagLifeControlChara m_mode 2 for the jnfc_ name variant (static 0x40-byte buffer 0x2971d0). Callers in maglifepcmode.cpp / maglifepcmove.cpp / maglifepcbtl.cpp still use FUN_ placeholders or stubs: when those TUs are written, call setStanceSubMotion 0x11df7c, clearSubMotion 0x11dfd0, setWaitSubMotion 0x11dff8, getHealthMotionStep 0x11d720, changeMotion(const char*) 0x11d7c0. 0x11e0d8 (ray/strip debug drawer) stays outside the TU.",
    "ranges": [
     [
      "0011d720",
      "0011e0d8"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-27 21:27",
+     "status": "verify",
+     "summary": "MagLifePC motions reconstructed: all 14 functions of 0x11d720..0x11e0d8 (initMotion, changeMotion by name and the unimplemented by-number overload, loadMotion, loadWeaponMotion, play/isEnd action motion, the stance/wait/clear sub motions, getHealthMotionStep, getSubStateClass, isMoveState) with their tables; m_f4 renamed m_action_motion"
+    }
+   ],
+   "status": "verify",
    "why": "the file's asserts (mag/maglifepc3.cpp) anchor 0x11d720..0x11df14; initMotion 0x11dd40 sits between those anchors and calls the file's loadWeaponMotion 0x11dc64; 0x11df7c..0x11e0d8 are the setMotionSub helpers initMotion calls plus getSubStateClass / isMoveState (small MagLifePC queries). 0x11e0d8 (a ray / strip debug drawer) is left out"
   },
   "mag/maglifepcmode.cpp": {

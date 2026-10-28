@@ -1611,30 +1611,10 @@ int MagLifePC::getPcParam1c()
     return {};
 }
 
-// stub of ROR 0x0011e080
-int MagLifePC::getSubStateClass()
-{
-    ROSEPAN_STUB("MagLifePC::getSubStateClass", 0x0011e080);
-    return {};
-}
-
 // stub of ROR 0x0011cb70
 int MagLifePC::getWeaponType(int item)
 {
     ROSEPAN_STUB("MagLifePC::getWeaponType", 0x0011cb70);
-    return {};
-}
-
-// stub of ROR 0x0011dd40
-void MagLifePC::initMotion()
-{
-    ROSEPAN_STUB("MagLifePC::initMotion", 0x0011dd40);
-}
-
-// stub of ROR 0x0011e0ac
-int MagLifePC::isMoveState()
-{
-    ROSEPAN_STUB("MagLifePC::isMoveState", 0x0011e0ac);
     return {};
 }
 

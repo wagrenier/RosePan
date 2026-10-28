@@ -2543,11 +2543,77 @@
   "was": "FUN_0011d044",
   "why": "GamMan::findReloadSlot(0) != 0"
  },
+ "0011d720": {
+  "name": "MagLifePC::getHealthMotionStep",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d720",
+  "why": "asserts 0 <= m_health_stat < HEALTH_END (5), returns a 5-float table {1,1,1,0,0} by health times DogActor::getMotionStep"
+ },
+ "0011d790": {
+  "name": "MagLifePC::changeMotion(int)",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d790",
+  "why": "the by-number overload of 0x11d7c0 (same register signature: f12 speed, a1 no, a2 flags, a3 no2, t0 arg); body is assert(0) and -1"
+ },
+ "0011d7c0": {
+  "name": "MagLifePC::changeMotion(const_char*)",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d7c0",
+  "why": "asserts theMotion and m_actor, looks up two motion names (jnfc_ prefix variant in mode 2, by suffix otherwise) and tail-jumps DogActor::changeMotion"
+ },
+ "0011d990": {
+  "name": "MagLifePC::loadMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d990",
+  "why": "asserts theFileName, releases bank a1, reads a pack header and file theIndex (same asserts as DogActor::loadPackMotion) and DogActor::loadMotion into that bank"
+ },
+ "0011dc64": {
+  "name": "MagLifePC::loadWeaponMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0011dc64",
+  "why": "releases bank (default 3) and loadPackMotion of data/ch/pc/pc/MOTIONPK.RPK with the index given or picked by m_stance; initMotion calls it with the weapon type's pack index"
+ },
  "0011dd40": {
   "name": "MagLifePC::initMotion",
   "tag": "ror-inferred",
   "was": "FUN_0011dd40",
   "why": "with an actor bound: picks the start state (0x11cb70), looks its motion name up in the table 0x298178 on the actor and starts it when missing; setPC and MagScene::update call it"
+ },
+ "0011ddf4": {
+  "name": "MagLifePC::playActionMotion(int)",
+  "tag": "ror-inferred",
+  "was": "FUN_0011ddf4",
+  "why": "asserts theNo >= 0; when m_f4 < 0 calls changeMotion(int) and stores theNo in m_f4; returns -1"
+ },
+ "0011de78": {
+  "name": "MagLifePC::playActionMotion(const_char*)",
+  "tag": "ror-inferred",
+  "was": "FUN_0011de78",
+  "why": "asserts theMotion; when m_f4 < 0 calls changeMotion(const char*) and stores findMotionByName in m_f4; returns -1"
+ },
+ "0011df14": {
+  "name": "MagLifePC::isActionMotionEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_0011df14",
+  "why": "m_f4 < 0 -> 1; else asserts m_actor and when the actor's mode is clear resets m_f4 to -1 and returns 1, else 0"
+ },
+ "0011df7c": {
+  "name": "MagLifePC::setStanceSubMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0011df7c",
+  "why": "DogActor::setMotionSub(0, motion by m_stance, spine/arm node list; both arms for stance 4)"
+ },
+ "0011dfd0": {
+  "name": "MagLifePC::clearSubMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0011dfd0",
+  "why": "DogActor::setMotionSub(0, -1, NULL)"
+ },
+ "0011dff8": {
+  "name": "MagLifePC::setWaitSubMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0011dff8",
+  "why": "only caller MagLifePCModeWait::init; setMotionSub(0, ...) by m_weapon_type: arms motion 0xa5 for type 3, else the right finger node with none or 0x19"
  },
  "0011e080": {
   "name": "MagLifePC::getSubStateClass",

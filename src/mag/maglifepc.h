@@ -129,7 +129,36 @@ struct MagLifePC : MagLifeControlChara
     /* 0..3: the equipped item's weapon class (m_weapon_override first). */
     int  getWeaponType(int item);                                        // ROR 0x0011cb70
     int  canReload();                                                    // ROR 0x0011d044
+
+    /* ---- mag/maglifepc3.cpp: motions ---- */
+    /* DogActor::getMotionStep scaled by m_health (1, 1, 1, 0, 0). */
+    float getHealthMotionStep();                                         // ROR 0x0011d720
+    /* Unimplemented in the ROM: asserts and returns -1. */
+    int  changeMotion(float speed, int theNo, u_int flags, int theNo2, int arg); // ROR 0x0011d790
+    /* DogActor::changeMotion to theMotion (blended with theMotion2 when
+     * set): in m_mode 2 the "jnfc_" variant of the name first, else by
+     * suffix. < 0 when the motion is missing. */
+    int  changeMotion(float speed, const char *theMotion, u_int flags,
+                      const char *theMotion2, int arg);                  // ROR 0x0011d7c0
+    /* Unreferenced: file theIndex of the pack theFileName into bank theLevel. */
+    int  loadMotion(int theLevel, const char *theFileName, int theIndex); // ROR 0x0011d990
+    /* MOTIONPK.RPK file theIndex (< 0: by m_stance; stance 0 loads nothing)
+     * into bank theLevel (< 0: 3). */
+    void loadWeaponMotion(int theIndex, int theLevel);                   // ROR 0x0011dc64
+    /* The weapon type's motions (loaded when its "_in" is missing). */
     void initMotion();                                                   // ROR 0x0011dd40
+    /* Unreferenced: a one-shot motion unless one plays (m_action_motion);
+     * isActionMotionEnd ends it with the actor's mode. */
+    int  playActionMotion(float speed, int theNo);                       // ROR 0x0011ddf4
+    int  playActionMotion(float speed, const char *theMotion);           // ROR 0x0011de78
+    int  isActionMotionEnd();                                            // ROR 0x0011df14
+    /* Sub motion 0 by m_stance over the upper body (both arms for 4). */
+    void setStanceSubMotion();                                           // ROR 0x0011df7c
+    void clearSubMotion();                                               // ROR 0x0011dfd0
+    /* Sub motion 0 for the wait mode by m_weapon_type; noGrip: the right
+     * fingers without the grip motion. */
+    void setWaitSubMotion(int noGrip);                                   // ROR 0x0011dff8
+    /* 6 / 7 / 5 by m_move_level_prev 1 / 2 / other. */
     int  getSubStateClass();                                             // ROR 0x0011e080
     /* States 1..10 and 14. */
     int  isMoveState();                                                  // ROR 0x0011e0ac
@@ -162,7 +191,7 @@ struct MagLifePC : MagLifeControlChara
     int    m_stance_prev;       // ROR 0xe8
     int    m_move_level_prev;   // ROR 0xec: getSubStateClass maps 1 / 2 / other
     int    m_health_prev;       // ROR 0xf0
-    int    m_f4;                // ROR 0xf4: -1 (constructor, a stance change)
+    int    m_action_motion;     // ROR 0xf4: playActionMotion's motion while it plays, -1 none (constructor, a stance change)
     int    m_pad_seen;          // ROR 0xf8: processPad sets 1, live clears it
     int    m_fc;                // ROR 0xfc: the constructor sets -1
     int    m_100;               // ROR 0x100: the constructor sets -1

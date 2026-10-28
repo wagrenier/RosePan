@@ -1012,7 +1012,15 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   m_state != 0; m_08 = arg, m_04 = -1), `selectMode(1)` 0x11c2ac (current mode + its init).
 - MagLifeControlChara's slot names are ror-symbols: slot 12 `reset4MapJump`, 14 `message` -- so
   MagLifePC's overrides are `reset4MapJump` 0x11be60 and `message` 0x11b5e0 (renamed from reset /
-  command). Messages: 0/1 hold, 2/7/10/12 ride, 6/9/11/13 to the Ride mode, 0x12..0x14 stamina,
+  command).
+- MagLifePC's motions (`mag/maglifepc3.cpp` 0x11d720..0x11e0d8): weapon types 0 sude (bare hands),
+  1 gun, 2 knife, 3 ax; m_stance = type + 1. `initMotion` loads `data/ch/pc/pc/MOTIONPK.RPK` file
+  {0, 3, 2, 1}[type] into motion bank 3 when the actor lacks the type's `<type>_in` motion (table
+  0x298178: in / wait / wait_hi / wait_lo / wait_ml / wait_lo per type). Upper-body sub motion 0:
+  ids {-1, 0xe4, 0xbd, 0xd7, 0xa5} by stance over the spine+arms nodes (0x297160; stance 4 both
+  arms 0x2971a0). `changeMotion(name)` with m_mode 2 (+0x54, setActor's mode) tries "jnfc_" + name[3..] first (a separate
+  motion set; GamMan::is_pc_jnfc is m_pcJnfc == 2). m_action_motion (+0xf4) is the one-shot action
+  motion playing (playActionMotion / isActionMotionEnd). Messages: 0/1 hold, 2/7/10/12 ride, 6/9/11/13 to the Ride mode, 0x12..0x14 stamina,
   0x15 move the actor (sweep), 0x16 riding / hurt query, 0x17 weapon override, 0x18 health override.
 - processPad (states 1..11): status words via updatePadStatus -- health class m_health (+0xe4,
   calcHealth: override, mode 1 -> 3, 3 -> 4, PC param 0x1b / 0x1c ratio <= 0.3 -> 2, stamina),
