@@ -205,7 +205,7 @@ static_assert(offsetof(GamTenkyuRec, m_unit) == 0x4, "m_unit");
 struct GamObjFxRec
 {
     u_int m_oid;                // ROR 0x0
-    int   m_no;                 // ROR 0x4: the Obj176a3c entry, -1 none
+    int   m_no;                 // ROR 0x4: the EffMan entry, -1 none
 };
 static_assert(sizeof(GamObjFxRec) == 8, "GamObjFxRec");
 static_assert(offsetof(GamObjFxRec, m_no) == 4, "m_no");
@@ -508,18 +508,18 @@ struct GamMan
     /* The PC's ACHRstat::setParam(which, data), when there is a PC. */
     void setPcParam(int which, const void *data);                        // ROR 0x001cb4f0
     void ctlObj1cb8e4(u_int oid, int a, int b);                          // ROR 0x001cb8e4
-    /* Kind 0x32: an Obj176a3c effect 0x32 at pos (radius 50) bound to oid. */
+    /* Kind 0x32: an EffMan effect 0x32 at pos (radius 50) bound to oid. */
     void addObjMarker(u_int oid, int kind, const float *pos);            // ROR 0x001cb970
     /* A type-2 achr placed (placeAchr) and, in move state 2 without one, a
      * TskSeqEvent {60, radius} on its m_placeTask. */
     void startAchrPlaceTask(float radius, ACHRstat *chr, int keep);      // ROR 0x001d0efc
-    /* A +0x20b00 record {oid, no}: the scene +0x837e0 entry no belongs to oid. */
+    /* A +0x20b00 record {oid, no}: the scene EffMan entry no belongs to oid. */
     void addObjFx(u_int oid, int no);                                    // ROR 0x001cba0c
-    /* The scene +0x837e0 entry of oid's first +0x20b00 record, -1 none. */
+    /* The scene EffMan entry of oid's first +0x20b00 record, -1 none. */
     int  findObjFx(u_int oid);                                           // ROR 0x001cbafc
-    /* Frees oid's +0x20b00 records, releasing their scene +0x837e0 entry. */
+    /* Frees oid's +0x20b00 records, releasing their scene EffMan entry. */
     void ctlObj1cbb80(u_int oid);                                        // ROR 0x001cbb80
-    /* Clears the scene's +0x837e0 effect table and frees every +0x20b00
+    /* Clears the scene EffMan table and frees every +0x20b00
      * record (kind is not read). */
     void clearPool20b00(int kind);                                       // ROR 0x001cbd0c
     /* The scene actor of oid, NULL without one. */

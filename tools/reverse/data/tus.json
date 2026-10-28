@@ -207,6 +207,24 @@
    "status": "verify",
    "why": "11 of 16 functions assert with dog/dogtexinfo.cpp; the rest are DogTexInfo members (clear, term, findFree, setSepiaColor, releaseModel, releasePfh) taking the table in a0; DogModel code ends at 0x1161e4 (unassigned 0x1160a8 run before), MagSystem starts at 0x117654 after the 8-byte 0x11764c"
   },
+  "eff/effman.cpp": {
+   "notes": "Left in eff/effman.cpp: createEff 0x176cc8 (a stub returning -1; it news one of 43 Eff classes per kind, so write eff/eff0.cpp first: Eff0 0x16a914..0x16ac84 plus effInitRandTable 0x16ac84 and effClearDrawSets 0x16add8, then the classes from unassigned@0016a914 in link order) and EffFindItem1 0x176694..0x176a3c (doubt: may be its own file). PC deviation: eff.bin is opened and closed per read; keeping it open as the ROM does stops the New Game run after the title (open-items Open questions, hazards.md). releasePack skips the m_file words the ROM passes as texture numbers (pointers, ignored by release's range check). Screen: no effect is ever created yet (createEff stub), so nothing new draws; the 200 s run is unchanged (title, picture book with page turn at frames 3480..6060). For the references: written in architecture.md (The effect manager), open-items.md (Next up item, split note, open question), hazards.md.",
+   "ranges": [
+    [
+     "00176694",
+     "001788ec"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-28 09:02",
+     "status": "partial",
+     "summary": "The effect manager EffMan (formerly Obj176a3c, scene +0x837e0) split out of unassigned@00166a1c as eff/effman.cpp 0x176694..0x1788ec and written except createEff: init (scene / ctx globals, draw order, eff.bin index, the nine kept packs), term, live (retired and live entries), draw (layers 850 / 855 at the camera, z depths, far-to-near sort, render), the 0x110-entry table with its weak FIFO and retired bank, the pack loader (I3D_BIN / I3D_I3M relocated, TIM2 into the scene DogTexInfo, i3rAssignTex) and releasePack. Eff0 declared with its 12 virtual slots in eff/eff0.h; EffParam moved to eff/effman.h; emy/emy_out.cpp 0x166a1c..0x16a914 pinned (not written). 37 functions named (batch effman_001)."
+    }
+   ],
+   "status": "partial",
+   "why": "Obj176a3c (scene +0x837e0, the Eff* factory) is the effect manager: data/eff/eff.bin loader, the 0x110-entry table, draw sort. Code sits between EffLight3 and EffMuzzleFlash1 in alphabetical class link order (EffMan); EffFindItem1 code 0x176694..0x176a3c and its linkonce come from the same object (linkonce order Light3, FindItem1, MuzzleFlash1), so it joins this file. No source string names it."
+  },
   "emy/emy_hfm.cpp": {
    "notes": "Left in emy/emy_hfm.cpp (hand stubs at the end, return -1): HfmOutRide::start 0x146ae4 and its four phases execPhase0..3 (0x146d88, 0x1473e4, 0x147840, 0x1484ec) with their helpers 0x146bf0 / 0x146c8c / 0x147760 / 0x147a28 / 0x147e04.. 0x148450 (Ride's own fields after +0x40 m_phase still to place, EE size 0x98), HfmOutCounter 0x149184 / 0x1491ec / 0x1494ac, HfmOutTest 0x1494c8 / 0x149500. Start with python tus.py brief emy/emy_hfm.cpp. The new EmyOut helpers (emyStartChase, playSE, tickVoice, stopVoice, emyChkHitReach, emyVecLength, stopAllSE) are stubs in lib/unassigned_stubs.cpp and emy/emy_main.cpp; nothing moves until those plus setMotion/termCommon/selectTarget and the EmyMain ctor are written. Decisions: HfmOutWalk2::Exec tests the length of the roam point itself (ROM, not a distance); a chained slap keeps m_hit_pc/m_hit_dog/m_se_done from the previous slap so it cannot hit (ROM); HfmOutBitten reads the dog object without a NULL test (ROM); EffParam m_hit gained m_2c for kind 3. No enemy is created in the smoke run: the 15 s screenshot is the Atlus disclaimer as before.",
    "ranges": [
@@ -247,6 +265,15 @@
    ],
    "status": "verify",
    "why": "EmyManager (CmnITask; vtable 0x2e31a0, ctor 0x16265c, dtor 0x162700) and its findEmy-based accessors run 0x16265c..0x164118; 0x162630 before it is an EmyOut method (param+8 -> EmyMain) of the previous enemy, 0x164118 is EmyMain's ctor (emy/emy_main.cpp). No source string: file name after the class, emy_main.cpp style."
+  },
+  "emy/emy_out.cpp": {
+   "ranges": [
+    [
+     "00166a1c",
+     "0016a914"
+    ]
+   ],
+   "why": "The EmyOut base class (ctor 0x166a1c, vptr +0x34) and the emy* helpers its 77 subclasses call (emyStartMove, emyChkInSight, emyCanReach, emyChkHitReach); ends where Eff0 (0x16a914) starts. No source string; named after the class like emy_main / emy_hfm."
   },
   "game/gamfile.cpp": {
    "notes": "Black screen, as before: the code is complete but no boot path shows it yet; every FileReader::read caller that runs in the boot (GamMan::loadSystemData / loadStage, MagScene loaders behind MagScene::start) is a stub, and SprTexture's loads now get real sizes but stop at BedPfh::BedPfh / getFileIndex (stubs, bed/bedpfh.cpp). The first run whose loads go through FileReader with g_nowLoading up should show LOADING.BIN frames: mark this done then. The file name game/gamfile.cpp is a guess (no source string; game/ by link order). What remains of unassigned@001bde58: 0x1bde58..0x1be2cc is the language-select menu (mnusllg.rpk; belongs to mnu/mnuSelectLanguage.cpp from about 0x1bd028) and GamFont 0x1beb70..0x1c05c0 (game/gamfont.cpp). The ROM's month table 0x2b8da8 has 0 for December; kept.",

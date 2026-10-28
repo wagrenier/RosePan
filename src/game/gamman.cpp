@@ -2550,7 +2550,7 @@ void GamMan::ctlObj1cbb80(u_int oid)
             continue;
         }
         if (node->m_data.m_no != -1)
-            g_magSystem.m_scene.m_837e0.release(node->m_data.m_no);
+            g_magSystem.m_scene.m_eff_man.release(node->m_data.m_no);
         SeqNode<GamObjFxRec> *next = node->m_next;
         m_pool20b00.remove(node);
         node = next;
@@ -3234,7 +3234,7 @@ void GamMan::addObjMarker(u_int oid, int kind, const float *pos)
     param.m_08 = 0;
     float data[4] = {pos[0], pos[1], pos[2], 50.0f};
     memcpy(param.m_data, data, sizeof(data));
-    addObjFx(oid, g_magSystem.m_scene.m_837e0.createEff(&param));
+    addObjFx(oid, g_magSystem.m_scene.m_eff_man.createEff(&param));
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -3661,7 +3661,7 @@ void GamMan::moveAchr(u_int oid, const float *d)
 void GamMan::clearPool20b00(int kind)
 {
     (void)kind;
-    g_magSystem.m_scene.m_837e0.releaseAll();
+    g_magSystem.m_scene.m_eff_man.releaseAll();
     m_pool20b00.clear();
 }
 

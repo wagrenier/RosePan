@@ -2850,13 +2850,13 @@ intptr_t seqFunc281(intptr_t a0, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
         param.m_08 = 0;
         param.m_achr.m_actor = gam.getActor((u_int)word[0]);
         memcpy(param.m_achr.m_args, word + 1, sizeof(param.m_achr.m_args));
-        gam.addObjFx((u_int)a1, scene.m_837e0.createEff(&param));
+        gam.addObjFx((u_int)a1, scene.m_eff_man.createEff(&param));
         return 0;
     case 98:
     {
         int no = gam.findObjFx((u_int)a1);
         // PC: the ROM indexes the table with -1 when a1 has no effect.
-        Eff0 *eff = no >= 0 && no < 0x110 ? scene.m_837e0.m_entry[no] : NULL;
+        Eff0 *eff = no >= 0 && no < 0x110 ? scene.m_eff_man.m_eff[no] : NULL;
         if (eff != NULL)
             eff->setVisible(word[0] != 0);
         return 0;
@@ -2876,7 +2876,7 @@ intptr_t seqFunc281(intptr_t a0, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
         return 0;
     param.m_08 = 0;
     memcpy(param.m_data, (const void *)a2, sizeof(param.m_data));
-    int no = scene.m_837e0.createEff(&param);
+    int no = scene.m_eff_man.createEff(&param);
     if (flag != 0)
         gam.addObjFx((u_int)a1, no);
     return 0;

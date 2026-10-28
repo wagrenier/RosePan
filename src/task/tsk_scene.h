@@ -420,7 +420,7 @@ struct ScenePlay : CmnITask
     int              m_frame;         // ROR 0x34: frames left
     int              m_frames;        // ROR 0x38
     int              m_3c;            // ROR 0x3c: the constructor's arg (0 from scenePlayStart)
-    int              m_eff;           // ROR 0x40: the pack's effect (Obj176a3c), -1 none
+    int              m_eff;           // ROR 0x40: the pack's effect (EffMan), -1 none
     void            *m_cameraData;    // ROR 0x44: loadCamera's buffer
     char             m_cameraPath[0x40]; // ROR 0x48: loadCamera's path
     void            *m_focusData;     // ROR 0x88: loadFocus's buffer

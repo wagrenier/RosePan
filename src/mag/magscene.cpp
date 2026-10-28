@@ -361,7 +361,7 @@ int MagScene::initRender(i3dContext *ctx)
     m_mes.m_level = 7;
     m_life_man.add(&m_mes, 0x800a);
 
-    FUN_00176afc(&m_837e0, ctx, this);
+    m_eff_man.init(ctx, this);
     m_movie.init(ctx, this);
     m_sub_mode.m_step = -1;
     m_sub_mode.m_mode = 0;
@@ -372,14 +372,14 @@ int MagScene::initRender(i3dContext *ctx)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Tears the scene down: the 0x837e0 object and the movie, the font file,
+// Tears the scene down: the effects (EffMan) and the movie, the font file,
 // every actor's model, the sky slots, the texture table, and every life
 // object (the fader, a member, is taken off first).
 // ROR 0x00131f74
 
 void MagScene::term()
 {
-    FUN_00176c50(&m_837e0);
+    m_eff_man.term();
     m_movie.term();
     if (m_font_data)
     {
@@ -629,7 +629,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
 
     case 0:
         updateFog();
-        FUN_0017772c(&m_837e0);
+        m_eff_man.live();
         m_life_man.update(2);
         m_pc.live();
         updateBwn();
@@ -674,7 +674,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
     case 1:
     {
         updateFog();
-        FUN_0017772c(&m_837e0);
+        m_eff_man.live();
         m_life_man.update(1);
         ROR_ASSERT(m_pMenuBase == NULL); /* 1102 */
         if (pad0->m_repeat >> 3 & 1)
@@ -799,7 +799,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
 
     case 5:
         updateFog();
-        FUN_0017772c(&m_837e0);
+        m_eff_man.live();
         m_life_man.update(1);
         rotateTenkyu();
         updateFocus();

@@ -541,72 +541,13 @@ struct MagLife130da4 : MagLife  /* scene +0x418f0, constructor 0x130da4 */
 };
 static_assert(offsetof(MagLife130da4, m_34) >= 0x34, "m_34");
 struct DogActor;
-/* The base of the 43 Eff* effect classes (vtable 0x2e3250, vptr at +0x20).
- * layout: host -- only the flag word is placed. */
-struct Eff0
-{
-    /* Slot 10 of every Eff class (never overridden): flag bit 4 = hidden,
-     * bit 8 = changed. */
-    void setVisible(bool on);                                            // ROR 0x0016aa04
-
-    u_short m_flags;            // ROR 0x00
-};
-/* Obj176a3c::createEff's parameter block (EE 0x80; natives 281 fill it on
- * the stack). m_kind picks the class (1..0x34). layout: host -- word 0x10
- * holds a DogActor for kind 0x15, so the data that follows moves. */
-struct EffParam
-{
-    int m_kind;                 // ROR 0x00
-    int _04;
-    int m_08;                   // ROR 0x08: 0 from every caller seen
-    int _0c;
-    union
-    {
-        u_char m_data[0x70];    // ROR 0x10: the script's 0x70 bytes (native 281 ops 0..49)
-        struct
-        {
-            DogActor *m_actor;  // ROR 0x10
-            int       m_args[12]; // ROR 0x14
-        } m_achr;               // kind 0x15 (native 281 op 38)
-        const void *m_file;     // ROR 0x10: kind 0xd, an event pack's effect file (scenePlayStart)
-        struct
-        {
-            float m_pos[3];     // ROR 0x10
-            int   m_1c;         // ROR 0x1c: 0
-            float m_20;         // ROR 0x20: -1
-            int   m_24;         // ROR 0x24: 0
-            float m_scale;      // ROR 0x28: 1, 1.75 for a kind-2 damage; 100 for kind 3
-            int   m_2c;         // ROR 0x2c: kind 3 (HfmOutDead::Init): 90
-        } m_hit;                // kind 1 (scnDamageStart); kind 3 the same words
-    };
-};
-struct Obj176a3c                /* scene +0x837e0, constructor 0x176a3c */
-{
-    /* News the Eff class of param->m_kind into a free table entry; its
-     * number (scenePlayStart, native 281). */
-    int  createEff(const EffParam *param);                               // ROR 0x00176cc8
-    /* Deletes entry no of its table (GamMan::ctlObj1cbb80). */
-    void release(int no);                                                // ROR 0x0017756c
-    /* Deletes every entry of the table and resets its state words
-     * (GamMan::clearPool20b00). */
-    void releaseAll();                                                   // ROR 0x0017762c
-
-    int   _00;
-    Eff0 *m_entry[0x110];       // ROR 0x04: the constructor clears 0x440 bytes
-};
+/* The effect manager at scene +0x837e0, its EffParam, and Eff0: eff/effman.h. */
+#include "eff/effman.h"
 /* The secta world (SctWorld at scene +0x8542c, its SctLayers, GamSecta):
  * sct/sctlayer.h. */
 #include "sct/sctlayer.h"
-static_assert(sizeof(Obj176a3c) >= 4, "placeholders");
 
-int   FUN_00176afc(Obj176a3c *obj, i3dContext *ctx, MagScene *scene);    // ROR 0x00176afc
-void  FUN_00177830(Obj176a3c *obj, i3dContext *ctx);  /* MagScene::draw's world pass */ // ROR 0x00177830
-/* MagScene::update's step: runs a check slot of each of its objects and
- * deletes the finished ones. */
-void  FUN_0017772c(Obj176a3c *obj);                                      // ROR 0x0017772c
 /* mnuInitPool 0x1944d0 / mnuTermPool 0x194548 (the mnu pool): mnu/mnubase.h. */
-/* m_837e0's teardown (frees its buffer, closes its FileReader). */
-void  FUN_00176c50(Obj176a3c *obj);                                      // ROR 0x00176c50
 /* The closest points of segments p0 + s d0 and p1 + t d1 (s, t in 0..1,
  * either out pointer may be NULL); returns the squared distance. */
 float i3dSegSegDist2(const float *p0, const float *d0, const float *p1, const float *d1,
