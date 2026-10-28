@@ -357,6 +357,17 @@ static_assert(offsetof(GamFont, m_00) == 0x00, "m_00");
 
 /* ---- the utl range after utl/utlgame.cpp (unassigned@00103edc) ---- */
 
+/* The dog's params 0x1b / 0x1c through GamMan::get/setDogParam
+ * (MagLifeBwn::calcHealth's ratio; reset tops 0x1b up). */
+void utlSetDogParam1b(int v);                                            // ROR 0x00103edc
+int  utlGetDogParam1b(void);                                             // ROR 0x00103f08
+int  utlGetDogParam1c(void);                                             // ROR 0x00103f38
+/* GamMan::setObjRadius(the dog's oid, r), then testHitAt(pos, the dog's
+ * oid, 0, 1): non-zero on a hit, the record's word +0x10 into *hit. */
+int  utlTestDogHitAt(const float *pos, u_int *hit, float r);             // ROR 0x00104004
+/* GamMan::getObjRadius of the dog (GamMan::m_dogPtr's oid, 0 without). */
+float utlGetDogRadius(void);                                             // ROR 0x001040a0
+
 void utlRandReset(void);                                                 // ROR 0x0010421c
 /* A random integer in lo..hi (lo + 0x1041e4(hi - lo + 1)). */
 int  utlRandRange(int lo, int hi);                                       // ROR 0x0010423c
@@ -641,6 +652,10 @@ struct MagSectaPathReq
 /* Non-zero when a way through list's cells from req->m_from to req->m_to
  * exists; the cells go into req->m_path. */
 int   FUN_0017d298(MagSectaList *list, MagSectaPathReq *req);            // ROR 0x0017d298
+/* Non-zero when the segment from -> to stays inside list's cells (within
+ * r; the cells under both ends found by 0x17c8b8); MagLifeBwn::searchPath
+ * asks it for a way inside one cell. */
+int   FUN_0017e0a8(float r, MagSectaList *list, const float *from, const float *to); // ROR 0x0017e0a8
 /* mnuInitPool 0x1944d0 / mnuTermPool 0x194548 (the mnu pool): mnu/mnubase.h. */
 /* m_837e0's teardown (frees its buffer, closes its FileReader). */
 void  FUN_00176c50(Obj176a3c *obj);                                      // ROR 0x00176c50

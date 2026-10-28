@@ -29,6 +29,7 @@
 #include "sdk/eetypes.h"
 
 struct DogActor;
+struct GamSecta;
 struct I3dLayer;
 struct MagScene;
 
@@ -66,9 +67,18 @@ static_assert(offsetof(MagLife, m_scene) >= 0x20, "m_scene");
 static_assert(offsetof(MagLife, m_hide) >= 0x24, "m_hide");
 
 /* One row of a controller's motion sequence table (0x18 bytes; the PC's
- * is at 0x2961e0: "base", "run_out", "wait" ...). Read by
- * updateMotionSeq; declared when that TU writes it. */
-struct MagLifeMotionSeq;
+ * is at 0x2961e0: "base", "run_out", "wait" ..., Brown's at 0x297418).
+ * Read by updateMotionSeq; only the words other files read are named
+ * yet (the session that writes updateMotionSeq lays out the rest). */
+struct MagLifeMotionSeq
+{
+    u_char  _00[0x10];
+    u_short m_flags;            // ROR 0x10: & 0xf0 is MagLifeBwn::suspend's class (0x10 wait, 0x30 stop)
+    short   m_alt;              // ROR 0x12: changeMotionSeqAlt's alternative row
+    u_char  _14[0x18 - 0x14];
+};
+static_assert(offsetof(MagLifeMotionSeq, m_flags) == 0x10, "m_flags");
+static_assert(sizeof(MagLifeMotionSeq) == 0x18, "MagLifeMotionSeq is 0x18 bytes on the EE");
 
 /* EE at least 0x7c. layout: host -- holds the actor pointer. */
 struct MagLifeControlChara : MagLife
@@ -84,7 +94,7 @@ struct MagLifeControlChara : MagLife
     /* m_seq_no / m_seq_count = -1. */
     void clearMotionSeq();                                               // ROR 0x0011a130
     void setMotionSeqTable(const MagLifeMotionSeq *table);               // ROR 0x0011a144
-    /* m_70 = -1, m_goal cleared. */
+    /* m_70 = -1, m_secta cleared. */
     void clearGoal();                                                    // ROR 0x00119b34
     /* On the motion's event bit 1: the sound table[floor kind] (+ the
      * frame count's parity / 13) at the actor (playSe). */
@@ -116,9 +126,12 @@ struct MagLifeControlChara : MagLife
     /* A ray from 60 above the actor over 120: m_trans.y follows the floor
      * by (t - 0.5) * 60, at most 7 a call; returns the step. */
     float followGround();                                                // ROR 0x00119e1c
-    /* The secta query (radius 40) at the actor into the four cells at
-     * +0x60 (m_goal's words), kept when the first is set. */
+    /* The secta query (radius 40) at the actor into m_secta, searched
+     * from the cells it holds when the first is set. */
     void updateSectaCells();                                             // ROR 0x0011a6b0
+    /* m_secta, queried at the actor first when its first cell is NULL
+     * (MagLifeBwn::searchPath's nowsct). */
+    GamSecta **getSectaCells();                                          // ROR 0x0011a64c
 
     u_char    _28[0x30 - 0x28];
     int       m_prev_state[4];  // ROR 0x30: setState saves m_state, m_04, m_08, m_0c here
@@ -130,7 +143,7 @@ struct MagLifeControlChara : MagLife
     int       m_mode;           // ROR 0x54: setActor's third argument
     DogActor *m_actor;          // ROR 0x58: the bound actor, NULL = none (asserted in mag/maglife.cpp)
     const MagLifeMotionSeq *m_motion_seq; // ROR 0x5c: setMotionSeqTable (the asserts' m_tbl_motion_state)
-    float     m_goal[4];        // ROR 0x60: clearGoal clears it (the constructor clears +0x60)
+    GamSecta *m_secta[4];       // ROR 0x60: the secta cells under the actor, one per list (FUN_0017c340); clearGoal clears them, the constructor the first
     int       m_70;             // ROR 0x70: clearGoal sets -1
     int       m_74;             // ROR 0x74: the constructor clears it
     int       m_78;             // ROR 0x78: MagLifePC::setActor: 0 while the fade state is 5, else 1

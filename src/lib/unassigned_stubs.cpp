@@ -176,12 +176,6 @@ void FUN_0017c2c0(Obj17c0f0 *obj)
     ROSEPAN_STUB("FUN_0017c2c0", 0x0017c2c0);
 }
 
-// stub of ROR 0x001259e8
-void MagLifeBwn::renderPostProcess()
-{
-    ROSEPAN_STUB("MagLifeBwn::renderPostProcess", 0x001259e8);
-}
-
 // stub of ROR 0x0017c1f4
 int FUN_0017c1f4(Obj17c0f0 *obj, void *data, int copy)
 {
@@ -1686,5 +1680,46 @@ void MagLifePC::slideOffObj(float *out, const float *delta, u_int oid)
 int MagLifePC::testObjHit(const float *pos, u_int *oid)
 {
     ROSEPAN_STUB("MagLifePC::testObjHit", 0x0011ccd4);
+    return {};
+}
+
+// stub of ROR 0x0017e0a8
+int FUN_0017e0a8(float r, MagSectaList *list, const float *from, const float *to)
+{
+    ROSEPAN_STUB("FUN_0017e0a8", 0x0017e0a8);
+    return {};
+}
+
+// stub of ROR 0x00103f08
+int utlGetDogParam1b(void)
+{
+    ROSEPAN_STUB("utlGetDogParam1b", 0x00103f08);
+    return {};
+}
+
+// stub of ROR 0x00103f38
+int utlGetDogParam1c(void)
+{
+    ROSEPAN_STUB("utlGetDogParam1c", 0x00103f38);
+    return {};
+}
+
+// stub of ROR 0x001040a0
+float utlGetDogRadius(void)
+{
+    ROSEPAN_STUB("utlGetDogRadius", 0x001040a0);
+    return {};
+}
+
+// stub of ROR 0x00103edc
+void utlSetDogParam1b(int v)
+{
+    ROSEPAN_STUB("utlSetDogParam1b", 0x00103edc);
+}
+
+// stub of ROR 0x00104004
+int utlTestDogHitAt(const float *pos, u_int *hit, float r)
+{
+    ROSEPAN_STUB("utlTestDogHitAt", 0x00104004);
     return {};
 }

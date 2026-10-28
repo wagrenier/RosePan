@@ -305,6 +305,36 @@
   "was": "FUN_00103e94",
   "why": "GamMan +0x21fdc (m_pcActor) with assert id < 128 (utl/utlgame.cpp line 0x4e3)"
  },
+ "00103edc": {
+  "name": "utlSetDogParam1b",
+  "tag": "ror-inferred",
+  "was": "FUN_00103edc",
+  "why": "GamMan::setDogParam(0x1b, &v)"
+ },
+ "00103f08": {
+  "name": "utlGetDogParam1b",
+  "tag": "ror-inferred",
+  "was": "FUN_00103f08",
+  "why": "GamMan::getDogParam(0x1b) (MagLifeBwn::calcHealth's numerator)"
+ },
+ "00103f38": {
+  "name": "utlGetDogParam1c",
+  "tag": "ror-inferred",
+  "was": "FUN_00103f38",
+  "why": "GamMan::getDogParam(0x1c) (MagLifeBwn::calcHealth's denominator)"
+ },
+ "00104004": {
+  "name": "utlTestDogHitAt",
+  "tag": "ror-inferred",
+  "was": "FUN_00104004",
+  "why": "GamMan::setObjRadius(dog oid, r) then testHitAt(pos, dog oid, 0, 1); the record's word +0x10 into *hit"
+ },
+ "001040a0": {
+  "name": "utlGetDogRadius",
+  "tag": "ror-inferred",
+  "was": "FUN_001040a0",
+  "why": "GamMan::getObjRadius of the dog (m_dogPtr +0x100), 0 without one"
+ },
  "001041c4": {
   "name": "utlRandStep",
   "tag": "ror-inferred",
@@ -2405,6 +2435,12 @@
   "was": "FUN_0011a320",
   "why": "asserts theState >= 0 and m_tbl_motion_state[theState].m_state_id == theState (the 0x18-byte table at +0x5c), sets the row in +0x40 and starts its motion; blend -1 = the row's own"
  },
+ "0011a64c": {
+  "name": "MagLifeControlChara::getSectaCells",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a64c",
+  "why": "the secta query (radius 40) at the actor into +0x60 when its first cell is NULL; returns +0x60 (MagLifeBwn::searchPath's nowsct)"
+ },
  "0011a6b0": {
   "name": "MagLifeControlChara::updateSectaCells",
   "tag": "ror-inferred",
@@ -3179,6 +3215,90 @@
   "was": "FUN_001230fc",
   "why": "vtable _vt$...MagLifePCModeHug slot 2; slot names from the ror-symbols MagLifePCMode::init / ::pad and MagLifePCModeHold::live"
  },
+ "001233d8": {
+  "name": "MagLifeBwn::requestState",
+  "tag": "ror-inferred",
+  "was": "FUN_001233d8",
+  "why": "MagLifeBwn vtable slot 16: the pending state quad +0x80..+0x8c = (state, -1, a, b); changeMode calls it through the vtable"
+ },
+ "001233f4": {
+  "name": "MagLifeBwn::changeMode",
+  "tag": "ror-inferred",
+  "was": "FUN_001233f4",
+  "why": "asserts theMode >= 0 (mag/maglifebwn.cpp 270); 0 when already in a non-zero theMode, else requestState then applyState(0), 1"
+ },
+ "0012349c": {
+  "name": "MagLifeBwn::searchPath",
+  "tag": "ror-inferred",
+  "was": "FUN_0012349c",
+  "why": "secta cells at the target, GamMan-style 0x17d298 path from the dog's cells (asserts nowsct, m_search_path.m_num > 0), fills the search line points +0xa0 and widths +0x890"
+ },
+ "0012391c": {
+  "name": "MagLifeBwn::checkBodyHit",
+  "tag": "ror-inferred",
+  "was": "FUN_0012391c",
+  "why": "castSphere of theSize at the b_ch1 node (+ofs); asserts m_actor, m_scene, theSize > 0.0f; on a hit out = a step back along the heading (0 for floor-like normals)"
+ },
+ "00123bb8": {
+  "name": "MagLifeBwn::stepMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00123bb8",
+  "why": "moves the actor by the motion's root step after the body-hit and object-hit tests, follows the floor; result also into +0xcc4"
+ },
+ "00123f78": {
+  "name": "MagLifeBwn::testObjAt",
+  "tag": "ror-inferred",
+  "was": "FUN_00123f78",
+  "why": "the dog's object hit test at the actor + ofs (0x104004 with 0x1040a0's radius); the hit word when its kind (bits 23..27) is 2, else 0"
+ },
+ "00124008": {
+  "name": "MagLifeBwn::advancePathIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_00124008",
+  "why": "walks a 16.16 search line index forward by a distance over the segment lengths (+0xac); asserts 0 <= thePosIndex && thePosIndex <= ((m_num_search_line-1)<<16)"
+ },
+ "00124150": {
+  "name": "MagLifeBwn::followPath",
+  "tag": "ror-inferred",
+  "was": "FUN_00124150",
+  "why": "moves along the search line by the motion's root step (addTransRotY toward the point advancePathIndex gives), then picks a turn motion seq from the corner's angle"
+ },
+ "001247c8": {
+  "name": "MagLifeBwn::message",
+  "tag": "ror-inferred",
+  "was": "FUN_001247c8",
+  "why": "MagLifeBwn vtable slot 14 (MagLifePC::message's slot): mode < 10 through changeMode; 0 ok, -2 already pending, -1 refused"
+ },
+ "0012481c": {
+  "name": "MagLifeBwn::setNeckMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0012481c",
+  "why": "sub motion 0 over the neck nodes from the motions table neckblend3..neckblend2, wait (asserts theMotion < 9), rate theRate; theMotion < 0 clears"
+ },
+ "0012498c": {
+  "name": "MagLifeBwn::clearNeckMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0012498c",
+  "why": "DogActor::setMotionSub(0, -1, NULL)"
+ },
+ "001249b4": {
+  "name": "MagLifeBwn::updateLook",
+  "tag": "ror-inferred",
+  "was": "FUN_001249b4",
+  "why": "look mode +0xcd4: 1 smell sub motion, 2 the neckblend of the octant towards +0x90 (asserts v >= 0 && v < 8), fades the neck sub motion"
+ },
+ "00124d7c": {
+  "name": "MagLifeBwn::updateLimp",
+  "tag": "ror-inferred",
+  "was": "FUN_00124d7c",
+  "why": "health class 3: sub motion 1 w_blend_wait over the left foreleg nodes, else cleared"
+ },
+ "00124e18": {
+  "name": "MagLifeBwn::clearLegMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00124e18",
+  "why": "DogActor::setMotionSub(1, -1, NULL)"
+ },
  "00124e40": {
   "name": "MagLifeBwn::live",
   "tag": "ror-inferred",
@@ -3191,17 +3311,191 @@
   "was": "FUN_00124f38",
   "why": "slot 12, MagLifeBwn's override; MagScene::resetEntities calls it after MagLifePC::reset"
  },
+ "00125014": {
+  "name": "MagLifeBwn::aimAtPath",
+  "tag": "ror-inferred",
+  "was": "FUN_00125014",
+  "why": "+0xcb4 = the Y angle from the actor to the search line at the index +0xca8 (lerped between points), +0xcb0 = 0"
+ },
+ "00125104": {
+  "name": "MagLifeBwn::turnToPath",
+  "tag": "ror-inferred",
+  "was": "FUN_00125104",
+  "why": "stepMotion, then turn motion seq 0x2b..0x30 by the angle to +0xcb4 until within pi/20; 1 facing, 0 turning, -1 blocked"
+ },
+ "001252c4": {
+  "name": "MagLifeBwn::calcHealth",
+  "tag": "ror-inferred",
+  "was": "FUN_001252c4",
+  "why": "0..4 by the dog param 0x1b / 0x1c ratio (0.8, 0.4, 0.2, 0)"
+ },
+ "00125368": {
+  "name": "MagLifeBwn::escapeNoFloor",
+  "tag": "ror-inferred",
+  "was": "FUN_00125368",
+  "why": "no secta cell under the actor: probes around it in growing steps (+0xcd0 low half the step, high half the found direction) and walks that way"
+ },
  "001256d4": {
   "name": "MagLifeBwn::setActor",
   "tag": "ror-inferred",
   "was": "FUN_001256d4",
   "why": "MagLifeBwn vtable slot 10, same stores as MagLifePC::setActor (+0x58 actor, +0x50, +0x54); NULL actor runs 0x12498c"
  },
+ "00125704": {
+  "name": "MagLifeBwn::applyState",
+  "tag": "ror-inferred",
+  "was": "FUN_00125704",
+  "why": "the pending state quad +0x80 becomes the state (the old one saved at +0x30 like setState) once the mode's term agrees; m_mode_cur = the state's embedded mode, its init"
+ },
+ "001258a4": {
+  "name": "MagLifeBwn::suspend",
+  "tag": "ror-inferred",
+  "was": "FUN_001258a4",
+  "why": "+0xce4 = 1 (live and renderPostProcess skip), the motion number saved at +0xce8, the motion stopped or wait by the seq row's flags, look mode 0"
+ },
+ "00125980": {
+  "name": "MagLifeBwn::resume",
+  "tag": "ror-inferred",
+  "was": "FUN_00125980",
+  "why": "+0xce4 = 0; the motion changed meanwhile: clearMode, else its speed back to 1/60"
+ },
  "001259e8": {
   "name": "MagLifeBwn::renderPostProcess",
   "tag": "ror-inferred",
   "was": "FUN_001259e8",
   "why": "MagLifeBwn vtable slot 15 (MagLifeControlChara::renderPostProcess in the base): updateMotionSeq when m_actor is set and +0xce4 is 0"
+ },
+ "00125a20": {
+  "name": "MagLifeBwn::setLookMode",
+  "tag": "ror-inferred",
+  "was": "FUN_00125a20",
+  "why": "+0xcd4 = mode, +0xcd8 = 1 when it changes (updateLook)"
+ },
+ "00125a3c": {
+  "name": "MagLifeBwn::setLookPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00125a3c",
+  "why": "+0x90 = pos and +0xcd8 = 1 when it changes (updateLook)"
+ },
+ "00125a90": {
+  "name": "MagLifeBwn::clearMode",
+  "tag": "ror-inferred",
+  "was": "FUN_00125a90",
+  "why": "m_mode_cur (+0xcec) NULL, m_state and m_04 -1"
+ },
+ "00125aa4": {
+  "name": "MagLifeBwn::MagLifeBwn",
+  "tag": "ror-inferred",
+  "was": "FUN_00125aa4",
+  "why": "constructor: stores _vt$10MagLifeBwn and the ten mode vtables at +0xcf0..+0xd30, clears the search line, setMotionSeqTable(0x297418)"
+ },
+ "00125bd4": {
+  "name": "MagLifeBwnMode::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00125bd4",
+  "why": "MagLifeBwnMode vtable 0x2e13b0 slot 2 (shared by Wait / Sit / Fuse / Turn / Wall): stepMotion, then changeMode(0) once the motion seq ends; 0"
+ },
+ "00125c24": {
+  "name": "MagLifeBwnModeNull::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00125c24",
+  "why": "_vt$18MagLifeBwnModeNull slot 1 (init__..R10MagLifeBwn is the base's linkonce name)"
+ },
+ "00125c2c": {
+  "name": "MagLifeBwnModeWait::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00125c2c",
+  "why": "_vt$18MagLifeBwnModeWait slot 1"
+ },
+ "00125cb8": {
+  "name": "MagLifeBwnModeSit::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00125cb8",
+  "why": "_vt$17MagLifeBwnModeSit slot 1"
+ },
+ "00125d38": {
+  "name": "MagLifeBwnModeSit::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00125d38",
+  "why": "_vt$17MagLifeBwnModeSit slot 4 (term__14MagLifeBwnModeR10MagLifeBwni)"
+ },
+ "00125db4": {
+  "name": "MagLifeBwnModeFuse::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00125db4",
+  "why": "_vt$18MagLifeBwnModeFuse slot 1"
+ },
+ "00125e34": {
+  "name": "MagLifeBwnModeFuse::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00125e34",
+  "why": "_vt$18MagLifeBwnModeFuse slot 4"
+ },
+ "00125eb0": {
+  "name": "MagLifeBwnModeMove::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00125eb0",
+  "why": "_vt$18MagLifeBwnModeMove slot 1"
+ },
+ "00125f48": {
+  "name": "MagLifeBwnModeMove::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00125f48",
+  "why": "_vt$18MagLifeBwnModeMove slot 2"
+ },
+ "00126008": {
+  "name": "MagLifeBwnModePath::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00126008",
+  "why": "_vt$18MagLifeBwnModePath slot 1"
+ },
+ "00126044": {
+  "name": "MagLifeBwnModePath::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00126044",
+  "why": "_vt$18MagLifeBwnModePath slot 2"
+ },
+ "001262a4": {
+  "name": "MagLifeBwnModePath::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001262a4",
+  "why": "_vt$18MagLifeBwnModePath slot 4"
+ },
+ "00126364": {
+  "name": "MagLifeBwnModeTurn::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00126364",
+  "why": "_vt$18MagLifeBwnModeTurn slot 1"
+ },
+ "001263a0": {
+  "name": "MagLifeBwnModeOne::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001263a0",
+  "why": "_vt$17MagLifeBwnModeOne slot 1"
+ },
+ "001263ec": {
+  "name": "MagLifeBwnModeOne::live",
+  "tag": "ror-inferred",
+  "was": "FUN_001263ec",
+  "why": "_vt$17MagLifeBwnModeOne slot 2"
+ },
+ "00126450": {
+  "name": "MagLifeBwnModeWall::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00126450",
+  "why": "_vt$18MagLifeBwnModeWall slot 1"
+ },
+ "001264d8": {
+  "name": "MagLifeBwnModeRotate::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001264d8",
+  "why": "_vt$20MagLifeBwnModeRotate slot 1"
+ },
+ "0012668c": {
+  "name": "MagLifeBwnModeRotate::live",
+  "tag": "ror-inferred",
+  "was": "FUN_0012668c",
+  "why": "_vt$20MagLifeBwnModeRotate slot 2"
  },
  "0012a56c": {
   "name": "MagLifeBwnCtrl::requestState",
