@@ -231,7 +231,7 @@
    "why": "Obj176a3c (scene +0x837e0, the Eff* factory) is the effect manager: data/eff/eff.bin loader, the 0x110-entry table, draw sort. Code sits between EffLight3 and EffMuzzleFlash1 in alphabetical class link order (EffMan); EffFindItem1 code 0x176694..0x176a3c and its linkonce come from the same object (linkonce order Light3, FindItem1, MuzzleFlash1), so it joins this file. No source string names it."
   },
   "emy/emy_hfm.cpp": {
-   "notes": "Left: HfmOutTest::Exec 0x149500 (0x818 bytes, a 0x2d-step motion walk-through, the last stub of the TU); then the TU is done once an Hfm enemy is seen on screen. Ride's own fields placed (+0x38..+0x94, EE 0x98); m_44 is never written by the ROM's Ride but read by phase 0 for the slap end frame: the port zero-initialises it (open-items.md). The shared hit test, decide switch and motion-end idioms are file-static helpers hfmHitTest / hfmSetDecide / hfmMotionEnd with callcheck notes. New EmyOut stubs to write in emy_out: getFrontPos 0x167d88, getTargetNodePos 0x166c8c (same code as getBasePos on m_target), getTargetAngle 0x167e38. Nothing moves until the EmyOut helpers (setMotion, termCommon, selectTarget, emyStartChase, playSE, tickVoice, stopVoice, emyChkHitReach) and the EmyMain ctor are written; the smoke run still creates no enemy, the 15 s screenshot is the Atlus disclaimer.",
+   "notes": "Whole TU written (75 functions, no stubs left in this file). Status verify: the 15 s smoke run still ends on the Atlus disclaimer and creates no enemy, so no Hfm is on screen. Mark done the first time a smoke run shows an Hfm enemy moving. Still needed before anything moves: the EmyOut helpers in emy/emy_out.cpp (setMotion, termCommon, selectTarget, emyStartChase, playSE, tickVoice, stopVoice, emyChkHitReach, getFrontPos 0x167d88, getTargetNodePos 0x166c8c, getTargetAngle 0x167e38) and the EmyMain ctor. Steps 0x12, 0x1d, 0x1e, 0x1f only advance the step: the delay slot reloads the step, not v0=1, so it is step+1.",
    "ranges": [
     [
      "00145020",
@@ -253,9 +253,14 @@
      "date": "2026-10-28 10:14",
      "status": "partial",
      "summary": "Wrote HfmOutRide whole: start, restart, placePC, phases 0..3, phase 2's ten steps (jump table 0x2ef3c0: grab, mount, ride, hits, thrown, struggle, grip, nextHold, release) and phase 3's hug steps; HfmOutCounter (Init, Exec, Term) and HfmOutTest::Init. Named 23 slice functions and EmyOut::getFrontPos / getTargetNodePos / getTargetAngle (stubs in emy/emy_out.cpp). MagScene::commandPC now returns m_pc.message's int; utlRandPeakHi declared."
+    },
+    {
+     "date": "2026-10-28 11:36",
+     "status": "verify",
+     "summary": "Wrote HfmOutTest::Exec 0x149500, the last stub of the TU: a 0x2d-step motion walk-through (ROM switch via jump table 0x2ef4b0) written as a step-to-motion table; step 4 and step 0x2c restart at step 0, so steps 5..0x2c never run in the ROM either. emy/emy_hfm.cpp now has every function written."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "HfmMain + its ten HfmOut* classes: HfmMain::initOut (first, as every XxxMain::initOut opens its file) up to BdsMain::initOut 0x149d18 which opens the Bds file; no source string, named like emy_main.cpp / emy_manager.cpp"
   },
   "emy/emy_manager.cpp": {

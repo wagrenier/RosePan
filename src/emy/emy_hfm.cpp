@@ -1845,11 +1845,33 @@ void HfmOutTest::Init()
     m_emy->m_state2 = 0;
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00149500 // callcheck: isAchrMotionEnd (in hfmMotionEnd)
+// A motion walk-through: each time a motion ends, the next step's motion
+// starts. The ROM is a 0x2d-case switch (jump table 0x2ef4b0) with the
+// same body per case; the motions are this table, -1 where a step only
+// advances. Step 4 starts 0x10 again and goes back to step 0, so steps
+// 5..0x2c never run; step 0x2c (motion 0x31) also returns to 0.
 
-// stub of ROR 0x00149500
+static const int s_hfmTestMotion[0x2d] = {
+    0x10, 0x10, 0x10, 0x10, 0x10, 0x07, 0x0c, 0x14, 0x15, 0x00, 0x00, 0x16,
+    0x17, 0x18, 0x19, 0x1a, 0x1c, 0x1c,   -1, 0x24, 0x21, 0x1f, 0x23, 0x26,
+    0x27, 0x28, 0x29, 0x2e, 0x2f,   -1,   -1,   -1, 0x25, 0x20, 0x30, 0x13,
+    0x32, 0x33, 0x0d, 0x0e, 0x0f, 0x12, 0x0b, 0x0a, 0x31,
+};
+
 int HfmOutTest::Exec()
 {
-    ROSEPAN_STUB("HfmOutTest::Exec", 0x00149500);
+    if ((u_int)m_step > 0x2c)
+        return -1;
+    if (!hfmMotionEnd(this))
+        return -1;
+    int motion = s_hfmTestMotion[m_step];
+    if (motion >= 0)
+        setMotion(motion, 0);
+    if (m_step == 4 || m_step == 0x2c)
+        m_step = 0;
+    else
+        m_step++;
     return -1;
 }
