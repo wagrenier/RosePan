@@ -8,15 +8,14 @@
  *  the hug check; the modes: Null (picks the next state), Wait (idles,
  *  follows, barks), Follow, Stay, Find (to the item, through the doors on
  *  the way to its room) / FindEnd, Move / MoveEnd, Rot / RotEnd, Damage,
- *  Hug, Wound and the Bark helpers.
+ *  Bark (to the nearest enemy, the bite, the bark and its answer), Hug and
+ *  Wound.
  *  0x1267c0..0x12bc20 (pinned 2026-10-28; the asserts name this file).
- *  Left as a stub: Bark::live (0x129028).
  * ======================================================================== */
 
 #include "mag/maglifebwnctrl.h"
 
 #include "common/ror_assert.h"
-#include "common/rosepan_stub.h"
 #include "dog/dogactor.h"
 #include "lib/unassigned.h"
 #include "mag/maglifebwn.h"
@@ -1099,8 +1098,8 @@ void MagLifeBwnCtrlModeDamage::live(MagLifeBwnCtrl &theBwnCtrl)
 // ROR 0x00128e20
 void MagLifeBwnCtrlModeBark::init(MagLifeBwnCtrl &theBwnCtrl)
 {
-    m_28 = 0;
-    m_answer = 0;
+    m_target_kind = 0;
+    m_bite_target_oid = 0;
     utlSetBwnObjFlag(1);
     if (theBwnCtrl.m_08 == 0)
         theBwnCtrl.m_08 = 0;
@@ -1156,12 +1155,415 @@ int MagLifeBwnCtrlModeBark::findNearestEmy(MagLifeBwnCtrl &theBwnCtrl, UtlEmyInf
     return found;
 }
 
+/* Bark::live's phases (the ROM copies their names, MODE_START ..
+ * MODE_MOVING4ENEMY, from 0x2ec230 for a debug print it never makes; the
+ * assert's MODE_END is 18). The names here say what each phase does. */
+enum
+{
+    BARK_START = 0,             // the nearest enemy around Brown
+    BARK_TURNED = 1,            // the turn at it ended: growl (200 away) or bite
+    BARK_BITE = 2,
+    BARK_BITING = 3,
+    BARK_APPROACH = 4,          // a way to m_pos
+    BARK_APPROACHING = 5,
+    BARK_FACE = 6,              // turn at the enemy
+    BARK_FACING = 7,
+    BARK_GROWL = 8,
+    BARK_GROWLING = 9,
+    BARK_BARK = 10,
+    BARK_BARKING = 11,          // barkQuery's phase: Brown keeps facing it, m_bark_dist - 20 away
+    BARK_ANSWER = 12,           // barkSet's phase
+    BARK_ANSWERING = 13,
+    BARK_AHEAD = 14,            // Bark::init with an arg: the enemy ahead of the PC
+    BARK_GO = 15,               // a way to an enemy too far to bark at
+    BARK_GOING = 16,
+    BARK_REST = 17,
+    BARK_MODE_END = 18,
+};
+
+/* The picked enemy into the mode: its kind, its oid, its position into the
+ * controller's m_target. */
+static void takeBarkTarget(MagLifeBwnCtrlModeBark &mode, MagLifeBwnCtrl &theBwnCtrl,
+                           const UtlEmyInfo &e)
+{
+    mode.m_target_kind = e.m_24;
+    mode.m_bite_target_oid = e.m_obj_id;
+    theBwnCtrl.m_target[0] = e.m_trans[0];
+    theBwnCtrl.m_target[1] = e.m_trans[1];
+    theBwnCtrl.m_target[2] = e.m_trans[2];
+    theBwnCtrl.m_target[3] = e.m_trans[3];
+}
+
+// Brown at an enemy: picks the nearest one (around Brown, or ahead of the
+// PC when entered with an arg) and goes to m_bark_dist from it (kinds 0x401
+// 135, 0x421 110), turns to it and barks, turning and edging to keep the
+// distance while barkQuery can ask; barkSet's answer plays 0x71 / 0x79.
+// Other kinds get a turn and a growl, or a bite when near, or are walked
+// to when 200 away. Health 4: state 13, 3: state 0; a target leaving its
+// state ends the bark.
+// ROR 0x00129028
+void MagLifeBwnCtrlModeBark::live(MagLifeBwnCtrl &theBwnCtrl)
+{
+    int *work = &theBwnCtrl.m_08;
+    float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    int answer = theBwnCtrl.m_0c;
+    MagLifeBwn *bwn = theBwnCtrl.m_bwn;
+    bwn->getPosition(pos);
+    ROR_ASSERT((u_int)*work < BARK_MODE_END); /* 2191: work >= MODE_START && work < MODE_END */  // callcheck: FUN_00215a30 (the assert handler)
+
+    int health = bwn->getHealthStatus();
+    if (health == 4)
+    {
+        theBwnCtrl.requestState(13, 0, 0);
+        return;
+    }
+    if (health == 3)
+    {
+        theBwnCtrl.requestState(0, 0, 0);
+        return;
+    }
+    if (m_bite_target_oid != 0 && m_target_kind != 0)
+    {
+        int gone = 0;
+        if (m_target_kind == 0x401)
+            gone = utlIsEmyState4(m_bite_target_oid);
+        else if (m_target_kind == 0x421)
+            gone = utlIsEmyState7(m_bite_target_oid);
+        if (gone != 0)
+            theBwnCtrl.requestState(0, 0, 0);
+    }
+    if (*work != BARK_START && *work != BARK_AHEAD && m_bite_target_oid != 0 &&
+        utlTestEmyStateFlag(m_bite_target_oid) == 0)
+        *work = BARK_START;
+
+    UtlEmyInfoBuf eib;
+    float rot[4];
+    float t[4];
+    switch (*work)
+    {
+    case BARK_START:
+    {
+        clearEmyInfoBuf(eib);
+        int i = findNearestEmy(theBwnCtrl, &eib, 0);
+        if (i < 0)
+        {
+            theBwnCtrl.requestState(0, 0, 0);
+            return;
+        }
+        const UtlEmyInfo &e = eib.m_info[i];
+        takeBarkTarget(*this, theBwnCtrl, e);
+        int near;
+        if (m_target_kind == 0x401)
+        {
+            near = e.m_dist < 140.0f;
+            m_bark_dist = 135.0f;
+        }
+        else if (m_target_kind != 0x421 || utlGetEmyWord238(m_bite_target_oid) != 0)
+        {
+            if (200.0f <= utlVecDistRotY(pos, rot, theBwnCtrl.m_target))
+            {
+                *work = BARK_GO;
+                return;
+            }
+            bwn->message(8, floatArg(rot[0]), 0); /* EE slot 14: turn to it */
+            *work = BARK_TURNED;
+            return;
+        }
+        else
+        {
+            near = e.m_dist < 115.0f;
+            m_bark_dist = 110.0f;
+        }
+        *work = near ? BARK_FACE : BARK_APPROACH;
+        break;
+    }
+    case BARK_TURNED:
+    {
+        if (bwn->isActionEnd() == 0)
+        {
+            if (bwn->getMotionSeq() == 2)
+                *work = BARK_START;
+            return;
+        }
+        clearEmyInfoBuf(eib);
+        int i = findNearestEmy(theBwnCtrl, &eib, 0);
+        if (i < 0)
+        {
+            theBwnCtrl.requestState(0, 0, 0);
+            return;
+        }
+        *work = 200.0f <= eib.m_info[i].m_dist ? BARK_GROWL : BARK_BITE;
+        break;
+    }
+    case BARK_BITE:
+        bwn->m_state = -1;
+        bwn->m_04 = -1;
+        bwn->message(1, 0x2a, 1);
+        *work = BARK_BITING;
+        break;
+    case BARK_BITING:
+    {
+        if (theBwnCtrl.m_mode_count % 20 == 0)
+            bwn->playSe(13);
+        if (bwn->isActionEnd() == 0)
+            return;
+        ROR_ASSERT(m_bite_target_oid != 0); /* 2466 */
+        if (utlGetEmyHold(m_bite_target_oid) != 0)
+        {
+            *work = BARK_START;
+            return;
+        }
+        int kind = utlGetObjKind(m_bite_target_oid);
+        if (kind != 0x401 && kind != 0x421)
+        {
+            if (utlRandRange(0, 10) == 0)
+            {
+                *work = BARK_REST;
+                break;
+            }
+            if (utlRandRange(0, 10) != 0)
+            {
+                *work = BARK_BITE;
+                return;
+            }
+        }
+        *work = BARK_START;
+        break;
+    }
+    case BARK_APPROACH:
+        pos[0] -= theBwnCtrl.m_target[0];
+        pos[1] -= theBwnCtrl.m_target[1];
+        pos[2] -= theBwnCtrl.m_target[2];
+        pos[3] = 1.0f;
+        utlNormalize3(pos);
+        pos[0] = pos[0] * m_bark_dist + theBwnCtrl.m_target[0];
+        pos[3] = 1.0f;
+        pos[1] = pos[1] * m_bark_dist + theBwnCtrl.m_target[1];
+        pos[2] = pos[2] * m_bark_dist + theBwnCtrl.m_target[2];
+        m_pos[0] = pos[0];
+        m_pos[1] = pos[1];
+        m_pos[2] = pos[2];
+        m_pos[3] = 1.0f;
+        if (bwn->searchPath(pos) < 0)
+        {
+            *work = BARK_START;
+            break;
+        }
+        bwn->message(6, 4, 0); /* walk the path */
+        *work = BARK_APPROACHING;
+        return;
+    case BARK_APPROACHING:
+    {
+        float d = utlVecDist(pos, theBwnCtrl.m_target);
+        if (!(m_bark_dist - 3.0f <= d && d <= m_bark_dist + 3.0f) && bwn->isActionEnd() == 0)
+            return;
+        *work = BARK_FACE;
+        break;
+    }
+    case BARK_FACE:
+    {
+        t[2] = 0.0f;
+        t[1] = 0.0f;
+        t[0] = 0.0f;
+        t[3] = 1.0f;
+        utlGetObjPos(t, m_bite_target_oid);
+        t[0] -= pos[0];
+        t[3] = 1.0f;
+        t[1] -= pos[1];
+        t[2] -= pos[2];
+        float heading = utlVecToRotY(t);
+        float d = wrapAngle(heading - bwn->getRotY());
+        if (-0.052359883f <= d && d <= 0.052359883f)
+        {
+            *work = BARK_BARK;
+            return;
+        }
+        bwn->message(8, floatArg(heading), 0); /* turn to it */
+        *work = BARK_FACING;
+        break;
+    }
+    case BARK_FACING:
+    {
+        t[2] = 0.0f;
+        t[1] = 0.0f;
+        t[0] = 0.0f;
+        t[3] = 1.0f;
+        utlGetObjPos(t, m_bite_target_oid);
+        dbgTraceVector4(t);
+        dbgTraceVector4(theBwnCtrl.m_target);
+        t[0] -= theBwnCtrl.m_target[0];
+        t[3] = 1.0f;
+        t[1] -= theBwnCtrl.m_target[1];
+        t[2] -= theBwnCtrl.m_target[2];
+        utlVecLength(t); /* unused in the ROM */
+        if (bwn->isActionEnd() == 0)
+            return;
+        clearEmyInfoBuf(eib);
+        int i = findNearestEmy(theBwnCtrl, &eib, 0);
+        if (i < 0)
+        {
+            theBwnCtrl.requestState(0, 0, 0);
+            return;
+        }
+        if (eib.m_info[i].m_obj_id != m_bite_target_oid ||
+            m_bark_dist + 3.0f < utlVecDist(pos, eib.m_info[i].m_trans))
+        {
+            *work = BARK_START;
+            return;
+        }
+        *work = BARK_BARK;
+        return;
+    }
+    case BARK_GROWL:
+        bwn->message(1, 0x1c, 1);
+        *work = BARK_GROWLING;
+        break;
+    case BARK_GROWLING:
+        if (bwn->isActionEnd() != 0 || bwn->getMotionSeq() != 0x1c)
+            *work = BARK_START;
+        break;
+    case BARK_BARK:
+        bwn->m_state = -1;
+        bwn->m_04 = -1;
+        bwn->message(1, 0x76, 1);
+        utlSetBwnObjFlag(0);
+        *work = BARK_BARKING;
+        break;
+    case BARK_BARKING:
+    {
+        t[2] = 0.0f;
+        t[1] = 0.0f;
+        t[0] = 0.0f;
+        t[3] = 1.0f;
+        utlGetObjPos(t, m_bite_target_oid);
+        t[0] -= pos[0];
+        t[3] = 1.0f;
+        t[1] -= pos[1];
+        t[2] -= pos[2];
+        /* a degree a frame at most */
+        float d = wrapAngle(utlVecToRotY(t) - bwn->getRotY());
+        if (d < -0.017453294f)
+            d = -0.017453294f;
+        if (0.017453294f < d)
+            d = 0.017453294f;
+        DogActor *actor = bwn->m_actor; /* EE slot 11 getActor */
+        actor->m_rotate[1] += d;
+        float r = actor->m_rotate[1];
+        if (r < -DOG_PI)
+            actor->m_rotate[1] = r + 6.283186f;
+        else if (DOG_PI <= r)
+            actor->m_rotate[1] = r - 6.283186f;
+        actor->m_dirty = 1;
+        bwn->m_actor->addBaseRotY(d);
+        /* edge to m_bark_dist - 20, a unit a frame at most */
+        float move = utlVecLength(t) - (m_bark_dist - 20.0f);
+        if (move != 0.0f)
+        {
+            if (1.0f < move)
+                move = 1.0f;
+            if (move < -1.0f)
+                move = -1.0f;
+            float dir[4] = { t[0], t[1], t[2], t[3] };
+            utlNormalize3(dir);
+            dir[0] *= move;
+            dir[1] *= move;
+            dir[2] *= move;
+            dir[3] = 1.0f;
+            actor = bwn->m_actor;
+            actor->m_trans[0] += dir[0];
+            actor->m_trans[1] += dir[1];
+            actor->m_trans[3] = 1.0f;
+            actor->m_trans[2] += dir[2];
+            actor->m_dirty = 1;
+        }
+        break;
+    }
+    case BARK_ANSWER:
+        bwn->m_state = -1;
+        bwn->m_04 = -1;
+        bwn->message(1, answer == 0 ? 0x71 : 0x79, 1);
+        *work = BARK_ANSWERING;
+        break;
+    case BARK_ANSWERING:
+        if (bwn->isActionEnd() == 0)
+            return;
+        utlSetBwnObjFlag(1);
+        *work = BARK_REST;
+        break;
+    case BARK_AHEAD:
+    {
+        clearEmyInfoBuf(eib);
+        int i = findNearestEmy(theBwnCtrl, &eib, 2);
+        if (i < 0)
+        {
+            *work = BARK_START;
+            break;
+        }
+        takeBarkTarget(*this, theBwnCtrl, eib.m_info[i]);
+        theBwnCtrl.m_target[1] = pos[1];
+        float d = utlVecDistRotY(pos, rot, theBwnCtrl.m_target);
+        int near;
+        if (m_target_kind == 0x401)
+        {
+            near = d < 140.0f;
+            m_bark_dist = 135.0f;
+        }
+        else if (m_target_kind == 0x421)
+        {
+            near = d < 115.0f;
+            m_bark_dist = 110.0f;
+        }
+        else
+        {
+            if (200.0f <= d)
+            {
+                *work = BARK_GO;
+                return;
+            }
+            bwn->message(8, floatArg(rot[0]), 0);
+            *work = BARK_TURNED;
+            return;
+        }
+        *work = near ? BARK_FACE : BARK_APPROACH;
+        break;
+    }
+    case BARK_GO:
+        theBwnCtrl.m_target[1] = pos[1];
+        if (bwn->searchPath(theBwnCtrl.m_target) < 0)
+        {
+            *work = BARK_START;
+            break;
+        }
+        bwn->message(6, 4, 0);
+        *work = BARK_GOING;
+        return;
+    case BARK_GOING:
+        theBwnCtrl.m_target[1] = pos[1];
+        if (utlVecDistRotY(pos, rot, theBwnCtrl.m_target) <= 300.0f)
+        {
+            bwn->message(8, floatArg(rot[0]), 0);
+            *work = BARK_TURNED;
+            return;
+        }
+        if (bwn->isActionEnd() != 0)
+            *work = BARK_START;
+        break;
+    case BARK_REST:
+        if (theBwnCtrl.m_mode_count % 300 != 0)
+            *work = BARK_START;
+        break;
+    default:
+        ROR_ASSERT(0); /* 2785 */
+        break;
+    }
+}
+
 // ROR 0x00129f50
 int MagLifeBwnCtrlModeBark::query(MagLifeBwnCtrl &theBwnCtrl, int v)
 {
     if (theBwnCtrl.m_08 != 11)
         return -1;
-    return m_answer == v ? 1 : -1;
+    return m_bite_target_oid == (u_int)v ? 1 : -1;
 }
 
 // ROR 0x00129f78
@@ -1850,12 +2252,4 @@ void MagLifeBwnCtrl::setMission(int m)
 {
     ROR_ASSERT(m >= MISSION_NONE && m <= MISSION_HUG); /* mag/maglifebwnctrl.h 385 */  // callcheck: FUN_00215a30 (the assert handler)
     m_mission = m;
-}
-
-// ---- stubs (not reconstructed yet) ----
-
-// stub of ROR 0x00129028
-void MagLifeBwnCtrlModeBark::live(MagLifeBwnCtrl &theBwnCtrl)
-{
-    ROSEPAN_STUB("MagLifeBwnCtrlModeBark::live", 0x00129028);
 }

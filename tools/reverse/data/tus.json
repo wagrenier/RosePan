@@ -7,7 +7,6 @@
   "unassigned@0021c960",
   "unassigned@0013e2ec",
   "unassigned@001258a4",
-  "mag/maglifebwnctrl.cpp",
   "unassigned@00166a1c"
  ],
  "settings": {
@@ -810,7 +809,7 @@
    "why": "MagLifeBwn's own code: requestState 0x1233d8 (vtable slot 16) through the constructor 0x125aa4 (stores _vt$10MagLifeBwn); the asserts name mag/maglifebwn.cpp; 0x125bd4.. are the mode classes' methods (mag/maglifebwnmode.cpp)"
   },
   "mag/maglifebwnctrl.cpp": {
-   "notes": "Left: MagLifeBwnCtrlModeBark::live 0x129028 (970 instructions, the only stub in this file); findNearestEmy is its helper (where 0 Brown, 1 PC, 2 500 ahead of the PC). Decisions: MagLifeBwn::message 8 gets the heading as a float's bits (floatArg) since the ROM passes the float in a GPR; Find mode fields at +0x20 heading, +0x24 door kind (s16), +0x26 / +0x27 sides; the controller's m_0c holds the Find error ERR_* (assert line 1521). The Find path needs the utl/utlfind.cpp stubs (utlFindSetItem, utlFindBest, the obj accessors) and utlFindDoorBetween 0x102dc0 before it can work on the host. Screen: the 15 s smoke run shows the boot disclaimer only; Brown is not reachable yet (the 130 s New Game run ends on the black stage after the book), so nothing written here was seen.",
+   "notes": "Complete code, nothing on screen shows it: the 15 s smoke run ends on the boot disclaimer and Brown is not reachable yet, so the whole file stays verify until a run gets Brown near an enemy. New stubs this needs elsewhere: utlGetEmyHold 0x103f68, utlGetEmyWord238 0x103f88, utlIsEmyState7 0x103fac, utlIsEmyState4 0x103fd8, utlGetObjKind 0x10411c (unassigned@00103edc, one-line EmyManager / GamMan wrappers) and utlTestEmyStateFlag 0x102b24 (utl/utlgame.cpp, asserts oid then EmyManager::testEmyStateFlag). Decisions: the ROM's debug copy of the 18 phase names (0x2ec230) is not reproduced; phase 17 lasts while the mode frame count is a multiple of 300 (one frame), as the ROM does. The linkonce __tf functions in the slice are RTTI and need no code.",
    "ranges": [
     [
      "001267c0",
@@ -831,9 +830,14 @@
      "date": "2026-10-28 07:24",
      "status": "partial",
      "summary": "MagLifeBwnCtrl modes: Follow::live with followPC 0x127558, Find::init / live with isAtDoor 0x128724, searchDoorSide 0x128854, findBest / isFindTarget wrappers, FindEnd::live, Bark::findNearestEmy 0x128e6c; ERR_ enum and the error motion table 0x2ec028; utlfind object accessors, utlFindBest, utlFindDoorBetween and MagLifeControlChara::getTransPtr declared (getTransPtr written); 14 functions named (batch maglifebwnctrl_002)."
+    },
+    {
+     "date": "2026-10-28 07:32",
+     "status": "verify",
+     "summary": "MagLifeBwnCtrlModeBark::live 0x129028 written (18 phases: the nearest enemy, walk to 135 / 110 for kinds 0x401 / 0x421, turn, bark 0x76 with the per-frame face and edge, the growl / bite for other kinds, barkSet's answer 0x71 / 0x79, the walk to far enemies); Bark fields named m_bark_dist, m_bite_target_oid, m_target_kind; the utl wrappers it calls named and declared (batch maglifebwnctrl_003). The file has no stubs left."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "after MagLifeBwnModeRotate::live 0x12668c (mag/maglifebwnmode.cpp) the code serves MagLifeBwnCtrl and its 15 mode classes (vptrs stored by the ctor 0x12ba80) through the ctor; asserts name mag/maglifebwnctrl.cpp; 0x12bc20 starts mag/maglifepcbtl.cpp"
   },
   "mag/maglifefadekey.cpp": {

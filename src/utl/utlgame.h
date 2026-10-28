@@ -38,6 +38,8 @@ void utlPlaySe(int id, int a, int b);                                    // ROR 
 int utlIsEmyDamaging(unsigned int theOID);                               // ROR 0x00102adc
 /* GamMan::getObjPos(oid, out). */
 void utlGetObjPos(float *out, unsigned int oid);                         // ROR 0x00102ab8
+/* EmyManager::testEmyStateFlag(oid); asserts oid != 0. */
+int utlTestEmyStateFlag(unsigned int oid);                               // ROR 0x00102b24
 
 /* One enemy of utlCollectEmyInfo (EE 0x40 bytes). */
 struct UtlEmyInfo

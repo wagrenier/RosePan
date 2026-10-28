@@ -257,6 +257,12 @@
   "was": "FUN_00102adc",
   "why": "asserts theOID != 0 (utl/utlgame.cpp 0x23f), tail-calls EmyManager::isEmyDamaging on the global manager"
  },
+ "00102b24": {
+  "name": "utlTestEmyStateFlag",
+  "tag": "ror-inferred",
+  "was": "FUN_00102b24",
+  "why": "utl/utlgame.cpp wrapper (oid): asserts oid != 0 (line 0x248), EmyManager::testEmyStateFlag(theEmyManager, oid); Bark::live drops a target it clears for"
+ },
  "00102dc0": {
   "name": "utlFindDoorBetween",
   "tag": "ror-inferred",
@@ -353,6 +359,30 @@
   "was": "FUN_00103f38",
   "why": "GamMan::getDogParam(0x1c) (MagLifeBwn::calcHealth's denominator)"
  },
+ "00103f68": {
+  "name": "utlGetEmyHold",
+  "tag": "ror-inferred",
+  "was": "FUN_00103f68",
+  "why": "utl wrapper (oid): EmyManager::getEmyHoldWord248(theEmyManager, oid); Bark::live phase 3 drops the bite when it is non-zero"
+ },
+ "00103f88": {
+  "name": "utlGetEmyWord238",
+  "tag": "ror-inferred",
+  "was": "FUN_00103f88",
+  "why": "utl wrapper (oid): EmyManager::getEmyWord238(theEmyManager, oid); Bark::live tests it for kind 0x421 enemies"
+ },
+ "00103fac": {
+  "name": "utlIsEmyState7",
+  "tag": "ror-inferred",
+  "was": "FUN_00103fac",
+  "why": "utl wrapper (oid): EmyManager::getEmyWord3c == 7; Bark::live leaves the bark for kind 0x421 targets in it"
+ },
+ "00103fd8": {
+  "name": "utlIsEmyState4",
+  "tag": "ror-inferred",
+  "was": "FUN_00103fd8",
+  "why": "utl wrapper (oid): EmyManager::getEmyWord3c == 4; Bark::live leaves the bark for kind 0x401 targets in it"
+ },
  "00104004": {
   "name": "utlTestDogHitAt",
   "tag": "ror-inferred",
@@ -364,6 +394,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001040a0",
   "why": "GamMan::getObjRadius of the dog (m_dogPtr +0x100), 0 without one"
+ },
+ "0010411c": {
+  "name": "utlGetObjKind",
+  "tag": "ror-inferred",
+  "was": "FUN_0010411c",
+  "why": "utl wrapper (oid): GamMan::getObjParam(theGamMan, oid, 2, &out) -> out; Bark::live compares it with the enemy kinds 0x401 / 0x421"
  },
  "00104150": {
   "name": "utlSetBwnObjFlag",

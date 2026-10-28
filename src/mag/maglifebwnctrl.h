@@ -193,7 +193,8 @@ struct MagLifeBwnCtrlModeBark : MagLifeBwnCtrlMode
 {
     void init(MagLifeBwnCtrl &theBwnCtrl) override;                      // ROR 0x00128e20
     void live(MagLifeBwnCtrl &theBwnCtrl) override;                      // ROR 0x00129028
-    /* barkQuery: 1 in phase 11 when v is the bark's answer, else -1. */
+    /* barkQuery: 1 in phase 11 (barking) when v is the enemy barked at,
+     * else -1. */
     int  query(MagLifeBwnCtrl &theBwnCtrl, int v);                       // ROR 0x00129f50
     /* barkSet: the controller's m_0c = v, phase 12. */
     void set(MagLifeBwnCtrl &theBwnCtrl, int v);                         // ROR 0x00129f78
@@ -202,10 +203,10 @@ struct MagLifeBwnCtrlModeBark : MagLifeBwnCtrlMode
     int  findNearestEmy(MagLifeBwnCtrl &theBwnCtrl, UtlEmyInfoBuf *eib, int where); // ROR 0x00128e6c
 
     int   _04[3];
-    float m_pos[4];             // ROR 0x10: the constructor sets (0, 0, 0, 1)
-    int   _20;
-    int   m_answer;             // ROR 0x24: what query compares; init clears it
-    int   m_28;                 // ROR 0x28: init clears it
+    float m_pos[4];             // ROR 0x10: where Brown barks from (phase 4: m_bark_dist from the target towards Brown); the constructor sets (0, 0, 0, 1)
+    float m_bark_dist;          // ROR 0x20: how far from the enemy Brown barks: 135 (kind 0x401), 110 (0x421)
+    u_int m_bite_target_oid;    // ROR 0x24: the enemy barked at (the assert's name); query compares it; init clears it
+    int   m_target_kind;        // ROR 0x28: its UtlEmyInfo m_24 (0x401 / 0x421 have their own distances); init clears it
     int   _2c;
 };
 

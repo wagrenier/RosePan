@@ -133,3 +133,10 @@ int utlFindDoorBetween(UtlDoorInfo *out, int a, int b, const float *pos)
     ROSEPAN_STUB("utlFindDoorBetween", 0x00102dc0);
     return {};
 }
+
+// stub of ROR 0x00102b24
+int utlTestEmyStateFlag(unsigned int oid)
+{
+    ROSEPAN_STUB("utlTestEmyStateFlag", 0x00102b24);
+    return {};
+}

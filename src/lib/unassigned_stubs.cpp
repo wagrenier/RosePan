@@ -1729,3 +1729,38 @@ void utlSetBwnObjFlag(int on)
 {
     ROSEPAN_STUB("utlSetBwnObjFlag", 0x00104150);
 }
+
+// stub of ROR 0x00103f68
+int utlGetEmyHold(u_int oid)
+{
+    ROSEPAN_STUB("utlGetEmyHold", 0x00103f68);
+    return {};
+}
+
+// stub of ROR 0x00103f88
+int utlGetEmyWord238(u_int oid)
+{
+    ROSEPAN_STUB("utlGetEmyWord238", 0x00103f88);
+    return {};
+}
+
+// stub of ROR 0x0010411c
+int utlGetObjKind(u_int oid)
+{
+    ROSEPAN_STUB("utlGetObjKind", 0x0010411c);
+    return {};
+}
+
+// stub of ROR 0x00103fd8
+int utlIsEmyState4(u_int oid)
+{
+    ROSEPAN_STUB("utlIsEmyState4", 0x00103fd8);
+    return {};
+}
+
+// stub of ROR 0x00103fac
+int utlIsEmyState7(u_int oid)
+{
+    ROSEPAN_STUB("utlIsEmyState7", 0x00103fac);
+    return {};
+}

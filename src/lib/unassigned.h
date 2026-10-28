@@ -364,10 +364,18 @@ int  utlGetDogParam1b(void);                                             // ROR 
 int  utlGetDogParam1c(void);                                             // ROR 0x00103f38
 /* GamMan::setObjRadius(the dog's oid, r), then testHitAt(pos, the dog's
  * oid, 0, 1): non-zero on a hit, the record's word +0x10 into *hit. */
+/* EmyManager::getEmyHoldWord248 / getEmyWord238 of the enemy oid. */
+int  utlGetEmyHold(u_int oid);                                           // ROR 0x00103f68
+int  utlGetEmyWord238(u_int oid);                                        // ROR 0x00103f88
+/* EmyManager::getEmyWord3c(oid) == 7 / == 4. */
+int  utlIsEmyState7(u_int oid);                                          // ROR 0x00103fac
+int  utlIsEmyState4(u_int oid);                                          // ROR 0x00103fd8
 int  utlTestDogHitAt(const float *pos, u_int *hit, float r);             // ROR 0x00104004
 /* GamMan::getObjRadius of the dog (GamMan::m_dogPtr's oid, 0 without). */
 float utlGetDogRadius(void);                                             // ROR 0x001040a0
 
+/* GamMan::getObjParam(oid, 2): the object's kind (0x401 / 0x421 ...). */
+int  utlGetObjKind(u_int oid);                                           // ROR 0x0010411c
 void utlRandReset(void);                                                 // ROR 0x0010421c
 /* A random integer in lo..hi (lo + 0x1041e4(hi - lo + 1)). */
 int  utlRandRange(int lo, int hi);                                       // ROR 0x0010423c
