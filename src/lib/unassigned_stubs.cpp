@@ -1630,12 +1630,6 @@ void MagLifePC::setState14(int arg, int word)
     ROSEPAN_STUB("MagLifePC::setState14", 0x0012c9c0);
 }
 
-// stub of ROR 0x0011ee00
-void MagLifePC::moveBy(const float *move, float trans_ofs_y, float rot)
-{
-    ROSEPAN_STUB("MagLifePC::moveBy", 0x0011ee00);
-}
-
 // stub of ROR 0x0012bedc
 float MagLifePC::calcTargetAngle(float *roty, float *rotx, const float *pos)
 {
@@ -1679,5 +1673,18 @@ void MagLifePC::reload()
 int MagLifePC::takeItem(u_int oid)
 {
     ROSEPAN_STUB("MagLifePC::takeItem", 0x0011cc14);
+    return {};
+}
+
+// stub of ROR 0x0011cd20
+void MagLifePC::slideOffObj(float *out, const float *delta, u_int oid)
+{
+    ROSEPAN_STUB("MagLifePC::slideOffObj", 0x0011cd20);
+}
+
+// stub of ROR 0x0011ccd4
+int MagLifePC::testObjHit(const float *pos, u_int *oid)
+{
+    ROSEPAN_STUB("MagLifePC::testObjHit", 0x0011ccd4);
     return {};
 }

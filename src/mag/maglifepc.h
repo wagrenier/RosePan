@@ -145,6 +145,11 @@ struct MagLifePC : MagLifeControlChara
     int  takeItem(u_int oid);                                            // ROR 0x0011cc14
     /* GamMan::reloadEquip, the shell effect and the item's 'reload'. */
     void reload();                                                       // ROR 0x0011d06c
+    /* GamMan::testPcHitAt at pos; the object id into *oid when given. */
+    int  testObjHit(const float *pos, u_int *oid);                       // ROR 0x0011ccd4
+    /* out = delta less its part towards object oid (level), normalised
+     * when shorter than 1. */
+    void slideOffObj(float *out, const float *delta, u_int oid);         // ROR 0x0011cd20
 
     /* ---- mag/maglifepc3.cpp: motions ---- */
     /* DogActor::getMotionStep scaled by m_health (1, 1, 1, 0, 0). */
@@ -178,14 +183,45 @@ struct MagLifePC : MagLifeControlChara
     int  getSubStateClass();                                             // ROR 0x0011e080
     /* States 1..10 and 14. */
     int  isMoveState();                                                  // ROR 0x0011e0ac
-    /* The collision sweep of a move from by delta; < 0 = free. */
+    /* ---- mag/maglifepcmove.cpp ---- */
+    /* The collision sweep of a move from by delta (range / radius are
+     * m_sweep_range / m_sweep_radius): an object at from + delta (out: the
+     * delta slid off it) gives 1, else a cylinder of radius range - radius
+     * pushed radius ahead, against the scene; < 0 = free, else out (when
+     * given) is the move's length along the wall it hit. */
     float sweepMove(float range, float radius, const float *from, const float *delta,
                     float *out);                                         // ROR 0x0011ea04
-    void applyMotionMove();                                              // ROR 0x00120668
-    /* The PC moved by a root-motion step (mag/maglifepcmove.cpp). */
+    /* Two rays along delta from both sides of from (range - radius out):
+     * 0 when one hits and out is the move's length towards the other side,
+     * -1 when neither hits, 1 on an object at from + delta. */
+    float sweepSides(float range, float radius, const float *from, const float *delta,
+                     float *out);                                        // ROR 0x0011e4c4
+    /* The PC moved by a root-motion step: no move from health 3 up, no
+     * collision while the scene's m_22b8 is set, else the sweeps (sliding
+     * along walls), the floor and the secta cells. */
     void moveBy(const float *move, float trans_ofs_y, float rot);        // ROR 0x0011ee00
-    /* The stance walk by the stick (16 directions). */
+    /* Unreferenced: tank control (stick y walks, x turns or turns in place). */
+    int  moveTank(BedPad *pad);                                          // ROR 0x0011f0b4
+    /* Always 0: the current motion is restarted by moveToward. */
+    int  isKeepMotion(int no);                                           // ROR 0x0011f4a0
+    /* Turns towards theRotY (at most 0.2 a frame; near 180 degrees the turn
+     * motion theTurn) from thePlyY, plays theMotion (theIn first when set)
+     * and moves by its root motion. */
+    void moveToward(float theRotY, float thePlyY, float speed, const char *theIn,
+                    const char *theMotion, const char *theTurn);         // ROR 0x0011f4a8
+    /* A stance step motion and its root motion turned by theRotY. */
+    void moveStanceStep(float theRotY, float speed, const char *theMotion); // ROR 0x0011f884
+    /* The walk / run by the stick relative to the camera. */
+    int  moveFree(BedPad *pad);                                          // ROR 0x0011f9f8
+    /* The stance walk by the stick (8 directions against the heading). */
     int  moveAttackStance(BedPad *pad);                                  // ROR 0x0011ff10
+    /* Health 3 / 4: the ev201 crawl motion of the stick's direction. */
+    int  moveDowned(BedPad *pad);                                        // ROR 0x001203a0
+    /* Unreferenced: moveDowned, moveAttackStance or moveFree by the status. */
+    int  movePad(BedPad *pad);                                           // ROR 0x001205dc
+    /* The current motion's root step (frames doubled) turned by the base
+     * heading, unless the actor's mode has an argument. */
+    void applyMotionMove();                                              // ROR 0x00120668
     /* ---- mag/maglifepcbtl.cpp ---- */
     /* The weapon's hit node hitNo for theHeight into out; returns its
      * radius, 0 without one. */
@@ -221,8 +257,8 @@ struct MagLifePC : MagLifeControlChara
     int    m_stamina;           // ROR 0xd0: 0..1000 (getStamina)
     int    m_stamina_tick;      // ROR 0xd4: drainStamina's counter
     int    m_submode_level;     // ROR 0xd8
-    int    m_stance;            // ROR 0xdc: readStance (0 = none, 1.. weapon type + 1)
-    int    m_move_level;        // ROR 0xe0: readStick (0 idle, 1 walk, 2 run)
+    int    m_stance;            // ROR 0xdc: readStance (0 = none, 1.. weapon type + 1); the asserts' m_attack_stat (ATK_STAT_NONE 0)
+    int    m_move_level;        // ROR 0xe0: readStick (0 idle, 1 walk, 2 run); the asserts' m_move_stat (MOV_STAT_WAIT / _RUN)
     int    m_health;            // ROR 0xe4: calcHealth (getHealth; MagSystem::getPCWordE4)
     int    m_stance_prev;       // ROR 0xe8
     int    m_move_level_prev;   // ROR 0xec: getSubStateClass maps 1 / 2 / other

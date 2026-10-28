@@ -19,8 +19,11 @@ character needs to animate and move lead the pinned queue, ahead of Brown and th
      yet. **Not in any queued TU but needed for the PC to animate:**
      MagLifeControlChara::changeMotionSeq 0x11a320 / changeMotionSeqAlt 0x11a27c / updateMotionSeq
      0x11a14c (mag/maglife.cpp, stubs; the modes start every motion through them).
-  3. mag/maglifepcmove.cpp: applyMotionMove 0x120668 (root motion), sweepMove 0x11ea04 (collision),
-     moveBy 0x11ee00 (every moving mode's step).
+  3. mag/maglifepcmove.cpp: WRITTEN 2026-10-27 (verify; all 12 functions, pinned 0x11e4c4..0x120788,
+     moveBy 0x11ee00 included). Its stubbed callees, needed for the PC to collide and follow the
+     floor: MagLifeControlChara::followGround 0x119e1c / updateSectaCells 0x11a6b0 (mag/maglife.cpp),
+     MagLifePC::testObjHit 0x11ccd4 / slideOffObj 0x11cd20 (maglifepc2 territory, unassigned@0011cb70;
+     both a few lines). Until then the PC walks through objects and keeps its height.
   The small getters in mag/maglifepc2.cpp territory (getEquipItem, getPcParam1b / 1c,
   getWeaponType, canReload; stubs in src/lib/unassigned_stubs.cpp) are not queued; write them
   when a session's run needs real values (calcHealth gives class 2 until then).
