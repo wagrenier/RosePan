@@ -14,6 +14,8 @@ int utlIsVibrationOn(void);                                              // ROR 
 void utlPlaySe3d(int id, const float *pos);                              // ROR 0x0010254c
 /* GamMan::getActorNo(oid). */
 int utlGetActorNo(unsigned int oid);                                     // ROR 0x001034e4
+/* GamMan::getStatus(5): m_wrdNo, the current room. */
+int utlGetWrdNo(void);                                                   // ROR 0x001034b8
 /* With no menu open: GamMan::pause(0x100000) and bss 0x7a3208 |= 0x400;
  * returns whether it paused. */
 int utlPauseForMenu(void);                                               // ROR 0x00103de4

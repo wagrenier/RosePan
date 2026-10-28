@@ -902,12 +902,21 @@
    "why": "the file's asserts (mag/maglifepc3.cpp) anchor 0x11d720..0x11df14; initMotion 0x11dd40 sits between those anchors and calls the file's loadWeaponMotion 0x11dc64; 0x11df7c..0x11e0d8 are the setMotionSub helpers initMotion calls plus getSubStateClass / isMoveState (small MagLifePC queries). 0x11e0d8 (a ray / strip debug drawer) is left out"
   },
   "mag/maglifepcmode.cpp": {
+   "notes": "Left: AtkWait2D .. Hug, 0x1214b4..0x1233d8 (Ride::message 0x122c9c is the frontier entry; hand stubs remain in the file so the vtables link). Nothing on screen yet: the 200 s New Game run shows the picture book as before (frame 4200 matches PB010200) and black after it closes; the PC has no actor bound in that run, so Null::init returns at once and no mode code runs (neither the changeMotionSeq nor the moveBy stub is reached). Every motion the modes start goes through MagLifeControlChara::changeMotionSeq 0x11a320 (mag/maglife.cpp, stub; asserts m_tbl_motion_state[theState].m_state_id == theState) and updateMotionSeq 0x11a14c (stub): write them before or with the first run that binds the PC. MagLifePC::moveBy 0x11ee00 (mag/maglifepcmove.cpp, stub) takes the move vector, trans_ofs_y (root pos y) and rot (the root track turn) -- floats f12 / f13 in the ROM. Tables 0x2ead00..0x2ead88 and the event rows of 0x2973cc are copied as static arrays (architecture.md lists the motion sequence rows). Turn's word +4 is a float (m_start_roty). The 200 s run also prints DogActor asserts (dogactor.cpp 875 theNo >= 0 at the PC bind, 1753 m_interpolation > 0 and 1773 len > 0 after frame 6060); none comes from this TU's code, not investigated.",
    "ranges": [
     [
      "00120788",
      "001233d8"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-27 21:41",
+     "status": "partial",
+     "summary": "The standing-and-walking modes: MagLifePCMode::applyRootMotion / moveBy / live, Null, Wait (init, live, pad, updateIdle), Walk2D, Run2D, Turn (init, live, pad, move) and MagLifePCModeMove::steer; plus MagLifeControlChara getPosition, getRotY, setMotionSeqNo, getMotionSeq, isMotionSeqEnd in mag/maglife.cpp"
+    }
+   ],
+   "status": "partial",
    "why": "every MagLifePCMode* vtable slot (rtti.py) lies in 0x1208b8..0x1230fc, including AtkMove2D's 0x121858..0x1218fc that inference gave dog/doglight.cpp; 0x120788 / 0x1207a8 open the run and are called by MagLifePCMode::live; 0x1233d8 is the next unassigned gap before mag/maglifebwn.cpp"
   },
   "mag/magloader.cpp": {

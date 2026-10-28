@@ -97,17 +97,33 @@ struct MagLifeControlChara : MagLife
             updateMotionSeq();
     }
     void updateMotionSeq();                                              // ROR 0x0011a14c
+    /* m_seq_no = no, the phase words cleared. */
+    void setMotionSeqNo(int no);                                         // ROR 0x0011a010
+    /* m_seq_no. */
+    int  getMotionSeq();                                                 // ROR 0x0011a028
+    /* m_48 > 1: the row's motion has ended. */
+    int  isMotionSeqEnd();                                               // ROR 0x0011a054
+    /* Row theState of m_tbl_motion_state (m_motion_seq) and its motion;
+     * blend < 0: the row's own blend frames. Nothing while it already
+     * plays; row 0 only clears. */
+    void changeMotionSeq(int theState, int blend);                       // ROR 0x0011a320
+    /* changeMotionSeq of the row's alternative (+0x12) when it has one. */
+    void changeMotionSeqAlt(int theState, int blend);                    // ROR 0x0011a27c
+    /* The actor's m_trans into out (untouched without an actor). */
+    void getPosition(float *out);                                        // ROR 0x00119f88
+    /* DogActor::getRotY, 0 without an actor. */
+    float getRotY();                                                     // ROR 0x00119fb0
 
     u_char    _28[0x30 - 0x28];
     int       m_prev_state[4];  // ROR 0x30: setState saves m_state, m_04, m_08, m_0c here
     int       m_seq_no;         // ROR 0x40: the motion sequence row (clearMotionSeq: -1)
     int       m_seq_count;      // ROR 0x44: its frame count (clearMotionSeq: -1)
-    int       m_48;             // ROR 0x48: 0x11a054 tests > 1; the constructor clears it
+    int       m_48;             // ROR 0x48: the row's phase (isMotionSeqEnd: > 1); the constructor clears it
     int       m_4c;             // ROR 0x4c: the constructor clears it
     int       m_no;             // ROR 0x50: the actor's number (setActor)
     int       m_mode;           // ROR 0x54: setActor's third argument
     DogActor *m_actor;          // ROR 0x58: the bound actor, NULL = none (asserted in mag/maglife.cpp)
-    const MagLifeMotionSeq *m_motion_seq; // ROR 0x5c: setMotionSeqTable
+    const MagLifeMotionSeq *m_motion_seq; // ROR 0x5c: setMotionSeqTable (the asserts' m_tbl_motion_state)
     float     m_goal[4];        // ROR 0x60: clearGoal clears it (the constructor clears +0x60)
     int       m_70;             // ROR 0x70: clearGoal sets -1
     int       m_74;             // ROR 0x74: the constructor clears it

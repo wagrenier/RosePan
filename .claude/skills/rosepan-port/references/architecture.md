@@ -1022,6 +1022,23 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   motion set; GamMan::is_pc_jnfc is m_pcJnfc == 2). m_action_motion (+0xf4) is the one-shot action
   motion playing (playActionMotion / isActionMotionEnd). Messages: 0/1 hold, 2/7/10/12 ride, 6/9/11/13 to the Ride mode, 0x12..0x14 stamina,
   0x15 move the actor (sweep), 0x16 riding / hurt query, 0x17 weapon override, 0x18 health override.
+- The motion sequence table (MagLifeControlChara +0x5c, the asserts' `m_tbl_motion_state`; the PC's
+  at 0x2961e0, 164 rows of 0x18 bytes: +0 the row's own index, +4 the motion name, +8 blend frames
+  (short, -1), +0xa loop flag (< 1 loops), +0xc speed percent, +0x10 bit 0, +0x12 an alternative row
+  (`changeMotionSeqAlt` 0x11a27c), +0x0e the row that follows when it ends). Rows: 0 base, 1..3
+  run_out, 5 wait, 6 tired, 7 w_wait, 8 tired_out, 9..14 hold_*, 15..23 com/scom/w_com go/come/stay,
+  28..37 dmg_*, 38..46 walk_in / walk, 47..49 run, 50..55 the 180-degree turns, 56..115 the weapon
+  in / wait sets, 116..128 the ev201 / ev501 event poses, 129..136 item / check, 137..158 the dog /
+  hfm ride and hold reactions, 159..163 free_a..free_e idles. `changeMotionSeq(row, blend)` 0x11a320
+  starts one (no-op while it plays), m_40 the row, m_48 its phase (`isMotionSeqEnd` 0x11a054: > 1).
+- The modes (`mag/maglifepcmode.cpp`): the moving ones share `MagLifePCMode::applyRootMotion`
+  0x1207a8 (the root track's step from motion frame f to f + getHealthMotionStep, keys at 120 Hz,
+  rotated by the heading, into `MagLifePC::moveBy` 0x11ee00); Walk2D / Run2D steer toward the stick
+  by <= 0.2 rad a frame (0.14 at health 2, `MagLifePCModeMove::steer` 0x120dec); Turn plays the
+  180-degree turn until the stick leaves its start heading by pi/10 or the row ends. Health picks
+  the row column (0 normal, 1 tired, 2 w_ wounded; 3 / 4 the ev201 / ev501 poses Wait::pad drives
+  with the stick). Wait plays a free_* idle every 5400 frames at health 0 (free_e only in room 0x35
+  from x 1000, `utlGetWrdNo` 0x1034b8 = GamMan status 5 m_wrdNo).
 - processPad (states 1..11): status words via updatePadStatus -- health class m_health (+0xe4,
   calcHealth: override, mode 1 -> 3, 3 -> 4, PC param 0x1b / 0x1c ratio <= 0.3 -> 2, stamina),
   move level m_move_level (+0xe0, readStick: dead zone +0x1f8, run above 0.97), stance m_stance

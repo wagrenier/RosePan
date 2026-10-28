@@ -166,6 +166,8 @@ struct MagLifePC : MagLifeControlChara
     float sweepMove(float range, float radius, const float *from, const float *delta,
                     float *out);                                         // ROR 0x0011ea04
     void applyMotionMove();                                              // ROR 0x00120668
+    /* The PC moved by a root-motion step (mag/maglifepcmove.cpp). */
+    void moveBy(const float *move, float trans_ofs_y, float rot);        // ROR 0x0011ee00
     /* State 11: picks the attack target, then state 5. */
     void beginAttack();                                                  // ROR 0x0012cb50
     /* State 0xe with arg (mag/maglifepcbtl.cpp), word +0x0c = word. */
