@@ -12,7 +12,8 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
   a. dog/dogentity.cpp -- WRITTEN 2026-10-27 (verify; pinned 0x10fc7c..0x1103dc + linkonce), and
      dog/dogcamera.cpp -- WRITTEN 2026-10-27 (verify; all 8 functions: getMatrix now returns the
      real view matrix). Open: who starts a camera move (writes DogCamera +0x1d0 / +0x190..+0x1c0)
-     is not found yet -- look in mag/magscenecamera.cpp / the camera natives when they are written.
+     is not found yet -- not updateCamera (its mode 6 only calls updateMove): look in the camera
+     natives / setCameraMode's mode 6 caller.
      The queue entry unassigned@0010f944 is stale (tus.py next skips it: the run is now these two files).
   b. i3d/i3rmesh.cpp WRITTEN 2026-10-27 (verify; all 14 functions, the layer TEST / ALPHA feed the
      native mesh draw). Was: unassigned@00228c08 -- SPLIT 2026-10-27: i3d/i3rtype.cpp 0x22a6c0..0x22b1b0 (the per-type
@@ -47,8 +48,10 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      have no layer argument); untextured strips draw without depth.
   e. mag/magscenecamera.cpp WRITTEN 2026-10-27 (verify; all 13 functions, pinned 0x13c664..0x13e2ec:
      setCameraMode's six modes, the path camera, save / restoreCamera; the book screen is unchanged
-     and no map draws yet to show a path camera). Next: unassigned@0013e2ec (updateCamera, gamEnterMenu),
-     unassigned@00140c68 + unassigned@00140990 (drawFocus and its records: define them together as
+     and no map draws yet to show a path camera). unassigned@0013e2ec WRITTEN 2026-10-27 (verify): updateCamera
+     and its two look helpers extend mag/magscenecamera.cpp to 0x13f07c (its assert names that file);
+     the menu glue 0x13f07c..0x13f49c is mag/magscenemenu.cpp (gamEnterMenu, canOpen*, the fade
+     times, openSysMsgWindow). Next: unassigned@00140c68 + unassigned@00140990 (drawFocus and its records: define them together as
      mag/magscenefocus.cpp).
   f. In game: mag/maglifepc.cpp (MagLifePC::live), task/naga_chunk.cpp (event packs, so scenes
      play), mag/maglifebwn.cpp + unassigned@001258a4 (renderPostProcess) + mag/maglifebwnctrl.cpp
@@ -1004,9 +1007,21 @@ to adapt when a TU reaches them:
 
 - **Path camera ray** (2026-10-27, mag/magscenecamera.cpp): scoreCameraPath 0x13d8f8 with flags bit 1
   calls castRay(hit, camera point, target, -1) -- the target position itself as the ray's dir, and
-  counts a hit at t in 0..1. Kept as the ROM has it; check against castRay's callers when
-  updateCamera (the only flags-1 caller) is written: if dir is meant as target - camera, the ROM
-  has a bug (its hit test is then a ray toward the world origin's direction).
+  counts a hit at t in 0..1. Kept as the ROM has it. updateCamera is written now: all its three
+  calls and seekCameraPath's pass flags 0 (asm checked), so no caller reaches the ray -- dead code
+  in the retail build, the question is moot unless another caller turns up.
+
+- **Path camera look** (2026-10-27, mag/magscenecamera.cpp): clampCameraLook 0x13e2ec (updateCamera
+  modes 4 / 5, a path record with a look letter at +0x1f) normalises the target's world position
+  itself, not target - camera, before utlVecToRotX / Y (asm checked: a straight copy of the vector).
+  Kept as the ROM has it; the look is then the direction of the actor from the world origin,
+  clamped to +-limit around the record's m_look_rot. When a map with such a record draws, compare
+  the camera with the PS2 -- if it looks wrong only there, the ROM may mean target - camera.
+
+- **mag/magscenemenu.cpp is the port's name** (2026-10-27): 0x13f07c..0x13f49c has no source-path
+  string (no asserts). Its neighbours are magscenecamera.cpp (updateCamera, asserted) and
+  magscenelight.cpp (checkLightNo 0x13f49c); the run is MagScene's GamMan menu glue and the system message window, so it may really be the tail of magscenecamera.cpp or
+  a file of its own. Rename if a later finding says otherwise.
 
 - **Mesh draw** (2026-10-27, rosepan_i3dmesh.cpp, setup/i3d_mesh_draw.cpp verify). i3d/i3rdraw.cpp
   (2026-10-27) did (1) and (2): i3rDrawModel records at a 2-qword packet of the layer, the camera

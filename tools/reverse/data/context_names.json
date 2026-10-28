@@ -3773,6 +3773,18 @@
   "was": "FUN_0013e190",
   "why": "camera entity m_trans (+0x2abb0) = thePos[theI] lerped toward thePos[(theI+1) % theMax] by theF, m_dirty (+0x2ac00) = 1; asserts thePos, theI, theF"
  },
+ "0013e2ec": {
+  "name": "MagScene::clampCameraLook",
+  "tag": "ror-inferred",
+  "was": "FUN_0013e2ec",
+  "why": "updateCamera modes 4 / 5: sets the camera entity's x / y rotation (+0x2abc0 / +0x2abc4) to the rotation of the normalised target vector, kept within +-limit of a path record's base rotation (+0x10 / +0x14); a limit <= 0 keeps the base"
+ },
+ "0013e4c0": {
+  "name": "MagScene::getCameraLookLimit",
+  "tag": "ror-inferred",
+  "was": "FUN_0013e4c0",
+  "why": "updateCamera: from a path record's letter at +0x1f (minus 'a') makes the two look limits, (n / 8) * (pi/2) / 3 and (n % 8) * (pi/2) / 9, both 0 for 'a'"
+ },
  "0013e548": {
   "name": "MagScene::updateCamera",
   "tag": "ror-inferred",
@@ -3826,6 +3838,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0013f1e4",
   "why": "clears bit 25 of the word at *(0x7b2060) + 4 before a menu opens"
+ },
+ "0013f210": {
+  "name": "MagScene::pulseMenu1000a",
+  "tag": "ror-inferred",
+  "was": "FUN_0013f210",
+  "why": "pushes the sub mode as mode 5 step -1, gamEnterMenu(0x1000a) then at once gamLeaveMenu and pops it again; returns 0 (called from maglifepcmode 0x1221ec)"
  },
  "0013f280": {
   "name": "MagScene::openSysMsgWindow",
@@ -6214,6 +6232,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00183db0",
   "why": "copies a text into m_strBuf (msg/msgman.cpp assert) and lays it out in the scene window"
+ },
+ "00184128": {
+  "name": "MsgMan::expandText",
+  "tag": "ror-inferred",
+  "was": "FUN_00184128",
+  "why": "MagScene::openSysMsgWindow: clears the record's output buffer (+0x44, size +0x48) and copies the source text (+0x40) into it, expanding tag codes with the record's 16 argument words"
  },
  "0018741c": {
   "name": "MsgManSet::open",

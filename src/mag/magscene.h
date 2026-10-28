@@ -50,9 +50,11 @@ struct MagSceneCRec
     u_char m_alt;               // ROR 0x02: load stores the file's head word >> 16; 1 with one point: changeCamera flips m_alt_side
     u_char m_alt_side;          // ROR 0x03: a one-point path's view (0 the first point, 1 the point 4 on); load clears it
     float  m_fov;               // ROR 0x04: the lens angle in degrees (setCameraMode)
-    u_char _08[0x1c - 0x08];
+    u_char _08[0x10 - 0x08];
+    float  m_look_rot[2];       // ROR 0x10: the x / y rotation the camera looks around when m_look_tag is set (updateCamera modes 4 / 5)
+    u_char _18[0x1c - 0x18];
     char   m_tag[3];            // ROR 0x1c: letters 'a'.. tuning scoreCameraPath: [0] the step speed, [1] the distance, [2] the band
-    u_char _1f;
+    char   m_look_tag;          // ROR 0x1f: a letter 'a'.. limiting the camera's look around m_look_rot (getCameraLookLimit); 0 = lookAt the actor
     int    m_seg;               // ROR 0x20: the point the camera's segment starts at (pa)
     int    m_goal_seg;          // ROR 0x24: changeCamera's goal for m_seg; load clears it
     float  m_seg_t;             // ROR 0x28: the fraction along the segment, 0 <= pb < 1; load clears it
@@ -62,7 +64,9 @@ struct MagSceneCRec
     const float *points() const { return (const float *)(this + 1); }
 };
 static_assert(offsetof(MagSceneCRec, m_fov) == 0x04, "m_fov");
+static_assert(offsetof(MagSceneCRec, m_look_rot) == 0x10, "m_look_rot");
 static_assert(offsetof(MagSceneCRec, m_tag) == 0x1c, "m_tag");
+static_assert(offsetof(MagSceneCRec, m_look_tag) == 0x1f, "m_look_tag");
 static_assert(offsetof(MagSceneCRec, m_seg) == 0x20, "m_seg");
 static_assert(offsetof(MagSceneCRec, m_goal_t) == 0x2c, "m_goal_t");
 
@@ -438,7 +442,16 @@ struct MagScene
     /* One step of setFog's fade. */
     void updateFog();                                                    // ROR 0x00143fd0
     void updateDebug(BedPad *pad0, BedPad *pad1);                        // ROR 0x0014313c
+    /* Once a frame: plays out a pending path move (bit 0x10, 30 frames),
+     * else runs the mode -- 1 looks at the actor, 3 takes the best path of
+     * every sky slot, 4 / 5 stand on the current path (4 sliding it), 6 the
+     * camera's own move. */
     void updateCamera();                                                 // ROR 0x0013e548
+    /* The camera's x / y rotation toward target's normalised vector, kept
+     * within limX / limY of base (a limit <= 0 keeps base). */
+    void clampCameraLook(float limX, float limY, const float *target, const float *base); // ROR 0x0013e2ec
+    /* The look limits of letter number n (0: none). */
+    void getCameraLookLimit(int n, float *limX, float *limY);            // ROR 0x0013e4c0
     void changeCamera();                                                 // ROR 0x0013d5e4
     /* Turns every sky node about y by its spin (once a frame). */
     void rotateTenkyu();                                                 // ROR 0x0014062c
@@ -458,8 +471,8 @@ struct MagScene
     /* Focus value which (1, 2) runs to to over frames (from < 0: from
      * where it is). */
     void setFocusLerp(int which, float from, float to, int frames);      // ROR 0x00140d94
-    /* GamMan glue (g_gamMan and g_sequence.m_bits / m_global, read via bss 0x7b2060 / 0x7b205c). */
-    void gamEnterMenu();                                                 // ROR 0x0013f07c
+    /* ---- mag/magscenemenu.cpp: GamMan glue (g_gamMan and g_sequence.m_bits / m_global, read via bss 0x7b2060 / 0x7b205c) ---- */
+    void gamEnterMenu(int menu);                                         // ROR 0x0013f07c
     void gamLeaveMenu();                                                 // ROR 0x0013f09c
     int  canOpenItemMenu();                                              // ROR 0x0013f0c0
     int  canOpenMenu10001();                                             // ROR 0x0013f114
@@ -469,8 +482,11 @@ struct MagScene
     void clearGamFlag25();                                               // ROR 0x0013f1e4
     /* Opens message msg with 16 argument words (copied; args may be
      * NULL); returns the window handle. */
-    int  openSysMsgWindow(int msg, const int *args, int arg);            // ROR 0x0013f280
+    int  openSysMsgWindow(int msg, const int *args, int fillMsb);        // ROR 0x0013f280
     void closeSysMsgWindow(int win);                                     // ROR 0x0013f458
+    /* Sub mode 5 and the 0x1000a menu entered and left at once, the sub
+     * mode popped again; returns 0. */
+    int  pulseMenu1000a();                                               // ROR 0x0013f210
     /* m_window[win] is in use. */
     int  isWindowOpen(int win);                                          // ROR 0x0013f444
 
@@ -611,7 +627,7 @@ struct MagScene
      * by param); changeCamera adds 0x10 while a move to the path's goal is
      * pending (updateCamera). */
     int            m_camera_mode;       // ROR 0x2ad50: getCameraMode returns it
-    int            m_camera_2ad54;      // ROR 0x2ad54: changeCamera clears it with each new goal (updateCamera's move counter?)
+    int            m_cam_move_frame;    // ROR 0x2ad54: updateCamera's frame of the 30-frame move to a path's goal; changeCamera clears it with each new goal
     int            m_cam_actor_no;      // ROR 0x2ad58: the actor the camera follows or looks at (-1 none); getCameraMode's second word out
     float          m_cam_dist_max;      // ROR 0x2ad5c: a path camera's farthest distance to the actor (600 from the constructor; setCameraMode param[1])
     float          m_cam_dist_min;      // ROR 0x2ad60: its nearest (500; param[0])

@@ -19,6 +19,17 @@
 /* System text no (data 0x298fe8, 0x1d4 pointers); NULL past the end. */
 const char *msgGetSysText(int no);                                       // ROR 0x001832e8
 
+/* MsgMan::expandText's record: the source text with tag codes, the 16
+ * words the tags take, and the output buffer. EE 0x4c (the ROM's
+ * openSysMsgWindow builds it on the stack). layout: host -- pointers. */
+struct MsgExpand
+{
+    int         m_args[16];     // ROR 0x00: the argument words
+    const char *m_src;          // ROR 0x40: the text to expand
+    char       *m_dst;          // ROR 0x44: the output (cleared to m_dst_size first)
+    int         m_dst_size;     // ROR 0x48: its size in bytes
+};
+
 /* EE 0x3bc. layout: EE size only -- not written, padded (its words +0x10
  * hold the MagSystem pointer on the EE: give it host members when the
  * class is written). */
@@ -27,6 +38,8 @@ struct MsgMan
     int  open();                                                         // ROR 0x00183bb8
     int  close();                                                        // ROR 0x00183c4c
     void setMessage(const char *text, int flag);                         // ROR 0x00183db0
+    /* ex->m_src into ex->m_dst with its tags expanded from ex->m_args. */
+    int  expandText(MsgExpand *ex);                                      // ROR 0x00184128
 
     int    m_window;            // ROR 0x00: the scene window it writes into, -1 none
     u_char _04[0x3bc - 0x04];

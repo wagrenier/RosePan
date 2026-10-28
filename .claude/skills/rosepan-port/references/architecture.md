@@ -919,10 +919,10 @@ first slot with a sky (reads past slot 3 when slot 0 is empty); the port stops a
 0x140990 (a 4-qword GS packet helper for drawFocus) and `initRecords853bc` 0x140a84 (m_focus
 defaults) open the focus code, left as unassigned@00140030 for mag/magscenefocus.cpp.
 
-## The scene's camera (`mag/magscenecamera.cpp`, 0x13c664..0x13e2ec, 2026-10-27)
+## The scene's camera (`mag/magscenecamera.cpp`, 0x13c664..0x13f07c, 2026-10-27)
 
 MagScene's camera words +0x2ad50..+0x2ad98 (the assert texts name m_cam_map_no +0x2ad68 and
-m_cam_path_no +0x2ad64): mode +0x2ad50, +0x2ad54 (changeCamera clears it), target actor +0x2ad58,
+m_cam_path_no +0x2ad64): mode +0x2ad50, +0x2ad54 m_cam_move_frame (the 30-frame move's frame; changeCamera clears it), target actor +0x2ad58,
 distance band max / min +0x2ad5c / +0x2ad60 (600 / 500), saveCamera's count +0x2ad80 and copies
 +0x2ad84..+0x2ad98. `setCameraMode(mode, arg, param)` 0x13caf0 (jump table 0x2ee750): 0 free, 1 free
 with a target actor, 2 the camera a child of actor arg at (0, -50, -50) tilted -0.5, 3..5 a map camera
@@ -937,7 +937,23 @@ length of the segment ending there). The target is the actor's m_trans 120 up. s
 (native 016 case 7) places the camera and iterates scoreCameraPath 0x13d8f8 (one step toward the
 distance band, 1e6 - squared error) until it settles; changeCamera 0x13d5e4 (pad m_7a bits 8 / 9)
 sets the goal two projected lengths ahead and ORs 0x10 into the mode, which updateCamera 0x13e548
-(unassigned@0013e2ec) plays out -- the likely writer of DogCamera's move words.
+plays out over 30 frames (lerping seg + t to goal_seg + goal_t, looking at the actor), then copies the
+goal and clears the bit (a one-point path just drops the bit). updateCamera per mode: 1 lookAt the
+actor; 3 scores every path of the four sky slots into its +0x2c word (the goal word reused; the
+current path +200000) and takes the best; 4 slides the current path (scoreCameraPath), 5 holds it; 6
+DogCamera::updateMove (so updateCamera is not the writer of DogCamera's move words +0x190..+0x1d0 --
+mode 6's setter is). A one-point two-view path is two 0x40-byte records back to back (header + one
+point); the second is the view while +3 is set. A record's +0x1f letter (n = c - 'a') limits the
+look instead of lookAt: +-(n / 8) * 30 degrees in x and +-(n % 8) * 10 in y around the floats
++0x10 / +0x14 (clampCameraLook 0x13e2ec, getCameraLookLimit 0x13e4c0). After any mode 3..5 path
+change the new path's fov becomes the lens angle.
+
+MagScene's menu glue (`mag/magscenemenu.cpp`, 0x13f07c..0x13f49c, no path string): gamEnterMenu(menu)
+= g_gamMan.pauseForMenu(menu) (requestMenu passes its id; the system message 0x1000a),
+gamLeaveMenu = resumeFromMenu(0); the menu fade times are 0 with g_sequence.m_bits[1] bit
+0x4000000, globals 0x170 (out) / 0x16c (in) with bit 0x2000000, else 15; openSysMsgWindow expands a
+system text (msgGetSysText) through MsgMan::expandText 0x184128 (record: 16 args, src +0x40, dst
++0x44, size +0x48) into a 256 x 96 window at (128, 224) and holds the scene in sub mode 5.
 
 ## Fog and Brown's command glue (`mag/magscenecmd.cpp`, 0x143d3c..0x145020, 2026-10-27)
 
