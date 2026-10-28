@@ -896,6 +896,28 @@
    "status": "verify",
    "why": "the i3r per-type accessors before i3rroot.cpp: for each item type (0x4d 0x29 0x4a 0x26 0x59 0x25 0x2d 0x2a 0x52) its fixup pair then one-line accessors over its child slots (slot pointer, has data, count, n-th child, begin / end, find by name). The nine fixup pairs are written in i3ritem.cpp with the tables (open-items.md decision 2026-10-26)"
   },
+  "mag/maglife.cpp": {
+   "notes": "Verify: the 15 s smoke run ends on the boot disclaimer, so no controller runs yet; the first session whose run reaches a room with the PC or Brown moving checks the motions (changeMotionSeq now really drives DogActor::changeMotion from g_pc_motion_seq / g_bwn_motion_seq). Decisions: MagLifeMotionSeq is layout host (the motion name is a pointer); +0x12 is m_next_state (assert text), +0x0e is unused -1, +0x14 the row sound; the old architecture note that +0x0e is the next row was wrong and is fixed. isMotionStateEndless returns 0 for a cleared sequence (the ROM reads row -1). MagLifeControlChara::message (slot 14, returns 0) is not declared: MagLifePC and MagLifeBwn take different arguments on the host. utlPlaySe is still a stub (utl/utlgame.cpp), so no sound plays from these. MagLife::__tf 0x282ae4 stays with the MagLife0 satellite.",
+   "ranges": [
+    [
+     "00119b34",
+     "0011ab40"
+    ],
+    [
+     "0028285c",
+     "00282a60"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-28 19:07",
+     "status": "verify",
+     "summary": "MagLifeControlChara's motion sequence (changeMotionSeq, changeMotionSeqAlt, updateMotionSeq, isMotionStateEndless, changeMotion, the m_48 phase helpers), the floor queries (testFloor, testFloorStep, followGround), playSe / playStepSe, the linkonce accessors, MagLifeBillboard (live, distance); the PC's 164 and Brown's 138 motion sequence rows ported as host data and set by their constructors; MagLifeMotionSeq laid out (host layout); utlPlaySe takes a position pointer; TU pinned"
+    }
+   ],
+   "status": "verify",
+   "why": "mag/maglife.cpp source strings anchor 7 functions from 0x119cec to 0x11a8f4; MagLifeMan (maglifeman.cpp) ends before 0x119b34 and MagLifePC::restoreState (maglifepc.cpp) starts 0x11ab40; the linkonce block is MagLifeControlChara's and MagLifeBillboard's symbols"
+  },
   "mag/maglifebwn.cpp": {
    "notes": "Brown's live now runs in the smoke boot (MagLifeBwnModeWait::init and MagLifeBwnMode::live reached) but nothing on screen shows him yet: the screenshot is the boot disclaimer. Left for others: mag/maglifebwnmode.cpp (new file, all 18 mode methods are stubs; names are in Ghidra, maglifebwn_002 batch), the motion sequence rows 0x297418 and MagLifeControlChara::updateMotionSeq / changeMotionSeq (NULL table on the host, as the PC's), playStepSe, followGround, FUN_0017c340 / FUN_0017d298 / FUN_0017e0a8 (secta queries, unassigned@00166a1c), and the utl dog helpers utlGetDogParam1b / 1c, utlSetDogParam1b, utlTestDogHitAt, utlGetDogRadius (unassigned@00103edc, all stubs). Decisions: setActor skips the ROM's clearNeckMotion on the NULL actor; checkBodyHit zeroes the whole MagSceneRayHit. Open: slots 14 / 16 take (mode, a, b) while MagLifePC's same slots are message / processPad (open-items.md). Mark done once a run shows Brown walking with the PC.",
    "ranges": [

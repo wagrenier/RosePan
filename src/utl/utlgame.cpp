@@ -94,7 +94,7 @@ int utlIsEmyDamaging(unsigned int theOID)
 }
 
 // stub of ROR 0x001026b0
-void utlPlaySe(int id, int a, int b)
+void utlPlaySe(int id, int a, const float *pos)
 {
     ROSEPAN_STUB("utlPlaySe", 0x001026b0);
 }

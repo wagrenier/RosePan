@@ -2477,6 +2477,12 @@
   "was": "FUN_00119b34",
   "why": "+0x70 = -1, the vector +0x60 cleared (role from reset4MapJump; unconfirmed)"
  },
+ "00119b60": {
+  "name": "MagLifeControlChara::testFloorStep",
+  "tag": "ror-inferred",
+  "was": "FUN_00119b60",
+  "why": "testFloor with radius 180 that measures a 0x20000 cell: SctLayer::getCellY of list 0 against the point's y, 3 when more than 10 above, 2 when more than 10 below, else 0; -1 without an actor or a cell"
+ },
  "00119cec": {
   "name": "MagLifeControlChara::testFloor",
   "tag": "ror-inferred",
@@ -2531,6 +2537,18 @@
   "was": "FUN_0011a030",
   "why": "sets +0x48 = 1; called once by changeMotionSeq"
  },
+ "0011a03c": {
+  "name": "MagLifeControlChara::setMotionSeqEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a03c",
+  "why": "m_48 = 2 (isMotionSeqEnd: > 1); updateMotionSeq's end of a chain without a next state"
+ },
+ "0011a048": {
+  "name": "MagLifeControlChara::isMotionSeqStarted",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a048",
+  "why": "m_48 > 0: endMotionSeqPhase (1) ran; updateMotionSeq only counts while it holds"
+ },
  "0011a054": {
   "name": "MagLifeControlChara::isMotionSeqEnd",
   "tag": "ror-inferred",
@@ -2573,6 +2591,12 @@
   "was": "FUN_0011a320",
   "why": "asserts theState >= 0 and m_tbl_motion_state[theState].m_state_id == theState (the 0x18-byte table at +0x5c), sets the row in +0x40 and starts its motion; blend -1 = the row's own"
  },
+ "0011a4ec": {
+  "name": "MagLifeControlChara::changeMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a4ec",
+  "why": "(speed f12, theMotion, flags, sub, blend): asserts theMotion and m_actor (mag/maglife.cpp 504/505); the actor's motion numbers of theMotion and sub by suffix then by name, m_78 (zero link) cleared with blend 0, DogActor::changeMotion; changeMotionSeq's last step"
+ },
  "0011a64c": {
   "name": "MagLifeControlChara::getSectaCells",
   "tag": "ror-inferred",
@@ -2602,6 +2626,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0011a888",
   "why": "constructor: vptr _vt$19MagLifeControlChara 0x2e0ca8, level 1, words cleared / -1"
+ },
+ "0011a8f4": {
+  "name": "MagLifeBillboard::live",
+  "tag": "ror-inferred",
+  "was": "FUN_0011a8f4",
+  "why": "vtable 0x2e0c20 slot 2: m_04++, asserts m_scene (657); the actor faces the camera (its matrix z through utlVecToRot, x negated, y + pi) and sits m_80 (setDistance) along the actor-to-camera direction"
  },
  "0011ab40": {
   "name": "MagLifePC::restoreState",

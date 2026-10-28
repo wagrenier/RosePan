@@ -66,19 +66,32 @@ static_assert(offsetof(MagLife, m_level) >= 0x10, "m_level");
 static_assert(offsetof(MagLife, m_scene) >= 0x20, "m_scene");
 static_assert(offsetof(MagLife, m_hide) >= 0x24, "m_hide");
 
-/* One row of a controller's motion sequence table (0x18 bytes; the PC's
- * is at 0x2961e0: "base", "run_out", "wait" ..., Brown's at 0x297418).
- * Read by updateMotionSeq; only the words other files read are named
- * yet (the session that writes updateMotionSeq lays out the rest). */
+/* One row of a controller's motion sequence table (the asserts'
+ * m_tbl_motion_state; EE 0x18 bytes, row i has m_state_id i): the PC's
+ * 164 at 0x2961e0 ("base", "run_out", "wait" ...), Brown's 138 at
+ * 0x297418 -- g_pc_motion_seq / g_bwn_motion_seq, host data in
+ * maglifepc.cpp / maglifebwn.cpp. layout: host -- the motion name is a
+ * pointer. */
 struct MagLifeMotionSeq
 {
-    u_char  _00[0x10];
-    u_short m_flags;            // ROR 0x10: & 0xf0 is MagLifeBwn::suspend's class (0x10 wait, 0x30 stop)
-    short   m_alt;              // ROR 0x12: changeMotionSeqAlt's alternative row
-    u_char  _14[0x18 - 0x14];
+    int         m_state_id;     // ROR 0x00: the row's own index (changeMotionSeq asserts it)
+    const char *m_motion;       // ROR 0x04: the actor's motion, by suffix then by name (theMotion)
+    short       m_blend;        // ROR 0x08: blend frames when the caller passes < 0 (0: 5 while the actor blends in)
+    short       m_frames;       // ROR 0x0a: frames before m_next_state; < 1 the motion's loops are counted, < 0 endless
+    short       m_speed;        // ROR 0x0c: percent of the base speed (1/60), 0 = 100
+    short       _0e;            // ROR 0x0e: -1 in both tables, not read here
+    u_short     m_flags;        // ROR 0x10: bit 0 = motion flag 0x40; & 0xf0 is MagLifeBwn::suspend's class (0x10 wait, 0x30 stop)
+    short       m_next_state;   // ROR 0x12: the row that follows (changeMotionSeqAlt's alternative), < 0 = the chain ends
+    int         m_se;           // ROR 0x14: a sound played at the actor when the row starts (and per loop), <= 0 none
 };
-static_assert(offsetof(MagLifeMotionSeq, m_flags) == 0x10, "m_flags");
-static_assert(sizeof(MagLifeMotionSeq) == 0x18, "MagLifeMotionSeq is 0x18 bytes on the EE");
+static_assert(offsetof(MagLifeMotionSeq, m_motion) >= 0x04, "m_motion");
+static_assert(offsetof(MagLifeMotionSeq, m_frames) >= 0x0a, "m_frames");
+static_assert(offsetof(MagLifeMotionSeq, m_flags) >= 0x10, "m_flags");
+static_assert(offsetof(MagLifeMotionSeq, m_next_state) >= 0x12, "m_next_state");
+static_assert(offsetof(MagLifeMotionSeq, m_se) >= 0x14, "m_se");
+
+extern const MagLifeMotionSeq g_pc_motion_seq[164];                     // ROR 0x002961e0
+extern const MagLifeMotionSeq g_bwn_motion_seq[138];                    // ROR 0x00297418
 
 /* EE at least 0x7c. layout: host -- holds the actor pointer. */
 struct MagLifeControlChara : MagLife
@@ -86,6 +99,10 @@ struct MagLifeControlChara : MagLife
     /* m_level 1, m_04 / m_no -1, the rest cleared; the derived
      * constructors set m_motion_seq. */
     MagLifeControlChara();                                               // ROR 0x0011a888
+    /* EE slot 1: restores _vt$8MagLife0, flags & 1 deletes. The __tf
+     * type-info functions (0x28285c, MagLifeBillboard's 0x2829d0) are the
+     * host compiler's RTTI. */
+    ~MagLifeControlChara() override {}                                   // ROR 0x00282968
 
     /* EE slot 9 (+0x48): the state quad m_state..m_0c into m_prev_state
      * (when m_state != 0), then m_state = state, m_08 = arg, m_04 = -1.
@@ -109,13 +126,27 @@ struct MagLifeControlChara : MagLife
     void updateMotionSeq();                                              // ROR 0x0011a14c
     /* m_seq_no = no, the phase words cleared. */
     void setMotionSeqNo(int no);                                         // ROR 0x0011a010
+    /* m_48 = 1: the row's motion runs (changeMotionSeq's last step). */
+    void endMotionSeqPhase();                                            // ROR 0x0011a030
+    /* m_48 = 2: the chain has ended (isMotionSeqEnd). */
+    void setMotionSeqEnd();                                              // ROR 0x0011a03c
+    /* m_48 > 0. */
+    int  isMotionSeqStarted();                                           // ROR 0x0011a048
     /* The secta query (radius 40) at the actor, ahead along its heading
      * when ahead != 0 (that point into out when given): -1 without an
      * actor or a cell, 2 on a cell flagged 0x20000, else 0. */
     int  testFloor(float ahead, float *out);                             // ROR 0x00119cec
-    /* 1 when a row along m_seq_no's alternatives (+0x12) loops (+0x0a <
+    /* testFloor with radius 180; on a 0x20000 cell its height against the
+     * point's: 3 more than 10 above, 2 more than 10 below, else 0. */
+    int  testFloorStep(float ahead, float *out);                         // ROR 0x00119b60
+    /* 1 when a row along m_seq_no's next states is endless (m_frames <
      * 0), 0 when the chain ends. */
     int  isMotionStateEndless();                                         // ROR 0x0011a064
+    /* The actor's motions theMotion and sub (by suffix, then by name;
+     * sub NULL = none) into DogActor::changeMotion; m_78 (setZeroLink)
+     * forces blend 0 once. The motion index, < 0 when there is none. */
+    int  changeMotion(float speed, const char *theMotion, u_int flags,
+                      const char *sub, int blend);                       // ROR 0x0011a4ec
     /* utlPlaySe(se) at the actor (nothing without one). */
     void playSe(int se);                                                 // ROR 0x0011a704
     /* m_seq_no. */
@@ -126,8 +157,49 @@ struct MagLifeControlChara : MagLife
      * blend < 0: the row's own blend frames. Nothing while it already
      * plays; row 0 only clears. */
     void changeMotionSeq(int theState, int blend);                       // ROR 0x0011a320
-    /* changeMotionSeq of the row's alternative (+0x12) when it has one. */
+    /* changeMotionSeq of the row's next state when it has one. */
     void changeMotionSeqAlt(int theState, int blend);                    // ROR 0x0011a27c
+
+    /* The linkonce accessors (inline in the class). message (slot 14,
+     * returns 0) is left out: MagLifePC's and MagLifeBwn's take
+     * different arguments on the host. */
+    // ROR 0x002828ac
+    int  getMotionStateCount() { return m_seq_count; }
+    // ROR 0x002828b4
+    int  getLastMode() { return m_prev_state[0]; }
+    /* EE slot 10 (+0x50); MagLifeBwn has its own. */
+    // ROR 0x002828bc
+    void setActor(DogActor *actor, int no, int mode)
+    {
+        m_mode = mode;
+        m_actor = actor;
+        m_no = no;
+    }
+    /* EE slot 11 (+0x58) */
+    // ROR 0x002828cc
+    DogActor *getActor() { return m_actor; }
+    // ROR 0x002828d4
+    int  getSctFlag() { return m_70; }
+    // ROR 0x002828dc
+    void clearZeroLink() { m_78 = 0; }
+    // ROR 0x002828e4
+    void setZeroLink() { m_78 = 1; }
+    // ROR 0x002828f0
+    GamSecta **getSctPos() { return m_secta; }
+    /* EE slot 12 (+0x60); MagLifePC has its own. */
+    // ROR 0x002828f8
+    void reset4MapJump()
+    {
+        for (int i = 0; i < 4; i++)
+            m_prev_state[i] = 0;
+        clearGoal();
+    }
+    /* EE slot 13 (+0x68) */
+    // ROR 0x00282918
+    void termWorld() {}
+    /* EE slot 5 (+0x28) */
+    // ROR 0x00282960
+    const char *getName() { return NULL; }
     /* The actor's m_trans into out (untouched without an actor). */
     void getPosition(float *out);                                        // ROR 0x00119f88
     /* DogActor::getRotY, 0 without an actor. */
@@ -165,5 +237,25 @@ static_assert(offsetof(MagLifeControlChara, m_no) >= 0x50, "m_no");
 static_assert(offsetof(MagLifeControlChara, m_actor) >= 0x58, "m_actor");
 static_assert(offsetof(MagLifeControlChara, m_motion_seq) >= 0x5c, "m_motion_seq");
 static_assert(offsetof(MagLifeControlChara, m_78) >= 0x78, "m_78");
+
+/* An actor turned to the camera and held m_distance along the line to it
+ * (vtable 0x2e0c20; nothing in the ROM constructs one outside the
+ * linkonce constructor). EE at least 0x84. layout: host. */
+struct MagLifeBillboard : MagLifeControlChara
+{
+    // ROR 0x00282a20
+    MagLifeBillboard() {}
+    ~MagLifeBillboard() override {}                                      // ROR 0x0028299c
+    /* EE slot 2 (+0x10) */
+    void live() override;                                                // ROR 0x0011a8f4
+    // ROR 0x00282a50
+    void  setDistance(float d) { m_distance = d; }
+    // ROR 0x00282a58
+    float getDistance() { return m_distance; }
+
+    int       _7c;
+    float     m_distance;       // ROR 0x80: setDistance
+};
+static_assert(offsetof(MagLifeBillboard, m_distance) >= 0x80, "m_distance");
 
 #endif /* _MAG_MAGLIFE_H */

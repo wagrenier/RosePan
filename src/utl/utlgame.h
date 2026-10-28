@@ -32,8 +32,8 @@ void utlPlaySeRand4(int a, int b, int c, int d);                         // ROR 
  * commands need it). */
 int utlTestSeqBit34(void);                                               // ROR 0x0010346c
 /* Plays sound id without a position: a > 0 through 0x1f97c8(se, a), else
- * GamSndMan::playSE(se, 1, b) (b != 0: a position). */
-void utlPlaySe(int id, int a, int b);                                    // ROR 0x001026b0
+ * GamSndMan::playSE(se, 1, pos) (pos != NULL: a position). */
+void utlPlaySe(int id, int a, const float *pos);                         // ROR 0x001026b0
 /* EmyManager::isEmyDamaging(theOID) (asserts theOID != 0). */
 int utlIsEmyDamaging(unsigned int theOID);                               // ROR 0x00102adc
 /* GamMan::getObjPos(oid, out). */

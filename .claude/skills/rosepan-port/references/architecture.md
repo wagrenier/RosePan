@@ -1060,8 +1060,13 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   0x15 move the actor (sweep), 0x16 riding / hurt query, 0x17 weapon override, 0x18 health override.
 - The motion sequence table (MagLifeControlChara +0x5c, the asserts' `m_tbl_motion_state`; the PC's
   at 0x2961e0, 164 rows of 0x18 bytes: +0 the row's own index, +4 the motion name, +8 blend frames
-  (short, -1), +0xa loop flag (< 1 loops), +0xc speed percent, +0x10 bit 0, +0x12 an alternative row
-  (`changeMotionSeqAlt` 0x11a27c), +0x0e the row that follows when it ends). Rows: 0 base, 1..3
+  (short, -1), +0xa frames (> 0: frames before the next row while the actor is in no mode; < 1 the
+  motion's loops are counted, each replaying the sound; < 0 endless, `isMotionStateEndless`), +0xc speed
+  percent of 1/60 (0 = 100), +0x0e unused (-1), +0x10 bit 0 = motion flag 0x40 (flag 1 = a counted-loop
+  row), +0x12 m_next_state (the row that follows; also `changeMotionSeqAlt`'s pick), +0x14 a sound at
+  the actor when the row starts). Phase word +0x48: 0 set, 1 running (endMotionSeqPhase), 2 ended
+  (setMotionSeqEnd). Brown's at 0x297418 has 138 rows (walk, s_turn_*, find_lost ...). Both are host
+  data (`g_pc_motion_seq` / `g_bwn_motion_seq`, maglifepc.cpp / maglifebwn.cpp). Rows: 0 base, 1..3
   run_out, 5 wait, 6 tired, 7 w_wait, 8 tired_out, 9..14 hold_*, 15..23 com/scom/w_com go/come/stay,
   28..37 dmg_*, 38..46 walk_in / walk, 47..49 run, 50..55 the 180-degree turns, 56..115 the weapon
   in / wait sets, 116..128 the ev201 / ev501 event poses, 129..136 item / check, 137..158 the dog /
@@ -1117,9 +1122,6 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
 - live: the shadow blend scene +0x22b0 (0.1 in mode 3, else back to 1 by 0.05), footsteps
   (`playStepSe` with the 12 floor-kind sound ids at 0x2e9ef8), the mode's live, root motion outside
   the moving states (`isMoveState`: 1..10, 14).
-- The PC's motion sequence table (0x18-byte rows at 0x2961e0: "base", "run_out", "wait", "tired",
-  "w_wait", "hold_in" ... "sude_in_ml", 60+ rows) is passed to MagLifeControlChara +0x5c; it is not
-  on the host yet (NULL) -- it comes with updateMotionSeq's TU.
 - Tuning words (MagScene::parseOption options 6..14 -> `setParam`): +0x1f8 stick dead zone 0.1,
   +0x1fc / +0x200 cos 5 / 89 degrees, +0x204 0.07, +0x208 0.9, +0x20c 0.001 (stick change),
   +0x210 / +0x214 45 / 20 (move sweep range / radius).
