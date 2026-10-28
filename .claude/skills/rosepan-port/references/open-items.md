@@ -53,7 +53,14 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      the menu glue 0x13f07c..0x13f49c is mag/magscenemenu.cpp (gamEnterMenu, canOpen*, the fade
      times, openSysMsgWindow). Next: unassigned@00140c68 + unassigned@00140990 (drawFocus and its records: define them together as
      mag/magscenefocus.cpp).
-  f. In game: mag/maglifepc.cpp (MagLifePC::live), task/naga_chunk.cpp (event packs, so scenes
+  f. In game: mag/maglifepc.cpp -- WRITTEN 2026-10-27 (verify; pinned 0x11ab40..0x11c464: the
+     state machine, live, processPad, message; setActor now binds the PC after the film). What it
+     needs next to move the PC: mag/maglifepc3.cpp (initMotion 0x11dd40, its motion loads),
+     mag/maglifepcmode.cpp (the 20 modes' init / live / pad, all stubs -- Null, Wait, Walk2D,
+     Run2D first) and mag/maglifepcmove.cpp (applyMotionMove 0x120668, sweepMove 0x11ea04);
+     the trivial g_gamMan getters (getEquipItem 0x11c520, getPcParam1b / 1c 0x11c464 / 0x11c4c0)
+     are stubs in src/lib/unassigned_stubs.cpp (calcHealth divides 0 by 0 until then: health 2).
+     Then task/naga_chunk.cpp (event packs, so scenes
      play), mag/maglifebwn.cpp + unassigned@001258a4 (renderPostProcess) + mag/maglifebwnctrl.cpp
      (Brown), unassigned@00166a1c (the effect objects: Obj176a3c, FUN_00177830 in MagScene::draw).
 Re-assess from the run's reached stubs (work/run_relwithdebinfo.log) once the first model draws.
@@ -806,6 +813,14 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
   Also utlRandRange 0x10423c is a stub returning 0, so every eye blinks every 6 frames.
 
 ## Decisions
+
+- 2026-10-27 (mag/maglifepc.cpp session, no user present): five small MagLifeControlChara functions
+  of mag/maglife.cpp were written there (the constructor 0x11a888, setState 0x119fe0,
+  clearMotionSeq, setMotionSeqTable, clearGoal) because MagLifePC cannot hold a state without them;
+  the rest of maglife.cpp stays stubs. MagLifePC::reset / command became reset4MapJump / message
+  (the base slots' ror-symbol names). The 20 MagLifePCMode classes' virtuals are hand-written stubs
+  in mag/maglifepcmode.cpp: stubgen cannot see a missing vtable's slots, so a session that adds a
+  polymorphic class must stub its out-of-line virtuals itself (hazards.md).
 
 - 2026-10-27 (session decision, dog/dogentity.cpp; no answer could come): the Dog classes stay
   non-polymorphic on the host and every constructor stores its class's EE vtable address in the +0x94

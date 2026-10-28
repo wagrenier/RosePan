@@ -46,3 +46,22 @@ int utlPauseForMenu(void)
     ROSEPAN_STUB("utlPauseForMenu", 0x00103de4);
     return {};
 }
+
+// stub of ROR 0x00102918
+void utlPlaySeRand3(int a, int b, int c)
+{
+    ROSEPAN_STUB("utlPlaySeRand3", 0x00102918);
+}
+
+// stub of ROR 0x001029c4
+void utlPlaySeRand4(int a, int b, int c, int d)
+{
+    ROSEPAN_STUB("utlPlaySeRand4", 0x001029c4);
+}
+
+// stub of ROR 0x0010346c
+int utlTestSeqBit34(void)
+{
+    ROSEPAN_STUB("utlTestSeqBit34", 0x0010346c);
+    return {};
+}

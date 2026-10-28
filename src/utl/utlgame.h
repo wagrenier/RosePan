@@ -20,5 +20,12 @@ int utlPauseForMenu(void);                                               // ROR 
 /* GamMan's PC equip item / PC actor numbers (assert id < 128). */
 int utlGetPcEquipItemChrID(void);                                        // ROR 0x00103e4c
 int utlGetPcChrNo(void);                                                 // ROR 0x00103e94
+/* One of three / four sound ids at random (0x10423c), played without a
+ * position (0x1026b0). */
+void utlPlaySeRand3(int a, int b, int c);                                // ROR 0x00102918
+void utlPlaySeRand4(int a, int b, int c, int d);                         // ROR 0x001029c4
+/* g_sequence.m_bits[1] & 4: script flag 34 (MagLifePC::processPad's dog
+ * commands need it). */
+int utlTestSeqBit34(void);                                               // ROR 0x0010346c
 
 #endif /* _UTL_UTLGAME_H */

@@ -111,3 +111,21 @@ void MagLifeBwnCtrl::setRot(const float *v)
 {
     ROSEPAN_STUB("MagLifeBwnCtrl::setRot", 0x0012a89c);
 }
+
+// stub of ROR 0x0012b4a0
+void MagLifeBwnCtrl::orderCome(int a1)
+{
+    ROSEPAN_STUB("MagLifeBwnCtrl::orderCome", 0x0012b4a0);
+}
+
+// stub of ROR 0x0012b65c
+void MagLifeBwnCtrl::orderGo(int a1)
+{
+    ROSEPAN_STUB("MagLifeBwnCtrl::orderGo", 0x0012b65c);
+}
+
+// stub of ROR 0x0012b5f8
+void MagLifeBwnCtrl::orderStay(int a1)
+{
+    ROSEPAN_STUB("MagLifeBwnCtrl::orderStay", 0x0012b5f8);
+}

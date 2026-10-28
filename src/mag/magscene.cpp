@@ -210,7 +210,7 @@ bool MagScene::isPCWordDcSet()
 
 void MagScene::commandPC(int cmd, const float *arg)
 {
-    m_pc.command(cmd, arg, 0);
+    m_pc.message(cmd, arg);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -2017,7 +2017,7 @@ void MagScene::resetEntities()
     }
     for (int i = 0; i < 128; i++)
         m_actors[i].resetShadow();
-    m_pc.reset();
+    m_pc.reset4MapJump();
     m_bwn.reset();
     m_bwn_ctrl.reset();
 }
