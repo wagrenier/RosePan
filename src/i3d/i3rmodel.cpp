@@ -27,24 +27,18 @@ static inline I3rRootData *i3rModelData(const I3rRoot *root)
 }
 
 /* PORT: an STQ slot may point outside the file (an entity the game owns);
- * the host field still holds the distance, so it must fit in 32 bits.
- * One that does not (DogActor::setEyeTex's m_eye_uv in the global actor
- * array against a heap model) is left NULL -- a truncated distance would
- * be a wild pointer for the reader -- and logged once; a side table is
- * the real fix (open-items.md). */
+ * the host field holds the distance, and one that does not fit in 32 bits
+ * (MagScene's m_stq_map, DogActor::setEyeTex's m_eye_uv in the global
+ * actor array, against a heap model) goes through the far pointer side
+ * table (i3rroot.h I3R_FAR_PTR). */
 static void i3rSetFarPtr(u_int *field, const void *p)
 {
-    static int s_logged;
     ptrdiff_t d = p != NULL ? (const u_char *)p - (const u_char *)field : 0;
 
-    if (d != (ptrdiff_t)(int)d)
-    {
-        if (!s_logged)
-            printf("[i3r] %p is too far from the model slot %p for a 32-bit field (left NULL)\n", p, (void *)field);
-        s_logged = 1;
-        p = NULL;
-    }
-    i3rSetPtr(field, p);
+    if (d != (ptrdiff_t)(int)d || (u_int)(int)d == I3R_FAR_PTR)
+        i3rFarPtrSet(field, p);
+    else
+        i3rSetPtr(field, p);
 }
 
 /* out = a times b as VU0 micro 0 multiplies them (vf4..7 = a, vf8..11 =
@@ -232,8 +226,15 @@ int i3rReplaceStqMapEntity(I3rRoot *root, I3rStqMapEntity *entity)
                 I3rItem *slot = &slots->getChildren()[k];
                 const I3rStqMapEntity *cur = (const I3rStqMapEntity *)slot->getData();
 
-                /* PORT: the ROM reads an empty slot's id at address 0x41. */
-                if (cur != NULL && cur->m_id == id)
+                /* PORT: an empty slot (m_data 0 in the file) has the ROM
+                 * compare the byte at EE address 0x41 (kernel memory) with
+                 * the id. The map's shadow model -- the one model the game
+                 * calls this on (MagScene's map load, id 3) -- has exactly
+                 * one such slot and no other, and is drawn only to take the
+                 * projected shadow (drawActorShadow), so on hardware the
+                 * compare matched: the host takes an empty slot as a match
+                 * (open-items.md "Projected shadow open points"). */
+                if (cur == NULL || cur->m_id == id)
                 {
                     i3rSetFarPtr(&slot->m_data, entity);
                     ((I3rMaterialData *)mat->getData())->m_tex_anim = 1;

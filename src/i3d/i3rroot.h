@@ -32,10 +32,20 @@
 #define I3D_OK 0
 #endif
 
+/* PORT: a field pointing outside the file further than 32 bits reach (an
+ * STQ map entity the game owns: MagScene's, DogActor's eye uv) holds
+ * I3R_FAR_PTR -- a distance no file under 2 GB has -- and its target sits
+ * in a host side table keyed by the field's address (i3rroot.cpp). */
+#define I3R_FAR_PTR 0x80000000u
+void *i3rFarPtrGet(const u_int *field);
+void  i3rFarPtrSet(u_int *field, const void *p);
+
 /* A relocated pointer field (see PORT above): NULL for 0, else the field's
  * own address plus the signed distance it holds. */
 static inline void *i3rPtr(const u_int *field)
 {
+    if (*field == I3R_FAR_PTR)
+        return i3rFarPtrGet(field);
     return *field != 0 ? (void *)((const u_char *)field + (int)*field) : NULL;
 }
 

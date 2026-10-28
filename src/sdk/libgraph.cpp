@@ -272,18 +272,48 @@ sceGsVCallbackFunc sceGsSyncVCallback(sceGsVCallbackFunc func)
     return old;
 }
 
+/* One A+D register of a draw env: its value and its address word. */
+static void SetEnvReg(u_long *slot, u_long addr, u_long value)
+{
+    slot[0] = value;
+    slot[1] = addr;
+}
+
+/* The two draw environments as the SDK's sceGsSetDefDrawEnv fills them --
+ * FRAME (draw0 into the second buffer, after w x h's pages; draw1 into the
+ * first), ZBUF after both, XYOFFSET centring the w x h frame on the GS's
+ * 2048, SCISSOR the frame, PRMODECONT 1, COLCLAMP 1, DTHE 0, TEST with the
+ * z test -- because the game sends them again by reference
+ * (MagScene::putDrawEnv) and the native i3d module reads XYOFFSET / SCISSOR
+ * / TEST / FRAME from them.  The display envs and the clear sprites are
+ * left zero: the host shows its own frame. */
 void sceGsSetDefDBuff(sceGsDBuff *dp, short psm, short w, short h,
                       short ztest, short zpsm, short clear)
 {
-    (void)psm;
-    (void)w;
-    (void)h;
-    (void)ztest;
-    (void)zpsm;
     (void)clear;
-    if (dp != 0)
+    if (dp == 0)
     {
-        memset(dp, 0, sizeof(*dp));
+        return;
+    }
+    memset(dp, 0, sizeof(*dp));
+    const u_long fbw = (u_long)((w + 63) / 64);
+    const u_long pages = fbw * (u_long)((h + 31) / 32);
+    const u_long xy = (u_long)((2048 - w / 2) << 4) | (u_long)((2048 - h / 2) << 4) << 32;
+    const u_long scissor = (u_long)(w - 1) << 16 | (u_long)(h - 1) << 48;
+    const u_long test = 1ul << 16 | (u_long)(ztest & 3) << 17;
+    sceGsDrawEnv1 *envs[2] = {&dp->draw0, &dp->draw1};
+    for (int i = 0; i < 2; i++)
+    {
+        u_long *e = (u_long *)envs[i];
+        const u_long fbp = i == 0 ? pages : 0;
+        SetEnvReg(e + 0, SCE_GS_FRAME_1, fbp | fbw << 16 | (u_long)(psm & 0x3f) << 24);
+        SetEnvReg(e + 2, SCE_GS_ZBUF_1, (pages * 2) | (u_long)(zpsm & 0xf) << 24);
+        SetEnvReg(e + 4, SCE_GS_XYOFFSET_1, xy);
+        SetEnvReg(e + 6, SCE_GS_SCISSOR_1, scissor);
+        SetEnvReg(e + 8, SCE_GS_PRMODECONT, 1);
+        SetEnvReg(e + 10, SCE_GS_COLCLAMP, 1);
+        SetEnvReg(e + 12, SCE_GS_DTHE, 0);
+        SetEnvReg(e + 14, SCE_GS_TEST_1, test);
     }
 }
 

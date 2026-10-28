@@ -1464,6 +1464,18 @@ to adapt when a TU reaches them:
   misaligned blocks. Also: the host header is 56 bytes (EE 0x20), so the heap holds slightly less;
   utlMemInit's probe size may need raising once host objects (bigger than EE ones) fill it.
 
+- **Projected shadow, host (2026-10-28, i3d/i3rdraw.cpp session)**: drawn. The shadow target pass
+  (FRAME fbp 0x118, XYOFFSET 0) feeds the renderer's projected-shadow atlas from the FF ports
+  (RosePan_RendererShadowBegin/EndCaster: one episode per pass, closed when XYOFFSET returns to the
+  display); receivers are mesh layers whose STQ slot is kind 3 (MagScene's +0x2aa90), drawn through
+  the receiver shader (black, alpha = coverage x strength). Doubts: (1) the map shadow model's STQ
+  slot is EMPTY in the file (m_data 0): the ROM's i3rReplaceStqMapEntity compares the byte at EE
+  address 0x41 with id 3; the host takes an empty slot as a match (i3rmodel.cpp PORT) -- confirm with
+  an EE RAM dump (byte 0x41 should be 3) or other evidence. (2) strength = makeActorShadow's shadow
+  light alpha clamped to 1 (0.4 in the forest run: m_22a0 0.8 x m_2a9cc 0.5); the ROM's VU1 lighting of
+  the receiver under kinds 1 / 3 may scale it further (N.L, spot cones). (3) no receiver culling
+  (have_projector false); a ceiling above an actor would take the shadow too. (4) not compared with
+  real-game footage yet: the forest shot shows a soft shadow from Jennifer's feet to the right.
 - **Projected shadow open points** (2026-10-22, makeActorShadow): the shadow view's up vector at
   data 0x298cf0 reads (1, -1, 1, 0) -- odd for an up vector; check i3dMatLookDir's use of it when
   that module is written. The MagScene constructor's value for +0x2040 (m_shadow_mode) comes from a

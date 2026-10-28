@@ -43,6 +43,7 @@ constexpr float kScaleY = 448.0f / (float)kFrameHeight;
 constexpr uint64_t kRegTex0 = 0x06;
 constexpr uint64_t kRegTex1 = 0x14;
 constexpr uint64_t kRegXyOffset = 0x18;
+constexpr uint64_t kRegFrame = 0x4c;
 constexpr uint64_t kRegScissor = 0x40;
 constexpr uint64_t kRegAlpha = 0x42;
 constexpr uint64_t kRegTest = 0x47;
@@ -50,6 +51,11 @@ constexpr uint64_t kRegTest = 0x47;
 /* The opening state i3dPktOpenChain writes (ALPHA mode 0x10, TEST_1). */
 constexpr uint64_t kDefaultAlpha = 0x44;
 constexpr uint64_t kDefaultTest = 0x5000d;
+
+/* FRAME_1's FBP of MagScene::makeActorShadow's 256 x 256 shadow target. */
+constexpr unsigned kShadowFbp = 0x118;
+/* drawShadows' limit (makeActorShadow asserts theCount < 10). */
+constexpr int kMaxShadows = 10;
 
 struct Vertex
 {
@@ -139,6 +145,7 @@ struct GsState
     uint64_t        scissor = (uint64_t)(kFrameWidth - 1) << 16 | (uint64_t)(kFrameHeight - 1) << 48;
     int             offx = kDefaultOffX;
     int             offy = kDefaultOffY;
+    unsigned        fbp = 0;            /* FRAME_1's FBP (0: the display's, not followed) */
     const uint64_t *tex_regs = nullptr;
     /* A TEX0 written as a plain register (i3dPktSetReg) after the draw set's
      * registers: GS memory the module does not hold -- SprMan::drawFrameCopy's
@@ -155,6 +162,16 @@ std::vector<Camera> s_cameras;
 std::vector<std::vector<RosePanI3dVu1Vertex>> s_strips;
 GsState s_state;
 bool s_logged_offscreen;
+
+/* The projected shadows (MagScene::makeActorShadow / drawActorShadow): the
+ * shadow pass the replay is in (the n-th FRAME fbp 0x118 write of the
+ * frame), whether its caster episode is open in the renderer, whether the
+ * receivers after it may draw (the pass drew a caster), and each pass's
+ * strength as makeActorShadow left it. */
+int   s_shadow_pass = -1;
+bool  s_shadow_caster_open;
+bool  s_shadow_receivers;
+float s_shadow_strength[kMaxShadows];
 bool s_logged_notex;
 bool s_logged_direct_tex0;
 
@@ -485,6 +502,42 @@ void DrawMovie(const Record &r)
     RosePan_RendererDrawImageQuad(texture, xy, uv, 0x80, 0x80, 0x80, 0x80, 1);
 }
 
+/* A model drawn in an off-screen pass: in the shadow target it is the
+ * shadow's caster -- the renderer's shadow map takes it (the episode opens
+ * with the pass's first caster and is drawn from the camera it was queued
+ * with, the light's); any other target is not drawn. */
+bool BeginShadowCaster()
+{
+    if (s_state.fbp != kShadowFbp || s_shadow_pass < 0 || s_shadow_pass >= kMaxShadows)
+        return false;
+    if (!s_shadow_caster_open)
+    {
+        RosePan_RendererShadowBeginCaster();
+        RosePan_RendererShadowSetStrength(s_shadow_strength[s_shadow_pass]);
+        s_shadow_caster_open = true;
+    }
+    return true;
+}
+
+/* The pass ends (XYOFFSET back on the display: drawActorShadow's
+ * putDrawEnv): the episode closes while the light's camera is still the
+ * renderer's, which is what the receivers project through. */
+void EndShadowCaster()
+{
+    if (!s_shadow_caster_open)
+        return;
+    RosePan_RendererShadowEndCaster();
+    s_shadow_caster_open = false;
+    s_shadow_receivers = true;
+    static bool s_logged;
+    if (!s_logged)
+    {
+        RosePan_LogPrintf("rosepan_i3d: shadow pass %d cast (strength %.3f)\n", s_shadow_pass,
+                          s_shadow_strength[s_shadow_pass]);
+        s_logged = true;
+    }
+}
+
 void DrawModel(const Record &r)
 {
     if (r.index >= s_models.size())
@@ -492,7 +545,7 @@ void DrawModel(const Record &r)
     const ModelDraw &m = s_models[r.index];
     /* XYOFFSET 0: an off-screen pass (makeActorShadow's shadow model into
      * the 256 x 256 shadow target, drawCloseUp), not the display. */
-    if (s_state.offx == 0 && s_state.offy == 0)
+    if (s_state.offx == 0 && s_state.offy == 0 && !BeginShadowCaster())
         return;
     /* The mesh path's own state: opaque, depth tested, the whole frame. */
     RestoreState();
@@ -505,7 +558,7 @@ void DrawMesh(const Record &r)
         return;
     const MeshDraw &d = s_meshes[r.index];
     const ModelDraw &m = d.model;
-    if (s_state.offx == 0 && s_state.offy == 0)
+    if (s_state.offx == 0 && s_state.offy == 0 && !BeginShadowCaster())
         return;                                 /* an off-screen pass, as DrawModel */
     RestoreState();
     RosePan_I3dMeshDrawRef(m.root, m.world, m.nodes, m.tex, m.tex_count, m.has_opt ? &m.opt : NULL, &d.ref);
@@ -522,6 +575,18 @@ void ApplyReg(uint64_t reg, uint64_t value)
     case kRegXyOffset:
         s_state.offx = (int)(value & 0xffff);
         s_state.offy = (int)((value >> 32) & 0xffff);
+        if (s_state.offx != 0 || s_state.offy != 0)
+            EndShadowCaster();
+        break;
+    case kRegFrame:
+        s_state.fbp = (unsigned)(value & 0x1ff);
+        if (s_state.fbp == kShadowFbp)
+        {
+            /* A new shadow pass; its receivers wait for its caster. */
+            EndShadowCaster();
+            s_shadow_pass++;
+            s_shadow_receivers = false;
+        }
         break;
     default:           break;   /* TEX0 / TEX1 come through RosePan_I3dRecordTexRegs */
     }
@@ -731,6 +796,21 @@ void RosePan_I3dBeginFrame(void)
     s_cameras.clear();
     s_strips.clear();
     s_state = GsState();
+    /* The renderer drops its episodes with its frame. */
+    s_shadow_pass = -1;
+    s_shadow_caster_open = false;
+    s_shadow_receivers = false;
+}
+
+void RosePan_I3dSetShadowStrength(int n, float strength)
+{
+    if (n >= 0 && n < kMaxShadows)
+        s_shadow_strength[n] = strength;
+}
+
+int RosePan_I3dShadowReceiverReady(void)
+{
+    return s_shadow_receivers && !s_shadow_caster_open;
 }
 
 void RosePan_I3dReplay(const void *start, const void *end)
