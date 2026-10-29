@@ -2036,13 +2036,13 @@ void MagScene::clearPC()
 // ──────────────────────────────────────────────────────────────────────
 // The scene's constructor. g_magSystem holds the scene, so on the host it
 // runs before main. The ROM also runs its members' constructors here (the
-// light pool, the loaders, the sub mode, 128 DogActors, the sky models,
+// light pool, the loaders, 128 DogActors, the sky models,
 // the camera, the PC / Brown controllers, the fades, the 13 menus at
 // +0x2be60.., the 2D layers, the scene interfaces); the host runs those
 // that exist as C++ constructors (GamFont, DogEntity / DogCamera, S2d*),
 // the rest start zeroed as part of g_magSystem until their TUs write them.
 // ROR 0x001360a0
-// callcheck: FUN_00100320, FUN_0010eebc, FUN_00110a94, FUN_00114c54, FUN_0011bf0c, FUN_00125aa4, FUN_0012ba80, FUN_0012d398, FUN_0012d58c, MagLifeMenuPBook, MagLifeMenuBoard3D, FUN_0012f008, FUN_0012f298, FUN_00130da4, FUN_0014257c, FUN_00142e84, FUN_00176a3c, SctWorld, FUN_001947a4, FUN_0019a52c, FUN_001a1244, FUN_001a59b8, FUN_001a90ec, FUN_001ab474, FUN_001ad6b4, FUN_001adf04, FUN_001ae474, FUN_001ae954, FUN_001bdae4, FileReader, GamFont, S2dBg, S2dCineSco, S2dMes, S2dMovie, memset (member constructors: the host runs the C++ ones itself, the others are not written yet; the memsets are the field clears below)
+// callcheck: FUN_0010eebc, FUN_00110a94, FUN_00114c54, FUN_0011bf0c, FUN_00125aa4, FUN_0012ba80, FUN_0012d398, FUN_0012d58c, MagLifeMenuPBook, MagLifeMenuBoard3D, FUN_0012f008, FUN_0012f298, FUN_00130da4, FUN_0014257c, FUN_00142e84, FUN_00176a3c, SctWorld, FUN_001947a4, FUN_0019a52c, FUN_001a1244, FUN_001a59b8, FUN_001a90ec, FUN_001ab474, FUN_001ad6b4, FUN_001adf04, FUN_001ae474, FUN_001ae954, FUN_001bdae4, FileReader, GamFont, S2dBg, S2dCineSco, S2dMes, S2dMovie, memset (member constructors: the host runs the C++ ones itself, the others are not written yet; the memsets are the field clears below)
 
 MagScene::MagScene()
 {
@@ -2068,6 +2068,7 @@ MagScene::MagScene()
     m_sub_mode.m_arg = 0;
     m_sub_mode.m_arg2 = 0;
     memset(m_sub_mode.m_stack, 0, sizeof(m_sub_mode.m_stack));
+    m_sub_mode.reset();
     m_life_man.init();
     m_tex_info.clear();
 

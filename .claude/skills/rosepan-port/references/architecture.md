@@ -838,7 +838,9 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   breadth-first route over the links (one caller 0x127b28), `findByName` 0x17ea84 (no callers). The
   host builds WrdEntry records with pointers beside the file instead of relocating it (wrdsrv.h).
 - `BedSubMode` (bed/bedsubmode.cpp asserts `m_depth < MAX_STACK` / `m_depth > 0`): a current qword
-  at +0, a stack of 4 at +0x10, m_depth +0x50; push 0x100258 / pop 0x1002c0. The scene has one at
+  at +0, a stack of 4 at +0x10, m_depth +0x50; push 0x100258 / pop 0x1002c0 / reset 0x100320
+  (written 2026-10-29). Its ctor is inline: MagScene::MagScene zeroes the record and the stack, then
+  calls reset (m_depth 0, the 4 copies zeroed from the last). The scene has one at
   +0x22d0 (`MagScene::pushSubMode` 0x132744 pushes and sets mode 8 / -1, `popSubMode` 0x132784): the
   movie skip runs in sub mode 8. Its four words are the scene's mode, step (-1 on entry), the
   requested menu id and the PC's mode << 16 | number (`requestMenu` 0x1357b0).

@@ -1106,6 +1106,19 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-29, bed/bedsubmode.cpp) **Flaky boot: the smoke run sometimes stays black from frame ~1680**
+  (the logo -> title fade) to the end of the run instead of showing the title at ~1860 and going on
+  into the game. Same exe, same pad: 2 of 4 runs of this session went black, the others (and the one
+  baseline run without this TU) reached the title. Not this TU's code: a printf probe showed
+  BedSubMode::push / pop never run before frame ~1920 (the black starts at ~1680), and reset only
+  zeroes memory that is already zero. Look at what decides the title
+  phase near frame 1680 (a timing / thread race in the loader or the fade?) before trusting a single
+  black smoke shot. Also: BedSubMode's ctor is inline in the ROM (MagScene::MagScene zeroes the record
+  and the 4 saved copies, then calls BedSubMode::reset 0x100320); push / pop are reached only by the
+  system message window (openSysMsgWindow / closeSysMsgWindow, pulseMenu1000a) and MagScene's sub
+  mode 8 (pushSubMode: the movie skip), so a run that gets past the title into the opening film is
+  the first that exercises them.
+
 - (2026-10-29, mag/maglifepc2.cpp) Item pickup, the hit, reload and the hit sounds are written but no
   smoke run reaches them (the boot pad never picks up or attacks): status verify. A pad that walks to
   an item and presses the action button would show takeItem / collectNearItems. Unconfirmed: items
