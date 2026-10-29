@@ -1,4 +1,4 @@
-// sequence/seqvm.cpp -- the sequence script VM (0x20ff34..0x2155a0).
+// sequence/seqvm.cpp -- the sequence script VM (0x20ff34..0x2155f4).
 //
 // The sequence scripts are MIPS code the VM interprets one word at a time:
 // seqVmRun decodes the word and calls a handler from one of three tables
@@ -44,7 +44,10 @@
 #include "sequence/seqcall.h"
 #include "sequence/sequence.h"
 
-// The VM's state (see sequence.h).
+// The VM's state (see sequence.h). The file's static initializer
+// (__static_initialization_and_destruction_0$seqvm 0x2155a8, called by
+// _GLOBAL_$I$seqvm 0x2155d4) zeroes g_seqThread and g_seqThreadEnd; zero
+// initialisation does the same on the host.
 SeqNode<SeqThread> *g_seqThread;
 SeqNode<SeqThread> *g_seqThreadEnd;
 u_int    g_seqFpr[32];
@@ -1869,4 +1872,11 @@ int Sequence::loadBits(const void *src)
     memcpy(m_bits, in, 0x360);
     memcpy((u_char *)m_bits + SEQ_BITS_SLOT(slot), in + 0x360, 0x40);
     return 0x400;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x002155a0
+
+void debugNop(void)
+{
 }

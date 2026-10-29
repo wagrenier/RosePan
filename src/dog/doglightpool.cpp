@@ -31,7 +31,7 @@ static const int s_light_size[DOG_MAX_LIGHT_TYPE] = { 0x10, 0x20, 0x20, 0x40, 0x
 static const float s_pi = 0x1.921fb8p+1f;
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001103dc
 
 void DogLightBuffer::copyLights(int theType, const void *theLight, u_int mask)
@@ -137,7 +137,7 @@ static int dogLightFindInSet(const DogLightPool *pool, int type, int theSetNo, i
     return -1;
 }
 
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00110660
 
 DogAmbientLight *DogLightPool::getAmbientLight(int theSetNo, int theNo) const
@@ -150,7 +150,7 @@ DogAmbientLight *DogLightPool::getAmbientLight(int theSetNo, int theNo) const
     return i < 0 ? NULL : (DogAmbientLight *)m_light[type] + i;
 }
 
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011076c
 
 DogDirectLight *DogLightPool::getDirectLight(int theSetNo, int theNo) const
@@ -163,7 +163,7 @@ DogDirectLight *DogLightPool::getDirectLight(int theSetNo, int theNo) const
     return i < 0 ? NULL : (DogDirectLight *)m_light[type] + i;
 }
 
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00110878
 
 DogPointLight *DogLightPool::getPointLight(int theSetNo, int theNo) const
@@ -176,7 +176,7 @@ DogPointLight *DogLightPool::getPointLight(int theSetNo, int theNo) const
     return i < 0 ? NULL : (DogPointLight *)m_light[type] + i;
 }
 
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00110988
 
 DogSpotLight *DogLightPool::getSpotLight(int theSetNo, int theNo) const
@@ -206,7 +206,7 @@ void DogLightPool::init()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00110af8
 
 void DogLightPool::freeLights()
@@ -242,7 +242,7 @@ void dogLightToGray(float *color)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00110c0c
 
 int DogLightPool::newLight(int theType)
@@ -282,7 +282,7 @@ int DogLightPool::getDataSize()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00110d68
 
 int DogLightPool::create()
@@ -310,7 +310,7 @@ int DogLightPool::create()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00110e64
 
 void DogLightPool::alloc(const int *num)
@@ -339,7 +339,7 @@ void DogLightPool::alloc(const int *num)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00110f78
 
 void DogLightPool::resetSet(int theSet)
@@ -386,7 +386,7 @@ void DogLightPool::buildSet(int theSet, const int *num)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00111120
 
 int DogLightPool::allocId(int theType)
@@ -406,7 +406,7 @@ int DogLightPool::allocId(int theType)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001111e4
 
 void DogLightPool::removeLight(int theType, int theNo)
@@ -420,7 +420,7 @@ void DogLightPool::removeLight(int theType, int theNo)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001112a8
 
 void DogLightPool::addToSet(int theSet, int theType, int theID)
@@ -434,7 +434,7 @@ void DogLightPool::addToSet(int theSet, int theType, int theID)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011139c
 
 void DogLightPool::addToAllSets(int theType, int theID)
@@ -470,7 +470,7 @@ void DogLightPool::copySet(int theDst, int theSrc)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler, inside the get*Light inlines)
+// callcheck: dbgAssertFailed (the assert handler, inside the get*Light inlines)
 // ROR 0x00111584
 
 void DogLightPool::setLightParam(int type, int n, int param, const float *v)
@@ -538,7 +538,7 @@ void DogLightPool::setLightParam(int type, int n, int param, const float *v)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler, inside the get*Light const inlines)
+// callcheck: dbgAssertFailed (the assert handler, inside the get*Light const inlines)
 // ROR 0x00111b5c
 
 void DogLightPool::getLightParam(int type, int n, int param, float *v) const
@@ -606,7 +606,7 @@ void DogLightPool::getLightParam(int type, int n, int param, float *v) const
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00112134
 
 void DogLightPool::setSetLightParam(int type, int n, int param, const float *v, int set)
@@ -674,7 +674,7 @@ void DogLightPool::setSetLightParam(int type, int n, int param, const float *v, 
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001123b0
 
 void DogLightPool::getSetLightParam(int type, int n, int param, float *v, int set) const
@@ -740,7 +740,7 @@ void DogLightPool::getSetLightParam(int type, int n, int param, float *v, int se
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler inside the get*Light const inlines)
+// callcheck: dbgAssertFailed (the assert handler inside the get*Light const inlines)
 // ROR 0x0011262c
 
 I3dLight *DogLightPool::createLight(i3dContext *ctx, int set, int gray, float scale) const
@@ -825,7 +825,7 @@ I3dLight *DogLightPool::createLight(i3dContext *ctx, int set, int gray, float sc
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler inside getPointLight)
+// callcheck: dbgAssertFailed (the assert handler inside getPointLight)
 // ROR 0x001129cc
 
 int DogLightPool::findNearestPointLight(int set, const float *pos)

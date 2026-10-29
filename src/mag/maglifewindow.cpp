@@ -22,7 +22,7 @@ static inline int isSjisLead(u_int c)
 
 // ──────────────────────────────────────────────────────────────────────
 // GamFont::getCharMetrics on the window's font.
-// ROR 0x0012fca8 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0012fca8 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeWindow::getCharMetrics(int code, int *left, int *width, int *extra)
 {
@@ -31,7 +31,7 @@ void MagLifeWindow::getCharMetrics(int code, int *left, int *width, int *extra)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0012fd30 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0012fd30 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeWindow::setProportional(int on)
 {
@@ -40,7 +40,7 @@ void MagLifeWindow::setProportional(int on)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0012fd88 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0012fd88 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeWindow::setFontWord30(int v)
 {
@@ -49,7 +49,7 @@ void MagLifeWindow::setFontWord30(int v)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0012fddc // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0012fddc // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeWindow::setFontWord34(int v)
 {
@@ -219,7 +219,7 @@ void MagLifeWindow::getPos3(int *x, int *y, int *z)
 // first byte) centres every line in m_w, other codes below 0x20 draw
 // nothing. A glyph that would pass m_buf_w starts a new line, one that
 // would pass m_buf_h scrolls the buffer. The cursor is left after the text.
-// ROR 0x00130258 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00130258 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeWindow::drawText(int x, int y, const char *str, int color)
 {
@@ -299,7 +299,7 @@ void MagLifeWindow::drawText(int x, int y, const char *str, int color)
 // character that would pass m_buf_w; past m_buf_h the buffer scrolls up.
 // The bytes are signed here (lb), so the lead-byte test never matches a
 // byte >= 0x80: such bytes draw nothing (the ROM's; ASCII only in effect).
-// ROR 0x001305ec // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x001305ec // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeWindow::print(const char *str, int color)
 {
@@ -339,7 +339,7 @@ void MagLifeWindow::print(const char *str, int color)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00130778 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00130778 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeWindow::setFontManager(GamFont *thefontManager)
 {
@@ -360,7 +360,7 @@ void MagLifeWindow::setFontManager(GamFont *thefontManager)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0013086c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0013086c // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 int MagLifeWindow::getTextWidth(const char *theStr)
 {

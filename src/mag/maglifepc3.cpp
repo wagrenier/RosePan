@@ -83,7 +83,7 @@ static const MagLifePCWeaponMotion s_weaponMotion[4] = {
 };
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011d720
 float MagLifePC::getHealthMotionStep()
 {
@@ -93,7 +93,7 @@ float MagLifePC::getHealthMotionStep()
 
 // ──────────────────────────────────────────────────────────────────────
 // The by-number change was never written.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011d790
 int MagLifePC::changeMotion(float speed, int theNo, u_int flags, int theNo2, int arg)
 {
@@ -103,7 +103,7 @@ int MagLifePC::changeMotion(float speed, int theNo, u_int flags, int theNo2, int
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011d7c0
 int MagLifePC::changeMotion(float speed, const char *theMotion, u_int flags,
                             const char *theMotion2, int arg)
@@ -142,7 +142,7 @@ int MagLifePC::changeMotion(float speed, const char *theMotion, u_int flags,
 // ──────────────────────────────────────────────────────────────────────
 // DogActor::loadPackMotion's reading into a given bank: 1 when the actor
 // took the motions, 0 otherwise (the block freed).
-// callcheck: FUN_00215a30, BedPfh, FileReadReq, FileReader, ~FileReader (the assert handler; the pfh constructors; inline in game/gamfile.h: the two constructors and the destructor)
+// callcheck: dbgAssertFailed, BedPfh, FileReadReq, FileReader, ~FileReader (the assert handler; the pfh constructors; inline in game/gamfile.h: the two constructors and the destructor)
 // ROR 0x0011d990
 int MagLifePC::loadMotion(int theLevel, const char *theFileName, int theIndex)
 {
@@ -189,7 +189,7 @@ int MagLifePC::loadMotion(int theLevel, const char *theFileName, int theIndex)
 
 // ──────────────────────────────────────────────────────────────────────
 // The bank is released even when stance 0 then loads nothing.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011dc64
 void MagLifePC::loadWeaponMotion(int theIndex, int theLevel)
 {
@@ -233,7 +233,7 @@ void MagLifePC::initMotion()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011ddf4
 int MagLifePC::playActionMotion(float speed, int theNo)
 {
@@ -248,7 +248,7 @@ int MagLifePC::playActionMotion(float speed, int theNo)
 
 // ──────────────────────────────────────────────────────────────────────
 // m_action_motion takes the record index (findMotionByName), not the id.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011de78
 int MagLifePC::playActionMotion(float speed, const char *theMotion)
 {
@@ -263,7 +263,7 @@ int MagLifePC::playActionMotion(float speed, const char *theMotion)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011df14
 int MagLifePC::isActionMotionEnd()
 {

@@ -60,7 +60,7 @@ void MagScene::fadeOut(int time, int level, int white)
 // fader (to black / to 0xff), 1 and 2 the keyhole, whose texture is loaded
 // when the kind changes. A start while the same direction is already
 // running is ignored.
-// ROR 0x001311f4 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x001311f4 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setFade(const MagFadeParam *p)
 {
@@ -301,7 +301,7 @@ void MagScene::init()
 // After loadSystemData (MagSystem::start): each text window's font draws
 // into its texture's image (bit8a..bit8d, 512 x 256, 8 or 4 bits by the
 // TIM2's image type); the scene interfaces point at the scene.
-// ROR 0x00131a28 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00131a28 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::start()
 {
@@ -406,7 +406,7 @@ void MagScene::term()
 // ──────────────────────────────────────────────────────────────────────
 // Turns the sky models' billboard nodes to the camera: node flag 1 (b_a*
 // names) fully, 2 (b_y*) about y only; each keeps its translation.
-// ROR 0x00132048  // callcheck: FUN_00215a30, I3rRoot__CheckIdString, i3rGetNumNode (inside the inline DogModel::isAlive / get_nNode and ROR_ASSERT)
+// ROR 0x00132048  // callcheck: dbgAssertFailed, I3rRoot__CheckIdString, i3rGetNumNode (inside the inline DogModel::isAlive / get_nNode and ROR_ASSERT)
 
 void MagScene::updateTenkyuBillboards()
 {
@@ -489,7 +489,7 @@ void MagScene::updateBwn()
 // A footstep: when the actor's motion has event bit 0 in this frame's
 // step, the sound of the floor sector under it (or the map's default slot)
 // from the actor's table, at its position.
-// ROR 0x00132430 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00132430 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::playActorFootstep(int theNo)
 {
@@ -543,7 +543,7 @@ void MagScene::playActorFootstep(int theNo)
 // The live actors' motion commands: in_menu 0 runs the actors without
 // flag 8 (and their footsteps), 1 only those with it (they keep moving
 // under a menu or a message).
-// ROR 0x0013262c  // callcheck: FUN_00215a30, I3rRoot__CheckIdString (inside the inline DogModel::isAlive)
+// ROR 0x0013262c  // callcheck: dbgAssertFailed, I3rRoot__CheckIdString (inside the inline DogModel::isAlive)
 
 void MagScene::updateActors(int in_menu)
 {
@@ -610,7 +610,7 @@ void MagScene::updatePaused()
 //     every 2400 counts;
 //  7  the menu takes pad 0 until processPad returns non-zero;
 //  8  paused (pushSubMode); 9 the debug windows.
-// ROR 0x001327dc // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x001327dc // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::update(BedPad *pad0, BedPad *pad1)
 {
@@ -860,7 +860,7 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
 
 // ──────────────────────────────────────────────────────────────────────
 // The number of actor thePtr (its index in m_actors).
-// ROR 0x00133090 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00133090 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 int MagScene::getActorNo(DogActor *thePtr)
 {
@@ -962,7 +962,7 @@ float MagScene::getActorMotionSpeed(int no)
 // hits: a wall segment when dir is level, else (or when no wall is hit)
 // the collision model of sky slot tenkyu (< 0: the first of the four that
 // is hit). -1 when nothing is.
-// ROR 0x00133454  // callcheck: FUN_00215a30, I3rRoot__CheckIdString (inside the inline DogModel::isAlive)
+// ROR 0x00133454  // callcheck: dbgAssertFailed, I3rRoot__CheckIdString (inside the inline DogModel::isAlive)
 
 float MagScene::castRay(MagSceneRayHit *hit, const float *pos, const float *dir, int tenkyu)
 {
@@ -1002,7 +1002,7 @@ float MagScene::castRay(MagSceneRayHit *hit, const float *pos, const float *dir,
 // ──────────────────────────────────────────────────────────────────────
 // A sphere of radius r at pos: the walls first (1 on a hit), then sky
 // slot 0's collision model; -1 when nothing is hit or r <= 0.
-// ROR 0x00133658 // callcheck: FUN_00215a30, I3rRoot__CheckIdString (inside the inline DogModel::isAlive)
+// ROR 0x00133658 // callcheck: dbgAssertFailed, I3rRoot__CheckIdString (inside the inline DogModel::isAlive)
 
 float MagScene::castSphere(float r, MagSceneRayHit *hit, const float *pos)
 {
@@ -1047,7 +1047,7 @@ float MagScene::getGroundHeight(const float *pos, const float *dir)
 // (< 0) along y, against the wall segments whose height range overlaps
 // it: within theR of a segment (taken at pos's height) is a hit, with the
 // wall normal in hit->m_vec[1]. 1 on a hit, else -1.
-// ROR 0x0013386c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0013386c // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 float MagScene::hitWallsCylinder(float theH, float theR, MagSceneRayHit *hit, const float *pos)
 {
@@ -1098,7 +1098,7 @@ float MagScene::hitWallsCylinder(float theH, float theR, MagSceneRayHit *hit, co
 // m_vec_pair whose height range covers pos's y: each is tested in the
 // plane at that height (i3dSegSegDist2 0 = they cross). Returns t of the
 // first hit with its wall normal in hit->m_vec[1], else -1.
-// ROR 0x00133a0c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00133a0c // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 float MagScene::castWalls(MagSceneRayHit *hit, const float *pos, const float *dir)
 {
@@ -1143,7 +1143,7 @@ float MagScene::castWalls(MagSceneRayHit *hit, const float *pos, const float *di
 // ──────────────────────────────────────────────────────────────────────
 // A sphere of radius theR at pos against the wall segments whose height
 // range covers pos's y; as hitWallsCylinder.
-// ROR 0x00133b80 // callcheck: FUN_00215a30, FUN_0026cb48 (the assert handler; sqrtf's NaN path)
+// ROR 0x00133b80 // callcheck: dbgAssertFailed, FUN_0026cb48 (the assert handler; sqrtf's NaN path)
 
 float MagScene::hitWallsSphere(float theR, MagSceneRayHit *hit, const float *pos)
 {
@@ -1189,7 +1189,7 @@ float MagScene::hitWallsSphere(float theR, MagSceneRayHit *hit, const float *pos
 // A cylinder of radius r at pos, dir[1] high, against the walls, then
 // the collision model of sky slot tenkyu (< 0: the first of the four that
 // is hit). >= 0 on a hit.
-// ROR 0x00133d10 // callcheck: FUN_00215a30, I3rRoot__CheckIdString (inside the inline DogModel::isAlive)
+// ROR 0x00133d10 // callcheck: dbgAssertFailed, I3rRoot__CheckIdString (inside the inline DogModel::isAlive)
 
 float MagScene::castCylinder(float r, const float *pos, const float *dir, int tenkyu,
                              MagSceneRayHit *hit)
@@ -1408,7 +1408,7 @@ void MagScene::clearStrip(int no)
 // slot's font (its texture from start) and closing by life (see
 // MagLifeWindow::m_timer; > 0 also waits in sub mode 2). Returns the
 // slot, -1 when all four are open. a3 is not read.
-// ROR 0x00134730 // callcheck: operator_new, FUN_00215a30 (new MagLifeWindow; the assert handler, inside ROR_ASSERT)
+// ROR 0x00134730 // callcheck: operator_new, dbgAssertFailed (new MagLifeWindow; the assert handler, inside ROR_ASSERT)
 
 int MagScene::openWindow(int w, int h, int a3, int life)
 {
@@ -1439,7 +1439,7 @@ int MagScene::openWindow(int w, int h, int a3, int life)
 
 // ──────────────────────────────────────────────────────────────────────
 // Closes text window winNo (removed from the life manager and deleted).
-// ROR 0x001348b0 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x001348b0 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::closeWindow(int winNo)
 {
@@ -1455,7 +1455,7 @@ void MagScene::closeWindow(int winNo)
 
 // ──────────────────────────────────────────────────────────────────────
 // Places window theN: v = x, y, z (the position, w 1), width, height.
-// ROR 0x00134944 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134944 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setViewParam(int theN, const int *v)
 {
@@ -1474,7 +1474,7 @@ void MagScene::setViewParam(int theN, const int *v)
 
 // ──────────────────────────────────────────────────────────────────────
 // Moves window winNo to (x, y, z).
-// ROR 0x00134a00 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134a00 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setWindowPos(int winNo, int x, int y, int z)
 {
@@ -1490,7 +1490,7 @@ void MagScene::setWindowPos(int winNo, int x, int y, int z)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00134ab8 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134ab8 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setWindowSize(int winNo, int w, int h)
 {
@@ -1504,7 +1504,7 @@ void MagScene::setWindowSize(int winNo, int w, int h)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00134b34 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134b34 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::getWindowPos(int winNo, int *x, int *y)
 {
@@ -1514,7 +1514,7 @@ void MagScene::getWindowPos(int winNo, int *x, int *y)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00134bb8 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134bb8 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::getWindowPos3(int winNo, int *x, int *y, int *z)
 {
@@ -1524,7 +1524,7 @@ void MagScene::getWindowPos3(int winNo, int *x, int *y, int *z)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00134c4c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134c4c // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::getWindowSize(int theN, int *w, int *h)
 {
@@ -1539,7 +1539,7 @@ void MagScene::getWindowSize(int theN, int *w, int *h)
 
 // ──────────────────────────────────────────────────────────────────────
 // The window's four words +0x84..+0x90 (roles unknown).
-// ROR 0x00134cd0 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134cd0 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setWindowWords84(int theN, int a, int b, int c, int d)
 {
@@ -1555,7 +1555,7 @@ void MagScene::setWindowWords84(int theN, int a, int b, int c, int d)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00134d6c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134d6c // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::getWindowWords84(int theN, int *a, int *b, int *c, int *d)
 {
@@ -1571,7 +1571,7 @@ void MagScene::getWindowWords84(int theN, int *a, int *b, int *c, int *d)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00134e18 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134e18 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::getWindowWordCc(int theN, int *out)
 {
@@ -1581,7 +1581,7 @@ void MagScene::getWindowWordCc(int theN, int *out)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00134e88 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134e88 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::getWindowCharMetrics(int winNo, int code, int *left, int *width, int *extra)
 {
@@ -1591,7 +1591,7 @@ void MagScene::getWindowCharMetrics(int winNo, int code, int *left, int *width, 
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00134f2c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134f2c // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setWindowProportional(int winNo, int on)
 {
@@ -1601,7 +1601,7 @@ void MagScene::setWindowProportional(int winNo, int on)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00134fa0 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00134fa0 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setWindowFontWord30(int winNo, int v)
 {
@@ -1611,7 +1611,7 @@ void MagScene::setWindowFontWord30(int winNo, int v)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00135014 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135014 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setWindowFontWord34(int winNo, int v)
 {
@@ -1622,7 +1622,7 @@ void MagScene::setWindowFontWord34(int winNo, int v)
 
 // ──────────────────────────────────────────────────────────────────────
 // Fades window theN in (MagLifeWindow::fadeIn).
-// ROR 0x00135088 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135088 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::fadeInWindow(int theN, int time, int from, int to)
 {
@@ -1633,7 +1633,7 @@ void MagScene::fadeInWindow(int theN, int time, int from, int to)
 
 // ──────────────────────────────────────────────────────────────────────
 // Fades window theN out (MagLifeWindow::fadeOut).
-// ROR 0x0013511c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0013511c // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::fadeOutWindow(int theN, int time, int from, int to)
 {
@@ -1646,7 +1646,7 @@ void MagScene::fadeOutWindow(int theN, int time, int from, int to)
 // Hides window winNo (hide != 0) or shows it: the window's slot 7,
 // setHide. (The Ghidra name says "show"; the ROM passes the flag to
 // setHide, and S2d's map name passes 0 to show its window.)
-// ROR 0x001351b0 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x001351b0 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setWindowShow(int winNo, int hide)
 {
@@ -1658,7 +1658,7 @@ void MagScene::setWindowShow(int winNo, int hide)
 // ──────────────────────────────────────────────────────────────────────
 // Draws str into window winNo's font buffer at (x, y), then releases the
 // window font's texture so the next frame uploads the new pixels.
-// ROR 0x00135234 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135234 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::drawView(int winNo, int x, int y, const void *p, int arg)
 {
@@ -1681,7 +1681,7 @@ void MagScene::drawView(int winNo, int x, int y, const void *p, int arg)
 // ──────────────────────────────────────────────────────────────────────
 // Draws text in color at window winNo's cursor (when it is open) and
 // re-uploads its font texture.
-// ROR 0x00135364 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135364 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::printWindow(int winNo, const char *text, int color)
 {
@@ -1695,7 +1695,7 @@ void MagScene::printWindow(int winNo, const char *text, int color)
 
 // ──────────────────────────────────────────────────────────────────────
 // Window winNo's fill colour (its font's setFill).
-// ROR 0x00135418 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135418 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setWindowFill(int winNo, u_int fill)
 {
@@ -1705,7 +1705,7 @@ void MagScene::setWindowFill(int winNo, u_int fill)
 
 // ──────────────────────────────────────────────────────────────────────
 // The font's fill flag, then the fill colour 0 again (so it takes the flag).
-// ROR 0x00135494 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135494 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setWindowFillMsb(int winNo, int on)
 {
@@ -1735,7 +1735,7 @@ int MagScene::getWindowTextWidth(int no, const char *text)
 
 // ──────────────────────────────────────────────────────────────────────
 // Clears window winNo's font buffer and releases its texture.
-// ROR 0x00135594 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135594 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::updateWindowFont(int winNo)
 {
@@ -1746,7 +1746,7 @@ void MagScene::updateWindowFont(int winNo)
 
 // ──────────────────────────────────────────────────────────────────────
 // Re-uploads window winNo's font texture.
-// ROR 0x00135628 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135628 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::releaseWindowTex(int winNo)
 {
@@ -1756,7 +1756,7 @@ void MagScene::releaseWindowTex(int winNo)
 
 // ──────────────────────────────────────────────────────────────────────
 // Scrolls window theN's text buffer by rows and re-uploads it.
-// ROR 0x0013569c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0013569c // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::scrollWindow(int theN, int rows)
 {
@@ -1767,7 +1767,7 @@ void MagScene::scrollWindow(int theN, int rows)
 
 // ──────────────────────────────────────────────────────────────────────
 // Gives window winNo's font the language's font file again.
-// ROR 0x00135740 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135740 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::resetWindowFont(int winNo)
 {
@@ -1797,7 +1797,7 @@ void MagScene::requestMenu(int id, int arg)
 // menu by bit and keep the id in it. A menu not yet initialised gets the
 // scene, the requested argument and the texture table. Then it goes on
 // the life manager and its result is cleared.
-// ROR 0x0013580c // callcheck: operator_new, FUN_00215a30, MagLifeMenuSpecial, MagLifeMenuSpecial2 (new MagLifeMenuSpecial / Special2; the assert handler, inside ROR_ASSERT)
+// ROR 0x0013580c // callcheck: operator_new, dbgAssertFailed, MagLifeMenuSpecial, MagLifeMenuSpecial2 (new MagLifeMenuSpecial / Special2; the assert handler, inside ROR_ASSERT)
 
 void MagScene::openMenu(int id)
 {
@@ -1929,7 +1929,7 @@ void MagScene::closeMenu()
 // The keyhole fade with theTexName from EVNTEX.RPK: loads the texture,
 // resets the fade key to state 5 and puts it on the life manager (0x8003)
 // when it is not there yet.
-// ROR 0x00135cac // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135cac // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::openFadeKey(const char *theTexName)
 {
@@ -1942,7 +1942,7 @@ void MagScene::openFadeKey(const char *theTexName)
 
 // ──────────────────────────────────────────────────────────────────────
 // The keyhole's magnification, over time frames (<= 0: at once).
-// ROR 0x00135d58 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135d58 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::setFadeKeyMagnify(float theMagnify, int time)
 {
@@ -1965,7 +1965,7 @@ void MagScene::removeFadeKey()
 // heights mark a free segment) to the first free one of the
 // MAX_PRIVATE_COLLI that castWalls and the hitWalls tests read. Returns
 // its id, -1 when all are used.
-// ROR 0x00135e20 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135e20 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 int MagScene::addPrivateColli(const float *theP1, const float *theP2)
 {
@@ -1993,7 +1993,7 @@ int MagScene::addPrivateColli(const float *theP1, const float *theP2)
 
 // ──────────────────────────────────────────────────────────────────────
 // Frees wall segment theID (both end heights 0).
-// ROR 0x00135f44 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00135f44 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagScene::removePrivateColli(int theID)
 {

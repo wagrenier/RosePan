@@ -173,7 +173,7 @@ void DogEntityEx::reset()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001102b4
 
 void DogEntityEx::setParent(DogEntityEx *theParent)

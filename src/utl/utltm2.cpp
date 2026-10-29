@@ -20,7 +20,7 @@ void utlTm2ToSepia(void *tm2, int r, int g, int b)
 // ──────────────────────────────────────────────────────────────────────
 // Picture theN's header: the pictures follow the file header (0x10
 // bytes, 0x80 when m_format is set), each m_total_size long.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00104e64
 
 const I3dTim2Picture *utlTm2GetPicture(const void *tm2, int theN)

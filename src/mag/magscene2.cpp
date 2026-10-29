@@ -54,7 +54,7 @@ void MagScene::initMapLoader()
 // font file and the common textures (file 0) of PREMIERE.RPK, the
 // texture numbers of r_shadow / noise and the four bit8 font pages, then
 // the map and character lists. Returns 0.
-// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, FUN_00215a30 (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
+// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, dbgAssertFailed (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
 // ROR 0x00137330
 
 int MagScene::loadSystemData()
@@ -142,7 +142,7 @@ int MagScene::loadSystemData()
 // records and the _l.bin light, the sky textures (with a context) and
 // sector.sec. Returns the slot, -5 / -7 when a model does not load.
 // callcheck: dbgTraceVector4 x3 (traces of the clip spheres; the retail build prints nothing)
-// callcheck: i3rCopyClipSphere, i3rReplaceStqMapEntity, FUN_00215a30 (inside the inline DogModel::copyClipSphere / replaceStqMapEntity; the assert handler)
+// callcheck: i3rCopyClipSphere, i3rReplaceStqMapEntity, dbgAssertFailed (inside the inline DogModel::copyClipSphere / replaceStqMapEntity; the assert handler)
 // ROR 0x001377f0
 
 int MagScene::load(i3dContext *ctx, int id, void *data, int copy)
@@ -310,7 +310,7 @@ int MagScene::load(i3dContext *ctx, int id, void *data, int copy)
 // ──────────────────────────────────────────────────────────────────────
 // Reads map unit theNo of data/bg/mapunit.bin (the 0x2000-byte header
 // first) into the game heap and loads it. Nothing calls it.
-// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, FUN_00215a30 (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
+// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, dbgAssertFailed (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
 // ROR 0x0013836c
 
 int MagScene::loadMapUnit(i3dContext *ctx, int theNo)
@@ -351,7 +351,7 @@ int MagScene::loadMapUnit(i3dContext *ctx, int theNo)
 // ──────────────────────────────────────────────────────────────────────
 // Loads the map unit named theName (id 9999); the sky slot keeps the
 // buffer.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00138610
 
 void MagScene::loadMapByName(i3dContext *ctx, const char *theName)
@@ -406,7 +406,7 @@ void MagScene::releaseTenkyuAll()
 
 // ──────────────────────────────────────────────────────────────────────
 // The first actor without a model, -1 when all 128 hold one.
-// callcheck: I3rRoot__CheckIdString, FUN_00215a30 (inside the inline DogModel::isAlive; the assert handler)
+// callcheck: I3rRoot__CheckIdString, dbgAssertFailed (inside the inline DogModel::isAlive; the assert handler)
 // ROR 0x0013884c
 
 int MagScene::findFreeActor()
@@ -421,7 +421,7 @@ int MagScene::findFreeActor()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: I3rRoot__CheckIdString, FUN_00215a30 (inside the inline DogModel::isAlive; the assert handler)
+// callcheck: I3rRoot__CheckIdString, dbgAssertFailed (inside the inline DogModel::isAlive; the assert handler)
 // ROR 0x001388e8
 
 int MagScene::findActorById(int theID)
@@ -440,7 +440,7 @@ int MagScene::findActorById(int theID)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: I3rRoot__CheckIdString, FUN_00215a30 (inside the inline DogModel::isAlive; the assert handler)
+// callcheck: I3rRoot__CheckIdString, dbgAssertFailed (inside the inline DogModel::isAlive; the assert handler)
 // ROR 0x001389c4
 
 int MagScene::findActorByName(const char *theName)
@@ -462,7 +462,7 @@ int MagScene::findActorByName(const char *theName)
 // A free actor showing actor theActorNo's model. Returns it, -100 when
 // none is free, -200 when sharing fails.
 // callcheck: DogEntity::reset (EE virtual slot 1, called through the vtable)
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00138ac8
 
 int MagScene::shareActor(u_int theActorNo)
@@ -487,7 +487,7 @@ int MagScene::shareActor(u_int theActorNo)
 // ──────────────────────────────────────────────────────────────────────
 // A character by name: shares an actor that already shows it, else reads
 // it from CHARA.RPK.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00138bc4
 
 int MagScene::loadModelByName(i3dContext *ctx, const char *theCharaName, int arg,
@@ -512,7 +512,7 @@ int MagScene::loadModelByName(i3dContext *ctx, const char *theCharaName, int arg
 // holding the id (freeing thePtr unless keep), else loads the pack
 // thePtr. Returns the actor, -1 when none is free, -2 / -4 on failure.
 // callcheck: DogEntity::reset (EE virtual slot 1, called through the vtable)
-// callcheck: BedPfh, FUN_00215a30 (the local pack view constructor; the assert handler)
+// callcheck: BedPfh, dbgAssertFailed (the local pack view constructor; the assert handler)
 // ROR 0x00138ce8
 
 int MagScene::loadActor(i3dContext *ctx, int theID, void *thePtr, int keep)
@@ -555,7 +555,7 @@ int MagScene::loadActor(i3dContext *ctx, int theID, void *thePtr, int keep)
 // ──────────────────────────────────────────────────────────────────────
 // A character by id: shares an actor that already shows it, else reads
 // it from CHARA.RPK. Returns the actor, -999 for a negative id.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00138ed0
 
 int MagScene::loadModel(i3dContext *ctx, int theID, const char *rpk)
@@ -580,7 +580,7 @@ int MagScene::loadModel(i3dContext *ctx, int theID, const char *rpk)
 // ──────────────────────────────────────────────────────────────────────
 // Empties actor theN (after the GS has drawn it); unbinds the PC when it
 // was the PC's actor.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00139010
 
 void MagScene::releaseActor(u_int theN)
@@ -613,7 +613,7 @@ void MagScene::setActorAnim(int no, int a, int b)
 // Reads the motion pack name whole into the game heap (the actor keeps
 // it) and loads its motions into actor no. Returns -1 without a name, -2
 // when the file is missing or empty.
-// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, FUN_00215a30 (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
+// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, dbgAssertFailed (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
 // ROR 0x0013910c
 
 int MagScene::loadActorAnim(int no, int arg, const char *name)
@@ -651,7 +651,7 @@ int MagScene::loadActorAnim(int no, int arg, const char *name)
 // ──────────────────────────────────────────────────────────────────────
 // Reads entry theName of the pack theFile into a temporary buffer and
 // adds it to the scene's textures; returns the texture index.
-// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, FUN_00215a30 (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
+// callcheck: BedPfh, FileReadReq, FileReader, ~FileReader, dbgAssertFailed (constructors and destructors of locals; the assert handler inside ROR_ASSERT)
 // ROR 0x00139308
 
 int MagScene::loadTexture(const char *theFile, const char *theName)

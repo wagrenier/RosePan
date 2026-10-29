@@ -12,7 +12,7 @@ void BedPfh::clear()
     m_attr = NULL;
 }
 
-// ROR 0x00101750  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00101750  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // The tables follow the 0x20-byte header in flag order: sizes (1), offsets
 // (2), one 16-bit attribute row per consecutive flag bit from 0x10, names
 // (0x8000).
@@ -50,7 +50,7 @@ BedPfh::BedPfh(const void *p)
     }
 }
 
-// ROR 0x00101928  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00101928  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 const char *BedPfh::getFileName(int theN) const
 {
     ROR_ASSERT(theN >= 0 && theN <= getNumFile()); /* 90 */
@@ -64,7 +64,7 @@ const char *BedPfh::getFileName(int theN) const
     return s;
 }
 
-// ROR 0x001019f0  // callcheck: FUN_00215a30 (the assert handler, inside getNumFile)
+// ROR 0x001019f0  // callcheck: dbgAssertFailed (the assert handler, inside getNumFile)
 int BedPfh::getFileIndex(const char *theName) const
 {
     const char *s = m_name;

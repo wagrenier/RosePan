@@ -4502,7 +4502,7 @@ int chrIsNear(float range, u_int oid, u_int target)
 // ──────────────────────────────────────────────────────────────────────
 // A sphere of range around node name of oid's actor against target's
 // position at radius 50.
-// ROR 0x001f5410 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (the inlined getNodeIndexByName: its assert handler and lookup)
+// ROR 0x001f5410 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (the inlined getNodeIndexByName: its assert handler and lookup)
 
 int chrIsNearNode(float range, u_int oid, u_int target, const char *name)
 {
@@ -4533,7 +4533,7 @@ int chrIsNearNode(float range, u_int oid, u_int target, const char *name)
 
 // ──────────────────────────────────────────────────────────────────────
 // The limb nodes chrRestoreLimb puts back, by part (the bit in m_attr[0]).
-// ROR 0x001f5680 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (the inlined getNodeIndexByName: its assert handler and lookup)
+// ROR 0x001f5680 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (the inlined getNodeIndexByName: its assert handler and lookup)
 
 static const char *const s_limbNode[5] = {
     "Bip01 Neck", "Bip01 R UpperArm", "Bip01 L UpperArm", "Bip01 R Thigh", "Bip01 L Thigh",
@@ -4610,7 +4610,7 @@ CmnITask *chrMtnMove(float speed, float rotY, u_int oid, int motion, int p1d8, u
 // oid's actor's node by name, as DogActor::getNodeWorldPos (vtable slot
 // 18) gives it; the ROM inlines DogModel::getNodeIndexByName with its
 // asserts.
-// ROR 0x001f5558 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (the inlined getNodeIndexByName: its assert handler and lookup)
+// ROR 0x001f5558 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (the inlined getNodeIndexByName: its assert handler and lookup)
 
 int chrGetNodeWorldPos(u_int oid, float *out, const char *name)
 {

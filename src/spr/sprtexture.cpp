@@ -233,7 +233,7 @@ int SprTexture::releaseTex(int id)
 // ──────────────────────────────────────────────────────────────────────
 // A file the list skipped (no SPR_TEX_LOAD) is taken from the pack here,
 // decoded when it is RTCM data, then added by its texture name.
-// callcheck: FUN_00215a30 (the assert handler, inside BedPfh::getFile's ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside BedPfh::getFile's ROR_ASSERT)
 // ROR 0x0018fbb0
 
 int SprTexture::loadTex(int id)
@@ -295,7 +295,7 @@ int SprTexture::getPackIndex(const char *theName) const
 // ──────────────────────────────────────────────────────────────────────
 // One step of the load (see the top of the file). Every failure sets
 // step 0, which returns -1 from then on.
-// callcheck: FUN_00215a30 (the assert handler, inside BedPfh::getFile's ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside BedPfh::getFile's ROR_ASSERT)
 // ROR 0x0018febc
 
 int SprTexture::update()

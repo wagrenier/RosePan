@@ -48,7 +48,7 @@ void BedPad::setVibration(int small, int big)
     sceVibSetActParam(m_socket, 1, profile, size, data);
 }
 
-// ROR 0x00101bcc  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00101bcc  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 void BedPad::init(int thePortNo)
 {
     ROR_ASSERT(thePortNo >= 0 && thePortNo < 2);   /* 86 */
@@ -64,7 +64,7 @@ void BedPad::init(int thePortNo)
     m_socket = scePad2CreateSocket(&param, zDmaBuf[thePortNo]);
 }
 
-// ROR 0x00101c7c  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00101c7c  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 void BedPad::term()
 {
     ROR_ASSERT(m_socket>=0);   /* 133 */

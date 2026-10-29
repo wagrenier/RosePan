@@ -1568,6 +1568,15 @@ to adapt when a TU reaches them:
 
 ## Done
 
+- 2026-10-29: `debug/mimu_debug.cpp` (0x215a30..0x216154 pinned, all 10 functions, `done`): the assert
+  handler dbgAssertFailed, the silent traces (dbgTraceVector4 was the reached stub; dbgTraceMatrix
+  0x215a70 was hidden after the handler's spin) and the float formatter. They print nothing in the
+  retail build, so no screenshot can show them; the formatter was run on the host and follows the
+  ROM's arithmetic. The unassigned@002155a0 run is split: debugNop + seqvm's static initializer join
+  sequence/seqvm.cpp (debugNop written there), 0x2155f4..0x215a30 is the new todo TU
+  debug/mcd_debug.cpp (second assert handler, the unreferenced memory card test 0x215634, a static
+  MnuMcd at data 0x2d9e80). callcheck comments now say dbgAssertFailed for FUN_00215a30.
+
 - 2026-10-22: `game/gamfile.cpp` (0x1be2cc..0x1beb70 pinned, all 21 functions, `verify`): the file
   reader (FileReader / FileReadReq, the request state machine 0x1be564 that draws the now-loading
   screen, fileGetSize, fileExists, clock helpers). The FileReader bridges and the fileGetSize /

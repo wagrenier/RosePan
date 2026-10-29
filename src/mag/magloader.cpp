@@ -43,7 +43,7 @@ int MagLoaderIndex::calcSize(int theNum, int theNameSize) const
 // ──────────────────────────────────────────────────────────────────────
 // Each of theNum NUL-separated names: its length and its start offset in
 // theNameBuf. Returns the bytes the names take, NULs included.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00141e90
 
 int MagLoaderIndex::scanNames(int *theLens, int *theOffsets, int theNum,
@@ -65,7 +65,7 @@ int MagLoaderIndex::scanNames(int *theLens, int *theOffsets, int theNum,
 // A new index over a pack header's tables: one game-heap block with the
 // sizes, the offsets (plus theBase, the pack's own offset in its file),
 // the name pointers, the name lengths, then a copy of the names.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00141f54
 
 int MagLoaderIndex::create(int theNum, const char *theNames, const int *theOffsets,
@@ -101,7 +101,7 @@ int MagLoaderIndex::create(int theNum, const char *theNames, const int *theOffse
 // Appends theNum entries: a new block with the old entries and then the
 // new ones, the old block released. theSort orders the new entries by
 // their first 32 name characters (an exchange sort over the tail only).
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x001420f8
 
 void MagLoaderIndex::add(int theNum, const char *theNames, const int *theOffsets,
@@ -242,7 +242,7 @@ MagCharaLoader::MagCharaLoader()
 // appends that header's entries to the index with the sub-pack's offset
 // added: entry numbers run pack after pack, m_chara_start[i] being pack
 // i's first. Returns 1.
-// callcheck: FUN_00215a30, FileReadReq, BedPfh (the assert handler inside ROR_ASSERT; the request's reset, the local pack views)
+// callcheck: dbgAssertFailed, FileReadReq, BedPfh (the assert handler inside ROR_ASSERT; the request's reset, the local pack views)
 // ROR 0x001425dc
 
 int MagCharaLoader::init()
@@ -302,7 +302,7 @@ int MagCharaLoader::init()
 // init's twin over the loose packs (data/ch/pc/PC.RPK .. data/ch/12/
 // CHAP12.RPK, each read whole up to 0x2000 bytes with its own request);
 // packs that are not on the disc are skipped. Nothing calls it.
-// callcheck: FUN_00215a30, FileReadReq, FileReader, ~FileReader, BedPfh (the assert handler inside ROR_ASSERT; locals' constructors and destructors)
+// callcheck: dbgAssertFailed, FileReadReq, FileReader, ~FileReader, BedPfh (the assert handler inside ROR_ASSERT; locals' constructors and destructors)
 // ROR 0x00142908
 
 int MagCharaLoader::initFromPacks()
@@ -358,7 +358,7 @@ int MagCharaLoader::initFromPacks()
 // ──────────────────────────────────────────────────────────────────────
 // Reads pack entry theIndex from CHARA.RPK (still open from init) into a
 // new game-heap buffer (64-byte aligned) and returns it.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00142b18
 
 void *MagCharaLoader::load(int theIndex)
@@ -400,7 +400,7 @@ int MagCharaLoader::getCategory(int theIndex) const
 // ──────────────────────────────────────────────────────────────────────
 // The pack entry of character id theID: its id category (theID >> 10)
 // names a pack, its low 10 bits the number in that pack.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00142c88
 
 int MagCharaLoader::getIndex(int theID) const
@@ -442,7 +442,7 @@ int MagCharaLoader::getId(int theIndex) const
 // ──────────────────────────────────────────────────────────────────────
 // Reads mapunit.bin's first 0x2000 bytes (the file stays open) and builds
 // the index from its header. Returns 1.
-// callcheck: FUN_00215a30, FileReadReq, BedPfh (the assert handler inside ROR_ASSERT; the request's reset, the local pack view)
+// callcheck: dbgAssertFailed, FileReadReq, BedPfh (the assert handler inside ROR_ASSERT; the request's reset, the local pack view)
 // ROR 0x00142ed8
 
 int MagMapLoader::init()
@@ -465,7 +465,7 @@ int MagMapLoader::init()
 // ──────────────────────────────────────────────────────────────────────
 // Reads the map unit named theName into a new game-heap buffer (64-byte
 // aligned) and returns it.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00142fd0
 
 void *MagMapLoader::loadByName(const char *theName)

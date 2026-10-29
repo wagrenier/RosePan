@@ -260,7 +260,7 @@ void effFogColor(float *rgb, float depth)
 
 void effAmbientColor(float *rgb)
 {
-    // callcheck: FUN_00215a30 (the assert handler, inside the inline DogLightPool::getAmbientLight)
+    // callcheck: dbgAssertFailed (the assert handler, inside the inline DogLightPool::getAmbientLight)
     const DogAmbientLight *light = g_effScene->m_light_pool.getAmbientLight(0);
     /* PC: guard -- after the failed assert the ROM reads through NULL. */
     if (light == NULL)

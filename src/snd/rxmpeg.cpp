@@ -479,7 +479,7 @@ void rxMpegResetFrames(void)
 /* ---- the pictures and the decoder's callbacks ---- */
 
 // ROR 0x00181c14
-// callcheck: FUN_00215a30, FUN_002155f4 (the two assert handlers; ROR_ASSERT)
+// callcheck: dbgAssertFailed, FUN_002155f4 (the two assert handlers; ROR_ASSERT)
 void rxMpegCreatePictures(void)
 {
     s_free = 2;

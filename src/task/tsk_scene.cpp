@@ -146,7 +146,7 @@ void DisplayMessage::show(int no, int frames)
 // ══════════════════════════════════════════════════════════════════════
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: i3rGetNodeIndexByName, FUN_00215a30 (DogModel::getNodeIndexByName, inline in scnActorSndPos, with its m_i3r_root assert)
+// callcheck: i3rGetNodeIndexByName, dbgAssertFailed (DogModel::getNodeIndexByName, inline in scnActorSndPos, with its m_i3r_root assert)
 // ROR 0x001f6f4c
 
 void SeManager::play3d(u_int se, int actor, int frames)
@@ -242,7 +242,7 @@ void SeManager::stopSE(u_int se, int actor)
 // ══════════════════════════════════════════════════════════════════════
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: i3rGetNodeIndexByName, FUN_00215a30 (DogModel::getNodeIndexByName, inline in scnActorSndPos, with its m_i3r_root assert)
+// callcheck: i3rGetNodeIndexByName, dbgAssertFailed (DogModel::getNodeIndexByName, inline in scnActorSndPos, with its m_i3r_root assert)
 // ROR 0x001f7444
 
 void VoiceManager::play3d(int str, int actor, int frames)
@@ -656,7 +656,7 @@ char *scnMakeScenePath(char *out, const char *name)
 // "map" word becomes 0xcccc), then the frame count and the message lines.
 // withEff (native 0x46) adds the pack's effect (file 1) and focus track
 // (file 2). The FileReader is constructed and destroyed unused.
-// callcheck: FUN_00215a30, FileReader, ~FileReader, NagaChunk, ~NagaChunk, operator_new (BedPfh's inline asserts, the inline locals, the new expression)
+// callcheck: dbgAssertFailed, FileReader, ~FileReader, NagaChunk, ~NagaChunk, operator_new (BedPfh's inline asserts, the inline locals, the new expression)
 // ROR 0x001f83f4
 
 int scenePlayStart(const char *name, intptr_t oidsArg, int withEff)
@@ -803,7 +803,7 @@ int scenePlayStart(const char *name, intptr_t oidsArg, int withEff)
 // 0: the task ends on its first exec and releases the effect; the ROM
 // leaves the word to the heap -- see open-items.md). The FileReader and
 // the NagaChunk over file 0 are constructed and destroyed unused.
-// callcheck: FUN_00215a30, FileReader, ~FileReader, NagaChunk, ~NagaChunk, operator_new (BedPfh's inline asserts, the inline locals, the new expression)
+// callcheck: dbgAssertFailed, FileReader, ~FileReader, NagaChunk, ~NagaChunk, operator_new (BedPfh's inline asserts, the inline locals, the new expression)
 // ROR 0x001f8cec
 
 void scenePlayStartSimple(const char *name)

@@ -73,7 +73,7 @@ void BedMemory::create(int size, int id)
     m_size = 0;
     m_owner = 0;
     void *h = ::malloc((size >> 4) << 4);
-    ROR_ASSERT(h != NULL);  /* 79 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(h != NULL);  /* 79 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     format(h, size, id);
     m_owner = 1;
     m_num_alloc = 0;
@@ -86,7 +86,7 @@ void BedMemory::create(int size, int id)
 
 void BedMemory::format(void *theBuffer, int theSize, int id)
 {
-    ROR_ASSERT(theBuffer != NULL);  /* 97 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(theBuffer != NULL);  /* 97 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     ROR_ASSERT(theSize >= 256);     /* 98 */
     m_id = id;
     m_last = NULL;
@@ -143,7 +143,7 @@ void BedMemory::destroy()
 
 int BedMemory::alignBlock(BEDMEMHEADER *thePtr, int theSize, unsigned flags)
 {
-    ROR_ASSERT(thePtr != NULL);                   /* 169 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(thePtr != NULL);                   /* 169 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     ROR_ASSERT(((intptr_t)thePtr & 3) == 0);      /* 170 */
     ROR_ASSERT(theSize > 0);                      /* 172 */
     int gr = bedMemGrain(this, flags);
@@ -174,7 +174,7 @@ int BedMemory::alignBlock(BEDMEMHEADER *thePtr, int theSize, unsigned flags)
 
 BEDMEMHEADER *BedMemory::splitTail(BEDMEMHEADER *thePtr, int theSize, unsigned flags)
 {
-    ROR_ASSERT(thePtr != NULL);                   /* 247 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(thePtr != NULL);                   /* 247 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     ROR_ASSERT(((intptr_t)thePtr & 3) == 0);      /* 248 */
     ROR_ASSERT(theSize > 0);                      /* 250 */
     int gr = bedMemGrain(this, flags);
@@ -259,7 +259,7 @@ BEDMEMHEADER *BedMemory::findFreeFromEnd(int theSize, unsigned flags)
 
 void *BedMemory::alloc(int theSize, int flags)
 {
-    ROR_ASSERT(m_size > 0);         /* 406 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(m_size > 0);         /* 406 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     ROR_ASSERT(m_buffer != NULL);   /* 407: the ROM's text is m_buffer > 0 */
     ROR_ASSERT(theSize > 0);        /* 411 */
 
@@ -325,7 +325,7 @@ BEDMEMHEADER *BedMemory::getHeader(void *thePtr)
 {
     int headersize = ((int *)thePtr)[-1];
     BEDMEMHEADER *h = (BEDMEMHEADER *)((unsigned char *)thePtr - headersize);
-    ROR_ASSERT(h->m_header_size == headersize);  /* 534 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(h->m_header_size == headersize);  /* 534 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     return h;
 }
 
@@ -336,7 +336,7 @@ BEDMEMHEADER *BedMemory::getHeader(void *thePtr)
 
 void *BedMemory::shrink(void *thePtr, int theNewSize)
 {
-    ROR_ASSERT(thePtr != NULL);   /* 549 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(thePtr != NULL);   /* 549 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     ROR_ASSERT(theNewSize > 0);   /* 550 */
     BEDMEMHEADER *h = getHeader(thePtr);
     ROR_ASSERT((((intptr_t)thePtr) % 4) == 0);  /* 556 */
@@ -374,7 +374,7 @@ void *BedMemory::shrink(void *thePtr, int theNewSize)
 
 void *BedMemory::trimFront(void *theOldPtr, void *theNewPtr)
 {
-    ROR_ASSERT(theOldPtr);                  /* 640 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(theOldPtr);                  /* 640 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     ROR_ASSERT(theNewPtr);                  /* 641 */
     ROR_ASSERT(theNewPtr > theOldPtr);      /* 642 */
     BEDMEMHEADER *h = getHeader(theOldPtr);
@@ -424,7 +424,7 @@ void *BedMemory::realloc(void *thePtr, int theNewSize)
         if (theNewSize > 0) {
             return alloc(theNewSize, -1);
         }
-        ROR_ASSERT(0);  /* 720 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(0);  /* 720 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         return NULL;
     }
     if (theNewSize < 1) {
@@ -485,7 +485,7 @@ void *BedMemory::realloc(void *thePtr, int theNewSize)
 
 void BedMemory::free(void *thePtr)
 {
-    ROR_ASSERT(thePtr != NULL);  /* 825 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(thePtr != NULL);  /* 825 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     BEDMEMHEADER *h = getHeader(thePtr);
     int total = h->m_header_size;
     ROR_ASSERT(h->m_flag == 1);  /* 848 */
@@ -551,7 +551,7 @@ void BedMemory::check(int mode)
                     errcnt++;
                 }
             }
-            ROR_ASSERT(p != p->m_next);  /* 1032 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+            ROR_ASSERT(p != p->m_next);  /* 1032 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
             if (p == p->m_next) {
                 break;  /* PC: the ROM's handler hangs here; do not spin */
             }
@@ -573,7 +573,7 @@ void BedMemory::getInfo(BEDMEMINFO *info)
     for (BEDMEMHEADER *p = m_buffer; p != NULL; p = p->m_next) {
         if (((intptr_t)p & 3) != 0) {
             check(0);
-            ROR_ASSERT(0);  /* 1061 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+            ROR_ASSERT(0);  /* 1061 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         }
         if (p->m_flag >= 2) {
             check(0);

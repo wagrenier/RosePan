@@ -237,7 +237,7 @@ int MagLifePCModeWait::pad(MagLifePC *pc, BedPad *thePad)
                 else if (pc->m_stick_y < -lim)
                     dir = 3;
             }
-            ROR_ASSERT(1 <= healthsw && healthsw <= 2);  /* 471 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+            ROR_ASSERT(1 <= healthsw && healthsw <= 2);  /* 471 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
             pc->changeMotionSeq(s_event_motion[healthsw - 1][dir], -1);
             return 0;
         }
@@ -468,7 +468,7 @@ void MagLifePCModeAtkWait2D::init(MagLifePC *pc)
         pc->m_target_no = 0;
         hhh = 0;
     }
-    ROR_ASSERT(0 <= hhh && hhh < 5);    /* 844 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(0 <= hhh && hhh < 5);    /* 844 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     int wc = pc->m_weapon_type;
     ROR_ASSERT(0 <= wc && wc < 4);      /* 846 */
     int prev = pc->m_prev_state[0];
@@ -654,7 +654,7 @@ void MagLifePCModeAttacking::live(MagLifePC *pc)
     int num = utlCollectEmyInfo(&eib, 0);
     for (int i = 0; i < num; i++)
     {
-        ROR_ASSERT(eib.m_info[i].m_obj_id != 0);   /* 1161 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(eib.m_info[i].m_obj_id != 0);   /* 1161 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         if (utlIsEmyDamaging(eib.m_info[i].m_obj_id))
             continue;
         dbgTraceVector4(eib.m_info[i].m_pos);
@@ -698,7 +698,7 @@ void MagLifePCModeDamage::init(MagLifePC *pc)
     /* 0x11 replays the last damage (MagLifePCModeNull::init's arg) */
     if (type != 0x11)
         m_04 = type;
-    ROR_ASSERT(MAG_DAMAGE_NONE < type && type < MAG_MAX_DAMAGE);   /* 1259 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(MAG_DAMAGE_NONE < type && type < MAG_MAX_DAMAGE);   /* 1259 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     pc->clearSubMotion();
     switch (type)
     {
@@ -812,7 +812,7 @@ void MagLifePCModeDamage::live(MagLifePC *pc)
 void MagLifePCModeItem::init(MagLifePC *pc)
 {
     u_int oid = (u_int)pc->m_08;
-    ROR_ASSERT(oid != 0);           /* 1486 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(oid != 0);           /* 1486 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     utlGetObjPos(pos, oid);
     DogActor *actor = pc->m_actor;
@@ -1074,7 +1074,7 @@ void MagLifePCModeRide::init(MagLifePC *pc)
         case 3: motion = 0x98; break;
         case 4: motion = 0x9c; break;
         default:
-            ROR_ASSERT(0);  /* 2077 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+            ROR_ASSERT(0);  /* 2077 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
             motion = -1;
             break;
         }
@@ -1161,7 +1161,7 @@ void MagLifePCModeRide::message(MagLifePC *pc, int msg)
     case 0xb: motion = 0x9a; break;
     case 0xd: motion = 0x9e; break;
     default:
-        ROR_ASSERT(0);  /* 2225 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(0);  /* 2225 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         return;
     }
     pc->changeMotionSeq(motion, -1);
@@ -1182,7 +1182,7 @@ void MagLifePCModeRoped::init(MagLifePC *pc)
     else if (pc->m_mode == 3)
         motion = 0x79;
     else
-        ROR_ASSERT(0);  /* 2249 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(0);  /* 2249 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     pc->changeMotionSeq(motion, -1);
 }
 
@@ -1205,7 +1205,7 @@ int MagLifePCModeRoped::pad(MagLifePC *pc, BedPad *thePad)
     if (pc->m_mode != 1)
     {
         int flag = pc->m_mode;
-        ROR_ASSERT(flag == MAG_CTRL_PC_ROPED5);    /* 2295 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(flag == MAG_CTRL_PC_ROPED5);    /* 2295 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         base = 0x79;
     }
     /* a new pose only from the rest pose or once the last one ended */
@@ -1322,7 +1322,7 @@ void MagLifePCModeHug::live(MagLifePC *pc)
     {
         work = utlRandRange(1, 2);
         pc->m_08 = work;
-        ROR_ASSERT(work == 1 || work == 2);    /* 2522 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(work == 1 || work == 2);    /* 2522 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         return;
     }
     const float lim = 0x1.999998p-5f;   /* 0.05 */

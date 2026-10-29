@@ -57,7 +57,7 @@ static void initHit(MagSceneRayHit *hit)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011440c
 
 float DogModel::castRay(MagSceneRayHit *hit, const float *pos, const float *dir)
@@ -105,7 +105,7 @@ float DogModel::castRay(MagSceneRayHit *hit, const float *pos, const float *dir)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001145c0
 
 float DogModel::castSphere(float r, MagSceneRayHit *hit, const float *pos)
@@ -149,7 +149,7 @@ float DogModel::castSphere(float r, MagSceneRayHit *hit, const float *pos)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30, i3cGetNumGroup (the assert handler; get_nGroup inline)
+// callcheck: dbgAssertFailed, i3cGetNumGroup (the assert handler; get_nGroup inline)
 // ROR 0x00114758
 
 float DogModel::castRayGroups(const float *thePos, const float *theDir)
@@ -213,7 +213,7 @@ float DogModel::castRayGroups(const float *thePos, const float *theDir)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30, i3cGetNumGroup (the assert handler; get_nGroup inline)
+// callcheck: dbgAssertFailed, i3cGetNumGroup (the assert handler; get_nGroup inline)
 // ROR 0x001149d4
 
 float DogModel::castCylinder(float r, const float *pos, const float *dir, MagSceneRayHit *hit)
@@ -310,7 +310,7 @@ void DogModel::clear()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00114d04
 
 void DogModel::setRoot(I3rRoot *p)
@@ -360,7 +360,7 @@ void DogModel::getWorldPos(float *out)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00114e38
 
 int DogModel::transformBillboard(const float *theDir, const float *thePos)
@@ -449,7 +449,7 @@ void DogModel::transform()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001151f4
 
 void DogModel::draw(I3dLayer *layer, const float *cam_rotate, const float *cam_trans)
@@ -464,7 +464,7 @@ void DogModel::draw(I3dLayer *layer, const float *cam_rotate, const float *cam_t
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001152a8
 
 void DogModel::drawUnitMatrix(I3dLayer *layer)
@@ -504,7 +504,7 @@ void DogModel::setFlag100Bits(int v)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30, I3rRoot__CheckIdString, i3rGetNumNode, i3rCopyLocalBasicTransform, i3rConvertLocalToModel (the assert handler; isAlive, get_nNode, copyLocalBasicTransform and convertLocalToModel inline)
+// callcheck: dbgAssertFailed, I3rRoot__CheckIdString, i3rGetNumNode, i3rCopyLocalBasicTransform, i3rConvertLocalToModel (the assert handler; isAlive, get_nNode, copyLocalBasicTransform and convertLocalToModel inline)
 // ROR 0x0011533c
 
 void DogModel::allocMatrix()
@@ -539,7 +539,7 @@ void DogModel::freeMatrix()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30, I3rRoot__CheckIdString, i3rGetNumNode, i3rGetNodeNameByIndex (the assert handler; isAlive, get_nNode and getNodeName inline)
+// callcheck: dbgAssertFailed, I3rRoot__CheckIdString, i3rGetNumNode, i3rGetNodeNameByIndex (the assert handler; isAlive, get_nNode and getNodeName inline)
 // ROR 0x0011550c
 
 void DogModel::setupNodeFlags()
@@ -568,7 +568,7 @@ void DogModel::setupNodeFlags()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00115694
 
 u_short *DogModel::setupColliTbl()
@@ -591,7 +591,7 @@ u_short *DogModel::setupColliTbl()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30, i3rAssignTex (the assert handler; assignTex inline)
+// callcheck: dbgAssertFailed, i3rAssignTex (the assert handler; assignTex inline)
 // ROR 0x00115790
 
 int DogModel::loadData(DogTexInfo *tex, void *data, void *i3c)
@@ -626,7 +626,7 @@ int DogModel::loadData(DogTexInfo *tex, void *data, void *i3c)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30, i3rAssignTex, BedPfh (the assert handler, also BedPfh's getFile / getNumFile inline; assignTex inline; BedPfh is the textures constructor)
+// callcheck: dbgAssertFailed, i3rAssignTex, BedPfh (the assert handler, also BedPfh's getFile / getNumFile inline; assignTex inline; BedPfh is the textures constructor)
 // ROR 0x001158ec
 
 int DogModel::loadPack(DogTexInfo *tex, const BedPfh &pfh, int sepia, int sepia_disp)
@@ -678,7 +678,7 @@ int DogModel::loadPack(DogTexInfo *tex, const BedPfh &pfh, int sepia, int sepia_
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00115c60
 
 int DogModel::share(DogModel *theOriginal)
@@ -694,7 +694,7 @@ int DogModel::share(DogModel *theOriginal)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30, BedPfh (the assert handler, also BedPfh's getFile inline; BedPfh is the pfh constructor)
+// callcheck: dbgAssertFailed, BedPfh (the assert handler, also BedPfh's getFile inline; BedPfh is the pfh constructor)
 // ROR 0x00115cec
 
 void DogModel::release(int force)
@@ -785,7 +785,7 @@ void DogModel::release(int force)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30, i3rCopyClipSphere (the assert handler; copyClipSphere inline)
+// callcheck: dbgAssertFailed, i3rCopyClipSphere (the assert handler; copyClipSphere inline)
 // ROR 0x00116038
 
 float DogModel::getClipRadius()

@@ -153,7 +153,7 @@ MagSystem::MagSystem()
     {
         m_pad_ref[i].m_pad = NULL;
     }
-    ROR_ASSERT(m_current_system == NULL);  /* 184 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(m_current_system == NULL);  /* 184 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     m_current_system = this;
     m_trash_buf = NULL;
     utlRandReset();
@@ -335,7 +335,7 @@ void MagSystem::start()
     sp.initCount = 0;
     sp.option = 0;
     m_v_sema = CreateSema(&sp);
-    ROR_ASSERT(m_v_sema >= 0);  /* 583 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(m_v_sema >= 0);  /* 583 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     sceGsSyncVCallback(vSyncCallback);
     g_utlMemory.check(0);
     m_scene.initRender(&m_i3d);
@@ -368,7 +368,7 @@ void MagSystem::term()
         m_pad[i].term();
     }
     sceGsSyncVCallback(NULL);
-    ROR_ASSERT(m_v_sema);  /* 667 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(m_v_sema);  /* 667 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     DeleteSema(m_v_sema);
 }
 
@@ -415,7 +415,7 @@ void MagSystem::addLight(int type, unsigned int mask, const float *v0, const flo
             }
             else
             {
-                ROR_ASSERT(0);  /* 718 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+                ROR_ASSERT(0);  /* 718 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
             }
         }
     }
@@ -535,7 +535,7 @@ void MagSystem::update()
     m_scene.postDraw();
     m_info.m_t_cpu = (int)REG_RCNT0_COUNT - t0;
     int r = i3dCtxGetRest(&m_i3d);
-    ROR_ASSERT(r != 0);  /* 930 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(r != 0);  /* 930 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     endPacket();
     waitVSync();
     m_info.m_t_vwait -= t0;
@@ -561,7 +561,7 @@ void MagSystem::beginPacket()
 
 void MagSystem::storeImage()
 {
-    ROR_ASSERT(m_store_image_filename);  /* 1033 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(m_store_image_filename);  /* 1033 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     int fd = sceOpen(m_store_image_filename, SCE_WRONLY | SCE_CREAT | SCE_TRUNC);
     if (fd < 0)
     {
@@ -619,7 +619,7 @@ void MagSystem::endPacket()
 {
     m_info.m_trash_rest = i3dCtxGetRest(&m_i3d);
     m_info.m_trash_overrun = i3dCtxGetOverrun(&m_i3d);
-    ROR_ASSERT(m_info.m_trash_overrun == 0);  /* 1159 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(m_info.m_trash_overrun == 0);  /* 1159 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     BEDMEMINFO info;
     g_utlMemory.getInfo(&info);
     m_info.m_heap_max_free = info.m_max_free;
@@ -786,7 +786,7 @@ int MagSystem::loadScene(int id, void *data, int copy)
 
 void MagSystem::setActorParent(int theNo, int parentNo, int node)
 {
-    ROR_ASSERT(theNo >= 0);  /* 1486 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(theNo >= 0);  /* 1486 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     DogActor *actor = &m_scene.m_actors[theNo];
     if (parentNo < 0)
     {
@@ -806,7 +806,7 @@ void MagSystem::setActorParent(int theNo, int parentNo, int node)
 
 void MagSystem::getActorNodeMatrix(int no, I3dMatrixF4x4 *out, int n)
 {
-    ROR_ASSERT(no >= 0);  /* 1511 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(no >= 0);  /* 1511 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     ROR_ASSERT(n >= 0);   /* 1512 */
     sceVu0FMATRIX m;
     m_scene.m_actors[no].getNodeWorldMatrix(m, n);  /* EE: through vtable slot 17 */
@@ -819,7 +819,7 @@ void MagSystem::getActorNodeMatrix(int no, I3dMatrixF4x4 *out, int n)
 
 void MagSystem::getActorNodeMatrix(int no, sceVu0FMATRIX out, int n)
 {
-    ROR_ASSERT(no >= 0);  /* 1530 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(no >= 0);  /* 1530 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     ROR_ASSERT(n >= 0);   /* 1531 */
     m_scene.m_actors[no].getNodeWorldMatrix(out, n);  /* EE: through vtable slot 17 */
 }
@@ -832,7 +832,7 @@ void MagSystem::getActorNodeMatrix(int no, sceVu0FMATRIX out, int n)
 int MagSystem::getActorNodeMatrixByName(int no, I3dMatrixF4x4 *out, const char *name)
 {
     /* DogModel::getNodeIndexByName inlined (its asserts: dog/dogmodel.h 305) */
-    int n = m_scene.m_actors[no].getNodeIndexByName(name);  // callcheck: FUN_00215a30, i3rGetNodeIndexByName (inside the inline DogModel::getNodeIndexByName)
+    int n = m_scene.m_actors[no].getNodeIndexByName(name);  // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (inside the inline DogModel::getNodeIndexByName)
     if (n >= 0)
     {
         getActorNodeMatrix(no, out, n);
@@ -845,7 +845,7 @@ int MagSystem::getActorNodeMatrixByName(int no, I3dMatrixF4x4 *out, const char *
 
 int MagSystem::getActorNodeMatrixByName(int no, sceVu0FMATRIX out, const char *name)
 {
-    int n = m_scene.m_actors[no].getNodeIndexByName(name);  // callcheck: FUN_00215a30, i3rGetNodeIndexByName (inside the inline DogModel::getNodeIndexByName)
+    int n = m_scene.m_actors[no].getNodeIndexByName(name);  // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (inside the inline DogModel::getNodeIndexByName)
     if (n >= 0)
     {
         getActorNodeMatrix(no, out, n);
@@ -1067,7 +1067,7 @@ void MagSystem::setActorTrans(int no, float x, float y, float z)
 void MagSystem::setActorRotate(int no, float x, float y, float z)
 {
     DogActor *p = &m_scene.m_actors[no];
-    ROR_ASSERT(p);  /* 1877 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(p);  /* 1877 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     p->setRotate(x, y, z);
     p->setBaseRotate(x, y, z);
     p->m_80[3] = 1.0f;
@@ -1085,7 +1085,7 @@ void MagSystem::setActorRotate(int no, float x, float y, float z)
 void MagSystem::setActorRotate(int no, const float *v)
 {
     DogActor *p = &m_scene.m_actors[no];
-    ROR_ASSERT(p);  /* 1895 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(p);  /* 1895 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     p->m_rotate[0] = v[0];
     p->m_rotate[1] = v[1];
     p->m_rotate[2] = v[2];

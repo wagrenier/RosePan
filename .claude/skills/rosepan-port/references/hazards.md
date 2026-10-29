@@ -124,7 +124,10 @@ entries are marked **RoR** with the date.
   on every pinned range before naming; a callback's body is also where Ghidra puts "From <addr> [no
   function]" xrefs.
   hidden.py misses entries that follow a `b` (not `jr ra`) or sit after a lone padding nop: in
-  i3mpose 0x230688..0x231198 it reported 1 of 8 hidden quaternion functions (2026-10-28). Over a
+  i3mpose 0x230688..0x231198 it reported 1 of 8 hidden quaternion functions (2026-10-28).
+  Since 2026-10-29 it flags code after a spin (a backward `b` over nops: the assert handlers'
+  endless loop, which hid dbgTraceMatrix 0x215a70 and the memory card test 0x215634); other `b`s land
+  on jump-table cases, so they stay unflagged. Over a
   body far bigger than its decompile, `mipsdis.py` it and look for every `addiu sp,sp,-N` prologue.
 - **Tail calls are not calls to Ghidra.** `j <func>` at a function's end is missing from Ghidra's callee
   list ("0 callers"); features.py records it as a tail jump and callcheck counts it. A `j` to an
