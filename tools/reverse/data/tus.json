@@ -447,6 +447,24 @@
    "status": "verify",
    "why": "EmyManager (CmnITask; vtable 0x2e31a0, ctor 0x16265c, dtor 0x162700) and its findEmy-based accessors run 0x16265c..0x164118; 0x162630 before it is an EmyOut method (param+8 -> EmyMain) of the previous enemy, 0x164118 is EmyMain's ctor (emy/emy_main.cpp). No source string: file name after the class, emy_main.cpp style."
   },
+  "emy/emy_mrt.cpp": {
+   "notes": "Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run shows a Mrt (type 7) chasing or lunging. Doubt (open-items.md): decide forces input 3 whenever pad 0's triangle is pressed (m_pad[0].m_trig bit 0x1000), a left-in test hook ported as is. exec on notify bit 2 only restarts the current out and leaves m_notify set when nothing applied (ROM). The rest of the enemy run is unassigned@0014cde4, now from ClrMain::initOut 0x14dc7c: next emy/emy_clr.cpp up to NorMain::initOut 0x150b24 (ClrMain EE 0xa80, 7 vtable slots, five outs).",
+   "ranges": [
+    [
+     "0014cde4",
+     "0014dc7c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 15:00",
+     "status": "verify",
+     "summary": "Pinned emy/emy_mrt.cpp 0x14cde4..0x14dc7c out of unassigned@0014cde4 and wrote all 26 functions: MrtMain (enemy type 7: initOut, dtor, decide with its last-true-wins test chain and the pad 0 triangle trigger, exec, after, selectOut, the five decide tests) and its outs MrtOutYyy (never built), MrtOutSerch (states 2 and 3, PC or PC-or-dog chase), MrtOutAtk (TskChrRot turn, TskMoveTypeGen mode 0xd lunge with chrIsNear hits, word 0x18, motions 0x14 / 0x17 / 0x16) and MrtOutWin. New emy/emy_mrt.h; MrtMain moved out of lib/unassigned.h, its six stubs removed. 25 functions named (batch emymrt_001)."
+    }
+   ],
+   "status": "verify",
+   "why": "MrtMain + its four MrtOut* classes: MrtMain::initOut 0x14cde4 (every XxxMain::initOut opens its file) up to ClrMain::initOut 0x14dc7c which opens the Clr file; no source string, named like emy_bds.cpp"
+  },
   "emy/emy_out.cpp": {
    "notes": "No code left in the pinned range. Status verify: no enemy runs in the 15 s smoke run (boot disclaimer only, same picture as before), so nothing on screen shows this code yet; the first session whose run shows an enemy (walk, bite, Got carrying the scissors) marks it done. The callers are still stubs: EmyMain::updateOut 0x165038 (calls tickBitten) and EmyMain::resetOut 0x166518 (calls dropItem) in emy/emy_main.cpp, and the per-class outs in unassigned@00149d18. The ROM's setMotion family also passes the actor rot y in f13 and 1 in t0, which chrMtnMove2Achr does not read; the port drops them (comments say so). Two ROM oddities kept as they are (open-items.md Open questions): slideToTarget zeroes pos and rot on its last frame, setGotMotion's motion 0x4e passes an unset register (port: 2).",
    "ranges": [
@@ -2495,6 +2513,7 @@
   "unassigned@00145020": {},
   "unassigned@00149d18": {},
   "unassigned@0014b3bc": {},
+  "unassigned@0014cde4": {},
   "unassigned@00164fc0": {},
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},

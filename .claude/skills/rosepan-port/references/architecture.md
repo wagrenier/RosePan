@@ -1664,6 +1664,17 @@ never asserts): sessions name them (`tus.py define --why`).
   sector (2: -pi/8..5pi/8, 3: beyond 3pi/8 or -7pi/8, 4: beyond 7pi/8 or -3pi/8, 5: -5pi/8..pi/8),
   else stand on motion 1 until it does -- an enemy guarding one side. Attacks as Bds but reach 40
   over 4 nodes, words 0x1f / 0x20; a failed turn hands back input 7.
+  **MrtMain** (type 7, emy/emy_mrt.cpp 0x14cde4..0x14dc7c, 2026-10-29): four states, 1 Win (chase,
+  motion 0x15 within utlRandRangeF(100, 200)), 2 / 3 Serch (one MrtOutSerch each; it reads m_state: 2
+  chases the PC, 3 the PC or the dog; emyChkChase(100, pi) hands back 1 seen / 0 lost), 4 Atk.
+  MrtOutYyy has a vtable and code but initOut never builds it. decide runs every test and the last
+  true one wins (inputs 4 never, 5 PC class 1, 6 PC ahead, 7 PC class 7 off axis, 3 pad 0 triangle
+  trigger m_pad[0].m_trig & 0x1000 -- also forced whatever the row says, a debug-looking hook), then
+  the sight edge (emyChkInSight 10, 2pi): in sight input 2, lost input 4. exec: notify bit 2 only
+  restarts the current out; next() outside 1..5 is no move. MrtOutAtk (EE 0x50): chase to 200 /
+  pi / 8, note the target's position (+0x40), TskChrRot over 16 frames plus actor motion 0xb, then a
+  TskMoveTypeGen mode 0xd kind 7 lunge in the achr's move slot (m_task[0], flags 0x11) hitting the
+  PC (SE 0x30) and dog (SE 0x19) with chrIsNear 50, word 0x18; motions 0x14, 0x17, 0x16, input 1.
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00

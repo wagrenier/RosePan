@@ -7121,6 +7121,156 @@
   "was": "FUN_0014cde4",
   "why": "called right after the vtable store in the ELF's inline MrtMain::MrtMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
  },
+ "0014cef8": {
+  "name": "MrtMain::~MrtMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0014cef8",
+  "why": "MrtMain vtable 0x2e2540 slot 1: ~EmyMain then operator_delete on the deleting flag, as BdlMain::~BdlMain"
+ },
+ "0014cf58": {
+  "name": "MrtMain::decide",
+  "tag": "ror-inferred",
+  "was": "FUN_0014cf58",
+  "why": "MrtMain vtable slot 4: m_req from the inputs at +0x208 (tests 4..7 and 3, the triangle trigger, sight)"
+ },
+ "0014d13c": {
+  "name": "MrtMain::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d13c",
+  "why": "MrtMain vtable slot 5: EmyStateMap::next on m_req (states 1..5), notify bit 2 re-enters the state"
+ },
+ "0014d1c4": {
+  "name": "MrtMain::after",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d1c4",
+  "why": "MrtMain vtable slot 6: Term and selectOut on a change, then m_req = out->Exec(), as BdlMain::after"
+ },
+ "0014d240": {
+  "name": "MrtMain::selectOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d240",
+  "why": "MrtMain vtable slot 2: m_out[m_state] (1..4) Init, the transition row into the inputs"
+ },
+ "0014d308": {
+  "name": "MrtMain::isTrianglePressed",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d308",
+  "why": "MagSystem m_pad[0].m_trig (0x6e98fa = 0x6e9840 + 0x40 + 0x7a) bit 0x1000 (SCE_PADRup); decide's input 3 and forced 3"
+ },
+ "0014d320": {
+  "name": "MrtMain::testInput4",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d320",
+  "why": "returns 0; decide's input 4 test"
+ },
+ "0014d328": {
+  "name": "MrtMain::isPCStateClass1",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d328",
+  "why": "calls EmyMain::isPCStateClass1; decide's input 5 test"
+ },
+ "0014d33c": {
+  "name": "MrtMain::isPCAhead",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d33c",
+  "why": "calls EmyMain::isPCAhead; decide's input 6 test"
+ },
+ "0014d350": {
+  "name": "MrtMain::isPCClass7OffAxis",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d350",
+  "why": "calls EmyMain::isPCClass7OffAxis; decide's input 7 test"
+ },
+ "0014d384": {
+  "name": "MrtMain::isPCInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d384",
+  "why": "emyChkInSight(10, 2pi, 1, PC oid); decide's sight edge (input 2 / 4)"
+ },
+ "0014d3cc": {
+  "name": "MrtOutYyy::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d3cc",
+  "why": "MrtOutYyy vtable 0x2e2580 slot 2: selectTarget(100), step 0"
+ },
+ "0014d3f8": {
+  "name": "MrtOutYyy::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d3f8",
+  "why": "MrtOutYyy vtable slot 3: returns -1"
+ },
+ "0014d400": {
+  "name": "MrtOutYyy::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d400",
+  "why": "MrtOutYyy vtable slot 4: termCommon"
+ },
+ "0014d41c": {
+  "name": "MrtOutSerch::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d41c",
+  "why": "MrtOutSerch vtable 0x2e25b0 slot 2: state 2 chases the PC, state 3 the PC or dog (selectTarget 0 / 100, emyStartChase 10)"
+ },
+ "0014d4a4": {
+  "name": "MrtOutSerch::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d4a4",
+  "why": "MrtOutSerch vtable slot 3: execChasePC in state 2, execChaseAny in state 3"
+ },
+ "0014d500": {
+  "name": "MrtOutSerch::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d500",
+  "why": "MrtOutSerch vtable slot 4: termCommon"
+ },
+ "0014d51c": {
+  "name": "MrtOutSerch::execChasePC",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d51c",
+  "why": "MrtOutSerch::Exec's state 2: emyChkChase(100, pi) -> 1 seen, 0 lost, -1"
+ },
+ "0014d598": {
+  "name": "MrtOutSerch::execChaseAny",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d598",
+  "why": "MrtOutSerch::Exec's state 3: the same code as execChasePC"
+ },
+ "0014d614": {
+  "name": "MrtOutAtk::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d614",
+  "why": "MrtOutAtk vtable 0x2e25e0 slot 2: selectTarget(100), hit flags +0x38 / +0x3c cleared, emyStartChase(10), step 0"
+ },
+ "0014d65c": {
+  "name": "MrtOutAtk::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014d65c",
+  "why": "MrtOutAtk vtable slot 3: TskChrRot turn, TskMoveTypeGen lunge with chrIsNear hits (word 0x18), motions 0x14 / 0x17 / 0x16"
+ },
+ "0014db88": {
+  "name": "MrtOutAtk::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014db88",
+  "why": "MrtOutAtk vtable slot 4: termCommon"
+ },
+ "0014dba4": {
+  "name": "MrtOutWin::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014dba4",
+  "why": "MrtOutWin vtable 0x2e2610 slot 2: range utlRandRangeF(100, 200), emyStartChase(10), step 0"
+ },
+ "0014dbf4": {
+  "name": "MrtOutWin::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014dbf4",
+  "why": "MrtOutWin vtable slot 3: in chase range, motion 0x15 (step 1)"
+ },
+ "0014dc60": {
+  "name": "MrtOutWin::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014dc60",
+  "why": "MrtOutWin vtable slot 4: termCommon"
+ },
  "0014dc7c": {
   "name": "ClrMain::initOut",
   "tag": "ror-inferred",
