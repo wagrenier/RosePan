@@ -116,11 +116,34 @@ int   i3cCastCylinderLine(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats);
 int   i3cCastCylinderHalf(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats);   // ROR 0x00232580
 int   i3cCastCylinder(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats);       // ROR 0x002325a8
 
+/* A sphere (pos, w = r) moved along dir against a triangle, over 0..1
+ * (Seg) or t >= 0 (Ray): the hit point with w = the sweep's t, the unit
+ * plane with w = 1. */
+int   i3cPrimSphereSweepSeg(const float *shape, const I3cTri *prim, const float *verts,
+                            I3cQuery *q, int node, int both_face, const float *scale); // ROR 0x002325d0
+int   i3cPrimSphereSweepRay(const float *shape, const I3cTri *prim, const float *verts,
+                            I3cQuery *q, int node, int both_face, const float *scale); // ROR 0x00232be8
+/* The sweep casts (row-scaled). No callers. */
+int   i3cCastSphereSweepSeg(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats); // ROR 0x002331c8
+int   i3cCastSphereSweepRay(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats); // ROR 0x002331f0
+
 /* The inside-test epsilon (sdata 0x2db630, 0.001) and the row-scale switch
  * (0x2db634, 0) i3cCast reads. No callers in the ROM. */
 void  i3cSetEpsilon(float eps);                                                     // ROR 0x00233218
 float i3cGetEpsilon(void);                                                          // ROR 0x00233228
 void  i3cSetScaleEnable(u_char on);                                                 // ROR 0x00233238
 u_char i3cGetScaleEnable(void);                                                     // ROR 0x00233248
+
+/* The barycentric weights of point in the triangle prim (indices into
+ * verts): out.xyz, summing to 1. */
+void  i3cTriBarycentric(float *out, const float *verts, const u_short *prim,
+                        const float *point);                                        // ROR 0x00233258
+/* A hit's attributes (call it from an I3cHitFunc with its arguments): the
+ * triangle's three attribute records blended at point into out[5] (kind 1:
+ * out[0..1] blended, out[2..4] = plane.xyz; 2: out[2..4] blended, out[0..1]
+ * 0; 3: all five; else zeros). The kind; 0 when the part has none. No
+ * callers. */
+int   i3cGetHitAttr(float *out, const I3cQuery *q, const u_short *prim, const float *verts,
+                    const float *plane, const float *point);                        // ROR 0x002333b0
 
 #endif /* _I3D_I3CQUERY_H */

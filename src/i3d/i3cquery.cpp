@@ -7,9 +7,8 @@
  *  The i3c file keeps its offsets on the host (i3croot.h "PORT"): every
  *  tree / vertex field is resolved with i3cPtr from the query's root.
  *
- *  Not written yet: 0x2325d0 and 0x232be8 (two more triangle tests, no
- *  callers; 0x232be8 is the prim test of 0x2331f0, also uncalled), 0x2331f0,
- *  and the hit-attribute pair 0x233258 / 0x2333b0 (no callers).
+ *  The sweep casts (0x2331c8 / 0x2331f0) and the hit-attribute pair
+ *  (0x233258 / 0x2333b0) have no callers in the ROM.
  * ======================================================================== */
 #include <float.h>
 #include <math.h>
@@ -714,6 +713,187 @@ int i3cCastCylinder(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
     return i3cCast(q, shape, mats, i3dCylSegBoxTest, i3cPrimCylinderSeg, 1);
 }
 
+/* The two sweep tests: one ROM body each (0x2325d0 / 0x232be8), identical
+ * but for the same-side miss and the two distance helpers. both_face is not
+ * read (a back face always misses). */
+static int cqPrimSphereSweep(const float *shape, const I3cTri *prim, const float *verts,
+                             I3cQuery *q, int node, const float *scale, int seg)
+{
+    const float *pos = shape;
+    const float *dir = shape + 4;
+
+    float v[3][4];
+    cqLoadTri(v, prim, verts, scale);
+    float e[3][4];
+    for (int k = 0; k < 4; k++)
+    {
+        e[0][k] = v[1][k] - v[0][k];
+        e[1][k] = v[2][k] - v[1][k];
+    }
+    float plane[4];
+    cqCross(plane, e[0], e[1]);
+    plane[3] = 0.0f;
+    if (cqDot(plane, dir) < 0.0f)
+        return 0;
+    float len2 = cqDot(plane, plane);
+    float inv = len2 > 0.0f ? 1.0f / sqrtf(len2) : FLT_MAX;   /* PC: as in i3cPrimSphere */
+    plane[0] *= inv;
+    plane[1] *= inv;
+    plane[2] *= inv;
+
+    float r = pos[3];
+    float to[3];
+    cqSub(to, pos, v[0]);
+    if (0.0f < cqDot(plane, to))
+        return 0;
+
+    /* The plane moved r behind the triangle: the centre's distances to it. */
+    float back[3] = { v[0][0] - plane[0] * r, v[0][1] - plane[1] * r, v[0][2] - plane[2] * r };
+    float nb = cqDot(plane, back);
+    for (int k = 0; k < 4; k++)
+        e[2][k] = v[0][k] - v[2][k];
+    float end[3] = { pos[0] + dir[0], pos[1] + dir[1], pos[2] + dir[2] };
+    float d0 = cqDot(plane, pos) - nb;
+    float d1 = cqDot(plane, end) - nb;
+
+    if (seg && 0.0f <= d0 * d1)
+    {
+        int miss;
+        if (r < d0)
+            miss = r < d1;
+        else if (-r <= d0)
+            miss = 0;
+        else
+            miss = d1 < -r;
+        if (miss)
+            return 0;
+    }
+
+    /* PC: the EE FPU's x / 0 is +-MAX; a negative t is clamped below anyway. */
+    float den = d0 - d1;
+    float t = den != 0.0f ? d0 / den : (0.0f < d0 ? FLT_MAX : 0.0f);
+    if (t < 0.0f)
+        t = 0.0f;
+
+    float x[4];
+    for (int k = 0; k < 4; k++)
+        x[k] = dir[k] * t + pos[k];
+
+    int i;
+    for (i = 0; i < 3; i++)
+    {
+        float side[3];
+        cqCross(side, e[i], plane);
+        cqSub(to, x, v[i]);
+        if (0.0f < cqDot(side, to))
+            break;
+    }
+
+    float point[4];
+    int code;
+    if (i == 3)
+    {
+        float a[4];
+        i3dVu0VecSub(a, x, v[0]);
+        i3dVu0VecScale(i3dVu0VecDot(plane, a), a, plane);
+        i3dVu0VecSub(point, x, a);
+        code = (node << 16) + 3;
+    }
+    else
+    {
+        /* From the edge that failed, not from edge 0. */
+        float r2 = r * r;
+        float u = 0.0f;
+        for (; i < 3; i++)
+        {
+            float d2 = seg ? i3dSegSegDist2Rgn(pos, dir, v[i], e[i], NULL, &u)
+                           : i3dSegSegDist2(pos, dir, v[i], e[i], NULL, &u);
+            if (d2 < r2)
+                break;
+        }
+        if (i == 3)
+            return 0;
+
+        if (u <= 0.0f)
+        {
+            code = (node << 16) | i;
+            memcpy(point, v[i], sizeof(point));
+        }
+        else if (1.0f <= u)   /* rodata 0x303b48 */
+        {
+            int j = (i + 1) % 3;
+            code = (node << 16) | j;
+            memcpy(point, v[j], sizeof(point));
+        }
+        else
+        {
+            code = (node << 16) | i | 0x10;
+            for (int k = 0; k < 4; k++)
+                point[k] = e[i][k] * u + v[i][k];
+        }
+
+        /* The time the sphere reaches the edge: the edge as a cylinder of radius r. */
+        float cyl[4] = { v[i][0], v[i][1], v[i][2], r };
+        int flags = seg ? i3dSegCylinderTest(pos, dir, cyl, e[i], &t, NULL)
+                        : i3dRayCylinderTest(pos, dir, cyl, e[i], &t, NULL);
+        if ((flags & 1) == 0)
+            t = 0.0f;
+    }
+
+    if (q->m_func == NULL)
+        return 1;
+    if (scale != NULL)
+        i3dVu0VecMul(point, point, scale + 4);
+    plane[3] = 1.0f;
+    point[3] = t;
+    if (!q->m_func(q, code, prim->m_vtx, verts, plane, point))
+        return -1;
+    return 1;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * A sphere swept over pos .. pos + dir: a same-side sweep whose ends are
+ * both farther than r from the plane misses; edges by i3dSegSegDist2Rgn.
+ * callcheck: i3dSegCylinderTest, i3dSegSegDist2Rgn, i3dVecCopyW, i3dVu0VecDot, i3dVu0VecMul, i3dVu0VecScale, i3dVu0VecSub (in cqPrimSphereSweep and cqLoadTri)
+ * ROR 0x002325d0 */
+
+int i3cPrimSphereSweepSeg(const float *shape, const I3cTri *prim, const float *verts,
+                          I3cQuery *q, int node, int both_face, const float *scale)
+{
+    (void)both_face;
+    return cqPrimSphereSweep(shape, prim, verts, q, node, scale, 1);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * A sphere swept along a ray (no same-side miss); edges by i3dSegSegDist2.
+ * callcheck: i3dRayCylinderTest, i3dSegSegDist2, i3dVecCopyW, i3dVu0VecDot, i3dVu0VecMul, i3dVu0VecScale, i3dVu0VecSub (in cqPrimSphereSweep and cqLoadTri)
+ * ROR 0x00232be8 */
+
+int i3cPrimSphereSweepRay(const float *shape, const I3cTri *prim, const float *verts,
+                          I3cQuery *q, int node, int both_face, const float *scale)
+{
+    (void)both_face;
+    return cqPrimSphereSweep(shape, prim, verts, q, node, scale, 0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A swept-sphere cast over its segment (row-scaled). No callers.
+// ROR 0x002331c8
+
+int i3cCastSphereSweepSeg(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
+{
+    return i3cCast(q, shape, mats, i3dCylSegBoxTest, i3cPrimSphereSweepSeg, 1);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A swept-sphere cast along a ray (row-scaled). No callers.
+// ROR 0x002331f0
+
+int i3cCastSphereSweepRay(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
+{
+    return i3cCast(q, shape, mats, i3dCylHalfBoxTest, i3cPrimSphereSweepRay, 1);
+}
+
 // ROR 0x00233218
 
 void i3cSetEpsilon(float eps)
@@ -740,4 +920,76 @@ void i3cSetScaleEnable(u_char on)
 u_char i3cGetScaleEnable(void)
 {
     return s_i3c_scale_enable;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Each weight is the area opposite its vertex: |b x c|, |c x a|, |a x b|
+ * with a, b, c the vertices relative to the point, over their sum.
+ * ROR 0x00233258 */
+
+void i3cTriBarycentric(float *out, const float *verts, const u_short *prim, const float *point)
+{
+    float a[4], b[4], c[4];
+    i3dVecSub(a, verts + prim[0] * 4, point);
+    i3dVecSub(b, verts + prim[1] * 4, point);
+    i3dVecSub(c, verts + prim[2] * 4, point);
+    float bc[4], ca[4], ab[4];
+    i3dVecCross2(bc, b, c);
+    i3dVecCross2(ca, c, a);
+    i3dVecCross2(ab, a, b);
+    float w[4];
+    w[0] = i3dVecLength(bc);
+    w[1] = i3dVecLength(ca);
+    w[2] = i3dVecLength(ab);
+    w[3] = 0.0f;   /* PC: the ROM scales a stack word it never wrote */
+    i3dVecScale(1.0f / (w[0] + w[1] + w[2]), out, w);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * The triangle's I3cAttrRef (the part's m_attr[prim m_attr]) names three
+ * records of the table after the root; they are blended with the point's
+ * barycentric weights. The table holds at most five floats a record; the
+ * kind picks which of them are read.
+ * ROR 0x002333b0 */
+
+int i3cGetHitAttr(float *out, const I3cQuery *q, const u_short *prim, const float *verts,
+                  const float *plane, const float *point)
+{
+    const I3cRoot *root = q->m_root;
+    const I3cAttrRef *refs = (const I3cAttrRef *)i3cPtr(root, q->m_part->m_attr);
+    if (refs == NULL)
+        return 0;
+    const I3cAttrRef *ref = &refs[((const I3cTri *)prim)->m_attr];
+    const u_char *table = (const u_char *)(root + 1);
+    const float *r0 = (const float *)(table + ref->m_idx[0] * root->m_attr_size);
+    const float *r1 = (const float *)(table + ref->m_idx[1] * root->m_attr_size);
+    const float *r2 = (const float *)(table + ref->m_idx[2] * root->m_attr_size);
+
+    float w[4];
+    i3cTriBarycentric(w, verts, prim, point);
+    int kind = (u_char)ref->m_kind >> 4;
+    switch (kind)
+    {
+    case 1:
+        for (int k = 0; k < 2; k++)
+            out[k] = r2[k] * w[2] + r1[k] * w[1] + r0[k] * w[0];
+        out[2] = plane[0];
+        out[3] = plane[1];
+        out[4] = plane[2];
+        break;
+    case 2:
+        out[0] = 0.0f;
+        out[1] = 0.0f;
+        for (int k = 0; k < 3; k++)
+            out[2 + k] = r2[k] * w[2] + r1[k] * w[1] + r0[k] * w[0];
+        break;
+    case 3:
+        for (int k = 0; k < 5; k++)
+            out[k] = r2[k] * w[2] + r1[k] * w[1] + r0[k] * w[0];
+        break;
+    default:
+        memset(out, 0, 0x14);
+        break;
+    }
+    return kind;
 }

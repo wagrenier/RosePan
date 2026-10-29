@@ -125,6 +125,8 @@ entries are marked **RoR** with the date.
   function]" xrefs.
   hidden.py misses entries that follow a `b` (not `jr ra`) or sit after a lone padding nop: in
   i3mpose 0x230688..0x231198 it reported 1 of 8 hidden quaternion functions (2026-10-28).
+  Same in i3cquery (2026-10-29): the 0x28-byte cast entry 0x2331c8 sat after a `b` at the end of
+  0x232be8's body; found only through `ghidra.py refs` of an uncalled prim test (an addiu lo16 hit).
   Since 2026-10-29 it flags code after a spin (a backward `b` over nops: the assert handlers'
   endless loop, which hid dbgTraceMatrix 0x215a70 and the memory card test 0x215634); other `b`s land
   on jump-table cases, so they stay unflagged. Over a

@@ -19,6 +19,16 @@ float i3dLineSegDist2(const float *p0, const float *d0, const float *p1, const f
 float i3dSegSegDist2Rgn(const float *p0, const float *d0, const float *p1, const float *d1,
                         float *s, float *t);                                        // ROR 0x00234390
 
+/* A line p + t d against the cylinder of radius cyl.w around cyl.xyz + s
+ * axis (s 0..1), limited to a ray (t >= 0) / a segment (t 0..1): 0 a miss,
+ * else flags (bit 0 flipped when the entry t is before the start, bit 4
+ * when the exit t is past the end); the entry / exit t to t0 / t1 (either
+ * may be NULL). */
+int   i3dRayCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                         float *t0, float *t1);                                     // ROR 0x002365f8
+int   i3dSegCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                         float *t0, float *t1);                                     // ROR 0x00236678
+
 /* The casts' box tests: the shape's point relative to the box centre (w:
  * the radius), its direction, the box half extents; nonzero when they may
  * touch. */

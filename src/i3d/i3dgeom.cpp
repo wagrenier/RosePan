@@ -77,3 +77,19 @@ int i3dSphereBoxTest(const float *rel, const float *dir, const float *half)
     ROSEPAN_STUB("i3dSphereBoxTest", 0x002348f8);
     return {};
 }
+
+// stub of ROR 0x002365f8
+int i3dRayCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                         float *t0, float *t1)
+{
+    ROSEPAN_STUB("i3dRayCylinderTest", 0x002365f8);
+    return {};
+}
+
+// stub of ROR 0x00236678
+int i3dSegCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                         float *t0, float *t1)
+{
+    ROSEPAN_STUB("i3dSegCylinderTest", 0x00236678);
+    return {};
+}
