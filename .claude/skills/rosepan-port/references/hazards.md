@@ -203,6 +203,12 @@ entries are marked **RoR** with the date.
 
 ## Types and layouts
 
+- **A DogModel inline hidden by a DogActor overload** (2026-10-29, mag/magsceneif.cpp): code that
+  inlines DogModel::get_nNode() / getNodeName(i) on an actor fails to build ("no matching function
+  for DogActor::get_nNode()"), because DogActor declares get_nNode(int) / getNodeName(int, int) and
+  C++ name lookup stops there. The ROM's asserts name dog/dogmodel.h, so it is the base inline: call
+  it qualified, actor.DogModel::get_nNode().
+
 - **A game pointer stored into an i3r file word** (2026-10-27, utl/utlmath.cpp): the EE writes an
   address straight into a relocated field (a node slot's m_data = &DogModel::m_disp_control). On the
   host relocated fields are self-relative (i3rroot.h), so a raw store would truncate a 64-bit pointer

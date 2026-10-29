@@ -6,6 +6,13 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-29 (`mag/magsceneif.cpp`, verify): MagSceneIF / MagSceneIFMap / MagSceneIFChara, all
+13 methods** (map / character index counts, names, find, category; actor motion count, motion number,
+motion name and its trimmed label, model node count and names; virtual dtors in the header). Nothing
+draws; the 15 s run stays on the boot disclaimer. Mark done when a run reaches scene playback
+(scenePlayStart -> motNameConvert) and the actors play the right motions. Its callers in
+debug/motnamecnv.cpp (0x2163ac..0x2166e0, not yet a TU) are the natural next debug file.
+
 **WRITTEN 2026-10-29 (`emy/emy_nor.cpp`, verify; split out of unassigned@00150b24): NorMain (type 10)
 and its eight outs, all 55 functions** (architecture.md). No enemy spawns on the smoke path; mark done
 when a run shows a Nor (it wanders, claws, grabs and squeezes the PC). Next in the enemy run: Grg

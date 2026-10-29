@@ -1435,12 +1435,12 @@
 /* 00143640 00000094 */ MagSceneIFChara::getName(){}  // ror
 /* 001436d4 0000007c */ MagSceneIFChara::find(){}  // ror
 /* 00143750 00000058 */ MagSceneIFChara::getCategory(){}  // ror
-/* 001437a8 00000018 */ FUN_001437a8(){}
+/* 001437a8 00000018 */ MagSceneIFChara::getMaxMotion(){}  // ror
 /* 001437c0 000000f0 */ MagSceneIFChara::getMotionNo(){}  // ror
-/* 001438b0 000000ac */ FUN_001438b0(){}
-/* 0014395c 00000244 */ FUN_0014395c(){}
-/* 00143ba0 000000a8 */ FUN_00143ba0(){}
-/* 00143c48 000000f4 */ FUN_00143c48(){}
+/* 001438b0 000000ac */ MagSceneIFChara::getMotionName(){}  // ror
+/* 0014395c 00000244 */ MagSceneIFChara::getMotionLabel(){}  // ror
+/* 00143ba0 000000a8 */ MagSceneIFChara::getNumNode(){}  // ror
+/* 00143c48 000000f4 */ MagSceneIFChara::getNodeName(){}  // ror
 
 // *****************************************************************************
 // FILE -- mag/magscenecmd.cpp
