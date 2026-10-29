@@ -135,12 +135,6 @@ FshMain::~FshMain()
     ROSEPAN_STUB("FshMain::~FshMain", 0x00155d54);
 }
 
-// stub of ROR 0x0014cef8
-MrtMain::~MrtMain()
-{
-    ROSEPAN_STUB("MrtMain::~MrtMain", 0x0014cef8);
-}
-
 // stub of ROR 0x0014de54
 ClrMain::~ClrMain()
 {
@@ -674,36 +668,6 @@ int GrgMain::testView()
 {
     ROSEPAN_STUB("GrgMain::testView", 0x00154734);
     return {};
-}
-
-// stub of ROR 0x0014d1c4
-void MrtMain::after()
-{
-    ROSEPAN_STUB("MrtMain::after", 0x0014d1c4);
-}
-
-// stub of ROR 0x0014cf58
-void MrtMain::decide()
-{
-    ROSEPAN_STUB("MrtMain::decide", 0x0014cf58);
-}
-
-// stub of ROR 0x0014d13c
-void MrtMain::exec()
-{
-    ROSEPAN_STUB("MrtMain::exec", 0x0014d13c);
-}
-
-// stub of ROR 0x0014cde4
-void MrtMain::initOut()
-{
-    ROSEPAN_STUB("MrtMain::initOut", 0x0014cde4);
-}
-
-// stub of ROR 0x0014d240
-void MrtMain::selectOut()
-{
-    ROSEPAN_STUB("MrtMain::selectOut", 0x0014d240);
 }
 
 // stub of ROR 0x001510dc

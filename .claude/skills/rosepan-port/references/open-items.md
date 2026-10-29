@@ -6,6 +6,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-29 (`emy/emy_mrt.cpp`, verify; split out of unassigned@0014cde4): MrtMain (type 7)
+and its four outs, all 26 functions** (architecture.md). No enemy spawns on the smoke path; mark done
+when a run shows a Mrt. Doubt: decide forces input 3 whenever pad 0's triangle is pressed
+(MagSystem m_pad[0].m_trig bit 0x1000), whatever the state's row allows -- it looks like a left-in
+test hook; ported as the ROM has it. Next in the enemy run: Clr (ClrMain::initOut 0x14dc7c) up to
+NorMain::initOut 0x150b24, then Nor, Grg, Fsh, Got, Pig, Dwf (unassigned@0014cde4, now starting
+at 0x14dc7c).
+
 **WRITTEN 2026-10-29 (`emy/emy_bdl.cpp`, verify; split out of unassigned@0014b3bc): BdlMain (type 5)
 and its six outs, all 33 functions** -- Bds's twin (architecture.md). No enemy spawns on the smoke
 path; mark done when a run shows a Bdl. The rest of the enemy run is unassigned@0014cde4: Mrt

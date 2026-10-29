@@ -1640,35 +1640,40 @@
 /* 0014cdc8 0000001c */ BdlOutDead::Term(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- emy/emy_mrt.cpp
 // *****************************************************************************
 
 /* 0014cde4 00000114 */ MrtMain::initOut(){}  // ror
-/* 0014cef8 00000060 */ FUN_0014cef8(){}
-/* 0014cf58 000001e4 */ FUN_0014cf58(){}
-/* 0014d13c 00000088 */ FUN_0014d13c(){}
-/* 0014d1c4 0000007c */ FUN_0014d1c4(){}
-/* 0014d240 000000c8 */ FUN_0014d240(){}
-/* 0014d308 00000018 */ FUN_0014d308(){}
-/* 0014d320 00000008 */ FUN_0014d320(){}
-/* 0014d328 00000014 */ FUN_0014d328(){}
-/* 0014d33c 00000014 */ FUN_0014d33c(){}
-/* 0014d350 00000034 */ FUN_0014d350(){}
-/* 0014d384 00000048 */ FUN_0014d384(){}
-/* 0014d3cc 0000002c */ FUN_0014d3cc(){}
-/* 0014d3f8 00000008 */ FUN_0014d3f8(){}
-/* 0014d400 0000001c */ FUN_0014d400(){}
-/* 0014d41c 00000088 */ FUN_0014d41c(){}
-/* 0014d4a4 0000005c */ FUN_0014d4a4(){}
-/* 0014d500 0000001c */ FUN_0014d500(){}
-/* 0014d51c 0000007c */ FUN_0014d51c(){}
-/* 0014d598 0000007c */ FUN_0014d598(){}
-/* 0014d614 00000048 */ FUN_0014d614(){}
-/* 0014d65c 0000052c */ FUN_0014d65c(){}
-/* 0014db88 0000001c */ FUN_0014db88(){}
-/* 0014dba4 00000050 */ FUN_0014dba4(){}
-/* 0014dbf4 0000006c */ FUN_0014dbf4(){}
-/* 0014dc60 0000001c */ FUN_0014dc60(){}
+/* 0014cef8 00000060 */ MrtMain::~MrtMain(){}  // ror
+/* 0014cf58 000001e4 */ MrtMain::decide(){}  // ror
+/* 0014d13c 00000088 */ MrtMain::exec(){}  // ror
+/* 0014d1c4 0000007c */ MrtMain::after(){}  // ror
+/* 0014d240 000000c8 */ MrtMain::selectOut(){}  // ror
+/* 0014d308 00000018 */ MrtMain::isTrianglePressed(){}  // ror
+/* 0014d320 00000008 */ MrtMain::testInput4(){}  // ror
+/* 0014d328 00000014 */ MrtMain::isPCStateClass1(){}  // ror
+/* 0014d33c 00000014 */ MrtMain::isPCAhead(){}  // ror
+/* 0014d350 00000034 */ MrtMain::isPCClass7OffAxis(){}  // ror
+/* 0014d384 00000048 */ MrtMain::isPCInSight(){}  // ror
+/* 0014d3cc 0000002c */ MrtOutYyy::Init(){}  // ror
+/* 0014d3f8 00000008 */ MrtOutYyy::Exec(){}  // ror
+/* 0014d400 0000001c */ MrtOutYyy::Term(){}  // ror
+/* 0014d41c 00000088 */ MrtOutSerch::Init(){}  // ror
+/* 0014d4a4 0000005c */ MrtOutSerch::Exec(){}  // ror
+/* 0014d500 0000001c */ MrtOutSerch::Term(){}  // ror
+/* 0014d51c 0000007c */ MrtOutSerch::execChasePC(){}  // ror
+/* 0014d598 0000007c */ MrtOutSerch::execChaseAny(){}  // ror
+/* 0014d614 00000048 */ MrtOutAtk::Init(){}  // ror
+/* 0014d65c 0000052c */ MrtOutAtk::Exec(){}  // ror
+/* 0014db88 0000001c */ MrtOutAtk::Term(){}  // ror
+/* 0014dba4 00000050 */ MrtOutWin::Init(){}  // ror
+/* 0014dbf4 0000006c */ MrtOutWin::Exec(){}  // ror
+/* 0014dc60 0000001c */ MrtOutWin::Term(){}  // ror
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 0014dc7c 000001d8 */ ClrMain::initOut(){}  // ror
 /* 0014de54 00000060 */ FUN_0014de54(){}
 /* 0014deb4 00000200 */ FUN_0014deb4(){}
