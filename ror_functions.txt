@@ -1602,42 +1602,47 @@
 /* 0014b3a0 0000001c */ BdsOutDead::Term(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- emy/emy_bdl.cpp
 // *****************************************************************************
 
 /* 0014b3bc 00000198 */ BdlMain::initOut(){}  // ror
-/* 0014b554 00000060 */ FUN_0014b554(){}
-/* 0014b5b4 00000124 */ FUN_0014b5b4(){}
-/* 0014b6d8 000000a8 */ FUN_0014b6d8(){}
-/* 0014b780 0000007c */ FUN_0014b780(){}
-/* 0014b7fc 000000c4 */ FUN_0014b7fc(){}
-/* 0014b8c0 00000014 */ FUN_0014b8c0(){}
-/* 0014b8d4 00000014 */ FUN_0014b8d4(){}
-/* 0014b8e8 00000028 */ FUN_0014b8e8(){}
-/* 0014b910 00000064 */ FUN_0014b910(){}
-/* 0014b974 0000002c */ FUN_0014b974(){}
-/* 0014b9a0 00000158 */ FUN_0014b9a0(){}
-/* 0014baf8 000002c4 */ FUN_0014baf8(){}
-/* 0014bdbc 0000008c */ FUN_0014bdbc(){}
-/* 0014be48 0000006c */ FUN_0014be48(){}
-/* 0014beb4 0000001c */ FUN_0014beb4(){}
-/* 0014bed0 00000018 */ FUN_0014bed0(){}
-/* 0014beec 00000030 */ FUN_0014beec(){}
-/* 0014bf1c 0000016c */ FUN_0014bf1c(){}
-/* 0014c088 0000001c */ FUN_0014c088(){}
-/* 0014c0a4 00000150 */ FUN_0014c0a4(){}
-/* 0014c1f4 0000003c */ FUN_0014c1f4(){}
-/* 0014c230 000000b0 */ FUN_0014c230(){}
-/* 0014c2e0 0000001c */ FUN_0014c2e0(){}
-/* 0014c2fc 00000074 */ FUN_0014c2fc(){}
-/* 0014c370 00000848 */ FUN_0014c370(){}
-/* 0014cbb8 0000001c */ FUN_0014cbb8(){}
-/* 0014cbd4 00000058 */ FUN_0014cbd4(){}
-/* 0014cc2c 00000068 */ FUN_0014cc2c(){}
-/* 0014cc94 0000001c */ FUN_0014cc94(){}
-/* 0014ccb0 00000110 */ FUN_0014ccb0(){}
-/* 0014cdc0 00000008 */ FUN_0014cdc0(){}
-/* 0014cdc8 0000001c */ FUN_0014cdc8(){}
+/* 0014b554 00000060 */ BdlMain::~BdlMain(){}  // ror
+/* 0014b5b4 00000124 */ BdlMain::decide(){}  // ror
+/* 0014b6d8 000000a8 */ BdlMain::exec(){}  // ror
+/* 0014b780 0000007c */ BdlMain::after(){}  // ror
+/* 0014b7fc 000000c4 */ BdlMain::selectOut(){}  // ror
+/* 0014b8c0 00000014 */ BdlMain::isPCSameArea(){}  // ror
+/* 0014b8d4 00000014 */ BdlMain::testBarkReact(){}  // ror
+/* 0014b8e8 00000028 */ BdlMain::isPCStateClass4(){}  // ror
+/* 0014b910 00000064 */ BdlMain::isPCInSight(){}  // ror
+/* 0014b974 0000002c */ BdlOutWalk::Init(){}  // ror
+/* 0014b9a0 00000158 */ BdlOutWalk::Exec(){}  // ror
+/* 0014baf8 000002c4 */ BdlOutWalk::getRoamPos(){}  // ror
+/* 0014bdbc 0000008c */ BdlOutWalk::startIdle(){}  // ror
+/* 0014be48 0000006c */ BdlOutWalk::setWalkMotion(){}  // ror
+/* 0014beb4 0000001c */ BdlOutWalk::Term(){}  // ror
+/* 0014bed0 00000018 */ BdlOutWalk::setStep(){}  // ror
+/* 0014beec 00000030 */ BdlOutStared::Init(){}  // ror
+/* 0014bf1c 0000016c */ BdlOutStared::Exec(){}  // ror
+/* 0014c088 0000001c */ BdlOutStared::Term(){}  // ror
+/* 0014c0a4 00000150 */ BdlOutStared::isDogAhead(){}  // ror
+/* 0014c1f4 0000003c */ BdlOutSearch::Init(){}  // ror
+/* 0014c230 000000b0 */ BdlOutSearch::Exec(){}  // ror
+/* 0014c2e0 0000001c */ BdlOutSearch::Term(){}  // ror
+/* 0014c2fc 00000074 */ BdlOutAtk::Init(){}  // ror
+/* 0014c370 00000848 */ BdlOutAtk::Exec(){}  // ror
+/* 0014cbb8 0000001c */ BdlOutAtk::Term(){}  // ror
+/* 0014cbd4 00000058 */ BdlOutWin::Init(){}  // ror
+/* 0014cc2c 00000068 */ BdlOutWin::Exec(){}  // ror
+/* 0014cc94 0000001c */ BdlOutWin::Term(){}  // ror
+/* 0014ccb0 00000110 */ BdlOutDead::Init(){}  // ror
+/* 0014cdc0 00000008 */ BdlOutDead::Exec(){}  // ror
+/* 0014cdc8 0000001c */ BdlOutDead::Term(){}  // ror
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 0014cde4 00000114 */ MrtMain::initOut(){}  // ror
 /* 0014cef8 00000060 */ FUN_0014cef8(){}
 /* 0014cf58 000001e4 */ FUN_0014cf58(){}

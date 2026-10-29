@@ -6923,6 +6923,198 @@
   "was": "FUN_0014b3bc",
   "why": "called right after the vtable store in the ELF's inline BdlMain::BdlMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
  },
+ "0014b554": {
+  "name": "BdlMain::~BdlMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b554",
+  "why": "BdlMain vtable 0x2e23e0 slot 1: ~EmyMain then operator_delete on the deleting flag, as BdsMain::~BdsMain"
+ },
+ "0014b5b4": {
+  "name": "BdlMain::decide",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b5b4",
+  "why": "BdlMain vtable slot 4: m_req from the inputs at +0x208, BdsMain::decide's code with testBarkReact as input 1"
+ },
+ "0014b6d8": {
+  "name": "BdlMain::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b6d8",
+  "why": "BdlMain vtable slot 5: EmyStateMap::next on m_req, state 6 forced on notify bit 2, as BdsMain::exec"
+ },
+ "0014b780": {
+  "name": "BdlMain::after",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b780",
+  "why": "BdlMain vtable slot 6: Term and selectOut on a change, then m_req = out->Exec(), as BdsMain::after"
+ },
+ "0014b7fc": {
+  "name": "BdlMain::selectOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b7fc",
+  "why": "BdlMain vtable slot 2: m_out[m_state] Init, the transition row into the inputs, as BdsMain::selectOut"
+ },
+ "0014b8c0": {
+  "name": "BdlMain::isPCSameArea",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b8c0",
+  "why": "calls EmyMain::isPCSameArea; decide's input 0 test, as BdsMain::isPCSameArea"
+ },
+ "0014b8d4": {
+  "name": "BdlMain::testBarkReact",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b8d4",
+  "why": "calls EmyMain::testBarkReact; decide's input 1 test (Bds returns 0 there)"
+ },
+ "0014b8e8": {
+  "name": "BdlMain::isPCStateClass4",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b8e8",
+  "why": "MagSystem::getPCStateClass == 4; decide's input 5 test, as BdsMain::isPCStateClass4"
+ },
+ "0014b910": {
+  "name": "BdlMain::isPCInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b910",
+  "why": "emyChkInSight(param 0x5f, pi, 1, PC oid); decide's inputs 3 / 4, as BdsMain::isPCInSight"
+ },
+ "0014b974": {
+  "name": "BdlOutWalk::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b974",
+  "why": "BdlOutWalk vtable 0x2e2420 slot 2: setWalkMotion(1), step 0, as BdsOutWalk::Init"
+ },
+ "0014b9a0": {
+  "name": "BdlOutWalk::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b9a0",
+  "why": "BdlOutWalk vtable slot 3: roam / idle steps, BdsOutWalk::Exec's code"
+ },
+ "0014baf8": {
+  "name": "BdlOutWalk::getRoamPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0014baf8",
+  "why": "BdlOutWalk::Exec's point: home (param 0x59) +-500 at four scales, emyCanReach, as BdsOutWalk::getRoamPos"
+ },
+ "0014bdbc": {
+  "name": "BdlOutWalk::startIdle",
+  "tag": "ror-inferred",
+  "was": "FUN_0014bdbc",
+  "why": "walk motion 1 / 0x1c / 0x1d in place or motion 0x14, as BdsOutWalk::startIdle"
+ },
+ "0014be48": {
+  "name": "BdlOutWalk::setWalkMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0014be48",
+  "why": "chrMtnMove2Achr at m_agl / 60, as BdsOutWalk::setWalkMotion"
+ },
+ "0014beb4": {
+  "name": "BdlOutWalk::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014beb4",
+  "why": "BdlOutWalk vtable slot 4: termCommon"
+ },
+ "0014bed0": {
+  "name": "BdlOutWalk::setStep",
+  "tag": "ror-inferred",
+  "was": "FUN_0014bed0",
+  "why": "sets m_step and clears the count at +0x38 on a change, as BdsOutWalk::setStep"
+ },
+ "0014beec": {
+  "name": "BdlOutStared::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014beec",
+  "why": "BdlOutStared vtable 0x2e2450 slot 2: step 0 and Exec through the vtable, as BdsOutStared::Init"
+ },
+ "0014bf1c": {
+  "name": "BdlOutStared::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014bf1c",
+  "why": "BdlOutStared vtable slot 3: turn to the barking dog and cower, BdsOutStared::Exec's code"
+ },
+ "0014c088": {
+  "name": "BdlOutStared::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014c088",
+  "why": "BdlOutStared vtable slot 4: termCommon"
+ },
+ "0014c0a4": {
+  "name": "BdlOutStared::isDogAhead",
+  "tag": "ror-inferred",
+  "was": "FUN_0014c0a4",
+  "why": "the dog's direction less the facing within range / 2, as BdsOutStared::isDogAhead"
+ },
+ "0014c1f4": {
+  "name": "BdlOutSearch::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014c1f4",
+  "why": "BdlOutSearch vtable 0x2e2480 slot 2: selectTarget, emyStartChase(10), as BdsOutSearch::Init"
+ },
+ "0014c230": {
+  "name": "BdlOutSearch::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014c230",
+  "why": "BdlOutSearch vtable slot 3: emyChkChase(300, pi) to inputs 6 / 4 / 7, as BdsOutSearch::Exec (200 there)"
+ },
+ "0014c2e0": {
+  "name": "BdlOutSearch::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014c2e0",
+  "why": "BdlOutSearch vtable slot 4: termCommon"
+ },
+ "0014c2fc": {
+  "name": "BdlOutAtk::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014c2fc",
+  "why": "BdlOutAtk vtable 0x2e24b0 slot 2: selectTarget, param 0x68 mode, emyStartTurn unless mode 1"
+ },
+ "0014c370": {
+  "name": "BdlOutAtk::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014c370",
+  "why": "BdlOutAtk vtable slot 3: turn into the mode's sector, then attack motion 0x20 / 0x21 with hit windows (words 0x1f / 0x20)"
+ },
+ "0014cbb8": {
+  "name": "BdlOutAtk::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014cbb8",
+  "why": "BdlOutAtk vtable slot 4: termCommon"
+ },
+ "0014cbd4": {
+  "name": "BdlOutWin::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014cbd4",
+  "why": "BdlOutWin vtable 0x2e24e0 slot 2: motion 0x15, looping SE 0xd, as BdsOutWin::Init"
+ },
+ "0014cc2c": {
+  "name": "BdlOutWin::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014cc2c",
+  "why": "BdlOutWin vtable slot 3: BdsOutWin::Exec's code"
+ },
+ "0014cc94": {
+  "name": "BdlOutWin::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014cc94",
+  "why": "BdlOutWin vtable slot 4: termCommon"
+ },
+ "0014ccb0": {
+  "name": "BdlOutDead::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014ccb0",
+  "why": "BdlOutDead vtable 0x2e2510 slot 2: effect kind 3, hide, motion 0x24, as BdsOutDead::Init"
+ },
+ "0014cdc0": {
+  "name": "BdlOutDead::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014cdc0",
+  "why": "BdlOutDead vtable slot 3: returns -1"
+ },
+ "0014cdc8": {
+  "name": "BdlOutDead::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014cdc8",
+  "why": "BdlOutDead vtable slot 4: termCommon"
+ },
  "0014cde4": {
   "name": "MrtMain::initOut",
   "tag": "ror-inferred",

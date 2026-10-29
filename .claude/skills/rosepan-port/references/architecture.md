@@ -1656,6 +1656,14 @@ never asserts): sessions name them (`tus.py define --why`).
   Stared: turns to the barking dog (chrRotMotion 8 / 9), motion 0x17, cowers while
   magBwnIsBarkPhase3, input 6 after 60 frames. The enemy files link in the order Hfm, Bds, Bdl, Mrt,
   Clr, Nor, Grg, Fsh, Got, Pig, Dwf (the XxxMain::initOut addresses), then EmyManager 0x16265c.
+  **BdlMain** (type 5, emy/emy_bdl.cpp 0x14b3bc..0x14cde4, 2026-10-29): Bds's twin -- same states,
+  words and outs, mostly the same code. Differences: input 1 is EmyMain::testBarkReact (the dog's
+  bark), Search ends within 300, Dead plays motion 0x24 always. BdlOutAtk (EE 0x50) reads param
+  0x68 as a mode (+0x3c): mode 1 waits for the target within 200 / pi / 4 ahead; modes 2..5 turn
+  (emyStartTurn pi / 4) only while the target's world angle atan2(dx, dz) lies in a fixed 6pi / 8
+  sector (2: -pi/8..5pi/8, 3: beyond 3pi/8 or -7pi/8, 4: beyond 7pi/8 or -3pi/8, 5: -5pi/8..pi/8),
+  else stand on motion 1 until it does -- an enemy guarding one side. Attacks as Bds but reach 40
+  over 4 nodes, words 0x1f / 0x20; a failed turn hands back input 7.
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00
