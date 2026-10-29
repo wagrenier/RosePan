@@ -69,7 +69,7 @@ static const char *const s_hitNodes[10] = {
 /* PC: the ROM inlines this at every use -- DogModel::getNodeIndexByName
  * (its two asserts) and the actor's vtable slot 17 -- and keeps the
  * matrix's translation row. */
-static void emyGetNodePos(int no, const char *name, float *pos)
+void emyGetNodePos(int no, const char *name, float *pos)
 {
     DogActor &actor = g_magSystem.m_scene.m_actors[no];
     sceVu0FMATRIX m;
@@ -98,7 +98,7 @@ static float emyMotSpeed(const EmyMain *emy)
 }
 
 /* PC: the angle wrap the ROM inlines, then its size. */
-static float emyAbsAngle(float d)
+float emyAbsAngle(float d)
 {
     d = emyWrapAngle(d);
     return d < 0.0f ? -d : d;
@@ -233,7 +233,7 @@ void emyStartChase(float range, EmyOut *out, u_int target)
     prm.m_target      = target;
     prm.m_range       = range;
     const EmyKindMoveParam *kind = emy->getMoveParam();
-    if (kind != NULL) {     /* PC: NULL while EmyMain::getMoveParam is a stub */
+    if (kind != NULL) {     /* PC: a guard from the stub days (getMoveParam never returns NULL) */
         prm.m_kind[0] = kind->m_w[0];
         prm.m_kind[1] = kind->m_w[1];
         prm.m_kind[2] = kind->m_w[2];
@@ -270,7 +270,7 @@ void emyStartMove(float range, EmyOut *out, const float *pos)
     prm.m_target      = 0;
     prm.m_range       = range;
     const EmyKindMoveParam *kind = emy->getMoveParam();
-    if (kind != NULL) {     /* PC: NULL while EmyMain::getMoveParam is a stub */
+    if (kind != NULL) {     /* PC: a guard from the stub days (getMoveParam never returns NULL) */
         prm.m_kind[0] = kind->m_w[0];
         prm.m_kind[1] = kind->m_w[1];
         prm.m_kind[2] = kind->m_w[2];

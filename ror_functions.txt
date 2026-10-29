@@ -2111,41 +2111,41 @@
 /* 00164364 000001a4 */ EmyMain::setStartState(){}  // ror
 /* 00164508 00000ab8 */ EmyMain::loadParam(){}  // ror
 /* 00164fc0 00000050 */ EmyMain::exec(){}  // ror
-/* 00165010 00000028 */ FUN_00165010(){}
+/* 00165010 00000028 */ EmyMain::startBitten(){}  // ror
 /* 00165038 00000028 */ EmyMain::updateOut(){}  // ror
 /* 00165060 00000010 */ EmyMain::stopOut(){}  // ror
 /* 00165074 0000020c */ EmyMain::updateGroup(){}  // ror
-/* 00165280 00000118 */ FUN_00165280(){}
-/* 00165398 0000006c */ FUN_00165398(){}
-/* 00165404 00000094 */ FUN_00165404(){}
-/* 00165498 000000d8 */ FUN_00165498(){}
+/* 00165280 00000118 */ EmyMain::getBasePos(){}  // ror
+/* 00165398 0000006c */ EmyMain::setSE(){}  // ror
+/* 00165404 00000094 */ EmyMain::addSE(){}  // ror
+/* 00165498 000000d8 */ EmyMain::stopSE(){}  // ror
 /* 00165570 000000c8 */ EmyMain::stopAllSE(){}  // ror
-/* 00165638 0000007c */ FUN_00165638(){}
+/* 00165638 0000007c */ EmyMain::clearSEType(){}  // ror
 /* 001656b4 0000005c */ EmyMain::testHittable(){}  // ror
 /* 00165710 00000020 */ EmyMain::testStateFlag(){}  // ror
 /* 00165734 00000060 */ EmyMain::isPCSameArea(){}  // ror
-/* 00165794 000002d4 */ FUN_00165794(){}
-/* 00165a68 00000040 */ FUN_00165a68(){}
-/* 00165aa8 00000290 */ FUN_00165aa8(){}
-/* 00165d38 00000044 */ FUN_00165d38(){}
-/* 00165d7c 00000288 */ FUN_00165d7c(){}
-/* 00166004 00000044 */ FUN_00166004(){}
-/* 00166048 000000c0 */ FUN_00166048(){}
+/* 00165794 000002d4 */ EmyMain::testBarkReact(){}  // ror
+/* 00165a68 00000040 */ EmyMain::isPCStateClass1(){}  // ror
+/* 00165aa8 00000290 */ EmyMain::isPCAhead(){}  // ror
+/* 00165d38 00000044 */ EmyMain::isPCStateClass2(){}  // ror
+/* 00165d7c 00000288 */ EmyMain::isPCClass7OffAxis(){}  // ror
+/* 00166004 00000044 */ EmyMain::isPCNear(){}  // ror
+/* 00166048 000000c0 */ EmyMain::isPCOrDogInSight(){}  // ror
 /* 00166108 00000020 */ EmyMain::isLowLife(){}  // ror
-/* 00166128 00000050 */ FUN_00166128(){}
-/* 00166178 00000020 */ FUN_00166178(){}
-/* 00166198 00000044 */ FUN_00166198(){}
+/* 00166128 00000050 */ EmyMain::hasOid0Twice(){}  // ror
+/* 00166178 00000020 */ EmyMain::isHalfLife(){}  // ror
+/* 00166198 00000044 */ EmyMain::isPCStateClass4(){}  // ror
 /* 001661dc 00000040 */ EmyMain::notify(){}  // ror
 /* 0016621c 00000148 */ EmyMain::createHeldItem(){}  // ror
 /* 00166364 00000014 */ EmyMain::setGroup(){}  // ror
 /* 00166378 00000094 */ EmyMain::setManageSw(){}  // ror
-/* 0016640c 00000028 */ FUN_0016640c(){}
+/* 0016640c 00000028 */ EmyMain::setLPFromStack(){}  // ror
 /* 00166434 00000068 */ EmyMain::callFunc(){}  // ror
 /* 0016649c 00000008 */ EmyMain::setDecideSw(){}  // ror
 /* 001664a4 00000074 */ EmyMain::pauseMove(){}  // ror
 /* 00166518 0000001c */ EmyMain::resetOut(){}  // ror
 /* 00166534 00000030 */ EmyMain::countDamageEnd(){}  // ror
-/* 00166568 00000050 */ FUN_00166568(){}
+/* 00166568 00000050 */ EmyMain::pickSE(){}  // ror
 /* 001665b8 000003ec */ EmyMain::getSE(){}  // ror
 /* 001669a4 00000068 */ EmyMain::getMoveParam(){}  // ror
 /* 00166a0c 00000010 */ EmyMain::testNotifyHit(){}  // ror
@@ -4393,7 +4393,7 @@
 /* 002005b8 000000c4 */ FUN_002005b8(){}
 /* 0020067c 00000004 */ FUN_0020067c(){}
 /* 00200684 0000002c */ FUN_00200684(){}
-/* 002006b0 0000001c */ FUN_002006b0(){}
+/* 002006b0 0000001c */ TskEnemyMove::TskEnemyMove(){}  // ror
 /* 002006cc 00000034 */ FUN_002006cc(){}
 /* 00200700 000001f0 */ TskEnemyMove::start(){}  // ror
 /* 002008f0 00000098 */ FUN_002008f0(){}
@@ -4414,21 +4414,21 @@
 /* 00202e20 000000a8 */ FUN_00202e20(){}
 /* 00202ec8 00000044 */ FUN_00202ec8(){}
 /* 00202f10 00000050 */ TskEnemyMove::stop(){}  // ror
-/* 00202f60 0000005c */ FUN_00202f60(){}
-/* 00202fbc 00000024 */ FUN_00202fbc(){}
+/* 00202f60 0000005c */ TskEnemyMove::suspend(){}  // ror
+/* 00202fbc 00000024 */ TskEnemyMove::resume(){}  // ror
 /* 00202fe4 00000158 */ FUN_00202fe4(){}
 /* 0020313c 0000032c */ FUN_0020313c(){}
 /* 00203468 0000002c */ FUN_00203468(){}
 /* 00203494 0000002c */ FUN_00203494(){}
-/* 002034c0 00000018 */ FUN_002034c0(){}
+/* 002034c0 00000018 */ TskEnemyTurn::TskEnemyTurn(){}  // ror
 /* 002034d8 00000034 */ FUN_002034d8(){}
 /* 0020350c 000000cc */ TskEnemyTurn::start(){}  // ror
 /* 002035d8 000000ac */ FUN_002035d8(){}
 /* 00203684 000001a4 */ FUN_00203684(){}
 /* 00203828 00000134 */ FUN_00203828(){}
 /* 0020395c 00000044 */ FUN_0020395c(){}
-/* 002039a4 0000005c */ FUN_002039a4(){}
-/* 00203a00 00000024 */ FUN_00203a00(){}
+/* 002039a4 0000005c */ TskEnemyTurn::suspend(){}  // ror
+/* 00203a00 00000024 */ TskEnemyTurn::resume(){}  // ror
 /* 00203a28 0000011c */ FUN_00203a28(){}
 /* 00203b44 00000250 */ FUN_00203b44(){}
 

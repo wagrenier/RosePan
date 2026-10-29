@@ -277,18 +277,32 @@ struct EmyTurnParam
  * polymorphic; nothing placed yet. */
 struct TskEnemyMove : CmnITask
 {
+    /* +4, +0x28 and +0xac4 cleared (EmyMain::loadParam news it, EE 0xad0). */
+    TskEnemyMove();                                                      // ROR 0x002006b0
     /* Active (+4 = 1) toward the record's goal or target. */
     void start(const EmyMoveParam *prm);                                 // ROR 0x00200700
     /* Stops it: +4 = 0, its SE stopped, EmyManager's work word of its
      * oid cleared (EmyMain::InactiveMove). */
     void stop();                                                         // ROR 0x00202f10
+    /* Paused (+0xac4 = 1): its SE stopped, the achr's +0x1e8 speed made
+     * tiny while active; resume undoes it (EmyMain::pauseMove). */
+    void suspend();                                                      // ROR 0x00202f60
+    void resume();                                                       // ROR 0x00202fbc
+
+    int m_active;               // ROR 0x04: start / EmyMain::ActiveMove set 1, stop 0
 };
 
-/* The enemy turn task (unassigned@001fd424). layout: host -- polymorphic. */
+/* The enemy turn task (vtable 0x2e5080; unassigned@001fd424).
+ * layout: host -- polymorphic. */
 struct TskEnemyTurn : CmnITask
 {
+    /* m_active and +0x10 cleared (EmyMain::loadParam news it, EE 0x60). */
+    TskEnemyTurn();                                                      // ROR 0x002034c0
     /* Active (+4 = 1) toward the record's target. */
     void start(const EmyTurnParam *prm);                                 // ROR 0x0020350c
+    /* TskEnemyMove::suspend / resume's twins (+0x48). */
+    void suspend();                                                      // ROR 0x002039a4
+    void resume();                                                       // ROR 0x00203a00
 
     int m_active;               // ROR 0x04: start sets 1, EmyOut::termCommon 0
 };

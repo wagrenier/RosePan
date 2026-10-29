@@ -18,6 +18,8 @@
 
 struct TskEnemyMove;
 struct TskEnemyTurn;
+struct EmyMoveParam;
+struct EmyTurnParam;
 struct GamIdMap;
 class  EmyMain;
 
@@ -69,14 +71,70 @@ struct EmyStateMap
     int       m_cur;            // ROR 0xa4: the current state
 };
 
-/* The enemy's parameter block (GamMan::setEmyParam's word, script data).
- * Only the start state is read so far; the rest is EmyMain::loadParam's. */
+/* The enemy's parameter block (GamMan::setEmyParam's word, script data,
+ * EE 0x60; EmyMain::loadParam copies it to the achr's params). Plain EE
+ * layout: it comes from the scripts. */
 struct _tagEnemyParam
 {
-    u_char _00[0x10];
-    int    m_start_state;       // ROR 0x10: createEmy's state for setStartState
+    float  m_rot[4];            // ROR 0x00: o_rot
+    int    m_start_state;       // ROR 0x10: createEmy's state for setStartState; loadParam's m_state
+    u_char _14[3];
+    u_char m_flag800;           // ROR 0x17: the achr's m_flags bit 0x800
+    u_char m_attr0[23];         // ROR 0x18: m_attr[0] bits 0..6, 8..23 (a byte each, bit 7 skipped)
+    u_char m_attr1[8];          // ROR 0x2f: m_attr[1] bits 0..7
+    u_char _37;
+    float  m_p5b;               // ROR 0x38: param 0x5b
+    int    m_p5c;               // ROR 0x3c: param 0x5c
+    float  m_p5f;               // ROR 0x40: param 0x5f
+    u_short m_p68;              // ROR 0x44: param 0x68
+    u_short _46;
+    u_short m_p69;              // ROR 0x48: param 0x69
+    u_short _4a;
+    u_short m_p5a;              // ROR 0x4c: param 0x5a (EmyOut::getSelectRate's 0..5)
+    u_short m_p5e;              // ROR 0x4e: param 0x5e
+    u_short m_p63;              // ROR 0x50: param 0x63
+    u_short m_item_kind;        // ROR 0x52: param 0x66, the held item's kind (0xa00 none; createHeldItem)
+    u_short m_p6a;              // ROR 0x54: param 0x6a
+    u_short m_name;             // ROR 0x56: EmyMain::m_name
+    int    m_item;              // ROR 0x58: param 0x67, the held item's oid
+    int    _5c;
 };
+static_assert(sizeof(_tagEnemyParam) == 0x60, "_tagEnemyParam");
 static_assert(offsetof(_tagEnemyParam, m_start_state) == 0x10, "m_start_state");
+static_assert(offsetof(_tagEnemyParam, m_flag800) == 0x17, "m_flag800");
+static_assert(offsetof(_tagEnemyParam, m_attr0) == 0x18, "m_attr0");
+static_assert(offsetof(_tagEnemyParam, m_attr1) == 0x2f, "m_attr1");
+static_assert(offsetof(_tagEnemyParam, m_p5b) == 0x38, "m_p5b");
+static_assert(offsetof(_tagEnemyParam, m_p5c) == 0x3c, "m_p5c");
+static_assert(offsetof(_tagEnemyParam, m_p5f) == 0x40, "m_p5f");
+static_assert(offsetof(_tagEnemyParam, m_p68) == 0x44, "m_p68");
+static_assert(offsetof(_tagEnemyParam, m_p69) == 0x48, "m_p69");
+static_assert(offsetof(_tagEnemyParam, m_p5a) == 0x4c, "m_p5a");
+static_assert(offsetof(_tagEnemyParam, m_p5e) == 0x4e, "m_p5e");
+static_assert(offsetof(_tagEnemyParam, m_p63) == 0x50, "m_p63");
+static_assert(offsetof(_tagEnemyParam, m_item_kind) == 0x52, "m_item_kind");
+static_assert(offsetof(_tagEnemyParam, m_p6a) == 0x54, "m_p6a");
+static_assert(offsetof(_tagEnemyParam, m_name) == 0x56, "m_name");
+static_assert(offsetof(_tagEnemyParam, m_item) == 0x58, "m_item");
+
+/* One of EmyMain's four sound records (EE 0x1c at +0x154): a playing SE
+ * (type < 3) or stream the enemy owns, stopped by stopAllSE / stopSE.
+ * The counters are the classes' (not read in emy_main.cpp). */
+struct EmySERec
+{
+    int m_handle;               // ROR 0x00: 0 a free record
+    int _04;
+    int _08;
+    int m_type;                 // ROR 0x0c: < 3 an SE (funcSE), else a stream (funcStr)
+    int m_10;                   // ROR 0x10: setSE / addSE clear it
+    int m_14;                   // ROR 0x14: setSE / addSE clear it
+    int m_wait;                 // ROR 0x18: utlRandPeakHi(1, n, 4)
+};
+static_assert(sizeof(EmySERec) == 0x1c, "EmySERec");
+static_assert(offsetof(EmySERec, m_type) == 0x0c, "m_type");
+static_assert(offsetof(EmySERec, m_10) == 0x10, "m_10");
+static_assert(offsetof(EmySERec, m_14) == 0x14, "m_14");
+static_assert(offsetof(EmySERec, m_wait) == 0x18, "m_wait");
 
 /* An enemy's behaviour for one state (EE: data to 0x34, vptr at +0x34,
  * vtable 0x2e3220; constructor 0x166a1c, destructor 0x166a74; its methods
@@ -237,6 +295,12 @@ int  emyChkInSight(float range, float angle, int useAngle, u_int target,
 /* emyStartMove's record with a target oid: the TskEnemyMove follows
  * target until within range (the achr's tasks are killed first). */
 void emyStartChase(float range, EmyOut *out, u_int target);              // ROR 0x00166f50
+/* PC: the inlines emy_out.cpp and emy_main.cpp share. The actor no's
+ * node name world position (DogModel::getNodeIndexByName and the matrix's
+ * translation row); an angle wrapped into -pi..pi (in double, as the ROM)
+ * and its size. */
+void  emyGetNodePos(int no, const char *name, float *pos);
+float emyAbsAngle(float d);
 /* sqrt(x*x + y*y + z*z). */
 float emyVecLength(const float *v);                                      // ROR 0x00169a14
 /* One of the first nodes "p_hit" .. (table 0x298de8; fewer than 9) of
@@ -312,6 +376,85 @@ public:
     bool isLowLife();                                                    // ROR 0x00166108
     /* m_decide_sw: the classes' decide does nothing while it is 0. */
     void setDecideSw(int on);                                            // ROR 0x0016649c
+    /* The out's startBitten when there is one. */
+    void startBitten();                                                  // ROR 0x00165010
+    /* The actor's node "Bip01 Spine1" (x, z) at the object's height
+     * (EmyOut::getBasePos on the enemy itself). */
+    void getBasePos(float *pos);                                         // ROR 0x00165280
+    /* stopAllSE, then record 0 holds handle (type, the wait utlRandPeakHi(1, n, 4)). */
+    void setSE(int handle, int type, int n);                             // ROR 0x00165398
+    /* setSE's fill into the first free record (none free: nothing). */
+    void addSE(int handle, int type, int n);                             // ROR 0x00165404
+    /* The records holding handle: stopped and cleared. */
+    void stopSE(int handle);                                             // ROR 0x00165498
+    /* The records of type cleared, not stopped. */
+    void clearSEType(int type);                                          // ROR 0x00165638
+    /* With m_bark_cool run out: the dog barks (magBwnIsBarkPhase3), the
+     * m_bark_wait count is below 0, the enemy within 300 of the dog in
+     * x / z and within pi / 4 of the dog's facing -- both counts re-armed,
+     * 1. */
+    int  testBarkReact();                                                // ROR 0x00165794
+    /* The PC's state class is 1 (or magBwnReturn0 is 0). */
+    int  isPCStateClass1();                                              // ROR 0x00165a68
+    /* Without attr bit 0: the PC's state class 6..8 and the PC within
+     * pi / 8 of the enemy actor's facing. */
+    int  isPCAhead();                                                    // ROR 0x00165aa8
+    /* The PC's state class is 2 (or magBwnReturn0 is 1). */
+    int  isPCStateClass2();                                              // ROR 0x00165d38
+    /* Without attr bit 0: the PC's state class 7 and the PC not exactly
+     * on the enemy's facing. */
+    int  isPCClass7OffAxis();                                            // ROR 0x00165d7c
+    /* The PC's spine within 60 of getBasePos in x / z. */
+    int  isPCNear();                                                     // ROR 0x00166004
+    /* EmyManager::hasOid(0), asked twice. */
+    int  hasOid0Twice();                                                 // ROR 0x00166128
+    /* The achr's a_lp is under half of m_lp. */
+    bool isHalfLife();                                                   // ROR 0x00166178
+    /* setParam(a_lp) from an unset word (no callers). */
+    int  setLPFromStack();                                               // ROR 0x0016640c
+    /* getSE's pair pick: pair[m_parsonality], [rand 0..99 > 49] for 2. */
+    u_int pickSE(const u_int *pair);                                     // ROR 0x00166568
+    /* emyChkInSight(60, 2 pi) of the PC (0 without one) or of the dog. */
+    int  isPCOrDogInSight();                                             // ROR 0x00166048
+    /* The PC's state class is 4 (or magBwnReturn0 is 2). */
+    int  isPCStateClass4();                                              // ROR 0x00166198
+    /* m_func's default: nothing. */
+    void default_func() {}                                               // ROR 0x0028a884
+    /* The ELF's linkonce task wrappers; defined in emy_main.cpp because
+     * the task classes are not complete here. */
+    void StartMove(const EmyMoveParam *prm);                             // ROR 0x0028a910
+    void ActiveMove();                                                   // ROR 0x0028a92c
+    void DamagePauseMove();                                              // ROR 0x0028a958
+    void DamageResumeMove();                                             // ROR 0x0028a974
+    void StartTurn(const EmyTurnParam *prm);                             // ROR 0x0028a990
+    void ActiveTurn();                                                   // ROR 0x0028a9ac
+    void InactiveTurn();                                                 // ROR 0x0028a9bc
+    void DamagePauseTurn();                                              // ROR 0x0028a9c8
+    void DamageResumeTurn();                                             // ROR 0x0028a9e4
+    /* The achr's m_flags bits on / off. */
+    void SetFlg(u_int bits, bool on)                                     // ROR 0x0028a7d0
+    {
+        if (on)
+            m_param->m_flags |= bits;
+        else
+            m_param->m_flags &= ~bits;
+    }
+    /* The achr's attr word bits >> 24, its low 24 bits on / off. */
+    void SetFlgAlt(u_int bits, bool on)                                  // ROR 0x0028a800
+    {
+        u_int &w = m_param->m_attr[bits >> 24];
+        if (on)
+            w |= bits & 0xffffff;
+        else
+            w &= ~(bits & 0xffffff);
+    }
+    void     func_count() { m_func_count++; }                            // ROR 0x0028a88c
+    u_short  GetName() { return m_name; }                                // ROR 0x0028a8e8
+    u_char   GetParsonality() { return m_parsonality; }                  // ROR 0x0028a8f8
+    void     change_visible(int v) { m_visible = v; }                    // ROR 0x0028a908
+    int      IsDownSupine() { return m_down_supine; }                    // ROR 0x0028aa2c
+    void     SetState2(int v) { m_state2 = v; }                          // ROR 0x0028aa68
+    int     *GetGroupPtr() { return &m_grp_no; }                         // ROR 0x0028aa80
 
     /* The ELF's linkonce accessors (inline in the class body). */
     u_int    GetOid() { return m_oid; }                                  // ROR 0x0028a86c
@@ -355,24 +498,34 @@ public:
     int           m_decide_sw;      // ROR 0x28: setDecideSw (1 at construction)
     int           m_input_flg_motion; // ROR 0x2c: SetInputFlgMotion; 1 when the out's motion ended (decide tests & 0x11)
     u_int         m_notify;         // ROR 0x30: notify's bits (1 hit, 2 killed ...)
+    int           m_bark_wait;      // ROR 0x34: testBarkReact's count (utlRandRange(0, 20))
+    int           m_bark_cool;      // ROR 0x38: testBarkReact's cooldown (utlRandRange(60, 120); 0 at loadParam)
     int           m_state;          // ROR 0x3c: GetState
     int           m_changed;        // ROR 0x40: exec changed the state (after() then switches outs)
     EmyOut       *m_emy_out;        // ROR 0x44: GetEmyOut (the current state's out)
     EmyOut       *m_out[40];        // ROR 0x48: the out of each state (initOut)
     const _tagEnemyTransition *m_trans; // ROR 0xe8
     int           m_motion_list[15];  // ROR 0xec: GetMotionList / SetMotionList (initOut fills them per class)
-    u_char        m_motion_flg[16];   // ROR 0x128: a byte per motion-list entry (initOut sets them; role not read)
+    u_char        m_state_flg[40];  // ROR 0x128: a byte per state (testStateFlag; initOut sets them)
     int           m_state2;         // ROR 0x150: GetState2 / SetState2
+    EmySERec      m_se[4];          // ROR 0x154: setSE / addSE / stopSE / stopAllSE
     float         m_agl;            // ROR 0x1c4: set_agl / RefAGL (the motion speed x 60; 0 = 1)
     int           m_grp_no;         // ROR 0x1c8: GetGrpNo (0 = no group; GetGroupPtr points here)
     int           m_grp_state;      // ROR 0x1cc: 0 idle, 1 waiting, 3 out, 4 respawning, 5 gone (updateGroup)
     short         m_grp_wait;       // ROR 0x1d0: frames until it appears
     short         m_grp_1d2;        // ROR 0x1d2: updateGroup's respawn frame count
     int           m_grp_respawn;    // ROR 0x1d4: the group's respawn number it waits for
-    int           m_lp;             // ROR 0x1d8: RefLP
+    int           m_lp;             // ROR 0x1d8: RefLP (loadParam's a_lp)
+    /* A GCC 2 member-function pointer on the EE ({short delta, short
+     * index, pfn}, 8 bytes): callFunc calls it every frame. */
+    void (EmyMain::*m_func)();      // ROR 0x1dc: default_func at construction
     int           m_damage_end;     // ROR 0x1e4: GetDamageEnd / SetDamageEnd (6)
+    int           m_func_count;     // ROR 0x1e8: func_count
+    int           m_1ec;            // ROR 0x1ec: 0 at construction
     TskEnemyMove *m_move;           // ROR 0x1f0: StartMove / ActiveMove / InactiveMove
+    int           m_move_id;        // ROR 0x1f4: m_move's task id (the destructor kills it)
     TskEnemyTurn *m_turn;           // ROR 0x1f8: StartTurn / ActiveTurn / InactiveTurn
+    int           m_turn_id;        // ROR 0x1fc: m_turn's task id
     /* PC: a word of the derived classes (EmyMain's EE data ends at 0x200);
      * EmyManager::setEmyWord238 / getEmyWord238 use it on any enemy, so
      * the host keeps it in the base. */

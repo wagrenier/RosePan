@@ -1476,8 +1476,22 @@ never asserts): sessions name them (`tus.py define --why`).
   `m_changed` +0x40; `after` (slot 6) calls the old out's Term, `selectOut` (slot 2: `m_out[state]`
   +0x48, 40 pointers, and its Init) and stores the out's Exec result in `m_req`. `_tagEnemyTransition`:
   +0 rows (states), +1 columns (inputs), +0xc the row bytes (next state, 0 none). EmyMain also has
-  the motion list +0xec (GetMotionList / SetMotionList, ints) with a byte per entry at +0x128, the
-  motion-ended input word +0x2c (SetInputFlgMotion) and `m_agl` +0x1c4 (set_agl: the motion speed x 60).
+  the motion list +0xec (GetMotionList / SetMotionList, ints), a byte per *state* at +0x128 (40;
+  testStateFlag 0x165710 reads `[m_state]`), the motion-ended input word +0x2c (SetInputFlgMotion) and
+  `m_agl` +0x1c4 (set_agl: the motion speed x 60).
+- **EmyMain itself (2026-10-29, emy/emy_main.cpp 0x164118..0x166a1c + linkonce 0x28a790..0x28aa88).**
+  `_tagEnemyParam` is 0x60 bytes: rot +0, start state +0x10, a flag byte per achr bit (+0x17 m_flags
+  0x800; +0x18..+0x2e m_attr[0] bits 0..6, 8..23; +0x2f..+0x36 m_attr[1] bits 0..7), params 0x5b /
+  0x5c / 0x5f / 0x68 / 0x69 / 0x5a / 0x5e / 0x63 / 0x66 / 0x6a at +0x38..+0x54, the name +0x56, the held
+  item oid +0x58. loadParam rolls a_lp from system data fields 0x1c +- 0x1f (kept in +0x1d8) and m_agl
+  from the kind move row's word 5 x 0.9..1.1, then news TskEnemyMove (EE 0xad0, ctor 0x2006b0) and
+  TskEnemyTurn (EE 0x60, ctor 0x2034c0) as manager-owned tasks (addTask flags 0x11, ids +0x1f4 /
+  +0x1fc; the destructor kills them). Four sound records of 0x1c at +0x154 (handle +0, type +0xc: < 3
+  funcSE else funcStr; setSE / addSE / stopSE / clearSEType 0x165398..). A GCC 2 member-function
+  pointer at +0x1dc (default_func) runs every frame through callFunc 0x166434; +0x1e8 func_count.
+  The bark reaction counters +0x34 / +0x38 (testBarkReact 0x165794). The kind move table 0x2f18b8 has
+  12 rows; getSE's data is one image 0x2f16b8..0x2f18b8 (pairs by parsonality, nos 15.. straight).
+  TskEnemyMove / TskEnemyTurn pause through suspend / resume (0x202f60 / 0x202fbc, 0x2039a4 / 0x203a00).
   **EmyOut** (ctor 0x166a1c `(oid, achr, emy)`): oid +0, step +4, achr +8, emy +0xc, target-is-dog
   +0x10, target oid +0x14, bitten +0x1c, move done +0x24 (the move task's flag), looping SE +0x2c (-1),
   turn done +0x28 (emyStartTurn), +0x30 = utlRandRange(8, 24); vptr +0x34, slots 2 Init, 3 Exec (returns the next input, -1 none),

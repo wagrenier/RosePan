@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 07:41 at commit `5e56472` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 08:01 at commit `f929cc8` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-29 07:41 at commit `5e56472` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7160**, named **6188** (86%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4586
-- context-name ledger: 4887 entries; overrides of wrong library matches: 5
+- game functions: **7160**, named **6212** (87%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4610
+- context-name ledger: 4911 entries; overrides of wrong library matches: 5
 - placed in a source file: 5245/7160 in 126 files
 
 Least-named game-code regions (64 KB blocks):
@@ -23,14 +23,14 @@ Least-named game-code regions (64 KB blocks):
 | `00140000` | 152/293 (52%) | emy/emy_hfm.cpp, mag/magscenecmd.cpp, mag/magloader.cpp |
 | `001b0000` | 45/82 (55%) | game/gamfile.cpp, game/gamfont.cpp, mnu/mnuSelectLanguage.cpp |
 | `001a0000` | 142/214 (66%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnutitle.cpp |
-| `00200000` | 102/143 (71%) | sequence/seqcall.cpp, sequence/sequence.cpp, system/system.cpp |
-| `00160000` | 195/268 (73%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
+| `00200000` | 108/143 (76%) | sequence/seqcall.cpp, sequence/sequence.cpp, system/system.cpp |
+| `00160000` | 213/268 (79%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `001f0000` | 190/234 (81%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `00190000` | 187/227 (82%) | spr/s2d.cpp, mnu/mnupbook.cpp, mnu/mnubase.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4714**; stubs: **442**
+- reconstructed RoR functions: **4765**; stubs: **424**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -49,7 +49,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/eff/eff0.cpp` | 16 | 0 |
 | `src/eff/effman.cpp` | 32 | 0 |
 | `src/emy/emy_hfm.cpp` | 76 | 0 |
-| `src/emy/emy_main.cpp` | 1 | 22 |
+| `src/emy/emy_main.cpp` | 52 | 0 |
 | `src/emy/emy_manager.cpp` | 59 | 0 |
 | `src/emy/emy_out.cpp` | 58 | 0 |
 | `src/game/gamfile.cpp` | 18 | 0 |
@@ -78,7 +78,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 352 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 356 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -149,8 +149,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 163 TUs: todo 97, partial 5, verify 91, done 13
-- next: **emy/emy_main.cpp** (frontier score 54)
+- 163 TUs: todo 97, partial 4, verify 92, done 13
+- next: **unassigned@002155a0** (frontier score 53)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -164,6 +164,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `eff/eff0.cpp` 14/14 -- Verify: the 240 s run reaches the bus-stop room and EffMan now creates and deletes EffLight1 (kind 0x21) and EffCameraAnim1 (0xd) through the real Eff0, but eve
 - verify: `eff/effman.cpp` 32/32 -- Verify: the 200 s run creates EffLight1 (kind 0x21) and EffCameraAnim1 (kind 0xd) during the picture book; their init is a stub returning 0, so createEff delete
 - verify: `emy/emy_hfm.cpp` 75/75 -- Whole TU written (75 functions, no stubs left in this file). Status verify: the 15 s smoke run still ends on the Atlus disclaimer and creates no enemy, so no Hf
+- verify: `emy/emy_main.cpp` 53/88 -- Verify: the 15 s smoke run stops at the disclaimer screen, no enemy exists yet; the first run that reaches a room with an enemy checks it (createEmy, then the c
 - verify: `emy/emy_manager.cpp` 58/58 -- Verify: the 15 s smoke run shows the boot disclaimer as before (EmyManager now runs its exec every frame with no enemies; no crash); no enemy is created on the 
 - verify: `emy/emy_out.cpp` 58/58 -- No code left in the pinned range. Status verify: no enemy runs in the 15 s smoke run (boot disclaimer only, same picture as before), so nothing on screen shows 
 - verify: `game/gamfile.cpp` 18/21 -- Black screen, as before: the code is complete but no boot path shows it yet; every FileReader::read caller that runs in the boot (GamMan::loadSystemData / loadS
@@ -246,6 +247,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 08:00 `emy/emy_main.cpp` verify: EmyMain reconstructed whole: constructor and destructor, setStartState (the state graph from the transition table), loadParam (the 0x60 script block onto the ac
 - 2026-10-29 07:41 `game/gamfont.cpp` done: GamFont written whole (28 functions, game/gamfont.cpp pinned 0x1beb70..0x1c05c0): setFont with the font header struct, setTarget / releaseTarget, clear, fillRec
 - 2026-10-29 07:20 `mag/maglifewindow.cpp` verify: MagLifeWindow written whole: constructor, live (timer), render (alpha fade + font-texture TexSpriteUV), setup, fadeIn/fadeOut, drawText (Shift-JIS, wrap, scroll
 - 2026-10-28 22:23 `msg/msgman.cpp` verify: MsgMan and MsgManSet written whole: 124 functions (0x18330c..0x187724, the unassigned@00184f2c run pinned into msg/msgman.cpp), the 41 #-tags with their exec an
@@ -253,22 +255,21 @@ Recent sessions:
 - 2026-10-28 21:21 `utl/utlgame.cpp` verify: reconstruct all 49 functions of utl/utlgame.cpp: tbl_sound (200 rows) and the sound helpers, the uid / door / item searches over GamMan's object lists, the enem
 - 2026-10-28 21:01 `fix/aspect_ratio.cpp` done: Any aspect ratio: the i3d camera widens by the renderer view extend (new RosePan_RendererWidenProjection, skipped in off-screen passes such as the shadow target
 - 2026-10-28 20:32 `fix/ingame_camera.cpp` done: First room in 3D after New Game: native 021 cases fixed to its jump table (3 and 6 setPc, 4 setDog, 5 setMurder) so the script binds the PC and GamMan::setPc pl
-- 2026-10-28 19:15 `utl/utlrand.cpp` verify: Split unassigned@00103edc: pinned 0x1041c4..0x10452c as utl/utlrand.cpp and wrote it whole (utlRandStep, utlRand, utlRandReset, utlRandSeed 0x104230 created in 
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `emy/emy_main.cpp` | partial | 2/24/88 | 11.0 | 54 | 0 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 53 | 1 |
 | `unassigned@00225018` | todo | 0/3/18 | 4.5 | 50 | 1 |
+| `unassigned@001fd424` | todo | 0/24/61 | 26.3 | 32 | 0 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
 | `unassigned@0011cb70` | todo | 0/6/7 | 0.7 | 24 | 3 |
 | `unassigned@0016afcc` | todo | 0/109/158 | 45.7 | 23 | 3 |
 | `unassigned@0011c464` | todo | 0/3/6 | 0.5 | 19 | 3 |
 | `unassigned@001832e8` | todo | 0/1/1 | 0.0 | 18 | 1 |
-| `unassigned@001fd424` | todo | 0/18/61 | 26.3 | 18 | 0 |
 | `bed/bedsubmode.cpp` | todo | 0/2/2 | 0.2 | 16 | 2 |
 | `utl/utlfind.cpp` | todo | 0/9/10 | 1.4 | 16 | 1 |
 | `mnu/mnuselect.cpp` | partial | 3/6/14 | 3.0 | 16 | 0 |
+| `unassigned@00216ad0` | partial | 2/2/16 | 6.5 | 15 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -283,9 +284,6 @@ Recent sessions:
 | `001832e8` | msgGetSysText | 13 | ror | stub | - |
 | `00225460` | FUN_00225460 | 12 | - | missing | - |
 | `002261b8` | FUN_002261b8 | 12 | - | missing | - |
-| `00164118` | EmyMain::EmyMain | 11 | ror | stub | emy/emy_main.cpp |
-| `00164364` | EmyMain::setStartState | 10 | ror | stub | emy/emy_main.cpp |
-| `00164508` | EmyMain::loadParam | 9 | ror | stub | emy/emy_main.cpp |
 | `00217f10` | utlAtan2 | 8 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 6 | ror | missing | - |
 | `002251f0` | i3rTrackGetValue | 5 | ror | stub | - |
@@ -295,22 +293,25 @@ Recent sessions:
 | `00226060` | FUN_00226060 | 4 | - | missing | - |
 | `0010620c` | utlFindClear | 3 | ror | stub | utl/utlfind.cpp |
 | `00225670` | FUN_00225670 | 3 | - | missing | - |
+| `00202fbc` | TskEnemyMove::resume | 3 | ror | stub | - |
+| `00203a00` | TskEnemyTurn::resume | 3 | ror | stub | - |
 | `00100258` | BedSubMode::push | 3 | ror | stub | bed/bedsubmode.cpp |
 | `001002c0` | BedSubMode::pop | 3 | ror | stub | bed/bedsubmode.cpp |
-| `0016621c` | EmyMain::createHeldItem | 3 | ror | stub | emy/emy_main.cpp |
+| `00200700` | TskEnemyMove::start | 3 | ror | stub | - |
 | `0012f790` | MagLifeFadeKey::releaseTexture | 3 | ror | stub | mag/maglifefadekey.cpp |
 | `001ab474` | MnuOpt::MnuOpt | 2 | ror | missing | - |
 | `0011c64c` | MagLifePC::collectNearItems | 2 | ror | stub | mag/maglifepc2.cpp |
 | `00232508` | i3cCastRay | 2 | ror | stub | i3d/i3cquery.cpp |
+| `00202f60` | TskEnemyMove::suspend | 2 | ror | stub | - |
+| `002039a4` | TskEnemyTurn::suspend | 2 | ror | stub | - |
 | `0011ccd4` | MagLifePC::testObjHit | 2 | ror | stub | - |
 | `0012ab18` | MagLifeBwnCtrl::reset | 2 | ror | missing | mag/maglifebwnctrl.cpp |
 | `00225fd8` | FUN_00225fd8 | 2 | - | missing | - |
 | `00192ac0` | mnuBase::mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
 | `00192b3c` | mnuBase::~mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
+| `0020350c` | TskEnemyTurn::start | 2 | ror | stub | - |
 | `00104e1c` | utlTm2GetSize | 2 | ror | stub | - |
 | `001ab4e0` | MnuOpt::~MnuOpt | 2 | ror | missing | - |
-| `001669a4` | EmyMain::getMoveParam | 2 | ror | stub | emy/emy_main.cpp |
-| `00200700` | TskEnemyMove::start | 2 | ror | stub | - |
 | `001ab598` | MnuOpt::init | 2 | ror | stub | - |
 | `001ab66c` | MnuOpt::processPad | 2 | ror | stub | - |
 | `0011ce50` | MagLifePC::getEquipItemChrNo | 2 | ror | stub | - |

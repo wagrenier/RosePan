@@ -1087,6 +1087,15 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-29, emy/emy_main.cpp) ROM oddities ported as they are: `EmyMain::setLPFromStack` 0x16640c
+  (no callers) calls setParam(a_lp) with an unset stack word (getParam was probably meant; the host
+  passes 0); `EmyMain::hasOid0Twice` 0x166128 asks EmyManager::hasOid(0) twice; `pickSE` indexes the
+  pair by parsonality with no bound (the host keeps the ROM image so overreads read the same words);
+  getMoveParam's row (field 0x20) is not bounds-checked (12 rows). The EmyMain constructor leaves
+  m_name, m_state, the motion list, the group words and the task ids to the heap / loadParam; the host
+  clears them. The scripted smoke run (15 s) stops at the disclaimer: no enemy is on screen yet, so
+  the TU finished verify -- the first run that reaches a room with an enemy (Dwf / Pig / Hfm) checks it.
+
 - (2026-10-28, emy/emy_out.cpp) Two ROM oddities ported as they are: `EmyOut::slideToTarget` 0x168a30
   (no callers found) sets the achr's position and rotation to 0 on its last frame, and
   `EmyOut::setGotMotion` 0x1685c0 passes an unset register (the caller's s3) as the scissors' motion for
