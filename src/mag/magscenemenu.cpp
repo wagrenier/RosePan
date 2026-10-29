@@ -113,7 +113,7 @@ int MagScene::pulseMenu1000a()
 // System text msg expanded with args (16 words; NULL leaves them unset, as
 // the ROM does) into a 256 x 96 window at (128, 224), the scene held in
 // sub mode 5 on the 0x1000a menu's pause. Returns the window (-1 none).
-// callcheck: MsgMan, ~MsgMan (the ROM's two stack MsgMan; not written: plain zeroed records on the host)
+// callcheck: MsgMan, ~MsgMan (the ROM's two stack MsgMan: implicit on the host)
 // ROR 0x0013f280
 
 int MagScene::openSysMsgWindow(int msg, const int *args, int fillMsb)
@@ -128,11 +128,8 @@ int MagScene::openSysMsgWindow(int msg, const int *args, int fillMsb)
     }
     ex.m_dst_size = sizeof(text);
     ex.m_dst = text;
-    /* PORT: expandText clears the buffer first; while it is a stub the
-     * window gets an empty text instead of stack garbage. */
-    text[0] = '\0';
     {
-        MsgMan mm[2] = {};
+        MsgMan mm[2];
         mm[0].expandText(&ex);
     }
     text[sizeof(text) - 1] = '\0';

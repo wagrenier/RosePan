@@ -1554,6 +1554,24 @@
    "status": "verify",
    "why": "MnuTitle's constructor 0x1a90ec (the functions before it are the save screen's: 0x1a8e84 calls 0x1a90dc / 0x1a90e4) up to MnuOpt's constructor 0x1ab474; every function in it takes the MnuTitle object (SprMan at +0x4df0, data/mnurpk/mnutitle.rpk, s100000.str, CP_LOGO.PSS); file named after the class and the rpk, mnu/ as mnu/mnusvld.cpp and mnu/mnuSelectLanguage.cpp"
   },
+  "msg/msgman.cpp": {
+   "notes": "Status verify: in the bus-stop room the message window shows MsgMan's key icon (S2dMes sprite 0) but no text, because the window's text path is stubbed: MagLifeWindow::drawText 0x130258, getPos3, setProportional, setFontWord30/34, fadeIn/fadeOut (mag/maglifewindow.cpp) and GamFont::getTextWidth 0x1c047c, setFill, setFillMsb. Those make the text visible; the first session whose screenshot shows message text marks this done. msgGetSysText 0x1832e8 (unassigned@001832e8, 0x1d4 string pointers at data 0x298fe8) is still a stub returning an empty string. Trap fixed: the boot card check closes its MsgManSet before the scene S2dMes has sprites, the ROM writes into low memory, the host stalled the boot with black frames (PC guard in msgShowSprite; hazards.md). Decisions: the handler tables stay per-object members like the ROM; the charset word 0x2f73e4 is a static 2 (SJIS); cmdInsertDigits clears m_insBuf instead of whatever m_ins points at (PC: comment). Doubt: expandText #K leaves a zero-byte gap the size of its digit count, as the ROM does (open-items.md).",
+   "ranges": [
+    [
+     "0018330c",
+     "00187724"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-28 22:23",
+     "status": "verify",
+     "summary": "MsgMan and MsgManSet written whole: 124 functions (0x18330c..0x187724, the unassigned@00184f2c run pinned into msg/msgman.cpp), the 41 #-tags with their exec and measure handlers as pointer-to-member tables, expandText, the three S2dMes message icons; 18 functions Ghidra had folded created and named"
+    }
+   ],
+   "status": "verify",
+   "why": "MsgMan's constructor 0x18330c fills two 41-entry pointer-to-member tables (+0x12c, +0x274) with the tag handlers 0x1857fc..0x187414; the run 0x184f2c..0x18741c are MsgMan methods (this+0x10 MagSystem, the tables at +0x270), MsgManSet 0x18741c..0x187724 wraps two MsgMan; ends at McdMan::McdMan"
+  },
   "rx/rxfile.cpp": {
    "notes": "Status verify: every function in 0x2437f8..0x249b88 is written, but nothing can show it: main 0x2045a8 is still the placeholder (black screen), and the rxthread functions rxThCreate / rxThGetParam / rxThGetIndex / rxThSetState / rxThSetPriority / rxThDelete / rxThSync are stubs in src/rx/rxthread.cpp, so the file thread never runs and any slot open (default load and size hooks, snd streams) would spin for ever on pending. Next: main (unassigned@001fd424), then rx/rxthread.cpp (0x249b88..0x24b490). The cdrom driver walks ISO 9660 itself, so a CDROM boot needs sceCdRead to read a disc image; src/sdk/libcdvd.cpp still serves FF3 IMG_BD.BIN (open-items Next up 6, a platform decision for the user). Decisions: DIntr/EIntr are a process-wide recursive SDL mutex; the ROM's Status save/restore and DI-error check are left out (rxFileSpin, callcheck comments). rxFileCdProcess gets step = priority + 1 from the thread block, as in the ROM. Renamed globals: s_cdCacheCount is s_cdDiscRead, s_cdCacheReset is s_cdNeedSetup, s_cdQueued0/1 are s_cdReadPos/2. Knowledge recorded in architecture.md (rx file layer), hazards.md (folded wrappers, hidden.py), open-items 5 and 6, README and SKILL tool tables.",
    "ranges": [
@@ -2133,6 +2151,7 @@
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},
   "unassigned@001810f4": {},
+  "unassigned@00184f2c": {},
   "unassigned@00190a78": {},
   "unassigned@00192ac0": {},
   "unassigned@001a0950": {},

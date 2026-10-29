@@ -9773,6 +9773,12 @@
   "was": "FUN_00183b24",
   "why": "the MsgMan destructor (flag 2 from MnuMcd's array destructor loop, stride 0x3bc)"
  },
+ "00183b74": {
+  "name": "MsgMan::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_00183b74",
+  "why": "the constructor's tail: clears window, flags, stream id -1"
+ },
  "00183bb8": {
   "name": "MsgMan::open",
   "tag": "ror-inferred",
@@ -9785,17 +9791,671 @@
   "was": "FUN_00183c4c",
   "why": "when open: window -1, four sub resets, stops its stream (SndMan::stopStream), +8 0"
  },
+ "00183ce0": {
+  "name": "msgUtf8ToLatin1",
+  "tag": "ror-inferred",
+  "was": "FUN_00183ce0",
+  "why": "2-byte UTF-8 to one byte into dst; setMessage uses it when the charset word 0x2f73e4 is 3"
+ },
  "00183db0": {
   "name": "MsgMan::setMessage",
   "tag": "ror-inferred",
   "was": "FUN_00183db0",
   "why": "copies a text into m_strBuf (msg/msgman.cpp assert) and lays it out in the scene window"
  },
+ "00184008": {
+  "name": "MsgMan::update",
+  "tag": "ror-inferred",
+  "was": "FUN_00184008",
+  "why": "MsgManSet::update's per-MsgMan call: process() while active"
+ },
+ "00184048": {
+  "name": "MsgMan::getDataText",
+  "tag": "ror-inferred",
+  "was": "FUN_00184048",
+  "why": "GamSysData::getField(id, 0xc), the unknown-text default"
+ },
+ "00184098": {
+  "name": "MsgMan::getTagText",
+  "tag": "ror-inferred",
+  "was": "FUN_00184098",
+  "why": "unreferenced: the text a #m tag at p names"
+ },
  "00184128": {
   "name": "MsgMan::expandText",
   "tag": "ror-inferred",
   "was": "FUN_00184128",
   "why": "MagScene::openSysMsgWindow: clears the record's output buffer (+0x44, size +0x48) and copies the source text (+0x40) into it, expanding tag codes with the record's 16 argument words"
+ },
+ "001844c4": {
+  "name": "MsgMan::matchTag",
+  "tag": "ror-inferred",
+  "was": "FUN_001844c4",
+  "why": "0 when p starts with tag (an empty tag matches the string end)"
+ },
+ "0018454c": {
+  "name": "MsgMan::countDigits",
+  "tag": "ror-inferred",
+  "was": "FUN_0018454c",
+  "why": "leading decimal digits"
+ },
+ "00184578": {
+  "name": "MsgMan::readInt",
+  "tag": "ror-inferred",
+  "was": "FUN_00184578",
+  "why": "atoi of the leading digits, returns their count"
+ },
+ "00184600": {
+  "name": "MsgMan::readHex",
+  "tag": "ror-inferred",
+  "was": "FUN_00184600",
+  "why": "strtol base 16 of the leading decimal-digit run"
+ },
+ "00184698": {
+  "name": "MsgMan::readDigits",
+  "tag": "ror-inferred",
+  "was": "FUN_00184698",
+  "why": "copies the leading digits (16-byte buffer)"
+ },
+ "00184710": {
+  "name": "MsgMan::findTag",
+  "tag": "ror-inferred",
+  "was": "FUN_00184710",
+  "why": "tag id at p from the table 0x299738, 0x29 for a plain character"
+ },
+ "001847bc": {
+  "name": "MsgMan::getTagName",
+  "tag": "ror-inferred",
+  "was": "FUN_001847bc",
+  "why": "tag id to its text"
+ },
+ "00184820": {
+  "name": "MsgMan::isSingleByte",
+  "tag": "ror-inferred",
+  "was": "FUN_00184820",
+  "why": "one-byte character for the charset word 0x2f73e4"
+ },
+ "00184874": {
+  "name": "MsgMan::isLeadByte",
+  "tag": "ror-inferred",
+  "was": "FUN_00184874",
+  "why": "SJIS lead byte (charset 3: never)"
+ },
+ "001848c4": {
+  "name": "MsgMan::drawChar",
+  "tag": "ror-inferred",
+  "was": "FUN_001848c4",
+  "why": "MagSystem::drawView one character at the cursor, x advances by its width"
+ },
+ "00184a94": {
+  "name": "MsgMan::process",
+  "tag": "ror-inferred",
+  "was": "FUN_00184a94",
+  "why": "the per-frame text runner: waits, scroll, tag handlers, characters"
+ },
+ "00184f2c": {
+  "name": "MsgMan::getLineWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_00184f2c",
+  "why": "sums getWindowTextWidth to the line end, measure handlers skip tags"
+ },
+ "001850fc": {
+  "name": "MsgMan::countLines",
+  "tag": "ror-inferred",
+  "was": "FUN_001850fc",
+  "why": "lines to the page end"
+ },
+ "00185268": {
+  "name": "MsgMan::showKeyIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_00185268",
+  "why": "S2dMes sprite 0 on (anim +0xcc - 1) / off"
+ },
+ "00185348": {
+  "name": "MsgMan::updateKeyIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_00185348",
+  "why": "S2dMes sprite 0 at the window + cursor"
+ },
+ "001853cc": {
+  "name": "MsgMan::showIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_001853cc",
+  "why": "S2dMes sprite 2 on (anim +0xd4 - 1) / off"
+ },
+ "001854ac": {
+  "name": "MsgMan::updateIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_001854ac",
+  "why": "S2dMes sprite 2 at the cursor, or the window bottom in key mode 2"
+ },
+ "00185594": {
+  "name": "MsgMan::showInlineIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_00185594",
+  "why": "S2dMes sprite 1 on (anim +0xdc - 1) / off"
+ },
+ "00185670": {
+  "name": "MsgMan::updateInlineIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_00185670",
+  "why": "S2dMes sprite 1 at its saved cursor"
+ },
+ "001856f4": {
+  "name": "MsgMan::setStyle",
+  "tag": "ror-inferred",
+  "was": "FUN_001856f4",
+  "why": "+0x24 = style"
+ },
+ "001856fc": {
+  "name": "MsgMan::applyStyle",
+  "tag": "ror-inferred",
+  "was": "FUN_001856fc",
+  "why": "empty in the ROM"
+ },
+ "00185704": {
+  "name": "MsgMan::applyFont",
+  "tag": "ror-inferred",
+  "was": "FUN_00185704",
+  "why": "window font words 30 / 34 from +0x88 / +0x8c"
+ },
+ "00185760": {
+  "name": "MsgMan::getLineStartX",
+  "tag": "ror-inferred",
+  "was": "FUN_00185760",
+  "why": "centred line start when +0x34, else 0"
+ },
+ "001857c8": {
+  "name": "MsgMan::getCenterOffset",
+  "tag": "ror-inferred",
+  "was": "FUN_001857c8",
+  "why": "height/2 - lines*lineH/2, +10 for line height 0x26"
+ },
+ "001857fc": {
+  "name": "MsgMan::cmdEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_001857fc",
+  "why": "tag 0 ## exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+0*8): returns 0; also entry 40 (the string end)"
+ },
+ "00185804": {
+  "name": "MsgMan::skipEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00185804",
+  "why": "tag 0 ## measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+0*8): skips its argument for getLineWidth / countLines"
+ },
+ "0018580c": {
+  "name": "MsgMan::cmdNewLine",
+  "tag": "ror-inferred",
+  "was": "FUN_0018580c",
+  "why": "tag 1 #n exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+1*8): x to the line start, y += line height"
+ },
+ "00185848": {
+  "name": "MsgMan::skipNewLine",
+  "tag": "ror-inferred",
+  "was": "FUN_00185848",
+  "why": "tag 1 #n measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+1*8): skips its argument for getLineWidth / countLines"
+ },
+ "00185850": {
+  "name": "MsgMan::startPage",
+  "tag": "ror-inferred",
+  "was": "FUN_00185850",
+  "why": "tag 2 #r exec handler and process's first step: font refresh, line start, vertical centring"
+ },
+ "00185954": {
+  "name": "MsgMan::skipNewPage",
+  "tag": "ror-inferred",
+  "was": "FUN_00185954",
+  "why": "tag 2 #r measure handler"
+ },
+ "0018595c": {
+  "name": "MsgMan::cmdDelay",
+  "tag": "ror-inferred",
+  "was": "FUN_0018595c",
+  "why": "tag 3 #d exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+3*8): n frames per character"
+ },
+ "001859cc": {
+  "name": "MsgMan::skipDelay",
+  "tag": "ror-inferred",
+  "was": "FUN_001859cc",
+  "why": "tag 3 #d measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+3*8): skips its argument for getLineWidth / countLines"
+ },
+ "001859fc": {
+  "name": "MsgMan::cmdDelaySkip",
+  "tag": "ror-inferred",
+  "was": "FUN_001859fc",
+  "why": "tag 4 #D exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+4*8): like #d and the cross button skips"
+ },
+ "00185a74": {
+  "name": "MsgMan::skipDelaySkip",
+  "tag": "ror-inferred",
+  "was": "FUN_00185a74",
+  "why": "tag 4 #D measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+4*8): skips its argument for getLineWidth / countLines"
+ },
+ "00185aa4": {
+  "name": "MsgMan::cmdColor",
+  "tag": "ror-inferred",
+  "was": "FUN_00185aa4",
+  "why": "tag 5 #c exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+5*8): hex colour or g<n> script global into +0x90"
+ },
+ "00185b58": {
+  "name": "MsgMan::skipColor",
+  "tag": "ror-inferred",
+  "was": "FUN_00185b58",
+  "why": "tag 5 #c measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+5*8): skips its argument for getLineWidth / countLines"
+ },
+ "00185bbc": {
+  "name": "MsgMan::cmdCenter",
+  "tag": "ror-inferred",
+  "was": "FUN_00185bbc",
+  "why": "tag 6 #C exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+6*8): +0x34 = 1, x = centred line start"
+ },
+ "00185bf8": {
+  "name": "MsgMan::skipCenter",
+  "tag": "ror-inferred",
+  "was": "FUN_00185bf8",
+  "why": "tag 6 #C measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+6*8): skips its argument for getLineWidth / countLines"
+ },
+ "00185c04": {
+  "name": "MsgMan::cmdCenterV",
+  "tag": "ror-inferred",
+  "was": "FUN_00185c04",
+  "why": "tag 7 #R exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+7*8): +0x84 = 1, centres the page's lines vertically"
+ },
+ "00185c84": {
+  "name": "MsgMan::skipCenterV",
+  "tag": "ror-inferred",
+  "was": "FUN_00185c84",
+  "why": "tag 7 #R measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+7*8): skips its argument for getLineWidth / countLines"
+ },
+ "00185c90": {
+  "name": "MsgMan::cmdTop",
+  "tag": "ror-inferred",
+  "was": "FUN_00185c90",
+  "why": "tag 8 #T exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+8*8): +0x84 = 0, window back to its top"
+ },
+ "00185cdc": {
+  "name": "MsgMan::skipTop",
+  "tag": "ror-inferred",
+  "was": "FUN_00185cdc",
+  "why": "tag 8 #T measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+8*8): skips its argument for getLineWidth / countLines"
+ },
+ "00185ce8": {
+  "name": "MsgMan::cmdLeft",
+  "tag": "ror-inferred",
+  "was": "FUN_00185ce8",
+  "why": "tag 9 #L exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+9*8): +0x34 = 0, left aligned"
+ },
+ "00185d20": {
+  "name": "MsgMan::skipLeft",
+  "tag": "ror-inferred",
+  "was": "FUN_00185d20",
+  "why": "tag 9 #L measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+9*8): skips its argument for getLineWidth / countLines"
+ },
+ "00185d2c": {
+  "name": "MsgMan::cmdInsertText",
+  "tag": "ror-inferred",
+  "was": "FUN_00185d2c",
+  "why": "tag 25 #m exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+25*8): inserts GamSysData text n (or g<n> global)"
+ },
+ "00185dec": {
+  "name": "MsgMan::skipInsertText",
+  "tag": "ror-inferred",
+  "was": "FUN_00185dec",
+  "why": "tag 25 #m measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+25*8): skips its argument for getLineWidth / countLines"
+ },
+ "00185ea4": {
+  "name": "MsgMan::cmdInsertDigits",
+  "tag": "ror-inferred",
+  "was": "FUN_00185ea4",
+  "why": "tag 26 #v exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+26*8): inserts the digits as full-width SJIS"
+ },
+ "00185f68": {
+  "name": "MsgMan::skipInsertDigits",
+  "tag": "ror-inferred",
+  "was": "FUN_00185f68",
+  "why": "tag 26 #v measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+26*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186018": {
+  "name": "MsgMan::cmdWait",
+  "tag": "ror-inferred",
+  "was": "FUN_00186018",
+  "why": "tag 27 #w exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+27*8): waits n frames"
+ },
+ "00186088": {
+  "name": "MsgMan::skipWait",
+  "tag": "ror-inferred",
+  "was": "FUN_00186088",
+  "why": "tag 27 #w measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+27*8): skips its argument for getLineWidth / countLines"
+ },
+ "001860c0": {
+  "name": "MsgMan::cmdStyle",
+  "tag": "ror-inferred",
+  "was": "FUN_001860c0",
+  "why": "tag 10 #G exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+10*8): style n: non-zero centres vertically with line height 0x26"
+ },
+ "001861cc": {
+  "name": "MsgMan::skipStyle",
+  "tag": "ror-inferred",
+  "was": "FUN_001861cc",
+  "why": "tag 10 #G measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+10*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186204": {
+  "name": "MsgMan::cmdX",
+  "tag": "ror-inferred",
+  "was": "FUN_00186204",
+  "why": "tag 11 #X exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+11*8): cursor x = n"
+ },
+ "00186258": {
+  "name": "MsgMan::skipX",
+  "tag": "ror-inferred",
+  "was": "FUN_00186258",
+  "why": "tag 11 #X measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+11*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186290": {
+  "name": "MsgMan::cmdY",
+  "tag": "ror-inferred",
+  "was": "FUN_00186290",
+  "why": "tag 12 #Y exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+12*8): cursor y = n"
+ },
+ "001862e4": {
+  "name": "MsgMan::skipY",
+  "tag": "ror-inferred",
+  "was": "FUN_001862e4",
+  "why": "tag 12 #Y measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+12*8): skips its argument for getLineWidth / countLines"
+ },
+ "0018631c": {
+  "name": "MsgMan::cmdWindowX",
+  "tag": "ror-inferred",
+  "was": "FUN_0018631c",
+  "why": "tag 13 #[ exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+13*8): window x = n (setWindowPos)"
+ },
+ "001863bc": {
+  "name": "MsgMan::skipWindowX",
+  "tag": "ror-inferred",
+  "was": "FUN_001863bc",
+  "why": "tag 13 #[ measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+13*8): skips its argument for getLineWidth / countLines"
+ },
+ "001863f4": {
+  "name": "MsgMan::cmdWindowY",
+  "tag": "ror-inferred",
+  "was": "FUN_001863f4",
+  "why": "tag 14 #] exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+14*8): window y = n (setWindowPos)"
+ },
+ "00186494": {
+  "name": "MsgMan::skipWindowY",
+  "tag": "ror-inferred",
+  "was": "FUN_00186494",
+  "why": "tag 14 #] measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+14*8): skips its argument for getLineWidth / countLines"
+ },
+ "001864cc": {
+  "name": "MsgMan::cmdFont30",
+  "tag": "ror-inferred",
+  "was": "FUN_001864cc",
+  "why": "tag 15 #j exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+15*8): setWindowFontWord30(n)"
+ },
+ "00186540": {
+  "name": "MsgMan::skipFont30",
+  "tag": "ror-inferred",
+  "was": "FUN_00186540",
+  "why": "tag 15 #j measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+15*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186578": {
+  "name": "MsgMan::cmdFont34",
+  "tag": "ror-inferred",
+  "was": "FUN_00186578",
+  "why": "tag 16 #J exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+16*8): setWindowFontWord34(n)"
+ },
+ "001865ec": {
+  "name": "MsgMan::skipFont34",
+  "tag": "ror-inferred",
+  "was": "FUN_001865ec",
+  "why": "tag 16 #J measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+16*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186624": {
+  "name": "MsgMan::cmdFadeIn",
+  "tag": "ror-inferred",
+  "was": "FUN_00186624",
+  "why": "tag 17 #F exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+17*8): fadeInWindow and the three icon sprites over n"
+ },
+ "00186714": {
+  "name": "MsgMan::skipFadeIn",
+  "tag": "ror-inferred",
+  "was": "FUN_00186714",
+  "why": "tag 17 #F measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+17*8): skips its argument for getLineWidth / countLines"
+ },
+ "0018674c": {
+  "name": "MsgMan::cmdFadeOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0018674c",
+  "why": "tag 18 #f exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+18*8): fadeOutWindow and the three icon sprites over n"
+ },
+ "00186804": {
+  "name": "MsgMan::skipFadeOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00186804",
+  "why": "tag 18 #f measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+18*8): skips its argument for getLineWidth / countLines"
+ },
+ "0018683c": {
+  "name": "MsgMan::cmdSkipNumber",
+  "tag": "ror-inferred",
+  "was": "FUN_0018683c",
+  "why": "tag 19 #A exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+19*8): reads a number and ignores it"
+ },
+ "00186880": {
+  "name": "MsgMan::skipSkipNumber",
+  "tag": "ror-inferred",
+  "was": "FUN_00186880",
+  "why": "tag 19 #A measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+19*8): skips its argument for getLineWidth / countLines"
+ },
+ "001868b8": {
+  "name": "MsgMan::cmdFadeOutSprite3",
+  "tag": "ror-inferred",
+  "was": "FUN_001868b8",
+  "why": "tag 20 #a exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+20*8): S2dMes sprite 3 fades out over n"
+ },
+ "00186928": {
+  "name": "MsgMan::skipFadeOutSprite3",
+  "tag": "ror-inferred",
+  "was": "FUN_00186928",
+  "why": "tag 20 #a measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+20*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186960": {
+  "name": "MsgMan::cmdVoice",
+  "tag": "ror-inferred",
+  "was": "FUN_00186960",
+  "why": "tag 21 #V exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+21*8): plays stream n (GamSndMan::playStr), stops the last"
+ },
+ "00186a04": {
+  "name": "MsgMan::skipVoice",
+  "tag": "ror-inferred",
+  "was": "FUN_00186a04",
+  "why": "tag 21 #V measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+21*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186a3c": {
+  "name": "MsgMan::cmdStopVoice",
+  "tag": "ror-inferred",
+  "was": "FUN_00186a3c",
+  "why": "tag 22 #s exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+22*8): stops the voice stream"
+ },
+ "00186ab4": {
+  "name": "MsgMan::skipStopVoice",
+  "tag": "ror-inferred",
+  "was": "FUN_00186ab4",
+  "why": "tag 22 #s measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+22*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186aec": {
+  "name": "MsgMan::cmdIconWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_00186aec",
+  "why": "tag 23 #W exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+23*8): +0x40 = n (icon / unknown-byte advance)"
+ },
+ "00186b44": {
+  "name": "MsgMan::skipIconWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_00186b44",
+  "why": "tag 23 #W measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+23*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186b80": {
+  "name": "MsgMan::cmdLineHeight",
+  "tag": "ror-inferred",
+  "was": "FUN_00186b80",
+  "why": "tag 24 #H exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+24*8): +0x44 = n, re-centres"
+ },
+ "00186c38": {
+  "name": "MsgMan::skipLineHeight",
+  "tag": "ror-inferred",
+  "was": "FUN_00186c38",
+  "why": "tag 24 #H measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+24*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186c70": {
+  "name": "MsgMan::cmdNumber28",
+  "tag": "ror-inferred",
+  "was": "FUN_00186c70",
+  "why": "tag 28 #s exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+28*8): second #s entry, shadowed by 22: reads a number"
+ },
+ "00186cb8": {
+  "name": "MsgMan::skipNumber28",
+  "tag": "ror-inferred",
+  "was": "FUN_00186cb8",
+  "why": "tag 28 #s measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+28*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186cf4": {
+  "name": "MsgMan::cmdPause",
+  "tag": "ror-inferred",
+  "was": "FUN_00186cf4",
+  "why": "tag 29 #p exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+29*8): toggles +0x20 (pause)"
+ },
+ "00186d0c": {
+  "name": "MsgMan::skipPause",
+  "tag": "ror-inferred",
+  "was": "FUN_00186d0c",
+  "why": "tag 29 #p measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+29*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186d14": {
+  "name": "MsgMan::cmdKeyWait",
+  "tag": "ror-inferred",
+  "was": "FUN_00186d14",
+  "why": "tag 30 #K exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+30*8): waits for cross with key icon anim n (S2dMes sprite 0)"
+ },
+ "00186dc4": {
+  "name": "MsgMan::skipKeyWait",
+  "tag": "ror-inferred",
+  "was": "FUN_00186dc4",
+  "why": "tag 30 #K measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+30*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186df4": {
+  "name": "MsgMan::showChoiceIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_00186df4",
+  "why": "expandText's #K: icon n on sprite 2 at the choice line"
+ },
+ "00186ef4": {
+  "name": "MsgMan::cmdIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_00186ef4",
+  "why": "tag 31 #I exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+31*8): icon anim n on S2dMes sprite 2"
+ },
+ "00186f90": {
+  "name": "MsgMan::skipIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_00186f90",
+  "why": "tag 31 #I measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+31*8): skips its argument for getLineWidth / countLines"
+ },
+ "00186fc0": {
+  "name": "MsgMan::cmdKeyWaitIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_00186fc0",
+  "why": "tag 32 #i exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+32*8): waits for cross with sprite 2 icon n at the window bottom"
+ },
+ "0018704c": {
+  "name": "MsgMan::skipKeyWaitIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_0018704c",
+  "why": "tag 32 #i measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+32*8): skips its argument for getLineWidth / countLines"
+ },
+ "0018707c": {
+  "name": "MsgMan::cmdInlineIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_0018707c",
+  "why": "tag 33 #/ exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+33*8): icon n at the cursor (S2dMes sprite 1), x advances"
+ },
+ "00187114": {
+  "name": "MsgMan::skipInlineIcon",
+  "tag": "ror-inferred",
+  "was": "FUN_00187114",
+  "why": "tag 33 #/ measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+33*8): skips its argument for getLineWidth / countLines"
+ },
+ "00187144": {
+  "name": "MsgMan::cmdScroll",
+  "tag": "ror-inferred",
+  "was": "FUN_00187144",
+  "why": "tag 34 #S exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+34*8): scrolls n%10 lines over n/10 frames"
+ },
+ "00187220": {
+  "name": "MsgMan::skipScroll",
+  "tag": "ror-inferred",
+  "was": "FUN_00187220",
+  "why": "tag 34 #S measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+34*8): skips its argument for getLineWidth / countLines"
+ },
+ "00187250": {
+  "name": "MsgMan::cmdProportional",
+  "tag": "ror-inferred",
+  "was": "FUN_00187250",
+  "why": "tag 35 #b exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+35*8): setWindowProportional(1)"
+ },
+ "0018728c": {
+  "name": "MsgMan::skipProportional",
+  "tag": "ror-inferred",
+  "was": "FUN_0018728c",
+  "why": "tag 35 #b measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+35*8): skips its argument for getLineWidth / countLines"
+ },
+ "00187294": {
+  "name": "MsgMan::cmdFixed",
+  "tag": "ror-inferred",
+  "was": "FUN_00187294",
+  "why": "tag 36 #B exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+36*8): setWindowProportional(0)"
+ },
+ "001872cc": {
+  "name": "MsgMan::skipFixed",
+  "tag": "ror-inferred",
+  "was": "FUN_001872cc",
+  "why": "tag 36 #B measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+36*8): skips its argument for getLineWidth / countLines"
+ },
+ "001872d4": {
+  "name": "MsgMan::cmdInsertGlobal",
+  "tag": "ror-inferred",
+  "was": "FUN_001872d4",
+  "why": "tag 37 #g exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+37*8): inserts script global n as %d"
+ },
+ "00187368": {
+  "name": "MsgMan::skipInsertGlobal",
+  "tag": "ror-inferred",
+  "was": "FUN_00187368",
+  "why": "tag 37 #g measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+37*8): skips its argument for getLineWidth / countLines"
+ },
+ "001873fc": {
+  "name": "MsgMan::cmdQuit",
+  "tag": "ror-inferred",
+  "was": "FUN_001873fc",
+  "why": "tag 38 #q exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+38*8): returns 1; process ends the text on #q first"
+ },
+ "00187404": {
+  "name": "MsgMan::skipQuit",
+  "tag": "ror-inferred",
+  "was": "FUN_00187404",
+  "why": "tag 38 #q measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+38*8): skips its argument for getLineWidth / countLines"
+ },
+ "0018740c": {
+  "name": "MsgMan::cmdNop",
+  "tag": "ror-inferred",
+  "was": "FUN_0018740c",
+  "why": "tag 39 #_ exec handler (MsgMan's constructor stores it in its tag-handler table +0x12c+39*8): returns 0"
+ },
+ "00187414": {
+  "name": "MsgMan::skipNop",
+  "tag": "ror-inferred",
+  "was": "FUN_00187414",
+  "why": "tag 39 #_ measure handler (MsgMan's constructor stores it in its tag-handler table +0x274+39*8): skips its argument for getLineWidth / countLines"
  },
  "0018741c": {
   "name": "MsgManSet::open",
@@ -9832,6 +10492,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0018761c",
   "why": "MsgManSet method (strides 0xef words over the two MsgMan): the MsgMan showing window gets four resets with 0, m_window -1 and word 1 = 1; TskMsgMan::exec calls it when the message ends"
+ },
+ "001876b0": {
+  "name": "MsgManSet::togglePause",
+  "tag": "ror-inferred",
+  "was": "FUN_001876b0",
+  "why": "unreferenced: toggles the window's MsgMan +0x20 pause"
+ },
+ "001876e8": {
+  "name": "MsgManSet::setDelay",
+  "tag": "ror-inferred",
+  "was": "FUN_001876e8",
+  "why": "unreferenced: forces the window's MsgMan character delay"
  },
  "00187724": {
   "name": "McdMan::McdMan",

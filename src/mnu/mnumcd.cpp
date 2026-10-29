@@ -5,8 +5,7 @@
  *  and the name from the class, between MnuTextList's mnu/mnuselect.cpp
  *  and mnu/mnudlg.cpp). See mnu/mnumcd.h.
  *
- *  PORT: MsgMan (msg/msgman.cpp) is not written yet: until it is, the
- *  check's windows stay empty. McdMan (mcd/mcdman.cpp) runs the card
+ *  PORT: McdMan (mcd/mcdman.cpp) runs the card
  *  commands over the host card directories of src/sdk/libmc.cpp.
  * ======================================================================== */
 #include "mnu/mnumcd.h"
@@ -91,7 +90,7 @@ static int mcdErrorState(int result)
 
 /* ---- the menu ---- */
 
-// ROR 0x001a1244; callcheck: McdMan, MsgMan (member constructors, not written: the members start zeroed in the global scene)
+// ROR 0x001a1244; callcheck: McdMan, MsgMan (member constructors: implicit on the host)
 MnuMcd::MnuMcd()
 {
     m_open = 0;

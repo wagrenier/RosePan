@@ -40,8 +40,7 @@ struct MagSystem;
 struct MnuMcd
 {
     /* callcheck: McdMan::McdMan (the member's constructor, implicit on the
-     * host), MsgMan::MsgMan (not written: the member starts zeroed in the
-     * global scene). */
+     * host), MsgMan::MsgMan (implicit). */
     MnuMcd();                                                            // ROR 0x001a1244
     /* callcheck: MsgMan::~MsgMan, McdMan::~McdMan (implicit). */
     ~MnuMcd();                                                           // ROR 0x001a12a8

@@ -4283,7 +4283,7 @@ int TskSeqEvent::stepGrow()
 // ──────────────────────────────────────────────────────────────────────
 // Opens the window from the words param (writing 0x8001 into the caller's
 // p[2], the view's flag), fills it and shows "#C" + text. arg is not read.
-// ROR 0x001f4a24 // callcheck: MsgMan::MsgMan (MsgManSet's members construct zeroed on the host)
+// ROR 0x001f4a24 // callcheck: MsgMan::MsgMan (MsgManSet's members: implicit on the host)
 
 TskMsgMan::TskMsgMan(const char *text, int arg, int *param, int fill, int mode, int time)
 {

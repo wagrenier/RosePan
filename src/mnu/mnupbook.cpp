@@ -89,7 +89,7 @@ static inline int mnuPBookSheetOf(int page)
 
 // ──────────────────────────────────────────────────────────────────────
 // MnuPBook
-// ROR 0x00196a9c; callcheck: mnuBase, MsgMan (the inline base constructor; the MsgManSet members construct zeroed on the host)
+// ROR 0x00196a9c; callcheck: mnuBase, MsgMan (the inline base constructor; the MsgManSet members: implicit on the host)
 
 MnuPBook::MnuPBook()
 {
@@ -700,7 +700,7 @@ void MnuPBook::setPageText(int page)
 
 // ──────────────────────────────────────────────────────────────────────
 // MnuDiary
-// ROR 0x00198720; callcheck: mnuBase, MsgMan (the inline base constructor; the MsgManSet members construct zeroed on the host)
+// ROR 0x00198720; callcheck: mnuBase, MsgMan (the inline base constructor; the MsgManSet members: implicit on the host)
 
 MnuDiary::MnuDiary()
 {
