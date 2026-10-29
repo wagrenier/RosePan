@@ -1344,7 +1344,15 @@ camera with light set 0, fog record 0 when +0x2aa84, view 0; Eff0::RENDERPARAM {
 slots 1 dtor, 2 init(param), 3 term, 4 live, 5 liveMain (pure), 6 render, 7 renderPreMain, 8
 renderMain (pure), 9 createPacketEntry, 10 setVisible, 11 liveActivateExec, 12 updateZDepth.
 0x8282a0[54] is the per-kind draw-set cache (cleared each frame by effClearDrawSets 0x16add8);
-0x828378[256] a random permutation (effInitRandTable 0x16ac84).
+0x828378[256] a random permutation (effInitRandTable 0x16ac84: each pick a random distance of at least
+a quarter of the rest past the last; effRand 0x16ad94 returns the next byte, cursor 0x308050).
+`eff/eff0.cpp` (0x16a914..0x16afcc, 2026-10-28) holds Eff0 and these helpers: live waits out m_delay,
+runs liveActivateExec when flag 8 is set (Eff0's clears it), counts m_life down (flag 2 at 0), returns
+liveMain; render (m_delay < 0) picks layer[0]; renderPreMain makes the kind's draw set once a frame from
+createPacketEntry (the pack's textures, files nI3r + nI3m.., depth 1) and wraps renderMain in a key-0
+set node. effFogColor 0x16ae00 tints an rgb by fog record 0 (scene +0x2aae0) at a depth (the full fog
+colour past far, a squared ramp of the two amounts between); effAmbientColor 0x16af20 by ambient light
+0 of the scene's light pool. The constructor's m_z is the int 0x7fffffff (hazards.md).
 **createEff's kinds -> classes** (0x176cc8; EE object sizes in src/eff/effclasses.h): 1 BloodSpray1,
 2 BloodSpray2, 3 BloodStay1, 4 BloodStay2, 5 BloodStay3, 6 BloodStay3Prim, 8 Breath1, 9 Breath1Space,
 0xa Breath2, 0xb Breath2Prim, 0xc Breath2Ground, 0xd CameraAnim1, 0x11 Cloud1, 0x12 Dust2, 0x13 Dust2Prim,

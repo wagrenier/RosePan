@@ -7607,11 +7607,29 @@
   "was": "FUN_0016ac84",
   "why": "fills 0x828378[256] with a random permutation of 0..255 and clears the index 0x308050; EffMan::init calls it"
  },
+ "0016ad94": {
+  "name": "effRand",
+  "tag": "ror-inferred",
+  "was": "FUN_0016ad94",
+  "why": "advances the cursor 0x308050 mod 256 and returns that byte of the permutation table 0x828378 effInitRandTable fills; 43 callers in the Eff classes"
+ },
  "0016add8": {
   "name": "effClearDrawSets",
   "tag": "ror-inferred",
   "was": "FUN_0016add8",
   "why": "clears the per-kind draw-set cache 0x8282a0[54] that Eff0::renderPreMain fills; EffMan::draw calls it each frame"
+ },
+ "0016ae00": {
+  "name": "effFogColor",
+  "tag": "ror-inferred",
+  "was": "FUN_0016ae00",
+  "why": "scales an rgb by the scene's fog record 0 (+0x2aae0) at a depth: unchanged before near, times the fog colour past far, between them lerp(1, colour, amount ramp of the squared fraction)"
+ },
+ "0016af20": {
+  "name": "effAmbientColor",
+  "tag": "ror-inferred",
+  "was": "FUN_0016af20",
+  "why": "scales an rgb by the scene light pool's ambient light 0 colour (inline DogLightPool::getAmbientLight, doglightpool.h line 129 asserts)"
  },
  "0016afcc": {
   "name": "EffBg1::EffBg1",
@@ -28487,6 +28505,12 @@
   "was": "FUN_0026cb18",
   "why": "newlib wrapper (two float args) tail-jumping to 0x26dac0; native 020 case 60 wraps an angle with fmodf(x, 2 pi)"
  },
+ "0026cb30": {
+  "name": "powf",
+  "tag": "lib-context",
+  "was": "FUN_0026cb30",
+  "why": "newlib w_powf reduced to a tail jump to __ieee754_powf (f12 base, f13 exponent; effFogColor squares a fraction with exponent 2.0)"
+ },
  "0026cb48": {
   "name": "sqrtf",
   "tag": "lib-context",
@@ -28498,6 +28522,12 @@
   "tag": "lib-context",
   "was": "FUN_0026d540",
   "why": "newlib e_asinf: |x| == 0x3f800000 -> x * pio2_hi (0x3fc90fda) + x * pio2_lo (0x33a22168)"
+ },
+ "0026dc90": {
+  "name": "__ieee754_powf",
+  "tag": "lib-context",
+  "was": "FUN_0026dc90",
+  "why": "0x7e0-byte float function of two float args jumped to by powf; newlib e_powf size"
  },
  "00278288": {
   "name": "atof",

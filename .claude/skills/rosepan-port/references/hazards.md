@@ -250,6 +250,9 @@ entries are marked **RoR** with the date.
 - **`param_1 != -0x240` in a decompile is a null test of `&obj->member`**: a sub-struct at that offset.
 - **EE float literals are not always round-to-nearest**: read the bits, write hex floats.
 - **EE float division by zero is not IEEE**: +-MAX, and 0 * MAX = 0; the host gives inf / NaN. Guard.
+- **An int 0x7fffffff stored into a float field is the EE's largest value, a NaN on the host** (Eff0::Eff0
+  sets Eff0::m_z this way; EffMan's depth sort compares it): every host comparison with it is false, so
+  sorts and range tests break. Write FLT_MAX with a PC: comment.
 - **Twin functions that differ only in an `ldl` / `sdl` copy are overloads on the matrix type**: one
   writes an aligned `sceVu0FMATRIX` straight through, the other builds it in an aligned temporary and
   copies it out unaligned -- an `I3dMatrixF4x4 *` (4-aligned struct; DogModel's symbols overload on

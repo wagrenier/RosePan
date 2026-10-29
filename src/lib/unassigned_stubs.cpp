@@ -1379,31 +1379,7 @@ int MagLifePC::testObjHit(const float *pos, u_int *oid)
     return {};
 }
 
-// stub of ROR 0x0016add8
-void effClearDrawSets()
-{
-    ROSEPAN_STUB("effClearDrawSets", 0x0016add8);
-}
-
-// stub of ROR 0x0016ac84
-void effInitRandTable()
-{
-    ROSEPAN_STUB("effInitRandTable", 0x0016ac84);
-}
-
 // ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----
-
-// stub of ROR 0x0016a914
-Eff0::Eff0()
-{
-    ROSEPAN_STUB("Eff0::Eff0", 0x0016a914);
-}
-
-// stub of ROR 0x0016a950
-Eff0::~Eff0()
-{
-    ROSEPAN_STUB("Eff0::~Eff0", 0x0016a950);
-}
 
 // stub of ROR 0x0016b62c
 EffBloodSpray1::EffBloodSpray1()
@@ -1499,63 +1475,6 @@ EffWater3::EffWater3()
 EffWater3::~EffWater3()
 {
     ROSEPAN_STUB("EffWater3::~EffWater3", 0x0017b010);
-}
-
-// stub of ROR 0x0016abe4
-I3dDrawSet * Eff0::createPacketEntry(I3dLayer *layer)
-{
-    ROSEPAN_STUB("Eff0::createPacketEntry", 0x0016abe4);
-    return {};
-}
-
-// stub of ROR 0x0016a9ac
-int Eff0::init(const EffParam *param)
-{
-    ROSEPAN_STUB("Eff0::init", 0x0016a9ac);
-    return {};
-}
-
-// stub of ROR 0x0016aa2c
-int Eff0::live()
-{
-    ROSEPAN_STUB("Eff0::live", 0x0016aa2c);
-    return {};
-}
-
-// stub of ROR 0x0028adf8
-void Eff0::liveActivateExec()
-{
-    ROSEPAN_STUB("Eff0::liveActivateExec", 0x0028adf8);
-}
-
-// stub of ROR 0x0016aacc
-void Eff0::render(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("Eff0::render", 0x0016aacc);
-}
-
-// stub of ROR 0x0016ab10
-void Eff0::renderPreMain(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("Eff0::renderPreMain", 0x0016ab10);
-}
-
-// stub of ROR 0x0016aa04
-void Eff0::setVisible(bool on)
-{
-    ROSEPAN_STUB("Eff0::setVisible", 0x0016aa04);
-}
-
-// stub of ROR 0x0016a9e0
-void Eff0::term()
-{
-    ROSEPAN_STUB("Eff0::term", 0x0016a9e0);
-}
-
-// stub of ROR 0x0028ae18
-void Eff0::updateZDepth()
-{
-    ROSEPAN_STUB("Eff0::updateZDepth", 0x0028ae18);
 }
 
 // stub of ROR 0x0016b060
