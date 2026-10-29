@@ -6725,6 +6725,198 @@
   "was": "FUN_00149d18",
   "why": "called right after the vtable store in the ELF's inline BdsMain::BdsMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
  },
+ "00149eb0": {
+  "name": "BdsMain::~BdsMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00149eb0",
+  "why": "BdsMain vtable 0x2e2280 slot 1: ~EmyMain then operator_delete on the deleting flag"
+ },
+ "00149f10": {
+  "name": "BdsMain::decide",
+  "tag": "ror-inferred",
+  "was": "FUN_00149f10",
+  "why": "BdsMain vtable slot 4 (decide in every EmyMain class, cf. HfmMain::decide): picks m_req from the inputs at +0x208"
+ },
+ "0014a034": {
+  "name": "BdsMain::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a034",
+  "why": "BdsMain vtable slot 5: EmyStateMap::next on m_req, state 6 forced on notify bit 2, as HfmMain::exec"
+ },
+ "0014a0dc": {
+  "name": "BdsMain::after",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a0dc",
+  "why": "BdsMain vtable slot 6: Term the out and selectOut on a change, then m_req = out->Exec(), as HfmMain::after"
+ },
+ "0014a158": {
+  "name": "BdsMain::selectOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a158",
+  "why": "BdsMain vtable slot 2: m_out[m_state] Init, the transition row into the inputs, as HfmMain::selectOut"
+ },
+ "0014a21c": {
+  "name": "BdsMain::isPCSameArea",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a21c",
+  "why": "calls EmyMain::isPCSameArea; decide's input 1 test (HfmMain::isPCSameArea's twin)"
+ },
+ "0014a230": {
+  "name": "BdsMain::returnFalse",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a230",
+  "why": "returns 0; decide's input 2 test, never true"
+ },
+ "0014a240": {
+  "name": "BdsMain::isPCStateClass4",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a240",
+  "why": "MagSystem::getPCStateClass == 4 (HfmMain::isPCStateClass4's twin)"
+ },
+ "0014a268": {
+  "name": "BdsMain::isPCInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a268",
+  "why": "emyChkInSight(param 0x5f, pi, 1, PC oid) (HfmMain::isPCInSight's twin)"
+ },
+ "0014a2cc": {
+  "name": "BdsOutWalk::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a2cc",
+  "why": "BdsOutWalk vtable 0x2e22c0 slot 2"
+ },
+ "0014a2f8": {
+  "name": "BdsOutWalk::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a2f8",
+  "why": "BdsOutWalk vtable slot 3: roam / idle steps like HfmOutWalk::Exec"
+ },
+ "0014a450": {
+  "name": "BdsOutWalk::getRoamPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a450",
+  "why": "HfmOutWalk::getRoamPos's code with +-500: a reachable point around home param 0x59"
+ },
+ "0014a700": {
+  "name": "BdsOutWalk::startIdle",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a700",
+  "why": "r < 86: a walk motion 1 / 0x1c / 0x1d in place (step 2), else motion 0x14 (step 3), as HfmOutWalk::startIdle"
+ },
+ "0014a78c": {
+  "name": "BdsOutWalk::setWalkMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a78c",
+  "why": "chrMtnMove2Achr(motion) at the emy's speed, flags 0x100 (HfmOutWalk2::setWalkMotion's twin)"
+ },
+ "0014a7f8": {
+  "name": "BdsOutWalk::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a7f8",
+  "why": "BdsOutWalk vtable slot 4: termCommon"
+ },
+ "0014a814": {
+  "name": "BdsOutWalk::setStep",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a814",
+  "why": "a new step zeroes the count +0x38 (HfmOutWalk::setStep's twin)"
+ },
+ "0014a830": {
+  "name": "BdsOutStared::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a830",
+  "why": "BdsOutStared vtable 0x2e22f0 slot 2: step 0 then its own Exec"
+ },
+ "0014a860": {
+  "name": "BdsOutStared::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a860",
+  "why": "BdsOutStared vtable slot 3: turn to the barking dog, motion 0x17 while magBwnIsBarkPhase3"
+ },
+ "0014a9cc": {
+  "name": "BdsOutStared::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a9cc",
+  "why": "BdsOutStared vtable slot 4: termCommon"
+ },
+ "0014a9e8": {
+  "name": "BdsOutStared::isDogAhead",
+  "tag": "ror-inferred",
+  "was": "FUN_0014a9e8",
+  "why": "the angle from getBasePos to emyGetDogPos less the actor's rot y (wrapped) into *angle; 1 within +-range / 2"
+ },
+ "0014ab38": {
+  "name": "BdsOutSearch::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014ab38",
+  "why": "BdsOutSearch vtable 0x2e2320 slot 2: selectTarget, emyStartChase(10)"
+ },
+ "0014ab74": {
+  "name": "BdsOutSearch::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014ab74",
+  "why": "BdsOutSearch vtable slot 3: emyChkChase(200, pi) -> input 6 / 4 / 7"
+ },
+ "0014ac24": {
+  "name": "BdsOutSearch::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014ac24",
+  "why": "BdsOutSearch vtable slot 4: termCommon"
+ },
+ "0014ac40": {
+  "name": "BdsOutAtk::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014ac40",
+  "why": "BdsOutAtk vtable 0x2e2350 slot 2: chase at 75, SE 0xb"
+ },
+ "0014ac98": {
+  "name": "BdsOutAtk::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014ac98",
+  "why": "BdsOutAtk vtable slot 3: in sight -> attack motion 0x20 / 0x21 with hit windows, scnChrRequest words 0x1d / 0x1e"
+ },
+ "0014b180": {
+  "name": "BdsOutAtk::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b180",
+  "why": "BdsOutAtk vtable slot 4: termCommon"
+ },
+ "0014b19c": {
+  "name": "BdsOutWin::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b19c",
+  "why": "BdsOutWin vtable 0x2e2380 slot 2: motion 0x15, looping SE 0xd"
+ },
+ "0014b1f4": {
+  "name": "BdsOutWin::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b1f4",
+  "why": "BdsOutWin vtable slot 3"
+ },
+ "0014b25c": {
+  "name": "BdsOutWin::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b25c",
+  "why": "BdsOutWin vtable slot 4: termCommon"
+ },
+ "0014b278": {
+  "name": "BdsOutDead::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b278",
+  "why": "BdsOutDead vtable 0x2e23b0 slot 2: effect kind 3, hidden, motion 10 / 11 by IsDownSupine (HfmOutDead::Init's twin)"
+ },
+ "0014b398": {
+  "name": "BdsOutDead::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b398",
+  "why": "BdsOutDead vtable slot 3: returns -1"
+ },
+ "0014b3a0": {
+  "name": "BdsOutDead::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014b3a0",
+  "why": "BdsOutDead vtable slot 4: termCommon"
+ },
  "0014b3bc": {
   "name": "BdlMain::initOut",
   "tag": "ror-inferred",

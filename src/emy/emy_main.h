@@ -297,9 +297,10 @@ int  emyChkInSight(float range, float angle, int useAngle, u_int target,
 void emyStartChase(float range, EmyOut *out, u_int target);              // ROR 0x00166f50
 /* PC: the inlines emy_out.cpp and emy_main.cpp share. The actor no's
  * node name world position (DogModel::getNodeIndexByName and the matrix's
- * translation row); an angle wrapped into -pi..pi (in double, as the ROM)
- * and its size. */
+ * translation row); an angle wrapped into -pi..pi (in double, as the ROM;
+ * emy_bds.cpp too) and its size. */
 void  emyGetNodePos(int no, const char *name, float *pos);
+float emyWrapAngle(float d);
 float emyAbsAngle(float d);
 /* sqrt(x*x + y*y + z*z). */
 float emyVecLength(const float *v);                                      // ROR 0x00169a14

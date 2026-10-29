@@ -1134,6 +1134,13 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-29, emy/emy_bds.cpp) **Bds ROM oddities ported as they are**: BdsOutStared step 1 waits
+  for m_move_done after a chrRotMotion turn (only move tasks set it, so it may wait until the bark
+  ends and hands back input 6); BdsOutWin::Exec's chase range +0x38 is never set (Init's step 1 keeps
+  Exec from reading it); BdsOutWalk roams only when emyVecLength of the roam point itself (not the
+  way to it) is at least 100. Check against the picture when a Bds first shows (watch it face Brown's
+  bark).
+
 - (2026-10-29, bed/bedsubmode.cpp) **Flaky boot: the smoke run sometimes stays black from frame ~1680**
   (the logo -> title fade) to the end of the run instead of showing the title at ~1860 and going on
   into the game. Same exe, same pad: 2 of 4 runs of this session went black, the others (and the one

@@ -80,7 +80,7 @@ void emyGetNodePos(int no, const char *name, float *pos)
 }
 
 /* PC: the wrap of an angle into -pi..pi the ROM inlines (in double). */
-static float emyWrapAngle(float d)
+float emyWrapAngle(float d)
 {
     if ((double)d < -3.141592653589793)
         d = (float)((double)d + 6.283185307179586);

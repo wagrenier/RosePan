@@ -112,24 +112,8 @@ public:
     void initOut();                                                      // ROR 0x00156620
 };
 
-/* Type 4 (vtable from rtti.py; EE 0x228). layout: host -- polymorphic. */
-class BdsMain : public EmyMain
-{
-public:
-    BdsMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x0028621c
-            const _tagEnemyTransition *trans, float *pos)
-        : EmyMain(oid, name, param, prm, trans, pos)
-    {
-        initOut();
-    }
-    ~BdsMain();                                                         // EE slot 1 (+0x08), ROR 0x00149eb0
-    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x0014a158
-    int  GetType() { return 4; }                                       // EE slot 3 (+0x18), ROR 0x00286254
-    void decide();                                                       // EE slot 4 (+0x20), ROR 0x00149f10
-    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0014a034
-    void after();                                                        // EE slot 6 (+0x30), ROR 0x0014a0dc
-    void initOut();                                                      // ROR 0x00149d18
-};
+/* Type 4, BdsMain: emy/emy_bds.h. */
+#include "emy/emy_bds.h"
 
 /* Type 5 (vtable from rtti.py; EE 0x228). layout: host -- polymorphic. */
 class BdlMain : public EmyMain

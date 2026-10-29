@@ -135,12 +135,6 @@ FshMain::~FshMain()
     ROSEPAN_STUB("FshMain::~FshMain", 0x00155d54);
 }
 
-// stub of ROR 0x00149eb0
-BdsMain::~BdsMain()
-{
-    ROSEPAN_STUB("BdsMain::~BdsMain", 0x00149eb0);
-}
-
 // stub of ROR 0x0014b554
 BdlMain::~BdlMain()
 {
@@ -553,36 +547,6 @@ void BdlMain::initOut()
 void BdlMain::selectOut()
 {
     ROSEPAN_STUB("BdlMain::selectOut", 0x0014b7fc);
-}
-
-// stub of ROR 0x0014a0dc
-void BdsMain::after()
-{
-    ROSEPAN_STUB("BdsMain::after", 0x0014a0dc);
-}
-
-// stub of ROR 0x00149f10
-void BdsMain::decide()
-{
-    ROSEPAN_STUB("BdsMain::decide", 0x00149f10);
-}
-
-// stub of ROR 0x0014a034
-void BdsMain::exec()
-{
-    ROSEPAN_STUB("BdsMain::exec", 0x0014a034);
-}
-
-// stub of ROR 0x00149d18
-void BdsMain::initOut()
-{
-    ROSEPAN_STUB("BdsMain::initOut", 0x00149d18);
-}
-
-// stub of ROR 0x0014a158
-void BdsMain::selectOut()
-{
-    ROSEPAN_STUB("BdsMain::selectOut", 0x0014a158);
 }
 
 // stub of ROR 0x0014e16c
