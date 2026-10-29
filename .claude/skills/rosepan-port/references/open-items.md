@@ -6,6 +6,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**DONE 2026-10-29 (`msg/msgsystext.cpp`, was unassigned@001832e8): msgGetSysText and its 0x1d4
+system texts (data 0x298fe8, byte-exact: some English lines quote with Shift-JIS punctuation).** The
+240 s run's picture book now shows its header "The Little Princess" above the cover and "Exit" by the
+circle prompt (both were blank). The book's story lines (setPageText) belong on the opened right-hand
+page, which still does not draw (i3d/i3rdraw.cpp's open item) -- look for them when it does. Doubt:
+the file may be the head of msg/msgman.cpp (the table ends where msgman's tag table 0x299738 starts);
+kept apart for the 468-string table. datadump.py's S field now prints byte-exact C literals.
+
 **DONE 2026-10-29 (`eff/effcameraanim1.cpp`): EffCameraAnim1 (kind 0xd), the first Eff class with
 code; the prologue's cutscene camera shows.** The picture-book stretch's event packs create it twice
 (181 and 161 keys, lens 55 degrees): the 200 s run's frames 3300..3420 now show the girl reading the

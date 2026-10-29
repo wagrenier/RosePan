@@ -16,7 +16,6 @@ line with its EE address, for a host table in src/ (the pattern ReiPan used for 
 character and ghost tables: rebuild pointer arrays with host pointers, copy the rest as values). Pointers
 into .data that are themselves tables need their own dump; the comment shows where they point.
 """
-import json
 import struct
 import sys
 
@@ -50,6 +49,23 @@ def dump_words(argv):
         print(f'    {row},  // 0x{lo + 4 * r:08x}')
     print('};')
     return 0
+
+
+def c_literal(raw):
+    """Bytes as a C string literal: printable ASCII as is, the rest as \\x escapes (a literal split
+    after each, so a following hex digit does not join it) -- the game's bytes exactly, never re-encoded."""
+    out, hexed = [], False
+    for b in raw:
+        c = chr(b)
+        if b < 0x20 or b >= 0x7f:
+            out.append(f'\\x{b:02x}')
+            hexed = True
+            continue
+        if hexed and c in '0123456789abcdefABCDEF':
+            out.append('" "')
+        hexed = False
+        out.append('\\' + c if c in '"\\' else c)
+    return '"' + ''.join(out) + '"'
 
 
 def main(argv):
@@ -98,8 +114,8 @@ def main(argv):
                 if p == 0:
                     vals.append('nullptr')
                 elif code == 'S':
-                    s = elf.cstring(p, 512)
-                    vals.append(json.dumps(s.decode('latin-1')) if s is not None else f'/* 0x{p:08x} */ nullptr')
+                    s = elf.cstring(p, 4096)
+                    vals.append(c_literal(s) if s is not None else f'/* 0x{p:08x} */ nullptr')
                 elif p in names:
                     vals.append(names[p].split('(')[0])
                 elif p in vts:

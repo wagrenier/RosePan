@@ -921,6 +921,15 @@ build.py --run 45: the last trace before the log goes quiet names the call; comp
   environment variable for one run: three runs located it in 15 minutes. A new draw whose data
   comes from a stubbed producer is the first suspect for a black screen.
 
+## A string table dumped as JSON escapes (2026-10-29)
+
+- Symptom: `datadump.py ... S:text` printed non-ASCII bytes as `\u0082`; pasted into C++ that is a
+  universal character name, which GCC / MSVC store as UTF-8 -- two or three bytes, not the ROM's one.
+- Cause: the S field used `json.dumps(s.decode('latin-1'))`.
+- Fix (msg/msgsystext.cpp session): S now prints a C literal with `\x` escapes and a `" "` split
+  before a following hex digit -- the ROM's bytes exactly. RoR's English texts carry Shift-JIS
+  punctuation (0x81 0x68 quotes, 0x81 0x66 apostrophe, 0x81 0x40 space): never re-encode game text.
+
 ## A VU0 vcallms address is a byte address in Ghidra (2026-10-29)
 
 - Symptom: `python vudis.py 2949f0 9c 0xaf0` prints nothing for i3rSkinVertices' `_vcallms(0xaf0)`.

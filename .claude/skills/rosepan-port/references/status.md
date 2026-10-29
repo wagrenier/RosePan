@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 10:49 at commit `ce53c38` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 10:59 at commit `ab3d931` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -13,7 +13,7 @@ Generated 2026-10-29 10:49 at commit `ce53c38` by `tools/reverse/status.py` (`re
 - game functions: **7163**, named **6292** (88%); library functions: 1017
 - by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4690
 - context-name ledger: 4991 entries; overrides of wrong library matches: 5
-- placed in a source file: 5456/7163 in 135 files
+- placed in a source file: 5457/7163 in 136 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4878**; stubs: **384**
+- reconstructed RoR functions: **4879**; stubs: **383**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -82,7 +82,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 319 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 318 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -122,6 +122,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mnu/mnusvld.cpp` | 41 | 0 |
 | `src/mnu/mnutitle.cpp` | 20 | 0 |
 | `src/msg/msgman.cpp` | 124 | 0 |
+| `src/msg/msgsystext.cpp` | 1 | 0 |
 | `src/rx/rxfile.cpp` | 168 | 0 |
 | `src/rx/rxsnd.cpp` | 222 | 0 |
 | `src/rx/rxsys.cpp` | 74 | 6 |
@@ -155,8 +156,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 167 TUs: todo 98, partial 4, verify 96, done 16
-- next: **unassigned@001832e8** (frontier score 19)
+- 167 TUs: todo 98, partial 4, verify 96, done 17
+- next: **bed/bedsubmode.cpp** (frontier score 16)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -257,6 +258,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 10:59 `msg/msgsystext.cpp` done: msgGetSysText 0x1832e8 and its 0x1d4 system texts (data 0x298fe8) written as msg/msgsystext.cpp, byte-exact; stub removed. datadump.py S fields now print byte-e
 - 2026-10-29 10:49 `eff/effcameraanim1.cpp` done: EffCameraAnim1 (kind 0xd): init, setKey, liveMain and the linkonce no-draw slots; the class moved out of effclasses.h into eff/effcameraanim1.h with the event f
 - 2026-10-29 10:31 `mag/maglifepc2.cpp` verify: mag/maglifepc2.cpp pinned 0x11c464..0x11d720 (absorbing unassigned@0011cb70 and the gaps between the file's assert anchors) and all 25 functions written: the Ga
 - 2026-10-29 09:59 `debug/mcd_debug.cpp` verify: debug/mcd_debug.cpp written whole (0x2155f4..0x215a30, 5 functions): mcdDbgAssertFailed, the second assert handler (callcheck comments in mnu/msg/snd renamed fr
@@ -264,22 +266,21 @@ Recent sessions:
 - 2026-10-29 09:13 `task/tsk_enemy.cpp` verify: TskEnemyMove complete: plan 0x200988, step 0x200d18 and the route helpers setRoute, startWalk, nextPoint, walk, checkAhead, checkStep, checkBump, moveRoot, move
 - 2026-10-29 09:01 `task/tsk_enemy.cpp` partial: task/tsk_enemy.cpp pinned 0x20067c..0x203d94 (cut from unassigned@001fd424). TskEnemyTurn complete (13 functions: start, exec, turn, setTurnMotion, tickVoice, g
 - 2026-10-29 08:48 `i3d/i3rblend.cpp` verify: Pinned the unassigned@00225018 run as i3d/i3rblend.cpp (0x225018..0x226278) and wrote all 18 functions: key bisect, scalar and vector curves, i3rTrackGetValue, 
-- 2026-10-29 08:15 `debug/mimu_debug.cpp` done: debug/mimu_debug.cpp pinned 0x215a30..0x216154 and written whole: dbgAssertFailed, the silent traces dbgTraceMatrix (hidden at 0x215a70), dbgTraceFloat4, dbgTra
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@001832e8` | todo | 0/1/1 | 0.0 | 19 | 1 |
-| `utl/utlfind.cpp` | todo | 0/9/10 | 1.4 | 16 | 1 |
-| `mnu/mnuselect.cpp` | partial | 3/6/14 | 3.0 | 16 | 0 |
 | `bed/bedsubmode.cpp` | todo | 0/2/2 | 0.2 | 16 | 2 |
-| `unassigned@0016fb70` | todo | 0/65/102 | 26.8 | 15 | 2 |
+| `mnu/mnuselect.cpp` | partial | 3/6/14 | 3.0 | 16 | 0 |
+| `utl/utlfind.cpp` | todo | 0/9/10 | 1.4 | 16 | 1 |
 | `unassigned@00216ad0` | partial | 2/2/16 | 6.5 | 15 | 0 |
+| `unassigned@0016fb70` | todo | 0/65/102 | 26.8 | 15 | 2 |
 | `i3d/i3cquery.cpp` | todo | 0/3/16 | 8.9 | 14 | 2 |
 | `unassigned@00149d18` | todo | 0/62/431 | 98.3 | 12 | 0 |
 | `mag/maglifefadekey.cpp` | todo | 0/6/9 | 2.5 | 9 | 0 |
-| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
 | `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
 | `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
+| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
+| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -288,7 +289,6 @@ Recent sessions:
 | `001be734` | FileReadReq::FileReadReq | 63 | ror | missing | game/gamfile.cpp |
 | `001be2dc` | FileReader::~FileReader | 30 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 25 | ror | missing | game/gamfile.cpp |
-| `001832e8` | msgGetSysText | 14 | ror | stub | - |
 | `00217f10` | utlAtan2 | 8 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 6 | ror | missing | - |
 | `001a074c` | MnuTextList::close | 4 | ror | stub | mnu/mnuselect.cpp |
@@ -325,4 +325,5 @@ Recent sessions:
 | `00218338` | utlStrToLower | 1 | ror | stub | - |
 | `00216184` | motNameConvert | 1 | ror | stub | debug/motnamecnv0.cpp |
 | `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
+| `001f9e38` | FUN_001f9e38 | 1 | - | missing | task/tsk_scene.cpp |
 

@@ -544,15 +544,6 @@ void MnuTextList::setItems(const char *items, u_int mask)
     ROSEPAN_STUB("MnuTextList::setItems", 0x001a09b8);
 }
 
-// stub of ROR 0x001832e8
-const char * msgGetSysText(int no)
-{
-    ROSEPAN_STUB("msgGetSysText", 0x001832e8);
-    /* PC: "" not NULL -- MnuPBook::setPageText strlen()s it. The ROM reads
-     * 0x1d4 string pointers at data 0x298fe8 (datadump.py 298fe8 468 S:text). */
-    return "";
-}
-
 // stub of ROR 0x00217f10
 float utlAtan2(float x, float z)
 {

@@ -1767,6 +1767,24 @@
    "status": "verify",
    "why": "MsgMan's constructor 0x18330c fills two 41-entry pointer-to-member tables (+0x12c, +0x274) with the tag handlers 0x1857fc..0x187414; the run 0x184f2c..0x18741c are MsgMan methods (this+0x10 MagSystem, the tables at +0x270), MsgManSet 0x18741c..0x187724 wraps two MsgMan; ends at McdMan::McdMan"
   },
+  "msg/msgsystext.cpp": {
+   "notes": "Seen in the 240 s run: the picture book header The Little Princess above the cover (frames 3600..4260) and Exit by the circle prompt (4500..5400), both blank before; last.png is the bus-stop narration as before. The book story lines (setPageText) go on the opened right-hand page, which does not draw yet (i3d/i3rdraw.cpp open item): look for them when it does. Doubt: this may be the head of msg/msgman.cpp (the table ends where msgman tag table 0x299738 starts); kept apart for the 468-string table. Some English texts quote with Shift-JIS punctuation (0x81 0x68); GamFont handles SJIS, never re-encode.",
+   "ranges": [
+    [
+     "001832e8",
+     "0018330c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 10:59",
+     "status": "done",
+     "summary": "msgGetSysText 0x1832e8 and its 0x1d4 system texts (data 0x298fe8) written as msg/msgsystext.cpp, byte-exact; stub removed. datadump.py S fields now print byte-exact C literals (were JSON escapes)."
+    }
+   ],
+   "status": "done",
+   "why": "msgGetSysText alone between snd/unitque.cpp and msg/msgman.cpp; its table data 0x298fe8 (468 pointers) ends where msgman's tag table 0x299738 starts, so it may be msgman.cpp's head -- kept as its own file for the 468-string table"
+  },
   "rx/rxfile.cpp": {
    "notes": "Status verify: every function in 0x2437f8..0x249b88 is written, but nothing can show it: main 0x2045a8 is still the placeholder (black screen), and the rxthread functions rxThCreate / rxThGetParam / rxThGetIndex / rxThSetState / rxThSetPriority / rxThDelete / rxThSync are stubs in src/rx/rxthread.cpp, so the file thread never runs and any slot open (default load and size hooks, snd streams) would spin for ever on pending. Next: main (unassigned@001fd424), then rx/rxthread.cpp (0x249b88..0x24b490). The cdrom driver walks ISO 9660 itself, so a CDROM boot needs sceCdRead to read a disc image; src/sdk/libcdvd.cpp still serves FF3 IMG_BD.BIN (open-items Next up 6, a platform decision for the user). Decisions: DIntr/EIntr are a process-wide recursive SDL mutex; the ROM's Status save/restore and DI-error check are left out (rxFileSpin, callcheck comments). rxFileCdProcess gets step = priority + 1 from the thread block, as in the ROM. Renamed globals: s_cdCacheCount is s_cdDiscRead, s_cdCacheReset is s_cdNeedSetup, s_cdQueued0/1 are s_cdReadPos/2. Knowledge recorded in architecture.md (rx file layer), hazards.md (folded wrappers, hidden.py), open-items 5 and 6, README and SKILL tool tables.",
    "ranges": [
@@ -2371,6 +2389,7 @@
   "unassigned@0016a914": {},
   "unassigned@0016afcc": {},
   "unassigned@001810f4": {},
+  "unassigned@001832e8": {},
   "unassigned@00184f2c": {},
   "unassigned@00190a78": {},
   "unassigned@00192ac0": {},
