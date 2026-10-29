@@ -4883,11 +4883,35 @@
   "was": "FUN_001308bc",
   "why": "stores _vt$13MagLifeWindow (rtti: the class's only constructor); MagScene::openWindow runs it on operator_new(0xe0)"
  },
+ "00130a2c": {
+  "name": "MagLifeNoise::writeNoiseLayer",
+  "tag": "ror-inferred",
+  "was": "FUN_00130a2c",
+  "why": "ALPHA_1 0x61 or 0x64 with FIX = a5, one REGLIST textured sprite (PRIM 0x156) over the rect with a UV window at a random offset (rand % size) and random width"
+ },
+ "00130c34": {
+  "name": "MagLifeNoise::writeNoise",
+  "tag": "ror-inferred",
+  "was": "FUN_00130c34",
+  "why": "CLAMP_1 0, RGBAQ 0x3f202020, TEST_1 0x31001, then 0x130a2c four times with sizes 400 / 600 / 888 / 1000 and alpha (strength + 3..0) / 4, alternating blend"
+ },
+ "00130da4": {
+  "name": "MagLifeNoise::MagLifeNoise(void)",
+  "tag": "ror-inferred",
+  "was": "FUN_00130da4",
+  "why": "stores _vt$12MagLifeNoise 0x2e1e20 at +0x14, MagLife0 field clears, +0x30 = 0, +0x34 = 0; the default overload beside the linkonce MagLifeNoise(int) 0x285378 (which stores its argument at +0x34); MagScene::MagScene's member constructor"
+ },
  "00130de0": {
-  "name": "MagLife130da4::setVolume",
+  "name": "MagLifeNoise::setVolume",
   "tag": "ror-inferred",
   "was": "FUN_00130de0",
-  "why": "stores a1 at +0x30; GamMan::setVolume's only call, on the scene's +0x418f0 life object with the scaled master volume"
+  "why": "+0x30 = a1; GamMan::setVolume's only call (the scaled volume), read back by render as the noise strength"
+ },
+ "00130de8": {
+  "name": "MagLifeNoise::render",
+  "tag": "ror-inferred",
+  "was": "FUN_00130de8",
+  "why": "vtable 0x2e1e20 slot 6 (MagLife::render's); while +0x30 is set: the draw set of texture +0x34 (depth 1.0), i3dLayerBeginSet 895.0, the texture's registers, 0x130c34 over the 512x448 frame"
  },
  "00131184": {
   "name": "MagScene::fadeIn",

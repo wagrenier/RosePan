@@ -86,12 +86,6 @@ void utlAddPolar(float angle, float dist, float *v)
 }
 
 
-// stub of ROR 0x00130de0
-void MagLife130da4::setVolume(int volume)
-{
-    ROSEPAN_STUB("MagLife130da4::setVolume", 0x00130de0);
-}
-
 // ---- stubs (hand-written: EmyMain / EmyOut and the enemy classes' constructors and destructors, which stubgen does not write) ----
 
 // stub of ROR 0x0015c2a4

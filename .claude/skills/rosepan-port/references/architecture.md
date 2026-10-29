@@ -690,8 +690,13 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   -- file 0 g1waynozoki blind slats, 1 kabeana1 wall hole, 2 kagiana1 keyhole, all 512 x 512
   8-bit / 32-bit CLUT black masks with the hole in alpha -- added as "kagiana_tcc" whatever the
   file and drawn as one full-screen textured sprite, UV centre (256, 256) +- 256 / magnify; the
-  state's colour / TEXA ramps cannot show on these pictures, the magnify does the opening), a life of an unnamed class at
-  +0x418f0 (0x130da4), the 2D layers `S2dCineSco`
+  state's colour / TEXA ramps cannot show on these pictures, the magnify does the opening), the screen noise `MagLifeNoise` at
+  +0x418f0 (mag/maglifenoise.cpp 0x130a2c..0x130ee8, life priority 0x8004: while
+  `GamMan::setVolume`'s scaled volume is non-zero, render lays four full-screen sprites of the
+  noise texture -- common texture 1 -- in a draw set of depth 1 at key 895: RGBAQ register
+  (0x20, 0x20, 0x20, 0x3f), CLAMP repeat, random UV windows of sizes 400 / 600 / 888 / 1000,
+  ALPHA_1 0x61 / 0x64 alternating with FIX = volume / 4; the sprites' REGLIST data carries no
+  RGBAQ, so the host i3d module latches the register, GsState::rgbaq), the 2D layers `S2dCineSco`
   +0x41930, `S2dBg` +0x42260, `S2dMes` +0x42bb0 (all MagLife, level 7, life priorities 0x8006 /
   0x8000 / 0x800a), the current fade record +0x43700 (six words: kind, mode, time, -, -, level;
   `MagScene::setFade` 0x1311f4, `getFadeState` 0x131550 maps the fader state to 0..6) and the

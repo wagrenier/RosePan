@@ -1374,6 +1374,24 @@
    "status": "verify",
    "why": "source string mag/maglifemenu.cpp anchors 0x12cf3c..0x12d788 (asserts m_type, m_scene, theRenderStage, actor); every function is a MagLifeMenu* vtable slot; maglifemenusp.cpp starts at 0x12d9c8; plus the PBook / Board3D / Base linkonce symbols the brief placed here"
   },
+  "mag/maglifenoise.cpp": {
+   "notes": "Verify: the 15 s smoke run ends on the disclaimer, before anything calls GamMan::setVolume with a non-zero volume, so no screenshot shows the noise yet. First run in-game with a non-zero GamMan volume: expect a faint grey grain over the whole frame (RGBAQ 0x20 grey, alpha FIX volume/4, layers alternating Cd+(Cd-Cs)*FIX and lerp). Check that the noise texture (scene common texture 1, MagScene::initRender m_common_tex_no[1]) tiles: CLAMP_1 is repeat and the UV windows run past the texture, so if the host sampler clamps the grain will smear at the edges -- then the renderer's image quad needs a repeat sampler for CLAMP_1 0. Host change: rosepan_i3d.cpp GsState::rgbaq set by i3dPktSetReg RGBAQ writes, used by REC_PRIM records whose data has no RGBAQ (Record::has_rgbaq), updated after prims that write it.",
+   "ranges": [
+    [
+     "00130a2c",
+     "00130ee8"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 17:40",
+     "status": "verify",
+     "summary": "MagLifeNoise (scene +0x418f0, the screen noise): default ctor, linkonce MagLifeNoise(int), setVolume, render (vtable slot 6) and its packet writers writeNoise / writeNoiseLayer, the four randomly offset full-screen sprites of common texture 1 blended by FIX = volume / 4. Pinned 0x130a2c..0x130ee8 as mag/maglifenoise.cpp; placeholder MagLife130da4 and its stub removed. Host i3d module now latches the RGBAQ register for primitives whose data has none."
+    }
+   ],
+   "status": "verify",
+   "why": "MagLifeNoise's out-of-line code (default ctor, setVolume, render vtable slot 6 and its two packet writers) between MagLifeWindow (mag/maglifewindow.cpp) and MagLifeTest (mag/maglifetest.cpp); the linkonce members sit in the 0x285xxx linkonce run"
+  },
   "mag/maglifepc.cpp": {
    "notes": "Verify: the 200 s New Game run binds the PC after the film (setActor -> changeState(0) -> MagLifePCModeNull::init reached) and ends on the picture book's page stack as before, no crash; the PC's room does not draw yet, so nothing on screen shows this code. Next on the PC path: mag/maglifepc3.cpp (initMotion 0x11dd40 and the motion loads), mag/maglifepcmode.cpp (the modes' init / live / pad: all hand-written stubs there, Null / Wait / Walk2D / Run2D first), mag/maglifepcmove.cpp (applyMotionMove, sweepMove). initMotion, getSubStateClass, setState14, getEquipItem, getEquipItemChrNo, getPcParam1b / 1c, getWeaponType, canReload, isMoveState are stubs in src/lib/unassigned_stubs.cpp (their runs are not pinned: 0x11c464..0x11c64c and 0x11dd40 / 0x11e080 sit in maglifepc2 / maglifepc3 territory, 0x12c9c0 beside maglifepcbtl). calcHealth divides two stubbed zeros (NaN, health class 2) until getPcParam1b / 1c are written. The PC motion sequence table 0x2961e0 (0x18-byte rows) is not on the host: the constructor passes NULL; it arrives with MagLifeControlChara::updateMotionSeq. message's int arguments travel in the pointer (intptr_t cast, PC: comment). Polymorphic classes with unwritten virtuals need hand stubs (hazards.md).",
    "ranges": [
@@ -2593,6 +2611,7 @@
   "unassigned@0011262c": {},
   "unassigned@0011cb70": {},
   "unassigned@0012f008": {},
+  "unassigned@00130a2c": {},
   "unassigned@0013e2ec": {},
   "unassigned@00140030": {},
   "unassigned@00143d3c": {},

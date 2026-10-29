@@ -57,6 +57,7 @@ constexpr uint64_t kRegXyOffset = 0x18;
 constexpr uint64_t kRegFrame = 0x4c;
 constexpr uint64_t kRegScissor = 0x40;
 constexpr uint64_t kRegAlpha = 0x42;
+constexpr uint64_t kRegRgbaq = 0x01;
 constexpr uint64_t kRegTest = 0x47;
 
 /* The opening state i3dPktOpenChain writes (ALPHA mode 0x10, TEST_1). */
@@ -92,6 +93,7 @@ struct Record
 {
     RecordKind      kind;
     unsigned        prim;           /* REC_PRIM: the PRIM register */
+    bool            has_rgbaq;      /* REC_PRIM: its data writes RGBAQ (else the register's) */
     int             count;          /* REC_PRIM: vertices */
     Vertex          v[4];
     uint64_t        reg, value;     /* REC_REG */
@@ -156,6 +158,9 @@ struct GsState
     uint64_t        scissor = (uint64_t)(kFrameWidth - 1) << 16 | (uint64_t)(kFrameHeight - 1) << 48;
     int             offx = kDefaultOffX;
     int             offy = kDefaultOffY;
+    /* RGBAQ as a register: a primitive whose data has none draws with it
+     * (MagLifeNoise's sprites, colour from i3dPktSetReg). */
+    uint64_t        rgbaq = 0x3f80000080808080ull;
     unsigned        fbp = 0;            /* FRAME_1's FBP (0: the display's, not followed) */
     const uint64_t *tex_regs = nullptr;
     /* A TEX0 written as a plain register (i3dPktSetReg) after the draw set's
@@ -366,7 +371,10 @@ void DrawPrim(const Record &r)
     {
         const Vertex &v = r.v[i];
         /* Flat shading takes the last vertex's colour. */
-        const Vertex &c = iip ? v : r.v[n - 1];
+        Vertex c = iip ? v : r.v[n - 1];
+        if (!r.has_rgbaq)
+            for (int k = 0; k < 4; k++)
+                c.rgba[k] = (uint8_t)(gs.rgbaq >> (k * 8));
         xy[i * 2 + 0] = FrameX(gs, v.x);
         xy[i * 2 + 1] = FrameY(gs, v.y);
         if (fst)
@@ -586,6 +594,7 @@ void ApplyReg(uint64_t reg, uint64_t value)
     {
     case kRegAlpha:    s_state.alpha = value; break;
     case kRegTest:     s_state.test = value; break;
+    case kRegRgbaq:    s_state.rgbaq = value; break;
     case kRegScissor:  s_state.scissor = value; break;
     case kRegTex0:     s_state.direct_tex0 = true; break;
     case kRegXyOffset:
@@ -643,6 +652,7 @@ void RosePan_I3dRecordGif(const uint64_t *pkt)
                 case 0x1:
                     for (int k = 0; k < 4; k++)
                         cur.rgba[k] = (uint8_t)w[k];
+                    r.has_rgbaq = true;
                     break;
                 case 0x2:
                     cur.s = FloatOf((uint32_t)w[0]);
@@ -675,6 +685,7 @@ void RosePan_I3dRecordGif(const uint64_t *pkt)
                     for (int k = 0; k < 4; k++)
                         cur.rgba[k] = (uint8_t)(value >> (k * 8));
                     cur.q = FloatOf((uint32_t)(value >> 32));
+                    r.has_rgbaq = true;
                     break;
                 case 0x2:
                     cur.s = FloatOf((uint32_t)value);
@@ -842,7 +853,20 @@ void RosePan_I3dReplay(const void *start, const void *end)
         {
         case REC_REG:     ApplyReg(r.reg, r.value); break;
         case REC_TEXREGS: s_state.tex_regs = r.regs; s_state.direct_tex0 = false; break;
-        case REC_PRIM:    DrawPrim(r); drew = true; break;
+        case REC_PRIM:
+            DrawPrim(r);
+            drew = true;
+            if (r.has_rgbaq && r.count > 0)
+            {
+                /* The register keeps the last colour the data wrote. */
+                const Vertex &v = r.v[r.count - 1];
+                uint32_t q;
+                memcpy(&q, &v.q, sizeof(q));
+                s_state.rgbaq = (uint64_t)v.rgba[0] | (uint64_t)v.rgba[1] << 8 |
+                                (uint64_t)v.rgba[2] << 16 | (uint64_t)v.rgba[3] << 24 |
+                                (uint64_t)q << 32;
+            }
+            break;
         case REC_MOVIE:   DrawMovie(r); drew = true; break;
         case REC_MODEL:   DrawModel(r); drew = true; break;
         case REC_MESH:    DrawMesh(r); drew = true; break;

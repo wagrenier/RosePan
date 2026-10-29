@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 17:19 at commit `594e2e0` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 17:40 at commit `e6fcaf4` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-29 17:19 at commit `594e2e0` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6601** (92%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4999
-- context-name ledger: 5300 entries; overrides of wrong library matches: 5
-- placed in a source file: 5709/7187 in 143 files
+- game functions: **7187**, named **6605** (92%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 5003
+- context-name ledger: 5304 entries; overrides of wrong library matches: 5
+- placed in a source file: 5714/7187 in 144 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5253**; stubs: **303**
+- reconstructed RoR functions: **5259**; stubs: **302**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -90,7 +90,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 258 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 257 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -100,6 +100,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/maglifeman.cpp` | 12 | 0 |
 | `src/mag/maglifemenu.cpp` | 45 | 0 |
 | `src/mag/maglifemenusp.cpp` | 0 | 12 |
+| `src/mag/maglifenoise.cpp` | 6 | 0 |
 | `src/mag/maglifepc.cpp` | 29 | 0 |
 | `src/mag/maglifepc2.cpp` | 28 | 0 |
 | `src/mag/maglifepc3.cpp` | 22 | 0 |
@@ -167,8 +168,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 171 TUs: todo 95, partial 1, verify 112, done 17
-- next: **unassigned@00130a2c** (frontier score 7)
+- 171 TUs: todo 95, partial 1, verify 113, done 17
+- next: **unassigned@00153e40** (frontier score 7)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -228,6 +229,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/maglifefadekey.cpp` 9/13 -- Complete code, not visible yet: setFade kinds 1..3 and MagScene::openFadeKey come from event scripts, which the 15 s smoke run does not reach (it ends on the di
 - verify: `mag/maglifeman.cpp` 12/12 -- Status verify: the S2d layers now run live and render every frame (one i3d primitive reaches rosepan_i3d without a texture object), but the screenshot stays bla
 - verify: `mag/maglifemenu.cpp` 45/53 -- Complete, nothing on screen yet: the smoke run now opens the title (MagScene::openMenu 0x10005 -> MagLifeMenuTitle) and reaches MnuTitle::isInit / init / draw /
+- verify: `mag/maglifenoise.cpp` 5/5 -- Verify: the 15 s smoke run ends on the disclaimer, before anything calls GamMan::setVolume with a non-zero volume, so no screenshot shows the noise yet. First r
 - verify: `mag/maglifepc.cpp` 27/27 -- Verify: the 200 s New Game run binds the PC after the film (setActor -> changeState(0) -> MagLifePCModeNull::init reached) and ends on the picture book's page s
 - verify: `mag/maglifepc2.cpp` 25/25 -- Nothing in the boot smoke run picks up an item, attacks or reloads, so the code is unseen: verify. The 240 s run still reaches the first room (Jennifer on the f
 - verify: `mag/maglifepc3.cpp` 14/14 -- Status verify: the smoke run ends on the boot disclaimer screen, before MagScene::setPC binds the player, so nothing on screen shows these motions yet; the firs
@@ -285,6 +287,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 17:40 `mag/maglifenoise.cpp` verify: MagLifeNoise (scene +0x418f0, the screen noise): default ctor, linkonce MagLifeNoise(int), setVolume, render (vtable slot 6) and its packet writers writeNoise /
 - 2026-10-29 17:19 `utl/utltm2.cpp` verify: Pinned unassigned@00104970: 0x104970..0x104e1c (three unreferenced sight checks) joins utl/utlbtl.cpp, utl/utltm2.cpp is 0x104e1c..0x105650. Wrote all of utltm2
 - 2026-10-29 16:39 `mag/magsceneif.cpp` verify: MagSceneIF and its map / character interfaces: all 13 methods reconstructed (index counts, names, find, category, actor motion count / number / name / trimmed l
 - 2026-10-29 16:20 `debug/motnamecnv0.cpp` verify: debug/motnamecnv0.cpp reconstructed (pinned 0x216154..0x2163ac, 8 functions): motNameConvert (scene thread motion keys to actor motion numbers), motNameFindChar
@@ -292,22 +295,21 @@ Recent sessions:
 - 2026-10-29 15:49 `emy/emy_clr.cpp` verify: Pinned emy/emy_clr.cpp 0x14dc7c..0x150b24 out of unassigned@0014dc7c and wrote all 45 functions: ClrMain (enemy type 8: initOut, dtor, decide with tests 13..9 /
 - 2026-10-29 15:10 `mag/maglifefadekey.cpp` verify: MagLifeFadeKeyHole (the keyhole fade at scene +0x41890) reconstructed whole: constructor, loadTexture / loadTextureByName (EVNTEX.RPK header then one file, adde
 - 2026-10-29 15:00 `emy/emy_mrt.cpp` verify: Pinned emy/emy_mrt.cpp 0x14cde4..0x14dc7c out of unassigned@0014cde4 and wrote all 26 functions: MrtMain (enemy type 7: initOut, dtor, decide with its last-true
-- 2026-10-29 14:30 `emy/emy_bdl.cpp` verify: Pinned emy/emy_bdl.cpp 0x14b3bc..0x14cde4 out of unassigned@0014b3bc and wrote all 33 functions: BdlMain (enemy type 5: initOut, dtor, decide with testBarkReact
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00153e40` | todo | 0/32/239 | 58.0 | 7 | 0 |
 | `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
-| `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
-| `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
-| `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
+| `unassigned@00153e40` | todo | 0/32/239 | 58.0 | 7 | 0 |
 | `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
-| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
+| `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
 | `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
+| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
+| `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
 | `mag/maglifepcbtl.cpp` | todo | 0/3/6 | 3.2 | 4 | 0 |
 | `unassigned@00113ea8` | todo | 0/2/3 | 1.3 | 4 | 0 |
-| `unassigned@001788ec` | todo | 0/36/45 | 14.0 | 3 | 0 |
 | `mag/maglifepceff.cpp` | todo | 0/3/3 | 0.1 | 3 | 0 |
+| `unassigned@0016afcc` | todo | 0/42/53 | 17.8 | 3 | 0 |
+| `unassigned@001788ec` | todo | 0/36/45 | 14.0 | 3 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -343,7 +345,6 @@ Recent sessions:
 | `0012cddc` | MagLifePC::message15 | 1 | ror | stub | mag/maglifepceff.cpp |
 | `0012ce08` | MagLifePC::message16 | 1 | ror | stub | mag/maglifepceff.cpp |
 | `0012ce34` | MagLifePC::message17 | 1 | ror | stub | - |
-| `00130de0` | MagLife130da4::setVolume | 1 | ror | stub | - |
 | `00154734` | GrgMain::testView | 1 | ror | stub | - |
 | `00154748` | GrgMain::releaseHold | 1 | ror | stub | - |
 | `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
@@ -353,4 +354,5 @@ Recent sessions:
 | `001bdfe0` | MnuSelectLanguage::draw | 1 | ror | stub | - |
 | `001aeacc` | MnuItem::init | 1 | ror | stub | mnu/mnuitem.cpp |
 | `001b099c` | MnuItem::processPad | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001aed08` | MnuItem::draw | 1 | ror | stub | mnu/mnuitem.cpp |
 
