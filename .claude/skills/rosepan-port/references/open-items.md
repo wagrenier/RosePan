@@ -1529,6 +1529,12 @@ to adapt when a TU reaches them:
   rxSysSetFileDevice; probably rxSysGetFileDevice) -- create it in Ghidra (`ghidra.py mkfunc`) when
   rxsys is next touched.
 
+- **utlFindMatchObj's signature (utl/utlfind.h, 2026-10-28, from utl/utlgame.cpp).** 0x1062b4
+  tail-calls `utlFindItemByUids(a1, p->m_id, p->m_10)`: its second argument is the float[4] the found
+  object's position goes to (not an `FCHRstat *`), and it returns the 64-bit `uid << 32 | oid`
+  (unsigned long long in the port), not an int. Fix the prototype when utl/utlfind.cpp is written and
+  check its callers (MagLifeBwnCtrl's find mode) against it.
+
 ## Done
 
 - 2026-10-22: `game/gamfile.cpp` (0x1be2cc..0x1beb70 pinned, all 21 functions, `verify`): the file

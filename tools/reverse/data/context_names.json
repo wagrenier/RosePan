@@ -221,17 +221,53 @@
   "was": "FUN_00102188",
   "why": "d-pad bits of 0x78 or the left stick past 0.7 -> direction bits 0x68 held / 0x6c triggered / 0x70 repeated with BedPad's own repeat counters, vector 0x4c / 0x50, length 0x54, quadrant 0x60 and a quick-change counter 0x64"
  },
+ "001024d0": {
+  "name": "utlGetSoundName",
+  "tag": "ror-inferred",
+  "was": "FUN_001024d0",
+  "why": "tbl_sound (0x2e6978, 200 x 0x10) row no, following m_link when >= 0; returns m_name (SE_SAVE_FINISH ...); assert tbl_sound[no].m_tag == no"
+ },
  "0010254c": {
   "name": "utlPlaySe3d",
   "tag": "ror-inferred",
   "was": "FUN_0010254c",
   "why": "sound id at a position (NULL: none) through 0x1e4ebc on the sound object 0x79a0c0"
  },
+ "001025c0": {
+  "name": "utlGetSoundSE",
+  "tag": "ror-inferred",
+  "was": "FUN_001025c0",
+  "why": "theN < 200: tbl_sound[theN] (asserts tbl_sound[theN].m_tag == theN), follows m_link, returns m_se (asserts it non-zero); the SE id utlPlaySe hands GamSndMan::playSE"
+ },
  "001026b0": {
   "name": "utlPlaySe",
   "tag": "ror-inferred",
   "was": "FUN_001026b0",
   "why": "(id, a, b): sound id via 0x1025c0, then GamSndMan::playSE(se, 1, b) or 0x1f97c8(se, a) when a > 0; the no-position sibling of utlPlaySe3d, used by utlPlaySeRand3/4"
+ },
+ "00102758": {
+  "name": "utlPlaySeIfIdle",
+  "tag": "ror-inferred",
+  "was": "FUN_00102758",
+  "why": "utlGetSoundSE(no); GamSndMan::funcSE(se, 0x16) == 0 (not playing) -> playSE(se, 1, NULL, 0)"
+ },
+ "001027d4": {
+  "name": "utlStopSe",
+  "tag": "ror-inferred",
+  "was": "FUN_001027d4",
+  "why": "utlGetSoundSE(no); while funcSE(se, 0x16) says it plays, funcSE(se, 1): stops it"
+ },
+ "0010284c": {
+  "name": "utlPlaySeChance",
+  "tag": "ror-inferred",
+  "was": "FUN_0010284c",
+  "why": "utlRandRange(0, range) < chance -> utlPlaySe(no, 0, NULL); returns whether it played"
+ },
+ "001028a8": {
+  "name": "utlPlaySeRand2",
+  "tag": "ror-inferred",
+  "was": "FUN_001028a8",
+  "why": "utlRandRange(0, 200) < 100 picks a else b for utlPlaySe; the 2-way sibling of utlPlaySeRand3 / 4"
  },
  "00102918": {
   "name": "utlPlaySeRand3",
@@ -263,11 +299,65 @@
   "was": "FUN_00102b24",
   "why": "utl/utlgame.cpp wrapper (oid): asserts oid != 0 (line 0x248), EmyManager::testEmyStateFlag(theEmyManager, oid); Bark::live drops a target it clears for"
  },
+ "00102b6c": {
+  "name": "utlFindItemByUids",
+  "tag": "ror-inferred",
+  "was": "FUN_00102b6c",
+  "why": "for each of n uids: utlFindFreeObjByUid then utlFindItemByUid; the first hit's (uid << 32 | oid) with its position in out; utlFindMatchObj's tail call"
+ },
+ "00102bf0": {
+  "name": "utlFindItemByUid",
+  "tag": "ror-inferred",
+  "was": "FUN_00102bf0",
+  "why": "walks GamMan m_avfchrList (0x7a01d0) for uid (+0x128): one not flagged 2 in the system data returns at once, else the last flagged one; position into out, returns uid << 32 | oid"
+ },
+ "00102d54": {
+  "name": "utlFindVFchrByUid",
+  "tag": "ror-inferred",
+  "was": "FUN_00102d54",
+  "why": "first object of GamMan m_vfchrList (0x79ef90) whose uid (+0x128) is uid, NULL none"
+ },
  "00102dc0": {
   "name": "utlFindDoorBetween",
   "tag": "ror-inferred",
   "was": "FUN_00102dc0",
   "why": "over the object list, kind-9 objects whose ctlObjParam 0xc rooms are (a, b) either way: the nearest to pos fills pos, rooms, rotY (+0x1a4 wrapped), the object and a kind 0..3 from three ctlObjParam 2 tests; 1 found"
+ },
+ "0010315c": {
+  "name": "utlFindFreeObjByUid",
+  "tag": "ror-inferred",
+  "was": "FUN_0010315c",
+  "why": "walks GamMan m_fchrList (0x79ec50) for an object of uid whose system record has no flag 2; position into out, returns uid << 32 | oid, 0 none"
+ },
+ "00103240": {
+  "name": "utlGetItemUids",
+  "tag": "ror-inferred",
+  "was": "FUN_00103240",
+  "why": "system data fields 0x10..0x12 of item (three related uids) and item itself (unless table 6) into out; asserts theMax >= 4; returns the count 4 / 3; utlFindSetItem fills UtlFind with it"
+ },
+ "0010332c": {
+  "name": "utlTakeObjItem",
+  "tag": "ror-inferred",
+  "was": "FUN_0010332c",
+  "why": "GamMan::getObjParam(oid, 2) gives the item id; addItem(id, 0) then releaseChr(oid); no callers"
+ },
+ "00103390": {
+  "name": "utlGetOidTypeKind",
+  "tag": "ror-inferred",
+  "was": "FUN_00103390",
+  "why": "oid type bits 23..27: 5 -> 1, 6 -> 2, else 0; was folded into utlTakeObjItem's body (no references)"
+ },
+ "001033b8": {
+  "name": "utlSetItemFlag2",
+  "tag": "ror-inferred",
+  "was": "FUN_001033b8",
+  "why": "GamSysData::setFlags(id & 0xffff, 2) on GamMan's system data; utlIsItemFlag2's setter; was folded into utlTakeObjItem's body (no references)"
+ },
+ "001033f0": {
+  "name": "utlIsItemFlag2",
+  "tag": "ror-inferred",
+  "was": "FUN_001033f0",
+  "why": "GamSysData::testFlags(id, 2) of GamMan's system data (0x7a34e0)"
  },
  "00103428": {
   "name": "utlMarkObjTaken",
@@ -304,6 +394,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001034e4",
   "why": "GamMan::getActorNo(a0)"
+ },
+ "00103510": {
+  "name": "utlGetEmySpinePos",
+  "tag": "ror-inferred",
+  "was": "FUN_00103510",
+  "why": "the actor of oid: its Bip01 Spine1 node world position (DogActor slot 18) into out; returns EmyManager::getEmyTypeDist (kind != 0) or getEmyTypeDist2; no callers"
+ },
+ "00103654": {
+  "name": "utlFindNearestEmyInRange",
+  "tag": "ror-inferred",
+  "was": "FUN_00103654",
+  "why": "asserts -DOG_PI <= theR < DOG_PI and theInfo.m_count <= MAX_INFO; the index of the UtlEnemyInfoBuf entry with the least m_dist whose angle is within +-theR (one entry: 0, none: -1); MagLifePC::startAttack / beginAttack"
  },
  "0010376c": {
   "name": "utlCollectEmyInfoAt",
@@ -394,6 +496,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001040a0",
   "why": "GamMan::getObjRadius of the dog (m_dogPtr +0x100), 0 without one"
+ },
+ "001040dc": {
+  "name": "utlSetDogRadius",
+  "tag": "ror-inferred",
+  "was": "FUN_001040dc",
+  "why": "GamMan::setObjRadius(the dog's oid (m_dogPtr +0x100), r); utlTestDogHitAt's first half"
  },
  "0010411c": {
   "name": "utlGetObjKind",

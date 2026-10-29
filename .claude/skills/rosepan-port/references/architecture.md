@@ -1361,6 +1361,30 @@ Shared helpers: effCalcViewDepth 0x16ff18 (dot(camera row 2, pos - row 3)), effM
 the camera, +0x44 frame 0..44): a 40 x 40 VU1 sprite, colour (1,1,1,0.5), ALPHA_1 0x48, shown frames
 0..14 of 45 with textures 0,1,2,3,2,1,0 (frame ends 2,3,4,8,10,12,14).
 
+## The game helpers (`utl/utlgame.cpp`, 0x1024d0..0x1041c4, 2026-10-28)
+
+One-call queries and commands on top of GamMan, EmyManager and the scene's actors; 49 functions,
+all written.
+- **tbl_sound** (data 0x2e6978, 200 rows of 0x10: `m_se`, `m_link` (-1 in every retail row),
+  `m_tag` == the row, `m_name` "SE_SAVE_FINISH" ..). The game's sound calls take a *row*:
+  `utlPlaySe(row, delay, pos)` 0x1026b0 maps it by `utlGetSoundSE` 0x1025c0 and plays at pos, after
+  delay frames (`scnPlaySEDelayed` 0x1f97c8) or now; `utlPlaySe3d` 0x10254c takes a raw SE id.
+  Random / chance / play-if-idle / stop variants follow (`utlPlaySeRand2..4`, `utlPlaySeChance`,
+  `utlPlaySeIfIdle`, `utlStopSe`: funcSE 0x16 = "is it playing", 1 = stop).
+- GamMan's object pools as their used lists: m_achrList 0x79e610, m_fchrList 0x79ec50, m_vfchrList
+  0x79ef90, m_avfchrList 0x7a01d0 (pool + 0x10). The uid searches (`utlFindItemByUids` 0x102b6c,
+  `utlFindFreeObjByUid`, `utlFindItemByUid`) return a 64-bit `uid << 32 | oid` in v0 -- the port
+  returns `unsigned long long`; `utlFindMatchObj` (utl/utlfind.cpp) tail-calls with (obj's pos out,
+  UtlFind ids, m_10), so its header's `FCHRstat *obj` parameter is really a float out.
+- `UtlEnemyInfoBuf` (the asserts' name; `MAX_INFO` 32, `m_count` at 0x800) of `UtlEnemyInfo` 0x40:
+  `utlCollectEmyInfo` / `utlCollectEmyInfoAt` fill it from m_achrList objects of oid type 2 (the
+  'Bip01 Spine1' node of the actor via DogActor slot 18 `getNodeWorldPos`, else m_trans);
+  `utlFindNearestEmyInRange` 0x103654 picks the nearest within +-theR (one entry: index 0 whatever
+  its angle) for MagLifePC::startAttack / beginAttack.
+- The dog's oid is `GamMan::m_dogPtr->m_oid` (0 without), inline at each use.
+- `utlGetOidTypeKind` 0x103390 and `utlSetItemFlag2` 0x1033b8 have no callers and were folded into
+  `utlTakeObjItem`'s body in Ghidra (created 2026-10-28).
+
 ## Modules (RoR's own source files)
 
 73 `.cpp` paths survive in assert / error strings (export.py anchors on them), plus headers whose inline
@@ -1382,7 +1406,7 @@ functions assert (`.h`). Directories and files:
 | `spr/` | sprman (+.h), sprtexture |
 | `system/` | sysnowloading |
 | `task/` | naga_chunk, tsk_bg_load, tsk_scene |
-| `utl/` | utlbtl (0x10452c..0x104970: two record clears -- 0x28 bytes at 0x10452c, a `UtlHitCheck` 0x14 bytes at 0x10454c -- then `utlHitCheck` and 0x1046b4), utlfile, utlfind, utlgame (0x1024d0..0x1041c4, its tail 0x103edc.. the one-call GamMan / EmyManager wrappers on the dog / enemy oid), utlrand (0x1041c4..0x10452c, the port's file name: the PRNG -- seed word 0x308484, step `seed * 0x769 + 0x7cf9`, `utlRand(n)` = high word of `(u64)seed * n` after a step, reset 0xc45330af by `MagSystem::MagSystem`, uncalled `utlRandSeed` 0x104230; `utlRandRange` 0x10423c has ~99 callers; mean / peak-lo / peak-hi / peak / float-range draws), utlmath (0x106658..0x10737c: `utlConvSndId` -- a sound id 0x0a0Nxxxx swapped for its twin of the current map area, `GamMan::getMapArea` column of the 54-row table 0x295f08; `utlDrawI3r` = `i3rDrawModel` 0x21fe68 with dispatch held off; node display words; vector rotations / dot / cross / lengths / distances / direction to angles with the ROM's pi 0x40490fdc and pi/2 0x3fc90fda), utlmisc (0x105650..0x105e50: text helpers, `utlParseParam` name/value lines, the frame counter, operator new/delete, the game heap), utltm2 |
+| `utl/` | utlbtl (0x10452c..0x104970: two record clears -- 0x28 bytes at 0x10452c, a `UtlHitCheck` 0x14 bytes at 0x10454c -- then `utlHitCheck` and 0x1046b4), utlfile, utlfind, utlgame (0x1024d0..0x1041c4: tbl_sound, object / door / enemy searches, the dog / enemy wrappers; "The game helpers" above), utlrand (0x1041c4..0x10452c, the port's file name: the PRNG -- seed word 0x308484, step `seed * 0x769 + 0x7cf9`, `utlRand(n)` = high word of `(u64)seed * n` after a step, reset 0xc45330af by `MagSystem::MagSystem`, uncalled `utlRandSeed` 0x104230; `utlRandRange` 0x10423c has ~99 callers; mean / peak-lo / peak-hi / peak / float-range draws), utlmath (0x106658..0x10737c: `utlConvSndId` -- a sound id 0x0a0Nxxxx swapped for its twin of the current map area, `GamMan::getMapArea` column of the 54-row table 0x295f08; `utlDrawI3r` = `i3rDrawModel` 0x21fe68 with dispatch held off; node display words; vector rotations / dot / cross / lengths / distances / direction to angles with the ROM's pi 0x40490fdc and pi/2 0x3fc90fda), utlmisc (0x105650..0x105e50: text helpers, `utlParseParam` name/value lines, the frame counter, operator new/delete, the game heap), utltm2 |
 
 Files without an assert are not named by the binary (`main`, the rx middleware, every file whose code
 never asserts): sessions name them (`tus.py define --why`).
