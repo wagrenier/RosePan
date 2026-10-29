@@ -73,12 +73,21 @@
    "why": "the four BedPfh methods between BedMemory (0x101718 clears 7 words, not BedPfh's 5) and BedPad::~BedPad 0x101aec; bed/bedpfh.cpp / bedpfh.h assert strings in the ctor and getFileName"
   },
   "debug/mcd_debug.cpp": {
+   "notes": "Nothing calls these functions in the retail ROM, so no screenshot can show them; the smoke run still reaches the disclaimer screen unchanged. mcdDbgMenuTest state 3 (run g_mcdDbgMenu.processPad) is unreachable: no code sets it. The test's state lives in file statics (bss 0x2db280..0x2db29c). Pad bits read are pad 0 m_repeat (MagSystem +0xbc). The host constructs g_mcdDbgMenu at static-init time as the ROM does (MnuMcd ctor only clears m_open and cursors); its destructor calls close, which returns at once when not open. Nothing left to write.",
    "ranges": [
     [
      "002155f4",
      "00215a30"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-29 09:59",
+     "status": "verify",
+     "summary": "debug/mcd_debug.cpp written whole (0x2155f4..0x215a30, 5 functions): mcdDbgAssertFailed, the second assert handler (callcheck comments in mnu/msg/snd renamed from FUN_002155f4); mcdDbgMenuTest, the unreferenced memory card menu test (futuki banner, three cursor values, separator on input); the static MnuMcd g_mcdDbgMenu at data 0x2d9e80 from the file's static initializer."
+    }
+   ],
+   "status": "verify",
    "why": "Between seqvm.cpp's static initializer 0x2155d4 and mimu_debug.cpp's assert handler 0x215a30: its own assert handler 0x2155f4 (format 0x301880; called by mnu/ msg/ snd/ rx), an unreferenced memory-card menu test 0x215634 (prints a futuki banner, drives a MnuMcd at data 0x2d9e80 with the pad) and that MnuMcd's static constructor / destructor 0x215998..0x215a30, with rodata 0x301880..0x301938 (its switch table 0x301920). File name invented: debug code around a memory card menu."
   },
   "debug/mimu_debug.cpp": {

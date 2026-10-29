@@ -13,7 +13,7 @@
 #include "rx/rxsys.h"
 
 // ROR 0x001830fc
-// callcheck: FUN_002155f4 (the second assert handler is ROR_ASSERT)
+// callcheck: mcdDbgAssertFailed (the second assert handler is ROR_ASSERT)
 UnitQue *unitQueCreate(int size)
 {
     UnitQue *pQue = (UnitQue *)((void *(*)(int))g_rxSysMemFunc[0])(size + 0x40);

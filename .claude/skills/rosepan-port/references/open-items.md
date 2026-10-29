@@ -1606,6 +1606,12 @@ to adapt when a TU reaches them:
   skinned mesh ever looks off. A blended mesh with flags 2 alone gets the ROM's non-advancing source
   (hazards.md).
 
+- 2026-10-29: `debug/mcd_debug.cpp` (0x2155f4..0x215a30, all 5 functions, `verify`): mcdDbgAssertFailed
+  (the second assert handler; callcheck comments renamed from FUN_002155f4), the unreferenced memory
+  card test mcdDbgMenuTest (prints a futuki banner and a separator on input; its state 3 that runs the
+  MnuMcd is unreachable) and the static MnuMcd g_mcdDbgMenu (data 0x2d9e80, a host global). Nothing
+  calls them, so no screenshot can show them.
+
 - 2026-10-29: `debug/mimu_debug.cpp` (0x215a30..0x216154 pinned, all 10 functions, `done`): the assert
   handler dbgAssertFailed, the silent traces (dbgTraceVector4 was the reached stub; dbgTraceMatrix
   0x215a70 was hidden after the handler's spin) and the float formatter. They print nothing in the

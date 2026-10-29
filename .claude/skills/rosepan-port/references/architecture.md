@@ -1448,7 +1448,7 @@ functions assert (`.h`). Directories and files:
 | dir | files |
 |---|---|
 | `bed/` | bedmemory, bedpad, bedpfh (+.h), bedsubmode |
-| `debug/` | mimu_debug, motnamecnv, motnamecnv0, naga_debug |
+| `debug/` | mcd_debug (name invented), mimu_debug, motnamecnv, motnamecnv0, naga_debug |
 | `dog/` | dogactor (+.h), dogcamera, dogentity, doglight, doglightpool (+.h), dogmodel (+.h), dogmotionblend (+.h), dogtexinfo |
 | `emy/` | emy_main |
 | `game/` | gamman, gamsnd, gamstat, gamtrg |
@@ -1605,6 +1605,7 @@ never asserts): sessions name them (`tus.py define --why`).
 | 0x240eb8 | `rxSysInit`: console bring-up (see Program flow) | strings; `rx/rxsys.cpp` |
 | 0x241f58 | `rxSysPrintf`: the middleware's and game's printf (151 callers): print hook 0x2db9d0, then `scePrintf`, or a buffered host tty (file 0x2dba34 / IOP tty RPC) | `rx/rxsys.cpp` |
 | 0x2dbe8c | `g_rxSysMemFunc[4]`: memory hooks the game's allocators call through (0x1830fc, 0x182818 ...) | `rx/rxsys.cpp` |
+| 0x2155f4 | `mcdDbgAssertFailed(file, line, expr)` (debug/mcd_debug.cpp 0x2155f4..0x215a30, verify 2026-10-29): a second copy of the assert handler (same format 0x301880, then spins), called by mnu/msg/snd asserts; ROR_ASSERT covers it. The same file holds mcdDbgMenuTest 0x215634 (unreferenced; state in bss 0x2db280..0x2db29c, nothing sets its menu-running state 3) and a static MnuMcd g_mcdDbgMenu at data 0x2d9e80 built by its static initializer 0x215998 |
 | 0x215a30 | `dbgAssertFailed(file, line, expr)` (debug/mimu_debug.cpp 0x215a30..0x216154, done 2026-10-29): prints "Assertion Failed: %s(%d)   %s
 " through 0x260110 and loops for ever. The same file holds the retail build's silent traces (dbgTraceMatrix 0x215a70, dbgTraceFloat4, dbgTraceVector3 / 4 / 4Alt: each float goes through `dbgFloatToStr` 0x215e1c into a 256-byte stack buffer and nothing is printed) and the float splitter `dbgSplitFloat` 0x215c74 (sign / integer / binary fraction / its decimal digit count, table 0x301958); the formatter writes three decimals lossily (100.25 -> "100.200") and gives --UNDERFLOW-- once the fraction needs 32 bits or more (0.001 does) | 1,483 call sites |
 | 0x105ba4 | `operator delete` (`utlOperatorDelete` in src): `if (p) utlMemFree(p)`; the deleting destructors tail-jump to it. `operator new` 0x105b54, `new[]` 0x105b7c, `delete[]` 0x105bc4 | 277 call sites; `DogEntity::~DogEntity` 0x280f34; `utl/utlmisc.cpp` |

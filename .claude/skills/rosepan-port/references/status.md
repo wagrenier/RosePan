@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 09:53 at commit `4edd2d7` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 09:59 at commit `0519abe` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-29 09:53 at commit `4edd2d7` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7163**, named **6275** (88%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4673
-- context-name ledger: 4974 entries; overrides of wrong library matches: 5
+- game functions: **7163**, named **6280** (88%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4678
+- context-name ledger: 4979 entries; overrides of wrong library matches: 5
 - placed in a source file: 5433/7163 in 134 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4845**; stubs: **404**
+- reconstructed RoR functions: **4847**; stubs: **404**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -38,6 +38,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/bed/bedpad.cpp` | 14 | 0 |
 | `src/bed/bedpfh.cpp` | 4 | 0 |
 | `src/bed/bedsubmode.cpp` | 0 | 2 |
+| `src/debug/mcd_debug.cpp` | 2 | 0 |
 | `src/debug/mimu_debug.cpp` | 9 | 0 |
 | `src/debug/motnamecnv0.cpp` | 0 | 2 |
 | `src/dog/dogactor.cpp` | 147 | 0 |
@@ -153,11 +154,12 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 169 TUs: todo 102, partial 4, verify 94, done 15
-- next: **debug/mcd_debug.cpp** (frontier score 24)
+- 169 TUs: todo 101, partial 4, verify 95, done 15
+- next: **unassigned@0011cb70** (frontier score 24)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
+- verify: `debug/mcd_debug.cpp` 2/5 -- Nothing calls these functions in the retail ROM, so no screenshot can show them; the smoke run still reaches the disclaimer screen unchanged. mcdDbgMenuTest sta
 - verify: `dog/dogactor.cpp` 147/147 -- Status verify: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run stays black after the film because the pose and draw path below DogActo
 - verify: `dog/dogcamera.cpp` 8/10 -- Status verify: the 200 s New Game run (second try; the first looped the boot logos, the known boot race) plays the opening film to Once upon a time, then ends b
 - verify: `dog/dogentity.cpp` 11/16 -- Status verify: the 200 s New Game run ends black (one small ring at the bottom) with no assert or crash; the DogEntity stubs no longer appear, the camera (paren
@@ -253,6 +255,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 09:59 `debug/mcd_debug.cpp` verify: debug/mcd_debug.cpp written whole (0x2155f4..0x215a30, 5 functions): mcdDbgAssertFailed, the second assert handler (callcheck comments in mnu/msg/snd renamed fr
 - 2026-10-29 09:53 `mnu/mnuopt.cpp` done: MnuOpt, the options screen, all 15 functions (exec step machine, execMain pad / redraw, fadeInItems, setDisp, open / close, ctor / dtor) with its pattern image,
 - 2026-10-29 09:13 `task/tsk_enemy.cpp` verify: TskEnemyMove complete: plan 0x200988, step 0x200d18 and the route helpers setRoute, startWalk, nextPoint, walk, checkAhead, checkStep, checkBump, moveRoot, move
 - 2026-10-29 09:01 `task/tsk_enemy.cpp` partial: task/tsk_enemy.cpp pinned 0x20067c..0x203d94 (cut from unassigned@001fd424). TskEnemyTurn complete (13 functions: start, exec, turn, setTurnMotion, tickVoice, g
@@ -260,22 +263,21 @@ Recent sessions:
 - 2026-10-29 08:15 `debug/mimu_debug.cpp` done: debug/mimu_debug.cpp pinned 0x215a30..0x216154 and written whole: dbgAssertFailed, the silent traces dbgTraceMatrix (hidden at 0x215a70), dbgTraceFloat4, dbgTra
 - 2026-10-29 08:00 `emy/emy_main.cpp` verify: EmyMain reconstructed whole: constructor and destructor, setStartState (the state graph from the transition table), loadParam (the 0x60 script block onto the ac
 - 2026-10-29 07:41 `game/gamfont.cpp` done: GamFont written whole (28 functions, game/gamfont.cpp pinned 0x1beb70..0x1c05c0): setFont with the font header struct, setTarget / releaseTarget, clear, fillRec
-- 2026-10-29 07:20 `mag/maglifewindow.cpp` verify: MagLifeWindow written whole: constructor, live (timer), render (alpha fade + font-texture TexSpriteUV), setup, fadeIn/fadeOut, drawText (Shift-JIS, wrap, scroll
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `unassigned@0011cb70` | todo | 0/6/7 | 0.7 | 24 | 3 |
-| `debug/mcd_debug.cpp` | todo | 0/0/5 | 1.1 | 24 | 0 |
 | `unassigned@0016afcc` | todo | 0/109/158 | 45.7 | 23 | 3 |
-| `unassigned@001832e8` | todo | 0/1/1 | 0.0 | 19 | 1 |
 | `unassigned@0011c464` | todo | 0/3/6 | 0.5 | 19 | 3 |
-| `utl/utlfind.cpp` | todo | 0/9/10 | 1.4 | 16 | 1 |
+| `unassigned@001832e8` | todo | 0/1/1 | 0.0 | 19 | 1 |
 | `mnu/mnuselect.cpp` | partial | 3/6/14 | 3.0 | 16 | 0 |
 | `bed/bedsubmode.cpp` | todo | 0/2/2 | 0.2 | 16 | 2 |
+| `utl/utlfind.cpp` | todo | 0/9/10 | 1.4 | 16 | 1 |
 | `unassigned@00216ad0` | partial | 2/2/16 | 6.5 | 15 | 0 |
 | `i3d/i3cquery.cpp` | todo | 0/3/16 | 8.9 | 14 | 2 |
 | `unassigned@00149d18` | todo | 0/62/431 | 98.3 | 12 | 0 |
 | `mag/maglifefadekey.cpp` | todo | 0/6/9 | 2.5 | 9 | 0 |
+| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -284,7 +286,6 @@ Recent sessions:
 | `001be734` | FileReadReq::FileReadReq | 63 | ror | missing | game/gamfile.cpp |
 | `001be2dc` | FileReader::~FileReader | 30 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 25 | ror | missing | game/gamfile.cpp |
-| `002155f4` | FUN_002155f4 | 24 | - | missing | debug/mcd_debug.cpp |
 | `001832e8` | msgGetSysText | 14 | ror | stub | - |
 | `00217f10` | utlAtan2 | 8 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 6 | ror | missing | - |
@@ -321,4 +322,5 @@ Recent sessions:
 | `001ad6b4` | FUN_001ad6b4 | 1 | - | missing | mnu/mnuboard2d.cpp |
 | `001bdae4` | MnuSelectLanguage::MnuSelectLanguage | 1 | ror | missing | - |
 | `0012f298` | FUN_0012f298 | 1 | - | missing | mag/maglifefadekey.cpp |
+| `00130da4` | FUN_00130da4 | 1 | - | missing | - |
 

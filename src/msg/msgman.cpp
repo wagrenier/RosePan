@@ -221,7 +221,7 @@ int MsgMan::close()
     return 0;
 }
 
-// ROR 0x00183db0; callcheck: FUN_002155f4 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00183db0; callcheck: mcdDbgAssertFailed (the assert handler, inside ROR_ASSERT)
 void MsgMan::setMessage(int window, const char *text, int flag)
 {
     (void)flag;
@@ -589,7 +589,7 @@ void MsgMan::drawChar(const char *p, int *pos)
     m_x += w;
 }
 
-// ROR 0x00184a94; callcheck: FUN_002155f4 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00184a94; callcheck: mcdDbgAssertFailed (the assert handler, inside ROR_ASSERT)
 int MsgMan::process()
 {
     bool run = true;
