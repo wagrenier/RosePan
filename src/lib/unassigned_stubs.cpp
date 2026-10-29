@@ -867,19 +867,6 @@ u_long * EffWater3::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long
     return {};
 }
 
-// stub of ROR 0x0016ff18
-float effCalcViewDepth(DogCamera *cam, const float *pos)
-{
-    ROSEPAN_STUB("effCalcViewDepth", 0x0016ff18);
-    return {};
-}
-
-// stub of ROR 0x0016ff78
-void effMoveToward(float d, float *out, const float *from, const float *to)
-{
-    ROSEPAN_STUB("effMoveToward", 0x0016ff78);
-}
-
 // stub of ROR 0x0016b668
 int EffBloodSpray1::init(const EffParam *param)
 {
@@ -1668,9 +1655,3 @@ void EffCloud1::updateZDepth()
 
 
 
-// stub of ROR 0x0016fc20
-float effVecLength(const float *v)
-{
-    ROSEPAN_STUB("effVecLength", 0x0016fc20);
-    return {};
-}

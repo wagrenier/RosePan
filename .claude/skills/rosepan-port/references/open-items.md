@@ -6,6 +6,16 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-29 (`eff/effcommon.cpp`, verify, pinned 0x16fb70..0x1704a4 out of
+unassigned@0016fb70): the 13 shared effect helpers -- effCalcViewDepth / effMoveToward / effVecLength,
+matrix and angle helpers, effMakeNodeMap, effFindChild52 and the actor probe (architecture.md "The effect
+manager").** The 240 s run shows the "Once upon a time" intro and the park scene unchanged and no
+visible EffLight1 glow (none can be pointed at in shots 2880..3420 / 6180..7680): mark done when a
+glow or a footstep effect is seen where the reference has it. Doubt: the file name `effcommon` is
+inferred (alphabetical between effcameraanim1 and effdust2; no source string). The effect classes after
+it (EffDust2 .. EffFog2Prim, 0x1704a4..0x172678) are unassigned@001704a4: one file per class family
+(effdust2 / efffire1 / efffire2 / efffog1 / efffog2), the next eff work.
+
 **WRITTEN 2026-10-29 (`eff/efflight.cpp`, verify, pinned 0x174dd8..0x176694 out of unassigned@00172e4c):
 all 17 functions -- EffLight1 / EffLight2 glow sprites and EffLight3 lightning (architecture.md "The
 effect manager").** No scene on the smoke path creates EffLight3 (kind 0x23); mark done when a stormy

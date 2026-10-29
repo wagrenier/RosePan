@@ -82,16 +82,6 @@ public:
     int      m_delay;           // ROR 0x1c: frames before it renders (EffParam +8)
 };
 
-struct DogCamera;
-
-/* The depth of pos along cam's view axis: the camera's transform, then
- * dot(matrix row 2, pos - row 3). */
-float effCalcViewDepth(DogCamera *cam, const float *pos);                // ROR 0x0016ff18
-/* The length of a 3-vector (sqrtf of its squares). */
-float effVecLength(const float *v);                                      // ROR 0x0016fc20
-/* out = from + normalize(to - from) * d. */
-void  effMoveToward(float d, float *out, const float *from, const float *to); // ROR 0x0016ff78
-
 /* Clears the per-kind draw-set cache 0x8282a0[54] that renderPreMain fills
  * (EffMan::draw, once a frame). */
 void effClearDrawSets();                                                 // ROR 0x0016add8
@@ -106,5 +96,8 @@ u_char effRand();                                                        // ROR 
 void effFogColor(float *rgb, float depth);                               // ROR 0x0016ae00
 /* rgb scaled by the colour of the scene's ambient light 0. */
 void effAmbientColor(float *rgb);                                        // ROR 0x0016af20
+
+/* effCalcViewDepth, effVecLength, effMoveToward and the other shared helpers. */
+#include "eff/effcommon.h"
 
 #endif /* _EFF_EFF0_H */

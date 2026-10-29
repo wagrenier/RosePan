@@ -758,6 +758,13 @@ m_entry (int, EE offset 0x34) keeps only the low half of a host code pointer, wh
 (seqvm.cpp). Any other script-filled record holding a code address goes the same way. Also: a native
 whose cases look plausible can still be shifted -- read its jump table (native 021, data 0x3005c0).
 
+## A smoke run that goes black after the publisher logo (2026-10-29)
+
+Symptom: a 240 s run's screenshots are all black (4 KB PNGs) from frame ~1680 to the end, no stub or
+error in the log. Cause: not the code -- two reruns of the same build reached the title and the
+intro (cause of the stall unknown; seen once, on eff/effcommon.cpp's session). Fix: before blaming a change, rerun once and
+compare the shot sizes with a baseline build (git stash -u, build.py --run 60 with the same pad, pop).
+
 ## How to debug (the method that worked)
 
 - **The picture is the test.** Logs, stub hits and callcheck show the code ran, not that it is right.
