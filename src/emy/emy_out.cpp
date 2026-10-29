@@ -1080,9 +1080,9 @@ void emyGetDogPos(float *pos)
 // ──────────────────────────────────────────────────────────────────────
 // ROR 0x0016a8a4
 
-void emyPlaySE(u_int oid, int no)
+int emyPlaySE(u_int oid, int no)
 {
     float pos[4];
     emyGetSEPos(oid, pos);
-    g_gamMan.m_sndMan.playSE(g_emyManager.getEmySE(oid, no), false, pos, 0);
+    return g_gamMan.m_sndMan.playSE(g_emyManager.getEmySE(oid, no), false, pos, 0);
 }
