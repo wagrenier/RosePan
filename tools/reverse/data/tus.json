@@ -1541,6 +1541,24 @@
    "status": "verify",
    "why": "mnuBase ctor/dtor/term and the shared menu helpers (2D buffer, file/texture slots, layer draw) every Mnu* class calls; ends where MnuMap::MnuMap starts"
   },
+  "mnu/mnuboard2d.cpp": {
+   "ranges": [
+    [
+     "001ad6b4",
+     "001adf04"
+    ]
+   ],
+   "why": "MnuBoard2D ctor 0x1ad6b4 .. its fade helpers (mnuboard.rpk); 0x1adf04 is MnuMovie's constructor. File named after the class"
+  },
+  "mnu/mnuitem.cpp": {
+   "ranges": [
+    [
+     "001ae954",
+     "001bdae4"
+    ]
+   ],
+   "why": "MnuItem ctor 0x1ae954 .. the item helpers 0x1bc790..0x1bdae4 (called by MnuItem's pad states); 0x1bdae4 is MnuSelectLanguage's constructor. File named after the class"
+  },
   "mnu/mnumap.cpp": {
    "ranges": [
     [
@@ -1567,6 +1585,42 @@
    ],
    "status": "verify",
    "why": "MnuMcd: ctor 0x1a1244 / dtor 0x1a12a8 .. the check dialogs and 0x1a47f0; every function uses MnuMcd's members and the memory card manager, the strings are the memory card messages; 0x1a4bd8.. is another class (no callers, vtable-only, next to mnu/mnudlg.cpp)"
+  },
+  "mnu/mnumovie.cpp": {
+   "ranges": [
+    [
+     "001adf04",
+     "001ae474"
+    ]
+   ],
+   "why": "MnuMovie ctor 0x1adf04 .. its RxMpeg player 0x1ae330; 0x1ae474 is MnuNow's constructor. File named after the class"
+  },
+  "mnu/mnunow.cpp": {
+   "ranges": [
+    [
+     "001ae474",
+     "001ae954"
+    ]
+   ],
+   "why": "MnuNow ctor 0x1ae474 .. 0x1ae868 (mnunow.rpk); 0x1ae954 is MnuItem's constructor. File named after the class"
+  },
+  "mnu/mnuopt.cpp": {
+   "notes": "Done: seen on screen (pad 1800:START,2400:START,3000:DOWN,3100:DOWN,3200:CROSS then RIGHT / DOWN / LEFT: Stereo to Monaural, BGM 9 to 7, the scribble cursor only on rows 0 / 5). Not seen: the vibration row and the triangle exit (the run ended first). MnuOpt moved from lib/unassigned.h to mnu/mnuopt.h (not includable from unassigned.h: spr/sprman.h includes it); mnutitle.h and maglifemenu.h include it. MnuOpt now has a host constructor (runs before main inside MnuTitle). GamMan option 1 is the Noir Filter row although gamman names it m_optMasterLevel / m_masterVolume (open-items). Next in this run: mnu/mnumovie.cpp (RxMpeg player, 15 small functions), mnu/mnunow.cpp, mnu/mnuboard2d.cpp, then mnu/mnuitem.cpp (53 functions, the item menu; several sessions). 0x1bdae4..0x1bdc9c still unpinned (MnuSelectLanguage ctor .. isInit).",
+   "ranges": [
+    [
+     "001ab474",
+     "001ad6b4"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 09:53",
+     "status": "done",
+     "summary": "MnuOpt, the options screen, all 15 functions (exec step machine, execMain pad / redraw, fadeInItems, setDisp, open / close, ctor / dtor) with its pattern image, display list and texture list. Split unassigned@001ab474 into mnu/mnuopt.cpp, mnuboard2d.cpp, mnumovie.cpp, mnunow.cpp, mnuitem.cpp (pinned). From the title's Option item the screen shows Sound / BGM vol. / SE vol. / Contrast / Noir Filter / Vibration from the game's textures, and left / right / down change the values on screen."
+    }
+   ],
+   "status": "done",
+   "why": "MnuOpt: ctor 0x1ab474 .. its pad state machines 0x1abb58 / 0x1ac5b0 (mnuopt.rpk); 0x1ad6b4 is MnuBoard2D's constructor. No source string: file named after the class (MagLifeMenuOpt)"
   },
   "mnu/mnupbook.cpp": {
    "notes": "Nothing left to write in this TU. verify: the smoke run never opens a diary (types 0x1000 / 0x1024 / 0x102a), and the picture book on the same path is still black while open (shot_04500 shows only the prompt sprite; work/ref/MNUPBOOK has the reference): the VU1 sprite packets of mnuBase::drawSprite (0x21e5a0, 0x21e488, 0x21e428, 0x21e690, 0x21e688, unassigned@0021c960) and the pose player (i3mGetLength / i3mGetPose / i3mPoseToMatrices) are stubs, see open-items item 4. The first session whose screenshot shows the book or diary drawn marks this done. PC guards added where the ROM would index texture slot -1 (setSheetTex, setBaseTex, queueSheetTex). setPageText(-1) while turning is the ROM's (asm li a1,-1), unlike MnuPBook's -99. References updated in this commit (architecture MnuDiary, open-items item 4).",
@@ -2275,6 +2329,7 @@
   "unassigned@00192ac0": {},
   "unassigned@001a0950": {},
   "unassigned@001a6830": {},
+  "unassigned@001ab474": {},
   "unassigned@001bde58": {},
   "unassigned@001beb70": {},
   "unassigned@001d3b44": {},

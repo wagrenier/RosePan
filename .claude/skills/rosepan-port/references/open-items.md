@@ -1087,6 +1087,22 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- mnu/mnuopt.cpp (2026-10-29, done): the options screen shows the row "Noir Filter" for GamMan option 1,
+  which game/gamman names m_optMasterLevel / m_masterVolume (scaled 32..224, then setVolume): the
+  names are likely wrong -- check what setOption 1 changes in a room. MnuOpt calls SprMan::volumeOn only
+  while that row is chosen (volumeOff otherwise): volumeOn / volumeOff may be the noir filter preview,
+  not sound. Vibration and the triangle exit were not reached by the scripted run (the code follows the
+  ROM; quirk kept: m_vib_off is never cleared after switching vibration on, so each redraw of the row
+  pulses the pad). The split of unassigned@001ab474 also pinned mnu/mnuboard2d.cpp, mnu/mnumovie.cpp,
+  mnu/mnunow.cpp and mnu/mnuitem.cpp (todo; file names from their classes, no source strings).
+  0x1bdae4..0x1bdc9c (MnuSelectLanguage ctor / dtor / init / term / isInit) is still outside
+  mnu/mnuSelectLanguage.cpp's inferred extent: pin that file from 0x1bdae4 when it is worked on.
+  Pad for the options: "1800:START,2400:START,3000:DOWN,3100:DOWN,3200:CROSS" opens them (~3600 frames).
+- Black screenshots (2026-10-29): at a 5120x1417 window one 140 s run had every shot black from frame
+  1740 on, while the next three runs (one on the code before mnuopt, two after) showed the title; the
+  same symptom as the 16:9 run of 2026-10-28. That black run also presented at 60 fps where the others
+  ran at about 37: look at timing / presentation first if it recurs.
+
 - task/tsk_enemy.cpp (2026-10-29, partial): the file name is a guess (no RoR source string; the range
   was cut from unassigned@001fd424, whose remaining 0x1fd424..0x20067c is the TskAttack / TskDamage
   steps of data 0x2feb64 -- a task/ file still to name). Doubt: both getTargetPos lead the PC along

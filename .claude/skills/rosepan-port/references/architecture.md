@@ -1428,6 +1428,18 @@ all written.
 - `utlGetOidTypeKind` 0x103390 and `utlSetItemFlag2` 0x1033b8 have no callers and were folded into
   `utlTakeObjItem`'s body in Ghidra (created 2026-10-28).
 
+## The options screen (`mnu/mnuopt.cpp`, 0x1ab474..0x1ad6b4, 2026-10-29)
+
+MnuOpt (MagLifeMenuOpt +0x40, MnuTitle +0x3b80) edits GamMan's option block in place: getStatus 0x15
+returns &m_optOutput (+0x21f8c), and the six rows on screen map to setOption numbers and fields:
+Sound Stereo / Monaural = option 6 (+0x00), BGM vol. = option 2 (+0x1c, m_optStrLevel), SE vol. =
+option 3 (+0x18), Contrast = option 0 (+0x10, m_optBrightLevel), **Noir Filter = option 1** (+0x0c,
+GamMan names it m_optMasterLevel / m_masterVolume), Vibration = option 7 (+0x04). Levels are 0..8 (shown
+1..9). Any direction press sets GamMan m_flags2 0x400; triangle then sets all options again. The
+pattern table is the EE image 0x2a8848..0x2aad10, display list 0x2aad70 (65 sprites), textures
+data/mnurpk/mnuopt.rpk (option_sita / option_yogore / option). Seen working 2026-10-29 from the title's
+Option item (progress/ shot).
+
 ## Modules (RoR's own source files)
 
 73 `.cpp` paths survive in assert / error strings (export.py anchors on them), plus headers whose inline
@@ -1442,7 +1454,7 @@ functions assert (`.h`). Directories and files:
 | `game/` | gamman, gamsnd, gamstat, gamtrg |
 | `mag/` | maglife, maglifebwn (+.h), maglifebwnctrl (+.h), maglifebwnmode, maglifefadekey, maglifeman, maglifemenu, maglifemenusp, maglifepc, maglifepc2, maglifepc3, maglifepcbtl, maglifepceff, maglifepcmode, maglifepcmove, maglifepcmsg, maglifetest, maglifewindow, magloader, magscene (+.h), magscene2, magscenecamera, magscenedebug, magscenefocus, magsceneif, magscenelight, magsceneoption, magscenerender, magscenetenkyu, magsystem (+.h) |
 | `mcd/` | mcdman |
-| `mnu/` | mnuSelectLanguage, mnudlg, mnuselect, mnusvld (named by class: mnubase, mnumap, mnupbook, mnustock, mnumcd, mnutitle) |
+| `mnu/` | mnuSelectLanguage, mnudlg, mnuselect, mnusvld (named by class: mnubase, mnumap, mnupbook, mnustock, mnumcd, mnutitle, mnuopt 0x1ab474, mnuboard2d 0x1ad6b4, mnumovie 0x1adf04, mnunow 0x1ae474, mnuitem 0x1ae954..0x1bdae4) |
 | `msg/` | msgman |
 | `sequence/` | sequence |
 | `snd/` | rxmpeg, sndman, unitque |

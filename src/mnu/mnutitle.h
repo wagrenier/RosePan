@@ -22,6 +22,7 @@
 #include <stddef.h>
 
 #include "lib/unassigned.h"
+#include "mnu/mnuopt.h"
 #include "mnu/mnusvld.h"
 #include "sdk/eetypes.h"
 #include "spr/sprman.h"

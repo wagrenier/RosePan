@@ -439,38 +439,6 @@ void MnuNow::term()
     ROSEPAN_STUB("MnuNow::term", 0x001ae574);
 }
 
-// stub of ROR 0x001ab680
-void MnuOpt::draw(I3dLayer *layer)
-{
-    ROSEPAN_STUB("MnuOpt::draw", 0x001ab680);
-}
-
-// stub of ROR 0x001ab598
-void MnuOpt::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("MnuOpt::init", 0x001ab598);
-}
-
-// stub of ROR 0x001ab65c
-int MnuOpt::isInit()
-{
-    ROSEPAN_STUB("MnuOpt::isInit", 0x001ab65c);
-    return {};
-}
-
-// stub of ROR 0x001ab66c
-int MnuOpt::processPad(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuOpt::processPad", 0x001ab66c);
-    return {};
-}
-
-// stub of ROR 0x001ab5e4
-void MnuOpt::term()
-{
-    ROSEPAN_STUB("MnuOpt::term", 0x001ab5e4);
-}
-
 // stub of ROR 0x001bdfe0
 void MnuSelectLanguage::draw(I3dLayer *layer)
 {
