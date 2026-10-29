@@ -72,6 +72,24 @@
    "status": "verify",
    "why": "the four BedPfh methods between BedMemory (0x101718 clears 7 words, not BedPfh's 5) and BedPad::~BedPad 0x101aec; bed/bedpfh.cpp / bedpfh.h assert strings in the ctor and getFileName"
   },
+  "bed/bedsubmode.cpp": {
+   "notes": "Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu1000a) and MagScene sub mode 8 (pushSubMode, the movie skip); a printf probe showed no call before frame ~1920. The first run that gets into the opening film with START held exercises them: if the film skip or a sys message misbehaves, look here first. Smoke runs are flaky at the logo to title fade: 2 of 4 runs this session (same exe) stayed black from frame ~1680 to the end, the rest reached the title at ~1860; not this TU (open-items.md Open questions). The committed last.png is from a 45 s run that reached the title.",
+   "ranges": [
+    [
+     "00100258",
+     "00100354"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 11:27",
+     "status": "verify",
+     "summary": "BedSubMode written: push 0x100258 and pop 0x1002c0 (save / restore the four-word record on a 4-deep stack, asserts at lines 25 / 35) and reset 0x100320 (named, pinned into the TU: m_depth 0 and the saved copies zeroed); MagScene::MagScene now calls reset as the ROM does after its own field clears. Pinned 0x100258-0x100354."
+    }
+   ],
+   "status": "verify",
+   "why": "push/pop carry the bed/bedsubmode.cpp source string; 0x00100320 clears the same BedSubMode stack (m_depth +0x50, records +0x10) and sits between them and BedMemory::create at 0x00100354"
+  },
   "debug/mcd_debug.cpp": {
    "notes": "Nothing calls these functions in the retail ROM, so no screenshot can show them; the smoke run still reaches the disclaimer screen unchanged. mcdDbgMenuTest state 3 (run g_mcdDbgMenu.processPad) is unreachable: no code sets it. The test's state lives in file statics (bss 0x2db280..0x2db29c). Pad bits read are pad 0 m_repeat (MagSystem +0xbc). The host constructs g_mcdDbgMenu at static-init time as the ROM does (MnuMcd ctor only clears m_open and cursors); its destructor calls close, which returns at once when not open. Nothing left to write.",
    "ranges": [

@@ -23,6 +23,12 @@
   "was": "FUN_001002c0",
   "why": "bed/bedsubmode.cpp assert m_depth > 0: drops m_depth (+0x50), restoring the pushed qword"
  },
+ "00100320": {
+  "name": "BedSubMode::reset",
+  "tag": "ror-inferred",
+  "was": "FUN_00100320",
+  "why": "zeroes m_depth (+0x50) and the four saved records (+0x10..+0x50) of the BedSubMode that push/pop use; called once, from MagScene::MagScene on its sub mode at +0x22d0 after the ctor's own field clears"
+ },
  "00100354": {
   "name": "BedMemory::create",
   "tag": "ror-inferred",
