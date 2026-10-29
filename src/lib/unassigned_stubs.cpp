@@ -242,45 +242,18 @@ void MagLife130da4::setVolume(int volume)
 
 // ---- stubs (hand-written: EmyMain / EmyOut and the enemy classes' constructors and destructors, which stubgen does not write) ----
 
-// stub of ROR 0x00164118
-EmyMain::EmyMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,
-                 const _tagEnemyTransition *trans, float *pos)
+// stub of ROR 0x002006b0
+TskEnemyMove::TskEnemyMove()
 {
-    ROSEPAN_STUB("EmyMain::EmyMain", 0x00164118);
-    (void)prm;
-    (void)trans;
-    (void)pos;
-    // PORT: the fields EmyManager reads, until the constructor is written.
-    m_oid = oid;
-    m_name = name;
-    m_parsonality = 0;
-    m_voice = 0;
-    m_manage_sw = 0;
-    m_visible = 0;
-    m_down_flg = 0;
-    m_damage = 0;
-    m_down_supine = 0;
-    m_param = param;
-    m_notify = 0;
-    m_state = 0;
-    m_emy_out = NULL;
-    m_state2 = 0;
-    m_grp_no = 0;
-    m_grp_state = 0;
-    m_grp_wait = 0;
-    m_grp_1d2 = 0;
-    m_grp_respawn = 0;
-    m_lp = 0;
-    m_damage_end = 0;
-    m_move = NULL;
-    m_turn = NULL;
-    m_238 = 0;
+    ROSEPAN_STUB("TskEnemyMove::TskEnemyMove", 0x002006b0);
+    m_active = 0;
 }
 
-// stub of ROR 0x00164208
-EmyMain::~EmyMain()
+// stub of ROR 0x002034c0
+TskEnemyTurn::TskEnemyTurn()
 {
-    ROSEPAN_STUB("EmyMain::~EmyMain", 0x00164208);
+    ROSEPAN_STUB("TskEnemyTurn::TskEnemyTurn", 0x002034c0);
+    m_active = 0;
 }
 
 // stub of ROR 0x0015c2a4
@@ -2540,3 +2513,27 @@ void TskEnemyTurn::start(const EmyTurnParam *prm)
     ROSEPAN_STUB("TskEnemyTurn::start", 0x0020350c);
 }
 
+
+// stub of ROR 0x00202fbc
+void TskEnemyMove::resume()
+{
+    ROSEPAN_STUB("TskEnemyMove::resume", 0x00202fbc);
+}
+
+// stub of ROR 0x00202f60
+void TskEnemyMove::suspend()
+{
+    ROSEPAN_STUB("TskEnemyMove::suspend", 0x00202f60);
+}
+
+// stub of ROR 0x00203a00
+void TskEnemyTurn::resume()
+{
+    ROSEPAN_STUB("TskEnemyTurn::resume", 0x00203a00);
+}
+
+// stub of ROR 0x002039a4
+void TskEnemyTurn::suspend()
+{
+    ROSEPAN_STUB("TskEnemyTurn::suspend", 0x002039a4);
+}

@@ -7097,6 +7097,12 @@
   "was": "FUN_00164fc0",
   "why": "EmyMain vtable slot 5 default; updateEmys calls slot 5 each frame"
  },
+ "00165010": {
+  "name": "EmyMain::startBitten",
+  "tag": "ror-inferred",
+  "was": "FUN_00165010",
+  "why": "calls EmyOut::startBitten on m_emy_out (+0x44) when there is one; the bite counterpart of updateOut (tickBitten)"
+ },
  "00165038": {
   "name": "EmyMain::updateOut",
   "tag": "ror-inferred",
@@ -7115,11 +7121,41 @@
   "was": "FUN_00165074",
   "why": "switch on the group state +0x1cc (hide, wait, appear ...), args the group's float, motion, position"
  },
+ "00165280": {
+  "name": "EmyMain::getBasePos",
+  "tag": "ror-inferred",
+  "was": "FUN_00165280",
+  "why": "EmyOut::getBasePos's body on EmyMain: the oid's actor node Bip01 Spine1 (DogModel::getNodeIndexByName inline) with the object's y"
+ },
+ "00165398": {
+  "name": "EmyMain::setSE",
+  "tag": "ror-inferred",
+  "was": "FUN_00165398",
+  "why": "stopAllSE, then the first of the four sound records at +0x154 gets the handle, type (+0xc) and utlRandPeakHi(1, n, 4) (+0x18), counters cleared"
+ },
+ "00165404": {
+  "name": "EmyMain::addSE",
+  "tag": "ror-inferred",
+  "was": "FUN_00165404",
+  "why": "setSE's record fill into the first free one of the four sound records at +0x154 (handle 0)"
+ },
+ "00165498": {
+  "name": "EmyMain::stopSE",
+  "tag": "ror-inferred",
+  "was": "FUN_00165498",
+  "why": "stopAllSE for the records whose handle is the argument: funcSE (type < 3) or funcStr stops it, record cleared"
+ },
  "00165570": {
   "name": "EmyMain::stopAllSE",
   "tag": "ror-inferred",
   "was": "FUN_00165570",
   "why": "the four sound records at +0x154 (0x1c each): funcSE / funcStr op 8 by kind, then cleared"
+ },
+ "00165638": {
+  "name": "EmyMain::clearSEType",
+  "tag": "ror-inferred",
+  "was": "FUN_00165638",
+  "why": "clears (memset 0x1c) every sound record whose type word (+0xc, 0x160) is the argument, without stopping it"
  },
  "001656b4": {
   "name": "EmyMain::testHittable",
@@ -7139,11 +7175,71 @@
   "was": "FUN_00165734",
   "why": "param 8 (o_area_no) of GamMan::m_pcPtr equals the enemy achr's; 0 with no PC"
  },
+ "00165794": {
+  "name": "EmyMain::testBarkReact",
+  "tag": "ror-inferred",
+  "was": "FUN_00165794",
+  "why": "cooldown +0x38 counts down; when done and magBwnIsBarkPhase3, counter +0x34 below 0, within 300 of the dog in x/z and within pi/4 of the dog's facing: re-arms both with utlRandRange and returns 1"
+ },
+ "00165a68": {
+  "name": "EmyMain::isPCStateClass1",
+  "tag": "ror-inferred",
+  "was": "FUN_00165a68",
+  "why": "MagSystem::getPCStateClass() == 1, or magBwnReturn0() == 0"
+ },
+ "00165aa8": {
+  "name": "EmyMain::isPCAhead",
+  "tag": "ror-inferred",
+  "was": "FUN_00165aa8",
+  "why": "without attr bit 0, PC state class 6..8 and the PC within pi/8 of the enemy actor's facing (atan2 of PC - getBasePos minus DogActor::getRotY)"
+ },
+ "00165d38": {
+  "name": "EmyMain::isPCStateClass2",
+  "tag": "ror-inferred",
+  "was": "FUN_00165d38",
+  "why": "MagSystem::getPCStateClass() == 2, or magBwnReturn0() == 1"
+ },
+ "00165d7c": {
+  "name": "EmyMain::isPCClass7OffAxis",
+  "tag": "ror-inferred",
+  "was": "FUN_00165d7c",
+  "why": "without attr bit 0, PC state class 7 and the wrapped angle from the enemy's facing to the PC is non-zero"
+ },
+ "00166004": {
+  "name": "EmyMain::isPCNear",
+  "tag": "ror-inferred",
+  "was": "FUN_00166004",
+  "why": "emyChkNearXZ(60, getBasePos, emyGetPCPos)"
+ },
+ "00166048": {
+  "name": "EmyMain::isPCOrDogInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_00166048",
+  "why": "emyChkInSight(60, 2 pi, 0, target, m_param) for the PC (0 without one) and for the dog; 1 when either sees"
+ },
  "00166108": {
   "name": "EmyMain::isLowLife",
   "tag": "ror-inferred",
   "was": "FUN_00166108",
   "why": "achr a_lp (+0x126) < m_lp (+0x1d8) / 4"
+ },
+ "00166128": {
+  "name": "EmyMain::hasOid0Twice",
+  "tag": "ror-inferred",
+  "was": "FUN_00166128",
+  "why": "EmyManager::hasOid(0) && EmyManager::hasOid(0): the same call twice"
+ },
+ "00166178": {
+  "name": "EmyMain::isHalfLife",
+  "tag": "ror-inferred",
+  "was": "FUN_00166178",
+  "why": "isLowLife's twin: the achr's a_lp under half of m_lp (+0x1d8)"
+ },
+ "00166198": {
+  "name": "EmyMain::isPCStateClass4",
+  "tag": "ror-inferred",
+  "was": "FUN_00166198",
+  "why": "isPCStateClass1's twin: MagSystem::getPCStateClass() == 4, or magBwnReturn0() == 2"
  },
  "001661dc": {
   "name": "EmyMain::notify",
@@ -7168,6 +7264,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00166378",
   "why": "+8 = on; off pauses tasks and move, sets param flags 0x400 | 0x2000"
+ },
+ "0016640c": {
+  "name": "EmyMain::setLPFromStack",
+  "tag": "ror-inferred",
+  "was": "FUN_0016640c",
+  "why": "setParam(0x1b a_lp) from an uninitialised stack word and returns that word (probably meant getParam); no callers"
  },
  "00166434": {
   "name": "EmyMain::callFunc",
@@ -7198,6 +7300,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00166534",
   "why": "+0x1e4 - 1; at 0 clears param flag 0x400"
+ },
+ "00166568": {
+  "name": "EmyMain::pickSE",
+  "tag": "ror-inferred",
+  "was": "FUN_00166568",
+  "why": "getSE's helper: pair[parsonality], parsonality 2 picks [utlRandRange(0, 99) > 49]"
  },
  "001665b8": {
   "name": "EmyMain::getSE",
@@ -18011,6 +18119,12 @@
   "was": "FUN_002005b8",
   "why": "TskDamage::setup's step for chr word 6"
  },
+ "002006b0": {
+  "name": "TskEnemyMove::TskEnemyMove",
+  "tag": "ror-inferred",
+  "was": "FUN_002006b0",
+  "why": "stores vtable 0x2e5040 (TskEnemyMove), clears +4, +0x28, +0xac4; EmyMain::loadParam calls it on operator_new(0xad0)"
+ },
  "00200700": {
   "name": "TskEnemyMove::start",
   "tag": "ror-inferred",
@@ -18023,11 +18137,41 @@
   "was": "FUN_00202f10",
   "why": "+4 = 0, stops its SE +0xab8, clears EmyManager's work word of its oid +8"
  },
+ "00202f60": {
+  "name": "TskEnemyMove::suspend",
+  "tag": "ror-inferred",
+  "was": "FUN_00202f60",
+  "why": "+0xac4 = 1, its SE (+0xab8) stopped, the achr's +0x1e8 speed made tiny while active; EmyMain::pauseMove(1)"
+ },
+ "00202fbc": {
+  "name": "TskEnemyMove::resume",
+  "tag": "ror-inferred",
+  "was": "FUN_00202fbc",
+  "why": "+0xac4 = 0, the achr's +0x1e8 back to +0x4c while active; EmyMain::pauseMove(0)"
+ },
+ "002034c0": {
+  "name": "TskEnemyTurn::TskEnemyTurn",
+  "tag": "ror-inferred",
+  "was": "FUN_002034c0",
+  "why": "stores vtable 0x2e5080 (TskEnemyTurn), clears +4 and +0x10; EmyMain::loadParam calls it on operator_new(0x60)"
+ },
  "0020350c": {
   "name": "TskEnemyTurn::start",
   "tag": "ror-inferred",
   "was": "FUN_0020350c",
   "why": "emyStartTurn's record into the turn task (EmyMain +0x1f8)"
+ },
+ "002039a4": {
+  "name": "TskEnemyTurn::suspend",
+  "tag": "ror-inferred",
+  "was": "FUN_002039a4",
+  "why": "TskEnemyMove::suspend's twin: +0x48 = 1, SE +0x3c stopped, achr +0x1e8 tiny"
+ },
+ "00203a00": {
+  "name": "TskEnemyTurn::resume",
+  "tag": "ror-inferred",
+  "was": "FUN_00203a00",
+  "why": "TskEnemyMove::resume's twin: +0x48 = 0, achr +0x1e8 = +0x1c"
  },
  "00203d94": {
   "name": "SysTimer::SysTimer",

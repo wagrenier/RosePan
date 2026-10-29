@@ -281,6 +281,28 @@
    "status": "verify",
    "why": "HfmMain + its ten HfmOut* classes: HfmMain::initOut (first, as every XxxMain::initOut opens its file) up to BdsMain::initOut 0x149d18 which opens the Bds file; no source string, named like emy_main.cpp / emy_manager.cpp"
   },
+  "emy/emy_main.cpp": {
+   "notes": "Verify: the 15 s smoke run stops at the disclaimer screen, no enemy exists yet; the first run that reaches a room with an enemy checks it (createEmy, then the class decide loop). Decisions: _tagEnemyParam is a plain EE-layout 0x60 struct; EmySERec models the records at +0x154; m_motion_flg was really a byte per state (renamed m_state_flg[40], emy_hfm.cpp updated); m_func is a host member-function pointer standing in for the GCC 2 PMF at +0x1dc. emyGetNodePos and emyAbsAngle are no longer static in emy_out.cpp (declared in emy_main.h). TskEnemyMove and TskEnemyTurn got hand-written constructor stubs in lib/unassigned_stubs.cpp (stubgen does not write constructors) and suspend and resume declarations (stubbed); their real code is unassigned@001fd424. ROM oddities ported as is (open-items.md): setLPFromStack passes an unset word, hasOid0Twice, pickSE and getMoveParam unbounded. The new decide helpers (testBarkReact, isPCAhead ...) have no host callers until the enemy classes (unassigned@00149d18) are written.",
+   "ranges": [
+    [
+     "00164118",
+     "00166a1c"
+    ],
+    [
+     "0028a790",
+     "0028aa88"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 08:00",
+     "status": "verify",
+     "summary": "EmyMain reconstructed whole: constructor and destructor, setStartState (the state graph from the transition table), loadParam (the 0x60 script block onto the achr, random life and speed, the move and turn tasks), exec, the group appear and respawn steps, the four sound records, getSE with its ROM data image, getMoveParam with the 12-row kind table, the PC and dog tests the classes decide with, and the linkonce task wrappers and accessors. 20 functions named (EmyMain helpers, TskEnemyMove and TskEnemyTurn ctor, suspend, resume); TU pinned to 0x164118-0x166a1c plus linkonce 0x28a790-0x28aa88."
+    }
+   ],
+   "status": "verify",
+   "why": "RoR's source string emy/emy_main.cpp anchors 0x164364 / 0x164508; EmyMain's methods run unbroken from its constructor 0x164118 to EmyOut::EmyOut 0x166a1c (emy_out.cpp); plus EmyMain's linkonce accessors 0x28a790..0x28aa88 (__tf .. GetGroupPtr)"
+  },
   "emy/emy_manager.cpp": {
    "notes": "Verify: the 15 s smoke run shows the boot disclaimer as before (EmyManager now runs its exec every frame with no enemies; no crash); no enemy is created on the New Game path yet, so the first run that spawns one should look at it. Resolved the open item on addEmy's extra stack word: it is createEmy's makeOid, passed as 1 by addEmy. Callers updated: gamman.cpp addChr/addChrGroup pass typed param/transition/pos, seqcall native 212 case 24 is the inline SetGrpMotion. Doubts (open-items.md item 7): the file name; createEmy's transition table is GamMan m_image[place] as the callers pass it; EmyMain keeps the derived word +0x238 on the host; the host has a ninth group for setGroup a=8. Left: EmyMain itself (ctor 0x164118 / dtor 0x164208 now unassigned@00164118, belongs with emy/emy_main.cpp 0x164364..; its methods 0x164fc0.. in unassigned@00164fc0) and the eleven enemy files in unassigned@00145020; their virtual slots and initOut are stubs, ctor/dtors hand stubs in lib/unassigned_stubs.cpp (the EmyMain ctor stub sets the fields EmyManager reads).",
    "ranges": [
