@@ -776,7 +776,9 @@ void RosePan_RendererDrawImageQuad(const void *texture,
                                   int linear);
 /* As RosePan_RendererDrawImageQuad, with UVs that wrap when `repeat` (the
  * GS CLAMP_1 REPEAT); a repeating quad over the whole frame is widened to
- * the window with its UVs, so a tiling fill covers widescreen too. */
+ * the window with its UVs, so a tiling fill covers widescreen too.  The one
+ * path that honours a FIX-weighted blend between Cs and Cd (ALPHA 0x64 /
+ * 0x61 with any FIX, MagLifeNoise's grain): it draws in two passes. */
 void RosePan_RendererDrawImageQuadWrap(const void *texture,
                                       const float *xy,
                                       const float *uv,
@@ -874,7 +876,9 @@ void RosePan_RendererSetGsTestRegister(unsigned long long test);
  *
  *   ALPHA   the blend equation (A-B)*C>>7 + D.  Classified into the handful of
  *           shapes SDL_GPU can express; anything else falls back to the
- *           ordinary source-alpha blend rather than dropping the draw.
+ *           ordinary source-alpha blend rather than dropping the draw.  The
+ *           FIX blends between Cs and Cd are also recorded for
+ *           RosePan_RendererDrawImageQuadWrap, which draws them exactly.
  *   ZBUF    only ZMSK is used, to stop a transparent pass writing depth.
  *   SCISSOR the clip box, in the PS2's 640x448 framebuffer pixels. */
 void RosePan_RendererSetGsAlphaRegister(unsigned long long alpha);

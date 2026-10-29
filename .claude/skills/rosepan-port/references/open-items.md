@@ -1258,7 +1258,10 @@ to adapt when a TU reaches them:
 
 - mnu/mnuopt.cpp (2026-10-29, done): the options screen shows the row "Noir Filter" for GamMan option 1,
   which game/gamman names m_optMasterLevel / m_masterVolume (scaled 32..224, then setVolume): the
-  names are likely wrong -- check what setOption 1 changes in a room. MnuOpt calls SprMan::volumeOn only
+  names are likely wrong -- check what setOption 1 changes in a room. (Seen in the first room,
+  2026-10-29: it is the strength of MagLifeNoise's grain -- setVolume's only target -- level 8 visibly
+  grainier and greyer than level 0. A rename of the "volume" family to the noise level is still open.)
+  MnuOpt calls SprMan::volumeOn only
   while that row is chosen (volumeOff otherwise): volumeOn / volumeOff may be the noir filter preview,
   not sound. Vibration and the triangle exit were not reached by the scripted run (the code follows the
   ROM; quirk kept: m_vib_off is never cleared after switching vibration on, so each redraw of the row

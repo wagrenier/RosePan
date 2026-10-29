@@ -699,7 +699,11 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   RGBAQ, so the host i3d module latches the register, GsState::rgbaq; it also follows CLAMP_1,
   GsState::clamp, and draws REPEAT sprites with RosePan_RendererDrawImageQuadWrap, which wraps the
   UVs and widens a full-frame one to the window -- clamped, the grain showed only in the corner of
-  the frame whose UVs fell inside the texture), the 2D layers `S2dCineSco`
+  the frame whose UVs fell inside the texture. The volume is the options screen's Noir Filter:
+  setOption 1's level 0..8 -> m_masterVolume 32..224 -> setVolume -> FIX 8..56, so the option
+  acts only through FIX. The renderer draws those FIX blends in two passes (DrawFixWeightedQuad:
+  0x64 = Cd*(1-F) + Cs*F, 0x61 = (Cd - Cs*F/(1+F))*(1+F), F = FIX/128); before 2026-10-29 it
+  fell back to a plain source-alpha blend and the grain was the same at every level), the 2D layers `S2dCineSco`
   +0x41930, `S2dBg` +0x42260, `S2dMes` +0x42bb0 (all MagLife, level 7, life priorities 0x8006 /
   0x8000 / 0x800a), the current fade record +0x43700 (six words: kind, mode, time, -, -, level;
   `MagScene::setFade` 0x1311f4, `getFadeState` 0x131550 maps the fader state to 0..6) and the
