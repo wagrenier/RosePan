@@ -722,6 +722,16 @@ bits); MagScene (a global) is more than 2 GB from the model heap. Fix: I3R_FAR_P
 table keyed by the field address (i3rroot.h / i3rroot.cpp), used by i3rSetFarPtr. The unrelocate
 path (0x22c328) does not know the marker; a model unrelocated with a far slot needs it.
 
+## A script entry kept in a 32-bit record word (2026-10-28)
+
+Symptom: the plain run exits 0xC0000005 about 2 s after the picture book, not every time; gdbrun
+never faults. ROSEPAN_CRASH_LOG=1 + addr2line: GamArea::checkPc -> Sequence::execThread ->
+seqFindEntry reading 0x64dfbac4. Cause: the script fills its own GamAreaTrg record with sw, so
+m_entry (int, EE offset 0x34) keeps only the low half of a host code pointer, while m_base (native
+018 case 0x1e) is the full host pointer. Fix: seqImagePc takes the in-image offset in 32 bits
+(seqvm.cpp). Any other script-filled record holding a code address goes the same way. Also: a native
+whose cases look plausible can still be shifted -- read its jump table (native 021, data 0x3005c0).
+
 ## How to debug (the method that worked)
 
 - **The picture is the test.** Logs, stub hits and callcheck show the code ran, not that it is right.

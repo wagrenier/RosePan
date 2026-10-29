@@ -6,17 +6,22 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
-**TOP PRIORITY, NEWEST (the user, 2026-10-28): get the game to show up in 3D -- the user thinks the
-camera is the issue.** Host task `fix/ingame_camera.cpp`, first in the pinned queue (its brief has
-the full text). What is known: after the picture book MagScene::draw runs and the forest map and
-Jennifer are loaded, but the scene camera is still the default (mode 0, no parent, (0, 1000, 0)
-looking along +y, away from the scene), so i3rDrawModel culls everything. ROSEPAN_TEST_CAM=1 shows
-Jennifer textured and lit, so the draw path works and the camera placement is the gap: no PC is
-bound (GamMan::setPC never runs setCameraMode) and no camera native is called. Write the real code
-that places the camera / binds the PC (GamMan::setPC and the script PC native, MagLifePC::setActor,
-TskCamera, setCameraMode 3..5 / map camera, the writer of DogCamera +0x1d0 / +0x190..+0x1c0) until
-the 200 s smoke run shows the first room without the test switch. Supersedes the lists below until
-then.
+**TOP PRIORITY, NEWEST (the user, 2026-10-28, after the first room showed): any aspect ratio.**
+Host task `fix/aspect_ratio.cpp`, first in the pinned queue: the requirement in architecture.md "PC
+platform layer" (the display correct at any aspect ratio, from one renderer-owned source the player
+can later set by hand; move rosepan_i3d's 640x448 frame scale and the 512-wide frame buffer stretch
+onto it). The picture decides: compare a 16:9 window with the 4:3 one (no stretching of the 3D room
+or the 2D overlays).
+
+**DONE 2026-10-28 (`fix/ingame_camera.cpp`): the first room shows in 3D after New Game** (Jennifer at
+the forest bus stop at night, lit and textured, no ROSEPAN_TEST_CAM). It was not the camera code: (1)
+native 021's cases were shifted against its jump table (data 0x3005c0: 3 and 6 = setPc, 4 = setDog,
+5 = setMurder), so the script's setPc(0x50000001) ran setDog and no PC was ever bound -- with the PC
+bound, GamMan::setPc runs setCameraMode and the camera follows; (2) an intermittent access violation
+right after the book (GamArea::checkPc -> execThread -> seqFindEntry): a trigger entry the script
+stores in the 32-bit GamAreaTrg::m_entry lost its top half (hazards.md). Open: the message window
+frame shows with no text (MsgManSet / GamFont stubs); the smoke run needs about 220 s to reach the
+room (`--run 240`).
 
 **PC BLOCKERS FIRST (the user, 2026-10-27, after mag/maglifepc.cpp): the three TUs the player
 character needs to animate and move lead the pinned queue, ahead of Brown and the rest:**

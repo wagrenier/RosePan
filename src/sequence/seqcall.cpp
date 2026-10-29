@@ -536,15 +536,15 @@ intptr_t seqFunc021(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
         if ((u_int)a1 != 0x100000)
             return 0;
         return SEQ_RET_YIELD;
-    case 3:
-        gam.setDog(arg);
-        return 0;
-    case 4:
-        gam.setMurder(arg);
-        return 0;
-    case 5:
+    case 3:     // table 0x3005c0: 3 and 6 share setPc's case
     case 6:
         gam.setPc(arg);
+        return 0;
+    case 4:
+        gam.setDog(arg);
+        return 0;
+    case 5:
+        gam.setMurder(arg);
         return 0;
     case 7:
         g_sequence.m_bits[(u_int)a1 >> 5] |= 1u << ((u_int)a1 & 0x1f);

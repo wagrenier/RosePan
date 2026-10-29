@@ -1,6 +1,6 @@
 {
  "queue": [
-  "fix/ingame_camera.cpp",
+  "fix/aspect_ratio.cpp",
   "unassigned@0010f944",
   "unassigned@0022e840",
   "unassigned@00106658",
@@ -305,7 +305,19 @@
    "status": "verify",
    "why": "The EmyOut base class (ctor 0x166a1c, vptr +0x34) and the emy* helpers its 77 subclasses call (emyStartMove, emyChkInSight, emyCanReach, emyChkHitReach); ends where Eff0 (0x16a914) starts. No source string; named after the class like emy_main / emy_hfm."
   },
+  "fix/aspect_ratio.cpp": {
+   "task": "TOP PRIORITY (the user, 2026-10-28): any aspect ratio. Make the PC port display correctly at any aspect ratio, read from one renderer-owned source (window / output size now, a player setting later), per architecture.md PC platform layer: no fixed 4:3 or 640x448 assumption in host draw code (2D placement, 3D projection, render targets, screen-space effects); move rosepan_i3d's 640x448 frame scale and the 512-wide frame buffer stretch onto it. Test: the smoke run at a 16:9 window (ROSEPAN_ASPECT / window size) and at 4:3 -- the forest bus-stop room (about 220 s, --run 240) and the 2D overlays must not stretch. The picture decides."
+  },
   "fix/ingame_camera.cpp": {
+   "notes": "Done: the forest bus-stop room shows lit and textured with Jennifer from about frame 6400 (about 220 s; use --run 240), no ROSEPAN_TEST_CAM. Not the camera code: the script setPc call went to setDog, so no PC was bound. Crash was a host pointer cut to 32 bits in GamAreaTrg m_entry (hazards.md). Open: the message window frame shows with no text (MsgManSet and GamFont stubs); smoke_pad unchanged. Next: the user's aspect-ratio host task fix/aspect_ratio.cpp is queued first.",
+   "sessions": [
+    {
+     "date": "2026-10-28 20:32",
+     "status": "done",
+     "summary": "First room in 3D after New Game: native 021 cases fixed to its jump table (3 and 6 setPc, 4 setDog, 5 setMurder) so the script binds the PC and GamMan::setPc places the camera; seqImagePc takes the script entry offset in 32 bits (fixes the intermittent crash after the book in GamArea::checkPc)"
+    }
+   ],
+   "status": "done",
    "task": "TOP PRIORITY (the user, 2026-10-28): get the game on screen in 3D after New Game; the user thinks the camera is the issue. Known (open-items.md Open questions, 2026-10-28 i3d/i3rdraw.cpp note): after the picture book MagScene::draw runs (flags 0x101, 2 actors, forest map) but i3rDrawModel culls everything because the scene camera is still the default -- mode 0, no parent, world (0, 1000, 0) looking along +y, away from actor 0 at (-700, -88, 70). No PC is bound (m_pc_no -1, so GamMan::setPC never calls setCameraMode(m_cameraMode)) and the script calls no camera native (seqFunc016 0x206640). With ROSEPAN_TEST_CAM=1 (MagScene::testCamera debug hack) Jennifer draws textured and lit in the forest, so the draw path works. Do: find and write (as real ROR code, in the files they belong to) whatever places the camera or binds the PC after the book -- GamMan::setPC from the script's PC native, MagLifePC::setActor, the opening's TskCamera, setCameraMode 3..5 / the map camera path, and who writes DogCamera +0x1d0 / +0x190..+0x1c0 -- until the 200 s smoke run (tus.py check fix/ingame_camera.cpp --run 200) shows the first room in 3D without ROSEPAN_TEST_CAM. The picture decides. Never fix it by forcing the test camera on; a PC: workaround only with a note why. If it splits over several sessions, finish partial with the next step in the notes; when the room shows, finish done and re-assess the queue."
   },
   "game/gamfile.cpp": {
