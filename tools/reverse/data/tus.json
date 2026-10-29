@@ -1241,12 +1241,21 @@
    "why": "after MagLifeBwnModeRotate::live 0x12668c (mag/maglifebwnmode.cpp) the code serves MagLifeBwnCtrl and its 15 mode classes (vptrs stored by the ctor 0x12ba80) through the ctor; asserts name mag/maglifebwnctrl.cpp; 0x12bc20 starts mag/maglifepcbtl.cpp"
   },
   "mag/maglifefadekey.cpp": {
+   "notes": "Complete code, not visible yet: setFade kinds 1..3 and MagScene::openFadeKey come from event scripts, which the 15 s smoke run does not reach (it ends on the disclaimer). First session whose screenshot shows an EVNTEX mask (black screen with a keyhole, wall hole or blind-slat cutout) marks this done; reference PNGs: python tm2png.py --scan on data/evntex/EVNTEX.RPK writes work/ref/EVNTEX. Facts: the three pictures are 512x512 8-bit with 32-bit CLUTs, black with the hole in alpha, so the colour and TEXA ramps per state cannot show; the magnify (setFadeKeyMagnify) does the opening. m_50 (view shift) is only set by the constructor here; who writes it is unknown. PC deviations: the ramp words start at 1 (ROM leaves them), and a missing file or bad size loads nothing instead of reading index -1. Watch for rosepan_i3d honouring TEXA on 32-bit CLUT textures (it must not).",
    "ranges": [
     [
      "0012f298",
      "0012fca8"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-29 15:10",
+     "status": "verify",
+     "summary": "MagLifeFadeKeyHole (the keyhole fade at scene +0x41890) reconstructed whole: constructor, loadTexture / loadTextureByName (EVNTEX.RPK header then one file, added as kagiana_tcc), releaseTexture, reset, start, setMagnify, live (state steps and magnify ramp) and render (one full-screen textured sprite zoomed by the magnify). Class renamed from MagLifeFadeKey to the vtable's MagLifeFadeKeyHole in Ghidra and src; header mag/maglifefadekey.h replaces the struct in lib/unassigned.h."
+    }
+   ],
+   "status": "verify",
    "why": "MagLifeFadeKeyHole ctor 0x12f298 (vtable 0x2e1cf8) through setMagnify (ends 0x12fca8); loadTexture / loadTextureByName / releaseTexture assert mag/maglifefadekey.cpp; MagLifeWindow::getCharMetrics 0x12fca8 asserts mag/maglifewindow.cpp"
   },
   "mag/maglifefader.cpp": {

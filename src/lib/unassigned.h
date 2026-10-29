@@ -321,7 +321,7 @@ struct MagScene;
  * at +0x43700, kind -1 = none). */
 struct MagFadeParam
 {
-    int m_kind;                 // ROR 0x00: 0 MagLifeFader to black, 4 to colour 0xff, 1..3 MagLifeFadeKey (the keyhole)
+    int m_kind;                 // ROR 0x00: 0 MagLifeFader to black, 4 to colour 0xff, 1..3 MagLifeFadeKeyHole (the keyhole)
     int m_mode;                 // ROR 0x04: the fader's state to start in; 0 stops the fade
     int m_time;                 // ROR 0x08: frames
     int m_0c;                   // ROR 0x0c: role unknown (MagScene::update leaves it unset)
@@ -331,27 +331,8 @@ struct MagFadeParam
 static_assert(offsetof(MagFadeParam, m_level) == 0x14, "m_level");
 static_assert(sizeof(MagFadeParam) == 0x18, "MagFadeParam is 0x18 bytes on the EE");
 
-/* The keyhole fade (scene +0x41890, mag/maglifefadekey.cpp: the
- * kagiana_tcc texture of data/evntex/EVNTEX.RPK). layout: host -- a
- * MagLife. */
-struct MagLifeFadeKey : MagLife
-{
-    /* Adds kagiana_tcc to tex (the int is 0 from MagScene::setFade). */
-    void loadTexture(DogTexInfo *tex, int arg);                          // ROR 0x0012f2f0
-    /* Releases the texture m_tex_no from theTexInfo. */
-    void releaseTexture(DogTexInfo *theTexInfo);                         // ROR 0x0012f790
-    void start(const MagFadeParam *p);                                   // ROR 0x0012f824
-    /* Adds theName from data/evntex/EVNTEX.RPK to tex. */
-    void loadTextureByName(DogTexInfo *tex, const char *theName);       // ROR 0x0012f518
-    /* m_state = state, the time words = time, the magnify words 1. */
-    void reset(int state, int time);                                     // ROR 0x0012f7f4
-    /* The magnify word to magnify over time frames (<= 0: at once). */
-    void setMagnify(float magnify, int time);                            // ROR 0x0012fc80
-
-    u_char _28[0x40 - 0x28];
-    int    m_tex_no;            // ROR 0x40: kagiana_tcc in the scene's table, -1 = not loaded
-};
-static_assert(offsetof(MagLifeFadeKey, m_tex_no) >= 0x40, "m_tex_no");
+/* The keyhole fade at scene +0x41890 (MagLifeFadeKeyHole): mag/maglifefadekey.h. */
+#include "mag/maglifefadekey.h"
 struct MagLife130da4 : MagLife  /* scene +0x418f0, constructor 0x130da4 */
 {
     /* m_volume = volume (GamMan::setVolume's scaled master volume). */
