@@ -3531,36 +3531,37 @@
 /* 001bea18 00000158 */ fileClockDiff(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- game/gamfont.cpp
 // *****************************************************************************
 
 /* 001beb70 00000054 */ GamFont::GamFont(){}  // ror
 /* 001bebc4 00000028 */ GamFont::~GamFont(){}  // ror
 /* 001bebec 000001d4 */ GamFont::setFont(){}  // ror
 /* 001bedc0 000000cc */ GamFont::setTarget(){}  // ror
-/* 001bee8c 00000024 */ FUN_001bee8c(){}
+/* 001bee8c 00000024 */ GamFont::releaseTarget(){}  // ror
 /* 001beeb4 00000038 */ GamFont::clear(){}  // ror
-/* 001beeec 00000038 */ FUN_001beeec(){}
+/* 001beeec 00000038 */ GamFont::getCellWidth(){}  // ror
 /* 001bef24 000000fc */ GamFont::fillRect(){}  // ror
 /* 001bf024 000008a0 */ GamFont::drawChar(){}  // ror
-/* 001bf8c4 0000056c */ FUN_001bf8c4(){}
+/* 001bf8c4 0000056c */ GamFont::putChar(){}  // ror
 /* 001bfe30 000000f8 */ GamFont::scroll(){}  // ror
 /* 001bff28 00000030 */ GamFont::setFill(){}  // ror
 /* 001bff5c 00000008 */ GamFont::setFillMsb(){}  // ror
-/* 001bff64 00000068 */ GamFont::setColor(){}  // ror
+/* 001bff64 00000044 */ GamFont::setColor(){}  // ror
+/* 001bffac 00000020 */ gamFontCompareCode(){}  // ror
 /* 001bffcc 000000ac */ GamFont::getGlyph(){}  // ror
 /* 001c0078 000000d0 */ GamFont::getCharMetrics(){}  // ror
-/* 001c0148 000000c4 */ FUN_001c0148(){}
+/* 001c0148 000000c4 */ GamFont::getCharWidth(){}  // ror
 /* 001c020c 00000044 */ GamFont::getGlyphLeft(){}  // ror
 /* 001c0254 00000044 */ GamFont::getGlyphWidth(){}  // ror
-/* 001c0298 0000001c */ FUN_001c0298(){}
-/* 001c02b8 00000028 */ FUN_001c02b8(){}
-/* 001c02e4 00000014 */ FUN_001c02e4(){}
-/* 001c02f8 000000d8 */ FUN_001c02f8(){}
-/* 001c03d0 000000ac */ FUN_001c03d0(){}
+/* 001c0298 0000001c */ GamFont::isHalfWidth(){}  // ror
+/* 001c02b8 00000028 */ GamFont::isSjisCode(){}  // ror
+/* 001c02e4 00000014 */ GamFont::isSingleByte(){}  // ror
+/* 001c02f8 000000d8 */ GamFont::calcTextWidth(){}  // ror
+/* 001c03d0 000000ac */ GamFont::calcTextWidth8(){}  // ror
 /* 001c047c 00000014 */ GamFont::getTextWidth(){}  // ror
-/* 001c0490 000000a4 */ FUN_001c0490(){}
-/* 001c0534 0000008c */ FUN_001c0534(){}
+/* 001c0490 000000a4 */ GamFont::calcTextWidthNoSpace(){}  // ror
+/* 001c0534 0000008c */ GamFont::getKanjiIndex(){}  // ror
 
 // *****************************************************************************
 // FILE -- game/gamman.cpp
@@ -9053,7 +9054,7 @@
 // FILE -- (library) sdk
 // *****************************************************************************
 
-/* 002782c8 000000cc */ FUN_002782c8(){}
+/* 002782c8 000000cc */ bsearch(){}  // lib-ctx
 /* 00278398 0000000c */ FUN_00278398(){}
 
 // *****************************************************************************

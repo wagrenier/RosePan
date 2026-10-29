@@ -6,14 +6,15 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
-**WRITTEN 2026-10-29 (`mag/maglifewindow.cpp`, verify): MagLifeWindow, all 29 functions (render,
-live, drawText, print, fades, the accessors).** The prologue's dialogue text is still blank: the
-window's font is a stubbed GamFont (setTarget, setFont, clear, drawChar, getCharMetrics, setColor,
-getTextWidth, setFill / setFillMsb, scroll; lib/unassigned_stubs.cpp, 0x1beb70..0x1c0534). GamFont is
-the next step for any text on screen (name its file first: game/ by link order). When it lands,
-remove the PC guard in MagLifeWindow::render (m_buf_w <= 0, hazards.md "A sprite of a stubbed buffer
-covers the screen") and check the window sprite against the text the ROM shows: the uv / TEXA / CLUT
-alpha path through rosepan_i3d for an 8-bit font texture is untested.
+**DONE 2026-10-29 (`game/gamfont.cpp`): GamFont, all 28 functions; the prologue's dialogue text
+shows.** The 240 s New Game run ends in the bus-stop room with "Suddenly, the girl was all alone..."
+centred between the message window's ornaments (proportional widths, getTextWidth centring). The
+MagLifeWindow PC guard (m_buf_w <= 0) is removed; no black frames (brightness per shot matches the
+run with the guard). MagLifeWindow (`mag/maglifewindow.cpp`) is seen working here and marked done in
+tus.json (edited by hand: no tus.py command sets another TU's state). Still blank: the
+picture-book pages' text (msgGetSysText 0x1832e8 is a stub, reached; data 0x298fe8) -- the next
+step for text. SprMan::drawText's text sprites (title / menus) use the same GamFont: look at them
+when a run reaches a menu with text.
 
 **WRITTEN 2026-10-28 (`msg/msgman.cpp`, verify): MsgMan and MsgManSet, all 124 functions (the old
 unassigned@00184f2c run is this file's tag handlers).** In the bus-stop room the message window now shows

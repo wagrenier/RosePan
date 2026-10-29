@@ -183,59 +183,6 @@ int utlTm2GetSize(const void *tm2)
     return size;
 }
 
-// stub of ROR 0x001bf024
-void GamFont::drawChar(int x, int y, int code)
-{
-    ROSEPAN_STUB("GamFont::drawChar", 0x001bf024);
-}
-
-// stub of ROR 0x001bef24
-int GamFont::fillRect(int x, int y, int w, int h)
-{
-    ROSEPAN_STUB("GamFont::fillRect", 0x001bef24);
-    return {};
-}
-
-// stub of ROR 0x001bffcc
-int GamFont::getGlyph(int code)
-{
-    ROSEPAN_STUB("GamFont::getGlyph", 0x001bffcc);
-    return {};
-}
-
-// stub of ROR 0x001c020c
-int GamFont::getGlyphLeft(int glyph)
-{
-    ROSEPAN_STUB("GamFont::getGlyphLeft", 0x001c020c);
-    return {};
-}
-
-// stub of ROR 0x001c0254
-int GamFont::getGlyphWidth(int glyph)
-{
-    ROSEPAN_STUB("GamFont::getGlyphWidth", 0x001c0254);
-    return {};
-}
-
-// stub of ROR 0x001bff64
-void GamFont::setColor(u_int color)
-{
-    ROSEPAN_STUB("GamFont::setColor", 0x001bff64);
-}
-
-// stub of ROR 0x001bebec
-void GamFont::setFont(const void *font)
-{
-    ROSEPAN_STUB("GamFont::setFont", 0x001bebec);
-}
-
-// stub of ROR 0x001bedc0
-int GamFont::setTarget(void *buf, u_int w, u_int h, int bits)
-{
-    ROSEPAN_STUB("GamFont::setTarget", 0x001bedc0);
-    return {};
-}
-
 // ──────────────────────────────────────────────────────────────────────
 // Equality without case: a..z fold to A..Z (unassigned@00106010, written
 // ahead for MagLoaderIndex::find).
@@ -260,44 +207,12 @@ int utlStrEqualNoCase(const char *a, const char *b)
 }
 
 
-// stub of ROR 0x001beeb4
-int GamFont::clear()
-{
-    ROSEPAN_STUB("GamFont::clear", 0x001beeb4);
-    return {};
-}
-
-// stub of ROR 0x001c047c
-int GamFont::getTextWidth(const char *text)
-{
-    ROSEPAN_STUB("GamFont::getTextWidth", 0x001c047c);
-    return {};
-}
-
 // stub of ROR 0x00234050
 float i3dSegSegDist2(const float *p0, const float *d0, const float *p1, const float *d1,
                      float *s, float *t)
 {
     ROSEPAN_STUB("i3dSegSegDist2", 0x00234050);
     return {};
-}
-
-// stub of ROR 0x001bfe30
-void GamFont::scroll(int rows)
-{
-    ROSEPAN_STUB("GamFont::scroll", 0x001bfe30);
-}
-
-// stub of ROR 0x001bff28
-void GamFont::setFill(u_int fill)
-{
-    ROSEPAN_STUB("GamFont::setFill", 0x001bff28);
-}
-
-// stub of ROR 0x001bff5c
-void GamFont::setFillMsb(int on)
-{
-    ROSEPAN_STUB("GamFont::setFillMsb", 0x001bff5c);
 }
 
 // stub of ROR 0x002337e0
@@ -2625,8 +2540,3 @@ void TskEnemyTurn::start(const EmyTurnParam *prm)
     ROSEPAN_STUB("TskEnemyTurn::start", 0x0020350c);
 }
 
-// stub of ROR 0x001c0078
-void GamFont::getCharMetrics(int code, int *left, int *width, int *extra)
-{
-    ROSEPAN_STUB("GamFont::getCharMetrics", 0x001c0078);
-}

@@ -13349,11 +13349,23 @@
   "was": "FUN_001bedc0",
   "why": "the pixel buffer, width (& 0xff80), height, bits 4 or 8 the glyphs are drawn into"
  },
+ "001bee8c": {
+  "name": "GamFont::releaseTarget",
+  "tag": "ror-inferred",
+  "was": "FUN_001bee8c",
+  "why": "setTarget calls it first: clears m_dst and m_04 when a buffer is set, returns whether one was"
+ },
  "001beeb4": {
   "name": "GamFont::clear",
   "tag": "ror-inferred",
   "was": "FUN_001beeb4",
   "why": "memsets the target buffer (+0x0c) with the fill byte (+0x64) over its size (+0x1c); 1 when there is a buffer"
+ },
+ "001beeec": {
+  "name": "GamFont::getCellWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_001beeec",
+  "why": "half the glyph cell m_38 for a single-byte code (isHalfWidth), else the whole cell; no callers"
  },
  "001bef24": {
   "name": "GamFont::fillRect",
@@ -13366,6 +13378,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001bf024",
   "why": "rasterizes the glyph of a code at x, y into the target in colour +0x2c (1 / 2 bit glyphs)"
+ },
+ "001bf8c4": {
+  "name": "GamFont::putChar",
+  "tag": "ror-inferred",
+  "was": "FUN_001bf8c4",
+  "why": "drawChar's blit with stores instead of ORs: writes 0 where the glyph is clear (opaque); no callers"
  },
  "001bfe30": {
   "name": "GamFont::scroll",
@@ -13391,6 +13409,12 @@
   "was": "FUN_001bff64",
   "why": "the glyph colour +0x2c, masked to the target's bits"
  },
+ "001bffac": {
+  "name": "gamFontCompareCode",
+  "tag": "ror-inferred",
+  "was": "FUN_001bffac",
+  "why": "bsearch comparator getGlyph passes (0x1bffac, folded into setColor's body): -1 / 0 / 1 over two u16 codes"
+ },
  "001bffcc": {
   "name": "GamFont::getGlyph",
   "tag": "ror-inferred",
@@ -13402,6 +13426,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001c0078",
   "why": "code < 0x20: 0, 0; proportional: the glyph's left and width (getGlyphLeft / getGlyphWidth) and m_30 or m_34; else the fixed width"
+ },
+ "001c0148": {
+  "name": "GamFont::getCharWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_001c0148",
+  "why": "a code's advance: the width table's for proportional fonts (6 for spaces), else half / whole cell by isHalfWidth"
  },
  "001c020c": {
   "name": "GamFont::getGlyphLeft",
@@ -13415,11 +13445,53 @@
   "was": "FUN_001c0254",
   "why": "the glyph's width byte in proportional fonts, else the cell width +0x38"
  },
+ "001c0298": {
+  "name": "GamFont::isHalfWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_001c0298",
+  "why": "true for single-byte codes 0x20..0x7f and 0xa0..0xdf (ASCII, half-width kana)"
+ },
+ "001c02b8": {
+  "name": "GamFont::isSjisCode",
+  "tag": "ror-inferred",
+  "was": "FUN_001c02b8",
+  "why": "true for a two-byte code whose lead byte is 0x80..0x9f or 0xe0..0xea (Shift-JIS)"
+ },
+ "001c02e4": {
+  "name": "GamFont::isSingleByte",
+  "tag": "ror-inferred",
+  "was": "FUN_001c02e4",
+  "why": "true for 0x20..0xff (the code range of entry 0 of the table at 0x2b8de8)"
+ },
+ "001c02f8": {
+  "name": "GamFont::calcTextWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_001c02f8",
+  "why": "getTextWidth tail-jumps to it: walks a Shift-JIS string summing getCharWidth plus the spacing m_30 / m_34"
+ },
+ "001c03d0": {
+  "name": "GamFont::calcTextWidth8",
+  "tag": "ror-inferred",
+  "was": "FUN_001c03d0",
+  "why": "calcTextWidth over single-byte codes only (isSingleByte); no callers"
+ },
  "001c047c": {
   "name": "GamFont::getTextWidth",
   "tag": "ror-inferred",
   "was": "FUN_001c047c",
   "why": "tail jump to 0x1c02f8, which sums the glyph widths of a Shift-JIS string; MagScene::getWindowTextWidth calls it on a window font"
+ },
+ "001c0490": {
+  "name": "GamFont::calcTextWidthNoSpace",
+  "tag": "ror-inferred",
+  "was": "FUN_001c0490",
+  "why": "calcTextWidth without the per-character spacing; no callers"
+ },
+ "001c0534": {
+  "name": "GamFont::getKanjiIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_001c0534",
+  "why": "a Shift-JIS code's index in the font's kanji rows: walks the (start, count) table at 0x2b8df0; getGlyph adds m_44"
  },
  "001c05c0": {
   "name": "GamMan::GamMan",
@@ -29224,6 +29296,12 @@
   "tag": "lib-context",
   "was": "FUN_00278288",
   "why": "returns strtod(a0, NULL) (0x27b920)"
+ },
+ "002782c8": {
+  "name": "bsearch",
+  "tag": "lib-context",
+  "was": "FUN_002782c8",
+  "why": "newlib bsearch shape: (key, base, nmemb, size, compar), halves [lo, hi) calling compar through t0; getGlyph passes the u16 compare 0x1bffac"
  },
  "00279b70": {
   "name": "snprintf",

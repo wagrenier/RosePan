@@ -364,6 +364,24 @@
    "status": "verify",
    "why": "FileReader / FileReadReq methods, fileGetSize / fileExists, the rxFileCd clock wrappers and two clock helpers that follow them; bounded by the language-select menu code (mnusllg.rpk, SprMan calls) below and GamFont::GamFont above. No source string: game/ by link order (GamFont, then GamMan), gamfile after RoR's gam* names -- a guess"
   },
+  "game/gamfont.cpp": {
+   "notes": "Seen: the 240 s New Game run ends with Suddenly, the girl was all alone... centred between the message window ornaments, proportional widths correct; brightness per shot matches the run with the guard (no black frames). MagLifeWindow marked done in tus.json. getGlyphWidth masks the width index to a byte as the ROM does (glyph 128+ reads glyph and 0x7f); kept. The constructor leaves m_prop, m_bpp and the table pointers unset as the ROM does; getCharMetrics before setFont would read them. Not seen yet: SprMan text sprites (title / menus) through the same GamFont, kanji fonts (US build), putChar and the calcTextWidth8 / NoSpace variants (no callers). Next text blocker: the picture-book pages are blank, msgGetSysText 0x1832e8 is a reached stub (string table data 0x298fe8).",
+   "ranges": [
+    [
+     "001beb70",
+     "001c05c0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 07:41",
+     "status": "done",
+     "summary": "GamFont written whole (28 functions, game/gamfont.cpp pinned 0x1beb70..0x1c05c0): setFont with the font header struct, setTarget / releaseTarget, clear, fillRect, drawChar and putChar as one loop per glyph pixel, scroll, fill and colour setters, getGlyph (bsearch plus the Shift-JIS kanji row table at 0x2b8de8), metrics and the text-width walks. Named the 12 unnamed helpers, bsearch 0x2782c8 and the folded comparator 0x1bffac. Removed the MagLifeWindow m_buf_w PC guard; the prologue dialogue now shows in the bus-stop room."
+    }
+   ],
+   "status": "done",
+   "why": "GamFont's methods and helpers, between game/gamfile.cpp (ends 0x1beb70) and GamMan::GamMan (0x1c05c0); no assert names the file, game/ by link order, gamfont after the class"
+  },
   "game/gamman.cpp": {
    "notes": "All 409 gamman functions are written; status verify because nothing in the TU draws in the 15 s boot, which still ends on the Atlus disclaimer (correct for that point). initStage2FromPack, setObjFxOn, releaseEnemies, setObjPosLocal have no callers in the ROM. collectFchrs' no-pool shortcut (type -1, need 0) returns only the fchr list count, as the ROM does. getPcPos / getPcRot / getDogPos copy three floats on the host: the ROM's quad copy writes a fourth word past the ELF float[3]. getMapObjPtr returns GamMan itself: the WRD block +0x18c00 lives as GamMan members on the host. New stubs in other TUs: GamSndMan::free_all_se_bank / getStatSEtrack / setVolSEtrack / getStatSTRtrack / setVolSTRtrack (game/gamsnd.cpp), ObjStat::getPosSectaY 0x1d8c50 (game/gamstat.cpp), CmnTaskMan::killKinds 0x1e7910 (unassigned). The next blocker on the New Game run is still unassigned@001d3b44 (GamMan::checkMenuReq and the code after relinkObj).",
    "ranges": [
@@ -1159,7 +1177,7 @@
    "why": "mag/maglifepcmove.cpp asserts in 9 of the 12 functions across 0x11e4c4..0x120668; moveBy 0x11ee00 sits between sweepMove and 0x11f0b4 and is called by them; 0x11e0d8 debug strip drawer stays out (maglifepc3 notes); MagLifePCMode::moveBy 0x120788 opens maglifepcmode.cpp"
   },
   "mag/maglifewindow.cpp": {
-   "notes": "Status verify: the dialogue text between the prologue's bands is still blank because GamFont (lib/unassigned_stubs.cpp: setTarget, setFont, clear, drawChar, getCharMetrics, setColor, getTextWidth, setFill, setFillMsb, scroll; 0x1beb70..0x1c0534) is stubbed. Next: the GamFont TU (name its file first, game/ by link order). When it lands, delete the PC guard in MagLifeWindow::render (skips the sprite while m_buf_w <= 0) and compare the window's text with the ROM: the 8-bit font texture's uv / TEXA / CLUT alpha path through rosepan_i3d is untested. Without the guard the stub font made the sprite one stretched texel covering the title from frame 1680 (hazards.md). print reads bytes signed (lb) as the ROM does, so only ASCII draws there. drawText's line table is 10 entries; a PC clamp keeps indices past 9 on entry 9 (the ROM reads other locals there). MagLifeWindowDebug::getName 0x285844 and its destructor belong with mag/magscenecmd.cpp.",
+   "notes": "Done 2026-10-29 (game/gamfont.cpp session): the prologue dialogue shows in the bus-stop room, centred between the window ornaments; the m_buf_w PC guard in render is removed. Earlier notes: Status verify: the dialogue text between the prologue's bands is still blank because GamFont (lib/unassigned_stubs.cpp: setTarget, setFont, clear, drawChar, getCharMetrics, setColor, getTextWidth, setFill, setFillMsb, scroll; 0x1beb70..0x1c0534) is stubbed. Next: the GamFont TU (name its file first, game/ by link order). When it lands, delete the PC guard in MagLifeWindow::render (skips the sprite while m_buf_w <= 0) and compare the window's text with the ROM: the 8-bit font texture's uv / TEXA / CLUT alpha path through rosepan_i3d is untested. Without the guard the stub font made the sprite one stretched texel covering the title from frame 1680 (hazards.md). print reads bytes signed (lb) as the ROM does, so only ASCII draws there. drawText's line table is 10 entries; a PC clamp keeps indices past 9 on entry 9 (the ROM reads other locals there). MagLifeWindowDebug::getName 0x285844 and its destructor belong with mag/magscenecmd.cpp.",
    "sessions": [
     {
      "date": "2026-10-29 07:20",
@@ -1167,7 +1185,7 @@
      "summary": "MagLifeWindow written whole: constructor, live (timer), render (alpha fade + font-texture TexSpriteUV), setup, fadeIn/fadeOut, drawText (Shift-JIS, wrap, scroll, 0x11 centring), print, setFontManager, getTextWidth, getPos/getPos3, getCharMetrics, the font setters, and the ELF's linkonce accessors inline in the header; MagLifePos (m_pos/m_speed/m_accel, updatePos/updateSpeed/move) added as the host base. Fields named from the asserts (m_fntman, m_ch_w, m_ch_h, m_buf_w, m_buf_h); magscene.cpp follows the renames (m_timer, m_uv, m_ch_h). Smoke run (240 s) matches the previous commit's frame for frame up to the bus-stop room."
     }
    ],
-   "status": "verify"
+   "status": "done"
   },
   "mag/magloader.cpp": {
    "notes": "Status verify: all 17 functions written, nothing past the title menu draws yet. A New Game run (build.py --run 140 --pad 1800:START,2400:START,2700:CROSS) no longer crashes in MagScene::loadModel: no loader or loadActor assert fires and the PC model reaches DogActor::load 0x10cd5c (a stub), the next blocker for actors (dog/dogactor.cpp). The screenshot (last.png) is the title menu, the last frame before the New Game fade; a plain run then dies with an access violation right after GamMan::setPcAnim / ACHRstat::setParam (the open-items 10d crash, not this TU); under gdbrun it does not crash and reaches GamMan::initStage2 / startStage2 (stubs). Mark done when a screenshot shows a character or map unit loaded through these loaders. Decisions: MagLoaderIndex is 0x24 bytes on the EE (the old header said 0x1c); calcSize uses host pointer size (EE num*13); both loaders got inline destructors releasing the index (the ROM's MagScene destructor does it inline) and MagMapLoader an inline constructor clearing it; PC guards return NULL / -1 after the index asserts. Names: MagLoaderIndex::dump/calcSize/scanNames/create/add/clear/release, MagCharaLoader::MagCharaLoader/initFromPacks/getCategory, utlStrEqualNoCase (ror-inferred). For the references: architecture.md loaders paragraph and open-items 10i written in this commit.",
@@ -2168,6 +2186,7 @@
   "unassigned@001a0950": {},
   "unassigned@001a6830": {},
   "unassigned@001bde58": {},
+  "unassigned@001beb70": {},
   "unassigned@001d3b44": {},
   "unassigned@001d859c": {},
   "unassigned@001dd5e8": {},
