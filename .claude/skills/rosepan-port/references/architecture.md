@@ -1449,6 +1449,18 @@ all written.
 - `utlGetOidTypeKind` 0x103390 and `utlSetItemFlag2` 0x1033b8 have no callers and were folded into
   `utlTakeObjItem`'s body in Ghidra (created 2026-10-28).
 
+## The dog's item search (`utl/utlfind.cpp`, 0x1060e8..0x106658, 2026-10-29)
+
+- `UtlFind` (0x18, MagLifeBwnCtrl +0x48 `m_find`): `m_id[4]` uids from `utlGetItemUids` (the item
+  and its three related uids), `m_num` +0x10, `m_again` +0x14 (utlFindSetItem's arg).
+- `utlFindBest` 0x106344 walks m_vfchrList for objects of those uids: score = o_smell_range (+0x118,
+  0 means 1e6) / (distance / 100), the distance from pos to the object's world position
+  (`WrdSrv::cnvPosL2W` of its room, FCHRstat::getParam 8) with height weighted x10 (dy^2 x 100 under
+  the root). Only scores >= 1 count; with `m_again` 0 a flag-2 item (`utlIsItemFlag2`) scores /10.
+  The first object in room wrd resets the best and from then on only room wrd counts. NULL pos:
+  `utlFindFirstVFchr` 0x1062d8, the first uid with any vfchr. Assert line 172 "area >= 0".
+- The accessors `utlFindObjWrdNo` / `Uid` / `Id` / `Pos` assert "theHandle != 0" (lines 22, 36, 48, 60).
+
 ## The options screen (`mnu/mnuopt.cpp`, 0x1ab474..0x1ad6b4, 2026-10-29)
 
 MnuOpt (MagLifeMenuOpt +0x40, MnuTitle +0x3b80) edits GamMan's option block in place: getStatus 0x15

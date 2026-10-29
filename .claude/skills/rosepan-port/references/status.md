@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 11:39 at commit `06a3efa` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 11:58 at commit `efc20bd` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-29 11:39 at commit `06a3efa` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7163**, named **6298** (88%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4696
-- context-name ledger: 4997 entries; overrides of wrong library matches: 5
+- game functions: **7163**, named **6299** (88%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4697
+- context-name ledger: 4998 entries; overrides of wrong library matches: 5
 - placed in a source file: 5458/7163 in 136 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4893**; stubs: **375**
+- reconstructed RoR functions: **4903**; stubs: **366**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -147,7 +147,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/task/tsk_scene.cpp` | 76 | 0 |
 | `src/utl/utlbtl.cpp` | 0 | 1 |
 | `src/utl/utlfile.cpp` | 2 | 0 |
-| `src/utl/utlfind.cpp` | 0 | 9 |
+| `src/utl/utlfind.cpp` | 10 | 0 |
 | `src/utl/utlgame.cpp` | 49 | 0 |
 | `src/utl/utlmath.cpp` | 25 | 0 |
 | `src/utl/utlmisc.cpp` | 24 | 0 |
@@ -157,8 +157,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 166 TUs: todo 96, partial 3, verify 98, done 17
-- next: **utl/utlfind.cpp** (frontier score 16)
+- 166 TUs: todo 95, partial 3, verify 99, done 17
+- next: **unassigned@0016fb70** (frontier score 15)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -253,6 +253,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `task/tsk_enemy.cpp` 37/40 -- Nothing on the smoke path starts an enemy (the 15 s run ends on the boot disclaimer, same as before), so the code is verify: the first session whose run reaches
 - verify: `task/tsk_man.cpp` 25/25 -- Pinned 0x1e7094..0x1e7f28 out of unassigned@001e6d54 (file name a guess, open-items). CmnITask slots: 1 get_task_type, 2 pause, 3 init, 4 exec(id, time, arg) no
 - verify: `task/tsk_scene.cpp` 76/93 -- Visual test: the 15 s smoke run ends on the disclaimer screen as before; nothing in this TU is reached yet (hits need the first room and an attack), so the TU i
+- verify: `utl/utlfind.cpp` 10/10 -- Complete code, nothing on screen shows it yet: the 15 s smoke run reaches the disclaimer (drawn right); utlFindBest / utlFindSetItem run only when Brown is told
 - verify: `utl/utlgame.cpp` 49/49 -- Complete; verify because nothing on screen shows it yet. The 240 s New Game run reaches the forest bus stop with Jennifer as before (no assert from this file; u
 - verify: `utl/utlmath.cpp` 25/25 -- Nothing on screen can show this yet: after the film the stage stays black (a ring indicator only) because utlDrawI3r ends in the i3rDrawModel stub 0x21fe68; the
 - verify: `utl/utlmisc.cpp` 24/24 -- Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and i
@@ -261,6 +262,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 11:58 `utl/utlfind.cpp` verify: utl/utlfind.cpp reconstructed: all 10 functions (UtlFind fields m_num / m_again named, FUN_001062d8 named utlFindFirstVFchr), extent pinned 0x1060e8-0x106658; u
 - 2026-10-29 11:39 `mnu/mnuselect.cpp` verify: MnuTextList written whole: ctor, dtor, open, close, clear, processPad and its step state machine, allocText and freeText, setItems (labels split on #0#0, mask f
 - 2026-10-29 11:27 `bed/bedsubmode.cpp` verify: BedSubMode written: push 0x100258 and pop 0x1002c0 (save / restore the four-word record on a 4-deep stack, asserts at lines 25 / 35) and reset 0x100320 (named, 
 - 2026-10-29 10:59 `msg/msgsystext.cpp` done: msgGetSysText 0x1832e8 and its 0x1d4 system texts (data 0x298fe8) written as msg/msgsystext.cpp, byte-exact; stub removed. datadump.py S fields now print byte-e
@@ -268,22 +270,21 @@ Recent sessions:
 - 2026-10-29 10:31 `mag/maglifepc2.cpp` verify: mag/maglifepc2.cpp pinned 0x11c464..0x11d720 (absorbing unassigned@0011cb70 and the gaps between the file's assert anchors) and all 25 functions written: the Ga
 - 2026-10-29 09:59 `debug/mcd_debug.cpp` verify: debug/mcd_debug.cpp written whole (0x2155f4..0x215a30, 5 functions): mcdDbgAssertFailed, the second assert handler (callcheck comments in mnu/msg/snd renamed fr
 - 2026-10-29 09:53 `mnu/mnuopt.cpp` done: MnuOpt, the options screen, all 15 functions (exec step machine, execMain pad / redraw, fadeInItems, setDisp, open / close, ctor / dtor) with its pattern image,
-- 2026-10-29 09:13 `task/tsk_enemy.cpp` verify: TskEnemyMove complete: plan 0x200988, step 0x200d18 and the route helpers setRoute, startWalk, nextPoint, walk, checkAhead, checkStep, checkBump, moveRoot, move
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `utl/utlfind.cpp` | todo | 0/9/10 | 1.4 | 16 | 1 |
 | `unassigned@00216ad0` | partial | 2/2/16 | 6.5 | 15 | 0 |
 | `unassigned@0016fb70` | todo | 0/65/102 | 26.8 | 15 | 2 |
 | `i3d/i3cquery.cpp` | todo | 0/3/16 | 8.9 | 14 | 2 |
 | `unassigned@00149d18` | todo | 0/62/431 | 98.3 | 12 | 0 |
 | `mag/maglifefadekey.cpp` | todo | 0/6/9 | 2.5 | 9 | 0 |
+| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
 | `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
 | `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
-| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
 | `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
-| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
 | `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
+| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
+| `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -294,7 +295,6 @@ Recent sessions:
 | `001be2cc` | FileReader::FileReader | 25 | ror | missing | game/gamfile.cpp |
 | `00217f10` | utlAtan2 | 8 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 6 | ror | missing | - |
-| `0010620c` | utlFindClear | 3 | ror | stub | utl/utlfind.cpp |
 | `0012f790` | MagLifeFadeKey::releaseTexture | 3 | ror | stub | mag/maglifefadekey.cpp |
 | `00232508` | i3cCastRay | 2 | ror | stub | i3d/i3cquery.cpp |
 | `0012ab18` | MagLifeBwnCtrl::reset | 2 | ror | missing | mag/maglifebwnctrl.cpp |
@@ -322,11 +322,12 @@ Recent sessions:
 | `001f9e38` | FUN_001f9e38 | 1 | - | missing | task/tsk_scene.cpp |
 | `002324b8` | i3cCastSphere | 1 | ror | stub | i3d/i3cquery.cpp |
 | `0016ff78` | effMoveToward | 1 | ror | stub | - |
-| `00106280` | utlFindSetItem | 1 | ror | stub | utl/utlfind.cpp |
-| `001062b4` | utlFindMatchObj | 1 | ror | stub | utl/utlfind.cpp |
 | `00172678` | gamCreateEff1a | 1 | ror | stub | - |
-| `00106344` | utlFindBest | 1 | ror | stub | utl/utlfind.cpp |
 | `0014313c` | MagScene::updateDebug | 1 | ror | stub | mag/magscenedebug.cpp |
 | `0012a6a0` | MagLifeBwnCtrl::processPad | 1 | ror | missing | mag/maglifebwnctrl.cpp |
 | `002325a8` | i3cCastCylinder | 1 | ror | stub | i3d/i3cquery.cpp |
+| `0016ff18` | effCalcViewDepth | 1 | ror | stub | - |
+| `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |
+| `0015c304` | DwfMain::initOut | 1 | ror | stub | - |
+| `0015a17c` | PigMain::initOut | 1 | ror | stub | - |
 

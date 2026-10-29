@@ -2455,6 +2455,24 @@
    ],
    "why": "utlHitCheck 0x10456c and 0x1046b4 assert with utl/utlbtl.cpp; the two memset clears before them (0x10452c: 0x28 bytes, the record of 0x1046b4's m_pos_self / m_pos_aim / m_pos_target; 0x10454c: 0x14 bytes = UtlHitCheck, called from MagLifePC::startAttack before a hit check) are the records' inline clears; ends where unassigned@00104970 starts"
   },
+  "utl/utlfind.cpp": {
+   "notes": "Complete code, nothing on screen shows it yet: the 15 s smoke run reaches the disclaimer (drawn right); utlFindBest / utlFindSetItem run only when Brown is told to fetch an item in game. Mark done when a run gets Brown fetching. utlFindMatchObj keeps the ROM's call passing obj as utlFindItemByUids's position out (its caller isFindTarget has no callers). callcheck: the asserts carry the callcheck comment for dbgAssertFailed; begin / end extras are SeqList inlines as in utlgame.cpp. Facts added to architecture.md (The dog's item search).",
+   "ranges": [
+    [
+     "001060e8",
+     "00106658"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 11:58",
+     "status": "verify",
+     "summary": "utl/utlfind.cpp reconstructed: all 10 functions (UtlFind fields m_num / m_again named, FUN_001062d8 named utlFindFirstVFchr), extent pinned 0x1060e8-0x106658; utlFindBest is Brown's smell search over m_vfchrList"
+    }
+   ],
+   "status": "verify",
+   "why": "five of ten functions reference the utl/utlfind.cpp source string; all ten take a UtlFind or an FCHRstat handle; utlStrEqualNoCase before and utlConvSndId after belong to other files"
+  },
   "utl/utlgame.cpp": {
    "notes": "Complete; verify because nothing on screen shows it yet. The 240 s New Game run reaches the forest bus stop with Jennifer as before (no assert from this file; utlFindClear is reached next in utl/utlfind.cpp). Mark done when a run shows a sound, Brown command or the PC attack working through these helpers. The uid searches return a 64-bit uid << 32 | oid (unsigned long long on the host); utlFindMatchObj in utl/utlfind.h passes a float out where its prototype says FCHRstat * (open-items Open questions). The tail prototypes moved from lib/unassigned.h into utl/utlgame.h (unassigned.h includes it).",
    "ranges": [
