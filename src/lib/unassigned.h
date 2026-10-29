@@ -236,11 +236,6 @@ struct MagViewParam;
 
 /* The i3c casts and their query: i3d/i3cquery.h. */
 #include "i3d/i3cquery.h"
-/* The hit callbacks (unassigned@00113ea8): keep the nearest hit. */
-int   dogModelHitNearest(I3cQuery *q, int code, const u_short *prim, const float *verts,
-                         float *plane, float *point);                               // ROR 0x00114034
-int   dogModelHitCylinder(I3cQuery *q, int code, const u_short *prim, const float *verts,
-                          float *plane, float *point);                              // ROR 0x001141c8
 
 
 /* The i3d VU1 packet writers (strips, sprites, wire shapes). */

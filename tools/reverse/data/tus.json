@@ -209,6 +209,15 @@
    "status": "verify",
    "why": "dog/dogentity.cpp source string at DogEntityEx::setParent 0x1102b4 (assert p != m_parent); files link alphabetically (dogactor, dogcamera, dogentity, doglightpool): 0x10f860..0x10fc7c carries dog/dogcamera.cpp strings and camera members (+0x134, +0x140, +0x180, +0x1d0, the +0xf0 view matrix), so dogentity starts at DogEntity::setRotate 0x10fc7c and ends where doglightpool.cpp's strings start (0x1103dc); plus the DogEntity / DogEntityEx linkonce methods 0x280e88..0x280f68 and 0x281b78..0x281cbc"
   },
+  "dog/doglight.cpp": {
+   "ranges": [
+    [
+     "00112bc8",
+     "00114034"
+    ]
+   ],
+   "why": "4 of 4 functions anchored by dog/doglight.cpp asserts; FUN_00113ea8 (unreferenced) is the only caller of FUN_00112bc8 / FUN_00112d60 and follows them: a DogLight copy at the file end"
+  },
   "dog/doglightpool.cpp": {
    "notes": "TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark done when a screenshot shows a lit stage. Decisions: DogLightPool got a host constructor calling init (the ROM MagScene ctor calls it), no destructor (g_magSystem is static, the heap is gone by static destruction; ~MagScene calls term in the ROM). doglightpool.h lines 129..132 are the non-const getters, 140..143 their const twins, so createLight and getLightParam are const. DogLightBuffer::setupDesc 0x110578 in the ROM reads the counts from +0x5e0 / +0x600, past m_num at +0x5c0; nothing calls it, the port uses m_num (open-items.md). Spot cone angles use the ROM pi 0x40490fdc. Still left near this file: unassigned@00112b08 (three small light-desc helpers) belongs to dog/doglight.cpp.",
    "ranges": [
@@ -233,15 +242,27 @@
    "why": "doglightpool.cpp source strings from 0x1103dc (after DogEntityEx::setParent / dogentity.cpp at 0x1102b4..0x1103dc) through 0x1123b0, DogLightPool::createLight / findNearestPointLight use the doglightpool.h inline getters; 0x112b08.. works on a light-desc object freed/cleared from dog/doglight.cpp 0x112d60, so the file ends there"
   },
   "dog/dogmodel.cpp": {
-   "notes": "Status verify: nothing on screen can show a model yet. On New Game the loader runs (loadPack, setRoot, i3rRelocate, i3rAssignTex) but i3rItemRelocate 0x22c478 is a stub, so the i3r tree keeps file offsets, i3rGetNumNode returns garbage and allocMatrix's alloc fails; PC guards in allocMatrix, setupNodeFlags and MagScene's node billboard loop stop the crash this caused (hazards.md). Queued first: unassigned@0022b4b8 (i3rItemRelocate, i3c functions incl. i3cRelocate which must use i3rroot.h relative pointers on the host, the casts) and unassigned@0021a3e8 (i3rBuildPackets, i3rAssignTex, i3rCopyLocalBasicTransform, i3rConvertLocalToModel), then utlDrawI3r 0x106760 into the native i3d draw module. Mark this done when a screenshot shows a model. Decisions: classes still not polymorphic; the parent of a model is taken as a DogModel (parentModel, PORT comment); ~DogModel 0x2827c8 and DogModel::__tf not written; castRay / castSphere set the query group word the ROM leaves unset to -1. Unknowns: the reader of m_i3r_root2 (+0x120, pack file 2), the allocator of +0x16c, DogDispControl field roles. New smoke_pad 1800:START,2400:START,2700:CROSS,3100:START*900 skips the film (cut near frame 3600); only some runs reach the model loads by timing, check the log for i3rAssignTex. The stale unassigned@00192ac0 claim (menus) was released; it stays queued.",
+   "notes": "Status verify: the casts run only in gameplay; the 15 s smoke run ends on the disclaimer screen, which draws correctly. Mark done when a run walks the player into a wall or onto a floor (MagLifeControlChara::followGround / castCylinder). ROM quirks kept: dogModelHitNearest writes q->m_group to m_50 on every call, nearer or not; ties go to the later triangle; the name copy leaves a 28-char name unterminated. Hit vectors are stored in the game frame (-x, -z, -y). The DogModel model loads still depend on i3rItemRelocate (see the earlier notes). FUN_00113ea8 (dead DogLight copy) is left for dog/doglight.cpp, see open-items.",
+   "ranges": [
+    [
+     "00114034",
+     "0011618c"
+    ]
+   ],
    "sessions": [
     {
      "date": "2026-10-26 21:55",
      "status": "verify",
      "summary": "DogModel written whole: clear, setRoot, loadPack (texture pack, model, optional second root, sepia display control), loadData (i3r plus optional i3c collision with setupColliTbl), share, release for every load flag, allocMatrix / freeMatrix (local, model matrices and flags in one block), setupNodeFlags, transform (parent and parent-node attach), transformBillboard, getWorldPos, draw, drawUnitMatrix, getClipRadius, setFlag100Bits, castRay / castSphere / castCylinder / castRayGroups over I3cQuery, both constructors and all header inlines with the ROM asserts. DogModel fields 0x100..0x1a0 named from the asserts (shadow words moved from DogActor), DogEntityEx m_local_matrix, DogEntity::makeLocalMatrix, i3r / i3c / utlDrawI3r declarations. Smoke pad now holds START through the opening film (the user: skip cinematics)."
+    },
+    {
+     "date": "2026-10-29 19:13",
+     "status": "verify",
+     "summary": "unassigned@00113ea8 resolved: dogModelHitNearest 0x114034 and dogModelHitCylinder 0x1141c8 (the casts' I3cQuery hit callbacks) written into dog/dogmodel.cpp, pinned 0x114034-0x11618c; FUN_00113ea8 pinned into dog/doglight.cpp 0x112bc8-0x114034. MagSceneRayHit fixed to 0x70 bytes with m_name[28] at +0x54 (castRayGroups stack frame proves it); SeqRayHit is now just the record."
     }
    ],
-   "status": "verify"
+   "status": "verify",
+   "why": "15 of 23 anchored by dog/dogmodel.cpp; dogModelHitNearest / dogModelHitCylinder are the casts' I3cQuery hit callbacks, called only from DogModel's casts, placed before them"
   },
   "dog/dogmotionblend.cpp": {
    "notes": "Verify: the smoke run stays on the disclaimer screen and no actor is drawn yet, because the i3m pose player (unassigned@0022e840: i3mGetPose 0x22e960, i3mGetBlendPose 0x22eab0, i3mPoseLerp 0x22f610, i3mPoseToMatrices 0x22f7a0) and utlDrawI3r 0x106760 are stubs. Those are the next gate to an actor on screen. The first session whose screenshot shows an animated actor marks this done. No DogMotionBlend assert fired in the run. Facts: getPose copies each entry pose over its masked nodes with i3mPoseLerp t 0 (the ROM really passes 0.0, mtc1 zero f12); the actual fade is DogActor's via getNodeRate. stepLoop returns 1 when speed is 0 (checked in the asm). PC guards: NULL m_motion or a NULL i3m root returns or skips where the ROM hangs in its assert. Knowledge recorded in architecture.md (DogMotionBlend paragraph) and open-items.md Next up item 5.",
@@ -2668,6 +2689,7 @@
   "unassigned@001056f8": {},
   "unassigned@00106658": {},
   "unassigned@0011262c": {},
+  "unassigned@00113ea8": {},
   "unassigned@0011cb70": {},
   "unassigned@0012f008": {},
   "unassigned@00130a2c": {},

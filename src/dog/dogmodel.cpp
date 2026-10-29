@@ -1,4 +1,4 @@
-// dog/dogmodel.cpp -- DogModel, an entity drawn from an i3d model (0x11440c..0x1160a8).
+// dog/dogmodel.cpp -- DogModel, an entity drawn from an i3d model (0x114034..0x11618c).
 //
 // A DogModel owns (or borrows) an i3r model root: loadPack takes a model
 // pack (file 0 its TIM2s, file 1 the model, file 2 an optional second
@@ -13,7 +13,7 @@
 // the camera when it is a billboard -- and hands the root, the node
 // matrices and the world matrix to the i3d renderer. The casts run the
 // collision module over the i3c's groups for MagScene's ray / sphere /
-// cylinder tests.
+// cylinder tests; the casts' hit callbacks keep the nearest triangle.
 
 #include "dog/dogmodel.h"
 
@@ -23,6 +23,7 @@
 #include "common/ror_assert.h"
 #include "i3d/i3dmath.h"
 #include "mag/magscene.h"
+#include "utl/utlmath.h"
 #include "utl/utlmisc.h"
 
 /* The angle wrap's pi and 2 pi: 0x40490fdc / 0x40c90fdc, one ulp above
@@ -54,6 +55,97 @@ static void initHit(MagSceneRayHit *hit)
         hit->m_vec[i][2] = 0.0f;
         hit->m_vec[i][3] = 1.0f;
     }
+}
+
+/* An i3c vector into the game's frame: (x, y, z) -> (-x, -z, -y), w 1. */
+static void hitVec(float *out, const float *v)
+{
+    out[0] = -v[0];
+    out[1] = -v[2];
+    out[3] = 1.0f;
+    out[2] = -v[1];
+}
+
+/* Both callbacks' store, inlined twice in the ROM: the hit point (w = its
+ * t), the unit normal, the triangle's three vertices and the name of the
+ * group the query is on. */
+static void storeHit(MagSceneRayHit *hit, I3cQuery *q, const u_short *prim, const float *verts,
+                     const float *plane, const float *point)
+{
+    hitVec(hit->m_vec[0], point);
+    hit->m_vec[0][3] = point[3];
+    hitVec(hit->m_vec[1], plane);
+    utlNormalize3(hit->m_vec[1]);   /* w back to 0 */
+    for (int i = 0; i < 3; i++)
+        hitVec(hit->m_vec[2 + i], &verts[prim[i] * 4]);
+
+    const char *name = NULL;
+    if (q->m_group >= 0)
+        name = i3cGetGroupName(q->m_root, (short)q->m_group);
+    if (name != NULL)
+    {
+        hit->m_name[0] = name[0];
+        if (name[0] != '\0')
+        {
+            /* At most 28 bytes: a 28-character name is left unterminated. */
+            for (int i = 1; i < (int)sizeof(hit->m_name); i++)
+            {
+                hit->m_name[i] = name[i];
+                if (name[i] == '\0')
+                    break;
+            }
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The ray / sphere casts' hit: keep the nearest (a tie goes to the later
+// triangle). The query's group lands in m_50 on every call, nearer or not.
+// callcheck: i3cGetGroupName, utlNormalize3 (in storeHit)
+// ROR 0x00114034
+
+int dogModelHitNearest(I3cQuery *q, int code, const u_short *prim, const float *verts,
+                       float *plane, float *point)
+{
+    (void)code;
+    MagSceneRayHit *hit = q->m_hit;
+    hit->m_50 = q->m_group;
+    if (hit->m_vec[0][3] < 0.0f || point[3] <= hit->m_vec[0][3])
+        storeHit(hit, q, prim, verts, plane, point);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The cylinder cast's hit: only walls (the unit normal's up within
+// -0.5..0.5, 30 degrees of level), the nearest of them.
+// callcheck: i3cGetGroupName, utlNormalize3 (the second in storeHit)
+// ROR 0x001141c8
+
+int dogModelHitCylinder(I3cQuery *q, int code, const u_short *prim, const float *verts,
+                        float *plane, float *point)
+{
+    (void)code;
+    sceVu0FVECTOR n;
+    n[0] = -plane[0];
+    n[1] = -plane[2];
+    n[2] = -plane[1];
+    n[3] = 1.0f;
+    MagSceneRayHit *hit = q->m_hit;
+    utlNormalize3(n);
+    sceVu0FVECTOR up;
+    up[0] = 0.0f;
+    up[1] = 1.0f;
+    up[2] = 0.0f;
+    up[3] = 1.0f;
+    float d = utlVecDot(n, up);
+    if (-0.5f <= d && d <= 0.5f)
+    {
+        if (0.0f <= hit->m_vec[0][3] && hit->m_vec[0][3] < point[3])
+            return 1;
+        hit->m_50 = q->m_group;
+        storeHit(hit, q, prim, verts, plane, point);
+    }
+    return 1;
 }
 
 // ──────────────────────────────────────────────────────────────────────

@@ -1352,6 +1352,13 @@ by (x -> -x, y <-> -z) first. Billboards: m_flag100 bits 1..3 (on / with X turn 
 used by slot 11 transformBillboard. Casts build an I3cQuery (root, node matrices, colli table, group,
 hit callback 0x114034 / 0x1141c8, hit record) for i3cCastRay 0x232508 / Sphere 0x2324b8 / Cylinder
 0x2325a8 with 64 unit matrices; the hit record is MagSceneRayHit (t at +0x0c, m_50 group).
+The hit callbacks (2026-10-29) sit just before castRay in dogmodel.cpp: dogModelHitNearest 0x114034
+(ray / sphere) keeps the hit with the smallest point.w (a tie goes to the later triangle) and writes
+q->m_group to m_50 on every call, nearer or not; dogModelHitCylinder 0x1141c8 keeps only walls
+(normal's up within -0.5..0.5). Both store, in the game frame (i3c (x, y, z) -> (-x, -z, -y)), the
+point (w = t), the unit normal (w 0, utlNormalize3), the triangle's 3 vertices, and the group's name
+(i3cGetGroupName, up to 28 bytes, at +0x54; skipped when m_group < 0). MagSceneRayHit is 0x70 bytes:
+castRayGroups' frame puts the record at sp + 0x50 and its matrices at sp + 0xc0.
 
 ## The actor's motions (`dog/dogactor.cpp`, 0x108674..0x10f860, 2026-10-27, partial)
 

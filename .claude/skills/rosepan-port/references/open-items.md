@@ -1518,11 +1518,13 @@ to adapt when a TU reaches them:
   +0x40, +0x6c..+0x84, +0x688..+0x6c0 (no code in the file touches them), the list at +4 (findTask reads
   it, nothing adds to it), node flag 0x10 (all callers pass 0x11).
 
-- MagSceneRayHit size (2026-10-26, sequence/seqcall.cpp session 9): native 156 copies castRay's hit
-  record out as 0x70 bytes (3 x 0x20 + 0x10 struct-copy code) while magscene.h asserts 0x60 (from
-  drawBlobShadows' clear). The extra 0x10 is never initialised in the ROM's frame, so the record is
-  likely 0x70 with an unused tail; seqcall.cpp wraps it in SeqRayHit (0x70) for now. Settle it when
-  MagScene::castRay's model code (DogModel::castRay 0x11440c) is written.
+- MagSceneRayHit size -- answered 2026-10-29 (dog/dogmodel.cpp hit callbacks): 0x70 bytes, char
+  m_name[28] at +0x54 (the hit group's name). castRayGroups' frame proves it (record sp + 0x50,
+  matrices sp + 0xc0); SeqRayHit is now just the record.
+- FUN_00113ea8 (2026-10-29): unreferenced, pinned into dog/doglight.cpp (its only callers' file
+  end). Reads like a DogLight copy: dst->setup(src + 0x5c counts) via 0x112d60, memcpy(dst +0x40
+  buffer, src +0x40 buffer, size 0x112bc8(src, counts)), dst +0x78 = 1. Write it with doglight.cpp;
+  dead code, so low priority.
 - MagLifeFadeKey vs MagLifeFadeKeyHole (2026-10-25, found in the mag/maglifefader.cpp session): the
   scene's +0x41890 object is built by 0x12f298, which stores `_vt$18MagLifeFadeKeyHole` 0x2e1cf8
   (rtti.py: MagLifeFadeKeyHole : MagLife, slots 2 0x12f84c, 6 0x12f95c). The code names its
