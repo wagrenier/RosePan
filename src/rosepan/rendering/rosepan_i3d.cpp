@@ -34,10 +34,21 @@ constexpr int kFrameWidth = 512;
 constexpr int kFrameHeight = 448;
 constexpr int kDefaultOffX = (2048 - kFrameWidth / 2) << 4;
 constexpr int kDefaultOffY = (2048 - kFrameHeight / 2) << 4;
-/* The renderer's frame: RoR's 512 columns stretch to its 640, as the PS2
- * display stretches them. */
-constexpr float kScaleX = 640.0f / (float)kFrameWidth;
-constexpr float kScaleY = 448.0f / (float)kFrameHeight;
+/* RoR's frame onto the renderer's (RosePan_RendererGetFrameSize): the 512
+ * columns stretch to its width, as the PS2 display stretches them. */
+float ScaleX()
+{
+    float w = 0.0f;
+    RosePan_RendererGetFrameSize(&w, nullptr);
+    return w / (float)kFrameWidth;
+}
+
+float ScaleY()
+{
+    float h = 0.0f;
+    RosePan_RendererGetFrameSize(nullptr, &h);
+    return h / (float)kFrameHeight;
+}
 
 /* GS registers the module follows. */
 constexpr uint64_t kRegTex0 = 0x06;
@@ -222,30 +233,33 @@ const void *TextureFor(const Binding &b, int tcc)
 
 float FrameX(const GsState &gs, int x)
 {
-    return ((float)(x - gs.offx) / 16.0f) * kScaleX;
+    return ((float)(x - gs.offx) / 16.0f) * ScaleX();
 }
 
 float FrameY(const GsState &gs, int y)
 {
-    return ((float)(y - gs.offy) / 16.0f) * kScaleY;
+    return ((float)(y - gs.offy) / 16.0f) * ScaleY();
 }
 
 /* The renderer's GS shadows from the replay state: ALPHA as it is, the
- * scissor in the renderer's 640x448 frame. */
+ * scissor in the renderer's frame. */
 void ApplyState(const GsState &gs)
 {
     RosePan_RendererSetGsAlphaRegister(gs.alpha);
-    const uint64_t x0 = (uint64_t)((double)(gs.scissor & 0x7ff) * kScaleX);
-    const uint64_t x1 = (uint64_t)((double)(((gs.scissor >> 16) & 0x7ff) + 1) * kScaleX) - 1;
-    const uint64_t y0 = (gs.scissor >> 32) & 0x7ff;
-    const uint64_t y1 = (gs.scissor >> 48) & 0x7ff;
+    const double sx = ScaleX(), sy = ScaleY();
+    const uint64_t x0 = (uint64_t)((double)(gs.scissor & 0x7ff) * sx);
+    const uint64_t x1 = (uint64_t)((double)(((gs.scissor >> 16) & 0x7ff) + 1) * sx) - 1;
+    const uint64_t y0 = (uint64_t)((double)((gs.scissor >> 32) & 0x7ff) * sy);
+    const uint64_t y1 = (uint64_t)((double)(((gs.scissor >> 48) & 0x7ff) + 1) * sy) - 1;
     RosePan_RendererSetGsScissorRegister(x0 | x1 << 16 | y0 << 32 | y1 << 48);
 }
 
 void RestoreState()
 {
     RosePan_RendererSetGsAlphaRegister(kDefaultAlpha);
-    RosePan_RendererSetGsScissorRegister((uint64_t)639 << 16 | (uint64_t)447 << 48);
+    float w = 0.0f, h = 0.0f;
+    RosePan_RendererGetFrameSize(&w, &h);
+    RosePan_RendererSetGsScissorRegister((uint64_t)(w - 1.0f) << 16 | (uint64_t)(h - 1.0f) << 48);
 }
 
 /* Does the current state write colour at all? */
@@ -405,13 +419,13 @@ void DrawPrim(const Record &r)
         if (n >= 2)
         {
             const float lxy[4] = {xy[0], xy[1], xy[2], xy[3]};
-            RosePan_RendererDrawLine2D(lxy, rgba, kScaleX);
+            RosePan_RendererDrawLine2D(lxy, rgba, ScaleX());
         }
         break;
     case 0:                                     /* point: one frame pixel */
     {
         const float x = xy[0], y = xy[1];
-        const float pxy[8] = {x, y, x + kScaleX, y, x, y + kScaleY, x + kScaleX, y + kScaleY};
+        const float pxy[8] = {x, y, x + ScaleX(), y, x, y + ScaleY(), x + ScaleX(), y + ScaleY()};
         uint8_t q[16];
         for (int k = 0; k < 4; k++)
             memcpy(&q[k * 4], rgba, 4);
@@ -448,8 +462,8 @@ void DrawStrip(const Record &r)
         {
             const RosePanI3dVu1Vertex &p = v[k];
             const RosePanI3dVu1Vertex &c = iip ? p : v[i];
-            xy.push_back((p.x - (float)gs.offx / 16.0f) * kScaleX);
-            xy.push_back((p.y - (float)gs.offy / 16.0f) * kScaleY);
+            xy.push_back((p.x - (float)gs.offx / 16.0f) * ScaleX());
+            xy.push_back((p.y - (float)gs.offy / 16.0f) * ScaleY());
             const float q = p.q != 0.0f ? p.q : 1.0f;
             uv.push_back(p.s / q);
             uv.push_back(p.t / q);
@@ -493,7 +507,9 @@ void DrawMovie(const Record &r)
     /* The transfer replaces the frame buffer's pixels: no blending, the
      * whole frame. */
     RestoreState();
-    const float sx = 640.0f / (float)m[4], sy = 448.0f / (float)m[5];
+    float fw = 0.0f, fh = 0.0f;
+    RosePan_RendererGetFrameSize(&fw, &fh);
+    const float sx = fw / (float)m[4], sy = fh / (float)m[5];
     const float x0 = m[0] * sx, x1 = m[2] * sx, y0 = m[1] * sy, y1 = m[3] * sy;
     const float s1 = (float)(m[2] - m[0]) / (float)(1 << tw);
     const float t1 = (float)(m[3] - m[1]) / (float)(1 << th);
@@ -833,8 +849,17 @@ void RosePan_I3dReplay(const void *start, const void *end)
         case REC_STRIP:   DrawStrip(r); drew = true; break;
         case REC_CAMERA:
             if (r.index < s_cameras.size())
-                RosePan_RendererSet3DViewProjection(s_cameras[r.index].view,
-                                                    s_cameras[r.index].projection);
+            {
+                /* The ROM's projection fills its 512x448 frame; drawn to
+                 * the display it widens to the composed aspect (more world
+                 * on a wider window, never a stretch). XYOFFSET 0 is an
+                 * off-screen pass (the shadow target's light camera), which
+                 * keeps its own shape. */
+                Camera c = s_cameras[r.index];
+                if (s_state.offx != 0 || s_state.offy != 0)
+                    RosePan_RendererWidenProjection(c.projection);
+                RosePan_RendererSet3DViewProjection(c.view, c.projection);
+            }
             break;
         }
     }
@@ -980,7 +1005,9 @@ void OrbitCamera(const float *c, float dist, float angle, float *view, float *pr
     memcpy(view, v16, sizeof(v16));
     const float n = dist * 0.05f, fa = dist * 4.0f;
     const float sy = 1.0f / tanf(0.5f * 0.75f);                /* 43 degrees vertical */
-    const float sx = sy * 448.0f / 640.0f;
+    float fw = 0.0f, fh = 0.0f;
+    RosePan_RendererGetFrameSize(&fw, &fh);
+    const float sx = sy * fh / fw;                              /* the replay widens it */
     const float p16[16] = {
         sx, 0.0f, 0.0f, 0.0f,
         0.0f, sy, 0.0f, 0.0f,
