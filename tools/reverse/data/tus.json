@@ -334,7 +334,7 @@
    "why": "gamCreateEff1a creates kind 0x1a (EffFog3) and opens the EffFog3 / EffFog3Dark / EffFog3WeakUp run, after EffFog2Prim::updateZDepth and before EffFoot1::init; one file per effect family as eff/effcameraanim1.cpp"
   },
   "eff/efflight.cpp": {
-   "notes": "Left: EffLight3 (ctor 0x17562c, dtor 0x175664, init 0x175804, liveMain 0x175dc4, helpers 0x176430 adds lights per bit of MagScene+0x20b0 words, 0x1764fc a 4-entry table 13/3/11/7, 0x17653c points the light3_%02d i3r nodes at m_340, 0x1765e8 scales DogLightPool direct light 0 colour); start with rtti.py --class EffLight3 and the DogLightPool header. Picture: the 240 s run reaches EffLight1::renderMain in the Once upon a time intro (about frame 2850), but effCalcViewDepth and effMoveToward (0x16ff18 / 0x16ff78, unassigned@0016fb70) are still stubs, so the sprite lands at the stub position; write them (and effVecLength 0x16fc20, declared in eff0.h) before judging the glow. The 240 s run still ends in the bus-stop room, unchanged. Doubt: the activation fade counts up while hidden and down while shown (alpha m_fade / 5), ported as the ROM has it (open-items.md).",
+   "notes": "Verify: no smoke-path scene creates kind 0x23, the 240 s run still ends in the bus-stop intro text, unchanged. Mark done when a stormy scene shows the sky's light3 nodes and the lights flashing. PORT: setSkyNodeDisp takes the record (the ROM always uses m_disp) so the destructor can point the nodes at a static reset copy instead of the dying object; node pointers go through i3rFarPtrSet. Doubt: between flashes m_disp.m_10 rgb is 0 (ported as the ROM has it; DogDispControl roles unverified, open-items.md). EffLight1's glow still waits on effCalcViewDepth / effMoveToward / effVecLength (0x16ff18 / 0x16ff78 / 0x16fc20, unassigned@0016fb70) before its picture can be judged.",
    "ranges": [
     [
      "00174dd8",
@@ -346,9 +346,14 @@
      "date": "2026-10-29 18:22",
      "status": "partial",
      "summary": "EffLight1 and EffLight2 (9 functions, eff/efflight.cpp pinned 0x174dd8..0x176694 out of unassigned@00172e4c): camera-facing glow sprites. EffLight1 is pulled m_near toward the eye and flickers 64/72 of 128 every 3 frames; EffLight2 sits at its position, flickers 0.5/0.525 every 4 frames, fades with the square of its eye distance between m_fade_near and m_fade_far and draws into the always-pass layer. Both fade over 5 frames on setVisible. EffParam gains m_light1 / m_light2; declarations moved from effclasses.h to efflight.h; FUN_0016fc20 named effVecLength."
+    },
+    {
+     "date": "2026-10-29 18:38",
+     "status": "verify",
+     "summary": "EffLight3 (8 functions + 3 empty linkonce virtuals): lightning. Thunder every 90..210 frames (SE 0xb030352, pattern 13/3/11/7), 5-frame flashes that light the first sky model's light3_%02d nodes through a DogDispControl at +0x340 and, by EffParam mode word 0x10, flash copies of light set 1's direct/point/spot lights (mode 0, ambient 0.3 to 0.9 over 30 frames) or the ambient alone (mode 1). EffParam gains m_light3; helpers named EffLight3::addLights / getFlashPattern / setSkyNodeDisp / setAmbientScale. The whole TU is now written."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "EffLight1::init 0x174dd8 opens the EffLight1 / EffLight2 / EffLight3 run (the helpers before it are called only from EffGeneric1), ending before EffFindItem1::init 0x176694 (eff/effman.cpp); one file per effect family as eff/efffog3.cpp"
   },
   "eff/effman.cpp": {

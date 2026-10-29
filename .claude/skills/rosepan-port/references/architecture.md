@@ -1486,6 +1486,17 @@ dark and every enemy of types 0..5 down (effFog3AllEmyDown 0x1727ec) -> EffFog3W
 record's fog on the map fog `m_fog[1]` (distances x scale, amount0 lerped toward amount1, amount1 x scale,
 colour rgb/255, w 0) and calls MagScene::addFog with fog - map (on) or map - fog (off), so it shifts
 whatever target the scene has then.
+**EffLight3** (kind 0x23, EE 0x3a0, `eff/efflight.cpp` 0x17562c..0x176694, 2026-10-29) is lightning and
+draws nothing (its renderPreMain / renderMain / createPacketEntry are empty linkonces 0x28c860..0x28c878).
+EffParam word 0x10 = mode. +0x24 a [6][16] table {src bit, id} (memset -1): mode 0 copies light set 1's
+direct / point / spot lights (bits 0..15 of pool m_set_mask[1][kind], MagScene::addLight(kind, 2)).
++0x330 the scene's ambient light 0 colour at init, +0x340 a DogDispControl that the first sky pack's
+model (m_tenkyu[0].m_model[0]) nodes `light3_%02d` display by (slot 2A data). Thunder every 90..210
+frames: SE 0xb030352, pattern 13/3/11/7 (effRand & 3), a set bit at frames 0, 4, 8, 12 starts a 5-frame
+flash: DogDispControl m_color = flash/5 with m_10 = 1 (0 / 0 once it ends), mode 0 the copies at 2x
+(direct) / 4x (point, spot) of their source colour times flash/5 and the ambient 0.3 -> 0.9 of its colour
+over 30 frames; mode 1 the ambient 1 -> 2 -> 1 over the flash. The dtor resets the disp, ambient x1, and
+removes the copies (all 6 kinds, by id).
 
 ## The game helpers (`utl/utlgame.cpp`, 0x1024d0..0x1041c4, 2026-10-28)
 

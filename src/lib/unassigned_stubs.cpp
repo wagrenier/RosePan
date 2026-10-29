@@ -657,18 +657,6 @@ EffBg1::~EffBg1()
     ROSEPAN_STUB("EffBg1::~EffBg1", 0x0016affc);
 }
 
-// stub of ROR 0x0017562c
-EffLight3::EffLight3()
-{
-    ROSEPAN_STUB("EffLight3::EffLight3", 0x0017562c);
-}
-
-// stub of ROR 0x00175664
-EffLight3::~EffLight3()
-{
-    ROSEPAN_STUB("EffLight3::~EffLight3", 0x00175664);
-}
-
 // stub of ROR 0x001790e4
 EffReload1::EffReload1()
 {
@@ -796,40 +784,6 @@ u_long * EffGeneric1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_lo
 void EffGeneric1::renderPreMain(RENDERPARAM *param)
 {
     ROSEPAN_STUB("EffGeneric1::renderPreMain", 0x00174534);
-}
-
-// stub of ROR 0x0028c860
-I3dDrawSet * EffLight3::createPacketEntry(I3dLayer *layer)
-{
-    ROSEPAN_STUB("EffLight3::createPacketEntry", 0x0028c860);
-    return {};
-}
-
-// stub of ROR 0x00175804
-int EffLight3::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffLight3::init", 0x00175804);
-    return {};
-}
-
-// stub of ROR 0x00175dc4
-int EffLight3::liveMain()
-{
-    ROSEPAN_STUB("EffLight3::liveMain", 0x00175dc4);
-    return {};
-}
-
-// stub of ROR 0x0028c870
-u_long * EffLight3::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffLight3::renderMain", 0x0028c870);
-    return {};
-}
-
-// stub of ROR 0x0028c868
-void EffLight3::renderPreMain(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("EffLight3::renderPreMain", 0x0028c868);
 }
 
 // stub of ROR 0x001791ac
