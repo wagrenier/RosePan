@@ -7,6 +7,7 @@ python build.py [--config relwithdebinfo|debug|release] [--run SECONDS [--shot-e
 - Configures the build directory on first use, reusing a sibling ReiPan / MioPan build's fetched
   dependency sources when present (no re-download).
 - Runs ninja; retries once when parallel shadercross runs collide on a Windows file lock.
+- Refuses raw NUL bytes in src/ (MinGW compiles a quoted NUL, MSVC fails C2137).
 - Prints unique compile errors and undefined references. Exit code = build result.
 - --run N starts the exe for N seconds and prints stub hits, warnings and the log tail; the full output
   goes to work/run_<config>.log (tus.py ranks reached stubs first). The platform layer saves a screenshot
@@ -64,6 +65,16 @@ if not (bdir / 'build.ninja').exists():
 else:
     # pick up added/removed source files (the CMake globs are CONFIGURE_DEPENDS, but be explicit)
     subprocess.run(['cmake', str(bdir)], env=env, capture_output=True)
+
+
+# A raw NUL byte in a source file (a shell-written backslash-zero that landed unescaped): GCC takes the
+# quoted NUL as a character, MSVC stops on C2137 "empty character constant". MinGW never shows it.
+nul = [f'{p.relative_to(rosepan.REPO)}:{i}' for p in sorted((rosepan.REPO / 'src').rglob('*'))
+       if p.suffix in ('.c', '.cpp', '.h', '.hpp', '.inl')
+       for i, line in enumerate(p.read_bytes().split(b'\n'), 1) if bytes(1) in line]
+if nul:
+    print('raw NUL bytes (MSVC rejects them; write the escape instead):', ', '.join(nul))
+    raise SystemExit('build FAILED (NUL bytes in sources)')
 
 
 def build():
