@@ -5,7 +5,7 @@
  *  (0x18330c..0x187724, the file named by its asserts). See msg/msgman.h.
  *
  *  PORT: all of MsgMan and MsgManSet (msgGetSysText 0x1832e8 sits before
- *  the file, unassigned@001832e8).
+ *  the file: msg/msgsystext.cpp).
  * ======================================================================== */
 #include "msg/msgman.h"
 
