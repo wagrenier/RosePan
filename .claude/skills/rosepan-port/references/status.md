@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 12:24 at commit `5fc1ea8` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 12:35 at commit `4a5cefb` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-29 12:24 at commit `5fc1ea8` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7163**, named **6302** (88%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4700
-- context-name ledger: 5001 entries; overrides of wrong library matches: 5
-- placed in a source file: 5468/7163 in 137 files
+- game functions: **7166**, named **6307** (88%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4705
+- context-name ledger: 5006 entries; overrides of wrong library matches: 5
+- placed in a source file: 5478/7166 in 138 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4921**; stubs: **351**
+- reconstructed RoR functions: **4929**; stubs: **349**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -83,7 +83,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 12 | 297 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 295 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -152,14 +152,15 @@ Least-named game-code regions (64 KB blocks):
 | `src/utl/utlgame.cpp` | 49 | 0 |
 | `src/utl/utlmath.cpp` | 25 | 0 |
 | `src/utl/utlmisc.cpp` | 24 | 0 |
+| `src/utl/utlmisc2.cpp` | 10 | 0 |
 | `src/utl/utlrand.cpp` | 10 | 0 |
 | `src/utl/utltm2.cpp` | 1 | 1 |
 | `src/wrd/wrdsrv.cpp` | 11 | 0 |
 
 ## Translation units (one session each: `tus.py`)
 
-- 168 TUs: todo 96, partial 3, verify 100, done 17
-- next: **unassigned@00216ad0** (frontier score 15)
+- 169 TUs: todo 97, partial 2, verify 101, done 17
+- next: **i3d/i3cquery.cpp** (frontier score 14)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -259,11 +260,13 @@ Least-named game-code regions (64 KB blocks):
 - verify: `utl/utlgame.cpp` 49/49 -- Complete; verify because nothing on screen shows it yet. The 240 s New Game run reaches the forest bus stop with Jennifer as before (no assert from this file; u
 - verify: `utl/utlmath.cpp` 25/25 -- Nothing on screen can show this yet: after the film the stage stays black (a ring indicator only) because utlDrawI3r ends in the i3rDrawModel stub 0x21fe68; the
 - verify: `utl/utlmisc.cpp` 24/24 -- Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and i
+- verify: `utl/utlmisc2.cpp` 10/10 -- Verify: the 240 s New Game run ends in the bus-stop room with Suddenly, the girl was all alone... as before (progress shot); the headings feed GamArea::update, 
 - verify: `utl/utlrand.cpp` 10/10 -- Verify: the 15 s smoke run ends on the boot disclaimer as before; utlRandReset now runs from MagSystem's constructor (no stub hit) but no random draw shows on s
 - verify: `wrd/wrdsrv.cpp` 11/14 -- Verified by a temporary self-test (not committed) loading WRD.BIN stages 1 and 13: 49 rooms of 247 index slots, names, floors, captions, offsets, get / findByNa
 
 Recent sessions:
 
+- 2026-10-29 12:35 `utl/utlmisc2.cpp` verify: Split unassigned@00216ad0: pinned utl/utlmisc2.cpp 0x217f10..0x2184c0 and wrote all 10 functions: utlAtan2 (stub replaced), utlDirDist and utlStrNCopy (moved fr
 - 2026-10-29 12:24 `eff/efffog3.cpp` verify: EffFog3, EffFog3Dark, EffFog3WeakUp and gamCreateEff1a (10 functions, 0x172678..0x172e4c, pinned out of unassigned@0016fb70): the per-stage enemy fog. init pick
 - 2026-10-29 11:58 `utl/utlfind.cpp` verify: utl/utlfind.cpp reconstructed: all 10 functions (UtlFind fields m_num / m_again named, FUN_001062d8 named utlFindFirstVFchr), extent pinned 0x1060e8-0x106658; u
 - 2026-10-29 11:39 `mnu/mnuselect.cpp` verify: MnuTextList written whole: ctor, dtor, open, close, clear, processPad and its step state machine, allocText and freeText, setItems (labels split on #0#0, mask f
@@ -271,22 +274,21 @@ Recent sessions:
 - 2026-10-29 10:59 `msg/msgsystext.cpp` done: msgGetSysText 0x1832e8 and its 0x1d4 system texts (data 0x298fe8) written as msg/msgsystext.cpp, byte-exact; stub removed. datadump.py S fields now print byte-e
 - 2026-10-29 10:49 `eff/effcameraanim1.cpp` done: EffCameraAnim1 (kind 0xd): init, setKey, liveMain and the linkonce no-draw slots; the class moved out of effclasses.h into eff/effcameraanim1.h with the event f
 - 2026-10-29 10:31 `mag/maglifepc2.cpp` verify: mag/maglifepc2.cpp pinned 0x11c464..0x11d720 (absorbing unassigned@0011cb70 and the gaps between the file's assert anchors) and all 25 functions written: the Ga
-- 2026-10-29 09:59 `debug/mcd_debug.cpp` verify: debug/mcd_debug.cpp written whole (0x2155f4..0x215a30, 5 functions): mcdDbgAssertFailed, the second assert handler (callcheck comments in mnu/msg/snd renamed fr
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00216ad0` | partial | 2/2/16 | 6.5 | 15 | 0 |
 | `i3d/i3cquery.cpp` | todo | 0/3/16 | 8.9 | 14 | 2 |
 | `unassigned@00149d18` | todo | 0/62/431 | 98.3 | 12 | 0 |
 | `mag/maglifefadekey.cpp` | todo | 0/6/9 | 2.5 | 9 | 0 |
-| `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
-| `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
 | `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
+| `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
 | `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
+| `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
 | `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
 | `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
-| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
 | `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
+| `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
+| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -295,8 +297,6 @@ Recent sessions:
 | `001be734` | FileReadReq::FileReadReq | 63 | ror | missing | game/gamfile.cpp |
 | `001be2dc` | FileReader::~FileReader | 30 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 25 | ror | missing | game/gamfile.cpp |
-| `00217f10` | utlAtan2 | 8 | ror | stub | - |
-| `00218470` | rorDebugPrintf | 6 | ror | missing | - |
 | `0012f790` | MagLifeFadeKey::releaseTexture | 3 | ror | stub | mag/maglifefadekey.cpp |
 | `00192ac0` | mnuBase::mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
 | `00192b3c` | mnuBase::~mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
@@ -309,7 +309,6 @@ Recent sessions:
 | `0010559c` | utlTm2ToSepia | 2 | ror | stub | utl/utltm2.cpp |
 | `0021628c` | motNameFindChara | 1 | ror | stub | debug/motnamecnv0.cpp |
 | `002162e0` | motNameGetCategory | 1 | ror | stub | - |
-| `00218338` | utlStrToLower | 1 | ror | stub | - |
 | `00216184` | motNameConvert | 1 | ror | stub | debug/motnamecnv0.cpp |
 | `00281cbc` | DogModel::__tf | 1 | sym | missing | dog/dogmodel.cpp |
 | `0012f2f0` | MagLifeFadeKey::loadTexture | 1 | ror | stub | mag/maglifefadekey.cpp |
@@ -332,4 +331,7 @@ Recent sessions:
 | `0014b3bc` | BdlMain::initOut | 1 | ror | stub | - |
 | `0014cde4` | MrtMain::initOut | 1 | ror | stub | - |
 | `0014dc7c` | ClrMain::initOut | 1 | ror | stub | - |
+| `00153e40` | GrgMain::initOut | 1 | ror | stub | - |
+| `00150b24` | NorMain::initOut | 1 | ror | stub | - |
+| `0012cb50` | MagLifePC::beginAttack | 1 | ror | stub | mag/maglifepcbtl.cpp |
 

@@ -20099,6 +20099,12 @@
   "was": "FUN_002180e4",
   "why": "sqrt of x, z into *a0, returns pi/2 - acos(x/len) signed by z, wrapped to -pi..pi; next to utlAtan2"
  },
+ "002182c4": {
+  "name": "utlStrToUpper",
+  "tag": "ror-inferred",
+  "was": "FUN_002182c4",
+  "why": "upper-cases a..z of the string in place through a 256-byte stack copy and strncpy 0x100; returns the string; no callers"
+ },
  "00218338": {
   "name": "utlStrToLower",
   "tag": "ror-inferred",
@@ -20111,11 +20117,35 @@
   "was": "FUN_0021838c",
   "why": "copies src into dst, at most n chars, zero-terminated while room is left"
  },
+ "002183f8": {
+  "name": "utlMemCopyBytes",
+  "tag": "ror-inferred",
+  "was": "utlMemCopyBytes",
+  "why": "byte loop copying n bytes src -> dst (a0, a1, a2); no callers, hidden after utlStrNCopy"
+ },
+ "00218424": {
+  "name": "utlFmodf",
+  "tag": "ror-inferred",
+  "was": "utlFmodf",
+  "why": "x - (float)(int)(x / m) * m (cvt.w.s truncation); folded into 0x218450's body, which tail-jumps here"
+ },
+ "00218450": {
+  "name": "utlFmodPi",
+  "tag": "ror-inferred",
+  "was": "FUN_00218450",
+  "why": "utlFmodf(x, 3.1415925f) (0x40490fda); no callers found"
+ },
  "00218470": {
   "name": "rorDebugPrintf",
   "tag": "ror-inferred",
   "was": "FUN_00218470",
   "why": "a variadic stub (saves a1..a3, returns): the debug print; releaseTenkyus passes the format dropMap : m_p_keep_buf %x"
+ },
+ "002184b8": {
+  "name": "utlNullFunc",
+  "tag": "ror-inferred",
+  "was": "utlNullFunc",
+  "why": "bare jr ra after rorDebugPrintf; no callers"
  },
  "002184c0": {
   "name": "i3dNibbleSet",
