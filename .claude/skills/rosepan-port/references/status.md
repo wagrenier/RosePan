@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 13:40 at commit `16925fb` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 13:55 at commit `f09e465` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-29 13:40 at commit `16925fb` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7184**, named **6372** (89%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4770
-- context-name ledger: 5071 entries; overrides of wrong library matches: 5
-- placed in a source file: 5496/7184 in 138 files
+- game functions: **7187**, named **6385** (89%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4783
+- context-name ledger: 5084 entries; overrides of wrong library matches: 5
+- placed in a source file: 5499/7187 in 138 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4999**; stubs: **344**
+- reconstructed RoR functions: **5012**; stubs: **344**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -67,7 +67,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3croot.cpp` | 12 | 0 |
 | `src/i3d/i3dctx.cpp` | 31 | 0 |
 | `src/i3d/i3denv.cpp` | 12 | 0 |
-| `src/i3d/i3dgeom.cpp` | 41 | 0 |
+| `src/i3d/i3dgeom.cpp` | 54 | 0 |
 | `src/i3d/i3dlayer.cpp` | 80 | 0 |
 | `src/i3d/i3dmath.cpp` | 95 | 0 |
 | `src/i3d/i3dpacket.cpp` | 54 | 0 |
@@ -161,10 +161,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 169 TUs: todo 95, partial 3, verify 102, done 17
-- next: **i3d/i3dgeom.cpp** (continuing a partial TU)
+- 169 TUs: todo 95, partial 2, verify 103, done 17
+- next: **unassigned@00149d18** (frontier score 12)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
-- partial: `i3d/i3dgeom.cpp` 41/51 -- Left: 0x2355c8, 0x235608, 0x235648 (wrappers passing swapped args to 0x236168, 0x236228, 0x2362a8; 0x235608 is called by utlHitCheck), 0x235768 (0x480, uses i3d
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -193,6 +192,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `i3d/i3croot.cpp` 12/12 -- Status verify: DogModel::loadData calls i3cRelocate, setupColliTbl and i3cSetBothFaceEnable, but no smoke run reaches a model load yet and no raw I3D_I3C exists
 - verify: `i3d/i3dctx.cpp` 31/31 -- Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the pa
 - verify: `i3d/i3denv.cpp` 12/12 -- Pinned 0x21a120..0x21a3e8 + 0x21ac80..0x21b220 as one file (a guess: the i3r helpers 0x21a3e8..0x21ac80 sit between; split into i3dfog / i3dlight if evidence ap
+- verify: `i3d/i3dgeom.cpp` 54/54 -- Nothing left to write. Status verify: collision is not visible in the 15 s boot (the screenshot is the disclaimer, drawn right). Mark done once a longer run pas
 - verify: `i3d/i3dlayer.cpp` 80/80 -- Every frame now builds real groups, layers and a sorted DMA chain; the smoke run is stable and still black: nothing on the i3d path reaches a host draw module (
 - verify: `i3d/i3dmath.cpp` 95/95 -- Nothing on screen can show it yet (boot still black; the i3d path has no host draw consumer, and the per-frame lightstatus asserts wait on DogLightPool::createL
 - verify: `i3d/i3dpacket.cpp` 54/54 -- All packet-module bridges are gone. Black screen: nothing on the host consumes i3d packets (no GS emulation); the user still has to choose the host draw hook (o
@@ -270,6 +270,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 13:55 `i3d/i3dgeom.cpp` verify: i3dgeom complete: all 54 geometry tests written. This session: the flat-capped cylinder family (core 0x235768, line/ray/seg forms, hit tests incl. utlHitCheck 0
 - 2026-10-29 13:40 `i3d/i3dgeom.cpp` partial: i3dgeom: 37 of 47 geometry tests written (box tests, point/line/ray/segment distances, sphere and capsule hit tests, line-sphere and line-capsule intersections)
 - 2026-10-29 13:22 `i3d/i3cquery.cpp` verify: i3cquery complete: swept-sphere triangle tests 0x2325d0 (segment) / 0x232be8 (ray) as one worker, their casts 0x2331c8 (hidden in 0x232be8, created in Ghidra) /
 - 2026-10-29 13:12 `i3d/i3cquery.cpp` partial: i3c collision casts: i3cCast worker 0x232120, tree walk 0x231ed0, shape transform, ray / sphere / cylinder triangle tests with their mode wrappers, the seven ca
@@ -277,21 +278,20 @@ Recent sessions:
 - 2026-10-29 12:24 `eff/efffog3.cpp` verify: EffFog3, EffFog3Dark, EffFog3WeakUp and gamCreateEff1a (10 functions, 0x172678..0x172e4c, pinned out of unassigned@0016fb70): the per-stage enemy fog. init pick
 - 2026-10-29 11:58 `utl/utlfind.cpp` verify: utl/utlfind.cpp reconstructed: all 10 functions (UtlFind fields m_num / m_again named, FUN_001062d8 named utlFindFirstVFchr), extent pinned 0x1060e8-0x106658; u
 - 2026-10-29 11:39 `mnu/mnuselect.cpp` verify: MnuTextList written whole: ctor, dtor, open, close, clear, processPad and its step state machine, allocText and freeText, setItems (labels split on #0#0, mask f
-- 2026-10-29 11:27 `bed/bedsubmode.cpp` verify: BedSubMode written: push 0x100258 and pop 0x1002c0 (save / restore the four-word record on a 4-deep stack, asserts at lines 25 / 35) and reset 0x100320 (named, 
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `unassigned@00149d18` | todo | 0/62/431 | 98.3 | 12 | 0 |
 | `mag/maglifefadekey.cpp` | todo | 0/6/9 | 2.5 | 9 | 0 |
 | `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
-| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
 | `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
 | `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
-| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
+| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
 | `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
-| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
 | `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
 | `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
+| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
+| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
 | `unassigned@00113ea8` | todo | 0/2/3 | 1.3 | 4 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)

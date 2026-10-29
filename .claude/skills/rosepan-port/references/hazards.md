@@ -129,7 +129,10 @@ entries are marked **RoR** with the date.
   0x232be8's body; found only through `ghidra.py refs` of an uncalled prim test (an addiu lo16 hit).
   Since 2026-10-29 it flags code after a spin (a backward `b` over nops: the assert handlers'
   endless loop, which hid dbgTraceMatrix 0x215a70 and the memory card test 0x215634); other `b`s land
-  on jump-table cases, so they stay unflagged. Over a
+  on jump-table cases, so they stay unflagged -- unless the code after the `b` (nops skipped) is a frame
+  setup `addiu sp, sp, -N`: since 2026-10-29 that is flagged too (i3dgeom: 0x236348 and 0x236870 after
+  a `b` into the epilogue, and 0x233de8, code in no function at all, all missed before). A callcheck
+  MISSING on a tiny wrapper whose Ghidra size is too big is the same trap. Over a
   body far bigger than its decompile, `mipsdis.py` it and look for every `addiu sp,sp,-N` prologue.
 - **Tail calls are not calls to Ghidra.** `j <func>` at a function's end is missing from Ghidra's callee
   list ("0 callers"); features.py records it as a tail jump and callcheck counts it. A `j` to an

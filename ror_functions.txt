@@ -5924,7 +5924,8 @@
 /* 002337e0 000000e8 */ i3dPointSegDist2(){}  // ror
 /* 002338c8 00000190 */ i3dLineLineDist2(){}  // ror
 /* 00233a58 000001b4 */ i3dLineRayDist2(){}  // ror
-/* 00233c10 0000043c */ i3dLineSegDist2(){}  // ror
+/* 00233c10 000001d4 */ i3dLineSegDist2(){}  // ror
+/* 00233de8 00000264 */ i3dRayRayDist2(){}  // ror
 /* 00234050 00000340 */ i3dRaySegDist2(){}  // ror
 /* 00234390 00000568 */ i3dSegSegDist2(){}  // ror
 /* 002348f8 00000158 */ i3dSphereBoxTest(){}  // ror
@@ -5954,21 +5955,23 @@
 /* 002353c8 00000078 */ i3dCylLineSphereTest(){}  // ror
 /* 00235440 00000078 */ i3dCylHalfSphereTest(){}  // ror
 /* 002354b8 00000110 */ i3dCylinderSphereTest(){}  // ror
-/* 002355c8 0000003c */ FUN_002355c8(){}
-/* 00235608 0000003c */ FUN_00235608(){}
-/* 00235648 0000003c */ FUN_00235648(){}
+/* 002355c8 0000003c */ i3dFlatCylinderLineTest(){}  // ror
+/* 00235608 0000003c */ i3dFlatCylinderRayTest(){}  // ror
+/* 00235648 0000003c */ i3dFlatCylinderSegTest(){}  // ror
 /* 00235688 000000dc */ i3dVecOrthoBasis(){}  // ror
-/* 00235768 00000480 */ FUN_00235768(){}
+/* 00235768 00000480 */ i3dLineFlatCylinderCoreTest(){}  // ror
 /* 00235be8 0000057c */ i3dLineCylinderTest(){}  // ror
-/* 00236168 000000c0 */ FUN_00236168(){}
-/* 00236228 0000007c */ FUN_00236228(){}
-/* 002362a8 00000158 */ FUN_002362a8(){}
-/* 00236400 000000ec */ FUN_00236400(){}
-/* 002364f0 00000104 */ FUN_002364f0(){}
+/* 00236168 000000c0 */ i3dLineFlatCylinderTest(){}  // ror
+/* 00236228 0000007c */ i3dRayFlatCylinderTest(){}  // ror
+/* 002362a8 0000009c */ i3dSegFlatCylinderTest(){}  // ror
+/* 00236348 000000b8 */ i3dFlatCylinderCylLineTest(){}  // ror
+/* 00236400 000000ec */ i3dFlatCylinderCylHalfTest(){}  // ror
+/* 002364f0 00000104 */ i3dFlatCylinderCylSegTest(){}  // ror
 /* 002365f8 0000007c */ i3dRayCylinderTest(){}  // ror
 /* 00236678 0000009c */ i3dSegCylinderTest(){}  // ror
 /* 00236718 00000088 */ i3dCylLineCylinderTest(){}  // ror
-/* 002367a0 000001bc */ FUN_002367a0(){}
+/* 002367a0 000000cc */ i3dCylHalfCylinderTest(){}  // ror
+/* 00236870 000000ec */ i3dCylSegCylinderTest(){}  // ror
 
 // *****************************************************************************
 // FILE -- i3d/i3dmath.cpp

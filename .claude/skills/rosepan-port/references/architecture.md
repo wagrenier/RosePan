@@ -466,7 +466,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     0x2333b0, uncalled): the part's +0x24 records (I3cAttrRef: three u16 indices, kind in bits 4..7
     of +6: 1 uv, 2 a vector, 3 both) index a table right after the 0x20-byte root with stride
     root+0x11; blended by barycentric weights (0x233258) into five floats.
-    **The geometry tests** (`i3d/i3dgeom.cpp` 0x233628..0x236960, 2026-10-29, partial): shapes are
+    **The geometry tests** (`i3d/i3dgeom.cpp` 0x233628..0x236960, 2026-10-29, all 54 written, verify): shapes are
     float[4] with the radius in w. Names follow the box tests: Line (t free), Ray (t >= 0), Seg (t
     0..1); Cyl* grows a shape by its start point's w (CylLine an infinite cylinder, CylHalf a ray
     capsule, CylSeg a capsule); Cylinder is the finite one around cyl + s axis. Distances
@@ -477,6 +477,16 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     Ray / Seg / CylLine forms) return 0x111 with bit 0 cleared when the entry t is before the start and
     bit 4 when the exit is past the end. i3dLineCylinderTest is really a capsule test (side wall
     within 0..|axis|, then the end spheres) in the frame of i3dVecOrthoBasis 0x235688.
+    The flat-capped cylinder cyl..cyl + axis (radius cyl.w, like i3dCylinderSphereTest 0x2354b8)
+    has its own family: core i3dLineFlatCylinderCoreTest 0x235768 (h in f12, r in f13, centre,
+    axis: cap-plane crossings within r, then side-wall roots between them), Line / Ray / Seg forms
+    0x236168 / 0x236228 / 0x2362a8, hit tests with (cyl, axis, p, d) i3dFlatCylinderLine / Ray /
+    SegTest 0x2355c8 / 0x235608 (utlHitCheck) / 0x235648, and capsule forms CylLine / CylHalf /
+    CylSeg 0x236348 / 0x236400 / 0x2364f0 that grow the cylinder by p.w (height by 2 p.w; the
+    last two first test the start sphere). i3dCylHalf / CylSegCylinderTest 0x2367a0 / 0x236870
+    grow the capsule. Distances cover Line x Line / Ray / Seg, Ray x Ray (i3dRayRayDist2 0x233de8,
+    code outside any function) / Seg, Seg x Seg. Hidden: 0x233de8, 0x236348, 0x236870 (each after a
+    `b` into the previous body's epilogue).
   - **Texture and CLUT objects** (`i3d/i3dtex.cpp`, 0x2184c0..0x21a120, written 2026-10-22, verify;
     33 functions incl. 4 hidden TEX1 setters 0x219dd0..0x219e30). Both start with their
     I3dVramHandle (+0 m_image = the object, +4 size: texture pages / CLUT 4-block units, +0x10 kind

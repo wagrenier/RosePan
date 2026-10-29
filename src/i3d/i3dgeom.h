@@ -34,8 +34,10 @@ float i3dLineRayDist2(const float *p0, const float *d0, const float *p1, const f
                       float *s, float *t);                                          // ROR 0x00233a58
 float i3dLineSegDist2(const float *p0, const float *d0, const float *p1, const float *d1,
                       float *s, float *t);                                          // ROR 0x00233c10
-/* The same for a ray p0 + s d0 (s >= 0) / a segment (s 0..1) against the
- * segment p1 + t d1. */
+/* The same for a ray p0 + s d0 (s >= 0) against a ray (t >= 0) / a segment,
+ * and for two segments (s, t 0..1). */
+float i3dRayRayDist2(const float *p0, const float *d0, const float *p1, const float *d1,
+                     float *s, float *t);                                           // ROR 0x00233de8
 float i3dRaySegDist2(const float *p0, const float *d0, const float *p1, const float *d1,
                      float *s, float *t);                                           // ROR 0x00234050
 float i3dSegSegDist2(const float *p0, const float *d0, const float *p1, const float *d1,
@@ -73,6 +75,15 @@ int   i3dCylSegCylHalfTest(const float *p0, const float *d0, const float *p1, co
 int   i3dCylSegCylSegTest(const float *p0, const float *d0, const float *p1, const float *d1);  // ROR 0x002350e0
 /* The flat-capped cylinder p..p + d (radius p.w) against a sphere. */
 int   i3dCylinderSphereTest(const float *p, const float *d, const float *sph);      // ROR 0x002354b8
+/* The flat-capped cylinder cyl..cyl + axis (radius cyl.w) against a line /
+ * ray / segment p + t d, then against a grown ray / segment (radius p.w:
+ * the cylinder grows by it, its height by twice it). */
+int   i3dFlatCylinderLineTest(const float *cyl, const float *axis, const float *p, const float *d);   // ROR 0x002355c8
+int   i3dFlatCylinderRayTest(const float *cyl, const float *axis, const float *p, const float *d);    // ROR 0x00235608
+int   i3dFlatCylinderSegTest(const float *cyl, const float *axis, const float *p, const float *d);    // ROR 0x00235648
+int   i3dFlatCylinderCylLineTest(const float *cyl, const float *axis, const float *p, const float *d); // ROR 0x00236348
+int   i3dFlatCylinderCylHalfTest(const float *cyl, const float *axis, const float *p, const float *d); // ROR 0x00236400
+int   i3dFlatCylinderCylSegTest(const float *cyl, const float *axis, const float *p, const float *d);  // ROR 0x002364f0
 
 /* ---- intersections: entry / exit t to t0 / t1 ---- */
 
@@ -98,5 +109,22 @@ int   i3dSegCylinderTest(const float *p, const float *d, const float *cyl, const
                          float *t0, float *t1);                                     // ROR 0x00236678
 int   i3dCylLineCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
                              float *t0, float *t1);                                 // ROR 0x00236718
+int   i3dCylHalfCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                             float *t0, float *t1);                                 // ROR 0x002367a0
+int   i3dCylSegCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                            float *t0, float *t1);                                  // ROR 0x00236870
+
+/* A line p + t d against the flat-capped cylinder of height h and radius r
+ * centred on centre along axis; then the one around cyl..cyl + axis
+ * (radius cyl.w) and its ray / segment forms. */
+int   i3dLineFlatCylinderCoreTest(float h, float r, const float *p, const float *d,
+                                  const float *centre, const float *axis,
+                                  float *t0, float *t1);                            // ROR 0x00235768
+int   i3dLineFlatCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                              float *t0, float *t1);                                // ROR 0x00236168
+int   i3dRayFlatCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                             float *t0, float *t1);                                 // ROR 0x00236228
+int   i3dSegFlatCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                             float *t0, float *t1);                                 // ROR 0x002362a8
 
 #endif /* _I3D_I3DGEOM_H */
