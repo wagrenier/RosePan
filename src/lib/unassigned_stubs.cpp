@@ -527,37 +527,16 @@ void DogTexInfo::dump()
 }
 
 // stub of ROR 0x001141c8
-int dogModelHitCylinder(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5)
+int dogModelHitCylinder(I3cQuery *q, int code, const u_short *prim, const float *verts, float *plane, float *point)
 {
     ROSEPAN_STUB("dogModelHitCylinder", 0x001141c8);
     return {};
 }
 
 // stub of ROR 0x00114034
-int dogModelHitNearest(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5)
+int dogModelHitNearest(I3cQuery *q, int code, const u_short *prim, const float *verts, float *plane, float *point)
 {
     ROSEPAN_STUB("dogModelHitNearest", 0x00114034);
-    return {};
-}
-
-// stub of ROR 0x002325a8
-int i3cCastCylinder(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
-{
-    ROSEPAN_STUB("i3cCastCylinder", 0x002325a8);
-    return {};
-}
-
-// stub of ROR 0x00232508
-int i3cCastRay(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
-{
-    ROSEPAN_STUB("i3cCastRay", 0x00232508);
-    return {};
-}
-
-// stub of ROR 0x002324b8
-int i3cCastSphere(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats)
-{
-    ROSEPAN_STUB("i3cCastSphere", 0x002324b8);
     return {};
 }
 

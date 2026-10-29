@@ -446,8 +446,20 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     offsets and +0x28 a tree of 12-byte nodes (u16 count, bit 15 leaf; +8 children or leaf data).
     All offsets from the root, -1 = none. No raw I3D_I3C exists in the disc's RPK / ARA files
     (compressed somewhere). Curve / interpolation maths 0x22e840..0x231198, collision casts
-    0x2312a0..0x2337e0 (i3cCastRay 0x232508 ...), distance maths (i3dPointSegDist2, i3dSegSegDist2)
-    ..0x23695c. Host pointers in these files: hazards.md "Types and layouts".
+    0x2312a0..0x233628, distance maths (i3dPointSegDist2, i3dSegSegDist2) ..0x23695c. Host pointers
+    in these files: hazards.md "Types and layouts".
+    **The casts** (`i3d/i3cquery.cpp`, 2026-10-29, partial): a part is box centre +0x00, half
+    extents +0x10, group +0x20, +0x24 per-triangle attribute records, +0x28 tree, +0x2c vertex array
+    (16-byte points); a node's +6 u16 enables it. A tree node's box is relative to its parent's
+    (centre + half * s8[3] at +2 / 127, half * u8[3] at +5 / 127, rodata 0x303b40 = 1/127); a leaf
+    holds m_info & 0x7fff triangles of 8 bytes (three u16 vertex indices, +6 the attribute index).
+    Each cast i3cCast(q, shape, world, box test, prim test, scale) (0x232120) inverts world * node
+    matrix per node, moves the shape into it, walks each part of q->m_group (q+0x20 nonzero: all)
+    and calls q->m_func(q, node << 16 | what, tri, verts, plane, point) on a hit (what 3 face, 0..2
+    vertex, 0x10 | i edge); q+0x14 an optional box filter, q+0x1c the part walked. Seven casts:
+    sphere, line, ray, segment and three cylinder modes; only Sphere / Ray / Cylinder are called
+    (DogModel). The box tests are i3dgeom's (0x2348f8, 0x234a50..0x234ce8). Epsilon sdata 0x2db630
+    (0.001), row-scale switch 0x2db634 (0, never set).
   - **Texture and CLUT objects** (`i3d/i3dtex.cpp`, 0x2184c0..0x21a120, written 2026-10-22, verify;
     33 functions incl. 4 hidden TEX1 setters 0x219dd0..0x219e30). Both start with their
     I3dVramHandle (+0 m_image = the object, +4 size: texture pages / CLUT 4-block units, +0x10 kind

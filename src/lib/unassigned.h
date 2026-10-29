@@ -338,36 +338,13 @@ struct MagViewParam;
 
 #include "i3d/i3croot.h"
 
-struct I3cQuery;
-struct MagSceneRayHit;
-/* A cast's hit callback (dogModelHitNearest / dogModelHitCylinder);
- * arguments past the query are the collision module's (roles unverified). */
-typedef int (*I3cHitFunc)(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5);
-/* A collision cast's request (built on the stack by DogModel's casts).
- * layout: host -- pointers. */
-struct I3cQuery
-{
-    I3cRoot        *m_root;       // ROR 0x00: m_i3c_root
-    sceVu0FMATRIX  *m_mat;        // ROR 0x04: the model's node matrices (m_mat_model)
-    u_short        *m_colli_tbl;  // ROR 0x08: the collision node -> model node table
-    int             m_group;      // ROR 0x0c: the group cast (-1 all); the callbacks copy it to the hit's m_50
-    I3cHitFunc      m_func;       // ROR 0x10
-    int             m_14;         // ROR 0x14: 0
-    MagSceneRayHit *m_hit;        // ROR 0x18: the record the callback fills
-    int             _1c;          // ROR 0x1c: not set
-    int             m_20;         // ROR 0x20: 1 (castRayGroups leaves it unset)
-};
-static_assert(offsetof(I3cQuery, m_hit) >= 0x18, "m_hit");
-
-/* The casts: a sphere (centre, w = radius), a ray (pos, dir) or a
- * cylinder (centre, w = radius; dir) under the query, with up to 64 node
- * matrices (DogModel passes unit ones). */
-int   i3cCastSphere(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats); // ROR 0x002324b8
-int   i3cCastRay(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats);    // ROR 0x00232508
-int   i3cCastCylinder(I3cQuery *q, const float *shape, sceVu0FMATRIX *mats); // ROR 0x002325a8
+/* The i3c casts and their query: i3d/i3cquery.h. */
+#include "i3d/i3cquery.h"
 /* The hit callbacks (unassigned@00113ea8): keep the nearest hit. */
-int   dogModelHitNearest(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5); // ROR 0x00114034
-int   dogModelHitCylinder(I3cQuery *q, void *a1, const u_short *a2, int a3, float *a4, float *a5); // ROR 0x001141c8
+int   dogModelHitNearest(I3cQuery *q, int code, const u_short *prim, const float *verts,
+                         float *plane, float *point);                               // ROR 0x00114034
+int   dogModelHitCylinder(I3cQuery *q, int code, const u_short *prim, const float *verts,
+                          float *plane, float *point);                              // ROR 0x001141c8
 
 
 /* The i3d VU1 packet writers (strips, sprites, wire shapes). */

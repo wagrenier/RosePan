@@ -99,7 +99,7 @@ int i3cRelocate(I3cRoot *root)
         {
             i3cClearNone(&part->m_tree);
             i3cClearNone(&part->m_24);
-            i3cClearNone(&part->m_2c);
+            i3cClearNone(&part->m_vertex);
             i3cTreeRelocate((I3cTree *)i3cPtr(root, part->m_tree), root);
         }
     }
@@ -140,7 +140,7 @@ int i3cUnrelocate(I3cRoot *root)
         for (j = 0; j < node->m_num_part; j++, part++)
         {
             i3cTreeUnrelocate((I3cTree *)i3cPtr(root, part->m_tree), root);
-            i3cClearNone(&part->m_2c);
+            i3cClearNone(&part->m_vertex);
             i3cClearNone(&part->m_24);
             i3cClearNone(&part->m_tree);
         }
