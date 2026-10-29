@@ -1193,6 +1193,24 @@
    "status": "verify",
    "why": "the file's asserts (mag/maglifepc.cpp, lines 1046..2340) run 0x11af30..0x11c1e8 in line order; 0x11ab40..0x11ade4 (restoreState, calcHealth, readStick, readStance, updatePadStatus) and termWorld use only MagLifePC fields; 0x11c464.. are GamMan PC-param getters before maglifepc2.cpp's first anchor 0x11c64c. initMotion 0x11dd40 / getSubStateClass 0x11e080 sit in maglifepc3.cpp's run, setState14 0x12c9c0 beside maglifepcbtl.cpp"
   },
+  "mag/maglifepc2.cpp": {
+   "notes": "Nothing in the boot smoke run picks up an item, attacks or reloads, so the code is unseen: verify. The 240 s run still reaches the first room (Jennifer on the forest path, message window) as before. Decisions: m_118 renamed m_shots; EffParam gained m_reload (kind 0x27); MagLifePCItemData +0x1c is the actor (short); hitTarget passes 0 for scnChrRequest a3 (the ROM passes the actor position, which is never read); getAttackHeightByDist skips the neck node when the model has no matrices (PC guard). Items 0xa3e / 0xa43 taken as the guns (open-items). Callers still stubbed elsewhere: startAttack, getAttackHeight 0x12ca28 and 0x12caa4 in maglifepcbtl.cpp / unassigned@0012c9c0 call getEmyTypeRate, decSelItemNum, getSelItemNum, testEmyHittable, getAttackHeightByDist.",
+   "ranges": [
+    [
+     "0011c464",
+     "0011d720"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 10:31",
+     "status": "verify",
+     "summary": "mag/maglifepc2.cpp pinned 0x11c464..0x11d720 (absorbing unassigned@0011cb70 and the gaps between the file's assert anchors) and all 25 functions written: the GamMan / EmyManager glue (PC params, equipped item, sel item, enemy type rate / hittable), collectNearItems and takeItem (the script's pick-up words), testObjHit / slideOffObj, hitTarget with getAttackType (system field 0x27) and getWeaponType, getTargetSpinePos, reload (effect 0x27 with m_shots), getAttackSeNo with its tables, getAttackHeightByDist with the enemy-type distance bands. Named 10 functions (batch maglifepc2_001)."
+    }
+   ],
+   "status": "verify",
+   "why": "mag/maglifepc2.cpp asserts anchor 0x11c64c, 0x11caf8, 0x11ce5c, 0x11d1cc, 0x11d3d0; the gaps between them (hitTarget, getWeaponType..getEquipItemChrNo, canReload/reload) are MagLifePC methods with no other file's strings; 0x11c464..0x11c64c (GamMan PC-param getters, getEquipItem) follow maglifepc.cpp's pinned end and precede the first anchor; 0x11d720 opens maglifepc3.cpp"
+  },
   "mag/maglifepc3.cpp": {
    "notes": "Status verify: the smoke run ends on the boot disclaimer screen, before MagScene::setPC binds the player, so nothing on screen shows these motions yet; the first session whose run reaches a room with Jennifer should check she stands in the weapon wait pose and mark this done. Names (batch maglifepc_003): overloads changeMotion(int)/(const_char*) and playActionMotion(int)/(const_char*) in Ghidra. loadMotion 0x11d990 and playActionMotion/isActionMotionEnd have no callers in the ROM (kept, written). changeMotion(name) uses MagLifeControlChara m_mode 2 for the jnfc_ name variant (static 0x40-byte buffer 0x2971d0). Callers in maglifepcmode.cpp / maglifepcmove.cpp / maglifepcbtl.cpp still use FUN_ placeholders or stubs: when those TUs are written, call setStanceSubMotion 0x11df7c, clearSubMotion 0x11dfd0, setWaitSubMotion 0x11dff8, getHealthMotionStep 0x11d720, changeMotion(const char*) 0x11d7c0. 0x11e0d8 (ray/strip debug drawer) stays outside the TU.",
    "ranges": [
@@ -2324,6 +2342,7 @@
   "unassigned@001056f8": {},
   "unassigned@00106658": {},
   "unassigned@0011262c": {},
+  "unassigned@0011cb70": {},
   "unassigned@0012f008": {},
   "unassigned@0013e2ec": {},
   "unassigned@00140030": {},

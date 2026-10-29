@@ -1093,6 +1093,18 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   motion set; GamMan::is_pc_jnfc is m_pcJnfc == 2). m_action_motion (+0xf4) is the one-shot action
   motion playing (playActionMotion / isActionMotionEnd). Messages: 0/1 hold, 2/7/10/12 ride, 6/9/11/13 to the Ride mode, 0x12..0x14 stamina,
   0x15 move the actor (sweep), 0x16 riding / hurt query, 0x17 weapon override, 0x18 health override.
+- MagLifePC's items and attacks (`mag/maglifepc2.cpp` 0x11c464..0x11d720, pinned 2026-10-29): the
+  item's attack type is system data field 0x27 (`getAttackType` 0x11caf8; 2 bare hands); weapon type
+  = attack type 5 -> 3 ax, 4 -> 2 knife, 6 -> 1 gun, else 0. `hitTarget` sends scnChrRequest(0xb,
+  PC oid, scnCalcPcDamage(oid, attack type), -, attack type, oid, combo) (kind != 0: word 7).
+  `takeItem` writes the script's pick-up words g_sequence.m_global[0x28..0x2a] = 0x13, item, oid.
+  m_shots (+0x118) counts shots since the last reload (`decSelItemNum` 0x11d178); `reload` hands it
+  to effect 0x27 (EffReload1, the shells) with the actor's trans / rotate. Hit sounds
+  (`getAttackSeNo`): table 0x2ea340 [7 rows][combo 0..2, hit] by item (0x2ea378 item -> row);
+  bare 0x41 / 0x43 (height 2), stomp 0x1c, guns 0xa3e / 0xa43 0x7f / 0x80 (empty) and 0x83.
+  Enemy types (EmyManager::getEmyType, names in the height table 0x2ea450): 0 DWF, 1 PIG, 2 GOAT,
+  3 FISH, 4 BIRD_S, 5 BIRD_L, 6 HOFFMAN, 8 CLARA, 10 STRAYDOG; `getAttackHeightByDist` 0x11d3d0
+  maps the XZ distance by type to heights 1 / 0 / 3 / 2 (Hoffman by his neck height).
 - The motion sequence table (MagLifeControlChara +0x5c, the asserts' `m_tbl_motion_state`; the PC's
   at 0x2961e0, 164 rows of 0x18 bytes: +0 the row's own index, +4 the motion name, +8 blend frames
   (short, -1), +0xa frames (> 0: frames before the next row while the actor is in no mode; < 1 the

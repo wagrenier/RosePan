@@ -715,7 +715,7 @@ MagLifePC::MagLifePC()
     m_move_level_prev = 0;
     m_health_prev = 0;
     m_pad_seen = 0;
-    m_118 = 0;
+    m_shots = 0;
     m_mode_cur = NULL;
     m_mode_ride.m_04 = 0;
     m_debug_dash = 1;

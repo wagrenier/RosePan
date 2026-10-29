@@ -1041,48 +1041,6 @@ void PigMain::selectOut()
 
 
 
-// stub of ROR 0x0011d044
-int MagLifePC::canReload()
-{
-    ROSEPAN_STUB("MagLifePC::canReload", 0x0011d044);
-    return {};
-}
-
-// stub of ROR 0x0011c520
-int MagLifePC::getEquipItem()
-{
-    ROSEPAN_STUB("MagLifePC::getEquipItem", 0x0011c520);
-    return {};
-}
-
-// stub of ROR 0x0011ce50
-int MagLifePC::getEquipItemChrNo()
-{
-    ROSEPAN_STUB("MagLifePC::getEquipItemChrNo", 0x0011ce50);
-    return {};
-}
-
-// stub of ROR 0x0011c464
-int MagLifePC::getPcParam1b()
-{
-    ROSEPAN_STUB("MagLifePC::getPcParam1b", 0x0011c464);
-    return {};
-}
-
-// stub of ROR 0x0011c4c0
-int MagLifePC::getPcParam1c()
-{
-    ROSEPAN_STUB("MagLifePC::getPcParam1c", 0x0011c4c0);
-    return {};
-}
-
-// stub of ROR 0x0011cb70
-int MagLifePC::getWeaponType(int item)
-{
-    ROSEPAN_STUB("MagLifePC::getWeaponType", 0x0011cb70);
-    return {};
-}
-
 // stub of ROR 0x0012ce34
 void MagLifePC::message17()
 {
@@ -1102,13 +1060,6 @@ float MagLifePC::calcTargetAngle(float *roty, float *rotx, const float *pos)
     return {};
 }
 
-// stub of ROR 0x0011cbf4
-int MagLifePC::canTakeItem(u_int oid)
-{
-    ROSEPAN_STUB("MagLifePC::canTakeItem", 0x0011cbf4);
-    return {};
-}
-
 // stub of ROR 0x0012ca28
 int MagLifePC::getAttackHeight()
 {
@@ -1120,38 +1071,6 @@ int MagLifePC::getAttackHeight()
 void MagLifePC::getHitFrameRange(float *from, float *to)
 {
     ROSEPAN_STUB("MagLifePC::getHitFrameRange", 0x0012c014);
-}
-
-// stub of ROR 0x0011c974
-void MagLifePC::hitTarget(u_int oid, int combo, int kind)
-{
-    ROSEPAN_STUB("MagLifePC::hitTarget", 0x0011c974);
-}
-
-// stub of ROR 0x0011d06c
-void MagLifePC::reload()
-{
-    ROSEPAN_STUB("MagLifePC::reload", 0x0011d06c);
-}
-
-// stub of ROR 0x0011cc14
-int MagLifePC::takeItem(u_int oid)
-{
-    ROSEPAN_STUB("MagLifePC::takeItem", 0x0011cc14);
-    return {};
-}
-
-// stub of ROR 0x0011cd20
-void MagLifePC::slideOffObj(float *out, const float *delta, u_int oid)
-{
-    ROSEPAN_STUB("MagLifePC::slideOffObj", 0x0011cd20);
-}
-
-// stub of ROR 0x0011ccd4
-int MagLifePC::testObjHit(const float *pos, u_int *oid)
-{
-    ROSEPAN_STUB("MagLifePC::testObjHit", 0x0011ccd4);
-    return {};
 }
 
 // ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----
