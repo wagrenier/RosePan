@@ -10013,6 +10013,30 @@
   "was": "FUN_00175dc4",
   "why": "vtable _vt$9EffLight3 0x2e3fe0 slot 5 (Eff0 slot liveMain)"
  },
+ "00176430": {
+  "name": "EffLight3::addLights",
+  "tag": "ror-inferred",
+  "was": "FUN_00176430",
+  "why": "a0 = this, a1 = light kind: per bit i of the pool's light set 1 mask of that kind, records i and MagScene::addLight(kind, 2) in this+0x24 table row kind"
+ },
+ "001764fc": {
+  "name": "EffLight3::getFlashPattern",
+  "tag": "ror-inferred",
+  "was": "FUN_001764fc",
+  "why": "returns entry n of the stack table 13, 3, 11, 7: liveMain's 4-bit flash pattern, picked by effRand() & 3"
+ },
+ "0017653c": {
+  "name": "EffLight3::setSkyNodeDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_0017653c",
+  "why": "a0 = this: for i = 0.. while the sky model (MagScene m_tenkyu[0].m_model[0] i3r root) has node light3_%02d, points that node's slot 2A data at this+0x340 (a DogDispControl); callers liveMain and the dtor"
+ },
+ "001765e8": {
+  "name": "EffLight3::setAmbientScale",
+  "tag": "ror-inferred",
+  "was": "FUN_001765e8",
+  "why": "a0 = this, f12 = scale: DogLightPool ambient light 0 colour rgb = this+0x330 (the copy init took) times scale; doglightpool.h line 129 asserts"
+ },
  "00176694": {
   "name": "EffFindItem1::init",
   "tag": "ror-inferred",

@@ -6,10 +6,13 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
-**PARTIAL 2026-10-29 (`eff/efflight.cpp`, pinned 0x174dd8..0x176694 out of unassigned@00172e4c):
-EffLight1 and EffLight2 written (9 functions: glow sprites, EffParam m_light1 / m_light2), EffLight3
-left (ctor, dtor, init, liveMain, 4 helpers 0x176430..0x176694: the light3_%02d nodes and the scene's
-DogLightPool at MagScene+0x2050).** The 240 s run reaches EffLight1's draw in the "Once upon a time"
+**WRITTEN 2026-10-29 (`eff/efflight.cpp`, verify, pinned 0x174dd8..0x176694 out of unassigned@00172e4c):
+all 17 functions -- EffLight1 / EffLight2 glow sprites and EffLight3 lightning (architecture.md "The
+effect manager").** No scene on the smoke path creates EffLight3 (kind 0x23); mark done when a stormy
+scene shows the sky's light3 nodes and the scene lights flashing. Doubts: DogDispControl's roles are
+unverified (between flashes EffLight3 leaves m_10 rgb 0, which would black the light3 nodes if m_10 is a
+multiplier -- ported as the ROM has it); PORT: the dtor points the nodes at a static copy of the reset
+display instead of the dying object. The 240 s run reaches EffLight1's draw in the "Once upon a time"
 intro (~frame 2850), but effCalcViewDepth / effMoveToward (0x16ff18 / 0x16ff78, unassigned@0016fb70)
 are still stubs, so EffLight1's sprite sits at the stub's (0,0,1) and no glow can be checked: write
 those two helpers (with effVecLength 0x16fc20) before judging the picture. Doubt: the activation fade

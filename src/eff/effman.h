@@ -99,6 +99,10 @@ struct EffParam
             float m_fade_far;   // ROR 0x3c: gone (not drawn) from this distance
             int   m_fog;        // ROR 0x40: non-zero = fogged (EFF_LIGHT_FOG)
         } m_light2;             // kind 0x22 (EffLight2::init)
+        struct
+        {
+            int   m_mode;       // ROR 0x10: 0 = flash light set 1's lights, 1 = only the ambient
+        } m_light3;             // kind 0x23 (EffLight3::init)
     };
 };
 
