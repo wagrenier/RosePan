@@ -6,6 +6,18 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-28 (`msg/msgman.cpp`, verify): MsgMan and MsgManSet, all 124 functions (the old
+unassigned@00184f2c run is this file's tag handlers).** In the bus-stop room the message window now shows
+MsgMan's key icon (S2dMes sprite 0); the text itself is still blank because the window's text path is
+stubbed: MagLifeWindow::drawText 0x130258, getPos3 0x130230, setProportional / setFontWord30 / 34,
+fadeIn / fadeOut (mag/maglifewindow.cpp) and GamFont::getTextWidth 0x1c047c, setFill / setFillMsb
+(game/gamfont). Those two files are the next step for any text on screen (with the width stubbed at 0,
+centred lines start mid-window, so the key icon sits there). msgGetSysText 0x1832e8
+(unassigned@001832e8: 0x1d4 string pointers at data 0x298fe8) is reached in the picture-book stretch
+and returns "" -- a few lines with datadump.py. Doubt: expandText's #K moves the output by the digit
+count and leaves the source at the digits (a zero-byte gap), as the ROM does; check when a system
+message with a choice shows.
+
 **DONE 2026-10-28 (`fix/aspect_ratio.cpp`, the user's top priority): any aspect ratio.** The i3d
 camera widens by the renderer's view extend (RosePan_RendererWidenProjection), rosepan_i3d /
 rosepan_draw2d take the frame size from the renderer, and smoke shots now hold the whole composed
@@ -23,7 +35,7 @@ native 021's cases were shifted against its jump table (data 0x3005c0: 3 and 6 =
 bound, GamMan::setPc runs setCameraMode and the camera follows; (2) an intermittent access violation
 right after the book (GamArea::checkPc -> execThread -> seqFindEntry): a trigger entry the script
 stores in the 32-bit GamAreaTrg::m_entry lost its top half (hazards.md). Open: the message window
-frame shows with no text (MsgManSet / GamFont stubs); the smoke run needs about 220 s to reach the
+frame shows with no text (MsgMan written 2026-10-28; MagLifeWindow / GamFont text stubs); the smoke run needs about 220 s to reach the
 room (`--run 240`).
 
 **PC BLOCKERS FIRST (the user, 2026-10-27, after mag/maglifepc.cpp): the three TUs the player

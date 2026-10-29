@@ -720,37 +720,6 @@ void MnuTextList::setItems(const char *items, u_int mask)
     ROSEPAN_STUB("MnuTextList::setItems", 0x001a09b8);
 }
 
-// stub of ROR 0x00187464
-void MsgManSet::close()
-{
-    ROSEPAN_STUB("MsgManSet::close", 0x00187464);
-}
-
-// stub of ROR 0x001875c0
-int MsgManSet::getState(int window)
-{
-    ROSEPAN_STUB("MsgManSet::getState", 0x001875c0);
-    return {};
-}
-
-// stub of ROR 0x0018741c
-void MsgManSet::open()
-{
-    ROSEPAN_STUB("MsgManSet::open", 0x0018741c);
-}
-
-// stub of ROR 0x001874f4
-void MsgManSet::setMessage(int window, const char *text, int flag)
-{
-    ROSEPAN_STUB("MsgManSet::setMessage", 0x001874f4);
-}
-
-// stub of ROR 0x001874ac
-void MsgManSet::update()
-{
-    ROSEPAN_STUB("MsgManSet::update", 0x001874ac);
-}
-
 // stub of ROR 0x001832e8
 const char * msgGetSysText(int no)
 {
@@ -771,12 +740,6 @@ float utlAtan2(float x, float z)
 void gamCreateEff1a(void)
 {
     ROSEPAN_STUB("gamCreateEff1a", 0x00172678);
-}
-
-// stub of ROR 0x0018761c
-void MsgManSet::release(int window)
-{
-    ROSEPAN_STUB("MsgManSet::release", 0x0018761c);
 }
 
 

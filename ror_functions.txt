@@ -2696,115 +2696,128 @@
 
 /* 0018330c 00000818 */ MsgMan::MsgMan(){}  // ror
 /* 00183b24 00000050 */ MsgMan::~MsgMan(){}  // ror
-/* 00183b74 00000044 */ FUN_00183b74(){}
+/* 00183b74 00000044 */ MsgMan::reset(){}  // ror
 /* 00183bb8 00000090 */ MsgMan::open(){}  // ror
 /* 00183c4c 00000094 */ MsgMan::close(){}  // ror
-/* 00183ce0 000000d0 */ FUN_00183ce0(){}
+/* 00183ce0 000000d0 */ msgUtf8ToLatin1(){}  // ror
 /* 00183db0 00000258 */ MsgMan::setMessage(){}  // ror
-/* 00184008 00000040 */ FUN_00184008(){}
-/* 00184048 00000050 */ FUN_00184048(){}
-/* 00184098 00000090 */ FUN_00184098(){}
+/* 00184008 00000040 */ MsgMan::update(){}  // ror
+/* 00184048 00000050 */ MsgMan::getDataText(){}  // ror
+/* 00184098 00000090 */ MsgMan::getTagText(){}  // ror
 /* 00184128 0000039c */ MsgMan::expandText(){}  // ror
-/* 001844c4 00000088 */ FUN_001844c4(){}
-/* 0018454c 0000002c */ FUN_0018454c(){}
-/* 00184578 00000088 */ FUN_00184578(){}
-/* 00184600 00000098 */ FUN_00184600(){}
-/* 00184698 00000078 */ FUN_00184698(){}
-/* 00184710 000000ac */ FUN_00184710(){}
-/* 001847bc 00000064 */ FUN_001847bc(){}
-/* 00184820 00000050 */ FUN_00184820(){}
-/* 00184874 0000004c */ FUN_00184874(){}
-/* 001848c4 000001d0 */ FUN_001848c4(){}
-/* 00184a94 00000498 */ FUN_00184a94(){}
-
-// *****************************************************************************
-// FILE -- (unassigned)
-// *****************************************************************************
-
-/* 00184f2c 000001d0 */ FUN_00184f2c(){}
-/* 001850fc 0000016c */ FUN_001850fc(){}
-/* 00185268 000000e0 */ FUN_00185268(){}
-/* 00185348 00000084 */ FUN_00185348(){}
-/* 001853cc 000000e0 */ FUN_001853cc(){}
-/* 001854ac 000000e8 */ FUN_001854ac(){}
-/* 00185594 000000dc */ FUN_00185594(){}
-/* 00185670 00000084 */ FUN_00185670(){}
-/* 001856f4 00000008 */ FUN_001856f4(){}
-/* 001856fc 00000004 */ FUN_001856fc(){}
-/* 00185704 0000005c */ FUN_00185704(){}
-/* 00185760 00000068 */ FUN_00185760(){}
-/* 001857c8 00000044 */ FUN_001857c8(){}
-/* 0018580c 00000044 */ FUN_0018580c(){}
-/* 00185850 0000010c */ FUN_00185850(){}
-/* 0018595c 00000070 */ FUN_0018595c(){}
-/* 001859cc 00000030 */ FUN_001859cc(){}
-/* 001859fc 00000078 */ FUN_001859fc(){}
-/* 00185a74 00000030 */ FUN_00185a74(){}
-/* 00185aa4 000000b4 */ FUN_00185aa4(){}
-/* 00185b58 00000064 */ FUN_00185b58(){}
-/* 00185bbc 00000048 */ FUN_00185bbc(){}
-/* 00185c04 0000008c */ FUN_00185c04(){}
-/* 00185c90 00000058 */ FUN_00185c90(){}
-/* 00185ce8 00000044 */ FUN_00185ce8(){}
-/* 00185d2c 000000c0 */ FUN_00185d2c(){}
-/* 00185dec 000000b8 */ FUN_00185dec(){}
-/* 00185ea4 000000c4 */ FUN_00185ea4(){}
-/* 00185f68 000000b0 */ FUN_00185f68(){}
-/* 00186018 00000070 */ FUN_00186018(){}
-/* 00186088 00000038 */ FUN_00186088(){}
-/* 001860c0 0000010c */ FUN_001860c0(){}
-/* 001861cc 00000038 */ FUN_001861cc(){}
-/* 00186204 00000054 */ FUN_00186204(){}
-/* 00186258 00000038 */ FUN_00186258(){}
-/* 00186290 00000054 */ FUN_00186290(){}
-/* 001862e4 00000038 */ FUN_001862e4(){}
-/* 0018631c 000000a0 */ FUN_0018631c(){}
-/* 001863bc 00000038 */ FUN_001863bc(){}
-/* 001863f4 000000a0 */ FUN_001863f4(){}
-/* 00186494 00000038 */ FUN_00186494(){}
-/* 001864cc 00000074 */ FUN_001864cc(){}
-/* 00186540 00000038 */ FUN_00186540(){}
-/* 00186578 00000074 */ FUN_00186578(){}
-/* 001865ec 00000038 */ FUN_001865ec(){}
-/* 00186624 000000f0 */ FUN_00186624(){}
-/* 00186714 00000038 */ FUN_00186714(){}
-/* 0018674c 000000b8 */ FUN_0018674c(){}
-/* 00186804 00000038 */ FUN_00186804(){}
-/* 0018683c 00000044 */ FUN_0018683c(){}
-/* 00186880 00000038 */ FUN_00186880(){}
-/* 001868b8 00000070 */ FUN_001868b8(){}
-/* 00186928 00000038 */ FUN_00186928(){}
-/* 00186960 000000a4 */ FUN_00186960(){}
-/* 00186a04 00000038 */ FUN_00186a04(){}
-/* 00186a3c 00000078 */ FUN_00186a3c(){}
-/* 00186ab4 00000038 */ FUN_00186ab4(){}
-/* 00186aec 00000058 */ FUN_00186aec(){}
-/* 00186b44 0000003c */ FUN_00186b44(){}
-/* 00186b80 000000b8 */ FUN_00186b80(){}
-/* 00186c38 00000038 */ FUN_00186c38(){}
-/* 00186c70 00000048 */ FUN_00186c70(){}
-/* 00186cb8 0000005c */ FUN_00186cb8(){}
-/* 00186d14 000000b0 */ FUN_00186d14(){}
-/* 00186dc4 00000030 */ FUN_00186dc4(){}
-/* 00186df4 00000100 */ FUN_00186df4(){}
-/* 00186ef4 0000009c */ FUN_00186ef4(){}
-/* 00186f90 00000030 */ FUN_00186f90(){}
-/* 00186fc0 0000008c */ FUN_00186fc0(){}
-/* 0018704c 00000030 */ FUN_0018704c(){}
-/* 0018707c 00000098 */ FUN_0018707c(){}
-/* 00187114 00000030 */ FUN_00187114(){}
-/* 00187144 000000dc */ FUN_00187144(){}
-/* 00187220 00000030 */ FUN_00187220(){}
-/* 00187250 00000044 */ FUN_00187250(){}
-/* 00187294 00000040 */ FUN_00187294(){}
-/* 001872d4 00000094 */ FUN_001872d4(){}
-/* 00187368 000000b4 */ FUN_00187368(){}
+/* 001844c4 00000088 */ MsgMan::matchTag(){}  // ror
+/* 0018454c 0000002c */ MsgMan::countDigits(){}  // ror
+/* 00184578 00000088 */ MsgMan::readInt(){}  // ror
+/* 00184600 00000098 */ MsgMan::readHex(){}  // ror
+/* 00184698 00000078 */ MsgMan::readDigits(){}  // ror
+/* 00184710 000000ac */ MsgMan::findTag(){}  // ror
+/* 001847bc 00000064 */ MsgMan::getTagName(){}  // ror
+/* 00184820 00000050 */ MsgMan::isSingleByte(){}  // ror
+/* 00184874 0000004c */ MsgMan::isLeadByte(){}  // ror
+/* 001848c4 000001d0 */ MsgMan::drawChar(){}  // ror
+/* 00184a94 00000498 */ MsgMan::process(){}  // ror
+/* 00184f2c 000001d0 */ MsgMan::getLineWidth(){}  // ror
+/* 001850fc 0000016c */ MsgMan::countLines(){}  // ror
+/* 00185268 000000e0 */ MsgMan::showKeyIcon(){}  // ror
+/* 00185348 00000084 */ MsgMan::updateKeyIcon(){}  // ror
+/* 001853cc 000000e0 */ MsgMan::showIcon(){}  // ror
+/* 001854ac 000000e8 */ MsgMan::updateIcon(){}  // ror
+/* 00185594 000000dc */ MsgMan::showInlineIcon(){}  // ror
+/* 00185670 00000084 */ MsgMan::updateInlineIcon(){}  // ror
+/* 001856f4 00000008 */ MsgMan::setStyle(){}  // ror
+/* 001856fc 00000004 */ MsgMan::applyStyle(){}  // ror
+/* 00185704 0000005c */ MsgMan::applyFont(){}  // ror
+/* 00185760 00000068 */ MsgMan::getLineStartX(){}  // ror
+/* 001857c8 00000034 */ MsgMan::getCenterOffset(){}  // ror
+/* 001857fc 00000008 */ MsgMan::cmdEnd(){}  // ror
+/* 00185804 00000008 */ MsgMan::skipEnd(){}  // ror
+/* 0018580c 0000003c */ MsgMan::cmdNewLine(){}  // ror
+/* 00185848 00000008 */ MsgMan::skipNewLine(){}  // ror
+/* 00185850 00000104 */ MsgMan::startPage(){}  // ror
+/* 00185954 00000008 */ MsgMan::skipNewPage(){}  // ror
+/* 0018595c 00000070 */ MsgMan::cmdDelay(){}  // ror
+/* 001859cc 00000030 */ MsgMan::skipDelay(){}  // ror
+/* 001859fc 00000078 */ MsgMan::cmdDelaySkip(){}  // ror
+/* 00185a74 00000030 */ MsgMan::skipDelaySkip(){}  // ror
+/* 00185aa4 000000b4 */ MsgMan::cmdColor(){}  // ror
+/* 00185b58 00000064 */ MsgMan::skipColor(){}  // ror
+/* 00185bbc 0000003c */ MsgMan::cmdCenter(){}  // ror
+/* 00185bf8 0000000c */ MsgMan::skipCenter(){}  // ror
+/* 00185c04 00000080 */ MsgMan::cmdCenterV(){}  // ror
+/* 00185c84 0000000c */ MsgMan::skipCenterV(){}  // ror
+/* 00185c90 0000004c */ MsgMan::cmdTop(){}  // ror
+/* 00185cdc 0000000c */ MsgMan::skipTop(){}  // ror
+/* 00185ce8 00000038 */ MsgMan::cmdLeft(){}  // ror
+/* 00185d20 0000000c */ MsgMan::skipLeft(){}  // ror
+/* 00185d2c 000000c0 */ MsgMan::cmdInsertText(){}  // ror
+/* 00185dec 000000b8 */ MsgMan::skipInsertText(){}  // ror
+/* 00185ea4 000000c4 */ MsgMan::cmdInsertDigits(){}  // ror
+/* 00185f68 000000b0 */ MsgMan::skipInsertDigits(){}  // ror
+/* 00186018 00000070 */ MsgMan::cmdWait(){}  // ror
+/* 00186088 00000038 */ MsgMan::skipWait(){}  // ror
+/* 001860c0 0000010c */ MsgMan::cmdStyle(){}  // ror
+/* 001861cc 00000038 */ MsgMan::skipStyle(){}  // ror
+/* 00186204 00000054 */ MsgMan::cmdX(){}  // ror
+/* 00186258 00000038 */ MsgMan::skipX(){}  // ror
+/* 00186290 00000054 */ MsgMan::cmdY(){}  // ror
+/* 001862e4 00000038 */ MsgMan::skipY(){}  // ror
+/* 0018631c 000000a0 */ MsgMan::cmdWindowX(){}  // ror
+/* 001863bc 00000038 */ MsgMan::skipWindowX(){}  // ror
+/* 001863f4 000000a0 */ MsgMan::cmdWindowY(){}  // ror
+/* 00186494 00000038 */ MsgMan::skipWindowY(){}  // ror
+/* 001864cc 00000074 */ MsgMan::cmdFont30(){}  // ror
+/* 00186540 00000038 */ MsgMan::skipFont30(){}  // ror
+/* 00186578 00000074 */ MsgMan::cmdFont34(){}  // ror
+/* 001865ec 00000038 */ MsgMan::skipFont34(){}  // ror
+/* 00186624 000000f0 */ MsgMan::cmdFadeIn(){}  // ror
+/* 00186714 00000038 */ MsgMan::skipFadeIn(){}  // ror
+/* 0018674c 000000b8 */ MsgMan::cmdFadeOut(){}  // ror
+/* 00186804 00000038 */ MsgMan::skipFadeOut(){}  // ror
+/* 0018683c 00000044 */ MsgMan::cmdSkipNumber(){}  // ror
+/* 00186880 00000038 */ MsgMan::skipSkipNumber(){}  // ror
+/* 001868b8 00000070 */ MsgMan::cmdFadeOutSprite3(){}  // ror
+/* 00186928 00000038 */ MsgMan::skipFadeOutSprite3(){}  // ror
+/* 00186960 000000a4 */ MsgMan::cmdVoice(){}  // ror
+/* 00186a04 00000038 */ MsgMan::skipVoice(){}  // ror
+/* 00186a3c 00000078 */ MsgMan::cmdStopVoice(){}  // ror
+/* 00186ab4 00000038 */ MsgMan::skipStopVoice(){}  // ror
+/* 00186aec 00000058 */ MsgMan::cmdIconWidth(){}  // ror
+/* 00186b44 0000003c */ MsgMan::skipIconWidth(){}  // ror
+/* 00186b80 000000b8 */ MsgMan::cmdLineHeight(){}  // ror
+/* 00186c38 00000038 */ MsgMan::skipLineHeight(){}  // ror
+/* 00186c70 00000048 */ MsgMan::cmdNumber28(){}  // ror
+/* 00186cb8 0000003c */ MsgMan::skipNumber28(){}  // ror
+/* 00186cf4 00000018 */ MsgMan::cmdPause(){}  // ror
+/* 00186d0c 00000008 */ MsgMan::skipPause(){}  // ror
+/* 00186d14 000000b0 */ MsgMan::cmdKeyWait(){}  // ror
+/* 00186dc4 00000030 */ MsgMan::skipKeyWait(){}  // ror
+/* 00186df4 00000100 */ MsgMan::showChoiceIcon(){}  // ror
+/* 00186ef4 0000009c */ MsgMan::cmdIcon(){}  // ror
+/* 00186f90 00000030 */ MsgMan::skipIcon(){}  // ror
+/* 00186fc0 0000008c */ MsgMan::cmdKeyWaitIcon(){}  // ror
+/* 0018704c 00000030 */ MsgMan::skipKeyWaitIcon(){}  // ror
+/* 0018707c 00000098 */ MsgMan::cmdInlineIcon(){}  // ror
+/* 00187114 00000030 */ MsgMan::skipInlineIcon(){}  // ror
+/* 00187144 000000dc */ MsgMan::cmdScroll(){}  // ror
+/* 00187220 00000030 */ MsgMan::skipScroll(){}  // ror
+/* 00187250 0000003c */ MsgMan::cmdProportional(){}  // ror
+/* 0018728c 00000008 */ MsgMan::skipProportional(){}  // ror
+/* 00187294 00000038 */ MsgMan::cmdFixed(){}  // ror
+/* 001872cc 00000008 */ MsgMan::skipFixed(){}  // ror
+/* 001872d4 00000094 */ MsgMan::cmdInsertGlobal(){}  // ror
+/* 00187368 00000094 */ MsgMan::skipInsertGlobal(){}  // ror
+/* 001873fc 00000008 */ MsgMan::cmdQuit(){}  // ror
+/* 00187404 00000008 */ MsgMan::skipQuit(){}  // ror
+/* 0018740c 00000008 */ MsgMan::cmdNop(){}  // ror
+/* 00187414 00000008 */ MsgMan::skipNop(){}  // ror
 /* 0018741c 00000048 */ MsgManSet::open(){}  // ror
 /* 00187464 00000048 */ MsgManSet::close(){}  // ror
 /* 001874ac 00000048 */ MsgManSet::update(){}  // ror
 /* 001874f4 000000cc */ MsgManSet::setMessage(){}  // ror
 /* 001875c0 0000005c */ MsgManSet::getState(){}  // ror
-/* 0018761c 00000104 */ MsgManSet::release(){}  // ror
+/* 0018761c 00000094 */ MsgManSet::release(){}  // ror
+/* 001876b0 00000034 */ MsgManSet::togglePause(){}  // ror
+/* 001876e8 00000038 */ MsgManSet::setDelay(){}  // ror
 
 // *****************************************************************************
 // FILE -- mcd/mcdman.cpp

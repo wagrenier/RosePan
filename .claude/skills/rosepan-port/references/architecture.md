@@ -2126,8 +2126,23 @@ throughout (identifiers, env variables, files, shader macros):
   +0x114, name +0x154, dir table +0x1c0 (rows of 0x40). The unnamed libmc calls by SDK 3.0 link
   order: 0x24d9e0 sceMcRead, 0x24daf8 sceMcWrite, 0x24df80 sceMcGetDir, 0x24e160 sceMcChdir,
   0x24e550 sceMcSetFileInfo, 0x24e720 sceMcRename, 0x24e948 sceMcGetEntSpace.
-- **MsgMan** (msg/msgman.cpp, 0x18330c..; EE 0x3bc; not written): a text in a scene window (m_strBuf,
-  optional voice stream). **MsgManSet** 0x18741c..0x18761c: two of them found by window number.
+- **MsgMan** (msg/msgman.cpp, 0x18330c..0x18741c, written 2026-10-28; EE 0x3bc): runs a text in a scene
+  window one character a frame (process 0x184a94, through MagSystem::drawView and the window's
+  getWindowTextWidth). The text carries #-tags, table at data 0x299738 (41 entries {id, text}, ended by id
+  0x29 = plain character; entry 40 is "" = the string's NUL): ## end, #n line, #r page, #d / #D n char
+  delay (#D: cross skips), #c hex colour, #C / #L centre / left, #R / #T / #G vertical centring, #X / #Y
+  cursor, #[ / #] window pos, #j / #J font words 30 / 34, #F / #f fades, #V n voice stream (playStr), #s
+  stop it, #W icon advance, #H line height, #m n GamSysData text n (field 0xc), #v digits as SJIS
+  full-width, #w n wait, #p pause, #K n wait for cross with key icon anim n, #I / #i / #/ icons, #S n scroll
+  n%10 lines over n/10 frames, #b / #B proportional, #g n script global n, #q quit; "g<n>" in #c / #m reads
+  g_sequence.m_global[n]. Each tag has an exec handler (no args; reads at m_strBuf + m_pos; non-zero ends
+  the frame) and a measure handler (arg, *len) for getLineWidth / countLines, both GCC 2
+  pointer-to-member tables the constructor fills at +0x12c / +0x274 (8-byte {delta, index, pfn}). The
+  three message icons are g_magSystem.m_scene.m_mes (S2dMes, bss 0x73e930) sprites 0 (key icon), 1
+  (inline #/), 2 (#I / #i / expandText's #K choice marker). The charset word data 0x2f73e4 is 2 (SJIS);
+  3 would read one-byte Latin and decode UTF-8 first (msgUtf8ToLatin1 into bss 0x6e92d0). **MsgManSet**
+  0x18741c..0x187724: two MsgMan found by window number (setMessage takes the first idle one unless one
+  shows the window already; getState bit 0 running, bit 1 paused; togglePause / setDelay unreferenced).
 
 ## The save / load screen (mnu/mnusvld.cpp, 0x1a59b8..0x1a90ec, 2026-10-25)
 

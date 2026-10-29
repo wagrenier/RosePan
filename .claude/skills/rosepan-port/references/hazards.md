@@ -893,3 +893,15 @@ whose cases look plausible can still be shifted -- read its jump table (native 0
   its own. Note: a smoke run can take a different path from run to run. One of four 200 s runs went
   black at the title (frame ~1860) and never reached the book, so compare against a second run before
   reading anything into a single black run.
+
+## A write through a member the ROM leaves NULL at boot (2026-10-28)
+
+Symptom: after msg/msgman.cpp was written, every frame after the boot logos was black, the main loop
+kept waiting on V-sync and the ROM log went silent ~3 s in -- no crash report, not even under gdbrun.
+Cause: the boot memory card check (MnuMcd) opens and closes its MsgManSet before the scene's S2dMes has
+sprites; MsgMan::close hides the three message icons through S2dMes::setSpriteState, which writes
+through m_spr.m_sprite (NULL then). On the EE that lands in low memory and nothing happens.
+Fix: a PC: guard where the write starts (msgShowSprite in msg/msgman.cpp). To find such a stall, add
+scePrintf traces to the new TU's entry points (they reach the run log; stderr does not) and run
+build.py --run 45: the last trace before the log goes quiet names the call; compare a stashed baseline run.
+
