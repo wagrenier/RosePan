@@ -338,6 +338,24 @@
    "status": "verify",
    "why": "Obj176a3c (scene +0x837e0, the Eff* factory) is the effect manager: data/eff/eff.bin loader, the 0x110-entry table, draw sort. Code sits between EffLight3 and EffMuzzleFlash1 in alphabetical class link order (EffMan); EffFindItem1 code 0x176694..0x176a3c and its linkonce come from the same object (linkonce order Light3, FindItem1, MuzzleFlash1), so it joins this file. No source string names it."
   },
+  "emy/emy_bds.cpp": {
+   "notes": "Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture as before, no regression); no enemy exists on that path, so mark done the first time a run shows a Bds (type 4) moving or cowering at Brown's bark. ROM oddities kept (open-items.md Open questions): Stared step 1 waits on m_move_done after a turn, BdsOutWin m_range never set, Walk tests the roam point's own length. The rest of the enemy run is unassigned@0014b3bc (Bdl, Mrt, Clr, Nor, Grg, Fsh, Got, Pig, Dwf): split it the same way, one file per XxxMain::initOut, next emy/emy_bdl.cpp 0x14b3bc up to MrtMain's file (MrtMain::initOut 0x14cde4); BdlMain looks like Bds's twin (same vtable shape, same out names), so emy_bds.cpp is the template.",
+   "ranges": [
+    [
+     "00149d18",
+     "0014b3bc"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 14:20",
+     "status": "verify",
+     "summary": "Pinned emy/emy_bds.cpp 0x149d18..0x14b3bc out of unassigned@00149d18 and wrote all 33 functions: BdsMain (enemy type 4: initOut, dtor, decide, exec, after, selectOut and its four decide tests) and its outs BdsOutWalk (roam / idle, getRoamPos, startIdle, setWalkMotion, setStep), BdsOutStared (turn to the barking dog, isDogAhead), BdsOutSearch (chase), BdsOutAtk (two attacks with hit windows, words 0x1d / 0x1e), BdsOutWin and BdsOutDead. New emy/emy_bds.h; BdsMain moved out of lib/unassigned.h, its six stubs removed; emyWrapAngle now shared (emy_main.h). 32 functions named (batch emybds_001)."
+    }
+   ],
+   "status": "verify",
+   "why": "BdsMain + its six BdsOut* classes: BdsMain::initOut 0x149d18 (every XxxMain::initOut opens its file, as emy_hfm.cpp) up to BdlMain::initOut 0x14b3bc which opens the Bdl file; no source string, named like emy_hfm.cpp"
+  },
   "emy/emy_hfm.cpp": {
    "notes": "Whole TU written (75 functions, no stubs left in this file). Status verify: the 15 s smoke run still ends on the Atlus disclaimer and creates no enemy, so no Hfm is on screen. Mark done the first time a smoke run shows an Hfm enemy moving. Still needed before anything moves: the EmyOut helpers in emy/emy_out.cpp (setMotion, termCommon, selectTarget, emyStartChase, playSE, tickVoice, stopVoice, emyChkHitReach, getFrontPos 0x167d88, getTargetNodePos 0x166c8c, getTargetAngle 0x167e38) and the EmyMain ctor. Steps 0x12, 0x1d, 0x1e, 0x1f only advance the step: the delay slot reloads the step, not v0=1, so it is step+1.",
    "ranges": [
@@ -2457,6 +2475,7 @@
   "unassigned@00140030": {},
   "unassigned@00143d3c": {},
   "unassigned@00145020": {},
+  "unassigned@00149d18": {},
   "unassigned@00164fc0": {},
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},

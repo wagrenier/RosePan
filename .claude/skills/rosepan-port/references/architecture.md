@@ -1647,6 +1647,15 @@ never asserts): sessions name them (`tus.py define --why`).
   hug squeezes 0x29 / 0x2a, the counter blow (HfmOutCounter) 0x2c; the PC in state class 3 counts
   `countFree` (startFree(40)) to struggle free. EmyOut helpers: `getFrontPos` 0x167d88 (f12 dist: base
   pos plus dist along the actor's rot y), `getTargetNodePos` 0x166c8c (the target's Bip01 Spine1).
+  **BdsMain** (type 4, emy/emy_bds.cpp 0x149d18..0x14b3bc, 2026-10-29): states 1 Walk, 2 Search,
+  3 Atk, 4 Win, 5 Stared, 6 Dead; its own words are bytes +0x204 (PC seen) / +0x205 (PC was in the
+  area) and the inputs at +0x208 (EE 0x228). Inputs 0 the PC left the area, 1 never (0x14a230
+  returns 0), 2 hit (notify bit 1), 3 / 4 PC into / out of sight, 5 PC state class 4; outs hand back
+  4 / 6 / 7. Atk: chase to 75, in sight 150 / pi / 3 -> motion 0x20 (66 %, hits frames 12..16, word
+  0x1d) or 0x21 (hits 12..16, 32..35, 53..56, word 0x1e), reach 20 over 3 nodes, SE 1 on a hit.
+  Stared: turns to the barking dog (chrRotMotion 8 / 9), motion 0x17, cowers while
+  magBwnIsBarkPhase3, input 6 after 60 frames. The enemy files link in the order Hfm, Bds, Bdl, Mrt,
+  Clr, Nor, Grg, Fsh, Got, Pig, Dwf (the XxxMain::initOut addresses), then EmyManager 0x16265c.
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00
