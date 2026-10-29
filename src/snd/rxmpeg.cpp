@@ -479,7 +479,7 @@ void rxMpegResetFrames(void)
 /* ---- the pictures and the decoder's callbacks ---- */
 
 // ROR 0x00181c14
-// callcheck: dbgAssertFailed, FUN_002155f4 (the two assert handlers; ROR_ASSERT)
+// callcheck: dbgAssertFailed, mcdDbgAssertFailed (the two assert handlers; ROR_ASSERT)
 void rxMpegCreatePictures(void)
 {
     s_free = 2;
@@ -745,7 +745,7 @@ void rxMpegReset(void)
 }
 
 // ROR 0x001825e4
-// callcheck: FUN_002155f4, FUN_0024f978 (the printing assert handler is ROR_ASSERT; 0x24f978 is a libmpeg setting -- mode 1 into its context +0x87c -- the host libmpeg does not have)
+// callcheck: mcdDbgAssertFailed, FUN_0024f978 (the printing assert handler is ROR_ASSERT; 0x24f978 is a libmpeg setting -- mode 1 into its context +0x87c -- the host libmpeg does not have)
 void rxMpegCreate(void)
 {
     if (s_created != 0)

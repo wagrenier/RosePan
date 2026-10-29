@@ -19853,6 +19853,36 @@
   "was": "FUN_002155d4",
   "why": "the ctors-table entry (data 0x2e0158) calling the seqvm initializer with (1, 0xffff)"
  },
+ "002155f4": {
+  "name": "mcdDbgAssertFailed",
+  "tag": "ror-inferred",
+  "was": "FUN_002155f4",
+  "why": "prints 'Assertion Failed: %s(%d)   %s' (0x301880) with file, line, expr and loops for ever: the second assert handler (same code as dbgAssertFailed 0x215a30), called from mnu/msg/snd asserts"
+ },
+ "00215634": {
+  "name": "mcdDbgMenuTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00215634",
+  "why": "unreferenced debug loop: prints a futuki banner, steps a state machine driving the MnuMcd at 0x2d9e80 (processPad/term) with pad 0's repeat bits, three cursor values"
+ },
+ "00215998": {
+  "name": "__static_initialization_and_destruction_0$mcd_debug",
+  "tag": "ror-inferred",
+  "was": "FUN_00215998",
+  "why": "GCC 2 file initializer: (1, 0xffff) constructs the MnuMcd at 0x2d9e80, (0, 0xffff) destroys it"
+ },
+ "002159f0": {
+  "name": "_GLOBAL_$I$mcd_debug",
+  "tag": "ror-inferred",
+  "was": "FUN_002159f0",
+  "why": "calls the file initializer with (1, 0xffff)"
+ },
+ "00215a10": {
+  "name": "_GLOBAL_$D$mcd_debug",
+  "tag": "ror-inferred",
+  "was": "FUN_00215a10",
+  "why": "calls the file initializer with (0, 0xffff)"
+ },
  "00215a30": {
   "name": "dbgAssertFailed",
   "tag": "ror-inferred",

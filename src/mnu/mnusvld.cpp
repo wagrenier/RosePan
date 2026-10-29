@@ -426,7 +426,7 @@ MnuSvld::~MnuSvld()
 // ──────────────────────────────────────────────────────────────────────
 // Sets up the sprite manager (73 sprites, textures into tex), opens,
 // loads the textures and the font, and allocates the save image once.
-// ROR 0x001a5af4; callcheck: FUN_002155f4 (the second assert handler is ROR_ASSERT)
+// ROR 0x001a5af4; callcheck: mcdDbgAssertFailed (the second assert handler is ROR_ASSERT)
 
 void MnuSvld::init(DogTexInfo *tex)
 {
@@ -748,7 +748,7 @@ int MnuSvld::update()
 
 // ──────────────────────────────────────────────────────────────────────
 // The game into the save image, with MnuMcd's checksum after it.
-// ROR 0x001a6764; callcheck: FUN_002155f4 (the second assert handler is ROR_ASSERT)
+// ROR 0x001a6764; callcheck: mcdDbgAssertFailed (the second assert handler is ROR_ASSERT)
 
 void *MnuSvld::makeSaveData()
 {
@@ -760,7 +760,7 @@ void *MnuSvld::makeSaveData()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x001a67d8; callcheck: FUN_002155f4 (the second assert handler is ROR_ASSERT)
+// ROR 0x001a67d8; callcheck: mcdDbgAssertFailed (the second assert handler is ROR_ASSERT)
 
 int MnuSvld::applyLoadData()
 {

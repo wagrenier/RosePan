@@ -658,7 +658,7 @@ static int sndStreamChunk(SndFStream *s)
 }
 
 // ROR 0x00180230
-// callcheck: FUN_002155f4, rxFileGetRingFilled, rxFileGetRingReadPos, rxFileGetRingSize, rxSndAdpcmGetFree (the second assert handler is ROR_ASSERT; the ring and room reads are in sndStreamChunk, which the ROM inlines twice)
+// callcheck: mcdDbgAssertFailed, rxFileGetRingFilled, rxFileGetRingReadPos, rxFileGetRingSize, rxSndAdpcmGetFree (the second assert handler is ROR_ASSERT; the ring and room reads are in sndStreamChunk, which the ROM inlines twice)
 int SndMan::updateStream(SndInfo *strSndInfo)
 {
     SndFStream *s = &strSndInfo->uniPtr.sndFStream;
