@@ -2149,7 +2149,6 @@ intptr_t seqFunc026(intptr_t op, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t
 struct SeqRayHit
 {
     MagSceneRayHit hit;
-    u_int          m_60[4];     // the ROM copies 0x70 bytes: 0x10 past MagSceneRayHit (stale stack)
 };
 static_assert(sizeof(SeqRayHit) == 0x70, "the 0x70 bytes native 156 copies out");
 
@@ -2163,8 +2162,7 @@ static void seqClearHit(SeqRayHit *h)
         h->hit.m_vec[k][3] = 1.0f;
     }
     h->hit.m_50 = -1;
-    h->hit._54[0] = h->hit._54[1] = h->hit._54[2] = 0;  // PC: unset in the ROM
-    h->m_60[0] = h->m_60[1] = h->m_60[2] = h->m_60[3] = 0;
+    memset(h->hit.m_name, 0, sizeof(h->hit.m_name));  // PC: unset in the ROM
 }
 
 // ROR 0x0020abfc

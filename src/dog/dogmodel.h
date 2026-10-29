@@ -39,6 +39,7 @@
 #include "common/ror_assert.h"
 #include "dog/dogentity.h"
 #include "dog/dogtexinfo.h"
+#include "i3d/i3cquery.h"
 #include "lib/unassigned.h"
 
 struct BedPfh;
@@ -392,5 +393,15 @@ static_assert(offsetof(DogModel, m_shadow_light) >= 0x160, "m_shadow_light");
 static_assert(offsetof(DogModel, m_shadow_fade) >= 0x168, "m_shadow_fade");
 static_assert(offsetof(DogModel, m_disp_control) >= 0x170, "m_disp_control");
 static_assert(sizeof(DogModel) >= 0x1a0, "DogModel is 0x1a0 bytes on the EE");
+
+/* The casts' i3c hit callbacks (I3cQuery::m_func; q->m_hit is the
+ * MagSceneRayHit). Each stores the triangle hit nearest so far -- point,
+ * unit normal, vertices and its group's name -- and returns 1 (carry on).
+ * dogModelHitCylinder keeps only walls: normals within 30 degrees of
+ * level (|up| <= 0.5). */
+int   dogModelHitNearest(I3cQuery *q, int code, const u_short *prim, const float *verts,
+                         float *plane, float *point);                               // ROR 0x00114034
+int   dogModelHitCylinder(I3cQuery *q, int code, const u_short *prim, const float *verts,
+                          float *plane, float *point);                              // ROR 0x001141c8
 
 #endif /* _DOG_DOGMODEL_H */

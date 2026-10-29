@@ -129,15 +129,20 @@ struct MagSceneStrip
 static_assert(offsetof(MagSceneStrip, m_data) >= 0x10, "m_data");
 static_assert(offsetof(MagSceneStrip, m_type) >= 0x1e, "m_type");
 
-/* castRay's hit record (EE 0x60: drawBlobShadows clears it to five
- * (0, 0, 0, 1) vectors and -1). Field roles unverified. */
+/* castRay's hit record, EE 0x70 (castRayGroups' stack: the record at sp
+ * + 0x50, its matrices at sp + 0xc0; native 156 copies 0x70 bytes).
+ * drawBlobShadows clears it to five (0, 0, 0, 1) vectors and -1. The
+ * DogModel hit callbacks (dog/dogmodel.cpp) fill it in the game's frame,
+ * each i3c vector (x, y, z) stored as (-x, -z, -y). */
 struct MagSceneRayHit
 {
-    sceVu0FVECTOR m_vec[5];     // ROR 0x00: [1] = the hit normal (castWalls: the wall's, unit, w 0)
-    int           m_50;         // ROR 0x50: -1 before the cast
-    int           _54[3];
+    sceVu0FVECTOR m_vec[5];     // ROR 0x00: [0] the hit point, w = t; [1] the unit normal (castWalls: the wall's, w 0); [2..4] the triangle's vertices
+    int           m_50;         // ROR 0x50: -1 before the cast; the group of the last triangle tested (dogModelHitNearest writes it on every call)
+    char          m_name[28];   // ROR 0x54: that group's name (i3cGetGroupName), cut to 28 bytes; untouched when the group is < 0
 };
-static_assert(sizeof(MagSceneRayHit) == 0x60, "MagSceneRayHit is 0x60 bytes on the EE");
+static_assert(sizeof(MagSceneRayHit) == 0x70, "MagSceneRayHit is 0x70 bytes on the EE");
+static_assert(offsetof(MagSceneRayHit, m_50) == 0x50, "m_50");
+static_assert(offsetof(MagSceneRayHit, m_name) == 0x54, "m_name");
 
 /* A value running from m_from to m_to over m_frames (EE 0x10; startLerp
  * fills it, updateRecords853fc steps it). */

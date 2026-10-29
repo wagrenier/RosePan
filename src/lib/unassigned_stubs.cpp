@@ -445,20 +445,6 @@ void DogTexInfo::dump()
     ROSEPAN_STUB("DogTexInfo::dump", 0x0011764c);
 }
 
-// stub of ROR 0x001141c8
-int dogModelHitCylinder(I3cQuery *q, int code, const u_short *prim, const float *verts, float *plane, float *point)
-{
-    ROSEPAN_STUB("dogModelHitCylinder", 0x001141c8);
-    return {};
-}
-
-// stub of ROR 0x00114034
-int dogModelHitNearest(I3cQuery *q, int code, const u_short *prim, const float *verts, float *plane, float *point)
-{
-    ROSEPAN_STUB("dogModelHitNearest", 0x00114034);
-    return {};
-}
-
 // stub of ROR 0x0015cd30
 void DwfMain::after()
 {
