@@ -304,7 +304,23 @@ enum GsBlendMode
                            * source colour is unused by the GS, so the pipeline
                            * carries As in the colour channels (DST_COLOR/ONE)
                            * and DrawSolidQuad encodes it there                  */
+    GS_BLEND_SUB_ONE,     /* Cd - Cs            -- subtractive at full strength;
+                           * a pass of DrawFixWeightedQuad, whose weight
+                           * travels in the vertex colour                       */
     GS_BLEND_COUNT
+};
+
+/*
+ * The FIX-weighted ALPHA shapes the textured-quad path draws in two passes
+ * (DrawFixWeightedQuad): SDL_GPU's blend constant is render-pass state rather
+ * than part of a pipeline, so a per-draw FIX cannot ride on the factors, and
+ * g_gs_blend_mode keeps the source-alpha fallback for every other path.
+ */
+enum GsFixBlend
+{
+    GS_FIX_NONE = 0,
+    GS_FIX_TOWARD_SRC,    /* (Cs - Cd)*F + Cd  -- ALPHA 0x64 */
+    GS_FIX_AWAY_FROM_SRC  /* (Cd - Cs)*F + Cd  -- ALPHA 0x61 */
 };
 
 /* The PS2 scissor box, in 640x448 framebuffer pixels.  SCAX1/SCAY1 are
@@ -1427,6 +1443,10 @@ float g_alpha_cutoff = 0.0f;
  * at the values ClearDrawEnv() lays down every frame, so a draw queued before
  * anything writes the registers behaves as it would on hardware. */
 GsBlendMode g_gs_blend_mode = GS_BLEND_ALPHA;
+/* The FIX-weighted shape the ALPHA register holds, if any, and its weight
+ * FIX/128 (beside g_gs_blend_mode's fallback). */
+GsFixBlend g_gs_fix_blend = GS_FIX_NONE;
+float g_gs_fix_weight = 0.0f;
 bool g_gs_depth_write = true;
 /* ZTST from the GS TEST register, and the Z of the 2D primitive being built.
  * Both are per-draw state the 2D layer refreshes immediately before the draw,
@@ -4137,6 +4157,11 @@ SDL_GPUColorTargetBlendState BlendStateForMode(GsBlendMode mode)
          * RosePan_RendererDrawSolidQuad(). */
         blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_DST_COLOR;
         blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+        break;
+    case GS_BLEND_SUB_ONE:                              /* Cd - Cs */
+        blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+        blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+        blend.color_blend_op = SDL_GPU_BLENDOP_REVERSE_SUBTRACT;
         break;
     case GS_BLEND_ALPHA:
     default:                                            /* Cs*As + Cd*(1-As) */
@@ -7695,6 +7720,8 @@ bool GeometrySmoothingActive(int extra)
 {
     return extra > 0 && g_interpolate_presents && g_interpolate_geometry;
 }
+
+static_assert(GS_BLEND_COUNT <= 8, "GeometryDrawFlags keeps the blend mode in 3 bits");
 
 unsigned int GeometryDrawFlags(const DrawCommand &draw)
 {
@@ -12162,6 +12189,66 @@ void RosePan_RendererDrawImageQuad(const void *texture,
  */
 bool IsFullFrameQuad(const float *xy);   /* below, beside the solid fills */
 
+/* QueueQuad under a blend mode of the caller's, the GS's own left as it was. */
+void QueueQuadWithBlend(GsBlendMode mode, SDL_GPUTexture *texture, int texture_width,
+                        int texture_height, const SpriteVertex *corners, bool repeat,
+                        bool linear)
+{
+    const GsBlendMode saved = g_gs_blend_mode;
+    g_gs_blend_mode = mode;
+    QueueQuad(texture, texture_width, texture_height, corners, true, repeat, linear, linear);
+    g_gs_blend_mode = saved;
+}
+
+/*
+ * A textured quad under a FIX-weighted ALPHA (g_gs_fix_blend), as two passes
+ * through fixed-factor pipelines with the weight F in the vertex colour.  The
+ * GS never reads As under C = FIX, so the textured pass draws opaque.
+ *
+ *   toward  (Cs - Cd)*F + Cd = Cd*(1 - F) + Cs*F: a white quad of alpha F
+ *           decays the target (DST_DECAY), then the texture adds Cs*F
+ *           (ADD_ONE).  The sum never passes white, so nothing clamps early.
+ *   away    (Cd - Cs)*F + Cd = (Cd - Cs*F/(1 + F))*(1 + F): the texture
+ *           subtracts Cs*F/(1 + F) (SUB_ONE), then a white quad of colour F
+ *           scales the target by 1 + F (DST_ADD).  Subtracting first keeps the
+ *           GS's single clamp: a pixel the GS takes below black is black after
+ *           the first pass and stays so, one it takes past white saturates in
+ *           the second.
+ *
+ * F is capped at 1 (FIX 0x80): past it "toward" extrapolates beyond Cs, which
+ * two passes cannot draw.  MagLifeNoise, the user, stays under FIX 0x38.  The
+ * texture function's clamp is taken after the weight, which matters only for
+ * a vertex colour above 0x80.
+ */
+void DrawFixWeightedQuad(const TextureEntry *entry, const float *xy, const float *uv,
+                         unsigned char r, unsigned char g, unsigned char b, bool linear,
+                         bool repeat)
+{
+    const float f = std::min(1.0f, g_gs_fix_weight);
+    if (f <= 0.0f)
+        return;                                 /* (A - B)*0 + Cd: the target as it is */
+    const bool away = g_gs_fix_blend == GS_FIX_AWAY_FROM_SRC;
+    const float k = away ? f / (1.0f + f) : f;
+
+    SpriteVertex tex[4], white[4];
+    BuildQuadVertices(tex, xy, uv, 1.0f, 1.0f, Ps2ColorToFloat(r) * k,
+                      Ps2ColorToFloat(g) * k, Ps2ColorToFloat(b) * k, 1.0f);
+    if (away)
+    {
+        BuildQuadVertices(white, xy, nullptr, 1.0f, 1.0f, f, f, f, 1.0f);
+        QueueQuadWithBlend(GS_BLEND_SUB_ONE, entry->texture, entry->width, entry->height,
+                           tex, repeat, linear);
+        QueueQuadWithBlend(GS_BLEND_DST_ADD, g_white_texture, 1, 1, white, false, true);
+    }
+    else
+    {
+        BuildQuadVertices(white, xy, nullptr, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, f);
+        QueueQuadWithBlend(GS_BLEND_DST_DECAY, g_white_texture, 1, 1, white, false, true);
+        QueueQuadWithBlend(GS_BLEND_ADD_ONE, entry->texture, entry->width, entry->height,
+                           tex, repeat, linear);
+    }
+}
+
 void RosePan_RendererDrawImageQuadWrap(const void *texture,
                                       const float *xy,
                                       const float *uv,
@@ -12196,6 +12283,12 @@ void RosePan_RendererDrawImageQuadWrap(const void *texture,
             wuv[i * 2 + 0] = uc + (uv[i * 2 + 0] - uc) * g_view_extend_x;
             wuv[i * 2 + 1] = vc + (uv[i * 2 + 1] - vc) * g_view_extend_y;
         }
+    }
+
+    if (g_gs_fix_blend != GS_FIX_NONE)
+    {
+        DrawFixWeightedQuad(entry, wxy, wuv, r, g, b, linear != 0, repeat != 0);
+        return;
     }
 
     BuildQuadVertices(vertices, wxy, wuv, 1.0f, 1.0f, Ps2ColorToFloat(r),
@@ -14360,6 +14453,7 @@ void RosePan_RendererSetGsAlphaRegister(unsigned long long alpha)
     if (c == 3) { c = CO_FIX; }
 
     g_gs_blend_mode = GS_BLEND_ALPHA;
+    g_gs_fix_blend = GS_FIX_NONE;
 
     /*
      * Only the source-alpha and FIX families are classified.  A destination-
@@ -14406,15 +14500,29 @@ void RosePan_RendererSetGsAlphaRegister(unsigned long long alpha)
     else if (c == CO_FIX)
     {
         /*
-         * SDL_GPU has no blend-constant, so a FIX-weighted equation is only
-         * reproducible at the extremes.  0x80 is 1.0 in the GS's 7-bit alpha
-         * scale, and is what the engine uses when it wants a plain add; treat
-         * anything at or above that as full strength and anything below as
-         * the ordinary alpha blend rather than silently doubling an effect.
+         * SDL_GPU's blend constant is render-pass state, not a pipeline's, so
+         * no pipeline here carries a FIX weight.  0x80 is 1.0 in the GS's
+         * 7-bit alpha scale, and is what the engine uses when it wants a
+         * plain add; treat anything at or above that as full strength.  The
+         * two blends between Cs and Cd (MagLifeNoise's grain layers) are
+         * drawn by the textured-quad path in two passes with the weight in
+         * the vertex colour (DrawFixWeightedQuad); every other path, and
+         * every other shape, keeps the ordinary alpha blend rather than
+         * silently doubling an effect.
          */
         if (fix >= 0x80 && a == COL_SRC && b == COL_ZERO && d == COL_DST)
         {
             g_gs_blend_mode = GS_BLEND_ADD_ONE;      /* Cs + Cd */
+        }
+        else if (d == COL_DST && a == COL_SRC && b == COL_DST)
+        {
+            g_gs_fix_blend = GS_FIX_TOWARD_SRC;      /* (Cs - Cd)*F + Cd */
+            g_gs_fix_weight = (float)fix / kPs2AlphaScale;
+        }
+        else if (d == COL_DST && a == COL_DST && b == COL_SRC)
+        {
+            g_gs_fix_blend = GS_FIX_AWAY_FROM_SRC;   /* (Cd - Cs)*F + Cd */
+            g_gs_fix_weight = (float)fix / kPs2AlphaScale;
         }
     }
 
