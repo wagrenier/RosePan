@@ -90,6 +90,19 @@ static void rxFileSpin(void)
 {
 }
 
+// PORT: the host's file thread runs beside the game, and a callback lowers
+// pending part way through (rxFileOnGetSize sets the failed bit after it), so
+// a waiter that sees pending reach 0 could read the slot before the callback
+// is done: fileExists took a missing data/options.txt for there and the
+// FileReader that followed retried it forever (hazards.md). The callbacks run
+// inside the file thread's DIntr ... EIntr; taking the section once waits the
+// last one out. The PS2's waiter cannot run before the callback returns.
+static void rxFileWaitCallbacks(void)
+{
+    DIntr();
+    EIntr();
+}
+
 /* ---- async file slots ------------------------------------------------- */
 
 static RxFileSlot *rxFileGetSlot(int fd)
@@ -489,6 +502,7 @@ int rxFileOpenSlot(int device, const char *path, int flags, void *ring, int ring
         return fd;
     while (slot->pending > 0)
         rxFileSpin();             // callcheck: EIntr, rxSysPrintf (the DI check)
+    rxFileWaitCallbacks();
     if ((slot->state & 4) != 0)
     {
         slot->used = 0;
@@ -541,6 +555,7 @@ void rxFileSlotClose(RxFileSlot *slot, int abort)
     rxFileCancelRequests(slot->device, slot, abort);
     while (slot->pending > 0)
         rxFileSpin();             // callcheck: EIntr, rxSysPrintf (the DI check)
+    rxFileWaitCallbacks();
     rxFileSlotFreeSegments(slot);
     rxFileSlotSetMarkers(slot, 0, 0, 0);
     rxFileSlotSetTags(slot, 0, 0);

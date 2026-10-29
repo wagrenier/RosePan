@@ -521,6 +521,12 @@ public:
 - **layoutcheck compiles every header on its own**: a header that relies on what its .c included first
   fails; give it its own includes.
 - **The build never runs MSVC**; only layoutcheck does (syntax only): MSVC-only errors show up there.
+- **A raw NUL byte in a character constant breaks MSVC only**: 13cb7db (the aspect task) left
+  `dir[0] != '<NUL>'` twice in rosepan_renderer.cpp; MinGW compiled it, the user's Visual Studio build
+  stopped on C2137 "empty character constant" (2026-10-29). Cause: a C escape `\0` written through a
+  shell command can land as the byte itself (seen again while fixing it: a Python heredoc's `\\0`
+  wrote a NUL). Write source text with Edit / Write, or build the byte as `bytes([92]) + b'0'`.
+  build.py now refuses NUL bytes in src/ before compiling; layoutcheck never saw it (headers only).
 - **A smoke run that exits at once with 0x20474343** is an uncaught C++ exception -- seen when another
   game process held the log file. Check `tasklist` for another RosePan.exe; never kill another
   session's process.
@@ -532,17 +538,16 @@ public:
   `ReiPanVu1*` / `REIPAN_*`, and shadercross failed with "unknown type name RosePanVu1LightImage"
   (2026-10-22, bootstrap). The prebuilt `.msl` / `.spv` keep old names in comments only.
 
-- **A smoke run can hang retrying `data/options.txt`** (100k "rxfile : failed to open file
-  'host0:data/options.txt'" lines, nothing after MagScene::loadSystemData): seen once on
-  2026-10-25 (maglifemenu session); the same build passed on the next run (fileExists -> -1, one
-  failure line each). A race in the rx file layer around the missing file (fileExists flags 1,
-  then FileReader's 0x8001 = NOWAIT | retry read); rerun before suspecting your change, and look
-  at rxFileOpenEx's state / pending handling if it comes back.
-  Seen again 2026-10-26 (task/tsk_scene.cpp session, a `--run 200` New Game run): stuck on the black
-  "Now Loading" with 1.6M such lines from log line 73; the rerun of the same build went through New
-  Game to the film's end. Two sightings in two days: if a third comes, make it a host task.
-  2026-10-26 (gamman session 5): two of eight runs of one tree hung this way (one under gdb, 2.8M
-  lines), so it is not rare any more; it also makes gdbrun runs useless. Worth its own host task.
+- **FIXED 2026-10-29: the boot hung on "Now Loading" retrying `data/options.txt`** (100k+ "rxfile :
+  failed to open file 'host0:data/options.txt'" lines from MagScene::loadSystemData; 1 run in 4..16
+  since 2026-10-25, gdbrun too). Cause: the host's rx file thread runs beside the game thread, and
+  rxFileOnGetSize lowers `pending` before it sets the failed bit (`state |= 4`); rxFileOpenSlot's
+  waiter could see pending 0 and read state in between, so fileExists said yes to the missing file
+  and the FileReader's 0x8001 open (NOWAIT, retry a missing file) retried it forever. The PS2's
+  waiter cannot run before the callback returns. Fix: rxFileWaitCallbacks (DIntr + EIntr, which
+  waits out the callback the file thread runs inside its section) after the waits in rxFileOpenSlot
+  and rxFileSlotClose. Proven by a 20 ms sleep after the `pending--`: 4 of 4 runs hung without the
+  fix, 4 of 4 booted with it. Any new host wait on a slot field that a callback writes needs the same.
 - **Sequence::loadSubImage copies 0x30000 bytes whatever the image's size** (as the ROM does). The
   ARA packs' stage-2 images are 12..31 KB near the end of a ~90 KB pack buffer: the PS2 reads what
   follows, the host faulted in memmove past the heap block (GamMan::initStage2, 2026-10-26). The
@@ -567,9 +572,6 @@ public:
   min(2 KB-rounded readable, 2 KB-rounded parsed). Retiring odd counts broke the que's 2 KB read
   alignment, left a sliver under 0x800 before the wrap that no DMA could take, and froze the logo
   movie at its 103rd picture.
-- **One run logged ~160 "rxfile : failed to open file 'host0:data/options.txt'" lines a frame**
-  (fileExists in MagScene::loadSystemData runs once; the file is not on the disc). Not seen again in
-  five later runs of the same tree; if it comes back, find who re-issues the open.
 
 - **RoR: script pointers in 32-bit words** (2026-10-25). Symptom to expect: a script that stores a
   pointer (sw) and loads it back crashes on a truncated host address. Cause: the scripts' memory is

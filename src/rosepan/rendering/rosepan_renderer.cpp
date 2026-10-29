@@ -6353,7 +6353,7 @@ bool RecordScreenMirror(SDL_GPUCommandBuffer *cmd, SDL_GPUTexture *source,
 bool SmokeShotsEnabled()
 {
     static const char *const dir = std::getenv("ROSEPAN_SHOT_DIR");
-    return dir != nullptr && dir[0] != ' ';
+    return dir != nullptr && dir[0] != '\0';
 }
 
 /* The smoke shot's frame: all of `source`, scaled to g_shot_texture. */
@@ -11537,7 +11537,7 @@ static void WriteSmokeShotIfDue(void)
     }();
     static unsigned presented = 0;
 
-    if (dir == nullptr || dir[0] == ' ' || ++presented % every != 0)
+    if (dir == nullptr || dir[0] == '\0' || ++presented % every != 0)
     {
         return;
     }

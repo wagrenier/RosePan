@@ -339,7 +339,8 @@ follows it; reached stubs in run order):
      i3dPktDrawStrip): one with the full table, one with only the book's lookups forced to 0. The
      other four reached the end (~6780), three of them with the full table.** Intermittent and seen
      with both variants, so likely an older race, not this TU; the two ROSEPAN_CRASH_LOG=1 runs did
-     not crash, and gdbrun never boots here (the options.txt loop from the start). Next time it
+     not crash, and gdbrun never boots here (the options.txt loop from the start; fixed 2026-10-29,
+     the rx file thread race in hazards.md, so gdbrun should boot again). Next time it
      happens, rerun with build.py --env ROSEPAN_CRASH_LOG=1 until it faults and addr2line the stack.
   Also reached, lower: EmyManager::resetWork, Obj176a3c::createEff (the effect manager in
   unassigned@00164fc0), chrMtnMove, MagLifePC / MagLifeBwn::reset, i3rCopyClipSphere /
@@ -539,7 +540,7 @@ data/mnurpk/mnuboard.rpk). The other menu ids: 0x10000 item, 0x10001 map, 0x1000
      2700:CROSS to smoke_pad) and queue the stubs it reaches, in order. Seen once, not reproduced:
      a run pressing Start every 120 reads from read 240 showed "Now Loading" from frame 180 on and
      failed to open data/options.txt every frame (rxfile) -- the New Game load path, or a boot that
-     raced; if a New Game press ends there, MagScene2's options.txt read (mag/magscene2.cpp) and
+     raced (it was the boot: the rx file thread race, fixed 2026-10-29, hazards.md); if a New Game press ends there, MagScene2's options.txt read (mag/magscene2.cpp) and
      the stage load are the first suspects.
   10c. DONE 2026-10-25 (`verify`): `mnu/mnusvld.cpp` (pinned 0x1a59b8..0x1a90ec; the queue's
      unassigned@001a6830 was its tail) -- all 40 MnuSvld functions, the save / load screen, plus
