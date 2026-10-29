@@ -48,11 +48,11 @@ static inline int floatArg(float f)
 
 /* The collectors' buffer as the ROM's callers set it up: every entry's
  * two points (0, 0, 0, 1), no count. */
-static void clearEmyInfoBuf(UtlEmyInfoBuf &eib)
+static void clearEmyInfoBuf(UtlEnemyInfoBuf &eib)
 {
     for (int i = 0; i < 32; i++)
     {
-        UtlEmyInfo &e = eib.m_info[i];
+        UtlEnemyInfo &e = eib.m_info[i];
         e.m_pos[2] = 0.0f;
         e.m_pos[1] = 0.0f;
         e.m_pos[0] = 0.0f;
@@ -62,7 +62,7 @@ static void clearEmyInfoBuf(UtlEmyInfoBuf &eib)
         e.m_trans[1] = 0.0f;
         e.m_trans[0] = 0.0f;
     }
-    eib.m_num = 0;
+    eib.m_count = 0;
 }
 
 /* Brown's idle actions in Wait (MagLifeBwn::message 1's motion). */
@@ -100,7 +100,7 @@ int MagLifeBwnCtrlMode::countEmyAround(MagLifeBwnCtrl &theBwnCtrl, float radius)
         return 0;
     float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     theBwnCtrl.m_bwn->getPosition(pos);
-    UtlEmyInfoBuf eib;
+    UtlEnemyInfoBuf eib;
     clearEmyInfoBuf(eib);
     return utlCollectEmyInfoAt(&eib, pos, 0, 1, 0.0f, radius);
 }
@@ -1108,7 +1108,7 @@ void MagLifeBwnCtrlModeBark::init(MagLifeBwnCtrl &theBwnCtrl)
 }
 
 // ROR 0x00128e6c
-int MagLifeBwnCtrlModeBark::findNearestEmy(MagLifeBwnCtrl &theBwnCtrl, UtlEmyInfoBuf *eib, int where)
+int MagLifeBwnCtrlModeBark::findNearestEmy(MagLifeBwnCtrl &theBwnCtrl, UtlEnemyInfoBuf *eib, int where)
 {
     float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     if (theBwnCtrl.m_pc == NULL || theBwnCtrl.m_bwn == NULL)
@@ -1184,7 +1184,7 @@ enum
 /* The picked enemy into the mode: its kind, its oid, its position into the
  * controller's m_target. */
 static void takeBarkTarget(MagLifeBwnCtrlModeBark &mode, MagLifeBwnCtrl &theBwnCtrl,
-                           const UtlEmyInfo &e)
+                           const UtlEnemyInfo &e)
 {
     mode.m_target_kind = e.m_24;
     mode.m_bite_target_oid = e.m_obj_id;
@@ -1236,7 +1236,7 @@ void MagLifeBwnCtrlModeBark::live(MagLifeBwnCtrl &theBwnCtrl)
         utlTestEmyStateFlag(m_bite_target_oid) == 0)
         *work = BARK_START;
 
-    UtlEmyInfoBuf eib;
+    UtlEnemyInfoBuf eib;
     float rot[4];
     float t[4];
     switch (*work)
@@ -1250,7 +1250,7 @@ void MagLifeBwnCtrlModeBark::live(MagLifeBwnCtrl &theBwnCtrl)
             theBwnCtrl.requestState(0, 0, 0);
             return;
         }
-        const UtlEmyInfo &e = eib.m_info[i];
+        const UtlEnemyInfo &e = eib.m_info[i];
         takeBarkTarget(*this, theBwnCtrl, e);
         int near;
         if (m_target_kind == 0x401)
@@ -1905,7 +1905,7 @@ int MagLifeBwnCtrl::isStateDone()
 // ROR 0x0012ab20
 int MagLifeBwnCtrl::findItemAhead()
 {
-    UtlEmyInfoBuf eib;
+    UtlEnemyInfoBuf eib;
     clearEmyInfoBuf(eib);
     int num = utlCollectItemInfo(&eib, 1);
     if (num <= 0)
@@ -1919,7 +1919,7 @@ int MagLifeBwnCtrl::findItemAhead()
     int found = -1;
     for (int i = 0; i < num; i++)
     {
-        UtlEmyInfo &e = eib.m_info[i];
+        UtlEnemyInfo &e = eib.m_info[i];
         float dy = e.m_pos[1] - pos[1];
         if (!(-100.0f < dy && dy < 100.0f))
             continue;
@@ -1940,7 +1940,7 @@ int MagLifeBwnCtrl::findItemAhead()
     }
     if (found < 0)
         return 0;
-    UtlEmyInfo &e = eib.m_info[found];
+    UtlEnemyInfo &e = eib.m_info[found];
     m_target[0] = e.m_pos[0];
     m_target[1] = e.m_pos[1];
     m_target[2] = e.m_pos[2];
@@ -1983,7 +1983,7 @@ int MagLifeBwnCtrl::isEmyAheadOfPC()
     if (m_bwn == NULL || m_bwn->getHealthStatus() >= 3)
         return 0;
     float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-    UtlEmyInfoBuf eib;
+    UtlEnemyInfoBuf eib;
     clearEmyInfoBuf(eib);
     if (m_pc == NULL)
         return 0;
@@ -2004,7 +2004,7 @@ int MagLifeBwnCtrl::isEmyNearPC()
         return 0;
     float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     m_pc->getPosition(pos);
-    UtlEmyInfoBuf eib;
+    UtlEnemyInfoBuf eib;
     clearEmyInfoBuf(eib);
     return utlCollectEmyInfoAt(&eib, pos, 0, 1, 0.0f, 500.0f) > 0;
 }

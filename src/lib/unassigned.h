@@ -402,32 +402,11 @@ struct GamFont
 };
 static_assert(offsetof(GamFont, m_00) == 0x00, "m_00");
 
-/* ---- the tail of utl/utlgame.cpp (0x103edc..0x1041c4), not written yet;
- * the random numbers after it are utl/utlrand.cpp ---- */
+/* The tail of utl/utlgame.cpp (0x103edc..0x1041c4: the dog / enemy
+ * wrappers) is in its header; the random numbers after it are
+ * utl/utlrand.cpp. */
+#include "utl/utlgame.h"
 #include "utl/utlrand.h"
-
-/* The dog's params 0x1b / 0x1c through GamMan::get/setDogParam
- * (MagLifeBwn::calcHealth's ratio; reset tops 0x1b up). */
-void utlSetDogParam1b(int v);                                            // ROR 0x00103edc
-int  utlGetDogParam1b(void);                                             // ROR 0x00103f08
-int  utlGetDogParam1c(void);                                             // ROR 0x00103f38
-/* GamMan::setObjRadius(the dog's oid, r), then testHitAt(pos, the dog's
- * oid, 0, 1): non-zero on a hit, the record's word +0x10 into *hit. */
-/* EmyManager::getEmyHoldWord248 / getEmyWord238 of the enemy oid. */
-int  utlGetEmyHold(u_int oid);                                           // ROR 0x00103f68
-int  utlGetEmyWord238(u_int oid);                                        // ROR 0x00103f88
-/* EmyManager::getEmyWord3c(oid) == 7 / == 4. */
-int  utlIsEmyState7(u_int oid);                                          // ROR 0x00103fac
-int  utlIsEmyState4(u_int oid);                                          // ROR 0x00103fd8
-int  utlTestDogHitAt(const float *pos, u_int *hit, float r);             // ROR 0x00104004
-/* GamMan::getObjRadius of the dog (GamMan::m_dogPtr's oid, 0 without). */
-float utlGetDogRadius(void);                                             // ROR 0x001040a0
-
-/* GamMan::getObjParam(oid, 2): the object's kind (0x401 / 0x421 ...). */
-int  utlGetObjKind(u_int oid);                                           // ROR 0x0010411c
-/* GamMan::setObj(the object at GamMan +0x22094, 0x40); both values of on
- * do the same in the ROM. */
-void utlSetBwnObjFlag(int on);                                           // ROR 0x00104150
 
 /* ---- the i3d library (unassigned@00216ad0 .. 0x237d80; its version string
  * "i3d_package_version 050121-stable-050826") ---- */

@@ -89,35 +89,37 @@
 // FILE -- utl/utlgame.cpp
 // *****************************************************************************
 
-/* 001024d0 0000007c */ FUN_001024d0(){}
+/* 001024d0 0000007c */ utlGetSoundName(){}  // ror
 /* 0010254c 00000074 */ utlPlaySe3d(){}  // ror
-/* 001025c0 000000f0 */ FUN_001025c0(){}
+/* 001025c0 000000f0 */ utlGetSoundSE(){}  // ror
 /* 001026b0 000000a8 */ utlPlaySe(){}  // ror
-/* 00102758 0000007c */ FUN_00102758(){}
-/* 001027d4 00000078 */ FUN_001027d4(){}
-/* 0010284c 0000005c */ FUN_0010284c(){}
-/* 001028a8 00000070 */ FUN_001028a8(){}
+/* 00102758 0000007c */ utlPlaySeIfIdle(){}  // ror
+/* 001027d4 00000078 */ utlStopSe(){}  // ror
+/* 0010284c 0000005c */ utlPlaySeChance(){}  // ror
+/* 001028a8 00000070 */ utlPlaySeRand2(){}  // ror
 /* 00102918 000000ac */ utlPlaySeRand3(){}  // ror
 /* 001029c4 000000f4 */ utlPlaySeRand4(){}  // ror
 /* 00102ab8 00000024 */ utlGetObjPos(){}  // ror
 /* 00102adc 00000048 */ utlIsEmyDamaging(){}  // ror
 /* 00102b24 00000048 */ utlTestEmyStateFlag(){}  // ror
-/* 00102b6c 00000084 */ FUN_00102b6c(){}
-/* 00102bf0 00000164 */ FUN_00102bf0(){}
-/* 00102d54 0000006c */ FUN_00102d54(){}
+/* 00102b6c 00000084 */ utlFindItemByUids(){}  // ror
+/* 00102bf0 00000164 */ utlFindItemByUid(){}  // ror
+/* 00102d54 0000006c */ utlFindVFchrByUid(){}  // ror
 /* 00102dc0 0000039c */ utlFindDoorBetween(){}  // ror
-/* 0010315c 000000e4 */ FUN_0010315c(){}
-/* 00103240 000000ec */ FUN_00103240(){}
-/* 0010332c 000000c4 */ FUN_0010332c(){}
-/* 001033f0 00000038 */ FUN_001033f0(){}
+/* 0010315c 000000e4 */ utlFindFreeObjByUid(){}  // ror
+/* 00103240 000000ec */ utlGetItemUids(){}  // ror
+/* 0010332c 00000064 */ utlTakeObjItem(){}  // ror
+/* 00103390 00000024 */ utlGetOidTypeKind(){}  // ror
+/* 001033b8 00000038 */ utlSetItemFlag2(){}  // ror
+/* 001033f0 00000038 */ utlIsItemFlag2(){}  // ror
 /* 00103428 00000024 */ utlMarkObjTaken(){}  // ror
 /* 0010344c 00000020 */ utlIsObj(){}  // ror
 /* 0010346c 00000018 */ utlTestSeqBit34(){}  // ror
 /* 00103484 00000034 */ utlIsVibrationOn(){}  // ror
 /* 001034b8 0000002c */ utlGetWrdNo(){}  // ror
 /* 001034e4 0000002c */ utlGetActorNo(){}  // ror
-/* 00103510 00000144 */ FUN_00103510(){}
-/* 00103654 00000118 */ FUN_00103654(){}
+/* 00103510 00000144 */ utlGetEmySpinePos(){}  // ror
+/* 00103654 00000118 */ utlFindNearestEmyInRange(){}  // ror
 /* 0010376c 00000324 */ utlCollectEmyInfoAt(){}  // ror
 /* 00103a90 0000023c */ utlCollectEmyInfo(){}  // ror
 /* 00103ccc 00000118 */ utlCollectItemInfo(){}  // ror
@@ -133,7 +135,7 @@
 /* 00103fd8 0000002c */ utlIsEmyState4(){}  // ror
 /* 00104004 0000009c */ utlTestDogHitAt(){}  // ror
 /* 001040a0 0000003c */ utlGetDogRadius(){}  // ror
-/* 001040dc 00000040 */ FUN_001040dc(){}
+/* 001040dc 00000040 */ utlSetDogRadius(){}  // ror
 /* 0010411c 00000034 */ utlGetObjKind(){}  // ror
 /* 00104150 00000074 */ utlSetBwnObjFlag(){}  // ror
 

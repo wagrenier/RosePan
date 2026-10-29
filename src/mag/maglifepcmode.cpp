@@ -637,10 +637,10 @@ void MagLifePCModeAttacking::live(MagLifePC *pc)
     }
     for (int i = 0; i < 8; i++)
         hit_radius[i] = pc->getWeaponHitPos(hit_pos[i], m_0c & 0xffff, i);
-    UtlEmyInfoBuf eib;
+    UtlEnemyInfoBuf eib;
     for (int i = 0; i < 32; i++)
     {
-        UtlEmyInfo &e = eib.m_info[i];
+        UtlEnemyInfo &e = eib.m_info[i];
         e.m_pos[2] = 0.0f;
         e.m_pos[1] = 0.0f;
         e.m_pos[0] = 0.0f;
@@ -650,7 +650,7 @@ void MagLifePCModeAttacking::live(MagLifePC *pc)
         e.m_trans[2] = 0.0f;
         e.m_trans[1] = 0.0f;
     }
-    eib.m_num = 0;
+    eib.m_count = 0;
     int num = utlCollectEmyInfo(&eib, 0);
     for (int i = 0; i < num; i++)
     {

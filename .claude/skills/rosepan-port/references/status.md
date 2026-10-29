@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 21:02 at commit `6162ff6` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-28 21:21 at commit `13cb7db` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-28 21:02 at commit `6162ff6` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7139**, named **6040** (85%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 4438
-- context-name ledger: 4736 entries; overrides of wrong library matches: 5
-- placed in a source file: 5099/7139 in 124 files
+- game functions: **7141**, named **6058** (85%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 260, ror-inferred 4456
+- context-name ledger: 4754 entries; overrides of wrong library matches: 5
+- placed in a source file: 5101/7141 in 124 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4481**; stubs: **520**
+- reconstructed RoR functions: **4530**; stubs: **489**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -76,7 +76,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 395 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 384 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -138,7 +138,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/utl/utlbtl.cpp` | 0 | 1 |
 | `src/utl/utlfile.cpp` | 2 | 0 |
 | `src/utl/utlfind.cpp` | 0 | 9 |
-| `src/utl/utlgame.cpp` | 0 | 20 |
+| `src/utl/utlgame.cpp` | 49 | 0 |
 | `src/utl/utlmath.cpp` | 25 | 0 |
 | `src/utl/utlmisc.cpp` | 24 | 0 |
 | `src/utl/utlrand.cpp` | 10 | 0 |
@@ -147,8 +147,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 163 TUs: todo 99, partial 5, verify 88, done 11
-- next: **utl/utlgame.cpp** (frontier score 82)
+- 163 TUs: todo 98, partial 5, verify 89, done 11
+- next: **unassigned@0016a914** (frontier score 76)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -234,6 +234,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `task/tsk_chr.cpp` 150/169 -- All of task/tsk_chr.cpp is now written; the inline dtors and empty terms the brief still lists as todo are in tsk_chr.h. Status verify: nothing on screen reache
 - verify: `task/tsk_man.cpp` 25/25 -- Pinned 0x1e7094..0x1e7f28 out of unassigned@001e6d54 (file name a guess, open-items). CmnITask slots: 1 get_task_type, 2 pause, 3 init, 4 exec(id, time, arg) no
 - verify: `task/tsk_scene.cpp` 76/93 -- Visual test: the 15 s smoke run ends on the disclaimer screen as before; nothing in this TU is reached yet (hits need the first room and an attack), so the TU i
+- verify: `utl/utlgame.cpp` 49/49 -- Complete; verify because nothing on screen shows it yet. The 240 s New Game run reaches the forest bus stop with Jennifer as before (no assert from this file; u
 - verify: `utl/utlmath.cpp` 25/25 -- Nothing on screen can show this yet: after the film the stage stays black (a ring indicator only) because utlDrawI3r ends in the i3rDrawModel stub 0x21fe68; the
 - verify: `utl/utlmisc.cpp` 24/24 -- Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and i
 - verify: `utl/utlrand.cpp` 10/10 -- Verify: the 15 s smoke run ends on the boot disclaimer as before; utlRandReset now runs from MagSystem's constructor (no stub hit) but no random draw shows on s
@@ -241,6 +242,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-28 21:21 `utl/utlgame.cpp` verify: reconstruct all 49 functions of utl/utlgame.cpp: tbl_sound (200 rows) and the sound helpers, the uid / door / item searches over GamMan's object lists, the enem
 - 2026-10-28 21:01 `fix/aspect_ratio.cpp` done: Any aspect ratio: the i3d camera widens by the renderer view extend (new RosePan_RendererWidenProjection, skipped in off-screen passes such as the shadow target
 - 2026-10-28 20:32 `fix/ingame_camera.cpp` done: First room in 3D after New Game: native 021 cases fixed to its jump table (3 and 6 setPc, 4 setDog, 5 setMurder) so the script binds the PC and GamMan::setPc pl
 - 2026-10-28 19:15 `utl/utlrand.cpp` verify: Split unassigned@00103edc: pinned 0x1041c4..0x10452c as utl/utlrand.cpp and wrote it whole (utlRandStep, utlRand, utlRandReset, utlRandSeed 0x104230 created in 
@@ -248,21 +250,20 @@ Recent sessions:
 - 2026-10-28 16:56 `emy/emy_out.cpp` verify: EmyOut and the emy helpers complete (all 58 functions of 0x166a1c..0x16a914): the last 24 written -- emyChkInAngle, isSameSecta, getAttackMotion, getTargetDir, 
 - 2026-10-28 16:44 `emy/emy_out.cpp` partial: EmyOut base and the emy helpers: ctor/dtor, termCommon, getBasePos/getTargetNodePos/getFrontPos/getTargetAngle, selectTarget/selectNearTarget, setMotion/setWalk
 - 2026-10-28 16:30 `i3d/i3ritem.cpp` verify: i3ritem.cpp complete: the 288 per-type item accessors after the fixup pairs (42 types, 0x22c5a0..0x22e840), 258 of them hidden and now Ghidra functions, named i
-- 2026-10-28 16:16 `i3d/i3rdraw.cpp` verify: Projected actor shadows drawn: rosepan_i3d follows FRAME_1 and hands the models of the shadow target pass (fbp 0x118, XYOFFSET 0) to the renderer's shadow atlas
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `utl/utlgame.cpp` | todo | 0/31/47 | 7.2 | 82 | 5 |
 | `unassigned@0016a914` | todo | 0/120/172 | 47.3 | 76 | 6 |
 | `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 75 | 6 |
-| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
 | `emy/emy_main.cpp` | partial | 2/24/88 | 11.0 | 54 | 0 |
+| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 51 | 1 |
 | `unassigned@00225018` | todo | 0/3/18 | 4.5 | 50 | 1 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
 | `unassigned@0011cb70` | todo | 0/6/7 | 0.7 | 24 | 3 |
 | `unassigned@0011c464` | todo | 0/3/6 | 0.5 | 19 | 3 |
+| `unassigned@001832e8` | todo | 0/1/1 | 0.0 | 18 | 1 |
 | `unassigned@001fd424` | todo | 0/18/61 | 26.3 | 18 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
@@ -279,7 +280,6 @@ Recent sessions:
 | `001832e8` | msgGetSysText | 13 | ror | stub | - |
 | `00225460` | FUN_00225460 | 12 | - | missing | - |
 | `002261b8` | FUN_002261b8 | 12 | - | missing | - |
-| `001026b0` | utlPlaySe | 12 | ror | stub | utl/utlgame.cpp |
 | `001874f4` | MsgManSet::setMessage | 11 | ror | stub | - |
 | `00187464` | MsgManSet::close | 11 | ror | stub | - |
 | `00164118` | EmyMain::EmyMain | 11 | ror | stub | emy/emy_main.cpp |
@@ -293,11 +293,8 @@ Recent sessions:
 | `00183b24` | MsgMan::~MsgMan | 6 | ror | missing | msg/msgman.cpp |
 | `002251f0` | i3rTrackGetValue | 5 | ror | stub | - |
 | `001874ac` | MsgManSet::update | 5 | ror | stub | - |
-| `00102ab8` | utlGetObjPos | 4 | ror | stub | utl/utlgame.cpp |
 | `001bebec` | GamFont::setFont | 4 | ror | stub | - |
-| `00104150` | utlSetBwnObjFlag | 4 | ror | stub | utl/utlgame.cpp |
 | `001a074c` | MnuTextList::close | 4 | ror | stub | mnu/mnuselect.cpp |
-| `0010376c` | utlCollectEmyInfoAt | 4 | ror | stub | utl/utlgame.cpp |
 | `001bedc0` | GamFont::setTarget | 4 | ror | stub | - |
 | `001c0254` | GamFont::getGlyphWidth | 4 | ror | stub | - |
 | `001a06d4` | MnuTextList::processPad | 4 | ror | stub | mnu/mnuselect.cpp |
@@ -309,4 +306,8 @@ Recent sessions:
 | `001002c0` | BedSubMode::pop | 3 | ror | stub | bed/bedsubmode.cpp |
 | `0016621c` | EmyMain::createHeldItem | 3 | ror | stub | emy/emy_main.cpp |
 | `0012f790` | MagLifeFadeKey::releaseTexture | 3 | ror | stub | mag/maglifefadekey.cpp |
+| `001beb70` | GamFont::GamFont | 2 | ror | missing | - |
+| `001ab474` | MnuOpt::MnuOpt | 2 | ror | missing | - |
+| `0011c64c` | MagLifePC::collectNearItems | 2 | ror | stub | mag/maglifepc2.cpp |
+| `001308bc` | MagLifeWindow::MagLifeWindow | 2 | ror | stub | mag/maglifewindow.cpp |
 

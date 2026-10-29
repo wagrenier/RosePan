@@ -2148,12 +2148,21 @@
    "why": "utlHitCheck 0x10456c and 0x1046b4 assert with utl/utlbtl.cpp; the two memset clears before them (0x10452c: 0x28 bytes, the record of 0x1046b4's m_pos_self / m_pos_aim / m_pos_target; 0x10454c: 0x14 bytes = UtlHitCheck, called from MagLifePC::startAttack before a hit check) are the records' inline clears; ends where unassigned@00104970 starts"
   },
   "utl/utlgame.cpp": {
+   "notes": "Complete; verify because nothing on screen shows it yet. The 240 s New Game run reaches the forest bus stop with Jennifer as before (no assert from this file; utlFindClear is reached next in utl/utlfind.cpp). Mark done when a run shows a sound, Brown command or the PC attack working through these helpers. The uid searches return a 64-bit uid << 32 | oid (unsigned long long on the host); utlFindMatchObj in utl/utlfind.h passes a float out where its prototype says FCHRstat * (open-items Open questions). The tail prototypes moved from lib/unassigned.h into utl/utlgame.h (unassigned.h includes it).",
    "ranges": [
     [
      "001024d0",
      "001041c4"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-28 21:21",
+     "status": "verify",
+     "summary": "reconstruct all 49 functions of utl/utlgame.cpp: tbl_sound (200 rows) and the sound helpers, the uid / door / item searches over GamMan's object lists, the enemy info collectors, the dog / enemy wrappers; two folded functions created (0x103390, 0x1033b8); UtlEmyInfoBuf renamed to the asserts' UtlEnemyInfoBuf with m_count / MAX_INFO"
+    }
+   ],
+   "status": "verify",
    "why": "utlgame.cpp asserts (12) span 0x1024d0..0x103e94; the run 0x103edc..0x1041c4 is the same family of one-call GamMan / EmyManager wrappers on the dog / enemy oid (utlSetDogParam1b .. utlSetBwnObjFlag), so it is taken as the file's tail; starts after bed/bedpfh's helpers end 0x1024d0"
   },
   "utl/utlmath.cpp": {
