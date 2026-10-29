@@ -200,7 +200,7 @@ void GamMan::initGameState()
 // 6400.se, 3 the sound table, 4 the system script image, 5 the stream
 // table. The buffer is cut to the pack's size, then to 0x60000 once the
 // script image is copied out.
-// ROR 0x001c1b48 // callcheck: FUN_00215a30, BedPfh, FileReadReq, FileReader, ~FileReader (the assert handler inside BedPfh's inlines; the locals' constructors and destructor)
+// ROR 0x001c1b48 // callcheck: dbgAssertFailed, BedPfh, FileReadReq, FileReader, ~FileReader (the assert handler inside BedPfh's inlines; the locals' constructors and destructor)
 
 void GamMan::loadSystemData()
 {
@@ -261,7 +261,7 @@ void GamMan::convertObjTable(GamObjTable *dst, const GamObjTable *src, int count
 // image, 1 the object table, 2 and 4 copied into their buffers. Then the
 // stage's sounds, the camera at (0, 1000, 0) turned -90 degrees, and the PC
 // and dog objects reset.
-// ROR 0x001c204c // callcheck: FUN_00215a30, BedPfh, FileReadReq, FileReader, ~FileReader, memset (the assert handler inside ROR_ASSERT and BedPfh's inlines; the locals' constructors and destructor; memset clears the two vectors, initializers here)
+// ROR 0x001c204c // callcheck: dbgAssertFailed, BedPfh, FileReadReq, FileReader, ~FileReader, memset (the assert handler inside ROR_ASSERT and BedPfh's inlines; the locals' constructors and destructor; memset clears the two vectors, initializers here)
 
 void GamMan::loadStage(int stage)
 {
@@ -543,7 +543,7 @@ void GamMan::setCameraMode(int mode, u_int no)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x001c7494 // callcheck: FUN_00215a30 (the assert handler, inside MagScene::getCameraMaxPath)
+// ROR 0x001c7494 // callcheck: dbgAssertFailed (the assert handler, inside MagScene::getCameraMaxPath)
 
 int GamMan::getMapCamNum()
 {
@@ -2091,7 +2091,7 @@ void GamMan::loadItemSe(u_short id, int cur)
 // param 0x32, the old held object released, a new one created and parented
 // to the PC's node p_hn_r (the lamp 0xa3e / 0xa43 keeps its count in
 // m_selItemNum), and its SE pack once flags2 0x40 or 0x200000 is set.
-// ROR 0x001c7a4c // callcheck: FUN_00215a30, i3rGetNodeIndexByName, memset (the assert handler and the call inside the inline DogModel::getNodeIndexByName; memset clears the zero vector, an initializer here)
+// ROR 0x001c7a4c // callcheck: dbgAssertFailed, i3rGetNodeIndexByName, memset (the assert handler and the call inside the inline DogModel::getNodeIndexByName; memset clears the zero vector, an initializer here)
 
 void GamMan::equipItem(short id)
 {
@@ -3880,7 +3880,7 @@ void GamMan::onSubSeqEnd()
 // the end, file n-4 is the stage-2 script image, n-2 the WRD room data,
 // and the actor files run down from n-5. Each actor is loaded hidden and
 // kept in the +0x1f880 records.
-// ROR 0x001c47c4 // callcheck: FUN_00215a30, BedPfh, FileReadReq, FileReader, ~FileReader (the assert handler inside BedPfh's inlines; the locals' constructors and destructor)
+// ROR 0x001c47c4 // callcheck: dbgAssertFailed, BedPfh, FileReadReq, FileReader, ~FileReader (the assert handler inside BedPfh's inlines; the locals' constructors and destructor)
 
 void GamMan::initStage2()
 {
@@ -4973,7 +4973,7 @@ void GamMan::setActorBindMode(u_int oid, int mode)
 
 // ──────────────────────────────────────────────────────────────────────
 // oid's position is cleared first (it becomes relative to the node).
-// ROR 0x001d1a5c // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName's asserts and call)
+// ROR 0x001d1a5c // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName's asserts and call)
 
 void GamMan::attachObj(u_int oid, u_int parent, const char *node)
 {
@@ -5610,7 +5610,7 @@ void GamMan::emptyAchr1d3a14(u_int oid)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x001c3a48 // callcheck: FUN_00215a30, BedPfh (the assert handler inside BedPfh's inlines)
+// ROR 0x001c3a48 // callcheck: dbgAssertFailed, BedPfh (the assert handler inside BedPfh's inlines)
 
 void GamMan::initStage2FromPack(void *pack)
 {

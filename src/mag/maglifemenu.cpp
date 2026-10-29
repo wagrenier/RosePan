@@ -94,7 +94,7 @@ static const MagLifeMenuTypeRec s_menuTypeTable[268] = {
 // ──────────────────────────────────────────────────────────────────────
 // The value of m_type's row; the end row's -1 when m_type is not in the
 // table (asserting when m_type is 0).
-// ROR 0x0012cf3c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0012cf3c // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 int MagLifeMenuBase::getTypeValue()
 {
@@ -344,7 +344,7 @@ MagLifeMenuPBook::MagLifeMenuPBook()
 // ──────────────────────────────────────────────────────────────────────
 // Picks the book whose page table holds the type's page (the personal
 // book first, then the diary), hands it the scene and inits it.
-// ROR 0x0012d400 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0012d400 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeMenuPBook::init(DogTexInfo *tex)
 {
@@ -433,7 +433,7 @@ MagLifeMenuBoard3D::~MagLifeMenuBoard3D()
 // ──────────────────────────────────────────────────────────────────────
 // Loads the type's model as a scene actor and saves the scene's camera
 // (render places its own), step 0.
-// ROR 0x0012d648 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0012d648 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeMenuBoard3D::init(DogTexInfo *tex)
 {
@@ -447,7 +447,7 @@ void MagLifeMenuBoard3D::init(DogTexInfo *tex)
 
 // ──────────────────────────────────────────────────────────────────────
 // Releases the actor init loaded and gives the scene its camera back.
-// ROR 0x0012d6c0 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0012d6c0 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeMenuBoard3D::term()
 {
@@ -491,7 +491,7 @@ int MagLifeMenuBoard3D::processPad(BedPad *pad)
 // at the origin unrotated, and fades in over 30 frames; step 1 waits for
 // the fade, step 3 fades out and back in (closing the menu). Every step
 // draws the actor into the layer.
-// ROR 0x0012d788 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0012d788 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeMenuBoard3D::render(I3dLayer *theRenderStage)
 {

@@ -252,7 +252,7 @@ const char *utlGetSoundName(int no)
     if (link >= 0)
     {
         no = link;
-        ROR_ASSERT(tbl_sound[no].m_tag == no); /* 325 */  // callcheck: FUN_00215a30 (the assert handler)
+        ROR_ASSERT(tbl_sound[no].m_tag == no); /* 325 */  // callcheck: dbgAssertFailed (the assert handler)
     }
     return tbl_sound[no].m_name;
 }
@@ -270,7 +270,7 @@ u_int utlGetSoundSE(u_int theN)
     u_int oid = 0;
     if (theN < UTL_SOUND_MAX)
     {
-        ROR_ASSERT(tbl_sound[theN].m_tag == (int)theN); /* 356 */  // callcheck: FUN_00215a30 (the assert handler)
+        ROR_ASSERT(tbl_sound[theN].m_tag == (int)theN); /* 356 */  // callcheck: dbgAssertFailed (the assert handler)
         int no = tbl_sound[theN].m_link;
         if (no >= 0)
         {
@@ -366,14 +366,14 @@ void utlGetObjPos(float *out, u_int oid)
 /* ROR 0x00102adc */
 int utlIsEmyDamaging(u_int theOID)
 {
-    ROR_ASSERT(theOID != 0); /* 575 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(theOID != 0); /* 575 */  // callcheck: dbgAssertFailed (the assert handler)
     return g_emyManager.isEmyDamaging(theOID);
 }
 
 /* ROR 0x00102b24 */
 int utlTestEmyStateFlag(u_int theOID)
 {
-    ROR_ASSERT(theOID != 0); /* 584 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(theOID != 0); /* 584 */  // callcheck: dbgAssertFailed (the assert handler)
     return g_emyManager.testEmyStateFlag(theOID);
 }
 
@@ -516,7 +516,7 @@ int utlGetItemUids(int *out, int theMax, u_int item)
 {
     int id = (int)(item & 0xffff);
     short field[8];
-    ROR_ASSERT(theMax >= 4); /* 797 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(theMax >= 4); /* 797 */  // callcheck: dbgAssertFailed (the assert handler)
     g_gamMan.m_sysData.getField(id, 0x10, field);
     out[0] = field[0];
     g_gamMan.m_sysData.getField(id, 0x11, field);
@@ -611,7 +611,7 @@ float utlGetEmySpinePos(float *out, u_int oid, int kind)
     if ((u_int)no >= 0x80)
         return 0.0f;
     DogActor &actor = g_magSystem.m_scene.m_actors[no];
-    int n = actor.getNodeIndexByName("Bip01 Spine1");   // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+    int n = actor.getNodeIndexByName("Bip01 Spine1");   // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
     ROR_ASSERT(n >= 0); /* 931 */
     if (n >= 0)     /* PC: the ROM's assert never returns */
         actor.getNodeWorldPos(out, n);
@@ -623,7 +623,7 @@ float utlGetEmySpinePos(float *out, u_int oid, int kind)
 /* ROR 0x00103654 */
 int utlFindNearestEmyInRange(float theR, const UtlEnemyInfoBuf &theInfo)
 {
-    ROR_ASSERT(-DOG_PI <= theR && theR < DOG_PI); /* 967 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(-DOG_PI <= theR && theR < DOG_PI); /* 967 */  // callcheck: dbgAssertFailed (the assert handler)
     ROR_ASSERT(0 <= theInfo.m_count && theInfo.m_count <= UtlEnemyInfoBuf::MAX_INFO); /* 968 */
     int count = theInfo.m_count;
     if (count <= 0)
@@ -688,7 +688,7 @@ int utlCollectEmyInfoAt(UtlEnemyInfoBuf *eib, const float *pos, int kind, int fl
         if ((obj->m_flags & (flag == 0 ? 0x400 : 0x2000)) != 0)
             continue;
         UtlEnemyInfo &e = eib->m_info[count];
-        if (fillEmyInfo(e, obj) != NULL)    // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+        if (fillEmyInfo(e, obj) != NULL)    // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
         {
             if (kind == 0)
                 e.m_radius = 0.0f;
@@ -723,7 +723,7 @@ int utlCollectEmyInfo(UtlEnemyInfoBuf *eib, int flag)
         if ((obj->m_flags & (flag == 0 ? 0x400 : 0x2000)) != 0)
             continue;
         UtlEnemyInfo &e = eib->m_info[count];
-        if (fillEmyInfo(e, obj) != NULL)    // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+        if (fillEmyInfo(e, obj) != NULL)    // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
             e.m_radius = g_emyManager.getEmyTypeDist(oid);
         count++;
         if (count >= UtlEnemyInfoBuf::MAX_INFO)
@@ -770,7 +770,7 @@ int utlPauseForMenu(void)
 int utlGetPcEquipItemChrID(void)
 {
     int id = g_gamMan.m_pcEquipItemChrID;
-    ROR_ASSERT(id < 128); /* 1241 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(id < 128); /* 1241 */  // callcheck: dbgAssertFailed (the assert handler)
     return id;
 }
 
@@ -778,7 +778,7 @@ int utlGetPcEquipItemChrID(void)
 int utlGetPcChrNo(void)
 {
     int id = g_gamMan.m_pcActor;
-    ROR_ASSERT(id < 128); /* 1251 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(id < 128); /* 1251 */  // callcheck: dbgAssertFailed (the assert handler)
     return id;
 }
 

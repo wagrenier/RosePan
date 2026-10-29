@@ -44,7 +44,7 @@ static int tenkyuStrNCaseCmp(const char *a, const char *b, size_t n)
 // ──────────────────────────────────────────────────────────────────────
 // Slot no's sky: its textures out of the scene's table, the model and the
 // node buffers back to the game heap.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013ff00
 
 void MagScene::releaseTenkyuTex(int no)
@@ -79,7 +79,7 @@ void MagScene::releaseTenkyuTex(int no)
 // the i3r is copied to the game heap, relocated, its textures added to
 // the scene's table (sepia per m_sepia) and assigned. With a motion, one
 // block holds the node matrices and the spins initTenkyuSpin fills.
-// callcheck: FUN_00215a30, BedPfh, strncasecmp (the assert handler inside the inline BedPfh::getFile; the local pack's constructor; the host's tenkyuStrNCaseCmp)
+// callcheck: dbgAssertFailed, BedPfh, strncasecmp (the assert handler inside the inline BedPfh::getFile; the local pack's constructor; the host's tenkyuStrNCaseCmp)
 // ROR 0x00140030
 
 void MagScene::loadTenkyuTex(int no, const BedPfh *pfh, i3dContext *ctx)

@@ -233,7 +233,7 @@ int McdMan::loadIconPack()
     return 0;
 }
 
-// ROR 0x00187b10 // callcheck: FUN_00215a30, BedPfh (the assert handler inside getFile; the local's constructor)
+// ROR 0x00187b10 // callcheck: dbgAssertFailed, BedPfh (the assert handler inside getFile; the local's constructor)
 int McdMan::loadData(int no)
 {
     BedPfh pfh;

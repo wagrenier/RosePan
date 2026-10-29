@@ -245,7 +245,7 @@ void SprMan::setDispList(const SprDispDef *def)
 // texture pack by name when m_font_in_pack, else the last pack font. 0 on
 // success.
 // ROR 0x0018c2e4
-// callcheck: FUN_00215a30 x2 (BedPfh::getFile's asserts, bed/bedpfh.h lines 85 / 86)
+// callcheck: dbgAssertFailed x2 (BedPfh::getFile's asserts, bed/bedpfh.h lines 85 / 86)
 
 int SprMan::setFont(const char *theName, int no)
 {

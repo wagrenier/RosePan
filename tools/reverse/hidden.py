@@ -4,8 +4,10 @@ unreferenced function after it").
 python hidden.py <lo> <hi>     scan a range (a TU's extent), read-only
 
 Prints two kinds of candidates:
-- code right after a `jr ra` / `j` (and its delay slot, nops skipped) that no branch in the range
-  targets and that does not start a known function: a new entry (rx's slot-check wrappers, 2026-10-22);
+- code right after a `jr ra` / `j` / `b` (and its delay slot, nops skipped) that no branch in the range
+  targets and that does not start a known function: a new entry (rx's slot-check wrappers, 2026-10-22;
+  `b` only as a spin -- a backward `b` over nothing but nops, the assert handlers' endless loop, whose
+  next function Ghidra folds in: debug/mimu_debug.cpp 2026-10-29);
 - `jal` targets inside the range that do not start a known function (a `j` there is usually a
   loop branch; check tail jumps by hand).
 Check each with `ghidra.py asm`, then `ghidra.py mkfunc <addr>` and name it in a batch.
@@ -41,7 +43,12 @@ def main():
 
     print('-- code after a return that nothing branches to')
     for i, (_, text) in enumerate(ins):
-        if text.startswith('jr ra') or text.startswith('j 0x'):
+        if text.startswith('b 0x'):
+            # only a spin: a backward b over nops (other b's land after jump-table cases)
+            t = int(text[4:], 16)
+            if not (t <= ins[i][0] and all(x == 'nop' for a, x in ins if t <= a < ins[i][0])):
+                continue
+        if text.startswith(('jr ra', 'j 0x', 'b 0x')):
             j = i + 2
             while j < len(ins) and ins[j][1] == 'nop':
                 j += 1

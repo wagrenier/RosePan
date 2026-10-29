@@ -451,7 +451,7 @@ void MagLifeBwnCtrlModeFollow::live(MagLifeBwnCtrl &theBwnCtrl)
         theBwnCtrl.requestState(1, 0, 0);
         return;
     default:
-        ROR_ASSERT(0); /* 735 */  // callcheck: FUN_00215a30 (the assert handler)
+        ROR_ASSERT(0); /* 735 */  // callcheck: dbgAssertFailed (the assert handler)
         return;
     }
 }
@@ -488,7 +488,7 @@ void MagLifeBwnCtrlModeFollow::followPC(MagLifeBwnCtrl &theBwnCtrl)
         tol = still ? 0.03926991f : 0.07853982f;
     }
     else
-        ROR_ASSERT(0); /* 789 */  // callcheck: FUN_00215a30 (the assert handler)
+        ROR_ASSERT(0); /* 789 */  // callcheck: dbgAssertFailed (the assert handler)
     float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     theBwnCtrl.m_bwn->getPosition(pos);
     float dist = utlVecDistXZ(pos, to);
@@ -640,7 +640,7 @@ void MagLifeBwnCtrlModeFind::init(MagLifeBwnCtrl &theBwnCtrl)
                 theBwnCtrl.m_08 = 12;
                 return;
             }
-            ROR_ASSERT(areapath.m_num >= 2); /* 1147 */  // callcheck: FUN_00215a30 (the assert handler)
+            ROR_ASSERT(areapath.m_num >= 2); /* 1147 */  // callcheck: dbgAssertFailed (the assert handler)
             /* (an empty loop over areapath's rooms 1 .. m_num - 1: a debug
              * print compiled out) */
             UtlDoorInfo door;
@@ -857,7 +857,7 @@ void MagLifeBwnCtrlModeFind::live(MagLifeBwnCtrl &theBwnCtrl)
             theBwnCtrl.m_find_result = -1;
             theBwnCtrl.m_mission = MISSION_NONE;
             u_int work2 = (u_int)theBwnCtrl.m_0c;
-            ROR_ASSERT(ERR_CANNOT_FIND_ITEM <= work2 && work2 < ERR_END); /* 1521 */  // callcheck: FUN_00215a30 (the assert handler)
+            ROR_ASSERT(ERR_CANNOT_FIND_ITEM <= work2 && work2 < ERR_END); /* 1521 */  // callcheck: dbgAssertFailed (the assert handler)
             theBwnCtrl.m_bwn->m_state = -1;
             theBwnCtrl.m_bwn->m_04 = -1;
             theBwnCtrl.m_bwn->message(1, s_findErrMotion[work2], 1);
@@ -1000,7 +1000,7 @@ void MagLifeBwnCtrlModeFindEnd::live(MagLifeBwnCtrl &theBwnCtrl)
     }
     if (theBwnCtrl.m_08 != 1)
     {
-        ROR_ASSERT(0); /* 1916 */  // callcheck: FUN_00215a30 (the assert handler)
+        ROR_ASSERT(0); /* 1916 */  // callcheck: dbgAssertFailed (the assert handler)
         return;
     }
     if (utlIsObj(theBwnCtrl.m_found_obj) == 0)
@@ -1070,7 +1070,7 @@ void MagLifeBwnCtrlModeDamage::init(MagLifeBwnCtrl &theBwnCtrl)
         motion = 0x6e;
         break;
     case 2:
-        ROR_ASSERT(0); /* 2038 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(0); /* 2038 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         break;
     case 3:
     case 4:
@@ -1092,7 +1092,7 @@ void MagLifeBwnCtrlModeDamage::live(MagLifeBwnCtrl &theBwnCtrl)
         theBwnCtrl.requestState(1, 0, 0);
         return;
     }
-    ROR_ASSERT(!theBwnCtrl.m_bwn->isMotionStateEndless()); /* 2067 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(!theBwnCtrl.m_bwn->isMotionStateEndless()); /* 2067 */  // callcheck: dbgAssertFailed (the assert handler)
 }
 
 // ROR 0x00128e20
@@ -1133,7 +1133,7 @@ int MagLifeBwnCtrlModeBark::findNearestEmy(MagLifeBwnCtrl &theBwnCtrl, UtlEnemyI
         break;
     }
     default:
-        ROR_ASSERT(0); /* 2129 */  // callcheck: FUN_00215a30 (the assert handler)
+        ROR_ASSERT(0); /* 2129 */  // callcheck: dbgAssertFailed (the assert handler)
         break;
     }
     int num = utlCollectEmyInfoAt(eib, pos, 0, 1, 0.0f, 500.0f);
@@ -1209,7 +1209,7 @@ void MagLifeBwnCtrlModeBark::live(MagLifeBwnCtrl &theBwnCtrl)
     int answer = theBwnCtrl.m_0c;
     MagLifeBwn *bwn = theBwnCtrl.m_bwn;
     bwn->getPosition(pos);
-    ROR_ASSERT((u_int)*work < BARK_MODE_END); /* 2191: work >= MODE_START && work < MODE_END */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT((u_int)*work < BARK_MODE_END); /* 2191: work >= MODE_START && work < MODE_END */  // callcheck: dbgAssertFailed (the assert handler)
 
     int health = bwn->getHealthStatus();
     if (health == 4)
@@ -1634,7 +1634,7 @@ void MagLifeBwnCtrlModeHug::live(MagLifeBwnCtrl &theBwnCtrl)
 void MagLifeBwnCtrlModeWound::init(MagLifeBwnCtrl &theBwnCtrl)
 {
     DogActor *actor = theBwnCtrl.m_bwn->m_actor; /* EE slot 11 getActor */
-    ROR_ASSERT(actor); /* 2931 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(actor); /* 2931 */  // callcheck: dbgAssertFailed (the assert handler)
     if (actor->getMotionNoBySuffix("dmgl_wait") != actor->m_motion.getNo())
     {
         theBwnCtrl.m_bwn->m_state = -1;
@@ -1718,7 +1718,7 @@ void MagLifeBwnCtrl::applyMode()
         break;
     default:
         m_mode_cur = NULL;
-        ROR_ASSERT(0); /* 3056 */  // callcheck: FUN_00215a30 (the assert handler)
+        ROR_ASSERT(0); /* 3056 */  // callcheck: dbgAssertFailed (the assert handler)
         break;
     }
     m_mode_count = 0;
@@ -1733,7 +1733,7 @@ void MagLifeBwnCtrl::applyMode()
 // ROR 0x0012a56c
 void MagLifeBwnCtrl::requestState(int theMode, int arg, int force)
 {
-    ROR_ASSERT(theMode >= 0); /* 3083 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(theMode >= 0); /* 3083 */  // callcheck: dbgAssertFailed (the assert handler)
     utlSetBwnObjFlag(1);
     /* PC: the ROM asks m_bwn's floor even while Brown is unbound (a read
      * through NULL on the EE); unbound counts as no flagged cell. */
@@ -1910,7 +1910,7 @@ int MagLifeBwnCtrl::findItemAhead()
     int num = utlCollectItemInfo(&eib, 1);
     if (num <= 0)
         return 0;
-    ROR_ASSERT(m_pc); /* 3511 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(m_pc); /* 3511 */  // callcheck: dbgAssertFailed (the assert handler)
     float pos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     m_pc->getPosition(pos);
     float best = 1e+06f;
@@ -1928,7 +1928,7 @@ int MagLifeBwnCtrl::findItemAhead()
         float dv = utlVecDot(dir, fwd);
         if (dv < 0.7f)
             continue;
-        ROR_ASSERT(dv > 0.0f && dv <= 1.0f); /* 3536 */  // callcheck: FUN_00215a30 (the assert handler)
+        ROR_ASSERT(dv > 0.0f && dv <= 1.0f); /* 3536 */  // callcheck: dbgAssertFailed (the assert handler)
         float dist = utlVecDist(e.m_pos, pos);
         e.m_dist = dist;
         float w = dist / dv;
@@ -2150,7 +2150,7 @@ void MagLifeBwnCtrl::requestHug(int arg)
 // ROR 0x0012b7cc
 void MagLifeBwnCtrl::setLevel(int theLevel)
 {
-    ROR_ASSERT(theLevel >= MAG_BWNCTRL_LEVEL_AUTO && theLevel <= MAG_BWNCTRL_LEVEL_MANUAL); /* 3922 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(theLevel >= MAG_BWNCTRL_LEVEL_AUTO && theLevel <= MAG_BWNCTRL_LEVEL_MANUAL); /* 3922 */  // callcheck: dbgAssertFailed (the assert handler)
     if (m_ctrl_level == theLevel)
         return;
     m_ctrl_level = theLevel;
@@ -2250,6 +2250,6 @@ MagLifeBwnCtrl::MagLifeBwnCtrl()
 // ROR 0x00283d54
 void MagLifeBwnCtrl::setMission(int m)
 {
-    ROR_ASSERT(m >= MISSION_NONE && m <= MISSION_HUG); /* mag/maglifebwnctrl.h 385 */  // callcheck: FUN_00215a30 (the assert handler)
+    ROR_ASSERT(m >= MISSION_NONE && m <= MISSION_HUG); /* mag/maglifebwnctrl.h 385 */  // callcheck: dbgAssertFailed (the assert handler)
     m_mission = m;
 }

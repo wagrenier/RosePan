@@ -145,7 +145,7 @@ u_int MagScene::getDrawFlags()
 // (FRAME fbp 0x118) over a dark sprite, lit by a 0.7 grey ambient, seen
 // from four clip radii away along -z with a frustum that just holds the
 // clip sphere.
-// callcheck: FUN_00215a30, FUN_0026cb48, i3rCopyClipSphere (the assert handler inside ROR_ASSERT; sqrtf; inside the inline DogModel::copyClipSphere); drawModel is the vtable slot 19
+// callcheck: dbgAssertFailed, FUN_0026cb48, i3rCopyClipSphere (the assert handler inside ROR_ASSERT; sqrtf; inside the inline DogModel::copyClipSphere); drawModel is the vtable slot 19
 // ROR 0x00139664
 
 void MagScene::drawCloseUp(i3dContext *ctx, DogActor *actor, DogEntity *src)
@@ -194,7 +194,7 @@ void MagScene::drawCloseUp(i3dContext *ctx, DogActor *actor, DogEntity *src)
 // ──────────────────────────────────────────────────────────────────────
 // The sky models in a layer at 1000 seen through an entity's transform
 // (rotation z, x, y then the translation, inverted). Nothing calls it.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x00139920
 
 void MagScene::drawTenkyuRotated(i3dContext *ctx, I3dLight *light, const float *trans,
@@ -242,7 +242,7 @@ void MagScene::drawTenkyuRotated(i3dContext *ctx, I3dLight *light, const float *
 // radii from the actor and never above y 0). The view just holds the clip
 // sphere; stq gets the projection (texture matrix x view), and the scene's
 // shadow light record the light the layers at 705 + 10 n are lit by.
-// callcheck: FUN_00215a30, FUN_0026cb48, i3rCopyClipSphere (the assert handler inside ROR_ASSERT; sqrtf; inside the inline DogModel::copyClipSphere); transform / drawShadow are vtable slots 2 / 20
+// callcheck: dbgAssertFailed, FUN_0026cb48, i3rCopyClipSphere (the assert handler inside ROR_ASSERT; sqrtf; inside the inline DogModel::copyClipSphere); transform / drawShadow are vtable slots 2 / 20
 // ROR 0x00139b4c
 
 void MagScene::makeActorShadow(int theCount, i3dContext *ctx, DogActor *actor, I3rStqMapEntity *stq)
@@ -421,7 +421,7 @@ void MagScene::makeActorShadow(int theCount, i3dContext *ctx, DogActor *actor, I
 // ──────────────────────────────────────────────────────────────────────
 // The focused actor close up, then a layer that restores the draw
 // environment.
-// callcheck: FUN_00215a30, I3rRoot__CheckIdString (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive)
+// callcheck: dbgAssertFailed, I3rRoot__CheckIdString (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive)
 // ROR 0x0013a464
 
 void MagScene::drawFocusActor(i3dContext *ctx, sceGsDBuff *dbuff, int frame)
@@ -442,7 +442,7 @@ void MagScene::drawFocusActor(i3dContext *ctx, sceGsDBuff *dbuff, int frame)
 // A textured quad (r_shadow) under every shown actor whose flags are 0x20
 // of 0x60: centred under Bip01 (or the actor's translation), sized by the
 // clip radius, dropped onto the ground castRay finds below.
-// callcheck: FUN_00215a30, I3rRoot__CheckIdString, i3rGetNodeIndexByName (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive; inside the inline DogModel::getNodeIndexByName); isHide / getNodeWorldPos are vtable slots 9 / 18
+// callcheck: dbgAssertFailed, I3rRoot__CheckIdString, i3rGetNodeIndexByName (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive; inside the inline DogModel::getNodeIndexByName); isHide / getNodeWorldPos are vtable slots 9 / 18
 // ROR 0x0013a57c
 
 void MagScene::drawBlobShadows(I3dLayer *layer)
@@ -516,7 +516,7 @@ void MagScene::drawBlobShadows(I3dLayer *layer)
 // The projected shadows of the shown actors whose flags are 0x60 of 0x60
 // (at most ten: drawActorShadow asserts the count), through the second
 // view with its depth range from m_22a4 / m_22b0.
-// callcheck: FUN_00215a30, I3rRoot__CheckIdString (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive); isHide is vtable slot 9
+// callcheck: dbgAssertFailed, I3rRoot__CheckIdString (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive); isHide is vtable slot 9
 // ROR 0x0013a924
 
 void MagScene::drawShadows(i3dContext *ctx, sceGsDBuff *dbuff, int frame)
@@ -545,7 +545,7 @@ void MagScene::drawShadows(i3dContext *ctx, sceGsDBuff *dbuff, int frame)
 // One actor's shadow: makeActorShadow renders it from the light and sets
 // the STQ map, then a layer at 705 + 10 n draws the sky's second models
 // (the ones with the STQ map) with the shadow light.
-// callcheck: FUN_00215a30, I3rRoot__CheckIdString (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive)
+// callcheck: dbgAssertFailed, I3rRoot__CheckIdString (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive)
 // ROR 0x0013ab30
 
 void MagScene::drawActorShadow(int theChara, int theCount, i3dContext *ctx, sceGsDBuff *dbuff,
@@ -579,7 +579,7 @@ void MagScene::drawActorShadow(int theChara, int theCount, i3dContext *ctx, sceG
 // i3d calls), counting their lives down; then, when m_22b4 is set, every
 // sky record's path as a line strip (m_22b4 1 copies the points first and
 // becomes 2).
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013ad24
 
 void MagScene::drawStrips(I3dLayer *layer)
@@ -688,7 +688,7 @@ void MagScene::drawStrips(I3dLayer *layer)
 
 // ──────────────────────────────────────────────────────────────────────
 // The four sky slots' first models (no camera cull).
-// callcheck: FUN_00215a30, I3rRoot__CheckIdString (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive)
+// callcheck: dbgAssertFailed, I3rRoot__CheckIdString (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive)
 // ROR 0x0013b20c
 
 void MagScene::drawTenkyu(I3dLayer *layer)
@@ -707,7 +707,7 @@ void MagScene::drawTenkyu(I3dLayer *layer)
 // 0x10000 when it hangs from another actor, plus 65535 - its distance to
 // the camera; the PC's key is 0. Returns the entries; *parented gets the
 // parented ones.
-// callcheck: FUN_00215a30, I3rRoot__CheckIdString (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive); getParent / isHide / setHide are vtable slots 4 / 9 / 8
+// callcheck: dbgAssertFailed, I3rRoot__CheckIdString (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive); getParent / isHide / setHide are vtable slots 4 / 9 / 8
 // ROR 0x0013b2ac
 
 int MagScene::collectActors(int *parented, MagSceneDrawEntry *theArray, int theMax, int flag3)
@@ -773,7 +773,7 @@ int MagScene::collectActors(int *parented, MagSceneDrawEntry *theArray, int theM
 // ──────────────────────────────────────────────────────────────────────
 // Bubble sort, ascending key: the far unparented actors first, the
 // parented ones (drawn after their parents) last.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013b580
 
 void MagScene::sortActors(MagSceneDrawEntry *theArray, int theMax)
@@ -799,7 +799,7 @@ void MagScene::sortActors(MagSceneDrawEntry *theArray, int theMax)
 // The draw list into the render stages of the actors' light sets: first
 // the mirror images (when the map has a mirror and this is not the flag-3
 // pass), then the actors.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT); draw is vtable slot 12
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT); draw is vtable slot 12
 // ROR 0x0013b650
 
 void MagScene::drawActors(MagSceneDrawEntry *theArray, int theMaxArray, I3dLayer **theRenderStage,
@@ -977,7 +977,7 @@ void MagScene::testCamera()
 // One frame of the scene into the i3d context (see the file comment).
 // dbuff and frame pick the draw environment the full-screen passes put
 // back.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013bcc0
 
 void MagScene::draw(i3dContext *ctx, sceGsDBuff *dbuff, int frame)

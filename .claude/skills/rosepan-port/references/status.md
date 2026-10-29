@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 08:01 at commit `f929cc8` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 08:15 at commit `4122be3` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-29 08:01 at commit `f929cc8` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7160**, named **6212** (87%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4610
-- context-name ledger: 4911 entries; overrides of wrong library matches: 5
-- placed in a source file: 5245/7160 in 126 files
+- game functions: **7163**, named **6221** (87%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4619
+- context-name ledger: 4920 entries; overrides of wrong library matches: 5
+- placed in a source file: 5261/7163 in 127 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4765**; stubs: **424**
+- reconstructed RoR functions: **4775**; stubs: **421**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -38,6 +38,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/bed/bedpad.cpp` | 14 | 0 |
 | `src/bed/bedpfh.cpp` | 4 | 0 |
 | `src/bed/bedsubmode.cpp` | 0 | 2 |
+| `src/debug/mimu_debug.cpp` | 9 | 0 |
 | `src/debug/motnamecnv0.cpp` | 0 | 2 |
 | `src/dog/dogactor.cpp` | 147 | 0 |
 | `src/dog/dogcamera.cpp` | 8 | 0 |
@@ -78,7 +79,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 356 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 353 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -124,7 +125,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/sct/sctlayer.cpp` | 35 | 0 |
 | `src/sequence/seqcall.cpp` | 43 | 0 |
 | `src/sequence/sequence.cpp` | 19 | 0 |
-| `src/sequence/seqvm.cpp` | 143 | 0 |
+| `src/sequence/seqvm.cpp` | 144 | 0 |
 | `src/snd/rxmpeg.cpp` | 67 | 0 |
 | `src/snd/sndman.cpp` | 52 | 0 |
 | `src/snd/unitque.cpp` | 9 | 0 |
@@ -149,8 +150,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 163 TUs: todo 97, partial 4, verify 92, done 13
-- next: **unassigned@002155a0** (frontier score 53)
+- 163 TUs: todo 97, partial 4, verify 92, done 14
+- next: **unassigned@00225018** (frontier score 50)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -226,7 +227,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `sct/sctlayer.cpp` 35/35 -- verify: a temporary self-test on two MAPUNIT.BIN packs (not committed) found every flat and sloped cell at its point, gave neighbour-chain paths both ways and s
 - verify: `sequence/seqcall.cpp` 43/43 -- TU complete: all 43 functions written; verify because no smoke run reaches native 252 (the boot pad stops at NowLoading) and sound has no picture. Decisions: st
 - verify: `sequence/sequence.cpp` 19/19 -- All 19 functions written; the smoke run executes Sequence::exec every frame with empty pools (screen black as before: no image is loaded because GamMan::loadSys
-- verify: `sequence/seqvm.cpp` 143/143 -- Status verify: complete code, screen still black. New in the boot: the registered threads run and reach seqFunc004 0x205570 and seqFunc029 0x208b98 (stubs in se
+- verify: `sequence/seqvm.cpp` 144/146 -- Status verify: complete code, screen still black. New in the boot: the registered threads run and reach seqFunc004 0x205570 and seqFunc029 0x208b98 (stubs in se
 - verify: `setup/i3d_draw_module.cpp` 0/0 -- Hook recorded in open-items Decisions (The native i3d hook). The committed screenshot is the forced test (ROSEPAN_I3D_TEST=1): S2DMAN.RPK @0x800 (PSMT8, Now Loa
 - verify: `setup/i3d_mesh_draw.cpp` 0/0 -- Verify: only the forced test (ROSEPAN_I3D_MESH_TEST=1, MagSystem::update) shows it; the screenshot shows Amanda in bind pose, the dress and hair textures matchi
 - verify: `snd/sndman.cpp` 52/52 -- Done as verify: SndMan::update runs every frame now, but every rxSnd call (rx/rxsnd.h, unassigned@00237ce8) is a stub, so nothing is heard and nothing on screen
@@ -247,6 +248,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 08:15 `debug/mimu_debug.cpp` done: debug/mimu_debug.cpp pinned 0x215a30..0x216154 and written whole: dbgAssertFailed, the silent traces dbgTraceMatrix (hidden at 0x215a70), dbgTraceFloat4, dbgTra
 - 2026-10-29 08:00 `emy/emy_main.cpp` verify: EmyMain reconstructed whole: constructor and destructor, setStartState (the state graph from the transition table), loadParam (the 0x60 script block onto the ac
 - 2026-10-29 07:41 `game/gamfont.cpp` done: GamFont written whole (28 functions, game/gamfont.cpp pinned 0x1beb70..0x1c05c0): setFont with the font header struct, setTarget / releaseTarget, clear, fillRec
 - 2026-10-29 07:20 `mag/maglifewindow.cpp` verify: MagLifeWindow written whole: constructor, live (timer), render (alpha fade + font-texture TexSpriteUV), setup, fadeIn/fadeOut, drawText (Shift-JIS, wrap, scroll
@@ -254,14 +256,13 @@ Recent sessions:
 - 2026-10-28 21:33 `eff/eff0.cpp` verify: Eff0, the base of the 43 Eff classes, and the shared effect helpers written: ctor, dtor, init, term, setVisible, live, render, renderPreMain, createPacketEntry,
 - 2026-10-28 21:21 `utl/utlgame.cpp` verify: reconstruct all 49 functions of utl/utlgame.cpp: tbl_sound (200 rows) and the sound helpers, the uid / door / item searches over GamMan's object lists, the enem
 - 2026-10-28 21:01 `fix/aspect_ratio.cpp` done: Any aspect ratio: the i3d camera widens by the renderer view extend (new RosePan_RendererWidenProjection, skipped in off-screen passes such as the shadow target
-- 2026-10-28 20:32 `fix/ingame_camera.cpp` done: First room in 3D after New Game: native 021 cases fixed to its jump table (3 and 6 setPc, 4 setDog, 5 setMurder) so the script binds the PC and GamMan::setPc pl
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 53 | 1 |
 | `unassigned@00225018` | todo | 0/3/18 | 4.5 | 50 | 1 |
 | `unassigned@001fd424` | todo | 0/24/61 | 26.3 | 32 | 0 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
+| `debug/mcd_debug.cpp` | todo | 0/0/5 | 1.1 | 24 | 0 |
 | `unassigned@0011cb70` | todo | 0/6/7 | 0.7 | 24 | 3 |
 | `unassigned@0016afcc` | todo | 0/109/158 | 45.7 | 23 | 3 |
 | `unassigned@0011c464` | todo | 0/3/6 | 0.5 | 19 | 3 |
@@ -278,8 +279,7 @@ Recent sessions:
 | `001be734` | FileReadReq::FileReadReq | 63 | ror | missing | game/gamfile.cpp |
 | `001be2dc` | FileReader::~FileReader | 30 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 25 | ror | missing | game/gamfile.cpp |
-| `002155f4` | FUN_002155f4 | 24 | - | missing | - |
-| `00215bb4` | dbgTraceVector4 | 22 | ror | stub | - |
+| `002155f4` | FUN_002155f4 | 24 | - | missing | debug/mcd_debug.cpp |
 | `00202f10` | TskEnemyMove::stop | 15 | ror | stub | - |
 | `001832e8` | msgGetSysText | 13 | ror | stub | - |
 | `00225460` | FUN_00225460 | 12 | - | missing | - |
@@ -315,4 +315,5 @@ Recent sessions:
 | `001ab598` | MnuOpt::init | 2 | ror | stub | - |
 | `001ab66c` | MnuOpt::processPad | 2 | ror | stub | - |
 | `0011ce50` | MagLifePC::getEquipItemChrNo | 2 | ror | stub | - |
+| `001a06e8` | MnuTextList::open | 2 | ror | stub | mnu/mnuselect.cpp |
 

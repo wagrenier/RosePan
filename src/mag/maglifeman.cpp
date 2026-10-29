@@ -42,7 +42,7 @@ void MagLifeMan::unlink(MagLifeEntry *ppod)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0011950c // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x0011950c // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeMan::insertBefore(MagLifeEntry *thePod1, MagLifeEntry *thePod2)
 {
@@ -66,7 +66,7 @@ void MagLifeMan::insertBefore(MagLifeEntry *thePod1, MagLifeEntry *thePod2)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x001195ac // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x001195ac // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeMan::insertAfter(MagLifeEntry *thePod1, MagLifeEntry *thePod2)
 {
@@ -112,7 +112,7 @@ void MagLifeMan::deleteAll()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x001196d4 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x001196d4 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 int MagLifeMan::add(MagLife *life, int priority)
 {
@@ -148,7 +148,7 @@ int MagLifeMan::add(MagLife *life, int priority)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00119810 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00119810 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 int MagLifeMan::remove(MagLife *life)
 {
@@ -177,7 +177,7 @@ int MagLifeMan::find(MagLife *life)
 
 // ──────────────────────────────────────────────────────────────────────
 // No callers in the ROM.
-// ROR 0x00119908 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00119908 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeMan::removeNo(int theNo)
 {
@@ -187,7 +187,7 @@ void MagLifeMan::removeNo(int theNo)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00119968 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00119968 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeMan::update(u_int mask)
 {
@@ -203,7 +203,7 @@ void MagLifeMan::update(u_int mask)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00119a38 // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// ROR 0x00119a38 // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
 void MagLifeMan::draw(I3dLayer *layer, u_int group)
 {

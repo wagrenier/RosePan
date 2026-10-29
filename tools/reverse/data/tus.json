@@ -72,6 +72,33 @@
    "status": "verify",
    "why": "the four BedPfh methods between BedMemory (0x101718 clears 7 words, not BedPfh's 5) and BedPad::~BedPad 0x101aec; bed/bedpfh.cpp / bedpfh.h assert strings in the ctor and getFileName"
   },
+  "debug/mcd_debug.cpp": {
+   "ranges": [
+    [
+     "002155f4",
+     "00215a30"
+    ]
+   ],
+   "why": "Between seqvm.cpp's static initializer 0x2155d4 and mimu_debug.cpp's assert handler 0x215a30: its own assert handler 0x2155f4 (format 0x301880; called by mnu/ msg/ snd/ rx), an unreferenced memory-card menu test 0x215634 (prints a futuki banner, drives a MnuMcd at data 0x2d9e80 with the pad) and that MnuMcd's static constructor / destructor 0x215998..0x215a30, with rodata 0x301880..0x301938 (its switch table 0x301920). File name invented: debug code around a memory card menu."
+  },
+  "debug/mimu_debug.cpp": {
+   "notes": "Done: every function written; the traces format and print nothing in the retail build, so no screenshot shows them (the 15 s smoke run still reaches the disclaimer screen as before). dbgFloatToStr was run on the host: 1.5 gives ' 1.500', 100.25 gives ' 100.200' (the ROM's lossy digit table), 0.001 gives --UNDERFLOW--, as the ROM computes. The prec argument (always 3) is never read. Split of unassigned@002155a0: debugNop 0x2155a0 and the seqvm static initializer 0x2155a8/0x2155d4 now end sequence/seqvm.cpp (debugNop declared in sequence.h; the initializer only zeroes g_seqThread/g_seqThreadEnd, which host zero-init does). debug/mcd_debug.cpp 0x2155f4..0x215a30 is a new todo TU: the second assert handler 0x2155f4 (ROR_ASSERT covers it), an unreferenced memory card menu test 0x215634 (futuki banner, MnuMcd at data 0x2d9e80, BedPad inline ctor/dtor on the stack, pad bits of BedPad +0x7c, counters 0x2db280..0x2db298) and the static MnuMcd ctor/dtor 0x215998/0x2159f0/0x215a10; nothing calls it, so it is low priority. 0x216154 (unassigned) calls the MagLoader 0x781268 and likely belongs to debug/motnamecnv0.cpp. callcheck comments across src now name dbgAssertFailed instead of FUN_00215a30.",
+   "ranges": [
+    [
+     "00215a30",
+     "00216154"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 08:15",
+     "status": "done",
+     "summary": "debug/mimu_debug.cpp pinned 0x215a30..0x216154 and written whole: dbgAssertFailed, the silent traces dbgTraceMatrix (hidden at 0x215a70), dbgTraceFloat4, dbgTraceVector3/4/4Alt, dbgSplitFloat, dbgFloatToStr, dbgUnused21614c; the unassigned@002155a0 run split into seqvm.cpp's tail (debugNop written) and the new TU debug/mcd_debug.cpp; hidden.py flags code after an assert spin"
+    }
+   ],
+   "status": "done",
+   "why": "The debug/mimu_debug.cpp string (0x301998) is the assert text of the float formatter 0x215e1c; rodata runs assert format 0x301938, the digit-count table 0x301958 that 0x215c74 copies, then that string: one file from the assert handler 0x215a30 (called by bed/ and this file) through the vector traces 0x215ae8..0x215c14, the float splitter 0x215c74, the formatter and the empty function 0x21614c. 0x216154 calls the MagLoader (0x781268) like debug/motnamecnv0.cpp."
+  },
   "dog/dogactor.cpp": {
    "notes": "Status verify: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run stays black after the film because the pose and draw path below DogActor is stubbed. Next for an actor on screen: dog/dogmotionblend.cpp (getPose 0x1081b0, getNodeRate 0x1078dc, step 0x107e30, stepLoop 0x1079d8, and the three declared this session: getTimeRatio 0x107560, setTimeRatio 0x107678, setBlendRate 0x108428, all decompiled in dogactor_003.json whys), then the i3m pose player unassigned@0022e840 (i3mGetPose 0x22e960, i3mGetBlendPose 0x22eab0, i3mPoseLerp, i3mPoseToMatrices, quaternion ops) and utlDrawI3r 0x106760 into the native i3d draw module. Decisions: ~DogActor 0x10f16c is not a host destructor (same policy as ~DogModel; comment-only annotation); DogActor::__tf comment-only; getMotion / getBlendMotion take the posture as void* and I3M_INTER as int until those types exist. Field renames: m_3b0 to m_base_trans, m_1dc to m_speed0, 0x1e0 m_time0, 0x458 m_speed_ratio, DogMotionBlend 0x14 m_14. The blend entry layout and the tag track layout are in architecture.md. References updated in this commit: architecture.md, hazards.md (member hiding), open-items.md item 5.",
    "sessions": [
@@ -1834,7 +1861,7 @@
    "ranges": [
     [
      "0020ff34",
-     "002155a0"
+     "002155f4"
     ]
    ],
    "sessions": [
@@ -1850,7 +1877,7 @@
     }
    ],
    "status": "verify",
-   "why": "The script VM after sequence.cpp: opcode handlers (tables data 0x2d9958 / 0x2d9a58 / 0x2d9b08), seqVmRun, the thread record save / load and the Sequence thread methods (startThread, killThreads, findThread, setupImage). No source-path string; a separate file is a guess (sequence.cpp could hold it all). 0x2155a0.. is debug / assert code, not the VM."
+   "why": "The script VM after sequence.cpp: opcode handlers (tables data 0x2d9958 / 0x2d9a58 / 0x2d9b08), seqVmRun, the thread record save / load and the Sequence thread methods. No source-path string; a separate file is a guess. Its tail: debugNop 0x2155a0 and the static initializer 0x2155a8 / 0x2155d4 that zeroes the VM globals g_seqThread / g_seqThreadEnd (bss 0x7b4640 / 0x7b4650): GCC emits a file's initializer after its functions, so both close this file. 0x2155f4.. is debug code."
   },
   "setup/ghidra_seed.cpp": {
    "notes": "Done. Snapshot of the names before seeding: work/snapshots/20261022_094006.json (gitignored, local). Every section function's Ghidra body now equals its section; the 3 tail-jump targets that do not follow a jr ra are labels inside functions (0x218424, 0x23a000, 0x2480a0) and were left alone. libmatch.py --list shows 5 SKIP rows, all named by hand already. Next: setup/platform_bootstrap.cpp.",
@@ -2218,6 +2245,7 @@
   "unassigned@002053f4": {},
   "unassigned@0020eda4": {},
   "unassigned@0020ff34": {},
+  "unassigned@002155a0": {},
   "unassigned@00216ad0": {},
   "unassigned@0021a3e8": {},
   "unassigned@0021c960": {},

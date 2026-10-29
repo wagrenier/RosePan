@@ -358,6 +358,10 @@ extern intptr_t g_seqPc;                    /* bss 0x7b4780: the word being run 
  * stores an address into script data goes through these. */
 intptr_t seqVmLoadWord(intptr_t addr);
 void     seqVmStoreWord(intptr_t addr, intptr_t value);
+
+/* An empty function at the end of seqvm.cpp; mainExceptionHandler calls it
+ * first (a breakpoint hook the retail build left empty). */
+void debugNop(void);                                                     // ROR 0x002155a0
 extern int      g_seqHi;                    /* bss 0x7b4790 */
 extern int      g_seqLo;                    /* bss 0x7b47a0 */
 /* A taken jump: an image offset + 0x8160, a native call below 0x8160, or

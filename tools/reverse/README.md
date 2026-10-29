@@ -60,7 +60,7 @@ python refresh.py          # all of the above that is not a one-time write, in o
 | `modview.py` | `range <lo> <hi>` / `tree <func> [depth]` -- one line per function: name, provenance, size, call sites, callees, strings. Offline. |
 | `dec.py` | `python dec.py <addr\|name> ...` -- decompile over HTTP. |
 | `ghidra.py` | `asm` (read-only disassembly of any range), `func`, `xrefs`, `refs` (xrefs + `jal`/`j` encodings + data words + low halves: "is it really unreferenced"), `find`, `segments`, `mkfunc` (create + save, lock retry). |
-| `hidden.py` | `python hidden.py <lo> <hi>` -- functions Ghidra folded into the body before them: code after a return nothing branches to, `jal` targets that start no function. Run it over a TU's range before naming; then `ghidra.py mkfunc`. |
+| `hidden.py` | `python hidden.py <lo> <hi>` -- functions Ghidra folded into the body before them: code after a return (`jr ra`, `j`, or an assert's `b .` spin) nothing branches to, `jal` targets that start no function. Run it over a TU's range before naming; then `ghidra.py mkfunc`. |
 | `mipsdis.py` | Offline R5900 disassembler over the ELF, annotated with cached names; for code Ghidra has no function for. |
 | `vudis.py` | `python vudis.py <image addr> <qwords> <micro addr> [...] \| --all` -- VU microcode disassembler: follows a microprogram image's VIF MPG codes in the ELF and prints upper \| lower instructions from each address to its [E] bit (vcallms takes the instruction index). The i3d VU0 image is `2949f0 9c`. |
 | `mipsemu.py` | A tiny EE integer interpreter: run a leaf function over every input to check a C rewrite of a switch-table function; `Emu` with load / call hooks for non-leaf ones. |

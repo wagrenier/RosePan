@@ -145,26 +145,8 @@ float utlDirDist(float x, float z, float *dist)
 
 // ---- stubs (tools/reverse/stubgen.py) ----
 
-// stub of ROR 0x002155a0
-void debugNop(void)
-{
-    ROSEPAN_STUB("debugNop", 0x002155a0);
-}
-
 // ---- bridges (hand-written) ----
 
-// stub of ROR 0x00215b5c
-void dbgTraceVector3(float x, float y, float z)
-{
-    ROSEPAN_STUB("dbgTraceVector3", 0x00215b5c);
-}
-
-
-// stub of ROR 0x00215bb4
-void dbgTraceVector4(const float *v)
-{
-    ROSEPAN_STUB("dbgTraceVector4", 0x00215bb4);
-}
 
 // ---- bridge: utlTm2GetSize (2026-10-22, the dogtexinfo session) ----
 // The ROM's code, until utl/utltm2.cpp (unassigned@00104970) is written:

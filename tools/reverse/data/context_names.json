@@ -19607,6 +19607,36 @@
   "was": "FUN_002155a0",
   "why": "empty function in the debug range before debug/mimu_debug.cpp; mainExceptionHandler calls it first"
  },
+ "002155a8": {
+  "name": "__static_initialization_and_destruction_0$seqvm",
+  "tag": "ror-inferred",
+  "was": "FUN_002155a8",
+  "why": "GCC 2 file initializer: (1, 0xffff) zeroes g_seqThread / g_seqThreadEnd (bss 0x7b4640 / 0x7b4650); no destruction part"
+ },
+ "002155d4": {
+  "name": "_GLOBAL_$I$seqvm",
+  "tag": "ror-inferred",
+  "was": "FUN_002155d4",
+  "why": "the ctors-table entry (data 0x2e0158) calling the seqvm initializer with (1, 0xffff)"
+ },
+ "00215a30": {
+  "name": "dbgAssertFailed",
+  "tag": "ror-inferred",
+  "was": "FUN_00215a30",
+  "why": "prints 'Assertion Failed: %s(%d)   %s' with (file, line, expr) and loops for ever; the assert target of bed/ and debug/mimu_debug.cpp (0x2155f4 is a second copy in debug/mcd_debug.cpp)"
+ },
+ "00215a70": {
+  "name": "dbgTraceMatrix",
+  "tag": "ror-inferred",
+  "was": "FUN_00215a70",
+  "why": "hidden after dbgAssertFailed's loop: formats the 16 floats of a 4x4 matrix row by row with dbgFloatToStr into four stack buffers and prints nothing; no references"
+ },
+ "00215ae8": {
+  "name": "dbgTraceFloat4",
+  "tag": "ror-inferred",
+  "was": "FUN_00215ae8",
+  "why": "formats its four float arguments with dbgFloatToStr (3 decimals) into stack buffers and prints nothing, like dbgTraceVector3 with a fourth value; no callers"
+ },
  "00215b5c": {
   "name": "dbgTraceVector3",
   "tag": "ror-inferred",
@@ -19618,6 +19648,30 @@
   "tag": "ror-inferred",
   "was": "FUN_00215bb4",
   "why": "formats four floats (3 digits) into stack buffers and prints nothing, the four-float twin of dbgTraceVector3 0x215b5c"
+ },
+ "00215c14": {
+  "name": "dbgTraceVector4Alt",
+  "tag": "ror-inferred",
+  "was": "FUN_00215c14",
+  "why": "code identical to dbgTraceVector4 (formats v[0..3]); no callers"
+ },
+ "00215c74": {
+  "name": "dbgSplitFloat",
+  "tag": "ror-inferred",
+  "was": "FUN_00215c74",
+  "why": "splits an IEEE float's bits into sign (2 overflow / 3 underflow), integer part, binary fraction, its shift and decimal digit count (table 0x301958); only dbgFloatToStr calls it"
+ },
+ "00215e1c": {
+  "name": "dbgFloatToStr",
+  "tag": "ror-inferred",
+  "was": "FUN_00215e1c",
+  "why": "asserts theValStr (debug/mimu_debug.cpp line 262), writes sign, integer digits, '.', three decimals, or --UNDERFLOW-- / # OVERFLOW #; returns the buffer"
+ },
+ "0021614c": {
+  "name": "dbgUnused21614c",
+  "tag": "ror-inferred",
+  "was": "FUN_0021614c",
+  "why": "an empty function (jr ra) at the end of debug/mimu_debug.cpp, no references"
  },
  "00216184": {
   "name": "motNameConvert",

@@ -146,7 +146,7 @@ void EmyOut::termCommon()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00166b74 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x00166b74 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 void EmyOut::getBasePos(float *pos)
 {
@@ -158,7 +158,7 @@ void EmyOut::getBasePos(float *pos)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00166c8c // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x00166c8c // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 void EmyOut::getTargetNodePos(float *pos)
 {
@@ -303,7 +303,7 @@ void emyStartTurn(float arg, EmyOut *out, int dog)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x001672e8 // callcheck: FUN_00215a30, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the double wrap in emyAbsAngle)
+// ROR 0x001672e8 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the double wrap in emyAbsAngle)
 
 int emyChkInAngle(float angle, EmyOut *out, u_int target)
 {
@@ -316,7 +316,7 @@ int emyChkInAngle(float angle, EmyOut *out, u_int target)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0016768c // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x0016768c // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 int EmyOut::isSameSecta(u_int target)
 {
@@ -387,7 +387,7 @@ int emyChkChase(float range, float angle, EmyOut *out, u_int target, int useAngl
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00167a64 // callcheck: FUN_00215a30, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the wrap in double)
+// ROR 0x00167a64 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the wrap in double)
 
 int EmyOut::getTargetDir(float *vec, float *angle)
 {
@@ -635,7 +635,7 @@ void EmyOut::leaveGroup()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00168a30 // callcheck: FUN_00215a30, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the wraps in double)
+// ROR 0x00168a30 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the wraps in double)
 
 int EmyOut::slideToTarget(int *node, const int *back, int *count, int frames)
 {
@@ -669,7 +669,7 @@ int EmyOut::slideToTarget(int *node, const int *back, int *count, int frames)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00168ea0 // callcheck: FUN_00215a30, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the wrap in double)
+// ROR 0x00168ea0 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the wrap in double)
 
 void EmyOut::snapToTarget(int *node, const int *back)
 {
@@ -688,7 +688,7 @@ void EmyOut::snapToTarget(int *node, const int *back)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0016913c // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x0016913c // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 void EmyOut::dropItem()
 {
@@ -877,7 +877,7 @@ int emyCanReach(const float *from, const float *to)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00169810 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x00169810 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 int emyAttachItem(u_int oid, u_int item)
 {
@@ -958,7 +958,7 @@ int emyChkNearXZY(float r, const float *a, const float *b)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00169bac // callcheck: FUN_00215a30, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the double wrap in emyAbsAngle)
+// ROR 0x00169bac // callcheck: dbgAssertFailed, i3rGetNodeIndexByName, fptodp, dpcmp, dpadd, dpsub, dptofp (DogModel::getNodeIndexByName inline; the double wrap in emyAbsAngle)
 
 int emyChkInSight(float range, float angle, int useAngle, u_int target, ACHRstat *achr)
 {
@@ -979,7 +979,7 @@ int emyChkInSight(float range, float angle, int useAngle, u_int target, ACHRstat
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00169f94 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x00169f94 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 int emyChkHitReach(float range, u_int oid, int nodes, u_int target)
 {
@@ -998,7 +998,7 @@ int emyChkHitReach(float range, u_int oid, int nodes, u_int target)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0016a1dc // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x0016a1dc // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 int emyChkHitReachXZ(float range, u_int oid, int nodes, u_int target)
 {
@@ -1017,7 +1017,7 @@ int emyChkHitReachXZ(float range, u_int oid, int nodes, u_int target)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0016a424 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x0016a424 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 int emyChkPointReach(float range, const float *points, int n, u_int target)
 {
@@ -1034,7 +1034,7 @@ int emyChkPointReach(float range, const float *points, int n, u_int target)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0016a594 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x0016a594 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 void emyGetSEPos(u_int oid, float *pos)
 {
@@ -1048,7 +1048,7 @@ void emyGetSEPos(u_int oid, float *pos)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0016a6b4 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x0016a6b4 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 void emyGetPCPos(float *pos)
 {
@@ -1063,7 +1063,7 @@ void emyGetPCPos(float *pos)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x0016a7ac // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x0016a7ac // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 void emyGetDogPos(float *pos)
 {

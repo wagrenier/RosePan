@@ -33,7 +33,7 @@ BedMemory g_utlMemory;                          /* bss 0x6e9800: the game heap *
 /* ROR 0x00105650 */
 int utlIsTccName(const char *theName)
 {
-    ROR_ASSERT(theName);    // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(theName);    // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     if (theName == NULL) {
         return 0;   /* PC: the ROM's handler hangs here; do not walk NULL */
     }

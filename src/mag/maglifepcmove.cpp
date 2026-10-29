@@ -173,7 +173,7 @@ static void getRootStep(DogActor *actor, float speed, float *move, float *rot, f
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011e4c4
 float MagLifePC::sweepSides(float range, float radius, const float *from, const float *delta,
                             float *out)
@@ -245,7 +245,7 @@ float MagLifePC::sweepSides(float range, float radius, const float *from, const 
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011ea04
 float MagLifePC::sweepMove(float range, float radius, const float *from, const float *delta,
                            float *out)
@@ -365,7 +365,7 @@ void MagLifePC::moveBy(const float *move, float trans_ofs_y, float rot)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011f0b4
 int MagLifePC::moveTank(BedPad *pad)
 {
@@ -465,7 +465,7 @@ int MagLifePC::isKeepMotion(int no)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // callcheck: getModeArg, getMotionFrame, getMotionMove (in getRootStep)
 // ROR 0x0011f4a8
 void MagLifePC::moveToward(float theRotY, float thePlyY, float speed, const char *theIn,
@@ -524,7 +524,7 @@ void MagLifePC::moveToward(float theRotY, float thePlyY, float speed, const char
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // callcheck: getModeArg, getMotionFrame, getMotionMove (in getRootStep)
 // ROR 0x0011f884
 void MagLifePC::moveStanceStep(float theRotY, float speed, const char *theMotion)
@@ -543,7 +543,7 @@ void MagLifePC::moveStanceStep(float theRotY, float speed, const char *theMotion
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // callcheck: utlNormalize3, utlVecToRot (in stickWorldRotY)
 // ROR 0x0011f9f8
 int MagLifePC::moveFree(BedPad *pad)
@@ -596,7 +596,7 @@ int MagLifePC::moveFree(BedPad *pad)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // callcheck: utlNormalize3, utlVecToRot (in stickWorldRotY)
 // ROR 0x0011ff10
 int MagLifePC::moveAttackStance(BedPad *pad)
@@ -630,7 +630,7 @@ int MagLifePC::moveAttackStance(BedPad *pad)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001203a0
 int MagLifePC::moveDowned(BedPad *pad)
 {
@@ -670,7 +670,7 @@ int MagLifePC::movePad(BedPad *pad)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00120668
 void MagLifePC::applyMotionMove()
 {

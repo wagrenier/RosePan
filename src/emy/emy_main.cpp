@@ -373,7 +373,7 @@ int EmyMain::updateGroup(float f, int motion, const float *pos)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// ROR 0x00165280 // callcheck: FUN_00215a30, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
+// ROR 0x00165280 // callcheck: dbgAssertFailed, i3rGetNodeIndexByName (DogModel::getNodeIndexByName inline)
 
 void EmyMain::getBasePos(float *pos)
 {

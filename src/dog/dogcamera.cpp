@@ -23,7 +23,7 @@ static void copyVector(sceVu0FVECTOR dst, const sceVu0FVECTOR src)
 }
 
 // ROR 0x0010f860
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 void DogCamera::saveCamera()
 {
     ROR_ASSERT(m_saved==0);  /* 22 */
@@ -35,7 +35,7 @@ void DogCamera::saveCamera()
 }
 
 // ROR 0x0010f8cc
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 void DogCamera::restoreCamera()
 {
     ROR_ASSERT(m_saved != 0);  /* 36 */

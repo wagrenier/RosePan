@@ -21,7 +21,7 @@
 alignas(16) static const float ShadowAmbient[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013f49c
 
 void MagScene::checkLightNo(int theNo)
@@ -30,7 +30,7 @@ void MagScene::checkLightNo(int theNo)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013f4d0
 
 void MagScene::setLightNo(int theNo)
@@ -41,7 +41,7 @@ void MagScene::setLightNo(int theNo)
 
 // ──────────────────────────────────────────────────────────────────────
 // theNum is indexed by light kind (DOG_LIGHT_*).
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013f528
 
 void MagScene::setLightFlags(const int *theNum, int theNo)
@@ -67,7 +67,7 @@ void MagScene::setLightFlags(const int *theNum, int theNo)
 // into sets 0 and 1, the directional and point lights into set 1 only.
 // The light m_shadow_no counts down to (the directional light first)
 // becomes the shadow light.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013f658
 
 void MagScene::loadLight(const void *theData)
@@ -142,7 +142,7 @@ void MagScene::setDefaultLight()
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013f980
 
 void MagScene::setLightParam(int type, int idx, int which, const float *v, int theNo)
@@ -155,7 +155,7 @@ void MagScene::setLightParam(int type, int idx, int which, const float *v, int t
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013fa50
 
 void MagScene::getLightParam(int type, int idx, int which, float *theA, int theNo)
@@ -170,7 +170,7 @@ void MagScene::getLightParam(int type, int idx, int which, float *theA, int theN
 
 // ──────────────────────────────────────────────────────────────────────
 // The ROM compares unsigned (a negative set fails "< (8)" too).
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013fb3c
 
 void MagScene::copyLightSet(int theD, int theS)
@@ -187,7 +187,7 @@ void MagScene::copyLightSet(int theD, int theS)
 // point or spot light, m_shadow_lightrec as its one spot light
 // (makeActorShadow fills the record from m_shadow_src each shadow). The
 // pool lookups are doglightpool.h's const accessors (lines 141..143).
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT); getDirectLight / getPointLight / getSpotLight are the ROM's inlined pool accessors
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT); getDirectLight / getPointLight / getSpotLight are the ROM's inlined pool accessors
 // ROR 0x0013fbe4
 
 void MagScene::setShadowLight(int theLight, int theNo)

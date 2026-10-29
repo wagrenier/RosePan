@@ -314,7 +314,7 @@ int MagLifeControlChara::isMotionSeqStarted()
 // ──────────────────────────────────────────────────────────────────────
 // Follows the rows from m_seq_no along m_next_state: 1 at an endless row,
 // 0 where the chain ends.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011a064
 int MagLifeControlChara::isMotionStateEndless()
 {
@@ -343,7 +343,7 @@ int MagLifeControlChara::isMotionStateEndless()
 // runs, counts its frames (m_frames > 0, while the actor is in no mode)
 // or the motion's loops (with the row's sound each loop), and moves to
 // m_next_state after m_frames, or ends the chain.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011a14c
 void MagLifeControlChara::updateMotionSeq()
 {
@@ -381,7 +381,7 @@ void MagLifeControlChara::updateMotionSeq()
 // ──────────────────────────────────────────────────────────────────────
 // changeMotionSeq of theState's next state, or of theState itself when it
 // has none.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011a27c
 void MagLifeControlChara::changeMotionSeqAlt(int theState, int blend)
 {
@@ -400,7 +400,7 @@ void MagLifeControlChara::changeMotionSeqAlt(int theState, int blend)
 // (flag 1 for a counted-loop row, 0x40 for flag bit 0), blend < 0 taking
 // the row's blend (0 becomes 5 while the actor still blends in), and the
 // row's sound. Nothing while the row already runs; row 0 only resets.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011a320
 void MagLifeControlChara::changeMotionSeq(int theState, int blend)
 {
@@ -435,7 +435,7 @@ void MagLifeControlChara::changeMotionSeq(int theState, int blend)
 // ──────────────────────────────────────────────────────────────────────
 // theMotion (and sub) on the actor; a zero link (m_78) blends in 0 frames
 // once.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011a4ec
 int MagLifeControlChara::changeMotion(float speed, const char *theMotion, u_int flags,
                                       const char *sub, int blend)
@@ -487,7 +487,7 @@ void MagLifeControlChara::playSe(int se)
 // A footstep on the motion's event bit 0 this frame: table[] by the floor
 // sector's sound slot (the map's default when it has none), the second of
 // a pair while m_04 / 13 is odd.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011a738
 void MagLifeControlChara::playStepSe(const int *table)
 {
@@ -525,7 +525,7 @@ void MagLifeControlChara::playStepSe(const int *table)
 // EE slot 2: the actor faces the camera (its z axis turned into
 // rotations: x negated, y half a turn) and sits m_distance along the
 // direction from its world position to the camera's.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0011a8f4
 void MagLifeBillboard::live()
 {

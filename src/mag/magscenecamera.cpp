@@ -56,7 +56,7 @@ static inline float camModf(float t, int *ip)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013c664
 
 void MagScene::getCameraPathWork(MagCameraPathWork *theWork, MagSceneCRec *path)
@@ -162,7 +162,7 @@ void MagScene::restoreCamera()
 // (mode 3: when > 0, 4 / 5: when >= 0); mode 5 takes [0] as the path's
 // point and [1] / 1000 as its fraction instead, and with no param puts the
 // camera on the path's first point.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT and the inline getCameraMaxPath)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT and the inline getCameraMaxPath)
 // ROR 0x0013caf0
 
 void MagScene::setCameraMode(int mode, int arg, const int *param)
@@ -276,7 +276,7 @@ void MagScene::setCameraMode(int mode, int arg, const int *param)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30, I3rRoot__CheckIdString (the assert handler; inside the inline DogModel::isAlive)
+// callcheck: dbgAssertFailed, I3rRoot__CheckIdString (the assert handler; inside the inline DogModel::isAlive)
 // ROR 0x0013d240
 
 void MagScene::seekCameraPath(float pos)
@@ -363,7 +363,7 @@ int MagScene::getCameraMode(int *out)
 // m_alt == 1 flips its view; a longer one projects the actor onto the
 // camera's segment and aims two segment lengths of that ahead. A new goal
 // sets the move bit 0x10 and clears m_cam_move_frame.
-// callcheck: FUN_00215a30, I3rRoot__CheckIdString, modff (the assert handler; inside the inline DogModel::isAlive; modff inside camModf)
+// callcheck: dbgAssertFailed, I3rRoot__CheckIdString, modff (the assert handler; inside the inline DogModel::isAlive; modff inside camModf)
 // ROR 0x0013d5e4
 
 void MagScene::changeCamera()
@@ -421,7 +421,7 @@ void MagScene::changeCamera()
 // letter: a tenth too), [1] 'a'..'z' both distances to 100 + 20 per letter,
 // [2] 'a'..'z' widens the band by 10 per letter each way. flags bit 1 adds
 // 1e6 when a ray from the camera point toward target hits.
-// callcheck: FUN_00215a30, modff (the assert handler inside ROR_ASSERT; modff inside camModf)
+// callcheck: dbgAssertFailed, modff (the assert handler inside ROR_ASSERT; modff inside camModf)
 // ROR 0x0013d8f8
 
 float MagScene::scoreCameraPath(MagSceneCRec *thePath, const float *target, u_int flags)
@@ -606,7 +606,7 @@ int MagScene::findCameraPathStart(float pos, const MagSceneCRec *path, const flo
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x0013e190
 
 void MagScene::setCameraOnPath(float theF, const float *thePos, int theI, int theMax)
@@ -720,7 +720,7 @@ static bool camAnyPath(const MagScene *s)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30, I3rRoot__CheckIdString, modff (the assert handler; inside the inline DogModel::isAlive; modff inside camModf)
+// callcheck: dbgAssertFailed, I3rRoot__CheckIdString, modff (the assert handler; inside the inline DogModel::isAlive; modff inside camModf)
 // ROR 0x0013e548
 
 void MagScene::updateCamera()

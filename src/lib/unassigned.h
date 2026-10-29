@@ -735,16 +735,7 @@ struct MnuBoard2D
 };
 static_assert(offsetof(MnuBoard2D, m_board) == 0x10b8, "m_board");
 
-/* ---- the debug range before debug/mimu_debug.cpp (unassigned@0020eda4) ---- */
-
-void debugNop(void);                                                     // ROR 0x002155a0
-
-/* ---- after the assert handler 0x215a30 (unassigned@0020ff34) ---- */
-
-/* Formats the three floats (3 digits) and prints nothing: a trace whose
- * output the retail build compiled out. */
-void dbgTraceVector3(float x, float y, float z);                         // ROR 0x00215b5c
-/* The same for four floats. */
-void dbgTraceVector4(const float *v);                                    // ROR 0x00215bb4
+/* debugNop 0x2155a0: sequence/sequence.h. */
+#include "debug/mimu_debug.h"
 
 #endif /* _LIB_UNASSIGNED_H */

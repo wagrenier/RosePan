@@ -243,7 +243,7 @@ void MagLifePC::orderDog(int state, u_int flags)
             ctrl->orderStay(0);
         return;
     }
-    ROR_ASSERT(0);  /* 1046 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(0);  /* 1046 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -261,7 +261,7 @@ void MagLifePC::pickUpNearItem()
     }
     if (collectNearItems(50.0f, itemdata, 10) > 0)
     {
-        ROR_ASSERT(itemdata[0].m_obj_id != 0);  /* 1065 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(itemdata[0].m_obj_id != 0);  /* 1065 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         changeState(19, itemdata[0].m_obj_id, 0);
     }
 }
@@ -443,7 +443,7 @@ int MagLifePC::message(int msg, const float *arg)
     case 5:
     case 8:
     default:
-        ROR_ASSERT(0);  /* 1607 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(0);  /* 1607 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         break;
     case 6:
     case 9:
@@ -543,42 +543,42 @@ void MagLifePC::setParam(float theValue, int id)
     switch (id)
     {
     case 6:
-        ROR_ASSERT(theValue >= 0.0f && theValue < 1.0f);  /* 1619 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(theValue >= 0.0f && theValue < 1.0f);  /* 1619 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         m_dead_zone = theValue;
         break;
     case 7:
-        ROR_ASSERT(theValue > 0.0f && theValue < 90.0f);  /* 1623 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(theValue > 0.0f && theValue < 90.0f);  /* 1623 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         m_cos_1fc = cosf((theValue * DOG_PI) / 180.0f);
         break;
     case 8:
-        ROR_ASSERT(theValue > 0.0f && theValue < 90.0f);  /* 1627 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(theValue > 0.0f && theValue < 90.0f);  /* 1627 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         m_cos_200 = cosf((theValue * DOG_PI) / 180.0f);
         break;
     case 9:
-        ROR_ASSERT(theValue >= 0.0f && theValue < 10.0f);  /* 1631 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(theValue >= 0.0f && theValue < 10.0f);  /* 1631 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         m_204 = theValue;
         break;
     case 10:
-        ROR_ASSERT(theValue > 0.0f && theValue < 180.0f);  /* 1636 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(theValue > 0.0f && theValue < 180.0f);  /* 1636 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         m_208 = theValue / 180.0f;
         break;
     case 11:
-        ROR_ASSERT(theValue > 0.0f && theValue < 1.0f);  /* 1642 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(theValue > 0.0f && theValue < 1.0f);  /* 1642 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         m_stick_threshold = theValue;
         break;
     case 12:
-        ROR_ASSERT(theValue > 0.0f && theValue < 1000.0f);  /* 1646 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(theValue > 0.0f && theValue < 1000.0f);  /* 1646 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         m_sweep_range = theValue;
         break;
     case 13:
-        ROR_ASSERT(theValue > 0.0f && theValue < 1000.0f);  /* 1650 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(theValue > 0.0f && theValue < 1000.0f);  /* 1650 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         m_sweep_radius = theValue;
         break;
     case 14:
         m_218 = theValue;
         break;
     default:
-        ROR_ASSERT(0);  /* 1657 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+        ROR_ASSERT(0);  /* 1657 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
         return;
     }
 }
@@ -588,7 +588,7 @@ void MagLifePC::setParam(float theValue, int id)
 // ROR 0x0011bc64
 void MagLifePC::pushSubMode()
 {
-    ROR_ASSERT(m_submode_level >= 0 && m_submode_level < MAX_SUBMODE_STACK);  /* 1666 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(m_submode_level >= 0 && m_submode_level < MAX_SUBMODE_STACK);  /* 1666 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     int *slot = m_submode_stack[m_submode_level];
     slot[0] = m_state;
     slot[1] = m_04;
@@ -602,7 +602,7 @@ void MagLifePC::pushSubMode()
 // ROR 0x0011bcd8
 void MagLifePC::popSubMode()
 {
-    ROR_ASSERT(m_submode_level > 0 && m_submode_level <= MAX_SUBMODE_STACK);  /* 1674 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(m_submode_level > 0 && m_submode_level <= MAX_SUBMODE_STACK);  /* 1674 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     int level = m_submode_level - 1;
     m_submode_level = level;
     const int *slot = m_submode_stack[level];
@@ -752,7 +752,7 @@ MagLifePC::MagLifePC()
 // ROR 0x0011c1e8
 void MagLifePC::changeState(int theMode, int arg, int force)
 {
-    ROR_ASSERT(theMode >= 0);  /* 2340 */  // callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+    ROR_ASSERT(theMode >= 0);  /* 2340 */  // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
     if (m_state == theMode && theMode != 0 && force == 0)
         return;
     clearMotionSeq();

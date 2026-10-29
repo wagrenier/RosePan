@@ -85,7 +85,7 @@ void MagScene::initFocus()
 // ──────────────────────────────────────────────────────────────────────
 // Mode 0 releases efffocus and drops the track; any other adds efffocus
 // (once) and becomes the mode.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x00140b20
 
 void MagScene::setFocus(int mode)
@@ -238,7 +238,7 @@ void MagScene::shrinkFocusFrame(i3dContext *ctx, u_int fbp)
 // to the view's width and height there, colour (1, 1, 1, m_val[0]),
 // drawn into the frame at fbp (XYOFFSET 1792, 1824) with z test GEQUAL
 // and blend mode 0x44.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT); the camera's transform is EE vtable slot 2 (callTransform)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT); the camera's transform is EE vtable slot 2 (callTransform)
 // ROR 0x00141184
 
 void MagScene::drawFocusPlane(float dist, i3dContext *ctx, u_int fbp)
@@ -445,7 +445,7 @@ void MagScene::runFocusTrack()
 //   movealpha TO N          the alpha lerps from where it is
 //   movedist PLANE TO N     setFocusLerp(PLANE, -1, TO, N)
 // A line of fewer than two words is skipped.
-// callcheck: FUN_00215a30, dptofp (the assert handler inside ROR_ASSERT; the float conversion of atof's double)
+// callcheck: dbgAssertFailed, dptofp (the assert handler inside ROR_ASSERT; the float conversion of atof's double)
 // ROR 0x001419d8
 
 int MagScene::execFocusCommand(char *line)

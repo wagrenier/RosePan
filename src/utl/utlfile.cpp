@@ -13,7 +13,7 @@
 // ──────────────────────────────────────────────────────────────────────
 // Copies theSrc (NULL: nothing) into theDest, cut to theSize - 1 chars,
 // always terminated.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00105e50
 
 void utlStrCopy(char *theDest, int theSize, const char *theSrc)
@@ -30,7 +30,7 @@ void utlStrCopy(char *theDest, int theSize, const char *theSrc)
 
 // ──────────────────────────────────────────────────────────────────────
 // utlStrCopy of a then b (either may be NULL), together cut to theSize - 1.
-// callcheck: FUN_00215a30 (the assert handler, inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 // ROR 0x00105f0c
 
 void utlStrCopy2(char *theDest, int theSize, const char *a, const char *b)

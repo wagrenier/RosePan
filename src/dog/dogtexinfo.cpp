@@ -49,7 +49,7 @@ static inline void dogTexTrim(DogTexInfo *t)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x001161e4
 
 I3dTexEntry *DogTexInfo::getTexInfo(int theN)
@@ -87,7 +87,7 @@ void DogTexInfo::clear()
 // ──────────────────────────────────────────────────────────────────────
 // Empties the table: theMax zeroed name records and texture records from
 // the game heap (term frees the old ones first).
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x001162ac
 
 void DogTexInfo::init(int theMax)
@@ -180,7 +180,7 @@ void DogTexInfo::term()
 // ──────────────────────────────────────────────────────────────────────
 // The last reference frees the texture: terms its texture / CLUT, leaves
 // the name record empty ("") and clears the record (freeing its TIM2 copy).
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x00116618
 
 void DogTexInfo::release(int theN)
@@ -217,7 +217,7 @@ void DogTexInfo::release(int theN)
 // ──────────────────────────────────────────────────────────────────────
 // Releases one reference to each texture the model's root names, then
 // trims m_num_tex.
-// callcheck: FUN_00215a30, i3rGetNumTex, i3rGetTexName (the assert handler inside ROR_ASSERT; inside the inline DogModel::get_nTex / getTexName)
+// callcheck: dbgAssertFailed, i3rGetNumTex, i3rGetTexName (the assert handler inside ROR_ASSERT; inside the inline DogModel::get_nTex / getTexName)
 // ROR 0x001167f4
 
 void DogTexInfo::releaseModel(DogModel *model)
@@ -243,7 +243,7 @@ void DogTexInfo::releaseModel(DogModel *model)
 // ──────────────────────────────────────────────────────────────────────
 // Releases one reference to each texture named in a pack's name table,
 // which follows its header and offset table, then trims m_num_tex.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x001169d0
 
 void DogTexInfo::releasePfh(const BedPfhHead *head)
@@ -273,7 +273,7 @@ void DogTexInfo::releasePfh(const BedPfhHead *head)
 // A texture already in VRAM: an existing name returns its record as it is
 // (no reference counted); a new one takes the last empty record, else the
 // next new one.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x00116b5c
 
 int DogTexInfo::add(const I3dTexDesc *desc, const char *name)
@@ -315,7 +315,7 @@ int DogTexInfo::add(const I3dTexDesc *desc, const char *name)
 // A texture and CLUT from a TIM2 (a heap copy when flags is not 0; the
 // ROM sizes it twice and tags the block 0 or 2 by the second size). A
 // TIM2 without a CLUT leaves the record's CLUT NULL.
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x00116d14
 
 int DogTexInfo::addData(const char *theTexName, void *theTM2, int flags, int tcc)
@@ -393,7 +393,7 @@ int DogTexInfo::addData(const char *theTexName, void *theTM2, int flags, int tcc
 // Adds a pack's TIM2s under the pack's names, or -- with an i3r model --
 // the pack's TIM2s the model names, under the model's names. sepia not 0
 // turns each picture sepia first (utlTm2ToSepia with the table's colour).
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT and BedPfh's inline getNumFile / getFile)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT and BedPfh's inline getNumFile / getFile)
 // ROR 0x001170b8
 
 int DogTexInfo::addPfh(const BedPfh *pfh, I3rRoot *theI3r, int flags, int sepia)
@@ -448,7 +448,7 @@ int DogTexInfo::addPfh(const BedPfh *pfh, I3rRoot *theI3r, int flags, int sepia)
 // ──────────────────────────────────────────────────────────────────────
 // Texture fname takes texture ename's picture, CLUT and index (the
 // picture's VRAM copy is dropped, i3dTexRelease).
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x001173d4
 
 void DogTexInfo::copy(const char *fname, const char *ename)
@@ -468,7 +468,7 @@ void DogTexInfo::copy(const char *fname, const char *ename)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30 (the assert handler inside ROR_ASSERT)
+// callcheck: dbgAssertFailed (the assert handler inside ROR_ASSERT)
 // ROR 0x001174c4
 
 void DogTexInfo::setTexFlag(int theNo, int tcc)
@@ -484,7 +484,7 @@ void DogTexInfo::setTexFlag(int theNo, int tcc)
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// callcheck: FUN_00215a30, i3dCtxSetTexTable (the assert handler inside ROR_ASSERT; a tail jump)
+// callcheck: dbgAssertFailed, i3dCtxSetTexTable (the assert handler inside ROR_ASSERT; a tail jump)
 // ROR 0x0011756c
 
 void DogTexInfo::setTexTable(i3dContext *p)

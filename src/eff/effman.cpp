@@ -758,7 +758,7 @@ int EffMan::loadPack(int kind, const char *suffix, int keep)
 // relocated, then the TIM2 textures added to the scene's table (the
 // first file of another kind ends the list: the effect's parameters);
 // with textures the table goes to the context, and the models get it.
-// callcheck: FUN_00215a30, clear (the assert handler inside ROR_ASSERT and the inline getNumFile / getFile; the clear before the constructor, which sets every member)
+// callcheck: dbgAssertFailed, clear (the assert handler inside ROR_ASSERT and the inline getNumFile / getFile; the clear before the constructor, which sets every member)
 // ROR 0x001782cc
 
 int EffMan::readPack(EffPackReq *req)

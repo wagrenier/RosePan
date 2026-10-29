@@ -87,7 +87,7 @@ void MagLifeBwn::requestState(int mode, int a, int b)
     m_next_state[2] = a;
 }
 
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001233f4
 int MagLifeBwn::changeMode(int theMode, int a, int b)
 {
@@ -107,7 +107,7 @@ int MagLifeBwn::changeMode(int theMode, int a, int b)
 // the last two (a single cell: the target, when a straight line to it
 // stays inside). Each point's w is the length to the next; the widths are
 // the cells' narrower sides. The index starts 150 along the line.
-// callcheck: FUN_00215a30, dpcmp, dpsub, dptofp, fptodp (the assert handler; the double fabs)
+// callcheck: dbgAssertFailed, dpcmp, dpsub, dptofp, fptodp (the assert handler; the double fabs)
 // ROR 0x0012349c
 int MagLifeBwn::searchPath(const float *target)
 {
@@ -190,7 +190,7 @@ int MagLifeBwn::searchPath(const float *target)
 // A sphere of theSize round the b_ch1 node (moved by ofs) against the
 // scene. On a hit, a wall-like normal gives a step back (0, 0, -1) turned
 // by Brown's heading, anything else no step.
-// callcheck: FUN_00215a30, i3rGetNodeIndexByName (the assert handler; inside the inline DogModel::getNodeIndexByName)
+// callcheck: dbgAssertFailed, i3rGetNodeIndexByName (the assert handler; inside the inline DogModel::getNodeIndexByName)
 // ROR 0x0012391c
 int MagLifeBwn::checkBodyHit(float theSize, float *out, const float *ofs)
 {
@@ -344,7 +344,7 @@ u_int MagLifeBwn::testObjAt(const float *ofs)
 // ──────────────────────────────────────────────────────────────────────
 // The index moves over each segment's length (the points' w); it stops
 // at the last point.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00124008
 int MagLifeBwn::advancePathIndex(float theLength, int thePosIndex)
 {
@@ -532,7 +532,7 @@ int MagLifeBwn::message(u_int mode, int a, int b)
 // The neck sub motion theMotion over s_neckNodes, fading to theRate over
 // 20 frames; the one already playing only takes the new rate (rate 0
 // fades it). theMotion < 0 clears it.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x0012481c
 void MagLifeBwn::setNeckMotion(float theRate, int theMotion)
 {
@@ -591,7 +591,7 @@ void MagLifeBwn::clearNeckMotion()
 // (none beyond 90 degrees). The neck sub motion then follows: a new
 // octant fades in over 15 frames, the same one takes the rate, none winds
 // the motion's ratio down by 0.1 a frame and clears it at 0.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001249b4
 void MagLifeBwn::updateLook()
 {
@@ -860,7 +860,7 @@ int MagLifeBwn::calcHealth()
 // turn; the first with a cell gives the direction (1..4) in the high
 // half, which Brown then walks a unit a frame until a cell is under him,
 // for at most 100 steps (then 5: given up).
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00125368
 void MagLifeBwn::escapeNoFloor()
 {
@@ -952,7 +952,7 @@ void MagLifeBwn::setActor(DogActor *actor, int no, int mode)
 // ──────────────────────────────────────────────────────────────────────
 // The pending state enters once the current mode's term agrees (state 0
 // enters regardless); the old state is saved as setState saves it.
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00125704
 int MagLifeBwn::applyState(int force)
 {

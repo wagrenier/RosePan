@@ -81,7 +81,7 @@ void DogMotionBlend::reset()
 // entry m_main and the entries as m_sub[4]. The text is the ROM's with this
 // header's names. Each function repeats the length lookup with its own line
 // numbers (a macro or an inline in the source).
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00107560
 
 float DogMotionBlend::getTimeRatio()
@@ -103,7 +103,7 @@ float DogMotionBlend::getTimeRatio()
     return r;
 }
 
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x00107678
 
 int DogMotionBlend::setTimeRatio(float theRatio)
@@ -159,7 +159,7 @@ static void dogMotionBlendFade(DogMotionBlendEntry &e, float mf)
         e.m_count = e.m_time;
 }
 
-// callcheck: FUN_00215a30, dogMotionBlendFade (the assert handler; the fade step inline)
+// callcheck: dbgAssertFailed, dogMotionBlendFade (the assert handler; the fade step inline)
 // ROR 0x001079d8
 
 int DogMotionBlend::stepLoop()
@@ -255,7 +255,7 @@ int DogMotionBlend::stepLoop()
     return ret;
 }
 
-// callcheck: FUN_00215a30, dogMotionBlendFade (the assert handler; the fade step inline)
+// callcheck: dbgAssertFailed, dogMotionBlendFade (the assert handler; the fade step inline)
 // ROR 0x00107e30
 
 int DogMotionBlend::step()
@@ -340,7 +340,7 @@ int DogMotionBlend::step()
     return ret;
 }
 
-// callcheck: FUN_00215a30 (the assert handler)
+// callcheck: dbgAssertFailed (the assert handler)
 // ROR 0x001081b0
 
 int DogMotionBlend::getPose(void *thePosture)
@@ -385,7 +385,7 @@ int DogMotionBlend::getPose(void *thePosture)
     return maxnode;
 }
 
-// callcheck: FUN_00215a30, fptodp, dpcmp (the assert handler; the 0.0 double compare)
+// callcheck: dbgAssertFailed, fptodp, dpcmp (the assert handler; the 0.0 double compare)
 // ROR 0x00108428
 
 void DogMotionBlend::setBlendRate(float theRatio, int theNo, int theTime)
