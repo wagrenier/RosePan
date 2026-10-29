@@ -1084,9 +1084,13 @@ static intptr_t seqFindEntry(intptr_t pc)
 
 // A script address of image idx (as m_base counts it) as a host address
 // in its code (inline in every thread starter).
+// PC: the script's base (native 018 case 0x1e) is a host pointer, and an
+// entry the script stored in a 32-bit record word (GamAreaTrg::m_entry) has
+// lost its top half; the offset into the image is taken in 32 bits, as
+// the EE's addresses are, so both forms give the same pc.
 static intptr_t seqImagePc(const Sequence *seq, u_int idx, intptr_t entry)
 {
-    return entry + g_seqImageState[idx].m_code - seq->m_base[idx];
+    return g_seqImageState[idx].m_code + (int)((u_int)entry - (u_int)seq->m_base[idx]);
 }
 
 // ──────────────────────────────────────────────────────────────────────

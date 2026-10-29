@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 19:15 at commit `248d07a` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-28 20:32 at commit `ded2127` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -147,9 +147,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 163 TUs: todo 99, partial 5, verify 88, done 9
-- next: **unassigned@00184f2c** (frontier score 60)
-- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
+- 163 TUs: todo 100, partial 5, verify 88, done 10
+- next: **fix/aspect_ratio.cpp** (pinned in the queue)
+- pinned queue: fix/aspect_ratio.cpp, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `dog/dogactor.cpp` 147/147 -- Status verify: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run stays black after the film because the pose and draw path below DogActo
@@ -241,6 +241,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-28 20:32 `fix/ingame_camera.cpp` done: First room in 3D after New Game: native 021 cases fixed to its jump table (3 and 6 setPc, 4 setDog, 5 setMurder) so the script binds the PC and GamMan::setPc pl
 - 2026-10-28 19:15 `utl/utlrand.cpp` verify: Split unassigned@00103edc: pinned 0x1041c4..0x10452c as utl/utlrand.cpp and wrote it whole (utlRandStep, utlRand, utlRandReset, utlRandSeed 0x104230 created in 
 - 2026-10-28 19:07 `mag/maglife.cpp` verify: MagLifeControlChara's motion sequence (changeMotionSeq, changeMotionSeqAlt, updateMotionSeq, isMotionStateEndless, changeMotion, the m_48 phase helpers), the fl
 - 2026-10-28 16:56 `emy/emy_out.cpp` verify: EmyOut and the emy helpers complete (all 58 functions of 0x166a1c..0x16a914): the last 24 written -- emyChkInAngle, isSameSecta, getAttackMotion, getTargetDir, 
@@ -248,22 +249,21 @@ Recent sessions:
 - 2026-10-28 16:30 `i3d/i3ritem.cpp` verify: i3ritem.cpp complete: the 288 per-type item accessors after the fixup pairs (42 types, 0x22c5a0..0x22e840), 258 of them hidden and now Ghidra functions, named i
 - 2026-10-28 16:16 `i3d/i3rdraw.cpp` verify: Projected actor shadows drawn: rosepan_i3d follows FRAME_1 and hands the models of the shadow target pass (fbp 0x118, XYOFFSET 0) to the renderer's shadow atlas
 - 2026-10-28 15:08 `i3d/i3rdraw.cpp` partial: Depth-keyed batches: i3rDrawModel no longer records the whole model at a layer packet; i3rDrawMesh45 / 46 file one state packet per 0x4d mesh in its material's 
-- 2026-10-28 13:57 `i3d/i3rdraw.cpp` partial: Native mesh module draws every material layer of a batch: DrawBatch follows i3rPktCallStrips 0x221080 -- per layer of the mesh's material, the byte in the 0x4d 
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 60 | 3 |
-| `utl/utlgame.cpp` | todo | 0/31/47 | 7.2 | 57 | 0 |
+| `utl/utlgame.cpp` | todo | 0/31/47 | 7.2 | 82 | 5 |
+| `unassigned@0016a914` | todo | 0/120/172 | 47.3 | 76 | 6 |
+| `unassigned@00184f2c` | todo | 0/6/84 | 10.0 | 75 | 6 |
+| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 54 | 5 |
 | `emy/emy_main.cpp` | partial | 2/24/88 | 11.0 | 54 | 0 |
-| `unassigned@0016a914` | todo | 0/120/172 | 47.3 | 51 | 1 |
-| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 46 | 0 |
-| `unassigned@00225018` | todo | 0/3/18 | 4.5 | 45 | 0 |
-| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 44 | 3 |
+| `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 51 | 1 |
+| `unassigned@00225018` | todo | 0/3/18 | 4.5 | 50 | 1 |
 | `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 34 | 4 |
 | `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
+| `unassigned@0011cb70` | todo | 0/6/7 | 0.7 | 24 | 3 |
+| `unassigned@0011c464` | todo | 0/3/6 | 0.5 | 19 | 3 |
 | `unassigned@001fd424` | todo | 0/18/61 | 26.3 | 18 | 0 |
-| `mnu/mnuselect.cpp` | partial | 3/6/14 | 3.0 | 16 | 0 |
-| `utl/utlfind.cpp` | todo | 0/9/10 | 1.4 | 16 | 1 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
