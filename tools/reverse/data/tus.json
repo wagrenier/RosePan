@@ -261,6 +261,24 @@
    "status": "verify",
    "why": "Eff0 base class (ctor/dtor/slots, vtable 0x2e3250) and the shared effect helpers before EffBg1's constructor 0x16afcc, the first class in alphabetical link order"
   },
+  "eff/effcameraanim1.cpp": {
+   "notes": "Pinned 0x16f71c..0x16fb70 (one file per Eff class, link order). Seen working: the 200 s New Game run creates it twice in the picture-book stretch (181 and 161 keys, lens 55 degrees); frames 3300..3420 show the girl reading the picture book by the bench, the same frames are black with init returning 0. Not seen: the restore path at the last key (the first instance had not reached frame 181 when the scene moved on). 0x16fb70 named effStrIndex (no callers) opens an unclassed helper run 0x16fb70..0x1704a4 (effCalcViewDepth, effMoveToward, FUN_0016fc20 and others): a shared helper file between effcameraanim1 and effdust2, still inside unassigned@0016afcc. Next for effects: EffLight1 0x174dd8 and gamCreateEff1a 0x172678, both reached in the same stretch.",
+   "ranges": [
+    [
+     "0016f71c",
+     "0016fb70"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 10:49",
+     "status": "done",
+     "summary": "EffCameraAnim1 (kind 0xd): init, setKey, liveMain and the linkonce no-draw slots; the class moved out of effclasses.h into eff/effcameraanim1.h with the event file layout (EffCameraFile, 0x1c-byte EffCameraKey)"
+    }
+   ],
+   "status": "done",
+   "why": "EffCameraAnim1's two out-of-line methods and setKey, between EffBreath2Ground (0x16f55c) and the shared helper run 0x16fb70 (no class); one file per Eff class in alphabetical link order"
+  },
   "eff/effman.cpp": {
    "notes": "Verify: the 200 s run creates EffLight1 (kind 0x21) and EffCameraAnim1 (kind 0xd) during the picture book; their init is a stub returning 0, so createEff deletes them and nothing new draws. Screen unchanged from the last session (title, picture book with page turns, black at the end as before). PC deviation: the ROM returns the stale pack slot number and reads the deleted object when init or addEff fails, and calls through NULL for a kind with no class; the host returns -1 (open-items Open questions). Next: eff/eff0.cpp 0x16a914..0x16ade0 (Eff0 and effInitRandTable / effClearDrawSets; effCalcViewDepth 0x16ff18 and effMoveToward 0x16ff78 are stubs too), then EffLight1 and EffCameraAnim1, moving each class out of effclasses.h into its own file header. EffFindItem1 shows once a kind-0x32 effect is created with Eff0 written. References updated: architecture.md (kind to class map), open-items.md, hazards.md (vtable-only undefined references, callcheck colon).",
    "ranges": [
@@ -2351,6 +2369,7 @@
   "unassigned@00164fc0": {},
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},
+  "unassigned@0016afcc": {},
   "unassigned@001810f4": {},
   "unassigned@00184f2c": {},
   "unassigned@00190a78": {},

@@ -20,6 +20,7 @@
 #define _EFF_EFFCLASSES_H
 
 #include "eff/eff0.h"
+#include "eff/effcameraanim1.h"
 
 /* kind 0x1; EE 0x280, vtable 0x2e33a0. layout: host. */
 class EffBloodSpray1 : public Eff0
@@ -171,21 +172,6 @@ public:
     virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0016f3c8
 
     u_char m_body[0x8c];                                                    // ROR 0x24..0xb0: not decoded yet
-};
-
-/* kind 0xd; EE 0x50, vtable 0x2e3800. layout: host. */
-class EffCameraAnim1 : public Eff0
-{
-public:
-    EffCameraAnim1() {}                                                     // ROR 0x0028b858 (linkonce; inlined in createEff)
-    virtual ~EffCameraAnim1() {}                                            // ROR 0x0028b7a8 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x0016f71c
-    virtual int  liveMain();                                                // ROR 0x0016faa0
-    virtual void render(RENDERPARAM *param);                                // ROR 0x0028b890 (linkonce)
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0028b898 (linkonce)
-    virtual I3dDrawSet *createPacketEntry(I3dLayer *layer);                 // ROR 0x0028b888 (linkonce)
-
-    u_char m_body[0x2c];                                                    // ROR 0x24..0x50: not decoded yet
 };
 
 /* kind 0x12; EE 0xc0, vtable 0x2e38e0. layout: host. */

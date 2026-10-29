@@ -1415,6 +1415,13 @@ Shared helpers: effCalcViewDepth 0x16ff18 (dot(camera row 2, pos - row 3)), effM
 (from + normalize(to - from) * d). **EffFindItem1** (kind 0x32, EE 0x50; +0x30 pos, +0x40 pull toward
 the camera, +0x44 frame 0..44): a 40 x 40 VU1 sprite, colour (1,1,1,0.5), ALPHA_1 0x48, shown frames
 0..14 of 45 with textures 0,1,2,3,2,1,0 (frame ends 2,3,4,8,10,12,14).
+**EffCameraAnim1** (kind 0xd, EE 0x50, `eff/effcameraanim1.cpp` 0x16f71c..0x16fb70, 2026-10-29):
+EffParam::m_file is an event file {+0 type (only 1 plays), +4 key count, +0x10 keys of 0x1c: trans[3],
+rotate[3] radians, lens degrees}. init saves the scene camera mode (+0x30), m_camera_entity m_trans
+(+0x34) / m_rotate (+0x40) / m_angle (+0x4c), sets mode 0 and puts key 0 on; setKey 0x16f80c writes
+m_trans + m_dirty, wraps the rotation into -pi..pi for setRotate and m_angle = deg * pi / 180 (the
+camera angle is radians); liveMain plays one key a frame, then restores and calls setCameraMode(saved,
+0, NULL) -- the followed actor is not restored. The prologue picture-book stretch plays two of them.
 
 ## The game helpers (`utl/utlgame.cpp`, 0x1024d0..0x1041c4, 2026-10-28)
 

@@ -6,6 +6,17 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**DONE 2026-10-29 (`eff/effcameraanim1.cpp`): EffCameraAnim1 (kind 0xd), the first Eff class with
+code; the prologue's cutscene camera shows.** The picture-book stretch's event packs create it twice
+(181 and 161 keys, lens 55 degrees): the 200 s run's frames 3300..3420 now show the girl reading the
+picture book by the bench, where the same frames were black without it (the camera stayed on its
+free mode at the old position). Pinned 0x16f71c..0x16fb70; 0x16fb70 (effStrIndex, no callers) opens an
+unclassed helper run 0x16fb70..0x1704a4 (effCalcViewDepth, effMoveToward, FUN_0016fc20 ...: a shared
+helper file between effcameraanim1 and effdust2 in link order -- name it when its first function is
+needed). Doubt: the first instance logs no end (its 181 frames were not reached before the scene
+moved on, so the restore path is unseen). Next for effects: EffLight1 0x174dd8 and gamCreateEff1a
+0x172678 (both reached in the same stretch).
+
 **DONE 2026-10-29 (`game/gamfont.cpp`): GamFont, all 28 functions; the prologue's dialogue text
 shows.** The 240 s New Game run ends in the bus-stop room with "Suddenly, the girl was all alone..."
 centred between the message window's ornaments (proportional widths, getTextWidth centring). The
@@ -129,7 +140,7 @@ the stubs the 140 s New Game run reaches on the 3D path, in the order they block
      (Brown; WRITTEN 2026-10-28, partial: the controller, its orders and 11 of 14 modes; left Follow::live
      0x127150 (+0x127558), Find::init / live 0x127b28 / 0x127e68 (+0x128724, 0x128854), FindEnd::live
      0x128970, Bark::live 0x129028 (+0x128e6c). Doubt: MISSION_3 has no reader yet; requestState /
-     Null::live / applyMode / setLevel carry PC: guards for an unbound m_bwn that the ROM reads through), eff/effman.cpp (the effect manager EffMan, formerly Obj176a3c: WRITTEN 2026-10-28, verify -- all 32 functions incl. createEff and EffFindItem1; the run creates EffLight1 (kind 0x21) and EffCameraAnim1 (0xd) in the picture-book stretch, and every class's init is a stub, so createEff deletes them again. eff/eff0.cpp WRITTEN 2026-10-28 (verify; pinned 0x16a914..0x16afcc: Eff0 and the shared helpers effInitRandTable / effRand / effClearDrawSets / effFogColor / effAmbientColor). Next for effects to live: the reached classes EffLight1 0x174dd8 and EffCameraAnim1 0x16f71c, then one file per Eff class from unassigned@0016a914 in link order, moving each class out of src/eff/effclasses.h).
+     Null::live / applyMode / setLevel carry PC: guards for an unbound m_bwn that the ROM reads through), eff/effman.cpp (the effect manager EffMan, formerly Obj176a3c: WRITTEN 2026-10-28, verify -- all 32 functions incl. createEff and EffFindItem1; the run creates EffLight1 (kind 0x21) and EffCameraAnim1 (0xd) in the picture-book stretch, and every class's init is a stub, so createEff deletes them again. eff/eff0.cpp WRITTEN 2026-10-28 (verify; pinned 0x16a914..0x16afcc: Eff0 and the shared helpers effInitRandTable / effRand / effClearDrawSets / effFogColor / effAmbientColor). eff/effcameraanim1.cpp DONE 2026-10-29 (0x16f71c..0x16fb70, its own header now). Next for effects to live: the reached EffLight1 0x174dd8 and gamCreateEff1a 0x172678, then one file per Eff class from unassigned@0016a914 in link order, moving each class out of src/eff/effclasses.h).
 Re-assess from the run's reached stubs (work/run_relwithdebinfo.log) once the first model draws.
 emy/emy_hfm.cpp was mid-session when this was set; it finishes first (an active claim goes before the
 queue), then the queue rules.
