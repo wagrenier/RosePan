@@ -1714,12 +1714,21 @@
    "why": "MnuPBook and MnuDiary: both load data/mnurpk/mnupbook/, both serve MagLifeMenuPBook (one file assumed); ends at MnuStock::MnuStock"
   },
   "mnu/mnuselect.cpp": {
+   "notes": "verify: no text list is on screen in the 200 s smoke run (it reaches the first outdoor narration, Suddenly the girl was all alone); MnuTextList shows in the title's movie viewer and in script choice lists (TskFrameFunc kind 8), so the first run that opens either should compare the list window and cursor with the game. Notes: setItems with 32 labels writes a 33rd terminator past m_text in RoR; the port skips it (PC comment). The horizontal draw compares the raw row index with m_cur while the vertical one counts shown rows, as RoR does. m_text is the first host pointer so offsets after 0x80 are host-layout. Fields 0x08..0x1c, 0x24, 0x28, 0x80 have no reader in this file.",
    "ranges": [
     [
      "001a066c",
      "001a1244"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-29 11:39",
+     "status": "verify",
+     "summary": "MnuTextList written whole: ctor, dtor, open, close, clear, processPad and its step state machine, allocText and freeText, setItems (labels split on #0#0, mask flags), getSelect, endSelect, and select (window and cursor sprite, d-pad and cross or circle, row redraw). Class moved from lib/unassigned to src/mnu/mnuselect.h; five functions named in Ghidra."
+    }
+   ],
+   "status": "verify",
    "why": "MnuTextList (ctor 0x1a066c .. list draw 0x1a0be4); its allocator 0x1a08d4 passes the source path mnu/mnuselect.cpp to BedMemory::allocDebug"
   },
   "mnu/mnustock.cpp": {

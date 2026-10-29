@@ -2173,6 +2173,21 @@ throughout (identifiers, env variables, files, shader macros):
 - **Type table** data 0x298318 (267 rows + -1): 0x40001.. -> themselves (2D boards), 0x80001.. ->
   0x10c5.. (3D board models), 0x100001.. / 0x200001.. -> page ids 0x1000.., 0x400001.. -> 0.
 
+## The text list (mnu/mnuselect.cpp, 0x1a066c..0x1a1244, 2026-10-29)
+
+- **MnuTextList** (EE 0x104, name invented; MnuTitle +0x4c68 the movie viewer, TskFrameFunc kind 8
+  the script's choice list via operator new; also FUN_001bb12c): open allocates 32 row buffers of 32
+  bytes (BedMemory::allocDebug with RoR's own path "mnu/mnuselect.cpp", line 0xb5, flags 2) at +0x84;
+  setItems(labels, mask) copies labels ended by "#0#0" (31 chars kept, an optional "#<digit>" prefix
+  sets the start row +0x04), mask bits 0..31 the rows shown (+0x20 counts them), bit 16 horizontal
+  (+0x68), bit 18 circle cancels (+0x74).
+- processPad -> step 0x1a0788 (+0x3c: 0, 1, 2 runs select 0x1a0be4, 4 / 5 return 1). select (+0x44:
+  0 / 1 open a 512 x 256 MagScene window at +0x54 / +0x58 / +0x5c with message sprite 1 as cursor,
+  3 shown, 4 close): d-pad via BedPad m_dir_repeat (+0x70) up / down (left / right when horizontal)
+  wraps, cross (m_trig 0x4000) picks the m_cur-th shown row into +0x64, circle (0x2000) gives -3;
+  rows redrawn with MagSystem::drawView (colour 0 the cursor row, 8 the others, row height 0x12)
+  only when the window opens or the cursor moves. getSelect -1 none, -3 cancelled, -2 not open.
+
 ## The memory card check (mnu/mnumcd.cpp, 0x1a1244..0x1a4bd8, 2026-10-25)
 
 - **MnuMcd** (EE 0x1400; MnuTitle +0, MagLifeMenuMcd +0x40): open +0, init +4, per-mode yes / no

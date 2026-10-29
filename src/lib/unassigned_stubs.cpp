@@ -45,41 +45,6 @@ int g_bss_780d04;               /* bss 0x780d04: GamMan option 0 (brightness) */
 
 const char *g_versionNumber = "1.01";   /* data 0x2d9e18 -> 0x301720 */
 
-// ---- MnuTextList (unassigned@00192ac0), written ahead for TskFrameFunc kind 8 ----
-
-// ROR 0x001a066c
-
-MnuTextList::MnuTextList()
-{
-    m_open = 0;
-    clear();
-}
-
-// ROR 0x001a0684
-
-MnuTextList::~MnuTextList()
-{
-    close();
-}
-
-// ROR 0x001a0860
-
-int MnuTextList::clear()
-{
-    m_cur = 0;
-    for (int i = 0; i < 6; i++)
-        m_08[i] = 0;
-    m_28 = 2;
-    m_6c = 0;
-    m_24 = 2;
-    m_70 = 0;
-    m_20 = 1;
-    m_60 = -1;
-    for (int i = 0; i < 0x20; i++)
-        m_84[i] = 0;
-    return 0;
-}
-
 // ---- utlStrNCopy (unassigned@00216ad0), written ahead for TskFrameFunc kind 15 ----
 
 // ROR 0x0021838c
@@ -503,46 +468,6 @@ void MnuStock::term()
     ROSEPAN_STUB("MnuStock::term", 0x0019a6b8);
 }
 
-
-// stub of ROR 0x001a074c
-int MnuTextList::close()
-{
-    ROSEPAN_STUB("MnuTextList::close", 0x001a074c);
-    return {};
-}
-
-// stub of ROR 0x001a0bb8
-void MnuTextList::endSelect()
-{
-    ROSEPAN_STUB("MnuTextList::endSelect", 0x001a0bb8);
-}
-
-// stub of ROR 0x001a0ba0
-int MnuTextList::getSelect()
-{
-    ROSEPAN_STUB("MnuTextList::getSelect", 0x001a0ba0);
-    return {};
-}
-
-// stub of ROR 0x001a06e8
-int MnuTextList::open()
-{
-    ROSEPAN_STUB("MnuTextList::open", 0x001a06e8);
-    return {};
-}
-
-// stub of ROR 0x001a06d4
-int MnuTextList::processPad(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuTextList::processPad", 0x001a06d4);
-    return {};
-}
-
-// stub of ROR 0x001a09b8
-void MnuTextList::setItems(const char *items, u_int mask)
-{
-    ROSEPAN_STUB("MnuTextList::setItems", 0x001a09b8);
-}
 
 // stub of ROR 0x00217f10
 float utlAtan2(float x, float z)

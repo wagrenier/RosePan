@@ -3174,15 +3174,15 @@
 /* 001a06d4 00000014 */ MnuTextList::processPad(){}  // ror
 /* 001a06e8 00000064 */ MnuTextList::open(){}  // ror
 /* 001a074c 0000003c */ MnuTextList::close(){}  // ror
-/* 001a0788 000000d8 */ FUN_001a0788(){}
+/* 001a0788 000000d8 */ MnuTextList::step(){}  // ror
 /* 001a0860 00000074 */ MnuTextList::clear(){}  // ror
-/* 001a08d4 0000007c */ FUN_001a08d4(){}
-/* 001a0950 00000068 */ FUN_001a0950(){}
+/* 001a08d4 0000007c */ MnuTextList::allocText(){}  // ror
+/* 001a0950 00000068 */ MnuTextList::freeText(){}  // ror
 /* 001a09b8 000001e8 */ MnuTextList::setItems(){}  // ror
 /* 001a0ba0 00000014 */ MnuTextList::getSelect(){}  // ror
 /* 001a0bb8 00000020 */ MnuTextList::endSelect(){}  // ror
-/* 001a0bdc 00000008 */ FUN_001a0bdc(){}
-/* 001a0be4 00000660 */ FUN_001a0be4(){}
+/* 001a0bdc 00000008 */ MnuTextList::stepExtra(){}  // ror
+/* 001a0be4 00000660 */ MnuTextList::select(){}  // ror
 
 // *****************************************************************************
 // FILE -- mnu/mnumcd.cpp
