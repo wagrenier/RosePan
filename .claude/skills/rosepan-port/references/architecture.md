@@ -1565,6 +1565,27 @@ pattern table is the EE image 0x2a8848..0x2aad10, display list 0x2aad70 (65 spri
 data/mnurpk/mnuopt.rpk (option_sita / option_yogore / option). Seen working 2026-10-29 from the title's
 Option item (progress/ shot).
 
+## The item menu (`mnu/mnuitem.cpp`, 0x1ae954..0x1bdae4, 2026-10-29, partial)
+
+MnuItem (EE 0x2710; MagLifeMenuItem +0x40, menu 0x10000) owns three SprMan: +0x98 the menu (120
+sprites, data/mnurpk/mnuitem.rpk textures base / tex01 (tex01_eu in languages 1..4, bss 0x7812ac) /
+tex02 / tex03 / texmoji / item01..04, pattern table 0x2acb10..0x2b6e88, display list 0x2b6f40 of 102
+rows), +0x984 findpt.rpk's one sprite (only while sequence bit-word 1 bit 0x100 is set) and +0x1270
+(drawn first, set up by the unwritten pages); MnuTextList +0x1b64, MsgManSet +0x1c68, the window
++0x2700 (system text 0x17), a second window +0x26fc. processPad's steps: 0 window, 1 textures and
+refreshSlots, 2 findpt, 3 setDisp + fade in + the first page (bit 0x10000000 -> page 9, 0x20000000 ->
+page 11, else 0; se 5), 4 execPage (switch on +0x58, 14 handlers 0x1b1cd4..0x1bc370, 1 = close) +
+updateFrame 0x1b113c, 6 fade out, 7 close: clears bit-word 1 bit 0x40000000 and, when global 0x15 is
+3 and global 0x11 is 0xa17..0xa19, 0xa1b..0xa21, 0xab6 or 0xacc..0xace, sets bit 0x4000000 and
+the item's flag-table bit (lookupFlagTable(2, id, 6)). **Slots**: +0x2434 twelve GamItemSlot pointers
+into GamMan's item-have vector (clearItemHave keeps twelve, id 0xa00 = none), slot 12 = +0x2430
+(0xa23), 13 = the find target +0x242c; findSlot returns 12 for "not found". Sprites 0x30 + n are the
+icons (anim table 0x2b60c0, pattern base 0xd0 + 4 * (system data field 0xd - 1); 0x2b5f38 = none),
+0x3d + n the "%2d" counts (stacking items, 0xa3e, 0xa43), 0x49 / 0x4f the equipped item and its
+cursor, 0x4b / 0x50 the find target, 0x4d the chapter plate (pattern 0x51..0x5b by GamMan status 4).
+showFrame 0x1aff5c hides / fades the frame by four flags from bit-word 1 bits 0 / 1 (+0x2410..).
+Life rates +0x23e4.. = LP * 100 / MAX_LP of the PC and the dog.
+
 ## Modules (RoR's own source files)
 
 73 `.cpp` paths survive in assert / error strings (export.py anchors on them), plus headers whose inline

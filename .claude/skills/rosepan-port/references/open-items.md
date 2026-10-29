@@ -6,6 +6,15 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**PARTIAL 2026-10-29 (`mnu/mnuitem.cpp`, session 1): MnuItem's frame -- ctor / dtor, init / term,
+open / close, draw, processPad's eight steps, the slots, the sprites (setDisp, setEquipSprites,
+setSlotSprites, showFrame) and the texture helpers, 30 functions** (architecture.md "The item menu").
+Left: the 14 page handlers execPage0..13 (0x1b1cd4..0x1bc370, stubs returning 0, so an opened menu
+never closes) and updateFrame 0x1b113c, then the helpers 0x1bc790..0x1bdae4. Nothing on the smoke
+path opens the item menu, so no picture yet: when a run reaches a room, open it from the pad and
+compare with work/ref (tm2png.py --scan data/mnurpk/mnuitem.rpk). Doubt: the slot 12 / 13 reads
+through m_slot[] in setEquipSprites (an EE read past the array) are taken as no item (PORT).
+
 **WRITTEN 2026-10-29 (`eff/effcommon.cpp`, verify, pinned 0x16fb70..0x1704a4 out of
 unassigned@0016fb70): the 13 shared effect helpers -- effCalcViewDepth / effMoveToward / effVecLength,
 matrix and angle helpers, effMakeNodeMap, effFindChild52 and the actor probe (architecture.md "The effect

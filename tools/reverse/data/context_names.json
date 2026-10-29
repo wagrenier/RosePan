@@ -14999,6 +14999,12 @@
   "was": "FUN_001aeacc",
   "why": "the menu object at +0x40 of MagLifeMenuItem: its wrapper's init calls it (class name from the wrapper, real one unknown)"
  },
+ "001aeb7c": {
+  "name": "MnuItem::initWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001aeb7c",
+  "why": "constructor helper: clears the ten work words +4.., sets the four menu flags +0x2410.. to 1 and +0x2c/+0x30/+0x34 (MnuOpt::initWork's shape)"
+ },
  "001aebc8": {
   "name": "MnuItem::term",
   "tag": "ror-inferred",
@@ -15011,17 +15017,233 @@
   "was": "FUN_001aec48",
   "why": "the menu object at +0x40 of MagLifeMenuItem: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
  },
+ "001aec50": {
+  "name": "MnuItem::loadTexList",
+  "tag": "ror-inferred",
+  "was": "FUN_001aec50",
+  "why": "init: patches the European tex01 row by language, SprTexture::setList(0x2aca20, data/mnurpk/mnuitem.rpk) and waits for update"
+ },
  "001aed08": {
   "name": "MnuItem::draw",
   "tag": "ror-inferred",
   "was": "FUN_001aed08",
   "why": "the menu object at +0x40 of MagLifeMenuItem: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
  },
+ "001aed5c": {
+  "name": "MnuItem::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001aed5c",
+  "why": "init: m_open 0 -> 1 (-1 when already open), resets steps and slots, life rates, MsgManSet::open (MnuOpt::open's shape)"
+ },
+ "001aee50": {
+  "name": "MnuItem::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001aee50",
+  "why": "term: m_open 1 -> 0 (-1 when closed) after refreshSlots(1)"
+ },
+ "001aee8c": {
+  "name": "MnuItem::loadTex",
+  "tag": "ror-inferred",
+  "was": "FUN_001aee8c",
+  "why": "SprTexture::loadTex for every row of the texture list 0x2aca20"
+ },
+ "001aef14": {
+  "name": "MnuItem::freeTexFiles",
+  "tag": "ror-inferred",
+  "was": "FUN_001aef14",
+  "why": "SprTexture::freeFile for every row of the texture list 0x2aca20"
+ },
+ "001aef9c": {
+  "name": "MnuItem::releaseTex",
+  "tag": "ror-inferred",
+  "was": "FUN_001aef9c",
+  "why": "SprTexture::releaseTex for every row of the texture list 0x2aca20"
+ },
+ "001af024": {
+  "name": "MnuItem::calcLifeRate",
+  "tag": "ror-inferred",
+  "was": "FUN_001af024",
+  "why": "GamMan::getPcParam / getDogParam 0x1b over 0x1c as a percentage into +0x23e4.. (pc, dog, twice)"
+ },
+ "001af130": {
+  "name": "MnuItem::readMenuFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_001af130",
+  "why": "sets the four flags +0x2410..+0x241c and +0x240c from sequence bit-word 1 bits 0, 1, 2 (and global slot 7)"
+ },
+ "001af21c": {
+  "name": "MnuItem::setSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_001af21c",
+  "why": "points slot n (all when < 0) at GamMan's item-have vector entry and sets its sprite 0x30+n's anim table / pattern base"
+ },
+ "001af3f0": {
+  "name": "MnuItem::findSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_001af3f0",
+  "why": "the slot whose item id equals id: 0..11, 12 none, 13 the find target, -1 for 0xa00"
+ },
+ "001af44c": {
+  "name": "MnuItem::refreshSlots",
+  "tag": "ror-inferred",
+  "was": "FUN_001af44c",
+  "why": "mode 0: life rates, all slots, the equipped item's and the find target's slots"
+ },
+ "001af4d0": {
+  "name": "MnuItem::getAnimTable",
+  "tag": "ror-inferred",
+  "was": "FUN_001af4d0",
+  "why": "returns the item anim table 0x2b60c0, or 0x2b5f38 for 0xa00 / 0xb3b (no item)"
+ },
+ "001af4fc": {
+  "name": "MnuItem::getPatBase",
+  "tag": "ror-inferred",
+  "was": "FUN_001af4fc",
+  "why": "an item's icon pattern base: 0xd0 + 4 * (GamSysData field 0xd - 1), 0 for no item"
+ },
+ "001af5e0": {
+  "name": "MnuItem::setSlotSprites",
+  "tag": "ror-inferred",
+  "was": "FUN_001af5e0",
+  "why": "the twelve slot icons 0x30.. and their count texts 0x3d.. (sprintf %2d) from the slots"
+ },
+ "001af928": {
+  "name": "MnuItem::setEquipSprites",
+  "tag": "ror-inferred",
+  "was": "FUN_001af928",
+  "why": "setSlotSprites, then the equipped item sprite 0x49 / cursor 0x4f and the find target sprite 0x4b / 0x50, then showFrame(0)"
+ },
+ "001aff5c": {
+  "name": "MnuItem::showFrame",
+  "tag": "ror-inferred",
+  "was": "FUN_001aff5c",
+  "why": "mode 0 hides the menu frame sprites, 1 / 2 fade them in (10 / 1 frames) by the menu flags +0x2410.."
+ },
+ "001b070c": {
+  "name": "MnuItem::testSlotFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_001b070c",
+  "why": "GamSysData::testFlags(slot item, bits), 0 for no item"
+ },
+ "001b0784": {
+  "name": "MnuItem::setDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_001b0784",
+  "why": "pattern table 0x2acb10, the chapter's pattern into display row 0x4d, setDispList 0x2b6f40, setEquipSprites, the system, sprites on (MnuOpt::setDisp's shape)"
+ },
  "001b099c": {
   "name": "MnuItem::processPad",
   "tag": "ror-inferred",
   "was": "FUN_001b099c",
   "why": "the menu object at +0x40 of MagLifeMenuItem: its wrapper's processPad calls it (class name from the wrapper, real one unknown)"
+ },
+ "001b113c": {
+  "name": "MnuItem::updateFrame",
+  "tag": "ror-inferred",
+  "was": "FUN_001b113c",
+  "why": "processPad step 4 runs it after execPage every frame; calls showFrame"
+ },
+ "001b1b34": {
+  "name": "MnuItem::getSlotItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001b1b34",
+  "why": "slot n's item id: 0..11 the slots, 12 +0x2430, 13 the find target +0x242c, else 0xa00"
+ },
+ "001b1b98": {
+  "name": "MnuItem::getZero",
+  "tag": "ror-inferred",
+  "was": "FUN_001b1b98",
+  "why": "returns 0; called by execPage2 only"
+ },
+ "001b1ba0": {
+  "name": "MnuItem::execPage",
+  "tag": "ror-inferred",
+  "was": "FUN_001b1ba0",
+  "why": "switch on +0x58 (0..13) into fourteen page handlers; a handler returning 1 sets step 6 (fade out)"
+ },
+ "001b1cd4": {
+  "name": "MnuItem::execPage0",
+  "tag": "ror-inferred",
+  "was": "FUN_001b1cd4",
+  "why": "case 0 of execPage's switch on +0x58; its result 1 closes the menu"
+ },
+ "001b2f64": {
+  "name": "MnuItem::execPage1",
+  "tag": "ror-inferred",
+  "was": "FUN_001b2f64",
+  "why": "case 1 of execPage's switch on +0x58"
+ },
+ "001b3534": {
+  "name": "MnuItem::execPage2",
+  "tag": "ror-inferred",
+  "was": "FUN_001b3534",
+  "why": "case 2 of execPage's switch on +0x58"
+ },
+ "001b3e20": {
+  "name": "MnuItem::execPage8",
+  "tag": "ror-inferred",
+  "was": "FUN_001b3e20",
+  "why": "case 8 of execPage: returns 0"
+ },
+ "001b3e28": {
+  "name": "MnuItem::execPage3",
+  "tag": "ror-inferred",
+  "was": "FUN_001b3e28",
+  "why": "case 3 of execPage's switch on +0x58"
+ },
+ "001b4488": {
+  "name": "MnuItem::execPage4",
+  "tag": "ror-inferred",
+  "was": "FUN_001b4488",
+  "why": "case 4 of execPage's switch on +0x58"
+ },
+ "001b5c20": {
+  "name": "MnuItem::execPage5",
+  "tag": "ror-inferred",
+  "was": "FUN_001b5c20",
+  "why": "case 5 of execPage's switch on +0x58; its result 1 closes the menu"
+ },
+ "001b64c4": {
+  "name": "MnuItem::execPage7",
+  "tag": "ror-inferred",
+  "was": "FUN_001b64c4",
+  "why": "case 7 of execPage's switch on +0x58; its result 1 closes the menu"
+ },
+ "001ba3a0": {
+  "name": "MnuItem::execPage6",
+  "tag": "ror-inferred",
+  "was": "FUN_001ba3a0",
+  "why": "case 6 of execPage's switch on +0x58"
+ },
+ "001ba8e4": {
+  "name": "MnuItem::execPage9",
+  "tag": "ror-inferred",
+  "was": "FUN_001ba8e4",
+  "why": "case 9 of execPage's switch on +0x58; its result 1 closes the menu"
+ },
+ "001bb12c": {
+  "name": "MnuItem::execPage10",
+  "tag": "ror-inferred",
+  "was": "FUN_001bb12c",
+  "why": "case 10 of execPage's switch on +0x58; its result 1 closes the menu"
+ },
+ "001bb4f0": {
+  "name": "MnuItem::execPage11",
+  "tag": "ror-inferred",
+  "was": "FUN_001bb4f0",
+  "why": "case 11 of execPage's switch on +0x58; its result 1 closes the menu"
+ },
+ "001bbcfc": {
+  "name": "MnuItem::execPage12",
+  "tag": "ror-inferred",
+  "was": "FUN_001bbcfc",
+  "why": "case 12 of execPage's switch on +0x58"
+ },
+ "001bc370": {
+  "name": "MnuItem::execPage13",
+  "tag": "ror-inferred",
+  "was": "FUN_001bc370",
+  "why": "case 13 of execPage's switch on +0x58; its result 1 closes the menu"
  },
  "001bdae4": {
   "name": "MnuSelectLanguage::MnuSelectLanguage",

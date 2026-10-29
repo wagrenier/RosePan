@@ -1897,12 +1897,21 @@
    "why": "MnuBoard2D ctor 0x1ad6b4 .. its fade helpers (mnuboard.rpk); 0x1adf04 is MnuMovie's constructor. File named after the class"
   },
   "mnu/mnuitem.cpp": {
+   "notes": "Left: the 14 page handlers execPage0..13 (0x1b1cd4..0x1bc370, stubs returning 0: an opened menu never closes), updateFrame 0x1b113c (stub; calls showFrame), then the helpers 0x1bc790..0x1bdae4 and FUN_001af578. Start with execPage0 (the main page) and updateFrame. Data: mnuItemPattern is the EE image 0x2acb10..0x2b6e88 (anims 0x2b5f38 none / 0x2b60c0 icons, fade colours 0x2b6d60..), mnuItemPos 0x2b6e88 (16 rows: equip, find, slot 0..12, sprite 0x3c, a pad row), mnuItemDisp 0x2b6f40; later pages will need the tables after 0x2b8598 (another display list and text pointers, see datadump --words 0x2b8598 0x2b8838). PORT: setEquipSprites reads slot 12/13 through m_slot[] past the array in the ROM; the port takes them as no item (mnuItemSlotId). Screen: the smoke run stays on the boot disclaimer; nothing on the smoke path opens the item menu, so the picture is unchecked (compare with tm2png.py --scan data/mnurpk/mnuitem.rpk once a room is reached). Another session was editing src/rosepan/rendering/rosepan_renderer.* in this checkout during the run; those files were left out of this commit.",
    "ranges": [
     [
      "001ae954",
      "001bdae4"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-29 19:32",
+     "status": "partial",
+     "summary": "MnuItem session 1: header mnu/mnuitem.h (EE 0x2710, three SprMan, slots, flags) moved out of lib/unassigned.h; 30 functions: ctor/dtor, init/term/isInit/draw, open/close/initWork, processPad (8 steps incl. findpt.rpk and the close-time item flag), texture helpers, slots (setSlot/findSlot/refreshSlots/getSlotItem/testSlotFlags), sprites (setDisp/setEquipSprites/setSlotSprites/showFrame), execPage dispatcher; pattern image 0x2acb10, display list 0x2b6f40, findpt tables as EE images; 37 names (ror-inferred)."
+    }
+   ],
+   "status": "partial",
    "why": "MnuItem ctor 0x1ae954 .. the item helpers 0x1bc790..0x1bdae4 (called by MnuItem's pad states); 0x1bdae4 is MnuSelectLanguage's constructor. File named after the class"
   },
   "mnu/mnumap.cpp": {

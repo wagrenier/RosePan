@@ -323,20 +323,8 @@ static_assert(sizeof(MnuMap) >= 0x8e0, "EE 0x8e0");
  * keeps the wrapper's scene at the offset its init wrapper writes.
  * layout: host -- unwritten classes padded to their EE size. */
 
-/* The item menu. EE 0x2710 (MagLifeMenuItem +0x40..+0x2750). */
-struct MnuItem
-{
-    void init(DogTexInfo *tex);                                          // ROR 0x001aeacc
-    void term();                                                         // ROR 0x001aebc8
-    int  isInit();                                                       // ROR 0x001aec48
-    int  processPad(BedPad *pad);                                        // ROR 0x001b099c
-    void draw(I3dLayer *layer);                                          // ROR 0x001aed08
-
-    u_char    _00[0x1b60];
-    MagScene *m_scene;          // ROR 0x1b60: MagLifeMenuItem::init stores the scene
-    u_char    _1b64[0x2710 - 0x1b64];
-};
-static_assert(offsetof(MnuItem, m_scene) == 0x1b60, "m_scene");
+/* The item menu MnuItem: mnu/mnuitem.h (not included here: it holds a
+ * SprMan, and spr/sprman.h includes this file). */
 
 /* The stock (item box) menu. EE 0x15b0 (MagLifeMenuStock +0x40..+0x15f0). */
 struct MnuStock
