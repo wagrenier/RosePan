@@ -338,6 +338,24 @@
    "status": "verify",
    "why": "Obj176a3c (scene +0x837e0, the Eff* factory) is the effect manager: data/eff/eff.bin loader, the 0x110-entry table, draw sort. Code sits between EffLight3 and EffMuzzleFlash1 in alphabetical class link order (EffMan); EffFindItem1 code 0x176694..0x176a3c and its linkonce come from the same object (linkonce order Light3, FindItem1, MuzzleFlash1), so it joins this file. No source string names it."
   },
+  "emy/emy_bdl.cpp": {
+   "notes": "Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run shows a Bdl (type 5) attacking or cowering at Brown's bark. Bdl is Bds's twin; the file was generated from emy_bds.cpp plus the differences listed in emy_bdl.h. ROM oddity kept (open-items.md Open questions): BdlOutAtk step 2's mode-4 sector uses 5pi/8 as lower bound (step 0 uses -3pi/8). The rest of the enemy run is unassigned@0014cde4 (Mrt, Clr, Nor, Grg, Fsh, Got, Pig, Dwf): next emy/emy_mrt.cpp 0x14cde4 up to ClrMain::initOut 0x14dc7c; MrtMain has an extra out (MrtOutYyy) and EE size 0x23c.",
+   "ranges": [
+    [
+     "0014b3bc",
+     "0014cde4"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 14:30",
+     "status": "verify",
+     "summary": "Pinned emy/emy_bdl.cpp 0x14b3bc..0x14cde4 out of unassigned@0014b3bc and wrote all 33 functions: BdlMain (enemy type 5: initOut, dtor, decide with testBarkReact as input 1, exec, after, selectOut and its four decide tests) and its outs BdlOutWalk, BdlOutStared, BdlOutSearch (ends within 300), BdlOutAtk (param 0x68 mode, turn into a fixed world-angle sector, motions 0x20 / 0x21 with hit windows, words 0x1f / 0x20, reach 40 over 4 nodes), BdlOutWin and BdlOutDead (motion 0x24). New emy/emy_bdl.h; BdlMain moved out of lib/unassigned.h, its six stubs removed. 32 functions named (batch emybdl_001)."
+    }
+   ],
+   "status": "verify",
+   "why": "BdlMain + its six BdlOut* classes: BdlMain::initOut 0x14b3bc (every XxxMain::initOut opens its file) up to MrtMain::initOut 0x14cde4 which opens the Mrt file; no source string, named like emy_bds.cpp (Bdl is Bds's twin)"
+  },
   "emy/emy_bds.cpp": {
    "notes": "Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture as before, no regression); no enemy exists on that path, so mark done the first time a run shows a Bds (type 4) moving or cowering at Brown's bark. ROM oddities kept (open-items.md Open questions): Stared step 1 waits on m_move_done after a turn, BdsOutWin m_range never set, Walk tests the roam point's own length. The rest of the enemy run is unassigned@0014b3bc (Bdl, Mrt, Clr, Nor, Grg, Fsh, Got, Pig, Dwf): split it the same way, one file per XxxMain::initOut, next emy/emy_bdl.cpp 0x14b3bc up to MrtMain's file (MrtMain::initOut 0x14cde4); BdlMain looks like Bds's twin (same vtable shape, same out names), so emy_bds.cpp is the template.",
    "ranges": [
@@ -2476,6 +2494,7 @@
   "unassigned@00143d3c": {},
   "unassigned@00145020": {},
   "unassigned@00149d18": {},
+  "unassigned@0014b3bc": {},
   "unassigned@00164fc0": {},
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},

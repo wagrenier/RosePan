@@ -6,6 +6,11 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-29 (`emy/emy_bdl.cpp`, verify; split out of unassigned@0014b3bc): BdlMain (type 5)
+and its six outs, all 33 functions** -- Bds's twin (architecture.md). No enemy spawns on the smoke
+path; mark done when a run shows a Bdl. The rest of the enemy run is unassigned@0014cde4: Mrt
+(0x14cde4) next, then Clr, Nor, Grg, Fsh, Got, Pig, Dwf, one file per XxxMain::initOut.
+
 **WRITTEN 2026-10-29 (`i3d/i3dgeom.cpp`, verify): the distance / box / hit tests the i3c casts and
 MagScene's wall tests call -- all 54 functions.** The second session added i3dRayRayDist2 0x233de8
 (code outside any function), the flat-capped cylinder
@@ -1133,6 +1138,11 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- (2026-10-29, emy/emy_bdl.cpp) **BdlOutAtk's step 2 sector test for mode 4 uses 5pi / 8 as its lower
+  bound** (ROM 0x14c6fc shares mode 2's constant; step 0 uses -3pi / 8), so a mode-4 Bdl standing in
+  step 2 restarts its turn for almost any angle. Ported as the ROM has it (bdlAtkInSectorAgain). The
+  Bds oddities below hold for Bdl too (same code). Check when a Bdl first shows.
 
 - (2026-10-29, emy/emy_bds.cpp) **Bds ROM oddities ported as they are**: BdsOutStared step 1 waits
   for m_move_done after a chrRotMotion turn (only move tasks set it, so it may wait until the bark
