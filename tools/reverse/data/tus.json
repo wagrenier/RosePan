@@ -374,6 +374,24 @@
    "status": "verify",
    "why": "BdsMain + its six BdsOut* classes: BdsMain::initOut 0x149d18 (every XxxMain::initOut opens its file, as emy_hfm.cpp) up to BdlMain::initOut 0x14b3bc which opens the Bdl file; no source string, named like emy_hfm.cpp"
   },
+  "emy/emy_clr.cpp": {
+   "notes": "Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run shows a Clr (type 8) dropping from above, spitting or climbing away. ROM oddities kept (open-items.md Open questions): the arm swing sets m_hit_pc for the dog too, ClrOutUp::execUp reports done at the top so its wait step never runs, updateHitPoints stores 2 for the dog, the spit voice table is read one past its 3 words, isPCInSight range 0. EffParam kinds 0xa / 0xc views are inferred from these callers only (EffBreath2 / EffBreath2Ground init not written). The rest of the enemy run is unassigned@0014dc7c from NorMain::initOut 0x150b24: next emy/emy_nor.cpp up to GrgMain::initOut 0x153e40 (NorMain 7 vtable slots, eight outs), then Grg, Fsh, Got, Pig, Dwf.",
+   "ranges": [
+    [
+     "0014dc7c",
+     "00150b24"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 15:49",
+     "status": "verify",
+     "summary": "Pinned emy/emy_clr.cpp 0x14dc7c..0x150b24 out of unassigned@0014dc7c and wrote all 45 functions: ClrMain (enemy type 8: initOut, dtor, decide with tests 13..9 / sight edge / tests 3..8, exec with the hit count and forced death state, after, selectOut, the hit-point pool addHitPoint / updateHitPoints) and its outs ClrOutUp (climb out of sight), ClrOutDeathUp, ClrOutMove (spot, voice wait, spit effects 0xa / 0xc, drop with chrIsNear hits), ClrOutAtk (TskAttack kinds 0x2e..0x30, spit along p_eff / p_gero3, arm swing) and ClrOutWin. New emy/emy_clr.h; ClrMain moved out of lib/unassigned.h, its six stubs removed; EffParam gained m_breath (kind 0xa) and m_ground (kind 0xc); ClrMain m_248 renamed m_hold. 44 functions named (batch emyclr_001)."
+    }
+   ],
+   "status": "verify",
+   "why": "ClrMain + its five ClrOut* classes: ClrMain::initOut 0x14dc7c (every XxxMain::initOut opens its file) up to NorMain::initOut 0x150b24 which opens the Nor file; no source string, named like emy_bds.cpp"
+  },
   "emy/emy_hfm.cpp": {
    "notes": "Whole TU written (75 functions, no stubs left in this file). Status verify: the 15 s smoke run still ends on the Atlus disclaimer and creates no enemy, so no Hfm is on screen. Mark done the first time a smoke run shows an Hfm enemy moving. Still needed before anything moves: the EmyOut helpers in emy/emy_out.cpp (setMotion, termCommon, selectTarget, emyStartChase, playSE, tickVoice, stopVoice, emyChkHitReach, getFrontPos 0x167d88, getTargetNodePos 0x166c8c, getTargetAngle 0x167e38) and the EmyMain ctor. Steps 0x12, 0x1d, 0x1e, 0x1f only advance the step: the delay slot reloads the step, not v0=1, so it is step+1.",
    "ranges": [
@@ -2523,6 +2541,7 @@
   "unassigned@00149d18": {},
   "unassigned@0014b3bc": {},
   "unassigned@0014cde4": {},
+  "unassigned@0014dc7c": {},
   "unassigned@00164fc0": {},
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},

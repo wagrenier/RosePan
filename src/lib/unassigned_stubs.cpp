@@ -135,12 +135,6 @@ FshMain::~FshMain()
     ROSEPAN_STUB("FshMain::~FshMain", 0x00155d54);
 }
 
-// stub of ROR 0x0014de54
-ClrMain::~ClrMain()
-{
-    ROSEPAN_STUB("ClrMain::~ClrMain", 0x0014de54);
-}
-
 // stub of ROR 0x00154030
 GrgMain::~GrgMain()
 {
@@ -505,36 +499,6 @@ int dogModelHitNearest(I3cQuery *q, int code, const u_short *prim, const float *
 {
     ROSEPAN_STUB("dogModelHitNearest", 0x00114034);
     return {};
-}
-
-// stub of ROR 0x0014e16c
-void ClrMain::after()
-{
-    ROSEPAN_STUB("ClrMain::after", 0x0014e16c);
-}
-
-// stub of ROR 0x0014deb4
-void ClrMain::decide()
-{
-    ROSEPAN_STUB("ClrMain::decide", 0x0014deb4);
-}
-
-// stub of ROR 0x0014e0b4
-void ClrMain::exec()
-{
-    ROSEPAN_STUB("ClrMain::exec", 0x0014e0b4);
-}
-
-// stub of ROR 0x0014dc7c
-void ClrMain::initOut()
-{
-    ROSEPAN_STUB("ClrMain::initOut", 0x0014dc7c);
-}
-
-// stub of ROR 0x0014e224
-void ClrMain::selectOut()
-{
-    ROSEPAN_STUB("ClrMain::selectOut", 0x0014e224);
 }
 
 // stub of ROR 0x0015cd30

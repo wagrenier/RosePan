@@ -1671,54 +1671,59 @@
 /* 0014dc60 0000001c */ MrtOutWin::Term(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- emy/emy_clr.cpp
 // *****************************************************************************
 
 /* 0014dc7c 000001d8 */ ClrMain::initOut(){}  // ror
-/* 0014de54 00000060 */ FUN_0014de54(){}
-/* 0014deb4 00000200 */ FUN_0014deb4(){}
-/* 0014e0b4 000000b8 */ FUN_0014e0b4(){}
-/* 0014e16c 000000b8 */ FUN_0014e16c(){}
-/* 0014e224 000000c8 */ FUN_0014e224(){}
-/* 0014e2ec 00000014 */ FUN_0014e2ec(){}
-/* 0014e300 00000014 */ FUN_0014e300(){}
-/* 0014e314 00000014 */ FUN_0014e314(){}
-/* 0014e328 00000014 */ FUN_0014e328(){}
-/* 0014e33c 00000014 */ FUN_0014e33c(){}
-/* 0014e350 00000014 */ FUN_0014e350(){}
-/* 0014e364 00000008 */ FUN_0014e364(){}
-/* 0014e36c 00000008 */ FUN_0014e36c(){}
-/* 0014e374 00000008 */ FUN_0014e374(){}
-/* 0014e37c 00000008 */ FUN_0014e37c(){}
-/* 0014e384 00000008 */ FUN_0014e384(){}
-/* 0014e38c 00000044 */ FUN_0014e38c(){}
-/* 0014e3d0 00000104 */ FUN_0014e3d0(){}
-/* 0014e4d4 00000268 */ FUN_0014e4d4(){}
-/* 0014e73c 00000014 */ FUN_0014e73c(){}
-/* 0014e750 000000e4 */ FUN_0014e750(){}
-/* 0014e834 0000001c */ FUN_0014e834(){}
-/* 0014e850 00000304 */ FUN_0014e850(){}
-/* 0014eb54 00000078 */ FUN_0014eb54(){}
-/* 0014ebcc 00000128 */ FUN_0014ebcc(){}
-/* 0014ecf4 0000001c */ FUN_0014ecf4(){}
-/* 0014ed10 00000130 */ FUN_0014ed10(){}
-/* 0014ee40 0000005c */ FUN_0014ee40(){}
-/* 0014ee9c 00000384 */ FUN_0014ee9c(){}
-/* 0014f220 0000001c */ FUN_0014f220(){}
-/* 0014f23c 00000124 */ FUN_0014f23c(){}
-/* 0014f360 000003cc */ FUN_0014f360(){}
-/* 0014f72c 00000160 */ FUN_0014f72c(){}
-/* 0014f88c 0000005c */ FUN_0014f88c(){}
-/* 0014f8e8 000005d4 */ FUN_0014f8e8(){}
-/* 0014febc 000003d4 */ FUN_0014febc(){}
-/* 00150290 00000410 */ FUN_00150290(){}
-/* 001506a0 00000164 */ FUN_001506a0(){}
-/* 00150804 00000218 */ FUN_00150804(){}
-/* 00150a1c 00000008 */ FUN_00150a1c(){}
-/* 00150a24 0000001c */ FUN_00150a24(){}
-/* 00150a40 00000050 */ FUN_00150a40(){}
-/* 00150a90 00000078 */ FUN_00150a90(){}
-/* 00150b08 0000001c */ FUN_00150b08(){}
+/* 0014de54 00000060 */ ClrMain::~ClrMain(){}  // ror
+/* 0014deb4 00000200 */ ClrMain::decide(){}  // ror
+/* 0014e0b4 000000b8 */ ClrMain::exec(){}  // ror
+/* 0014e16c 000000b8 */ ClrMain::after(){}  // ror
+/* 0014e224 000000c8 */ ClrMain::selectOut(){}  // ror
+/* 0014e2ec 00000014 */ ClrMain::testInput3(){}  // ror
+/* 0014e300 00000014 */ ClrMain::testInput4(){}  // ror
+/* 0014e314 00000014 */ ClrMain::testInput5(){}  // ror
+/* 0014e328 00000014 */ ClrMain::testInput6(){}  // ror
+/* 0014e33c 00000014 */ ClrMain::testInput7(){}  // ror
+/* 0014e350 00000014 */ ClrMain::testInput8(){}  // ror
+/* 0014e364 00000008 */ ClrMain::testInput13(){}  // ror
+/* 0014e36c 00000008 */ ClrMain::testInput12(){}  // ror
+/* 0014e374 00000008 */ ClrMain::testInput11(){}  // ror
+/* 0014e37c 00000008 */ ClrMain::testInput10(){}  // ror
+/* 0014e384 00000008 */ ClrMain::testInput9(){}  // ror
+/* 0014e38c 00000044 */ ClrMain::isPCInSight(){}  // ror
+/* 0014e3d0 00000104 */ ClrMain::addHitPoint(){}  // ror
+/* 0014e4d4 00000268 */ ClrMain::updateHitPoints(){}  // ror
+/* 0014e73c 00000014 */ ClrOutUp::Init(){}  // ror
+/* 0014e750 000000e4 */ ClrOutUp::Exec(){}  // ror
+/* 0014e834 0000001c */ ClrOutUp::Term(){}  // ror
+/* 0014e850 00000304 */ ClrOutUp::execUp(){}  // ror
+/* 0014eb54 00000078 */ ClrOutDeathUp::Init(){}  // ror
+/* 0014ebcc 00000128 */ ClrOutDeathUp::Exec(){}  // ror
+/* 0014ecf4 0000001c */ ClrOutDeathUp::Term(){}  // ror
+/* 0014ed10 00000130 */ ClrOutDeathUp::execUp(){}  // ror
+/* 0014ee40 0000005c */ ClrOutMove::Init(){}  // ror
+/* 0014ee9c 00000384 */ ClrOutMove::Exec(){}  // ror
+/* 0014f220 0000001c */ ClrOutMove::Term(){}  // ror
+/* 0014f23c 00000124 */ ClrOutMove::turnToPC(){}  // ror
+/* 0014f360 000003cc */ ClrOutMove::execDown(){}  // ror
+/* 0014f72c 00000160 */ ClrOutMove::createDropEff(){}  // ror
+/* 0014f88c 0000005c */ ClrOutAtk::Init(){}  // ror
+/* 0014f8e8 000005d4 */ ClrOutAtk::Exec(){}  // ror
+/* 0014febc 000003d4 */ ClrOutAtk::selectAttack(){}  // ror
+/* 00150290 00000410 */ ClrOutAtk::emitSpit(){}  // ror
+/* 001506a0 00000164 */ ClrOutAtk::getPCSide(){}  // ror
+/* 00150804 00000218 */ ClrOutAtk::isArmTouching(){}  // ror
+/* 00150a1c 00000008 */ ClrOutAtk::execExtra(){}  // ror
+/* 00150a24 0000001c */ ClrOutAtk::Term(){}  // ror
+/* 00150a40 00000050 */ ClrOutWin::Init(){}  // ror
+/* 00150a90 00000078 */ ClrOutWin::Exec(){}  // ror
+/* 00150b08 0000001c */ ClrOutWin::Term(){}  // ror
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 00150b24 000002d4 */ NorMain::initOut(){}  // ror
 /* 00150df8 00000060 */ FUN_00150df8(){}
 /* 00150e58 000001d4 */ FUN_00150e58(){}

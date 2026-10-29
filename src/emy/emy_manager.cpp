@@ -916,7 +916,7 @@ int EmyManager::getEmyHoldWord248(u_int oid)
         return 0;
     if (emy->GetType() != 8)
         return 0;
-    return static_cast<ClrMain *>(emy)->m_248;
+    return static_cast<ClrMain *>(emy)->m_hold;
 }
 
 // ──────────────────────────────────────────────────────────────────────

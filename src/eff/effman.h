@@ -65,6 +65,22 @@ struct EffParam
             float m_rot[3];     // ROR 0x1c: its m_rotate
             int   m_shots;      // ROR 0x28: MagLifePC::m_shots
         } m_reload;             // kind 0x27 (MagLifePC::reload)
+        struct
+        {
+            const float *m_pos; // ROR 0x10: the caller's position (read while it lives)
+            const float *m_dir; // ROR 0x14: the caller's direction
+            float m_18;         // ROR 0x18: 0.5 (ClrOut*)
+            float m_1c[6];      // ROR 0x1c: 1 (ClrOut*)
+            int   m_34;         // ROR 0x34: 8 (ClrOut*)
+        } m_breath;             // kind 0xa (EffBreath2; ClrOutMove / ClrOutAtk)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10
+            float m_1c;         // ROR 0x1c: 100 (ClrOut*)
+            float m_20[3];      // ROR 0x20: 1 (ClrOut*)
+            float m_2c;         // ROR 0x2c: 0.5 (ClrOut*)
+            int   m_30;         // ROR 0x30: frames: 100 / 200 (ClrOut*, its hit point's life)
+        } m_ground;             // kind 0xc (EffBreath2Ground; ClrOutMove / ClrOutAtk)
     };
 };
 

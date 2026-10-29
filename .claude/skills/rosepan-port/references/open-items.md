@@ -6,6 +6,12 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-29 (`emy/emy_clr.cpp`, verify; split out of unassigned@0014dc7c): ClrMain (type 8)
+and its five outs, all 45 functions** (architecture.md). No enemy spawns on the smoke path; mark done
+when a run shows a Clr (it drops from above, spits, climbs away). Next in the enemy run: Nor
+(NorMain::initOut 0x150b24) up to GrgMain::initOut 0x153e40, then Grg, Fsh, Got, Pig, Dwf
+(unassigned@0014dc7c, now starting at 0x150b24).
+
 **WRITTEN 2026-10-29 (`emy/emy_mrt.cpp`, verify; split out of unassigned@0014cde4): MrtMain (type 7)
 and its four outs, all 26 functions** (architecture.md). No enemy spawns on the smoke path; mark done
 when a run shows a Mrt. Doubt: decide forces input 3 whenever pad 0's triangle is pressed
@@ -1146,6 +1152,15 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- (2026-10-29, emy/emy_clr.cpp) **Clr ROM oddities ported as they are**: ClrOutAtk's arm swing sets
+  m_hit_pc when it hits the dog (0x14fdbc stores +0x190, not +0x194), so the dog is hit every frame of
+  11..28; ClrOutUp::execUp reports done the frame it reaches the top, so its 120-frame step 2 never
+  runs from Exec; updateHitPoints stores hit = 2 (not |= 2) for the dog; ClrOutMove phase 1 picks
+  utlRandRange(0, 3) of a 3-word SE table (the 4th is the next .data word 0x44); isPCInSight's range is
+  0; ClrOutDeathUp hands back -1 (no 0xd) when out of sight; scnAttackStart's words 1, 3..5 and the
+  kind 0xc EffParam's tail are uninitialised stack in the ROM (zero on the host). The Ghidra session
+  went down mid-run once (it rebooted); names applied after it came back.
 
 - (2026-10-29, emy/emy_bdl.cpp) **BdlOutAtk's step 2 sector test for mode 4 uses 5pi / 8 as its lower
   bound** (ROM 0x14c6fc shares mode 2's constant; step 0 uses -3pi / 8), so a mode-4 Bdl standing in
