@@ -1,8 +1,9 @@
 /* ==========================================================================
  *  utl/utltm2.h
  *
- *  TIM2 helpers (utl/utltm2.cpp, ROR ~0x104970..0x105650; the asserts
- *  from 0x104e64 on name the file). Minimal: what DogTexInfo calls.
+ *  TIM2 helpers (utl/utltm2.cpp, ROR 0x104e1c..0x105650; the asserts
+ *  from 0x104e64 on name the file): sizes, picture lookup and the sepia
+ *  tint DogTexInfo applies to old photographs.
  *  A TIM2 file: a 0x10-byte header (0x80 when the format byte +5 is set),
  *  the picture count at +6, then the pictures, each starting with its
  *  total size; a picture's colour type is its byte +0x13.
