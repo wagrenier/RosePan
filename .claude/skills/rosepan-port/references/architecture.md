@@ -1680,6 +1680,22 @@ never asserts): sessions name them (`tus.py define --why`).
   pi / 8, note the target's position (+0x40), TskChrRot over 16 frames plus actor motion 0xb, then a
   TskMoveTypeGen mode 0xd kind 7 lunge in the achr's move slot (m_task[0], flags 0x11) hitting the
   PC (SE 0x30) and dog (SE 0x19) with chrIsNear 50, word 0x18; motions 0x14, 0x17, 0x16, input 1.
+  **ClrMain** (type 8, emy/emy_clr.cpp 0x14dc7c..0x150b24, 2026-10-29; EE 0xa80): a fixed stage
+  enemy that hangs out of sight and drops in along y (y grows downward: floors 0 / -52.653 / -97.346
+  by m_height +0x264, out of sight -347.346). States 1 Move, 2 Atk, 3 and 5 Up (one ClrOutUp each),
+  4 DeathUp (forced by notify bit 2, not through the graph); ClrOutWin never built. The outs share
+  m_phase +0x260 (Up 5..7, Move 0..5 / 8). Notify bit 1 with no input restarts the state and counts
+  m_hit_count +0x24c (Atk gives up on it: 90 / 70 / 40 percent). m_hold +0x248 is
+  EmyManager::getEmyHoldWord248 (1 once a Move ran). decide: inputs 13..9 never, sight edge
+  emyChkInSight(0, 3pi/4) gives 0 / 1 (in) or 2 (lost), in sight tests 3..8 (class 1, ahead, class 7
+  off axis, two each). The prop it drags with motion 2 is g_sequence.m_global[0x1e2]. Its spit leaves
+  64 ClrHitPoint records (+0x274, EE 0x20: wait, life, loud, radius, pos; ClrMain::addHitPoint /
+  updateHitPoints in after, chr word 0x32); ClrOutMove's drop hits with chrIsNear 60 word 0x31,
+  ClrOutAtk's arm swing (motions 3 / 4, node nodel_p_arm_r / _l vs Bip01 Spine1) word 0x33, its
+  three TskAttack attacks via scnAttackStart kinds 0x2e / 0x2f / 0x30 (motions 0x14 / 0x12 / 0x13,
+  param words [0] target, [2] kind, [6] motion, [7], [8] 1, [9] 5, [10] float). Effects kind 0xa
+  (EffBreath2: host pointers to a position and a direction at +0x10 / +0x14, read while it lives) and
+  0xc (EffBreath2Ground: pos, m_08 the delay) -- EffParam m_breath / m_ground.
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00

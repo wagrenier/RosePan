@@ -124,25 +124,8 @@ public:
 /* Type 7, MrtMain: emy/emy_mrt.h. */
 #include "emy/emy_mrt.h"
 
-/* Type 8 (vtable from rtti.py; EE 0xa80). layout: host -- polymorphic. */
-class ClrMain : public EmyMain
-{
-public:
-    ClrMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00287244
-            const _tagEnemyTransition *trans, float *pos)
-        : EmyMain(oid, name, param, prm, trans, pos)
-    {
-        initOut();
-    }
-    ~ClrMain();                                                         // EE slot 1 (+0x08), ROR 0x0014de54
-    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x0014e224
-    int  GetType() { return 8; }                                       // EE slot 3 (+0x18), ROR 0x0028727c
-    void decide();                                                       // EE slot 4 (+0x20), ROR 0x0014deb4
-    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0014e0b4
-    void after();                                                        // EE slot 6 (+0x30), ROR 0x0014e16c
-    virtual void initOut();                                              // EE slot 7 (+0x38), ROR 0x0014dc7c
-    int m_248;                  // ROR 0x248: EmyManager::getEmyHoldWord248
-};
+/* Type 8, ClrMain: emy/emy_clr.h. */
+#include "emy/emy_clr.h"
 
 /* Type 9 (vtable from rtti.py; EE 0x244). layout: host -- polymorphic. */
 class GrgMain : public EmyMain

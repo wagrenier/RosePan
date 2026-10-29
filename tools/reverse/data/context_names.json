@@ -7295,6 +7295,270 @@
   "was": "FUN_0014dc7c",
   "why": "called right after the vtable store in the ELF's inline ClrMain::ClrMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
  },
+ "0014de54": {
+  "name": "ClrMain::~ClrMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0014de54",
+  "why": "ClrMain vtable 0x2e2640 slot 1: vptr store, ~EmyMain then operator_delete on the deleting flag, as MrtMain::~MrtMain"
+ },
+ "0014deb4": {
+  "name": "ClrMain::decide",
+  "tag": "ror-inferred",
+  "was": "FUN_0014deb4",
+  "why": "ClrMain vtable slot 4: m_req from the inputs at +0x208 (tests 13..9, sight edge, tests 3..8), as MrtMain::decide"
+ },
+ "0014e0b4": {
+  "name": "ClrMain::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e0b4",
+  "why": "ClrMain vtable slot 5: EmyStateMap::next on m_req (states 1..5), notify bit 2 forces state 4, bit 1 restarts and counts +0x24c"
+ },
+ "0014e16c": {
+  "name": "ClrMain::after",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e16c",
+  "why": "ClrMain vtable slot 6: clears actor flags 0x60, ticks the hit points, Term / selectOut on a change, m_req = out->Exec()"
+ },
+ "0014e224": {
+  "name": "ClrMain::selectOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e224",
+  "why": "ClrMain vtable slot 2: m_out[state 1..5]->Init, the state's row of the transition table into +0x208"
+ },
+ "0014e2ec": {
+  "name": "ClrMain::testInput3",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e2ec",
+  "why": "ClrMain::decide's input 3 test: EmyMain::isPCStateClass1"
+ },
+ "0014e300": {
+  "name": "ClrMain::testInput4",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e300",
+  "why": "ClrMain::decide's input 4 test: EmyMain::isPCStateClass1"
+ },
+ "0014e314": {
+  "name": "ClrMain::testInput5",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e314",
+  "why": "ClrMain::decide's input 5 test: EmyMain::isPCAhead"
+ },
+ "0014e328": {
+  "name": "ClrMain::testInput6",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e328",
+  "why": "ClrMain::decide's input 6 test: EmyMain::isPCAhead"
+ },
+ "0014e33c": {
+  "name": "ClrMain::testInput7",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e33c",
+  "why": "ClrMain::decide's input 7 test: EmyMain::isPCClass7OffAxis"
+ },
+ "0014e350": {
+  "name": "ClrMain::testInput8",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e350",
+  "why": "ClrMain::decide's input 8 test: EmyMain::isPCClass7OffAxis"
+ },
+ "0014e364": {
+  "name": "ClrMain::testInput13",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e364",
+  "why": "ClrMain::decide's input 13 test: returns 0"
+ },
+ "0014e36c": {
+  "name": "ClrMain::testInput12",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e36c",
+  "why": "ClrMain::decide's input 12 test: returns 0"
+ },
+ "0014e374": {
+  "name": "ClrMain::testInput11",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e374",
+  "why": "ClrMain::decide's input 11 test: returns 0"
+ },
+ "0014e37c": {
+  "name": "ClrMain::testInput10",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e37c",
+  "why": "ClrMain::decide's input 10 test: returns 0"
+ },
+ "0014e384": {
+  "name": "ClrMain::testInput9",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e384",
+  "why": "ClrMain::decide's input 9 test: returns 0"
+ },
+ "0014e38c": {
+  "name": "ClrMain::isPCInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e38c",
+  "why": "emyChkInSight(0, 3pi/4, 1, PC oid, m_param); decide's sight edge, as MrtMain::isPCInSight"
+ },
+ "0014e3d0": {
+  "name": "ClrMain::addHitPoint",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e3d0",
+  "why": "fills a free 0x20 record of the 64 at ClrMain +0x274 (wait, life, loud, radius, pos) from the cursor +0x270; called by the spit effects"
+ },
+ "0014e4d4": {
+  "name": "ClrMain::updateHitPoints",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e4d4",
+  "why": "counts the 64 records down, emyChkPointReach of the PC / dog, scnChrRequest word 0x32; called by ClrMain::after"
+ },
+ "0014e73c": {
+  "name": "ClrOutUp::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e73c",
+  "why": "ClrOutUp vtable 0x2e2688 slot 2"
+ },
+ "0014e750": {
+  "name": "ClrOutUp::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e750",
+  "why": "ClrOutUp vtable slot 3: phases 5..7 of ClrMain +0x260 around execUp, 0xd at the end"
+ },
+ "0014e834": {
+  "name": "ClrOutUp::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e834",
+  "why": "ClrOutUp vtable slot 4: termCommon"
+ },
+ "0014e850": {
+  "name": "ClrOutUp::execUp",
+  "tag": "ror-inferred",
+  "was": "FUN_0014e850",
+  "why": "ClrOutUp::Exec's climb: y -= 4 a frame to -347.346 (motion 10, the prop's motion), start flag restarts"
+ },
+ "0014eb54": {
+  "name": "ClrOutDeathUp::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014eb54",
+  "why": "ClrOutDeathUp vtable 0x2e26b8 slot 2"
+ },
+ "0014ebcc": {
+  "name": "ClrOutDeathUp::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014ebcc",
+  "why": "ClrOutDeathUp vtable slot 3: phases 5..7 around execUp"
+ },
+ "0014ecf4": {
+  "name": "ClrOutDeathUp::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014ecf4",
+  "why": "ClrOutDeathUp vtable slot 4: termCommon"
+ },
+ "0014ed10": {
+  "name": "ClrOutDeathUp::execUp",
+  "tag": "ror-inferred",
+  "was": "FUN_0014ed10",
+  "why": "ClrOutDeathUp::Exec's climb: y -= 2 a frame to -347.346"
+ },
+ "0014ee40": {
+  "name": "ClrOutMove::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014ee40",
+  "why": "ClrOutMove vtable 0x2e26e8 slot 2"
+ },
+ "0014ee9c": {
+  "name": "ClrOutMove::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014ee9c",
+  "why": "ClrOutMove vtable slot 3: phases 0..5 / 8 of ClrMain +0x260: spot, wait, spit, drop"
+ },
+ "0014f220": {
+  "name": "ClrOutMove::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0014f220",
+  "why": "ClrOutMove vtable slot 4: termCommon"
+ },
+ "0014f23c": {
+  "name": "ClrOutMove::turnToPC",
+  "tag": "ror-inferred",
+  "was": "FUN_0014f23c",
+  "why": "atan2 of the PC from the achr less its rot y, wrapped, into the achr's rot y; ClrOutMove::Exec phase 0"
+ },
+ "0014f360": {
+  "name": "ClrOutMove::execDown",
+  "tag": "ror-inferred",
+  "was": "FUN_0014f360",
+  "why": "ClrOutMove::Exec's drop: y falls to the floor of ClrMain +0x264, chrIsNear hits (word 0x31), start flag restarts"
+ },
+ "0014f72c": {
+  "name": "ClrOutMove::createDropEff",
+  "tag": "ror-inferred",
+  "was": "FUN_0014f72c",
+  "why": "effects kinds 0xa and 0xc at the spot and ClrMain::addHitPoint(25); ClrOutMove::Exec phase 1"
+ },
+ "0014f88c": {
+  "name": "ClrOutAtk::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0014f88c",
+  "why": "ClrOutAtk vtable 0x2e2718 slot 2"
+ },
+ "0014f8e8": {
+  "name": "ClrOutAtk::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0014f8e8",
+  "why": "ClrOutAtk vtable slot 3: steps 1..5 on the TskAttack of m_task[3] and the arm swing"
+ },
+ "0014febc": {
+  "name": "ClrOutAtk::selectAttack",
+  "tag": "ror-inferred",
+  "was": "FUN_0014febc",
+  "why": "picks attack 3 / 4 / 0x12..0x14 (scnAttackStart kinds 0x2e..0x30) or gives up with 0xd by ClrMain +0x24c"
+ },
+ "00150290": {
+  "name": "ClrOutAtk::emitSpit",
+  "tag": "ror-inferred",
+  "was": "FUN_00150290",
+  "why": "nodes p_eff / p_gero3 of its actor into effects 0xa / 0xc and ClrMain::addHitPoint(80) on a 9-frame cycle (data 0x298dd0)"
+ },
+ "001506a0": {
+  "name": "ClrOutAtk::getPCSide",
+  "tag": "ror-inferred",
+  "was": "FUN_001506a0",
+  "why": "the PC's angle off the actor's rot y: 0 within pi/3, 1 left, 2 right; picks attack 3 / 4"
+ },
+ "00150804": {
+  "name": "ClrOutAtk::isArmTouching",
+  "tag": "ror-inferred",
+  "was": "FUN_00150804",
+  "why": "emyChkNearXZY(radius + 32) of node nodel_p_arm_r / _l against the target's Bip01 Spine1"
+ },
+ "00150a1c": {
+  "name": "ClrOutAtk::execExtra",
+  "tag": "ror-inferred",
+  "was": "FUN_00150a1c",
+  "why": "returns 0; ClrOutAtk::Exec calls it last with 1"
+ },
+ "00150a24": {
+  "name": "ClrOutAtk::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00150a24",
+  "why": "ClrOutAtk vtable slot 4: termCommon"
+ },
+ "00150a40": {
+  "name": "ClrOutWin::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00150a40",
+  "why": "ClrOutWin vtable 0x2e2748 slot 2, as MrtOutWin::Init"
+ },
+ "00150a90": {
+  "name": "ClrOutWin::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00150a90",
+  "why": "ClrOutWin vtable slot 3, as MrtOutWin::Exec"
+ },
+ "00150b08": {
+  "name": "ClrOutWin::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00150b08",
+  "why": "ClrOutWin vtable slot 4: termCommon"
+ },
  "00150b24": {
   "name": "NorMain::initOut",
   "tag": "ror-inferred",
