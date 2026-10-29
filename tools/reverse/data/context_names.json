@@ -9599,6 +9599,12 @@
   "was": "FUN_0016fb70",
   "why": "no callers; returns the index of the first occurrence of the second string in the first, -1 when none (strlen both, naive scan); opens the shared helper run 0x16fb70..0x1704a4 after EffCameraAnim1"
  },
+ "0016fc20": {
+  "name": "effVecLength",
+  "tag": "ror-inferred",
+  "was": "FUN_0016fc20",
+  "why": "sqrt of x*x + y*y + z*z of a0 (sqrtf fallback on NaN); EffLight2::render's distance from the eye"
+ },
  "0016ff18": {
   "name": "effCalcViewDepth",
   "tag": "ror-inferred",

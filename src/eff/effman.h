@@ -81,6 +81,24 @@ struct EffParam
             float m_2c;         // ROR 0x2c: 0.5 (ClrOut*)
             int   m_30;         // ROR 0x30: frames: 100 / 200 (ClrOut*, its hit point's life)
         } m_ground;             // kind 0xc (EffBreath2Ground; ClrOutMove / ClrOutAtk)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10
+            float m_scale[2];   // ROR 0x1c: the sprite's width and height
+            float m_color[4];   // ROR 0x24: 0..1, alpha last
+            float m_near;       // ROR 0x34: the pull toward the camera
+            int   m_fog;        // ROR 0x38: non-zero = fogged (EFF_LIGHT_FOG)
+        } m_light1;             // kind 0x21 (EffLight1::init)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10
+            float m_scale[2];   // ROR 0x1c: the sprite's width and height
+            float m_color[4];   // ROR 0x24: 0..1, alpha last
+            int   m_tex;        // ROR 0x34: the pack texture
+            float m_fade_near;  // ROR 0x38: full alpha up to this distance from the eye
+            float m_fade_far;   // ROR 0x3c: gone (not drawn) from this distance
+            int   m_fog;        // ROR 0x40: non-zero = fogged (EFF_LIGHT_FOG)
+        } m_light2;             // kind 0x22 (EffLight2::init)
     };
 };
 

@@ -6,6 +6,17 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**PARTIAL 2026-10-29 (`eff/efflight.cpp`, pinned 0x174dd8..0x176694 out of unassigned@00172e4c):
+EffLight1 and EffLight2 written (9 functions: glow sprites, EffParam m_light1 / m_light2), EffLight3
+left (ctor, dtor, init, liveMain, 4 helpers 0x176430..0x176694: the light3_%02d nodes and the scene's
+DogLightPool at MagScene+0x2050).** The 240 s run reaches EffLight1's draw in the "Once upon a time"
+intro (~frame 2850), but effCalcViewDepth / effMoveToward (0x16ff18 / 0x16ff78, unassigned@0016fb70)
+are still stubs, so EffLight1's sprite sits at the stub's (0,0,1) and no glow can be checked: write
+those two helpers (with effVecLength 0x16fc20) before judging the picture. Doubt: the activation fade
+runs "backwards" (m_fade rises to 5 while hidden, falls to 0 while shown, alpha m_fade / 5), ported as
+the ROM has it. The rest of unassigned@00172e4c (EffFoot1 .. EffGeneric1, 0x172e4c..0x174dd8) stays
+queued.
+
 **WRITTEN 2026-10-29 (`emy/emy_grg.cpp`, verify; split out of unassigned@00153e40): GrgMain (type 9)
 and its six outs, all 37 functions** (architecture.md). No enemy spawns on the smoke path; mark done
 when a run shows a Grg (it roams rooms 0x84..0x8b, hides in their fchrs and reappears). Three ROM
