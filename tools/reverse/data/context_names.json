@@ -18119,17 +18119,65 @@
   "was": "FUN_002005b8",
   "why": "TskDamage::setup's step for chr word 6"
  },
+ "0020067c": {
+  "name": "TskEnemyMove::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0020067c",
+  "why": "vtable 0x2e5040 slot 3 (CmnITask init), empty"
+ },
+ "00200684": {
+  "name": "TskEnemyMove::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00200684",
+  "why": "vtable 0x2e5040 slot 5 (term): stops the voice +0xab8 when >= 0"
+ },
  "002006b0": {
   "name": "TskEnemyMove::TskEnemyMove",
   "tag": "ror-inferred",
   "was": "FUN_002006b0",
   "why": "stores vtable 0x2e5040 (TskEnemyMove), clears +4, +0x28, +0xac4; EmyMain::loadParam calls it on operator_new(0xad0)"
  },
+ "002006cc": {
+  "name": "TskEnemyMove::~TskEnemyMove",
+  "tag": "ror-inferred",
+  "was": "FUN_002006cc",
+  "why": "vtable 0x2e5040 slot 6: resets the vptr, deletes on bit 0"
+ },
  "00200700": {
   "name": "TskEnemyMove::start",
   "tag": "ror-inferred",
   "was": "FUN_00200700",
   "why": "this+4 = 1 and copies the move record emyStartMove / emyStartChase build (oid, done flag pointer, speeds by m_agl, target, position, radii) into the task"
+ },
+ "002008f0": {
+  "name": "TskEnemyMove::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_002008f0",
+  "why": "vtable 0x2e5040 slot 4 (exec): while active and not suspended, actor pos to bss 0x6e97d8, plan / step / voice; returns 0"
+ },
+ "00200988": {
+  "name": "TskEnemyMove::plan",
+  "tag": "ror-inferred",
+  "was": "FUN_00200988",
+  "why": "exec's first call: switch on pickEvent; 1/2 SctLayer::searchPath to the goal, 3/4 stand motions; 0 when the target is gone (*done = 2)"
+ },
+ "00200bc4": {
+  "name": "TskEnemyMove::pickEvent",
+  "tag": "ror-inferred",
+  "was": "FUN_00200bc4",
+  "why": "plan's switch value: restart flag +0x34 -> 1, three utlRandRange countdowns over +0xa98..+0xab0 -> 4 / 3 / 2"
+ },
+ "00200d18": {
+  "name": "TskEnemyMove::step",
+  "tag": "ror-inferred",
+  "was": "FUN_00200d18",
+  "why": "exec's second call: switch on the step +0x2c (0..4), walk / turn / idle motions"
+ },
+ "00202ec8": {
+  "name": "TskEnemyMove::pause",
+  "tag": "ror-inferred",
+  "was": "FUN_00202ec8",
+  "why": "vtable 0x2e5040 slot 2 (pause): the actor's motion speed +0x1e8 tiny / back to +0x4c"
  },
  "00202f10": {
   "name": "TskEnemyMove::stop",
@@ -18149,17 +18197,71 @@
   "was": "FUN_00202fbc",
   "why": "+0xac4 = 0, the achr's +0x1e8 back to +0x4c while active; EmyMain::pauseMove(0)"
  },
+ "00202fe4": {
+  "name": "TskEnemyMove::tickVoice",
+  "tag": "ror-inferred",
+  "was": "FUN_00202fe4",
+  "why": "exec's last call: SE state of +0xab8, countdown +0xabc, emyPlaySE from tables 0x2ff5c0 / 0x2ff600 by type, EmyManager::setEmyWork"
+ },
+ "0020313c": {
+  "name": "TskEnemyMove::getTargetPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0020313c",
+  "why": "(target oid, pos): emyGetSEPos, or the PC's Bip01 Spine1 led by its state-class speed x frames to reach, kept when on a secta cell"
+ },
+ "00203468": {
+  "name": "TskEnemyTurn::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00203468",
+  "why": "vtable 0x2e5080 slot 5 (term): stops the voice +0x3c"
+ },
+ "00203494": {
+  "name": "TskEnemyTurn::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00203494",
+  "why": "vtable 0x2e5080 slot 3 (init): stops the voice +0x3c"
+ },
  "002034c0": {
   "name": "TskEnemyTurn::TskEnemyTurn",
   "tag": "ror-inferred",
   "was": "FUN_002034c0",
   "why": "stores vtable 0x2e5080 (TskEnemyTurn), clears +4 and +0x10; EmyMain::loadParam calls it on operator_new(0x60)"
  },
+ "002034d8": {
+  "name": "TskEnemyTurn::~TskEnemyTurn",
+  "tag": "ror-inferred",
+  "was": "FUN_002034d8",
+  "why": "vtable 0x2e5080 slot 6: resets the vptr, deletes on bit 0"
+ },
  "0020350c": {
   "name": "TskEnemyTurn::start",
   "tag": "ror-inferred",
   "was": "FUN_0020350c",
   "why": "emyStartTurn's record into the turn task (EmyMain +0x1f8)"
+ },
+ "002035d8": {
+  "name": "TskEnemyTurn::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_002035d8",
+  "why": "vtable 0x2e5080 slot 4 (exec): target gone -> *done = 2, else target pos, turn motion, turn test, voice; returns 0"
+ },
+ "00203684": {
+  "name": "TskEnemyTurn::turn",
+  "tag": "ror-inferred",
+  "was": "FUN_00203684",
+  "why": "exec: angle to the target vs getRotY, re-picks motion 8/9 on a side change or motion end, *done = 1 within +0x28"
+ },
+ "00203828": {
+  "name": "TskEnemyTurn::setTurnMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00203828",
+  "why": "angle to the target > 0 -> motion 9 else 8, DogActor::changeMotion when it differs from +0x20"
+ },
+ "0020395c": {
+  "name": "TskEnemyTurn::pause",
+  "tag": "ror-inferred",
+  "was": "FUN_0020395c",
+  "why": "vtable 0x2e5080 slot 2 (pause): TskEnemyMove::pause's twin on +0x10 / +0x1c"
  },
  "002039a4": {
   "name": "TskEnemyTurn::suspend",
@@ -18172,6 +18274,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00203a00",
   "why": "TskEnemyMove::resume's twin: +0x48 = 0, achr +0x1e8 = +0x1c"
+ },
+ "00203a28": {
+  "name": "TskEnemyTurn::tickVoice",
+  "tag": "ror-inferred",
+  "was": "FUN_00203a28",
+  "why": "TskEnemyMove::tickVoice's twin (180 range, tables 0x2ff6a8 / 0x2ff6e8, no work word)"
+ },
+ "00203b44": {
+  "name": "TskEnemyTurn::getTargetPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00203b44",
+  "why": "TskEnemyMove::getTargetPos's twin: PC lead x 3, no cell test"
  },
  "00203d94": {
   "name": "SysTimer::SysTimer",

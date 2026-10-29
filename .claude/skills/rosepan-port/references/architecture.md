@@ -107,9 +107,9 @@ Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
   25, inlined): ctor 0x203d94 -> reset 0x203dd0, start 0x203ea8 (adds the stopped time to +0x28),
   stop 0x203efc (no callers), read 0x203f38 (adds |now - prev| to +0xc), update 0x204014 (main, once a
   frame: +0x18 count, +0x20 time = elapsed - paused, the old one to +0x1c / +0x24), hold 0x204090
-  (CmnTaskMan::exec: +0x24 = +0x20). The code before it, 0x1fd424..0x203d94 (still
-  unassigned@001fd424), is enemy behaviour tasks: TskEnemyMove (vtable 0x2e5040), TskEnemyTurn
-  (0x2e5080) and their motion / turn helpers -- a task/ file (or two).
+  (CmnTaskMan::exec: +0x24 = +0x20). The code before it is task/tsk_enemy.cpp
+  (0x20067c..0x203d94, 2026-10-29), and before that 0x1fd424..0x20067c (unassigned@001fd424) the
+  TskAttack / TskDamage steps (table at data 0x2feb64).
 - The rx bring-up main runs, in order: `rxSysSetIopImage("IOPRP300.IMG")` 0x241b20,
   `rxSysSetBootPath("cdrom0:")` 0x241d68 (boot device CDROM, dir, name), `rxSysResetHardware` via
   `rxSysInit` 0x240eb8: VIF/VU/GS-path/DMA reset, `rxThInit`, memory hooks reset, boot device (more than
@@ -2466,3 +2466,24 @@ not identified yet.
   motion (speed rec/60), 3 SE (panned volume or at the actor's Bip01 node; SeManager stops it after its
   frames), 4 voice stream, 5 message line (window 0x20,0x140 0x1c0x0x50), 6 / 7 scene fade in / out
   (skipped while one runs), 8 / 9 show / hide. ScenePlay::term releases the models it loaded.
+
+## Enemy move / turn tasks (task/tsk_enemy.cpp, 2026-10-29)
+
+- Pinned 0x20067c..0x203d94; no RoR source string (the name is the port's). Both classes kind 0x13,
+  manager-owned (EmyMain::loadParam), exec always returns 0; the result goes to the starter's word
+  (*m_done: 0 under way, 1 arrived / facing, 2 the target is gone).
+- **TskEnemyTurn** (0x2e5080, EE 0x60): exec 0x2035d8 -> getTargetPos 0x203b44 (the PC: spine node led
+  along the *enemy actor's* facing by the PC's state-class speed x 3: class 7 E4 ? 2.575 : 90/13,
+  class 6 E4 ? 2.575 : 26/7, class 8 2.5), setTurnMotion 0x203828 (motion 9 when the target is left of
+  the facing, else 8; changeMotion(m_speed, no, 1, -1, -1)), turn 0x203684 (*done = 1 within +0x28),
+  tickVoice 0x203a28. init 0x203494 and term 0x203468 both stop the voice.
+- **TskEnemyMove** (0x2e5040, EE 0xad0): exec 0x2008f0 copies the actor's m_trans to bss 0x6e97d8 (read by
+  the route helpers only), then plan 0x200988 (switch on pickEvent 0x200bc4: 1 restart / 2 m_kind[1]
+  countdown re-plan with SctLayer::searchPath over secta list 1 into +0x88, points of 0x10 at +0x288,
+  count +0xa78, index +0xa7c; 3 / 4 stand motions 2 or 10 when carrying), step 0x200d18 (states 0..4),
+  tickVoice 0x202fe4 (EmyManager work word = talking; at most four; types 7..9 set the word without a
+  voice and never clear it before stop). getTargetPos 0x20313c leads the PC by its speed x the frames to
+  reach it at m_walk (cap 250) and keeps the led point only when it is on a cell of m_layer
+  (getEmyTypeFlag: 1 for every type). The countdowns +0xa9c / +0xaa4 / +0xaac and m_se are never set
+  before use in the ROM (the port zeroes them / -1 in the constructors).
+- emyPlaySE 0x16a8a4 returns playSE's SndMan id (both tasks keep it).

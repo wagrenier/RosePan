@@ -4391,15 +4391,20 @@
 /* 002002cc 00000178 */ FUN_002002cc(){}
 /* 00200444 00000174 */ FUN_00200444(){}
 /* 002005b8 000000c4 */ FUN_002005b8(){}
-/* 0020067c 00000004 */ FUN_0020067c(){}
-/* 00200684 0000002c */ FUN_00200684(){}
+
+// *****************************************************************************
+// FILE -- task/tsk_enemy.cpp
+// *****************************************************************************
+
+/* 0020067c 00000004 */ TskEnemyMove::init(){}  // ror
+/* 00200684 0000002c */ TskEnemyMove::term(){}  // ror
 /* 002006b0 0000001c */ TskEnemyMove::TskEnemyMove(){}  // ror
-/* 002006cc 00000034 */ FUN_002006cc(){}
+/* 002006cc 00000034 */ TskEnemyMove::~TskEnemyMove(){}  // ror
 /* 00200700 000001f0 */ TskEnemyMove::start(){}  // ror
-/* 002008f0 00000098 */ FUN_002008f0(){}
-/* 00200988 0000023c */ FUN_00200988(){}
-/* 00200bc4 00000154 */ FUN_00200bc4(){}
-/* 00200d18 0000044c */ FUN_00200d18(){}
+/* 002008f0 00000098 */ TskEnemyMove::exec(){}  // ror
+/* 00200988 0000023c */ TskEnemyMove::plan(){}  // ror
+/* 00200bc4 00000154 */ TskEnemyMove::pickEvent(){}  // ror
+/* 00200d18 0000044c */ TskEnemyMove::step(){}  // ror
 /* 00201164 000003c0 */ FUN_00201164(){}
 /* 00201524 000004ac */ FUN_00201524(){}
 /* 002019d0 00000388 */ FUN_002019d0(){}
@@ -4412,25 +4417,25 @@
 /* 00202874 0000008c */ FUN_00202874(){}
 /* 00202900 00000520 */ FUN_00202900(){}
 /* 00202e20 000000a8 */ FUN_00202e20(){}
-/* 00202ec8 00000044 */ FUN_00202ec8(){}
+/* 00202ec8 00000044 */ TskEnemyMove::pause(){}  // ror
 /* 00202f10 00000050 */ TskEnemyMove::stop(){}  // ror
 /* 00202f60 0000005c */ TskEnemyMove::suspend(){}  // ror
 /* 00202fbc 00000024 */ TskEnemyMove::resume(){}  // ror
-/* 00202fe4 00000158 */ FUN_00202fe4(){}
-/* 0020313c 0000032c */ FUN_0020313c(){}
-/* 00203468 0000002c */ FUN_00203468(){}
-/* 00203494 0000002c */ FUN_00203494(){}
+/* 00202fe4 00000158 */ TskEnemyMove::tickVoice(){}  // ror
+/* 0020313c 0000032c */ TskEnemyMove::getTargetPos(){}  // ror
+/* 00203468 0000002c */ TskEnemyTurn::term(){}  // ror
+/* 00203494 0000002c */ TskEnemyTurn::init(){}  // ror
 /* 002034c0 00000018 */ TskEnemyTurn::TskEnemyTurn(){}  // ror
-/* 002034d8 00000034 */ FUN_002034d8(){}
+/* 002034d8 00000034 */ TskEnemyTurn::~TskEnemyTurn(){}  // ror
 /* 0020350c 000000cc */ TskEnemyTurn::start(){}  // ror
-/* 002035d8 000000ac */ FUN_002035d8(){}
-/* 00203684 000001a4 */ FUN_00203684(){}
-/* 00203828 00000134 */ FUN_00203828(){}
-/* 0020395c 00000044 */ FUN_0020395c(){}
+/* 002035d8 000000ac */ TskEnemyTurn::exec(){}  // ror
+/* 00203684 000001a4 */ TskEnemyTurn::turn(){}  // ror
+/* 00203828 00000134 */ TskEnemyTurn::setTurnMotion(){}  // ror
+/* 0020395c 00000044 */ TskEnemyTurn::pause(){}  // ror
 /* 002039a4 0000005c */ TskEnemyTurn::suspend(){}  // ror
 /* 00203a00 00000024 */ TskEnemyTurn::resume(){}  // ror
-/* 00203a28 0000011c */ FUN_00203a28(){}
-/* 00203b44 00000250 */ FUN_00203b44(){}
+/* 00203a28 0000011c */ TskEnemyTurn::tickVoice(){}  // ror
+/* 00203b44 00000250 */ TskEnemyTurn::getTargetPos(){}  // ror
 
 // *****************************************************************************
 // FILE -- system/system.cpp

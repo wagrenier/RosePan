@@ -1087,6 +1087,15 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- task/tsk_enemy.cpp (2026-10-29, partial): the file name is a guess (no RoR source string; the range
+  was cut from unassigned@001fd424, whose remaining 0x1fd424..0x20067c is the TskAttack / TskDamage
+  steps of data 0x2feb64 -- a task/ file still to name). Doubt: both getTargetPos lead the PC along
+  the enemy actor's facing (m_dog->getRotY), not the PC's; written as the ROM reads it -- check when a
+  chase is on screen. Left for the next session: TskEnemyMove::plan 0x200988 / step 0x200d18 (stubs at
+  the end of tsk_enemy.cpp) and the route helpers 0x201164..0x202e20 with the route block +0x88..+0xa80
+  (SctLayer::searchPath's out record). Nothing on the smoke path starts an enemy: a run needs a room
+  with one (the bus-stop prologue has none).
+
 - (2026-10-29, emy/emy_main.cpp) ROM oddities ported as they are: `EmyMain::setLPFromStack` 0x16640c
   (no callers) calls setParam(a_lp) with an unset stack word (getParam was probably meant; the host
   passes 0); `EmyMain::hasOid0Twice` 0x166128 asks EmyManager::hasOid(0) twice; `pickSE` indexes the

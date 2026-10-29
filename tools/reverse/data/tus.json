@@ -2178,6 +2178,24 @@
    "status": "verify",
    "why": "Unanchored run between task/tsk_man.cpp and task/tsk_scene.cpp: the seq-driven character tasks (TskMtnMove*, TskMove*, TskRotAdj, TskChrRot, TskAttach) and their chr* starters, plus the generic script tasks (TskMovie, TskMsgMan, TskSeqEvent, TskSysFunc, TskFrameFunc). Ends at 0x1f6c64 where DisplayMessage / SeManager / VoiceManager / ScenePlay (tsk_scene.cpp's classes, used by 0x1f82e4..) begin; 0x1f6c14 is still called from TskChrRot code. Name descriptive (no source string)."
   },
+  "task/tsk_enemy.cpp": {
+   "notes": "Left: TskEnemyMove::plan 0x200988 and step 0x200d18 (stubbed at the end of tsk_enemy.cpp) and their route helpers 0x201164, 0x201524, 0x2019d0, 0x201d58, 0x201fa4, 0x202138, 0x202234, 0x202380, 0x202638, 0x202874, 0x202900, 0x202e20 (still FUN_ names). They need the route block +0x88..+0xa80 placed: SctLayer::searchPath out record at +0x88, point count +0x284, 16-byte points from +0x288, m_nodes +0xa78, m_node +0xa7c; bss 0x6e97d8 is s_movePos (exec writes it). PORT: the constructors set m_se -1, the event countdowns and Turn m_pause to 0 (the ROM leaves heap garbage). Doubt in open-items: both getTargetPos lead the PC along the enemy actor's facing, as the ROM reads. Screen: the 15 s smoke run ends on the boot disclaimer as before; no enemy is on the smoke path (the bus-stop prologue has none), so nothing can show these tasks yet. The rest of unassigned@001fd424 (0x1fd424..0x20067c) is the TskAttack / TskDamage step table of data 0x2feb64, a task/ file still to name.",
+   "ranges": [
+    [
+     "0020067c",
+     "00203d94"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 09:01",
+     "status": "partial",
+     "summary": "task/tsk_enemy.cpp pinned 0x20067c..0x203d94 (cut from unassigned@001fd424). TskEnemyTurn complete (13 functions: start, exec, turn, setTurnMotion, tickVoice, getTargetPos, pause, suspend, resume, init, term, ctor, dtor). TskEnemyMove lifecycle written: ctor, start, stop, suspend, resume, pause, init, term, exec frame, pickEvent, tickVoice, getTargetPos. Classes moved from lib/unassigned.h to task/tsk_enemy.h; emyPlaySE now returns the SndMan id. 19 functions named."
+    }
+   ],
+   "status": "partial",
+   "why": "TskEnemyMove (vtable 0x2e5040: slots 3 0x20067c, 5 0x200684, ctor 0x2006b0) and TskEnemyTurn (0x2e5080) with their move / turn helpers, up to system/system.cpp 0x203d94. No RoR source string: the name is a guess after task/tsk_*.cpp. 0x1fd424..0x20067c (TskAttack / TskDamage steps from the table at 0x2feb64) is another file."
+  },
   "task/tsk_man.cpp": {
    "notes": "Pinned 0x1e7094..0x1e7f28 out of unassigned@001e6d54 (file name a guess, open-items). CmnITask slots: 1 get_task_type, 2 pause, 3 init, 4 exec(id, time, arg) nonzero ends, 5 term, 6 dtor. Task classes whose virtuals are not written run host defaults (kind 0, exec returns 1 so the task ends on its first step, as when the manager was a stub); writing a class's exec/get_task_type replaces that. Smoke runs: 15 s boot shows the Sony logo then the Atlus disclaimer, an 80 s run with 1800:START,2400:START reaches Press START and the title menu exactly as before. Nothing draws through the manager yet, hence verify. Next in the old range: the Tsk* classes 0x1e7f28..0x1f8034 (TskMtnMove/2, TskMove*, TskFrameFunc, TskMsgMan, TskMovie...), in New Game order; 0x1e6d54/0x1e6e00 are GamSndMan 3D volume helpers for game/gamsnd.cpp.",
    "ranges": [

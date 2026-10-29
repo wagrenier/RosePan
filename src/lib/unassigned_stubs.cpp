@@ -224,20 +224,6 @@ void MagLife130da4::setVolume(int volume)
 
 // ---- stubs (hand-written: EmyMain / EmyOut and the enemy classes' constructors and destructors, which stubgen does not write) ----
 
-// stub of ROR 0x002006b0
-TskEnemyMove::TskEnemyMove()
-{
-    ROSEPAN_STUB("TskEnemyMove::TskEnemyMove", 0x002006b0);
-    m_active = 0;
-}
-
-// stub of ROR 0x002034c0
-TskEnemyTurn::TskEnemyTurn()
-{
-    ROSEPAN_STUB("TskEnemyTurn::TskEnemyTurn", 0x002034c0);
-    m_active = 0;
-}
-
 // stub of ROR 0x0015c2a4
 DwfMain::~DwfMain()
 {
@@ -1083,12 +1069,6 @@ void PigMain::initOut()
 void PigMain::selectOut()
 {
     ROSEPAN_STUB("PigMain::selectOut", 0x0015abc4);
-}
-
-// stub of ROR 0x00202f10
-void TskEnemyMove::stop()
-{
-    ROSEPAN_STUB("TskEnemyMove::stop", 0x00202f10);
 }
 
 
@@ -2462,39 +2442,4 @@ void EffCloud1::updateZDepth()
     ROSEPAN_STUB("EffCloud1::updateZDepth", 0x0017a8d8);
 }
 
-// stub of ROR 0x00200700
-void TskEnemyMove::start(const EmyMoveParam *prm)
-{
-    ROSEPAN_STUB("TskEnemyMove::start", 0x00200700);
-}
 
-// stub of ROR 0x0020350c
-void TskEnemyTurn::start(const EmyTurnParam *prm)
-{
-    ROSEPAN_STUB("TskEnemyTurn::start", 0x0020350c);
-}
-
-
-// stub of ROR 0x00202fbc
-void TskEnemyMove::resume()
-{
-    ROSEPAN_STUB("TskEnemyMove::resume", 0x00202fbc);
-}
-
-// stub of ROR 0x00202f60
-void TskEnemyMove::suspend()
-{
-    ROSEPAN_STUB("TskEnemyMove::suspend", 0x00202f60);
-}
-
-// stub of ROR 0x00203a00
-void TskEnemyTurn::resume()
-{
-    ROSEPAN_STUB("TskEnemyTurn::resume", 0x00203a00);
-}
-
-// stub of ROR 0x002039a4
-void TskEnemyTurn::suspend()
-{
-    ROSEPAN_STUB("TskEnemyTurn::suspend", 0x002039a4);
-}
