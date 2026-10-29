@@ -418,13 +418,9 @@ struct DogActor;
 #include "sct/sctlayer.h"
 
 /* mnuInitPool 0x1944d0 / mnuTermPool 0x194548 (the mnu pool): mnu/mnubase.h. */
-/* The closest points of segments p0 + s d0 and p1 + t d1 (s, t in 0..1,
- * either out pointer may be NULL); returns the squared distance. */
-float i3dSegSegDist2(const float *p0, const float *d0, const float *p1, const float *d1,
-                     float *s, float *t);                                // ROR 0x00234050
-/* The squared distance from p to the segment a + t d (t in 0..1, written
- * to *t when t is not NULL). */
-float i3dPointSegDist2(const float *p, const float *a, const float *d, float *t); // ROR 0x002337e0
+/* i3dRaySegDist2 0x234050 / i3dPointSegDist2 0x2337e0 (the distance tests):
+ * i3d/i3dgeom.h. */
+#include "i3d/i3dgeom.h"
 
 /* ---- the room table: wrd/wrdsrv.h (WrdSrv, g_wrdSrv) ---- */
 #include "wrd/wrdsrv.h"

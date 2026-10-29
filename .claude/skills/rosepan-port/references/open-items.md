@@ -6,19 +6,23 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-29 (`i3d/i3dgeom.cpp`, partial): the distance / box / hit tests the i3c casts and
+MagScene's wall tests call.** 37 of 47 functions (all box tests, the point / line / ray / segment
+distances, the sphere and capsule hit tests, the line-sphere and line-capsule intersections); checked
+against brute force on the host. RENAMED as the earlier doubt said: 0x234050 is ray-vs-segment
+(**i3dRaySegDist2**), the old "i3dSegSegDist2Rgn" 0x234390 the true segment pair (**i3dSegSegDist2**).
+Left: 0x2355c8 / 0x235608 / 0x235648 (wrappers of 0x236168 / 0x236228 / 0x2362a8; 0x235608 is what
+utlHitCheck calls), 0x235768, 0x236168..0x2365f8 and 0x2367a0. Doubt (PORT choice, decided):
+i3dLineCylinderTest 0x235be8 reads two uninitialised root slots when a line meets the infinite wall but
+misses the capsule, and never stores its t for a line along the axis; the port returns 0 for no root,
+repeats a tangent root, and the callers start t at 0. Next for collision: the i3c casts (i3cquery,
+verify) now get real box tests -- run past the bus stop and check Lucinda is stopped by a wall; then
+dogModelHitNearest / dogModelHitCylinder (0x114034 / 0x1141c8, stubs in lib/unassigned_stubs.cpp).
+
 **WRITTEN 2026-10-29 (`i3d/i3cquery.cpp`, verify): the i3c collision casts (i3cCast worker, tree walk,
-ray / sphere / cylinder / swept-sphere triangle tests, the nine cast entries, hit attributes).** The 240 s run reaches the bus-stop
-room unchanged; i3cCastRay now walks the real i3c data and stops at the **i3dRayBoxTest stub (0x234b38)**,
-so no cast hits anything yet: **i3d/i3dgeom.cpp (0x233628..0x236960) is the next step for collision**
-(the box tests, i3dPointDist2, i3dLineSegDist2, i3dSegSegDist2 / Rgn; their prototypes are in
-src/i3d/i3dgeom.h). Then dogModelHitNearest / dogModelHitCylinder (0x114034 / 0x1141c8, stubs in
-lib/unassigned_stubs.cpp; their signature is now (q, code, tri, verts, plane, point)). Mark
-i3cquery done once a cast visibly hits (Lucinda stopped by a wall). Doubt: cylinder mode
-1 uses i3dSegSegDist2 and mode 2 i3dSegSegDist2Rgn although mode 2 is the segment by its plane test;
-0x234050's name may really be a ray-segment distance. Supporting that: the swept-sphere ray test
-0x232be8 also pairs i3dSegSegDist2 with the ray cylinder time 0x2365f8 and the CylHalf box test, the
-segment one 0x2325d0 i3dSegSegDist2Rgn with 0x236678 -- so 0x234050 is likely ray-vs-segment and
-"CylinderHalf" a ray; rename when i3dgeom.cpp is written.
+ray / sphere / cylinder / swept-sphere triangle tests, the nine cast entries, hit attributes).** The 240 s
+run reaches the bus-stop room unchanged; i3cCastRay walked the real i3c data and stopped at the
+i3dRayBoxTest stub, now written (i3dgeom above). Mark i3cquery done once a cast visibly hits.
 
 **WRITTEN 2026-10-29 (`eff/efffog3.cpp`, verify; was the head of unassigned@0016fb70): EffFog3 / Dark /
 WeakUp and gamCreateEff1a, the reached stub of GamMan::initStage2.** The enemy fog: one EffFog3 per stage

@@ -307,8 +307,8 @@ int i3cPrimSphere(const float *shape, const I3cTri *prim, const float *verts, I3
  * distances); a segment (mode 2) on one side of the plane takes the nearer
  * end, missing when both are farther than r. That point inside the edges
  * is projected on the plane (code 3); else the first edge whose distance
- * to the axis (mode 0 i3dLineSegDist2, 1 i3dSegSegDist2, 2
- * i3dSegSegDist2Rgn) is within r gives its closest edge point (code i, or
+ * to the axis (mode 0 i3dLineSegDist2, 1 i3dRaySegDist2, 2
+ * i3dSegSegDist2) is within r gives its closest edge point (code i, or
  * 0x10 | i strictly inside the edge). The point goes out with w = t, the
  * plane with w = n.d (mode 0) or -d0.
  * ROR 0x00231948 */
@@ -417,9 +417,9 @@ int i3cPrimCylinder(const float *shape, const I3cTri *prim, const float *verts, 
             float d2 = 0.0f;
             float s = 0.0f, u = 0.0f;
             if (mode == 1)
-                d2 = i3dSegSegDist2(pos, dir, v[i], e[i], &s, &u);
+                d2 = i3dRaySegDist2(pos, dir, v[i], e[i], &s, &u);
             else if (mode == 2)
-                d2 = i3dSegSegDist2Rgn(pos, dir, v[i], e[i], &s, &u);
+                d2 = i3dSegSegDist2(pos, dir, v[i], e[i], &s, &u);
             else if (mode == 0)
                 d2 = i3dLineSegDist2(pos, dir, v[i], e[i], &s, &u);
             if (!(d2 <= r2))
@@ -806,8 +806,8 @@ static int cqPrimSphereSweep(const float *shape, const I3cTri *prim, const float
         float u = 0.0f;
         for (; i < 3; i++)
         {
-            float d2 = seg ? i3dSegSegDist2Rgn(pos, dir, v[i], e[i], NULL, &u)
-                           : i3dSegSegDist2(pos, dir, v[i], e[i], NULL, &u);
+            float d2 = seg ? i3dSegSegDist2(pos, dir, v[i], e[i], NULL, &u)
+                           : i3dRaySegDist2(pos, dir, v[i], e[i], NULL, &u);
             if (d2 < r2)
                 break;
         }
@@ -853,8 +853,8 @@ static int cqPrimSphereSweep(const float *shape, const I3cTri *prim, const float
 
 /* ──────────────────────────────────────────────────────────────────────
  * A sphere swept over pos .. pos + dir: a same-side sweep whose ends are
- * both farther than r from the plane misses; edges by i3dSegSegDist2Rgn.
- * callcheck: i3dSegCylinderTest, i3dSegSegDist2Rgn, i3dVecCopyW, i3dVu0VecDot, i3dVu0VecMul, i3dVu0VecScale, i3dVu0VecSub (in cqPrimSphereSweep and cqLoadTri)
+ * both farther than r from the plane misses; edges by i3dSegSegDist2.
+ * callcheck: i3dSegCylinderTest, i3dSegSegDist2, i3dVecCopyW, i3dVu0VecDot, i3dVu0VecMul, i3dVu0VecScale, i3dVu0VecSub (in cqPrimSphereSweep and cqLoadTri)
  * ROR 0x002325d0 */
 
 int i3cPrimSphereSweepSeg(const float *shape, const I3cTri *prim, const float *verts,
@@ -865,8 +865,8 @@ int i3cPrimSphereSweepSeg(const float *shape, const I3cTri *prim, const float *v
 }
 
 /* ──────────────────────────────────────────────────────────────────────
- * A sphere swept along a ray (no same-side miss); edges by i3dSegSegDist2.
- * callcheck: i3dRayCylinderTest, i3dSegSegDist2, i3dVecCopyW, i3dVu0VecDot, i3dVu0VecMul, i3dVu0VecScale, i3dVu0VecSub (in cqPrimSphereSweep and cqLoadTri)
+ * A sphere swept along a ray (no same-side miss); edges by i3dRaySegDist2.
+ * callcheck: i3dRayCylinderTest, i3dRaySegDist2, i3dVecCopyW, i3dVu0VecDot, i3dVu0VecMul, i3dVu0VecScale, i3dVu0VecSub (in cqPrimSphereSweep and cqLoadTri)
  * ROR 0x00232be8 */
 
 int i3cPrimSphereSweepRay(const float *shape, const I3cTri *prim, const float *verts,

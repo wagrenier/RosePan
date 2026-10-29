@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 13:22 at commit `553fc8f` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 13:40 at commit `16925fb` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-29 13:22 at commit `553fc8f` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7180**, named **6345** (88%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4743
-- context-name ledger: 5044 entries; overrides of wrong library matches: 5
-- placed in a source file: 5492/7180 in 138 files
+- game functions: **7184**, named **6372** (89%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4770
+- context-name ledger: 5071 entries; overrides of wrong library matches: 5
+- placed in a source file: 5496/7184 in 138 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4958**; stubs: **358**
+- reconstructed RoR functions: **4999**; stubs: **344**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -67,7 +67,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3croot.cpp` | 12 | 0 |
 | `src/i3d/i3dctx.cpp` | 31 | 0 |
 | `src/i3d/i3denv.cpp` | 12 | 0 |
-| `src/i3d/i3dgeom.cpp` | 0 | 12 |
+| `src/i3d/i3dgeom.cpp` | 41 | 0 |
 | `src/i3d/i3dlayer.cpp` | 80 | 0 |
 | `src/i3d/i3dmath.cpp` | 95 | 0 |
 | `src/i3d/i3dpacket.cpp` | 54 | 0 |
@@ -85,7 +85,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 292 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 290 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -161,9 +161,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 169 TUs: todo 96, partial 2, verify 102, done 17
-- next: **i3d/i3dgeom.cpp** (frontier score 20)
+- 169 TUs: todo 95, partial 3, verify 102, done 17
+- next: **i3d/i3dgeom.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
+- partial: `i3d/i3dgeom.cpp` 41/51 -- Left: 0x2355c8, 0x235608, 0x235648 (wrappers passing swapped args to 0x236168, 0x236228, 0x2362a8; 0x235608 is called by utlHitCheck), 0x235768 (0x480, uses i3d
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -269,6 +270,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 13:40 `i3d/i3dgeom.cpp` partial: i3dgeom: 37 of 47 geometry tests written (box tests, point/line/ray/segment distances, sphere and capsule hit tests, line-sphere and line-capsule intersections)
 - 2026-10-29 13:22 `i3d/i3cquery.cpp` verify: i3cquery complete: swept-sphere triangle tests 0x2325d0 (segment) / 0x232be8 (ray) as one worker, their casts 0x2331c8 (hidden in 0x232be8, created in Ghidra) /
 - 2026-10-29 13:12 `i3d/i3cquery.cpp` partial: i3c collision casts: i3cCast worker 0x232120, tree walk 0x231ed0, shape transform, ray / sphere / cylinder triangle tests with their mode wrappers, the seven ca
 - 2026-10-29 12:35 `utl/utlmisc2.cpp` verify: Split unassigned@00216ad0: pinned utl/utlmisc2.cpp 0x217f10..0x2184c0 and wrote all 10 functions: utlAtan2 (stub replaced), utlDirDist and utlStrNCopy (moved fr
@@ -276,22 +278,21 @@ Recent sessions:
 - 2026-10-29 11:58 `utl/utlfind.cpp` verify: utl/utlfind.cpp reconstructed: all 10 functions (UtlFind fields m_num / m_again named, FUN_001062d8 named utlFindFirstVFchr), extent pinned 0x1060e8-0x106658; u
 - 2026-10-29 11:39 `mnu/mnuselect.cpp` verify: MnuTextList written whole: ctor, dtor, open, close, clear, processPad and its step state machine, allocText and freeText, setItems (labels split on #0#0, mask f
 - 2026-10-29 11:27 `bed/bedsubmode.cpp` verify: BedSubMode written: push 0x100258 and pop 0x1002c0 (save / restore the four-word record on a 4-deep stack, asserts at lines 25 / 35) and reset 0x100320 (named, 
-- 2026-10-29 10:59 `msg/msgsystext.cpp` done: msgGetSysText 0x1832e8 and its 0x1d4 system texts (data 0x298fe8) written as msg/msgsystext.cpp, byte-exact; stub removed. datadump.py S fields now print byte-e
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `i3d/i3dgeom.cpp` | todo | 0/14/47 | 12.7 | 20 | 0 |
 | `unassigned@00149d18` | todo | 0/62/431 | 98.3 | 12 | 0 |
 | `mag/maglifefadekey.cpp` | todo | 0/6/9 | 2.5 | 9 | 0 |
 | `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
-| `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
 | `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
+| `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
 | `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
-| `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
 | `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
 | `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
-| `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
 | `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
+| `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
+| `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
+| `unassigned@00113ea8` | todo | 0/2/3 | 1.3 | 4 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -301,12 +302,9 @@ Recent sessions:
 | `001be2dc` | FileReader::~FileReader | 30 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 25 | ror | missing | game/gamfile.cpp |
 | `0012f790` | MagLifeFadeKey::releaseTexture | 3 | ror | stub | mag/maglifefadekey.cpp |
-| `00234050` | i3dSegSegDist2 | 3 | ror | stub | i3d/i3dgeom.cpp |
 | `00192ac0` | mnuBase::mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
 | `00192b3c` | mnuBase::~mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
 | `0012c31c` | MagLifePC::startAttack | 2 | ror | stub | mag/maglifepcbtl.cpp |
-| `00234390` | i3dSegSegDist2Rgn | 2 | ror | stub | i3d/i3dgeom.cpp |
-| `002337e0` | i3dPointSegDist2 | 2 | ror | stub | i3d/i3dgeom.cpp |
 | `0012ab18` | MagLifeBwnCtrl::reset | 2 | ror | missing | mag/maglifebwnctrl.cpp |
 | `0010456c` | utlHitCheck | 2 | ror | stub | utl/utlbtl.cpp |
 | `00104e1c` | utlTm2GetSize | 2 | ror | stub | - |
@@ -318,23 +316,26 @@ Recent sessions:
 | `0012f2f0` | MagLifeFadeKey::loadTexture | 1 | ror | stub | mag/maglifefadekey.cpp |
 | `0012f824` | MagLifeFadeKey::start | 1 | ror | stub | mag/maglifefadekey.cpp |
 | `0012ca28` | MagLifePC::getAttackHeight | 1 | ror | stub | - |
-| `00233628` | i3dPointDist2 | 1 | ror | stub | i3d/i3dgeom.cpp |
 | `0012c9c0` | MagLifePC::setState14 | 1 | ror | stub | - |
 | `0012bedc` | MagLifePC::calcTargetAngle | 1 | ror | stub | - |
 | `002413d8` | rxSysIniFind | 1 | ror | stub | rx/rxsys.cpp |
 | `0012c014` | MagLifePC::getHitFrameRange | 1 | ror | stub | - |
 | `0012bc98` | MagLifePC::getWeaponHitPos | 1 | ror | stub | mag/maglifepcbtl.cpp |
-| `00233c10` | i3dLineSegDist2 | 1 | ror | stub | i3d/i3dgeom.cpp |
 | `00241a00` | rxSysOpenTty | 1 | ror | stub | rx/rxsys.cpp |
 | `001f9e38` | FUN_001f9e38 | 1 | - | missing | task/tsk_scene.cpp |
-| `00236678` | i3dSegCylinderTest | 1 | ror | stub | i3d/i3dgeom.cpp |
 | `0014313c` | MagScene::updateDebug | 1 | ror | stub | mag/magscenedebug.cpp |
 | `0012a6a0` | MagLifeBwnCtrl::processPad | 1 | ror | missing | mag/maglifebwnctrl.cpp |
-| `002365f8` | i3dRayCylinderTest | 1 | ror | stub | i3d/i3dgeom.cpp |
 | `0015c304` | DwfMain::initOut | 1 | ror | stub | - |
 | `0015a17c` | PigMain::initOut | 1 | ror | stub | - |
 | `001583d4` | GotMain::initOut | 1 | ror | stub | - |
 | `00156620` | FshMain::initOut | 1 | ror | stub | - |
 | `00149d18` | BdsMain::initOut | 1 | ror | stub | - |
 | `0014b3bc` | BdlMain::initOut | 1 | ror | stub | - |
+| `0014cde4` | MrtMain::initOut | 1 | ror | stub | - |
+| `0014dc7c` | ClrMain::initOut | 1 | ror | stub | - |
+| `00153e40` | GrgMain::initOut | 1 | ror | stub | - |
+| `00150b24` | NorMain::initOut | 1 | ror | stub | - |
+| `0012cb50` | MagLifePC::beginAttack | 1 | ror | stub | mag/maglifepcbtl.cpp |
+| `00243560` | rxSysUpdateDevices | 1 | ror | stub | rx/rxsys.cpp |
+| `0012cdb0` | MagLifePC::message14 | 1 | ror | stub | mag/maglifepceff.cpp |
 

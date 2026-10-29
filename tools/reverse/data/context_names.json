@@ -26093,11 +26093,35 @@
   "was": "FUN_00233628",
   "why": "|a - b|^2 over xyz (vsub, vmul, two adds)"
  },
+ "00233650": {
+  "name": "i3dPointLineDist2",
+  "tag": "ror-inferred",
+  "was": "FUN_00233650",
+  "why": "squared distance from p to the line a + t d (t free, 0 when d is zero), writes t"
+ },
+ "00233718": {
+  "name": "i3dPointRayDist2",
+  "tag": "ror-inferred",
+  "was": "FUN_00233718",
+  "why": "squared distance from p to the ray a + t d (t >= 0), writes t"
+ },
  "002337e0": {
   "name": "i3dPointSegDist2",
   "tag": "ror-inferred",
   "was": "FUN_002337e0",
   "why": "p - a projected on d clamped to 0..1 (written to the a3 out pointer when not NULL); returns the squared distance from p to the segment a + t d"
+ },
+ "002338c8": {
+  "name": "i3dLineLineDist2",
+  "tag": "ror-inferred",
+  "was": "FUN_002338c8",
+  "why": "hidden after i3dPointSegDist2: closest points of two lines (s, t free; 0.0001 parallel test), writes s t, returns the squared distance"
+ },
+ "00233a58": {
+  "name": "i3dLineRayDist2",
+  "tag": "ror-inferred",
+  "was": "FUN_00233a58",
+  "why": "hidden: closest points of the line p0 + s d0 and the ray p1 + t d1 (t >= 0)"
  },
  "00233c10": {
   "name": "i3dLineSegDist2",
@@ -26106,16 +26130,16 @@
   "why": "closest points of the line p0 + s d0 (s unclamped) and the segment p1 + t d1 (t 0..1): dots, 0.0001 parallel test, writes s and t, returns |dist2|"
  },
  "00234050": {
-  "name": "i3dSegSegDist2",
+  "name": "i3dRaySegDist2",
   "tag": "ror-inferred",
   "was": "FUN_00234050",
-  "why": "closest points of segments p0 + s d0 and p1 + t d1 (dots of d0, d1, p1 - p0; the 0.0001 parallel test), writes s and t, returns the squared distance"
+  "why": "closest points of the ray p0 + s d0 (s >= 0, no upper clamp) and the segment p1 + t d1 (t 0..1); was i3dSegSegDist2, renamed as open-items asked once the code was read (i3c casts pair it with the ray cylinder 0x2365f8)"
  },
  "00234390": {
-  "name": "i3dSegSegDist2Rgn",
+  "name": "i3dSegSegDist2",
   "tag": "ror-inferred",
   "was": "FUN_00234390",
-  "why": "segment-segment closest points by nine-region classification (0.0001 parallel test); i3cPrimCylinder mode 2's edge distance; the plain name is 0x234050's"
+  "why": "closest points of two segments (s, t both 0..1) by a nine-region switch; was i3dSegSegDist2Rgn, the true segment-segment test (the seg casts use it)"
  },
  "002348f8": {
   "name": "i3dSphereBoxTest",
@@ -26159,6 +26183,138 @@
   "was": "FUN_00234ce8",
   "why": "box test of 0x232558 (radius-grown line); body not read"
  },
+ "00234d40": {
+  "name": "i3dSphereSphereTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234d40",
+  "why": "i3dPointDist2(a, b) <= (a.w + b.w)^2"
+ },
+ "00234d80": {
+  "name": "i3dSphereLineTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234d80",
+  "why": "i3dPointLineDist2(sphere, p, d) <= sphere.w^2"
+ },
+ "00234dc0": {
+  "name": "i3dSphereRayTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234dc0",
+  "why": "i3dPointRayDist2(sphere, p, d) <= sphere.w^2"
+ },
+ "00234e00": {
+  "name": "i3dSphereSegTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234e00",
+  "why": "i3dPointSegDist2(sphere, p, d) <= sphere.w^2"
+ },
+ "00234e40": {
+  "name": "i3dSphereCylLineTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234e40",
+  "why": "point-line distance against (sphere.w + p.w)^2: sphere vs an infinite cylinder (Cyl = radius in p.w, as the box tests)"
+ },
+ "00234e88": {
+  "name": "i3dSphereCylHalfTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234e88",
+  "why": "point-ray distance against (sphere.w + p.w)^2 (CylHalf = the ray cylinder, as i3dCylHalfBoxTest)"
+ },
+ "00234ed0": {
+  "name": "i3dSphereCylSegTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234ed0",
+  "why": "point-segment distance against (sphere.w + p.w)^2: sphere vs capsule"
+ },
+ "00234f18": {
+  "name": "i3dCylSegLineTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234f18",
+  "why": "i3dLineSegDist2(line, capsule seg) <= capsule.w^2"
+ },
+ "00234f70": {
+  "name": "i3dCylSegRayTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234f70",
+  "why": "i3dRaySegDist2(ray, capsule seg) <= capsule.w^2"
+ },
+ "00234fc8": {
+  "name": "i3dCylSegSegTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234fc8",
+  "why": "i3dSegSegDist2(seg, capsule seg) <= capsule.w^2"
+ },
+ "00235020": {
+  "name": "i3dCylSegCylLineTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00235020",
+  "why": "line-segment distance against the sum of both radii"
+ },
+ "00235080": {
+  "name": "i3dCylSegCylHalfTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00235080",
+  "why": "ray-segment distance against the sum of both radii"
+ },
+ "002350e0": {
+  "name": "i3dCylSegCylSegTest",
+  "tag": "ror-inferred",
+  "was": "FUN_002350e0",
+  "why": "segment-segment distance against the sum of both radii (capsule vs capsule)"
+ },
+ "00235128": {
+  "name": "i3dLineSphereTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00235128",
+  "why": "line p + t d against a sphere: the quadratic's roots to t0 t1, 0x111 on a hit"
+ },
+ "00235228": {
+  "name": "i3dRaySphereTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00235228",
+  "why": "i3dLineSphereTest limited to t >= 0 (bit 0 off when the entry is behind the start)"
+ },
+ "002352a8": {
+  "name": "i3dSegSphereTest",
+  "tag": "ror-inferred",
+  "was": "FUN_002352a8",
+  "why": "i3dLineSphereTest limited to t 0..1 (bit 0 / bit 4 off when entry / exit lie outside)"
+ },
+ "00235350": {
+  "name": "i3dCylSegSphereTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00235350",
+  "why": "hidden: i3dSegSphereTest with the sphere grown by p.w"
+ },
+ "002353c8": {
+  "name": "i3dCylLineSphereTest",
+  "tag": "ror-inferred",
+  "was": "FUN_002353c8",
+  "why": "i3dLineSphereTest with the sphere grown by p.w"
+ },
+ "00235440": {
+  "name": "i3dCylHalfSphereTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00235440",
+  "why": "i3dRaySphereTest with the sphere grown by p.w"
+ },
+ "002354b8": {
+  "name": "i3dCylinderSphereTest",
+  "tag": "ror-inferred",
+  "was": "FUN_002354b8",
+  "why": "flat-capped cylinder p..p+d (radius p.w) vs sphere: capsule distance, then the centre within its radius of both cap planes"
+ },
+ "00235688": {
+  "name": "i3dVecOrthoBasis",
+  "tag": "ror-inferred",
+  "was": "FUN_00235688",
+  "why": "two unit vectors u, v perpendicular to unit n (u in the plane of n's two largest axes, v = n x u)"
+ },
+ "00235be8": {
+  "name": "i3dLineCylinderTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00235be8",
+  "why": "core of i3dRay/SegCylinderTest: line vs the capsule around cyl + s axis (s 0..1, radius cyl.w) in the axis frame; entry / exit t, 0x111"
+ },
  "002365f8": {
   "name": "i3dRayCylinderTest",
   "tag": "ror-inferred",
@@ -26170,6 +26326,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00236678",
   "why": "0x235be8 limited to a segment: entry t above 1 or exit t below 0 miss; bit 0 flipped when entry below 0, bit 4 when exit above 1; writes the two t"
+ },
+ "00236718": {
+  "name": "i3dCylLineCylinderTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00236718",
+  "why": "hidden after i3dSegCylinderTest: i3dLineCylinderTest with the radius grown by p.w"
  },
  "00236960": {
   "name": "i3dVecZero",
