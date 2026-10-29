@@ -890,7 +890,7 @@ int EmyManager::getEmyHoldWord24c(u_int oid)
         return 0;
     if (emy->GetType() != 10)
         return 0;
-    return static_cast<NorMain *>(emy)->m_24c;
+    return static_cast<NorMain *>(emy)->m_grab_back;
 }
 
 // ──────────────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 15:49 at commit `528e4a9` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 16:09 at commit `a7b257c` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,16 +10,16 @@ Generated 2026-10-29 15:49 at commit `528e4a9` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6521** (91%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4919
-- context-name ledger: 5220 entries; overrides of wrong library matches: 5
-- placed in a source file: 5640/7187 in 142 files
+- game functions: **7187**, named **6575** (91%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4973
+- context-name ledger: 5274 entries; overrides of wrong library matches: 5
+- placed in a source file: 5695/7187 in 143 files
 
 Least-named game-code regions (64 KB blocks):
 
 | block | named | inferred files |
 |---|---|---|
-| `00150000` | 16/272 (6%) | emy/emy_clr.cpp |
+| `00150000` | 70/272 (26%) | emy/emy_nor.cpp, emy/emy_clr.cpp |
 | `001b0000` | 45/82 (55%) | mnu/mnuitem.cpp, game/gamfile.cpp, game/gamfont.cpp |
 | `001a0000` | 155/214 (72%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `00160000` | 215/268 (80%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5158**; stubs: **314**
+- reconstructed RoR functions: **5219**; stubs: **308**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -59,6 +59,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/emy/emy_main.cpp` | 52 | 0 |
 | `src/emy/emy_manager.cpp` | 59 | 0 |
 | `src/emy/emy_mrt.cpp` | 26 | 0 |
+| `src/emy/emy_nor.cpp` | 61 | 0 |
 | `src/emy/emy_out.cpp` | 58 | 0 |
 | `src/game/gamfile.cpp` | 18 | 0 |
 | `src/game/gamfont.cpp` | 28 | 0 |
@@ -89,7 +90,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 266 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 260 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -165,8 +166,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 173 TUs: todo 98, partial 2, verify 108, done 17
-- next: **unassigned@00150b24** (frontier score 8)
+- 174 TUs: todo 99, partial 2, verify 109, done 17
+- next: **debug/motnamecnv0.cpp** (frontier score 7)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -189,6 +190,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `emy/emy_main.cpp` 53/88 -- Verify: the 15 s smoke run stops at the disclaimer screen, no enemy exists yet; the first run that reaches a room with an enemy checks it (createEmy, then the c
 - verify: `emy/emy_manager.cpp` 58/58 -- Verify: the 15 s smoke run shows the boot disclaimer as before (EmyManager now runs its exec every frame with no enemies; no crash); no enemy is created on the 
 - verify: `emy/emy_mrt.cpp` 26/26 -- Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run sho
+- verify: `emy/emy_nor.cpp` 55/55 -- Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run sho
 - verify: `emy/emy_out.cpp` 58/58 -- No code left in the pinned range. Status verify: no enemy runs in the 15 s smoke run (boot disclaimer only, same picture as before), so nothing on screen shows 
 - verify: `game/gamfile.cpp` 18/21 -- Black screen, as before: the code is complete but no boot path shows it yet; every FileReader::read caller that runs in the boot (GamMan::loadSystemData / loadS
 - verify: `game/gamman.cpp` 409/409 -- All 409 gamman functions are written; status verify because nothing in the TU draws in the 15 s boot, which still ends on the Atlus disclaimer (correct for that
@@ -279,6 +281,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 16:09 `emy/emy_nor.cpp` verify: Pinned emy/emy_nor.cpp 0x150b24..0x153e40 out of unassigned@00150b24 and wrote all 55 functions: NorMain (enemy type 10: initOut, dtor, decide with flee input 5
 - 2026-10-29 15:49 `emy/emy_clr.cpp` verify: Pinned emy/emy_clr.cpp 0x14dc7c..0x150b24 out of unassigned@0014dc7c and wrote all 45 functions: ClrMain (enemy type 8: initOut, dtor, decide with tests 13..9 /
 - 2026-10-29 15:10 `mag/maglifefadekey.cpp` verify: MagLifeFadeKeyHole (the keyhole fade at scene +0x41890) reconstructed whole: constructor, loadTexture / loadTextureByName (EVNTEX.RPK header then one file, adde
 - 2026-10-29 15:00 `emy/emy_mrt.cpp` verify: Pinned emy/emy_mrt.cpp 0x14cde4..0x14dc7c out of unassigned@0014cde4 and wrote all 26 functions: MrtMain (enemy type 7: initOut, dtor, decide with its last-true
@@ -286,22 +289,21 @@ Recent sessions:
 - 2026-10-29 14:20 `emy/emy_bds.cpp` verify: Pinned emy/emy_bds.cpp 0x149d18..0x14b3bc out of unassigned@00149d18 and wrote all 33 functions: BdsMain (enemy type 4: initOut, dtor, decide, exec, after, sele
 - 2026-10-29 13:55 `i3d/i3dgeom.cpp` verify: i3dgeom complete: all 54 geometry tests written. This session: the flat-capped cylinder family (core 0x235768, line/ray/seg forms, hit tests incl. utlHitCheck 0
 - 2026-10-29 13:40 `i3d/i3dgeom.cpp` partial: i3dgeom: 37 of 47 geometry tests written (box tests, point/line/ray/segment distances, sphere and capsule hit tests, line-sphere and line-capsule intersections)
-- 2026-10-29 13:22 `i3d/i3cquery.cpp` verify: i3cquery complete: swept-sphere triangle tests 0x2325d0 (segment) / 0x232be8 (ray) as one worker, their casts 0x2331c8 (hidden in 0x232be8, created in Ghidra) /
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00150b24` | todo | 0/38/294 | 70.8 | 8 | 0 |
+| `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
+| `unassigned@00153e40` | todo | 0/32/239 | 58.0 | 7 | 0 |
+| `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
 | `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
 | `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
-| `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
-| `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
-| `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
 | `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
 | `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
+| `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
 | `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
 | `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
-| `mag/maglifepcbtl.cpp` | todo | 0/3/6 | 3.2 | 4 | 0 |
 | `unassigned@00113ea8` | todo | 0/2/3 | 1.3 | 4 | 0 |
+| `mag/maglifepcbtl.cpp` | todo | 0/3/6 | 3.2 | 4 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -336,7 +338,6 @@ Recent sessions:
 | `001583d4` | GotMain::initOut | 1 | ror | stub | - |
 | `00156620` | FshMain::initOut | 1 | ror | stub | - |
 | `00153e40` | GrgMain::initOut | 1 | ror | stub | - |
-| `00150b24` | NorMain::initOut | 1 | ror | stub | - |
 | `0012cb50` | MagLifePC::beginAttack | 1 | ror | stub | mag/maglifepcbtl.cpp |
 | `00243560` | rxSysUpdateDevices | 1 | ror | stub | rx/rxsys.cpp |
 | `0012cdb0` | MagLifePC::message14 | 1 | ror | stub | mag/maglifepceff.cpp |
@@ -347,4 +348,5 @@ Recent sessions:
 | `00154734` | GrgMain::testView | 1 | ror | stub | - |
 | `00154748` | GrgMain::releaseHold | 1 | ror | stub | - |
 | `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
+| `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |
 

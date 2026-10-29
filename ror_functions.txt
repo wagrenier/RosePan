@@ -1721,64 +1721,69 @@
 /* 00150b08 0000001c */ ClrOutWin::Term(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- emy/emy_nor.cpp
 // *****************************************************************************
 
 /* 00150b24 000002d4 */ NorMain::initOut(){}  // ror
-/* 00150df8 00000060 */ FUN_00150df8(){}
-/* 00150e58 000001d4 */ FUN_00150e58(){}
-/* 0015102c 000000b0 */ FUN_0015102c(){}
-/* 001510dc 0000007c */ FUN_001510dc(){}
-/* 00151158 000000c0 */ FUN_00151158(){}
-/* 00151218 00000014 */ FUN_00151218(){}
-/* 0015122c 000000e0 */ FUN_0015122c(){}
-/* 0015130c 00000008 */ FUN_0015130c(){}
-/* 00151314 00000014 */ FUN_00151314(){}
-/* 00151328 000000c4 */ FUN_00151328(){}
-/* 001513ec 0000005c */ FUN_001513ec(){}
-/* 00151448 00000018 */ FUN_00151448(){}
-/* 00151460 000000a8 */ FUN_00151460(){}
-/* 00151508 000000bc */ FUN_00151508(){}
-/* 001515c4 000000b0 */ FUN_001515c4(){}
-/* 00151674 00000038 */ FUN_00151674(){}
-/* 001516ac 00000098 */ FUN_001516ac(){}
-/* 00151744 0000009c */ FUN_00151744(){}
-/* 001517e0 0000017c */ FUN_001517e0(){}
-/* 0015195c 0000005c */ FUN_0015195c(){}
-/* 001519b8 00000394 */ FUN_001519b8(){}
-/* 00151d4c 000001d0 */ FUN_00151d4c(){}
-/* 00151f1c 000001b0 */ FUN_00151f1c(){}
-/* 001520cc 000003a0 */ FUN_001520cc(){}
-/* 0015246c 000000d8 */ FUN_0015246c(){}
-/* 00152544 00000204 */ FUN_00152544(){}
-/* 00152748 000003dc */ FUN_00152748(){}
-/* 00152b24 00000090 */ FUN_00152b24(){}
-/* 00152bb4 000000ac */ FUN_00152bb4(){}
-/* 00152c60 0000009c */ FUN_00152c60(){}
-/* 00152cfc 000000a8 */ FUN_00152cfc(){}
-/* 00152da4 0000009c */ FUN_00152da4(){}
-/* 00152e40 00000050 */ FUN_00152e40(){}
-/* 00152e90 000000a8 */ FUN_00152e90(){}
-/* 00152f3c 000000f4 */ FUN_00152f3c(){}
-/* 00153030 00000038 */ FUN_00153030(){}
-/* 00153068 000002d8 */ FUN_00153068(){}
-/* 00153340 0000001c */ FUN_00153340(){}
-/* 0015335c 0000003c */ FUN_0015335c(){}
-/* 00153398 00000334 */ FUN_00153398(){}
-/* 001536cc 00000010 */ FUN_001536cc(){}
-/* 001536dc 0000001c */ FUN_001536dc(){}
-/* 001536f8 00000044 */ FUN_001536f8(){}
-/* 0015373c 00000008 */ FUN_0015373c(){}
-/* 00153744 0000001c */ FUN_00153744(){}
-/* 00153760 00000040 */ FUN_00153760(){}
-/* 001537a0 0000005c */ FUN_001537a0(){}
-/* 001537fc 00000068 */ FUN_001537fc(){}
-/* 00153864 000002b4 */ FUN_00153864(){}
-/* 00153b18 0000001c */ FUN_00153b18(){}
-/* 00153b34 00000044 */ FUN_00153b34(){}
-/* 00153b78 00000188 */ FUN_00153b78(){}
-/* 00153d00 00000024 */ FUN_00153d00(){}
-/* 00153d24 0000011c */ FUN_00153d24(){}
+/* 00150df8 00000060 */ NorMain::~NorMain(){}  // ror
+/* 00150e58 000001d4 */ NorMain::decide(){}  // ror
+/* 0015102c 000000b0 */ NorMain::exec(){}  // ror
+/* 001510dc 0000007c */ NorMain::after(){}  // ror
+/* 00151158 000000c0 */ NorMain::selectOut(){}  // ror
+/* 00151218 00000014 */ NorMain::testInput4(){}  // ror
+/* 0015122c 000000e0 */ NorMain::testInput5(){}  // ror
+/* 0015130c 00000008 */ NorMain::testInput6(){}  // ror
+/* 00151314 00000014 */ NorMain::testInput7(){}  // ror
+/* 00151328 000000c4 */ NorMain::isTargetInSight(){}  // ror
+/* 001513ec 0000005c */ NorMain::isCoaxTime(){}  // ror
+/* 00151448 00000018 */ NorMain::countBiteWait(){}  // ror
+/* 00151460 000000a8 */ NorMain::isPressed(){}  // ror
+/* 00151508 000000bc */ NorMain::getHitNodePos(){}  // ror
+/* 001515c4 000000b0 */ NorMain::nextAttack(){}  // ror
+/* 00151674 00000038 */ NorOutAttack::Init(){}  // ror
+/* 001516ac 00000098 */ NorOutAttack::Exec(){}  // ror
+/* 00151744 0000009c */ NorOutAttack::Term(){}  // ror
+/* 001517e0 0000017c */ NorOutAttack::start(){}  // ror
+/* 0015195c 0000005c */ NorOutAttack::restartClaw(){}  // ror
+/* 001519b8 00000394 */ NorOutAttack::execLunge(){}  // ror
+/* 00151d4c 000001d0 */ NorOutAttack::isTouching(){}  // ror
+/* 00151f1c 000001b0 */ NorOutAttack::execScream(){}  // ror
+/* 001520cc 000003a0 */ NorOutAttack::execClaw(){}  // ror
+/* 0015246c 000000d8 */ NorOutAttack::releasePC(){}  // ror
+/* 00152544 00000204 */ NorOutAttack::execGrab(){}  // ror
+/* 00152748 000003dc */ NorOutAttack::grabTry(){}  // ror
+/* 00152b24 00000090 */ NorOutAttack::grabHoldStart(){}  // ror
+/* 00152bb4 000000ac */ NorOutAttack::grabHold(){}  // ror
+/* 00152c60 0000009c */ NorOutAttack::grabSqueeze(){}  // ror
+/* 00152cfc 000000a8 */ NorOutAttack::grabSqueezeEnd(){}  // ror
+/* 00152da4 0000009c */ NorOutAttack::grabReleaseEnd(){}  // ror
+/* 00152e40 00000050 */ NorOutAttack::grabMissEnd(){}  // ror
+/* 00152e90 000000a8 */ NorOutAttack::grabStruggle(){}  // ror
+/* 00152f3c 000000f4 */ NorOutAttack::placePC(){}  // ror
+/* 00153030 00000038 */ NorOutBitten::Init(){}  // ror
+/* 00153068 000002d8 */ NorOutBitten::Exec(){}  // ror
+/* 00153340 0000001c */ NorOutBitten::Term(){}  // ror
+/* 0015335c 0000003c */ NorOutWalk::Init(){}  // ror
+/* 00153398 00000334 */ NorOutWalk::Exec(){}  // ror
+/* 001536cc 00000010 */ NorOutWalk::getMode(){}  // ror
+/* 001536dc 0000001c */ NorOutWalk::Term(){}  // ror
+/* 001536f8 00000044 */ NorOutDead::Init(){}  // ror
+/* 0015373c 00000008 */ NorOutDead::Exec(){}  // ror
+/* 00153744 0000001c */ NorOutDead::Term(){}  // ror
+/* 00153760 00000040 */ NorOutBrownEv::Init(){}  // ror
+/* 001537a0 0000005c */ NorOutBrownEv::Exec(){}  // ror
+/* 001537fc 00000068 */ NorOutCounter::Init(){}  // ror
+/* 00153864 000002b4 */ NorOutCounter::Exec(){}  // ror
+/* 00153b18 0000001c */ NorOutCounter::Term(){}  // ror
+/* 00153b34 00000044 */ NorOutCoax::Init(){}  // ror
+/* 00153b78 00000188 */ NorOutCoax::Exec(){}  // ror
+/* 00153d00 00000024 */ NorOutTest::Init(){}  // ror
+/* 00153d24 0000011c */ NorOutTest::Exec(){}  // ror
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 00153e40 000001f0 */ GrgMain::initOut(){}  // ror
 /* 00154030 00000060 */ FUN_00154030(){}
 /* 00154090 00000178 */ FUN_00154090(){}

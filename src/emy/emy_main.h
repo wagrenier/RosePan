@@ -78,7 +78,8 @@ struct _tagEnemyParam
 {
     float  m_rot[4];            // ROR 0x00: o_rot
     int    m_start_state;       // ROR 0x10: createEmy's state for setStartState; loadParam's m_state
-    u_char _14[3];
+    u_short m_14;               // ROR 0x14: NorMain::m_max_lp
+    u_char _16;
     u_char m_flag800;           // ROR 0x17: the achr's m_flags bit 0x800
     u_char m_attr0[23];         // ROR 0x18: m_attr[0] bits 0..6, 8..23 (a byte each, bit 7 skipped)
     u_char m_attr1[8];          // ROR 0x2f: m_attr[1] bits 0..7
@@ -101,6 +102,7 @@ struct _tagEnemyParam
 };
 static_assert(sizeof(_tagEnemyParam) == 0x60, "_tagEnemyParam");
 static_assert(offsetof(_tagEnemyParam, m_start_state) == 0x10, "m_start_state");
+static_assert(offsetof(_tagEnemyParam, m_14) == 0x14, "m_14");
 static_assert(offsetof(_tagEnemyParam, m_flag800) == 0x17, "m_flag800");
 static_assert(offsetof(_tagEnemyParam, m_attr0) == 0x18, "m_attr0");
 static_assert(offsetof(_tagEnemyParam, m_attr1) == 0x2f, "m_attr1");
