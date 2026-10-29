@@ -171,38 +171,6 @@ void MnuBoard2D::term()
     ROSEPAN_STUB("MnuBoard2D::term", 0x001ad870);
 }
 
-// stub of ROR 0x001aed08
-void MnuItem::draw(I3dLayer *layer)
-{
-    ROSEPAN_STUB("MnuItem::draw", 0x001aed08);
-}
-
-// stub of ROR 0x001aeacc
-void MnuItem::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("MnuItem::init", 0x001aeacc);
-}
-
-// stub of ROR 0x001aec48
-int MnuItem::isInit()
-{
-    ROSEPAN_STUB("MnuItem::isInit", 0x001aec48);
-    return {};
-}
-
-// stub of ROR 0x001b099c
-int MnuItem::processPad(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuItem::processPad", 0x001b099c);
-    return {};
-}
-
-// stub of ROR 0x001aebc8
-void MnuItem::term()
-{
-    ROSEPAN_STUB("MnuItem::term", 0x001aebc8);
-}
-
 // stub of ROR 0x001ae040
 void MnuMovie::draw(I3dLayer *layer)
 {

@@ -31,6 +31,7 @@
 #include "lib/unassigned.h"
 #include "mag/maglife.h"
 #include "mnu/mnuSelectLanguage.h"
+#include "mnu/mnuitem.h"
 #include "mnu/mnuopt.h"
 #include "mnu/mnusvld.h"
 #include "mnu/mnutitle.h"
@@ -107,7 +108,7 @@ struct MagLifeMenuSelLang : MagLifeMenuBase
 /* The item menu, 0x10000 (vtable 0x2e1ae8). EE 0x2750. */
 struct MagLifeMenuItem : MagLifeMenuBase
 {
-    // ROR 0x00283ff0; callcheck: MnuItem::MnuItem (not written; the member starts zeroed)
+    // ROR 0x00283ff0; callcheck: MnuItem::MnuItem (the member's)
     MagLifeMenuItem() {}
     // ROR 0x00284040; callcheck: MnuItem::~MnuItem (the member's)
     ~MagLifeMenuItem() {}

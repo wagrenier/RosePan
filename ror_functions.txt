@@ -3457,51 +3457,51 @@
 /* 001ae954 000000a0 */ MnuItem::MnuItem(){}  // ror
 /* 001ae9f4 000000d8 */ MnuItem::~MnuItem(){}  // ror
 /* 001aeacc 000000b0 */ MnuItem::init(){}  // ror
-/* 001aeb7c 0000004c */ FUN_001aeb7c(){}
+/* 001aeb7c 0000004c */ MnuItem::initWork(){}  // ror
 /* 001aebc8 00000080 */ MnuItem::term(){}  // ror
 /* 001aec48 00000008 */ MnuItem::isInit(){}  // ror
-/* 001aec50 000000b8 */ FUN_001aec50(){}
+/* 001aec50 000000b8 */ MnuItem::loadTexList(){}  // ror
 /* 001aed08 00000054 */ MnuItem::draw(){}  // ror
-/* 001aed5c 000000f4 */ FUN_001aed5c(){}
-/* 001aee50 0000003c */ FUN_001aee50(){}
-/* 001aee8c 00000088 */ FUN_001aee8c(){}
-/* 001aef14 00000088 */ FUN_001aef14(){}
-/* 001aef9c 00000088 */ FUN_001aef9c(){}
-/* 001af024 0000010c */ FUN_001af024(){}
-/* 001af130 000000ec */ FUN_001af130(){}
-/* 001af21c 000001d4 */ FUN_001af21c(){}
-/* 001af3f0 00000058 */ FUN_001af3f0(){}
-/* 001af44c 00000084 */ FUN_001af44c(){}
-/* 001af4d0 0000002c */ FUN_001af4d0(){}
-/* 001af4fc 0000007c */ FUN_001af4fc(){}
+/* 001aed5c 000000f4 */ MnuItem::open(){}  // ror
+/* 001aee50 0000003c */ MnuItem::close(){}  // ror
+/* 001aee8c 00000088 */ MnuItem::loadTex(){}  // ror
+/* 001aef14 00000088 */ MnuItem::freeTexFiles(){}  // ror
+/* 001aef9c 00000088 */ MnuItem::releaseTex(){}  // ror
+/* 001af024 0000010c */ MnuItem::calcLifeRate(){}  // ror
+/* 001af130 000000ec */ MnuItem::readMenuFlags(){}  // ror
+/* 001af21c 000001d4 */ MnuItem::setSlot(){}  // ror
+/* 001af3f0 00000058 */ MnuItem::findSlot(){}  // ror
+/* 001af44c 00000084 */ MnuItem::refreshSlots(){}  // ror
+/* 001af4d0 0000002c */ MnuItem::getAnimTable(){}  // ror
+/* 001af4fc 0000007c */ MnuItem::getPatBase(){}  // ror
 /* 001af578 00000068 */ FUN_001af578(){}
-/* 001af5e0 00000348 */ FUN_001af5e0(){}
-/* 001af928 00000634 */ FUN_001af928(){}
-/* 001aff5c 00000690 */ FUN_001aff5c(){}
+/* 001af5e0 00000348 */ MnuItem::setSlotSprites(){}  // ror
+/* 001af928 00000634 */ MnuItem::setEquipSprites(){}  // ror
+/* 001aff5c 00000690 */ MnuItem::showFrame(){}  // ror
 /* 001b05ec 0000011c */ FUN_001b05ec(){}
-/* 001b070c 00000078 */ FUN_001b070c(){}
-/* 001b0784 00000214 */ FUN_001b0784(){}
+/* 001b070c 00000078 */ MnuItem::testSlotFlags(){}  // ror
+/* 001b0784 00000214 */ MnuItem::setDisp(){}  // ror
 /* 001b099c 000007a0 */ MnuItem::processPad(){}  // ror
-/* 001b113c 000009f8 */ FUN_001b113c(){}
-/* 001b1b34 00000064 */ FUN_001b1b34(){}
-/* 001b1b98 00000008 */ FUN_001b1b98(){}
-/* 001b1ba0 00000134 */ FUN_001b1ba0(){}
-/* 001b1cd4 00001290 */ FUN_001b1cd4(){}
-/* 001b2f64 000005d0 */ FUN_001b2f64(){}
-/* 001b3534 000008ec */ FUN_001b3534(){}
-/* 001b3e20 00000008 */ FUN_001b3e20(){}
-/* 001b3e28 00000660 */ FUN_001b3e28(){}
-/* 001b4488 00001798 */ FUN_001b4488(){}
-/* 001b5c20 000008a4 */ FUN_001b5c20(){}
-/* 001b64c4 0000050c */ FUN_001b64c4(){}
+/* 001b113c 000009f8 */ MnuItem::updateFrame(){}  // ror
+/* 001b1b34 00000064 */ MnuItem::getSlotItem(){}  // ror
+/* 001b1b98 00000008 */ MnuItem::getZero(){}  // ror
+/* 001b1ba0 00000134 */ MnuItem::execPage(){}  // ror
+/* 001b1cd4 00001290 */ MnuItem::execPage0(){}  // ror
+/* 001b2f64 000005d0 */ MnuItem::execPage1(){}  // ror
+/* 001b3534 000008ec */ MnuItem::execPage2(){}  // ror
+/* 001b3e20 00000008 */ MnuItem::execPage8(){}  // ror
+/* 001b3e28 00000660 */ MnuItem::execPage3(){}  // ror
+/* 001b4488 00001798 */ MnuItem::execPage4(){}  // ror
+/* 001b5c20 000008a4 */ MnuItem::execPage5(){}  // ror
+/* 001b64c4 0000050c */ MnuItem::execPage7(){}  // ror
 /* 001b69d0 000039d0 */ FUN_001b69d0(){}
-/* 001ba3a0 00000544 */ FUN_001ba3a0(){}
-/* 001ba8e4 00000710 */ FUN_001ba8e4(){}
+/* 001ba3a0 00000544 */ MnuItem::execPage6(){}  // ror
+/* 001ba8e4 00000710 */ MnuItem::execPage9(){}  // ror
 /* 001baff4 00000138 */ FUN_001baff4(){}
-/* 001bb12c 000003c4 */ FUN_001bb12c(){}
-/* 001bb4f0 0000080c */ FUN_001bb4f0(){}
-/* 001bbcfc 00000674 */ FUN_001bbcfc(){}
-/* 001bc370 00000420 */ FUN_001bc370(){}
+/* 001bb12c 000003c4 */ MnuItem::execPage10(){}  // ror
+/* 001bb4f0 0000080c */ MnuItem::execPage11(){}  // ror
+/* 001bbcfc 00000674 */ MnuItem::execPage12(){}  // ror
+/* 001bc370 00000420 */ MnuItem::execPage13(){}  // ror
 /* 001bc790 00000168 */ FUN_001bc790(){}
 /* 001bc8f8 0000028c */ FUN_001bc8f8(){}
 /* 001bcb84 00000084 */ FUN_001bcb84(){}

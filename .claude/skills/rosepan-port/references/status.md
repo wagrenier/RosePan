@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 19:14 at commit `5179937` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 19:33 at commit `57490c9` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-29 19:14 at commit `5179937` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6653** (93%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 5051
-- context-name ledger: 5352 entries; overrides of wrong library matches: 5
+- game functions: **7187**, named **6690** (93%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 5088
+- context-name ledger: 5389 entries; overrides of wrong library matches: 5
 - placed in a source file: 5784/7187 in 147 files
 
 Least-named game-code regions (64 KB blocks):
@@ -20,8 +20,8 @@ Least-named game-code regions (64 KB blocks):
 | block | named | inferred files |
 |---|---|---|
 | `00150000` | 104/272 (38%) | emy/emy_nor.cpp, emy/emy_grg.cpp, emy/emy_clr.cpp |
-| `001b0000` | 45/82 (55%) | mnu/mnuitem.cpp, game/gamfile.cpp, game/gamfont.cpp |
-| `001a0000` | 155/214 (72%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
+| `001b0000` | 65/82 (79%) | mnu/mnuitem.cpp, game/gamfile.cpp, game/gamfont.cpp |
+| `001a0000` | 172/214 (80%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `001f0000` | 190/234 (81%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `00190000` | 187/227 (82%) | spr/s2d.cpp, mnu/mnupbook.cpp, mnu/mnubase.cpp |
 | `00160000` | 221/268 (82%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5328**; stubs: **274**
+- reconstructed RoR functions: **5358**; stubs: **283**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -93,7 +93,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 229 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 224 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -129,6 +129,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/main.cpp` | 11 | 0 |
 | `src/mcd/mcdman.cpp` | 42 | 0 |
 | `src/mnu/mnubase.cpp` | 36 | 0 |
+| `src/mnu/mnuitem.cpp` | 30 | 14 |
 | `src/mnu/mnumcd.cpp` | 39 | 0 |
 | `src/mnu/mnuopt.cpp` | 15 | 0 |
 | `src/mnu/mnupbook.cpp` | 43 | 0 |
@@ -171,9 +172,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 173 TUs: todo 97, partial 1, verify 116, done 17
-- next: **mnu/mnuitem.cpp** (frontier score 5)
+- 173 TUs: todo 96, partial 2, verify 116, done 17
+- next: **mnu/mnuitem.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
+- partial: `mnu/mnuitem.cpp` 30/53 -- Left: the 14 page handlers execPage0..13 (0x1b1cd4..0x1bc370, stubs returning 0: an opened menu never closes), updateFrame 0x1b113c (stub; calls showFrame), the
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -293,6 +295,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 19:32 `mnu/mnuitem.cpp` partial: MnuItem session 1: header mnu/mnuitem.h (EE 0x2710, three SprMan, slots, flags) moved out of lib/unassigned.h; 30 functions: ctor/dtor, init/term/isInit/draw, o
 - 2026-10-29 19:13 `dog/dogmodel.cpp` verify: unassigned@00113ea8 resolved: dogModelHitNearest 0x114034 and dogModelHitCylinder 0x1141c8 (the casts' I3cQuery hit callbacks) written into dog/dogmodel.cpp, pi
 - 2026-10-29 19:03 `eff/effcommon.cpp` verify: The 13 shared effect helpers pinned as eff/effcommon.cpp (0x16fb70..0x1704a4, out of unassigned@0016fb70): effCalcViewDepth, effMoveToward, effVecLength (their 
 - 2026-10-29 18:38 `eff/efflight.cpp` verify: EffLight3 (8 functions + 3 empty linkonce virtuals): lightning. Thunder every 90..210 frames (SE 0xb030352, pattern 13/3/11/7), 5-frame flashes that light the f
@@ -300,21 +303,20 @@ Recent sessions:
 - 2026-10-29 18:07 `emy/emy_grg.cpp` verify: Pinned emy/emy_grg.cpp 0x153e40..0x155d54 out of unassigned@00153e40 and wrote all 37 functions: GrgMain (enemy type 9: initOut, dtor, decide, exec, after, sele
 - 2026-10-29 17:40 `mag/maglifenoise.cpp` verify: MagLifeNoise (scene +0x418f0, the screen noise): default ctor, linkonce MagLifeNoise(int), setVolume, render (vtable slot 6) and its packet writers writeNoise /
 - 2026-10-29 17:19 `utl/utltm2.cpp` verify: Pinned unassigned@00104970: 0x104970..0x104e1c (three unreferenced sight checks) joins utl/utlbtl.cpp, utl/utltm2.cpp is 0x104e1c..0x105650. Wrote all of utltm2
-- 2026-10-29 16:39 `mag/magsceneif.cpp` verify: MagSceneIF and its map / character interfaces: all 13 methods reconstructed (index counts, names, find, category, actor motion count / number / name / trimmed l
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
-| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
-| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
+| `mnu/mnuitem.cpp` | partial | 30/14/53 | 60.4 | 14 | 0 |
 | `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
+| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
+| `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
 | `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
 | `mag/maglifepcbtl.cpp` | todo | 0/3/6 | 3.2 | 4 | 0 |
 | `unassigned@00155d54` | todo | 0/24/202 | 50.2 | 4 | 0 |
-| `unassigned@0016afcc` | todo | 0/42/53 | 17.8 | 3 | 0 |
-| `unassigned@001788ec` | todo | 0/36/45 | 14.0 | 3 | 0 |
-| `unassigned@001bdae4` | todo | 0/3/5 | 0.4 | 3 | 0 |
 | `mag/maglifepceff.cpp` | todo | 0/3/3 | 0.1 | 3 | 0 |
+| `unassigned@001788ec` | todo | 0/36/45 | 14.0 | 3 | 0 |
+| `unassigned@0016afcc` | todo | 0/42/53 | 17.8 | 3 | 0 |
+| `unassigned@001bdae4` | todo | 0/3/5 | 0.4 | 3 | 0 |
 | `mnu/mnuboard2d.cpp` | todo | 0/5/16 | 2.1 | 2 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
@@ -329,6 +331,7 @@ Recent sessions:
 | `0012c31c` | MagLifePC::startAttack | 2 | ror | stub | mag/maglifepcbtl.cpp |
 | `0012ab18` | MagLifeBwnCtrl::reset | 2 | ror | missing | mag/maglifebwnctrl.cpp |
 | `0010456c` | utlHitCheck | 2 | ror | stub | utl/utlbtl.cpp |
+| `001b113c` | MnuItem::updateFrame | 1 | ror | stub | mnu/mnuitem.cpp |
 | `00281cbc` | DogModel::__tf | 1 | sym | missing | dog/dogmodel.cpp |
 | `0012ca28` | MagLifePC::getAttackHeight | 1 | ror | stub | - |
 | `0012c9c0` | MagLifePC::setState14 | 1 | ror | stub | - |
@@ -336,6 +339,19 @@ Recent sessions:
 | `002413d8` | rxSysIniFind | 1 | ror | stub | rx/rxsys.cpp |
 | `0012c014` | MagLifePC::getHitFrameRange | 1 | ror | stub | - |
 | `0012bc98` | MagLifePC::getWeaponHitPos | 1 | ror | stub | mag/maglifepcbtl.cpp |
+| `001b1cd4` | MnuItem::execPage0 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001b2f64` | MnuItem::execPage1 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001b3534` | MnuItem::execPage2 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001b3e28` | MnuItem::execPage3 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001b4488` | MnuItem::execPage4 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001b5c20` | MnuItem::execPage5 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001b64c4` | MnuItem::execPage7 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001ba3a0` | MnuItem::execPage6 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001ba8e4` | MnuItem::execPage9 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001bb12c` | MnuItem::execPage10 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001bb4f0` | MnuItem::execPage11 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001bbcfc` | MnuItem::execPage12 | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001bc370` | MnuItem::execPage13 | 1 | ror | stub | mnu/mnuitem.cpp |
 | `00241a00` | rxSysOpenTty | 1 | ror | stub | rx/rxsys.cpp |
 | `001f9e38` | FUN_001f9e38 | 1 | - | missing | task/tsk_scene.cpp |
 | `0014313c` | MagScene::updateDebug | 1 | ror | stub | mag/magscenedebug.cpp |
@@ -347,18 +363,4 @@ Recent sessions:
 | `0012cb50` | MagLifePC::beginAttack | 1 | ror | stub | mag/maglifepcbtl.cpp |
 | `00243560` | rxSysUpdateDevices | 1 | ror | stub | rx/rxsys.cpp |
 | `0012cdb0` | MagLifePC::message14 | 1 | ror | stub | mag/maglifepceff.cpp |
-| `0012cddc` | MagLifePC::message15 | 1 | ror | stub | mag/maglifepceff.cpp |
-| `0012ce08` | MagLifePC::message16 | 1 | ror | stub | mag/maglifepceff.cpp |
-| `0012ce34` | MagLifePC::message17 | 1 | ror | stub | - |
-| `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
-| `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |
-| `001bdc00` | MnuSelectLanguage::init | 1 | ror | stub | - |
-| `001bde58` | MnuSelectLanguage::processPad | 1 | ror | stub | - |
-| `001bdfe0` | MnuSelectLanguage::draw | 1 | ror | stub | - |
-| `001aeacc` | MnuItem::init | 1 | ror | stub | mnu/mnuitem.cpp |
-| `001b099c` | MnuItem::processPad | 1 | ror | stub | mnu/mnuitem.cpp |
-| `001aed08` | MnuItem::draw | 1 | ror | stub | mnu/mnuitem.cpp |
-| `00194908` | MnuMap::init | 1 | ror | stub | mnu/mnumap.cpp |
-| `00194fe4` | MnuMap::processPad | 1 | ror | stub | mnu/mnumap.cpp |
-| `00195e90` | MnuMap::draw | 1 | ror | stub | mnu/mnumap.cpp |
 
