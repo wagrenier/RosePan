@@ -1173,14 +1173,14 @@
 /* 0012fe30 00000038 */ MagLifeWindow::setup(){}  // ror
 /* 0012fe68 00000090 */ MagLifeWindow::fadeIn(){}  // ror
 /* 0012fef8 0000008c */ MagLifeWindow::fadeOut(){}  // ror
-/* 0012ff84 00000014 */ FUN_0012ff84(){}
-/* 0012ff9c 00000278 */ FUN_0012ff9c(){}
+/* 0012ff84 00000014 */ MagLifeWindow::live(){}  // ror
+/* 0012ff9c 00000278 */ MagLifeWindow::render(){}  // ror
 /* 00130214 0000001c */ MagLifeWindow::getPos(){}  // ror
 /* 00130230 00000028 */ MagLifeWindow::getPos3(){}  // ror
 /* 00130258 00000394 */ MagLifeWindow::drawText(){}  // ror
 /* 001305ec 0000018c */ MagLifeWindow::print(){}  // ror
 /* 00130778 000000f4 */ MagLifeWindow::setFontManager(){}  // ror
-/* 0013086c 00000050 */ FUN_0013086c(){}
+/* 0013086c 00000050 */ MagLifeWindow::getTextWidth(){}  // ror
 /* 001308bc 00000170 */ MagLifeWindow::MagLifeWindow(){}  // ror
 
 // *****************************************************************************

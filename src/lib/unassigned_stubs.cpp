@@ -2624,3 +2624,9 @@ void TskEnemyTurn::start(const EmyTurnParam *prm)
 {
     ROSEPAN_STUB("TskEnemyTurn::start", 0x0020350c);
 }
+
+// stub of ROR 0x001c0078
+void GamFont::getCharMetrics(int code, int *left, int *width, int *extra)
+{
+    ROSEPAN_STUB("GamFont::getCharMetrics", 0x001c0078);
+}
