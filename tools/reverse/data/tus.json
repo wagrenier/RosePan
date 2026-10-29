@@ -2546,6 +2546,24 @@
    "status": "verify",
    "why": "0x105650 asserts with utl/utlmisc.cpp line 22 (the file's first function, right after utltm2's last assert at 0x10559c); the run up to utlfile.cpp's first assert at 0x105e50 has no source string and is taken as the rest of utlmisc: text helpers, a param parser, the frame counter, operator new/delete and the game heap wrappers over BedMemory"
   },
+  "utl/utlmisc2.cpp": {
+   "notes": "Verify: the 240 s New Game run ends in the bus-stop room with Suddenly, the girl was all alone... as before (progress shot); the headings feed GamArea::update, GamMan::getObjDirTo and the TskMove aims, which nothing on screen isolates yet. Mark done when a run shows an actor turning toward a target (TskMoveTypeGen::aim, chrStepAwayFrom). The rest of the old unassigned@00216ad0 run, 0x216ad0..0x217f10, is the retail-dead debug menu (DBGFLAG / DBGSTEP / DBGITEM / DBGAREA .BIN, sprintf with the draw calls compiled out, called only from debug/naga_debug 0x2168f8): not worth porting unless the user wants the debug menu; define it as debug/naga_debug.cpp with the naga_debug run when that file is taken. utlStrToLower tests A..Z where the ROM indexes newlib ctype with a signed char (same result for ASCII; Shift-JIS bytes never upper). The run left last.png at 0 bytes; the final frame shot was copied over it (hazards.md).",
+   "ranges": [
+    [
+     "00217f10",
+     "002184c0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 12:35",
+     "status": "verify",
+     "summary": "Split unassigned@00216ad0: pinned utl/utlmisc2.cpp 0x217f10..0x2184c0 and wrote all 10 functions: utlAtan2 (stub replaced), utlDirDist and utlStrNCopy (moved from lib/unassigned_stubs.cpp), utlStrToUpper, utlStrToLower (stub replaced), utlMemCopyBytes, utlFmodf, utlFmodPi, rorDebugPrintf, utlNullFunc. Created Ghidra functions 0x218424 (folded into 0x218450), 0x2183f8, 0x2184b8; batch utlmisc2_001."
+    }
+   ],
+   "status": "verify",
+   "why": "angle and string helpers linked between the debug menu (DBGFLAG.BIN, 0x216ad0..0x217f10, debug/naga_debug territory) and the i3d texture library 0x2184c0; called from game code (GamMan, GamTrg, TskMove*, scenePlayStart); file name is the port's own (no source string)"
+  },
   "utl/utlrand.cpp": {
    "notes": "Verify: the 15 s smoke run ends on the boot disclaimer as before; utlRandReset now runs from MagSystem's constructor (no stub hit) but no random draw shows on screen until enemies, Brown or the battle rolls run. The first session whose run reaches a fight or the dog blinking (DogActor::updateEye uses utlRandRange) can mark it done. Decisions: n == 0 in the mean / peak draws returns lo (the ROM traps with break 7); utlRand multiplies the zero-extended seed by the sign-extended n and keeps the high word, as lwu + __muldi3 + dsra32 do. The utlgame.cpp tail 0x103edc..0x1041c4 (dog param, enemy and object wrappers, still stubs declared in lib/unassigned.h) is now part of the utl/utlgame.cpp TU; the 0x10452c / 0x10454c clears are part of utl/utlbtl.cpp. File name utlrand.cpp is the port's (open-items.md Open questions).",
    "ranges": [

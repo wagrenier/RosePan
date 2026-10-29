@@ -45,69 +45,6 @@ int g_bss_780d04;               /* bss 0x780d04: GamMan option 0 (brightness) */
 
 const char *g_versionNumber = "1.01";   /* data 0x2d9e18 -> 0x301720 */
 
-// ---- utlStrNCopy (unassigned@00216ad0), written ahead for TskFrameFunc kind 15 ----
-
-// ROR 0x0021838c
-
-void utlStrNCopy(char *dst, const char *src, int n)
-{
-    int i = 0;
-
-    if (*src != '\0')
-    {
-        i = 1;
-        if (n > 0)
-        {
-            for (;;)
-            {
-                *dst++ = *src++;
-                if (*src == '\0')
-                    break;
-                int more = i < n;
-                i++;
-                if (!more)
-                    break;
-            }
-        }
-    }
-    if (i < n)
-        *dst++ = '\0';
-    if (i + 1 < n)
-        *dst = '\0';
-}
-
-// ---- utlDirDist (unassigned@00216ad0), written ahead for TskMovePointPath ----
-// The heading pi/2 - acos(x / len) (negated for z < 0), each wrapped once
-// into -pi..pi in double as the ROM does.
-// callcheck: sqrtf, acosf (FUN_0026cad0), fptodp, dpcmp, dpadd, dpsub, dptofp
-// ROR 0x002180e4
-
-float utlDirDist(float x, float z, float *dist)
-{
-    const double pi = 3.141592653589793, twoPi = 6.283185307179586;
-    float len = sqrtf(x * x + z * z);
-
-    *dist = len;
-    if (len == 0.0f)
-    {
-        *dist = 0.0f;
-        return 0.0f;
-    }
-    float a = acosf(x / len);
-    if (z < 0.0f)
-        a = -a;
-    if ((double)a < -pi)
-        a = (float)((double)a + twoPi);
-    if ((double)a > pi)
-        a = (float)((double)a - twoPi);
-    float r = (float)((double)-a + 1.5707963267948966);
-    if ((double)r < -pi)
-        r = (float)((double)r + twoPi);
-    if ((double)r > pi)
-        r = (float)((double)r - twoPi);
-    return r;
-}
-
 // ---- stubs (tools/reverse/stubgen.py) ----
 
 // ---- bridges (hand-written) ----
@@ -469,13 +406,6 @@ void MnuStock::term()
 }
 
 
-// stub of ROR 0x00217f10
-float utlAtan2(float x, float z)
-{
-    ROSEPAN_STUB("utlAtan2", 0x00217f10);
-    return {};
-}
-
 // stub of ROR 0x00172678
 
 // stub of ROR 0x002162e0
@@ -483,12 +413,6 @@ int motNameGetCategory(int chara)
 {
     ROSEPAN_STUB("motNameGetCategory", 0x002162e0);
     return {};
-}
-
-// stub of ROR 0x00218338
-void utlStrToLower(char *dst, const char *src)
-{
-    ROSEPAN_STUB("utlStrToLower", 0x00218338);
 }
 
 // stub of ROR 0x001fd6bc

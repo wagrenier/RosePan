@@ -944,3 +944,10 @@ build.py --run 45: the last trace before the log goes quiet names the call; comp
   mesh with plain-qword targets looks collapsed, that is the ROM's behaviour, not a port bug (check
   on the PS2 before "fixing" it).
 
+
+## An empty last.png after a long smoke run (2026-10-29)
+
+- Symptom: after `tus.py check --run 240` the Read tool says `work/shots/last.png` is empty (0 bytes),
+  while every `shot_<frame>.png` is fine. Cause: the run is stopped while the port is writing
+  last.png. Fix: look at the highest `shot_<frame>.png` instead, and copy it over last.png before
+  `tus.py finish` (progress_shot copies last.png into progress/).

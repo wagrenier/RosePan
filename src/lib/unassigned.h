@@ -251,17 +251,8 @@ public:
 int   utlStrEqualNoCase(const char *a, const char *b);                   // ROR 0x00106010
 /* The vector helpers, utlConvSndId and the i3r wrappers: utl/utlmath.h. */
 #include "utl/utlmath.h"
-/* The heading of (x, z) in -pi..pi, 0 for a zero vector (unassigned@00216ad0). */
-float utlAtan2(float x, float z);                                        // ROR 0x00217f10
-/* Copies src to dst with upper case letters (the ctype table's bit 1)
- * lowered. */
-void  utlStrToLower(char *dst, const char *src);                         // ROR 0x00218338
-/* The heading of (x, z) (pi/2 - acos(x / len), negative for z < 0) in
- * -pi..pi and its length into *dist; 0 / 0 for a zero vector. */
-float utlDirDist(float x, float z, float *dist);                          // ROR 0x002180e4
-/* Copies src into dst, at most n chars; zero-terminates while room is
- * left (n = strlen: no terminator). */
-void  utlStrNCopy(char *dst, const char *src, int n);                    // ROR 0x0021838c
+/* utlAtan2, utlDirDist, utlStrToLower, utlStrNCopy ...: utl/utlmisc2.h. */
+#include "utl/utlmisc2.h"
 /* The SE no of the enemy oid (0x163ea0) played at its position (0x16a594);
  * returns the SE's SndMan id
  * (unassigned@00164fc0). */
