@@ -207,6 +207,24 @@
    "status": "verify",
    "why": "11 of 16 functions assert with dog/dogtexinfo.cpp; the rest are DogTexInfo members (clear, term, findFree, setSepiaColor, releaseModel, releasePfh) taking the table in a0; DogModel code ends at 0x1161e4 (unassigned 0x1160a8 run before), MagSystem starts at 0x117654 after the 8-byte 0x11764c"
   },
+  "eff/eff0.cpp": {
+   "notes": "Verify: the 240 s run reaches the bus-stop room and EffMan now creates and deletes EffLight1 (kind 0x21) and EffCameraAnim1 (0xd) through the real Eff0, but every class init is still a stub returning 0, so createEff deletes them and nothing on screen shows Eff0 yet; the first session whose screenshot shows an effect marks this done. Decisions: the constructor's m_z is FLT_MAX on the host (the ROM stores int 0x7fffffff, the EE's largest float, a NaN on the host; hazards.md). PC guards: createPacketEntry with no pack returns NULL, effAmbientColor with no ambient light returns. The draw-set cache, random table and cursor are file statics in eff0.cpp (0x8282a0, 0x828378, 0x308050). Next: the rest of the old run is unassigned@0016afcc (EffBg1 onward, one file per Eff class in link order); start with the reached EffLight1::init 0x174dd8 and EffCameraAnim1::init 0x16f71c and move each class out of src/eff/effclasses.h. effCalcViewDepth 0x16ff18 and effMoveToward 0x16ff78 are still stubs there.",
+   "ranges": [
+    [
+     "0016a914",
+     "0016afcc"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-28 21:33",
+     "status": "verify",
+     "summary": "Eff0, the base of the 43 Eff classes, and the shared effect helpers written: ctor, dtor, init, term, setVisible, live, render, renderPreMain, createPacketEntry, the linkonce liveActivateExec and updateZDepth, effInitRandTable, effRand, effClearDrawSets, effFogColor, effAmbientColor. Pinned 0x16a914..0x16afcc out of unassigned@0016a914; named the three helpers and powf."
+    }
+   ],
+   "status": "verify",
+   "why": "Eff0 base class (ctor/dtor/slots, vtable 0x2e3250) and the shared effect helpers before EffBg1's constructor 0x16afcc, the first class in alphabetical link order"
+  },
   "eff/effman.cpp": {
    "notes": "Verify: the 200 s run creates EffLight1 (kind 0x21) and EffCameraAnim1 (kind 0xd) during the picture book; their init is a stub returning 0, so createEff deletes them and nothing new draws. Screen unchanged from the last session (title, picture book with page turns, black at the end as before). PC deviation: the ROM returns the stale pack slot number and reads the deleted object when init or addEff fails, and calls through NULL for a kind with no class; the host returns -1 (open-items Open questions). Next: eff/eff0.cpp 0x16a914..0x16ade0 (Eff0 and effInitRandTable / effClearDrawSets; effCalcViewDepth 0x16ff18 and effMoveToward 0x16ff78 are stubs too), then EffLight1 and EffCameraAnim1, moving each class out of effclasses.h into its own file header. EffFindItem1 shows once a kind-0x32 effect is created with Eff0 written. References updated: architecture.md (kind to class map), open-items.md, hazards.md (vtable-only undefined references, callcheck colon).",
    "ranges": [
@@ -2113,6 +2131,7 @@
   "unassigned@00145020": {},
   "unassigned@00164fc0": {},
   "unassigned@00166a1c": {},
+  "unassigned@0016a914": {},
   "unassigned@001810f4": {},
   "unassigned@00190a78": {},
   "unassigned@00192ac0": {},

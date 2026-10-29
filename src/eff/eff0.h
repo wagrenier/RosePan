@@ -2,8 +2,8 @@
  *  eff/eff0.h
  *
  *  Eff0, the base of the 43 Eff* effect classes (vtable 0x2e3250, vptr at
- *  +0x20; code 0x16a914..0x16ac84, not written yet: this header declares
- *  what EffMan (eff/effman.cpp) calls through the table). Every class is
+ *  +0x20), and the helpers the classes share (eff/eff0.cpp, 0x16a914..
+ *  0x16afcc: the random table, the fog and ambient tints). Every class is
  *  `: Eff0`; EffMan::createEff news one per effect kind. The virtuals are
  *  declared in vtable slot order (GCC 2: 8-byte slots, slot 0 the type
  *  info); the names with a ROR symbol come from the overrides the ELF keeps
@@ -69,11 +69,14 @@ public:
     /* Slot 12: m_z for EffMan::draw's sort (Eff0: nothing). */
     virtual void updateZDepth();                                         // ROR 0x0028ae18
 
+    /* EFF_FLAG_WEAK (EffMan::addEff). */
+    bool isBeWeak() const { return (m_flags >> 4) & 1; }                // ROR 0x0028ae08 (linkonce)
+
     u_short  m_flags;           // ROR 0x00: EFF_FLAG_*
     int      m_life;            // ROR 0x04: live's finish countdown, -1 none (the constructor); EffMan::retireEff sets 0
     int      m_08;              // ROR 0x08
     int      m_0c;              // ROR 0x0c
-    float    m_z;               // ROR 0x10: depth from the camera, EffMan::draw draws the largest first
+    float    m_z;               // ROR 0x10: depth from the camera, EffMan::draw draws the largest first (the constructor: the largest float)
     EffPack *m_pack;            // ROR 0x14: the param's pack (its m_ref counts the users)
     int      m_kind;            // ROR 0x18: EffParam::m_kind
     int      m_delay;           // ROR 0x1c: frames before it renders (EffParam +8)
@@ -93,5 +96,13 @@ void effClearDrawSets();                                                 // ROR 
 /* Fills the 256-byte table 0x828378 with a random permutation of 0..255
  * and clears its cursor 0x308050 (EffMan::init). */
 void effInitRandTable();                                                 // ROR 0x0016ac84
+/* The next byte of that table (the cursor wraps at 256). */
+u_char effRand();                                                        // ROR 0x0016ad94
+/* rgb scaled by the scene's fog record 0 at depth: unchanged up to its
+ * near distance, times the fog colour from its far distance, between them
+ * a squared ramp of the two fog amounts toward the colour. */
+void effFogColor(float *rgb, float depth);                               // ROR 0x0016ae00
+/* rgb scaled by the colour of the scene's ambient light 0. */
+void effAmbientColor(float *rgb);                                        // ROR 0x0016af20
 
 #endif /* _EFF_EFF0_H */
