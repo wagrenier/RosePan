@@ -315,6 +315,24 @@
    "status": "done",
    "why": "EffCameraAnim1's two out-of-line methods and setKey, between EffBreath2Ground (0x16f55c) and the shared helper run 0x16fb70 (no class); one file per Eff class in alphabetical link order"
   },
+  "eff/effcommon.cpp": {
+   "notes": "Complete; verify because no picture shows a helper yet: the 240 s run shows the Once upon a time intro and the park scene as before, with no EffLight1 glow identifiable in shots 2880..3420 and 6180..7680. Mark done when a glow (EffLight1) or a footstep effect is visible where the game has it. The file name effcommon is inferred (alphabetical between effcameraanim1 and effdust2; no source string). Next eff work: unassigned@001704a4 = EffDust2, EffDust2Prim, EffFire1, EffFire1Ex, EffFire2, EffFog1, EffFog2, EffFog2Prim (0x1704a4..0x172678), likely one file per family; their callers of the helpers (effMatMakeUpright in EffFire1Ex::renderMain, effWrapAngle / effMatMulRotZ in EffFog2 / EffFog2Prim) are now real. One 240 s run went black after the publisher logo (frame 1680 on); two reruns were fine (hazards.md).",
+   "ranges": [
+    [
+     "0016fb70",
+     "001704a4"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 19:03",
+     "status": "verify",
+     "summary": "The 13 shared effect helpers pinned as eff/effcommon.cpp (0x16fb70..0x1704a4, out of unassigned@0016fb70): effCalcViewDepth, effMoveToward, effVecLength (their stubs removed), effMatMakeUpright, effMatMulRotZ, effMatFromAxisZ, effWrapAngle, effMakeNodeMap, effFindChild52, effStrIndex, and the actor probe EffActorProbe with effProbeNode / effProbeActorInBox / effProbeActorLimbs (toe and finger nodes on motion events). Prototypes moved from eff0.h to eff/effcommon.h (eff0.h includes it)."
+    }
+   ],
+   "status": "verify",
+   "why": "The effect helpers between EffCameraAnim1 (eff/effcameraanim1.cpp ends 0x16fb70) and EffDust2::init 0x1704a4: vector / matrix / angle helpers and the actor-probe used by 10+ Eff classes in other files; no source-path string, file name inferred (alphabetical link order between effcameraanim1 and effdust2)"
+  },
   "eff/efffog3.cpp": {
    "notes": "Code complete; nothing on screen shows it yet: the 240 s smoke run ends in the bus-stop room with no enemies, so the fog correctly stays the map's (frame mean equals the msgsystext shot, no regression). Mark done the first time a run with an enemy shows the fog thicken. Class declarations moved from eff/effclasses.h to eff/efffog3.h (included there); gamCreateEff1a's prototype moved from game/gamman.h to eff/efffog3.h. Doubt: g_bss_7a3210 is taken as the record key (the chapter); check which record init picks if a stage looks wrong. The rest of the old unassigned@0016fb70 run stays: EffDust2..EffFog2Prim before 0x172678, EffFoot1..EffLight3 from 0x172e4c; EffLight1::init 0x174dd8 is the next reached effect stub (reached in the picture-book stretch).",
    "ranges": [

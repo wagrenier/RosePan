@@ -9605,6 +9605,30 @@
   "was": "FUN_0016fc20",
   "why": "sqrt of x*x + y*y + z*z of a0 (sqrtf fallback on NaN); EffLight2::render's distance from the eye"
  },
+ "0016fc74": {
+  "name": "effMatMakeUpright",
+  "tag": "ror-inferred",
+  "was": "FUN_0016fc74",
+  "why": "keeps the lengths of rows 0 and 2, flattens row 2 to y = 0 (unit z when degenerate), row 1 = (0,1,0), row 0 = cross(row 1, row 2): an upright billboard matrix (EffFire1Ex::renderMain)"
+ },
+ "0016fd4c": {
+  "name": "effMatMulRotZ",
+  "tag": "ror-inferred",
+  "was": "FUN_0016fd4c",
+  "why": "m = i3dMatMul(m, RotZ(angle) of a unit matrix) (EffFog2Prim / EffSteam2Prim / EffCloud1 renderMain)"
+ },
+ "0016fda0": {
+  "name": "effMatFromAxisZ",
+  "tag": "ror-inferred",
+  "was": "FUN_0016fda0",
+  "why": "builds a matrix whose row 2 is dir: rows 0 / 1 from cross products with up (0,1,0), or z = -+1 when dir is near vertical; row 3 = (0,0,0,1)"
+ },
+ "0016fe88": {
+  "name": "effWrapAngle",
+  "tag": "ror-inferred",
+  "was": "FUN_0016fe88",
+  "why": "adds / subtracts 2pi until the float is in -pi..pi (EffFog2, EffCloud1)"
+ },
  "0016ff18": {
   "name": "effCalcViewDepth",
   "tag": "ror-inferred",
@@ -9616,6 +9640,36 @@
   "tag": "ror-inferred",
   "was": "FUN_0016ff78",
   "why": "(f12 d, out, from, to): out = from + normalize(to - from) * d (EffFindItem1::renderMain pulls its sprite toward the camera)"
+ },
+ "0016ffec": {
+  "name": "effMakeNodeMap",
+  "tag": "ror-inferred",
+  "was": "FUN_0016ffec",
+  "why": "allocates u16 [count + 1] in g_utlMemory: count, then for each I3M node the I3R node index with its name (-1 when none) (EffGeneric1::init, EffReload1::init)"
+ },
+ "001700b0": {
+  "name": "effFindChild52",
+  "tag": "ror-inferred",
+  "was": "FUN_001700b0",
+  "why": "the first type-52 child whose name contains the string (strstr), its index stored through the optional pointer; NULL when none"
+ },
+ "00170158": {
+  "name": "effProbeNode",
+  "tag": "ror-inferred",
+  "was": "FUN_00170158",
+  "why": "the probe's actor node by name (inline DogModel::getNodeIndexByName, dog/dogmodel.h 305 asserts) -> world position; inside the probe box sets bit n and keeps the position"
+ },
+ "001702e4": {
+  "name": "effProbeActorInBox",
+  "tag": "ror-inferred",
+  "was": "FUN_001702e4",
+  "why": "1 when the probe actor's m_trans lies in the box centre +- (half x + margin, half y, half x + margin)"
+ },
+ "001703c0": {
+  "name": "effProbeActorLimbs",
+  "tag": "ror-inferred",
+  "was": "FUN_001703c0",
+  "why": "on the actor's motion events over the next frame (bits 0x10000000 / 0x20000000 / 0x4000000 / 0x8000000) probes Bip01 L Toe0 / R Toe0 / L Finger0 / R Finger0 as bits 0..3"
  },
  "001704a4": {
   "name": "EffDust2::init",

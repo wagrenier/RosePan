@@ -1465,8 +1465,17 @@ Bg1 (: Generic1); 7, 0xe..0x10, 0x24, 0x25, 0x28, 0x30 have none. Out-of-line co
 2, Light3, Reload1, Water1, Water3, Generic1, Bg1; the rest are linkonce (Eff0::Eff0 + the vtable) and
 inlined. Every class's slot functions are named `EffX::init / liveMain / render / renderPreMain /
 renderMain / createPacketEntry / liveActivateExec / updateZDepth` from its vtable (batch effman_002).
-Shared helpers: effCalcViewDepth 0x16ff18 (dot(camera row 2, pos - row 3)), effMoveToward 0x16ff78
-(from + normalize(to - from) * d). **EffFindItem1** (kind 0x32, EE 0x50; +0x30 pos, +0x40 pull toward
+Shared helpers, `eff/effcommon.cpp` (0x16fb70..0x1704a4, between EffCameraAnim1 and EffDust2, 2026-10-29;
+file name inferred): effCalcViewDepth 0x16ff18 (dot(camera row 2, pos - row 3)), effMoveToward 0x16ff78
+(from + normalize(to - from) * d), effVecLength 0x16fc20, effMatMakeUpright 0x16fc74 (billboard: z flat,
+y up, row lengths kept), effMatMulRotZ 0x16fd4c, effMatFromAxisZ 0x16fda0, effWrapAngle 0x16fe88,
+effMakeNodeMap 0x16ffec (u16 [count, I3R node per I3M node] in g_utlMemory; EffGeneric1 / EffReload1),
+effFindChild52 0x1700b0 (strstr on type-0x52 child names), and the **actor probe** `EffActorProbe` (EE 0x54:
+hit bits, DogActor*, box centre / half sizes, margin, 4 limb positions): effProbeActorInBox 0x1702e4 (actor
+m_trans in the box, margin on x / z), effProbeActorLimbs 0x1703c0 (motion events 0x10000000 / 0x20000000 /
+0x4000000 / 0x8000000 over the next frame -> Bip01 L Toe0 / R Toe0 / L Finger0 / R Finger0 via
+effProbeNode 0x170158, bits 0..3) -- the footstep / handprint effects 0x16cebc and 0x1730d4 use it.
+effStrIndex 0x16fb70 is unreferenced. **EffFindItem1** (kind 0x32, EE 0x50; +0x30 pos, +0x40 pull toward
 the camera, +0x44 frame 0..44): a 40 x 40 VU1 sprite, colour (1,1,1,0.5), ALPHA_1 0x48, shown frames
 0..14 of 45 with textures 0,1,2,3,2,1,0 (frame ends 2,3,4,8,10,12,14).
 **EffCameraAnim1** (kind 0xd, EE 0x50, `eff/effcameraanim1.cpp` 0x16f71c..0x16fb70, 2026-10-29):
