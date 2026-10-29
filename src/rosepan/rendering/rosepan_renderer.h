@@ -23,6 +23,19 @@ void RosePan_RendererGetViewExtend(float *ext_x, float *ext_y);
  * must reach the window edge (MapSky's fog band and horizon strip) build their
  * geometry against this instead of the fixed frame. */
 void RosePan_RendererGetViewBounds(float *x0, float *y0, float *x1, float *y1);
+
+/* The renderer's frame, in the units every 2D entry point takes: 640x448, the
+ * PS2 display's picture.  Host draw modules map the game's own frame buffer
+ * (RoR's is 512x448) onto this rather than writing the numbers themselves;
+ * how the frame then sits in the window is the view extend's business. */
+void RosePan_RendererGetFrameSize(float *width, float *height);
+
+/* Widen a host 3D camera's projection (row-major, row vectors: clip = p * M)
+ * to the composed aspect: clip x divided by the view extend's x, clip y by its
+ * y.  A projection built for the 640x448 frame then shows more world on a
+ * wider output instead of stretching.  Only for cameras drawn to the display:
+ * an off-screen target (a shadow map) keeps its own shape. */
+void RosePan_RendererWidenProjection(float *projection);
 void RosePan_RendererSetPresentInterval(int interval);
 
 /* Internal render resolution, decoupled from the window.

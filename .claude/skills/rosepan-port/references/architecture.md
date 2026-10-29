@@ -1710,8 +1710,26 @@ Paths the ELF names (the disc dump has not been looked at yet: `ROSEPAN_DATA`):
 aspect ratio, taking it from the window's dimensions or the renderer's output size -- never a fixed
 4:3 / 640x448 assumption in new host draw code (2D placement, 3D projections, render targets,
 screen-space effects). A future feature will let the player set the aspect ratio by hand, so read it
-from one renderer-owned source rather than recomputing it per module. Existing fixed-frame paths
-(rosepan_i3d's 640x448 frame scale, the 512-wide RoR frame buffer stretch) are debts to move onto it.
+from one renderer-owned source rather than recomputing it per module.
+How it works (2026-10-28, host task `fix/aspect_ratio.cpp`; the machinery is ReiPan's renderer):
+- **The one source**: the renderer's aspect mode (`ROSEPAN_ASPECT` auto | original | 4:3 | 16:9 |
+  16:10 | w:h, `RosePan_RendererSetAspectMode`, default AUTO = the window's shape) gives the *view
+  extend* each BeginFrame (`RosePan_RendererGetViewExtend`: about 1.27 x on 16:9 against the 640x448
+  frame, 1.0 on 4:3). A fixed mode on a window of another shape bars the difference.
+- **2D**: every 2D entry point takes coordinates in the renderer's frame
+  (`RosePan_RendererGetFrameSize`, 640x448); the renderer shrinks them about the centre by the
+  extend (`ApplyOriginalAspectToVertices`, the scissor with them), so overlays keep their shape,
+  centred, and only full-frame solid fills (`IsFullFrameQuad`) reach the window edges. Host modules
+  map the game's frame onto that size: rosepan_i3d (RoR's 512 columns -> its width, the scissor,
+  movie quads) and rosepan_draw2d read it from the renderer, no 640 / 448 constants.
+- **3D**: a host camera's projection is built for the frame and widened by
+  `RosePan_RendererWidenProjection` (clip x / extend x, clip y / extend y): more world on a wider
+  window, never stretched. rosepan_i3d's REC_CAMERA replay widens every display camera (i3rHostCamera's
+  and the mesh test's); a camera recorded in an off-screen pass (XYOFFSET 0: the shadow target's
+  light camera) is left alone.
+- Still 4:3-bound (pillarboxed, not stretched): VU1 strips (rosepan_i3d DrawStrip: screen-space XY
+  the ROM's VU1 program projected) and textured full-frame sprites (pictures, frame copies, the
+  movie). A new screen-space draw must say which of the two it wants.
 
 Created 2026-10-22 (host task `setup/platform_bootstrap.cpp`) from ReiPan's, renamed ReiPan -> RosePan
 throughout (identifiers, env variables, files, shader macros):

@@ -63,7 +63,9 @@ const void *RosePan_Draw2dMakeTexture(const RosePanImage2d *image);
 
 /* Draws `sprite` from `texture` into the current host frame.  `frame_width`
  * x `frame_height` is the game's frame buffer (RoR's is 512x448), stretched
- * to the renderer's 640x448 frame the way the PS2 display stretches it.
+ * to the renderer's frame (RosePan_RendererGetFrameSize) the way the PS2
+ * display stretches it; the renderer keeps that frame's proportions at any
+ * window aspect.
  * `decal`: TEX0 TFX DECAL (the texture's colour as it is, the vertex colour
  * ignored); `linear`: TEX1 bilinear filtering. */
 void RosePan_Draw2dSprite(const void *texture, const RosePanSprite2d *sprite,

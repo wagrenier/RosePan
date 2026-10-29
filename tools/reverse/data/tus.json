@@ -1,6 +1,5 @@
 {
  "queue": [
-  "fix/aspect_ratio.cpp",
   "unassigned@0010f944",
   "unassigned@0022e840",
   "unassigned@00106658",
@@ -306,6 +305,15 @@
    "why": "The EmyOut base class (ctor 0x166a1c, vptr +0x34) and the emy* helpers its 77 subclasses call (emyStartMove, emyChkInSight, emyCanReach, emyChkHitReach); ends where Eff0 (0x16a914) starts. No source string; named after the class like emy_main / emy_hfm."
   },
   "fix/aspect_ratio.cpp": {
+   "notes": "Seen: the forest bus-stop room at 16:9 (progress shot, 796x448) and about 3.6:1 shows more forest at the sides with Jennifer and the message frame unstretched; the centre matches the 4:3 run; title and menu 2D are pillarboxed at their shape. The user tested the aspect modes live and confirmed it works. The visual runs used build.py --config release because another session was play-testing from cmake-build-relwithdebinfo (hazards.md Build). Left in the 4:3 band, not stretched: VU1 strips (rosepan_i3d DrawStrip screen-space XY) and textured full-frame sprites (frame copies, movie). One 16:9 run had all-black shots from the title on while its log reached the room; two later runs did not repeat it (probably the window being handled during the run). For the references: architecture.md PC platform layer, open-items.md Next up and hazards.md Build were written in this commit.",
+   "sessions": [
+    {
+     "date": "2026-10-28 21:01",
+     "status": "done",
+     "summary": "Any aspect ratio: the i3d camera widens by the renderer view extend (new RosePan_RendererWidenProjection, skipped in off-screen passes such as the shadow target), rosepan_i3d and rosepan_draw2d take the frame size from the renderer (RosePan_RendererGetFrameSize) instead of 640x448 constants, and smoke shots capture the whole composed frame at its aspect instead of the 4:3 mirror band."
+    }
+   ],
+   "status": "done",
    "task": "TOP PRIORITY (the user, 2026-10-28): any aspect ratio. Make the PC port display correctly at any aspect ratio, read from one renderer-owned source (window / output size now, a player setting later), per architecture.md PC platform layer: no fixed 4:3 or 640x448 assumption in host draw code (2D placement, 3D projection, render targets, screen-space effects); move rosepan_i3d's 640x448 frame scale and the 512-wide frame buffer stretch onto it. Test: the smoke run at a 16:9 window (ROSEPAN_ASPECT / window size) and at 4:3 -- the forest bus-stop room (about 220 s, --run 240) and the 2D overlays must not stretch. The picture decides."
   },
   "fix/ingame_camera.cpp": {

@@ -9,12 +9,6 @@
 
 namespace
 {
-constexpr float kRendererFrameWidth = 640.0f;
-constexpr float kRendererFrameHeight = 448.0f;
-}
-
-namespace
-{
 /* GS alpha: 0x80 is opaque. */
 unsigned char GsAlpha(unsigned int a)
 {
@@ -154,8 +148,10 @@ void RosePan_Draw2dSprite(const void *texture, const RosePanSprite2d *sprite,
         return;
     }
 
-    const float sx = kRendererFrameWidth / (float)frame_width;
-    const float sy = kRendererFrameHeight / (float)frame_height;
+    float fw = 0.0f, fh = 0.0f;
+    RosePan_RendererGetFrameSize(&fw, &fh);
+    const float sx = fw / (float)frame_width;
+    const float sy = fh / (float)frame_height;
     const float x0 = sprite->x0 * sx, x1 = sprite->x1 * sx;
     const float y0 = sprite->y0 * sy, y1 = sprite->y1 * sy;
     const float xy[8] = {x0, y0, x1, y0, x0, y1, x1, y1};

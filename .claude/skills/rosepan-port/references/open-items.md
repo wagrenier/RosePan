@@ -6,12 +6,15 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
-**TOP PRIORITY, NEWEST (the user, 2026-10-28, after the first room showed): any aspect ratio.**
-Host task `fix/aspect_ratio.cpp`, first in the pinned queue: the requirement in architecture.md "PC
-platform layer" (the display correct at any aspect ratio, from one renderer-owned source the player
-can later set by hand; move rosepan_i3d's 640x448 frame scale and the 512-wide frame buffer stretch
-onto it). The picture decides: compare a 16:9 window with the 4:3 one (no stretching of the 3D room
-or the 2D overlays).
+**DONE 2026-10-28 (`fix/aspect_ratio.cpp`, the user's top priority): any aspect ratio.** The i3d
+camera widens by the renderer's view extend (RosePan_RendererWidenProjection), rosepan_i3d /
+rosepan_draw2d take the frame size from the renderer, and smoke shots now hold the whole composed
+frame (640x448 on 4:3, 796x448 on 16:9) instead of the 4:3 mirror band. Seen: the bus-stop room at
+16:9 and about 3.6:1 shows more forest, nothing stretched; title / menu 2D pillarboxed at their
+shape; the user tested the modes live and confirmed. Open: VU1 strips and textured full-frame
+sprites stay in the 4:3 band (architecture.md "PC platform layer"); one 16:9 run had all-black
+shots from the title on while the log reached the room -- not reproduced in two later runs (likely
+the window being handled during the run; look again if it recurs).
 
 **DONE 2026-10-28 (`fix/ingame_camera.cpp`): the first room shows in 3D after New Game** (Jennifer at
 the forest bus stop at night, lit and textured, no ROSEPAN_TEST_CAM). It was not the camera code: (1)

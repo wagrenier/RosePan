@@ -999,6 +999,18 @@ bool g_screen_mirror_valid;
 SDL_GPUTransferBuffer *g_screen_mirror_download;
 Uint32 g_screen_mirror_download_size;
 /*
+ * The smoke-run screenshot's own copy of the frame (ROSEPAN_SHOT_DIR only):
+ * the whole composed picture, not the mirror's 4:3 band, at 448 rows and the
+ * composed aspect's width (640 on 4:3, 796 on 16:9), so a smoke shot shows
+ * what the window shows at any aspect.  Reallocated when the aspect changes.
+ */
+SDL_GPUTexture *g_shot_texture;
+Uint32 g_shot_width;
+Uint32 g_shot_height;
+bool g_shot_valid;
+SDL_GPUTransferBuffer *g_shot_download;
+Uint32 g_shot_download_size;
+/*
  * GS capture slots.
  *
  * A slot stands in for one page of GS memory that the game fills by copying
@@ -6338,6 +6350,69 @@ bool RecordScreenMirror(SDL_GPUCommandBuffer *cmd, SDL_GPUTexture *source,
     return true;
 }
 
+bool SmokeShotsEnabled()
+{
+    static const char *const dir = std::getenv("ROSEPAN_SHOT_DIR");
+    return dir != nullptr && dir[0] != ' ';
+}
+
+/* The smoke shot's frame: all of `source`, scaled to g_shot_texture. */
+bool RecordSmokeShotFrame(SDL_GPUCommandBuffer *cmd, SDL_GPUTexture *source,
+                          Uint32 width, Uint32 height)
+{
+    if (!SmokeShotsEnabled() || cmd == nullptr || source == nullptr ||
+        width == 0 || height == 0 ||
+        g_scene_format == SDL_GPU_TEXTUREFORMAT_INVALID)
+    {
+        return false;
+    }
+
+    const Uint32 shot_h = (Uint32)kLogicalHeight;
+    const Uint32 shot_w = (Uint32)std::max(
+        1L, std::lround((double)shot_h * (double)width / (double)height));
+    if (g_shot_texture != nullptr &&
+        (g_shot_width != shot_w || g_shot_height != shot_h))
+    {
+        SDL_ReleaseGPUTexture(g_device, g_shot_texture);
+        g_shot_texture = nullptr;
+    }
+    if (g_shot_texture == nullptr)
+    {
+        SDL_GPUTextureCreateInfo info{};
+        info.type = SDL_GPU_TEXTURETYPE_2D;
+        info.format = kScreenMirrorFormat;
+        info.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER |
+                     SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
+        info.width = shot_w;
+        info.height = shot_h;
+        info.layer_count_or_depth = 1;
+        info.num_levels = 1;
+        info.sample_count = SDL_GPU_SAMPLECOUNT_1;
+        g_shot_texture = SDL_CreateGPUTexture(g_device, &info);
+        if (g_shot_texture == nullptr)
+        {
+            LogSdlError("SDL_CreateGPUTexture(smoke shot)");
+            return false;
+        }
+        g_shot_width = shot_w;
+        g_shot_height = shot_h;
+    }
+
+    SDL_GPUBlitInfo blit{};
+    blit.source.texture = source;
+    blit.source.w = width;
+    blit.source.h = height;
+    blit.destination.texture = g_shot_texture;
+    blit.destination.w = shot_w;
+    blit.destination.h = shot_h;
+    blit.load_op = SDL_GPU_LOADOP_DONT_CARE;
+    blit.filter = SDL_GPU_FILTER_LINEAR;
+    blit.cycle = false;
+    SDL_BlitGPUTexture(cmd, &blit);
+    g_shot_valid = true;
+    return true;
+}
+
 /*
  * The eight filter/address combinations for one anisotropy level.
  *
@@ -10142,6 +10217,7 @@ void RecordFramePasses(SDL_GPUCommandBuffer *cmd,
                                                      render_height);
         *mirror_recorded = RecordScreenMirror(cmd, scene_texture, render_width,
                                               render_height);
+        RecordSmokeShotFrame(cmd, scene_texture, render_width, render_height);
     }
 
     /*
@@ -10682,6 +10758,34 @@ void RosePan_RendererGetViewBounds(float *x0, float *y0, float *x1, float *y1)
     if (y1 != nullptr)
     {
         *y1 = half_h + half_h * g_view_extend_y;
+    }
+}
+
+void RosePan_RendererGetFrameSize(float *width, float *height)
+{
+    if (width != nullptr)
+    {
+        *width = (float)kLogicalWidth;
+    }
+    if (height != nullptr)
+    {
+        *height = (float)kLogicalHeight;
+    }
+}
+
+void RosePan_RendererWidenProjection(float *projection)
+{
+    if (projection == nullptr)
+    {
+        return;
+    }
+
+    /* Column 0 makes clip x and column 1 clip y; dividing them keeps the
+     * frustum's centre and widens only the extended axis. */
+    for (int row = 0; row < 4; row++)
+    {
+        projection[row * 4 + 0] /= g_view_extend_x;
+        projection[row * 4 + 1] /= g_view_extend_y;
     }
 }
 
@@ -11347,11 +11451,82 @@ void RosePan_RendererBeginFrame(void)
  * Smoke-run screenshots, for checking reconstructed code by eye
  * (tools/reverse/build.py --run sets these).  With ROSEPAN_SHOT_DIR set, every
  * ROSEPAN_SHOT_EVERY-th presented frame (default 120) is read back from the
- * screen mirror -- the ROM's 640x448 frame, before the debug UI -- and saved in
- * that directory as shot_<frame>.png and as last.png.  The process is killed at
- * the end of a smoke run, so the shots have to be on disk as they happen.  Off
- * unless the variable is set; one synchronous read-back per shot.
+ * smoke shot's copy of the frame -- the whole composed picture at its aspect
+ * (640x448 on 4:3, 796x448 on 16:9; RecordSmokeShotFrame), before the debug
+ * UI -- and saved in that directory as shot_<frame>.png and as last.png.  The
+ * process is killed at the end of a smoke run, so the shots have to be on disk
+ * as they happen.  Off unless the variable is set; one synchronous read-back
+ * per shot.
  */
+static bool DownloadSmokeShot(std::vector<unsigned char> &pixels)
+{
+    if (!g_shot_valid || g_shot_texture == nullptr)
+    {
+        return false;
+    }
+
+    const Uint32 needed = g_shot_width * g_shot_height * 4;
+    if (g_shot_download != nullptr && g_shot_download_size < needed)
+    {
+        SDL_ReleaseGPUTransferBuffer(g_device, g_shot_download);
+        g_shot_download = nullptr;
+    }
+    if (g_shot_download == nullptr)
+    {
+        SDL_GPUTransferBufferCreateInfo info{};
+        info.usage = SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD;
+        info.size = needed;
+        g_shot_download = SDL_CreateGPUTransferBuffer(g_device, &info);
+        if (g_shot_download == nullptr)
+        {
+            LogSdlError("SDL_CreateGPUTransferBuffer(smoke shot)");
+            return false;
+        }
+        g_shot_download_size = needed;
+    }
+
+    SDL_GPUCommandBuffer *cmd = SDL_AcquireGPUCommandBuffer(g_device);
+    if (cmd == nullptr)
+    {
+        return false;
+    }
+    SDL_GPUCopyPass *copy = SDL_BeginGPUCopyPass(cmd);
+    if (copy == nullptr)
+    {
+        SDL_CancelGPUCommandBuffer(cmd);
+        return false;
+    }
+    SDL_GPUTextureRegion region{};
+    region.texture = g_shot_texture;
+    region.w = g_shot_width;
+    region.h = g_shot_height;
+    region.d = 1;
+    SDL_GPUTextureTransferInfo transfer{};
+    transfer.transfer_buffer = g_shot_download;
+    transfer.pixels_per_row = g_shot_width;
+    transfer.rows_per_layer = g_shot_height;
+    SDL_DownloadFromGPUTexture(copy, &region, &transfer);
+    SDL_EndGPUCopyPass(copy);
+
+    SDL_GPUFence *fence = SDL_SubmitGPUCommandBufferAndAcquireFence(cmd);
+    if (fence == nullptr)
+    {
+        return false;
+    }
+    SDL_WaitForGPUFences(g_device, true, &fence, 1);
+    SDL_ReleaseGPUFence(g_device, fence);
+
+    const unsigned char *mapped = (const unsigned char *)SDL_MapGPUTransferBuffer(
+        g_device, g_shot_download, false);
+    if (mapped == nullptr)
+    {
+        return false;
+    }
+    pixels.assign(mapped, mapped + needed);
+    SDL_UnmapGPUTransferBuffer(g_device, g_shot_download);
+    return true;
+}
+
 static void WriteSmokeShotIfDue(void)
 {
     static const char *const dir = std::getenv("ROSEPAN_SHOT_DIR");
@@ -11362,27 +11537,27 @@ static void WriteSmokeShotIfDue(void)
     }();
     static unsigned presented = 0;
 
-    if (dir == nullptr || dir[0] == '\0' || ++presented % every != 0)
+    if (dir == nullptr || dir[0] == ' ' || ++presented % every != 0)
     {
         return;
     }
 
-    std::vector<unsigned char> pixels((size_t)kLogicalWidth * kLogicalHeight * 4);
-    if (!RosePan_RendererReadbackScreen(pixels.data(), kLogicalWidth, 0, 0,
-                                       kLogicalWidth, kLogicalHeight,
-                                       kLogicalWidth, kLogicalHeight))
+    std::vector<unsigned char> pixels;
+    if (!DownloadSmokeShot(pixels))
     {
         return;
     }
-    /* The read-back carries the PS2's 0..128 alpha; a screenshot is opaque. */
+    /* The scene carries the PS2's 0..128 alpha; a screenshot is opaque. */
     for (size_t i = 3; i < pixels.size(); i += 4)
     {
         pixels[i] = 0xff;
     }
 
+    const int width = (int)g_shot_width;
+    const int height = (int)g_shot_height;
     SDL_Surface *surface =
-        SDL_CreateSurfaceFrom(kLogicalWidth, kLogicalHeight, SDL_PIXELFORMAT_RGBA32,
-                              pixels.data(), kLogicalWidth * 4);
+        SDL_CreateSurfaceFrom(width, height, SDL_PIXELFORMAT_RGBA32,
+                              pixels.data(), width * 4);
     if (surface == nullptr)
     {
         LogSdlError("SDL_CreateSurfaceFrom(smoke shot)");

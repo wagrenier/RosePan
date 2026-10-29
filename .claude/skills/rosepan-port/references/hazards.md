@@ -495,7 +495,11 @@ public:
 - **MinGW must be on PATH** or `cc1plus` fails with no diagnostics -- use build.py.
 - **shadercross file lock** ("being used by another process") on parallel shader builds: rerun
   (build.py retries once).
-- `ld: cannot open output file RosePan.exe: Permission denied`: the game is still running.
+- `ld: cannot open output file RosePan.exe: Permission denied`: the game is still running -- possibly
+  another session's play test from the same `cmake-build-relwithdebinfo` (2026-10-28: a session ran
+  `ROSEPAN_CRASH_LOG=1 ./RosePan.exe` twice in a row during the aspect task). Never kill it; build and
+  run the visual test from another config (`build.py --config release --run N ...`, its own
+  `cmake-build-release`, deps reused from ReiPan) and say so in the notes.
 - `-fno-strict-aliasing` is required (MioPan's release-only crash).
 - **layoutcheck compiles every header on its own**: a header that relies on what its .c included first
   fails; give it its own includes.
