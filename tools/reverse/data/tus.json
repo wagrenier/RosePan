@@ -1613,6 +1613,28 @@
    "status": "verify",
    "why": "The focus effect file: setFocus 0x140b20 asserts m_focus.m_texindex != -1 with mag/magscenefocus.cpp; 0x140990..0x141e44 all work on the focus block +0x853bc..+0x8542c (packet helper and initRecords853bc before it, the lerps, drawFocus and its layer setup, the focus draw 0x141184, then setFocusData and its text-track parser 0x14159c..0x1419d8); mag/magloader.cpp starts at 0x141e44"
   },
+  "mag/magsceneif.cpp": {
+   "notes": "Nothing on screen can show this TU: its callers are debug/motnamecnv0.cpp (scene playback, motNameConvert) and debug/motnamecnv.cpp; the 15 s run stays on the boot disclaimer. Mark done when a run reaches scene playback and actors play the named motions. The interfaces are now 8 bytes with a vptr (GCC 2 at +4; host at 0), constructed by MagScene's ctor through C++. getName returns NULL on a bad index (PC guard: the ROM hangs in the assert). DogModel::get_nNode / getNodeName are called qualified because DogActor's overloads hide them (hazards.md). Next debug file: debug/motnamecnv.cpp 0x2163ac..0x2166e0 (FUN_002163ac getName wrapper, FUN_0021641c find with the PC fallback, FUN_0021649c / FUN_002165c0 label and name copies, FUN_00216598 / 00216690 / 002166b8 count wrappers).",
+   "ranges": [
+    [
+     "00143498",
+     "00143d3c"
+    ],
+    [
+     "002854d4",
+     "00285650"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 16:39",
+     "status": "verify",
+     "summary": "MagSceneIF and its map / character interfaces: all 13 methods reconstructed (index counts, names, find, category, actor motion count / number / name / trimmed label, node count / names), virtual dtors inline, five functions named, TU pinned 0x143498..0x143d3c plus linkonce 0x2854d4..0x285650"
+    }
+   ],
+   "status": "verify",
+   "why": "source string 0x2ef168 anchors 12 of 13 functions in 0x143498..0x143d3c; 0x143430 asserts magscenedebug.cpp, 0x143d3c is magscenecmd's setFog wrapper; the linkonce __tf / dtors of MagSceneIF, MagSceneIFMap, MagSceneIFChara at 0x2854d4..0x285650 (MagLifeMenuBoard2D::__tf follows)"
+  },
   "mag/magscenelight.cpp": {
    "notes": "Build, callcheck and layoutcheck green. The 200 s New Game run passes the four previously reached stubs (setLightNo, setLightFlags, setLightParam, copyLightSet) with no assert and still ends black after the narration, as before: no model draws yet (utlDrawI3r 0x106760, DogMotionBlend::getPose and the i3m pose player unassigned@0022e840 are stubs), so lights cannot be seen; the first session whose screenshot shows a lit model marks this done. Decisions: addLight walks nine sets (0..8) as the ROM does; setShadowLight uses the const pool accessors (assert lines 141..143) and reinterprets m_shadow_lightrec as I3dParallelLight / I3dSpotLight (all floats, same layout); the unreachable ShadowAmbient alignment assert is a comment. loadLight reads only one directional light even when the count is larger (ROM behaviour). Next on the 3D path: item 7, unassigned@00140030 (sky) / setFog.",
    "ranges": [

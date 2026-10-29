@@ -6119,11 +6119,41 @@
   "was": "FUN_00143750",
   "why": "MagCharaLoader::getCategory on the scene chara loader (+0x215c); class name as architecture.md has it"
  },
+ "001437a8": {
+  "name": "MagSceneIFChara::getMaxMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_001437a8",
+  "why": "reads scene actor theCharaID's +0x1c0 (DogActor m_max_motion, the motion record count); a0 is the MagSceneIF, called through the 0x781268 chara interface by debug/motnamecnv.cpp"
+ },
  "001437c0": {
   "name": "MagSceneIFChara::getMotionNo",
   "tag": "ror-inferred",
   "was": "FUN_001437c0",
   "why": "DogActor::getMotionNoByName on scene actor theActor (+0x2920 + n*0x4d0); when negative, retries getMotionNoBySuffix with the name cut at its first * or +; class name as architecture.md has it"
+ },
+ "001438b0": {
+  "name": "MagSceneIFChara::getMotionName",
+  "tag": "ror-inferred",
+  "was": "FUN_001438b0",
+  "why": "asserts m_scene_ptr, theCharaID >= 0, theMotionID >= 0, tail-calls DogActor::getMotionName on scene actor theCharaID"
+ },
+ "0014395c": {
+  "name": "MagSceneIFChara::getMotionLabel",
+  "tag": "ror-inferred",
+  "was": "FUN_0014395c",
+  "why": "asserts theName, theSize > 16, theCharaID, theMotionID; copies getMotionName's text after its first underscore into theName, up to a double underscore unless the last argument is set; whole name when it has no underscore"
+ },
+ "00143ba0": {
+  "name": "MagSceneIFChara::getNumNode",
+  "tag": "ror-inferred",
+  "was": "FUN_00143ba0",
+  "why": "asserts m_scene_ptr, theCharaID >= 0, then the inline DogModel::get_nNode of scene actor theCharaID (dog/dogmodel.h line 297, i3rGetNumNode)"
+ },
+ "00143c48": {
+  "name": "MagSceneIFChara::getNodeName",
+  "tag": "ror-inferred",
+  "was": "FUN_00143c48",
+  "why": "asserts m_scene_ptr, theCharaID >= 0, theNodeNo >= 0, then the inline DogModel::getNodeName of scene actor theCharaID (dog/dogmodel.h line 310, i3rGetNodeNameByIndex)"
  },
  "00143d7c": {
   "name": "MagScene::setFog",

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 16:20 at commit `7afaa13` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 16:39 at commit `183202b` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-29 16:20 at commit `7afaa13` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6588** (92%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4986
-- context-name ledger: 5287 entries; overrides of wrong library matches: 5
+- game functions: **7187**, named **6593** (92%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4991
+- context-name ledger: 5292 entries; overrides of wrong library matches: 5
 - placed in a source file: 5705/7187 in 143 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5227**; stubs: **312**
+- reconstructed RoR functions: **5240**; stubs: **305**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -115,7 +115,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/magscenecmd.cpp` | 36 | 0 |
 | `src/mag/magscenedebug.cpp` | 0 | 1 |
 | `src/mag/magscenefocus.cpp` | 16 | 0 |
-| `src/mag/magsceneif.cpp` | 0 | 7 |
+| `src/mag/magsceneif.cpp` | 13 | 0 |
 | `src/mag/magscenelight.cpp` | 10 | 0 |
 | `src/mag/magscenemenu.cpp` | 12 | 0 |
 | `src/mag/magsceneoption.cpp` | 0 | 1 |
@@ -167,8 +167,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 172 TUs: todo 96, partial 2, verify 110, done 17
-- next: **mag/magsceneif.cpp** (frontier score 7)
+- 172 TUs: todo 95, partial 2, verify 111, done 17
+- next: **unassigned@00104970** (frontier score 7)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -239,6 +239,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/magscenecamera.cpp` 16/16 -- 200 s New Game run: no assert or crash, ends on the open picture book as before (progress shot); no map draws yet, so no path camera can be seen: verify. Traps 
 - verify: `mag/magscenecmd.cpp` 36/36 -- Verify: the 200 s run reaches gamSetBwnFollow (MagLifeBwnCtrl::setLevel stub hit) and still ends black after the narration frame (~6000) as before; fog shows on
 - verify: `mag/magscenefocus.cpp` 16/16 -- Verify: the 15 s smoke run shows the disclaimer screen as before; nothing on that path turns focus on (setFocusData runs from an event pack with a file 2, seqFu
+- verify: `mag/magsceneif.cpp` 13/18 -- Nothing on screen can show this TU: its callers are debug/motnamecnv0.cpp (scene playback, motNameConvert) and debug/motnamecnv.cpp; the 15 s run stays on the b
 - verify: `mag/magscenelight.cpp` 10/10 -- Build, callcheck and layoutcheck green. The 200 s New Game run passes the four previously reached stubs (setLightNo, setLightFlags, setLightParam, copyLightSet)
 - verify: `mag/magscenemenu.cpp` 12/12 -- No source-path string in the run: the file name is the port's (open-items.md Open questions). Nothing on screen shows it yet: the 200 s New Game run still ends 
 - verify: `mag/magscenerender.cpp` 20/20 -- All 20 functions written; verify because nothing on screen can show it: no boot actor has the 0x60 shadow flags and all i3d layer / view / light functions are s
@@ -283,6 +284,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 16:39 `mag/magsceneif.cpp` verify: MagSceneIF and its map / character interfaces: all 13 methods reconstructed (index counts, names, find, category, actor motion count / number / name / trimmed l
 - 2026-10-29 16:20 `debug/motnamecnv0.cpp` verify: debug/motnamecnv0.cpp reconstructed (pinned 0x216154..0x2163ac, 8 functions): motNameConvert (scene thread motion keys to actor motion numbers), motNameFindChar
 - 2026-10-29 16:09 `emy/emy_nor.cpp` verify: Pinned emy/emy_nor.cpp 0x150b24..0x153e40 out of unassigned@00150b24 and wrote all 55 functions: NorMain (enemy type 10: initOut, dtor, decide with flee input 5
 - 2026-10-29 15:49 `emy/emy_clr.cpp` verify: Pinned emy/emy_clr.cpp 0x14dc7c..0x150b24 out of unassigned@0014dc7c and wrote all 45 functions: ClrMain (enemy type 8: initOut, dtor, decide with tests 13..9 /
@@ -290,22 +292,21 @@ Recent sessions:
 - 2026-10-29 15:00 `emy/emy_mrt.cpp` verify: Pinned emy/emy_mrt.cpp 0x14cde4..0x14dc7c out of unassigned@0014cde4 and wrote all 26 functions: MrtMain (enemy type 7: initOut, dtor, decide with its last-true
 - 2026-10-29 14:30 `emy/emy_bdl.cpp` verify: Pinned emy/emy_bdl.cpp 0x14b3bc..0x14cde4 out of unassigned@0014b3bc and wrote all 33 functions: BdlMain (enemy type 5: initOut, dtor, decide with testBarkReact
 - 2026-10-29 14:20 `emy/emy_bds.cpp` verify: Pinned emy/emy_bds.cpp 0x149d18..0x14b3bc out of unassigned@00149d18 and wrote all 33 functions: BdsMain (enemy type 4: initOut, dtor, decide, exec, after, sele
-- 2026-10-29 13:55 `i3d/i3dgeom.cpp` verify: i3dgeom complete: all 54 geometry tests written. This session: the flat-capped cylinder family (core 0x235768, line/ray/seg forms, hit tests incl. utlHitCheck 0
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `mag/magsceneif.cpp` | todo | 0/7/18 | 2.5 | 7 | 0 |
-| `unassigned@00153e40` | todo | 0/32/239 | 58.0 | 7 | 0 |
+| `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
 | `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
 | `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
-| `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
+| `unassigned@00153e40` | todo | 0/32/239 | 58.0 | 7 | 0 |
 | `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
+| `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
+| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
 | `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
 | `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
-| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
-| `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
 | `unassigned@00113ea8` | todo | 0/2/3 | 1.3 | 4 | 0 |
 | `mag/maglifepcbtl.cpp` | todo | 0/3/6 | 3.2 | 4 | 0 |
+| `mag/maglifepceff.cpp` | todo | 0/3/3 | 0.1 | 3 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
