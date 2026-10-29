@@ -448,7 +448,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     (compressed somewhere). Curve / interpolation maths 0x22e840..0x231198, collision casts
     0x2312a0..0x233628, distance maths (i3dPointSegDist2, i3dSegSegDist2) ..0x23695c. Host pointers
     in these files: hazards.md "Types and layouts".
-    **The casts** (`i3d/i3cquery.cpp`, 2026-10-29, partial): a part is box centre +0x00, half
+    **The casts** (`i3d/i3cquery.cpp`, 2026-10-29, verify): a part is box centre +0x00, half
     extents +0x10, group +0x20, +0x24 per-triangle attribute records, +0x28 tree, +0x2c vertex array
     (16-byte points); a node's +6 u16 enables it. A tree node's box is relative to its parent's
     (centre + half * s8[3] at +2 / 127, half * u8[3] at +5 / 127, rodata 0x303b40 = 1/127); a leaf
@@ -458,8 +458,14 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     and calls q->m_func(q, node << 16 | what, tri, verts, plane, point) on a hit (what 3 face, 0..2
     vertex, 0x10 | i edge); q+0x14 an optional box filter, q+0x1c the part walked. Seven casts:
     sphere, line, ray, segment and three cylinder modes; only Sphere / Ray / Cylinder are called
-    (DogModel). The box tests are i3dgeom's (0x2348f8, 0x234a50..0x234ce8). Epsilon sdata 0x2db630
-    (0.001), row-scale switch 0x2db634 (0, never set).
+    (DogModel). Two more, uncalled: swept-sphere casts i3cCastSphereSweepSeg 0x2331c8 (hidden in
+    0x232be8's body; box i3dCylSegBoxTest) / SweepRay 0x2331f0 (box i3dCylHalfBoxTest), whose tests
+    shift the plane r behind the triangle and time edge hits with i3dSeg/RayCylinderTest
+    (0x236678 / 0x2365f8). The box tests are i3dgeom's (0x2348f8, 0x234a50..0x234ce8). Epsilon sdata
+    0x2db630 (0.001), row-scale switch 0x2db634 (0, never set). Hit attributes (i3cGetHitAttr
+    0x2333b0, uncalled): the part's +0x24 records (I3cAttrRef: three u16 indices, kind in bits 4..7
+    of +6: 1 uv, 2 a vector, 3 both) index a table right after the 0x20-byte root with stride
+    root+0x11; blended by barycentric weights (0x233258) into five floats.
   - **Texture and CLUT objects** (`i3d/i3dtex.cpp`, 0x2184c0..0x21a120, written 2026-10-22, verify;
     33 functions incl. 4 hidden TEX1 setters 0x219dd0..0x219e30). Both start with their
     I3dVramHandle (+0 m_image = the object, +4 size: texture pages / CLUT 4-block units, +0x10 kind

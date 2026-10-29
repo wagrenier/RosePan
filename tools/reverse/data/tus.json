@@ -655,7 +655,7 @@
    "why": "0x1dd558 allocates its 0xb0 trigger copy with the source string game/gamtrg.cpp (0x2fd630, line 0x62); the run from GamArea's constructor 0x1dd1e8 to hasId ends where game/gamsnd.cpp begins (GamSndMan::GamSndMan 0x1e0df0)"
   },
   "i3d/i3cquery.cpp": {
-   "notes": "Left: 0x2325d0 and 0x232be8 (two more triangle tests, no callers; 0x232be8 is the prim test of 0x2331f0), 0x2331f0 (cast with box test 0x234c30), 0x233258 / 0x2333b0 (hit attribute interpolation over part m_24, no callers). The 240 s run reaches the room unchanged; i3cCastRay walks real i3c data and stops at the i3dRayBoxTest stub, so nothing hits yet: next for collision is i3d/i3dgeom.cpp (box tests 0x2348f8 / 0x234a50..0x234ce8, i3dPointDist2, i3dLineSegDist2, i3dSegSegDist2 and Rgn), then dogModelHitNearest / Cylinder (new signature q, code, tri, verts, plane, point). ROM quirks kept: the sphere edge case picks vertex (i+1)%2; the walker counts each passed box as a hit; cylinder edge hits keep the plane t in point.w. Doubt in open-items: which cylinder mode is ray vs segment.",
+   "notes": "All 29 functions written; none of this session's six has a caller in the ROM, and the called casts still stop at the i3dgeom box-test stubs, so verify: mark done when a run shows a cast hit (Lucinda stopped by a wall). The 15 s smoke run shows the disclaimer screen unchanged. Next for collision: i3d/i3dgeom.cpp (box tests, distances, the cylinder times 0x2365f8 / 0x236678 over 0x235be8). ROM quirks kept: the sweep's edge loop starts at the edge that failed the inside test, not edge 0; both_face is unread by the sweeps; the barycentric scale reads a stack word the ROM never wrote (zeroed on PC). Doubt in open-items: 0x234050 is probably ray-vs-segment and CylinderHalf a ray.",
    "ranges": [
     [
      "002312a0",
@@ -667,9 +667,14 @@
      "date": "2026-10-29 13:12",
      "status": "partial",
      "summary": "i3c collision casts: i3cCast worker 0x232120, tree walk 0x231ed0, shape transform, ray / sphere / cylinder triangle tests with their mode wrappers, the seven cast entries and the epsilon / scale accessors (25 functions, 12 new in Ghidra); I3cQuery moved to i3d/i3cquery.h with real field names, I3cPart / I3cTree / I3cTri layouts in i3croot.h, i3d/i3dgeom.h for the box tests and distances"
+    },
+    {
+     "date": "2026-10-29 13:22",
+     "status": "verify",
+     "summary": "i3cquery complete: swept-sphere triangle tests 0x2325d0 (segment) / 0x232be8 (ray) as one worker, their casts 0x2331c8 (hidden in 0x232be8, created in Ghidra) / 0x2331f0, i3cTriBarycentric 0x233258 and i3cGetHitAttr 0x2333b0; I3cAttrRef and the root's attribute stride byte in i3croot.h; i3dRayCylinderTest / i3dSegCylinderTest 0x2365f8 / 0x236678 named and stubbed in i3dgeom"
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "the i3c collision query: i3cCastSphere/Ray/Cylinder and their shared worker 0x232120 with its per-shape testers; boundary with the distance helpers at 0x233628 inferred from callers"
   },
   "i3d/i3croot.cpp": {

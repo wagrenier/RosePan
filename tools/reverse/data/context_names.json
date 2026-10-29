@@ -26027,6 +26027,30 @@
   "was": "FUN_002325a8",
   "why": "DogModel::castCylinder's collision query (query, cylinder, node matrices)"
  },
+ "002325d0": {
+  "name": "i3cPrimSphereSweepSeg",
+  "tag": "ror-inferred",
+  "was": "FUN_002325d0",
+  "why": "sphere (pos, w = r) moved along dir (0..1) against a triangle: the plane shifted r behind v0, t = d0 / (d0 - d1), same-side ends farther than r miss; edges by i3dSegSegDist2Rgn then the edge cylinder time 0x236678; prim test of the cast 0x2331c8 (box test i3dCylSegBoxTest)"
+ },
+ "00232be8": {
+  "name": "i3cPrimSphereSweepRay",
+  "tag": "ror-inferred",
+  "was": "FUN_00232be8",
+  "why": "the 0x2325d0 sweep without the same-side miss, edges by i3dSegSegDist2 and the ray edge cylinder time 0x2365f8; prim test of the cast 0x2331f0 (box test i3dCylHalfBoxTest)"
+ },
+ "002331c8": {
+  "name": "i3cCastSphereSweepSeg",
+  "tag": "ror-inferred",
+  "was": "FUN_002331c8",
+  "why": "hidden in 0x232be8's body (created this session): i3cCast(q, shape, mats, i3dCylSegBoxTest, i3cPrimSphereSweepSeg, 1), like the other 0x28-byte cast entries; no callers"
+ },
+ "002331f0": {
+  "name": "i3cCastSphereSweepRay",
+  "tag": "ror-inferred",
+  "was": "FUN_002331f0",
+  "why": "i3cCast(q, shape, mats, i3dCylHalfBoxTest, i3cPrimSphereSweepRay, 1); no callers"
+ },
  "00233218": {
   "name": "i3cSetEpsilon",
   "tag": "ror-inferred",
@@ -26050,6 +26074,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00233248",
   "why": "returns the byte at 0x2db634"
+ },
+ "00233258": {
+  "name": "i3cTriBarycentric",
+  "tag": "ror-inferred",
+  "was": "FUN_00233258",
+  "why": "out = (|b x c|, |c x a|, |a x b|) / their sum with a, b, c the triangle's vertices minus the point: the point's barycentric weights"
+ },
+ "002333b0": {
+  "name": "i3cGetHitAttr",
+  "tag": "ror-inferred",
+  "was": "FUN_002333b0",
+  "why": "a hit's per-vertex attributes: the part's m_24 record for the triangle's m_attr (three indices and a kind nibble) into the root+0x20 table (stride byte root+0x11), blended by i3cTriBarycentric into 5 floats; returns the kind"
  },
  "00233628": {
   "name": "i3dPointDist2",
@@ -26122,6 +26158,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00234ce8",
   "why": "box test of 0x232558 (radius-grown line); body not read"
+ },
+ "002365f8": {
+  "name": "i3dRayCylinderTest",
+  "tag": "ror-inferred",
+  "was": "FUN_002365f8",
+  "why": "0x235be8 (line against a cylinder given as start with w = r and axis) limited to a ray: the exit t below 0 misses, flag bit 0 flipped when the entry t is below 0; writes the two t"
+ },
+ "00236678": {
+  "name": "i3dSegCylinderTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00236678",
+  "why": "0x235be8 limited to a segment: entry t above 1 or exit t below 0 miss; bit 0 flipped when entry below 0, bit 4 when exit above 1; writes the two t"
  },
  "00236960": {
   "name": "i3dVecZero",
