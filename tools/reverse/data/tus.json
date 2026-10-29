@@ -297,6 +297,24 @@
    "status": "done",
    "why": "EffCameraAnim1's two out-of-line methods and setKey, between EffBreath2Ground (0x16f55c) and the shared helper run 0x16fb70 (no class); one file per Eff class in alphabetical link order"
   },
+  "eff/efffog3.cpp": {
+   "notes": "Code complete; nothing on screen shows it yet: the 240 s smoke run ends in the bus-stop room with no enemies, so the fog correctly stays the map's (frame mean equals the msgsystext shot, no regression). Mark done the first time a run with an enemy shows the fog thicken. Class declarations moved from eff/effclasses.h to eff/efffog3.h (included there); gamCreateEff1a's prototype moved from game/gamman.h to eff/efffog3.h. Doubt: g_bss_7a3210 is taken as the record key (the chapter); check which record init picks if a stage looks wrong. The rest of the old unassigned@0016fb70 run stays: EffDust2..EffFog2Prim before 0x172678, EffFoot1..EffLight3 from 0x172e4c; EffLight1::init 0x174dd8 is the next reached effect stub (reached in the picture-book stretch).",
+   "ranges": [
+    [
+     "00172678",
+     "00172e4c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 12:24",
+     "status": "verify",
+     "summary": "EffFog3, EffFog3Dark, EffFog3WeakUp and gamCreateEff1a (10 functions, 0x172678..0x172e4c, pinned out of unassigned@0016fb70): the per-stage enemy fog. init picks the chapter record (g_bss_7a3210) from the pack table, liveMain checks the enemies every 30 frames and creates Dark (fog toward the record over 30 frames) or WeakUp (back over 90 after 150); effFog3Shift moves MagScene's target fog by record minus map fog m_fog[1]. Helpers named effFog3AnyEmyAwake, effFog3AllEmyDown, effFog3Shift."
+    }
+   ],
+   "status": "verify",
+   "why": "gamCreateEff1a creates kind 0x1a (EffFog3) and opens the EffFog3 / EffFog3Dark / EffFog3WeakUp run, after EffFog2Prim::updateZDepth and before EffFoot1::init; one file per effect family as eff/effcameraanim1.cpp"
+  },
   "eff/effman.cpp": {
    "notes": "Verify: the 200 s run creates EffLight1 (kind 0x21) and EffCameraAnim1 (kind 0xd) during the picture book; their init is a stub returning 0, so createEff deletes them and nothing new draws. Screen unchanged from the last session (title, picture book with page turns, black at the end as before). PC deviation: the ROM returns the stale pack slot number and reads the deleted object when init or addEff fails, and calls through NULL for a kind with no class; the host returns -1 (open-items Open questions). Next: eff/eff0.cpp 0x16a914..0x16ade0 (Eff0 and effInitRandTable / effClearDrawSets; effCalcViewDepth 0x16ff18 and effMoveToward 0x16ff78 are stubs too), then EffLight1 and EffCameraAnim1, moving each class out of effclasses.h into its own file header. EffFindItem1 shows once a kind-0x32 effect is created with Eff0 written. References updated: architecture.md (kind to class map), open-items.md, hazards.md (vtable-only undefined references, callcheck colon).",
    "ranges": [
@@ -2415,6 +2433,7 @@
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},
   "unassigned@0016afcc": {},
+  "unassigned@0016fb70": {},
   "unassigned@001810f4": {},
   "unassigned@001832e8": {},
   "unassigned@00184f2c": {},

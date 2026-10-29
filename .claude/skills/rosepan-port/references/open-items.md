@@ -6,6 +6,17 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-29 (`eff/efffog3.cpp`, verify; was the head of unassigned@0016fb70): EffFog3 / Dark /
+WeakUp and gamCreateEff1a, the reached stub of GamMan::initStage2.** The enemy fog: one EffFog3 per stage
+darkens the scene fog toward its chapter's record while an enemy is awake and clears it when all are
+down (architecture.md, under the effect manager). The 240 s run shows the bus-stop room unchanged
+(frame mean equal to the msgsystext shot): no enemies there, so the fog stays the map's -- correct, but
+unseen. Mark it done the first time a run with an enemy shows the fog thicken. Doubt: g_bss_7a3210 is
+read as the record key (the chapter, 1..13 per sequence.h); if a stage shows the wrong darkness, check
+which record init picked. The rest of unassigned@0016fb70 (EffDust2 .. EffFog2Prim before, EffFoot1 ..
+EffLight3 after, now unassigned@0016fb70 and unassigned@00172e4c) stays queued; EffLight1::init
+0x174dd8 is the next reached effect stub.
+
 **DONE 2026-10-29 (`msg/msgsystext.cpp`, was unassigned@001832e8): msgGetSysText and its 0x1d4
 system texts (data 0x298fe8, byte-exact: some English lines quote with Shift-JIS punctuation).** The
 240 s run's picture book now shows its header "The Little Princess" above the cover and "Exit" by the

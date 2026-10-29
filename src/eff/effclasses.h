@@ -21,6 +21,7 @@
 
 #include "eff/eff0.h"
 #include "eff/effcameraanim1.h"
+#include "eff/efffog3.h"
 
 /* kind 0x1; EE 0x280, vtable 0x2e33a0. layout: host. */
 class EffBloodSpray1 : public Eff0
@@ -287,44 +288,7 @@ public:
     u_char m_body[0x5c];                                                    // ROR 0x24..0x80: not decoded yet
 };
 
-/* kind 0x1a; EE 0x2c, vtable 0x2e3b80. layout: host. */
-class EffFog3 : public Eff0
-{
-public:
-    EffFog3() {}                                                            // ROR 0x0028c020 (linkonce; inlined in createEff)
-    virtual ~EffFog3();                                                     // ROR 0x00172ac8
-    virtual int  init(const EffParam *param);                               // ROR 0x00172b30
-    virtual int  liveMain();                                                // ROR 0x00172cb8
-    virtual void render(RENDERPARAM *param);                                // ROR 0x0028c058 (linkonce)
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0028c060 (linkonce)
-    virtual I3dDrawSet *createPacketEntry(I3dLayer *layer);                 // ROR 0x0028c050 (linkonce)
-
-    u_char m_body[0x8];                                                     // ROR 0x24..0x2c: not decoded yet
-};
-
-/* kind 0x1b; EE 0x24, vtable 0x2e3b10. layout: host. */
-class EffFog3Dark : public Eff0
-{
-public:
-    EffFog3Dark() {}                                                        // ROR 0x0028c118 (linkonce; inlined in createEff)
-    virtual ~EffFog3Dark() {}                                               // ROR 0x0028c068 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x00172d98
-    virtual int  liveMain();                                                // ROR 0x0028c148 (linkonce)
-    virtual void render(RENDERPARAM *param);                                // ROR 0x0028c150 (linkonce)
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0028c158 (linkonce)
-};
-
-/* kind 0x1c; EE 0x24, vtable 0x2e3aa0. layout: host. */
-class EffFog3WeakUp : public Eff0
-{
-public:
-    EffFog3WeakUp() {}                                                      // ROR 0x0028c210 (linkonce; inlined in createEff)
-    virtual ~EffFog3WeakUp() {}                                             // ROR 0x0028c160 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x00172de8
-    virtual int  liveMain();                                                // ROR 0x00172e08
-    virtual void render(RENDERPARAM *param);                                // ROR 0x0028c240 (linkonce)
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0028c248 (linkonce)
-};
+/* kinds 0x1a..0x1c (EffFog3, EffFog3Dark, EffFog3WeakUp): eff/efffog3.h. */
 
 /* kind 0x1d; EE 0x4c, vtable 0x2e3e90. layout: host. */
 class EffFoot1 : public Eff0

@@ -8285,6 +8285,24 @@
   "was": "FUN_00172678",
   "why": "Obj176a3c::createEff on scene +0x837e0 with kind 0x1a; initStage2's call"
  },
+ "001726b4": {
+  "name": "effFog3AnyEmyAwake",
+  "tag": "ror-inferred",
+  "was": "FUN_001726b4",
+  "why": "walks GamMan m_achrList; for each enemy oid (type 2) 1 when EmyManager::getEmyType 0..3 has state (getEmyWord3c) != 4, 4/5 state != 6, or any type past 10; types 6..10 ignored; 0 otherwise. EffFog3 init/liveMain darken the fog on it"
+ },
+ "001727ec": {
+  "name": "effFog3AllEmyDown",
+  "tag": "ror-inferred",
+  "was": "FUN_001727ec",
+  "why": "the converse walk of m_achrList: 0 as soon as an enemy of type 0..3 is not in state 4 or of type 4/5 not in state 6, else 1; EffFog3::liveMain creates EffFog3WeakUp (kind 0x1c) on it"
+ },
+ "00172934": {
+  "name": "effFog3Shift",
+  "tag": "ror-inferred",
+  "was": "FUN_00172934",
+  "why": "builds the chapter record's fog (g 0x298e18: rgb/255, near/far times its scale, amounts) against MagScene m_fog[1] and calls MagScene::addFog with the difference (on) or its negation (off) over frames; callers EffFog3::init, EffFog3Dark::init (1,30), EffFog3WeakUp::liveMain (0,90)"
+ },
  "00172ac8": {
   "name": "EffFog3::~EffFog3",
   "tag": "ror-inferred",
