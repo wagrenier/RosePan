@@ -1696,6 +1696,23 @@ never asserts): sessions name them (`tus.py define --why`).
   param words [0] target, [2] kind, [6] motion, [7], [8] 1, [9] 5, [10] float). Effects kind 0xa
   (EffBreath2: host pointers to a position and a direction at +0x10 / +0x14, read while it lives) and
   0xc (EffBreath2Ground: pos, m_08 the delay) -- EffParam m_breath / m_ground.
+  **NorMain** (type 10, emy/emy_nor.cpp 0x150b24..0x153e40, 2026-10-29; EE 0x258, 7 vtable slots,
+  slot 7 isPressed 0x151460 with no caller found): the enemy that grabs the PC. States 1 Attack, 2 Walk,
+  3 Bitten, 4 Dead (forced by notify bit 2), 5 Counter, 6 BrownEv (script global 0x193 while its motion
+  1 plays), 7 Coax, 8 Test. m_func = EmyMain::func_count, so m_func_count +0x1e8 is its frame clock.
+  decide (inputs at +0x204): 5 flee once (PC lp under half of +0x234, 3601 frames or 4 hits m_hits
+  +0x23c; achr flag 0x400, damage end 6, m_fled +0x230, obj flag 0x800 follows it) and a won input-3
+  draw return at once; 7 PC class 4, 6 never, 4 isLowLife, 3 a motion end with a growing chance
+  (EE 0x238, rates 0/50/30/40/60/100), 2 the bark (m_bite_wait +0x248 = 30..60), 0 / 1 the sight edge
+  (emyChkInSight(param 0x5f, pi) of the PC or the dog). NorOutAttack (EE 0x7c) modes by pattern tables
+  0x298dd8 (counts 0x2efa60; +0x250 / +0x254): 0 claw (chase 88.5, motion 0x1c, emyChkHitReachXZ 20
+  word 0x21), 1 grab (chase 156, steps table 0x2efb40: motion 0x21, then commandPC 2 front / 7 behind
+  with motions 0x28 / 0x29, hold 0x24 / 0x25 placing the PC with commandPC 0x15, 1..3 squeezes 0x1d
+  word 0x22, the PC struggling (class 3) 80 frames or a bark: commandPC 6 / 9 release, motion 0x23),
+  2 lunge (chase 386, motion 0x2b, XZ 55 word 0x23), 3 scream (turn, stream 0x3b8, motions 0x12 / 0x13,
+  script global 0x194 while it screams). m_grab_back +0x24c (the grab from behind) is
+  EmyManager::getEmyHoldWord24c. The dog is spared while the row has input 5 and it has not fled.
+  _tagEnemyParam +0x14 (u_short m_14) is NorMain's max life (+0x236).
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00

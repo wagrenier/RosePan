@@ -483,6 +483,24 @@
    "status": "verify",
    "why": "MrtMain + its four MrtOut* classes: MrtMain::initOut 0x14cde4 (every XxxMain::initOut opens its file) up to ClrMain::initOut 0x14dc7c which opens the Clr file; no source string, named like emy_bds.cpp"
   },
+  "emy/emy_nor.cpp": {
+   "notes": "Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run shows a Nor (type 10) wandering, clawing or grabbing the PC. ROM oddities kept (open-items.md Open questions): m_chase_cnt never counted, grab step 7 never set, placePC moves the enemy when the second commandPC 0x15 succeeds, the dog kick reads m_dogPtr unguarded (guarded on the host), isPressed / getHitNodePos / isTouching have no callers. EmyMain::m_238 on the host is decide's motion-end counter (EE 0x238). The rest of the enemy run is unassigned@00153e40 from GrgMain::initOut 0x153e40: next emy/emy_grg.cpp up to FshMain::initOut 0x156620 (GrgMain 6 vtable slots, six outs; check with rtti.py), then Fsh, Got, Pig, Dwf.",
+   "ranges": [
+    [
+     "00150b24",
+     "00153e40"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 16:09",
+     "status": "verify",
+     "summary": "Pinned emy/emy_nor.cpp 0x150b24..0x153e40 out of unassigned@00150b24 and wrote all 55 functions: NorMain (enemy type 10: initOut, dtor, decide with flee input 5 and the motion-end chance, exec, after, selectOut, tests 4..7, isTargetInSight, isCoaxTime, countBiteWait, slot 7 isPressed, nextAttack over the pattern tables 0x298dd8) and its outs NorOutAttack (claw, grab with the 9-step table 0x2efb40 and commandPC hold / squeeze / release, lunge, scream), NorOutWalk, NorOutBitten, NorOutDead, NorOutCounter, NorOutBrownEv, NorOutCoax, NorOutTest. New emy/emy_nor.h; NorMain moved out of lib/unassigned.h, its six stubs removed; m_24c renamed m_grab_back; _tagEnemyParam gained m_14 (Nor max life). 55 functions named (batch emynor_001)."
+    }
+   ],
+   "status": "verify",
+   "why": "NorMain + its eight NorOut* classes: NorMain::initOut 0x150b24 (every XxxMain::initOut opens its file) up to GrgMain::initOut 0x153e40 which opens the Grg file; no source string, named like emy_bds.cpp"
+  },
   "emy/emy_out.cpp": {
    "notes": "No code left in the pinned range. Status verify: no enemy runs in the 15 s smoke run (boot disclaimer only, same picture as before), so nothing on screen shows this code yet; the first session whose run shows an enemy (walk, bite, Got carrying the scissors) marks it done. The callers are still stubs: EmyMain::updateOut 0x165038 (calls tickBitten) and EmyMain::resetOut 0x166518 (calls dropItem) in emy/emy_main.cpp, and the per-class outs in unassigned@00149d18. The ROM's setMotion family also passes the actor rot y in f13 and 1 in t0, which chrMtnMove2Achr does not read; the port drops them (comments say so). Two ROM oddities kept as they are (open-items.md Open questions): slideToTarget zeroes pos and rot on its last frame, setGotMotion's motion 0x4e passes an unset register (port: 2).",
    "ranges": [
@@ -2542,6 +2560,7 @@
   "unassigned@0014b3bc": {},
   "unassigned@0014cde4": {},
   "unassigned@0014dc7c": {},
+  "unassigned@00150b24": {},
   "unassigned@00164fc0": {},
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},

@@ -141,12 +141,6 @@ GrgMain::~GrgMain()
     ROSEPAN_STUB("GrgMain::~GrgMain", 0x00154030);
 }
 
-// stub of ROR 0x00150df8
-NorMain::~NorMain()
-{
-    ROSEPAN_STUB("NorMain::~NorMain", 0x00150df8);
-}
-
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
 
 // stub of ROR 0x00194908
@@ -632,36 +626,6 @@ int GrgMain::testView()
 {
     ROSEPAN_STUB("GrgMain::testView", 0x00154734);
     return {};
-}
-
-// stub of ROR 0x001510dc
-void NorMain::after()
-{
-    ROSEPAN_STUB("NorMain::after", 0x001510dc);
-}
-
-// stub of ROR 0x00150e58
-void NorMain::decide()
-{
-    ROSEPAN_STUB("NorMain::decide", 0x00150e58);
-}
-
-// stub of ROR 0x0015102c
-void NorMain::exec()
-{
-    ROSEPAN_STUB("NorMain::exec", 0x0015102c);
-}
-
-// stub of ROR 0x00150b24
-void NorMain::initOut(const _tagEnemyParam *prm)
-{
-    ROSEPAN_STUB("NorMain::initOut", 0x00150b24);
-}
-
-// stub of ROR 0x00151158
-void NorMain::selectOut()
-{
-    ROSEPAN_STUB("NorMain::selectOut", 0x00151158);
 }
 
 // stub of ROR 0x0015ab48

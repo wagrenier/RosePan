@@ -6,6 +6,12 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-29 (`emy/emy_nor.cpp`, verify; split out of unassigned@00150b24): NorMain (type 10)
+and its eight outs, all 55 functions** (architecture.md). No enemy spawns on the smoke path; mark done
+when a run shows a Nor (it wanders, claws, grabs and squeezes the PC). Next in the enemy run: Grg
+(GrgMain::initOut 0x153e40) up to FshMain::initOut 0x156620 (check the boundary: rtti.py --class
+FshMain), then Fsh, Got, Pig, Dwf (unassigned@00153e40).
+
 **WRITTEN 2026-10-29 (`emy/emy_clr.cpp`, verify; split out of unassigned@0014dc7c): ClrMain (type 8)
 and its five outs, all 45 functions** (architecture.md). No enemy spawns on the smoke path; mark done
 when a run shows a Clr (it drops from above, spits, climbs away). Next in the enemy run: Nor
@@ -1153,6 +1159,13 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-29, emy/emy_nor.cpp) **Nor ROM oddities ported as they are**: NorOutAttack::m_chase_cnt
+  (+0x3c) is cleared but never counted, so the claw's chase limit m_chase_max never fires (only the
+  arrival or a failed chase ends it); grab step 7 (grabMissEnd) has no code that sets it; placePC moves
+  the enemy itself to the point 30 behind it when commandPC 0x15 takes the PC there; NorOutWalk's third
+  try uses the same offsets as the second; NorOutBitten kicks the dog through m_dogPtr without a NULL
+  test (guarded on the host); NorMain::isPressed (slot 7), getHitNodePos and NorOutAttack::isTouching
+  have no callers in the ROM. The lunge sets obj flag 0x20000000 that nothing here clears.
 - (2026-10-29, emy/emy_clr.cpp) **Clr ROM oddities ported as they are**: ClrOutAtk's arm swing sets
   m_hit_pc when it hits the dog (0x14fdbc stores +0x190, not +0x194), so the dog is hit every frame of
   11..28; ClrOutUp::execUp reports done the frame it reaches the top, so its 120-frame step 2 never

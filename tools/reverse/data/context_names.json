@@ -7565,6 +7565,330 @@
   "was": "FUN_00150b24",
   "why": "called right after the vtable store in the ELF's inline NorMain::NorMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
  },
+ "00150df8": {
+  "name": "NorMain::~NorMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00150df8",
+  "why": "NorMain vtable 0x2e2778 slot 1: vptr store, ~EmyMain then operator_delete on the deleting flag, as ClrMain::~ClrMain"
+ },
+ "00150e58": {
+  "name": "NorMain::decide",
+  "tag": "ror-inferred",
+  "was": "FUN_00150e58",
+  "why": "NorMain vtable slot 4: m_req from the inputs at +0x204 (tests 5, 7, 6, 4, the motion-end chance 3, the bark 2, the sight edge 0 / 1)"
+ },
+ "0015102c": {
+  "name": "NorMain::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015102c",
+  "why": "NorMain vtable slot 5: EmyStateMap::next on m_req, notify bit 2 forces state 4, bit 1 restarts the state"
+ },
+ "001510dc": {
+  "name": "NorMain::after",
+  "tag": "ror-inferred",
+  "was": "FUN_001510dc",
+  "why": "NorMain vtable slot 6: Term / selectOut on a change, m_req = out->Exec()"
+ },
+ "00151158": {
+  "name": "NorMain::selectOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00151158",
+  "why": "NorMain vtable slot 2: the state row of the transition table into +0x204, m_out[state 1..8]->Init"
+ },
+ "00151218": {
+  "name": "NorMain::testInput4",
+  "tag": "ror-inferred",
+  "was": "FUN_00151218",
+  "why": "NorMain::decide input 4 test: EmyMain::isLowLife"
+ },
+ "0015122c": {
+  "name": "NorMain::testInput5",
+  "tag": "ror-inferred",
+  "was": "FUN_0015122c",
+  "why": "NorMain::decide input 5 test: once, the PC under half its max lp, 3601 frames passed or 4 hits given: achr flag 0x400, damage end 6, +0x230 = 1; obj flag 0x800 follows +0x230"
+ },
+ "0015130c": {
+  "name": "NorMain::testInput6",
+  "tag": "ror-inferred",
+  "was": "FUN_0015130c",
+  "why": "NorMain::decide input 6 test: returns 0"
+ },
+ "00151314": {
+  "name": "NorMain::testInput7",
+  "tag": "ror-inferred",
+  "was": "FUN_00151314",
+  "why": "NorMain::decide input 7 test: EmyMain::isPCStateClass4"
+ },
+ "00151328": {
+  "name": "NorMain::isTargetInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_00151328",
+  "why": "emyChkInSight(param 0x5f, pi) of the PC or of the dog; decide sight edge"
+ },
+ "001513ec": {
+  "name": "NorMain::isCoaxTime",
+  "tag": "ror-inferred",
+  "was": "FUN_001513ec",
+  "why": "m_func_count - 1000: 0, or mod 700 under 200; NorOutCoax::Exec keeps coaxing while true"
+ },
+ "00151448": {
+  "name": "NorMain::countBiteWait",
+  "tag": "ror-inferred",
+  "was": "FUN_00151448",
+  "why": "--(+0x248), true while it is not negative; NorOutBitten::Exec wait, set by decide bark input"
+ },
+ "00151460": {
+  "name": "NorMain::isPressed",
+  "tag": "ror-inferred",
+  "was": "FUN_00151460",
+  "why": "NorMain vtable slot 7: 1 unless fled (+0x230) or (own lp at least half of +0x236, under 3601 frames, the PC at least 3/4 of its max lp); no caller found yet"
+ },
+ "00151508": {
+  "name": "NorMain::getHitNodePos",
+  "tag": "ror-inferred",
+  "was": "FUN_00151508",
+  "why": "the achr actor p_hit node matrix into a local, unused; no references (dead code)"
+ },
+ "001515c4": {
+  "name": "NorMain::nextAttack",
+  "tag": "ror-inferred",
+  "was": "FUN_001515c4",
+  "why": "steps +0x254 through the attack pattern +0x250 (tables 0x298dd8 / counts 0x2efa60), a new pattern by rand at the end; NorOutAttack::start mode"
+ },
+ "00151674": {
+  "name": "NorOutAttack::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00151674",
+  "why": "NorOutAttack vtable 0x2e27c0 slot 2: selectTarget(100), m_state2 0, start"
+ },
+ "001516ac": {
+  "name": "NorOutAttack::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001516ac",
+  "why": "NorOutAttack vtable slot 3: runs the mode +0x40: 0 claw, 1 grab, 2 lunge, 3 scream"
+ },
+ "00151744": {
+  "name": "NorOutAttack::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00151744",
+  "why": "NorOutAttack vtable slot 4: termCommon, global 0x194 cleared, the grab obj flags back, decide on"
+ },
+ "001517e0": {
+  "name": "NorOutAttack::start",
+  "tag": "ror-inferred",
+  "was": "FUN_001517e0",
+  "why": "picks the mode (NorMain::nextAttack, or claw / grab when input 5 is in the row) and starts its chase (88.5 / 156 / 386) or turn"
+ },
+ "0015195c": {
+  "name": "NorOutAttack::restartClaw",
+  "tag": "ror-inferred",
+  "was": "FUN_0015195c",
+  "why": "mode 0 with a new chase limit and emyStartChase(88.5); the grab fallback when no cell is ahead"
+ },
+ "001519b8": {
+  "name": "NorOutAttack::execLunge",
+  "tag": "ror-inferred",
+  "was": "FUN_001519b8",
+  "why": "mode 2: on arrival motion 0x2b with SE 0x54 / 0x62, hit frames 20..50 (emyChkHitReachXZ 55, word 0x23), 8 at the end"
+ },
+ "00151d4c": {
+  "name": "NorOutAttack::isTouching",
+  "tag": "ror-inferred",
+  "was": "FUN_00151d4c",
+  "why": "target Bip01 Spine1 within 55 of the enemy p_hit in x / z; no references (dead code), sits among NorOutAttack methods"
+ },
+ "00151f1c": {
+  "name": "NorOutAttack::execScream",
+  "tag": "ror-inferred",
+  "was": "FUN_00151f1c",
+  "why": "mode 3: after the turn stream 0x3b8 and motion 0x12, then 0x13 for 45..60 frames, then start again"
+ },
+ "001520cc": {
+  "name": "NorOutAttack::execClaw",
+  "tag": "ror-inferred",
+  "was": "FUN_001520cc",
+  "why": "mode 0: on arrival motion 0x1c with SE 0x53 / 99, hit frames 19..25 (emyChkHitReachXZ 20, word 0x21, counts +0x23c), then start again"
+ },
+ "0015246c": {
+  "name": "NorOutAttack::releasePC",
+  "tag": "ror-inferred",
+  "was": "FUN_0015246c",
+  "why": "the grab let go: voice stopped, commandPC 6 / 9 by the side, SE 0x5b and 0x65 / 100, motion 0x23, step 6"
+ },
+ "00152544": {
+  "name": "NorOutAttack::execGrab",
+  "tag": "ror-inferred",
+  "was": "FUN_00152544",
+  "why": "mode 1: a bark in steps 3 / 8 releases the PC, else the step table 0x2efb40 (0 arrive, 1 try .. 8 struggle)"
+ },
+ "00152748": {
+  "name": "NorOutAttack::grabTry",
+  "tag": "ror-inferred",
+  "was": "FUN_00152748",
+  "why": "grab step 1: frames 21..25 with the PC in sight (80, pi / 4), not riding, sys flags 4 without 0x2000: commandPC 2 / 7 by the side, motion 0x28 / 0x29, step 2"
+ },
+ "00152b24": {
+  "name": "NorOutAttack::grabHoldStart",
+  "tag": "ror-inferred",
+  "was": "FUN_00152b24",
+  "why": "grab step 2: places the PC; at the motion end hold motion 0x24 / 0x25, step 3, 5..18 frames"
+ },
+ "00152bb4": {
+  "name": "NorOutAttack::grabHold",
+  "tag": "ror-inferred",
+  "was": "FUN_00152bb4",
+  "why": "grab step 3: places the PC, voice 0x58; the count out: 1..3 squeezes (motion 0x1d, step 4); PC class 3: motion 0x26 / 0x27, step 8"
+ },
+ "00152c60": {
+  "name": "NorOutAttack::grabSqueeze",
+  "tag": "ror-inferred",
+  "was": "FUN_00152c60",
+  "why": "grab step 4: the third frame damages the target (word 0x22, counts +0x23c); step 2 after the last squeeze, else 5"
+ },
+ "00152cfc": {
+  "name": "NorOutAttack::grabSqueezeEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00152cfc",
+  "why": "grab step 5: at the motion end struggle (0x26 / 0x27, step 8) when the PC class is 3, else squeeze again (0x1d, step 4)"
+ },
+ "00152da4": {
+  "name": "NorOutAttack::grabReleaseEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00152da4",
+  "why": "grab step 6: at the motion end the obj flags back and start again"
+ },
+ "00152e40": {
+  "name": "NorOutAttack::grabMissEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00152e40",
+  "why": "grab step 7: at the motion end start again (no code sets step 7)"
+ },
+ "00152e90": {
+  "name": "NorOutAttack::grabStruggle",
+  "tag": "ror-inferred",
+  "was": "FUN_00152e90",
+  "why": "grab step 8: PC class 3 for over 80 frames releases it; otherwise back to the hold (step 3)"
+ },
+ "00152f3c": {
+  "name": "NorOutAttack::placePC",
+  "tag": "ror-inferred",
+  "was": "FUN_00152f3c",
+  "why": "commandPC 0x15 at the base pos (rot +0x74), else 30 behind, else the enemy onto the target spine when a cell is there; as HfmOutRide::placePC"
+ },
+ "00153030": {
+  "name": "NorOutBitten::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00153030",
+  "why": "NorOutBitten vtable 0x2e27f0 slot 2: step 0, motion 0x17 looping, counts cleared"
+ },
+ "00153068": {
+  "name": "NorOutBitten::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00153068",
+  "why": "NorOutBitten vtable slot 3: waits with voice 0x52 for NorMain::countBiteWait, then motion 0x18 hits (frames 29..43, word 0x24), kicks the dog (frame 23, word 0x25), 8 at the end"
+ },
+ "00153340": {
+  "name": "NorOutBitten::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00153340",
+  "why": "NorOutBitten vtable slot 4: termCommon"
+ },
+ "0015335c": {
+  "name": "NorOutWalk::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015335c",
+  "why": "NorOutWalk vtable 0x2e2820 slot 2: +0x3a from getMode, +0x44 = rand(1000, 2000), step 0"
+ },
+ "00153398": {
+  "name": "NorOutWalk::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00153398",
+  "why": "NorOutWalk vtable slot 3: wanders to a random reachable point near the base (3 tries), motion 0xc when none, waits 20..50"
+ },
+ "001536cc": {
+  "name": "NorOutWalk::getMode",
+  "tag": "ror-inferred",
+  "was": "FUN_001536cc",
+  "why": "returns 0; NorOutWalk::Init stores it at +0x3a, nothing reads it"
+ },
+ "001536dc": {
+  "name": "NorOutWalk::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_001536dc",
+  "why": "NorOutWalk vtable slot 4: termCommon"
+ },
+ "001536f8": {
+  "name": "NorOutDead::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_001536f8",
+  "why": "NorOutDead vtable 0x2e2850 slot 2: achr flags 0x400 and 0x2000, motion 1 looping"
+ },
+ "0015373c": {
+  "name": "NorOutDead::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015373c",
+  "why": "NorOutDead vtable slot 3: returns -1"
+ },
+ "00153744": {
+  "name": "NorOutDead::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00153744",
+  "why": "NorOutDead vtable slot 4: termCommon"
+ },
+ "00153760": {
+  "name": "NorOutBrownEv::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00153760",
+  "why": "NorOutBrownEv vtable 0x2e2880 slot 2: motion 1, script global 0x193 = 1"
+ },
+ "001537a0": {
+  "name": "NorOutBrownEv::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001537a0",
+  "why": "NorOutBrownEv vtable slot 3: at the motion end global 0x193 = 0, 8"
+ },
+ "001537fc": {
+  "name": "NorOutCounter::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_001537fc",
+  "why": "NorOutCounter vtable 0x2e28b0 slot 2: SE 0x56 / 99, motion 0x2a, selectTarget(100)"
+ },
+ "00153864": {
+  "name": "NorOutCounter::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00153864",
+  "why": "NorOutCounter vtable slot 3: hit frames 17..38 (emyChkHitReach 65, word 0x24, counts +0x23c), 8 at the motion end"
+ },
+ "00153b18": {
+  "name": "NorOutCounter::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00153b18",
+  "why": "NorOutCounter vtable slot 4: termCommon"
+ },
+ "00153b34": {
+  "name": "NorOutCoax::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00153b34",
+  "why": "NorOutCoax vtable 0x2e28e0 slot 2: emyStartTurn(pi / 8) to the PC, decide off"
+ },
+ "00153b78": {
+  "name": "NorOutCoax::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00153b78",
+  "why": "NorOutCoax vtable slot 3: after the turn SE 0x59 and motions 0x12 / 0x13 while NorMain::isCoaxTime, then 0x14 and 8"
+ },
+ "00153d00": {
+  "name": "NorOutTest::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00153d00",
+  "why": "NorOutTest vtable 0x2e2910 slot 2: step 0, motion 0x21"
+ },
+ "00153d24": {
+  "name": "NorOutTest::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00153d24",
+  "why": "NorOutTest vtable slot 3: motion 0x28 again at every motion end, steps 0..2 cycling"
+ },
  "00153e40": {
   "name": "GrgMain::initOut",
   "tag": "ror-inferred",

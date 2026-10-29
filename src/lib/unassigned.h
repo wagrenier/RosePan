@@ -152,25 +152,8 @@ public:
     int m_240;                  // ROR 0x240
 };
 
-/* Type 10 (vtable from rtti.py; EE 0x258). layout: host -- polymorphic. */
-class NorMain : public EmyMain
-{
-public:
-    NorMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00287868
-            const _tagEnemyTransition *trans, float *pos)
-        : EmyMain(oid, name, param, prm, trans, pos)
-    {
-        initOut(prm);
-    }
-    ~NorMain();                                                         // EE slot 1 (+0x08), ROR 0x00150df8
-    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x00151158
-    int  GetType() { return 10; }                                       // EE slot 3 (+0x18), ROR 0x002878b0
-    void decide();                                                       // EE slot 4 (+0x20), ROR 0x00150e58
-    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0015102c
-    void after();                                                        // EE slot 6 (+0x30), ROR 0x001510dc
-    void initOut(const _tagEnemyParam *prm);                             // ROR 0x00150b24
-    int m_24c;                  // ROR 0x24c: EmyManager::getEmyHoldWord24c
-};
+/* Type 10, NorMain: emy/emy_nor.h. */
+#include "emy/emy_nor.h"
 
 /* EmyMoveParam, EmyTurnParam, TskEnemyMove, TskEnemyTurn: task/tsk_enemy.h. */
 #include "task/tsk_enemy.h"
