@@ -6,6 +6,17 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**PARTIAL 2026-10-29 (`i3d/i3cquery.cpp`): the i3c collision casts (i3cCast worker, tree walk,
+ray / sphere / cylinder triangle tests, the seven cast entries).** The 240 s run reaches the bus-stop
+room unchanged; i3cCastRay now walks the real i3c data and stops at the **i3dRayBoxTest stub (0x234b38)**,
+so no cast hits anything yet: **i3d/i3dgeom.cpp (0x233628..0x236960) is the next step for collision**
+(the box tests, i3dPointDist2, i3dLineSegDist2, i3dSegSegDist2 / Rgn; their prototypes are in
+src/i3d/i3dgeom.h). Then dogModelHitNearest / dogModelHitCylinder (0x114034 / 0x1141c8, stubs in
+lib/unassigned_stubs.cpp; their signature is now (q, code, tri, verts, plane, point)). Left in
+i3cquery: 0x2325d0, 0x232be8, 0x2331f0, 0x233258, 0x2333b0, all without callers. Doubt: cylinder mode
+1 uses i3dSegSegDist2 and mode 2 i3dSegSegDist2Rgn although mode 2 is the segment by its plane test;
+0x234050's name may really be a ray-segment distance.
+
 **WRITTEN 2026-10-29 (`eff/efffog3.cpp`, verify; was the head of unassigned@0016fb70): EffFog3 / Dark /
 WeakUp and gamCreateEff1a, the reached stub of GamMan::initStage2.** The enemy fog: one EffFog3 per stage
 darkens the scene fog toward its chapter's record while an enemy is awake and clears it when all are

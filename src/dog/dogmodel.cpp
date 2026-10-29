@@ -83,10 +83,10 @@ float DogModel::castRay(MagSceneRayHit *hit, const float *pos, const float *dir)
     q.m_colli_tbl = m_colli_tbl;
     q.m_group = -1;     /* PC: the ROM leaves the word unset */
     q.m_func = dogModelHitNearest;
-    q.m_14 = 0;
+    q.m_box_func = NULL;
     q.m_hit = hit;
-    q._1c = 0;
-    q.m_20 = 1;
+    q.m_part = NULL;
+    q.m_all_group = 1;
     hit->m_50 = -1;
     hit->m_vec[0][3] = -1.0f;
 
@@ -127,10 +127,10 @@ float DogModel::castSphere(float r, MagSceneRayHit *hit, const float *pos)
     q.m_colli_tbl = m_colli_tbl;
     q.m_group = -1;     /* PC: the ROM leaves the word unset */
     q.m_func = dogModelHitNearest;
-    q.m_14 = 0;
+    q.m_box_func = NULL;
     q.m_hit = hit;
-    q._1c = 0;
-    q.m_20 = 1;
+    q.m_part = NULL;
+    q.m_all_group = 1;
     hit->m_50 = -1;
     hit->m_vec[0][3] = -1.0f;
 
@@ -177,10 +177,10 @@ float DogModel::castRayGroups(const float *thePos, const float *theDir)
     ROR_ASSERT(m_colli_tbl); /* 454 */
     q.m_colli_tbl = m_colli_tbl;
     q.m_func = dogModelHitNearest;
-    q.m_14 = 0;
+    q.m_box_func = NULL;
     q.m_hit = &hit;
-    q._1c = 0;
-    q.m_20 = 0;         /* PC: the ROM leaves the word unset */
+    q.m_part = NULL;
+    q.m_all_group = 0;         /* PC: the ROM leaves the word unset */
     int ng = get_nGroup();
     ROR_ASSERT(ng >= 0); /* 462 */
     hit.m_50 = -1;
@@ -247,10 +247,10 @@ float DogModel::castCylinder(float r, const float *pos, const float *dir, MagSce
         hit = &local;
     q.m_group = -1;
     q.m_func = dogModelHitCylinder;
-    q.m_14 = 0;
+    q.m_box_func = NULL;
     q.m_hit = hit;
-    q._1c = 0;
-    q.m_20 = 1;
+    q.m_part = NULL;
+    q.m_all_group = 1;
     int ng = get_nGroup();
     ROR_ASSERT(ng >= 0); /* 556 */
     (void)ng;

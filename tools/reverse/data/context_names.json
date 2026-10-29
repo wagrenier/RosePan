@@ -25913,11 +25913,89 @@
   "was": "FUN_00231198",
   "why": "half-angle sin / cos of x, y, z into a quaternion"
  },
+ "002312a0": {
+  "name": "i3cTransformShape",
+  "tag": "ror-inferred",
+  "was": "FUN_002312a0",
+  "why": "out[0].xyz = m * (s[0], 1), out[1].xyz = m rotation * s[1], w kept: the cast shape into a node's frame (worker 0x232120 calls it after i3dVu0MatInverse)"
+ },
+ "002312e0": {
+  "name": "i3cPrimRay",
+  "tag": "ror-inferred",
+  "was": "FUN_002312e0",
+  "why": "ray (pos, dir) vs a leaf triangle (3 u16 vertex indices): plane n = e0 x e1, t = n.(v0 - p) / n.d, mode t2 bit 1 t >= 0, bit 2 t <= 1, inside test with the 0x2db630 epsilon, then q->m_func(q, node << 16 | 3, prim, verts, plane, point)"
+ },
+ "002314c8": {
+  "name": "i3cPrimRayLine",
+  "tag": "ror-inferred",
+  "was": "FUN_002314c8",
+  "why": "tail jump to 0x2312e0 with mode 0 (no t limit); the prim test of 0x2324e0"
+ },
+ "002314e8": {
+  "name": "i3cPrimRayHalf",
+  "tag": "ror-inferred",
+  "was": "FUN_002314e8",
+  "why": "tail jump to 0x2312e0 with mode 1 (t >= 0); the prim test of i3cCastRay"
+ },
+ "00231508": {
+  "name": "i3cPrimRaySeg",
+  "tag": "ror-inferred",
+  "was": "FUN_00231508",
+  "why": "tail jump to 0x2312e0 with mode 3 (0 <= t <= 1); the prim test of 0x232530"
+ },
+ "00231528": {
+  "name": "i3cPrimSphere",
+  "tag": "ror-inferred",
+  "was": "FUN_00231528",
+  "why": "sphere (centre, w radius) vs a leaf triangle: signed plane distance within -r..0 (both faces -r..r), inside the three edges -> projected point, else the nearest vertex / edge point within r; calls q->m_func; the prim test of i3cCastSphere"
+ },
+ "00231948": {
+  "name": "i3cPrimCylinder",
+  "tag": "ror-inferred",
+  "was": "FUN_00231948",
+  "why": "axis p + s d with radius p.w vs a leaf triangle, mode t3 0 / 1 / 2 picks the plane crossing and the edge distance helper (0x233c10 / 0x234050 / 0x234390); calls q->m_func"
+ },
+ "00231e70": {
+  "name": "i3cPrimCylinderLine",
+  "tag": "ror-inferred",
+  "was": "FUN_00231e70",
+  "why": "tail jump to 0x231948 with mode 0; the prim test of 0x232558"
+ },
+ "00231e90": {
+  "name": "i3cPrimCylinderHalf",
+  "tag": "ror-inferred",
+  "was": "FUN_00231e90",
+  "why": "tail jump to 0x231948 with mode 1; the prim test of 0x232580"
+ },
+ "00231eb0": {
+  "name": "i3cPrimCylinderSeg",
+  "tag": "ror-inferred",
+  "was": "FUN_00231eb0",
+  "why": "tail jump to 0x231948 with mode 2; the prim test of i3cCastCylinder"
+ },
+ "00231ed0": {
+  "name": "i3cWalkTree",
+  "tag": "ror-inferred",
+  "was": "FUN_00231ed0",
+  "why": "recursive part-tree walk: child box = centre + half * s8 / 127, half * u8 / 127, the cast's box test, the query's optional box callback, leaves (bit 15) run the prim test on each 8-byte triangle; sums hits, -1 aborts"
+ },
+ "00232120": {
+  "name": "i3cCast",
+  "tag": "ror-inferred",
+  "was": "FUN_00232120",
+  "why": "the casts' shared worker: per collision node (colli table -> model matrix, inverse, optional row scale) transforms the shape, then walks every part of the query's group with i3cWalkTree; returns the hit count"
+ },
  "002324b8": {
   "name": "i3cCastSphere",
   "tag": "ror-inferred",
   "was": "FUN_002324b8",
   "why": "DogModel::castSphere's collision query (query, sphere, node matrices)"
+ },
+ "002324e0": {
+  "name": "i3cCastLine",
+  "tag": "ror-inferred",
+  "was": "FUN_002324e0",
+  "why": "i3cCast with box test 0x234ae8 and prim test i3cPrimRayLine; no callers"
  },
  "00232508": {
   "name": "i3cCastRay",
@@ -25925,11 +26003,59 @@
   "was": "FUN_00232508",
   "why": "DogModel::castRay's collision query (query, ray, node matrices)"
  },
+ "00232530": {
+  "name": "i3cCastSegment",
+  "tag": "ror-inferred",
+  "was": "FUN_00232530",
+  "why": "i3cCast with box test 0x234a50 and prim test i3cPrimRaySeg; no callers"
+ },
+ "00232558": {
+  "name": "i3cCastCylinderLine",
+  "tag": "ror-inferred",
+  "was": "FUN_00232558",
+  "why": "i3cCast with box test 0x234ce8 and prim test i3cPrimCylinderLine, scaled; no callers"
+ },
+ "00232580": {
+  "name": "i3cCastCylinderHalf",
+  "tag": "ror-inferred",
+  "was": "FUN_00232580",
+  "why": "i3cCast with box test 0x234c30 and prim test i3cPrimCylinderHalf, scaled; no callers"
+ },
  "002325a8": {
   "name": "i3cCastCylinder",
   "tag": "ror-inferred",
   "was": "FUN_002325a8",
   "why": "DogModel::castCylinder's collision query (query, cylinder, node matrices)"
+ },
+ "00233218": {
+  "name": "i3cSetEpsilon",
+  "tag": "ror-inferred",
+  "was": "FUN_00233218",
+  "why": "stores f12 to 0x2db630 (0.001), the inside-test epsilon of i3cPrimRay / i3cPrimCylinder"
+ },
+ "00233228": {
+  "name": "i3cGetEpsilon",
+  "tag": "ror-inferred",
+  "was": "FUN_00233228",
+  "why": "returns the float at 0x2db630"
+ },
+ "00233238": {
+  "name": "i3cSetScaleEnable",
+  "tag": "ror-inferred",
+  "was": "FUN_00233238",
+  "why": "stores a0 to the byte at 0x2db634, which i3cCast reads before its row-scale path"
+ },
+ "00233248": {
+  "name": "i3cGetScaleEnable",
+  "tag": "ror-inferred",
+  "was": "FUN_00233248",
+  "why": "returns the byte at 0x2db634"
+ },
+ "00233628": {
+  "name": "i3dPointDist2",
+  "tag": "ror-inferred",
+  "was": "FUN_00233628",
+  "why": "|a - b|^2 over xyz (vsub, vmul, two adds)"
  },
  "002337e0": {
   "name": "i3dPointSegDist2",
@@ -25937,11 +26063,65 @@
   "was": "FUN_002337e0",
   "why": "p - a projected on d clamped to 0..1 (written to the a3 out pointer when not NULL); returns the squared distance from p to the segment a + t d"
  },
+ "00233c10": {
+  "name": "i3dLineSegDist2",
+  "tag": "ror-inferred",
+  "was": "FUN_00233c10",
+  "why": "closest points of the line p0 + s d0 (s unclamped) and the segment p1 + t d1 (t 0..1): dots, 0.0001 parallel test, writes s and t, returns |dist2|"
+ },
  "00234050": {
   "name": "i3dSegSegDist2",
   "tag": "ror-inferred",
   "was": "FUN_00234050",
   "why": "closest points of segments p0 + s d0 and p1 + t d1 (dots of d0, d1, p1 - p0; the 0.0001 parallel test), writes s and t, returns the squared distance"
+ },
+ "00234390": {
+  "name": "i3dSegSegDist2Rgn",
+  "tag": "ror-inferred",
+  "was": "FUN_00234390",
+  "why": "segment-segment closest points by nine-region classification (0.0001 parallel test); i3cPrimCylinder mode 2's edge distance; the plain name is 0x234050's"
+ },
+ "002348f8": {
+  "name": "i3dSphereBoxTest",
+  "tag": "ror-inferred",
+  "was": "FUN_002348f8",
+  "why": "i3cCastSphere's box test (a0 centre - box centre, a2 half extents); body not read"
+ },
+ "00234a50": {
+  "name": "i3dSegBoxTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234a50",
+  "why": "segment p + 0.5 d (I = 0.5) vs a box at the origin with half extents a2, separating axes over vabs, sign flag -> 0 / -2"
+ },
+ "00234ae8": {
+  "name": "i3dLineBoxTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234ae8",
+  "why": "line through a0 along a1 vs half extents a2: the cross-product axes only, sign flag -> 0 / -2"
+ },
+ "00234b38": {
+  "name": "i3dRayBoxTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234b38",
+  "why": "per axis: start outside and moving away -> 0, else i3dLineBoxTest; i3cCastRay's box test"
+ },
+ "00234be8": {
+  "name": "i3dCylSegBoxTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234be8",
+  "why": "half extents + a0.w (radius), then i3dSegBoxTest; i3cCastCylinder's box test"
+ },
+ "00234c30": {
+  "name": "i3dCylHalfBoxTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234c30",
+  "why": "box test of 0x232580 and 0x2331f0 (radius-grown); body not read"
+ },
+ "00234ce8": {
+  "name": "i3dCylLineBoxTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00234ce8",
+  "why": "box test of 0x232558 (radius-grown line); body not read"
  },
  "00236960": {
   "name": "i3dVecZero",

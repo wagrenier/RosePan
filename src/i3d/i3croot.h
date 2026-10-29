@@ -56,35 +56,55 @@ struct I3cNode
 {
     u_int   m_name;             // ROR 0x00: the node's name
     u_short m_num_part;         // ROR 0x04
-    u_short _06;
+    u_short m_enable;           // ROR 0x06: 0 = i3cCast skips the node
     u_int   m_part;             // ROR 0x08: m_num_part I3cPart records
 };
 static_assert(offsetof(I3cNode, m_num_part) == 0x04, "I3cNode::m_num_part");
+static_assert(offsetof(I3cNode, m_enable) == 0x06, "I3cNode::m_enable");
 static_assert(offsetof(I3cNode, m_part) == 0x08, "I3cNode::m_part");
 static_assert(sizeof(I3cNode) == 0x0c, "I3cNode is 0xc bytes on the EE");
 
-/* A node's part. EE 0x30; only the three offsets the relocators touch. */
+/* A node's part: a box (centre, half extents) around its tree, its group,
+ * and its vertex array (16-byte points the leaf triangles index). EE 0x30. */
 struct I3cPart
 {
-    u_char  _00[0x24];          // ROR 0x00: not read here
-    u_int   m_24;               // ROR 0x24: an offset (role unknown)
+    float   m_center[4];        // ROR 0x00: the box centre (i3cCast)
+    float   m_half[4];          // ROR 0x10: the box half extents
+    int     m_group;            // ROR 0x20: the group (I3cQuery::m_group)
+    u_int   m_24;               // ROR 0x24: an offset: 8-byte records a triangle's +6 indexes (0x2333b0)
     u_int   m_tree;             // ROR 0x28: the part's I3cTree root
-    u_int   m_2c;               // ROR 0x2c: an offset (role unknown)
+    u_int   m_vertex;           // ROR 0x2c: the vertex array (sceVu0FVECTOR each)
 };
+static_assert(offsetof(I3cPart, m_half) == 0x10, "I3cPart::m_half");
+static_assert(offsetof(I3cPart, m_group) == 0x20, "I3cPart::m_group");
 static_assert(offsetof(I3cPart, m_24) == 0x24, "I3cPart::m_24");
 static_assert(offsetof(I3cPart, m_tree) == 0x28, "I3cPart::m_tree");
-static_assert(offsetof(I3cPart, m_2c) == 0x2c, "I3cPart::m_2c");
+static_assert(offsetof(I3cPart, m_vertex) == 0x2c, "I3cPart::m_vertex");
 static_assert(sizeof(I3cPart) == 0x30, "I3cPart is 0x30 bytes on the EE");
 
-/* A part tree's node. EE 0xc. */
+/* A part tree's node: its box relative to the parent's (centre = parent
+ * centre + parent half * m_ofs / 127, half = parent half * m_size / 127),
+ * then children or a leaf's triangles. EE 0xc. */
 struct I3cTree
 {
-    u_short m_info;             // ROR 0x00: bit 15 leaf, else the child count
-    u_char  _02[6];             // ROR 0x02: not read here
-    u_int   m_child;            // ROR 0x08: the m_info children (I3cTree), or the leaf's data
+    u_short m_info;             // ROR 0x00: bit 15 leaf (low 15 bits: the triangle count), else the child count
+    s_char  m_ofs[3];           // ROR 0x02: the centre offset, x y z
+    u_char  m_size[3];          // ROR 0x05: the half extents, x y z
+    u_int   m_child;            // ROR 0x08: the m_info children (I3cTree), or the leaf's I3cTri array
 };
+static_assert(offsetof(I3cTree, m_ofs) == 0x02, "I3cTree::m_ofs");
+static_assert(offsetof(I3cTree, m_size) == 0x05, "I3cTree::m_size");
 static_assert(offsetof(I3cTree, m_child) == 0x08, "I3cTree::m_child");
 static_assert(sizeof(I3cTree) == 0x0c, "I3cTree is 0xc bytes on the EE");
+
+/* A leaf's triangle: three indices into the part's vertex array. EE 8. */
+struct I3cTri
+{
+    u_short m_vtx[3];           // ROR 0x00
+    u_short m_attr;             // ROR 0x06: an index into the part's m_24 records (0x2333b0)
+};
+static_assert(offsetof(I3cTri, m_attr) == 0x06, "I3cTri::m_attr");
+static_assert(sizeof(I3cTri) == 0x08, "I3cTri is 8 bytes on the EE");
 
 #define I3C_TREE_LEAF 0x8000
 
