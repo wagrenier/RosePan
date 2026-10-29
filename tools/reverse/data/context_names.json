@@ -815,6 +815,12 @@
   "was": "FUN_001062b4",
   "why": "0x102b6c(obj, find ids, find->m_10): nonzero when obj is one of the find's ids"
  },
+ "001062d8": {
+  "name": "utlFindFirstVFchr",
+  "tag": "ror-inferred",
+  "was": "FUN_001062d8",
+  "why": "for each of the first m_10 uids of a UtlFind, utlFindVFchrByUid; returns the first object found, NULL none; utlFindBest's answer when it has no position"
+ },
  "00106344": {
   "name": "utlFindBest",
   "tag": "ror-inferred",
