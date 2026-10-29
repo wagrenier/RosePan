@@ -13,9 +13,9 @@
  *  clamps s / t to its shapes' ranges and evaluates the squared distance
  *  from the same dot products (the ROM returns its absolute value).
  *
- *  Not written yet (the next session): 0x2355c8 / 0x235608 / 0x235648
- *  (wrappers of 0x236168 / 0x236228 / 0x2362a8), 0x235768 (another
- *  i3dVecOrthoBasis user), 0x236168..0x2365f8 and 0x2367a0.
+ *  Two cylinder families: i3dLineCylinderTest and its forms take the
+ *  capsule around cyl + s axis, the FlatCylinder ones (and
+ *  i3dCylinderSphereTest) the flat-capped cylinder cyl..cyl + axis.
  * ======================================================================== */
 
 #include <math.h>
@@ -237,6 +237,90 @@ float i3dLineSegDist2(const float *p0, const float *d0, const float *p1, const f
     ss = d / a;
     tt = 0.0f;
     dist = ww - d * ss;
+done:
+    if (s != NULL)
+        *s = ss;
+    if (t != NULL)
+        *t = tt;
+    return fabsf(dist);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Two rays (s, t >= 0; e is -(w.d1), as in the ROM). An end clamp tries
+// the other ray's start against the ray first. Parallel rays (det below
+// 0.0001) take s from d when it is positive, else t from e -- unclamped,
+// as in the ROM.
+// Outside every function in Ghidra (code between two bodies).
+// ROR 0x00233de8
+
+float i3dRayRayDist2(const float *p0, const float *d0, const float *p1, const float *d1,
+                     float *s, float *t)
+{
+    float w[4];
+    i3dVu0VecSub(w, p1, p0);
+    float a = i3dVu0VecDot(d0, d0);
+    float b = i3dVu0VecDot(d0, d1);
+    float c = i3dVu0VecDot(d1, d1);
+    float d = i3dVu0VecDot(w, d0);
+    float ww = i3dVu0VecDot(w, w);
+    float det = fabsf(a * c - b * b);
+    float e;
+    float ss, tt, dist;
+    if (0.0001f <= det)
+    {
+        e = -i3dVu0VecDot(w, d1);
+        ss = c * d + b * e;
+        tt = b * d + a * e;
+        if (0.0f <= ss)
+        {
+            if (0.0f <= tt)
+            {
+                float inv = 1.0f / det;
+                ss *= inv;
+                tt *= inv;
+                dist = ss * ((a * ss - b * tt) - (d + d)) + tt * ((c * tt - b * ss) - (e + e)) + ww;
+                goto done;
+            }
+            if (d < 0.0f)
+                goto starts;
+            goto on_ray0;
+        }
+        if (0.0f <= tt)
+        {
+            if (e < 0.0f)
+                goto starts;
+            goto on_ray1;
+        }
+        if (0.0f < d)
+            goto on_ray0;
+        if (e <= 0.0f)
+            goto starts;
+        goto on_ray1;
+    }
+    if (b < 0.0f)
+    {
+        if (d <= 0.0f)
+            goto starts;
+        goto on_ray0;
+    }
+    if (0.0f < d)
+        goto on_ray0;
+    e = -i3dVu0VecDot(w, d1);
+
+on_ray1:
+    ss = 0.0f;
+    tt = e / c;
+    dist = ww - e * tt;
+    goto done;
+on_ray0:
+    ss = d / a;
+    tt = 0.0f;
+    dist = ww - d * ss;
+    goto done;
+starts:
+    ss = 0.0f;
+    tt = 0.0f;
+    dist = ww;
 done:
     if (s != NULL)
         *s = ss;
@@ -929,6 +1013,30 @@ int i3dCylinderSphereTest(const float *p, const float *d, const float *sph)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x002355c8
+
+int i3dFlatCylinderLineTest(const float *cyl, const float *axis, const float *p, const float *d)
+{
+    return i3dLineFlatCylinderTest(p, d, cyl, axis, NULL, NULL) != 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00235608
+
+int i3dFlatCylinderRayTest(const float *cyl, const float *axis, const float *p, const float *d)
+{
+    return i3dRayFlatCylinderTest(p, d, cyl, axis, NULL, NULL) != 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00235648
+
+int i3dFlatCylinderSegTest(const float *cyl, const float *axis, const float *p, const float *d)
+{
+    return i3dSegFlatCylinderTest(p, d, cyl, axis, NULL, NULL) != 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // u takes the plane of n's larger of x / y with z, normalised; v = n x u.
 // ROR 0x00235688
 
@@ -953,6 +1061,120 @@ void i3dVecOrthoBasis(float *u, float *v, const float *n)
         u[2] = -n[1] * inv;
     }
     i3dVecCross(v, n, u);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The line in the cylinder's frame (u, v across the axis, n along it, the
+// direction normalised so the roots come out as the line's t, centre at
+// the origin, caps at n = +-h/2): along the axis the two cap planes, across
+// it the side wall where the line lies between the caps; otherwise the cap
+// planes' crossings that fall within the radius, then the side wall's roots
+// between the two crossings, until two roots are found. Fewer than two is
+// a miss.
+// ROR 0x00235768
+
+int i3dLineFlatCylinderCoreTest(float h, float r, const float *p, const float *d,
+                                const float *centre, const float *axis, float *t0, float *t1)
+{
+    float u[4], v[4], n[4], w[4];
+    float dl[4], e[3];
+    float t[2];
+    int found = 0;
+
+    float r2 = r * r;
+    i3dVecNormalize(n, axis);
+    i3dVecOrthoBasis(u, v, n);
+    dl[0] = i3dVu0VecDot(u, d);
+    dl[1] = i3dVu0VecDot(v, d);
+    dl[2] = i3dVu0VecDot(n, d);
+    dl[3] = 0.0f;
+    float inv = 1.0f / sqrtf(i3dVu0VecDot(dl, dl));
+    i3dVu0VecScale(inv, dl, dl);
+    i3dVu0VecSub(w, p, centre);
+    e[0] = i3dVu0VecDot(u, w);
+    e[1] = i3dVu0VecDot(v, w);
+    e[2] = i3dVu0VecDot(n, w);
+    float hh = h * 0.5f;
+
+    if (1.0f - fabsf(dl[2]) <= 1e-07f)
+    {
+        /* Along the axis: inside the radius, the two cap planes. */
+        if (r2 < e[1] * e[1] + e[0] * e[0])
+            return 0;
+        float k = -inv / dl[2];
+        t[1] = (e[2] + hh) * k;
+        t[0] = (e[2] - hh) * k;
+        found = 2;
+    }
+    else if (fabsf(dl[2]) <= 1e-07f)
+    {
+        /* Across the axis: between the caps, the side wall. */
+        if (hh < fabsf(e[2]))
+            return 0;
+        float A = dl[1] * dl[1] + dl[0] * dl[0];
+        float B = e[1] * dl[1] + e[0] * dl[0];
+        float disc = B * B - A * ((e[1] * e[1] + e[0] * e[0]) - r2);
+        if (disc < 0.0f)
+            return 0;
+        float sq = sqrtf(disc);
+        float k = -inv / A;
+        t[1] = (B - sq) * k;
+        t[0] = (B + sq) * k;
+        found = 2;
+    }
+    else
+    {
+        float id = 1.0f / dl[2];
+        float ta = (hh - e[2]) * id;  /* the cap at +h/2 */
+        float tb = (-hh - e[2]) * id; /* the cap at -h/2 */
+        float x = e[0] + ta * dl[0];
+        float y = e[1] + ta * dl[1];
+        if (y * y + x * x <= r2)
+            t[found++] = ta * inv;
+        x = e[0] + tb * dl[0];
+        y = e[1] + tb * dl[1];
+        if (y * y + x * x <= r2)
+            t[found++] = tb * inv;
+        if (found < 2)
+        {
+            float A = dl[1] * dl[1] + dl[0] * dl[0];
+            float B = e[1] * dl[1] + e[0] * dl[0];
+            float disc = B * B - A * ((e[1] * e[1] + e[0] * e[0]) - r2);
+            if (disc < 0.0f || A == 0.0f)
+                return 0;
+            float sq = sqrtf(disc);
+            float ia = 1.0f / A;
+            float lo = ta < tb ? ta : tb;
+            float hi = ta < tb ? tb : ta;
+            float tw = (-B - sq) * ia;
+            if (lo <= tw && tw <= hi)
+                t[found++] = tw * inv;
+            if (found < 2)
+            {
+                tw = (sq - B) * ia;
+                if (lo <= tw && tw <= hi)
+                    t[found++] = tw * inv;
+            }
+        }
+    }
+
+    if (found != 2)
+        return 0;
+    if (t[0] < t[1])
+    {
+        if (t0 != NULL)
+            *t0 = t[0];
+        if (t1 != NULL)
+            *t1 = t[1];
+    }
+    else
+    {
+        if (t0 != NULL)
+            *t0 = t[1];
+        if (t1 != NULL)
+            *t1 = t[0];
+    }
+    return 0x111;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1116,6 +1338,117 @@ int i3dLineCylinderTest(const float *p, const float *d, const float *cyl, const 
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x00236168
+
+int i3dLineFlatCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                            float *t0, float *t1)
+{
+    float centre[4];
+    i3dVu0VecScale(0.5f, centre, axis);
+    i3dVu0VecAdd(centre, centre, cyl);
+    float h = sqrtf(i3dVu0VecDot(axis, axis));
+    return i3dLineFlatCylinderCoreTest(h, cyl[3], p, d, centre, axis, t0, t1);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00236228
+
+int i3dRayFlatCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                           float *t0, float *t1)
+{
+    float t[2];
+    int hit = i3dLineFlatCylinderTest(p, d, cyl, axis, &t[0], &t[1]);
+    if (hit == 0 || t[1] < 0.0f)
+        return 0;
+    if (t[0] < 0.0f)
+        hit ^= 1;
+    if (t0 != NULL)
+        *t0 = t[0];
+    if (t1 != NULL)
+        *t1 = t[1];
+    return hit;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x002362a8
+
+int i3dSegFlatCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                           float *t0, float *t1)
+{
+    float t[2];
+    int hit = i3dLineFlatCylinderTest(p, d, cyl, axis, &t[0], &t[1]);
+    if (hit == 0 || 1.0f < t[0] || t[1] < 0.0f)
+        return 0;
+    if (t[0] < 0.0f)
+        hit ^= 1;
+    if (1.0f < t[1])
+        hit ^= 0x10;
+    if (t0 != NULL)
+        *t0 = t[0];
+    if (t1 != NULL)
+        *t1 = t[1];
+    return hit;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The infinite capsule around the line p + t d (radius p.w): the line
+// against the cylinder grown by the radius (its height by twice it).
+// Folded into i3dSegFlatCylinderTest's body by Ghidra (no references).
+// ROR 0x00236348
+
+int i3dFlatCylinderCylLineTest(const float *cyl, const float *axis, const float *p, const float *d)
+{
+    float centre[4];
+    i3dVu0VecScale(0.5f, centre, axis);
+    i3dVu0VecAdd(centre, centre, cyl);
+    float h = sqrtf(i3dVu0VecDot(axis, axis));
+    return i3dLineFlatCylinderCoreTest(h + (p[3] + p[3]), cyl[3] + p[3], p, d, centre, axis,
+                                       NULL, NULL) != 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The ray capsule p + t d (radius p.w): its start sphere inside the
+// cylinder, else the line against the cylinder grown by the radius (its
+// height by twice it), touching from t 0 on.
+// ROR 0x00236400
+
+int i3dFlatCylinderCylHalfTest(const float *cyl, const float *axis, const float *p, const float *d)
+{
+    float centre[4];
+    float t[2];
+    if (i3dCylinderSphereTest(cyl, axis, p) != 0)
+        return 1;
+    i3dVu0VecScale(0.5f, centre, axis);
+    i3dVu0VecAdd(centre, centre, cyl);
+    float h = sqrtf(i3dVu0VecDot(axis, axis));
+    if (i3dLineFlatCylinderCoreTest(h + (p[3] + p[3]), cyl[3] + p[3], p, d, centre, axis,
+                                    &t[0], &t[1]) == 0
+        || t[1] < 0.0f)
+        return 0;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The same for the capsule segment (t 0..1).
+// ROR 0x002364f0
+
+int i3dFlatCylinderCylSegTest(const float *cyl, const float *axis, const float *p, const float *d)
+{
+    float centre[4];
+    float t[2];
+    if (i3dCylinderSphereTest(cyl, axis, p) != 0)
+        return 1;
+    i3dVu0VecScale(0.5f, centre, axis);
+    i3dVu0VecAdd(centre, centre, cyl);
+    float h = sqrtf(i3dVu0VecDot(axis, axis));
+    if (i3dLineFlatCylinderCoreTest(h + (p[3] + p[3]), cyl[3] + p[3], p, d, centre, axis,
+                                    &t[0], &t[1]) == 0
+        || 1.0f < t[0] || t[1] < 0.0f)
+        return 0;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x002365f8
 
 int i3dRayCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
@@ -1166,4 +1499,51 @@ int i3dCylLineCylinderTest(const float *p, const float *d, const float *cyl, con
     i3dVecCopyW(grown, cyl);
     grown[3] += p[3];
     return i3dLineCylinderTest(p, d, grown, axis, t0, t1);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x002367a0
+
+int i3dCylHalfCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                           float *t0, float *t1)
+{
+    float grown[4];
+    float t[2] = {0.0f, 0.0f}; /* PORT: see i3dLineCylinderTest */
+    i3dVecCopyW(grown, cyl);
+    grown[3] += p[3];
+    int hit = i3dLineCylinderTest(p, d, grown, axis, &t[0], &t[1]);
+    if (hit == 0 || t[1] < 0.0f)
+        return 0;
+    if (t[0] < 0.0f)
+        hit ^= 1;
+    if (t0 != NULL)
+        *t0 = t[0];
+    if (t1 != NULL)
+        *t1 = t[1];
+    return hit;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Folded into i3dCylHalfCylinderTest's body by Ghidra (no references).
+// ROR 0x00236870
+
+int i3dCylSegCylinderTest(const float *p, const float *d, const float *cyl, const float *axis,
+                          float *t0, float *t1)
+{
+    float grown[4];
+    float t[2] = {0.0f, 0.0f}; /* PORT: see i3dLineCylinderTest */
+    i3dVecCopyW(grown, cyl);
+    grown[3] += p[3];
+    int hit = i3dLineCylinderTest(p, d, grown, axis, &t[0], &t[1]);
+    if (hit == 0 || 1.0f < t[0] || t[1] < 0.0f)
+        return 0;
+    if (t[0] < 0.0f)
+        hit ^= 1;
+    if (1.0f < t[1])
+        hit ^= 0x10;
+    if (t0 != NULL)
+        *t0 = t[0];
+    if (t1 != NULL)
+        *t1 = t[1];
+    return hit;
 }

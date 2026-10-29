@@ -26129,6 +26129,12 @@
   "was": "FUN_00233c10",
   "why": "closest points of the line p0 + s d0 (s unclamped) and the segment p1 + t d1 (t 0..1): dots, 0.0001 parallel test, writes s and t, returns |dist2|"
  },
+ "00233de8": {
+  "name": "i3dRayRayDist2",
+  "tag": "ror-inferred",
+  "was": "FUN_00233de8",
+  "why": "outside every function between i3dLineSegDist2 and i3dRaySegDist2 (found by hidden.py's new b-then-prologue rule): closest points of two rays, s and t clamped at 0 only, the Line/Ray/Seg x Line/Ray/Seg family's missing member"
+ },
  "00234050": {
   "name": "i3dRaySegDist2",
   "tag": "ror-inferred",
@@ -26303,17 +26309,77 @@
   "was": "FUN_002354b8",
   "why": "flat-capped cylinder p..p+d (radius p.w) vs sphere: capsule distance, then the centre within its radius of both cap planes"
  },
+ "002355c8": {
+  "name": "i3dFlatCylinderLineTest",
+  "tag": "ror-inferred",
+  "was": "FUN_002355c8",
+  "why": "hit test: i3dLineFlatCylinderTest with the args swapped (cyl, axis, p, d), returns != 0"
+ },
+ "00235608": {
+  "name": "i3dFlatCylinderRayTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00235608",
+  "why": "hit test: i3dRayFlatCylinderTest with swapped args, != 0; utlHitCheck calls it"
+ },
+ "00235648": {
+  "name": "i3dFlatCylinderSegTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00235648",
+  "why": "hit test: i3dSegFlatCylinderTest with swapped args, != 0"
+ },
  "00235688": {
   "name": "i3dVecOrthoBasis",
   "tag": "ror-inferred",
   "was": "FUN_00235688",
   "why": "two unit vectors u, v perpendicular to unit n (u in the plane of n's two largest axes, v = n x u)"
  },
+ "00235768": {
+  "name": "i3dLineFlatCylinderCoreTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00235768",
+  "why": "line p + t d against the flat-capped cylinder of height h (f12) and radius r (f13) centred on centre along axis, in the i3dVecOrthoBasis frame: cap planes, then side wall between them; entry / exit t, 0x111"
+ },
  "00235be8": {
   "name": "i3dLineCylinderTest",
   "tag": "ror-inferred",
   "was": "FUN_00235be8",
   "why": "core of i3dRay/SegCylinderTest: line vs the capsule around cyl + s axis (s 0..1, radius cyl.w) in the axis frame; entry / exit t, 0x111"
+ },
+ "00236168": {
+  "name": "i3dLineFlatCylinderTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00236168",
+  "why": "calls 0x235768 with centre cyl + axis/2, h |axis|, r cyl.w: the flat cylinder cyl..cyl + axis against a line, t0 / t1 out"
+ },
+ "00236228": {
+  "name": "i3dRayFlatCylinderTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00236228",
+  "why": "0x236168 then 0 when exit t < 0, bit 0 flipped when entry t < 0 (same shape as i3dRayCylinderTest)"
+ },
+ "002362a8": {
+  "name": "i3dSegFlatCylinderTest",
+  "tag": "ror-inferred",
+  "was": "FUN_002362a8",
+  "why": "0x236168 clamped to t 0..1 with bits 0 / 4 (same shape as i3dSegCylinderTest)"
+ },
+ "00236348": {
+  "name": "i3dFlatCylinderCylLineTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00236348",
+  "why": "hidden after 0x2362a8 (no references): 0x235768 on the flat cylinder grown by p.w (h + 2 p.w, r + p.w) against the line, no t out, returns != 0; the CylLine member of the 0x236400 / 0x2364f0 family"
+ },
+ "00236400": {
+  "name": "i3dFlatCylinderCylHalfTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00236400",
+  "why": "flat cylinder against a ray capsule: i3dCylinderSphereTest at its start, else 0x235768 with the cylinder grown by p.w (h + 2 p.w, r + p.w), hit when exit t >= 0"
+ },
+ "002364f0": {
+  "name": "i3dFlatCylinderCylSegTest",
+  "tag": "ror-inferred",
+  "was": "FUN_002364f0",
+  "why": "as 0x236400 for a capsule segment: hit when entry t <= 1 and exit t >= 0"
  },
  "002365f8": {
   "name": "i3dRayCylinderTest",
@@ -26332,6 +26398,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00236718",
   "why": "hidden after i3dSegCylinderTest: i3dLineCylinderTest with the radius grown by p.w"
+ },
+ "002367a0": {
+  "name": "i3dCylHalfCylinderTest",
+  "tag": "ror-inferred",
+  "was": "FUN_002367a0",
+  "why": "i3dLineCylinderTest on cyl grown by p.w, ray clamp (0 when exit < 0, bit 0 when entry < 0)"
+ },
+ "00236870": {
+  "name": "i3dCylSegCylinderTest",
+  "tag": "ror-inferred",
+  "was": "FUN_00236870",
+  "why": "hidden after 0x2367a0 (no references): i3dLineCylinderTest on cyl grown by p.w, segment clamp with bits 0 / 4"
  },
  "00236960": {
   "name": "i3dVecZero",

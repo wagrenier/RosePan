@@ -736,7 +736,7 @@
    "why": "the frame environment records i3d hangs on layers (+0x82c light, +0x830 fog): i3dFogInit / i3dCtxSetFog / the fog VU1 packet 0x21a270, and the light descriptions and i3dCtxCreateLight with its five kind builders; both build packet-tail records. One file for both is a guess: the i3r helpers 0x21a3e8..0x21ac80 sit between them"
   },
   "i3d/i3dgeom.cpp": {
-   "notes": "Left: 0x2355c8, 0x235608, 0x235648 (wrappers passing swapped args to 0x236168, 0x236228, 0x2362a8; 0x235608 is called by utlHitCheck), 0x235768 (0x480, uses i3dVecOrthoBasis like i3dLineCylinderTest), 0x236168, 0x236228, 0x2362a8, 0x236400, 0x2364f0 (both call i3dCylinderSphereTest), 0x2367a0. Check hidden.py and ghidra.py asm on that range first: this TU had six functions folded into the body before them (0x2338c8, 0x233a58, 0x235350, 0x235648, 0x236718 created this session). PORT choice: i3dLineCylinderTest reads uninitialised root slots on a capsule miss and never stores t for a line along the axis; port returns 0 for no root, repeats a tangent root, callers start t at 0 (comment in the code, open-items). Nothing on screen shows collision yet (smoke run ends at the disclaimer, drawn right); i3cquery casts now get real box tests, so a longer run past the bus stop should show walls stopping Lucinda. References updated (architecture i3dgeom paragraph, open-items, hazards: callcheck col-0 label before if).",
+   "notes": "Nothing left to write. Status verify: collision is not visible in the 15 s boot (the screenshot is the disclaimer, drawn right). Mark done once a longer run past the bus stop shows Lucinda stopped by a wall (i3cquery casts use the box tests; utlHitCheck uses 0x235608). PORT choice kept: i3dLineCylinderTest returns 0 for no root and callers start t at 0. Naming: Cylinder = capsule around cyl + s axis (i3dLineCylinderTest family), FlatCylinder = flat-capped cyl..cyl + axis (with i3dCylinderSphereTest). Next for collision: dogModelHitNearest / dogModelHitCylinder 0x114034 / 0x1141c8 (stubs in lib/unassigned_stubs.cpp). References updated (architecture i3dgeom paragraph, open-items, hazards hidden.py entry, hidden.py).",
    "ranges": [
     [
      "00233628",
@@ -748,9 +748,14 @@
      "date": "2026-10-29 13:40",
      "status": "partial",
      "summary": "i3dgeom: 37 of 47 geometry tests written (box tests, point/line/ray/segment distances, sphere and capsule hit tests, line-sphere and line-capsule intersections); 6 hidden functions created in Ghidra; 0x234050 renamed i3dRaySegDist2 and the old i3dSegSegDist2Rgn renamed i3dSegSegDist2; distances checked against brute force on the host"
+    },
+    {
+     "date": "2026-10-29 13:55",
+     "status": "verify",
+     "summary": "i3dgeom complete: all 54 geometry tests written. This session: the flat-capped cylinder family (core 0x235768, line/ray/seg forms, hit tests incl. utlHitCheck 0x235608, capsule CylLine/CylHalf/CylSeg forms), grown-capsule 0x2367a0/0x236870, and i3dRayRayDist2 0x233de8; three functions created in Ghidra (0x233de8, 0x236348, 0x236870); flat core and ray-ray checked against brute force on the host; hidden.py now flags a frame setup after any b"
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "point/segment/triangle distance tests (i3dPointSegDist2, i3dSegSegDist2 ...) up to i3d/i3dmath.cpp at 0x236960; inferred: leaf geometry the i3c query calls"
   },
   "i3d/i3dlayer.cpp": {
