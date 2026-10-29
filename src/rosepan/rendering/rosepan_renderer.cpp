@@ -12153,6 +12153,59 @@ void RosePan_RendererDrawImageQuad(const void *texture,
 }
 
 /*
+ * RosePan_RendererDrawImageQuad with the GS CLAMP register's choice: `repeat`
+ * wraps the UVs (CLAMP_1 WMS = WMT = REPEAT) instead of clamping them to the
+ * edge.  A repeating quad over the whole 640x448 frame is a tiling fill
+ * (MagLifeNoise's grain), so like RosePan_RendererDrawSolidQuad's full-frame
+ * fills it is widened about the centre to the window, its UVs widened with
+ * it so the texels keep their size on screen.
+ */
+bool IsFullFrameQuad(const float *xy);   /* below, beside the solid fills */
+
+void RosePan_RendererDrawImageQuadWrap(const void *texture,
+                                      const float *xy,
+                                      const float *uv,
+                                      unsigned char r,
+                                      unsigned char g,
+                                      unsigned char b,
+                                      unsigned char a,
+                                      int linear,
+                                      int repeat)
+{
+    SpriteVertex vertices[4];
+    const TextureEntry *entry = static_cast<const TextureEntry *>(texture);
+
+    if (entry == nullptr || entry->texture == nullptr || xy == nullptr ||
+        uv == nullptr || !g_frame_active)
+    {
+        return;
+    }
+
+    float wxy[8], wuv[8];
+    memcpy(wxy, xy, sizeof(wxy));
+    memcpy(wuv, uv, sizeof(wuv));
+    if (repeat && IsFullFrameQuad(xy))
+    {
+        const float uc = (uv[0] + uv[6]) * 0.5f, vc = (uv[1] + uv[7]) * 0.5f;
+        for (int i = 0; i < 4; i++)
+        {
+            wxy[i * 2 + 0] = (float)kLogicalWidth * 0.5f +
+                             (xy[i * 2 + 0] - (float)kLogicalWidth * 0.5f) * g_view_extend_x;
+            wxy[i * 2 + 1] = (float)kLogicalHeight * 0.5f +
+                             (xy[i * 2 + 1] - (float)kLogicalHeight * 0.5f) * g_view_extend_y;
+            wuv[i * 2 + 0] = uc + (uv[i * 2 + 0] - uc) * g_view_extend_x;
+            wuv[i * 2 + 1] = vc + (uv[i * 2 + 1] - vc) * g_view_extend_y;
+        }
+    }
+
+    BuildQuadVertices(vertices, wxy, wuv, 1.0f, 1.0f, Ps2ColorToFloat(r),
+                      Ps2ColorToFloat(g), Ps2ColorToFloat(b),
+                      Ps2AlphaToFloat(a));
+    QueueQuad(entry->texture, entry->width, entry->height, vertices,
+              true, repeat != 0, linear != 0, linear != 0);
+}
+
+/*
  * Is this TEX0 pointing at one of the two GS display buffers?
  *
  * The frame buffers are 640x448 PSMCT24 at blocks 0x0000 and 0x1180, so
