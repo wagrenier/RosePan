@@ -1674,40 +1674,6 @@ u_long * EffBreath2Ground::renderMain(RENDERPARAM *param, const I3dDrawSet *set,
     return {};
 }
 
-// stub of ROR 0x0016f71c
-int EffCameraAnim1::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffCameraAnim1::init", 0x0016f71c);
-    return {};
-}
-
-// stub of ROR 0x0016faa0
-int EffCameraAnim1::liveMain()
-{
-    ROSEPAN_STUB("EffCameraAnim1::liveMain", 0x0016faa0);
-    return {};
-}
-
-// stub of ROR 0x0028b890
-void EffCameraAnim1::render(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("EffCameraAnim1::render", 0x0028b890);
-}
-
-// stub of ROR 0x0028b898
-u_long * EffCameraAnim1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffCameraAnim1::renderMain", 0x0028b898);
-    return {};
-}
-
-// stub of ROR 0x0028b888
-I3dDrawSet * EffCameraAnim1::createPacketEntry(I3dLayer *layer)
-{
-    ROSEPAN_STUB("EffCameraAnim1::createPacketEntry", 0x0028b888);
-    return {};
-}
-
 // stub of ROR 0x001704a4
 int EffDust2::init(const EffParam *param)
 {

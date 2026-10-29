@@ -8075,11 +8075,23 @@
   "was": "FUN_0016f71c",
   "why": "vtable _vt$14EffCameraAnim1 0x2e3800 slot 2 (Eff0 slot init)"
  },
+ "0016f80c": {
+  "name": "EffCameraAnim1::setKey",
+  "tag": "ror-inferred",
+  "was": "FUN_0016f80c",
+  "why": "called by EffCameraAnim1::init and liveMain with the object and a 0x1c-byte key of the effect file: frees the camera mode, writes the key's translation into the scene camera's m_trans, wraps its rotation into -pi..pi for DogEntity::setRotate and sets m_angle from its degrees"
+ },
  "0016faa0": {
   "name": "EffCameraAnim1::liveMain",
   "tag": "ror-inferred",
   "was": "FUN_0016faa0",
   "why": "vtable _vt$14EffCameraAnim1 0x2e3800 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016fb70": {
+  "name": "effStrIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_0016fb70",
+  "why": "no callers; returns the index of the first occurrence of the second string in the first, -1 when none (strlen both, naive scan); opens the shared helper run 0x16fb70..0x1704a4 after EffCameraAnim1"
  },
  "0016ff18": {
   "name": "effCalcViewDepth",
