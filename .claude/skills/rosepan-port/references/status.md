@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 15:01 at commit `9a72871` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 15:10 at commit `5db4a1b` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-29 15:01 at commit `9a72871` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6474** (90%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4872
-- context-name ledger: 5173 entries; overrides of wrong library matches: 5
-- placed in a source file: 5591/7187 in 141 files
+- game functions: **7187**, named **6477** (90%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4875
+- context-name ledger: 5176 entries; overrides of wrong library matches: 5
+- placed in a source file: 5595/7187 in 141 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5104**; stubs: **326**
+- reconstructed RoR functions: **5113**; stubs: **320**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -93,7 +93,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
 | `src/mag/maglifebwnmode.cpp` | 0 | 18 |
-| `src/mag/maglifefadekey.cpp` | 0 | 6 |
+| `src/mag/maglifefadekey.cpp` | 9 | 0 |
 | `src/mag/maglifefader.cpp` | 5 | 0 |
 | `src/mag/maglifeman.cpp` | 12 | 0 |
 | `src/mag/maglifemenu.cpp` | 45 | 0 |
@@ -164,8 +164,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 172 TUs: todo 98, partial 2, verify 106, done 17
-- next: **mag/maglifefadekey.cpp** (frontier score 9)
+- 172 TUs: todo 97, partial 2, verify 107, done 17
+- next: **unassigned@0014dc7c** (frontier score 9)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -219,6 +219,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/maglife.cpp` 27/49 -- Verify: the 15 s smoke run ends on the boot disclaimer, so no controller runs yet; the first session whose run reaches a room with the PC or Brown moving checks
 - verify: `mag/maglifebwn.cpp` 29/42 -- Brown's live now runs in the smoke boot (MagLifeBwnModeWait::init and MagLifeBwnMode::live reached) but nothing on screen shows him yet: the screenshot is the b
 - verify: `mag/maglifebwnctrl.cpp` 70/94 -- Complete code, nothing on screen shows it: the 15 s smoke run ends on the boot disclaimer and Brown is not reachable yet, so the whole file stays verify until a
+- verify: `mag/maglifefadekey.cpp` 9/13 -- Complete code, not visible yet: setFade kinds 1..3 and MagScene::openFadeKey come from event scripts, which the 15 s smoke run does not reach (it ends on the di
 - verify: `mag/maglifeman.cpp` 12/12 -- Status verify: the S2d layers now run live and render every frame (one i3d primitive reaches rosepan_i3d without a texture object), but the screenshot stays bla
 - verify: `mag/maglifemenu.cpp` 45/53 -- Complete, nothing on screen yet: the smoke run now opens the title (MagScene::openMenu 0x10005 -> MagLifeMenuTitle) and reaches MnuTitle::isInit / init / draw /
 - verify: `mag/maglifepc.cpp` 27/27 -- Verify: the 200 s New Game run binds the PC after the film (setActor -> changeState(0) -> MagLifePCModeNull::init reached) and ends on the picture book's page s
@@ -276,6 +277,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 15:10 `mag/maglifefadekey.cpp` verify: MagLifeFadeKeyHole (the keyhole fade at scene +0x41890) reconstructed whole: constructor, loadTexture / loadTextureByName (EVNTEX.RPK header then one file, adde
 - 2026-10-29 15:00 `emy/emy_mrt.cpp` verify: Pinned emy/emy_mrt.cpp 0x14cde4..0x14dc7c out of unassigned@0014cde4 and wrote all 26 functions: MrtMain (enemy type 7: initOut, dtor, decide with its last-true
 - 2026-10-29 14:30 `emy/emy_bdl.cpp` verify: Pinned emy/emy_bdl.cpp 0x14b3bc..0x14cde4 out of unassigned@0014b3bc and wrote all 33 functions: BdlMain (enemy type 5: initOut, dtor, decide with testBarkReact
 - 2026-10-29 14:20 `emy/emy_bds.cpp` verify: Pinned emy/emy_bds.cpp 0x149d18..0x14b3bc out of unassigned@00149d18 and wrote all 33 functions: BdsMain (enemy type 4: initOut, dtor, decide, exec, after, sele
@@ -283,31 +285,29 @@ Recent sessions:
 - 2026-10-29 13:40 `i3d/i3dgeom.cpp` partial: i3dgeom: 37 of 47 geometry tests written (box tests, point/line/ray/segment distances, sphere and capsule hit tests, line-sphere and line-capsule intersections)
 - 2026-10-29 13:22 `i3d/i3cquery.cpp` verify: i3cquery complete: swept-sphere triangle tests 0x2325d0 (segment) / 0x232be8 (ray) as one worker, their casts 0x2331c8 (hidden in 0x232be8, created in Ghidra) /
 - 2026-10-29 13:12 `i3d/i3cquery.cpp` partial: i3c collision casts: i3cCast worker 0x232120, tree walk 0x231ed0, shape transform, ray / sphere / cylinder triangle tests with their mode wrappers, the seven ca
-- 2026-10-29 12:35 `utl/utlmisc2.cpp` verify: Split unassigned@00216ad0: pinned utl/utlmisc2.cpp 0x217f10..0x2184c0 and wrote all 10 functions: utlAtan2 (stub replaced), utlDirDist and utlStrNCopy (moved fr
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `mag/maglifefadekey.cpp` | todo | 0/6/9 | 2.5 | 9 | 0 |
 | `unassigned@0014dc7c` | todo | 0/44/339 | 82.4 | 9 | 0 |
-| `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
-| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
 | `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
+| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
+| `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
 | `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
-| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
-| `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
-| `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
-| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
 | `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
+| `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
+| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
+| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
+| `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
 | `mag/maglifepcbtl.cpp` | todo | 0/3/6 | 3.2 | 4 | 0 |
+| `unassigned@00113ea8` | todo | 0/2/3 | 1.3 | 4 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
 | RoR addr | name | call sites | provenance | state | inferred file |
 |---|---|---|---|---|---|
-| `001be734` | FileReadReq::FileReadReq | 63 | ror | missing | game/gamfile.cpp |
-| `001be2dc` | FileReader::~FileReader | 30 | ror | missing | game/gamfile.cpp |
-| `001be2cc` | FileReader::FileReader | 25 | ror | missing | game/gamfile.cpp |
-| `0012f790` | MagLifeFadeKey::releaseTexture | 3 | ror | stub | mag/maglifefadekey.cpp |
+| `001be734` | FileReadReq::FileReadReq | 65 | ror | missing | game/gamfile.cpp |
+| `001be2dc` | FileReader::~FileReader | 32 | ror | missing | game/gamfile.cpp |
+| `001be2cc` | FileReader::FileReader | 27 | ror | missing | game/gamfile.cpp |
 | `00192ac0` | mnuBase::mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
 | `00192b3c` | mnuBase::~mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
 | `0012c31c` | MagLifePC::startAttack | 2 | ror | stub | mag/maglifepcbtl.cpp |
@@ -319,8 +319,6 @@ Recent sessions:
 | `002162e0` | motNameGetCategory | 1 | ror | stub | - |
 | `00216184` | motNameConvert | 1 | ror | stub | debug/motnamecnv0.cpp |
 | `00281cbc` | DogModel::__tf | 1 | sym | missing | dog/dogmodel.cpp |
-| `0012f2f0` | MagLifeFadeKey::loadTexture | 1 | ror | stub | mag/maglifefadekey.cpp |
-| `0012f824` | MagLifeFadeKey::start | 1 | ror | stub | mag/maglifefadekey.cpp |
 | `0012ca28` | MagLifePC::getAttackHeight | 1 | ror | stub | - |
 | `0012c9c0` | MagLifePC::setState14 | 1 | ror | stub | - |
 | `0012bedc` | MagLifePC::calcTargetAngle | 1 | ror | stub | - |
@@ -344,4 +342,7 @@ Recent sessions:
 | `0012cddc` | MagLifePC::message15 | 1 | ror | stub | mag/maglifepceff.cpp |
 | `0012ce08` | MagLifePC::message16 | 1 | ror | stub | mag/maglifepceff.cpp |
 | `0012ce34` | MagLifePC::message17 | 1 | ror | stub | - |
+| `00130de0` | MagLife130da4::setVolume | 1 | ror | stub | - |
+| `00154734` | GrgMain::testView | 1 | ror | stub | - |
+| `00154748` | GrgMain::releaseHold | 1 | ror | stub | - |
 

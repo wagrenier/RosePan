@@ -1112,15 +1112,15 @@
 // FILE -- mag/maglifefadekey.cpp
 // *****************************************************************************
 
-/* 0012f298 00000058 */ FUN_0012f298(){}
-/* 0012f2f0 00000228 */ MagLifeFadeKey::loadTexture(){}  // ror
-/* 0012f518 00000278 */ MagLifeFadeKey::loadTextureByName(){}  // ror
-/* 0012f790 00000064 */ MagLifeFadeKey::releaseTexture(){}  // ror
-/* 0012f7f4 00000030 */ MagLifeFadeKey::reset(){}  // ror
-/* 0012f824 00000028 */ MagLifeFadeKey::start(){}  // ror
-/* 0012f84c 00000110 */ FUN_0012f84c(){}
-/* 0012f95c 00000324 */ FUN_0012f95c(){}
-/* 0012fc80 00000028 */ MagLifeFadeKey::setMagnify(){}  // ror
+/* 0012f298 00000058 */ MagLifeFadeKeyHole::MagLifeFadeKeyHole(){}  // ror
+/* 0012f2f0 00000228 */ MagLifeFadeKeyHole::loadTexture(){}  // ror
+/* 0012f518 00000278 */ MagLifeFadeKeyHole::loadTextureByName(){}  // ror
+/* 0012f790 00000064 */ MagLifeFadeKeyHole::releaseTexture(){}  // ror
+/* 0012f7f4 00000030 */ MagLifeFadeKeyHole::reset(){}  // ror
+/* 0012f824 00000028 */ MagLifeFadeKeyHole::start(){}  // ror
+/* 0012f84c 00000110 */ MagLifeFadeKeyHole::live(){}  // ror
+/* 0012f95c 00000324 */ MagLifeFadeKeyHole::render(){}  // ror
+/* 0012fc80 00000028 */ MagLifeFadeKeyHole::setMagnify(){}  // ror
 
 // *****************************************************************************
 // FILE -- mag/maglifewindow.cpp
@@ -10185,7 +10185,7 @@
 /* 00284fe8 00000034 */ MagLifeFader::~MagLifeFader(){}  // sym
 
 // *****************************************************************************
-// FILE -- (satellite) MagLifeFadeKeyHole
+// FILE -- mag/maglifefadekey.cpp
 // *****************************************************************************
 
 /* 0028501c 00000050 */ MagLifeFadeKeyHole::__tf(){}  // sym

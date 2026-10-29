@@ -684,8 +684,13 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   (mag/maglifefader.cpp 0x12f008..0x12f298; fade kinds 0 / 4, colour +0x38 0 / 0xff; frame +0x30,
   time +0x34; states 1 / 8 opaque, 2..3 alpha 0x80 -> 0 then 4, 6..7 alpha 0 -> 0x80 over time - 2
   then 8 after time, 4 / 5 nothing; one full-screen untextured sprite at key 0 in the life layer,
-  ALPHA 0x44) and `MagLifeFadeKey` (the ELF's vtable says MagLifeFadeKeyHole) +0x41890 (0x12f298;
-  kinds 1..3, the kagiana_tcc keyhole of data/evntex/EVNTEX.RPK), a life of an unnamed class at
+  ALPHA 0x44) and `MagLifeFadeKeyHole` +0x41890 (mag/maglifefadekey.cpp 0x12f298..0x12fca8, vtable 0x2e1cf8;
+  kinds 1..3 and MagScene::openFadeKey / setFadeKeyMagnify; frame +0x30, time +0x34, tex +0x40,
+  magnify +0x44 with ramp +0x48 -> +0x4c, view shift +0x50; a picture of data/evntex/EVNTEX.RPK
+  -- file 0 g1waynozoki blind slats, 1 kabeana1 wall hole, 2 kagiana1 keyhole, all 512 x 512
+  8-bit / 32-bit CLUT black masks with the hole in alpha -- added as "kagiana_tcc" whatever the
+  file and drawn as one full-screen textured sprite, UV centre (256, 256) +- 256 / magnify; the
+  state's colour / TEXA ramps cannot show on these pictures, the magnify does the opening), a life of an unnamed class at
   +0x418f0 (0x130da4), the 2D layers `S2dCineSco`
   +0x41930, `S2dBg` +0x42260, `S2dMes` +0x42bb0 (all MagLife, level 7, life priorities 0x8006 /
   0x8000 / 0x800a), the current fade record +0x43700 (six words: kind, mode, time, -, -, level;

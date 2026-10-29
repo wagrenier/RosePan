@@ -4685,41 +4685,59 @@
   "was": "FUN_0012f128",
   "why": "vtable 0x2e1ca8 slot 6 (MagLife::render): a full-screen i3dPktSprite in colour +0x38 with alpha from the state (1 / 8 opaque, 2..3 ramp down, 6..7 ramp up)"
  },
+ "0012f298": {
+  "name": "MagLifeFadeKeyHole::MagLifeFadeKeyHole",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f298",
+  "why": "stores _vt$18MagLifeFadeKeyHole 0x2e1cf8 at +0x14 and clears the words; MagScene::MagScene runs it on +0x41890"
+ },
  "0012f2f0": {
-  "name": "MagLifeFadeKey::loadTexture",
+  "name": "MagLifeFadeKeyHole::loadTexture",
   "tag": "ror-inferred",
   "was": "FUN_0012f2f0",
-  "why": "reads data/evntex/EVNTEX.RPK and adds kagiana_tcc to the texture table (maglifefadekey.cpp asserts)"
+  "why": "class from the vtable of the object it serves (+0x41890, the linkonce symbols name MagLifeFadeKeyHole); reads file n of data/evntex/EVNTEX.RPK, adds it as kagiana_tcc, asserts mag/maglifefadekey.cpp"
  },
  "0012f518": {
-  "name": "MagLifeFadeKey::loadTextureByName",
+  "name": "MagLifeFadeKeyHole::loadTextureByName",
   "tag": "ror-inferred",
   "was": "FUN_0012f518",
-  "why": "asserts theName (maglifefadekey 110); reads data/evntex/EVNTEX.RPK's index and adds the named texture to the tex info a1"
+  "why": "as loadTexture with the file found by theName (asserts theName, fileno >= 0)"
  },
  "0012f790": {
-  "name": "MagLifeFadeKey::releaseTexture",
+  "name": "MagLifeFadeKeyHole::releaseTexture",
   "tag": "ror-inferred",
   "was": "FUN_0012f790",
-  "why": "asserts theTexInfo, releases the texture at +0x40"
+  "why": "asserts theTexInfo; DogTexInfo::release of +0x40, then -1"
  },
  "0012f7f4": {
-  "name": "MagLifeFadeKey::reset",
+  "name": "MagLifeFadeKeyHole::reset",
   "tag": "ror-inferred",
   "was": "FUN_0012f7f4",
-  "why": "m_state = a1, m_08 and +0x34 = a2, m_04 / m_0c / +0x30 = 0, the three magnify words +0x44 / +0x48 / +0x4c = 1"
+  "why": "state, time, magnify words 1.0; MagScene::openFadeKey passes (5, 0)"
  },
  "0012f824": {
-  "name": "MagLifeFadeKey::start",
+  "name": "MagLifeFadeKeyHole::start",
   "tag": "ror-inferred",
   "was": "FUN_0012f824",
-  "why": "as MagLifeFader::start for the keyhole fade"
+  "why": "state and time from the MagFadeParam (MagScene::setFade)"
+ },
+ "0012f84c": {
+  "name": "MagLifeFadeKeyHole::live",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f84c",
+  "why": "vtable 0x2e1cf8 slot 2 (MagLife::live's slot): counts frames, steps fade states 2->3->4 and 6->7->8, ramps the magnify in 4 / 5"
+ },
+ "0012f95c": {
+  "name": "MagLifeFadeKeyHole::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012f95c",
+  "why": "vtable 0x2e1cf8 slot 6 (MagLife::render's slot): one textured full-screen sprite of texture +0x40, zoomed by the magnify word"
  },
  "0012fc80": {
-  "name": "MagLifeFadeKey::setMagnify",
+  "name": "MagLifeFadeKeyHole::setMagnify",
   "tag": "ror-inferred",
   "was": "FUN_0012fc80",
-  "why": "a2 > 0: blends +0x44 to f12 over a2 frames (+0x34 time, +0x48 from, +0x4c to, +0x30 = 0); else +0x44 = f12 at once"
+  "why": "magnify at once, or a ramp from the current over time frames (MagScene::setFadeKeyMagnify)"
  },
  "0012fca8": {
   "name": "MagLifeWindow::getCharMetrics",

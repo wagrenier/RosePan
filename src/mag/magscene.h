@@ -702,7 +702,7 @@ struct MagScene
     MagLifeMenuBoard3D m_menu_board3d;  // ROR 0x40720: ids with bit 0x80000
     MagLifeMenuSelLang m_menu_sellang;  // ROR 0x40780: 0x10010
     MagLifeFader   m_fader;             // ROR 0x41850: fade kinds 0 / 4
-    MagLifeFadeKey m_fade_key;          // ROR 0x41890: fade kinds 1..3
+    MagLifeFadeKeyHole m_fade_key;      // ROR 0x41890: fade kinds 1..3
     MagLife130da4  m_life_418f0;        // ROR 0x418f0
     S2dCineSco     m_cine_sco;          // ROR 0x41930
     S2dBg          m_bg;                // ROR 0x42260
