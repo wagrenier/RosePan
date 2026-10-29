@@ -299,16 +299,8 @@ static_assert(sizeof(MagFadeParam) == 0x18, "MagFadeParam is 0x18 bytes on the E
 
 /* The keyhole fade at scene +0x41890 (MagLifeFadeKeyHole): mag/maglifefadekey.h. */
 #include "mag/maglifefadekey.h"
-struct MagLife130da4 : MagLife  /* scene +0x418f0, constructor 0x130da4 */
-{
-    /* m_volume = volume (GamMan::setVolume's scaled master volume). */
-    void setVolume(int volume);                                          // ROR 0x00130de0
-
-    u_char _28[0x30 - 0x28];
-    int    m_volume;            // ROR 0x30
-    int    m_34;                // ROR 0x34: initRender copies the scene's +0x2910 into it
-};
-static_assert(offsetof(MagLife130da4, m_34) >= 0x34, "m_34");
+/* The screen noise at scene +0x418f0 (MagLifeNoise): mag/maglifenoise.h. */
+#include "mag/maglifenoise.h"
 struct DogActor;
 /* The effect manager at scene +0x837e0, its EffParam, and Eff0: eff/effman.h. */
 #include "eff/effman.h"

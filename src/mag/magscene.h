@@ -704,7 +704,7 @@ struct MagScene
     MagLifeMenuSelLang m_menu_sellang;  // ROR 0x40780: 0x10010
     MagLifeFader   m_fader;             // ROR 0x41850: fade kinds 0 / 4
     MagLifeFadeKeyHole m_fade_key;      // ROR 0x41890: fade kinds 1..3
-    MagLife130da4  m_life_418f0;        // ROR 0x418f0
+    MagLifeNoise   m_life_418f0;        // ROR 0x418f0: the screen noise
     S2dCineSco     m_cine_sco;          // ROR 0x41930
     S2dBg          m_bg;                // ROR 0x42260
     S2dMes         m_mes;               // ROR 0x42bb0

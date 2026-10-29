@@ -351,7 +351,7 @@ int MagScene::initRender(i3dContext *ctx)
     m_bg.init(&m_tex_info);
     m_bg.m_level = 7;
     m_life_man.add(&m_bg, 0x8000);
-    m_life_418f0.m_34 = m_common_tex_no[1];
+    m_life_418f0.m_tex_no = m_common_tex_no[1];
     m_life_man.add(&m_life_418f0, 0x8004);
     m_cine_sco.init(&m_tex_info);
     m_cine_sco.m_level = 7;
@@ -2042,7 +2042,7 @@ void MagScene::clearPC()
 // that exist as C++ constructors (GamFont, DogEntity / DogCamera, S2d*),
 // the rest start zeroed as part of g_magSystem until their TUs write them.
 // ROR 0x001360a0
-// callcheck: FUN_0010eebc, FUN_00110a94, FUN_00114c54, FUN_0011bf0c, FUN_00125aa4, FUN_0012ba80, FUN_0012d398, FUN_0012d58c, MagLifeMenuPBook, MagLifeMenuBoard3D, FUN_0012f008, FUN_0012f298, FUN_00130da4, FUN_0014257c, FUN_00142e84, FUN_00176a3c, SctWorld, FUN_001947a4, FUN_0019a52c, FUN_001a1244, FUN_001a59b8, FUN_001a90ec, FUN_001ab474, FUN_001ad6b4, FUN_001adf04, FUN_001ae474, FUN_001ae954, FUN_001bdae4, FileReader, GamFont, S2dBg, S2dCineSco, S2dMes, S2dMovie, memset (member constructors: the host runs the C++ ones itself, the others are not written yet; the memsets are the field clears below)
+// callcheck: FUN_0010eebc, FUN_00110a94, FUN_00114c54, FUN_0011bf0c, FUN_00125aa4, FUN_0012ba80, FUN_0012d398, FUN_0012d58c, MagLifeMenuPBook, MagLifeMenuBoard3D, FUN_0012f008, FUN_0012f298, MagLifeNoise, FUN_0014257c, FUN_00142e84, FUN_00176a3c, SctWorld, FUN_001947a4, FUN_0019a52c, FUN_001a1244, FUN_001a59b8, FUN_001a90ec, FUN_001ab474, FUN_001ad6b4, FUN_001adf04, FUN_001ae474, FUN_001ae954, FUN_001bdae4, FileReader, GamFont, S2dBg, S2dCineSco, S2dMes, S2dMovie, memset (member constructors: the host runs the C++ ones itself, the others are not written yet; the memsets are the field clears below)
 
 MagScene::MagScene()
 {

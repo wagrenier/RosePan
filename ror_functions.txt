@@ -1139,14 +1139,14 @@
 /* 001308bc 00000170 */ MagLifeWindow::MagLifeWindow(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- mag/maglifenoise.cpp
 // *****************************************************************************
 
-/* 00130a2c 00000208 */ FUN_00130a2c(){}
-/* 00130c34 00000170 */ FUN_00130c34(){}
-/* 00130da4 0000003c */ FUN_00130da4(){}
-/* 00130de0 00000008 */ MagLife130da4::setVolume(){}  // ror
-/* 00130de8 00000100 */ FUN_00130de8(){}
+/* 00130a2c 00000208 */ MagLifeNoise::writeNoiseLayer(){}  // ror
+/* 00130c34 00000170 */ MagLifeNoise::writeNoise(){}  // ror
+/* 00130da4 0000003c */ MagLifeNoise::MagLifeNoise(void)(){}  // ror
+/* 00130de0 00000008 */ MagLifeNoise::setVolume(){}  // ror
+/* 00130de8 00000100 */ MagLifeNoise::render(){}  // ror
 
 // *****************************************************************************
 // FILE -- mag/maglifetest.cpp
