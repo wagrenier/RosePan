@@ -953,3 +953,11 @@ build.py --run 45: the last trace before the log goes quiet names the call; comp
   while every `shot_<frame>.png` is fine. Cause: the run is stopped while the port is writing
   last.png. Fix: look at the highest `shot_<frame>.png` instead, and copy it over last.png before
   `tus.py finish` (progress_shot copies last.png into progress/).
+
+## callcheck reads a column-0 label before "if (" as a function (2026-10-29)
+
+Symptom: callcheck reports a function named "if" with every RoR call MISSING. Cause: a goto label at
+column 0 directly followed by an if statement (label:
+    if (...)) matches its definition pattern,
+so the real function's body ends at the label. Fix: put another statement first after the label (or
+restructure); other col-0 labels are fine.

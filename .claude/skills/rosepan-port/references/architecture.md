@@ -446,7 +446,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     offsets and +0x28 a tree of 12-byte nodes (u16 count, bit 15 leaf; +8 children or leaf data).
     All offsets from the root, -1 = none. No raw I3D_I3C exists in the disc's RPK / ARA files
     (compressed somewhere). Curve / interpolation maths 0x22e840..0x231198, collision casts
-    0x2312a0..0x233628, distance maths (i3dPointSegDist2, i3dSegSegDist2) ..0x23695c. Host pointers
+    0x2312a0..0x233628, distance maths (i3dPointSegDist2, i3dRaySegDist2, i3dSegSegDist2) ..0x23695c. Host pointers
     in these files: hazards.md "Types and layouts".
     **The casts** (`i3d/i3cquery.cpp`, 2026-10-29, verify): a part is box centre +0x00, half
     extents +0x10, group +0x20, +0x24 per-triangle attribute records, +0x28 tree, +0x2c vertex array
@@ -466,6 +466,17 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     0x2333b0, uncalled): the part's +0x24 records (I3cAttrRef: three u16 indices, kind in bits 4..7
     of +6: 1 uv, 2 a vector, 3 both) index a table right after the 0x20-byte root with stride
     root+0x11; blended by barycentric weights (0x233258) into five floats.
+    **The geometry tests** (`i3d/i3dgeom.cpp` 0x233628..0x236960, 2026-10-29, partial): shapes are
+    float[4] with the radius in w. Names follow the box tests: Line (t free), Ray (t >= 0), Seg (t
+    0..1); Cyl* grows a shape by its start point's w (CylLine an infinite cylinder, CylHalf a ray
+    capsule, CylSeg a capsule); Cylinder is the finite one around cyl + s axis. Distances
+    i3d<A><B>Dist2 return the squared distance (absolute value) with s / t out; parallel below
+    det 0.0001 (rodata 0x303b58). Box tests: i3dSphereBoxTest returns 1, the separating-axis ones -2
+    (VU0 status sign flag after the last subtract). Hit tests i3d<A><B>Test return 1 / 0;
+    intersections (i3dLine/Ray/SegSphereTest 0x235128.., i3dLineCylinderTest 0x235be8 and its
+    Ray / Seg / CylLine forms) return 0x111 with bit 0 cleared when the entry t is before the start and
+    bit 4 when the exit is past the end. i3dLineCylinderTest is really a capsule test (side wall
+    within 0..|axis|, then the end spheres) in the frame of i3dVecOrthoBasis 0x235688.
   - **Texture and CLUT objects** (`i3d/i3dtex.cpp`, 0x2184c0..0x21a120, written 2026-10-22, verify;
     33 functions incl. 4 hidden TEX1 setters 0x219dd0..0x219e30). Both start with their
     I3dVramHandle (+0 m_image = the object, +4 size: texture pages / CLUT 4-block units, +0x10 kind
@@ -628,7 +639,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     0x21cfb0..0x21db18 (four functions) have no code or data references: dead.
 - The scene's first 0x2000 bytes are 256 **wall segments** (two (x, y, z, w) ends each):
   `MagScene::castWalls` 0x133a0c tests a level ray against those whose height range covers the ray's
-  y with `i3dSegSegDist2` 0x234050 (squared segment distance 0 = a hit) before `castRay` 0x133454
+  y with `i3dRaySegDist2` 0x234050 (squared ray-segment distance 0 = a hit) before `castRay` 0x133454
   falls back to the sky slots' collision models (`DogModel::castRay` 0x11440c on model 2).
   They are the scene's **private collision** (MAX_PRIVATE_COLLI 256): `addPrivateColli(p1, p2)`
   0x135e20 takes the first free one (free = equal end heights, so p1.y != p2.y is asserted),

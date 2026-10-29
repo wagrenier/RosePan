@@ -1096,7 +1096,7 @@ float MagScene::hitWallsCylinder(float theH, float theR, MagSceneRayHit *hit, co
 // ──────────────────────────────────────────────────────────────────────
 // The level ray pos + t dir (t in 0..1) against the wall segments in
 // m_vec_pair whose height range covers pos's y: each is tested in the
-// plane at that height (i3dSegSegDist2 0 = they cross). Returns t of the
+// plane at that height (i3dRaySegDist2 0 = they cross). Returns t of the
 // first hit with its wall normal in hit->m_vec[1], else -1.
 // ROR 0x00133a0c // callcheck: dbgAssertFailed (the assert handler, inside ROR_ASSERT)
 
@@ -1125,7 +1125,7 @@ float MagScene::castWalls(MagSceneRayHit *hit, const float *pos, const float *di
         d1[3] = 1.0f;
 
         float s, u;
-        if (i3dSegSegDist2(pos, dir, p1, d1, &s, &u) == 0.0f)
+        if (i3dRaySegDist2(pos, dir, p1, d1, &s, &u) == 0.0f)
         {
             if (hit)
             {

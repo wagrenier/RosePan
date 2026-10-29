@@ -91,21 +91,6 @@ int utlStrEqualNoCase(const char *a, const char *b)
 }
 
 
-// stub of ROR 0x00234050
-float i3dSegSegDist2(const float *p0, const float *d0, const float *p1, const float *d1,
-                     float *s, float *t)
-{
-    ROSEPAN_STUB("i3dSegSegDist2", 0x00234050);
-    return {};
-}
-
-// stub of ROR 0x002337e0
-float i3dPointSegDist2(const float *p, const float *a, const float *d, float *t)
-{
-    ROSEPAN_STUB("i3dPointSegDist2", 0x002337e0);
-    return {};
-}
-
 // ──────────────────────────────────────────────────────────────────────
 // A step along angle on the ground plane (unassigned@001e6cac, written
 // ahead for native 152).
