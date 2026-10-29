@@ -87,6 +87,8 @@ struct DogCamera;
 /* The depth of pos along cam's view axis: the camera's transform, then
  * dot(matrix row 2, pos - row 3). */
 float effCalcViewDepth(DogCamera *cam, const float *pos);                // ROR 0x0016ff18
+/* The length of a 3-vector (sqrtf of its squares). */
+float effVecLength(const float *v);                                      // ROR 0x0016fc20
 /* out = from + normalize(to - from) * d. */
 void  effMoveToward(float d, float *out, const float *from, const float *to); // ROR 0x0016ff78
 

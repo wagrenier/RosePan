@@ -1519,64 +1519,22 @@ u_long * EffFoot2Prim::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_l
 }
 
 // stub of ROR 0x00174dd8
-int EffLight1::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffLight1::init", 0x00174dd8);
-    return {};
-}
 
 // stub of ROR 0x00174e9c
-int EffLight1::liveMain()
-{
-    ROSEPAN_STUB("EffLight1::liveMain", 0x00174e9c);
-    return {};
-}
 
 // stub of ROR 0x00174eb0
-u_long * EffLight1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffLight1::renderMain", 0x00174eb0);
-    return {};
-}
 
 // stub of ROR 0x0017512c
-void EffLight1::liveActivateExec()
-{
-    ROSEPAN_STUB("EffLight1::liveActivateExec", 0x0017512c);
-}
 
 // stub of ROR 0x00175170
-int EffLight2::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffLight2::init", 0x00175170);
-    return {};
-}
 
 // stub of ROR 0x00175254
-int EffLight2::liveMain()
-{
-    ROSEPAN_STUB("EffLight2::liveMain", 0x00175254);
-    return {};
-}
 
 // stub of ROR 0x00175268
-void EffLight2::render(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("EffLight2::render", 0x00175268);
-}
 
 // stub of ROR 0x00175378
-u_long * EffLight2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffLight2::renderMain", 0x00175378);
-    return {};
-}
 
 // stub of ROR 0x001755e8
-void EffLight2::liveActivateExec()
-{
-    ROSEPAN_STUB("EffLight2::liveActivateExec", 0x001755e8);
-}
 
 // stub of ROR 0x001788ec
 int EffMuzzleFlash1::init(const EffParam *param)
@@ -1755,3 +1713,10 @@ void EffCloud1::updateZDepth()
 }
 
 
+
+// stub of ROR 0x0016fc20
+float effVecLength(const float *v)
+{
+    ROSEPAN_STUB("effVecLength", 0x0016fc20);
+    return {};
+}
