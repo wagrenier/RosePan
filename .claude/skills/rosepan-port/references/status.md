@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 09:13 at commit `ca349b1` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 09:53 at commit `4edd2d7` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-29 09:13 at commit `ca349b1` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7163**, named **6267** (87%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4665
-- context-name ledger: 4966 entries; overrides of wrong library matches: 5
-- placed in a source file: 5319/7163 in 129 files
+- game functions: **7163**, named **6275** (88%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4673
+- context-name ledger: 4974 entries; overrides of wrong library matches: 5
+- placed in a source file: 5433/7163 in 134 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -21,8 +21,8 @@ Least-named game-code regions (64 KB blocks):
 |---|---|---|
 | `00150000` | 8/272 (3%) | - |
 | `00140000` | 152/293 (52%) | emy/emy_hfm.cpp, mag/magscenecmd.cpp, mag/magloader.cpp |
-| `001b0000` | 45/82 (55%) | game/gamfile.cpp, game/gamfont.cpp, mnu/mnuSelectLanguage.cpp |
-| `001a0000` | 142/214 (66%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnutitle.cpp |
+| `001b0000` | 45/82 (55%) | mnu/mnuitem.cpp, game/gamfile.cpp, game/gamfont.cpp |
+| `001a0000` | 150/214 (70%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `00160000` | 213/268 (79%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `001f0000` | 190/234 (81%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `00190000` | 187/227 (82%) | spr/s2d.cpp, mnu/mnupbook.cpp, mnu/mnubase.cpp |
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4830**; stubs: **409**
+- reconstructed RoR functions: **4845**; stubs: **404**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -80,7 +80,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 341 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 336 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -115,6 +115,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mcd/mcdman.cpp` | 42 | 0 |
 | `src/mnu/mnubase.cpp` | 36 | 0 |
 | `src/mnu/mnumcd.cpp` | 39 | 0 |
+| `src/mnu/mnuopt.cpp` | 15 | 0 |
 | `src/mnu/mnupbook.cpp` | 43 | 0 |
 | `src/mnu/mnusvld.cpp` | 41 | 0 |
 | `src/mnu/mnutitle.cpp` | 20 | 0 |
@@ -152,8 +153,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 164 TUs: todo 97, partial 4, verify 94, done 14
-- next: **unassigned@001ab474** (frontier score 31)
+- 169 TUs: todo 102, partial 4, verify 94, done 15
+- next: **debug/mcd_debug.cpp** (frontier score 24)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -252,6 +253,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 09:53 `mnu/mnuopt.cpp` done: MnuOpt, the options screen, all 15 functions (exec step machine, execMain pad / redraw, fadeInItems, setDisp, open / close, ctor / dtor) with its pattern image,
 - 2026-10-29 09:13 `task/tsk_enemy.cpp` verify: TskEnemyMove complete: plan 0x200988, step 0x200d18 and the route helpers setRoute, startWalk, nextPoint, walk, checkAhead, checkStep, checkBump, moveRoot, move
 - 2026-10-29 09:01 `task/tsk_enemy.cpp` partial: task/tsk_enemy.cpp pinned 0x20067c..0x203d94 (cut from unassigned@001fd424). TskEnemyTurn complete (13 functions: start, exec, turn, setTurnMotion, tickVoice, g
 - 2026-10-29 08:48 `i3d/i3rblend.cpp` verify: Pinned the unassigned@00225018 run as i3d/i3rblend.cpp (0x225018..0x226278) and wrote all 18 functions: key bisect, scalar and vector curves, i3rTrackGetValue, 
@@ -259,22 +261,21 @@ Recent sessions:
 - 2026-10-29 08:00 `emy/emy_main.cpp` verify: EmyMain reconstructed whole: constructor and destructor, setStartState (the state graph from the transition table), loadParam (the 0x60 script block onto the ac
 - 2026-10-29 07:41 `game/gamfont.cpp` done: GamFont written whole (28 functions, game/gamfont.cpp pinned 0x1beb70..0x1c05c0): setFont with the font header struct, setTarget / releaseTarget, clear, fillRec
 - 2026-10-29 07:20 `mag/maglifewindow.cpp` verify: MagLifeWindow written whole: constructor, live (timer), render (alpha fade + font-texture TexSpriteUV), setup, fadeIn/fadeOut, drawText (Shift-JIS, wrap, scroll
-- 2026-10-28 22:23 `msg/msgman.cpp` verify: MsgMan and MsgManSet written whole: 124 functions (0x18330c..0x187724, the unassigned@00184f2c run pinned into msg/msgman.cpp), the 41 #-tags with their exec an
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@001ab474` | todo | 0/28/119 | 74.0 | 31 | 0 |
-| `debug/mcd_debug.cpp` | todo | 0/0/5 | 1.1 | 24 | 0 |
 | `unassigned@0011cb70` | todo | 0/6/7 | 0.7 | 24 | 3 |
+| `debug/mcd_debug.cpp` | todo | 0/0/5 | 1.1 | 24 | 0 |
 | `unassigned@0016afcc` | todo | 0/109/158 | 45.7 | 23 | 3 |
+| `unassigned@001832e8` | todo | 0/1/1 | 0.0 | 19 | 1 |
 | `unassigned@0011c464` | todo | 0/3/6 | 0.5 | 19 | 3 |
-| `unassigned@001832e8` | todo | 0/1/1 | 0.0 | 18 | 1 |
 | `utl/utlfind.cpp` | todo | 0/9/10 | 1.4 | 16 | 1 |
-| `bed/bedsubmode.cpp` | todo | 0/2/2 | 0.2 | 16 | 2 |
 | `mnu/mnuselect.cpp` | partial | 3/6/14 | 3.0 | 16 | 0 |
+| `bed/bedsubmode.cpp` | todo | 0/2/2 | 0.2 | 16 | 2 |
 | `unassigned@00216ad0` | partial | 2/2/16 | 6.5 | 15 | 0 |
 | `i3d/i3cquery.cpp` | todo | 0/3/16 | 8.9 | 14 | 2 |
 | `unassigned@00149d18` | todo | 0/62/431 | 98.3 | 12 | 0 |
+| `mag/maglifefadekey.cpp` | todo | 0/6/9 | 2.5 | 9 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -284,7 +285,7 @@ Recent sessions:
 | `001be2dc` | FileReader::~FileReader | 30 | ror | missing | game/gamfile.cpp |
 | `001be2cc` | FileReader::FileReader | 25 | ror | missing | game/gamfile.cpp |
 | `002155f4` | FUN_002155f4 | 24 | - | missing | debug/mcd_debug.cpp |
-| `001832e8` | msgGetSysText | 13 | ror | stub | - |
+| `001832e8` | msgGetSysText | 14 | ror | stub | - |
 | `00217f10` | utlAtan2 | 8 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 6 | ror | missing | - |
 | `001a074c` | MnuTextList::close | 4 | ror | stub | mnu/mnuselect.cpp |
@@ -293,7 +294,6 @@ Recent sessions:
 | `00100258` | BedSubMode::push | 3 | ror | stub | bed/bedsubmode.cpp |
 | `001002c0` | BedSubMode::pop | 3 | ror | stub | bed/bedsubmode.cpp |
 | `0012f790` | MagLifeFadeKey::releaseTexture | 3 | ror | stub | mag/maglifefadekey.cpp |
-| `001ab474` | MnuOpt::MnuOpt | 2 | ror | missing | - |
 | `0011c64c` | MagLifePC::collectNearItems | 2 | ror | stub | mag/maglifepc2.cpp |
 | `00232508` | i3cCastRay | 2 | ror | stub | i3d/i3cquery.cpp |
 | `0011ccd4` | MagLifePC::testObjHit | 2 | ror | stub | - |
@@ -301,23 +301,24 @@ Recent sessions:
 | `00192ac0` | mnuBase::mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
 | `00192b3c` | mnuBase::~mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
 | `00104e1c` | utlTm2GetSize | 2 | ror | stub | - |
-| `001ab4e0` | MnuOpt::~MnuOpt | 2 | ror | missing | - |
-| `001ab598` | MnuOpt::init | 2 | ror | stub | - |
-| `001ab66c` | MnuOpt::processPad | 2 | ror | stub | - |
 | `0011ce50` | MagLifePC::getEquipItemChrNo | 2 | ror | stub | - |
 | `001a06e8` | MnuTextList::open | 2 | ror | stub | mnu/mnuselect.cpp |
 | `001a09b8` | MnuTextList::setItems | 2 | ror | stub | mnu/mnuselect.cpp |
 | `001a0ba0` | MnuTextList::getSelect | 2 | ror | stub | mnu/mnuselect.cpp |
 | `001a0bb8` | MnuTextList::endSelect | 2 | ror | stub | mnu/mnuselect.cpp |
 | `0010559c` | utlTm2ToSepia | 2 | ror | stub | utl/utltm2.cpp |
-| `001ab680` | MnuOpt::draw | 2 | ror | stub | - |
 | `0011c520` | MagLifePC::getEquipItem | 2 | ror | stub | - |
 | `0011cb70` | MagLifePC::getWeaponType | 2 | ror | stub | - |
 | `0010456c` | utlHitCheck | 2 | ror | stub | utl/utlbtl.cpp |
 | `002337e0` | i3dPointSegDist2 | 2 | ror | stub | i3d/i3dgeom.cpp |
 | `0012c31c` | MagLifePC::startAttack | 2 | ror | stub | mag/maglifepcbtl.cpp |
 | `00100320` | FUN_00100320 | 1 | - | missing | - |
-| `001ae954` | MnuItem::MnuItem | 1 | ror | missing | - |
+| `001ae954` | MnuItem::MnuItem | 1 | ror | missing | mnu/mnuitem.cpp |
 | `001947a4` | MnuMap::MnuMap | 1 | ror | missing | mnu/mnumap.cpp |
 | `0019a52c` | MnuStock::MnuStock | 1 | ror | missing | mnu/mnustock.cpp |
+| `001adf04` | MnuMovie::MnuMovie | 1 | ror | missing | mnu/mnumovie.cpp |
+| `001ae474` | MnuNow::MnuNow | 1 | ror | missing | mnu/mnunow.cpp |
+| `001ad6b4` | FUN_001ad6b4 | 1 | - | missing | mnu/mnuboard2d.cpp |
+| `001bdae4` | MnuSelectLanguage::MnuSelectLanguage | 1 | ror | missing | - |
+| `0012f298` | FUN_0012f298 | 1 | - | missing | mag/maglifefadekey.cpp |
 

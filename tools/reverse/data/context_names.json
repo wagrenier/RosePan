@@ -13103,6 +13103,54 @@
   "was": "FUN_001ab680",
   "why": "the menu object at +0x40 of MagLifeMenuOpt: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
  },
+ "001ab6ac": {
+  "name": "MnuOpt::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001ab6ac",
+  "why": "m_open 1, step / sub step cleared, MsgManSet::open on +0x58; -1 when already open (as MnuSvld::open)"
+ },
+ "001ab6f4": {
+  "name": "MnuOpt::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001ab6f4",
+  "why": "m_open 0; -1 when not open (as MnuSvld::close); term and the destructor call it"
+ },
+ "001ab720": {
+  "name": "MnuOpt::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001ab720",
+  "why": "processPad's body: the step machine (open the window with sys text 0x1c, load mnuopt.rpk, fade in, run execMain, fade out, close), as MnuSvld::exec"
+ },
+ "001aba44": {
+  "name": "MnuOpt::initWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001aba44",
+  "why": "the constructor's: cursors cleared and the cursor counts (6 rows, 2 / 9 values), as MnuSvld::initWork"
+ },
+ "001aba98": {
+  "name": "MnuOpt::setDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_001aba98",
+  "why": "m_current_system, the pattern table 0x2a8848, setDispList 0x2aad70, cursors reset, SprMan active, as MnuSvld::setDisp"
+ },
+ "001abb24": {
+  "name": "MnuOpt::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001abb24",
+  "why": "SprMan::update and MsgManSet::update each frame (exec step 4)"
+ },
+ "001abb58": {
+  "name": "MnuOpt::fadeInItems",
+  "tag": "ror-inferred",
+  "was": "FUN_001abb58",
+  "why": "fadeInSprite on every option sprite: the frame, the rows' values dim, the chosen value of each row and the cursor full"
+ },
+ "001ac5b0": {
+  "name": "MnuOpt::execMain",
+  "tag": "ror-inferred",
+  "was": "FUN_001ac5b0",
+  "why": "reads GamMan status 0x15 (the option block), waits 0x47 frames, then up / down rows, left / right values with setOption, triangle (0x2000) leaves; returns 1 when done"
+ },
  "001ad72c": {
   "name": "MnuBoard2D::~MnuBoard2D",
   "tag": "ror-inferred",
