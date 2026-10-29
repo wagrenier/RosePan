@@ -6,6 +6,15 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-29 (`emy/emy_grg.cpp`, verify; split out of unassigned@00153e40): GrgMain (type 9)
+and its six outs, all 37 functions** (architecture.md). No enemy spawns on the smoke path; mark done
+when a run shows a Grg (it roams rooms 0x84..0x8b, hides in their fchrs and reappears). Three ROM
+reads of unset stack, ported as decided (PORT comments): GrgOutDisappear::getRoomIndex's room 0x89
+split (the port uses the achr's z against 255), walkToFchr's search position (the port uses the
+enemy's) and its pick past the last fchr (the port: none). The Fsh file starts at FshMain's dtor
+0x155d54, before FshMain::initOut 0x156620 (hazards.md): next in the enemy run is Fsh from 0x155d54
+(check its end: rtti.py --class GotMain), then Got, Pig, Dwf (unassigned@00153e40, now from 0x155d54).
+
 **WRITTEN 2026-10-29 (`mag/magsceneif.cpp`, verify): MagSceneIF / MagSceneIFMap / MagSceneIFChara, all
 13 methods** (map / character index counts, names, find, category; actor motion count, motion number,
 motion name and its trimmed label, model node count and names; virtual dtors in the header). Nothing

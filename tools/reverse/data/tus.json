@@ -410,6 +410,24 @@
    "status": "verify",
    "why": "ClrMain + its five ClrOut* classes: ClrMain::initOut 0x14dc7c (every XxxMain::initOut opens its file) up to NorMain::initOut 0x150b24 which opens the Nor file; no source string, named like emy_bds.cpp"
   },
+  "emy/emy_grg.cpp": {
+   "notes": "Complete code, nothing on screen yet: the 15 s run stays on the boot disclaimer and no enemy spawns on the smoke path. Mark done when a run shows a Grg roaming rooms 0x84..0x8b, hiding in an fchr and reappearing. PORT choices for three ROM reads of unset stack: GrgOutDisappear::getRoomIndex room 0x89 split (achr z vs 255), walkToFchr search position (the enemy's), its pick past the last fchr (none). Boundary: the Fsh file starts at FshMain's dtor 0x155d54, before FshMain::initOut 0x156620 (hazards.md); the rest of unassigned@00153e40 now starts there: Fsh, Got, Pig, Dwf.",
+   "ranges": [
+    [
+     "00153e40",
+     "00155d54"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 18:07",
+     "status": "verify",
+     "summary": "Pinned emy/emy_grg.cpp 0x153e40..0x155d54 out of unassigned@00153e40 and wrote all 37 functions: GrgMain (enemy type 9: initOut, dtor, decide, exec, after, selectOut, isPCInArea, isAreaCurrent, testInput0 / 1 / 7, isTargetInSight, testView, releaseHold) and its outs GrgOutCatch, GrgOutWalk (room points, fchr hide, idle; tables 0x2f01d0 / 0x2f0410 / 0x2f0430 / 0x2f08b0), GrgOutBitten, GrgOutDisappear (reappearance table 0x2efc98), GrgOutEvent, GrgOutTest. New emy/emy_grg.h; GrgMain moved out of lib/unassigned.h, its eight stubs removed. 34 functions named (batch emygrg_001)."
+    }
+   ],
+   "status": "verify",
+   "why": "GrgMain + its six GrgOut* classes: GrgMain::initOut 0x153e40 up to FshMain's dtor 0x155d54 (vtable slot 1), which opens the Fsh code -- Fsh puts its main virtuals before FshMain::initOut 0x156620; no source string, named like emy_bds.cpp"
+  },
   "emy/emy_hfm.cpp": {
    "notes": "Whole TU written (75 functions, no stubs left in this file). Status verify: the 15 s smoke run still ends on the Atlus disclaimer and creates no enemy, so no Hfm is on screen. Mark done the first time a smoke run shows an Hfm enemy moving. Still needed before anything moves: the EmyOut helpers in emy/emy_out.cpp (setMotion, termCommon, selectTarget, emyStartChase, playSE, tickVoice, stopVoice, emyChkHitReach, getFrontPos 0x167d88, getTargetNodePos 0x166c8c, getTargetAngle 0x167e38) and the EmyMain ctor. Steps 0x12, 0x1d, 0x1e, 0x1f only advance the step: the delay slot reloads the step, not v0=1, so it is step+1.",
    "ranges": [
@@ -2621,6 +2639,7 @@
   "unassigned@0014cde4": {},
   "unassigned@0014dc7c": {},
   "unassigned@00150b24": {},
+  "unassigned@00153e40": {},
   "unassigned@00164fc0": {},
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},

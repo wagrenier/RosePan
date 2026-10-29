@@ -8045,6 +8045,72 @@
   "was": "FUN_00153e40",
   "why": "called right after the vtable store in the ELF's inline GrgMain::GrgMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
  },
+ "00154030": {
+  "name": "GrgMain::~GrgMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00154030",
+  "why": "GrgMain vtable 0x2e2940 slot 1: vptr store, ~EmyMain then operator_delete on the deleting flag, as NorMain::~NorMain"
+ },
+ "00154090": {
+  "name": "GrgMain::decide",
+  "tag": "ror-inferred",
+  "was": "FUN_00154090",
+  "why": "GrgMain vtable slot 4: m_req from the inputs at +0x204 (8 release, 7, the sight edge 5 / 6, the room 4, 1, 0)"
+ },
+ "00154208": {
+  "name": "GrgMain::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00154208",
+  "why": "GrgMain vtable slot 5: EmyStateMap::next on m_req, m_changed"
+ },
+ "00154270": {
+  "name": "GrgMain::after",
+  "tag": "ror-inferred",
+  "was": "FUN_00154270",
+  "why": "GrgMain vtable slot 6: script globals 0x54 / 0x55, Term / selectOut on a change, m_req = out->Exec()"
+ },
+ "00154340": {
+  "name": "GrgMain::selectOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00154340",
+  "why": "GrgMain vtable slot 2: out of states 1..6 Init, then the state row of the transition table into the input words"
+ },
+ "00154408": {
+  "name": "GrgMain::isPCInArea",
+  "tag": "ror-inferred",
+  "was": "FUN_00154408",
+  "why": "with a PC (GamMan::m_pcPtr, bss 0x7a3350), getStatus 5 (the room) equals the achr's param 8 (area)"
+ },
+ "00154474": {
+  "name": "GrgMain::isAreaCurrent",
+  "tag": "ror-inferred",
+  "was": "FUN_00154474",
+  "why": "getStatus 5 (the room) equals the achr's param 8 (area), no PC test"
+ },
+ "001544c8": {
+  "name": "GrgMain::testInput7",
+  "tag": "ror-inferred",
+  "was": "FUN_001544c8",
+  "why": "returns 0; decide's input 7 test"
+ },
+ "001544d0": {
+  "name": "GrgMain::testInput1",
+  "tag": "ror-inferred",
+  "was": "FUN_001544d0",
+  "why": "decide's input 1: with m_234 clear, room 0x81, or 16 appearances (m_237) and the PC elsewhere and not in class 10; sets m_234"
+ },
+ "00154584": {
+  "name": "GrgMain::testInput0",
+  "tag": "ror-inferred",
+  "was": "FUN_00154584",
+  "why": "decide's input 0: with m_234 set and m_238 not 2 / 3, the room is its area (and with m_238 1 the PC in sight); clears m_234"
+ },
+ "00154668": {
+  "name": "GrgMain::isTargetInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_00154668",
+  "why": "isPCInArea, then emyChkInSight(param 0x5f, pi) of the PC or the dog; GrgMain::testView forwards to it"
+ },
  "00154734": {
   "name": "GrgMain::testView",
   "tag": "ror-inferred",
@@ -8056,6 +8122,144 @@
   "tag": "ror-inferred",
   "was": "FUN_00154748",
   "why": "param flags lose 0x10000000 and 0x80, +0x240 = 1"
+ },
+ "00154780": {
+  "name": "GrgOutCatch::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00154780",
+  "why": "GrgOutCatch vtable 0x2e2980 slot 2: global 0x53 = 1, shown, selectTarget(100), emyStartChase(10)"
+ },
+ "001547e8": {
+  "name": "GrgOutCatch::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001547e8",
+  "why": "GrgOutCatch slot 3: the chase, then a catch motion 0xb / 0xc / 0xd by the secta cell (input 9) or 0xe and chase again"
+ },
+ "00154a18": {
+  "name": "GrgOutCatch::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00154a18",
+  "why": "GrgOutCatch slot 4: termCommon"
+ },
+ "00154a34": {
+  "name": "GrgOutBitten::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00154a34",
+  "why": "GrgOutBitten vtable 0x2e29b0 slot 2: motion 0x13, wait utlRandRange(60, 180)"
+ },
+ "00154a94": {
+  "name": "GrgOutBitten::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00154a94",
+  "why": "GrgOutBitten slot 3: the wait, motion 0x14 / 0x16, input 9 at its end"
+ },
+ "00154b44": {
+  "name": "GrgOutBitten::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00154b44",
+  "why": "GrgOutBitten slot 4: termCommon"
+ },
+ "00154b60": {
+  "name": "GrgOutDisappear::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00154b60",
+  "why": "GrgOutDisappear vtable 0x2e29e0 slot 2: hidden, the room, calcWait"
+ },
+ "00154bd8": {
+  "name": "GrgOutDisappear::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00154bd8",
+  "why": "GrgOutDisappear slot 3: after the wait placed at the room's point (table 0x2efc98) and shown; motion end input 9 and m_237 + 1"
+ },
+ "00154d78": {
+  "name": "GrgOutDisappear::getRoomIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_00154d78",
+  "why": "getStatus 5 rooms 0x84..0x8b to rows 0..8 of the Grg point tables (0x89 by a stack float)"
+ },
+ "00154e20": {
+  "name": "GrgOutDisappear::calcWait",
+  "tag": "ror-inferred",
+  "was": "FUN_00154e20",
+  "why": "half the x / z distance to the room's point, utlRandRange(0.7x, 1.3x)"
+ },
+ "00154f1c": {
+  "name": "GrgOutDisappear::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00154f1c",
+  "why": "GrgOutDisappear slot 4: termCommon, shown"
+ },
+ "00154f54": {
+  "name": "GrgOutEvent::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00154f54",
+  "why": "GrgOutEvent vtable 0x2e2a10 slot 2: global 0x53 = 0, hidden"
+ },
+ "00154f88": {
+  "name": "GrgOutEvent::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00154f88",
+  "why": "GrgOutEvent slot 3: returns -1"
+ },
+ "00154f90": {
+  "name": "GrgOutWalk::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00154f90",
+  "why": "GrgOutWalk vtable 0x2e2a40 slot 2: the room row, walkToPoint"
+ },
+ "00154fd8": {
+  "name": "GrgOutWalk::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00154fd8",
+  "why": "GrgOutWalk slot 3: steps of the walk, the turn to an fchr and its motion (input 3, hidden), the idle motions"
+ },
+ "00155498": {
+  "name": "GrgOutWalk::selectNext",
+  "tag": "ror-inferred",
+  "was": "FUN_00155498",
+  "why": "a draw over the room's rates (table 0x2f0410): walkToPoint, walkToFchr or startIdle; the next step"
+ },
+ "0015558c": {
+  "name": "GrgOutWalk::getRoomIndex",
+  "tag": "ror-inferred",
+  "was": "FUN_0015558c",
+  "why": "the achr's area 0x84..0x8b to rows 0..8 (0x89 by z < 260)"
+ },
+ "00155648": {
+  "name": "GrgOutWalk::walkToPoint",
+  "tag": "ror-inferred",
+  "was": "FUN_00155648",
+  "why": "another of the room's four points (table 0x2f01d0), TskMoveTypeGen mode 0xd to it when reachable"
+ },
+ "0015582c": {
+  "name": "GrgOutWalk::walkToFchr",
+  "tag": "ror-inferred",
+  "was": "FUN_0015582c",
+  "why": "collectFchrsNear type 9, the n-th by table 0x2f08b0, TskMoveTypeGen to its point (table 0x2f0430)"
+ },
+ "00155bb4": {
+  "name": "GrgOutWalk::startIdle",
+  "tag": "ror-inferred",
+  "was": "FUN_00155bb4",
+  "why": "motion 0x28 for utlRandRange(2, 6) loops; step 4"
+ },
+ "00155bf8": {
+  "name": "GrgOutWalk::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00155bf8",
+  "why": "GrgOutWalk slot 4: termCommon"
+ },
+ "00155c14": {
+  "name": "GrgOutTest::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00155c14",
+  "why": "GrgOutTest vtable 0x2e2a70 slot 2: global 0x53 = 1, step 0"
+ },
+ "00155c2c": {
+  "name": "GrgOutTest::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00155c2c",
+  "why": "GrgOutTest slot 3: motions 0x15 / 0x16 in turn"
  },
  "00156620": {
   "name": "FshMain::initOut",

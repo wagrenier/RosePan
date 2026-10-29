@@ -112,12 +112,6 @@ FshMain::~FshMain()
     ROSEPAN_STUB("FshMain::~FshMain", 0x00155d54);
 }
 
-// stub of ROR 0x00154030
-GrgMain::~GrgMain()
-{
-    ROSEPAN_STUB("GrgMain::~GrgMain", 0x00154030);
-}
-
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
 
 // stub of ROR 0x00194908
@@ -553,49 +547,6 @@ void GotMain::initOut()
 void GotMain::selectOut()
 {
     ROSEPAN_STUB("GotMain::selectOut", 0x00158dd8);
-}
-
-// stub of ROR 0x00154270
-void GrgMain::after()
-{
-    ROSEPAN_STUB("GrgMain::after", 0x00154270);
-}
-
-// stub of ROR 0x00154090
-void GrgMain::decide()
-{
-    ROSEPAN_STUB("GrgMain::decide", 0x00154090);
-}
-
-// stub of ROR 0x00154208
-void GrgMain::exec()
-{
-    ROSEPAN_STUB("GrgMain::exec", 0x00154208);
-}
-
-// stub of ROR 0x00153e40
-void GrgMain::initOut()
-{
-    ROSEPAN_STUB("GrgMain::initOut", 0x00153e40);
-}
-
-// stub of ROR 0x00154748
-void GrgMain::releaseHold()
-{
-    ROSEPAN_STUB("GrgMain::releaseHold", 0x00154748);
-}
-
-// stub of ROR 0x00154340
-void GrgMain::selectOut()
-{
-    ROSEPAN_STUB("GrgMain::selectOut", 0x00154340);
-}
-
-// stub of ROR 0x00154734
-int GrgMain::testView()
-{
-    ROSEPAN_STUB("GrgMain::testView", 0x00154734);
-    return {};
 }
 
 // stub of ROR 0x0015ab48

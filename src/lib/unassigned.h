@@ -127,30 +127,8 @@ public:
 /* Type 8, ClrMain: emy/emy_clr.h. */
 #include "emy/emy_clr.h"
 
-/* Type 9 (vtable from rtti.py; EE 0x244). layout: host -- polymorphic. */
-class GrgMain : public EmyMain
-{
-public:
-    GrgMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00288058
-            const _tagEnemyTransition *trans, float *pos)
-        : EmyMain(oid, name, param, prm, trans, pos)
-    {
-        initOut();
-    }
-    ~GrgMain();                                                         // EE slot 1 (+0x08), ROR 0x00154030
-    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x00154340
-    int  GetType() { return 9; }                                       // EE slot 3 (+0x18), ROR 0x00288090
-    void decide();                                                       // EE slot 4 (+0x20), ROR 0x00154090
-    void exec();                                                         // EE slot 5 (+0x28), ROR 0x00154208
-    void after();                                                        // EE slot 6 (+0x30), ROR 0x00154270
-    void initOut();                                                      // ROR 0x00153e40
-    /* Forwards to 0x154668 (EmyManager::testEmyView). */
-    int  testView();                                                     // ROR 0x00154734
-    /* The achr loses flags 0x10000000 and 0x80; m_240 = 1. */
-    void releaseHold();                                                  // ROR 0x00154748
-
-    int m_240;                  // ROR 0x240
-};
+/* Type 9, GrgMain: emy/emy_grg.h. */
+#include "emy/emy_grg.h"
 
 /* Type 10, NorMain: emy/emy_nor.h. */
 #include "emy/emy_nor.h"
