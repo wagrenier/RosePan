@@ -336,71 +336,8 @@ extern int g_bss_7a3210;        /* bss 0x7a3210 */
 /* ---- the file reader: moved to game/gamfile.h ---- */
 #include "game/gamfile.h"
 
-/* A font rasterizer (0x1beb70..0x1c0534, named in the sprman session; game/
- * by link order, before GamMan::init): draws a font file's 1- or 2-bit
- * glyphs into a 4- or 8-bit pixel buffer (a texture image). SprMan's text
- * sprites have one, MagScene's text windows one each (+0x2744). EE 0x6c.
- * layout: host -- the buffer and font pointers; EE offsets in comments. */
-struct GamFont
-{
-    // ROR 0x001beb70
-    GamFont()
-        : m_00(0), m_04(0), m_dst(NULL), m_dst_w(0), m_dst_h(0), m_dst_bits(4),
-          m_dst_size(0), m_color(0), m_30(0), m_34(2), m_char_w(0), m_char_h(0),
-          m_first_code(0), m_font(NULL), m_fill(0x80), m_68(1)
-    {
-    }
-    // ROR 0x001bebc4 (GCC 2 destructor: only the deleting variant)
-    ~GamFont() {}
-
-    /* Reads a font file's header (glyph cell, first code, tables). */
-    void setFont(const void *font);                                      // ROR 0x001bebec
-    /* The pixel buffer the glyphs go to; w & 0xff80, bits 4 or 8. 1 when
-     * set. */
-    int  setTarget(void *buf, u_int w, u_int h, int bits);               // ROR 0x001bedc0
-    /* Fills the whole buffer with m_fill; 1 when there is one. */
-    int  clear();                                                        // ROR 0x001beeb4
-    /* Fills the rect with m_fill. */
-    int  fillRect(int x, int y, int w, int h);                           // ROR 0x001bef24
-    void drawChar(int x, int y, int code);                               // ROR 0x001bf024
-    /* Scrolls the buffer by rows (< 0: up), filling the freed rows with
-     * m_fill; nothing beyond +-m_dst_h. */
-    void scroll(int rows);                                               // ROR 0x001bfe30
-    /* m_fill = fill (| 0x80 for 8-bit targets while m_68 is set). */
-    void setFill(u_int fill);                                            // ROR 0x001bff28
-    void setFillMsb(int on);                                             // ROR 0x001bff5c
-    void setColor(u_int color);                                          // ROR 0x001bff64
-    /* The glyph of a (Shift-JIS) code, -1 when the font has none. */
-    int  getGlyph(int code);                                             // ROR 0x001bffcc
-    int  getGlyphLeft(int glyph);                                        // ROR 0x001c020c
-    /* The glyph's width (proportional fonts), else m_char_w. */
-    int  getGlyphWidth(int glyph);                                       // ROR 0x001c0254
-    /* The width of a Shift-JIS string (a tail jump to 0x1c02f8). */
-    int  getTextWidth(const char *text);                                 // ROR 0x001c047c
-    /* A character's left offset, width and spacing (m_30 fixed, m_34
-     * proportional); all 0 below 0x20. */
-    void getCharMetrics(int code, int *left, int *width, int *extra);    // ROR 0x001c0078
-
-    int            m_00;            // ROR 0x00
-    int            m_04;            // ROR 0x04
-    u_char        *m_dst;           // ROR 0x0c: setTarget's buffer
-    int            m_dst_w;         // ROR 0x10
-    int            m_dst_h;         // ROR 0x14
-    int            m_dst_bits;      // ROR 0x18: 4 or 8
-    int            m_dst_size;      // ROR 0x1c
-    int            m_prop;          // ROR 0x24: the font has a width table
-    int            m_prop_on;       // ROR 0x28
-    int            m_color;         // ROR 0x2c: setColor
-    int            m_30;            // ROR 0x30
-    int            m_34;            // ROR 0x34
-    int            m_char_w;        // ROR 0x38: the glyph cell (font header +0xe)
-    int            m_char_h;        // ROR 0x3c: (+0xf), the line height
-    int            m_first_code;    // ROR 0x44
-    const u_char  *m_font;          // ROR 0x54: setFont's file
-    int            m_fill;          // ROR 0x64: fillRect's colour
-    int            m_68;            // ROR 0x68
-};
-static_assert(offsetof(GamFont, m_00) == 0x00, "m_00");
+/* ---- the font rasterizer: moved to game/gamfont.h ---- */
+#include "game/gamfont.h"
 
 /* The tail of utl/utlgame.cpp (0x103edc..0x1041c4: the dog / enemy
  * wrappers) is in its header; the random numbers after it are

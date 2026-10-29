@@ -907,12 +907,19 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   MagSystem::m_frame & 1) over the screen on layer 1. `update` only steps the CLUT animations.
   volumeOn / volumeOff / saveVolume / restoreVolume 0x18f024..0x18f0b4 wrap
   `GamMan::switchVolume` 0x1d3ac8 (GamMan +0x22214 the saved volume, -1 none; setVolume 0x1d3a38).
-- **GamFont** (0x1beb70..~0x1c0534, unassigned@001bde58, class named in the sprman session): a
-  0x6c-byte software font rasterizer -- setFont 0x1bebec (font file: cell w / h bytes +0xe / +0xf,
-  glyph bits +0x10, first code +0xc, flags +0xb), setTarget 0x1bedc0 (pixels, w, h, 4 / 8 bits),
-  fillRect 0x1bef24, drawChar 0x1bf024, setColor 0x1bff64, getGlyph 0x1bffcc (bsearch / Shift-JIS
-  walk), getGlyphLeft / getGlyphWidth 0x1c020c / 0x1c0254. Declared in lib/unassigned.h; constructor
-  and destructor are written inline there, the rest are stubs.
+- **GamFont** (`game/gamfont.cpp`, pinned 0x1beb70..0x1c05c0, 2026-10-29, `done`): a 0x6c-byte
+  software font rasterizer into a 4- or 8-bit CLUT image the owner uploads (SprMan +0x440, MagScene's
+  four window fonts +0x2744). Font file header (`GamFontHeader`, EE 0x24): flags u32 +0x8 (0x2000000
+  = holds the JIS level-1 kanji, 0x4000000 = level 2), glyph count u16 +0xc, cell w / h +0xe / +0xf,
+  bits per pixel (1 / 2) +0x10, table offsets (from +4) +0x14 sorted u16 codes, +0x1c (left, width)
+  byte pairs (present = proportional), +0x20 glyph bitmaps (rows MSB first, (w*bpp+7)/8 bytes).
+  getGlyph 0x1bffcc: bsearch (0x2782c8, comparator 0x1bffac) over the code table; with kanji flags,
+  codes >= 0x8140 index the Shift-JIS row table at data 0x2b8de8 (entry 0 = single bytes {0x20,
+  0xe0}, then 44 rows 0x8140..0xea40 {start, count}, 8-byte rows) after the table's m_44 codes.
+  drawChar ORs v | m_color per glyph pixel (1-bit pixels count as 3; 4-bit buffers: even pixel in
+  the low nibble), putChar 0x1bf8c4 stores (no callers). Widths: getCharWidth 0x1c0148 (6 for spaces
+  in proportional fonts), calcTextWidth 0x1c02f8 (0x8164 = 0x12, 0x8149 = 10, + m_30 / m_34 spacing
+  per character). getGlyphWidth masks the width-table index to a byte (ROM quirk, kept).
 
 - **The sprite texture loader** (`spr/sprtexture.cpp`, pinned 0x18f5b0..0x190a78, 2026-10-22,
   `verify`): `SprTexture` (EE 0x438) loads a list of `SprTexFile` (EE 0x18: id 0..59, file name,

@@ -45,7 +45,7 @@ void MagLifeWindow::setProportional(int on)
 void MagLifeWindow::setFontWord30(int v)
 {
     ROR_ASSERT(m_fntman); /* 55 */
-    m_fntman->m_30 = v;
+    m_fntman->m_spacing = v;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ void MagLifeWindow::setFontWord30(int v)
 void MagLifeWindow::setFontWord34(int v)
 {
     ROR_ASSERT(m_fntman); /* 61 */
-    m_fntman->m_34 = v;
+    m_fntman->m_spacing_prop = v;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -168,13 +168,6 @@ void MagLifeWindow::render(I3dLayer *layer)
         }
         m_fade_time = t - 1;
     }
-
-    /* PC: temporary, while GamFont::setTarget is a stub. Its font then has
-     * no buffer (m_dst_w 0), setFontManager collapses m_uv to one texel and
-     * the sprite covers the title with it (2026-10-29 smoke run: black from
-     * frame 1680). Remove once mag text renders through a real GamFont. */
-    if (m_buf_w <= 0)
-        return;
 
     I3dTexSetDesc set_desc;
     set_desc.m_depth = 60000.0f;
