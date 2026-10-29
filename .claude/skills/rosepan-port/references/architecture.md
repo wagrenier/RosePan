@@ -2486,4 +2486,15 @@ not identified yet.
   reach it at m_walk (cap 250) and keeps the led point only when it is on a cell of m_layer
   (getEmyTypeFlag: 1 for every type). The countdowns +0xa9c / +0xaa4 / +0xaac and m_se are never set
   before use in the ROM (the port zeroes them / -1 in the constructors).
+- TskEnemyMove's route (complete 2026-10-29): +0x88 is a GamSectaPath (cells, m_num +0x284), +0x288 127
+  points of 0x10 (setRoute 0x2019d0: a cell's m_pos per path cell after the start, m_goal last; a point
+  replaces the one before where the way bends under pi/4), +0x18 a findCells scratch (isBlocked 0x202e20 /
+  moveRoot). Steps: 0 nextPoint 0x201164 + walk 0x201524 (root motion steered by the angle off / frames
+  left, at most m_turn per frame; a turn past pi/4), 1 a stand / look / side step moved by its root until
+  the mode ends (moveRootStill 0x202638), then checkBump 0x202234, 2 a turn on the spot (startTurn
+  0x202874: motion 9 / 8, 15 / 14 carrying) until within pi/6, 3 wait for the blend, 4 restart the walk
+  motion. Blocks: moveRoot 0x202380 returns 1 off the list's cells, 2 into an object; avoid 0x202900
+  side-steps (0x10 / 0x11) to a free side m_angle off, probed m_dist out, else m_wait1 = 0 forces a
+  re-plan. Walk motions: m_parsonality + 3, 7 near the goal (+0xab4, the kind row's float word 4, also
+  switches +0x50 to the +0x58 speed), 0xb carrying (m_mode 0). +0xa80 is the turn side (1 = motion 8).
 - emyPlaySE 0x16a8a4 returns playSE's SndMan id (both tasks keep it).

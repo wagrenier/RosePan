@@ -21,6 +21,7 @@
 #include <stddef.h>
 
 #include "sdk/eetypes.h"
+#include "sct/sctlayer.h"
 #include "task/tsk_man.h"
 
 struct DogActor;
@@ -46,7 +47,7 @@ struct EmyMoveParam
     int    _10;                 // [16]: not set
     u_int  m_kind[4];           // [17]: EmyMain::getMoveParam's words 0..3
     int    m_type;              // [21]: EmyMain::GetType
-    u_int  m_kind4;             // [22]: ... and word 4
+    u_int  m_kind4;             // [22]: ... and word 4 (a float's bits: the slow-down range)
     float  m_range;             // [23]: added to the two radii (the stop distance)
 };
 
@@ -67,10 +68,12 @@ struct EmyTurnParam
  * cells, walks it with the walk / turn motions, and breaks off now and
  * then (pickEvent: an idle motion, a look around). The result goes to
  * *m_done: 0 under way, 1 arrived (within m_stopRange), 2 the target is
- * gone. layout: host -- polymorphic; EE offsets in the comments.
- * Written: the lifecycle, exec's frame, pickEvent, tickVoice and
- * getTargetPos. Not yet: plan 0x200988 and step 0x200d18 with their
- * route helpers 0x201164..0x202e20 (the route data +0x88..+0xa80). */
+ * gone. The route: SctLayer::searchPath through list 1's cells, the
+ * cells' points thinned where the way bends less than pi / 4 (setRoute),
+ * walked with the root motion steered toward the next point (walk);
+ * a turn on the spot past pi / 4 (startTurn), a side step round an
+ * object or a missing cell ahead (avoid), else a re-plan (m_wait1 = 0).
+ * layout: host -- polymorphic; EE offsets in the comments. */
 struct TskEnemyMove : CmnITask
 {
     /* m_active, m_dog and m_pause cleared (EmyMain::loadParam news it).
@@ -116,6 +119,55 @@ struct TskEnemyMove : CmnITask
      * type 6 (one of 16) / 10 (one of 4), else voice 12 for types 0..5;
      * EmyManager's work word marks the speaker until the SE ends. */
     void tickVoice(const float *pos);                                    // ROR 0x00202fe4
+    /* The walk points from m_path: one per cell after the start, the
+     * last m_goal, a point replacing the one before when the way turns
+     * less than pi / 4 there (tested only while m_goal has a list-1
+     * cell); m_node 0. */
+    void setRoute();                                                     // ROR 0x002019d0
+    /* Starts walking to m_points[m_node]: a turn (startTurn, 2) when it
+     * is more than pi / 4 off the facing; else the walk motion (m_mode 0:
+     * 0xb carrying, else m_walkMotion / 7 near the goal; m_mode set with
+     * m_68: 10 / 0xb and 3), m_walk the near / far speed on the last
+     * point; returns the next m_step. */
+    int  startWalk(const float *pos);                                    // ROR 0x00201d58
+    /* Step 0's point check: on to the next point within two keep radii;
+     * at the last one within m_stopRange, a turn when the goal is more
+     * than m_turn off (0); a followed target's position becomes the last
+     * point. 1: walk on. */
+    int  nextPoint(const float *pos);                                    // ROR 0x00201164
+    /* One frame of the walk to m_points[m_node]: the side step test for
+     * m_mode 0 (checkAhead), the root move turned by the angle off /
+     * the frames left (at most m_turn), a turn or side step when it hits
+     * a wall / object; *m_done 1 at the last point within m_stopRange
+     * and m_turn of facing it. */
+    void walk(const float *pos);                                         // ROR 0x00201524
+    /* checkAhead's probe at 70, then 30, along the facing: avoid when
+     * blocked; 1 then. f12 / f13 (the angle off and its size) unread. */
+    int  checkAhead(const float *pos);                                   // ROR 0x00201fa4
+    /* The same probe one m_walk ahead (step 2's straight-on test). */
+    int  checkStep(const float *pos);                                    // ROR 0x00202138
+    /* An object at pos (testHitAt): the side step away from it (motion
+     * 0x10 when it is left, else 0x11), m_step 1; 1 then. */
+    int  checkBump(const float *pos);                                    // ROR 0x00202234
+    /* The motion's root move this frame turned by turn (heading less
+     * turn): 1 its end leaves the list's cells, 2 an object there, 0
+     * moved; 0 also while a mode runs (getModeArg >= 0). */
+    int  moveRoot(float turn);                                           // ROR 0x00202380
+    /* moveRoot without a turn; only type-2 objects pass. */
+    int  moveRootStill();                                                // ROR 0x00202638
+    /* The turn motion toward d's side (9 / 15 carrying for d > 0, else
+     * 8 / 14), m_right, m_step 2. */
+    void startTurn(float d);                                             // ROR 0x00202874
+    /* A side step: one side at random (m_angle off rot, probed m_dist
+     * out), the other when blocked: motion 0x10 / 0x11, m_step 1; both
+     * blocked: m_wait1 0 (a re-plan) and m_step 0. */
+    void avoid(float rot, const float *pos);                             // ROR 0x00202900
+    /* Blocked: no list cell of m_layer at at (into m_cells), or
+     * testHitAt(pos) hits something but skip. */
+    int  isBlocked(const float *pos, const float *at, u_int skip);       // ROR 0x00202e20
+    /* PC: the probe the ROM inlines: pos and s_movePos moved dist along
+     * rot (y pos's), then isBlocked with m_target. */
+    int  probe(float rot, float dist, const float *pos);
     /* target's position into pos: emyGetSEPos, or for the PC its spine
      * node led along the actor's facing by the PC's speed (by its state
      * class) x the frames to get there at m_walk (at most 250), when the
@@ -126,9 +178,8 @@ struct TskEnemyMove : CmnITask
     u_int     m_oid;            // ROR 0x08
     int       m_actor;          // ROR 0x0c: the achr's scene actor (ACHRstat m_actor)
     int       m_mode;           // ROR 0x10: prm m_mode
-    int       m_layer;          // ROR 0x14: EmyManager::getEmyTypeFlag: the secta list walked
-    /* ROR 0x18..0x27: not read yet (0x18 is the base the route points
-     * are addressed from: +0x288 = +0x18 + 0x270). */
+    int       m_layer;          // ROR 0x14: EmyManager::getEmyTypeFlag: the secta list a move must stay on
+    GamSecta *m_cells[4];       // ROR 0x18: findCells' answer for isBlocked / moveRoot
     DogActor *m_dog;            // ROR 0x28: scene actor m_actor
     int       m_step;           // ROR 0x2c: step's state, 0 at start
     int      *m_done;           // ROR 0x30: prm m_done
@@ -137,22 +188,22 @@ struct TskEnemyMove : CmnITask
     float     m_pos[3];         // ROR 0x3c: prm m_pos
     int       m_48;             // ROR 0x48: prm word 14 (not set by the starters)
     float     m_speed;          // ROR 0x4c: m_agl / 60, the motion speed
-    float     m_walk;           // ROR 0x50: prm m_walk (getTargetPos's speed)
+    float     m_walk;           // ROR 0x50: prm m_walk, then startWalk's m_runSpeed / m_walkSpeed (getTargetPos's speed, the probe step)
     float     m_walkSpeed;      // ROR 0x54: m_walk x m_agl
     float     m_runSpeed;       // ROR 0x58: m_run x m_agl
     int       m_motion;         // ROR 0x5c: the motion changeMotion was last given, 0
     int       m_motionFlags;    // ROR 0x60: 0x40 at start, 0x41 for the idle motion
-    int       m_idleMotion;     // ROR 0x64: m_parsonality + 3
+    int       m_walkMotion;     // ROR 0x64: m_parsonality + 3 (7 near the goal instead)
     int       m_68;             // ROR 0x68: step 3 -> 4 when set
     int       m_6c;             // ROR 0x6c
     int       m_carry;          // ROR 0x70: walk motion 10 instead of 2
     int       m_74;             // ROR 0x74: blocks event 4; idle motion 7 when set
     float     m_goal[4];        // ROR 0x78: where the route ends (m_pos or getTargetPos); w unused
-    /* ROR 0x88..0xa77: SctLayer::searchPath's route (out at +0x88, its
-     * point count +0x284, points of 0x10 from +0x288). Not placed yet. */
-    int       m_nodes;          // ROR 0xa78: route points
+    GamSectaPath m_path;        // ROR 0x88: SctLayer::searchPath's cells (m_num at +0x284)
+    float     m_points[GAM_SECTA_PATH_MAX][4]; // ROR 0x288: setRoute's walk points (w unused)
+    int       m_nodes;          // ROR 0xa78: points in m_points
     int       m_node;           // ROR 0xa7c: the point walked to
-    int       m_turnLeft;       // ROR 0xa80
+    int       m_right;          // ROR 0xa80: startTurn: 1 turning with 8 / 14 (d <= 0)
     float     m_turn;           // ROR 0xa84: prm m_turn (the angle step 2 walks within)
     float     m_keepRadius;     // ROR 0xa88: GamMan::getObjKeepRadius(m_oid)
     float     m_stopRange;      // ROR 0xa8c: keep radius + target's radius + prm m_range
@@ -161,11 +212,11 @@ struct TskEnemyMove : CmnITask
     int       m_kind0;          // ROR 0xa98: prm m_kind[0]: event 4's period
     int       m_wait0;          // ROR 0xa9c
     int       m_kind1;          // ROR 0xaa0: prm m_kind[1]: event 2's period
-    int       m_wait1;          // ROR 0xaa4
+    int       m_wait1;          // ROR 0xaa4: event 2's countdown (0: a re-plan next frame)
     int       m_kind2;          // ROR 0xaa8: prm m_kind[2]: event 3's period
     int       m_wait3;          // ROR 0xaac: event 3's countdown
-    int       m_kind3;          // ROR 0xab0: prm m_kind[3]: event 3 on / off
-    u_int     m_kind4;          // ROR 0xab4: prm m_kind4
+    int       m_kind3;          // ROR 0xab0: prm m_kind[3]: event 3's motion, 0 none
+    float     m_nearRange;      // ROR 0xab4: prm m_kind4: the last point's slow-down range
     int       m_se;             // ROR 0xab8: the voice's SndMan id, -1 none
     int       m_voiceWait;      // ROR 0xabc: frames to the next voice
     int       m_type;           // ROR 0xac0: prm m_type (EmyMain::GetType)

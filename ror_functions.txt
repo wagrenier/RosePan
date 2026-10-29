@@ -4405,18 +4405,18 @@
 /* 00200988 0000023c */ TskEnemyMove::plan(){}  // ror
 /* 00200bc4 00000154 */ TskEnemyMove::pickEvent(){}  // ror
 /* 00200d18 0000044c */ TskEnemyMove::step(){}  // ror
-/* 00201164 000003c0 */ FUN_00201164(){}
-/* 00201524 000004ac */ FUN_00201524(){}
-/* 002019d0 00000388 */ FUN_002019d0(){}
-/* 00201d58 0000024c */ FUN_00201d58(){}
-/* 00201fa4 00000194 */ FUN_00201fa4(){}
-/* 00202138 000000fc */ FUN_00202138(){}
-/* 00202234 0000014c */ FUN_00202234(){}
-/* 00202380 000002b8 */ FUN_00202380(){}
-/* 00202638 0000023c */ FUN_00202638(){}
-/* 00202874 0000008c */ FUN_00202874(){}
-/* 00202900 00000520 */ FUN_00202900(){}
-/* 00202e20 000000a8 */ FUN_00202e20(){}
+/* 00201164 000003c0 */ TskEnemyMove::nextPoint(){}  // ror
+/* 00201524 000004ac */ TskEnemyMove::walk(){}  // ror
+/* 002019d0 00000388 */ TskEnemyMove::setRoute(){}  // ror
+/* 00201d58 0000024c */ TskEnemyMove::startWalk(){}  // ror
+/* 00201fa4 00000194 */ TskEnemyMove::checkAhead(){}  // ror
+/* 00202138 000000fc */ TskEnemyMove::checkStep(){}  // ror
+/* 00202234 0000014c */ TskEnemyMove::checkBump(){}  // ror
+/* 00202380 000002b8 */ TskEnemyMove::moveRoot(){}  // ror
+/* 00202638 0000023c */ TskEnemyMove::moveRootStill(){}  // ror
+/* 00202874 0000008c */ TskEnemyMove::startTurn(){}  // ror
+/* 00202900 00000520 */ TskEnemyMove::avoid(){}  // ror
+/* 00202e20 000000a8 */ TskEnemyMove::isBlocked(){}  // ror
 /* 00202ec8 00000044 */ TskEnemyMove::pause(){}  // ror
 /* 00202f10 00000050 */ TskEnemyMove::stop(){}  // ror
 /* 00202f60 0000005c */ TskEnemyMove::suspend(){}  // ror

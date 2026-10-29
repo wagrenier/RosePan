@@ -2179,7 +2179,7 @@
    "why": "Unanchored run between task/tsk_man.cpp and task/tsk_scene.cpp: the seq-driven character tasks (TskMtnMove*, TskMove*, TskRotAdj, TskChrRot, TskAttach) and their chr* starters, plus the generic script tasks (TskMovie, TskMsgMan, TskSeqEvent, TskSysFunc, TskFrameFunc). Ends at 0x1f6c64 where DisplayMessage / SeManager / VoiceManager / ScenePlay (tsk_scene.cpp's classes, used by 0x1f82e4..) begin; 0x1f6c14 is still called from TskChrRot code. Name descriptive (no source string)."
   },
   "task/tsk_enemy.cpp": {
-   "notes": "Left: TskEnemyMove::plan 0x200988 and step 0x200d18 (stubbed at the end of tsk_enemy.cpp) and their route helpers 0x201164, 0x201524, 0x2019d0, 0x201d58, 0x201fa4, 0x202138, 0x202234, 0x202380, 0x202638, 0x202874, 0x202900, 0x202e20 (still FUN_ names). They need the route block +0x88..+0xa80 placed: SctLayer::searchPath out record at +0x88, point count +0x284, 16-byte points from +0x288, m_nodes +0xa78, m_node +0xa7c; bss 0x6e97d8 is s_movePos (exec writes it). PORT: the constructors set m_se -1, the event countdowns and Turn m_pause to 0 (the ROM leaves heap garbage). Doubt in open-items: both getTargetPos lead the PC along the enemy actor's facing, as the ROM reads. Screen: the 15 s smoke run ends on the boot disclaimer as before; no enemy is on the smoke path (the bus-stop prologue has none), so nothing can show these tasks yet. The rest of unassigned@001fd424 (0x1fd424..0x20067c) is the TskAttack / TskDamage step table of data 0x2feb64, a task/ file still to name.",
+   "notes": "Nothing on the smoke path starts an enemy (the 15 s run ends on the boot disclaimer, same as before), so the code is verify: the first session whose run reaches a room with an enemy (a chase or emyStartMove) should check the walk on screen and mark it done. Doubts in open-items (task/tsk_enemy.cpp): near the goal startWalk switches +0x50 to the +0x58 speed, which is prm m_run (0 for a plain move) - the m_run / m_walk names may be swapped; plan's searchPath always uses secta list 1 while the moves test m_layer. The step 2 ROM computes the angle to the point from pos a second time and drops it (noted in the callcheck line). PC helper probe() is the inlined 2-point probe of checkAhead / checkStep / avoid. Left in the area: 0x1fd424..0x20067c (TskAttack / TskDamage steps of data 0x2feb64) is another task/ file still to name.",
    "ranges": [
     [
      "0020067c",
@@ -2191,9 +2191,14 @@
      "date": "2026-10-29 09:01",
      "status": "partial",
      "summary": "task/tsk_enemy.cpp pinned 0x20067c..0x203d94 (cut from unassigned@001fd424). TskEnemyTurn complete (13 functions: start, exec, turn, setTurnMotion, tickVoice, getTargetPos, pause, suspend, resume, init, term, ctor, dtor). TskEnemyMove lifecycle written: ctor, start, stop, suspend, resume, pause, init, term, exec frame, pickEvent, tickVoice, getTargetPos. Classes moved from lib/unassigned.h to task/tsk_enemy.h; emyPlaySE now returns the SndMan id. 19 functions named."
+    },
+    {
+     "date": "2026-10-29 09:13",
+     "status": "verify",
+     "summary": "TskEnemyMove complete: plan 0x200988, step 0x200d18 and the route helpers setRoute, startWalk, nextPoint, walk, checkAhead, checkStep, checkBump, moveRoot, moveRootStill, startTurn, avoid, isBlocked (12 named). Route block placed in the header: +0x18 findCells scratch, +0x88 GamSectaPath, +0x288 127 walk points; +0xab4 is a float (m_nearRange), +0x64 the walk motion, +0xa80 the turn side (m_right). The whole TU is now reconstructed, no stubs left."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "TskEnemyMove (vtable 0x2e5040: slots 3 0x20067c, 5 0x200684, ctor 0x2006b0) and TskEnemyTurn (0x2e5080) with their move / turn helpers, up to system/system.cpp 0x203d94. No RoR source string: the name is a guess after task/tsk_*.cpp. 0x1fd424..0x20067c (TskAttack / TskDamage steps from the table at 0x2feb64) is another file."
   },
   "task/tsk_man.cpp": {
