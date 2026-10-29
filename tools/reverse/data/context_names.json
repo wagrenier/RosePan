@@ -12515,11 +12515,29 @@
   "was": "FUN_001a074c",
   "why": "when open: 0x1a0950 and clears the open word; -1 when not open"
  },
+ "001a0788": {
+  "name": "MnuTextList::step",
+  "tag": "ror-inferred",
+  "was": "FUN_001a0788",
+  "why": "MnuTextList::processPad tail-jumps here with this and the pad; steps +0x3c 0,1,2(select),4,5 and returns 1 once done"
+ },
  "001a0860": {
   "name": "MnuTextList::clear",
   "tag": "ror-inferred",
   "was": "FUN_001a0860",
   "why": "called by MnuTextList::MnuTextList: clears the words, +0x20 = 1, +0x24 / +0x28 = 2, +0x60 = -1"
+ },
+ "001a08d4": {
+  "name": "MnuTextList::allocText",
+  "tag": "ror-inferred",
+  "was": "FUN_001a08d4",
+  "why": "called by MnuTextList::open; allocates 32 x 0x20-byte buffers into +0x84 with the path mnu/mnuselect.cpp"
+ },
+ "001a0950": {
+  "name": "MnuTextList::freeText",
+  "tag": "ror-inferred",
+  "was": "FUN_001a0950",
+  "why": "called by MnuTextList::close; utlMemFree on the 32 buffers at +0x84"
  },
  "001a09b8": {
   "name": "MnuTextList::setItems",
@@ -12538,6 +12556,18 @@
   "tag": "ror-inferred",
   "was": "FUN_001a0bb8",
   "why": "when open and +0x70 is 1, sets +0x44 to 4; MnuTitle::execMovie calls it after a choice or cancel"
+ },
+ "001a0bdc": {
+  "name": "MnuTextList::stepExtra",
+  "tag": "ror-inferred",
+  "was": "FUN_001a0bdc",
+  "why": "empty hook (returns 0) MnuTextList::step calls after select"
+ },
+ "001a0be4": {
+  "name": "MnuTextList::select",
+  "tag": "ror-inferred",
+  "was": "FUN_001a0be4",
+  "why": "MnuTextList::step's state 2 body: opens the window and cursor sprite, moves the cursor, picks or cancels, draws the rows"
  },
  "001a1244": {
   "name": "MnuMcd::MnuMcd",
