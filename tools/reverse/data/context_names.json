@@ -6077,6 +6077,54 @@
   "was": "FUN_0014313c",
   "why": "sub mode 9; magscenedebug.cpp assert m_window[m_dbg_window[i]]"
  },
+ "00143498": {
+  "name": "MagSceneIFMap::getMax",
+  "tag": "ror-inferred",
+  "was": "FUN_00143498",
+  "why": "mag/magsceneif.cpp line 0x1d: asserts m_scene_ptr, returns the map loader index's m_num (scene +0x2278); getMax() named by the asserts of 0x1434e4; class name as architecture.md has it"
+ },
+ "001434e4": {
+  "name": "MagSceneIFMap::getName",
+  "tag": "ror-inferred",
+  "was": "FUN_001434e4",
+  "why": "asserts 0 <= theIndex && theIndex < getMax(); returns the map index m_name[theIndex] (scene +0x228c); class name as architecture.md has it"
+ },
+ "00143578": {
+  "name": "MagSceneIFMap::find",
+  "tag": "ror-inferred",
+  "was": "FUN_00143578",
+  "why": "asserts theName; MagLoaderIndex::find on the map loader index (scene +0x2278); class name as architecture.md has it"
+ },
+ "001435f4": {
+  "name": "MagSceneIFChara::getMax",
+  "tag": "ror-inferred",
+  "was": "FUN_001435f4",
+  "why": "line 0x43: returns the chara loader index m_num (scene +0x2228); class name as architecture.md has it"
+ },
+ "00143640": {
+  "name": "MagSceneIFChara::getName",
+  "tag": "ror-inferred",
+  "was": "FUN_00143640",
+  "why": "asserts theIndex < getMax(); returns the chara index m_name[theIndex] (scene +0x223c); class name as architecture.md has it"
+ },
+ "001436d4": {
+  "name": "MagSceneIFChara::find",
+  "tag": "ror-inferred",
+  "was": "FUN_001436d4",
+  "why": "asserts theName; MagLoaderIndex::find on the chara loader index (scene +0x2228); class name as architecture.md has it"
+ },
+ "00143750": {
+  "name": "MagSceneIFChara::getCategory",
+  "tag": "ror-inferred",
+  "was": "FUN_00143750",
+  "why": "MagCharaLoader::getCategory on the scene chara loader (+0x215c); class name as architecture.md has it"
+ },
+ "001437c0": {
+  "name": "MagSceneIFChara::getMotionNo",
+  "tag": "ror-inferred",
+  "was": "FUN_001437c0",
+  "why": "DogActor::getMotionNoByName on scene actor theActor (+0x2920 + n*0x4d0); when negative, retries getMotionNoBySuffix with the name cut at its first * or +; class name as architecture.md has it"
+ },
  "00143d7c": {
   "name": "MagScene::setFog",
   "tag": "ror-inferred",
@@ -21209,6 +21257,12 @@
   "was": "FUN_0021614c",
   "why": "an empty function (jr ra) at the end of debug/mimu_debug.cpp, no references"
  },
+ "00216154": {
+  "name": "motNameGetMotionNo",
+  "tag": "ror-inferred",
+  "was": "FUN_00216154",
+  "why": "forwards (actor, name) to MagSceneIFChara::getMotionNo on the scene's chara interface (0x781268); motNameConvert's lookup"
+ },
  "00216184": {
   "name": "motNameConvert",
   "tag": "ror-inferred",
@@ -21225,7 +21279,31 @@
   "name": "motNameGetCategory",
   "tag": "ror-inferred",
   "was": "FUN_002162e0",
-  "why": "MagCharaLoader::getCategory of a character index (0x143750); scenePlayStart picks the oid type from it"
+  "why": "forwards to MagSceneIFChara::getCategory (0x143750)"
+ },
+ "0021630c": {
+  "name": "motNameGetMapMax",
+  "tag": "ror-inferred",
+  "was": "FUN_0021630c",
+  "why": "forwards to MagSceneIFMap::getMax (0x143498) on the map interface (0x781260); no callers"
+ },
+ "00216334": {
+  "name": "motNameGetMapName",
+  "tag": "ror-inferred",
+  "was": "FUN_00216334",
+  "why": "forwards a1 to MagSceneIFMap::getName (0x1434e4); no callers"
+ },
+ "0021635c": {
+  "name": "motNameFindMap",
+  "tag": "ror-inferred",
+  "was": "FUN_0021635c",
+  "why": "forwards a1 to MagSceneIFMap::find (0x143578); no callers"
+ },
+ "00216384": {
+  "name": "motNameGetCharaMax",
+  "tag": "ror-inferred",
+  "was": "FUN_00216384",
+  "why": "forwards to MagSceneIFChara::getMax (0x1435f4); no callers"
  },
  "00217f10": {
   "name": "utlAtan2",
