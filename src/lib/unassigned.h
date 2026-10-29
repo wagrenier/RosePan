@@ -379,36 +379,9 @@ extern int g_bss_7a3210;        /* bss 0x7a3210 */
  * own file. */
 #include "i3d/i3dpacket.h"
 
-/* An i3r item's vector at time t (unassigned@00225018): its data when its
- * child 0 has no data, else child 0's keys interpolated (0x225148). */
-struct I3rItem;
-void  i3rTrackGetValue(const I3rItem *track, float *out, float t);       // ROR 0x002251f0
-
-/* A blend target's weight at time t (unassigned@00225018): its child 0's
- * curve (a type 0x58 item: keys, then slope / intercept pairs) at t when
- * it has one, else the target's own weight (its data). */
-float i3rBlendGetWeight(float t, const I3rItem *target);                // ROR 0x00225108
-
-/* The block VU1 gets for one blended slot (0x225498's first argument;
- * EE: five words). layout: host -- m_data is a pointer. */
-struct I3rVertexRef
-{
-    const void *m_data;         // ROR 0x00: the qwords (or the VIF stream, m_kind 1)
-    u_int   m_qwc;              // ROR 0x04
-    u_int   m_count;            // ROR 0x08: the vertices
-    u_int   m_kind;             // ROR 0x0c: the 0x33 block's kind
-    u_int   m_blended;          // ROR 0x10: 1 = computed into buf (V4-32 qwords)
-};
-
-/* One blended slot (unassigned@00225018): blocks[0] the mesh's own, [k]
- * blend target k. Group flags & 2: buf = the sum of list's weights x their
- * targets (flags & 1: each target's per-vertex curves at t); flags & 1
- * alone: buf = the own block's curves at t; else ref = the own block.
- * Returns the end of what it wrote into buf. PC: the list in place of the
- * ROM's entries and count. */
-struct I3rBlendList;
-float *i3rBlendVertices(float t, I3rVertexRef *ref, float *buf, const I3rItem *blocks, u_int num_blocks,
-                        const I3rBlendList *list, u_int flags);         // ROR 0x00225498
+/* The curves, tracks, blend targets and vertex refs (i3rTrackGetValue,
+ * i3rBlendVertices ...) have their own file. */
+#include "i3d/i3rblend.h"
 
 /* A layer's light set, fog and view (EE layer +0x82c / +0x830 / +0x834).
  * Opaque: built by 0x11262c over the scene light pool, i3dCtxSetFog and

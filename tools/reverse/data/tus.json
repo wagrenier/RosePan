@@ -857,6 +857,24 @@
    "status": "verify",
    "why": "I3D_I3M motion file root (id 0x303a68): id/version checks, relocators, node and key accessors; between i3rroot.cpp and i3croot.cpp, which it mirrors"
   },
+  "i3d/i3rblend.cpp": {
+   "notes": "Seen: the 240 s New Game run reaches the bus-stop room; the shot is pixel-identical to the GamFont progress shot, so nothing on screen shows these yet (uv tracks feed i3rGetMaterialPacket, which the host mesh draw does not read; the skin and VIF writers have no PC caller, rosepan_i3dmesh.cpp SkinBatch and its block rebase stand in). Mark done when a uv-animated material or a blended mesh shows right. Doubts: SkinBatch writes xyz only and keeps untouched vertices, the ROM zeroes the results and sums all four components; i3rBlendAddVertices keeps the ROM bug of a source that never advances (hazards.md). i3rBlendVertices skips an empty list (the ROM would take entry 0). Ghidra shows vcallms operands as byte addresses: divide by 8 for vudis.py.",
+   "ranges": [
+    [
+     "00225018",
+     "00226278"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-29 08:48",
+     "status": "verify",
+     "summary": "Pinned the unassigned@00225018 run as i3d/i3rblend.cpp (0x225018..0x226278) and wrote all 18 functions: key bisect, scalar and vector curves, i3rTrackGetValue, i3rBlendGetWeight, i3rBlendVertices and its adders, the vertex refs, both skin passes (VU0 microprograms 0x15e/0x172/0x186 read), i3rMakeSkinMatrices, the average and the VIF unpack writers. Declarations moved from unassigned.h to i3rblend.h, three stubs deleted."
+    }
+   ],
+   "status": "verify",
+   "why": "between i3dtim2.cpp (ends 0x225018) and i3dview.cpp (0x226278): the i3r curve / track evaluators, blend targets and the vertex refs (skin pools, VIF unpacks) the mesh draw uses; an earlier session named the blend functions i3rblend"
+  },
   "i3d/i3rdraw.cpp": {
    "notes": "Verify: mark done once the forest shadow is compared with real-game footage (direction, darkness, softness). Doubts in open-items.md Projected shadow, host: the empty STQ slot match (check EE byte 0x41 = 3), strength 0.4 = light alpha clamped (the ROM VU1 lighting may scale it), no receiver culling (have_projector false), shadow filter is the renderer default. Unrelocate 0x22c328 does not know I3R_FAR_PTR. Still open from before: multi-layer materials unseen; skinned sorted writers 0x222560 / 0x222aa0 key by skinned centroid vs host box centre; no per-mesh box cull on the host. The intermittent access violation after frame 6240 of the 200 s run is still there (seen this session too); rerun gdbrun.py with the smoke pad to locate it. Also recorded this session at the user's request: architecture.md PC platform layer now requires any aspect ratio from the window or renderer size (a manual aspect setting is planned).",
    "ranges": [
@@ -2251,6 +2269,7 @@
   "unassigned@0021c960": {},
   "unassigned@0021fb50": {},
   "unassigned@00224de0": {},
+  "unassigned@00225018": {},
   "unassigned@00228c08": {},
   "unassigned@0022b4b8": {},
   "unassigned@0022e840": {},

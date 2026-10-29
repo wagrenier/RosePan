@@ -921,3 +921,17 @@ build.py --run 45: the last trace before the log goes quiet names the call; comp
   environment variable for one run: three runs located it in 15 minutes. A new draw whose data
   comes from a stubbed producer is the first suspect for a black screen.
 
+## A VU0 vcallms address is a byte address in Ghidra (2026-10-29)
+
+- Symptom: `python vudis.py 2949f0 9c 0xaf0` prints nothing for i3rSkinVertices' `_vcallms(0xaf0)`.
+- Cause: Ghidra shows the vcallms operand as a byte address (index x 8); vudis.py takes the
+  instruction index.
+- Fix: divide by 8 (`vudis.py 2949f0 9c 0x15e 0x172 0x186` for the skin microprograms).
+
+## A ROM loop that never advances its source (2026-10-29)
+
+- i3rBlendAddVertices 0x2253e0 (i3rBlendVertices, group flags 2 without 1) moves only its counter:
+  every output qword gets w x the target block's first qword. Kept as the ROM does it; if a blended
+  mesh with plain-qword targets looks collapsed, that is the ROM's behaviour, not a port bug (check
+  on the PS2 before "fixing" it).
+
