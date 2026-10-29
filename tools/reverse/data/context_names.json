@@ -2915,17 +2915,35 @@
   "was": "FUN_0011c464",
   "why": "GamMan::getPcParam(0x1b); calcHealth divides it by getPcParam1c (the PC's current / maximum value, likely life)"
  },
+ "0011c494": {
+  "name": "MagLifePC::setPcParam1b",
+  "tag": "ror-inferred",
+  "was": "FUN_0011c494",
+  "why": "unreferenced counterpart of getPcParam1b: GamMan::setPcParam(g_gamMan, 0x1b, &value)"
+ },
  "0011c4c0": {
   "name": "MagLifePC::getPcParam1c",
   "tag": "ror-inferred",
   "was": "FUN_0011c4c0",
   "why": "GamMan::getPcParam(0x1c); calcHealth's divisor"
  },
+ "0011c4f0": {
+  "name": "MagLifePC::getPcParam0",
+  "tag": "ror-inferred",
+  "was": "FUN_0011c4f0",
+  "why": "GamMan::getPcParam(g_gamMan, 0, &v); its only caller compares achrs' param 0 with it"
+ },
  "0011c520": {
   "name": "MagLifePC::getEquipItem",
   "tag": "ror-inferred",
   "was": "FUN_0011c520",
   "why": "the short g_gamMan +0x2220c (GamMan m_equipItem)"
+ },
+ "0011c52c": {
+  "name": "MagLifePC::collectPcParam0AchrPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0011c52c",
+  "why": "unreferenced: walks g_gamMan.m_achrList's used list (0x79e610), skips flag 0x10000 (the PC / dog), and for each achr whose param 0 equals the PC's (getPcParam0) writes ObjStat::getPos into out (vec4 records) up to max; returns the count"
  },
  "0011c64c": {
   "name": "MagLifePC::collectNearItems",
@@ -2939,11 +2957,23 @@
   "was": "FUN_0011c974",
   "why": "(oid, combo, kind): damage by scnCalcPcDamage of the weapon class (0x11caf8 of the equipped item, 7 when kind != 0), then scnChrRequest(0xb, ...) at the PC's position; Attacking::live on a hit"
  },
+ "0011caf8": {
+  "name": "MagLifePC::getAttackType",
+  "tag": "ror-inferred",
+  "was": "FUN_0011caf8",
+  "why": "its assert names attack_type: system data field 0x27 of the item (GamSysData::getField on g_gamMan +0x22220), 2 for no item (<= 0); hitTarget passes it to scnCalcPcDamage as the attack word, getWeaponType maps 5 / 4 / 6 to classes 3 / 2 / 1"
+ },
  "0011cb70": {
   "name": "MagLifePC::getWeaponType",
   "tag": "ror-inferred",
   "was": "FUN_0011cb70",
   "why": "m_1ac override, else the item's attack type (0x11caf8) 5 -> 3, 4 -> 2, 6 -> 1, other 0; indexes the sude_in motion table"
+ },
+ "0011cbd0": {
+  "name": "MagLifePC::countItems",
+  "tag": "ror-inferred",
+  "was": "FUN_0011cbd0",
+  "why": "unreferenced tail jump to GamMan::countItems(g_gamMan)"
  },
  "0011cbf4": {
   "name": "MagLifePC::canTakeItem",
@@ -2981,6 +3011,12 @@
   "was": "FUN_0011ce5c",
   "why": "(out, oid, flag): the 'Bip01 Spine1' node (fallback 'p_fuckme') of oid's actor into out, returns EmyManager::getEmyTypeDist2 (flag 0) / getEmyTypeDist"
  },
+ "0011d028": {
+  "name": "MagLifePC::getEmyTypeRate",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d028",
+  "why": "tail jump to EmyManager::getEmyTypeRate(g_emyManager, oid); called by startAttack"
+ },
  "0011d044": {
   "name": "MagLifePC::canReload",
   "tag": "ror-inferred",
@@ -2993,11 +3029,35 @@
   "was": "FUN_0011d06c",
   "why": "GamMan::reloadEquip(-1), the shell effect when +0x118 > 0, and the equipped item's 'reload' motion; MagLifePCModeReload::init"
  },
+ "0011d15c": {
+  "name": "MagLifePC::getSelItemNum",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d15c",
+  "why": "tail jump to GamMan::getSelItemNum(g_gamMan); getAttackSeNo picks the gun sound by it (> 0 loaded)"
+ },
+ "0011d178": {
+  "name": "MagLifePC::decSelItemNum",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d178",
+  "why": "GamMan::decSelItemNum(g_gamMan) and m_118 + 1 (the shots reload's effect 0x27 is told about, cleared by reload); called by startAttack"
+ },
+ "0011d1b0": {
+  "name": "MagLifePC::testEmyHittable",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d1b0",
+  "why": "tail jump to EmyManager::testEmyHittable(g_emyManager, oid); 0x12caa4 asks it before the stomp height"
+ },
  "0011d1cc": {
   "name": "MagLifePC::getAttackSeNo",
   "tag": "ror-inferred",
   "was": "FUN_0011d1cc",
   "why": "(theHeight 0..4, theCombo 0..2, kind) asserts both, returns a sound id by equipped item (0x1c kick, 0x41 / 0x43 bare hand, 0x7f / 0x80 ...); Attacking::live plays it through utlPlaySe on a hit"
+ },
+ "0011d3d0": {
+  "name": "MagLifePC::getAttackHeightByDist",
+  "tag": "ror-inferred",
+  "was": "FUN_0011d3d0",
+  "why": "0x12caa4 passes the XZ distance to target oid: a 10-record table on the stack (copied from 0x2ea450, names DWF STRAYDOG CLARA BIRD_L BIRD_S FISH GOAT PIG HOFFMAN HOFFMAN2) by EmyManager::getEmyType, Hoffman (6) by his Bip01 Neck height (< -140 record 8), gives four [min, max) distance bands -> heights 1, 0, 3, 2, else -1"
  },
  "0011d720": {
   "name": "MagLifePC::getHealthMotionStep",

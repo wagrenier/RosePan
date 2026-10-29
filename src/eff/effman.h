@@ -59,6 +59,12 @@ struct EffParam
             float m_pos[3];     // ROR 0x10
             float m_near;       // ROR 0x1c: EffFindItem1::m_near
         } m_find;               // kind 0x32 (EffFindItem1::init)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10: the PC actor's m_trans
+            float m_rot[3];     // ROR 0x1c: its m_rotate
+            int   m_shots;      // ROR 0x28: MagLifePC::m_shots
+        } m_reload;             // kind 0x27 (MagLifePC::reload)
     };
 };
 

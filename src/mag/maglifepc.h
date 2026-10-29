@@ -36,10 +36,18 @@ struct MagLifePCItemData
     float m_pos[4];             // ROR 0x00
     int   m_obj_id;             // ROR 0x10: asserted != 0 for the nearest
     int   m_item_id;            // ROR 0x14: the item (MagLifePCModeItem::live's message argument)
-    int   _18[2];
+    int   _18;
+    short m_actor;              // ROR 0x1c: the object's scene actor (ObjStat::m_actor)
+    short _1e;
 };
 static_assert(sizeof(MagLifePCItemData) == 0x20, "MagLifePCItemData is 0x20 bytes on the EE");
 static_assert(offsetof(MagLifePCItemData, m_obj_id) == 0x10, "m_obj_id");
+static_assert(offsetof(MagLifePCItemData, m_item_id) == 0x14, "m_item_id");
+static_assert(offsetof(MagLifePCItemData, m_actor) == 0x1c, "m_actor");
+
+/* The attack heights (getAttackSeNo's assert names the ends; 4 is the
+ * kick / stomp, startAttack's low half). */
+enum { ATK_HEIGHT_NORMAL = 0, ATK_HEIGHT_STOMP = 4 };
 
 /* MAX_SUBMODE_STACK (the pushSubMode / popSubMode asserts). */
 enum { MAX_SUBMODE_STACK = 4 };
@@ -117,39 +125,61 @@ struct MagLifePC : MagLifeControlChara
     // ROR 0x00282bd0
     void setDebugDashOnOff(int on) { m_debug_dash = on; }
 
-    /* ---- elsewhere in the class (other mag/maglifepc*.cpp files) ---- */
-    /* g_gamMan's equipped item (+0x2220c) / its actor number (+0x2200c). */
-    /* GamMan::getPcParam(0x1b) / (0x1c): calcHealth's ratio. */
+    /* ---- mag/maglifepc2.cpp: items, attacks (0x11c464..0x11d720) ---- */
+    /* GamMan::getPcParam(0x1b) / (0x1c): calcHealth's ratio; setPcParam1b
+     * is unreferenced. */
     static int getPcParam1b();                                           // ROR 0x0011c464
+    static void setPcParam1b(int value);                                 // ROR 0x0011c494
     static int getPcParam1c();                                           // ROR 0x0011c4c0
+    static int getPcParam0();                                            // ROR 0x0011c4f0
+    /* g_gamMan's equipped item (+0x2220c, 0xa00 none) / its actor number
+     * (+0x2200c), both read as shorts. */
     static int getEquipItem();                                           // ROR 0x0011c520
     static int getEquipItemChrNo();                                      // ROR 0x0011ce50
-    /* Up to max items within range into records of 0x20 bytes (+0x10 the
-     * object id); returns the count. */
-    int  collectNearItems(float range, MagLifePCItemData *itemdata, int max); // ROR 0x0011c64c
-    /* 0..3: the equipped item's weapon class (m_weapon_override first). */
-    int  getWeaponType(int item);                                        // ROR 0x0011cb70
-    int  canReload();                                                    // ROR 0x0011d044
-    /* Damages oid by the combo step (kind != 0: weapon class 7) through
-     * scnChrRequest(0xb). */
+    /* Unreferenced: the positions of the achrs (not the PC / dog) whose
+     * param 0 is the PC's, max at most; returns the count. */
+    int  collectPcParam0AchrPos(float *out, int max);                    // ROR 0x0011c52c
+    /* Up to max items in a radius range circle centred range - 5 ahead of
+     * the actor and -200..30 of its height, into records of 0x20 bytes;
+     * returns the count. */
+    int  collectNearItems(float theRange, MagLifePCItemData *theData, int theMax); // ROR 0x0011c64c
+    /* Damages oid by the combo step through scnChrRequest(0xb): kind 0 the
+     * equipped item's attack type (bare hands: combo 0), else word 7. */
     void hitTarget(u_int oid, int combo, int kind);                      // ROR 0x0011c974
-    /* oid's 'Bip01 Spine1' node into out; returns its EmyManager distance
-     * (flag 0: getEmyTypeDist2). */
-    float getTargetSpinePos(float *out, u_int oid, int flag);            // ROR 0x0011ce5c
-    /* The hit sound id for theHeight 0..4 and theCombo 0..2. */
-    int  getAttackSeNo(int theHeight, int theCombo, int kind);           // ROR 0x0011d1cc
+    /* System data field 0x27 of item (2 for no item, <= 0). */
+    int  getAttackType(int item);                                        // ROR 0x0011caf8
+    /* 0..3: item's weapon class (attack type 5 -> 3, 4 -> 2, 6 -> 1),
+     * m_weapon_override first. */
+    int  getWeaponType(int item);                                        // ROR 0x0011cb70
+    static int countItems();                                             // ROR 0x0011cbd0
     /* GamMan::canAddItem of oid. */
     int  canTakeItem(u_int oid);                                         // ROR 0x0011cbf4
-    /* Picks oid up (addItem, the sequence's pick-up words, releaseChr);
+    /* Picks oid up (addItem, the script's pick-up words, releaseChr);
      * -1 when it cannot. */
     int  takeItem(u_int oid);                                            // ROR 0x0011cc14
-    /* GamMan::reloadEquip, the shell effect and the item's 'reload'. */
-    void reload();                                                       // ROR 0x0011d06c
     /* GamMan::testPcHitAt at pos; the object id into *oid when given. */
     int  testObjHit(const float *pos, u_int *oid);                       // ROR 0x0011ccd4
     /* out = delta less its part towards object oid (level), normalised
      * when shorter than 1. */
     void slideOffObj(float *out, const float *delta, u_int oid);         // ROR 0x0011cd20
+    /* oid's 'p_fuckme' node ('Bip01 Spine1' without one) into out; returns
+     * its EmyManager distance (flag 0: getEmyTypeDist2), 0 without an actor. */
+    float getTargetSpinePos(float *out, u_int oid, int flag);            // ROR 0x0011ce5c
+    float getEmyTypeRate(u_int oid);                                     // ROR 0x0011d028
+    int  canReload();                                                    // ROR 0x0011d044
+    /* GamMan::reloadEquip, the shells effect (0x27, m_shots) and the
+     * equipped item's 'reload' motion. */
+    void reload();                                                       // ROR 0x0011d06c
+    static int getSelItemNum();                                          // ROR 0x0011d15c
+    /* One shot: GamMan::decSelItemNum and m_shots + 1. */
+    void decSelItemNum();                                                // ROR 0x0011d178
+    bool testEmyHittable(u_int oid);                                     // ROR 0x0011d1b0
+    /* The hit sound id for theHeight 0..4 and theCombo 0..2 (kind != 0:
+     * the hit, else the swing). */
+    int  getAttackSeNo(int theHeight, int theCombo, int kind);           // ROR 0x0011d1cc
+    /* The attack height (0..3) of enemy oid at XZ distance dist by its
+     * type's distance bands; -1 outside them. */
+    int  getAttackHeightByDist(float dist, u_int oid);                   // ROR 0x0011d3d0
 
     /* ---- mag/maglifepc3.cpp: motions ---- */
     /* DogActor::getMotionStep scaled by m_health (1, 1, 1, 0, 0). */
@@ -272,7 +302,7 @@ struct MagLifePC : MagLifeControlChara
     float  m_stick_y;           // ROR 0x10c
     float  m_stick_roty;        // ROR 0x110: getStickRotY
     float  m_stick_change;      // ROR 0x114: BedPad::getDirChange; selectMode sets 9999
-    int    m_118;               // ROR 0x118: the constructor clears it
+    int    m_shots;             // ROR 0x118: shots since the last reload (decSelItemNum; reload's effect, then 0); the constructor clears it
     u_char _11c[0x130 - 0x11c];
     int    m_mode_frame;        // ROR 0x130: frames in the mode (selectMode 0, live +1)
     MagLifePCMode *m_mode_cur;  // ROR 0x134: selectMode's pick, NULL in state 11

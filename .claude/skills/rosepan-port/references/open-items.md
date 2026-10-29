@@ -1087,6 +1087,11 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- (2026-10-29, mag/maglifepc2.cpp) Item pickup, the hit, reload and the hit sounds are written but no
+  smoke run reaches them (the boot pad never picks up or attacks): status verify. A pad that walks to
+  an item and presses the action button would show takeItem / collectNearItems. Unconfirmed: items
+  0xa3e / 0xa43 are taken to be the guns (the only items with the loaded / empty sound pair).
+
 - mnu/mnuopt.cpp (2026-10-29, done): the options screen shows the row "Noir Filter" for GamMan option 1,
   which game/gamman names m_optMasterLevel / m_masterVolume (scaled 32..224, then setVolume): the
   names are likely wrong -- check what setOption 1 changes in a room. MnuOpt calls SprMan::volumeOn only
