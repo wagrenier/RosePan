@@ -696,7 +696,10 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   noise texture -- common texture 1 -- in a draw set of depth 1 at key 895: RGBAQ register
   (0x20, 0x20, 0x20, 0x3f), CLAMP repeat, random UV windows of sizes 400 / 600 / 888 / 1000,
   ALPHA_1 0x61 / 0x64 alternating with FIX = volume / 4; the sprites' REGLIST data carries no
-  RGBAQ, so the host i3d module latches the register, GsState::rgbaq), the 2D layers `S2dCineSco`
+  RGBAQ, so the host i3d module latches the register, GsState::rgbaq; it also follows CLAMP_1,
+  GsState::clamp, and draws REPEAT sprites with RosePan_RendererDrawImageQuadWrap, which wraps the
+  UVs and widens a full-frame one to the window -- clamped, the grain showed only in the corner of
+  the frame whose UVs fell inside the texture), the 2D layers `S2dCineSco`
   +0x41930, `S2dBg` +0x42260, `S2dMes` +0x42bb0 (all MagLife, level 7, life priorities 0x8006 /
   0x8000 / 0x800a), the current fade record +0x43700 (six words: kind, mode, time, -, -, level;
   `MagScene::setFade` 0x1311f4, `getFadeState` 0x131550 maps the fader state to 0..6) and the

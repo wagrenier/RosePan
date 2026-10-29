@@ -58,6 +58,7 @@ constexpr uint64_t kRegFrame = 0x4c;
 constexpr uint64_t kRegScissor = 0x40;
 constexpr uint64_t kRegAlpha = 0x42;
 constexpr uint64_t kRegRgbaq = 0x01;
+constexpr uint64_t kRegClamp = 0x08;
 constexpr uint64_t kRegTest = 0x47;
 
 /* The opening state i3dPktOpenChain writes (ALPHA mode 0x10, TEST_1). */
@@ -161,6 +162,9 @@ struct GsState
     /* RGBAQ as a register: a primitive whose data has none draws with it
      * (MagLifeNoise's sprites, colour from i3dPktSetReg). */
     uint64_t        rgbaq = 0x3f80000080808080ull;
+    /* CLAMP_1 as a register: WMS = WMT = 0 wraps the UVs (MagLifeNoise's
+     * grain).  Starts at CLAMP, the edge clamp every other draw has had. */
+    uint64_t        clamp = 0x5;
     unsigned        fbp = 0;            /* FRAME_1's FBP (0: the display's, not followed) */
     const uint64_t *tex_regs = nullptr;
     /* A TEX0 written as a plain register (i3dPktSetReg) after the draw set's
@@ -403,8 +407,9 @@ void DrawPrim(const Record &r)
         if (tme)
         {
             const float quv[8] = {uv[0], uv[1], uv[2], uv[1], uv[0], uv[3], uv[2], uv[3]};
-            RosePan_RendererDrawImageQuad(texture, qxy, quv, rgba[4], rgba[5], rgba[6], rgba[7],
-                                          linear);
+            const int repeat = (gs.clamp & 0xf) == 0;   /* WMS = WMT = REPEAT */
+            RosePan_RendererDrawImageQuadWrap(texture, qxy, quv, rgba[4], rgba[5], rgba[6],
+                                              rgba[7], linear, repeat);
         }
         else
         {
@@ -595,6 +600,7 @@ void ApplyReg(uint64_t reg, uint64_t value)
     case kRegAlpha:    s_state.alpha = value; break;
     case kRegTest:     s_state.test = value; break;
     case kRegRgbaq:    s_state.rgbaq = value; break;
+    case kRegClamp:    s_state.clamp = value; break;
     case kRegScissor:  s_state.scissor = value; break;
     case kRegTex0:     s_state.direct_tex0 = true; break;
     case kRegXyOffset:

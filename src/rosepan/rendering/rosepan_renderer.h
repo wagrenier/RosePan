@@ -774,6 +774,18 @@ void RosePan_RendererDrawImageQuad(const void *texture,
                                   unsigned char b,
                                   unsigned char a,
                                   int linear);
+/* As RosePan_RendererDrawImageQuad, with UVs that wrap when `repeat` (the
+ * GS CLAMP_1 REPEAT); a repeating quad over the whole frame is widened to
+ * the window with its UVs, so a tiling fill covers widescreen too. */
+void RosePan_RendererDrawImageQuadWrap(const void *texture,
+                                      const float *xy,
+                                      const float *uv,
+                                      unsigned char r,
+                                      unsigned char g,
+                                      unsigned char b,
+                                      unsigned char a,
+                                      int linear,
+                                      int repeat);
 /* The live movie's picture as such a handle (rosepan_video.h: the frame the
  * decoder published, uploaded into one persistent texture of 1 << tw by
  * 1 << th, the picture in its top-left corner).  NULL when no movie is live.
