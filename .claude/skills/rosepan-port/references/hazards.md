@@ -198,6 +198,9 @@ entries are marked **RoR** with the date.
   functions between TUs. Re-run `tus.Model().tu_of` for callees before writing their prototypes.
 - **A queued `unassigned@` key goes stale** once a session defines that run under a file name; queue file
   keys when you can. `tus.py next` skips stale keys; an effectively empty queue means re-assess.
+- **"Every XxxMain::initOut opens its enemy file" is not a rule** (2026-10-29): Mrt .. Grg do, but Fsh puts
+  FshMain's destructor 0x155d54 and its other vtable slots before FshMain::initOut 0x156620. End an
+  enemy file at the next class's first vtable slot or initOut, whichever is lower (`rtti.py --class`).
 - **A stub inside a TU marked done is never picked**: `grep -rn "stub of ROR" src` and the run log's
   `[stub] ... reached` lines find them; claim the TU by name.
 

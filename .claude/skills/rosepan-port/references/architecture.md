@@ -1718,6 +1718,24 @@ never asserts): sessions name them (`tus.py define --why`).
   script global 0x194 while it screams). m_grab_back +0x24c (the grab from behind) is
   EmyManager::getEmyHoldWord24c. The dog is spared while the row has input 5 and it has not fled.
   _tagEnemyParam +0x14 (u_short m_14) is NorMain's max life (+0x236).
+  **GrgMain** (type 9, emy/emy_grg.cpp 0x153e40..0x155d54, 2026-10-29; EE 0x244, 6 slots): a roaming
+  enemy of rooms 0x84..0x8b (getStatus 5 = GamMan m_wrdNo; its area is the achr's param 8, -1 at
+  initOut). It reads no notify bits. States 1 Catch (emyStartChase 10, emyChkChase 80 / pi, then motion
+  0xd, or 0xb / 0xc by the PC below / above on a secta cell flagged 0x20000, and 0xf; 0xe and chase
+  again when the target is not within pi / 4 at 50), 2 Walk, 3 Bitten (0x13, 60..180 frames, 0x14),
+  4 Disappear (hidden; after utlRandRange(0.7 d, 1.3 d), d half the x / z distance, placed at the room's
+  point of table 0x2efc98 and shown; m_appear_count +0x237 + 1), 5 Event (hidden), 6 Test. decide runs
+  only with EmyMain +0x2c set; inputs (+0x204): 8 releaseHold (+0x240, EmyManager::releaseEmyHold), 7
+  never, 5 / 6 the sight edge (+0x236) in its area, 4 the room left its area (+0x235), 1 with m_arm
+  +0x234 clear: room 0x81, or 16 appearances with the PC elsewhere and not class 10 (sets m_arm), 0 with
+  m_arm and m_238 not 2 / 3: the room is its area (m_238 1: also the PC in sight; clears m_arm, the
+  achr loses flags 0x10000000 / 0x80). Rooms map to rows 0..8 of its tables (0x85 / 0x86 and 0x87 /
+  0x88 swapped, 0x89 split at z 260). GrgOutWalk: rates 0x2f0410 {walk, fchr, max} pick walking to
+  another of the room's four points (0x2f01d0, emyCanReach first), to the n-th fchr of type 9 within
+  1000 (pick 0x2f08b0 by utlRandRange(0, 64), points 0x2f0430) where it turns (chrRotMotion, motion 4 /
+  3), plays 0x21 / 0x23 with the fchr's actor motion 1 and hides (input 3), or idling (0x28, 0x2a /
+  0x2b, 0x29). Its walks are TskMoveTypeGen mode 0xd with params 0x1100..0x1104 = 2, 4, 3, 1, 1 and
+  addTask flags 0x11. Script globals: 0x53 1 while about (0 in Event), 0x54 its area, 0x55 -1.
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00
