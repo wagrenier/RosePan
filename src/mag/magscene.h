@@ -34,6 +34,7 @@
 #include "mag/maglifemenusp.h"
 #include "mag/maglifepc.h"
 #include "mag/maglifewindow.h"
+#include "mag/magsceneif.h"
 #include "sdk/sce_gs.h"
 #include "spr/s2d.h"
 
@@ -723,8 +724,8 @@ struct MagScene
     int            m_854c0[5];          // ROR 0x854c0: the constructor clears them; roles unknown
     u_char         m_854d4;             // ROR 0x854d4: the constructor sets 1; role unknown
     u_char         m_854d5;             // ROR 0x854d5: idem
-    MagScene      *m_854e0;             // ROR 0x854e0: start points it at the scene (an interface pointer; class unknown)
-    MagScene      *m_854e8;             // ROR 0x854e8: idem
+    MagSceneIFMap   m_map_if;           // ROR 0x854e0: start points it at the scene (mag/magsceneif.h)
+    MagSceneIFChara m_chara_if;         // ROR 0x854e8: idem
 };
 static_assert(offsetof(MagScene, m_actors) > offsetof(MagScene, m_life_man), "EE order");
 static_assert(offsetof(MagScene, m_light_pool) > offsetof(MagScene, m_shadow_src), "EE order");

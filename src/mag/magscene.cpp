@@ -319,8 +319,8 @@ void MagScene::start()
         else
             m_window_font[i].setTarget(p, 0x200, 0x100, 4);
     }
-    m_854e8 = this;
-    m_854e0 = this;
+    m_chara_if.m_scene_ptr = this;
+    m_map_if.m_scene_ptr = this;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -2079,8 +2079,8 @@ MagScene::MagScene()
         m_camera_pos[k] = v;
         m_camera_at[k] = v;
     }
-    m_854e0 = NULL;
-    m_854e8 = NULL;
+    m_map_if.m_scene_ptr = NULL;
+    m_chara_if.m_scene_ptr = NULL;
 
     memset(&m_shadow_lightrec, 0, sizeof(m_shadow_lightrec));
     m_shadow_mode = 0;

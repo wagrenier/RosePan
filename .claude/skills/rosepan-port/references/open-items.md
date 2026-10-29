@@ -243,7 +243,8 @@ follows it; reached stubs in run order):
      **scenePlayStart parses event packs with `task/naga_chunk.cpp`'s NagaChunk reader, stubbed
      (find returned 0, so a scene loaded nothing and ended at once)**: task/naga_chunk.cpp WRITTEN
      2026-10-27 (verify, pinned 0x1fc47c..0x1fce0c: reader and writer). Still before any scene plays:
-     debug/motnamecnv0.cpp (motNameFindChara / GetCategory / Convert, stubbed) and
+     debug/motnamecnv0.cpp (WRITTEN 2026-10-29, verify; its callees mag/magsceneif.cpp's
+     MagSceneIFChara::find / getCategory / getMotionNo are stubs, so scenes still get chara 0) and
      DogActor::setBaseRotateY 0x10ed2c / utlStrToLower 0x218338 / MagScene::setFocusData 0x1417e4 (stubs).
   3. **`dog/dogmodel.cpp`** -- WRITTEN 2026-10-26 (all 66 functions, `verify`). The New Game load
      path now runs loadPack -> setRoot -> i3rRelocate, and stops in the i3r library stubs: the item

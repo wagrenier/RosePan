@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 16:09 at commit `a7b257c` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 16:20 at commit `7afaa13` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-29 16:09 at commit `a7b257c` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6575** (91%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4973
-- context-name ledger: 5274 entries; overrides of wrong library matches: 5
-- placed in a source file: 5695/7187 in 143 files
+- game functions: **7187**, named **6588** (92%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4986
+- context-name ledger: 5287 entries; overrides of wrong library matches: 5
+- placed in a source file: 5705/7187 in 143 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5219**; stubs: **308**
+- reconstructed RoR functions: **5227**; stubs: **312**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -40,7 +40,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/bed/bedsubmode.cpp` | 3 | 0 |
 | `src/debug/mcd_debug.cpp` | 2 | 0 |
 | `src/debug/mimu_debug.cpp` | 9 | 0 |
-| `src/debug/motnamecnv0.cpp` | 0 | 2 |
+| `src/debug/motnamecnv0.cpp` | 8 | 0 |
 | `src/dog/dogactor.cpp` | 147 | 0 |
 | `src/dog/dogcamera.cpp` | 8 | 0 |
 | `src/dog/dogentity.cpp` | 13 | 0 |
@@ -90,7 +90,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 260 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 259 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -115,6 +115,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/magscenecmd.cpp` | 36 | 0 |
 | `src/mag/magscenedebug.cpp` | 0 | 1 |
 | `src/mag/magscenefocus.cpp` | 16 | 0 |
+| `src/mag/magsceneif.cpp` | 0 | 7 |
 | `src/mag/magscenelight.cpp` | 10 | 0 |
 | `src/mag/magscenemenu.cpp` | 12 | 0 |
 | `src/mag/magsceneoption.cpp` | 0 | 1 |
@@ -166,13 +167,14 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 174 TUs: todo 99, partial 2, verify 109, done 17
-- next: **debug/motnamecnv0.cpp** (frontier score 7)
+- 172 TUs: todo 96, partial 2, verify 110, done 17
+- next: **mag/magsceneif.cpp** (frontier score 7)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
 - verify: `debug/mcd_debug.cpp` 2/5 -- Nothing calls these functions in the retail ROM, so no screenshot can show them; the smoke run still reaches the disclaimer screen unchanged. mcdDbgMenuTest sta
+- verify: `debug/motnamecnv0.cpp` 8/8 -- Verify: the 15 s smoke run ends on the boot disclaimer, scenePlayStart is not reached, and every callee is a mag/magsceneif.cpp stub (MagSceneIFChara::find / ge
 - verify: `dog/dogactor.cpp` 147/147 -- Status verify: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run stays black after the film because the pose and draw path below DogActo
 - verify: `dog/dogcamera.cpp` 8/10 -- Status verify: the 200 s New Game run (second try; the first looped the boot logos, the known boot race) plays the opening film to Once upon a time, then ends b
 - verify: `dog/dogentity.cpp` 11/16 -- Status verify: the 200 s New Game run ends black (one small ring at the bottom) with no assert or crash; the DogEntity stubs no longer appear, the camera (paren
@@ -281,6 +283,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 16:20 `debug/motnamecnv0.cpp` verify: debug/motnamecnv0.cpp reconstructed (pinned 0x216154..0x2163ac, 8 functions): motNameConvert (scene thread motion keys to actor motion numbers), motNameFindChar
 - 2026-10-29 16:09 `emy/emy_nor.cpp` verify: Pinned emy/emy_nor.cpp 0x150b24..0x153e40 out of unassigned@00150b24 and wrote all 55 functions: NorMain (enemy type 10: initOut, dtor, decide with flee input 5
 - 2026-10-29 15:49 `emy/emy_clr.cpp` verify: Pinned emy/emy_clr.cpp 0x14dc7c..0x150b24 out of unassigned@0014dc7c and wrote all 45 functions: ClrMain (enemy type 8: initOut, dtor, decide with tests 13..9 /
 - 2026-10-29 15:10 `mag/maglifefadekey.cpp` verify: MagLifeFadeKeyHole (the keyhole fade at scene +0x41890) reconstructed whole: constructor, loadTexture / loadTextureByName (EVNTEX.RPK header then one file, adde
@@ -288,20 +291,19 @@ Recent sessions:
 - 2026-10-29 14:30 `emy/emy_bdl.cpp` verify: Pinned emy/emy_bdl.cpp 0x14b3bc..0x14cde4 out of unassigned@0014b3bc and wrote all 33 functions: BdlMain (enemy type 5: initOut, dtor, decide with testBarkReact
 - 2026-10-29 14:20 `emy/emy_bds.cpp` verify: Pinned emy/emy_bds.cpp 0x149d18..0x14b3bc out of unassigned@00149d18 and wrote all 33 functions: BdsMain (enemy type 4: initOut, dtor, decide, exec, after, sele
 - 2026-10-29 13:55 `i3d/i3dgeom.cpp` verify: i3dgeom complete: all 54 geometry tests written. This session: the flat-capped cylinder family (core 0x235768, line/ray/seg forms, hit tests incl. utlHitCheck 0
-- 2026-10-29 13:40 `i3d/i3dgeom.cpp` partial: i3dgeom: 37 of 47 geometry tests written (box tests, point/line/ray/segment distances, sphere and capsule hit tests, line-sphere and line-capsule intersections)
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
+| `mag/magsceneif.cpp` | todo | 0/7/18 | 2.5 | 7 | 0 |
 | `unassigned@00153e40` | todo | 0/32/239 | 58.0 | 7 | 0 |
-| `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
-| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
 | `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
+| `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
+| `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
 | `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
-| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
-| `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
-| `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
 | `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
+| `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
+| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
+| `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
 | `unassigned@00113ea8` | todo | 0/2/3 | 1.3 | 4 | 0 |
 | `mag/maglifepcbtl.cpp` | todo | 0/3/6 | 3.2 | 4 | 0 |
 
@@ -319,9 +321,6 @@ Recent sessions:
 | `0010456c` | utlHitCheck | 2 | ror | stub | utl/utlbtl.cpp |
 | `00104e1c` | utlTm2GetSize | 2 | ror | stub | - |
 | `0010559c` | utlTm2ToSepia | 2 | ror | stub | utl/utltm2.cpp |
-| `0021628c` | motNameFindChara | 1 | ror | stub | debug/motnamecnv0.cpp |
-| `002162e0` | motNameGetCategory | 1 | ror | stub | - |
-| `00216184` | motNameConvert | 1 | ror | stub | debug/motnamecnv0.cpp |
 | `00281cbc` | DogModel::__tf | 1 | sym | missing | dog/dogmodel.cpp |
 | `0012ca28` | MagLifePC::getAttackHeight | 1 | ror | stub | - |
 | `0012c9c0` | MagLifePC::setState14 | 1 | ror | stub | - |
@@ -349,4 +348,7 @@ Recent sessions:
 | `00154748` | GrgMain::releaseHold | 1 | ror | stub | - |
 | `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
 | `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |
+| `001bdc00` | MnuSelectLanguage::init | 1 | ror | stub | - |
+| `001bde58` | MnuSelectLanguage::processPad | 1 | ror | stub | - |
+| `001bdfe0` | MnuSelectLanguage::draw | 1 | ror | stub | - |
 

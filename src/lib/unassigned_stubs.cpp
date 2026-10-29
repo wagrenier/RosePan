@@ -363,13 +363,6 @@ void MnuStock::term()
 
 // stub of ROR 0x00172678
 
-// stub of ROR 0x002162e0
-int motNameGetCategory(int chara)
-{
-    ROSEPAN_STUB("motNameGetCategory", 0x002162e0);
-    return {};
-}
-
 // stub of ROR 0x001fd6bc
 int TskAttack::stepKind12()
 {

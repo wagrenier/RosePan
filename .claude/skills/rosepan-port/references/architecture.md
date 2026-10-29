@@ -696,7 +696,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   0x8000 / 0x800a), the current fade record +0x43700 (six words: kind, mode, time, -, -, level;
   `MagScene::setFade` 0x1311f4, `getFadeState` 0x131550 maps the fader state to 0..6) and the
   system message window +0x43718, objects at +0x837e0 (ctor 0x176a3c), `S2dMovie` +0x84aa8 (spr/s2d.cpp), +0x8542c
-  (0x17c0f0), `MagSceneIFMap` / `MagSceneIFChara` at +0x854e0 / +0x854e8, Brown / PC actor
+  (0x17c0f0), `MagSceneIFMap` / `MagSceneIFChara` at +0x854e0 / +0x854e8 (bss 0x781260 / 0x781268; one word each, `m_scene_ptr`, set by start; mag/magsceneif.h -- their methods read the map / character loader index and the actors' motions, and debug/motnamecnv*.cpp wrap them), Brown / PC actor
   numbers +0x853b4 / +0x853b8. Every MagLife has `m_scene` at +0x20 and the vptr at +0x14;
   MagLifeControlChara's bound actor is +0x58 (`m_actor`).
 - **The scene's constructor** (0x1360a0, written 2026-10-22): besides its members' constructors it
