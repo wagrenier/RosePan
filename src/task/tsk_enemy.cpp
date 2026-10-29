@@ -2,15 +2,14 @@
  *  task/tsk_enemy.cpp
  *
  *  The enemy behaviour tasks (pinned 0x20067c..0x203d94); see
- *  tsk_enemy.h. Written so far: TskEnemyTurn complete; TskEnemyMove's
- *  lifecycle (start / stop / suspend / resume / pause / term), exec's
- *  frame, pickEvent, tickVoice and getTargetPos. Left: plan 0x200988,
- *  step 0x200d18 and the route helpers 0x201164..0x202e20.
+ *  tsk_enemy.h. Complete: TskEnemyMove (the lifecycle, plan / step and
+ *  the route helpers) and TskEnemyTurn.
  * ======================================================================== */
 #include "task/tsk_enemy.h"
 #include "common/rosepan_stub.h"
 
 #include <math.h>
+#include <string.h>
 
 #include "dog/dogactor.h"
 #include "emy/emy_main.h"
@@ -22,6 +21,8 @@
 #include "mag/magsystem.h"
 #include "sct/sctlayer.h"
 #include "snd/sndman.h"
+#include "task/tsk_chr.h"
+#include "utl/utlmath.h"
 #include "utl/utlrand.h"
 
 /* The enemy actor's translation, set by TskEnemyMove::exec each frame
@@ -74,6 +75,12 @@ static float tskEnemyPCLead()
     if (cls == 8)
         return 2.5f;
     return 0.0f;
+}
+
+/* PC: MagScene's sector.sec (bss 0x7811ac). */
+static SctWorld &tskEnemyWorld()
+{
+    return g_magSystem.m_scene.m_8542c;
 }
 
 /* PC: the PC's oid, 0 without one (GamMan::m_pcPtr, bss 0x7a3350). */
@@ -138,7 +145,7 @@ void TskEnemyMove::start(const EmyMoveParam *prm)
     m_motion = 0;
     m_68 = 0;
     m_6c = 0;
-    m_idleMotion = prm->m_parsonality + 3;
+    m_walkMotion = prm->m_parsonality + 3;
     m_74 = 0;
     m_carry = prm->m_carry;
     m_turn = prm->m_turn;
@@ -150,7 +157,7 @@ void TskEnemyMove::start(const EmyMoveParam *prm)
     m_kind1 = (int)prm->m_kind[1];
     m_kind2 = (int)prm->m_kind[2];
     m_kind3 = (int)prm->m_kind[3];
-    m_kind4 = prm->m_kind4;
+    memcpy(&m_nearRange, &prm->m_kind4, sizeof(m_nearRange));
     m_voiceWait = utlRandRange(15, 30);
     m_se = -1;
     m_type = prm->m_type;
@@ -173,6 +180,65 @@ int TskEnemyMove::exec(int id, int time, int arg)
         tickVoice(pos);
     }
     return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00200988 // callcheck: SctWorld::findCells, SctLayer::searchPath (through tskEnemyWorld)
+
+int TskEnemyMove::plan(const float *pos)
+{
+    switch (pickEvent()) {
+    case 1:
+    case 2: {
+        SctWorld &world = tskEnemyWorld();
+        SctPathReq req;
+        GamSecta *from[4];
+        GamSecta *to[4];
+        req.m_list = 1;
+        world.findCells(s_movePos, from, 0, 40.0f, 30.0f);
+        req.m_from = from;
+        if (m_target == 0) {
+            m_goal[0] = m_pos[0];
+            m_goal[1] = m_pos[1];
+            m_goal[2] = m_pos[2];
+        } else {
+            if (!g_gamMan.isObj(m_target)) {
+                *m_done = 2;
+                m_goal[0] = 0.0f;
+                m_goal[2] = 0.0f;
+                m_goal[1] = 0.0f;
+                return 0;
+            }
+            getTargetPos(m_target, m_goal);
+        }
+        world.findCells(m_goal, to, 0, 40.0f, 80.0f);
+        req.m_to = to;
+        req.m_path = &m_path;
+        if (world.m_list[req.m_list].searchPath(&req) == 0 || m_path.m_num < 1) {
+            /* No way there: stand (event 4's motion) and wait in step 1. */
+            m_68 = 0;
+            m_dog->changeMotion(m_speed, m_carry != 0 ? 10 : 2, 0, -1, -1);
+            m_motion = 0;
+            m_step = 1;
+            return 0;
+        }
+        setRoute();
+        m_step = startWalk(pos);
+        break;
+    }
+    case 3:
+        m_dog->changeMotion(m_speed, m_kind3, 0, -1, -1);
+        m_motion = 0;
+        m_step = 1;
+        break;
+    case 4:
+        m_68 = 0;
+        m_dog->changeMotion(m_speed, m_carry != 0 ? 10 : 2, 0, -1, -1);
+        m_motion = 0;
+        m_step = 1;
+        break;
+    }
+    return 1;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -206,6 +272,439 @@ int TskEnemyMove::pickEvent()
         }
     }
     return ev;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00200d18 // callcheck: atan2f, getRotY, fptodp, dpcmp, dpadd, dpsub, dptofp (tskEnemyAngleTo; the ROM's second angle, to the point from pos, is computed and dropped)
+
+void TskEnemyMove::step(const float *pos)
+{
+    switch (m_step) {
+    case 0:
+        if (nextPoint(pos))
+            walk(pos);
+        break;
+    case 1:
+        /* A stand, look or side step: moved by its root until it ends. */
+        if (g_magSystem.m_scene.m_actors[m_actor].isModeSet()) {
+            moveRootStill();
+            return;
+        }
+        if (checkBump(pos))
+            return;
+        m_step = startWalk(pos);
+        break;
+    case 2: {
+        float d = tskEnemyAngleTo(m_dog, s_movePos, m_points[m_node]);
+        /* Turned past the point: walk on (with a re-plan). */
+        if (d > 0.0f ? m_right != 0 : m_right == 0) {
+            m_wait1 = 0;
+            m_step = 0;
+            break;
+        }
+        if (!g_magSystem.m_scene.m_actors[m_actor].isModeSet())
+            startTurn(d);
+        if (d < 0.0f)
+            d = -d;
+        if (m_node < m_nodes - 1) {
+            if ((double)d >= 0.5235987755982988) /* pi / 6 */
+                return;
+        } else {
+            if (!(d < m_turn))
+                return;
+            if (emyChkNearXZ(m_stopRange, pos, m_goal)) {
+                *m_done = 1;
+                return;
+            }
+            *m_done = 0;
+        }
+        if (checkStep(pos))
+            return;
+        m_step = startWalk(pos);
+        break;
+    }
+    case 3:
+        if (m_dog->isBlendIn())
+            return;
+        m_step = m_68 != 0 ? 4 : 0;
+        break;
+    case 4:
+        if (!g_magSystem.m_scene.m_actors[m_actor].isModeSet()) {
+            int motion = m_74 != 0 ? 7 : m_walkMotion;
+            m_dog->changeMotion(m_speed, motion, 0x41, -1, -1);
+            m_motion = motion;
+            m_motionFlags = 0x41;
+            m_step = 3;
+            m_68 = 0;
+        } else {
+            moveRootStill();
+        }
+        break;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00201164 // callcheck: atan2f, getRotY, fptodp, dpcmp, dpadd, dpsub, dptofp (tskEnemyAngleTo)
+
+int TskEnemyMove::nextPoint(const float *pos)
+{
+    if (m_node < m_nodes - 1) {
+        if (emyChkNearXZ(m_keepRadius + m_keepRadius, pos, m_points[m_node]))
+            m_node++;
+        if (m_node < m_nodes - 1)
+            return 1;
+    }
+    if (emyChkNearXZ(m_stopRange, pos, m_goal)) {
+        float d = tskEnemyAngleTo(m_dog, pos, m_points[m_node]);
+        if (m_turn < fabsf(d)) {
+            startTurn(d);
+            return 0;
+        }
+    }
+    if (m_target != 0) {
+        getTargetPos(m_target, m_goal);
+        m_points[m_node][0] = m_goal[0];
+        m_points[m_node][1] = m_goal[1];
+        m_points[m_node][2] = m_goal[2];
+    }
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00201524 // callcheck: atan2f, fptodp, dpcmp, dpadd, dpsub, dptofp (tskEnemyAngleTo), sqrtf (sqrt.s)
+
+void TskEnemyMove::walk(const float *pos)
+{
+    float rot = m_dog->getRotY();
+    float d = tskEnemyWrapAngle(atan2f(m_points[m_node][0] - pos[0],
+                                       m_points[m_node][2] - pos[2]) - rot);
+    float ad = d < 0.0f ? -d : d;
+    if (m_mode == 0 && checkAhead(pos))
+        return;
+    float turn;
+    if ((double)ad > 0.7853981633974483) { /* pi / 4 */
+        m_74 = 0;
+        turn = 0.0f;
+    } else {
+        /* The angle off spread over the frames left to the point. */
+        float dx = m_points[m_node][0] - s_movePos[0];
+        float dz = m_points[m_node][2] - s_movePos[2];
+        turn = ad / (sqrtf(dx * dx + dz * dz) / m_walk);
+        if (m_turn < turn)
+            turn = m_turn;
+        if (0.0f < d)
+            turn = -turn;
+    }
+    int r = moveRoot(turn);
+    if (r == 1)
+        startTurn(d);
+    else if (r == 2)
+        avoid(rot, pos);
+    if (m_node == m_nodes - 1) {
+        float self[4];
+        emyGetSEPos(m_oid, self);
+        if (emyChkNearXZ(m_stopRange, pos, m_goal)) {
+            float a = fabsf(tskEnemyAngleTo(m_dog, self, m_points[m_node]));
+            if (a < m_turn) {
+                *m_done = 1;
+                return;
+            }
+        }
+        *m_done = 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x002019d0 // callcheck: findCells, fptodp, dpcmp, dpadd, dpsub, dptofp (tskEnemyWorld, tskEnemyWrapAngle)
+
+void TskEnemyMove::setRoute()
+{
+    m_node = 0;
+    if (m_path.m_num == 1) {
+        m_nodes = 1;
+        m_points[0][2] = m_goal[2];
+        m_points[0][0] = m_goal[0];
+        m_points[0][1] = m_goal[1];
+        return;
+    }
+    float prev[3] = { s_movePos[0], s_movePos[1], s_movePos[2] };
+    float prevAngle = 0.0f;
+    int n = 0;
+    for (int i = 0; i < m_path.m_num - 1; i++) {
+        float pt[3];
+        if (i + 1 == m_path.m_num - 1) {
+            pt[0] = m_goal[0];
+            pt[1] = m_goal[1];
+            pt[2] = m_goal[2];
+        } else {
+            const GamSecta *cell = m_path.m_cell[i + 1];
+            pt[0] = cell->m_pos[0];
+            pt[1] = cell->m_pos[1];
+            pt[2] = cell->m_pos[2];
+        }
+        float a = atan2f(pt[0] - prev[0], pt[2] - prev[2]);
+        if (i == 0) {
+            n = 0;
+        } else {
+            GamSecta *cells[4];
+            tskEnemyWorld().findCells(m_goal, cells, 0, 40.0f, 0.0f);
+            /* Nearly straight on: this point replaces the one before. */
+            if (cells[1] != NULL
+                && (double)fabsf(tskEnemyWrapAngle(a - prevAngle)) < 0.7853981633974483)
+                n--;
+        }
+        m_points[n][0] = pt[0];
+        m_points[n][1] = pt[1];
+        m_points[n][2] = pt[2];
+        n++;
+        prev[0] = pt[0];
+        prev[1] = pt[1];
+        prev[2] = pt[2];
+        prevAngle = a;
+    }
+    m_nodes = n;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00201d58 // callcheck: atan2f, getRotY, fptodp, dpcmp, dpadd, dpsub, dptofp (tskEnemyAngleTo)
+
+int TskEnemyMove::startWalk(const float *pos)
+{
+    float d = tskEnemyAngleTo(m_dog, s_movePos, m_points[m_node]);
+    if ((double)fabsf(d) > 0.7853981633974483) { /* pi / 4 */
+        startTurn(d);
+        return 2;
+    }
+    int near = 0;
+    if (m_node == m_nodes - 1) {
+        float dx = m_goal[0] - pos[0];
+        float dz = m_goal[2] - pos[2];
+        near = dx * dx + dz * dz < m_nearRange * m_nearRange;
+        m_walk = near ? m_runSpeed : m_walkSpeed;
+    }
+    m_74 = near;
+    int motion;
+    u_int flags = 0x41;
+    int next = 0;
+    if (m_mode == 0 && m_carry != 0) {
+        motion = 0xb;
+    } else if (m_mode != 0 && m_68 != 0) {
+        motion = near ? 0xb : 10;
+        flags = 0x40;
+        next = 3;
+        m_6c = 1;
+        m_motionFlags = 0x40;
+    } else {
+        motion = near ? 7 : m_walkMotion;
+    }
+    if (m_motion == motion)
+        return 0;
+    m_dog->changeMotion(m_speed, motion, flags, -1, -1);
+    m_motion = motion;
+    return next;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00201fa4 // callcheck: sinf, cosf, isBlocked (probe inlined)
+
+int TskEnemyMove::checkAhead(const float *pos)
+{
+    float rot = m_dog->getRotY();
+    if (!probe(rot, 70.0f, pos) && !probe(rot, 30.0f, pos))
+        return 0;
+    avoid(rot, pos);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00202138 // callcheck: sinf, cosf, isBlocked (probe inlined)
+
+int TskEnemyMove::checkStep(const float *pos)
+{
+    float rot = m_dog->getRotY();
+    if (!probe(rot, m_walk, pos))
+        return 0;
+    avoid(rot, pos);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00202234 // callcheck: atan2f, getRotY, fptodp, dpcmp, dpadd, dpsub, dptofp (tskEnemyAngleTo)
+
+int TskEnemyMove::checkBump(const float *pos)
+{
+    ChrHitRec hit;
+    if (g_gamMan.testHitAt(pos, m_oid, 0, 0, &hit) == 0)
+        return 0;
+    float at[4];
+    emyGetSEPos(hit.m_oid, at);
+    int motion = tskEnemyAngleTo(m_dog, pos, at) > 0.0f ? 0x10 : 0x11;
+    m_dog->changeMotion(m_speed, motion, 0, -1, -1);
+    m_motion = motion;
+    m_step = 1;
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00202380 // callcheck: findCells, fptodp, dpcmp, dpadd, dpsub, dptofp (tskEnemyWorld, tskEnemyWrapAngle)
+
+int TskEnemyMove::moveRoot(float turn)
+{
+    float move[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float at[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float to[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float rot[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    float ofsY = 0.0f;
+    float rotY = m_dog->getRotY();
+    if (m_dog->getModeArg() >= 0)
+        return 0;
+    float frame = m_dog->getMotionFrame();
+    if (0.0f <= frame) {
+        float t1 = frame + m_dog->m_motion.m_speed / 0x1.11112ep-6f; /* 0x3c888897 */
+        m_dog->getMotionMove(frame + frame, t1 + t1, move, rot, at);
+        ofsY = at[1];
+    }
+    move[3] = 1.0f;
+    utlVecRotMatY(m_dog->m_base_rotate[1], move);
+    to[0] = m_dog->m_trans[0] + move[0];
+    to[1] = m_dog->m_trans[1] + move[1];
+    to[2] = m_dog->m_trans[2] + move[2];
+    SctWorld &world = tskEnemyWorld();
+    GamSecta *here[4];
+    world.findCells(s_movePos, here, 0, 40.0f, 0.0f);
+    if (here[m_layer] != NULL) {
+        /* Off the list's cells: refused only when it starts on them. */
+        world.findCells(to, m_cells, 0, 40.0f, 0.0f);
+        if (m_cells[m_layer] == NULL)
+            return 1;
+    }
+    if (g_gamMan.testHitAt(to, m_oid, 0, 0, NULL) != 0)
+        return 2;
+    m_dog->addTransRotY(move, ofsY, tskEnemyWrapAngle(rotY - turn));
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00202638 // callcheck: SctWorld::findCells (tskEnemyWorld)
+
+int TskEnemyMove::moveRootStill()
+{
+    float move[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float at[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float to[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float rot[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    float ofsY = 0.0f;
+    float rotY = m_dog->getRotY();
+    if (m_dog->getModeArg() >= 0)
+        return 0;
+    float frame = m_dog->getMotionFrame();
+    if (0.0f <= frame) {
+        float t1 = frame + m_dog->m_motion.m_speed / 0x1.11112ep-6f; /* 0x3c888897 */
+        m_dog->getMotionMove(frame + frame, t1 + t1, move, rot, at);
+        ofsY = at[1];
+    }
+    move[3] = 1.0f;
+    utlVecRotMatY(m_dog->m_base_rotate[1], move);
+    to[0] = m_dog->m_trans[0] + move[0];
+    to[1] = m_dog->m_trans[1] + move[1];
+    to[2] = m_dog->m_trans[2] + move[2];
+    SctWorld &world = tskEnemyWorld();
+    GamSecta *here[4];
+    world.findCells(s_movePos, here, 0, 40.0f, 0.0f);
+    if (here[m_layer] != NULL) {
+        world.findCells(to, m_cells, 0, 40.0f, 0.0f);
+        if (m_cells[m_layer] == NULL)
+            return 1;
+    }
+    ChrHitRec hit;
+    if (g_gamMan.testHitAt(to, m_oid, 0, 0, &hit) != 0 && gamOidType(hit.m_oid) != 2)
+        return 2;
+    m_dog->addTransRotY(move, ofsY, rotY);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00202874
+
+void TskEnemyMove::startTurn(float d)
+{
+    int motion;
+    int carried;
+    if (0.0f < d) {
+        motion = 9;
+        carried = 0xf;
+        m_right = 0;
+    } else {
+        motion = 8;
+        carried = 0xe;
+        m_right = 1;
+    }
+    if (m_carry != 0)
+        motion = carried;
+    if (m_motion != motion) {
+        m_dog->changeMotion(m_speed, motion, 1, -1, -1);
+        m_motion = motion;
+    }
+    m_step = 2;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00202900 // callcheck: sinf, cosf, isBlocked, fptodp, dpcmp, dpadd, dpsub, dptofp (probe and tskEnemyWrapAngle inlined)
+
+void TskEnemyMove::avoid(float rot, const float *pos)
+{
+    int motion;
+    if (utlRandRange(0, 99) < 50) {
+        motion = 0x10;
+        if (probe(tskEnemyWrapAngle(rot - m_angle), m_dist, pos)) {
+            motion = 0x11;
+            if (probe(tskEnemyWrapAngle(rot + m_angle), m_dist, pos)) {
+                m_wait1 = 0;
+                m_step = 0;
+                return;
+            }
+        }
+    } else {
+        motion = 0x11;
+        if (probe(tskEnemyWrapAngle(rot + m_angle), m_dist, pos)) {
+            motion = 0x10;
+            if (probe(tskEnemyWrapAngle(rot - m_angle), m_dist, pos)) {
+                m_wait1 = 0;
+                m_step = 0;
+                return;
+            }
+        }
+    }
+    m_dog->changeMotion(m_speed, motion, 0, -1, -1);
+    m_motion = motion;
+    m_step = 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00202e20 // callcheck: SctWorld::findCells (tskEnemyWorld)
+
+int TskEnemyMove::isBlocked(const float *pos, const float *at, u_int skip)
+{
+    tskEnemyWorld().findCells(at, m_cells, 0, 40.0f, 0.0f);
+    if (m_cells[m_layer] == NULL)
+        return 1;
+    return g_gamMan.testHitAt(pos, m_oid, (int)skip, 0, NULL) != 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// PC: the probe checkAhead, checkStep and avoid inline.
+
+int TskEnemyMove::probe(float rot, float dist, const float *pos)
+{
+    float a[4];
+    float b[4];
+    a[1] = pos[1];
+    b[1] = pos[1];
+    a[0] = pos[0] + sinf(rot) * dist;
+    a[2] = pos[2] + cosf(rot) * dist;
+    b[0] = s_movePos[0] + sinf(rot) * dist;
+    b[2] = s_movePos[2] + cosf(rot) * dist;
+    return isBlocked(a, b, m_target);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -520,19 +1019,4 @@ void TskEnemyTurn::getTargetPos(u_int target, float *pos)
     float rot = m_dog->getRotY();
     pos[0] += sinf(rot) * lead;
     pos[2] += cosf(rot) * lead;
-}
-
-// ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x00200988
-int TskEnemyMove::plan(const float *pos)
-{
-    ROSEPAN_STUB("TskEnemyMove::plan", 0x00200988);
-    return {};
-}
-
-// stub of ROR 0x00200d18
-void TskEnemyMove::step(const float *pos)
-{
-    ROSEPAN_STUB("TskEnemyMove::step", 0x00200d18);
 }

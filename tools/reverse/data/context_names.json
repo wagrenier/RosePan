@@ -18173,6 +18173,78 @@
   "was": "FUN_00200d18",
   "why": "exec's second call: switch on the step +0x2c (0..4), walk / turn / idle motions"
  },
+ "00201164": {
+  "name": "TskEnemyMove::nextPoint",
+  "tag": "ror-inferred",
+  "was": "FUN_00201164",
+  "why": "step 0: advances +0xa7c within two keep radii of the point; near the goal turns when off by more than m_turn; refreshes the last point from the target"
+ },
+ "00201524": {
+  "name": "TskEnemyMove::walk",
+  "tag": "ror-inferred",
+  "was": "FUN_00201524",
+  "why": "step 0 after nextPoint: moves the actor by its root motion steered at the point (0x202380), turns or side-steps on a block, sets *m_done 1 at the goal"
+ },
+ "002019d0": {
+  "name": "TskEnemyMove::setRoute",
+  "tag": "ror-inferred",
+  "was": "FUN_002019d0",
+  "why": "only from plan after searchPath: copies the path's cell points (+0x8c list, goal last) into the 16-byte points at +0x288, merging bends under pi/4, sets +0xa78 count and +0xa7c 0"
+ },
+ "00201d58": {
+  "name": "TskEnemyMove::startWalk",
+  "tag": "ror-inferred",
+  "was": "FUN_00201d58",
+  "why": "turns (0x202874, returns 2) when the next point is over pi/4 off the facing, else sets the walk motion and speed for the last point; plan / step store its result in m_step"
+ },
+ "00201fa4": {
+  "name": "TskEnemyMove::checkAhead",
+  "tag": "ror-inferred",
+  "was": "FUN_00201fa4",
+  "why": "probes 70 then 30 ahead along the facing with 0x202e20; side step (0x202900) when blocked, returns 1"
+ },
+ "00202138": {
+  "name": "TskEnemyMove::checkStep",
+  "tag": "ror-inferred",
+  "was": "FUN_00202138",
+  "why": "the same probe one +0x50 speed ahead; step 2 calls it before walking on"
+ },
+ "00202234": {
+  "name": "TskEnemyMove::checkBump",
+  "tag": "ror-inferred",
+  "was": "FUN_00202234",
+  "why": "GamMan::testHitAt at the enemy's position; on a hit plays side-step motion 0x10 / 0x11 away from the object, m_step 1"
+ },
+ "00202380": {
+  "name": "TskEnemyMove::moveRoot",
+  "tag": "ror-inferred",
+  "was": "FUN_00202380",
+  "why": "getMotionMove of this frame rotated by the base heading, refused off the secta list (1) or into an object (2), else addTransRotY with the heading less f12"
+ },
+ "00202638": {
+  "name": "TskEnemyMove::moveRootStill",
+  "tag": "ror-inferred",
+  "was": "FUN_00202638",
+  "why": "moveRoot without the turn; type-2 hits do not block (step 1 / 4 while a mode runs)"
+ },
+ "00202874": {
+  "name": "TskEnemyMove::startTurn",
+  "tag": "ror-inferred",
+  "was": "FUN_00202874",
+  "why": "turn motion 9 / 8 (15 / 14 carrying) by the sign of the angle, +0xa80 the side, m_step = 2 (TskEnemyTurn::setTurnMotion's twin)"
+ },
+ "00202900": {
+  "name": "TskEnemyMove::avoid",
+  "tag": "ror-inferred",
+  "was": "FUN_00202900",
+  "why": "random side first: probes m_dist out at heading -/+ m_angle (+0xa94); motion 0x10 / 0x11 and step 1 on the free side, else +0xaa4 = 0 (re-plan) and step 0"
+ },
+ "00202e20": {
+  "name": "TskEnemyMove::isBlocked",
+  "tag": "ror-inferred",
+  "was": "FUN_00202e20",
+  "why": "findCells at a2 into +0x18; 1 without a cell of list +0x14, else GamMan::testHitAt(a1, m_oid, skip a3) != 0"
+ },
  "00202ec8": {
   "name": "TskEnemyMove::pause",
   "tag": "ror-inferred",

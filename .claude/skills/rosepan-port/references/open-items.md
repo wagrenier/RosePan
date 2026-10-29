@@ -1091,10 +1091,12 @@ to adapt when a TU reaches them:
   was cut from unassigned@001fd424, whose remaining 0x1fd424..0x20067c is the TskAttack / TskDamage
   steps of data 0x2feb64 -- a task/ file still to name). Doubt: both getTargetPos lead the PC along
   the enemy actor's facing (m_dog->getRotY), not the PC's; written as the ROM reads it -- check when a
-  chase is on screen. Left for the next session: TskEnemyMove::plan 0x200988 / step 0x200d18 (stubs at
-  the end of tsk_enemy.cpp) and the route helpers 0x201164..0x202e20 with the route block +0x88..+0xa80
-  (SctLayer::searchPath's out record). Nothing on the smoke path starts an enemy: a run needs a room
-  with one (the bus-stop prologue has none).
+  chase is on screen. The code is complete (2026-10-29, verify): plan / step and the route helpers.
+  Doubts to check on screen: near the goal startWalk sets +0x50 to the +0x58 speed, which is prm m_run
+  (0 for emyStartMove), so a plain move's last point would walk at speed 0 by the names -- the m_run /
+  m_walk names may be swapped; plan's searchPath always uses secta list 1, while the moves test
+  m_layer (getEmyTypeFlag, 1 for every type today). Nothing on the smoke path starts an enemy: a run
+  needs a room with one (the bus-stop prologue has none).
 
 - (2026-10-29, emy/emy_main.cpp) ROM oddities ported as they are: `EmyMain::setLPFromStack` 0x16640c
   (no callers) calls setParam(a_lp) with an unset stack word (getParam was probably meant; the host
