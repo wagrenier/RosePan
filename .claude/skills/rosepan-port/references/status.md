@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 16:39 at commit `183202b` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 17:19 at commit `594e2e0` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-29 16:39 at commit `183202b` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6593** (92%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4991
-- context-name ledger: 5292 entries; overrides of wrong library matches: 5
-- placed in a source file: 5705/7187 in 143 files
+- game functions: **7187**, named **6601** (92%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4999
+- context-name ledger: 5300 entries; overrides of wrong library matches: 5
+- placed in a source file: 5709/7187 in 143 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5240**; stubs: **305**
+- reconstructed RoR functions: **5253**; stubs: **303**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -90,7 +90,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 259 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 258 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -162,13 +162,13 @@ Least-named game-code regions (64 KB blocks):
 | `src/utl/utlmisc.cpp` | 24 | 0 |
 | `src/utl/utlmisc2.cpp` | 10 | 0 |
 | `src/utl/utlrand.cpp` | 10 | 0 |
-| `src/utl/utltm2.cpp` | 1 | 1 |
+| `src/utl/utltm2.cpp` | 14 | 0 |
 | `src/wrd/wrdsrv.cpp` | 11 | 0 |
 
 ## Translation units (one session each: `tus.py`)
 
-- 172 TUs: todo 95, partial 2, verify 111, done 17
-- next: **unassigned@00104970** (frontier score 7)
+- 171 TUs: todo 95, partial 1, verify 112, done 17
+- next: **unassigned@00130a2c** (frontier score 7)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -280,10 +280,12 @@ Least-named game-code regions (64 KB blocks):
 - verify: `utl/utlmisc.cpp` 24/24 -- Verify: nothing calls this yet (main 0x2045a8 is still the placeholder; the smoke run shows a black frame). When main is reconstructed it calls utlMemInit and i
 - verify: `utl/utlmisc2.cpp` 10/10 -- Verify: the 240 s New Game run ends in the bus-stop room with Suddenly, the girl was all alone... as before (progress shot); the headings feed GamArea::update, 
 - verify: `utl/utlrand.cpp` 10/10 -- Verify: the 15 s smoke run ends on the boot disclaimer as before; utlRandReset now runs from MagSystem's constructor (no stub hit) but no random draw shows on s
+- verify: `utl/utltm2.cpp` 11/11 -- utltm2 is complete (11/11). Verify: the sepia tint runs from DogTexInfo::addPfh, which the 15 s smoke run (boot disclaimer) does not reach; the first session wh
 - verify: `wrd/wrdsrv.cpp` 11/14 -- Verified by a temporary self-test (not committed) loading WRD.BIN stages 1 and 13: 49 rooms of 247 index slots, names, floors, captions, offsets, get / findByNa
 
 Recent sessions:
 
+- 2026-10-29 17:19 `utl/utltm2.cpp` verify: Pinned unassigned@00104970: 0x104970..0x104e1c (three unreferenced sight checks) joins utl/utlbtl.cpp, utl/utltm2.cpp is 0x104e1c..0x105650. Wrote all of utltm2
 - 2026-10-29 16:39 `mag/magsceneif.cpp` verify: MagSceneIF and its map / character interfaces: all 13 methods reconstructed (index counts, names, find, category, actor motion count / number / name / trimmed l
 - 2026-10-29 16:20 `debug/motnamecnv0.cpp` verify: debug/motnamecnv0.cpp reconstructed (pinned 0x216154..0x2163ac, 8 functions): motNameConvert (scene thread motion keys to actor motion numbers), motNameFindChar
 - 2026-10-29 16:09 `emy/emy_nor.cpp` verify: Pinned emy/emy_nor.cpp 0x150b24..0x153e40 out of unassigned@00150b24 and wrote all 55 functions: NorMain (enemy type 10: initOut, dtor, decide with flee input 5
@@ -291,21 +293,20 @@ Recent sessions:
 - 2026-10-29 15:10 `mag/maglifefadekey.cpp` verify: MagLifeFadeKeyHole (the keyhole fade at scene +0x41890) reconstructed whole: constructor, loadTexture / loadTextureByName (EVNTEX.RPK header then one file, adde
 - 2026-10-29 15:00 `emy/emy_mrt.cpp` verify: Pinned emy/emy_mrt.cpp 0x14cde4..0x14dc7c out of unassigned@0014cde4 and wrote all 26 functions: MrtMain (enemy type 7: initOut, dtor, decide with its last-true
 - 2026-10-29 14:30 `emy/emy_bdl.cpp` verify: Pinned emy/emy_bdl.cpp 0x14b3bc..0x14cde4 out of unassigned@0014b3bc and wrote all 33 functions: BdlMain (enemy type 5: initOut, dtor, decide with testBarkReact
-- 2026-10-29 14:20 `emy/emy_bds.cpp` verify: Pinned emy/emy_bds.cpp 0x149d18..0x14b3bc out of unassigned@00149d18 and wrote all 33 functions: BdsMain (enemy type 4: initOut, dtor, decide, exec, after, sele
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
+| `unassigned@00153e40` | todo | 0/32/239 | 58.0 | 7 | 0 |
 | `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
 | `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
-| `unassigned@00153e40` | todo | 0/32/239 | 58.0 | 7 | 0 |
-| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
-| `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
-| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
 | `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
 | `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
-| `unassigned@00113ea8` | todo | 0/2/3 | 1.3 | 4 | 0 |
+| `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
+| `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
+| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
 | `mag/maglifepcbtl.cpp` | todo | 0/3/6 | 3.2 | 4 | 0 |
+| `unassigned@00113ea8` | todo | 0/2/3 | 1.3 | 4 | 0 |
+| `unassigned@001788ec` | todo | 0/36/45 | 14.0 | 3 | 0 |
 | `mag/maglifepceff.cpp` | todo | 0/3/3 | 0.1 | 3 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
@@ -320,8 +321,6 @@ Recent sessions:
 | `0012c31c` | MagLifePC::startAttack | 2 | ror | stub | mag/maglifepcbtl.cpp |
 | `0012ab18` | MagLifeBwnCtrl::reset | 2 | ror | missing | mag/maglifebwnctrl.cpp |
 | `0010456c` | utlHitCheck | 2 | ror | stub | utl/utlbtl.cpp |
-| `00104e1c` | utlTm2GetSize | 2 | ror | stub | - |
-| `0010559c` | utlTm2ToSepia | 2 | ror | stub | utl/utltm2.cpp |
 | `00281cbc` | DogModel::__tf | 1 | sym | missing | dog/dogmodel.cpp |
 | `0012ca28` | MagLifePC::getAttackHeight | 1 | ror | stub | - |
 | `0012c9c0` | MagLifePC::setState14 | 1 | ror | stub | - |
@@ -352,4 +351,6 @@ Recent sessions:
 | `001bdc00` | MnuSelectLanguage::init | 1 | ror | stub | - |
 | `001bde58` | MnuSelectLanguage::processPad | 1 | ror | stub | - |
 | `001bdfe0` | MnuSelectLanguage::draw | 1 | ror | stub | - |
+| `001aeacc` | MnuItem::init | 1 | ror | stub | mnu/mnuitem.cpp |
+| `001b099c` | MnuItem::processPad | 1 | ror | stub | mnu/mnuitem.cpp |
 

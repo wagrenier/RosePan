@@ -599,6 +599,54 @@
   "was": "FUN_00104e64",
   "why": "utl/utltm2.cpp asserts theN < h->Pictures: walks the picture sizes to picture n"
  },
+ "00104ef8": {
+  "name": "utlTm2SepiaColors16",
+  "tag": "ror-inferred",
+  "was": "FUN_00104ef8",
+  "why": "loops n u_shorts of 5:5:5 colour, luminance 0x4d/0x96/0x1d times the sepia r/g/b globals 0x308488.., asserts theR/theG/theB < 256 (utl/utltm2.cpp 147-149); called for 16-bit images and CLUTs"
+ },
+ "001050b0": {
+  "name": "utlTm2SepiaImage16",
+  "tag": "ror-inferred",
+  "was": "FUN_001050b0",
+  "why": "utlTm2ToSepia case image type 1: picture + header size, image size / 2 colours"
+ },
+ "001050e0": {
+  "name": "utlTm2SepiaColors24",
+  "tag": "ror-inferred",
+  "was": "FUN_001050e0",
+  "why": "the same luminance tint over n 3-byte RGB colours"
+ },
+ "00105254": {
+  "name": "utlTm2SepiaImage24",
+  "tag": "ror-inferred",
+  "was": "FUN_00105254",
+  "why": "utlTm2ToSepia case image type 2: image size / 3 colours"
+ },
+ "0010528c": {
+  "name": "utlTm2SepiaColors32",
+  "tag": "ror-inferred",
+  "was": "FUN_0010528c",
+  "why": "the same luminance tint over n 4-byte RGBA colours, alpha kept"
+ },
+ "00105400": {
+  "name": "utlTm2SepiaImage32",
+  "tag": "ror-inferred",
+  "was": "FUN_00105400",
+  "why": "utlTm2ToSepia case image type 3: image size / 4 colours"
+ },
+ "00105434": {
+  "name": "utlTm2SepiaClut4",
+  "tag": "ror-inferred",
+  "was": "FUN_00105434",
+  "why": "utlTm2ToSepia case image type 4 (4-bit index): tints the CLUT after the image by its clut type, assert 0 at line 270"
+ },
+ "001054e8": {
+  "name": "utlTm2SepiaClut8",
+  "tag": "ror-inferred",
+  "was": "FUN_001054e8",
+  "why": "utlTm2ToSepia case image type 5 (8-bit index): the same CLUT tint, assert 0 at line 292"
+ },
  "0010559c": {
   "name": "utlTm2ToSepia",
   "tag": "ror-inferred",

@@ -50,23 +50,6 @@ const char *g_versionNumber = "1.01";   /* data 0x2d9e18 -> 0x301720 */
 // ---- bridges (hand-written) ----
 
 
-// ---- bridge: utlTm2GetSize (2026-10-22, the dogtexinfo session) ----
-// The ROM's code, until utl/utltm2.cpp (unassigned@00104970) is written:
-// DogTexInfo::addData sizes its TIM2 copy with it, and a stub's 0 would
-// copy nothing.
-
-// bridge of ROR 0x00104e1c
-int utlTm2GetSize(const void *tm2)
-{
-    ROSEPAN_BRIDGE("utlTm2GetSize", 0x00104e1c);
-    const u_char *p = (const u_char *)tm2;
-    u_int n = *(const u_short *)(p + 6);
-    int size = p[5] != 0 ? 0x80 : 0x10;
-    for (; n != 0; n--)
-        size += *(const int *)(p + size);
-    return size;
-}
-
 // ──────────────────────────────────────────────────────────────────────
 // Equality without case: a..z fold to A..Z (unassigned@00106010, written
 // ahead for MagLoaderIndex::find).
