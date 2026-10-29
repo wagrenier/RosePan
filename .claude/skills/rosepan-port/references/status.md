@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-29 11:58 at commit `efc20bd` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 12:24 at commit `5fc1ea8` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-29 11:58 at commit `efc20bd` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7163**, named **6299** (88%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4697
-- context-name ledger: 4998 entries; overrides of wrong library matches: 5
-- placed in a source file: 5458/7163 in 136 files
+- game functions: **7163**, named **6302** (88%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 4700
+- context-name ledger: 5001 entries; overrides of wrong library matches: 5
+- placed in a source file: 5468/7163 in 137 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -26,11 +26,11 @@ Least-named game-code regions (64 KB blocks):
 | `00160000` | 215/268 (80%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `001f0000` | 190/234 (81%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `00190000` | 187/227 (82%) | spr/s2d.cpp, mnu/mnupbook.cpp, mnu/mnubase.cpp |
-| `00170000` | 212/251 (84%) | sct/sctlayer.cpp, eff/effman.cpp, snd/sndman.cpp |
+| `00170000` | 215/251 (86%) | sct/sctlayer.cpp, eff/effman.cpp, snd/sndman.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4903**; stubs: **366**
+- reconstructed RoR functions: **4921**; stubs: **351**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -50,6 +50,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/dog/dogtexinfo.cpp` | 16 | 0 |
 | `src/eff/eff0.cpp` | 16 | 0 |
 | `src/eff/effcameraanim1.cpp` | 3 | 0 |
+| `src/eff/efffog3.cpp` | 10 | 0 |
 | `src/eff/effman.cpp` | 32 | 0 |
 | `src/emy/emy_hfm.cpp` | 76 | 0 |
 | `src/emy/emy_main.cpp` | 52 | 0 |
@@ -82,7 +83,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 4 | 312 |
+| `src/lib/unassigned_stubs.cpp` | 12 | 297 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -157,8 +158,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 166 TUs: todo 95, partial 3, verify 99, done 17
-- next: **unassigned@0016fb70** (frontier score 15)
+- 168 TUs: todo 96, partial 3, verify 100, done 17
+- next: **unassigned@00216ad0** (frontier score 15)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -172,6 +173,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `dog/dogmotionblend.cpp` 11/11 -- Verify: the smoke run stays on the disclaimer screen and no actor is drawn yet, because the i3m pose player (unassigned@0022e840: i3mGetPose 0x22e960, i3mGetBle
 - verify: `dog/dogtexinfo.cpp` 16/16 -- Pinned 0x1161e4..0x11764c, all 16 functions written. Smoke run: MagScene::init's init / add run without asserts; screen still black (SprMan::draw and the scene 
 - verify: `eff/eff0.cpp` 14/14 -- Verify: the 240 s run reaches the bus-stop room and EffMan now creates and deletes EffLight1 (kind 0x21) and EffCameraAnim1 (0xd) through the real Eff0, but eve
+- verify: `eff/efffog3.cpp` 10/10 -- Code complete; nothing on screen shows it yet: the 240 s smoke run ends in the bus-stop room with no enemies, so the fog correctly stays the map's (frame mean e
 - verify: `eff/effman.cpp` 32/32 -- Verify: the 200 s run creates EffLight1 (kind 0x21) and EffCameraAnim1 (kind 0xd) during the picture book; their init is a stub returning 0, so createEff delete
 - verify: `emy/emy_hfm.cpp` 75/75 -- Whole TU written (75 functions, no stubs left in this file). Status verify: the 15 s smoke run still ends on the Atlus disclaimer and creates no enemy, so no Hf
 - verify: `emy/emy_main.cpp` 53/88 -- Verify: the 15 s smoke run stops at the disclaimer screen, no enemy exists yet; the first run that reaches a room with an enemy checks it (createEmy, then the c
@@ -262,6 +264,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 12:24 `eff/efffog3.cpp` verify: EffFog3, EffFog3Dark, EffFog3WeakUp and gamCreateEff1a (10 functions, 0x172678..0x172e4c, pinned out of unassigned@0016fb70): the per-stage enemy fog. init pick
 - 2026-10-29 11:58 `utl/utlfind.cpp` verify: utl/utlfind.cpp reconstructed: all 10 functions (UtlFind fields m_num / m_again named, FUN_001062d8 named utlFindFirstVFchr), extent pinned 0x1060e8-0x106658; u
 - 2026-10-29 11:39 `mnu/mnuselect.cpp` verify: MnuTextList written whole: ctor, dtor, open, close, clear, processPad and its step state machine, allocText and freeText, setItems (labels split on #0#0, mask f
 - 2026-10-29 11:27 `bed/bedsubmode.cpp` verify: BedSubMode written: push 0x100258 and pop 0x1002c0 (save / restore the four-word record on a 4-deep stack, asserts at lines 25 / 35) and reset 0x100320 (named, 
@@ -269,22 +272,21 @@ Recent sessions:
 - 2026-10-29 10:49 `eff/effcameraanim1.cpp` done: EffCameraAnim1 (kind 0xd): init, setKey, liveMain and the linkonce no-draw slots; the class moved out of effclasses.h into eff/effcameraanim1.h with the event f
 - 2026-10-29 10:31 `mag/maglifepc2.cpp` verify: mag/maglifepc2.cpp pinned 0x11c464..0x11d720 (absorbing unassigned@0011cb70 and the gaps between the file's assert anchors) and all 25 functions written: the Ga
 - 2026-10-29 09:59 `debug/mcd_debug.cpp` verify: debug/mcd_debug.cpp written whole (0x2155f4..0x215a30, 5 functions): mcdDbgAssertFailed, the second assert handler (callcheck comments in mnu/msg/snd renamed fr
-- 2026-10-29 09:53 `mnu/mnuopt.cpp` done: MnuOpt, the options screen, all 15 functions (exec step machine, execMain pad / redraw, fadeInItems, setDisp, open / close, ctor / dtor) with its pattern image,
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `unassigned@00216ad0` | partial | 2/2/16 | 6.5 | 15 | 0 |
-| `unassigned@0016fb70` | todo | 0/65/102 | 26.8 | 15 | 2 |
 | `i3d/i3cquery.cpp` | todo | 0/3/16 | 8.9 | 14 | 2 |
 | `unassigned@00149d18` | todo | 0/62/431 | 98.3 | 12 | 0 |
 | `mag/maglifefadekey.cpp` | todo | 0/6/9 | 2.5 | 9 | 0 |
-| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
 | `unassigned@00104970` | todo | 0/1/4 | 1.2 | 7 | 1 |
 | `unassigned@00130a2c` | todo | 0/1/5 | 1.2 | 7 | 1 |
-| `mnu/mnunow.cpp` | todo | 0/5/15 | 1.2 | 5 | 0 |
+| `debug/motnamecnv0.cpp` | todo | 0/2/2 | 0.3 | 7 | 1 |
+| `unassigned@00172e4c` | todo | 0/29/51 | 14.1 | 7 | 1 |
 | `mnu/mnuitem.cpp` | todo | 0/5/53 | 60.4 | 5 | 0 |
-| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
 | `mnu/mnumovie.cpp` | todo | 0/5/15 | 1.4 | 5 | 0 |
+| `mnu/mnumap.cpp` | todo | 0/4/18 | 8.7 | 5 | 0 |
+| `mnu/mnustock.cpp` | todo | 0/5/35 | 24.3 | 5 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -296,38 +298,38 @@ Recent sessions:
 | `00217f10` | utlAtan2 | 8 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 6 | ror | missing | - |
 | `0012f790` | MagLifeFadeKey::releaseTexture | 3 | ror | stub | mag/maglifefadekey.cpp |
-| `00232508` | i3cCastRay | 2 | ror | stub | i3d/i3cquery.cpp |
-| `0012ab18` | MagLifeBwnCtrl::reset | 2 | ror | missing | mag/maglifebwnctrl.cpp |
 | `00192ac0` | mnuBase::mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
 | `00192b3c` | mnuBase::~mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
+| `0012c31c` | MagLifePC::startAttack | 2 | ror | stub | mag/maglifepcbtl.cpp |
+| `002337e0` | i3dPointSegDist2 | 2 | ror | stub | i3d/i3dgeom.cpp |
+| `00232508` | i3cCastRay | 2 | ror | stub | i3d/i3cquery.cpp |
+| `0012ab18` | MagLifeBwnCtrl::reset | 2 | ror | missing | mag/maglifebwnctrl.cpp |
+| `0010456c` | utlHitCheck | 2 | ror | stub | utl/utlbtl.cpp |
 | `00104e1c` | utlTm2GetSize | 2 | ror | stub | - |
 | `0010559c` | utlTm2ToSepia | 2 | ror | stub | utl/utltm2.cpp |
-| `0010456c` | utlHitCheck | 2 | ror | stub | utl/utlbtl.cpp |
-| `002337e0` | i3dPointSegDist2 | 2 | ror | stub | i3d/i3dgeom.cpp |
-| `0012c31c` | MagLifePC::startAttack | 2 | ror | stub | mag/maglifepcbtl.cpp |
-| `001ae954` | MnuItem::MnuItem | 1 | ror | missing | mnu/mnuitem.cpp |
-| `001947a4` | MnuMap::MnuMap | 1 | ror | missing | mnu/mnumap.cpp |
-| `0019a52c` | MnuStock::MnuStock | 1 | ror | missing | mnu/mnustock.cpp |
-| `001adf04` | MnuMovie::MnuMovie | 1 | ror | missing | mnu/mnumovie.cpp |
-| `001ae474` | MnuNow::MnuNow | 1 | ror | missing | mnu/mnunow.cpp |
-| `001ad6b4` | FUN_001ad6b4 | 1 | - | missing | mnu/mnuboard2d.cpp |
-| `001bdae4` | MnuSelectLanguage::MnuSelectLanguage | 1 | ror | missing | - |
-| `0012f298` | FUN_0012f298 | 1 | - | missing | mag/maglifefadekey.cpp |
-| `00130da4` | FUN_00130da4 | 1 | - | missing | - |
 | `0021628c` | motNameFindChara | 1 | ror | stub | debug/motnamecnv0.cpp |
 | `002162e0` | motNameGetCategory | 1 | ror | stub | - |
 | `00218338` | utlStrToLower | 1 | ror | stub | - |
 | `00216184` | motNameConvert | 1 | ror | stub | debug/motnamecnv0.cpp |
-| `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
+| `00281cbc` | DogModel::__tf | 1 | sym | missing | dog/dogmodel.cpp |
+| `0012f2f0` | MagLifeFadeKey::loadTexture | 1 | ror | stub | mag/maglifefadekey.cpp |
+| `0012f824` | MagLifeFadeKey::start | 1 | ror | stub | mag/maglifefadekey.cpp |
+| `0012ca28` | MagLifePC::getAttackHeight | 1 | ror | stub | - |
+| `0012c9c0` | MagLifePC::setState14 | 1 | ror | stub | - |
+| `0012bedc` | MagLifePC::calcTargetAngle | 1 | ror | stub | - |
+| `002413d8` | rxSysIniFind | 1 | ror | stub | rx/rxsys.cpp |
+| `0012c014` | MagLifePC::getHitFrameRange | 1 | ror | stub | - |
+| `0012bc98` | MagLifePC::getWeaponHitPos | 1 | ror | stub | mag/maglifepcbtl.cpp |
+| `00241a00` | rxSysOpenTty | 1 | ror | stub | rx/rxsys.cpp |
 | `001f9e38` | FUN_001f9e38 | 1 | - | missing | task/tsk_scene.cpp |
-| `002324b8` | i3cCastSphere | 1 | ror | stub | i3d/i3cquery.cpp |
-| `0016ff78` | effMoveToward | 1 | ror | stub | - |
-| `00172678` | gamCreateEff1a | 1 | ror | stub | - |
 | `0014313c` | MagScene::updateDebug | 1 | ror | stub | mag/magscenedebug.cpp |
 | `0012a6a0` | MagLifeBwnCtrl::processPad | 1 | ror | missing | mag/maglifebwnctrl.cpp |
-| `002325a8` | i3cCastCylinder | 1 | ror | stub | i3d/i3cquery.cpp |
-| `0016ff18` | effCalcViewDepth | 1 | ror | stub | - |
-| `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |
 | `0015c304` | DwfMain::initOut | 1 | ror | stub | - |
 | `0015a17c` | PigMain::initOut | 1 | ror | stub | - |
+| `001583d4` | GotMain::initOut | 1 | ror | stub | - |
+| `00156620` | FshMain::initOut | 1 | ror | stub | - |
+| `00149d18` | BdsMain::initOut | 1 | ror | stub | - |
+| `0014b3bc` | BdlMain::initOut | 1 | ror | stub | - |
+| `0014cde4` | MrtMain::initOut | 1 | ror | stub | - |
+| `0014dc7c` | ClrMain::initOut | 1 | ror | stub | - |
 

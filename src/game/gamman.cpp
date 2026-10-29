@@ -20,6 +20,7 @@
 
 #include "bed/bedmemory.h"
 #include "bed/bedpfh.h"
+#include "eff/efffog3.h"
 #include "game/gamfile.h"
 #include "lib/unassigned.h"
 #include "mag/magsystem.h"

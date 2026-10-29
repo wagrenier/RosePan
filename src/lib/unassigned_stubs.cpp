@@ -477,11 +477,6 @@ float utlAtan2(float x, float z)
 }
 
 // stub of ROR 0x00172678
-void gamCreateEff1a(void)
-{
-    ROSEPAN_STUB("gamCreateEff1a", 0x00172678);
-}
-
 
 // stub of ROR 0x002162e0
 int motNameGetCategory(int chara)
@@ -1009,12 +1004,6 @@ EffBloodStay3::~EffBloodStay3()
     ROSEPAN_STUB("EffBloodStay3::~EffBloodStay3", 0x0016d804);
 }
 
-// stub of ROR 0x00172ac8
-EffFog3::~EffFog3()
-{
-    ROSEPAN_STUB("EffFog3::~EffFog3", 0x00172ac8);
-}
-
 // stub of ROR 0x00173df8
 EffGeneric1::EffGeneric1()
 {
@@ -1149,39 +1138,10 @@ u_long * EffBloodStay3::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_
 }
 
 // stub of ROR 0x0028c050
-I3dDrawSet * EffFog3::createPacketEntry(I3dLayer *layer)
-{
-    ROSEPAN_STUB("EffFog3::createPacketEntry", 0x0028c050);
-    return {};
-}
-
 // stub of ROR 0x00172b30
-int EffFog3::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffFog3::init", 0x00172b30);
-    return {};
-}
-
 // stub of ROR 0x00172cb8
-int EffFog3::liveMain()
-{
-    ROSEPAN_STUB("EffFog3::liveMain", 0x00172cb8);
-    return {};
-}
-
 // stub of ROR 0x0028c058
-void EffFog3::render(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("EffFog3::render", 0x0028c058);
-}
-
 // stub of ROR 0x0028c060
-u_long * EffFog3::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffFog3::renderMain", 0x0028c060);
-    return {};
-}
-
 // stub of ROR 0x00173f3c
 int EffGeneric1::init(const EffParam *param)
 {
@@ -1813,59 +1773,13 @@ void EffFog2Prim::updateZDepth()
 }
 
 // stub of ROR 0x00172d98
-int EffFog3Dark::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffFog3Dark::init", 0x00172d98);
-    return {};
-}
-
 // stub of ROR 0x0028c148
-int EffFog3Dark::liveMain()
-{
-    ROSEPAN_STUB("EffFog3Dark::liveMain", 0x0028c148);
-    return {};
-}
-
 // stub of ROR 0x0028c150
-void EffFog3Dark::render(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("EffFog3Dark::render", 0x0028c150);
-}
-
 // stub of ROR 0x0028c158
-u_long * EffFog3Dark::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffFog3Dark::renderMain", 0x0028c158);
-    return {};
-}
-
 // stub of ROR 0x00172de8
-int EffFog3WeakUp::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffFog3WeakUp::init", 0x00172de8);
-    return {};
-}
-
 // stub of ROR 0x00172e08
-int EffFog3WeakUp::liveMain()
-{
-    ROSEPAN_STUB("EffFog3WeakUp::liveMain", 0x00172e08);
-    return {};
-}
-
 // stub of ROR 0x0028c240
-void EffFog3WeakUp::render(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("EffFog3WeakUp::render", 0x0028c240);
-}
-
 // stub of ROR 0x0028c248
-u_long * EffFog3WeakUp::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffFog3WeakUp::renderMain", 0x0028c248);
-    return {};
-}
-
 // stub of ROR 0x00172e4c
 int EffFoot1::init(const EffParam *param)
 {

@@ -1281,9 +1281,7 @@ struct GamMan
 extern GamMan g_gamMan;         /* bss 0x7812c0 */
 
 /* gamSystemDataLoaded / gamStage2Loaded (outside GamMan): task/tsk_scene.h. */
-/* Effect kind 0x1a created in the scene's +0x837e0 table (initStage2's
- * first call). */
-void gamCreateEff1a(void);                                               // ROR 0x00172678
+/* gamCreateEff1a (EffFog3 into the scene's effects, initStage2): eff/efffog3.h. */
 extern int    g_bss_780d04;     /* bss 0x780d04: option 0's brightness word (32..176) */
 /* The words GamMan, MagScene and the menus read through bss 0x7b2060 /
  * 0x7b205c are g_sequence.m_bits / m_global (Sequence +0xdc20 / +0xdc1c,

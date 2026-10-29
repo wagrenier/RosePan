@@ -1424,6 +1424,19 @@ rotate[3] radians, lens degrees}. init saves the scene camera mode (+0x30), m_ca
 m_trans + m_dirty, wraps the rotation into -pi..pi for setRotate and m_angle = deg * pi / 180 (the
 camera angle is radians); liveMain plays one key a frame, then restores and calls setCameraMode(saved,
 0, NULL) -- the followed actor is not restored. The prologue picture-book stretch plays two of them.
+**EffFog3 / EffFog3Dark / EffFog3WeakUp** (kinds 0x1a..0x1c, `eff/efffog3.cpp` 0x172678..0x172e4c,
+2026-10-29): the fog that thickens while enemies are about. `gamCreateEff1a` 0x172678 (GamMan::initStage2)
+creates one EffFog3 per stage. init takes its pack's file after the models, motions and textures (BedPfh
+index m_num_i3r + m_num_i3m + m_num_tex) as a table of 0x20-byte records {+0 chapter (g_bss_7a3210, -1
+last), +4 distance scale, +8 near-amount t, +0x10 far-amount scale, +0x14 rgb ints} and keeps the
+chapter's in `g_effFog3Rec` 0x298e18 (the destructor clears it); flag word 0x298e14 bit 0 = dark. Every
+30 frames liveMain walks GamMan m_achrList: clear and an enemy awake (effFog3AnyEmyAwake 0x1726b4: types
+0..3 not in EmyMain state 4, 4/5 not in state 6, types past 10) -> EffFog3Dark (init: effFog3Shift(1, 30));
+dark and every enemy of types 0..5 down (effFog3AllEmyDown 0x1727ec) -> EffFog3WeakUp with delay 150
+(liveMain: effFog3Shift(0, 90)) and 180 frames to the next check. effFog3Shift 0x172934 builds the
+record's fog on the map fog `m_fog[1]` (distances x scale, amount0 lerped toward amount1, amount1 x scale,
+colour rgb/255, w 0) and calls MagScene::addFog with fog - map (on) or map - fog (off), so it shifts
+whatever target the scene has then.
 
 ## The game helpers (`utl/utlgame.cpp`, 0x1024d0..0x1041c4, 2026-10-28)
 
