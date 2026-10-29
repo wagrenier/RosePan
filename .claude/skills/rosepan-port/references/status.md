@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-28 22:23 at commit `252b137` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-29 07:20 at commit `bf4de0e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-28 22:23 at commit `252b137` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7159**, named **6173** (86%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 262, ror-inferred 4571
-- context-name ledger: 4871 entries; overrides of wrong library matches: 5
+- game functions: **7159**, named **6176** (86%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 262, ror-inferred 4574
+- context-name ledger: 4874 entries; overrides of wrong library matches: 5
 - placed in a source file: 5217/7159 in 125 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **4670**; stubs: **469**
+- reconstructed RoR functions: **4686**; stubs: **456**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -77,7 +77,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 7 | 365 |
+| `src/lib/unassigned_stubs.cpp` | 7 | 366 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -94,7 +94,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/maglifepceff.cpp` | 0 | 3 |
 | `src/mag/maglifepcmode.cpp` | 64 | 0 |
 | `src/mag/maglifepcmove.cpp` | 26 | 0 |
-| `src/mag/maglifewindow.cpp` | 0 | 14 |
+| `src/mag/maglifewindow.cpp` | 16 | 0 |
 | `src/mag/magloader.cpp` | 17 | 0 |
 | `src/mag/magscene.cpp` | 89 | 0 |
 | `src/mag/magscene2.cpp` | 19 | 0 |
@@ -148,8 +148,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 163 TUs: todo 98, partial 5, verify 91, done 11
-- next: **mag/maglifewindow.cpp** (frontier score 69)
+- 163 TUs: todo 97, partial 5, verify 92, done 11
+- next: **unassigned@001beb70** (frontier score 84)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -199,6 +199,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/maglifepc3.cpp` 14/14 -- Status verify: the smoke run ends on the boot disclaimer screen, before MagScene::setPC binds the player, so nothing on screen shows these motions yet; the firs
 - verify: `mag/maglifepcmode.cpp` 57/70 -- Every function of the TU is written; nothing on screen can show it yet: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run binds no actor
 - verify: `mag/maglifepcmove.cpp` 12/18 -- Status verify: the 200 s New Game run ends on a dark film frame with no assert or crash; no MagLifePC code moves anything on screen yet (applyMotionMove runs fr
+- verify: `mag/maglifewindow.cpp` 16/29 -- Status verify: the dialogue text between the prologue's bands is still blank because GamFont (lib/unassigned_stubs.cpp: setTarget, setFont, clear, drawChar, get
 - verify: `mag/magloader.cpp` 17/17 -- Status verify: all 17 functions written, nothing past the title menu draws yet. A New Game run (build.py --run 140 --pad 1800:START,2400:START,2700:CROSS) no lo
 - verify: `mag/magscene.cpp` 89/89 -- Screen still black (textures never load; game/gamfile.cpp callers GamMan::loadSystemData / loadStage are stubs), and nothing calls this slice's new code in the 
 - verify: `mag/magscene2.cpp` 19/19 -- Complete but unseen: MagScene::start (magscene.cpp) and the GamMan loads are stubs, so no loader runs and the screen stays black (MagScene::draw is a stub too).
@@ -245,6 +246,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-29 07:20 `mag/maglifewindow.cpp` verify: MagLifeWindow written whole: constructor, live (timer), render (alpha fade + font-texture TexSpriteUV), setup, fadeIn/fadeOut, drawText (Shift-JIS, wrap, scroll
 - 2026-10-28 22:23 `msg/msgman.cpp` verify: MsgMan and MsgManSet written whole: 124 functions (0x18330c..0x187724, the unassigned@00184f2c run pinned into msg/msgman.cpp), the 41 #-tags with their exec an
 - 2026-10-28 21:33 `eff/eff0.cpp` verify: Eff0, the base of the 43 Eff classes, and the shared effect helpers written: ctor, dtor, init, term, setVisible, live, render, renderPreMain, createPacketEntry,
 - 2026-10-28 21:21 `utl/utlgame.cpp` verify: reconstruct all 49 functions of utl/utlgame.cpp: tbl_sound (200 rows) and the sound helpers, the uid / door / item searches over GamMan's object lists, the enem
@@ -252,12 +254,10 @@ Recent sessions:
 - 2026-10-28 20:32 `fix/ingame_camera.cpp` done: First room in 3D after New Game: native 021 cases fixed to its jump table (3 and 6 setPc, 4 setDog, 5 setMurder) so the script binds the PC and GamMan::setPc pl
 - 2026-10-28 19:15 `utl/utlrand.cpp` verify: Split unassigned@00103edc: pinned 0x1041c4..0x10452c as utl/utlrand.cpp and wrote it whole (utlRandStep, utlRand, utlRandReset, utlRandSeed 0x104230 created in 
 - 2026-10-28 19:07 `mag/maglife.cpp` verify: MagLifeControlChara's motion sequence (changeMotionSeq, changeMotionSeqAlt, updateMotionSeq, isMotionStateEndless, changeMotion, the m_48 phase helpers), the fl
-- 2026-10-28 16:56 `emy/emy_out.cpp` verify: EmyOut and the emy helpers complete (all 58 functions of 0x166a1c..0x16a914): the last 24 written -- emyChkInAngle, isSameSecta, getAttackMotion, getTargetDir, 
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `mag/maglifewindow.cpp` | todo | 0/14/29 | 3.7 | 69 | 11 |
-| `unassigned@001beb70` | todo | 0/13/27 | 6.6 | 59 | 6 |
+| `unassigned@001beb70` | todo | 0/14/27 | 6.6 | 84 | 9 |
 | `emy/emy_main.cpp` | partial | 2/24/88 | 11.0 | 54 | 0 |
 | `unassigned@002155a0` | todo | 0/3/13 | 2.1 | 53 | 1 |
 | `unassigned@00225018` | todo | 0/3/18 | 4.5 | 50 | 1 |
@@ -267,6 +267,7 @@ Recent sessions:
 | `unassigned@0011c464` | todo | 0/3/6 | 0.5 | 19 | 3 |
 | `unassigned@001832e8` | todo | 0/1/1 | 0.0 | 18 | 1 |
 | `unassigned@001fd424` | todo | 0/18/61 | 26.3 | 18 | 0 |
+| `utl/utlfind.cpp` | todo | 0/9/10 | 1.4 | 16 | 1 |
 | `mnu/mnuselect.cpp` | partial | 3/6/14 | 3.0 | 16 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
@@ -288,6 +289,8 @@ Recent sessions:
 | `00217f10` | utlAtan2 | 8 | ror | stub | - |
 | `00218470` | rorDebugPrintf | 6 | ror | missing | - |
 | `002251f0` | i3rTrackGetValue | 5 | ror | stub | - |
+| `001bff64` | GamFont::setColor | 4 | ror | stub | - |
+| `001bf024` | GamFont::drawChar | 4 | ror | stub | - |
 | `001bebec` | GamFont::setFont | 4 | ror | stub | - |
 | `001a074c` | MnuTextList::close | 4 | ror | stub | mnu/mnuselect.cpp |
 | `001bedc0` | GamFont::setTarget | 4 | ror | stub | - |
@@ -297,6 +300,8 @@ Recent sessions:
 | `00226060` | FUN_00226060 | 4 | - | missing | - |
 | `0010620c` | utlFindClear | 3 | ror | stub | utl/utlfind.cpp |
 | `00225670` | FUN_00225670 | 3 | - | missing | - |
+| `001c0078` | GamFont::getCharMetrics | 3 | ror | stub | - |
+| `001bfe30` | GamFont::scroll | 3 | ror | stub | - |
 | `00100258` | BedSubMode::push | 3 | ror | stub | bed/bedsubmode.cpp |
 | `001002c0` | BedSubMode::pop | 3 | ror | stub | bed/bedsubmode.cpp |
 | `0016621c` | EmyMain::createHeldItem | 3 | ror | stub | emy/emy_main.cpp |
@@ -304,13 +309,9 @@ Recent sessions:
 | `001beb70` | GamFont::GamFont | 2 | ror | missing | - |
 | `001ab474` | MnuOpt::MnuOpt | 2 | ror | missing | - |
 | `0011c64c` | MagLifePC::collectNearItems | 2 | ror | stub | mag/maglifepc2.cpp |
-| `001308bc` | MagLifeWindow::MagLifeWindow | 2 | ror | stub | mag/maglifewindow.cpp |
 | `00232508` | i3cCastRay | 2 | ror | stub | i3d/i3cquery.cpp |
 | `0011ccd4` | MagLifePC::testObjHit | 2 | ror | stub | - |
 | `0012ab18` | MagLifeBwnCtrl::reset | 2 | ror | missing | mag/maglifebwnctrl.cpp |
 | `00225fd8` | FUN_00225fd8 | 2 | - | missing | - |
 | `00192ac0` | mnuBase::mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
-| `00192b3c` | mnuBase::~mnuBase | 2 | ror | missing | mnu/mnubase.cpp |
-| `001bffcc` | GamFont::getGlyph | 2 | ror | stub | - |
-| `00104e1c` | utlTm2GetSize | 2 | ror | stub | - |
 

@@ -4691,6 +4691,18 @@
   "was": "FUN_0012fef8",
   "why": "MagScene::fadeOutWindow's body: the same clamps, an alpha ramp from 'to' down to 'from' over time frames"
  },
+ "0012ff84": {
+  "name": "MagLifeWindow::live",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ff84",
+  "why": "_vt$13MagLifeWindow slot 2 (MagLife0::live's slot); counts m_timer (setTimer's word +0x80) down to 0"
+ },
+ "0012ff9c": {
+  "name": "MagLifeWindow::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ff9c",
+  "why": "_vt$13MagLifeWindow slot 6 (MagLife::render's slot); takes the layer, steps the alpha fade and draws the font texture as a TexSpriteUV"
+ },
  "00130214": {
   "name": "MagLifeWindow::getPos",
   "tag": "ror-inferred",
@@ -4720,6 +4732,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00130778",
   "why": "asserts thefontManager (mag/maglifewindow.cpp:578), stores the GamFont at +0xc4 and copies its cell / buffer sizes (asserts m_ch_w, m_ch_h, m_buf_w, m_buf_h)"
+ },
+ "0013086c": {
+  "name": "MagLifeWindow::getTextWidth",
+  "tag": "ror-inferred",
+  "was": "FUN_0013086c",
+  "why": "asserts theStr in mag/maglifewindow.cpp, then GamFont::getTextWidth on m_fntman"
  },
  "001308bc": {
   "name": "MagLifeWindow::MagLifeWindow",

@@ -645,9 +645,21 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   m_id -1, the strip records free, m_focus_actor -1, +0x2a9c8 3, +0x2aa84 1, +0x854b0 (0.1, 0.1,
   0.1, 1), +0x854d4 / d5 1, and m_pc_no **0** (not -1). The camera's inline constructor gives a
   pi/3 lens (+0x140, 0x3f860a92) and 115 at +0x144; DogEntity's inline one gives (0, 0, 0, 1)
-  translation / rotation / offset / +0x80, scale 1, dirty. Text windows (MagLifeWindow, 0xe0 bytes,
-  ctor 0x1308bc) keep their position at +0x30, size +0x94 / +0x98, alpha ramp +0xac..+0xbc, font
-  +0xc4, font texture number +0xc0; MagScene::setWindowShow passes its flag to setHide.
+  translation / rotation / offset / +0x80, scale 1, dirty. Text windows: see "MagLifeWindow" below;
+  MagScene::setWindowShow passes its flag to setHide.
+- **MagLifeWindow** (`mag/maglifewindow.cpp` 0x12fca8..0x1308bc + linkonce 0x285234..0x2852ec, all
+  written 2026-10-29, `verify`; EE 0xe0, base MagLifePos 0x2e1db8 <- MagLife). A life in the scene's
+  MagLifeMan (openWindow adds it with 0x800c): slot 2 live 0x12ff84 counts m_timer +0x80 down (the
+  scene's sub mode 2 closes a window at 0; setTimer / getTimer are the ELF's names), slot 6 render
+  0x12ff9c steps the alpha fade (+0xac time, +0xb0 step, +0xb4 max, +0xb8 min, +0xbc current ->
+  m_alpha +0xa8) and draws the font texture m_tex_no +0xc0 as one TexSpriteUV at GS (0x700 + x,
+  0x720 + y) .. + (m_w +0x94, m_h +0x98), uv m_uv +0x84..+0x90, colour +0x9c..+0xa4, set depth
+  60000, BeginSet key 950, TEXA 0x8000, TEST 0x31003, ALPHA 0x44. The asserts name +0xc4 m_fntman,
+  +0xc8 m_ch_w, +0xcc m_ch_h (the font's cell; getFontH), +0xd0 m_buf_w, +0xd4 m_buf_h (its buffer;
+  setFontManager copies them and sets m_uv to the whole buffer); +0xd8 / +0xdc the text cursor.
+  drawText 0x130258 is Shift-JIS with 10 = new line and a leading 0x11 = centre each line in m_w;
+  print 0x1305ec reads bytes signed (lb), so only ASCII draws. MagLifePos: m_pos +0x30, m_speed
+  +0x40, m_accel +0x50 (updatePos / updateSpeed), two more (0,0,0,1) vectors +0x60 / +0x70.
 - **The scene's frame** (`mag/magscenerender.cpp`, pinned 0x139540..0x13c328, 2026-10-22;
   all 20 written, `verify`). `MagScene::draw(ctx, dbuff, frame)` 0x13bcc0:
   setTexTable when DogTexInfo +0x10 (dirty) is set; rebuilds both view records' frustum from the

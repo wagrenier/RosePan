@@ -6,6 +6,15 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-29 (`mag/maglifewindow.cpp`, verify): MagLifeWindow, all 29 functions (render,
+live, drawText, print, fades, the accessors).** The prologue's dialogue text is still blank: the
+window's font is a stubbed GamFont (setTarget, setFont, clear, drawChar, getCharMetrics, setColor,
+getTextWidth, setFill / setFillMsb, scroll; lib/unassigned_stubs.cpp, 0x1beb70..0x1c0534). GamFont is
+the next step for any text on screen (name its file first: game/ by link order). When it lands,
+remove the PC guard in MagLifeWindow::render (m_buf_w <= 0, hazards.md "A sprite of a stubbed buffer
+covers the screen") and check the window sprite against the text the ROM shows: the uv / TEXA / CLUT
+alpha path through rosepan_i3d for an 8-bit font texture is untested.
+
 **WRITTEN 2026-10-28 (`msg/msgman.cpp`, verify): MsgMan and MsgManSet, all 124 functions (the old
 unassigned@00184f2c run is this file's tag handlers).** In the bus-stop room the message window now shows
 MsgMan's key icon (S2dMes sprite 0); the text itself is still blank because the window's text path is

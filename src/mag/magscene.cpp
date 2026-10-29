@@ -651,16 +651,16 @@ void MagScene::update(BedPad *pad0, BedPad *pad1)
             MagLifeWindow *w = m_window[i];
             if (!w)
                 continue;
-            if (w->m_wait_key == 0)
+            if (w->m_timer == 0)
                 closeWindow(i);
-            else if (w->m_wait_key > 0 && (pad0->m_hold >> 14 & 1))
+            else if (w->m_timer > 0 && (pad0->m_hold >> 14 & 1))
                 closeWindow(i);
         }
         int waiting = 0;
         for (int i = 0; i < 4; i++)
         {
             if (m_window[i])
-                waiting += m_window[i]->m_wait_key > 0;
+                waiting += m_window[i]->m_timer > 0;
         }
         if (waiting < 1)
         {
@@ -1406,7 +1406,7 @@ void MagScene::clearStrip(int no)
 // ──────────────────────────────────────────────────────────────────────
 // Opens a text window w x h in the first free slot, drawing with that
 // slot's font (its texture from start) and closing by life (see
-// MagLifeWindow::m_wait_key; > 0 also waits in sub mode 2). Returns the
+// MagLifeWindow::m_timer; > 0 also waits in sub mode 2). Returns the
 // slot, -1 when all four are open. a3 is not read.
 // ROR 0x00134730 // callcheck: operator_new, FUN_00215a30 (new MagLifeWindow; the assert handler, inside ROR_ASSERT)
 
@@ -1427,7 +1427,7 @@ int MagScene::openWindow(int w, int h, int a3, int life)
     font->setFont(m_font_data);
     m_window[n]->setFontManager(font);
     m_window[n]->m_tex_no = m_font_tex_no[n];
-    m_window[n]->m_wait_key = life;
+    m_window[n]->m_timer = life;
     if (life > 0)
     {
         m_sub_mode.m_mode = 2;
@@ -1547,10 +1547,10 @@ void MagScene::setWindowWords84(int theN, int a, int b, int c, int d)
     MagLifeWindow *pw = m_window[theN];
     if (pw)
     {
-        pw->m_84[3] = d;
-        pw->m_84[0] = a;
-        pw->m_84[1] = b;
-        pw->m_84[2] = c;
+        pw->m_uv[3] = d;
+        pw->m_uv[0] = a;
+        pw->m_uv[1] = b;
+        pw->m_uv[2] = c;
     }
 }
 
@@ -1563,10 +1563,10 @@ void MagScene::getWindowWords84(int theN, int *a, int *b, int *c, int *d)
     MagLifeWindow *pw = m_window[theN];
     if (pw)
     {
-        *a = pw->m_84[0];
-        *b = pw->m_84[1];
-        *c = pw->m_84[2];
-        *d = pw->m_84[3];
+        *a = pw->m_uv[0];
+        *b = pw->m_uv[1];
+        *c = pw->m_uv[2];
+        *d = pw->m_uv[3];
     }
 }
 
@@ -1577,7 +1577,7 @@ void MagScene::getWindowWordCc(int theN, int *out)
 {
     ROR_ASSERT(theN >= 0 && theN < MAX_WINDOW); /* 2262 */
     if (m_window[theN])
-        *out = m_window[theN]->m_cc;
+        *out = m_window[theN]->m_ch_h;
 }
 
 // ──────────────────────────────────────────────────────────────────────

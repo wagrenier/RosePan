@@ -905,3 +905,16 @@ Fix: a PC: guard where the write starts (msgShowSprite in msg/msgman.cpp). To fi
 scePrintf traces to the new TU's entry points (they reach the run log; stderr does not) and run
 build.py --run 45: the last trace before the log goes quiet names the call; compare a stashed baseline run.
 
+## A sprite of a stubbed buffer covers the screen (2026-10-29)
+
+- Symptom: after writing MagLifeWindow, the 240 s smoke run went black at frame 1680 and stayed
+  black (the baseline showed the title at 1800, the book, the bus-stop room).
+- Cause: the window's render draws its GamFont buffer as a texture. With GamFont::setTarget still a
+  stub the font has no buffer (m_dst_w / m_dst_h 0), so setFontManager set m_uv to 0..0 and the
+  sprite stretched one texel over the whole 640 x 448 window, opaque, every frame.
+- Fix: a PC guard in MagLifeWindow::render skips the sprite while m_buf_w <= 0 (remove it with the
+  GamFont TU). Method: compare brightness per shot against a baseline run of the previous commit
+  (git stash, same --pad, PIL ImageStat over work/shots), then toggle the suspect draw with an
+  environment variable for one run: three runs located it in 15 minutes. A new draw whose data
+  comes from a stubbed producer is the first suspect for a black screen.
+
