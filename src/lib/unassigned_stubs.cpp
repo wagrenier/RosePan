@@ -1093,12 +1093,6 @@ void TskEnemyMove::stop()
 
 
 
-// stub of ROR 0x002251f0
-void i3rTrackGetValue(const I3rItem *track, float *out, float t)
-{
-    ROSEPAN_STUB("i3rTrackGetValue", 0x002251f0);
-}
-
 // stub of ROR 0x0011d044
 int MagLifePC::canReload()
 {
@@ -2466,21 +2460,6 @@ u_long * EffCloud1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long
 void EffCloud1::updateZDepth()
 {
     ROSEPAN_STUB("EffCloud1::updateZDepth", 0x0017a8d8);
-}
-
-// stub of ROR 0x00225108
-float i3rBlendGetWeight(float t, const I3rItem *target)
-{
-    ROSEPAN_STUB("i3rBlendGetWeight", 0x00225108);
-    return {};
-}
-
-// stub of ROR 0x00225498
-float * i3rBlendVertices(float t, I3rVertexRef *ref, float *buf, const I3rItem *blocks, u_int num_blocks,
-                        const I3rBlendList *list, u_int flags)
-{
-    ROSEPAN_STUB("i3rBlendVertices", 0x00225498);
-    return {};
 }
 
 // stub of ROR 0x00200700

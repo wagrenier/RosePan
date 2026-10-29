@@ -1568,6 +1568,17 @@ to adapt when a TU reaches them:
 
 ## Done
 
+- 2026-10-29: `i3d/i3rblend.cpp` (the unassigned@00225018 run, 0x225018..0x226278 pinned, all 18
+  functions, `verify`): key curves, i3rTrackGetValue (the reached stub: i3rmesh's uv transforms read
+  it), i3rBlendGetWeight / i3rBlendVertices (moved out of unassigned.h, stubs deleted), the skin
+  passes (VU0 microprograms read) and the VIF unpack writers. The 240 s run's room shot is
+  pixel-identical to the GamFont one: no material in view has a uv track the host draw shows, and
+  the skin / VIF writers have no PC caller (rosepan_i3dmesh.cpp stands in). Doubt: the host
+  SkinBatch writes xyz only and keeps untouched vertices; the ROM's pass starts the results at zero
+  and accumulates all four components (p.w included) -- switch SkinBatch to i3rSkinVertices if a
+  skinned mesh ever looks off. A blended mesh with flags 2 alone gets the ROM's non-advancing source
+  (hazards.md).
+
 - 2026-10-29: `debug/mimu_debug.cpp` (0x215a30..0x216154 pinned, all 10 functions, `done`): the assert
   handler dbgAssertFailed, the silent traces (dbgTraceVector4 was the reached stub; dbgTraceMatrix
   0x215a70 was hidden after the handler's spin) and the float formatter. They print nothing in the

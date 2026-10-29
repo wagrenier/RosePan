@@ -81,7 +81,7 @@ static void i3rHostCamera(const I3dView *view, float *out_view, float *out_proj)
 // PC: the ROM writes each mesh's VIF chains here once, at relocation --
 // per 0x4c group the position / normal pool unpacks (VU1 0x1dc / 0x22c),
 // per 0x56 batch and 0x47 strip the colour and STQ unpacks (VU1 0x17 /
-// 0x2b, 0x225460 / 0x226060 / 0x2261b8) and an MSCAL of the strip program
+// 0x2b, i3rblend.cpp) and an MSCAL of the strip program
 // (0x302c40 + flags * 0x30) -- and stores their addresses in the group's
 // and batches' data words for the draw-time writers. The host's mesh draw
 // reads the items themselves (rosepan_i3dmesh.cpp rebases the blocks
@@ -90,7 +90,7 @@ static void i3rHostCamera(const I3dView *view, float *out_view, float *out_proj)
 
 void i3rBuildMeshPacket(I3rItem *mesh, void *buf)
 {
-    // callcheck: FUN_00225460, FUN_00226060, FUN_002261b8 (the VIF unpack writers: no packets on the host)
+    // callcheck: i3rVertexRefSet, i3rVertexRefRebase, i3rVertexRefWriteUnpack (the VIF unpack writers: no packets on the host)
     (void)mesh;
     (void)buf;
 }
@@ -301,7 +301,7 @@ static int i3rDrawMesh46(I3dLayer *layer, const I3rItem *part, int clip, I3rDraw
         if (clip == I3D_VIEW_OUT)
             return I3D_VIEW_OUT;
     }
-    // callcheck: FUN_00225ec8, i3dCtxGetHead, i3dPktDmaTag, i3dVecNormalize, i3dMatCopy, i3dVu0MatInverse, i3dVu0MatTranspose, i3dCtxSetHead, i3rDrawGroupRigid, i3rDrawGroupSkinned (the scratchpad bone matrices and the VU1 writers: PC, above)
+    // callcheck: i3rMakeSkinMatrices, i3dCtxGetHead, i3dPktDmaTag, i3dVecNormalize, i3dMatCopy, i3dVu0MatInverse, i3dVu0MatTranspose, i3dCtxSetHead, i3rDrawGroupRigid, i3rDrawGroupSkinned (the scratchpad bone matrices and the VU1 writers: PC, above)
     if (part->getNumChild() != 0)
     {
         const I3rItem &groups = part->getChildren()[0];

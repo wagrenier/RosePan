@@ -392,6 +392,22 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
     children are type 0x34 vector curves per vertex: +0 after, +0x10 before, +0x24 -> slope /
     intercept qword pairs, +0x28 -> times, +0x30 u16 count); flags & 1 alone: the own block's
     per-vertex curves. Skinned groups skin the blended pools after (0x225670).
+    **`i3d/i3rblend.cpp`** 0x225018..0x226278 (pinned and written 2026-10-29, verify; types in
+    i3rblend.h): i3rCurveFindKey 0x225018 bisects the key times (the last key <= t, -1 before the
+    first; the curves test idx < count - 1 for the slope pair, else the after value), the scalar
+    (0x58, I3rCurveData) and vector (0x34, I3rVecCurveData) curves, i3rTrackGetValue (a track's own
+    qword when child 0 has no data), i3rBlendVertices and its adders, and the I3rVertexRef (5 words:
+    data, qwc, count, kind, blended) the mesh writers pass; i3rVertexRefAlloc 0x225638 points an
+    unblended ref at the draw buffer. Skinning: i3rSkinVertices 0x225670 (M = offsets[slot] x
+    nodes[bones[slot]], normal rows 0..2 normalised, w kept from the node row) and
+    i3rSkinVerticesPre 0x225af0 (matrices from i3rMakeSkinMatrices 0x225ec8, whose normal rows keep
+    the offset rows' w) DMA both pools to the scratchpad (0x70000000 / +0x800, results +0x1000 /
+    +0x1800), zero the results and run VU0 micro 0x15e / 0x172 / 0x186 per pair (pipelined three
+    ways): pos += M x (w p) over all four rows (p.w included), nrm += N x (w n) over rows 0..2; the
+    record's count is read as a byte (lbu +6). i3rVertexRefAverage 0x225fd8 = mean xyz, w 1 (sum
+    starts at vf0). i3rVertexRefRebase 0x226060 / i3rVertexRefWriteUnpack 0x2261b8 are the VIF
+    writers (REF tag + STCYCL 1,1 + UNPACK V4-32, 0x8000 = TOPS-relative). Nothing calls the skin /
+    VIF ones on the PC (rosepan_i3dmesh.cpp's SkinBatch and block rebase stand in).
     The accessors between the fixups in i3ritem.cpp's own extent (0x22c840.., most call
     i3rItemFindChild) are not written.
 
