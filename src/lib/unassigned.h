@@ -345,20 +345,8 @@ static_assert(offsetof(MnuStock, m_scene) >= 0x110c, "m_scene");
 /* The text list MnuTextList: mnu/mnuselect.h. */
 #include "mnu/mnuselect.h"
 
-/* The "now" (status) menu. EE 0x920 (MagLifeMenuNow +0x40..+0x960). */
-struct MnuNow
-{
-    void init(DogTexInfo *tex);                                          // ROR 0x001ae520
-    void term();                                                         // ROR 0x001ae574
-    int  isInit();                                                       // ROR 0x001ae5b4
-    int  processPad(BedPad *pad);                                        // ROR 0x001ae600
-    void draw(I3dLayer *layer);                                          // ROR 0x001ae614
-
-    u_char    _00[0x90c];
-    MagScene *m_scene;          // ROR 0x90c: MagLifeMenuNow::init stores the scene
-    u_char    _910[0x920 - 0x910];
-};
-static_assert(offsetof(MnuNow, m_scene) >= 0x90c, "m_scene");
+/* The "now loading" screen MnuNow: mnu/mnunow.h (not included here: it
+ * holds a SprMan, and spr/sprman.h includes this file). */
 
 /* The 2D board. EE 0x10c0 (MagLifeMenuBoard2D +0x40..+0x1100). */
 struct MnuBoard2D
