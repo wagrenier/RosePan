@@ -174,7 +174,17 @@ public:
      * isEmyTarget reads it in state 11). */
 };
 
-/* (vtable 0x2e2ff0, EE 0x84) layout: host -- polymorphic. */
+/* State 3 (vtable 0x2e2ff0, EE 0x84): the close attack, in one of three
+ * modes picked at Init. Mode 0 (an item in hand): chases to the item's
+ * reach and throws or swings it (TskAttack 0x12, the Got's scissors 0x13
+ * / 0x14). Mode 1: chases and claws (motions 0x3f / 0x40 / 0x41, the hit
+ * frames 5..15 within 12) up to m_combo times. Mode 2 (not both grab
+ * slots taken, the PC its target, 50 % with attr bit 0x800000 or always
+ * with attr[1] bit 1): the grab -- a leap (motion 0x48) that in frames
+ * 17..23 catches the PC from the front or back (p_sp_f / p_sp_b, the
+ * EmyManager slot by side) and rides it until the PC shakes it off,
+ * then falls and gets up. Each mode ends with input 22 or 23.
+ * layout: host -- polymorphic. */
 class DwfOutAtkNear : public EmyOut
 {
 public:
@@ -183,6 +193,30 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x0015efb0
     int  Exec();                                                         // EE slot 3, ROR 0x0015f2fc
     void Term();                                                         // EE slot 4, ROR 0x0015ef94
+    int  execThrow();                                                    // ROR 0x0015f37c
+    /* The TskAttack with the held item at m_target; 0 with empty hands. */
+    int  startThrow();                                                   // ROR 0x0015f744
+    int  execClaw();                                                     // ROR 0x0015f8ac
+    /* Without attr bit 1: the claw motion (0x3c / 0x3f) and SE 0xb, 1. */
+    int  startClaw();                                                    // ROR 0x0015fee8
+    int  execGrab();                                                     // ROR 0x0015ff54
+
+    int   m_kind;               // ROR 0x38: the enemy's type (GetType) at Init
+    int   m_mode;               // ROR 0x3c: 0 throw, 1 claw, 2 grab
+    int   m_idles;              // ROR 0x40: motion-6 idles before a new chase (up to 1)
+    int   m_hits;               // ROR 0x44: throws / claws that hit in this round
+    int   m_combo;              // ROR 0x48: claws per round, utlRandPeakHi(1, param 0x6a, 4) (2 when 0)
+    int   m_tries;              // ROR 0x4c: base-motion idles before a new chase (up to 3)
+    u_int m_frame;              // ROR 0x50: the leap's frames
+    int   m_back;               // ROR 0x54: the grab from behind (EmyManager slot 1)
+    int   m_node;               // ROR 0x58: the PC's p_sp_f / p_sp_b node
+    int   m_hold;               // ROR 0x5c: frames the PC struggled (class 3)
+    int   _60;                  // ROR 0x60: not used
+    int   m_claw_frame;         // ROR 0x64: frames of the claw motion
+    float m_range;              // ROR 0x68: the throw's reach (mode 0)
+    int   _6c[4];               // ROR 0x6c: not used
+    int   m_hit_pc;             // ROR 0x7c: this claw hit the PC
+    int   m_hit_dog;            // ROR 0x80: this claw hit the dog
 };
 
 /* State 10 (vtable 0x2e3020, EE 0x40): with an item in hand (and not
@@ -268,7 +302,11 @@ public:
     void Term() {}                                                       // EE slot 4, ROR 0x0028a3ec
 };
 
-/* (vtable 0x2e3110, EE 0x68) layout: host -- polymorphic. */
+/* State 13 (vtable 0x2e3110, EE 0x68): holds its ground facing the PC
+ * and, once the PC is within the type's reach + 20, drops its item and
+ * leaps (motion 0x48) for the grab, as DwfOutAtkNear's mode 2; input 23
+ * with attr bits 8 and 0x10 or 2 and 4, else 22 after the fall.
+ * layout: host -- polymorphic. */
 class DwfOutFort : public EmyOut
 {
 public:
@@ -277,6 +315,15 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x00161230
     int  Exec();                                                         // EE slot 3, ROR 0x00161300
     void Term();                                                         // EE slot 4, ROR 0x00161a90
+    /* The PC within reach + 20 (pi / 8): the leap, the item dropped, 1. */
+    bool startLeap();                                                    // ROR 0x00161aac
+
+    int   m_kind;               // ROR 0x38: the enemy's type (GetType) at Init
+    u_int m_frame;              // ROR 0x3c: the leap's frames
+    int   m_back;               // ROR 0x40: the grab from behind (EmyManager slot 1)
+    int   m_node;               // ROR 0x44: the PC's p_sp_f / p_sp_b node
+    int   m_hold;               // ROR 0x48: frames the PC struggled (class 3)
+    int   _4c[7];               // ROR 0x4c: not used
 };
 
 /* State 14 (vtable 0x2e3140, EE 0x44): turns to the PC and keeps a
@@ -302,7 +349,12 @@ public:
     int m_count;                // ROR 0x40: step 2's repeats (only pickMove's dead branch would set them)
 };
 
-/* (vtable 0x2e3170, EE 0x40) layout: host -- polymorphic. */
+/* State 4 (vtable 0x2e3170, EE 0x40): the death -- the blood effect,
+ * the item dropped, hidden. With revivals left (param 0x5e), no group and
+ * the attr bits allowing it, it lies m_wait frames, gets up (motion 0x34
+ * then 0x30, or 10 with attr bits 8 and 0x10) and ends with input 23;
+ * otherwise it leaves its group and counts in script global name + 0x33.
+ * layout: host -- polymorphic. */
 class DwfOutDead : public EmyOut
 {
 public:
@@ -311,6 +363,13 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x00162118
     int  Exec();                                                         // EE slot 3, ROR 0x00162394
     void Term();                                                         // EE slot 4, ROR 0x00162630
+
+    int m_kind;                 // ROR 0x38: the enemy's type (GetType) at Init
+    int m_wait;                 // ROR 0x3c: frames before the revival, utlRandPeakLo(250, 7500, 4)
 };
+
+/* pos += front along the rot y of out's enemy actor and side across it.
+ * No callers in the ROM. */
+void dwfOffsetByRot(float front, float side, EmyOut *out, float *pos);  // ROR 0x00161e74
 
 #endif /* _EMY_EMY_DWF_H */

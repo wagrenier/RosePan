@@ -2037,6 +2037,20 @@ never asserts): sessions name them (`tus.py define --why`).
   The shared outs (types 0..2) keep GetType at +0x38 where the Got's scissors (0xa2e) change motions;
   DwfOutPickup's item is +0x3c (EmyManager::isEmyTarget in state 11), its result inputs come from data
   0x2f0f10 (23 failed) / 0x2f0f20 (22 taken) by type.
+  The Dwf grab (DwfOutAtkNear mode 2 / DwfOutFort, the outs of types 0..2): a leap (motion 0x48)
+  whose frames 17..23 catch the PC in reach (AtkNear 0x2f1030 45 / 65 / 65 at pi / 5, Fort 0x2f1148
+  80 / 90 / 90 at pi / 6) when commandPC(0x16) says it is free and game flag 4 is set without 0x2000.
+  The side picks the PC node (p_sp_f front, p_sp_b back) and the EmyManager oid slot (setOid(back,
+  oid), at most one enemy per side); the achr goes to the origin and setActorParent(enemy actor, PC
+  actor, node), EmyMain::m_state2 1, commandPC(0) holds the PC, ride motion 0x39 / 0x38 (0x100 flag),
+  4 % per frame a bite (scnChrRequest damage 0xf). The PC struggling (getPCStateClass 3) more frames
+  than 15 / 20 / 18 (0x2f1020 = 0x2f1160) throws it: commandPC(1), unparent, clearOid, state2 0,
+  snapToTarget, motion 0x3b / 0x3a, the fall 0x2b..0x2d (EmyMain::m_down_flg), 0x34, 0x30, input 22.
+  DwfOutAtkNear's other modes: 0 the held item's TskAttack (0x12 swing at the item's reach by
+  GamSysData fields 0x28 / 0x1b; the Got's scissors 0x13 / 0x14), 1 the claw combo (hits within 12,
+  m_combo = utlRandPeakHi(1, achr param 0x6a, 4)). DwfOutDead mirrors FshOutDead with motions 0x12 /
+  0x13 down, 0x34 / 0x30 / 10 up, input 23 (0x2f11f8), and its revival actually happens (no step
+  overwrite).
   **GotMain** (type 2, emy/emy_got.cpp 0x1583d4..0x15a17c, 2026-10-30; EE 0x270, 6 slots): uses the
   Dwf's outs (emy/emy_dwf.h) for states 1 Disappear, 2 Appear, 3 AtkNear, 4 Dead, 5 Stared, 6 Win,
   7 Serch, 8 Walk, 9 Wait, 10 AtkFar, 11 Pickup, 13 Fort, 14 Irritate; its own 12 GotOutParts

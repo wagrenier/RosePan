@@ -18,11 +18,13 @@
 #include <string.h>
 
 #include "common/rosepan_stub.h"
+#include "dog/dogactor.h"
 
 #include "emy/emy_manager.h"
 #include "game/gamman.h"
 #include "game/gamstat.h"
 #include "lib/unassigned.h"
+#include "mag/magscene.h"
 #include "mag/magscenecmd.h"
 #include "mag/magsystem.h"
 #include "sequence/sequence.h"
@@ -40,6 +42,10 @@ static const float DWF_PI_2  = 0x1.921fb4p+0f;  /* 0x3fc90fda */
 static const float DWF_PI_4  = 0x1.921fb4p-1f;  /* 0x3f490fda */
 static const float DWF_PI_8  = 0x1.921fb4p-2f;  /* 0x3ec90fda */
 static const float DWF_PI_10 = 0x1.41b2f6p-2f;  /* 0x3ea0d97b */
+static const float DWF_PI_5  = 0x1.41b2f6p-1f;  /* 0x3f20d97b */
+static const float DWF_PI_6  = 0x1.0c1522p-1f;  /* 0x3f060a91 */
+/* A chase stops between this share of its range and all of it. */
+static const float DWF_RANGE_LO = 0x1.999998p-1f; /* 0x3f4ccccc */
 
 /* The script globals the scripted win reads (bss 0x7b205c + 0x5cc /
  * 0x5d0, g_sequence.m_global): the scene wants it, the scene ends it. */
@@ -53,6 +59,28 @@ static const int     s_dwf_stare_end[3]   = { 0x16, 0x16, 0x16 };   // ROR 0x002
 static const float   s_dwf_win_pos[4] = { -70.0f, 0x1.c54cccp+8f, -1780.0f, 0.0f }; // ROR 0x002f1090
 /* DwfOutIrritate's end input per type (0x2f11a8). */
 static const int     s_dwf_irritate_end[3] = { 0x17, 0x17, 0x17 };  // ROR 0x002f11a8
+/* DwfOutAtkNear per type: the swing's reach by the item's class (field
+ * 0x28 4 / other), the chase ranges of the claw and the grab, the inputs
+ * of a miss and an end, the PC's struggle frames, the grab's reach; the
+ * ride motion by side. */
+static const float   s_dwf_near_reach4[3] = { 55.0f, 75.0f, 78.0f };   // ROR 0x002f0fc0
+static const float   s_dwf_near_reach[3]  = { 55.0f, 80.0f, 72.0f };   // ROR 0x002f0fd0
+static const float   s_dwf_near_claw[3]   = { 60.0f, 87.0f, 100.0f };  // ROR 0x002f0fe0
+static const float   s_dwf_near_grab[3]   = { 90.0f, 100.0f, 110.0f }; // ROR 0x002f0ff0
+static const int     s_dwf_near_miss[3]   = { 0x17, 0x17, 0x17 };      // ROR 0x002f1000
+static const int     s_dwf_near_end[3]    = { 0x16, 0x16, 0x16 };      // ROR 0x002f1010
+static const int     s_dwf_near_hold[3]   = { 15, 20, 18 };            // ROR 0x002f1020
+static const float   s_dwf_grab_reach[3]  = { 45.0f, 65.0f, 65.0f };   // ROR 0x002f1030
+static const int     s_dwf_grab_ride[2]   = { 0x39, 0x38 };            // ROR 0x002f1040
+/* DwfOutFort per type: the leap's reach (+ 20 to start it), the ride
+ * motion by side, the struggle frames, the inputs. */
+static const float   s_dwf_fort_reach[3]  = { 80.0f, 90.0f, 90.0f };   // ROR 0x002f1148
+static const int     s_dwf_fort_ride[2]   = { 0x39, 0x38 };            // ROR 0x002f1158
+static const int     s_dwf_fort_hold[3]   = { 15, 20, 18 };            // ROR 0x002f1160
+static const int     s_dwf_fort_quit[3]   = { 0x17, 0x17, 0x17 };      // ROR 0x002f1170
+static const int     s_dwf_fort_end[3]    = { 0x16, 0x16, 0x16 };      // ROR 0x002f1180
+/* DwfOutDead's input once up again. */
+static const int     s_dwf_dead_end[3]    = { 0x17, 0x17, 0x17 };      // ROR 0x002f11f8
 
 static u_int dwfPCOid()
 {
@@ -123,6 +151,81 @@ static int dwfScissorsMotion(EmyOut *out, int kind, int motion, int scissors)
     u_int held;
     out->m_achr->getParam(0x67, &held);
     return g_gamMan.getObjKind(held) == 0xa2e ? scissors : motion;
+}
+
+/* The grab (DwfOutAtkNear mode 2, DwfOutFort), inline in both: the PC
+ * may be caught unless already held (commandPC 0x16) and only with game
+ * flag 4 without 0x2000. */
+static bool dwfGrabAllowed()
+{
+    if (g_magSystem.m_scene.commandPC(0x16, NULL) != 0)
+        return false;
+    if (g_gamMan.m_flags & 0x2000)
+        return false;
+    return (g_gamMan.m_flags & 4) != 0;
+}
+
+/* The catch: the PC's node by side (*node is set even when the side's
+ * EmyManager slot is taken: false then); decide off, off the secta lists,
+ * the slot, state2 1, the achr at the origin parented to the node, the PC
+ * told (commandPC 0). */
+static bool dwfGrabCatch(EmyOut *out, int no, int targetNo, int back, int *node)
+{
+    DogActor &target = g_magSystem.m_scene.m_actors[targetNo];
+    *node = target.getNodeIndexByName(back == 0 ? "p_sp_f" : "p_sp_b");
+    if (g_emyManager.hasOid(back))
+        return false;
+    out->m_emy->setDecideSw(0);
+    g_gamMan.resetObj(out->m_oid, 0x40);
+    g_gamMan.setObj(out->m_oid, 0x10000000);
+    g_gamMan.setObj(out->m_oid, 0x400);
+    g_emyManager.setOid(back, out->m_oid);
+    out->m_emy->m_state2 = 1;
+    float pos[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    float rot[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    out->m_achr->ObjStat::setPos(pos);
+    out->m_achr->ObjStat::setRot(rot);
+    g_magSystem.setActorParent(no, targetNo, *node);
+    g_magSystem.m_scene.commandPC(0, NULL);
+    return true;
+}
+
+/* Thrown off: the PC freed (commandPC 1), unparented, the slot cleared,
+ * on the floor behind the PC's node, the fall motion by side. */
+static void dwfGrabRelease(EmyOut *out, int no, int *node, int *back)
+{
+    g_magSystem.m_scene.commandPC(1, NULL);
+    g_magSystem.setActorParent(no, -1, 0);
+    g_emyManager.clearOid(*back);
+    out->m_emy->m_state2 = 0;
+    out->snapToTarget(node, back);
+    g_gamMan.setObj(out->m_oid, 0x4000000);
+    out->changeMotion(*back == 0 ? 0x3b : 0x3a, 0);
+}
+
+/* Back on the secta lists, collisions on. */
+static void dwfGrabFlagsOff(EmyOut *out)
+{
+    g_gamMan.setObj(out->m_oid, 0x40);
+    g_gamMan.resetObj(out->m_oid, 0x10000000);
+    g_gamMan.resetObj(out->m_oid, 0x400);
+    g_gamMan.resetObj(out->m_oid, 0x4000000);
+}
+
+/* Decide off while it gets up. */
+static void dwfHoldOff(EmyOut *out)
+{
+    out->m_emy->setDecideSw(0);
+    g_gamMan.setObj(out->m_oid, 0x400);
+}
+
+/* Up again: decide on (the ROM sets it twice), the input end. */
+static int dwfGetUpEnd(EmyOut *out, int end)
+{
+    out->m_emy->setDecideSw(1);
+    out->m_emy->setDecideSw(1);
+    g_gamMan.resetObj(out->m_oid, 0x400);
+    return end;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1064,6 +1167,508 @@ void DwfOutPickup::Term()
     termCommon();
 }
 
+// ──── DwfOutAtkNear ───────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0015ef94
+
+void DwfOutAtkNear::Term()
+{
+    termCommon();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0015efb0 // callcheck: getObjKind, getField (the item's fields 0x1b and 0x28)
+// With an item: mode 0, the reach by the item's class (field 0x28: 4
+// 0x2f0fc0, else 0x2f0fd0) plus 70 / 50 / 20 by its size (field 0x1b 3 /
+// 2 / other); the Got's scissors 197. Without: mode 2 (0x2f0ff0) unless
+// both asks of grab slot 0 say taken (the ROM asks slot 0 twice), the
+// dog is the target, or the attr dice fail; else mode 1 (0x2f0fe0). The
+// chase stops between 80 % and all of the range. A type other than 0..2
+// keeps m_kind.
+
+void DwfOutAtkNear::Init()
+{
+    switch (m_emy->GetType()) {
+    case 1:
+        m_kind = 1;
+        break;
+    case 0:
+        m_kind = 0;
+        break;
+    case 2:
+        m_kind = 2;
+        break;
+    }
+    m_tries = 0;
+    m_idles = 0;
+    m_hits  = 0;
+    m_hold  = 0;
+    selectNearTarget(100);
+    u_short combo;
+    m_achr->getParam(0x6a, &combo);
+    m_combo = combo == 0 ? 2 : utlRandPeakHi(1, combo, 4);
+
+    u_int held;
+    m_achr->getParam(0x67, &held);
+    if (held != 0) {
+        short kind = g_gamMan.getObjKind(held);
+        u_short size, cls;
+        g_gamMan.m_sysData.getField(kind, 0x1b, &size);
+        g_gamMan.m_sysData.getField(kind, 0x28, &cls);
+        u_int target = m_target;
+        float reach = cls == 4 ? s_dwf_near_reach4[m_kind] : s_dwf_near_reach[m_kind];
+        if (m_kind == 2 && kind == 0xa2e)
+            m_range = 197.0f;
+        else if (size == 3)
+            m_range = reach + 70.0f;
+        else if (size == 2)
+            m_range = reach + 50.0f;
+        else
+            m_range = reach + 20.0f;
+        emyStartChase(utlRandRangeF(m_range * DWF_RANGE_LO, m_range), this, target);
+        m_mode = 0;
+        m_step = 0;
+        return;
+    }
+
+    bool grab = false;
+    if (!(g_emyManager.hasOid(0) && g_emyManager.hasOid(0)) && m_target_dog == 0) {
+        if (utlRandRange(0, 99) < 0x32 && (m_achr->m_attr[0] & 0x800000))
+            grab = true;
+        else if (m_achr->m_attr[1] & 1)
+            grab = true;
+    }
+    u_int target = m_target;
+    if (grab) {
+        float range = s_dwf_near_grab[m_kind];
+        emyStartChase(utlRandRangeF(range * DWF_RANGE_LO, range), this, target);
+        m_mode = 2;
+        m_step = 0;
+        return;
+    }
+    float range = s_dwf_near_claw[m_kind];
+    emyStartChase(utlRandRangeF(range * DWF_RANGE_LO, range), this, target);
+    m_hit_dog = 0;
+    m_step    = 0;
+    m_mode    = 1;
+    m_hit_pc  = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0015f2fc
+
+int DwfOutAtkNear::Exec()
+{
+    switch (m_mode) {
+    case 0:
+        return execThrow();
+    case 1:
+        return execClaw();
+    case 2:
+        return execGrab();
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0015f37c // callcheck: isAchrMotionEnd, getObjKind, getParam (chk_motion_end inlined: dwfMotionEnd; the scissors test inline)
+// Step 0: the chase ends: arrived, the throw (step 1), else input 23.
+// Step 1: the throw task gone, decide on; after a throw that hit (always:
+// startThrow counts it) or 60 %: 20 % an idle (step 2), else a new chase;
+// otherwise another throw. The ROM's r > 100 branch (motion 6 or the
+// scissors' 0xc, step 3) never runs. Step 2: the throw once m_target is
+// in sight within the range (pi / 4), else at a motion's end 5 % (up to
+// 3) another idle, then a new chase. Step 3: 20 % once motion 6, then a
+// new chase.
+
+int DwfOutAtkNear::execThrow()
+{
+    switch (m_step) {
+    case 0:
+        if (m_move_done == 0)
+            return -1;
+        m_emy->m_move->stop();
+        if (m_move_done != 1)
+            return s_dwf_near_miss[m_kind];
+        break;
+    case 1: {
+        if (g_taskMan.getTask(m_achr->m_task[3]) != 0)
+            return -1;
+        m_emy->setDecideSw(1);
+        int r = utlRandRange(0, 99);
+        if (m_hits <= 0 && r <= 0x3b)
+            break;
+        m_hits = 0;
+        if (r > 100) {
+            changeMotion(dwfScissorsMotion(this, m_kind, 6, 0xc), 0);
+            m_step = 3;
+            return -1;
+        }
+        if (utlRandRange(0, 99) < 0x14) {
+            if (m_kind == 2)
+                setGotWalkMotion();
+            else
+                setBaseMotion();
+            m_step = 2;
+            return -1;
+        }
+        m_step = 0;
+        selectNearTarget(100);
+        emyStartChase(utlRandRangeF(m_range * DWF_RANGE_LO, m_range), this, m_target);
+        return -1;
+    }
+    case 2:
+        if (emyChkInSight(m_range, DWF_PI_4, 1, m_target, m_achr) != 0)
+            break;
+        if (!dwfMotionEnd(this))
+            return -1;
+        if (m_tries < 3 && utlRandRange(0, 99) < 5) {
+            if (m_kind == 2)
+                setGotWalkMotion();
+            else
+                setBaseMotion();
+            m_tries++;
+            return -1;
+        }
+        m_step = 0;
+        selectNearTarget(100);
+        emyStartChase(utlRandRangeF(m_range * DWF_RANGE_LO, m_range), this, m_target);
+        m_tries = 0;
+        return -1;
+    case 3:
+        if (!dwfMotionEnd(this))
+            return -1;
+        if (m_idles == 0 && utlRandRange(0, 99) < 0x14) {
+            changeMotion(6, 0);
+            m_step = 3;
+            m_idles++;
+            return -1;
+        }
+        m_step = 0;
+        selectNearTarget(100);
+        emyStartChase(utlRandRangeF(m_range * DWF_RANGE_LO, m_range), this, m_target);
+        m_idles = 0;
+        return -1;
+    default:
+        return -1;
+    }
+    if (startThrow() != 0) {
+        m_step = 1;
+        return -1;
+    }
+    return s_dwf_near_miss[m_kind];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0015f744 // callcheck: FUN_001f9d90 (scnAttackStart), getField
+// Decide stays off while the task runs. The parameter words: [0] the
+// target, [1] the type, [2] the attack kind, [5] the scissors, [10] the
+// reach. The Got's scissors cut once (0x14, 50 % on the first throw:
+// m_hits is already counted then, so only when it was -1) then stab
+// (0x13); any other item is swung (0x12) at the reach of its class.
+// PORT: the ROM leaves the words it does not set as the stack had them.
+
+int DwfOutAtkNear::startThrow()
+{
+    u_int held;
+    m_achr->getParam(0x67, &held);
+    if (held == 0)
+        return 0;
+    m_hits++;
+    m_emy->setDecideSw(0);
+    int prm[12] = {};
+    prm[0] = (int)m_target;
+    prm[1] = m_kind;
+    short kind = g_gamMan.getObjKind(held);
+    float reach;
+    if (m_kind == 2 && kind == 0xa2e) {
+        prm[5] = (int)held;
+        if (m_hits == 0) {
+            prm[2] = 0x13;
+            if (utlRandRange(0, 99) < 0x32) {
+                prm[2] = 0x14;
+                m_hits = 1;
+            }
+        } else if (m_hits == 1) {
+            prm[2] = 0x14;
+        } else {
+            prm[2] = 0x13;
+        }
+        reach = m_range;
+    } else {
+        prm[2] = 0x12;
+        u_short cls;
+        g_gamMan.m_sysData.getField(kind, 0x28, &cls);
+        reach = cls == 4 ? s_dwf_near_reach4[m_kind] : s_dwf_near_reach[m_kind];
+    }
+    memcpy(&prm[10], &reach, sizeof(float));
+    scnAttackStart(m_oid, prm);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0015f8ac // callcheck: isAchrMotionEnd, getPCStateClass, getBwnState, emyChkHitReach, scnChrRequest (chk_motion_end inlined: dwfMotionEnd)
+// Step 0: the chase ends: arrived, the claw (step 1), else input 23.
+// Step 1: the wind-up's end, the swipe (0x40; 0x3d with attr bits 8 and
+// 0x10). Step 2: frames 5..15 of the swipe hit the PC (unless class 9)
+// or the dog (unless barking state 10 / 0xd) within 12: SE 5 and damage
+// 0xd to m_target (with attr 8 and 0x10 damage 0x11 and the round ends).
+// At the swipe's end (no PC hit after frame 14 ends the round) another
+// swipe, or the recovery 0x41 / 0x3e (step 3). Step 3: 50 % input 22;
+// else to 70 % with attr 0x10 but not 8 motion 6 (step 5), else an idle
+// (step 4). Steps 4 / 5: the claw again once m_target is within 60
+// (pi / 4), else at a motion's end another idle (10 % up to 3 / 20 % once)
+// or a new chase.
+
+int DwfOutAtkNear::execClaw()
+{
+    switch (m_step) {
+    case 0:
+        if (m_move_done == 0)
+            return -1;
+        m_emy->m_move->stop();
+        if (m_move_done == 1 && startClaw() != 0) {
+            m_step = 1;
+            return -1;
+        }
+        return s_dwf_near_miss[m_kind];
+    case 1:
+        if (dwfMotionEnd(this)) {
+            u_int attr = m_achr->m_attr[0];
+            changeMotion((attr & 8) && (attr & 0x10) ? 0x3d : 0x40, 0);
+            m_claw_frame = 0;
+            m_step = 2;
+        }
+        return -1;
+    case 2: {
+        m_claw_frame++;
+        if (4 < m_claw_frame && m_claw_frame < 0x10) {
+            if (m_hit_pc == 0 && g_magSystem.getPCStateClass() != 9) {
+                if (emyChkHitReach(12.0f, m_oid, 1, dwfPCOid()) != 0) {
+                    playSE(5);
+                    m_hit_pc = 1;
+                    m_hits++;
+                    int damage = 0xd;
+                    u_int attr = m_achr->m_attr[0];
+                    if ((attr & 8) && (attr & 0x10)) {
+                        damage = 0x11;
+                        m_hits = m_combo;
+                    }
+                    scnChrRequest(0xb, m_oid, 0, 0, damage, m_target, 0);
+                }
+            }
+            if (m_hit_dog == 0 && g_magSystem.getBwnState() != 10 && g_magSystem.getBwnState() != 0xd) {
+                if (emyChkHitReach(12.0f, m_oid, 1, dwfDogOid()) != 0) {
+                    playSE(5);
+                    m_hit_dog = 1;
+                    scnChrRequest(0xb, m_oid, 0, 0, 0xd, m_target, 0);
+                }
+            }
+        }
+        if (!dwfMotionEnd(this))
+            return -1;
+        if (m_claw_frame > 0xe && m_hit_pc == 0)
+            m_hits = m_combo;
+        u_int attr = m_achr->m_attr[0];
+        int motion;
+        if (m_hits < m_combo) {
+            m_hit_dog = 0;
+            m_hit_pc  = 0;
+            motion = (attr & 8) && (attr & 0x10) ? 0x3d : 0x40;
+            playSE(0xb);
+            m_claw_frame = 0;
+        } else {
+            motion = (attr & 8) && (attr & 0x10) ? 0x3e : 0x41;
+            m_step = 3;
+        }
+        changeMotion(motion, 0);
+        return -1;
+    }
+    case 3: {
+        if (!dwfMotionEnd(this))
+            return -1;
+        m_hits = 0;
+        int r = utlRandRange(0, 99);
+        if (r < 0x32)
+            return s_dwf_near_end[m_kind];
+        u_int attr = m_achr->m_attr[0];
+        if (r < 0x46 && (attr & 8) == 0 && (attr & 0x10) != 0) {
+            changeMotion(6, 0);
+            m_step = 5;
+        } else {
+            setBaseMotion();
+            m_step = 4;
+            m_tries++;
+        }
+        return -1;
+    }
+    case 4:
+        if (emyChkInSight(60.0f, DWF_PI_4, 1, m_target, m_achr) == 0) {
+            if (!dwfMotionEnd(this))
+                return -1;
+            if (m_tries < 3 && utlRandRange(0, 99) < 10) {
+                setBaseMotion();
+                m_tries++;
+                return -1;
+            }
+            selectNearTarget(100);
+            float range = s_dwf_near_claw[m_kind];
+            emyStartChase(utlRandRangeF(range * DWF_RANGE_LO, range), this, m_target);
+            m_step  = 0;
+            m_tries = 0;
+            return -1;
+        }
+        break;
+    case 5:
+        if (!dwfMotionEnd(this))
+            return -1;
+        if (emyChkInSight(60.0f, DWF_PI_4, 1, m_target, m_achr) == 0) {
+            if (m_idles == 0 && utlRandRange(0, 99) < 0x14) {
+                changeMotion(6, 0);
+                m_step = 5;
+                m_idles++;
+                return -1;
+            }
+            selectNearTarget(100);
+            float range = s_dwf_near_claw[m_kind];
+            emyStartChase(utlRandRangeF(range * DWF_RANGE_LO, range), this, m_target);
+            m_step  = 0;
+            m_idles = 0;
+            return -1;
+        }
+        break;
+    default:
+        return -1;
+    }
+    if (startClaw() == 0)
+        return s_dwf_near_miss[m_kind];
+    m_step = 1;
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0015fee8
+
+int DwfOutAtkNear::startClaw()
+{
+    u_int attr = m_achr->m_attr[0];
+    if (attr & 1)
+        return 0;
+    changeMotion((attr & 8) && (attr & 0x10) ? 0x3c : 0x3f, 0);
+    playSE(0xb);
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0015ff54 // callcheck: isAchrMotionEnd, getTask, dbgAssertFailed, i3rGetNodeIndexByName, fptodp, dpcmp, setObj, resetObj, setDecideSw, setOid, clearOid, setPos, setRot, setActorParent, commandPC, scnChrRequest, hasOid, snapToTarget (chk_motion_end inlined: dwfMotionEnd; the grab: dwfGrabCatch / dwfGrabRelease / dwfGrabFlagsOff / dwfHoldOff; DogModel::getNodeIndexByName inline)
+// Step 0: the chase ends: arrived and not attr bits 8 + 0x10 or 2 + 4,
+// the leap (step 1); else input 23. Step 1: frames 17..23 of the leap
+// catch the PC within the type's reach (0x2f1030, pi / 5, all round) from
+// the front (angle under pi / 4) or behind (over 3 pi / 4), not from the
+// side; ride motion 0x39 / 0x38 (step 2). The leap's end without a catch
+// falls to step 7. Step 2: 4 % a bite (SE 5, damage 0xf; step 3 waits for
+// the task); the PC struggling (class 3) longer than 0x2f1020 frames
+// throws it off (motion 0x3b / 0x3a, step 4). Steps 4..7: the fall
+// (motions 0x2b..0x2d, down), 0x34, 0x30, then input 22.
+
+int DwfOutAtkNear::execGrab()
+{
+    int no = g_gamMan.getActorNo(m_oid);
+    switch (m_step) {
+    case 0: {
+        if (m_move_done == 0)
+            return -1;
+        m_emy->m_move->stop();
+        u_int attr = m_achr->m_attr[0];
+        if (m_move_done == 1 && !((attr & 8) && (attr & 0x10)) && !((attr & 2) && (attr & 4))) {
+            playSE(0xb);
+            changeMotion(0x48, 0);
+            m_frame = 0;
+            m_step  = 1;
+            return -1;
+        }
+        return s_dwf_near_miss[m_kind];
+    }
+    case 1: {
+        m_frame++;
+        if (dwfMotionEnd(this)) {
+            dwfGrabFlagsOff(this);
+            changeMotion(0x30, 0);
+            dwfHoldOff(this);
+            m_step = 7;
+            return -1;
+        }
+        if (m_frame - 0x11 > 6)
+            return -1;
+        if (emyChkInSight(s_dwf_grab_reach[m_kind], DWF_PI_5, 0, m_target, m_achr) == 0)
+            return -1;
+        if (!dwfGrabAllowed())
+            return -1;
+        int targetNo = g_gamMan.getActorNo(m_target);
+        double angle = (double)getTargetAngle();
+        if (angle < 0.7853981633974483) {
+            m_back = 0;
+        } else {
+            if (angle <= 2.356194490192345)
+                return -1;
+            m_back = 1;
+        }
+        if (!dwfGrabCatch(this, no, targetNo, m_back, &m_node))
+            return -1;
+        changeMotion(s_dwf_grab_ride[m_back], 0x100);
+        m_step = 2;
+        return -1;
+    }
+    case 2:
+        if (utlRandRange(0, 99) < 4) {
+            playSE(5);
+            scnChrRequest(0xb, m_oid, 0, 0, 0xf, m_target, 0);
+            m_step = 3;
+        }
+        if (g_magSystem.getPCStateClass() == 3 && ++m_hold > s_dwf_near_hold[m_kind]) {
+            m_hold = 0;
+            dwfGrabRelease(this, no, &m_node, &m_back);
+            m_step = 4;
+        }
+        return -1;
+    case 3:
+        if (g_taskMan.getTask(m_achr->m_task[3]) != 0)
+            return -1;
+        changeMotion(s_dwf_grab_ride[m_back], 0x100);
+        m_step = 2;
+        return -1;
+    case 4:
+        if (dwfMotionEnd(this)) {
+            dwfGrabFlagsOff(this);
+            changeMotion(0x2b + utlRandRange(0, 2), 0);
+            m_emy->m_down_flg = 1;
+            m_step = 5;
+        }
+        return -1;
+    case 5:
+        if (dwfMotionEnd(this)) {
+            changeMotion(0x34, 0);
+            m_step = 6;
+        }
+        return -1;
+    case 6:
+        dwfHoldOff(this);
+        if (dwfMotionEnd(this)) {
+            changeMotion(0x30, 0);
+            m_emy->m_down_flg = 0;
+            m_step = 7;
+        }
+        return -1;
+    case 7:
+        dwfHoldOff(this);
+        if (dwfMotionEnd(this))
+            return dwfGetUpEnd(this, s_dwf_near_end[m_kind]);
+        return -1;
+    }
+    return -1;
+}
+
 // ──── DwfOutAtkFar ────────────────────────────────────────────────────
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1415,6 +2020,178 @@ int DwfOutTest::Exec()
     return -1;
 }
 
+// ──── DwfOutFort ──────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00161230 // callcheck: fptodp, dpcmp (the double compare)
+// The PC is the target; m_back from where the enemy stands (behind the PC
+// from pi / 2). A type other than 0..2 keeps m_kind.
+
+void DwfOutFort::Init()
+{
+    switch (m_emy->GetType()) {
+    case 1:
+        m_kind = 1;
+        break;
+    case 0:
+        m_kind = 0;
+        break;
+    case 2:
+        m_kind = 2;
+        break;
+    }
+    m_hold = 0;
+    m_target_dog = 0;
+    m_target = dwfPCOid();
+    m_back = (double)getTargetAngle() >= 1.5707963267948966;
+    emyStartTurn(DWF_PI_8, this, 0);
+    m_step = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00161300 // callcheck: isAchrMotionEnd, getTask, dbgAssertFailed, i3rGetNodeIndexByName, fptodp, dpcmp, setObj, resetObj, setDecideSw, setOid, clearOid, setPos, setRot, setActorParent, commandPC, scnChrRequest, hasOid, snapToTarget (chk_motion_end inlined: dwfMotionEnd; the grab: dwfGrabCatch / dwfGrabRelease / dwfGrabFlagsOff / dwfHoldOff; DogModel::getNodeIndexByName inline)
+// Input 23 at once with attr bits 8 and 0x10 or 2 and 4. Step 0: the turn
+// to the PC, the leap when it comes near (startLeap: step 1), else on the
+// walk motion (step 0xb) until the PC leaves pi / 6 of its facing, then
+// turn again. Step 1: frames 17..23 of the leap catch the PC within
+// 0x2f1148 (pi / 6, all round) from the front (angle under pi / 2) or
+// behind; ride motion 0x39 / 0x38 (step 3); the leap's end without a
+// catch falls to step 10. Step 3: 4 % a bite (SE 5, damage 0xf; step 4
+// waits for the task); the PC struggling (class 3) longer than 0x2f1160
+// frames throws it off (step 5). Steps 5, 6, 7, 10: the fall, 0x34,
+// 0x30, input 22. Steps 2, 8 and 9 are empty.
+
+int DwfOutFort::Exec()
+{
+    int no = g_gamMan.getActorNo(m_oid);
+    u_int attr = m_achr->m_attr[0];
+    if ((attr & 8) && (attr & 0x10))
+        return s_dwf_fort_quit[m_kind];
+    if ((attr & 2) && (attr & 4))
+        return s_dwf_fort_quit[m_kind];
+
+    switch (m_step) {
+    case 0:
+        if (startLeap()) {
+            m_step = 1;
+        } else if (m_turn_done != 0) {
+            m_emy->InactiveTurn();
+            resetWalkMotion();
+            m_step = 0xb;
+        }
+        break;
+    case 1: {
+        m_frame++;
+        if (dwfMotionEnd(this)) {
+            dwfGrabFlagsOff(this);
+            changeMotion(0x30, 0);
+            m_step = 10;
+            break;
+        }
+        if (m_frame - 0x11 > 6)
+            return -1;
+        if (emyChkInSight(s_dwf_fort_reach[m_kind], DWF_PI_6, 0, m_target, m_achr) == 0)
+            break;
+        if (!dwfGrabAllowed())
+            return -1;
+        int targetNo = g_gamMan.getActorNo(m_target);
+        m_back = (double)getTargetAngle() >= 1.5707963267948966;
+        if (!dwfGrabCatch(this, no, targetNo, m_back, &m_node))
+            return -1;
+        changeMotion(s_dwf_fort_ride[m_back], 0x100);
+        m_step = 3;
+        break;
+    }
+    case 2:
+    case 8:
+    case 9:
+        break;
+    case 3:
+        if (utlRandRange(0, 99) < 4) {
+            playSE(5);
+            scnChrRequest(0xb, m_oid, 0, 0, 0xf, m_target, 0);
+            m_step = 4;
+        }
+        if (g_magSystem.getPCStateClass() != 3)
+            return -1;
+        if (++m_hold > s_dwf_fort_hold[m_kind]) {
+            m_hold = 0;
+            dwfGrabRelease(this, no, &m_node, &m_back);
+            m_step = 5;
+        }
+        break;
+    case 4:
+        if (g_taskMan.getTask(m_achr->m_task[3]) != 0)
+            return -1;
+        changeMotion(s_dwf_fort_ride[m_back], 0x100);
+        m_step = 3;
+        break;
+    case 5:
+        if (dwfMotionEnd(this)) {
+            dwfGrabFlagsOff(this);
+            changeMotion(0x2b + utlRandRange(0, 2), 0);
+            m_emy->m_down_flg = 1;
+            m_step = 6;
+        }
+        break;
+    case 6:
+        if (dwfMotionEnd(this)) {
+            changeMotion(0x34, 0);
+            m_step = 7;
+        }
+        break;
+    case 7:
+        dwfHoldOff(this);
+        if (dwfMotionEnd(this)) {
+            changeMotion(0x30, 0);
+            m_emy->m_down_flg = 0;
+            m_step = 10;
+        }
+        break;
+    case 10:
+        dwfHoldOff(this);
+        if (dwfMotionEnd(this))
+            return dwfGetUpEnd(this, s_dwf_fort_end[m_kind]);
+        break;
+    case 0xb:
+        if (startLeap()) {
+            m_step = 1;
+            break;
+        }
+        if (emyChkInAngle(DWF_PI_6, this, m_target) != 0)
+            return -1;
+        emyStartTurn(DWF_PI_8, this, 0);
+        m_step = 0;
+        break;
+    }
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00161a90
+
+void DwfOutFort::Term()
+{
+    termCommon();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00161aac
+// The turn stops with the leap.
+
+bool DwfOutFort::startLeap()
+{
+    int seen = emyChkInSight(s_dwf_fort_reach[m_kind] + 20.0f, DWF_PI_8, 1, m_target, m_achr);
+    if (seen != 0) {
+        playSE(0xb);
+        changeMotion(0x48, 0);
+        m_frame = 0;
+        dropItem();
+        m_emy->InactiveTurn();
+    }
+    return seen != 0;
+}
+
 // ──── DwfOutIrritate ──────────────────────────────────────────────────
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1530,6 +2307,19 @@ float DwfOutIrritate::getReach()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// ROR 0x00161e74
+
+void dwfOffsetByRot(float front, float side, EmyOut *out, float *pos)
+{
+    int no = g_gamMan.getActorNo(out->m_oid);
+    float rot = g_magSystem.m_scene.m_actors[no].getRotY();
+    float s = sinf(rot);
+    float c = cosf(rot);
+    pos[0] = pos[0] + front * s + side * c;
+    pos[2] = pos[2] + (front * c - side * s);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x00161f28
 // The PC sees it within the reach (all round): 0, m_count 0. The ROM then
 // looks for a nonzero m_count three times -- it was just cleared, so the
@@ -1572,4 +2362,152 @@ int DwfOutIrritate::pickMove()
         playSE(0xd);
     m_step = 3;
     return 1;
+}
+
+// ──── DwfOutDead ──────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00162118 // callcheck: utlRandPeakLo (the revival draw), setParam
+// No revival (step 3) with no revivals left, in a group, with attr bit 1
+// and bits 2 + 4 or 8 + 0x10, or with bits 2 + 4 and 8 + 0x10. Otherwise
+// it spends some revivals and waits (step 0). A type other than 0..2 keeps
+// m_kind.
+
+void DwfOutDead::Init()
+{
+    switch (m_emy->GetType()) {
+    case 1:
+        m_kind = 1;
+        break;
+    case 0:
+        m_kind = 0;
+        break;
+    case 2:
+        m_kind = 2;
+        break;
+    }
+    float pos[4];
+    m_achr->getPos(pos);
+    float floor = g_gamMan.getFloorY(pos);
+    EffParam eff = {};          // PORT: the ROM leaves the words it does not set as they were
+    eff.m_kind = 3;
+    eff.m_08   = 0;
+    eff.m_hit.m_pos[0] = pos[0];
+    eff.m_hit.m_pos[1] = floor;
+    eff.m_hit.m_pos[2] = pos[2];
+    eff.m_hit.m_1c    = 0;
+    eff.m_hit.m_20    = -1.0f;
+    eff.m_hit.m_24    = 0;
+    eff.m_hit.m_scale = 100.0f;
+    eff.m_hit.m_2c    = 0x5a;
+    g_magSystem.m_scene.m_eff_man.createEff(&eff);
+    dropItem();
+    m_emy->m_visible = 0;
+    g_gamMan.resetObj(m_oid, 0x40);
+    g_gamMan.setObj(m_oid, 0x10000000);
+    g_gamMan.setObj(m_oid, 0x400);
+    m_wait = 0;
+    m_emy->stopAllSE();
+    m_achr->m_flags |= 0x400;
+    m_achr->m_flags |= 0x2000;
+    changeMotion(m_emy->m_down_supine != 0 ? 0x12 : 0x13, 0x100);
+
+    short left;
+    m_achr->getParam(0x5e, &left);
+    if (left == 0 || m_emy->m_grp_no != 0) {
+        m_step = 3;
+        return;
+    }
+    u_int attr = m_achr->m_attr[0];
+    bool down = (attr & 8) && (attr & 0x10);
+    if ((attr & 2) && (attr & 4)) {
+        if ((attr & 1) || down) {
+            m_step = 3;
+            return;
+        }
+    } else if (down && (attr & 1)) {
+        m_step = 3;
+        return;
+    }
+    m_step = 0;
+    left -= (short)utlRandPeakLo(1, left, 4);
+    m_achr->setParam(0x5e, &left);
+    m_wait = utlRandPeakLo(0xfa, 0x1d4c, 4);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00162394 // callcheck: isAchrMotionEnd (chk_motion_end inlined: dwfMotionEnd)
+// Step 0: the wait's end, the life back (EmyMain's m_lp). Lying on its
+// back it rolls over first (0x34, step 1); then with attr bits 8 and 0x10
+// it is up at once (motion 10, input 23), else it stands (0x30, step 2,
+// input 23 at its end). Step 3: the death for good, counted once (step 4
+// idles).
+
+int DwfOutDead::Exec()
+{
+    switch (m_step) {
+    case 0: {
+        if (--m_wait != 0)
+            return -1;
+        m_achr->m_flags &= ~0x2000u;
+        int lp = m_emy->m_lp;
+        m_achr->setParam(GAM_PRM_A_LP, &lp);
+        if (m_emy->m_down_supine != 0) {
+            m_step = 1;
+            changeMotion(0x34, 0);
+            return -1;
+        }
+        u_int attr = m_achr->m_attr[0];
+        if (!((attr & 8) && (attr & 0x10)))
+            break;
+        m_emy->m_visible = 1;
+        goto up;
+    }
+    case 1: {
+        if (!dwfMotionEnd(this))
+            return -1;
+        u_int attr = m_achr->m_attr[0];
+        if (!((attr & 8) && (attr & 0x10)))
+            break;
+        m_emy->m_visible = 1;
+        goto up;
+    }
+    case 2:
+        if (dwfMotionEnd(this)) {
+            m_emy->m_visible = 1;
+            m_achr->m_flags &= ~0x400u;
+            g_gamMan.setObj(m_oid, 0x40);
+            g_gamMan.resetObj(m_oid, 0x10000000);
+            g_gamMan.resetObj(m_oid, 0x400);
+            return s_dwf_dead_end[m_kind];
+        }
+        return -1;
+    case 3:
+        leaveGroup();
+        g_sequence.m_global[m_emy->m_name + 0x33]++;
+        m_step = 4;
+        return -1;
+    default:
+        return -1;
+    }
+    m_step = 2;
+    changeMotion(0x30, 0);
+    return -1;
+
+up:
+    m_achr->m_flags &= ~0x400u;
+    g_gamMan.setObj(m_oid, 0x40);
+    g_gamMan.resetObj(m_oid, 0x10000000);
+    g_gamMan.resetObj(m_oid, 0x400);
+    changeMotion(10, 0);
+    return s_dwf_dead_end[m_kind];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00162630
+
+void DwfOutDead::Term()
+{
+    m_achr->m_flags &= ~0x400u;
+    termCommon();
 }

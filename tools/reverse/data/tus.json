@@ -527,7 +527,7 @@
    "why": "ClrMain + its five ClrOut* classes: ClrMain::initOut 0x14dc7c (every XxxMain::initOut opens its file) up to NorMain::initOut 0x150b24 which opens the Nor file; no source string, named like emy_bds.cpp"
   },
   "emy/emy_dwf.cpp": {
-   "notes": "Left: DwfOutAtkNear (0x15efb0 Init, 0x15f2fc Exec, 0x15ef94 Term; helpers 0x15f37c, 0x15f744, 0x15f8ac, 0x15fee8, 0x15ff54; EE 0x84), DwfOutFort (0x161230 Init, Exec 0x161300 0x790 bytes, 0x161a90 Term, 0x161aac its in-sight throw using ranges table 0x2f1148 = 80 90 90 and table 0x2f1158; EE 0x68) and DwfOutDead (0x162118..0x16265c; 0x161e74 offsets a point by an actor rot y, likely Dead's): still hand stubs in lib/unassigned_stubs.cpp. Reuse dwfStartThrow / dwfReleaseThrown for any throw. The Init type switch leaves m_kind for types other than 0..2. Picture: 15 s smoke still ends on the Atlus disclaimer (no regression); no enemy spawns on that path. ROM oddities ported as-is (open-items.md): Irritate pickMove dead branch (table 0x2f11b8, step 2), AtkFar step 2 never set, Win scripted branch keeps the old m_step.",
+   "notes": "TU complete, verify: nothing on the 15 s smoke path spawns an enemy (the run still ends on the Atlus disclaimer / Punchline logo, as before). Mark done when a run shows a Dwf, Pig or Got attacking, riding the PC (the grab: setActorParent onto p_sp_f / p_sp_b, EmyManager oid slots 0 / 1) or dying and reviving. ROM oddities ported as-is (open-items.md): AtkNear Init asks hasOid(0) twice; execThrow r > 100 branch dead and its throw-again path unreachable after one throw; startThrow tests m_hits == 0 after incrementing it. The grab facts are in architecture.md under DwfMain.",
    "ranges": [
     [
      "0015c2a4",
@@ -544,9 +544,14 @@
      "date": "2026-10-30 11:54",
      "status": "partial",
      "summary": "DwfOutAtkFar (Init, Exec, Term, startThrow), DwfOutStared, DwfOutWin (chase and scripted win, execChase / execScripted) and DwfOutIrritate (Init, Exec, Term, getReach, pickMove) reconstructed with their EE data members and tables 0x2f1068 / 0x2f1070 / 0x2f1090 / 0x2f11a8; their 12 hand stubs removed; shared helpers dwfStartThrow (TskAttack kind 0x15), dwfReleaseThrown, dwfWinHold"
+    },
+    {
+     "date": "2026-10-30 12:12",
+     "status": "verify",
+     "summary": "DwfOutAtkNear (Init, Exec, Term and its throw, claw and grab modes with startThrow / startClaw), DwfOutFort (Init, Exec, Term, startLeap), DwfOutDead (Init, Exec, Term) and the uncalled dwfOffsetByRot reconstructed with their EE data members and tables 0x2f0fc0..0x2f1040, 0x2f1148..0x2f1180, 0x2f11f8; shared grab helpers dwfGrabCatch / dwfGrabRelease / dwfGrabFlagsOff / dwfHoldOff / dwfGetUpEnd; the last 9 DwfOut hand stubs removed; all 80 functions of the TU written"
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "DwfMain's destructor 0x15c2a4 (Dwf puts its dtor before initOut, like Fsh) up to EmyManager::EmyManager 0x16265c; DwfMain and every DwfOut* (rtti)."
   },
   "emy/emy_fsh.cpp": {
