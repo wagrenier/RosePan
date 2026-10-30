@@ -20,6 +20,7 @@
 #define _EFF_EFFCLASSES_H
 
 #include "eff/eff0.h"
+#include "eff/effbg.h"
 #include "eff/effblood.h"
 #include "eff/effcameraanim1.h"
 #include "eff/efffog3.h"
@@ -268,31 +269,7 @@ public:
     u_char m_body[0x2c];                                                    // ROR 0x24..0x50: not decoded yet
 };
 
-/* kind 0x33; EE 0x90, vtable 0x2e3f00. layout: host. */
-class EffGeneric1 : public Eff0
-{
-public:
-    EffGeneric1();                                                          // ROR 0x00173df8
-    virtual ~EffGeneric1();                                                 // ROR 0x00173e48
-    virtual int  init(const EffParam *param);                               // ROR 0x00173f3c
-    virtual int  liveMain();                                                // ROR 0x00174438
-    virtual void renderPreMain(RENDERPARAM *param);                         // ROR 0x00174534
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0028c648 (linkonce)
-
-    u_char m_body[0x6c];                                                    // ROR 0x24..0x90: not decoded yet
-};
-
-/* kind 0x34; EE 0x90, vtable 0x2e32c0. layout: host. */
-class EffBg1 : public EffGeneric1
-{
-public:
-    EffBg1();                                                               // ROR 0x0016afcc
-    virtual ~EffBg1();                                                      // ROR 0x0016affc
-    virtual int  init(const EffParam *param);                               // ROR 0x0016b060
-    virtual int  liveMain();                                                // ROR 0x0016b348
-    virtual void renderPreMain(RENDERPARAM *param);                         // ROR 0x0016b444
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0028ae70 (linkonce)
-};
+/* kinds 0x33, 0x34 (EffGeneric1, EffBg1): eff/effgeneric.h, eff/effbg.h. */
 
 /* kinds 0x21..0x23 (EffLight1, EffLight2, EffLight3): eff/efflight.h. */
 

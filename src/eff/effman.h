@@ -78,6 +78,11 @@ struct EffParam
         char m_suffix[0x70];    // ROR 0x10: kinds 0x33 / 0x34, the pack name's suffix (createEff)
         struct
         {
+            char m_suffix[0xc]; // ROR 0x10: the pack name's suffix (m_suffix above)
+            char m_mat[0x20];   // ROR 0x1c: the map material the records drive (EffBg1::init writes it into each)
+        } m_bg;                 // kind 0x34 (EffBg1::init)
+        struct
+        {
             float m_pos[3];     // ROR 0x10
             float m_near;       // ROR 0x1c: EffFindItem1::m_near
         } m_find;               // kind 0x32 (EffFindItem1::init)

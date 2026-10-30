@@ -323,6 +323,24 @@
    "status": "verify",
    "why": "Eff0 base class (ctor/dtor/slots, vtable 0x2e3250) and the shared effect helpers before EffBg1's constructor 0x16afcc, the first class in alphabetical link order"
   },
+  "eff/effbg.cpp": {
+   "notes": "Verify: the 15 s smoke run stops at the legal disclaimer; EffBg1 is created by event scripts (native 281, kind 0x34) in maps, so nothing on screen shows it yet. It needs EffGeneric1's TU (unassigned@00172e4c): EffGeneric1::EffGeneric1 / ~EffGeneric1 are still stubs (the host constructor leaves m_root, m_file, m_uv uninitialised until init; the ROM zeroes 0x24..0x40), and applyUvScroll 0x174bb0, applyUvKeys 0x174bd8 and setMatUv 0x174c4c are stubs that EffBg1::renderPreMain calls -- write those first when EffGeneric1 is taken (decompilation is staged in work/stage/tu_unassigned_0016afcc). EffGeneric1's class now lives in eff/effgeneric.h (moved from effclasses.h) with members decoded from its ctor, dtor and init; m_48 (8 bytes) is undecoded. strcasecmp is a static host helper (effStrCaseCmp) here and tenkyuStrNCaseCmp in magscenetenkyu.cpp: a shared one would be cleaner once a third user appears. Facts are in architecture.md under the effect manager section.",
+   "ranges": [
+    [
+     "0016afcc",
+     "0016b62c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 12:54",
+     "status": "verify",
+     "summary": "EffBg1 (kind 0x34) written whole: ctor, dtor, init, liveMain, renderPreMain, applyTexKeys (0x16afcc..0x16b62c, pinned as eff/effbg.cpp). New eff/effgeneric.h decodes EffGeneric1's members and the eff record file (types 4 uv scroll, 5 uv keys, 6 texture keys); EffParam gains m_bg (suffix 0xc bytes, material name at +0x1c). Named EffGeneric1::applyUvScroll / applyUvKeys / setMatUv, EffBg1::applyTexKeys, strcasecmp (0x279e98)."
+    }
+   ],
+   "status": "verify",
+   "why": "EffBg1 (kind 0x34): ctor, dtor, init, liveMain, renderPreMain and its type-6 helper, the first Eff class in alphabetical link order between eff/eff0.cpp and eff/effblood.cpp; no source-path string, named after the class"
+  },
   "eff/effblood.cpp": {
    "notes": "Nothing on the smoke path creates blood (the 15 s run is at the boot disclaimer): mark done when a run shows a hit spray (scnDamageStart, kind 1) or stains under a dying enemy (kind 3). Doubts in open-items.md: script ops 15 / 17 copy raw script words that are EE pointers into m_spray2 / m_trail (host pointers): convert in seqFunc281 when a script uses them; EffBloodStay2's strip colour 255 / 127 with the textured scale 128 saturates (ROM values kept); isActorOnStain adds the stain's angle to z (ROM). Left of the old run: EffBg1 0x16afcc..0x16b62c (unassigned@0016afcc, needs EffGeneric1) and the EffBreath classes 0x16dcc8..0x16f71c (eff/effbreath.cpp next).",
    "ranges": [

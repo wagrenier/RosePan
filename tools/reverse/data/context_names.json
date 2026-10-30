@@ -10661,6 +10661,12 @@
   "was": "FUN_0016b444",
   "why": "vtable _vt$6EffBg1 0x2e32c0 slot 7 (Eff0 slot renderPreMain)"
  },
+ "0016b50c": {
+  "name": "EffBg1::applyTexKeys",
+  "tag": "ror-inferred",
+  "was": "FUN_0016b50c",
+  "why": "EffBg1::renderPreMain's type-6 record handler: the last key whose frame <= m_frame (this+0x44) copies its texture (MagScene::copyTexture) onto every layer of the material named by the record whose texture name differs (strcasecmp)"
+ },
  "0016b62c": {
   "name": "EffBloodSpray1::EffBloodSpray1",
   "tag": "ror-inferred",
@@ -11326,6 +11332,24 @@
   "tag": "ror-inferred",
   "was": "FUN_00174534",
   "why": "vtable _vt$11EffGeneric1 0x2e3f00 slot 7 (Eff0 slot renderPreMain)"
+ },
+ "00174bb0": {
+  "name": "EffGeneric1::applyUvScroll",
+  "tag": "ror-inferred",
+  "was": "FUN_00174bb0",
+  "why": "type-4 record handler of EffGeneric1/EffBg1::renderPreMain: hands the record's scrolled uv (+0x2c, +0x30) and name (+4) to 0x174c4c"
+ },
+ "00174bd8": {
+  "name": "EffGeneric1::applyUvKeys",
+  "tag": "ror-inferred",
+  "was": "FUN_00174bd8",
+  "why": "type-5 record handler: the last 0x10-byte key whose frame <= m_frame hands its uv (+4, +8) and the record's name to 0x174c4c"
+ },
+ "00174c4c": {
+  "name": "EffGeneric1::setMatUv",
+  "tag": "ror-inferred",
+  "was": "FUN_00174c4c",
+  "why": "this a0, name a1, u f12, v f13: effFindChild52 on m_root's item finds the material and its index, stores u v into m_uv[index] (this+0x3c, 0x10 each), i3rSetMatEntity0 on each of its layers, bumps the material data's +8 counter"
  },
  "00174dd8": {
   "name": "EffLight1::init",
@@ -34204,6 +34228,12 @@
   "tag": "lib-context",
   "was": "FUN_00279b70",
   "why": "newlib: a string FILE (flags 0x208, size n-1) through vfiprintf, NUL-terminates when n != 0"
+ },
+ "00279e98": {
+  "name": "strcasecmp",
+  "tag": "lib-context",
+  "was": "FUN_00279e98",
+  "why": "newlib strcasecmp: compares bytes through _ctype_ (0x3079a9) upper bit 1 -> +0x20, returns the difference"
  },
  "0027a490": {
   "name": "strlwr",

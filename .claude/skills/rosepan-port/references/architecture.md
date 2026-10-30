@@ -1600,6 +1600,22 @@ the fog at once by MagScene::addFog toward grey 0.15 and near / far 200 / 400 (m
 relative to m_fog[3]; nothing restores it when the rain ends, and the destructor counts down even
 after a failed init. Creators not traced.
 
+**The record animation, EffGeneric1 / EffBg1** (kinds 0x33 / 0x34; EffBg1 `eff/effbg.cpp`
+0x16afcc..0x16b62c, 2026-10-30, written, verify; layouts in eff/effgeneric.h, EffParam m_bg). Both load
+a pack named with the param's suffix (EffParam +0x10, 0xc bytes) whose file after the models, motions
+and textures is named "eff" (strcasecmp): a u16 header (flags, record count, the loop's last frame)
+then records of {u16 type, u16 size, char name[0x20]}: 4 a uv scroll (speeds per second, offsets kept
+to their fractions with modff), 5 uv keys (0x10 each), 6 texture keys (0x28 each: MagScene::copyTexture
+of the key's texture over each layer texture of the material); keys apply from their frame, the last
+reached wins. A record's name picks a root material (effFindChild52, a substring); its uv goes in the
+object's m_uv[index] (0, 0, 1, 1 at init) as the material's entity 0 on every layer, and the material
+data's +8 count is bumped (EffGeneric1::setMatUv 0x174c4c). EffBg1 runs them over the map's model
+(MagScene m_tenkyu[0].m_model[0]'s I3rRoot, borrowed: its destructor clears m_root so EffGeneric1's
+does not free it) and overwrites every record's name with the param's material (EffParam +0x1c, 0x20
+bytes); it draws nothing itself. EffGeneric1 takes the param's position / rotation / scale / colour
+(+0x1c / +0x28 / +0x34 / +0x40) and owns a model copy and an optional motion. Creators not traced
+(event scripts through native 281).
+
 ## The game helpers (`utl/utlgame.cpp`, 0x1024d0..0x1041c4, 2026-10-28)
 
 One-call queries and commands on top of GamMan, EmyManager and the scene's actors; 49 functions,
