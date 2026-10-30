@@ -15245,6 +15245,30 @@
   "was": "FUN_001bc370",
   "why": "case 13 of execPage's switch on +0x58; its result 1 closes the menu"
  },
+ "001bc790": {
+  "name": "MnuItem::setNameText",
+  "tag": "ror-inferred",
+  "was": "FUN_001bc790",
+  "why": "a0 = MnuItem (execPage0..11 pass this); item of slot a1 (getSlotItem / 0x2430 / 0x242c); system data field 0xc text centred on 0x100 into sprite 0x12's text (clear rect 0x2b8850)"
+ },
+ "001bcb84": {
+  "name": "MnuItem::getKnownName",
+  "tag": "ror-inferred",
+  "was": "FUN_001bcb84",
+  "why": "returns system data field 0xc (the name) of item a1 when GamSysData::testFlags(a1, 4), else the rodata text of fullwidth question marks 0x2fb190"
+ },
+ "001bcc08": {
+  "name": "MnuItem::setLinkTexts",
+  "tag": "ror-inferred",
+  "was": "FUN_001bcc08",
+  "why": "with m_flag_c: the item of slot a1's system data fields 0x10..0x12 (item ids, 0xa00 none) -> getKnownName into sprites 0x6f..0x71, squeezed past 120 px; a2 the anim (0/1)"
+ },
+ "001bd028": {
+  "name": "MnuItem::showLinkPanel",
+  "tag": "ror-inferred",
+  "was": "FUN_001bd028",
+  "why": "with m_flag_c: fades sprites 0x6a..0x71 in when the slot's item has any of fields 0x10..0x12, out otherwise; m_2420 remembers the state"
+ },
  "001bdae4": {
   "name": "MnuSelectLanguage::MnuSelectLanguage",
   "tag": "ror-inferred",

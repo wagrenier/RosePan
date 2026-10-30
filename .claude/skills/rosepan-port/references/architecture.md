@@ -1589,6 +1589,21 @@ icons (anim table 0x2b60c0, pattern base 0xd0 + 4 * (system data field 0xd - 1);
 cursor, 0x4b / 0x50 the find target, 0x4d the chapter plate (pattern 0x51..0x5b by GamMan status 4).
 showFrame 0x1aff5c hides / fades the frame by four flags from bit-word 1 bits 0 / 1 (+0x2410..).
 Life rates +0x23e4.. = LP * 100 / MAX_LP of the PC and the dog.
+**updateFrame** (session 2): +0x2464 counts frames from step 3 (the frame shows at once at 60:
+both outcomes of an idle-pad test skip the slow fade), +0x2490 = 1 / 2 opens system message 6 / 7
+at frame 150 (closed by cross / circle), +0x2498 = page 0 takes input. Life gauges: shown rate
++0x23e4[2] steps 1 per frame toward +0x23ec[2]; bars from the rects at 0x2b6e68 (l, t, r, b; PC then
+dog): sprites 0x55 / 0x54 (PC), 0x57 / 0x56 (dog) cut at r - (r - l) * (100 - rate) / 100; faces
+0x10 / 0xf take anim 1 / 1 / 2 / 3 by the levels +0x23f4[3][2] (100, 70, 30), anim 4 / 5 on sprite
+0x10 while rising (se 0xc every 8), se 0xd at full. **Page 0** (0x1b1cd4): cursor 0x51 over area
+m_work[0] (0 equipped, 1 find target, 2 the 4 x 3 grid at m_work[1], 3 slot 12); pad m_dir_repeat
+0x10 up / 0x40 down / 0x80 left / 0x20 right, m_trig bit 14 cross opens page 3 (equipped / find),
+4 (slot) or 10 (slot 12), circle / start close (global 0x15 = 1, 0x16 = 0). Pages keep their own
+step at +0x60 + 4 * page. Helpers: setNameText 0x1bc790 (sprite 0x12, field 0xc centred on 0x100),
+getKnownName 0x1bcb84 (field 0xc if flag 4, else SJIS question marks), setLinkTexts 0x1bcc08 /
+showLinkPanel 0x1bd028 (system data fields 0x10..0x12 are linked item ids; panel sprites
+0x6a..0x71, texts 0x6f..0x71 squeezed past 120 px; +0x2420 = panel in). Fades save m_color into
+SprSprite +0x48 (m_fade_save) and fade from / back to it.
 
 ## Modules (RoR's own source files)
 

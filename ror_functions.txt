@@ -3502,11 +3502,11 @@
 /* 001bb4f0 0000080c */ MnuItem::execPage11(){}  // ror
 /* 001bbcfc 00000674 */ MnuItem::execPage12(){}  // ror
 /* 001bc370 00000420 */ MnuItem::execPage13(){}  // ror
-/* 001bc790 00000168 */ FUN_001bc790(){}
+/* 001bc790 00000168 */ MnuItem::setNameText(){}  // ror
 /* 001bc8f8 0000028c */ FUN_001bc8f8(){}
-/* 001bcb84 00000084 */ FUN_001bcb84(){}
-/* 001bcc08 00000420 */ FUN_001bcc08(){}
-/* 001bd028 00000abc */ FUN_001bd028(){}
+/* 001bcb84 00000084 */ MnuItem::getKnownName(){}  // ror
+/* 001bcc08 00000420 */ MnuItem::setLinkTexts(){}  // ror
+/* 001bd028 00000abc */ MnuItem::showLinkPanel(){}  // ror
 
 // *****************************************************************************
 // FILE -- (unassigned)
