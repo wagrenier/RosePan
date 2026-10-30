@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 11:23 at commit `fe7fbfa` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 11:35 at commit `82e94e7` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-30 11:23 at commit `fe7fbfa` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6967** (97%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 265, ror-inferred 5365
-- context-name ledger: 5668 entries; overrides of wrong library matches: 5
+- game functions: **7187**, named **6993** (97%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 265, ror-inferred 5391
+- context-name ledger: 5694 entries; overrides of wrong library matches: 5
 - placed in a source file: 6065/7187 in 154 files
 
 Least-named game-code regions (64 KB blocks):
@@ -20,17 +20,17 @@ Least-named game-code regions (64 KB blocks):
 | block | named | inferred files |
 |---|---|---|
 | `001f0000` | 190/234 (81%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
-| `00150000` | 241/272 (89%) | emy/emy_fsh.cpp, emy/emy_nor.cpp, emy/emy_dwf.cpp |
 | `00240000` | 298/336 (89%) | rx/rxfile.cpp, rx/rxsys.cpp, rx/rxthread.cpp |
 | `00170000` | 228/251 (91%) | sct/sctlayer.cpp, eff/effman.cpp, snd/sndman.cpp |
 | `00160000` | 249/268 (93%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `001a0000` | 199/214 (93%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `00210000` | 337/361 (93%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
 | `00110000` | 246/257 (96%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
+| `00200000` | 139/143 (97%) | sequence/seqcall.cpp, task/tsk_enemy.cpp, sequence/sequence.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5724**; stubs: **180**
+- reconstructed RoR functions: **5771**; stubs: **154**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -60,6 +60,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/emy/emy_bdl.cpp` | 33 | 0 |
 | `src/emy/emy_bds.cpp` | 33 | 0 |
 | `src/emy/emy_clr.cpp` | 45 | 0 |
+| `src/emy/emy_dwf.cpp` | 47 | 0 |
 | `src/emy/emy_fsh.cpp` | 61 | 0 |
 | `src/emy/emy_got.cpp` | 31 | 0 |
 | `src/emy/emy_grg.cpp` | 37 | 0 |
@@ -99,7 +100,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 154 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 128 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -184,9 +185,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 174 TUs: todo 87, partial 1, verify 133, done 17
-- next: **emy/emy_dwf.cpp** (frontier score 1)
+- 174 TUs: todo 86, partial 2, verify 133, done 17
+- next: **emy/emy_dwf.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
+- partial: `emy/emy_dwf.cpp` 47/80 -- Left: DwfOutAtkNear (0x15efb0 Init, 0x15f2fc Exec 0x13f0 bytes, 0x15ef94 Term; EE 0x84), AtkFar 0x1606ec.., Stared 0x160a44.., Win 0x160cb8.., Fort 0x161230.. (
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -323,6 +325,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 11:35 `emy/emy_dwf.cpp` partial: DwfMain (type 0, all 25 methods and tests, the two finders) and the outs Disappear, Appear, Wait, Walk, Serch, Pickup, Parts, Test reconstructed (49 functions);
 - 2026-10-30 11:23 `eff/effwater.cpp` verify: reconstruct 15 functions: EffWater1 (kind 0x2f, the EFFWATER1.RPK model with a scrolling texture) and EffWater3 (kind 0x31, rain over a box with ground ripples 
 - 2026-10-30 10:54 `emy/emy_pig.cpp` verify: PigMain (type 1) and its outs PigOutParts, PigOutTackle, PigOutTest: all 34 functions; unassigned@0015a17c split into emy/emy_pig.cpp and emy/emy_dwf.cpp
 - 2026-10-30 10:00 `mag/maglifemenusp.cpp` verify: Reconstructed both dial-lock menus: MagLifeMenuSpecial (KLCK, 0x1000b) and MagLifeMenuSpecial2 (0x1000c..f) -- constructors, destructors, init, term, isInit, pr
@@ -330,17 +333,15 @@ Recent sessions:
 - 2026-10-30 09:41 `eff/effsteam.cpp` verify: eff/effsteam.cpp pinned 0x179428..0x17a918 out of unassigned@001788ec: EffSteam1 (vent puffing EffSteam1Prim every third frame of its period), EffSteam1Prim (gr
 - 2026-10-30 09:28 `eff/effblood.cpp` verify: The blood effects, kinds 1..6: EffBloodSpray1 / 2 (drop bursts and a following spray), EffBloodStay1 (floor stains), EffBloodStay2 (a trail strip), EffBloodStay
 - 2026-10-30 08:56 `emy/emy_got.cpp` verify: Pinned emy/emy_got.cpp 0x1583d4..0x15a17c out of unassigned@001583d4 and wrote all 31 functions: GotMain (enemy type 2: initOut with its 15 outs, dtor, decide o
-- 2026-10-30 08:42 `mnu/mnuboard2d.cpp` verify: MnuBoard2D, all 16 functions: ctor / dtor, init / term / isInit / processPad / draw, open / close, exec (load the board texture named by mnuBoardGetTexName + .t
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
-| `mag/magsceneoption.cpp` | todo | 0/1/1 | 0.8 | 1 | 0 |
-| `unassigned@0016afcc` | todo | 0/5/6 | 1.6 | 1 | 0 |
 | `mag/magscenedebug.cpp` | todo | 0/1/3 | 0.8 | 1 | 0 |
-| `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
 | `unassigned@001788ec` | todo | 0/9/13 | 2.8 | 1 | 0 |
-| `emy/emy_dwf.cpp` | todo | 0/47/80 | 24.9 | 1 | 0 |
+| `mag/magsceneoption.cpp` | todo | 0/1/1 | 0.8 | 1 | 0 |
+| `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
+| `unassigned@0016afcc` | todo | 0/5/6 | 1.6 | 1 | 0 |
+| `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -358,7 +359,6 @@ Recent sessions:
 | `001f9e38` | FUN_001f9e38 | 1 | - | missing | task/tsk_scene.cpp |
 | `0014313c` | MagScene::updateDebug | 1 | ror | stub | mag/magscenedebug.cpp |
 | `0012a6a0` | MagLifeBwnCtrl::processPad | 1 | ror | missing | mag/maglifebwnctrl.cpp |
-| `0015c304` | DwfMain::initOut | 1 | ror | stub | emy/emy_dwf.cpp |
 | `00243560` | rxSysUpdateDevices | 1 | ror | stub | rx/rxsys.cpp |
 | `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
 | `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |

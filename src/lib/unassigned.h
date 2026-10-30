@@ -36,24 +36,8 @@
  * constructor, the vtable store, then the class's own init (initOut: it
  * builds the per-state EmyOut objects). layout: host -- polymorphic; the
  * EE sizes (createEmy's operator new) and offsets are in the comments. */
-/* Type 0 (vtable from rtti.py; EE 0x274). layout: host -- polymorphic. */
-class DwfMain : public EmyMain
-{
-public:
-    DwfMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00289810
-            const _tagEnemyTransition *trans, float *pos)
-        : EmyMain(oid, name, param, prm, trans, pos)
-    {
-        initOut();
-    }
-    ~DwfMain();                                                         // EE slot 1 (+0x08), ROR 0x0015c2a4
-    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x0015cdac
-    int  GetType() { return 0; }                                       // EE slot 3 (+0x18), ROR 0x00289848
-    void decide();                                                       // EE slot 4 (+0x20), ROR 0x0015c710
-    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0015cc84
-    void after();                                                        // EE slot 6 (+0x30), ROR 0x0015cd30
-    void initOut();                                                      // ROR 0x0015c304
-};
+/* Type 0, DwfMain (and the shared outs DwfOut*): emy/emy_dwf.h. */
+#include "emy/emy_dwf.h"
 
 /* Type 1, PigMain: emy/emy_pig.h. */
 #include "emy/emy_pig.h"

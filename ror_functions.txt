@@ -1923,32 +1923,32 @@
 // FILE -- emy/emy_dwf.cpp
 // *****************************************************************************
 
-/* 0015c2a4 00000060 */ FUN_0015c2a4(){}
+/* 0015c2a4 00000060 */ DwfMain::~DwfMain(){}  // ror
 /* 0015c304 0000040c */ DwfMain::initOut(){}  // ror
-/* 0015c710 00000574 */ FUN_0015c710(){}
-/* 0015cc84 000000ac */ FUN_0015cc84(){}
-/* 0015cd30 0000007c */ FUN_0015cd30(){}
-/* 0015cdac 000000c8 */ FUN_0015cdac(){}
-/* 0015ce74 00000014 */ FUN_0015ce74(){}
-/* 0015ce88 000000a8 */ FUN_0015ce88(){}
-/* 0015cf30 0000015c */ FUN_0015cf30(){}
-/* 0015d08c 000000a8 */ FUN_0015d08c(){}
-/* 0015d134 000000a8 */ FUN_0015d134(){}
-/* 0015d1dc 000000a8 */ FUN_0015d1dc(){}
-/* 0015d284 000000a8 */ FUN_0015d284(){}
-/* 0015d32c 000000b4 */ FUN_0015d32c(){}
-/* 0015d3e0 000000a8 */ FUN_0015d3e0(){}
-/* 0015d488 000000a8 */ FUN_0015d488(){}
-/* 0015d530 000000a8 */ FUN_0015d530(){}
-/* 0015d5d8 000000a8 */ FUN_0015d5d8(){}
-/* 0015d680 000000b8 */ FUN_0015d680(){}
-/* 0015d738 000000b8 */ FUN_0015d738(){}
-/* 0015d7f0 000000a0 */ FUN_0015d7f0(){}
-/* 0015d890 000000b8 */ FUN_0015d890(){}
-/* 0015d948 000000b8 */ FUN_0015d948(){}
-/* 0015da00 000000a8 */ FUN_0015da00(){}
-/* 0015daa8 000002cc */ FUN_0015daa8(){}
-/* 0015dd74 000004a0 */ FUN_0015dd74(){}
+/* 0015c710 00000574 */ DwfMain::decide(){}  // ror
+/* 0015cc84 000000ac */ DwfMain::exec(){}  // ror
+/* 0015cd30 0000007c */ DwfMain::after(){}  // ror
+/* 0015cdac 000000c8 */ DwfMain::selectOut(){}  // ror
+/* 0015ce74 00000014 */ DwfMain::isPCSameArea(){}  // ror
+/* 0015ce88 000000a8 */ DwfMain::testBarkReact(){}  // ror
+/* 0015cf30 0000015c */ DwfMain::isTargetInSight(){}  // ror
+/* 0015d08c 000000a8 */ DwfMain::isPCStateClass1(){}  // ror
+/* 0015d134 000000a8 */ DwfMain::isPCAhead(){}  // ror
+/* 0015d1dc 000000a8 */ DwfMain::isPCStateClass2(){}  // ror
+/* 0015d284 000000a8 */ DwfMain::isPCClass7OffAxis(){}  // ror
+/* 0015d32c 000000b4 */ DwfMain::isPCNear(){}  // ror
+/* 0015d3e0 000000a8 */ DwfMain::isPCOrDogInSight(){}  // ror
+/* 0015d488 000000a8 */ DwfMain::hasOid0Twice(){}  // ror
+/* 0015d530 000000a8 */ DwfMain::isLowLife(){}  // ror
+/* 0015d5d8 000000a8 */ DwfMain::isHalfLife(){}  // ror
+/* 0015d680 000000b8 */ DwfMain::testAttr8And10(){}  // ror
+/* 0015d738 000000b8 */ DwfMain::testAttr2And4(){}  // ror
+/* 0015d7f0 000000a0 */ DwfMain::testAttr1(){}  // ror
+/* 0015d890 000000b8 */ DwfMain::testAttr2Or4(){}  // ror
+/* 0015d948 000000b8 */ DwfMain::testAttr8Or10(){}  // ror
+/* 0015da00 000000a8 */ DwfMain::isPCStateClass4(){}  // ror
+/* 0015daa8 000002cc */ dwfFindPickupItem(){}  // ror
+/* 0015dd74 000004a0 */ dwfFindPart(){}  // ror
 /* 0015e214 0000008c */ DwfOutDisappear::Init(){}  // ror
 /* 0015e2a0 00000084 */ DwfOutDisappear::Term(){}  // ror
 /* 0015e324 00000020 */ DwfOutAppear::Init(){}  // ror
@@ -1958,7 +1958,7 @@
 /* 0015e51c 000000a0 */ DwfOutWalk::Init(){}  // ror
 /* 0015e5bc 000004d0 */ DwfOutWalk::Exec(){}  // ror
 /* 0015ea8c 0000001c */ DwfOutWalk::Term(){}  // ror
-/* 0015eaa8 00000018 */ FUN_0015eaa8(){}
+/* 0015eaa8 00000018 */ DwfOutWalk::setStep(){}  // ror
 /* 0015eac4 0000003c */ DwfOutSerch::Init(){}  // ror
 /* 0015eb00 000000a8 */ DwfOutSerch::Exec(){}  // ror
 /* 0015eba8 0000001c */ DwfOutSerch::Term(){}  // ror

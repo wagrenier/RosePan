@@ -85,108 +85,7 @@ void utlAddPolar(float angle, float dist, float *v)
 
 // ---- stubs (hand-written: EmyMain / EmyOut and the enemy classes' constructors and destructors, which stubgen does not write) ----
 
-// stub of ROR 0x0015c2a4
-DwfMain::~DwfMain()
-{
-    ROSEPAN_STUB("DwfMain::~DwfMain", 0x0015c2a4);
-}
-
 // ---- stubs (hand-written: the DwfOut* virtual slots, emy/emy_dwf.cpp, which stubgen cannot see behind the vtable) ----
-
-// stub of ROR 0x0015e214
-void DwfOutDisappear::Init()
-{
-    ROSEPAN_STUB("DwfOutDisappear::Init", 0x0015e214);
-}
-
-// stub of ROR 0x0015e2a0
-void DwfOutDisappear::Term()
-{
-    ROSEPAN_STUB("DwfOutDisappear::Term", 0x0015e2a0);
-}
-
-// stub of ROR 0x0015e324
-void DwfOutAppear::Init()
-{
-    ROSEPAN_STUB("DwfOutAppear::Init", 0x0015e324);
-}
-
-// stub of ROR 0x0015e344
-int DwfOutAppear::Exec()
-{
-    ROSEPAN_STUB("DwfOutAppear::Exec", 0x0015e344);
-    return -1;
-}
-
-// stub of ROR 0x0015e4b0
-void DwfOutWait::Init()
-{
-    ROSEPAN_STUB("DwfOutWait::Init", 0x0015e4b0);
-}
-
-// stub of ROR 0x0015e514
-int DwfOutWait::Exec()
-{
-    ROSEPAN_STUB("DwfOutWait::Exec", 0x0015e514);
-    return -1;
-}
-
-// stub of ROR 0x0015e51c
-void DwfOutWalk::Init()
-{
-    ROSEPAN_STUB("DwfOutWalk::Init", 0x0015e51c);
-}
-
-// stub of ROR 0x0015e5bc
-int DwfOutWalk::Exec()
-{
-    ROSEPAN_STUB("DwfOutWalk::Exec", 0x0015e5bc);
-    return -1;
-}
-
-// stub of ROR 0x0015ea8c
-void DwfOutWalk::Term()
-{
-    ROSEPAN_STUB("DwfOutWalk::Term", 0x0015ea8c);
-}
-
-// stub of ROR 0x0015eac4
-void DwfOutSerch::Init()
-{
-    ROSEPAN_STUB("DwfOutSerch::Init", 0x0015eac4);
-}
-
-// stub of ROR 0x0015eb00
-int DwfOutSerch::Exec()
-{
-    ROSEPAN_STUB("DwfOutSerch::Exec", 0x0015eb00);
-    return -1;
-}
-
-// stub of ROR 0x0015eba8
-void DwfOutSerch::Term()
-{
-    ROSEPAN_STUB("DwfOutSerch::Term", 0x0015eba8);
-}
-
-// stub of ROR 0x0015ebc4
-void DwfOutPickup::Init()
-{
-    ROSEPAN_STUB("DwfOutPickup::Init", 0x0015ebc4);
-}
-
-// stub of ROR 0x0015ec30
-int DwfOutPickup::Exec()
-{
-    ROSEPAN_STUB("DwfOutPickup::Exec", 0x0015ec30);
-    return -1;
-}
-
-// stub of ROR 0x0015ef78
-void DwfOutPickup::Term()
-{
-    ROSEPAN_STUB("DwfOutPickup::Term", 0x0015ef78);
-}
 
 // stub of ROR 0x0015efb0
 void DwfOutAtkNear::Init()
@@ -262,38 +161,6 @@ int DwfOutWin::Exec()
 void DwfOutWin::Term()
 {
     ROSEPAN_STUB("DwfOutWin::Term", 0x00161160);
-}
-
-// stub of ROR 0x0016117c
-void DwfOutParts::Init()
-{
-    ROSEPAN_STUB("DwfOutParts::Init", 0x0016117c);
-}
-
-// stub of ROR 0x001611e0
-int DwfOutParts::Exec()
-{
-    ROSEPAN_STUB("DwfOutParts::Exec", 0x001611e0);
-    return -1;
-}
-
-// stub of ROR 0x001611e8
-void DwfOutParts::Term()
-{
-    ROSEPAN_STUB("DwfOutParts::Term", 0x001611e8);
-}
-
-// stub of ROR 0x00161204
-void DwfOutTest::Init()
-{
-    ROSEPAN_STUB("DwfOutTest::Init", 0x00161204);
-}
-
-// stub of ROR 0x00161228
-int DwfOutTest::Exec()
-{
-    ROSEPAN_STUB("DwfOutTest::Exec", 0x00161228);
-    return -1;
 }
 
 // stub of ROR 0x00161230
@@ -466,36 +333,6 @@ int TskDamage::stepKindA()
 void DogTexInfo::dump()
 {
     ROSEPAN_STUB("DogTexInfo::dump", 0x0011764c);
-}
-
-// stub of ROR 0x0015cd30
-void DwfMain::after()
-{
-    ROSEPAN_STUB("DwfMain::after", 0x0015cd30);
-}
-
-// stub of ROR 0x0015c710
-void DwfMain::decide()
-{
-    ROSEPAN_STUB("DwfMain::decide", 0x0015c710);
-}
-
-// stub of ROR 0x0015cc84
-void DwfMain::exec()
-{
-    ROSEPAN_STUB("DwfMain::exec", 0x0015cc84);
-}
-
-// stub of ROR 0x0015c304
-void DwfMain::initOut()
-{
-    ROSEPAN_STUB("DwfMain::initOut", 0x0015c304);
-}
-
-// stub of ROR 0x0015cdac
-void DwfMain::selectOut()
-{
-    ROSEPAN_STUB("DwfMain::selectOut", 0x0015cdac);
 }
 
 // ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----

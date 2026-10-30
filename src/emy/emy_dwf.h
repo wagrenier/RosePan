@@ -1,13 +1,24 @@
 /* ==========================================================================
  *  emy/emy_dwf.h
  *
- *  emy/emy_dwf.cpp (not written yet: DwfMain's destructor 0x15c2a4 up to
- *  EmyManager 0x16265c, still in unassigned@0015a17c): the outs DwfOut*,
- *  built by DwfMain::initOut and shared with the Pig (PigMain::initOut)
- *  and the Got (GotMain::initOut). Only their declarations so far, so the
- *  Got and Pig can build them; their data members come with the Dwf
- *  session (EE sizes from GotMain::initOut's operator new). DwfMain itself
- *  is still declared in lib/unassigned.h.
+ *  emy/emy_dwf.cpp (0x15c2a4..0x16265c): DwfMain, enemy type 0, and the
+ *  outs DwfOut*, which the Pig (PigMain::initOut) and the Got
+ *  (GotMain::initOut) build too. No source string names the file; it is
+ *  the run from DwfMain's destructor (Dwf, like Fsh, puts it before its
+ *  initOut) up to EmyManager, named like emy_pig.cpp. The ELF's linkonce
+ *  symbols name the classes, their constructors and GetType.
+ *
+ *  The Dwf is the Pig's elder twin: the same decide, tests and finders
+ *  with its own part kinds (0xbbf..0xbc3) and fifteen states (m_out
+ *  index, initOut): 1 Disappear, 2 Appear, 3 AtkNear, 4 Dead, 5 Stared,
+ *  6 Win, 7 Serch, 8 Walk, 9 Wait, 10 AtkFar, 11 Pickup, 12 Parts, 13
+ *  Fort, 14 Irritate, 15 Test. Decide's inputs are the Got's (1..21,
+ *  emy/emy_got.h). Every input is dropped when it would lead to state 11
+ *  with no pickup item (m_pickup), to state 12 with no part (m_part), or
+ *  to state 14 with attr bits 8 and 0x10 both set.
+ *
+ *  The outs are shared by types 0..2, so they test the type (GetType)
+ *  where the Got differs (its scissors, kind 0xa2e, have own motions).
  * ======================================================================== */
 #ifndef _EMY_EMY_DWF_H
 #define _EMY_EMY_DWF_H
@@ -15,7 +26,72 @@
 #include "sdk/eetypes.h"
 #include "emy/emy_main.h"
 
-/* (vtable 0x2e2ed0, EE 0x38) layout: host -- polymorphic. */
+/* Type 0 (vtable 0x2e2e90, vptr at +0x200, EE 0x274). layout: host --
+ * polymorphic; EE offsets in the comments. */
+class DwfMain : public EmyMain
+{
+public:
+    DwfMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00289810
+            const _tagEnemyTransition *trans, float *pos)
+        : EmyMain(oid, name, param, prm, trans, pos)
+    {
+        initOut();
+    }
+    ~DwfMain();                                                          // EE slot 1 (+0x08), ROR 0x0015c2a4
+    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x0015cdac
+    int  GetType() { return 0; }                                         // EE slot 3 (+0x18), ROR 0x00289848
+    void decide();                                                       // EE slot 4 (+0x20), ROR 0x0015c710
+    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0015cc84
+    void after();                                                        // EE slot 6 (+0x30), ROR 0x0015cd30
+    /* The outs, the motion list, the state flags, the collision shape 1,
+     * a random parsonality 0..2 and voice 0..3, the two targets. */
+    void initOut();                                                      // ROR 0x0015c304
+    bool isPCSameArea();                                                 // ROR 0x0015ce74
+    int  testBarkReact();                                                // ROR 0x0015ce88
+    /* The PC or the dog within param 0x5f in the facing's half circle;
+     * with attr bit 1 or in state 1 all round, within the smaller of
+     * param 0x5f and the PC state class's range. */
+    bool isTargetInSight();                                              // ROR 0x0015cf30
+    /* The tests below return 0 when the input's next state is blocked
+     * (isBlocked), else EmyMain's test or the attr bits. */
+    int  isPCStateClass1();                                              // ROR 0x0015d08c
+    int  isPCAhead();                                                    // ROR 0x0015d134
+    int  isPCStateClass2();                                              // ROR 0x0015d1dc
+    int  isPCClass7OffAxis();                                            // ROR 0x0015d284
+    int  isPCNear();                                                     // ROR 0x0015d32c
+    int  isPCOrDogInSight();                                             // ROR 0x0015d3e0
+    int  hasOid0Twice();                                                 // ROR 0x0015d488
+    int  isLowLife();                                                    // ROR 0x0015d530
+    int  isHalfLife();                                                   // ROR 0x0015d5d8
+    int  testAttr8And10();                                               // ROR 0x0015d680
+    int  testAttr2And4();                                                // ROR 0x0015d738
+    int  testAttr1();                                                    // ROR 0x0015d7f0
+    int  testAttr2Or4();                                                 // ROR 0x0015d890
+    int  testAttr8Or10();                                                // ROR 0x0015d948
+    int  isPCStateClass4();                                              // ROR 0x0015da00
+    /* Inline in every test and in decide: the input's next state (peek) is
+     * 11 with no pickup item, 12 with no part, or 14 with attr bits 8 and
+     * 0x10. */
+    bool isBlocked(int input);
+
+    /* selectOut: the current state's row has the input (decide reads 1..21);
+     * EE 0x204.., as many words as the table has inputs. PC: EE 0x238
+     * (EmyMain::m_238 on the host) is m_input[13] here. */
+    int     m_input[24];        // ROR 0x204
+    u_char  m_264;              // ROR 0x264: cleared at initOut and on a state change, not read here
+    u_char  m_265;              // ROR 0x265: cleared at initOut and on a state change, not read here
+    u_char  m_seen;             // ROR 0x266: the PC or the dog in sight (decide's edge)
+    int     m_268;              // ROR 0x268: not written by DwfMain
+    u_int   m_pickup;           // ROR 0x26c: dwfFindPickupItem (state 11's gate)
+    u_int   m_part;             // ROR 0x270: dwfFindPart (state 12's gate)
+};
+
+/* The outs (EmyOut: vptr at +0x34, own data from +0x38; each vtable's
+ * slots are Init, Exec, Term). EE sizes from DwfMain::initOut's
+ * operator new. */
+
+/* State 1 (vtable 0x2e2ed0, EE 0x38): hidden, invisible and out of the
+ * secta lists until the state ends. layout: host -- polymorphic. */
 class DwfOutDisappear : public EmyOut
 {
 public:
@@ -26,7 +102,8 @@ public:
     void Term();                                                         // EE slot 4, ROR 0x0015e2a0
 };
 
-/* (vtable 0x2e2f00, EE 0x38) layout: host -- polymorphic. */
+/* State 2 (vtable 0x2e2f00, EE 0x38): shown, the group's appear motion;
+ * input 22 when it ends. layout: host -- polymorphic. */
 class DwfOutAppear : public EmyOut
 {
 public:
@@ -37,7 +114,8 @@ public:
     void Term() {}                                                       // EE slot 4, ROR 0x00289aa8
 };
 
-/* (vtable 0x2e2f30, EE 0x38) layout: host -- polymorphic. */
+/* State 9 (vtable 0x2e2f30, EE 0x38): the walk motion in place, for
+ * ever. layout: host -- polymorphic. */
 class DwfOutWait : public EmyOut
 {
 public:
@@ -48,7 +126,9 @@ public:
     void Term() {}                                                       // EE slot 4, ROR 0x00289b90
 };
 
-/* (vtable 0x2e2f60, EE 0x50) layout: host -- polymorphic. */
+/* State 8 (vtable 0x2e2f60, EE 0x50): wanders around its home (param
+ * 0x59) by +-500, idling between walks; never ends by itself.
+ * layout: host -- polymorphic. */
 class DwfOutWalk : public EmyOut
 {
 public:
@@ -57,9 +137,16 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x0015e51c
     int  Exec();                                                         // EE slot 3, ROR 0x0015e5bc
     void Term();                                                         // EE slot 4, ROR 0x0015ea8c
+    /* A new step restarts m_count. */
+    void setStep(int step);                                              // ROR 0x0015eaa8
+
+    int m_kind;                 // ROR 0x38: the enemy's type (GetType) at Init
+    int m_count;                // ROR 0x3c: frames in the step
+    int _40[4];                 // ROR 0x40: not used
 };
 
-/* (vtable 0x2e2f90, EE 0x38) layout: host -- polymorphic. */
+/* State 7 (vtable 0x2e2f90, EE 0x38): chases its target until it sees
+ * it within 200 or the chase ends; input 22. layout: host -- polymorphic. */
 class DwfOutSerch : public EmyOut
 {
 public:
@@ -70,7 +157,9 @@ public:
     void Term();                                                         // EE slot 4, ROR 0x0015eba8
 };
 
-/* (vtable 0x2e2fc0, EE 0x40) layout: host -- polymorphic. */
+/* State 11 (vtable 0x2e2fc0, EE 0x40): with free hands goes to the
+ * nearest pickup item and takes it (input 22), else plays the idle
+ * motion (input 23). layout: host -- polymorphic. */
 class DwfOutPickup : public EmyOut
 {
 public:
@@ -79,6 +168,10 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x0015ebc4
     int  Exec();                                                         // EE slot 3, ROR 0x0015ec30
     void Term();                                                         // EE slot 4, ROR 0x0015ef78
+
+    int m_kind;                 // ROR 0x38: the enemy's type (GetType) at Init
+    /* The item it goes for: EE 0x3c, EmyOut::m_3c on the host (EmyManager::
+     * isEmyTarget reads it in state 11). */
 };
 
 /* (vtable 0x2e2ff0, EE 0x84) layout: host -- polymorphic. */
@@ -125,7 +218,8 @@ public:
     void Term();                                                         // EE slot 4, ROR 0x00161160
 };
 
-/* (vtable 0x2e30b0, EE size: DwfMain::initOut) layout: host -- polymorphic. */
+/* State 12 (vtable 0x2e30b0, EE 0x3c): the idle motion by the attr
+ * bits; never ends by itself. layout: host -- polymorphic. */
 class DwfOutParts : public EmyOut
 {
 public:
@@ -136,7 +230,8 @@ public:
     void Term();                                                         // EE slot 4, ROR 0x001611e8
 };
 
-/* (vtable 0x2e30e0, EE size: DwfMain::initOut) layout: host -- polymorphic. */
+/* State 15 (vtable 0x2e30e0, EE 0x38): motion 6, for ever.
+ * layout: host -- polymorphic. */
 class DwfOutTest : public EmyOut
 {
 public:

@@ -527,12 +527,21 @@
    "why": "ClrMain + its five ClrOut* classes: ClrMain::initOut 0x14dc7c (every XxxMain::initOut opens its file) up to NorMain::initOut 0x150b24 which opens the Nor file; no source string, named like emy_bds.cpp"
   },
   "emy/emy_dwf.cpp": {
+   "notes": "Left: DwfOutAtkNear (0x15efb0 Init, 0x15f2fc Exec 0x13f0 bytes, 0x15ef94 Term; EE 0x84), AtkFar 0x1606ec.., Stared 0x160a44.., Win 0x160cb8.., Fort 0x161230.. (EE 0x68), Irritate 0x161b48.., Dead 0x162118..0x16265c: still hand stubs in lib/unassigned_stubs.cpp (block 'the DwfOut* virtual slots'); delete each stub when writing it and give the class its data members in emy/emy_dwf.h (EE sizes in the header comments). Outs are shared by types 0..2: Pickup and Walk keep GetType at +0x38 (m_kind) and use dwfScissorsMotion for the Got's scissors 0xa2e; Pickup's item lives in EmyOut::m_3c on the host because EmyManager::isEmyTarget reads it in state 11 (state 12's m_38 likewise for any out that stores a part). Picture: the 15 s smoke run still ends on the Atlus disclaimer (no regression); no enemy spawns on that path, so nothing here can be seen yet. ROM oddities kept: Walk steps 4..6 and Pickup step 0 unreachable, Serch returns 22 on the host for every type (open-items.md).",
    "ranges": [
     [
      "0015c2a4",
      "0016265c"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-30 11:35",
+     "status": "partial",
+     "summary": "DwfMain (type 0, all 25 methods and tests, the two finders) and the outs Disappear, Appear, Wait, Walk, Serch, Pickup, Parts, Test reconstructed (49 functions); DwfMain moved from lib/unassigned.h to emy/emy_dwf.h; their hand stubs removed"
+    }
+   ],
+   "status": "partial",
    "why": "DwfMain's destructor 0x15c2a4 (Dwf puts its dtor before initOut, like Fsh) up to EmyManager::EmyManager 0x16265c; DwfMain and every DwfOut* (rtti)."
   },
   "emy/emy_fsh.cpp": {
