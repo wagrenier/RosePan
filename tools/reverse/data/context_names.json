@@ -24113,6 +24113,42 @@
   "was": "FUN_00216384",
   "why": "forwards to MagSceneIFChara::getMax (0x1435f4); no callers"
  },
+ "00216768": {
+  "name": "nagaDbgLoadFile",
+  "tag": "ror-inferred",
+  "was": "FUN_00216768",
+  "why": "fileGetSize, BedMemory::allocDebug(size, debug/naga_debug.cpp, 111, 0, 2), FileReader::read of the whole file; returns the buffer; EventTestTask's menu loads DBGFLAG / DBGSTEP / DBGITEM / DBGAREA.BIN with it"
+ },
+ "00216828": {
+  "name": "EventTestTask::EventTestTask",
+  "tag": "ror-inferred",
+  "was": "FUN_00216828",
+  "why": "stores vtable 0x2e50c0 (EventTestTask), clears the members +0x4..+0x28 and the file's text buffers; was folded into the end of 0x216768"
+ },
+ "002168bc": {
+  "name": "EventTestTask::~EventTestTask",
+  "tag": "ror-inferred",
+  "was": "FUN_002168bc",
+  "why": "vtable slot 6: restores vtable 0x2e50c0, operator delete when bit 0 of the flags"
+ },
+ "002168f0": {
+  "name": "EventTestTask::init",
+  "tag": "ror-inferred",
+  "was": "FUN_002168f0",
+  "why": "vtable slot 3 (CmnITask::init), empty"
+ },
+ "002168f8": {
+  "name": "EventTestTask::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_002168f8",
+  "why": "vtable slot 4 (CmnITask::exec): counts pad 1 d-pad hold frames, cycles the display mode 0x2db2a4 on pad 0 R3 / pad 1 SELECT, calls 0x216ad0, returns 0"
+ },
+ "00216ad0": {
+  "name": "EventTestTask::disp",
+  "tag": "ror-inferred",
+  "was": "FUN_00216ad0",
+  "why": "called only by EventTestTask::exec with this; prints the world / area / position pages by mode 0x2db2a4 and runs the flag menu 0x217260 in mode 3"
+ },
  "00217f10": {
   "name": "utlAtan2",
   "tag": "ror-inferred",

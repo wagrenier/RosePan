@@ -6,6 +6,15 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**PARTIAL 2026-10-30 (`debug/naga_debug.cpp`; pinned 0x216768..0x217f10 + 0x2911cc..0x291228,
+absorbing unassigned@00216ad0, the debug menu): EventTestTask's loader, constructor, destructor, init,
+exec written (architecture.md "The event test overlay")**. The queue was empty; picked as the largest
+todo file. Left: disp 0x216ad0 (0x790, a stub now) and the menu 0x217260..0x217f10 (8 functions,
+FUN_ names; 0x217260 is the page state machine). Unreferenced in the ROM, so it finishes verify once
+written. Doubts: the sizes of the bss text buffers 0x7b4e08.. come from address gaps; EventTestTask's
+EE size 0x2c is a guess (no allocation site). After this file the dead-code supply is gone: the next
+useful run lengthens the smoke pad (the bus-stop walk) to mark verify TUs done from screenshots.
+
 **WRITTEN 2026-10-30 (`task/tsk_bg_load.cpp`, verify; pinned 0x1fce0c..0x1fd424 + 0x290c1c..0x290e88,
 absorbing unassigned@001fce0c): TskBGLoad / TskBGLoadArea / TskBGLoadMap, all 19 functions**
 (architecture.md "The background pack loaders"). The queue was empty; picked as the largest todo file.

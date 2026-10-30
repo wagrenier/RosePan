@@ -146,6 +146,28 @@
    "status": "verify",
    "why": "motNameConvert and motNameFindChara carry debug/motnamecnv0.cpp (lines 0x77/0x78, 0xcf); 216154 (before them, motNameConvert's only callee) and 2162e0..2163ac are one-line wrappers on the same scene interface objects (scene +0x854e0 / +0x854e8); 2163ac starts debug/motnamecnv.cpp (its own source string)"
   },
+  "debug/naga_debug.cpp": {
+   "notes": "Left: EventTestTask::disp 0x216ad0 (0x790 bytes, stubbed in naga_debug.cpp; pages by mode bss 0x2db2a4, strings World %d, MAP_ORPH, position formats) and the menu 0x217260..0x217f10 (8 FUN_ functions: 0x217260 the page state machine loading DBGFLAG / DBGSTEP / DBGITEM / DBGAREA.BIN via nagaDbgLoadFile, 0x217bec / 0x217cac / 0x217da4 cursor and list helpers). Name them EventTestTask methods (this in a0). Statics already in the cpp: s_nagaDbgMode 0x2db2a4, s_nagaDbgFixView 0x2db2b8, text buffers 0x7b4e08 / 0x7b4e28 / 0x7b4ec8 / 0x7b5968 (sizes from address gaps). Nothing constructs the task in the ROM, so the file finishes verify once written. The menu reads pad 1 (MagSystem m_pad[1].m_repeat, 0x6e998c): 0x4000 select, 0x2000 back. Screenshot: boot disclaimer, unchanged (dead code).",
+   "ranges": [
+    [
+     "00216768",
+     "00217f10"
+    ],
+    [
+     "002911cc",
+     "00291228"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 16:56",
+     "status": "partial",
+     "summary": "EventTestTask (vtable 0x2e50c0, kind 2): nagaDbgLoadFile, the constructor split out of 0x216768 at 0x216828, destructor, init, exec, inline get_task_type / term; pinned the whole file 0x216768..0x217f10 (absorbing the debug menu run unassigned@00216ad0) plus the linkonce 0x2911cc..0x291228"
+    }
+   ],
+   "status": "partial",
+   "why": "source string debug/naga_debug.cpp in nagaDbgLoadFile's allocDebug; EventTestTask (vtable 0x2e50c0) ctor/dtor/init/exec follow; 0x216ad0..0x217f10 is the debug menu only EventTestTask::exec reaches, which loads its BIN files through nagaDbgLoadFile and reads the buffers the ctor clears; utl/utlmisc2.cpp starts at 0x217f10; 0x2911cc..0x291228 are EventTestTask's linkonce __tf / get_task_type / term"
+  },
   "dog/dogactor.cpp": {
    "notes": "Status verify: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run stays black after the film because the pose and draw path below DogActor is stubbed. Next for an actor on screen: dog/dogmotionblend.cpp (getPose 0x1081b0, getNodeRate 0x1078dc, step 0x107e30, stepLoop 0x1079d8, and the three declared this session: getTimeRatio 0x107560, setTimeRatio 0x107678, setBlendRate 0x108428, all decompiled in dogactor_003.json whys), then the i3m pose player unassigned@0022e840 (i3mGetPose 0x22e960, i3mGetBlendPose 0x22eab0, i3mPoseLerp, i3mPoseToMatrices, quaternion ops) and utlDrawI3r 0x106760 into the native i3d draw module. Decisions: ~DogActor 0x10f16c is not a host destructor (same policy as ~DogModel; comment-only annotation); DogActor::__tf comment-only; getMotion / getBlendMotion take the posture as void* and I3M_INTER as int until those types exist. Field renames: m_3b0 to m_base_trans, m_1dc to m_speed0, 0x1e0 m_time0, 0x458 m_speed_ratio, DogMotionBlend 0x14 m_14. The blend entry layout and the tag track layout are in architecture.md. References updated in this commit: architecture.md, hazards.md (member hiding), open-items.md item 5.",
    "sessions": [
