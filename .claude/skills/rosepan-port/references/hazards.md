@@ -72,6 +72,18 @@ entries are marked **RoR** with the date.
   open in one Ghidra only (its `.lock`); a plain `ghidraRun` opens the last project used, which may be
   another game's: start this one by its `.gpr` (`python ghidra_mcp.py launch`).
 
+- **The IOP program and the EE caches** (2026-10-30, `rxsnddrv.elf` imported next to SLUS_214.48).
+  `ROSEPAN_PROGRAM=rxsnddrv.elf` points every tool at the IOP driver, but the caches and the ledger are
+  keyed by address alone: `name_ctx.py` (`data/context_names.json`), `fetch.py` / `features.py` /
+  `export.py` / `refresh.py` (`work/*_ror.json`, `ror_tags.json`, status) and so `tus.py check / finish`
+  would mix IOP addresses into the EE's data, and `ctxcard.py` / `stage.py` read the EE caches (wrong
+  evidence for an IOP address). Safe with it: `dec.py` and `ghidra.py` (asm, func, xrefs, refs, find,
+  segments; mkfunc writes to the program named). Anything else waits for the IOP pipeline decision
+  (open-items.md, `setup/iop_rxsnddrv.cpp`); never run `tus.py finish` with the variable set.
+- **Small constants look like addresses in `rxsnddrv.elf`.** It is loaded at 0 (the IRX's own link
+  addresses), so any value below 0x38970 can be taken for a pointer: `sceSifRegisterRpc(&sd,
+  &DAT_0000d000, ...)` is RPC number 0xd000, not data. Read such operands as numbers unless the
+  code dereferences them.
 - **`program` must be in the query string.** In a POST body it is ignored and the write lands on the
   active program -- this once renamed 69 FF2 functions in ReiPan. `rosepan.http()` does it right; raw
   curl must too.
