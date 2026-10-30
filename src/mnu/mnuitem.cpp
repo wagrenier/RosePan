@@ -3988,6 +3988,181 @@ int MnuItem::execPage7(BedPad *pad)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The description layout: mode 0 fades the main page out (its frame, the
+// slots, the rows 3..9 / 99..101 and 0x13..0x1d, page 4's action rows, the
+// link panel when it is on), 1 brings in the description view (sprite 2
+// 800 lower, panel 0x58..0x5b and 0x60, the link panel 0x6a..0x71, the text
+// rows 0x5c..0x5f that setDescTexts fills, the slots back with rows 0x13..
+// 0x17 and 0x1f moved down), 2 fades the description view out and 3 brings
+// the main page back (rows at their page 0 places, the link panel of page
+// 0's slot). Nothing in the ROM calls it (ghidra.py refs: no jal, no data
+// word); setDescTexts is uncalled too -- a description page the game does
+// not use.
+// ROR 0x001b69d0; callcheck: setFade (through mnuItemFadeFromSaved / mnuItemFadeToSaved)
+
+/* The sprites mode 0 and mode 2 fade out alike: the slot icons and count
+ * texts, rows 3..9 and 99..101, 0x3c, the cursors 0x4f..0x51, rows 0x13..
+ * 0x17. */
+static const u_char mnuItemDescOut[] = {
+    0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b,
+    0x3d, 0x3e, 0x3f, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
+    3, 4, 5, 6, 7, 8, 9, 99, 100, 0x65, 0x3c, 0x4f, 0x50, 0x51,
+    0x13, 0x14, 0x15, 0x16, 0x17,
+};
+
+/* Mode 0 / 3: the main page's frame (mode 3 fades it in again). */
+static const u_char mnuItemDescFrame[] = {
+    10, 0xb, 0xc, 0xf, 0x10, 0x49, 0x4a, 0x4b, 0x4c, 0x52, 0x53, 0x54, 0x56,
+};
+
+/* The rows' m_off[1] (sprites 0x1f, 0x13..0x17): [0] the description
+ * view, [1] the main page. */
+static const int mnuItemDescRowY[2][6] = {
+    { 0xf30, 0xd40, 0xde0, 0xe30, 0xee0, 0x1080 },
+    { 0x1060, 0xa00, 0xaa0, 0xaf0, 0xba0, 0xd40 },
+};
+
+/* PC: m_color back from m_fade_save (the ROM copies the two dwords). */
+static void mnuItemRestoreColor(SprSprite &s)
+{
+    memcpy(s.m_color, s.m_fade_save, sizeof(s.m_color));
+}
+
+void MnuItem::setDescLayout(int mode)
+{
+    const int *clear = mnuItemColor(MNUITEM_COLOR_CLEAR);
+    const int *opaque_a = mnuItemColor(MNUITEM_COLOR_OPAQUE_A);
+    const int *opaque = mnuItemColor(MNUITEM_COLOR_OPAQUE);
+
+    if (mode == 0) {
+        for (u_int i = 0; i < sizeof(mnuItemDescFrame); i++)
+            mnuItemFadeToSaved(m_spr, mnuItemDescFrame[i], 10);
+        mnuItemFadeToSaved(m_spr, 0x11, 10);
+        mnuItemFadeToSaved(m_spr, 0x12, 10);
+        for (u_int i = 0; i < sizeof(mnuItemDescOut); i++)
+            mnuItemFadeToSaved(m_spr, mnuItemDescOut[i], 10);
+        for (int n = 0x18; n <= 0x1d; n++)
+            mnuItemFadeToSaved(m_spr, n, 10);
+        /* PORT: the ROM fades m_act_spr[0..4] whatever they hold (-1 past
+         * the last row indexes before the sprite table); the port skips
+         * those. */
+        for (int i = 0; i < 5; i++)
+            if (m_act_spr[i] >= 0)
+                mnuItemFadeToSaved(m_spr, m_act_spr[i], 10);
+        if (sprite(0x6a).m_state != SPR_STATE_OFF) {
+            for (int n = 0x6a; n <= 0x71; n++)
+                mnuItemFadeToSaved(m_spr, n, 10);
+        }
+        m_link_shown = 0;
+    } else if (mode == 1) {
+        sprite(2).m_off[1] = 800;
+        for (int n = 0x58; n <= 0x5b; n++) {
+            sprite(n).m_state = SPR_STATE_ON;
+            m_spr.setAnim(n, 1);
+            sprite(n).m_disp = 1;
+            mnuItemSetColor(sprite(n), 0x80);
+        }
+        m_spr.showSprite(0x6a, 3, -1);
+        for (int n = 0x6c; n <= 0x6e; n++)
+            m_spr.showSprite(n, 1, -1);
+        for (int n = 0x6f; n <= 0x71; n++)
+            sprite(n).m_state = SPR_STATE_ON;
+        for (int n = 0x6f; n <= 0x71; n++)
+            m_spr.setFade(n, 1, 10, clear, opaque_a);
+        for (int n = 0x6f; n <= 0x71; n++)
+            m_spr.setAnim(n, 1);
+        for (int n = 0x6f; n <= 0x71; n++)
+            sprite(n).m_disp = 1;
+        sprite(0x60).m_state = SPR_STATE_ON;
+        mnuItemSetColor(sprite(0x60), 0x80);
+        m_spr.setAnim(0x60, 1);
+        sprite(0x60).m_disp = 1;
+        for (int n = 0x5c; n <= 0x5f; n++)
+            sprite(n).m_state = SPR_STATE_ON;
+        for (int n = 0x5c; n <= 0x5f; n++)
+            m_spr.setFade(n, 1, 10, clear, opaque_a);
+        fadeInDescSlots(2);
+        for (int n = 0x13; n <= 0x17; n++)
+            m_spr.showSprite(n, 2, -1);
+        sprite(0x1f).m_state = SPR_STATE_WAIT_IN;
+        sprite(0x1f).m_fade_wait = 0x1e;
+        mnuItemFadeFromSaved(m_spr, 0x1f, 10, opaque);
+        sprite(0x1f).m_off[1] = mnuItemDescRowY[0][0];
+        for (int n = 0; n < 5; n++)
+            sprite(0x13 + n).m_off[1] = mnuItemDescRowY[0][1 + n];
+    } else if (mode == 2) {
+        /* The panel goes off ten frames after its fade starts. */
+        static const u_char panel[] = { 0x58, 0x59, 0x60, 0x5a, 0x5b };
+        for (u_int i = 0; i < sizeof(panel); i++) {
+            m_spr.setFade(panel[i], 2, 10, clear, opaque_a);
+            sprite(panel[i]).m_state = SPR_STATE_WAIT_OUT;
+            sprite(panel[i]).m_fade_wait = 10;
+        }
+        m_spr.setFade(0x6a, 2, 10, clear, opaque_a);
+        for (int n = 0x6c; n <= 0x6e; n++)
+            mnuItemFadeToSaved(m_spr, n, 10);
+        for (int n = 0x6f; n <= 0x71; n++)
+            m_spr.setFade(n, 2, 10, clear, opaque_a);
+        for (int n = 0x5c; n <= 0x5f; n++) {
+            sprite(n).m_state = SPR_STATE_WAIT_OUT;
+            sprite(n).m_fade_wait = 10;
+        }
+        for (int n = 0x5c; n <= 0x5f; n++)
+            m_spr.setFade(n, 2, 10, clear, opaque_a);
+        for (u_int i = 0; i < sizeof(mnuItemDescOut); i++)
+            mnuItemFadeToSaved(m_spr, mnuItemDescOut[i], 10);
+        mnuItemFadeToSaved(m_spr, 0x1f, 10);
+    } else if (mode == 3) {
+        sprite(2).m_off[1] = 0;
+        for (u_int i = 0; i < sizeof(mnuItemDescFrame); i++)
+            mnuItemFadeFromSaved(m_spr, mnuItemDescFrame[i], 10, opaque);
+        mnuItemFadeFromSaved(m_spr, 0x12, 10, opaque_a);
+        m_spr.setAnim(0x11, 1);
+        mnuItemSetColor(sprite(0x11), 0x80);
+        fadeInDescSlots(1);
+        sprite(0x1f).m_off[1] = mnuItemDescRowY[1][0];
+        for (int n = 0; n < 5; n++)
+            sprite(0x13 + n).m_off[1] = mnuItemDescRowY[1][1 + n];
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// PC: setDescLayout's common fade in (modes 1 and 3, inline in the ROM):
+// the filled slots' icons and counts, the cursors that are on, 0x51, rows
+// 3..9 and 99..101 back to their saved colour on anim (2 the description
+// view, 1 the main page; the main page shows page 0's slot's link panel
+// between them), 0x3c.
+
+void MnuItem::fadeInDescSlots(int anim)
+{
+    const int *clear = mnuItemColor(MNUITEM_COLOR_CLEAR);
+    const int *opaque = mnuItemColor(MNUITEM_COLOR_OPAQUE);
+
+    for (int n = 0; n < MNUITEM_SLOT_MAX; n++) {
+        if ((u_short)m_slot[n]->m_id != MNUITEM_ID_NONE) {
+            m_spr.fadeInSprite(MNUITEM_SPR_ICON + n, 10, 0x1e, 0, -1, clear, opaque);
+            m_spr.fadeInSprite(MNUITEM_SPR_NUM + n, 10, 0x1e, 0, -1, clear, opaque);
+        }
+    }
+    if (sprite(MNUITEM_SPR_EQUIP_CURSOR).m_state != SPR_STATE_OFF)
+        m_spr.fadeInSprite(MNUITEM_SPR_EQUIP_CURSOR, 10, 0x1e, 0, -1, clear, opaque);
+    if (sprite(MNUITEM_SPR_FIND_CURSOR).m_state != SPR_STATE_OFF)
+        m_spr.fadeInSprite(MNUITEM_SPR_FIND_CURSOR, 10, 0x1e, 0, -1, clear, opaque);
+    m_spr.fadeInSprite(0x51, 10, 0x1e, 0, -1, clear, opaque);
+    for (int n = 3; n <= 9; n++)
+        mnuItemRestoreColor(sprite(n));
+    for (int n = 3; n <= 9; n++)
+        m_spr.setAnim(n, anim);
+    if (anim == 1)
+        showLinkPanel(m_work[1]);
+    for (int n = 99; n <= 0x65; n++) {
+        mnuItemRestoreColor(sprite(n));
+        m_spr.setAnim(n, anim);
+    }
+    m_spr.fadeInSprite(0x3c, 10, 0x1e, 0, -1, clear, opaque);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Examine: the board picture of page 0's slot (m_work[1]) -- the item's
 // field 0x42 (0x40000 when 0) names a texture of mnuboard.rpk that m_spr3
 // loads (the scene fades out, the menu's window and message sprites with

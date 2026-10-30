@@ -15227,6 +15227,12 @@
   "was": "FUN_001b64c4",
   "why": "case 7 of execPage's switch on +0x58; its result 1 closes the menu"
  },
+ "001b69d0": {
+  "name": "MnuItem::setDescLayout",
+  "tag": "ror-inferred",
+  "was": "FUN_001b69d0",
+  "why": "uncalled MnuItem method between execPage7 and execPage6: arg 0..3 fades the main page out / brings a description view in (panel 0x58..0x5b, text rows 0x5c..0x5f that setDescTexts fills) / fades it out / restores the main page"
+ },
  "001ba3a0": {
   "name": "MnuItem::execPage6",
   "tag": "ror-inferred",

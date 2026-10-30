@@ -1569,7 +1569,7 @@ pattern table is the EE image 0x2a8848..0x2aad10, display list 0x2aad70 (65 spri
 data/mnurpk/mnuopt.rpk (option_sita / option_yogore / option). Seen working 2026-10-29 from the title's
 Option item (progress/ shot).
 
-## The item menu (`mnu/mnuitem.cpp`, 0x1ae954..0x1bdae4, 2026-10-29, partial: all but 0x1b69d0)
+## The item menu (`mnu/mnuitem.cpp`, 0x1ae954..0x1bdae4, 2026-10-29, written, verify)
 
 MnuItem (EE 0x2710; MagLifeMenuItem +0x40, menu 0x10000) owns three SprMan: +0x98 the menu (120
 sprites, data/mnurpk/mnuitem.rpk textures base / tex01 (tex01_eu in languages 1..4, bss 0x7812ac) /
@@ -1589,6 +1589,10 @@ icons (anim table 0x2b60c0, pattern base 0xd0 + 4 * (system data field 0xd - 1);
 cursor, 0x4b / 0x50 the find target, 0x4d the chapter plate (pattern 0x51..0x5b by GamMan status 4).
 showFrame 0x1aff5c hides / fades the frame by four flags from bit-word 1 bits 0 / 1 (+0x2410..).
 Life rates +0x23e4.. = LP * 100 / MAX_LP of the PC and the dog.
+**Unused description page**: setDescLayout 0x1b69d0 and setDescTexts 0x1bc8f8 have no callers (no jal,
+no data word): modes 0..3 fade the main page out, bring panel 0x58..0x5b / 0x60, link panel 0x6a..0x71
+and text rows 0x5c..0x5f in (sprite 2 m_off[1] 800, rows 0x13..0x17 / 0x1f lower), fade them out,
+restore the main page.
 **updateFrame** (session 2): +0x2464 counts frames from step 3 (the frame shows at once at 60:
 both outcomes of an idle-pad test skip the slow fade), +0x2490 = 1 / 2 opens system message 6 / 7
 at frame 150 (closed by cross / circle), +0x2498 = page 0 takes input. Life gauges: shown rate

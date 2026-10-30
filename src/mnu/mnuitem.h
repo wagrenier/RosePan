@@ -115,6 +115,12 @@ struct MnuItem
     int  execPage4(BedPad *pad);                                         // ROR 0x001b4488
     int  execPage5(BedPad *pad);                                         // ROR 0x001b5c20
     int  execPage7(BedPad *pad);                                         // ROR 0x001b64c4
+    /* 0 fades the main page out, 1 brings the description view in, 2
+     * fades it out, 3 brings the main page back. Nothing in the ROM calls
+     * it. */
+    void setDescLayout(int mode);                                        // ROR 0x001b69d0
+    /* PC: modes 1 / 3's shared fade in (inline in the ROM). */
+    void fadeInDescSlots(int anim);
     int  execPage6(BedPad *pad);                                         // ROR 0x001ba3a0
     int  execPage9(BedPad *pad);                                         // ROR 0x001ba8e4
     int  execPage10(BedPad *pad);                                        // ROR 0x001bb12c
