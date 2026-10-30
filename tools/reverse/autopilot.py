@@ -128,7 +128,7 @@ def preflight():
     if git('status', '--porcelain'):
         problems.append('working tree is not clean (commit or stash first)')
     if not rosepan.ghidra_up():
-        problems.append(f'Ghidra (GhidraMCP on {rosepan.GHIDRA}) is not reachable or {rosepan.PROGRAM} is not open')
+        problems.append(f'Ghidra: {rosepan.ghidra_down_reason()}')
     if STOP.exists():
         problems.append(f'{STOP} exists (delete it to run)')
     return branch, problems

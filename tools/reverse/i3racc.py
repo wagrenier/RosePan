@@ -172,7 +172,7 @@ def cmd_list():
 
 def cmd_mkfunc():
     if not rosepan.ghidra_up():
-        raise SystemExit('Ghidra is not up')
+        raise SystemExit(f'Ghidra: {rosepan.ghidra_down_reason()}')
     made = failed = 0
     for a, t, op, k in scan():
         if rosepan.has_function(a):

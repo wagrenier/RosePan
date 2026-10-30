@@ -337,7 +337,7 @@ def ranges(out):
 
 def apply(out):
     if not rosepan.ghidra_up():
-        raise SystemExit(f'Ghidra (GhidraMCP at {rosepan.GHIDRA}) is not reachable with {rosepan.PROGRAM} open')
+        raise SystemExit(f'Ghidra: {rosepan.ghidra_down_reason()}')
     rosepan.ensure_tags()
     current = rosepan.function_names()
     taken = defaultdict(list)

@@ -131,7 +131,7 @@ def plan(S):
 
 def apply(S):
     if not rosepan.ghidra_up():
-        raise SystemExit(f'Ghidra (GhidraMCP at {rosepan.GHIDRA}) is not reachable with {rosepan.PROGRAM} open')
+        raise SystemExit(f'Ghidra: {rosepan.ghidra_down_reason()}')
     rosepan.ensure_tags()
     current = {int(a, 16): n for a, n in rosepan.function_names().items()}
     made, named, failed = 0, 0, []

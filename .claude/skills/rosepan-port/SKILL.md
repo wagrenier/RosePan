@@ -40,9 +40,11 @@ Read before working:
 
 ## Environment
 
-- Ghidra 12.1.2 with the GhidraMCP plugin (HTTP `127.0.0.1:8089`), project `C:\Users\willi\Ghidra`,
-  program `SLUS_214.48` (path `/Rule of Rose - US`) open. The tools use HTTP through
-  `tools/reverse/rosepan.py` (`program` always in the query string). Offline (Ghidra down): status,
+- Ghidra 12.1.2 with the GhidraMCP plugin, project `C:\Users\willi\Ghidra`, program `SLUS_214.48`
+  (path `/Rule of Rose - US`) open. Several Ghidras may run (one per game, each on its own port of
+  127.0.0.1:8089..8104): the tools use HTTP through `tools/reverse/rosepan.py`, which finds the one
+  holding the project with `ghidra_mcp.py` (`python ghidra_mcp.py which` / `list`; `program` always in
+  the query string). Offline (Ghidra down): status,
   export, sections / libmatch plans, tus list/check/finish, callcheck and build work from cached `work/`.
 - Tools: `tools/reverse/` (run from there: `python <tool>.py`); every tool is in its README.
 - Build: `python build.py` (MinGW + ninja, configures on first use) once the platform bootstrap host
