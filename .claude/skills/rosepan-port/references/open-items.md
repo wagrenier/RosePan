@@ -6,6 +6,15 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`debug/motnamecnv.cpp`, verify; pinned 0x2163ac..0x216768, absorbing
+unassigned@00216690): seven MagSceneIFChara wrappers and two hidden assert-printer copies, plus
+utlStrNCopyUpper 0x106064 (src/lib/unassigned_stubs.cpp)** (architecture.md, row 0x2163ac). The queue was
+empty; picked as the largest todo file. Nothing in the ROM calls any of it, so verify is final unless a
+caller turns up. Doubt: the second assert copy 0x216728 may belong to naga_debug.cpp (no evidence either
+way; placed with the first). What is left todo is only 1-function runs (mnu/mnudlg.cpp, maglifepcmsg.cpp,
+unassigned@0011e0d8 ...) and empty runs: the dead-code supply is gone. The next useful run lengthens the
+smoke pad (the bus-stop walk) to mark verify TUs done from screenshots.
+
 **PARTIAL 2026-10-30 (`debug/naga_debug.cpp`; pinned 0x216768..0x217f10 + 0x2911cc..0x291228,
 absorbing unassigned@00216ad0, the debug menu): EventTestTask's loader, constructor, destructor, init,
 exec written (architecture.md "The event test overlay")**. The queue was empty; picked as the largest

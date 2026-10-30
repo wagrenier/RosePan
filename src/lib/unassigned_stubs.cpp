@@ -74,6 +74,37 @@ int utlStrEqualNoCase(const char *a, const char *b)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Upper-case bounded copy (unassigned@00106010, written ahead for
+// motNameGetMotionName). The ROM tests newlib's _ctype_ (0x3079a8 + 1) bit
+// _L with the signed char as index; only a..z have it, so the host compares
+// the range. Like the ROM it writes dst[n - 1] even when n <= 0 (every
+// caller passes n > 16).
+// ROR 0x00106064
+
+char *utlStrNCopyUpper(char *dst, int n, const char *src)
+{
+    if (n > 0) {
+        char *d = dst;
+        int i = 0;
+        for (;;) {
+            char c = *src;
+            if ((unsigned)(c - 'a') < 26)
+                c -= 0x20;
+            *d = c;
+            if (c == '\0')
+                break;
+            i++;
+            d++;
+            src++;
+            if (i >= n)
+                break;
+        }
+    }
+    dst[n - 1] = '\0';
+    return dst;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // A step along angle on the ground plane (unassigned@001e6cac, written
 // ahead for native 152).
 // ROR 0x001f6b28

@@ -851,6 +851,12 @@
   "was": "FUN_00106010",
   "why": "compares two strings folding a..z to upper case; 1 when equal, 0 otherwise; MagLoaderIndex::find uses it"
  },
+ "00106064": {
+  "name": "utlStrNCopyUpper",
+  "tag": "ror-inferred",
+  "was": "FUN_00106064",
+  "why": "(dst, n, src): copies at most n chars of src with newlib ctype _L (a..z) raised by 0x20, stops after the terminator, always writes dst[n-1] = 0; returns dst"
+ },
  "001060e8": {
   "name": "utlFindObjWrdNo",
   "tag": "ror-inferred",
@@ -24130,6 +24136,60 @@
   "tag": "ror-inferred",
   "was": "FUN_00216384",
   "why": "forwards to MagSceneIFChara::getMax (0x1435f4); no callers"
+ },
+ "002163ac": {
+  "name": "motNameGetCharaName",
+  "tag": "ror-inferred",
+  "was": "FUN_002163ac",
+  "why": "debug/motnamecnv.cpp line 191 asserts p: MagSceneIFChara::getName(a1) of the scene's character interface, \"----\" for a negative index; a0 unused like motNameGetMapName"
+ },
+ "0021641c": {
+  "name": "motNameFindCharaOrPC",
+  "tag": "ror-inferred",
+  "was": "FUN_0021641c",
+  "why": "line 216 asserts str: MagSceneIFChara::find(str); when not found, 0 for a name starting \"PC\", else -1"
+ },
+ "0021649c": {
+  "name": "motNameGetMotionLabel",
+  "tag": "ror-inferred",
+  "was": "FUN_0021649c",
+  "why": "lines 261..264 assert theBuf, theSize > 16, chara_num >= 0, motion_num >= 0; memset then MagSceneIFChara::getMotionLabel(theBuf, theSize, chara, motion, 1); returns theBuf"
+ },
+ "00216598": {
+  "name": "motNameGetMaxMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_00216598",
+  "why": "tail jump to MagSceneIFChara::getMaxMotion with a1 forwarded"
+ },
+ "002165c0": {
+  "name": "motNameGetMotionName",
+  "tag": "ror-inferred",
+  "was": "FUN_002165c0",
+  "why": "lines 318/319 assert theBuf, theSize > 16; memset, MagSceneIFChara::getMotionName(chara, motion) copied upper-cased by 0x106064; returns theBuf"
+ },
+ "00216690": {
+  "name": "motNameGetNumNode",
+  "tag": "ror-inferred",
+  "was": "FUN_00216690",
+  "why": "tail jump to MagSceneIFChara::getNumNode with a1 forwarded"
+ },
+ "002166b8": {
+  "name": "motNameGetNodeName",
+  "tag": "ror-inferred",
+  "was": "FUN_002166b8",
+  "why": "tail jump to MagSceneIFChara::getNodeName with a1, a2 forwarded"
+ },
+ "002166e0": {
+  "name": "motNameAssertFailed",
+  "tag": "ror-inferred",
+  "was": "motNameAssertFailed",
+  "why": "unreferenced copy of dbgAssertFailed 0x215a30: scePrintf(\"Assertion Failed: %s(%d)   %s\", file, line, expr) and a nop loop for ever; folded out of 0x2166b8's body"
+ },
+ "00216728": {
+  "name": "motNameAssertFailed2",
+  "tag": "ror-inferred",
+  "was": "motNameAssertFailed2",
+  "why": "a second identical unreferenced copy (format string 0x301ac0); which file it came from is unknown, placed with the first"
  },
  "00216768": {
   "name": "nagaDbgLoadFile",

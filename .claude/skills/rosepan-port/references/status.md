@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 17:27 at commit `bfb4185` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 17:59 at commit `5cee9fb` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-30 17:27 at commit `bfb4185` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7195**, named **7134** (99%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5532
-- context-name ledger: 5822 entries; overrides of wrong library matches: 5
-- placed in a source file: 6220/7195 in 166 files
+- game functions: **7197**, named **7144** (99%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5542
+- context-name ledger: 5832 entries; overrides of wrong library matches: 5
+- placed in a source file: 6224/7197 in 166 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -22,15 +22,15 @@ Least-named game-code regions (64 KB blocks):
 | `001a0000` | 199/214 (93%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `001f0000` | 218/234 (93%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `00160000` | 257/268 (96%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
-| `00210000` | 351/362 (97%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
 | `00110000` | 254/257 (99%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
-| `00100000` | 301/304 (99%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmath.cpp |
+| `00210000` | 360/364 (99%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
+| `00100000` | 302/304 (99%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmath.cpp |
 | `00120000` | 282/283 (100%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
 | `00140000` | 292/293 (100%) | emy/emy_hfm.cpp, emy/emy_clr.cpp, mag/magscenecmd.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **6054**; stubs: **0**
+- reconstructed RoR functions: **6064**; stubs: **0**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -40,6 +40,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/bed/bedsubmode.cpp` | 3 | 0 |
 | `src/debug/mcd_debug.cpp` | 2 | 0 |
 | `src/debug/mimu_debug.cpp` | 9 | 0 |
+| `src/debug/motnamecnv.cpp` | 9 | 0 |
 | `src/debug/motnamecnv0.cpp` | 8 | 0 |
 | `src/debug/naga_debug.cpp` | 12 | 0 |
 | `src/dog/dogactor.cpp` | 147 | 0 |
@@ -113,7 +114,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 0 |
+| `src/lib/unassigned_stubs.cpp` | 11 | 0 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -201,13 +202,14 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 174 TUs: todo 75, partial 1, verify 153, done 17
+- 173 TUs: todo 73, verify 154, done 18
 - next: **None** (nothing on the frontier and no queued TU)
 - pinned queue: unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
 - verify: `debug/mcd_debug.cpp` 2/5 -- Nothing calls these functions in the retail ROM, so no screenshot can show them; the smoke run still reaches the disclaimer screen unchanged. mcdDbgMenuTest sta
+- verify: `debug/motnamecnv.cpp` 9/9 -- Verify: no reference to any of these in the ROM (all callers 0), so no screenshot can show them; the 15 s smoke run still ends on the boot disclaimer, unchanged
 - verify: `debug/motnamecnv0.cpp` 8/8 -- Verify: the 15 s smoke run ends on the boot disclaimer, scenePlayStart is not reached, and every callee is a mag/magsceneif.cpp stub (MagSceneIFChara::find / ge
 - verify: `debug/naga_debug.cpp` 12/14 -- Whole file written; nothing in the ROM constructs EventTestTask and retail stripped its draw calls (text is formatted into a stack buffer and dropped), so no sc
 - verify: `dog/dogactor.cpp` 147/147 -- Status verify: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run stays black after the film because the pose and draw path below DogActo
@@ -360,6 +362,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 17:59 `debug/motnamecnv.cpp` verify: debug/motnamecnv.cpp written whole (0x2163ac..0x216768, 9 functions): seven MagSceneIFChara wrappers with an unused first argument (motNameGetCharaName, motName
 - 2026-10-30 17:27 `mag/maglifetest.cpp` verify: MagLifeTest test controller complete: ctor, live (motion chain 0xac, 5, 1 on its phase word, then the motion's root movement into addTrans turned by the base he
 - 2026-10-30 17:20 `debug/naga_debug.cpp` verify: EventTestTask debug overlay complete: disp (info pages: PC / dog position, world position via WrdSrv, heap and packet use, chapter, map area, PC and dog health,
 - 2026-10-30 16:56 `debug/naga_debug.cpp` partial: EventTestTask (vtable 0x2e50c0, kind 2): nagaDbgLoadFile, the constructor split out of 0x216768 at 0x216828, destructor, init, exec, inline get_task_type / term
@@ -367,7 +370,6 @@ Recent sessions:
 - 2026-10-30 16:30 `dog/doglight.cpp` verify: DogLight, all 8 functions: init / clear / term, getDataSize, create (one block of ambient, direct, point, spot, hemi and dist lights), setParam / getParam (pos,
 - 2026-10-30 16:19 `mag/maglifebwnmode.cpp` verify: Brown's ten modes (MagLifeBwnMode Null/One/Wait/Sit/Fuse/Move/Path/Turn/Rotate/Wall), all 19 functions; pinned 0x125bd4..0x1267c0 absorbing unassigned@00125bd4 
 - 2026-10-30 15:52 `rx/rxsys.cpp` verify: rx/rxsys.cpp session 3: the System Monitor exception console 0x242c10..0x2432d8, 15 functions (clear row, scroll, LoadImage, glyph row expand from the 8x8 font 
-- 2026-10-30 15:41 `rx/rxsys.cpp` partial: rx/rxsys.cpp session 2: removed the 5 boot stubs - ini parser (rxSysIniFindSection/ReadKey/FindKey/Find, key count and key-at helpers), tty bind/open/close, rxS
 
 ## Frontier (called by reconstructed code, not written yet)
 

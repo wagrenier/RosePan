@@ -128,6 +128,24 @@
    "status": "done",
    "why": "The debug/mimu_debug.cpp string (0x301998) is the assert text of the float formatter 0x215e1c; rodata runs assert format 0x301938, the digit-count table 0x301958 that 0x215c74 copies, then that string: one file from the assert handler 0x215a30 (called by bed/ and this file) through the vector traces 0x215ae8..0x215c14, the float splitter 0x215c74, the formatter and the empty function 0x21614c. 0x216154 calls the MagLoader (0x781268) like debug/motnamecnv0.cpp."
   },
+  "debug/motnamecnv.cpp": {
+   "notes": "Verify: no reference to any of these in the ROM (all callers 0), so no screenshot can show them; the 15 s smoke run still ends on the boot disclaimer, unchanged. Extent absorbs unassigned@00216690 up to naga_debug.cpp at 0x216768. Doubt: the second assert copy 0x216728 (format string 0x301ac0) could be naga_debug.cpp's; nothing decides it. utlStrNCopyUpper writes dst[n-1] even for n <= 0 as the ROM does; unassigned@00106010 now has both its functions written. Nothing left to write here. The todo list now holds only 1-function and empty runs: the next useful run lengthens the smoke pad (bus-stop walk) to mark verify TUs done.",
+   "ranges": [
+    [
+     "002163ac",
+     "00216768"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 17:59",
+     "status": "verify",
+     "summary": "debug/motnamecnv.cpp written whole (0x2163ac..0x216768, 9 functions): seven MagSceneIFChara wrappers with an unused first argument (motNameGetCharaName, motNameFindCharaOrPC, motNameGetMotionLabel, motNameGetMaxMotion, motNameGetMotionName, motNameGetNumNode, motNameGetNodeName) and two unreferenced assert-printer copies 0x2166e0 / 0x216728 that Ghidra had folded into 0x2166b8 (functions created); also utlStrNCopyUpper 0x106064 in src/lib/unassigned_stubs.cpp, the upper-casing bounded copy motNameGetMotionName uses."
+    }
+   ],
+   "status": "verify",
+   "why": "source string debug/motnamecnv.cpp (0x301a40) anchors 0x2163ac..0x216690; 0x216690 / 0x2166b8 are the same MagSceneIFChara tail-call wrappers and 0x2166e0 / 0x216728 two hidden assert-printer copies, up to naga_debug.cpp at 0x216768 (absorbs unassigned@00216690)"
+  },
   "debug/motnamecnv0.cpp": {
    "notes": "Verify: the 15 s smoke run ends on the boot disclaimer, scenePlayStart is not reached, and every callee is a mag/magsceneif.cpp stub (MagSceneIFChara::find / getCategory / getMotionNo return 0), so scenes still spawn chara 0. Next: port mag/magsceneif.cpp (0x143430..0x143d3c, 13 functions, 8 named: getMax / getName / find on both, getCategory, getMotionNo; 0x1437a8 reads actor +0x1c0, 0x143430 / 0x1438b0.. unread); getMotionNo retries getMotionNoBySuffix with the name cut at its first star or plus. The uncalled wrappers 0x216334 / 0x21635c forward a1 without moving a0, so they take an unused first argument. motNameConvert keeps the caller's intptr_t pair table (host stride 2 words).",
    "ranges": [
