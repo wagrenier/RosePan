@@ -47,12 +47,34 @@ struct EffParam
         struct
         {
             float m_pos[3];     // ROR 0x10
-            int   m_1c;         // ROR 0x1c: 0
-            float m_20;         // ROR 0x20: -1
-            int   m_24;         // ROR 0x24: 0
+            float m_1c;         // ROR 0x1c: 0  } the direction: EffBloodSpray1 sprays along it,
+            float m_20;         // ROR 0x20: -1 } EffBloodStay1 lays its stains across it
+            float m_24;         // ROR 0x24: 0  } (every caller: straight down)
             float m_scale;      // ROR 0x28: 1, 1.75 for a kind-2 damage; 100 for kind 3
-            int   m_2c;         // ROR 0x2c: kind 3 (HfmOutDead::Init): 90
+            int   m_2c;         // ROR 0x2c: kind 3 (HfmOutDead::Init): 90, the frames it stays (< 0 forever)
         } m_hit;                // kind 1 (scnDamageStart); kind 3 the same words
+        struct
+        {
+            const float *m_pos; // ROR 0x10: the caller's position, read at every drop
+            const float *m_dir; // ROR 0x14: the caller's direction (down when shorter than 0.9)
+            float m_scale;      // ROR 0x18
+            u_int m_frames;     // ROR 0x1c: frames it sprays (a drop every second one)
+        } m_spray2;             // kind 2 (EffBloodSpray2; script op 15)
+        struct
+        {
+            const float *m_pos; // ROR 0x10: the caller's position, followed while it lives
+            const float *m_up;  // ROR 0x14: the trail's normal (it lies across up x direction)
+            float m_width;      // ROR 0x18
+            float m_length;     // ROR 0x1c: the trail's length (31 segments)
+        } m_trail;              // kind 4 (EffBloodStay2; script op 17)
+        struct
+        {
+            int   m_type;       // ROR 0x10: 0 / 1 the texture half (other types draw nothing)
+            int   m_flip;       // ROR 0x14: type 0: non-zero mirrored; type 1: bit 2 mirrored
+            const float *m_pos; // ROR 0x18: copied at init
+            float m_rot;        // ROR 0x1c: the y rotation
+            float m_alpha;      // ROR 0x20
+        } m_prim;               // kind 6 (EffBloodStay3Prim)
         char m_suffix[0x70];    // ROR 0x10: kinds 0x33 / 0x34, the pack name's suffix (createEff)
         struct
         {

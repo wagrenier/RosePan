@@ -6,6 +6,19 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`eff/effblood.cpp`, verify; pinned 0x16b62c..0x16dcc8 out of
+unassigned@0016afcc): the six blood effects, all 27 functions** (architecture.md "The blood effects").
+Not on the smoke path (the 15 s run is at the boot disclaimer; blood needs a hit or an enemy death):
+mark done when a run shows a spray on a hit (scnDamageStart, kind 1) or stains under a dying enemy (kind
+3). Doubts: (1) script ops 15 / 17 (kinds 2 / 4) memcpy the script's 0x70 bytes, whose words 0 / 1 are
+EE pointers, but EffParam m_spray2 / m_trail hold host pointers (8 bytes on the host, so the floats after
+them move too): convert in seqFunc281 when a script uses them. (2) EffBloodStay2's strip colour is
+(255, 255, 255, 127) with the textured colour scale 128 (saturates to 255 on the host) -- ported as the
+ROM has it; check the trail's brightness when one shows. (3) EffBloodStay1::isActorOnStain (no callers)
+adds the stain's angle to z, as the ROM does. EffBloodStay3Prim (kind 6) has no creator found. Left of
+the old run: unassigned@0016afcc = EffBg1 (0x16afcc..0x16b62c, needs EffGeneric1 from
+unassigned@00172e4c) and the EffBreath classes 0x16dcc8..0x16f71c (eff/effbreath.cpp next).
+
 **WRITTEN 2026-10-30 (`mnu/mnuboard2d.cpp`, verify): MnuBoard2D, all 16 functions -- the 2D board
 picture (architecture.md "The 2D board").** Not on the smoke path (the 15 s run is at the boot
 disclaimer; boards open from MagScene menu ids 0x4xxxx, a script event in a room): mark done when a

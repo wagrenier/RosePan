@@ -318,6 +318,24 @@
    "status": "verify",
    "why": "Eff0 base class (ctor/dtor/slots, vtable 0x2e3250) and the shared effect helpers before EffBg1's constructor 0x16afcc, the first class in alphabetical link order"
   },
+  "eff/effblood.cpp": {
+   "notes": "Nothing on the smoke path creates blood (the 15 s run is at the boot disclaimer): mark done when a run shows a hit spray (scnDamageStart, kind 1) or stains under a dying enemy (kind 3). Doubts in open-items.md: script ops 15 / 17 copy raw script words that are EE pointers into m_spray2 / m_trail (host pointers): convert in seqFunc281 when a script uses them; EffBloodStay2's strip colour 255 / 127 with the textured scale 128 saturates (ROM values kept); isActorOnStain adds the stain's angle to z (ROM). Left of the old run: EffBg1 0x16afcc..0x16b62c (unassigned@0016afcc, needs EffGeneric1) and the EffBreath classes 0x16dcc8..0x16f71c (eff/effbreath.cpp next).",
+   "ranges": [
+    [
+     "0016b62c",
+     "0016dcc8"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 09:28",
+     "status": "verify",
+     "summary": "The blood effects, kinds 1..6: EffBloodSpray1 / 2 (drop bursts and a following spray), EffBloodStay1 (floor stains), EffBloodStay2 (a trail strip), EffBloodStay3 and its counter setter, EffBloodStay3Prim; all 27 functions, pinned 0x16b62c..0x16dcc8 out of unassigned@0016afcc. EffParam gains m_spray2 / m_trail / m_prim, m_hit's direction words are floats; sin / cos named."
+    }
+   ],
+   "status": "verify",
+   "why": "EffBloodSpray1/2 and EffBloodStay1/2/3/3Prim, contiguous in link order between EffBg1 and EffBreath1; no source string, named after the class family like efflight.cpp"
+  },
   "eff/effcameraanim1.cpp": {
    "notes": "Pinned 0x16f71c..0x16fb70 (one file per Eff class, link order). Seen working: the 200 s New Game run creates it twice in the picture-book stretch (181 and 161 keys, lens 55 degrees); frames 3300..3420 show the girl reading the picture book by the bench, the same frames are black with init returning 0. Not seen: the restore path at the last key (the first instance had not reached frame 181 when the scene moved on). 0x16fb70 named effStrIndex (no callers) opens an unclassed helper run 0x16fb70..0x1704a4 (effCalcViewDepth, effMoveToward, FUN_0016fc20 and others): a shared helper file between effcameraanim1 and effdust2, still inside unassigned@0016afcc. Next for effects: EffLight1 0x174dd8 and gamCreateEff1a 0x172678, both reached in the same stretch.",
    "ranges": [
