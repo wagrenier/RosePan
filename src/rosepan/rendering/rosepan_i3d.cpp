@@ -180,7 +180,11 @@ struct GsState
 
 std::map<uintptr_t, Record> s_records;
 std::unordered_map<const uint64_t *, Binding> s_bindings;
-std::map<TexKey, const void *> s_textures;
+/* Never destroyed, deliberately (rosepan_log.cpp's loggers): std::exit runs
+ * the game's static destructors, and ~CmnTaskMan's task terms release
+ * textures into this (TskMsgMan::term -> i3dTexRelease) after this TU's
+ * statics are gone. */
+std::map<TexKey, const void *> &s_textures = *new std::map<TexKey, const void *>;
 std::vector<ModelDraw> s_models;
 std::vector<MeshDraw> s_meshes;
 std::vector<Camera> s_cameras;
