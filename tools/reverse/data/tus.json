@@ -1897,7 +1897,7 @@
    "why": "MnuBoard2D ctor 0x1ad6b4 .. its fade helpers (mnuboard.rpk); 0x1adf04 is MnuMovie's constructor. File named after the class"
   },
   "mnu/mnuitem.cpp": {
-   "notes": "Left: execPage1..7 and 9..13 (stubs returning 0); start with execPage7 0x1b64c4 (in this slice, not written), then execPage4 (slot page, cross from the grid) and execPage3 (equipped / find target). Pages keep their own step at m_page_sub[page] (0x60 + 4n). The page fades use mnuItemFadeFromSaved / mnuItemFadeToSaved (m_color copied into SprSprite m_fade_save). ROM quirks kept: updateFrame's idle-pad test has no effect (frame always shows at frame 60); the dog's rising anim goes to sprite 0x10 and its empty-gauge test compares anim 5. Screen: unchecked. The 240 s smoke run with settings.smoke_pad stays on the picture book The Little Princess from frame ~3300 to 8160 (RIGHT*1700 and the CIRCLE presses do not leave it), so no room is reached and the item menu (START in a room) cannot be opened; last.png is the 15 s boot (black). Reference textures: tm2png.py --scan on GAME_DATA data/mnurpk/mnuitem.rpk -> work/ref/mnuitem (0x8c800 is the item icon sheet, 4 frames per icon). Next blocker: what advances the picture book on the smoke path (open-items).",
+   "notes": "Left: execPage4 0x1b4488 (the slot page reached by cross on a grid slot from page 0; next, it leads to pages 5 and 7 which now exist), execPage6 0x1ba3a0, execPage9..13 (stubs returning 0; page 10 calls buildFlagList). m_page_ret[n] (+0x60 + 4n) is the page page n returns to, set by the caller; page 5 ends its return page at step 0xc, page 7 at step 6 after no. m_work: [0] page 0 area, [1] page 0 slot (pages 5 and 7 act on it), [2] page 1 cursor, [4] page 7 choice, [5] page 2 cursor. Item record GamSysRec5: m_flags +0xb0 (0x10000 equippable, 8 find-targetable, 0x1000000 not stocked), m_b8 field 0x24 kind (1 PC heal, 3 dog heal). PORT: buildFlagList bounds m_flag_rows at 16 (the ROM runs into m_find_spr 0x26e4). Screen: the 15 s smoke shows the boot (disclaimer, Presents card) unchanged; the item menu is not reachable on the smoke path (the picture book The Little Princess holds the 240 s run), so pages 1..7 are unchecked against work/ref/mnuitem. Next blocker: what advances the picture book (open-items).",
    "ranges": [
     [
      "001ae954",
@@ -1914,6 +1914,11 @@
      "date": "2026-10-29 20:10",
      "status": "partial",
      "summary": "MnuItem session 2: updateFrame (frame timer, notice system message 6/7, life gauges with level anims), execPage0 (main page cursor over equipped / find / 4x3 grid / slot 12, cross to pages 3/4/10, circle/start close), helpers setNameText 0x1bc790, getKnownName 0x1bcb84, setLinkTexts 0x1bcc08, showLinkPanel 0x1bd028; header fields named (m_rate / m_rate_target / m_rate_level[3][2], m_page_sub, m_frame_timer, m_notice, m_ready, m_link_shown); SprSprite +0x48 named m_fade_save; 4 names (ror-inferred)."
+    },
+    {
+     "date": "2026-10-29 20:47",
+     "status": "partial",
+     "summary": "MnuItem session 3: execPage1 (equip from the grid), execPage2 (find target with the link panel), execPage3 (unequip / untarget), execPage5 (use: ammo reload into the gun, PC / dog heals by field 0x2d percent, other items to the sequence), execPage7 (put away yes/no, item to the stock); helpers useSlotItem 0x1af578, dimSlots 0x1b05ec, buildFlagList 0x1baff4; m_page_sub renamed m_page_ret (+0x60 + 4n is the page page n returns to); header fields m_flag_text / m_flag_rows[16] / m_find_spr / m_use_* / m_gun_idx / m_gun_num; 3 names (ror-inferred)."
     }
    ],
    "status": "partial",

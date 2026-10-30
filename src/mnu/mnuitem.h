@@ -123,6 +123,13 @@ struct MnuItem
     /* Fades the panel 0x6a..0x71 in when slot no's item has linked items,
      * out when it has none. */
     void showLinkPanel(int no);                                          // ROR 0x001bd028
+    /* One of slot no's stacking items used: its count, the slot cleared at
+     * the last; the slots redrawn. */
+    void useSlotItem(int no);                                            // ROR 0x001af578
+    /* Slot icons whose item record has none of bits dimmed (alpha 0x28),
+     * the others full; 0x10008 shows them all full. */
+    void dimSlots(u_int bits);                                           // ROR 0x001b05ec
+    void buildFlagList();                                                // ROR 0x001baff4
 
     /* PC: m_spr's sprite n (m_sprite is the SprMan's table). */
     SprSprite &sprite(int n) { return m_spr.m_sprite[n]; }
@@ -130,7 +137,9 @@ struct MnuItem
     int           m_open;           // ROR 0x0000: open / close
     /* Cleared together (initWork, open after the boot load, processPad);
      * [0] 2, [3] 0 at open. Page 0: [0] the cursor's area (MNUITEM_AREA_*),
-     * [1] its slot (0..11 in a 4 x 3 grid, 12 the slot-12 item). */
+     * [1] its slot (0..11 in a 4 x 3 grid, 12 the slot-12 item; page 7
+     * puts that slot's item away). [2] page 1's slot, [5] page 2's, [4]
+     * page 7's choice (0 yes, 1 no). */
     int           m_work[10];       // ROR 0x0004
     int           m_2c;             // ROR 0x002c: initWork 4; unverified
     int           m_30;             // ROR 0x0030: initWork 2; unverified
@@ -139,8 +148,9 @@ struct MnuItem
     int           m_step;           // ROR 0x0054: processPad's step
     int           m_page;           // ROR 0x0058: execPage's page (0..13)
     int           m_page_step;      // ROR 0x005c: the page's step
-    /* Page n's own step at 0x60 + 4n (page 0 sets 3, 4 and 10's to 0). */
-    int           m_page_sub[14];   // ROR 0x0060
+    /* The page page n returns to when it ends (its caller sets it: page 0
+     * sets 3's, 4's and 10's to 0, pages 1 / 2 set 3's and 8's). */
+    int           m_page_ret[14];   // ROR 0x0060
     SprMan        m_spr;            // ROR 0x0098: EE 0x8ec, the menu
     SprMan        m_spr_find;       // ROR 0x0984: findpt.rpk's one sprite
     SprMan        m_spr3;           // ROR 0x1270: drawn first; not set up here
@@ -168,13 +178,14 @@ struct MnuItem
     u_int         m_slot12_item;    // ROR 0x2430: slot 12's id (open: 0xa23)
     GamItemSlot  *m_slot[MNUITEM_SLOT_MAX]; // ROR 0x2434: GamMan's item-have entries
     int           m_frame_timer;    // ROR 0x2464: updateFrame's frames since step 3 (to 18000)
-    int           _2468;
+    int           m_use_timer;      // ROR 0x2468: page 5's frames between ammo rounds (3)
     int           m_246c;           // ROR 0x246c: open clears it
     int           m_bit28;          // ROR 0x2470: sequence bit 0x10000000 at step 3 (page 9)
     int           m_bit29;          // ROR 0x2474: bit 0x20000000 (page 11; the frame stays hidden)
     int           _2478[2];
     int           m_init;           // ROR 0x2480: isInit
-    int           _2484[2];
+    int           m_use_num;        // ROR 0x2484: page 5: the ammo slot's count while it empties
+    int           m_use_moves;      // ROR 0x2488: page 5: rounds still to move (6 - m_gun_num at most)
     int           m_248c;           // ROR 0x248c: step 0 clears it
     /* step 3: 1 with sequence bit-word 1 bit 3, 2 with bit 4, else 0;
      * updateFrame opens system message 6 / 7 at frame 150 for 1 / 2. */
@@ -183,17 +194,27 @@ struct MnuItem
     int           m_ready;          // ROR 0x2498: page 0 takes input (frame 60, or the message closed)
     int           m_249c;           // ROR 0x249c: page 0 closes the menu while not m_ready
     int           m_frame_mode;     // ROR 0x24a0: showFrame's mode
-    u_char        _24a4[0x26fc - 0x24a4];
+    /* buildFlagList: the system texts (column 5) of flag table 99's rows
+     * whose sequence bit (column 3) is set, row 0 always; their row
+     * numbers in m_flag_rows, -1 after the last (the ROM does not bound
+     * it; 0x26e4 follows). */
+    char          m_flag_text[0x200]; // ROR 0x24a4
+    int           _26a0;
+    int           m_flag_rows[0x10]; // ROR 0x26a4
+    int           m_find_spr;       // ROR 0x26e4: the find-target frame sprite shown (page 5 sets 0x21)
+    int           _26e8[5];
     int           m_win2;           // ROR 0x26fc: a second window, closed at the end when >= 0
     int           m_win;            // ROR 0x2700: the scene window
-    u_char        _2704[0x2710 - 0x2704];
+    int           _2704;
+    int           m_gun_idx;        // ROR 0x2708: page 5: GamMan::getEquipSlot (scePrintf "m_gun_idx")
+    int           m_gun_num;        // ROR 0x270c: page 5: GamMan::getSelItemNum, the gun's rounds
 };
 static_assert(offsetof(MnuItem, m_work) == 0x04, "m_work");
 static_assert(offsetof(MnuItem, m_2c) == 0x2c, "m_2c");
 static_assert(offsetof(MnuItem, m_step) == 0x54, "m_step");
 static_assert(offsetof(MnuItem, m_page) == 0x58, "m_page");
 static_assert(offsetof(MnuItem, m_page_step) == 0x5c, "m_page_step");
-static_assert(offsetof(MnuItem, m_page_sub) == 0x60, "m_page_sub");
+static_assert(offsetof(MnuItem, m_page_ret) == 0x60, "m_page_ret");
 static_assert(offsetof(MnuItem, m_spr) == 0x98, "m_spr");
 static_assert(offsetof(MnuItem, m_spr_find) >= 0x984, "m_spr_find");
 static_assert(offsetof(MnuItem, m_spr3) >= 0x1270, "m_spr3");
@@ -204,6 +225,10 @@ static_assert(offsetof(MnuItem, m_tex) >= 0x23e0, "m_tex");
 static_assert(offsetof(MnuItem, m_slot) >= 0x2434, "m_slot");
 static_assert(offsetof(MnuItem, m_init) >= 0x2480, "m_init");
 static_assert(offsetof(MnuItem, m_frame_mode) >= 0x24a0, "m_frame_mode");
+static_assert(offsetof(MnuItem, m_flag_text) >= 0x24a4, "m_flag_text");
+static_assert(offsetof(MnuItem, m_flag_rows) >= 0x26a4, "m_flag_rows");
+static_assert(offsetof(MnuItem, m_find_spr) >= 0x26e4, "m_find_spr");
+static_assert(offsetof(MnuItem, m_gun_idx) >= 0x2708, "m_gun_idx");
 static_assert(offsetof(MnuItem, m_win) >= 0x2700, "m_win");
 static_assert(sizeof(MnuItem) >= 0x2710, "EE 0x2710");
 

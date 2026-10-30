@@ -3474,11 +3474,11 @@
 /* 001af44c 00000084 */ MnuItem::refreshSlots(){}  // ror
 /* 001af4d0 0000002c */ MnuItem::getAnimTable(){}  // ror
 /* 001af4fc 0000007c */ MnuItem::getPatBase(){}  // ror
-/* 001af578 00000068 */ FUN_001af578(){}
+/* 001af578 00000068 */ MnuItem::useSlotItem(){}  // ror
 /* 001af5e0 00000348 */ MnuItem::setSlotSprites(){}  // ror
 /* 001af928 00000634 */ MnuItem::setEquipSprites(){}  // ror
 /* 001aff5c 00000690 */ MnuItem::showFrame(){}  // ror
-/* 001b05ec 0000011c */ FUN_001b05ec(){}
+/* 001b05ec 0000011c */ MnuItem::dimSlots(){}  // ror
 /* 001b070c 00000078 */ MnuItem::testSlotFlags(){}  // ror
 /* 001b0784 00000214 */ MnuItem::setDisp(){}  // ror
 /* 001b099c 000007a0 */ MnuItem::processPad(){}  // ror
@@ -3497,7 +3497,7 @@
 /* 001b69d0 000039d0 */ FUN_001b69d0(){}
 /* 001ba3a0 00000544 */ MnuItem::execPage6(){}  // ror
 /* 001ba8e4 00000710 */ MnuItem::execPage9(){}  // ror
-/* 001baff4 00000138 */ FUN_001baff4(){}
+/* 001baff4 00000138 */ MnuItem::buildFlagList(){}  // ror
 /* 001bb12c 000003c4 */ MnuItem::execPage10(){}  // ror
 /* 001bb4f0 0000080c */ MnuItem::execPage11(){}  // ror
 /* 001bbcfc 00000674 */ MnuItem::execPage12(){}  // ror
