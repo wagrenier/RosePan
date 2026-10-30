@@ -29,6 +29,18 @@ struct VSOutput
     float4 vWorld : TEXCOORD1;
 };
 
+/*
+ * RoR's receivers are their own model (the map pack's file 2) lying on the
+ * floor, depth tested GEQUAL against the floor the map drew.  The GS's Z
+ * buffer is 16 bit (PSMZ16S, 65530 near .. 1 far), so a receiver within a
+ * step or two of the floor passed there; in the host's float depth the two
+ * meshes' rounding decides pixel by pixel and the shadow sank into the
+ * ground in patches.  The receiver is pulled toward the eye by a few of
+ * those steps -- the reversed depth z / w spans the same near .. far range,
+ * so one step is 1 / 65529 of it.
+ */
+static const float kReceiverDepthSteps = 4.0 / 65529.0;
+
 VSOutput main(VSInput input)
 {
     float4 localPos = float4(input.aPos.xyz, 1.0);
@@ -36,6 +48,8 @@ VSOutput main(VSInput input)
 
     VSOutput output;
     output.position = mul(mvp, localPos);
+    output.position.z = min(output.position.z + kReceiverDepthSteps * output.position.w,
+                            output.position.w);
     output.vShadowClip = mul(uShadowMatrix, worldPos);
     output.vWorld = worldPos;
     return output;

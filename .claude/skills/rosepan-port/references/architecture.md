@@ -2446,6 +2446,17 @@ throughout (identifiers, env variables, files, shader macros):
     of 0x225670 is redone on the host. `ROSEPAN_I3D_MESH_TEST=1` (MagSystem::update) draws
     CHARA.RPK CHAP01's first model (amd.mdl, Amanda) with a turning camera: textured, skinned,
     depth-tested, right side up (progress/ screenshot of 2026-10-27).
+  - **Depth state** (2026-10-30, fix/effect-zdepth): RoR keeps translucent things out of the Z
+    buffer through TEST, not ZBUF: ATST NEVER with AFAIL FB_ONLY / RGB_ONLY draws colour without Z
+    (effects' TEST 0x51001 / 0x31001, SprMan's colour sprites, i3r layers with m_fail_only 0x10 /
+    0x18), and its i3r cut-outs write TEST 0x5140d (alpha GREATER 0, FB_ONLY: a clear texel leaves Z
+    alone). The renderer reads both from TEST (RosePan_RendererSetGsTestRegister): NEVER + FB_ONLY
+    turns the depth write off, any other test + FB_ONLY draws twice (the test as KEEP, then the
+    inverse comparison without Z write). The replay feeds TEST and ZBUF_1 (ZMSK) to every 2D / VU1
+    draw and ZBUF to the meshes; putDrawEnv records the env's ZBUF. Untextured VU1 strips carry
+    their depth. GIF primitives (DrawPrim) still draw without depth: RoR's are 2D (UI, fades), its
+    effects go through the VU1 writers. Shadow receivers (file 2) are pulled 4 Z16 steps toward
+    the eye in shadow_receiver.vert: the PS2's 16-bit Z let a receiver on the floor pass GEQUAL.
   - The emulated GS path remains only as a fallback for something not bridged yet; anything that
     lands there is a known performance debt to list in open-items.md.
 - Data root: the disc's root copied file by file (the folder holding `DATA/`); `LooksLikeDataRoot`

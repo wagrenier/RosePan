@@ -1011,3 +1011,19 @@ loop's start pointer in the asm when its twin starts elsewhere.
   have 0 and keep their shape). The projections stay the ROM's: i3rHostCamera and the CPU strips
   build from m_rect_proj / m_rect_viewport, so widening those would widen twice. Any new host-side
   widening (a new aspect knob) has to reach i3dViewHostExtend too.
+
+## Translucent geometry that hides the player (2026-10-30)
+
+- Symptom (the user, in the orphanage): light shafts drew over Jennifer so she could not be seen
+  behind them; effects in general had depth trouble; her projected shadow sank into the floor in
+  patches.
+- Cause: the renderer (inherited from FF3, where AFAIL was always KEEP) ignored TEST's AFAIL and the
+  2D replay never passed TEST or ZBUF on. RoR writes "no Z" through the alpha test instead of ZMSK:
+  ATST NEVER + FB_ONLY (0x51001 / 0x31001, i3r m_fail_only 0x10) and its cut-outs' 0x5140d (GREATER
+  0 + FB_ONLY), so every translucent mesh and effect sprite wrote depth on the host. The shadow
+  receiver is its own model on the floor, which the PS2's 16-bit Z let pass GEQUAL and the host's
+  float depth did not.
+- Fix: architecture.md "Depth state". Method: log every distinct (TEST, ALPHA, ZBUF) the mesh path
+  and the replay see (one line each, a std::set) over a smoke run -- 26 lines told the whole story.
+  Read the TEST bits (ATE 0, ATST 1-3, AREF 4-11, AFAIL 12-13, ZTE 16, ZTST 17-18) before trusting a
+  comment that a register value is "the default".
