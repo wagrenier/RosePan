@@ -2438,17 +2438,22 @@
 /* 00178894 00000058 */ EffMan::releasePacks(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- eff/effmuzzleflash.cpp
 // *****************************************************************************
 
 /* 001788ec 000001d4 */ EffMuzzleFlash1::init(){}  // ror
 /* 00178ac0 00000194 */ EffMuzzleFlash1::liveMain(){}  // ror
-/* 00178c54 00000030 */ FUN_00178c54(){}
+/* 00178c54 00000030 */ EffMuzzleFlash1::stepPart(){}  // ror
 /* 00178c84 00000154 */ EffMuzzleFlash1::renderMain(){}  // ror
-/* 00178dd8 00000090 */ FUN_00178dd8(){}
-/* 00178e68 00000084 */ FUN_00178e68(){}
-/* 00178eec 000001b8 */ FUN_00178eec(){}
+/* 00178dd8 00000090 */ EffMuzzleFlash1::drawSmoke(){}  // ror
+/* 00178e68 00000084 */ EffMuzzleFlash1::drawFlash(){}  // ror
+/* 00178eec 000001b8 */ EffMuzzleFlash1::drawPart(){}  // ror
 /* 001790a4 00000040 */ EffMuzzleFlash1::updateZDepth(){}  // ror
+
+// *****************************************************************************
+// FILE -- eff/effreload.cpp
+// *****************************************************************************
+
 /* 001790e4 00000038 */ EffReload1::EffReload1(){}  // ror
 /* 0017911c 00000090 */ EffReload1::~EffReload1(){}  // ror
 /* 001791ac 00000178 */ EffReload1::init(){}  // ror

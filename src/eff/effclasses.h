@@ -25,6 +25,7 @@
 #include "eff/effcameraanim1.h"
 #include "eff/efffog3.h"
 #include "eff/efflight.h"
+#include "eff/effmuzzleflash.h"
 #include "eff/effsteam.h"
 #include "eff/effwater.h"
 
@@ -273,19 +274,7 @@ public:
 
 /* kinds 0x21..0x23 (EffLight1, EffLight2, EffLight3): eff/efflight.h. */
 
-/* kind 0x26; EE 0x70, vtable 0x2e41a0. layout: host. */
-class EffMuzzleFlash1 : public Eff0
-{
-public:
-    EffMuzzleFlash1() {}                                                    // ROR 0x0028ca08 (linkonce; inlined in createEff)
-    virtual ~EffMuzzleFlash1() {}                                           // ROR 0x0028c958 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x001788ec
-    virtual int  liveMain();                                                // ROR 0x00178ac0
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x00178c84
-    virtual void updateZDepth();                                            // ROR 0x001790a4
-
-    u_char m_body[0x4c];                                                    // ROR 0x24..0x70: not decoded yet
-};
+/* kind 0x26 (EffMuzzleFlash1): eff/effmuzzleflash.h. */
 
 /* kind 0x27; EE 0x90, vtable 0x2e4130. layout: host. */
 class EffReload1 : public Eff0

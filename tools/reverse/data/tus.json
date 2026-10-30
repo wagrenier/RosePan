@@ -1,5 +1,6 @@
 {
  "queue": [
+  "eff/effreload.cpp",
   "unassigned@0010f944",
   "unassigned@0022e840",
   "unassigned@00106658",
@@ -485,6 +486,33 @@
    ],
    "status": "verify",
    "why": "Obj176a3c (scene +0x837e0, the Eff* factory) is the effect manager: data/eff/eff.bin loader, the 0x110-entry table, draw sort. Code sits between EffLight3 and EffMuzzleFlash1 in alphabetical class link order (EffMan); EffFindItem1 code 0x176694..0x176a3c and its linkonce come from the same object (linkonce order Light3, FindItem1, MuzzleFlash1), so it joins this file. No source string names it."
+  },
+  "eff/effmuzzleflash.cpp": {
+   "notes": "Not on the smoke path: the 15 s run stops at the boot disclaimer; the flash needs a gun shot (MagLifePC::createMuzzleEff at the gun_mazzle node). Mark done when a run shows a shot: flash texture 0 additive, smoke texture 1 alpha-blended, rising. PORT: when MagScene::addLight returns < 0 the ROM writes point light -1; the host skips the light (init and liveMain guard m_light). EffMuzzlePart is an EE-layout 0x10 struct (roll, size, y offset, short alpha / 32768, short velocity); EffMuzzleDraw is drawPart's host-layout argument block. Next: eff/effreload.cpp (EffReload1, 5 functions: ctor, dtor freeing m_nodes / m_node_map from g_utlMemory, init picks motion m_file[num_i3r + min(shots,6) - 1] and poses the shared pack model, liveMain over the motion length, renderPreMain via utlDrawI3r with m_mat at +0x40; the pattern is EffGeneric1's). The build regenerates resources/shaders/*/shadow_receiver.vert.* from the MioPan shader source (a depth-bias change); this session reverted them as not its own.",
+   "ranges": [
+    [
+     "001788ec",
+     "001790e4"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 13:52",
+     "status": "verify",
+     "summary": "EffMuzzleFlash1 (kind 0x26), all 8 functions: init (muzzle position, flash and smoke parts, random roll, a point light in sets 0/1), liveMain (parts step, the light follows the flash alpha and is removed when it is gone), stepPart, renderMain (two camera-facing VU1 sprites far to near), drawSmoke / drawFlash / drawPart, updateZDepth. Pinned 0x1788ec..0x1790e4 out of unassigned@001788ec; EffReload1 pinned as eff/effreload.cpp 0x1790e4..0x179428 and queued next."
+    }
+   ],
+   "status": "verify",
+   "why": "EffMuzzleFlash1 (kind 0x26), its 4 virtuals and 4 draw helpers; between eff/effman.cpp and EffReload1; no source string names the file -- named after the class, sorting between effman and effsteam in the alphabetical link order"
+  },
+  "eff/effreload.cpp": {
+   "ranges": [
+    [
+     "001790e4",
+     "00179428"
+    ]
+   ],
+   "why": "EffReload1 (kind 0x27, MagLifePC::reload), 5 functions; between EffMuzzleFlash1 and eff/effsteam.cpp; file named after the class (alphabetical link order)"
   },
   "eff/effsteam.cpp": {
    "notes": "Not on the smoke path (15 s run stops at the boot disclaimer; no creator of kinds 0x11 / 0x29 / 0x2b / 0x2d in written code, probably room scripts via native 281): mark done when a room shows steam or a cloud. Doubts in open-items.md Next up: EffSteam1 always creates kind 0x2a even as kind 0x2d; m_steam1prim.m_pos is a host pointer (convert in seqFunc281 if a script creates 0x2a / 0x2e); EffCloud1 starts in its wait. EffSteam2::liveMain computes the alpha in double as the ROM does (soft-float helpers noted for callcheck). The rest of unassigned@001788ec: EffMuzzleFlash1 + EffReload1 (0x1788ec..0x179428, eff/ file of their own) and EffWater1 / EffWater3 (0x17a918..0x17c0f0).",

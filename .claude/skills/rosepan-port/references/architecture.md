@@ -1571,6 +1571,17 @@ no z write) tiled every 3 widths. Kind 5 EffBloodStay3: no picture, two counters
 0x16d8e8 creates the one instance, its number in 0x298e10). Kind 6 EffBloodStay3Prim: a flat sprite on
 the floor, half of texture 0 (rect u, v, w, h; mirrored by m_flip), 165 frames.
 
+**The muzzle flash** (kind 0x26, `eff/effmuzzleflash.cpp` 0x1788ec..0x1790e4, 2026-10-30; layout in
+eff/effmuzzleflash.h, EffParam m_muzzle). MagLifePC::createMuzzleEff creates it at the gun's gun_mazzle
+node. Two camera-facing VU1 sprites (EffMuzzlePart, 0x10 bytes: roll, size, y offset, alpha short / 32768
+and its velocity) drawn far to near: the flash (texture 0, ALPHA_1 0x48, size 10 + 20 a frame, alpha
+0x7f00 with velocity -0x3200 then -0x180 a frame: 3 frames) and the smoke (texture 1, ALPHA_1 0x44, size
+40 + 2.5, rising 2.25 and rolling 1.5 degrees a frame, pushed 1 along the camera z axis, alpha 0x6000
+from velocity -0x700 + 0x40 a frame: about 30 frames). The flash also owns a point light
+(MagScene::addLight(2, 3): light sets 0 and 1) at the muzzle, grey alpha x 150 / 32768, removed
+(DogLightPool::removeLight) once the flash is gone. EffReload1 (kind 0x27, next in the binary) is
+`eff/effreload.cpp` 0x1790e4..0x179428.
+
 **The vapour effects** (kinds 0x11, 0x29..0x2e, `eff/effsteam.cpp` 0x179428..0x17a918, 2026-10-30;
 eff/effsteam.h has the layouts, EffParam m_steam1 / m_steam1prim / m_steam2 / m_steam2prim / m_cloud the
 params). EffSteam1 (0x29 / 0x2d) is a vent: a period of m_frames + m_pause frames from a random phase,
