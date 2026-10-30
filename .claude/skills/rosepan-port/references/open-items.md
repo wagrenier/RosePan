@@ -20,6 +20,17 @@ pipeline question below is settled, only `dec.py` / `ghidra.py` may run with
 program (IOP addresses annotated `IOP 0x...` so they never collide with `ROR 0x...`) or RXSNDDRV is
 tracked by hand over a few sessions; where the code lives (proposed `src/iop/rxsnddrv/`, one file per
 subsystem, on the host IOP layer and host libsd, replacing the silent `src/sdk/iop_rxsnd.cpp`).
+**Session 1 (2026-10-30, partial)** settled both (Decisions) and wrote `src/iop/rxsnddrv/`: entry,
+tick thread, dispatcher (every command routed), RPC server, DMA queues, system / mix / effect
+(IOP 0x0..0x2330); everything from XVAB on is `stubs.cpp`. It runs only with `ROSEPAN_RXSNDDRV=1`
+(`build.py --run 25 --env ROSEPAN_RXSNDDRV=1`: logs the first four calls of each command; the boot
+reaches the Punchline logo with the bank uploads going through the DMA queue). **Next session: XVAB
+(0x2330..0x2e00: open 0x50 / close 0x51, the header parser 0x2578, program lookups 0x29b0..0x2da0)**,
+then XSEQ (0x2e00..0x35c0), the voice layer (0x35c0..0x45b0, with sceSdNote2Pitch), SE, NOTE, BGM,
+ADPCM, PCM. Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
+of all 229 functions; `iopdec.py dump` refreshes it when names change in Ghidra). What should be
+heard: the title BGM on the title screen, then the bus-stop BGM and footstep / UI SEs; the user
+listens.
 
 **PARTIAL 2026-10-30 (host task `setup/smoke_pad.cpp`): the bus-stop walk is the default smoke pad;
 16 verify TUs marked done from it. Moved to the end of the queue 2026-10-30 (the user puts IOP
@@ -1292,6 +1303,29 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
   Also utlRandRange 0x10423c is a stub returning 0, so every eye blinks every 6 frames.
 
 ## Decisions
+
+- 2026-10-30 (setup/iop_rxsnddrv.cpp session 1, no user present; revisit if wanted): **RXSNDDRV is
+  tracked by hand, not through the TU pipeline.** The code lives in `src/iop/rxsnddrv/`, one file per
+  subsystem in link order (rxsnddrv.h lists the files and every function), each function annotated
+  `// IOP 0x<addr>` (never `ROR 0x`, so status / callcheck / stubgen never count it as EE code);
+  names are given in the source only (RxSndDrv<Subsystem><Verb>), not in Ghidra, so nothing
+  touches the address-keyed ledger; `tools/reverse/iopdec.py` caches the program's decompilation in
+  `work/iop/dec/`. Progress is the host task's notes plus `stubs.cpp` (what is left). Extending the
+  pipeline to a second program was not worth it for ~200 functions.
+- 2026-10-30 (same session): **the reconstruction runs only with `ROSEPAN_RXSNDDRV=1`**; the silent
+  stand-in `src/sdk/iop_rxsnd.cpp` stays the default until every command the boot sends is
+  answered for real, then it is deleted and the switch removed.
+- 2026-10-30 (same session, platform layer): the host IOP gained event flags
+  (Create / Set / iSet / Clear / WaitEventFlag on the semaphore table, released at shutdown),
+  WaitVblankEnd (a 60 Hz steady clock, DelayThread so the big lock drops), QueryMemSize, and libsd
+  `sceSdProcBatch` (headers `thevent.h`, `vblank.h`). `sceSdNote2Pitch` is still missing (the voice
+  layer session adds it).
+- 2026-10-30 (same session): **EE addresses sent to the IOP are widened back on the host.**
+  Command 0x40's EE address is a 32-bit word (RxSndCmdTransfer m_eeAddr) and the EE heap can lie
+  above 4 GB; rxSndSpuTransfer notes the full pointer (`RosePan_RxSndNoteEeAddress`) and the
+  driver's `RxSndDrvEePointer` maps a word back to the latest noted block holding it. Type 4
+  (SPU -> EE, rxSndSpuTransferType4) passes a u_int from its caller and is not noted yet: note it
+  where the pointer is known when that path is used.
 
 - 2026-10-30 (rx/rxsys.cpp session 3, no user present; revisit if wanted): the System Monitor
   exception console is log-only on the PC. Its cells and the expanded 640-pixel row image are built as

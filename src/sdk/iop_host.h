@@ -127,6 +127,27 @@ int RosePan_IopPollSema(int semid);
 int RosePan_IopReferSemaStatus(int semid, SemaInfo *info);
 
 /* --------------------------------------------------------------------------
+ *  Event flags (thevent) and V-blank (vblank)
+ * ------------------------------------------------------------------------ */
+
+typedef struct
+{
+    u_int attr;
+    u_int option;
+    u_int initPattern;
+} IopEventFlagParam;
+
+#define WEF_AND   0x00
+#define WEF_OR    0x01
+#define WEF_CLEAR 0x10
+
+int RosePan_IopCreateEventFlag(IopEventFlagParam *param);
+int RosePan_IopSetEventFlag(int evfid, u_int bitpattern);
+int RosePan_IopClearEventFlag(int evfid, u_int bitpattern);
+int RosePan_IopWaitEventFlag(int evfid, u_int bitpattern, int waitmode, u_int *resultpat);
+int RosePan_IopWaitVblankEnd(void);
+
+/* --------------------------------------------------------------------------
  *  Hard timers (timrman)
  * ------------------------------------------------------------------------ */
 
@@ -164,6 +185,7 @@ void *RosePan_IopAllocSysMemory(int mode, int size, void *ptr);
  * RosePan_IopFreeSysMemory() like any other block. */
 void *RosePan_IopAllocIopHeap(int size);
 int   RosePan_IopFreeSysMemory(void *ptr);
+int   RosePan_IopQueryMemSize(void);
 int   RosePan_IopQueryMaxFreeMemSize(void);
 int   RosePan_IopQueryTotalFreeMemSize(void);
 

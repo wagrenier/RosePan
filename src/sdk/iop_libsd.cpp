@@ -651,3 +651,45 @@ int sceSdClearEffectWorkArea(int core, int channel, int effect_mode)
 
     return 0;
 }
+
+/* --------------------------------------------------------------------------
+ *  Batches
+ *
+ *  RXSNDDRV's inits hand their register defaults over as one batch (the
+ *  master mix and volumes, the effect volumes, end addresses and enables).
+ *  Each command is the call of the same name; the get forms store into
+ *  `returns` when it is given.  Answers how many were processed.
+ * ------------------------------------------------------------------------ */
+
+int sceSdProcBatch(sceSdBatch *batch, u_int returns[], u_int num)
+{
+    u_int i;
+
+    if (batch == NULL)
+        return 0;
+
+    for (i = 0; i < num; i++)
+    {
+        const sceSdBatch *b = &batch[i];
+        u_int ret = 0;
+
+        switch (b->func)
+        {
+        case SD_BATCH_SETPARAM:  sceSdSetParam(b->entry, (u_short)b->value);    break;
+        case SD_BATCH_SETSWITCH: sceSdSetSwitch(b->entry, b->value);            break;
+        case SD_BATCH_SETADDR:   sceSdSetAddr(b->entry, b->value);              break;
+        case SD_BATCH_SETCORE:   sceSdSetCoreAttr(b->entry, (u_short)b->value); break;
+        case SD_BATCH_GETPARAM:  ret = sceSdGetParam(b->entry);                 break;
+        case SD_BATCH_GETSWITCH: ret = sceSdGetSwitch(b->entry);                break;
+        case SD_BATCH_GETADDR:   ret = sceSdGetAddr(b->entry);                  break;
+        default:
+            /* WRITEIOP / WRITEEE / EERETURN / GETCORE: nothing on the
+             * host sends them yet. */
+            break;
+        }
+        if (returns != NULL)
+            returns[i] = ret;
+    }
+
+    return (int)i;
+}

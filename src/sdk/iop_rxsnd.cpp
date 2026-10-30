@@ -27,9 +27,17 @@
  *  on its audio que, which only drains through rxSndAdpcmWrite).  No sound
  *  is produced.  Playing sound means answering the play / status commands for
  *  real and mixing the voices on the host (open-items.md).
+ *
+ *  The reconstruction of the real driver (src/iop/rxsnddrv/) replaces this
+ *  one subsystem at a time; until it answers every command the boot sends,
+ *  it runs only with ROSEPAN_RXSNDDRV=1 in the environment.
  * ======================================================================== */
 
 #include "sifcmd.h"
+#include "iop/rxsnddrv/rxsnddrv.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <string.h>
 
@@ -172,6 +180,14 @@ static void *RxSndDriverCall(u_int fno, void *data, int size)
 
 void RosePan_IopRxSndStart(void)
 {
+    const char *env = getenv("ROSEPAN_RXSNDDRV");
+    if (env != NULL && env[0] == '1')
+    {
+        printf("iop: RXSNDDRV reconstruction (ROSEPAN_RXSNDDRV=1)\n");
+        RxSndDrvStart();
+        return;
+    }
+
     sceSifSetRpcQueue(&s_queue, 0);
     sceSifRegisterRpc(&s_serve, RXSND_RPC_NO, RxSndDriverCall, s_recv, NULL, NULL, &s_queue);
     sceSifRpcLoop(&s_queue);

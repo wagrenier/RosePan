@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 18:45 at commit `7f1a3df` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 19:10 at commit `847b7c9` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -202,9 +202,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 172 TUs: todo 73, partial 1, verify 138, done 34
-- next: **setup/smoke_pad.cpp** (pinned in the queue)
-- pinned queue: setup/smoke_pad.cpp, setup/iop_rxsnddrv.cpp, unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
+- 172 TUs: todo 72, partial 2, verify 138, done 34
+- next: **setup/iop_rxsnddrv.cpp** (pinned in the queue)
+- pinned queue: setup/iop_rxsnddrv.cpp, unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8, setup/smoke_pad.cpp
+- partial: `setup/iop_rxsnddrv.cpp` 0/0 -- Decided (open-items.md Decisions): RXSNDDRV is tracked by hand in src/iop/rxsnddrv/, one file per subsystem in link order (rxsnddrv.h lists files and every func
 - partial: `setup/smoke_pad.cpp` 0/0 -- Done: pad step (1) and the marks of step (3), see open-items.md Next up for the list and the shots (5400 picture book, 7200 lit bus stop, 8400 narration, 9960 w
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -347,6 +348,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 19:10 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 1: src/iop/rxsnddrv/ with the module entry, V-blank tick thread, full command dispatcher, RPC server, SPU DMA queues, system / master mix / rev
 - 2026-10-30 18:45 `setup/smoke_pad.cpp` partial: Bus-stop walk is the default smoke pad (settings.smoke_pad: CROSS every 300 reads through the narration, then LSDOWN, LSLEFT, LSUP, LSRIGHT round the bus stop, 
 - 2026-10-30 18:42 `dog/dogcamera.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): camera views render from the scene cameras with correct framing, shots 9960, 10560,
 - 2026-10-30 18:42 `dog/doglightpool.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): the street lamp lights the bench and road (lit stage), shots 7200, 11160
@@ -354,7 +356,6 @@ Recent sessions:
 - 2026-10-30 18:42 `dog/dogmotionblend.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): walk and run motions blend on Jennifer without pops, shots 9960..11160
 - 2026-10-30 18:42 `i3d/i3cquery.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): casts hit the hedge, Jennifer stopped against it, shots 10560, 10740
 - 2026-10-30 18:42 `i3d/i3croot.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): collision tables set up and casts give correct results (floor and hedge), shots 105
-- 2026-10-30 18:42 `i3d/i3mpose.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): Jennifer posed through walk and run cycles, shots 9960, 11040
 
 ## Frontier (called by reconstructed code, not written yet)
 

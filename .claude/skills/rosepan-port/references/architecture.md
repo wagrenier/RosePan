@@ -2490,7 +2490,35 @@ never asserts): sessions name them (`tus.py define --why`).
   CpuSuspendIntr), 0x30 system (0x18b0), 0x31 (0x1bdc), 0x32 SPU2 effect (0x21e0), 0x40 XVAB transfer
   (0x1124(1, id, ...) then 0x1250), 0x41 transfer busy (0x127c), 0x50 XVAB open (0x2330), 0x51 close
   (0x28b8), 0x60 XSEQ open (0x2e00), 0x63 (0x3310), 0x72 BGM status (0x5b68(reply, reply + 0x80),
-  count at +0x100) ...; the rest of the switch is read in the IOP session.
+  count at +0x100) ...; the whole switch is `RxSndDrvCommand` in `src/iop/rxsnddrv/rxsnddrv.cpp`.
+- **Link order = subsystems** (2026-10-30; each file is tick, init, accessors, command handlers in
+  that order): 0x0 entry / tick thread / dispatcher, 0xb08 RPC server, 0xc60 DMA queues, 0x1680
+  system parameters, 0x19e0 master mix / volume, 0x1ca0 reverb, 0x2330 XVAB, 0x2e00 XSEQ, 0x35c0 voice
+  layer (0x3f6c sets the output mode on 0x30 voices), 0x45b0 BGM + MIDI interpreter, 0x6ab0 SE,
+  0x8f10 NOTE slots, 0x9eb0 ADPCM streams, 0xb4a0 PCM streams, 0xce84 import stubs.
+- **Double buffer**: the tick thread (priority 0x23) waits for V-blank, flips bank 0xe4f4, then runs
+  the ticks sys, mix, effect, BGM 0x5e60, SE 0x8878, NOTE 0x93c0, ADPCM 0xb1dc, voice 0x35c0, PCM
+  0xb5ac. Commands write pending records {mask, values} of bank 0x268() (the current one); a tick
+  applies bank 0x254() (the other) and clears its mask. 0x10 re-creates the thread, 0x11 asks it to
+  stop and answers whether it has (the EE loops while the answer is non-zero), 0x12 answers the
+  version 0x0101.
+- **RPC server**: thread priority 0xc; receive buffer 0xf504 (0x1000), answer word 0x10504 followed
+  by the reply data 0x10508. Command 0x200 runs a queue {cmd, replySize, dataSize, data} closed by
+  cmd 0, each reply after the last; the queued commands' return values are dropped.
+- **DMA queues** (0x11510): two FIFOs of 256 entries {id, type, a, b, size, done, arg, total}, ids
+  from a counter; queue 0 first. Types: 1 IOP -> SPU (a spu, b iop), 2 SPU -> IOP, 3 EE -> SPU and 4
+  SPU -> EE through a 0x4000 staging buffer (0x15540, sceSifGetOtherData / sceSifSetDma), 5 zeros ->
+  SPU 0x1000 at a time from 0xe500. A thread (priority 0xd) waits on an event flag and starts the
+  head with sceSdVoiceTrans(core 0); libsd's transfer handler 0xed4 advances / pops it, calls
+  done(arg, total) and sets the flag. 0x40 {type, a, b, size} queues on queue 1 and answers the id;
+  0x41 answers whether the id is still queued.
+- **System 0x30 {param, value}**: 0 debug flags (default 7; bit 1 errors, bit 4 info messages), 1
+  frame rate (60), 2 output mode (1; passed to the voices), 3..5 bytes composing SD_C_SPDIF_MODE.
+  **Mix 0x31 {core, param, value}**: 0 MMIX (default 0xfcc), 1 MVOL {L, R} (0x3fff). **Reverb 0x32
+  {core, param, value}**: 0 mode 0..9 (table 0xdda0: SDK mode and work size 0x80..0x18040), 1 EEA
+  (defaults 0x1fffff / 0x1dffff), 2 depth {L, R} (byte scale, sent << 8, ramped 8 per tick), 3
+  feedback, 4 delay. A mode or EEA change turns the effect off and zeroes the work area by a type 5
+  DMA before the new attributes go out.
 
 ## Disc and data files
 
