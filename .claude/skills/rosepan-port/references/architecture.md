@@ -963,7 +963,9 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
 - **The sprite manager** (`spr/sprman.cpp`, pinned 0x18bb8c..0x18f5b0, 2026-10-22, `verify`; 53
   functions, all written): `SprMan` (EE 0x8ec; +0x440 a `GamFont`, +0x4c4 grey 0x80, +0x4c8 saved
   volume flag, +0x4d8 the open packet, +0x4dc the draw sets, +0x4e4 the font file, +0x8e8 font from
-  the pack). Each sprite record (EE 0x154, spr/sprman.h has every field) runs on the owner's table
+  the pack; +0x4b8 / +0x4bc / +0x4c0 the work-sprite range and counter m_objWorkIndexNo, handed out
+  round robin by an inline with an assert in spr/sprman.h line 0x3da (SprMan::getObjWork); +0x4e8
+  eight 0x80-byte text lines the owners fill with getTextLine, 2026-10-30 from MnuStock). Each sprite record (EE 0x154, spr/sprman.h has every field) runs on the owner's table
   image: **patterns** (0x14: texture id or -98 plain colour / -99 frame buffer, u, v, w, h in 1/16
   texels), **anims** (0xc: id, frame count (< 0: counted and written back), frames pointer; id -1
   ends), **frames** (0x1c: time | flags << 16 (0x10000 size from the frame, 0x20000 / 0x40000 flip
@@ -1597,7 +1599,19 @@ SeqFixedPool at +0x1a7c0: its used list's nodes hold GamItemSlots at node +0x10)
 MsgManSet +0x58, SprMan +0x7d0 (138 sprites, mnustock.rpk: base / texstock / tex02 / texmoji /
 item01..04.tm2, font fnt16US.bin from the pack), window system text 0x1b, button guides 4 and 5,
 sequence bit-word 1 bit 0x40000000 while open, g_sequence.m_global[0x15] = 6 on close. exec step 4 runs
-page m_page (+0x40): execPage0 0x19cf48 / 1 0x19e474 / 2 0x19fbc8 (not written yet).
+page m_page (+0x40), each stepping m_main_step (+0x44; 3 = taking input):
+execPage0 0x19cf48 the category tabs 0x2e..0x34 (m_category_num +0x20 = 7; up / down rebuild the list
+from the top, cross -> page 1, circle closes); execPage1 0x19e474 the list (up / down, L1 / R1 a
+window via m_repeat bits 10 / 11, scrolling past the window's ends runs setRowMove 0x19c630, which
+re-targets the row sprites' move table and rotates m_row_spr / m_row_spr2 so index k stays screen
+row k; cross with m_54 == 3 -> page 2 (the slots) with m_54 = 1, cross with m_54 == 1 swaps the
+entry into m_slot, the picked icon 0x22 copied to a SprMan work sprite (0x69..0x89, +0x1554) flying
+right (speed 2, accel 1 from 0x2a31c8) and fading out; circle -> page 0); execPage2 0x19fbc8 the
+slot grid (not written yet). The row highlight fades between the pattern image's colours 0x2a2e28
+(alpha 0x28) and 0x2a2e38 (0x80) with mode 0x100. setDescText 0x19e010: the item's text field
+0x25 -> SprMan text lines 0..2 (no sprite gets them here: the reader is still unknown), linked
+items fields 0x10..0x12 (names when m_flag_c +0x156c) -> lines 3..5 on sprites 0x3e..0x40, name
+field 0xc on 0x42; sprites 0x43..0x45 and those restarted.
 The list +0x1110 (0x100 pointers, unbounded in the ROM): [0] a fixed GamItemSlot (data 0x2a42f0, id
 0xa00) whose record (0x2a4300, a GamSysRec5 image) names "----------------" / "Item Change" and
 describes "move from the item slots to the stock"; then stock items of m_category (0 all, else

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 07:00 at commit `3c1352e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 07:13 at commit `3e34a76` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-30 07:00 at commit `3c1352e` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6751** (94%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 5149
-- context-name ledger: 5450 entries; overrides of wrong library matches: 5
+- game functions: **7187**, named **6756** (94%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 5154
+- context-name ledger: 5455 entries; overrides of wrong library matches: 5
 - placed in a source file: 5784/7187 in 147 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5459**; stubs: **254**
+- reconstructed RoR functions: **5463**; stubs: **252**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -138,7 +138,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mnu/mnuopt.cpp` | 15 | 0 |
 | `src/mnu/mnupbook.cpp` | 43 | 0 |
 | `src/mnu/mnuselect.cpp` | 14 | 0 |
-| `src/mnu/mnustock.cpp` | 30 | 3 |
+| `src/mnu/mnustock.cpp` | 34 | 1 |
 | `src/mnu/mnusvld.cpp` | 41 | 0 |
 | `src/mnu/mnutitle.cpp` | 20 | 0 |
 | `src/msg/msgman.cpp` | 124 | 0 |
@@ -180,7 +180,7 @@ Least-named game-code regions (64 KB blocks):
 - 173 TUs: todo 92, partial 2, verify 120, done 17
 - next: **mnu/mnustock.cpp** (continuing a partial TU)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
-- partial: `mnu/mnustock.cpp` 30/35 -- Left: execPage0 0x19cf48 (list page, start here), execPage1 0x19e474, execPage2 0x19fbc8 -- stubs returning 0 at the end of src/mnu/mnustock.cpp -- and their he
+- partial: `mnu/mnustock.cpp` 34/35 -- Left: execPage2 0x19fbc8 (0xaa0 bytes, the slot grid, stub at the end of src/mnu/mnustock.cpp returning 0); it must set m_slot for execPage1's swap (execPage1 c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -304,6 +304,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 07:13 `mnu/mnustock.cpp` partial: MnuStock pages 0 and 1: execPage0 (category tabs), execPage1 (the stock list: cursor, L1/R1 windows, scrolling rows, cross to the slots or swap with the flying 
 - 2026-10-30 07:00 `mnu/mnustock.cpp` partial: MnuStock (the item box, menu 0x10002): ctor/dtor, init/term/isInit/processPad/draw, open/close, exec (window text 0x1b, mnustock.rpk, fades, pages), initWork, r
 - 2026-10-30 06:35 `mnu/mnunow.cpp` verify: MnuNow, the Now Loading screen (menu 0x10009): all 15 functions written - ctor/dtor, init/term/isInit, processPad/draw, open/close/exec/execMain, setDisp/update
 - 2026-10-29 22:37 `mnu/mnumovie.cpp` verify: MnuMovie, the theatre's movie player: ctor/dtor, init/term/isInit/processPad/draw, open/close/exec/execMain/initWork/setDisp/update/prepare (15 functions, all o
@@ -311,22 +312,21 @@ Recent sessions:
 - 2026-10-29 21:56 `mnu/mnuitem.cpp` verify: MnuItem session 6: the last function, 0x1b69d0, written as MnuItem::setDescLayout(mode): the layout switch of an unused description page (0 fades the main page 
 - 2026-10-29 21:39 `mnu/mnuitem.cpp` partial: MnuItem session 5: execPage11 (gift grid under sequence bit 0x20000000: prompt window m_win2 'Choose a gift to offer.', page 9 cursor, frame sprites hidden, cro
 - 2026-10-29 21:31 `mnu/mnuitem.cpp` partial: MnuItem session 4: execPage4 (the action list use / equip / find / examine / put away, rows m_act_spr +0x26e4, m_work[3]), execPage6 (examine: the board picture
-- 2026-10-29 20:47 `mnu/mnuitem.cpp` partial: MnuItem session 3: execPage1 (equip from the grid), execPage2 (find target with the link panel), execPage3 (unequip / untarget), execPage5 (use: ammo reload int
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@00155d54` | todo | 0/24/202 | 50.2 | 4 | 0 |
 | `mag/maglifepcbtl.cpp` | todo | 0/3/6 | 3.2 | 4 | 0 |
+| `unassigned@00155d54` | todo | 0/24/202 | 50.2 | 4 | 0 |
 | `unassigned@0016afcc` | todo | 0/42/53 | 17.8 | 3 | 0 |
 | `mag/maglifepceff.cpp` | todo | 0/3/3 | 0.1 | 3 | 0 |
-| `unassigned@001bdae4` | todo | 0/3/5 | 0.4 | 3 | 0 |
-| `mnu/mnustock.cpp` | partial | 30/3/35 | 24.3 | 3 | 0 |
-| `unassigned@001788ec` | todo | 0/36/45 | 14.0 | 3 | 0 |
 | `mnu/mnuboard2d.cpp` | todo | 0/6/16 | 2.1 | 3 | 0 |
-| `unassigned@0012bedc` | todo | 0/2/2 | 0.5 | 2 | 0 |
-| `unassigned@0012c9c0` | todo | 0/2/3 | 0.4 | 2 | 0 |
-| `unassigned@001bde58` | todo | 0/2/8 | 1.1 | 2 | 0 |
+| `unassigned@001788ec` | todo | 0/36/45 | 14.0 | 3 | 0 |
+| `unassigned@001bdae4` | todo | 0/3/5 | 0.4 | 3 | 0 |
 | `utl/utlbtl.cpp` | todo | 0/1/7 | 2.2 | 2 | 0 |
+| `unassigned@0012c9c0` | todo | 0/2/3 | 0.4 | 2 | 0 |
+| `unassigned@0012bedc` | todo | 0/2/2 | 0.5 | 2 | 0 |
+| `mag/maglifemenusp.cpp` | todo | 0/12/18 | 5.7 | 2 | 0 |
+| `unassigned@001bde58` | todo | 0/2/8 | 1.1 | 2 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -352,9 +352,7 @@ Recent sessions:
 | `001f9e38` | FUN_001f9e38 | 1 | - | missing | task/tsk_scene.cpp |
 | `0014313c` | MagScene::updateDebug | 1 | ror | stub | mag/magscenedebug.cpp |
 | `0012a6a0` | MagLifeBwnCtrl::processPad | 1 | ror | missing | mag/maglifebwnctrl.cpp |
-| `0019cf48` | FUN_0019cf48 | 1 | - | stub | mnu/mnustock.cpp |
-| `0019e474` | FUN_0019e474 | 1 | - | stub | mnu/mnustock.cpp |
-| `0019fbc8` | FUN_0019fbc8 | 1 | - | stub | mnu/mnustock.cpp |
+| `0019fbc8` | MnuStock::execPage2 | 1 | ror | stub | mnu/mnustock.cpp |
 | `0015c304` | DwfMain::initOut | 1 | ror | stub | - |
 | `0015a17c` | PigMain::initOut | 1 | ror | stub | - |
 | `001583d4` | GotMain::initOut | 1 | ror | stub | - |
@@ -372,4 +370,6 @@ Recent sessions:
 | `001bdfe0` | MnuSelectLanguage::draw | 1 | ror | stub | - |
 | `0012e23c` | MagLifeMenuSpecial::MagLifeMenuSpecial | 1 | ror | stub | mag/maglifemenusp.cpp |
 | `0012eef0` | MagLifeMenuSpecial2::MagLifeMenuSpecial2 | 1 | ror | stub | mag/maglifemenusp.cpp |
+| `0011764c` | DogTexInfo::dump | 1 | ror | stub | - |
+| `001ad6b4` | FUN_001ad6b4 | 1 | - | missing | mnu/mnuboard2d.cpp |
 

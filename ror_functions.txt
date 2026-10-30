@@ -3192,18 +3192,18 @@
 /* 0019c048 0000009c */ MnuStock::findSlot(){}  // ror
 /* 0019c0e4 00000088 */ MnuStock::setupLists(){}  // ror
 /* 0019c16c 000004c4 */ MnuStock::setDisp(){}  // ror
-/* 0019c630 0000087c */ FUN_0019c630(){}
+/* 0019c630 0000087c */ MnuStock::setRowMove(){}  // ror
 /* 0019ceac 0000009c */ MnuStock::update(){}  // ror
-/* 0019cf48 00000c80 */ FUN_0019cf48(){}
+/* 0019cf48 00000c80 */ MnuStock::execPage0(){}  // ror
 /* 0019dbc8 000000f4 */ MnuStock::setRowName(){}  // ror
 /* 0019dcbc 00000220 */ MnuStock::setRowCount(){}  // ror
 /* 0019dedc 0000009c */ MnuStock::getItemName(){}  // ror
 /* 0019df78 00000094 */ MnuStock::copyMesText(){}  // ror
-/* 0019e010 0000042c */ FUN_0019e010(){}
+/* 0019e010 0000042c */ MnuStock::setDescText(){}  // ror
 /* 0019e43c 00000038 */ MnuStock::getScrollBarPos(){}  // ror
-/* 0019e474 00001710 */ FUN_0019e474(){}
+/* 0019e474 00001710 */ MnuStock::execPage1(){}  // ror
 /* 0019fb88 00000040 */ MnuStock::testItemFlags(){}  // ror
-/* 0019fbc8 00000aa4 */ FUN_0019fbc8(){}
+/* 0019fbc8 00000aa4 */ MnuStock::execPage2(){}  // ror
 
 // *****************************************************************************
 // FILE -- mnu/mnuselect.cpp

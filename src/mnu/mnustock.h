@@ -79,15 +79,26 @@ struct MnuStock
     int  findSlot(int id);                                               // ROR 0x0019c048
     void setupLists(int mode);                                           // ROR 0x0019c0e4
     void setDisp();                                                      // ROR 0x0019c16c
+    /* Scrolls the 8 lower list rows (sprites and the m_row_spr / m_row_spr2
+     * order) by one: dir 0 up the screen (the cursor went down), 1 down. */
+    void setRowMove(int dir);                                            // ROR 0x0019c630
     int  update();                                                       // ROR 0x0019ceac
     /* The pages: 0 while running, 1 once the box closes. */
-    int  execPage0(BedPad *pad);                                         // ROR 0x0019cf48 (not written)
+    /* Page 0: the category tabs 0x2e.. (up / down), cross to the list
+     * (page 1), circle closes. */
+    int  execPage0(BedPad *pad);                                         // ROR 0x0019cf48
     void setRowName(int no, int index);                                  // ROR 0x0019dbc8
     void setRowCount(int no, int row, int index);                        // ROR 0x0019dcbc
     const char *getItemName(int id);                                     // ROR 0x0019dedc
     void copyMesText(char *dst, const char *src);                        // ROR 0x0019df78
+    /* The description sprites 0x3e..0x45 for item slot (its text field
+     * 0x25 in three lines, the three linked items' names, its name); NULL
+     * sets only their clear rects. */
+    void setDescText(const GamItemSlot *slot);                           // ROR 0x0019e010
     int  getScrollBarPos(int index, int count);                          // ROR 0x0019e43c
-    int  execPage1(BedPad *pad);                                         // ROR 0x0019e474 (not written)
+    /* Page 1: the stock list (up / down, L1 / R1 a window), cross picks the
+     * entry for a slot (page 2) or swaps it in, circle back to page 0. */
+    int  execPage1(BedPad *pad);                                         // ROR 0x0019e474
     int  testItemFlags(int id, u_int bits);                              // ROR 0x0019fb88
     int  execPage2(BedPad *pad);                                         // ROR 0x0019fbc8 (not written)
 
@@ -103,7 +114,7 @@ struct MnuStock
     int           m_slot;           // ROR 0x000c: the slot setSlotSprites redraws after a swap
     int           m_index;          // ROR 0x0010: the cursor's list entry
     int           _14[3];           // ROR 0x0014: cleared with the work words
-    int           m_20;             // ROR 0x0020: initWork sets 7
+    int           m_category_num;   // ROR 0x0020: the categories (tabs 0x2e..), initWork sets 7
     int           m_rows;           // ROR 0x0024: the window's rows, 8
     int           m_28;             // ROR 0x0028: initWork sets 2
     int           m_count;          // ROR 0x002c: the list's entries
@@ -128,7 +139,8 @@ struct MnuStock
     int           _1548;
     int           m_equip_slot;     // ROR 0x154c: the equipped item's slot, -1 none
     int           m_find_slot;      // ROR 0x1550: the find target's slot, -1 none
-    int           _1554[3];
+    int           m_fly_spr;        // ROR 0x1554: the work sprite flying the swapped icon
+    int           _1558[2];
     int           m_flag_bit2;      // ROR 0x1560: sequence bit-word 1 bit 2
     int           m_flag_a;         // ROR 0x1564: bit 1
     int           m_flag_b;         // ROR 0x1568: bit 0
@@ -152,6 +164,7 @@ static_assert(offsetof(MnuStock, m_spr) >= 0x7d0, "m_spr");
 static_assert(offsetof(MnuStock, m_scene) >= 0x110c, "m_scene");
 static_assert(offsetof(MnuStock, m_list) >= 0x1110, "m_list");
 static_assert(offsetof(MnuStock, m_init) >= 0x1540, "m_init");
+static_assert(offsetof(MnuStock, m_fly_spr) >= 0x1554, "m_fly_spr");
 static_assert(offsetof(MnuStock, m_win) >= 0x1580, "m_win");
 
 #endif /* _MNU_MNUSTOCK_H */

@@ -28,6 +28,7 @@
 
 #include <stddef.h>
 
+#include "common/ror_assert.h"
 #include "lib/unassigned.h"
 #include "sdk/eetypes.h"
 #include "spr/sprtexture.h"
@@ -321,6 +322,21 @@ struct SprMan
     void saveVolume();                                                   // ROR 0x0018f09c
     void restoreVolume();                                                // ROR 0x0018f0b4
 
+    /* The next work sprite, m_objWorkStart..m_objWorkEnd round robin.
+     * Inline in the ROM (MnuStock::execPage1, the assert's spr/sprman.h);
+     * the assert runs only when m_objWorkStart < 0, as the ROM tests it. */
+    int getObjWork()
+    {
+        int no = m_objWorkIndexNo;
+        if (m_objWorkStart < 0)
+            ROR_ASSERT(m_objWorkIndexNo);
+        if (m_objWorkIndexNo < m_objWorkEnd)
+            m_objWorkIndexNo++;
+        else
+            m_objWorkIndexNo = m_objWorkStart;
+        return no;
+    }
+
     /* PC: an EE address in the table image -> its host address (NULL for
      * 0). */
     void *eePtr(u_int ee) const
@@ -335,7 +351,10 @@ struct SprMan
     SprSprite   *m_sprite;      // ROR 0x4ac: m_num records
     u_int       *m_pattern;     // ROR 0x4b0: the owner's table image, SprPatterns first
     int          m_num;         // ROR 0x4b4
-    int          _4b8[3];
+    /* The work sprites getObjWork hands out (MnuStock: 0x69..0x89). */
+    int          m_objWorkStart; // ROR 0x4b8
+    int          m_objWorkEnd;  // ROR 0x4bc: the last one
+    int          m_objWorkIndexNo; // ROR 0x4c0: the next one (name from spr/sprman.h's assert)
     int          m_back_color;  // ROR 0x4c4: drawFrameCopy's grey, 0x80
     int          m_volume_on;   // ROR 0x4c8: saveVolume
     int          m_4cc;         // ROR 0x4cc: the constructor clears it
@@ -343,7 +362,9 @@ struct SprMan
     u_long      *m_pkt;         // ROR 0x4d8: the open draw set's packet position
     I3dDrawSet  *m_draw_set[2]; // ROR 0x4dc: by layer
     void        *m_font_data[1]; // ROR 0x4e4: setFont's font file
-    u_char       _4e8[0x8e8 - 0x4e8];
+    /* Text lines for the owner's sprites (getTextLine's line buffers;
+     * MnuStock's description and effect texts). */
+    char         m_text_line[8][0x80]; // ROR 0x4e8
     int          m_font_in_pack; // ROR 0x8e8: 1 = setFont takes the font from the texture pack
     u_int        m_pattern_ee;  // PC: m_pattern's EE address (see the file comment)
 };

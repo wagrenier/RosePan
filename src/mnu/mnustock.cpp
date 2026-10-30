@@ -36,6 +36,7 @@
 #define MNUSTOCK_MOVE_ROW   0x002a30c8u /* the list rows' move table */
 
 #define MNUSTOCK_SPR_PICK   0x22    /* the picked list entry's icon */
+#define MNUSTOCK_SPR_TAB    0x2e    /* + category: the category tabs */
 #define MNUSTOCK_SPR_UP     0x35    /* the arrows */
 #define MNUSTOCK_SPR_DOWN   0x36
 #define MNUSTOCK_SPR_BAR    0x37    /* the scroll bar */
@@ -43,6 +44,26 @@
 #define MNUSTOCK_SPR_NUM    0x59    /* + slot: their counts */
 #define MNUSTOCK_SPR_EQUIP  0x65    /* the equipped item's slot marker */
 #define MNUSTOCK_SPR_FIND   0x66    /* the find target's */
+#define MNUSTOCK_SPR_LINK   0x3e    /* .. 0x40: the three linked items' names */
+#define MNUSTOCK_SPR_NAME   0x42    /* the item's name */
+#define MNUSTOCK_SPR_DESC   0x43    /* .. 0x45: the description lines */
+
+/* The row highlight's colours in the pattern image: grey 0x80 with alpha
+ * 0, 0x28 and 0x80 (data 0x2a2e18 / 0x2a2e28 / 0x2a2e38). */
+#define MNUSTOCK_COLOR_CLEAR 0x002a2e18u
+#define MNUSTOCK_COLOR_DIM   0x002a2e28u
+#define MNUSTOCK_COLOR_FULL  0x002a2e38u
+
+/* m_dir_repeat (cursor moves with auto-repeat), m_trig / m_repeat bits. */
+#define MNUSTOCK_PAD_UP      0x10
+#define MNUSTOCK_PAD_RIGHT   0x20
+#define MNUSTOCK_PAD_DOWN    0x40
+#define MNUSTOCK_PAD_LEFT    0x80
+#define MNUSTOCK_REP_L1(pad)       (((pad)->m_repeat >> 10) & 1)    /* a window up */
+#define MNUSTOCK_REP_R1(pad)       (((pad)->m_repeat >> 11) & 1)    /* a window down */
+#define MNUSTOCK_TRIG_TRIANGLE(pad) (((pad)->m_trig >> 12) & 1)
+#define MNUSTOCK_TRIG_CIRCLE(pad)  (((pad)->m_trig >> 13) & 1)      /* back */
+#define MNUSTOCK_TRIG_CROSS(pad)   (((pad)->m_trig >> 14) & 1)      /* confirm */
 
 /* ---- data ---- */
 
@@ -1021,8 +1042,8 @@ static SprTexFile mnuStockTexList[9] = {
 static const char mnuStockRpk[] = "data/mnurpk/mnustock.rpk";  /* rodata 0x2f83e8 */
 static const char mnuStockFont[] = "fnt16US.bin";               /* rodata 0x2f8408 */
 
-/* The list rows' positions (data 0x2a3150; only [0], the picked icon
- * 0x22's, is read here). */
+/* The list rows' positions (data 0x2a3150): the picked icon 0x22 sits on
+ * the cursor's row. */
 static const int mnuStockRowPos[10][3] = {
     { 1376, 1360, 17920 },  // 0x002a3150
     { 1376, 1712, 17920 },  // 0x002a315c
@@ -1057,6 +1078,13 @@ static const int mnuStockSlotPos[MNUSTOCK_SLOT_MAX][3] = {
  * count (data 0x2a42a8) and a list row (0x2a42c0). */
 static const int mnuStockNumRect[4] = { 0, 0, 0x20, 0x10 };
 static const int mnuStockRowRect[4] = { 0, 0, 0x100, 0x10 };
+/* The description sprites' (data 0x2a42d0). */
+static const int mnuStockDescRect[4] = { 0, 0, 0x100, 0x10 };
+
+/* The swapped icon's flight (data 0x2a31c8 / 0x2a31d8: x speed 2, x
+ * accel 1 per frame; 0x2a31e8 / 0x2a31f8 hold the mirrored -2, -1). */
+static const float mnuStockFlySpeed[4] = { 2.0f, 0.0f, 0.0f, 0.0f };
+static const float mnuStockFlyAccel[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
 
 /* getItemName's text for an unknown item (rodata 0x2f84a8 through data
  * 0x2a42e0), and for an empty name (0x2f84b8). */
@@ -1078,6 +1106,8 @@ static char mnuStockRowNum[MNUSTOCK_ROW_MAX][4];
 /* The fade colours: grey 0x80 opaque (data 0x2999a0); the from colour is
  * g_sprColorClear (0x2999b0). */
 static const int mnuStockColorFull[4] = { 0x80, 0x80, 0x80, 0x80 };
+/* Dim grey, alpha 0x28 (data 0x2999c0): the items flag 0x1000000 greys. */
+static const int mnuStockColorDim[4] = { 0x80, 0x80, 0x80, 0x28 };
 
 /* ---- MnuStock ---- */
 
@@ -1342,7 +1372,7 @@ int MnuStock::initWork()
 {
     clearWork();
     m_flag_a = 1;
-    m_20 = 7;
+    m_category_num = 7;
     m_rows = 8;
     m_28 = 2;
     m_flag_d = 1;
@@ -1756,9 +1786,9 @@ void MnuStock::setDisp()
     m_spr.m_pattern = mnuStockPattern;
     m_spr.m_pattern_ee = MNUSTOCKPATTERN_EE;   // PC
     m_spr.setDispList(mnuStockDisp);
-    m_spr._4b8[2] = 0x69;
-    m_spr._4b8[1] = 0x89;
-    m_spr._4b8[0] = 0x69;
+    m_spr.m_objWorkIndexNo = 0x69;
+    m_spr.m_objWorkEnd = 0x89;
+    m_spr.m_objWorkStart = 0x69;
     setSlotDisp();
 
     for (int i = 0; i < 18; i++)
@@ -1798,6 +1828,51 @@ void MnuStock::setDisp()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// PC: one of setRowMove's two row tables. The rows 1..8 run move table
+// entries (dir 0: row 1 the 9th, the others one row up; dir 1: one row
+// down, row 8 the first) and the table turns by one, so rows[k] stays
+// the sprite on screen row k; the row leaving the window jumps to the
+// other end (y 0x1110 / 0x610) first.
+
+static void mnuStockMoveRows(SprMan &spr, int rows[MNUSTOCK_ROW_MAX], int dir)
+{
+    if (dir == 0) {
+        spr.m_sprite[rows[8]].m_off[1] = 0x1110;
+        for (int i = 1; i < MNUSTOCK_ROW_MAX; i++)
+            spr.setMove(rows[i], i == 1 ? 9 : i - 1);
+        for (int i = 1; i < MNUSTOCK_ROW_MAX; i++)
+            spr.m_sprite[rows[i]].m_move_mode = SPR_MOVE_TABLE;
+        int top = rows[1];
+        for (int i = 1; i < MNUSTOCK_ROW_MAX - 1; i++)
+            rows[i] = rows[i + 1];
+        rows[8] = top;
+    } else {
+        spr.m_sprite[rows[8]].m_off[1] = 0x610;
+        for (int i = 1; i < MNUSTOCK_ROW_MAX; i++)
+            spr.setMove(rows[i], i == 8 ? 1 : i + 1);
+        for (int i = 1; i < MNUSTOCK_ROW_MAX; i++)
+            spr.m_sprite[rows[i]].m_move_mode = SPR_MOVE_TABLE;
+        int bottom = rows[8];
+        for (int i = MNUSTOCK_ROW_MAX - 1; i > 1; i--)
+            rows[i] = rows[i - 1];
+        rows[1] = bottom;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The list rows (names, then the counts beside them) scroll by one;
+// other dirs do nothing.
+// ROR 0x0019c630; callcheck: setMove (in mnuStockMoveRows)
+
+void MnuStock::setRowMove(int dir)
+{
+    if (dir != 0 && dir != 1)
+        return;
+    mnuStockMoveRows(m_spr, m_row_spr, dir);
+    mnuStockMoveRows(m_spr, m_row_spr2, dir);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Sprites and text each frame; sequence bit 0x40000000 once the scene
 // has faded; from frame 10 the arrows fade in after 5 frames, not 0x1e.
 // ROR 0x0019ceac
@@ -1814,6 +1889,120 @@ int MnuStock::update()
             m_fade_wait = 5;
     }
     return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// PC: m_fade_save = m_color (the ROM's two doubleword copies), before a
+// fade from the sprite's colour.
+
+static void mnuStockSaveColor(SprSprite &spr)
+{
+    for (int i = 0; i < 4; i++)
+        spr.m_fade_save[i] = spr.m_color[i];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Page 0, the category tabs. The first frame fades the slot grid in
+// (dim for flag 0x1000000) with its markers, dims the tabs and clears the
+// description; up / down change m_category (the list rebuilt from the
+// top, the tabs re-lit), cross goes to the list (page 1), circle closes
+// (1).
+// ROR 0x0019cf48
+
+int MnuStock::execPage0(BedPad *pad)
+{
+    u_int flags = 0;
+    int ret = 0;
+
+    switch (m_main_step) {
+    case 0:
+        m_row = 0;
+        m_index = 0;
+        for (int i = 0; i < MNUSTOCK_SLOT_MAX; i++) {
+            const int *to = testItemFlags(m_have[i]->m_id, 0x1000000) == 1 ? mnuStockColorDim
+                                                                          : mnuStockColorFull;
+            m_spr.fadeInSprite(MNUSTOCK_SPR_ICON + i, 10, 0x1e, 0, -1, g_sprColorClear, to);
+            m_spr.fadeInSprite(MNUSTOCK_SPR_NUM + i, 10, 0x1e, 0, -1, g_sprColorClear, to);
+        }
+        if (m_equip_slot != -1)
+            m_spr.fadeInSprite(MNUSTOCK_SPR_EQUIP, 10, 0x1e, 0, -1, g_sprColorClear, mnuStockColorFull);
+        if (m_find_slot != -1)
+            m_spr.fadeInSprite(MNUSTOCK_SPR_FIND, 10, 0x1e, 0, -1, g_sprColorClear, mnuStockColorFull);
+        flags = 1;
+        m_main_step = 1;
+        /* fall through */
+    case 1:
+        flags |= 2;
+        for (int i = 0; i < 7; i++)
+            mnuStockSetGrey(sprite(MNUSTOCK_SPR_TAB + i), 0x28);
+        setDescText(NULL);
+        m_main_step = 3;
+        break;
+    }
+
+    int old = m_category;
+    u_int dir = pad->m_dir_repeat;
+    if (dir & MNUSTOCK_PAD_UP) {
+        flags = 3;
+        if (old > 0) {
+            g_sndMan.playSe(1);
+            m_category--;
+        } else {
+            g_sndMan.playSe(3);
+        }
+    } else if (dir & MNUSTOCK_PAD_DOWN) {
+        flags = 3;
+        if (old < m_category_num - 1) {
+            g_sndMan.playSe(1);
+            m_category++;
+        } else {
+            g_sndMan.playSe(3);
+        }
+    } else if (dir & (MNUSTOCK_PAD_LEFT | MNUSTOCK_PAD_RIGHT)) {
+        g_sndMan.playSe(3);
+    } else if (MNUSTOCK_TRIG_CROSS(pad)) {
+        m_main_step = 0;
+        m_page = 1;
+        flags |= 4;
+        g_sndMan.playSe(4);
+    } else if (MNUSTOCK_TRIG_CIRCLE(pad)) {
+        ret = 1;
+        g_sndMan.playSe(2);
+    }
+
+    if (flags == 0)
+        return ret;
+
+    if (flags & 1) {
+        m_row = 0;
+        m_index = 0;
+        buildStockList(m_category);
+        for (int i = 0; i < MNUSTOCK_ROW_MAX; i++)
+            setRowName(m_row_spr[i], i);
+        for (int i = 0; i < MNUSTOCK_ROW_MAX; i++)
+            setRowCount(m_row_spr[i] + 9, i, i);
+        for (int i = 0; i < MNUSTOCK_ROW_MAX; i++)
+            mnuStockSetGrey(sprite(m_row_spr[i]), 0x28);
+        for (int i = 0; i < MNUSTOCK_ROW_MAX; i++)
+            mnuStockSetGrey(sprite(m_row_spr2[i]), 0x28);
+        m_spr.setAnimTable(MNUSTOCK_SPR_PICK, (SprAnim *)m_spr.eePtr(getAnimTable(m_list[m_index]->m_id)));
+        sprite(MNUSTOCK_SPR_PICK).m_pat_base = getPatBase(m_list[m_index]->m_id);
+        m_spr.setAnim(MNUSTOCK_SPR_PICK, 0);
+        sprite(MNUSTOCK_SPR_PICK).m_disp = 1;
+    }
+    if (flags & 2) {
+        m_spr.setAnim(MNUSTOCK_SPR_TAB + old, 0);
+        sprite(MNUSTOCK_SPR_TAB + old).m_disp = 1;
+        mnuStockSetGrey(sprite(MNUSTOCK_SPR_TAB + old), 0x28);
+        m_spr.setAnim(MNUSTOCK_SPR_TAB + m_category, 1);
+        sprite(MNUSTOCK_SPR_TAB + m_category).m_disp = 1;
+        mnuStockSetGrey(sprite(MNUSTOCK_SPR_TAB + m_category), 0x80);
+    }
+    if (flags & 4) {
+        m_spr.setAnim(MNUSTOCK_SPR_TAB + m_category, 0);
+        sprite(MNUSTOCK_SPR_TAB + m_category).m_disp = 1;
+    }
+    return ret;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1926,6 +2115,73 @@ void MnuStock::copyMesText(char *dst, const char *src)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The description panel for slot's item: text field 0x25 (copyMesText's
+// escapes) broken into lines 0..2 of the SprMan's text lines, the names of
+// the three items in fields 0x10..0x12 (once m_flag_c is set; blank for
+// none) in lines 3..5 on sprites 0x3e..0x40, the item's name on 0x42, and
+// the panel's sprites restarted. Without an item only the clear rects are
+// set.
+// ROR 0x0019e010
+
+void MnuStock::setDescText(const GamItemSlot *slot)
+{
+    GamSysData &data = g_gamMan.m_sysData;
+    char (*line)[0x80] = m_spr.m_text_line;
+
+    sprite(MNUSTOCK_SPR_LINK).m_clear_rect = mnuStockDescRect;
+    sprite(MNUSTOCK_SPR_LINK + 1).m_clear_rect = mnuStockDescRect;
+    sprite(MNUSTOCK_SPR_LINK + 2).m_clear_rect = mnuStockDescRect;
+    sprite(MNUSTOCK_SPR_NAME).m_clear_rect = mnuStockDescRect;
+    if (slot == NULL || slot->m_id == MNUSTOCK_ID_NONE)
+        return;
+
+    const char *text = NULL;
+    char buf[0x100];
+    data.getField(slot->m_id, 0x25, &text);
+    memset(buf, 0, sizeof(buf));
+    copyMesText(buf, text);
+    m_spr.getTextLine(buf, line[0], 0);
+    m_spr.getTextLine(buf, line[1], 1);
+    m_spr.getTextLine(buf, line[2], 2);
+
+    short link[2];
+    data.getField(slot->m_id, 0x10, link);
+    if (m_flag_c == 1) {
+        for (int k = 0; k < 3; k++) {
+            if (k != 0)
+                data.getField(slot->m_id, 0x10 + k, link);
+            m_spr.getTextLine(link[0] == MNUSTOCK_ID_NONE ? mnuStockEmptyName : getItemName(link[0]),
+                              line[3 + k], 0);
+        }
+    } else {
+        for (int k = 0; k < 3; k++)
+            m_spr.getTextLine(mnuStockEmptyName, line[3 + k], 0);
+    }
+
+    for (int k = 0; k < 3; k++) {
+        SprSprite &s = sprite(MNUSTOCK_SPR_LINK + k);
+        s.m_text_x = 0;
+        s.m_text_y = 0;
+        s.m_text = line[3 + k];
+    }
+    data.getField(slot->m_id, 0xc, &text);
+    m_spr.getTextWidth(text);   /* ROM: the width is not used */
+    SprSprite &name = sprite(MNUSTOCK_SPR_NAME);
+    name.m_text_x = 0;
+    name.m_text_y = 0;
+    name.m_text = text;
+
+    static const int restart[7] = {
+        MNUSTOCK_SPR_DESC, MNUSTOCK_SPR_DESC + 1, MNUSTOCK_SPR_DESC + 2,
+        MNUSTOCK_SPR_LINK, MNUSTOCK_SPR_LINK + 1, MNUSTOCK_SPR_LINK + 2, MNUSTOCK_SPR_NAME,
+    };
+    for (int k = 0; k < 7; k++) {
+        m_spr.setAnim(restart[k], 0);
+        sprite(restart[k]).m_disp = 1;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // The scroll bar's y (pixels): 0x69 at the top, 0x69 + 0x89 at the last
 // entry.
 // ROR 0x0019e43c
@@ -1939,6 +2195,314 @@ int MnuStock::getScrollBarPos(int index, int count)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// PC: a list row's name and count sprites dimmed (alpha 0x28), their
+// colour saved for the next fade.
+
+static void mnuStockDimRow(SprSprite &name, SprSprite &count)
+{
+    mnuStockSetGrey(name, 0x28);
+    mnuStockSaveColor(name);
+    mnuStockSetGrey(count, 0x28);
+    mnuStockSaveColor(count);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Page 1, the stock list. The first frame dims the rows and lights the
+// cursor's (a fade 0x100 from dim to full) and the picked icon 0x22;
+// step 4 only stops the icon's anim. Up / down move the cursor (the rows
+// scroll at the window's ends when the list is longer than it), L1 / R1
+// move a window, circle goes back to the tabs (page 0); cross takes the
+// entry to the slots (page 2) the first time (m_54 3) and, once a slot is
+// picked (m_54 1), swaps it in with the icon flying off on a work sprite.
+// A move re-lights the cursor's row, its description, the icon, the
+// scroll bar and the arrows. Always 0.
+// ROR 0x0019e474; callcheck: mcdDbgAssertFailed (ROR_ASSERT in the inline SprMan::getObjWork)
+
+int MnuStock::execPage1(BedPad *pad)
+{
+    u_int flags = 0;
+    int se;
+
+    if (m_main_step == 0) {
+        m_main_step = 3;
+        m_rows = 8;
+        m_count = m_list_num;
+        for (int i = 0; i < MNUSTOCK_ROW_MAX; i++) {
+            mnuStockSetGrey(sprite(m_row_spr[i]), 0x28);
+            sprite(m_row_spr[i]).m_fade_mode = 0;
+            mnuStockSetGrey(sprite(m_row_spr2[i]), 0x28);
+            sprite(m_row_spr2[i]).m_fade_mode = 0;
+        }
+        flags = 1;
+        mnuStockSaveColor(sprite(m_row_spr[m_row]));
+        m_spr.setFade(m_row_spr[m_row], 0x100, 10, (const int *)m_spr.eePtr(MNUSTOCK_COLOR_DIM),
+                      (const int *)m_spr.eePtr(MNUSTOCK_COLOR_FULL));
+        mnuStockSaveColor(sprite(m_row_spr2[m_row]));
+        m_spr.setFade(m_row_spr2[m_row], 0x100, 10, (const int *)m_spr.eePtr(MNUSTOCK_COLOR_DIM),
+                      (const int *)m_spr.eePtr(MNUSTOCK_COLOR_FULL));
+        m_spr.setAnim(MNUSTOCK_SPR_PICK, 1);
+        sprite(MNUSTOCK_SPR_PICK).m_disp = 1;
+    } else if (m_main_step == 4) {
+        m_spr.setAnim(MNUSTOCK_SPR_PICK, 0);
+        sprite(MNUSTOCK_SPR_PICK).m_disp = 1;
+    }
+
+    /* The row whose fade the redraw below stops (the cursor's before). */
+    int old_row = m_row;
+    if (m_main_step != 3)
+        goto redraw;
+
+    {
+        u_int dir = pad->m_dir_repeat;
+
+        if (dir & MNUSTOCK_PAD_UP) {
+            if (m_rows < m_count) {
+                if (m_index > 0) {
+                    g_sndMan.playSe(1);
+                    if (m_row == 0) {
+                        setRowMove(1);
+                        old_row = 1;
+                        /* (the ROM tests m_row again; its other branch
+                         * cannot run) */
+                        setRowName(m_row_spr[0], 0);
+                        setRowCount(m_row_spr[m_row] + 9, m_row, m_row);
+                        setRowName(m_row_spr[1], m_index);
+                        setRowCount(m_row_spr[1] + 9, 1, m_index);
+                        m_index--;
+                    } else {
+                        m_index--;
+                        m_row--;
+                    }
+                    flags = 1;
+                    m_spr.setAnim(MNUSTOCK_SPR_UP, 1);
+                    goto redraw;
+                }
+            } else if (m_index > 0) {
+                g_sndMan.playSe(1);
+                flags = 1;
+                m_index--;
+                m_row--;
+                goto redraw;
+            }
+            g_sndMan.playSe(3);
+            goto redraw;
+        }
+
+        if (dir & MNUSTOCK_PAD_DOWN) {
+            int last = m_count - 1;
+            if (m_rows < m_count) {
+                if (m_index < last) {
+                    g_sndMan.playSe(1);
+                    m_index++;
+                    if (m_row < m_rows - 1) {
+                        m_row++;
+                    } else {
+                        setRowMove(0);
+                        old_row = 6;
+                        setRowName(m_row_spr[m_row], m_index);
+                        setRowCount(m_row_spr[m_row] + 9, m_row, m_index);
+                    }
+                    flags = 1;
+                    m_spr.setAnim(MNUSTOCK_SPR_DOWN, 1);
+                    goto redraw;
+                }
+            } else if (m_index < last) {
+                g_sndMan.playSe(1);
+                flags = 1;
+                m_index++;
+                m_row++;
+                goto redraw;
+            }
+            g_sndMan.playSe(3);
+            goto redraw;
+        }
+
+        se = 3;
+        if (dir & (MNUSTOCK_PAD_LEFT | MNUSTOCK_PAD_RIGHT))
+            goto play;
+
+        if (MNUSTOCK_REP_L1(pad)) {
+            if (m_rows < m_count) {
+                g_sndMan.playSe(1);
+                int top = m_index - m_row;
+                if (m_index >= m_rows)
+                    top = m_row != 0 ? m_index - m_row + 1 : m_index;
+                if (top != 0) {
+                    m_spr.setAnim(MNUSTOCK_SPR_UP, 1);
+                    top = top - m_rows + 2;
+                    flags = 1;
+                    if (top < 2)
+                        top = 0;
+                    m_index = top;
+                    old_row = m_row;
+                    m_row = 0;
+                    for (int i = 0; i < m_rows; i++) {
+                        mnuStockDimRow(sprite(m_row_spr[i]), sprite(m_row_spr2[i]));
+                        if (i == 0) {
+                            setRowName(m_row_spr[0], m_row);
+                            setRowCount(m_row_spr[0] + 9, 0, m_row);
+                        } else {
+                            setRowName(m_row_spr[i], m_index + i);
+                            setRowCount(m_row_spr[i] + 9, i, m_index + i);
+                        }
+                    }
+                }
+            }
+            goto redraw;
+        }
+
+        if (MNUSTOCK_REP_R1(pad)) {
+            if (m_rows < m_count && m_index + (m_rows - m_row) < m_count) {
+                g_sndMan.playSe(1);
+                int top = m_index < m_rows ? m_index + (m_rows - m_row)
+                                           : m_index + (m_rows - m_row) - 1;
+                if (top < m_count) {
+                    m_spr.setAnim(MNUSTOCK_SPR_DOWN, 1);
+                    flags = 1;
+                    int last = top + m_rows - 2;
+                    if (last >= m_count) {
+                        last = m_count - 1;
+                        top = m_count - m_rows + 1;
+                    }
+                    m_index = top;
+                    old_row = m_row;
+                    m_row = 0;
+                    for (int i = 0; i < m_rows; i++) {
+                        mnuStockDimRow(sprite(m_row_spr[i]), sprite(m_row_spr2[i]));
+                        if (i == 0) {
+                            setRowName(m_row_spr[0], m_row);
+                            setRowCount(m_row_spr[0] + 9, 0, m_row);
+                        } else {
+                            setRowName(m_row_spr[i], m_index + i - 1);
+                            setRowCount(m_row_spr[i] + 9, i, m_index + i - 1);
+                        }
+                    }
+                    m_index = last;
+                    m_row = m_rows - 1;
+                }
+            }
+            goto redraw;
+        }
+
+        if (MNUSTOCK_TRIG_TRIANGLE(pad))
+            goto redraw;
+
+        if (!MNUSTOCK_TRIG_CROSS(pad)) {
+            if (MNUSTOCK_TRIG_CIRCLE(pad)) {
+                g_sndMan.playSe(2);
+                m_page = 0;
+                m_main_step = 1;
+                sprite(m_row_spr[m_row]).m_fade_mode = 0;
+                mnuStockSetGrey(sprite(m_row_spr[m_row]), 0x28);
+                sprite(m_row_spr2[m_row]).m_fade_mode = 0;
+                mnuStockSetGrey(sprite(m_row_spr2[m_row]), 0x28);
+                m_spr.setAnim(MNUSTOCK_SPR_PICK, 0);
+                sprite(MNUSTOCK_SPR_PICK).m_disp = 1;
+            }
+            goto redraw;
+        }
+
+        if (m_54 == 3) {
+            /* the first cross: on to the slots with the entry */
+            m_page = 2;
+            m_54 = 1;
+            m_main_step = 0;
+            sprite(m_row_spr[m_row]).m_fade_mode = 0;
+            mnuStockSetGrey(sprite(m_row_spr[m_row]), 0x80);
+            sprite(m_row_spr2[m_row]).m_fade_mode = 0;
+            mnuStockSetGrey(sprite(m_row_spr2[m_row]), 0x80);
+            m_spr.setAnim(MNUSTOCK_SPR_PICK, 0);
+            sprite(MNUSTOCK_SPR_PICK).m_disp = 1;
+            se = 4;
+            goto play;
+        }
+
+        /* the slot is picked: the icon flies off on a work sprite, the
+         * entry goes into slot m_slot */
+        flags |= 2;
+        m_fly_spr = m_spr.getObjWork();
+        sprite(m_fly_spr) = sprite(MNUSTOCK_SPR_PICK);
+        m_spr.startSpeedMove(m_fly_spr, 5, mnuStockFlySpeed, mnuStockFlyAccel);
+        sprite(m_fly_spr).m_state = 4;
+        sprite(m_fly_spr).m_fade_wait = 5;
+        m_spr.setFade(m_fly_spr, 2, 5, (const int *)m_spr.eePtr(MNUSTOCK_COLOR_FULL),
+                      (const int *)m_spr.eePtr(MNUSTOCK_COLOR_CLEAR));
+        sprite(m_row_spr[m_row]).m_fade_mode = 0;
+        mnuStockSetGrey(sprite(m_row_spr[m_row]), 0x28);
+        sprite(m_row_spr2[m_row]).m_fade_mode = 0;
+        mnuStockSetGrey(sprite(m_row_spr2[m_row]), 0x28);
+        const GamItemSlot *pick;
+        if (m_row == 0) {
+            swapItem(m_slot, 0);
+            m_spr.setAnimTable(MNUSTOCK_SPR_PICK, (SprAnim *)m_spr.eePtr(getAnimTable(m_list[0]->m_id)));
+            pick = m_list[0];
+        } else {
+            swapItem(m_slot, m_index);
+            m_spr.setAnimTable(MNUSTOCK_SPR_PICK,
+                               (SprAnim *)m_spr.eePtr(getAnimTable(m_list[m_index]->m_id)));
+            pick = m_list[m_index];
+        }
+        sprite(MNUSTOCK_SPR_PICK).m_pat_base = getPatBase(pick->m_id);
+        m_page = 2;
+        m_54 = 3;
+        m_main_step = 0;
+        m_spr.setAnim(MNUSTOCK_SPR_PICK, 0);
+        sprite(MNUSTOCK_SPR_PICK).m_disp = 1;
+        g_sndMan.playSe(4);
+        goto redraw;
+    }
+
+play:
+    g_sndMan.playSe(se);
+
+redraw:
+    if ((flags & 1) == 0)
+        return 0;
+
+    for (int i = 0; i < m_rows; i++) {
+        /* ROM: the fade it stops is old_row's, each time round */
+        mnuStockSetGrey(sprite(m_row_spr[i]), 0x28);
+        sprite(m_row_spr[old_row]).m_fade_mode = 0;
+        mnuStockSetGrey(sprite(m_row_spr2[i]), 0x28);
+        sprite(m_row_spr2[old_row]).m_fade_mode = 0;
+    }
+    mnuStockSaveColor(sprite(m_row_spr[m_row]));
+    m_spr.setFade(m_row_spr[m_row], 0x100, 10, (const int *)m_spr.eePtr(MNUSTOCK_COLOR_FULL),
+                  (const int *)m_spr.eePtr(MNUSTOCK_COLOR_DIM));
+    mnuStockSaveColor(sprite(m_row_spr2[m_row]));
+    m_spr.setFade(m_row_spr2[m_row], 0x100, 10, (const int *)m_spr.eePtr(MNUSTOCK_COLOR_FULL),
+                  (const int *)m_spr.eePtr(MNUSTOCK_COLOR_DIM));
+
+    /* row 0 is always the none entry */
+    int k = m_row == 0 ? 0 : m_index;
+    setDescText(m_list[k]);
+    m_spr.setAnimTable(MNUSTOCK_SPR_PICK, (SprAnim *)m_spr.eePtr(getAnimTable(m_list[k]->m_id)));
+    SprSprite &pick = sprite(MNUSTOCK_SPR_PICK);
+    pick.m_pat_base = getPatBase(m_list[k]->m_id);
+    m_spr.setAnim(MNUSTOCK_SPR_PICK, 1);
+    pick.m_disp = 1;
+    pick.m_state = 1;
+    pick.m_off[0] = mnuStockRowPos[m_row][0];
+    pick.m_off[1] = mnuStockRowPos[m_row][1];
+    pick.m_off[2] = mnuStockRowPos[m_row][2];
+
+    sprite(MNUSTOCK_SPR_BAR).m_off[1] = getScrollBarPos(m_index, m_count) << 4;
+    if (canScroll(0) == 0) {
+        if (sprite(MNUSTOCK_SPR_UP).m_state != 0)
+            m_spr.fadeOutDefault(MNUSTOCK_SPR_UP, 10);
+    } else if (sprite(MNUSTOCK_SPR_UP).m_state == 0) {
+        m_spr.fadeInSprite(MNUSTOCK_SPR_UP, 10, 10, 0, -1, g_sprColorClear, mnuStockColorFull);
+    }
+    if (canScroll(1) == 0) {
+        if (sprite(MNUSTOCK_SPR_DOWN).m_state != 0)
+            m_spr.fadeOutDefault(MNUSTOCK_SPR_DOWN, 10);
+    } else if (sprite(MNUSTOCK_SPR_DOWN).m_state == 0) {
+        m_spr.fadeInSprite(MNUSTOCK_SPR_DOWN, 10, 10, 0, -1, g_sprColorClear, mnuStockColorFull);
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x0019fb88
 
 int MnuStock::testItemFlags(int id, u_int bits)
@@ -1949,20 +2513,6 @@ int MnuStock::testItemFlags(int id, u_int bits)
 }
 
 // ---- stubs (tools/reverse/stubgen.py) ----
-
-// stub of ROR 0x0019cf48
-int MnuStock::execPage0(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuStock::execPage0", 0x0019cf48);
-    return {};
-}
-
-// stub of ROR 0x0019e474
-int MnuStock::execPage1(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuStock::execPage1", 0x0019e474);
-    return {};
-}
 
 // stub of ROR 0x0019fbc8
 int MnuStock::execPage2(BedPad *pad)
