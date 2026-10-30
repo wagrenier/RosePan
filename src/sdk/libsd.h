@@ -80,6 +80,26 @@ typedef struct                      /* 0x14 */
     int    feedback;
 } sceSdEffectAttrSdk;
 
+/* sceSdProcBatch commands: {func, entry, value}, as the SDK lays them out. */
+typedef struct                      /* 0x8 */
+{
+    u_short func;
+    u_short entry;
+    u_int   value;
+} sceSdBatch;
+
+#define SD_BATCH_SETPARAM   0x01
+#define SD_BATCH_SETSWITCH  0x02
+#define SD_BATCH_SETADDR    0x03
+#define SD_BATCH_SETCORE    0x04
+#define SD_BATCH_WRITEIOP   0x05
+#define SD_BATCH_WRITEEE    0x06
+#define SD_BATCH_EERETURN   0x07
+#define SD_BATCH_GETPARAM   0x10
+#define SD_BATCH_GETSWITCH  0x12
+#define SD_BATCH_GETADDR    0x13
+#define SD_BATCH_GETCORE    0x14
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -106,6 +126,7 @@ int    sceSdVoiceTransStatus(short chan, short flag);
 int    sceSdBlockTransStatus(short chan, short flag);
 
 int    sceSdSetEffectAttr(int core, void *attr);
+int    sceSdProcBatch(sceSdBatch *batch, u_int returns[], u_int num);
 int    sceSdClearEffectWorkArea(int core, int channel, int effect_mode);
 
 /* Completion callbacks.  The transfer handler fires when a voice/block upload

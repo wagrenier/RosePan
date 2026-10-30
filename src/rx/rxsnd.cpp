@@ -21,6 +21,7 @@
 
 #include "rx/rxsys.h"
 #include "rx/rxthread.h"
+#include "iop/rxsnddrv/rxsnddrv.h"
 #include "sdk/eekernel.h"
 #include "sdk/sifman.h"
 #include "sdk/sifrpc.h"
@@ -890,8 +891,8 @@ void rxSndSpuFree(u_int addr)
     s_spuFreeHook(addr);
 }
 
-/* PC: m_eeAddr keeps the low 32 bits of the host pointer; the stand-in
- * does not read it. */
+/* PC: m_eeAddr keeps the low 32 bits of the host pointer; the driver
+ * widens it back from the note (src/iop/rxsnddrv/dma.cpp). */
 // ROR 0x00239120
 int rxSndSpuTransfer(u_int spuAddr, const void *src, int size)
 {
@@ -903,6 +904,7 @@ int rxSndSpuTransfer(u_int spuAddr, const void *src, int size)
     req.m_spuAddr = spuAddr;
     req.m_eeAddr  = (u_int)(uintptr_t)src;
     req.m_size    = size;
+    RosePan_RxSndNoteEeAddress(src, (size_t)size);
     return (int)rxSndRpcCommand(0x40, NULL, 0, &req, sizeof(req));
 }
 

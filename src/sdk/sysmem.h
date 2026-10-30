@@ -6,6 +6,7 @@
 
 #define AllocSysMemory          RosePan_IopAllocSysMemory
 #define FreeSysMemory           RosePan_IopFreeSysMemory
+#define QueryMemSize            RosePan_IopQueryMemSize
 #define QueryMaxFreeMemSize     RosePan_IopQueryMaxFreeMemSize
 #define QueryTotalFreeMemSize   RosePan_IopQueryTotalFreeMemSize
 

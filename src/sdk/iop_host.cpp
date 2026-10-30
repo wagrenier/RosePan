@@ -635,6 +635,132 @@ int RosePan_IopReferSemaStatus(int semid, SemaInfo *info)
 }
 
 /* --------------------------------------------------------------------------
+ *  Event flags (thevent)
+ *
+ *  RXSNDDRV's DMA management thread parks on one (WaitEventFlag(flag, 1,
+ *  WEF_OR | WEF_CLEAR)) and the transfer-complete handler / the RPC side set
+ *  it.  A flag is a pattern plus a semaphore from the table above that every
+ *  set signals (count capped at 1), so a waiter re-checks the pattern after
+ *  each wake, and the shutdown that releases every semaphore releases it.
+ * ------------------------------------------------------------------------ */
+
+#define IOP_MAX_EVF 16
+
+typedef struct
+{
+    int            used;
+    volatile u_int bits;
+    int            sema;
+} IopEventFlag;
+
+static IopEventFlag iop_evfs[IOP_MAX_EVF];
+
+static IopEventFlag *FindEventFlag(int evfid)
+{
+    if (evfid < 1 || evfid > IOP_MAX_EVF || !iop_evfs[evfid - 1].used)
+        return NULL;
+
+    return &iop_evfs[evfid - 1];
+}
+
+int RosePan_IopCreateEventFlag(IopEventFlagParam *param)
+{
+    IopSemaParam sp = { 0, 0, 0, 1 };
+
+    for (int i = 0; i < IOP_MAX_EVF; i++)
+    {
+        if (!iop_evfs[i].used)
+        {
+            int sema = RosePan_IopCreateSema(&sp);
+            if (sema < 0)
+                return -1;
+            iop_evfs[i].used = 1;
+            iop_evfs[i].bits = param != NULL ? param->initPattern : 0;
+            iop_evfs[i].sema = sema;
+            return i + 1;
+        }
+    }
+
+    return -1;
+}
+
+int RosePan_IopSetEventFlag(int evfid, u_int bitpattern)
+{
+    IopEventFlag *f = FindEventFlag(evfid);
+    if (f == NULL)
+        return -1;
+
+    f->bits |= bitpattern;
+    RosePan_IopSignalSema(f->sema);
+
+    return 0;
+}
+
+int RosePan_IopClearEventFlag(int evfid, u_int bitpattern)
+{
+    IopEventFlag *f = FindEventFlag(evfid);
+    if (f == NULL)
+        return -1;
+
+    f->bits &= bitpattern;
+
+    return 0;
+}
+
+int RosePan_IopWaitEventFlag(int evfid, u_int bitpattern, int waitmode, u_int *resultpat)
+{
+    IopEventFlag *f = FindEventFlag(evfid);
+    if (f == NULL)
+        return -1;
+
+    for (;;)
+    {
+        if (iop_shutdown)
+            return -1;
+
+        u_int bits = f->bits;
+        int   hit  = (waitmode & WEF_OR) ? (bits & bitpattern) != 0
+                                         : (bits & bitpattern) == bitpattern;
+        if (hit)
+        {
+            if (resultpat != NULL)
+                *resultpat = bits;
+            if (waitmode & WEF_CLEAR)
+                f->bits &= ~bitpattern;
+            return 0;
+        }
+
+        /* WaitSema drops the big lock while parked, as the IOP did here. */
+        if (RosePan_IopWaitSema(f->sema) < 0)
+            return -1;
+    }
+}
+
+/* --------------------------------------------------------------------------
+ *  V-blank (vblank)
+ *
+ *  WaitVblankEnd parks until the next 1/60 s boundary of a steady host clock:
+ *  RXSNDDRV's double-buffer thread runs its whole tick once per V-blank.
+ * ------------------------------------------------------------------------ */
+
+int RosePan_IopWaitVblankEnd(void)
+{
+    static Uint64 next;
+    const Uint64 period = 1000000000ULL / 60;
+    Uint64 now = SDL_GetTicksNS();
+
+    if (next == 0 || now >= next + period)
+        next = now + period;            /* first wait, or fell behind: resync */
+    else
+        next += period;
+
+    if (next > now)
+        RosePan_IopDelayThread((int)((next - now) / 1000));
+
+    return iop_shutdown ? -1 : 0;
+}
+
+/* --------------------------------------------------------------------------
  *  Hard timers
  * ------------------------------------------------------------------------ */
 
@@ -1208,6 +1334,12 @@ int RosePan_IopMemIsBareOffset(const void *addr)
         return 0;
 
     return iop_arena != NULL && (uintptr_t)addr < (uintptr_t)iop_arena;
+}
+
+/* The IOP's RAM: 2 MB.  RXSNDDRV's command 0x22 {0} reports it. */
+int RosePan_IopQueryMemSize(void)
+{
+    return 2 * 1024 * 1024;
 }
 
 /* The IOP had 2 MB, and PrintIOPMem() only ever prints these. */
