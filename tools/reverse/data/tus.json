@@ -527,7 +527,7 @@
    "why": "ClrMain + its five ClrOut* classes: ClrMain::initOut 0x14dc7c (every XxxMain::initOut opens its file) up to NorMain::initOut 0x150b24 which opens the Nor file; no source string, named like emy_bds.cpp"
   },
   "emy/emy_dwf.cpp": {
-   "notes": "Left: DwfOutAtkNear (0x15efb0 Init, 0x15f2fc Exec 0x13f0 bytes, 0x15ef94 Term; EE 0x84), AtkFar 0x1606ec.., Stared 0x160a44.., Win 0x160cb8.., Fort 0x161230.. (EE 0x68), Irritate 0x161b48.., Dead 0x162118..0x16265c: still hand stubs in lib/unassigned_stubs.cpp (block 'the DwfOut* virtual slots'); delete each stub when writing it and give the class its data members in emy/emy_dwf.h (EE sizes in the header comments). Outs are shared by types 0..2: Pickup and Walk keep GetType at +0x38 (m_kind) and use dwfScissorsMotion for the Got's scissors 0xa2e; Pickup's item lives in EmyOut::m_3c on the host because EmyManager::isEmyTarget reads it in state 11 (state 12's m_38 likewise for any out that stores a part). Picture: the 15 s smoke run still ends on the Atlus disclaimer (no regression); no enemy spawns on that path, so nothing here can be seen yet. ROM oddities kept: Walk steps 4..6 and Pickup step 0 unreachable, Serch returns 22 on the host for every type (open-items.md).",
+   "notes": "Left: DwfOutAtkNear (0x15efb0 Init, 0x15f2fc Exec, 0x15ef94 Term; helpers 0x15f37c, 0x15f744, 0x15f8ac, 0x15fee8, 0x15ff54; EE 0x84), DwfOutFort (0x161230 Init, Exec 0x161300 0x790 bytes, 0x161a90 Term, 0x161aac its in-sight throw using ranges table 0x2f1148 = 80 90 90 and table 0x2f1158; EE 0x68) and DwfOutDead (0x162118..0x16265c; 0x161e74 offsets a point by an actor rot y, likely Dead's): still hand stubs in lib/unassigned_stubs.cpp. Reuse dwfStartThrow / dwfReleaseThrown for any throw. The Init type switch leaves m_kind for types other than 0..2. Picture: 15 s smoke still ends on the Atlus disclaimer (no regression); no enemy spawns on that path. ROM oddities ported as-is (open-items.md): Irritate pickMove dead branch (table 0x2f11b8, step 2), AtkFar step 2 never set, Win scripted branch keeps the old m_step.",
    "ranges": [
     [
      "0015c2a4",
@@ -539,6 +539,11 @@
      "date": "2026-10-30 11:35",
      "status": "partial",
      "summary": "DwfMain (type 0, all 25 methods and tests, the two finders) and the outs Disappear, Appear, Wait, Walk, Serch, Pickup, Parts, Test reconstructed (49 functions); DwfMain moved from lib/unassigned.h to emy/emy_dwf.h; their hand stubs removed"
+    },
+    {
+     "date": "2026-10-30 11:54",
+     "status": "partial",
+     "summary": "DwfOutAtkFar (Init, Exec, Term, startThrow), DwfOutStared, DwfOutWin (chase and scripted win, execChase / execScripted) and DwfOutIrritate (Init, Exec, Term, getReach, pickMove) reconstructed with their EE data members and tables 0x2f1068 / 0x2f1070 / 0x2f1090 / 0x2f11a8; their 12 hand stubs removed; shared helpers dwfStartThrow (TskAttack kind 0x15), dwfReleaseThrown, dwfWinHold"
     }
    ],
    "status": "partial",

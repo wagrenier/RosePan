@@ -106,63 +106,6 @@ void DwfOutAtkNear::Term()
     ROSEPAN_STUB("DwfOutAtkNear::Term", 0x0015ef94);
 }
 
-// stub of ROR 0x001606ec
-void DwfOutAtkFar::Init()
-{
-    ROSEPAN_STUB("DwfOutAtkFar::Init", 0x001606ec);
-}
-
-// stub of ROR 0x00160784
-int DwfOutAtkFar::Exec()
-{
-    ROSEPAN_STUB("DwfOutAtkFar::Exec", 0x00160784);
-    return -1;
-}
-
-// stub of ROR 0x0016097c
-void DwfOutAtkFar::Term()
-{
-    ROSEPAN_STUB("DwfOutAtkFar::Term", 0x0016097c);
-}
-
-// stub of ROR 0x00160a44
-void DwfOutStared::Init()
-{
-    ROSEPAN_STUB("DwfOutStared::Init", 0x00160a44);
-}
-
-// stub of ROR 0x00160b08
-int DwfOutStared::Exec()
-{
-    ROSEPAN_STUB("DwfOutStared::Exec", 0x00160b08);
-    return -1;
-}
-
-// stub of ROR 0x00160c9c
-void DwfOutStared::Term()
-{
-    ROSEPAN_STUB("DwfOutStared::Term", 0x00160c9c);
-}
-
-// stub of ROR 0x00160cb8
-void DwfOutWin::Init()
-{
-    ROSEPAN_STUB("DwfOutWin::Init", 0x00160cb8);
-}
-
-// stub of ROR 0x00160d50
-int DwfOutWin::Exec()
-{
-    ROSEPAN_STUB("DwfOutWin::Exec", 0x00160d50);
-    return -1;
-}
-
-// stub of ROR 0x00161160
-void DwfOutWin::Term()
-{
-    ROSEPAN_STUB("DwfOutWin::Term", 0x00161160);
-}
-
 // stub of ROR 0x00161230
 void DwfOutFort::Init()
 {
@@ -180,25 +123,6 @@ int DwfOutFort::Exec()
 void DwfOutFort::Term()
 {
     ROSEPAN_STUB("DwfOutFort::Term", 0x00161a90);
-}
-
-// stub of ROR 0x00161b48
-void DwfOutIrritate::Init()
-{
-    ROSEPAN_STUB("DwfOutIrritate::Init", 0x00161b48);
-}
-
-// stub of ROR 0x00161bd4
-int DwfOutIrritate::Exec()
-{
-    ROSEPAN_STUB("DwfOutIrritate::Exec", 0x00161bd4);
-    return -1;
-}
-
-// stub of ROR 0x00161d8c
-void DwfOutIrritate::Term()
-{
-    ROSEPAN_STUB("DwfOutIrritate::Term", 0x00161d8c);
 }
 
 // stub of ROR 0x00162118
