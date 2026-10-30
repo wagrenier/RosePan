@@ -15,6 +15,7 @@
 #include "mag/maglifepc.h"
 #include "eff/eff0.h"
 #include "eff/effclasses.h"
+#include "eff/effgeneric.h"
 
 #include "dog/dogentity.h"
 #include "mag/maglifebwn.h"
@@ -208,18 +209,6 @@ EffGeneric1::~EffGeneric1()
     ROSEPAN_STUB("EffGeneric1::~EffGeneric1", 0x00173e48);
 }
 
-// stub of ROR 0x0016afcc
-EffBg1::EffBg1()
-{
-    ROSEPAN_STUB("EffBg1::EffBg1", 0x0016afcc);
-}
-
-// stub of ROR 0x0016affc
-EffBg1::~EffBg1()
-{
-    ROSEPAN_STUB("EffBg1::~EffBg1", 0x0016affc);
-}
-
 // stub of ROR 0x001790e4
 EffReload1::EffReload1()
 {
@@ -230,33 +219,6 @@ EffReload1::EffReload1()
 EffReload1::~EffReload1()
 {
     ROSEPAN_STUB("EffReload1::~EffReload1", 0x0017911c);
-}
-
-// stub of ROR 0x0016b060
-int EffBg1::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffBg1::init", 0x0016b060);
-    return {};
-}
-
-// stub of ROR 0x0016b348
-int EffBg1::liveMain()
-{
-    ROSEPAN_STUB("EffBg1::liveMain", 0x0016b348);
-    return {};
-}
-
-// stub of ROR 0x0028ae70
-u_long * EffBg1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffBg1::renderMain", 0x0028ae70);
-    return {};
-}
-
-// stub of ROR 0x0016b444
-void EffBg1::renderPreMain(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("EffBg1::renderPreMain", 0x0016b444);
 }
 
 // stub of ROR 0x0028c050
@@ -838,3 +800,15 @@ void EffMuzzleFlash1::updateZDepth()
     ROSEPAN_STUB("EffMuzzleFlash1::updateZDepth", 0x001790a4);
 }
 
+
+// stub of ROR 0x00174bd8
+void EffGeneric1::applyUvKeys(const EffGenUvKeys *rec)
+{
+    ROSEPAN_STUB("EffGeneric1::applyUvKeys", 0x00174bd8);
+}
+
+// stub of ROR 0x00174bb0
+void EffGeneric1::applyUvScroll(const EffGenScroll *rec)
+{
+    ROSEPAN_STUB("EffGeneric1::applyUvScroll", 0x00174bb0);
+}
