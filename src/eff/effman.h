@@ -196,6 +196,29 @@ struct EffParam
             float m_box[2][3];  // ROR 0x10: two opposite corners (x, y, z), any order
             int   m_mode;       // ROR 0x28: 0, or non-zero: bigger, faster drops with ground ripples, a denser grid, lighter fog
         } m_water3;             // kind 0x31 (EffWater3::init)
+        struct
+        {
+            float m_box[2][3];  // ROR 0x10: two opposite corners (x, y, z), any order
+            int   m_tex;        // ROR 0x28: } the puffs' EffFoot1Prim m_tex,
+            int   m_mode;       // ROR 0x2c: } m_mode, m_scale, m_alpha
+            float m_scale;      // ROR 0x30: }
+            float m_alpha;      // ROR 0x34: }
+        } m_foot1;              // kind 0x1d (EffFoot1::init)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10: the limb
+            int   m_tex;        // ROR 0x1c: the pack texture
+            int   m_mode;       // ROR 0x20: EFF_FOOT1_PUFF, 1, 2
+            float m_scale;      // ROR 0x24: the growth per frame
+            float m_alpha;      // ROR 0x28
+        } m_foot1prim;          // kind 0x1e (EffFoot1Prim::init; EffFoot1::probeActor)
+        struct
+        {
+            u_int m_type;       // ROR 0x10: EFF_FOOT2_DOG
+            float m_pos[3];     // ROR 0x14: the limb's x / z at the actor's y
+            float m_rot;        // ROR 0x20: the actor's y angle
+            float m_scale;      // ROR 0x24: EffFoot2Work::m_scale
+        } m_foot2prim;          // kind 0x20 (EffFoot2Prim::init; EffFoot2::addPrint)
     };
 };
 

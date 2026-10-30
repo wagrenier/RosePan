@@ -11249,6 +11249,12 @@
   "was": "FUN_00172f4c",
   "why": "vtable _vt$8EffFoot1 0x2e3e90 slot 5 (Eff0 slot liveMain)"
  },
+ "001730d4": {
+  "name": "EffFoot1::probeActor",
+  "tag": "ror-inferred",
+  "was": "FUN_001730d4",
+  "why": "only caller EffFoot1::liveMain passes this and the PC / dog actor; fills an EffActorProbe from m_center / m_size (margin 100), and for each limb effProbeActorLimbs reports creates a kind-0x1e EffFoot1Prim at it"
+ },
  "001731f0": {
   "name": "EffFoot1Prim::init",
   "tag": "ror-inferred",
@@ -11273,6 +11279,42 @@
   "was": "FUN_00173340",
   "why": "vtable _vt$12EffFoot1Prim 0x2e3e20 slot 12 (Eff0 slot updateZDepth)"
  },
+ "00173380": {
+  "name": "EffFoot1Prim::liveMode0",
+  "tag": "ror-inferred",
+  "was": "FUN_00173380",
+  "why": "EffFoot1Prim::liveMain's case m_mode 0 (tail jump): m_frame++, alive while 1 - m_frame * 0.05 > 0 (20 frames)"
+ },
+ "001733cc": {
+  "name": "EffFoot1Prim::renderMode0",
+  "tag": "ror-inferred",
+  "was": "FUN_001733cc",
+  "why": "EffFoot1Prim::renderMain's case m_mode 0 (tail jump, same args): the growing, fading camera-facing puff sprite"
+ },
+ "00173610": {
+  "name": "EffFoot1Prim::liveMode1",
+  "tag": "ror-inferred",
+  "was": "FUN_00173610",
+  "why": "EffFoot1Prim::liveMain's case m_mode 1 (tail jump): returns 0"
+ },
+ "00173618": {
+  "name": "EffFoot1Prim::renderMode1",
+  "tag": "ror-inferred",
+  "was": "FUN_00173618",
+  "why": "EffFoot1Prim::renderMain's case m_mode 1 (tail jump): returns the packet pointer unchanged"
+ },
+ "00173620": {
+  "name": "EffFoot1Prim::liveMode2",
+  "tag": "ror-inferred",
+  "was": "FUN_00173620",
+  "why": "EffFoot1Prim::liveMain's case m_mode 2 (tail jump): returns 0"
+ },
+ "00173628": {
+  "name": "EffFoot1Prim::renderMode2",
+  "tag": "ror-inferred",
+  "was": "FUN_00173628",
+  "why": "EffFoot1Prim::renderMain's case m_mode 2 (tail jump): returns the packet pointer unchanged"
+ },
  "00173630": {
   "name": "EffFoot2::init",
   "tag": "ror-inferred",
@@ -11284,6 +11326,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00173688",
   "why": "vtable _vt$8EffFoot2 0x2e3db0 slot 5 (Eff0 slot liveMain)"
+ },
+ "00173840": {
+  "name": "EffFoot2::checkSteps",
+  "tag": "ror-inferred",
+  "was": "FUN_00173840",
+  "why": "only caller EffFoot2::liveMain passes the PC / dog actor and its work record; the actor's motion events over its next frame (bits 0x10000000 / 0x20000000 / 0x4000000 / 0x8000000) each call addPrint with Bip01 L/R Toe0 / Finger0"
+ },
+ "00173948": {
+  "name": "EffFoot2::addPrint",
+  "tag": "ror-inferred",
+  "was": "FUN_00173948",
+  "why": "only caller EffFoot2::checkSteps; the named node's world position (actor slot 18) at the actor's m_trans y and m_rotate y into a kind-0x20 EffFoot2Prim, then decrements the work record's count"
  },
  "00173a90": {
   "name": "EffFoot2Prim::init",

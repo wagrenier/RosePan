@@ -24,6 +24,7 @@
 #include "eff/effblood.h"
 #include "eff/effcameraanim1.h"
 #include "eff/efffog3.h"
+#include "eff/efffoot.h"
 #include "eff/efflight.h"
 #include "eff/effmuzzleflash.h"
 #include "eff/effreload.h"
@@ -217,59 +218,7 @@ public:
 
 /* kinds 0x1a..0x1c (EffFog3, EffFog3Dark, EffFog3WeakUp): eff/efffog3.h. */
 
-/* kind 0x1d; EE 0x4c, vtable 0x2e3e90. layout: host. */
-class EffFoot1 : public Eff0
-{
-public:
-    EffFoot1() {}                                                           // ROR 0x0028c300 (linkonce; inlined in createEff)
-    virtual ~EffFoot1() {}                                                  // ROR 0x0028c250 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x00172e4c
-    virtual int  liveMain();                                                // ROR 0x00172f4c
-    virtual void render(RENDERPARAM *param);                                // ROR 0x0028c330 (linkonce)
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0028c338 (linkonce)
-
-    u_char m_body[0x28];                                                    // ROR 0x24..0x4c: not decoded yet
-};
-
-/* kind 0x1e; EE 0x60, vtable 0x2e3e20. layout: host. */
-class EffFoot1Prim : public Eff0
-{
-public:
-    EffFoot1Prim() {}                                                       // ROR 0x0028c3f0 (linkonce; inlined in createEff)
-    virtual ~EffFoot1Prim() {}                                              // ROR 0x0028c340 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x001731f0
-    virtual int  liveMain();                                                // ROR 0x00173274
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x001732d8
-    virtual void updateZDepth();                                            // ROR 0x00173340
-
-    u_char m_body[0x3c];                                                    // ROR 0x24..0x60: not decoded yet
-};
-
-/* kind 0x1f; EE 0x24, vtable 0x2e3db0. layout: host. */
-class EffFoot2 : public Eff0
-{
-public:
-    EffFoot2() {}                                                           // ROR 0x0028c4d0 (linkonce; inlined in createEff)
-    virtual ~EffFoot2() {}                                                  // ROR 0x0028c420 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x00173630
-    virtual int  liveMain();                                                // ROR 0x00173688
-    virtual void render(RENDERPARAM *param);                                // ROR 0x0028c508 (linkonce)
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0028c510 (linkonce)
-    virtual I3dDrawSet *createPacketEntry(I3dLayer *layer);                 // ROR 0x0028c500 (linkonce)
-};
-
-/* kind 0x20; EE 0x50, vtable 0x2e3d40. layout: host. */
-class EffFoot2Prim : public Eff0
-{
-public:
-    EffFoot2Prim() {}                                                       // ROR 0x0028c5c8 (linkonce; inlined in createEff)
-    virtual ~EffFoot2Prim() {}                                              // ROR 0x0028c518 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x00173a90
-    virtual int  liveMain();                                                // ROR 0x00173b2c
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x00173b68
-
-    u_char m_body[0x2c];                                                    // ROR 0x24..0x50: not decoded yet
-};
+/* kinds 0x1d..0x20 (EffFoot1 .. EffFoot2Prim): eff/efffoot.h. */
 
 /* kinds 0x33, 0x34 (EffGeneric1, EffBg1): eff/effgeneric.h, eff/effbg.h. */
 

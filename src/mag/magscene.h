@@ -408,6 +408,14 @@ struct MagScene
         ROR_ASSERT(no >= 0 && no < MAX_MAP_MODEL); /* 816 */
         return m_tenkyu[no].m_c_num;
     }
+    /* The ROM's line-708 inline (mag/magscene.h; the assert names the
+     * member m_curdog, here m_bwn_no; the name is inferred): the dog's
+     * actor (EffFoot1 / EffFoot2::liveMain). */
+    DogActor *getCurDog()
+    {
+        ROR_ASSERT(m_bwn_no >= 0); /* 708 */
+        return &m_actors[m_bwn_no];
+    }
     int  getCameraMode(int *out);                                        // ROR 0x0013d5ac
     /* Camera modes 3 / 4 (a map camera's path): the camera placed on the
      * path -- pos 0..100 starts pos percent along it, other values at the

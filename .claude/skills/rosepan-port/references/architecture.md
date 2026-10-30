@@ -1591,6 +1591,24 @@ frame): node block 0xb0 a node (pose 0x30, local, model matrices) as EffGeneric1
 draws with utlDrawI3r; over once m_frame / 60 reaches i3mGetLength. renderMain (linkonce 0x28ca88)
 returns NULL.
 
+**The footstep effects** (kinds 0x1d..0x20, `eff/efffoot.cpp` 0x172e4c..0x173df8, 2026-10-30, written,
+verify; layouts in eff/efffoot.h, EffParam m_foot1 / m_foot1prim / m_foot2prim). EffFoot1 (0x1d) is a box
+(two corners in any order -> centre and full sizes, the sizes handed to effProbeActorInBox as its half
+sizes, margin 100): each frame the PC's actor (MagLifePC::getActor) and the dog's (MagScene::getCurDog,
+the ROM's line-708 inline asserting m_curdog = m_bwn_no >= 0) are probed when loaded and shown (slot 9
+isHide), and each limb effProbeActorLimbs reports gets an EffFoot1Prim (0x1e) with the box's tex / mode /
+scale / alpha. EffFoot1Prim mode 0: a camera-facing sprite (frame + 15) x m_scale wide, centred half that
+toward -y from the limb, pulled 20 toward the camera, alpha m_alpha x (1 - frame x 0.05) -- 20 frames;
+modes 1 / 2 end at once. EffFoot2 (0x1f, one at a time) keeps two file-static work records {type, count,
+scale 10} at 0x828648 (PC, type 0) and 0x828618 (dog, type 0x10); while a count is above 0 its actor's
+motion events over the next frame (the effProbeActorLimbs bits: Bip01 L / R Toe0, L / R Finger0) each make
+an EffFoot2Prim (0x20) at the node's x / z and the actor's m_trans y and m_rotate y, and decrement the
+count. init sets both counts to 0 and no other writer is found: in the ROM EffFoot2 never prints.
+EffFoot2Prim: weak, a flat sprite (effMatFromAxisZ of +y, i3dMatRotY m_rot) 2 toward -y, m_scale wide,
+the shoe 3x long with texture v 0..0.75, the paw square with v 0.75..1 (u 4..4.25 for the paw: (type &
+0x10) x 16 / 64, equal to 0..0.25 when the texture repeats), lit and fogged, TEST_1 0x51001 then 0x5000d,
+alpha in over 15 frames, out from 165 to 180 (EFF_FLAG_FINISHED jumps to 165).
+
 **The vapour effects** (kinds 0x11, 0x29..0x2e, `eff/effsteam.cpp` 0x179428..0x17a918, 2026-10-30;
 eff/effsteam.h has the layouts, EffParam m_steam1 / m_steam1prim / m_steam2 / m_steam2prim / m_cloud the
 params). EffSteam1 (0x29 / 0x2d) is a vent: a period of m_frames + m_pause frames from a random phase,

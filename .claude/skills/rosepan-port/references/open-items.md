@@ -6,6 +6,19 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`eff/efffoot.cpp`, verify; pinned 0x172e4c..0x173df8): EffFoot1 / EffFoot1Prim /
+EffFoot2 / EffFoot2Prim, all 20 functions** (architecture.md "The footstep effects"). Not on the smoke path
+(the 15 s run is at the boot disclaimer; kinds 0x1d / 0x1f have no creator in written code, probably room
+scripts through native 281): mark done when a room shows dust puffs at Jennifer's or Brown's steps.
+Doubts: (1) EffFoot2's print counts (statics 0x828648 / 0x828618) are set to 0 by init and only
+decremented by addPrint; no other writer found (ghidra.py refs on both words), so EffFoot2 never prints
+in the ROM -- if a script or a computed pointer sets them, search writes to 0x82861c / 0x82864c. (2)
+EffFoot1 hands its full box sizes to effProbeActorInBox as half sizes (ported as the ROM has it). (3) the
+paw print's u is 4..4.25 (ROM arithmetic), right only with a repeating texture: check the host sprite
+path wraps u when a print shows. Added MagScene::getCurDog (the line-708 inline). Queue refilled with the
+other effect runs: unassigned@0016dcc8 (EffBreath*, eff/effbreath.cpp) then unassigned@001704a4
+(EffDust2 .. EffFog2Prim, one file per family).
+
 **DONE 2026-10-30 (fix/effect-zdepth, the user's report): translucent meshes and effects no longer
 write depth where the GS did not** (light shafts hid Jennifer; her shadow sank into the floor in
 patches). The renderer now reads TEST's AFAIL (NEVER + FB_ONLY = no Z write; another test + FB_ONLY =
