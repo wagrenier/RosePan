@@ -14255,11 +14255,23 @@
   "was": "FUN_0019c16c",
   "why": "MnuOpt::setDisp's shape: pattern image 0x29c508, display list 0x2a3298, row sprites and move tables, the equip / find markers 0x65 / 0x66, SprMan active"
  },
+ "0019c630": {
+  "name": "MnuStock::setRowMove",
+  "tag": "ror-inferred",
+  "was": "FUN_0019c630",
+  "why": "MnuStock this; sets the move tables of the row sprites m_row_spr / m_row_spr2 1..8 and rotates both arrays by one (arg 0 up, 1 down); called by execPage1 on scrolling"
+ },
  "0019ceac": {
   "name": "MnuStock::update",
   "tag": "ror-inferred",
   "was": "FUN_0019ceac",
   "why": "MnuOpt::update's shape: SprMan::update, MsgManSet::update, sequence bit 0x40000000 once faded in, the frame timer"
+ },
+ "0019cf48": {
+  "name": "MnuStock::execPage0",
+  "tag": "ror-inferred",
+  "was": "FUN_0019cf48",
+  "why": "exec step 4 calls it while m_page is 0; up/down change m_category and rebuild the list, cross sets m_page 1, circle returns 1"
  },
  "0019dbc8": {
   "name": "MnuStock::setRowName",
@@ -14285,17 +14297,35 @@
   "was": "FUN_0019df78",
   "why": "copies a message text up to 0x100 bytes, a #n escape written #0; caller 0x19e010 (the description text)"
  },
+ "0019e010": {
+  "name": "MnuStock::setDescText",
+  "tag": "ror-inferred",
+  "was": "FUN_0019e010",
+  "why": "item slot arg: getField 0x25 text through copyMesText and getTextLine into the SprMan text lines, linked item names fields 0x10..0x12, name field 0xc onto sprites 0x3e..0x42"
+ },
  "0019e43c": {
   "name": "MnuStock::getScrollBarPos",
   "tag": "ror-inferred",
   "was": "FUN_0019e43c",
   "why": "0x69 + index * 0x89 / (count - 1): the scroll bar sprite 0x37's y between 0x69 and 0xf2"
  },
+ "0019e474": {
+  "name": "MnuStock::execPage1",
+  "tag": "ror-inferred",
+  "was": "FUN_0019e474",
+  "why": "exec step 4 calls it while m_page is 1; the stock list cursor, L1/R1 windows, cross swapItem into m_slot / m_page 2, circle back to page 0"
+ },
  "0019fb88": {
   "name": "MnuStock::testItemFlags",
   "tag": "ror-inferred",
   "was": "FUN_0019fb88",
   "why": "GamSysData::testFlags(id, bits), 0 for id 0xa00 (no item)"
+ },
+ "0019fbc8": {
+  "name": "MnuStock::execPage2",
+  "tag": "ror-inferred",
+  "was": "FUN_0019fbc8",
+  "why": "exec step 4 calls it while m_page is 2 (the slot grid); execPage1 enters it on cross"
  },
  "001a066c": {
   "name": "MnuTextList::MnuTextList",

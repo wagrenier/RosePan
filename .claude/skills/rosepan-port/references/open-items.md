@@ -10,7 +10,12 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 init / term, open / close, exec, the list (buildStockList, rows, scroll bar, arrows), the slot grid
 (setSlotSprites, setSlotDisp), swapItem and the small helpers, 30 functions** (architecture.md "The
 item box"). Left: execPage0 0x19cf48 (the list page, next), execPage1 0x19e474, execPage2 0x19fbc8 (stubs
-returning 0) and their helpers setRowMove 0x19c630 (one argument, mode) and setDescText 0x19e010. Not on
+returning 0) and their helpers setRowMove 0x19c630 (one argument, mode) and setDescText 0x19e010.
+Session 2 (2026-10-30): execPage0, execPage1, setRowMove, setDescText written; left: execPage2
+0x19fbc8 (0xaa0 bytes, the slot grid: it sets m_slot and returns to page 1 with m_main_step 4?
+check -- execPage1's step 4 only stops the icon's anim, nothing in pages 0 / 1 sets 4).
+Doubt: setDescText fills SprMan text lines 0..2 (the description) but sets no sprite's m_text to
+them; look for the reader in execPage2 or the display list (sprites 0x43..0x45). Not on
 the smoke path (no room is reached; the box opens from MagScene's stock menu 0x10002): when a run opens
 it, compare with work/ref/MNUSTOCK (tm2png.py --scan of DATA/MNURPK/MNUSTOCK.RPK). Doubts: m_list has
 0x100 entries while the stock pool holds 0x14e (the ROM does not bound it; ported unbounded);
