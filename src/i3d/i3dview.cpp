@@ -24,6 +24,7 @@
 #include "i3d/i3rroot.h"
 #include "lib/unassigned.h"
 #include "mag/magscene.h"
+#include "rosepan/rendering/rosepan_renderer.h"
 
 /* The GS guard band the projections widen to, in screen units (x / y). */
 #define I3D_GUARD_MIN 64.0f
@@ -450,6 +451,26 @@ float i3dViewGetDepth(I3dView *view, const float *point)
     return i3dDot4(point, view->m_depth, 2);
 }
 
+/* PC: how much wider / taller than the record's rectangle the host shows a
+ * view: rosepan_i3d.cpp widens the camera of every pass drawn to the display
+ * (XYOFFSET not 0) by the renderer's view extend, so more world shows on a
+ * wide window. The off-screen views (the shadow target's light camera, the
+ * close-up) have a record offset of 0 and keep their shape. Never below 1: a
+ * picture band's zoom only narrows what shows, so the ROM's cull is
+ * conservative there. */
+static void i3dViewHostExtend(const MagViewParam *param, float *ex, float *ey)
+{
+    *ex = 1.0f;
+    *ey = 1.0f;
+    if (param->m_offx == 0.0f && param->m_offy == 0.0f)
+        return;
+    RosePan_RendererGetViewExtend(ex, ey);
+    if (*ex < 1.0f)
+        *ex = 1.0f;
+    if (*ey < 1.0f)
+        *ey = 1.0f;
+}
+
 /* The SCISSOR_1 value of a screen rectangle (the ROM converts with cvt.w.s
  * and or-s the sign-extended words). */
 static u_long i3dScissor(float x0, float x1, float y0, float y1)
@@ -514,6 +535,20 @@ I3dView *i3dCtxCreateView(i3dContext *ctx, MagViewParam *param, sceVu0FVECTOR *m
                            view->m_rect_proj, view->m_rect_viewport);
     i3dVu0MatMul(view->m_rect_clip, view->m_rect_proj, matrix);
 
+    /* PC: the rectangle's cull volume widened as the host widens the
+     * camera (RosePan_RendererWidenProjection: clip x / y divided by the
+     * extend), or a model past the 4:3 edges -- in the picture on a wide
+     * window -- is culled and pops as the camera turns. m_rect_proj and
+     * m_rect_viewport stay the ROM's: the host camera (i3rHostCamera) and
+     * the CPU strips' projection are built from them. */
+    float ex, ey;
+    i3dViewHostExtend(param, &ex, &ey);
+    for (int row = 0; row < 4; row++)
+    {
+        view->m_rect_clip[row][0] /= ex;
+        view->m_rect_clip[row][1] /= ey;
+    }
+
     /* The draw frustum: m_float_param of the way to the guard band. */
     float t = ctx->m_float_param;
     i3dVecSet(mn, i3dLerpf(fr.m_left, gx0, t), i3dLerpf(fr.m_bottom, gy0, t), fr.m_near);
@@ -526,11 +561,14 @@ I3dView *i3dCtxCreateView(i3dContext *ctx, MagViewParam *param, sceVu0FVECTOR *m
     i3dVu0MatMul(view->m_world_clip, view->m_proj, matrix);
     i3dVu0MatMul(view->m_world_screen, view->m_viewport, view->m_world_clip);
 
-    /* The side planes of the rectangle's and the guard band's frusta. */
-    i3dVecSet(lb, fr.m_left, fr.m_bottom, fr.m_near);
-    i3dVecSet(lt, fr.m_left, fr.m_top, fr.m_near);
-    i3dVecSet(rb, fr.m_right, fr.m_bottom, fr.m_near);
-    i3dVecSet(rt, fr.m_right, fr.m_top, fr.m_near);
+    /* The side planes of the rectangle's and the guard band's frusta.
+     * PC: the rectangle's widened about its centre as m_rect_clip. */
+    float wx = (fr.m_right - fr.m_left) * (ex - 1.0f) * 0.5f;
+    float wy = (fr.m_top - fr.m_bottom) * (ey - 1.0f) * 0.5f;
+    i3dVecSet(lb, fr.m_left - wx, fr.m_bottom - wy, fr.m_near);
+    i3dVecSet(lt, fr.m_left - wx, fr.m_top + wy, fr.m_near);
+    i3dVecSet(rb, fr.m_right + wx, fr.m_bottom - wy, fr.m_near);
+    i3dVecSet(rt, fr.m_right + wx, fr.m_top + wy, fr.m_near);
     i3dViewMakePlanes(view->m_rect_planes, matrix, lb, lt, rb, rt);
     i3dVecSet(lb, gx0, gy0, fr.m_near);
     i3dVecSet(lt, gx0, gy1, fr.m_near);
