@@ -81,6 +81,10 @@
 /* 1 when the two strings are equal, a..z compared as A..Z, else 0
  * (unassigned@00106010, after utl/utlfile.cpp). */
 int   utlStrEqualNoCase(const char *a, const char *b);                   // ROR 0x00106010
+/* Copies src into dst, at most n chars, a..z raised to A..Z, stopping after
+ * the terminator; dst[n - 1] is always zeroed. Returns dst
+ * (unassigned@00106010). */
+char *utlStrNCopyUpper(char *dst, int n, const char *src);               // ROR 0x00106064
 /* The vector helpers, utlConvSndId and the i3r wrappers: utl/utlmath.h. */
 #include "utl/utlmath.h"
 /* utlAtan2, utlDirDist, utlStrToLower, utlStrNCopy ...: utl/utlmisc2.h. */
