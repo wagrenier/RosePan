@@ -4334,7 +4334,7 @@
 /* 001f96c0 0000008c */ TskSnd::stepPlayStream(){}  // ror
 /* 001f974c 00000074 */ TskSnd::stepSEFadeOut(){}  // ror
 /* 001f97c0 00000008 */ TskSnd::stepEnd(){}  // ror
-/* 001f97c8 00000094 */ FUN_001f97c8(){}
+/* 001f97c8 00000094 */ scnPlaySEDelayed(){}  // ror
 /* 001f985c 00000064 */ FUN_001f985c(){}
 /* 001f98c0 00000428 */ FUN_001f98c0(){}
 /* 001f9ce8 00000004 */ FUN_001f9ce8(){}
@@ -4422,30 +4422,30 @@
 /* 001fd2dc 00000148 */ FUN_001fd2dc(){}
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- task/tsk_attack.cpp
 // *****************************************************************************
 
-/* 001fd424 00000298 */ FUN_001fd424(){}
-/* 001fd6bc 00000300 */ FUN_001fd6bc(){}
-/* 001fd9bc 000003fc */ FUN_001fd9bc(){}
-/* 001fddb8 000001d4 */ FUN_001fddb8(){}
-/* 001fdf8c 000001d4 */ FUN_001fdf8c(){}
-/* 001fe160 0000071c */ FUN_001fe160(){}
-/* 001fe87c 000002bc */ FUN_001fe87c(){}
-/* 001feb38 00000724 */ FUN_001feb38(){}
-/* 001ff25c 00000084 */ FUN_001ff25c(){}
-/* 001ff2e0 000001b4 */ FUN_001ff2e0(){}
-/* 001ff494 000001d0 */ FUN_001ff494(){}
-/* 001ff664 000001cc */ FUN_001ff664(){}
-/* 001ff830 000001cc */ FUN_001ff830(){}
-/* 001ff9fc 000001c4 */ FUN_001ff9fc(){}
-/* 001ffbc0 00000120 */ FUN_001ffbc0(){}
-/* 001ffce0 000002e0 */ FUN_001ffce0(){}
-/* 001fffc0 0000018c */ FUN_001fffc0(){}
-/* 0020014c 00000180 */ FUN_0020014c(){}
-/* 002002cc 00000178 */ FUN_002002cc(){}
-/* 00200444 00000174 */ FUN_00200444(){}
-/* 002005b8 000000c4 */ FUN_002005b8(){}
+/* 001fd424 00000298 */ TskAttack::stepReach(){}  // ror
+/* 001fd6bc 00000300 */ TskAttack::stepKind12(){}  // ror
+/* 001fd9bc 000003fc */ TskAttack::stepKind15(){}  // ror
+/* 001fddb8 000001d4 */ TskDamage::pickFallBack(){}  // ror
+/* 001fdf8c 000001d4 */ TskDamage::pickFallFront(){}  // ror
+/* 001fe160 0000071c */ TskDamage::stepKind0(){}  // ror
+/* 001fe87c 000002bc */ scnDropWeapon(){}  // ror
+/* 001feb38 00000724 */ TskDamage::cutOffPart(){}  // ror
+/* 001ff25c 00000084 */ TskDamage::updateCutSpray(){}  // ror
+/* 001ff2e0 000001b4 */ TskDamage::stepKind1(){}  // ror
+/* 001ff494 000001d0 */ TskAttack::stepKind2e(){}  // ror
+/* 001ff664 000001cc */ TskAttack::stepKind2f(){}  // ror
+/* 001ff830 000001cc */ TskAttack::stepKind30(){}  // ror
+/* 001ff9fc 000001c4 */ TskDamage::stepKind9(){}  // ror
+/* 001ffbc0 00000120 */ TskDamage::stepKind2(){}  // ror
+/* 001ffce0 000002e0 */ TskAttack::stepKind26(){}  // ror
+/* 001fffc0 0000018c */ TskDamage::stepKind7(){}  // ror
+/* 0020014c 00000180 */ TskDamage::stepKind8(){}  // ror
+/* 002002cc 00000178 */ TskDamage::stepKindA(){}  // ror
+/* 00200444 00000174 */ TskDamage::stepKind5(){}  // ror
+/* 002005b8 000000c4 */ TskDamage::stepKind6(){}  // ror
 
 // *****************************************************************************
 // FILE -- task/tsk_enemy.cpp

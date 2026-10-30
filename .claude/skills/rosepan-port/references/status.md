@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 15:06 at commit `0cf25d8` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 15:24 at commit `24c0133` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,27 +10,27 @@ Generated 2026-10-30 15:06 at commit `0cf25d8` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **7031** (98%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 266, ror-inferred 5429
-- context-name ledger: 5733 entries; overrides of wrong library matches: 5
-- placed in a source file: 6167/7187 in 165 files
+- game functions: **7187**, named **7053** (98%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 266, ror-inferred 5451
+- context-name ledger: 5739 entries; overrides of wrong library matches: 5
+- placed in a source file: 6188/7187 in 166 files
 
 Least-named game-code regions (64 KB blocks):
 
 | block | named | inferred files |
 |---|---|---|
-| `001f0000` | 190/234 (81%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `00240000` | 298/336 (89%) | rx/rxfile.cpp, rx/rxsys.cpp, rx/rxthread.cpp |
+| `001f0000` | 208/234 (89%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `001a0000` | 199/214 (93%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `00210000` | 337/361 (93%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
 | `00110000` | 246/257 (96%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
 | `00160000` | 257/268 (96%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
-| `00200000` | 139/143 (97%) | sequence/seqcall.cpp, task/tsk_enemy.cpp, sequence/sequence.cpp |
 | `00130000` | 180/183 (98%) | mag/magscene.cpp, mag/magscenerender.cpp, mag/magscene2.cpp |
+| `00100000` | 301/304 (99%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmath.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5928**; stubs: **39**
+- reconstructed RoR functions: **5949**; stubs: **24**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -111,7 +111,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 15 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 0 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -179,6 +179,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/system/sysnowloading.cpp` | 8 | 0 |
 | `src/system/system.cpp` | 11 | 0 |
 | `src/task/naga_chunk.cpp` | 30 | 0 |
+| `src/task/tsk_attack.cpp` | 21 | 0 |
 | `src/task/tsk_chr.cpp` | 151 | 0 |
 | `src/task/tsk_enemy.cpp` | 37 | 0 |
 | `src/task/tsk_man.cpp` | 25 | 0 |
@@ -196,9 +197,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 179 TUs: todo 84, partial 1, verify 147, done 17
+- 179 TUs: todo 84, partial 1, verify 148, done 17
 - next: **None** (nothing on the frontier and no queued TU)
-- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
+- pinned queue: unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -333,6 +334,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `system/sysnowloading.cpp` 8/8 -- Code complete, nothing on the boot path shows it yet: draw 0x2051cc is called only by the pfh loader 0x1be564 (GamMan load path, unassigned@001bde58), a stub, s
 - verify: `system/system.cpp` 11/14 -- Complete except the three static-init functions 0x2041f8 / 0x20439c / 0x2043bc, which the host compiler generates (the globals' definition order in system.cpp r
 - verify: `task/naga_chunk.cpp` 30/30 -- Complete code, nothing on screen yet: the 15 s smoke run shows the boot disclaimer (unchanged) and no event scene is reached before the film ends. First session
+- verify: `task/tsk_attack.cpp` 21/21 -- Verify: the 15 s smoke run still ends on the boot disclaimer (no regression); attacks and damage need an enemy in a room, so mark done when a run shows an enemy
 - verify: `task/tsk_chr.cpp` 150/169 -- All of task/tsk_chr.cpp is now written; the inline dtors and empty terms the brief still lists as todo are in tsk_chr.h. Status verify: nothing on screen reache
 - verify: `task/tsk_enemy.cpp` 37/40 -- Nothing on the smoke path starts an enemy (the 15 s run ends on the boot disclaimer, same as before), so the code is verify: the first session whose run reaches
 - verify: `task/tsk_man.cpp` 25/25 -- Pinned 0x1e7094..0x1e7f28 out of unassigned@001e6d54 (file name a guess, open-items). CmnITask slots: 1 get_task_type, 2 pause, 3 init, 4 exec(id, time, arg) no
@@ -349,6 +351,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 15:23 `task/tsk_attack.cpp` verify: TskAttack and TskDamage steps written: all 21 functions of 0x1fd424..0x20067c (was unassigned@001fd424, pinned as task/tsk_attack.cpp): the six attack steps (sw
 - 2026-10-30 15:05 `eff/effdust2.cpp` verify: unassigned@001704a4 split into eff/effdust2.cpp, efffire1.cpp, efffire2.cpp, efffog1.cpp, efffog2.cpp and all 28 functions written (EffDust2 .. EffFog2Prim, kin
 - 2026-10-30 15:04 `eff/efffog1.cpp` verify: EffFog1 written, all 4 functions: a camera-facing fog quad drifting along the camera x axis, reset every 540 frames, corner alpha keys per 60 frames with the le
 - 2026-10-30 15:04 `eff/efffog2.cpp` verify: EffFog2 / EffFog2Prim written, all 6 functions: an emitter line and the rising, gliding fog wisps (quarter-circle rise, flat glide to m_dist, corner alpha cycle
@@ -356,7 +359,6 @@ Recent sessions:
 - 2026-10-30 15:02 `eff/efffire1.cpp` verify: EffFire1 / EffFire1Ex written, all 7 functions: init, flicker liveMain, flame + glow renderMain, 5-frame fade liveActivateExec, depth; Ex follows an actor node;
 - 2026-10-30 14:37 `eff/effbreath.cpp` verify: EffBreath1 / EffBreath1Space / EffBreath2 / EffBreath2Prim / EffBreath2Ground, all 20 functions: actor breath in a box (ring of mouth points, farthest-first spr
 - 2026-10-30 14:13 `eff/efffoot.cpp` verify: EffFoot1 / EffFoot1Prim / EffFoot2 / EffFoot2Prim, all 20 functions: footstep dust puffs in a box and the PC / dog footprints; EffParam m_foot1 / m_foot1prim / 
-- 2026-10-30 13:58 `eff/effreload.cpp` verify: EffReload1 (kind 0x27, the gun reload model) written whole: ctor, dtor, init, liveMain, renderPreMain, linkonce renderMain; layout in eff/effreload.h; class mov
 
 ## Frontier (called by reconstructed code, not written yet)
 

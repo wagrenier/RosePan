@@ -98,13 +98,17 @@ struct TskSnd : CmnITask
 };
 
 struct ACHRstat;
+struct DogActor;
 
 /* TskAttack : CmnITask (vtable 0x2e4eb0, EE 0x80; kind 0x15): an achr's
  * attack, started by scnAttackStart on the achr's task slot m_task[3].
  * setup picks the motion and the step from the parameter words' kind
  * (param[2]): 0x12..0x14, 0x15, 0x26..0x28, 0x2e, 0x2f, 0x30; other kinds
- * set no step and the task idles. The steps live in the file after
- * task/naga_chunk.cpp (unassigned@001fd424) and call scnChrRequest.
+ * set no step and the task idles. The steps (task/tsk_attack.cpp) run a
+ * phase machine: phase 0 starts the motion, 1 hits from frame m_hitFrom
+ * to m_hitTo (scnChrRequest chr 11 on whatever is in reach), then the
+ * task ends with the motion (phase 999, or 30 frames in phase 10 / 3,
+ * also end it; nothing found sets them).
  * layout: host -- a member-function pointer; EE offsets in the comments. */
 struct TskAttack : CmnITask
 {
@@ -122,10 +126,20 @@ struct TskAttack : CmnITask
     void term() override;                                                // ROR 0x001f9ce8
 
     void setup(u_int oid, const int *param);                             // ROR 0x001f98c0
+    /* An unused step: kind 0x12's frame with emyChkHitReach(m_reach, the
+     * achr's own node 1) instead of the held object's. Unreferenced. */
+    int  stepReach();                                                    // ROR 0x001fd424
+    /* 0x12..0x14: the held object (param 0x67) hits the PC / the dog. */
     int  stepKind12();                                                   // ROR 0x001fd6bc
+    /* 0x15: at m_hitFrom the held object m_throwOid is thrown from the
+     * p_hn_r node (a TskMovePhysic). */
     int  stepKind15();                                                   // ROR 0x001fd9bc
+    /* 0x26..0x28: as 0x12, with a swing sound every frame of the window. */
     int  stepKind26();                                                   // ROR 0x001ffce0
+    /* 0x2e: nodes b_fg_l / b_fg_r within m_reach of m_victim hit it once. */
     int  stepKind2e();                                                   // ROR 0x001ff494
+    /* 0x2f / 0x30: nodes p_gero / p_gero1 hit m_victim every frame of
+     * the window. */
     int  stepKind2f();                                                   // ROR 0x001ff664
     int  stepKind30();                                                   // ROR 0x001ff830
 
@@ -133,18 +147,18 @@ struct TskAttack : CmnITask
     u_int     m_oid;            // ROR 0x10
     int       m_actor;          // ROR 0x14: the achr's scene actor
     ACHRstat *m_achr;           // ROR 0x18
-    int       m_1c;             // ROR 0x1c: 0
-    int       m_20;             // ROR 0x20: 0
+    int       m_frame;          // ROR 0x1c: frames in the phase (0 when the motion starts)
+    int       m_phase;          // ROR 0x20: the step's phase (see the struct comment)
     int       m_motion;         // ROR 0x24: the attack's motion number
-    int       m_34;             // ROR 0x34: param[0]
-    int       m_kind;           // ROR 0x3c: param[2]
-    float     m_40;             // ROR 0x40: 0x15: 70 / 50 / 20 by system field 0x1b; 0x26..0x28: 110 / 110 / 120; 0x2e..0x30: param[10]
-    int       m_44;             // ROR 0x44: a frame of the motion (role unverified)
-    int       m_48;             // ROR 0x48: a later frame (role unverified)
-    int       m_4c;             // ROR 0x4c: 0x15: object param 0x67
+    int       m_victim;         // ROR 0x34: param[0], the object 0x2e..0x30 hit
+    int       m_kind;           // ROR 0x3c: param[2]; scnChrRequest's word
+    float     m_reach;          // ROR 0x40: the hit range; 0x15: 70 / 50 / 20 by system field 0x1b; 0x26..0x28: 110 / 110 / 120; 0x2e..0x30: param[10]
+    int       m_hitFrom;        // ROR 0x44: the first frame that hits (0x15: the throw's)
+    int       m_hitTo;          // ROR 0x48: the last frame that hits
+    int       m_throwOid;       // ROR 0x4c: 0x15: object param 0x67, the thrown object
     u_int     m_target;         // ROR 0x50: 0x13 / 0x14: param[5], the object whose actor plays motion 9 / 10
-    int       m_54;             // ROR 0x54: 0x15: param[3]
-    int       m_58;             // ROR 0x58: 0x15: param[4]
+    int       m_54;             // ROR 0x54: 0x15: param[3], float bits (the throw's pitch)
+    int       m_58;             // ROR 0x58: 0x15: param[4], float bits (the throw's speed)
 };
 
 /* scnDamageStart's parameter words (EE stack, scnChrRequest's a2 / word
@@ -162,7 +176,11 @@ static_assert(sizeof(ScnDamageParam) == 0xc, "ScnDamageParam is 3 words");
  * slot m_task[3]. setup takes the damage off the achr's LP (param 0x1b;
  * kill when it reaches them), tells the enemy (EmyManager::notifyEmy),
  * picks the reaction step by the chr word (param->m_chr; the steps live in
- * unassigned@001fd424 after task/naga_chunk.cpp) and plays a hurt SE.
+ * task/tsk_attack.cpp) and plays a hurt SE. Each step waits for the
+ * motion's end (or runs at once while m_flags 4 is set), ends the task
+ * through endReact once flag 8 is set, else picks the next motion by
+ * m_frames (the reaction's state: a case sets the motion, the last one
+ * of a chain flag 8), steps m_frames by one and starts the motion.
  * layout: host -- a member-function pointer; EE offsets in the comments. */
 struct TskDamage : CmnITask
 {
@@ -193,6 +211,17 @@ struct TskDamage : CmnITask
      * resumes the enemy (setEmyMode6), or for a killed one (frames >=
      * 10000) stops it and kills the achr's tasks; 1 then, else 0. */
     int  endReact();                                                     // ROR 0x001fbb04
+    /* stepKind0's falls: the first of three spots around the achr (behind
+     * / in front) with a cell and nothing in the way gives the state
+     * 5000..5003; none sets m_flags 8 and keeps m_frames. */
+    int  pickFallBack();                                                 // ROR 0x001fddb8
+    int  pickFallFront();                                                // ROR 0x001fdf8c
+    /* The cut-off body part (pickAttrBit's bit: 1 neck, 2 / 4 upper arms,
+     * 8 / 0x10 thighs): the node is hidden, blood sprays from it and an
+     * item object of the part (table 0x2ff2a0 by enemy type) is thrown.
+     * Unreferenced in the ROM, as is the spray's follow below. */
+    void cutOffPart(ACHRstat *achr, int part);                           // ROR 0x001feb38
+    void updateCutSpray();                                               // ROR 0x001ff25c
     int  stepKind0();                                                    // ROR 0x001fe160
     int  stepKind1();                                                    // ROR 0x001ff2e0
     int  stepKind2();                                                    // ROR 0x001ffbc0
@@ -208,8 +237,8 @@ struct TskDamage : CmnITask
     u_int     m_oid;            // ROR 0x10
     int       m_actor;          // ROR 0x14: the achr's scene actor
     ACHRstat *m_achr = NULL;    // ROR 0x18
-    int       m_1c;             // ROR 0x1c: 0
-    int       m_frames;         // ROR 0x20: getReactFrames, else 0 / 10 / 20 / 30; +10000 by kill
+    int       m_frame;          // ROR 0x1c: frames run
+    int       m_frames;         // ROR 0x20: the reaction's state: getReactFrames, else 0 / 10 / 20 / 30; +10000 by kill; the steps step it
     int       m_motion;         // ROR 0x24: the actor's motion when hit
     int       m_motion0;        // ROR 0x28: m_motion
     u_char    _2c[0x3c - 0x2c]; // ROR 0x2c
@@ -219,7 +248,12 @@ struct TskDamage : CmnITask
     u_short   m_lp;             // ROR 0x48: the achr's param 0x1b
     u_short   m_emy1d8;         // ROR 0x4a: EmyManager::getEmyWord1d8 (never 0: the ROM traps)
     short     m_kind;           // ROR 0x4c: scnDamageStart's kind
-    u_char    _4e[0x80 - 0x4e]; // ROR 0x4e
+    u_char    _4e[2];           // ROR 0x4e
+    DogActor *m_cutActor;       // ROR 0x50: cutOffPart's actor
+    int       m_cutNode;        // ROR 0x54: the cut node (-1 none)
+    float     m_cutPos[4];      // ROR 0x58: updateCutSpray: the node's world position (the spray's m_pos)
+    float     m_cutDir[4];      // ROR 0x68: its z row (the spray's m_dir)
+    u_char    _78[0x80 - 0x78]; // ROR 0x78
 };
 
 /* TskCamera : CmnITask (vtable 0x2e4f30, EE 0xc0; kind 0): the scripted

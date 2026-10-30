@@ -108,7 +108,7 @@ Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
   stop 0x203efc (no callers), read 0x203f38 (adds |now - prev| to +0xc), update 0x204014 (main, once a
   frame: +0x18 count, +0x20 time = elapsed - paused, the old one to +0x1c / +0x24), hold 0x204090
   (CmnTaskMan::exec: +0x24 = +0x20). The code before it is task/tsk_enemy.cpp
-  (0x20067c..0x203d94, 2026-10-29), and before that 0x1fd424..0x20067c (unassigned@001fd424) the
+  (0x20067c..0x203d94, 2026-10-29), and before that 0x1fd424..0x20067c (task/tsk_attack.cpp) the
   TskAttack / TskDamage steps (table at data 0x2feb64).
 - The rx bring-up main runs, in order: `rxSysSetIopImage("IOPRP300.IMG")` 0x241b20,
   `rxSysSetBootPath("cdrom0:")` 0x241d68 (boot device CDROM, dir, name), `rxSysResetHardware` via
@@ -2964,8 +2964,36 @@ throughout (identifiers, env variables, files, shader macros):
   TskDamage kind 0x16 and effect kind 1 40 below the achr). `scnChrRequest` 0x1fac60 dispatches on chr
   (0..10, or 11 = from the oid's kind): 3 the dog (0x1fae14), 4 the PC (0x1fb084), the rest damage.
 - TskAttack's steps (picked by the kind word param[2]: 0x12..0x14, 0x15, 0x26..0x28, 0x2e..0x30) and
-  most of TskDamage's live in the file after task/naga_chunk.cpp (unassigned@001fd424, 0x1fd424..
-  0x200000), not in tsk_scene.cpp; they call scnChrRequest back.
+  all of TskDamage's live in task/tsk_attack.cpp (pinned 0x1fd424..0x20067c, written 2026-10-30), not
+  in tsk_scene.cpp; they call scnChrRequest(11, self, 0, 0, kind, target, 0) back.
+- TskAttack steps are a phase machine (m_phase +0x20, m_frame +0x1c counted every frame, 0 when the
+  motion starts): phase 0 plays SE 0xb (0x26: 0x13) and chrMtnMove2(1/60, oid, m_motion, -1); phase 1
+  hits on frames m_hitFrom (+0x44) .. m_hitTo (+0x48), then phase 0x14 ends the task with the motion
+  (999 and 30 frames of phase 10 end it too; nothing found sets them). 0x12..0x14 / 0x26..0x28 test
+  the held object (param 0x67) with its kind's system fields 0x22 (node count) / 0x30 (range) by
+  emyChkHitReach against the PC (skipped in PC state class 9) and the dog (skipped in Brown state 10 /
+  13); hit SE 3 (0x26: 0x10, else 0xf every window frame). 0x15 throws the held object m_throwOid from
+  node p_hn_r at m_hitFrom (setActorParent -1, the thrower's rotation, motion 1, TskMovePhysic).
+  0x2e tests nodes b_fg_l / b_fg_r, 0x2f / 0x30 p_gero / p_gero1, by chrIsNearNode(m_reach, oid,
+  m_victim = param[0]); 0x2e hits once, 0x2f / 0x30 every window frame. Every step's chrMtnMove2 gets a
+  heading in f13 that chrMtnMove2 never reads (a leftover of chrMtnMove's signature).
+- TskDamage steps: wait for the motion's end (or go at once while m_flags 4, set by setup), then
+  endReact (flag 8 = the chain's last motion: the task ends); else m_frames (+0x20) is the reaction's
+  state -- each step's switch maps it to the next motion (0 / 10 / 20 / 30 from setup's front / back
+  test, getReactFrames' 0x3c / 0x46 / 0x50, 10000+ once killed), m_frames++ and the motion starts
+  (p1d8 -1). chr 0 adds falls: from state 0 (10% / 40% / 80% by achr attribute 0x400 / 0x800) or 10
+  (10%), pickFallBack 0x1fddb8 / pickFallFront 0x1fdf8c try three spots (behind pi, -pi/2, pi/2 at
+  60.6 / 49.6; in front 0, pi/2, -pi/2 at 43.3 / 49.6) for a cell with nothing in the way (pickSectaCell
+  + testHitAt) and give state 5000..5003 (motions 0x49, 6, 0x4a, 0x4b); the down chains set
+  EmyManager::setEmyDownFlg and achr flag 0x400, and voices go through getEmyVoiceSE + scnPlaySEDelayed.
+  chr 7 takes 8..16 off the enemy's free count when it ends; chr 6 replays motion 0x19 (p1d8 1).
+- A cut dismemberment feature remains, unreferenced: TskDamage::cutOffPart 0x1feb38 (part = pickAttrBit's
+  bit: 1 Bip01 Neck, 2 / 4 R / L UpperArm, 8 / 0x10 R / L Thigh) hides the node (setNodeScale 0), sprays
+  blood (effect kind 2, 45 frames) from TskDamage +0x58 / +0x68, which updateCutSpray 0x1ff25c fills from
+  the node's world matrix rows 3 / 2, and throws the part's item object (kinds by enemy type, data
+  0x2ff2a0: type 0 0xbbf..0xbc3, 1 0xbd3..0xbd7, 2 0xbce..0xbd2); scnDropWeapon 0x1fe87c drops the held
+  weapon with the right arm (or when killed / legless). TskAttack::stepReach 0x1fd424 (kind 0x12's code
+  with emyChkHitReach(m_reach, self, 1)) is unreferenced too.
 - The damage roll `scnCalcDamage` 0x1fb624 (attacker, target, attack word): attacker's ST (param 0x1d,
   PC via getPcParam) x the word's percent (fixed or utlRandRange per word; 4 / 5 / 0xb use utlRandMean /
   utlRandPeak) / 100 x the weapon's system field 0x2b, + field 0x2a, - target kind's DEF (field 0x1e) x

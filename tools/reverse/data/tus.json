@@ -1,5 +1,6 @@
 {
  "queue": [
+  "unassigned@001fd424",
   "unassigned@0010f944",
   "unassigned@0022e840",
   "unassigned@00106658",
@@ -3064,6 +3065,24 @@
    ],
    "status": "verify",
    "why": "source strings anchor 0x1fc4f0/0x1fc89c/0x1fcb14; 0x1fc47c/0x1fc490 are the writer's inline ctor/dtor (fields +0x400..+0x50c the writers use); the NagaChunk reader 0x1fcbf8..0x1fce0c follows; 0x1fce0c.. are vtable slots (0x2e4f8c..) of task/tsk_bg_load.cpp classes"
+  },
+  "task/tsk_attack.cpp": {
+   "notes": "Verify: the 15 s smoke run still ends on the boot disclaimer (no regression); attacks and damage need an enemy in a room, so mark done when a run shows an enemy swing hitting Jennifer or an enemy staggering, falling or going down. TskAttack members renamed from their roles (m_frame, m_phase, m_victim, m_reach, m_hitFrom, m_hitTo, m_throwOid); TskDamage m_1c is m_frame, m_frames is the reaction state, and +0x50..+0x77 are the cut fields. Every step passes chrMtnMove2 a heading in f13 that it never reads; the throw velocities the ROM builds for TskMovePhysic are dropped (its ctor reads only the oid). Doubts in open-items.md (motion 6 for fall state 5001, phases 10 / 3 / 999 never set). The queue was empty; remaining stubbed todo TUs: mag/maglifebwnmode.cpp, unassigned@00125bd4, unassigned@0012668c, and rx/rxsys.cpp boot stubs.",
+   "ranges": [
+    [
+     "001fd424",
+     "0020067c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 15:23",
+     "status": "verify",
+     "summary": "TskAttack and TskDamage steps written: all 21 functions of 0x1fd424..0x20067c (was unassigned@001fd424, pinned as task/tsk_attack.cpp): the six attack steps (swing, throw, node hits), the nine damage reaction steps with the fall-spot pickers, and the unreferenced stepReach and body-part cut helpers (cutOffPart, updateCutSpray, scnDropWeapon). 15 stubs removed; callcheck clean, layoutcheck OK."
+    }
+   ],
+   "status": "verify",
+   "why": "TskAttack / TskDamage step functions (the member-function pointers TskAttack::setup / TskDamage::setup in task/tsk_scene.cpp store), the unreferenced attack step, the damage fall-direction pickers and the cut dismemberment helpers; no source string, named after its contents; between task/tsk_bg_load.cpp and task/tsk_enemy.cpp"
   },
   "task/tsk_chr.cpp": {
    "notes": "All of task/tsk_chr.cpp is now written; the inline dtors and empty terms the brief still lists as todo are in tsk_chr.h. Status verify: nothing on screen reaches the script tasks yet (the smoke run stops at the boot disclaimer); the first session whose screenshot shows a script-driven character move or turn should mark it done. New stub: DogActor::setNodeScale 0x10eba0 (dog/dogactor.cpp, a 14-instruction leaf: node entry gets the value, 1.0 frees it, else first free or 1.0 entry takes it) -- write it with dogactor.cpp. chrStepAwayFrom guards the frame list against overflow (PORT); the ROM writes past 32. The setter of non-1.0 node scales (limb loss) is not found yet.",
