@@ -134,8 +134,8 @@ struct RosePanI3dVu1Vertex
 };
 
 /* A triangle strip of `count` such vertices at `at` (copied), drawn with the
- * GS PRIM bits `prim` (TME, ABE...) and the replay's register state; textured
- * ones honour TEST_1's Z test (GEQUAL) against the meshes. */
+ * GS PRIM bits `prim` (TME, ABE...) and the replay's register state: TEST_1's
+ * Z test (GEQUAL) against the meshes and alpha test, ZBUF_1's ZMSK. */
 void RosePan_I3dRecordVu1Strip(const void *at, unsigned int prim, const RosePanI3dVu1Vertex *v,
                                int count);
 

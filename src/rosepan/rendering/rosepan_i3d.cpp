@@ -60,10 +60,14 @@ constexpr uint64_t kRegAlpha = 0x42;
 constexpr uint64_t kRegRgbaq = 0x01;
 constexpr uint64_t kRegClamp = 0x08;
 constexpr uint64_t kRegTest = 0x47;
+constexpr uint64_t kRegZbuf = 0x4e;
 
 /* The opening state i3dPktOpenChain writes (ALPHA mode 0x10, TEST_1). */
 constexpr uint64_t kDefaultAlpha = 0x44;
 constexpr uint64_t kDefaultTest = 0x5000d;
+/* The display's ZBUF_1 (sceGsSetDefDBuff's: Z at 0xe0, PSMZ16S, ZMSK
+ * clear). */
+constexpr uint64_t kDefaultZbuf = 0x0a0000e0;
 
 /* FRAME_1's FBP of MagScene::makeActorShadow's 256 x 256 shadow target. */
 constexpr unsigned kShadowFbp = 0x118;
@@ -156,6 +160,7 @@ struct GsState
 {
     uint64_t        alpha = kDefaultAlpha;
     uint64_t        test = kDefaultTest;
+    uint64_t        zbuf = kDefaultZbuf;
     uint64_t        scissor = (uint64_t)(kFrameWidth - 1) << 16 | (uint64_t)(kFrameHeight - 1) << 48;
     int             offx = kDefaultOffX;
     int             offy = kDefaultOffY;
@@ -250,11 +255,14 @@ float FrameY(const GsState &gs, int y)
     return ((float)(y - gs.offy) / 16.0f) * ScaleY();
 }
 
-/* The renderer's GS shadows from the replay state: ALPHA as it is, the
+/* The renderer's GS shadows from the replay state: ALPHA, TEST and ZBUF as
+ * they are (the depth write follows ZMSK and TEST's FB_ONLY alpha test), the
  * scissor in the renderer's frame. */
 void ApplyState(const GsState &gs)
 {
     RosePan_RendererSetGsAlphaRegister(gs.alpha);
+    RosePan_RendererSetGsTestRegister(gs.test);
+    RosePan_RendererSetGsZbufRegister(gs.zbuf);
     const double sx = ScaleX(), sy = ScaleY();
     const uint64_t x0 = (uint64_t)((double)(gs.scissor & 0x7ff) * sx);
     const uint64_t x1 = (uint64_t)((double)(((gs.scissor >> 16) & 0x7ff) + 1) * sx) - 1;
@@ -266,6 +274,8 @@ void ApplyState(const GsState &gs)
 void RestoreState()
 {
     RosePan_RendererSetGsAlphaRegister(kDefaultAlpha);
+    RosePan_RendererSetGsTestRegister(kDefaultTest);
+    RosePan_RendererSetGsZbufRegister(kDefaultZbuf);
     float w = 0.0f, h = 0.0f;
     RosePan_RendererGetFrameSize(&w, &h);
     RosePan_RendererSetGsScissorRegister((uint64_t)(w - 1.0f) << 16 | (uint64_t)(h - 1.0f) << 48);
@@ -496,7 +506,7 @@ void DrawStrip(const Record &r)
         RosePan_RendererDrawImageTriangles2DDepth(texture, xy.data(), uv.data(), rgba.data(),
                                                   z.data(), n, linear, ztest);
     else
-        RosePan_RendererDrawSolidTriangles2D(xy.data(), rgba.data(), n);   /* no depth yet */
+        RosePan_RendererDrawSolidTriangles2DDepth(xy.data(), rgba.data(), z.data(), n, ztest);
 }
 
 /* The smallest power of two exponent covering n. */
@@ -576,8 +586,10 @@ void DrawModel(const Record &r)
      * the 256 x 256 shadow target, drawCloseUp), not the display. */
     if (s_state.offx == 0 && s_state.offy == 0 && !BeginShadowCaster())
         return;
-    /* The mesh path's own state: opaque, depth tested, the whole frame. */
+    /* The mesh path's own state: opaque, depth tested, the whole frame;
+     * the depth write still follows the layer's ZBUF. */
     RestoreState();
+    RosePan_RendererSetGsZbufRegister(s_state.zbuf);
     RosePan_I3dMeshDraw(m.root, m.world, m.nodes, m.tex, m.tex_count, m.has_opt ? &m.opt : NULL);
 }
 
@@ -590,6 +602,7 @@ void DrawMesh(const Record &r)
     if (s_state.offx == 0 && s_state.offy == 0 && !BeginShadowCaster())
         return;                                 /* an off-screen pass, as DrawModel */
     RestoreState();
+    RosePan_RendererSetGsZbufRegister(s_state.zbuf);
     RosePan_I3dMeshDrawRef(m.root, m.world, m.nodes, m.tex, m.tex_count, m.has_opt ? &m.opt : NULL, &d.ref);
 }
 
@@ -599,6 +612,7 @@ void ApplyReg(uint64_t reg, uint64_t value)
     {
     case kRegAlpha:    s_state.alpha = value; break;
     case kRegTest:     s_state.test = value; break;
+    case kRegZbuf:     s_state.zbuf = value; break;
     case kRegRgbaq:    s_state.rgbaq = value; break;
     case kRegClamp:    s_state.clamp = value; break;
     case kRegScissor:  s_state.scissor = value; break;

@@ -1448,6 +1448,9 @@ GsBlendMode g_gs_blend_mode = GS_BLEND_ALPHA;
 GsFixBlend g_gs_fix_blend = GS_FIX_NONE;
 float g_gs_fix_weight = 0.0f;
 bool g_gs_depth_write = true;
+/* TEST's alpha test failing every fragment into FB_ONLY / RGB_ONLY: colour
+ * without Z (RosePan_RendererSetGsTestRegister). */
+bool g_gs_test_blocks_depth_write = false;
 /* ZTST from the GS TEST register, and the Z of the 2D primitive being built.
  * Both are per-draw state the 2D layer refreshes immediately before the draw,
  * the same way the blend mode and ZMSK already are.
@@ -8603,7 +8606,7 @@ bool BuildScissorRect(const DrawCommand &draw, int target_width,
 void ApplyGsDrawEnv(DrawCommand &command)
 {
     command.blend_mode = g_gs_blend_mode;
-    command.depth_write = g_gs_depth_write;
+    command.depth_write = g_gs_depth_write && !g_gs_test_blocks_depth_write;
     command.scissor = g_gs_scissor;
 
     /*
@@ -9045,6 +9048,14 @@ bool ResidentDrawContinues(const DrawCommand &previous, const DrawCommand &next)
            !previous.finder_mask && !next.finder_mask;
 }
 
+/* The GS alpha comparison a fragment failing `atst` passes. */
+unsigned int GsInverseAlphaTest(unsigned int atst)
+{
+    /* NEVER <-> ALWAYS, LESS <-> GEQUAL, LEQUAL <-> GREATER, EQUAL <-> NOTEQUAL */
+    static const unsigned int inverse[8] = {1, 0, 5, 6, 7, 2, 3, 4};
+    return inverse[atst & 7u];
+}
+
 /* Replays g_draws[first, last).  The range exists so a draw that samples the
  * GS frame buffer can break the pass: the caller replays up to it, copies the
  * colour target into the scene capture, and resumes.  Everything else passes
@@ -9319,63 +9330,98 @@ void DrawQueuedSprites(SDL_GPURenderPass *pass, SDL_GPUCommandBuffer *cmd,
         }
         SDL_BindGPUFragmentSamplers(pass, 0, samplers, 2);
 
-        if (draw.resident_mesh)
+        /* AFAIL FB_ONLY / RGB_ONLY under a real alpha test: a fragment that
+         * fails it still draws its colour, without Z.  The first pass is the
+         * test as KEEP; a second one over the same geometry inverts the
+         * comparison with the depth write off (alphaTest.w, set by
+         * RosePan_RendererSetGsTestRegister). */
+        const bool alpha_fail_pass = draw.alpha_test[0] != 0.0f &&
+                                     draw.alpha_test[3] != 0.0f &&
+                                     !draw.finder_mask &&
+                                     !draw.shadow_receiver;
+        for (int alpha_pass = 0; alpha_pass < (alpha_fail_pass ? 2 : 1);
+             alpha_pass++)
         {
-            DrawResidentMesh(pass, draw);
-            streamed_vertices_bound = false;
-        }
-        else if (draw.indexed_mesh)
-        {
-            if (draw.cached_mesh == nullptr ||
-                draw.cached_mesh->vertex_buffer == nullptr ||
-                draw.cached_mesh->index_buffer == nullptr ||
-                (draw.animated_mesh
-                     ? g_animated_mesh_buffer == nullptr
-                     : g_mesh_colour_buffer == nullptr))
+            if (alpha_pass == 1)
             {
-                continue;
+                SDL_GPUGraphicsPipeline *colour_only = GetPipeline(
+                    layout, draw.indexed_mesh ? true : draw.transform_mesh,
+                    depth_test, draw.depth_compare, false, g_dbg_wireframe,
+                    draw.blend_mode, draw.fragment_lighting);
+                if (colour_only == nullptr)
+                {
+                    break;
+                }
+                if (colour_only != bound_pipeline)
+                {
+                    SDL_BindGPUGraphicsPipeline(pass, colour_only);
+                    bound_pipeline = colour_only;
+                }
+                g_uniforms.alphaTest[2] =
+                    (float)GsInverseAlphaTest((unsigned int)draw.alpha_test[2]);
+                g_uniforms.alphaTest[3] = 0.0f;
+                SDL_PushGPUFragmentUniformData(cmd, 0, &g_uniforms,
+                                               (Uint32)sizeof(g_uniforms));
             }
 
-            SDL_GPUBufferBinding vertex_bindings[2]{};
-            vertex_bindings[0].buffer = draw.cached_mesh->vertex_buffer;
-            vertex_bindings[0].offset =
-                draw.cached_mesh->vertex_buffer_offset;
-            if (draw.animated_mesh)
+            if (draw.resident_mesh)
             {
-                vertex_bindings[1].buffer = g_animated_mesh_buffer;
-                vertex_bindings[1].offset =
-                    draw.first_animated_mesh_vertex *
-                    (Uint32)sizeof(AnimatedMeshVertex);
+                DrawResidentMesh(pass, draw);
+                streamed_vertices_bound = false;
+            }
+            else if (draw.indexed_mesh)
+            {
+                if (draw.cached_mesh == nullptr ||
+                    draw.cached_mesh->vertex_buffer == nullptr ||
+                    draw.cached_mesh->index_buffer == nullptr ||
+                    (draw.animated_mesh
+                         ? g_animated_mesh_buffer == nullptr
+                         : g_mesh_colour_buffer == nullptr))
+                {
+                    continue;
+                }
+
+                SDL_GPUBufferBinding vertex_bindings[2]{};
+                vertex_bindings[0].buffer = draw.cached_mesh->vertex_buffer;
+                vertex_bindings[0].offset =
+                    draw.cached_mesh->vertex_buffer_offset;
+                if (draw.animated_mesh)
+                {
+                    vertex_bindings[1].buffer = g_animated_mesh_buffer;
+                    vertex_bindings[1].offset =
+                        draw.first_animated_mesh_vertex *
+                        (Uint32)sizeof(AnimatedMeshVertex);
+                }
+                else
+                {
+                    vertex_bindings[1].buffer = g_mesh_colour_buffer;
+                    vertex_bindings[1].offset =
+                        draw.first_mesh_colour * (Uint32)sizeof(MeshColour);
+                }
+                SDL_BindGPUVertexBuffers(pass, 0, vertex_bindings, 2);
+
+                SDL_GPUBufferBinding index_binding{};
+                index_binding.buffer = draw.cached_mesh->index_buffer;
+                index_binding.offset = draw.cached_mesh->index_buffer_offset;
+                SDL_BindGPUIndexBuffer(pass, &index_binding,
+                                       SDL_GPU_INDEXELEMENTSIZE_32BIT);
+                SDL_DrawGPUIndexedPrimitives(
+                    pass, draw.cached_mesh->index_count, 1, 0, 0, 0);
+                streamed_vertices_bound = false;
             }
             else
             {
-                vertex_bindings[1].buffer = g_mesh_colour_buffer;
-                vertex_bindings[1].offset =
-                    draw.first_mesh_colour * (Uint32)sizeof(MeshColour);
+                if (!streamed_vertices_bound)
+                {
+                    SDL_GPUBufferBinding vertex_binding{};
+                    vertex_binding.buffer = g_vertex_buffer;
+                    vertex_binding.offset = 0;
+                    SDL_BindGPUVertexBuffers(pass, 0, &vertex_binding, 1);
+                    streamed_vertices_bound = true;
+                }
+                SDL_DrawGPUPrimitives(pass, draw.vertex_count, 1,
+                                      draw.first_vertex, 0);
             }
-            SDL_BindGPUVertexBuffers(pass, 0, vertex_bindings, 2);
-
-            SDL_GPUBufferBinding index_binding{};
-            index_binding.buffer = draw.cached_mesh->index_buffer;
-            index_binding.offset = draw.cached_mesh->index_buffer_offset;
-            SDL_BindGPUIndexBuffer(pass, &index_binding,
-                                   SDL_GPU_INDEXELEMENTSIZE_32BIT);
-            SDL_DrawGPUIndexedPrimitives(
-                pass, draw.cached_mesh->index_count, 1, 0, 0, 0);
-            streamed_vertices_bound = false;
-        }
-        else
-        {
-            if (!streamed_vertices_bound)
-            {
-                SDL_GPUBufferBinding vertex_binding{};
-                vertex_binding.buffer = g_vertex_buffer;
-                vertex_binding.offset = 0;
-                SDL_BindGPUVertexBuffers(pass, 0, &vertex_binding, 1);
-                streamed_vertices_bound = true;
-            }
-            SDL_DrawGPUPrimitives(pass, draw.vertex_count, 1,
-                                  draw.first_vertex, 0);
         }
     }
 }
@@ -13659,9 +13705,13 @@ void RosePan_RendererDrawTexturedTriangles2D(const sceGsTex0 *tex0,
                       depth_test != 0, false);
 }
 
-void RosePan_RendererDrawSolidTriangles2D(const float *xy,
-                                         const unsigned char *rgba,
-                                         int vertex_count)
+/* The untextured triangles of both entry points below; `ndc_z` NULL = no
+ * depth (z 0, untested). */
+static void QueueSolidTriangles2D(const float *xy,
+                                  const unsigned char *rgba,
+                                  const float *ndc_z,
+                                  int vertex_count,
+                                  bool depth_test)
 {
     std::vector<SpriteVertex> vertices;
 
@@ -13685,12 +13735,32 @@ void RosePan_RendererDrawSolidTriangles2D(const float *xy,
         vertex.colour[3] = Ps2AlphaToFloat(rgba[i * 4 + 3]);
         vertex.position[0] = ScreenXToClip(xy[i * 2 + 0]);
         vertex.position[1] = ScreenYToClip(xy[i * 2 + 1]);
-        vertex.position[2] = 0.0f;
+        vertex.position[2] = ndc_z != nullptr ? ndc_z[i] : 0.0f;
         vertex.position[3] = 1.0f;
     }
 
     QueueTriangleList(g_white_texture, 1, 1, vertices.data(), vertex_count,
-                      false, false);
+                      ndc_z != nullptr && depth_test, false);
+}
+
+void RosePan_RendererDrawSolidTriangles2D(const float *xy,
+                                         const unsigned char *rgba,
+                                         int vertex_count)
+{
+    QueueSolidTriangles2D(xy, rgba, nullptr, vertex_count, false);
+}
+
+void RosePan_RendererDrawSolidTriangles2DDepth(const float *xy,
+                                              const unsigned char *rgba,
+                                              const float *ndc_z,
+                                              int vertex_count,
+                                              int depth_test)
+{
+    if (ndc_z == nullptr)
+    {
+        return;
+    }
+    QueueSolidTriangles2D(xy, rgba, ndc_z, vertex_count, depth_test != 0);
 }
 
 void RosePan_RendererDrawImageTriangles2D(const void *texture,
@@ -13771,8 +13841,11 @@ void RosePan_RendererDrawImageTriangles2DDepth(const void *texture,
         vertex.position[3] = 1.0f;
     }
 
+    /* The GS alpha test the replay set (TEST_1): under the effect layers'
+     * 0x5000d a texel of alpha 0 neither draws nor writes Z. */
     QueueTriangleList(entry->texture, entry->width, entry->height,
-                      vertices.data(), vertex_count, depth_test != 0, false);
+                      vertices.data(), vertex_count, depth_test != 0, false,
+                      true, nullptr, g_gs_alpha_test);
     (void)linear; /* QueueTriangleList always filters linearly (TEX1 0x60). */
 }
 
@@ -14550,18 +14623,31 @@ void RosePan_RendererSetGsTestRegister(unsigned long long test)
     g_gs_ztst = zte != 0 ? (GsDepthCompare)ztst : GS_DEPTH_ALWAYS;
 
     /*
+     * The alpha test as a depth-write mask.  A fragment that fails the test
+     * with AFAIL FB_ONLY or RGB_ONLY still draws its colour but leaves Z
+     * alone, so ATST NEVER with either is the GS's "draw, do not write
+     * depth" -- how RoR keeps translucent geometry out of the Z buffer
+     * without touching ZBUF: i3r layers with m_fail_only 0x10 / 0x18
+     * (i3rPktLayerTest), the effects' TEST 0x51001 / 0x31001, SprMan's colour
+     * sprites.  Without it a light shaft drawn before the player stamped
+     * its whole volume into the depth buffer and she vanished behind it.
+     * ApplyGsDrawEnv() takes it together with ZMSK.
+     */
+    g_gs_test_blocks_depth_write = ate != 0 && atst == 0 && (afail == 1 || afail == 3);
+
+    /*
      * AFAIL says what a failing fragment still writes: KEEP (0) is the total
      * discard a cut-out wants; FB_ONLY (1) and RGB_ONLY (3) still write colour
-     * and so are not a discard at all; ZB_ONLY (2) *is* a colour discard, but
-     * one that keeps writing depth and cannot be spelled as a plain `discard`.
-     * Treat all three as "no test", so a texture relying on them cannot
-     * suddenly vanish.
+     * but not Z; ZB_ONLY (2) *is* a colour discard, but one that keeps
+     * writing depth and cannot be spelled as a plain `discard`, so it is
+     * treated as "no test".
      *
-     * MEASURED: over a full session (574,618 TEST writes, 7 distinct values)
-     * AFAIL was KEEP every single time, so this branch never fires in this
-     * game.  An earlier note here claimed it was turning away a "more common
-     * FB_ONLY form" -- there is no such traffic.  Kept as a guard for data
-     * outside that sample, not as a live path.
+     * FB_ONLY / RGB_ONLY with a real comparison is RoR's cut-out: its i3r
+     * layers write TEST 0x5140d (alpha GREATER 0, FB_ONLY), so a clear texel
+     * of a fence or a leaf leaves the depth buffer alone.  The test runs as
+     * KEEP and alphaTest.w asks the draw loop for a second pass over the
+     * failing fragments -- the inverse comparison, colour only, no depth
+     * write (RecordDrawPass).  FF3's sample had AFAIL KEEP only.
      */
     const float ref = (float)aref / kPs2AlphaScale;
 
@@ -14582,7 +14668,7 @@ void RosePan_RendererSetGsTestRegister(unsigned long long test)
      * AREF anywhere in it is 0x01, so nothing in the ROM comes close to the
      * saturation edge this rule exists to catch.
      */
-    if (ate == 0 || afail != 0 || !GsAlphaTestPasses(1.0f, ref, atst))
+    if (ate == 0 || afail == 2 || !GsAlphaTestPasses(1.0f, ref, atst))
     {
         g_gs_alpha_test[0] = 0.0f;
         return;
@@ -14591,7 +14677,7 @@ void RosePan_RendererSetGsTestRegister(unsigned long long test)
     g_gs_alpha_test[0] = 1.0f;
     g_gs_alpha_test[1] = ref;
     g_gs_alpha_test[2] = (float)atst;
-    g_gs_alpha_test[3] = 0.0f;
+    g_gs_alpha_test[3] = (afail == 1 || afail == 3) && atst != 1 ? 1.0f : 0.0f;
 }
 
 void RosePan_RendererSetGsAlphaRegister(unsigned long long alpha)
