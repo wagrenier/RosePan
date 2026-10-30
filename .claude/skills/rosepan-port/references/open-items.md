@@ -21,6 +21,10 @@ canOpenItemMenu) cannot open the item menu yet. Open: what advances the book. No
 path opens the item menu, so no picture yet: when a run reaches a room, open it from the pad and
 compare with work/ref (tm2png.py --scan data/mnurpk/mnuitem.rpk). Doubt: the slot 12 / 13 reads
 through m_slot[] in setEquipSprites (an EE read past the array) are taken as no item (PORT).
+Session 5 (2026-10-29): pages 11 / 12 / 13 (the gift grid, the offer list, the offer question) and
+setDescTexts 0x1bc8f8; every page is written. Left: FUN_001b69d0 (0x39d0 bytes, no callers found by
+ghidra.py refs -- dead code or reached through a table nobody found; decide whether to write it or
+mark it unreachable). Doubt: page 11 passes 0x32767 to MagSystem::setViewParam, copied as is.
 
 **WRITTEN 2026-10-29 (`eff/effcommon.cpp`, verify, pinned 0x16fb70..0x1704a4 out of
 unassigned@0016fb70): the 13 shared effect helpers -- effCalcViewDepth / effMoveToward / effVecLength,

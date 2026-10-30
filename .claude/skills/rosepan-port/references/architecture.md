@@ -1569,7 +1569,7 @@ pattern table is the EE image 0x2a8848..0x2aad10, display list 0x2aad70 (65 spri
 data/mnurpk/mnuopt.rpk (option_sita / option_yogore / option). Seen working 2026-10-29 from the title's
 Option item (progress/ shot).
 
-## The item menu (`mnu/mnuitem.cpp`, 0x1ae954..0x1bdae4, 2026-10-29, partial)
+## The item menu (`mnu/mnuitem.cpp`, 0x1ae954..0x1bdae4, 2026-10-29, partial: all but 0x1b69d0)
 
 MnuItem (EE 0x2710; MagLifeMenuItem +0x40, menu 0x10000) owns three SprMan: +0x98 the menu (120
 sprites, data/mnurpk/mnuitem.rpk textures base / tex01 (tex01_eu in languages 1..4, bss 0x7812ac) /
@@ -1628,6 +1628,17 @@ the grid while sequence bit 0x10000000 (offering): wrapping cursor, cross -> pag
 unequips, circle / start close once page 7 put an item away (+0x248c). **Page 10** 0x1bb12c lists
 buildFlagList's rows in MnuTextList at (0x82, 100); a choice puts column 2 in global 0x11 (0x15 = 3,
 0x16 = 1) and closes the menu.
+Session 5: **page 11** 0x1bb4f0 is the gift grid while sequence bit 0x20000000: prompt window +0x26fc
+("Choose a gift to offer.", rodata 0x2fb0e8; setViewParam 0xa0, 0x82, 0x32767 as the ROM has it),
+page 9's cursor, the equipped / find / gauge / frame sprites hidden (m_state 0), chapter plate pattern
+0x5c; cross on an item -> page 13 (m_page_ret[13] = 11), circle / start close with global 0x11 =
+0xa00, 0x15 = 1. **Page 12** 0x1bbcfc (nothing sets m_page 12) is page 4's list with an offer row
+0x25 (m_work[8], others dim). **Page 13** 0x1bc370 asks yes 0x2a / no 0x2b (m_work[9], frame
+0x26..0x29): yes waits 4 frames, then global 0x11 = the slot's item, 0x15 = 3, 0x16 = 1 and the menu
+closes (processPad step 7 sets the item's flag for the ids listed above). setDescTexts 0x1bc8f8
+(no callers): name sprite 0x5c, field 0x25 lines into 0x5d..0x5f. FUN_001b69d0 (0x39d0 bytes, no
+callers, unwritten): a big sprite-state setter (setFade / setAnim / showSprite over many sprites,
+argument 1 selects a block).
 
 ## Modules (RoR's own source files)
 
