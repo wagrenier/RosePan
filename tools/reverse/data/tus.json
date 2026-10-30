@@ -1970,6 +1970,17 @@
    "status": "verify",
    "why": "No source string in 0x13f07c..0x13f49c: MagScene's GamMan menu glue (gamEnterMenu / gamLeaveMenu, canOpen*, the menu fade times over g_sequence) and the system message window (openSysMsgWindow, closeSysMsgWindow, isWindowOpen, pulseMenu1000a). Between updateCamera (magscenecamera.cpp, asserted) and checkLightNo 0x13f49c (magscenelight.cpp). The file name is a guess: an assertless file leaves no path string"
   },
+  "mag/magsceneoption.cpp": {
+   "notes": "verify: the retail disc has no data/options.txt (checked the extracted disc), so loadSystemData never calls this; nothing on screen can show it. Ids 0 (MAGTEST, string) and 1 (CAMERA_MOVE_SPEED, float) only assert their type and store nothing on the ROM. An integer value counts as its float; a string value converts its pointer bits on the ROM (harmless, written as the int member). Smoke run still ends on the Atlus disclaimer at 15 s, as before this TU. For the references: architecture.md -- MagScene +0x4371c m_option_bucket[16] (UtlParam, EE stride 0xc, up to 0x437dc), option table 0x2ee548 {name, id} x15 + {NULL, -1}; +0x22a4 m_opt_shadow_offset, +0x22a8 m_opt_ambient_extra (assert names).",
+   "sessions": [
+    {
+     "date": "2026-10-30 12:27",
+     "status": "verify",
+     "summary": "MagScene::parseOption reconstructed: data/options.txt parsed by utlParseParam into the new m_option_bucket (0x4371c), names looked up in the 15-row option table (0x2ee548), setting the camera zoom unit (DogCamera m_144), SHADOW_BLACKNESS m_22a0, m_opt_shadow_offset and m_opt_ambient_extra (renamed from m_22a4 / m_22a8 after the ROM asserts), and the PC tunings through MagLifePC::setParam. Added the ROM names UTLVB_TYPE_FLOAT / UTLVB_TYPE_STR to utlmisc.h."
+    }
+   ],
+   "status": "verify"
+  },
   "mag/magscenerender.cpp": {
    "notes": "All 20 functions written; verify because nothing on screen can show it: no boot actor has the 0x60 shadow flags and all i3d layer / view / light functions are stubs (screen black). The first session whose screenshot shows projected shadows marks it done. Open points in open-items.md (Projected shadow open points): the up vector at data 0x298cf0 reads (1, -1, 1, 0); the constructor's +0x2040 value (likely -1, the host stub leaves 0); the light-set mask layout in DogLightPool. Next for any picture is unchanged: the draw-group / layer module unassigned@0021fb50 (queue B.3), then i3dCtxCreateView, i3dCtxCreateLight, DogLightPool::createLight.",
    "ranges": [

@@ -515,7 +515,7 @@ void MagScene::drawBlobShadows(I3dLayer *layer)
 // ──────────────────────────────────────────────────────────────────────
 // The projected shadows of the shown actors whose flags are 0x60 of 0x60
 // (at most ten: drawActorShadow asserts the count), through the second
-// view with its depth range from m_22a4 / m_22b0.
+// view with its depth range from m_opt_shadow_offset / m_22b0.
 // callcheck: dbgAssertFailed, I3rRoot__CheckIdString (the assert handler inside ROR_ASSERT; inside the inline DogModel::isAlive); isHide is vtable slot 9
 // ROR 0x0013a924
 
@@ -528,7 +528,7 @@ void MagScene::drawShadows(i3dContext *ctx, sceGsDBuff *dbuff, int frame)
         if (!actor->isAlive() || actor->isHide() || (m_actor_flags[i] & 0x60) != 0x60)
             continue;
 
-        float z = m_22a4;
+        float z = m_opt_shadow_offset;
         if (m_22b0 != 1.0f)
             z = (z - 1.0f) * m_22b0 + 1.0f;
         m_view[1].m_zmin = z;
@@ -1022,7 +1022,7 @@ void MagScene::draw(i3dContext *ctx, sceGsDBuff *dbuff, int frame)
 
     for (int i = 0; i < 8; i++)
     {
-        float scale = ((u_int)(i - 1) < 2) ? m_22a8 : 1.0f;
+        float scale = ((u_int)(i - 1) < 2) ? m_opt_ambient_extra : 1.0f;
         lightstatus[i] = m_light_pool.createLight(ctx, i, m_sepia, scale);
         ROR_ASSERT(lightstatus[i] != NULL); /* 2282 */
         renderstage[i] = i3dCtxCreateLayer(ctx, 500.0f);

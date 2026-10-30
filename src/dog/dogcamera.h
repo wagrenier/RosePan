@@ -70,7 +70,7 @@ struct DogCamera : DogEntityEx
     int           m_138;            // ROR 0x138: role unknown
     int           m_13c;            // ROR 0x13c: role unknown
     float         m_angle;          // ROR 0x140: the lens angle; MagScene::draw rebuilds the frustum when it changes
-    float         m_144;            // ROR 0x144: 115 from the constructor; the lens scale's unit
+    float         m_144;            // ROR 0x144: 115 from the constructor; the lens scale's unit (options.txt ZOOM_RATIO sets it)
     float         m_saved_angle;    // ROR 0x148: saveCamera's m_angle
     u_char        _14c[0x150 - 0x14c];
     sceVu0FVECTOR m_saved_trans;    // ROR 0x150: saveCamera's m_trans ((0, 0, 0, 1) from the constructor)
