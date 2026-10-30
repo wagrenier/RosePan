@@ -2120,7 +2120,7 @@ MagScene::MagScene()
     m_2aa84 = 1;
     m_mirror_axis = 0;
     for (int i = 0; i < 4; i++)
-        m_22bc[i] = -1;
+        m_dbg_window[i] = -1;
     m_854d5 = 1;
     m_854d4 = 1;
     m_854b0[0] = 0x1.999998p-4f; /* 0x3dcccccc, 0.1 */
