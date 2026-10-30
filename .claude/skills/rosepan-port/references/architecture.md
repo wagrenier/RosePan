@@ -3064,6 +3064,23 @@ called directly by their ctors:
   data/bg/mapunit.bin (pointer at data 0x2d8ff4), allocDebug line 341 flags 1, no retry.
 Nothing in the ROM references either constructor or vtable: dead code (streamed areas).
 
+## The event test overlay (debug/naga_debug.cpp, 0x216768..0x217f10 + 0x2911cc..0x291228, 2026-10-30)
+
+`EventTestTask : CmnITask` (vtable 0x2e50c0, kind 2 from get_task_type 0x29121c), a developer's
+debug task; nothing in the ROM constructs it (constructor 0x216828 -- Ghidra had folded it into the
+end of 0x216768 -- and the vtable have no references). EE layout: +0x04 exec count, +0x08 the loaded
+BIN file (its word +0x08 is the entry count), +0x0c file + 0x40 (0x40-byte entries, word +0x3c the
+id), +0x10 menu page, +0x14 cursor, +0x18 first shown entry, +0x1c / +0x20 / +0x24 / +0x28 hold frames
+of pad 1 UP / DOWN / LEFT / RIGHT. exec 0x2168f8: pad 0 R3 (repeat bit 4) cycles the mode bss 0x2db2a4
+through 0..2, pad 1 SELECT toggles it 3 / 0; while bss 0x2db2b8 (a menu toggle) is set it forces
+MagSystem::setLightColor(0, 0, 2, 0.99 x3, 1), clears MagScene m_2aa84 and sets the view far to
+10000; then disp 0x216ad0 (pages by mode; mode 3 runs the menu 0x217260 over
+data/seq/w%03d/DBGFLAG.BIN (toggles the flag bit in the words at 0x7b2060), DBGSTEP.BIN,
+data/seq/DBGITEM.BIN, w%03d/DBGAREA.BIN, w = bss 0x7a3210). nagaDbgLoadFile 0x216768 reads a whole
+file into allocDebug(size, file, 111, 0, 2). The constructor clears text buffers bss 0x7b4e08 (0x20),
+0x7b4e28 (0xa0), 0x7b4ec8 (40 x 0x40) and the words 0x7b5968 (40). The menu is on the second pad
+(MagSystem m_pad[1], 0x6e998c = its m_repeat: 0x4000 CROSS selects, 0x2000 CIRCLE backs out).
+
 ## The script tasks (task/tsk_chr.cpp, 0x1e7f28..0x1f6c64, 2026-10-26)
 
 Unanchored (no source string): the run between tsk_man.cpp and tsk_scene.cpp, pinned by its classes.

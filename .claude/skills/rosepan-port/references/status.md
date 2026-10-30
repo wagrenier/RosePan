@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 16:47 at commit `469ef48` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 16:56 at commit `4730783` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-30 16:47 at commit `469ef48` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7194**, named **7117** (99%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5515
-- context-name ledger: 5805 entries; overrides of wrong library matches: 5
-- placed in a source file: 6213/7194 in 166 files
+- game functions: **7195**, named **7123** (99%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5521
+- context-name ledger: 5811 entries; overrides of wrong library matches: 5
+- placed in a source file: 6220/7195 in 166 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -21,7 +21,7 @@ Least-named game-code regions (64 KB blocks):
 |---|---|---|
 | `001a0000` | 199/214 (93%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `001f0000` | 218/234 (93%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
-| `00210000` | 337/361 (93%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
+| `00210000` | 343/362 (95%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
 | `00160000` | 257/268 (96%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `00130000` | 180/183 (98%) | mag/magscene.cpp, mag/magscenerender.cpp, mag/magscene2.cpp |
 | `00110000` | 254/257 (99%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **6038**; stubs: **0**
+- reconstructed RoR functions: **6041**; stubs: **1**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -41,6 +41,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/debug/mcd_debug.cpp` | 2 | 0 |
 | `src/debug/mimu_debug.cpp` | 9 | 0 |
 | `src/debug/motnamecnv0.cpp` | 8 | 0 |
+| `src/debug/naga_debug.cpp` | 3 | 1 |
 | `src/dog/dogactor.cpp` | 147 | 0 |
 | `src/dog/dogcamera.cpp` | 8 | 0 |
 | `src/dog/dogentity.cpp` | 13 | 0 |
@@ -199,9 +200,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 175 TUs: todo 77, partial 1, verify 151, done 17
-- next: **None** (nothing on the frontier and no queued TU)
+- 174 TUs: todo 76, partial 2, verify 151, done 17
+- next: **debug/naga_debug.cpp** (continuing a partial TU)
 - pinned queue: unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
+- partial: `debug/naga_debug.cpp` 3/14 -- Left: EventTestTask::disp 0x216ad0 (0x790 bytes, stubbed in naga_debug.cpp; pages by mode bss 0x2db2a4, strings World %d, MAP_ORPH, position formats) and the me
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -356,6 +358,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 16:56 `debug/naga_debug.cpp` partial: EventTestTask (vtable 0x2e50c0, kind 2): nagaDbgLoadFile, the constructor split out of 0x216768 at 0x216828, destructor, init, exec, inline get_task_type / term
 - 2026-10-30 16:47 `task/tsk_bg_load.cpp` verify: TskBGLoad / TskBGLoadArea / TskBGLoadMap, all 19 functions: the background pack loaders that read a pack head, allocate its total size and read the whole pack i
 - 2026-10-30 16:30 `dog/doglight.cpp` verify: DogLight, all 8 functions: init / clear / term, getDataSize, create (one block of ambient, direct, point, spot, hemi and dist lights), setParam / getParam (pos,
 - 2026-10-30 16:19 `mag/maglifebwnmode.cpp` verify: Brown's ten modes (MagLifeBwnMode Null/One/Wait/Sit/Fuse/Move/Path/Turn/Rotate/Wall), all 19 functions; pinned 0x125bd4..0x1267c0 absorbing unassigned@00125bd4 
@@ -363,15 +366,18 @@ Recent sessions:
 - 2026-10-30 15:41 `rx/rxsys.cpp` partial: rx/rxsys.cpp session 2: removed the 5 boot stubs - ini parser (rxSysIniFindSection/ReadKey/FindKey/Find, key count and key-at helpers), tty bind/open/close, rxS
 - 2026-10-30 15:23 `task/tsk_attack.cpp` verify: TskAttack and TskDamage steps written: all 21 functions of 0x1fd424..0x20067c (was unassigned@001fd424, pinned as task/tsk_attack.cpp): the six attack steps (sw
 - 2026-10-30 15:05 `eff/effdust2.cpp` verify: unassigned@001704a4 split into eff/effdust2.cpp, efffire1.cpp, efffire2.cpp, efffog1.cpp, efffog2.cpp and all 28 functions written (EffDust2 .. EffFog2Prim, kin
-- 2026-10-30 15:04 `eff/efffog1.cpp` verify: EffFog1 written, all 4 functions: a camera-facing fog quad drifting along the camera x axis, reset every 540 frames, corner alpha keys per 60 frames with the le
+
+| TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
+|---|---|---|---|---|---|
+| `debug/naga_debug.cpp` | partial | 3/1/14 | 5.9 | 1 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
 | RoR addr | name | call sites | provenance | state | inferred file |
 |---|---|---|---|---|---|
-| `001be734` | FileReadReq::FileReadReq | 67 | ror | missing | game/gamfile.cpp |
-| `001be2dc` | FileReader::~FileReader | 33 | ror | missing | game/gamfile.cpp |
-| `001be2cc` | FileReader::FileReader | 30 | ror | missing | game/gamfile.cpp |
+| `001be734` | FileReadReq::FileReadReq | 68 | ror | missing | game/gamfile.cpp |
+| `001be2dc` | FileReader::~FileReader | 34 | ror | missing | game/gamfile.cpp |
+| `001be2cc` | FileReader::FileReader | 31 | ror | missing | game/gamfile.cpp |
 | `00192ac0` | mnuBase::mnuBase | 3 | ror | missing | mnu/mnubase.cpp |
 | `00192b3c` | mnuBase::~mnuBase | 3 | ror | missing | mnu/mnubase.cpp |
 | `0012ab18` | MagLifeBwnCtrl::reset | 2 | ror | missing | mag/maglifebwnctrl.cpp |
@@ -380,6 +386,7 @@ Recent sessions:
 | `0012a6a0` | MagLifeBwnCtrl::processPad | 1 | ror | missing | mag/maglifebwnctrl.cpp |
 | `00282bd8` | MagLifePCMode::__tf | 1 | sym | missing | - |
 | `00174c44` | EffGeneric1::applyTexKeys | 1 | ror | missing | eff/effgeneric.cpp |
+| `00216ad0` | EventTestTask::disp | 1 | ror | stub | debug/naga_debug.cpp |
 | `001f7644` | VoiceManager::stop | 1 | ror | missing | task/tsk_scene.cpp |
 | `001f6c64` | DisplayMessage::DisplayMessage | 1 | ror | missing | task/tsk_scene.cpp |
 | `001f6edc` | SeManager::SeManager | 1 | ror | missing | task/tsk_scene.cpp |
