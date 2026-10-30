@@ -139,7 +139,12 @@ void        rxSysExceptionHandler(u_int stat, u_int cause, u_int epc, u_int bva,
 void        rxSysSetDebugHandlers(void);                        // ROR 0x00242960
 void        rxSysRestoreDebugHandlers(void);                    // ROR 0x00242a10
 void        rxSysHexDump(const char *p, int size);              // ROR 0x00242aa8
+void        rxSysConsoleSetDisplay(int on);                     // ROR 0x002430a0
+void        rxSysConsoleSetWaits(int newlineWait, int closePause); // ROR 0x00243148
+u_int       rxSysConsoleSetColor(u_int color);                  // ROR 0x00243160
+void        rxSysExitHook(int retval);                          // ROR 0x00243178
 void        rxSysInitExceptionScreen(void);                     // ROR 0x002431c0
+void        rxSysTermExceptionScreen(void);                     // ROR 0x002432d8
 void        rxSysLockSema1(void);                               // ROR 0x00242480
 void        rxSysUnlockSema1(void);                             // ROR 0x002424e0
 void        rxSysInitUser(void);                                // ROR 0x002433d8

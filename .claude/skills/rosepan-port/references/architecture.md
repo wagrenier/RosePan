@@ -138,6 +138,17 @@ Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
   dir + search dir + name ("/" makes either absolute) behind the driver's root.
 - `rxFileLoad` / `rxFileLoadModule` / `rxFileRebootIop` open through rxsys's print-locked sce*
   wrappers (`rxSysOpen` 0x242528 .. `rxSysLseek` 0x242660). `rxFileLoad` reads size + 0x80 bytes.
+- **System Monitor** (0x242c10..0x2432d8): the 80 x 28 text console the two exception handlers
+  (`rxSysExceptionHandler` 0x242740, `mainExceptionHandler` 0x204a00) open with
+  `rxSysInitExceptionScreen` 0x2431c0. Cells (bss 0x7d88a8, 28 rows x 0x140) are char << 24 | ABGR
+  colour (0x7d88a0: grey 0x807f7f7f, banner blue 0x80804040); the cursor (0x7d8898 / 0x7d889c) runs
+  over rows 1..26, columns 3..77 (wrap at 75, scroll past cursor row 25). A row is expanded through the
+  8x8 font 0x2dbeb0 (96 glyphs from ' ', bit 0 = left pixel) into 640 x 8 PSMCT32 pixels (0x7ce860,
+  lines doubled when sceGsGParam.ffmode is 0) and uploaded with LoadImage at fbp 0. Opening patches
+  `_exit` 0x100248 with `j 0x243178` (rxSysExitHook: "Exit System (retval=%d)" in orange, spin) and
+  installs `rxSysConsolePrintHook` 0x243050, which returns 1 so rxSysPrintf still prints.
+  `rxSysTermExceptionScreen` 0x2432d8 (unreferenced) pauses 0x2dbea8 = 120 VSyncs and undoes both;
+  0x2dbea4 (0) is a VSync wait per newline. PC: log-only (uploads / display env dropped).
 - **Async file slots** (bss 0x7dabb0, 64 x 0xd0, fd 1..63; pools for markers 0x7de3b4, ring segments
   0x7de9b8 and tags 0x7ddfb0, threaded by rxSysInitModules): `rxSysStreamOpen(name, flags)` 0x243788 ->
   `rxFileOpenEx` 0x2442e8 -> `rxFileOpenSlot` 0x244410, which posts a create (SCE_CREAT, then never
