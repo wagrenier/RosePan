@@ -468,7 +468,14 @@ struct MagScene
     void addFog(const I3dFog *delta, int frames);                        // ROR 0x00143eec
     /* One step of setFog's fade. */
     void updateFog();                                                    // ROR 0x00143fd0
+    /* mag/magscenedebug.cpp: the debug windows, one per level 0..3, each a
+     * MagLifeWindowDebug in an m_window slot. updateDebug runs them from
+     * level 3 down (live, then processPad; a nonzero processPad stops). */
     void updateDebug(BedPad *pad0, BedPad *pad1);                        // ROR 0x0014313c
+    /* A 0x200 x 0x100 window at (0, 0xa0, 30000) for theLevel; its slot,
+     * -1 when no window is free. Nothing in the ROM calls these two. */
+    int  openDebugWindow(int theLevel);                                  // ROR 0x0014324c
+    void closeDebugWindow(int theLevel);                                 // ROR 0x00143430
     /* Once a frame: plays out a pending path move (bit 0x10, 30 frames),
      * else runs the mode -- 1 looks at the actor, 3 takes the best path of
      * every sky slot, 4 / 5 stand on the current path (4 sliding it), 6 the
@@ -631,7 +638,7 @@ struct MagScene
     float          m_22b0;              // ROR 0x22b0: blends m_22a4 toward 1 for the shadow view (1 = m_22a4 as is)
     int            m_22b4;              // ROR 0x22b4: sky path display: 0 off, 1 copy the points then 2, 2 draw the copy (the constructor's value: 1)
     int            m_22b8;              // ROR 0x22b8: the constructor clears it; role unknown
-    int            m_22bc[4];           // ROR 0x22bc: the constructor sets -1; role unknown
+    int            m_dbg_window[4];     // ROR 0x22bc: per debug level, its m_window slot (openDebugWindow), -1 = none (the constructor's value)
     int            m_sepia;             // ROR 0x22cc: sepia on (Brown op sepo); textures and lights load sepia by it; MagSystem::clearScene22cc zeroes it
     BedSubMode     m_sub_mode;          // ROR 0x22d0: update's mode (pushSubMode sets 8; getDrawFlags tests 7 and 8); m_step -1 on entry; m_arg the requested menu id, m_arg2 the PC's mode / number then
     MagLifeMan     m_life_man;          // ROR 0x2330

@@ -6287,6 +6287,18 @@
   "was": "FUN_0014313c",
   "why": "sub mode 9; magscenedebug.cpp assert m_window[m_dbg_window[i]]"
  },
+ "0014324c": {
+  "name": "MagScene::openDebugWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_0014324c",
+  "why": "asserts m_dbg_window[theLevel] < 0, takes the first free m_window slot, news a MagLifeWindowDebug 0x200 x 0x100 at (0, 0xa0, 30000), stores the slot in m_dbg_window[theLevel] and returns it (-1 when full)"
+ },
+ "00143430": {
+  "name": "MagScene::closeDebugWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_00143430",
+  "why": "asserts m_dbg_window[theLevel] >= 0, closeWindow on it, sets it -1"
+ },
  "00143498": {
   "name": "MagSceneIFMap::getMax",
   "tag": "ror-inferred",

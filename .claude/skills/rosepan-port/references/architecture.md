@@ -713,7 +713,7 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   MagLifeControlChara's bound actor is +0x58 (`m_actor`).
 - **The scene's constructor** (0x1360a0, written 2026-10-22): besides its members' constructors it
   sets 256 vector pairs at +0x0 to (0, 0, 0, 1) (resetEntities clears their y), the shadow mode -1,
-  +0x22a0 0.8 / +0x22a4 1.03 / +0x22a8 0.4 / +0x22b0 1 / +0x22b4 1, +0x22bc[4] -1, every sky slot's
+  +0x22a0 0.8 / +0x22a4 1.03 / +0x22a8 0.4 / +0x22b0 1 / +0x22b4 1, +0x22bc[4] -1 (m_dbg_window: per debug level 0..3 its m_window slot, openDebugWindow 0x14324c / closeDebugWindow 0x143430, both without callers in retail), every sky slot's
   m_id -1, the strip records free, m_focus_actor -1, +0x2a9c8 3, +0x2aa84 1, +0x854b0 (0.1, 0.1,
   0.1, 1), +0x854d4 / d5 1, and m_pc_no **0** (not -1). The camera's inline constructor gives a
   pi/3 lens (+0x140, 0x3f860a92) and 115 at +0x144; DogEntity's inline one gives (0, 0, 0, 1)

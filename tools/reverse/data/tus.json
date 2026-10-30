@@ -1876,6 +1876,24 @@
    "status": "verify",
    "why": "No source string in 0x143d3c..0x145020; mag/magsceneif.cpp asserts end at 0x143d3c (its 13 functions serve debug/motnamecnv) and the Hfm enemy classes start at 0x145020. The run is MagScene fog (setFog 0x143d7c and its two wrappers, updateFog), MagLifeWindowDebug's ctor and the Brown control interface over g_magSystem's MagLifeBwnCtrl (magBwnHurt, gamSetBwn*, gamGetBwn*, magBwnSeqCommand) called from gamman, seqcall, tsk_scene: one scene-command file, name chosen by the session (open-items.md)."
   },
+  "mag/magscenedebug.cpp": {
+   "notes": "Complete. The debug windows are MagLifeWindowDebug in m_window slots, one per level 0..3 in m_dbg_window (scene +0x22bc). updateDebug runs from MagScene::update sub mode 9 (live, then processPad, which is MagLifeWindow's linkonce return 0 in every window here). Nothing in retail calls openDebugWindow or closeDebugWindow, so nothing can show on screen; the smoke run still reaches the disclaimer screen, drawn correctly. verify, not done: no picture can confirm it.",
+   "ranges": [
+    [
+     "0014313c",
+     "00143498"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 12:19",
+     "status": "verify",
+     "summary": "MagScene debug windows: updateDebug, openDebugWindow, closeDebugWindow reconstructed; m_22bc renamed m_dbg_window; extent pinned 0x14313c-0x143498"
+    }
+   ],
+   "status": "verify",
+   "why": "all three functions reference the mag/magscenedebug.cpp source string; neighbours are magloader.cpp below and magsceneif.cpp above"
+  },
   "mag/magscenefocus.cpp": {
    "notes": "Verify: the 15 s smoke run shows the disclaimer screen as before; nothing on that path turns focus on (setFocusData runs from an event pack with a file 2, seqFunc281 op 13 from scripts). Even once a scene turns it on, the PC draws nothing: the native i3d module models neither FRAME_1 render targets nor VRAM-only textures (efffocus block 0x2700, like shadow01 at 0x2300), and the shrink's hand-written GIF packet is deliberately not recorded (its TEX0 is the frame buffer). open-items Open questions has the render-target host task this needs; the first session whose screenshot shows a blurred background behind a focus track marks this done. PC deviations: the track line copy is clipped to the ROM's 128-byte buffer; strlwr is a local helper (focusStrLwr). Renamed updateRecords853fc -> updateFocus, initRecords853bc -> initFocus (magscene.cpp callers updated); seqcall op 13 now uses m_focus.m_val / m_lerp. Removed the stale queue entries unassigned@00140c68 / unassigned@00140990.",
    "ranges": [

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 12:12 at commit `a73d65a` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 12:20 at commit `b09a9a0` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-30 12:12 at commit `a73d65a` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **7000** (97%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 265, ror-inferred 5398
-- context-name ledger: 5701 entries; overrides of wrong library matches: 5
+- game functions: **7187**, named **7002** (97%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 265, ror-inferred 5400
+- context-name ledger: 5703 entries; overrides of wrong library matches: 5
 - placed in a source file: 6065/7187 in 154 files
 
 Least-named game-code regions (64 KB blocks):
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5823**; stubs: **133**
+- reconstructed RoR functions: **5826**; stubs: **132**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -124,7 +124,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/magscene2.cpp` | 19 | 0 |
 | `src/mag/magscenecamera.cpp` | 16 | 0 |
 | `src/mag/magscenecmd.cpp` | 36 | 0 |
-| `src/mag/magscenedebug.cpp` | 0 | 1 |
+| `src/mag/magscenedebug.cpp` | 3 | 0 |
 | `src/mag/magscenefocus.cpp` | 16 | 0 |
 | `src/mag/magsceneif.cpp` | 13 | 0 |
 | `src/mag/magscenelight.cpp` | 10 | 0 |
@@ -185,8 +185,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 174 TUs: todo 86, partial 1, verify 134, done 17
-- next: **mag/magscenedebug.cpp** (frontier score 1)
+- 174 TUs: todo 85, partial 1, verify 135, done 17
+- next: **mag/magsceneoption.cpp** (frontier score 1)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -270,6 +270,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/magscene2.cpp` 19/19 -- Complete but unseen: MagScene::start (magscene.cpp) and the GamMan loads are stubs, so no loader runs and the screen stays black (MagScene::draw is a stub too).
 - verify: `mag/magscenecamera.cpp` 16/16 -- 200 s New Game run: no assert or crash, ends on the open picture book as before (progress shot); no map draws yet, so no path camera can be seen: verify. Traps 
 - verify: `mag/magscenecmd.cpp` 36/36 -- Verify: the 200 s run reaches gamSetBwnFollow (MagLifeBwnCtrl::setLevel stub hit) and still ends black after the narration frame (~6000) as before; fog shows on
+- verify: `mag/magscenedebug.cpp` 3/3 -- Complete. The debug windows are MagLifeWindowDebug in m_window slots, one per level 0..3 in m_dbg_window (scene +0x22bc). updateDebug runs from MagScene::update
 - verify: `mag/magscenefocus.cpp` 16/16 -- Verify: the 15 s smoke run shows the disclaimer screen as before; nothing on that path turns focus on (setFocusData runs from an event pack with a file 2, seqFu
 - verify: `mag/magsceneif.cpp` 13/18 -- Nothing on screen can show this TU: its callers are debug/motnamecnv0.cpp (scene playback, motNameConvert) and debug/motnamecnv.cpp; the 15 s run stays on the b
 - verify: `mag/magscenelight.cpp` 10/10 -- Build, callcheck and layoutcheck green. The 200 s New Game run passes the four previously reached stubs (setLightNo, setLightFlags, setLightParam, copyLightSet)
@@ -325,6 +326,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 12:19 `mag/magscenedebug.cpp` verify: MagScene debug windows: updateDebug, openDebugWindow, closeDebugWindow reconstructed; m_22bc renamed m_dbg_window; extent pinned 0x14313c-0x143498
 - 2026-10-30 12:12 `emy/emy_dwf.cpp` verify: DwfOutAtkNear (Init, Exec, Term and its throw, claw and grab modes with startThrow / startClaw), DwfOutFort (Init, Exec, Term, startLeap), DwfOutDead (Init, Exe
 - 2026-10-30 11:54 `emy/emy_dwf.cpp` partial: DwfOutAtkFar (Init, Exec, Term, startThrow), DwfOutStared, DwfOutWin (chase and scripted win, execChase / execScripted) and DwfOutIrritate (Init, Exec, Term, ge
 - 2026-10-30 11:35 `emy/emy_dwf.cpp` partial: DwfMain (type 0, all 25 methods and tests, the two finders) and the outs Disappear, Appear, Wait, Walk, Serch, Pickup, Parts, Test reconstructed (49 functions);
@@ -332,16 +334,14 @@ Recent sessions:
 - 2026-10-30 10:54 `emy/emy_pig.cpp` verify: PigMain (type 1) and its outs PigOutParts, PigOutTackle, PigOutTest: all 34 functions; unassigned@0015a17c split into emy/emy_pig.cpp and emy/emy_dwf.cpp
 - 2026-10-30 10:00 `mag/maglifemenusp.cpp` verify: Reconstructed both dial-lock menus: MagLifeMenuSpecial (KLCK, 0x1000b) and MagLifeMenuSpecial2 (0x1000c..f) -- constructors, destructors, init, term, isInit, pr
 - 2026-10-30 09:51 `mnu/mnuSelectLanguage.cpp` verify: MnuSelectLanguage, the language select screen: all 16 functions (ctor, dtor, init, term, isInit, processPad with the inline exec, draw, open, close, openWindow,
-- 2026-10-30 09:41 `eff/effsteam.cpp` verify: eff/effsteam.cpp pinned 0x179428..0x17a918 out of unassigned@001788ec: EffSteam1 (vent puffing EffSteam1Prim every third frame of its period), EffSteam1Prim (gr
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@001788ec` | todo | 0/9/13 | 2.8 | 1 | 0 |
-| `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
-| `mag/magscenedebug.cpp` | todo | 0/1/3 | 0.8 | 1 | 0 |
 | `unassigned@0016afcc` | todo | 0/5/6 | 1.6 | 1 | 0 |
-| `mag/magsceneoption.cpp` | todo | 0/1/1 | 0.8 | 1 | 0 |
+| `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
 | `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
+| `mag/magsceneoption.cpp` | todo | 0/1/1 | 0.8 | 1 | 0 |
+| `unassigned@001788ec` | todo | 0/9/13 | 2.8 | 1 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -357,7 +357,6 @@ Recent sessions:
 | `002413d8` | rxSysIniFind | 1 | ror | stub | rx/rxsys.cpp |
 | `00241a00` | rxSysOpenTty | 1 | ror | stub | rx/rxsys.cpp |
 | `001f9e38` | FUN_001f9e38 | 1 | - | missing | task/tsk_scene.cpp |
-| `0014313c` | MagScene::updateDebug | 1 | ror | stub | mag/magscenedebug.cpp |
 | `0012a6a0` | MagLifeBwnCtrl::processPad | 1 | ror | missing | mag/maglifebwnctrl.cpp |
 | `00243560` | rxSysUpdateDevices | 1 | ror | stub | rx/rxsys.cpp |
 | `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
