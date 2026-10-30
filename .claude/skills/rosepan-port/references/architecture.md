@@ -1288,6 +1288,15 @@ cancelled, 2 opened (gmnr reads it).
   +0x1fc / +0x200 cos 5 / 89 degrees, +0x204 0.07, +0x208 0.9, +0x20c 0.001 (stick change),
   +0x210 / +0x214 45 / 20 (move sweep range / radius).
 
+## The test controller (`mag/maglifetest.cpp`, 0x130ee8..0x131184, 2026-10-30)
+
+`MagLifeTest` <- MagLifeControlChara (vtable 0x2e1e70, vptr +0x14, ctor 0x13114c; EE 0x88): unreferenced in
+the ROM (no caller of the ctor, the vtable only stored by it). Slot 16 (processPad) sets m_phase (+0x80) to 1 on
+R2 (BedPad m_trig 0x200); slot 2 (live) then plays the bound actor's motions 0xac, 5 (flags 0x40) after 43 frames
+and 1 (flags 1) after 5 more, timed by one shared counter 0x298b78, and every frame (mode arg < 0) moves the actor
+by its motion's root movement over this frame's span (getMotionMove with doubled frames), turned by m_base_rotate.y
+(asserted in -pi..pi, line 186), with the root's y as addTrans's height. +0x84 is addTrans's rot_y_aar, never set.
+
 ## Brown's controller (`mag/maglifebwn.cpp`, 0x1233d8..0x125bd4, 2026-10-27)
 
 - `MagLifeBwn` (EE 0xd40, scene +0x2afe0): Brown's state machine as MagLifePC's, but requested and

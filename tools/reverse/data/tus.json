@@ -2017,6 +2017,28 @@
    "status": "verify",
    "why": "mag/maglifepcmove.cpp asserts in 9 of the 12 functions across 0x11e4c4..0x120668; moveBy 0x11ee00 sits between sweepMove and 0x11f0b4 and is called by them; 0x11e0d8 debug strip drawer stays out (maglifepc3 notes); MagLifePCMode::moveBy 0x120788 opens maglifepcmode.cpp"
   },
+  "mag/maglifetest.cpp": {
+   "notes": "Whole file written. Nothing in the ROM constructs MagLifeTest (ghidra.py refs on the ctor 0x13114c and vtable 0x2e1e70 find only the ctor itself), so no screenshot can show it: verify is final unless a caller turns up. Boot smoke run still shows the disclaimer, unchanged. Picked because the queue was empty; remaining todo files with functions are debug/motnamecnv.cpp (5), unassigned@0011e0d8 (1 KB) and 1-function runs. Decisions: m_84 named m_rot_y_aar (addTrans third arg, never set); the shared frame counter 0x298b78 is a file static; the rot vector passed to getMotionMove is zeroed whole on the host (the ROM sets only word 0). The better next step than more dead code is still a longer smoke pad (the bus-stop walk) to mark verify TUs done from screenshots.",
+   "ranges": [
+    [
+     "00130ee8",
+     "00131184"
+    ],
+    [
+     "002853c4",
+     "00285450"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 17:27",
+     "status": "verify",
+     "summary": "MagLifeTest test controller complete: ctor, live (motion chain 0xac, 5, 1 on its phase word, then the motion's root movement into addTrans turned by the base heading), processPad (R2 starts the chain), and the linkonce dtor and getName; __tf is host RTTI"
+    }
+   ],
+   "status": "verify",
+   "why": "assert string mag/maglifetest.cpp in 0x130ee8; MagLifeTest ctor 0x13114c and slots 2/16 between maglifenoise.cpp and MagScene::fadeIn 0x131184; linkonce dtor/__tf/getName 0x2853c4..0x285450"
+  },
   "mag/maglifewindow.cpp": {
    "notes": "Done 2026-10-29 (game/gamfont.cpp session): the prologue dialogue shows in the bus-stop room, centred between the window ornaments; the m_buf_w PC guard in render is removed. Earlier notes: Status verify: the dialogue text between the prologue's bands is still blank because GamFont (lib/unassigned_stubs.cpp: setTarget, setFont, clear, drawChar, getCharMetrics, setColor, getTextWidth, setFill, setFillMsb, scroll; 0x1beb70..0x1c0534) is stubbed. Next: the GamFont TU (name its file first, game/ by link order). When it lands, delete the PC guard in MagLifeWindow::render (skips the sprite while m_buf_w <= 0) and compare the window's text with the ROM: the 8-bit font texture's uv / TEXA / CLUT alpha path through rosepan_i3d is untested. Without the guard the stub font made the sprite one stretched texel covering the title from frame 1680 (hazards.md). print reads bytes signed (lb) as the ROM does, so only ASCII draws there. drawText's line table is 10 entries; a PC clamp keeps indices past 9 on entry 9 (the ROM reads other locals there). MagLifeWindowDebug::getName 0x285844 and its destructor belong with mag/magscenecmd.cpp.",
    "sessions": [

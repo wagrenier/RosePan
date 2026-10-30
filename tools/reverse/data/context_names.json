@@ -5105,6 +5105,24 @@
   "was": "FUN_00130de8",
   "why": "vtable 0x2e1e20 slot 6 (MagLife::render's); while +0x30 is set: the draw set of texture +0x34 (depth 1.0), i3dLayerBeginSet 895.0, the texture's registers, 0x130c34 over the 512x448 frame"
  },
+ "00130ee8": {
+  "name": "MagLifeTest::live",
+  "tag": "ror-inferred",
+  "was": "FUN_00130ee8",
+  "why": "MagLifeTest vtable 0x2e1e70 slot 2 (live, as MagLife0::live); steps a motion chain 0xac -> 5 -> 1 on its +0x80 phase and moves the actor by the motion's root movement; asserts in mag/maglifetest.cpp"
+ },
+ "00131120": {
+  "name": "MagLifeTest::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_00131120",
+  "why": "MagLifeTest vtable slot 16 (MagLifePC::processPad's slot); reads BedPad m_trig (+0x7a) bit 0x200 and starts the chain (+0x80 = 1)"
+ },
+ "0013114c": {
+  "name": "MagLifeTest::MagLifeTest",
+  "tag": "ror-inferred",
+  "was": "FUN_0013114c",
+  "why": "calls MagLifeControlChara::MagLifeControlChara then stores _vt$11MagLifeTest 0x2e1e70 at +0x14 and clears +0x80 / +0x84"
+ },
  "00131184": {
   "name": "MagScene::fadeIn",
   "tag": "ror-inferred",

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 17:20 at commit `ed66edd` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 17:27 at commit `bfb4185` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-30 17:20 at commit `ed66edd` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7195**, named **7131** (99%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5529
-- context-name ledger: 5819 entries; overrides of wrong library matches: 5
+- game functions: **7195**, named **7134** (99%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5532
+- context-name ledger: 5822 entries; overrides of wrong library matches: 5
 - placed in a source file: 6220/7195 in 166 files
 
 Least-named game-code regions (64 KB blocks):
@@ -23,14 +23,14 @@ Least-named game-code regions (64 KB blocks):
 | `001f0000` | 218/234 (93%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `00160000` | 257/268 (96%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `00210000` | 351/362 (97%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
-| `00130000` | 180/183 (98%) | mag/magscene.cpp, mag/magscenerender.cpp, mag/magscene2.cpp |
 | `00110000` | 254/257 (99%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
 | `00100000` | 301/304 (99%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmath.cpp |
 | `00120000` | 282/283 (100%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
+| `00140000` | 292/293 (100%) | emy/emy_hfm.cpp, emy/emy_clr.cpp, mag/magscenecmd.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **6050**; stubs: **0**
+- reconstructed RoR functions: **6054**; stubs: **0**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -131,6 +131,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/maglifepceff.cpp` | 5 | 0 |
 | `src/mag/maglifepcmode.cpp` | 64 | 0 |
 | `src/mag/maglifepcmove.cpp` | 26 | 0 |
+| `src/mag/maglifetest.cpp` | 4 | 0 |
 | `src/mag/maglifewindow.cpp` | 16 | 0 |
 | `src/mag/magloader.cpp` | 17 | 0 |
 | `src/mag/magscene.cpp` | 89 | 0 |
@@ -200,7 +201,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 174 TUs: todo 76, partial 1, verify 152, done 17
+- 174 TUs: todo 75, partial 1, verify 153, done 17
 - next: **None** (nothing on the frontier and no queued TU)
 - pinned queue: unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
@@ -294,6 +295,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/maglifepceff.cpp` 5/5 -- Complete; nothing on screen can show it yet: the 15s smoke run stops at the disclaimer screen (drawn correctly), and the muzzle flash needs the PC firing the gu
 - verify: `mag/maglifepcmode.cpp` 57/70 -- Every function of the TU is written; nothing on screen can show it yet: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run binds no actor
 - verify: `mag/maglifepcmove.cpp` 12/18 -- Status verify: the 200 s New Game run ends on a dark film frame with no assert or crash; no MagLifePC code moves anything on screen yet (applyMotionMove runs fr
+- verify: `mag/maglifetest.cpp` 3/6 -- Whole file written. Nothing in the ROM constructs MagLifeTest (ghidra.py refs on the ctor 0x13114c and vtable 0x2e1e70 find only the ctor itself), so no screens
 - verify: `mag/magloader.cpp` 17/17 -- Status verify: all 17 functions written, nothing past the title menu draws yet. A New Game run (build.py --run 140 --pad 1800:START,2400:START,2700:CROSS) no lo
 - verify: `mag/magscene.cpp` 89/89 -- Screen still black (textures never load; game/gamfile.cpp callers GamMan::loadSystemData / loadStage are stubs), and nothing calls this slice's new code in the 
 - verify: `mag/magscene2.cpp` 19/19 -- Complete but unseen: MagScene::start (magscene.cpp) and the GamMan loads are stubs, so no loader runs and the screen stays black (MagScene::draw is a stub too).
@@ -358,6 +360,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 17:27 `mag/maglifetest.cpp` verify: MagLifeTest test controller complete: ctor, live (motion chain 0xac, 5, 1 on its phase word, then the motion's root movement into addTrans turned by the base he
 - 2026-10-30 17:20 `debug/naga_debug.cpp` verify: EventTestTask debug overlay complete: disp (info pages: PC / dog position, world position via WrdSrv, heap and packet use, chapter, map area, PC and dog health,
 - 2026-10-30 16:56 `debug/naga_debug.cpp` partial: EventTestTask (vtable 0x2e50c0, kind 2): nagaDbgLoadFile, the constructor split out of 0x216768 at 0x216828, destructor, init, exec, inline get_task_type / term
 - 2026-10-30 16:47 `task/tsk_bg_load.cpp` verify: TskBGLoad / TskBGLoadArea / TskBGLoadMap, all 19 functions: the background pack loaders that read a pack head, allocate its total size and read the whole pack i
@@ -365,7 +368,6 @@ Recent sessions:
 - 2026-10-30 16:19 `mag/maglifebwnmode.cpp` verify: Brown's ten modes (MagLifeBwnMode Null/One/Wait/Sit/Fuse/Move/Path/Turn/Rotate/Wall), all 19 functions; pinned 0x125bd4..0x1267c0 absorbing unassigned@00125bd4 
 - 2026-10-30 15:52 `rx/rxsys.cpp` verify: rx/rxsys.cpp session 3: the System Monitor exception console 0x242c10..0x2432d8, 15 functions (clear row, scroll, LoadImage, glyph row expand from the 8x8 font 
 - 2026-10-30 15:41 `rx/rxsys.cpp` partial: rx/rxsys.cpp session 2: removed the 5 boot stubs - ini parser (rxSysIniFindSection/ReadKey/FindKey/Find, key count and key-at helpers), tty bind/open/close, rxS
-- 2026-10-30 15:23 `task/tsk_attack.cpp` verify: TskAttack and TskDamage steps written: all 21 functions of 0x1fd424..0x20067c (was unassigned@001fd424, pinned as task/tsk_attack.cpp): the six attack steps (sw
 
 ## Frontier (called by reconstructed code, not written yet)
 
