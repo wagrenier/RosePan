@@ -2473,8 +2473,24 @@ never asserts): sessions name them (`tus.py define --why`).
   `sceSdNote2Pitch` and `sceSdProcBatch` are missing. Reconstructing RXSNDDRV against them is what gives
   RoR sound (open-items.md, `setup/iop_rxsnddrv.cpp`).
 - Ghidra: `python iop.py elf <MODULES>/RXSNDDRV.IRX` writes `work/iop/elf/rxsnddrv.elf` (MIPS R3000 LE,
-  base 0, import stubs, `_start` and `_gp` as symbols), importable as its own program next to
-  SLUS_214.48.
+  base 0, import stubs, `_start` and `_gp` as symbols). **Imported 2026-10-30 as program
+  `rxsnddrv.elf`** in the same project and Ghidra as SLUS_214.48: 229 functions after analysis (`_start`,
+  40 named import stubs, 188 `FUN_`), gp applied (strings resolve). Read it with
+  `ROSEPAN_PROGRAM=rxsnddrv.elf python dec.py <addr>` / `ghidra.py` (hazards.md: the other tools are
+  not program-aware yet).
+- Entry points found: `_start` 0 calls FlushDcache, clears the bss, sceSdInit(0), sceSifInitRpc(0),
+  clears 0x1000 bytes at 0xe500, then the subsystem inits 0x1814, 0x1b5c, 0x20c4, 0x1048, 0x1570, 0x2854,
+  0x3170, 0x3eb8, 0x98e4, 0x6ab0, 0x45b0, 0xacac, 0xb4a0, 0xb08 and 0x190 (creates the double-buffer
+  thread: priority 0x23, stack 0x1000, entry 0x29c); 0x1890 returns the debug flags (bit 4 = print).
+  The RPC server thread 0xbc4 registers RPC 0xd000 with handler 0xc24 and receive buffer 0xf504, then
+  sceSifRpcLoop; 0xc24 stores 0x360(fno, 0x10508, data)'s result at 0x10504 and returns that reply.
+  **0x360 is the command dispatcher**, a switch on the EE's command numbers: 0x10 start (0x190), 0x11
+  stop all (0x238), 0x12 (0x27c), 0x20 AllocSysMemory {mode, size, addr} / 0x21 FreeSysMemory / 0x22
+  Query{Mem, MaxFree, TotalFree}Size by {0, 1, 2} / 0x23 an IOP memmove {dst, src, size} (all under
+  CpuSuspendIntr), 0x30 system (0x18b0), 0x31 (0x1bdc), 0x32 SPU2 effect (0x21e0), 0x40 XVAB transfer
+  (0x1124(1, id, ...) then 0x1250), 0x41 transfer busy (0x127c), 0x50 XVAB open (0x2330), 0x51 close
+  (0x28b8), 0x60 XSEQ open (0x2e00), 0x63 (0x3310), 0x72 BGM status (0x5b68(reply, reply + 0x80),
+  count at +0x100) ...; the rest of the switch is read in the IOP session.
 
 ## Disc and data files
 

@@ -17,9 +17,10 @@ second in the queue** -- reconstruct RXSNDDRV.IRX, the game's only IOP code and 
 silent (architecture.md "The IOP side": ~53 KB of R3000 code, ~200 functions, no symbols; RPC server,
 XVAB banks, the XSEQ MIDI sequencer for BGM, SE, NOTE slots, ADPCM / PCM streams; 15 libsd imports, 13
 already in the host libsd). Unpacked and identified with `tools/reverse/iop.py`; `iop.py elf` writes
-the Ghidra-ready `work/iop/elf/rxsnddrv.elf`. **Needs the user first: import that ELF into the Ghidra
-project** (File > Import File, language MIPS:LE:32:default, analyse) -- a headless import cannot
-write to a project the GUI holds open. Open for that session: whether the TU tools learn a second
+the Ghidra-ready `work/iop/elf/rxsnddrv.elf`. **Imported by the user 2026-10-30** (program
+`rxsnddrv.elf`, 229 functions; the RPC dispatcher is 0x360, architecture.md "The IOP side"). Until the
+pipeline question below is settled, only `dec.py` / `ghidra.py` may run with
+`ROSEPAN_PROGRAM=rxsnddrv.elf` (hazards.md). Open for that session: whether the TU tools learn a second
 program (IOP addresses annotated `IOP 0x...` so they never collide with `ROR 0x...`) or RXSNDDRV is
 tracked by hand over a few sessions; where the code lives (proposed `src/iop/rxsnddrv/`, one file per
 subsystem, on the host IOP layer and host libsd, replacing the silent `src/sdk/iop_rxsnd.cpp`).
