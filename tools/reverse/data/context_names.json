@@ -10223,6 +10223,12 @@
   "was": "FUN_0016be70",
   "why": "vtable _vt$14EffBloodSpray2 0x2e3330 slot 2 (Eff0 slot init)"
  },
+ "0016bedc": {
+  "name": "EffBloodSpray2::emitDrop",
+  "tag": "ror-inferred",
+  "was": "FUN_0016bedc",
+  "why": "EffBloodSpray2's init and liveMain (every second frame) call it with this: fills drop m_next % 16 at *m_pos moving along *m_dir rotated by table 0x2f2020, then m_next++"
+ },
  "0016c258": {
   "name": "EffBloodSpray2::liveMain",
   "tag": "ror-inferred",
@@ -10259,6 +10265,18 @@
   "was": "FUN_0016cac0",
   "why": "vtable _vt$13EffBloodStay1 0x2e3560 slot 8 (Eff0 slot renderMain)"
  },
+ "0016ccb8": {
+  "name": "EffBloodStay1::drawStain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016ccb8",
+  "why": "called by EffBloodStay1::renderMain once per stain with a context block: scales the object's matrix by sin(45..90 deg over 20 frames) * size and writes one VU1 sprite at the stain's offset"
+ },
+ "0016cebc": {
+  "name": "EffBloodStay1::isActorOnStain",
+  "tag": "ror-inferred",
+  "was": "FUN_0016cebc",
+  "why": "EffActorProbe around the stain centre (effProbeActorInBox), then each stain's box with effProbeActorLimbs; 1 when a toe / finger event lands in one. No callers found"
+ },
  "0016d01c": {
   "name": "EffBloodStay2::init",
   "tag": "ror-inferred",
@@ -10270,6 +10288,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0016d0d0",
   "why": "vtable _vt$13EffBloodStay2 0x2e34f0 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016d3e4": {
+  "name": "EffBloodStay2::setEdge",
+  "tag": "ror-inferred",
+  "was": "FUN_0016d3e4",
+  "why": "EffBloodStay2::liveMain's helper: segment m_count's two points = at +- normalize(up x dir) * m_width / 2, w 1"
  },
  "0016d4bc": {
   "name": "EffBloodStay2::renderMain",
@@ -10294,6 +10318,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0016d8ac",
   "why": "vtable _vt$13EffBloodStay3 0x2e3480 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016d8e8": {
+  "name": "effSetBloodStay3",
+  "tag": "ror-inferred",
+  "was": "FUN_0016d8e8",
+  "why": "free function: creates the single EffBloodStay3 (kind 5, index kept in 0x298e10) when none, then sets its counter a0 to a1 (EffBloodStay3::set inlined); 0 when createEff fails"
  },
  "0016d9a8": {
   "name": "EffBloodStay3Prim::init",
@@ -33520,6 +33550,18 @@
   "tag": "lib-context",
   "was": "FUN_0026bb10",
   "why": "libvib: (socket, profile size, profile, data size, data) packed into a 0x103400b DBC request; BedPad::setVibration passes profile bit 0 small motor / bit 1 big motor"
+ },
+ "0026c2f0": {
+  "name": "cos",
+  "tag": "lib-context",
+  "was": "FUN_0026c2f0",
+  "why": "fdlibm cos: |x| < pi/4 -> __kernel_cos(x, 0); else __ieee754_rem_pio2 and the n & 3 switch (n 1: -__kernel_sin)"
+ },
+ "0026c418": {
+  "name": "sin",
+  "tag": "lib-context",
+  "was": "FUN_0026c418",
+  "why": "fdlibm sin: |x| < pi/4 -> __kernel_sin(x, 0, 0); else __ieee754_rem_pio2 and the n & 3 switch between __kernel_sin / __kernel_cos and their negations"
  },
  "0026c550": {
   "name": "atanf",

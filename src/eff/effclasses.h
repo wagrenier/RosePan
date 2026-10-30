@@ -20,91 +20,12 @@
 #define _EFF_EFFCLASSES_H
 
 #include "eff/eff0.h"
+#include "eff/effblood.h"
 #include "eff/effcameraanim1.h"
 #include "eff/efffog3.h"
 #include "eff/efflight.h"
 
-/* kind 0x1; EE 0x280, vtable 0x2e33a0. layout: host. */
-class EffBloodSpray1 : public Eff0
-{
-public:
-    EffBloodSpray1();                                                       // ROR 0x0016b62c
-    virtual ~EffBloodSpray1() {}                                            // ROR 0x0028ae78 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x0016b668
-    virtual int  liveMain();                                                // ROR 0x0016b978
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0016ba7c
-    virtual void updateZDepth();                                            // ROR 0x0016bdd4
-
-    u_char m_body[0x25c];                                                   // ROR 0x24..0x280: not decoded yet
-};
-
-/* kind 0x2; EE 0x590, vtable 0x2e3330. layout: host. */
-class EffBloodSpray2 : public Eff0
-{
-public:
-    EffBloodSpray2();                                                       // ROR 0x0016be14
-    virtual ~EffBloodSpray2() {}                                            // ROR 0x0028af28 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x0016be70
-    virtual int  liveMain();                                                // ROR 0x0016c258
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0016c400
-    virtual void updateZDepth();                                            // ROR 0x0016c748
-
-    u_char m_body[0x56c];                                                   // ROR 0x24..0x590: not decoded yet
-};
-
-/* kind 0x3; EE 0xc0, vtable 0x2e3560. layout: host. */
-class EffBloodStay1 : public Eff0
-{
-public:
-    EffBloodStay1() {}                                                      // ROR 0x0028b088 (linkonce; inlined in createEff)
-    virtual ~EffBloodStay1() {}                                             // ROR 0x0028afd8 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x0016c7c0
-    virtual int  liveMain();                                                // ROR 0x0016ca00
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0016cac0
-
-    u_char m_body[0x9c];                                                    // ROR 0x24..0xc0: not decoded yet
-};
-
-/* kind 0x4; EE 0x4f0, vtable 0x2e34f0. layout: host. */
-class EffBloodStay2 : public Eff0
-{
-public:
-    EffBloodStay2() {}                                                      // ROR 0x0028b168 (linkonce; inlined in createEff)
-    virtual ~EffBloodStay2() {}                                             // ROR 0x0028b0b8 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x0016d01c
-    virtual int  liveMain();                                                // ROR 0x0016d0d0
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0016d4bc
-
-    u_char m_body[0x4cc];                                                   // ROR 0x24..0x4f0: not decoded yet
-};
-
-/* kind 0x5; EE 0x2c, vtable 0x2e3480. layout: host. */
-class EffBloodStay3 : public Eff0
-{
-public:
-    EffBloodStay3() {}                                                      // ROR 0x0028b1e8 (linkonce; inlined in createEff)
-    virtual ~EffBloodStay3();                                               // ROR 0x0016d804
-    virtual int  init(const EffParam *param);                               // ROR 0x0016d870
-    virtual int  liveMain();                                                // ROR 0x0016d8ac
-    virtual void render(RENDERPARAM *param);                                // ROR 0x0028b230 (linkonce)
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0028b238 (linkonce)
-    virtual I3dDrawSet *createPacketEntry(I3dLayer *layer);                 // ROR 0x0028b218 (linkonce)
-
-    u_char m_body[0x8];                                                     // ROR 0x24..0x2c: not decoded yet
-};
-
-/* kind 0x6; EE 0x50, vtable 0x2e3410. layout: host. */
-class EffBloodStay3Prim : public Eff0
-{
-public:
-    EffBloodStay3Prim() {}                                                  // ROR 0x0028b2f0 (linkonce; inlined in createEff)
-    virtual ~EffBloodStay3Prim() {}                                         // ROR 0x0028b240 (linkonce)
-    virtual int  init(const EffParam *param);                               // ROR 0x0016d9a8
-    virtual int  liveMain();                                                // ROR 0x0016da30
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0016da44
-
-    u_char m_body[0x2c];                                                    // ROR 0x24..0x50: not decoded yet
-};
+/* kinds 0x1..0x6 (EffBloodSpray1 .. EffBloodStay3Prim): eff/effblood.h. */
 
 /* kind 0x8; EE 0x1a0, vtable 0x2e3720. layout: host. */
 class EffBreath1 : public Eff0

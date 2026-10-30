@@ -1540,6 +1540,21 @@ flash: DogDispControl m_color = flash/5 with m_10 = 1 (0 / 0 once it ends), mode
 (direct) / 4x (point, spot) of their source colour times flash/5 and the ambient 0.3 -> 0.9 of its colour
 over 30 frames; mode 1 the ambient 1 -> 2 -> 1 over the flash. The dtor resets the disp, ambient x1, and
 removes the copies (all 6 kinds, by id).
+**The blood effects** (kinds 1..6, `eff/effblood.cpp` 0x16b62c..0x16dcc8, 2026-10-30; eff/effblood.h has
+the layouts). Eff0's m_0c is their state (0 start, 10 running, 20 fading, -1 done) and m_08 the last
+frame's. Kind 1 EffBloodSpray1 (scnDamageStart): 9 drops (+0x40, 0x40 each) from m_hit.m_pos along its
+direction (m_1c..m_24, every caller (0, -1, 0)) turned about x then z by table 0x2f1fa0 from a random row;
+speed 13.5 s x 0.8 per drop, fade step + (192 s x 1.25^n) + 0x300, alpha 0x7f00 >> drawn as alpha / 32768;
+camera-facing sprites 20 toward the eye, texture 0 for drops 0..4, 1 for 5..8, far to near. Kind 2
+EffBloodSpray2 (script op 15): follows *m_pos / *m_dir (pointers), a drop every second frame for m_frames
+frames into slot m_next % 16 (17 slots, table 0x2f2020). Kind 3 EffBloodStay1 (the enemies' deaths, m_hit
+with m_scale 100, m_2c 90): 2..4 stains on the floor (delays 0 / 15 / 25 / 40, scales 1 / .8 / .7 / .6),
+each grown by sin(45..90 deg over 20 frames), TEST_1 0x51001 around them; weak (EFF_FLAG_WEAK). Kind 4
+EffBloodStay2 (script op 17): a trail of 32 edges behind *m_pos, a segment closed at m_length / 31 or when
+it turns past 90 deg less its share, drawn as 4-vertex strips (i3dPktDrawStripColor, ZBUF_1 0x13a0000e0
+no z write) tiled every 3 widths. Kind 5 EffBloodStay3: no picture, two counters (effSetBloodStay3
+0x16d8e8 creates the one instance, its number in 0x298e10). Kind 6 EffBloodStay3Prim: a flat sprite on
+the floor, half of texture 0 (rect u, v, w, h; mirrored by m_flip), 165 frames.
 
 ## The game helpers (`utl/utlgame.cpp`, 0x1024d0..0x1041c4, 2026-10-28)
 

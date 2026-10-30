@@ -568,24 +568,6 @@ void PigMain::selectOut()
 
 // ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----
 
-// stub of ROR 0x0016b62c
-EffBloodSpray1::EffBloodSpray1()
-{
-    ROSEPAN_STUB("EffBloodSpray1::EffBloodSpray1", 0x0016b62c);
-}
-
-// stub of ROR 0x0016be14
-EffBloodSpray2::EffBloodSpray2()
-{
-    ROSEPAN_STUB("EffBloodSpray2::EffBloodSpray2", 0x0016be14);
-}
-
-// stub of ROR 0x0016d804
-EffBloodStay3::~EffBloodStay3()
-{
-    ROSEPAN_STUB("EffBloodStay3::~EffBloodStay3", 0x0016d804);
-}
-
 // stub of ROR 0x00173df8
 EffGeneric1::EffGeneric1()
 {
@@ -671,40 +653,6 @@ u_long * EffBg1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *p
 void EffBg1::renderPreMain(RENDERPARAM *param)
 {
     ROSEPAN_STUB("EffBg1::renderPreMain", 0x0016b444);
-}
-
-// stub of ROR 0x0028b218
-I3dDrawSet * EffBloodStay3::createPacketEntry(I3dLayer *layer)
-{
-    ROSEPAN_STUB("EffBloodStay3::createPacketEntry", 0x0028b218);
-    return {};
-}
-
-// stub of ROR 0x0016d870
-int EffBloodStay3::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffBloodStay3::init", 0x0016d870);
-    return {};
-}
-
-// stub of ROR 0x0016d8ac
-int EffBloodStay3::liveMain()
-{
-    ROSEPAN_STUB("EffBloodStay3::liveMain", 0x0016d8ac);
-    return {};
-}
-
-// stub of ROR 0x0028b230
-void EffBloodStay3::render(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("EffBloodStay3::render", 0x0028b230);
-}
-
-// stub of ROR 0x0028b238
-u_long * EffBloodStay3::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffBloodStay3::renderMain", 0x0028b238);
-    return {};
 }
 
 // stub of ROR 0x0028c050
@@ -817,123 +765,6 @@ int EffWater3::liveMain()
 u_long * EffWater3::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
 {
     ROSEPAN_STUB("EffWater3::renderMain", 0x0017b6d4);
-    return {};
-}
-
-// stub of ROR 0x0016b668
-int EffBloodSpray1::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffBloodSpray1::init", 0x0016b668);
-    return {};
-}
-
-// stub of ROR 0x0016b978
-int EffBloodSpray1::liveMain()
-{
-    ROSEPAN_STUB("EffBloodSpray1::liveMain", 0x0016b978);
-    return {};
-}
-
-// stub of ROR 0x0016ba7c
-u_long * EffBloodSpray1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffBloodSpray1::renderMain", 0x0016ba7c);
-    return {};
-}
-
-// stub of ROR 0x0016bdd4
-void EffBloodSpray1::updateZDepth()
-{
-    ROSEPAN_STUB("EffBloodSpray1::updateZDepth", 0x0016bdd4);
-}
-
-// stub of ROR 0x0016be70
-int EffBloodSpray2::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffBloodSpray2::init", 0x0016be70);
-    return {};
-}
-
-// stub of ROR 0x0016c258
-int EffBloodSpray2::liveMain()
-{
-    ROSEPAN_STUB("EffBloodSpray2::liveMain", 0x0016c258);
-    return {};
-}
-
-// stub of ROR 0x0016c400
-u_long * EffBloodSpray2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffBloodSpray2::renderMain", 0x0016c400);
-    return {};
-}
-
-// stub of ROR 0x0016c748
-void EffBloodSpray2::updateZDepth()
-{
-    ROSEPAN_STUB("EffBloodSpray2::updateZDepth", 0x0016c748);
-}
-
-// stub of ROR 0x0016c7c0
-int EffBloodStay1::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffBloodStay1::init", 0x0016c7c0);
-    return {};
-}
-
-// stub of ROR 0x0016ca00
-int EffBloodStay1::liveMain()
-{
-    ROSEPAN_STUB("EffBloodStay1::liveMain", 0x0016ca00);
-    return {};
-}
-
-// stub of ROR 0x0016cac0
-u_long * EffBloodStay1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffBloodStay1::renderMain", 0x0016cac0);
-    return {};
-}
-
-// stub of ROR 0x0016d01c
-int EffBloodStay2::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffBloodStay2::init", 0x0016d01c);
-    return {};
-}
-
-// stub of ROR 0x0016d0d0
-int EffBloodStay2::liveMain()
-{
-    ROSEPAN_STUB("EffBloodStay2::liveMain", 0x0016d0d0);
-    return {};
-}
-
-// stub of ROR 0x0016d4bc
-u_long * EffBloodStay2::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffBloodStay2::renderMain", 0x0016d4bc);
-    return {};
-}
-
-// stub of ROR 0x0016d9a8
-int EffBloodStay3Prim::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffBloodStay3Prim::init", 0x0016d9a8);
-    return {};
-}
-
-// stub of ROR 0x0016da30
-int EffBloodStay3Prim::liveMain()
-{
-    ROSEPAN_STUB("EffBloodStay3Prim::liveMain", 0x0016da30);
-    return {};
-}
-
-// stub of ROR 0x0016da44
-u_long * EffBloodStay3Prim::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffBloodStay3Prim::renderMain", 0x0016da44);
     return {};
 }
 

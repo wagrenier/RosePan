@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 08:57 at commit `a8a812c` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 09:28 at commit `adb6604` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-30 08:57 at commit `a8a812c` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6903** (96%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 5301
-- context-name ledger: 5602 entries; overrides of wrong library matches: 5
-- placed in a source file: 5879/7187 in 149 files
+- game functions: **7187**, named **6908** (96%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 265, ror-inferred 5306
+- context-name ledger: 5609 entries; overrides of wrong library matches: 5
+- placed in a source file: 5906/7187 in 150 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -24,13 +24,13 @@ Least-named game-code regions (64 KB blocks):
 | `00240000` | 298/336 (89%) | rx/rxfile.cpp, rx/rxsys.cpp, rx/rxthread.cpp |
 | `00170000` | 223/251 (89%) | sct/sctlayer.cpp, eff/effman.cpp, snd/sndman.cpp |
 | `001b0000` | 73/82 (89%) | mnu/mnuitem.cpp, game/gamfile.cpp, game/gamfont.cpp |
-| `00160000` | 244/268 (91%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
+| `00160000` | 249/268 (93%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `001a0000` | 199/214 (93%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `00210000` | 337/361 (93%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5601**; stubs: **262**
+- reconstructed RoR functions: **5628**; stubs: **237**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -49,6 +49,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/dog/dogmotionblend.cpp` | 11 | 0 |
 | `src/dog/dogtexinfo.cpp` | 16 | 0 |
 | `src/eff/eff0.cpp` | 16 | 0 |
+| `src/eff/effblood.cpp` | 27 | 0 |
 | `src/eff/effcameraanim1.cpp` | 3 | 0 |
 | `src/eff/effcommon.cpp` | 13 | 0 |
 | `src/eff/efffog3.cpp` | 10 | 0 |
@@ -95,7 +96,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 224 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 199 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -179,8 +180,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 171 TUs: todo 86, partial 1, verify 127, done 17
-- next: **unassigned@0016afcc** (frontier score 3)
+- 173 TUs: todo 87, partial 1, verify 128, done 17
+- next: **unassigned@001788ec** (frontier score 3)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -195,6 +196,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `dog/dogmotionblend.cpp` 11/11 -- Verify: the smoke run stays on the disclaimer screen and no actor is drawn yet, because the i3m pose player (unassigned@0022e840: i3mGetPose 0x22e960, i3mGetBle
 - verify: `dog/dogtexinfo.cpp` 16/16 -- Pinned 0x1161e4..0x11764c, all 16 functions written. Smoke run: MagScene::init's init / add run without asserts; screen still black (SprMan::draw and the scene 
 - verify: `eff/eff0.cpp` 14/14 -- Verify: the 240 s run reaches the bus-stop room and EffMan now creates and deletes EffLight1 (kind 0x21) and EffCameraAnim1 (0xd) through the real Eff0, but eve
+- verify: `eff/effblood.cpp` 27/27 -- Nothing on the smoke path creates blood (the 15 s run is at the boot disclaimer): mark done when a run shows a hit spray (scnDamageStart, kind 1) or stains unde
 - verify: `eff/effcommon.cpp` 13/13 -- Complete; verify because no picture shows a helper yet: the 240 s run shows the Once upon a time intro and the park scene as before, with no EffLight1 glow iden
 - verify: `eff/efffog3.cpp` 10/10 -- Code complete; nothing on screen shows it yet: the 240 s smoke run ends in the bus-stop room with no enemies, so the fog correctly stays the map's (frame mean e
 - verify: `eff/efflight.cpp` 17/17 -- Verify: no smoke-path scene creates kind 0x23, the 240 s run still ends in the bus-stop intro text, unchanged. Mark done when a stormy scene shows the sky's lig
@@ -312,6 +314,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 09:28 `eff/effblood.cpp` verify: The blood effects, kinds 1..6: EffBloodSpray1 / 2 (drop bursts and a following spray), EffBloodStay1 (floor stains), EffBloodStay2 (a trail strip), EffBloodStay
 - 2026-10-30 08:56 `emy/emy_got.cpp` verify: Pinned emy/emy_got.cpp 0x1583d4..0x15a17c out of unassigned@001583d4 and wrote all 31 functions: GotMain (enemy type 2: initOut with its 15 outs, dtor, decide o
 - 2026-10-30 08:42 `mnu/mnuboard2d.cpp` verify: MnuBoard2D, all 16 functions: ctor / dtor, init / term / isInit / processPad / draw, open / close, exec (load the board texture named by mnuBoardGetTexName + .t
 - 2026-10-30 08:19 `mag/maglifepceff.cpp` verify: Pinned mag/maglifepceff.cpp to 0x12ccac-0x12ce3c and reconstructed all 5 functions: MagLifePC::createMuzzleEff (EffMan kind 0x26 at the equipped gun's gun_mazzl
@@ -319,20 +322,19 @@ Recent sessions:
 - 2026-10-30 08:04 `emy/emy_fsh.cpp` verify: Pinned emy/emy_fsh.cpp 0x155d54..0x1583d4 out of unassigned@00155d54 and wrote all 57 functions: FshMain (enemy type 3: dtor, decide over 19 inputs, exec, after
 - 2026-10-30 07:33 `mag/maglifepcbtl.cpp` verify: MagLifePC fighting, all 11 functions of 0x12bc20..0x12ccac (pinned): getAttackBasePos, getWeaponHitPos, calcTargetAngle, getHitFrameRange, getAttackMotionName, 
 - 2026-10-30 07:20 `mnu/mnustock.cpp` verify: MnuStock::execPage2 0x19fbc8, the slot grid: cursor 0x67 with wrap (m_slot_num 12), left/right off the grid to page 1/0, cross picks a slot (m_pick 2) or flies 
-- 2026-10-30 07:13 `mnu/mnustock.cpp` partial: MnuStock pages 0 and 1: execPage0 (category tabs), execPage1 (the stock list: cursor, L1/R1 windows, scrolling rows, cross to the slots or swap with the flying 
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@0016afcc` | todo | 0/42/53 | 17.8 | 3 | 0 |
 | `unassigned@001788ec` | todo | 0/36/45 | 14.0 | 3 | 0 |
 | `unassigned@001bdae4` | todo | 0/3/5 | 0.4 | 3 | 0 |
-| `unassigned@0015a17c` | todo | 0/53/114 | 33.2 | 2 | 0 |
-| `mag/maglifemenusp.cpp` | todo | 0/12/18 | 5.7 | 2 | 0 |
 | `unassigned@001bde58` | todo | 0/2/8 | 1.1 | 2 | 0 |
-| `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
-| `mag/magsceneoption.cpp` | todo | 0/1/1 | 0.8 | 1 | 0 |
+| `mag/maglifemenusp.cpp` | todo | 0/12/18 | 5.7 | 2 | 0 |
+| `unassigned@0015a17c` | todo | 0/53/114 | 33.2 | 2 | 0 |
 | `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
+| `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
+| `unassigned@0016afcc` | todo | 0/5/6 | 1.6 | 1 | 0 |
 | `mag/magscenedebug.cpp` | todo | 0/1/3 | 0.8 | 1 | 0 |
+| `mag/magsceneoption.cpp` | todo | 0/1/1 | 0.8 | 1 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -362,8 +364,6 @@ Recent sessions:
 | `0012eef0` | MagLifeMenuSpecial2::MagLifeMenuSpecial2 | 1 | ror | stub | mag/maglifemenusp.cpp |
 | `0011764c` | DogTexInfo::dump | 1 | ror | stub | - |
 | `001bdae4` | MnuSelectLanguage::MnuSelectLanguage | 1 | ror | missing | - |
-| `0016b62c` | EffBloodSpray1::EffBloodSpray1 | 1 | ror | stub | - |
-| `0016be14` | EffBloodSpray2::EffBloodSpray2 | 1 | ror | stub | - |
 | `001790e4` | EffReload1::EffReload1 | 1 | ror | stub | - |
 | `0017a918` | EffWater1::EffWater1 | 1 | ror | stub | - |
 | `0017afd8` | EffWater3::EffWater3 | 1 | ror | stub | - |

@@ -2202,6 +2202,11 @@
 /* 0016b348 000000fc */ EffBg1::liveMain(){}  // ror
 /* 0016b444 000000c8 */ EffBg1::renderPreMain(){}  // ror
 /* 0016b50c 00000120 */ FUN_0016b50c(){}
+
+// *****************************************************************************
+// FILE -- eff/effblood.cpp
+// *****************************************************************************
+
 /* 0016b62c 0000003c */ EffBloodSpray1::EffBloodSpray1(){}  // ror
 /* 0016b668 00000310 */ EffBloodSpray1::init(){}  // ror
 /* 0016b978 00000104 */ EffBloodSpray1::liveMain(){}  // ror
@@ -2209,26 +2214,31 @@
 /* 0016bdd4 00000040 */ EffBloodSpray1::updateZDepth(){}  // ror
 /* 0016be14 0000005c */ EffBloodSpray2::EffBloodSpray2(){}  // ror
 /* 0016be70 0000006c */ EffBloodSpray2::init(){}  // ror
-/* 0016bedc 0000037c */ FUN_0016bedc(){}
+/* 0016bedc 0000037c */ EffBloodSpray2::emitDrop(){}  // ror
 /* 0016c258 000001a8 */ EffBloodSpray2::liveMain(){}  // ror
 /* 0016c400 00000348 */ EffBloodSpray2::renderMain(){}  // ror
 /* 0016c748 00000078 */ EffBloodSpray2::updateZDepth(){}  // ror
 /* 0016c7c0 00000240 */ EffBloodStay1::init(){}  // ror
 /* 0016ca00 000000bc */ EffBloodStay1::liveMain(){}  // ror
 /* 0016cac0 000001f8 */ EffBloodStay1::renderMain(){}  // ror
-/* 0016ccb8 00000204 */ FUN_0016ccb8(){}
-/* 0016cebc 00000160 */ FUN_0016cebc(){}
+/* 0016ccb8 00000204 */ EffBloodStay1::drawStain(){}  // ror
+/* 0016cebc 00000160 */ EffBloodStay1::isActorOnStain(){}  // ror
 /* 0016d01c 000000b4 */ EffBloodStay2::init(){}  // ror
 /* 0016d0d0 00000314 */ EffBloodStay2::liveMain(){}  // ror
-/* 0016d3e4 000000d8 */ FUN_0016d3e4(){}
+/* 0016d3e4 000000d8 */ EffBloodStay2::setEdge(){}  // ror
 /* 0016d4bc 00000348 */ EffBloodStay2::renderMain(){}  // ror
 /* 0016d804 0000006c */ EffBloodStay3::~EffBloodStay3(){}  // ror
 /* 0016d870 0000003c */ EffBloodStay3::init(){}  // ror
 /* 0016d8ac 00000038 */ EffBloodStay3::liveMain(){}  // ror
-/* 0016d8e8 000000c0 */ FUN_0016d8e8(){}
+/* 0016d8e8 000000c0 */ effSetBloodStay3(){}  // ror
 /* 0016d9a8 00000088 */ EffBloodStay3Prim::init(){}  // ror
 /* 0016da30 00000014 */ EffBloodStay3Prim::liveMain(){}  // ror
 /* 0016da44 00000284 */ EffBloodStay3Prim::renderMain(){}  // ror
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 0016dcc8 00000178 */ EffBreath1::init(){}  // ror
 /* 0016de40 000000f8 */ EffBreath1::liveMain(){}  // ror
 /* 0016df38 000004b4 */ EffBreath1::renderMain(){}  // ror
@@ -8620,8 +8630,8 @@
 // FILE -- (library) sdk
 // *****************************************************************************
 
-/* 0026c2f0 00000124 */ FUN_0026c2f0(){}
-/* 0026c418 00000134 */ FUN_0026c418(){}
+/* 0026c2f0 00000124 */ cos(){}  // lib-ctx
+/* 0026c418 00000134 */ sin(){}  // lib-ctx
 /* 0026c550 0000028c */ atanf(){}  // lib-ctx
 
 // *****************************************************************************
