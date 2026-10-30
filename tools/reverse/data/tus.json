@@ -490,6 +490,24 @@
    "status": "verify",
    "why": "FshMain + its FshOut* classes: FshMain dtor 0x155d54 (opens the file, as Grg's note found) up to GotMain::initOut 0x1583d4, which opens the Got code"
   },
+  "emy/emy_got.cpp": {
+   "notes": "Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run shows a Got (type 2) picking up an item or a part. ROM oddities kept (open-items.md Open questions): GotOutTest loops on motion 0x36 (steps 2 / 3 dead), the targets are refreshed only at initOut and on GamMan's reset frame. isBlocked is a host helper for the peek test the ROM inlines in every decide test. The DwfOut* hand stubs in lib/unassigned_stubs.cpp (block 'the DwfOut* virtual slots') go away when emy/emy_dwf.cpp is written; give the classes their data members then (EE sizes in GotMain::initOut: AtkNear 0x84, Fort 0x68, Walk 0x50, Stared 0x48, Irritate 0x44, Dead / Win / AtkFar / Pickup 0x40, the rest 0x38). The rest of the enemy run is unassigned@0015a17c: next emy/emy_pig.cpp from PigMain::initOut 0x15a17c up to DwfMain's dtor 0x15c2a4 (PigMain 6 slots, own outs PigOutParts / PigOutTackle / PigOutTest at 0x15bd58.., plus the shared DwfOuts; its finders 0x15b5ec / 0x15b8b8 are Got's twins), then Dwf 0x15c2a4..0x16265c.",
+   "ranges": [
+    [
+     "001583d4",
+     "0015a17c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 08:56",
+     "status": "verify",
+     "summary": "Pinned emy/emy_got.cpp 0x1583d4..0x15a17c out of unassigned@001583d4 and wrote all 31 functions: GotMain (enemy type 2: initOut with its 15 outs, dtor, decide over 21 inputs, exec, after, selectOut, isTargetInSight and the 15 gated tests) with the two target finders gotFindPickupItem / gotFindPart that gate states 11 / 12, and its own outs GotOutParts and GotOutTest. New emy/emy_got.h; GotMain moved out of lib/unassigned.h, its six stubs removed. New emy/emy_dwf.h declares the 15 DwfOut classes the Got borrows, with hand stubs of their 41 virtual slots in lib/unassigned_stubs.cpp. 71 functions named (batches emygot_001 / 002)."
+    }
+   ],
+   "status": "verify",
+   "why": "GotMain + its two GotOut* classes (it also builds the shared DwfOut* outs, written in Dwf's file): GotMain::initOut 0x1583d4 (every XxxMain::initOut opens its file) up to PigMain::initOut 0x15a17c which opens the Pig file; no source string, named like emy_bds.cpp"
+  },
   "emy/emy_grg.cpp": {
    "notes": "Complete code, nothing on screen yet: the 15 s run stays on the boot disclaimer and no enemy spawns on the smoke path. Mark done when a run shows a Grg roaming rooms 0x84..0x8b, hiding in an fchr and reappearing. PORT choices for three ROM reads of unset stack: GrgOutDisappear::getRoomIndex room 0x89 split (achr z vs 255), walkToFchr search position (the enemy's), its pick past the last fchr (none). Boundary: the Fsh file starts at FshMain's dtor 0x155d54, before FshMain::initOut 0x156620 (hazards.md); the rest of unassigned@00153e40 now starts there: Fsh, Got, Pig, Dwf.",
    "ranges": [
@@ -2847,6 +2865,7 @@
   "unassigned@00150b24": {},
   "unassigned@00153e40": {},
   "unassigned@00155d54": {},
+  "unassigned@001583d4": {},
   "unassigned@00164fc0": {},
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},

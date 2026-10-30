@@ -74,24 +74,8 @@ public:
     void initOut();                                                      // ROR 0x0015a17c
 };
 
-/* Type 2 (vtable from rtti.py; EE 0x270). layout: host -- polymorphic. */
-class GotMain : public EmyMain
-{
-public:
-    GotMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x002891b0
-            const _tagEnemyTransition *trans, float *pos)
-        : EmyMain(oid, name, param, prm, trans, pos)
-    {
-        initOut();
-    }
-    ~GotMain();                                                         // EE slot 1 (+0x08), ROR 0x00158798
-    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x00158dd8
-    int  GetType() { return 2; }                                       // EE slot 3 (+0x18), ROR 0x002891e8
-    void decide();                                                       // EE slot 4 (+0x20), ROR 0x001587f8
-    void exec();                                                         // EE slot 5 (+0x28), ROR 0x00158ca4
-    void after();                                                        // EE slot 6 (+0x30), ROR 0x00158d5c
-    void initOut();                                                      // ROR 0x001583d4
-};
+/* Type 2, GotMain: emy/emy_got.h. */
+#include "emy/emy_got.h"
 
 /* Type 3, FshMain: emy/emy_fsh.h. */
 #include "emy/emy_fsh.h"
