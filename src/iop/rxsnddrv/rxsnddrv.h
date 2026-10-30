@@ -13,7 +13,8 @@
  *    mix.cpp       0x19e0..0x1ca0  per-core master mix and volume
  *    effect.cpp    0x1ca0..0x2330  per-core SPU2 reverb
  *    xvab.cpp      0x2330..0x2e00  XVAB sound banks and the chunk file format
- *    (not yet)     0x2e00..        XSEQ, voices, BGM, SE, NOTE, ADPCM,
+ *    xseq.cpp      0x2e00..0x35c0  XSEQ sequences (BGM's MIDI data)
+ *    (not yet)     0x35c0..        voices, BGM, SE, NOTE, ADPCM,
  *                                  PCM: stubs.cpp until reconstructed
  *
  *  Functions carry `IOP 0x<addr>` (never `ROR 0x`: these are IOP addresses,
@@ -159,12 +160,41 @@ int   RxSndDrvXvabGetUsers(int id);                 // IOP 0x00002d14
 u_char *RxSndDrvChunkFindV1(const void *file, u_int tag); // IOP 0x00002d40
 u_char *RxSndDrvChunkFindV2(const void *file, u_int tag); // IOP 0x00002da0
 
-/* ---- not reconstructed yet (stubs.cpp) --------------------------------- */
+/* ---- xseq.cpp ---------------------------------------------------------- */
+
+/* A slot (0x20 at IOP 0x1a680). */
+struct RxSndDrvXseq
+{
+    u_int m_file;                       // IOP +0x00: the file in IOP memory, 0 free
+    u_int m_head;                       // IOP +0x04: its HEAD (or MIDI) chunk
+    int   m_state;                      // IOP +0x08: -1 after a close, read nowhere
+    int   m_users;                      // IOP +0x0c: BGMs playing it
+    short m_bank[8];                    // IOP +0x10: XVAB per bank index, -1 unset
+};
+static_assert(sizeof(RxSndDrvXseq) == 0x20, "RxSndDrvXseq");
+static_assert(offsetof(RxSndDrvXseq, m_head) == 0x4, "RxSndDrvXseq::m_head");
+static_assert(offsetof(RxSndDrvXseq, m_state) == 0x8, "RxSndDrvXseq::m_state");
+static_assert(offsetof(RxSndDrvXseq, m_users) == 0xc, "RxSndDrvXseq::m_users");
+static_assert(offsetof(RxSndDrvXseq, m_bank) == 0x10, "RxSndDrvXseq::m_bank");
 
 int   RxSndDrvXseqOpen(u_int id, u_int iop);        // IOP 0x00002e00
+int   RxSndDrvXseqRelocate(u_char *file, int dir, int open); // IOP 0x00002fa0
 void  RxSndDrvXseqInit(void);                       // IOP 0x00003170
+void  RxSndDrvXseqCloseAll(void);                   // IOP 0x0000319c
 int   RxSndDrvXseqClose(u_int id);                  // IOP 0x000031d4
-void  RxSndDrvXseqCmd63(u_int a, u_int b, u_int c); // IOP 0x00003310
+u_int *RxSndDrvXseqGetHead(u_int id);               // IOP 0x000032d8
+void  RxSndDrvXseqSetBank(u_int id, u_int index, u_int xvab); // IOP 0x00003310
+int   RxSndDrvXseqGetBank(int id, u_int index);     // IOP 0x00003348
+int   RxSndDrvXseqLock(int id);                     // IOP 0x0000338c
+void  RxSndDrvXseqUnlock(int id);                   // IOP 0x00003400
+int   RxSndDrvXseqAttach(u_char *file);             // IOP 0x00003460
+int   RxSndDrvXseqDetach(u_char *file);             // IOP 0x00003484
+u_char *RxSndDrvXseqChunkFind(const void *file, u_int tag);   // IOP 0x000034a8
+u_char *RxSndDrvXseqChunkFindV1(const void *file, u_int tag); // IOP 0x00003518
+u_char *RxSndDrvXseqChunkFindV2(const void *file, u_int tag); // IOP 0x00003568
+
+/* ---- not reconstructed yet (stubs.cpp) --------------------------------- */
+
 void  RxSndDrvVoiceTick(void);                      // IOP 0x000035c0
 void  RxSndDrvVoiceInit(void);                      // IOP 0x00003eb8
 void  RxSndDrvVoiceSetOutputMode(int mode);         // IOP 0x00003f6c

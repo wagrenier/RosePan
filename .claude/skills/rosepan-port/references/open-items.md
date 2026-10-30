@@ -26,7 +26,9 @@ tick thread, dispatcher (every command routed), RPC server, DMA queues, system /
 (`build.py --run 25 --env ROSEPAN_RXSNDDRV=1`: logs the first four calls of each command; the boot
 reaches the Punchline logo with the bank uploads going through the DMA queue). **Session 2
 (2026-10-30, partial)** wrote XVAB (0x2330..0x2e00, xvab.cpp; banks 0 and 1 open in the boot, the
-intro logo shows). **Next session: XSEQ (0x2e00..0x35c0)**, then the voice layer (0x35c0..0x45b0, with sceSdNote2Pitch), SE, NOTE, BGM,
+intro logo shows). **Session 3 (2026-10-30, partial)** wrote XSEQ (0x2e00..0x35c0, xseq.cpp;
+the boot sends no XSEQ command yet). **Next session: the voice layer (0x35c0..0x45b0, with
+sceSdNote2Pitch in iop_libsd.cpp; 0x3f6c output mode)**, then SE, NOTE, BGM,
 ADPCM, PCM. Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
 of all 229 functions; `iopdec.py dump` refreshes it when names change in Ghidra). What should be
 heard: the title BGM on the title screen, then the bus-stop BGM and footstep / UI SEs; the user
@@ -1548,6 +1550,14 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- **RXSNDDRV XSEQ close copies m_head from IOP address 0 (2026-10-30, setup/iop_rxsnddrv.cpp
+  session 3).** RxSndDrvXseqClose (IOP 0x31d4) stores slot +4 with lwl / lwr off li t1, 0 -- an
+  unaligned 4-byte struct copy from absolute 0 (no HI16 / LO16 pair, so no relocation). Likely a
+  zero-initialised constant the linker placed at 0 or a compiler oddity; the PC clears the field.
+  Harmless either way: open overwrites it and nothing reads it while the slot is free. Also: no plain
+  XSEQ file was found on the disc, so the HEAD / TRCK layout is the driver's reading, unchecked; the
+  BGM session should find where the EE's rxSndXseqLoad gets its data.
 
 - **RXSNDDRV SE record fields (2026-10-30, setup/iop_rxsnddrv.cpp session 2).** RxSndDrvXvabFindSe
   (IOP 0x2ae8) hands the SE tick four values from a SERQ record: the low 10 flag bits (0 -> 60 in the

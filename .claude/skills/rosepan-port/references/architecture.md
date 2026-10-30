@@ -2530,6 +2530,16 @@ never asserts): sessions name them (`tus.py define --why`).
   TGIF / TGPG offsets on TGIF and SEIF / SEGP / SERQ offsets on SEIF; closing undoes it. SE lookup
   0x2ae8(id, group, index): SEIF[group] -> SEGP list -> SERQ record {u8, u8, u16 flags (0x3ff ticks,
   0x1000 / 0x2000 negate the bytes, 0xc000 mode), offset into SESQ}.
+- **XSEQ 0x60 {id, iop} / 0x61 {id} / 0x63 {id, index, xvab}** (`src/iop/rxsnddrv/xseq.cpp`,
+  2026-10-30): 0x20 slots of 0x20 at 0x1a680 {file, HEAD-or-MIDI chunk, state (-1 after close, read
+  nowhere), users, s16 bank[8]}; open sets bank[] to -1, 0x63 sets bank[index] (index < 8). BGM open
+  0x4680 locks a slot (0x338c / 0x3400) and walks the HEAD chunk via 0x32d8; the BGM event code 0x5370
+  maps a track's byte 4 through 0x3348 (bank -> XVAB id) before NOTE 0x8f10. Close answers 1 while a
+  BGM plays it (the EE's rxSndXseqFree waits on that). Own chunk-finder copy 0x34a8 / 0x3518 / 0x3568
+  (its v1 walk has no zero-tag stop). HEAD: u8 track count, u8 relocated, offset[count] to 8-byte TRCK
+  records whose second word is the track data; version < 0x200 offsets are rebased on HEAD at open
+  (0x2fa0, dir +1) and back at close. The boot sends no XSEQ commands; no plain XSEQ file is on the
+  disc (only one 'XSEQ' string inside DATA/CH/CHARA.RPK), so the format is unchecked against data.
 
 ## Disc and data files
 

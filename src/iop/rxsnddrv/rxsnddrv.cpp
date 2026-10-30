@@ -248,7 +248,7 @@ u_int RxSndDrvCommand(u_int cmd, u_char *reply, const u_int *data)
     case 0x61:
         return (u_int)RxSndDrvXseqClose(data[0]);
     case 0x63:
-        RxSndDrvXseqCmd63(data[0], data[1], data[2]);
+        RxSndDrvXseqSetBank(data[0], data[1], data[2]);
         return 0;
 
     case 0x70:
