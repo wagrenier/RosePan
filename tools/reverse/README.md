@@ -15,7 +15,8 @@ overridden with environment variables:
 |---|---|
 | `ROSEPAN_ELF` | `<repo>/SLUS_214.48` -- not distributed; dump it from your own disc |
 | `ROSEPAN_PROGRAM` | `SLUS_214.48` (the program as Ghidra names it; project path `/Rule of Rose - US`) |
-| `GHIDRA_MCP_URL` | `http://127.0.0.1:8089` |
+| `GHIDRA_MCP_PROJECT`, `GHIDRA_MCP_PORTS` | `data/ghidra.json`: the shared project `C:\Users\willi\Ghidra`, ports `8089:16` (8089..8104); the tools use whichever Ghidra holds the project |
+| `GHIDRA_MCP_URL` | unset; pins one instance (`http://127.0.0.1:8089`) and skips the discovery |
 | `ROSEPAN_REIPAN` / `ROSEPAN_MIOPAN` | `../ReiPan`, `../MioPan` (library references for libmatch.py, platform layer source) |
 | `ROSEPAN_DATA` | the unpacked disc (unset until the data layout is known) |
 | `ROSEPAN_MINGW_BIN`, `ROSEPAN_NINJA`, `ROSEPAN_VCVARS` | CLion's MinGW, Python's ninja, vswhere's vcvars64.bat |
@@ -42,6 +43,8 @@ python refresh.py          # all of the above that is not a one-time write, in o
 | script | what it does |
 |---|---|
 | `rosepan.py` | Paths, the address map (`data/layout.json`), the GhidraMCP client (`program` always in the query string) and its write helpers (create with lock retry, rename, tag, save with retry). Import it; not a CLI. |
+| `ghidra_mcp.py` | Finds the Ghidra that holds the shared project among every Ghidra running (one per game: GhidraMCP binds 8089, or the next free port up to 8104 when another Ghidra has it) and talks to it; `rosepan.http()` / `ghidra_up()` go through it. `list` (every instance, `*` = RosePan's), `which` (what the tools resolve to, or why none), `launch` (start Ghidra on the project unless it runs). Config `data/ghidra.json`; the resolved port is cached in `work/ghidra_instance.json`. Same module as YamiPan's (`YamiPan/.claude/skills/yamipan-port/references/ghidra.md` has how the plugin serves). |
+| `ghidra_bridge.py` | GhidraMCP's `bridge_mcp_ghidra.py` with start-up, `list_instances`, `connect_instance` and reconnect replaced by `ghidra_mcp.py`'s discovery, for a `ghidra` MCP entry (run with the bridge's venv python, `data/ghidra.json` `bridge_python`). RosePan has no such entry yet. |
 | `elf32.py` | Minimal ELF32 reader: sections (with names), segments, VA->bytes, `_gp` from `.reginfo`. |
 | `gcc2.py` | GCC 2.x name mangling: `demangle()` / `ghidra_name()` (the project's Ghidra spelling) / `mangle()`; `--selftest` demangles every named section (1,733/1,733). Mangling has no T/N-safe guarantee for repeated class params; `struct X` forces the by-value `G` marker. |
 | `fetch.py` | Function starts, names and hashes, and every function's provenance tag, from Ghidra. |

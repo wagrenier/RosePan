@@ -8,9 +8,9 @@ and the same ee-gcc 2.9x runtime as FF2.
 import json
 import os
 import re
-import urllib.parse
-import urllib.request
 from pathlib import Path
+
+import ghidra_mcp
 
 TOOLS = Path(__file__).resolve().parent
 REPO = TOOLS.parents[1]
@@ -19,9 +19,10 @@ DATA = TOOLS / 'data'   # results worth keeping: name ledger, TU state, layout
 
 ELF = Path(os.environ.get('ROSEPAN_ELF', REPO / 'SLUS_214.48'))
 FUNCTIONS_TXT = REPO / 'ror_functions.txt'
-# Program name as Ghidra reports it (project path /Rule of Rose - US).
-PROGRAM = os.environ.get('ROSEPAN_PROGRAM', 'SLUS_214.48')
-GHIDRA = os.environ.get('GHIDRA_MCP_URL', 'http://127.0.0.1:8089').rstrip('/') + '/'
+# Program name as Ghidra reports it (project path /Rule of Rose - US). Which Ghidra holds it, among
+# several running (one per game, ports 8089..8104): ghidra_mcp.py, by data/ghidra.json's project.
+PROGRAM = os.environ.get('ROSEPAN_PROGRAM') or ghidra_mcp.PROGRAM or 'SLUS_214.48'
+GHIDRA_CLIENT = ghidra_mcp.Ghidra(PROGRAM)
 
 # Library references (read-only, offline): an ELF plus a functions.txt-style list with sizes.
 REIPAN = Path(os.environ.get('ROSEPAN_REIPAN', REPO.parent / 'ReiPan'))
@@ -141,25 +142,24 @@ def src_path_for(inferred_file):
 # ---- Ghidra ---------------------------------------------------------------------------------------
 
 def http(method, endpoint, program=None, body=None, timeout=300, **query):
-    """Call GhidraMCP. `program` always goes in the query string: in a POST body it is silently
-    ignored and the write lands on whichever program is active."""
-    program = program or PROGRAM
-    url = GHIDRA + endpoint + '?' + urllib.parse.urlencode({'program': program, **query})
-    data = json.dumps(body).encode() if body is not None else None
-    req = urllib.request.Request(url, data=data, method=method, headers={'Content-Type': 'application/json'})
-    return urllib.request.urlopen(req, timeout=timeout).read().decode('utf-8', 'replace')
+    """Call GhidraMCP in the instance that holds the project. `program` always goes in the query
+    string: in a POST body it is silently ignored and the write lands on whichever program is active.
+    No instance (or several) raises ghidra_mcp.GhidraError, an OSError."""
+    return GHIDRA_CLIENT.http(method, endpoint, body=body, program=program, timeout=timeout, **query)
 
 
 def ghidra_up():
-    """True when the GhidraMCP server answers and has the RoR program open."""
+    """True when the project's Ghidra answers and has the RoR program open."""
+    return GHIDRA_CLIENT.up()
+
+
+def ghidra_down_reason():
+    """Why ghidra_up() is False, for error messages: no instance, or the program is not open in it."""
     try:
-        urllib.request.urlopen(GHIDRA + 'check_connection', timeout=3).read()
-    except OSError:
-        return False
-    try:
-        return PROGRAM in http('GET', 'list_open_programs', timeout=10)
-    except OSError:
-        return False
+        inst = ghidra_mcp.find(GHIDRA_CLIENT.project, PROGRAM)
+    except OSError as e:
+        return str(e)
+    return f'{PROGRAM} is not open in {inst.describe()}'
 
 
 def function_names(program=None):

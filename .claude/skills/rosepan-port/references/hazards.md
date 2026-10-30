@@ -64,7 +64,13 @@ entries are marked **RoR** with the date.
   0x5000d, GEQUAL) at the far plane while the replay order draws it after the model; fix, VU1
   strips carry clip z (rosepan_i3d DrawStrip -> RosePan_RendererDrawImageTriangles2DDepth).
 
-## Ghidra / GhidraMCP (HTTP on 127.0.0.1:8089)
+## Ghidra / GhidraMCP (HTTP on 127.0.0.1:8089..8104, found by project)
+
+- **Several Ghidras, one per game.** The first to start binds 8089, the next ones 8090.., so 8089 is
+  not RoR's by right: the tools find the instance holding `C:\Users\willi\Ghidra` (`ghidra_mcp.py`,
+  `data/ghidra.json`); raw curl must take the port from `python ghidra_mcp.py which`. A project is
+  open in one Ghidra only (its `.lock`); a plain `ghidraRun` opens the last project used, which may be
+  another game's: start this one by its `.gpr` (`python ghidra_mcp.py launch`).
 
 - **`program` must be in the query string.** In a POST body it is ignored and the write lands on the
   active program -- this once renamed 69 FF2 functions in ReiPan. `rosepan.http()` does it right; raw

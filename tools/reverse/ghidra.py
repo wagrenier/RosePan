@@ -109,5 +109,5 @@ if __name__ == '__main__':
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
         raise SystemExit(__doc__)
     if not rosepan.ghidra_up():
-        raise SystemExit(f'Ghidra (GhidraMCP) is not reachable at {rosepan.GHIDRA} with {rosepan.PROGRAM} open')
+        raise SystemExit(f'Ghidra: {rosepan.ghidra_down_reason()}')
     COMMANDS[sys.argv[1]](*sys.argv[2:])
