@@ -38,11 +38,6 @@ struct EffParam
     union
     {
         u_char m_data[0x70];    // ROR 0x10: the script's 0x70 bytes (native 281 ops 0..49)
-        struct
-        {
-            DogActor *m_actor;  // ROR 0x10
-            int       m_args[12]; // ROR 0x14
-        } m_achr;               // kind 0x15 (native 281 op 38)
         const void *m_file;     // ROR 0x10: kind 0xd, an event pack's effect file (scenePlayStart)
         struct
         {
@@ -244,6 +239,63 @@ struct EffParam
             float m_rot;        // ROR 0x20: the actor's y angle
             float m_scale;      // ROR 0x24: EffFoot2Work::m_scale
         } m_foot2prim;          // kind 0x20 (EffFoot2Prim::init; EffFoot2::addPrint)
+        struct
+        {
+            float m_from[3];    // ROR 0x10: the segment the puffs rise along
+            float m_spread0;    // ROR 0x1c: their scatter radius at m_from
+            float m_to[3];      // ROR 0x20
+            float m_spread1;    // ROR 0x2c: at m_to
+            float m_color[4];   // ROR 0x30: 0..1, alpha last (fainter toward m_to)
+            float m_size;       // ROR 0x40: the puffs' EffDust2Prim m_size
+        } m_dust2;              // kind 0x12 (EffDust2::init)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10
+            float m_size;       // ROR 0x1c
+            float m_color[4];   // ROR 0x20: 0..1, alpha last
+        } m_dust2prim;          // kind 0x13 (EffDust2Prim::init; EffDust2::createPrim)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10: the flame's foot
+            float m_color[4];   // ROR 0x1c: the glow's colour, 0..1, alpha last
+            float m_near;       // ROR 0x2c: the glow's pull toward the camera, past 10
+        } m_fire1;              // kind 0x14 (EffFire1::init)
+        struct
+        {
+            DogActor *m_actor;  // ROR 0x10: the actor the flame sits on
+            char  m_node[0x20]; // ROR 0x14: its node name
+            float m_color[4];   // ROR 0x34: the glow's colour, 0..1, alpha last
+        } m_achr;               // kind 0x15 (EffFire1Ex::init; native 281 op 38)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10
+            float m_rot[3];     // ROR 0x1c: radians, z x y order (i3dMatRotZXY)
+            float m_scale;      // ROR 0x28: the sprite's width and height
+            float m_alpha;      // ROR 0x2c
+        } m_fire2;              // kind 0x16 (EffFire2::init)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10
+            float m_scale[2];   // ROR 0x1c: the quad's width and height
+            float m_alpha;      // ROR 0x24
+            float m_speed;      // ROR 0x28: its drift along the camera's x axis per frame
+            int   m_raise;      // ROR 0x2c: non-zero = m_pos is the bottom edge (moved up half the height)
+        } m_fog1;               // kind 0x17 (EffFog1::init)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10: the centre of the line the wisps start on
+            float m_rot;        // ROR 0x1c: the y angle; the line runs along its x axis
+            float m_width;      // ROR 0x20: the line's length
+            float m_dist;       // ROR 0x24: the wisps' EffFog2Prim m_dist
+            float m_color[4];   // ROR 0x28: 0..1, alpha last
+        } m_fog2;               // kind 0x18 (EffFog2::init)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10: the start (y below 0 rises)
+            float m_rot;        // ROR 0x1c: the y angle it drifts along (its z axis)
+            float m_dist;       // ROR 0x20: how far it goes in all
+            float m_color[4];   // ROR 0x24: 0..1, alpha last
+        } m_fog2prim;           // kind 0x19 (EffFog2Prim::init; EffFog2::liveMain)
     };
 };
 

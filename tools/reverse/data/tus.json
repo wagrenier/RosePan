@@ -8,8 +8,7 @@
   "unassigned@0013e2ec",
   "unassigned@001258a4",
   "unassigned@00166a1c",
-  "unassigned@0016dcc8",
-  "unassigned@001704a4"
+  "unassigned@0016dcc8"
  ],
  "settings": {
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
@@ -414,6 +413,96 @@
    ],
    "status": "verify",
    "why": "The effect helpers between EffCameraAnim1 (eff/effcameraanim1.cpp ends 0x16fb70) and EffDust2::init 0x1704a4: vector / matrix / angle helpers and the actor-probe used by 10+ Eff classes in other files; no source-path string, file name inferred (alphabetical link order between effcameraanim1 and effdust2)"
+  },
+  "eff/effdust2.cpp": {
+   "notes": "Not on the smoke path: the 15 s run stops at the boot disclaimer and kinds 0x12..0x19 come from room scripts (0x15 from native 281 op 38). Mark done when a room shows rising dust. Doubts in open-items.md (heap leftovers set on the host, the ROM's 90.03096-degree turn in EffFog2, createEff -1 never refilled). The queue entry unassigned@001704a4 was removed; the queue's remaining entries all predate this run. For the next eff work: the effect classes are all written now except those still stubbed in lib/unassigned_stubs.cpp past 0x172d98 (EffFog3 linkonce and EffLight1 entries are already ported, the stub comments are leftovers).",
+   "ranges": [
+    [
+     "001704a4",
+     "00170ca4"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 15:05",
+     "status": "verify",
+     "summary": "unassigned@001704a4 split into eff/effdust2.cpp, efffire1.cpp, efffire2.cpp, efffog1.cpp, efffog2.cpp and all 28 functions written (EffDust2 .. EffFog2Prim, kinds 0x12..0x19); this file: EffDust2 / EffDust2Prim, 7 functions incl. createPrim 0x170624; EffParam m_dust2 .. m_fog2prim"
+    }
+   ],
+   "status": "verify",
+   "why": "EffDust2 / EffDust2Prim (kinds 0x12 / 0x13), right after eff/effcommon.cpp; one file per numbered effect family as eff/efffog3.cpp (a RoR source path)"
+  },
+  "eff/efffire1.cpp": {
+   "notes": "Not on the smoke path (15 s run at the boot disclaimer; kind 0x14 from room scripts, 0x15 from native 281 op 38). Mark done when a room shows a candle flame with its glow. Shared slots liveMain / renderMain / liveActivateExec renamed from EffFire1Ex:: to EffFire1:: (batch effdust2_001). PC: m_flicker zeroed in EffFire1Ex::init (ROM leaves heap leftovers); NULL actor guarded in EffFire1Ex::updateZDepth.",
+   "ranges": [
+    [
+     "00170ca4",
+     "0017145c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 15:02",
+     "status": "verify",
+     "summary": "EffFire1 / EffFire1Ex written, all 7 functions: init, flicker liveMain, flame + glow renderMain, 5-frame fade liveActivateExec, depth; Ex follows an actor node; EffParam m_achr gets m_node / m_color (native 281 op 38)"
+    }
+   ],
+   "status": "verify",
+   "why": "EffFire1 / EffFire1Ex (kinds 0x14 / 0x15, Ex derives from Fire1); family file as eff/efffog3.cpp"
+  },
+  "eff/efffire2.cpp": {
+   "notes": "Not on the smoke path (kind 0x16 from room scripts). Mark done when a room shows it. PC: m_pos w set to 1 (ROM leaves it unset).",
+   "ranges": [
+    [
+     "0017145c",
+     "001716bc"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 15:03",
+     "status": "verify",
+     "summary": "EffFire2 written, all 4 functions: a world-oriented fire sprite cycling the four quarters of texture 0 every 4 frames"
+    }
+   ],
+   "status": "verify",
+   "why": "EffFire2 (kind 0x16); family file as eff/efffog3.cpp"
+  },
+  "eff/efffog1.cpp": {
+   "notes": "Not on the smoke path (kind 0x17 from room scripts). Mark done when a room shows a drifting fog bank. The drift is applied in renderMain, as the ROM does (so it stops while not drawn).",
+   "ranges": [
+    [
+     "001716bc",
+     "00171bfc"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 15:04",
+     "status": "verify",
+     "summary": "EffFog1 written, all 4 functions: a camera-facing fog quad drifting along the camera x axis, reset every 540 frames, corner alpha keys per 60 frames with the left corners 45 frames ahead"
+    }
+   ],
+   "status": "verify",
+   "why": "EffFog1 (kind 0x17); family file as eff/efffog3.cpp"
+  },
+  "eff/efffog2.cpp": {
+   "notes": "Not on the smoke path (kind 0x18 from room scripts). Mark done when a room shows ground fog wisps. EffFog2's turn uses the ROM's 90.03096 degrees (0x42b40fda), kept.",
+   "ranges": [
+    [
+     "00171bfc",
+     "00172678"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 15:04",
+     "status": "verify",
+     "summary": "EffFog2 / EffFog2Prim written, all 6 functions: an emitter line and the rising, gliding fog wisps (quarter-circle rise, flat glide to m_dist, corner alpha cycle, 30-frame fades)"
+    }
+   ],
+   "status": "verify",
+   "why": "EffFog2 / EffFog2Prim (kinds 0x18 / 0x19), ending at eff/efffog3.cpp's gamCreateEff1a 0x172678"
   },
   "eff/efffog3.cpp": {
    "notes": "Code complete; nothing on screen shows it yet: the 240 s smoke run ends in the bus-stop room with no enemies, so the fog correctly stays the map's (frame mean equals the msgsystext shot, no regression). Mark done the first time a run with an enemy shows the fog thicken. Class declarations moved from eff/effclasses.h to eff/efffog3.h (included there); gamCreateEff1a's prototype moved from game/gamman.h to eff/efffog3.h. Doubt: g_bss_7a3210 is taken as the record key (the chapter); check which record init picks if a stage looks wrong. The rest of the old unassigned@0016fb70 run stays: EffDust2..EffFog2Prim before 0x172678, EffFoot1..EffLight3 from 0x172e4c; EffLight1::init 0x174dd8 is the next reached effect stub (reached in the picture-book stretch).",
@@ -3147,6 +3236,7 @@
   "unassigned@0016afcc": {},
   "unassigned@0016dcc8": {},
   "unassigned@0016fb70": {},
+  "unassigned@001704a4": {},
   "unassigned@00172e4c": {},
   "unassigned@001788ec": {},
   "unassigned@0017a918": {},
