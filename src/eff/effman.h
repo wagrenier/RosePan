@@ -83,6 +83,14 @@ struct EffParam
         } m_bg;                 // kind 0x34 (EffBg1::init)
         struct
         {
+            char  m_suffix[0xc]; // ROR 0x10: the pack name's suffix (m_suffix above)
+            float m_pos[3];     // ROR 0x1c
+            float m_rot[3];     // ROR 0x28: radians, z x y order (i3dMatRotZXY)
+            float m_scale[3];   // ROR 0x34
+            float m_color[4];   // ROR 0x40: the display control's colour scale
+        } m_generic;            // kind 0x33 (EffGeneric1::init)
+        struct
+        {
             float m_pos[3];     // ROR 0x10
             float m_near;       // ROR 0x1c: EffFindItem1::m_near
         } m_find;               // kind 0x32 (EffFindItem1::init)

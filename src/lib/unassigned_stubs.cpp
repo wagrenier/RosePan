@@ -197,18 +197,6 @@ int TskDamage::stepKindA()
 
 // ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----
 
-// stub of ROR 0x00173df8
-EffGeneric1::EffGeneric1()
-{
-    ROSEPAN_STUB("EffGeneric1::EffGeneric1", 0x00173df8);
-}
-
-// stub of ROR 0x00173e48
-EffGeneric1::~EffGeneric1()
-{
-    ROSEPAN_STUB("EffGeneric1::~EffGeneric1", 0x00173e48);
-}
-
 // stub of ROR 0x001790e4
 EffReload1::EffReload1()
 {
@@ -226,33 +214,6 @@ EffReload1::~EffReload1()
 // stub of ROR 0x00172cb8
 // stub of ROR 0x0028c058
 // stub of ROR 0x0028c060
-// stub of ROR 0x00173f3c
-int EffGeneric1::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffGeneric1::init", 0x00173f3c);
-    return {};
-}
-
-// stub of ROR 0x00174438
-int EffGeneric1::liveMain()
-{
-    ROSEPAN_STUB("EffGeneric1::liveMain", 0x00174438);
-    return {};
-}
-
-// stub of ROR 0x0028c648
-u_long * EffGeneric1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffGeneric1::renderMain", 0x0028c648);
-    return {};
-}
-
-// stub of ROR 0x00174534
-void EffGeneric1::renderPreMain(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("EffGeneric1::renderPreMain", 0x00174534);
-}
-
 // stub of ROR 0x001791ac
 int EffReload1::init(const EffParam *param)
 {
@@ -801,14 +762,3 @@ void EffMuzzleFlash1::updateZDepth()
 }
 
 
-// stub of ROR 0x00174bd8
-void EffGeneric1::applyUvKeys(const EffGenUvKeys *rec)
-{
-    ROSEPAN_STUB("EffGeneric1::applyUvKeys", 0x00174bd8);
-}
-
-// stub of ROR 0x00174bb0
-void EffGeneric1::applyUvScroll(const EffGenScroll *rec)
-{
-    ROSEPAN_STUB("EffGeneric1::applyUvScroll", 0x00174bb0);
-}

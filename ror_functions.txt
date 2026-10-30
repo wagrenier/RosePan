@@ -2335,7 +2335,7 @@
 /* 00172e08 00000044 */ EffFog3WeakUp::liveMain(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- eff/efffoot.cpp
 // *****************************************************************************
 
 /* 00172e4c 00000100 */ EffFoot1::init(){}  // ror
@@ -2358,20 +2358,25 @@
 /* 00173a90 0000009c */ EffFoot2Prim::init(){}  // ror
 /* 00173b2c 0000003c */ EffFoot2Prim::liveMain(){}  // ror
 /* 00173b68 00000290 */ EffFoot2Prim::renderMain(){}  // ror
+
+// *****************************************************************************
+// FILE -- eff/effgeneric.cpp
+// *****************************************************************************
+
 /* 00173df8 00000050 */ EffGeneric1::EffGeneric1(){}  // ror
 /* 00173e48 000000f4 */ EffGeneric1::~EffGeneric1(){}  // ror
 /* 00173f3c 000004fc */ EffGeneric1::init(){}  // ror
 /* 00174438 000000fc */ EffGeneric1::liveMain(){}  // ror
 /* 00174534 000004c8 */ EffGeneric1::renderPreMain(){}  // ror
-/* 001749fc 00000064 */ FUN_001749fc(){}
-/* 00174a60 00000078 */ FUN_00174a60(){}
-/* 00174ad8 00000064 */ FUN_00174ad8(){}
-/* 00174b3c 00000074 */ FUN_00174b3c(){}
+/* 001749fc 00000064 */ EffGeneric1::applyTransKeys(){}  // ror
+/* 00174a60 00000078 */ EffGeneric1::applyRotKeys(){}  // ror
+/* 00174ad8 00000064 */ EffGeneric1::applyScaleKeys(){}  // ror
+/* 00174b3c 00000074 */ EffGeneric1::applyColorKeys(){}  // ror
 /* 00174bb0 00000028 */ EffGeneric1::applyUvScroll(){}  // ror
 /* 00174bd8 0000006c */ EffGeneric1::applyUvKeys(){}  // ror
-/* 00174c44 00000004 */ FUN_00174c44(){}
+/* 00174c44 00000004 */ EffGeneric1::applyTexKeys(){}  // ror
 /* 00174c4c 000000c8 */ EffGeneric1::setMatUv(){}  // ror
-/* 00174d14 000000c0 */ FUN_00174d14(){}
+/* 00174d14 000000c0 */ EffGeneric1::getKeyValue(){}  // ror
 
 // *****************************************************************************
 // FILE -- eff/efflight.cpp
