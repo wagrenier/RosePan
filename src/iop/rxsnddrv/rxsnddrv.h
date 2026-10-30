@@ -12,7 +12,8 @@
  *    sys.cpp       0x1680..0x19e0  system parameters (debug, rate, output)
  *    mix.cpp       0x19e0..0x1ca0  per-core master mix and volume
  *    effect.cpp    0x1ca0..0x2330  per-core SPU2 reverb
- *    (not yet)     0x2330..        XVAB, XSEQ, voices, BGM, SE, NOTE, ADPCM,
+ *    xvab.cpp      0x2330..0x2e00  XVAB sound banks and the chunk file format
+ *    (not yet)     0x2e00..        XSEQ, voices, BGM, SE, NOTE, ADPCM,
  *                                  PCM: stubs.cpp until reconstructed
  *
  *  Functions carry `IOP 0x<addr>` (never `ROR 0x`: these are IOP addresses,
@@ -114,11 +115,52 @@ void  RxSndDrvEffectTick(void);                     // IOP 0x00001ca0
 void  RxSndDrvEffectInit(void);                     // IOP 0x000020c4
 void  RxSndDrvEffectSet(int core, const u_int *data); // IOP 0x000021e0
 
-/* ---- not reconstructed yet (stubs.cpp) --------------------------------- */
+/* ---- xvab.cpp ---------------------------------------------------------- */
+
+/* A bank's tables (IOP addresses, 0 none) and its SPU sample base. */
+struct RxSndDrvXvabTables
+{
+    u_int m_tgif;                       // IOP +0x00: programs
+    u_int m_seif;                       // IOP +0x04: SE groups
+    u_int m_velt;                       // IOP +0x08: velocity curves
+    u_int m_pant;                       // IOP +0x0c: pan curves
+    u_int m_lfot;                       // IOP +0x10: LFO curves
+    u_int m_spu;                        // IOP +0x14
+};
+static_assert(sizeof(RxSndDrvXvabTables) == 0x18, "RxSndDrvXvabTables");
+
+/* A slot (0x80 at IOP 0x19680). */
+struct RxSndDrvXvab
+{
+    u_int              m_file;          // IOP +0x00: the file in IOP memory, 0 free
+    RxSndDrvXvabTables m_tables;        // IOP +0x04
+    int                m_users;         // IOP +0x1c: notes / SEs using it
+};
+static_assert(sizeof(RxSndDrvXvab) == 0x20, "RxSndDrvXvab");
+static_assert(offsetof(RxSndDrvXvab, m_tables) == 0x4, "RxSndDrvXvab::m_tables");
+static_assert(offsetof(RxSndDrvXvab, m_users) == 0x1c, "RxSndDrvXvab::m_users");
 
 int   RxSndDrvXvabOpen(u_int id, u_int iop, u_int spu);    // IOP 0x00002330
+int   RxSndDrvXvabRelocate(u_char *file, int dir, int open); // IOP 0x00002578
 void  RxSndDrvXvabInit(void);                       // IOP 0x00002854
+void  RxSndDrvXvabCloseAll(void);                   // IOP 0x00002880
 int   RxSndDrvXvabClose(u_int id);                  // IOP 0x000028b8
+RxSndDrvXvabTables *RxSndDrvXvabGetTables(u_int id); // IOP 0x000029b0
+u_int RxSndDrvXvabGetSpu(int id);                   // IOP 0x000029e8
+int   RxSndDrvXvabLock(int id);                     // IOP 0x00002a14
+void  RxSndDrvXvabUnlock(int id);                   // IOP 0x00002a88
+u_int RxSndDrvXvabFindSe(int id, int group, int index, int *ticks, int *a, int *b,
+                         int *mode);                // IOP 0x00002ae8
+int   RxSndDrvXvabAttach(u_char *file);             // IOP 0x00002c7c
+int   RxSndDrvXvabDetach(u_char *file);             // IOP 0x00002ca0
+u_int RxSndDrvChunkGetVersion(const void *file);    // IOP 0x00002cc4
+u_char *RxSndDrvChunkFind(const void *file, u_int tag);   // IOP 0x00002cd0
+int   RxSndDrvXvabGetUsers(int id);                 // IOP 0x00002d14
+u_char *RxSndDrvChunkFindV1(const void *file, u_int tag); // IOP 0x00002d40
+u_char *RxSndDrvChunkFindV2(const void *file, u_int tag); // IOP 0x00002da0
+
+/* ---- not reconstructed yet (stubs.cpp) --------------------------------- */
+
 int   RxSndDrvXseqOpen(u_int id, u_int iop);        // IOP 0x00002e00
 void  RxSndDrvXseqInit(void);                       // IOP 0x00003170
 int   RxSndDrvXseqClose(u_int id);                  // IOP 0x000031d4
