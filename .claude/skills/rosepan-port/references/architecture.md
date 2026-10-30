@@ -1129,6 +1129,21 @@ flag texture and light loads pass), sepc (DogTexInfo::setSepiaColor, clamped 255
 0x1000d, BFML 0x1000e, BCPL 0x1000f, after utlPauseForMenu), whti / whto (white fades, level 7),
 rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
 
+**The special menus (dial locks, `mag/maglifemenusp.cpp` 0x12d9c8..0x12f008, 2026-10-30).** spmn's
+KLCK opens MagLifeMenuSpecial (EE 0x80), BVIL / BLND / BFML / BCPL MagLifeMenuSpecial2 (EE 0x70,
+m_type 0..3 picks the body model 0x10e1..0x10e4; dials 0x10de..0x10e0). Both load their models as
+scene actors with actor flag 8 (motions keep running under the menu), save the camera, place it
+(Special (0, -60, 200), Special2 (0, -20, 80) then zoomed by the body's clip radius over 30 frames),
+turned (-0.1, pi, 0), and use MagLife's m_state as the step and m_04 (MagLife::live) as the frame
+counter. Three dials: pad dir 0x80 / 0x20 pick, 0x10 / 0x40 turn a step (0x1000), render eases 0x100
+a frame; the picked dial's actor gets m_attention 0 (Special) / 1 (Special2), others -1. Special:
+models 0x10dd box, 0x10d9..0x10db dials, 0x10dc frame (data 0x2ed090); 8 positions per 0x8000 turn,
+pad bit 14 opens when all three dials are at -0x4000 (box motion 0). Special2: 10 digits per 0xa000;
+pad bit 14 checks m_menu_arg as three decimal digits (hundreds on dial 0, digit d at -d*0x1000 wrapped
+into -0x5000..0x4fff), SE 0xc2, shakes 20 frames, then SE 0xc3 + body motion 1 (right) or 0xc4 (wrong,
+dials again). Pad bit 13 cancels both (fade out / in). processPad returns m_result when done: 1
+cancelled, 2 opened (gmnr reads it).
+
 ## The player's controller (`mag/maglifepc.cpp`, 0x11ab40..0x11c464, 2026-10-27)
 
 - `MagLifePC` (EE 0x220, scene +0x2adc0) is a state machine: `m_state` (MagLife0 +0) picks one of 20

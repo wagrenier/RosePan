@@ -4757,17 +4757,89 @@
   "was": "FUN_0012d788",
   "why": "slot 6: asserts theRenderStage / actor; places the camera and the actor, fades, draws the actor (DogActor slot 19 drawModel)"
  },
+ "0012d9c8": {
+  "name": "MagLifeMenuSpecial::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012d9c8",
+  "why": "vtable 0x2e1c38 slot 9 (MagLifeMenuBase::init); loads five models as scene actors, asserts m_scene"
+ },
+ "0012dac4": {
+  "name": "MagLifeMenuSpecial::term",
+  "tag": "ror-inferred",
+  "was": "FUN_0012dac4",
+  "why": "vtable 0x2e1c38 slot 10; releases the five actors and restores the camera"
+ },
+ "0012db54": {
+  "name": "MagLifeMenuSpecial::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0012db54",
+  "why": "vtable 0x2e1c38 slot 11; last actor number >= 0"
+ },
+ "0012db64": {
+  "name": "MagLifeMenuSpecial::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012db64",
+  "why": "vtable 0x2e1c38 slot 12; pad bits, dial selection, asserts actor"
+ },
+ "0012dda4": {
+  "name": "MagLifeMenuSpecial::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012dda4",
+  "why": "vtable 0x2e1c38 slot 6; asserts theRenderStage, steps camera / dials / fades"
+ },
  "0012e23c": {
   "name": "MagLifeMenuSpecial::MagLifeMenuSpecial",
   "tag": "ror-inferred",
   "was": "FUN_0012e23c",
   "why": "stores MagLifeMenuSpecial's vtable 0x2e1c38 (rtti); openMenu 0x1000b news 0x80 bytes and runs it"
  },
+ "0012e2e4": {
+  "name": "MagLifeMenuSpecial::~MagLifeMenuSpecial",
+  "tag": "ror-inferred",
+  "was": "FUN_0012e2e4",
+  "why": "vtable 0x2e1c38 slot 1: stores its vtable, runs term, stores MagLife0's, deletes on bit 0"
+ },
+ "0012e34c": {
+  "name": "MagLifeMenuSpecial2::init",
+  "tag": "ror-inferred",
+  "was": "FUN_0012e34c",
+  "why": "vtable 0x2e1bc8 slot 9; loads the m_type body and three dials as scene actors"
+ },
+ "0012e498": {
+  "name": "MagLifeMenuSpecial2::term",
+  "tag": "ror-inferred",
+  "was": "FUN_0012e498",
+  "why": "vtable 0x2e1bc8 slot 10; releases the four actors and restores the camera"
+ },
+ "0012e528": {
+  "name": "MagLifeMenuSpecial2::isInit",
+  "tag": "ror-inferred",
+  "was": "FUN_0012e528",
+  "why": "vtable 0x2e1bc8 slot 11; last actor number >= 0"
+ },
+ "0012e538": {
+  "name": "MagLifeMenuSpecial2::processPad",
+  "tag": "ror-inferred",
+  "was": "FUN_0012e538",
+  "why": "vtable 0x2e1bc8 slot 12; dials and the decimal code check against m_menu_arg"
+ },
+ "0012e854": {
+  "name": "MagLifeMenuSpecial2::render",
+  "tag": "ror-inferred",
+  "was": "FUN_0012e854",
+  "why": "vtable 0x2e1bc8 slot 6; asserts theRenderStage, camera zoom, dials, shake"
+ },
  "0012eef0": {
   "name": "MagLifeMenuSpecial2::MagLifeMenuSpecial2",
   "tag": "ror-inferred",
   "was": "FUN_0012eef0",
   "why": "stores MagLifeMenuSpecial2's vtable 0x2e1bc8 (rtti); openMenu 0x1000c..0x1000f news 0x70 bytes and runs it"
+ },
+ "0012efa0": {
+  "name": "MagLifeMenuSpecial2::~MagLifeMenuSpecial2",
+  "tag": "ror-inferred",
+  "was": "FUN_0012efa0",
+  "why": "vtable 0x2e1bc8 slot 1: stores its vtable, runs term, stores MagLife0's, deletes on bit 0"
  },
  "0012f008": {
   "name": "MagLifeFader::MagLifeFader",

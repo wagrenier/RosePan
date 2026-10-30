@@ -1295,6 +1295,12 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- **Dial locks (mag/maglifemenusp.cpp, written 2026-10-30, verify).** MagLifeMenuSpecial (KLCK,
+  menu 0x1000b) and MagLifeMenuSpecial2 (0x1000c..0x1000f) are opened by the event script command
+  spmn mid-game; the 15 s smoke run ends on the boot disclaimer. Mark done when a run shows a lock:
+  the box / body with three dials under the scene camera, the picked dial highlighted. Doubt: the
+  highlight comes from DogModel m_attention (0 / 1 / -1); whoever reads it (the draw path) decides
+  what "picked" looks like.
 - **MnuNow (mnu/mnunow.cpp, written 2026-10-30, verify).** The "Now Loading" screen, menu 0x10009.
   Not seen yet: the 15 s smoke run ends on the boot disclaimer, and no written code was found that
   opens menu 0x10009 (MagScene::setMenu's caller with that id -- likely an event script command).
