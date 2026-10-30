@@ -19,7 +19,7 @@
    "00215a30"
   ],
   "slice_bytes": 10240,
-  "smoke_pad": "1800:START,2400:START,2700:CROSS,3100:START*900,4200:RIGHT*1700,6000:CIRCLE,6300:CIRCLE"
+  "smoke_pad": "1800:START,2400:START,2700:CROSS,3100:START*900,4200:RIGHT*1700,6000:CIRCLE,6300:CIRCLE,7000:CROSS,7300:CROSS,7600:CROSS,7900:CROSS,8200:CROSS,8500:CROSS,8800:CROSS,9100:CROSS,9400:CROSS,9700:LSDOWN*250,10000:LSLEFT*300,10350:LSUP*350,10750:LSRIGHT*350"
  },
  "tus": {
   "bed/bedmemory.cpp": {
@@ -227,9 +227,14 @@
      "date": "2026-10-27 17:18",
      "status": "verify",
      "summary": "DogCamera written, all 8 functions of 0x10f860..0x10fc7c: saveCamera / restoreCamera (one-level save of angle, translation, rotation, scale; asserts m_saved), updateMove (timed lerp of translation and rotation), DogEntity::getMatrix (slot 2 transform then i3dMatInverse into the +0xf0 view matrix; the real camera now replaces the unit-matrix stub), getLensFov (13-entry degree table, modff), getLensScale / setLensScale (moved from lib/unassigned_stubs.cpp), getRotY. Header fields named (m_saved_*, m_saved, m_move_*). utlLerp4 0x106d40 written ahead in lib/unassigned_stubs.cpp. 6 names (dogcamera_001.json)."
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): camera views render from the scene cameras with correct framing, shots 9960, 10560, 11040"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "dog/dogcamera.cpp source strings at 0x10f860 / 0x10f8cc (asserts m_saved==0, m_saved != 0); DogCamera::getMatrix (the +0xf0 inverse), getLensFov / getLensScale / setLensScale and the camera interpolation 0x10f944 (+0x134 / +0x1d0) up to DogEntity::setRotate 0x10fc7c; starts after DogActor::eyeReset (dogactor.cpp)"
   },
   "dog/dogentity.cpp": {
@@ -294,9 +299,14 @@
      "date": "2026-10-22 21:58",
      "status": "verify",
      "summary": "Wrote the rest of DogLightPool (26 functions 0x1103dc..0x1123b0): init/term/create/alloc/newLight, the id and set-mask edits (allocId, addToSet, removeLight, resetSet, buildSet, copySet), the per-kind set getters, set/getLightParam and their per-set twins, and DogLightBuffer (copyLights, setupDesc, clear); +0x30 is m_used, +0x108 m_data"
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): the street lamp lights the bench and road (lit stage), shots 7200, 11160"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "doglightpool.cpp source strings from 0x1103dc (after DogEntityEx::setParent / dogentity.cpp at 0x1102b4..0x1103dc) through 0x1123b0, DogLightPool::createLight / findNearestPointLight use the doglightpool.h inline getters; 0x112b08.. works on a light-desc object freed/cleared from dog/doglight.cpp 0x112d60, so the file ends there"
   },
   "dog/dogmodel.cpp": {
@@ -317,9 +327,14 @@
      "date": "2026-10-29 19:13",
      "status": "verify",
      "summary": "unassigned@00113ea8 resolved: dogModelHitNearest 0x114034 and dogModelHitCylinder 0x1141c8 (the casts' I3cQuery hit callbacks) written into dog/dogmodel.cpp, pinned 0x114034-0x11618c; FUN_00113ea8 pinned into dog/doglight.cpp 0x112bc8-0x114034. MagSceneRayHit fixed to 0x70 bytes with m_name[28] at +0x54 (castRayGroups stack frame proves it); SeqRayHit is now just the record."
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): Jennifer follows the ground and stops at the hedge while the stick is still held up (same spot 10560 and 10740)"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "15 of 23 anchored by dog/dogmodel.cpp; dogModelHitNearest / dogModelHitCylinder are the casts' I3cQuery hit callbacks, called only from DogModel's casts, placed before them"
   },
   "dog/dogmotionblend.cpp": {
@@ -335,9 +350,14 @@
      "date": "2026-10-27 17:49",
      "status": "verify",
      "summary": "DogMotionBlend complete (11 of 11): getPose, getNodeRate, step, stepLoop, getTimeRatio, setTimeRatio, setBlendRate written from the ROM; blend entry fields m_node_mask, m_state, m_time, m_count named and asserted; range pinned 0x10737c-0x108660"
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): walk and run motions blend on Jennifer without pops, shots 9960..11160"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "Every DogMotionBlend method, reset 0x10737c through the constructor 0x108588; six carry the dog/dogmotionblend.cpp source string; utlVecToRot before and DogActor::countBlendFrame after belong to other files"
   },
   "dog/dogtexinfo.cpp": {
@@ -1257,9 +1277,14 @@
      "date": "2026-10-29 13:22",
      "status": "verify",
      "summary": "i3cquery complete: swept-sphere triangle tests 0x2325d0 (segment) / 0x232be8 (ray) as one worker, their casts 0x2331c8 (hidden in 0x232be8, created in Ghidra) / 0x2331f0, i3cTriBarycentric 0x233258 and i3cGetHitAttr 0x2333b0; I3cAttrRef and the root's attribute stride byte in i3croot.h; i3dRayCylinderTest / i3dSegCylinderTest 0x2365f8 / 0x236678 named and stubbed in i3dgeom"
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): casts hit the hedge, Jennifer stopped against it, shots 10560, 10740"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "the i3c collision query: i3cCastSphere/Ray/Cylinder and their shared worker 0x232120 with its per-shape testers; boundary with the distance helpers at 0x233628 inferred from callers"
   },
   "i3d/i3croot.cpp": {
@@ -1275,9 +1300,14 @@
      "date": "2026-10-26 22:24",
      "status": "verify",
      "summary": "I3D_I3C collision root written whole in the i3ritem session (same slice): id check, i3cRelocate / i3cUnrelocate with the part-tree relocators, node / group counts, names and name lookups, i3cSetBothFaceEnable; header i3croot.h with I3cRoot / I3cNode / I3cPart / I3cTree at EE offsets."
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): collision tables set up and casts give correct results (floor and hedge), shots 10560, 10740"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "the I3D_I3C collision file root: its id check (0x303a70), relocators, node / group lookups; between the I3D_I3M code (0x22b4b8..) and the i3r item core"
   },
   "i3d/i3dctx.cpp": {
@@ -1510,9 +1540,14 @@
      "date": "2026-10-28 12:00",
      "status": "verify",
      "summary": "i3m pose player complete: the last 10 functions, a quaternion kit Ghidra had folded into 0x230688 and 0x230df8 (shorter-arc slerp memory and GPR forms, shorter-arc lerp, normalized slerp memory and GPR forms, squad both forms, quaternion to matrix, matrix to quaternion, squad control point); created and named in Ghidra (batch i3mpose_003)"
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): Jennifer posed through walk and run cycles, shots 9960, 11040"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "the i3m pose player: key search, key decode (I3mRoot +0x20/+0x28 tables), lerp/spline/slerp/squad, pose blends, PoseToMatrices, quaternion helpers; ends with i3mQuatFromEuler; 0x2312a0 starts the i3c query code"
   },
   "i3d/i3mroot.cpp": {
@@ -1528,9 +1563,14 @@
      "date": "2026-10-26 22:40",
      "status": "verify",
      "summary": "I3D_I3M motion file root written (12 functions, 0x22b4b8..0x22ba20): id and version checks, relocators, node count / name / index-by-name, node and key-time lookups; layout checked on all 14,647 I3M files on the disc"
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): motions play on screen, shots 9960, 11040"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "I3D_I3M motion file root (id 0x303a68): id/version checks, relocators, node and key accessors; between i3rroot.cpp and i3croot.cpp, which it mirrors"
   },
   "i3d/i3rblend.cpp": {
@@ -1658,9 +1698,14 @@
      "date": "2026-10-26 22:59",
      "status": "verify",
      "summary": "Pinned unassigned@0021a3e8 as i3d/i3rmodel.cpp 0x21a3e8..0x21ac80 and wrote all 14 functions: i3rBuildPackets / i3rClearPackets, i3rAssignTex, i3rCopyLocalBasicTransform, i3rConvertLocalToModel (parent x local as VU0 micro 0), i3rCopyClipSphere, i3rUpdateTexAnim, i3rReplaceStqMapEntity, and the material entity slot accessors i3rGetMatEntity0..2 / i3rSetMatEntity0..2 (slot 0 getter 0x21aa10 was hidden after ReplaceStq's return: mkfunc). New header i3rmodel.h with the EE layouts of the material, layer, node, packet buffer and STQ entity data; I3dMatrixF4x4 moved there. I3rRootData gained the clip sphere and m_local_basic. MagScene m_2aad0 / m_2aad1 were the STQ entity's +0x40 / id: folded into I3rStqMapEntity (0x50). Tree paths checked offline on all 2565 models on the disc."
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): the bus-stop map and Jennifer draw textured and lit, shots 7200, 11040"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "the i3r model helpers between i3denv's fog (to 0x21a3e8) and lights (from 0x21ac80): packets of the root, texture assignment, texture animation, STQ entities, node transforms; one object file as a contiguous run, named after the I3D_BIN model operations it serves"
   },
   "i3d/i3rroot.cpp": {
@@ -1716,9 +1761,14 @@
      "date": "2026-10-28 19:07",
      "status": "verify",
      "summary": "MagLifeControlChara's motion sequence (changeMotionSeq, changeMotionSeqAlt, updateMotionSeq, isMotionStateEndless, changeMotion, the m_48 phase helpers), the floor queries (testFloor, testFloorStep, followGround), playSe / playStepSe, the linkonce accessors, MagLifeBillboard (live, distance); the PC's 164 and Brown's 138 motion sequence rows ported as host data and set by their constructors; MagLifeMotionSeq laid out (host layout); utlPlaySe takes a position pointer; TU pinned"
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): changeMotionSeq drives Jennifer's motions from the stick, shots 9960, 11040, 11160"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "mag/maglife.cpp source strings anchor 7 functions from 0x119cec to 0x11a8f4; MagLifeMan (maglifeman.cpp) ends before 0x119b34 and MagLifePC::restoreState (maglifepc.cpp) starts 0x11ab40; the linkonce block is MagLifeControlChara's and MagLifeBillboard's symbols"
   },
   "mag/maglifebwn.cpp": {
@@ -1919,9 +1969,14 @@
      "date": "2026-10-27 21:09",
      "status": "verify",
      "summary": "MagLifePC, the player controller: all 33 functions of 0x11ab40..0x11c464 (pinned) written - the constructor, changeState / selectMode over the 20 embedded MagLifePCMode objects, live, processPad (health / move level / stance, attack, reload, dog orders), message (was command), reset4MapJump (was reset), setActor, termWorld, setParam, the sub-mode stack, stamina; mag/maglifepcmode.h declares the modes. Also MagLifeControlChara's constructor, setState, clearMotionSeq, setMotionSeqTable and clearGoal in mag/maglife.cpp."
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): the PC is bound and walks and runs under the stick, shots 9960, 10560, 11040, 11160 (progress/ of setup/smoke_pad.cpp)"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "the file's asserts (mag/maglifepc.cpp, lines 1046..2340) run 0x11af30..0x11c1e8 in line order; 0x11ab40..0x11ade4 (restoreState, calcHealth, readStick, readStance, updatePadStatus) and termWorld use only MagLifePC fields; 0x11c464.. are GamMan PC-param getters before maglifepc2.cpp's first anchor 0x11c64c. initMotion 0x11dd40 / getSubStateClass 0x11e080 sit in maglifepc3.cpp's run, setState14 0x12c9c0 beside maglifepcbtl.cpp"
   },
   "mag/maglifepc2.cpp": {
@@ -1955,9 +2010,14 @@
      "date": "2026-10-27 21:27",
      "status": "verify",
      "summary": "MagLifePC motions reconstructed: all 14 functions of 0x11d720..0x11e0d8 (initMotion, changeMotion by name and the unimplemented by-number overload, loadMotion, loadWeaponMotion, play/isEnd action motion, the stance/wait/clear sub motions, getHealthMotionStep, getSubStateClass, isMoveState) with their tables; m_f4 renamed m_action_motion"
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): the PC motions load and play (stand, walk, run), shots 7200, 9960, 11040; the weapon wait pose needs a weapon, not in the prologue"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "the file's asserts (mag/maglifepc3.cpp) anchor 0x11d720..0x11df14; initMotion 0x11dd40 sits between those anchors and calls the file's loadWeaponMotion 0x11dc64; 0x11df7c..0x11e0d8 are the setMotionSub helpers initMotion calls plus getSubStateClass / isMoveState (small MagLifePC queries). 0x11e0d8 (a ray / strip debug drawer) is left out"
   },
   "mag/maglifepcbtl.cpp": {
@@ -2014,9 +2074,14 @@
      "date": "2026-10-27 21:53",
      "status": "verify",
      "summary": "The rest of the PC modes: AtkWait2D (with getTurnStep and the 0x2ead98 weapon x height table), AtkMove2D, Attacking (combo chain and the weapon hit spheres against utlCollectEmyInfo), Damage, Item, DogGo / DogCome / DogStay, Hold / HoldAttack / Unhold, Ride (init, live, pad, message), Roped, Reload, Hug. Named and stubbed their 20 callees (MagLifePC::startAttack, getWeaponHitPos, getHitFrameRange, hitTarget, getAttackHeight, takeItem, reload ..., MagLifeBwnCtrl::checkHug / requestHug / getBwnPosition, utlPlaySe, utlCollectEmyInfo, utlGetObjPos, utlIsEmyDamaging)."
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): stand, walk and run modes switch with the stick, shots 7200 (standing), 9960 (walking), 11040 (running)"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "every MagLifePCMode* vtable slot (rtti.py) lies in 0x1208b8..0x1230fc, including AtkMove2D's 0x121858..0x1218fc that inference gave dog/doglight.cpp; 0x120788 / 0x1207a8 open the run and are called by MagLifePCMode::live; 0x1233d8 is the next unassigned gap before mag/maglifebwn.cpp"
   },
   "mag/maglifepcmove.cpp": {
@@ -2088,9 +2153,14 @@
      "date": "2026-10-26 08:26",
      "status": "verify",
      "summary": "mag/magloader.cpp: reconstruct all 17 functions (MagLoaderIndex create/add/find/clear/release, MagCharaLoader ctor/init/initFromPacks/load/getIndex/getId/getCategory, MagMapLoader init/loadByName); utlStrEqualNoCase 0x106010 written ahead"
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): the bus-stop map units and Jennifer load and draw, shot 7200"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "mag/magloader.cpp asserts in 0x141e90..0x142fd0 (MagLoaderIndex, MagCharaLoader init/load/getIndex/getId, MagMapLoader init/loadByName); 0x141e44 / 0x141e78 are helpers its functions call; magscenefocus.cpp ends before, magscenedebug.cpp starts at MagScene::updateDebug 0x14313c"
   },
   "mag/magscene.cpp": {
@@ -2167,9 +2237,14 @@
      "date": "2026-10-27 20:33",
      "status": "verify",
      "summary": "MagScene::updateCamera written with its look helpers clampCameraLook (was FUN_0013e2ec) and getCameraLookLimit (was FUN_0013e4c0); magscenecamera.cpp re-pinned to 0x13c664..0x13f07c (updateCamera asserts with the file, line 1157). The 30-frame path move, modes 1 / 3 (best path of the four sky slots) / 4 / 5 (one-point two-view records, the +0x1f look letter and +0x10 look rotation) / 6, the lens angle on a path change. Named m_cam_move_frame (+0x2ad54), MagSceneCRec m_look_rot / m_look_tag. The rest of unassigned@0013e2ec is mag/magscenemenu.cpp (same commit)."
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): the scene camera cuts between the bench view, the hedge view and the path view as Jennifer walks, shots 9960, 10560, 11040, 11160"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "every function from 0x13c664 to 0x13e2ec asserts with mag/magscenecamera.cpp or is a MagScene camera method between them; updateCamera 0x13e548 asserts with mag/magscenecamera.cpp line 1157, and its two helpers clampCameraLook 0x13e2ec / getCameraLookLimit 0x13e4c0 sit before it with no strings; 0x13f07c starts the assertless MagScene GamMan menu glue (mag/magscenemenu.cpp)"
   },
   "mag/magscenecmd.cpp": {
@@ -2705,9 +2780,14 @@
      "date": "2026-10-28 22:23",
      "status": "verify",
      "summary": "MsgMan and MsgManSet written whole: 124 functions (0x18330c..0x187724, the unassigned@00184f2c run pinned into msg/msgman.cpp), the 41 #-tags with their exec and measure handlers as pointer-to-member tables, expandText, the three S2dMes message icons; 18 functions Ghidra had folded created and named"
+    },
+    {
+     "date": "2026-10-30 18:42",
+     "status": "done",
+     "summary": "marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): narration text expands and lays out right in the ornate window (Oh, what an unlucky girl...), shot 8400"
     }
    ],
-   "status": "verify",
+   "status": "done",
    "why": "MsgMan's constructor 0x18330c fills two 41-entry pointer-to-member tables (+0x12c, +0x274) with the tag handlers 0x1857fc..0x187414; the run 0x184f2c..0x18741c are MsgMan methods (this+0x10 MagSystem, the tables at +0x270), MsgManSet 0x18741c..0x187724 wraps two MsgMan; ends at McdMan::McdMan"
   },
   "msg/msgsystext.cpp": {
@@ -3031,6 +3111,15 @@
    "task": "Create the PC project (no RoR functions to write). The platform layer comes from ReiPan (../ReiPan, read-only), which took it from MioPan (FF2) and adapted it to FF3: src/sdk emulates the PS2 SDK (libgraph, libdma, libvif, libvu0, libpad, libmc, libcdvd, sif / IOP host, libmpeg + FFmpeg, eekernel threads), src/reipan draws the GS through SDL3 GPU and holds the host thread, log, paths, config and the ImGui debug UI. Steps: (1) copy ../ReiPan/src/reipan to src/rosepan and ../ReiPan/src/sdk to src/sdk; rename ReiPan_ / REIPAN_ / reipan_ identifiers, env variables and file names to RosePan_ / ROSEPAN_ / rosepan_, keeping the tool contract in tools/reverse/README.md 'Platform contract' (ROSEPAN_SHOT_DIR / ROSEPAN_SHOT_EVERY screenshots of the presented frame, ROSEPAN_AUTOPAD scripted pad in sdk/libpad.cpp, ROSEPAN_DATA_DIR, the RosePanGame thread name, the stub log line). (2) Write src/common/rosepan_stub.h from ../ReiPan/src/common/reipan_stub.h: ROSEPAN_STUB / ROSEPAN_BRIDGE printing '[stub] Name (ROR 0x%08x) reached'. (3) Drop or neutralise FF3-only pieces and list each in open-items.md 'Platform bootstrap': reipan/debug/reipan_warp.* (FF3 chapter warps and snapshots), FF3 game hooks in rendering/reipan_graph3d.cpp and reipan_ui, FF3 file names in io/reipan_paths (IMG_BD.BIN, ZERO3.FHD: RoR reads 'cdrom0:\\\\DATA\\\\...' and data/... paths, decide the data folder layout from the ELF), the FF3 IOP services in sdk/iop_* (RoR loads only Sony modules: sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv, fileio, sifcmd, usbd, plus ioprp300.img; its sound goes through rxmpeg / the rx middleware). (4) CMakeLists.txt, CMakePresets.json, cmake/*.cmake and resources/ (shaders) from ReiPan with ReiPan renamed RosePan: target RosePan, output cmake-build-*/RosePan/RosePan.exe, the sibling extern fallback pointed at ../ReiPan/extern then ../MioPan/extern (FFmpeg, shadercross), -fno-strict-aliasing and the src/sdk/pc_prefix.h force-include kept, every .c/.cpp compiled as C++. (5) A placeholder src/main.cpp whose main() initialises the platform, opens the window and presents cleared frames until RoR's main (0x002045a8) is reconstructed. (6) python build.py green; python build.py --run 15 writes work/shots/last.png (look at it); python layoutcheck.py runs clean. Keep platform edits minimal and list them in the summary; record the layer's shape in architecture.md 'PC platform layer' and anything that burned time in hazards.md. Finish --status done (the screenshot of an empty window is the expected picture)."
   },
   "setup/smoke_pad.cpp": {
+   "notes": "Done: pad step (1) and the marks of step (3), see open-items.md Next up for the list and the shots (5400 picture book, 7200 lit bus stop, 8400 narration, 9960 walk, 10560 to 10740 stopped by the hedge, 11040 running past the gate, 11160 bench camera; progress/ has 11040). Left: step (2), pushing past the bus stop. Candidate pad tail: 10750:LSRIGHT*270,11030:LSUP*700,11740:LSLEFT*200,11950:LSUP*700 (the forest path seen in shot 11040 goes up from the gate), run with build.py --run 520 --pad. Two tries exited cleanly with code 0 at frames 1920 and 1560 while another Claude session worked in this checkout (its gdb held the relwithdebinfo exe, so this run used --config release); rerun it alone before blaming the game. Still verify after this run: game/gamtrg.cpp (no trg thread seen), spr/sprtexture.cpp (narration frame probably S2dMes, compare with tm2png first), eff/efffoot.cpp, utl/utlmisc2.cpp.",
+   "sessions": [
+    {
+     "date": "2026-10-30 18:45",
+     "status": "partial",
+     "summary": "Bus-stop walk is the default smoke pad (settings.smoke_pad: CROSS every 300 reads through the narration, then LSDOWN, LSLEFT, LSUP, LSRIGHT round the bus stop, about 420 s); new tus.py mark command sets another TU's state with a reason in its history; 16 verify TUs marked done from the 420 s run's shots (PC walking and running, motions, collision at the hedge, scene cameras, lit stage, narration text)."
+    }
+   ],
+   "status": "partial",
    "task": "Lengthen the smoke run so verify TUs can be marked done from screenshots (the user, 2026-10-30; no RoR functions to write). 154 TUs are verify and only 18 done: the default pad (settings.smoke_pad in data/tus.json) ends in the picture book / first narration, and the per-TU check (--run 15) at the boot disclaimer, so almost no written code is ever seen. (1) Make the bus-stop walk the default: append \",7000:CROSS,7300:CROSS,7600:CROSS,7900:CROSS,8200:CROSS,8500:CROSS,8800:CROSS,9100:CROSS,9400:CROSS,9700:LSDOWN*250,10000:LSLEFT*300,10350:LSUP*350,10750:LSRIGHT*350\" to settings.smoke_pad (open-items.md, the fix/effect-zdepth entry: CROSS every 300 reads advances the narration, then the stick walks Jennifer round the bus stop; about 400 s). Run build.py --run 400 in the background and check the shot sequence shows the walk; if a run loops the boot logos (the known boot race), run once more. The added reads sit past the 15 s window, so tus.py check --run 15 stays as it is. (2) Push the pad further where the game allows: past the bus stop toward the first rooms with Brown, items, enemies and the in-game menus (START item menu, map, stock box), extending only while each step is confirmed by screenshots. Write in open-items.md Next up how far it now gets, with pad reads / frames. If the pad grows long, consider named pads in settings (boot / busstop / ...) that tus.py check can select, documented in tools/reverse/README.md. (3) Go through the verify TUs whose \"mark done when\" note the new run shows (PC walking and colliding: mag/maglifepc*.cpp, mag/maglife.cpp; models posing: dog/dogmotionblend.cpp, i3d/i3mpose.cpp, i3d/i3rmodel.cpp; camera: mag/magscenecamera.cpp, dog/dogcamera.cpp; area triggers: game/gamtrg.cpp, utl/utlmisc2.cpp; message text: msg/msgman.cpp; and any other the shots show), compare with the references (tm2png.py, work/ref) and mark each done or write the visible difference in its notes. No tus.py command sets another TU state, so add one (for example tus.py mark <TU> done|partial --why TEXT, recorded in its history) instead of hand-editing tus.json again. Name the screenshots that justified each change in the finish notes."
   },
   "snd/rxmpeg.cpp": {

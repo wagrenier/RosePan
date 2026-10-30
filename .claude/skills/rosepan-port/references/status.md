@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 18:06 at commit `4dcf6df` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 18:45 at commit `7f1a3df` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -202,9 +202,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 172 TUs: todo 72, verify 154, done 18
-- next: **None** (nothing on the frontier and no queued TU)
-- pinned queue: unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
+- 172 TUs: todo 73, partial 1, verify 138, done 34
+- next: **setup/smoke_pad.cpp** (pinned in the queue)
+- pinned queue: setup/smoke_pad.cpp, setup/iop_rxsnddrv.cpp, unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
+- partial: `setup/smoke_pad.cpp` 0/0 -- Done: pad step (1) and the marks of step (3), see open-items.md Next up for the list and the shots (5400 picture book, 7200 lit bus stop, 8400 narration, 9960 w
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -213,12 +214,8 @@ Least-named game-code regions (64 KB blocks):
 - verify: `debug/motnamecnv0.cpp` 8/8 -- Verify: the 15 s smoke run ends on the boot disclaimer, scenePlayStart is not reached, and every callee is a mag/magsceneif.cpp stub (MagSceneIFChara::find / ge
 - verify: `debug/naga_debug.cpp` 12/14 -- Whole file written; nothing in the ROM constructs EventTestTask and retail stripped its draw calls (text is formatted into a stack buffer and dropped), so no sc
 - verify: `dog/dogactor.cpp` 147/147 -- Status verify: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run stays black after the film because the pose and draw path below DogActo
-- verify: `dog/dogcamera.cpp` 8/10 -- Status verify: the 200 s New Game run (second try; the first looped the boot logos, the known boot race) plays the opening film to Once upon a time, then ends b
 - verify: `dog/dogentity.cpp` 11/16 -- Status verify: the 200 s New Game run ends black (one small ring at the bottom) with no assert or crash; the DogEntity stubs no longer appear, the camera (paren
 - verify: `dog/doglight.cpp` 10/10 -- The whole class is unreferenced in the ROM (ghidra.py refs on every entry: no call, jump, data word or lui/addiu pair), so nothing can ever show it: verify is f
-- verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
-- verify: `dog/dogmodel.cpp` 26/71 -- Status verify: the casts run only in gameplay; the 15 s smoke run ends on the disclaimer screen, which draws correctly. Mark done when a run walks the player in
-- verify: `dog/dogmotionblend.cpp` 11/11 -- Verify: the smoke run stays on the disclaimer screen and no actor is drawn yet, because the i3m pose player (unassigned@0022e840: i3mGetPose 0x22e960, i3mGetBle
 - verify: `dog/dogtexinfo.cpp` 17/17 -- All 17 DogTexInfo functions written. Smoke run shows the Atlus disclaimer screen; dump is unobservable (empty, error path only). Earlier handoff still holds: ad
 - verify: `eff/eff0.cpp` 14/14 -- Verify: the 240 s run reaches the bus-stop room and EffMan now creates and deletes EffLight1 (kind 0x21) and EffCameraAnim1 (0xd) through the real Eff0, but eve
 - verify: `eff/effbg.cpp` 6/6 -- Verify: the 15 s smoke run stops at the legal disclaimer; EffBg1 is created by event scripts (native 281, kind 0x34) in maps, so nothing on screen shows it yet.
@@ -259,8 +256,6 @@ Least-named game-code regions (64 KB blocks):
 - verify: `game/gamsnd.cpp` 74/75 -- Code complete; verify until a run reaches a room whose scripts put 3D sounds (native 252 put_*_3d_pos) -- the boot smoke run (logos, disclaimer, MV00_AD film, u
 - verify: `game/gamstat.cpp` 74/74 -- All code of the TU is written; nothing in it draws at boot, so verify. The map helpers run when the map menu (0x1949bc / 0x196878, unassigned) opens: the first 
 - verify: `game/gamtrg.cpp` 22/22 -- Status verify: all 22 GamArea functions are written. The 140 s New Game run calls update every frame to the end without a fault, but the stage does not draw (bl
-- verify: `i3d/i3cquery.cpp` 29/29 -- All 29 functions written; none of this session's six has a caller in the ROM, and the called casts still stop at the i3dgeom box-test stubs, so verify: mark don
-- verify: `i3d/i3croot.cpp` 12/12 -- Status verify: DogModel::loadData calls i3cRelocate, setupColliTbl and i3cSetBothFaceEnable, but no smoke run reaches a model load yet and no raw I3D_I3C exists
 - verify: `i3d/i3dctx.cpp` 31/31 -- Status verify: the screen stays black because MagScene::draw (no layers) and i3dCtxCloseFrame (0x224798, draw-group module) are stubs, so nothing reaches the pa
 - verify: `i3d/i3denv.cpp` 12/12 -- Pinned 0x21a120..0x21a3e8 + 0x21ac80..0x21b220 as one file (a guess: the i3r helpers 0x21a3e8..0x21ac80 sit between; split into i3dfog / i3dlight if evidence ap
 - verify: `i3d/i3dgeom.cpp` 54/54 -- Nothing left to write. Status verify: collision is not visible in the 15 s boot (the screenshot is the disclaimer, drawn right). Mark done once a longer run pas
@@ -272,16 +267,12 @@ Least-named game-code regions (64 KB blocks):
 - verify: `i3d/i3dview.cpp` 19/19 -- Status verify: views are built every frame (host test: screen centre 2047.5, frustum corner on the rectangle corner, depth 4094.6..1.06, scissor 0..511 x 0..447
 - verify: `i3d/i3dvram.cpp` 37/37 -- Complete; nothing on screen shows it yet (screen black: the draw path is stubbed). A host test (init, reserve x3 frames with eviction, compact, end frame, reset
 - verify: `i3d/i3dvu1pkt.cpp` 17/21 -- Complete except 0x21cfb0..0x21d378 (four functions: a REF-tag helper, an ADC index builder, two strip writers): no code or data references in the ROM, left unwr
-- verify: `i3d/i3mpose.cpp` 46/46 -- Whole TU written. Nothing in the ROM reaches 0x230688..0x231198 (no jal, j, data word or lui/addiu pair), so no picture can show it; the rest of the TU (key dec
-- verify: `i3d/i3mroot.cpp` 12/12 -- Pinned from unassigned@0022b4b8 to i3d/i3mroot.cpp. Host keeps root-relative offsets (i3mPtr), like i3c: the relocators walk with delta 0 and keep +0x16 at 1 (o
 - verify: `i3d/i3rblend.cpp` 18/18 -- Seen: the 240 s New Game run reaches the bus-stop room; the shot is pixel-identical to the GamFont progress shot, so nothing on screen shows these yet (uv track
 - verify: `i3d/i3rdraw.cpp` 19/19 -- Verify: mark done once the forest shadow is compared with real-game footage (direction, darkness, softness). Doubts in open-items.md Projected shadow, host: the
 - verify: `i3d/i3ritem.cpp` 426/426 -- Nothing left to write in i3ritem.cpp. Status verify: none of the accessors has a caller in the ROM, and the smoke run still ends on the boot disclaimer (no mode
 - verify: `i3d/i3rmesh.cpp` 14/14 -- Verify: the packet builder's callers (i3rDrawGroupSkinned / Rigid, 0x220838) are not ported, so only i3rPktLayerTest / i3rPktLayerAlpha run, through rosepan_i3d
-- verify: `i3d/i3rmodel.cpp` 14/14 -- Verify: nothing on screen reaches it yet. The 200 s New Game run still ends black after the film; DogActor::load 0x10cd5c (dog/dogactor.cpp) is the stub that ke
 - verify: `i3d/i3rroot.cpp` 14/14 -- Verify: no model loads in the smoke run yet, so nothing can show it (screen still black, as before). Port trap: the ROM relocates i3r files in place into absolu
 - verify: `i3d/i3rtype.cpp` 96/96 -- Verify: complete code, nothing on screen can show it (the 15 s smoke run shows the boot disclaimer; no model draws yet). The nine fixup pairs inside this extent
-- verify: `mag/maglife.cpp` 27/49 -- Verify: the 15 s smoke run ends on the boot disclaimer, so no controller runs yet; the first session whose run reaches a room with the PC or Brown moving checks
 - verify: `mag/maglifebwn.cpp` 29/42 -- Brown's live now runs in the smoke boot (MagLifeBwnModeWait::init and MagLifeBwnMode::live reached) but nothing on screen shows him yet: the screenshot is the b
 - verify: `mag/maglifebwnctrl.cpp` 70/94 -- Complete code, nothing on screen shows it: the 15 s smoke run ends on the boot disclaimer and Brown is not reachable yet, so the whole file stays verify until a
 - verify: `mag/maglifebwnmode.cpp` 19/22 -- Complete code, not on the smoke path (15 s run ends at the boot disclaimer): mark done when a run shows Brown walking a path, sitting, lying down or turning on 
@@ -290,18 +281,13 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/maglifemenu.cpp` 45/53 -- Complete, nothing on screen yet: the smoke run now opens the title (MagScene::openMenu 0x10005 -> MagLifeMenuTitle) and reaches MnuTitle::isInit / init / draw /
 - verify: `mag/maglifemenusp.cpp` 14/18 -- All code written; nothing on screen can show it yet (spmn opens these mid-game; the 15 s smoke ends on the boot disclaimer), so verify. Fields: m_state is the s
 - verify: `mag/maglifenoise.cpp` 5/5 -- Verify: the 15 s smoke run ends on the disclaimer, before anything calls GamMan::setVolume with a non-zero volume, so no screenshot shows the noise yet. First r
-- verify: `mag/maglifepc.cpp` 27/27 -- Verify: the 200 s New Game run binds the PC after the film (setActor -> changeState(0) -> MagLifePCModeNull::init reached) and ends on the picture book's page s
 - verify: `mag/maglifepc2.cpp` 25/25 -- Nothing in the boot smoke run picks up an item, attacks or reloads, so the code is unseen: verify. The 240 s run still reaches the first room (Jennifer on the f
-- verify: `mag/maglifepc3.cpp` 14/14 -- Status verify: the smoke run ends on the boot disclaimer screen, before MagScene::setPC binds the player, so nothing on screen shows these motions yet; the firs
 - verify: `mag/maglifepcbtl.cpp` 11/11 -- Complete code, not reachable on the smoke path (needs a room with enemies and the attack modes); the 15 s smoke run still shows the disclaimer screen. When a ru
 - verify: `mag/maglifepceff.cpp` 5/5 -- Complete; nothing on screen can show it yet: the 15s smoke run stops at the disclaimer screen (drawn correctly), and the muzzle flash needs the PC firing the gu
-- verify: `mag/maglifepcmode.cpp` 57/70 -- Every function of the TU is written; nothing on screen can show it yet: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run binds no actor
 - verify: `mag/maglifepcmove.cpp` 13/19 -- sweepRay is unreferenced in the ROM (ghidra.py refs: none), so verify is final unless a caller turns up. Doubt: placed with the sweeps for its sweepMove slide m
 - verify: `mag/maglifetest.cpp` 3/6 -- Whole file written. Nothing in the ROM constructs MagLifeTest (ghidra.py refs on the ctor 0x13114c and vtable 0x2e1e70 find only the ctor itself), so no screens
-- verify: `mag/magloader.cpp` 17/17 -- Status verify: all 17 functions written, nothing past the title menu draws yet. A New Game run (build.py --run 140 --pad 1800:START,2400:START,2700:CROSS) no lo
 - verify: `mag/magscene.cpp` 89/89 -- Screen still black (textures never load; game/gamfile.cpp callers GamMan::loadSystemData / loadStage are stubs), and nothing calls this slice's new code in the 
 - verify: `mag/magscene2.cpp` 19/19 -- Complete but unseen: MagScene::start (magscene.cpp) and the GamMan loads are stubs, so no loader runs and the screen stays black (MagScene::draw is a stub too).
-- verify: `mag/magscenecamera.cpp` 16/16 -- 200 s New Game run: no assert or crash, ends on the open picture book as before (progress shot); no map draws yet, so no path camera can be seen: verify. Traps 
 - verify: `mag/magscenecmd.cpp` 36/36 -- Verify: the 200 s run reaches gamSetBwnFollow (MagLifeBwnCtrl::setLevel stub hit) and still ends black after the narration frame (~6000) as before; fog shows on
 - verify: `mag/magscenedebug.cpp` 3/3 -- Complete. The debug windows are MagLifeWindowDebug in m_window slots, one per level 0..3 in m_dbg_window (scene +0x22bc). updateDebug runs from MagScene::update
 - verify: `mag/magscenefocus.cpp` 16/16 -- Verify: the 15 s smoke run shows the disclaimer screen as before; nothing on that path turns focus on (setFocusData runs from an event pack with a file 2, seqFu
@@ -326,7 +312,6 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mnu/mnustock.cpp` 35/35 -- TU fully written, verify: the item box opens only from a room's stock menu (MagScene menu 0x10002), which the smoke pad does not reach; the 15 s run shows the b
 - verify: `mnu/mnusvld.cpp` 41/41 -- Status verify: a Load Game press (pad 1800:START,2400:START,2700:DOWN,2800:CROSS, about 100 s) opens the screen and it matches work/ref/mnusvld (background, Loa
 - verify: `mnu/mnutitle.cpp` 20/20 -- Status verify: the code is complete but the plain boot stays black because execLogo waits at step 1 on MnuMcd::startCheck (a stub returning 0; MnuMcd init / pro
-- verify: `msg/msgman.cpp` 124/124 -- Status verify: in the bus-stop room the message window shows MsgMan's key icon (S2dMes sprite 0) but no text, because the window's text path is stubbed: MagLife
 - verify: `rx/rxfile.cpp` 168/168 -- Status verify: every function in 0x2437f8..0x249b88 is written, but nothing can show it: main 0x2045a8 is still the placeholder (black screen), and the rxthread
 - verify: `rx/rxsnd.cpp` 222/222 -- Complete apart from two unreferenced trivia (0x2384b0 empty, 0x23a910 returns its argument). Screen black as before: sound has no picture and the boot reaches n
 - verify: `rx/rxsys.cpp` 126/126 -- Decided without the user (open-items Decisions 2026-10-30): the System Monitor is log-only on the PC. Cells and the expanded 640-pixel row image are built as th
@@ -362,14 +347,14 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
-- 2026-10-30 18:06 `mag/maglifepcmove.cpp` verify: MagLifePC::sweepRay 0x11e0d8: the last unassigned run beside the sweeps, an older single-ray sweepMove (castRay from m_trans - 30 y along the level move, quarte
-- 2026-10-30 17:59 `debug/motnamecnv.cpp` verify: debug/motnamecnv.cpp written whole (0x2163ac..0x216768, 9 functions): seven MagSceneIFChara wrappers with an unused first argument (motNameGetCharaName, motName
-- 2026-10-30 17:27 `mag/maglifetest.cpp` verify: MagLifeTest test controller complete: ctor, live (motion chain 0xac, 5, 1 on its phase word, then the motion's root movement into addTrans turned by the base he
-- 2026-10-30 17:20 `debug/naga_debug.cpp` verify: EventTestTask debug overlay complete: disp (info pages: PC / dog position, world position via WrdSrv, heap and packet use, chapter, map area, PC and dog health,
-- 2026-10-30 16:56 `debug/naga_debug.cpp` partial: EventTestTask (vtable 0x2e50c0, kind 2): nagaDbgLoadFile, the constructor split out of 0x216768 at 0x216828, destructor, init, exec, inline get_task_type / term
-- 2026-10-30 16:47 `task/tsk_bg_load.cpp` verify: TskBGLoad / TskBGLoadArea / TskBGLoadMap, all 19 functions: the background pack loaders that read a pack head, allocate its total size and read the whole pack i
-- 2026-10-30 16:30 `dog/doglight.cpp` verify: DogLight, all 8 functions: init / clear / term, getDataSize, create (one block of ambient, direct, point, spot, hemi and dist lights), setParam / getParam (pos,
-- 2026-10-30 16:19 `mag/maglifebwnmode.cpp` verify: Brown's ten modes (MagLifeBwnMode Null/One/Wait/Sit/Fuse/Move/Path/Turn/Rotate/Wall), all 19 functions; pinned 0x125bd4..0x1267c0 absorbing unassigned@00125bd4 
+- 2026-10-30 18:45 `setup/smoke_pad.cpp` partial: Bus-stop walk is the default smoke pad (settings.smoke_pad: CROSS every 300 reads through the narration, then LSDOWN, LSLEFT, LSUP, LSRIGHT round the bus stop, 
+- 2026-10-30 18:42 `dog/dogcamera.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): camera views render from the scene cameras with correct framing, shots 9960, 10560,
+- 2026-10-30 18:42 `dog/doglightpool.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): the street lamp lights the bench and road (lit stage), shots 7200, 11160
+- 2026-10-30 18:42 `dog/dogmodel.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): Jennifer follows the ground and stops at the hedge while the stick is still held up
+- 2026-10-30 18:42 `dog/dogmotionblend.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): walk and run motions blend on Jennifer without pops, shots 9960..11160
+- 2026-10-30 18:42 `i3d/i3cquery.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): casts hit the hedge, Jennifer stopped against it, shots 10560, 10740
+- 2026-10-30 18:42 `i3d/i3croot.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): collision tables set up and casts give correct results (floor and hedge), shots 105
+- 2026-10-30 18:42 `i3d/i3mpose.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): Jennifer posed through walk and run cycles, shots 9960, 11040
 
 ## Frontier (called by reconstructed code, not written yet)
 
