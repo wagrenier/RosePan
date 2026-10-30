@@ -2003,6 +2003,16 @@ never asserts): sessions name them (`tus.py define --why`).
   (param 0x5e) is dead code (Init always stores step 1). The rest of the enemy run splits the same way:
   Got 0x1583d4 (GotMain::initOut opens it) .. 0x15a17c, Pig 0x15a17c .. 0x15c2a4, Dwf 0x15c2a4 (its
   dtor) .. EmyManager 0x16265c.
+  **PigMain** (type 1, emy/emy_pig.cpp 0x15a17c..0x15c2a4, 2026-10-30; EE 0x270, vtable 0x2e2dc0):
+  the Got's twin -- same decide / exec / after / tests / sight test and the same next-state gate (11 needs
+  m_pickup +0x268, 12 m_part +0x26c); 24 input words at +0x204, bytes +0x264 / +0x265 cleared, sight edge
+  +0x266; selectOut takes states 1..16. Outs: the Dwf's for 1..11, 14 Fort, 15 Irritate; its own 12
+  PigOutParts (setMotion 10 / 1 / 0x14 by attr bits 8 / 0x10), 13 PigOutTackle (chase to 300, motion 0x4d
+  + SE 0xb, tackle 0x4c for 28 (70%) or 42 frames with object flags 0x10000000 / 0x400 / 0x4000000 on and
+  0x40 off, emyChkHitReach 50 once per PC / dog, scnChrRequest word 0x18; 0x4e; returns input 22 done,
+  23 chase failed), 16 PigOutTest. pigFindPickupItem 0x15b5ec skips fchrs with object flag 1 (no kind
+  0xa2e rule); pigFindPart 0x15b8b8 uses part kinds 0xbd3 / 0xbd7 / 0xbd5 / 0xbd6 / 0xbd4 for attr bits
+  1 / 2 / 4 / 8 / 0x10 (same GamSysData fields 0x4f..0x58).
   **GotMain** (type 2, emy/emy_got.cpp 0x1583d4..0x15a17c, 2026-10-30; EE 0x270, 6 slots): uses the
   Dwf's outs (emy/emy_dwf.h) for states 1 Disappear, 2 Appear, 3 AtkNear, 4 Dead, 5 Stared, 6 Win,
   7 Serch, 8 Walk, 9 Wait, 10 AtkFar, 11 Pickup, 13 Fort, 14 Irritate; its own 12 GotOutParts

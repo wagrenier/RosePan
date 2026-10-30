@@ -8933,6 +8933,204 @@
   "was": "FUN_0015a17c",
   "why": "called right after the vtable store in the ELF's inline PigMain::PigMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
  },
+ "0015a580": {
+  "name": "PigMain::~PigMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0015a580",
+  "why": "PigMain vtable 0x2e2dc0 slot 1: vptr store, ~EmyMain then operator_delete on the deleting flag"
+ },
+ "0015a5e0": {
+  "name": "PigMain::decide",
+  "tag": "ror-inferred",
+  "was": "FUN_0015a5e0",
+  "why": "PigMain vtable slot 4: m_req from inputs 21..1 at +0x204, gated by the next state (11 needs a pickup item, 12 a part), as GotMain::decide"
+ },
+ "0015aa8c": {
+  "name": "PigMain::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015aa8c",
+  "why": "PigMain vtable slot 5: EmyStateMap::next on m_req, notify bits 1 / 2 (kill forces state 4), as GotMain::exec"
+ },
+ "0015ab48": {
+  "name": "PigMain::after",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ab48",
+  "why": "PigMain vtable slot 6: Term / selectOut on m_changed, then the out's Exec into m_req"
+ },
+ "0015abc4": {
+  "name": "PigMain::selectOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0015abc4",
+  "why": "PigMain vtable slot 2: m_out[state] for states 1..16, Init, then the transition row into the input words +0x204"
+ },
+ "0015ac8c": {
+  "name": "PigMain::isPCSameArea",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ac8c",
+  "why": "one-line wrapper of EmyMain::isPCSameArea called by the sight test, as GotMain's"
+ },
+ "0015aca0": {
+  "name": "PigMain::testBarkReact",
+  "tag": "ror-inferred",
+  "was": "FUN_0015aca0",
+  "why": "decide input 1: unless the next state is blocked, EmyMain::testBarkReact"
+ },
+ "0015ad18": {
+  "name": "PigMain::isTargetInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ad18",
+  "why": "decide's sight edge: emyChkInSight for the PC and the dog, body identical to GotMain::isTargetInSight"
+ },
+ "0015ae78": {
+  "name": "PigMain::isPCStateClass1",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ae78",
+  "why": "decide input 7: unless the next state is blocked, the same test as GotMain::isPCStateClass1"
+ },
+ "0015aef0": {
+  "name": "PigMain::isPCAhead",
+  "tag": "ror-inferred",
+  "was": "FUN_0015aef0",
+  "why": "decide input 8: unless the next state is blocked, the same test as GotMain::isPCAhead"
+ },
+ "0015af68": {
+  "name": "PigMain::isPCStateClass2",
+  "tag": "ror-inferred",
+  "was": "FUN_0015af68",
+  "why": "decide input 9: unless the next state is blocked, the same test as GotMain::isPCStateClass2"
+ },
+ "0015afe0": {
+  "name": "PigMain::isPCClass7OffAxis",
+  "tag": "ror-inferred",
+  "was": "FUN_0015afe0",
+  "why": "decide input 10: unless the next state is blocked, the same test as GotMain::isPCClass7OffAxis"
+ },
+ "0015b058": {
+  "name": "PigMain::isPCNear",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b058",
+  "why": "decide input 11: unless the next state is blocked, the same test as GotMain::isPCNear"
+ },
+ "0015b0dc": {
+  "name": "PigMain::isPCOrDogInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b0dc",
+  "why": "decide input 12: unless the next state is blocked, the same test as GotMain::isPCOrDogInSight"
+ },
+ "0015b154": {
+  "name": "PigMain::hasOid0Twice",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b154",
+  "why": "decide input 13: unless the next state is blocked, the same test as GotMain::hasOid0Twice"
+ },
+ "0015b1cc": {
+  "name": "PigMain::isLowLife",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b1cc",
+  "why": "decide input 14: unless the next state is blocked, the same test as GotMain::isLowLife"
+ },
+ "0015b244": {
+  "name": "PigMain::isHalfLife",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b244",
+  "why": "decide input 15: unless the next state is blocked, the same test as GotMain::isHalfLife"
+ },
+ "0015b2bc": {
+  "name": "PigMain::testAttr8And10",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b2bc",
+  "why": "decide input 16: unless the next state is blocked, the same test as GotMain::testAttr8And10"
+ },
+ "0015b34c": {
+  "name": "PigMain::testAttr2And4",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b34c",
+  "why": "decide input 17: unless the next state is blocked, the same test as GotMain::testAttr2And4"
+ },
+ "0015b3dc": {
+  "name": "PigMain::testAttr1",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b3dc",
+  "why": "decide input 18: unless the next state is blocked, the same test as GotMain::testAttr1"
+ },
+ "0015b454": {
+  "name": "PigMain::testAttr2Or4",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b454",
+  "why": "decide input 19: unless the next state is blocked, the same test as GotMain::testAttr2Or4"
+ },
+ "0015b4e4": {
+  "name": "PigMain::testAttr8Or10",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b4e4",
+  "why": "decide input 20: unless the next state is blocked, the same test as GotMain::testAttr8Or10"
+ },
+ "0015b574": {
+  "name": "PigMain::isPCStateClass4",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b574",
+  "why": "decide input 21: unless the next state is blocked, the same test as GotMain::isPCStateClass4"
+ },
+ "0015b5ec": {
+  "name": "pigFindPickupItem",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b5ec",
+  "why": "written into PigMain +0x268 by initOut / decide; nearest reachable type-5 fchr not targeted, as gotFindPickupItem with a testObjFlags(1) gate"
+ },
+ "0015b8b8": {
+  "name": "pigFindPart",
+  "tag": "ror-inferred",
+  "was": "FUN_0015b8b8",
+  "why": "written into PigMain +0x26c; as gotFindPart with the Pig's part kinds 0xbd3..0xbd7"
+ },
+ "0015bd58": {
+  "name": "PigOutParts::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015bd58",
+  "why": "PigOutParts vtable 0x2e2e00 slot 2: motion by attr bits 8 / 0x10, step 0"
+ },
+ "0015bdbc": {
+  "name": "PigOutParts::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015bdbc",
+  "why": "PigOutParts vtable slot 3: returns -1"
+ },
+ "0015bdc4": {
+  "name": "PigOutParts::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0015bdc4",
+  "why": "PigOutParts vtable slot 4: termCommon"
+ },
+ "0015bde0": {
+  "name": "PigOutTackle::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015bde0",
+  "why": "PigOutTackle vtable 0x2e2e30 slot 2: selectNearTarget, hit flags cleared, emyStartChase 300"
+ },
+ "0015be28": {
+  "name": "PigOutTackle::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015be28",
+  "why": "PigOutTackle vtable slot 3: chase, motion 0x4c tackle with emyChkHitReach on PC and dog, scnChrRequest 0x18"
+ },
+ "0015c164": {
+  "name": "PigOutTackle::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0015c164",
+  "why": "PigOutTackle vtable slot 4: termCommon"
+ },
+ "0015c180": {
+  "name": "PigOutTest::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015c180",
+  "why": "PigOutTest vtable 0x2e2e60 slot 2: step 0"
+ },
+ "0015c188": {
+  "name": "PigOutTest::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015c188",
+  "why": "PigOutTest vtable slot 3: motion 0x36 loop, as GotOutTest::Exec"
+ },
  "0015c304": {
   "name": "DwfMain::initOut",
   "tag": "ror-inferred",

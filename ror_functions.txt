@@ -1881,43 +1881,48 @@
 /* 0015a060 0000011c */ GotOutTest::Exec(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- emy/emy_pig.cpp
 // *****************************************************************************
 
 /* 0015a17c 00000404 */ PigMain::initOut(){}  // ror
-/* 0015a580 00000060 */ FUN_0015a580(){}
-/* 0015a5e0 000004ac */ FUN_0015a5e0(){}
-/* 0015aa8c 000000bc */ FUN_0015aa8c(){}
-/* 0015ab48 0000007c */ FUN_0015ab48(){}
-/* 0015abc4 000000c8 */ FUN_0015abc4(){}
-/* 0015ac8c 00000014 */ FUN_0015ac8c(){}
-/* 0015aca0 00000078 */ FUN_0015aca0(){}
-/* 0015ad18 00000160 */ FUN_0015ad18(){}
-/* 0015ae78 00000078 */ FUN_0015ae78(){}
-/* 0015aef0 00000078 */ FUN_0015aef0(){}
-/* 0015af68 00000078 */ FUN_0015af68(){}
-/* 0015afe0 00000078 */ FUN_0015afe0(){}
-/* 0015b058 00000084 */ FUN_0015b058(){}
-/* 0015b0dc 00000078 */ FUN_0015b0dc(){}
-/* 0015b154 00000078 */ FUN_0015b154(){}
-/* 0015b1cc 00000078 */ FUN_0015b1cc(){}
-/* 0015b244 00000078 */ FUN_0015b244(){}
-/* 0015b2bc 00000090 */ FUN_0015b2bc(){}
-/* 0015b34c 00000090 */ FUN_0015b34c(){}
-/* 0015b3dc 00000078 */ FUN_0015b3dc(){}
-/* 0015b454 00000090 */ FUN_0015b454(){}
-/* 0015b4e4 00000090 */ FUN_0015b4e4(){}
-/* 0015b574 00000078 */ FUN_0015b574(){}
-/* 0015b5ec 000002cc */ FUN_0015b5ec(){}
-/* 0015b8b8 000004a0 */ FUN_0015b8b8(){}
-/* 0015bd58 00000064 */ FUN_0015bd58(){}
-/* 0015bdbc 00000008 */ FUN_0015bdbc(){}
-/* 0015bdc4 0000001c */ FUN_0015bdc4(){}
-/* 0015bde0 00000048 */ FUN_0015bde0(){}
-/* 0015be28 0000033c */ FUN_0015be28(){}
-/* 0015c164 0000001c */ FUN_0015c164(){}
-/* 0015c180 00000008 */ FUN_0015c180(){}
-/* 0015c188 0000011c */ FUN_0015c188(){}
+/* 0015a580 00000060 */ PigMain::~PigMain(){}  // ror
+/* 0015a5e0 000004ac */ PigMain::decide(){}  // ror
+/* 0015aa8c 000000bc */ PigMain::exec(){}  // ror
+/* 0015ab48 0000007c */ PigMain::after(){}  // ror
+/* 0015abc4 000000c8 */ PigMain::selectOut(){}  // ror
+/* 0015ac8c 00000014 */ PigMain::isPCSameArea(){}  // ror
+/* 0015aca0 00000078 */ PigMain::testBarkReact(){}  // ror
+/* 0015ad18 00000160 */ PigMain::isTargetInSight(){}  // ror
+/* 0015ae78 00000078 */ PigMain::isPCStateClass1(){}  // ror
+/* 0015aef0 00000078 */ PigMain::isPCAhead(){}  // ror
+/* 0015af68 00000078 */ PigMain::isPCStateClass2(){}  // ror
+/* 0015afe0 00000078 */ PigMain::isPCClass7OffAxis(){}  // ror
+/* 0015b058 00000084 */ PigMain::isPCNear(){}  // ror
+/* 0015b0dc 00000078 */ PigMain::isPCOrDogInSight(){}  // ror
+/* 0015b154 00000078 */ PigMain::hasOid0Twice(){}  // ror
+/* 0015b1cc 00000078 */ PigMain::isLowLife(){}  // ror
+/* 0015b244 00000078 */ PigMain::isHalfLife(){}  // ror
+/* 0015b2bc 00000090 */ PigMain::testAttr8And10(){}  // ror
+/* 0015b34c 00000090 */ PigMain::testAttr2And4(){}  // ror
+/* 0015b3dc 00000078 */ PigMain::testAttr1(){}  // ror
+/* 0015b454 00000090 */ PigMain::testAttr2Or4(){}  // ror
+/* 0015b4e4 00000090 */ PigMain::testAttr8Or10(){}  // ror
+/* 0015b574 00000078 */ PigMain::isPCStateClass4(){}  // ror
+/* 0015b5ec 000002cc */ pigFindPickupItem(){}  // ror
+/* 0015b8b8 000004a0 */ pigFindPart(){}  // ror
+/* 0015bd58 00000064 */ PigOutParts::Init(){}  // ror
+/* 0015bdbc 00000008 */ PigOutParts::Exec(){}  // ror
+/* 0015bdc4 0000001c */ PigOutParts::Term(){}  // ror
+/* 0015bde0 00000048 */ PigOutTackle::Init(){}  // ror
+/* 0015be28 0000033c */ PigOutTackle::Exec(){}  // ror
+/* 0015c164 0000001c */ PigOutTackle::Term(){}  // ror
+/* 0015c180 00000008 */ PigOutTest::Init(){}  // ror
+/* 0015c188 0000011c */ PigOutTest::Exec(){}  // ror
+
+// *****************************************************************************
+// FILE -- emy/emy_dwf.cpp
+// *****************************************************************************
+
 /* 0015c2a4 00000060 */ FUN_0015c2a4(){}
 /* 0015c304 0000040c */ DwfMain::initOut(){}  // ror
 /* 0015c710 00000574 */ FUN_0015c710(){}
