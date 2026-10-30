@@ -2182,7 +2182,8 @@ float ScreenYToClip(float y)
 /*
  * How much wider (or taller) the output is than the original 640x448 frame,
  * measured in original-frame units: 1.0 on a 4:3 output, about 1.21 on 16:9.
- * Only one of the two is ever above 1.
+ * Only one of the two is ever above 1 -- except under a picture band
+ * (g_view_offset_y below), whose zoom takes the height below 1.
  *
  * Everything that has to agree about "how much of the world fits on screen"
  * reads these -- the 3D projection widens by them so the extra area shows more
@@ -2197,6 +2198,82 @@ float ScreenYToClip(float y)
  */
 float g_view_extend_x = 1.0f;
 float g_view_extend_y = 1.0f;
+
+/*
+ * The vertical offset of the window's centre from the frame's, in frame units
+ * (down positive), and the band of frame lines the game letterboxes its
+ * picture to this frame (RosePan_RendererSetPictureBand: Rule of Rose's
+ * cinemascope bars).  While a band is set on a window wider than the frame,
+ * the view zooms toward it, so the extends can drop below 1 and the window
+ * centre leaves the frame centre: every frame <-> window mapping takes the
+ * offset with the extends (ExtendFrameX / ExtendFrameY).  The band resets to
+ * the whole frame each BeginFrame; the bars set it again while they draw.
+ */
+float g_view_offset_y = 0.0f;
+float g_picture_band_top = 0.0f;
+float g_picture_band_bottom = (float)kLogicalHeight;
+/* The composed aspect UpdateViewExtend resolved, kept for a mid-frame band. */
+float g_view_output_aspect = (float)kLogicalWidth / (float)kLogicalHeight;
+
+/* The window aspect at which a band fills the window's height: the
+ * cinemascope band (frame lines 64..400) is 16:9 on the PS2's 4:3 picture. */
+constexpr float kPictureBandFillAspect = 16.0f / 9.0f;
+
+/* A frame position grown out so that, once the 2D pass maps it back
+ * (ApplyOriginalAspectToVertices), it lands where the frame's edge meets the
+ * window's: a full-frame quad becomes the whole window. */
+float ExtendFrameX(float x)
+{
+    return (float)kLogicalWidth * 0.5f + (x - (float)kLogicalWidth * 0.5f) * g_view_extend_x;
+}
+
+float ExtendFrameY(float y)
+{
+    return (float)kLogicalHeight * 0.5f + g_view_offset_y +
+           (y - (float)kLogicalHeight * 0.5f) * g_view_extend_y;
+}
+
+/* The window centre in the frame's clip space (clip y is up). */
+float ViewOffsetClipY()
+{
+    return -g_view_offset_y * 2.0f / (float)kLogicalHeight;
+}
+
+/*
+ * g_view_extend_* and g_view_offset_y from the composed aspect and the band.
+ * The whole frame: the window shows all of it, widened on the long axis.  A
+ * band on a window wider than the frame: the visible height closes in on the
+ * band's, fully at kPictureBandFillAspect and wider, so the letterbox the PS2
+ * shows on a 4:3 set becomes the zoomed picture a wide set shows; the width
+ * follows the window's aspect.  The window stays on the band and inside the
+ * frame.  At the frame's shape or narrower the bars show as they are.
+ */
+void ComputeViewExtend()
+{
+    const float frame_aspect = (float)kLogicalWidth / (float)kLogicalHeight;
+    const float half_w = (float)kLogicalWidth * 0.5f;
+    const float half_h = (float)kLogicalHeight * 0.5f;
+    const float aspect = g_view_output_aspect;
+
+    float hh = aspect > frame_aspect ? half_h : half_w / aspect;
+    const float band_hh = (g_picture_band_bottom - g_picture_band_top) * 0.5f;
+    if (band_hh < half_h && aspect > frame_aspect)
+    {
+        const float s = std::min(1.0f, (aspect - frame_aspect) /
+                                           (kPictureBandFillAspect - frame_aspect));
+        hh = half_h + (band_hh - half_h) * s;
+    }
+    float centre_y = half_h;
+    if (hh < half_h)
+    {
+        centre_y = (g_picture_band_top + g_picture_band_bottom) * 0.5f;
+        centre_y = std::max(hh, std::min((float)kLogicalHeight - hh, centre_y));
+    }
+
+    g_view_extend_x = hh * aspect / half_w;
+    g_view_extend_y = hh / half_h;
+    g_view_offset_y = centre_y - half_h;
+}
 
 /*
  * Internal render resolution policy.  See RosePan_RendererSetRenderResolution()
@@ -2408,6 +2485,10 @@ void UpdateViewExtend()
 
     g_view_extend_x = 1.0f;
     g_view_extend_y = 1.0f;
+    g_view_offset_y = 0.0f;
+    /* A new frame: no band until the bars draw again. */
+    g_picture_band_top = 0.0f;
+    g_picture_band_bottom = (float)kLogicalHeight;
 
     if (g_window == nullptr || !SDL_GetWindowSizeInPixels(g_window, &w, &h) ||
         w <= 0 || h <= 0)
@@ -2415,22 +2496,13 @@ void UpdateViewExtend()
         return;
     }
 
-    float logical_aspect = (float)kLogicalWidth / (float)kLogicalHeight;
     /* The composed aspect, which is the window's only in AUTO mode.  Everything
      * downstream -- the 3D projection's widening, the 2D contraction, the sky's
-     * bounds, the shape of the scene target -- follows from these two, so
+     * bounds, the shape of the scene target -- follows from the extends, so
      * choosing the aspect here is the whole of the feature; the rest is
      * arithmetic and one clear pass for the bars. */
-    float output_aspect = ResolveAspect(w, h);
-
-    if (output_aspect > logical_aspect)
-    {
-        g_view_extend_x = output_aspect / logical_aspect;
-    }
-    else
-    {
-        g_view_extend_y = logical_aspect / output_aspect;
-    }
+    g_view_output_aspect = ResolveAspect(w, h);
+    ComputeViewExtend();
 
     /* The one point in the frame where the scene capture may be (re)allocated:
      * no draw holds a pointer to it yet.  RecordGsCapture never allocates,
@@ -6351,24 +6423,42 @@ bool RecordScreenMirror(SDL_GPUCommandBuffer *cmd, SDL_GPUTexture *source,
      * Capturing the band alone also keeps the picture's field of view right:
      * the projection widened by exactly g_view_extend_x, so the central
      * 1/g_view_extend_x of it is the original 4:3 view.
+     *
+     * Under a picture band the frame reaches past the window (the zoom), so
+     * only the part of it inside the window is copied, into the same part of
+     * the mirror, and the rest -- the letterbox -- is cleared black.
      */
-    Uint32 src_w = (Uint32)std::max(
-        1L, std::lround((double)width / (double)g_view_extend_x));
-    Uint32 src_h = (Uint32)std::max(
-        1L, std::lround((double)height / (double)g_view_extend_y));
-    src_w = std::min(src_w, width);
-    src_h = std::min(src_h, height);
+    const double half_h = (double)kLogicalHeight * 0.5;
+    const double fx0 = (0.5 - 0.5 / (double)g_view_extend_x) * (double)width;
+    const double fx1 = (0.5 + 0.5 / (double)g_view_extend_x) * (double)width;
+    const double fy0 = (0.5 - (half_h + (double)g_view_offset_y) /
+                                  ((double)kLogicalHeight * (double)g_view_extend_y)) *
+                       (double)height;
+    const double fy1 = (0.5 + (half_h - (double)g_view_offset_y) /
+                                  ((double)kLogicalHeight * (double)g_view_extend_y)) *
+                       (double)height;
+    const double sx0 = std::max(0.0, fx0), sx1 = std::min((double)width, fx1);
+    const double sy0 = std::max(0.0, fy0), sy1 = std::min((double)height, fy1);
+    if (sx1 - sx0 < 1.0 || sy1 - sy0 < 1.0)
+    {
+        return false;
+    }
+    const double mw = (double)g_screen_mirror_width, mh = (double)g_screen_mirror_height;
+    const bool partial = fx0 < 0.0 || fy0 < 0.0 || fx1 > (double)width || fy1 > (double)height;
 
     SDL_GPUBlitInfo blit{};
     blit.source.texture = source;
-    blit.source.x = (width - src_w) / 2;
-    blit.source.y = (height - src_h) / 2;
-    blit.source.w = src_w;
-    blit.source.h = src_h;
+    blit.source.x = (Uint32)std::lround(sx0);
+    blit.source.y = (Uint32)std::lround(sy0);
+    blit.source.w = (Uint32)std::max(1L, std::lround(sx1 - sx0));
+    blit.source.h = (Uint32)std::max(1L, std::lround(sy1 - sy0));
     blit.destination.texture = g_screen_mirror_texture;
-    blit.destination.w = g_screen_mirror_width;
-    blit.destination.h = g_screen_mirror_height;
-    blit.load_op = SDL_GPU_LOADOP_DONT_CARE;
+    blit.destination.x = (Uint32)std::lround((sx0 - fx0) / (fx1 - fx0) * mw);
+    blit.destination.y = (Uint32)std::lround((sy0 - fy0) / (fy1 - fy0) * mh);
+    blit.destination.w = (Uint32)std::max(1L, std::lround((sx1 - sx0) / (fx1 - fx0) * mw));
+    blit.destination.h = (Uint32)std::max(1L, std::lround((sy1 - sy0) / (fy1 - fy0) * mh));
+    blit.load_op = partial ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_DONT_CARE;
+    blit.clear_color = SDL_FColor{0.0f, 0.0f, 0.0f, 1.0f};
     blit.filter = SDL_GPU_FILTER_LINEAR;
     blit.cycle = false;
     SDL_BlitGPUTexture(cmd, &blit);
@@ -7678,11 +7768,14 @@ void ApplyOriginalAspectToVertices()
      * cancel that out and put the wider view back inside a 4:3 box.  The sky
      * backdrop does opt in, and reaches the window edge because MapSky.c
      * extends its geometry past 640 to exactly the bounds this scale maps to.
+     * A picture band (g_view_offset_y) also moves the window's centre off the
+     * frame's.
      */
     float horizontal_scale = 1.0f / g_view_extend_x;
     float vertical_scale = 1.0f / g_view_extend_y;
+    const float offset_y = ViewOffsetClipY();
 
-    if (horizontal_scale == 1.0f && vertical_scale == 1.0f)
+    if (horizontal_scale == 1.0f && vertical_scale == 1.0f && offset_y == 0.0f)
     {
         return;
     }
@@ -7699,7 +7792,9 @@ void ApplyOriginalAspectToVertices()
         for (size_t vertex = first; vertex < end; vertex++)
         {
             g_vertices[vertex].position[0] *= horizontal_scale;
-            g_vertices[vertex].position[1] *= vertical_scale;
+            g_vertices[vertex].position[1] =
+                (g_vertices[vertex].position[1] - offset_y * g_vertices[vertex].position[3]) *
+                vertical_scale;
         }
     }
 }
@@ -8457,16 +8552,18 @@ bool BuildScissorRect(const DrawCommand &draw, int target_width,
 
     float scale_x = draw.preserve_original_aspect ? 1.0f / g_view_extend_x : 1.0f;
     float scale_y = draw.preserve_original_aspect ? 1.0f / g_view_extend_y : 1.0f;
+    float offset_y = draw.preserve_original_aspect ? ViewOffsetClipY() : 0.0f;
 
     /* SCAX1 / SCAY1 are inclusive on the GS, so the box ends one past them. */
     float left = (ScreenXToClip((float)draw.scissor.x0) * scale_x * 0.5f + 0.5f) *
                  (float)target_width;
     float right = (ScreenXToClip((float)(draw.scissor.x1 + 1)) * scale_x * 0.5f + 0.5f) *
                   (float)target_width;
-    float top = (0.5f - ScreenYToClip((float)draw.scissor.y0) * scale_y * 0.5f) *
+    float top = (0.5f - (ScreenYToClip((float)draw.scissor.y0) - offset_y) * scale_y * 0.5f) *
                 (float)target_height;
-    float bottom = (0.5f - ScreenYToClip((float)(draw.scissor.y1 + 1)) * scale_y * 0.5f) *
-                   (float)target_height;
+    float bottom =
+        (0.5f - (ScreenYToClip((float)(draw.scissor.y1 + 1)) - offset_y) * scale_y * 0.5f) *
+        (float)target_height;
 
     int x0 = std::max(0, (int)std::floor(left));
     int y0 = std::max(0, (int)std::floor(top));
@@ -10767,25 +10864,36 @@ void RosePan_RendererGetViewExtend(float *ext_x, float *ext_y)
 
 void RosePan_RendererGetViewBounds(float *x0, float *y0, float *x1, float *y1)
 {
-    float half_w = (float)kLogicalWidth * 0.5f;
-    float half_h = (float)kLogicalHeight * 0.5f;
-
     if (x0 != nullptr)
     {
-        *x0 = half_w - half_w * g_view_extend_x;
+        *x0 = ExtendFrameX(0.0f);
     }
     if (x1 != nullptr)
     {
-        *x1 = half_w + half_w * g_view_extend_x;
+        *x1 = ExtendFrameX((float)kLogicalWidth);
     }
     if (y0 != nullptr)
     {
-        *y0 = half_h - half_h * g_view_extend_y;
+        *y0 = ExtendFrameY(0.0f);
     }
     if (y1 != nullptr)
     {
-        *y1 = half_h + half_h * g_view_extend_y;
+        *y1 = ExtendFrameY((float)kLogicalHeight);
     }
+}
+
+void RosePan_RendererSetPictureBand(float top, float bottom)
+{
+    top = std::max(0.0f, std::min((float)kLogicalHeight, top));
+    bottom = std::max(top, std::min((float)kLogicalHeight, bottom));
+    if (bottom - top < 1.0f)
+    {
+        top = 0.0f;
+        bottom = (float)kLogicalHeight;
+    }
+    g_picture_band_top = top;
+    g_picture_band_bottom = bottom;
+    ComputeViewExtend();
 }
 
 void RosePan_RendererGetFrameSize(float *width, float *height)
@@ -10807,12 +10915,15 @@ void RosePan_RendererWidenProjection(float *projection)
         return;
     }
 
-    /* Column 0 makes clip x and column 1 clip y; dividing them keeps the
-     * frustum's centre and widens only the extended axis. */
+    /* Column 0 makes clip x, column 1 clip y and column 3 clip w; dividing x
+     * and y keeps the frustum's centre and widens only the extended axis.  A
+     * picture band moves the centre: clip y less the offset times w. */
+    const float offset_y = ViewOffsetClipY();
     for (int row = 0; row < 4; row++)
     {
         projection[row * 4 + 0] /= g_view_extend_x;
-        projection[row * 4 + 1] /= g_view_extend_y;
+        projection[row * 4 + 1] =
+            (projection[row * 4 + 1] - offset_y * projection[row * 4 + 3]) / g_view_extend_y;
     }
 }
 
@@ -12273,15 +12384,15 @@ void RosePan_RendererDrawImageQuadWrap(const void *texture,
     memcpy(wuv, uv, sizeof(wuv));
     if (repeat && IsFullFrameQuad(xy))
     {
-        const float uc = (uv[0] + uv[6]) * 0.5f, vc = (uv[1] + uv[7]) * 0.5f;
+        /* Corners 0 and 3 are opposite; the UVs run linearly between them. */
+        const float du = (uv[6] - uv[0]) / (xy[6] - xy[0]);
+        const float dv = (uv[7] - uv[1]) / (xy[7] - xy[1]);
         for (int i = 0; i < 4; i++)
         {
-            wxy[i * 2 + 0] = (float)kLogicalWidth * 0.5f +
-                             (xy[i * 2 + 0] - (float)kLogicalWidth * 0.5f) * g_view_extend_x;
-            wxy[i * 2 + 1] = (float)kLogicalHeight * 0.5f +
-                             (xy[i * 2 + 1] - (float)kLogicalHeight * 0.5f) * g_view_extend_y;
-            wuv[i * 2 + 0] = uc + (uv[i * 2 + 0] - uc) * g_view_extend_x;
-            wuv[i * 2 + 1] = vc + (uv[i * 2 + 1] - vc) * g_view_extend_y;
+            wxy[i * 2 + 0] = ExtendFrameX(xy[i * 2 + 0]);
+            wxy[i * 2 + 1] = ExtendFrameY(xy[i * 2 + 1]);
+            wuv[i * 2 + 0] = uv[0] + (wxy[i * 2 + 0] - xy[0]) * du;
+            wuv[i * 2 + 1] = uv[1] + (wxy[i * 2 + 1] - xy[1]) * dv;
         }
     }
 
@@ -12643,14 +12754,8 @@ static void DrawTexturedQuadImpl(const sceGsTex0 *tex0,
              */
             for (int i = 0; i < 4; i++)
             {
-                extended[i * 2 + 0] =
-                    (float)kLogicalWidth * 0.5f +
-                    (xy[i * 2 + 0] - (float)kLogicalWidth * 0.5f) *
-                        g_view_extend_x;
-                extended[i * 2 + 1] =
-                    (float)kLogicalHeight * 0.5f +
-                    (xy[i * 2 + 1] - (float)kLogicalHeight * 0.5f) *
-                        g_view_extend_y;
+                extended[i * 2 + 0] = ExtendFrameX(xy[i * 2 + 0]);
+                extended[i * 2 + 1] = ExtendFrameY(xy[i * 2 + 1]);
             }
 
             BuildQuadVertices(vertices, extended, uv, (float)slot.logical_w,
@@ -12940,10 +13045,8 @@ void RosePan_RendererDrawSolidQuad(const float *xy, const unsigned char *rgba)
         {
             /* About the centre, so the fill lands exactly on the bounds
              * ApplyOriginalAspectToVertices() will map back to the window. */
-            x = (float)kLogicalWidth * 0.5f +
-                (x - (float)kLogicalWidth * 0.5f) * g_view_extend_x;
-            y = (float)kLogicalHeight * 0.5f +
-                (y - (float)kLogicalHeight * 0.5f) * g_view_extend_y;
+            x = ExtendFrameX(x);
+            y = ExtendFrameY(y);
         }
 
         vertices[i].uv[0] = 0.0f;
@@ -13110,10 +13213,8 @@ void RosePan_RendererDrawFinderMask(int alpha)
     {
         const float frame_x = kCorners[i][0];
         const float frame_y = kCorners[i][1];
-        const float extended_x = (float)kLogicalWidth * 0.5f +
-            (frame_x - (float)kLogicalWidth * 0.5f) * g_view_extend_x;
-        const float extended_y = (float)kLogicalHeight * 0.5f +
-            (frame_y - (float)kLogicalHeight * 0.5f) * g_view_extend_y;
+        const float extended_x = ExtendFrameX(frame_x);
+        const float extended_y = ExtendFrameY(frame_y);
 
         /* The capture spans the whole target, so the frame's own corners are
          * its 0 and 1. */
@@ -13450,10 +13551,8 @@ void RosePan_RendererDrawTexturedTriangles2D(const sceGsTex0 *tex0,
             /* A whole-screen filter, authored in 640x448.  Grow it so
              * ApplyOriginalAspectToVertices() maps it back out to the window
              * bounds, and let the UVs span the capture: window onto window. */
-            x = (float)kLogicalWidth * 0.5f +
-                (x - (float)kLogicalWidth * 0.5f) * g_view_extend_x;
-            y = (float)kLogicalHeight * 0.5f +
-                (y - (float)kLogicalHeight * 0.5f) * g_view_extend_y;
+            x = ExtendFrameX(x);
+            y = ExtendFrameY(y);
         }
         else
         {
@@ -13469,7 +13568,7 @@ void RosePan_RendererDrawTexturedTriangles2D(const sceGsTex0 *tex0,
              * contract about the centre by the same factor.  Without this the
              * mesh samples the wrong part of the frame on any non-4:3 output. */
             u = (u - 0.5f) / g_view_extend_x + 0.5f;
-            v = (v - 0.5f) / g_view_extend_y + 0.5f;
+            v = (v - 0.5f - g_view_offset_y / (float)kLogicalHeight) / g_view_extend_y + 0.5f;
         }
 
         vertex.uv[0] = u;

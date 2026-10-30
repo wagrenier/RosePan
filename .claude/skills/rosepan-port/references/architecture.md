@@ -2066,6 +2066,14 @@ How it works (2026-10-28, host task `fix/aspect_ratio.cpp`; the machinery is Rei
   window, never stretched. rosepan_i3d's REC_CAMERA replay widens every display camera (i3rHostCamera's
   and the mesh test's); a camera recorded in an off-screen pass (XYOFFSET 0: the shadow target's
   light camera) is left alone.
+- **Cinemascope** (2026-10-29): the events' black bars are the ROM's S2dCineSco sprites (frame lines
+  0..64 and 400..448, faded by script op 033 cases 6 / 7), which leave a band that is 16:9 on the
+  PS2's 4:3 picture -- a wide set shows it zoomed. S2dCineSco::render reports the band (each bar's
+  height times its opacity) with `RosePan_RendererSetPictureBand`; on a window wider than the frame
+  the renderer zooms 2D and 3D alike toward it (ComputeViewExtend: fully from 16:9, the window
+  centred on the band, so the extends drop below 1 and `g_view_offset_y` moves the centre), and
+  every frame <-> window mapping goes through ExtendFrameX / ExtendFrameY / ViewOffsetClipY. At the
+  frame's shape or narrower the bars show as on the PS2; BeginFrame resets the band.
 - Still 4:3-bound (pillarboxed, not stretched): VU1 strips (rosepan_i3d DrawStrip: screen-space XY
   the ROM's VU1 program projected) and textured full-frame sprites (pictures, frame copies, the
   movie). A new screen-space draw must say which of the two it wants.

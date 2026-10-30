@@ -15,7 +15,8 @@ void RosePan_RendererEndFrame(void);
  * of the two is ever above 1.  The 3D projection widens by these so the extra
  * area shows more world rather than black bars; 2D overlays are shrunk by the
  * reciprocal and stay centred at their original proportions.  Sampled once per
- * BeginFrame, so they are stable for the whole frame. */
+ * BeginFrame, so they are stable for the whole frame -- unless a picture band
+ * is set (RosePan_RendererSetPictureBand), which also moves the centre. */
 void RosePan_RendererGetViewExtend(float *ext_x, float *ext_y);
 
 /* The same thing as a screen rect in 640x448 units: exactly (0,0)-(640,448) on
@@ -23,6 +24,15 @@ void RosePan_RendererGetViewExtend(float *ext_x, float *ext_y);
  * must reach the window edge (MapSky's fog band and horizon strip) build their
  * geometry against this instead of the fixed frame. */
 void RosePan_RendererGetViewBounds(float *x0, float *y0, float *x1, float *y1);
+
+/* The frame lines [top, bottom) the game letterboxes its picture to this
+ * frame (S2dCineSco's cinemascope bars, scaled by their fade).  On a window
+ * wider than the frame the view zooms toward the band -- fully from 16:9, so
+ * the letterbox a 4:3 set shows becomes the zoomed picture a wide set shows,
+ * bars outside the window -- with 2D and 3D alike; at the frame's shape or
+ * narrower nothing changes.  Takes effect at once (call it before the frame's
+ * draws are replayed); every BeginFrame resets it to the whole frame. */
+void RosePan_RendererSetPictureBand(float top, float bottom);
 
 /* The renderer's frame, in the units every 2D entry point takes: 640x448, the
  * PS2 display's picture.  Host draw modules map the game's own frame buffer
