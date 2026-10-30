@@ -1459,6 +1459,15 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- **g_bss_7a3210 is GamMan::m_chapter (2026-10-30, debug/naga_debug.cpp).** bss 0x7a3210 =
+  g_gamMan (0x7812c0) + 0x21f50, the member getChapter reads (game/gamman.h m_chapter). The host
+  defines it as a separate int in src/lib/unassigned_stubs.cpp that nothing writes, so efffog3.cpp
+  (the chapter's fog record), seqvm.cpp (the save slot), sequence.h and mnuitem.cpp (chapter 7) all
+  read 0 on the PC. Fix: replace every g_bss_7a3210 with g_gamMan.m_chapter and delete the extern and
+  its definition. naga_debug.cpp already uses g_gamMan.m_chapter. The same holds for
+  g_bss_7a3d48 / g_bss_7a3d4c (main sets both to 1): they are GamMan +0x22a88 / +0x22a8c,
+  m_cursolInitItem / m_cursolInitStock. Check every g_bss_ word inside 0x7812c0..0x7a3d78.
+
 - **Dial locks (mag/maglifemenusp.cpp, written 2026-10-30, verify).** MagLifeMenuSpecial (KLCK,
   menu 0x1000b) and MagLifeMenuSpecial2 (0x1000c..0x1000f) are opened by the event script command
   spmn mid-game; the 15 s smoke run ends on the boot disclaimer. Mark done when a run shows a lock:

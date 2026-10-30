@@ -4807,14 +4807,14 @@
 /* 002168f0 00000004 */ EventTestTask::init(){}  // ror
 /* 002168f8 000001d8 */ EventTestTask::exec(){}  // ror
 /* 00216ad0 00000790 */ EventTestTask::disp(){}  // ror
-/* 00217260 0000098c */ FUN_00217260(){}
-/* 00217bec 000000c0 */ FUN_00217bec(){}
-/* 00217cac 00000004 */ FUN_00217cac(){}
-/* 00217cb4 0000003c */ FUN_00217cb4(){}
-/* 00217cf0 0000003c */ FUN_00217cf0(){}
-/* 00217d2c 0000003c */ FUN_00217d2c(){}
-/* 00217d68 0000003c */ FUN_00217d68(){}
-/* 00217da4 0000016c */ FUN_00217da4(){}
+/* 00217260 0000098c */ EventTestTask::menu(){}  // ror
+/* 00217bec 000000c0 */ EventTestTask::dispCursor(){}  // ror
+/* 00217cac 00000004 */ EventTestTask::dispScroll(){}  // ror
+/* 00217cb4 0000003c */ EventTestTask::isUp(){}  // ror
+/* 00217cf0 0000003c */ EventTestTask::isDown(){}  // ror
+/* 00217d2c 0000003c */ EventTestTask::isLeft(){}  // ror
+/* 00217d68 0000003c */ EventTestTask::isRight(){}  // ror
+/* 00217da4 0000016c */ EventTestTask::moveCursor(){}  // ror
 
 // *****************************************************************************
 // FILE -- utl/utlmisc2.cpp

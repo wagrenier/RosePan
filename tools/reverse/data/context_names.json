@@ -24149,6 +24149,54 @@
   "was": "FUN_00216ad0",
   "why": "called only by EventTestTask::exec with this; prints the world / area / position pages by mode 0x2db2a4 and runs the flag menu 0x217260 in mode 3"
  },
+ "00217260": {
+  "name": "EventTestTask::menu",
+  "tag": "ror-inferred",
+  "was": "FUN_00217260",
+  "why": "disp's mode 3 call with this in a0: the page state machine at +0x10 over the DBGFLAG / DBGSTEP / DBGITEM / DBGAREA.BIN lists, the chapter list and the switches page"
+ },
+ "00217bec": {
+  "name": "EventTestTask::dispCursor",
+  "tag": "ror-inferred",
+  "was": "FUN_00217bec",
+  "why": "sinf of m_frame * 0.25 wrapped into -pi..pi with an x argument the menu passes after every list: the cursor's pulse, its draw stripped in retail"
+ },
+ "00217cac": {
+  "name": "EventTestTask::dispScroll",
+  "tag": "ror-inferred",
+  "was": "FUN_00217cac",
+  "why": "empty in retail; the menu passes it m_top, the page size 17 and the entry count after every list: the scroll bar, its draw stripped"
+ },
+ "00217cb4": {
+  "name": "EventTestTask::isUp",
+  "tag": "ror-inferred",
+  "was": "FUN_00217cb4",
+  "why": "m_hold_up (+0x1c) > 8 or pad 1 m_trig bit 0x10 (up)"
+ },
+ "00217cf0": {
+  "name": "EventTestTask::isDown",
+  "tag": "ror-inferred",
+  "was": "FUN_00217cf0",
+  "why": "m_hold_down (+0x20) > 8 or pad 1 m_trig bit 0x40 (down)"
+ },
+ "00217d2c": {
+  "name": "EventTestTask::isLeft",
+  "tag": "ror-inferred",
+  "was": "FUN_00217d2c",
+  "why": "m_hold_left (+0x24) > 8 or pad 1 m_trig bit 0x80 (left)"
+ },
+ "00217d68": {
+  "name": "EventTestTask::isRight",
+  "tag": "ror-inferred",
+  "was": "FUN_00217d68",
+  "why": "m_hold_right (+0x28) > 8 or pad 1 m_trig bit 0x20 (right)"
+ },
+ "00217da4": {
+  "name": "EventTestTask::moveCursor",
+  "tag": "ror-inferred",
+  "was": "FUN_00217da4",
+  "why": "steps m_cursor (+0x14) by the up / down helpers and by a page on left / right, clamps it to count-1 and scrolls m_top (+0x18); returns whether the cursor moved"
+ },
  "00217f10": {
   "name": "utlAtan2",
   "tag": "ror-inferred",
