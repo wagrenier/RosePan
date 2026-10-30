@@ -6,6 +6,18 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`dog/doglight.cpp`, verify; pinned 0x112b08..0x114034, absorbing
+unassigned@00112b08): DogLight, all 8 functions** (architecture.md, after DogLightPool). The queue
+was empty and no TU had stubs; picked as the largest anchored todo file. The whole class is
+unreferenced in the ROM (ghidra.py refs on every entry), so it can never show on screen: verify is
+final unless a caller turns up. Doubts: (1) the class name DogLight is inferred from the file; (2)
+setParam param 4 tests m_hemi, not m_dist, before writing m_dist (ROM slip, ported with a PC guard);
+(3) roles of the hemi / dist +0x10 / +0x20 vectors unverified. Left todo with functions (all
+fuzzy, none reached): task/tsk_bg_load.cpp (15), unassigned@001a4e34 (9), unassigned@00216ad0 (9,
+the i3d debug menu), debug/naga_debug.cpp (7), mag/maglifetest.cpp (6), debug/motnamecnv.cpp (5),
+unassigned@001a4bd8 (5) and a few 1..4-function runs. Better next step than more dead code: a
+longer smoke pad (the bus-stop walk) to mark verify TUs done from screenshots.
+
 **WRITTEN 2026-10-30 (`mag/maglifebwnmode.cpp`, verify; pinned 0x125bd4..0x1267c0, absorbing
 unassigned@00125bd4 and unassigned@0012668c): Brown's ten modes, all 19 functions** (architecture.md
 "Brown's controller"). The queue was empty; this was the last game file with stubs. Not on the smoke

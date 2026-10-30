@@ -212,13 +212,22 @@
    "why": "dog/dogentity.cpp source string at DogEntityEx::setParent 0x1102b4 (assert p != m_parent); files link alphabetically (dogactor, dogcamera, dogentity, doglightpool): 0x10f860..0x10fc7c carries dog/dogcamera.cpp strings and camera members (+0x134, +0x140, +0x180, +0x1d0, the +0xf0 view matrix), so dogentity starts at DogEntity::setRotate 0x10fc7c and ends where doglightpool.cpp's strings start (0x1103dc); plus the DogEntity / DogEntityEx linkonce methods 0x280e88..0x280f68 and 0x281b78..0x281cbc"
   },
   "dog/doglight.cpp": {
+   "notes": "The whole class is unreferenced in the ROM (ghidra.py refs on every entry: no call, jump, data word or lui/addiu pair), so nothing can ever show it: verify is final unless a caller turns up. Smoke run unchanged at the boot disclaimer. Doubts: class name DogLight inferred from the file; setParam param 4 tests m_hemi (lw +0x54 at 0x1135a8) before writing m_dist, ported with a PC guard; hemi / dist +0x10 / +0x20 vector roles unverified. The queue is empty again and no TU has stubs: the remaining todo files are small fuzzy runs nothing reaches (task/tsk_bg_load.cpp 15, unassigned@001a4e34 9, unassigned@00216ad0 9 debug menu, debug/naga_debug.cpp 7, mag/maglifetest.cpp 6). A longer smoke pad that marks verify TUs done from screenshots is worth more than further dead code (open-items.md Next up).",
    "ranges": [
     [
-     "00112bc8",
+     "00112b08",
      "00114034"
     ]
    ],
-   "why": "4 of 4 functions anchored by dog/doglight.cpp asserts; FUN_00113ea8 (unreferenced) is the only caller of FUN_00112bc8 / FUN_00112d60 and follows them: a DogLight copy at the file end"
+   "sessions": [
+    {
+     "date": "2026-10-30 16:30",
+     "status": "verify",
+     "summary": "DogLight, all 8 functions: init / clear / term, getDataSize, create (one block of ambient, direct, point, spot, hemi and dist lights), setParam / getParam (pos, dir, colour, hemi and dist third vectors, spot cone, per-kind enable bit), copyTo. Pinned 0x112b08..0x114034, absorbing unassigned@00112b08. Added DOG_LIGHT_HEMI / DOG_LIGHT_DIST and the DogLight params to doglightpool.h."
+    }
+   ],
+   "status": "verify",
+   "why": "dog/doglight.cpp asserts anchor 0x112bc8..0x1136d0; 0x112b08 / 0x112b58 / 0x112b84 (was unassigned@00112b08) init / term / free the same object (+0x40 block, +0x44..+0x58 light arrays, +0x74 mask, +0x78 dirty) that setup 0x112d60 frees and fills; DogLightPool ends at 0x112b08"
   },
   "dog/doglightpool.cpp": {
    "notes": "TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark done when a screenshot shows a lit stage. Decisions: DogLightPool got a host constructor calling init (the ROM MagScene ctor calls it), no destructor (g_magSystem is static, the heap is gone by static destruction; ~MagScene calls term in the ROM). doglightpool.h lines 129..132 are the non-const getters, 140..143 their const twins, so createLight and getLightParam are const. DogLightBuffer::setupDesc 0x110578 in the ROM reads the counts from +0x5e0 / +0x600, past m_num at +0x5c0; nothing calls it, the port uses m_num (open-items.md). Spot cone angles use the ROM pi 0x40490fdc. Still left near this file: unassigned@00112b08 (three small light-desc helpers) belongs to dog/doglight.cpp.",

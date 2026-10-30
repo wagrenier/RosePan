@@ -15,26 +15,32 @@
 #include "i3d/i3denv.h"
 #include "lib/unassigned.h"
 
-/* The light kinds (the assert texts name AMBIENT, DIRECT, POINT and SPOT;
- * kinds 4 and 5 are 0x30 bytes, the size of the i3d dir2 / vec3 lights,
- * and the pool's setup never gives them any). */
+/* The light kinds (the assert texts of dog/doglightpool.cpp and
+ * dog/doglight.cpp name all six; kinds 4 and 5 are 0x30 bytes, the size of
+ * the i3d dir2 / vec3 lights, and the pool's setup never gives them any). */
 enum
 {
     DOG_LIGHT_AMBIENT  = 0,
     DOG_LIGHT_DIRECT   = 1,
     DOG_LIGHT_POINT    = 2,
     DOG_LIGHT_SPOT     = 3,
+    DOG_LIGHT_HEMI     = 4,
+    DOG_LIGHT_DIST     = 5,
     DOG_MAX_LIGHT_TYPE = 6,
 };
 
-/* The parameters setLightParam / getLightParam address (names inferred
- * from the fields they pick; 3 and 4 only assert). */
+/* The parameters setLightParam / getLightParam (and DogLight's setParam /
+ * getParam) address (names inferred from the fields they pick; the pool's
+ * 3 and 4 only assert). */
 enum
 {
-    DOG_LIGHT_PARAM_POS   = 0,  /* point, spot */
-    DOG_LIGHT_PARAM_DIR   = 1,  /* direct, spot */
-    DOG_LIGHT_PARAM_COLOR = 2,  /* every kind */
-    DOG_LIGHT_PARAM_CONE  = 5,  /* spot: two angles, degrees outside, radians inside */
+    DOG_LIGHT_PARAM_POS    = 0, /* point, spot (DogLight: dist too) */
+    DOG_LIGHT_PARAM_DIR    = 1, /* direct, spot (DogLight: hemi too) */
+    DOG_LIGHT_PARAM_COLOR  = 2, /* every kind */
+    DOG_LIGHT_PARAM_HEMI2  = 3, /* DogLight: a hemi light's third vector (+0x20) */
+    DOG_LIGHT_PARAM_DIST2  = 4, /* DogLight: a dist light's third vector (+0x20) */
+    DOG_LIGHT_PARAM_CONE   = 5, /* spot: two angles, degrees outside, radians inside */
+    DOG_LIGHT_PARAM_ENABLE = 6, /* DogLight: a kind's bit in m_enable (theType is the kind, theNo unused) */
 };
 
 /* The number of light sets (the asserts' "theSetNo >= 0 && theSetNo < 8"). */

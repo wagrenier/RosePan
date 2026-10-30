@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 16:19 at commit `bd2ee12` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 16:31 at commit `891c51b` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-30 16:19 at commit `bd2ee12` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7194**, named **7099** (99%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5497
-- context-name ledger: 5787 entries; overrides of wrong library matches: 5
-- placed in a source file: 6206/7194 in 166 files
+- game functions: **7194**, named **7107** (99%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5505
+- context-name ledger: 5795 entries; overrides of wrong library matches: 5
+- placed in a source file: 6209/7194 in 166 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -22,15 +22,15 @@ Least-named game-code regions (64 KB blocks):
 | `001f0000` | 208/234 (89%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `001a0000` | 199/214 (93%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `00210000` | 337/361 (93%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
-| `00110000` | 246/257 (96%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
 | `00160000` | 257/268 (96%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `00130000` | 180/183 (98%) | mag/magscene.cpp, mag/magscenerender.cpp, mag/magscene2.cpp |
+| `00110000` | 254/257 (99%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
 | `00100000` | 301/304 (99%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmath.cpp |
 | `00120000` | 282/283 (100%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **6020**; stubs: **0**
+- reconstructed RoR functions: **6030**; stubs: **0**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -44,6 +44,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/dog/dogactor.cpp` | 147 | 0 |
 | `src/dog/dogcamera.cpp` | 8 | 0 |
 | `src/dog/dogentity.cpp` | 13 | 0 |
+| `src/dog/doglight.cpp` | 10 | 0 |
 | `src/dog/doglightpool.cpp` | 29 | 0 |
 | `src/dog/dogmodel.cpp` | 26 | 0 |
 | `src/dog/dogmotionblend.cpp` | 11 | 0 |
@@ -197,7 +198,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 177 TUs: todo 81, partial 1, verify 149, done 17
+- 176 TUs: todo 79, partial 1, verify 150, done 17
 - next: **None** (nothing on the frontier and no queued TU)
 - pinned queue: unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
@@ -208,6 +209,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `dog/dogactor.cpp` 147/147 -- Status verify: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run stays black after the film because the pose and draw path below DogActo
 - verify: `dog/dogcamera.cpp` 8/10 -- Status verify: the 200 s New Game run (second try; the first looped the boot logos, the known boot race) plays the opening film to Once upon a time, then ends b
 - verify: `dog/dogentity.cpp` 11/16 -- Status verify: the 200 s New Game run ends black (one small ring at the bottom) with no assert or crash; the DogEntity stubs no longer appear, the camera (paren
+- verify: `dog/doglight.cpp` 10/10 -- The whole class is unreferenced in the ROM (ghidra.py refs on every entry: no call, jump, data word or lui/addiu pair), so nothing can ever show it: verify is f
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
 - verify: `dog/dogmodel.cpp` 26/71 -- Status verify: the casts run only in gameplay; the 15 s smoke run ends on the disclaimer screen, which draws correctly. Mark done when a run walks the player in
 - verify: `dog/dogmotionblend.cpp` 11/11 -- Verify: the smoke run stays on the disclaimer screen and no actor is drawn yet, because the i3m pose player (unassigned@0022e840: i3mGetPose 0x22e960, i3mGetBle
@@ -352,6 +354,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 16:30 `dog/doglight.cpp` verify: DogLight, all 8 functions: init / clear / term, getDataSize, create (one block of ambient, direct, point, spot, hemi and dist lights), setParam / getParam (pos,
 - 2026-10-30 16:19 `mag/maglifebwnmode.cpp` verify: Brown's ten modes (MagLifeBwnMode Null/One/Wait/Sit/Fuse/Move/Path/Turn/Rotate/Wall), all 19 functions; pinned 0x125bd4..0x1267c0 absorbing unassigned@00125bd4 
 - 2026-10-30 15:52 `rx/rxsys.cpp` verify: rx/rxsys.cpp session 3: the System Monitor exception console 0x242c10..0x2432d8, 15 functions (clear row, scroll, LoadImage, glyph row expand from the 8x8 font 
 - 2026-10-30 15:41 `rx/rxsys.cpp` partial: rx/rxsys.cpp session 2: removed the 5 boot stubs - ini parser (rxSysIniFindSection/ReadKey/FindKey/Find, key count and key-at helpers), tty bind/open/close, rxS
@@ -359,7 +362,6 @@ Recent sessions:
 - 2026-10-30 15:05 `eff/effdust2.cpp` verify: unassigned@001704a4 split into eff/effdust2.cpp, efffire1.cpp, efffire2.cpp, efffog1.cpp, efffog2.cpp and all 28 functions written (EffDust2 .. EffFog2Prim, kin
 - 2026-10-30 15:04 `eff/efffog1.cpp` verify: EffFog1 written, all 4 functions: a camera-facing fog quad drifting along the camera x axis, reset every 540 frames, corner alpha keys per 60 frames with the le
 - 2026-10-30 15:04 `eff/efffog2.cpp` verify: EffFog2 / EffFog2Prim written, all 6 functions: an emitter line and the rising, gliding fog wisps (quarter-circle rise, flat glide to m_dist, corner alpha cycle
-- 2026-10-30 15:03 `eff/efffire2.cpp` verify: EffFire2 written, all 4 functions: a world-oriented fire sprite cycling the four quarters of texture 0 every 4 frames
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -374,6 +376,7 @@ Recent sessions:
 | `00281cbc` | DogModel::__tf | 1 | sym | missing | dog/dogmodel.cpp |
 | `001f9e38` | FUN_001f9e38 | 1 | - | missing | task/tsk_scene.cpp |
 | `0012a6a0` | MagLifeBwnCtrl::processPad | 1 | ror | missing | mag/maglifebwnctrl.cpp |
+| `00282bd8` | MagLifePCMode::__tf | 1 | sym | missing | - |
 | `00174c44` | EffGeneric1::applyTexKeys | 1 | ror | missing | eff/effgeneric.cpp |
 | `001f7644` | VoiceManager::stop | 1 | ror | missing | task/tsk_scene.cpp |
 | `001f6c64` | DisplayMessage::DisplayMessage | 1 | ror | missing | task/tsk_scene.cpp |
