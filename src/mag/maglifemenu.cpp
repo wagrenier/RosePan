@@ -116,7 +116,7 @@ int MagLifeMenuBase::getTypeValue()
 
 void MagLifeMenuSelLang::init(DogTexInfo *tex)
 {
-    m_menu.m_scene = m_menu_scene;
+    m_menu.m_pScene = m_menu_scene;
     m_menu.init(tex);
 }
 

@@ -361,38 +361,6 @@ void DwfOutDead::Term()
 
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
 
-// stub of ROR 0x001bdfe0
-void MnuSelectLanguage::draw(I3dLayer *layer)
-{
-    ROSEPAN_STUB("MnuSelectLanguage::draw", 0x001bdfe0);
-}
-
-// stub of ROR 0x001bdc00
-void MnuSelectLanguage::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("MnuSelectLanguage::init", 0x001bdc00);
-}
-
-// stub of ROR 0x001bdc94
-int MnuSelectLanguage::isInit()
-{
-    ROSEPAN_STUB("MnuSelectLanguage::isInit", 0x001bdc94);
-    return {};
-}
-
-// stub of ROR 0x001bde58
-int MnuSelectLanguage::processPad(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuSelectLanguage::processPad", 0x001bde58);
-    return {};
-}
-
-// stub of ROR 0x001bdc54
-void MnuSelectLanguage::term()
-{
-    ROSEPAN_STUB("MnuSelectLanguage::term", 0x001bdc54);
-}
-
 // stub of ROR 0x00172678
 
 // stub of ROR 0x001fd6bc

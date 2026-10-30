@@ -3509,7 +3509,7 @@
 /* 001bd028 00000abc */ MnuItem::showLinkPanel(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- mnu/mnuSelectLanguage.cpp
 // *****************************************************************************
 
 /* 001bdae4 00000068 */ MnuSelectLanguage::MnuSelectLanguage(){}  // ror
@@ -3517,27 +3517,17 @@
 /* 001bdc00 00000054 */ MnuSelectLanguage::init(){}  // ror
 /* 001bdc54 00000040 */ MnuSelectLanguage::term(){}  // ror
 /* 001bdc94 00000008 */ MnuSelectLanguage::isInit(){}  // ror
-
-// *****************************************************************************
-// FILE -- mnu/mnuSelectLanguage.cpp
-// *****************************************************************************
-
-/* 001bdc9c 000000ac */ FUN_001bdc9c(){}
-/* 001bdd48 00000074 */ FUN_001bdd48(){}
-/* 001bddbc 0000009c */ FUN_001bddbc(){}
-
-// *****************************************************************************
-// FILE -- (unassigned)
-// *****************************************************************************
-
+/* 001bdc9c 000000ac */ MnuSelectLanguage::openWindow(){}  // ror
+/* 001bdd48 00000074 */ MnuSelectLanguage::closeWindow(){}  // ror
+/* 001bddbc 0000009c */ MnuSelectLanguage::updateMessage(){}  // ror
 /* 001bde58 00000188 */ MnuSelectLanguage::processPad(){}  // ror
 /* 001bdfe0 00000024 */ MnuSelectLanguage::draw(){}  // ror
-/* 001be004 00000044 */ FUN_001be004(){}
-/* 001be048 0000003c */ FUN_001be048(){}
-/* 001be084 0000003c */ FUN_001be084(){}
-/* 001be0c0 0000000c */ FUN_001be0c0(){}
-/* 001be0cc 00000044 */ FUN_001be0cc(){}
-/* 001be110 000001bc */ FUN_001be110(){}
+/* 001be004 00000044 */ MnuSelectLanguage::loadTexture(){}  // ror
+/* 001be048 0000003c */ MnuSelectLanguage::open(){}  // ror
+/* 001be084 0000003c */ MnuSelectLanguage::close(){}  // ror
+/* 001be0c0 0000000c */ MnuSelectLanguage::initWork(){}  // ror
+/* 001be0cc 00000044 */ MnuSelectLanguage::setDisp(){}  // ror
+/* 001be110 000001bc */ MnuSelectLanguage::execMain(){}  // ror
 
 // *****************************************************************************
 // FILE -- game/gamfile.cpp

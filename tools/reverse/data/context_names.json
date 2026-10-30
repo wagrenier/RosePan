@@ -16589,6 +16589,24 @@
   "was": "FUN_001bdc94",
   "why": "the menu object at +0x40 of MagLifeMenuSelLang: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
  },
+ "001bdc9c": {
+  "name": "MnuSelectLanguage::openWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_001bdc9c",
+  "why": "opens the MsgManSet at +0x14 and a 512x256 scene window at (220,120) hidden, keeps its slot at +0x1084; asserts m_pScene in mnu/mnuSelectLanguage.cpp"
+ },
+ "001bdd48": {
+  "name": "MnuSelectLanguage::closeWindow",
+  "tag": "ror-inferred",
+  "was": "FUN_001bdd48",
+  "why": "closes the scene window at +0x1084 (sets -1) and the MsgManSet; asserts m_pScene"
+ },
+ "001bddbc": {
+  "name": "MnuSelectLanguage::updateMessage",
+  "tag": "ror-inferred",
+  "was": "FUN_001bddbc",
+  "why": "re-opens the MsgManSet and shows the language list text 0x2b8c90[m_language] in the window, then updates it"
+ },
  "001bde58": {
   "name": "MnuSelectLanguage::processPad",
   "tag": "ror-inferred",
@@ -16600,6 +16618,42 @@
   "tag": "ror-inferred",
   "was": "FUN_001bdfe0",
   "why": "the menu object at +0x40 of MagLifeMenuSelLang: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001be004": {
+  "name": "MnuSelectLanguage::loadTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_001be004",
+  "why": "SprTexture::setList(location.tm2, data/mnurpk/mnusllg.rpk) and update until loaded, as MnuNow::loadTexture"
+ },
+ "001be048": {
+  "name": "MnuSelectLanguage::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001be048",
+  "why": "m_open 1, steps 0, openWindow; -1 when already open (MnuNow::open shape)"
+ },
+ "001be084": {
+  "name": "MnuSelectLanguage::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001be084",
+  "why": "closeWindow, m_open 0; -1 when not open (MnuNow::close shape)"
+ },
+ "001be0c0": {
+  "name": "MnuSelectLanguage::initWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001be0c0",
+  "why": "the constructor's tail call: clears the language cursor +0x107c, returns 0 (MnuNow::initWork)"
+ },
+ "001be0cc": {
+  "name": "MnuSelectLanguage::setDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_001be0cc",
+  "why": "pattern image 0x2b8a10, SprMan::setDispList(0x2b8bf0), sprites active (MnuNow::setDisp shape)"
+ },
+ "001be110": {
+  "name": "MnuSelectLanguage::execMain",
+  "tag": "ror-inferred",
+  "was": "FUN_001be110",
+  "why": "up/down move the language cursor 0..4, cross calls MagSystem::setLanguage and fades out; 1 once the fade ended"
  },
  "001be2cc": {
   "name": "FileReader::FileReader",

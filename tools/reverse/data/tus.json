@@ -1977,6 +1977,24 @@
    "status": "done",
    "why": "McdMan ctor 0x187724 .. hasSpace 0x18bb28 is one class; mcd/mcdman.cpp string at 0x187a28; 0x18761c calls MsgMan code (msg/), 0x18bb8c is SprMan::SprMan (spr/sprman.cpp)"
   },
+  "mnu/mnuSelectLanguage.cpp": {
+   "notes": "Verify: complete code that nothing on screen shows. The US disc has no DATA/MNURPK/MNUSLLG.RPK, so the language menu (MagLifeMenuSelLang, 0x10010) looks like a PAL leftover; the smoke run still ends on the disclaimer screen, unchanged. Mark done only if the menu is ever opened with its pack present. While shown it forces GamMan option 0 (brightness) to 4 and restores getStatus 0x10 on exit; cross calls MagSystem::setLanguage. The constructor is now a host constructor (runs before main inside MagScene; it only clears words). unassigned@001bde58 is absorbed by this pin except GamFont 0x1beb70..0x1c05c0 (game/gamfont.cpp) if that TU still lists it.",
+   "ranges": [
+    [
+     "001bdae4",
+     "001be2cc"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 09:51",
+     "status": "verify",
+     "summary": "MnuSelectLanguage, the language select screen: all 16 functions (ctor, dtor, init, term, isInit, processPad with the inline exec, draw, open, close, openWindow, closeWindow, updateMessage, loadTexture, initWork, setDisp, execMain) with its mnusllg.rpk texture list, pattern image, display list and the five language texts; file pinned 0x1bdae4..0x1be2cc; scene member renamed m_pScene after the assert"
+    }
+   ],
+   "status": "verify",
+   "why": "MnuSelectLanguage ctor 0x1bdae4 .. the menu's last helper 0x1be110 (FileReader::FileReader starts at 0x1be2cc); 0x1bdc9c/0x1bdd48/0x1bddbc assert with mnu/mnuSelectLanguage.cpp, 0x1be004 loads data/mnurpk/mnusllg.rpk; every function takes the MnuSelectLanguage object"
+  },
   "mnu/mnubase.cpp": {
    "notes": "Verify: the 200 s New Game run inits the picture book through this loader (setupWork, addFile, openPack read the pack with no file error) and stops in the stubs MnuPBook::processPad 0x1976b8 / draw 0x197f70, still black; nothing here can show until they are written. updateLoad is what processPad polls each frame. Host layouts: MnuFile/MnuModel/MnuMotion/MnuTex slots are host structs (pointers) carved from the pool by sizeof, MnuPoolBlock stays 16 bytes; mnuAlloc/mnuFree refuse a NULL pool (PORT), mnuFindPackFile answers -1 for a name the pack lacks (PORT). Draw path: drawSprite writes the ROM VU1 sprite packets (i3dPktBeginVu1Sprite 0x21e5a0, i3dPktVu1Color/Matrix/Sprite 0x21e488/0x21e428/0x21e690, end 0x21e688 in unassigned@0021c960, stubs) which the native i3d module cannot draw yet - it needs a VU1 sprite record (textured quad from the matrix and uv) before the book shows; drawModel needs i3mGetPose 0x22e960 / i3mPoseToMatrices 0x22f7a0 (unassigned@0022e840, stubs) and utlDrawI3r. MagScene::initRender/term now call mnuInitPool/mnuTermPool (were FUN_001944d0/FUN_00194548).",
    "ranges": [
@@ -2917,6 +2935,7 @@
   "unassigned@001a0950": {},
   "unassigned@001a6830": {},
   "unassigned@001ab474": {},
+  "unassigned@001bdae4": {},
   "unassigned@001bde58": {},
   "unassigned@001beb70": {},
   "unassigned@001d3b44": {},
