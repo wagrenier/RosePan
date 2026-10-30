@@ -100,7 +100,10 @@ struct MnuStock
      * entry for a slot (page 2) or swaps it in, circle back to page 0. */
     int  execPage1(BedPad *pad);                                         // ROR 0x0019e474
     int  testItemFlags(int id, u_int bits);                              // ROR 0x0019fb88
-    int  execPage2(BedPad *pad);                                         // ROR 0x0019fbc8 (not written)
+    /* Page 2: the slot grid (the cursor 0x67, wrapping), cross picks the
+     * slot for an entry (page 1) or swaps the picked entry in with both
+     * icons flying, circle drops the pick or closes the box (1). */
+    int  execPage2(BedPad *pad);                                         // ROR 0x0019fbc8
 
     /* PC: m_spr's sprite n (m_sprite is the SprMan's table). */
     SprSprite &sprite(int n) { return m_spr.m_sprite[n]; }
@@ -111,19 +114,21 @@ struct MnuStock
     int           m_open;           // ROR 0x0000: open / close
     int           m_category;       // ROR 0x0004: buildStockList's category (0 all)
     int           m_row;            // ROR 0x0008: the cursor's row in the window (0..m_rows-1)
-    int           m_slot;           // ROR 0x000c: the slot setSlotSprites redraws after a swap
+    int           m_slot;           // ROR 0x000c: the slot grid's cursor (0..11), the slot a swap fills
     int           m_index;          // ROR 0x0010: the cursor's list entry
     int           _14[3];           // ROR 0x0014: cleared with the work words
     int           m_category_num;   // ROR 0x0020: the categories (tabs 0x2e..), initWork sets 7
     int           m_rows;           // ROR 0x0024: the window's rows, 8
-    int           m_28;             // ROR 0x0028: initWork sets 2
+    int           m_slot_num;       // ROR 0x0028: the grid's slots for the cursor's wrap: execPage2 sets 12 (initWork 2)
     int           m_count;          // ROR 0x002c: the list's entries
     int           _30[3];
     int           m_step;           // ROR 0x003c: exec's step
     int           m_page;           // ROR 0x0040: exec step 4's page (0..2)
     int           m_main_step;      // ROR 0x0044: the pages' step (open / exec's end clear it)
     int           _48[3];
-    int           m_54;             // ROR 0x0054: open sets 3; role unknown
+    /* What the other page picked: 3 nothing, 1 a list entry (page 2 picks
+     * the slot and swaps), 2 a slot (page 1 picks the entry and swaps). */
+    int           m_pick;           // ROR 0x0054: open sets 3
     MsgManSet     m_msg;            // ROR 0x0058: the window's text
     SprMan        m_spr;            // ROR 0x07d0: EE 0x8ec
     MagSystem    *m_system;         // ROR 0x10bc: MagSystem::m_current_system (its scene fades)
@@ -147,7 +152,7 @@ struct MnuStock
     int           m_flag_c;         // ROR 0x156c: bit 1 (init sets 1)
     int           m_flag_d;         // ROR 0x1570: bit 0
     int           m_fade_wait;      // ROR 0x1574: the arrows' fade-in wait: 0x1e, 5 from frame 10
-    int           _1578;
+    int           m_swap_wait;      // ROR 0x1578: execPage2's frames for the icons' flight (10)
     int           m_timer;          // ROR 0x157c: frames since the box opened (to 0x7fff)
     int           m_win;            // ROR 0x1580: the scene window
     int           _1584[11];
@@ -158,13 +163,15 @@ static_assert(offsetof(MnuStock, m_rows) == 0x24, "m_rows");
 static_assert(offsetof(MnuStock, m_count) == 0x2c, "m_count");
 static_assert(offsetof(MnuStock, m_step) == 0x3c, "m_step");
 static_assert(offsetof(MnuStock, m_main_step) == 0x44, "m_main_step");
-static_assert(offsetof(MnuStock, m_54) == 0x54, "m_54");
+static_assert(offsetof(MnuStock, m_slot_num) == 0x28, "m_slot_num");
+static_assert(offsetof(MnuStock, m_pick) == 0x54, "m_pick");
 static_assert(offsetof(MnuStock, m_msg) == 0x58, "m_msg");
 static_assert(offsetof(MnuStock, m_spr) >= 0x7d0, "m_spr");
 static_assert(offsetof(MnuStock, m_scene) >= 0x110c, "m_scene");
 static_assert(offsetof(MnuStock, m_list) >= 0x1110, "m_list");
 static_assert(offsetof(MnuStock, m_init) >= 0x1540, "m_init");
 static_assert(offsetof(MnuStock, m_fly_spr) >= 0x1554, "m_fly_spr");
+static_assert(offsetof(MnuStock, m_swap_wait) >= 0x1578, "m_swap_wait");
 static_assert(offsetof(MnuStock, m_win) >= 0x1580, "m_win");
 
 #endif /* _MNU_MNUSTOCK_H */

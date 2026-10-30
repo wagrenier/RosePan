@@ -2076,7 +2076,7 @@
    "why": "MnuTextList (ctor 0x1a066c .. list draw 0x1a0be4); its allocator 0x1a08d4 passes the source path mnu/mnuselect.cpp to BedMemory::allocDebug"
   },
   "mnu/mnustock.cpp": {
-   "notes": "Left: execPage2 0x19fbc8 (0xaa0 bytes, the slot grid, stub at the end of src/mnu/mnustock.cpp returning 0); it must set m_slot for execPage1's swap (execPage1 cross with m_54 3 enters page 2 and m_54 1; back on page 1 a cross with m_54 1 swaps m_list entry into m_slot). Nothing in pages 0/1 sets m_main_step 4, which execPage1 handles (stop the picked icon's anim): probably execPage2 on return. Doubt (open-items): setDescText fills SprMan text lines 0..2 with the description but assigns no sprite text; find the reader (execPage2 or sprites 0x43..0x45). Colours 0x2a2e18/28/38 are read through eePtr from the pattern image; the fly speed/accel 0x2a31c8/d8 are host constants (0x2a31e8/f8 hold -2/-1, maybe execPage2's). Picture: the 15 s smoke run shows the boot disclaimer as before; the item box opens only from a room's stock menu, which the smoke pad does not reach, so nothing on screen shows these pages yet (references in work/ref/MNUSTOCK).",
+   "notes": "TU fully written, verify: the item box opens only from a room's stock menu (MagScene menu 0x10002), which the smoke pad does not reach; the 15 s run shows the boot disclaimer as before. When a run opens it, compare with work/ref/MNUSTOCK and mark done. execPage1's earlier comment said cross with m_pick 1 swaps; it is m_pick 2 (fixed). Still open: nobody found sets m_main_step 4 for execPage1 (execPage2's own step 4 stays in page 2); setDescText's text lines 0..2 have no reader in execPage2 either, look in the display list for sprites 0x43..0x45.",
    "ranges": [
     [
      "0019a52c",
@@ -2093,9 +2093,14 @@
      "date": "2026-10-30 07:13",
      "status": "partial",
      "summary": "MnuStock pages 0 and 1: execPage0 (category tabs), execPage1 (the stock list: cursor, L1/R1 windows, scrolling rows, cross to the slots or swap with the flying icon), setRowMove 0x19c630 (row sprite move tables and order), setDescText 0x19e010 (description, linked items, name); SprMan +0x4b8 work-sprite range and the inline getObjWork with its m_objWorkIndexNo assert, +0x4e8 text lines; m_20 is m_category_num; Ghidra names for 0x19c630, 0x19cf48, 0x19e010, 0x19e474, 0x19fbc8"
+    },
+    {
+     "date": "2026-10-30 07:20",
+     "status": "verify",
+     "summary": "MnuStock::execPage2 0x19fbc8, the slot grid: cursor 0x67 with wrap (m_slot_num 12), left/right off the grid to page 1/0, cross picks a slot (m_pick 2) or flies the picked entry's icon and the slot's icon on two work sprites and swaps after m_swap_wait 10 frames (steps 4/5), circle drops the pick or closes the box. All 35 MnuStock functions written; m_54 named m_pick (3 none, 1 entry, 2 slot), m_28 m_slot_num, +0x1578 m_swap_wait; fly-back constants 0x2a31e8/f8."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "MnuStock (mnustock.rpk) and its item-box helpers up to mnu/mnuselect.cpp's MnuTextList"
   },
   "mnu/mnusvld.cpp": {

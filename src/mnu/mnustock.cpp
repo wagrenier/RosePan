@@ -44,6 +44,7 @@
 #define MNUSTOCK_SPR_NUM    0x59    /* + slot: their counts */
 #define MNUSTOCK_SPR_EQUIP  0x65    /* the equipped item's slot marker */
 #define MNUSTOCK_SPR_FIND   0x66    /* the find target's */
+#define MNUSTOCK_SPR_CURSOR 0x67    /* the slot grid's cursor */
 #define MNUSTOCK_SPR_LINK   0x3e    /* .. 0x40: the three linked items' names */
 #define MNUSTOCK_SPR_NAME   0x42    /* the item's name */
 #define MNUSTOCK_SPR_DESC   0x43    /* .. 0x45: the description lines */
@@ -1085,6 +1086,9 @@ static const int mnuStockDescRect[4] = { 0, 0, 0x100, 0x10 };
  * accel 1 per frame; 0x2a31e8 / 0x2a31f8 hold the mirrored -2, -1). */
 static const float mnuStockFlySpeed[4] = { 2.0f, 0.0f, 0.0f, 0.0f };
 static const float mnuStockFlyAccel[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+/* execPage2's: the slot's icon back to the list (0x2a31e8 / 0x2a31f8). */
+static const float mnuStockFlyBackSpeed[4] = { -2.0f, 0.0f, 0.0f, 0.0f };
+static const float mnuStockFlyBackAccel[4] = { -1.0f, 0.0f, 0.0f, 0.0f };
 
 /* getItemName's text for an unknown item (rodata 0x2f84a8 through data
  * 0x2a42e0), and for an empty name (0x2f84b8). */
@@ -1202,7 +1206,7 @@ int MnuStock::open()
         return -1;
     m_open = 1;
     m_step = 0;
-    m_54 = 3;
+    m_pick = 3;
     m_find_slot = -1;
     m_page = 0;
     m_main_step = 0;
@@ -1374,7 +1378,7 @@ int MnuStock::initWork()
     m_flag_a = 1;
     m_category_num = 7;
     m_rows = 8;
-    m_28 = 2;
+    m_slot_num = 2;
     m_flag_d = 1;
     m_flag_b = 1;
     m_flag_c = 1;
@@ -2212,8 +2216,8 @@ static void mnuStockDimRow(SprSprite &name, SprSprite &count)
 // step 4 only stops the icon's anim. Up / down move the cursor (the rows
 // scroll at the window's ends when the list is longer than it), L1 / R1
 // move a window, circle goes back to the tabs (page 0); cross takes the
-// entry to the slots (page 2) the first time (m_54 3) and, once a slot is
-// picked (m_54 1), swaps it in with the icon flying off on a work sprite.
+// entry to the slots (page 2) when nothing is picked (m_pick 3) and, when
+// page 2 picked a slot first (m_pick 2), swaps it in with the icon flying off.
 // A move re-lights the cursor's row, its description, the icon, the
 // scroll bar and the arrows. Always 0.
 // ROR 0x0019e474; callcheck: mcdDbgAssertFailed (ROR_ASSERT in the inline SprMan::getObjWork)
@@ -2402,10 +2406,10 @@ int MnuStock::execPage1(BedPad *pad)
             goto redraw;
         }
 
-        if (m_54 == 3) {
+        if (m_pick == 3) {
             /* the first cross: on to the slots with the entry */
             m_page = 2;
-            m_54 = 1;
+            m_pick = 1;
             m_main_step = 0;
             sprite(m_row_spr[m_row]).m_fade_mode = 0;
             mnuStockSetGrey(sprite(m_row_spr[m_row]), 0x80);
@@ -2444,7 +2448,7 @@ int MnuStock::execPage1(BedPad *pad)
         }
         sprite(MNUSTOCK_SPR_PICK).m_pat_base = getPatBase(pick->m_id);
         m_page = 2;
-        m_54 = 3;
+        m_pick = 3;
         m_main_step = 0;
         m_spr.setAnim(MNUSTOCK_SPR_PICK, 0);
         sprite(MNUSTOCK_SPR_PICK).m_disp = 1;
@@ -2512,11 +2516,191 @@ int MnuStock::testItemFlags(int id, u_int bits)
     return g_gamMan.m_sysData.testFlags((short)id, bits);
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+// ──────────────────────────────────────────────────────────────────────
+// Page 2, the slot grid. The first frame fades the cursor 0x67 in; up /
+// down move it a row and left / right a column, wrapping, except that with
+// nothing picked (m_pick 3) left off the grid goes to the list (page 1)
+// and right off it to the tabs (page 0). Cross on a slot that is not the
+// equipped item's or the find target's: with nothing picked it picks the
+// slot and goes to the list (m_pick 2); with a list entry picked (m_pick
+// 1) the entry's icon flies onto the slot and the slot's icon back to the
+// list on two work sprites, steps 4 / 5 wait m_swap_wait frames and then
+// swap the items and go back to the list. Circle drops the pick (back to
+// the list) or, with nothing picked, closes the box. A move re-lights the
+// cursor's slot icon, places the cursor and shows the slot's description.
+// 1 once the box closes, else 0.
+// ROR 0x0019fbc8; callcheck: mcdDbgAssertFailed (ROR_ASSERT in the inline SprMan::getObjWork)
 
-// stub of ROR 0x0019fbc8
 int MnuStock::execPage2(BedPad *pad)
 {
-    ROSEPAN_STUB("MnuStock::execPage2", 0x0019fbc8);
-    return {};
+    u_int flags = 0;
+    int ret = 0;
+
+    if (m_main_step == 0) {
+        m_main_step = 3;
+        m_slot_num = MNUSTOCK_SLOT_MAX;
+        flags = 1;
+        m_spr.setFade(MNUSTOCK_SPR_CURSOR, 0x100, 10, (const int *)m_spr.eePtr(MNUSTOCK_COLOR_DIM),
+                      (const int *)m_spr.eePtr(MNUSTOCK_COLOR_FULL));
+    } else if (m_main_step == 4) {
+        /* the icons in flight */
+        if (m_swap_wait < 1)
+            m_main_step = 5;
+        else
+            m_swap_wait--;
+    } else if (m_main_step == 5) {
+        /* landed: swap, the list row and the picked icon come back */
+        sprite(m_row_spr[m_row]).m_state = 1;
+        m_spr.setFade(m_row_spr[m_row], 0x100, 10, (const int *)m_spr.eePtr(MNUSTOCK_COLOR_DIM),
+                      (const int *)m_spr.eePtr(MNUSTOCK_COLOR_FULL));
+        /* row 0 is always the none entry */
+        int k = m_row == 0 ? 0 : m_index;
+        swapItem(m_slot, k);
+        m_spr.setAnimTable(MNUSTOCK_SPR_PICK, (SprAnim *)m_spr.eePtr(getAnimTable(m_list[k]->m_id)));
+        sprite(MNUSTOCK_SPR_PICK).m_pat_base = getPatBase(m_list[k]->m_id);
+        m_spr.fadeInSprite(MNUSTOCK_SPR_PICK, 1, 10, -1, -1, (const int *)m_spr.eePtr(MNUSTOCK_COLOR_DIM),
+                           (const int *)m_spr.eePtr(MNUSTOCK_COLOR_FULL));
+        m_pick = 3;
+        m_page = 1;
+        m_main_step = 0;
+    }
+
+    /* the slot whose icon the redraw below stops (the cursor's before) */
+    int old_slot = m_slot;
+    if (m_main_step != 3)
+        goto redraw;
+
+    {
+        u_int dir = pad->m_dir_repeat;
+
+        if (dir & MNUSTOCK_PAD_UP) {
+            flags = 1;
+            g_sndMan.playSe(1);
+            if (m_slot < 4)
+                m_slot = m_slot_num + m_slot - 4;
+            else
+                m_slot -= 4;
+            goto redraw;
+        }
+
+        if (dir & MNUSTOCK_PAD_DOWN) {
+            flags = 1;
+            g_sndMan.playSe(1);
+            if (m_slot < m_slot_num - 4)
+                m_slot += 4;
+            else
+                m_slot -= 8;    /* (the ROM assumes 3 rows) */
+            goto redraw;
+        }
+
+        if (dir & MNUSTOCK_PAD_LEFT) {
+            g_sndMan.playSe(1);
+            if (m_slot % 4 != 0) {
+                m_slot--;
+                flags = 1;
+            } else if (m_pick != 3) {
+                m_slot += 3;
+                flags = 1;
+            } else {
+                /* off the grid: the list */
+                m_main_step = 0;
+                m_page = 1;
+                flags |= 2;
+                m_spr.setAnim(MNUSTOCK_SPR_ICON + m_slot, 0);
+                sprite(MNUSTOCK_SPR_CURSOR).m_state = 0;
+            }
+            goto redraw;
+        }
+
+        if (dir & MNUSTOCK_PAD_RIGHT) {
+            g_sndMan.playSe(1);
+            if (m_slot % 4 != 3) {
+                m_slot++;
+                flags = 1;
+            } else if (m_pick != 3) {
+                m_slot -= 3;
+                flags = 1;
+            } else {
+                /* off the grid: the tabs */
+                m_page = 0;
+                m_main_step = 1;
+                flags |= 2;
+                m_spr.setAnim(MNUSTOCK_SPR_ICON + m_slot, 0);
+                sprite(MNUSTOCK_SPR_CURSOR).m_state = 0;
+            }
+            goto redraw;
+        }
+
+        if (MNUSTOCK_TRIG_CROSS(pad)) {
+            int se = 3;
+            if (old_slot != m_equip_slot && old_slot != m_find_slot
+                && !(m_list[m_index]->m_id == MNUSTOCK_ID_NONE && m_have[old_slot]->m_id == MNUSTOCK_ID_NONE)
+                && testItemFlags(m_have[m_slot]->m_id, 0x1000000) != 1) {
+                if (m_pick == 3) {
+                    /* the slot is picked: on to the list for the entry */
+                    m_page = 1;
+                    m_pick = 2;
+                    m_main_step = 0;
+                } else {
+                    /* the entry goes in: its icon flies onto the slot */
+                    m_main_step = 4;
+                    m_swap_wait = 10;
+                    m_fly_spr = m_spr.getObjWork();
+                    sprite(m_fly_spr) = sprite(MNUSTOCK_SPR_PICK);
+                    sprite(MNUSTOCK_SPR_PICK).m_state = 0;
+                    m_spr.startSpeedMove(m_fly_spr, 5, mnuStockFlySpeed, mnuStockFlyAccel);
+                    m_spr.fadeOutDefault(m_fly_spr, 5);
+                    /* and the slot's icon back to the list */
+                    m_fly_spr = m_spr.getObjWork();
+                    sprite(m_fly_spr) = sprite(MNUSTOCK_SPR_ICON + m_slot);
+                    sprite(MNUSTOCK_SPR_ICON + m_slot).m_state = 0;
+                    m_spr.startSpeedMove(m_fly_spr, 5, mnuStockFlyBackSpeed, mnuStockFlyBackAccel);
+                    m_spr.fadeOutDefault(m_fly_spr, 5);
+                    m_spr.fadeOutDefault(MNUSTOCK_SPR_NUM + m_slot, 5);
+                    m_spr.fadeOutDefault(m_row_spr[m_row], 2);
+                    m_spr.setFade(m_row_spr2[m_row], 3, 2, g_sprColorClear, g_sprColorOpaque);
+                    m_spr.setAnim(MNUSTOCK_SPR_ICON + m_slot, 0);
+                }
+                m_spr.setFade(MNUSTOCK_SPR_CURSOR, 3, 10, g_sprColorClear, g_sprColorOpaque);
+                se = 4;
+            }
+            g_sndMan.playSe(se);
+            goto redraw;
+        }
+
+        if (MNUSTOCK_TRIG_CIRCLE(pad)) {
+            if (m_pick == 3) {
+                ret = 1;
+            } else {
+                /* drop the pick: back to the list */
+                m_pick = 3;
+                m_page = 1;
+                m_main_step = 0;
+                flags |= 2;
+                m_spr.setFade(MNUSTOCK_SPR_CURSOR, 3, 10, g_sprColorClear, g_sprColorOpaque);
+                m_spr.setAnim(MNUSTOCK_SPR_ICON + m_slot, 0);
+            }
+            g_sndMan.playSe(2);
+        }
+    }
+
+redraw:
+    if ((flags & 1) == 0)
+        return ret;
+
+    m_spr.setAnim(MNUSTOCK_SPR_ICON + old_slot, 0);
+    sprite(MNUSTOCK_SPR_ICON + old_slot).m_disp = 1;
+    if (m_slot != m_equip_slot && m_slot != m_find_slot) {
+        m_spr.setAnim(MNUSTOCK_SPR_ICON + m_slot, 1);
+        sprite(MNUSTOCK_SPR_ICON + m_slot).m_disp = 1;
+    }
+    SprSprite &cursor = sprite(MNUSTOCK_SPR_CURSOR);
+    cursor.m_state = 1;
+    m_spr.setAnim(MNUSTOCK_SPR_CURSOR, 1);
+    cursor.m_disp = 1;
+    cursor.m_off[0] = mnuStockSlotPos[m_slot][0];
+    cursor.m_off[1] = mnuStockSlotPos[m_slot][1];
+    cursor.m_off[2] = mnuStockSlotPos[m_slot][2];
+    setDescText(m_have[m_slot]);
+    return ret;
 }

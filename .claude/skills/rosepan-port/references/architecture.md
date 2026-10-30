@@ -1591,7 +1591,7 @@ then fades out (3, 7, 0), calls MagSystem::resetDBuff and returns 1; exec fades 
 and returns 1 once getFadeState > 4. m_system +0x900, m_layer +0x904, m_result +0x908, m_scene
 +0x90c, m_init +0x910.
 
-## The item box (`mnu/mnustock.cpp`, 0x19a52c..0x1a066c, 2026-10-30, partial)
+## The item box (`mnu/mnustock.cpp`, 0x19a52c..0x1a066c, 2026-10-30, written, verify)
 
 MnuStock (EE 0x15b0; MagLifeMenuStock +0x40, menu 0x10002; MagScene +0x2eed0 via the wrapper) moves
 items between GamMan's 12 item slots (m_itemHave, vector at +0x1a6c0) and the stock (m_itemStock, the
@@ -1604,10 +1604,15 @@ execPage0 0x19cf48 the category tabs 0x2e..0x34 (m_category_num +0x20 = 7; up / 
 from the top, cross -> page 1, circle closes); execPage1 0x19e474 the list (up / down, L1 / R1 a
 window via m_repeat bits 10 / 11, scrolling past the window's ends runs setRowMove 0x19c630, which
 re-targets the row sprites' move table and rotates m_row_spr / m_row_spr2 so index k stays screen
-row k; cross with m_54 == 3 -> page 2 (the slots) with m_54 = 1, cross with m_54 == 1 swaps the
-entry into m_slot, the picked icon 0x22 copied to a SprMan work sprite (0x69..0x89, +0x1554) flying
+row k; m_pick +0x54 says what the other page picked: 3 nothing, 1 a list entry, 2 a slot; cross
+with m_pick 3 -> page 2 (the slots) with m_pick 1, cross with m_pick 2 swaps the entry into m_slot, the picked icon 0x22 copied to a SprMan work sprite (0x69..0x89, +0x1554) flying
 right (speed 2, accel 1 from 0x2a31c8) and fading out; circle -> page 0); execPage2 0x19fbc8 the
-slot grid (not written yet). The row highlight fades between the pattern image's colours 0x2a2e28
+slot grid: cursor 0x67 at grid 0x2a3208[m_slot], m_slot_num +0x28 = 12 for the wrap; left / right
+off the grid with m_pick 3 go to page 1 / page 0; cross (not the equip / find slot, not both
+none, not flag 0x1000000) with m_pick 3 picks the slot (m_pick 2, page 1), with m_pick 1 flies
+the picked icon 0x22 right and the slot icon left (-2 / -1 from 0x2a31e8) on two work sprites,
+steps 4 / 5 wait m_swap_wait +0x1578 = 10, then swapItem and page 1; circle drops the pick or
+(m_pick 3) returns 1, closing the box. The row highlight fades between the pattern image's colours 0x2a2e28
 (alpha 0x28) and 0x2a2e38 (0x80) with mode 0x100. setDescText 0x19e010: the item's text field
 0x25 -> SprMan text lines 0..2 (no sprite gets them here: the reader is still unknown), linked
 items fields 0x10..0x12 (names when m_flag_c +0x156c) -> lines 3..5 on sprites 0x3e..0x40, name
