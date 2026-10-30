@@ -11333,6 +11333,30 @@
   "was": "FUN_00174534",
   "why": "vtable _vt$11EffGeneric1 0x2e3f00 slot 7 (Eff0 slot renderPreMain)"
  },
+ "001749fc": {
+  "name": "EffGeneric1::applyTransKeys",
+  "tag": "ror-inferred",
+  "was": "FUN_001749fc",
+  "why": "renderPreMain record type 0: the key value (getKeyValue) into the translation vector's x / y / z by the record's mask bits 1 / 2 / 4"
+ },
+ "00174a60": {
+  "name": "EffGeneric1::applyRotKeys",
+  "tag": "ror-inferred",
+  "was": "FUN_00174a60",
+  "why": "record type 1: the key value into the rotation vector (added to m_rot before i3dMatRotZXY) by mask; skipped when the file's flag 4 is set"
+ },
+ "00174ad8": {
+  "name": "EffGeneric1::applyScaleKeys",
+  "tag": "ror-inferred",
+  "was": "FUN_00174ad8",
+  "why": "record type 2: the key value into the scale vector (times m_scale before i3dMatScale) by mask"
+ },
+ "00174b3c": {
+  "name": "EffGeneric1::applyColorKeys",
+  "tag": "ror-inferred",
+  "was": "FUN_00174b3c",
+  "why": "record type 3: the key value into the colour (times m_color into the display control) by mask bits 1 / 2 / 4 / 8"
+ },
  "00174bb0": {
   "name": "EffGeneric1::applyUvScroll",
   "tag": "ror-inferred",
@@ -11345,11 +11369,23 @@
   "was": "FUN_00174bd8",
   "why": "type-5 record handler: the last 0x10-byte key whose frame <= m_frame hands its uv (+4, +8) and the record's name to 0x174c4c"
  },
+ "00174c44": {
+  "name": "EffGeneric1::applyTexKeys",
+  "tag": "ror-inferred",
+  "was": "FUN_00174c44",
+  "why": "record type 6 in renderPreMain: an empty function (jr ra); EffBg1 has its own applyTexKeys for type 6"
+ },
  "00174c4c": {
   "name": "EffGeneric1::setMatUv",
   "tag": "ror-inferred",
   "was": "FUN_00174c4c",
   "why": "this a0, name a1, u f12, v f13: effFindChild52 on m_root's item finds the material and its index, stores u v into m_uv[index] (this+0x3c, 0x10 each), i3rSetMatEntity0 on each of its layers, bumps the material data's +8 counter"
+ },
+ "00174d14": {
+  "name": "EffGeneric1::getKeyValue",
+  "tag": "ror-inferred",
+  "was": "FUN_00174d14",
+  "why": "value of a frame/flags/float key list at m_frame: the last key at or before it, linear toward the next when the next key's flag bit 0 is set, 0 before the first"
  },
  "00174dd8": {
   "name": "EffLight1::init",

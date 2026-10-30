@@ -6,6 +6,16 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`eff/effgeneric.cpp`, verify; pinned 0x173df8..0x174dd8 out of
+unassigned@00172e4c): EffGeneric1, all 14 functions** (architecture.md "The record animation"). Not on
+the smoke path (the 15 s run is at the boot disclaimer; kind 0x33 comes from scripts through native
+281): mark done when a run shows one. Doubts: (1) the ROM saves the nodes' display-control pointers in
+a 16-word stack array (more nodes overrun it); the host saves any count. (2) init unrelocates the
+pack's model in place and never relocates it back, as the ROM does -- a second user of the same pack
+file would see it unrelocated. (3) the ctor leaves m_uv uninitialised in the ROM (zeroed on the PC).
+The rest of the run is pinned as `eff/efffoot.cpp` (0x172e4c..0x173df8: EffFoot1 / EffFoot1Prim /
+EffFoot2 / EffFoot2Prim, 20 functions), next.
+
 **WRITTEN 2026-10-30 (`eff/effsteam.cpp`, verify; pinned 0x179428..0x17a918 out of
 unassigned@001788ec): EffSteam1 / EffSteam1Prim / EffSteam2 / EffSteam2Prim / EffCloud1, all 17
 functions** (architecture.md "The vapour effects"). Not on the smoke path (the 15 s run is at the boot

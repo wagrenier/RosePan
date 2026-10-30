@@ -413,6 +413,33 @@
    "status": "verify",
    "why": "gamCreateEff1a creates kind 0x1a (EffFog3) and opens the EffFog3 / EffFog3Dark / EffFog3WeakUp run, after EffFog2Prim::updateZDepth and before EffFoot1::init; one file per effect family as eff/effcameraanim1.cpp"
   },
+  "eff/efffoot.cpp": {
+   "ranges": [
+    [
+     "00172e4c",
+     "00173df8"
+    ]
+   ],
+   "why": "EffFoot1 / EffFoot1Prim / EffFoot2 / EffFoot2Prim, after EffFog3 (eff/efffog3.cpp) and before EffGeneric1; file named after the classes (alphabetical link order fits)"
+  },
+  "eff/effgeneric.cpp": {
+   "notes": "Not on the smoke path: the 15 s run stops at the boot disclaimer and kind 0x33 comes from event scripts via native 281; mark done when a run shows one. Doubts in open-items.md: the ROM's 16-word save array for node display pointers (host saves any count), init leaves the pack's model unrelocated as the ROM does, ctor m_uv zeroed on the PC. Next: eff/efffoot.cpp (0x172e4c..0x173df8, pinned, 20 functions: EffFoot1/EffFoot1Prim/EffFoot2/EffFoot2Prim; their classes in eff/effclasses.h still hold undecoded m_body arrays). Callcheck reminder: a note stops at its first parenthesis, so give strcasecmp its own callcheck line.",
+   "ranges": [
+    [
+     "00173df8",
+     "00174dd8"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 13:42",
+     "status": "verify",
+     "summary": "EffGeneric1 written, all 14 functions: ctor/dtor, init (model copy, motion, eff record file, node block, uv entities), liveMain, renderPreMain (keyed translation/rotation/scale/colour records, motion pose, billboard flag 4, display control, utlDrawI3r), the uv/value key helpers and getKeyValue; EffParam m_generic; run split into eff/effgeneric.cpp and eff/efffoot.cpp"
+    }
+   ],
+   "status": "verify",
+   "why": "EffGeneric1 (ctor 0x173df8 .. getKeyValue 0x174d14), up to EffLight1::init 0x174dd8 (eff/efflight.cpp); effgeneric.h was already named for it"
+  },
   "eff/efflight.cpp": {
    "notes": "Verify: no smoke-path scene creates kind 0x23, the 240 s run still ends in the bus-stop intro text, unchanged. Mark done when a stormy scene shows the sky's light3 nodes and the lights flashing. PORT: setSkyNodeDisp takes the record (the ROM always uses m_disp) so the destructor can point the nodes at a static reset copy instead of the dying object; node pointers go through i3rFarPtrSet. Doubt: between flashes m_disp.m_10 rgb is 0 (ported as the ROM has it; DogDispControl roles unverified, open-items.md). EffLight1's glow still waits on effCalcViewDepth / effMoveToward / effVecLength (0x16ff18 / 0x16ff78 / 0x16fc20, unassigned@0016fb70) before its picture can be judged.",
    "ranges": [

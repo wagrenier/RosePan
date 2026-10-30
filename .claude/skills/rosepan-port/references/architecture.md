@@ -1613,8 +1613,21 @@ data's +8 count is bumped (EffGeneric1::setMatUv 0x174c4c). EffBg1 runs them ove
 (MagScene m_tenkyu[0].m_model[0]'s I3rRoot, borrowed: its destructor clears m_root so EffGeneric1's
 does not free it) and overwrites every record's name with the param's material (EffParam +0x1c, 0x20
 bytes); it draws nothing itself. EffGeneric1 takes the param's position / rotation / scale / colour
-(+0x1c / +0x28 / +0x34 / +0x40) and owns a model copy and an optional motion. Creators not traced
-(event scripts through native 281).
+(+0x1c / +0x28 / +0x34 / +0x40, EffParam m_generic) and owns a model copy and an optional motion.
+Creators not traced (event scripts through native 281).
+EffGeneric1 (`eff/effgeneric.cpp` 0x173df8..0x174dd8, 2026-10-30, written, verify): init unrelocates
+the pack's model 0 in place, copies it, relocates the copy (the pack's stays unrelocated) and assigns
+the scene's textures; the pack's first motion (m_file[m_num_i3r]) sets the loop to its length x 60
+frames (else the file's m_frames). Four more record types, {u16 type, size, num, mask} + 8-byte keys
+{u16 frame, u16 flags, float}: 0 translation, 1 rotation, 2 scale, 3 colour (mask bits x y z (a)); the
+value is the last key reached, linear toward the next key when that key's flag bit 0 is set, 0 before
+the first (getKeyValue 0x174d14). renderPreMain draws the model itself (utlDrawI3r on param m_cur):
+rotation m_rot + keyed (i3dMatRotZXY), scale m_scale x keyed, at m_pos + keyed; nodes 1.. show a
+DogDispControl of colour m_color x keyed with +0x20 = 1000.0f, restored after the draw. File flag 4 =
+billboard: rotation records ignored, each node's model matrix replaced by the camera's (MagScene
+m_camera_entity after callTransform) scaled, at its placed position, and the draw matrix made unit;
+without a motion flag 4 also keeps the model's local transforms (node block n x 0x80). Type 6 does
+nothing here (an empty function 0x174c44).
 
 ## The game helpers (`utl/utlgame.cpp`, 0x1024d0..0x1041c4, 2026-10-28)
 
