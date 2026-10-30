@@ -6,6 +6,12 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**QUEUED 2026-10-30 (the user): host task `setup/smoke_pad.cpp` at the top of the queue** -- make the
+bus-stop walk (below, about 400 s) the default smoke pad, push it further where screenshots confirm each
+step, and mark the verify TUs it shows done (adding a `tus.py` command to set another TU's state). The
+task text in tus.json has the full pad and the candidate TUs. Why: only ~20 unreferenced functions
+(~7 KB) of game logic are left unwritten, while 154 TUs wait in verify.
+
 **WRITTEN 2026-10-30 (`mag/maglifepcmove.cpp`, verify; repinned 0x11e0d8..0x120788, absorbing
 unassigned@0011e0d8): MagLifePC::sweepRay, an older single-ray sweepMove** (architecture.md "PC
 movement"). The queue was empty; picked as the largest remaining todo run (1 KB). Unreferenced, so
