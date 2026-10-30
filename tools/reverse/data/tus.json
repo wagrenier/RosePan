@@ -1897,7 +1897,7 @@
    "why": "MnuBoard2D ctor 0x1ad6b4 .. its fade helpers (mnuboard.rpk); 0x1adf04 is MnuMovie's constructor. File named after the class"
   },
   "mnu/mnuitem.cpp": {
-   "notes": "Left: execPage4 0x1b4488 (the slot page reached by cross on a grid slot from page 0; next, it leads to pages 5 and 7 which now exist), execPage6 0x1ba3a0, execPage9..13 (stubs returning 0; page 10 calls buildFlagList). m_page_ret[n] (+0x60 + 4n) is the page page n returns to, set by the caller; page 5 ends its return page at step 0xc, page 7 at step 6 after no. m_work: [0] page 0 area, [1] page 0 slot (pages 5 and 7 act on it), [2] page 1 cursor, [4] page 7 choice, [5] page 2 cursor. Item record GamSysRec5: m_flags +0xb0 (0x10000 equippable, 8 find-targetable, 0x1000000 not stocked), m_b8 field 0x24 kind (1 PC heal, 3 dog heal). PORT: buildFlagList bounds m_flag_rows at 16 (the ROM runs into m_find_spr 0x26e4). Screen: the 15 s smoke shows the boot (disclaimer, Presents card) unchanged; the item menu is not reachable on the smoke path (the picture book The Little Princess holds the 240 s run), so pages 1..7 are unchecked against work/ref/mnuitem. Next blocker: what advances the picture book (open-items).",
+   "notes": "Left in this TU: execPage11 0x1bb4f0 (the page under sequence bit 0x20000000, m_bit29), execPage12 0x1bbcfc, execPage13 0x1bc370 (stubs returning 0), plus any helpers they call. mnuBoardGetTexName 0x1ad7d4 is a stub in src/mnu/mnuboard2d.cpp (a 6-line lookup in the key/name table 0x2abdb8; page 6 guards its NULL with a PORT note) -- write it with mnu/mnuboard2d.cpp. Page 4's colour is a writable static in the ROM (data 0x2999d0), always set before use, a local here. Page 9 setFade mode 0x100 on the cursor 0x51 is copied as the ROM passes it. Screen: the 15 s smoke shows the boot disclaimer unchanged; the item menu is not on the smoke path (the picture book holds the long run), so pages 4/6/9/10 are unchecked against work/ref/mnuitem and the board picture against mnuboard.rpk. Next blocker: what advances the picture book (open-items).",
    "ranges": [
     [
      "001ae954",
@@ -1919,6 +1919,11 @@
      "date": "2026-10-29 20:47",
      "status": "partial",
      "summary": "MnuItem session 3: execPage1 (equip from the grid), execPage2 (find target with the link panel), execPage3 (unequip / untarget), execPage5 (use: ammo reload into the gun, PC / dog heals by field 0x2d percent, other items to the sequence), execPage7 (put away yes/no, item to the stock); helpers useSlotItem 0x1af578, dimSlots 0x1b05ec, buildFlagList 0x1baff4; m_page_sub renamed m_page_ret (+0x60 + 4n is the page page n returns to); header fields m_flag_text / m_flag_rows[16] / m_find_spr / m_use_* / m_gun_idx / m_gun_num; 3 names (ror-inferred)."
+    },
+    {
+     "date": "2026-10-29 21:31",
+     "status": "partial",
+     "summary": "MnuItem session 4: execPage4 (the action list use / equip / find / examine / put away, rows m_act_spr +0x26e4, m_work[3]), execPage6 (examine: the board picture of field 0x42 from mnuboard.rpk in m_spr3 with field 0x25 in the message window), execPage9 (the offering grid under sequence bit 0x10000000: wrapping cursor, cross to page 4, triangle unequips), execPage10 (flag list in MnuTextList, a choice sets global 0x11 and closes); board tables 0x2b8598 / 0x2b85c8..0x2b8838 / 0x2b8740 as EE images; header m_act_spr[6], m_board_wait; mnu/mnuboard2d.h with mnuBoardGetTexName 0x1ad7d4 (stub); 1 name (ror-inferred)."
     }
    ],
    "status": "partial",
