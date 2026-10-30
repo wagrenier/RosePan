@@ -8297,11 +8297,347 @@
   "was": "FUN_00155c2c",
   "why": "GrgOutTest slot 3: motions 0x15 / 0x16 in turn"
  },
+ "00155d54": {
+  "name": "FshMain::~FshMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00155d54",
+  "why": "FshMain vtable 0x2e2aa0 slot 1: vptr store, ~EmyMain then operator_delete on the deleting flag"
+ },
+ "00155db4": {
+  "name": "FshMain::decide",
+  "tag": "ror-inferred",
+  "was": "FUN_00155db4",
+  "why": "FshMain vtable slot 4: m_req from the 19 inputs at +0x204 (18..11, the sight edge 4 / 5, 10..6, 3, 2, 1), gated on m_input_flg_motion"
+ },
+ "00156048": {
+  "name": "FshMain::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00156048",
+  "why": "FshMain vtable slot 5: EmyStateMap::next on m_req (state 2 while visible goes on by 0x14), notify bits 1 / 2"
+ },
+ "00156140": {
+  "name": "FshMain::after",
+  "tag": "ror-inferred",
+  "was": "FUN_00156140",
+  "why": "FshMain vtable slot 6: Term / selectOut on m_changed, then the out's Exec into m_req"
+ },
+ "001561bc": {
+  "name": "FshMain::selectOut",
+  "tag": "ror-inferred",
+  "was": "FUN_001561bc",
+  "why": "FshMain vtable slot 2: m_emy_out = m_out[state] (1..12) Init, the transition row into m_input"
+ },
+ "00156284": {
+  "name": "FshMain::isPCSameArea",
+  "tag": "ror-inferred",
+  "was": "FUN_00156284",
+  "why": "one-call wrapper of EmyMain::isPCSameArea used by FshMain::isTargetInSight"
+ },
+ "00156298": {
+  "name": "FshMain::testBarkReact",
+  "tag": "ror-inferred",
+  "was": "FUN_00156298",
+  "why": "decide input 1: wrapper of EmyMain::testBarkReact"
+ },
+ "001562ac": {
+  "name": "FshMain::isTargetInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_001562ac",
+  "why": "decide sight edge: emyChkInSight of the PC and the dog over param 0x5f or a range by the PC state class"
+ },
+ "0015640c": {
+  "name": "FshMain::isPCTouching",
+  "tag": "ror-inferred",
+  "was": "FUN_0015640c",
+  "why": "decide input 3: emyChkNearXZ(both getObjRadius + 10, getBasePos, emyGetPCPos)"
+ },
+ "001564c0": {
+  "name": "FshMain::isPCStateClass1",
+  "tag": "ror-inferred",
+  "was": "FUN_001564c0",
+  "why": "decide input 6: wrapper of EmyMain::isPCStateClass1"
+ },
+ "001564d4": {
+  "name": "FshMain::isPCAhead",
+  "tag": "ror-inferred",
+  "was": "FUN_001564d4",
+  "why": "decide input 7: wrapper of EmyMain::isPCAhead"
+ },
+ "001564e8": {
+  "name": "FshMain::isPCStateClass2",
+  "tag": "ror-inferred",
+  "was": "FUN_001564e8",
+  "why": "decide input 8: wrapper of EmyMain::isPCStateClass2"
+ },
+ "001564fc": {
+  "name": "FshMain::isPCClass7OffAxis",
+  "tag": "ror-inferred",
+  "was": "FUN_001564fc",
+  "why": "decide input 9: wrapper of EmyMain::isPCClass7OffAxis"
+ },
+ "00156510": {
+  "name": "FshMain::isPCNear",
+  "tag": "ror-inferred",
+  "was": "FUN_00156510",
+  "why": "decide input 10: wrapper of EmyMain::isPCNear"
+ },
+ "00156524": {
+  "name": "FshMain::isLowLife",
+  "tag": "ror-inferred",
+  "was": "FUN_00156524",
+  "why": "decide input 11: wrapper of EmyMain::isLowLife"
+ },
+ "00156538": {
+  "name": "FshMain::isHalfLife",
+  "tag": "ror-inferred",
+  "was": "FUN_00156538",
+  "why": "decide input 12: wrapper of EmyMain::isHalfLife"
+ },
+ "0015654c": {
+  "name": "FshMain::testAttr8And10",
+  "tag": "ror-inferred",
+  "was": "FUN_0015654c",
+  "why": "decide input 13: achr +0x3ec bits 8 and 0x10 both set"
+ },
+ "00156578": {
+  "name": "FshMain::testAttr2And4",
+  "tag": "ror-inferred",
+  "was": "FUN_00156578",
+  "why": "decide input 14: achr +0x3ec bits 2 and 4 both set"
+ },
+ "001565a4": {
+  "name": "FshMain::testAttr1",
+  "tag": "ror-inferred",
+  "was": "FUN_001565a4",
+  "why": "decide input 15: achr +0x3ec bit 1"
+ },
+ "001565b4": {
+  "name": "FshMain::testAttr2Or4",
+  "tag": "ror-inferred",
+  "was": "FUN_001565b4",
+  "why": "decide input 16: achr +0x3ec bit 2 or 4"
+ },
+ "001565e0": {
+  "name": "FshMain::testAttr8Or10",
+  "tag": "ror-inferred",
+  "was": "FUN_001565e0",
+  "why": "decide input 17: achr +0x3ec bit 8 or 0x10"
+ },
+ "0015660c": {
+  "name": "FshMain::isPCStateClass4",
+  "tag": "ror-inferred",
+  "was": "FUN_0015660c",
+  "why": "decide input 18: wrapper of EmyMain::isPCStateClass4"
+ },
  "00156620": {
   "name": "FshMain::initOut",
   "tag": "ror-inferred",
   "was": "FUN_00156620",
   "why": "called right after the vtable store in the ELF's inline FshMain::FshMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "0015694c": {
+  "name": "FshOutDisappear::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015694c",
+  "why": "FshOutDisappear vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "001569d8": {
+  "name": "FshOutDisappear::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_001569d8",
+  "why": "FshOutDisappear vtable slot 4 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00156a5c": {
+  "name": "FshOutAppear::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00156a5c",
+  "why": "FshOutAppear vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00156a7c": {
+  "name": "FshOutAppear::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00156a7c",
+  "why": "FshOutAppear vtable slot 3 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00156b48": {
+  "name": "FshOutAtk::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00156b48",
+  "why": "FshOutAtk vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00156c00": {
+  "name": "FshOutAtk::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00156c00",
+  "why": "FshOutAtk vtable slot 3 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "001570e0": {
+  "name": "FshOutAtk::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_001570e0",
+  "why": "FshOutAtk vtable slot 4 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "001570fc": {
+  "name": "FshOutAtk::checkHit",
+  "tag": "ror-inferred",
+  "was": "FUN_001570fc",
+  "why": "called by FshOutAtk::Exec while idling / attacking: PC (not class 9) and dog (not hurt) hit up to twice each, scnChrRequest word 0x17"
+ },
+ "00157230": {
+  "name": "FshOutAtk::isTouching",
+  "tag": "ror-inferred",
+  "was": "FUN_00157230",
+  "why": "checkHit's test: four points along the enemy's rot y vs the target's Bip01 Spine1 with emyChkNearXZ"
+ },
+ "001574e4": {
+  "name": "FshOutWait::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_001574e4",
+  "why": "FshOutWait vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "0015750c": {
+  "name": "FshOutWait::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015750c",
+  "why": "FshOutWait vtable slot 3 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157514": {
+  "name": "FshOutWalk::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00157514",
+  "why": "FshOutWalk vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157548": {
+  "name": "FshOutWalk::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00157548",
+  "why": "FshOutWalk vtable slot 3 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "001577dc": {
+  "name": "FshOutWalk::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_001577dc",
+  "why": "FshOutWalk vtable slot 4 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "001577f8": {
+  "name": "FshOutWalk::setStep",
+  "tag": "ror-inferred",
+  "was": "FUN_001577f8",
+  "why": "FshOutWalk::Exec helper: a new m_step clears the counter at +0x38"
+ },
+ "00157814": {
+  "name": "FshOutSerch::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00157814",
+  "why": "FshOutSerch vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157864": {
+  "name": "FshOutSerch::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00157864",
+  "why": "FshOutSerch vtable slot 3 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "001578c4": {
+  "name": "FshOutSerch::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_001578c4",
+  "why": "FshOutSerch vtable slot 4 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "001578e0": {
+  "name": "FshOutRound::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_001578e0",
+  "why": "FshOutRound vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157934": {
+  "name": "FshOutRound::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00157934",
+  "why": "FshOutRound vtable slot 3 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "001579b4": {
+  "name": "FshOutRound::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_001579b4",
+  "why": "FshOutRound vtable slot 4 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "001579d0": {
+  "name": "FshOutStared::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_001579d0",
+  "why": "FshOutStared vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157a30": {
+  "name": "FshOutStared::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00157a30",
+  "why": "FshOutStared vtable slot 3 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157b74": {
+  "name": "FshOutStared::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00157b74",
+  "why": "FshOutStared vtable slot 4 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157b90": {
+  "name": "FshOutCollision::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00157b90",
+  "why": "FshOutCollision vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157df8": {
+  "name": "FshOutCollision::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00157df8",
+  "why": "FshOutCollision vtable slot 3 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157e48": {
+  "name": "FshOutWin::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00157e48",
+  "why": "FshOutWin vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157eb4": {
+  "name": "FshOutWin::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00157eb4",
+  "why": "FshOutWin vtable slot 3 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157f44": {
+  "name": "FshOutWin::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00157f44",
+  "why": "FshOutWin vtable slot 4 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157f60": {
+  "name": "FshOutTest::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00157f60",
+  "why": "FshOutTest vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00157f68": {
+  "name": "FshOutTest::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00157f68",
+  "why": "FshOutTest vtable slot 3 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "001580b4": {
+  "name": "FshOutDead::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001580b4",
+  "why": "FshOutDead vtable slot 3 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "001581ec": {
+  "name": "FshOutDead::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_001581ec",
+  "why": "FshOutDead vtable slot 4 (EmyOut Init / Exec / Term), created by FshMain::initOut"
+ },
+ "00158218": {
+  "name": "FshOutDead::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00158218",
+  "why": "FshOutDead vtable slot 2 (EmyOut Init / Exec / Term), created by FshMain::initOut"
  },
  "001583d4": {
   "name": "GotMain::initOut",

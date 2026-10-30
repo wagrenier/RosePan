@@ -1923,6 +1923,24 @@ never asserts): sessions name them (`tus.py define --why`).
   3), plays 0x21 / 0x23 with the fchr's actor motion 1 and hides (input 3), or idling (0x28, 0x2a /
   0x2b, 0x29). Its walks are TskMoveTypeGen mode 0xd with params 0x1100..0x1104 = 2, 4, 3, 1, 1 and
   addTask flags 0x11. Script globals: 0x53 1 while about (0 in Event), 0x54 its area, 0x55 -1.
+  **FshMain** (type 3, emy/emy_fsh.cpp 0x155d54..0x1583d4, 2026-10-30; EE 0x25c, 6 slots; the dtor and
+  the other slots come before initOut 0x156620): a crawler on the floor, collision kind 2 shape 4
+  radius 10, a random parsonality 0..2. States 1 Disappear (hidden, 0x16), 2 Appear (0x17, then
+  visible), 3 Atk, 4 Dead, 5 Stared, 6 Collision (SE 8, 0x1d with the PC within pi / 2 of its facing,
+  else 0x20), 7 Win, 8 Serch (chase 10, sight pi: 0x13 / 0x14), 9 Round (the same within 30), 10 Walk
+  (a point within 500 of param 0x59, reachable from it and over 100 off in both x and z), 11 Wait,
+  12 Test. decide needs m_decide_sw and m_input_flg_motion; 21 input words at +0x204: 1 testBarkReact,
+  2 notify bit 1, 3 the PC within both radii + 10, 4 / 5 the sight edge (+0x259; in the PC's area,
+  param 0x5f with the angle, or with attr bit 0 / in state 1 60, 200 for PC classes 2 / 3 / 7, 100 for
+  6), 6..10 while in sight (PC class 1, isPCAhead, class 2, class 7 off axis, isPCNear), 11 / 12 low /
+  half life, 13..17 achr attr word 0 bits (8&0x10, 2&4, 1, 2|4, 8|0x10), 18 PC class 4; exec takes
+  state 2 on by input 0x14 while visible. FshOutAtk: poses 0..3 with idle / attack / rest motions
+  (0x2f0bf8 / 0x2f0c08 / 0x2f0c18), 0x23 rises from pose 0, 0x22 lowers to it; hits by four points
+  along its facing against the target's spine (chr word 0x17, twice per target). FshOutDead counts
+  the kill in script global 0x33 + m_name (Sequence m_global) and leaves its group; its revival path
+  (param 0x5e) is dead code (Init always stores step 1). The rest of the enemy run splits the same way:
+  Got 0x1583d4 (GotMain::initOut opens it) .. 0x15a17c, Pig 0x15a17c .. 0x15c2a4, Dwf 0x15c2a4 (its
+  dtor) .. EmyManager 0x16265c.
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00

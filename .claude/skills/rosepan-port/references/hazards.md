@@ -200,7 +200,8 @@ entries are marked **RoR** with the date.
   keys when you can. `tus.py next` skips stale keys; an effectively empty queue means re-assess.
 - **"Every XxxMain::initOut opens its enemy file" is not a rule** (2026-10-29): Mrt .. Grg do, but Fsh puts
   FshMain's destructor 0x155d54 and its other vtable slots before FshMain::initOut 0x156620. End an
-  enemy file at the next class's first vtable slot or initOut, whichever is lower (`rtti.py --class`).
+  enemy file at the next class's first vtable slot or initOut, whichever is lower (`rtti.py --class`). Dwf does the same
+  (dtor 0x15c2a4 before initOut 0x15c304); Got and Pig open with initOut, their dtor right after.
 - **A stub inside a TU marked done is never picked**: `grep -rn "stub of ROR" src` and the run log's
   `[stub] ... reached` lines find them; claim the TU by name.
 

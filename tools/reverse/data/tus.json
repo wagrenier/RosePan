@@ -472,6 +472,24 @@
    "status": "verify",
    "why": "ClrMain + its five ClrOut* classes: ClrMain::initOut 0x14dc7c (every XxxMain::initOut opens its file) up to NorMain::initOut 0x150b24 which opens the Nor file; no source string, named like emy_bds.cpp"
   },
+  "emy/emy_fsh.cpp": {
+   "notes": "Complete code, nothing on screen yet: the 15 s run stays on the boot disclaimer and no enemy spawns on the smoke path. Mark done when a run shows an Fsh (crawls, rises and lowers between poses, bites; flinches when the PC bumps it). ROM oddities kept as they are: FshOutDead::Init always stores step 1, so the revival step 0 never runs; FshOutStared's limit table 0x2f0c78 is all zero; FshOutAtk::isTouching's dog pass tests the spine matrix's first row because magBwnNop is empty. PC: EE 0x238 is m_input[13] here, EmyMain::m_238 on the host. Next in the enemy run (unassigned@001583d4): Got 0x1583d4..0x15a17c, Pig 0x15a17c..0x15c2a4, Dwf 0x15c2a4 (its dtor, before DwfMain::initOut 0x15c304)..0x16265c; their decide/test-input shapes match Fsh's (EmyStateMap::peek variants).",
+   "ranges": [
+    [
+     "00155d54",
+     "001583d4"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 08:04",
+     "status": "verify",
+     "summary": "Pinned emy/emy_fsh.cpp 0x155d54..0x1583d4 out of unassigned@00155d54 and wrote all 57 functions: FshMain (enemy type 3: dtor, decide over 19 inputs, exec, after, selectOut, initOut, isTargetInSight, isPCTouching, the attr-bit and EmyMain-wrapper tests) and its outs FshOutDisappear, Appear, Atk (pose tables 0x2f0bf8 / 0x2f0c08 / 0x2f0c18, checkHit, isTouching), Wait, Walk, Serch, Round, Stared, Collision, Win, Test, Dead. New emy/emy_fsh.h; FshMain moved out of lib/unassigned.h, its six stubs removed. 56 functions named (batch emyfsh_001)."
+    }
+   ],
+   "status": "verify",
+   "why": "FshMain + its FshOut* classes: FshMain dtor 0x155d54 (opens the file, as Grg's note found) up to GotMain::initOut 0x1583d4, which opens the Got code"
+  },
   "emy/emy_grg.cpp": {
    "notes": "Complete code, nothing on screen yet: the 15 s run stays on the boot disclaimer and no enemy spawns on the smoke path. Mark done when a run shows a Grg roaming rooms 0x84..0x8b, hiding in an fchr and reappearing. PORT choices for three ROM reads of unset stack: GrgOutDisappear::getRoomIndex room 0x89 split (achr z vs 255), walkToFchr search position (the enemy's), its pick past the last fchr (none). Boundary: the Fsh file starts at FshMain's dtor 0x155d54, before FshMain::initOut 0x156620 (hazards.md); the rest of unassigned@00153e40 now starts there: Fsh, Got, Pig, Dwf.",
    "ranges": [
@@ -2801,6 +2819,7 @@
   "unassigned@0014dc7c": {},
   "unassigned@00150b24": {},
   "unassigned@00153e40": {},
+  "unassigned@00155d54": {},
   "unassigned@00164fc0": {},
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},
