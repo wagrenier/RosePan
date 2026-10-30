@@ -147,7 +147,7 @@
    "why": "motNameConvert and motNameFindChara carry debug/motnamecnv0.cpp (lines 0x77/0x78, 0xcf); 216154 (before them, motNameConvert's only callee) and 2162e0..2163ac are one-line wrappers on the same scene interface objects (scene +0x854e0 / +0x854e8); 2163ac starts debug/motnamecnv.cpp (its own source string)"
   },
   "debug/naga_debug.cpp": {
-   "notes": "Left: EventTestTask::disp 0x216ad0 (0x790 bytes, stubbed in naga_debug.cpp; pages by mode bss 0x2db2a4, strings World %d, MAP_ORPH, position formats) and the menu 0x217260..0x217f10 (8 FUN_ functions: 0x217260 the page state machine loading DBGFLAG / DBGSTEP / DBGITEM / DBGAREA.BIN via nagaDbgLoadFile, 0x217bec / 0x217cac / 0x217da4 cursor and list helpers). Name them EventTestTask methods (this in a0). Statics already in the cpp: s_nagaDbgMode 0x2db2a4, s_nagaDbgFixView 0x2db2b8, text buffers 0x7b4e08 / 0x7b4e28 / 0x7b4ec8 / 0x7b5968 (sizes from address gaps). Nothing constructs the task in the ROM, so the file finishes verify once written. The menu reads pad 1 (MagSystem m_pad[1].m_repeat, 0x6e998c): 0x4000 select, 0x2000 back. Screenshot: boot disclaimer, unchanged (dead code).",
+   "notes": "Whole file written; nothing in the ROM constructs EventTestTask and retail stripped its draw calls (text is formatted into a stack buffer and dropped), so no screenshot can show it: verify. Boot smoke run still shows the disclaimer, unchanged. Decisions: disp returns void (the ROM's return is a leftover register); text buffer 0x7b4e28 split into 0x20 at 0x7b4e28 and 0x80 at 0x7b4e48 (disp prints 0x7b4e48 with %s); NagaDbgBinHead / NagaDbgEntry describe the BIN files (count at +8, 0x40-byte entries, value at +0x3c). Found: g_bss_7a3210 is g_gamMan.m_chapter and g_bss_7a3d48 / 7a3d4c are GamMan m_cursolInitItem / m_cursolInitStock, defined on the host as separate never-written ints (open-items Open questions): a small fix for a later session.",
    "ranges": [
     [
      "00216768",
@@ -163,9 +163,14 @@
      "date": "2026-10-30 16:56",
      "status": "partial",
      "summary": "EventTestTask (vtable 0x2e50c0, kind 2): nagaDbgLoadFile, the constructor split out of 0x216768 at 0x216828, destructor, init, exec, inline get_task_type / term; pinned the whole file 0x216768..0x217f10 (absorbing the debug menu run unassigned@00216ad0) plus the linkonce 0x2911cc..0x291228"
+    },
+    {
+     "date": "2026-10-30 17:20",
+     "status": "verify",
+     "summary": "EventTestTask debug overlay complete: disp (info pages: PC / dog position, world position via WrdSrv, heap and packet use, chapter, map area, PC and dog health, camera heading) and the mode 3 menu with its helpers (moveCursor, isUp/Down/Left/Right, dispCursor, dispScroll): event flag, step, area warp, chapter, item and switch pages over DBGFLAG / DBGSTEP / DBGAREA / DBGITEM.BIN; overlay statics with their .data initial values, the chapter table 0x2db2f8"
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "source string debug/naga_debug.cpp in nagaDbgLoadFile's allocDebug; EventTestTask (vtable 0x2e50c0) ctor/dtor/init/exec follow; 0x216ad0..0x217f10 is the debug menu only EventTestTask::exec reaches, which loads its BIN files through nagaDbgLoadFile and reads the buffers the ctor clears; utl/utlmisc2.cpp starts at 0x217f10; 0x2911cc..0x291228 are EventTestTask's linkonce __tf / get_task_type / term"
   },
   "dog/dogactor.cpp": {
