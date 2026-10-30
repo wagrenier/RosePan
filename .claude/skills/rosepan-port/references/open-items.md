@@ -6,6 +6,20 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`task/tsk_attack.cpp`, verify; pinned 0x1fd424..0x20067c, was
+unassigned@001fd424): the TskAttack / TskDamage steps, all 21 functions** (architecture.md "Attack /
+damage tasks"). The queue was empty this run; this TU was picked as the last stubbed run that written
+code calls (TskAttack::setup / TskDamage::setup). Not on the smoke path (the 15 s run is at the boot
+disclaimer; attacks need an enemy in a room): mark done when a run shows an enemy swing hit Jennifer or
+an enemy react to a hit (stagger, fall, down). Doubts: (1) chr 0's fall state 5001 plays motion 6 (the
+ROM's li 6 among 0x49 / 0x4a / 0x4b; ported as is). (2) TskAttack phases 10 / 3 (30-frame end) and 999
+are never set by anything found. (3) stepKind15 and the cut helpers build a TskMovePhysic velocity the
+constructor does not read (the ctor takes only the oid): if a throw looks wrong, check whether
+TskMovePhysic 0x1eeaec really ignores a2. (4) cutOffPart / updateCutSpray / scnDropWeapon / stepReach
+are unreferenced (a cut dismemberment feature); written for completeness. Remaining todo TUs with
+stubs: mag/maglifebwnmode.cpp (Brown's modes, 8 stubs), unassigned@00125bd4 (9), unassigned@0012668c
+(1), rx/rxsys.cpp's 6 boot stubs (rxSysOpenTty / IniFind / SetDebugHandlers are reached every boot).
+
 **WRITTEN 2026-10-30 (`eff/effdust2.cpp`, `efffire1.cpp`, `efffire2.cpp`, `efffog1.cpp`, `efffog2.cpp`,
 all verify; unassigned@001704a4 split and pinned): EffDust2 .. EffFog2Prim, all 28 functions**
 (architecture.md "The dust, fire and fog effects"). Not on the smoke path (the 15 s run is at the boot

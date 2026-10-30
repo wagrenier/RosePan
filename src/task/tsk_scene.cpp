@@ -1124,12 +1124,12 @@ void TskAttack::setup(u_int oid, const int *param)
     float rot[4];
 
     (void)oid;
-    m_1c = 0;
-    m_20 = 0;
+    m_frame = 0;
+    m_phase = 0;
     m_achr = g_gamMan.getAchr(m_oid);
     m_actor = m_achr->m_actor;
     m_kind = param[2];
-    m_34 = param[0];
+    m_victim = param[0];
     g_gamMan.getObjRot(m_oid, rot);     /* the ROM drops the rotation */
 
     switch (m_kind)
@@ -1145,38 +1145,38 @@ void TskAttack::setup(u_int oid, const int *param)
             if (utlRandRange(0, 100) < 0x32)
             {
                 m_motion = 0x42;
-                m_44 = 0x10;
-                m_48 = 0x14;
+                m_hitFrom = 0x10;
+                m_hitTo = 0x14;
             }
             else
             {
                 m_motion = 0x43;
-                m_44 = 0x1e;
-                m_48 = 0x2b;
+                m_hitFrom = 0x1e;
+                m_hitTo = 0x2b;
             }
         }
         else
         {
             m_motion = 0x44;
-            m_44 = 0x14;
-            m_48 = 0x17;
+            m_hitFrom = 0x14;
+            m_hitTo = 0x17;
         }
         m_step = &TskAttack::stepKind12;
         break;
     }
     case 0x13:
-        m_44 = 0x1c;
+        m_hitFrom = 0x1c;
         m_motion = 0x51;
-        m_48 = 0x21;
+        m_hitTo = 0x21;
         m_target = (u_int)param[5];
         /* The ROM passes m_target in a sixth register setActorMotion does not read. */
         scene.setActorMotion(speed, g_gamMan.getActorNo((u_int)param[5]), 9, 0, 0);
         m_step = &TskAttack::stepKind12;
         break;
     case 0x14:
-        m_44 = 0x20;
+        m_hitFrom = 0x20;
         m_motion = 0x52;
-        m_48 = 0x26;
+        m_hitTo = 0x26;
         m_target = (u_int)param[5];
         scene.setActorMotion(speed, g_gamMan.getActorNo((u_int)param[5]), 10, 0, 0);
         m_step = &TskAttack::stepKind12;
@@ -1187,17 +1187,17 @@ void TskAttack::setup(u_int oid, const int *param)
         u_short type;
         int size;
         g_gamMan.getObjParam(m_oid, 0x66, &kind);
-        g_gamMan.getObjParam(m_oid, 0x67, &m_4c);
+        g_gamMan.getObjParam(m_oid, 0x67, &m_throwOid);
         g_gamMan.m_sysData.getField(kind, 0x28, &type);  /* not read */
         m_motion = 0x45;
-        m_44 = 0x2e;
+        m_hitFrom = 0x2e;
         g_gamMan.m_sysData.getField(kind, 0x1b, &size);
         if (size == 3)
-            m_40 = 70.0f;
+            m_reach = 70.0f;
         else if (size == 2)
-            m_40 = 50.0f;
+            m_reach = 50.0f;
         else
-            m_40 = 20.0f;
+            m_reach = 20.0f;
         m_54 = param[3];
         m_58 = param[4];
         m_step = &TskAttack::stepKind15;
@@ -1209,45 +1209,45 @@ void TskAttack::setup(u_int oid, const int *param)
         if (m_kind == 0x26)
         {
             m_motion = 0x14;
-            m_40 = 110.0f;
-            m_44 = 0xe;
-            m_48 = 0x11;
+            m_reach = 110.0f;
+            m_hitFrom = 0xe;
+            m_hitTo = 0x11;
         }
         else if (m_kind == 0x27)
         {
             m_motion = 0x15;
-            m_40 = 110.0f;
-            m_44 = 8;
-            m_48 = 0xb;
+            m_reach = 110.0f;
+            m_hitFrom = 8;
+            m_hitTo = 0xb;
         }
         else
         {
             m_motion = 0x16;
-            m_40 = 120.0f;
-            m_44 = 0x4b;
-            m_48 = 0x4e;
+            m_reach = 120.0f;
+            m_hitFrom = 0x4b;
+            m_hitTo = 0x4e;
         }
         m_step = &TskAttack::stepKind26;
         break;
     case 0x2e:
-        m_40 = scnRecFloat(param[10]);
-        m_44 = 0x18;
+        m_reach = scnRecFloat(param[10]);
+        m_hitFrom = 0x18;
         m_motion = param[6];
-        m_48 = 0x2b;
+        m_hitTo = 0x2b;
         m_step = &TskAttack::stepKind2e;
         break;
     case 0x2f:
-        m_40 = scnRecFloat(param[10]);
-        m_44 = 0x23;
+        m_reach = scnRecFloat(param[10]);
+        m_hitFrom = 0x23;
         m_motion = param[6];
-        m_48 = 0x37;
+        m_hitTo = 0x37;
         m_step = &TskAttack::stepKind2f;
         break;
     case 0x30:
-        m_40 = scnRecFloat(param[10]);
-        m_44 = 0x23;
+        m_reach = scnRecFloat(param[10]);
+        m_hitFrom = 0x23;
         m_motion = param[6];
-        m_48 = 0x86;
+        m_hitTo = 0x86;
         m_step = &TskAttack::stepKind30;
         break;
     }
@@ -1302,7 +1302,7 @@ void TskDamage::setup(u_int oid, u_int attacker, const ScnDamageParam *param, in
     m_kind = (short)kind;
     m_oid = oid;
     m_flags = 0;
-    m_1c = 0;
+    m_frame = 0;
     m_frames = 0;
     m_achr = NULL;
     m_achr = g_gamMan.getAchr(oid);

@@ -21693,7 +21693,7 @@
   "name": "scnPlaySEDelayed",
   "tag": "ror-inferred",
   "was": "FUN_001f97c8",
-  "why": "news TskGenFrameFunc(1, se) and adds it to start at the task clock + delay: the SE plays delay frames later"
+  "why": "already reconstructed under this name in task/tsk_scene.cpp: a TskGenFrameFunc kind 1 started delay frames from now"
  },
  "001f985c": {
   "name": "TskAttack::TskAttack",
@@ -22055,95 +22055,131 @@
   "was": "FUN_001fcdf4",
   "why": "unreferenced (folded after getInt): the current entry's +0x0c, the size addEntry stores"
  },
+ "001fd424": {
+  "name": "TskAttack::stepReach",
+  "tag": "ror-inferred",
+  "was": "FUN_001fd424",
+  "why": "TskAttack step shape (m_20 state, m_1c frames, m_44..m_48 hit window, m_24 motion) testing emyChkHitReach(m_40, oid, 1) on the PC and dog; no reference anywhere (an unused step)"
+ },
  "001fd6bc": {
   "name": "TskAttack::stepKind12",
   "tag": "ror-inferred",
   "was": "FUN_001fd6bc",
-  "why": "TskAttack::setup's step for kind words 0x12..0x14"
+  "why": "pfn TskAttack::setup stores for kinds 0x12..0x14 (tsk_scene.h)"
  },
  "001fd9bc": {
   "name": "TskAttack::stepKind15",
   "tag": "ror-inferred",
   "was": "FUN_001fd9bc",
-  "why": "TskAttack::setup's step for kind word 0x15"
+  "why": "pfn TskAttack::setup stores for kind 0x15: throws object param 0x67 from node p_hn_r with a TskMovePhysic"
+ },
+ "001fddb8": {
+  "name": "TskDamage::pickFallBack",
+  "tag": "ror-inferred",
+  "was": "FUN_001fddb8",
+  "why": "TskDamage::stepKind0 helper: first of three directions (pi, -pi/2, pi/2 at 60.6 / 49.6) behind the achr with a free cell, returns 5001..5003, else sets m_flags 8"
+ },
+ "001fdf8c": {
+  "name": "TskDamage::pickFallFront",
+  "tag": "ror-inferred",
+  "was": "FUN_001fdf8c",
+  "why": "as pickFallBack with directions 0, pi/2, -pi/2 (43.3 / 49.6), returns 5000 / 5003 / 5002"
  },
  "001fe160": {
   "name": "TskDamage::stepKind0",
   "tag": "ror-inferred",
   "was": "FUN_001fe160",
-  "why": "TskDamage::setup's step for chr word 0"
+  "why": "pfn TskDamage::setup stores for chr 0"
+ },
+ "001fe87c": {
+  "name": "scnDropWeapon",
+  "tag": "ror-inferred",
+  "was": "FUN_001fe87c",
+  "why": "called only by TskDamage::cutOffPart with the achr: its held object param 0x67 is placed at node p_hn_r, detached, thrown by a TskMovePhysic and params 0x66 / 0x67 cleared"
+ },
+ "001feb38": {
+  "name": "TskDamage::cutOffPart",
+  "tag": "ror-inferred",
+  "was": "FUN_001feb38",
+  "why": "unreferenced; part bit 1/2/4/8/0x10 (pickAttrBit's bits) picks a Bip01 node, hides it (setNodeScale 0), sprays blood (kind 2) from it and throws a body-part item object (chrCreateItemObj, table 0x2ff2a0 by enemy type)"
+ },
+ "001ff25c": {
+  "name": "TskDamage::updateCutSpray",
+  "tag": "ror-inferred",
+  "was": "FUN_001ff25c",
+  "why": "unreferenced; copies the cut node's world matrix rows 3 / 2 into the position / direction cutOffPart's blood spray follows (+0x58 / +0x68)"
  },
  "001ff2e0": {
   "name": "TskDamage::stepKind1",
   "tag": "ror-inferred",
   "was": "FUN_001ff2e0",
-  "why": "TskDamage::setup's step for chr word 1"
+  "why": "pfn TskDamage::setup stores for chr 1"
  },
  "001ff494": {
   "name": "TskAttack::stepKind2e",
   "tag": "ror-inferred",
   "was": "FUN_001ff494",
-  "why": "TskAttack::setup's step for kind word 0x2e"
+  "why": "pfn TskAttack::setup stores for kind 0x2e (nodes b_fg_l / b_fg_r)"
  },
  "001ff664": {
   "name": "TskAttack::stepKind2f",
   "tag": "ror-inferred",
   "was": "FUN_001ff664",
-  "why": "TskAttack::setup's step for kind word 0x2f"
+  "why": "pfn TskAttack::setup stores for kind 0x2f (nodes p_gero / p_gero1)"
  },
  "001ff830": {
   "name": "TskAttack::stepKind30",
   "tag": "ror-inferred",
   "was": "FUN_001ff830",
-  "why": "TskAttack::setup's step for kind word 0x30"
+  "why": "pfn TskAttack::setup stores for kind 0x30 (same code as stepKind2f)"
  },
  "001ff9fc": {
   "name": "TskDamage::stepKind9",
   "tag": "ror-inferred",
   "was": "FUN_001ff9fc",
-  "why": "TskDamage::setup's step for chr word 9"
+  "why": "pfn TskDamage::setup stores for chr 9"
  },
  "001ffbc0": {
   "name": "TskDamage::stepKind2",
   "tag": "ror-inferred",
   "was": "FUN_001ffbc0",
-  "why": "TskDamage::setup's step for chr word 2"
+  "why": "pfn TskDamage::setup stores for chr 2"
  },
  "001ffce0": {
   "name": "TskAttack::stepKind26",
   "tag": "ror-inferred",
   "was": "FUN_001ffce0",
-  "why": "TskAttack::setup's step for kind words 0x26..0x28"
+  "why": "pfn TskAttack::setup stores for kinds 0x26..0x28"
  },
  "001fffc0": {
   "name": "TskDamage::stepKind7",
   "tag": "ror-inferred",
   "was": "FUN_001fffc0",
-  "why": "TskDamage::setup's step for chr word 7"
+  "why": "pfn TskDamage::setup stores for chr 7"
  },
  "0020014c": {
   "name": "TskDamage::stepKind8",
   "tag": "ror-inferred",
   "was": "FUN_0020014c",
-  "why": "TskDamage::setup's step for chr word 8"
+  "why": "pfn TskDamage::setup stores for chr 8"
  },
  "002002cc": {
   "name": "TskDamage::stepKindA",
   "tag": "ror-inferred",
   "was": "FUN_002002cc",
-  "why": "TskDamage::setup's step for chr word 10"
+  "why": "pfn TskDamage::setup stores for chr 10"
  },
  "00200444": {
   "name": "TskDamage::stepKind5",
   "tag": "ror-inferred",
   "was": "FUN_00200444",
-  "why": "TskDamage::setup's step for chr word 5"
+  "why": "pfn TskDamage::setup stores for chr 5"
  },
  "002005b8": {
   "name": "TskDamage::stepKind6",
   "tag": "ror-inferred",
   "was": "FUN_002005b8",
-  "why": "TskDamage::setup's step for chr word 6"
+  "why": "pfn TskDamage::setup stores for chr 6"
  },
  "0020067c": {
   "name": "TskEnemyMove::init",
