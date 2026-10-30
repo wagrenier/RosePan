@@ -6,6 +6,16 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**PARTIAL 2026-10-30 (`mnu/mnustock.cpp`, session 1): MnuStock, the item box -- ctor / dtor,
+init / term, open / close, exec, the list (buildStockList, rows, scroll bar, arrows), the slot grid
+(setSlotSprites, setSlotDisp), swapItem and the small helpers, 30 functions** (architecture.md "The
+item box"). Left: execPage0 0x19cf48 (the list page, next), execPage1 0x19e474, execPage2 0x19fbc8 (stubs
+returning 0) and their helpers setRowMove 0x19c630 (one argument, mode) and setDescText 0x19e010. Not on
+the smoke path (no room is reached; the box opens from MagScene's stock menu 0x10002): when a run opens
+it, compare with work/ref/MNUSTOCK (tm2png.py --scan of DATA/MNURPK/MNUSTOCK.RPK). Doubts: m_list has
+0x100 entries while the stock pool holds 0x14e (the ROM does not bound it; ported unbounded);
+setSlotDisp's picked-icon pattern tests slot 0's id but uses list entry 0's (ported as is).
+
 **PARTIAL 2026-10-29 (`mnu/mnuitem.cpp`, session 1): MnuItem's frame -- ctor / dtor, init / term,
 open / close, draw, processPad's eight steps, the slots, the sprites (setDisp, setEquipSprites,
 setSlotSprites, showFrame) and the texture helpers, 30 functions** (architecture.md "The item menu").

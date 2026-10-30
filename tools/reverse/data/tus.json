@@ -2076,12 +2076,21 @@
    "why": "MnuTextList (ctor 0x1a066c .. list draw 0x1a0be4); its allocator 0x1a08d4 passes the source path mnu/mnuselect.cpp to BedMemory::allocDebug"
   },
   "mnu/mnustock.cpp": {
+   "notes": "Left: execPage0 0x19cf48 (list page, start here), execPage1 0x19e474, execPage2 0x19fbc8 -- stubs returning 0 at the end of src/mnu/mnustock.cpp -- and their helpers 0x19c630 (one int argument, a mode: sets row sprite m_off and setMove; name it setRowMove) and 0x19e010 (description text: getField, memset, copyMesText, getTextLine, getItemName, getTextWidth, setAnim; name it setDescText). getItemName and copyMesText are written for them. The rows 0x2a3150 (10 x/y/z) and the floats 0x2a31c8..0x2a3208 (2, 1, -2, -1) are probably read by 0x19c630. Picture: the 15 s smoke run shows the boot disclaimer as before; the box opens only in a room (MagScene stock menu), which the smoke path does not reach, so nothing on screen shows it yet. References in work/ref/MNUSTOCK (tm2png --scan DATA/MNURPK/MNUSTOCK.RPK, 8 TIM2). Doubts in open-items: m_list holds 0x100 entries but the stock pool 0x14e (ROM unbounded, ported so); setSlotDisp's picked icon 0x22 tests slot 0's id but takes list entry 0's pattern (ported as is).",
    "ranges": [
     [
      "0019a52c",
      "001a066c"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-30 07:00",
+     "status": "partial",
+     "summary": "MnuStock (the item box, menu 0x10002): ctor/dtor, init/term/isInit/processPad/draw, open/close, exec (window text 0x1b, mnustock.rpk, fades, pages), initWork, readMenuFlags, the stock list (buildStockList, updateRows, setRowName/Count, scroll bar, arrows), the slot grid (setSlotSprites, setSlotDisp, findSlot, setupLists, setDisp), swapItem, update and helpers; 30 functions, pattern image 0x29c508..0x2a3150 and display list 0x2a3298 as data. MnuStock moved out of lib/unassigned.h into mnu/mnustock.h."
+    }
+   ],
+   "status": "partial",
    "why": "MnuStock (mnustock.rpk) and its item-box helpers up to mnu/mnuselect.cpp's MnuTextList"
   },
   "mnu/mnusvld.cpp": {

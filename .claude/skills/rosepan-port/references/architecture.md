@@ -1589,6 +1589,28 @@ then fades out (3, 7, 0), calls MagSystem::resetDBuff and returns 1; exec fades 
 and returns 1 once getFadeState > 4. m_system +0x900, m_layer +0x904, m_result +0x908, m_scene
 +0x90c, m_init +0x910.
 
+## The item box (`mnu/mnustock.cpp`, 0x19a52c..0x1a066c, 2026-10-30, partial)
+
+MnuStock (EE 0x15b0; MagLifeMenuStock +0x40, menu 0x10002; MagScene +0x2eed0 via the wrapper) moves
+items between GamMan's 12 item slots (m_itemHave, vector at +0x1a6c0) and the stock (m_itemStock, the
+SeqFixedPool at +0x1a7c0: its used list's nodes hold GamItemSlots at node +0x10). MnuOpt's frame:
+MsgManSet +0x58, SprMan +0x7d0 (138 sprites, mnustock.rpk: base / texstock / tex02 / texmoji /
+item01..04.tm2, font fnt16US.bin from the pack), window system text 0x1b, button guides 4 and 5,
+sequence bit-word 1 bit 0x40000000 while open, g_sequence.m_global[0x15] = 6 on close. exec step 4 runs
+page m_page (+0x40): execPage0 0x19cf48 / 1 0x19e474 / 2 0x19fbc8 (not written yet).
+The list +0x1110 (0x100 pointers, unbounded in the ROM): [0] a fixed GamItemSlot (data 0x2a42f0, id
+0xa00) whose record (0x2a4300, a GamSysRec5 image) names "----------------" / "Item Change" and
+describes "move from the item slots to the stock"; then stock items of m_category (0 all, else
+GamSysRec5::m_b8 1..6). The window: m_rows 8 at m_index / m_row, row sprites 7..0xf (+9 counts) and
+0x19..0x21 (move table 0x2a30c8), scroll bar 0x37 (y = 0x69 + index * 0x89 / (count - 1)), arrows
+0x35 / 0x36. The slots: icons 0x4d+i (anim 0x2a2d80, pattern = icon no * 4 + 0x6d; 0x2a26b0 empty),
+counts 0x59+i (anim 0x2a2da8, pattern 0x61+i, text "%2d" for stacking items, flag 0x20000, and ids
+0xa3e / 0xa43), grid 0x2a3208 (4 x 3); markers 0x65 (the equipped item's slot, GamMan +0x2220c) and
+0x66 (the find target's, +0x2220e). Item flag 4 = name known (else question marks), 0x1000000 = drawn
+dim (alpha 0x28). swapItem: entry 0 puts the slot's item back (addStockItem + clearItemSlot); another
+entry goes into the slot (the slot's different item to the stock first), delStock(id, 0) +
+setItemSlot.
+
 ## The item menu (`mnu/mnuitem.cpp`, 0x1ae954..0x1bdae4, 2026-10-29, written, verify)
 
 MnuItem (EE 0x2710; MagLifeMenuItem +0x40, menu 0x10000) owns three SprMan: +0x98 the menu (120

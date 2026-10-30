@@ -178,39 +178,6 @@ void MnuSelectLanguage::term()
     ROSEPAN_STUB("MnuSelectLanguage::term", 0x001bdc54);
 }
 
-// stub of ROR 0x0019a754
-void MnuStock::draw(I3dLayer *layer)
-{
-    ROSEPAN_STUB("MnuStock::draw", 0x0019a754);
-}
-
-// stub of ROR 0x0019a650
-void MnuStock::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("MnuStock::init", 0x0019a650);
-}
-
-// stub of ROR 0x0019a730
-int MnuStock::isInit()
-{
-    ROSEPAN_STUB("MnuStock::isInit", 0x0019a730);
-    return {};
-}
-
-// stub of ROR 0x0019a740
-int MnuStock::processPad(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuStock::processPad", 0x0019a740);
-    return {};
-}
-
-// stub of ROR 0x0019a6b8
-void MnuStock::term()
-{
-    ROSEPAN_STUB("MnuStock::term", 0x0019a6b8);
-}
-
-
 // stub of ROR 0x00172678
 
 // stub of ROR 0x001fd6bc
