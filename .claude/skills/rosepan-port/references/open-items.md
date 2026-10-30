@@ -12,7 +12,8 @@ setSlotSprites, showFrame) and the texture helpers, 30 functions** (architecture
 Session 2 (2026-10-29): updateFrame (frame timer, notice message, life gauges), execPage0 (the main
 page: cursor, grid, cross to pages 3 / 4 / 10, circle / start close) and the helpers setNameText,
 getKnownName, setLinkTexts, showLinkPanel -- an opened menu now closes from page 0.
-Left: execPage1..7 and 9..13 (0x1b2f64..0x1bc370, stubs returning 0; execPage7 0x1b64c4 next), the
+Session 3 (2026-10-29): execPage1 / 2 / 3 / 5 / 7 and the helpers useSlotItem, dimSlots,
+buildFlagList. Left: execPage4 0x1b4488 (the slot page, next), 6, 9..13 (stubs returning 0); the
 rest of 0x1bc790..0x1bdae4 is written. Smoke path (2026-10-29 20:05, --run 240 with smoke_pad): the
 picture book "The Little Princess" shows from frame ~3300 to the end (8160); RIGHT*1700 and the two
 CIRCLE presses do not leave it, so no room is reached and START (m_repeat bit 3, MagScene mode 1,

@@ -1598,8 +1598,18 @@ dog): sprites 0x55 / 0x54 (PC), 0x57 / 0x56 (dog) cut at r - (r - l) * (100 - ra
 0x10 while rising (se 0xc every 8), se 0xd at full. **Page 0** (0x1b1cd4): cursor 0x51 over area
 m_work[0] (0 equipped, 1 find target, 2 the 4 x 3 grid at m_work[1], 3 slot 12); pad m_dir_repeat
 0x10 up / 0x40 down / 0x80 left / 0x20 right, m_trig bit 14 cross opens page 3 (equipped / find),
-4 (slot) or 10 (slot 12), circle / start close (global 0x15 = 1, 0x16 = 0). Pages keep their own
-step at +0x60 + 4 * page. Helpers: setNameText 0x1bc790 (sprite 0x12, field 0xc centred on 0x100),
+4 (slot) or 10 (slot 12), circle / start close (global 0x15 = 1, 0x16 = 0). **+0x60 + 4 * n is
+the page page n returns to** (m_page_ret; the caller sets it before switching -- session 2 read it as
+a per-page step). Session 3 (0x1b2f64..0x1b69d0): page 1 equip (cursor m_work[2], record flag 0x10000,
+GamMan::equipItem), page 2 find target (m_work[5], flag 8; with notice 1 only item 0xb93; link panel
+0x6a / 99..101), page 3 remove (area m_work[0]: unequip or untarget; returns to m_page_ret[3], cursor
+of page 2 when it called, else page 1's), page 5 use (m_work[1]: ammo 0xa3f / 0xa42 moves into the gun
+one round per 3 frames, se 0x40070998; record field 0x24 (+0xb8) kind 1 heals the PC, 3 the dog, by
+field 0x2d percent; other items -> global 0x11 = id, 0x15 = 3, 0x16 = 1 and the menu closes), page 7
+put away (yes 0x2a / no 0x2b, m_work[4]; the item goes to the stock unless flag 0x1000000). Record
+flag word +0xb0 (GamSysRec5::m_flags) dims the slot icons (dimSlots 0x1b05ec). buildFlagList
+0x1baff4 (page 10): flag table 99 rows with their sequence bit -> texts +0x24a4, rows +0x26a4 (16).
+Helpers: setNameText 0x1bc790 (sprite 0x12, field 0xc centred on 0x100),
 getKnownName 0x1bcb84 (field 0xc if flag 4, else SJIS question marks), setLinkTexts 0x1bcc08 /
 showLinkPanel 0x1bd028 (system data fields 0x10..0x12 are linked item ids; panel sprites
 0x6a..0x71, texts 0x6f..0x71 squeezed past 120 px; +0x2420 = panel in). Fades save m_color into

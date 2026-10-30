@@ -15101,6 +15101,12 @@
   "was": "FUN_001af4fc",
   "why": "an item's icon pattern base: 0xd0 + 4 * (GamSysData field 0xd - 1), 0 for no item"
  },
+ "001af578": {
+  "name": "MnuItem::useSlotItem",
+  "tag": "ror-inferred",
+  "was": "FUN_001af578",
+  "why": "a0 MnuItem, a1 slot: decrements m_slot[no]->m_num, GamMan::clearItemSlot(no) at the last one, then setSlot(-1) and setSlotSprites; called by execPage5"
+ },
  "001af5e0": {
   "name": "MnuItem::setSlotSprites",
   "tag": "ror-inferred",
@@ -15118,6 +15124,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001aff5c",
   "why": "mode 0 hides the menu frame sprites, 1 / 2 fade them in (10 / 1 frames) by the menu flags +0x2410.."
+ },
+ "001b05ec": {
+  "name": "MnuItem::dimSlots",
+  "tag": "ror-inferred",
+  "was": "FUN_001b05ec",
+  "why": "sets the colour of slot icons 0x30+n to alpha 0x28 when the item record flag word (+0xb0) has none of a1, 0x80 otherwise; 0x10008 resets all; called by execPage1 (0x10000) and execPage2 (8)"
  },
  "001b070c": {
   "name": "MnuItem::testSlotFlags",
@@ -15220,6 +15232,12 @@
   "tag": "ror-inferred",
   "was": "FUN_001ba8e4",
   "why": "case 9 of execPage's switch on +0x58; its result 1 closes the menu"
+ },
+ "001baff4": {
+  "name": "MnuItem::buildFlagList",
+  "tag": "ror-inferred",
+  "was": "FUN_001baff4",
+  "why": "walks GamMan::lookupFlagTable(99, row, ...) rows whose sequence bit (col 3) is set: row numbers into +0x26a4 (-1 terminated), msgGetSysText(col 5) appended to the text at +0x24a4; called by execPage10"
  },
  "001bb12c": {
   "name": "MnuItem::execPage10",
