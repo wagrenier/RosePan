@@ -1579,6 +1579,16 @@ circle / cross (m_trig 0x2000 / 0x4000), closes and restores the interval to 2. 
 (rows 32..96 and 416..480), full width. Its SprMan (+0x54) is constructed and never set up; prepare
 0x1ae024 and update 0x1ae328 are empty.
 
+MnuNow (`mnu/mnunow.cpp` 0x1ae474..0x1ae954, EE 0x920; MagLifeMenuNow +0x40, menu 0x10009, MagScene
+m_menu_now +0x3ecc0) is the "Now Loading" screen, in the same open / exec / execMain shape. SprMan at
++0x14 (2 records), data/mnurpk/mnunow.rpk: loading.tm2 (nowloading_tcc), 256 x 256 = four 256 x 64
+rows of the "Now Loading" picture; pattern image 0x2ac7b8..0x2ac980, display list 0x2ac980 (sprite 1
+at (32, 370) cycling patterns 1..4 six frames each, anim table 0x2ac968). exec fades the scene in
+(MagScene::fadeIn(4, 7, 0) on m_system->m_scene), runs execMain + SprMan::update until circle; execMain
+then fades out (3, 7, 0), calls MagSystem::resetDBuff and returns 1; exec fades out (4, 7, 0) again
+and returns 1 once getFadeState > 4. m_system +0x900, m_layer +0x904, m_result +0x908, m_scene
++0x90c, m_init +0x910.
+
 ## The item menu (`mnu/mnuitem.cpp`, 0x1ae954..0x1bdae4, 2026-10-29, written, verify)
 
 MnuItem (EE 0x2710; MagLifeMenuItem +0x40, menu 0x10000) owns three SprMan: +0x98 the menu (120

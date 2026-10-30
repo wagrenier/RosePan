@@ -3439,16 +3439,16 @@
 /* 001ae520 00000054 */ MnuNow::init(){}  // ror
 /* 001ae574 00000040 */ MnuNow::term(){}  // ror
 /* 001ae5b4 00000008 */ MnuNow::isInit(){}  // ror
-/* 001ae5bc 00000044 */ FUN_001ae5bc(){}
+/* 001ae5bc 00000044 */ MnuNow::loadTexture(){}  // ror
 /* 001ae600 00000014 */ MnuNow::processPad(){}  // ror
 /* 001ae614 0000002c */ MnuNow::draw(){}  // ror
-/* 001ae640 00000030 */ FUN_001ae640(){}
-/* 001ae674 0000002c */ FUN_001ae674(){}
-/* 001ae6a0 00000150 */ FUN_001ae6a0(){}
-/* 001ae7f0 00000008 */ FUN_001ae7f0(){}
-/* 001ae7f8 00000050 */ FUN_001ae7f8(){}
-/* 001ae848 00000020 */ FUN_001ae848(){}
-/* 001ae868 000000ec */ FUN_001ae868(){}
+/* 001ae640 00000030 */ MnuNow::open(){}  // ror
+/* 001ae674 0000002c */ MnuNow::close(){}  // ror
+/* 001ae6a0 00000150 */ MnuNow::exec(){}  // ror
+/* 001ae7f0 00000008 */ MnuNow::initWork(){}  // ror
+/* 001ae7f8 00000050 */ MnuNow::setDisp(){}  // ror
+/* 001ae848 00000020 */ MnuNow::update(){}  // ror
+/* 001ae868 000000ec */ MnuNow::execMain(){}  // ror
 
 // *****************************************************************************
 // FILE -- mnu/mnuitem.cpp

@@ -1994,12 +1994,21 @@
    "why": "MnuMovie ctor 0x1adf04 .. its RxMpeg player 0x1ae330; 0x1ae474 is MnuNow's constructor. File named after the class"
   },
   "mnu/mnunow.cpp": {
+   "notes": "Not seen on screen: the 15 s smoke run ends on the boot disclaimer and nothing found yet opens menu 0x10009 (MagScene setMenu with that id, probably an event script). Reference: work/ref/mnunow/mnunow_00000800.png, four 256x64 Now Loading rows; expect sprite 1 at (32, 370) cycling them six frames each. Mark done when a run shows it. Kept as the ROM: closes on circle, and both execMain (3,7,0) and exec (4,7,0) fade the scene out. Facts in architecture.md after MnuMovie; open item in open-items.md Open questions.",
    "ranges": [
     [
      "001ae474",
      "001ae954"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-30 06:35",
+     "status": "verify",
+     "summary": "MnuNow, the Now Loading screen (menu 0x10009): all 15 functions written - ctor/dtor, init/term/isInit, processPad/draw, open/close/exec/execMain, setDisp/update/initWork/loadTexture; mnunow.rpk tex list, pattern image and display list as EE data; 8 functions named ror-inferred; old decl and 5 stubs removed from lib/unassigned"
+    }
+   ],
+   "status": "verify",
    "why": "MnuNow ctor 0x1ae474 .. 0x1ae868 (mnunow.rpk); 0x1ae954 is MnuItem's constructor. File named after the class"
   },
   "mnu/mnuopt.cpp": {

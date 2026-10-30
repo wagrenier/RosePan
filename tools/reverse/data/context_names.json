@@ -15095,6 +15095,12 @@
   "was": "FUN_001ae5b4",
   "why": "the menu object at +0x40 of MagLifeMenuNow: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
  },
+ "001ae5bc": {
+  "name": "MnuNow::loadTexture",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae5bc",
+  "why": "SprTexture::setList(list 0x2ac788, data/mnurpk/mnunow.rpk) then update until loaded, as MnuSvld::loadTexture / MnuTitle::loadTexture"
+ },
  "001ae600": {
   "name": "MnuNow::processPad",
   "tag": "ror-inferred",
@@ -15106,6 +15112,48 @@
   "tag": "ror-inferred",
   "was": "FUN_001ae614",
   "why": "the menu object at +0x40 of MagLifeMenuNow: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae640": {
+  "name": "MnuNow::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae640",
+  "why": "same shape as MnuMovie::open: -1 when +0 is 1, else sets +0 = 1 and clears the step words; init calls it"
+ },
+ "001ae674": {
+  "name": "MnuNow::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae674",
+  "why": "same shape as MnuMovie::close: -1 when +0 is 0, else clears it; term and the destructor call it"
+ },
+ "001ae6a0": {
+  "name": "MnuNow::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae6a0",
+  "why": "processPad tail-jumps to it; the open / exec step machine of MnuMovie::exec: setDisp + scene fade in, execMain + update, fade out, 1 when the fade is done"
+ },
+ "001ae7f0": {
+  "name": "MnuNow::initWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae7f0",
+  "why": "returns 0; the constructor calls it between m_open = 0 and m_init = 0, as MnuMovie::MnuMovie calls MnuMovie::initWork"
+ },
+ "001ae7f8": {
+  "name": "MnuNow::setDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae7f8",
+  "why": "stores MagSystem::m_current_system, the pattern table 0x2ac7b8 and SprMan::setDispList(0x2ac980); MnuMovie::setDisp's slot in exec"
+ },
+ "001ae848": {
+  "name": "MnuNow::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae848",
+  "why": "SprMan::update, returns 0; exec calls it after execMain every frame, as MnuMovie::update"
+ },
+ "001ae868": {
+  "name": "MnuNow::execMain",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae868",
+  "why": "exec's main step: circle (pad +0x7a bit 13) starts a scene fade out, then MagSystem::resetDBuff and returns the result 1, as MnuMovie::execMain"
  },
  "001ae954": {
   "name": "MnuItem::MnuItem",

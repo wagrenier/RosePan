@@ -1225,6 +1225,13 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- **MnuNow (mnu/mnunow.cpp, written 2026-10-30, verify).** The "Now Loading" screen, menu 0x10009.
+  Not seen yet: the 15 s smoke run ends on the boot disclaimer, and no written code was found that
+  opens menu 0x10009 (MagScene::setMenu's caller with that id -- likely an event script command).
+  Mark done when a run shows sprite 1 at (32, 370) matching work/ref/mnunow (tm2png.py --scan
+  data/mnurpk/mnunow.rpk). Oddity kept as the ROM has it: the loading screen closes on circle
+  (m_trig 0x2000), and both execMain and exec fade the scene out.
+
 - **MnuMap (mnu/mnumap.cpp, written 2026-10-29, verify).** Not seen yet: no smoke run reaches a room
   (the run ends on the picture book), and the map opens from the field (MagScene menu 0x10001). Mark
   done when a run opens it and the shot matches work/ref (tm2png.py --scan data/mnurpk/mnumap.rpk:

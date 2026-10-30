@@ -33,6 +33,7 @@
 #include "mnu/mnuSelectLanguage.h"
 #include "mnu/mnuitem.h"
 #include "mnu/mnumovie.h"
+#include "mnu/mnunow.h"
 #include "mnu/mnuopt.h"
 #include "mnu/mnusvld.h"
 #include "mnu/mnutitle.h"
@@ -312,10 +313,10 @@ struct MagLifeMenuMcd : MagLifeMenuBase
     MnuMcd    m_menu;           // ROR 0x40
 };
 
-/* The status ("now") screen, 0x10009 (vtable 0x2e1688). EE 0x960. */
+/* The "now loading" screen, 0x10009 (vtable 0x2e1688). EE 0x960. */
 struct MagLifeMenuNow : MagLifeMenuBase
 {
-    // ROR 0x00284d14; callcheck: MnuNow::MnuNow (not written; the member starts zeroed)
+    // ROR 0x00284d14; callcheck: MnuNow::MnuNow (the member's)
     MagLifeMenuNow() {}
     // ROR 0x00284d64; callcheck: MnuNow::~MnuNow (the member's)
     ~MagLifeMenuNow() {}
