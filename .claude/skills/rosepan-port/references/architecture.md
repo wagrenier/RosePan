@@ -1569,6 +1569,16 @@ pattern table is the EE image 0x2a8848..0x2aad10, display list 0x2aad70 (65 spri
 data/mnurpk/mnuopt.rpk (option_sita / option_yogore / option). Seen working 2026-10-29 from the title's
 Option item (progress/ shot).
 
+## The theatre's movie player (`mnu/mnumovie.cpp`, 0x1adf04..0x1ae474, 2026-10-29, written, verify)
+
+MnuMovie (EE 0x990; MagLifeMenuMovie +0x40, menu 0x10007) is MnuOpt's open / exec / execMain shape
+around g_rxMpeg: the caller copies the movie name into g_rxMpeg.m_name, execMain opens it and runs
+`playNow(m_name, 0x200, 0x180)` with MagSystem::m_v_interval 1 (60 fps), ends on getStatus 1 or
+circle / cross (m_trig 0x2000 / 0x4000), closes and restores the interval to 2. draw shows the picture
+(RxMpeg::draw while m_playing is 1) then two black PRIM sprites, y 0x7200..0x7600 and 0x8a00..0x8e00
+(rows 32..96 and 416..480), full width. Its SprMan (+0x54) is constructed and never set up; prepare
+0x1ae024 and update 0x1ae328 are empty.
+
 ## The item menu (`mnu/mnuitem.cpp`, 0x1ae954..0x1bdae4, 2026-10-29, written, verify)
 
 MnuItem (EE 0x2710; MagLifeMenuItem +0x40, menu 0x10000) owns three SprMan: +0x98 the menu (120

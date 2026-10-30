@@ -32,6 +32,7 @@
 #include "mag/maglife.h"
 #include "mnu/mnuSelectLanguage.h"
 #include "mnu/mnuitem.h"
+#include "mnu/mnumovie.h"
 #include "mnu/mnuopt.h"
 #include "mnu/mnusvld.h"
 #include "mnu/mnutitle.h"
@@ -275,7 +276,7 @@ struct MagLifeMenuOpt : MagLifeMenuBase
 /* The movie theatre, 0x10007 (vtable 0x2e1848). EE 0x9d0. */
 struct MagLifeMenuMovie : MagLifeMenuBase
 {
-    // ROR 0x002847e4; callcheck: MnuMovie::MnuMovie (not written; the member starts zeroed)
+    // ROR 0x002847e4; callcheck: MnuMovie::MnuMovie (the member's)
     MagLifeMenuMovie() {}
     // ROR 0x00284834; callcheck: MnuMovie::~MnuMovie (the member's)
     ~MagLifeMenuMovie() {}

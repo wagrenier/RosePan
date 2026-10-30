@@ -1976,12 +1976,21 @@
    "why": "MnuMcd: ctor 0x1a1244 / dtor 0x1a12a8 .. the check dialogs and 0x1a47f0; every function uses MnuMcd's members and the memory card manager, the strings are the memory card messages; 0x1a4bd8.. is another class (no callers, vtable-only, next to mnu/mnudlg.cpp)"
   },
   "mnu/mnumovie.cpp": {
+   "notes": "Complete code; the 15 s smoke run stops at the boot disclaimer, so nothing on screen shows it yet. To see it: reach the theatre menu (MagLifeMenuMovie 0x10007) with a movie name in g_rxMpeg.m_name; draw should show the movie picture plus black bars over rows 32..96 and 416..480 (full width), circle or cross skips. The picture is RxMpeg::draw (a GS image transfer into the frame buffer), so whether it appears depends on the host path for that transfer. 8 helpers named ror-inferred after MnuOpt's shape (batch mnumovie_001); prepare and update are empty in the ROM.",
    "ranges": [
     [
      "001adf04",
      "001ae474"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-29 22:37",
+     "status": "verify",
+     "summary": "MnuMovie, the theatre's movie player: ctor/dtor, init/term/isInit/processPad/draw, open/close/exec/execMain/initWork/setDisp/update/prepare (15 functions, all of the TU); header mnu/mnumovie.h (host layout, holds a SprMan), placeholder struct and 5 stubs removed from lib/unassigned"
+    }
+   ],
+   "status": "verify",
    "why": "MnuMovie ctor 0x1adf04 .. its RxMpeg player 0x1ae330; 0x1ae474 is MnuNow's constructor. File named after the class"
   },
   "mnu/mnunow.cpp": {
