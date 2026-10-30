@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 15:52 at commit `d0e7e6a` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 16:19 at commit `bd2ee12` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-30 15:52 at commit `d0e7e6a` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7194**, named **7098** (99%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5496
-- context-name ledger: 5786 entries; overrides of wrong library matches: 5
-- placed in a source file: 6195/7194 in 166 files
+- game functions: **7194**, named **7099** (99%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5497
+- context-name ledger: 5787 entries; overrides of wrong library matches: 5
+- placed in a source file: 6206/7194 in 166 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -26,11 +26,11 @@ Least-named game-code regions (64 KB blocks):
 | `00160000` | 257/268 (96%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `00130000` | 180/183 (98%) | mag/magscene.cpp, mag/magscenerender.cpp, mag/magscene2.cpp |
 | `00100000` | 301/304 (99%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmath.cpp |
-| `00120000` | 281/283 (99%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
+| `00120000` | 282/283 (100%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **6001**; stubs: **18**
+- reconstructed RoR functions: **6020**; stubs: **0**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -115,7 +115,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
-| `src/mag/maglifebwnmode.cpp` | 0 | 18 |
+| `src/mag/maglifebwnmode.cpp` | 19 | 0 |
 | `src/mag/maglifefadekey.cpp` | 9 | 0 |
 | `src/mag/maglifefader.cpp` | 5 | 0 |
 | `src/mag/maglifeman.cpp` | 12 | 0 |
@@ -197,7 +197,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 179 TUs: todo 84, partial 1, verify 148, done 17
+- 177 TUs: todo 81, partial 1, verify 149, done 17
 - next: **None** (nothing on the frontier and no queued TU)
 - pinned queue: unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
@@ -276,6 +276,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/maglife.cpp` 27/49 -- Verify: the 15 s smoke run ends on the boot disclaimer, so no controller runs yet; the first session whose run reaches a room with the PC or Brown moving checks
 - verify: `mag/maglifebwn.cpp` 29/42 -- Brown's live now runs in the smoke boot (MagLifeBwnModeWait::init and MagLifeBwnMode::live reached) but nothing on screen shows him yet: the screenshot is the b
 - verify: `mag/maglifebwnctrl.cpp` 70/94 -- Complete code, nothing on screen shows it: the 15 s smoke run ends on the boot disclaimer and Brown is not reachable yet, so the whole file stays verify until a
+- verify: `mag/maglifebwnmode.cpp` 19/22 -- Complete code, not on the smoke path (15 s run ends at the boot disclaimer): mark done when a run shows Brown walking a path, sitting, lying down or turning on 
 - verify: `mag/maglifefadekey.cpp` 9/13 -- Complete code, not visible yet: setFade kinds 1..3 and MagScene::openFadeKey come from event scripts, which the 15 s smoke run does not reach (it ends on the di
 - verify: `mag/maglifeman.cpp` 12/12 -- Status verify: the S2d layers now run live and render every frame (one i3d primitive reaches rosepan_i3d without a texture object), but the screenshot stays bla
 - verify: `mag/maglifemenu.cpp` 45/53 -- Complete, nothing on screen yet: the smoke run now opens the title (MagScene::openMenu 0x10005 -> MagLifeMenuTitle) and reaches MnuTitle::isInit / init / draw /
@@ -351,6 +352,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 16:19 `mag/maglifebwnmode.cpp` verify: Brown's ten modes (MagLifeBwnMode Null/One/Wait/Sit/Fuse/Move/Path/Turn/Rotate/Wall), all 19 functions; pinned 0x125bd4..0x1267c0 absorbing unassigned@00125bd4 
 - 2026-10-30 15:52 `rx/rxsys.cpp` verify: rx/rxsys.cpp session 3: the System Monitor exception console 0x242c10..0x2432d8, 15 functions (clear row, scroll, LoadImage, glyph row expand from the 8x8 font 
 - 2026-10-30 15:41 `rx/rxsys.cpp` partial: rx/rxsys.cpp session 2: removed the 5 boot stubs - ini parser (rxSysIniFindSection/ReadKey/FindKey/Find, key count and key-at helpers), tty bind/open/close, rxS
 - 2026-10-30 15:23 `task/tsk_attack.cpp` verify: TskAttack and TskDamage steps written: all 21 functions of 0x1fd424..0x20067c (was unassigned@001fd424, pinned as task/tsk_attack.cpp): the six attack steps (sw
@@ -358,7 +360,6 @@ Recent sessions:
 - 2026-10-30 15:04 `eff/efffog1.cpp` verify: EffFog1 written, all 4 functions: a camera-facing fog quad drifting along the camera x axis, reset every 540 frames, corner alpha keys per 60 frames with the le
 - 2026-10-30 15:04 `eff/efffog2.cpp` verify: EffFog2 / EffFog2Prim written, all 6 functions: an emitter line and the rising, gliding fog wisps (quarter-circle rise, flat glide to m_dist, corner alpha cycle
 - 2026-10-30 15:03 `eff/efffire2.cpp` verify: EffFire2 written, all 4 functions: a world-oriented fire sprite cycling the four quarters of texture 0 every 4 frames
-- 2026-10-30 15:02 `eff/efffire1.cpp` verify: EffFire1 / EffFire1Ex written, all 7 functions: init, flicker liveMain, flame + glow renderMain, 5-frame fade liveActivateExec, depth; Ex follows an actor node;
 
 ## Frontier (called by reconstructed code, not written yet)
 

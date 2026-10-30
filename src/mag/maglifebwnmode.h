@@ -15,8 +15,9 @@
  *
  *  State -> mode (MagLifeBwn::applyState): 0 Null, 1 One, 2 Wait, 3 Sit,
  *  4 Fuse, 5 Move, 6 Path, 7 Turn, 8 Rotate, 9 Wall.
- *  Minimal: the classes MagLifeBwn embeds; their methods are stubs until
- *  mag/maglifebwnmode.cpp is written.
+ *  The mode's arguments are MagLifeBwn's m_08 / m_0c (changeMode's a /
+ *  b); m_70 is the floor step testFloorStep last found (2 / 3 a step,
+ *  0 flat). Written in mag/maglifebwnmode.cpp (0x125bd4..0x1267c0).
  * ======================================================================== */
 #ifndef _MAG_MAGLIFEBWNMODE_H
 #define _MAG_MAGLIFEBWNMODE_H
@@ -60,7 +61,8 @@ struct MagLifeBwnModeWait : MagLifeBwnMode
 {
     void init(MagLifeBwn &bwn) override;                                 // ROR 0x00125c2c
 
-    int _04[2];                 // ROR 0x04: roles unknown
+    int m_04;                   // ROR 0x04: init clears it; nothing in the ROM reads it
+    int m_08;                   // ROR 0x08: init clears it; nothing in the ROM reads it
 };
 
 /* layout: host (EE 4 bytes, +0xd04). */
@@ -85,7 +87,8 @@ struct MagLifeBwnModeMove : MagLifeBwnMode
     // ROR 0x0028366c
     void setParam(MagLifeBwn &bwn, int id, void *param) override {}
 
-    int _04[2];                 // ROR 0x04: roles unknown
+    int m_motion;               // ROR 0x04: the walk row (by gait m_08 and health, + m_0c)
+    int m_step;                 // ROR 0x08: 0x1000 while a floor-step motion runs, else 0
 };
 
 /* layout: host (EE 0x10 bytes, +0xd18). */
@@ -95,7 +98,9 @@ struct MagLifeBwnModePath : MagLifeBwnMode
     int  live(MagLifeBwn &bwn) override;                                 // ROR 0x00126044
     int  term(MagLifeBwn &bwn, int force) override;                      // ROR 0x001262a4
 
-    int _04[3];                 // ROR 0x04: roles unknown
+    int m_motion;               // ROR 0x04: the walk row (as MagLifeBwnModeMove's)
+    int m_step;                 // ROR 0x08: 0x1000 while a floor-step motion runs, else 0
+    int m_phase;                // ROR 0x0c: 0 turn to the line, 1 blocked turn, 2 follow it
 };
 
 /* layout: host (EE 4 bytes, +0xd28). */
@@ -115,8 +120,13 @@ struct MagLifeBwnModeRotate : MagLifeBwnMode
 {
     void init(MagLifeBwn &bwn) override;                                 // ROR 0x001264d8
     int  live(MagLifeBwn &bwn) override;                                 // ROR 0x0012668c
+    /* The turn motion for the angle left to m_target_rot, or the rotate's
+     * end within 2 degrees (m_08 = 1, m_path_end). */
+    void startTurn(MagLifeBwn &bwn);                                     // ROR 0x001264f8
 
-    int _04[3];                 // ROR 0x04: roles unknown
+    float m_target_rot;         // ROR 0x04: the heading (m_08's float bits; the assert's name)
+    float m_rot_left;           // ROR 0x08: the angle left to it at the last check
+    int   _0c;                  // ROR 0x0c: unused
 };
 
 #endif /* _MAG_MAGLIFEBWNMODE_H */
