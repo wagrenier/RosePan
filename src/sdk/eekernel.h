@@ -207,6 +207,7 @@ u_long RosePan_sceGsPutIMR(u_long imr);
 #define RemoveIntcHandler      RosePan_RemoveIntcHandler
 #define EnableIntc             RosePan_EnableIntc
 #define DisableIntc            RosePan_DisableIntc
+#define iDisableIntc           RosePan_DisableIntc
 #define sceDevVif0Reset        RosePan_sceDevVif0Reset
 #define sceDevVu0Reset         RosePan_sceDevVu0Reset
 #define sceDevVif1Reset        RosePan_sceDevVif1Reset

@@ -6,6 +6,19 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**PARTIAL 2026-10-30 (`rx/rxsys.cpp`, session 2): the boot stubs are gone -- ini parser, tty bind /
+open / close, rxSysTerm and its teardown, the RPC client helpers, rxSysIoctl, the debug handlers and
+rxSysExceptionHandler, 36 functions** (architecture.md "Key functions"). Behaviour change on the PC:
+rxSysThreadCallback now passes its yielding flag to rxSysSetFileContext (was a stub), so rxfile switches
+to context 1 while the main thread yields; the 80 s run still reaches the "Once upon a time" narration.
+Left: the System Monitor console 0x242c10..0x2432d8 (rxSysInitExceptionScreen is a stub, called only
+by the two exception handlers, which the host kernel never raises). Decision needed before writing it:
+it draws an 80 x 28 text console with GS LoadImage uploads, and drawing must not go through the
+emulated GS -- either a host debug-text draw or leave the screen as a log-only no-op. Doubts: s_bootDev
+empty on the PC keeps rxSysOpenTty a no-op; sceIoctl is a host stub returning -1.
+Remaining todo TUs with stubs: mag/maglifebwnmode.cpp (8), unassigned@00125bd4 (9),
+unassigned@0012668c (1).
+
 **WRITTEN 2026-10-30 (`task/tsk_attack.cpp`, verify; pinned 0x1fd424..0x20067c, was
 unassigned@001fd424): the TskAttack / TskDamage steps, all 21 functions** (architecture.md "Attack /
 damage tasks"). The queue was empty this run; this TU was picked as the last stubbed run that written
@@ -1979,9 +1992,6 @@ to adapt when a TU reaches them:
   boot load (`g_bss_*` / `g_data_*` in lib/unassigned.h until the game modes that read them are
   written). Class names `CmnTaskMan`, `SysTimer`, `SndMan`, `Sequence`, `MagScene` (for MagSystem's
   +0x12540 member) are inferred, not from the ELF: confirm or rename when their TUs are read.
-  rxsys.cpp has a function Ghidra folded at 0x243620 (`j 0x248870`, between rxSysInitFileDevice and
-  rxSysSetFileDevice; probably rxSysGetFileDevice) -- create it in Ghidra (`ghidra.py mkfunc`) when
-  rxsys is next touched.
 
 - **utlFindMatchObj's signature (utl/utlfind.h, 2026-10-28, from utl/utlgame.cpp).** 0x1062b4
   tail-calls `utlFindItemByUids(a1, p->m_id, p->m_10)`: its second argument is the float[4] the found

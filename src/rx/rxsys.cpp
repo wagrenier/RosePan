@@ -5,10 +5,10 @@
  *  the game (rxSysInit), the IOP reboot and module list, the boot path,
  *  system.ini, and rxSysPrintf. See rxsys.h.
  *
- *  Not reconstructed yet in this file: the ini parser (0x2410b8..0x241848),
- *  the tty / IOP RPC binding (0x241890..0x241ac8, 0x242188..0x2424e0), the
- *  rxSysIoctl (0x2426b8), the exception handler and system
- *  monitor (0x242710..0x2432d8) and the rxfile wrappers after 0x2436a0.
+ *  Not reconstructed yet in this file: the System Monitor, the text console
+ *  the exception handler prints on (0x242c10..0x2432d8: rxSysInitExceptionScreen
+ *  is a stub; it draws through GS image uploads, which the PC must replace
+ *  with a host draw).
  * ======================================================================== */
 #include "common/rosepan_stub.h"
 
@@ -17,9 +17,13 @@
 #include <ctype.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "rx/rxfile.h"
 #include "rx/rxthread.h"
+#include "rosepan/rosepan_memory.h"
+#include "sdk/eekernel.h"
 #include "sdk/libcdvd.h"
 #include "sdk/libdma.h"
 #include "sdk/libgraph.h"
@@ -80,6 +84,34 @@ static const char *const s_moduleListUsb[] = { "usbd.irx", 0 };          /* data
 static int s_hardwareReset;                     /* data 0x2dbd90 */
 static int s_sema1 = -1;                        /* data 0x2dbd94 */
 static int s_printSema = -1;                    /* data 0x2dbd98 */
+
+/* The exception handler's register rows: a label, then count registers
+ * from first (main has its own copy for mainExceptionHandler).
+ * layout: host -- a pointer table, never read from files. */
+struct RxSysRegRow
+{
+    const char *name;
+    int         first;
+    int         count;
+    int         pad;
+};
+static const RxSysRegRow s_regRows[] = {                                  /* data 0x2dbda0 */
+    { "\nat/v0-1    ",  1, 3, 0 },
+    { "\na0-3       ",  4, 4, 0 },
+    { "\nt0-3       ",  8, 4, 0 },
+    { "\nt4-9       ", 12, 4, 0 },
+    { "",              24, 2, 0 },
+    { "\ns0-8       ", 16, 4, 0 },
+    { "\ns4-7/k0-1  ", 20, 4, 0 },
+    { "",              26, 2, 0 },
+    { "\ngp/sp/fp/ra", 28, 4, 0 },
+    { NULL,             0, 0, 0 },
+};
+static int s_exceptionOpen;                     /* data 0x2dbe40, set by the handler, read by nothing found */
+static int s_inException;                       /* data 0x2dbe44 */
+static RosePanDebugHandler s_oldHandlersLow[7]; /* data 0x2dbe4c, causes 1..7   */
+static RosePanDebugHandler s_oldHandlersHigh[4];/* data 0x2dbe70, causes 10..13 */
+static int s_debugHandlersSet;                  /* data 0x2dbe88 */
 
 RxSysMemFunc g_rxSysMemFunc[4];                 /* data 0x2dbe8c..0x2dbe98 */
 
@@ -724,6 +756,234 @@ void rxSysInit(void)
     rxSysInitEnd();
 }
 
+/* ---- ini parser ------------------------------------------------------------ */
+
+static inline int rxSysIsEol(char c)
+{
+    return c == '\r' || c == '\n';
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The line after "[section]"; NULL when there is none. A NULL section
+// returns the text itself. Only a '[' in a line's first column counts.
+// ROR 0x002410b8
+
+char *rxSysIniFindSection(char *text, const char *section)
+{
+    if (section == NULL)
+        return text;
+    int len = strlen(section);
+    while (*text != '\0')
+    {
+        char *p = text;
+        if (*text == '[')
+        {
+            // The ROM's compare leaves p one past the first mismatch.
+            p = text + 1;
+            int i = 0;
+            if (len > 0)
+            {
+                char want = section[0];
+                char have = *p++;
+                while (have == want)
+                {
+                    i++;
+                    if (i >= len)
+                        break;
+                    want = section[i];
+                    have = *p++;
+                }
+            }
+            if (i == len && *p == ']')
+                return rxSysSkipEol(p + rxSysStrLenToEol(p));
+        }
+        text = rxSysSkipEol(p + rxSysStrLenToEol(p));
+    }
+    return NULL;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Copy a line's key -- up to '=' or the end of the line -- into out, with
+// the blanks before '=' trimmed; returns where it stopped ('=', EOL or 0).
+// ROR 0x002411d0
+
+char *rxSysIniReadKey(char *out, char *line)
+{
+    int n = 0;
+    out[0] = '\0';
+    for (;;)
+    {
+        char c = *line;
+        if (c == '\0' || rxSysIsEol(c))
+            return line;
+        if (c == '=')
+        {
+            while (n > 0 && (out[n - 1] == ' ' || out[n - 1] == '\t'))
+                n--;
+            out[n] = '\0';
+            return line;
+        }
+        out[n] = c;
+        out[n + 1] = '\0';
+        line++;
+        n++;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The value of key in a section's body (after '=' and blanks); NULL at
+// the next section or the end of the text.
+// ROR 0x00241298
+
+char *rxSysIniFindKey(char *body, const char *key)
+{
+    char name[0x100];
+    int len = strlen(key);
+    for (;;)
+    {
+        char *p = rxSysSkipSpace(body);
+        char c = *p;
+        if (c == '\0' || c == '[')
+            return NULL;
+        if (c != '#' && !rxSysIsEol(c))
+        {
+            p = rxSysIniReadKey(name, p);
+            if ((int)strlen(name) == len)
+            {
+                int i = 0;
+                while (i < len && name[i] == key[i])
+                    i++;
+                if (i == len)
+                {
+                    p = rxSysSkipSpace(p);
+                    return rxSysSkipSpace(p + 1);
+                }
+            }
+        }
+        body = rxSysSkipEol(p + rxSysStrLenToEol(p));
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A key's value: the rest of its line, a '\' before the end of the line
+// joining the next one (comment lines between are skipped; the next line
+// must start with a blank, which is kept). Returns the length.
+// ROR 0x002413d8
+
+int rxSysIniFind(char *out, const char *text, const char *section, const char *key)
+{
+    *out = '\0';
+    char *body = rxSysIniFindSection((char *)text, section);
+    if (body == NULL)
+        return 0;
+    char *p = rxSysIniFindKey(body, key);
+    if (p == NULL)
+        return 0;
+    int n = 0;
+    for (char c = *p; c != '\0' && !rxSysIsEol(c); c = *++p)
+    {
+        if (c == '\\' && rxSysIsEol(p[1]))
+        {
+            for (;;)
+            {
+                p = rxSysSkipEol(p + 1);
+                if (*p != '#')
+                    break;
+                while (*p != '\0' && !rxSysIsEol(*p))
+                    p++;
+                if (*p == '\0')
+                {
+                    *out = '\0';
+                    return n;
+                }
+            }
+            if (*p != ' ' && *p != '\t')
+            {
+                *out = '\0';
+                return n;
+            }
+            *out = *p;
+        }
+        else
+        {
+            *out = c;
+        }
+        out++;
+        n++;
+    }
+    *out = '\0';
+    return n;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The key lines of a section (comments and blank lines not counted).
+// ROR 0x00241558
+
+int rxSysIniCountKeys(char *body)
+{
+    int n = 0;
+    for (;;)
+    {
+        char *p = rxSysSkipSpace(body);
+        char c = *p;
+        if (c == '\0' || c == '[')
+            return n;
+        if (c != '#' && !rxSysIsEol(c))
+            n++;
+        body = rxSysSkipEol(p + rxSysStrLenToEol(p));
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The index-th key of a section into out; returns its length, 0 past the
+// last.
+// ROR 0x00241620
+
+int rxSysIniKeyAt(char *out, char *body, int index)
+{
+    int n = 0;
+    *out = '\0';
+    for (;;)
+    {
+        char *p = rxSysSkipSpace(body);
+        char c = *p;
+        if (c == '\0' || c == '[')
+            return 0;
+        if (c != '#' && !rxSysIsEol(c))
+        {
+            if (n == index)
+            {
+                rxSysIniReadKey(out, p);
+                return strlen(out);
+            }
+            n++;
+        }
+        body = rxSysSkipEol(p + rxSysStrLenToEol(p));
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00241720
+
+int rxSysIniFindKeyCount(char *text, const char *section)
+{
+    char *body = rxSysIniFindSection(text, section);
+    if (body == NULL)
+        return 0;
+    return rxSysIniCountKeys(body);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00241758
+
+int rxSysIniFindKeyAt(char *out, char *text, const char *section, int index)
+{
+    char *body = rxSysIniFindSection(text, section);
+    if (body == NULL)
+        return 0;
+    return rxSysIniKeyAt(out, body, index);
+}
+
 // ──────────────────────────────────────────────────────────────────────
 // A system.ini value; 0 when no system.ini was read.
 // ROR 0x002417c0
@@ -733,6 +993,112 @@ int rxSysIniGetString(char *out, const char *section, const char *key)
     if (s_iniLoaded != 0)
         return rxSysIniFind(out, s_confBuf, section, key);
     return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The number of keys in a system.ini section; 0 when no system.ini was read.
+// ROR 0x00241808
+
+int rxSysIniGetKeyCount(const char *section)
+{
+    if (s_iniLoaded != 0)
+        return rxSysIniFindKeyCount(s_confBuf, section);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00241848
+
+int rxSysIniGetKeyAt(char *out, const char *section, int index)
+{
+    if (s_iniLoaded != 0)
+        return rxSysIniFindKeyAt(out, s_confBuf, section, index);
+    return 0;
+}
+
+/* ---- tty ------------------------------------------------------------------ */
+
+// ──────────────────────────────────────────────────────────────────────
+// Bind the tty client, up to ten tries, each waiting a moment for the IOP
+// to serve it; 1 when bound.
+// ROR 0x00241890
+
+int rxSysBindTtyRpc(sceSifClientData *client, unsigned int id)
+{
+    rxSysPrintf("rxsys: binding IOP module %08X ...\n", id);
+    for (int i = 0; i < 10; i++)
+    {
+        client->serve = 0;
+        if (sceSifBindRpc(client, id, 0) < 0)
+            break;
+        // (a short busy-wait loop in the ROM)
+        if (client->serve != 0)
+            break;
+    }
+    FlushCache(0);
+    int bound = client->serve != 0;
+    if (bound)
+        rxSysPrintf("rxsys : binding completed\n");
+    else
+        rxSysPrintf("rxsys : bind error\n");
+    return bound;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00241968
+
+void rxSysBindTty(void)
+{
+    sceSifInitRpc(0);
+    if (rxSysBindTtyRpc(&s_ttyClient, 0x80000220))
+        s_ttyRpcBound = 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// With a boot device, send rxSysPrintf's output to the IOP tty service;
+// when it does not bind, to the device's tty file ("host0:>"). The PC
+// boot path leaves s_bootDev empty, so nothing opens.
+// ROR 0x00241a00
+
+void rxSysOpenTty(void)
+{
+    char path[0x80];
+    if (s_bootDev[0] == '\0')
+        return;
+    rxSysBindTty();
+    if (s_ttyRpcBound != 0)
+        return;
+    strcpy(path, s_bootDev);
+    strcpy(path + strlen(path), ">");
+    s_ttyFd = rxSysOpen(path, SCE_WRONLY);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00241a80
+
+void rxSysCloseTty(void)
+{
+    if (s_ttyFd >= 0)
+    {
+        rxSysClose(s_ttyFd);
+        s_ttyFd = -1;
+    }
+    s_ttyRpcBound = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// rxSysInit's teardown, in reverse.
+// ROR 0x00241ac8
+
+void rxSysTerm(void)
+{
+    rxSysCloseTty();
+    rxSysTermEnd();
+    rxSysTermModules();
+    rxSysTermUser();
+    rxSysTermSema();
+    rxThExitOnce();
+    rxSysRestoreDebugHandlers();
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -752,6 +1118,23 @@ void rxSysTtyWrite(const char *buf, int size)
 void rxSysSetIopImage(const char *img)
 {
     strcpy(s_iopImage, img);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// system.ini VMODE (0 NTSC, 1 PAL).
+// ROR 0x00241b50
+
+int rxSysGetVMode(void)
+{
+    return s_vmode;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00241b60
+
+int rxSysGetFrameRate(void)
+{
+    return rxSysGetVMode() != 0 ? 50 : 60;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -956,6 +1339,14 @@ void rxSysInitEnd(void)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Empty in the retail build; rxSysTerm's step after rxSysCloseTty.
+// ROR 0x00242158
+
+void rxSysTermEnd(void)
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // The EE SemaParam takes max_count at +4 and init_count at +8, in that
 // order of the arguments.
 // ROR 0x00242160
@@ -976,6 +1367,81 @@ void rxSysInitSema(void)
 {
     s_printSema = rxSysCreateSema(1, 1);
     s_sema1 = rxSysCreateSema(1, 1);
+}
+
+/* ---- IOP RPC clients ------------------------------------------------------ */
+
+// ──────────────────────────────────────────────────────────────────────
+// Create the client's call semaphore and bind it to an IOP service,
+// retrying until it is served; 0 on a bind error. No caller in the retail
+// ELF.
+// ROR 0x00242188
+
+int rxSysBindRpc(RxSysRpc *rpc, unsigned int id)
+{
+    rpc->sema = rxSysCreateSema(1, 1);
+    rxSysPrintf("rxsys : binding IOP module %08X ...\n", id);
+    do
+    {
+        if (sceSifBindRpc(&rpc->client, id, 0) < 0)
+        {
+            rxSysPrintf("rxsys : bind error '%08X'\n", id);
+            return 0;
+        }
+        // (a short busy-wait loop in the ROM)
+    } while (rpc->client.serve == 0);
+    FlushCache(0);
+    rxSysPrintf("rxsys : binding completed\n");
+    return 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00242268
+
+void rxSysUnbindRpc(RxSysRpc *rpc)
+{
+    if (rpc->sema >= 0)
+    {
+        DeleteSema(rpc->sema);
+        rpc->sema = -1;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// One call at a time per client: take its semaphore (rxSysRpcDone gives
+// it back when the IOP answers), post the call, wait for the answer.
+// ROR 0x002422a8
+
+void rxSysCallRpc(RxSysRpc *rpc, int fno, void *send, int sendSize, void *recv, int recvSize)
+{
+    rxThDisableDispatch();
+    WaitSema(rpc->sema);
+    FlushCache(0);
+    sceSifCallRpc(&rpc->client, fno, SIF_RPC_M_NOWAIT, send, sendSize, recv, recvSize,
+                  (sceSifEndFunc)rxSysRpcDone, rpc);
+    rxThEnableDispatch();
+    while (sceSifCheckStatRpc(&rpc->client.rpcd) == 1)
+        ;
+    FlushCache(0);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The call's end function (interrupt context).
+// ROR 0x00242368
+
+void rxSysRpcDone(void *rpc)
+{
+    iSignalSema(((RxSysRpc *)rpc)->sema);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// rxSysInitSema's twin.
+// ROR 0x002423d0
+
+void rxSysTermSema(void)
+{
+    DeleteSema(s_sema1);
+    DeleteSema(s_printSema);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1089,6 +1555,146 @@ int rxSysLseek(int fd, int offset, int whence)
     return ret;
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// sceIoctl under the print lock.
+// ROR 0x002426b8
+
+int rxSysIoctl(int fd, int req, void *arg)
+{
+    rxSysLockPrint();
+    int ret = sceIoctl(fd, req, arg);
+    rxSysUnlockPrint();
+    return ret;
+}
+
+/* ---- exception handler ------------------------------------------------------ */
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00242710
+
+void rxSysLockConsole(void)
+{
+    rxSysLockPrint();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00242728
+
+void rxSysUnlockConsole(void)
+{
+    rxSysUnlockPrint();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The debug exception handler rxSysSetDebugHandlers installs: once, stop
+// the vblank interrupt, reset the VIFs, VUs, GS path and DMA, open the
+// exception screen, print epc / status / cause, the bad addresses, the
+// registers by row and 14 lines of the stack, then hang.
+// mainExceptionHandler (0x204a00) is its twin. The host kernel never
+// raises a debug exception, so it does not run on the PC.
+// ROR 0x00242740
+
+void rxSysExceptionHandler(u_int stat, u_int cause, u_int epc, u_int bva, u_int bpa,
+                           u_long128 *gpr)
+{
+    if (s_inException != 0)
+        return;
+    s_inException = 1;
+    s_exceptionOpen = 1;
+    iDisableIntc(2);        // INTC_VBLANK_S
+    sceDevVif0Reset();
+    sceDevVu0Reset();
+    sceDevVif1Reset();
+    sceDevVu1Reset();
+    sceGsResetPath();
+    sceDmaReset(1);
+    rxSysInitExceptionScreen();
+    rxSysPrintf("epc     = %08x  status  = %08x  cause   = %08x\n", epc, stat, cause);
+    rxSysPrintf("badvadr = %08x  badpadr = %08x\n", bva, bpa);
+    for (const RxSysRegRow *row = s_regRows; row->name != NULL; row++)
+    {
+        rxSysPrintf("%s", row->name);
+        for (int i = 0; i < row->count; i++)
+            rxSysPrintf(" %08x", *(u_int *)&gpr[row->first + i]);
+    }
+    rxSysPrintf("\n\n");
+    // PC: the stack pointer is an EE address; read it through emulated RAM.
+    u_int sp = *(u_int *)&gpr[29];
+    for (int line = 13; line >= 0; line--, sp += 0x10)
+    {
+        if (sp > 0xfffff && (int)sp <= rxSysGetMemorySize() - 0x11)
+        {
+            u_int *p = (u_int *)RosePan_GetHostPointer(sp);
+            rxSysPrintf("%08x: %08x %08x %08x %08x\n", sp, p[0], p[1], p[2], p[3]);
+        }
+    }
+    for (;;)
+    {
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Once (main calls it at boot): rxSysExceptionHandler for causes 1-7 and
+// 10-13, keeping the old handlers for rxSysRestoreDebugHandlers.
+// ROR 0x00242960
+
+void rxSysSetDebugHandlers(void)
+{
+    if (s_debugHandlersSet != 0)
+        return;
+    s_debugHandlersSet = 1;
+    for (int cause = 1; cause < 8; cause++)
+        s_oldHandlersLow[cause - 1] = (RosePanDebugHandler)(intptr_t)SetDebugHandler(cause, rxSysExceptionHandler);
+    for (int cause = 10; cause < 14; cause++)
+        s_oldHandlersHigh[cause - 10] = (RosePanDebugHandler)(intptr_t)SetDebugHandler(cause, rxSysExceptionHandler);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00242a10
+
+void rxSysRestoreDebugHandlers(void)
+{
+    if (s_debugHandlersSet == 0)
+        return;
+    s_debugHandlersSet = 0;
+    for (int cause = 1; cause < 8; cause++)
+        SetDebugHandler(cause, s_oldHandlersLow[cause - 1]);
+    for (int cause = 10; cause < 14; cause++)
+        SetDebugHandler(cause, s_oldHandlersHigh[cause - 10]);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Print memory 16 bytes a line: the address, the bytes in hex, then the
+// printable ones (letters, digits, punctuation, space; '.' for others).
+// No caller in the retail ELF.
+// ROR 0x00242aa8
+
+void rxSysHexDump(const char *p, int size)
+{
+    while (size > 0)
+    {
+        int n = size < 0x10 ? size : 0x10;
+        rxSysPrintf("%08X: ", (u_int)(uintptr_t)p);  // PC: the host address's low bits
+        size -= n;
+        int i;
+        for (i = 0; i < n; i++)
+            rxSysPrintf("%02X ", p[i]);
+        for (; i < 0x10; i++)
+            rxSysPrintf("   ");
+        for (i = 0; i < n; i++)
+        {
+            unsigned char c = (unsigned char)p[i];
+            if (!(isalnum(c) || ispunct(c) || c == ' '))
+                c = '.';
+            rxSysPrintf("%c", c);
+        }
+        for (; i < 0x10; i++)
+            rxSysPrintf(" ");
+        rxSysPrintf("\n");
+        p += n;
+    }
+}
+
 /* ---- subsystems ----------------------------------------------------------- */
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1096,6 +1702,14 @@ int rxSysLseek(int fd, int offset, int whence)
 // ROR 0x002433d8
 
 void rxSysInitUser(void)
+{
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Empty in the retail build.
+// ROR 0x002433e0
+
+void rxSysTermUser(void)
 {
 }
 
@@ -1136,12 +1750,60 @@ void rxSysInitModules(void)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// rxSysInitModules' twin: close every rx file, drop the per-tick
+// callback, stop rxfile's thread and shut rxfile down.
+// ROR 0x002434f0
+
+void rxSysTermModules(void)
+{
+    for (int i = 0; i < 64; i++)
+        rxFileClose(i);
+    rxThRemoveCallback(rxSysThreadCallback);
+    rxFileUpdate();
+    rxFileStopThread();
+    rxFileTerm();
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x002433e8
 
 void rxSysThreadCallback(int yielding)
 {
-    (void)yielding;             // rxThRunCallbacks' argument, unused
-    rxSysUpdateDevices();
+    rxSysSetFileContext(yielding);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// rxfile's context follows the running thread: 1 while the main thread
+// yields to the rx thread (rxThYield), 0 when it runs again.
+// ROR 0x00243560
+
+int rxSysSetFileContext(int index)
+{
+    return rxFileSetContext(index);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A device driver's control call. No caller in the retail ELF.
+// ROR 0x00243578
+
+int rxSysDeviceControl(int device, int cmd, int arg)
+{
+    RxFileDriver *driver = rxFileGetDriver(device);
+    if (driver != NULL)
+        return driver->control(cmd, arg);
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A device driver's status. No caller in the retail ELF.
+// ROR 0x002435c8
+
+int rxSysDeviceStatus(int device, int what)
+{
+    RxFileDriver *driver = rxFileGetDriver(device);
+    if (driver != NULL)
+        return driver->getStatus(what);
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1152,6 +1814,14 @@ void rxSysThreadCallback(int yielding)
 int rxSysInitFileDevice(int device)
 {
     return rxFileSetCurrent(device);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00243620
+
+int rxSysGetFileDevice(void)
+{
+    return rxFileGetCurrent();
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1256,39 +1926,9 @@ int rxSysStreamOpenPath(int device, const char *path, int flags, void *ring, int
 
 // ---- stubs (tools/reverse/stubgen.py) ----
 
-// stub of ROR 0x002413d8
-int rxSysIniFind(char *out, const char *text, const char *section, const char *key)
-{
-    ROSEPAN_STUB("rxSysIniFind", 0x002413d8);
-    return {};
-}
-
-// stub of ROR 0x00241a00
-void rxSysOpenTty(void)
-{
-    ROSEPAN_STUB("rxSysOpenTty", 0x00241a00);
-}
-
-// stub of ROR 0x00243560
-void rxSysUpdateDevices(void)
-{
-    ROSEPAN_STUB("rxSysUpdateDevices", 0x00243560);
-}
-
 // stub of ROR 0x002431c0
 void rxSysInitExceptionScreen(void)
 {
     ROSEPAN_STUB("rxSysInitExceptionScreen", 0x002431c0);
 }
 
-// stub of ROR 0x00242960
-void rxSysSetDebugHandlers(void)
-{
-    ROSEPAN_STUB("rxSysSetDebugHandlers", 0x00242960);
-}
-
-// stub of ROR 0x00241ac8
-void rxSysTerm(void)
-{
-    ROSEPAN_STUB("rxSysTerm", 0x00241ac8);
-}

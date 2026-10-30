@@ -14,6 +14,9 @@
 
 #include <stdint.h>
 
+#include "sdk/eekernel.h"
+#include "sdk/sifrpc.h"
+
 /* Boot devices: the index into the device-ready flags and the "Device[%s]"
  * names (0x2dbc38). rxSysDetectDevice picks HOST on a devkit (more than
  * 32 MB), CDROM on a retail console. */
@@ -32,6 +35,15 @@ enum RX_SYS_DEVICE
  * code pointers and cast at the call. Unset ones point at rxSysNoMemFunc. */
 typedef void (*RxSysMemFunc)(void);
 extern RxSysMemFunc g_rxSysMemFunc[4];          /* data 0x2dbe8c */
+
+/* An IOP RPC client with its call semaphore (rxSysBindRpc / rxSysCallRpc;
+ * no caller in the retail ELF). EE: the semaphore at 0, the client data at
+ * 0x40. layout: host -- sceSifClientData holds pointers. */
+struct RxSysRpc
+{
+    int              sema;      // ROR 0x00
+    sceSifClientData client;    // ROR 0x40
+};
 
 /* The print filter rxSysPrintf asks first: 0 drops the line. */
 typedef int (*RxSysPrintHook)(const char *text);
@@ -70,14 +82,28 @@ void        rxSysResetHardware(void);                           // ROR 0x00240df
 void        rxSysReadRomDate(void);                             // ROR 0x00240e60
 void        rxSysInit(void);                                    // ROR 0x00240eb8
 int         rxSysIniFind(char *out, const char *text, const char *section, const char *key); // ROR 0x002413d8
+char       *rxSysIniFindSection(char *text, const char *section);  // ROR 0x002410b8
+char       *rxSysIniReadKey(char *out, char *line);             // ROR 0x002411d0
+char       *rxSysIniFindKey(char *body, const char *key);       // ROR 0x00241298
+int         rxSysIniCountKeys(char *body);                      // ROR 0x00241558
+int         rxSysIniKeyAt(char *out, char *body, int index);    // ROR 0x00241620
+int         rxSysIniFindKeyCount(char *text, const char *section);  // ROR 0x00241720
+int         rxSysIniFindKeyAt(char *out, char *text, const char *section, int index); // ROR 0x00241758
 int         rxSysIniGetString(char *out, const char *section, const char *key); // ROR 0x002417c0
+int         rxSysIniGetKeyCount(const char *section);           // ROR 0x00241808
+int         rxSysIniGetKeyAt(char *out, const char *section, int index); // ROR 0x00241848
 void        rxSysTtyWrite(const char *buf, int size);           // ROR 0x002419a8
+int         rxSysBindTtyRpc(sceSifClientData *client, unsigned int id); // ROR 0x00241890
+void        rxSysBindTty(void);                                 // ROR 0x00241968
 void        rxSysOpenTty(void);                                 // ROR 0x00241a00
+void        rxSysCloseTty(void);                                // ROR 0x00241a80
 void        rxSysSetIopImage(const char *img);                  // ROR 0x00241b20
 const char *rxSysGetProductNumber(void);                        // ROR 0x00241b90
 /* Closes the tty, the semaphore, the file devices, the IOP RPC and the
  * threads (SndMan::term). */
 void        rxSysTerm(void);                                    // ROR 0x00241ac8
+int         rxSysGetVMode(void);                                // ROR 0x00241b50
+int         rxSysGetFrameRate(void);                            // ROR 0x00241b60
 int         rxSysGetCountry(void);                              // ROR 0x00241bb0
 int         rxSysGetMemorySize(void);                           // ROR 0x00241c00
 int         rxSysIsCdromPath(const char *path);                 // ROR 0x00241c18
@@ -88,6 +114,13 @@ int         rxSysPrintWait(intptr_t *args);                     // ROR 0x00241f2
 int         rxSysIsTtyOpen(void);                               // ROR 0x00241f28
 int         rxSysPrintf(const char *fmt, ...);                  // ROR 0x00241f58
 void        rxSysInitEnd(void);                                 // ROR 0x00242150
+void        rxSysTermEnd(void);                                 // ROR 0x00242158
+int         rxSysBindRpc(RxSysRpc *rpc, unsigned int id);       // ROR 0x00242188
+void        rxSysUnbindRpc(RxSysRpc *rpc);                      // ROR 0x00242268
+void        rxSysCallRpc(RxSysRpc *rpc, int fno, void *send, int sendSize,
+                         void *recv, int recvSize);             // ROR 0x002422a8
+void        rxSysRpcDone(void *rpc);                            // ROR 0x00242368
+void        rxSysTermSema(void);                                // ROR 0x002423d0
 int         rxSysCreateSema(int max, int init);                 // ROR 0x00242160
 void        rxSysInitSema(void);                                // ROR 0x00242390
 void        rxSysLockPrint(void);                               // ROR 0x00242400
@@ -98,15 +131,29 @@ int         rxSysClose(int fd);                                 // ROR 0x0024257
 int         rxSysRead(int fd, void *buf, int size);             // ROR 0x002425b0
 int         rxSysWrite(int fd, const void *buf, int size);      // ROR 0x00242608
 int         rxSysLseek(int fd, int offset, int whence);         // ROR 0x00242660
+int         rxSysIoctl(int fd, int req, void *arg);             // ROR 0x002426b8
+void        rxSysLockConsole(void);                             // ROR 0x00242710
+void        rxSysUnlockConsole(void);                           // ROR 0x00242728
+void        rxSysExceptionHandler(u_int stat, u_int cause, u_int epc, u_int bva, u_int bpa,
+                                  u_long128 *gpr);              // ROR 0x00242740
 void        rxSysSetDebugHandlers(void);                        // ROR 0x00242960
+void        rxSysRestoreDebugHandlers(void);                    // ROR 0x00242a10
+void        rxSysHexDump(const char *p, int size);              // ROR 0x00242aa8
 void        rxSysInitExceptionScreen(void);                     // ROR 0x002431c0
 void        rxSysLockSema1(void);                               // ROR 0x00242480
 void        rxSysUnlockSema1(void);                             // ROR 0x002424e0
 void        rxSysInitUser(void);                                // ROR 0x002433d8
+void        rxSysTermUser(void);                                // ROR 0x002433e0
 void        rxSysThreadCallback(int yielding);                  // ROR 0x002433e8
 void        rxSysInitModules(void);                             // ROR 0x00243400
-void        rxSysUpdateDevices(void);                           // ROR 0x00243560
+void        rxSysTermModules(void);                             // ROR 0x002434f0
+/* rxSysThreadCallback's yielding flag picks rxfile's context: 1 while the
+ * main thread yields to the rx thread, 0 when it runs again. */
+int         rxSysSetFileContext(int index);                     // ROR 0x00243560
+int         rxSysDeviceControl(int device, int cmd, int arg);   // ROR 0x00243578
+int         rxSysDeviceStatus(int device, int what);            // ROR 0x002435c8
 int         rxSysInitFileDevice(int device);                    // ROR 0x00243608
+int         rxSysGetFileDevice(void);                           // ROR 0x00243620
 int         rxSysSetFileDevice(int slot, int device);           // ROR 0x00243638
 void        rxSysSetFileDir(const char *dir);                   // ROR 0x00243650
 char       *rxSysGetFileDir(void);                              // ROR 0x00243680

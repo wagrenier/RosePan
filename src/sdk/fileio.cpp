@@ -202,4 +202,13 @@ int sceLseek(int fd, int offset, int whence)
     return (int)RosePan_FileTell(fp);
 }
 
+
+int sceIoctl(int fd, int req, void *arg)
+{
+    (void)fd;
+    (void)req;
+    (void)arg;
+    return -1;
+}
+
 }
