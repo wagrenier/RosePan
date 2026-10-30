@@ -1,7 +1,7 @@
 /* ==========================================================================
  *  dog/dogtexinfo.h
  *
- *  DogTexInfo (dog/dogtexinfo.cpp, ROR 0x1161e4..0x11764c): a named texture
+ *  DogTexInfo (dog/dogtexinfo.cpp, ROR 0x1161e4..0x117654): a named texture
  *  table -- m_max_tex name records of 16 bytes (the i3d context's texture
  *  table, I3dTexEntry: name, texture, CLUT) and as many 0x198-byte texture
  *  records (DogTexData: the i3d texture and CLUT, the TIM2 they were built

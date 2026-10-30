@@ -1,4 +1,4 @@
-// dog/dogtexinfo.cpp -- the named texture table (0x1161e4..0x11764c).
+// dog/dogtexinfo.cpp -- the named texture table (0x1161e4..0x117654).
 //
 // A DogTexInfo keeps m_max_tex textures by name: m_tex_info is the i3d
 // context's texture table (name, texture, CLUT), m_tex_data the records
@@ -501,4 +501,13 @@ void DogTexInfo::setTexTable(i3dContext *p)
     m_dirty = 0;
     m_num_tex = i + 1;
     i3dCtxSetTexTable(p, m_tex_info, m_num_tex);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0011764c
+
+/* Empty in the retail build (jr ra): the debug listing DogModel::loadPack calls
+   before asserting on a texture it could not assign. */
+void DogTexInfo::dump()
+{
 }

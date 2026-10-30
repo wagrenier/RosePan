@@ -194,12 +194,6 @@ int TskDamage::stepKindA()
     return {};
 }
 
-// stub of ROR 0x0011764c
-void DogTexInfo::dump()
-{
-    ROSEPAN_STUB("DogTexInfo::dump", 0x0011764c);
-}
-
 // ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----
 
 // stub of ROR 0x00173df8
