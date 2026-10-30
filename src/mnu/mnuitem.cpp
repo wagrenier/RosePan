@@ -1536,6 +1536,28 @@ static char mnuItemNumText[MNUITEM_SLOT_MAX][3];
 #define MNUITEM_COLOR_CLEAR     0x002b6d70u
 #define MNUITEM_COLOR_OPAQUE    0x002b6d90u
 
+/* The pattern image's dim grey, alpha 0x28 (the link panel's frame). */
+#define MNUITEM_COLOR_DIM       0x002b6d80u
+
+/* The life gauges' rects (pattern image 0x2b6e68, 0x10 apart): left, top,
+ * right, bottom of the PC's and the dog's bar. */
+#define MNUITEM_GAUGE_EE        0x002b6e68u
+
+/* m_dir_repeat (cursor moves with auto-repeat) and m_trig bits. */
+#define MNUITEM_PAD_UP      0x10
+#define MNUITEM_PAD_RIGHT   0x20
+#define MNUITEM_PAD_DOWN    0x40
+#define MNUITEM_PAD_LEFT    0x80
+#define MNUITEM_TRIG_START(pad)  (((pad)->m_trig >> 3) & 1)
+#define MNUITEM_TRIG_CIRCLE(pad) (((pad)->m_trig >> 13) & 1)   /* back */
+#define MNUITEM_TRIG_CROSS(pad)  (((pad)->m_trig >> 14) & 1)   /* confirm */
+
+/* The text rects (data 0x2b8850 / 0x2b8860): the name, the link texts. */
+static const int mnuItemNameRect[4] = { 0, 0, 0x100, 0x10 };
+static const int mnuItemLinkRect[4] = { 0, 0, 0xa0, 0x10 };
+static const char mnuItemBlank[] = " ";                               /* rodata 0x2fb188 */
+static const char mnuItemUnknown[] = "\x81H \x81H \x81H \x81H \x81H";  /* rodata 0x2fb190: SJIS question marks */
+
 /* Dim grey, alpha 0x28 (data 0x2999c0). */
 static const int mnuItemColorDim[4] = { 0x80, 0x80, 0x80, 0x28 };
 
@@ -1586,6 +1608,22 @@ static void mnuItemSetDef(SprDispDef def[2], int no, int pat_base, int parent, i
     def[1].m_no = -1;
 }
 
+/* PC: the fade every page writes inline -- m_color saved to m_fade_save,
+ * then a fade from it (mode 1) or back to it (mode 2, from clear). */
+static void mnuItemFadeFromSaved(SprMan &spr, int no, int time, const int *to)
+{
+    SprSprite &s = spr.m_sprite[no];
+    memcpy(s.m_fade_save, s.m_color, sizeof(s.m_fade_save));
+    spr.setFade(no, 1, time, s.m_fade_save, to);
+}
+
+static void mnuItemFadeToSaved(SprMan &spr, int no, int time)
+{
+    SprSprite &s = spr.m_sprite[no];
+    memcpy(s.m_fade_save, s.m_color, sizeof(s.m_fade_save));
+    spr.setFade(no, 2, time, mnuItemColor(MNUITEM_COLOR_CLEAR), s.m_fade_save);
+}
+
 /* ---- MnuItem ---- */
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1599,7 +1637,7 @@ MnuItem::MnuItem()
     m_find_item = MNUITEM_ID_NONE;
     m_slot12_item = 0xa23;
     m_frame_mode = 0;
-    m_2490 = 0;
+    m_notice = 0;
     m_249c = 0;
     /* PC: the ROM leaves the slots unset until refreshSlots fills all
      * twelve (GamMan::clearItemHave keeps twelve entries). */
@@ -1628,7 +1666,7 @@ void MnuItem::init(DogTexInfo *tex)
         return;
     m_tex = tex;
     m_frame_mode = 0;
-    m_2490 = 0;
+    m_notice = 0;
     m_249c = 0;
     m_spr.init(0x78);
     m_spr.m_font_in_pack = 1;
@@ -1664,7 +1702,7 @@ void MnuItem::term()
 {
     if (m_init != 0) {
         MagScene &scene = g_magSystem.m_scene;
-        m_2490 = 0;
+        m_notice = 0;
         m_249c = 0;
         m_spr.release();
         scene.updateWindowFont(m_win);
@@ -1734,12 +1772,12 @@ int MnuItem::open()
     m_page_step = 0;
     m_frame_mode = 0;
     calcLifeRate();
-    m_rate_level[1] = 100;
-    m_rate_level[3] = 0x46;
-    m_rate_level[5] = 0x1e;
-    m_rate_level[0] = 100;
-    m_rate_level[2] = 0x46;
-    m_rate_level[4] = 0x1e;
+    m_rate_level[0][1] = 100;
+    m_rate_level[1][1] = 0x46;
+    m_rate_level[2][1] = 0x1e;
+    m_rate_level[0][0] = 100;
+    m_rate_level[1][0] = 0x46;
+    m_rate_level[2][0] = 0x1e;
     if (g_bss_7a3d48 != 0) {
         for (int i = 0; i < 10; i++)
             m_work[i] = 0;
@@ -1752,7 +1790,7 @@ int MnuItem::open()
     m_246c = 0;
     m_bit28 = 0;
     m_bit29 = 0;
-    m_2420 = 0;
+    m_link_shown = 0;
     m_msg.open();
     return 0;
 }
@@ -1807,13 +1845,13 @@ void MnuItem::calcLifeRate()
     g_gamMan.getPcParam(GAM_PRM_A_LP, &lp);
     g_gamMan.getPcParam(GAM_PRM_A_MAX_LP, &max);
     int rate = (int)(100.0f / ((float)max / (float)lp));
-    m_pc_rate = rate;
-    m_pc_rate2 = rate;
+    m_rate[0] = rate;
+    m_rate_target[0] = rate;
     g_gamMan.getDogParam(GAM_PRM_A_LP, &lp);
     g_gamMan.getDogParam(GAM_PRM_A_MAX_LP, &max);
     rate = (int)(100.0f / ((float)max / (float)lp));
-    m_dog_rate = rate;
-    m_dog_rate2 = rate;
+    m_rate[1] = rate;
+    m_rate_target[1] = rate;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -2296,7 +2334,7 @@ int MnuItem::processPad(BedPad *pad)
         break;
 
     case 1:
-        m_2420 = 0;
+        m_link_shown = 0;
         loadTex();
         m_spr_find.init(1);
         m_spr_find.m_tex.m_tex_info = m_tex;
@@ -2321,7 +2359,7 @@ int MnuItem::processPad(BedPad *pad)
         break;
 
     case 3: {
-        m_2464 = 0;
+        m_frame_timer = 0;
         m_step = 4;
         readMenuFlags();
         setDisp();
@@ -2337,15 +2375,15 @@ int MnuItem::processPad(BedPad *pad)
         }
         m_spr.saveVolume();
         SprMan::volumeOff();
-        m_2494 = 0;
-        m_2490 = 0;
+        m_notice_open = 0;
+        m_notice = 0;
         if ((g_sequence.m_bits[1] & 8) != 0)
-            m_2490 = 1;
+            m_notice = 1;
         if ((g_sequence.m_bits[1] & 0x10) != 0)
-            m_2490 = 2;
+            m_notice = 2;
         m_249c = 0;
-        if (m_2490 == 0 || m_2490 == 1 || m_2490 == 2)
-            m_2498 = 0;
+        if (m_notice == 0 || m_notice == 1 || m_notice == 2)
+            m_ready = 0;
         m_system->m_scene.fadeIn(0xf, 7, 0);
         scene.fadeInWindow(m_win, 0xf, 0, 0x80);
         g_gamMan.fadeInMesSprite(8, 0xf);
@@ -2424,6 +2462,112 @@ int MnuItem::processPad(BedPad *pad)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Every frame of step 4: the close request bit once the scene has faded,
+// the frame shown at once (frame 60), the notice message (frame 150, until
+// cross / circle), then the life gauges: the shown rate steps toward the
+// target, bars 0x55 / 0x54 (PC) and 0x57 / 0x56 (dog) are cut at the rate,
+// and the face sprites 0x10 / 0xf take the anim of the rate's level.
+// ROR 0x001b113c; callcheck: fptodp, dpdiv, dpmul, dptoli (the gauge's double arithmetic, compiled inline on the host)
+
+void MnuItem::updateFrame(BedPad *pad)
+{
+    static const int s_bar[2][2] = { { 0x55, 0x54 }, { 0x57, 0x56 } };
+
+    if (m_system->m_scene.getFadeState() >= 5)
+        g_sequence.m_bits[1] |= 0x40000000;
+
+    if (m_frame_timer < 60) {
+        /* ROM: tests for an idle pad (13 buttons, both sticks) while the
+         * frame is hidden, but both outcomes show the frame at once. */
+        int idle = m_frame_mode == 0 && (pad->m_hold & 0x5fff) == 0
+                && pad->getRightX() == 0.0f && pad->getRightY() == 0.0f
+                && pad->getLeftX() == 0.0f && pad->getLeftY() == 0.0f;
+        (void)idle;
+        m_frame_timer = 60;
+        showFrame(2);
+    }
+    if (m_frame_timer == 59 && m_frame_mode == 0)
+        showFrame(1);
+    if (m_frame_timer == 60 && m_notice == 0)
+        m_ready = 1;
+
+    if (m_notice == 1 || m_notice == 2) {
+        if (m_frame_timer == 150 && m_notice_open == 0) {
+            m_notice_open = 1;
+            g_gamMan.openSysMsg(m_notice == 1 ? 6 : 7, -1, -1, -1, -1);
+        }
+        if (m_notice_open == 1) {
+            if (MNUITEM_TRIG_CROSS(pad))
+                m_notice_open = 0;
+            if (MNUITEM_TRIG_CIRCLE(pad))
+                m_notice_open = 0;
+            if (m_notice_open == 0) {
+                m_ready = 1;
+                g_gamMan.closeSysMsg();
+            }
+        }
+    }
+    if (m_frame_timer < 18000)
+        m_frame_timer++;
+
+    const int *gauge = mnuItemColor(MNUITEM_GAUGE_EE);
+    for (int i = 0; i < 2; i++) {
+        if (m_rate[i] < m_rate_target[i])
+            m_rate[i]++;
+        if (m_rate_target[i] < m_rate[i])
+            m_rate[i]--;
+
+        const int *rect = &gauge[i * 4];
+        int lost = 0;
+        if (100 - m_rate[i] != 0)
+            lost = (int)((double)(float)(rect[2] - rect[0]) / 100.0 * (double)(float)(100 - m_rate[i]));
+        sprite(s_bar[i][0]).m_off[0] = (rect[2] - lost - 2) * 0x10;
+        sprite(s_bar[i][1]).m_off[0] = (rect[2] - lost) * 0x10;
+        sprite(s_bar[i][1]).m_fix_w = lost << 4;
+
+        int rate = m_rate[i];
+        int no = i == 0 ? 0x10 : 0xf;
+        SprSprite &face = sprite(no);
+        if (rate < m_rate_target[i]) {
+            /* ROM: both rising anims (4 the PC, 5 the dog) go to sprite
+             * 0x10, the PC's face. */
+            if (sprite(0x10).m_anim_no != 4 + i) {
+                m_spr.setAnim(0x10, 4 + i);
+                sprite(0x10).m_disp = 1;
+            }
+            if ((rate & 7) == 0)
+                g_sndMan.playSe(0xc);
+            continue;
+        }
+        if (m_rate_level[0][i] == rate && face.m_anim_no != 1) {
+            m_spr.setAnim(no, 1);
+            face.m_disp = 1;
+            g_sndMan.playSe(0xd);
+        }
+        if (rate < m_rate_level[0][i] && rate >= m_rate_level[1][i] && face.m_anim_no != 1) {
+            m_spr.setAnim(no, 1);
+            face.m_disp = 1;
+        }
+        if (rate < m_rate_level[1][i] && rate >= m_rate_level[2][i] && face.m_anim_no != 2) {
+            m_spr.setAnim(no, 2);
+            face.m_disp = 1;
+        }
+        if (rate < m_rate_level[2][i] && rate > 0 && face.m_anim_no != 3) {
+            m_spr.setAnim(no, 3);
+            face.m_disp = 1;
+        }
+        /* ROM: the dog's test is anim 5, so an empty dog gauge sets anim 3
+         * every frame. */
+        if (rate == 0 && face.m_anim_no != (i == 0 ? 3 : 5)) {
+            m_spr.setAnim(no, 3);
+            face.m_disp = 1;
+        }
+    }
+    m_spr.update();
+    m_msg.update();
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001b1b34
 
 int MnuItem::getSlotItem(int no)
@@ -2478,6 +2622,283 @@ void MnuItem::execPage(BedPad *pad)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The main page: the cursor 0x51 over the equipped item, the find target,
+// the 4 x 3 slot grid and the slot-12 item (wrapping in the grid); cross
+// opens page 3 (equipped / find target), 4 (a slot) or 10 (slot 12);
+// circle / start close the menu (1). Moving shows the item's name and its
+// linked items.
+// ROR 0x001b1cd4
+
+int MnuItem::execPage0(BedPad *pad)
+{
+    int &area = m_work[0];
+    int &cur = m_work[1];
+    u_int redraw = 0;      /* 1 the texts, 2 the cursor */
+    int ret = 0;
+
+    switch (m_page_step) {
+    case 0:
+        sprite(3).m_parent = 2;
+        for (int n = 3; n <= 9; n++)
+            m_spr.setAnim(n, 1);
+        m_page_step = 1;
+        if (m_equip_slot == m_find_slot) {
+            m_spr.setAnim(MNUITEM_SPR_FIND_CURSOR, 1);
+            sprite(MNUITEM_SPR_FIND_CURSOR).m_disp = 1;
+        }
+        /* fall through */
+    case 1:
+        m_spr.setAnim(10, 0);
+        sprite(10).m_disp = 1;
+        m_spr.setAnim(11, 0);
+        sprite(11).m_disp = 1;
+        sprite(0x51).m_parent = 2;
+        if (m_equip_slot < 0)
+            sprite(MNUITEM_SPR_EQUIP).m_state = 0;
+        if (m_find_slot < 0)
+            sprite(MNUITEM_SPR_FIND).m_state = 0;
+        if (area == MNUITEM_AREA_SLOT12) {
+            cur = 0xc;
+            if (m_slot12_item == MNUITEM_ID_NONE) {
+                area = MNUITEM_AREA_SLOTS;
+                cur = 0;
+            }
+        }
+        if (m_ready == 0) {
+            sprite(MNUITEM_SPR_EQUIP).m_state = 0;
+            sprite(MNUITEM_SPR_FIND).m_state = 0;
+        }
+        if (area == MNUITEM_AREA_SLOTS) {
+            m_spr.setAnim(0x51, 0);
+            sprite(0x51).m_disp = 1;
+            sprite(0x51).m_off[0] = mnuItemPos[2 + cur][0];
+            sprite(0x51).m_off[1] = mnuItemPos[2 + cur][1];
+            sprite(0x51).m_off[2] = mnuItemPos[2 + cur][2];
+        } else if (area == MNUITEM_AREA_SLOT12 && m_slot12_item != MNUITEM_ID_NONE) {
+            m_spr.setAnim(0x51, 0);
+            sprite(0x51).m_disp = 1;
+            sprite(0x51).m_off[0] = mnuItemPos[14][0];
+            sprite(0x51).m_off[1] = mnuItemPos[14][1];
+            sprite(0x51).m_off[2] = mnuItemPos[14][2];
+        }
+        redraw = 1;
+        m_spr.setFade(0x51, 0x100, 10, mnuItemColorDim, g_sprColorOpaque);
+        m_page_step = 6;
+        break;
+
+    case 6:
+        if (m_ready != 1) {
+            if (m_249c != 1)
+                break;
+            goto close;
+        }
+        if (m_flag_d != 1) {
+            if (!MNUITEM_TRIG_CIRCLE(pad) && !MNUITEM_TRIG_START(pad))
+                break;
+            g_sndMan.playSe(2);
+            goto close;
+        }
+
+        if (pad->m_dir_repeat & (MNUITEM_PAD_UP | MNUITEM_PAD_DOWN | MNUITEM_PAD_LEFT | MNUITEM_PAD_RIGHT)) {
+            g_sndMan.playSe(1);
+            if (area == MNUITEM_AREA_SLOTS) {
+                m_spr.setAnim(MNUITEM_SPR_ICON + cur, 0);
+                sprite(MNUITEM_SPR_ICON + cur).m_disp = 1;
+            } else if (area == MNUITEM_AREA_SLOT12 && m_slot12_item != MNUITEM_ID_NONE) {
+                m_spr.setAnim(0x3c, 0);
+                sprite(0x3c).m_disp = 1;
+            }
+        }
+
+        if ((pad->m_dir_repeat & MNUITEM_PAD_UP) && area == MNUITEM_AREA_SLOTS) {
+            cur = cur < 4 ? cur + 8 : cur - 4;
+            redraw = 3;
+        }
+
+        if (pad->m_dir_repeat & MNUITEM_PAD_DOWN) {
+            switch (area) {
+            case MNUITEM_AREA_EQUIP:
+                redraw = 3;
+                if (m_flag_a == 1) {
+                    area = MNUITEM_AREA_FIND;
+                    m_spr.setAnim(MNUITEM_SPR_FIND, 0);
+                    break;
+                }
+                /* fall through: no find target, down to the grid */
+            case MNUITEM_AREA_FIND:
+                cur = 3;
+                area = MNUITEM_AREA_SLOTS;
+                redraw = 3;
+                if (m_find_item != MNUITEM_ID_NONE) {
+                    switch (m_find_item >> 9) {
+                    case 5:
+                        break;
+                    case 6:
+                        for (int n = 0x66; n <= 0x69; n++)
+                            mnuItemFadeToSaved(m_spr, n, 10);
+                        break;
+                    }
+                }
+                break;
+            case MNUITEM_AREA_SLOTS:
+                cur = cur < 8 ? cur + 4 : cur - 8;
+                redraw = 3;
+                break;
+            }
+        }
+
+        if (pad->m_dir_repeat & MNUITEM_PAD_LEFT) {
+            if (area == MNUITEM_AREA_SLOTS) {
+                redraw = 3;
+                if ((cur & 3) != 0) {
+                    cur--;
+                } else if (cur != 8) {
+                    cur += 3;
+                } else if (m_slot12_item == MNUITEM_ID_NONE) {
+                    cur = 0xb;
+                } else {
+                    area = MNUITEM_AREA_SLOT12;
+                    cur = 0xc;
+                }
+            } else if (area == MNUITEM_AREA_SLOT12) {
+                area = MNUITEM_AREA_SLOTS;
+                cur = 0xb;
+                redraw = 3;
+                for (int n = 0x66; n <= 0x69; n++)
+                    mnuItemFadeToSaved(m_spr, n, 10);
+            }
+        }
+
+        if (pad->m_dir_repeat & MNUITEM_PAD_RIGHT) {
+            if (area == MNUITEM_AREA_SLOTS) {
+                redraw = 3;
+                if (cur % 4 != 3) {
+                    cur++;
+                } else if (cur != 0xb) {
+                    cur -= 3;
+                } else if (m_slot12_item == MNUITEM_ID_NONE) {
+                    cur = 8;
+                } else {
+                    area = MNUITEM_AREA_SLOT12;
+                    cur = 0xc;
+                }
+            } else if (area == MNUITEM_AREA_SLOT12) {
+                area = MNUITEM_AREA_SLOTS;
+                cur = 8;
+                redraw = 3;
+                for (int n = 0x66; n <= 0x69; n++)
+                    mnuItemFadeToSaved(m_spr, n, 10);
+            }
+        }
+
+        if (MNUITEM_TRIG_CROSS(pad)) {
+            switch (area) {
+            case MNUITEM_AREA_EQUIP:
+            case MNUITEM_AREA_FIND:
+                if ((area == MNUITEM_AREA_EQUIP ? m_equip_slot : m_find_slot) == -1) {
+                    g_sndMan.playSe(3);
+                    break;
+                }
+                m_page_sub[3] = 0;
+                m_page = 3;
+                m_page_step = 0;
+                g_sndMan.playSe(4);
+                m_spr.setFade(0x51, 3, 10, mnuItemColorDim, g_sprColorOpaque);
+                break;
+            case MNUITEM_AREA_SLOTS:
+                if (getSlotItem(cur) != MNUITEM_ID_NONE) {
+                    m_spr.setAnim(MNUITEM_SPR_ICON + cur, 0);
+                    sprite(MNUITEM_SPR_ICON + cur).m_disp = 1;
+                    m_page = 4;
+                    m_page_sub[4] = 0;
+                    m_page_step = 0;
+                    g_sndMan.playSe(4);
+                    m_spr.setFade(0x51, 4, 10, mnuItemColorDim, g_sprColorOpaque);
+                }
+                break;
+            case MNUITEM_AREA_SLOT12:
+                if (m_slot12_item != MNUITEM_ID_NONE) {
+                    m_spr.setAnim(0x3c, 0);
+                    sprite(0x3c).m_disp = 1;
+                    m_page = 10;
+                    m_page_sub[10] = 0;
+                    m_page_step = 0;
+                    g_sndMan.playSe(5);
+                    m_spr.setFade(0x51, 4, 10, mnuItemColorDim, g_sprColorOpaque);
+                }
+                break;
+            }
+        }
+
+        if ((MNUITEM_TRIG_CIRCLE(pad) || MNUITEM_TRIG_START(pad)) && m_notice == 0) {
+            g_sndMan.playSe(2);
+            goto close;
+        }
+        break;
+
+    close:
+        ret = 1;
+        g_sequence.m_global[0x15] = 1;
+        g_sequence.m_global[0x16] = 0;
+        break;
+    }
+
+    if (redraw == 0)
+        return ret;
+
+    if (redraw & 1) {
+        if (area == MNUITEM_AREA_SLOTS) {
+            m_spr.setAnim(10, 0);
+            sprite(10).m_disp = 1;
+            m_spr.setAnim(11, 0);
+            sprite(11).m_disp = 1;
+            setLinkTexts(cur, 0);
+            showLinkPanel(cur);
+        } else if (area == MNUITEM_AREA_SLOT12) {
+            m_spr.setAnim(10, 0);
+            sprite(10).m_disp = 1;
+            m_spr.setAnim(11, 0);
+            sprite(11).m_disp = 1;
+            setLinkTexts(0xc, 0);
+            showLinkPanel(cur);
+        }
+        if (area == MNUITEM_AREA_SLOTS) {
+            setNameText(cur);
+            m_spr.setAnim(MNUITEM_SPR_EQUIP, 0);
+            sprite(MNUITEM_SPR_EQUIP).m_disp = 1;
+            m_spr.setAnim(MNUITEM_SPR_FIND, 0);
+            sprite(MNUITEM_SPR_FIND).m_disp = 1;
+            m_spr.setAnim(MNUITEM_SPR_ICON + cur, 1);
+            sprite(MNUITEM_SPR_ICON + cur).m_disp = 1;
+        } else if (area == MNUITEM_AREA_SLOT12) {
+            setNameText(0xc);
+            m_spr.setAnim(MNUITEM_SPR_EQUIP, 0);
+            sprite(MNUITEM_SPR_EQUIP).m_disp = 1;
+            m_spr.setAnim(MNUITEM_SPR_FIND, 0);
+            sprite(MNUITEM_SPR_FIND).m_disp = 1;
+            m_spr.setAnim(0x3c, 1);
+            sprite(0x3c).m_disp = 1;
+        }
+    }
+    if (redraw & 2) {
+        const int *pos = NULL;
+        if (area == MNUITEM_AREA_SLOTS)
+            pos = mnuItemPos[area + cur];
+        else if (area == MNUITEM_AREA_SLOT12)
+            pos = mnuItemPos[14];
+        if (pos != NULL) {
+            sprite(0x51).m_parent = 2;
+            m_spr.setAnim(0x51, 1);
+            sprite(0x51).m_disp = 1;
+            sprite(0x51).m_off[0] = pos[0];
+            sprite(0x51).m_off[1] = pos[1];
+            sprite(0x51).m_off[2] = pos[2];
+        }
+    }
+    return ret;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x001b3e20
 
 int MnuItem::execPage8(BedPad *pad)
@@ -2486,14 +2907,149 @@ int MnuItem::execPage8(BedPad *pad)
     return 0;
 }
 
-// ---- stubs (tools/reverse/stubgen.py) ----
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001bc790
 
-// stub of ROR 0x001b1cd4
-int MnuItem::execPage0(BedPad *pad)
+void MnuItem::setNameText(int no)
 {
-    ROSEPAN_STUB("MnuItem::execPage0", 0x001b1cd4);
-    return {};
+    SprSprite &spr = sprite(0x12);
+    u_int id = MNUITEM_ID_NONE;
+    const char *text = NULL;
+
+    spr.m_clear_rect = mnuItemNameRect;
+    if (no < 0)
+        return;
+    if (no < MNUITEM_SLOT_MAX)
+        id = getSlotItem(no);
+    else if (no == 0xc)
+        id = m_slot12_item;
+    else if (no == 0xd)
+        id = m_find_item;
+    if (id == MNUITEM_ID_NONE)
+        return;
+    /* ROM: measures field 0xb as well and drops the width. */
+    g_gamMan.m_sysData.getField(id & 0xffff, 0xb, &text);
+    if (text == NULL)
+        text = mnuItemBlank;
+    m_spr.getTextWidth(text);
+    g_gamMan.m_sysData.getField(id & 0xffff, 0xc, &text);
+    if (text == NULL)
+        text = mnuItemBlank;
+    int w = m_spr.getTextWidth(text);
+    spr.m_text_x = 0;
+    spr.m_text_y = 0;
+    spr.m_text = text;
+    spr.m_off[0] = (0x100 - (w >> 1)) * 0x10;
+    m_spr.setAnim(0x12, 0);
+    spr.m_disp = 1;
 }
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001bcb84
+
+const char *MnuItem::getKnownName(int id)
+{
+    const char *name = NULL;
+
+    if (g_gamMan.m_sysData.testFlags((short)id, 4) == 0)
+        return mnuItemUnknown;
+    g_gamMan.m_sysData.getField(id, 0xc, &name);
+    return name;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001bcc08
+
+void MnuItem::setLinkTexts(int no, int anim)
+{
+    u_int id = MNUITEM_ID_NONE;
+
+    anim = anim == 1 ? 1 : 0;
+    for (int k = 0; k < 3; k++)
+        sprite(0x6f + k).m_clear_rect = mnuItemLinkRect;
+    if (m_flag_c == 0 || no < 0)
+        return;
+    if (no < MNUITEM_SLOT_MAX)
+        id = getSlotItem(no);
+    else if (no == 0xc)
+        id = m_slot12_item;
+    else if (no == 0xd)
+        id = m_find_item;
+    if (id == MNUITEM_ID_NONE)
+        return;
+    id &= 0xffff;
+    for (int k = 0; k < 3; k++) {
+        short link[8];
+        g_gamMan.m_sysData.getField(id, 0x10 + k, link);
+        if (link[0] == MNUITEM_ID_NONE)
+            continue;
+        const char *text = getKnownName(link[0]);
+        if (text == NULL)
+            text = mnuItemBlank;
+        int w = m_spr.getTextWidth(text);
+        SprSprite &spr = sprite(0x6f + k);
+        spr.m_fix_w = 0xa00;
+        if (w >= 0x79)
+            spr.m_fix_w = (int)((120.0f / (float)w) * 160.0f) << 4;
+        spr.m_text_x = 0;
+        spr.m_text_y = 0;
+        spr.m_text = text;
+        m_spr.setAnim(0x6f + k, anim);
+        spr.m_disp = 1;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001bd028; callcheck: setFade (through mnuItemFadeFromSaved / mnuItemFadeToSaved)
+
+void MnuItem::showLinkPanel(int no)
+{
+    int has = 0;
+
+    if (m_flag_c == 0)
+        return;
+    if ((u_int)no < MNUITEM_SLOT_MAX) {
+        u_int id = getSlotItem(no);
+        if (id != MNUITEM_ID_NONE) {
+            short link[8];
+            id &= 0xffff;
+            g_gamMan.m_sysData.getField(id, 0x10, link);
+            has = link[0] != MNUITEM_ID_NONE;
+            g_gamMan.m_sysData.getField(id, 0x11, link);
+            has = link[0] != MNUITEM_ID_NONE || has;
+            g_gamMan.m_sysData.getField(id, 0x12, link);
+            if (link[0] != MNUITEM_ID_NONE)
+                has = 1;
+        }
+    }
+    if (has) {
+        if (m_link_shown != 0)
+            return;
+        const int *opaque = mnuItemColor(MNUITEM_COLOR_OPAQUE_A);
+        const int *dim = mnuItemColor(MNUITEM_COLOR_DIM);
+        m_spr.showSprite(0x6a, 2, -1);
+        mnuItemFadeFromSaved(m_spr, 0x6a, 1, opaque);
+        for (int n = 0x6b; n <= 0x6e; n++)
+            m_spr.showSprite(n, 1, -1);
+        for (int n = 0x6b; n <= 0x6e; n++)
+            mnuItemFadeFromSaved(m_spr, n, 2, dim);
+        for (int n = 0x6f; n <= 0x71; n++)
+            mnuItemFadeFromSaved(m_spr, n, 10, opaque);
+        for (int n = 0x6f; n <= 0x71; n++)
+            m_spr.showSprite(n, 0, -1);
+        for (int n = 0x6f; n <= 0x71; n++)
+            m_spr.setAnim(n, 0);
+        for (int n = 0x6f; n <= 0x71; n++)
+            sprite(n).m_disp = 1;
+        m_link_shown = 1;
+    } else if (m_link_shown == 1) {
+        for (int n = 0x6a; n <= 0x71; n++)
+            mnuItemFadeToSaved(m_spr, n, 10);
+        m_link_shown = 0;
+    }
+}
+
+// ---- stubs (tools/reverse/stubgen.py) ----
 
 // stub of ROR 0x001b2f64
 int MnuItem::execPage1(BedPad *pad)
@@ -2579,8 +3135,3 @@ int MnuItem::execPage9(BedPad *pad)
     return {};
 }
 
-// stub of ROR 0x001b113c
-void MnuItem::updateFrame(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuItem::updateFrame", 0x001b113c);
-}

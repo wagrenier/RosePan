@@ -46,6 +46,12 @@ struct MagSystem;
 #define MNUITEM_ID_EMPTY    0xb3b   /* drawn as an empty slot */
 #define MNUITEM_SLOT_MAX    12      /* GamMan's item-have slots */
 
+/* Page 0's cursor areas (m_work[0]). */
+#define MNUITEM_AREA_EQUIP  0       /* the equipped item */
+#define MNUITEM_AREA_FIND   1       /* the find target */
+#define MNUITEM_AREA_SLOTS  2       /* the 4 x 3 slot grid */
+#define MNUITEM_AREA_SLOT12 3       /* the slot-12 item (0xa23) */
+
 /* EE 0x2710 (MagLifeMenuItem +0x40..+0x2750). layout: host -- three SprMan,
  * a MnuTextList and a MsgManSet hold pointers; the EE offsets are in the
  * comments. */
@@ -86,6 +92,8 @@ struct MnuItem
     void setDisp();                                                      // ROR 0x001b0784
     /* 0 while open, 1 when the menu has closed, -1 before open. */
     int  processPad(BedPad *pad);                                        // ROR 0x001b099c
+    /* The frame fade, the notice message, the life gauges; the sprites
+     * and the text run. */
     void updateFrame(BedPad *pad);                                       // ROR 0x001b113c
     int  getSlotItem(int no);                                            // ROR 0x001b1b34
     int  getZero();                                                      // ROR 0x001b1b98
@@ -105,13 +113,24 @@ struct MnuItem
     int  execPage11(BedPad *pad);                                        // ROR 0x001bb4f0
     int  execPage12(BedPad *pad);                                        // ROR 0x001bbcfc
     int  execPage13(BedPad *pad);                                        // ROR 0x001bc370
+    /* Sprite 0x12: the name (system data field 0xc) of slot no's item. */
+    void setNameText(int no);                                            // ROR 0x001bc790
+    /* Field 0xc of item id when its flag 4 is set, else question marks. */
+    const char *getKnownName(int id);                                    // ROR 0x001bcb84
+    /* Sprites 0x6f..0x71: the names of the items in fields 0x10..0x12 of
+     * slot no's item (with m_flag_c); anim 1 runs them. */
+    void setLinkTexts(int no, int anim);                                 // ROR 0x001bcc08
+    /* Fades the panel 0x6a..0x71 in when slot no's item has linked items,
+     * out when it has none. */
+    void showLinkPanel(int no);                                          // ROR 0x001bd028
 
     /* PC: m_spr's sprite n (m_sprite is the SprMan's table). */
     SprSprite &sprite(int n) { return m_spr.m_sprite[n]; }
 
     int           m_open;           // ROR 0x0000: open / close
     /* Cleared together (initWork, open after the boot load, processPad);
-     * [0] 2, [3] 0 at open. Roles not known yet (the page handlers). */
+     * [0] 2, [3] 0 at open. Page 0: [0] the cursor's area (MNUITEM_AREA_*),
+     * [1] its slot (0..11 in a 4 x 3 grid, 12 the slot-12 item). */
     int           m_work[10];       // ROR 0x0004
     int           m_2c;             // ROR 0x002c: initWork 4; unverified
     int           m_30;             // ROR 0x0030: initWork 2; unverified
@@ -120,7 +139,8 @@ struct MnuItem
     int           m_step;           // ROR 0x0054: processPad's step
     int           m_page;           // ROR 0x0058: execPage's page (0..13)
     int           m_page_step;      // ROR 0x005c: the page's step
-    int           _60[14];
+    /* Page n's own step at 0x60 + 4n (page 0 sets 3, 4 and 10's to 0). */
+    int           m_page_sub[14];   // ROR 0x0060
     SprMan        m_spr;            // ROR 0x0098: EE 0x8ec, the menu
     SprMan        m_spr_find;       // ROR 0x0984: findpt.rpk's one sprite
     SprMan        m_spr3;           // ROR 0x1270: drawn first; not set up here
@@ -129,25 +149,25 @@ struct MnuItem
     MnuTextList   m_list;           // ROR 0x1b64: EE 0x104
     MsgManSet     m_msg;            // ROR 0x1c68: the window's text
     DogTexInfo   *m_tex;            // ROR 0x23e0: init's texture table
-    int           m_pc_rate;        // ROR 0x23e4: the PC's life in percent
-    int           m_dog_rate;       // ROR 0x23e8: the dog's life in percent
-    int           m_pc_rate2;       // ROR 0x23ec: calcLifeRate writes the same
-    int           m_dog_rate2;      // ROR 0x23f0
-    /* open: 100, 100, 70, 70, 30, 30 (pairs, PC then dog); unverified as
-     * the life gauge's thresholds. */
-    int           m_rate_level[6];  // ROR 0x23f4
+    /* Life in percent, [0] the PC, [1] the dog: updateFrame steps the
+     * shown rate one per frame toward the target (calcLifeRate sets both). */
+    int           m_rate[2];        // ROR 0x23e4: shown on the gauges
+    int           m_rate_target[2]; // ROR 0x23ec
+    /* The gauges' levels [level][PC, dog] (open: 100, 70, 30): at or above
+     * level 0 anim 1, 1 anim 1, 2 anim 2, below anim 3 (updateFrame). */
+    int           m_rate_level[3][2]; // ROR 0x23f4
     int           m_flag_bit2;      // ROR 0x240c: sequence bit-word 1 bit 2
     int           m_flag_a;         // ROR 0x2410: bit 1 (frame sprite 0xf)
     int           m_flag_b;         // ROR 0x2414: bit 0, cleared in slot 7 (sprite 10, the equipped item)
     int           m_flag_c;         // ROR 0x2418: bit 1 (sprite 11, the find target)
     int           m_flag_d;         // ROR 0x241c: bit 0 (the slots)
-    int           m_2420;           // ROR 0x2420: open / step 1 clear it
+    int           m_link_shown;     // ROR 0x2420: showLinkPanel's panel is in (open / step 1 clear it)
     int           m_equip_slot;     // ROR 0x2424: findSlot(GamMan m_equipItem), -1 none
     int           m_find_slot;      // ROR 0x2428: findSlot(GamMan m_findTargetItem), -1 none
     u_int         m_find_item;      // ROR 0x242c: slot 13's id (GamMan m_findTargetItem)
     u_int         m_slot12_item;    // ROR 0x2430: slot 12's id (open: 0xa23)
     GamItemSlot  *m_slot[MNUITEM_SLOT_MAX]; // ROR 0x2434: GamMan's item-have entries
-    int           m_2464;           // ROR 0x2464: step 3 clears it
+    int           m_frame_timer;    // ROR 0x2464: updateFrame's frames since step 3 (to 18000)
     int           _2468;
     int           m_246c;           // ROR 0x246c: open clears it
     int           m_bit28;          // ROR 0x2470: sequence bit 0x10000000 at step 3 (page 9)
@@ -156,10 +176,12 @@ struct MnuItem
     int           m_init;           // ROR 0x2480: isInit
     int           _2484[2];
     int           m_248c;           // ROR 0x248c: step 0 clears it
-    int           m_2490;           // ROR 0x2490: step 3: 1 with bit 3, 2 with bit 4, else 0
-    int           m_2494;           // ROR 0x2494: step 3 clears it
-    int           m_2498;           // ROR 0x2498: step 3 clears it
-    int           m_249c;           // ROR 0x249c
+    /* step 3: 1 with sequence bit-word 1 bit 3, 2 with bit 4, else 0;
+     * updateFrame opens system message 6 / 7 at frame 150 for 1 / 2. */
+    int           m_notice;         // ROR 0x2490
+    int           m_notice_open;    // ROR 0x2494: the message is up (cross / circle close it)
+    int           m_ready;          // ROR 0x2498: page 0 takes input (frame 60, or the message closed)
+    int           m_249c;           // ROR 0x249c: page 0 closes the menu while not m_ready
     int           m_frame_mode;     // ROR 0x24a0: showFrame's mode
     u_char        _24a4[0x26fc - 0x24a4];
     int           m_win2;           // ROR 0x26fc: a second window, closed at the end when >= 0
@@ -171,6 +193,7 @@ static_assert(offsetof(MnuItem, m_2c) == 0x2c, "m_2c");
 static_assert(offsetof(MnuItem, m_step) == 0x54, "m_step");
 static_assert(offsetof(MnuItem, m_page) == 0x58, "m_page");
 static_assert(offsetof(MnuItem, m_page_step) == 0x5c, "m_page_step");
+static_assert(offsetof(MnuItem, m_page_sub) == 0x60, "m_page_sub");
 static_assert(offsetof(MnuItem, m_spr) == 0x98, "m_spr");
 static_assert(offsetof(MnuItem, m_spr_find) >= 0x984, "m_spr_find");
 static_assert(offsetof(MnuItem, m_spr3) >= 0x1270, "m_spr3");

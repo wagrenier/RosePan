@@ -1897,7 +1897,7 @@
    "why": "MnuBoard2D ctor 0x1ad6b4 .. its fade helpers (mnuboard.rpk); 0x1adf04 is MnuMovie's constructor. File named after the class"
   },
   "mnu/mnuitem.cpp": {
-   "notes": "Left: the 14 page handlers execPage0..13 (0x1b1cd4..0x1bc370, stubs returning 0: an opened menu never closes), updateFrame 0x1b113c (stub; calls showFrame), then the helpers 0x1bc790..0x1bdae4 and FUN_001af578. Start with execPage0 (the main page) and updateFrame. Data: mnuItemPattern is the EE image 0x2acb10..0x2b6e88 (anims 0x2b5f38 none / 0x2b60c0 icons, fade colours 0x2b6d60..), mnuItemPos 0x2b6e88 (16 rows: equip, find, slot 0..12, sprite 0x3c, a pad row), mnuItemDisp 0x2b6f40; later pages will need the tables after 0x2b8598 (another display list and text pointers, see datadump --words 0x2b8598 0x2b8838). PORT: setEquipSprites reads slot 12/13 through m_slot[] past the array in the ROM; the port takes them as no item (mnuItemSlotId). Screen: the smoke run stays on the boot disclaimer; nothing on the smoke path opens the item menu, so the picture is unchecked (compare with tm2png.py --scan data/mnurpk/mnuitem.rpk once a room is reached). Another session was editing src/rosepan/rendering/rosepan_renderer.* in this checkout during the run; those files were left out of this commit.",
+   "notes": "Left: execPage1..7 and 9..13 (stubs returning 0); start with execPage7 0x1b64c4 (in this slice, not written), then execPage4 (slot page, cross from the grid) and execPage3 (equipped / find target). Pages keep their own step at m_page_sub[page] (0x60 + 4n). The page fades use mnuItemFadeFromSaved / mnuItemFadeToSaved (m_color copied into SprSprite m_fade_save). ROM quirks kept: updateFrame's idle-pad test has no effect (frame always shows at frame 60); the dog's rising anim goes to sprite 0x10 and its empty-gauge test compares anim 5. Screen: unchecked. The 240 s smoke run with settings.smoke_pad stays on the picture book The Little Princess from frame ~3300 to 8160 (RIGHT*1700 and the CIRCLE presses do not leave it), so no room is reached and the item menu (START in a room) cannot be opened; last.png is the 15 s boot (black). Reference textures: tm2png.py --scan on GAME_DATA data/mnurpk/mnuitem.rpk -> work/ref/mnuitem (0x8c800 is the item icon sheet, 4 frames per icon). Next blocker: what advances the picture book on the smoke path (open-items).",
    "ranges": [
     [
      "001ae954",
@@ -1909,6 +1909,11 @@
      "date": "2026-10-29 19:32",
      "status": "partial",
      "summary": "MnuItem session 1: header mnu/mnuitem.h (EE 0x2710, three SprMan, slots, flags) moved out of lib/unassigned.h; 30 functions: ctor/dtor, init/term/isInit/draw, open/close/initWork, processPad (8 steps incl. findpt.rpk and the close-time item flag), texture helpers, slots (setSlot/findSlot/refreshSlots/getSlotItem/testSlotFlags), sprites (setDisp/setEquipSprites/setSlotSprites/showFrame), execPage dispatcher; pattern image 0x2acb10, display list 0x2b6f40, findpt tables as EE images; 37 names (ror-inferred)."
+    },
+    {
+     "date": "2026-10-29 20:10",
+     "status": "partial",
+     "summary": "MnuItem session 2: updateFrame (frame timer, notice system message 6/7, life gauges with level anims), execPage0 (main page cursor over equipped / find / 4x3 grid / slot 12, cross to pages 3/4/10, circle/start close), helpers setNameText 0x1bc790, getKnownName 0x1bcb84, setLinkTexts 0x1bcc08, showLinkPanel 0x1bd028; header fields named (m_rate / m_rate_target / m_rate_level[3][2], m_page_sub, m_frame_timer, m_notice, m_ready, m_link_shown); SprSprite +0x48 named m_fade_save; 4 names (ror-inferred)."
     }
    ],
    "status": "partial",

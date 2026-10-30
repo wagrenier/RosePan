@@ -160,7 +160,7 @@ struct SprSprite
     int    m_color[4];          // ROR 0x18: RGBA, 0x80 = full
     int    m_fade_from[4];      // ROR 0x28
     int    m_fade_to[4];        // ROR 0x38
-    int    _48[4];
+    int    m_fade_save[4];      // ROR 0x48: callers copy m_color here to fade from / to it (MnuItem)
     int    m_std[3];            // ROR 0x58: the standard point x, y, z
     int    m_off[3];            // ROR 0x64: the offset point x, y, z (the motion writes it)
     int    m_pos[3];            // ROR 0x70: drawSprite's position (children start from it)

@@ -9,8 +9,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 **PARTIAL 2026-10-29 (`mnu/mnuitem.cpp`, session 1): MnuItem's frame -- ctor / dtor, init / term,
 open / close, draw, processPad's eight steps, the slots, the sprites (setDisp, setEquipSprites,
 setSlotSprites, showFrame) and the texture helpers, 30 functions** (architecture.md "The item menu").
-Left: the 14 page handlers execPage0..13 (0x1b1cd4..0x1bc370, stubs returning 0, so an opened menu
-never closes) and updateFrame 0x1b113c, then the helpers 0x1bc790..0x1bdae4. Nothing on the smoke
+Session 2 (2026-10-29): updateFrame (frame timer, notice message, life gauges), execPage0 (the main
+page: cursor, grid, cross to pages 3 / 4 / 10, circle / start close) and the helpers setNameText,
+getKnownName, setLinkTexts, showLinkPanel -- an opened menu now closes from page 0.
+Left: execPage1..7 and 9..13 (0x1b2f64..0x1bc370, stubs returning 0; execPage7 0x1b64c4 next), the
+rest of 0x1bc790..0x1bdae4 is written. Smoke path (2026-10-29 20:05, --run 240 with smoke_pad): the
+picture book "The Little Princess" shows from frame ~3300 to the end (8160); RIGHT*1700 and the two
+CIRCLE presses do not leave it, so no room is reached and START (m_repeat bit 3, MagScene mode 1,
+canOpenItemMenu) cannot open the item menu yet. Open: what advances the book. Nothing on the smoke
 path opens the item menu, so no picture yet: when a run reaches a room, open it from the pad and
 compare with work/ref (tm2png.py --scan data/mnurpk/mnuitem.rpk). Doubt: the slot 12 / 13 reads
 through m_slot[] in setEquipSprites (an EE read past the array) are taken as no item (PORT).
