@@ -106,12 +106,6 @@ GotMain::~GotMain()
     ROSEPAN_STUB("GotMain::~GotMain", 0x00158798);
 }
 
-// stub of ROR 0x00155d54
-FshMain::~FshMain()
-{
-    ROSEPAN_STUB("FshMain::~FshMain", 0x00155d54);
-}
-
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
 
 // stub of ROR 0x001ad8e0
@@ -319,36 +313,6 @@ void DwfMain::initOut()
 void DwfMain::selectOut()
 {
     ROSEPAN_STUB("DwfMain::selectOut", 0x0015cdac);
-}
-
-// stub of ROR 0x00156140
-void FshMain::after()
-{
-    ROSEPAN_STUB("FshMain::after", 0x00156140);
-}
-
-// stub of ROR 0x00155db4
-void FshMain::decide()
-{
-    ROSEPAN_STUB("FshMain::decide", 0x00155db4);
-}
-
-// stub of ROR 0x00156048
-void FshMain::exec()
-{
-    ROSEPAN_STUB("FshMain::exec", 0x00156048);
-}
-
-// stub of ROR 0x00156620
-void FshMain::initOut()
-{
-    ROSEPAN_STUB("FshMain::initOut", 0x00156620);
-}
-
-// stub of ROR 0x001561bc
-void FshMain::selectOut()
-{
-    ROSEPAN_STUB("FshMain::selectOut", 0x001561bc);
 }
 
 // stub of ROR 0x00158d5c

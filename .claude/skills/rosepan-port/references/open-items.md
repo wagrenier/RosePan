@@ -74,6 +74,15 @@ runs "backwards" (m_fade rises to 5 while hidden, falls to 0 while shown, alpha 
 the ROM has it. The rest of unassigned@00172e4c (EffFoot1 .. EffGeneric1, 0x172e4c..0x174dd8) stays
 queued.
 
+**WRITTEN 2026-10-30 (`emy/emy_fsh.cpp`, verify; split out of unassigned@00155d54): FshMain (type 3)
+and its twelve outs, all 57 functions** (architecture.md). No enemy spawns on the smoke path; mark done
+when a run shows an Fsh (a crawler: rises / lowers between poses and bites, flinches when bumped). ROM
+oddities ported as they are: FshOutDead never takes its revival step (Init stores step 1 after drawing
+the wait), FshOutStared's limit table 0x2f0c78 is all 0, FshOutAtk::isTouching's dog pass compares
+against the spine matrix's first row (magBwnNop is empty). Next in the enemy run: Got 0x1583d4 ..
+0x15a17c, then Pig 0x15a17c .. 0x15c2a4 (Pig's dtor 0x15a580 follows its initOut), then Dwf 0x15c2a4
+(its dtor, before DwfMain::initOut 0x15c304) .. 0x16265c (unassigned@001583d4).
+
 **WRITTEN 2026-10-29 (`emy/emy_grg.cpp`, verify; split out of unassigned@00153e40): GrgMain (type 9)
 and its six outs, all 37 functions** (architecture.md). No enemy spawns on the smoke path; mark done
 when a run shows a Grg (it roams rooms 0x84..0x8b, hides in their fchrs and reappears). Three ROM
