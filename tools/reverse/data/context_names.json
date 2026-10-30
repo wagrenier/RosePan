@@ -11057,6 +11057,12 @@
   "was": "FUN_00170594",
   "why": "vtable _vt$8EffDust2 0x2e38e0 slot 5 (Eff0 slot liveMain)"
  },
+ "00170624": {
+  "name": "EffDust2::createPrim",
+  "tag": "ror-inferred",
+  "was": "FUN_00170624",
+  "why": "called by EffDust2::init (delay i*8, 12 times) and liveMain (delay 0) with this; creates a kind-0x13 EffDust2Prim at a random point of the segment 0x30..0x50 plus a random offset, its size between 0x40 and 0x60, colour 0x70 with alpha fading toward the far end; returns the effect number kept at 0x88 + i*4"
+ },
  "0017093c": {
   "name": "EffDust2Prim::init",
   "tag": "ror-inferred",
@@ -11088,16 +11094,16 @@
   "why": "vtable _vt$8EffFire1 0x2e3a30 slot 2 (Eff0 slot init)"
  },
  "00170d44": {
-  "name": "EffFire1Ex::liveMain",
+  "name": "EffFire1::liveMain",
   "tag": "ror-inferred",
   "was": "FUN_00170d44",
-  "why": "vtable _vt$10EffFire1Ex 0x2e39c0 slot 5 (Eff0 slot liveMain)"
+  "why": "slot 5 of both the EffFire1 vtable 0x2e3a30 and EffFire1Ex 0x2e39c0: EffFire1's own method, inherited (was EffFire1Ex::liveMain); flicker 0x54 from a 96-bit pattern"
  },
  "00170e14": {
-  "name": "EffFire1Ex::renderMain",
+  "name": "EffFire1::renderMain",
   "tag": "ror-inferred",
   "was": "FUN_00170e14",
-  "why": "vtable _vt$10EffFire1Ex 0x2e39c0 slot 8 (Eff0 slot renderMain)"
+  "why": "slot 8 of both the EffFire1 and EffFire1Ex vtables: EffFire1's own, inherited (was EffFire1Ex::renderMain)"
  },
  "001711fc": {
   "name": "EffFire1::updateZDepth",
@@ -11106,10 +11112,10 @@
   "why": "vtable _vt$8EffFire1 0x2e3a30 slot 12 (Eff0 slot updateZDepth)"
  },
  "00171278": {
-  "name": "EffFire1Ex::liveActivateExec",
+  "name": "EffFire1::liveActivateExec",
   "tag": "ror-inferred",
   "was": "FUN_00171278",
-  "why": "vtable _vt$10EffFire1Ex 0x2e39c0 slot 11 (Eff0 slot liveActivateExec)"
+  "why": "slot 11 of both the EffFire1 and EffFire1Ex vtables: EffFire1's own, inherited (was EffFire1Ex::liveActivateExec); 5-frame fade counter 0x5c"
  },
  "001712bc": {
   "name": "EffFire1Ex::init",

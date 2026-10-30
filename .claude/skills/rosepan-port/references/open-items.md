@@ -6,6 +6,16 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`eff/effdust2.cpp`, `efffire1.cpp`, `efffire2.cpp`, `efffog1.cpp`, `efffog2.cpp`,
+all verify; unassigned@001704a4 split and pinned): EffDust2 .. EffFog2Prim, all 28 functions**
+(architecture.md "The dust, fire and fog effects"). Not on the smoke path (the 15 s run is at the boot
+disclaimer; kinds 0x12..0x19 come from room scripts, 0x15 from native 281 op 38): mark done when a room
+shows candle flames, rising dust or ground fog. Doubts: (1) EffFire1Ex::init never sets m_flicker (+0x54)
+and EffFire2::init never sets m_pos w (+0x6c) -- heap leftovers in the ROM, set to 0 / 1 on the host.
+(2) EffFog2's turn is r * 90.03096 degrees (0x42b40fda, a mistyped 90; ported as is). (3) EffDust2 never
+refills a puff whose createEff failed (-1 reads EffMan::m_scene in the ROM; the host skips it). (4)
+EffFire1Ex reads through a NULL actor in the ROM; the host keeps m_pos.
+
 **WRITTEN 2026-10-30 (`eff/effbreath.cpp`, verify; pinned 0x16dcc8..0x16f71c): EffBreath1 / EffBreath1Space /
 EffBreath2 / EffBreath2Prim / EffBreath2Ground, all 20 functions** (architecture.md "The breath effects").
 Not on the smoke path (the 15 s run is at the boot disclaimer): kinds 0xa / 0xc come from ClrOut* (the

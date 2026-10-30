@@ -2847,7 +2847,8 @@ intptr_t seqFunc281(intptr_t a0, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
         param.m_kind = 0x15;
         param.m_08 = 0;
         param.m_achr.m_actor = gam.getActor((u_int)word[0]);
-        memcpy(param.m_achr.m_args, word + 1, sizeof(param.m_achr.m_args));
+        memcpy(param.m_achr.m_node, word + 1, sizeof(param.m_achr.m_node));
+        memcpy(param.m_achr.m_color, word + 9, sizeof(param.m_achr.m_color));
         gam.addObjFx((u_int)a1, scene.m_eff_man.createEff(&param));
         return 0;
     case 98:

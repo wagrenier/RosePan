@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 14:38 at commit `6721f4e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 15:06 at commit `0cf25d8` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-30 14:38 at commit `6721f4e` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **7030** (98%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 266, ror-inferred 5428
-- context-name ledger: 5732 entries; overrides of wrong library matches: 5
-- placed in a source file: 6139/7187 in 160 files
+- game functions: **7187**, named **7031** (98%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 266, ror-inferred 5429
+- context-name ledger: 5733 entries; overrides of wrong library matches: 5
+- placed in a source file: 6167/7187 in 165 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5900**; stubs: **72**
+- reconstructed RoR functions: **5928**; stubs: **39**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -54,6 +54,11 @@ Least-named game-code regions (64 KB blocks):
 | `src/eff/effbreath.cpp` | 20 | 0 |
 | `src/eff/effcameraanim1.cpp` | 3 | 0 |
 | `src/eff/effcommon.cpp` | 13 | 0 |
+| `src/eff/effdust2.cpp` | 7 | 0 |
+| `src/eff/efffire1.cpp` | 7 | 0 |
+| `src/eff/efffire2.cpp` | 4 | 0 |
+| `src/eff/efffog1.cpp` | 4 | 0 |
+| `src/eff/efffog2.cpp` | 6 | 0 |
 | `src/eff/efffog3.cpp` | 10 | 0 |
 | `src/eff/efffoot.cpp` | 20 | 0 |
 | `src/eff/effgeneric.cpp` | 13 | 0 |
@@ -106,7 +111,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 48 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 15 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -191,9 +196,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 175 TUs: todo 84, partial 1, verify 142, done 17
-- next: **unassigned@001704a4** (pinned in the queue)
-- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8, unassigned@001704a4
+- 179 TUs: todo 84, partial 1, verify 147, done 17
+- next: **None** (nothing on the frontier and no queued TU)
+- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -211,6 +216,11 @@ Least-named game-code regions (64 KB blocks):
 - verify: `eff/effblood.cpp` 27/27 -- Nothing on the smoke path creates blood (the 15 s run is at the boot disclaimer): mark done when a run shows a hit spray (scnDamageStart, kind 1) or stains unde
 - verify: `eff/effbreath.cpp` 20/20 -- Complete; not on the smoke path (15 s run ends at the boot disclaimer). Kinds 0xa / 0xc come from ClrOut (emy/emy_clr.cpp), kind 9 likely from room scripts: mar
 - verify: `eff/effcommon.cpp` 13/13 -- Complete; verify because no picture shows a helper yet: the 240 s run shows the Once upon a time intro and the park scene as before, with no EffLight1 glow iden
+- verify: `eff/effdust2.cpp` 7/7 -- Not on the smoke path: the 15 s run stops at the boot disclaimer and kinds 0x12..0x19 come from room scripts (0x15 from native 281 op 38). Mark done when a room
+- verify: `eff/efffire1.cpp` 7/7 -- Not on the smoke path (15 s run at the boot disclaimer; kind 0x14 from room scripts, 0x15 from native 281 op 38). Mark done when a room shows a candle flame wit
+- verify: `eff/efffire2.cpp` 4/4 -- Not on the smoke path (kind 0x16 from room scripts). Mark done when a room shows it. PC: m_pos w set to 1 (ROM leaves it unset).
+- verify: `eff/efffog1.cpp` 4/4 -- Not on the smoke path (kind 0x17 from room scripts). Mark done when a room shows a drifting fog bank. The drift is applied in renderMain, as the ROM does (so it
+- verify: `eff/efffog2.cpp` 6/6 -- Not on the smoke path (kind 0x18 from room scripts). Mark done when a room shows ground fog wisps. EffFog2's turn uses the ROM's 90.03096 degrees (0x42b40fda), 
 - verify: `eff/efffog3.cpp` 10/10 -- Code complete; nothing on screen shows it yet: the 240 s smoke run ends in the bus-stop room with no enemies, so the fog correctly stays the map's (frame mean e
 - verify: `eff/efffoot.cpp` 20/20 -- Not on the smoke path: the 15 s run is at the boot disclaimer and no written code creates kinds 0x1d / 0x1f (probably room scripts through native 281). Mark don
 - verify: `eff/effgeneric.cpp` 13/14 -- Not on the smoke path: the 15 s run stops at the boot disclaimer and kind 0x33 comes from event scripts via native 281; mark done when a run shows one. Doubts i
@@ -339,14 +349,14 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 15:05 `eff/effdust2.cpp` verify: unassigned@001704a4 split into eff/effdust2.cpp, efffire1.cpp, efffire2.cpp, efffog1.cpp, efffog2.cpp and all 28 functions written (EffDust2 .. EffFog2Prim, kin
+- 2026-10-30 15:04 `eff/efffog1.cpp` verify: EffFog1 written, all 4 functions: a camera-facing fog quad drifting along the camera x axis, reset every 540 frames, corner alpha keys per 60 frames with the le
+- 2026-10-30 15:04 `eff/efffog2.cpp` verify: EffFog2 / EffFog2Prim written, all 6 functions: an emitter line and the rising, gliding fog wisps (quarter-circle rise, flat glide to m_dist, corner alpha cycle
+- 2026-10-30 15:03 `eff/efffire2.cpp` verify: EffFire2 written, all 4 functions: a world-oriented fire sprite cycling the four quarters of texture 0 every 4 frames
+- 2026-10-30 15:02 `eff/efffire1.cpp` verify: EffFire1 / EffFire1Ex written, all 7 functions: init, flicker liveMain, flame + glow renderMain, 5-frame fade liveActivateExec, depth; Ex follows an actor node;
 - 2026-10-30 14:37 `eff/effbreath.cpp` verify: EffBreath1 / EffBreath1Space / EffBreath2 / EffBreath2Prim / EffBreath2Ground, all 20 functions: actor breath in a box (ring of mouth points, farthest-first spr
 - 2026-10-30 14:13 `eff/efffoot.cpp` verify: EffFoot1 / EffFoot1Prim / EffFoot2 / EffFoot2Prim, all 20 functions: footstep dust puffs in a box and the PC / dog footprints; EffParam m_foot1 / m_foot1prim / 
 - 2026-10-30 13:58 `eff/effreload.cpp` verify: EffReload1 (kind 0x27, the gun reload model) written whole: ctor, dtor, init, liveMain, renderPreMain, linkonce renderMain; layout in eff/effreload.h; class mov
-- 2026-10-30 13:52 `eff/effmuzzleflash.cpp` verify: EffMuzzleFlash1 (kind 0x26), all 8 functions: init (muzzle position, flash and smoke parts, random roll, a point light in sets 0/1), liveMain (parts step, the l
-- 2026-10-30 13:42 `eff/effgeneric.cpp` verify: EffGeneric1 written, all 14 functions: ctor/dtor, init (model copy, motion, eff record file, node block, uv entities), liveMain, renderPreMain (keyed translatio
-- 2026-10-30 12:54 `eff/effbg.cpp` verify: EffBg1 (kind 0x34) written whole: ctor, dtor, init, liveMain, renderPreMain, applyTexKeys (0x16afcc..0x16b62c, pinned as eff/effbg.cpp). New eff/effgeneric.h de
-- 2026-10-30 12:38 `dog/dogtexinfo.cpp` verify: Absorbed unassigned@0011764c: DogTexInfo::dump (0x11764c, 4 bytes, jr ra) is the empty retail debug listing that DogModel::loadPack calls before asserting on a 
-- 2026-10-30 12:27 `mag/magsceneoption.cpp` verify: MagScene::parseOption reconstructed: data/options.txt parsed by utlParseParam into the new m_option_bucket (0x4371c), names looked up in the 15-row option table
 
 ## Frontier (called by reconstructed code, not written yet)
 

@@ -1531,6 +1531,28 @@ rotate[3] radians, lens degrees}. init saves the scene camera mode (+0x30), m_ca
 m_trans + m_dirty, wraps the rotation into -pi..pi for setRotate and m_angle = deg * pi / 180 (the
 camera angle is radians); liveMain plays one key a frame, then restores and calls setCameraMode(saved,
 0, NULL) -- the followed actor is not restored. The prologue picture-book stretch plays two of them.
+**The dust, fire and fog effects** (kinds 0x12..0x19, 0x1704a4..0x172678 between eff/effcommon.cpp and
+eff/efffog3.cpp, 2026-10-30, written, verify; one file per numbered family: eff/effdust2.cpp,
+efffire1.cpp, efffire2.cpp, efffog1.cpp, efffog2.cpp, layouts in their headers, EffParam m_dust2 ..
+m_fog2prim). No written code creates them except kind 0x15 (native 281 op 38: the 12 words after the
+actor are a 0x20-byte node name and an RGBA colour); the rest come from room scripts' 0x70-byte
+records. EffDust2 (0x12) keeps 12 EffDust2Prim (0x13, 150-frame camera-facing puffs rising 0.025 a frame,
+alpha keys 0 / 0.8 / 1 / 0.8 / 0 per 30 frames, 0.9 on frames with bit 2) alive along a segment, scattered
+by a radius that grows from m_spread0 to m_spread1 and fainter toward the far end; createPrim 0x170624.
+EffFire1 (0x14): an upright 5 x 10 flame (effMatMakeUpright, a 4 x 2 sheet of texture 0, 6 frames a
+cell, ALPHA 0x44) 5 above m_pos plus a 100-wide camera-facing glow (texture 1, ALPHA 0x48) 2 above it
+pulled m_near + 10 toward the eye, its alpha 0.85..1 from a 96-bit flicker pattern (data built on the
+stack: 0x52a53d2a, 0xa5656951, 0x56512b2a); setVisible fades it over 5 frames (liveActivateExec, m_fade
++0x5c). Its liveMain / renderMain / liveActivateExec were named EffFire1Ex:: by batch effman_002 (the
+slots are shared): renamed EffFire1:: (batch effdust2_001). EffFire1Ex (0x15, EE 0x90) reads +0x60 actor,
++0x64 node name, and moves m_pos to the node in updateZDepth. EffFire2 (0x16): a world-oriented sprite
+(rot z x y, scale) cycling the 2 x 2 quarters every 4 frames. EffFog1 (0x17): a camera-facing quad that
+drifts m_speed a frame along the camera's x row (in renderMain) and resets every 540 frames; corner
+alpha keys {0, 0, 0.5, 1, 0.6, 1, 0.6, 1, 0.5, 0} per 60 frames, the left corners 45 frames ahead.
+EffFog2 (0x18) emits an EffFog2Prim (0x19) every 30 frames from a line across its heading; the wisp
+rises on a quarter circle from y < 0 (-y up) for 1.5 frames per unit of depth, then glides flat to
+m_dist (Eff0 m_0c state 0 / 10), corners cycling {0, 1, 1, 1, 0} per 20 frames, fading 30 frames in and
+out. Fog1 / Fog2Prim share EffSteam2Prim's quad tables (data 0x2f24e0 / 0x2f2520, 0x2f2580 / 0x2f25c0).
 **EffFog3 / EffFog3Dark / EffFog3WeakUp** (kinds 0x1a..0x1c, `eff/efffog3.cpp` 0x172678..0x172e4c,
 2026-10-29): the fog that thickens while enemies are about. `gamCreateEff1a` 0x172678 (GamMan::initStage2)
 creates one EffFog3 per stage. init takes its pack's file after the models, motions and textures (BedPfh
