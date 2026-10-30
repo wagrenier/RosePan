@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 12:20 at commit `b09a9a0` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 12:27 at commit `600adbf` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5826**; stubs: **132**
+- reconstructed RoR functions: **5827**; stubs: **131**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -129,7 +129,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/magsceneif.cpp` | 13 | 0 |
 | `src/mag/magscenelight.cpp` | 10 | 0 |
 | `src/mag/magscenemenu.cpp` | 12 | 0 |
-| `src/mag/magsceneoption.cpp` | 0 | 1 |
+| `src/mag/magsceneoption.cpp` | 1 | 0 |
 | `src/mag/magscenerender.cpp` | 20 | 0 |
 | `src/mag/magscenetenkyu.cpp` | 5 | 0 |
 | `src/mag/magsystem.cpp` | 55 | 0 |
@@ -185,8 +185,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 174 TUs: todo 85, partial 1, verify 135, done 17
-- next: **mag/magsceneoption.cpp** (frontier score 1)
+- 174 TUs: todo 84, partial 1, verify 136, done 17
+- next: **unassigned@0011764c** (frontier score 1)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -275,6 +275,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/magsceneif.cpp` 13/18 -- Nothing on screen can show this TU: its callers are debug/motnamecnv0.cpp (scene playback, motNameConvert) and debug/motnamecnv.cpp; the 15 s run stays on the b
 - verify: `mag/magscenelight.cpp` 10/10 -- Build, callcheck and layoutcheck green. The 200 s New Game run passes the four previously reached stubs (setLightNo, setLightFlags, setLightParam, copyLightSet)
 - verify: `mag/magscenemenu.cpp` 12/12 -- No source-path string in the run: the file name is the port's (open-items.md Open questions). Nothing on screen shows it yet: the 200 s New Game run still ends 
+- verify: `mag/magsceneoption.cpp` 1/1 -- verify: the retail disc has no data/options.txt (checked the extracted disc), so loadSystemData never calls this; nothing on screen can show it. Ids 0 (MAGTEST,
 - verify: `mag/magscenerender.cpp` 20/20 -- All 20 functions written; verify because nothing on screen can show it: no boot actor has the 0x60 shadow flags and all i3d layer / view / light functions are s
 - verify: `mag/magscenetenkyu.cpp` 5/5 -- Verify: the 200 s run passes the film with no assert; the frame after it is black as before (no model draws: utlDrawI3r 0x106760 and the i3m pose player i3mGetP
 - verify: `mag/magsystem.cpp` 55/55 -- All 55 functions written; nothing on screen can show them yet (black: MagScene::draw and i3d are stubs; no caller of the actor methods runs). The Dog classes ar
@@ -326,6 +327,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 12:27 `mag/magsceneoption.cpp` verify: MagScene::parseOption reconstructed: data/options.txt parsed by utlParseParam into the new m_option_bucket (0x4371c), names looked up in the 15-row option table
 - 2026-10-30 12:19 `mag/magscenedebug.cpp` verify: MagScene debug windows: updateDebug, openDebugWindow, closeDebugWindow reconstructed; m_22bc renamed m_dbg_window; extent pinned 0x14313c-0x143498
 - 2026-10-30 12:12 `emy/emy_dwf.cpp` verify: DwfOutAtkNear (Init, Exec, Term and its throw, claw and grab modes with startThrow / startClaw), DwfOutFort (Init, Exec, Term, startLeap), DwfOutDead (Init, Exe
 - 2026-10-30 11:54 `emy/emy_dwf.cpp` partial: DwfOutAtkFar (Init, Exec, Term, startThrow), DwfOutStared, DwfOutWin (chase and scripted win, execChase / execScripted) and DwfOutIrritate (Init, Exec, Term, ge
@@ -333,15 +335,13 @@ Recent sessions:
 - 2026-10-30 11:23 `eff/effwater.cpp` verify: reconstruct 15 functions: EffWater1 (kind 0x2f, the EFFWATER1.RPK model with a scrolling texture) and EffWater3 (kind 0x31, rain over a box with ground ripples 
 - 2026-10-30 10:54 `emy/emy_pig.cpp` verify: PigMain (type 1) and its outs PigOutParts, PigOutTackle, PigOutTest: all 34 functions; unassigned@0015a17c split into emy/emy_pig.cpp and emy/emy_dwf.cpp
 - 2026-10-30 10:00 `mag/maglifemenusp.cpp` verify: Reconstructed both dial-lock menus: MagLifeMenuSpecial (KLCK, 0x1000b) and MagLifeMenuSpecial2 (0x1000c..f) -- constructors, destructors, init, term, isInit, pr
-- 2026-10-30 09:51 `mnu/mnuSelectLanguage.cpp` verify: MnuSelectLanguage, the language select screen: all 16 functions (ctor, dtor, init, term, isInit, processPad with the inline exec, draw, open, close, openWindow,
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@0016afcc` | todo | 0/5/6 | 1.6 | 1 | 0 |
-| `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
-| `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
-| `mag/magsceneoption.cpp` | todo | 0/1/1 | 0.8 | 1 | 0 |
 | `unassigned@001788ec` | todo | 0/9/13 | 2.8 | 1 | 0 |
+| `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
+| `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
+| `unassigned@0016afcc` | todo | 0/5/6 | 1.6 | 1 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -366,7 +366,6 @@ Recent sessions:
 | `00173df8` | EffGeneric1::EffGeneric1 | 1 | ror | stub | - |
 | `0016afcc` | EffBg1::EffBg1 | 1 | ror | stub | - |
 | `00241ac8` | rxSysTerm | 1 | lib-ctx | stub | rx/rxsys.cpp |
-| `0013c328` | MagScene::parseOption | 1 | ror | stub | mag/magsceneoption.cpp |
 | `001f7644` | VoiceManager::stop | 1 | ror | missing | task/tsk_scene.cpp |
 | `001f6c64` | DisplayMessage::DisplayMessage | 1 | ror | missing | task/tsk_scene.cpp |
 | `001f6edc` | SeManager::SeManager | 1 | ror | missing | task/tsk_scene.cpp |

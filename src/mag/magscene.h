@@ -37,6 +37,7 @@
 #include "mag/magsceneif.h"
 #include "sdk/sce_gs.h"
 #include "spr/s2d.h"
+#include "utl/utlmisc.h"
 
 /* A record of a sky pack's <name>_c.bin: a map camera path (the asserts
  * call it ppath / thePath) -- m_pos_num points from +0x30, each (x, y, z,
@@ -196,8 +197,8 @@ struct MagViewParam
     float m_right;              // ROR 0x0c: 5.12
     float m_bottom;             // ROR 0x10: -4.48
     float m_top;                // ROR 0x14: 4.48
-    float m_zmax;               // ROR 0x18: 65530 (the second view: m_22a4 * 65530)
-    float m_zmin;               // ROR 0x1c: 1 (the second view: m_22a4)
+    float m_zmax;               // ROR 0x18: 65530 (the second view: m_opt_shadow_offset * 65530)
+    float m_zmin;               // ROR 0x1c: 1 (the second view: m_opt_shadow_offset)
     float m_x0;                 // ROR 0x20: 0
     float m_x1;                 // ROR 0x24: 511
     float m_y0;                 // ROR 0x28: 0
@@ -631,11 +632,11 @@ struct MagScene
     MagCharaLoader m_chara_loader;      // ROR 0x215c: data/ch/CHARA.RPK
     MagMapLoader   m_map_loader;        // ROR 0x224c: data/bg/mapunit.bin
     int            m_229c;              // ROR 0x229c: initRender zeroes it; role unknown
-    float          m_22a0;              // ROR 0x22a0: scales the shadow light's intensity (with m_2a9cc); role unverified
-    float          m_22a4;              // ROR 0x22a4: scales the second view's depth range
-    float          m_22a8;              // ROR 0x22a8: the ambient scale of render stages 1 and 2 (others 1.0); role unverified
+    float          m_22a0;              // ROR 0x22a0: options.txt SHADOW_BLACKNESS; scales the shadow light's intensity (with m_2a9cc)
+    float          m_opt_shadow_offset; // ROR 0x22a4: the assert's name; options.txt SHADOW_OFFSET, asserted 0.9..1.9; scales the second view's depth range
+    float          m_opt_ambient_extra; // ROR 0x22a8: the assert's name; options.txt AMBIENT_EXTRA, asserted 0..2; the ambient scale of render stages 1 and 2 (others 1.0)
     int            m_pc_mode;           // ROR 0x22ac: setPC's mode
-    float          m_22b0;              // ROR 0x22b0: blends m_22a4 toward 1 for the shadow view (1 = m_22a4 as is)
+    float          m_22b0;              // ROR 0x22b0: blends m_opt_shadow_offset toward 1 for the shadow view (1 = m_opt_shadow_offset as is)
     int            m_22b4;              // ROR 0x22b4: sky path display: 0 off, 1 copy the points then 2, 2 draw the copy (the constructor's value: 1)
     int            m_22b8;              // ROR 0x22b8: the constructor clears it; role unknown
     int            m_dbg_window[4];     // ROR 0x22bc: per debug level, its m_window slot (openDebugWindow), -1 = none (the constructor's value)
@@ -722,6 +723,8 @@ struct MagScene
     S2dMes         m_mes;               // ROR 0x42bb0
     MagFadeParam   m_fade;              // ROR 0x43700: the current fade (m_kind -1 = none; setFade)
     int            m_sys_msg_window;    // ROR 0x43718: the system message's window (asserted >= 0 in sub mode 5)
+    enum { MAX_OPTION = 16 };           /* parseOption's utlParseParam limit */
+    UtlParam       m_option_bucket[MAX_OPTION]; // ROR 0x4371c: stride 0xc on the EE, data/options.txt parsed (parseOption)
     MagSceneStrip  m_strip[0x2000];     // ROR 0x437e0: drawStrips' records
     EffMan         m_eff_man;           // ROR 0x837e0: the effects (eff/effman.h)
     S2dMovie       m_movie;             // ROR 0x84aa8

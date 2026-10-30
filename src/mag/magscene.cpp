@@ -339,8 +339,8 @@ int MagScene::initRender(i3dContext *ctx)
     m_view[0] = view;
     m_view[1] = view;
     m_2aa80 = -1.0f;
-    m_view[1].m_zmin = m_22a4 * 1.0f;
-    m_view[1].m_zmax = m_22a4 * 65530.0f;
+    m_view[1].m_zmin = m_opt_shadow_offset * 1.0f;
+    m_view[1].m_zmax = m_opt_shadow_offset * 65530.0f;
     setLightNo(-1);
     m_pc.m_scene = this;
     m_menu_id = -1;
@@ -2057,8 +2057,8 @@ MagScene::MagScene()
     }
 
     m_22a0 = 0x1.999998p-1f;    /* 0x3f4ccccc, 0.8 */
-    m_22a4 = 1.03f;
-    m_22a8 = 0x1.999998p-2f;    /* 0x3ecccccc, 0.4 */
+    m_opt_shadow_offset = 1.03f;
+    m_opt_ambient_extra = 0x1.999998p-2f;    /* 0x3ecccccc, 0.4 */
     m_22b0 = 1.0f;
     m_22b4 = 1;
     m_22b8 = 0;

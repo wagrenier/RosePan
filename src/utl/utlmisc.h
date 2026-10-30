@@ -22,6 +22,9 @@ enum UTL_PARAM_TYPE
     UTL_PARAM_INT    = 1,       /* decimal, or hex after '$' */
     UTL_PARAM_FLOAT  = 2,       /* digits with a '.' */
     UTL_PARAM_STRING = 3,       /* in double quotes */
+    /* The ROM's own names, from MagScene::parseOption's asserts. */
+    UTLVB_TYPE_FLOAT = UTL_PARAM_FLOAT,
+    UTLVB_TYPE_STR   = UTL_PARAM_STRING,
 };
 
 /* One parsed "name value" line (12 bytes on the EE: name +0x0, type +0x4,
