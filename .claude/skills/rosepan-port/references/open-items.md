@@ -6,6 +6,16 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`task/tsk_bg_load.cpp`, verify; pinned 0x1fce0c..0x1fd424 + 0x290c1c..0x290e88,
+absorbing unassigned@001fce0c): TskBGLoad / TskBGLoadArea / TskBGLoadMap, all 19 functions**
+(architecture.md "The background pack loaders"). The queue was empty; picked as the largest todo file.
+No reference to either constructor or vtable in the ROM, so nothing can show it: verify is final unless
+a caller turns up. Doubt: the host aligns the head buffer up from m_head (the ROM computes
+(this & ~63) + 0x80, the same span on the EE). Left todo with functions (all fuzzy, all unreached):
+debug/naga_debug.cpp (7), mag/maglifetest.cpp (6), debug/motnamecnv.cpp (5) and 1-function runs.
+The dead-code supply is nearly gone: the next useful run lengthens the smoke pad (the bus-stop walk)
+to mark verify TUs done from screenshots.
+
 **WRITTEN 2026-10-30 (`dog/doglight.cpp`, verify; pinned 0x112b08..0x114034, absorbing
 unassigned@00112b08): DogLight, all 8 functions** (architecture.md, after DogLightPool). The queue
 was empty and no TU had stubs; picked as the largest anchored todo file. The whole class is

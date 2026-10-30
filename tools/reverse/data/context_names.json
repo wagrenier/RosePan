@@ -22109,6 +22109,66 @@
   "was": "FUN_001fcdf4",
   "why": "unreferenced (folded after getInt): the current entry's +0x0c, the size addEntry stores"
  },
+ "001fce0c": {
+  "name": "TskBGLoad::init",
+  "tag": "ror-inferred",
+  "was": "FUN_001fce0c",
+  "why": "TskBGLoad / Area / Map vtable slot 3 (CmnITask::init, addTask), empty"
+ },
+ "001fce14": {
+  "name": "TskBGLoad::term",
+  "tag": "ror-inferred",
+  "was": "FUN_001fce14",
+  "why": "TskBGLoad vtable slot 5 (CmnITask::term), empty; Area / Map override it with their own empty term symbols"
+ },
+ "001fce1c": {
+  "name": "TskBGLoad::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001fce1c",
+  "why": "TskBGLoad vtable slot 4 (CmnITask::exec): FileReader::update(1) on the reader at +4, ends the task when the read is done"
+ },
+ "001fce40": {
+  "name": "TskBGLoad::startRead",
+  "tag": "ror-inferred",
+  "was": "FUN_001fce40",
+  "why": "builds the FileReadReq at +0xc (name when the last arg is set, buf, size, offset, seek set, close after) and starts it async with FileReader::read; both loaders call it twice (pack head, then the whole pack)"
+ },
+ "001fcef8": {
+  "name": "TskBGLoadArea::TskBGLoadArea",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcef8",
+  "why": "stores TskBGLoad's then TskBGLoadArea's vtable, constructs the FileReader at +4, tail-calls slot 7 (start)"
+ },
+ "001fcf6c": {
+  "name": "TskBGLoadArea::start",
+  "tag": "ror-inferred",
+  "was": "FUN_001fcf6c",
+  "why": "TskBGLoadArea slot 7, called by its ctor: copies the pack name (0x100) to +0x880, keeps the output pointer at +0x984, reads the pack's first 0x800 bytes into the 64-aligned head buffer, step 1"
+ },
+ "001fd008": {
+  "name": "TskBGLoadArea::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001fd008",
+  "why": "TskBGLoadArea slot 4: step 1 waits the head read, BedPfh getTotalSize (assert bedpfh.h line 72 m_top), allocDebug (tsk_bg_load.cpp lines 183 / 216, GamMan::releaseObjs(2, 1) between), reads the whole pack, step 2 waits it"
+ },
+ "001fd200": {
+  "name": "TskBGLoadMap::TskBGLoadMap",
+  "tag": "ror-inferred",
+  "was": "FUN_001fd200",
+  "why": "stores TskBGLoad's then TskBGLoadMap's vtable, constructs the FileReader at +4, tail-calls slot 7 (start)"
+ },
+ "001fd264": {
+  "name": "TskBGLoadMap::start",
+  "tag": "ror-inferred",
+  "was": "FUN_001fd264",
+  "why": "TskBGLoadMap slot 7, called by its ctor: keeps the output pointer at +0x888, reads data/bg/mapunit.bin's first 0x800 bytes into the head buffer, step 1"
+ },
+ "001fd2dc": {
+  "name": "TskBGLoadMap::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001fd2dc",
+  "why": "TskBGLoadMap slot 4: as TskBGLoadArea::exec for data/bg/mapunit.bin (allocDebug line 341, no release-and-retry)"
+ },
  "001fd424": {
   "name": "TskAttack::stepReach",
   "tag": "ror-inferred",

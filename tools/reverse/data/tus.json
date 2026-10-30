@@ -3129,6 +3129,28 @@
    "status": "verify",
    "why": "TskAttack / TskDamage step functions (the member-function pointers TskAttack::setup / TskDamage::setup in task/tsk_scene.cpp store), the unreferenced attack step, the damage fall-direction pickers and the cut dismemberment helpers; no source string, named after its contents; between task/tsk_bg_load.cpp and task/tsk_enemy.cpp"
   },
+  "task/tsk_bg_load.cpp": {
+   "notes": "Nothing in the ROM references either constructor or vtable (ghidra.py refs on 0x1fcef8 / 0x1fd200 / both vtables), so no run can show it: verify is final unless a caller turns up. Area retries allocDebug after GamMan::releaseObjs(2, 1) and stores NULL when both fail; Map ends without storing on failure. Host doubt: getHead aligns up from m_head, the ROM computes (this AND NOT 63) + 0x80 (same span on the EE). TskBGLoad ctor / dtor / get_task_type symbols 0x290c6c..0x290cf8 are written inline in the header but the export does not file them under this TU. Next: the remaining todo files are small unreached debug / test code; a longer smoke pad (bus-stop walk) would mark verify TUs done.",
+   "ranges": [
+    [
+     "001fce0c",
+     "001fd424"
+    ],
+    [
+     "00290c1c",
+     "00290e88"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 16:47",
+     "status": "verify",
+     "summary": "TskBGLoad / TskBGLoadArea / TskBGLoadMap, all 19 functions: the background pack loaders that read a pack head, allocate its total size and read the whole pack into a new block; pinned 0x1fce0c..0x1fd424 + 0x290c1c..0x290e88, absorbing unassigned@001fce0c"
+    }
+   ],
+   "status": "verify",
+   "why": "task/tsk_bg_load.cpp asserts anchor 0x1fd008 / 0x1fd2dc; 0x1fce0c..0x1fcef8 (was unassigned@001fce0c) are TskBGLoad's own vtable slots 3/4/5 and the shared read starter both loaders call; 0x290c1c..0x290e88 are the TskBGLoad / TskBGLoadArea / TskBGLoadMap linkonce section symbols (tf, ctor, dtors, get_task_type, term); NagaChunk ends at 0x1fce0c, TskAttack starts at 0x1fd424"
+  },
   "task/tsk_chr.cpp": {
    "notes": "All of task/tsk_chr.cpp is now written; the inline dtors and empty terms the brief still lists as todo are in tsk_chr.h. Status verify: nothing on screen reaches the script tasks yet (the smoke run stops at the boot disclaimer); the first session whose screenshot shows a script-driven character move or turn should mark it done. New stub: DogActor::setNodeScale 0x10eba0 (dog/dogactor.cpp, a 14-instruction leaf: node entry gets the value, 1.0 frees it, else first free or 1.0 entry takes it) -- write it with dogactor.cpp. chrStepAwayFrom guards the frame list against overflow (PORT); the ROM writes past 32. The setter of non-1.0 node scales (limb loss) is not found yet.",
    "ranges": [

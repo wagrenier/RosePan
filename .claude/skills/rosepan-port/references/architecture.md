@@ -3048,6 +3048,22 @@ throughout (identifiers, env variables, files, shader macros):
   were folded into the body before them (align 0x1fc880, NagaChunk() 0x1fca70, setIndex 0x1fcd4c,
   getSize 0x1fcdf4; created in Ghidra). 0x1fce0c.. are tsk_bg_load.cpp vtable slots (0x2e4f8c..).
 
+## The background pack loaders (task/tsk_bg_load.cpp, 0x1fce0c..0x1fd424 + 0x290c1c..0x290e88, 2026-10-30)
+
+TskBGLoad : CmnITask (vtable 0x2e5000, kind 0x11, EE 0x880): FileReader at +0x04, its FileReadReq at
++0x0c, +0x30 cleared and never read, a 0x840-byte buffer at +0x40 holding the 64-aligned 0x800-byte
+pack head ((this & ~63) + 0x80). Base slots: init 0x1fce0c / term 0x1fce14 empty, exec 0x1fce1c =
+FileReader::update(1) == 0. startRead 0x1fce40 (name, buf, size, offset, open) fills the request
+(m_08 = open, seek set, close after) and starts it async. Two subclasses add slot 7 start(name, out),
+called directly by their ctors:
+- TskBGLoadArea (vtable 0x2e4fb8, EE 0x988): name copy +0x880 (0x100), step +0x980, out +0x984.
+  exec 0x1fd008: step 1 waits the head, BedPfh getTotalSize, allocDebug(round 2048, flags 0x101,
+  tsk_bg_load.cpp lines 183 / 216 with GamMan::releaseObjs(2, 1) between), *out = block (NULL when
+  both fail), reads the whole pack; step 2 waits it.
+- TskBGLoadMap (vtable 0x2e4f70): step +0x880, out +0x888 (+0x884 unwritten); the same for
+  data/bg/mapunit.bin (pointer at data 0x2d8ff4), allocDebug line 341 flags 1, no retry.
+Nothing in the ROM references either constructor or vtable: dead code (streamed areas).
+
 ## The script tasks (task/tsk_chr.cpp, 0x1e7f28..0x1f6c64, 2026-10-26)
 
 Unanchored (no source string): the run between tsk_man.cpp and tsk_scene.cpp, pinned by its classes.
