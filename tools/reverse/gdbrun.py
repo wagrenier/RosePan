@@ -84,6 +84,7 @@ def play():
     env.pop('ROSEPAN_AUTOPAD', None)
     if opt('--pad'):
         env['ROSEPAN_AUTOPAD'] = opt('--pad')
+    env.setdefault('ROSEPAN_SKIP_INTRO', '0')    # the pad is timed against the intro (build.py)
     log = DIR / 'log.txt'
     print(f'{exe.name} under gdb; output in {log}, a fault leaves {DIR / "crash.txt"}')
     with open(log, 'w', encoding='utf-8', errors='replace') as f:

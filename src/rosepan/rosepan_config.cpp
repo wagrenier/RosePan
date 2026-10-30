@@ -91,6 +91,12 @@ RosePan_Config rosepan_config = {
          * resolves, only no longer re-sent. */
         /* .resident_textures = */ 1,
     },
+    /* .paths = */ {""},
+    /* .game = */ {
+        /* Off: the intro is the ROM's and a first run shows it.  Start
+         * skips it anyway, so the setting only saves the press. */
+        /* .skip_intro        = */ 0,
+    },
 };
 
 namespace
@@ -832,6 +838,8 @@ static void ConfigLoadOnce(void)
     ReadString("paths", "data_folder", rosepan_config.paths.data_folder,
                sizeof(rosepan_config.paths.data_folder));
 
+    ReadInt("game", "skip_intro", &rosepan_config.game.skip_intro);
+
     RosePan_ConfigRenderer *r = &rosepan_config.renderer;
     ReadEnum("window", "mode", kWindowModes, &r->window_mode);
     ReadInt("window", "width", &r->window_width);
@@ -965,6 +973,13 @@ int RosePan_ConfigSave(void)
         ";   executable and above it, and whatever is found written back here.\n"
         ";   ROSEPAN_DATA_DIR overrides it for one run.\n"
         "data_folder = %s\n"
+        "\n"
+        "[game]\n"
+        "; 1 skips the logos and the two opening movies at launch (the\n"
+        ";   company logo film and the attract film) and opens on \"Press\n"
+        ";   START button\". 0 plays them as the PS2 did; Start skips them\n"
+        ";   either way. ROSEPAN_SKIP_INTRO overrides it for one run.\n"
+        "skip_intro = %d\n"
         "\n"
         "[window]\n"
         "; windowed | borderless   (borderless is desktop fullscreen)\n"
@@ -1127,6 +1142,7 @@ int RosePan_ConfigSave(void)
         "surround_scale = %.3f\n"
         "\n%s",
         rosepan_config.paths.data_folder,
+        rosepan_config.game.skip_intro != 0 ? 1 : 0,
         EnumToName(kWindowModes, r->window_mode),
         r->window_width,
         r->window_height,
@@ -1308,6 +1324,17 @@ int RosePan_ConfigCaptureAndSave(void)
 {
     RosePan_ConfigCapture();
     return RosePan_ConfigSave();
+}
+
+int RosePan_ConfigSkipIntro(void)
+{
+    const char *env = std::getenv("ROSEPAN_SKIP_INTRO");
+    if (env != nullptr && env[0] != '\0')
+    {
+        return std::strtol(env, nullptr, 10) != 0;
+    }
+    RosePan_ConfigLoad();
+    return rosepan_config.game.skip_intro != 0;
 }
 
 }

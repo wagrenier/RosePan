@@ -826,6 +826,11 @@ compare the shot sizes with a baseline build (git stash -u, build.py --run 60 wi
   name in that session: use `p 's_yieldSema'` style quoting, it worked for s_alarm). Plain 170 s runs
   can also freeze right after New Game (last log GamMan::setPcAnim, no frames after 2700) -- probably
   the same lost wake-up.
+  2026-10-30 (the intro skip): one of six runs went black after CP_LOGO **with frames still presenting**
+  (a shot every 0.5 s, i.e. v_interval 1, so execLogo had passed step 0x11): MV00_AD was opened but
+  RxMpeg::isReady never came (the ring never primed), and execLogo waits at step 0x12 for ever. So at
+  least one form of this stall is the movie ring, not waitVSync. The PC skip (mnu/mnutitle.cpp) also
+  waits for isReady there before closing; `[game] skip_intro = 1` never opens the movie at launch.
 - **Hidden functions inside GamMan bodies**: 0x1d1e88 (setObjScale) holds a float getter at 0x1d1f14,
   0x1d18c4 (clearObjAttr) one at 0x1d1958 (achr tail call 0x1d9f40); Ghidra's sizes include them.
 

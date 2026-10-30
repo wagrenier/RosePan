@@ -18,6 +18,7 @@ python build.py [--config relwithdebinfo|debug|release] [--run SECONDS [--shot-e
   stick) and masks the host's pads and keyboard (ROSEPAN_AUTOPAD, src/sdk/libpad.cpp). Without --pad,
   $ROSEPAN_AUTOPAD (if set) is passed on; `--pad none` runs with host input.
 - --env NAME=VALUE passes extra variables to the game (debug hooks a session adds: a warp, a probe).
+  Runs get ROSEPAN_SKIP_INTRO=0 unless it is set, so rosepan.ini's [game] skip_intro never shifts the pad.
 Override paths with ROSEPAN_MINGW_BIN / ROSEPAN_NINJA.
 """
 import os
@@ -110,6 +111,9 @@ if '--run' in sys.argv:
         old.unlink()
     every = sys.argv[sys.argv.index('--shot-every') + 1] if '--shot-every' in sys.argv else '60'
     run_env = dict(env, ROSEPAN_SHOT_DIR=str(shots), ROSEPAN_SHOT_EVERY=every)
+    # The scripted pad is timed against the boot's logos and movies: a skip_intro in the player's
+    # rosepan.ini must not move them (--env ROSEPAN_SKIP_INTRO=1 skips them for one run).
+    run_env.setdefault('ROSEPAN_SKIP_INTRO', '0')
     if 'ROSEPAN_DATA_DIR' not in run_env and rosepan.GAME_DATA is not None:
         run_env['ROSEPAN_DATA_DIR'] = str(rosepan.GAME_DATA)
     if '--pad' in sys.argv:

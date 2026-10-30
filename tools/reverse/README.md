@@ -110,6 +110,7 @@ The bootstrap host task copies ReiPan's platform layer; these hooks must survive
 | `ROSEPAN_SHOT_DIR` / `ROSEPAN_SHOT_EVERY`: save every Nth presented frame as `shot_<frame>.png` + `last.png` | rendering/reipan_renderer.cpp | build.py --run, tus.py finish (progress/) |
 | `ROSEPAN_AUTOPAD`: scripted pad 0, `<read>:<BUTTON>[*<reads>],...`, host input masked | sdk/libpad.cpp | build.py --pad, settings.smoke_pad |
 | `ROSEPAN_DATA_DIR`: the game's data folder | io/reipan_paths.cpp | build.py ($ROSEPAN_DATA) |
+| `ROSEPAN_SKIP_INTRO`: 0 / 1 over rosepan.ini's `[game] skip_intro` (the boot logos and movies) | rosepan_config.cpp, mnu/mnutitle.cpp | build.py / gdbrun.py set 0 unless given, so the pad's timing holds |
 | `ROSEPAN_GDB_DIR`, the game thread named `RosePanGame` | os/reipan_host.cpp | gdbrun.py / gdbdrive.py |
 | `[stub] <name> (ROR 0x%08x) reached` from `ROSEPAN_STUB` / `ROSEPAN_BRIDGE` | common/reipan_stub.h | tus.py (reached stubs rank first), status.py, stubgen.py |
 | log lines `[W]` / `[E]` for warnings and errors on stdout | io/reipan_log.cpp | build.py --run summary |
