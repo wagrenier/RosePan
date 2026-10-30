@@ -6,6 +6,18 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`eff/effsteam.cpp`, verify; pinned 0x179428..0x17a918 out of
+unassigned@001788ec): EffSteam1 / EffSteam1Prim / EffSteam2 / EffSteam2Prim / EffCloud1, all 17
+functions** (architecture.md "The vapour effects"). Not on the smoke path (the 15 s run is at the boot
+disclaimer; no creator of kinds 0x11 / 0x29 / 0x2b / 0x2d is in written code, probably room scripts):
+mark done when a room shows steam or a cloud. Doubts: (1) EffSteam1 always creates kind 0x2a, also when
+it is kind 0x2d (ported as the ROM has it); kind 0x2e is never created by code. (2) EffParam
+m_steam1prim.m_pos is a pointer (EffSteam1's matrix row 3): a script creating 0x2a / 0x2e directly would
+memcpy an EE address there -- convert in seqFunc281 if one does. (3) EffCloud1 starts in its wait
+(init sets m_frame = m_frames), so the first cloud shows m_frames % 30 frames after creation. Left of
+the old run unassigned@001788ec: EffMuzzleFlash1 + EffReload1 (0x1788ec..0x179428) and EffWater1 /
+EffWater3 (0x17a918..0x17c0f0) -- one file each family.
+
 **WRITTEN 2026-10-30 (`eff/effblood.cpp`, verify; pinned 0x16b62c..0x16dcc8 out of
 unassigned@0016afcc): the six blood effects, all 27 functions** (architecture.md "The blood effects").
 Not on the smoke path (the 15 s run is at the boot disclaimer; blood needs a hit or an enemy death):

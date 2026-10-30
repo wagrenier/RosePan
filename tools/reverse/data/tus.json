@@ -436,6 +436,24 @@
    "status": "verify",
    "why": "Obj176a3c (scene +0x837e0, the Eff* factory) is the effect manager: data/eff/eff.bin loader, the 0x110-entry table, draw sort. Code sits between EffLight3 and EffMuzzleFlash1 in alphabetical class link order (EffMan); EffFindItem1 code 0x176694..0x176a3c and its linkonce come from the same object (linkonce order Light3, FindItem1, MuzzleFlash1), so it joins this file. No source string names it."
   },
+  "eff/effsteam.cpp": {
+   "notes": "Not on the smoke path (15 s run stops at the boot disclaimer; no creator of kinds 0x11 / 0x29 / 0x2b / 0x2d in written code, probably room scripts via native 281): mark done when a room shows steam or a cloud. Doubts in open-items.md Next up: EffSteam1 always creates kind 0x2a even as kind 0x2d; m_steam1prim.m_pos is a host pointer (convert in seqFunc281 if a script creates 0x2a / 0x2e); EffCloud1 starts in its wait. EffSteam2::liveMain computes the alpha in double as the ROM does (soft-float helpers noted for callcheck). The rest of unassigned@001788ec: EffMuzzleFlash1 + EffReload1 (0x1788ec..0x179428, eff/ file of their own) and EffWater1 / EffWater3 (0x17a918..0x17c0f0).",
+   "ranges": [
+    [
+     "00179428",
+     "0017a918"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 09:41",
+     "status": "verify",
+     "summary": "eff/effsteam.cpp pinned 0x179428..0x17a918 out of unassigned@001788ec: EffSteam1 (vent puffing EffSteam1Prim every third frame of its period), EffSteam1Prim (growing fading sprite), EffSteam2 (wisp every 180..210 frames), EffSteam2Prim (rolling 4-vertex strip with cycling corner alphas), EffCloud1 (fog-faded drifting sprite) -- all 17 functions; EffParam gains m_steam1 / m_steam1prim / m_steam2 / m_steam2prim / m_cloud; FUN_0017a410 named EffCloud1::resetPos; the classes moved from effclasses.h to eff/effsteam.h"
+    }
+   ],
+   "status": "verify",
+   "why": "EffSteam1 / EffSteam1Prim / EffSteam2 / EffSteam2Prim and EffCloud1, contiguous after EffReload1 and before EffWater1; no source string; EffCloud1 sits after the steam classes against alphabetical link order, so it shares their file (vapour effects); one file per effect family as eff/efffog3.cpp"
+  },
   "emy/emy_bdl.cpp": {
    "notes": "Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run shows a Bdl (type 5) attacking or cowering at Brown's bark. Bdl is Bds's twin; the file was generated from emy_bds.cpp plus the differences listed in emy_bdl.h. ROM oddity kept (open-items.md Open questions): BdlOutAtk step 2's mode-4 sector uses 5pi/8 as lower bound (step 0 uses -3pi/8). The rest of the enemy run is unassigned@0014cde4 (Mrt, Clr, Nor, Grg, Fsh, Got, Pig, Dwf): next emy/emy_mrt.cpp 0x14cde4 up to ClrMain::initOut 0x14dc7c; MrtMain has an extra out (MrtOutYyy) and EE size 0x23c.",
    "ranges": [
@@ -2890,6 +2908,7 @@
   "unassigned@0016afcc": {},
   "unassigned@0016fb70": {},
   "unassigned@00172e4c": {},
+  "unassigned@001788ec": {},
   "unassigned@001810f4": {},
   "unassigned@001832e8": {},
   "unassigned@00184f2c": {},

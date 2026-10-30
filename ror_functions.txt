@@ -2449,6 +2449,11 @@
 /* 001791ac 00000178 */ EffReload1::init(){}  // ror
 /* 00179324 0000006c */ EffReload1::liveMain(){}  // ror
 /* 00179390 00000098 */ EffReload1::renderPreMain(){}  // ror
+
+// *****************************************************************************
+// FILE -- eff/effsteam.cpp
+// *****************************************************************************
+
 /* 00179428 00000134 */ EffSteam1::init(){}  // ror
 /* 0017955c 0000027c */ EffSteam1::liveMain(){}  // ror
 /* 001797d8 00000100 */ EffSteam1Prim::init(){}  // ror
@@ -2462,10 +2467,15 @@
 /* 00179ed0 000003ec */ EffSteam2Prim::renderMain(){}  // ror
 /* 0017a2bc 00000040 */ EffSteam2Prim::updateZDepth(){}  // ror
 /* 0017a2fc 00000114 */ EffCloud1::init(){}  // ror
-/* 0017a410 00000124 */ FUN_0017a410(){}
+/* 0017a410 00000124 */ EffCloud1::resetPos(){}  // ror
 /* 0017a534 000000b8 */ EffCloud1::liveMain(){}  // ror
 /* 0017a5ec 000002ec */ EffCloud1::renderMain(){}  // ror
 /* 0017a8d8 00000040 */ EffCloud1::updateZDepth(){}  // ror
+
+// *****************************************************************************
+// FILE -- (unassigned)
+// *****************************************************************************
+
 /* 0017a918 00000034 */ EffWater1::EffWater1(){}  // ror
 /* 0017a94c 0000007c */ EffWater1::~EffWater1(){}  // ror
 /* 0017a9c8 00000294 */ EffWater1::init(){}  // ror
