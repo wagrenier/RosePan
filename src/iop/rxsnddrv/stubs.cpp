@@ -21,38 +21,6 @@ static void RxSndDrvStubHit(int *once, const char *addr)
 
 #define RXSNDDRV_STUB(addr) do { static int once; RxSndDrvStubHit(&once, addr); } while (0)
 
-// stub of IOP 0x00002e00
-int RxSndDrvXseqOpen(u_int id, u_int iop)
-{
-    (void)iop;
-    (void)id;
-    RXSNDDRV_STUB("0x00002e00");
-    return 0;
-}
-
-// stub of IOP 0x00003170
-void RxSndDrvXseqInit(void)
-{
-    RXSNDDRV_STUB("0x00003170");
-}
-
-// stub of IOP 0x000031d4
-int RxSndDrvXseqClose(u_int id)
-{
-    (void)id;
-    RXSNDDRV_STUB("0x000031d4");
-    return 0;
-}
-
-// stub of IOP 0x00003310
-void RxSndDrvXseqCmd63(u_int a, u_int b, u_int c)
-{
-    (void)c;
-    (void)b;
-    (void)a;
-    RXSNDDRV_STUB("0x00003310");
-}
-
 // stub of IOP 0x000035c0
 void RxSndDrvVoiceTick(void)
 {
