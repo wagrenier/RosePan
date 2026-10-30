@@ -1027,3 +1027,8 @@ loop's start pointer in the asm when its twin starts elsewhere.
   and the replay see (one line each, a std::set) over a smoke run -- 26 lines told the whole story.
   Read the TEST bits (ATE 0, ATST 1-3, AREF 4-11, AFAIL 12-13, ZTE 16, ZTST 17-18) before trusting a
   comment that a register value is "the default".
+- Trap met on the way: a build in a git worktree (.claude/worktrees/<name>) does not find the
+  sibling checkouts cmake looks in for shadercross and FFmpeg (../MioPan resolves inside .claude),
+  so HLSL edits are silently not compiled -- the run uses the committed .spv / .dxil. Configure it
+  with -DSHADERCROSS_EXECUTABLE=E:/Programming/Git/Github/MioPan/extern/shadercross/windows/shadercross.exe
+  and check that resources/shaders/{spirv,dxil}/ changed before trusting a shader test.
