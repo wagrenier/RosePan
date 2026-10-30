@@ -3494,7 +3494,7 @@
 /* 001b4488 00001798 */ MnuItem::execPage4(){}  // ror
 /* 001b5c20 000008a4 */ MnuItem::execPage5(){}  // ror
 /* 001b64c4 0000050c */ MnuItem::execPage7(){}  // ror
-/* 001b69d0 000039d0 */ FUN_001b69d0(){}
+/* 001b69d0 000039d0 */ MnuItem::setDescLayout(){}  // ror
 /* 001ba3a0 00000544 */ MnuItem::execPage6(){}  // ror
 /* 001ba8e4 00000710 */ MnuItem::execPage9(){}  // ror
 /* 001baff4 00000138 */ MnuItem::buildFlagList(){}  // ror

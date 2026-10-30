@@ -25,6 +25,10 @@ Session 5 (2026-10-29): pages 11 / 12 / 13 (the gift grid, the offer list, the o
 setDescTexts 0x1bc8f8; every page is written. Left: FUN_001b69d0 (0x39d0 bytes, no callers found by
 ghidra.py refs -- dead code or reached through a table nobody found; decide whether to write it or
 mark it unreachable). Doubt: page 11 passes 0x32767 to MagSystem::setViewParam, copied as is.
+Session 6 (2026-10-29): 0x1b69d0 written as MnuItem::setDescLayout(mode) -- the layout switch of an
+unused description page (0 main page out, 1 description view in, 2 out, 3 main page back; its text
+rows 0x5c..0x5f are what the uncalled setDescTexts fills). TU complete, status verify: the first
+run that opens the item menu compares it with work/ref and marks it done.
 
 **WRITTEN 2026-10-29 (`eff/effcommon.cpp`, verify, pinned 0x16fb70..0x1704a4 out of
 unassigned@0016fb70): the 13 shared effect helpers -- effCalcViewDepth / effMoveToward / effVecLength,

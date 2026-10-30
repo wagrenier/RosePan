@@ -1897,7 +1897,7 @@
    "why": "MnuBoard2D ctor 0x1ad6b4 .. its fade helpers (mnuboard.rpk); 0x1adf04 is MnuMovie's constructor. File named after the class"
   },
   "mnu/mnuitem.cpp": {
-   "notes": "Left in this TU: FUN_001b69d0 (0x39d0 bytes between execPage7 and execPage6) has no callers (ghidra.py refs: no xrefs, jal, data words); a big sprite-state setter (setFade/setAnim/showSprite over many sprites, argument 1 picks a block). Decide whether to write it or mark it unreachable and finish the TU. Page 11 passes 0x32767 to MagSystem::setViewParam as the ROM does (open-items doubt). Screen: the 15 s smoke shows the boot disclaimer unchanged; the item menu is not on the smoke path (the picture book holds the long run), so pages 4/6/9..13 are unchecked against work/ref/mnuitem. Next blocker: what advances the picture book (open-items).",
+   "notes": "TU complete; status verify because nothing on the smoke path opens the item menu (the 15 s smoke shows the boot disclaimer, unchanged). setDescLayout and setDescTexts have no callers in the ROM (dead description page), so they cannot be seen even then. The first session whose run opens the item menu from a room compares it with work/ref (tm2png.py --scan data/mnurpk/mnuitem.rpk) and marks the TU done. PORT: mode 0 skips m_act_spr rows that are -1 (the ROM indexes before the sprite table). Open doubts unchanged: slot 12 / 13 reads through m_slot taken as no item; page 11 passes 0x32767 to MagSystem::setViewParam. Next blocker: what advances the picture book on the smoke path (open-items).",
    "ranges": [
     [
      "001ae954",
@@ -1929,9 +1929,14 @@
      "date": "2026-10-29 21:39",
      "status": "partial",
      "summary": "MnuItem session 5: execPage11 (gift grid under sequence bit 0x20000000: prompt window m_win2 'Choose a gift to offer.', page 9 cursor, frame sprites hidden, cross to page 13, circle/start close with global 0x11 = 0xa00), execPage12 (action list with the offer row 0x25, m_work[8]; nothing sets page 12), execPage13 (offer yes/no 0x2a/0x2b, m_work[9]; yes sets global 0x11 = the item, 0x15 = 3, 0x16 = 1 and closes), setDescTexts 0x1bc8f8 (uncalled: name sprite 0x5c, field 0x25 lines into 0x5d..0x5f); 1 name (ror-inferred); no stubs left in the TU."
+    },
+    {
+     "date": "2026-10-29 21:56",
+     "status": "verify",
+     "summary": "MnuItem session 6: the last function, 0x1b69d0, written as MnuItem::setDescLayout(mode): the layout switch of an unused description page (0 fades the main page out, 1 brings panel 0x58..0x5b / 0x60, the link panel and text rows 0x5c..0x5f in, 2 fades them out, 3 restores the main page); fadeInDescSlots holds the shared fade in; 1 name (ror-inferred). All 53 functions of the TU are written."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "MnuItem ctor 0x1ae954 .. the item helpers 0x1bc790..0x1bdae4 (called by MnuItem's pad states); 0x1bdae4 is MnuSelectLanguage's constructor. File named after the class"
   },
   "mnu/mnumap.cpp": {
