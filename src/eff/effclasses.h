@@ -26,6 +26,7 @@
 #include "eff/efffog3.h"
 #include "eff/efflight.h"
 #include "eff/effmuzzleflash.h"
+#include "eff/effreload.h"
 #include "eff/effsteam.h"
 #include "eff/effwater.h"
 
@@ -276,19 +277,7 @@ public:
 
 /* kind 0x26 (EffMuzzleFlash1): eff/effmuzzleflash.h. */
 
-/* kind 0x27; EE 0x90, vtable 0x2e4130. layout: host. */
-class EffReload1 : public Eff0
-{
-public:
-    EffReload1();                                                           // ROR 0x001790e4
-    virtual ~EffReload1();                                                  // ROR 0x0017911c
-    virtual int  init(const EffParam *param);                               // ROR 0x001791ac
-    virtual int  liveMain();                                                // ROR 0x00179324
-    virtual void renderPreMain(RENDERPARAM *param);                         // ROR 0x00179390
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0028ca88 (linkonce)
-
-    u_char m_body[0x6c];                                                    // ROR 0x24..0x90: not decoded yet
-};
+/* kind 0x27 (EffReload1): eff/effreload.h. */
 
 /* kinds 0x11, 0x29..0x2e (EffCloud1, EffSteam1 .. EffSteam2Prim): eff/effsteam.h. */
 

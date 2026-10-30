@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 13:53 at commit `6b11908` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 13:58 at commit `18b3f11` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5855**; stubs: **114**
+- reconstructed RoR functions: **5860**; stubs: **108**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -58,6 +58,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/eff/efflight.cpp` | 17 | 0 |
 | `src/eff/effman.cpp` | 32 | 0 |
 | `src/eff/effmuzzleflash.cpp` | 8 | 0 |
+| `src/eff/effreload.cpp` | 5 | 0 |
 | `src/eff/effsteam.cpp` | 17 | 0 |
 | `src/eff/effwater.cpp` | 15 | 0 |
 | `src/emy/emy_bdl.cpp` | 33 | 0 |
@@ -103,7 +104,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 90 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 84 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -188,9 +189,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 175 TUs: todo 86, partial 1, verify 139, done 17
-- next: **eff/effreload.cpp** (pinned in the queue)
-- pinned queue: eff/effreload.cpp, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
+- 175 TUs: todo 85, partial 1, verify 140, done 17
+- next: **None** (nothing on the frontier and no queued TU)
+- pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -212,6 +213,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `eff/efflight.cpp` 17/17 -- Verify: no smoke-path scene creates kind 0x23, the 240 s run still ends in the bus-stop intro text, unchanged. Mark done when a stormy scene shows the sky's lig
 - verify: `eff/effman.cpp` 32/32 -- Verify: the 200 s run creates EffLight1 (kind 0x21) and EffCameraAnim1 (kind 0xd) during the picture book; their init is a stub returning 0, so createEff delete
 - verify: `eff/effmuzzleflash.cpp` 8/8 -- Not on the smoke path: the 15 s run stops at the boot disclaimer; the flash needs a gun shot (MagLifePC::createMuzzleEff at the gun_mazzle node). Mark done when
+- verify: `eff/effreload.cpp` 5/5 -- Complete code; the smoke run only reaches the boot disclaimer, and the reload needs MagLifePC::reload in play with the gun, so nothing on screen shows it yet. T
 - verify: `eff/effsteam.cpp` 17/17 -- Not on the smoke path (15 s run stops at the boot disclaimer; no creator of kinds 0x11 / 0x29 / 0x2b / 0x2d in written code, probably room scripts via native 28
 - verify: `eff/effwater.cpp` 15/15 -- All 15 functions written, build and layoutcheck green, callcheck clean. Nothing on screen yet: the 15 s smoke run ends on the boot disclaimer and no code caller
 - verify: `emy/emy_bdl.cpp` 33/33 -- Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run sho
@@ -333,6 +335,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 13:58 `eff/effreload.cpp` verify: EffReload1 (kind 0x27, the gun reload model) written whole: ctor, dtor, init, liveMain, renderPreMain, linkonce renderMain; layout in eff/effreload.h; class mov
 - 2026-10-30 13:52 `eff/effmuzzleflash.cpp` verify: EffMuzzleFlash1 (kind 0x26), all 8 functions: init (muzzle position, flash and smoke parts, random roll, a point light in sets 0/1), liveMain (parts step, the l
 - 2026-10-30 13:42 `eff/effgeneric.cpp` verify: EffGeneric1 written, all 14 functions: ctor/dtor, init (model copy, motion, eff record file, node block, uv entities), liveMain, renderPreMain (keyed translatio
 - 2026-10-30 12:54 `eff/effbg.cpp` verify: EffBg1 (kind 0x34) written whole: ctor, dtor, init, liveMain, renderPreMain, applyTexKeys (0x16afcc..0x16b62c, pinned as eff/effbg.cpp). New eff/effgeneric.h de
@@ -340,11 +343,6 @@ Recent sessions:
 - 2026-10-30 12:27 `mag/magsceneoption.cpp` verify: MagScene::parseOption reconstructed: data/options.txt parsed by utlParseParam into the new m_option_bucket (0x4371c), names looked up in the 15-row option table
 - 2026-10-30 12:19 `mag/magscenedebug.cpp` verify: MagScene debug windows: updateDebug, openDebugWindow, closeDebugWindow reconstructed; m_22bc renamed m_dbg_window; extent pinned 0x14313c-0x143498
 - 2026-10-30 12:12 `emy/emy_dwf.cpp` verify: DwfOutAtkNear (Init, Exec, Term and its throw, claw and grab modes with startThrow / startClaw), DwfOutFort (Init, Exec, Term, startLeap), DwfOutDead (Init, Exe
-- 2026-10-30 11:54 `emy/emy_dwf.cpp` partial: DwfOutAtkFar (Init, Exec, Term, startThrow), DwfOutStared, DwfOutWin (chase and scripted win, execChase / execScripted) and DwfOutIrritate (Init, Exec, Term, ge
-
-| TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
-|---|---|---|---|---|---|
-| `eff/effreload.cpp` | todo | 0/5/5 | 0.8 | 1 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -365,7 +363,6 @@ Recent sessions:
 | `00174c44` | EffGeneric1::applyTexKeys | 1 | ror | missing | eff/effgeneric.cpp |
 | `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
 | `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |
-| `001790e4` | EffReload1::EffReload1 | 1 | ror | stub | eff/effreload.cpp |
 | `00241ac8` | rxSysTerm | 1 | lib-ctx | stub | rx/rxsys.cpp |
 | `001f7644` | VoiceManager::stop | 1 | ror | missing | task/tsk_scene.cpp |
 | `001f6c64` | DisplayMessage::DisplayMessage | 1 | ror | missing | task/tsk_scene.cpp |

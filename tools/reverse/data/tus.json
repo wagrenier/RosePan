@@ -1,6 +1,5 @@
 {
  "queue": [
-  "eff/effreload.cpp",
   "unassigned@0010f944",
   "unassigned@0022e840",
   "unassigned@00106658",
@@ -506,12 +505,21 @@
    "why": "EffMuzzleFlash1 (kind 0x26), its 4 virtuals and 4 draw helpers; between eff/effman.cpp and EffReload1; no source string names the file -- named after the class, sorting between effman and effsteam in the alphabetical link order"
   },
   "eff/effreload.cpp": {
+   "notes": "Complete code; the smoke run only reaches the boot disclaimer, and the reload needs MagLifePC::reload in play with the gun, so nothing on screen shows it yet. The first run that reloads the gun should see the pack model 0 played once through motion m_shots - 1 at the PC position and mark it done. Ported faithfully: the model is the pack's own (not copied, unlike EffGeneric1), no check that the pack has m_shots motions (the ROM trusts the pack). PC deviation: the constructor also clears m_root.",
    "ranges": [
     [
      "001790e4",
      "00179428"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-30 13:58",
+     "status": "verify",
+     "summary": "EffReload1 (kind 0x27, the gun reload model) written whole: ctor, dtor, init, liveMain, renderPreMain, linkonce renderMain; layout in eff/effreload.h; class moved out of effclasses.h, its six stubs deleted"
+    }
+   ],
+   "status": "verify",
    "why": "EffReload1 (kind 0x27, MagLifePC::reload), 5 functions; between EffMuzzleFlash1 and eff/effsteam.cpp; file named after the class (alphabetical link order)"
   },
   "eff/effsteam.cpp": {

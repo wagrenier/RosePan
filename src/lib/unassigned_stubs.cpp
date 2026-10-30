@@ -197,50 +197,11 @@ int TskDamage::stepKindA()
 
 // ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----
 
-// stub of ROR 0x001790e4
-EffReload1::EffReload1()
-{
-    ROSEPAN_STUB("EffReload1::EffReload1", 0x001790e4);
-}
-
-// stub of ROR 0x0017911c
-EffReload1::~EffReload1()
-{
-    ROSEPAN_STUB("EffReload1::~EffReload1", 0x0017911c);
-}
-
 // stub of ROR 0x0028c050
 // stub of ROR 0x00172b30
 // stub of ROR 0x00172cb8
 // stub of ROR 0x0028c058
 // stub of ROR 0x0028c060
-// stub of ROR 0x001791ac
-int EffReload1::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffReload1::init", 0x001791ac);
-    return {};
-}
-
-// stub of ROR 0x00179324
-int EffReload1::liveMain()
-{
-    ROSEPAN_STUB("EffReload1::liveMain", 0x00179324);
-    return {};
-}
-
-// stub of ROR 0x0028ca88
-u_long * EffReload1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffReload1::renderMain", 0x0028ca88);
-    return {};
-}
-
-// stub of ROR 0x00179390
-void EffReload1::renderPreMain(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("EffReload1::renderPreMain", 0x00179390);
-}
-
 // stub of ROR 0x0016dcc8
 int EffBreath1::init(const EffParam *param)
 {
