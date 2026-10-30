@@ -11,6 +11,7 @@
 #include "task/tsk_scene.h"
 #include "dog/dogtexinfo.h"
 #include "emy/emy_main.h"
+#include "emy/emy_dwf.h"
 #include "mag/maglifepc.h"
 #include "eff/eff0.h"
 #include "eff/effclasses.h"
@@ -35,7 +36,6 @@
 // ---- globals (hand-written) ----
 // (The global managers moved to system/system.cpp.)
 
-
 int g_emyManagerTaskId;         /* bss 0x7b45c0 */
 int g_bss_7a3d48;               /* bss 0x7a3d48 */
 int g_bss_7a3d4c;               /* bss 0x7a3d4c */
@@ -48,7 +48,6 @@ const char *g_versionNumber = "1.01";   /* data 0x2d9e18 -> 0x301720 */
 // ---- stubs (tools/reverse/stubgen.py) ----
 
 // ---- bridges (hand-written) ----
-
 
 // ──────────────────────────────────────────────────────────────────────
 // Equality without case: a..z fold to A..Z (unassigned@00106010, written
@@ -73,7 +72,6 @@ int utlStrEqualNoCase(const char *a, const char *b)
     }
 }
 
-
 // ──────────────────────────────────────────────────────────────────────
 // A step along angle on the ground plane (unassigned@001e6cac, written
 // ahead for native 152).
@@ -84,7 +82,6 @@ void utlAddPolar(float angle, float dist, float *v)
     v[0] = v[0] + sinf(angle) * dist;
     v[2] = v[2] + cosf(angle) * dist;
 }
-
 
 // ---- stubs (hand-written: EmyMain / EmyOut and the enemy classes' constructors and destructors, which stubgen does not write) ----
 
@@ -100,10 +97,266 @@ PigMain::~PigMain()
     ROSEPAN_STUB("PigMain::~PigMain", 0x0015a580);
 }
 
-// stub of ROR 0x00158798
-GotMain::~GotMain()
+// ---- stubs (hand-written: the DwfOut* virtual slots, emy/emy_dwf.cpp, which stubgen cannot see behind the vtable) ----
+
+// stub of ROR 0x0015e214
+void DwfOutDisappear::Init()
 {
-    ROSEPAN_STUB("GotMain::~GotMain", 0x00158798);
+    ROSEPAN_STUB("DwfOutDisappear::Init", 0x0015e214);
+}
+
+// stub of ROR 0x0015e2a0
+void DwfOutDisappear::Term()
+{
+    ROSEPAN_STUB("DwfOutDisappear::Term", 0x0015e2a0);
+}
+
+// stub of ROR 0x0015e324
+void DwfOutAppear::Init()
+{
+    ROSEPAN_STUB("DwfOutAppear::Init", 0x0015e324);
+}
+
+// stub of ROR 0x0015e344
+int DwfOutAppear::Exec()
+{
+    ROSEPAN_STUB("DwfOutAppear::Exec", 0x0015e344);
+    return -1;
+}
+
+// stub of ROR 0x0015e4b0
+void DwfOutWait::Init()
+{
+    ROSEPAN_STUB("DwfOutWait::Init", 0x0015e4b0);
+}
+
+// stub of ROR 0x0015e514
+int DwfOutWait::Exec()
+{
+    ROSEPAN_STUB("DwfOutWait::Exec", 0x0015e514);
+    return -1;
+}
+
+// stub of ROR 0x0015e51c
+void DwfOutWalk::Init()
+{
+    ROSEPAN_STUB("DwfOutWalk::Init", 0x0015e51c);
+}
+
+// stub of ROR 0x0015e5bc
+int DwfOutWalk::Exec()
+{
+    ROSEPAN_STUB("DwfOutWalk::Exec", 0x0015e5bc);
+    return -1;
+}
+
+// stub of ROR 0x0015ea8c
+void DwfOutWalk::Term()
+{
+    ROSEPAN_STUB("DwfOutWalk::Term", 0x0015ea8c);
+}
+
+// stub of ROR 0x0015eac4
+void DwfOutSerch::Init()
+{
+    ROSEPAN_STUB("DwfOutSerch::Init", 0x0015eac4);
+}
+
+// stub of ROR 0x0015eb00
+int DwfOutSerch::Exec()
+{
+    ROSEPAN_STUB("DwfOutSerch::Exec", 0x0015eb00);
+    return -1;
+}
+
+// stub of ROR 0x0015eba8
+void DwfOutSerch::Term()
+{
+    ROSEPAN_STUB("DwfOutSerch::Term", 0x0015eba8);
+}
+
+// stub of ROR 0x0015ebc4
+void DwfOutPickup::Init()
+{
+    ROSEPAN_STUB("DwfOutPickup::Init", 0x0015ebc4);
+}
+
+// stub of ROR 0x0015ec30
+int DwfOutPickup::Exec()
+{
+    ROSEPAN_STUB("DwfOutPickup::Exec", 0x0015ec30);
+    return -1;
+}
+
+// stub of ROR 0x0015ef78
+void DwfOutPickup::Term()
+{
+    ROSEPAN_STUB("DwfOutPickup::Term", 0x0015ef78);
+}
+
+// stub of ROR 0x0015efb0
+void DwfOutAtkNear::Init()
+{
+    ROSEPAN_STUB("DwfOutAtkNear::Init", 0x0015efb0);
+}
+
+// stub of ROR 0x0015f2fc
+int DwfOutAtkNear::Exec()
+{
+    ROSEPAN_STUB("DwfOutAtkNear::Exec", 0x0015f2fc);
+    return -1;
+}
+
+// stub of ROR 0x0015ef94
+void DwfOutAtkNear::Term()
+{
+    ROSEPAN_STUB("DwfOutAtkNear::Term", 0x0015ef94);
+}
+
+// stub of ROR 0x001606ec
+void DwfOutAtkFar::Init()
+{
+    ROSEPAN_STUB("DwfOutAtkFar::Init", 0x001606ec);
+}
+
+// stub of ROR 0x00160784
+int DwfOutAtkFar::Exec()
+{
+    ROSEPAN_STUB("DwfOutAtkFar::Exec", 0x00160784);
+    return -1;
+}
+
+// stub of ROR 0x0016097c
+void DwfOutAtkFar::Term()
+{
+    ROSEPAN_STUB("DwfOutAtkFar::Term", 0x0016097c);
+}
+
+// stub of ROR 0x00160a44
+void DwfOutStared::Init()
+{
+    ROSEPAN_STUB("DwfOutStared::Init", 0x00160a44);
+}
+
+// stub of ROR 0x00160b08
+int DwfOutStared::Exec()
+{
+    ROSEPAN_STUB("DwfOutStared::Exec", 0x00160b08);
+    return -1;
+}
+
+// stub of ROR 0x00160c9c
+void DwfOutStared::Term()
+{
+    ROSEPAN_STUB("DwfOutStared::Term", 0x00160c9c);
+}
+
+// stub of ROR 0x00160cb8
+void DwfOutWin::Init()
+{
+    ROSEPAN_STUB("DwfOutWin::Init", 0x00160cb8);
+}
+
+// stub of ROR 0x00160d50
+int DwfOutWin::Exec()
+{
+    ROSEPAN_STUB("DwfOutWin::Exec", 0x00160d50);
+    return -1;
+}
+
+// stub of ROR 0x00161160
+void DwfOutWin::Term()
+{
+    ROSEPAN_STUB("DwfOutWin::Term", 0x00161160);
+}
+
+// stub of ROR 0x0016117c
+void DwfOutParts::Init()
+{
+    ROSEPAN_STUB("DwfOutParts::Init", 0x0016117c);
+}
+
+// stub of ROR 0x001611e0
+int DwfOutParts::Exec()
+{
+    ROSEPAN_STUB("DwfOutParts::Exec", 0x001611e0);
+    return -1;
+}
+
+// stub of ROR 0x001611e8
+void DwfOutParts::Term()
+{
+    ROSEPAN_STUB("DwfOutParts::Term", 0x001611e8);
+}
+
+// stub of ROR 0x00161204
+void DwfOutTest::Init()
+{
+    ROSEPAN_STUB("DwfOutTest::Init", 0x00161204);
+}
+
+// stub of ROR 0x00161228
+int DwfOutTest::Exec()
+{
+    ROSEPAN_STUB("DwfOutTest::Exec", 0x00161228);
+    return -1;
+}
+
+// stub of ROR 0x00161230
+void DwfOutFort::Init()
+{
+    ROSEPAN_STUB("DwfOutFort::Init", 0x00161230);
+}
+
+// stub of ROR 0x00161300
+int DwfOutFort::Exec()
+{
+    ROSEPAN_STUB("DwfOutFort::Exec", 0x00161300);
+    return -1;
+}
+
+// stub of ROR 0x00161a90
+void DwfOutFort::Term()
+{
+    ROSEPAN_STUB("DwfOutFort::Term", 0x00161a90);
+}
+
+// stub of ROR 0x00161b48
+void DwfOutIrritate::Init()
+{
+    ROSEPAN_STUB("DwfOutIrritate::Init", 0x00161b48);
+}
+
+// stub of ROR 0x00161bd4
+int DwfOutIrritate::Exec()
+{
+    ROSEPAN_STUB("DwfOutIrritate::Exec", 0x00161bd4);
+    return -1;
+}
+
+// stub of ROR 0x00161d8c
+void DwfOutIrritate::Term()
+{
+    ROSEPAN_STUB("DwfOutIrritate::Term", 0x00161d8c);
+}
+
+// stub of ROR 0x00162118
+void DwfOutDead::Init()
+{
+    ROSEPAN_STUB("DwfOutDead::Init", 0x00162118);
+}
+
+// stub of ROR 0x00162394
+int DwfOutDead::Exec()
+{
+    ROSEPAN_STUB("DwfOutDead::Exec", 0x00162394);
+    return -1;
+}
+
+// stub of ROR 0x00162630
+void DwfOutDead::Term()
+{
+    ROSEPAN_STUB("DwfOutDead::Term", 0x00162630);
 }
 
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
@@ -283,36 +536,6 @@ void DwfMain::selectOut()
     ROSEPAN_STUB("DwfMain::selectOut", 0x0015cdac);
 }
 
-// stub of ROR 0x00158d5c
-void GotMain::after()
-{
-    ROSEPAN_STUB("GotMain::after", 0x00158d5c);
-}
-
-// stub of ROR 0x001587f8
-void GotMain::decide()
-{
-    ROSEPAN_STUB("GotMain::decide", 0x001587f8);
-}
-
-// stub of ROR 0x00158ca4
-void GotMain::exec()
-{
-    ROSEPAN_STUB("GotMain::exec", 0x00158ca4);
-}
-
-// stub of ROR 0x001583d4
-void GotMain::initOut()
-{
-    ROSEPAN_STUB("GotMain::initOut", 0x001583d4);
-}
-
-// stub of ROR 0x00158dd8
-void GotMain::selectOut()
-{
-    ROSEPAN_STUB("GotMain::selectOut", 0x00158dd8);
-}
-
 // stub of ROR 0x0015ab48
 void PigMain::after()
 {
@@ -342,9 +565,6 @@ void PigMain::selectOut()
 {
     ROSEPAN_STUB("PigMain::selectOut", 0x0015abc4);
 }
-
-
-
 
 // ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----
 
@@ -1385,7 +1605,4 @@ void EffCloud1::updateZDepth()
 {
     ROSEPAN_STUB("EffCloud1::updateZDepth", 0x0017a8d8);
 }
-
-
-
 

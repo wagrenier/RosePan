@@ -1959,6 +1959,19 @@ never asserts): sessions name them (`tus.py define --why`).
   (param 0x5e) is dead code (Init always stores step 1). The rest of the enemy run splits the same way:
   Got 0x1583d4 (GotMain::initOut opens it) .. 0x15a17c, Pig 0x15a17c .. 0x15c2a4, Dwf 0x15c2a4 (its
   dtor) .. EmyManager 0x16265c.
+  **GotMain** (type 2, emy/emy_got.cpp 0x1583d4..0x15a17c, 2026-10-30; EE 0x270, 6 slots): uses the
+  Dwf's outs (emy/emy_dwf.h) for states 1 Disappear, 2 Appear, 3 AtkNear, 4 Dead, 5 Stared, 6 Win,
+  7 Serch, 8 Walk, 9 Wait, 10 AtkFar, 11 Pickup, 13 Fort, 14 Irritate; its own 12 GotOutParts
+  (setGotMotion 10 / 1 / 0x4f / 0x14 by attr bits 8 / 0x10 and the held item's kind 0xa2e) and 15
+  GotOutTest. 22 input words at +0x204 (1 bark, 2 / 3 / 4 notify bits 4 / 8 / 1, 5 / 6 sight edge
+  +0x265, 7..12 in sight, 13 hasOid0Twice, 14 / 15 life, 16..20 attr bits, 21 PC class 4). Two targets
+  gate the inputs: any input whose next state (EmyStateMap::peek) is 11 needs m_pickup +0x268
+  (gotFindPickupItem 0x159800: nearest reachable type-5 fchr within 700 with flag 0x800000, not
+  0x4000000, not another enemy's target, kind 0xa2e only with attr 2 / 4), 12 needs m_part +0x26c
+  (gotFindPart 0x159af8: no held item; part kinds 0xbce / 0xbd2 / 0xbd0 / 0xbd1 / 0xbcf for attr bits
+  1 / 2 / 4 / 8 / 0x10, listed in the Got kind's GamSysData fields 0x4f..0x58). Both are looked up at
+  initOut and again on GamMan's reset frame (m_flags 0x40000). Pig and Dwf have their own copies of
+  the two finders (0x15b5ec / 0x15b8b8, 0x15daa8 / 0x15dd74).
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
   (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00

@@ -119,6 +119,14 @@ when a run shows a Clr (it drops from above, spits, climbs away). Next in the en
 (NorMain::initOut 0x150b24) up to GrgMain::initOut 0x153e40, then Grg, Fsh, Got, Pig, Dwf
 (unassigned@0014dc7c, now starting at 0x150b24).
 
+**WRITTEN 2026-10-30 (`emy/emy_got.cpp`, verify; split out of unassigned@001583d4): GotMain (type 2)
+and its own outs GotOutParts / GotOutTest, all 31 functions** (architecture.md). The Got borrows
+thirteen of the Dwf's outs (states 1..11, 13, 14), declared in the new emy/emy_dwf.h with hand stubs
+of their 41 virtual slots in lib/unassigned_stubs.cpp (stubgen cannot see behind a vtable; the Dwf
+session deletes them). No enemy spawns on the smoke path; mark done when a run shows a Got picking up
+an item or a part. Next in the enemy run: Pig (PigMain::initOut 0x15a17c) up to DwfMain's destructor
+0x15c2a4, then Dwf 0x15c2a4..0x16265c (its outs, shared with Pig and Got) -- unassigned@0015a17c.
+
 **WRITTEN 2026-10-29 (`emy/emy_mrt.cpp`, verify; split out of unassigned@0014cde4): MrtMain (type 7)
 and its four outs, all 26 functions** (architecture.md). No enemy spawns on the smoke path; mark done
 when a run shows a Mrt. Doubt: decide forces input 3 whenever pad 0's triangle is pressed
@@ -1294,6 +1302,11 @@ to adapt when a TU reaches them:
   kind 0xc EffParam's tail are uninitialised stack in the ROM (zero on the host). The Ghidra session
   went down mid-run once (it rebooted); names applied after it came back.
 
+- (2026-10-30, emy/emy_got.cpp) **GotOutTest::Exec 0x15a060 loops on motion 0x36**: step 1 restarts
+  0x36 and stays at step 1, so steps 2 (0x34) and 3 (0x30) are dead code in the ROM; ported as is.
+  GotMain::decide refreshes both targets (gotFindPickupItem / gotFindPart) only on GamMan's reset
+  frame (m_flags 0x40000), so a pickup item or part that appears later never unblocks states 11 / 12
+  until then -- check when a Got first shows.
 - (2026-10-29, emy/emy_bdl.cpp) **BdlOutAtk's step 2 sector test for mode 4 uses 5pi / 8 as its lower
   bound** (ROM 0x14c6fc shares mode 2's constant; step 0 uses -3pi / 8), so a mode-4 Bdl standing in
   step 2 restarts its turn for almost any angle. Ported as the ROM has it (bdlAtkInSectorAgain). The

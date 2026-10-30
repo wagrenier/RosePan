@@ -8675,6 +8675,186 @@
   "was": "FUN_001583d4",
   "why": "called right after the vtable store in the ELF's inline GotMain::GotMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
  },
+ "00158798": {
+  "name": "GotMain::~GotMain",
+  "tag": "ror-inferred",
+  "was": "FUN_00158798",
+  "why": "GotMain vtable 0x2e2d20 slot 1: vptr store, ~EmyMain then operator_delete on the deleting flag"
+ },
+ "001587f8": {
+  "name": "GotMain::decide",
+  "tag": "ror-inferred",
+  "was": "FUN_001587f8",
+  "why": "GotMain vtable slot 4: m_req from inputs 21..1 at +0x204, each gated by the next state (11 needs a pickup item, 12 a part); refreshes both targets when debug flag 0x40000 is set"
+ },
+ "00158ca4": {
+  "name": "GotMain::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00158ca4",
+  "why": "GotMain vtable slot 5: EmyStateMap::next on m_req, notify bits 1 / 2 (kill forces state 4)"
+ },
+ "00158d5c": {
+  "name": "GotMain::after",
+  "tag": "ror-inferred",
+  "was": "FUN_00158d5c",
+  "why": "GotMain vtable slot 6: Term / selectOut on m_changed, then the out's Exec into m_req"
+ },
+ "00158dd8": {
+  "name": "GotMain::selectOut",
+  "tag": "ror-inferred",
+  "was": "FUN_00158dd8",
+  "why": "GotMain vtable slot 2: m_out[state] for states 1..15, Init, then the transition row into the input words +0x204"
+ },
+ "00158ea0": {
+  "name": "GotMain::isPCSameArea",
+  "tag": "ror-inferred",
+  "was": "FUN_00158ea0",
+  "why": "one-line wrapper of EmyMain::isPCSameArea called by the sight test, as FshMain's"
+ },
+ "00158eb4": {
+  "name": "GotMain::testBarkReact",
+  "tag": "ror-inferred",
+  "was": "FUN_00158eb4",
+  "why": "decide input 1: unless the next state is blocked, EmyMain::testBarkReact"
+ },
+ "00158f2c": {
+  "name": "GotMain::isTargetInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_00158f2c",
+  "why": "emyChkInSight of the PC or the dog within pi, range param 0x5f or by PC class (60 / 100 / 200), same as FshMain::isTargetInSight"
+ },
+ "0015908c": {
+  "name": "GotMain::isPCStateClass1",
+  "tag": "ror-inferred",
+  "was": "FUN_0015908c",
+  "why": "decide input 7: unless the next state is blocked, EmyMain::isPCStateClass1"
+ },
+ "00159104": {
+  "name": "GotMain::isPCAhead",
+  "tag": "ror-inferred",
+  "was": "FUN_00159104",
+  "why": "decide input 8: unless blocked, EmyMain::isPCAhead"
+ },
+ "0015917c": {
+  "name": "GotMain::isPCStateClass2",
+  "tag": "ror-inferred",
+  "was": "FUN_0015917c",
+  "why": "decide input 9: unless blocked, EmyMain::isPCStateClass2"
+ },
+ "001591f4": {
+  "name": "GotMain::isPCClass7OffAxis",
+  "tag": "ror-inferred",
+  "was": "FUN_001591f4",
+  "why": "decide input 10: unless blocked, EmyMain::isPCClass7OffAxis"
+ },
+ "0015926c": {
+  "name": "GotMain::isPCNear",
+  "tag": "ror-inferred",
+  "was": "FUN_0015926c",
+  "why": "decide input 11: unless blocked, EmyMain::isPCNear"
+ },
+ "001592f0": {
+  "name": "GotMain::isPCOrDogInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_001592f0",
+  "why": "decide input 12: unless blocked, EmyMain::isPCOrDogInSight"
+ },
+ "00159368": {
+  "name": "GotMain::hasOid0Twice",
+  "tag": "ror-inferred",
+  "was": "FUN_00159368",
+  "why": "decide input 13: unless blocked, EmyMain::hasOid0Twice"
+ },
+ "001593e0": {
+  "name": "GotMain::isLowLife",
+  "tag": "ror-inferred",
+  "was": "FUN_001593e0",
+  "why": "decide input 14: unless blocked, EmyMain::isLowLife"
+ },
+ "00159458": {
+  "name": "GotMain::isHalfLife",
+  "tag": "ror-inferred",
+  "was": "FUN_00159458",
+  "why": "decide input 15: unless blocked, EmyMain::isHalfLife"
+ },
+ "001594d0": {
+  "name": "GotMain::testAttr8And10",
+  "tag": "ror-inferred",
+  "was": "FUN_001594d0",
+  "why": "decide input 16: unless blocked, achr attr word 0 bits 8 and 0x10 (FshMain's tests)"
+ },
+ "00159560": {
+  "name": "GotMain::testAttr2And4",
+  "tag": "ror-inferred",
+  "was": "FUN_00159560",
+  "why": "decide input 17: unless blocked, attr bits 2 and 4"
+ },
+ "001595f0": {
+  "name": "GotMain::testAttr1",
+  "tag": "ror-inferred",
+  "was": "FUN_001595f0",
+  "why": "decide input 18: unless blocked, attr bit 1"
+ },
+ "00159668": {
+  "name": "GotMain::testAttr2Or4",
+  "tag": "ror-inferred",
+  "was": "FUN_00159668",
+  "why": "decide input 19: unless blocked, attr bit 2 or 4"
+ },
+ "001596f8": {
+  "name": "GotMain::testAttr8Or10",
+  "tag": "ror-inferred",
+  "was": "FUN_001596f8",
+  "why": "decide input 20: unless blocked, attr bit 8 or 0x10"
+ },
+ "00159788": {
+  "name": "GotMain::isPCStateClass4",
+  "tag": "ror-inferred",
+  "was": "FUN_00159788",
+  "why": "decide input 21: unless blocked, EmyMain::isPCStateClass4"
+ },
+ "00159800": {
+  "name": "gotFindPickupItem",
+  "tag": "ror-inferred",
+  "was": "FUN_00159800",
+  "why": "nearest (x+z distance, under 700) reachable type-5 fchr with flag 0x800000 no other enemy targets, kind 0xa2e only with attr 2 or 4; initOut / decide store it at +0x268, the gate of state 11 (DwfOutPickup)"
+ },
+ "00159af8": {
+  "name": "gotFindPart",
+  "tag": "ror-inferred",
+  "was": "FUN_00159af8",
+  "why": "without a held item (param 0x67): the nearest reachable fchr whose kind 0xbce..0xbd2 matches an attr bit and the Got kind's sysdata fields 0x4f..0x58; stored at +0x26c, the gate of state 12 (GotOutParts)"
+ },
+ "00159f98": {
+  "name": "GotOutParts::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00159f98",
+  "why": "GotOutParts vtable 0x2e2d60 slot 2: setGotMotion 10 / 1 / 0x4f / 0x14 by attr bits 8 / 0x10 and the held item's kind 0xa2e"
+ },
+ "0015a034": {
+  "name": "GotOutParts::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015a034",
+  "why": "GotOutParts vtable slot 3: returns -1"
+ },
+ "0015a03c": {
+  "name": "GotOutParts::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0015a03c",
+  "why": "GotOutParts vtable slot 4: termCommon"
+ },
+ "0015a058": {
+  "name": "GotOutTest::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015a058",
+  "why": "GotOutTest vtable 0x2e2d90 slot 2: step 0"
+ },
+ "0015a060": {
+  "name": "GotOutTest::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015a060",
+  "why": "GotOutTest vtable slot 3: setGotMotion 0x36 / 0x34 / 0x30 walk-through by motion end"
+ },
  "0015a17c": {
   "name": "PigMain::initOut",
   "tag": "ror-inferred",
@@ -8686,6 +8866,252 @@
   "tag": "ror-inferred",
   "was": "FUN_0015c304",
   "why": "called right after the vtable store in the ELF's inline DwfMain::DwfMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "0015e214": {
+  "name": "DwfOutDisappear::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015e214",
+  "why": "DwfOutDisappear vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015e2a0": {
+  "name": "DwfOutDisappear::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0015e2a0",
+  "why": "DwfOutDisappear vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015e324": {
+  "name": "DwfOutAppear::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015e324",
+  "why": "DwfOutAppear vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015e344": {
+  "name": "DwfOutAppear::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015e344",
+  "why": "DwfOutAppear vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015e4b0": {
+  "name": "DwfOutWait::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015e4b0",
+  "why": "DwfOutWait vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015e514": {
+  "name": "DwfOutWait::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015e514",
+  "why": "DwfOutWait vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015e51c": {
+  "name": "DwfOutWalk::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015e51c",
+  "why": "DwfOutWalk vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015e5bc": {
+  "name": "DwfOutWalk::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015e5bc",
+  "why": "DwfOutWalk vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015ea8c": {
+  "name": "DwfOutWalk::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ea8c",
+  "why": "DwfOutWalk vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015eac4": {
+  "name": "DwfOutSerch::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015eac4",
+  "why": "DwfOutSerch vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015eb00": {
+  "name": "DwfOutSerch::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015eb00",
+  "why": "DwfOutSerch vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015eba8": {
+  "name": "DwfOutSerch::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0015eba8",
+  "why": "DwfOutSerch vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015ebc4": {
+  "name": "DwfOutPickup::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ebc4",
+  "why": "DwfOutPickup vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015ec30": {
+  "name": "DwfOutPickup::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ec30",
+  "why": "DwfOutPickup vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015ef78": {
+  "name": "DwfOutPickup::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ef78",
+  "why": "DwfOutPickup vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015ef94": {
+  "name": "DwfOutAtkNear::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ef94",
+  "why": "DwfOutAtkNear vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015efb0": {
+  "name": "DwfOutAtkNear::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0015efb0",
+  "why": "DwfOutAtkNear vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015f2fc": {
+  "name": "DwfOutAtkNear::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015f2fc",
+  "why": "DwfOutAtkNear vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "001606ec": {
+  "name": "DwfOutAtkFar::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_001606ec",
+  "why": "DwfOutAtkFar vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00160784": {
+  "name": "DwfOutAtkFar::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00160784",
+  "why": "DwfOutAtkFar vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0016097c": {
+  "name": "DwfOutAtkFar::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_0016097c",
+  "why": "DwfOutAtkFar vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00160a44": {
+  "name": "DwfOutStared::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00160a44",
+  "why": "DwfOutStared vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00160b08": {
+  "name": "DwfOutStared::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00160b08",
+  "why": "DwfOutStared vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00160c9c": {
+  "name": "DwfOutStared::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00160c9c",
+  "why": "DwfOutStared vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00160cb8": {
+  "name": "DwfOutWin::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00160cb8",
+  "why": "DwfOutWin vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00160d50": {
+  "name": "DwfOutWin::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00160d50",
+  "why": "DwfOutWin vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00161160": {
+  "name": "DwfOutWin::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00161160",
+  "why": "DwfOutWin vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0016117c": {
+  "name": "DwfOutParts::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_0016117c",
+  "why": "DwfOutParts vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "001611e0": {
+  "name": "DwfOutParts::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001611e0",
+  "why": "DwfOutParts vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "001611e8": {
+  "name": "DwfOutParts::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_001611e8",
+  "why": "DwfOutParts vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00161204": {
+  "name": "DwfOutTest::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00161204",
+  "why": "DwfOutTest vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00161228": {
+  "name": "DwfOutTest::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00161228",
+  "why": "DwfOutTest vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00161230": {
+  "name": "DwfOutFort::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00161230",
+  "why": "DwfOutFort vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00161300": {
+  "name": "DwfOutFort::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00161300",
+  "why": "DwfOutFort vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00161a90": {
+  "name": "DwfOutFort::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00161a90",
+  "why": "DwfOutFort vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00161b48": {
+  "name": "DwfOutIrritate::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00161b48",
+  "why": "DwfOutIrritate vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00161bd4": {
+  "name": "DwfOutIrritate::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00161bd4",
+  "why": "DwfOutIrritate vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00161d8c": {
+  "name": "DwfOutIrritate::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00161d8c",
+  "why": "DwfOutIrritate vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00162118": {
+  "name": "DwfOutDead::Init",
+  "tag": "ror-inferred",
+  "was": "FUN_00162118",
+  "why": "DwfOutDead vtable slot 2 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00162394": {
+  "name": "DwfOutDead::Exec",
+  "tag": "ror-inferred",
+  "was": "FUN_00162394",
+  "why": "DwfOutDead vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00162630": {
+  "name": "DwfOutDead::Term",
+  "tag": "ror-inferred",
+  "was": "FUN_00162630",
+  "why": "DwfOutDead vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
  },
  "0016265c": {
   "name": "EmyManager::EmyManager",
