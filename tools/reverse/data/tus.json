@@ -508,6 +508,15 @@
    "status": "verify",
    "why": "ClrMain + its five ClrOut* classes: ClrMain::initOut 0x14dc7c (every XxxMain::initOut opens its file) up to NorMain::initOut 0x150b24 which opens the Nor file; no source string, named like emy_bds.cpp"
   },
+  "emy/emy_dwf.cpp": {
+   "ranges": [
+    [
+     "0015c2a4",
+     "0016265c"
+    ]
+   ],
+   "why": "DwfMain's destructor 0x15c2a4 (Dwf puts its dtor before initOut, like Fsh) up to EmyManager::EmyManager 0x16265c; DwfMain and every DwfOut* (rtti)."
+  },
   "emy/emy_fsh.cpp": {
    "notes": "Complete code, nothing on screen yet: the 15 s run stays on the boot disclaimer and no enemy spawns on the smoke path. Mark done when a run shows an Fsh (crawls, rises and lowers between poses, bites; flinches when the PC bumps it). ROM oddities kept as they are: FshOutDead::Init always stores step 1, so the revival step 0 never runs; FshOutStared's limit table 0x2f0c78 is all zero; FshOutAtk::isTouching's dog pass tests the spine matrix's first row because magBwnNop is empty. PC: EE 0x238 is m_input[13] here, EmyMain::m_238 on the host. Next in the enemy run (unassigned@001583d4): Got 0x1583d4..0x15a17c, Pig 0x15a17c..0x15c2a4, Dwf 0x15c2a4 (its dtor, before DwfMain::initOut 0x15c304)..0x16265c; their decide/test-input shapes match Fsh's (EmyStateMap::peek variants).",
    "ranges": [
@@ -693,6 +702,24 @@
    ],
    "status": "verify",
    "why": "The EmyOut base class (ctor 0x166a1c, vptr +0x34) and the emy* helpers its 77 subclasses call (emyStartMove, emyChkInSight, emyCanReach, emyChkHitReach); ends where Eff0 (0x16a914) starts. No source string; named after the class like emy_main / emy_hfm."
+  },
+  "emy/emy_pig.cpp": {
+   "notes": "Complete; the Pig is the Got's twin (decide, tests, sight test, finders) with its own part kinds 0xbd3..0xbd7, a pickup gate on object flag 1, 24 input words and a 16th state. PigOutTackle returns inputs 22 (done) and 23 (chase failed). No enemy spawns on the 15 s smoke path (boot disclaimer): mark done when a run shows a Pig tackling. Next: emy/emy_dwf.cpp 0x15c2a4..0x16265c, the last enemy file; it replaces the hand stubs of DwfMain and the DwfOut slots in lib/unassigned_stubs.cpp and moves DwfMain from lib/unassigned.h into emy/emy_dwf.h.",
+   "ranges": [
+    [
+     "0015a17c",
+     "0015c2a4"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 10:54",
+     "status": "verify",
+     "summary": "PigMain (type 1) and its outs PigOutParts, PigOutTackle, PigOutTest: all 34 functions; unassigned@0015a17c split into emy/emy_pig.cpp and emy/emy_dwf.cpp"
+    }
+   ],
+   "status": "verify",
+   "why": "PigMain::initOut (every enemy file opens with its initOut) up to DwfMain's destructor 0x15c2a4; PigMain's vtable slots, its finders and PigOutParts/Tackle/Test (rtti). Like emy_got.cpp."
   },
   "fix/aspect_ratio.cpp": {
    "notes": "Seen: the forest bus-stop room at 16:9 (progress shot, 796x448) and about 3.6:1 shows more forest at the sides with Jennifer and the message frame unstretched; the centre matches the 4:3 run; title and menu 2D are pillarboxed at their shape. The user tested the aspect modes live and confirmed it works. The visual runs used build.py --config release because another session was play-testing from cmake-build-relwithdebinfo (hazards.md Build). Left in the 4:3 band, not stretched: VU1 strips (rosepan_i3d DrawStrip screen-space XY) and textured full-frame sprites (frame copies, movie). One 16:9 run had all-black shots from the title on while its log reached the room; two later runs did not repeat it (probably the window being handled during the run). For the references: architecture.md PC platform layer, open-items.md Next up and hazards.md Build were written in this commit.",
@@ -2931,6 +2958,7 @@
   "unassigned@00153e40": {},
   "unassigned@00155d54": {},
   "unassigned@001583d4": {},
+  "unassigned@0015a17c": {},
   "unassigned@00164fc0": {},
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},

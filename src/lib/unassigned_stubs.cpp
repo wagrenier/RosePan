@@ -91,12 +91,6 @@ DwfMain::~DwfMain()
     ROSEPAN_STUB("DwfMain::~DwfMain", 0x0015c2a4);
 }
 
-// stub of ROR 0x0015a580
-PigMain::~PigMain()
-{
-    ROSEPAN_STUB("PigMain::~PigMain", 0x0015a580);
-}
-
 // ---- stubs (hand-written: the DwfOut* virtual slots, emy/emy_dwf.cpp, which stubgen cannot see behind the vtable) ----
 
 // stub of ROR 0x0015e214
@@ -502,36 +496,6 @@ void DwfMain::initOut()
 void DwfMain::selectOut()
 {
     ROSEPAN_STUB("DwfMain::selectOut", 0x0015cdac);
-}
-
-// stub of ROR 0x0015ab48
-void PigMain::after()
-{
-    ROSEPAN_STUB("PigMain::after", 0x0015ab48);
-}
-
-// stub of ROR 0x0015a5e0
-void PigMain::decide()
-{
-    ROSEPAN_STUB("PigMain::decide", 0x0015a5e0);
-}
-
-// stub of ROR 0x0015aa8c
-void PigMain::exec()
-{
-    ROSEPAN_STUB("PigMain::exec", 0x0015aa8c);
-}
-
-// stub of ROR 0x0015a17c
-void PigMain::initOut()
-{
-    ROSEPAN_STUB("PigMain::initOut", 0x0015a17c);
-}
-
-// stub of ROR 0x0015abc4
-void PigMain::selectOut()
-{
-    ROSEPAN_STUB("PigMain::selectOut", 0x0015abc4);
 }
 
 // ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----

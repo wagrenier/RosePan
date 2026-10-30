@@ -144,6 +144,15 @@ when a run shows a Clr (it drops from above, spits, climbs away). Next in the en
 (NorMain::initOut 0x150b24) up to GrgMain::initOut 0x153e40, then Grg, Fsh, Got, Pig, Dwf
 (unassigned@0014dc7c, now starting at 0x150b24).
 
+**WRITTEN 2026-10-30 (`emy/emy_pig.cpp`, verify; split out of unassigned@0015a17c): PigMain (type 1)
+and its own outs PigOutParts / PigOutTackle / PigOutTest, all 34 functions** (architecture.md). The Pig
+is the Got's twin (its decide, tests, sight test and finders were derived from emy_got.cpp and checked
+against the decompilation). No enemy spawns on the smoke path; mark done when a run shows a Pig
+tackling (input 22 / 23 come from PigOutTackle). unassigned@0015a17c is now pinned as emy/emy_pig.cpp
+0x15a17c..0x15c2a4 and emy/emy_dwf.cpp 0x15c2a4..0x16265c: the Dwf is the last enemy file; its session
+replaces the 41 hand stubs of the DwfOut* slots and DwfMain's 6 in lib/unassigned_stubs.cpp and moves
+DwfMain out of lib/unassigned.h into emy/emy_dwf.h.
+
 **WRITTEN 2026-10-30 (`emy/emy_got.cpp`, verify; split out of unassigned@001583d4): GotMain (type 2)
 and its own outs GotOutParts / GotOutTest, all 31 functions** (architecture.md). The Got borrows
 thirteen of the Dwf's outs (states 1..11, 13, 14), declared in the new emy/emy_dwf.h with hand stubs

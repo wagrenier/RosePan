@@ -55,24 +55,8 @@ public:
     void initOut();                                                      // ROR 0x0015c304
 };
 
-/* Type 1 (vtable from rtti.py; EE 0x270). layout: host -- polymorphic. */
-class PigMain : public EmyMain
-{
-public:
-    PigMain(u_int oid, u_short name, ACHRstat *param, const _tagEnemyParam *prm,  // ROR 0x00289470
-            const _tagEnemyTransition *trans, float *pos)
-        : EmyMain(oid, name, param, prm, trans, pos)
-    {
-        initOut();
-    }
-    ~PigMain();                                                         // EE slot 1 (+0x08), ROR 0x0015a580
-    void selectOut();                                                    // EE slot 2 (+0x10), ROR 0x0015abc4
-    int  GetType() { return 1; }                                       // EE slot 3 (+0x18), ROR 0x002894a8
-    void decide();                                                       // EE slot 4 (+0x20), ROR 0x0015a5e0
-    void exec();                                                         // EE slot 5 (+0x28), ROR 0x0015aa8c
-    void after();                                                        // EE slot 6 (+0x30), ROR 0x0015ab48
-    void initOut();                                                      // ROR 0x0015a17c
-};
+/* Type 1, PigMain: emy/emy_pig.h. */
+#include "emy/emy_pig.h"
 
 /* Type 2, GotMain: emy/emy_got.h. */
 #include "emy/emy_got.h"
