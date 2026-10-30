@@ -1373,8 +1373,7 @@ to adapt when a TU reaches them:
   ROM; quirk kept: m_vib_off is never cleared after switching vibration on, so each redraw of the row
   pulses the pad). The split of unassigned@001ab474 also pinned mnu/mnuboard2d.cpp, mnu/mnumovie.cpp,
   mnu/mnunow.cpp and mnu/mnuitem.cpp (todo; file names from their classes, no source strings).
-  0x1bdae4..0x1bdc9c (MnuSelectLanguage ctor / dtor / init / term / isInit) is still outside
-  mnu/mnuSelectLanguage.cpp's inferred extent: pin that file from 0x1bdae4 when it is worked on.
+  (Resolved 2026-10-30: mnu/mnuSelectLanguage.cpp pinned 0x1bdae4..0x1be2cc and written.)
   Pad for the options: "1800:START,2400:START,3000:DOWN,3100:DOWN,3200:CROSS" opens them (~3600 frames).
 - Black screenshots (2026-10-29): at a 5120x1417 window one 140 s run had every shot black from frame
   1740 on, while the next three runs (one on the code before mnuopt, two after) showed the title; the
@@ -1907,8 +1906,8 @@ to adapt when a TU reaches them:
   fileExists stubs are gone; main's now-loading object is the extern `g_nowLoading`. Black screen:
   every FileReader::read caller that runs in the boot (GamMan::loadSystemData / loadStage, MagScene's
   loaders behind MagScene::start) is still a stub. What is left of unassigned@001bde58: the
-  language-select menu code 0x1bde58..0x1be2cc (mnusllg.rpk, SprMan calls: belongs to
-  mnu/mnuSelectLanguage.cpp, whose functions start at ~0x1bd028 -- pin it with that TU) and GamFont
+  language-select menu code 0x1bde58..0x1be2cc (resolved 2026-10-30: mnu/mnuSelectLanguage.cpp,
+  pinned 0x1bdae4..0x1be2cc) and GamFont
   0x1beb70..0x1c05c0 (game/gamfont.cpp is the natural key; GamFont::drawChar is sprman's text path).
 
 - 2026-10-22: host task `setup/i3d_draw_module.cpp` (`verify`): the native i3d module
@@ -1970,3 +1969,12 @@ to adapt when a TU reaches them:
   in `tools/reverse/` (GCC 2 demangler, section symbols, GCC 2 RTTI with vptr offsets, the library
   matcher, file inference from RoR's own source strings, the TU queue, build / check / autopilot), the
   address map in `data/layout.json`, and the first two host tasks.
+
+- **Language select on the US disc** (2026-10-30, mnu/mnuSelectLanguage.cpp, `verify`): the US
+  disc has no DATA/MNURPK/MNUSLLG.RPK (the screen's location.tm2 background), so the language
+  menu (MagLifeMenuSelLang, menu 0x10010) looks like a PAL leftover the US scripts never open;
+  if something does open it, loadTexture spins forever on the missing pack (the ROM does the
+  same). Not seen on screen; mark it done only if a PAL data set is ever used, or confirm from
+  W099's script (open-items "what W099's script does before system call 0x16") that the US boot
+  never opens 0x10010.
+

@@ -2998,3 +2998,14 @@ not identified yet.
   re-plan. Walk motions: m_parsonality + 3, 7 near the goal (+0xab4, the kind row's float word 4, also
   switches +0x50 to the +0x58 speed), 0xb carrying (m_mode 0). +0xa80 is the turn side (1 = motion 8).
 - emyPlaySE 0x16a8a4 returns playSE's SndMan id (both tasks keep it).
+
+### Language select (mnu/mnuSelectLanguage.cpp, 0x1bdae4..0x1be2cc)
+
+MnuSelectLanguage (EE 0x1090) is held by MagLifeMenuSelLang (menu 0x10010) at +0x40: MsgManSet at
++0x14, SprMan at +0x78c, m_pScene +0x1078 (the assert's name), cursor +0x107c (0..4: English,
+French, German, Spanish, Italian, texts 0x2b8c90 with colour codes #c15 / #c8), window slot
++0x1084. A 512 x 256 scene window at (220, 120); background location.tm2 / sellang_bg_tcc from
+data/mnurpk/mnusllg.rpk, which the US disc does not have (PAL leftover). Cross calls
+MagSystem::setLanguage (0x1178b8); while shown it forces GamMan option 0 (brightness) to 4 and
+restores getStatus(0x10) on exit, and sets g_bss_7a3d48 / g_bss_7a3d4c to 1.
+

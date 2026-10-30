@@ -93,7 +93,7 @@ static_assert(offsetof(MagLifeMenuBase, m_menu_arg) >= 0x38, "m_menu_arg");
 /* The language select, menu 0x10010 (vtable 0x2e1b58). EE 0x10d0. */
 struct MagLifeMenuSelLang : MagLifeMenuBase
 {
-    // ROR 0x00283ea4; callcheck: MnuSelectLanguage::MnuSelectLanguage (not written; the member starts zeroed)
+    // ROR 0x00283ea4; callcheck: MnuSelectLanguage::MnuSelectLanguage (the member's)
     MagLifeMenuSelLang() {}
     // ROR 0x00283ef4; callcheck: MnuSelectLanguage::~MnuSelectLanguage (the member's)
     ~MagLifeMenuSelLang() {}
