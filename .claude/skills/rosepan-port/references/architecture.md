@@ -1582,6 +1582,15 @@ from velocity -0x700 + 0x40 a frame: about 30 frames). The flash also owns a poi
 (DogLightPool::removeLight) once the flash is gone. EffReload1 (kind 0x27, next in the binary) is
 `eff/effreload.cpp` 0x1790e4..0x179428.
 
+**The reload** (kind 0x27, `eff/effreload.cpp` 0x1790e4..0x179428, 2026-10-30, written, verify; layout
+in eff/effreload.h, EffParam m_reload). MagLifePC::reload creates it with the PC actor's m_trans /
+m_rotate and m_shots. It borrows the pack's model 0 (no copy; the scene's textures assigned) and plays
+motion m_shots - 1 of the pack once (m_shots clamped to 6; below 1 no model and the effect ends the next
+frame): node block 0xb0 a node (pose 0x30, local, model matrices) as EffGeneric1's, placement matrix
++0x40 = unit, i3dMatRotZXY(m_rot), row 3 m_pos. renderPreMain poses at m_frame / 60 s (flags 0x111) and
+draws with utlDrawI3r; over once m_frame / 60 reaches i3mGetLength. renderMain (linkonce 0x28ca88)
+returns NULL.
+
 **The vapour effects** (kinds 0x11, 0x29..0x2e, `eff/effsteam.cpp` 0x179428..0x17a918, 2026-10-30;
 eff/effsteam.h has the layouts, EffParam m_steam1 / m_steam1prim / m_steam2 / m_steam2prim / m_cloud the
 params). EffSteam1 (0x29 / 0x2d) is a vent: a period of m_frames + m_pause frames from a random phase,
