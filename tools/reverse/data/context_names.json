@@ -3929,6 +3929,12 @@
   "was": "FUN_001264d8",
   "why": "_vt$20MagLifeBwnModeRotate slot 1"
  },
+ "001264f8": {
+  "name": "MagLifeBwnModeRotate::startTurn",
+  "tag": "ror-inferred",
+  "was": "FUN_001264f8",
+  "why": "non-virtual helper of MagLifeBwnModeRotate (a0 = the mode, from Rotate::init and Rotate::live): asserts m_target_rot in -DOG_PI..DOG_PI, picks a turn motion by the angle left to m_target_rot, or ends the rotate inside 2 degrees"
+ },
  "0012668c": {
   "name": "MagLifeBwnModeRotate::live",
   "tag": "ror-inferred",

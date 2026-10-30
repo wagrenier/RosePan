@@ -6,6 +6,15 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`mag/maglifebwnmode.cpp`, verify; pinned 0x125bd4..0x1267c0, absorbing
+unassigned@00125bd4 and unassigned@0012668c): Brown's ten modes, all 19 functions** (architecture.md
+"Brown's controller"). The queue was empty; this was the last game file with stubs. Not on the smoke
+path (the 15 s run is at the boot disclaimer): mark done when a run shows Brown walking a path, sitting,
+lying down or turning on a command. Doubts: (1) Move / Path / Wall index their motion tables with m_08
+unchecked in the ROM; the host clamps out-of-range to entry 0 (PC comments). (2) Wait's +0x04 / +0x08
+are cleared and never read. No game TU has stubs left: the next run must re-assess (refill the queue
+from what a longer smoke pad reaches, e.g. the bus-stop pad below, or mark verify TUs done from runs).
+
 **WRITTEN 2026-10-30 (`rx/rxsys.cpp`, session 3, verify): the System Monitor console
 0x242c10..0x2432d8, 15 functions; rx/rxsys.cpp has no stubs left** (architecture.md "System
 Monitor"). Split three functions Ghidra had folded into 0x2430e0 (0x243148 set waits, 0x243160 set

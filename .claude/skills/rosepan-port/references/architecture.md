@@ -1290,7 +1290,17 @@ cancelled, 2 opened (gmnr reads it).
   setParam 4 term, all taking `MagLifeBwn &` (the linkonce symbols); embedded at +0xcf0 Null(0),
   +0xcf4 One(1), +0xcf8 Wait(2), +0xd04 Sit(3), +0xd08 Fuse(4), +0xd0c Move(5), +0xd18 Path(6),
   +0xd28 Turn(7), +0xd30 Rotate(8), +0xd2c Wall(9). The shared live 0x125bd4 = stepMotion, then
-  state 0 when the motion sequence ends.
+  state 0 when the motion sequence ends. Written 2026-10-30 (0x125bd4..0x1267c0, verify): args are
+  the state quad's m_08 / m_0c (a / b); +0x70 is the floor step testFloorStep found (2 / 3 a step,
+  0 flat; Sit / Fuse refuse on 2..3 and wait instead). Rows: Wait 2 (0x25 after Wall, 0x6a / 0x6c
+  on a step), Sit 7 (0xf from Fuse; term stands row 8 up via 9), Fuse 0xc (0x10 from Sit; row 0xd up
+  via 0xe), Move / Path walk = {0x57, 0x4e, 0x60, 0x45}[gait m_08] + m_0c (gait 1 at health > 2;
+  Path's gait 4 = 2, or 0 within 500 of the goal +0xc9c), steps 0x6b (kind 3) / 0x69 (kind 2) probed
+  75 (and 37.5 for Path) ahead, Path's blocked turn 0x43 and stop 0x68 (from rows 0x60..0x67), Turn
+  0x2b + m_0c, One row m_08 (m_0c != 0 holds at the end, +0xcc0), Wall {0x1d, 0x1f, 0x21, 0x23}
+  [m_08 % 4], Rotate (+4 m_target_rot from m_08's float bits, +8 the angle left; startTurn 0x1264f8
+  picks 0x39 / 0x2c / 0x2b left, 0x3a / 0x2f / 0x2e right by 90 / 45 / 2 degrees, ends inside 2
+  degrees or on a sign change: +0xcc0 = 1, m_08 = 1).
 - `MagLifeBwnCtrl` (mag/maglifebwnctrl.cpp, 0x1267c0..0x12bc20, EE 0x130, scene +0x2bd20): what Brown
   decides. `requestState(theMode, arg, force)` 0x12a56c enters a state at once (refused while the cell
   under Brown has flag 0x20000, `MagLifeControlChara::testFloor` 0x119cec, except state 13) and
