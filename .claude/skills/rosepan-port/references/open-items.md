@@ -6,15 +6,12 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
-**PARTIAL 2026-10-30 (`rx/rxsys.cpp`, session 2): the boot stubs are gone -- ini parser, tty bind /
-open / close, rxSysTerm and its teardown, the RPC client helpers, rxSysIoctl, the debug handlers and
-rxSysExceptionHandler, 36 functions** (architecture.md "Key functions"). Behaviour change on the PC:
-rxSysThreadCallback now passes its yielding flag to rxSysSetFileContext (was a stub), so rxfile switches
-to context 1 while the main thread yields; the 80 s run still reaches the "Once upon a time" narration.
-Left: the System Monitor console 0x242c10..0x2432d8 (rxSysInitExceptionScreen is a stub, called only
-by the two exception handlers, which the host kernel never raises). Decision needed before writing it:
-it draws an 80 x 28 text console with GS LoadImage uploads, and drawing must not go through the
-emulated GS -- either a host debug-text draw or leave the screen as a log-only no-op. Doubts: s_bootDev
+**WRITTEN 2026-10-30 (`rx/rxsys.cpp`, session 3, verify): the System Monitor console
+0x242c10..0x2432d8, 15 functions; rx/rxsys.cpp has no stubs left** (architecture.md "System
+Monitor"). Split three functions Ghidra had folded into 0x2430e0 (0x243148 set waits, 0x243160 set
+colour, 0x243178 the _exit hook); named sceGsSetDefDispEnv 0x259230. Decided without the user (see
+Decisions 2026-10-30, System Monitor): the screen is log-only on the PC. Only the exception handlers
+reach it, which the host kernel never raises, so nothing on screen can show it. Doubts carried: s_bootDev
 empty on the PC keeps rxSysOpenTty a no-op; sceIoctl is a host stub returning -1.
 Remaining todo TUs with stubs: mag/maglifebwnmode.cpp (8), unassigned@00125bd4 (9),
 unassigned@0012668c (1).
@@ -1199,6 +1196,13 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
   Also utlRandRange 0x10423c is a stub returning 0, so every eye blinks every 6 frames.
 
 ## Decisions
+
+- 2026-10-30 (rx/rxsys.cpp session 3, no user present; revisit if wanted): the System Monitor
+  exception console is log-only on the PC. Its cells and the expanded 640-pixel row image are built as
+  the ROM builds them, but the GS LoadImage upload, sceGsSetDefDispEnv / sceGsPutDispEnv and the _exit
+  patch are dropped (drawing must not go through the emulated GS, and the host exit is native code).
+  The text reaches the host log anyway (the hook returns 1, rxSysPrintf then calls scePrintf). A host
+  debug-text draw could later read s_consoleText / s_consoleImage in src/rx/rxsys.cpp.
 
 - 2026-10-30 (the user: the boot intro takes too long): a PC skip in mnu/mnutitle.cpp. Start during
   execLogo's steps 4..0x12 (the SCEI logo, the Atlus notice, CP_LOGO.PSS, the MV00_AD.PSS start) jumps

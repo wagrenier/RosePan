@@ -32753,11 +32753,101 @@
   "was": "FUN_00242aa8",
   "why": "prints memory 16 bytes a line: address, hex bytes, printable chars"
  },
+ "00242c10": {
+  "name": "rxSysConsoleWait",
+  "tag": "ror-inferred",
+  "was": "FUN_00242c10",
+  "why": "VSync wrapper the System Monitor console waits with (newline pause, close pause, redraw)"
+ },
+ "00242c28": {
+  "name": "rxSysConsoleClearRow",
+  "tag": "ror-inferred",
+  "was": "FUN_00242c28",
+  "why": "zeroes the 80 cells of text row y+1 at 0x7d88a8 (cursor rows sit one below the top margin row)"
+ },
+ "00242c70": {
+  "name": "rxSysConsoleScroll",
+  "tag": "ror-inferred",
+  "was": "FUN_00242c70",
+  "why": "copies text rows 1..27 up one row over 0..26"
+ },
+ "00242cc8": {
+  "name": "rxSysConsoleLoadImage",
+  "tag": "ror-inferred",
+  "was": "FUN_00242cc8",
+  "why": "sceGsSetDefLoadImage at fbp 0 / 640 wide / PSMCT32, FlushCache, sceGsExecLoadImage with the packet at 0x7ce800"
+ },
+ "00242d40": {
+  "name": "rxSysConsoleDrawRow",
+  "tag": "ror-inferred",
+  "was": "FUN_00242d40",
+  "why": "expands one text row through the 8x8 font 0x2dbeb0 into the 640-pixel image at 0x7ce860 (lines doubled in field mode) and uploads it at y = row * 8"
+ },
+ "00242ed8": {
+  "name": "rxSysConsoleRedraw",
+  "tag": "ror-inferred",
+  "was": "FUN_00242ed8",
+  "why": "draws all 28 rows, waits a VSync and puts the console display env 0x7d8870"
+ },
+ "00242f28": {
+  "name": "rxSysConsoleNewline",
+  "tag": "ror-inferred",
+  "was": "FUN_00242f28",
+  "why": "x = 0, y + 1, scroll past row 25, clear the row, redraw, wait 0x2dbea4 VSyncs"
+ },
+ "00242fc0": {
+  "name": "rxSysConsolePutc",
+  "tag": "ror-inferred",
+  "was": "FUN_00242fc0",
+  "why": "stores char << 24 | colour at column x+3 of row y+1; newline on 10 or past column 74"
+ },
+ "00243050": {
+  "name": "rxSysConsolePrintHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00243050",
+  "why": "the rxSysPrintf hook rxSysInitExceptionScreen installs: putc every char, return 1 (still print)"
+ },
+ "002430a0": {
+  "name": "rxSysConsoleSetDisplay",
+  "tag": "ror-inferred",
+  "was": "FUN_002430a0",
+  "why": "sets or clears PMODE bit 1 (EN2) of the console display env and puts it"
+ },
+ "002430e0": {
+  "name": "rxSysConsoleClear",
+  "tag": "ror-inferred",
+  "was": "FUN_002430e0",
+  "why": "zeroes all 28 text rows and the cursor 0x7d8898 / 0x7d889c"
+ },
+ "00243148": {
+  "name": "rxSysConsoleSetWaits",
+  "tag": "ror-inferred",
+  "was": "FUN_00243148",
+  "why": "stores the newline wait 0x2dbea4 and the close pause 0x2dbea8 (VSync counts); split from 0x2430e0, unreferenced"
+ },
+ "00243160": {
+  "name": "rxSysConsoleSetColor",
+  "tag": "ror-inferred",
+  "was": "FUN_00243160",
+  "why": "swaps the text colour 0x7d88a0 and returns the old one; split from 0x2430e0, unreferenced"
+ },
+ "00243178": {
+  "name": "rxSysExitHook",
+  "tag": "ror-inferred",
+  "was": "FUN_00243178",
+  "why": "rxSysInitExceptionScreen patches _exit 0x100248 with j here: red text, prints Exit System (retval=%d), spins; split from 0x2430e0"
+ },
  "002431c0": {
   "name": "rxSysInitExceptionScreen",
   "tag": "ror-inferred",
   "was": "FUN_002431c0",
   "why": "once: patches _exit, rxSysResetHardware, print hook 0x243050, a text screen at 0x7d8870 sized from sceGsGetGParam; mainExceptionHandler calls it before printing"
+ },
+ "002432d8": {
+  "name": "rxSysTermExceptionScreen",
+  "tag": "ror-inferred",
+  "was": "FUN_002432d8",
+  "why": "undoes rxSysInitExceptionScreen: prints System Monitor Close...Pause %d, waits 0x2dbea8 VSyncs, restores the print hook and _exit; unreferenced"
  },
  "002433d8": {
   "name": "rxSysInitUser",
@@ -34312,6 +34402,12 @@
   "tag": "lib-context",
   "was": "FUN_00259108",
   "why": "libgraph: returns the address of the GParam block 0x2de090; rxThVBlankHandler reads its first short (sceGsInterMode)"
+ },
+ "00259230": {
+  "name": "sceGsSetDefDispEnv",
+  "tag": "lib-context",
+  "was": "FUN_00259230",
+  "why": "SDK libgraph: (disp, psm, w, h, dx, dy) from sceGsGetGParam, writes PMODE 0x66, SMODE2 from interlace / ffmode, DISPFB psm and fbw (w+63)>>6, DISPLAY via _GetGsDxDyOffset; rxSysInitExceptionScreen calls it with (0x7d8870, 0, 640, 224 << field, 0, 0)"
  },
  "002599e8": {
   "name": "sceGsSwapDBuff",

@@ -2681,7 +2681,7 @@
    "why": "the whole run between i3dmath and rxsys is one library: rxsnd strings, one RPC client 0x7ca300 (IOP module 0xd000, RXSNDDRV.IRX), modules init/term in rxSndInitModules order"
   },
   "rx/rxsys.cpp": {
-   "notes": "Left: the System Monitor console 0x242c10..0x2432d8 (rxSysInitExceptionScreen stays a stub; 0x242c28 clear row, 0x242c70 scroll, 0x242cc8 LoadImage, 0x242d40 glyph row expand from the 8x8 font 0x2dbeb0, 0x242ed8 redraw, 0x242f28 newline, 0x242fc0 putc, 0x243050 print hook, 0x2430a0 display toggle, 0x2430e0 clear, 0x2432d8 close). It is only reached from the exception handlers, which the host kernel never raises, and it draws with GS LoadImage: decide host debug-text draw vs log-only no-op before writing it (open-items Next up). Behaviour change: rxSysThreadCallback now passes yielding to rxSysSetFileContext (rxFileSetContext), so rxfile uses context 1 while the main thread yields; the 80 s smoke run still reaches the Once upon a time narration. rxSysOpenTty is a no-op on the PC (s_bootDev empty). Unreferenced in the ROM but written: ini key count/key-at, RPC helpers, hexdump, device control/status.",
+   "notes": "Decided without the user (open-items Decisions 2026-10-30): the System Monitor is log-only on the PC. Cells and the expanded 640-pixel row image are built as the ROM does, but the GS LoadImage upload, sceGsSetDefDispEnv / sceGsPutDispEnv and the _exit patch at 0x100248 are dropped (callcheck comments say so); the text still reaches the host log because the hook returns 1. Only the exception handlers reach rxSysInitExceptionScreen and the host kernel never raises one, so nothing on screen can show it: verify. Mark done if a host debug-text draw is ever added that reads s_consoleText / s_consoleImage and shows the System Monitor Open banner. Smoke run unchanged: the boot disclaimer at 15 s. Doubts carried: s_bootDev empty keeps rxSysOpenTty a no-op; sceIoctl is a host stub returning -1. Trap: work/batches is gitignored scratch, so check the highest number before writing a batch (one old rxsys_003.json was overwritten this run; its names are safe in data/context_names.json).",
    "ranges": [
     [
      "0023ff58",
@@ -2698,9 +2698,14 @@
      "date": "2026-10-30 15:41",
      "status": "partial",
      "summary": "rx/rxsys.cpp session 2: removed the 5 boot stubs - ini parser (rxSysIniFindSection/ReadKey/FindKey/Find, key count and key-at helpers), tty bind/open/close, rxSysTerm with its teardown (TermEnd, TermModules, TermUser, TermSema, RestoreDebugHandlers), RPC client helpers (rxSysBindRpc/UnbindRpc/CallRpc/RpcDone), rxSysIoctl, console lock wrappers, rxSysSetDebugHandlers and rxSysExceptionHandler, rxSysHexDump, VMode/FrameRate getters, rxSysSetFileContext, device control/status, rxSysGetFileDevice; 36 functions. Split 4 folded functions in Ghidra (0x242728, 0x242740, 0x243578, 0x243620), named iDisableIntc 0x25e300. Platform: sceIoctl host stub (-1), iDisableIntc macro."
+    },
+    {
+     "date": "2026-10-30 15:52",
+     "status": "verify",
+     "summary": "rx/rxsys.cpp session 3: the System Monitor exception console 0x242c10..0x2432d8, 15 functions (clear row, scroll, LoadImage, glyph row expand from the 8x8 font 0x2dbeb0, redraw, newline, putc, print hook, display toggle, clear, set waits, set colour, the _exit hook, rxSysInitExceptionScreen, rxSysTermExceptionScreen). rxsys.cpp has no stubs left. Split 3 functions folded into 0x2430e0 (0x243148, 0x243160, 0x243178); named sceGsSetDefDispEnv 0x259230."
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "why": "rx middleware system layer: rxSys/rxsys strings at 0x23ff58 (No Memory Allocate Func), 0x241890 and 0x242188 (rxsys binding IOP module); starts after the IOP RPC client ending 0x23feb8 (unprefixed binding strings), ends before rxfile at 0x2437f8 (DI error / rxfile file slots); main 0x2045a8 calls its init 0x240eb8 and setters"
   },
   "rx/rxthread.cpp": {
