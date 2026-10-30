@@ -10853,6 +10853,18 @@
   "was": "FUN_0016e3ec",
   "why": "vtable _vt$10EffBreath1 0x2e3720 slot 12 (Eff0 slot updateZDepth)"
  },
+ "0016e438": {
+  "name": "EffBreath1::addPoint",
+  "tag": "ror-inferred",
+  "was": "FUN_0016e438",
+  "why": "called by EffBreath1::init and liveMain with this; the actor's Bip01 Head node matrix (slot 7) times its m_matrix applied to the offset at 0x60, pushed as the next of the 8 ring points at 0x80 (stride 0x20) with its distance from the newest, head index at 0x180"
+ },
+ "0016e65c": {
+  "name": "EffBreath1::isActorInBox",
+  "tag": "ror-inferred",
+  "was": "FUN_0016e65c",
+  "why": "only caller EffBreath1::liveMain; 1 when the actor's m_trans (0x40..0x48) lies in the box min 0x24 / max 0x30"
+ },
  "0016e6e4": {
   "name": "EffBreath1Space::init",
   "tag": "ror-inferred",
@@ -10864,6 +10876,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0016e7cc",
   "why": "vtable _vt$15EffBreath1Space 0x2e3790 slot 5 (Eff0 slot liveMain)"
+ },
+ "0016e92c": {
+  "name": "EffBreath1Space::createBreath",
+  "tag": "ror-inferred",
+  "was": "FUN_0016e92c",
+  "why": "only caller EffBreath1Space::liveMain passes this and an actor number; creates a kind-8 EffBreath1 with the box, scale, colour and &m_actors[no], keeps its number at 0x50 + no*4"
+ },
+ "0016e9f4": {
+  "name": "EffBreath1Space::isActorInBox",
+  "tag": "ror-inferred",
+  "was": "FUN_0016e9f4",
+  "why": "only caller EffBreath1Space::liveMain passes this and an m_actors entry; 0 when it has no Bip01 Head node, else whether its m_trans lies in the box"
  },
  "0016eb00": {
   "name": "EffBreath2::init",
@@ -10918,6 +10942,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0016f3c8",
   "why": "vtable _vt$16EffBreath2Ground 0x2e35d0 slot 8 (Eff0 slot renderMain)"
+ },
+ "0016f55c": {
+  "name": "EffBreath2Ground::renderPuff",
+  "tag": "ror-inferred",
+  "was": "FUN_0016f55c",
+  "why": "only caller EffBreath2Ground::renderMain passes this and a stack block (puff, depth, scale, alpha, frame, pkt); one flat sprite (rot x -pi/2, rot y the puff's angle) with fades, returns the packet"
  },
  "0016f71c": {
   "name": "EffCameraAnim1::init",

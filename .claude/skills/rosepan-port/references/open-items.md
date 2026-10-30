@@ -6,6 +6,17 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`eff/effbreath.cpp`, verify; pinned 0x16dcc8..0x16f71c): EffBreath1 / EffBreath1Space /
+EffBreath2 / EffBreath2Prim / EffBreath2Ground, all 20 functions** (architecture.md "The breath effects").
+Not on the smoke path (the 15 s run is at the boot disclaimer): kinds 0xa / 0xc come from ClrOut* (the
+monster's breath; emy/emy_clr.cpp), kind 9 probably from room scripts. Mark done when a cold room shows
+breath at the actors' heads or ClrOut breathes. EffParam m_breath / m_ground fields got their roles
+(m_scale, m_drag, m_color, m_frames, m_size); emy_clr.cpp updated. Doubts: (1) EffBreath2Prim::init adds 5
+to m_size (0x54) that nothing sets first -- the ROM starts from heap leftovers; the host starts from 0. (2)
+EffBreath2Ground's puffs count frames from their own start only in the last 16 frames (ROM, movn at
+0x16f4f8): later puffs fade out later and are cut off at the end -- ported as is. (3) EffBreath1 never
+ends by itself; only EffBreath1Space releases it.
+
 **WRITTEN 2026-10-30 (`eff/efffoot.cpp`, verify; pinned 0x172e4c..0x173df8): EffFoot1 / EffFoot1Prim /
 EffFoot2 / EffFoot2Prim, all 20 functions** (architecture.md "The footstep effects"). Not on the smoke path
 (the 15 s run is at the boot disclaimer; kinds 0x1d / 0x1f have no creator in written code, probably room

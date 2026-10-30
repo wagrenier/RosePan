@@ -271,6 +271,8 @@ entries are marked **RoR** with the date.
 - **An int 0x7fffffff stored into a float field is the EE's largest value, a NaN on the host** (Eff0::Eff0
   sets Eff0::m_z this way; EffMan's depth sort compares it): every host comparison with it is false, so
   sorts and range tests break. Write FLT_MAX with a PC: comment.
+- **0xffffffff stored into a float is the EE's most negative value, a NaN on the host** (EffBreath1::renderMain
+  marks drawn sprites so in its farthest-first pick): write -FLT_MAX with a PC: comment.
 - **Twin functions that differ only in an `ldl` / `sdl` copy are overloads on the matrix type**: one
   writes an aligned `sceVu0FMATRIX` straight through, the other builds it in an aligned temporary and
   copies it out unaligned -- an `I3dMatrixF4x4 *` (4-aligned struct; DogModel's symbols overload on
