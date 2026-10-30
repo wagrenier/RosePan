@@ -9401,6 +9401,36 @@
   "was": "FUN_0015f2fc",
   "why": "DwfOutAtkNear vtable slot 3 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
  },
+ "0015f37c": {
+  "name": "DwfOutAtkNear::execThrow",
+  "tag": "ror-inferred",
+  "was": "FUN_0015f37c",
+  "why": "Exec's m_mode 0 arm (0x3c == 0): the chase, the TskAttack via 0x15f744, idles and re-chases"
+ },
+ "0015f744": {
+  "name": "DwfOutAtkNear::startThrow",
+  "tag": "ror-inferred",
+  "was": "FUN_0015f744",
+  "why": "with param 0x67 held: scnAttackStart kind 0x12, or 0x13 / 0x14 for the Got's scissors 0xa2e; decide off"
+ },
+ "0015f8ac": {
+  "name": "DwfOutAtkNear::execClaw",
+  "tag": "ror-inferred",
+  "was": "FUN_0015f8ac",
+  "why": "Exec's m_mode 1 arm: swipe motions 0x3d / 0x40 / 0x41, emyChkHitReach 12 frames 5..15, scnChrRequest damage 0xd"
+ },
+ "0015fee8": {
+  "name": "DwfOutAtkNear::startClaw",
+  "tag": "ror-inferred",
+  "was": "FUN_0015fee8",
+  "why": "without attr bit 1: changeMotion 0x3c / 0x3f and SE 0xb, returns 1"
+ },
+ "0015ff54": {
+  "name": "DwfOutAtkNear::execGrab",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ff54",
+  "why": "Exec's m_mode 2 arm: leap 0x48, p_sp_f / p_sp_b, EmyManager::setOid, setActorParent onto the PC, then the fall"
+ },
  "001606ec": {
   "name": "DwfOutAtkFar::Init",
   "tag": "ror-inferred",
@@ -9503,6 +9533,12 @@
   "was": "FUN_00161a90",
   "why": "DwfOutFort vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
  },
+ "00161aac": {
+  "name": "DwfOutFort::startLeap",
+  "tag": "ror-inferred",
+  "was": "FUN_00161aac",
+  "why": "DwfOutFort::Exec steps 0 / 0xb: PC in sight within table 0x2f1148 + 20, motion 0x48, dropItem, turn off"
+ },
  "00161b48": {
   "name": "DwfOutIrritate::Init",
   "tag": "ror-inferred",
@@ -9520,6 +9556,12 @@
   "tag": "ror-inferred",
   "was": "FUN_00161d8c",
   "why": "DwfOutIrritate vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "00161e74": {
+  "name": "dwfOffsetByRot",
+  "tag": "ror-inferred",
+  "was": "FUN_00161e74",
+  "why": "no callers: pos x / z += (a, b) rotated by the actor's getRotY of the out's oid"
  },
  "00162118": {
   "name": "DwfOutDead::Init",

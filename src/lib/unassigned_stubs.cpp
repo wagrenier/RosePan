@@ -85,65 +85,6 @@ void utlAddPolar(float angle, float dist, float *v)
 
 // ---- stubs (hand-written: EmyMain / EmyOut and the enemy classes' constructors and destructors, which stubgen does not write) ----
 
-// ---- stubs (hand-written: the DwfOut* virtual slots, emy/emy_dwf.cpp, which stubgen cannot see behind the vtable) ----
-
-// stub of ROR 0x0015efb0
-void DwfOutAtkNear::Init()
-{
-    ROSEPAN_STUB("DwfOutAtkNear::Init", 0x0015efb0);
-}
-
-// stub of ROR 0x0015f2fc
-int DwfOutAtkNear::Exec()
-{
-    ROSEPAN_STUB("DwfOutAtkNear::Exec", 0x0015f2fc);
-    return -1;
-}
-
-// stub of ROR 0x0015ef94
-void DwfOutAtkNear::Term()
-{
-    ROSEPAN_STUB("DwfOutAtkNear::Term", 0x0015ef94);
-}
-
-// stub of ROR 0x00161230
-void DwfOutFort::Init()
-{
-    ROSEPAN_STUB("DwfOutFort::Init", 0x00161230);
-}
-
-// stub of ROR 0x00161300
-int DwfOutFort::Exec()
-{
-    ROSEPAN_STUB("DwfOutFort::Exec", 0x00161300);
-    return -1;
-}
-
-// stub of ROR 0x00161a90
-void DwfOutFort::Term()
-{
-    ROSEPAN_STUB("DwfOutFort::Term", 0x00161a90);
-}
-
-// stub of ROR 0x00162118
-void DwfOutDead::Init()
-{
-    ROSEPAN_STUB("DwfOutDead::Init", 0x00162118);
-}
-
-// stub of ROR 0x00162394
-int DwfOutDead::Exec()
-{
-    ROSEPAN_STUB("DwfOutDead::Exec", 0x00162394);
-    return -1;
-}
-
-// stub of ROR 0x00162630
-void DwfOutDead::Term()
-{
-    ROSEPAN_STUB("DwfOutDead::Term", 0x00162630);
-}
-
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
 
 // stub of ROR 0x00172678

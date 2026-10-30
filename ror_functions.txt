@@ -1968,11 +1968,11 @@
 /* 0015ef94 0000001c */ DwfOutAtkNear::Term(){}  // ror
 /* 0015efb0 0000034c */ DwfOutAtkNear::Init(){}  // ror
 /* 0015f2fc 00000080 */ DwfOutAtkNear::Exec(){}  // ror
-/* 0015f37c 000003c8 */ FUN_0015f37c(){}
-/* 0015f744 00000168 */ FUN_0015f744(){}
-/* 0015f8ac 0000063c */ FUN_0015f8ac(){}
-/* 0015fee8 0000006c */ FUN_0015fee8(){}
-/* 0015ff54 00000798 */ FUN_0015ff54(){}
+/* 0015f37c 000003c8 */ DwfOutAtkNear::execThrow(){}  // ror
+/* 0015f744 00000168 */ DwfOutAtkNear::startThrow(){}  // ror
+/* 0015f8ac 0000063c */ DwfOutAtkNear::execClaw(){}  // ror
+/* 0015fee8 0000006c */ DwfOutAtkNear::startClaw(){}  // ror
+/* 0015ff54 00000798 */ DwfOutAtkNear::execGrab(){}  // ror
 /* 001606ec 00000098 */ DwfOutAtkFar::Init(){}  // ror
 /* 00160784 000001f8 */ DwfOutAtkFar::Exec(){}  // ror
 /* 0016097c 0000001c */ DwfOutAtkFar::Term(){}  // ror
@@ -1993,12 +1993,12 @@
 /* 00161230 000000d0 */ DwfOutFort::Init(){}  // ror
 /* 00161300 00000790 */ DwfOutFort::Exec(){}  // ror
 /* 00161a90 0000001c */ DwfOutFort::Term(){}  // ror
-/* 00161aac 0000009c */ FUN_00161aac(){}
+/* 00161aac 0000009c */ DwfOutFort::startLeap(){}  // ror
 /* 00161b48 0000008c */ DwfOutIrritate::Init(){}  // ror
 /* 00161bd4 000001b8 */ DwfOutIrritate::Exec(){}  // ror
 /* 00161d8c 0000001c */ DwfOutIrritate::Term(){}  // ror
 /* 00161da8 000000cc */ FUN_00161da8(){}
-/* 00161e74 000000b4 */ FUN_00161e74(){}
+/* 00161e74 000000b4 */ dwfOffsetByRot(){}  // ror
 /* 00161f28 000001f0 */ FUN_00161f28(){}
 /* 00162118 0000027c */ DwfOutDead::Init(){}  // ror
 /* 00162394 0000029c */ DwfOutDead::Exec(){}  // ror

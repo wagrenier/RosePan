@@ -153,11 +153,14 @@ tackling (input 22 / 23 come from PigOutTackle). unassigned@0015a17c is now pinn
 replaces the 41 hand stubs of the DwfOut* slots and DwfMain's 6 in lib/unassigned_stubs.cpp and moves
 DwfMain out of lib/unassigned.h into emy/emy_dwf.h.
 
-**PARTIAL 2026-10-30 (`emy/emy_dwf.cpp`, session 2): DwfOutAtkFar, Stared, Win and Irritate
-written** (their 12 hand stubs gone). Left: AtkNear (0x15ef94..0x1606ec, Exec plus four helpers),
-Fort (Exec 0x161300, 0x790 bytes; 0x161aac its in-sight throw; ranges table 0x2f1148 = 80, 90, 90)
-and Dead (0x162118..0x16265c; 0x161e74 offsets a point by an actor's rot y, probably Dead's).
-ROM oddities ported as they are: DwfOutIrritate::pickMove clears m_count then searches it for a
+**WRITTEN 2026-10-30 (`emy/emy_dwf.cpp`, verify, session 3): all 80 functions** -- the last
+slice was DwfOutAtkNear (throw / claw / grab modes), DwfOutFort (the grab from a standing guard),
+DwfOutDead and the uncalled dwfOffsetByRot; no DwfOut* hand stubs remain in lib/unassigned_stubs.cpp.
+No enemy spawns on the smoke path; mark done when a run shows a Dwf / Pig / Got attacking, grabbing
+(the enemy riding the PC's back) or dying. More ROM oddities ported as they are: AtkNear::Init asks
+EmyManager::hasOid(0) twice (slot 1 probably meant); execThrow's r > 100 branch is dead and its
+throw-again path needs m_hits <= 0, which startThrow's count rules out after one throw;
+startThrow's scissors pick tests m_hits == 0 after incrementing it. Earlier ROM oddities ported as they are: DwfOutIrritate::pickMove clears m_count then searches it for a
 nonzero word, so its motion table 0x2f11b8 and Exec step 2 are dead; DwfOutAtkFar step 2 is never
 set; DwfOutWin's scripted branch (script globals 0x173 / 0x174) keeps m_step from before and never
 uses step 3. Doubt: the scripted win teleports to (-70, 453.3, -1780) every time motion 0x44 ends --

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 11:54 at commit `0b49625` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 12:12 at commit `a73d65a` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,9 +10,9 @@ Generated 2026-10-30 11:54 at commit `0b49625` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6993** (97%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 265, ror-inferred 5391
-- context-name ledger: 5694 entries; overrides of wrong library matches: 5
+- game functions: **7187**, named **7000** (97%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 265, ror-inferred 5398
+- context-name ledger: 5701 entries; overrides of wrong library matches: 5
 - placed in a source file: 6065/7187 in 154 files
 
 Least-named game-code regions (64 KB blocks):
@@ -22,15 +22,15 @@ Least-named game-code regions (64 KB blocks):
 | `001f0000` | 190/234 (81%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `00240000` | 298/336 (89%) | rx/rxfile.cpp, rx/rxsys.cpp, rx/rxthread.cpp |
 | `00170000` | 228/251 (91%) | sct/sctlayer.cpp, eff/effman.cpp, snd/sndman.cpp |
-| `00160000` | 249/268 (93%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `001a0000` | 199/214 (93%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `00210000` | 337/361 (93%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
+| `00160000` | 251/268 (94%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `00110000` | 246/257 (96%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
 | `00200000` | 139/143 (97%) | sequence/seqcall.cpp, task/tsk_enemy.cpp, sequence/sequence.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5792**; stubs: **142**
+- reconstructed RoR functions: **5823**; stubs: **133**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -60,7 +60,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/emy/emy_bdl.cpp` | 33 | 0 |
 | `src/emy/emy_bds.cpp` | 33 | 0 |
 | `src/emy/emy_clr.cpp` | 45 | 0 |
-| `src/emy/emy_dwf.cpp` | 68 | 0 |
+| `src/emy/emy_dwf.cpp` | 99 | 0 |
 | `src/emy/emy_fsh.cpp` | 61 | 0 |
 | `src/emy/emy_got.cpp` | 31 | 0 |
 | `src/emy/emy_grg.cpp` | 37 | 0 |
@@ -100,7 +100,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 116 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 107 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -185,10 +185,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 174 TUs: todo 86, partial 2, verify 133, done 17
-- next: **emy/emy_dwf.cpp** (continuing a partial TU)
+- 174 TUs: todo 86, partial 1, verify 134, done 17
+- next: **mag/magscenedebug.cpp** (frontier score 1)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
-- partial: `emy/emy_dwf.cpp` 64/80 -- Left: DwfOutAtkNear (0x15efb0 Init, 0x15f2fc Exec, 0x15ef94 Term; helpers 0x15f37c, 0x15f744, 0x15f8ac, 0x15fee8, 0x15ff54; EE 0x84), DwfOutFort (0x161230 Init,
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -212,6 +211,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `emy/emy_bdl.cpp` 33/33 -- Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run sho
 - verify: `emy/emy_bds.cpp` 33/33 -- Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture as before, no regression); no enemy exists on that path, so mark done the first time
 - verify: `emy/emy_clr.cpp` 45/45 -- Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run sho
+- verify: `emy/emy_dwf.cpp` 80/80 -- TU complete, verify: nothing on the 15 s smoke path spawns an enemy (the run still ends on the Atlus disclaimer / Punchline logo, as before). Mark done when a r
 - verify: `emy/emy_fsh.cpp` 57/57 -- Complete code, nothing on screen yet: the 15 s run stays on the boot disclaimer and no enemy spawns on the smoke path. Mark done when a run shows an Fsh (crawls
 - verify: `emy/emy_got.cpp` 31/31 -- Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run sho
 - verify: `emy/emy_grg.cpp` 37/37 -- Complete code, nothing on screen yet: the 15 s run stays on the boot disclaimer and no enemy spawns on the smoke path. Mark done when a run shows a Grg roaming 
@@ -325,6 +325,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 12:12 `emy/emy_dwf.cpp` verify: DwfOutAtkNear (Init, Exec, Term and its throw, claw and grab modes with startThrow / startClaw), DwfOutFort (Init, Exec, Term, startLeap), DwfOutDead (Init, Exe
 - 2026-10-30 11:54 `emy/emy_dwf.cpp` partial: DwfOutAtkFar (Init, Exec, Term, startThrow), DwfOutStared, DwfOutWin (chase and scripted win, execChase / execScripted) and DwfOutIrritate (Init, Exec, Term, ge
 - 2026-10-30 11:35 `emy/emy_dwf.cpp` partial: DwfMain (type 0, all 25 methods and tests, the two finders) and the outs Disappear, Appear, Wait, Walk, Serch, Pickup, Parts, Test reconstructed (49 functions);
 - 2026-10-30 11:23 `eff/effwater.cpp` verify: reconstruct 15 functions: EffWater1 (kind 0x2f, the EFFWATER1.RPK model with a scrolling texture) and EffWater3 (kind 0x31, rain over a box with ground ripples 
@@ -332,15 +333,14 @@ Recent sessions:
 - 2026-10-30 10:00 `mag/maglifemenusp.cpp` verify: Reconstructed both dial-lock menus: MagLifeMenuSpecial (KLCK, 0x1000b) and MagLifeMenuSpecial2 (0x1000c..f) -- constructors, destructors, init, term, isInit, pr
 - 2026-10-30 09:51 `mnu/mnuSelectLanguage.cpp` verify: MnuSelectLanguage, the language select screen: all 16 functions (ctor, dtor, init, term, isInit, processPad with the inline exec, draw, open, close, openWindow,
 - 2026-10-30 09:41 `eff/effsteam.cpp` verify: eff/effsteam.cpp pinned 0x179428..0x17a918 out of unassigned@001788ec: EffSteam1 (vent puffing EffSteam1Prim every third frame of its period), EffSteam1Prim (gr
-- 2026-10-30 09:28 `eff/effblood.cpp` verify: The blood effects, kinds 1..6: EffBloodSpray1 / 2 (drop bursts and a following spray), EffBloodStay1 (floor stains), EffBloodStay2 (a trail strip), EffBloodStay
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
+| `unassigned@001788ec` | todo | 0/9/13 | 2.8 | 1 | 0 |
+| `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
 | `mag/magscenedebug.cpp` | todo | 0/1/3 | 0.8 | 1 | 0 |
 | `unassigned@0016afcc` | todo | 0/5/6 | 1.6 | 1 | 0 |
 | `mag/magsceneoption.cpp` | todo | 0/1/1 | 0.8 | 1 | 0 |
-| `unassigned@001788ec` | todo | 0/9/13 | 2.8 | 1 | 0 |
-| `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
 | `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
