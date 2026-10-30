@@ -1944,7 +1944,7 @@ void DrawMainMenuBar()
             };
             static const AspectChoice kAspects[] = {
                 {"Auto (window)", ROSEPAN_ASPECT_AUTO},
-                {"Original 640:448 (PS2 framing)", ROSEPAN_ASPECT_ORIGINAL},
+                {"Original (PS2 4:3)", ROSEPAN_ASPECT_ORIGINAL},
                 {"4:3", ROSEPAN_ASPECT_4_3},
                 {"16:9", ROSEPAN_ASPECT_16_9},
                 {"16:10", ROSEPAN_ASPECT_16_10},

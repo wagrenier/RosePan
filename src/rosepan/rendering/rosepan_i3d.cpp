@@ -1035,9 +1035,7 @@ void OrbitCamera(const float *c, float dist, float angle, float *view, float *pr
     memcpy(view, v16, sizeof(v16));
     const float n = dist * 0.05f, fa = dist * 4.0f;
     const float sy = 1.0f / tanf(0.5f * 0.75f);                /* 43 degrees vertical */
-    float fw = 0.0f, fh = 0.0f;
-    RosePan_RendererGetFrameSize(&fw, &fh);
-    const float sx = sy * fh / fw;                              /* the replay widens it */
+    const float sx = sy * 3.0f / 4.0f;      /* the frame shows at 4:3; the replay widens it */
     const float p16[16] = {
         sx, 0.0f, 0.0f, 0.0f,
         0.0f, sy, 0.0f, 0.0f,

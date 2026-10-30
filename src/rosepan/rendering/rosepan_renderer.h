@@ -11,7 +11,8 @@ void RosePan_RendererBeginFrame(void);
 void RosePan_RendererEndFrame(void);
 
 /* How much wider/taller the output window is than the original 640x448 frame,
- * in original-frame units: 1.0 on a 4:3 output, about 1.21 on 16:9.  Only one
+ * in original-frame units: 1.0 on a 4:3 output, 1.33 on 16:9 (the frame is
+ * shown at the PS2's 4:3, not as square 640x448 pixels).  Only one
  * of the two is ever above 1.  The 3D projection widens by these so the extra
  * area shows more world rather than black bars; 2D overlays are shrunk by the
  * reciprocal and stay centred at their original proportions.  Sampled once per
@@ -20,7 +21,7 @@ void RosePan_RendererEndFrame(void);
 void RosePan_RendererGetViewExtend(float *ext_x, float *ext_y);
 
 /* The same thing as a screen rect in 640x448 units: exactly (0,0)-(640,448) on
- * a 4:3 output, about (-66,0)-(706,448) on 16:9.  Full-screen backdrops that
+ * a 4:3 output, about (-107,0)-(747,448) on 16:9.  Full-screen backdrops that
  * must reach the window edge (MapSky's fog band and horizon strip) build their
  * geometry against this instead of the fixed frame. */
 void RosePan_RendererGetViewBounds(float *x0, float *y0, float *x1, float *y1);

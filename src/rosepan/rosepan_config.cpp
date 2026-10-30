@@ -999,7 +999,7 @@ int RosePan_ConfigSave(void)
         "anisotropy = %d\n"
         "; auto | original | 4:3 | 16:9 | 16:10 | custom\n"
         ";   a wider aspect shows more world, it does not stretch the image\n"
-        ";   original is 640:448, the framing the game was composed for\n"
+        ";   original is the PS2's 4:3 picture, the framing the game was composed for\n"
         "aspect = %s\n"
         "aspect_ratio = %.4f\n"
         "; Restores the one-texel alpha edge on cut-out textures --\n"
