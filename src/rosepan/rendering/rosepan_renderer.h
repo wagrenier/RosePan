@@ -808,6 +808,14 @@ void RosePan_RendererDrawSolidQuad(const float *xy, const unsigned char *rgba);
 void RosePan_RendererDrawSolidTriangles2D(const float *xy,
                                          const unsigned char *rgba,
                                          int vertex_count);
+/* As RosePan_RendererDrawSolidTriangles2D with a depth per vertex in the
+ * symmetric clip convention and ZTST GEQUAL when `depth_test`: the native
+ * i3d module's untextured VU1 strips (rosepan_i3d.cpp DrawStrip). */
+void RosePan_RendererDrawSolidTriangles2DDepth(const float *xy,
+                                              const unsigned char *rgba,
+                                              const float *ndc_z,
+                                              int vertex_count,
+                                              int depth_test);
 /* Screen-space triangles from a RosePan_RendererCreateImageTexture handle:
  * `vertex_count` (a multiple of 3) corners in 640x448 frame coordinates,
  * uv normalised 0..1, colours on the PS2 scale (0x80 = 1.0, modulating the

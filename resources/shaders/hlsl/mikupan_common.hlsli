@@ -104,8 +104,9 @@ cbuffer MikuPanUniforms : register(b0, ROSEPAN_UNIFORM_SPACE)
 };
 
 // GS alpha test.  Returns true when the fragment should be thrown away, which
-// is what AFAIL=KEEP asks for; the renderer only ever enables the test for that
-// mode, so the other three AFAIL values arrive here as ATE=0.
+// is what AFAIL=KEEP asks for.  FB_ONLY / RGB_ONLY arrive as two draws -- this
+// test, then the inverse comparison with the depth write off -- and ZB_ONLY
+// arrives as ATE=0.
 bool MikuPanAlphaTestFails(float alpha)
 {
     if (uAlphaTest.x == 0.0)
