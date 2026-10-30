@@ -20,6 +20,8 @@ python tus.py check <tu> [--run N] [--pad S] build, stub undefined references, r
                                             layoutcheck; smoke-run N s with settings.smoke_pad (or S, 'none')
 python tus.py finish <tu> --status done|verify|partial|blocked --summary TEXT [--notes TEXT]
                          [--coauthor LINE] [--no-commit]    record the session, refresh, commit
+python tus.py mark <tu> done|verify|partial|blocked|todo --why TEXT   set another TU's state from what a
+                                            run showed (in its history; committed by the session's finish)
 
 <tu> is a key ('dog/dogmodel.cpp'), a unique file name ('dogmodel.cpp'), an 'unassigned@...' run, or a
 function name/address (the TU that contains it).
@@ -644,8 +646,29 @@ def cmd_finish(args):
     return 0
 
 
+def cmd_mark(args):
+    """Set another TU's state from what a run showed (a verify TU seen working -> done; a wrong picture ->
+    partial), recorded in its session history; the session's finish commits it."""
+    why = opt(args, '--why')
+    if len(args) < 2 or args[1] not in ('done', 'verify', 'partial', 'blocked', 'todo') or not why:
+        raise SystemExit('mark needs <tu> done|verify|partial|blocked|todo --why TEXT')
+    M = Model()
+    key = M.resolve(args[0])
+    e = M.db['tus'].setdefault(key, {})
+    old = e.get('status', 'todo')
+    e['status'] = args[1]
+    e.setdefault('sessions', []).append({'date': time.strftime('%Y-%m-%d %H:%M'), 'status': args[1],
+                                         'summary': f'marked {old} -> {args[1]}: {why}'})
+    e['sessions'] = e['sessions'][-12:]
+    if args[1] in ('done', 'verify'):
+        M.db['queue'] = [k for k in M.db['queue'] if k != key]
+    M.save()
+    print(f'{key}: {old} -> {args[1]}')
+    return 0
+
+
 COMMANDS = {'list': cmd_list, 'next': cmd_next, 'claim': cmd_claim, 'brief': cmd_brief, 'define': cmd_define,
-            'queue': cmd_queue, 'check': cmd_check, 'finish': cmd_finish}
+            'queue': cmd_queue, 'check': cmd_check, 'finish': cmd_finish, 'mark': cmd_mark}
 
 if __name__ == '__main__':
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:

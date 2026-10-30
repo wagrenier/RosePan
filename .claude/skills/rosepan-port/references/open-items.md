@@ -6,11 +6,26 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
-**QUEUED 2026-10-30 (the user): host task `setup/smoke_pad.cpp` at the top of the queue** -- make the
-bus-stop walk (below, about 400 s) the default smoke pad, push it further where screenshots confirm each
-step, and mark the verify TUs it shows done (adding a `tus.py` command to set another TU's state). The
-task text in tus.json has the full pad and the candidate TUs. Why: only ~20 unreferenced functions
-(~7 KB) of game logic are left unwritten, while 154 TUs wait in verify.
+**PARTIAL 2026-10-30 (host task `setup/smoke_pad.cpp`): the bus-stop walk is the default smoke pad;
+16 verify TUs marked done from it.** `settings.smoke_pad` now ends
+`...,9400:CROSS,9700:LSDOWN*250,10000:LSLEFT*300,10350:LSUP*350,10750:LSRIGHT*350` (pad reads ~ frames;
+the game runs ~31 fps here, so 420 s reaches frame ~13000). How far it gets (420 s run, release build):
+frame 5400 picture book, 7200 the bus stop lit by the street lamp, 8400 narration ("Oh, what an unlucky
+girl..."), 9960 Jennifer walks under the stick, 10560..10740 stopped against the hedge (collision), 11040
+running past the gate where a path goes up into the forest, 11160 back on the bench camera. New
+`tus.py mark <TU> done|... --why TEXT` sets another TU's state (in its history). Marked done:
+mag/maglifepc.cpp, maglifepcmode.cpp, maglifepc3.cpp, maglife.cpp, dog/dogmotionblend.cpp,
+i3d/i3mpose.cpp, i3mroot.cpp, i3rmodel.cpp, mag/magloader.cpp, dog/doglightpool.cpp,
+mag/magscenecamera.cpp, dog/dogcamera.cpp, dog/dogmodel.cpp, i3d/i3cquery.cpp, i3croot.cpp,
+msg/msgman.cpp. Left verify on purpose: game/gamtrg.cpp (no sign a trg thread fired), spr/sprtexture.cpp
+(the narration frame is probably S2dMes; compare with a tm2png reference first), eff/efffoot.cpp (no
+puffs seen at this size), utl/utlmisc2.cpp. **Not done: pushing past the bus stop.** Two 520 s runs of
+the candidate `...,10750:LSRIGHT*270,11030:LSUP*700,11740:LSLEFT*200,11950:LSUP*700` (up the forest path
+seen in shot 11040) exited cleanly with code 0 at frames ~1920 and ~1560 while another Claude session
+was working in this checkout (its gdbrun held cmake-build-relwithdebinfo/RosePan.exe, so the runs used
+--config release); cause unconfirmed -- rerun it alone. Next session: run that candidate with nothing
+else in the checkout, extend only as shots confirm, then the item / START menus; named pads (boot /
+busstop / ...) only if it grows much longer.
 
 **QUEUED 2026-10-30 (the user: "the IOP code is missing too"): host task `setup/iop_rxsnddrv.cpp`,
 second in the queue** -- reconstruct RXSNDDRV.IRX, the game's only IOP code and the reason RoR is
