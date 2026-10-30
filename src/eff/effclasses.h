@@ -25,6 +25,7 @@
 #include "eff/efffog3.h"
 #include "eff/efflight.h"
 #include "eff/effsteam.h"
+#include "eff/effwater.h"
 
 /* kinds 0x1..0x6 (EffBloodSpray1 .. EffBloodStay3Prim): eff/effblood.h. */
 
@@ -325,32 +326,6 @@ public:
 
 /* kinds 0x11, 0x29..0x2e (EffCloud1, EffSteam1 .. EffSteam2Prim): eff/effsteam.h. */
 
-/* kind 0x2f; EE 0x90, vtable 0x2e44b0. layout: host. */
-class EffWater1 : public Eff0
-{
-public:
-    EffWater1();                                                            // ROR 0x0017a918
-    virtual ~EffWater1();                                                   // ROR 0x0017a94c
-    virtual int  init(const EffParam *param);                               // ROR 0x0017a9c8
-    virtual int  liveMain();                                                // ROR 0x0017ac5c
-    virtual void renderPreMain(RENDERPARAM *param);                         // ROR 0x0017ae04
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0028cf70 (linkonce)
-    virtual void liveActivateExec();                                        // ROR 0x0017adc0
-
-    u_char m_body[0x6c];                                                    // ROR 0x24..0x90: not decoded yet
-};
-
-/* kind 0x31; EE 0x60, vtable 0x2e4440. layout: host. */
-class EffWater3 : public Eff0
-{
-public:
-    EffWater3();                                                            // ROR 0x0017afd8
-    virtual ~EffWater3();                                                   // ROR 0x0017b010
-    virtual int  init(const EffParam *param);                               // ROR 0x0017b0a4
-    virtual int  liveMain();                                                // ROR 0x0017b5e0
-    virtual u_long *renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt); // ROR 0x0017b6d4
-
-    u_char m_body[0x3c];                                                    // ROR 0x24..0x60: not decoded yet
-};
+/* kinds 0x2f, 0x31 (EffWater1, EffWater3): eff/effwater.h. */
 
 #endif /* _EFF_EFFCLASSES_H */

@@ -1585,6 +1585,21 @@ frame along a y angle for m_dist, faded by the square of its depth between fog r
 wait. Creators not traced (no code caller of kinds 0x11 / 0x29 / 0x2b / 0x2d found in written code;
 probably event scripts through native 281).
 
+**The water effects** (kinds 0x2f, 0x31, `eff/effwater.cpp` 0x17a918..0x17c0f0, 2026-10-30; layouts in
+eff/effwater.h, EffParam m_water1 / m_water3). EffWater1 (0x2f) reads `data/eff/EFFWATER1.RPK` whole
+itself (not through its EffMan pack), keeps file 0 (an I3D_BIN model) in a heap block, adds the pack's
+textures to MagScene::m_tex_info, and draws the model in renderPreMain with utlDrawI3r (turned about y,
+scaled, its nodes' display control a stack DogDispControl with the param's colour as m_10 and m_20 =
+the float 1.0's bits), scrolling the texture through i3rSetMatEntity0 (u / v offsets, speed / 30 a
+frame) and bumping each node's change count (data +8). EffWater3 (0x31) is rain over a box (y points
+down): a grid of 0xd0-byte cells (500 units, mode 1: 200), each 8 layers of falling sprites and 4 of
+ground ripples, every layer one random offset tiled over the cell by a random spacing; drawn as one
+VU1 sprite batch per cell in view (i3dViewTestBox 1 / 2), texture 0 split into drop (u 0.5..1, v
+0.25..1), ripple (v 0..0.125) and splash (v 0.125..0.25). The first one alive (count 0x298e1c) moves
+the fog at once by MagScene::addFog toward grey 0.15 and near / far 200 / 400 (mode 1: 600 / 1500)
+relative to m_fog[3]; nothing restores it when the rain ends, and the destructor counts down even
+after a failed init. Creators not traced.
+
 ## The game helpers (`utl/utlgame.cpp`, 0x1024d0..0x1041c4, 2026-10-28)
 
 One-call queries and commands on top of GamMan, EmyManager and the scene's actors; 49 functions,

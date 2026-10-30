@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 10:54 at commit `21cc6d6` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 11:23 at commit `fe7fbfa` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-30 10:54 at commit `21cc6d6` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **6963** (97%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 265, ror-inferred 5361
-- context-name ledger: 5664 entries; overrides of wrong library matches: 5
-- placed in a source file: 6050/7187 in 153 files
+- game functions: **7187**, named **6967** (97%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 265, ror-inferred 5365
+- context-name ledger: 5668 entries; overrides of wrong library matches: 5
+- placed in a source file: 6065/7187 in 154 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -22,7 +22,7 @@ Least-named game-code regions (64 KB blocks):
 | `001f0000` | 190/234 (81%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `00150000` | 241/272 (89%) | emy/emy_fsh.cpp, emy/emy_nor.cpp, emy/emy_dwf.cpp |
 | `00240000` | 298/336 (89%) | rx/rxfile.cpp, rx/rxsys.cpp, rx/rxthread.cpp |
-| `00170000` | 224/251 (89%) | sct/sctlayer.cpp, eff/effman.cpp, snd/sndman.cpp |
+| `00170000` | 228/251 (91%) | sct/sctlayer.cpp, eff/effman.cpp, snd/sndman.cpp |
 | `00160000` | 249/268 (93%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `001a0000` | 199/214 (93%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `00210000` | 337/361 (93%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5709**; stubs: **192**
+- reconstructed RoR functions: **5724**; stubs: **180**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -56,6 +56,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/eff/efflight.cpp` | 17 | 0 |
 | `src/eff/effman.cpp` | 32 | 0 |
 | `src/eff/effsteam.cpp` | 17 | 0 |
+| `src/eff/effwater.cpp` | 15 | 0 |
 | `src/emy/emy_bdl.cpp` | 33 | 0 |
 | `src/emy/emy_bds.cpp` | 33 | 0 |
 | `src/emy/emy_clr.cpp` | 45 | 0 |
@@ -98,7 +99,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 166 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 154 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -183,8 +184,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 174 TUs: todo 87, partial 1, verify 132, done 17
-- next: **unassigned@0017a918** (frontier score 2)
+- 174 TUs: todo 87, partial 1, verify 133, done 17
+- next: **emy/emy_dwf.cpp** (frontier score 1)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -205,6 +206,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `eff/efflight.cpp` 17/17 -- Verify: no smoke-path scene creates kind 0x23, the 240 s run still ends in the bus-stop intro text, unchanged. Mark done when a stormy scene shows the sky's lig
 - verify: `eff/effman.cpp` 32/32 -- Verify: the 200 s run creates EffLight1 (kind 0x21) and EffCameraAnim1 (kind 0xd) during the picture book; their init is a stub returning 0, so createEff delete
 - verify: `eff/effsteam.cpp` 17/17 -- Not on the smoke path (15 s run stops at the boot disclaimer; no creator of kinds 0x11 / 0x29 / 0x2b / 0x2d in written code, probably room scripts via native 28
+- verify: `eff/effwater.cpp` 15/15 -- All 15 functions written, build and layoutcheck green, callcheck clean. Nothing on screen yet: the 15 s smoke run ends on the boot disclaimer and no code caller
 - verify: `emy/emy_bdl.cpp` 33/33 -- Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run sho
 - verify: `emy/emy_bds.cpp` 33/33 -- Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture as before, no regression); no enemy exists on that path, so mark done the first time
 - verify: `emy/emy_clr.cpp` 45/45 -- Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run sho
@@ -321,6 +323,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 11:23 `eff/effwater.cpp` verify: reconstruct 15 functions: EffWater1 (kind 0x2f, the EFFWATER1.RPK model with a scrolling texture) and EffWater3 (kind 0x31, rain over a box with ground ripples 
 - 2026-10-30 10:54 `emy/emy_pig.cpp` verify: PigMain (type 1) and its outs PigOutParts, PigOutTackle, PigOutTest: all 34 functions; unassigned@0015a17c split into emy/emy_pig.cpp and emy/emy_dwf.cpp
 - 2026-10-30 10:00 `mag/maglifemenusp.cpp` verify: Reconstructed both dial-lock menus: MagLifeMenuSpecial (KLCK, 0x1000b) and MagLifeMenuSpecial2 (0x1000c..f) -- constructors, destructors, init, term, isInit, pr
 - 2026-10-30 09:51 `mnu/mnuSelectLanguage.cpp` verify: MnuSelectLanguage, the language select screen: all 16 functions (ctor, dtor, init, term, isInit, processPad with the inline exec, draw, open, close, openWindow,
@@ -328,26 +331,24 @@ Recent sessions:
 - 2026-10-30 09:28 `eff/effblood.cpp` verify: The blood effects, kinds 1..6: EffBloodSpray1 / 2 (drop bursts and a following spray), EffBloodStay1 (floor stains), EffBloodStay2 (a trail strip), EffBloodStay
 - 2026-10-30 08:56 `emy/emy_got.cpp` verify: Pinned emy/emy_got.cpp 0x1583d4..0x15a17c out of unassigned@001583d4 and wrote all 31 functions: GotMain (enemy type 2: initOut with its 15 outs, dtor, decide o
 - 2026-10-30 08:42 `mnu/mnuboard2d.cpp` verify: MnuBoard2D, all 16 functions: ctor / dtor, init / term / isInit / processPad / draw, open / close, exec (load the board texture named by mnuBoardGetTexName + .t
-- 2026-10-30 08:19 `mag/maglifepceff.cpp` verify: Pinned mag/maglifepceff.cpp to 0x12ccac-0x12ce3c and reconstructed all 5 functions: MagLifePC::createMuzzleEff (EffMan kind 0x26 at the equipped gun's gun_mazzl
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
-| `unassigned@0017a918` | todo | 0/11/15 | 6.0 | 2 | 0 |
 | `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
-| `unassigned@0016afcc` | todo | 0/5/6 | 1.6 | 1 | 0 |
 | `mag/magsceneoption.cpp` | todo | 0/1/1 | 0.8 | 1 | 0 |
+| `unassigned@0016afcc` | todo | 0/5/6 | 1.6 | 1 | 0 |
 | `mag/magscenedebug.cpp` | todo | 0/1/3 | 0.8 | 1 | 0 |
 | `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
-| `emy/emy_dwf.cpp` | todo | 0/47/80 | 24.9 | 1 | 0 |
 | `unassigned@001788ec` | todo | 0/9/13 | 2.8 | 1 | 0 |
+| `emy/emy_dwf.cpp` | todo | 0/47/80 | 24.9 | 1 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
 | RoR addr | name | call sites | provenance | state | inferred file |
 |---|---|---|---|---|---|
-| `001be734` | FileReadReq::FileReadReq | 65 | ror | missing | game/gamfile.cpp |
-| `001be2dc` | FileReader::~FileReader | 32 | ror | missing | game/gamfile.cpp |
-| `001be2cc` | FileReader::FileReader | 27 | ror | missing | game/gamfile.cpp |
+| `001be734` | FileReadReq::FileReadReq | 66 | ror | missing | game/gamfile.cpp |
+| `001be2dc` | FileReader::~FileReader | 33 | ror | missing | game/gamfile.cpp |
+| `001be2cc` | FileReader::FileReader | 28 | ror | missing | game/gamfile.cpp |
 | `00192ac0` | mnuBase::mnuBase | 3 | ror | missing | mnu/mnubase.cpp |
 | `00192b3c` | mnuBase::~mnuBase | 3 | ror | missing | mnu/mnubase.cpp |
 | `0012ab18` | MagLifeBwnCtrl::reset | 2 | ror | missing | mag/maglifebwnctrl.cpp |
@@ -363,8 +364,6 @@ Recent sessions:
 | `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |
 | `0011764c` | DogTexInfo::dump | 1 | ror | stub | - |
 | `001790e4` | EffReload1::EffReload1 | 1 | ror | stub | - |
-| `0017a918` | EffWater1::EffWater1 | 1 | ror | stub | - |
-| `0017afd8` | EffWater3::EffWater3 | 1 | ror | stub | - |
 | `00173df8` | EffGeneric1::EffGeneric1 | 1 | ror | stub | - |
 | `0016afcc` | EffBg1::EffBg1 | 1 | ror | stub | - |
 | `00241ac8` | rxSysTerm | 1 | lib-ctx | stub | rx/rxsys.cpp |
