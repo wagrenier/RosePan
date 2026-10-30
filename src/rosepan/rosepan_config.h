@@ -98,13 +98,32 @@ typedef struct RosePan_ConfigPaths
     char data_folder[1024];
 } RosePan_ConfigPaths;
 
+/*
+ * The port's changes to how the game runs rather than how it looks.
+ *
+ * skip_intro: the title's first-launch logos (SCEI, the Atlus notice) and its
+ * two movies (CP_LOGO.PSS, the MV00_AD.PSS attract film) are skipped once the
+ * memory card check is done, so a launch opens on "Press START button".  Start
+ * skips them either way; this is for not having to press it.
+ */
+typedef struct RosePan_ConfigGame
+{
+    int skip_intro;          /* 0 off, 1 on */
+} RosePan_ConfigGame;
+
 typedef struct RosePan_Config
 {
     RosePan_ConfigRenderer renderer;
     RosePan_ConfigPaths    paths;
+    RosePan_ConfigGame     game;
 } RosePan_Config;
 
 extern RosePan_Config rosepan_config;
+
+/* [game] skip_intro, or ROSEPAN_SKIP_INTRO when that is set (0 or 1).  The
+ * environment is read here rather than stored in the struct, so a one-off run
+ * never writes its value into the file. */
+int RosePan_ConfigSkipIntro(void);
 
 /* Absolute path of the settings file, or NULL if the user directory could not be
  * created. */

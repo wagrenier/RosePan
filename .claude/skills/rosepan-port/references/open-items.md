@@ -1089,6 +1089,15 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
 
 ## Decisions
 
+- 2026-10-30 (the user: the boot intro takes too long): a PC skip in mnu/mnutitle.cpp. Start during
+  execLogo's steps 4..0x12 (the SCEI logo, the Atlus notice, CP_LOGO.PSS, the MV00_AD.PSS start) jumps
+  to "Press START button" (MnuTitle::skipIntro, step 0x16); the ROM lets Start skip only a running
+  MV00_AD (step 0x13). `[game] skip_intro = 1` in rosepan.ini (or the Settings menu, or
+  ROSEPAN_SKIP_INTRO=1) does it unasked after the card check; default 0. build.py / gdbrun.py runs get
+  ROSEPAN_SKIP_INTRO=0 unless given, so settings.smoke_pad keeps its timing. Seen: skip on, the title
+  by frame 180; Start in the notice or in CP_LOGO, the title next, and a second Start opens the menu.
+  Open: a smoke run with `--env ROSEPAN_SKIP_INTRO=1` and a retimed pad would save about 50 s a run.
+
 - 2026-10-27 (mag/maglifepc.cpp session, no user present): five small MagLifeControlChara functions
   of mag/maglife.cpp were written there (the constructor 0x11a888, setState 0x119fe0,
   clearMotionSeq, setMotionSeqTable, clearGoal) because MagLifePC cannot hold a state without them;

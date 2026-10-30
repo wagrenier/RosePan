@@ -19,6 +19,7 @@
 #include "game/gamsnd.h"
 #include "mag/magscene.h"
 #include "mag/magsystem.h"
+#include "rosepan/rosepan_config.h"
 #include "sequence/sequence.h"
 #include "snd/sndman.h"
 #include "spr/s2d.h"
@@ -141,6 +142,9 @@ static int mnuTitleLogoDone = 0;
  * frame counts (data 0x2a8418). */
 static const int mnuTitleLogoSpr[4] = { 2, 5, -1, 0 };
 static const int mnuTitleLogoTime[4] = { 90, 150, -1, 0 };
+/* PC: 1 while a skip of the logos and movies waits for execLogo to take it
+ * (a Start press, or [game] skip_intro at launch). */
+static int mnuTitleSkip = 0;
 
 /* "press start"'s fade colour: grey 0x80, alpha 0x28 (data 0x2999c0). */
 static const int mnuTitleColorDim[4] = { 0x80, 0x80, 0x80, 0x28 };
@@ -489,6 +493,21 @@ int MnuTitle::execLogo(BedPad *pad)
     MagScene &scene = m_system->m_scene;
     int t;
 
+    // PC: Start skips what is left of the logos and the two movies, and
+    // [game] skip_intro in rosepan.ini skips them unasked at launch (step
+    // 3); the ROM lets Start skip only MV00_AD (step 0x13). A movie being
+    // opened (steps 9, 0x12) is closed once its ring is primed.
+    if (m_step >= 4 && m_step <= 0x12) {
+        if ((pad->m_trig >> 3 & 1) != 0)
+            mnuTitleSkip = 1;
+        if (mnuTitleSkip == 1 &&
+            ((m_step != 9 && m_step != 0x12) || g_rxMpeg.isReady() == 1)) {
+            mnuTitleSkip = 0;
+            skipIntro();
+            return 0;
+        }
+    }
+
     switch (m_step) {
     case 0:
         m_cursor[1] = 0;
@@ -527,6 +546,7 @@ int MnuTitle::execLogo(BedPad *pad)
         m_logo = 0;
         m_timer = 0;
         m_step = 4;
+        mnuTitleSkip = RosePan_ConfigSkipIntro();   // PC
         break;
     case 4:
         if (++m_timer < 0x3d)
@@ -710,6 +730,30 @@ int MnuTitle::execLogo(BedPad *pad)
         return 0;
     }
     return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// PC: execLogo's skip (see there). The movie it opened is closed and the
+// logos hidden, then "press start" shows over the title as step 0x13 shows
+// it when MV00_AD ends; step 0x16 starts the title stream.
+
+void MnuTitle::skipIntro()
+{
+    if (m_step == 9 || m_step == 10 || m_step == 0x12) {
+        g_rxMpeg.close();
+        MagSystem::m_v_interval = 2;
+    }
+    g_sequence.m_bits[1] &= ~0x8000000u;
+    for (int i = 0; mnuTitleLogoSpr[i] != -1; i++)
+        sprite(mnuTitleLogoSpr[i]).m_state = 0;
+    m_system->m_scene.fadeIn(7, 7, 0);
+    sprite(6).m_state = 1;
+    m_spr.setFade(6, 1, 10, g_sprColorClear, g_sprColorOpaque);
+    sprite(8).m_state = 1;
+    m_spr.setFade(8, 5, 10, mnuTitleColorDim, g_sprColorOpaque);
+    m_logo = 0;
+    m_timer = 0;
+    m_step = 0x16;
 }
 
 // ──────────────────────────────────────────────────────────────────────

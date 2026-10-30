@@ -80,6 +80,9 @@ struct MnuTitle
 
     /* PC: m_spr's sprite n (m_sprite is the SprMan's table). */
     SprSprite &sprite(int n) { return m_spr.m_sprite[n]; }
+    /* PC: execLogo's skip of the logos and movies -- straight to "press
+     * start" (step 0x16). */
+    void skipIntro();
 
     MnuMcd      m_mcd;              // ROR 0x0000: the memory card check
     MnuSvld     m_svld;             // ROR 0x1400: the load screen (m_save 0)

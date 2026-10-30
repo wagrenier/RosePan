@@ -2182,6 +2182,19 @@ void DrawMainMenuBar()
     {
         ImGui::MenuItem("Game data folder...", nullptr, &g_show_data_folder);
         ImGui::Separator();
+        bool skip_intro = rosepan_config.game.skip_intro != 0;
+        if (ImGui::MenuItem("Skip intro at launch", nullptr, &skip_intro))
+        {
+            rosepan_config.game.skip_intro = skip_intro ? 1 : 0;
+            MarkSettingsDirty();
+        }
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("Open on \"Press START button\", without the logos\n"
+                              "and the two opening movies. Takes effect at the\n"
+                              "next launch; Start skips them either way.");
+        }
+        ImGui::Separator();
         if (ImGui::MenuItem("Open user data folder"))
         {
             OpenFolderInShell(RosePan_PathUserDir());
