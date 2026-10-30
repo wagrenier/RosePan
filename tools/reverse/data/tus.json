@@ -7,7 +7,9 @@
   "unassigned@0021c960",
   "unassigned@0013e2ec",
   "unassigned@001258a4",
-  "unassigned@00166a1c"
+  "unassigned@00166a1c",
+  "unassigned@0016dcc8",
+  "unassigned@001704a4"
  ],
  "settings": {
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
@@ -414,12 +416,21 @@
    "why": "gamCreateEff1a creates kind 0x1a (EffFog3) and opens the EffFog3 / EffFog3Dark / EffFog3WeakUp run, after EffFog2Prim::updateZDepth and before EffFoot1::init; one file per effect family as eff/effcameraanim1.cpp"
   },
   "eff/efffoot.cpp": {
+   "notes": "Not on the smoke path: the 15 s run is at the boot disclaimer and no written code creates kinds 0x1d / 0x1f (probably room scripts through native 281). Mark done when a room shows dust puffs at Jennifer's or Brown's steps. Doubts: EffFoot2's print counts (statics 0x828648 PC, 0x828618 dog) are set to 0 by init and only decremented by addPrint, no other writer found, so EffFoot2 never prints in the ROM; EffFoot1 passes its full box sizes as the probe's half sizes (as the ROM); the paw print's u is 4..4.25 (ROM arithmetic, right only with a repeating texture). The 9 unnamed functions are named (batch efffoot_001). Queue refilled with unassigned@0016dcc8 (EffBreath, eff/effbreath.cpp) then unassigned@001704a4 (EffDust2 .. EffFog2Prim).",
    "ranges": [
     [
      "00172e4c",
      "00173df8"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-30 14:13",
+     "status": "verify",
+     "summary": "EffFoot1 / EffFoot1Prim / EffFoot2 / EffFoot2Prim, all 20 functions: footstep dust puffs in a box and the PC / dog footprints; EffParam m_foot1 / m_foot1prim / m_foot2prim; MagScene::getCurDog (the line-708 inline); declarations moved out of effclasses.h, 16 stubs deleted"
+    }
+   ],
+   "status": "verify",
    "why": "EffFoot1 / EffFoot1Prim / EffFoot2 / EffFoot2Prim, after EffFog3 (eff/efffog3.cpp) and before EffGeneric1; file named after the classes (alphabetical link order fits)"
   },
   "eff/effgeneric.cpp": {
