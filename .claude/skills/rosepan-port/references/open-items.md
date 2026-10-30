@@ -1351,6 +1351,10 @@ to adapt when a TU reaches them:
   kind 0xc EffParam's tail are uninitialised stack in the ROM (zero on the host). The Ghidra session
   went down mid-run once (it rebooted); names applied after it came back.
 
+- (2026-10-30, emy/emy_dwf.cpp) **DwfOutWalk steps 4..6 and DwfOutPickup step 0 are never entered**
+  (nothing sets them; ported as is). DwfOutSerch::Exec 0x15eb00 returns a leftover register for a type
+  other than 0..2 (none builds it); the host returns 22. DwfOutWalk aims at home +-500 but takes the
+  floor y at home, not at the target. Check when a Dwf first shows.
 - (2026-10-30, emy/emy_got.cpp) **GotOutTest::Exec 0x15a060 loops on motion 0x36**: step 1 restarts
   0x36 and stays at step 1, so steps 2 (0x34) and 3 (0x30) are dead code in the ROM; ported as is.
   GotMain::decide refreshes both targets (gotFindPickupItem / gotFindPart) only on GamMan's reset

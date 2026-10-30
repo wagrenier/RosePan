@@ -2028,6 +2028,15 @@ never asserts): sessions name them (`tus.py define --why`).
   23 chase failed), 16 PigOutTest. pigFindPickupItem 0x15b5ec skips fchrs with object flag 1 (no kind
   0xa2e rule); pigFindPart 0x15b8b8 uses part kinds 0xbd3 / 0xbd7 / 0xbd5 / 0xbd6 / 0xbd4 for attr bits
   1 / 2 / 4 / 8 / 0x10 (same GamSysData fields 0x4f..0x58).
+  **DwfMain** (type 0, emy/emy_dwf.cpp 0x15c2a4..0x16265c, 2026-10-30; EE 0x274, vtable 0x2e2e90): the
+  Pig's twin with m_pickup +0x26c, m_part +0x270 (+0x268 unwritten), states 1..15 (12 DwfOutParts, 13
+  Fort, 14 Irritate, 15 Test) and a third gate: input blocked when it leads to 14 with attr bits 8 and
+  0x10. Its sight test has no same-area check (range param 0x5f, capped by the PC class range with attr
+  bit 1 or in state 1); initOut also sets m_voice = rand 0..3 and the collision shape 1 (param 0x18).
+  dwfFindPickupItem 0x15daa8 = pig's; dwfFindPart 0x15dd74 kinds 0xbbf / 0xbc3 / 0xbc1 / 0xbc2 / 0xbc0.
+  The shared outs (types 0..2) keep GetType at +0x38 where the Got's scissors (0xa2e) change motions;
+  DwfOutPickup's item is +0x3c (EmyManager::isEmyTarget in state 11), its result inputs come from data
+  0x2f0f10 (23 failed) / 0x2f0f20 (22 taken) by type.
   **GotMain** (type 2, emy/emy_got.cpp 0x1583d4..0x15a17c, 2026-10-30; EE 0x270, 6 slots): uses the
   Dwf's outs (emy/emy_dwf.h) for states 1 Disappear, 2 Appear, 3 AtkNear, 4 Dead, 5 Stared, 6 Win,
   7 Serch, 8 Walk, 9 Wait, 10 AtkFar, 11 Pickup, 13 Fort, 14 Irritate; its own 12 GotOutParts

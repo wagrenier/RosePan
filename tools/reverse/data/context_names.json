@@ -9131,11 +9131,161 @@
   "was": "FUN_0015c188",
   "why": "PigOutTest vtable slot 3: motion 0x36 loop, as GotOutTest::Exec"
  },
+ "0015c2a4": {
+  "name": "DwfMain::~DwfMain",
+  "tag": "ror-inferred",
+  "was": "FUN_0015c2a4",
+  "why": "DwfMain vtable 0x2e2e90 slot 1: vptr store, ~EmyMain then operator_delete on the deleting flag"
+ },
  "0015c304": {
   "name": "DwfMain::initOut",
   "tag": "ror-inferred",
   "was": "FUN_0015c304",
   "why": "called right after the vtable store in the ELF's inline DwfMain::DwfMain (and createEmy); builds the class's per-state EmyOut objects (stores their vtables)"
+ },
+ "0015c710": {
+  "name": "DwfMain::decide",
+  "tag": "ror-inferred",
+  "was": "FUN_0015c710",
+  "why": "DwfMain vtable slot 4: m_req from inputs 21..1 at +0x204 gated by isBlocked (next state 11 needs a pickup item, 12 a part, 14 not with attr 8 and 0x10), as PigMain::decide"
+ },
+ "0015cc84": {
+  "name": "DwfMain::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0015cc84",
+  "why": "DwfMain vtable slot 5: EmyStateMap::next on m_req, notify bits 1 / 2 (kill forces state 4), as PigMain::exec"
+ },
+ "0015cd30": {
+  "name": "DwfMain::after",
+  "tag": "ror-inferred",
+  "was": "FUN_0015cd30",
+  "why": "DwfMain vtable slot 6: Term / selectOut on m_changed, then the out's Exec into m_req"
+ },
+ "0015cdac": {
+  "name": "DwfMain::selectOut",
+  "tag": "ror-inferred",
+  "was": "FUN_0015cdac",
+  "why": "DwfMain vtable slot 2: m_out[state] for states 1..15, Init, then the transition row into the input words +0x204"
+ },
+ "0015ce74": {
+  "name": "DwfMain::isPCSameArea",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ce74",
+  "why": "one-line wrapper of EmyMain::isPCSameArea, as PigMain::isPCSameArea"
+ },
+ "0015ce88": {
+  "name": "DwfMain::testBarkReact",
+  "tag": "ror-inferred",
+  "was": "FUN_0015ce88",
+  "why": "decide input 1: isBlocked(1) else EmyMain::testBarkReact"
+ },
+ "0015cf30": {
+  "name": "DwfMain::isTargetInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_0015cf30",
+  "why": "decide's sight edge: emyChkInSight of the PC and the dog, range param 0x5f (capped by the PC state class range with attr bit 1 or state 1)"
+ },
+ "0015d08c": {
+  "name": "DwfMain::isPCStateClass1",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d08c",
+  "why": "decide input 7: isBlocked(7) else EmyMain::isPCStateClass1"
+ },
+ "0015d134": {
+  "name": "DwfMain::isPCAhead",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d134",
+  "why": "decide input 8: isBlocked(8) else EmyMain::isPCAhead"
+ },
+ "0015d1dc": {
+  "name": "DwfMain::isPCStateClass2",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d1dc",
+  "why": "decide input 9: isBlocked(9) else EmyMain::isPCStateClass2"
+ },
+ "0015d284": {
+  "name": "DwfMain::isPCClass7OffAxis",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d284",
+  "why": "decide input 10: isBlocked(10) else EmyMain::isPCClass7OffAxis"
+ },
+ "0015d32c": {
+  "name": "DwfMain::isPCNear",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d32c",
+  "why": "decide input 11: isBlocked(11) else EmyMain::isPCNear"
+ },
+ "0015d3e0": {
+  "name": "DwfMain::isPCOrDogInSight",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d3e0",
+  "why": "decide input 12: isBlocked(12) else EmyMain::isPCOrDogInSight"
+ },
+ "0015d488": {
+  "name": "DwfMain::hasOid0Twice",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d488",
+  "why": "decide input 13: isBlocked(13) else EmyMain::hasOid0Twice"
+ },
+ "0015d530": {
+  "name": "DwfMain::isLowLife",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d530",
+  "why": "decide input 14: isBlocked(14) else EmyMain::isLowLife"
+ },
+ "0015d5d8": {
+  "name": "DwfMain::isHalfLife",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d5d8",
+  "why": "decide input 15: isBlocked(15) else EmyMain::isHalfLife"
+ },
+ "0015d680": {
+  "name": "DwfMain::testAttr8And10",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d680",
+  "why": "decide input 16: isBlocked(16) else achr attr bits 8 and 0x10"
+ },
+ "0015d738": {
+  "name": "DwfMain::testAttr2And4",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d738",
+  "why": "decide input 17: isBlocked(17) else achr attr bits 2 and 4"
+ },
+ "0015d7f0": {
+  "name": "DwfMain::testAttr1",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d7f0",
+  "why": "decide input 18: isBlocked(18) else achr attr bit 1"
+ },
+ "0015d890": {
+  "name": "DwfMain::testAttr2Or4",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d890",
+  "why": "decide input 19: isBlocked(19) else achr attr bit 2 or 4"
+ },
+ "0015d948": {
+  "name": "DwfMain::testAttr8Or10",
+  "tag": "ror-inferred",
+  "was": "FUN_0015d948",
+  "why": "decide input 20: isBlocked(20) else achr attr bit 8 or 0x10"
+ },
+ "0015da00": {
+  "name": "DwfMain::isPCStateClass4",
+  "tag": "ror-inferred",
+  "was": "FUN_0015da00",
+  "why": "decide input 21: isBlocked(21) else EmyMain::isPCStateClass4"
+ },
+ "0015daa8": {
+  "name": "dwfFindPickupItem",
+  "tag": "ror-inferred",
+  "was": "FUN_0015daa8",
+  "why": "DwfMain::initOut / decide store it at +0x26c (state 11's gate); pigFindPickupItem's twin: type-5 fchrs within 700, not object flag 1, not an enemy target, nearest reachable"
+ },
+ "0015dd74": {
+  "name": "dwfFindPart",
+  "tag": "ror-inferred",
+  "was": "FUN_0015dd74",
+  "why": "DwfMain::initOut / decide store it at +0x270 (state 12's gate); pigFindPart's twin with kinds 0xbbf..0xbc3"
  },
  "0015e214": {
   "name": "DwfOutDisappear::Init",
@@ -9190,6 +9340,12 @@
   "tag": "ror-inferred",
   "was": "FUN_0015ea8c",
   "why": "DwfOutWalk vtable slot 4 (rtti.py); the out is built by DwfMain, PigMain and GotMain::initOut"
+ },
+ "0015eaa8": {
+  "name": "DwfOutWalk::setStep",
+  "tag": "ror-inferred",
+  "was": "FUN_0015eaa8",
+  "why": "called only by DwfOutWalk::Exec: a new step resets the frame count +0x3c"
  },
  "0015eac4": {
   "name": "DwfOutSerch::Init",
