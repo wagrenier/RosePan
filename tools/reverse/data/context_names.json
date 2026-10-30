@@ -15275,6 +15275,12 @@
   "was": "FUN_001bc790",
   "why": "a0 = MnuItem (execPage0..11 pass this); item of slot a1 (getSlotItem / 0x2430 / 0x242c); system data field 0xc text centred on 0x100 into sprite 0x12's text (clear rect 0x2b8850)"
  },
+ "001bc8f8": {
+  "name": "MnuItem::setDescTexts",
+  "tag": "ror-inferred",
+  "was": "FUN_001bc8f8",
+  "why": "a0 MnuItem (m_spr +0x98, m_slot12_item / m_find_item for slots 12 / 13): sprite 0x5c gets the slot item's name (field 0xc), 0x5d..0x5f lines 3n..3n+2 of field 0x25 (the description) via getTextLine; no callers in the ROM"
+ },
  "001bcb84": {
   "name": "MnuItem::getKnownName",
   "tag": "ror-inferred",

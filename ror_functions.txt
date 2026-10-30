@@ -3503,7 +3503,7 @@
 /* 001bbcfc 00000674 */ MnuItem::execPage12(){}  // ror
 /* 001bc370 00000420 */ MnuItem::execPage13(){}  // ror
 /* 001bc790 00000168 */ MnuItem::setNameText(){}  // ror
-/* 001bc8f8 0000028c */ FUN_001bc8f8(){}
+/* 001bc8f8 0000028c */ MnuItem::setDescTexts(){}  // ror
 /* 001bcb84 00000084 */ MnuItem::getKnownName(){}  // ror
 /* 001bcc08 00000420 */ MnuItem::setLinkTexts(){}  // ror
 /* 001bd028 00000abc */ MnuItem::showLinkPanel(){}  // ror

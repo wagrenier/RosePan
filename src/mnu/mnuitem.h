@@ -138,6 +138,9 @@ struct MnuItem
      * the others full; 0x10008 shows them all full. */
     void dimSlots(u_int bits);                                           // ROR 0x001b05ec
     void buildFlagList();                                                // ROR 0x001baff4
+    /* Sprite 0x5c: slot no's item name; 0x5d..0x5f lines 3 * page .. + 2
+     * of its description (field 0x25). Nothing in the ROM calls it. */
+    void setDescTexts(int no, int page);                                 // ROR 0x001bc8f8
 
     /* PC: m_spr's sprite n (m_sprite is the SprMan's table). */
     SprSprite &sprite(int n) { return m_spr.m_sprite[n]; }
@@ -148,7 +151,8 @@ struct MnuItem
      * [1] its slot (0..11 in a 4 x 3 grid, 12 the slot-12 item; page 7
      * puts that slot's item away). [2] page 1's slot, [5] page 2's, [4]
      * page 7's choice (0 yes, 1 no), [3] page 4's action row, [7] page
-     * 10's chosen row. */
+     * 10's chosen row, [8] page 12's row, [9] page 13's choice (0 offer,
+     * 1 not). */
     int           m_work[10];       // ROR 0x0004
     int           m_2c;             // ROR 0x002c: initWork 4; unverified
     int           m_30;             // ROR 0x0030: initWork 2; unverified
@@ -214,7 +218,7 @@ struct MnuItem
      * 0x21 / 0x24 targeted, use 0x1e, equip 0x22 / 0x23 equipped, examine
      * 0x1f, put away 0x20), -1 after the last. */
     int           m_act_spr[6];     // ROR 0x26e4
-    int           m_win2;           // ROR 0x26fc: a second window, closed at the end when >= 0
+    int           m_win2;           // ROR 0x26fc: page 11's prompt window, closed at the end when >= 0
     int           m_win;            // ROR 0x2700: the scene window
     int           m_board_wait;     // ROR 0x2704: page 6: frames before the menu comes back (10)
     int           m_gun_idx;        // ROR 0x2708: page 5: GamMan::getEquipSlot (scePrintf "m_gun_idx")
