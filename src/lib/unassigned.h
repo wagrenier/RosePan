@@ -320,20 +320,8 @@ struct I3dLayer;
 /* The "now loading" screen MnuNow: mnu/mnunow.h (not included here: it
  * holds a SprMan, and spr/sprman.h includes this file). */
 
-/* The 2D board. EE 0x10c0 (MagLifeMenuBoard2D +0x40..+0x1100). */
-struct MnuBoard2D
-{
-    void init(DogTexInfo *tex);                                          // ROR 0x001ad824
-    void term();                                                         // ROR 0x001ad870
-    int  isInit();                                                       // ROR 0x001ad8bc
-    int  processPad(BedPad *pad);                                        // ROR 0x001ad8cc
-    void draw(I3dLayer *layer);                                          // ROR 0x001ad8e0
-
-    u_char    _00[0x10b8];
-    int       m_board;          // ROR 0x10b8: MagLifeMenuBoard2D::init stores getTypeValue's board id
-    u_char    _10bc[0x10c0 - 0x10bc];
-};
-static_assert(offsetof(MnuBoard2D, m_board) == 0x10b8, "m_board");
+/* The 2D board MnuBoard2D: mnu/mnuboard2d.h (not included here: it
+ * holds a SprMan, and spr/sprman.h includes this file). */
 
 /* debugNop 0x2155a0: sequence/sequence.h. */
 #include "debug/mimu_debug.h"

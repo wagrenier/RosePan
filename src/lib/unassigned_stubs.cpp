@@ -108,38 +108,6 @@ GotMain::~GotMain()
 
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
 
-// stub of ROR 0x001ad8e0
-void MnuBoard2D::draw(I3dLayer *layer)
-{
-    ROSEPAN_STUB("MnuBoard2D::draw", 0x001ad8e0);
-}
-
-// stub of ROR 0x001ad824
-void MnuBoard2D::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("MnuBoard2D::init", 0x001ad824);
-}
-
-// stub of ROR 0x001ad8bc
-int MnuBoard2D::isInit()
-{
-    ROSEPAN_STUB("MnuBoard2D::isInit", 0x001ad8bc);
-    return {};
-}
-
-// stub of ROR 0x001ad8cc
-int MnuBoard2D::processPad(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuBoard2D::processPad", 0x001ad8cc);
-    return {};
-}
-
-// stub of ROR 0x001ad870
-void MnuBoard2D::term()
-{
-    ROSEPAN_STUB("MnuBoard2D::term", 0x001ad870);
-}
-
 // stub of ROR 0x001bdfe0
 void MnuSelectLanguage::draw(I3dLayer *layer)
 {

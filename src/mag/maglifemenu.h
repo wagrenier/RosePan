@@ -31,6 +31,7 @@
 #include "lib/unassigned.h"
 #include "mag/maglife.h"
 #include "mnu/mnuSelectLanguage.h"
+#include "mnu/mnuboard2d.h"
 #include "mnu/mnuitem.h"
 #include "mnu/mnumovie.h"
 #include "mnu/mnunow.h"

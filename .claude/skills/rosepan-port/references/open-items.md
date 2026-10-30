@@ -6,6 +6,14 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`mnu/mnuboard2d.cpp`, verify): MnuBoard2D, all 16 functions -- the 2D board
+picture (architecture.md "The 2D board").** Not on the smoke path (the 15 s run is at the boot
+disclaimer; boards open from MagScene menu ids 0x4xxxx, a script event in a room): mark done when a
+run shows one and it matches work/ref (tm2png.py --scan data/mnurpk/mnuboard.rpk). Doubts: the
+name buffer 0x2ac4e0 is ported as 0x80 bytes (its EE size not checked); nothing found sets
+m_main_mode 1 (the triangle mode) or m_keep_tex; execMainPad's closing fade in before exec's fade
+out is ported as the ROM has it.
+
 **WRITTEN 2026-10-30 (`mnu/mnustock.cpp`, verify): all 35 MnuStock functions; session 3 wrote
 execPage2 (the slot grid). m_pick (+0x54): 3 nothing picked, 1 a list entry (page 2 swaps), 2 a
 slot (page 1 swaps); execPage2 steps 4 / 5 wait m_swap_wait (10) for the two flying icons, then
