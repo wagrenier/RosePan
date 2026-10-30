@@ -316,20 +316,8 @@ struct I3dLayer;
 /* The item menu MnuItem: mnu/mnuitem.h (not included here: it holds a
  * SprMan, and spr/sprman.h includes this file). */
 
-/* The stock (item box) menu. EE 0x15b0 (MagLifeMenuStock +0x40..+0x15f0). */
-struct MnuStock
-{
-    void init(DogTexInfo *tex);                                          // ROR 0x0019a650
-    void term();                                                         // ROR 0x0019a6b8
-    int  isInit();                                                       // ROR 0x0019a730
-    int  processPad(BedPad *pad);                                        // ROR 0x0019a740
-    void draw(I3dLayer *layer);                                          // ROR 0x0019a754
-
-    u_char    _00[0x110c];
-    MagScene *m_scene;          // ROR 0x110c: MagLifeMenuStock::init stores the scene
-    u_char    _1110[0x15b0 - 0x1110];
-};
-static_assert(offsetof(MnuStock, m_scene) >= 0x110c, "m_scene");
+/* The stock (item box) menu MnuStock: mnu/mnustock.h (not included
+ * here: it holds a SprMan, and spr/sprman.h includes this file). */
 
 /* The options menu MnuOpt: mnu/mnuopt.h (not included here: it holds a
  * SprMan, and spr/sprman.h includes this file). */

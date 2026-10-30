@@ -14159,6 +14159,144 @@
   "was": "FUN_0019a754",
   "why": "the menu object at +0x40 of MagLifeMenuStock: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
  },
+ "0019a780": {
+  "name": "MnuStock::open",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a780",
+  "why": "MnuOpt::open's shape: -1 when open, else open=1, step / page / main step 0, MsgManSet::open on +0x58; only caller MnuStock::init"
+ },
+ "0019a7d8": {
+  "name": "MnuStock::close",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a7d8",
+  "why": "MnuOpt::close's shape (open flag off, -1 when closed); called by term and the destructor"
+ },
+ "0019a824": {
+  "name": "MnuStock::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_0019a824",
+  "why": "processPad tail-calls it; MnuOpt::exec's step machine: window with system text 0x1b, mnustock.rpk textures, fade in, pages 0..2, fade out, close"
+ },
+ "0019ae20": {
+  "name": "MnuStock::initWork",
+  "tag": "ror-inferred",
+  "was": "FUN_0019ae20",
+  "why": "MnuOpt::initWork's shape: the constructor's work clear (+0x04..+0x1c, rows 8, the menu flags 1)"
+ },
+ "0019ae78": {
+  "name": "MnuStock::readMenuFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_0019ae78",
+  "why": "same code as MnuItem::readMenuFlags 0x1af130: sequence bit-word 1 bits 0 / 1 / 2 into +0x1560..+0x1570"
+ },
+ "0019af08": {
+  "name": "MnuStock::getAnimTable",
+  "tag": "ror-inferred",
+  "was": "FUN_0019af08",
+  "why": "MnuItem::getAnimTable's shape: item id 0xa00 / 0xb3b -> the empty anim table 0x2a26b0, else the icon table 0x2a2d80"
+ },
+ "0019af34": {
+  "name": "MnuStock::getPatBase",
+  "tag": "ror-inferred",
+  "was": "FUN_0019af34",
+  "why": "MnuItem::getPatBase's shape: GamSysData field 0xd (icon no) * 4 + 0x6d, the icon's first pattern"
+ },
+ "0019afb0": {
+  "name": "MnuStock::canScroll",
+  "tag": "ror-inferred",
+  "was": "FUN_0019afb0",
+  "why": "1 when the list (count > 7) has rows above (dir 0) / below (dir 1) the window; decides the arrow sprites 0x35 / 0x36"
+ },
+ "0019b020": {
+  "name": "MnuStock::buildStockList",
+  "tag": "ror-inferred",
+  "was": "FUN_0019b020",
+  "why": "fills +0x1110 with the none entry and GamMan's stock pool items of the category (0 all, 1..6 GamSysRec5 m_b8), clamps cursor / window, places scroll bar 0x37 and arrows"
+ },
+ "0019b384": {
+  "name": "MnuStock::setSlotSprites",
+  "tag": "ror-inferred",
+  "was": "FUN_0019b384",
+  "why": "MnuItem::setSlot's counterpart: slot pointers (-1 all) into +0x1510, then each slot's icon 0x4d+i and count text 0x59+i"
+ },
+ "0019b7f4": {
+  "name": "MnuStock::setSlotDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_0019b7f4",
+  "why": "display records for the 12 slot icons 0x4d.. / counts 0x59.. at the slot grid 0x2a3208 and the picked item icon 0x22, through setDispList"
+ },
+ "0019bd6c": {
+  "name": "MnuStock::updateRows",
+  "tag": "ror-inferred",
+  "was": "FUN_0019bd6c",
+  "why": "rewrites the visible list rows' name / count texts from the window top, then setSlotSprites(-2)"
+ },
+ "0019beb0": {
+  "name": "MnuStock::swapItem",
+  "tag": "ror-inferred",
+  "was": "FUN_0019beb0",
+  "why": "moves list entry into item slot: GamMan addStockItem / clearItemSlot / delStock / setItemSlot, then rebuilds the list and rows; 1 when something moved"
+ },
+ "0019c048": {
+  "name": "MnuStock::findSlot",
+  "tag": "ror-inferred",
+  "was": "FUN_0019c048",
+  "why": "the slot (0..11) holding item id, -1 for 0xa00 or none"
+ },
+ "0019c0e4": {
+  "name": "MnuStock::setupLists",
+  "tag": "ror-inferred",
+  "was": "FUN_0019c0e4",
+  "why": "mode 0: all slot pointers, equipped / find-target slots (GamMan +0x2220c / +0x2220e), the full stock list; other modes do nothing (close passes 1)"
+ },
+ "0019c16c": {
+  "name": "MnuStock::setDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_0019c16c",
+  "why": "MnuOpt::setDisp's shape: pattern image 0x29c508, display list 0x2a3298, row sprites and move tables, the equip / find markers 0x65 / 0x66, SprMan active"
+ },
+ "0019ceac": {
+  "name": "MnuStock::update",
+  "tag": "ror-inferred",
+  "was": "FUN_0019ceac",
+  "why": "MnuOpt::update's shape: SprMan::update, MsgManSet::update, sequence bit 0x40000000 once faded in, the frame timer"
+ },
+ "0019dbc8": {
+  "name": "MnuStock::setRowName",
+  "tag": "ror-inferred",
+  "was": "FUN_0019dbc8",
+  "why": "a list row sprite's text: the item's name (GamSysData field 0xc), the none entry's own text for row 0"
+ },
+ "0019dcbc": {
+  "name": "MnuStock::setRowCount",
+  "tag": "ror-inferred",
+  "was": "FUN_0019dcbc",
+  "why": "a list row's count text (two digits into bss 0x6e9408, stacking items only, blanks past the list)"
+ },
+ "0019dedc": {
+  "name": "MnuStock::getItemName",
+  "tag": "ror-inferred",
+  "was": "FUN_0019dedc",
+  "why": "GamSysData field 0xc when the item's flag 4 (known) is set, else the question-mark text 0x2f84a8, a space when empty"
+ },
+ "0019df78": {
+  "name": "MnuStock::copyMesText",
+  "tag": "ror-inferred",
+  "was": "FUN_0019df78",
+  "why": "copies a message text up to 0x100 bytes, a #n escape written #0; caller 0x19e010 (the description text)"
+ },
+ "0019e43c": {
+  "name": "MnuStock::getScrollBarPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0019e43c",
+  "why": "0x69 + index * 0x89 / (count - 1): the scroll bar sprite 0x37's y between 0x69 and 0xf2"
+ },
+ "0019fb88": {
+  "name": "MnuStock::testItemFlags",
+  "tag": "ror-inferred",
+  "was": "FUN_0019fb88",
+  "why": "GamSysData::testFlags(id, bits), 0 for id 0xa00 (no item)"
+ },
  "001a066c": {
   "name": "MnuTextList::MnuTextList",
   "tag": "ror-inferred",

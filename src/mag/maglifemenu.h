@@ -35,6 +35,7 @@
 #include "mnu/mnumovie.h"
 #include "mnu/mnunow.h"
 #include "mnu/mnuopt.h"
+#include "mnu/mnustock.h"
 #include "mnu/mnusvld.h"
 #include "mnu/mnutitle.h"
 
@@ -149,7 +150,7 @@ struct MagLifeMenuMap : MagLifeMenuBase
 /* The stock (item box), 0x10002 (vtable 0x2e1a08). EE 0x15f0. */
 struct MagLifeMenuStock : MagLifeMenuBase
 {
-    // ROR 0x0028427c; callcheck: MnuStock::MnuStock (not written; the member starts zeroed)
+    // ROR 0x0028427c; callcheck: MnuStock::MnuStock (the member constructor, implicit)
     MagLifeMenuStock() {}
     // ROR 0x002842cc; callcheck: MnuStock::~MnuStock (the member's)
     ~MagLifeMenuStock() {}
