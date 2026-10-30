@@ -997,3 +997,17 @@ Symptom: MagLifeMenuSpecial::render step 5 (0x12e178) clears m_attention on "act
 dial angle like -0x4000 as an actor index writes far outside m_actors. Fix: keep the ROM's three
 words but skip any outside 0..127 (the host must not scribble), with a comment. Check a decompiled
 loop's start pointer in the asm when its twin starts elsewhere.
+
+## Models that pop at the 4:3 edges on a wide window (2026-10-30)
+
+- Symptom: on a 16:9 window, a door (any model) past the original 4:3 picture's sides vanished and
+  reappeared as the camera turned, though the extra width showed the rest of the world.
+- Cause: the host widens every display camera by the view extend (rosepan_i3d.cpp REC_CAMERA ->
+  RosePan_RendererWidenProjection), but the game culls in i3dViewTestBox / BoneBox / Sphere against
+  the view record's 4:3 rectangle (I3dView m_rect_clip / m_rect_planes): a model wholly in the wide
+  margin was I3D_VIEW_OUT before it was drawn.
+- Fix: i3dCtxCreateView widens only m_rect_clip (clip x / y divided by the extend, as the host does)
+  and m_rect_planes for views with a non-zero record offset (the off-screen shadow / close-up views
+  have 0 and keep their shape). The projections stay the ROM's: i3rHostCamera and the CPU strips
+  build from m_rect_proj / m_rect_viewport, so widening those would widen twice. Any new host-side
+  widening (a new aspect knob) has to reach i3dViewHostExtend too.
