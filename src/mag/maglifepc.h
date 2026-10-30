@@ -253,6 +253,9 @@ struct MagLifePC : MagLifeControlChara
      * heading, unless the actor's mode has an argument. */
     void applyMotionMove();                                              // ROR 0x00120668
     /* ---- mag/maglifepcbtl.cpp ---- */
+    /* out = the actor's m_trans 120 lower (the attack's base); returns its
+     * heading. */
+    float getAttackBasePos(float *out);                                  // ROR 0x0012bc20
     /* The weapon's hit node hitNo for theHeight into out; returns its
      * radius, 0 without one. */
     float getWeaponHitPos(float *out, int theHeight, int hitNo);         // ROR 0x0012bc98
@@ -261,6 +264,12 @@ struct MagLifePC : MagLifeControlChara
     float calcTargetAngle(float *roty, float *rotx, const float *pos);   // ROR 0x0012bedc
     /* The current attack's hit window in motion frames (default 0..1000). */
     void getHitFrameRange(float *from, float *to);                       // ROR 0x0012c014
+    /* The motion of theWeapon (0 bare hands, 1 gun, 2 knife, 3 axe),
+     * theHeight (0 mid, 1 high, 2 low, 3 mid-low, 4 stomp) and theCombo
+     * 0..2; "gun_empty" for the gun without ammunition. */
+    const char *getAttackMotionName(int theWeapon, int theHeight, int theCombo); // ROR 0x0012c104
+    /* Remembers the attack (m_atk_*), plays its motion and swing sound. */
+    void playAttackMotion(int theWeapon, int theHeight, int theCombo);   // ROR 0x0012c1fc
     /* Starts the attack motion for combo step combo; returns the height
      * (0..4, 4 the kick) in the low half and 1 in the high half when the
      * attack has no hit test. */
@@ -268,8 +277,14 @@ struct MagLifePC : MagLifeControlChara
     /* 0..4: the target's height class (m_target_no), else message 0x17's
      * low half (>= 0). */
     int  getAttackHeight();                                              // ROR 0x0012ca28
+    /* The height to attack enemy oid at pos with: 4 (stomp) when it is
+     * not hittable standing and within 80, else getAttackHeightByDist. */
+    int  calcAttackHeight(const float *pos, u_int oid);                  // ROR 0x0012caa4
     /* State 11: picks the attack target, then state 5. */
     void beginAttack();                                                  // ROR 0x0012cb50
+    /* The equipped gun's muzzle flash (EffMan kind 0x26 at its gun_mazzle
+     * node). Not written yet. */
+    void createMuzzleEff();                                              // ROR 0x0012ccac
     /* State 0xe with arg (mag/maglifepcbtl.cpp), word +0x0c = word. */
     void setState14(int arg, int word);                                  // ROR 0x0012c9c0
     /* message 0xe..0x11 (mag/maglifepceff.cpp; the first three assert). */
@@ -303,7 +318,10 @@ struct MagLifePC : MagLifeControlChara
     float  m_stick_roty;        // ROR 0x110: getStickRotY
     float  m_stick_change;      // ROR 0x114: BedPad::getDirChange; selectMode sets 9999
     int    m_shots;             // ROR 0x118: shots since the last reload (decSelItemNum; reload's effect, then 0); the constructor clears it
-    u_char _11c[0x130 - 0x11c];
+    u_char _11c[0x124 - 0x11c];
+    int    m_atk_weapon;        // ROR 0x124: playAttackMotion's weapon (getHitFrameRange)
+    int    m_atk_height;        // ROR 0x128: its height
+    int    m_atk_combo;         // ROR 0x12c: its combo step
     int    m_mode_frame;        // ROR 0x130: frames in the mode (selectMode 0, live +1)
     MagLifePCMode *m_mode_cur;  // ROR 0x134: selectMode's pick, NULL in state 11
     MagLifePCModeNull       m_mode_null;        // ROR 0x138
@@ -333,9 +351,10 @@ struct MagLifePC : MagLifeControlChara
     u_char _1bc[0x1c0 - 0x1bc];
     float  m_target_pos[4];     // ROR 0x1c0: beginAttack's target
     float  m_1d0[4];            // ROR 0x1d0: the constructor sets (0, 0, 0, 1)
-    u_char _1e0[0x1f0 - 0x1e0];
+    float  m_target_dist;       // ROR 0x1e0: startAttack: getTargetSpinePos's type distance
+    u_char _1e4[0x1f0 - 0x1e4];
     int    m_target_no;         // ROR 0x1f0: beginAttack
-    int    m_target_node;       // ROR 0x1f4: beginAttack
+    int    m_target_node;       // ROR 0x1f4: beginAttack: the target's UtlEnemyInfo::m_24 (its uid), -1 none
     float  m_dead_zone;         // ROR 0x1f8: option 6 (stick magnitude), 0.1
     float  m_cos_1fc;           // ROR 0x1fc: option 7, cos(5 degrees)
     float  m_cos_200;           // ROR 0x200: option 8, cos(89 degrees)
@@ -356,6 +375,8 @@ static_assert(offsetof(MagLifePC, m_mode_cur) >= 0x134, "m_mode_cur");
 static_assert(offsetof(MagLifePC, m_mode_hug) >= 0x1a8, "m_mode_hug");
 static_assert(offsetof(MagLifePC, m_debug_dash) >= 0x1b8, "m_debug_dash");
 static_assert(offsetof(MagLifePC, m_target_no) >= 0x1f0, "m_target_no");
+static_assert(offsetof(MagLifePC, m_atk_combo) >= 0x12c, "m_atk_combo");
+static_assert(offsetof(MagLifePC, m_target_dist) >= 0x1e0, "m_target_dist");
 static_assert(offsetof(MagLifePC, m_weapon_type) >= 0x21c, "m_weapon_type");
 
 #endif /* _MAG_MAGLIFEPC_H */

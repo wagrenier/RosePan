@@ -419,32 +419,6 @@ void MagLifePC::message17()
     ROSEPAN_STUB("MagLifePC::message17", 0x0012ce34);
 }
 
-// stub of ROR 0x0012c9c0
-void MagLifePC::setState14(int arg, int word)
-{
-    ROSEPAN_STUB("MagLifePC::setState14", 0x0012c9c0);
-}
-
-// stub of ROR 0x0012bedc
-float MagLifePC::calcTargetAngle(float *roty, float *rotx, const float *pos)
-{
-    ROSEPAN_STUB("MagLifePC::calcTargetAngle", 0x0012bedc);
-    return {};
-}
-
-// stub of ROR 0x0012ca28
-int MagLifePC::getAttackHeight()
-{
-    ROSEPAN_STUB("MagLifePC::getAttackHeight", 0x0012ca28);
-    return {};
-}
-
-// stub of ROR 0x0012c014
-void MagLifePC::getHitFrameRange(float *from, float *to)
-{
-    ROSEPAN_STUB("MagLifePC::getHitFrameRange", 0x0012c014);
-}
-
 // ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----
 
 // stub of ROR 0x0016b62c
@@ -1487,3 +1461,9 @@ void EffCloud1::updateZDepth()
 
 
 
+
+// stub of ROR 0x0012ccac
+void MagLifePC::createMuzzleEff()
+{
+    ROSEPAN_STUB("MagLifePC::createMuzzleEff", 0x0012ccac);
+}

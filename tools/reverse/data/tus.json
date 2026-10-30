@@ -1526,6 +1526,24 @@
    "status": "verify",
    "why": "the file's asserts (mag/maglifepc3.cpp) anchor 0x11d720..0x11df14; initMotion 0x11dd40 sits between those anchors and calls the file's loadWeaponMotion 0x11dc64; 0x11df7c..0x11e0d8 are the setMotionSub helpers initMotion calls plus getSubStateClass / isMoveState (small MagLifePC queries). 0x11e0d8 (a ray / strip debug drawer) is left out"
   },
+  "mag/maglifepcbtl.cpp": {
+   "notes": "Complete code, not reachable on the smoke path (needs a room with enemies and the attack modes); the 15 s smoke run still shows the disclaimer screen. When a run reaches combat, check the attack motions play and the gun ray hits. Left outside this TU: createMuzzleEff 0x12ccac (unassigned@0012ccac, the gun_mazzle EffMan kind 0x26 flash, probably the head of mag/maglifepceff.cpp) and utlInitHitCheck 0x10454c / utlHitCheck 0x10456c in utl/utlbtl.cpp are stubs, so the shot never hits yet. Doubt: playAttackMotion asserts theCombo >= -1 but getAttackMotionName needs >= 0; callers pass 0..2. getWeaponHitPos takes theHeight as its low 16 bits (andi 0xffff), as the ROM.",
+   "ranges": [
+    [
+     "0012bc20",
+     "0012ccac"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 07:33",
+     "status": "verify",
+     "summary": "MagLifePC fighting, all 11 functions of 0x12bc20..0x12ccac (pinned): getAttackBasePos, getWeaponHitPos, calcTargetAngle, getHitFrameRange, getAttackMotionName, playAttackMotion, startAttack (targetting, motion, the gun shot with spread ray and pass-through hit tests), setState14, getAttackHeight, calcAttackHeight, beginAttack; motion / hit-node / hit-window tables as host data; new PC fields m_atk_weapon/height/combo (+0x124..0x12c) and m_target_dist (+0x1e0)"
+    }
+   ],
+   "status": "verify",
+   "why": "All 6 anchored functions assert with mag/maglifepcbtl.cpp; the unanchored MagLifePC methods between them (calcTargetAngle, getHitFrameRange, setState14, getAttackHeight, FUN_0012caa4) fill the gaps; 0x12bc20 follows maglifebwnctrl.cpp (pinned to 0x12bc20); 0x12ccac (gun_mazzle effect, no maglifepcbtl string) starts the effect code before maglifepceff.cpp"
+  },
   "mag/maglifepcmode.cpp": {
    "notes": "Every function of the TU is written; nothing on screen can show it yet: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run binds no actor to the PC, so no mode runs. The first session whose run binds the PC and shows Jennifer standing / walking marks this done. Needed before any of it animates: MagLifeControlChara::changeMotionSeq 0x11a320, changeMotionSeqAlt 0x11a27c (new stub in mag/maglife.cpp) and updateMotionSeq 0x11a14c, plus the PC motion table 0x2961e0 on the host. The attack path then needs mag/maglifepcbtl.cpp (startAttack 0x12c31c is 0x6a4 bytes, getWeaponHitPos, getHitFrameRange, calcTargetAngle) and getAttackHeight 0x12ca28 (stub in src/lib/unassigned_stubs.cpp, it sits in unassigned@0012c9c0). MagLifePCItemData +0x14 is now m_item_id. Ride::message is still called only from MagLifePC::message 6/9/0xb/0xd. The Hug turn reads the actor through vtable slot 11 getActor on the EE; the host uses m_actor (same object).",
    "ranges": [

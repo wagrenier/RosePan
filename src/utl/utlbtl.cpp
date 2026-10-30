@@ -12,3 +12,9 @@ int utlHitCheck(UtlHitCheck *theHitCheck)
     ROSEPAN_STUB("utlHitCheck", 0x0010456c);
     return {};
 }
+
+// stub of ROR 0x0010454c
+void utlInitHitCheck(UtlHitCheck *theHitCheck)
+{
+    ROSEPAN_STUB("utlInitHitCheck", 0x0010454c);
+}

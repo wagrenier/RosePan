@@ -1165,6 +1165,23 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   Enemy types (EmyManager::getEmyType, names in the height table 0x2ea450): 0 DWF, 1 PIG, 2 GOAT,
   3 FISH, 4 BIRD_S, 5 BIRD_L, 6 HOFFMAN, 8 CLARA, 10 STRAYDOG; `getAttackHeightByDist` 0x11d3d0
   maps the XZ distance by type to heights 1 / 0 / 3 / 2 (Hoffman by his neck height).
+- MagLifePC's fighting (`mag/maglifepcbtl.cpp` 0x12bc20..0x12ccac, pinned 2026-10-30): weapons 0
+  bare hands, 1 gun, 2 knife, 3 axe; heights 0 mid, 1 hi, 2 lo, 3 ml, 4 stomp. Attack motions
+  0x298228 [weapon][height][combo 0..2] (sude_atk*, gun_atk*, knife_atk1..3*, ax_atk1..3*, *_stomp;
+  "gun_empty" without ammo); `playAttackMotion` 0x12c1fc keeps weapon / height / combo at PC
+  +0x124 / +0x128 / +0x12c for `getHitFrameRange` 0x12c014 (hit windows in motion frames: stomp
+  25..30, bare 0..10, knife / axe tables 0x2ec9f8 / 0x2eca58, gun 0..1000). Hit nodes
+  (`getWeaponHitPos`): stomp 'Bip01 R Toe0' r 50, gun 'gun_mazzle' r 1, knife / axe p_hit..p_hit7
+  r 5 on the weapon item's actor, bare low kick 'Bip01 R Calf' / Toe0, punch 'b_fg_r' r 10.
+  Targetting (state 11, `beginAttack`): nearest enemy within 500 and +-90 degrees -> m_target_pos /
+  m_target_no (oid) / m_target_node (its uid), then state 5; the first blow from state 5 retargets
+  within 45 degrees (not the gun). Height = 4 when the enemy is not hittable standing and within
+  80 XZ of the PC's trans - 120 (`calcAttackHeight` 0x12caa4), else getAttackHeightByDist; message
+  0x17 (+0x1b0 / +0x1ac) forces height and weapon. The gun shot: sounds 0x7f shot / 0x80 empty /
+  0x83 hit / 0x85 miss (0x7d on targetting), muzzle flash `createMuzzleEff` 0x12ccac (EffMan kind
+  0x26), a ray of 800 from the muzzle to the target turned by utlRandMean(+-10 degrees), enemies
+  within 800 nearest first, each hit by `hitTarget`; it goes on through one only while
+  rand(0..1) < getEmyTypeRate x (800 - dist) / 800.
 - The motion sequence table (MagLifeControlChara +0x5c, the asserts' `m_tbl_motion_state`; the PC's
   at 0x2961e0, 164 rows of 0x18 bytes: +0 the row's own index, +4 the motion name, +8 blend frames
   (short, -1), +0xa frames (> 0: frames before the next row while the actor is in no mode; < 1 the
