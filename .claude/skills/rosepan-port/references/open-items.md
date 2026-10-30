@@ -6,6 +6,16 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**WRITTEN 2026-10-30 (`mag/maglifepcmove.cpp`, verify; repinned 0x11e0d8..0x120788, absorbing
+unassigned@0011e0d8): MagLifePC::sweepRay, an older single-ray sweepMove** (architecture.md "PC
+movement"). The queue was empty; picked as the largest remaining todo run (1 KB). Unreferenced, so
+verify is final unless a caller turns up. Doubt: placed with the sweeps (same slide math) rather than
+maglifepc3.cpp, whose last helpers it follows in link order; it has no asserts to decide it. The 15 s
+smoke run still ends on the boot disclaimer. Left todo: only 0.0..0.2 KB single-function runs
+(maglifepcmsg.cpp, mnudlg.cpp, unassigned@00101718 / 00102490 / 0011618c) and empty runs. The useful
+next step is the user's: queue a host task that lengthens the smoke run (the bus-stop pad, about 400 s)
+so the many verify TUs can be marked done from screenshots.
+
 **WRITTEN 2026-10-30 (`debug/motnamecnv.cpp`, verify; pinned 0x2163ac..0x216768, absorbing
 unassigned@00216690): seven MagSceneIFChara wrappers and two hidden assert-printer copies, plus
 utlStrNCopyUpper 0x106064 (src/lib/unassigned_stubs.cpp)** (architecture.md, row 0x2163ac). The queue was

@@ -214,6 +214,11 @@ struct MagLifePC : MagLifeControlChara
     /* States 1..10 and 14. */
     int  isMoveState();                                                  // ROR 0x0011e0ac
     /* ---- mag/maglifepcmove.cpp ---- */
+    /* Unreferenced: one ray from the actor (30 below m_trans) along delta's
+     * level direction, range long; < 0 = free (-1 for a zero move), else
+     * out is the move's level length along the wall it hit (sweepMove's
+     * slide). m_218 adds the ray and the hit triangle as debug strips. */
+    float sweepRay(float range, float *out, const float *delta);         // ROR 0x0011e0d8
     /* The collision sweep of a move from by delta (range / radius are
      * m_sweep_range / m_sweep_radius): an object at from + delta (out: the
      * delta slid off it) gives 1, else a cylinder of radius range - radius

@@ -3293,6 +3293,12 @@
   "was": "FUN_0011e0ac",
   "why": "m_state 1..10 or 14"
  },
+ "0011e0d8": {
+  "name": "MagLifePC::sweepRay",
+  "tag": "ror-inferred",
+  "was": "FUN_0011e0d8",
+  "why": "a0 = MagLifePC (m_actor +0x58, m_scene +0x20, m_218 +0x218): one castRay from the actor's m_trans - 30 y along the level move direction scaled to f12; on a hit out = the wall normal turned a quarter along the wall (sweepMove's slide), the move's xz length long; m_218 adds a debug line / strip once. Unreferenced; an older single-ray sweepMove"
+ },
  "0011e4c4": {
   "name": "MagLifePC::sweepSides",
   "tag": "ror-inferred",

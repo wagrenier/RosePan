@@ -2018,10 +2018,10 @@
    "why": "every MagLifePCMode* vtable slot (rtti.py) lies in 0x1208b8..0x1230fc, including AtkMove2D's 0x121858..0x1218fc that inference gave dog/doglight.cpp; 0x120788 / 0x1207a8 open the run and are called by MagLifePCMode::live; 0x1233d8 is the next unassigned gap before mag/maglifebwn.cpp"
   },
   "mag/maglifepcmove.cpp": {
-   "notes": "Status verify: the 200 s New Game run ends on a dark film frame with no assert or crash; no MagLifePC code moves anything on screen yet (applyMotionMove runs from live outside move states once the PC is bound; moveBy from every moving mode). Mark done when a room screenshot shows Jennifer walking. Stubs this code needs for real collision: MagLifeControlChara::followGround 0x119e1c and updateSectaCells 0x11a6b0 (mag/maglife.cpp; decompiled in the batch whys and architecture.md), MagLifePC::testObjHit 0x11ccd4 and slideOffObj 0x11cd20 (unassigned@0011cb70, maglifepc2 territory, a few lines each). Until then the PC walks through objects and keeps its height. Decisions: the ROM indexes row 6 of the motion table 0x297240 (run at health 1 up) past its six rows; the host row is NULL so changeMotion asserts (PC: comment). sweepSides hit records get m_50 = 0 (the ROM leaves stack garbage). The angle-to-sector macro is PC_ROT_SECTOR (asserts yyy). The two inline helpers getRootStep and stickWorldRotY carry callcheck notes. For the references: architecture.md PC movement paragraph and open-items PC blockers item 3 written in this commit.",
+   "notes": "sweepRay is unreferenced in the ROM (ghidra.py refs: none), so verify is final unless a caller turns up. Doubt: placed with the sweeps for its sweepMove slide math; maglifepc3.cpp ends right before it in link order and it has no asserts to decide. The debug line reads out even when the ray missed (stale caller data), as the ROM does. The 15 s smoke run ends on the boot disclaimer as before. Left todo: only 0.0..0.2 KB one-function runs and empty runs; the useful next step is a longer smoke run (bus-stop pad) to mark verify TUs done from screenshots.",
    "ranges": [
     [
-     "0011e4c4",
+     "0011e0d8",
      "00120788"
     ]
    ],
@@ -2030,10 +2030,15 @@
      "date": "2026-10-27 22:32",
      "status": "verify",
      "summary": "mag/maglifepcmove.cpp: pinned 0x11e4c4..0x120788 (moveBy 0x11ee00 included) and wrote all 12 functions: sweepMove (object test, cylinder sweep, wall slide), sweepSides (head-on side rays), moveBy, applyMotionMove, moveAttackStance and moveStanceStep (the stance walk), and the unreferenced pad set movePad / moveFree / moveDowned / moveTank / moveToward / isKeepMotion, with their motion tables. Named 12 functions (batch maglifepcmove_001), including the callees followGround, updateSectaCells, testObjHit, slideOffObj (stubs)."
+    },
+    {
+     "date": "2026-10-30 18:06",
+     "status": "verify",
+     "summary": "MagLifePC::sweepRay 0x11e0d8: the last unassigned run beside the sweeps, an older single-ray sweepMove (castRay from m_trans - 30 y along the level move, quarter-turned wall slide, m_218 debug line and hit-triangle strip); file repinned 0x11e0d8..0x120788"
     }
    ],
    "status": "verify",
-   "why": "mag/maglifepcmove.cpp asserts in 9 of the 12 functions across 0x11e4c4..0x120668; moveBy 0x11ee00 sits between sweepMove and 0x11f0b4 and is called by them; 0x11e0d8 debug strip drawer stays out (maglifepc3 notes); MagLifePCMode::moveBy 0x120788 opens maglifepcmode.cpp"
+   "why": "mag/maglifepcmove.cpp asserts in 9 of the 12 functions across 0x11e4c4..0x120668; moveBy 0x11ee00 sits between sweepMove and 0x11f0b4 and is called by them; 0x11e0d8 MagLifePC::sweepRay (unreferenced, no asserts) is an older single-ray sweepMove with the same wall-slide math and m_218 debug strip, so it joins the sweeps rather than maglifepc3's motion helpers; MagLifePCMode::moveBy 0x120788 opens maglifepcmode.cpp"
   },
   "mag/maglifetest.cpp": {
    "notes": "Whole file written. Nothing in the ROM constructs MagLifeTest (ghidra.py refs on the ctor 0x13114c and vtable 0x2e1e70 find only the ctor itself), so no screenshot can show it: verify is final unless a caller turns up. Boot smoke run still shows the disclaimer, unchanged. Picked because the queue was empty; remaining todo files with functions are debug/motnamecnv.cpp (5), unassigned@0011e0d8 (1 KB) and 1-function runs. Decisions: m_84 named m_rot_y_aar (addTrans third arg, never set); the shared frame counter 0x298b78 is a file static; the rot vector passed to getMotionMove is zeroed whole on the host (the ROM sets only word 0). The better next step than more dead code is still a longer smoke pad (the bus-stop walk) to mark verify TUs done from screenshots.",
