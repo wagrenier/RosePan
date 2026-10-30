@@ -1942,12 +1942,21 @@
    "why": "mnuBase ctor/dtor/term and the shared menu helpers (2D buffer, file/texture slots, layer draw) every Mnu* class calls; ends where MnuMap::MnuMap starts"
   },
   "mnu/mnuboard2d.cpp": {
+   "notes": "Complete; not on the smoke path (the run stops at the boot disclaimer, boards open from MagScene menu ids 0x4xxxx in a room). Mark done when a run shows a board and it matches work/ref (tm2png.py --scan data/mnurpk/mnuboard.rpk). The placeholder struct in lib/unassigned.h and the five hand-written stubs in lib/unassigned_stubs.cpp are gone; maglifemenu.h includes mnu/mnuboard2d.h. Doubts in open-items.md: name buffer 0x2ac4e0 ported as 0x80 bytes; nothing found sets m_main_mode 1 or m_keep_tex; PORT: a NULL name (unknown key) is copied as empty.",
    "ranges": [
     [
      "001ad6b4",
      "001adf04"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-30 08:42",
+     "status": "verify",
+     "summary": "MnuBoard2D, all 16 functions: ctor / dtor, init / term / isInit / processPad / draw, open / close, exec (load the board texture named by mnuBoardGetTexName + .tm2 from mnuboard.rpk, fade in, execMain, fade out), initWork, setDisp, update, execMainFlag (script bit 0x27) and execMainPad (triangle); the 228-entry name table, texture list, pattern image and display list as data"
+    }
+   ],
+   "status": "verify",
    "why": "MnuBoard2D ctor 0x1ad6b4 .. its fade helpers (mnuboard.rpk); 0x1adf04 is MnuMovie's constructor. File named after the class"
   },
   "mnu/mnuitem.cpp": {

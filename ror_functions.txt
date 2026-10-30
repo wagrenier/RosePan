@@ -3368,7 +3368,7 @@
 // FILE -- mnu/mnuboard2d.cpp
 // *****************************************************************************
 
-/* 001ad6b4 00000078 */ FUN_001ad6b4(){}
+/* 001ad6b4 00000078 */ MnuBoard2D::MnuBoard2D(){}  // ror
 /* 001ad72c 000000a8 */ MnuBoard2D::~MnuBoard2D(){}  // ror
 /* 001ad7d4 00000050 */ mnuBoardGetTexName(){}  // ror
 /* 001ad824 0000004c */ MnuBoard2D::init(){}  // ror
@@ -3376,14 +3376,14 @@
 /* 001ad8bc 0000000c */ MnuBoard2D::isInit(){}  // ror
 /* 001ad8cc 00000014 */ MnuBoard2D::processPad(){}  // ror
 /* 001ad8e0 0000002c */ MnuBoard2D::draw(){}  // ror
-/* 001ad90c 00000030 */ FUN_001ad90c(){}
-/* 001ad940 0000002c */ FUN_001ad940(){}
-/* 001ad96c 0000026c */ FUN_001ad96c(){}
-/* 001adbd8 00000034 */ FUN_001adbd8(){}
-/* 001adc0c 00000060 */ FUN_001adc0c(){}
-/* 001adc6c 0000006c */ FUN_001adc6c(){}
-/* 001adcd8 000000f8 */ FUN_001adcd8(){}
-/* 001addd0 00000134 */ FUN_001addd0(){}
+/* 001ad90c 00000030 */ MnuBoard2D::open(){}  // ror
+/* 001ad940 0000002c */ MnuBoard2D::close(){}  // ror
+/* 001ad96c 0000026c */ MnuBoard2D::exec(){}  // ror
+/* 001adbd8 00000034 */ MnuBoard2D::initWork(){}  // ror
+/* 001adc0c 00000060 */ MnuBoard2D::setDisp(){}  // ror
+/* 001adc6c 0000006c */ MnuBoard2D::update(){}  // ror
+/* 001adcd8 000000f8 */ MnuBoard2D::execMainFlag(){}  // ror
+/* 001addd0 00000134 */ MnuBoard2D::execMainPad(){}  // ror
 
 // *****************************************************************************
 // FILE -- mnu/mnumovie.cpp

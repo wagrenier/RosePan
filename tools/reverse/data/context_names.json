@@ -15503,6 +15503,12 @@
   "was": "FUN_001ac5b0",
   "why": "reads GamMan status 0x15 (the option block), waits 0x47 frames, then up / down rows, left / right values with setOption, triangle (0x2000) leaves; returns 1 when done"
  },
+ "001ad6b4": {
+  "name": "MnuBoard2D::MnuBoard2D",
+  "tag": "ror-inferred",
+  "was": "FUN_001ad6b4",
+  "why": "MagScene::MagScene constructs the member at MagLifeMenuBoard2D+0x40: MsgMan x2, SprMan at +0x7a4, board key 0x40001; MnuBoard2D dtor's counterpart"
+ },
  "001ad72c": {
   "name": "MnuBoard2D::~MnuBoard2D",
   "tag": "ror-inferred",
@@ -15544,6 +15550,54 @@
   "tag": "ror-inferred",
   "was": "FUN_001ad8e0",
   "why": "the menu object at +0x40 of MagLifeMenuBoard2D: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ad90c": {
+  "name": "MnuBoard2D::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001ad90c",
+  "why": "init's call: sets +0x778 to 1 and clears the steps, -1 when already 1 (MnuOpt::open's shape)"
+ },
+ "001ad940": {
+  "name": "MnuBoard2D::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001ad940",
+  "why": "term / dtor call: clears +0x778, -1 when already 0 (MnuOpt::close's shape)"
+ },
+ "001ad96c": {
+  "name": "MnuBoard2D::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001ad96c",
+  "why": "processPad's tail call: step machine loading mnuboard.rpk, fading in, execMain, fading out (MnuOpt::exec's shape)"
+ },
+ "001adbd8": {
+  "name": "MnuBoard2D::initWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001adbd8",
+  "why": "constructor's call: clears +0x77c / +0x780, sets +0x784 (MnuOpt::initWork's place)"
+ },
+ "001adc0c": {
+  "name": "MnuBoard2D::setDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_001adc0c",
+  "why": "exec step 3: MagSystem current system, pattern 0x2abb08, setDispList 0x2abce8, m_active 1 (MnuOpt::setDisp's shape)"
+ },
+ "001adc6c": {
+  "name": "MnuBoard2D::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001adc6c",
+  "why": "exec step 4 every frame: SprMan::update, sets sequence bit 30 once the fade is done"
+ },
+ "001adcd8": {
+  "name": "MnuBoard2D::execMainFlag",
+  "tag": "ror-inferred",
+  "was": "FUN_001adcd8",
+  "why": "exec step 4 when +0x790 is 0: returns 1 once sequence m_bits[1] bit 7 is clear and the fade done"
+ },
+ "001addd0": {
+  "name": "MnuBoard2D::execMainPad",
+  "tag": "ror-inferred",
+  "was": "FUN_001addd0",
+  "why": "exec step 4 when +0x790 is 1: triangle (pad m_trig bit 13) fades out, then returns 1"
  },
  "001adf04": {
   "name": "MnuMovie::MnuMovie",

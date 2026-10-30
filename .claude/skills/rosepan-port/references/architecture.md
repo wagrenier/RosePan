@@ -1589,6 +1589,23 @@ pattern table is the EE image 0x2a8848..0x2aad10, display list 0x2aad70 (65 spri
 data/mnurpk/mnuopt.rpk (option_sita / option_yogore / option). Seen working 2026-10-29 from the title's
 Option item (progress/ shot).
 
+## The 2D board (`mnu/mnuboard2d.cpp`, 0x1ad6b4..0x1adf04, 2026-10-30, written, verify)
+
+MnuBoard2D (EE 0x10c0; MagLifeMenuBoard2D +0x40, the menu ids with bit 0x40000, MagScene
+m_menu_board2d +0x3f620) shows one full-screen picture, in MnuOpt's open / exec / execMain shape.
+MsgManSet at +0 (never opened), SprMan at +0x7a4 (3 sprites). m_board +0x10b8 (the wrapper's type
+value; 0x40001 at construction) picks the texture: mnuBoardGetTexName 0x1ad7d4 looks it up in the
+{key, name} table 0x2abdb8 (228 entries, keys 0x40000..0x400e3, names k2_dummy, k2_1_1 .. k2_164; -1
+ends), exec appends ".tm2" into the buffer 0x2ac4e0 and loads it from data/mnurpk/mnuboard.rpk as
+board1_tcc (SprTexture::setListMode mode 1; tex list 0x2abad8). Pattern image 0x2abb08..0x2abce8,
+display list 0x2abce8 (sprites 0 / 1 / 2 at z 32000 / 32016 / 32160). The scene fades in over
+g_sequence.m_global[0x59] frames and out over [0x5a]. execMain by +0x790 (open sets 0, nothing found
+sets 1): mode 0 (0x1adcd8) waits until the script clears g_sequence.m_bits[1] bit 7, plays SE 4 and
+returns 1 once the fade is done; mode 1 (0x1addd0) fades in over 15, triangle fades out, then fades in
+again and returns 1. update 0x1adc6c sets m_bits[1] bit 30 while the fade is complete (MnuItem does
+the same); the close clears it. MnuItem's page 6 shows the same pictures through its own copy of the
+tables (0x2b8598..).
+
 ## The theatre's movie player (`mnu/mnumovie.cpp`, 0x1adf04..0x1ae474, 2026-10-29, written, verify)
 
 MnuMovie (EE 0x990; MagLifeMenuMovie +0x40, menu 0x10007) is MnuOpt's open / exec / execMain shape
