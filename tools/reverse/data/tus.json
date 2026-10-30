@@ -2858,12 +2858,21 @@
   "unassigned@00237ce8": {},
   "unassigned@002437f8": {},
   "utl/utlbtl.cpp": {
+   "notes": "Complete; verify because the smoke run (15 s) stops at the disclaimer screen and the callers (MagLifePC::startAttack shot ray, chrIsNear / chrIsNearNode) run only in play. First session whose run reaches a shot or a chrIsNear range test can mark it done. Sight-check constants are the ROM's one-ulp-low 0.29999998 / 0.84999996; utlSightCheck3 type 6 keeps the ROM's impossible band test (dist > 200 and < 100). No sight check has a caller in the ROM; record words 0x00 and 0x1c..0x27 are never read. Names tagged ror-inferred (batch utlbtl_001).",
    "ranges": [
     [
      "0010452c",
      "00104e1c"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-30 08:11",
+     "status": "verify",
+     "summary": "All 7 functions of utl/utlbtl.cpp reconstructed: utlInitSightCheck, utlInitHitCheck, utlHitCheck (sphere / capsule / ray / flat-cylinder dispatch), utlSightCheck and its three unreferenced copies utlSightCheck2/3/4 over the new UtlSightCheck record."
+    }
+   ],
+   "status": "verify",
    "why": "utlHitCheck 0x10456c and 0x1046b4 assert with utl/utlbtl.cpp; the memset clears 0x10452c / 0x10454c are the records' inline clears; 0x104970 / 0x104ad0 / 0x104c44 are three unreferenced sight checks (distance + view-cone with acosf / tanf) of the same battle-utility kind, between utlbtl and utltm2 in link order; ends where utlTm2GetSize starts"
   },
   "utl/utlfind.cpp": {

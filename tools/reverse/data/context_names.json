@@ -581,6 +581,12 @@
   "was": "FUN_001044b8",
   "why": "lo + utlRandRange(0, (hi-lo)*65536) / ((hi-lo)*65536) * (hi-lo); 0 when the draw is 0"
  },
+ "0010452c": {
+  "name": "utlInitSightCheck",
+  "tag": "ror-inferred",
+  "was": "FUN_0010452c",
+  "why": "memset of 0x28 bytes: the clear of the sight record the utlSightCheck family reads (offsets up to 0x18), next to utlInitHitCheck's 0x14 clear"
+ },
  "0010454c": {
   "name": "utlInitHitCheck",
   "tag": "ror-inferred",
@@ -592,6 +598,30 @@
   "tag": "ror-inferred",
   "was": "FUN_0010456c",
   "why": "asserts theHitCheck, theHitCheck->m_origin_pos, ->m_target_pos in utl/utlbtl.cpp; sphere or sweep test by its words"
+ },
+ "001046b4": {
+  "name": "utlSightCheck",
+  "tag": "ror-inferred",
+  "was": "FUN_001046b4",
+  "why": "asserts theHitCheck->m_pos_self / m_pos_aim / m_pos_target (utl/utlbtl.cpp); distance to target plus facing dot / acosf-tanf cone test by m_type 0..3; no callers in the ROM"
+ },
+ "00104970": {
+  "name": "utlSightCheck2",
+  "tag": "ror-inferred",
+  "was": "FUN_00104970",
+  "why": "same distance + view-cone body as utlSightCheck without asserts, types 0 and 0x100; unreferenced"
+ },
+ "00104ad0": {
+  "name": "utlSightCheck3",
+  "tag": "ror-inferred",
+  "was": "FUN_00104ad0",
+  "why": "same distance + view-cone body as utlSightCheck without asserts, types 0 and 6; unreferenced"
+ },
+ "00104c44": {
+  "name": "utlSightCheck4",
+  "tag": "ror-inferred",
+  "was": "FUN_00104c44",
+  "why": "same distance + view-cone body as utlSightCheck without asserts, types 0, 2, 4, 5; unreferenced"
  },
  "00104e1c": {
   "name": "utlTm2GetSize",
