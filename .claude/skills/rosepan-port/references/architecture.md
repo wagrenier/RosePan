@@ -813,6 +813,17 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   {8,8,16,8,0,0}, light size 0x2e87e0 {0x10,0x20,0x20,0x40,0x30,0x30}. `DogLightBuffer` (copyToBuffer
   0x111460, copyLights 0x1103dc, setupDesc 0x110578): a pool set copied with its own I3dLightDesc at
   +0x580 -- no callers in the ROM.
+  `DogLight` (`dog/doglight.cpp` pinned 0x112b08..0x114034, written 2026-10-30, `verify`; class name
+  inferred from the file): the pool's simpler cousin, **unreferenced** -- no call, jump, data word or
+  lui / addiu pair reaches any of its 8 functions (ghidra.py refs). +0x00 I3dLightDesc, +0x40 m_data
+  (one block from `create` 0x112d60, sized by `getDataSize` 0x112bc8: per kind 0x10 / 0x20 / 0x20 /
+  0x40 / 0x30 / 0x30), +0x44..+0x58 the six arrays m_ambient / m_direct / m_point / m_spot / m_hemi /
+  m_dist (the assert texts name kinds 4 DOG_LIGHT_HEMI and 5 DOG_LIGHT_DIST), +0x5c m_num[6] (ambient
+  0..1, the rest 0..16), +0x74 per-kind enable mask (init all on), +0x78 dirty word. `setParam`
+  0x112fc8 / `getParam` 0x1136d0 extend the pool's params: 0 pos (point, spot, dist), 1 dir (direct,
+  spot, hemi), 2 colour (all; set zeroes w except ambient), 3 hemi +0x20, 4 dist +0x20, 5 spot cone,
+  6 the kind's enable bit. ROM slip: setParam param 4 tests m_hemi for NULL, then writes m_dist.
+  init 0x112b08, clear 0x112b58 (term + init), term 0x112b84 (free + init), copyTo 0x113ea8.
 - **The scene's loaders** (`mag/magscene2.cpp`, pinned 0x137300..0x139540, 2026-10-22; `verify`):
   - `MagScene::loadSystemData` 0x137330 (start's first call): data/options.txt -> `parseOption`
     (magsceneoption.cpp, buckets at +0x4371c); data/PREMIERE.RPK's 2048-byte header, then the font

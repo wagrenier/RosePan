@@ -2033,6 +2033,54 @@
   "was": "FUN_001129cc",
   "why": "(pool, light set, pos): walks the set's point-light mask at pool +0x50 + set * 0x18 and returns the index of the point light (m_light[DOG_LIGHT_POINT], stride 0x20, position first) nearest to pos, -1 when none; doglightpool.h line 131 asserts"
  },
+ "00112b08": {
+  "name": "DogLight::init",
+  "tag": "ror-inferred",
+  "was": "FUN_00112b08",
+  "why": "i3dLightDescInit(this), zeroes +0x40 block and the six light arrays +0x44..+0x58, mask +0x74 = all on, dirty +0x78 = 1"
+ },
+ "00112b58": {
+  "name": "DogLight::clear",
+  "tag": "ror-inferred",
+  "was": "FUN_00112b58",
+  "why": "calls DogLight::term then DogLight::init on the same object; no callers"
+ },
+ "00112b84": {
+  "name": "DogLight::term",
+  "tag": "ror-inferred",
+  "was": "FUN_00112b84",
+  "why": "frees the +0x40 block to g_utlMemory, then init (the shape of DogLightPool::term)"
+ },
+ "00112bc8": {
+  "name": "DogLight::getDataSize",
+  "tag": "ror-inferred",
+  "was": "FUN_00112bc8",
+  "why": "asserts theNum and theNum[DOG_LIGHT_*] ranges, returns the block size 0x10 / 0x20 / 0x20 / 0x40 / 0x30 / 0x30 per light, asserts sz > 0"
+ },
+ "00112d60": {
+  "name": "DogLight::create",
+  "tag": "ror-inferred",
+  "was": "FUN_00112d60",
+  "why": "asserts theNum ranges, term, allocates getDataSize bytes, carves the ambient / direct / point / spot / hemi / dist arrays and stores the counts at +0x5c"
+ },
+ "00112fc8": {
+  "name": "DogLight::setParam",
+  "tag": "ror-inferred",
+  "was": "FUN_00112fc8",
+  "why": "(type, theNo, param, v): writes four floats of a light field picked by type and param, cone angles in degrees, param 6 the per-kind enable bit; asserts theNo < m_num[DOG_LIGHT_*]; sets the dirty word"
+ },
+ "001136d0": {
+  "name": "DogLight::getParam",
+  "tag": "ror-inferred",
+  "was": "FUN_001136d0",
+  "why": "the read twin of setParam: same fields, asserts m_spot / m_point ... non-NULL, radians back to degrees, param 6 reads the enable bit as 0 / 1"
+ },
+ "00113ea8": {
+  "name": "DogLight::copyTo",
+  "tag": "ror-inferred",
+  "was": "FUN_00113ea8",
+  "why": "dst->create(this->m_num), memcpy of the light block, dst dirty = 1; unreferenced"
+ },
  "00114034": {
   "name": "dogModelHitNearest",
   "tag": "ror-inferred",
