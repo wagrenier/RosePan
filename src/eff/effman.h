@@ -169,6 +169,20 @@ struct EffParam
             float m_dist;       // ROR 0x28: how far it drifts before it starts again
             float m_color[4];   // ROR 0x2c: 0..1, alpha last
         } m_cloud;              // kind 0x11 (EffCloud1::init)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10
+            float m_rot;        // ROR 0x1c: the y angle
+            float m_scale;      // ROR 0x20
+            float m_uspeed;     // ROR 0x24: texture u scroll per second
+            float m_vspeed;     // ROR 0x28: v scroll per second
+            float m_color[4];   // ROR 0x2c: 0..1, alpha last
+        } m_water1;             // kind 0x2f (EffWater1::init)
+        struct
+        {
+            float m_box[2][3];  // ROR 0x10: two opposite corners (x, y, z), any order
+            int   m_mode;       // ROR 0x28: 0, or non-zero: bigger, faster drops with ground ripples, a denser grid, lighter fog
+        } m_water3;             // kind 0x31 (EffWater3::init)
     };
 };
 

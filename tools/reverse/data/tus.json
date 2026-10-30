@@ -454,6 +454,24 @@
    "status": "verify",
    "why": "EffSteam1 / EffSteam1Prim / EffSteam2 / EffSteam2Prim and EffCloud1, contiguous after EffReload1 and before EffWater1; no source string; EffCloud1 sits after the steam classes against alphabetical link order, so it shares their file (vapour effects); one file per effect family as eff/efffog3.cpp"
   },
+  "eff/effwater.cpp": {
+   "notes": "All 15 functions written, build and layoutcheck green, callcheck clean. Nothing on screen yet: the 15 s smoke run ends on the boot disclaimer and no code caller of kinds 0x2f / 0x31 is known (likely event scripts through native 281), so verify. The first session whose screenshot shows rain (sprites falling, ripples on the ground, fog greyed) or the EffWater1 model marks it done; compare with python tm2png.py --scan on the eff pack holding the rain texture (texture 0: drop u 0.5..1 v 0.25..1, ripple v 0..0.125, splash v 0.125..0.25). Decisions: helper names resetDrop / resetRipple / isCellVisible / drawCell are ror-inferred; EffParam m_water3.m_mode named neutrally (mode 1 = bigger faster drops, ripples on, denser grid, lighter fog). Ported as the ROM: renderPreMain points the nodes' display control at a stack DogDispControl (host: i3rFarPtrSet, zeroed whole); drawCell writes the sprite position into the VU1 matrix's row 3; the fog shift is never undone and s_count goes negative after a failed init. resetDrop / resetRipple loop forever on a zero-width cell, as the ROM would.",
+   "ranges": [
+    [
+     "0017a918",
+     "0017c0f0"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 11:23",
+     "status": "verify",
+     "summary": "reconstruct 15 functions: EffWater1 (kind 0x2f, the EFFWATER1.RPK model with a scrolling texture) and EffWater3 (kind 0x31, rain over a box with ground ripples and a fog shift); new eff/effwater.h, EffParam m_water1 / m_water3"
+    }
+   ],
+   "status": "verify",
+   "why": "EffWater1 (kind 0x2f, loads data/eff/EFFWATER1.RPK) and EffWater3 (kind 0x31) with its four helpers, between eff/effsteam.cpp (EffCloud1) and sct/sctlayer.cpp; alphabetical class link order puts EffWater* last of the Eff files"
+  },
   "emy/emy_bdl.cpp": {
    "notes": "Verify: the 15 s smoke run still ends on the Atlus disclaimer (same picture, no regression); no enemy spawns on that path, so mark done the first time a run shows a Bdl (type 5) attacking or cowering at Brown's bark. Bdl is Bds's twin; the file was generated from emy_bds.cpp plus the differences listed in emy_bdl.h. ROM oddity kept (open-items.md Open questions): BdlOutAtk step 2's mode-4 sector uses 5pi/8 as lower bound (step 0 uses -3pi/8). The rest of the enemy run is unassigned@0014cde4 (Mrt, Clr, Nor, Grg, Fsh, Got, Pig, Dwf): next emy/emy_mrt.cpp 0x14cde4 up to ClrMain::initOut 0x14dc7c; MrtMain has an extra out (MrtOutYyy) and EE size 0x23c.",
    "ranges": [
@@ -2966,6 +2984,7 @@
   "unassigned@0016fb70": {},
   "unassigned@00172e4c": {},
   "unassigned@001788ec": {},
+  "unassigned@0017a918": {},
   "unassigned@001810f4": {},
   "unassigned@001832e8": {},
   "unassigned@00184f2c": {},

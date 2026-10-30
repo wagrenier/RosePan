@@ -536,30 +536,6 @@ EffReload1::~EffReload1()
     ROSEPAN_STUB("EffReload1::~EffReload1", 0x0017911c);
 }
 
-// stub of ROR 0x0017a918
-EffWater1::EffWater1()
-{
-    ROSEPAN_STUB("EffWater1::EffWater1", 0x0017a918);
-}
-
-// stub of ROR 0x0017a94c
-EffWater1::~EffWater1()
-{
-    ROSEPAN_STUB("EffWater1::~EffWater1", 0x0017a94c);
-}
-
-// stub of ROR 0x0017afd8
-EffWater3::EffWater3()
-{
-    ROSEPAN_STUB("EffWater3::EffWater3", 0x0017afd8);
-}
-
-// stub of ROR 0x0017b010
-EffWater3::~EffWater3()
-{
-    ROSEPAN_STUB("EffWater3::~EffWater3", 0x0017b010);
-}
-
 // stub of ROR 0x0016b060
 int EffBg1::init(const EffParam *param)
 {
@@ -644,60 +620,6 @@ u_long * EffReload1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_lon
 void EffReload1::renderPreMain(RENDERPARAM *param)
 {
     ROSEPAN_STUB("EffReload1::renderPreMain", 0x00179390);
-}
-
-// stub of ROR 0x0017a9c8
-int EffWater1::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffWater1::init", 0x0017a9c8);
-    return {};
-}
-
-// stub of ROR 0x0017adc0
-void EffWater1::liveActivateExec()
-{
-    ROSEPAN_STUB("EffWater1::liveActivateExec", 0x0017adc0);
-}
-
-// stub of ROR 0x0017ac5c
-int EffWater1::liveMain()
-{
-    ROSEPAN_STUB("EffWater1::liveMain", 0x0017ac5c);
-    return {};
-}
-
-// stub of ROR 0x0028cf70
-u_long * EffWater1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffWater1::renderMain", 0x0028cf70);
-    return {};
-}
-
-// stub of ROR 0x0017ae04
-void EffWater1::renderPreMain(RENDERPARAM *param)
-{
-    ROSEPAN_STUB("EffWater1::renderPreMain", 0x0017ae04);
-}
-
-// stub of ROR 0x0017b0a4
-int EffWater3::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffWater3::init", 0x0017b0a4);
-    return {};
-}
-
-// stub of ROR 0x0017b5e0
-int EffWater3::liveMain()
-{
-    ROSEPAN_STUB("EffWater3::liveMain", 0x0017b5e0);
-    return {};
-}
-
-// stub of ROR 0x0017b6d4
-u_long * EffWater3::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffWater3::renderMain", 0x0017b6d4);
-    return {};
 }
 
 // stub of ROR 0x0016dcc8

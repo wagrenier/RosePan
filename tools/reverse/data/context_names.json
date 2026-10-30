@@ -11633,6 +11633,30 @@
   "was": "FUN_0017b6d4",
   "why": "vtable _vt$9EffWater3 0x2e4440 slot 8 (Eff0 slot renderMain)"
  },
+ "0017b7cc": {
+  "name": "EffWater3::resetDrop",
+  "tag": "ror-inferred",
+  "was": "FUN_0017b7cc",
+  "why": "init / liveMain call it per falling sprite: random x / z within m_34 wrapped into the cell, y = m_2c - m_40 (above the box), random spacing; liveMain calls it once y passes m_30"
+ },
+ "0017b918": {
+  "name": "EffWater3::resetRipple",
+  "tag": "ror-inferred",
+  "was": "FUN_0017b918",
+  "why": "init / liveMain call it per ground sprite: y = 0, random x / z within m_34 * m_54 wrapped into the cell; liveMain calls it once y falls below -3"
+ },
+ "0017ba54": {
+  "name": "EffWater3::isCellVisible",
+  "tag": "ror-inferred",
+  "was": "FUN_0017ba54",
+  "why": "renderMain's per-cell test: a unit box scaled to the cell (x / z rect, y m_2c..m_30), i3dViewTestBox result 1 or 2"
+ },
+ "0017bb50": {
+  "name": "EffWater3::drawCell",
+  "tag": "ror-inferred",
+  "was": "FUN_0017bb50",
+  "why": "renderMain's per-cell packet writer: the falling sprites (8 layers) and the two ground ripple layers through i3dPktVu1Sprite"
+ },
  "0017c0f0": {
   "name": "SctWorld::SctWorld",
   "tag": "ror-inferred",
