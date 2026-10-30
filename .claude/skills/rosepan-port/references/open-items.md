@@ -6,6 +6,16 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**DONE 2026-10-30 (fix/effect-zdepth, the user's report): translucent meshes and effects no longer
+write depth where the GS did not** (light shafts hid Jennifer; her shadow sank into the floor in
+patches). The renderer now reads TEST's AFAIL (NEVER + FB_ONLY = no Z write; another test + FB_ONLY =
+two passes) and the replay passes TEST / ZBUF on; shadow receivers get a Z16 tolerance
+(architecture.md "Depth state", hazards.md). Seen on the bus-stop walk (pad below): Jennifer whole
+behind foreground bushes, her shadow on the road. Not seen: the orphanage's light shafts (no pad gets
+there) -- the user checks them. Pad that walks the bus stop (400 s):
+`...,6300:CIRCLE,7000:CROSS,7300:CROSS,...,9400:CROSS` (CROSS every 300 reads advances the
+narration), then `9700:LSDOWN*250,10000:LSLEFT*300,10350:LSUP*350,10750:LSRIGHT*350`.
+
 **WRITTEN 2026-10-30 (`eff/effsteam.cpp`, verify; pinned 0x179428..0x17a918 out of
 unassigned@001788ec): EffSteam1 / EffSteam1Prim / EffSteam2 / EffSteam2Prim / EffCloud1, all 17
 functions** (architecture.md "The vapour effects"). Not on the smoke path (the 15 s run is at the boot

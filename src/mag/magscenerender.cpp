@@ -111,9 +111,9 @@ void MagScene::putDrawEnv(I3dLayer *layer, sceGsDBuff *dbuff, int frame)
     pkt = i3dPktDmaTag(pkt + 2, 8, 0x30, env, 0, 0x50000008);
     /* PC: the env goes by DMA reference, which the native i3d module's
      * replay does not read: record the registers it uses (XYOFFSET ends an
-     * off-screen pass's XYOFFSET 0; FRAME its target), one per word of
-     * the packet. */
-    u_long xyoffset, scissor, test;
+     * off-screen pass's XYOFFSET 0; FRAME its target; ZBUF its ZMSK), one
+     * per word of the packet. */
+    u_long xyoffset, scissor, test, zbuf;
     memcpy(&xyoffset, &env->xyoffset1, sizeof(xyoffset));
     memcpy(&scissor, &env->scissor1, sizeof(scissor));
     memcpy(&test, &env->test1, sizeof(test));
@@ -123,6 +123,8 @@ void MagScene::putDrawEnv(I3dLayer *layer, sceGsDBuff *dbuff, int frame)
     u_long frame1;
     memcpy(&frame1, &env->frame1, sizeof(frame1));
     RosePan_I3dRecordReg(start + 3, SCE_GS_FRAME_1, frame1);
+    memcpy(&zbuf, &env->zbuf1, sizeof(zbuf));
+    RosePan_I3dRecordReg(start + 4, SCE_GS_ZBUF_1, zbuf);
     i3dLayerEndPacket(layer, pkt);
 }
 
