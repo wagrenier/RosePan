@@ -202,7 +202,12 @@ void GamMan::endPcAction()
         {
             u_int flag[4];
             fchr->getParam(0x40, flag);
-            if (flag[0] != 0)
+            /* PORT: the scripts give their items -1 here (seqFunc155 3 / 4's
+             * flag word: no flag). On the EE m_bits + 0x1ffffffc wraps into the
+             * uncached RAM mirror and sets bit 31 of m_bits[-1], its heap
+             * header size (BedMemory::getHeader would assert on a free); the
+             * host faults, so a bit outside m_bits' 0xa00 bytes is skipped. */
+            if (flag[0] != 0 && flag[0] < 0xa00 * 8)
                 g_sequence.m_bits[flag[0] >> 5] |= 1u << (flag[0] & 0x1f);
         }
         if (m_pcActor != -1)
