@@ -6,8 +6,24 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
+**PRIORITY 2026-10-30 (the user: "prioritize the code related to iop reversing instead of verifying
+TUs"): host task `setup/iop_rxsnddrv.cpp`, first in the queue; it stays first while partial, so the
+following sessions keep on it until RXSNDDRV is written** (queued earlier the same day: "the IOP code is
+missing too") -- reconstruct RXSNDDRV.IRX, the game's only IOP code and the reason RoR is
+silent (architecture.md "The IOP side": ~53 KB of R3000 code, ~200 functions, no symbols; RPC server,
+XVAB banks, the XSEQ MIDI sequencer for BGM, SE, NOTE slots, ADPCM / PCM streams; 15 libsd imports, 13
+already in the host libsd). Unpacked and identified with `tools/reverse/iop.py`; `iop.py elf` writes
+the Ghidra-ready `work/iop/elf/rxsnddrv.elf`. **Imported by the user 2026-10-30** (program
+`rxsnddrv.elf`, 229 functions; the RPC dispatcher is 0x360, architecture.md "The IOP side"). Until the
+pipeline question below is settled, only `dec.py` / `ghidra.py` may run with
+`ROSEPAN_PROGRAM=rxsnddrv.elf` (hazards.md). Open for that session: whether the TU tools learn a second
+program (IOP addresses annotated `IOP 0x...` so they never collide with `ROR 0x...`) or RXSNDDRV is
+tracked by hand over a few sessions; where the code lives (proposed `src/iop/rxsnddrv/`, one file per
+subsystem, on the host IOP layer and host libsd, replacing the silent `src/sdk/iop_rxsnd.cpp`).
+
 **PARTIAL 2026-10-30 (host task `setup/smoke_pad.cpp`): the bus-stop walk is the default smoke pad;
-16 verify TUs marked done from it.** `settings.smoke_pad` now ends
+16 verify TUs marked done from it. Moved to the end of the queue 2026-10-30 (the user puts IOP
+reversing before verifying TUs).** `settings.smoke_pad` now ends
 `...,9400:CROSS,9700:LSDOWN*250,10000:LSLEFT*300,10350:LSUP*350,10750:LSRIGHT*350` (pad reads ~ frames;
 the game runs ~31 fps here, so 420 s reaches frame ~13000). How far it gets (420 s run, release build):
 frame 5400 picture book, 7200 the bus stop lit by the street lamp, 8400 narration ("Oh, what an unlucky
@@ -26,19 +42,6 @@ was working in this checkout (its gdbrun held cmake-build-relwithdebinfo/RosePan
 --config release); cause unconfirmed -- rerun it alone. Next session: run that candidate with nothing
 else in the checkout, extend only as shots confirm, then the item / START menus; named pads (boot /
 busstop / ...) only if it grows much longer.
-
-**QUEUED 2026-10-30 (the user: "the IOP code is missing too"): host task `setup/iop_rxsnddrv.cpp`,
-second in the queue** -- reconstruct RXSNDDRV.IRX, the game's only IOP code and the reason RoR is
-silent (architecture.md "The IOP side": ~53 KB of R3000 code, ~200 functions, no symbols; RPC server,
-XVAB banks, the XSEQ MIDI sequencer for BGM, SE, NOTE slots, ADPCM / PCM streams; 15 libsd imports, 13
-already in the host libsd). Unpacked and identified with `tools/reverse/iop.py`; `iop.py elf` writes
-the Ghidra-ready `work/iop/elf/rxsnddrv.elf`. **Imported by the user 2026-10-30** (program
-`rxsnddrv.elf`, 229 functions; the RPC dispatcher is 0x360, architecture.md "The IOP side"). Until the
-pipeline question below is settled, only `dec.py` / `ghidra.py` may run with
-`ROSEPAN_PROGRAM=rxsnddrv.elf` (hazards.md). Open for that session: whether the TU tools learn a second
-program (IOP addresses annotated `IOP 0x...` so they never collide with `ROR 0x...`) or RXSNDDRV is
-tracked by hand over a few sessions; where the code lives (proposed `src/iop/rxsnddrv/`, one file per
-subsystem, on the host IOP layer and host libsd, replacing the silent `src/sdk/iop_rxsnd.cpp`).
 
 **WRITTEN 2026-10-30 (`mag/maglifepcmove.cpp`, verify; repinned 0x11e0d8..0x120788, absorbing
 unassigned@0011e0d8): MagLifePC::sweepRay, an older single-ray sweepMove** (architecture.md "PC
