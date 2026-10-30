@@ -149,6 +149,7 @@ above, since lower effort reconstructs worse). Keep that line when editing the f
 | classes | `rtti.py` (`--class NAME`, `--vtable ADDR`): bases, slots, ctors/dtors, vptr offset |
 | TU identity | `tuid.py <TU>` (also in the brief) |
 | game data | `datadump.py` (an ELF table -> C++ initializers), `tm2png.py` (TIM2 -> PNG references, `--scan` an archive) |
+| IOP modules | `iop.py` (unpack `IOPRP300.IMG`, identify every `.irx`, name imports, write a Ghidra-ready ELF of `RXSNDDRV.IRX`, the game's own IOP code) |
 | frontier | `build.py`, `stubgen.py --from-build`, `callcheck.py` (all wrapped by `tus.py check`) |
 | type layouts | `layoutcheck.py` (GCC + MSVC asserts, missing asserts, host-type lint; in `check` / `finish`) |
 | crashes | `gdbrun.py`: the game under gdb; a fault holds it, `--cmd` inspects, `--break` stops a hang |

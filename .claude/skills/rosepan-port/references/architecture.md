@@ -14,6 +14,7 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
 - Modules (RoR's own source files)
 - Classes
 - Key functions and globals
+- The IOP side (MODULES/, rxsnddrv.irx)
 - Disc and data files
 - PC platform layer
 - The title screen (mnu/mnutitle.cpp)
@@ -35,8 +36,10 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
   libipu 3000, libkernl 3000, libmc 3020, libmpeg 3000, libpad2 3020, libscf 3000, libvib 3000,
   libvu0 3000 -- the SDK 3.0 versions FF3 (SLES_538.25) links, except libpad2 / libdbc / libvib, which FF3
   and FF2 do not use (no reference: their functions stay unmatched).
-- IOP modules the EE loads: sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv, fileio, sifcmd, usbd
-  (`.irx` names), after rebooting the IOP with `ioprp300.img` (main). No game-specific IRX name appears.
+- IOP modules: the ELF's strings name sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv, fileio, sifcmd,
+  usbd, but what loads is the disc's `modules/iopconf.cnf`: `ioprp300.img` (the IOP reboot), then
+  sio2man, sio2d, dbcman, pad2/ds1o_d, mcman, mcserv, libsd and **rxsnddrv.irx, the game's own IOP
+  code** (the rx sound driver; "The IOP side" below). Everything else in `MODULES/` is Sony's.
 - 44 VU1 microprograms in `.DVP.overlay..*` sections (Ghidra makes 50 overlay spaces of them and the
   other DVP sections); `.vutext` 0x291230..0x2953b0.
 
@@ -2436,6 +2439,42 @@ never asserts): sessions name them (`tus.py define --why`).
   and getSysFlg bit 0x8000 clear.
 - GamMan +0x18c00 is a WRD block whose words the port keeps as GamMan members (the gam*Wrd* functions
   take GamMan or nothing); getMapObjPtr returns GamMan on the host.
+
+## The IOP side (`MODULES/`, 2026-10-30, `tools/reverse/iop.py`)
+
+- `IOPRP300.IMG` (275,345 bytes, built 2003-10-22) is a ROMDIR image (the IOP boot ROM's layout: RESET,
+  ROMDIR, EXTINFO, then the files 16-aligned) holding Sony's 16 replacement modules: SYSMEM 2.03,
+  LOADCORE 2.06, SIFCMD 2.08, SIFMAN 2.03, THREADMAN 2.03, IOMAN 2.03, MODLOAD 2.09, FILEIO 2.12, CDVDMAN
+  2.25, CDVDFSV 2.25, LOADFILE, TIMEMANI, ROMDRV, EESYNC, SYSCLIB 2.03, STDIO 2.03. `IOPRP270.IMG` is an
+  older one nothing loads. `python iop.py extract` unpacks both to `work/iop/<img>/`.
+- Loose modules: sio2man 3.01, sio2d 3.03, dbcman 3.10, pad2/ds1o_d 3.10, mcman 2.30, mcserv 2.10, libsd
+  3.03 (all loaded by `iopconf.cnf`, all Sony), and unused padman 4.05, usbd 2.04, pad2/ds1o_s1 /
+  ds2o_s1, sndbgext (SN Systems' ProDG debug extension "SN_DBGEXT"). The platform layer stands in for
+  the Sony ones at their API (`src/sdk`).
+- **`RXSNDDRV.IRX` is the only game IOP code**: "Sound driver version 1.00" (iopmod version 1.01, disc file
+  dated 2005-12-12), the server of RPC 0xd000 that `rx/rxsnd.cpp` calls. No symbols (`.symtab` holds only the
+  null entry). Linked at 0: `.text` 0..0xd0f0 (53,488 bytes, ~135 framed functions plus leaves, entry
+  `_start` 0 clears the bss and prints "Installed sound driver"), `.rodata` 0xd0f0..0xdd60, `.data`
+  0xdd60..0xe4f0, `.bss` 0xe4f0..0x38970 (173 KB), gp 0x164e0. Imports (stubs at 0xce70..): libsd 1.05
+  (sceSdInit, Set/GetParam, Set/GetSwitch, Set/GetAddr, SetCoreAttr, Note2Pitch, ProcBatch, VoiceTrans,
+  BlockTrans, BlockTransStatus, SetEffectAttr, SetTransIntrHandler), sysmem (Alloc/FreeSysMemory, the
+  three Query*), intrman (CpuSuspend/ResumeIntr), loadcore FlushDcache, sifcmd (InitRpc, RegisterRpc,
+  SetRpcQueue, RpcLoop, GetOtherData), sifman (SetDma, DmaStat), printf, memset, thbase (Create/Start
+  Thread, GetThreadId), thevent (Create/Set/iSet/WaitEventFlag), vblank WaitVblankEnd. No exports.
+- Its strings ("snddrv : ...") name the subsystems: the RPC server ("Start RX - sound RPC server",
+  "invalide RPC command"), a DMA management thread and a sound double-buffer thread, XVAB banks (header
+  in IOP memory, body in SPU RAM; versioned), XSEQ sequences ('MIDI' / 'HEAD' chunks) played by BGM
+  slots -- **the music is MIDI sequenced on the IOP** (CC, RPN, NRPN, system and meta events), not
+  streamed -- the SE system (SE requests and "SE sequence codes"), NOTE slots over XVAB programs, the
+  ADPCM stream system (voice and movie audio) and the PCM stream system.
+- On the PC `src/sdk/iop_rxsnd.cpp` answers the RPC silently (zeroed replies, a bump IOP heap, streams
+  draining at their rate). `src/sdk/iop_libsd.cpp` (register model + SPU RAM) and `iop_voice.cpp` /
+  `iop_reverb.cpp` (the synthesiser, from ReiPan) already implement 13 of RXSNDDRV's 15 libsd imports;
+  `sceSdNote2Pitch` and `sceSdProcBatch` are missing. Reconstructing RXSNDDRV against them is what gives
+  RoR sound (open-items.md, `setup/iop_rxsnddrv.cpp`).
+- Ghidra: `python iop.py elf <MODULES>/RXSNDDRV.IRX` writes `work/iop/elf/rxsnddrv.elf` (MIPS R3000 LE,
+  base 0, import stubs, `_start` and `_gp` as symbols), importable as its own program next to
+  SLUS_214.48.
 
 ## Disc and data files
 

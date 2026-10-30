@@ -12,6 +12,18 @@ step, and mark the verify TUs it shows done (adding a `tus.py` command to set an
 task text in tus.json has the full pad and the candidate TUs. Why: only ~20 unreferenced functions
 (~7 KB) of game logic are left unwritten, while 154 TUs wait in verify.
 
+**QUEUED 2026-10-30 (the user: "the IOP code is missing too"): host task `setup/iop_rxsnddrv.cpp`,
+second in the queue** -- reconstruct RXSNDDRV.IRX, the game's only IOP code and the reason RoR is
+silent (architecture.md "The IOP side": ~53 KB of R3000 code, ~200 functions, no symbols; RPC server,
+XVAB banks, the XSEQ MIDI sequencer for BGM, SE, NOTE slots, ADPCM / PCM streams; 15 libsd imports, 13
+already in the host libsd). Unpacked and identified with `tools/reverse/iop.py`; `iop.py elf` writes
+the Ghidra-ready `work/iop/elf/rxsnddrv.elf`. **Needs the user first: import that ELF into the Ghidra
+project** (File > Import File, language MIPS:LE:32:default, analyse) -- a headless import cannot
+write to a project the GUI holds open. Open for that session: whether the TU tools learn a second
+program (IOP addresses annotated `IOP 0x...` so they never collide with `ROR 0x...`) or RXSNDDRV is
+tracked by hand over a few sessions; where the code lives (proposed `src/iop/rxsnddrv/`, one file per
+subsystem, on the host IOP layer and host libsd, replacing the silent `src/sdk/iop_rxsnd.cpp`).
+
 **WRITTEN 2026-10-30 (`mag/maglifepcmove.cpp`, verify; repinned 0x11e0d8..0x120788, absorbing
 unassigned@0011e0d8): MagLifePC::sweepRay, an older single-ray sweepMove** (architecture.md "PC
 movement"). The queue was empty; picked as the largest remaining todo run (1 KB). Unreferenced, so

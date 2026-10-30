@@ -33,6 +33,8 @@ REFERENCES = (
     ('ff3', REIPAN / 'SLES_538.25', REIPAN / 'ff3_functions.txt', 'Sony SDK 3.0 libraries (same versions as RoR)'),
     ('ff2', MIOPAN / 'SLES_523.84', MIOPAN / 'functions.txt', 'ee-gcc 2.96 runtime, newlib, SDK 2.8 (debug symbols)'),
 )
+# IOP import names (read-only): PCSX2's table of Sony IOP library exports by index (iop.py).
+PCSX2 = Path(os.environ.get('ROSEPAN_PCSX2', REPO.parent / 'pcsx2'))
 
 # The game's disc files (unpacked), for data tools (tm2png.py --scan, rawfile-style readers) and the
 # smoke run's data root: $ROSEPAN_DATA, else settings.data_dir in data/tus.json (the user's copy of the
