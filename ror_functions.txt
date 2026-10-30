@@ -2236,19 +2236,19 @@
 /* 0016da44 00000284 */ EffBloodStay3Prim::renderMain(){}  // ror
 
 // *****************************************************************************
-// FILE -- (unassigned)
+// FILE -- eff/effbreath.cpp
 // *****************************************************************************
 
 /* 0016dcc8 00000178 */ EffBreath1::init(){}  // ror
 /* 0016de40 000000f8 */ EffBreath1::liveMain(){}  // ror
 /* 0016df38 000004b4 */ EffBreath1::renderMain(){}  // ror
 /* 0016e3ec 0000004c */ EffBreath1::updateZDepth(){}  // ror
-/* 0016e438 00000224 */ FUN_0016e438(){}
-/* 0016e65c 00000088 */ FUN_0016e65c(){}
+/* 0016e438 00000224 */ EffBreath1::addPoint(){}  // ror
+/* 0016e65c 00000088 */ EffBreath1::isActorInBox(){}  // ror
 /* 0016e6e4 000000e8 */ EffBreath1Space::init(){}  // ror
 /* 0016e7cc 00000160 */ EffBreath1Space::liveMain(){}  // ror
-/* 0016e92c 000000c8 */ FUN_0016e92c(){}
-/* 0016e9f4 0000010c */ FUN_0016e9f4(){}
+/* 0016e92c 000000c8 */ EffBreath1Space::createBreath(){}  // ror
+/* 0016e9f4 0000010c */ EffBreath1Space::isActorInBox(){}  // ror
 /* 0016eb00 00000098 */ EffBreath2::init(){}  // ror
 /* 0016eb98 00000228 */ EffBreath2::liveMain(){}  // ror
 /* 0016edc0 000000f4 */ EffBreath2Prim::init(){}  // ror
@@ -2258,7 +2258,7 @@
 /* 0016f1a0 000001e0 */ EffBreath2Ground::init(){}  // ror
 /* 0016f380 00000044 */ EffBreath2Ground::liveMain(){}  // ror
 /* 0016f3c8 00000194 */ EffBreath2Ground::renderMain(){}  // ror
-/* 0016f55c 000001c0 */ FUN_0016f55c(){}
+/* 0016f55c 000001c0 */ EffBreath2Ground::renderPuff(){}  // ror
 
 // *****************************************************************************
 // FILE -- eff/effcameraanim1.cpp

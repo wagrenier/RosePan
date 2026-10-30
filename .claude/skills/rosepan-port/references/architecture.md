@@ -1609,6 +1609,27 @@ the shoe 3x long with texture v 0..0.75, the paw square with v 0.75..1 (u 4..4.2
 0x10) x 16 / 64, equal to 0..0.25 when the texture repeats), lit and fogged, TEST_1 0x51001 then 0x5000d,
 alpha in over 15 frames, out from 165 to 180 (EFF_FLAG_FINISHED jumps to 165).
 
+**The breath effects** (kinds 8..0xc, `eff/effbreath.cpp` 0x16dcc8..0x16f71c, 2026-10-30, written,
+verify; layouts in eff/effbreath.h, EffParam m_breath1 / m_breath1space / m_breath / m_breath2prim /
+m_ground). EffBreath1Space (9) is a box (corners in any order); each frame one group of 8 of
+MagScene::m_actors (frame & 15) is checked: an actor loaded (isAlive), with a "Bip01 Head" node and m_trans
+in the box gets a kind-8 EffBreath1 (numbers in m_eff[128], -1 none); one whose model is gone has it
+released (EffMan::release). EffBreath1: a ring of 8 mouth points {pos, distance from the previous}
+(0x80, stride 0x20, head 0x180), each frame the head node's model matrix (actor slot 7 getNodeMatrixPtr)
+times m_matrix applied to the mouth offset ((m_id & 0xff00) == 0x2400: (8, 25, 0), else (0, 14, 0)); a
+step within 3 on x / z and 5 on y keeps the last y. Every 70 frames, actor still in the box, a puff:
+alpha +0.06 to 1 then -0.015, size from 8 growing by 0.015 more each frame. Drawn while alpha > 0 as up
+to 8 camera-facing sprites (texture 0, the camera matrix scaled, its translation kept) walked back along
+the ring 10 apart, point k risen by ((frame + k)(frame + k + 1) / 2) x 0.0035, (size + k(k+1)/2 x 0.015) x
+scale wide, alpha x (9 - k) x 3 / 32 past the first, farthest first. EffBreath2 (0xa, ClrOutMove /
+ClrOutAtk): on frames 1, 3, 4, 6, 7 of 8 (0xda) an EffBreath2Prim (0xb) from *m_pos along *m_dir turned
+by up to +-15 degrees / m_scale about x and z, texture halves alternating, for m_frames (8) frames.
+EffBreath2Prim: speed 7.5 x m_scale, each frame x / z x (1 - m_drag / 40), y + m_drag / 2, size 5 + 2.5 a
+frame; over once y > 0 (the floor). EffBreath2Ground (0xc): weak, four flat puffs (rot x -pi/2, a random
+y angle; all but the first at random offsets up to 0.6 x m_size) 2 above the point, texture 1, TEST_1
+0x51001 / 0x5000d, starting at frames 0 / 6 / 8 / 12 with size x 1 / 0.9 / 0.8 / 0.7 and alpha x 1 / 0.8
+/ 0.6 / 0.5 (0x2f2278.. tables), grown in over 2 frames, faded out over the last 15; at least 17 frames.
+
 **The vapour effects** (kinds 0x11, 0x29..0x2e, `eff/effsteam.cpp` 0x179428..0x17a918, 2026-10-30;
 eff/effsteam.h has the layouts, EffParam m_steam1 / m_steam1prim / m_steam2 / m_steam2prim / m_cloud the
 params). EffSteam1 (0x29 / 0x2d) is a vent: a period of m_frames + m_pause frames from a random phase,

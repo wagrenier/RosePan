@@ -361,6 +361,24 @@
    "status": "verify",
    "why": "EffBloodSpray1/2 and EffBloodStay1/2/3/3Prim, contiguous in link order between EffBg1 and EffBreath1; no source string, named after the class family like efflight.cpp"
   },
+  "eff/effbreath.cpp": {
+   "notes": "Complete; not on the smoke path (15 s run ends at the boot disclaimer). Kinds 0xa / 0xc come from ClrOut (emy/emy_clr.cpp), kind 9 likely from room scripts: mark done when a room shows breath at actors' heads or ClrOut breathes. PC deviations: EffBreath2Prim m_size starts at 0 (ROM adds 5 to heap leftovers at 0x54); EffBreath1 renderMain marks drawn depths -FLT_MAX (ROM 0xffffffff); renderPuff position w 1 (ROM unset). EffBreath2Ground counts a puff's frames from its own start only in the last 16 frames (ROM, as is). Next in the queue: unassigned@001704a4 (EffDust2 .. EffFog2Prim).",
+   "ranges": [
+    [
+     "0016dcc8",
+     "0016f71c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 14:37",
+     "status": "verify",
+     "summary": "EffBreath1 / EffBreath1Space / EffBreath2 / EffBreath2Prim / EffBreath2Ground, all 20 functions: actor breath in a box (ring of mouth points, farthest-first sprites) and the ClrOut breath stream and ground puffs; EffParam m_breath1 / m_breath1space / m_breath2prim added, m_breath / m_ground fields named (emy_clr.cpp updated); declarations moved out of effclasses.h, 20 stubs deleted"
+    }
+   ],
+   "status": "verify",
+   "why": "EffBreath1/1Space/2/2Prim/2Ground code between eff/effblood.cpp and eff/effcameraanim1.cpp; no source string, named after the classes (alphabetical Eff* link order)"
+  },
   "eff/effcameraanim1.cpp": {
    "notes": "Pinned 0x16f71c..0x16fb70 (one file per Eff class, link order). Seen working: the 200 s New Game run creates it twice in the picture-book stretch (181 and 161 keys, lens 55 degrees); frames 3300..3420 show the girl reading the picture book by the bench, the same frames are black with init returning 0. Not seen: the restore path at the last key (the first instance had not reached frame 181 when the scene moved on). 0x16fb70 named effStrIndex (no callers) opens an unclassed helper run 0x16fb70..0x1704a4 (effCalcViewDepth, effMoveToward, FUN_0016fc20 and others): a shared helper file between effcameraanim1 and effdust2, still inside unassigned@0016afcc. Next for effects: EffLight1 0x174dd8 and gamCreateEff1a 0x172678, both reached in the same stretch.",
    "ranges": [
@@ -3127,6 +3145,7 @@
   "unassigned@00166a1c": {},
   "unassigned@0016a914": {},
   "unassigned@0016afcc": {},
+  "unassigned@0016dcc8": {},
   "unassigned@0016fb70": {},
   "unassigned@00172e4c": {},
   "unassigned@001788ec": {},

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 14:13 at commit `f1aab20` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 14:38 at commit `6721f4e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-30 14:13 at commit `f1aab20` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **7025** (98%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 266, ror-inferred 5423
-- context-name ledger: 5727 entries; overrides of wrong library matches: 5
-- placed in a source file: 6119/7187 in 159 files
+- game functions: **7187**, named **7030** (98%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 266, ror-inferred 5428
+- context-name ledger: 5732 entries; overrides of wrong library matches: 5
+- placed in a source file: 6139/7187 in 160 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -23,14 +23,14 @@ Least-named game-code regions (64 KB blocks):
 | `00240000` | 298/336 (89%) | rx/rxfile.cpp, rx/rxsys.cpp, rx/rxthread.cpp |
 | `001a0000` | 199/214 (93%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `00210000` | 337/361 (93%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
-| `00160000` | 252/268 (94%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `00110000` | 246/257 (96%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
+| `00160000` | 257/268 (96%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
 | `00200000` | 139/143 (97%) | sequence/seqcall.cpp, task/tsk_enemy.cpp, sequence/sequence.cpp |
 | `00130000` | 180/183 (98%) | mag/magscene.cpp, mag/magscenerender.cpp, mag/magscene2.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5880**; stubs: **92**
+- reconstructed RoR functions: **5900**; stubs: **72**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -51,6 +51,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/eff/eff0.cpp` | 16 | 0 |
 | `src/eff/effbg.cpp` | 6 | 0 |
 | `src/eff/effblood.cpp` | 27 | 0 |
+| `src/eff/effbreath.cpp` | 20 | 0 |
 | `src/eff/effcameraanim1.cpp` | 3 | 0 |
 | `src/eff/effcommon.cpp` | 13 | 0 |
 | `src/eff/efffog3.cpp` | 10 | 0 |
@@ -105,7 +106,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 68 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 48 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -190,8 +191,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 175 TUs: todo 84, partial 1, verify 141, done 17
-- next: **unassigned@0016dcc8** (pinned in the queue)
+- 175 TUs: todo 84, partial 1, verify 142, done 17
+- next: **unassigned@001704a4** (pinned in the queue)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8, unassigned@001704a4
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -208,6 +209,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `eff/eff0.cpp` 14/14 -- Verify: the 240 s run reaches the bus-stop room and EffMan now creates and deletes EffLight1 (kind 0x21) and EffCameraAnim1 (0xd) through the real Eff0, but eve
 - verify: `eff/effbg.cpp` 6/6 -- Verify: the 15 s smoke run stops at the legal disclaimer; EffBg1 is created by event scripts (native 281, kind 0x34) in maps, so nothing on screen shows it yet.
 - verify: `eff/effblood.cpp` 27/27 -- Nothing on the smoke path creates blood (the 15 s run is at the boot disclaimer): mark done when a run shows a hit spray (scnDamageStart, kind 1) or stains unde
+- verify: `eff/effbreath.cpp` 20/20 -- Complete; not on the smoke path (15 s run ends at the boot disclaimer). Kinds 0xa / 0xc come from ClrOut (emy/emy_clr.cpp), kind 9 likely from room scripts: mar
 - verify: `eff/effcommon.cpp` 13/13 -- Complete; verify because no picture shows a helper yet: the 240 s run shows the Once upon a time intro and the park scene as before, with no EffLight1 glow iden
 - verify: `eff/efffog3.cpp` 10/10 -- Code complete; nothing on screen shows it yet: the 240 s smoke run ends in the bus-stop room with no enemies, so the fog correctly stays the map's (frame mean e
 - verify: `eff/efffoot.cpp` 20/20 -- Not on the smoke path: the 15 s run is at the boot disclaimer and no written code creates kinds 0x1d / 0x1f (probably room scripts through native 281). Mark don
@@ -337,6 +339,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 14:37 `eff/effbreath.cpp` verify: EffBreath1 / EffBreath1Space / EffBreath2 / EffBreath2Prim / EffBreath2Ground, all 20 functions: actor breath in a box (ring of mouth points, farthest-first spr
 - 2026-10-30 14:13 `eff/efffoot.cpp` verify: EffFoot1 / EffFoot1Prim / EffFoot2 / EffFoot2Prim, all 20 functions: footstep dust puffs in a box and the PC / dog footprints; EffParam m_foot1 / m_foot1prim / 
 - 2026-10-30 13:58 `eff/effreload.cpp` verify: EffReload1 (kind 0x27, the gun reload model) written whole: ctor, dtor, init, liveMain, renderPreMain, linkonce renderMain; layout in eff/effreload.h; class mov
 - 2026-10-30 13:52 `eff/effmuzzleflash.cpp` verify: EffMuzzleFlash1 (kind 0x26), all 8 functions: init (muzzle position, flash and smoke parts, random roll, a point light in sets 0/1), liveMain (parts step, the l
@@ -344,7 +347,6 @@ Recent sessions:
 - 2026-10-30 12:54 `eff/effbg.cpp` verify: EffBg1 (kind 0x34) written whole: ctor, dtor, init, liveMain, renderPreMain, applyTexKeys (0x16afcc..0x16b62c, pinned as eff/effbg.cpp). New eff/effgeneric.h de
 - 2026-10-30 12:38 `dog/dogtexinfo.cpp` verify: Absorbed unassigned@0011764c: DogTexInfo::dump (0x11764c, 4 bytes, jr ra) is the empty retail debug listing that DogModel::loadPack calls before asserting on a 
 - 2026-10-30 12:27 `mag/magsceneoption.cpp` verify: MagScene::parseOption reconstructed: data/options.txt parsed by utlParseParam into the new m_option_bucket (0x4371c), names looked up in the 15-row option table
-- 2026-10-30 12:19 `mag/magscenedebug.cpp` verify: MagScene debug windows: updateDebug, openDebugWindow, closeDebugWindow reconstructed; m_22bc renamed m_dbg_window; extent pinned 0x14313c-0x143498
 
 ## Frontier (called by reconstructed code, not written yet)
 

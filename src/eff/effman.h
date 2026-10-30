@@ -107,19 +107,44 @@ struct EffParam
         struct
         {
             const float *m_pos; // ROR 0x10: the caller's position (read while it lives)
-            const float *m_dir; // ROR 0x14: the caller's direction
-            float m_18;         // ROR 0x18: 0.5 (ClrOut*)
-            float m_1c[6];      // ROR 0x1c: 1 (ClrOut*)
-            int   m_34;         // ROR 0x34: 8 (ClrOut*)
+            const float *m_dir; // ROR 0x14: the caller's direction (read at every puff)
+            float m_scale;      // ROR 0x18: 0.5 (ClrOut*): the puffs' speed scale; the spread is 15 degrees over it
+            float m_drag;       // ROR 0x1c: 1 (ClrOut*): EffBreath2Prim's slowing and fall
+            float m_20;         // ROR 0x20: 1 (ClrOut*): handed on, unread
+            float m_color[4];   // ROR 0x24: 1 (ClrOut*): 0..1, alpha last
+            u_int m_frames;     // ROR 0x34: 8 (ClrOut*): frames it puffs
         } m_breath;             // kind 0xa (EffBreath2; ClrOutMove / ClrOutAtk)
         struct
         {
-            float m_pos[3];     // ROR 0x10
-            float m_1c;         // ROR 0x1c: 100 (ClrOut*)
-            float m_20[3];      // ROR 0x20: 1 (ClrOut*)
-            float m_2c;         // ROR 0x2c: 0.5 (ClrOut*)
-            int   m_30;         // ROR 0x30: frames: 100 / 200 (ClrOut*, its hit point's life)
+            float m_pos[3];     // ROR 0x10: the puff
+            float m_dir[3];     // ROR 0x1c: its direction (7.5 * m_scale per frame)
+            float m_scale;      // ROR 0x28: EffBreath2's m_scale
+            float m_drag;       // ROR 0x2c: } EffBreath2's m_drag, m_20
+            float m_30;         // ROR 0x30: }
+            float m_color[4];   // ROR 0x34: 0..1, alpha last
+            int   m_half;       // ROR 0x44: the texture half (0 left, 1 right)
+        } m_breath2prim;        // kind 0xb (EffBreath2Prim::init; EffBreath2::liveMain)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10: y 2 less is used
+            float m_size;       // ROR 0x1c: 100 (ClrOut*): the puffs' size and spread
+            float m_color[4];   // ROR 0x20: (1, 1, 1, 0.5) (ClrOut*): 0..1, alpha last
+            int   m_frames;     // ROR 0x30: frames: 100 / 200 (ClrOut*, its hit point's life); at least 17
         } m_ground;             // kind 0xc (EffBreath2Ground; ClrOutMove / ClrOutAtk)
+        struct
+        {
+            float m_box[2][3];  // ROR 0x10: two opposite corners (x, y, z), any order
+            float m_scale;      // ROR 0x28: } EffBreath1's m_scale, m_color
+            float m_color[4];   // ROR 0x2c: }
+        } m_breath1space;       // kind 9 (EffBreath1Space::init)
+        struct
+        {
+            float m_min[3];     // ROR 0x10: the box the actor breathes in (EffBreath1Space's)
+            float m_max[3];     // ROR 0x1c
+            float m_scale;      // ROR 0x28: the puffs' size scale
+            float m_color[4];   // ROR 0x2c: 0..1, alpha last
+            DogActor *m_actor;  // ROR 0x3c: the breathing actor (a MagScene::m_actors entry)
+        } m_breath1;            // kind 8 (EffBreath1::init; EffBreath1Space::createBreath)
         struct
         {
             float m_pos[3];     // ROR 0x10

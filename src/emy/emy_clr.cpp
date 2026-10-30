@@ -857,10 +857,12 @@ void ClrOutMove::createDropEff()
     breath.m_08   = 0;
     breath.m_breath.m_pos = m_eff_pos;
     breath.m_breath.m_dir = m_eff_dir;
-    breath.m_breath.m_18  = 0.5f;
-    for (int i = 0; i < 6; i++)
-        breath.m_breath.m_1c[i] = 1.0f;
-    breath.m_breath.m_34 = 8;
+    breath.m_breath.m_scale = 0.5f;
+    breath.m_breath.m_drag  = 1.0f;
+    breath.m_breath.m_20    = 1.0f;
+    for (int i = 0; i < 4; i++)
+        breath.m_breath.m_color[i] = 1.0f;
+    breath.m_breath.m_frames = 8;
     g_magSystem.m_scene.m_eff_man.createEff(&breath);
 
     EffParam ground = {};       // PORT: the ROM leaves the words it does not set as they were
@@ -869,15 +871,15 @@ void ClrOutMove::createDropEff()
     ground.m_ground.m_pos[0] = m_pos[0];
     ground.m_ground.m_pos[1] = -10.0f;
     ground.m_ground.m_pos[2] = m_pos[2];
-    ground.m_ground.m_1c     = 100.0f;
-    ground.m_ground.m_20[0]  = 1.0f;
-    ground.m_ground.m_20[1]  = 1.0f;
-    ground.m_ground.m_20[2]  = 1.0f;
-    ground.m_ground.m_2c     = 0.5f;
-    ground.m_ground.m_30     = 100;
+    ground.m_ground.m_size     = 100.0f;
+    ground.m_ground.m_color[0] = 1.0f;
+    ground.m_ground.m_color[1] = 1.0f;
+    ground.m_ground.m_color[2] = 1.0f;
+    ground.m_ground.m_color[3] = 0.5f;
+    ground.m_ground.m_frames   = 100;
     g_magSystem.m_scene.m_eff_man.createEff(&ground);
     static_cast<ClrMain *>(m_emy)->addHitPoint(25.0f, ground.m_ground.m_pos, ground.m_08,
-                                               ground.m_ground.m_30, 1);
+                                               ground.m_ground.m_frames, 1);
 }
 
 // ──── ClrOutAtk ───────────────────────────────────────────────────────
@@ -1144,10 +1146,12 @@ void ClrOutAtk::emitSpit()
         breath.m_08   = 0;
         breath.m_breath.m_pos = m_eff_pos[k];
         breath.m_breath.m_dir = m_eff_dir[k];
-        breath.m_breath.m_18  = 0.5f;
-        for (int i = 0; i < 6; i++)
-            breath.m_breath.m_1c[i] = 1.0f;
-        breath.m_breath.m_34 = 8;
+        breath.m_breath.m_scale = 0.5f;
+        breath.m_breath.m_drag  = 1.0f;
+        breath.m_breath.m_20    = 1.0f;
+        for (int i = 0; i < 4; i++)
+            breath.m_breath.m_color[i] = 1.0f;
+        breath.m_breath.m_frames = 8;
         if (k == 0 || k == 4)
             g_magSystem.m_scene.m_eff_man.createEff(&breath);
     }
@@ -1169,15 +1173,15 @@ void ClrOutAtk::emitSpit()
     ground.m_ground.m_pos[0] = x;
     ground.m_ground.m_pos[1] = y;
     ground.m_ground.m_pos[2] = z;
-    ground.m_ground.m_1c     = 100.0f;
-    ground.m_ground.m_20[0]  = 1.0f;
-    ground.m_ground.m_20[1]  = 1.0f;
-    ground.m_ground.m_20[2]  = 1.0f;
-    ground.m_ground.m_2c     = 0.5f;
-    ground.m_ground.m_30     = 200;
+    ground.m_ground.m_size     = 100.0f;
+    ground.m_ground.m_color[0] = 1.0f;
+    ground.m_ground.m_color[1] = 1.0f;
+    ground.m_ground.m_color[2] = 1.0f;
+    ground.m_ground.m_color[3] = 0.5f;
+    ground.m_ground.m_frames   = 200;
     g_magSystem.m_scene.m_eff_man.createEff(&ground);
     static_cast<ClrMain *>(m_emy)->addHitPoint(80.0f, ground.m_ground.m_pos, ground.m_08,
-                                               ground.m_ground.m_30, 0);
+                                               ground.m_ground.m_frames, 0);
 }
 
 // ──────────────────────────────────────────────────────────────────────
