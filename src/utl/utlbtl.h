@@ -22,6 +22,8 @@ struct UtlHitCheck
     float        m_10;          // ROR 0x10
 };
 
+/* Clears the record (memset of its 0x14 bytes). */
+void utlInitHitCheck(UtlHitCheck *theHitCheck);                          // ROR 0x0010454c
 /* Non-zero when the check hits. */
 int utlHitCheck(UtlHitCheck *theHitCheck);                               // ROR 0x0010456c
 

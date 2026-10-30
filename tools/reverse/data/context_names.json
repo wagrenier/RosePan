@@ -581,6 +581,12 @@
   "was": "FUN_001044b8",
   "why": "lo + utlRandRange(0, (hi-lo)*65536) / ((hi-lo)*65536) * (hi-lo); 0 when the draw is 0"
  },
+ "0010454c": {
+  "name": "utlInitHitCheck",
+  "tag": "ror-inferred",
+  "was": "FUN_0010454c",
+  "why": "memset of the 0x14-byte UtlHitCheck before startAttack fills it for utlHitCheck 0x10456c (next function)"
+ },
  "0010456c": {
   "name": "utlHitCheck",
   "tag": "ror-inferred",
@@ -4355,6 +4361,12 @@
   "was": "FUN_0012ba80",
   "why": "stores _vt$14MagLifeBwnCtrl at +0x14 and the 14 mode vtables at +0x8c..+0x128; called from the MagScene constructor"
  },
+ "0012bc20": {
+  "name": "MagLifePC::getAttackBasePos",
+  "tag": "ror-inferred",
+  "was": "FUN_0012bc20",
+  "why": "a0 is the PC (m_actor +0x58): out = the actor's m_trans with y - 120, returns its rotate y; calcAttackHeight measures the target from it"
+ },
  "0012bc98": {
   "name": "MagLifePC::getWeaponHitPos",
   "tag": "ror-inferred",
@@ -4372,6 +4384,18 @@
   "tag": "ror-inferred",
   "was": "FUN_0012c014",
   "why": "(out from, out to): the attack's hit window by word +0x128 (combo) and +0x124 / +0x12c from tables 0x2ec9d0..; default 0..1000"
+ },
+ "0012c104": {
+  "name": "MagLifePC::getAttackMotionName",
+  "tag": "ror-inferred",
+  "was": "FUN_0012c104",
+  "why": "asserts theCombo/theWeapon/theHeight; returns the motion name of table 0x298228 [weapon][height][combo] (sude/gun/knife/ax_atk..), gun_empty for the gun without ammo"
+ },
+ "0012c1fc": {
+  "name": "MagLifePC::playAttackMotion",
+  "tag": "ror-inferred",
+  "was": "FUN_0012c1fc",
+  "why": "stores weapon/height/combo at +0x124/+0x128/+0x12c, changeMotion of getAttackMotionName, clearSubMotion, the swing sound getAttackSeNo(height, combo, 0)"
  },
  "0012c31c": {
   "name": "MagLifePC::startAttack",
@@ -4391,11 +4415,23 @@
   "was": "FUN_0012ca28",
   "why": "0..4 (AtkWait2D::init asserts 0 <= hhh && hhh < 5): with a target (m_target_no +0x1f0) 0x12caa4 of its spine position, else message 0x17's low half m_1b0 (>= 0)"
  },
+ "0012caa4": {
+  "name": "MagLifePC::calcAttackHeight",
+  "tag": "ror-inferred",
+  "was": "FUN_0012caa4",
+  "why": "XZ distance from getAttackBasePos to the target pos; 4 (stomp) when the enemy is not hittable and within 80, else getAttackHeightByDist"
+ },
  "0012cb50": {
   "name": "MagLifePC::beginAttack",
   "tag": "ror-inferred",
   "was": "FUN_0012cb50",
   "why": "state 11: picks a target (range 500, 90 degrees) into +0x1c0 / +0x1f0, then changeState(5)"
+ },
+ "0012ccac": {
+  "name": "MagLifePC::createMuzzleEff",
+  "tag": "ror-inferred",
+  "was": "FUN_0012ccac",
+  "why": "the equipped item actor's gun_mazzle node matrix, EffMan::createEff kind 0x26 at its position; called by startAttack's gun shot"
  },
  "0012cdb0": {
   "name": "MagLifePC::message14",
