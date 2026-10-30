@@ -153,6 +153,16 @@ tackling (input 22 / 23 come from PigOutTackle). unassigned@0015a17c is now pinn
 replaces the 41 hand stubs of the DwfOut* slots and DwfMain's 6 in lib/unassigned_stubs.cpp and moves
 DwfMain out of lib/unassigned.h into emy/emy_dwf.h.
 
+**PARTIAL 2026-10-30 (`emy/emy_dwf.cpp`, session 2): DwfOutAtkFar, Stared, Win and Irritate
+written** (their 12 hand stubs gone). Left: AtkNear (0x15ef94..0x1606ec, Exec plus four helpers),
+Fort (Exec 0x161300, 0x790 bytes; 0x161aac its in-sight throw; ranges table 0x2f1148 = 80, 90, 90)
+and Dead (0x162118..0x16265c; 0x161e74 offsets a point by an actor's rot y, probably Dead's).
+ROM oddities ported as they are: DwfOutIrritate::pickMove clears m_count then searches it for a
+nonzero word, so its motion table 0x2f11b8 and Exec step 2 are dead; DwfOutAtkFar step 2 is never
+set; DwfOutWin's scripted branch (script globals 0x173 / 0x174) keeps m_step from before and never
+uses step 3. Doubt: the scripted win teleports to (-70, 453.3, -1780) every time motion 0x44 ends --
+check in the room that sets global 0x173.
+
 **WRITTEN 2026-10-30 (`emy/emy_got.cpp`, verify; split out of unassigned@001583d4): GotMain (type 2)
 and its own outs GotOutParts / GotOutTest, all 31 functions** (architecture.md). The Got borrows
 thirteen of the Dwf's outs (states 1..11, 13, 14), declared in the new emy/emy_dwf.h with hand stubs

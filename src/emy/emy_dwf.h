@@ -185,7 +185,10 @@ public:
     void Term();                                                         // EE slot 4, ROR 0x0015ef94
 };
 
-/* (vtable 0x2e3020, EE 0x40) layout: host -- polymorphic. */
+/* State 10 (vtable 0x2e3020, EE 0x40): with an item in hand (and not
+ * attr bits 8 and 0x10 both) chases the nearer target to 150 and throws
+ * the item (TskAttack kind 0x15), input 22 once the throw task ends;
+ * empty-handed input 23. layout: host -- polymorphic. */
 class DwfOutAtkFar : public EmyOut
 {
 public:
@@ -194,9 +197,16 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x001606ec
     int  Exec();                                                         // EE slot 3, ROR 0x00160784
     void Term();                                                         // EE slot 4, ROR 0x0016097c
+    /* The throw at m_target (step 1), or input 22 with no item. */
+    void startThrow(int *ret);                                           // ROR 0x00160998
+
+    int m_wait;                 // ROR 0x38: utlRandRange(90, 150) at Init, not read
+    int m_tries;                // ROR 0x3c: idles in step 2 before a new chase (up to 3)
 };
 
-/* (vtable 0x2e3050, EE 0x48) layout: host -- polymorphic. */
+/* State 5 (vtable 0x2e3050, EE 0x48): turns to the dog, then stares
+ * (with voice) while the dog barks and m_limit / 10 frames after, or
+ * m_limit frames of barking; input 22. layout: host -- polymorphic. */
 class DwfOutStared : public EmyOut
 {
 public:
@@ -205,9 +215,20 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x00160a44
     int  Exec();                                                         // EE slot 3, ROR 0x00160b08
     void Term();                                                         // EE slot 4, ROR 0x00160c9c
+
+    u_short m_count;            // ROR 0x38: frames of the stare
+    u_short m_limit;            // ROR 0x3a: 50, 100 or 150 (table 0x2f1068)
+    int     m_kind;             // ROR 0x3c: the enemy's type (GetType) at Init
+    int     m_motion;           // ROR 0x40: the type's stare motion (0x56, 0x4f, 0x53)
+    int     m_quiet;            // ROR 0x44: the bark stopped (m_count restarted)
 };
 
-/* (vtable 0x2e3080, EE 0x40) layout: host -- polymorphic. */
+/* State 6 (vtable 0x2e3080, EE 0x40): the PC is down. Normally chases
+ * the target to 100..200 and gloats (motion 0x15, looping SE 0xd).
+ * With script global 0x173 set, the scripted win: motion 0x44 at a
+ * fixed spot until global 0x174 or a hit, then motion 8 and the throw
+ * of the held item (TskAttack kind 0x15), motion 0xd; out of the secta
+ * lists throughout. layout: host -- polymorphic. */
 class DwfOutWin : public EmyOut
 {
 public:
@@ -216,6 +237,11 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x00160cb8
     int  Exec();                                                         // EE slot 3, ROR 0x00160d50
     void Term();                                                         // EE slot 4, ROR 0x00161160
+    void execChase();                                                    // ROR 0x00160d94
+    void execScripted();                                                 // ROR 0x00160e44
+
+    int   m_count;              // ROR 0x38: frames of motion 0x44 (SE 2 at 17)
+    float m_range;              // ROR 0x3c: utlRandRangeF(100, 200)
 };
 
 /* State 12 (vtable 0x2e30b0, EE 0x3c): the idle motion by the attr
@@ -253,7 +279,11 @@ public:
     void Term();                                                         // EE slot 4, ROR 0x00161a90
 };
 
-/* (vtable 0x2e3140, EE 0x44) layout: host -- polymorphic. */
+/* State 14 (vtable 0x2e3140, EE 0x44): turns to the PC and keeps a
+ * distance set by the PC's equipped item: closes in when farther than
+ * the reach + 200, else idles or sidesteps (motions 2, 6, 0x10, 0x11);
+ * input 23 once the PC sees it within the reach, or with attr bit 8 or
+ * 0x10. layout: host -- polymorphic. */
 class DwfOutIrritate : public EmyOut
 {
 public:
@@ -262,6 +292,14 @@ public:
     void Init();                                                         // EE slot 2, ROR 0x00161b48
     int  Exec();                                                         // EE slot 3, ROR 0x00161bd4
     void Term();                                                         // EE slot 4, ROR 0x00161d8c
+    /* The PC's weapon reach (by g_gamMan.m_equipItem) + 10. */
+    float getReach();                                                    // ROR 0x00161da8
+    /* The next move (steps 1 / 3, 1); 0 when the PC sees it. */
+    int   pickMove();                                                    // ROR 0x00161f28
+
+    int m_kind;                 // ROR 0x38: the enemy's type (GetType) at Init
+    int m_motion;               // ROR 0x3c: the last idle motion
+    int m_count;                // ROR 0x40: step 2's repeats (only pickMove's dead branch would set them)
 };
 
 /* (vtable 0x2e3170, EE 0x40) layout: host -- polymorphic. */

@@ -10,7 +10,7 @@
  *  initOut also picks a voice and the collision shape 1.
  *
  *  Not written yet (stubs in lib/unassigned_stubs.cpp): DwfOutAtkNear,
- *  AtkFar, Stared, Win, Fort, Irritate and Dead.
+ *  Fort and Dead.
  * ======================================================================== */
 #include "emy/emy_dwf.h"
 
@@ -23,15 +23,36 @@
 #include "game/gamman.h"
 #include "game/gamstat.h"
 #include "lib/unassigned.h"
+#include "mag/magscenecmd.h"
 #include "mag/magsystem.h"
 #include "sequence/sequence.h"
+#include "snd/sndman.h"
 #include "task/tsk_enemy.h"
+#include "task/tsk_man.h"
+#include "task/tsk_scene.h"
 #include "utl/utlrand.h"
 
 static u_int dwfFindPickupItem(ACHRstat *achr);
 static u_int dwfFindPart(ACHRstat *achr);
 
-static const float DWF_PI = 0x1.921fb4p+1f;     /* 0x40490fda */
+static const float DWF_PI    = 0x1.921fb4p+1f;  /* 0x40490fda */
+static const float DWF_PI_2  = 0x1.921fb4p+0f;  /* 0x3fc90fda */
+static const float DWF_PI_4  = 0x1.921fb4p-1f;  /* 0x3f490fda */
+static const float DWF_PI_8  = 0x1.921fb4p-2f;  /* 0x3ec90fda */
+static const float DWF_PI_10 = 0x1.41b2f6p-2f;  /* 0x3ea0d97b */
+
+/* The script globals the scripted win reads (bss 0x7b205c + 0x5cc /
+ * 0x5d0, g_sequence.m_global): the scene wants it, the scene ends it. */
+enum { DWF_GLOBAL_WIN = 0x173, DWF_GLOBAL_WIN_END = 0x174 };
+
+/* DwfOutStared: the stare's frames (0x2f1068) and its end input per type
+ * (0x2f1070). */
+static const u_short s_dwf_stare_limit[3] = { 50, 100, 150 };       // ROR 0x002f1068
+static const int     s_dwf_stare_end[3]   = { 0x16, 0x16, 0x16 };   // ROR 0x002f1070
+/* DwfOutWin's scripted spot (0x2f1090; y 0x43e2a666, 453.3). */
+static const float   s_dwf_win_pos[4] = { -70.0f, 0x1.c54cccp+8f, -1780.0f, 0.0f }; // ROR 0x002f1090
+/* DwfOutIrritate's end input per type (0x2f11a8). */
+static const int     s_dwf_irritate_end[3] = { 0x17, 0x17, 0x17 };  // ROR 0x002f11a8
 
 static u_int dwfPCOid()
 {
@@ -53,6 +74,44 @@ static bool dwfMotionEnd(EmyOut *out)
         return false;
     out->m_emy->m_input_flg_motion = 1;
     return true;
+}
+
+/* The held item (param 0x67) handed over by the throw task: no longer
+ * carried (resetObj 0x4000000), the achr's item params cleared (kind
+ * 0xa00 = none). */
+static void dwfReleaseThrown(EmyOut *out)
+{
+    u_int held;
+    out->m_achr->getParam(0x67, &held);
+    g_gamMan.resetObj(held, 0x4000000);
+    short none = 0xa00;
+    out->m_achr->setParam(0x66, &none);
+    held = 0;
+    out->m_achr->setParam(0x67, &held);
+}
+
+/* The throw: TskAttack kind 0x15 at the out's target (words 3 / 4: pi / 2
+ * and 20). PORT: the ROM leaves word 1 as the stack had it; zero here. */
+static void dwfStartThrow(EmyOut *out)
+{
+    int prm[5] = {};
+    float angle = DWF_PI_2;
+    float dist  = 20.0f;
+    prm[0] = (int)out->m_target;
+    prm[2] = 0x15;
+    memcpy(&prm[3], &angle, sizeof(float));
+    memcpy(&prm[4], &dist, sizeof(float));
+    scnAttackStart(out->m_oid, prm);
+}
+
+/* The scripted win keeps the enemy out of decide and the secta lists. */
+static void dwfWinHold(EmyOut *out)
+{
+    out->m_emy->setDecideSw(0);
+    g_gamMan.setObj(out->m_oid, 0x400);
+    g_gamMan.resetObj(out->m_oid, 0x40);
+    g_gamMan.setObj(out->m_oid, 0x10000000);
+    g_gamMan.setObj(out->m_oid, 0x400);
 }
 
 /* Inline in the outs: the Got (type 2) holding the scissors (kind 0xa2e)
@@ -1005,6 +1064,303 @@ void DwfOutPickup::Term()
     termCommon();
 }
 
+// ──── DwfOutAtkFar ────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x001606ec
+
+void DwfOutAtkFar::Init()
+{
+    m_wait = utlRandRange(0x5a, 0x96);
+    selectNearTarget(100);
+    u_int held;
+    m_achr->getParam(0x67, &held);
+    u_int attr = m_achr->m_attr[0];
+    if (!((attr & 8) && (attr & 0x10)) && held != 0) {
+        m_step = 0;
+        emyStartChase(150.0f, this, m_target);
+    } else {
+        m_step = 3;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00160784 // callcheck: isAchrMotionEnd, getParam, resetObj, setParam (chk_motion_end inlined: dwfMotionEnd; the item release: dwfReleaseThrown)
+// Step 0: the chase ends: reached, the throw (startThrow), else input 23.
+// Step 1: the throw task (the achr's m_task[3]) gone, the item released,
+// decide back on: input 22. Step 2 (nothing sets it): the throw once the
+// target is in sight within 150 / pi / 8, else at a motion's end 40 % of
+// three times the base motion, then a new chase. Step 3: input 23.
+
+int DwfOutAtkFar::Exec()
+{
+    int ret = -1;
+    switch (m_step) {
+    case 0:
+        if (m_move_done == 0)
+            return -1;
+        m_emy->m_move->stop();
+        if (m_move_done != 1)
+            return 0x17;
+        break;
+    case 1:
+        if (g_taskMan.getTask(m_achr->m_task[3]) != 0)
+            return ret;
+        dwfReleaseThrown(this);         /* the ROM turns decide on between resetObj and setParam */
+        m_emy->setDecideSw(1);
+        return 0x16;
+    case 2:
+        if (emyChkInSight(150.0f, DWF_PI_8, 1, m_target, m_achr) == 0) {
+            if (!dwfMotionEnd(this))
+                return ret;
+            if (m_tries < 3 && utlRandRange(0, 99) < 0x28) {
+                setBaseMotion();
+                m_tries++;
+                return ret;
+            }
+            m_step = 0;
+            selectNearTarget(100);
+            emyStartChase(150.0f, this, m_target);
+            m_tries = 0;
+            return ret;
+        }
+        break;
+    case 3:
+        return 0x17;
+    default:
+        return -1;
+    }
+    startThrow(&ret);
+    return ret;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0016097c
+
+void DwfOutAtkFar::Term()
+{
+    termCommon();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00160998 // callcheck: FUN_001f9d90 (scnAttackStart through dwfStartThrow)
+// Decide stays off while the throw runs.
+
+void DwfOutAtkFar::startThrow(int *ret)
+{
+    u_int held;
+    m_achr->getParam(0x67, &held);
+    if (held == 0) {
+        *ret = 0x16;
+        return;
+    }
+    m_step = 1;
+    m_emy->setDecideSw(0);
+    dwfStartThrow(this);
+    playSE(0xb);
+}
+
+// ──── DwfOutStared ────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00160a44
+// The voice's countdown m_30 restarts at 0 (the first tickVoice plays).
+// A type other than 0..2 keeps m_kind and m_motion.
+
+void DwfOutStared::Init()
+{
+    switch (m_emy->GetType()) {
+    case 1:
+        m_kind   = 1;
+        m_motion = 0x4f;
+        break;
+    case 0:
+        m_kind   = 0;
+        m_motion = 0x56;
+        break;
+    case 2:
+        m_kind   = 2;
+        m_motion = 0x53;
+        break;
+    }
+    emyStartTurn(DWF_PI_8, this, 1);
+    m_step  = 0;
+    m_count = 0;
+    m_quiet = 0;
+    int r   = utlRandRange(0, 2);
+    m_30    = 0;
+    m_limit = s_dwf_stare_limit[r];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00160b08 // callcheck: getParam, getObjKind (the scissors test inline)
+// Step 0: the turn done, the stare motion: 0x26 with attr bits 8 and
+// 0x10, the Got's scissors 0x50, else 0x25 (30 %) or the type's own.
+// Step 1: voice; m_limit / 10 frames after the bark stops, or m_limit
+// frames of barking, end it.
+
+int DwfOutStared::Exec()
+{
+    if (m_step == 0) {
+        if (m_turn_done == 0)
+            return -1;
+        m_emy->InactiveTurn();
+        u_int attr = m_achr->m_attr[0];
+        int motion = -1;
+        if ((attr & 8) && (attr & 0x10)) {
+            motion = 0x26;
+        } else if (m_kind == 2) {
+            u_int held;
+            m_achr->getParam(0x67, &held);
+            if (g_gamMan.getObjKind(held) == 0xa2e)
+                motion = 0x50;
+        }
+        if (motion < 0)
+            motion = utlRandRange(0, 99) > 0x1d ? m_motion : 0x25;
+        changeMotion(motion, 0x100);
+        m_step = 1;
+        return -1;
+    }
+    if (m_step != 1)
+        return -1;
+    tickVoice(8, 0x18, 9);
+    bool done;
+    if (!magBwnIsBarkPhase3()) {
+        if (m_quiet == 0) {
+            m_quiet = 1;
+            m_count = 0;
+        }
+        m_count++;
+        done = (u_int)(m_limit / 10) < (u_int)m_count;
+    } else {
+        m_count++;
+        done = m_limit < m_count;
+    }
+    if (!done)
+        return -1;
+    stopVoice();
+    return s_dwf_stare_end[m_kind];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00160c9c
+
+void DwfOutStared::Term()
+{
+    termCommon();
+}
+
+// ──── DwfOutWin ───────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00160cb8
+// The target is kept unless m_target_dog is above 1 (never: 0 or 1). The
+// scripted win leaves m_step as it was.
+
+void DwfOutWin::Init()
+{
+    if (g_sequence.m_global[DWF_GLOBAL_WIN] == 0) {
+        if ((u_int)m_target_dog > 1)
+            selectTarget(100);
+        m_range = utlRandRangeF(100.0f, 200.0f);
+        emyStartChase(m_range, this, m_target);
+        m_step = 0;
+    } else {
+        changeMotion(0x44, 0);
+        selectNearTarget(100);
+        m_count = 0;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00160d50
+
+int DwfOutWin::Exec()
+{
+    if (g_sequence.m_global[DWF_GLOBAL_WIN] == 0)
+        execChase();
+    else
+        execScripted();
+    return -1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00160d94
+// Arrived: the gloat (0x15 with the looping SE 0xd; 10 with attr bits 8
+// and 0x10).
+
+void DwfOutWin::execChase()
+{
+    if (m_step != 0 || m_move_done == 0)
+        return;
+    m_emy->m_move->stop();
+    u_int attr = m_achr->m_attr[0];
+    if ((attr & 8) && (attr & 0x10)) {
+        changeMotion(10, 0x100);
+    } else {
+        changeMotion(0x15, 0x100);
+        m_se = playSE(0xd);
+        g_sndMan.setSeLoop(m_se, 1);
+    }
+    m_step = 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00160e44 // callcheck: isAchrMotionEnd, getTask, setObj, resetObj, getParam, setParam, setPos, FUN_001f9d90 (chk_motion_end: dwfMotionEnd; the hold: dwfWinHold; the release: dwfReleaseThrown; the throw: dwfStartThrow)
+// Step 0: motion 0x44 over and over at the fixed spot (SE 2 on frame
+// 17) until global 0x174 or a hit, then motion 8 (step 1). Step 1 at its
+// end throws (SE 0xb, step 2); step 2 releases the item once the throw
+// task ends, motion 0xd (step 4, held for ever).
+
+void DwfOutWin::execScripted()
+{
+    switch (m_step) {
+    case 0:
+        if (g_sequence.m_global[DWF_GLOBAL_WIN_END] != 0 || m_emy->m_damage != 0) {
+            changeMotion(8, 0);
+            m_step = 1;
+            return;
+        }
+        if (dwfMotionEnd(this)) {
+            m_count = 0;
+            changeMotion(0x44, 0);
+            static_cast<ObjStat *>(m_achr)->setPos(s_dwf_win_pos);
+            return;
+        }
+        if (++m_count == 0x11)
+            playSE(2);
+        break;
+    case 1:
+        dwfWinHold(this);
+        m_emy->setDecideSw(0);
+        if (dwfMotionEnd(this)) {
+            dwfStartThrow(this);
+            playSE(0xb);
+            m_step = 2;
+        }
+        break;
+    case 2:
+        dwfWinHold(this);
+        if (g_taskMan.getTask(m_achr->m_task[3]) == 0) {
+            dwfReleaseThrown(this);
+            m_step = 4;
+            changeMotion(0xd, 0);
+        }
+        break;
+    case 4:
+        dwfWinHold(this);
+        break;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00161160
+
+void DwfOutWin::Term()
+{
+    termCommon();
+}
+
 // ──── DwfOutParts ─────────────────────────────────────────────────────
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1057,4 +1413,163 @@ void DwfOutTest::Init()
 int DwfOutTest::Exec()
 {
     return -1;
+}
+
+// ──── DwfOutIrritate ──────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00161b48
+// A type other than 0..2 keeps m_kind.
+
+void DwfOutIrritate::Init()
+{
+    switch (m_emy->GetType()) {
+    case 1:
+        m_kind = 1;
+        break;
+    case 0:
+        m_kind = 0;
+        break;
+    case 2:
+        m_kind = 2;
+        break;
+    }
+    emyStartTurn(DWF_PI_10, this, 0);
+    m_step   = 0;
+    m_motion = 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00161bd4 // callcheck: isAchrMotionEnd (chk_motion_end inlined: dwfMotionEnd)
+// Steps: 0 the turn to the PC; 1 closing in until it sees m_target
+// within the reach + 50 (pi / 4); 3 an idle or sidestep; each ends in
+// pickMove, whose 0 (the PC sees it) ends the out. Step 2 repeats
+// m_motion m_count times (unreachable: see pickMove).
+
+int DwfOutIrritate::Exec()
+{
+    u_int attr = m_achr->m_attr[0];
+    if ((attr & 8) || (attr & 0x10))
+        return s_dwf_irritate_end[m_kind];
+    switch (m_step) {
+    case 0:
+        if (m_turn_done == 0)
+            return -1;
+        m_emy->InactiveTurn();
+        break;
+    case 1: {
+        int r = emyChkChase(getReach() + 50.0f, DWF_PI_4, this, m_target, 1);
+        if (r == 0)
+            return -1;
+        m_emy->InactiveTurn();
+        if (r != 1)
+            return s_dwf_irritate_end[m_kind];
+        break;
+    }
+    case 2:
+        if (!dwfMotionEnd(this))
+            return -1;
+        if (--m_count != 0) {
+            changeMotion(m_motion, 0);
+            return -1;
+        }
+        emyStartTurn(DWF_PI_10, this, 0);
+        m_step = 0;
+        return -1;
+    case 3:
+        if (!dwfMotionEnd(this))
+            return -1;
+        emyStartTurn(DWF_PI_10, this, 0);
+        m_step = 0;
+        return -1;
+    default:
+        return -1;
+    }
+    if (pickMove() != 0)
+        return -1;
+    return s_dwf_irritate_end[m_kind];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00161d8c
+
+void DwfOutIrritate::Term()
+{
+    termCommon();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00161da8
+// By the PC's equipped item (0xa00 none): 0xa3b and 0xb59 170; 0xa39,
+// 0xa3a, 0xa3c 130; 0xa36..0xa38, 0xa3d 110; else 50.
+
+float DwfOutIrritate::getReach()
+{
+    float reach;
+    switch (g_gamMan.m_equipItem) {
+    case 0xa3b:
+    case 0xb59:
+        reach = 170.0f;
+        break;
+    case 0xa39:
+    case 0xa3a:
+    case 0xa3c:
+        reach = 130.0f;
+        break;
+    case 0xa36:
+    case 0xa37:
+    case 0xa38:
+    case 0xa3d:
+        reach = 110.0f;
+        break;
+    default:
+        reach = 50.0f;
+        break;
+    }
+    return reach + 10.0f;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x00161f28
+// The PC sees it within the reach (all round): 0, m_count 0. The ROM then
+// looks for a nonzero m_count three times -- it was just cleared, so the
+// motion table 0x2f11b8 (6, 0x10, 0x11) and step 2 are never used.
+// Farther than the reach + 200: a chase to the PC (step 1). Else by
+// chance: 10 % the last motion (2 if none), 20 % motion 2, 25 % 0x10
+// again or 0x11, 25 % 0x11 again or 0x10, 20 % 6 after any motion (2
+// the first time); SE 0xd unless 2 (step 3).
+
+int DwfOutIrritate::pickMove()
+{
+    float base[4], pc[4];
+    getBasePos(base);
+    emyGetPCPos(pc);
+    float reach = getReach();
+    if (emyChkInSight(reach, DWF_PI, 0, dwfPCOid(), m_achr) != 0) {
+        m_count = 0;
+        return 0;
+    }
+    if (emyChkNearXZ(reach + 200.0f, base, pc) == 0) {
+        emyStartChase(10.0f, this, dwfPCOid());
+        m_step = 1;
+        return 1;
+    }
+    int r = utlRandRange(0, 99);
+    int motion;
+    if (r < 10)
+        motion = m_motion != 0 ? m_motion : 2;
+    else if (r < 30)
+        motion = 2;
+    else if (r < 55)
+        motion = m_motion == 0x10 ? 0x10 : 0x11;
+    else if (r < 80)
+        motion = m_motion == 0x11 ? 0x11 : 0x10;
+    else
+        motion = m_motion != 0 ? 6 : 2;
+    m_motion = motion;
+    changeMotion(motion, 0);
+    if (motion != 2)
+        playSE(0xd);
+    m_step = 3;
+    return 1;
 }
