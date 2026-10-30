@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 12:27 at commit `600adbf` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 12:38 at commit `a77cc5c` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -13,7 +13,7 @@ Generated 2026-10-30 12:27 at commit `600adbf` by `tools/reverse/status.py` (`re
 - game functions: **7187**, named **7002** (97%); library functions: 1017
 - by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 265, ror-inferred 5400
 - context-name ledger: 5703 entries; overrides of wrong library matches: 5
-- placed in a source file: 6065/7187 in 154 files
+- placed in a source file: 6066/7187 in 154 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5827**; stubs: **131**
+- reconstructed RoR functions: **5828**; stubs: **130**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -47,7 +47,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/dog/doglightpool.cpp` | 29 | 0 |
 | `src/dog/dogmodel.cpp` | 26 | 0 |
 | `src/dog/dogmotionblend.cpp` | 11 | 0 |
-| `src/dog/dogtexinfo.cpp` | 16 | 0 |
+| `src/dog/dogtexinfo.cpp` | 17 | 0 |
 | `src/eff/eff0.cpp` | 16 | 0 |
 | `src/eff/effblood.cpp` | 27 | 0 |
 | `src/eff/effcameraanim1.cpp` | 3 | 0 |
@@ -100,7 +100,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 107 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 106 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -185,8 +185,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 174 TUs: todo 84, partial 1, verify 136, done 17
-- next: **unassigned@0011764c** (frontier score 1)
+- 173 TUs: todo 84, partial 1, verify 136, done 17
+- next: **unassigned@0016afcc** (frontier score 1)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -199,7 +199,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `dog/doglightpool.cpp` 29/29 -- TU complete; verify because the boot screenshot is still black: GamMan::loadStage is a stub so MagScene::loadLight never fills the pool and nothing draws. Mark 
 - verify: `dog/dogmodel.cpp` 26/71 -- Status verify: the casts run only in gameplay; the 15 s smoke run ends on the disclaimer screen, which draws correctly. Mark done when a run walks the player in
 - verify: `dog/dogmotionblend.cpp` 11/11 -- Verify: the smoke run stays on the disclaimer screen and no actor is drawn yet, because the i3m pose player (unassigned@0022e840: i3mGetPose 0x22e960, i3mGetBle
-- verify: `dog/dogtexinfo.cpp` 16/16 -- Pinned 0x1161e4..0x11764c, all 16 functions written. Smoke run: MagScene::init's init / add run without asserts; screen still black (SprMan::draw and the scene 
+- verify: `dog/dogtexinfo.cpp` 17/17 -- All 17 DogTexInfo functions written. Smoke run shows the Atlus disclaimer screen; dump is unobservable (empty, error path only). Earlier handoff still holds: ad
 - verify: `eff/eff0.cpp` 14/14 -- Verify: the 240 s run reaches the bus-stop room and EffMan now creates and deletes EffLight1 (kind 0x21) and EffCameraAnim1 (0xd) through the real Eff0, but eve
 - verify: `eff/effblood.cpp` 27/27 -- Nothing on the smoke path creates blood (the 15 s run is at the boot disclaimer): mark done when a run shows a hit spray (scnDamageStart, kind 1) or stains unde
 - verify: `eff/effcommon.cpp` 13/13 -- Complete; verify because no picture shows a helper yet: the 240 s run shows the Once upon a time intro and the park scene as before, with no EffLight1 glow iden
@@ -327,6 +327,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 12:38 `dog/dogtexinfo.cpp` verify: Absorbed unassigned@0011764c: DogTexInfo::dump (0x11764c, 4 bytes, jr ra) is the empty retail debug listing that DogModel::loadPack calls before asserting on a 
 - 2026-10-30 12:27 `mag/magsceneoption.cpp` verify: MagScene::parseOption reconstructed: data/options.txt parsed by utlParseParam into the new m_option_bucket (0x4371c), names looked up in the 15-row option table
 - 2026-10-30 12:19 `mag/magscenedebug.cpp` verify: MagScene debug windows: updateDebug, openDebugWindow, closeDebugWindow reconstructed; m_22bc renamed m_dbg_window; extent pinned 0x14313c-0x143498
 - 2026-10-30 12:12 `emy/emy_dwf.cpp` verify: DwfOutAtkNear (Init, Exec, Term and its throw, claw and grab modes with startThrow / startClaw), DwfOutFort (Init, Exec, Term, startLeap), DwfOutDead (Init, Exe
@@ -334,13 +335,11 @@ Recent sessions:
 - 2026-10-30 11:35 `emy/emy_dwf.cpp` partial: DwfMain (type 0, all 25 methods and tests, the two finders) and the outs Disappear, Appear, Wait, Walk, Serch, Pickup, Parts, Test reconstructed (49 functions);
 - 2026-10-30 11:23 `eff/effwater.cpp` verify: reconstruct 15 functions: EffWater1 (kind 0x2f, the EFFWATER1.RPK model with a scrolling texture) and EffWater3 (kind 0x31, rain over a box with ground ripples 
 - 2026-10-30 10:54 `emy/emy_pig.cpp` verify: PigMain (type 1) and its outs PigOutParts, PigOutTackle, PigOutTest: all 34 functions; unassigned@0015a17c split into emy/emy_pig.cpp and emy/emy_dwf.cpp
-- 2026-10-30 10:00 `mag/maglifemenusp.cpp` verify: Reconstructed both dial-lock menus: MagLifeMenuSpecial (KLCK, 0x1000b) and MagLifeMenuSpecial2 (0x1000c..f) -- constructors, destructors, init, term, isInit, pr
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
 | `unassigned@001788ec` | todo | 0/9/13 | 2.8 | 1 | 0 |
 | `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
-| `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
 | `unassigned@0016afcc` | todo | 0/5/6 | 1.6 | 1 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
@@ -361,7 +360,6 @@ Recent sessions:
 | `00243560` | rxSysUpdateDevices | 1 | ror | stub | rx/rxsys.cpp |
 | `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
 | `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |
-| `0011764c` | DogTexInfo::dump | 1 | ror | stub | - |
 | `001790e4` | EffReload1::EffReload1 | 1 | ror | stub | - |
 | `00173df8` | EffGeneric1::EffGeneric1 | 1 | ror | stub | - |
 | `0016afcc` | EffBg1::EffBg1 | 1 | ror | stub | - |

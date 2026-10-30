@@ -283,11 +283,11 @@
    "why": "Every DogMotionBlend method, reset 0x10737c through the constructor 0x108588; six carry the dog/dogmotionblend.cpp source string; utlVecToRot before and DogActor::countBlendFrame after belong to other files"
   },
   "dog/dogtexinfo.cpp": {
-   "notes": "Pinned 0x1161e4..0x11764c, all 16 functions written. Smoke run: MagScene::init's init / add run without asserts; screen still black (SprMan::draw and the scene layers draw nothing yet). addData / setTexTable are not reached: SprTexture's lists end in error because fileGetSize 0x1be768 is a stub returning 0 and BedPfh::BedPfh / getFileIndex (bed/bedpfh.cpp) are stubs -- write those (and FileReader::read 0x1be524 / 0x1be564) next to see textures arrive. PC guards: release stops when the record's picture is NULL, copy and setTexFlag return on a bad index (the ROM writes on after the assert). term frees m_tex_data before terming the textures in it, as the ROM does (the heap keeps the bytes). The shadow01 rodata at 0x2ed500 is an I3dTexDesc: 256x256 CT32 at block 0x2300. Next on the queue: spr/sprman.cpp.",
+   "notes": "All 17 DogTexInfo functions written. Smoke run shows the Atlus disclaimer screen; dump is unobservable (empty, error path only). Earlier handoff still holds: addData / setTexTable wait on fileGetSize 0x1be768, BedPfh::BedPfh / getFileIndex (bed/bedpfh.cpp) and FileReader::read 0x1be524 / 0x1be564 before textures arrive. The unassigned queue now holds 1-function runs next to finished TUs: absorbing them into the neighbour with tus.py define is quicker than briefing them as new TUs.",
    "ranges": [
     [
      "001161e4",
-     "0011764c"
+     "00117654"
     ]
    ],
    "sessions": [
@@ -295,10 +295,15 @@
      "date": "2026-10-22 17:51",
      "status": "verify",
      "summary": "DogTexInfo written whole: init / term / clear, find / findFree, add (VRAM desc), addData (TIM2 with refcount and heap copy), addPfh (pack or i3r-named textures, optional sepia), release / releaseModel / releasePfh, copy, setTexFlag, setTexTable, getTexInfo, setSepiaColor. DogTexData record (0x198) and I3dTexEntry names pszTexName / pPicture from the asserts. utlTm2GetSize is a ROM-code bridge; utlTm2ToSepia and i3rGetNumTex / i3rGetTexName are stubs. Platform: rosepan_i3d test table field rename only."
+    },
+    {
+     "date": "2026-10-30 12:38",
+     "status": "verify",
+     "summary": "Absorbed unassigned@0011764c: DogTexInfo::dump (0x11764c, 4 bytes, jr ra) is the empty retail debug listing that DogModel::loadPack calls before asserting on a failed assignTex. Range pinned to 0x1161e4..0x117654 (MagSystem starts there); stub removed from lib/unassigned_stubs.cpp, empty body written in dogtexinfo.cpp."
     }
    ],
    "status": "verify",
-   "why": "11 of 16 functions assert with dog/dogtexinfo.cpp; the rest are DogTexInfo members (clear, term, findFree, setSepiaColor, releaseModel, releasePfh) taking the table in a0; DogModel code ends at 0x1161e4 (unassigned 0x1160a8 run before), MagSystem starts at 0x117654 after the 8-byte 0x11764c"
+   "why": "11 of 17 functions assert with dog/dogtexinfo.cpp; the rest are DogTexInfo members taking the table in a0, incl. the empty DogTexInfo::dump at 0x11764c (jr ra; nop, called by DogModel::loadPack on a failed assignTex); DogModel code ends at 0x1161e4, MagSystem starts at 0x117654"
   },
   "eff/eff0.cpp": {
    "notes": "Verify: the 240 s run reaches the bus-stop room and EffMan now creates and deletes EffLight1 (kind 0x21) and EffCameraAnim1 (0xd) through the real Eff0, but every class init is still a stub returning 0, so createEff deletes them and nothing on screen shows Eff0 yet; the first session whose screenshot shows an effect marks this done. Decisions: the constructor's m_z is FLT_MAX on the host (the ROM stores int 0x7fffffff, the EE's largest float, a NaN on the host; hazards.md). PC guards: createPacketEntry with no pack returns NULL, effAmbientColor with no ambient light returns. The draw-set cache, random table and cursor are file statics in eff0.cpp (0x8282a0, 0x828378, 0x308050). Next: the rest of the old run is unassigned@0016afcc (EffBg1 onward, one file per Eff class in link order); start with the reached EffLight1::init 0x174dd8 and EffCameraAnim1::init 0x16f71c and move each class out of src/eff/effclasses.h. effCalcViewDepth 0x16ff18 and effMoveToward 0x16ff78 are still stubs there.",
@@ -3009,6 +3014,7 @@
   "unassigned@00106658": {},
   "unassigned@0011262c": {},
   "unassigned@00113ea8": {},
+  "unassigned@0011764c": {},
   "unassigned@0011cb70": {},
   "unassigned@0012f008": {},
   "unassigned@00130a2c": {},
