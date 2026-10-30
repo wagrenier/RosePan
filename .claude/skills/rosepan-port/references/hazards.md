@@ -1040,3 +1040,22 @@ loop's start pointer in the asm when its twin starts elsewhere.
   so HLSL edits are silently not compiled -- the run uses the committed .spv / .dxil. Configure it
   with -DSHADERCROSS_EXECUTABLE=E:/Programming/Git/Github/MioPan/extern/shadercross/windows/shadercross.exe
   and check that resources/shaders/{spirv,dxil}/ changed before trusting a shader test.
+
+## A flag index the EE wraps into its RAM mirror (2026-10-30)
+
+- Symptom (the user, picking up an item after "There's a creepy doll tied to the pillar"): SIGSEGV
+  in GamMan::endPcAction (0x1d4540) setting `g_sequence.m_bits[flag >> 5]`, flag = 0xffffffff.
+- Cause: the scripts give every item -1 as its FCHRstat param 0x40 (seqFunc155 cases 3 / 4: no
+  flag); endPcAction, the only reader, tests only `!= 0`. On the EE `m_bits + 0x1ffffffc` wraps
+  32 bits into the uncached mirror at 0x20000000 and sets bit 31 of m_bits[-1], its BedMemory
+  header size; on the host it is 512 MB past the array. Fix: skip a bit outside m_bits' 0xa00
+  bytes, with a comment. Other `m_bits[n >> 5]` writers (seqcall.cpp's set / clear natives,
+  gamman.cpp, mnuitem.cpp, mnupbook.cpp) have no such guard: the same -1 there would fault the same
+  way, so check the value before blaming the reconstruction.
+- A negative index into an EE array that the PS2 survives is a mirror wrap (0x20000000 uncached,
+  0x30000000 uncached-accelerated): compute what the EE address hits before deciding what the host
+  should do.
+- Trap met on the way: gdbdrive died with "'utf-8' codec can't decode byte 0xa2" while writing
+  crash.txt (`bt full` of a frame with the game's SJIS text; to_string decodes as UTF-8), and gdb
+  -batch took the held game with it. gdbdrive now catches every exception, reruns an undecodable
+  command through gdb's log file, and holds the game when run / continue itself errs.

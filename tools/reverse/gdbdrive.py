@@ -20,10 +20,42 @@ gdb.events.exited.connect(lambda ev: state.__setitem__('exited', getattr(ev, 'ex
 
 
 def run(cmd):
+    # Not only gdb.error: an exception escaping this script ends gdb -batch and the held game.
     try:
         return gdb.execute(cmd, to_string=True)
-    except gdb.error as e:
+    except Exception as e:
+        if isinstance(e, UnicodeError) or 'codec' in str(e):
+            return run_logged(cmd)
         return f'<error: {e}>\n'
+
+
+def run_logged(cmd):
+    """cmd's output through gdb's log file, read as bytes: to_string decodes it as UTF-8, and the
+    game's SJIS text (a `bt full` local) is not."""
+    path = os.path.join(DIR, 'gdbout.tmp').replace('\\', '/')
+    try:
+        for c in (f'set logging file {path}', 'set logging overwrite on', 'set logging redirect on',
+                  'set logging enabled on'):
+            gdb.execute(c)
+        try:
+            gdb.execute(cmd)
+        finally:
+            gdb.execute('set logging enabled off')
+        with open(path, 'rb') as f:
+            return f.read().decode('utf-8', 'replace')
+    except Exception as e:
+        return f'<error: {e}>\n'
+
+
+def resume(cmd):
+    """run / continue; returns the error when gdb reports one (the inferior may still be stopped)."""
+    state['stop'] = None
+    try:
+        gdb.execute(cmd)
+        return None
+    except Exception as e:
+        log(f'{cmd}: {e}')
+        return e
 
 
 def log(msg):
@@ -73,7 +105,7 @@ def main():
     for c in ('set pagination off', 'set print pretty on', 'set confirm off'):
         run(c)
     log('starting game')
-    gdb.execute('run')
+    err = resume('run')
     while True:
         if state['exited'] is not None or not gdb.selected_inferior().pid:
             log(f'game exited (code {state["exited"]})')
@@ -94,13 +126,15 @@ def main():
                 log(f'first-chance {sig} at {pc:#x} in {where}: passed on\n{run("bt 8")}')
             else:
                 reason = f'{sig} at {pc:#x} in {where}'
+        elif ev is None and err is not None:
+            reason = f'stopped at {pc:#x} in {where} after a gdb error: {err}'
         else:
             log(f'stop ({sig}) at {pc:#x} in {where}: continuing')
         if reason:
             dump(reason)
             if serve() == 'quit':
                 return
-        gdb.execute('continue')
+        err = resume('continue')
 
 
 main()
