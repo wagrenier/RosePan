@@ -983,3 +983,12 @@ column 0 directly followed by an if statement (label:
     if (...)) matches its definition pattern,
 so the real function's body ends at the label. Fix: put another statement first after the label (or
 restructure); other col-0 labels are fine.
+
+## A ROM loop that walks past its array (2026-10-30)
+
+Symptom: MagLifeMenuSpecial::render step 5 (0x12e178) clears m_attention on "actors" taken from
++0x50, +0x54, +0x58 -- m_actor_no[4], m_sel and m_cur[0] -- where Special2's twin walks the dials
+(+0x44..). Cause: a ROM bug (the base pointer is the last actor, not the first dial); on the PS2 a
+dial angle like -0x4000 as an actor index writes far outside m_actors. Fix: keep the ROM's three
+words but skip any outside 0..127 (the host must not scribble), with a comment. Check a decompiled
+loop's start pointer in the asm when its twin starts elsewhere.

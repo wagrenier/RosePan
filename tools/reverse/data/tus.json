@@ -1526,6 +1526,17 @@
    "status": "verify",
    "why": "source string mag/maglifemenu.cpp anchors 0x12cf3c..0x12d788 (asserts m_type, m_scene, theRenderStage, actor); every function is a MagLifeMenu* vtable slot; maglifemenusp.cpp starts at 0x12d9c8; plus the PBook / Board3D / Base linkonce symbols the brief placed here"
   },
+  "mag/maglifemenusp.cpp": {
+   "notes": "All code written; nothing on screen can show it yet (spmn opens these mid-game; the 15 s smoke ends on the boot disclaimer), so verify. Fields: m_state is the step and MagLife m_04 the frame counter. ROM bug kept safely: Special render step 5 walks m_actor_no[4], m_sel, m_cur[0] as actor numbers; host skips words outside 0..127 (hazards.md). Facts in architecture.md near spmn; open item added. Mark done when a run reaches a lock and the box/body with three dials shows under the scene camera.",
+   "sessions": [
+    {
+     "date": "2026-10-30 10:00",
+     "status": "verify",
+     "summary": "Reconstructed both dial-lock menus: MagLifeMenuSpecial (KLCK, 0x1000b) and MagLifeMenuSpecial2 (0x1000c..f) -- constructors, destructors, init, term, isInit, processPad, render (14 functions, all 18 of the slice incl. linkonce getName / host RTTI for __tf); named the 12 FUN_ slots in Ghidra."
+    }
+   ],
+   "status": "verify"
+  },
   "mag/maglifenoise.cpp": {
    "notes": "Verify: the 15 s smoke run ends on the disclaimer, before anything calls GamMan::setVolume with a non-zero volume, so no screenshot shows the noise yet. First run in-game with a non-zero GamMan volume: expect a faint grey grain over the whole frame (RGBAQ 0x20 grey, alpha FIX volume/4, layers alternating Cd+(Cd-Cs)*FIX and lerp). Check that the noise texture (scene common texture 1, MagScene::initRender m_common_tex_no[1]) tiles: CLAMP_1 is repeat and the UV windows run past the texture, so if the host sampler clamps the grain will smear at the edges -- then the renderer's image quad needs a repeat sampler for CLAMP_1 0. Host change: rosepan_i3d.cpp GsState::rgbaq set by i3dPktSetReg RGBAQ writes, used by REC_PRIM records whose data has no RGBAQ (Record::has_rgbaq), updated after prims that write it.",
    "ranges": [

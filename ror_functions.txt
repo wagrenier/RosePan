@@ -1043,20 +1043,20 @@
 // FILE -- mag/maglifemenusp.cpp
 // *****************************************************************************
 
-/* 0012d9c8 000000fc */ FUN_0012d9c8(){}
-/* 0012dac4 00000090 */ FUN_0012dac4(){}
-/* 0012db54 00000010 */ FUN_0012db54(){}
-/* 0012db64 00000240 */ FUN_0012db64(){}
-/* 0012dda4 00000498 */ FUN_0012dda4(){}
+/* 0012d9c8 000000fc */ MagLifeMenuSpecial::init(){}  // ror
+/* 0012dac4 00000090 */ MagLifeMenuSpecial::term(){}  // ror
+/* 0012db54 00000010 */ MagLifeMenuSpecial::isInit(){}  // ror
+/* 0012db64 00000240 */ MagLifeMenuSpecial::processPad(){}  // ror
+/* 0012dda4 00000498 */ MagLifeMenuSpecial::render(){}  // ror
 /* 0012e23c 000000a8 */ MagLifeMenuSpecial::MagLifeMenuSpecial(){}  // ror
-/* 0012e2e4 00000068 */ FUN_0012e2e4(){}
-/* 0012e34c 0000014c */ FUN_0012e34c(){}
-/* 0012e498 00000090 */ FUN_0012e498(){}
-/* 0012e528 00000010 */ FUN_0012e528(){}
-/* 0012e538 0000031c */ FUN_0012e538(){}
-/* 0012e854 0000069c */ FUN_0012e854(){}
+/* 0012e2e4 00000068 */ MagLifeMenuSpecial::~MagLifeMenuSpecial(){}  // ror
+/* 0012e34c 0000014c */ MagLifeMenuSpecial2::init(){}  // ror
+/* 0012e498 00000090 */ MagLifeMenuSpecial2::term(){}  // ror
+/* 0012e528 00000010 */ MagLifeMenuSpecial2::isInit(){}  // ror
+/* 0012e538 0000031c */ MagLifeMenuSpecial2::processPad(){}  // ror
+/* 0012e854 0000069c */ MagLifeMenuSpecial2::render(){}  // ror
 /* 0012eef0 000000b0 */ MagLifeMenuSpecial2::MagLifeMenuSpecial2(){}  // ror
-/* 0012efa0 00000068 */ FUN_0012efa0(){}
+/* 0012efa0 00000068 */ MagLifeMenuSpecial2::~MagLifeMenuSpecial2(){}  // ror
 
 // *****************************************************************************
 // FILE -- mag/maglifefader.cpp
