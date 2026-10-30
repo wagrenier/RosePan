@@ -114,31 +114,6 @@ FshMain::~FshMain()
 
 // ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
 
-// stub of ROR 0x00194908
-void MnuMap::init(DogTexInfo *tex)
-{
-    ROSEPAN_STUB("MnuMap::init", 0x00194908);
-}
-
-// stub of ROR 0x00194960
-void MnuMap::term()
-{
-    ROSEPAN_STUB("MnuMap::term", 0x00194960);
-}
-
-// stub of ROR 0x00194fe4
-int MnuMap::processPad(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuMap::processPad", 0x00194fe4);
-    return {};
-}
-
-// stub of ROR 0x00195e90
-void MnuMap::draw(I3dLayer *layer)
-{
-    ROSEPAN_STUB("MnuMap::draw", 0x00195e90);
-}
-
 // stub of ROR 0x001ad8e0
 void MnuBoard2D::draw(I3dLayer *layer)
 {

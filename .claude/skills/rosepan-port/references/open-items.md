@@ -1225,6 +1225,15 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- **MnuMap (mnu/mnumap.cpp, written 2026-10-29, verify).** Not seen yet: no smoke run reaches a room
+  (the run ends on the picture book), and the map opens from the field (MagScene menu 0x10001). Mark
+  done when a run opens it and the shot matches work/ref (tm2png.py --scan data/mnurpk/mnumap.rpk:
+  map01_tcc, map_bg_tcc, map_o1_01..). Doubts kept as the ROM has them: flag 0x40000 (a scroll
+  animation) is cleared but never set; queueStrips at column 1 starts at strip -1 (texture slot 1,
+  file NN 00); the floor change keeps m_mapW of the first row (rows of one area have equal strips).
+  PORT guards: R1 / L1 test the no-map flag before reading the neighbouring row (the ROM reads past
+  the table's terminator), toMapPos / open accept a NULL WRD room and an area outside 0..2.
+
 - (2026-10-29, emy/emy_nor.cpp) **Nor ROM oddities ported as they are**: NorOutAttack::m_chase_cnt
   (+0x3c) is cleared but never counted, so the claw's chase limit m_chase_max never fires (only the
   arrival or a failed chase ends it); grab step 7 (grabMissEnd) has no code that sets it; placePC moves
