@@ -13775,17 +13775,89 @@
   "was": "FUN_00194960",
   "why": "MnuMap : mnuBase (rtti) term; MagLifeMenuMap's menu object"
  },
+ "001949bc": {
+  "name": "MnuMap::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001949bc",
+  "why": "MnuMap::init's tail: picks the area/floor row of the map table 0x29bfb8, the PC / Brown markers, the room-name window (or N O MAP), queues map01_tcc / map_bg_tcc and the strips"
+ },
+ "00194fa4": {
+  "name": "MnuMap::start",
+  "tag": "ror-inferred",
+  "was": "FUN_00194fa4",
+  "why": "pushCamera(256, pi/2) and lowerVolume when the textures are in (processPad step 1)"
+ },
  "00194fe4": {
   "name": "MnuMap::processPad",
   "tag": "ror-inferred",
   "was": "FUN_00194fe4",
   "why": "MnuMap : mnuBase (rtti) processPad; MagLifeMenuMap's menu object"
  },
+ "00195430": {
+  "name": "MnuMap::updatePad",
+  "tag": "ror-inferred",
+  "was": "FUN_00195430",
+  "why": "step 4 input: Circle/Select close (0), R1/L1 floor change, Square zoom, Triangle centre, stick/d-pad scroll"
+ },
+ "0019586c": {
+  "name": "MnuMap::clampScroll",
+  "tag": "ror-inferred",
+  "was": "FUN_0019586c",
+  "why": "clamps a scroll position to 0..map size - view size, centres it when the map is smaller"
+ },
+ "00195958": {
+  "name": "MnuMap::isScrollInRange",
+  "tag": "ror-inferred",
+  "was": "FUN_00195958",
+  "why": "1 when (x, y) lies in 0..map size - view size; no callers"
+ },
+ "001959ec": {
+  "name": "MnuMap::getViewSize",
+  "tag": "ror-inferred",
+  "was": "FUN_001959ec",
+  "why": "768x512 map pixels, 384x256 with flag 0x10000 (zoomed in): the window onto the map"
+ },
+ "00195a34": {
+  "name": "MnuMap::queueStrips",
+  "tag": "ror-inferred",
+  "was": "FUN_00195a34",
+  "why": "frees the 128-pixel map strips far from the scroll column and queues %s_%02d.tm2 for the near ones (texture slots 2..)"
+ },
+ "00195b78": {
+  "name": "MnuMap::showHelp",
+  "tag": "ror-inferred",
+  "was": "FUN_00195b78",
+  "why": "shows / hides the six button sprites at y 0x198 and the help window with system text 0x18"
+ },
  "00195e90": {
   "name": "MnuMap::draw",
   "tag": "ror-inferred",
   "was": "FUN_00195e90",
   "why": "MnuMap : mnuBase (rtti) draw; MagLifeMenuMap's menu object"
+ },
+ "00196760": {
+  "name": "MnuMap::isCurrentFloor",
+  "tag": "ror-inferred",
+  "was": "FUN_00196760",
+  "why": "the viewed row is the PC's row (area and floor equal)"
+ },
+ "00196790": {
+  "name": "MnuMap::getScrollRate",
+  "tag": "ror-inferred",
+  "was": "FUN_00196790",
+  "why": "0..1 cosine ease of m_animTime / m_animLen, the scroll interpolation"
+ },
+ "00196804": {
+  "name": "MnuMap::getZoomRate",
+  "tag": "ror-inferred",
+  "was": "FUN_00196804",
+  "why": "the same ease as 0x196790, used by draw for the zoom"
+ },
+ "00196878": {
+  "name": "MnuMap::toMapPos",
+  "tag": "ror-inferred",
+  "was": "FUN_00196878",
+  "why": "a room position plus the WRD room offset to map pixels by the area row of 0x2f7dc0 (attic rooms 0x32/0x33/0x63..0x6a their own rows)"
  },
  "00196a9c": {
   "name": "MnuPBook::MnuPBook",

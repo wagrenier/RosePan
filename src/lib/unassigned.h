@@ -293,8 +293,8 @@ struct DogActor;
  * each MagLifeMenu* wrapper (mag/maglifemenu.h) holds one at its +0x40 and
  * forwards init / term / isInit / processPad / render to it. Class names
  * from the wrappers (ror-inferred) except mnuBase, MnuMap, MnuPBook and
- * MnuDiary (the ELF's vtables). Constructors not written (MnuMap's and
- * the plain objects'): the objects live in the global scene and start
+ * MnuDiary (the ELF's vtables). Constructors not written (the plain
+ * objects'): the objects live in the global scene and start
  * zeroed (a stub constructor would log before main). EE sizes from the scene's member spacing.
  * MnuSvld (mnu/mnusvld.h) and MnuSelectLanguage (mnu/mnuSelectLanguage.h)
  * have their files' headers. ---- */
@@ -306,18 +306,8 @@ struct I3dLayer;
 #include "mnu/mnubase.h"
 #include "mnu/mnupbook.h"
 
-/* The map menu (vtable 0x2e46a8). EE 0x8e0 (MagLifeMenuMap +0x40..+0x920).
- * layout: host -- polymorphic. */
-struct MnuMap : mnuBase
-{
-    void init(DogTexInfo *tex) override;                                 // ROR 0x00194908
-    void term() override;                                                // ROR 0x00194960
-    int  processPad(BedPad *pad) override;                               // ROR 0x00194fe4
-    void draw(I3dLayer *layer) override;                                 // ROR 0x00195e90
-
-    u_char    _110[0x8e0 - 0x110];
-};
-static_assert(sizeof(MnuMap) >= 0x8e0, "EE 0x8e0");
+/* The map menu MnuMap: mnu/mnumap.h. */
+#include "mnu/mnumap.h"
 
 /* The plain menu objects: the same five calls, not polymorphic. Each
  * keeps the wrapper's scene at the offset its init wrapper writes.

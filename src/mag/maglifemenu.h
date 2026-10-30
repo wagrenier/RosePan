@@ -127,7 +127,7 @@ struct MagLifeMenuItem : MagLifeMenuBase
 /* The map, 0x10001 (vtable 0x2e1a78). EE 0x920. */
 struct MagLifeMenuMap : MagLifeMenuBase
 {
-    // ROR 0x0028413c; callcheck: MnuMap::MnuMap (not written; the member starts zeroed but for its vptr)
+    // ROR 0x0028413c; callcheck: MnuMap::MnuMap (the member's)
     MagLifeMenuMap() {}
     // ROR 0x0028418c; callcheck: MnuMap::~MnuMap (the member's)
     ~MagLifeMenuMap() {}

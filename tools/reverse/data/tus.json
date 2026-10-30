@@ -1940,12 +1940,21 @@
    "why": "MnuItem ctor 0x1ae954 .. the item helpers 0x1bc790..0x1bdae4 (called by MnuItem's pad states); 0x1bdae4 is MnuSelectLanguage's constructor. File named after the class"
   },
   "mnu/mnumap.cpp": {
+   "notes": "Status verify: the code is complete but no smoke run reaches a room (the run ends on the picture book), and the map opens from the field (MagScene menu 0x10001, MagLifeMenuMap). The first run that opens it should compare the shot with the game's textures (python tm2png.py --scan on data/mnurpk/mnumap.rpk: map01_tcc, map_bg_tcc, the strips map_o1_01..) and mark this done. The view is 384 x 256 at (64, 112) inside the map_bg frame; the strips draw only once m_alpha > 0 (step 3). MnuMap now has a real constructor (runs before main inside the global scene, like MnuPBook). Doubts and PORT guards are in open-items.md Open questions (MnuMap). Next: the queue (tus.py next).",
    "ranges": [
     [
      "001947a4",
      "00196a9c"
     ]
    ],
+   "sessions": [
+    {
+     "date": "2026-10-29 22:18",
+     "status": "verify",
+     "summary": "MnuMap, the map screen, written whole (18 functions, 0x1947a4..0x196a9c): ctor / dtor, init / term / processPad (11 steps: fade, base textures, strips fade in, pad, floor change / centre, close) / draw (map strips, PC and Brown markers, frame, area and floor labels, frame lines), open (map table row by area and floor, markers, room-name or N O MAP window, files), updatePad (Circle / Select close, R1 / L1 floor, Square zoom, Triangle centre, stick / d-pad scroll), toMapPos with the attic rooms' scales, queueStrips, clampScroll, getViewSize, showHelp, the ease helpers. Map table 0x29bfb8 and scale table 0x2f7dc0 as host data; new header mnu/mnumap.h (MnuMap moved out of lib/unassigned.h, its four stubs removed); 12 names (ror-inferred)."
+    }
+   ],
+   "status": "verify",
    "why": "MnuMap ctor..draw and its helpers (map01_tcc, mnumap.rpk); ends at MnuPBook::MnuPBook"
   },
   "mnu/mnumcd.cpp": {

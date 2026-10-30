@@ -2401,6 +2401,24 @@ throughout (identifiers, env variables, files, shader macros):
   (marks free, no merge) / mnuMergeFree 0x1946e4 (setupWork); mnuTermPool 0x194548. MnuMap, MnuPBook, MnuDiary
   derive mnuBase (mnu/mnumap.cpp 0x1947a4.., mnu/mnupbook.cpp 0x196a9c..0x19a52c; MnuStock
   0x19a52c..0x1a066c is not a mnuBase).
+- **MnuMap** (mnu/mnumap.cpp 0x1947a4..0x196a9c, written 2026-10-29, verify): the map screen
+  (MagLifeMenuMap, menu 0x10001). Pack data/mnurpk/mnumap.rpk: map01_tcc.tm2 (texture slot 0:
+  markers, area labels in 40-pixel rows, floor labels in 20-pixel rows, frame lines), map_bg_tcc.tm2
+  (slot 1, the 513 x 449 frame), the floor map as 128 x 512 strips `<name>_NN.tm2` (NN from 01) in
+  slots 2.. (queueStrips 0x195a34 keeps strips col-2..col+7 of the scroll column loaded). Map table
+  data 0x29bfb8 (0x20 rows {area, floor, name[0x10], strips, floor label}, area -1 ends; mansion area
+  0 floors 1..3 "map_al/au/am" 24 strips, area 2 "map_gu/g1", area 1 "map_ou/o1/o2/or" 4 strips): the
+  row matching GamMan::getMapArea and gamGetMapFloor (0 when the room's WRD word 0x18 is 0); none ->
+  flag 0x1000000 and a centred "N O     M A P" window. R1 / L1 step to the next / previous row of the
+  same area. Positions: open 0x1949bc takes GamMan m_pcPos (+0x22020) / m_dogPos (+0x22040) for
+  marker kinds 1 / 2 (gamGetMapMarkers only says who is there) through toMapPos 0x196878: rodata
+  0x2f7dc0 13 rows {worldW, worldH, mapW, mapH, x, y}: rows 0..2 the areas (the same numbers as
+  gamstat's 0x2fc748), in the attic (area 0, floor 3) rooms 0x63..0x6a rows 3..10, 0x33 row 11, 0x32
+  row 12. The view is 384 x 256 screen pixels at (64, 112), scale 0.5 (768 x 512 map pixels) or
+  1 after Square (18-frame cosine zoom); Triangle recentres on the PC (its own floor only); the
+  left stick or d-pad scrolls 16 px a frame; Circle / Select close. Brown's marker shows with
+  sequence bit 0x22 (m_bits[1] & 4). Help line: GamMan mes sprites 7, 6, 0xc, 10, 9, 4 at y 0x198
+  and system text 0x18.
 - **MnuPBook** (mnu/mnupbook.cpp, written 2026-10-27): processPad 0x1976b8 polls updateLoad and
   updateSheets 0x197d28 every frame, then steps on m_step (m_10 = last step, draw runs for 2..4):
   0 waits the base files (ehonbg / ehontex01_tcc from mnupbook.rpk) and the fade, closes that pack,
