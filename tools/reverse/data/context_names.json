@@ -14867,6 +14867,12 @@
   "was": "FUN_001ad72c",
   "why": "the menu object at +0x40 of MagLifeMenuBoard2D: its wrapper's dtor calls it (class name from the wrapper, real one unknown)"
  },
+ "001ad7d4": {
+  "name": "mnuBoardGetTexName",
+  "tag": "ror-inferred",
+  "was": "FUN_001ad7d4",
+  "why": "walks the {key, name} table at 0x2abdb8 (k2_dummy ...) until key -1 and returns the name of the key; MnuItem::execPage6 passes item field 0x42 and appends .tm2 for data/mnurpk/mnuboard.rpk"
+ },
  "001ad824": {
   "name": "MnuBoard2D::init",
   "tag": "ror-inferred",

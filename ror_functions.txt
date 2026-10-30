@@ -3395,7 +3395,7 @@
 
 /* 001ad6b4 00000078 */ FUN_001ad6b4(){}
 /* 001ad72c 000000a8 */ MnuBoard2D::~MnuBoard2D(){}  // ror
-/* 001ad7d4 00000050 */ FUN_001ad7d4(){}
+/* 001ad7d4 00000050 */ mnuBoardGetTexName(){}  // ror
 /* 001ad824 0000004c */ MnuBoard2D::init(){}  // ror
 /* 001ad870 0000004c */ MnuBoard2D::term(){}  // ror
 /* 001ad8bc 0000000c */ MnuBoard2D::isInit(){}  // ror

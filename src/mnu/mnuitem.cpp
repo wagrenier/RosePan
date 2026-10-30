@@ -23,6 +23,7 @@
 #include "lib/unassigned.h"
 #include "mag/magscene.h"
 #include "mag/magsystem.h"
+#include "mnu/mnuboard2d.h"
 #include "msg/msgman.h"
 #include "sequence/sequence.h"
 #include "snd/sndman.h"
@@ -1524,6 +1525,54 @@ static SprDispDef mnuItemFindDisp[2] = {
     { -1, 0, 0, 0, 0, 1, 0, 1, 0, { 0, 0, 0 }, 0x00000000u }, // 0x002b8564
 };
 
+/* Page 6's board picture: one texture of data/mnurpk/mnuboard.rpk named
+ * by mnuBoardGetTexName (data 0x2b8598; its file name is the buffer
+ * 0x2b8878), drawn by m_spr3 over the EE image 0x2b85c8..0x2b8838 (anim
+ * tables, the display list 0x2b8740, the patterns 0x2b8810 m_pattern
+ * points at). */
+static char mnuItemBoardName[0x80];                                    /* data 0x2b8878 */
+static SprTexFile mnuItemBoardTexList[2] = {
+    { 0, mnuItemBoardName, "board1_tcc", 0x100040, 1, NULL },  // 0x002b8598
+    { -1, "", "", 0, 0, NULL },  // 0x002b85b0
+};
+
+static const char mnuItemBoardExt[] = ".tm2";                          /* rodata 0x2fb088 */
+static const char mnuItemBoardRpk[] = "data/mnurpk/mnuboard.rpk";      /* rodata 0x2fb090 */
+
+static u_int mnuItemBoardPattern[156] = {
+    0x00000005, 0xffffffff, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x01000000,  // 0x002b85c8
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000005, 0xffffffff,  // 0x002b85e8
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000005, 0xffffffff, 0x00000000,  // 0x002b8608
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000005, 0xffffffff, 0x00000000, 0x00000000,  // 0x002b8628
+    0x00000000, 0x00000000, 0x00000000, 0x00000005, 0xffffffff, 0x00000000, 0x00000000, 0x00000000,  // 0x002b8648
+    0x00000000, 0x00000000, 0x00000005, 0xffffffff, 0x00000000, 0x00000000, 0x00000000, 0x00000000,  // 0x002b8668
+    0x00000000, 0x00000005, 0xffffffff, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,  // 0x002b8688
+    0x03000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,  // 0x002b86a8
+    0x0000001e, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00002000, 0x00001c00, 0x03000000,  // 0x002b86c8
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xffffffff,  // 0x002b86e8
+    0x002b85c8, 0x00000000, 0xffffffff, 0x002b8600, 0xffffffff, 0xffffffff, 0x00000000, 0x00000000,  // 0x002b8708
+    0x00000000, 0xffffffff, 0x002b86c8, 0xffffffff, 0xffffffff, 0x00000000, 0x00000000, 0x00000000,  // 0x002b8728
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,  // 0x002b8748
+    0x00000000, 0x00000000, 0x002b8700, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000,  // 0x002b8768
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000010, 0x002b8700,  // 0x002b8788
+    0x00000002, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000001, 0x00000000, 0x00000001,  // 0x002b87a8
+    0x00000000, 0x00000000, 0x00000000, 0x000000a0, 0x002b8728, 0xffffffff, 0x00000000, 0x00000000,  // 0x002b87c8
+    0x00000000, 0x00000000, 0x00000001, 0x00000000, 0x00000001, 0x00000000, 0x00000000, 0x00000000,  // 0x002b87e8
+    0x00000000, 0x002b8700, 0xffffffff, 0x00000000, 0x00000000, 0x00000100, 0x00000100, 0x00000000,  // 0x002b8808
+    0x00000000, 0x00000000, 0x00002000, 0x00001c00,  // 0x002b8828
+};
+
+#define MNUITEMBOARDIMAGE_EE    0x002b85c8u
+#define MNUITEMBOARDPATTERN_EE  0x002b8810u
+
+/* m_spr3's display list (data 0x2b8740): the picture's three sprites. */
+static SprDispDef mnuItemBoardDisp[4] = {
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, { 0, 0, 0 }, 0x002b8700u },   // 0x002b8740
+    { 1, 0, 0, 0, 0, 0, 0, 0, 0, { 0, 0, 16 }, 0x002b8700u },  // 0x002b8774
+    { 2, 0, 0, 0, 0, 1, 0, 1, 0, { 0, 0, 160 }, 0x002b8728u }, // 0x002b87a8
+    { -1, 0, 0, 0, 0, 1, 0, 1, 0, { 0, 0, 0 }, 0x002b8700u },  // 0x002b87dc
+};
+
 /* The count texts' clear rect x, y, w, h (data 0x2b8838) and their
  * buffers, three bytes a slot (data 0x2b88f8). */
 static const int mnuItemTextRect[4] = { 0, 0, 0x14, 0x14 };
@@ -1551,6 +1600,7 @@ static char mnuItemNumText[MNUITEM_SLOT_MAX][3];
 #define MNUITEM_TRIG_START(pad)  (((pad)->m_trig >> 3) & 1)
 #define MNUITEM_TRIG_CIRCLE(pad) (((pad)->m_trig >> 13) & 1)   /* back */
 #define MNUITEM_TRIG_CROSS(pad)  (((pad)->m_trig >> 14) & 1)   /* confirm */
+#define MNUITEM_TRIG_TRIANGLE(pad) (((pad)->m_trig >> 12) & 1)
 
 /* The text rects (data 0x2b8850 / 0x2b8860): the name, the link texts. */
 static const int mnuItemNameRect[4] = { 0, 0, 0x100, 0x10 };
@@ -1560,6 +1610,11 @@ static const char mnuItemUnknown[] = "\x81H \x81H \x81H \x81H \x81H";  /* rodata
 
 /* Dim grey, alpha 0x28 (data 0x2999c0). */
 static const int mnuItemColorDim[4] = { 0x80, 0x80, 0x80, 0x28 };
+
+/* Page 10's black panel 0x73: alpha 0x28 (data 0x299950) to 0x70
+ * (0x299970). */
+static const int mnuItemPanelFrom[4] = { 0, 0, 0, 0x28 };
+static const int mnuItemPanelTo[4] = { 0, 0, 0, 0x70 };
 
 /* The item ids whose count shows although they do not stack. */
 #define MNUITEM_ID_COUNT_A  0xa3e
@@ -3337,6 +3392,335 @@ int MnuItem::execPage3(BedPad *pad)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// The actions on page 0's slot (m_work[1]): the list 0x13..0x1d with the
+// rows m_act_spr (find 0x21 / 0x24 targeted, use 0x1e, equip 0x22 / 0x23
+// equipped, examine 0x1f, put away 0x20), m_work[3] the row. A row fades
+// in opaque when it applies, dim when not (slot 12 dims all but find).
+// Cross: use opens page 5, examine page 6, put away page 7 (all returning
+// here); equip and find toggle in place, redrawing the equipped / target
+// sprites. Circle returns to the return page.
+// ROR 0x001b4488
+
+int MnuItem::execPage4(BedPad *pad)
+{
+    int &row = m_work[3];
+    int cur = m_work[1];
+    /* 1 the row lit, 0x10 equipped, 0x40 unequipped, 0x20 targeted, 0x80
+     * untargeted (bit 2, set with the page changes, is not read). */
+    u_int redraw = 0;
+    const int *color;      /* the ROM keeps it in a static (data 0x2999d0) */
+
+    switch (m_page_step) {
+    case 0:
+        row = 0;
+        /* fall through */
+    case 1:
+        m_page_step = 6;
+        if (getSlotItem(cur) == MNUITEM_ID_NONE) {
+            m_page_step = 0xc;
+            break;
+        }
+        m_act_spr[MNUITEM_ACT_FIND] = 0x21;
+        m_act_spr[MNUITEM_ACT_USE] = 0x1e;
+        m_act_spr[MNUITEM_ACT_PUT] = 0x20;
+        m_act_spr[MNUITEM_ACT_END] = -1;
+        m_act_spr[MNUITEM_ACT_EQUIP] = 0x22;
+        m_act_spr[MNUITEM_ACT_EXAMINE] = 0x1f;
+        for (int n = 0x13; n <= 0x1d; n++)
+            m_spr.showSprite(n, 1, -1);
+        if (m_work[0] == MNUITEM_AREA_SLOT12) {
+            m_spr.fadeInSprite(0x1e, 1, 10, 0, -1, g_sprColorClear, mnuItemColorDim);
+            m_spr.fadeInSprite(0x22, 1, 10, 0, -1, g_sprColorClear, mnuItemColorDim);
+            m_spr.fadeInSprite(0x21, 1, 10, 0, -1, g_sprColorClear,
+                               m_find_slot == cur ? mnuItemColorDim : g_sprColorOpaque);
+            m_spr.fadeInSprite(0x20, 1, 10, 0, -1, g_sprColorClear, mnuItemColorDim);
+            m_spr.fadeInSprite(0x1f, 1, 10, 0, -1, g_sprColorClear, mnuItemColorDim);
+            redraw = 1;
+            break;
+        }
+
+        color = mnuItemColorDim;
+        if (testSlotFlags(cur, 0x4000) == 1 && m_bit28 == 0) {
+            if (m_equip_slot != cur)
+                color = g_sprColorOpaque;
+            if (((const GamSysRec5 *)m_slot[cur]->m_rec)->m_b8 == 3 && g_gamMan.m_inuMode != 1)
+                color = mnuItemColorDim;
+        }
+        m_spr.fadeInSprite(0x1e, 1, 10, 0, -1, g_sprColorClear, color);
+
+        if (testSlotFlags(cur, 0x10000) == 1 && g_gamMan.m_chapter != 7) {
+            color = m_bit28 == 0 && m_flag_b == 1 ? g_sprColorOpaque : mnuItemColorDim;
+            if (m_equip_slot == cur)
+                m_act_spr[MNUITEM_ACT_EQUIP] = 0x23;
+            m_spr.fadeInSprite(m_act_spr[MNUITEM_ACT_EQUIP], 1, 10, 0, -1, g_sprColorClear, color);
+        } else {
+            m_spr.fadeInSprite(0x22, 1, 10, 0, -1, g_sprColorClear, mnuItemColorDim);
+        }
+
+        if (testSlotFlags(cur, 8) == 1) {
+            color = m_bit28 == 0 && m_flag_c == 1 ? g_sprColorOpaque : mnuItemColorDim;
+            if (m_find_slot == cur)
+                m_act_spr[MNUITEM_ACT_FIND] = 0x24;
+            m_spr.fadeInSprite(m_act_spr[MNUITEM_ACT_FIND], 1, 10, 0, -1, g_sprColorClear, color);
+        } else {
+            m_spr.fadeInSprite(0x21, 1, 10, 0, -1, g_sprColorClear, mnuItemColorDim);
+        }
+
+        if (testSlotFlags(cur, 0x3000000) == 1 || testSlotFlags(cur, 0x1000000) == 1
+            || m_equip_slot == cur || m_find_slot == cur)
+            color = mnuItemColorDim;
+        else
+            color = g_sprColorOpaque;
+        m_spr.fadeInSprite(0x20, 1, 10, 0, -1, g_sprColorClear, color);
+        m_spr.fadeInSprite(0x1f, 1, 10, 0, -1, g_sprColorClear, g_sprColorOpaque);
+        redraw = 1;
+        break;
+
+    case 6:
+        if ((pad->m_dir_repeat & MNUITEM_PAD_UP) && row > 0)
+            m_spr.setAnim(m_act_spr[row], 0);
+        if ((pad->m_dir_repeat & MNUITEM_PAD_DOWN) && m_act_spr[row + 1] != -1)
+            m_spr.setAnim(m_act_spr[row], 0);
+        if ((pad->m_dir_repeat & MNUITEM_PAD_UP) && row > 0) {
+            row--;
+            redraw = 1;
+            g_sndMan.playSe(1);
+        }
+        if ((pad->m_dir_repeat & MNUITEM_PAD_DOWN) && m_act_spr[row + 1] != -1) {
+            row++;
+            redraw = 1;
+            g_sndMan.playSe(1);
+        }
+        if (MNUITEM_TRIG_CROSS(pad)) {
+            switch (m_act_spr[row]) {
+            case 0x1e: {        /* use */
+                int ok = 0;
+                if (m_bit28 != 1 && m_work[0] != MNUITEM_AREA_SLOT12 && m_equip_slot != cur
+                    && testSlotFlags(cur, 0x4000) == 1
+                    && (((const GamSysRec5 *)m_slot[cur]->m_rec)->m_b8 != 3 || g_gamMan.m_inuMode == 1)) {
+                    if ((getSlotItem(cur) != 0xa3f && getSlotItem(cur) != 0xa42)
+                        || g_gamMan.findReloadSlot(NULL) != 0)
+                        ok = 1;
+                }
+                if (!ok) {
+                    g_sndMan.playSe(3);
+                    break;
+                }
+                m_page_step = 0xd;
+                redraw |= 2;
+                g_sndMan.playSe(4);
+                m_spr.fadeInSprite(0x1e, 1, 10, 3, -1, g_sprColorClear, mnuItemColorDim);
+                break;
+            }
+
+            case 0x1f:          /* examine */
+                if (m_work[0] == MNUITEM_AREA_SLOT12) {
+                    g_sndMan.playSe(3);
+                    break;
+                }
+                m_page_step = 0xf;
+                redraw |= 2;
+                g_sndMan.playSe(4);
+                break;
+
+            case 0x20:          /* put away */
+                if (m_work[0] == MNUITEM_AREA_SLOT12 || testSlotFlags(cur, 0x3000000) == 1
+                    || testSlotFlags(cur, 0x1000000) == 1) {
+                    g_sndMan.playSe(3);
+                    break;
+                }
+                if (m_equip_slot != cur && m_find_slot != cur) {
+                    m_page_step = 0x10;
+                    g_sndMan.playSe(4);
+                } else if (cur != -1) {
+                    g_sndMan.playSe(3);
+                }
+                break;
+
+            case 0x21:          /* find */
+            case 0x24:
+                if (m_bit28 == 1 || m_flag_c != 1) {
+                    g_sndMan.playSe(3);
+                    break;
+                }
+                if (m_work[0] != MNUITEM_AREA_SLOTS)
+                    break;
+                if (testSlotFlags(cur, 8) != 1) {
+                    g_sndMan.playSe(3);
+                    break;
+                }
+                m_spr.fadeOutDefault(m_act_spr[MNUITEM_ACT_FIND], 6);
+                if (m_find_slot == cur) {
+                    g_sndMan.playSe(0xf);
+                    g_gamMan.setFindTargetItem(MNUITEM_ID_NONE);
+                    m_find_slot = -1;
+                    m_act_spr[MNUITEM_ACT_FIND] = 0x21;
+                    m_find_item = MNUITEM_ID_NONE;
+                    redraw |= 0x80;
+                    color = g_sprColorOpaque;
+                } else {
+                    g_sndMan.playSe(4);
+                    m_find_slot = cur;
+                    redraw |= 0x20;
+                    m_find_item = getSlotItem(cur);
+                    g_gamMan.setFindTargetItem(getSlotItem(m_find_slot));
+                    m_act_spr[MNUITEM_ACT_FIND] = 0x24;
+                    color = mnuItemColorDim;
+                }
+                m_spr.fadeInSprite(m_act_spr[MNUITEM_ACT_FIND], 1, 10, 3, -1, g_sprColorClear,
+                                   g_sprColorOpaque);
+                /* Put away dims while the item is the target. */
+                if (testSlotFlags(cur, 0x3000000) != 1 && testSlotFlags(cur, 0x1000000) != 1
+                    && m_equip_slot != cur)
+                    m_spr.setFade(0x20, 4, 10, g_sprColorClear, color);
+                break;
+
+            case 0x22:          /* equip */
+            case 0x23:
+                if (m_bit28 == 1 || m_flag_b != 1 || m_work[0] == MNUITEM_AREA_SLOT12
+                    || testSlotFlags(cur, 0x10000) != 1 || g_gamMan.m_chapter == 7) {
+                    g_sndMan.playSe(3);
+                    break;
+                }
+                if (m_equip_slot == cur) {
+                    g_gamMan.equipItem(MNUITEM_ID_NONE);
+                    redraw |= 0x40;
+                    g_sndMan.playSe(0xf);
+                    m_spr.setAnim(MNUITEM_SPR_FIND_CURSOR, m_equip_slot == m_find_slot);
+                    sprite(MNUITEM_SPR_FIND_CURSOR).m_disp = 1;
+                    m_equip_slot = -1;
+                    m_spr.fadeOutDefault(m_act_spr[MNUITEM_ACT_EQUIP], 6);
+                    m_act_spr[MNUITEM_ACT_EQUIP] = 0x22;
+                    color = g_sprColorOpaque;
+                } else {
+                    m_equip_slot = cur;
+                    redraw |= 0x10;
+                    g_gamMan.equipItem(m_slot[cur]->m_id);
+                    g_sndMan.playSe(4);
+                    m_spr.fadeOutDefault(m_act_spr[MNUITEM_ACT_EQUIP], 6);
+                    m_act_spr[MNUITEM_ACT_EQUIP] = 0x23;
+                    color = mnuItemColorDim;
+                }
+                m_spr.fadeInSprite(m_act_spr[MNUITEM_ACT_EQUIP], 1, 10, 3, -1, g_sprColorClear,
+                                   g_sprColorOpaque);
+                /* Put away and use dim while the item is equipped. */
+                if (testSlotFlags(cur, 0x3000000) != 1 && testSlotFlags(cur, 0x1000000) != 1
+                    && m_find_slot != cur)
+                    m_spr.setFade(0x20, 4, 10, g_sprColorClear, color);
+                if (testSlotFlags(cur, 0x4000) == 1 && m_bit28 == 0)
+                    m_spr.setFade(0x1e, 4, 10, g_sprColorClear, color);
+                break;
+
+            default:
+                break;
+            }
+        }
+        if (MNUITEM_TRIG_CIRCLE(pad)) {
+            m_page_step = 0xc;
+            redraw |= 2;
+            g_sndMan.playSe(2);
+        }
+        break;
+
+    case 0xc:
+    case 0xd:
+        for (int n = 0x13; n <= 0x1d; n++)
+            m_spr.fadeOutDefault(n, 6);
+        for (int k = 0; k < MNUITEM_ACT_END; k++)
+            m_spr.fadeOutDefault(m_act_spr[k], 6);
+        if (m_page_step == 0xc) {
+            m_page_step = 1;
+            m_page = m_page_ret[m_page];
+            break;
+        }
+        m_page_step = 0xe;
+        /* fall through */
+    case 0xe:
+        m_page_ret[5] = 4;
+        m_page = 5;
+        m_page_step = 0;
+        break;
+
+    case 0xf:
+    case 0x10:
+        for (int k = 0; k < MNUITEM_ACT_END; k++)
+            sprite(m_act_spr[k]).m_disp = 0;
+        m_page = m_page_step == 0xf ? 6 : 7;
+        m_page_ret[m_page] = 4;
+        m_page_step = 0;
+        break;
+    }
+
+    if (redraw & 1) {
+        m_spr.setAnim(m_act_spr[row], 3);
+        sprite(m_act_spr[row]).m_disp = 1;
+    }
+    if (redraw & 0x10) {
+        int id = mnuItemSlotId(this, m_equip_slot);
+        SprSprite &equip = sprite(MNUITEM_SPR_EQUIP);
+        m_spr.setAnimTable(MNUITEM_SPR_EQUIP, (SprAnim *)m_spr.eePtr(getAnimTable(id)));
+        equip.m_pat_base = getPatBase(id);
+        equip.m_disp = 1;
+        equip.m_state = 1;
+        m_spr.fadeInSprite(MNUITEM_SPR_EQUIP, 1, 6, 0, -1, g_sprColorClear, g_sprColorOpaque);
+        m_spr.setAnim(MNUITEM_SPR_FIND_CURSOR, m_equip_slot == m_find_slot);
+        sprite(MNUITEM_SPR_FIND_CURSOR).m_disp = 1;
+        SprSprite &cursor = sprite(MNUITEM_SPR_EQUIP_CURSOR);
+        cursor.m_parent = 2;
+        cursor.m_state = 1;
+        m_spr.setAnim(MNUITEM_SPR_EQUIP_CURSOR, 1);
+        cursor.m_disp = 1;
+        cursor.m_off[0] = mnuItemPos[2 + cur][0];
+        cursor.m_off[1] = mnuItemPos[2 + cur][1];
+        cursor.m_off[2] = mnuItemPos[2 + cur][2];
+        mnuItemSetColor(cursor, 0x80);
+    }
+    if (redraw & 0x40) {
+        m_spr.setAnim(10, 0);
+        sprite(10).m_disp = 1;
+        m_spr.fadeOutDefault(MNUITEM_SPR_EQUIP, 6);
+        SprSprite &cursor = sprite(MNUITEM_SPR_EQUIP_CURSOR);
+        cursor.m_parent = 2;
+        cursor.m_state = 0;
+        m_spr.setAnim(MNUITEM_SPR_EQUIP_CURSOR, 1);
+        cursor.m_disp = 1;
+        cursor.m_off[0] = mnuItemPos[2 + cur][0];
+        cursor.m_off[1] = mnuItemPos[2 + cur][1];
+        cursor.m_off[2] = mnuItemPos[2 + cur][2];
+    }
+    if (redraw & 0x20) {
+        SprSprite &find = sprite(MNUITEM_SPR_FIND);
+        m_spr.setAnimTable(MNUITEM_SPR_FIND,
+                           (SprAnim *)m_spr.eePtr(getAnimTable(getSlotItem(m_find_slot))));
+        find.m_pat_base = getPatBase(getSlotItem(m_find_slot));
+        find.m_disp = 1;
+        find.m_state = 1;
+        m_spr.fadeInSprite(MNUITEM_SPR_FIND, 1, 6, 0, -1, g_sprColorClear, g_sprColorOpaque);
+        SprSprite &cursor = sprite(MNUITEM_SPR_FIND_CURSOR);
+        m_spr.setAnim(MNUITEM_SPR_FIND_CURSOR, m_equip_slot == m_find_slot ? 3 : 2);
+        cursor.m_disp = 1;
+        cursor.m_parent = 2;
+        cursor.m_state = 1;
+        cursor.m_off[0] = mnuItemPos[2 + cur][0];
+        cursor.m_off[1] = mnuItemPos[2 + cur][1];
+        cursor.m_off[2] = mnuItemPos[2 + cur][2];
+        mnuItemSetColor(cursor, 0x80);
+    }
+    if (redraw & 0x80) {
+        m_spr.setAnim(11, 0);
+        sprite(11).m_disp = 1;
+        m_spr.fadeOutDefault(MNUITEM_SPR_FIND, 6);
+        SprSprite &cursor = sprite(MNUITEM_SPR_FIND_CURSOR);
+        cursor.m_parent = 2;
+        cursor.m_state = 0;
+        cursor.m_off[0] = mnuItemPos[2 + cur][0];
+        cursor.m_off[1] = mnuItemPos[2 + cur][1];
+        cursor.m_off[2] = mnuItemPos[2 + cur][2];
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Use: page 0's slot (m_work[1]). Ammo (0xa3f / 0xa42) moves into the
 // equipped gun one round every 3 frames while GamMan::findReloadSlot has
 // a slot, the two counts redrawn; a record of kind 1 (field 0x24) heals
@@ -3469,8 +3853,8 @@ int MnuItem::execPage5(BedPad *pad)
         cursor.m_off[2] = mnuItemPos[2 + cur][2];
         g_gamMan.setFindTargetItem(MNUITEM_ID_NONE);
         m_find_slot = -1;
-        m_spr.fadeOutDefault(m_find_spr, 6);
-        m_find_spr = 0x21;
+        m_spr.fadeOutDefault(m_act_spr[MNUITEM_ACT_FIND], 6);
+        m_act_spr[MNUITEM_ACT_FIND] = 0x21;
         m_spr.fadeInSprite(0x21, 1, 10, 3, -1, g_sprColorClear, g_sprColorOpaque);
         m_find_item = MNUITEM_ID_NONE;
         if (testSlotFlags(cur, 0x3000000) != 1 && testSlotFlags(cur, 0x1000000) != 1
@@ -3599,6 +3983,250 @@ int MnuItem::execPage7(BedPad *pad)
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Examine: the board picture of page 0's slot (m_work[1]) -- the item's
+// field 0x42 (0x40000 when 0) names a texture of mnuboard.rpk that m_spr3
+// loads (the scene fades out, the menu's window and message sprites with
+// it), then shows with the item's text (field 0x25) in the message window
+// (message sprite 2 at 0x100, 0x180). Cross or circle fades it out; ten
+// frames on the menu comes back and the page returns (to step 1).
+// ROR 0x001ba3a0
+
+int MnuItem::execPage6(BedPad *pad)
+{
+    /* The message window's words, set every frame (stack 0x60 in the ROM). */
+    const int msg_param[8] = { 0x20, 0x140, 0x8001, 0x1c0, 0x50, 0, 0, 0 };
+    MagScene &scene = g_magSystem.m_scene;
+    int key = 0;
+
+    g_gamMan.setMsgParam(msg_param);
+    switch (m_page_step) {
+    case 0: {
+        loadTex();
+        m_spr3.init(3);
+        m_spr3.m_tex.m_tex_info = m_tex;
+        sprite(0x6f).m_state = 4;
+        sprite(0x70).m_state = 4;
+        sprite(0x71).m_state = 4;
+        g_gamMan.m_sysData.getField(getSlotItem(m_work[1]) & 0xffff, 0x42, &key);
+        if (key == 0)
+            key = 0x40000;
+        /* PORT: the ROM copies the name unchecked (NULL for a key the table
+         * lacks). */
+        const char *name = mnuBoardGetTexName(key);
+        strcpy(mnuItemBoardName, name ? name : "");
+        strcpy(mnuItemBoardName + strlen(mnuItemBoardName), mnuItemBoardExt);
+        m_spr3.m_tex.setListMode(mnuItemBoardTexList, mnuItemBoardRpk, 1);
+        m_page_step = 1;
+        g_gamMan.killMsgTask();
+        scene.fadeOut(10, 7, 0);
+        scene.fadeOutWindow(m_win, 10, 0, 0x80);
+        g_gamMan.fadeOutMesSprite(8, 10);
+        g_gamMan.fadeOutMesSprite(4, 10);
+        break;
+    }
+
+    case 1:
+        if (m_spr3.m_tex.update() != 0) {
+            scene.fadeIn(10, 7, 0);
+            g_gamMan.showMesSprite(2, 1, 3);
+            g_gamMan.setMesSpritePos(2, 0x100, 0x180);
+            g_gamMan.fadeInMesSprite(2, 10);
+            m_page_step = 2;
+            m_spr3.m_pattern = &mnuItemBoardPattern[(MNUITEMBOARDPATTERN_EE - MNUITEMBOARDIMAGE_EE) / 4];
+            m_spr3.m_pattern_ee = MNUITEMBOARDPATTERN_EE;   // PC
+            m_spr3.setDispList(mnuItemBoardDisp);
+            m_spr3.m_active = 1;
+            m_spr3.m_sprite[0].m_state = 2;
+        }
+        break;
+
+    case 2: {
+        const char *text = NULL;
+        int id;
+
+        m_page_step = 3;
+        m_system->m_scene.fadeIn(g_sequence.m_global[0x59], 7, 0);
+        id = getSlotItem(m_work[1]) & 0xffff;
+        g_gamMan.m_sysData.getField(id, 0x42, &key);
+        g_gamMan.m_sysData.getField(id, 0x25, &text);
+        g_gamMan.openMsg(text, 0, 0xb4);
+        break;
+    }
+
+    case 3:
+        if (MNUITEM_TRIG_CIRCLE(pad) || MNUITEM_TRIG_CROSS(pad)) {
+            m_page_step = 0xc;
+            m_spr3.m_sprite[0].m_state = 4;
+            scene.fadeOut(10, 7, 0);
+            g_gamMan.fadeOutMesSprite(2, 10);
+            g_gamMan.killMsgTask();
+            m_board_wait = 10;
+        }
+        m_spr3.update();
+        break;
+
+    case 0xc:
+        if (m_board_wait-- >= 1) {
+            m_spr3.update();
+            break;
+        }
+        g_gamMan.showMesSprite(2, 0, 0);
+        scene.fadeIn(10, 7, 0);
+        scene.fadeInWindow(m_win, 10, 0, 0x80);
+        if ((g_sequence.m_bits[1] & 0x10000000) == 0 || m_246c == 1) {
+            g_gamMan.showMesSprite(8, 1, 0);
+            g_gamMan.showMesSprite(4, 1, 0);
+        }
+        g_gamMan.fadeInMesSprite(8, 10);
+        g_gamMan.fadeInMesSprite(4, 10);
+        m_spr3.release();
+        sprite(0x6f).m_state = 1;
+        sprite(0x70).m_state = 1;
+        sprite(0x71).m_state = 1;
+        m_page_step = 1;
+        m_page = m_page_ret[m_page];
+        break;
+    }
+    return 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The offering grid (sequence bit 0x10000000, m_bit28): the cursor 0x51
+// over the 4 x 3 slots (m_work[1], wrapping at the edges, m_work[0] the
+// slot area); cross on a slot with an item opens page 4 for it (returning
+// here), triangle unequips the equipped item. Circle or start close the
+// menu (1) once page 7 has put an item away (m_248c), else sound 3.
+// ROR 0x001ba8e4
+
+int MnuItem::execPage9(BedPad *pad)
+{
+    int &cur = m_work[1];
+    u_int redraw = 0;      /* 1 the slot's name and sprites, 2 the cursor */
+    int ret = 0;
+
+    switch (m_page_step) {
+    case 0:
+        m_work[0] = MNUITEM_AREA_SLOTS;
+        sprite(3).m_parent = 2;
+        for (int n = 3; n <= 9; n++)
+            m_spr.setAnim(n, 1);
+        m_page_step = 1;
+        /* fall through */
+    case 1:
+        m_spr.setAnim(10, 0);
+        sprite(10).m_disp = 1;
+        m_spr.setAnim(11, 0);
+        sprite(11).m_disp = 1;
+        sprite(0x51).m_parent = 2;
+        if (m_equip_slot < 0)
+            sprite(MNUITEM_SPR_EQUIP).m_state = 0;
+        if (m_find_slot < 0)
+            sprite(MNUITEM_SPR_FIND).m_state = 0;
+        redraw = 1;
+        m_spr.setAnim(0x51, 0);
+        sprite(0x51).m_disp = 1;
+        sprite(0x51).m_off[0] = mnuItemPos[2 + cur][0];
+        sprite(0x51).m_off[1] = mnuItemPos[2 + cur][1];
+        sprite(0x51).m_off[2] = mnuItemPos[2 + cur][2];
+        m_spr.setFade(0x51, 0x100, 10, mnuItemColorDim, g_sprColorOpaque);
+        m_page_step = 6;
+        break;
+    }
+
+    if (pad->m_dir_repeat & (MNUITEM_PAD_UP | MNUITEM_PAD_DOWN | MNUITEM_PAD_LEFT | MNUITEM_PAD_RIGHT)) {
+        g_sndMan.playSe(1);
+        if (m_work[0] == MNUITEM_AREA_SLOTS) {
+            m_spr.setAnim(MNUITEM_SPR_ICON + cur, 0);
+            sprite(MNUITEM_SPR_ICON + cur).m_disp = 1;
+        }
+    }
+    if (MNUITEM_TRIG_TRIANGLE(pad)) {
+        if (m_equip_slot < 0) {
+            if (getSlotItem(cur) != MNUITEM_ID_NONE)
+                g_sndMan.playSe(3);
+        } else {
+            g_gamMan.equipItem(MNUITEM_ID_NONE);
+            g_sndMan.playSe(4);
+            if (m_find_slot != -1 && m_equip_slot == m_find_slot) {
+                m_spr.setAnim(MNUITEM_SPR_FIND_CURSOR, 0);
+                sprite(MNUITEM_SPR_FIND_CURSOR).m_disp = 1;
+            }
+            m_spr.setAnim(10, 0);
+            sprite(10).m_disp = 1;
+            m_spr.fadeOutDefault(MNUITEM_SPR_EQUIP, 6);
+            SprSprite &cursor = sprite(MNUITEM_SPR_EQUIP_CURSOR);
+            cursor.m_parent = 2;
+            cursor.m_state = 0;
+            m_spr.setAnim(MNUITEM_SPR_EQUIP_CURSOR, 1);
+            cursor.m_disp = 1;
+            cursor.m_off[0] = mnuItemPos[2 + m_equip_slot][0];
+            cursor.m_off[1] = mnuItemPos[2 + m_equip_slot][1];
+            cursor.m_off[2] = mnuItemPos[2 + m_equip_slot][2];
+            m_equip_slot = -1;
+        }
+    }
+    if (pad->m_dir_repeat & MNUITEM_PAD_UP) {
+        redraw = 3;
+        cur = cur < 4 ? cur + 8 : cur - 4;
+    }
+    if (pad->m_dir_repeat & MNUITEM_PAD_DOWN) {
+        redraw = 3;
+        cur = cur < 8 ? cur + 4 : cur - 8;
+    }
+    if (pad->m_dir_repeat & MNUITEM_PAD_LEFT) {
+        redraw = 3;
+        cur = (cur & 3) == 0 ? cur + 3 : cur - 1;
+    }
+    if (pad->m_dir_repeat & MNUITEM_PAD_RIGHT) {
+        redraw = 3;
+        cur = cur % 4 == 3 ? cur - 3 : cur + 1;
+    }
+    if (MNUITEM_TRIG_CROSS(pad) && getSlotItem(cur) != MNUITEM_ID_NONE) {
+        m_spr.setAnim(MNUITEM_SPR_ICON + cur, 0);
+        sprite(MNUITEM_SPR_ICON + cur).m_disp = 1;
+        m_page_ret[4] = 9;
+        m_page = 4;
+        m_page_step = 0;
+        g_sndMan.playSe(4);
+        m_spr.setFade(0x51, 3, 10, mnuItemColorDim, g_sprColorOpaque);
+    }
+    if (MNUITEM_TRIG_CIRCLE(pad) || MNUITEM_TRIG_START(pad)) {
+        if (m_248c == 1) {
+            g_sndMan.playSe(4);
+            ret = 1;
+        } else {
+            g_sndMan.playSe(3);
+        }
+    }
+
+    if (redraw & 1) {
+        m_spr.setAnim(10, 0);
+        sprite(10).m_disp = 1;
+        m_spr.setAnim(11, 0);
+        sprite(11).m_disp = 1;
+        setLinkTexts(cur, 0);
+        showLinkPanel(cur);
+        setNameText(cur);
+        m_spr.setAnim(MNUITEM_SPR_EQUIP, 0);
+        sprite(MNUITEM_SPR_EQUIP).m_disp = 1;
+        m_spr.setAnim(MNUITEM_SPR_FIND, 0);
+        sprite(MNUITEM_SPR_FIND).m_disp = 1;
+        m_spr.setAnim(MNUITEM_SPR_ICON + cur, 1);
+        sprite(MNUITEM_SPR_ICON + cur).m_disp = 1;
+    }
+    if (redraw & 2) {
+        const int *pos = mnuItemPos[m_work[0] + cur];
+        sprite(0x51).m_parent = 2;
+        m_spr.setAnim(0x51, 1);
+        sprite(0x51).m_disp = 1;
+        sprite(0x51).m_off[0] = pos[0];
+        sprite(0x51).m_off[1] = pos[1];
+        sprite(0x51).m_off[2] = pos[2];
+    }
+    return ret;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // The rows of flag table 99 (GamMan::lookupFlagTable key column 0) whose
 // sequence bit (column 3) is set, row 0 always: their system texts
 // (column 5) joined into m_flag_text, their numbers into m_flag_rows.
@@ -3617,12 +4245,93 @@ void MnuItem::buildFlagList()
         if (row != 0 && (g_sequence.m_bits[(u_int)bit >> 5] & (1u << (bit & 0x1f))) == 0)
             continue;
         if (k + 1 >= 0x10)
-            break;      /* PORT: the ROM runs on into m_find_spr */
+            break;      /* PORT: the ROM runs on into m_act_spr */
         m_flag_rows[k++] = row;
         m_flag_rows[k] = -1;
         const char *text = msgGetSysText(g_gamMan.lookupFlagTable(99, row, 5));
         strcpy(m_flag_text + strlen(m_flag_text), text);
     }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The flag list: buildFlagList's texts in m_list (at 0x82, 100, depth
+// 0x7ff8, circle cancels) over the panel 0x73..0x77, the gauge sprites
+// 0xf / 0x10 and 0x52 frozen meanwhile. A chosen row (m_work[7]) puts
+// column 2 of its flag-table row in sequence global 0x11 (0x15 = 3, 0x16
+// = 1) and closes the menu (1); a cancel returns to the return page.
+// ROR 0x001bb12c
+
+int MnuItem::execPage10(BedPad *pad)
+{
+    int &sel = m_work[7];
+    int ret = 0;
+    int disp;
+
+    switch (m_page_step) {
+    case 0: {
+        u_int mask = 0;
+
+        m_page_step = 1;
+        sel = MNU_TEXT_LIST_NONE;
+        m_list.open();
+        buildFlagList();
+        for (int k = 0; m_flag_rows[k] != -1; k++)
+            mask |= 1u << k;
+        m_list.m_y = 100;
+        m_list.m_x = 0x82;
+        m_list.m_z = 0x7ff8;
+        m_list.setItems(m_flag_text, mask | MNU_TEXT_LIST_CANCEL);
+        memset(sprite(0x73).m_color, 0, sizeof(sprite(0x73).m_color));
+        m_spr.fadeInSprite(0x73, 1, 10, 0, -1, mnuItemPanelFrom,
+                           mnuItemPanelTo);
+        for (int n = 0x74; n <= 0x77; n++)
+            m_spr.fadeInSprite(n, 1, 10, n - 0x74, -1, mnuItemColor(MNUITEM_COLOR_CLEAR),
+                               mnuItemColor(MNUITEM_COLOR_OPAQUE));
+        disp = 2;
+        break;
+    }
+
+    case 1:
+        m_page_step = 6;
+        return 0;
+
+    case 6:
+        m_list.processPad(pad);
+        sel = m_list.getSelect();
+        if (sel < 0 && sel != MNU_TEXT_LIST_CANCELLED)
+            return 0;
+        g_sndMan.playSe(sel < 0 ? 2 : 4);
+        m_page_step = 0xc;
+        return 0;
+
+    case 0xc:
+        if (sel < 0) {
+            m_page_step = 1;
+            m_page = m_page_ret[m_page];
+        } else {
+            g_sequence.m_global[0x11] = g_gamMan.lookupFlagTable(99, m_flag_rows[sel], 2);
+            g_sequence.m_global[0x15] = 3;
+            g_sequence.m_global[0x16] = 1;
+        }
+        ret = sel >= 0;
+        m_list.endSelect();
+        m_list.processPad(pad);
+        m_list.close();
+        m_spr.fadeOutColor(0x73, 6, mnuItemPanelFrom,
+                           mnuItemPanelTo);
+        for (int n = 0x74; n <= 0x77; n++)
+            m_spr.fadeOutDefault(n, 6);
+        disp = 1;
+        break;
+
+    default:
+        return 0;
+    }
+
+    sprite(0x10).m_disp = disp;
+    sprite(0xf).m_disp = disp;
+    sprite(0x52).m_disp = disp;
+    return ret;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -3769,13 +4478,6 @@ void MnuItem::showLinkPanel(int no)
 
 // ---- stubs (tools/reverse/stubgen.py) ----
 
-// stub of ROR 0x001bb12c
-int MnuItem::execPage10(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuItem::execPage10", 0x001bb12c);
-    return {};
-}
-
 // stub of ROR 0x001bb4f0
 int MnuItem::execPage11(BedPad *pad)
 {
@@ -3796,25 +4498,3 @@ int MnuItem::execPage13(BedPad *pad)
     ROSEPAN_STUB("MnuItem::execPage13", 0x001bc370);
     return {};
 }
-
-// stub of ROR 0x001b4488
-int MnuItem::execPage4(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuItem::execPage4", 0x001b4488);
-    return {};
-}
-
-// stub of ROR 0x001ba3a0
-int MnuItem::execPage6(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuItem::execPage6", 0x001ba3a0);
-    return {};
-}
-
-// stub of ROR 0x001ba8e4
-int MnuItem::execPage9(BedPad *pad)
-{
-    ROSEPAN_STUB("MnuItem::execPage9", 0x001ba8e4);
-    return {};
-}
-

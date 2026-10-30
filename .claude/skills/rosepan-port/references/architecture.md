@@ -1614,6 +1614,20 @@ getKnownName 0x1bcb84 (field 0xc if flag 4, else SJIS question marks), setLinkTe
 showLinkPanel 0x1bd028 (system data fields 0x10..0x12 are linked item ids; panel sprites
 0x6a..0x71, texts 0x6f..0x71 squeezed past 120 px; +0x2420 = panel in). Fades save m_color into
 SprSprite +0x48 (m_fade_save) and fade from / back to it.
+Session 4: **page 4** 0x1b4488 is the action list for m_work[1] (rows +0x26e4[6] m_act_spr: find
+0x21 / 0x24 targeted, use 0x1e, equip 0x22 / 0x23 equipped, examine 0x1f, put away 0x20, -1;
+m_work[3] the row; frame 0x13..0x1d). Use needs record flag 0x4000, not equipped, and for kind 3 (dog
+heal) GamMan::m_inuMode == 1; equip needs flag 0x10000, m_flag_b and chapter != 7; find flag 8 and
+m_flag_c; put away no flag 0x3000000 / 0x1000000 and neither equipped nor targeted. Use -> page 5,
+examine -> 6, put away -> 7 (their m_page_ret = 4); equip / find toggle in place (se 0xf off, 4 on).
+**Page 6** 0x1ba3a0 examine: field 0x42 (0x40000 when 0) keys the {key, name} table 0x2abdb8 read
+by mnuBoardGetTexName 0x1ad7d4 (mnu/mnuboard2d.cpp); name + ".tm2" from data/mnurpk/mnuboard.rpk as
+board1_tcc into m_spr3 (+0x1270, 3 sprites, display list 0x2b8740, patterns 0x2b8810), field 0x25
+the text (GamMan::openMsg, message sprite 2), the scene faded out meanwhile. **Page 9** 0x1ba8e4 is
+the grid while sequence bit 0x10000000 (offering): wrapping cursor, cross -> page 4, triangle
+unequips, circle / start close once page 7 put an item away (+0x248c). **Page 10** 0x1bb12c lists
+buildFlagList's rows in MnuTextList at (0x82, 100); a choice puts column 2 in global 0x11 (0x15 = 3,
+0x16 = 1) and closes the menu.
 
 ## Modules (RoR's own source files)
 

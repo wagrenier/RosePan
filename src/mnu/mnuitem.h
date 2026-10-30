@@ -46,6 +46,14 @@ struct MagSystem;
 #define MNUITEM_ID_EMPTY    0xb3b   /* drawn as an empty slot */
 #define MNUITEM_SLOT_MAX    12      /* GamMan's item-have slots */
 
+/* Page 4's action rows (m_act_spr, m_work[3] the row). */
+#define MNUITEM_ACT_FIND    0
+#define MNUITEM_ACT_USE     1
+#define MNUITEM_ACT_EQUIP   2
+#define MNUITEM_ACT_EXAMINE 3
+#define MNUITEM_ACT_PUT     4
+#define MNUITEM_ACT_END     5       /* always -1 */
+
 /* Page 0's cursor areas (m_work[0]). */
 #define MNUITEM_AREA_EQUIP  0       /* the equipped item */
 #define MNUITEM_AREA_FIND   1       /* the find target */
@@ -139,7 +147,8 @@ struct MnuItem
      * [0] 2, [3] 0 at open. Page 0: [0] the cursor's area (MNUITEM_AREA_*),
      * [1] its slot (0..11 in a 4 x 3 grid, 12 the slot-12 item; page 7
      * puts that slot's item away). [2] page 1's slot, [5] page 2's, [4]
-     * page 7's choice (0 yes, 1 no). */
+     * page 7's choice (0 yes, 1 no), [3] page 4's action row, [7] page
+     * 10's chosen row. */
     int           m_work[10];       // ROR 0x0004
     int           m_2c;             // ROR 0x002c: initWork 4; unverified
     int           m_30;             // ROR 0x0030: initWork 2; unverified
@@ -197,15 +206,17 @@ struct MnuItem
     /* buildFlagList: the system texts (column 5) of flag table 99's rows
      * whose sequence bit (column 3) is set, row 0 always; their row
      * numbers in m_flag_rows, -1 after the last (the ROM does not bound
-     * it; 0x26e4 follows). */
+     * it; m_act_spr follows). */
     char          m_flag_text[0x200]; // ROR 0x24a4
     int           _26a0;
     int           m_flag_rows[0x10]; // ROR 0x26a4
-    int           m_find_spr;       // ROR 0x26e4: the find-target frame sprite shown (page 5 sets 0x21)
-    int           _26e8[5];
+    /* Page 4's action rows, MNUITEM_ACT_* (the sprite shown for each: find
+     * 0x21 / 0x24 targeted, use 0x1e, equip 0x22 / 0x23 equipped, examine
+     * 0x1f, put away 0x20), -1 after the last. */
+    int           m_act_spr[6];     // ROR 0x26e4
     int           m_win2;           // ROR 0x26fc: a second window, closed at the end when >= 0
     int           m_win;            // ROR 0x2700: the scene window
-    int           _2704;
+    int           m_board_wait;     // ROR 0x2704: page 6: frames before the menu comes back (10)
     int           m_gun_idx;        // ROR 0x2708: page 5: GamMan::getEquipSlot (scePrintf "m_gun_idx")
     int           m_gun_num;        // ROR 0x270c: page 5: GamMan::getSelItemNum, the gun's rounds
 };
@@ -227,7 +238,7 @@ static_assert(offsetof(MnuItem, m_init) >= 0x2480, "m_init");
 static_assert(offsetof(MnuItem, m_frame_mode) >= 0x24a0, "m_frame_mode");
 static_assert(offsetof(MnuItem, m_flag_text) >= 0x24a4, "m_flag_text");
 static_assert(offsetof(MnuItem, m_flag_rows) >= 0x26a4, "m_flag_rows");
-static_assert(offsetof(MnuItem, m_find_spr) >= 0x26e4, "m_find_spr");
+static_assert(offsetof(MnuItem, m_act_spr) >= 0x26e4, "m_act_spr");
 static_assert(offsetof(MnuItem, m_gun_idx) >= 0x2708, "m_gun_idx");
 static_assert(offsetof(MnuItem, m_win) >= 0x2700, "m_win");
 static_assert(sizeof(MnuItem) >= 0x2710, "EE 0x2710");
