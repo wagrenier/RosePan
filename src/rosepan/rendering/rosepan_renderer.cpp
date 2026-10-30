@@ -13020,7 +13020,52 @@ bool IsFullFrameQuad(const float *xy)
            std::fabs(max_y - (float)kLogicalHeight) < epsilon;
 }
 
-void RosePan_RendererDrawSolidQuad(const float *xy, const unsigned char *rgba)
+/*
+ * Under a picture band, a fill across the frame's whole width that reaches its
+ * top or bottom edge is a letterbox bar (S2dCineSco's): it carries on past
+ * that edge to the window's.  A window taller than the frame would otherwise
+ * show there the world the 3D projection extends into, and the PS2 has
+ * nothing past its bars.  Grown in place, in its own colour and opacity, so a
+ * fade or anything else drawn over the bars still covers it.  False when the
+ * quad is not such a bar.
+ */
+bool ExtendLetterboxBar(float *xy)
+{
+    if (g_picture_band_top <= 0.0f && g_picture_band_bottom >= (float)kLogicalHeight)
+    {
+        return false;
+    }
+
+    const float epsilon = 1.0f;     /* IsFullFrameQuad's pixel-centre allowance */
+    float min_x = xy[0], max_x = xy[0], min_y = xy[1], max_y = xy[1];
+    for (int i = 1; i < 4; i++)
+    {
+        min_x = std::min(min_x, xy[i * 2 + 0]);
+        max_x = std::max(max_x, xy[i * 2 + 0]);
+        min_y = std::min(min_y, xy[i * 2 + 1]);
+        max_y = std::max(max_y, xy[i * 2 + 1]);
+    }
+    const bool top = min_y < epsilon;
+    const bool bottom = max_y > (float)kLogicalHeight - epsilon;
+    if (min_x > epsilon || max_x < (float)kLogicalWidth - epsilon || (!top && !bottom))
+    {
+        return false;
+    }
+
+    const float x0 = std::min(min_x, ExtendFrameX(0.0f));
+    const float x1 = std::max(max_x, ExtendFrameX((float)kLogicalWidth));
+    const float y0 = top ? std::min(min_y, ExtendFrameY(0.0f)) : min_y;
+    const float y1 = bottom ? std::max(max_y, ExtendFrameY((float)kLogicalHeight)) : max_y;
+    const float mid_x = (min_x + max_x) * 0.5f, mid_y = (min_y + max_y) * 0.5f;
+    for (int i = 0; i < 4; i++)
+    {
+        xy[i * 2 + 0] = xy[i * 2 + 0] < mid_x ? x0 : x1;
+        xy[i * 2 + 1] = xy[i * 2 + 1] < mid_y ? y0 : y1;
+    }
+    return true;
+}
+
+void RosePan_RendererDrawSolidQuad(const float *frame_xy, const unsigned char *rgba)
 {
     SpriteVertex vertices[4];
     bool full_frame;
@@ -13029,12 +13074,18 @@ void RosePan_RendererDrawSolidQuad(const float *xy, const unsigned char *rgba)
      * it survives them. */
     const Gs2dDepth depth = ConsumeGs2dDepth();
 
-    if (xy == nullptr || rgba == nullptr || !g_frame_active || !EnsureRenderer())
+    if (frame_xy == nullptr || rgba == nullptr || !g_frame_active || !EnsureRenderer())
     {
         return;
     }
 
+    float xy[8];
+    std::memcpy(xy, frame_xy, sizeof(xy));
     full_frame = IsFullFrameQuad(xy);
+    if (!full_frame)
+    {
+        ExtendLetterboxBar(xy);
+    }
 
     for (int i = 0; i < 4; i++)
     {

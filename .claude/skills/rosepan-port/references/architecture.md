@@ -2083,7 +2083,9 @@ How it works (2026-10-28, host task `fix/aspect_ratio.cpp`; the machinery is Rei
   the renderer zooms 2D and 3D alike toward it (ComputeViewExtend: fully from 16:9, the window
   centred on the band, so the extends drop below 1 and `g_view_offset_y` moves the centre), and
   every frame <-> window mapping goes through ExtendFrameX / ExtendFrameY / ViewOffsetClipY. At the
-  frame's shape or narrower the bars show as on the PS2; BeginFrame resets the band.
+  frame's shape or narrower the bars show as on the PS2, and DrawSolidQuad grows them past the
+  frame edge to the window's (ExtendLetterboxBar: a full-width solid fill touching the top or bottom
+  edge while a band is set), so the world the 3D extends above / below the frame stays black; BeginFrame resets the band.
 - Still 4:3-bound (pillarboxed, not stretched): VU1 strips (rosepan_i3d DrawStrip: screen-space XY
   the ROM's VU1 program projected) and textured full-frame sprites (pictures, frame copies, the
   movie). A new screen-space draw must say which of the two it wants.
