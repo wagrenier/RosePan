@@ -21,30 +21,6 @@ static void RxSndDrvStubHit(int *once, const char *addr)
 
 #define RXSNDDRV_STUB(addr) do { static int once; RxSndDrvStubHit(&once, addr); } while (0)
 
-// stub of IOP 0x00002330
-int RxSndDrvXvabOpen(u_int id, u_int iop, u_int spu)
-{
-    (void)spu;
-    (void)iop;
-    (void)id;
-    RXSNDDRV_STUB("0x00002330");
-    return 0;
-}
-
-// stub of IOP 0x00002854
-void RxSndDrvXvabInit(void)
-{
-    RXSNDDRV_STUB("0x00002854");
-}
-
-// stub of IOP 0x000028b8
-int RxSndDrvXvabClose(u_int id)
-{
-    (void)id;
-    RXSNDDRV_STUB("0x000028b8");
-    return 0;
-}
-
 // stub of IOP 0x00002e00
 int RxSndDrvXseqOpen(u_int id, u_int iop)
 {

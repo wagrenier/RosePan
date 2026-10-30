@@ -24,9 +24,9 @@ subsystem, on the host IOP layer and host libsd, replacing the silent `src/sdk/i
 tick thread, dispatcher (every command routed), RPC server, DMA queues, system / mix / effect
 (IOP 0x0..0x2330); everything from XVAB on is `stubs.cpp`. It runs only with `ROSEPAN_RXSNDDRV=1`
 (`build.py --run 25 --env ROSEPAN_RXSNDDRV=1`: logs the first four calls of each command; the boot
-reaches the Punchline logo with the bank uploads going through the DMA queue). **Next session: XVAB
-(0x2330..0x2e00: open 0x50 / close 0x51, the header parser 0x2578, program lookups 0x29b0..0x2da0)**,
-then XSEQ (0x2e00..0x35c0), the voice layer (0x35c0..0x45b0, with sceSdNote2Pitch), SE, NOTE, BGM,
+reaches the Punchline logo with the bank uploads going through the DMA queue). **Session 2
+(2026-10-30, partial)** wrote XVAB (0x2330..0x2e00, xvab.cpp; banks 0 and 1 open in the boot, the
+intro logo shows). **Next session: XSEQ (0x2e00..0x35c0)**, then the voice layer (0x35c0..0x45b0, with sceSdNote2Pitch), SE, NOTE, BGM,
 ADPCM, PCM. Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
 of all 229 functions; `iopdec.py dump` refreshes it when names change in Ghidra). What should be
 heard: the title BGM on the title screen, then the bus-stop BGM and footstep / UI SEs; the user
@@ -1548,6 +1548,14 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- **RXSNDDRV SE record fields (2026-10-30, setup/iop_rxsnddrv.cpp session 2).** RxSndDrvXvabFindSe
+  (IOP 0x2ae8) hands the SE tick four values from a SERQ record: the low 10 flag bits (0 -> 60 in the
+  caller, so likely a tick rate or length), two bytes negated by flags 0x1000 / 0x2000 (stored as
+  shorts at SE +0x14 / +0x16), and a mode -1/0/1/2 from flags 0xc000. Named neutrally (ticks, a, b,
+  mode) until the SE session (0x6ab0..) reads what they drive. Also: the IOP indexes XVAB slots
+  without a range check (ids >= 0x80 would overrun its 0x80 slots while the EE allows 0..0xff); the PC
+  answers -1 / 1 there instead.
 
 - **g_bss_7a3210 is GamMan::m_chapter (2026-10-30, debug/naga_debug.cpp).** bss 0x7a3210 =
   g_gamMan (0x7812c0) + 0x21f50, the member getChapter reads (game/gamman.h m_chapter). The host

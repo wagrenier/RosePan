@@ -2519,6 +2519,17 @@ never asserts): sessions name them (`tus.py define --why`).
   (defaults 0x1fffff / 0x1dffff), 2 depth {L, R} (byte scale, sent << 8, ramped 8 per tick), 3
   feedback, 4 delay. A mode or EEA change turns the effect off and zeroes the work area by a type 5
   DMA before the new attributes go out.
+- **XVAB 0x50 {id, iop, spu} / 0x51 {id}** (`src/iop/rxsnddrv/xvab.cpp`, 2026-10-30): 0x80 slots
+  of 0x20 at 0x19680 {file, TGIF, SEIF, VELT, PANT, LFOT, spu, users}; id < 0 takes the first free
+  one. Close refuses (answers 1) while users > 0 (NOTE 0x8f10 / SE 0x6e04 lock a slot: 0x2a14 /
+  0x2ae8 count up, 0x2a88 down). Chunk file: "XVAB", version, size; version < 0x200 chunks {tag, size,
+  data} from +0xc, version 0x200 {tag, ?, size, ?, data} from +0x10 (0x2cd0 / 0x2d40 / 0x2da0, the
+  EE's rxSndChunkFind). The game's banks (DATA/SEQ/G000.GRB, area *.ARA) are version 0x101 with
+  HEAD TGIF TGPG TGSP SEIF SEGP SERQ SESQ VELT PANT LFOT; HEAD byte 0 = relocated, byte 1 = samples
+  follow, +4 sample size, +8..+0x18 the five tables' file offsets. Opening (0x2578, dir +1) rebases
+  TGIF / TGPG offsets on TGIF and SEIF / SEGP / SERQ offsets on SEIF; closing undoes it. SE lookup
+  0x2ae8(id, group, index): SEIF[group] -> SEGP list -> SERQ record {u8, u8, u16 flags (0x3ff ticks,
+  0x1000 / 0x2000 negate the bytes, 0xc000 mode), offset into SESQ}.
 
 ## Disc and data files
 
