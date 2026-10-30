@@ -334,20 +334,8 @@ static_assert(offsetof(MnuStock, m_scene) >= 0x110c, "m_scene");
 /* The options menu MnuOpt: mnu/mnuopt.h (not included here: it holds a
  * SprMan, and spr/sprman.h includes this file). */
 
-/* The movie (theatre) menu. EE 0x990 (MagLifeMenuMovie +0x40..+0x9d0). */
-struct MnuMovie
-{
-    void init(DogTexInfo *tex);                                          // ROR 0x001adfb0
-    void term();                                                         // ROR 0x001adfe4
-    int  isInit();                                                       // ROR 0x001ae01c
-    int  processPad(BedPad *pad);                                        // ROR 0x001ae02c
-    void draw(I3dLayer *layer);                                          // ROR 0x001ae040
-
-    u_char    _00[0x968];
-    MagScene *m_scene;          // ROR 0x968: MagLifeMenuMovie::init stores the scene
-    u_char    _96c[0x990 - 0x96c];
-};
-static_assert(offsetof(MnuMovie, m_scene) == 0x968, "m_scene");
+/* The movie (theatre) menu MnuMovie: mnu/mnumovie.h (not included here:
+ * it holds a SprMan, and spr/sprman.h includes this file). */
 
 /* The memory card menu MnuMcd: mnu/mnumcd.h. */
 #include "mnu/mnumcd.h"

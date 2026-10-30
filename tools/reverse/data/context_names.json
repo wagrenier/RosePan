@@ -15005,6 +15005,12 @@
   "was": "FUN_001ae01c",
   "why": "the menu object at +0x40 of MagLifeMenuMovie: its wrapper's isInit calls it (class name from the wrapper, real one unknown)"
  },
+ "001ae024": {
+  "name": "MnuMovie::prepare",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae024",
+  "why": "empty in the ROM; init calls it on this after open, where MnuOpt::init sets up its sprites"
+ },
  "001ae02c": {
   "name": "MnuMovie::processPad",
   "tag": "ror-inferred",
@@ -15016,6 +15022,48 @@
   "tag": "ror-inferred",
   "was": "FUN_001ae040",
   "why": "the menu object at +0x40 of MagLifeMenuMovie: its wrapper's draw calls it (class name from the wrapper, real one unknown)"
+ },
+ "001ae188": {
+  "name": "MnuMovie::open",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae188",
+  "why": "init's first call: -1 when +0 is already 1, else +0 = 1 and clears the exec / execMain steps (+0x3c, +0x44), +0x40, sets +0x50 2; MnuOpt::open's shape"
+ },
+ "001ae1bc": {
+  "name": "MnuMovie::close",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae1bc",
+  "why": "term and the destructor: -1 when +0 is 0, else clears it; MnuOpt::close's shape"
+ },
+ "001ae1e8": {
+  "name": "MnuMovie::exec",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae1e8",
+  "why": "processPad's tail call: the step machine at +0x3c (0..4 set up, 4 runs execMain until 1, 6/7 end) as MnuOpt::exec; 1 when done, -1 when closed"
+ },
+ "001ae2d8": {
+  "name": "MnuMovie::initWork",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae2d8",
+  "why": "the constructor's only call between m_open = 0 and m_init = 0, as MnuOpt::initWork: clears +0x04..+0x1c, sets +0x20 5, +0x24 2, +0x28 2, returns 0"
+ },
+ "001ae318": {
+  "name": "MnuMovie::setDisp",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae318",
+  "why": "exec step 2: stores MagSystem::m_current_system (sdata 0x296190) at +0x940, as MnuOpt::setDisp begins"
+ },
+ "001ae328": {
+  "name": "MnuMovie::update",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae328",
+  "why": "returns 0; exec step 4 calls it every frame after execMain, where MnuOpt::exec calls update"
+ },
+ "001ae330": {
+  "name": "MnuMovie::execMain",
+  "tag": "ror-inferred",
+  "was": "FUN_001ae330",
+  "why": "exec step 4: plays g_rxMpeg's named movie 0x200 x 0x180 (playNow) at 60 fps (m_v_interval 1), ends on getStatus 1 or circle / cross, closes it and restores m_v_interval 2"
  },
  "001ae474": {
   "name": "MnuNow::MnuNow",
