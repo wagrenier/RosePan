@@ -283,11 +283,12 @@ struct MagLifePC : MagLifeControlChara
     /* State 11: picks the attack target, then state 5. */
     void beginAttack();                                                  // ROR 0x0012cb50
     /* The equipped gun's muzzle flash (EffMan kind 0x26 at its gun_mazzle
-     * node). Not written yet. */
+     * node; mag/maglifepceff.cpp). */
     void createMuzzleEff();                                              // ROR 0x0012ccac
     /* State 0xe with arg (mag/maglifepcbtl.cpp), word +0x0c = word. */
     void setState14(int arg, int word);                                  // ROR 0x0012c9c0
-    /* message 0xe..0x11 (mag/maglifepceff.cpp; the first three assert). */
+    /* message 0xe..0x11 (mag/maglifepceff.cpp): the first three are
+     * assert(0) -- retired messages -- and 0x11 does nothing. */
     void message14();                                                    // ROR 0x0012cdb0
     void message15();                                                    // ROR 0x0012cddc
     void message16();                                                    // ROR 0x0012ce08

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 08:12 at commit `6e4ec90` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 08:19 at commit `2f4e67e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -13,7 +13,7 @@ Generated 2026-10-30 08:12 at commit `6e4ec90` by `tools/reverse/status.py` (`re
 - game functions: **7187**, named **6823** (95%); library functions: 1017
 - by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 263, ror-inferred 5221
 - context-name ledger: 5522 entries; overrides of wrong library matches: 5
-- placed in a source file: 5846/7187 in 148 files
+- placed in a source file: 5848/7187 in 148 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -30,7 +30,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5549**; stubs: **238**
+- reconstructed RoR functions: **5554**; stubs: **233**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -94,7 +94,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/i3d/i3rmodel.cpp` | 14 | 0 |
 | `src/i3d/i3rroot.cpp` | 14 | 0 |
 | `src/i3d/i3rtype.cpp` | 78 | 0 |
-| `src/lib/unassigned_stubs.cpp` | 10 | 196 |
+| `src/lib/unassigned_stubs.cpp` | 10 | 194 |
 | `src/mag/maglife.cpp` | 27 | 0 |
 | `src/mag/maglifebwn.cpp` | 35 | 0 |
 | `src/mag/maglifebwnctrl.cpp` | 73 | 0 |
@@ -109,7 +109,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/maglifepc2.cpp` | 28 | 0 |
 | `src/mag/maglifepc3.cpp` | 22 | 0 |
 | `src/mag/maglifepcbtl.cpp` | 17 | 0 |
-| `src/mag/maglifepceff.cpp` | 0 | 3 |
+| `src/mag/maglifepceff.cpp` | 5 | 0 |
 | `src/mag/maglifepcmode.cpp` | 64 | 0 |
 | `src/mag/maglifepcmove.cpp` | 26 | 0 |
 | `src/mag/maglifewindow.cpp` | 16 | 0 |
@@ -178,8 +178,8 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 172 TUs: todo 89, partial 1, verify 124, done 17
-- next: **mag/maglifepceff.cpp** (frontier score 3)
+- 170 TUs: todo 86, partial 1, verify 125, done 17
+- next: **mnu/mnuboard2d.cpp** (frontier score 3)
 - pinned queue: unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -248,6 +248,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/maglifepc2.cpp` 25/25 -- Nothing in the boot smoke run picks up an item, attacks or reloads, so the code is unseen: verify. The 240 s run still reaches the first room (Jennifer on the f
 - verify: `mag/maglifepc3.cpp` 14/14 -- Status verify: the smoke run ends on the boot disclaimer screen, before MagScene::setPC binds the player, so nothing on screen shows these motions yet; the firs
 - verify: `mag/maglifepcbtl.cpp` 11/11 -- Complete code, not reachable on the smoke path (needs a room with enemies and the attack modes); the 15 s smoke run still shows the disclaimer screen. When a ru
+- verify: `mag/maglifepceff.cpp` 5/5 -- Complete; nothing on screen can show it yet: the 15s smoke run stops at the disclaimer screen (drawn correctly), and the muzzle flash needs the PC firing the gu
 - verify: `mag/maglifepcmode.cpp` 57/70 -- Every function of the TU is written; nothing on screen can show it yet: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run binds no actor
 - verify: `mag/maglifepcmove.cpp` 12/18 -- Status verify: the 200 s New Game run ends on a dark film frame with no assert or crash; no MagLifePC code moves anything on screen yet (applyMotionMove runs fr
 - verify: `mag/magloader.cpp` 17/17 -- Status verify: all 17 functions written, nothing past the title menu draws yet. A New Game run (build.py --run 140 --pad 1800:START,2400:START,2700:CROSS) no lo
@@ -308,6 +309,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 08:19 `mag/maglifepceff.cpp` verify: Pinned mag/maglifepceff.cpp to 0x12ccac-0x12ce3c and reconstructed all 5 functions: MagLifePC::createMuzzleEff (EffMan kind 0x26 at the equipped gun's gun_mazzl
 - 2026-10-30 08:11 `utl/utlbtl.cpp` verify: All 7 functions of utl/utlbtl.cpp reconstructed: utlInitSightCheck, utlInitHitCheck, utlHitCheck (sphere / capsule / ray / flat-cylinder dispatch), utlSightChec
 - 2026-10-30 08:04 `emy/emy_fsh.cpp` verify: Pinned emy/emy_fsh.cpp 0x155d54..0x1583d4 out of unassigned@00155d54 and wrote all 57 functions: FshMain (enemy type 3: dtor, decide over 19 inputs, exec, after
 - 2026-10-30 07:33 `mag/maglifepcbtl.cpp` verify: MagLifePC fighting, all 11 functions of 0x12bc20..0x12ccac (pinned): getAttackBasePos, getWeaponHitPos, calcTargetAngle, getHitFrameRange, getAttackMotionName, 
@@ -315,22 +317,20 @@ Recent sessions:
 - 2026-10-30 07:13 `mnu/mnustock.cpp` partial: MnuStock pages 0 and 1: execPage0 (category tabs), execPage1 (the stock list: cursor, L1/R1 windows, scrolling rows, cross to the slots or swap with the flying 
 - 2026-10-30 07:00 `mnu/mnustock.cpp` partial: MnuStock (the item box, menu 0x10002): ctor/dtor, init/term/isInit/processPad/draw, open/close, exec (window text 0x1b, mnustock.rpk, fades, pages), initWork, r
 - 2026-10-30 06:35 `mnu/mnunow.cpp` verify: MnuNow, the Now Loading screen (menu 0x10009): all 15 functions written - ctor/dtor, init/term/isInit, processPad/draw, open/close/exec/execMain, setDisp/update
-- 2026-10-29 22:37 `mnu/mnumovie.cpp` verify: MnuMovie, the theatre's movie player: ctor/dtor, init/term/isInit/processPad/draw, open/close/exec/execMain/initWork/setDisp/update/prepare (15 functions, all o
 
 | TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
 |---|---|---|---|---|---|
+| `unassigned@001583d4` | todo | 0/18/145 | 40.6 | 3 | 0 |
+| `unassigned@0016afcc` | todo | 0/42/53 | 17.8 | 3 | 0 |
+| `unassigned@001788ec` | todo | 0/36/45 | 14.0 | 3 | 0 |
 | `mnu/mnuboard2d.cpp` | todo | 0/6/16 | 2.1 | 3 | 0 |
 | `unassigned@001bdae4` | todo | 0/3/5 | 0.4 | 3 | 0 |
-| `unassigned@0016afcc` | todo | 0/42/53 | 17.8 | 3 | 0 |
-| `unassigned@001583d4` | todo | 0/18/145 | 40.6 | 3 | 0 |
-| `unassigned@001788ec` | todo | 0/36/45 | 14.0 | 3 | 0 |
-| `mag/maglifepceff.cpp` | todo | 0/3/3 | 0.1 | 3 | 0 |
-| `unassigned@001bde58` | todo | 0/2/8 | 1.1 | 2 | 0 |
 | `mag/maglifemenusp.cpp` | todo | 0/12/18 | 5.7 | 2 | 0 |
-| `unassigned@0012ce34` | todo | 0/1/1 | 0.0 | 1 | 0 |
-| `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
-| `mag/magsceneoption.cpp` | todo | 0/1/1 | 0.8 | 1 | 0 |
+| `unassigned@001bde58` | todo | 0/2/8 | 1.1 | 2 | 0 |
 | `unassigned@0011764c` | todo | 0/1/1 | 0.0 | 1 | 0 |
+| `mag/magsceneoption.cpp` | todo | 0/1/1 | 0.8 | 1 | 0 |
+| `mag/magscenedebug.cpp` | todo | 0/1/3 | 0.8 | 1 | 0 |
+| `unassigned@00172e4c` | todo | 0/16/34 | 7.9 | 1 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -353,11 +353,6 @@ Recent sessions:
 | `0015a17c` | PigMain::initOut | 1 | ror | stub | - |
 | `001583d4` | GotMain::initOut | 1 | ror | stub | - |
 | `00243560` | rxSysUpdateDevices | 1 | ror | stub | rx/rxsys.cpp |
-| `0012cdb0` | MagLifePC::message14 | 1 | ror | stub | mag/maglifepceff.cpp |
-| `0012cddc` | MagLifePC::message15 | 1 | ror | stub | mag/maglifepceff.cpp |
-| `0012ce08` | MagLifePC::message16 | 1 | ror | stub | mag/maglifepceff.cpp |
-| `0012ce34` | MagLifePC::message17 | 1 | ror | stub | - |
-| `0012ccac` | MagLifePC::createMuzzleEff | 1 | ror | stub | - |
 | `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
 | `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |
 | `001bdc00` | MnuSelectLanguage::init | 1 | ror | stub | - |
@@ -376,4 +371,9 @@ Recent sessions:
 | `00173df8` | EffGeneric1::EffGeneric1 | 1 | ror | stub | - |
 | `0016afcc` | EffBg1::EffBg1 | 1 | ror | stub | - |
 | `001bdb4c` | MnuSelectLanguage::~MnuSelectLanguage | 1 | ror | missing | - |
+| `001ad72c` | MnuBoard2D::~MnuBoard2D | 1 | ror | missing | mnu/mnuboard2d.cpp |
+| `00241ac8` | rxSysTerm | 1 | lib-ctx | stub | rx/rxsys.cpp |
+| `0013c328` | MagScene::parseOption | 1 | ror | stub | mag/magsceneoption.cpp |
+| `001f7644` | VoiceManager::stop | 1 | ror | missing | task/tsk_scene.cpp |
+| `001f6c64` | DisplayMessage::DisplayMessage | 1 | ror | missing | task/tsk_scene.cpp |
 

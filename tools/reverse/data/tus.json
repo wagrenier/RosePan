@@ -1562,6 +1562,24 @@
    "status": "verify",
    "why": "All 6 anchored functions assert with mag/maglifepcbtl.cpp; the unanchored MagLifePC methods between them (calcTargetAngle, getHitFrameRange, setState14, getAttackHeight, FUN_0012caa4) fill the gaps; 0x12bc20 follows maglifebwnctrl.cpp (pinned to 0x12bc20); 0x12ccac (gun_mazzle effect, no maglifepcbtl string) starts the effect code before maglifepceff.cpp"
   },
+  "mag/maglifepceff.cpp": {
+   "notes": "Complete; nothing on screen can show it yet: the 15s smoke run stops at the disclaimer screen (drawn correctly), and the muzzle flash needs the PC firing the gun in a room, while EffMan kind 0x26's class/draw path is still to be checked. The first session whose run fires the gun should confirm a flash at the muzzle and mark this done. createMuzzleEff memsets the EffParam (the ROM leaves stack garbage in words other than 0x00/0x08/0x10..0x18).",
+   "ranges": [
+    [
+     "0012ccac",
+     "0012ce3c"
+    ]
+   ],
+   "sessions": [
+    {
+     "date": "2026-10-30 08:19",
+     "status": "verify",
+     "summary": "Pinned mag/maglifepceff.cpp to 0x12ccac-0x12ce3c and reconstructed all 5 functions: MagLifePC::createMuzzleEff (EffMan kind 0x26 at the equipped gun's gun_mazzle node world position; new EffParam::m_muzzle variant), message14..16 (assert(0), lines 118/140/175) and the empty message17; moved the two stubs out of unassigned_stubs.cpp."
+    }
+   ],
+   "status": "verify",
+   "why": "message14..16 carry the mag/maglifepceff.cpp source string (lines 118/140/175); createMuzzleEff (0x12ccac) directly before them builds an EffMan effect and only has the dogmodel.h inline asserts, so it opens the file (maglifepcbtl.cpp's last anchored code ends at beginAttack); message17 (empty) closes the message14..17 series before mag/maglifepcmsg.cpp at 0x12ce3c"
+  },
   "mag/maglifepcmode.cpp": {
    "notes": "Every function of the TU is written; nothing on screen can show it yet: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run binds no actor to the PC, so no mode runs. The first session whose run binds the PC and shows Jennifer standing / walking marks this done. Needed before any of it animates: MagLifeControlChara::changeMotionSeq 0x11a320, changeMotionSeqAlt 0x11a27c (new stub in mag/maglife.cpp) and updateMotionSeq 0x11a14c, plus the PC motion table 0x2961e0 on the host. The attack path then needs mag/maglifepcbtl.cpp (startAttack 0x12c31c is 0x6a4 bytes, getWeaponHitPos, getHitFrameRange, calcTargetAngle) and getAttackHeight 0x12ca28 (stub in src/lib/unassigned_stubs.cpp, it sits in unassigned@0012c9c0). MagLifePCItemData +0x14 is now m_item_id. Ride::message is still called only from MagLifePC::message 6/9/0xb/0xd. The Hug turn reads the actor through vtable slot 11 getActor on the EE; the host uses m_actor (same object).",
    "ranges": [

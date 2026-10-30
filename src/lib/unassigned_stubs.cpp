@@ -377,11 +377,6 @@ void PigMain::selectOut()
 
 
 
-// stub of ROR 0x0012ce34
-void MagLifePC::message17()
-{
-    ROSEPAN_STUB("MagLifePC::message17", 0x0012ce34);
-}
 
 // ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----
 
@@ -1426,8 +1421,3 @@ void EffCloud1::updateZDepth()
 
 
 
-// stub of ROR 0x0012ccac
-void MagLifePC::createMuzzleEff()
-{
-    ROSEPAN_STUB("MagLifePC::createMuzzleEff", 0x0012ccac);
-}

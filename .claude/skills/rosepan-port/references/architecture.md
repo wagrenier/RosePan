@@ -1179,7 +1179,8 @@ rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
   80 XZ of the PC's trans - 120 (`calcAttackHeight` 0x12caa4), else getAttackHeightByDist; message
   0x17 (+0x1b0 / +0x1ac) forces height and weapon. The gun shot: sounds 0x7f shot / 0x80 empty /
   0x83 hit / 0x85 miss (0x7d on targetting), muzzle flash `createMuzzleEff` 0x12ccac (EffMan kind
-  0x26), a ray of 800 from the muzzle to the target turned by utlRandMean(+-10 degrees), enemies
+  0x26, word 0x10..0x18 the equipped gun actor's gun_mazzle node world position; mag/maglifepceff.cpp
+  0x12ccac..0x12ce3c also holds message14..16 = assert(0) and an empty message17), a ray of 800 from the muzzle to the target turned by utlRandMean(+-10 degrees), enemies
   within 800 nearest first, each hit by `hitTarget`; it goes on through one only while
   rand(0..1) < getEmyTypeRate x (800 - dist) / 800.
 - The motion sequence table (MagLifeControlChara +0x5c, the asserts' `m_tbl_motion_state`; the PC's
