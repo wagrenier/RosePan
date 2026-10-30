@@ -734,31 +734,3 @@ u_long * EffFoot2Prim::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_l
 
 // stub of ROR 0x001755e8
 
-// stub of ROR 0x001788ec
-int EffMuzzleFlash1::init(const EffParam *param)
-{
-    ROSEPAN_STUB("EffMuzzleFlash1::init", 0x001788ec);
-    return {};
-}
-
-// stub of ROR 0x00178ac0
-int EffMuzzleFlash1::liveMain()
-{
-    ROSEPAN_STUB("EffMuzzleFlash1::liveMain", 0x00178ac0);
-    return {};
-}
-
-// stub of ROR 0x00178c84
-u_long * EffMuzzleFlash1::renderMain(RENDERPARAM *param, const I3dDrawSet *set, u_long *pkt)
-{
-    ROSEPAN_STUB("EffMuzzleFlash1::renderMain", 0x00178c84);
-    return {};
-}
-
-// stub of ROR 0x001790a4
-void EffMuzzleFlash1::updateZDepth()
-{
-    ROSEPAN_STUB("EffMuzzleFlash1::updateZDepth", 0x001790a4);
-}
-
-

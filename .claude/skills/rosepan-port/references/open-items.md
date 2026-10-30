@@ -16,6 +16,14 @@ there) -- the user checks them. Pad that walks the bus stop (400 s):
 `...,6300:CIRCLE,7000:CROSS,7300:CROSS,...,9400:CROSS` (CROSS every 300 reads advances the
 narration), then `9700:LSDOWN*250,10000:LSLEFT*300,10350:LSUP*350,10750:LSRIGHT*350`.
 
+**WRITTEN 2026-10-30 (`eff/effmuzzleflash.cpp`, verify; pinned 0x1788ec..0x1790e4 out of
+unassigned@001788ec): EffMuzzleFlash1, all 8 functions** (architecture.md "The muzzle flash"). Not on the
+smoke path (the 15 s run is at the boot disclaimer; it needs a gun shot, MagLifePC::createMuzzleEff): mark
+done when a run shows a shot's flash and smoke. Doubt: MagScene::addLight returning < 0 (no free point
+light) makes the ROM write light -1; the host skips the light (PORT comment). The rest of the old run is
+pinned as `eff/effreload.cpp` (0x1790e4..0x179428: EffReload1, 5 functions, a model of the pack posed
+by motion m_shots - 1), queued next.
+
 **WRITTEN 2026-10-30 (`eff/effgeneric.cpp`, verify; pinned 0x173df8..0x174dd8 out of
 unassigned@00172e4c): EffGeneric1, all 14 functions** (architecture.md "The record animation"). Not on
 the smoke path (the 15 s run is at the boot disclaimer; kind 0x33 comes from scripts through native

@@ -11693,11 +11693,35 @@
   "was": "FUN_00178ac0",
   "why": "vtable _vt$15EffMuzzleFlash1 0x2e41a0 slot 5 (Eff0 slot liveMain)"
  },
+ "00178c54": {
+  "name": "EffMuzzleFlash1::stepPart",
+  "tag": "ror-inferred",
+  "was": "FUN_00178c54",
+  "why": "a0 this (unused), a1 one of the two parts at +0x40 / +0x50: size += f12, alpha (short +0xc) += its velocity (+0xe), velocity += a2; called twice by liveMain"
+ },
  "00178c84": {
   "name": "EffMuzzleFlash1::renderMain",
   "tag": "ror-inferred",
   "was": "FUN_00178c84",
   "why": "vtable _vt$15EffMuzzleFlash1 0x2e41a0 slot 8 (Eff0 slot renderMain)"
+ },
+ "00178dd8": {
+  "name": "EffMuzzleFlash1::drawSmoke",
+  "tag": "ror-inferred",
+  "was": "FUN_00178dd8",
+  "why": "renderMain helper: when the part at +0x50 (alpha +0x5c) is visible, ALPHA_1 0x44 and drawPart with texture 1, pushed 1 along the view axis"
+ },
+ "00178e68": {
+  "name": "EffMuzzleFlash1::drawFlash",
+  "tag": "ror-inferred",
+  "was": "FUN_00178e68",
+  "why": "renderMain helper: when the part at +0x40 (alpha +0x4c, the one lighting the point light) is visible, ALPHA_1 0x48 (additive) and drawPart with texture 0"
+ },
+ "00178eec": {
+  "name": "EffMuzzleFlash1::drawPart",
+  "tag": "ror-inferred",
+  "was": "FUN_00178eec",
+  "why": "a camera-facing VU1 sprite: the camera matrix rolled by the part's angle and scaled by its size, at m_pos (+ the view axis times a factor, + the part's y offset), alpha the part's short / 32768"
  },
  "001790a4": {
   "name": "EffMuzzleFlash1::updateZDepth",
