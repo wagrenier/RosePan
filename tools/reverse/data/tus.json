@@ -1,6 +1,5 @@
 {
  "queue": [
-  "setup/smoke_pad.cpp",
   "setup/iop_rxsnddrv.cpp",
   "unassigned@001fd424",
   "unassigned@0010f944",
@@ -11,7 +10,8 @@
   "unassigned@0013e2ec",
   "unassigned@001258a4",
   "unassigned@00166a1c",
-  "unassigned@0016dcc8"
+  "unassigned@0016dcc8",
+  "setup/smoke_pad.cpp"
  ],
  "settings": {
   "data_dir": "C:/Users/willi/OneDrive/BIG SCHOOL/Documents/RosePan",
