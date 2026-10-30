@@ -2063,8 +2063,13 @@ from one renderer-owned source rather than recomputing it per module.
 How it works (2026-10-28, host task `fix/aspect_ratio.cpp`; the machinery is ReiPan's renderer):
 - **The one source**: the renderer's aspect mode (`ROSEPAN_ASPECT` auto | original | 4:3 | 16:9 |
   16:10 | w:h, `RosePan_RendererSetAspectMode`, default AUTO = the window's shape) gives the *view
-  extend* each BeginFrame (`RosePan_RendererGetViewExtend`: about 1.27 x on 16:9 against the 640x448
-  frame, 1.0 on 4:3). A fixed mode on a window of another shape bars the difference.
+  extend* each BeginFrame (`RosePan_RendererGetViewExtend`: 1.33 x on 16:9, 1.0 on 4:3). A fixed mode
+  on a window of another shape bars the difference.
+- **The frame is shown at 4:3** (2026-10-29): the PS2 put its 640x448 frame (RoR's 512x448) on a 4:3
+  set, so a frame unit is `kFramePixelAspect` (0.933) as wide as it is tall; ComputeViewExtend,
+  "original" (= 4:3), the fallbacks and the scene target's fit use `kFrameDisplayAspect`, never
+  640 / 448 (which showed everything about 7% too wide). The ROM's projection fills the frame
+  (i3rHostCamera), so the 3D is right once the frame is; the cinemascope band is then exactly 16:9.
 - **2D**: every 2D entry point takes coordinates in the renderer's frame
   (`RosePan_RendererGetFrameSize`, 640x448); the renderer shrinks them about the centre by the
   extend (`ApplyOriginalAspectToVertices`, the scissor with them), so overlays keep their shape,

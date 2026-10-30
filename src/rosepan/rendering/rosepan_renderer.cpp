@@ -2181,7 +2181,7 @@ float ScreenYToClip(float y)
 
 /*
  * How much wider (or taller) the output is than the original 640x448 frame,
- * measured in original-frame units: 1.0 on a 4:3 output, about 1.21 on 16:9.
+ * measured in original-frame units: 1.0 on a 4:3 output, 1.33 on 16:9.
  * Only one of the two is ever above 1 -- except under a picture band
  * (g_view_offset_y below), whose zoom takes the height below 1.
  *
@@ -2200,6 +2200,17 @@ float g_view_extend_x = 1.0f;
 float g_view_extend_y = 1.0f;
 
 /*
+ * The shape the frame is shown at.  The PS2 put its 640x448 frame (RoR's
+ * 512x448) on a 4:3 set, so a frame unit is not square on screen: it is
+ * kFramePixelAspect as wide as it is tall.  Every aspect sum below goes
+ * through these rather than kLogicalWidth / kLogicalHeight, which would show
+ * the picture about 7% wider than the PS2 did.
+ */
+constexpr float kFrameDisplayAspect = 4.0f / 3.0f;
+constexpr float kFramePixelAspect =
+    kFrameDisplayAspect / ((float)kLogicalWidth / (float)kLogicalHeight);
+
+/*
  * The vertical offset of the window's centre from the frame's, in frame units
  * (down positive), and the band of frame lines the game letterboxes its
  * picture to this frame (RosePan_RendererSetPictureBand: Rule of Rose's
@@ -2213,7 +2224,7 @@ float g_view_offset_y = 0.0f;
 float g_picture_band_top = 0.0f;
 float g_picture_band_bottom = (float)kLogicalHeight;
 /* The composed aspect UpdateViewExtend resolved, kept for a mid-frame band. */
-float g_view_output_aspect = (float)kLogicalWidth / (float)kLogicalHeight;
+float g_view_output_aspect = kFrameDisplayAspect;
 
 /* The window aspect at which a band fills the window's height: the
  * cinemascope band (frame lines 64..400) is 16:9 on the PS2's 4:3 picture. */
@@ -2246,16 +2257,17 @@ float ViewOffsetClipY()
  * band's, fully at kPictureBandFillAspect and wider, so the letterbox the PS2
  * shows on a 4:3 set becomes the zoomed picture a wide set shows; the width
  * follows the window's aspect.  The window stays on the band and inside the
- * frame.  At the frame's shape or narrower the bars show as they are.
+ * frame.  At the frame's shape or narrower the bars show as they are.  In
+ * frame units a window of aspect A is hh * A / kFramePixelAspect wide.
  */
 void ComputeViewExtend()
 {
-    const float frame_aspect = (float)kLogicalWidth / (float)kLogicalHeight;
+    const float frame_aspect = kFrameDisplayAspect;
     const float half_w = (float)kLogicalWidth * 0.5f;
     const float half_h = (float)kLogicalHeight * 0.5f;
     const float aspect = g_view_output_aspect;
 
-    float hh = aspect > frame_aspect ? half_h : half_w / aspect;
+    float hh = aspect > frame_aspect ? half_h : half_w * kFramePixelAspect / aspect;
     const float band_hh = (g_picture_band_bottom - g_picture_band_top) * 0.5f;
     if (band_hh < half_h && aspect > frame_aspect)
     {
@@ -2270,7 +2282,7 @@ void ComputeViewExtend()
         centre_y = std::max(hh, std::min((float)kLogicalHeight - hh, centre_y));
     }
 
-    g_view_extend_x = hh * aspect / half_w;
+    g_view_extend_x = hh * aspect / kFramePixelAspect / half_w;
     g_view_extend_y = hh / half_h;
     g_view_offset_y = centre_y - half_h;
 }
@@ -2357,8 +2369,8 @@ float ResolveAspect(int window_w, int window_h)
 {
     switch (g_aspect_mode)
     {
-    case ROSEPAN_ASPECT_ORIGINAL:
-        return (float)kLogicalWidth / (float)kLogicalHeight;
+    case ROSEPAN_ASPECT_ORIGINAL:                       /* the PS2's 4:3 set */
+        return kFrameDisplayAspect;
     case ROSEPAN_ASPECT_4_3:
         return 4.0f / 3.0f;
     case ROSEPAN_ASPECT_16_9:
@@ -2370,8 +2382,7 @@ float ResolveAspect(int window_w, int window_h)
     default:
         break;
     }
-    return window_h > 0 ? (float)window_w / (float)window_h
-                        : (float)kLogicalWidth / (float)kLogicalHeight;
+    return window_h > 0 ? (float)window_w / (float)window_h : kFrameDisplayAspect;
 }
 
 /*
@@ -2386,7 +2397,7 @@ void FitAspect(double avail_w, double avail_h, double aspect,
 {
     if (!(aspect > 0.0) || avail_w <= 0.0 || avail_h <= 0.0)
     {
-        aspect = (double)kLogicalWidth / (double)kLogicalHeight;
+        aspect = (double)kFrameDisplayAspect;
     }
 
     double w = avail_w;
@@ -2437,11 +2448,14 @@ void ComputeRenderSize(Uint32 out_w, Uint32 out_h, Uint32 *rw, Uint32 *rh)
     switch (g_render_res_mode)
     {
     case ROSEPAN_RENDER_RES_NATIVE_PS2:
-        /* Already the composed aspect: the extends encode it. */
-        w = (double)kLogicalWidth * (double)g_view_extend_x *
+        /* The frame's 448 lines (more on a window taller than 4:3), at the
+         * composed aspect.  From the aspect, not the extends: a picture band
+         * zooms the extends mid-frame, and the target must not shrink with
+         * it. */
+        h = (double)kLogicalHeight *
+            std::max(1.0, (double)kFrameDisplayAspect / (double)g_view_output_aspect) *
             (double)g_render_res_scale;
-        h = (double)kLogicalHeight * (double)g_view_extend_y *
-            (double)g_render_res_scale;
+        w = h * (double)g_view_output_aspect;
         break;
     case ROSEPAN_RENDER_RES_WINDOW_SCALE:
         w *= (double)g_render_res_scale;
@@ -2460,10 +2474,7 @@ void ComputeRenderSize(Uint32 out_w, Uint32 out_h, Uint32 *rw, Uint32 *rh)
          * path off the direct-to-swapchain route it is supposed to keep. */
         if (g_aspect_mode != ROSEPAN_ASPECT_AUTO)
         {
-            FitAspect(w, h,
-                      (double)kLogicalWidth * (double)g_view_extend_x /
-                          ((double)kLogicalHeight * (double)g_view_extend_y),
-                      nullptr, nullptr, &w, &h);
+            FitAspect(w, h, (double)g_view_output_aspect, nullptr, nullptr, &w, &h);
         }
         break;
     }
