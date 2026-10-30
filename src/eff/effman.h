@@ -129,6 +129,46 @@ struct EffParam
         {
             int   m_mode;       // ROR 0x10: 0 = flash light set 1's lights, 1 = only the ambient
         } m_light3;             // kind 0x23 (EffLight3::init)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10: the vent
+            float m_rot[2];     // ROR 0x1c: its x / y angles (the puffs go along its z axis)
+            float m_size;       // ROR 0x24: the puffs' size scale
+            float m_speed;      // ROR 0x28: their speed scale
+            float m_color[4];   // ROR 0x2c: 0..1, alpha last
+            int   m_frames;     // ROR 0x3c: frames of each period it puffs (one every third)
+            int   m_pause;      // ROR 0x40: frames of each period it rests
+        } m_steam1;             // kinds 0x29 / 0x2d (EffSteam1::init)
+        struct
+        {
+            const float *m_pos; // ROR 0x10: four floats copied at init (EffSteam1's matrix row 3)
+            float m_dir[3];     // ROR 0x14: the direction (EffSteam1's z axis, turned)
+            float m_size;       // ROR 0x20: the size scale
+            float m_speed;      // ROR 0x24: the start speed, times 15
+            float m_fade;       // ROR 0x28: how fast it fades once at full alpha
+            float m_color[4];   // ROR 0x2c: 0..1, alpha last
+        } m_steam1prim;         // kinds 0x2a / 0x2e (EffSteam1Prim::init; EffSteam1 creates 0x2a)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10: the centre (wisps start within m_radius / 2 of it)
+            float m_radius;     // ROR 0x1c: also the wisps' size; they start m_radius / 2 toward -y
+            float m_alpha;      // ROR 0x20
+        } m_steam2;             // kind 0x2b (EffSteam2::init)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10
+            float m_size;       // ROR 0x1c
+            float m_alpha;      // ROR 0x20
+        } m_steam2prim;         // kind 0x2c (EffSteam2Prim::init; EffSteam2 creates it)
+        struct
+        {
+            float m_pos[3];     // ROR 0x10: the origin (it starts within m_size / 2 of it)
+            float m_rot;        // ROR 0x1c: the y angle it drifts along
+            float m_size;       // ROR 0x20: the sprite's size
+            float m_speed;      // ROR 0x24: its drift per frame
+            float m_dist;       // ROR 0x28: how far it drifts before it starts again
+            float m_color[4];   // ROR 0x2c: 0..1, alpha last
+        } m_cloud;              // kind 0x11 (EffCloud1::init)
     };
 };
 

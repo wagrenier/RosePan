@@ -1556,6 +1556,20 @@ no z write) tiled every 3 widths. Kind 5 EffBloodStay3: no picture, two counters
 0x16d8e8 creates the one instance, its number in 0x298e10). Kind 6 EffBloodStay3Prim: a flat sprite on
 the floor, half of texture 0 (rect u, v, w, h; mirrored by m_flip), 165 frames.
 
+**The vapour effects** (kinds 0x11, 0x29..0x2e, `eff/effsteam.cpp` 0x179428..0x17a918, 2026-10-30;
+eff/effsteam.h has the layouts, EffParam m_steam1 / m_steam1prim / m_steam2 / m_steam2prim / m_cloud the
+params). EffSteam1 (0x29 / 0x2d) is a vent: a period of m_frames + m_pause frames from a random phase,
+one puff every third frame of the first m_frames, always kind 0x2a (also for 0x2d), along its matrix's z
+axis (rotated x / y by the param) turned by up to 15 degrees y and any z; it hands the puff a pointer to
+its own matrix row 3 (the position). EffSteam1Prim: sprite, size 20 + 4.5 a frame, alpha 0.4 up 0.03 a
+frame to 1, then down m_fade x 0.07. EffSteam2 (0x2b): a wisp (0x2c) every 180..210 frames in a disc of
+radius m_radius / 2, m_radius / 2 toward -y; EffSteam2Prim: a 4-vertex strip (i3dPktDrawStrip) for 150
+frames, rolling, its corner alphas cycling table 0x2f2f10. EffCloud1 (0x11): a sprite drifting m_speed a
+frame along a y angle for m_dist, faded by the square of its depth between fog record 0's near / far
+(m_param[0] / [2]) and over 60 frames at each end, then restarting near its origin; it begins in its
+wait. Creators not traced (no code caller of kinds 0x11 / 0x29 / 0x2b / 0x2d found in written code;
+probably event scripts through native 281).
+
 ## The game helpers (`utl/utlgame.cpp`, 0x1024d0..0x1041c4, 2026-10-28)
 
 One-call queries and commands on top of GamMan, EmyManager and the scene's actors; 49 functions,

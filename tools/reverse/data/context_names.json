@@ -11273,6 +11273,12 @@
   "was": "FUN_0017a2fc",
   "why": "vtable _vt$9EffCloud1 0x2e4210 slot 2 (Eff0 slot init)"
  },
+ "0017a410": {
+  "name": "EffCloud1::resetPos",
+  "tag": "ror-inferred",
+  "was": "FUN_0017a410",
+  "why": "called with the EffCloud1 from its init and from liveMain when the wait runs out: m_pos = the origin (+0x40) plus a random point within half m_size (+0x58), then a new random spin (+0x5c)"
+ },
  "0017a534": {
   "name": "EffCloud1::liveMain",
   "tag": "ror-inferred",
