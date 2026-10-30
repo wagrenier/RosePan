@@ -1262,6 +1262,10 @@ cancelled, 2 opened (gmnr reads it).
   along the wall normal (turned a quarter to the move's side, the move's length) is swept again; if
   that is blocked and the slide is within 0.8 (dot) of the move, `sweepSides` 0x11e4c4 casts two
   rays from +-90 degrees (castRay, length range) and slides away from the nearer hit; else stand.
+  `sweepRay` 0x11e0d8 (first in the file, pinned 2026-10-30, no asserts, unreferenced) is an older
+  single-ray sweep: castRay from the actor's m_trans - 30 y along the level move, range long, the
+  same quarter-turned wall slide (the level length), and an m_218 debug line + hit-triangle strip
+  (magenta, statics 0x297300..0x297340 / 0x664590 / 0x664600).
   Then `MagLifeControlChara::followGround` 0x119e1c (castRay from y - 60 over 120: y += (t - 0.5) *
   60, clamped +-7) and `updateSectaCells` 0x11a6b0 (secta query radius 40 into +0x60's four cells:
   m_goal is the cells). `applyMotionMove` 0x120668 (live, outside move states) adds the root step

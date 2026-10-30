@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 17:59 at commit `5cee9fb` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 18:06 at commit `4dcf6df` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,10 +10,10 @@ Generated 2026-10-30 17:59 at commit `5cee9fb` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7197**, named **7144** (99%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5542
-- context-name ledger: 5832 entries; overrides of wrong library matches: 5
-- placed in a source file: 6224/7197 in 166 files
+- game functions: **7197**, named **7145** (99%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 268, ror-inferred 5543
+- context-name ledger: 5833 entries; overrides of wrong library matches: 5
+- placed in a source file: 6225/7197 in 166 files
 
 Least-named game-code regions (64 KB blocks):
 
@@ -22,15 +22,15 @@ Least-named game-code regions (64 KB blocks):
 | `001a0000` | 199/214 (93%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `001f0000` | 218/234 (93%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `00160000` | 257/268 (96%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
-| `00110000` | 254/257 (99%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
 | `00210000` | 360/364 (99%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
+| `00110000` | 255/257 (99%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
 | `00100000` | 302/304 (99%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmath.cpp |
 | `00120000` | 282/283 (100%) | mag/maglifebwnctrl.cpp, mag/maglifepcmode.cpp, mag/maglifemenu.cpp |
 | `00140000` | 292/293 (100%) | emy/emy_hfm.cpp, emy/emy_clr.cpp, mag/magscenecmd.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **6064**; stubs: **0**
+- reconstructed RoR functions: **6071**; stubs: **0**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -131,7 +131,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/mag/maglifepcbtl.cpp` | 17 | 0 |
 | `src/mag/maglifepceff.cpp` | 5 | 0 |
 | `src/mag/maglifepcmode.cpp` | 64 | 0 |
-| `src/mag/maglifepcmove.cpp` | 26 | 0 |
+| `src/mag/maglifepcmove.cpp` | 33 | 0 |
 | `src/mag/maglifetest.cpp` | 4 | 0 |
 | `src/mag/maglifewindow.cpp` | 16 | 0 |
 | `src/mag/magloader.cpp` | 17 | 0 |
@@ -202,7 +202,7 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 173 TUs: todo 73, verify 154, done 18
+- 172 TUs: todo 72, verify 154, done 18
 - next: **None** (nothing on the frontier and no queued TU)
 - pinned queue: unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
@@ -296,7 +296,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `mag/maglifepcbtl.cpp` 11/11 -- Complete code, not reachable on the smoke path (needs a room with enemies and the attack modes); the 15 s smoke run still shows the disclaimer screen. When a ru
 - verify: `mag/maglifepceff.cpp` 5/5 -- Complete; nothing on screen can show it yet: the 15s smoke run stops at the disclaimer screen (drawn correctly), and the muzzle flash needs the PC firing the gu
 - verify: `mag/maglifepcmode.cpp` 57/70 -- Every function of the TU is written; nothing on screen can show it yet: the 15 s smoke run ends on the boot disclaimer and the 200 s New Game run binds no actor
-- verify: `mag/maglifepcmove.cpp` 12/18 -- Status verify: the 200 s New Game run ends on a dark film frame with no assert or crash; no MagLifePC code moves anything on screen yet (applyMotionMove runs fr
+- verify: `mag/maglifepcmove.cpp` 13/19 -- sweepRay is unreferenced in the ROM (ghidra.py refs: none), so verify is final unless a caller turns up. Doubt: placed with the sweeps for its sweepMove slide m
 - verify: `mag/maglifetest.cpp` 3/6 -- Whole file written. Nothing in the ROM constructs MagLifeTest (ghidra.py refs on the ctor 0x13114c and vtable 0x2e1e70 find only the ctor itself), so no screens
 - verify: `mag/magloader.cpp` 17/17 -- Status verify: all 17 functions written, nothing past the title menu draws yet. A New Game run (build.py --run 140 --pad 1800:START,2400:START,2700:CROSS) no lo
 - verify: `mag/magscene.cpp` 89/89 -- Screen still black (textures never load; game/gamfile.cpp callers GamMan::loadSystemData / loadStage are stubs), and nothing calls this slice's new code in the 
@@ -362,6 +362,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 18:06 `mag/maglifepcmove.cpp` verify: MagLifePC::sweepRay 0x11e0d8: the last unassigned run beside the sweeps, an older single-ray sweepMove (castRay from m_trans - 30 y along the level move, quarte
 - 2026-10-30 17:59 `debug/motnamecnv.cpp` verify: debug/motnamecnv.cpp written whole (0x2163ac..0x216768, 9 functions): seven MagSceneIFChara wrappers with an unused first argument (motNameGetCharaName, motName
 - 2026-10-30 17:27 `mag/maglifetest.cpp` verify: MagLifeTest test controller complete: ctor, live (motion chain 0xac, 5, 1 on its phase word, then the motion's root movement into addTrans turned by the base he
 - 2026-10-30 17:20 `debug/naga_debug.cpp` verify: EventTestTask debug overlay complete: disp (info pages: PC / dog position, world position via WrdSrv, heap and packet use, chapter, map area, PC and dog health,
@@ -369,7 +370,6 @@ Recent sessions:
 - 2026-10-30 16:47 `task/tsk_bg_load.cpp` verify: TskBGLoad / TskBGLoadArea / TskBGLoadMap, all 19 functions: the background pack loaders that read a pack head, allocate its total size and read the whole pack i
 - 2026-10-30 16:30 `dog/doglight.cpp` verify: DogLight, all 8 functions: init / clear / term, getDataSize, create (one block of ambient, direct, point, spot, hemi and dist lights), setParam / getParam (pos,
 - 2026-10-30 16:19 `mag/maglifebwnmode.cpp` verify: Brown's ten modes (MagLifeBwnMode Null/One/Wait/Sit/Fuse/Move/Path/Turn/Rotate/Wall), all 19 functions; pinned 0x125bd4..0x1267c0 absorbing unassigned@00125bd4 
-- 2026-10-30 15:52 `rx/rxsys.cpp` verify: rx/rxsys.cpp session 3: the System Monitor exception console 0x242c10..0x2432d8, 15 functions (clear row, scroll, LoadImage, glyph row expand from the 8x8 font 
 
 ## Frontier (called by reconstructed code, not written yet)
 

@@ -7,11 +7,14 @@
  *  mode's step: the sweeps, the floor, the secta cells), the root-motion
  *  step of the current motion, and the stick-driven motions: the stance
  *  walk (MagLifePCModeAtkMove2D) and an older pad set nothing references
- *  (movePad -> moveFree / moveDowned, moveTank).
- *  0x11e4c4..0x120788 (pinned; the asserts name this file).
+ *  (movePad -> moveFree / moveDowned, moveTank), plus sweepRay, an older
+ *  single-ray sweep nothing calls.
+ *  0x11e0d8..0x120788 (pinned; the asserts name this file from 0x11e4c4).
  * ======================================================================== */
 
 #include "mag/maglifepc.h"
+
+#include <math.h>
 
 #include "bed/bedpad.h"
 #include "common/ror_assert.h"
@@ -67,6 +70,23 @@ static const MagLifePCMoveMotion s_moveMotions[7] = {
     { "wait",       "run_in",  "run",      "walk_b_in", "walk_b",    "turn_l",   "turn_r",   "" },
     { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
 };
+
+/* sweepRay's ray record, its debug line (vectors 0..1 of four) and the
+ * hit triangle's strip colours, each set up once. */
+// ROR 0x00297300
+static int s_rayHitInit;
+// ROR 0x00297304
+static int s_rayLineInit;
+// ROR 0x00297308
+static int s_rayStripAdded;
+// ROR 0x00297310
+static const float s_rayStripColors[3][4] = {
+    { 1.0f, 0.0f, 1.0f, 0.5f }, { 1.0f, 0.0f, 1.0f, 0.5f }, { 1.0f, 0.0f, 1.0f, 0.5f },
+};
+// ROR 0x00664590
+static MagSceneRayHit s_rayHit;
+// ROR 0x00664600
+static sceVu0FVECTOR s_rayLine[4];
 
 /* sweepMove's cylinder record (its vectors set to (0, 0, 0, 1) on the
  * first call) and the debug strip m_218 adds once from its vectors 2..4. */
@@ -170,6 +190,77 @@ static void getRootStep(DogActor *actor, float speed, float *move, float *rot, f
             *trans_y = pos[1];
         }
     }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// ROR 0x0011e0d8
+float MagLifePC::sweepRay(float range, float *out, const float *delta)
+{
+    sceVu0FVECTOR pos = { m_actor->m_trans[0], m_actor->m_trans[1] - 30.0f,
+                          m_actor->m_trans[2], m_actor->m_trans[3] };
+    float len = sqrtf(delta[0] * delta[0] + delta[2] * delta[2]);
+    if (len <= 0.0f)
+        return -1.0f;
+    sceVu0FVECTOR ray = { delta[0] * range / len, 0.0f, delta[2] * range / len, 1.0f };
+    if (!s_rayHitInit)
+    {
+        clearRayHit(&s_rayHit);
+        s_rayHitInit = 1;
+    }
+    s_rayHit.m_50 = -1;
+    float t = m_scene->castRay(&s_rayHit, pos, ray, -1);
+    if (t >= 0.0f)
+    {
+        /* As sweepMove: the wall's normal facing the ray, turned a quarter
+         * to the side the ray leans to, the level move's length long. */
+        sceVu0FVECTOR n = { s_rayHit.m_vec[1][0], s_rayHit.m_vec[1][1],
+                            s_rayHit.m_vec[1][2], s_rayHit.m_vec[1][3] };
+        if (utlVecDot(n, ray) < 0.0f)
+        {
+            n[0] = -n[0];
+            n[3] = 1.0f;
+            n[1] = -n[1];
+            n[2] = -n[2];
+        }
+        sceVu0FVECTOR c = { 0.0f, 0.0f, 0.0f, 1.0f };
+        utlVecCross(c, ray, n);
+        if (c[1] > 0.0f)
+            utlVecRotMatY(-PC_HALF_PI, n);
+        else
+            utlVecRotMatY(PC_HALF_PI, n);
+        out[0] = n[0] * len;
+        out[1] = n[1] * len;
+        out[2] = n[2] * len;
+        out[3] = 1.0f;
+    }
+    if (m_218 != 0.0f)
+    {
+        if (!s_rayLineInit)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                s_rayLine[i][0] = 0.0f;
+                s_rayLine[i][1] = 0.0f;
+                s_rayLine[i][2] = 0.0f;
+                s_rayLine[i][3] = 1.0f;
+            }
+            s_rayLineInit = 1;
+        }
+        /* From the ray's start, 50 times out (stale when the ray missed). */
+        for (int i = 0; i < 4; i++)
+            s_rayLine[0][i] = pos[i];
+        s_rayLine[1][0] = pos[0] + out[0] * 50.0f;
+        s_rayLine[1][1] = pos[1] + out[1] * 50.0f;
+        s_rayLine[1][2] = pos[2] + out[2] * 50.0f;
+        s_rayLine[1][3] = 1.0f;
+        if (!s_rayStripAdded)
+        {
+            s_rayStripAdded = 1;
+            m_scene->addLineStrip(2, s_rayLine, 0x80ff8030, NULL);
+            m_scene->addStrip(3, s_rayHit.m_vec[2], s_rayStripColors, NULL, -1);
+        }
+    }
+    return t;
 }
 
 // ──────────────────────────────────────────────────────────────────────
