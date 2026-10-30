@@ -21,6 +21,7 @@
 #include "lib/unassigned.h"
 #include "mag/magscene.h"
 #include "mag/magsystem.h"
+#include "rosepan/rendering/rosepan_renderer.h"
 #include "sdk/libgraph.h"
 
 /* ---- data ---- */
@@ -443,6 +444,26 @@ void S2dCineSco::live()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// PC: the band the bars leave to the renderer, which zooms a window wider
+// than the frame toward it (RosePan_RendererSetPictureBand). Each bar's
+// height in the 448-line frame (64 at the top, 48 at the bottom: the
+// pattern's 0x400 / 0x300 in 12.4) times its opacity, when SprMan drew it
+// this frame (SprMan::drawSprite's states).
+
+static void s2dCineScoSetHostBand(const SprMan &spr)
+{
+    float cover[3] = { 0.0f, 0.0f, 0.0f };
+    for (int no = 1; no <= 2; no++) {
+        const SprSprite &bar = spr.m_sprite[no];
+        const bool drawn = bar.m_state == SPR_STATE_ON || bar.m_state == SPR_STATE_SHOW_IN ||
+                           bar.m_state == SPR_STATE_WAIT_OUT;
+        if (spr.m_active != 0 && (bar.m_flags & 2) == 0 && drawn)
+            cover[no] = (float)(bar.m_color[3] < 0x80 ? bar.m_color[3] : 0x80) / 128.0f;
+    }
+    RosePan_RendererSetPictureBand(64.0f * cover[1], 448.0f - 48.0f * cover[2]);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // EE slot 6: draws the sprites into the layer it is given.
 // ROR 0x00190c20
 
@@ -451,6 +472,7 @@ void S2dCineSco::render(I3dLayer *layer)
     if (layer != NULL) {
         m_spr.m_layer[0] = layer;
         m_spr.draw();
+        s2dCineScoSetHostBand(m_spr);     // PC: the zoom on a wide window
     }
 }
 
