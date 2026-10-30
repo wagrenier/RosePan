@@ -6,7 +6,12 @@ delete what is obsolete. Per-TU state and handoff notes live in `tools/reverse/d
 
 ## Next up (in order; the pinned queue in tus.json encodes it, `tus.py next` follows it)
 
-**PARTIAL 2026-10-30 (`mnu/mnustock.cpp`, session 1): MnuStock, the item box -- ctor / dtor,
+**WRITTEN 2026-10-30 (`mnu/mnustock.cpp`, verify): all 35 MnuStock functions; session 3 wrote
+execPage2 (the slot grid). m_pick (+0x54): 3 nothing picked, 1 a list entry (page 2 swaps), 2 a
+slot (page 1 swaps); execPage2 steps 4 / 5 wait m_swap_wait (10) for the two flying icons, then
+swap and return to page 1 with step 0. Still open: execPage1's step 4 (stop the picked icon's anim)
+is set by nobody found (execPage2's own 4 never reaches page 1). Sessions 1 / 2 below.**
+Session 1 (2026-10-30): MnuStock, the item box -- ctor / dtor,
 init / term, open / close, exec, the list (buildStockList, rows, scroll bar, arrows), the slot grid
 (setSlotSprites, setSlotDisp), swapItem and the small helpers, 30 functions** (architecture.md "The
 item box"). Left: execPage0 0x19cf48 (the list page, next), execPage1 0x19e474, execPage2 0x19fbc8 (stubs
@@ -15,7 +20,7 @@ Session 2 (2026-10-30): execPage0, execPage1, setRowMove, setDescText written; l
 0x19fbc8 (0xaa0 bytes, the slot grid: it sets m_slot and returns to page 1 with m_main_step 4?
 check -- execPage1's step 4 only stops the icon's anim, nothing in pages 0 / 1 sets 4).
 Doubt: setDescText fills SprMan text lines 0..2 (the description) but sets no sprite's m_text to
-them; look for the reader in execPage2 or the display list (sprites 0x43..0x45). Not on
+them; execPage2 does not read them either: look in the display list (sprites 0x43..0x45). Not on
 the smoke path (no room is reached; the box opens from MagScene's stock menu 0x10002): when a run opens
 it, compare with work/ref/MNUSTOCK (tm2png.py --scan of DATA/MNURPK/MNUSTOCK.RPK). Doubts: m_list has
 0x100 entries while the stock pool holds 0x14e (the ROM does not bound it; ported unbounded);
