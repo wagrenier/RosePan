@@ -2681,7 +2681,7 @@
    "why": "the whole run between i3dmath and rxsys is one library: rxsnd strings, one RPC client 0x7ca300 (IOP module 0xd000, RXSNDDRV.IRX), modules init/term in rxSndInitModules order"
   },
   "rx/rxsys.cpp": {
-   "notes": "Status verify: nothing calls rxSysInit yet - main 0x2045a8 is still the placeholder in src/main.cpp, so the screenshot is the black placeholder frame. Next: main (unassigned@001fd424) then rxfile right after it, because on a CDROM boot rxSysLoadIopModules loops while rxSysReadIopConf and rxFileRebootIop return 0, and the rxfile stubs return 0 (hang). Left in rx/rxsys.cpp: the ini parser 0x2410b8-0x241848 (rxSysIniFind is a stub), tty bind/open 0x241890-0x241ac8 (rxSysOpenTty stub), file wrappers 0x242500-0x2426b8, exception handler and system monitor 0x242710-0x2432d8, rxSysUpdateDevices 0x243560 (stub), rxfile wrappers after 0x2436f0. rxfile and rxthread callees are stubbed in src/lib/unassigned_stubs.cpp until those TUs are defined (rxfile ~0x2437f8-0x249000, rxthread ~0x249000-0x24b490). PC changes: rxSysReadRomDate compares against a zero host ROM (no BIOS), rxSysPrintf passes the text through a %s format. Open: memory hook signatures, the four rx pools at 0x7dabb0, which boot device starts with a (adds usbd.irx). References updated (architecture Program flow and Key functions, hazards callcheck/stubgen, open-items Next up 4).",
+   "notes": "Left: the System Monitor console 0x242c10..0x2432d8 (rxSysInitExceptionScreen stays a stub; 0x242c28 clear row, 0x242c70 scroll, 0x242cc8 LoadImage, 0x242d40 glyph row expand from the 8x8 font 0x2dbeb0, 0x242ed8 redraw, 0x242f28 newline, 0x242fc0 putc, 0x243050 print hook, 0x2430a0 display toggle, 0x2430e0 clear, 0x2432d8 close). It is only reached from the exception handlers, which the host kernel never raises, and it draws with GS LoadImage: decide host debug-text draw vs log-only no-op before writing it (open-items Next up). Behaviour change: rxSysThreadCallback now passes yielding to rxSysSetFileContext (rxFileSetContext), so rxfile uses context 1 while the main thread yields; the 80 s smoke run still reaches the Once upon a time narration. rxSysOpenTty is a no-op on the PC (s_bootDev empty). Unreferenced in the ROM but written: ini key count/key-at, RPC helpers, hexdump, device control/status.",
    "ranges": [
     [
      "0023ff58",
@@ -2693,9 +2693,14 @@
      "date": "2026-10-22 10:26",
      "status": "verify",
      "summary": "rx middleware system layer: pinned rx/rxsys.cpp 0x23ff58-0x2437f8 and reconstructed 60 functions - rxSysInit (hardware reset, boot device, memory hooks, rx subsystems), the IOP module loader (default module table, IOP reboot, iopconf.cnf), boot path split, system.ini reader, rxSysPrintf, print semaphores, rxfile wrappers. Named 90 rx and SDK functions; split three functions Ghidra had folded (0x241f20, 0x242480, 0x243680, 0x2436d0). Platform: GetMemorySize (32 MB) and sceDevVu1Reset added to src/sdk/eekernel."
+    },
+    {
+     "date": "2026-10-30 15:41",
+     "status": "partial",
+     "summary": "rx/rxsys.cpp session 2: removed the 5 boot stubs - ini parser (rxSysIniFindSection/ReadKey/FindKey/Find, key count and key-at helpers), tty bind/open/close, rxSysTerm with its teardown (TermEnd, TermModules, TermUser, TermSema, RestoreDebugHandlers), RPC client helpers (rxSysBindRpc/UnbindRpc/CallRpc/RpcDone), rxSysIoctl, console lock wrappers, rxSysSetDebugHandlers and rxSysExceptionHandler, rxSysHexDump, VMode/FrameRate getters, rxSysSetFileContext, device control/status, rxSysGetFileDevice; 36 functions. Split 4 folded functions in Ghidra (0x242728, 0x242740, 0x243578, 0x243620), named iDisableIntc 0x25e300. Platform: sceIoctl host stub (-1), iDisableIntc macro."
     }
    ],
-   "status": "verify",
+   "status": "partial",
    "why": "rx middleware system layer: rxSys/rxsys strings at 0x23ff58 (No Memory Allocate Func), 0x241890 and 0x242188 (rxsys binding IOP module); starts after the IOP RPC client ending 0x23feb8 (unprefixed binding strings), ends before rxfile at 0x2437f8 (DI error / rxfile file slots); main 0x2045a8 calls its init 0x240eb8 and setters"
   },
   "rx/rxthread.cpp": {

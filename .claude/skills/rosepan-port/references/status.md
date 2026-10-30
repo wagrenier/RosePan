@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 15:24 at commit `24c0133` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 15:41 at commit `cf23fe0` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -10,27 +10,27 @@ Generated 2026-10-30 15:24 at commit `24c0133` by `tools/reverse/status.py` (`re
 
 ## Naming (game code; library ranges excluded)
 
-- game functions: **7187**, named **7053** (98%); library functions: 1017
-- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 266, ror-inferred 5451
-- context-name ledger: 5739 entries; overrides of wrong library matches: 5
-- placed in a source file: 6188/7187 in 166 files
+- game functions: **7191**, named **7083** (98%); library functions: 1017
+- by provenance: ror-symbol 1449, lib-match 543, lib-match-low 133, lib-context 267, ror-inferred 5481
+- context-name ledger: 5770 entries; overrides of wrong library matches: 5
+- placed in a source file: 6192/7191 in 166 files
 
 Least-named game-code regions (64 KB blocks):
 
 | block | named | inferred files |
 |---|---|---|
-| `00240000` | 298/336 (89%) | rx/rxfile.cpp, rx/rxsys.cpp, rx/rxthread.cpp |
 | `001f0000` | 208/234 (89%) | task/tsk_chr.cpp, task/tsk_scene.cpp, task/naga_chunk.cpp |
 | `001a0000` | 199/214 (93%) | mnu/mnusvld.cpp, mnu/mnumcd.cpp, mnu/mnuitem.cpp |
 | `00210000` | 337/361 (93%) | sequence/seqvm.cpp, i3d/i3dpacket.cpp, i3d/i3dtex.cpp |
 | `00110000` | 246/257 (96%) | mag/magsystem.cpp, dog/doglightpool.cpp, mag/maglife.cpp |
 | `00160000` | 257/268 (96%) | emy/emy_manager.cpp, emy/emy_out.cpp, emy/emy_main.cpp |
+| `00240000` | 328/340 (96%) | rx/rxfile.cpp, rx/rxsys.cpp, rx/rxthread.cpp |
 | `00130000` | 180/183 (98%) | mag/magscene.cpp, mag/magscenerender.cpp, mag/magscene2.cpp |
 | `00100000` | 301/304 (99%) | dog/dogactor.cpp, utl/utlgame.cpp, utl/utlmath.cpp |
 
 ## Reconstruction (src/)
 
-- reconstructed RoR functions: **5949**; stubs: **24**
+- reconstructed RoR functions: **5985**; stubs: **19**
 
 | file | reconstructed | stubs |
 |---|---|---|
@@ -164,7 +164,7 @@ Least-named game-code regions (64 KB blocks):
 | `src/msg/msgsystext.cpp` | 1 | 0 |
 | `src/rx/rxfile.cpp` | 168 | 0 |
 | `src/rx/rxsnd.cpp` | 222 | 0 |
-| `src/rx/rxsys.cpp` | 74 | 6 |
+| `src/rx/rxsys.cpp` | 110 | 1 |
 | `src/rx/rxthread.cpp` | 53 | 0 |
 | `src/sct/sctlayer.cpp` | 35 | 0 |
 | `src/sequence/seqcall.cpp` | 43 | 0 |
@@ -197,9 +197,10 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 179 TUs: todo 84, partial 1, verify 148, done 17
-- next: **None** (nothing on the frontier and no queued TU)
+- 179 TUs: todo 84, partial 2, verify 147, done 17
+- next: **rx/rxsys.cpp** (continuing a partial TU)
 - pinned queue: unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8
+- partial: `rx/rxsys.cpp` 110/123 -- Left: the System Monitor console 0x242c10..0x2432d8 (rxSysInitExceptionScreen stays a stub; 0x242c28 clear row, 0x242c70 scroll, 0x242cc8 LoadImage, 0x242d40 gl
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
 - verify: `bed/bedsubmode.cpp` 3/3 -- Complete; nothing on screen shows it yet. push / pop are reached only by the system message window (MagScene::openSysMsgWindow / closeSysMsgWindow, pulseMenu100
@@ -319,7 +320,6 @@ Least-named game-code regions (64 KB blocks):
 - verify: `msg/msgman.cpp` 124/124 -- Status verify: in the bus-stop room the message window shows MsgMan's key icon (S2dMes sprite 0) but no text, because the window's text path is stubbed: MagLife
 - verify: `rx/rxfile.cpp` 168/168 -- Status verify: every function in 0x2437f8..0x249b88 is written, but nothing can show it: main 0x2045a8 is still the placeholder (black screen), and the rxthread
 - verify: `rx/rxsnd.cpp` 222/222 -- Complete apart from two unreferenced trivia (0x2384b0 empty, 0x23a910 returns its argument). Screen black as before: sound has no picture and the boot reaches n
-- verify: `rx/rxsys.cpp` 74/119 -- Status verify: nothing calls rxSysInit yet - main 0x2045a8 is still the placeholder in src/main.cpp, so the screenshot is the black placeholder frame. Next: mai
 - verify: `rx/rxthread.cpp` 53/53 -- Complete; verify because main (unassigned@001fd424) is still the placeholder, so nothing calls rxThInit in the smoke run (black frame as before). A temporary ca
 - verify: `sct/sctlayer.cpp` 35/35 -- verify: a temporary self-test on two MAPUNIT.BIN packs (not committed) found every flat and sloped cell at its point, gave neighbour-chain paths both ways and s
 - verify: `sequence/seqcall.cpp` 43/43 -- TU complete: all 43 functions written; verify because no smoke run reaches native 252 (the boot pad stops at NowLoading) and sound has no picture. Decisions: st
@@ -351,6 +351,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 15:41 `rx/rxsys.cpp` partial: rx/rxsys.cpp session 2: removed the 5 boot stubs - ini parser (rxSysIniFindSection/ReadKey/FindKey/Find, key count and key-at helpers), tty bind/open/close, rxS
 - 2026-10-30 15:23 `task/tsk_attack.cpp` verify: TskAttack and TskDamage steps written: all 21 functions of 0x1fd424..0x20067c (was unassigned@001fd424, pinned as task/tsk_attack.cpp): the six attack steps (sw
 - 2026-10-30 15:05 `eff/effdust2.cpp` verify: unassigned@001704a4 split into eff/effdust2.cpp, efffire1.cpp, efffire2.cpp, efffog1.cpp, efffog2.cpp and all 28 functions written (EffDust2 .. EffFog2Prim, kin
 - 2026-10-30 15:04 `eff/efffog1.cpp` verify: EffFog1 written, all 4 functions: a camera-facing fog quad drifting along the camera x axis, reset every 540 frames, corner alpha keys per 60 frames with the le
@@ -358,7 +359,10 @@ Recent sessions:
 - 2026-10-30 15:03 `eff/efffire2.cpp` verify: EffFire2 written, all 4 functions: a world-oriented fire sprite cycling the four quarters of texture 0 every 4 frames
 - 2026-10-30 15:02 `eff/efffire1.cpp` verify: EffFire1 / EffFire1Ex written, all 7 functions: init, flicker liveMain, flame + glow renderMain, 5-frame fade liveActivateExec, depth; Ex follows an actor node;
 - 2026-10-30 14:37 `eff/effbreath.cpp` verify: EffBreath1 / EffBreath1Space / EffBreath2 / EffBreath2Prim / EffBreath2Ground, all 20 functions: actor breath in a box (ring of mouth points, farthest-first spr
-- 2026-10-30 14:13 `eff/efffoot.cpp` verify: EffFoot1 / EffFoot1Prim / EffFoot2 / EffFoot2Prim, all 20 functions: footstep dust puffs in a box and the PC / dog footprints; EffParam m_foot1 / m_foot1prim / 
+
+| TU (by frontier score) | state | done/stubs/total | KB | score | reached stubs |
+|---|---|---|---|---|---|
+| `rx/rxsys.cpp` | partial | 110/1/123 | 13.8 | 2 | 0 |
 
 ## Frontier (called by reconstructed code, not written yet)
 
@@ -369,17 +373,12 @@ Recent sessions:
 | `001be2cc` | FileReader::FileReader | 28 | ror | missing | game/gamfile.cpp |
 | `00192ac0` | mnuBase::mnuBase | 3 | ror | missing | mnu/mnubase.cpp |
 | `00192b3c` | mnuBase::~mnuBase | 3 | ror | missing | mnu/mnubase.cpp |
+| `002431c0` | rxSysInitExceptionScreen | 2 | ror | stub | rx/rxsys.cpp |
 | `0012ab18` | MagLifeBwnCtrl::reset | 2 | ror | missing | mag/maglifebwnctrl.cpp |
 | `00281cbc` | DogModel::__tf | 1 | sym | missing | dog/dogmodel.cpp |
-| `002413d8` | rxSysIniFind | 1 | ror | stub | rx/rxsys.cpp |
-| `00241a00` | rxSysOpenTty | 1 | ror | stub | rx/rxsys.cpp |
 | `001f9e38` | FUN_001f9e38 | 1 | - | missing | task/tsk_scene.cpp |
 | `0012a6a0` | MagLifeBwnCtrl::processPad | 1 | ror | missing | mag/maglifebwnctrl.cpp |
-| `00243560` | rxSysUpdateDevices | 1 | ror | stub | rx/rxsys.cpp |
 | `00174c44` | EffGeneric1::applyTexKeys | 1 | ror | missing | eff/effgeneric.cpp |
-| `00242960` | rxSysSetDebugHandlers | 1 | ror | stub | rx/rxsys.cpp |
-| `002431c0` | rxSysInitExceptionScreen | 1 | ror | stub | rx/rxsys.cpp |
-| `00241ac8` | rxSysTerm | 1 | lib-ctx | stub | rx/rxsys.cpp |
 | `001f7644` | VoiceManager::stop | 1 | ror | missing | task/tsk_scene.cpp |
 | `001f6c64` | DisplayMessage::DisplayMessage | 1 | ror | missing | task/tsk_scene.cpp |
 | `001f6edc` | SeManager::SeManager | 1 | ror | missing | task/tsk_scene.cpp |

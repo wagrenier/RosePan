@@ -25,6 +25,8 @@ int sceClose(int fd);
 int sceRead(int fd, void *buf, int size);
 int sceWrite(int fd, const void *buf, int size);
 int sceLseek(int fd, int offset, int whence);
+/* PORT: no host device answers an ioctl; always -1. */
+int sceIoctl(int fd, int req, void *arg);
 
 #ifdef __cplusplus
 }

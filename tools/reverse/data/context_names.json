@@ -32417,17 +32417,83 @@
   "was": "FUN_00240eb8",
   "why": "called once by main: hardware reset, hooks, devices, 'BootDevice', 'Rom Date', subsystems, IOP modules, 'Device[%s] %s', system.ini, save-data prefix"
  },
+ "002410b8": {
+  "name": "rxSysIniFindSection",
+  "tag": "ror-inferred",
+  "was": "FUN_002410b8",
+  "why": "scans lines for '[' + name + ']', returns the line after it (NULL when absent, the text itself for a NULL name); used by rxSysIniFind"
+ },
+ "002411d0": {
+  "name": "rxSysIniReadKey",
+  "tag": "ror-inferred",
+  "was": "FUN_002411d0",
+  "why": "copies a line up to '=' or EOL into out, trims trailing blanks before '=', returns the stop position"
+ },
+ "00241298": {
+  "name": "rxSysIniFindKey",
+  "tag": "ror-inferred",
+  "was": "FUN_00241298",
+  "why": "walks a section's lines (stops at '[', skips '#' and blank lines), matches the key read by rxSysIniReadKey, returns the value after '=' and blanks"
+ },
  "002413d8": {
   "name": "rxSysIniFind",
   "tag": "ror-inferred",
   "was": "FUN_002413d8",
   "why": "(out, text, section, key): the ini section / key search rxSysIniGetString wraps"
  },
+ "00241558": {
+  "name": "rxSysIniCountKeys",
+  "tag": "ror-inferred",
+  "was": "FUN_00241558",
+  "why": "counts the non-comment non-blank lines of a section up to the next '['"
+ },
+ "00241620": {
+  "name": "rxSysIniKeyAt",
+  "tag": "ror-inferred",
+  "was": "FUN_00241620",
+  "why": "copies the index-th key line's key (rxSysIniReadKey) of a section, returns its length"
+ },
+ "00241720": {
+  "name": "rxSysIniFindKeyCount",
+  "tag": "ror-inferred",
+  "was": "FUN_00241720",
+  "why": "rxSysIniFindSection then rxSysIniCountKeys"
+ },
+ "00241758": {
+  "name": "rxSysIniFindKeyAt",
+  "tag": "ror-inferred",
+  "was": "FUN_00241758",
+  "why": "rxSysIniFindSection then rxSysIniKeyAt"
+ },
  "002417c0": {
   "name": "rxSysIniGetString",
   "tag": "ror-inferred",
   "was": "FUN_002417c0",
   "why": "(out, section, key) over the loaded system.ini buffer 0x7cc7c0 when 0x2dba28 says it was read"
+ },
+ "00241808": {
+  "name": "rxSysIniGetKeyCount",
+  "tag": "ror-inferred",
+  "was": "FUN_00241808",
+  "why": "rxSysIniFindKeyCount over the loaded system.ini (0x7cc7c0) when s_iniLoaded; twin of rxSysIniGetString"
+ },
+ "00241848": {
+  "name": "rxSysIniGetKeyAt",
+  "tag": "ror-inferred",
+  "was": "FUN_00241848",
+  "why": "rxSysIniFindKeyAt over the loaded system.ini when s_iniLoaded"
+ },
+ "00241890": {
+  "name": "rxSysBindTtyRpc",
+  "tag": "ror-inferred",
+  "was": "FUN_00241890",
+  "why": "up to 10 sceSifBindRpc tries until the client's serve is set, prints binding / completed / bind error"
+ },
+ "00241968": {
+  "name": "rxSysBindTty",
+  "tag": "ror-inferred",
+  "was": "FUN_00241968",
+  "why": "sceSifInitRpc then binds the tty client 0x7ce7c0 to 0x80000220, sets s_ttyRpcBound"
  },
  "002419a8": {
   "name": "rxSysTtyWrite",
@@ -32441,6 +32507,12 @@
   "was": "FUN_00241a00",
   "why": "booted from a host device: binds the tty RPC (0x241968), else opens boot device + 0x3048c0 for writing into 0x2dba34"
  },
+ "00241a80": {
+  "name": "rxSysCloseTty",
+  "tag": "ror-inferred",
+  "was": "FUN_00241a80",
+  "why": "closes the tty file s_ttyFd and clears s_ttyRpcBound; first call of rxSysTerm"
+ },
  "00241ac8": {
   "name": "rxSysTerm",
   "tag": "lib-context",
@@ -32452,6 +32524,18 @@
   "tag": "ror-inferred",
   "was": "FUN_00241b20",
   "why": "strcpy into the IOP image name 0x2dbc50; main passes IOPRP300.IMG"
+ },
+ "00241b50": {
+  "name": "rxSysGetVMode",
+  "tag": "ror-inferred",
+  "was": "FUN_00241b50",
+  "why": "returns s_vmode 0x2dba1c (system.ini VMODE, 0 NTSC 1 PAL)"
+ },
+ "00241b60": {
+  "name": "rxSysGetFrameRate",
+  "tag": "ror-inferred",
+  "was": "FUN_00241b60",
+  "why": "50 when rxSysGetVMode is PAL, else 60"
  },
  "00241b90": {
   "name": "rxSysGetProductNumber",
@@ -32519,17 +32603,53 @@
   "was": "FUN_00242150",
   "why": "empty, tail of rxSysInit"
  },
+ "00242158": {
+  "name": "rxSysTermEnd",
+  "tag": "ror-inferred",
+  "was": "FUN_00242158",
+  "why": "empty, called by rxSysTerm right after rxSysCloseTty; rxSysInitEnd 0x242150's twin"
+ },
  "00242160": {
   "name": "rxSysCreateSema",
   "tag": "ror-inferred",
   "was": "FUN_00242160",
   "why": "CreateSema(init, max)"
  },
+ "00242188": {
+  "name": "rxSysBindRpc",
+  "tag": "ror-inferred",
+  "was": "FUN_00242188",
+  "why": "creates the client's semaphore, binds an IOP RPC id until served (rxsys : binding IOP module %08X)"
+ },
+ "00242268": {
+  "name": "rxSysUnbindRpc",
+  "tag": "ror-inferred",
+  "was": "FUN_00242268",
+  "why": "deletes the client's semaphore and sets it -1"
+ },
+ "002422a8": {
+  "name": "rxSysCallRpc",
+  "tag": "ror-inferred",
+  "was": "FUN_002422a8",
+  "why": "waits the client's semaphore, posts sceSifCallRpc NOWAIT with rxSysRpcDone as end func, spins on sceSifCheckStatRpc"
+ },
+ "00242368": {
+  "name": "rxSysRpcDone",
+  "tag": "ror-inferred",
+  "was": "FUN_00242368",
+  "why": "the RPC end callback: iSignalSema of the client's semaphore"
+ },
  "00242390": {
   "name": "rxSysInitSema",
   "tag": "ror-inferred",
   "was": "FUN_00242390",
   "why": "creates the two binary semaphores 0x2dbd98 / 0x2dbd94"
+ },
+ "002423d0": {
+  "name": "rxSysTermSema",
+  "tag": "ror-inferred",
+  "was": "FUN_002423d0",
+  "why": "deletes s_sema1 and s_printSema, the twin of rxSysInitSema"
  },
  "00242400": {
   "name": "rxSysLockPrint",
@@ -32597,11 +32717,41 @@
   "was": "FUN_002426b8",
   "why": "sceIoctl under the print lock"
  },
+ "00242710": {
+  "name": "rxSysLockConsole",
+  "tag": "ror-inferred",
+  "was": "FUN_00242710",
+  "why": "tail call of rxSysLockPrint"
+ },
+ "00242728": {
+  "name": "rxSysUnlockConsole",
+  "tag": "ror-inferred",
+  "was": "FUN_00242728",
+  "why": "tail call of rxSysUnlockPrint"
+ },
+ "00242740": {
+  "name": "rxSysExceptionHandler",
+  "tag": "ror-inferred",
+  "was": "FUN_00242740",
+  "why": "installed by rxSysSetDebugHandlers; once: resets VIF/VU/GS/DMA, opens the exception screen, prints epc/status/cause, registers by row and the stack, hangs (mainExceptionHandler's twin)"
+ },
  "00242960": {
   "name": "rxSysSetDebugHandlers",
   "tag": "ror-inferred",
   "was": "FUN_00242960",
   "why": "rx/rxsys.cpp range: once, SetDebugHandler(1..7, 10..13, 0x242740), old handlers at 0x2dbe4c / 0x2dbe70; main calls it after the memory hooks"
+ },
+ "00242a10": {
+  "name": "rxSysRestoreDebugHandlers",
+  "tag": "ror-inferred",
+  "was": "FUN_00242a10",
+  "why": "reinstalls the handlers rxSysSetDebugHandlers saved for causes 1-7 and 10-13"
+ },
+ "00242aa8": {
+  "name": "rxSysHexDump",
+  "tag": "ror-inferred",
+  "was": "FUN_00242aa8",
+  "why": "prints memory 16 bytes a line: address, hex bytes, printable chars"
  },
  "002431c0": {
   "name": "rxSysInitExceptionScreen",
@@ -32615,6 +32765,12 @@
   "was": "FUN_002433d8",
   "why": "empty, called by rxSysInit before rxSysInitModules"
  },
+ "002433e0": {
+  "name": "rxSysTermUser",
+  "tag": "ror-inferred",
+  "was": "FUN_002433e0",
+  "why": "empty, called by rxSysTerm; rxSysInitUser 0x2433d8's twin"
+ },
  "002433e8": {
   "name": "rxSysThreadCallback",
   "tag": "ror-inferred",
@@ -32627,17 +32783,41 @@
   "was": "FUN_00243400",
   "why": "builds four free lists, then rxfile / rxthread inits, rxThAddCallback(0x2433e8)"
  },
+ "002434f0": {
+  "name": "rxSysTermModules",
+  "tag": "ror-inferred",
+  "was": "FUN_002434f0",
+  "why": "closes the 64 rx files, removes rxSysThreadCallback, stops and terminates rxfile; rxSysInitModules' twin"
+ },
  "00243560": {
-  "name": "rxSysUpdateDevices",
+  "name": "rxSysSetFileContext",
   "tag": "ror-inferred",
   "was": "FUN_00243560",
-  "why": "unverified: per-tick work of rxSysThreadCallback, calls the rxfile device entry 0x2462d8 and 0x248710 (unknown thread type message)"
+  "why": "tail call of rxFileSetContext with rxSysThreadCallback's yielding flag: file context 1 while the main thread yields"
+ },
+ "00243578": {
+  "name": "rxSysDeviceControl",
+  "tag": "ror-inferred",
+  "was": "FUN_00243578",
+  "why": "calls the device's rxfile driver slot 0x8 (control) with a1, a2"
+ },
+ "002435c8": {
+  "name": "rxSysDeviceStatus",
+  "tag": "ror-inferred",
+  "was": "FUN_002435c8",
+  "why": "calls the device's rxfile driver slot 0x4 (getStatus) with a1"
  },
  "00243608": {
   "name": "rxSysInitFileDevice",
   "tag": "ror-inferred",
   "was": "FUN_00243608",
   "why": "main calls with 1; tail to rxfile 0x248778 (device checks)"
+ },
+ "00243620": {
+  "name": "rxSysGetFileDevice",
+  "tag": "ror-inferred",
+  "was": "FUN_00243620",
+  "why": "tail call of rxFileGetCurrent 0x248870, between rxSysInitFileDevice (rxFileSetCurrent) and rxSysSetFileDevice; was folded into rxSysInitFileDevice"
  },
  "00243638": {
   "name": "rxSysSetFileDevice",
@@ -34192,6 +34372,12 @@
   "tag": "lib-context",
   "was": "FUN_0025e1a8",
   "why": "libkernel wrapper: DIntr when interrupts are on, _EnableIntc(a0), EIntr"
+ },
+ "0025e300": {
+  "name": "iDisableIntc",
+  "tag": "lib-context",
+  "was": "FUN_0025e300",
+  "why": "libkernel iDisableIntc (DisableIntc 0x25e140 is the interrupt-masking variant): _iDisableIntc(cause) then sync; rxSysExceptionHandler calls it with 2 (INTC_VBLANK_S) where mainExceptionHandler's twin stops interrupts"
  },
  "00260110": {
   "name": "scePrintf",
