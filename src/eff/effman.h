@@ -61,6 +61,10 @@ struct EffParam
         } m_find;               // kind 0x32 (EffFindItem1::init)
         struct
         {
+            float m_pos[3];     // ROR 0x10: the gun's gun_mazzle node, world space
+        } m_muzzle;             // kind 0x26 (MagLifePC::createMuzzleEff)
+        struct
+        {
             float m_pos[3];     // ROR 0x10: the PC actor's m_trans
             float m_rot[3];     // ROR 0x1c: its m_rotate
             int   m_shots;      // ROR 0x28: MagLifePC::m_shots
