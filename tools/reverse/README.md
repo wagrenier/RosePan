@@ -117,6 +117,7 @@ The bootstrap host task copies ReiPan's platform layer; these hooks must survive
 | `ROSEPAN_AUTOPAD`: scripted pad 0, `<read>:<BUTTON>[*<reads>],...`, host input masked | sdk/libpad.cpp | build.py --pad, settings.smoke_pad |
 | `ROSEPAN_DATA_DIR`: the game's data folder | io/reipan_paths.cpp | build.py ($ROSEPAN_DATA) |
 | `ROSEPAN_SKIP_INTRO`: 0 / 1 over rosepan.ini's `[game] skip_intro` (the boot logos and movies) | rosepan_config.cpp, mnu/mnutitle.cpp | build.py / gdbrun.py set 0 unless given, so the pad's timing holds |
+| `ROSEPAN_RXSNDDRV_LOG=all`: log every RXSNDDRV RPC command (not the per-frame status polls 0x72 / 0x83 / 0xa3 / 0xb3) and every ADPCM stream start / underrun / end, instead of the first few | iop/rxsnddrv/rpc.cpp, adpcm.cpp | the run log |
 | `ROSEPAN_AUDIO_DUMP`: a file path; the host mixer appends its output there as raw s16 stereo 48 kHz (1 MB buffered, so a killed run loses the last ~5 s) | sdk/iop_voice.cpp | audiocheck.py |
 | `ROSEPAN_GDB_DIR`, the game thread named `RosePanGame` | os/reipan_host.cpp | gdbrun.py / gdbdrive.py |
 | `[stub] <name> (ROR 0x%08x) reached` from `ROSEPAN_STUB` / `ROSEPAN_BRIDGE` | common/reipan_stub.h | tus.py (reached stubs rank first), status.py, stubgen.py |
