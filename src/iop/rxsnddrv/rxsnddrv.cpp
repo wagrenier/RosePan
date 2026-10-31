@@ -260,10 +260,10 @@ u_int RxSndDrvCommand(u_int cmd, u_char *reply, const u_int *data)
         *(int *)(reply + 0x100) = RxSndDrvBgmStatus(reply, reply + 0x80);
         return 0;
     case 0x73:
-        RxSndDrvBgmCmd73((char)data[0], ArgByte(data, 1), data + 1);
+        RxSndDrvBgmChannelSet((char)data[0], ArgByte(data, 1), data + 1);
         return 0;
     case 0x74:
-        RxSndDrvBgmCmd74((char)data[0], ArgByte(data, 1), data + 1);
+        RxSndDrvBgmTrackSet((char)data[0], ArgByte(data, 1), data + 1);
         return 0;
 
     case 0x80:

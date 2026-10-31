@@ -15,7 +15,8 @@
  *    xvab.cpp      0x2330..0x2e00  XVAB sound banks and the chunk file format
  *    xseq.cpp      0x2e00..0x35c0  XSEQ sequences (BGM's MIDI data)
  *    voice.cpp     0x35c0..0x45b0  the 48 SPU2 voices: allocation, registers
- *    (not yet)     0x45b0..        BGM, SE, NOTE, ADPCM,
+ *    bgm.cpp       0x45b0..0x6ab0  the BGM MIDI sequencer
+ *    (not yet)     0x6ab0..        SE, NOTE, ADPCM,
  *                                  PCM: stubs.cpp until reconstructed
  *
  *  Functions carry `IOP 0x<addr>` (never `ROR 0x`: these are IOP addresses,
@@ -42,6 +43,7 @@
 
 /* ---- debug flags (system parameter 0; RxSndDrvGetDebugFlags) ----------- */
 #define RXSNDDRV_DBG_ERROR   0x1     /* "snddrv : invalide RPC command" and the other errors */
+#define RXSNDDRV_DBG_WARN    0x2     /* unsupported MIDI controllers / meta events, slot shortages */
 #define RXSNDDRV_DBG_INFO    0x4     /* start-up / open / close messages */
 
 /* ---- rxsnddrv.cpp ------------------------------------------------------ */
@@ -223,15 +225,18 @@ void  RxSndDrvVoiceSetEnable(u_int voice, u_int enable); // IOP 0x0000451c
 void  RxSndDrvVoiceGetFlags(u_char *reply);         // IOP 0x00004540
 void  RxSndDrvVoiceFree(int voice);                 // IOP 0x00004570
 
-/* ---- not reconstructed yet (stubs.cpp) --------------------------------- */
+/* ---- bgm.cpp ----------------------------------------------------------- */
 
 void  RxSndDrvBgmInit(void);                        // IOP 0x000045b0
-int   RxSndDrvBgmOpen(u_int a, u_int b);            // IOP 0x00004680
+int   RxSndDrvBgmOpen(u_int slot, u_int xseq);      // IOP 0x00004680
 void  RxSndDrvBgmSet(u_int slot, const u_int *data);    // IOP 0x000059ec
-int   RxSndDrvBgmStatus(u_char *reply, u_char *reply2); // IOP 0x00005b68
-void  RxSndDrvBgmCmd73(int a, int b, const u_int *data); // IOP 0x00005c10
-void  RxSndDrvBgmCmd74(int a, int b, const u_int *data); // IOP 0x00005d20
+int   RxSndDrvBgmStatus(u_char *reply, u_char *values); // IOP 0x00005b68
+void  RxSndDrvBgmChannelSet(int slot, int channel, const u_int *data); // IOP 0x00005c10
+void  RxSndDrvBgmTrackSet(int slot, u_int track, const u_int *data);   // IOP 0x00005d20
 void  RxSndDrvBgmTick(void);                        // IOP 0x00005e60
+
+/* ---- not reconstructed yet (stubs.cpp) --------------------------------- */
+
 void  RxSndDrvSeInit(void);                         // IOP 0x00006ab0
 void  RxSndDrvSeSet(u_int voice, const u_int *data);    // IOP 0x00006bcc
 int   RxSndDrvSePlay(int voice, int xvab, int prog, int note);  // IOP 0x000084b0
@@ -240,6 +245,18 @@ int   RxSndDrvSeStatus(u_char *reply);              // IOP 0x00008800
 void  RxSndDrvSeTick(void);                         // IOP 0x00008878
 void  RxSndDrvNoteTick(void);                       // IOP 0x000093c0
 void  RxSndDrvNoteInit(void);                       // IOP 0x000098e4
+/* The NOTE layer as the BGM sequencer calls it: a NOTE id from Play (-1
+ * none), then key off, free and its parameters; GetFlags bit 1 = sounding. */
+int   RxSndDrvNotePlay(int xvab, int program, int key, int a, int b); // IOP 0x00008f10
+void  RxSndDrvNoteKeyOff(int note);                 // IOP 0x00009974
+void  RxSndDrvNoteFree(int note);                   // IOP 0x000099c8
+void  RxSndDrvNoteSetSwitch(int note, int on);      // IOP 0x00009ab0
+void  RxSndDrvNoteSetVolume(int note, short l, short r); // IOP 0x00009ae4
+void  RxSndDrvNoteSetVelocity(int note, int velocity);   // IOP 0x00009b1c
+void  RxSndDrvNoteSetPan(int note, int pan);        // IOP 0x00009bb0
+void  RxSndDrvNoteSetPitch(int note, int scale);    // IOP 0x00009c0c
+void  RxSndDrvNoteSetBend(int note, int bend);      // IOP 0x00009c40
+u_int RxSndDrvNoteGetFlags(int note);               // IOP 0x00009db4
 int   RxSndDrvAdpcmOpen(int id, int pitch, const u_int *data, int a, u_int iop, int size, int b); // IOP 0x00009eb0
 void  RxSndDrvAdpcmInit(void);                      // IOP 0x0000acac
 void  RxSndDrvAdpcmData(int id, int size, int a);  // IOP 0x0000ad94

@@ -2554,6 +2554,29 @@ never asserts): sessions name them (`tus.py define --why`).
   ticks and calls done; free 0x4570. The tick 0x35c0 (per V-blank) reads every ENVX, writes pending
   registers, the six switch words per core, then KON (mask & on) / KOFF (mask & ~on). Status: 0x90
   ENVX[48], 0x92 flags[48], 0x93 {kind 0 ENVX, 1 vol, 2 pitch, 3 switches, 4 priority, 5 ADSR}[48].
+- **BGM 0x70..0x74** (`src/iop/rxsnddrv/bgm.cpp`, 2026-10-30): a standard-MIDI sequencer. One block
+  0x7a90 at 0x1b540: 0x40 notes of 0x14 {next, track, channel, s8 NOTE id, dirty, state 0 on / 1
+  released / 2 killed, key, velocity, sostenuto}, free head 0x1ba40; 0x100 loops of 0xc {next, pos, count,
+  times}, head 0x1c644; 0x40 tracks of 0x3c {next, TRCK, pos, start, offset, no, dirty, ended, running
+  status, notes, wait, vol L/R 0x80, pitch 0x1000, loops, pending[2] {mask, L | R << 16}}, head 0x1d548;
+  0x20 slots of 0x2d4 at 0x1d54c {next (active list head 0x22fcc), xseq, flags (1 used, 2 playing, 4 ended,
+  8 paused, 0x10000 active, 0x20000 stopped; the low byte is the 0x72 status), division (HEAD +2 s16),
+  tempo (us / quarter, 500000), tickWait, frameStep, no, switch, dirty, vol L/R 0x80, pitch, speed
+  0x1000, seek, tracks, 16 channels of 0x28, notes, pending[2] of 0x10 {mask, stop, pause, switch, vol,
+  pitch, speed}}. Timing 0x60d8: tickWait = tempo * 60 / (division * 1000000 >> 12), frameStep = rate *
+  speed / 60; a track runs events while wait <= 0, a delta adds n * tickWait, a V-blank takes frameStep.
+  0x71 params: 0 stop (2 cut, else release), 1 pause (1 release, 2 cut, else resume), 2 NOTE switch, 3
+  volume, 4 pitch, 5 speed, 6 seek (direct). **0x73 is a channel's volume, 0x74 a track's** (by HEAD
+  index), both {3, L | R << 16}. 0x72 reply: {no, status} per active slot and the first track's offset.
+  Notes: 0x8f10(xvab = xseq bank[channel bank], program, key, -1, -1) -> NOTE id; the update pushes
+  0x9ab0 switch, 0x9b1c velocity, 0x9bb0 pan, 0x9ae4 volume (vol * expr >> 7 * channel * track * slot,
+  each >> 7), 0x9c0c pitch (slot * track >> 12), 0x9c40 bend ((msb - 0x40) * 0x40); a note goes when
+  0x9db4 bit 1 clears (0x99c8 frees it). Controllers 0, 1, 5, 6, 7, 10, 11, 0x20, 0x26, 0x40 (>= 0x40
+  holds), 0x41, 0x42, 0x54, 0x60..0x65, 0x78, 0x79, 0x7b, 0x7e mono / 0x7f poly. **Loops are NRPN:**
+  selecting NRPN 0 or 0xa00 pushes a loop at the next event, its data entry sets the repeat count (the
+  data word's low byte, 0 forever); selecting NRPN 1 or 0xf00 jumps back. Meta 0x2f ends a track, 0x51
+  sets the tempo; sysex skipped. Debug flag 2 = warnings (unsupported CC / RPN / NRPN / meta, no slot).
+  The title music is not BGM: the boot and the title screen send ADPCM 0xa0..0xa4 and no 0x60 / 0x70.
 
 ## Disc and data files
 

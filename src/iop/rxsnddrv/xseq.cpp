@@ -12,7 +12,7 @@
  *  The file is a chunk file like XVAB (xvab.cpp), magic "XSEQ", but the
  *  driver links its own copy of the chunk finder for it (0x34a8..0x35c0;
  *  its version < 0x200 walk does not stop at a zero tag).  The HEAD chunk:
- *    +0 u8 track count, +1 u8 "relocated", +4 int offset[count] to the
+ *    +0 u8 track count, +1 u8 "relocated", +2 s16 division, +4 int offset[count] to the
  *    tracks' TRCK records, 8 bytes each whose second word is the offset of
  *    the track's event data.
  *  Version < 0x200 stores those offsets from the file start: opening rebases
@@ -43,7 +43,7 @@ struct RxSndDrvXseqHead
 {
     u_char  m_tracks;                   // +0x00
     u_char  m_relocated;                // +0x01
-    u_short m_pad;                      // +0x02
+    short   m_division;                 // +0x02: ticks a quarter note (bgm.cpp)
     int     m_offset[1];                // +0x04: [m_tracks], into TRCK, 0 none
 };
 static_assert(offsetof(RxSndDrvXseqHead, m_relocated) == 0x1, "RxSndDrvXseqHead::m_relocated");
