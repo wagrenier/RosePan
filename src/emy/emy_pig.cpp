@@ -256,7 +256,7 @@ void PigMain::selectOut()
         m_emy_out->Init();
     }
     int n = m_trans->m_inputs;
-    const char *row = m_trans->m_table + m_state * n;
+    const char *row = m_trans->table() + m_state * n;
     // PORT: the ROM writes as many words as the table has inputs; the
     // host array holds 24 (EE 0x204..0x264).
     if (n > 24)
