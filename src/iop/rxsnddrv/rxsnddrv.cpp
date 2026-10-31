@@ -278,16 +278,16 @@ u_int RxSndDrvCommand(u_int cmd, u_char *reply, const u_int *data)
         return 0;
 
     case 0x90:
-        RxSndDrvCmd90(reply);
+        RxSndDrvVoiceGetEnvxAll(reply);
         return 0;
     case 0x91:
-        RxSndDrvCmd91(data[0], data[1]);
+        RxSndDrvVoiceSetEnable(data[0], data[1]);
         return 0;
     case 0x92:
-        RxSndDrvCmd92(reply);
+        RxSndDrvVoiceGetFlags(reply);
         return 0;
     case 0x93:
-        RxSndDrvCmd93(data[0], reply);
+        RxSndDrvVoiceGetTable(data[0], reply);
         return 0;
 
     case 0xa0:

@@ -43,6 +43,8 @@
 #define SD_P_BVOLR          0x1080
 
 /* ---- switches (sceSdSetSwitch / sceSdGetSwitch), one bit per voice ----- */
+#define SD_S_PMON           0x1300  /* pitch modulation by the voice below  */
+#define SD_S_NON            0x1400  /* noise instead of the sample          */
 #define SD_S_KON            0x1500
 #define SD_S_KOFF           0x1600
 #define SD_S_ENDX           0x1700
@@ -127,6 +129,9 @@ int    sceSdBlockTransStatus(short chan, short flag);
 
 int    sceSdSetEffectAttr(int core, void *attr);
 int    sceSdProcBatch(sceSdBatch *batch, u_int returns[], u_int num);
+/* The PITCH register value that plays `note` + `fine` (1/128 semitones) of a
+ * sample recorded at `center_note` + `center_fine`: 0x1000 at the centre. */
+u_short sceSdNote2Pitch(u_short center_note, u_short center_fine, u_short note, short fine);
 int    sceSdClearEffectWorkArea(int core, int channel, int effect_mode);
 
 /* Completion callbacks.  The transfer handler fires when a voice/block upload

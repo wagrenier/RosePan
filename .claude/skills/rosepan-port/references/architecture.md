@@ -2540,6 +2540,20 @@ never asserts): sessions name them (`tus.py define --why`).
   records whose second word is the track data; version < 0x200 offsets are rebased on HEAD at open
   (0x2fa0, dir +1) and back at close. The boot sends no XSEQ commands; no plain XSEQ file is on the
   disc (only one 'XSEQ' string inside DATA/CH/CHARA.RPK), so the format is unchecked against data.
+- **Voices 0x90..0x93** (`src/iop/rxsnddrv/voice.cpp`, 2026-10-30): state 0xab8 at 0x1aa80 {stereo
+  (0 mono: L = R = (|L| + |R|) / 2), 48 voices of 0x38 at +4, next[3], exclude[3][2] (group 1 core 0
+  only, group 2 core 1 only), keyMask[2], keyOn[2]}. Voice v = core v / 24, channel v % 24. Voice
+  {priority, age, no, flags (1 active, 2 owned, 4 keyed, 8 released, 0x10 auto-free), quiet, fade 0x80,
+  pending (1 SSA+ADSR, 2 LSAX, 4 switches, 8 volume, 0x10 pitch), switch bits (1 dry, 2 reverb, 4 NON,
+  8 PMON), s16 pitch, SSA, LSAX, ADSR1/2, vol L/R (register << 7), envx, done(voice, reason, arg),
+  arg, enable (0x91), owner}. Alloc 0x3b80(voice or -1, priority, autoFree, group, owner, done, arg):
+  first takes back the owner's voices, then the group's first free enabled voice from next[group], else
+  steals the largest priority, then the oldest. Owners write through 0x409c sample / 0x40d0 loop /
+  0x40fc switches / 0x4128 volume 0..0x7f / 0x4160 raw volume / 0x4190 pitch (sceSdNote2Pitch * scale
+  >> 12) / 0x4208 key on / 0x429c key off; release 0x3fcc(voice, reason, noFade) keys off, fades 8
+  ticks and calls done; free 0x4570. The tick 0x35c0 (per V-blank) reads every ENVX, writes pending
+  registers, the six switch words per core, then KON (mask & on) / KOFF (mask & ~on). Status: 0x90
+  ENVX[48], 0x92 flags[48], 0x93 {kind 0 ENVX, 1 vol, 2 pitch, 3 switches, 4 priority, 5 ADSR}[48].
 
 ## Disc and data files
 

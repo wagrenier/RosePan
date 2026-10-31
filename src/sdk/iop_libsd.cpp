@@ -53,6 +53,7 @@
 #include "iop_reverb.h"
 #include "iop_host.h"           /* RosePan_IopMemIsBareOffset */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -159,6 +160,10 @@ void sceSdSetParam(u_short entry, u_short value)
 
     if (EntryReg(entry) < SD_P_MMIX)
     {
+        /* Voice numbers past 23 name no voice: RXSNDDRV's defaults batch
+         * clears "voice 31" of both cores. */
+        if (EntryVoice(entry) >= SPU_VOICE_NUM)
+            return;
         core->voice[EntryVoice(entry)].param[reg & 7] = value;
         RosePan_VoiceSetParam(EntryCore(entry), EntryVoice(entry), reg & 7, value);
     }
@@ -210,7 +215,7 @@ u_short sceSdGetParam(u_short entry)
     int     reg  = EntryReg(entry) >> 8;
 
     if (EntryReg(entry) < SD_P_MMIX)
-        return core->voice[EntryVoice(entry)].param[reg & 7];
+        return EntryVoice(entry) < SPU_VOICE_NUM ? core->voice[EntryVoice(entry)].param[reg & 7] : 0;
 
     return core->param[reg & 0x1f];
 }
@@ -289,6 +294,9 @@ void sceSdSetAddr(u_short entry, u_int value)
 {
     SdCore *core = &sd_core[EntryCore(entry)];
 
+    if (EntryReg(entry) >= SD_VA_SSA && EntryVoice(entry) >= SPU_VOICE_NUM)
+        return;                         /* no such voice (sceSdSetParam) */
+
     switch (EntryReg(entry))
     {
     case SD_VA_SSA:
@@ -318,7 +326,10 @@ void sceSdSetAddr(u_short entry, u_int value)
 u_int sceSdGetAddr(u_short entry)
 {
     SdCore  *core  = &sd_core[EntryCore(entry)];
-    SdVoice *voice = &core->voice[EntryVoice(entry)];
+    SdVoice *voice = &core->voice[EntryVoice(entry) < SPU_VOICE_NUM ? EntryVoice(entry) : 0];
+
+    if (EntryReg(entry) >= SD_VA_SSA && EntryVoice(entry) >= SPU_VOICE_NUM)
+        return 0;                       /* no such voice (sceSdSetParam) */
 
     switch (EntryReg(entry))
     {
@@ -660,6 +671,25 @@ int sceSdClearEffectWorkArea(int core, int channel, int effect_mode)
  *  Each command is the call of the same name; the get forms store into
  *  `returns` when it is given.  Answers how many were processed.
  * ------------------------------------------------------------------------ */
+
+/* --------------------------------------------------------------------------
+ *  Pitch
+ *
+ *  RXSNDDRV's voices (sceSdNote2Pitch is one of its two libsd imports the
+ *  FF ports never needed).  The SDK computes it from semitone and fine
+ *  tables; 2^(cents / 1200) gives the same curve.  Clamped to the u_short
+ *  the SDK answers.
+ * ------------------------------------------------------------------------ */
+
+u_short sceSdNote2Pitch(u_short center_note, u_short center_fine, u_short note, short fine)
+{
+    int    offset = ((int)note - (int)center_note) * 128 + fine - (int)center_fine;
+    double pitch  = 4096.0 * pow(2.0, offset / (12.0 * 128.0));
+
+    if (pitch > 65535.0)
+        return 0xffff;
+    return (u_short)(pitch + 0.5);
+}
 
 int sceSdProcBatch(sceSdBatch *batch, u_int returns[], u_int num)
 {

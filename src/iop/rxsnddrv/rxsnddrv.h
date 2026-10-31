@@ -14,7 +14,8 @@
  *    effect.cpp    0x1ca0..0x2330  per-core SPU2 reverb
  *    xvab.cpp      0x2330..0x2e00  XVAB sound banks and the chunk file format
  *    xseq.cpp      0x2e00..0x35c0  XSEQ sequences (BGM's MIDI data)
- *    (not yet)     0x35c0..        voices, BGM, SE, NOTE, ADPCM,
+ *    voice.cpp     0x35c0..0x45b0  the 48 SPU2 voices: allocation, registers
+ *    (not yet)     0x45b0..        BGM, SE, NOTE, ADPCM,
  *                                  PCM: stubs.cpp until reconstructed
  *
  *  Functions carry `IOP 0x<addr>` (never `ROR 0x`: these are IOP addresses,
@@ -193,15 +194,37 @@ u_char *RxSndDrvXseqChunkFind(const void *file, u_int tag);   // IOP 0x000034a8
 u_char *RxSndDrvXseqChunkFindV1(const void *file, u_int tag); // IOP 0x00003518
 u_char *RxSndDrvXseqChunkFindV2(const void *file, u_int tag); // IOP 0x00003568
 
-/* ---- not reconstructed yet (stubs.cpp) --------------------------------- */
+/* ---- voice.cpp --------------------------------------------------------- */
+
+/* Told when an owner loses its voice: reason 0 it ended or was released,
+ * 1 another allocation took it. */
+typedef void (*RxSndDrvVoiceDone)(int voice, int reason, void *arg);
 
 void  RxSndDrvVoiceTick(void);                      // IOP 0x000035c0
+int   RxSndDrvVoiceAlloc(int voice, int priority, int autoFree, int group, int owner,
+                         RxSndDrvVoiceDone done, void *arg); // IOP 0x00003b80
 void  RxSndDrvVoiceInit(void);                      // IOP 0x00003eb8
 void  RxSndDrvVoiceSetOutputMode(int mode);         // IOP 0x00003f6c
-void  RxSndDrvCmd90(u_char *reply);                 // IOP 0x00004384
-void  RxSndDrvCmd93(u_int a, u_char *reply);        // IOP 0x000043b4
-void  RxSndDrvCmd91(u_int a, u_int b);              // IOP 0x0000451c
-void  RxSndDrvCmd92(u_char *reply);                 // IOP 0x00004540
+void  RxSndDrvVoiceRelease(int voice, int reason, int noFade); // IOP 0x00003fcc
+void  RxSndDrvVoiceSetSample(int voice, u_int ssa, u_short adsr1, u_short adsr2); // IOP 0x0000409c
+void  RxSndDrvVoiceSetLoop(int voice, u_int lsax);  // IOP 0x000040d0
+void  RxSndDrvVoiceSetSwitch(int voice, u_char bits); // IOP 0x000040fc
+void  RxSndDrvVoiceSetVolume(int voice, int l, int r);    // IOP 0x00004128
+void  RxSndDrvVoiceSetVolumeRaw(int voice, int l, int r); // IOP 0x00004160
+void  RxSndDrvVoiceSetPitch(int voice, u_short center, u_short centerFine, u_short note,
+                            short fine, int scale); // IOP 0x00004190
+void  RxSndDrvVoiceKeyOn(int voice);                // IOP 0x00004208
+void  RxSndDrvVoiceKeyOff(int voice);               // IOP 0x0000429c
+u_short RxSndDrvVoiceGetEnvx(int voice);            // IOP 0x00004340
+void  RxSndDrvVoiceGetEnvxAll(u_char *reply);       // IOP 0x00004384
+void  RxSndDrvVoiceGetTable(u_int kind, u_char *reply); // IOP 0x000043b4
+u_int RxSndDrvVoiceGetNax(int voice);               // IOP 0x00004468
+void  RxSndDrvVoiceSetEnable(u_int voice, u_int enable); // IOP 0x0000451c
+void  RxSndDrvVoiceGetFlags(u_char *reply);         // IOP 0x00004540
+void  RxSndDrvVoiceFree(int voice);                 // IOP 0x00004570
+
+/* ---- not reconstructed yet (stubs.cpp) --------------------------------- */
+
 void  RxSndDrvBgmInit(void);                        // IOP 0x000045b0
 int   RxSndDrvBgmOpen(u_int a, u_int b);            // IOP 0x00004680
 void  RxSndDrvBgmSet(u_int slot, const u_int *data);    // IOP 0x000059ec
