@@ -78,6 +78,7 @@ python refresh.py          # all of the above that is not a one-time write, in o
 | `stubgen.py` | Undefined references -> `ROSEPAN_STUB` definitions in their TU's file (address from a trailing `// ROR 0x...` on the declaration, else the Ghidra name, also `Class::Method`). |
 | `callcheck.py` | Calls in each `ROR 0x...`-annotated function vs RoR's callees (jal + tail jumps), by name's last component or the source definition at that address; `// callcheck: A, B (why)` explains invisible calls (names may end in [], e.g. operator_new[] for a C++ new[]). |
 | `layoutcheck.py` | Every game header on its own under MinGW GCC and MSVC so both evaluate the `static_assert` layouts; lints structs without asserts (or a `layout: host` note), plain `long`, `wchar_t`, `packed`. |
+| `audiocheck.py` | The sound test without a listener: reads the raw mix a run dumps (`build.py --run N --env ROSEPAN_AUDIO_DUMP=<abs path>/work/audio/mix.raw`), prints RMS / peak dBFS per interval (`--every S`) and the stretches of sound and silence, writes `mix.wav` for the user to listen to. Audio time is wall time, not frames. |
 | `gdbrun.py` / `gdbdrive.py` | The game under CLion's gdb: a fault holds it and writes `work/gdb/crash.txt`; `--cmd` inspects, `--break` stops a hang. |
 | `autopilot.py` | The unattended chain: one headless `claude -p "/rosepan-port tu <TU>"` per TU on a fixed allow-list, verified (finished, committed, clean, green), usage limits waited out and the session resumed. Run it yourself from a terminal. |
 | `routine.md` | The prompt for the desktop app's scheduled task `rosepan-next-tu` (preflight, one TU, push once approved). |
@@ -116,6 +117,7 @@ The bootstrap host task copies ReiPan's platform layer; these hooks must survive
 | `ROSEPAN_AUTOPAD`: scripted pad 0, `<read>:<BUTTON>[*<reads>],...`, host input masked | sdk/libpad.cpp | build.py --pad, settings.smoke_pad |
 | `ROSEPAN_DATA_DIR`: the game's data folder | io/reipan_paths.cpp | build.py ($ROSEPAN_DATA) |
 | `ROSEPAN_SKIP_INTRO`: 0 / 1 over rosepan.ini's `[game] skip_intro` (the boot logos and movies) | rosepan_config.cpp, mnu/mnutitle.cpp | build.py / gdbrun.py set 0 unless given, so the pad's timing holds |
+| `ROSEPAN_AUDIO_DUMP`: a file path; the host mixer appends its output there as raw s16 stereo 48 kHz (1 MB buffered, so a killed run loses the last ~5 s) | sdk/iop_voice.cpp | audiocheck.py |
 | `ROSEPAN_GDB_DIR`, the game thread named `RosePanGame` | os/reipan_host.cpp | gdbrun.py / gdbdrive.py |
 | `[stub] <name> (ROR 0x%08x) reached` from `ROSEPAN_STUB` / `ROSEPAN_BRIDGE` | common/reipan_stub.h | tus.py (reached stubs rank first), status.py, stubgen.py |
 | log lines `[W]` / `[E]` for warnings and errors on stdout | io/reipan_log.cpp | build.py --run summary |
