@@ -166,66 +166,6 @@ u_int RxSndDrvNoteGetFlags(int note)
     return 0;
 }
 
-// stub of IOP 0x00009eb0
-int RxSndDrvAdpcmOpen(int id, int pitch, const u_int *data, int a, u_int iop, int size, int b)
-{
-    (void)b;
-    (void)size;
-    (void)iop;
-    (void)a;
-    (void)data;
-    (void)pitch;
-    (void)id;
-    RXSNDDRV_STUB("0x00009eb0");
-    return 0;
-}
-
-// stub of IOP 0x0000acac
-void RxSndDrvAdpcmInit(void)
-{
-    RXSNDDRV_STUB("0x0000acac");
-}
-
-// stub of IOP 0x0000ad94
-void RxSndDrvAdpcmData(int id, int size, int a)
-{
-    (void)a;
-    (void)size;
-    (void)id;
-    RXSNDDRV_STUB("0x0000ad94");
-}
-
-// stub of IOP 0x0000aea0
-void RxSndDrvAdpcmSet(u_int id, const u_int *data)
-{
-    (void)data;
-    (void)id;
-    RXSNDDRV_STUB("0x0000aea0");
-}
-
-// stub of IOP 0x0000b01c
-void RxSndDrvAdpcmChannelSet(int a, int b, const u_int *data)
-{
-    (void)data;
-    (void)b;
-    (void)a;
-    RXSNDDRV_STUB("0x0000b01c");
-}
-
-// stub of IOP 0x0000b160
-int RxSndDrvAdpcmStatus(u_char *reply)
-{
-    (void)reply;
-    RXSNDDRV_STUB("0x0000b160");
-    return 0;
-}
-
-// stub of IOP 0x0000b1dc
-void RxSndDrvAdpcmTick(void)
-{
-    RXSNDDRV_STUB("0x0000b1dc");
-}
-
 // stub of IOP 0x0000b4a0
 void RxSndDrvPcmInit(void)
 {
