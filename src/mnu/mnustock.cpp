@@ -1147,6 +1147,11 @@ void MnuStock::init(DogTexInfo *tex)
     m_row = 0;
     m_index = 0;
     m_spr.init(0x8a);
+    /* PC: the pattern image now, not only in setDisp: exec's setupLists runs
+     * before setDisp and hands SprMan anim tables by EE address, which the
+     * ROM uses as they are and the host resolves through SprMan::eePtr. */
+    m_spr.m_pattern = mnuStockPattern;
+    m_spr.m_pattern_ee = MNUSTOCKPATTERN_EE;
     m_spr.m_tex.m_tex_info = tex;
     open();
     m_init = 1;
