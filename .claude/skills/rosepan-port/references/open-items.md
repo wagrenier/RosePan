@@ -42,7 +42,7 @@ title menu plays bank 0 SE requests (0, 3) and (0, 7) on slot 63, each keying on
 slot is stopped, reaped and reused; area bank 3 request (11, 11) starts two notes; no unknown SESQ
 codes. **The user should hear the title menu's cursor / confirm sounds** with ROSEPAN_RXSNDDRV=1
 (unchecked by ear). **Next session: PCM (0xb4a0..0xce84)**, the last stubs in stubs.cpp; then switch
-the default from the stand-in src/sdk/iop_rxsnd.cpp to the reconstruction. Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
+the default from the stand-in src/sdk/iop_rxsnd.cpp to the reconstruction. **Session 9 (2026-10-30, partial)** wrote PCM (0xb4a0..0xce84, pcm.cpp; stubs.cpp deleted: every function of the driver is reconstructed) and made the reconstruction the default: **a plain build now plays sound** (the user asked why their builds were silent while the session runs were not: those runs set ROSEPAN_RXSNDDRV=1). ROSEPAN_RXSNDDRV=0 still selects the silent stand-in. No smoke run opens a PCM stream yet (the opening movie streams ADPCM), so PCM is unheard. Next for this host task: the user listens (title BGM, menu SEs, movie sound); then delete iop_rxsnd.cpp and the switch, and close the host task. Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
 of all 229 functions; `iopdec.py dump` refreshes it when names change in Ghidra). What should be
 heard: the title BGM on the title screen, then the bus-stop BGM and footstep / UI SEs; the user
 listens.
@@ -1330,6 +1330,8 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
 - 2026-10-30 (same session): **the reconstruction runs only with `ROSEPAN_RXSNDDRV=1`**; the silent
   stand-in `src/sdk/iop_rxsnd.cpp` stays the default until every command the boot sends is
   answered for real, then it is deleted and the switch removed.
+  Session 9 (2026-10-30) flipped the default once every command was answered but kept the
+  stand-in behind ROSEPAN_RXSNDDRV=0 until the user has heard the reconstruction; delete it after that.
 - 2026-10-30 (same session, platform layer): the host IOP gained event flags
   (Create / Set / iSet / Clear / WaitEventFlag on the semaphore table, released at shutdown),
   WaitVblankEnd (a 60 Hz steady clock, DelayThread so the big lock drops), QueryMemSize, and libsd

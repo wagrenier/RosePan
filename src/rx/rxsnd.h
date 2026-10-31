@@ -214,7 +214,7 @@ struct RxSndPcmStatusEntry              /* EE 0xc */
 {
     u_char m_id;                        // ROR +0x0
     u_char m_status;                    // ROR +0x1
-    short  m_2;                         // ROR +0x2: stored in RxSndPcm::m_queued (unverified)
+    short  m_2;                         // ROR +0x2: the IOP's filled blocks not yet mixed (pcm.cpp), stored in RxSndPcm::m_queued
     int    m_posHi;                     // ROR +0x4: play position, compared signed
     int    m_posLo;                     // ROR +0x8
 };

@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 21:15 at commit `c6aaa17` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 21:27 at commit `aef931f` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -205,7 +205,7 @@ Least-named game-code regions (64 KB blocks):
 - 172 TUs: todo 72, partial 2, verify 138, done 34
 - next: **setup/iop_rxsnddrv.cpp** (pinned in the queue)
 - pinned queue: setup/iop_rxsnddrv.cpp, unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8, setup/smoke_pad.cpp
-- partial: `setup/iop_rxsnddrv.cpp` 0/0 -- Done: se.cpp, 21 functions (0x6ab0 init, 0x6bcc set, 0x6e04 apply, 0x7260 SESQ run, 0x7cb4 ramp, 0x8020 ramp tick, 0x81b4 update, 0x8458 stop all - unreferenced
+- partial: `setup/iop_rxsnddrv.cpp` 0/0 -- Done: pcm.cpp, 13 functions; facts in architecture.md PCM entry. PC deviations: the ring position is taken on the 32-bit truncation libsd reports instead of mas
 - partial: `setup/smoke_pad.cpp` 0/0 -- Done: pad step (1) and the marks of step (3), see open-items.md Next up for the list and the shots (5400 picture book, 7200 lit bus stop, 8400 narration, 9960 w
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -348,6 +348,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 21:27 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 9: PCM streams (IOP 0xb4a0..0xce84) in src/iop/rxsnddrv/pcm.cpp - 0x20 slots, open / data / set / status commands 0xb0..0xb3, the V-blank tick 
 - 2026-10-30 21:15 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 8: SE (IOP 0x6ab0..0x8f10) in src/iop/rxsnddrv/se.cpp - pools of notes, ramps, channels, loops and 0x40 slots, commands 0x80 SE request / 0x81 
 - 2026-10-30 20:56 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 7: NOTE slots (IOP 0x8f10..0x9eb0) in src/iop/rxsnddrv/note.cpp - play with TGIF / TGPG / TGSP region lookup and one auto-free voice per matchi
 - 2026-10-30 20:44 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 6: the ADPCM stream system (IOP 0x9eb0..0xb4a0) in src/iop/rxsnddrv/adpcm.cpp - open with channel pool, data / set / channel set / status comma
@@ -355,7 +356,6 @@ Recent sessions:
 - 2026-10-30 20:00 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 4: the 48-voice layer (IOP 0x35c0..0x45b0) in src/iop/rxsnddrv/voice.cpp - allocation with groups, owners and stealing, per-voice register reco
 - 2026-10-30 19:39 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 3: XSEQ sequences (IOP 0x2e00..0x35c0) in src/iop/rxsnddrv/xseq.cpp - open/close with HEAD-relative track relocation, the driver's own chunk-fi
 - 2026-10-30 19:19 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 2: XVAB sound banks (IOP 0x2330..0x2e00) in src/iop/rxsnddrv/xvab.cpp - open/close, version-0x101 offset relocation, the chunk finder for both 
-- 2026-10-30 19:10 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 1: src/iop/rxsnddrv/ with the module entry, V-blank tick thread, full command dispatcher, RPC server, SPU DMA queues, system / master mix / rev
 
 ## Frontier (called by reconstructed code, not written yet)
 

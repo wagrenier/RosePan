@@ -19,7 +19,7 @@
  *    se.cpp        0x6ab0..0x8f10  SEs: SESQ byte code over NOTE slots
  *    note.cpp      0x8f10..0x9eb0  NOTE slots: one program key on its voices
  *    adpcm.cpp     0x9eb0..0xb4a0  ADPCM streams (title music, voices, movies)
- *    (not yet)     0xb4a0..        PCM: stubs.cpp until reconstructed
+ *    pcm.cpp       0xb4a0..0xce84  PCM streams mixed into core 1's input ring
  *
  *  Functions carry `IOP 0x<addr>` (never `ROR 0x`: these are IOP addresses,
  *  and the TU tools count ROR annotations as EE functions).
@@ -280,12 +280,13 @@ void  RxSndDrvAdpcmChannelSet(int id, u_int no, const u_int *data); // IOP 0x000
 int   RxSndDrvAdpcmStatus(u_char *reply);           // IOP 0x0000b160
 void  RxSndDrvAdpcmTick(void);                      // IOP 0x0000b1dc
 
-/* ---- not reconstructed yet (stubs.cpp) --------------------------------- */
+/* ---- pcm.cpp ----------------------------------------------------------- */
 
 void  RxSndDrvPcmInit(void);                        // IOP 0x0000b4a0
 void  RxSndDrvPcmTick(void);                        // IOP 0x0000b5ac
-int   RxSndDrvPcmOpen(int id, int a, u_int b, u_int c);  // IOP 0x0000c944
-void  RxSndDrvPcmData(int id, const u_int *data, int a); // IOP 0x0000cabc
+void  RxSndDrvPcmCloseAll(void);                    // IOP 0x0000c8f4
+int   RxSndDrvPcmOpen(int id, int format, u_int iop, u_int blocks); // IOP 0x0000c944
+void  RxSndDrvPcmData(int id, const u_int *seq, int count);         // IOP 0x0000cabc
 void  RxSndDrvPcmSet(u_int id, const u_int *data);  // IOP 0x0000cc28
 int   RxSndDrvPcmStatus(u_char *reply);             // IOP 0x0000cd58
 
