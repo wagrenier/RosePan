@@ -2761,6 +2761,29 @@ throughout (identifiers, env variables, files, shader macros):
     of 0x225670 is redone on the host. `ROSEPAN_I3D_MESH_TEST=1` (MagSystem::update) draws
     CHARA.RPK CHAP01's first model (amd.mdl, Amanda) with a turning camera: textured, skinned,
     depth-tested, right side up (progress/ screenshot of 2026-10-27).
+  - **Mesh lighting and fog** (2026-10-30, branch render-lighting): VU1 microprogram 1 (data
+    0x2912b0, `vudis.py 2912b0 354 --all`; command words are micro addresses) lights per normal into
+    an accumulator at VU 0x2cc+i, cleared per layer by micro 0x15e (i3rPktLayerState's marker word);
+    the light lists add into it: shade 1 parallel 0x39 `c max(0, n.d)`, point 0xc8 `c max(0, n.L) /
+    |L|^2` (L to the light, unnormalised: falloff 1 / d; MagScene::loadLight premultiplies the colour
+    by the file's intensity); shade 2 parallel 0x66 `c max(0, P(n.h))` (h from i3rPktLayerLights),
+    point 0x108 `c max(0, P(n.h)) / |L|`, h = normalize(L / |L| + eye dir), P(x) = s0 x + s1 x^2 +
+    s2 x^4 + s3 x^8 with the layer's m_specular. Normals go through the batch matrix rows (VU
+    0x3da..0x3dc) unnormalised; point lights are moved into model space (0x3d6..0x3d9). The strip
+    program 0x3fc then gives each vertex strip colour x (accumulator + ambient 0x3f6) x colour scale
+    0x3f5 (128 textured, 255 not), max 0 / MINI I, ftoi0. Ambient: shade 0 = 1, m_ambient 0 = black,
+    else the light's. Fog (same program): F = clamp(base + scale x Q, 0, 255), Q = 1 / clip w, from
+    the ramp at 0x3f8 (i3dCtxSetFog's I3dFogState). The host does the sums on the CPU per strip
+    vertex in world space (rosepan_i3dmesh.cpp LayerLight / LightVertex) from the light set the
+    mesh record copies (i3rHostFile passes I3rMeshPacket m_light / m_view->m_eye_dir / m_fog), and
+    sets the renderer's fog per mesh draw (RosePan_RendererSetFog, now snapshotted per draw in
+    ApplyGsDrawEnv instead of read once at submit). Spot / kind 3 / kind 4 lights (only the shadow
+    layers' sets) are not evaluated. The bus stop (smoke pad frame ~6600..10500): set 1 = ambient
+    (0.199, 0.329, 0.353), one parallel light dir (0.148, -0.965, -0.217) colour (0.235, 0.314,
+    0.392), one point light (the street lamp, colour x intensity ~(188, 186, 158)); fog F = -63.75 +
+    255000 / w (clear to 800, full at 4000), FOGCOL (8, 12, 16). Every layer drawn there is shade 1
+    with m_ambient set at matrix scale 1; shade 2 is unexercised. The user checked the lit picture
+    against an emulator: matches (the old fixed light gave a neutral grey).
   - **Depth state** (2026-10-30, fix/effect-zdepth): RoR keeps translucent things out of the Z
     buffer through TEST, not ZBUF: ATST NEVER with AFAIL FB_ONLY / RGB_ONLY draws colour without Z
     (effects' TEST 0x51001 / 0x31001, SprMan's colour sprites, i3r layers with m_fail_only 0x10 /

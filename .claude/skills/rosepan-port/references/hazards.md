@@ -1071,3 +1071,19 @@ loop's start pointer in the asm when its twin starts elsewhere.
   crash.txt (`bt full` of a frame with the game's SJIS text; to_string decodes as UTF-8), and gdb
   -batch took the held game with it. gdbdrive now catches every exception, reruns an undecodable
   command through gdb's log file, and holds the game when run / continue itself errs.
+
+## A placeholder light that looks plausible (2026-10-30)
+
+- Symptom: the bus stop rendered neutral grey; on an emulator it is blue (the user). Nothing looked
+  broken, so it survived a week of verify sessions.
+- Cause: rosepan_i3dmesh.cpp lit every strip with one fixed grey direction (Shade) while the
+  scene's light set (DogLightPool -> i3dCtxCreateLight -> I3rMeshPacket m_light) never reached the
+  native draw. RoR's night scenes get their colour from the ambient and the moon light, not the
+  textures. Fix: the mesh record copies the material packet's light set and the module lights as
+  VU1 microprogram 1 does (architecture.md "Mesh lighting and fog").
+- Same family: the renderer's fog came from ReiPan as "last value wins", read once at submit; RoR
+  fogs per material packet, so it is snapshotted per draw now (ApplyGsDrawEnv). Any other global
+  the renderer reads at submit instead of per draw has the same problem once RoR changes it mid-frame.
+- When a host stand-in fills a gap the ROM fills with data (a fixed light, a default fog, a constant
+  colour), name it as a stand-in in the code and in open-items.md, so the screenshot check does not
+  mistake it for the real thing.

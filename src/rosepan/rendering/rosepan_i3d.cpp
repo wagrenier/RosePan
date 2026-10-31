@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "i3d/i3dctx.h"
+#include "i3d/i3denv.h"
 #include "i3d/i3dlayer.h"
 #include "i3d/i3dpacket.h"
 #include "i3d/i3dtex.h"
@@ -120,11 +121,17 @@ struct ModelDraw
 };
 
 /* A model's one mesh (or batch), filed in its material's draw-set group
- * by i3rDrawModel's part writers. */
+ * by i3rDrawModel's part writers, with its material packet's light set
+ * (an index into s_light_sets, -1 none) and fog (I3dFogState's ramp and
+ * FOGCOL; has_fog false = no FGE). */
 struct MeshDraw
 {
     ModelDraw         model;
     RosePanI3dMeshRef ref;
+    int               light;
+    bool              has_fog;
+    float             fog_base, fog_scale;
+    uint32_t          fogcol;
 };
 
 struct Camera
@@ -187,6 +194,10 @@ std::unordered_map<const uint64_t *, Binding> s_bindings;
 std::map<TexKey, const void *> &s_textures = *new std::map<TexKey, const void *>;
 std::vector<ModelDraw> s_models;
 std::vector<MeshDraw> s_meshes;
+/* The frame's light sets, one per created light and view the meshes were
+ * filed with (the ROM's lights live in the frame's context tail). */
+std::vector<RosePanI3dLightSet> s_light_sets;
+std::map<std::pair<const void *, const void *>, int> s_light_index;
 std::vector<Camera> s_cameras;
 std::vector<std::vector<RosePanI3dVu1Vertex>> s_strips;
 GsState s_state;
@@ -607,7 +618,69 @@ void DrawMesh(const Record &r)
         return;                                 /* an off-screen pass, as DrawModel */
     RestoreState();
     RosePan_RendererSetGsZbufRegister(s_state.zbuf);
-    RosePan_I3dMeshDrawRef(m.root, m.world, m.nodes, m.tex, m.tex_count, m.has_opt ? &m.opt : NULL, &d.ref);
+    /* VU1's fog: F = clamp(base + scale / w, 0, 255) per vertex (the
+     * strip program's MADDq / MAX / MINI), w the clip w -- the camera
+     * depth, as the host projection's (i3rHostCamera). */
+    if (d.has_fog)
+        RosePan_RendererSetFog(1, 0.0f, 255.0f, d.fog_base, d.fog_scale, (int)(d.fogcol & 0xff),
+                               (int)((d.fogcol >> 8) & 0xff), (int)((d.fogcol >> 16) & 0xff));
+    RosePan_I3dMeshDrawRef(m.root, m.world, m.nodes, m.tex, m.tex_count, m.has_opt ? &m.opt : NULL, &d.ref,
+                           d.light >= 0 ? &s_light_sets[(size_t)d.light] : NULL);
+    if (d.has_fog)
+        RosePan_RendererSetFog(0, 0.0f, 255.0f, 255.0f, 0.0f, 0, 0, 0);
+}
+
+/* The index of `light` seen from `eye_dir` in s_light_sets, copied the
+ * first time this frame. */
+int LightSetFor(const I3dLight *light, const float *eye_dir)
+{
+    if (light == nullptr)
+        return -1;
+    const std::pair<const void *, const void *> key(light, eye_dir);
+    const auto it = s_light_index.find(key);
+    if (it != s_light_index.end())
+        return it->second;
+    RosePanI3dLightSet s = {};
+    memcpy(s.ambient, light->m_ambient, sizeof(s.ambient));
+    if (eye_dir != nullptr)
+        memcpy(s.eye_dir, eye_dir, sizeof(s.eye_dir));
+    if (light->m_parallel != nullptr)
+    {
+        s.parallel_count = light->m_parallel_count < ROSEPAN_I3D_MAX_PARALLEL ? light->m_parallel_count
+                                                                               : ROSEPAN_I3D_MAX_PARALLEL;
+        for (int i = 0; i < s.parallel_count; i++)
+        {
+            memcpy(s.parallel_dir[i], light->m_parallel[i].m_dir, sizeof(s.parallel_dir[i]));
+            memcpy(s.parallel_color[i], light->m_parallel[i].m_color, sizeof(s.parallel_color[i]));
+        }
+    }
+    if (light->m_point != nullptr)
+    {
+        s.point_count = light->m_point_count < ROSEPAN_I3D_MAX_POINT ? light->m_point_count
+                                                                     : ROSEPAN_I3D_MAX_POINT;
+        for (int i = 0; i < s.point_count; i++)
+        {
+            memcpy(s.point_pos[i], light->m_point[i].m_pos, sizeof(s.point_pos[i]));
+            memcpy(s.point_color[i], light->m_point[i].m_color, sizeof(s.point_color[i]));
+        }
+    }
+    s.other_count = (light->m_spot != nullptr ? light->m_spot_count : 0) +
+                    (light->m_dir2 != nullptr ? light->m_dir2_count : 0) +
+                    (light->m_vec3 != nullptr ? light->m_vec3_count : 0);
+    if (light->m_parallel_count > ROSEPAN_I3D_MAX_PARALLEL || light->m_point_count > ROSEPAN_I3D_MAX_POINT)
+    {
+        static bool s_logged;
+        if (!s_logged)
+        {
+            RosePan_LogPrintf("rosepan_i3d: a light set has %d parallel / %d point lights; %d / %d kept\n",
+                              light->m_parallel_count, light->m_point_count, s.parallel_count, s.point_count);
+            s_logged = true;
+        }
+    }
+    const int index = (int)s_light_sets.size();
+    s_light_sets.push_back(s);
+    s_light_index[key] = index;
+    return index;
 }
 
 void ApplyReg(uint64_t reg, uint64_t value)
@@ -783,9 +856,25 @@ void RosePan_I3dRecordModel(const void *at, const I3rRoot *root, const float *wo
 
 void RosePan_I3dRecordMesh(const void *at, const I3rRoot *root, const float *world,
                            const float *nodes, const I3dTexEntry *tex, int tex_count,
-                           const I3rBlendOpt *opt, const RosePanI3dMeshRef *ref)
+                           const I3rBlendOpt *opt, const RosePanI3dMeshRef *ref,
+                           const I3dLight *light, const float *eye_dir, const I3dFogState *fog)
 {
     MeshDraw d = {};
+    d.light = LightSetFor(light, eye_dir);
+    if (fog != NULL)
+    {
+        d.has_fog = true;
+        d.fog_base = fog->m_ramp_base;
+        d.fog_scale = fog->m_ramp_scale;
+        d.fogcol = (uint32_t)fog->m_fogcol;
+        static bool s_logged;
+        if (!s_logged)
+        {
+            RosePan_LogPrintf("rosepan_i3d: first fogged mesh: F = %.3f + %.3f / w, FOGCOL %06x\n",
+                              d.fog_base, d.fog_scale, (unsigned)d.fogcol);
+            s_logged = true;
+        }
+    }
     d.model.root = root;
     memcpy(d.model.world, world, sizeof(d.model.world));
     d.model.nodes = nodes;
@@ -844,6 +933,8 @@ void RosePan_I3dBeginFrame(void)
     s_bindings.clear();
     s_models.clear();
     s_meshes.clear();
+    s_light_sets.clear();
+    s_light_index.clear();
     s_cameras.clear();
     s_strips.clear();
     s_state = GsState();

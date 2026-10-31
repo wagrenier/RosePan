@@ -1006,10 +1006,10 @@ int RosePan_RendererGetGeometryInterpolation(void);
  * figures. */
 float RosePan_RendererGetGeometryCoverage(void);
 
-/* GS fogging, standing in for the VU1 fog block gra3dApplyFog() uploads and
- * the FOGCOL register gra3dSetFogColor() writes.  Also "last value wins":
- * MapFog.c and scene.c push a new setting whenever the ramp moves, and every
- * transformed 3D draw queued afterwards is fogged with it.
+/* GS fogging, standing in for the VU1 fog block a material packet uploads
+ * and the FOGCOL register it writes (RoR: i3rPktMeshEnv).  Like the other GS
+ * state it is per draw: every transformed 3D draw queued afterwards is fogged
+ * with the setting current when it was queued, until the next call.
  *
  *   enable   PRIM's FOGE bit, i.e. gra3dIsFogEnable().
  *   f_min    density floor, reached at f_far          } raw GS fog units,

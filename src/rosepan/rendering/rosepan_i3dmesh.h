@@ -57,10 +57,35 @@ struct RosePanI3dMeshRef
     int      batch;
 };
 
-/* RosePan_I3dMeshDraw for the one mesh (or batch) `ref` names. */
+/* The light set a mesh's material packet was built with (I3rMeshPacket
+ * m_light, i3rPktLayerState / i3rPktLayerLights), copied when the mesh is
+ * filed, and its view's eye direction (I3dView::m_eye_dir: shade 2's half
+ * vectors). Only the kinds DogLightPool::createLight fills are kept --
+ * ambient, parallel, point; spot and the two 0x30 kinds only appear in
+ * the shadow layers' sets and are counted in other_count. */
+enum
+{
+    ROSEPAN_I3D_MAX_PARALLEL = 8,
+    ROSEPAN_I3D_MAX_POINT = 16
+};
+struct RosePanI3dLightSet
+{
+    float ambient[4];
+    float eye_dir[4];
+    int   parallel_count;
+    int   point_count;
+    int   other_count;
+    float parallel_dir[ROSEPAN_I3D_MAX_PARALLEL][4];
+    float parallel_color[ROSEPAN_I3D_MAX_PARALLEL][4];
+    float point_pos[ROSEPAN_I3D_MAX_POINT][4];
+    float point_color[ROSEPAN_I3D_MAX_POINT][4];
+};
+
+/* RosePan_I3dMeshDraw for the one mesh (or batch) `ref` names, its lit
+ * layers shaded with `lights` (NULL: the module's fixed light). */
 void RosePan_I3dMeshDrawRef(const I3rRoot *root, const float *world, const float *nodes,
                             const I3dTexEntry *tex, int tex_count, const I3rBlendOpt *opt,
-                            const RosePanI3dMeshRef *ref);
+                            const RosePanI3dMeshRef *ref, const RosePanI3dLightSet *lights);
 
 /* The GPU texture for an i3d texture object (rosepan_i3d.cpp's cache). */
 const void *RosePan_I3dTextureFor(const void *tex, const void *clut, unsigned clut_index, int tcc);

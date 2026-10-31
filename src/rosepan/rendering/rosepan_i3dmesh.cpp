@@ -7,9 +7,9 @@
  *  GS triangles.  Here the blocks are unpacked into a host copy of VU1
  *  memory exactly as VIF1 would write them, and each strip is read back
  *  from there: the index list picks positions and normals from the batch's
- *  pools, colours and STQ come per strip vertex.  What microprogram 1 does
- *  beyond the transform -- its lighting, fog and clipping -- is not
- *  reproduced: the colours are the strip's own, lit by one fixed direction
+ *  pools, colours and STQ come per strip vertex.  The strip colours are lit
+ *  on the CPU as microprogram 1 lights them, from the material packet's
+ *  light set (LayerLight); its fog and clipping are not reproduced
  *  (open-items.md "Mesh draw").
  * ======================================================================== */
 #include "rosepan/rendering/rosepan_i3dmesh.h"
@@ -119,6 +119,7 @@ HostVu s_vu;
 bool s_logged_vif;
 bool s_logged_kind;
 bool s_logged_group;
+bool s_logged_lights;
 
 float AsFloat(uint32_t bits)
 {
@@ -449,8 +450,8 @@ void ApplyMaterialState(const I3rItem *materials, unsigned num_mat, int index, u
     RosePan_RendererSetGsAlphaRegister(alpha);
 }
 
-/* A fixed light for the host colours until the scene lights are read:
- * from above and in front, in world space. */
+/* A fixed light for a model drawn with no light set (the forced mesh
+ * test): from above and in front, in world space. */
 float Shade(const float *m, const float n[3])
 {
     const float wx = n[0] * m[0] + n[1] * m[4] + n[2] * m[8];
@@ -464,6 +465,134 @@ float Shade(const float *m, const float n[3])
     return 0.55f + 0.45f * (d > 0.0f ? d : 0.0f);
 }
 
+/* How a material layer's strips are lit: what VU1 microprogram 1 does
+ * with i3rPktLayerState's colour block and i3rPktLayerLights' lists. Per
+ * layer an accumulator per normal is cleared (micro 0x15e), each light
+ * list adds into it -- shade 1: parallel 0x39 max(0, n.d) c, point 0xc8
+ * c max(0, n.L) / |L|^2 (L to the light, not normalised); shade 2:
+ * parallel 0x66 c max(0, P(n.h)) with h the half vector
+ * i3rPktLayerLights makes, point 0x108 c max(0, P(n.h)) / |L| with h =
+ * normalize(L / |L| + eye), P(x) = s0 x + s1 x^2 + s2 x^4 + s3 x^8 of the
+ * layer's m_specular -- and the strip program (0x3fc) gives each vertex
+ * its strip colour x (accumulator + ambient) x the colour scale (128
+ * textured, 255 not), clamped. The normals are rotated by the batch
+ * matrix unnormalised, as the VU does; the host does the sums in world
+ * space, the same products for a matrix of uniform scale. */
+struct LayerLight
+{
+    const RosePanI3dLightSet *set;      /* NULL: no light set (Shade) */
+    int   shade;                        /* I3rLayerData::m_shade: 0 unlit, 1 lights, 2 specular */
+    float ambient[3];                   /* the colour block's ambient qword */
+    float poly[4];                      /* shade 2: m_specular */
+    float half[ROSEPAN_I3D_MAX_PARALLEL][3];   /* shade 2: the parallel lights' half vectors */
+    float ceiling;                      /* the clamp, in the mesh stream's units (128 = 1.0) */
+};
+
+void Normalize3(float v[3])
+{
+    const float len = sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    if (len > 0.0f)
+        for (int i = 0; i < 3; i++)
+            v[i] /= len;
+}
+
+float Dot3(const float *a, const float *b)
+{
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+float SpecularPoly(const float *s, float x)
+{
+    const float x2 = x * x;
+    const float x4 = x2 * x2;
+    return s[0] * x + s[1] * x2 + s[2] * x4 + s[3] * x4 * x4;
+}
+
+/* Layer `d`'s lighting under `set` (i3rPktLayerState's ambient choice and
+ * i3rPktLayerLights' half vectors). */
+void SetupLayerLight(LayerLight &l, const I3rLayerData *d, bool textured, const RosePanI3dLightSet *set)
+{
+    memset(&l, 0, sizeof(l));
+    l.set = set;
+    l.shade = d != nullptr ? d->m_shade : 0;
+    /* MINI against the strip program's ceiling, 255: under a texture the
+     * scale is 128, so overbright up to 255 / 128. */
+    l.ceiling = textured ? 255.0f / 128.0f : 1.0f;
+    if (l.shade == 0)
+        l.ambient[0] = l.ambient[1] = l.ambient[2] = 1.0f;
+    else if (d->m_ambient != 0 && set != nullptr)
+        memcpy(l.ambient, set->ambient, sizeof(l.ambient));
+    if (l.shade == 2 && set != nullptr)
+    {
+        memcpy(l.poly, d->m_specular, sizeof(l.poly));
+        for (int i = 0; i < set->parallel_count; i++)
+        {
+            for (int c = 0; c < 3; c++)
+                l.half[i][c] = set->parallel_dir[i][c] + set->eye_dir[c];
+            Normalize3(l.half[i]);
+        }
+    }
+}
+
+/* The factor vertex (p, n) (model space) multiplies its strip colour by
+ * under l, through the batch matrix m. */
+void LightVertex(const LayerLight &l, const float *m, const float p[3], const float n[3], float out[3])
+{
+    if (l.set == nullptr)
+    {
+        out[0] = out[1] = out[2] = l.shade == 0 ? 1.0f : Shade(m, n);
+        return;
+    }
+    memcpy(out, l.ambient, sizeof(l.ambient));
+    if (l.shade == 0)
+        return;
+    const RosePanI3dLightSet &s = *l.set;
+    float nw[3], pw[3];
+    for (int c = 0; c < 3; c++)
+    {
+        nw[c] = n[0] * m[c] + n[1] * m[4 + c] + n[2] * m[8 + c];
+        pw[c] = p[0] * m[c] + p[1] * m[4 + c] + p[2] * m[8 + c] + m[12 + c];
+    }
+    for (int i = 0; i < s.parallel_count; i++)
+    {
+        float f;
+        if (l.shade == 1)
+            f = Dot3(nw, s.parallel_dir[i]);
+        else
+            f = SpecularPoly(l.poly, Dot3(nw, l.half[i]));
+        if (f > 0.0f)
+            for (int c = 0; c < 3; c++)
+                out[c] += f * s.parallel_color[i][c];
+    }
+    for (int i = 0; i < s.point_count; i++)
+    {
+        float L[3];
+        for (int c = 0; c < 3; c++)
+            L[c] = s.point_pos[i][c] - pw[c];
+        const float len2 = Dot3(L, L);
+        if (!(len2 > 0.0f))
+            continue;
+        float f;
+        if (l.shade == 1)
+        {
+            f = Dot3(nw, L) / len2;
+        }
+        else
+        {
+            const float inv = 1.0f / sqrtf(len2);
+            float h[3];
+            for (int c = 0; c < 3; c++)
+                h[c] = L[c] * inv + s.eye_dir[c];
+            Normalize3(h);
+            f = SpecularPoly(l.poly, Dot3(nw, h));
+            f = f > 0.0f ? f * inv : 0.0f;
+        }
+        if (f > 0.0f)
+            for (int c = 0; c < 3; c++)
+                out[c] += f * s.point_color[i][c];
+    }
+}
+
 /* What a 0x4d mesh draws its batches with: its material and, per material
  * layer, the batch strip group that layer draws (0xff = none). */
 struct MeshLayers
@@ -475,11 +604,13 @@ struct MeshLayers
     unsigned           count;           /* the material's layers */
     const I3dTexEntry *tex;
     int                tex_count;
+    const RosePanI3dLightSet *lights;   /* the material packet's light set; NULL none */
 };
 
 /* One 0x30 strip group of a batch (its child 0 list) as triangles, over the
- * pools DrawBatch loaded. */
-void DrawStripGroup(const I3rItem &group, const float *local_world, const void *texture, const Blend *blend)
+ * pools DrawBatch loaded, lit as `light` says. */
+void DrawStripGroup(const I3rItem &group, const float *local_world, const void *texture, const Blend *blend,
+                    const LayerLight &light)
 {
     if (group.getNumChild() == 0)
         return;
@@ -519,11 +650,14 @@ void DrawStripGroup(const I3rItem &group, const float *local_world, const void *
             const unsigned k = ix[v][0] & 0x7fff;
             VuVec3(kVuPositions + k, pos[v]);
             VuVec3(kVuNormals + k, nrm[v]);
-            float c[3];
+            float c[3], lit[3];
             VuVec3(kVuColours + v, c);
-            const float light = Shade(local_world, nrm[v]);
+            LightVertex(light, local_world, pos[v], nrm[v], lit);
             for (int j = 0; j < 3; j++)
-                rgb[v][j] = c[j] * light;
+            {
+                const float x = c[j] * lit[j];
+                rgb[v][j] = x > 0.0f ? (x < light.ceiling ? x : light.ceiling) : 0.0f;
+            }
             const uint32_t *q = s_vu.mem[(kVuStq + v) % kVuSize];
             const float qq = AsFloat(q[2]) != 0.0f ? AsFloat(q[2]) : 1.0f;
             st[v][0] = AsFloat(q[0]) / qq;
@@ -607,8 +741,23 @@ void DrawBatch(const I3rItem &batch, const float *local_world, const MeshLayers 
             }
             RosePan_RendererShadowBeginReceiver();
         }
+        const I3rItem *layers = MaterialLayers(ml.materials, ml.num_mat, ml.mat);
+        const I3rLayerData *d = layers != nullptr && u < layers->getNumChild()
+                                    ? (const I3rLayerData *)layers->getChildren()[u].getData()
+                                    : nullptr;
+        LayerLight light;
+        SetupLayerLight(light, d, d != nullptr && d->m_tex_index >= 0, ml.lights);
+        if (light.shade != 0 && ml.lights != nullptr && !s_logged_lights)
+        {
+            const RosePanI3dLightSet &s = *ml.lights;
+            RosePan_LogPrintf("rosepan_i3dmesh: first lit layer: shade %d, ambient %.3f %.3f %.3f, "
+                              "%d parallel, %d point, %d other\n",
+                              light.shade, light.ambient[0], light.ambient[1], light.ambient[2],
+                              s.parallel_count, s.point_count, s.other_count);
+            s_logged_lights = true;
+        }
         DrawStripGroup(slot[0].getChildren()[g], local_world,
-                       MaterialTexture(ml.materials, ml.num_mat, ml.mat, u, ml.tex, ml.tex_count), blend);
+                       MaterialTexture(ml.materials, ml.num_mat, ml.mat, u, ml.tex, ml.tex_count), blend, light);
         if (receiver)
             RosePan_RendererShadowEndReceiver();
     }
@@ -619,7 +768,7 @@ void DrawBatch(const I3rItem &batch, const float *local_world, const MeshLayers 
  * batch); NULL = all. */
 void DrawMeshList(const I3rItem &list, const I3rItem *materials, unsigned num_mat, const I3dTexEntry *tex,
                   int tex_count, const float *local_world, const Skin *skin, const Blend *blend,
-                  const RosePanI3dMeshRef *ref)
+                  const RosePanI3dMeshRef *ref, const RosePanI3dLightSet *lights)
 {
     const I3rItem *mesh4d = list.getChildren();
     for (u_int m = 0; m < list.getNumChild(); m++)
@@ -629,7 +778,7 @@ void DrawMeshList(const I3rItem &list, const I3rItem *materials, unsigned num_ma
         const u_char *md = (const u_char *)mesh4d[m].getData();
         if (md == nullptr || mesh4d[m].getNumChild() == 0)
             continue;
-        MeshLayers ml = {materials, num_mat, 0, nullptr, 0, tex, tex_count};
+        MeshLayers ml = {materials, num_mat, 0, nullptr, 0, tex, tex_count, lights};
         short mat;
         memcpy(&mat, md + 0x0c, sizeof(mat));
         ml.mat = mat;
@@ -645,7 +794,8 @@ void DrawMeshList(const I3rItem &list, const I3rItem *materials, unsigned num_ma
 
 /* The walk of RosePan_I3dMeshDraw; `ref` limits it to one mesh. */
 void DrawModel(const I3rRoot *root, const float *world, const float *nodes, const I3dTexEntry *tex,
-               int tex_count, const I3rBlendOpt *opt, const RosePanI3dMeshRef *ref)
+               int tex_count, const I3rBlendOpt *opt, const RosePanI3dMeshRef *ref,
+               const RosePanI3dLightSet *lights)
 {
     if (root == nullptr || world == nullptr || root->m_item.getNumChild() < 4)
         return;
@@ -717,7 +867,8 @@ void DrawModel(const I3rRoot *root, const float *world, const float *nodes, cons
                         if (group.getNumChild() != 0)
                             DrawMeshList(group.getChildren()[0], materials, num_mat, tex, tex_count,
                                          node_world, nullptr,
-                                         opt != nullptr && (blend.flags & 3) != 0 ? &blend : nullptr, ref);
+                                         opt != nullptr && (blend.flags & 3) != 0 ? &blend : nullptr, ref,
+                                         lights);
                     }
                 }
             }
@@ -756,7 +907,8 @@ void DrawModel(const I3rRoot *root, const float *world, const float *nodes, cons
                 }
                 const Blend blend = {opt, lists, gd[5]};
                 DrawMeshList(group[g].getChildren()[0], materials, num_mat, tex, tex_count, local_world,
-                             rigid ? nullptr : skinned, opt != nullptr && (gd[5] & 3) != 0 ? &blend : nullptr, ref);
+                             rigid ? nullptr : skinned, opt != nullptr && (gd[5] & 3) != 0 ? &blend : nullptr, ref,
+                             lights);
             }
         }
     }
@@ -770,13 +922,13 @@ void DrawModel(const I3rRoot *root, const float *world, const float *nodes, cons
 void RosePan_I3dMeshDraw(const I3rRoot *root, const float *world, const float *nodes,
                          const I3dTexEntry *tex, int tex_count, const I3rBlendOpt *opt)
 {
-    DrawModel(root, world, nodes, tex, tex_count, opt, nullptr);
+    DrawModel(root, world, nodes, tex, tex_count, opt, nullptr, nullptr);
 }
 
 void RosePan_I3dMeshDrawRef(const I3rRoot *root, const float *world, const float *nodes,
                             const I3dTexEntry *tex, int tex_count, const I3rBlendOpt *opt,
-                            const RosePanI3dMeshRef *ref)
+                            const RosePanI3dMeshRef *ref, const RosePanI3dLightSet *lights)
 {
     if (ref != nullptr)
-        DrawModel(root, world, nodes, tex, tex_count, opt, ref);
+        DrawModel(root, world, nodes, tex, tex_count, opt, ref, lights);
 }
