@@ -2474,7 +2474,7 @@ never asserts): sessions name them (`tus.py define --why`).
   the driver acts on are modelled from the engine, not mirrored: NAX (play position), ENDX, and since
   2026-10-31 ENVX (the envelope; the voice tick auto-frees SE / BGM voices and the ADPCM update ends
   streams when it reads 0 -- hazards.md "Sounds cut short").
-- The player's volume (`[audio]` master / music / effects in rosepan.ini, the ImGui Audio menu) is the
+- The player's volume (`[audio]` master / music / effects in rosepan.ini, ImGui Settings > Audio) is the
   host mixer's, on top of the game's own (master x family x voice in rx/rxsnd.cpp): `iop_voice.cpp`
   scales each voice by its group and the finished mix by the master. RXSNDDRV tags a voice's group as
   it allocates it (`RxSndDrvVoiceSetMixGroup`, set by the tick thread: every allocation happens in the
@@ -2749,9 +2749,9 @@ throughout (identifiers, env variables, files, shader macros):
 - `src/rosepan/` -- `os/` (host main thread vs game thread `RosePanGame`, pacing, time, rand),
   `io/` (log, paths, input, file, movie stream), `gs/` (GS memory and registers), `rendering/`
   (SDL3 GPU renderer: 2D GS primitives, the 3D mesh path, present, screenshots via
-  `ROSEPAN_SHOT_DIR` / `ROSEPAN_SHOT_EVERY`; video planes), `rosepan_ui/` (ImGui menus: performance,
-  graphics settings, data folder), config (`rosepan.ini` in `%APPDATA%/Mikompilation/RosePan/`),
-  memory (emulated EE RAM), profiler.
+  `ROSEPAN_SHOT_DIR` / `ROSEPAN_SHOT_EVERY`; video planes), `rosepan_ui/` (ImGui: the Settings and
+  Debug menus; the controls, data folder and profiler windows), config (`rosepan.ini` in
+  `%APPDATA%/Mikompilation/RosePan/`), memory (emulated EE RAM), profiler.
 - `src/common/rosepan_stub.h` -- `ROSEPAN_STUB` / `ROSEPAN_BRIDGE`.
 - `src/main.cpp` -- RoR's main file (2026-10-22): the process `main(argc, argv)` opens the log and runs
   `GameMain` on the game thread (`RosePan_HostMain`); GameMain builds argv with argv[0] =

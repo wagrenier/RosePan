@@ -685,7 +685,7 @@ void ReleaseCachedShaders();
 void ReleaseDepthProbeResources();
 void ReleasePresentResources();
 
-/* Debug view state, controlled by the host renderer menu.
+/* Debug view state, controlled by the host UI's Debug menu.
  *   wireframe -- edges only: shows geometry that is present but shaded away
  *   nodepth   -- ignore the depth buffer: shows geometry hidden behind
  *                something drawn in front of it; this diagnostic path also
@@ -1140,7 +1140,7 @@ struct FrameUploadState
 
 FrameUploadState g_frame_upload;
 /*
- * Frame smoothing -- menu bar, Profiler > Frame smoothing.
+ * Frame smoothing -- menu bar, Settings > Graphics > Frame smoothing.
  *
  * Additional presents of each logical frame, 0..3.  The game keeps simulating
  * at its own rate; these are the same frame put on screen again through a
