@@ -1577,7 +1577,7 @@ to adapt when a TU reaches them:
   the voice and master stages each lose 6 dB. Measured mixes fit: title music RMS -34..-44 dB,
   peaks -17 dB. Doubling both stages would match the hardware but rebalances every sound against
   the movies' auto-DMA (BVOL) and risks clipping where many voices sum; the user's decision. The
-  player's volume ([audio] in rosepan.ini, the Audio menu) tops out at the game's level and cannot
+  player's volume ([audio] in rosepan.ini, Settings > Audio) tops out at the game's level and cannot
   make up for it.
 - 2026-10-30 (RXSNDDRV session 8): `rxSndSeSetPan` (rx/rxsnd.cpp, ROR 0x23c800) sends SE parameter 10
   ((pan + 1) * 128), but the driver applies 10 as the first channel's **modulation rate** (0x80 = 1x;
