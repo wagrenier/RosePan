@@ -21,56 +21,6 @@ static void RxSndDrvStubHit(int *once, const char *addr)
 
 #define RXSNDDRV_STUB(addr) do { static int once; RxSndDrvStubHit(&once, addr); } while (0)
 
-// stub of IOP 0x00006ab0
-void RxSndDrvSeInit(void)
-{
-    RXSNDDRV_STUB("0x00006ab0");
-}
-
-// stub of IOP 0x00006bcc
-void RxSndDrvSeSet(u_int voice, const u_int *data)
-{
-    (void)data;
-    (void)voice;
-    RXSNDDRV_STUB("0x00006bcc");
-}
-
-// stub of IOP 0x000084b0
-int RxSndDrvSePlay(int voice, int xvab, int prog, int note)
-{
-    (void)note;
-    (void)prog;
-    (void)xvab;
-    (void)voice;
-    RXSNDDRV_STUB("0x000084b0");
-    return 0;
-}
-
-// stub of IOP 0x00008658
-int RxSndDrvSePlay2(int voice, int xvab, int prog, int note)
-{
-    (void)note;
-    (void)prog;
-    (void)xvab;
-    (void)voice;
-    RXSNDDRV_STUB("0x00008658");
-    return 0;
-}
-
-// stub of IOP 0x00008800
-int RxSndDrvSeStatus(u_char *reply)
-{
-    (void)reply;
-    RXSNDDRV_STUB("0x00008800");
-    return 0;
-}
-
-// stub of IOP 0x00008878
-void RxSndDrvSeTick(void)
-{
-    RXSNDDRV_STUB("0x00008878");
-}
-
 // stub of IOP 0x0000b4a0
 void RxSndDrvPcmInit(void)
 {

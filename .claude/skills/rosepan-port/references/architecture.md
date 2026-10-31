@@ -2577,6 +2577,31 @@ never asserts): sessions name them (`tus.py define --why`).
   data word's low byte, 0 forever); selecting NRPN 1 or 0xf00 jumps back. Meta 0x2f ends a track, 0x51
   sets the tempo; sysex skipped. Debug flag 2 = warnings (unsupported CC / RPN / NRPN / meta, no slot).
   The title music is not BGM: the boot and the title screen send ADPCM 0xa0..0xa4 and no 0x60 / 0x70.
+- **SE 0x80..0x83** (`src/iop/rxsnddrv/se.cpp`, 2026-10-30): one block 0x9e14 at 0x22fd0: 0x100 note
+  records of 0x10 {next, channel, tag, s8 NOTE id (-1 freed), dirty (0xff new), key}, free 0x23fd0; 0x100
+  ramps of 0x18 {next, param byte, kind, dirty bit, end, value << 12, step, ticks left << 12}, free
+  0x257d4; 0x400 channels of 0x14 {next, id, -, dirty, vol 0x80, pan 0x40, bend 0x40, mod depth 0, mod
+  rate 0x80, offset 0x80 (1/8 semitones), ramps}, free 0x2a7d8; 0x100 loops of 0xc {next, pos, count,
+  forever}, free 0x2b3dc; 0x40 slots of 0x68 at 0x2b3e0 {next (active list 0x2cde0, oldest first),
+  xvab, group / program, index / key, ended, flags (1 used, 2 playing, 8 paused, 0x10000 started,
+  0x20000 stopped, 0x40000 bank user; the low byte is the 0x83 status), id, mode (1 request, 0 one key),
+  switch, dirty, ticks a second (0x3c), vol L / R (the request's), master L / R (param 3), scale 0x1000,
+  param 5 (read nowhere), voice group s8, owner s16, SESQ pos, wait << 12, notes, channels, loops,
+  pending[2] of 0x18 {mask, stop, pause, switch, L | R << 16, scale, p5, chan vol / pan / bend / depth /
+  rate, group, owner}}. **0x80 {slot, xvab, group, index}** runs the SERQ record's SESQ code
+  (0x2ae8: ticks, vol L / R, voice group from flags 0xc000); **0x81 {slot, xvab, program, key}** plays
+  one key (ended from the start). 0x82 params: 0 stop (1 release, else cut), 1 pause (0 resume, 1
+  release, else cut), 2 switch, 3 volume L | R << 16, 4 pitch scale, 5 kept, 6..10 the first channel's
+  vol / pan / bend / mod depth / mod rate (one-key SEs only), 0xb voice group, 0xc owner (0xb / 0xc
+  share the mask bits of 6 / 7). Tick 0x8878: apply 0x6e04, reap 0x8988 (stopped and no note left:
+  unlock, free channels, ramps, loops), run 0x7260, ramps 0x8020, update 0x81b4 (drop silent notes,
+  push switch, volume vol * master >> 7 * chan >> 7, pan, pitch, bend (b - 0x40) * 0x40, offset, mod
+  depth / rate; flag 2 drops when ended with no note). **SESQ byte code**: opcode (bits 0..5, bit 6 =
+  every SE holding the operand), operands, varlen delta in ticks: 00 end, 01 / 0b nothing, 02 n loop
+  start (0 forever), 03 loop end, 04 tag chan program key velocity note on, 05 tag key off, 06 tag
+  free, 07 / 09 chan kind value set (09 adds), 08 / 0a chan kind value time ramp (0a adds around 0x80).
+  0x8458 stops every SE (unreferenced). The title menu plays bank 0 requests (0, 3) / (0, 7) on slot
+  63 (one note each); area bank 3 request (11, 11) starts two notes.
 - **NOTE slots 0x8f10..0x9eb0** (`src/iop/rxsnddrv/note.cpp`, 2026-10-30): block 0x3b0c at 0x2cdf0
   {0x100 layers of 0x30, free list 0x2fdf0; 0x40 slots of 0x2c at 0x2fdf4, active list 0x308f4, free
   list 0x308f8}. Play 0x8f10(xvab, program, key, group, owner; -1 = the region's): XvabLock, TGIF[program]
