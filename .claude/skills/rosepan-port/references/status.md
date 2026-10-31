@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 20:17 at commit `a1db7a7` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 20:44 at commit `edafd83` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -205,7 +205,7 @@ Least-named game-code regions (64 KB blocks):
 - 172 TUs: todo 72, partial 2, verify 138, done 34
 - next: **setup/iop_rxsnddrv.cpp** (pinned in the queue)
 - pinned queue: setup/iop_rxsnddrv.cpp, unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8, setup/smoke_pad.cpp
-- partial: `setup/iop_rxsnddrv.cpp` 0/0 -- Done: bgm.cpp, 36 functions, all static except the 7 the dispatcher calls; facts in architecture.md BGM entry. The NOTE calls BGM makes (0x8f10 play, 0x9974 key
+- partial: `setup/iop_rxsnddrv.cpp` 0/0 -- Done: adpcm.cpp, 18 functions incl. hidden 0xb480 (DMA done) and unreferenced 0xad54 (close all); facts in architecture.md ADPCM entry. Test: python build.py --
 - partial: `setup/smoke_pad.cpp` 0/0 -- Done: pad step (1) and the marks of step (3), see open-items.md Next up for the list and the shots (5400 picture book, 7200 lit bus stop, 8400 narration, 9960 w
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -348,6 +348,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 20:44 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 6: the ADPCM stream system (IOP 0x9eb0..0xb4a0) in src/iop/rxsnddrv/adpcm.cpp - open with channel pool, data / set / channel set / status comma
 - 2026-10-30 20:17 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 5: the BGM MIDI sequencer (IOP 0x45b0..0x6ab0) in src/iop/rxsnddrv/bgm.cpp - slot open with track setup from HEAD, set / status / channel and t
 - 2026-10-30 20:00 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 4: the 48-voice layer (IOP 0x35c0..0x45b0) in src/iop/rxsnddrv/voice.cpp - allocation with groups, owners and stealing, per-voice register reco
 - 2026-10-30 19:39 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 3: XSEQ sequences (IOP 0x2e00..0x35c0) in src/iop/rxsnddrv/xseq.cpp - open/close with HEAD-relative track relocation, the driver's own chunk-fi
@@ -355,7 +356,6 @@ Recent sessions:
 - 2026-10-30 19:10 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 1: src/iop/rxsnddrv/ with the module entry, V-blank tick thread, full command dispatcher, RPC server, SPU DMA queues, system / master mix / rev
 - 2026-10-30 18:45 `setup/smoke_pad.cpp` partial: Bus-stop walk is the default smoke pad (settings.smoke_pad: CROSS every 300 reads through the narration, then LSDOWN, LSLEFT, LSUP, LSRIGHT round the bus stop, 
 - 2026-10-30 18:42 `dog/dogcamera.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): camera views render from the scene cameras with correct framing, shots 9960, 10560,
-- 2026-10-30 18:42 `dog/doglightpool.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): the street lamp lights the bench and road (lit stage), shots 7200, 11160
 
 ## Frontier (called by reconstructed code, not written yet)
 

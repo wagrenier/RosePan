@@ -16,8 +16,9 @@
  *    xseq.cpp      0x2e00..0x35c0  XSEQ sequences (BGM's MIDI data)
  *    voice.cpp     0x35c0..0x45b0  the 48 SPU2 voices: allocation, registers
  *    bgm.cpp       0x45b0..0x6ab0  the BGM MIDI sequencer
- *    (not yet)     0x6ab0..        SE, NOTE, ADPCM,
- *                                  PCM: stubs.cpp until reconstructed
+ *    (not yet)     0x6ab0..0x9eb0  SE, NOTE: stubs.cpp until reconstructed
+ *    adpcm.cpp     0x9eb0..0xb4a0  ADPCM streams (title music, voices, movies)
+ *    (not yet)     0xb4a0..        PCM: stubs.cpp until reconstructed
  *
  *  Functions carry `IOP 0x<addr>` (never `ROR 0x`: these are IOP addresses,
  *  and the TU tools count ROR annotations as EE functions).
@@ -235,6 +236,18 @@ void  RxSndDrvBgmChannelSet(int slot, int channel, const u_int *data); // IOP 0x
 void  RxSndDrvBgmTrackSet(int slot, u_int track, const u_int *data);   // IOP 0x00005d20
 void  RxSndDrvBgmTick(void);                        // IOP 0x00005e60
 
+/* ---- adpcm.cpp --------------------------------------------------------- */
+
+int   RxSndDrvAdpcmOpen(int id, int pitch, const u_int *chans, int count, u_int iopSize,
+                        int spuSize, int priority); // IOP 0x00009eb0
+void  RxSndDrvAdpcmInit(void);                      // IOP 0x0000acac
+void  RxSndDrvAdpcmCloseAll(void);                  // IOP 0x0000ad54
+int   RxSndDrvAdpcmData(int id, int size, int end); // IOP 0x0000ad94
+void  RxSndDrvAdpcmSet(u_int id, const u_int *data);    // IOP 0x0000aea0
+void  RxSndDrvAdpcmChannelSet(int id, u_int no, const u_int *data); // IOP 0x0000b01c
+int   RxSndDrvAdpcmStatus(u_char *reply);           // IOP 0x0000b160
+void  RxSndDrvAdpcmTick(void);                      // IOP 0x0000b1dc
+
 /* ---- not reconstructed yet (stubs.cpp) --------------------------------- */
 
 void  RxSndDrvSeInit(void);                         // IOP 0x00006ab0
@@ -257,13 +270,6 @@ void  RxSndDrvNoteSetPan(int note, int pan);        // IOP 0x00009bb0
 void  RxSndDrvNoteSetPitch(int note, int scale);    // IOP 0x00009c0c
 void  RxSndDrvNoteSetBend(int note, int bend);      // IOP 0x00009c40
 u_int RxSndDrvNoteGetFlags(int note);               // IOP 0x00009db4
-int   RxSndDrvAdpcmOpen(int id, int pitch, const u_int *data, int a, u_int iop, int size, int b); // IOP 0x00009eb0
-void  RxSndDrvAdpcmInit(void);                      // IOP 0x0000acac
-void  RxSndDrvAdpcmData(int id, int size, int a);  // IOP 0x0000ad94
-void  RxSndDrvAdpcmSet(u_int id, const u_int *data);    // IOP 0x0000aea0
-void  RxSndDrvAdpcmChannelSet(int a, int b, const u_int *data); // IOP 0x0000b01c
-int   RxSndDrvAdpcmStatus(u_char *reply);           // IOP 0x0000b160
-void  RxSndDrvAdpcmTick(void);                      // IOP 0x0000b1dc
 void  RxSndDrvPcmInit(void);                        // IOP 0x0000b4a0
 void  RxSndDrvPcmTick(void);                        // IOP 0x0000b5ac
 int   RxSndDrvPcmOpen(int id, int a, u_int b, u_int c);  // IOP 0x0000c944

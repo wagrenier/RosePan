@@ -2577,6 +2577,31 @@ never asserts): sessions name them (`tus.py define --why`).
   data word's low byte, 0 forever); selecting NRPN 1 or 0xf00 jumps back. Meta 0x2f ends a track, 0x51
   sets the tempo; sysex skipped. Debug flag 2 = warnings (unsupported CC / RPN / NRPN / meta, no slot).
   The title music is not BGM: the boot and the title screen send ADPCM 0xa0..0xa4 and no 0x60 / 0x70.
+- **ADPCM streams 0xa0..0xa4** (`src/iop/rxsnddrv/adpcm.cpp`, 2026-10-30): block 0x45cc at 0x30900
+  {frameBytes (0x6b24 / frame rate: ADPCM bytes a V-blank at 48 kHz), 0x30 streams of 0x74 at 0x30904,
+  active list 0x31ec4, 0x100 channels of 0x30 at 0x31ec8, free list 0x34ec8}. Stream {next, flags (1 used,
+  2 playing, 4 ended, 8 paused, 0x10000 active, 0x20000 closed; low byte = 0xa3 status), priority (the
+  open's s16 arg, -1 from rxSndAdpcmOpen; >= 0: a stolen voice ends the stream), group, owner, u8 id,
+  reverb, dirty (1 switch, 2 volume, 4 pitch), end, vol L/R 0x80, pitch (rate * 0x1000 / 48000), scale
+  0x1000, need (1.5 frames of data, 0x40-rounded: the start threshold), iopSize, iopWrite, iopRead,
+  iopFill, dmaPending, spuSize, spuWrite, spuPlay, spuFill, posHi/Lo (bytes played, -1 at the end),
+  channels, pending[2] {mask, vol, pause, reverb, pitch, group, owner}}. Channel {next, stream, no, s8
+  voice, s8 voiceWant (0xa4 param 5), keyed, vol L/R, iop, spu, pending[2] {mask 2 vol / 8 voice, vol,
+  voice}}. 0xa0 {u8 id, -, u8 channels, -, s16 priority, s16 pitch, iopSize, spuSize, {iop, spu}[n]};
+  0xa1 {u8 id, u8 end, -, size} adds min(size, free) to iopFill; 0xa2 {id, param, value}: 0 close, 1
+  pause, 2 reverb (voice switch 3 instead of 1), 3 vol L | R << 16, 4 pitch scale, 6 voice group (EE
+  default param 6, 0..2), 7 voice owner (| 0x2000000; EE param 7); 0xa4 {u16 id, u16 channel, param, -,
+  value}: 3 vol, 5 voice. Tick 0xb1dc: apply 0xa140, reap closed 0xb250 (DmaCancelArg, release voices,
+  channels back), update 0xa3ec (end: m_end and a voice's ENVX 0 -> ended, pos -1; paused -> release;
+  playing -> follow 0xa63c: (NAX of the first channel - its SPU base) & ~0x3f counts played bytes, an
+  underrun releases the voices; else start 0xa7cc when spuFill - dmaPending >= need or the end has come:
+  VoiceAlloc(voiceWant, priority, 0, group on the first channel only, owner, done 0xb3c4), SSA = spu +
+  spuPlay with ADSR 0x8000 / 0x8026, LSAX = spu unless all the data left fits before the wrap, key on),
+  then feed 0xa9e0: IOP ring -> SPU buffer on DMA queue 0, runs that wrap neither ring, at most 0x400 a
+  stream a pass; the last channel in the list (channel 0) carries done 0xb480 (dmaPending -= size, a
+  leaf Ghidra folds into 0xb3c4). 0xad54 closes all (unreferenced). The opening movie's sound is stream
+  0x2f (stereo, 0x2000 + 0x2000 per channel, pitch 0x1000) opened at frame ~1750; with
+  ROSEPAN_RXSNDDRV=1 it keys on with 0x7c0 bytes buffered and plays 0x6b24 bytes a second, no underrun.
 
 ## Disc and data files
 

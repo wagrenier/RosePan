@@ -31,10 +31,12 @@ the boot sends no XSEQ command yet). **Session 4 (2026-10-30, partial)** wrote t
 (0x35c0..0x45b0, voice.cpp; sceSdNote2Pitch and the PMON / NON switch codes in libsd). **Session 5
 (2026-10-30, partial)** wrote the BGM MIDI sequencer (0x45b0..0x6ab0, bgm.cpp; the NOTE calls it
 makes are stubs, NotePlay answering -1). A 60 s run with the driver shows **the title music is an
-ADPCM stream** (commands 0xa0..0xa4 on stream 0x2f), and no XSEQ / BGM command is sent. **Next
-session: ADPCM (0x9eb0..0xb4a0)**, chosen over the earlier order (SE, NOTE first) because it is what
-the title screen plays (decided by session 5 with no user present; revert if the user wants SE first);
-then NOTE (0x8f10..0x9eb0, needed by BGM and SE), SE (0x6ab0..0x8f10), PCM. Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
+ADPCM stream** (commands 0xa0..0xa4 on stream 0x2f), and no XSEQ / BGM command is sent. **Session 6
+(2026-10-30, partial)** wrote the ADPCM streams (0x9eb0..0xb4a0, adpcm.cpp): the opening movie's
+stream 0x2f keys on at frame ~1750 and plays at 48 kHz without underruns (the log prints
+"rxsnddrv: ADPCM 47 keyed on"). **The user should hear the opening movie's soundtrack** with
+ROSEPAN_RXSNDDRV=1 (unchecked by ear). **Next session: NOTE (0x8f10..0x9eb0)**, needed by BGM and SE;
+then SE (0x6ab0..0x8f10), then PCM (0xb4a0..). Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
 of all 229 functions; `iopdec.py dump` refreshes it when names change in Ghidra). What should be
 heard: the title BGM on the title screen, then the bus-stop BGM and footstep / UI SEs; the user
 listens.

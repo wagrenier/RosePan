@@ -3084,7 +3084,7 @@
    "task": "Grow the native i3d draw module (src/rosepan/rendering/rosepan_i3d.*) a 3D mesh path: the hook named for VU1 strips in setup/i3d_draw_module.cpp becomes a host mesh draw. Input: an i3r model's mesh items (i3d/i3rmodel.cpp, i3d/i3ritem.cpp: vertices, normals, STQ, strips, textures from i3rAssignTex) with the node matrices i3mPoseToMatrices / DogEntity produce, the view and projection from I3dView / MagScene's camera (DogCamera::getLensFov), the scene lights (mag/magscenelight.cpp) and fog (magscenecmd.cpp). Never through the emulated GS. Prove it with a forced test (an env switch that loads one disc model, e.g. the first room's map pack, and draws it with a fixed camera) and a screenshot; finish verify when only the forced draw shows it, done when the New Game run shows the first room. Then utlDrawI3r 0x106760 / 0x21fe68 (unassigned@00106658, unassigned@0021fb50) call it."
   },
   "setup/iop_rxsnddrv.cpp": {
-   "notes": "Done: bgm.cpp, 36 functions, all static except the 7 the dispatcher calls; facts in architecture.md BGM entry. The NOTE calls BGM makes (0x8f10 play, 0x9974 key off, 0x99c8 free, 0x9ab0 switch, 0x9ae4 volume, 0x9b1c velocity, 0x9bb0 pan, 0x9c0c pitch, 0x9c40 bend, 0x9db4 flags) are stubs in stubs.cpp with rxsnddrv.h prototypes. Not exercised: a 60 s padded run with ROSEPAN_RXSNDDRV=1 sends no XSEQ 0x60 or BGM 0x70; the title music is an ADPCM stream (0xa0 open, 0xa1 data, 0xa2 set, 0xa4 channel volume, stream 0x2f). Screenshot: title screen (RULE of ROSE, Press START) as before. Next (open-items.md, decided this session): ADPCM 0x9eb0..0xb4a0 (open 0x9eb0, init 0xacac, data 0xad94, set 0xaea0, channel set 0xb01c, status 0xb160, tick 0xb1dc) so the title music can be heard, then NOTE 0x8f10..0x9eb0, SE 0x6ab0..0x8f10, PCM. Test: python build.py --run 60 --env ROSEPAN_RXSNDDRV=1 and grep snddrv in work/run_relwithdebinfo.log.",
+   "notes": "Done: adpcm.cpp, 18 functions incl. hidden 0xb480 (DMA done) and unreferenced 0xad54 (close all); facts in architecture.md ADPCM entry. Test: python build.py --run 60 --env ROSEPAN_RXSNDDRV=1 then grep 'ADPCM' in work/run_relwithdebinfo.log: stream 47 (opening movie, stereo) opens at frame ~1750, keys on with 0x7c0 buffered, position advanced 0x215c0 bytes per 5 s (= 0x6b24 per second, 48 kHz), no underrun; a PC-only LogStream prints the first 16 key-on / underrun / end events. Not checked by ear: the user should hear the opening movie soundtrack with the driver on. Screenshot: opening movie frame (roses, bench) as before; nothing visual changes. Next (open-items.md): NOTE 0x8f10..0x9eb0 (play 0x8f10, tick 0x93c0, init 0x98e4, key off 0x9974, free 0x99c8, switch 0x9ab0, volume 0x9ae4, velocity 0x9b1c, pan 0x9bb0, pitch 0x9c0c, bend 0x9c40, flags 0x9db4, voice done 0x9e50 calling 0x9ddc), then SE 0x6ab0..0x8f10, then PCM 0xb4a0..0xce84. Remaining stubs in src/iop/rxsnddrv/stubs.cpp.",
    "sessions": [
     {
      "date": "2026-10-30 19:10",
@@ -3110,6 +3110,11 @@
      "date": "2026-10-30 20:17",
      "status": "partial",
      "summary": "RXSNDDRV session 5: the BGM MIDI sequencer (IOP 0x45b0..0x6ab0) in src/iop/rxsnddrv/bgm.cpp - slot open with track setup from HEAD, set / status / channel and track volume commands 0x70..0x74 (0x73/0x74 renamed RxSndDrvBgmChannelSet / TrackSet), tempo timing, MIDI event runner with note on/off, CCs, RPN, NRPN loops, sysex and meta, note list driving the NOTE layer; 7 BGM stubs removed, 10 NOTE entry points stubbed (NotePlay answers -1)"
+    },
+    {
+     "date": "2026-10-30 20:44",
+     "status": "partial",
+     "summary": "RXSNDDRV session 6: the ADPCM stream system (IOP 0x9eb0..0xb4a0) in src/iop/rxsnddrv/adpcm.cpp - open with channel pool, data / set / channel set / status commands 0xa0..0xa4, the V-blank tick (apply, reap closed, start voices at 1.5 frames of data, follow NAX for the played position, underrun stop, end on ENVX 0) and the IOP ring to SPU buffer DMA feed with the hidden done leaf 0xb480; 7 stubs removed; with ROSEPAN_RXSNDDRV=1 the opening movie stream 47 keys on and plays at 48 kHz without underruns"
     }
    ],
    "status": "partial",
