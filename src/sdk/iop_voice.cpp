@@ -56,6 +56,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* RosePan's scetypes.h has no signed short/int aliases (the ROM never needed
@@ -177,6 +178,7 @@ static s32 acc_wet_r[IOP_VOICE_CORES][MIX_BLOCK_FRAMES];
 static s32 acc_rvb_l[IOP_VOICE_CORES][MIX_BLOCK_FRAMES];
 static s32 acc_rvb_r[IOP_VOICE_CORES][MIX_BLOCK_FRAMES];
 static s16 out_block[MIX_BLOCK_FRAMES * 2];
+static FILE *audio_dump;
 
 static void LockVoices(void)   { if (voice_mutex) SDL_LockMutex(voice_mutex); }
 static void UnlockVoices(void) { if (voice_mutex) SDL_UnlockMutex(voice_mutex); }
@@ -852,6 +854,15 @@ static void MixBlock(void)
     }
 
     SDL_PutAudioStreamData(out_stream, out_block, (int)sizeof(out_block));
+
+    /* ROSEPAN_AUDIO_DUMP: the same mix appended as raw s16 stereo 48 kHz, so a
+     * smoke run can be checked for sound without a listener
+     * (tools/reverse/audiocheck.py).  Raw rather than WAV because a killed run
+     * never reaches shutdown to patch a header.  Not flushed per block: that
+     * holds the voice lock across a disk write every 5 ms and delayed the
+     * opening movie by minutes; a killed run loses only the buffered tail. */
+    if (audio_dump != NULL)
+        fwrite(out_block, 1, sizeof(out_block), audio_dump);
 }
 
 static int SDLCALL VoiceThreadMain(void *arg)
@@ -1027,6 +1038,16 @@ void RosePan_VoiceInit(void)
 
     SDL_ResumeAudioDevice(audio_dev);
 
+    const char *dump_path = getenv("ROSEPAN_AUDIO_DUMP");
+    if (dump_path != NULL && dump_path[0] != '\0')
+    {
+        audio_dump = fopen(dump_path, "wb");
+        if (audio_dump != NULL)
+            setvbuf(audio_dump, NULL, _IOFBF, 1 << 20);
+        printf("iop_voice: dumping the mix to %s%s\n", dump_path,
+               audio_dump != NULL ? "" : " (open failed)");
+    }
+
     voice_quit   = 0;
     voice_thread = SDL_CreateThread(VoiceThreadMain, "iop_voice", NULL);
     if (voice_thread == NULL)
@@ -1057,6 +1078,11 @@ void RosePan_VoiceShutdown(void)
     {
         SDL_DestroyAudioStream(out_stream);
         out_stream = NULL;
+    }
+    if (audio_dump != NULL)
+    {
+        fclose(audio_dump);
+        audio_dump = NULL;
     }
     UnlockVoices();
 

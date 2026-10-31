@@ -1071,3 +1071,16 @@ loop's start pointer in the asm when its twin starts elsewhere.
   crash.txt (`bt full` of a frame with the game's SJIS text; to_string decodes as UTF-8), and gdb
   -batch took the held game with it. gdbdrive now catches every exception, reruns an undecodable
   command through gdb's log file, and holds the game when run / continue itself errs.
+
+## Disk writes in the mixer thread hold the IOP back (2026-10-30)
+
+- Symptom: with ROSEPAN_AUDIO_DUMP set, the opening movie (ADPCM stream 47) opened at 184 s instead
+  of 38 s; frames 1680..10560 were black and the log was silent for 2.5 minutes.
+- Cause: the first version of the dump called fflush after every 256-frame block, inside
+  MixBlock, which runs with the voice lock held. The IOP side (libsd calls from the RXSNDDRV tick,
+  the stream DMA) waits on that lock, so every 5 ms a disk write stalled the driver, and the movie
+  start, which waits on stream status, crawled.
+- Fix: a 1 MB stdio buffer and no per-block flush (src/sdk/iop_voice.cpp). Anything new in the
+  mixer thread (logging, file I/O, allocation) must stay off the voice lock or be bounded; when
+  the boot timeline shifts, compare the time of "rxsnd : open ADPCM '47'" with a run without
+  the change (38 s at ~60 fps on this machine).
