@@ -338,10 +338,11 @@ struct SprMan
     }
 
     /* PC: an EE address in the table image -> its host address (NULL for
-     * 0). */
+     * 0). Signed: an image's anim tables may come before the patterns
+     * m_pattern points at (MnuItem's board, 0x2b8700 below 0x2b8810). */
     void *eePtr(u_int ee) const
     {
-        return ee ? (u_char *)m_pattern + (ee - m_pattern_ee) : NULL;
+        return ee ? (u_char *)m_pattern + (int)(ee - m_pattern_ee) : NULL;
     }
 
     int          m_00;          // ROR 0x000: S2dMes::init sets 1
