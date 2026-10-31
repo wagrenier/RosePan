@@ -2646,6 +2646,23 @@ never asserts): sessions name them (`tus.py define --why`).
   leaf Ghidra folds into 0xb3c4). 0xad54 closes all (unreferenced). The opening movie's sound is stream
   0x2f (stereo, 0x2000 + 0x2000 per channel, pitch 0x1000) opened at frame ~1750; with
   ROSEPAN_RXSNDDRV=1 it keys on with 0x7c0 bytes buffered and plays 0x6b24 bytes a second, no underrun.
+- **PCM streams 0xb0..0xb3** (`src/iop/rxsnddrv/pcm.cpp`, 2026-10-30): 0x20 slots of 0x6c at 0x34ed0,
+  open list 0x35c50, 0x100 sequence nodes of 0xc at 0x35c54 (free 0x36854), core 1's input ring 0x2000 at
+  0x36858 (two 0x1000 halves, each 4 blocks of 0x100 L + 0x100 R samples; sceSdBlockTrans(1, LOOP),
+  BVOLL/R 0x7fff), next half 0x38858, 4 mixers of 0x44 at 0x38860 {fn, 3 x {slot, srcL, srcR, s16 vol
+  L/R, xor}, count}. Slot {next, format (0 mono 0x800 blocks, 1 L/R planes, 2 pairs, 3 pairs xored),
+  id, flags (1 used, 2 playing, 4 ended, 8 paused, 0x10000 active, 0x20000 closed, 0x40000 end sent),
+  iop, blocks, written, read, filled, seq list head, tag[2] per half, vol L/R 0x80, xor, playSeq,
+  playPos, lastSeq, pending[2] {mask 1 open / 2 close / 4 pause / 8 xor / 0x10 vol / 0x20 end, pause,
+  xor, vol}}. 0xb0 {u8 id, u8 format, -, iop, blocks}; 0xb1 {u8 id, u8 count, -, seq[count]}; 0xb2
+  {id, param, value}: 0 close, 1 pause (0 off, 1..2 on), 2 xor (L ^ high half, R ^ low), 4 vol, 5 end;
+  0xb3 12 bytes per open slot {id, flags, s16 filled, playSeq, playPos}. Tick 0xb5ac: apply, reap, read
+  the ring position (half = pos >> 12), and when the SPU changed half mix every active unpaused slot
+  with filled > 0 into the other: volume via the curve 0xe2e0 (v * |v| / 4, 0x1000 unity), the oldest
+  seq becomes that half's tag, a mixer runs as soon as it holds 3 streams, then the rest; mono output
+  (sys output mode 0) averages L/R (0xce18). 0xc8f4 closes all and stops the ring (unreferenced). The
+  movie player rxmpeg can choose PCM (rxSndPcmWrite) or ADPCM; the opening movie uses ADPCM, so no
+  smoke run has opened a PCM stream yet.
 
 ## Disc and data files
 
