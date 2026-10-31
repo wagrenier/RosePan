@@ -1570,6 +1570,15 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- **The host mix may be ~12 dB quieter than the PS2's (2026-10-31, the user's sound fixes).**
+  src/sdk/iop_voice.cpp's DecodeVolume / ApplyVolume take an SPU2 level word as a fraction of
+  0x8000, so 0x3fff (what RXSNDDRV's defaults and full voice volumes write) is x0.5. On the SPU2 a
+  level word is volume / 2 (psx-spx: -4000h..+3FFFh = -8000h..+7FFEh), so 0x3fff is full scale:
+  the voice and master stages each lose 6 dB. Measured mixes fit: title music RMS -34..-44 dB,
+  peaks -17 dB. Doubling both stages would match the hardware but rebalances every sound against
+  the movies' auto-DMA (BVOL) and risks clipping where many voices sum; the user's decision. The
+  player's volume ([audio] in rosepan.ini, the Audio menu) tops out at the game's level and cannot
+  make up for it.
 - 2026-10-30 (RXSNDDRV session 8): `rxSndSeSetPan` (rx/rxsnd.cpp, ROR 0x23c800) sends SE parameter 10
   ((pan + 1) * 128), but the driver applies 10 as the first channel's **modulation rate** (0x80 = 1x;
   pan is parameter 7, 0x40 centre). Either the EE name is a guess to revisit or the game really scales

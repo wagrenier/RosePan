@@ -20,6 +20,7 @@
 
 #include "iop/rxsnddrv/rxsnddrv.h"
 
+#include "iop_voice.h"
 #include "libsd.h"
 
 #include <string.h>
@@ -91,6 +92,9 @@ struct RxSndDrvVoiceState
 };
 
 static RxSndDrvVoiceState s_voice;      // IOP 0x0001aa80
+
+/* PC: RxSndDrvVoiceSetMixGroup. */
+static int s_mixGroup = ROSEPAN_VOICE_GROUP_MUSIC;
 
 /* The voice defaults (IOP 0xde30): no voice mixed, no noise, no pitch
  * modulation on either core; then volume, pitch and both addresses of voice
@@ -355,6 +359,8 @@ int RxSndDrvVoiceAlloc(int voice, int priority, int autoFree, int group, int own
     p->m_owner    = owner;
     p->m_pending &= ~RXSNDDRV_VOICE_SET_LOOP;
     p->m_arg      = arg;
+    /* PC: which of the player's volumes the host mixer applies to it. */
+    RosePan_VoiceSetGroup(VoiceCore(voice), VoiceChannel(voice), s_mixGroup);
     return voice;
 }
 
@@ -600,4 +606,11 @@ void RxSndDrvVoiceFree(int voice)
 {
     RxSndDrvVoiceKeyOff(voice);
     s_voice.m_voice[voice].m_flags = 0;
+}
+
+/* PC: every allocation happens on the tick thread, in the BGM, SE or ADPCM
+ * tick (RxSndDrvTickThread), so the tick in progress is the group. */
+void RxSndDrvVoiceSetMixGroup(int group)
+{
+    s_mixGroup = group;
 }

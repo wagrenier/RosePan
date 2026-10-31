@@ -28,6 +28,8 @@
  *  this file used to fake are now real:
  *
  *    - SD_VA_NAX comes from the engine's actual play position.
+ *    - SD_VP_ENVX is the engine's envelope level; RXSNDDRV frees voices and
+ *      ends streams on it.
  *    - SD_S_ENDX latches from RosePan_SdSetVoiceEnd(), called when a voice
  *      reaches a loop-end block it is not repeating.
  *    - SD_A_IRQA fires the SPU2 handler from RosePan_SdVoiceReachedAddress(),
@@ -215,7 +217,18 @@ u_short sceSdGetParam(u_short entry)
     int     reg  = EntryReg(entry) >> 8;
 
     if (EntryReg(entry) < SD_P_MMIX)
-        return EntryVoice(entry) < SPU_VOICE_NUM ? core->voice[EntryVoice(entry)].param[reg & 7] : 0;
+    {
+        if (EntryVoice(entry) >= SPU_VOICE_NUM)
+            return 0;
+
+        /* ENVX is the envelope the voice engine runs, not a stored write:
+         * nothing writes it, and RXSNDDRV frees voices and ends streams when it
+         * reads 0 (RosePan_VoiceGetEnvx). */
+        if (EntryReg(entry) == SD_VP_ENVX)
+            return RosePan_VoiceGetEnvx(EntryCore(entry), EntryVoice(entry));
+
+        return core->voice[EntryVoice(entry)].param[reg & 7];
+    }
 
     return core->param[reg & 0x1f];
 }

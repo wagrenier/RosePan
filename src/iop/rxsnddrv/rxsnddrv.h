@@ -226,6 +226,9 @@ u_int RxSndDrvVoiceGetNax(int voice);               // IOP 0x00004468
 void  RxSndDrvVoiceSetEnable(u_int voice, u_int enable); // IOP 0x0000451c
 void  RxSndDrvVoiceGetFlags(u_char *reply);         // IOP 0x00004540
 void  RxSndDrvVoiceFree(int voice);                 // IOP 0x00004570
+/* PC: the player's volume group (ROSEPAN_VOICE_GROUP_*, sdk/iop_voice.h) of
+ * the voices allocated from here on; the tick thread sets it per subsystem. */
+void  RxSndDrvVoiceSetMixGroup(int group);
 
 /* ---- bgm.cpp ----------------------------------------------------------- */
 

@@ -80,6 +80,29 @@ void RosePan_VoiceSetStereoPair(int core0, int voice0, int core1, int voice1);
 u_int RosePan_VoiceGetNowAddr(int core, int voice);
 int   RosePan_VoiceIsPlaying(int core, int voice);
 
+/* SD_VP_ENVX: the envelope's current level, 0..0x7fff; 0 once the voice has
+ * ended or its release has run out, as on the SPU2. */
+u_short RosePan_VoiceGetEnvx(int core, int voice);
+
+/* ---- the player's volume ----------------------------------------------
+ *
+ * RosePan's own setting ([audio] in rosepan.ini), on top of everything the
+ * game asks for: a master gain on the finished mix, and a gain per group.
+ * RXSNDDRV tags each voice with its group as it takes it -- BGM notes and
+ * ADPCM streams (music, but also speech and ambience: the game streams all
+ * three) are MUSIC, SE notes are EFFECTS -- and the auto-DMA input, which
+ * carries movie and PCM audio, counts as MUSIC.  Gains are linear amplitude,
+ * 0..1; a change is heard within the mixer's ~42 ms lead. */
+enum
+{
+    ROSEPAN_VOICE_GROUP_MUSIC   = 0,
+    ROSEPAN_VOICE_GROUP_EFFECTS = 1,
+    ROSEPAN_VOICE_GROUPS
+};
+
+void RosePan_VoiceSetGroup(int core, int voice, int group);
+void RosePan_VoiceSetUserVolume(float master, float music, float effects);
+
 /* ---- auto-DMA ("external input") --------------------------------------
  *
  * The other way sound reaches a core.  A voice reads ADPCM out of SPU RAM; the

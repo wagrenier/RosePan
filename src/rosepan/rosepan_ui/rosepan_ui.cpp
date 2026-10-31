@@ -1854,6 +1854,55 @@ void DrawDataFolderWindow()
     ImGui::End();
 }
 
+/*
+ * Volume.  RosePan's own, on top of the game's mix: the host mixer applies it
+ * (RosePan_ConfigApplyAudio), so a drag is heard at once, and the settle in
+ * PersistSettingsIfChanged writes it to rosepan.ini once the slider stops.
+ */
+void DrawAudioMenu()
+{
+    if (!ImGui::BeginMenu("Audio"))
+    {
+        return;
+    }
+
+    RosePan_ConfigAudio *a = &rosepan_config.audio;
+    bool changed = false;
+
+    ImGui::TextDisabled("Volume");
+    ImGui::SetNextItemWidth(180.0f);
+    changed |= ImGui::SliderInt("Master", &a->master, 0, 100, "%d%%",
+                                ImGuiSliderFlags_AlwaysClamp);
+    ImGui::SetNextItemWidth(180.0f);
+    changed |= ImGui::SliderInt("Music and voices", &a->music, 0, 100, "%d%%",
+                                ImGuiSliderFlags_AlwaysClamp);
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("Everything the game streams: its music, and the\n"
+                          "speech and ambience that share those streams;\n"
+                          "movie audio too.");
+    }
+    ImGui::SetNextItemWidth(180.0f);
+    changed |= ImGui::SliderInt("Sound effects", &a->effects, 0, 100, "%d%%",
+                                ImGuiSliderFlags_AlwaysClamp);
+    ImGui::TextDisabled("  100%% is the level the game asks for");
+
+    if (ImGui::MenuItem("Reset to 100%", nullptr, false,
+                        a->master != 100 || a->music != 100 || a->effects != 100))
+    {
+        a->master = a->music = a->effects = 100;
+        changed = true;
+    }
+
+    if (changed)
+    {
+        RosePan_ConfigApplyAudio();
+        MarkSettingsDirty();
+    }
+
+    ImGui::EndMenu();
+}
+
 void DrawMainMenuBar()
 {
     if (!g_show_main_menu_bar)
@@ -2178,6 +2227,7 @@ void DrawMainMenuBar()
         }
         ImGui::EndMenu();
     }
+    DrawAudioMenu();
     if (ImGui::BeginMenu("Settings"))
     {
         ImGui::MenuItem("Game data folder...", nullptr, &g_show_data_folder);

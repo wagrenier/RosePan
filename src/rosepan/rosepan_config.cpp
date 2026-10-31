@@ -5,6 +5,8 @@
 #include "io/rosepan_paths.h"
 #include "rendering/rosepan_renderer.h"
 
+#include "iop_voice.h"
+
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_stdinc.h>
 
@@ -96,6 +98,12 @@ RosePan_Config rosepan_config = {
         /* Off: the intro is the ROM's and a first run shows it.  Start
          * skips it anyway, so the setting only saves the press. */
         /* .skip_intro        = */ 0,
+    },
+    /* .audio = */ {
+        /* All at 100: the game's own levels. */
+        /* .master            = */ 100,
+        /* .music             = */ 100,
+        /* .effects           = */ 100,
     },
 };
 
@@ -840,6 +848,10 @@ static void ConfigLoadOnce(void)
 
     ReadInt("game", "skip_intro", &rosepan_config.game.skip_intro);
 
+    ReadInt("audio", "master", &rosepan_config.audio.master);
+    ReadInt("audio", "music", &rosepan_config.audio.music);
+    ReadInt("audio", "effects", &rosepan_config.audio.effects);
+
     RosePan_ConfigRenderer *r = &rosepan_config.renderer;
     ReadEnum("window", "mode", kWindowModes, &r->window_mode);
     ReadInt("window", "width", &r->window_width);
@@ -980,6 +992,18 @@ int RosePan_ConfigSave(void)
         ";   START button\". 0 plays them as the PS2 did; Start skips them\n"
         ";   either way. ROSEPAN_SKIP_INTRO overrides it for one run.\n"
         "skip_intro = %d\n"
+        "\n"
+        "[audio]\n"
+        "; Volume, percent: 100 is the level the game asks for, 0 silence.\n"
+        ";   The slider is shaped to the ear, so 50 sounds about half as\n"
+        ";   loud (-12 dB) rather than a half-amplitude -6 dB.\n"
+        ";   master  everything, movies included\n"
+        ";   music   what the game streams: its music, but also speech and\n"
+        ";           ambience, which ride the same streams; and movie audio\n"
+        ";   effects the sound effects\n"
+        "master = %d\n"
+        "music = %d\n"
+        "effects = %d\n"
         "\n"
         "[window]\n"
         "; windowed | borderless   (borderless is desktop fullscreen)\n"
@@ -1143,6 +1167,9 @@ int RosePan_ConfigSave(void)
         "\n%s",
         rosepan_config.paths.data_folder,
         rosepan_config.game.skip_intro != 0 ? 1 : 0,
+        rosepan_config.audio.master,
+        rosepan_config.audio.music,
+        rosepan_config.audio.effects,
         EnumToName(kWindowModes, r->window_mode),
         r->window_width,
         r->window_height,
@@ -1271,6 +1298,26 @@ void RosePan_ConfigApply(void)
     RosePan_RendererSetGrade(r->grade_brightness, r->grade_contrast,
                             r->grade_gamma, r->grade_saturation);
     RosePan_RendererSetWindowMode(r->window_mode);
+
+    RosePan_ConfigApplyAudio();
+}
+
+void RosePan_ConfigApplyAudio(void)
+{
+    RosePan_ConfigAudio *a = &rosepan_config.audio;
+
+    a->master  = SDL_clamp(a->master, 0, 100);
+    a->music   = SDL_clamp(a->music, 0, 100);
+    a->effects = SDL_clamp(a->effects, 0, 100);
+
+    /* Squared: loudness follows amplitude far more slowly than linearly, so a
+     * linear gain would put almost all of the audible range in the slider's
+     * bottom fifth.  This puts 50 at -12 dB, about half as loud. */
+    auto gain = [](int percent) {
+        const float x = (float)percent / 100.0f;
+        return x * x;
+    };
+    RosePan_VoiceSetUserVolume(gain(a->master), gain(a->music), gain(a->effects));
 }
 
 void RosePan_ConfigCapture(void)
