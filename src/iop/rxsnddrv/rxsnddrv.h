@@ -16,10 +16,10 @@
  *    xseq.cpp      0x2e00..0x35c0  XSEQ sequences (BGM's MIDI data)
  *    voice.cpp     0x35c0..0x45b0  the 48 SPU2 voices: allocation, registers
  *    bgm.cpp       0x45b0..0x6ab0  the BGM MIDI sequencer
- *    (not yet)     0x6ab0..0x8f10  SE: stubs.cpp until reconstructed
+ *    se.cpp        0x6ab0..0x8f10  SEs: SESQ byte code over NOTE slots
  *    note.cpp      0x8f10..0x9eb0  NOTE slots: one program key on its voices
  *    adpcm.cpp     0x9eb0..0xb4a0  ADPCM streams (title music, voices, movies)
- *    (not yet)     0xb4a0..        PCM: stubs.cpp until reconstructed
+ *    pcm.cpp       0xb4a0..0xce84  PCM streams mixed into core 1's input ring
  *
  *  Functions carry `IOP 0x<addr>` (never `ROR 0x`: these are IOP addresses,
  *  and the TU tools count ROR annotations as EE functions).
@@ -237,6 +237,16 @@ void  RxSndDrvBgmChannelSet(int slot, int channel, const u_int *data); // IOP 0x
 void  RxSndDrvBgmTrackSet(int slot, u_int track, const u_int *data);   // IOP 0x00005d20
 void  RxSndDrvBgmTick(void);                        // IOP 0x00005e60
 
+/* ---- se.cpp ------------------------------------------------------------ */
+
+void  RxSndDrvSeInit(void);                         // IOP 0x00006ab0
+void  RxSndDrvSeSet(u_int slot, const u_int *data); // IOP 0x00006bcc
+void  RxSndDrvSeStopAll(void);                      // IOP 0x00008458
+int   RxSndDrvSePlay(int slot, int xvab, int group, int index);  // IOP 0x000084b0
+int   RxSndDrvSePlay2(int slot, int xvab, int program, int key); // IOP 0x00008658
+int   RxSndDrvSeStatus(u_char *reply);              // IOP 0x00008800
+void  RxSndDrvSeTick(void);                         // IOP 0x00008878
+
 /* ---- note.cpp ---------------------------------------------------------- */
 
 /* One key of an XVAB program on as many voices as it has regions: a NOTE id
@@ -270,18 +280,13 @@ void  RxSndDrvAdpcmChannelSet(int id, u_int no, const u_int *data); // IOP 0x000
 int   RxSndDrvAdpcmStatus(u_char *reply);           // IOP 0x0000b160
 void  RxSndDrvAdpcmTick(void);                      // IOP 0x0000b1dc
 
-/* ---- not reconstructed yet (stubs.cpp) --------------------------------- */
+/* ---- pcm.cpp ----------------------------------------------------------- */
 
-void  RxSndDrvSeInit(void);                         // IOP 0x00006ab0
-void  RxSndDrvSeSet(u_int voice, const u_int *data);    // IOP 0x00006bcc
-int   RxSndDrvSePlay(int voice, int xvab, int prog, int note);  // IOP 0x000084b0
-int   RxSndDrvSePlay2(int voice, int xvab, int prog, int note); // IOP 0x00008658
-int   RxSndDrvSeStatus(u_char *reply);              // IOP 0x00008800
-void  RxSndDrvSeTick(void);                         // IOP 0x00008878
 void  RxSndDrvPcmInit(void);                        // IOP 0x0000b4a0
 void  RxSndDrvPcmTick(void);                        // IOP 0x0000b5ac
-int   RxSndDrvPcmOpen(int id, int a, u_int b, u_int c);  // IOP 0x0000c944
-void  RxSndDrvPcmData(int id, const u_int *data, int a); // IOP 0x0000cabc
+void  RxSndDrvPcmCloseAll(void);                    // IOP 0x0000c8f4
+int   RxSndDrvPcmOpen(int id, int format, u_int iop, u_int blocks); // IOP 0x0000c944
+void  RxSndDrvPcmData(int id, const u_int *seq, int count);         // IOP 0x0000cabc
 void  RxSndDrvPcmSet(u_int id, const u_int *data);  // IOP 0x0000cc28
 int   RxSndDrvPcmStatus(u_char *reply);             // IOP 0x0000cd58
 

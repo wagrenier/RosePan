@@ -37,8 +37,12 @@ stream 0x2f keys on at frame ~1750 and plays at 48 kHz without underruns (the lo
 "rxsnddrv: ADPCM 47 keyed on"). **The user should hear the opening movie's soundtrack** with
 ROSEPAN_RXSNDDRV=1 (unchecked by ear). **Session 7 (2026-10-30, partial)** wrote NOTE (0x8f10..0x9eb0,
 note.cpp; the region layout checked against G000.GRB's bank; nothing in the boot plays a note yet).
-**Next session: SE (0x6ab0..0x8f10)**, the first caller of NOTE in the boot (UI / footstep SEs); then
-PCM (0xb4a0..). Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
+**Session 8 (2026-10-30, partial)** wrote SE (0x6ab0..0x8f10, se.cpp): with the scripted pad the
+title menu plays bank 0 SE requests (0, 3) and (0, 7) on slot 63, each keying one NOTE on, and the
+slot is stopped, reaped and reused; area bank 3 request (11, 11) starts two notes; no unknown SESQ
+codes. **The user should hear the title menu's cursor / confirm sounds** with ROSEPAN_RXSNDDRV=1
+(unchecked by ear). **Next session: PCM (0xb4a0..0xce84)**, the last stubs in stubs.cpp; then switch
+the default from the stand-in src/sdk/iop_rxsnd.cpp to the reconstruction. **Session 9 (2026-10-30, partial)** wrote PCM (0xb4a0..0xce84, pcm.cpp; stubs.cpp deleted: every function of the driver is reconstructed) and made the reconstruction the default: **a plain build now plays sound** (the user asked why their builds were silent while the session runs were not: those runs set ROSEPAN_RXSNDDRV=1). ROSEPAN_RXSNDDRV=0 still selects the silent stand-in. No smoke run opens a PCM stream yet (the opening movie streams ADPCM), so PCM is unheard. Next for this host task: the user listens (title BGM, menu SEs, movie sound); then delete iop_rxsnd.cpp and the switch, and close the host task. Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
 of all 229 functions; `iopdec.py dump` refreshes it when names change in Ghidra). What should be
 heard: the title BGM on the title screen, then the bus-stop BGM and footstep / UI SEs; the user
 listens.
@@ -1326,6 +1330,8 @@ writers (`i3dPktDrawStrip` 0x21db18, a stub: RosePan_I3dRecordVu1 is their named
 - 2026-10-30 (same session): **the reconstruction runs only with `ROSEPAN_RXSNDDRV=1`**; the silent
   stand-in `src/sdk/iop_rxsnd.cpp` stays the default until every command the boot sends is
   answered for real, then it is deleted and the switch removed.
+  Session 9 (2026-10-30) flipped the default once every command was answered but kept the
+  stand-in behind ROSEPAN_RXSNDDRV=0 until the user has heard the reconstruction; delete it after that.
 - 2026-10-30 (same session, platform layer): the host IOP gained event flags
   (Create / Set / iSet / Clear / WaitEventFlag on the semaphore table, released at shutdown),
   WaitVblankEnd (a 60 Hz steady clock, DelayThread so the big lock drops), QueryMemSize, and libsd
@@ -1560,6 +1566,10 @@ to adapt when a TU reaches them:
 
 ## Open questions
 
+- 2026-10-30 (RXSNDDRV session 8): `rxSndSeSetPan` (rx/rxsnd.cpp, ROR 0x23c800) sends SE parameter 10
+  ((pan + 1) * 128), but the driver applies 10 as the first channel's **modulation rate** (0x80 = 1x;
+  pan is parameter 7, 0x40 centre). Either the EE name is a guess to revisit or the game really scales
+  the LFO rate; check where SndMan calls it before renaming.
 - **sceSdNote2Pitch is computed, not tabled (2026-10-30, setup/iop_rxsnddrv.cpp session 4).** The host
   libsd answers 0x1000 * 2^(((note - center) * 128 + fine - centerFine) / 1536), clamped to 0xffff;
   the SDK uses semitone / fine tables, so the low bits may differ and whether the SDK clamps or wraps
@@ -2286,4 +2296,3 @@ to adapt when a TU reaches them:
   same). Not seen on screen; mark it done only if a PAL data set is ever used, or confirm from
   W099's script (open-items "what W099's script does before system call 0x16") that the US boot
   never opens 0x10010.
-
