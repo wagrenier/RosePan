@@ -21,62 +21,6 @@ static void RxSndDrvStubHit(int *once, const char *addr)
 
 #define RXSNDDRV_STUB(addr) do { static int once; RxSndDrvStubHit(&once, addr); } while (0)
 
-// stub of IOP 0x000045b0
-void RxSndDrvBgmInit(void)
-{
-    RXSNDDRV_STUB("0x000045b0");
-}
-
-// stub of IOP 0x00004680
-int RxSndDrvBgmOpen(u_int a, u_int b)
-{
-    (void)b;
-    (void)a;
-    RXSNDDRV_STUB("0x00004680");
-    return 0;
-}
-
-// stub of IOP 0x000059ec
-void RxSndDrvBgmSet(u_int slot, const u_int *data)
-{
-    (void)data;
-    (void)slot;
-    RXSNDDRV_STUB("0x000059ec");
-}
-
-// stub of IOP 0x00005b68
-int RxSndDrvBgmStatus(u_char *reply, u_char *reply2)
-{
-    (void)reply2;
-    (void)reply;
-    RXSNDDRV_STUB("0x00005b68");
-    return 0;
-}
-
-// stub of IOP 0x00005c10
-void RxSndDrvBgmCmd73(int a, int b, const u_int *data)
-{
-    (void)data;
-    (void)b;
-    (void)a;
-    RXSNDDRV_STUB("0x00005c10");
-}
-
-// stub of IOP 0x00005d20
-void RxSndDrvBgmCmd74(int a, int b, const u_int *data)
-{
-    (void)data;
-    (void)b;
-    (void)a;
-    RXSNDDRV_STUB("0x00005d20");
-}
-
-// stub of IOP 0x00005e60
-void RxSndDrvBgmTick(void)
-{
-    RXSNDDRV_STUB("0x00005e60");
-}
-
 // stub of IOP 0x00006ab0
 void RxSndDrvSeInit(void)
 {
@@ -137,6 +81,89 @@ void RxSndDrvNoteTick(void)
 void RxSndDrvNoteInit(void)
 {
     RXSNDDRV_STUB("0x000098e4");
+}
+
+// stub of IOP 0x00008f10: no NOTE yet, so no note starts
+int RxSndDrvNotePlay(int xvab, int program, int key, int a, int b)
+{
+    (void)b;
+    (void)a;
+    (void)key;
+    (void)program;
+    (void)xvab;
+    RXSNDDRV_STUB("0x00008f10");
+    return -1;
+}
+
+// stub of IOP 0x00009974
+void RxSndDrvNoteKeyOff(int note)
+{
+    (void)note;
+    RXSNDDRV_STUB("0x00009974");
+}
+
+// stub of IOP 0x000099c8
+void RxSndDrvNoteFree(int note)
+{
+    (void)note;
+    RXSNDDRV_STUB("0x000099c8");
+}
+
+// stub of IOP 0x00009ab0
+void RxSndDrvNoteSetSwitch(int note, int on)
+{
+    (void)on;
+    (void)note;
+    RXSNDDRV_STUB("0x00009ab0");
+}
+
+// stub of IOP 0x00009ae4
+void RxSndDrvNoteSetVolume(int note, short l, short r)
+{
+    (void)r;
+    (void)l;
+    (void)note;
+    RXSNDDRV_STUB("0x00009ae4");
+}
+
+// stub of IOP 0x00009b1c
+void RxSndDrvNoteSetVelocity(int note, int velocity)
+{
+    (void)velocity;
+    (void)note;
+    RXSNDDRV_STUB("0x00009b1c");
+}
+
+// stub of IOP 0x00009bb0
+void RxSndDrvNoteSetPan(int note, int pan)
+{
+    (void)pan;
+    (void)note;
+    RXSNDDRV_STUB("0x00009bb0");
+}
+
+// stub of IOP 0x00009c0c
+void RxSndDrvNoteSetPitch(int note, int scale)
+{
+    (void)scale;
+    (void)note;
+    RXSNDDRV_STUB("0x00009c0c");
+}
+
+// stub of IOP 0x00009c40
+void RxSndDrvNoteSetBend(int note, int bend)
+{
+    (void)bend;
+    (void)note;
+    RXSNDDRV_STUB("0x00009c40");
+}
+
+// stub of IOP 0x00009db4
+u_int RxSndDrvNoteGetFlags(int note)
+{
+    (void)note;
+    RXSNDDRV_STUB("0x00009db4");
+    return 0;
 }
 
 // stub of IOP 0x00009eb0

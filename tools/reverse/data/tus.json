@@ -3084,7 +3084,7 @@
    "task": "Grow the native i3d draw module (src/rosepan/rendering/rosepan_i3d.*) a 3D mesh path: the hook named for VU1 strips in setup/i3d_draw_module.cpp becomes a host mesh draw. Input: an i3r model's mesh items (i3d/i3rmodel.cpp, i3d/i3ritem.cpp: vertices, normals, STQ, strips, textures from i3rAssignTex) with the node matrices i3mPoseToMatrices / DogEntity produce, the view and projection from I3dView / MagScene's camera (DogCamera::getLensFov), the scene lights (mag/magscenelight.cpp) and fog (magscenecmd.cpp). Never through the emulated GS. Prove it with a forced test (an env switch that loads one disc model, e.g. the first room's map pack, and draws it with a fixed camera) and a screenshot; finish verify when only the forced draw shows it, done when the New Game run shows the first room. Then utlDrawI3r 0x106760 / 0x21fe68 (unassigned@00106658, unassigned@0021fb50) call it."
   },
   "setup/iop_rxsnddrv.cpp": {
-   "notes": "Done: voice.cpp, 20 functions (names in rxsnddrv.h voice section; commands 0x90..0x93 renamed RxSndDrvVoiceGetEnvxAll / SetEnable / GetFlags / GetTable). Owners call RxSndDrvVoiceAlloc(voice or -1, priority, autoFree, group 0..2, owner, done, arg) then SetSample / SetLoop / SetSwitch / SetVolume / SetPitch / KeyOn; done(voice, reason, arg) uses a host void pointer for arg. The defaults batch at IOP 0xde30 names voice 31 of both cores; libsd now ignores voices past 23 (open-items.md Open questions, with the Note2Pitch formula doubt). Nothing audible yet: BGM, SE and NOTE are still stubs, so no voice is allocated in the boot. Screenshot unchanged: the Shirogumi intro logo with ROSEPAN_RXSNDDRV=1. Next: BGM + MIDI 0x45b0..0x6ab0 (init 0x45b0, open 0x4680, set 0x59ec, status 0x5b68, 0x73/0x74 channel volumes 0x5c10/0x5d20, tick 0x5e60, event code near 0x5370 calling NOTE 0x8f10), then SE 0x6ab0..0x8f10, NOTE 0x8f10..0x9eb0, ADPCM, PCM. Test: python build.py --run 25 --env ROSEPAN_RXSNDDRV=1 and grep rxsnddrv: in work/run_relwithdebinfo.log.",
+   "notes": "Done: bgm.cpp, 36 functions, all static except the 7 the dispatcher calls; facts in architecture.md BGM entry. The NOTE calls BGM makes (0x8f10 play, 0x9974 key off, 0x99c8 free, 0x9ab0 switch, 0x9ae4 volume, 0x9b1c velocity, 0x9bb0 pan, 0x9c0c pitch, 0x9c40 bend, 0x9db4 flags) are stubs in stubs.cpp with rxsnddrv.h prototypes. Not exercised: a 60 s padded run with ROSEPAN_RXSNDDRV=1 sends no XSEQ 0x60 or BGM 0x70; the title music is an ADPCM stream (0xa0 open, 0xa1 data, 0xa2 set, 0xa4 channel volume, stream 0x2f). Screenshot: title screen (RULE of ROSE, Press START) as before. Next (open-items.md, decided this session): ADPCM 0x9eb0..0xb4a0 (open 0x9eb0, init 0xacac, data 0xad94, set 0xaea0, channel set 0xb01c, status 0xb160, tick 0xb1dc) so the title music can be heard, then NOTE 0x8f10..0x9eb0, SE 0x6ab0..0x8f10, PCM. Test: python build.py --run 60 --env ROSEPAN_RXSNDDRV=1 and grep snddrv in work/run_relwithdebinfo.log.",
    "sessions": [
     {
      "date": "2026-10-30 19:10",
@@ -3105,6 +3105,11 @@
      "date": "2026-10-30 20:00",
      "status": "partial",
      "summary": "RXSNDDRV session 4: the 48-voice layer (IOP 0x35c0..0x45b0) in src/iop/rxsnddrv/voice.cpp - allocation with groups, owners and stealing, per-voice register records applied by the V-blank tick (switch words, KON/KOFF), release fade and auto-free, commands 0x90..0x93; host libsd gains sceSdNote2Pitch, SD_S_PMON/NON and ignores voice numbers past 23; 7 stubs removed"
+    },
+    {
+     "date": "2026-10-30 20:17",
+     "status": "partial",
+     "summary": "RXSNDDRV session 5: the BGM MIDI sequencer (IOP 0x45b0..0x6ab0) in src/iop/rxsnddrv/bgm.cpp - slot open with track setup from HEAD, set / status / channel and track volume commands 0x70..0x74 (0x73/0x74 renamed RxSndDrvBgmChannelSet / TrackSet), tempo timing, MIDI event runner with note on/off, CCs, RPN, NRPN loops, sysex and meta, note list driving the NOTE layer; 7 BGM stubs removed, 10 NOTE entry points stubbed (NotePlay answers -1)"
     }
    ],
    "status": "partial",
