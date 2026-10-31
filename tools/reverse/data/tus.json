@@ -1,6 +1,5 @@
 {
  "queue": [
-  "setup/iop_rxsnddrv.cpp",
   "unassigned@001fd424",
   "unassigned@0010f944",
   "unassigned@0022e840",
@@ -3084,7 +3083,7 @@
    "task": "Grow the native i3d draw module (src/rosepan/rendering/rosepan_i3d.*) a 3D mesh path: the hook named for VU1 strips in setup/i3d_draw_module.cpp becomes a host mesh draw. Input: an i3r model's mesh items (i3d/i3rmodel.cpp, i3d/i3ritem.cpp: vertices, normals, STQ, strips, textures from i3rAssignTex) with the node matrices i3mPoseToMatrices / DogEntity produce, the view and projection from I3dView / MagScene's camera (DogCamera::getLensFov), the scene lights (mag/magscenelight.cpp) and fog (magscenecmd.cpp). Never through the emulated GS. Prove it with a forced test (an env switch that loads one disc model, e.g. the first room's map pack, and draws it with a fixed camera) and a screenshot; finish verify when only the forced draw shows it, done when the New Game run shows the first room. Then utlDrawI3r 0x106760 / 0x21fe68 (unassigned@00106658, unassigned@0021fb50) call it."
   },
   "setup/iop_rxsnddrv.cpp": {
-   "notes": "Measured, not heard: the movie soundtrack is in the mix (audiocheck on a 300 s run with --env ROSEPAN_AUDIO_DUMP=<abs path>/tools/reverse/work/audio/mix.raw). The scripted pad did not leave the opening movie in that run (the game ran ~60 fps; it played to 300 s), so no SE 0x80, XSEQ or BGM command was sent and menu SEs are unmeasured. Trap fixed on the way: flushing the dump per block inside MixBlock (voice lock held) delayed the movie start from 38 s to 184 s; now a 1 MB stdio buffer with no flush (hazards.md). Next: a run that reaches the title menu and bus stop with the dump on (check SE bursts in audiocheck), or the user listens to mix.wav or a plain build; then delete src/sdk/iop_rxsnd.cpp and the ROSEPAN_RXSNDDRV switch and mark the host task done.",
+   "notes": "Every driver function is written and the stand-in is gone. Verify, not done: no run has sent XSEQ 0x60.., BGM 0x70.. or PCM 0xb0.. yet (the EE sends no BGM at the bus stop or in the Little Princess book; silence there is the game's request). The first session whose run sends them (in-game music past the bus stop) checks them with audiocheck plus ROSEPAN_RXSNDDRV_LOG=all and marks this host task done with tus.py mark. Audio test: build.py --run 110 --env ROSEPAN_SKIP_INTRO=1 --env ROSEPAN_AUDIO_DUMP=<abs>/tools/reverse/work/audio/mix.raw --pad 900:START,1200:CROSS,1600:START*900,2700:RIGHT*1700, then python audiocheck.py --every 2 (timeline in open-items.md). The user has not listened yet: tools/reverse/work/audio/mix.wav after such a run, or a plain build.",
    "sessions": [
     {
      "date": "2026-10-30 19:10",
@@ -3135,9 +3134,14 @@
      "date": "2026-10-30 21:46",
      "status": "partial",
      "summary": "RXSNDDRV session 10: a sound test without a listener - ROSEPAN_AUDIO_DUMP makes the host mixer write its output as raw s16 stereo 48 kHz and the new audiocheck.py prints loudness per interval and writes mix.wav; a 300 s run measures silence for the boot and logos, then the opening movie ADPCM stream 47 in the mix from 35 s to the end at -27..-50 dB RMS"
+    },
+    {
+     "date": "2026-10-30 22:05",
+     "status": "verify",
+     "summary": "RXSNDDRV session 11: measured the reconstruction in a run that reaches the title menu, the prologue movie, the bus stop and the picture book (audiocheck): title music stream 0x2f, the movie soundtrack, menu and page-turn SEs (peaks -32.6 dB, one per request) are in the mix; deleted the silent stand-in src/sdk/iop_rxsnd.cpp and the ROSEPAN_RXSNDDRV switch (the boot calls RxSndDrvStart); new ROSEPAN_RXSNDDRV_LOG=all traces every RPC command and ADPCM stream event"
     }
    ],
-   "status": "partial",
+   "status": "verify",
    "task": "Reconstruct the game IOP sound driver RXSNDDRV.IRX so Rule of Rose has sound (the user, 2026-10-30: the IOP code is missing). It is the only game code on the IOP: ~53 KB of R3000 code, ~200 functions, no symbols, RPC 0xd000, gp 0x164e0; facts in architecture.md \"The IOP side\", tool tools/reverse/iop.py (report / extract / irx --stubs / elf). (1) Ghidra: python iop.py elf <game data>/MODULES/RXSNDDRV.IRX writes work/iop/elf/rxsnddrv.elf (base 0, import stubs, _start, _gp as symbols). Imported by the user 2026-10-30 as program rxsnddrv.elf (229 functions; the RPC dispatcher is 0x360, architecture.md \"The IOP side\"). With ROSEPAN_PROGRAM=rxsnddrv.elf only dec.py and ghidra.py are safe: the caches and the name ledger are keyed by address alone (hazards.md), so never run name_ctx.py, refresh.py or tus.py check / finish with it set. The TU pipeline (fetch, features, export, tus.py, status, stubgen, callcheck) only knows SLUS_214.48: decide whether to extend it (a program key per TU, IOP functions annotated IOP 0x... so they never collide with ROR 0x... EE addresses) or to track RXSNDDRV by hand over a few host-task sessions; record the decision in open-items.md Decisions and the skill. (2) Placement (open-items.md proposal; confirm or record otherwise): src/iop/rxsnddrv/, one file per subsystem the driver strings name (rpc server, dma thread, double-buffer thread, xvab, xseq + bgm sequencer, se, note, adpcm, pcm), running on the host IOP layer (src/sdk/iop_host.cpp / iop_sif.cpp: threads, event flags, SIF RPC) and the host libsd (src/sdk/iop_libsd.cpp + iop_voice.cpp / iop_reverb.cpp). Add the two missing libsd imports, sceSdNote2Pitch and sceSdProcBatch, to iop_libsd.cpp. Keep src/sdk/iop_rxsnd.cpp (the silent stand-in) until the reconstruction answers every command the boot sends, then replace it. (3) Order: the RPC server and dispatch (the caller of sceSifRegisterRpc; command numbers and payloads are the EE client side, rx/rxsnd.cpp, rx/rxsnd.h and the architecture.md rxsnd row), IOP heap 0x2x, system 0x30..0x32, XVAB 0x4x / 0x50, the status replies 0x72 / 0x83 / 0xa3 / 0xb3, SE 0x80 / 0x81, then XSEQ 0x60.. and the BGM MIDI sequencer 0x70.., then ADPCM 0xa0.. and PCM 0xb0.. streams. Test: a log of the RPC commands in the smoke run, then audio -- the title and bus-stop BGM and SEs heard (the user listens; write in open-items.md what should be heard where). Several sessions: finish each partial with the next subsystem named."
   },
   "setup/newgame_crash.cpp": {

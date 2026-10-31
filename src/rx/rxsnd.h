@@ -11,7 +11,7 @@
  *
  *  Names from its own strings (rxSndBgmStop, rxSndSeStop, rxSndAdpcmClose
  *  are passed to the BG-call hook) and from how SndMan uses them.
- *  On the host the IOP side is src/sdk/iop_rxsnd.cpp (a silent stand-in).
+ *  On the host the IOP side is the reconstructed driver, src/iop/rxsnddrv/.
  * ======================================================================== */
 #ifndef _RX_RXSND_H
 #define _RX_RXSND_H

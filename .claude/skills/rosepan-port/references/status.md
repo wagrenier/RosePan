@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 21:46 at commit `696e7a1` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 22:05 at commit `27e6418` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -202,10 +202,9 @@ Least-named game-code regions (64 KB blocks):
 
 ## Translation units (one session each: `tus.py`)
 
-- 172 TUs: todo 72, partial 2, verify 138, done 34
-- next: **setup/iop_rxsnddrv.cpp** (pinned in the queue)
-- pinned queue: setup/iop_rxsnddrv.cpp, unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8, setup/smoke_pad.cpp
-- partial: `setup/iop_rxsnddrv.cpp` 0/0 -- Measured, not heard: the movie soundtrack is in the mix (audiocheck on a 300 s run with --env ROSEPAN_AUDIO_DUMP=<abs path>/tools/reverse/work/audio/mix.raw). T
+- 172 TUs: todo 72, partial 1, verify 139, done 34
+- next: **setup/smoke_pad.cpp** (pinned in the queue)
+- pinned queue: unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8, setup/smoke_pad.cpp
 - partial: `setup/smoke_pad.cpp` 0/0 -- Done: pad step (1) and the marks of step (3), see open-items.md Next up for the list and the shots (5400 picture book, 7200 lit bus stop, 8400 narration, 9960 w
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -323,6 +322,7 @@ Least-named game-code regions (64 KB blocks):
 - verify: `sequence/seqvm.cpp` 144/146 -- Status verify: complete code, screen still black. New in the boot: the registered threads run and reach seqFunc004 0x205570 and seqFunc029 0x208b98 (stubs in se
 - verify: `setup/i3d_draw_module.cpp` 0/0 -- Hook recorded in open-items Decisions (The native i3d hook). The committed screenshot is the forced test (ROSEPAN_I3D_TEST=1): S2DMAN.RPK @0x800 (PSMT8, Now Loa
 - verify: `setup/i3d_mesh_draw.cpp` 0/0 -- Verify: only the forced test (ROSEPAN_I3D_MESH_TEST=1, MagSystem::update) shows it; the screenshot shows Amanda in bind pose, the dress and hair textures matchi
+- verify: `setup/iop_rxsnddrv.cpp` 0/0 -- Every driver function is written and the stand-in is gone. Verify, not done: no run has sent XSEQ 0x60.., BGM 0x70.. or PCM 0xb0.. yet (the EE sends no BGM at t
 - verify: `snd/sndman.cpp` 52/52 -- Done as verify: SndMan::update runs every frame now, but every rxSnd call (rx/rxsnd.h, unassigned@00237ce8) is a stub, so nothing is heard and nothing on screen
 - verify: `spr/s2d.cpp` 86/86 -- All 86 functions written; nothing on screen can show them yet (MagScene::draw is a stub), so verify: the first session whose screenshot shows S2d sprites marks 
 - verify: `spr/sprman.cpp` 53/53 -- Verify: nothing calls SprMan::draw with m_active set yet. S2dMovie / S2dMes / S2dBg start only from MagScene::update 0x1327dc (stub), and textures never load (f
@@ -348,6 +348,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 22:05 `setup/iop_rxsnddrv.cpp` verify: RXSNDDRV session 11: measured the reconstruction in a run that reaches the title menu, the prologue movie, the bus stop and the picture book (audiocheck): title
 - 2026-10-30 21:46 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 10: a sound test without a listener - ROSEPAN_AUDIO_DUMP makes the host mixer write its output as raw s16 stereo 48 kHz and the new audiocheck.
 - 2026-10-30 21:27 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 9: PCM streams (IOP 0xb4a0..0xce84) in src/iop/rxsnddrv/pcm.cpp - 0x20 slots, open / data / set / status commands 0xb0..0xb3, the V-blank tick 
 - 2026-10-30 21:15 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 8: SE (IOP 0x6ab0..0x8f10) in src/iop/rxsnddrv/se.cpp - pools of notes, ramps, channels, loops and 0x40 slots, commands 0x80 SE request / 0x81 
@@ -355,7 +356,6 @@ Recent sessions:
 - 2026-10-30 20:44 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 6: the ADPCM stream system (IOP 0x9eb0..0xb4a0) in src/iop/rxsnddrv/adpcm.cpp - open with channel pool, data / set / channel set / status comma
 - 2026-10-30 20:17 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 5: the BGM MIDI sequencer (IOP 0x45b0..0x6ab0) in src/iop/rxsnddrv/bgm.cpp - slot open with track setup from HEAD, set / status / channel and t
 - 2026-10-30 20:00 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 4: the 48-voice layer (IOP 0x35c0..0x45b0) in src/iop/rxsnddrv/voice.cpp - allocation with groups, owners and stealing, per-voice register reco
-- 2026-10-30 19:39 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 3: XSEQ sequences (IOP 0x2e00..0x35c0) in src/iop/rxsnddrv/xseq.cpp - open/close with HEAD-relative track relocation, the driver's own chunk-fi
 
 ## Frontier (called by reconstructed code, not written yet)
 

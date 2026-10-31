@@ -583,7 +583,8 @@ public:
   10d crash. Compare stub logs before trusting a gdb backtrace for a build.py crash.
 
 ## Platform layer (ReiPan's, written for FF2 and FF3)
-- **The rxSnd IOP stand-in (src/sdk/iop_rxsnd.cpp) is silent, and a writer that waits for room
+- **(History: the stand-in was deleted 2026-10-30 when the reconstruction replaced it; the lesson
+  holds for any IOP fake.) The rxSnd IOP stand-in (src/sdk/iop_rxsnd.cpp) is silent, and a writer that waits for room
   stalls**: rxSndAdpcmGetFree is the IOP buffer size minus what the 0xa3 status says it holds, and
   an empty status left every ADPCM stream full after its first 8 KB, so the movie's audio que
   filled and back-pressured the demuxer (the attract movie froze on frame 71). The stand-in now

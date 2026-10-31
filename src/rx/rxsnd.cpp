@@ -11,7 +11,7 @@
  *  effect (reverb) commands, the SPU heap slots, IOP reads. Left: PCM open /
  *  play and the hidden ADPCM setters.
  *
- *  PC: the IOP side is a host stand-in (src/sdk/iop_rxsnd.cpp) registered
+ *  PC: the IOP side is the reconstructed driver (src/iop/rxsnddrv/), started
  *  at the IOP boot; without it rxSndRpcInit would bind for ever. The RPC
  *  completes on the caller's thread, so rxSndRpcEndFunc signals the
  *  semaphore before sceSifCallRpc returns, as the interrupt did.

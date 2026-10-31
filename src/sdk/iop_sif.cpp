@@ -27,6 +27,7 @@
 #include "sifcmd.h"
 #include "sifman.h"
 #include "iop_host.h"               /* the IOP big kernel lock */
+#include "iop/rxsnddrv/rxsnddrv.h"   /* RxSndDrvStart: the rx sound driver */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -114,7 +115,7 @@ void sceSifRpcLoop(sceSifQueueData *q)
  * loads Sony modules (sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv,
  * fileio, sifcmd, usbd) plus ioprp300.img, and one middleware module, the rx
  * sound driver RXSNDDRV.IRX (RPC 0xd000): the boot brings up the lock and
- * registers the host stand-in for that driver (iop_rxsnd.cpp). */
+ * starts that driver, reconstructed in src/iop/rxsnddrv/ (its _start). */
 
 /* Set ROSEPAN_IOP=0 in the environment to leave the IOP unbooted, so every
  * sceSifCallRpc() falls through and the EE behaves as it did before the IOP
@@ -158,7 +159,8 @@ void RosePan_IopBoot(void)
      * "the IOP is not up". */
     RosePan_IopBklInit();
 
-    RosePan_IopRxSndStart();
+    printf("iop: RXSNDDRV reconstruction\n");
+    RxSndDrvStart();
 }
 
 void *RosePan_IopRpcDispatch(u_int rpc_number, u_int command, void *data, int size)
