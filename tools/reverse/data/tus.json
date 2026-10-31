@@ -3084,7 +3084,7 @@
    "task": "Grow the native i3d draw module (src/rosepan/rendering/rosepan_i3d.*) a 3D mesh path: the hook named for VU1 strips in setup/i3d_draw_module.cpp becomes a host mesh draw. Input: an i3r model's mesh items (i3d/i3rmodel.cpp, i3d/i3ritem.cpp: vertices, normals, STQ, strips, textures from i3rAssignTex) with the node matrices i3mPoseToMatrices / DogEntity produce, the view and projection from I3dView / MagScene's camera (DogCamera::getLensFov), the scene lights (mag/magscenelight.cpp) and fog (magscenecmd.cpp). Never through the emulated GS. Prove it with a forced test (an env switch that loads one disc model, e.g. the first room's map pack, and draws it with a fixed camera) and a screenshot; finish verify when only the forced draw shows it, done when the New Game run shows the first room. Then utlDrawI3r 0x106760 / 0x21fe68 (unassigned@00106658, unassigned@0021fb50) call it."
   },
   "setup/iop_rxsnddrv.cpp": {
-   "notes": "Done: pcm.cpp, 13 functions; facts in architecture.md PCM entry. PC deviations: the ring position is taken on the 32-bit truncation libsd reports instead of masking 0xffffff, and kept inside the ring; a format past 3 is not mixed (the IOP would index past its mixer table). Default switched: src/sdk/iop_rxsnd.cpp now starts RxSndDrvStart unless ROSEPAN_RXSNDDRV=0. The user reported their builds were silent while session runs were not - that was the env switch; plain builds now play sound. Test: tus.py check --run 15 green, no stub IOP lines, PCM init message, 0xb3 status answered; the opening movie still plays via ADPCM 47 (screenshot at 60 s shows the movie). No smoke run opens a PCM stream (rxmpeg picks ADPCM for the opening movie), so PCM is unheard. Next: the user listens (title BGM, menu SEs, movie sound); then delete iop_rxsnd.cpp and the switch and mark the host task done. Open: EE rxSndPcmSetParamB4 sends 0xb4, which the driver rejects as invalid (faithful).",
+   "notes": "Measured, not heard: the movie soundtrack is in the mix (audiocheck on a 300 s run with --env ROSEPAN_AUDIO_DUMP=<abs path>/tools/reverse/work/audio/mix.raw). The scripted pad did not leave the opening movie in that run (the game ran ~60 fps; it played to 300 s), so no SE 0x80, XSEQ or BGM command was sent and menu SEs are unmeasured. Trap fixed on the way: flushing the dump per block inside MixBlock (voice lock held) delayed the movie start from 38 s to 184 s; now a 1 MB stdio buffer with no flush (hazards.md). Next: a run that reaches the title menu and bus stop with the dump on (check SE bursts in audiocheck), or the user listens to mix.wav or a plain build; then delete src/sdk/iop_rxsnd.cpp and the ROSEPAN_RXSNDDRV switch and mark the host task done.",
    "sessions": [
     {
      "date": "2026-10-30 19:10",
@@ -3130,6 +3130,11 @@
      "date": "2026-10-30 21:27",
      "status": "partial",
      "summary": "RXSNDDRV session 9: PCM streams (IOP 0xb4a0..0xce84) in src/iop/rxsnddrv/pcm.cpp - 0x20 slots, open / data / set / status commands 0xb0..0xb3, the V-blank tick mixing ready streams into core 1's looping 0x2000 input ring (four format mixers, volume curve 0xe2e0, per-half sequence tags, mono downmix), close-all; stubs.cpp deleted (every driver function reconstructed); the reconstruction is now the default over the silent stand-in (ROSEPAN_RXSNDDRV=0 selects it)"
+    },
+    {
+     "date": "2026-10-30 21:46",
+     "status": "partial",
+     "summary": "RXSNDDRV session 10: a sound test without a listener - ROSEPAN_AUDIO_DUMP makes the host mixer write its output as raw s16 stereo 48 kHz and the new audiocheck.py prints loudness per interval and writes mix.wav; a 300 s run measures silence for the boot and logos, then the opening movie ADPCM stream 47 in the mix from 35 s to the end at -27..-50 dB RMS"
     }
    ],
    "status": "partial",
