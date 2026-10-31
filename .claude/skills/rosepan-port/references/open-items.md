@@ -1829,8 +1829,13 @@ to adapt when a TU reaches them:
   is the row-vector world -> camera, the projection must become the renderer's reverse-Z form;
   RosePan_I3dRecordCamera takes the pair), and the host projection's y / handedness must be
   rechecked against the game's own view (the forced test builds its own: up = -y); (3) lights and
-  fog: the colours are the strip colours x one fixed light (Shade), not mag/magscenelight.cpp's
-  lights nor the fog (magscenecmd.cpp); (4) the 0x45 part of a combined mesh (FUN_00220098) is not
+  fog: DONE 2026-10-30 (branch render-lighting; the user: "the first scene on emulator has more of a
+  blue-ish tone"): the strips are lit from the material packet's light set as microprogram 1 does
+  (architecture.md "Mesh lighting and fog") and fogged per mesh draw; Shade stays only for the
+  forced mesh test, which has no light set. Spot / kind 3 / kind 4 lights are not evaluated (only
+  the shadow layers' sets have them; the shadow shaders ignore vertex colour); the batch matrix the
+  VU rotates normals by is taken to be the mesh's local -> world (the VU1 writers that upload it
+  are not ported); (4) the 0x45 part of a combined mesh (FUN_00220098) is not
   drawn; (5) alpha: DONE 2026-10-27 (i3d/i3rmesh.cpp): the host sets each material's TEST /
   ALPHA from its first layer through i3rPktLayerTest / i3rPktLayerAlpha (chain defaults 0x5000d /
   0x44 where the layer writes none; the ROM would keep the previous layer's value instead). Every

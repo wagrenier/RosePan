@@ -52,6 +52,8 @@ struct i3dContext;
 struct I3rRoot;
 struct I3dTexEntry;
 struct I3rBlendOpt;
+struct I3dLight;
+struct I3dFogState;
 struct RosePanI3dMeshRef;
 
 /* A GIF-tagged primitive written at `pkt` by an i3d writer: pkt[2] the GIF
@@ -85,10 +87,14 @@ void RosePan_I3dRecordModel(const void *at, const I3rRoot *root, const float *wo
  * RosePan_I3dMeshDrawRef): i3rDrawModel's part writers file one per 0x4d
  * mesh (one per batch for a depth-keyed material) in the material's
  * draw-set group, so the replay draws them in the ROM's draw-set and
- * depth order. Copies and lifetimes as RosePan_I3dRecordModel. */
+ * depth order. Copies and lifetimes as RosePan_I3dRecordModel; `light`
+ * (the material packet's light set, NULL for none), `eye_dir` (its view's
+ * I3dView::m_eye_dir) and `fog` (its fog state, NULL for none: the strips
+ * then have no FGE) are copied. */
 void RosePan_I3dRecordMesh(const void *at, const I3rRoot *root, const float *world,
                            const float *nodes, const I3dTexEntry *tex, int tex_count,
-                           const I3rBlendOpt *opt, const RosePanI3dMeshRef *ref);
+                           const I3rBlendOpt *opt, const RosePanI3dMeshRef *ref,
+                           const I3dLight *light, const float *eye_dir, const I3dFogState *fog);
 
 /* The camera the model records after `at` draw with: row-major 4x4s, p' =
  * p * M (RosePan_RendererSet3DViewProjection's form; copied). */

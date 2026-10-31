@@ -125,7 +125,9 @@ static_assert(offsetof(I3rDrawWork, m_world) >= 0x40, "I3rDrawWork::m_world");
 // PC: one state packet of a material's draw-set group (the writers'
 // i3dGroupBeginStatePacketUnaligned with the material packet's view / fog
 // packet as the channel 0 state), holding the camera and the mesh record
-// instead of the VU1 header and the strip CALLs.
+// instead of the VU1 header and the strip CALLs. The record carries the
+// material packet's light set, view eye direction and fog, which the ROM's
+// packets hand VU1 for the strip lighting and fog.
 
 static void i3rHostFile(I3dLayer *layer, I3rMeshPacket *pkt, u_int key, const I3rDrawWork *work,
                         const RosePanI3dMeshRef *ref)
@@ -135,7 +137,8 @@ static void i3rHostFile(I3dLayer *layer, I3rMeshPacket *pkt, u_int key, const I3
 
     RosePan_I3dRecordCamera(p, work->m_host_view, work->m_host_proj);
     RosePan_I3dRecordMesh(p + 2, work->m_model, (const float *)work->m_world, (const float *)work->m_nodes,
-                          ctx->m_tex_table, (int)ctx->m_tex_table_count, (const I3rBlendOpt *)work->m_opt, ref);
+                          ctx->m_tex_table, (int)ctx->m_tex_table_count, (const I3rBlendOpt *)work->m_opt, ref,
+                          pkt->m_light, pkt->m_view != NULL ? pkt->m_view->m_eye_dir : NULL, pkt->m_fog);
     p[0] = p[1] = p[2] = p[3] = 0;
     i3dGroupEndStatePacketUnaligned(pkt->m_group, p + 4);
 }

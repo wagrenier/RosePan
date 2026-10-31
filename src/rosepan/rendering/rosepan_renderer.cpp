@@ -407,6 +407,11 @@ struct DrawCommand
     GsBlendMode blend_mode;
     bool depth_write;
     GsScissor scissor;
+    /* The GS fog (g_gs_fog / g_gs_fog_color) as it stood when the draw was
+     * queued: RoR fogs per material packet, so one frame mixes fogged and
+     * unfogged meshes (and, in principle, fog ramps). */
+    float fog[4];
+    float fog_color[4];
 
     /* Index into g_fragment_light_states of the VU1 light image this draw's
      * fragment stage evaluates, and which of its three kernels it is
@@ -1394,7 +1399,8 @@ bool g_prev_3d_camera_valid;
 /*
  * Live GS fog state, in the form the shader consumes: (fMin, fMax, FA, FB)
  * and FOGCOL, both already divided by 255 so MikuPanApplyGsFog() can work in
- * its own 0..1 space.  RosePan_RendererSetFog() is the only writer.
+ * its own 0..1 space.  RosePan_RendererSetFog() is the only writer; each
+ * draw snapshots it when queued (ApplyGsDrawEnv).
  *
  * These start at "no fog" rather than at gra3d's own defaults, because a draw
  * queued before the game has ever pushed a setting -- the logo and title, and
@@ -8608,6 +8614,8 @@ void ApplyGsDrawEnv(DrawCommand &command)
     command.blend_mode = g_gs_blend_mode;
     command.depth_write = g_gs_depth_write && !g_gs_test_blocks_depth_write;
     command.scissor = g_gs_scissor;
+    std::memcpy(command.fog, g_gs_fog, sizeof(command.fog));
+    std::memcpy(command.fog_color, g_gs_fog_color, sizeof(command.fog_color));
 
     /*
      * PORT DEVIATION: a light-adding world-space billboard does not write
@@ -8673,7 +8681,10 @@ bool DrawCommandsAreMergeCompatible(const DrawCommand &previous,
         std::memcmp(&previous.scissor, &next.scissor,
                     sizeof(previous.scissor)) != 0 ||
         std::memcmp(previous.alpha_test, next.alpha_test,
-                    sizeof(previous.alpha_test)) != 0)
+                    sizeof(previous.alpha_test)) != 0 ||
+        std::memcmp(previous.fog, next.fog, sizeof(previous.fog)) != 0 ||
+        std::memcmp(previous.fog_color, next.fog_color,
+                    sizeof(previous.fog_color)) != 0)
     {
         return false;
     }
@@ -9040,6 +9051,9 @@ bool ResidentDrawContinues(const DrawCommand &previous, const DrawCommand &next)
                        sizeof(next.scissor)) == 0 &&
            std::memcmp(previous.alpha_test, next.alpha_test,
                        sizeof(next.alpha_test)) == 0 &&
+           std::memcmp(previous.fog, next.fog, sizeof(next.fog)) == 0 &&
+           std::memcmp(previous.fog_color, next.fog_color,
+                       sizeof(next.fog_color)) == 0 &&
            std::memcmp(previous.mvp, next.mvp, sizeof(next.mvp)) == 0 &&
            std::memcmp(previous.model, next.model, sizeof(next.model)) == 0 &&
            previous.shadow_caster == next.shadow_caster &&
@@ -9262,9 +9276,10 @@ void DrawQueuedSprites(SDL_GPURenderPass *pass, SDL_GPUCommandBuffer *cmd,
          * FOGE bit of all four SGD primitive tags, so on hardware fog covered
          * exactly the geometry that came through the transforming mesh path --
          * and nothing 2D, whose clip w is a meaningless 1.0.  transform_mesh
-         * is that same split here. */
-        std::memcpy(g_uniforms.fog, g_gs_fog, sizeof(g_uniforms.fog));
-        std::memcpy(g_uniforms.fogColor, g_gs_fog_color,
+         * is that same split here.  The fog is the draw's own, as it stood
+         * when the draw was queued (ApplyGsDrawEnv). */
+        std::memcpy(g_uniforms.fog, draw.fog, sizeof(g_uniforms.fog));
+        std::memcpy(g_uniforms.fogColor, draw.fog_color,
                     sizeof(g_uniforms.fogColor));
         if (!draw.transform_mesh)
         {
