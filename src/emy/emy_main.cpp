@@ -22,6 +22,7 @@
 #include "lib/unassigned.h"
 #include "mag/magscenecmd.h"
 #include "mag/magsystem.h"
+#include "sequence/sequence.h"
 #include "task/tsk_man.h"
 #include "utl/utlmisc.h"
 #include "utl/utlrand.h"
@@ -161,6 +162,14 @@ EmyMain::~EmyMain()
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// PC: no ROM counterpart (the EE reads the word as the pointer).
+
+const char *_tagEnemyTransition::table() const
+{
+    return (const char *)seqVmLoadWord((intptr_t)&m_table);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ROR 0x00164364 // callcheck: operator_new (new)
 // A GamIdMap per row of the table: each non-zero byte maps its column
 // (the decide input) to the state it leads to.
@@ -170,7 +179,7 @@ void EmyMain::setStartState(int state, const _tagEnemyTransition *trans)
     m_map = new EmyStateMap(state);
     int inputs = trans->m_inputs;
     int states = trans->m_states;
-    const char *table = trans->m_table;
+    const char *table = trans->table();
     u_char *pairs = (u_char *)g_utlMemory.allocDebug(inputs * 2, s_file, 0x91, 0, 2);
     for (int i = 0; i < states; i++) {
         int n = 0;

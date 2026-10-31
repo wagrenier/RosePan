@@ -27,13 +27,22 @@ class  EmyMain;
  * EmyMain::setStartState builds its EmyStateMap from it, the classes'
  * selectOut read the current state's row). A row per state, a column per
  * decide input; a byte is the state the input leads to, 0 none.
- * layout: host -- the pointer; EE offsets in the comments. */
+ * It is a GamImage of the script's (GamMan::setImage, m_image[place]): the
+ * table is the image's pixels, its address the word at +0x0c. */
 struct _tagEnemyTransition
 {
-    u_char      m_states;       // ROR 0x00: rows
-    u_char      m_inputs;       // ROR 0x01: columns
-    const char *m_table;        // ROR 0x0c: m_states x m_inputs
+    u_char      m_states;       // ROR 0x00: rows (GamImage m_w)
+    u_char      m_inputs;       // ROR 0x01: columns (GamImage m_h)
+    u_char      _02[10];
+    u_int       m_table;        // ROR 0x0c: m_states x m_inputs (GamImage m_pixels)
+
+    /* PC: m_table's host address: setImage stores it through the VM's word
+     * store, which keeps a host pointer whole (seqVmLoadWord). */
+    const char *table() const;
 };
+static_assert(sizeof(_tagEnemyTransition) == 0x10, "_tagEnemyTransition is a GamImage");
+static_assert(offsetof(_tagEnemyTransition, m_inputs) == 0x1, "m_inputs");
+static_assert(offsetof(_tagEnemyTransition, m_table) == 0xc, "m_table");
 
 /* A row of the kind move table (data 0x2f18b8, EE 0x18; EmyMain::getMoveParam):
  * emyStartMove / emyStartChase copy words 0..4 into the move record
