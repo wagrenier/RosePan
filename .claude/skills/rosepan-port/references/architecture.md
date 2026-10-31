@@ -2577,6 +2577,25 @@ never asserts): sessions name them (`tus.py define --why`).
   data word's low byte, 0 forever); selecting NRPN 1 or 0xf00 jumps back. Meta 0x2f ends a track, 0x51
   sets the tempo; sysex skipped. Debug flag 2 = warnings (unsupported CC / RPN / NRPN / meta, no slot).
   The title music is not BGM: the boot and the title screen send ADPCM 0xa0..0xa4 and no 0x60 / 0x70.
+- **NOTE slots 0x8f10..0x9eb0** (`src/iop/rxsnddrv/note.cpp`, 2026-10-30): block 0x3b0c at 0x2cdf0
+  {0x100 layers of 0x30, free list 0x2fdf0; 0x40 slots of 0x2c at 0x2fdf4, active list 0x308f4, free
+  list 0x308f8}. Play 0x8f10(xvab, program, key, group, owner; -1 = the region's): XvabLock, TGIF[program]
+  -> TGPG {u16, u16 count, offset from TGIF} -> TGSP regions of 0x24 {flags (1 dry, 2 reverb, 4 noise,
+  0x40 note key is the centre), priority, group (owner = xvab << 16 | group), voice group, key lo / hi,
+  centre key / fine, VELT, PANT, s8 vol L / R, s16 scale, -, ADSR1 / 2, SSA from the bank SPU base, LFOT
+  x3 (vol, pan, pitch), depth x3, rate x3, bend down / up}; a layer per region whose key range holds key,
+  VoiceAlloc(-1, priority, autoFree 1, group, owner, done 0x9e50), sample, key on; any layer without a
+  voice releases the rest (0x9ddc). Slot {next, xvab, flags (1 used, 2 voice sounding, 0x40000 bend,
+  0x80000 modulation), id, dirty (1 switch, 2 vol, 4 pitch), key, fine, switch, vol L / R 0x80, s8
+  velocity 0x7f, s8 pan 0x40, scale 0x1000, unused 0x1000, bend, mod depth, mod rate 0x80, s8 offset /
+  fine, layers, voices}. Setters 0x9ab0 switch, 0x9ae4 vol, 0x9b1c velocity, 0x9bb0 pan, 0x9c0c scale,
+  0x9c40 bend, 0x9ca0 pitch offset, 0x9cd8 mod depth 0..0x80, 0x9d64 mod rate (the last three: SE only).
+  Tick 0x93c0: vol = vol * region vol * VELT[velocity] >> 7 * PANT[pan] >> 7 (R from PANT + 0x80), pitch
+  = (key << 7 | fine) + bend * range * 0x80 >> 12 + offset, 0..0x3fff, scale = note * region >> 12;
+  with modulation the three LFOs step (0x80000 / frame rate) * rate[note] >> 12 * rate[region] >> 12 a
+  tick over 0x80-step curves (rate table 0xdee0, 0x1000 at index 0x80: one cycle a second); the auto-pan
+  LFO indexes PANT from the curve base, not the note's pan (as the ROM does). G000.GRB's bank: 3 programs
+  (62 / 21 / 2 regions), one key each, scale 3763 (44.1 kHz samples at 48 kHz), ADSR 0x80ff / 0x5fc0.
 - **ADPCM streams 0xa0..0xa4** (`src/iop/rxsnddrv/adpcm.cpp`, 2026-10-30): block 0x45cc at 0x30900
   {frameBytes (0x6b24 / frame rate: ADPCM bytes a V-blank at 48 kHz), 0x30 streams of 0x74 at 0x30904,
   active list 0x31ec4, 0x100 channels of 0x30 at 0x31ec8, free list 0x34ec8}. Stream {next, flags (1 used,

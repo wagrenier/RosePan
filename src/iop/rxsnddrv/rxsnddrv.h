@@ -16,7 +16,8 @@
  *    xseq.cpp      0x2e00..0x35c0  XSEQ sequences (BGM's MIDI data)
  *    voice.cpp     0x35c0..0x45b0  the 48 SPU2 voices: allocation, registers
  *    bgm.cpp       0x45b0..0x6ab0  the BGM MIDI sequencer
- *    (not yet)     0x6ab0..0x9eb0  SE, NOTE: stubs.cpp until reconstructed
+ *    (not yet)     0x6ab0..0x8f10  SE: stubs.cpp until reconstructed
+ *    note.cpp      0x8f10..0x9eb0  NOTE slots: one program key on its voices
  *    adpcm.cpp     0x9eb0..0xb4a0  ADPCM streams (title music, voices, movies)
  *    (not yet)     0xb4a0..        PCM: stubs.cpp until reconstructed
  *
@@ -236,6 +237,27 @@ void  RxSndDrvBgmChannelSet(int slot, int channel, const u_int *data); // IOP 0x
 void  RxSndDrvBgmTrackSet(int slot, u_int track, const u_int *data);   // IOP 0x00005d20
 void  RxSndDrvBgmTick(void);                        // IOP 0x00005e60
 
+/* ---- note.cpp ---------------------------------------------------------- */
+
+/* One key of an XVAB program on as many voices as it has regions: a NOTE id
+ * from Play (-1 none), then key off, free and its parameters; GetFlags bit 1
+ * = a voice still sounds. */
+int   RxSndDrvNotePlay(int xvab, int program, int key, int group, int owner); // IOP 0x00008f10
+void  RxSndDrvNoteTick(void);                       // IOP 0x000093c0
+void  RxSndDrvNoteInit(void);                       // IOP 0x000098e4
+void  RxSndDrvNoteKeyOff(int id);                   // IOP 0x00009974
+void  RxSndDrvNoteFree(int id);                     // IOP 0x000099c8
+void  RxSndDrvNoteSetSwitch(int id, int on);        // IOP 0x00009ab0
+void  RxSndDrvNoteSetVolume(int id, short l, short r); // IOP 0x00009ae4
+void  RxSndDrvNoteSetVelocity(int id, int velocity);   // IOP 0x00009b1c
+void  RxSndDrvNoteSetPan(int id, int pan);          // IOP 0x00009bb0
+void  RxSndDrvNoteSetPitch(int id, int scale);      // IOP 0x00009c0c
+void  RxSndDrvNoteSetBend(int id, int bend);        // IOP 0x00009c40
+void  RxSndDrvNoteSetOffset(int id, int semitones, int fine); // IOP 0x00009ca0
+void  RxSndDrvNoteSetModDepth(int id, int depth);   // IOP 0x00009cd8
+void  RxSndDrvNoteSetModRate(int id, int rate);     // IOP 0x00009d64
+u_int RxSndDrvNoteGetFlags(int id);                 // IOP 0x00009db4
+
 /* ---- adpcm.cpp --------------------------------------------------------- */
 
 int   RxSndDrvAdpcmOpen(int id, int pitch, const u_int *chans, int count, u_int iopSize,
@@ -256,20 +278,6 @@ int   RxSndDrvSePlay(int voice, int xvab, int prog, int note);  // IOP 0x000084b
 int   RxSndDrvSePlay2(int voice, int xvab, int prog, int note); // IOP 0x00008658
 int   RxSndDrvSeStatus(u_char *reply);              // IOP 0x00008800
 void  RxSndDrvSeTick(void);                         // IOP 0x00008878
-void  RxSndDrvNoteTick(void);                       // IOP 0x000093c0
-void  RxSndDrvNoteInit(void);                       // IOP 0x000098e4
-/* The NOTE layer as the BGM sequencer calls it: a NOTE id from Play (-1
- * none), then key off, free and its parameters; GetFlags bit 1 = sounding. */
-int   RxSndDrvNotePlay(int xvab, int program, int key, int a, int b); // IOP 0x00008f10
-void  RxSndDrvNoteKeyOff(int note);                 // IOP 0x00009974
-void  RxSndDrvNoteFree(int note);                   // IOP 0x000099c8
-void  RxSndDrvNoteSetSwitch(int note, int on);      // IOP 0x00009ab0
-void  RxSndDrvNoteSetVolume(int note, short l, short r); // IOP 0x00009ae4
-void  RxSndDrvNoteSetVelocity(int note, int velocity);   // IOP 0x00009b1c
-void  RxSndDrvNoteSetPan(int note, int pan);        // IOP 0x00009bb0
-void  RxSndDrvNoteSetPitch(int note, int scale);    // IOP 0x00009c0c
-void  RxSndDrvNoteSetBend(int note, int bend);      // IOP 0x00009c40
-u_int RxSndDrvNoteGetFlags(int note);               // IOP 0x00009db4
 void  RxSndDrvPcmInit(void);                        // IOP 0x0000b4a0
 void  RxSndDrvPcmTick(void);                        // IOP 0x0000b5ac
 int   RxSndDrvPcmOpen(int id, int a, u_int b, u_int c);  // IOP 0x0000c944

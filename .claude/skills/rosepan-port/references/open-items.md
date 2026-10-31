@@ -35,8 +35,10 @@ ADPCM stream** (commands 0xa0..0xa4 on stream 0x2f), and no XSEQ / BGM command i
 (2026-10-30, partial)** wrote the ADPCM streams (0x9eb0..0xb4a0, adpcm.cpp): the opening movie's
 stream 0x2f keys on at frame ~1750 and plays at 48 kHz without underruns (the log prints
 "rxsnddrv: ADPCM 47 keyed on"). **The user should hear the opening movie's soundtrack** with
-ROSEPAN_RXSNDDRV=1 (unchecked by ear). **Next session: NOTE (0x8f10..0x9eb0)**, needed by BGM and SE;
-then SE (0x6ab0..0x8f10), then PCM (0xb4a0..). Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
+ROSEPAN_RXSNDDRV=1 (unchecked by ear). **Session 7 (2026-10-30, partial)** wrote NOTE (0x8f10..0x9eb0,
+note.cpp; the region layout checked against G000.GRB's bank; nothing in the boot plays a note yet).
+**Next session: SE (0x6ab0..0x8f10)**, the first caller of NOTE in the boot (UI / footstep SEs); then
+PCM (0xb4a0..). Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
 of all 229 functions; `iopdec.py dump` refreshes it when names change in Ghidra). What should be
 heard: the title BGM on the title screen, then the bus-stop BGM and footstep / UI SEs; the user
 listens.
