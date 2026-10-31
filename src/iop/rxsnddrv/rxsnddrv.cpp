@@ -13,6 +13,7 @@
 #include "iop/rxsnddrv/rxsnddrv.h"
 
 #include "intrman.h"
+#include "iop_voice.h"
 #include "libsd.h"
 #include "loadcore.h"
 #include "sifcmd.h"
@@ -140,9 +141,14 @@ void RxSndDrvTickThread(void)
         RxSndDrvSysTick();
         RxSndDrvMixTick();
         RxSndDrvEffectTick();
+        /* PC: the voices these ticks take, tagged for the player's music
+         * and effects volumes (RxSndDrvVoiceSetMixGroup). */
+        RxSndDrvVoiceSetMixGroup(ROSEPAN_VOICE_GROUP_MUSIC);
         RxSndDrvBgmTick();
+        RxSndDrvVoiceSetMixGroup(ROSEPAN_VOICE_GROUP_EFFECTS);
         RxSndDrvSeTick();
         RxSndDrvNoteTick();
+        RxSndDrvVoiceSetMixGroup(ROSEPAN_VOICE_GROUP_MUSIC);
         RxSndDrvAdpcmTick();
         RxSndDrvVoiceTick();
         RxSndDrvPcmTick();

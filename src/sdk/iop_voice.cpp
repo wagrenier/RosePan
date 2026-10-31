@@ -145,6 +145,8 @@ typedef struct
      * reusing the slots later cannot inherit it. */
     int      pair;
     int      pair_armed;
+
+    int      group;                 /* ROSEPAN_VOICE_GROUP_*: the player's volume */
 } IopVoice;
 
 static IopVoice        voices[IOP_VOICE_NUM];
@@ -168,6 +170,12 @@ static u_int           mix_dry_l[IOP_VOICE_CORES];
 static u_int           mix_dry_r[IOP_VOICE_CORES];
 static u_int           mix_wet_l[IOP_VOICE_CORES];
 static u_int           mix_wet_r[IOP_VOICE_CORES];
+
+/* The player's volume (RosePan_VoiceSetUserVolume), Q15 with 0x8000 unity.
+ * Outside the voices so RosePan_VoiceInit() does not reset what the settings
+ * file set before the IOP booted. */
+static s32             user_master = 0x8000;
+static s32             user_group[ROSEPAN_VOICE_GROUPS] = { 0x8000, 0x8000 };
 
 /* Per-block accumulators.  The voice loop is the outer one so a voice's gains
  * and masks can be hoisted out of the frame loop; these are what it sums into. */
@@ -718,9 +726,12 @@ static void MixVoices(void)
         const u_int bit = 1u << VoiceNumber(v);
 
         /* Hoisted: the ROM can only change these between command frames, and
-         * the register write would have to go through the same lock. */
-        const s32 vol_l   = DecodeVolume(v->voll);
-        const s32 vol_r   = DecodeVolume(v->volr);
+         * the register write would have to go through the same lock.  The
+         * player's group volume scales the voice before the sends, so its
+         * reverb tail follows it. */
+        const s32 gain    = user_group[v->group];
+        const s32 vol_l   = (DecodeVolume(v->voll) * gain) >> 15;
+        const s32 vol_r   = (DecodeVolume(v->volr) * gain) >> 15;
         const int dry_l   = (mix_dry_l[c] & bit) != 0;
         const int dry_r   = (mix_dry_r[c] & bit) != 0;
         const int wet_l   = (mix_wet_l[c] & bit) != 0;
@@ -754,8 +765,9 @@ static void MixAutoDma(void)
         if (!ad->armed || ad->ring == NULL || ad->size < AUTODMA_FRAME)
             continue;
 
-        const s32 vl = (s32)ad->voll;
-        const s32 vr = (s32)ad->volr;
+        /* Movie and PCM audio: the player's music volume. */
+        const s32 vl = ((s32)ad->voll * user_group[ROSEPAN_VOICE_GROUP_MUSIC]) >> 15;
+        const s32 vr = ((s32)ad->volr * user_group[ROSEPAN_VOICE_GROUP_MUSIC]) >> 15;
 
         for (int f = 0; f < MIX_BLOCK_FRAMES; f++)
         {
@@ -849,8 +861,10 @@ static void MixBlock(void)
                              DecodeVolume(master_volr[c]));
         }
 
-        out_block[f * 2]     = ClampToS16(l);
-        out_block[f * 2 + 1] = ClampToS16(r);
+        /* The player's master volume, last: after the game's own master,
+         * so it turns down everything the device hears, reverb included. */
+        out_block[f * 2]     = ClampToS16(ApplyVolume(l, user_master));
+        out_block[f * 2 + 1] = ClampToS16(ApplyVolume(r, user_master));
     }
 
     SDL_PutAudioStreamData(out_stream, out_block, (int)sizeof(out_block));
@@ -1279,6 +1293,74 @@ int RosePan_VoiceIsPlaying(int core, int voice)
     UnlockVoices();
 
     return playing;
+}
+
+/* SD_VP_ENVX.  RXSNDDRV reads it every V-blank and acts on 0: an auto-free
+ * voice (every SE and BGM note) is released after 9 silent ticks, and an
+ * ADPCM stream whose last data has come ends the moment its voice reads 0.
+ * Unmodelled, it read 0 for ever, so every note was cut after 9 ticks and a
+ * stream's buffered tail was dropped.
+ *
+ * 0 once the voice has ended (a loop end without repeat: the SPU2 zeroes ENVX
+ * there) or its release has run out; otherwise the level.  One exception: a
+ * voice keyed on that the mixer has not reached yet still sits at the attack's
+ * 0, where the SPU2 would already be climbing.  The mixer runs in passes, so
+ * that can last a tick when its thread is starved, and the stream end check
+ * reads it once; report 1 there. */
+u_short RosePan_VoiceGetEnvx(int core, int voice)
+{
+    if (!voice_ready)
+        return 0;
+
+    LockVoices();
+    IopVoice *v    = VoiceAt(core, voice);
+    u_short   envx = 0;
+
+    if (v != NULL && v->playing)
+    {
+        if (!AdsrConfigured(v))
+            envx = ADSR_LEVEL_MAX;
+        else if (v->adsr_phase != VOICE_ADSR_OFF)
+            envx = (u_short)(ClampAdsrLevel(v->adsr_level) >> ADSR_FP_SHIFT);
+
+        if (envx == 0 && v->adsr_phase == VOICE_ADSR_ATTACK)
+            envx = 1;
+    }
+    UnlockVoices();
+
+    return envx;
+}
+
+void RosePan_VoiceSetGroup(int core, int voice, int group)
+{
+    if (group < 0 || group >= ROSEPAN_VOICE_GROUPS)
+        return;
+
+    LockVoices();
+    IopVoice *v = VoiceAt(core, voice);
+    if (v != NULL)
+        v->group = group;
+    UnlockVoices();
+}
+
+static s32 UserGain(float gain)
+{
+    if (!(gain > 0.0f))             /* NaN too */
+        return 0;
+    if (gain >= 1.0f)
+        return 0x8000;
+    return (s32)(gain * 32768.0f + 0.5f);
+}
+
+/* Callable before RosePan_VoiceInit(): the settings file is applied when the
+ * renderer starts, and the IOP may boot either side of that. */
+void RosePan_VoiceSetUserVolume(float master, float music, float effects)
+{
+    LockVoices();
+    user_master                             = UserGain(master);
+    user_group[ROSEPAN_VOICE_GROUP_MUSIC]   = UserGain(music);
+    user_group[ROSEPAN_VOICE_GROUP_EFFECTS] = UserGain(effects);
+    UnlockVoices();
 }
 
 void RosePan_VoiceAutoDmaStart(int core, void *ring, u_int size, u_int start_off)

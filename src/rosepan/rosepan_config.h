@@ -111,11 +111,27 @@ typedef struct RosePan_ConfigGame
     int skip_intro;          /* 0 off, 1 on */
 } RosePan_ConfigGame;
 
+/*
+ * The player's volume, on top of the game's own mix: percent, 0 silent .. 100
+ * the level the game asks for.  The host mixer applies them (sdk/iop_voice.h,
+ * RosePan_VoiceSetUserVolume), so they reach every sound without the game
+ * knowing.  `music` is everything the game streams or sequences -- music, but
+ * also speech and ambience, which share its streams -- and movie audio;
+ * `effects` is the sound effects.
+ */
+typedef struct RosePan_ConfigAudio
+{
+    int master;
+    int music;
+    int effects;
+} RosePan_ConfigAudio;
+
 typedef struct RosePan_Config
 {
     RosePan_ConfigRenderer renderer;
     RosePan_ConfigPaths    paths;
     RosePan_ConfigGame     game;
+    RosePan_ConfigAudio    audio;
 } RosePan_Config;
 
 extern RosePan_Config rosepan_config;
@@ -156,6 +172,10 @@ void RosePan_ConfigCapture(void);
 
 /* Capture then save -- what the host UI calls after a settings change. */
 int RosePan_ConfigCaptureAndSave(void);
+
+/* Push rosepan_config.audio into the mixer, clamped to 0..100 first.  Part of
+ * RosePan_ConfigApply(); the settings UI calls it alone as a slider moves. */
+void RosePan_ConfigApplyAudio(void);
 
 #ifdef __cplusplus
 }

@@ -1101,3 +1101,20 @@ loop's start pointer in the asm when its twin starts elsewhere.
 - When a host stand-in fills a gap the ROM fills with data (a fixed light, a default fog, a constant
   colour), name it as a stand-in in the code and in open-items.md, so the screenshot check does not
   mistake it for the real thing.
+
+## Sounds cut short: a libsd register nothing modelled (2026-10-31)
+
+- Symptom (the user, playing): one-shot effects stop early -- the door slam, Jennifer's scream;
+  audiocheck shows each picture-book page-turn SE ending dead ~0.14 s in. The log looked clean.
+- Cause: src/sdk/iop_libsd.cpp answered every SD_VP_* read from its write mirror, and nothing
+  writes SD_VP_ENVX, so it read 0 for ever. RXSNDDRV acts on it: RxSndDrvVoiceTick (IOP 0x35c0)
+  releases an auto-free voice (every SE and BGM note) after 9 ticks of ENVX 0, and
+  RxSndDrvAdpcmUpdate (IOP 0xa3ec) ends a stream whose last data has come the first tick its voice
+  reads 0, dropping the buffered tail. The driver matched the ROM; the host did not.
+- Fix: ENVX comes from the voice engine's envelope (RosePan_VoiceGetEnvx: 0 once the voice has
+  ended or its release has run out; 1 for a voice keyed on but not yet mixed, since the mixer works
+  in passes). Any libsd register the ROM *reads* needs a model, not a mirror: check what a driver
+  does with the value before trusting a stored 0.
+- Stale lead met on the way: "sceSifSetDma: dst=0000000000101c40 ... transfer dropped" lines come
+  from runs before 2026-10-30, when the silent stand-in iop_rxsnd.cpp handed out a fake IOP heap at
+  0x100000 (under IOP_MAP_LIMIT). The reconstruction's buffers are real arena addresses (0x420000+).

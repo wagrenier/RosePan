@@ -2470,9 +2470,16 @@ never asserts): sessions name them (`tus.py define --why`).
 - On the PC the reconstructed driver `src/iop/rxsnddrv/` serves the RPC (started by RosePan_IopBoot,
   src/sdk/iop_sif.cpp); the silent stand-in `src/sdk/iop_rxsnd.cpp` that answered before was deleted
   2026-10-30. `src/sdk/iop_libsd.cpp` (register model + SPU RAM) and `iop_voice.cpp` /
-  `iop_reverb.cpp` (the synthesiser, from ReiPan) already implement 13 of RXSNDDRV's 15 libsd imports;
-  `sceSdNote2Pitch` and `sceSdProcBatch` are missing. Reconstructing RXSNDDRV against them is what gives
-  RoR sound (open-items.md, `setup/iop_rxsnddrv.cpp`).
+  `iop_reverb.cpp` (the synthesiser, from ReiPan) implement all 15 of RXSNDDRV's libsd imports. Reads
+  the driver acts on are modelled from the engine, not mirrored: NAX (play position), ENDX, and since
+  2026-10-31 ENVX (the envelope; the voice tick auto-frees SE / BGM voices and the ADPCM update ends
+  streams when it reads 0 -- hazards.md "Sounds cut short").
+- The player's volume (`[audio]` master / music / effects in rosepan.ini, the ImGui Audio menu) is the
+  host mixer's, on top of the game's own (master x family x voice in rx/rxsnd.cpp): `iop_voice.cpp`
+  scales each voice by its group and the finished mix by the master. RXSNDDRV tags a voice's group as
+  it allocates it (`RxSndDrvVoiceSetMixGroup`, set by the tick thread: every allocation happens in the
+  BGM, SE or ADPCM tick); BGM and ADPCM streams are music (the streams also carry speech and ambience),
+  SEs effects, the auto-DMA input (movie / PCM audio) music.
 - Ghidra: `python iop.py elf <MODULES>/RXSNDDRV.IRX` writes `work/iop/elf/rxsnddrv.elf` (MIPS R3000 LE,
   base 0, import stubs, `_start` and `_gp` as symbols). **Imported 2026-10-30 as program
   `rxsnddrv.elf`** in the same project and Ghidra as SLUS_214.48: 229 functions after analysis (`_start`,
