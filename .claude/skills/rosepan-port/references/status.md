@@ -1,6 +1,6 @@
 # RosePan status (generated)
 
-Generated 2026-10-30 19:39 at commit `d450f2e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
+Generated 2026-10-30 20:00 at commit `615173e` by `tools/reverse/status.py` (`refresh.py` runs it). Do not edit by hand.
 
 ## Ghidra seeding (one-time: sections.py --apply, libmatch.py --apply)
 
@@ -205,7 +205,7 @@ Least-named game-code regions (64 KB blocks):
 - 172 TUs: todo 72, partial 2, verify 138, done 34
 - next: **setup/iop_rxsnddrv.cpp** (pinned in the queue)
 - pinned queue: setup/iop_rxsnddrv.cpp, unassigned@001fd424, unassigned@0010f944, unassigned@0022e840, unassigned@00106658, unassigned@0021fb50, unassigned@0021c960, unassigned@0013e2ec, unassigned@001258a4, unassigned@00166a1c, unassigned@0016dcc8, setup/smoke_pad.cpp
-- partial: `setup/iop_rxsnddrv.cpp` 0/0 -- Done: xseq.cpp, 15 functions incl. unreferenced 0x319c (close all). Slot RxSndDrvXseq in rxsnddrv.h {file, head, state, users, s16 bank[8]}; BGM uses RxSndDrvXs
+- partial: `setup/iop_rxsnddrv.cpp` 0/0 -- Done: voice.cpp, 20 functions (names in rxsnddrv.h voice section; commands 0x90..0x93 renamed RxSndDrvVoiceGetEnvxAll / SetEnable / GetFlags / GetTable). Owners
 - partial: `setup/smoke_pad.cpp` 0/0 -- Done: pad step (1) and the marks of step (3), see open-items.md Next up for the list and the shots (5400 picture book, 7200 lit bus stop, 8400 narration, 9960 w
 - verify: `bed/bedmemory.cpp` 16/16 -- All 16 functions written; nothing in the boot allocates yet (main is still the placeholder), so the screen stays black and the status is verify. A scratch host 
 - verify: `bed/bedpfh.cpp` 4/4 -- Complete; pinned 0x101738..0x101aec (0x101718 clears 7 words, not BedPfh). PC guard: a buffer without the RTPK id leaves the view empty (the ROM hangs in the as
@@ -348,6 +348,7 @@ Least-named game-code regions (64 KB blocks):
 
 Recent sessions:
 
+- 2026-10-30 20:00 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 4: the 48-voice layer (IOP 0x35c0..0x45b0) in src/iop/rxsnddrv/voice.cpp - allocation with groups, owners and stealing, per-voice register reco
 - 2026-10-30 19:39 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 3: XSEQ sequences (IOP 0x2e00..0x35c0) in src/iop/rxsnddrv/xseq.cpp - open/close with HEAD-relative track relocation, the driver's own chunk-fi
 - 2026-10-30 19:19 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 2: XVAB sound banks (IOP 0x2330..0x2e00) in src/iop/rxsnddrv/xvab.cpp - open/close, version-0x101 offset relocation, the chunk finder for both 
 - 2026-10-30 19:10 `setup/iop_rxsnddrv.cpp` partial: RXSNDDRV session 1: src/iop/rxsnddrv/ with the module entry, V-blank tick thread, full command dispatcher, RPC server, SPU DMA queues, system / master mix / rev
@@ -355,7 +356,6 @@ Recent sessions:
 - 2026-10-30 18:42 `dog/dogcamera.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): camera views render from the scene cameras with correct framing, shots 9960, 10560,
 - 2026-10-30 18:42 `dog/doglightpool.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): the street lamp lights the bench and road (lit stage), shots 7200, 11160
 - 2026-10-30 18:42 `dog/dogmodel.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): Jennifer follows the ground and stops at the hedge while the stick is still held up
-- 2026-10-30 18:42 `dog/dogmotionblend.cpp` done: marked verify -> done: bus-stop smoke run 2026-10-30 (420 s, release build): walk and run motions blend on Jennifer without pops, shots 9960..11160
 
 ## Frontier (called by reconstructed code, not written yet)
 

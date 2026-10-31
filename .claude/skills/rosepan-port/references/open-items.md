@@ -27,8 +27,9 @@ tick thread, dispatcher (every command routed), RPC server, DMA queues, system /
 reaches the Punchline logo with the bank uploads going through the DMA queue). **Session 2
 (2026-10-30, partial)** wrote XVAB (0x2330..0x2e00, xvab.cpp; banks 0 and 1 open in the boot, the
 intro logo shows). **Session 3 (2026-10-30, partial)** wrote XSEQ (0x2e00..0x35c0, xseq.cpp;
-the boot sends no XSEQ command yet). **Next session: the voice layer (0x35c0..0x45b0, with
-sceSdNote2Pitch in iop_libsd.cpp; 0x3f6c output mode)**, then SE, NOTE, BGM,
+the boot sends no XSEQ command yet). **Session 4 (2026-10-30, partial)** wrote the voice layer
+(0x35c0..0x45b0, voice.cpp; sceSdNote2Pitch and the PMON / NON switch codes in libsd). **Next
+session: BGM + MIDI (0x45b0..0x6ab0)**, then SE (0x6ab0..0x8f10), NOTE (0x8f10..0x9eb0),
 ADPCM, PCM. Read code offline with `python iopdec.py show <addr>` / `index` (cached decompilation
 of all 229 functions; `iopdec.py dump` refreshes it when names change in Ghidra). What should be
 heard: the title BGM on the title screen, then the bus-stop BGM and footstep / UI SEs; the user
@@ -1550,6 +1551,13 @@ to adapt when a TU reaches them:
   or `$ROSEPAN_DATA`; build.py passes it as `ROSEPAN_DATA_DIR`.
 
 ## Open questions
+
+- **sceSdNote2Pitch is computed, not tabled (2026-10-30, setup/iop_rxsnddrv.cpp session 4).** The host
+  libsd answers 0x1000 * 2^(((note - center) * 128 + fine - centerFine) / 1536), clamped to 0xffff;
+  the SDK uses semitone / fine tables, so the low bits may differ and whether the SDK clamps or wraps
+  past 0x3fff is unchecked. Also: RXSNDDRV's voice defaults batch (IOP 0xde30) writes "voice 31" of
+  both cores (entries 0x3e / 0x3f); the host libsd now ignores voice numbers past 23 instead of
+  indexing past its 24 voices.
 
 - **RXSNDDRV XSEQ close copies m_head from IOP address 0 (2026-10-30, setup/iop_rxsnddrv.cpp
   session 3).** RxSndDrvXseqClose (IOP 0x31d4) stores slot +4 with lwl / lwr off li t1, 0 -- an
