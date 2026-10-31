@@ -3084,7 +3084,7 @@
    "task": "Grow the native i3d draw module (src/rosepan/rendering/rosepan_i3d.*) a 3D mesh path: the hook named for VU1 strips in setup/i3d_draw_module.cpp becomes a host mesh draw. Input: an i3r model's mesh items (i3d/i3rmodel.cpp, i3d/i3ritem.cpp: vertices, normals, STQ, strips, textures from i3rAssignTex) with the node matrices i3mPoseToMatrices / DogEntity produce, the view and projection from I3dView / MagScene's camera (DogCamera::getLensFov), the scene lights (mag/magscenelight.cpp) and fog (magscenecmd.cpp). Never through the emulated GS. Prove it with a forced test (an env switch that loads one disc model, e.g. the first room's map pack, and draws it with a fixed camera) and a screenshot; finish verify when only the forced draw shows it, done when the New Game run shows the first room. Then utlDrawI3r 0x106760 / 0x21fe68 (unassigned@00106658, unassigned@0021fb50) call it."
   },
   "setup/iop_rxsnddrv.cpp": {
-   "notes": "Done: note.cpp, 17 functions (0x8f10 play, 0x93c0 tick, 0x98e4 init, 0x9974 key off, 0x99c8 free, 0x9ab0..0x9db4 setters and flags, 0x9ddc stop, 0x9e50 voice done); facts in architecture.md NOTE entry. Faithful quirks kept: the auto-pan LFO indexes PANT from the curve base (not the note pan); a freed slot's layers can still get the voice-done callback while their voices fade and decrement the old slot's voice count. Test: python build.py --run 60 --env ROSEPAN_RXSNDDRV=1 runs clean, the NOTE stubs no longer print, ADPCM stream 47 still keys on; nothing in the boot plays a NOTE yet (no BGM command, SE is still stubbed), so NOTE is unheard. Offline check: G000.GRB (XVAB at 0x3f8e0 inside the RTPK) has 3 programs of 62 / 21 / 2 one-key regions, scale 3763, ADSR 0x80ff / 0x5fc0, LFO rates 0x80, bend 12 - every field lands where note.cpp reads it. Screenshot: opening movie frame (roses, bench) as before; nothing visual changes. Next (open-items.md): SE 0x6ab0..0x8f10 (init 0x6ab0, set 0x6bcc, play 0x84b0 / 0x8658, status 0x8800, tick 0x8878, the SESQ interpreter 0x6e04.. calling NOTE through 0x8a5c and 0x81b4), then PCM 0xb4a0..0xce84. Remaining stubs in src/iop/rxsnddrv/stubs.cpp.",
+   "notes": "Done: pcm.cpp, 13 functions; facts in architecture.md PCM entry. PC deviations: the ring position is taken on the 32-bit truncation libsd reports instead of masking 0xffffff, and kept inside the ring; a format past 3 is not mixed (the IOP would index past its mixer table). Default switched: src/sdk/iop_rxsnd.cpp now starts RxSndDrvStart unless ROSEPAN_RXSNDDRV=0. The user reported their builds were silent while session runs were not - that was the env switch; plain builds now play sound. Test: tus.py check --run 15 green, no stub IOP lines, PCM init message, 0xb3 status answered; the opening movie still plays via ADPCM 47 (screenshot at 60 s shows the movie). No smoke run opens a PCM stream (rxmpeg picks ADPCM for the opening movie), so PCM is unheard. Next: the user listens (title BGM, menu SEs, movie sound); then delete iop_rxsnd.cpp and the switch and mark the host task done. Open: EE rxSndPcmSetParamB4 sends 0xb4, which the driver rejects as invalid (faithful).",
    "sessions": [
     {
      "date": "2026-10-30 19:10",
@@ -3120,6 +3120,16 @@
      "date": "2026-10-30 20:56",
      "status": "partial",
      "summary": "RXSNDDRV session 7: NOTE slots (IOP 0x8f10..0x9eb0) in src/iop/rxsnddrv/note.cpp - play with TGIF / TGPG / TGSP region lookup and one auto-free voice per matching region, all-or-nothing release, the V-blank tick (switches, volume with VELT / PANT curves, pitch with bend and offset, tremolo / auto-pan / vibrato LFOs with the ROM rate table 0xdee0), key off, free, the voice-done callback and all 11 setters incl. the SE-only offset / mod depth / mod rate; 12 stubs removed; region layout checked against the bank in DATA/SEQ/G000.GRB"
+    },
+    {
+     "date": "2026-10-30 21:15",
+     "status": "partial",
+     "summary": "RXSNDDRV session 8: SE (IOP 0x6ab0..0x8f10) in src/iop/rxsnddrv/se.cpp - pools of notes, ramps, channels, loops and 0x40 slots, commands 0x80 SE request / 0x81 one key / 0x82 params / 0x83 status, the V-blank tick (apply, reap, the SESQ byte-code interpreter with loops, note on/off/free, channel set and ramps, every-SE targeting), the push of switch, volume, pan, pitch, bend, offset and modulation to NOTE; 6 stubs removed; with ROSEPAN_RXSNDDRV=1 the title menu SEs key NOTEs on and their slot is reaped and reused"
+    },
+    {
+     "date": "2026-10-30 21:27",
+     "status": "partial",
+     "summary": "RXSNDDRV session 9: PCM streams (IOP 0xb4a0..0xce84) in src/iop/rxsnddrv/pcm.cpp - 0x20 slots, open / data / set / status commands 0xb0..0xb3, the V-blank tick mixing ready streams into core 1's looping 0x2000 input ring (four format mixers, volume curve 0xe2e0, per-half sequence tags, mono downmix), close-all; stubs.cpp deleted (every driver function reconstructed); the reconstruction is now the default over the silent stand-in (ROSEPAN_RXSNDDRV=0 selects it)"
     }
    ],
    "status": "partial",
