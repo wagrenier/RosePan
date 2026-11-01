@@ -104,6 +104,11 @@ TskEnemyMove::TskEnemyMove()
     m_wait0 = 0;
     m_wait1 = 0;
     m_wait3 = 0;
+    /* PORT: the route too: a first plan with no path waits in step 1 and
+     * then startWalk reads m_points[m_node] before any setRoute. */
+    m_nodes = 0;
+    m_node = 0;
+    memset(m_points, 0, sizeof(m_points));
 }
 
 // ──────────────────────────────────────────────────────────────────────
