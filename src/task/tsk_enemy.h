@@ -77,8 +77,9 @@ struct EmyTurnParam
 struct TskEnemyMove : CmnITask
 {
     /* m_active, m_dog and m_pause cleared (EmyMain::loadParam news it).
-     * PORT: also m_se (-1) and the three event countdowns, which the ROM
-     * never sets before their first use (heap garbage there). */
+     * PORT: also m_se (-1), the three event countdowns and the route
+     * (m_nodes, m_node, m_points), which the ROM never sets before their
+     * first use (heap garbage there). */
     TskEnemyMove();                                                      // ROR 0x002006b0
     ~TskEnemyMove() override {}                                          // ROR 0x002006cc
 
