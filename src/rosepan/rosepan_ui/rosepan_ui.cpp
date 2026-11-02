@@ -39,7 +39,9 @@ bool g_frame_started;
 bool g_frame_rendered;
 bool g_previous_rb;
 bool g_windowing_chord_latched;
-bool g_show_main_menu_bar = true;
+bool g_menu_bar_chord_latched;
+/* Hidden until F1 or L3+R1 on a pad asks for it. */
+bool g_show_main_menu_bar;
 bool g_show_performance_summary;
 /* Summary trimmed to its first line.  The frame rate is the figure worth
  * leaving on screen; the rest of the block is for when something is wrong. */
@@ -2715,6 +2717,34 @@ void RemapGamepadWindowingTrigger()
     }
 }
 
+/* L3+R1 going down together on one pad, in either order.  Read from the pad's
+ * state rather than the event, which names only one of the two; the latch is
+ * what stops both downs of one press, landing in the same pump, from toggling
+ * the bar twice.  Fixed buttons, not the game's bindings, the same as F1 is a
+ * fixed key -- and they still reach the game. */
+bool MenuBarChordPressed(const SDL_Event *event)
+{
+    if (event->type != SDL_EVENT_GAMEPAD_BUTTON_DOWN &&
+        event->type != SDL_EVENT_GAMEPAD_BUTTON_UP)
+    {
+        return false;
+    }
+    if (event->gbutton.button != SDL_GAMEPAD_BUTTON_LEFT_STICK &&
+        event->gbutton.button != SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER)
+    {
+        return false;
+    }
+
+    SDL_Gamepad *gamepad = SDL_GetGamepadFromID(event->gbutton.which);
+    const bool held =
+        event->type == SDL_EVENT_GAMEPAD_BUTTON_DOWN && gamepad != nullptr &&
+        SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_LEFT_STICK) &&
+        SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER);
+    const bool pressed = held && !g_menu_bar_chord_latched;
+    g_menu_bar_chord_latched = held;
+    return pressed;
+}
+
 // ---------------------------------------------------------------------------
 // Fatal Frame III: The Tormented theme.
 //
@@ -2970,7 +3000,8 @@ void Shutdown()
     g_frame_rendered = false;
     g_previous_rb = false;
     g_windowing_chord_latched = false;
-    g_show_main_menu_bar = true;
+    g_menu_bar_chord_latched = false;
+    g_show_main_menu_bar = false;
     g_show_performance_summary = false;
     g_summary_fps_only = false;
     g_show_performance_graphs = false;
@@ -2998,8 +3029,9 @@ void ProcessEvent(const SDL_Event *event)
         }
 
         ImGui_ImplSDL3_ProcessEvent(event);
-        if (event->type == SDL_EVENT_KEY_DOWN && !event->key.repeat &&
-            event->key.scancode == SDL_SCANCODE_F1)
+        if ((event->type == SDL_EVENT_KEY_DOWN && !event->key.repeat &&
+             event->key.scancode == SDL_SCANCODE_F1) ||
+            MenuBarChordPressed(event))
         {
             g_show_main_menu_bar = !g_show_main_menu_bar;
         }
