@@ -210,13 +210,11 @@ bool s_logged_offscreen;
 
 /* The projected shadows (MagScene::makeActorShadow / drawActorShadow): the
  * shadow pass the replay is in (the n-th FRAME fbp 0x118 write of the
- * frame), whether its caster episode is open in the renderer, whether the
- * receivers after it may draw (the pass drew a caster), and each pass's
- * strength as makeActorShadow left it. */
-int   s_shadow_pass = -1;
-bool  s_shadow_caster_open;
-bool  s_shadow_receivers;
-float s_shadow_strength[kMaxShadows];
+ * frame), whether its caster episode is open in the renderer and whether
+ * the receivers after it may draw (the pass drew a caster). */
+int  s_shadow_pass = -1;
+bool s_shadow_caster_open;
+bool s_shadow_receivers;
 bool s_logged_notex;
 bool s_logged_direct_tex0;
 
@@ -572,7 +570,6 @@ bool BeginShadowCaster()
     if (!s_shadow_caster_open)
     {
         RosePan_RendererShadowBeginCaster();
-        RosePan_RendererShadowSetStrength(s_shadow_strength[s_shadow_pass]);
         s_shadow_caster_open = true;
     }
     return true;
@@ -591,8 +588,7 @@ void EndShadowCaster()
     static bool s_logged;
     if (!s_logged)
     {
-        RosePan_LogPrintf("rosepan_i3d: shadow pass %d cast (strength %.3f)\n", s_shadow_pass,
-                          s_shadow_strength[s_shadow_pass]);
+        RosePan_LogPrintf("rosepan_i3d: shadow pass %d cast\n", s_shadow_pass);
         s_logged = true;
     }
 }
@@ -676,16 +672,28 @@ int LightSetFor(const I3dLight *light, const float *eye_dir)
             memcpy(s.point_color[i], light->m_point[i].m_color, sizeof(s.point_color[i]));
         }
     }
-    s.other_count = (light->m_spot != nullptr ? light->m_spot_count : 0) +
-                    (light->m_dir2 != nullptr ? light->m_dir2_count : 0) +
+    if (light->m_spot != nullptr)
+    {
+        s.spot_count = light->m_spot_count < ROSEPAN_I3D_MAX_SPOT ? light->m_spot_count : ROSEPAN_I3D_MAX_SPOT;
+        for (int i = 0; i < s.spot_count; i++)
+        {
+            memcpy(s.spot_pos[i], light->m_spot[i].m_pos, sizeof(s.spot_pos[i]));
+            memcpy(s.spot_dir[i], light->m_spot[i].m_dir, sizeof(s.spot_dir[i]));
+            memcpy(s.spot_color[i], light->m_spot[i].m_color, sizeof(s.spot_color[i]));
+            memcpy(s.spot_cone[i], light->m_spot[i].m_cone, sizeof(s.spot_cone[i]));
+        }
+    }
+    s.other_count = (light->m_dir2 != nullptr ? light->m_dir2_count : 0) +
                     (light->m_vec3 != nullptr ? light->m_vec3_count : 0);
-    if (light->m_parallel_count > ROSEPAN_I3D_MAX_PARALLEL || light->m_point_count > ROSEPAN_I3D_MAX_POINT)
+    if (light->m_parallel_count > ROSEPAN_I3D_MAX_PARALLEL || light->m_point_count > ROSEPAN_I3D_MAX_POINT ||
+        (light->m_spot != nullptr && light->m_spot_count > ROSEPAN_I3D_MAX_SPOT))
     {
         static bool s_logged;
         if (!s_logged)
         {
-            RosePan_LogPrintf("rosepan_i3d: a light set has %d parallel / %d point lights; %d / %d kept\n",
-                              light->m_parallel_count, light->m_point_count, s.parallel_count, s.point_count);
+            RosePan_LogPrintf("rosepan_i3d: a light set has %d parallel / %d point / %d spot lights; %d / %d / %d kept\n",
+                              light->m_parallel_count, light->m_point_count, light->m_spot_count,
+                              s.parallel_count, s.point_count, s.spot_count);
             s_logged = true;
         }
     }
@@ -955,12 +963,6 @@ void RosePan_I3dBeginFrame(void)
     s_shadow_pass = -1;
     s_shadow_caster_open = false;
     s_shadow_receivers = false;
-}
-
-void RosePan_I3dSetShadowStrength(int n, float strength)
-{
-    if (n >= 0 && n < kMaxShadows)
-        s_shadow_strength[n] = strength;
 }
 
 int RosePan_I3dShadowReceiverReady(void)

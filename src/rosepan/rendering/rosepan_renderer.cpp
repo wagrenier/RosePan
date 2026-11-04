@@ -941,9 +941,6 @@ struct ShadowEpisode
     /* World -> light clip, snapshotted from the shadow camera _RenderShadow()
      * applied.  Plays the part s_matIP does on VU1. */
     float matrix[16];
-    /* _CalcColor()'s projector alpha: the light's diffuse luminance at the
-     * shadow target, capped at half. */
-    float strength;
     /* What the ROM's projection microcode culls receiver triangles by
      * (RosePan_RendererShadowSetProjector): s_matIP's z row, the direction
      * towards the light, the game camera's position. */
@@ -9142,7 +9139,6 @@ void DrawQueuedSprites(SDL_GPURenderPass *pass, SDL_GPUCommandBuffer *cmd,
             const ShadowEpisode &episode = g_shadow_episodes[draw.shadow_episode];
             std::memcpy(g_uniforms.shadowMatrix, episode.matrix,
                         sizeof(g_uniforms.shadowMatrix));
-            g_uniforms.params0[1] = episode.strength;
             for (int c = 0; c < 4; c++)
             {
                 g_uniforms.shadowPlane[c] = episode.plane[c];
@@ -14188,7 +14184,6 @@ void RosePan_RendererShadowBeginCaster(void)
     ShadowEpisode episode{};
     episode.first_caster_draw = g_draws.size();
     episode.last_caster_draw = g_draws.size();
-    episode.strength = 0.0f;
     episode.have_casters = false;
     /* Identity until EndCaster() snapshots the light camera. */
     for (int i = 0; i < 4; i++)
@@ -14240,26 +14235,6 @@ void RosePan_RendererShadowEndReceiver(void)
     {
         g_shadow_receiver_depth--;
     }
-}
-
-/*
- * The projector strength: _CalcColor()'s alpha, which is the light's diffuse
- * luminance at the shadow target divided by sqrt(3) and halved.  The ROM packs
- * it into the VU1 scratchpad as a 0..255 byte; the shader wants 0..1.
- */
-void RosePan_RendererShadowSetStrength(float strength)
-{
-    if (g_shadow_current_episode < 0 ||
-        g_shadow_current_episode >= (int)g_shadow_episodes.size())
-    {
-        return;
-    }
-    if (!std::isfinite(strength))
-    {
-        strength = 0.0f;
-    }
-    g_shadow_episodes[g_shadow_current_episode].strength =
-        std::min(std::max(strength, 0.0f), 1.0f);
 }
 
 /*

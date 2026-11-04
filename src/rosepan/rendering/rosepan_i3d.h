@@ -39,7 +39,7 @@
  *    as screen-space vertices (RosePan_I3dRecordVu1Strip).
  *
  *  - shadows: the shadow target pass feeds the renderer's projected
- *    shadow atlas (RosePan_I3dSetShadowStrength below).
+ *    shadow atlas (RosePan_I3dShadowReceiverReady below).
  *
  *  Not here yet: CALLed channel state packets (fog / light, VU1 state only).
  * ======================================================================== */
@@ -106,10 +106,9 @@ void RosePan_I3dRecordCamera(const void *at, const float *view, const float *pro
  * models drawn into the shadow target (FRAME fbp 0x118, XYOFFSET 0) as one
  * caster episode per pass, from the light's camera; the receivers -- mesh
  * layers whose STQ map is the scene's shadow entity (kind 3) -- project it
- * after their pass.  SetShadowStrength: pass n's darkness (makeActorShadow's
- * shadow light alpha, 0..1 after clamping); ReceiverReady: non-zero while
- * a receiver may draw (its pass drew a caster). */
-void RosePan_I3dSetShadowStrength(int n, float strength);
+ * after their pass, at the alpha the pass's shadow light gives each vertex
+ * (rosepan_i3dmesh.cpp).  ReceiverReady: non-zero while a receiver may draw
+ * (its pass drew a caster). */
 int  RosePan_I3dShadowReceiverReady(void);
 
 /* i3dTexRegsSet / i3dTexRegsSetNone: the objects `regs` describes (NULL

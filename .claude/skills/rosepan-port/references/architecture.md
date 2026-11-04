@@ -776,8 +776,14 @@ A scheduler over the EE kernel's priority threads (all 53 functions written, `ve
   XYOFFSET returns to the display (drawActorShadow's putDrawEnv), so the episode matrix is the
   light's camera. The receivers are the map pack's file 2 (MagSceneTenkyu m_model[1]), whose one
   material layer has an STQ slot replaced by MagScene +0x2aa90 (kind 3); rosepan_i3dmesh draws such
-  layers as shadow receivers only after a pass that cast, with strength from
-  RosePan_I3dSetShadowStrength (makeActorShadow's light alpha).
+  layers as shadow receivers only after a pass that cast. A shadow's darkness is the receiver
+  vertex's alpha under the pass's shadow light (rosepan_i3d.cpp LightSetFor keeps its spot): the
+  light is black, ambient w 0, strength in the colour's w, so alpha = strip w x sum(c.w x f), f =
+  max(0, n.d) directional, cone x clamp01(n.l) / |L| spot (micro 0x19a, "Mesh lighting and fog"). A
+  surface turned away from the light or outside the cone takes no shadow; point shadows fade as
+  1e6 / d^2 x m_22a0 x m_2a9cc. Directional on a floor is nearly the bare strength (bus stop: 0.386
+  against 0.4). Silhouette At is 0x80 (FBA), so the texel adds nothing. Receiver meshes are dense
+  enough for this: a median of ~60 vertices within 100 units across the 261 rooms.
 - **Projected shadows** (`MagScene::makeActorShadow` 0x139b4c): per shadowed actor a layer at 700 +
   10 n drawn into the 256 x 256 target at fbp 0x118 (sprite clear to black, FBA 1, the actor's
   DogActor::drawShadow under an ambient-only light (0, 0, 1, 0), then a post packet
@@ -2838,7 +2844,7 @@ throughout (identifiers, env variables, files, shader macros):
     vertex in world space (rosepan_i3dmesh.cpp LayerLight / LightVertex) from the light set the
     mesh record copies (i3rHostFile passes I3rMeshPacket m_light / m_view->m_eye_dir / m_fog), and
     sets the renderer's fog per mesh draw (RosePan_RendererSetFog, now snapshotted per draw in
-    ApplyGsDrawEnv instead of read once at submit). Spot / kind 3 / kind 4 lights (only the shadow
+    ApplyGsDrawEnv instead of read once at submit). Shade 2 spots and kind 3 / kind 4 lights (only the shadow
     layers' sets) are not evaluated. The bus stop (smoke pad frame ~6600..10500): set 1 = ambient
     (0.199, 0.329, 0.353), one parallel light dir (0.148, -0.965, -0.217) colour (0.235, 0.314,
     0.392), one point light (the street lamp, colour x intensity ~(188, 186, 158)); fog F = -63.75 +

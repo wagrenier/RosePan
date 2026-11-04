@@ -60,13 +60,14 @@ struct RosePanI3dMeshRef
 /* The light set a mesh's material packet was built with (I3rMeshPacket
  * m_light, i3rPktLayerState / i3rPktLayerLights), copied when the mesh is
  * filed, and its view's eye direction (I3dView::m_eye_dir: shade 2's half
- * vectors). Only the kinds DogLightPool::createLight fills are kept --
- * ambient, parallel, point; spot and the two 0x30 kinds only appear in
- * the shadow layers' sets and are counted in other_count. */
+ * vectors). Only the kinds in use are kept -- DogLightPool::createLight's
+ * ambient, parallel and point, and MagScene::m_shadow_light's spot; the
+ * two 0x30 kinds are counted in other_count. */
 enum
 {
     ROSEPAN_I3D_MAX_PARALLEL = 8,
-    ROSEPAN_I3D_MAX_POINT = 16
+    ROSEPAN_I3D_MAX_POINT = 16,
+    ROSEPAN_I3D_MAX_SPOT = 4
 };
 struct RosePanI3dLightSet
 {
@@ -79,6 +80,11 @@ struct RosePanI3dLightSet
     float parallel_color[ROSEPAN_I3D_MAX_PARALLEL][4];
     float point_pos[ROSEPAN_I3D_MAX_POINT][4];
     float point_color[ROSEPAN_I3D_MAX_POINT][4];
+    int   spot_count;
+    float spot_pos[ROSEPAN_I3D_MAX_SPOT][4];
+    float spot_dir[ROSEPAN_I3D_MAX_SPOT][4];
+    float spot_color[ROSEPAN_I3D_MAX_SPOT][4];
+    float spot_cone[ROSEPAN_I3D_MAX_SPOT][4];   /* I3dSpotLight::m_cone, as created */
 };
 
 /* RosePan_I3dMeshDraw for the one mesh (or batch) `ref` names, its lit

@@ -1855,7 +1855,7 @@ to adapt when a TU reaches them:
   fog: DONE 2026-10-30 (branch render-lighting; the user: "the first scene on emulator has more of a
   blue-ish tone"): the strips are lit from the material packet's light set as microprogram 1 does
   (architecture.md "Mesh lighting and fog") and fogged per mesh draw; Shade stays only for the
-  forced mesh test, which has no light set. Spot / kind 3 / kind 4 lights are not evaluated (only
+  forced mesh test, which has no light set. Shade 2 spots and kind 3 / kind 4 lights are not evaluated (only
   the shadow layers' sets have them; the shadow shaders ignore vertex colour); the batch matrix the
   VU rotates normals by is taken to be the mesh's local -> world (the VU1 writers that upload it
   are not ported); (4) the 0x45 part of a combined mesh (FUN_00220098) is not
@@ -2174,14 +2174,15 @@ to adapt when a TU reaches them:
   (FRAME fbp 0x118, XYOFFSET 0) feeds the renderer's projected-shadow atlas from the FF ports
   (RosePan_RendererShadowBegin/EndCaster: one episode per pass, closed when XYOFFSET returns to the
   display); receivers are mesh layers whose STQ slot is kind 3 (MagScene's +0x2aa90), drawn through
-  the receiver shader (black, alpha = coverage x strength). Doubts: (1) the map shadow model's STQ
+  the receiver shader (black, alpha = coverage x the vertex's alpha, since 2026-11-04). Doubts: (1) the map shadow model's STQ
   slot is EMPTY in the file (m_data 0): the ROM's i3rReplaceStqMapEntity compares the byte at EE
   address 0x41 with id 3; the host takes an empty slot as a match (i3rmodel.cpp PORT) -- confirm with
-  an EE RAM dump (byte 0x41 should be 3) or other evidence. (2) strength = makeActorShadow's shadow
-  light alpha clamped to 1 (0.4 in the forest run: m_22a0 0.8 x m_2a9cc 0.5); the ROM's VU1 lighting of
-  the receiver under kinds 1 / 3 may scale it further (N.L, spot cones). (3) no receiver culling
-  (have_projector false); a ceiling above an actor would take the shadow too. (4) not compared with
-  real-game footage yet: the forest shot shows a soft shadow from Jennifer's feet to the right.
+  an EE RAM dump (byte 0x41 should be 3) or other evidence. (2) RESOLVED 2026-11-04: the strength
+  clamped to 1 made every point-light shadow solid black (its w runs 200..1200); VU1's lighting of
+  the receiver does scale it, architecture.md "Projected shadows on the host". (3) RESOLVED the
+  same day: have_projector stays false, the same lighting gives ceilings and walls turned away from
+  the light alpha 0. (4) only the bus stop has been compared, with the lamp forced as the shadow
+  light: a real indoor room is the user's check.
 - **Projected shadow open points** (2026-10-22, makeActorShadow): the shadow view's up vector at
   data 0x298cf0 reads (1, -1, 1, 0) -- odd for an up vector; check i3dMatLookDir's use of it when
   that module is written. The MagScene constructor's value for +0x2040 (m_shadow_mode) comes from a

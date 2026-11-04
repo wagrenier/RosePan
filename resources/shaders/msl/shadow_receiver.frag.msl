@@ -91,34 +91,35 @@ struct main0_in
 {
     float4 in_var_TEXCOORD0 [[user(locn0)]];
     float4 in_var_TEXCOORD1 [[user(locn1)]];
+    float in_var_TEXCOORD2 [[user(locn2)]];
 };
 
 fragment main0_out main0(main0_in in [[stage_in]], constant type_MikuPanUniforms& MikuPanUniforms [[buffer(0)]], texture2d<float> uAuxTexture [[texture(1)]], sampler uAuxTextureSampler [[sampler(1)]])
 {
     main0_out out = {};
-    float4 _289;
+    float4 _288;
     do
     {
-        float3 _85 = dfdx(in.in_var_TEXCOORD1.xyz);
-        float3 _86 = dfdy(in.in_var_TEXCOORD1.xyz);
-        float3 _87 = cross(_85, _86);
+        float3 _86 = dfdx(in.in_var_TEXCOORD1.xyz);
+        float3 _87 = dfdy(in.in_var_TEXCOORD1.xyz);
+        float3 _88 = cross(_86, _87);
         if (MikuPanUniforms.uShadowLight.w != 0.0)
         {
-            float _100 = dot(MikuPanUniforms.uShadowPlane.xyz, in.in_var_TEXCOORD1.xyz) + MikuPanUniforms.uShadowPlane.w;
-            bool _114;
-            if ((isunordered(_100, 0.0) || _100 >= 0.0))
+            float _101 = dot(MikuPanUniforms.uShadowPlane.xyz, in.in_var_TEXCOORD1.xyz) + MikuPanUniforms.uShadowPlane.w;
+            bool _115;
+            if ((isunordered(_101, 0.0) || _101 >= 0.0))
             {
-                _114 = (dot(_87, MikuPanUniforms.uShadowLight.xyz) * dot(_87, MikuPanUniforms.uShadowEye.xyz - in.in_var_TEXCOORD1.xyz)) < 0.0;
+                _115 = (dot(_88, MikuPanUniforms.uShadowLight.xyz) * dot(_88, MikuPanUniforms.uShadowEye.xyz - in.in_var_TEXCOORD1.xyz)) < 0.0;
             }
             else
             {
-                _114 = true;
+                _115 = true;
             }
-            if (_114)
+            if (_115)
             {
                 if (MikuPanUniforms.uFlags1.z != 0)
                 {
-                    _289 = float4(0.300000011920928955078125, 0.0, 0.449999988079071044921875, 1.0);
+                    _288 = float4(0.300000011920928955078125, 0.0, 0.449999988079071044921875, 1.0);
                     break;
                 }
                 discard_fragment();
@@ -128,101 +129,101 @@ fragment main0_out main0(main0_in in [[stage_in]], constant type_MikuPanUniforms
         {
             if (MikuPanUniforms.uFlags1.z != 0)
             {
-                _289 = float4(0.0, 0.0, 0.449999988079071044921875, 1.0);
+                _288 = float4(0.0, 0.0, 0.449999988079071044921875, 1.0);
                 break;
             }
             discard_fragment();
         }
-        float3 _134 = in.in_var_TEXCOORD0.xyz / float3(in.in_var_TEXCOORD0.w);
-        float _137 = (_134.x * 0.5) + 0.5;
-        float _140 = 0.5 - (_134.y * 0.5);
-        bool _146;
-        if ((isunordered(_137, 0.0) || _137 >= 0.0))
+        float3 _135 = in.in_var_TEXCOORD0.xyz / float3(in.in_var_TEXCOORD0.w);
+        float _138 = (_135.x * 0.5) + 0.5;
+        float _141 = 0.5 - (_135.y * 0.5);
+        bool _147;
+        if ((isunordered(_138, 0.0) || _138 >= 0.0))
         {
-            _146 = _137 > 1.0;
+            _147 = _138 > 1.0;
         }
         else
         {
-            _146 = true;
+            _147 = true;
         }
-        bool _151;
-        if (!_146)
+        bool _152;
+        if (!_147)
         {
-            _151 = _140 < 0.0;
+            _152 = _141 < 0.0;
         }
         else
         {
-            _151 = true;
+            _152 = true;
         }
-        bool _156;
-        if (!_151)
+        bool _157;
+        if (!_152)
         {
-            _156 = _140 > 1.0;
+            _157 = _141 > 1.0;
         }
         else
         {
-            _156 = true;
+            _157 = true;
         }
-        bool _162;
-        if (!_156)
+        bool _163;
+        if (!_157)
         {
-            _162 = _134.z < 0.0;
+            _163 = _135.z < 0.0;
         }
         else
         {
-            _162 = true;
+            _163 = true;
         }
-        bool _168;
-        if (!_162)
+        bool _169;
+        if (!_163)
         {
-            _168 = _134.z > 1.0;
+            _169 = _135.z > 1.0;
         }
         else
         {
-            _168 = true;
+            _169 = true;
         }
-        if (_168)
+        if (_169)
         {
             if (MikuPanUniforms.uFlags1.z != 0)
             {
-                _289 = float4(0.0, 0.0, 0.449999988079071044921875, 1.0);
+                _288 = float4(0.0, 0.0, 0.449999988079071044921875, 1.0);
                 break;
             }
             discard_fragment();
         }
-        float2 _182 = (fast::clamp(float2(_137, _140), float2(0.0), float2(1.0)) * MikuPanUniforms.uShadowSize.xy) + MikuPanUniforms.uShadowSize.zw;
-        bool _191;
+        float2 _183 = (fast::clamp(float2(_138, _141), float2(0.0), float2(1.0)) * MikuPanUniforms.uShadowSize.xy) + MikuPanUniforms.uShadowSize.zw;
+        bool _192;
         if (MikuPanUniforms.uShadowFilter.x > 0.5)
         {
-            _191 = MikuPanUniforms.uShadowFilter.y > 0.0;
+            _192 = MikuPanUniforms.uShadowFilter.y > 0.0;
         }
         else
         {
-            _191 = false;
+            _192 = false;
         }
-        float _272;
-        if (_191)
+        float _273;
+        if (_192)
         {
-            _272 = ((((((((uAuxTexture.sample(uAuxTextureSampler, (_182 + (float2(-1.0) * MikuPanUniforms.uShadowFilter.y))).x + uAuxTexture.sample(uAuxTextureSampler, (_182 + (float2(0.0, -1.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, (_182 + (float2(1.0, -1.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, (_182 + (float2(-1.0, 0.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, _182).x) + uAuxTexture.sample(uAuxTextureSampler, (_182 + (float2(1.0, 0.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, (_182 + (float2(-1.0, 1.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, (_182 + (float2(0.0, 1.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, (_182 + (float2(1.0) * MikuPanUniforms.uShadowFilter.y))).x) * 0.111111111938953399658203125;
+            _273 = ((((((((uAuxTexture.sample(uAuxTextureSampler, (_183 + (float2(-1.0) * MikuPanUniforms.uShadowFilter.y))).x + uAuxTexture.sample(uAuxTextureSampler, (_183 + (float2(0.0, -1.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, (_183 + (float2(1.0, -1.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, (_183 + (float2(-1.0, 0.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, _183).x) + uAuxTexture.sample(uAuxTextureSampler, (_183 + (float2(1.0, 0.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, (_183 + (float2(-1.0, 1.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, (_183 + (float2(0.0, 1.0) * MikuPanUniforms.uShadowFilter.y))).x) + uAuxTexture.sample(uAuxTextureSampler, (_183 + (float2(1.0) * MikuPanUniforms.uShadowFilter.y))).x) * 0.111111111938953399658203125;
         }
         else
         {
-            _272 = uAuxTexture.sample(uAuxTextureSampler, _182).x;
+            _273 = uAuxTexture.sample(uAuxTextureSampler, _183).x;
         }
         if (MikuPanUniforms.uFlags1.z != 0)
         {
-            _289 = float4(_272, 0.3499999940395355224609375 + (0.64999997615814208984375 * (1.0 - _272)), 0.0, 1.0);
+            _288 = float4(_273, 0.3499999940395355224609375 + (0.64999997615814208984375 * (1.0 - _273)), 0.0, 1.0);
             break;
         }
-        float _284 = _272 * MikuPanUniforms.uParams0.y;
-        if (_284 <= 0.001000000047497451305389404296875)
+        float _283 = _273 * in.in_var_TEXCOORD2;
+        if (_283 <= 0.001000000047497451305389404296875)
         {
             discard_fragment();
         }
-        _289 = float4(0.0, 0.0, 0.0, _284);
+        _288 = float4(0.0, 0.0, 0.0, _283);
         break;
     } while(false);
-    out.out_var_SV_Target0 = _289;
+    out.out_var_SV_Target0 = _288;
     return out;
 }
 

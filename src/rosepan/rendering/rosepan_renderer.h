@@ -1183,7 +1183,6 @@ void RosePan_RendererShadowBeginCaster(void);
 void RosePan_RendererShadowEndCaster(void);
 void RosePan_RendererShadowBeginReceiver(void);
 void RosePan_RendererShadowEndReceiver(void);
-void RosePan_RendererShadowSetStrength(float strength);
 /* The current shadow's receiver culling, as the projection microcode does it:
  * plane = s_matIP's z row (world; the projector z is below 0 between the
  * caster and the light), to_light = s_vDirection, eye = the game camera's
