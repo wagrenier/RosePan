@@ -1864,7 +1864,10 @@ to adapt when a TU reaches them:
   0x44 where the layer writes none; the ROM would keep the previous layer's value instead). Every
   amd.mdl layer is blend 0x10 (= 0x44) with no alpha test, so Amanda's picture is unchanged; a
   model whose layers set m_atst / m_blend will show it. Only layer 0 is read (materials seen so far
-  have one). (6) i3d/i3rmesh.cpp is written as the ROM does (the material packet cache and VIF
+  have one). Vertex alpha: DONE 2026-11-04, the strips' own (architecture.md "Mesh lighting and
+  fog"); it was 1.0 until then, so every translucent mesh drew solid. Still open: a layer that writes
+  no TEST / ALPHA starts from the defaults instead of the sticky value, and the layer's register
+  overrides (all CLAMP_1 so far) are not applied. (6) i3d/i3rmesh.cpp is written as the ROM does (the material packet cache and VIF
   chains, verify: its callers are the unported VU1 writers). For (3): amd.mdl's layers are
   m_shade 1 (lit) with m_ambient 1, so the scene light set (I3dLayer m_light, i3rPktLayerLights'
   five lists) is what the ROM shades them with. Doubt: the strip colour block (0x17) is read as RGB

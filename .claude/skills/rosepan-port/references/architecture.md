@@ -1071,7 +1071,12 @@ divided by 2 x length x 30 -- radians per frame. `rotateTenkyu` 0x14062c applies
 `i3dMatRotY` every update; `drawSkyDome` 0x1406b8 draws at layer 490 with a white ambient-only
 light, view 0 with far 100000 and zmin = zmax = 0, ALPHA_1 0x44 / FBA 0 / CLAMP 0 / TEST_1 0x13001,
 world = unit at the camera's x / z (y 0). ROM bug: its draw loop runs four slots starting at the
-first slot with a sky (reads past slot 3 when slot 0 is empty); the port stops at slot 3.
+first slot with a sky (reads past slot 3 when slot 0 is empty); the port stops at slot 3. The sky
+materials write their own TEST (0x51403: alpha ALWAYS, Z GEQUAL), so Z is written, but the view's
+empty z range makes it 0, the clear value: the sky never occludes. Domes are radius 3160, 7997 or
+21375, nearer than a map's far scenery, so the host, whose camera keeps real depth, draws meshes of
+such a view with ZMSK (rosepan_i3d.cpp DrawMesh, `far_z`). makeActorShadow's s_shadow_view has the
+same empty range; its caster pass has no depth target.
 0x140990 opens the focus code (mag/magscenefocus.cpp, next section).
 
 ## The scene's focus effect (`mag/magscenefocus.cpp`, 0x140990..0x141e44, 2026-10-27)
@@ -2821,8 +2826,14 @@ throughout (identifiers, env variables, files, shader macros):
     s2 x^4 + s3 x^8 with the layer's m_specular. Normals go through the batch matrix rows (VU
     0x3da..0x3dc) unnormalised; point lights are moved into model space (0x3d6..0x3d9). The strip
     program 0x3fc then gives each vertex strip colour x (accumulator + ambient 0x3f6) x colour scale
-    0x3f5 (128 textured, 255 not), max 0 / MINI I, ftoi0. Ambient: shade 0 = 1, m_ambient 0 = black,
-    else the light's. Fog (same program): F = clamp(base + scale x Q, 0, 255), Q = 1 / clip w, from
+    0x3f5 (128 textured, 255 not), max 0 / MINI I, ftoi0, on all four components: vertex alpha =
+    strip colour w x (accumulator w + ambient w) x 128 (the scale's w is 128 on every layer, the
+    host's 1.0), and PRIM always has ABE. Translucency lives in the strip colours, usually as
+    STMASK fills (0x6a6a6a6a: x y z from COL 1.0, w from ROW 0, so white at alpha 0): the
+    butterfly cases' `sortOn__glass` quads (specimen.mdl, specimenamd.mdl, buttbox.mdl) are alpha
+    0, so they show nothing, and only about 20 materials in the game are not 1.0 (o1ba_water 0.5,
+    o1ba_glass_tcc 0.74, amda09 0.3). Ambient: shade 0 = 1, m_ambient 0 = black (w 1),
+    else the light's (createLight sets w 1; makeActorShadow's w 0). Fog (same program): F = clamp(base + scale x Q, 0, 255), Q = 1 / clip w, from
     the ramp at 0x3f8 (i3dCtxSetFog's I3dFogState). The host does the sums on the CPU per strip
     vertex in world space (rosepan_i3dmesh.cpp LayerLight / LightVertex) from the light set the
     mesh record copies (i3rHostFile passes I3rMeshPacket m_light / m_view->m_eye_dir / m_fog), and

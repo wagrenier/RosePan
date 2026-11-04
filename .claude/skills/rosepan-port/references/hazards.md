@@ -1118,3 +1118,24 @@ loop's start pointer in the asm when its twin starts elsewhere.
 - Stale lead met on the way: "sceSifSetDma: dst=0000000000101c40 ... transfer dropped" lines come
   from runs before 2026-10-30, when the silent stand-in iop_rxsnd.cpp handed out a fake IOP heap at
   0x100000 (under IOP_MAP_LIMIT). The reconstruction's buffers are real arena addresses (0x420000+).
+
+## Host defaults that hide data: vertex alpha and sky depth (2026-11-04)
+
+- Symptom (the user, playing): a butterfly display case's glass is a solid grey sheet; in some
+  outdoor rooms the sky is drawn over the fogged distance.
+- Cause 1: rosepan_i3dmesh.cpp passed `tri.alpha = 1.0f`, so the strip colours' w never reached the
+  renderer. VU1 multiplies all four components (architecture.md "Mesh lighting and fog"); the
+  case's glass is white at alpha 0, a quad the GS never shows. Lit by the scene it came out grey.
+- Cause 2: drawSkyDome's view has zmin = zmax = 0, so the ROM's dome sits at Z 0, the clear value,
+  and occludes nothing. The host camera ignores the screen z range, so the dome wrote its real depth
+  and everything further away failed the depth test. Fix: `far_z` in rosepan_i3d.cpp (ZMSK).
+- Scanning the data found these faster than reading code: walk MAPUNIT.BIN / CHARA.RPK's RTPK trees,
+  list each I3D_BIN's material layers, unpack the strip colour blocks, and list what is not 1.0.
+- Testing traps, each cost a long run:
+  - ROSEPAN_I3D_MESH_TEST's camera mirrors the view, so back-face culling is inverted and a model
+    draws inside-out; its header read (2048 bytes) only reaches the first entries of a big pack;
+    models with a .MOT sit in their rest pose (the specimen case's lid over the glass).
+  - The bus stop's sky is nearly black, so a screenshot diff with a threshold sees nothing even when
+    the sky covers the backdrop. Paint the suspect draw a loud colour, and pull a dome in with a
+    world scale (centred on the camera) to force the case.
+  - A counter on "views with an empty z range" also counts the shadow casters.
