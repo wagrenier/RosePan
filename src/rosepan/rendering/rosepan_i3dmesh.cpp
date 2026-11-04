@@ -305,6 +305,12 @@ void VuVec3(unsigned addr, float out[3])
     out[2] = AsFloat(q[2]);
 }
 
+void VuVec4(unsigned addr, float out[4])
+{
+    VuVec3(addr, out);
+    out[3] = AsFloat(s_vu.mem[addr % kVuSize][3]);
+}
+
 /* out = a * b, row-major (p * a * b). */
 void MatMul(float *out, const float *a, const float *b)
 {
@@ -475,14 +481,17 @@ float Shade(const float *m, const float n[3])
  * normalize(L / |L| + eye), P(x) = s0 x + s1 x^2 + s2 x^4 + s3 x^8 of the
  * layer's m_specular -- and the strip program (0x3fc) gives each vertex
  * its strip colour x (accumulator + ambient) x the colour scale (128
- * textured, 255 not), clamped. The normals are rotated by the batch
- * matrix unnormalised, as the VU does; the host does the sums in world
- * space, the same products for a matrix of uniform scale. */
+ * textured, 255 not), clamped. All of that runs on four components: the
+ * vertex alpha is strip colour w x (accumulator w + ambient w) x 128, so a
+ * model's translucency is in its strip colours (the butterfly boxes'
+ * "glass" meshes are white at alpha 0). The normals are rotated by the
+ * batch matrix unnormalised, as the VU does; the host does the sums in
+ * world space, the same products for a matrix of uniform scale. */
 struct LayerLight
 {
     const RosePanI3dLightSet *set;      /* NULL: no light set (Shade) */
     int   shade;                        /* I3rLayerData::m_shade: 0 unlit, 1 lights, 2 specular */
-    float ambient[3];                   /* the colour block's ambient qword */
+    float ambient[4];                   /* the colour block's ambient qword */
     float poly[4];                      /* shade 2: m_specular */
     float half[ROSEPAN_I3D_MAX_PARALLEL][3];   /* shade 2: the parallel lights' half vectors */
     float ceiling;                      /* the clamp, in the mesh stream's units (128 = 1.0) */
@@ -518,6 +527,7 @@ void SetupLayerLight(LayerLight &l, const I3rLayerData *d, bool textured, const 
     /* MINI against the strip program's ceiling, 255: under a texture the
      * scale is 128, so overbright up to 255 / 128. */
     l.ceiling = textured ? 255.0f / 128.0f : 1.0f;
+    l.ambient[3] = 1.0f;
     if (l.shade == 0)
         l.ambient[0] = l.ambient[1] = l.ambient[2] = 1.0f;
     else if (d->m_ambient != 0 && set != nullptr)
@@ -536,11 +546,12 @@ void SetupLayerLight(LayerLight &l, const I3rLayerData *d, bool textured, const 
 
 /* The factor vertex (p, n) (model space) multiplies its strip colour by
  * under l, through the batch matrix m. */
-void LightVertex(const LayerLight &l, const float *m, const float p[3], const float n[3], float out[3])
+void LightVertex(const LayerLight &l, const float *m, const float p[3], const float n[3], float out[4])
 {
     if (l.set == nullptr)
     {
         out[0] = out[1] = out[2] = l.shade == 0 ? 1.0f : Shade(m, n);
+        out[3] = 1.0f;
         return;
     }
     memcpy(out, l.ambient, sizeof(l.ambient));
@@ -561,7 +572,7 @@ void LightVertex(const LayerLight &l, const float *m, const float p[3], const fl
         else
             f = SpecularPoly(l.poly, Dot3(nw, l.half[i]));
         if (f > 0.0f)
-            for (int c = 0; c < 3; c++)
+            for (int c = 0; c < 4; c++)
                 out[c] += f * s.parallel_color[i][c];
     }
     for (int i = 0; i < s.point_count; i++)
@@ -588,7 +599,7 @@ void LightVertex(const LayerLight &l, const float *m, const float p[3], const fl
             f = f > 0.0f ? f * inv : 0.0f;
         }
         if (f > 0.0f)
-            for (int c = 0; c < 3; c++)
+            for (int c = 0; c < 4; c++)
                 out[c] += f * s.point_color[i][c];
     }
 }
@@ -641,6 +652,7 @@ void DrawStripGroup(const I3rItem &group, const float *local_world, const void *
         LoadChannel(item.getChildren()[0], kVuColours, blend, I3R_BLEND_COLOUR);
         LoadChannel(item.getChildren()[1], kVuStq, blend, I3R_BLEND_STQ);
         float pos[20][3], nrm[20][3], rgb[20][3];
+        float alpha[20];
         float st[20][2];
         uint16_t ix[20][2];
         const int n = s->m_count > 20 ? 20 : s->m_count;
@@ -650,14 +662,16 @@ void DrawStripGroup(const I3rItem &group, const float *local_world, const void *
             const unsigned k = ix[v][0] & 0x7fff;
             VuVec3(kVuPositions + k, pos[v]);
             VuVec3(kVuNormals + k, nrm[v]);
-            float c[3], lit[3];
-            VuVec3(kVuColours + v, c);
+            float c[4], lit[4];
+            VuVec4(kVuColours + v, c);
             LightVertex(light, local_world, pos[v], nrm[v], lit);
             for (int j = 0; j < 3; j++)
             {
                 const float x = c[j] * lit[j];
                 rgb[v][j] = x > 0.0f ? (x < light.ceiling ? x : light.ceiling) : 0.0f;
             }
+            /* The colour scale's w is 128 on every layer, the host's 1.0. */
+            alpha[v] = c[3] * lit[3];
             const uint32_t *q = s_vu.mem[(kVuStq + v) % kVuSize];
             const float qq = AsFloat(q[2]) != 0.0f ? AsFloat(q[2]) : 1.0f;
             st[v][0] = AsFloat(q[0]) / qq;
@@ -684,7 +698,7 @@ void DrawStripGroup(const I3rItem &group, const float *local_world, const void *
                 tri[j].rgb = rgb[o];
                 tri[j].s = st[o][0];
                 tri[j].t = st[o][1];
-                tri[j].alpha = 1.0f;
+                tri[j].alpha = alpha[o];
             }
             RosePan_RendererAppendMeshTriangle(stream, tri);
         }

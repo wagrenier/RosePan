@@ -17,6 +17,7 @@
 #include "i3d/i3dlayer.h"
 #include "i3d/i3dpacket.h"
 #include "i3d/i3dtex.h"
+#include "i3d/i3dview.h"
 #include "i3d/i3rdraw.h"
 #include "i3d/i3rmodel.h"
 #include "i3d/i3rroot.h"
@@ -69,6 +70,8 @@ constexpr uint64_t kDefaultTest = 0x5000d;
 /* The display's ZBUF_1 (sceGsSetDefDBuff's: Z at 0xe0, PSMZ16S, ZMSK
  * clear). */
 constexpr uint64_t kDefaultZbuf = 0x0a0000e0;
+/* ZBUF_1's ZMSK: no depth write. */
+constexpr uint64_t kZbufZmsk = 1ull << 32;
 
 /* FRAME_1's FBP of MagScene::makeActorShadow's 256 x 256 shadow target. */
 constexpr unsigned kShadowFbp = 0x118;
@@ -123,12 +126,14 @@ struct ModelDraw
 /* A model's one mesh (or batch), filed in its material's draw-set group
  * by i3rDrawModel's part writers, with its material packet's light set
  * (an index into s_light_sets, -1 none) and fog (I3dFogState's ramp and
- * FOGCOL; has_fog false = no FGE). */
+ * FOGCOL; has_fog false = no FGE). far_z: its view's screen z range is
+ * empty at 0 (DrawMesh). */
 struct MeshDraw
 {
     ModelDraw         model;
     RosePanI3dMeshRef ref;
     int               light;
+    bool              far_z;
     bool              has_fog;
     float             fog_base, fog_scale;
     uint32_t          fogcol;
@@ -617,7 +622,14 @@ void DrawMesh(const Record &r)
     if (s_state.offx == 0 && s_state.offy == 0 && !BeginShadowCaster())
         return;                                 /* an off-screen pass, as DrawModel */
     RestoreState();
-    RosePan_RendererSetGsZbufRegister(s_state.zbuf);
+    /* MagScene::drawSkyDome's view (zmin = zmax = 0) puts every vertex at GS
+     * Z 0, what the buffer clears to, so the ROM's sky leaves the depth
+     * buffer as it was. The host camera keeps the real depth, where a dome
+     * of radius 3000 would hide whatever lies past it (the fogged distance,
+     * cut off by the sky), so the same result is spelled as no write.
+     * makeActorShadow's view has that range too; its caster pass has no
+     * depth target. */
+    RosePan_RendererSetGsZbufRegister(d.far_z ? s_state.zbuf | kZbufZmsk : s_state.zbuf);
     /* VU1's fog: F = clamp(base + scale / w, 0, 255) per vertex (the
      * strip program's MADDq / MAX / MINI), w the clip w -- the camera
      * depth, as the host projection's (i3rHostCamera). */
@@ -857,10 +869,11 @@ void RosePan_I3dRecordModel(const void *at, const I3rRoot *root, const float *wo
 void RosePan_I3dRecordMesh(const void *at, const I3rRoot *root, const float *world,
                            const float *nodes, const I3dTexEntry *tex, int tex_count,
                            const I3rBlendOpt *opt, const RosePanI3dMeshRef *ref,
-                           const I3dLight *light, const float *eye_dir, const I3dFogState *fog)
+                           const I3dLight *light, const I3dView *view, const I3dFogState *fog)
 {
     MeshDraw d = {};
-    d.light = LightSetFor(light, eye_dir);
+    d.light = LightSetFor(light, view != NULL ? view->m_eye_dir : NULL);
+    d.far_z = view != NULL && view->m_rect_viewport[2][2] == 0.0f && view->m_rect_viewport[3][2] == 0.0f;
     if (fog != NULL)
     {
         d.has_fog = true;
