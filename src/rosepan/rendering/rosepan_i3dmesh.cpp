@@ -475,8 +475,10 @@ float Shade(const float *m, const float n[3])
  * with i3rPktLayerState's colour block and i3rPktLayerLights' lists. Per
  * layer an accumulator per normal is cleared (micro 0x15e), each light
  * list adds into it -- shade 1: parallel 0x39 max(0, n.d) c, point 0xc8
- * c max(0, n.L) / |L|^2 (L to the light, not normalised); shade 2:
- * parallel 0x66 c max(0, P(n.h)) with h the half vector
+ * c max(0, n.L) / |L|^2 (L to the light, not normalised), spot 0x19a c
+ * cone clamp01(n.l) / |L| with l = L / |L| and cone = clamp01((-l.dir -
+ * cone 0) x cone 1) (i3dLightSetSpot's cos outer, 1 / (cos inner - cos
+ * outer)); shade 2: parallel 0x66 c max(0, P(n.h)) with h the half vector
  * i3rPktLayerLights makes, point 0x108 c max(0, P(n.h)) / |L| with h =
  * normalize(L / |L| + eye), P(x) = s0 x + s1 x^2 + s2 x^4 + s3 x^8 of the
  * layer's m_specular -- and the strip program (0x3fc) gives each vertex
@@ -484,9 +486,12 @@ float Shade(const float *m, const float n[3])
  * textured, 255 not), clamped. All of that runs on four components: the
  * vertex alpha is strip colour w x (accumulator w + ambient w) x 128, so a
  * model's translucency is in its strip colours (the butterfly boxes'
- * "glass" meshes are white at alpha 0). The normals are rotated by the
- * batch matrix unnormalised, as the VU does; the host does the sums in
- * world space, the same products for a matrix of uniform scale. */
+ * "glass" meshes are white at alpha 0) and a projected shadow's darkness
+ * in its light (MagScene::m_shadow_light: black, the strength in the
+ * colour's w, ambient w 0, so a surface turned away from the light or
+ * outside the spot takes no shadow). The normals are rotated by the batch
+ * matrix unnormalised, as the VU does; the host does the sums in world
+ * space, the same products for a matrix of uniform scale. */
 struct LayerLight
 {
     const RosePanI3dLightSet *set;      /* NULL: no light set (Shade) */
@@ -508,6 +513,11 @@ void Normalize3(float v[3])
 float Dot3(const float *a, const float *b)
 {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+float Clamp01f(float x)
+{
+    return x > 0.0f ? (x < 1.0f ? x : 1.0f) : 0.0f;
 }
 
 float SpecularPoly(const float *s, float x)
@@ -601,6 +611,28 @@ void LightVertex(const LayerLight &l, const float *m, const float p[3], const fl
         if (f > 0.0f)
             for (int c = 0; c < 4; c++)
                 out[c] += f * s.point_color[i][c];
+    }
+    /* Shade 1's spot, the only one in use: spots come from the shadow light,
+     * whose materials are all shade 1 (shade 2's micro 0x212 is not done).
+     * The micro first drops a batch whose bounding sphere misses the cone;
+     * per vertex that is the same zero. */
+    for (int i = 0; l.shade == 1 && i < s.spot_count; i++)
+    {
+        float L[3];
+        for (int c = 0; c < 3; c++)
+            L[c] = s.spot_pos[i][c] - pw[c];
+        const float len2 = Dot3(L, L);
+        if (!(len2 > 0.0f))
+            continue;
+        const float inv = 1.0f / sqrtf(len2);
+        for (int c = 0; c < 3; c++)
+            L[c] *= inv;
+        const float *cone = s.spot_cone[i];
+        const float in_cone = Clamp01f((-Dot3(L, s.spot_dir[i]) - cone[0]) * cone[1]);
+        const float f = in_cone * Clamp01f(Dot3(nw, L)) * inv;
+        if (f > 0.0f)
+            for (int c = 0; c < 4; c++)
+                out[c] += f * s.spot_color[i][c];
     }
 }
 

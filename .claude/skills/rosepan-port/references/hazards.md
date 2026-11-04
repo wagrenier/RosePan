@@ -1139,3 +1139,17 @@ loop's start pointer in the asm when its twin starts elsewhere.
     the sky covers the backdrop. Paint the suspect draw a loud colour, and pull a dome in with a
     world scale (centred on the camera) to force the case.
   - A counter on "views with an empty z range" also counts the shadow casters.
+
+## A clamped constant standing in for per-vertex lighting (2026-11-04)
+
+- Symptom (the user, against an emulator): shadows are always pure black, and copies appear on the
+  ceiling.
+- Cause: the receiver shader drew black at min(1, the shadow light's colour w), one number per
+  pass. That w is a strength the ROM divides back down per vertex: point shadows carry 1e6 / d x
+  0.8 x fade x factor, 200..1200 at the bus stop, so the clamp was always 1. With no N.L or cone
+  either, every surface the projection reached took the full shadow, ceilings and the far side of
+  a kerb included.
+- Fix: the receiver gets the vertex alpha VU1 computes (spot micro 0x19a added to LightVertex).
+- How to test without reaching a room: setShadowLight(DOG_LIGHT_POINT, 0) before makeActorShadow
+  makes the bus stop's street lamp the shadow light. The real bus-stop shadow is directional on a
+  flat road, where old and new differ by 3 %, so a plain before / after there proves nothing.

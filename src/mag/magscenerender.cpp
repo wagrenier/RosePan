@@ -417,7 +417,6 @@ void MagScene::makeActorShadow(int theCount, i3dContext *ctx, DogActor *actor, I
             inner = 0.0f;
         m_shadow_lightrec.m_cone_inner = inner;
     }
-    RosePan_I3dSetShadowStrength(theCount, color[3] < 1.0f ? color[3] : 1.0f);  // PC: the receivers' darkness (rosepan_i3d.h)
 }
 
 // ──────────────────────────────────────────────────────────────────────

@@ -5,10 +5,10 @@
  * blends a dark fragment over the already-drawn room, which is what the ROM's
  * SRT_MAPSHADOW pass does on VU1.
  *
- * uParams0.y is the projector strength -- gra3dShadow.c's _CalcColor() derives
- * it from the light's diffuse and attenuation at the shadow target, capped at
- * half (alpha = length(rgb)/sqrt(3) * 0.5), and the host is handed that same
- * number by RosePan_RendererShadowSetStrength().
+ * vAlpha is the shadow's darkness: the receiver vertex's alpha under the pass's
+ * shadow light, as VU1 lights it (rosepan_i3dmesh.cpp).  The light is black
+ * with its strength in the colour's w, so distance, the spot's cone and a
+ * surface turning away from the light all fade the shadow, down to none.
  *
  * uShadowSize is this shadow's tile in the shadow atlas: xy scale, zw offset.
  * Several shadows are in flight per frame -- the player, the sister, and one
@@ -35,6 +35,7 @@ struct PSInput
     float4 position : SV_Position;
     float4 vShadowClip : TEXCOORD0;
     float4 vWorld : TEXCOORD1;
+    float vAlpha : TEXCOORD2;
 };
 
 float4 main(PSInput input) : SV_Target0
@@ -131,7 +132,7 @@ float4 main(PSInput input) : SV_Target0
         return float4(occluded, 0.35 + 0.65 * (1.0 - occluded), 0.0, 1.0);
     }
 
-    float alpha = occluded * uParams0.y;
+    float alpha = occluded * input.vAlpha;
     if (alpha <= 0.001)
     {
         discard;

@@ -27,6 +27,7 @@ struct VSOutput
     float4 position : SV_Position;
     float4 vShadowClip : TEXCOORD0;
     float4 vWorld : TEXCOORD1;
+    float vAlpha : TEXCOORD2;
 };
 
 /*
@@ -52,5 +53,6 @@ VSOutput main(VSInput input)
                             output.position.w);
     output.vShadowClip = mul(uShadowMatrix, worldPos);
     output.vWorld = worldPos;
+    output.vAlpha = input.inColor.a;
     return output;
 }
