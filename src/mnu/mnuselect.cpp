@@ -286,6 +286,9 @@ int MnuTextList::select(BedPad *pad)
     case 3:
         sys->setViewParam(m_window, m_x, m_y, m_z, 0x200, 0x100);
         mes.setSpriteStdPoint(MNU_TEXT_LIST_CURSOR, m_x << 4, m_y << 4);
+        // PC: the scripts put every choice row at line 395, on the lower
+        // bar, which a wide window's zoom leaves out of view.
+        s2dCineScoKeepLine(m_y + (m_horizontal == 1 ? 1 : m_rows) * m_line + 8);
         break;
     case 4:
         scene->setWindowShow(m_window, 1);
