@@ -448,7 +448,19 @@ void S2dCineSco::live()
 // than the frame toward it (RosePan_RendererSetPictureBand). Each bar's
 // height in the 448-line frame (64 at the top, 48 at the bottom: the
 // pattern's 0x400 / 0x300 in 12.4) times its opacity, when SprMan drew it
-// this frame (SprMan::drawSprite's states).
+// this frame (SprMan::drawSprite's states). The band's bottom also reaches
+// the line a prompt asks for (s2dCineScoKeepLine): the PS2 shows it on the
+// lower bar, so the zoom eases out by just that much of the bar, 2 lines a
+// frame, and back in once nothing asks.
+
+static int   s_cineScoKeepLine = 0;     // asked for since the last band, 0 none
+static float s_cineScoGrown = 0.0f;     // lines the bottom has grown by
+
+void s2dCineScoKeepLine(int line)
+{
+    if (line > s_cineScoKeepLine)
+        s_cineScoKeepLine = line;
+}
 
 static void s2dCineScoSetHostBand(const SprMan &spr)
 {
@@ -460,7 +472,14 @@ static void s2dCineScoSetHostBand(const SprMan &spr)
         if (spr.m_active != 0 && (bar.m_flags & 2) == 0 && drawn)
             cover[no] = (float)(bar.m_color[3] < 0x80 ? bar.m_color[3] : 0x80) / 128.0f;
     }
-    RosePan_RendererSetPictureBand(64.0f * cover[1], 448.0f - 48.0f * cover[2]);
+    const float bottom = 448.0f - 48.0f * cover[2];
+    float want = (float)s_cineScoKeepLine - bottom;
+    if (want < 0.0f)
+        want = 0.0f;
+    const float step = want - s_cineScoGrown;
+    s_cineScoGrown += step > 2.0f ? 2.0f : (step < -2.0f ? -2.0f : step);
+    s_cineScoKeepLine = 0;
+    RosePan_RendererSetPictureBand(64.0f * cover[1], bottom + s_cineScoGrown);
 }
 
 // ──────────────────────────────────────────────────────────────────────

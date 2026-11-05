@@ -63,6 +63,11 @@ struct S2dCineSco : MagLife
     MagSystem *m_system;        // ROR 0x928
 };
 
+/* PC: frame line `line` stays in the window while the bars are up, for a
+ * prompt the ROM draws past the band a wide window zooms to. Asked for every
+ * frame the prompt shows. */
+void s2dCineScoKeepLine(int line);
+
 /* EE 0x940. layout: host. */
 struct S2dBg : MagLife
 {

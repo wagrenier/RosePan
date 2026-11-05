@@ -2744,6 +2744,17 @@ How it works (2026-10-28, host task `fix/aspect_ratio.cpp`; the machinery is Rei
   frame's shape or narrower the bars show as on the PS2, and DrawSolidQuad grows them past the
   frame edge to the window's (ExtendLetterboxBar: a full-width solid fill touching the top or bottom
   edge while a band is set), so the world the 3D extends above / below the frame stays black; BeginFrame resets the band.
+  The scripts' choice lists (MnuTextList, native 026 op 2) are the one prompt past that zoom: all 138
+  sit at y 395, x 167 (two choices) or 96 (three), a row on the lower bar right under the 320..400
+  message box. The list asks for its row with `s2dCineScoKeepLine` every frame it shows, and the
+  band's bottom eases out to it and back, 2 lines a frame (line 421: the view shows 64..421), so the
+  row keeps the PS2's place on the bar. Surveyed over DATA/SEQ 2026-11-05 (native n is the word
+  `0x0c100000 | (0x144 + n * 0x40) >> 2`): every message window and sprite a script places is inside
+  64..400, and only one menu opens with the bars on (W008/A137, id 0x40076, MnuBoard2D: a picture
+  with no text). To see it: a card save reloads beside its Bucket Knight; with
+  `ROSEPAN_SKIP_INTRO=1`, pad `300:START,600:START,1000:DOWN,1100:CROSS,1700:CROSS,2000:CROSS`
+  shows "Save your game?" from about frame 2130 (pad reads run ~105 behind frames after the load),
+  `2150:RIGHT*6` moves to No and `2300:CROSS` answers.
 - Still 4:3-bound (pillarboxed, not stretched): VU1 strips (rosepan_i3d DrawStrip: screen-space XY
   the ROM's VU1 program projected) and textured full-frame sprites (pictures, frame copies, the
   movie). A new screen-space draw must say which of the two it wants.
