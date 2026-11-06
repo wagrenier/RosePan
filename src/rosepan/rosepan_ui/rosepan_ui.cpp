@@ -6,6 +6,7 @@
 #include "../io/rosepan_paths.h"
 #include "../os/rosepan_host.h"
 #include "../rosepan_debug.h"
+#include "../rosepan_eventtest.h"
 
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
@@ -49,6 +50,14 @@ bool g_summary_fps_only;
 bool g_show_performance_graphs;
 bool g_show_controls;
 bool g_show_data_folder;
+/* The event test window: the chapter it lists (-1 until first opened), the
+ * step a jump arrives at (-1 the chapter's own), the filter, and whether the
+ * filter holds the keyboard. */
+bool g_show_event_test;
+int g_event_chapter = -1;
+int g_event_arrive_step = -1;
+char g_event_filter[64];
+bool g_event_typing;
 bool g_pause_performance_history;
 bool g_follow_performance_history = true;
 RosePanUi::PerformanceStats g_performance_stats{};
@@ -2294,6 +2303,10 @@ void DrawDebugMenu()
         return;
     }
 
+    ImGui::TextDisabled("Testing");
+    ImGui::MenuItem("Event test", "F2", &g_show_event_test);
+    ImGui::Separator();
+
     ImGui::TextDisabled("Profiler");
     {
         const bool visible =
@@ -2342,6 +2355,419 @@ void DrawDebugMenu()
     DrawDiagnosticsMenu();
 
     ImGui::EndMenu();
+}
+
+/*
+ * The event test: get to any chapter, room, story step or event without
+ * playing up to it.  The lists come from the game's own scripts and the jumps
+ * run on the game thread (rosepan_eventtest.h); this is only their front end.
+ */
+bool EventFilterMatches(const std::string &first, const std::string &second)
+{
+    if (g_event_filter[0] == '\0')
+    {
+        return true;
+    }
+    const char *const end = g_event_filter + std::strlen(g_event_filter);
+    return ImStristr(first.c_str(), nullptr, g_event_filter, end) != nullptr ||
+           ImStristr(second.c_str(), nullptr, g_event_filter, end) != nullptr;
+}
+
+const char *EventRoomName(const RosePanEventChapter *chapter, int room)
+{
+    if (chapter != nullptr)
+    {
+        for (const RosePanEventRoom &rec : chapter->rooms)
+        {
+            if (rec.room == room)
+            {
+                return rec.name.c_str();
+            }
+        }
+    }
+    return "";
+}
+
+const char *EventStepName(const RosePanEventChapter *chapter, int step)
+{
+    if (chapter != nullptr)
+    {
+        for (const RosePanEventStep &rec : chapter->steps)
+        {
+            if (rec.value == step)
+            {
+                return rec.name.c_str();
+            }
+        }
+    }
+    return "";
+}
+
+RosePanEventJump MakeEventJump(const RosePanEventChapter &chapter, int room,
+                               const char *label)
+{
+    RosePanEventJump jump;
+    jump.stage = chapter.stage;
+    jump.room = room;
+    jump.step = g_event_arrive_step;
+    jump.image = 0;
+    jump.entry = 0;
+    jump.label = label;
+    return jump;
+}
+
+void DrawEventTestEvents(const RosePanEventChapter &chapter)
+{
+    constexpr ImGuiTableFlags flags =
+        ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg |
+        ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable;
+    if (!ImGui::BeginTable("##events", 4, flags))
+    {
+        return;
+    }
+    ImGui::TableSetupScrollFreeze(0, 1);
+    ImGui::TableSetupColumn("Event", ImGuiTableColumnFlags_WidthFixed, 130.0f);
+    ImGui::TableSetupColumn("Room", ImGuiTableColumnFlags_WidthFixed, 150.0f);
+    ImGui::TableSetupColumn("Line", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableSetupColumn("##run", ImGuiTableColumnFlags_WidthFixed, 96.0f);
+    ImGui::TableHeadersRow();
+
+    int row = 0;
+    for (const RosePanEvent &event : chapter.events)
+    {
+        ImGui::PushID(row++);
+        if (!EventFilterMatches(event.name, event.text) &&
+            !EventFilterMatches(EventRoomName(&chapter, event.room), ""))
+        {
+            ImGui::PopID();
+            continue;
+        }
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted(event.name.c_str());
+        if (event.frames > 0 && ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("%d frames (%.1f s)", event.frames,
+                              (double)event.frames / 30.0);
+        }
+        ImGui::TableNextColumn();
+        if (event.room >= 0)
+        {
+            ImGui::Text("A%03d %s", event.room,
+                        EventRoomName(&chapter, event.room));
+        }
+        else
+        {
+            ImGui::TextDisabled("%s", event.entry != 0 ? "(any room)" : "--");
+        }
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted(event.text.c_str());
+        if (!event.text.empty() && ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("%s", event.text.c_str());
+        }
+        ImGui::TableNextColumn();
+        if (!event.movie && !event.has_scene)
+        {
+            ImGui::TextDisabled("not on disc");
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip(
+                    "A script names this scene, but the chapter's event pack\n"
+                    "does not hold it: code the game never reaches, and the\n"
+                    "game stops on an assert if it runs.");
+            }
+            ImGui::PopID();
+            continue;
+        }
+        if (event.entry != 0)
+        {
+            if (ImGui::SmallButton("Go"))
+            {
+                RosePanEventJump jump =
+                    MakeEventJump(chapter, event.room, event.name.c_str());
+                jump.image = event.image;
+                jump.entry = event.entry;
+                RosePanEventTest_Request(jump);
+            }
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip(
+                    "Goes to the room and runs the event's script function\n"
+                    "(0x%x), from its first line to its last: fades, actors,\n"
+                    "what it sets afterwards.  Story state is whatever the\n"
+                    "chapter starts with, plus the step chosen above.",
+                    event.entry);
+            }
+            ImGui::SameLine();
+        }
+        if (!event.movie)
+        {
+            if (ImGui::SmallButton("Scene"))
+            {
+                RosePanEventJump jump =
+                    MakeEventJump(chapter, event.room, event.name.c_str());
+                jump.scene = event.name;
+                RosePanEventTest_Request(jump);
+            }
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip(
+                    "Plays the scene file alone, without its script: the\n"
+                    "actors, camera and subtitles only.  Nothing happens\n"
+                    "around it and nothing is set afterwards, so the game\n"
+                    "stays where it was.");
+            }
+        }
+        ImGui::PopID();
+    }
+    ImGui::EndTable();
+}
+
+void DrawEventTestRooms(const RosePanEventChapter &chapter,
+                        const RosePanEventStatus &status)
+{
+    if (!ImGui::BeginChild("##rooms"))
+    {
+        ImGui::EndChild();
+        return;
+    }
+    const bool here = status.stage == chapter.stage;
+    for (const RosePanEventRoom &room : chapter.rooms)
+    {
+        if (!EventFilterMatches(room.name, ""))
+        {
+            continue;
+        }
+        char label[64];
+        SDL_snprintf(label, sizeof(label), "A%03d  %s", room.room,
+                     room.name.c_str());
+        if (ImGui::Selectable(label, here && status.room == room.room))
+        {
+            RosePanEventTest_Request(MakeEventJump(chapter, room.room, label));
+        }
+    }
+    ImGui::EndChild();
+}
+
+void DrawEventTestSteps(const RosePanEventChapter &chapter,
+                        const RosePanEventStatus &status)
+{
+    if (!ImGui::BeginChild("##steps"))
+    {
+        ImGui::EndChild();
+        return;
+    }
+    const bool here = status.stage == chapter.stage;
+    ImGui::TextDisabled("The chapter's story position.  Set here it applies");
+    ImGui::TextDisabled("at once; rooms read it when they load, so go to the");
+    ImGui::TextDisabled("room afterwards, or pick it above before jumping.");
+    ImGui::Separator();
+    ImGui::BeginDisabled(!here);
+    for (const RosePanEventStep &step : chapter.steps)
+    {
+        if (!EventFilterMatches(step.name, ""))
+        {
+            continue;
+        }
+        char label[96];
+        SDL_snprintf(label, sizeof(label), "%5d  %s", step.value,
+                     step.name.c_str());
+        if (ImGui::Selectable(label, here && status.step == step.value))
+        {
+            RosePanEventJump jump;
+            jump.stage = -1;
+            jump.room = -1;
+            jump.step = step.value;
+            jump.image = 0;
+            jump.entry = 0;
+            jump.label = step.name;
+            RosePanEventTest_Request(jump);
+        }
+    }
+    ImGui::EndDisabled();
+    ImGui::EndChild();
+}
+
+void DrawEventTestFlags(const RosePanEventChapter &chapter,
+                        const RosePanEventStatus &status)
+{
+    if (!ImGui::BeginChild("##flags"))
+    {
+        ImGui::EndChild();
+        return;
+    }
+    ImGui::BeginDisabled(status.stage != chapter.stage);
+    for (const RosePanEventFlag &flag : chapter.flags)
+    {
+        if (!EventFilterMatches(flag.name, ""))
+        {
+            continue;
+        }
+        bool on = RosePanEventTest_GetFlag(flag.bit) != 0;
+        char label[96];
+        SDL_snprintf(label, sizeof(label), "%s##%d", flag.name.c_str(),
+                     flag.bit);
+        if (ImGui::Checkbox(label, &on))
+        {
+            RosePanEventTest_SetFlag(flag.bit, on ? 1 : 0);
+        }
+    }
+    ImGui::EndDisabled();
+    ImGui::EndChild();
+}
+
+void DrawEventTestWindow()
+{
+    /* The game polls SDL directly rather than reading the event queue, so a
+     * filter being typed would also walk Jennifer around.  Handed back here
+     * rather than in the filter's own branch so closing the window with the
+     * field focused cannot leave the pad suppressed. */
+    const bool typing = g_show_event_test && ImGui::GetIO().WantTextInput;
+    if (typing != g_event_typing && !CaptureActive())
+    {
+        g_event_typing = typing;
+        RosePan_InputSetSuppressed(typing ? 1 : 0);
+    }
+
+    if (!g_show_event_test)
+    {
+        return;
+    }
+
+    RosePanEventStatus status;
+    RosePanEventTest_GetStatus(&status);
+    const int current = RosePanEventTest_ChapterOfStage(status.stage);
+
+    ImGui::SetNextWindowSize(ImVec2(720.0f, 560.0f), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("RosePan Event Test", &g_show_event_test))
+    {
+        /* First opened on the title there is no chapter to follow. */
+        if (g_event_chapter < 0)
+        {
+            g_event_chapter = current >= 0 ? current : 0;
+        }
+        const RosePanEventChapter *here =
+            current >= 0 ? RosePanEventTest_Chapter(current) : nullptr;
+
+        if (here != nullptr)
+        {
+            ImGui::Text("Now: %s (W%03d), A%03d %s, step %d %s", here->label,
+                        status.stage, status.room,
+                        EventRoomName(here, status.room), status.step,
+                        EventStepName(here, status.step));
+        }
+        else
+        {
+            ImGui::TextDisabled("Now: the title (stage %d)", status.stage);
+        }
+        if (status.busy)
+        {
+            if (ImGui::SmallButton("Cancel"))
+            {
+                RosePanEventTest_Cancel();
+            }
+            ImGui::SameLine();
+        }
+        ImGui::TextDisabled("%s", status.text[0] != '\0'
+                                      ? status.text
+                                      : "nothing asked yet");
+        ImGui::Separator();
+
+        ImGui::SetNextItemWidth(150.0f);
+        if (ImGui::BeginCombo("Chapter",
+                              RosePanEventTest_ChapterLabel(g_event_chapter)))
+        {
+            for (int i = 0; i < RosePanEventTest_ChapterCount(); i++)
+            {
+                if (ImGui::Selectable(RosePanEventTest_ChapterLabel(i),
+                                      i == g_event_chapter))
+                {
+                    g_event_chapter = i;
+                    g_event_arrive_step = -1;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        const RosePanEventChapter &chapter =
+            *RosePanEventTest_Chapter(g_event_chapter);
+
+        ImGui::SameLine();
+        if (ImGui::SmallButton("Start chapter"))
+        {
+            RosePanEventTest_Request(
+                MakeEventJump(chapter, -1, chapter.label));
+        }
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip(
+                "Loads the chapter and lets its script begin it as usual.");
+        }
+
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(230.0f);
+        char arrive[96] = "chapter's own";
+        if (g_event_arrive_step >= 0)
+        {
+            SDL_snprintf(arrive, sizeof(arrive), "%d %s", g_event_arrive_step,
+                         EventStepName(&chapter, g_event_arrive_step));
+        }
+        if (ImGui::BeginCombo("Arrive at step", arrive))
+        {
+            if (ImGui::Selectable("chapter's own", g_event_arrive_step < 0))
+            {
+                g_event_arrive_step = -1;
+            }
+            for (const RosePanEventStep &step : chapter.steps)
+            {
+                if (ImGui::Selectable(step.name.c_str(),
+                                      step.value == g_event_arrive_step))
+                {
+                    g_event_arrive_step = step.value;
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        ImGui::SetNextItemWidth(-1.0f);
+        ImGui::InputTextWithHint("##filter", "Filter by name, room or line",
+                                 g_event_filter, sizeof(g_event_filter));
+
+        if (ImGui::BeginTabBar("##eventtabs"))
+        {
+            char label[32];
+            SDL_snprintf(label, sizeof(label), "Events (%d)###events",
+                         (int)chapter.events.size());
+            if (ImGui::BeginTabItem(label))
+            {
+                DrawEventTestEvents(chapter);
+                ImGui::EndTabItem();
+            }
+            SDL_snprintf(label, sizeof(label), "Rooms (%d)###rooms",
+                         (int)chapter.rooms.size());
+            if (ImGui::BeginTabItem(label))
+            {
+                DrawEventTestRooms(chapter, status);
+                ImGui::EndTabItem();
+            }
+            SDL_snprintf(label, sizeof(label), "Steps (%d)###steps",
+                         (int)chapter.steps.size());
+            if (ImGui::BeginTabItem(label))
+            {
+                DrawEventTestSteps(chapter, status);
+                ImGui::EndTabItem();
+            }
+            SDL_snprintf(label, sizeof(label), "Flags (%d)###flags",
+                         (int)chapter.flags.size());
+            if (ImGui::BeginTabItem(label))
+            {
+                DrawEventTestFlags(chapter, status);
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+    }
+    ImGui::End();
 }
 
 void DrawMainMenuBar()
@@ -2962,6 +3388,9 @@ bool Init(SDL_Window *window, SDL_GPUDevice *device,
         return false;
     }
 
+    /* A scripted run's way to look at the event test window. */
+    g_show_event_test = std::getenv("ROSEPAN_EVENT_TEST_WINDOW") != nullptr;
+
     return true;
 }
 
@@ -3035,6 +3464,11 @@ void ProcessEvent(const SDL_Event *event)
         {
             g_show_main_menu_bar = !g_show_main_menu_bar;
         }
+        if (event->type == SDL_EVENT_KEY_DOWN && !event->key.repeat &&
+            event->key.scancode == SDL_SCANCODE_F2)
+        {
+            g_show_event_test = !g_show_event_test;
+        }
     }
 }
 
@@ -3077,6 +3511,7 @@ void Draw()
         DrawProfilerGraphs();
         DrawControlsWindow();
         DrawDataFolderWindow();
+        DrawEventTestWindow();
         return;
     }
 
@@ -3140,6 +3575,7 @@ void Draw()
     DrawProfilerGraphs();
     DrawControlsWindow();
     DrawDataFolderWindow();
+    DrawEventTestWindow();
 }
 
 void EndFrame()

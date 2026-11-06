@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "game/gamman.h"
+#include "rosepan/rosepan_eventtest.h"
 #include "rosepan/rosepan_seqtest.h"
 #include "sequence/sequence.h"
 #include "utl/utlmisc.h"
@@ -337,6 +338,7 @@ void Sequence::runImage()
 void Sequence::exec()
 {
     RosePan_SeqForcedTest();  // PC: ROSEPAN_SEQ_TEST=1 loads the G000 image (rosepan_seqtest.h)
+    RosePanEventTest_Tick();  // PC: the event test's jumps (rosepan_eventtest.h)
     if (m_flags & 1)
         return;
 

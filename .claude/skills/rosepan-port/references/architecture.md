@@ -3381,6 +3381,49 @@ file into allocDebug(size, file, 111, 0, 2). The constructor clears text buffers
 0x7b4e28 (0xa0), 0x7b4ec8 (40 x 0x40) and the words 0x7b5968 (40). The menu is on the second pad
 (MagSystem m_pad[1], 0x6e998c = its m_repeat: 0x4000 CROSS selects, 0x2000 CIRCLE backs out).
 
+## The event test (PC, rosepan/rosepan_eventtest.cpp, 2026-11-06)
+
+EventTestTask above is the developers' menu, but nothing constructs it and its lists (DBGFLAG / DBGSTEP /
+DBGAREA / DBGITEM.BIN) are not on the disc. RosePan's Event test (Debug menu, F2) does the same job from
+what the retail scripts still hold; `seqdis.py` reads them. What that showed:
+
+- **Names survive in the debug prints** (native 32): `[Area init] OG_GATE_F` opens a room's script;
+  `[Set Step] STEP_01_OPENING` sits right before the store to global 0x27 (`lw v0, globals(gp)`, `addiu
+  v1, v0, 0x9c`, constant, `sw`); `[Set Flag] NAME on` right after native 21 op 7 / 8 with the bit in a1
+  (some of those prints go with a global instead, and are skipped). An event's function loads the string
+  `ev108.scn` for system call 0x46 / 0x47. Those functions take no arguments and open with `[unplayable]`,
+  so a thread started at one runs the whole event. A function can name a scene its chapter's pack does
+  not hold (ev120 in W001 A189): dead code, and scenePlayStart asserts on it.
+- **A room's start** (A168 0xe938, the same shape everywhere): native 21 op 2 pauses, floor flags, the
+  object / trigger set-up functions, then op 1 resumes and the fade in. 0xe7e8 calls setPcStartPos and,
+  when m_flags 0x20 is clear (no door arrival), puts the PC at the room's default spot; in many rooms that
+  is the developers' (0, 0, 50), which can be outside the map.
+- **W000.WRD file 2 is not the room starts it looks like**: 459 of its 473 records are at (0, 0, 0). A real
+  arrival comes through a door: a door's function queues G000's thread 0x04000050 with the door's number,
+  native 29 op 2 hands it to requestStage, and setPcStartPos finds the type-9 fchr by param 0x41.
+- **The camera** is picked by the trigger under the PC (a trigger function does native 016 op 11):
+  GamArea::checkPc, the ELF's `init_pc_pos_cam_pnl`. With the PC in no trigger the camera stays mode 0 at
+  (0, 1000, 0) and the screen is black.
+- **m_flags 0x20 carries the PC over**: startStage2 moves it by the rooms' offsets. A jump clears it,
+  as execStageReq does for a chapter.
+- **Developer starts**: every W000.WRD image has a `[Debug Mode] 2` function (W001 0x8804), run from
+  `>Initial Start`. Native 21 op 14 tests m_flags2 0x8000, which GamMan::init always sets, so retail skips
+  to the default; with it clear, native 19 checks the held pad buttons and each branch sets a step, a room,
+  items and flags. Not used yet (open-items.md).
+- The title's New Game path is W099 0x8390: global 0x26 is the chapter, native 29 op 10 jumps. A jump from
+  the title works without it: resetStage closes the title menu.
+- A scene's chunk table also has "map" (the room's name; scenePlayStart overwrites it in the game's copy),
+  cam_file, foc_file, mes_file, version, chapter, cinema, fog, ambient, se_comp.
+
+How a jump runs: the UI queues it (any thread), `RosePanEventTest_Tick` at the head of Sequence::exec takes
+it once no stage change or menu is in the way, kills a running scene and the last test thread, and calls
+requestStage. A chapter jump lets the chapter's script run up to `ac_jump_area`, where native 029's hook
+swaps in the wanted room and applies the step, so the chapter's first room never loads. When the room's
+main thread (0x84000000) is gone and the start list is empty, PlacePc checks a camera trigger holds the PC
+and otherwise tries doors, then camera trigger centres. Once the PC is free (m_flags & 6) for 30 frames, the
+event's function starts as thread 0x84fffff0 ("evtest"). After 300 frames an event stops waiting and ends the
+room's main thread: a chapter's first room runs the chapter's opening there.
+
 ## The script tasks (task/tsk_chr.cpp, 0x1e7f28..0x1f6c64, 2026-10-26)
 
 Unanchored (no source string): the run between tsk_man.cpp and tsk_scene.cpp, pinned by its classes.
