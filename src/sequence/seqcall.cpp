@@ -31,6 +31,7 @@
 #include "game/gamman.h"
 #include "lib/unassigned.h"
 #include "mag/magsystem.h"
+#include "rosepan/rosepan_eventtest.h"
 #include "sdk/libvu0.h"
 #include "sequence/sequence.h"
 #include "snd/rxmpeg.h"
@@ -180,19 +181,21 @@ intptr_t seqFunc029(intptr_t id, intptr_t a1, intptr_t a2, intptr_t, intptr_t, i
 {
     GamMan &gam = g_gamMan;
     u_int   word;
+    int     room = (int)a1;
 
     if (id == 1 || id == 2)
     {
         if ((gam.m_flags & 0x800) != 0 && g_taskMan.getTask(gam.m_bgLoadTaskId) != 0)
             return SEQ_RET_WAIT;
         word = id == 1 ? (u_int)SEQ_RET_WAIT : (u_int)a2;
+        RosePanEventTest_OverrideRoom(&room, &word);    // PC: the event test's chapter jump
         if (gam.m_seqPair[3].m_a == 0)
         {
-            gam.requestStage(2, (int)a1, 0, -1, word);
+            gam.requestStage(2, room, 0, -1, word);
             return SEQ_RET_END;
         }
         // The task reads the four words (the ROM's stack block).
-        int words[4] = {gam.m_seqPair[3].m_b, gam.m_seqPair[3].m_a, (int)a1, (int)word};
+        int words[4] = {gam.m_seqPair[3].m_b, gam.m_seqPair[3].m_a, room, (int)word};
         TskFrameFunc *task = new TskFrameFunc(0xb, (intptr_t)words, 0);
         g_taskMan.addTask(1, -1, 1, 0, task, 0, NULL, 1);
         return SEQ_RET_END;
