@@ -1059,6 +1059,10 @@ intptr_t seqFunc014(intptr_t op, intptr_t a1, intptr_t, intptr_t, intptr_t, intp
 
 intptr_t seqFunc019(intptr_t op, intptr_t a1, intptr_t a2, intptr_t, intptr_t, intptr_t)
 {
+    const int forced = RosePanEventTest_OverridePad((int)op);   // PC: a developer start's button
+    if (forced >= 0)
+        return forced;
+
     const BedPad *pad = g_magSystem.m_pad_ref[0].m_pad;
     float x, y;
     pad->getDir(&x, &y);

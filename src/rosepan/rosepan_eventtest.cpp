@@ -31,18 +31,18 @@
 /* data 0x2db2c0 / 0x2db2f8, the developers' chapter page (naga_debug.cpp),
  * without its title row. */
 static RosePanEventChapter s_chapters[] = {
-    { 1, "Chapter 1", false, {}, {}, {}, {} },
-    { 2, "Chapter 2", false, {}, {}, {}, {} },
-    { 3, "Chapter 3", false, {}, {}, {}, {} },
-    { 4, "Chapter 4", false, {}, {}, {}, {} },
-    { 5, "Chapter 5a", false, {}, {}, {}, {} },
-    { 13, "Chapter 5b", false, {}, {}, {}, {} },
-    { 6, "Chapter 6", false, {}, {}, {}, {} },
-    { 7, "Chapter 7", false, {}, {}, {}, {} },
-    { 8, "Chapter 8", false, {}, {}, {}, {} },
-    { 10, "Chapter 10", false, {}, {}, {}, {} },
-    { 11, "Chapter 11", false, {}, {}, {}, {} },
-    { 12, "Chapter 12", false, {}, {}, {}, {} },
+    { 1, "Chapter 1", false, {}, {}, {}, {}, {} },
+    { 2, "Chapter 2", false, {}, {}, {}, {}, {} },
+    { 3, "Chapter 3", false, {}, {}, {}, {}, {} },
+    { 4, "Chapter 4", false, {}, {}, {}, {}, {} },
+    { 5, "Chapter 5a", false, {}, {}, {}, {}, {} },
+    { 13, "Chapter 5b", false, {}, {}, {}, {}, {} },
+    { 6, "Chapter 6", false, {}, {}, {}, {}, {} },
+    { 7, "Chapter 7", false, {}, {}, {}, {}, {} },
+    { 8, "Chapter 8", false, {}, {}, {}, {}, {} },
+    { 10, "Chapter 10", false, {}, {}, {}, {}, {} },
+    { 11, "Chapter 11", false, {}, {}, {}, {}, {} },
+    { 12, "Chapter 12", false, {}, {}, {}, {}, {} },
 };
 static const int kChapterCount = (int)(sizeof(s_chapters) / sizeof(s_chapters[0]));
 
@@ -196,6 +196,7 @@ static inline uint32_t Rs(uint32_t w) { return (w >> 21) & 31; }
 static inline uint32_t Rt(uint32_t w) { return (w >> 16) & 31; }
 static inline int Imm(uint32_t w) { return (int)(short)(w & 0xffff); }
 
+static const uint32_t kOpBeq = 0x04;
 static const uint32_t kOpAddiu = 0x09;
 static const uint32_t kOpLui = 0x0f;
 static const uint32_t kOpJal = 0x03;
@@ -208,10 +209,11 @@ static bool IsPrologue(uint32_t w)
     return (w & 0xffff8000) == 0x27bd8000;
 }
 
-/* A jal to native n (target 0x144 + n * 0x40, 16 bits kept). */
+/* A jal to native n (target 0x400144 + n * 0x40; a big image's own functions
+ * reach 0x41xxxx, so the low 16 bits alone would not do). */
 static bool IsNative(uint32_t w, int n)
 {
-    return Op(w) == kOpJal && ((w << 2) & 0xffff) == (uint32_t)(0x144 + n * 0x40);
+    return Op(w) == kOpJal && ((w << 2) & 0x0fffffff) == (uint32_t)(0x400144 + n * 0x40);
 }
 
 static void TrimPrint(std::string *s)
@@ -289,6 +291,65 @@ static int ScanFlagBit(const ScriptImage &img, uint32_t at)
     return -1;
 }
 
+/* The room a developer start sets, from the step's print to the branch's
+ * end: `addiu v0, zero, room` and `sw v0, 0(fp)`, the function's local that
+ * goes to ac_jump_area. -1 when the branch leaves the default. */
+static int ScanPresetRoom(const ScriptImage &img, uint32_t at, uint32_t end)
+{
+    int value = -1;
+    for (uint32_t i = at; i < end; i++) {
+        const uint32_t w = img.Code(i);
+        if (Op(w) == kOpAddiu && Rs(w) == 0 && Rt(w) == 2)
+            value = Imm(w);
+        else if (Op(w) == kOpSw && Rs(w) == 30 && Rt(w) == 2 && Imm(w) == 0)
+            return value;
+    }
+    return -1;
+}
+
+typedef std::vector<std::pair<uint32_t, std::string>> StepPrints;
+
+/* The [Debug Mode] function, from its print at word `at`: a chain of
+ *     if (native 19(op)) { [Set Step] ..; room = ..; items and flags; }
+ * Each `beq v0, zero, next` that follows a pad check and has a step print
+ * before `next` is a start. W004's holds further pad checks without a step
+ * of their own (variants of STEP_04_START): those are stepped over, and it
+ * runs with all of them unheld. */
+static void ScanPresets(const ScriptImage &img, uint32_t at, const StepPrints &prints,
+                        RosePanEventChapter *chapter)
+{
+    uint32_t end = at;
+    while (end < img.words && !IsPrologue(img.Code(end)))
+        end++;
+
+    int pad_op = -1;
+    for (uint32_t i = at; i + 2 < end; i++) {
+        const uint32_t w = img.Code(i);
+        if (Op(w) == kOpAddiu && Rs(w) == 0 && Rt(w) == 4) {
+            pad_op = Imm(w);
+            continue;
+        }
+        if (!IsNative(w, 19))
+            continue;
+        const uint32_t branch = img.Code(i + 2);
+        if (Op(branch) != kOpBeq || Rs(branch) != 2 || Rt(branch) != 0 || Imm(branch) <= 0)
+            continue;
+        const uint32_t next = i + 3 + (uint32_t)Imm(branch);
+        for (const auto &print : prints) {
+            if (print.first <= i || print.first >= next)
+                continue;
+            RosePanEventPreset preset;
+            preset.name = print.second;
+            preset.value = ScanStepValue(img, print.first);
+            preset.room = ScanPresetRoom(img, print.first, next);
+            preset.pad_op = pad_op;
+            chapter->presets.push_back(preset);
+            i = next - 1;
+            break;
+        }
+    }
+}
+
 /* Drops the message window's codes: "#F020", "#w120", "#R", "#n", "#K003". */
 static std::string PlainText(const char *s)
 {
@@ -325,6 +386,8 @@ static void ScanImage(const Bytes &bytes, int room, RosePanEventChapter *chapter
     uint32_t func = 0;
     std::set<std::string> seen;     /* one record per event and function */
     std::map<uint32_t, std::string> func_text;
+    StepPrints step_prints;
+    uint32_t debug_mode = 0;
     const size_t first_event = chapter->events.size();
     for (uint32_t i = 0; i < img.words; i++) {
         const uint32_t w = img.Code(i);
@@ -348,10 +411,13 @@ static void ScanImage(const Bytes &bytes, int room, RosePanEventChapter *chapter
 
         if (StartsWith(s, "[Area init] ")) {
             *area_name = s.substr(12);
+        } else if (StartsWith(s, "[Debug Mode]")) {
+            debug_mode = i;
         } else if (StartsWith(s, "[Set Step] ")) {
             const int value = ScanStepValue(img, i);
             if (value >= 0)
                 (*steps)[value] = s.substr(11);
+            step_prints.emplace_back(i, s.substr(11));
         } else if (StartsWith(s, "[Set Flag] ")) {
             const size_t end = s.rfind(' ');
             const int bit = ScanFlagBit(img, i);
@@ -380,6 +446,8 @@ static void ScanImage(const Bytes &bytes, int room, RosePanEventChapter *chapter
         if (it != func_text.end())
             chapter->events[i].text = it->second;
     }
+    if (room < 0 && debug_mode != 0)
+        ScanPresets(img, debug_mode, step_prints, chapter);
 }
 
 /* What the stage's event pack says about a scene (task/tsk_scene.h): its
@@ -527,10 +595,10 @@ static void ScanChapter(RosePanEventChapter *chapter)
      * event sort together. */
     std::stable_sort(chapter->events.begin(), chapter->events.end(),
                      [](const RosePanEvent &a, const RosePanEvent &b) { return a.name < b.name; });
-    RosePan_LogPrintf("event test: %s (W%03d): %d rooms, %d events, %d steps, %d flags\n",
+    RosePan_LogPrintf("event test: %s (W%03d): %d rooms, %d events, %d steps, %d flags, %d starts\n",
                       chapter->label, chapter->stage, (int)chapter->rooms.size(),
                       (int)chapter->events.size(), (int)chapter->steps.size(),
-                      (int)chapter->flags.size());
+                      (int)chapter->flags.size(), (int)chapter->presets.size());
 }
 
 int RosePanEventTest_ChapterCount(void)
@@ -602,6 +670,13 @@ static RosePanEventJump s_jump;
 static int s_settle;
 static int s_wait;
 static bool s_placed;
+static bool s_story_reset;
+static bool s_pad_active;
+
+/* The flags as the title screen has them: a new game's. m_bits is 0x800
+ * bytes; a load from the title replaces them after this is taken. */
+static u_int s_title_bits[0x800 / 4];
+static bool s_title_bits_taken;
 
 static RosePanEventStatus s_status;
 
@@ -770,8 +845,45 @@ static bool CanStart()
     /* A chapter jump under way must reach its first room first. */
     if (s_phase == PHASE_CHAPTER)
         return false;
-    const bool chapter = s_request.stage >= 0 && s_request.stage != gam.m_chapter;
+    const bool chapter =
+        s_request.stage >= 0 && (s_request.restart || s_request.stage != gam.m_chapter);
     return chapter || g_magSystem.m_scene.m_menu_id == -1;
+}
+
+/* Between the chapter's load and its script's first run. Chapter loads keep
+ * the sequence bits and the items, as a playthrough needs; a test wants the
+ * same start whatever it ran before. (Globals stay: the chapter sets the
+ * step, and clearStageVars has taken the stage's.) */
+static void ResetStory()
+{
+    s_story_reset = true;
+    if (s_title_bits_taken)
+        memcpy(g_sequence.m_bits, s_title_bits, sizeof(s_title_bits));
+    g_gamMan.clearItemHave();
+    g_gamMan.m_itemStock.clear();
+    if (s_jump.pad_op >= 0) {
+        g_gamMan.m_flags2 &= ~0x8000u;
+        s_pad_active = true;
+    }
+}
+
+/* Retail again before any room's script runs: four first rooms test the
+ * bit too (architecture.md "The event test"). */
+static void EndPreset()
+{
+    if (s_pad_active)
+        g_gamMan.m_flags2 |= 0x8000;
+    s_pad_active = false;
+}
+
+int RosePanEventTest_OverridePad(int op)
+{
+    /* 8..15: the shoulder and face buttons, all these functions ask about.
+     * Only the chapter's image: others read the same buttons for debug keys
+     * of their own (one opens a save prompt with no window to put it in). */
+    if (!s_pad_active || op < 8 || op > 15 || g_seqImage != 1)
+        return -1;
+    return op == s_jump.pad_op ? 1 : 0;
 }
 
 /* The step goes in once the chapter has set its own. */
@@ -800,11 +912,17 @@ static void Begin()
     g_sequence.endThread((1u << 30) | kThreadNumber, 0);
     g_sequence.endThread((2u << 30) | kThreadNumber, 0);
 
-    if (s_jump.stage >= 0 && s_jump.stage != g_gamMan.m_chapter) {
+    const int chapter = g_gamMan.m_chapter;
+    if (s_jump.stage >= 0 && (s_jump.restart || s_jump.stage != chapter)) {
         /* The chapter's script goes on to ac_jump_area by itself, and
-         * RosePanEventTest_OverrideRoom picks the room there. */
+         * RosePanEventTest_OverrideRoom picks the room there. requestStage
+         * takes the chapter already loaded for no change. */
         SetStatus("loading %s", s_jump.label.c_str());
+        if (s_jump.stage == chapter)
+            g_gamMan.m_chapter = -1;
         g_gamMan.requestStage(1, -1, -1, s_jump.stage, 0xccccccccu);
+        g_sequence.m_global[0x30] = chapter;
+        s_story_reset = false;
         s_phase = PHASE_CHAPTER;
         return;
     }
@@ -834,12 +952,13 @@ void RosePanEventTest_OverrideRoom(int *room, unsigned *word)
 {
     if (s_phase != PHASE_CHAPTER)
         return;
+    EndPreset();
     ApplyStep();
     s_placed = false;
     if (s_jump.room >= 0) {
         *room = s_jump.room;
         *word = 0xccccccccu;
-    } else if (s_jump.entry == 0 && s_jump.scene.empty()) {
+    } else if (s_jump.entry == 0 && s_jump.scene.empty() && s_jump.pad_op < 0) {
         /* Just the chapter: the rest is the chapter's own start. */
         SetStatus("arrived: %s", s_jump.label.c_str());
         s_phase = PHASE_IDLE;
@@ -848,14 +967,22 @@ void RosePanEventTest_OverrideRoom(int *room, unsigned *word)
     s_phase = PHASE_ROOM;
 }
 
+RosePanEventJump RosePanEventTest_PresetJump(const RosePanEventChapter &chapter,
+                                             const RosePanEventPreset &preset)
+{
+    RosePanEventJump jump;
+    jump.stage = chapter.stage;
+    jump.restart = true;
+    jump.pad_op = preset.pad_op;
+    jump.label = preset.name;
+    return jump;
+}
+
 static RosePanEventJump MakeJump(int stage, int room, const char *label)
 {
     RosePanEventJump jump;
     jump.stage = stage;
     jump.room = room;
-    jump.step = -1;
-    jump.image = 0;
-    jump.entry = 0;
     jump.label = label;
     return jump;
 }
@@ -869,15 +996,18 @@ enum SweepKind
     SWEEP_NONE,
     SWEEP_ROOMS,
     SWEEP_EVENTS,
+    SWEEP_STARTS,
 };
 
 /* Frames to look at each room (a screenshot lands in it), and the longest
  * an event runs before the next one cuts it off. */
 static const int kSweepRoomFrames = 90;
+static const int kSweepStartFrames = 180;
 static const int kSweepEventFrames = 900;
 
 static SweepKind s_sweep;
 static int s_sweep_stage;
+static bool s_sweep_all;
 static int s_sweep_next;
 static int s_sweep_wait;
 
@@ -900,12 +1030,40 @@ static void TickSweep()
     float pos[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
     if (g_gamMan.m_pcPtr != NULL)
         g_gamMan.m_pcPtr->getPos(pos);
-    RosePan_LogPrintf("sweep: left room %d pc (%.0f %.0f %.0f) camera mode %d fade %d: %s\n",
-                      g_gamMan.m_wrdNo, pos[0], pos[1], pos[2], g_magSystem.m_scene.m_camera_mode,
-                      g_magSystem.m_scene.getFadeState(), s_status.text);
+    int items = g_gamMan.m_itemStock.m_used.m_count;
+    for (GamItemSlot *slot = g_gamMan.m_itemHave.m_begin; slot != g_gamMan.m_itemHave.m_end; slot++)
+        items += slot->m_id != 0xa00;
+    int flags = 0;
+    for (int bit = 0; bit < kFlagBits; bit++)
+        flags += RosePanEventTest_GetFlag(bit);
+    RosePan_LogPrintf("sweep: left W%03d room %d step %d pc (%.0f %.0f %.0f) camera mode %d fade %d, "
+                      "%d items, %d flags set: %s\n",
+                      g_gamMan.m_chapter, g_gamMan.m_wrdNo, g_sequence.m_global[0x27], pos[0], pos[1],
+                      pos[2], g_magSystem.m_scene.m_camera_mode,
+                      g_magSystem.m_scene.getFadeState(), items, flags, s_status.text);
 
     char label[96];
-    if (s_sweep == SWEEP_ROOMS) {
+    if (s_sweep == SWEEP_STARTS) {
+        /* Stage 0: every chapter's, one after the other. */
+        if (s_sweep_next >= (int)chapter->presets.size()) {
+            const int index = RosePanEventTest_ChapterOfStage(s_sweep_stage);
+            if (!s_sweep_all || index + 1 >= kChapterCount) {
+                RosePan_LogPrintf("sweep: starts finished\n");
+                s_sweep = SWEEP_NONE;
+                return;
+            }
+            s_sweep_stage = s_chapters[index + 1].stage;
+            s_sweep_next = 0;
+            return;
+        }
+        const RosePanEventPreset &preset = chapter->presets[(size_t)s_sweep_next];
+        snprintf(label, sizeof(label), "%s", preset.name.c_str());
+        RosePan_LogPrintf("sweep: %s start %d/%d %s step %d room %d pad %d\n", chapter->label,
+                          s_sweep_next + 1, (int)chapter->presets.size(), label, preset.value,
+                          preset.room, preset.pad_op);
+        RosePanEventTest_Request(RosePanEventTest_PresetJump(*chapter, preset));
+        s_sweep_wait = kSweepStartFrames;
+    } else if (s_sweep == SWEEP_ROOMS) {
         if (s_sweep_next >= (int)chapter->rooms.size()) {
             RosePan_LogPrintf("sweep: W%03d rooms finished\n", s_sweep_stage);
             s_sweep = SWEEP_NONE;
@@ -948,8 +1106,11 @@ static void TickSweep()
  * the title is up:
  *   <stage>[:<room>[:<event>]]  jumps there; "scene:" in front of the event
  *                               plays its scene without the script function
+ *   start:<stage>:<index>       takes the chapter's developer start
  *   rooms:<stage>[:<first>]     sweeps the chapter's rooms
- *   events:<stage>[:<first>]    sweeps its events */
+ *   events:<stage>[:<first>]    sweeps its events
+ *   starts:<stage>[:<first>]    sweeps its developer starts (stage 0: every
+ *                               chapter's) */
 static void CheckEnvironment()
 {
     static int s_frames;
@@ -965,12 +1126,26 @@ static void CheckEnvironment()
         return;
     s_done = true;
 
-    if (strncmp(env, "rooms:", 6) == 0 || strncmp(env, "events:", 7) == 0) {
-        s_sweep = env[0] == 'r' ? SWEEP_ROOMS : SWEEP_EVENTS;
+    if (strncmp(env, "rooms:", 6) == 0 || strncmp(env, "events:", 7) == 0 ||
+        strncmp(env, "starts:", 7) == 0) {
+        s_sweep = env[0] == 'r' ? SWEEP_ROOMS : env[0] == 'e' ? SWEEP_EVENTS : SWEEP_STARTS;
         const char *arg = strchr(env, ':') + 1;
         s_sweep_stage = atoi(arg);
+        s_sweep_all = s_sweep_stage == 0;
+        if (s_sweep_all)
+            s_sweep_stage = s_chapters[0].stage;
         const char *first = strchr(arg, ':');
         s_sweep_next = first != NULL ? atoi(first + 1) : 0;
+        return;
+    }
+    if (strncmp(env, "start:", 6) == 0) {
+        const int stage = atoi(env + 6);
+        const char *index = strchr(env + 6, ':');
+        const RosePanEventChapter *chapter =
+            RosePanEventTest_Chapter(RosePanEventTest_ChapterOfStage(stage));
+        const size_t n = index != NULL ? (size_t)atoi(index + 1) : 0;
+        if (chapter != NULL && n < chapter->presets.size())
+            RosePanEventTest_Request(RosePanEventTest_PresetJump(*chapter, chapter->presets[n]));
         return;
     }
 
@@ -1041,6 +1216,10 @@ static void LogState()
 
 void RosePanEventTest_Tick(void)
 {
+    if (!s_title_bits_taken && g_magSystem.m_scene.m_menu_id == 0x10005) {
+        memcpy(s_title_bits, g_sequence.m_bits, sizeof(s_title_bits));
+        s_title_bits_taken = true;
+    }
     CheckEnvironment();
     LogState();
 
@@ -1049,6 +1228,7 @@ void RosePanEventTest_Tick(void)
         std::lock_guard<std::mutex> guard(s_lock);
         if (s_cancel) {
             s_cancel = false;
+            EndPreset();
             s_phase = PHASE_IDLE;
             SetStatus("cancelled%s", "");
         }
@@ -1074,8 +1254,11 @@ void RosePanEventTest_Tick(void)
 
     if (s_phase != PHASE_IDLE && ++s_wait > kWaitLimit) {
         SetStatus("still waiting on the game's own scripts: %s", s_jump.label.c_str());
+        EndPreset();
         s_phase = PHASE_IDLE;
     }
+    if (s_phase == PHASE_CHAPTER && !s_story_reset && (g_gamMan.m_flags2 & 3) == 0)
+        ResetStory();
     if (s_phase == PHASE_ROOM) {
         if (s_wait > kBusyRoomFrames && (s_jump.entry != 0 || !s_jump.scene.empty())) {
             /* A room that opens with a long script of its own, as a

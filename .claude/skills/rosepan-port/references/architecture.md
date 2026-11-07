@@ -3407,9 +3407,27 @@ what the retail scripts still hold; `seqdis.py` reads them. What that showed:
 - **m_flags 0x20 carries the PC over**: startStage2 moves it by the rooms' offsets. A jump clears it,
   as execStageReq does for a chapter.
 - **Developer starts**: every W000.WRD image has a `[Debug Mode] 2` function (W001 0x8804), run from
-  `>Initial Start`. Native 21 op 14 tests m_flags2 0x8000, which GamMan::init always sets, so retail skips
-  to the default; with it clear, native 19 checks the held pad buttons and each branch sets a step, a room,
-  items and flags. Not used yet (open-items.md).
+  `>Initial Start`: it sets the default step and room, then a chain of `if native 19(op) { [Set Step]; room;
+  items; flags }`, ops 8..0xe (the shoulder and face buttons), each `beq v0, zero, next`. Native 21 op 14
+  tests m_flags2 0x8000, which GamMan::init always sets, so retail skips the chain in W001, W003, W004,
+  W005, W010, W011 and W013. W007's chain has no such test, so holding the button works there in retail.
+  W002, W006, W008 and W012 have no chain there (26 starts in those functions). W004's op 0xd holds nested
+  pad checks with no step of their own (variants of STEP_04_START, untaken). STEP_04_START and
+  STEP_5B_DOGISDEAD lead straight into their room's own opening script.
+- **The first rooms have chains too**, not used: the only other readers of that bit in any script are W002
+  A000 0x1311c, W008 A128 0xcac0, W010 A055 0xc920 and W012 A056 0xd1cc, each inside the room's opening (a
+  function that first tests the step), where it branches to skip the opening movie or event; W002's op 0xb
+  also jumps to room 0x40 (STEP_02_BLUECHO_DEBUG). In W002 the check comes after the room's main thread has
+  waited on G000 thread 0x04000074, the chapter's picture book, which takes page turns from the player. So
+  answering it means holding the forced button and the clear bit open for as long as that takes, for a
+  branch that only skips a movie.
+- **Native 19's buttons are shared**: other images read ops 8..0xf for debug keys of their own (a forced op
+  8 in chapter 2 reached a "Would you like to save?" prompt with no window, and asserts), so a forced answer
+  is for the chapter's image only.
+- **A chapter reload keeps the story**: resetStage / clearStageVars clear only the stage's part, so
+  FLAG_01_* (bits around 0x1b00) and the items survive, as a playthrough needs. native 1
+  (clearGlobals + initGameState) runs once, from W099's main. requestStage ignores the chapter already
+  loaded, and the room already loaded; the test clears m_chapter / m_wrdNo to get past that.
 - The title's New Game path is W099 0x8390: global 0x26 is the chapter, native 29 op 10 jumps. A jump from
   the title works without it: resetStage closes the title menu.
 - A scene's chunk table also has "map" (the room's name; scenePlayStart overwrites it in the game's copy),
@@ -3418,7 +3436,11 @@ what the retail scripts still hold; `seqdis.py` reads them. What that showed:
 How a jump runs: the UI queues it (any thread), `RosePanEventTest_Tick` at the head of Sequence::exec takes
 it once no stage change or menu is in the way, kills a running scene and the last test thread, and calls
 requestStage. A chapter jump lets the chapter's script run up to `ac_jump_area`, where native 029's hook
-swaps in the wanted room and applies the step, so the chapter's first room never loads. When the room's
+swaps in the wanted room and applies the step, so the chapter's first room never loads. Between the load and
+the script's first run the sequence bits go back to a snapshot from the title screen and the items are
+cleared, so a test starts the same whatever ran before it. A developer start also clears m_flags2 0x8000
+and answers native 019 itself (op 8..0xf, image 1 only) until `ac_jump_area`, then the bit comes back. When
+the room's
 main thread (0x84000000) is gone and the start list is empty, PlacePc checks a camera trigger holds the PC
 and otherwise tries doors, then camera trigger centres. Once the PC is free (m_flags & 6) for 30 frames, the
 event's function starts as thread 0x84fffff0 ("evtest"). After 300 frames an event stops waiting and ends the
