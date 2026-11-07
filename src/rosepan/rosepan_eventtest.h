@@ -15,11 +15,14 @@
  *  the writes that do it, and an event scene is a string "ev108.scn" handed
  *  to system call 0x46 inside the script function that runs the event.
  *  W000.WRD file 4 adds each scene's length and text. RosePanEventTest_Chapter
- *  scans one chapter's files on first use.
+ *  scans one chapter's files on first use. The [Debug Mode] function in a
+ *  chapter's script gives its developer starts.
  *
  *  A jump never touches the game from the caller's thread: it is queued and
  *  RosePanEventTest_Tick runs it at the head of Sequence::exec, where the
- *  scripts' own stage changes run from.
+ *  scripts' own stage changes run from. A chapter loaded this way starts
+ *  clean, whatever ran before it: the flags as they were on the title
+ *  screen, and no items.
  * ======================================================================== */
 #ifndef ROSEPAN_EVENTTEST_H
 #define ROSEPAN_EVENTTEST_H
@@ -67,6 +70,18 @@ struct RosePanEventFlag
     int         bit;
 };
 
+/* A developer start: a branch of the [Debug Mode] function in the chapter's
+ * script, run on the way to its first room. Each sets a step and usually a
+ * room, items and flags. The script picks one by the pad buttons held, once
+ * m_flags2 0x8000 (set for good in GamMan::init: retail) is clear. */
+struct RosePanEventPreset
+{
+    std::string name;           /* the step it sets, "STEP_01_RUNBOY07" */
+    int         value;          /* that step */
+    int         room;           /* -1 when the script does not say here */
+    int         pad_op;         /* native 19's op that picks it */
+};
+
 /* A chapter and what its scripts name. */
 struct RosePanEventChapter
 {
@@ -77,16 +92,19 @@ struct RosePanEventChapter
     std::vector<RosePanEvent>      events;
     std::vector<RosePanEventStep>  steps;
     std::vector<RosePanEventFlag>  flags;
+    std::vector<RosePanEventPreset> presets;
 };
 
 /* What a jump asks for; a field of -1 (NULL, empty) stays as it is. */
 struct RosePanEventJump
 {
-    int         stage;          /* a chapter */
-    int         room;
-    int         step;
-    int         image;          /* with entry: the script function to run */
-    unsigned    entry;
+    int         stage = -1;     /* a chapter */
+    bool        restart = false;/* load it even when it is the current one */
+    int         pad_op = -1;    /* the developer start to take */
+    int         room = -1;
+    int         step = -1;
+    int         image = 0;      /* with entry: the script function to run */
+    unsigned    entry = 0;
     std::string scene;          /* a scene to play by itself, without its
                                    script function ("ev108") */
     std::string label;          /* for the status line */
@@ -100,6 +118,10 @@ const char *RosePanEventTest_ChapterLabel(int index);
 const RosePanEventChapter *RosePanEventTest_Chapter(int index);
 /* The index of chapter stage, -1 when it is not in the table. */
 int  RosePanEventTest_ChapterOfStage(int stage);
+
+/* The jump that takes a developer start. */
+RosePanEventJump RosePanEventTest_PresetJump(const RosePanEventChapter &chapter,
+                                             const RosePanEventPreset &preset);
 
 /* Queues a jump, replacing one not started yet. Any thread. */
 void RosePanEventTest_Request(const RosePanEventJump &jump);
@@ -129,5 +151,8 @@ void RosePanEventTest_Tick(void);
  * chapter's first room is swapped for the one the jump wants, so its room
  * never loads. */
 void RosePanEventTest_OverrideRoom(int *room, unsigned *word);
+/* Native 019 asked about a held button: what a developer start under way
+ * answers for it, -1 when the real pad does. */
+int  RosePanEventTest_OverridePad(int op);
 
 #endif /* ROSEPAN_EVENTTEST_H */

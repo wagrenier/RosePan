@@ -1,8 +1,8 @@
 """Offline disassembler for the sequence script images (ELFR101) inside the script packs.
 
 The scripts are MIPS code the game's VM interprets (architecture.md "The sequence script VM"); this
-prints one with what the compiler's conventions make readable: natives by number (a jal below the code
-is native (t - 0x144) / 0x40), strings at their load, writes to the script globals and bits.
+prints one with what the compiler's conventions make readable: natives by number (a jal to 0x400144 + n * 0x40
+is native n), strings at their load, writes to the script globals and bits.
 
     python seqdis.py W001                      the stage script (data/SEQ/W001/W000.WRD)
     python seqdis.py W001 A168                 room 168's script
@@ -106,9 +106,8 @@ class Image:
                     note = ' ; &0x%x' % addr
             elif op == 0x03:
                 target = (w & 0x03ffffff) << 2
-                t = target & 0xffff
-                if t < 0x8160:
-                    note = ' ; native %d' % ((t - 0x144) // 0x40)
+                if 0x400144 <= target < 0x408160:
+                    note = ' ; native %d' % ((target - 0x400144) // 0x40)
             yield pc, text, note
 
 

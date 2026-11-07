@@ -2410,8 +2410,6 @@ RosePanEventJump MakeEventJump(const RosePanEventChapter &chapter, int room,
     jump.stage = chapter.stage;
     jump.room = room;
     jump.step = g_event_arrive_step;
-    jump.image = 0;
-    jump.entry = 0;
     jump.label = label;
     return jump;
 }
@@ -2524,6 +2522,52 @@ void DrawEventTestEvents(const RosePanEventChapter &chapter)
     ImGui::EndTable();
 }
 
+void DrawEventTestStarts(const RosePanEventChapter &chapter)
+{
+    if (!ImGui::BeginChild("##starts"))
+    {
+        ImGui::EndChild();
+        return;
+    }
+    ImGui::TextDisabled("The developers' own ways into this chapter, left in its");
+    ImGui::TextDisabled("script.  Each loads it clean and sets a step, usually a");
+    ImGui::TextDisabled("room, and the items and flags that point in the story");
+    ImGui::TextDisabled("needs.");
+    ImGui::Separator();
+    if (chapter.presets.empty())
+    {
+        ImGui::TextDisabled("This chapter has none: Start chapter is its only way in.");
+    }
+    int row = 0;
+    for (const RosePanEventPreset &preset : chapter.presets)
+    {
+        ImGui::PushID(row++);
+        if (!EventFilterMatches(preset.name, EventRoomName(&chapter, preset.room)))
+        {
+            ImGui::PopID();
+            continue;
+        }
+        char label[96];
+        if (preset.room >= 0)
+        {
+            SDL_snprintf(label, sizeof(label), "%-30s A%03d  %s",
+                         preset.name.c_str(), preset.room,
+                         EventRoomName(&chapter, preset.room));
+        }
+        else
+        {
+            SDL_snprintf(label, sizeof(label), "%s", preset.name.c_str());
+        }
+        if (ImGui::Selectable(label))
+        {
+            RosePanEventTest_Request(
+                RosePanEventTest_PresetJump(chapter, preset));
+        }
+        ImGui::PopID();
+    }
+    ImGui::EndChild();
+}
+
 void DrawEventTestRooms(const RosePanEventChapter &chapter,
                         const RosePanEventStatus &status)
 {
@@ -2576,11 +2620,7 @@ void DrawEventTestSteps(const RosePanEventChapter &chapter,
         if (ImGui::Selectable(label, here && status.step == step.value))
         {
             RosePanEventJump jump;
-            jump.stage = -1;
-            jump.room = -1;
             jump.step = step.value;
-            jump.image = 0;
-            jump.entry = 0;
             jump.label = step.name;
             RosePanEventTest_Request(jump);
         }
@@ -2695,13 +2735,16 @@ void DrawEventTestWindow()
         ImGui::SameLine();
         if (ImGui::SmallButton("Start chapter"))
         {
-            RosePanEventTest_Request(
-                MakeEventJump(chapter, -1, chapter.label));
+            RosePanEventJump jump = MakeEventJump(chapter, -1, chapter.label);
+            jump.restart = true;
+            RosePanEventTest_Request(jump);
         }
         if (ImGui::IsItemHovered())
         {
             ImGui::SetTooltip(
-                "Loads the chapter and lets its script begin it as usual.");
+                "Loads the chapter, even the one running, and lets its script\n"
+                "begin it as usual.  Any chapter load starts clean: the flags\n"
+                "of a new game, and no items.");
         }
 
         ImGui::SameLine();
@@ -2741,6 +2784,13 @@ void DrawEventTestWindow()
             if (ImGui::BeginTabItem(label))
             {
                 DrawEventTestEvents(chapter);
+                ImGui::EndTabItem();
+            }
+            SDL_snprintf(label, sizeof(label), "Starts (%d)###starts",
+                         (int)chapter.presets.size());
+            if (ImGui::BeginTabItem(label))
+            {
+                DrawEventTestStarts(chapter);
                 ImGui::EndTabItem();
             }
             SDL_snprintf(label, sizeof(label), "Rooms (%d)###rooms",

@@ -2217,11 +2217,16 @@ to adapt when a TU reaches them:
   Swept without a crash: W001's 49 rooms and 20 of its 23 events (ev120 is blocked, the last two ran out of
   time), W002's first 82 rooms, W008's first 10 events; the other chapters are unswept, so a crash there is
   more likely a real bug the jump reached than a known limit.
-  Follow-ups, none started: (1) the developers' chapter starts: clear m_flags2 0x8000 and force the pad
-  check, for a preset's step, room, items and flags; (2) an event's step from its trigger's m_cmpValue
-  (native 023's record: global 0x27), so `Go` sets it by itself; (3) a chapter's story state at an event
-  (flags, items) is only what the chapter starts with, so events that assume earlier ones can differ from
-  a playthrough; (4) A208 OR_STEPWAY in W001 finds no spot with a camera.
+  Follow-ups, none started: (1) an event's step from its trigger's m_cmpValue (native 023's record:
+  global 0x27), so `Go` sets it by itself; (2) a chapter's story state at an event (flags, items) is only
+  what the chapter starts with, so events that assume earlier ones can differ from a playthrough: a
+  developer start closer to the event helps, where one exists; (3) A208 OR_STEPWAY in W001 finds no spot
+  with a camera.
+- 2026-11-06: the developers' chapter starts, the Event test's Starts tab and `starts:` sweeps
+  (architecture.md "The event test"). All 26 reach the expected room and step with no crash; W001's seven
+  grant the script's items (2, 2, 2, 3, 1, 1, 1) with nothing carried between them. Any chapter load by the
+  test now starts clean (title flags, no items) and can restart the current chapter. The four first rooms'
+  own debug branches are left out on purpose: they sit behind the chapter's picture book.
 
 - 2026-10-29: `i3d/i3rblend.cpp` (the unassigned@00225018 run, 0x225018..0x226278 pinned, all 18
   functions, `verify`): key curves, i3rTrackGetValue (the reached stub: i3rmesh's uv transforms read
