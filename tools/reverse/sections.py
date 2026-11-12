@@ -4,8 +4,9 @@ python sections.py                 plan: work/sections.json and what Ghidra stil
 python sections.py --list [FILTER] every named function: address, size, Ghidra name, demangled signature
 python sections.py --layout        write the satellite ranges (the linkonce text spans) into data/layout.json
 python sections.py --apply         create the missing functions -- every named section, every vtable slot
-                                   target, every .ctors / .dtors entry -- name the sections' functions,
-                                   tag them ror-symbol, save, refresh.py
+                                   target, every .ctors / .dtors entry, every tail-jump target that
+                                   follows a `jr ra` -- name the sections' functions, tag them
+                                   ror-symbol, save, refresh.py
 
 The retail ELF kept its section header table: every inline method and template instance GCC emitted
 into a .gnu.linkonce.t.<symbol> section is named by its mangled symbol (1,449 functions), and every
@@ -87,6 +88,30 @@ def ghidra_functions():
     return {int(f['address'], 16): f['name'] for f in d if ':' not in f['address']}
 
 
+def tail_targets(elf=None):
+    """Targets of tail jumps (`j` out of a body) where Ghidra has no function but the address follows
+    `jr ra; <delay>` (and nop padding): code reached only by tail calls, which Ghidra folds into the
+    caller's body (a decompile then shows the callee's code inline: hazards.md). Targets that do not
+    follow a `jr ra` are labels inside another function and are left alone."""
+    elf = elf or Elf(str(rosepan.ELF))
+    have = set(ghidra_functions())
+    try:
+        feat = json.load(open(rosepan.WORK / 'feat_ror.json', encoding='utf-8'))['functions']
+    except FileNotFoundError:
+        return []
+    out = set()
+    for f in feat:
+        for t in f.get('tails', []):
+            if t in have or not (elf.section_of(t) or '').startswith(('.text', '.gnu.linkonce.t')):
+                continue
+            a = t - 4
+            while elf.u32(a) == 0:
+                a -= 4
+            if elf.u32(a - 4) == 0x03e00008:
+                out.add(t)
+    return sorted(out)
+
+
 def plan(S):
     names = ghidra_functions()
     text = {f['addr'] for f in S['functions']}
@@ -95,17 +120,18 @@ def plan(S):
     rename = [f for f in S['functions'] if f['addr'] in names and names[f['addr']] != f['name']]
     slot_missing = [a for a in slots if a not in names]
     init_missing = [a for a in S['ctors'] + S['dtors'] if a not in names]
+    tails = tail_targets()
     print(f'{len(S["functions"])} named functions ({len(missing)} without a Ghidra function, {len(rename)} '
           f'to rename), {len(S["vtables"])} vtables with {len(slots)} slot targets in .text '
           f'({len(slot_missing)} without a function), .ctors {len(S["ctors"])} / .dtors {len(S["dtors"])} '
-          f'({len(init_missing)} without a function)')
+          f'({len(init_missing)} without a function), {len(tails)} tail-jump targets without a function')
     print('linkonce text spans: ' + ', '.join(f'{lo:08x}..{hi:08x}' for lo, hi in spans(S['functions'])))
     return missing, rename, slot_missing, init_missing
 
 
 def apply(S):
     if not rosepan.ghidra_up():
-        raise SystemExit(f'Ghidra (GhidraMCP at {rosepan.GHIDRA}) is not reachable with {rosepan.PROGRAM} open')
+        raise SystemExit(f'Ghidra: {rosepan.ghidra_down_reason()}')
     rosepan.ensure_tags()
     current = {int(a, 16): n for a, n in rosepan.function_names().items()}
     made, named, failed = 0, 0, []
@@ -125,7 +151,7 @@ def apply(S):
         named += 1
     text = {f['addr'] for f in S['functions']}
     extra = sorted(({e['pfn'] for v in S['vtables'] for e in v['entries'][1:] if e['pfn']} - text)
-                   | set(S['ctors']) | set(S['dtors']))
+                   | set(S['ctors']) | set(S['dtors']) | set(tail_targets()))
     for a in extra:
         if a not in current:
             if rosepan.create_function(a):

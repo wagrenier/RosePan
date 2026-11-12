@@ -23,7 +23,7 @@ import json
 import re
 import struct
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 import gcc2
 import rosepan
@@ -132,7 +132,10 @@ def ff2_reference():
             continue
         seen.add(a)
         out.append((a, size, name, f.rsplit('/', 1)[-1] if f else None))
-    return out
+    # Statics with one name in several library files (five kCopy, two Copy) get their file's stem, so
+    # every Ghidra name stays unique: kCopy_exit, kCopy_initsys.
+    count = Counter(n for _, _, n, _ in out)
+    return [(a, size, f'{n}_{fl.rsplit(".", 1)[0]}' if count[n] > 1 and fl else n, fl) for a, size, n, fl in out]
 
 
 def ref_names(label):
@@ -274,7 +277,29 @@ def plan():
                     'symbol': pick['name'], 'ref': pick['ref'], 'ref_addr': f'{pick["ref_addr"]:08x}',
                     'file': next((r['file'] for r in rs if r['file']), None), 'tier': tier,
                     'also': sorted(spellings - {ghidra_spelling(pick['name'])}),
-                    'current': names.get(c), 'boundary': boundary})
+                    'current': names.get(c), 'boundary': boundary, 'skip': ''})
+    # Reference bodies can be merged (ReiPan's FF3 Ghidra often swallowed the next function into a
+    # correctly named one -- harmless -- but also had kCopy + kFindAddress as one "kFindAddress"). A
+    # match is skipped when the function starting inside its body claims the same name (its own name
+    # belongs to the inner one), and when two addresses claim one name the better match keeps it.
+    by_addr = {int(m['addr'], 16): m for m in out}
+    starts_m = sorted(by_addr)
+    from bisect import bisect_right
+    for c, m in by_addr.items():
+        k = bisect_right(starts_m, c)
+        while k < len(starts_m) and starts_m[k] < c + m['size']:
+            inner = by_addr[starts_m[k]]['name']
+            if inner == m['name'] or inner.startswith(m['name'] + '_'):
+                m['skip'], m['tier'] = f'merged body: {inner} starts inside it', 'lib-match-low'
+            k += 1
+    claims = defaultdict(list)
+    for m in out:
+        if not m['skip']:
+            claims[m['name']].append(m)
+    for name, ms in claims.items():
+        ms.sort(key=lambda m: (m['tier'] != 'lib-match', m['ref'] != 'ff2', not m['boundary']))
+        for m in ms[1:]:
+            m['skip'] = f'{name} is better matched at {ms[0]["addr"]}'
     rosepan.save_json(PLAN, out)
     have = sum(1 for m in out if m['current'] is not None)
     renames = sum(1 for m in out if m['current'] and rosepan.GENERIC_NAME.match(m['current']))
@@ -312,16 +337,23 @@ def ranges(out):
 
 def apply(out):
     if not rosepan.ghidra_up():
-        raise SystemExit(f'Ghidra (GhidraMCP at {rosepan.GHIDRA}) is not reachable with {rosepan.PROGRAM} open')
+        raise SystemExit(f'Ghidra: {rosepan.ghidra_down_reason()}')
     rosepan.ensure_tags()
     current = rosepan.function_names()
     taken = defaultdict(list)
     for a, n in current.items():
         taken[n].append(a)
     applied = rosepan.load_json(APPLIED, {})
+    by_hand = set(rosepan.load_json(rosepan.DATA / 'overrides.json', {})) | \
+        set(rosepan.load_json(rosepan.DATA / 'context_names.json', {}))
     done, kept, failed = 0, [], []
     for m in out:
         a, ai = m['addr'], int(m['addr'], 16)
+        if a in by_hand:
+            continue                                    # named by reading (name_ctx.py): never re-applied
+        if m.get('skip'):
+            failed.append((a, m['name'], 'skipped: ' + m['skip'] + ' (name it by reading)'))
+            continue
         if a not in current:
             if not rosepan.create_function(ai):
                 failed.append((a, m['name'], 'could not create a function'))
@@ -360,7 +392,8 @@ if __name__ == '__main__':
         flt = args[args.index('--list') + 1] if len(args) > args.index('--list') + 1 else ''
         for m in rosepan.load_json(PLAN, []):
             line = (f'{m["addr"]} {m["size"]:#6x} {m["tier"]:13} {m["name"]:36} {m["ref"]}@{m["ref_addr"]} '
-                    f'{m["file"] or "":18} now {m["current"]}' + (f' also {m["also"]}' if m['also'] else ''))
+                    f'{m["file"] or "":18} now {m["current"]}' + (f' also {m["also"]}' if m['also'] else '')
+                    + (f' SKIP: {m["skip"]}' if m.get('skip') else ''))
             if flt in line:
                 print(line)
         sys.exit(0)

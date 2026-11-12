@@ -9,11 +9,17 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
 - Address map
 - Naming sources
 - Program flow
+- The rx file layer
+- The rx thread layer
 - Modules (RoR's own source files)
 - Classes
 - Key functions and globals
+- The IOP side (MODULES/, rxsnddrv.irx)
 - Disc and data files
 - PC platform layer
+- The title screen (mnu/mnutitle.cpp)
+- The task manager (task/tsk_man.cpp)
+- The script tasks (task/tsk_chr.cpp)
 
 ## Binary and toolchain
 
@@ -30,8 +36,10 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
   libipu 3000, libkernl 3000, libmc 3020, libmpeg 3000, libpad2 3020, libscf 3000, libvib 3000,
   libvu0 3000 -- the SDK 3.0 versions FF3 (SLES_538.25) links, except libpad2 / libdbc / libvib, which FF3
   and FF2 do not use (no reference: their functions stay unmatched).
-- IOP modules the EE loads: sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv, fileio, sifcmd, usbd
-  (`.irx` names), after rebooting the IOP with `ioprp300.img` (main). No game-specific IRX name appears.
+- IOP modules: the ELF's strings name sio2man, padman, mcman, mcserv, cdvdman, cdvdfsv, fileio, sifcmd,
+  usbd, but what loads is the disc's `modules/iopconf.cnf`: `ioprp300.img` (the IOP reboot), then
+  sio2man, sio2d, dbcman, pad2/ds1o_d, mcman, mcserv, libsd and **rxsnddrv.irx, the game's own IOP
+  code** (the rx sound driver; "The IOP side" below). Everything else in `MODULES/` is Sony's.
 - 44 VU1 microprograms in `.DVP.overlay..*` sections (Ghidra makes 50 overlay spaces of them and the
   other DVP sections); `.vutext` 0x291230..0x2953b0.
 
@@ -40,7 +48,7 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
 | range | contents |
 |---|---|
 | `0x100000`-`0x100258` | crt0 (`_start` 0x100008, `_exit`) |
-| `0x100258`-`~0x24b490` | game code; ends with the unsymbolised "rx" file / thread middleware ("rxfile : ..." strings 0x244410..0x24aff8; its start is not settled) |
+| `0x100258`-`~0x24b490` | game code; ends with the unsymbolised "rx" middleware: `rx/rxsys.cpp` 0x23ff58..0x2437f8, `rx/rxfile.cpp` 0x2437f8..0x249b88, `rx/rxthread.cpp` 0x249b88..0x24b490 (all pinned); below 0x23ff58 an IOP RPC client (0x23f960.., unprefixed "binding IOP module" strings) whose owner is open |
 | `0x24b490`-`0x280e88` | Sony SDK 3.0 libraries (libmc, libmpeg / IPU / CSC, libdbc, libpad2, libvib, libdma, libgraph, libvu0, devvu0 / devvif), EE kernel stubs and libc (klib, intr, thread, sif, tty, deci2, filestub, initsys), libgcc2 / fp-bit / dp-bit, newlib (`data/layout.json` lib_ranges) |
 | `0x280e88`-`0x29122c` | named `.gnu.linkonce.t` sections: the game's inline methods (satellites, ride with their class) |
 | `0x291230`-`0x2953b0` | `.vutext` (VU microcode) |
@@ -53,22 +61,1912 @@ address. Unverified guesses belong in `open-items.md`, not here. Established 202
 
 ## Naming sources
 
+Seeded 2026-10-22 (`setup/ghidra_seed.cpp`; snapshot of the names before it:
+`work/snapshots/20261022_094006.json`). Ghidra went from 5,728 to 7,370 functions.
+
 | source | count | tool | tag |
 |---|---|---|---|
-| the ELF's named linkonce sections (inline methods, templates, ctors / dtors / `__tf`) | 1,449 (37 had a Ghidra function before seeding) | `sections.py` | `ror-symbol` |
-| vtable slot targets in .text (the out-of-line virtuals), class known, name not | 763 (95 without a Ghidra function) | `rtti.py`, `sections.py --apply` creates them | -- |
-| library / runtime code matched to FF3's SDK 3.0 libs and FF2's ee-gcc 2.96 runtime | 696 planned (555 high, 141 low) | `libmatch.py` | `lib-match` / `-low` |
+| the ELF's named linkonce sections (inline methods, templates, ctors / dtors / `__tf`) | 1,449 named (1,411 created; 37 existed as `FUN_`, 1 trial) | `sections.py` | `ror-symbol` |
+| vtable slot targets in .text (the out-of-line virtuals), class known, name not | 763 (95 created) | `rtti.py`, `sections.py --apply` | -- |
+| tail-jump targets after a `jr ra` that Ghidra had folded into their callers | 21 created (0x1bdc94, 0x105434, 0x173610.. ; 3 more targets are labels inside functions) | `sections.py --apply` | -- |
+| library / runtime code matched to FF3's SDK 3.0 libs and FF2's ee-gcc 2.96 runtime | 687 planned: 544 `lib-match` + 133 `lib-match-low` applied (114 functions created), 2 existing names kept (`_StartThread`, and `entry` -> `_start` by hand), 5 skipped as merged reference bodies / duplicate claims | `libmatch.py` | `lib-match` / `-low` |
+| named by reading during the seeding | 10: `main`, `_start`, `_exit`, `Exit`, `sceSifLoadElfPart`, `sceSifLoadElf`, `kCopy_initsys`, `kFindAddress`, `Copy_exit`, `kCopy_exit` (4 overrides of FF3-reference names) | `name_ctx.py` | `ror-inferred` / `lib-context` |
 | Ghidra's own syscall-stub names | 76 | Ghidra analysis | (none) |
-| source-path strings anchoring functions to files | 465 functions, 73 `.cpp` files | `export.py` | -- |
+| source-path strings anchoring functions to files | 473 functions, 73 `.cpp` files; 1,221 game functions placed | `export.py` | -- |
 
 ## Program flow
 
 - `_start` 0x100008 (crt0): `_InitSys` 0x267798, `FlushCache`, the init hook (`jalr s0`), `atexit`
   0x2781e8, then `main` 0x2045a8 (`jal` at 0x100238), then exit.
-- `main` 0x2045a8: calls 0x2729f8, 0x2043dc, a printf-like 0x279b70 (version and build date), the IOP
-  reboot with `ioprp300.img` (0x241b20), boot-device detection (0x241d68: "host0:", "BootDev = %s",
-  "BootDir = %s"; 0x240eb8: "BootDevice = %d", "Rom Date"), `GetThreadId` / `ChangeThreadPriority`, then
-  0x2046d4 (calls into many game modules: likely the game's init / main loop -- unverified).
+- `main` 0x2045a8 (`main.cpp`, 0x2043dc..0x204d38, written 2026-10-22; `mainGame` in src): `__main`,
+  `mainParseArgs` 0x2043dc (`-l fre|ger|spa|ita` -> `MagSystem::setLanguage` 1..4, `-m N` / `-mN` -> the
+  boot stage, 99 by default), `snprintf` 0x279b70 of the version line "0.1.%sn.%s.%s" (number "1.01" from
+  data 0x2d9e18, `__DATE__`, `__TIME__`) into bss 0x7b45d0, the rx bring-up below, `utlMemInit` and the
+  memory hooks, `strcpy` of argv[0] into `SndMan` +0x4, `rxSysSetDebugHandlers` 0x242960,
+  `rxSysInitFileDevice(1)` 0x243608, then `mainInitGame(stage)` 0x2046d4, `mainLoop` 0x204864 (never
+  returns), `mainExit` 0x20483c.
+- `mainInitGame`: `mainInitDevices` 0x20499c (`SndMan::init` -> `rxSndInit` 0x237d80, `sceDbcInit`,
+  `scePad2Init(0)`, `sceMcInit`), `mainInitGraph` 0x20491c (NTSC interlaced frame, a 640x224 double
+  buffer), `sysInitManagers` 0x204148 (`Sequence::init`, `GamMan::init`), `MagSystem::init`; then a new
+  `SysNowLoading` (0x2a0 bytes): `init`, `MagSystem::setSceneFlags(1,1,1,1,1,1,0)`,
+  `MagScene::initCamera` (empty), `MagSystem::start` (V-blank semaphore and callback 0x117654),
+  `seqSetLanguage`, `GamMan::loadSystemData` 0x1c1b48, `GamMan::loadStage(stage)` 0x1c204c (unless -1),
+  `term` + delete; bss 0x7a3d48 / 0x7a3d4c = 1, data 0x296198 = 2, `MagSystem::resetDBuff` twice. The
+  now-loading frame itself is drawn (0x2051cc) from 0x1be564, inside the pfh loader GamMan's loads use.
+- `mainLoop`: `SysTimer::start` on the task manager's timer (0x7a3dc0 = 0x7a3d80 + 0x40),
+  `CmnTaskMan::addTask(1, -1, 1, 0, &EmyManager 0x7b2140, 0, &id 0x7b45c0, 0)`, RCNT0 mode 0x83, then
+  per frame: RCNT0 = 0, `SysTimer::update`, `Sequence::exec` 0x20f98c, `GamMan::update` 0x1c526c,
+  `CmnTaskMan::exec` 0x1e7a20, `MagSystem::update` 0x1182dc (the V-blank wait, draw, frame counter),
+  `GamMan::postUpdate` (empty).
+- **The globals file** before main.cpp: `system/system.cpp` (pinned 0x203d94..0x2043dc, written
+  2026-10-26; no source string, the file name is a guess). Its static initializer 0x2041f8 (entries
+  `_GLOBAL_$I$` 0x20439c / `$D$` 0x2043bc) constructs, in order, and destroys in reverse: game heap
+  `BedMemory` 0x6e9800, `MagSystem` 0x6e9840, `GamMan` 0x7812c0, `CmnTaskMan` 0x7a3d80, `Sequence`
+  0x7a4440, `EmyManager` 0x7b2140, `SndMan` 0x7b2580, `RxMpeg` 0x7b40c0. In src the six managers are
+  defined in system.cpp (the heap stays in utl/utlmisc.cpp, g_rxMpeg in snd/rxmpeg.cpp). Also there:
+  `sysInitManagers` 0x204148 / `sysTermManagers` 0x204174 (Sequence then GamMan), `sysExecHostElf`
+  0x2041a0 (debug restart from host0:main.ee.elf, no callers), and **SysTimer** (0x2c bytes, all words,
+  EE layout kept; the task manager's +0x40): a ms timer over `GamMan::getSysTime` (m_vcount x 1000 /
+  25, inlined): ctor 0x203d94 -> reset 0x203dd0, start 0x203ea8 (adds the stopped time to +0x28),
+  stop 0x203efc (no callers), read 0x203f38 (adds |now - prev| to +0xc), update 0x204014 (main, once a
+  frame: +0x18 count, +0x20 time = elapsed - paused, the old one to +0x1c / +0x24), hold 0x204090
+  (CmnTaskMan::exec: +0x24 = +0x20). The code before it is task/tsk_enemy.cpp
+  (0x20067c..0x203d94, 2026-10-29), and before that 0x1fd424..0x20067c (task/tsk_attack.cpp) the
+  TskAttack / TskDamage steps (table at data 0x2feb64).
+- The rx bring-up main runs, in order: `rxSysSetIopImage("IOPRP300.IMG")` 0x241b20,
+  `rxSysSetBootPath("cdrom0:")` 0x241d68 (boot device CDROM, dir, name), `rxSysResetHardware` via
+  `rxSysInit` 0x240eb8: VIF/VU/GS-path/DMA reset, `rxThInit`, memory hooks reset, boot device (more than
+  32 MB = devkit = HOST, else CDROM), `rxSysInitModules` (pools, `rxFileInit`, the rxfile thread,
+  `rxThAddCallback`), file devices and dir, `rxSysLoadIopModules` (default module table, SIF, CD,
+  IOP reboot with `modules/ioprp300.img`, then every `.irx` in `modules/iopconf.cnf` via
+  `rxFileLoadModule`), `system.ini` [SYSTEM] NUMBER / VERSION / VMODE / COUNTRY / LANGUAGE / WARNING
+  (optional), the save-data name = region prefix (BI / BA / BE by COUNTRY) + NUMBER. Then main installs
+  the game's memory hooks (`rxSysSetMemFunc0..3`: 0x105ca0, 0x105ca0, 0x105de0, 0x105e08).
+
+## The rx file layer (`rx/rxfile.cpp`, 2026-10-22)
+
+- **Drivers** (bss 0x7df9c0, 9 code pointers each, indexed by RX_SYS_DEVICE): makePath, getStatus,
+  control, getSize, create, read(name, buf, offset, size), write(name, offset, buf, size), setRoot,
+  getRoot. HOST 0x7df9c0 (root bss 0x7dfa50, default "host0:"), CDROM 0x7df9e4 (root fixed
+  "cdrom0:"; "\" and ";1" sit next to it at 0x2dc1c4 / 0x2dc1c8: the ISO name form, rxFileCdIsoName;
+  create / write return -2), HDD 0x7dfa2c (a host0: copy whose
+  errors -5 / -6 / -19 / -65531 remap HDD to its fallback device, data 0x2dc238 = {0,1,2,-1}, and call
+  the error hook 0x2dc248). MCARD has no driver. `rxFileCallDevice` = the driver's setRoot (rxsys passes
+  the boot path's device part).
+- **Contexts** ("thread type" 0 / 1, bss 0x7f1ec4, index 0x7f1ec0): device + load hook
+  (default 0x245ae8: whole-file read through rxsys's 0x243788.. async calls) + size hook (default
+  0x245a48). `rxFileGetCurrent` = the current context's device.
+- **Dirs** (bss 0x7f1edc, 0x128c per device): param word (-1), dir (lower-cased, '/'), and per context
+  a search dir, a 0x800-byte name stack (top 0x880, 0x7ff empty) and a last name. `rxFileMakePath` =
+  dir + search dir + name ("/" makes either absolute) behind the driver's root.
+- `rxFileLoad` / `rxFileLoadModule` / `rxFileRebootIop` open through rxsys's print-locked sce*
+  wrappers (`rxSysOpen` 0x242528 .. `rxSysLseek` 0x242660). `rxFileLoad` reads size + 0x80 bytes.
+- **System Monitor** (0x242c10..0x2432d8): the 80 x 28 text console the two exception handlers
+  (`rxSysExceptionHandler` 0x242740, `mainExceptionHandler` 0x204a00) open with
+  `rxSysInitExceptionScreen` 0x2431c0. Cells (bss 0x7d88a8, 28 rows x 0x140) are char << 24 | ABGR
+  colour (0x7d88a0: grey 0x807f7f7f, banner blue 0x80804040); the cursor (0x7d8898 / 0x7d889c) runs
+  over rows 1..26, columns 3..77 (wrap at 75, scroll past cursor row 25). A row is expanded through the
+  8x8 font 0x2dbeb0 (96 glyphs from ' ', bit 0 = left pixel) into 640 x 8 PSMCT32 pixels (0x7ce860,
+  lines doubled when sceGsGParam.ffmode is 0) and uploaded with LoadImage at fbp 0. Opening patches
+  `_exit` 0x100248 with `j 0x243178` (rxSysExitHook: "Exit System (retval=%d)" in orange, spin) and
+  installs `rxSysConsolePrintHook` 0x243050, which returns 1 so rxSysPrintf still prints.
+  `rxSysTermExceptionScreen` 0x2432d8 (unreferenced) pauses 0x2dbea8 = 120 VSyncs and undoes both;
+  0x2dbea4 (0) is a VSync wait per newline. PC: log-only (uploads / display env dropped).
+- **Async file slots** (bss 0x7dabb0, 64 x 0xd0, fd 1..63; pools for markers 0x7de3b4, ring segments
+  0x7de9b8 and tags 0x7ddfb0, threaded by rxSysInitModules): `rxSysStreamOpen(name, flags)` 0x243788 ->
+  `rxFileOpenEx` 0x2442e8 -> `rxFileOpenSlot` 0x244410, which posts a create (SCE_CREAT, then never
+  sized) or size request and waits unless flag 0x8000 (RX_FILE_NOWAIT). Flag 0x10000 (RX_FILE_RING):
+  the file thread keeps the slot's ring buffer filled in whole sectors while filled <= threshold;
+  `rxFileGetRingData / RingConsume / GetRingFilled` read it, segments map ring bytes to file positions.
+  A slot opens *paused* (`rxFilePause(fd, 0)` starts the refill). Markers {pos, active, id, count, max,
+  jumpPos, callback, user} split reads and jump the position (stream loops); tags {pos, active, id,
+  value} are reported per ring window (`rxFileGetRingTags`). The default load / size / save hooks
+  (0x245ae8 / 0x245a48 / 0x245be0) are open + seek(0, 2) + read / write + close on a slot. Users
+  outside rx: snd (sndman, rxmpeg) and the code at 0x17fd58..0x182c08 and 0x1be36c..0x1be8a8.
+- **The file thread** (bss 0x7f6910, one; `rxFileCreateThread(0, 2, rxFileThreadProc)` via rxThCreate
+  with a 64 KB stack): two 64-entry queues of 0x2c-byte requests {state, device, path, op 0 create /
+  1 size / 2 read / 3 write, offset, buf, size, retryMissing, busy, callback, owner} -- queue 0 for
+  opens and ring refills, queue 1 for rxFileRead / rxFileWrite (split into the device param's chunk
+  size). Device -> thread table 0x2dc250 (all 0); requests go through the device map 0x2dc228 to the
+  driver. A failed request stays queued and is retried after the next proc call (a -2 "not found"
+  only when retryMissing: async opens wait for the file to appear). Before every request the thread
+  runs `rxFileThreadProc(priority + 1)` -> `rxFileCdProcess`. Stop: `rxFileStopThread` 0x249000.
+- **The cdrom driver reads ISO 9660 itself**: `rxFileCdFind` (pointer 0x2dc1dc, replaceable by
+  `rxFileCdSetFindFunc`) reads the primary volume descriptor at 0x8000 (path table 0x808c / 0x8084),
+  walks the path table by parent number, scans the last dir's records for "NAME;1" (`rxFileCdIsoName`:
+  "\" + upper case + ";1"). Reads go through a 32-sector LRU cache (nodes {prev, next, buf, sector} at
+  0x7dfb80, buffers 0x7dfdc0, free list 0x7dfd90, used list sentinel 0x7dfd80) and `rxFileCdReadBytes`
+  (64-byte-aligned sector reads plus a 4-sector tail buffer 0x7efdc0). The first read waits for the
+  disc, sets sceCdMmode (DVD for 0x14 / 0xfe) and reads the dual-layer info (layer 1 start added to
+  every LSN when layer 1 is selected, `rxFileCdSetLayerMode`). A repeated read at the same offset first
+  reads 32 sectors earlier (forced seek). Once a lookup read the disc, the thread polls sceCdStatus every
+  0x400 steps (shell open: cache dropped, status 0 set); `rxFileCdControl(0, open)` queues tray
+  requests; `rxFileCdSetClockRead(1)` makes it read the drive clock every 30 ticks
+  (`rxFileCdGetClock`). **On the host this needs an ISO image behind sceCdRead** (open-items.md).
+- `s_verbose` data 0x2dc1b0 = 1: the retail build prints every rxfile message.
+
+## The rx thread layer (`rx/rxthread.cpp`, 0x249b88..0x24b490, 2026-10-22)
+
+A scheduler over the EE kernel's priority threads (all 53 functions written, `verify`):
+- **Priorities**: base = the main thread's current priority at `rxThInit` 0x249ea0 (sdata 0x2dc264);
+  offsets `s_prioIndex` sdata 0x2dc278 = {0, 2, 4} for main / worker / rx threads + idle
+  (`rxThSetPrioIndex` 0x24b048 keeps them increasing).
+- **Threads**: the idle thread (stack bss 0x818240, 0x400, spins) and the worker (stack 0x808240,
+  0x10000, suspended except while the main thread yields; runs the 32-entry call queue bss 0x807ff0 that
+  `rxThPostCall` 0x249e08 fills -- snd/rxmpeg.cpp's user). Up to 8 rx threads in slots bss 0x807f70
+  `{short id, short state, int count, int priority, void *param}`; `rxThCreate` starts them at the low
+  level with state 0 (not dispatched until `rxThSetState(i, 1)`).
+- **Semaphores** bss 0x807f40: yield (max 1; the main thread waits on it), dispatch (a counter:
+  `rxThDisableDispatch` signals, `rxThEnableDispatch` polls), request lock (the worker's
+  `rxThLockRequest` / `rxThUnlockRequest`).
+- **The dispatch alarm** `rxThDispatchAlarm` 0x24a678, every `s_interval` HSYNCs (sdata 0x2dc274 = 4,
+  `rxThSetInterval` clamps 4..256): unless dispatch is disabled, the next dispatched slot gets the CPU on
+  every (priority + 1)-th pass that lands on it (so "priority" is a slowdown); then, if the main thread
+  waits and the request lock is 0, it polls the request (sdata 0x2dc270, args bss 0x8081f0) and signals
+  the yield semaphore when it answers non-zero. Re-arms while rx threads exist or a request is pending.
+- **rxThYield** 0x24a508 on the main thread: request "vblank count changed" unless one is set, run the 8
+  yield callbacks (bss 0x808200; rxsys installs `rxSysThreadCallback`) with 1, resume the worker, wait,
+  suspend it, callbacks with 0. On an rx thread: lower itself below the main thread. `rxThVSync`,
+  `rxThGsSyncPath`, `rxThDmaSync` (mode 0) are yields with their own requests.
+- **Frame pacing**: `rxThVBlankInit` 0x24b278 adds an INTC cause-2 handler (vblank count sdata 0x2dc290,
+  field 0x2dc288 from GS CSR when interlaced) and runs timer 0 on HBLANK. `rxThSync(mode)` 0x24b3f8:
+  -1 = the vblank count, 0 = wait one vblank, 1 = no wait, n = wait until n vblanks since the last read;
+  each returns the HSYNCs since the last read (`rxThReadHSync`).
+- `rxThFindCallback` 0x24a218 always returns -1 (a delay-slot bug): duplicates are not refused and
+  `rxThRemoveCallback` removes nothing.
+
+## The block heap (`bed/bedmemory.cpp`, 0x100354..0x101718, 2026-10-22)
+
+- `BedMemory` (EE 0x1c): +0 `m_buffer` (first block; the assert names it), +4 set to the first block by
+  format (no reader), +8 the buffer as given (destroy frees it when +0x18 `m_owner`), +0xc `m_size`
+  (multiple of 16), +0x10 `m_id` (low 3 bits = default align mode), +0x14 live block count.
+- Blocks on a doubly linked list, each led by a `BEDMEMHEADER` (EE 0x20): +0 `m_next`, +4 `m_prev`,
+  +8 `m_chunk_size`, +0xc data pointer, +0x10 short (the heap id, written by format only), +0x12
+  `m_flag` (1 used), +0x14 id / +0x16 line (-1 none) / +0x18 file name (allocDebug's tags), +0x1c
+  `m_header_size` = data - header. The word before the data always holds that distance: getHeader
+  0x100ce4 finds the header from a pointer with it.
+- alloc 0x100a3c(size, flags): size rounded up to 16; flags & 7 = align mode (0 0x20, 1 0x40, 2 0x80,
+  3-6 4 bytes, 7 the heap default); (flags & 0x1c0) == 0x100 searches from the end (findFreeFromEnd /
+  splitTail), else first fit from the start (findFree / alignBlock). A rest of 0x40 bytes or more
+  becomes a free block. Every allocation is memset 0; format fills a new buffer with "$RUNTIME".
+- free merges with a free next and previous block; realloc shrinks in place (shrink 0x100d30), grows
+  into a free next block, or allocs + copies + frees. getInfo 0x1015fc returns {largest free, free total,
+  m_size}. trimFront 0x100ecc has no callers (and computes size - new - old).
+- ROM slips: realloc's grow-in-place leaves h->m_next at the swallowed header, shrink next to a used
+  block leaves next->m_prev at h, splitTail applies alignBlock's shift twice (-1 included). The host
+  mends the first two (`// PC:`), keeps the third.
+
+## The pad (`bed/bedpad.cpp`, 0x101aec..0x102490, 2026-10-25)
+
+- `BedPad` (0x90, no vtable) is one libpad2 socket: `init(port)` opens it on the static DMA buffer
+  `zDmaBuf` 0x308280 (0x100 per port; scePad2SocketParam option 2, port, slot 0), `term` deletes it,
+  the destructor terms an inited pad. `update` 0x101ccc (MagSystem, twice per frame path) reads only on
+  `scePad2GetState == 1`, straight into the object (+0x00 buttons active-low, +0x02..+0x05 right X / Y,
+  left X / Y), and builds the views: +0x78 `m_hold`, +0x7a `m_trig` (pressed this frame), +0x7c
+  `m_repeat` (trig, plus `m_hold` every `m_repeat_interval` +0x38 frames once held `m_repeat_wait`
+  +0x34 frames; MagSystem sets 15 / 10), +0x28 last hold, +0x2c hold count, +0x30 frame count, +0x7e
+  the stick bytes (0x80 when disconnected). Bits are the report's: 0x1 select, 0x8 start, 0x10 up,
+  0x20 right, 0x40 down, 0x80 left, 0x2000 circle, 0x4000 cross.
+- `updateDir` 0x102188: d-pad, else left stick past 0.7 (dead zone 0x60..0xa0, scale 96 / 95) -> a
+  second view in d-pad bits, +0x68 held / +0x6c trig / +0x70 `m_dir_repeat` (menu cursors: MnuTitle,
+  MnuMcd), vector +0x4c / +0x50 (y negative up), length +0x54, quadrant +0x60 and a wiggle counter
+  +0x64 (quadrant changes < 15 frames apart). `calcDirChange` (+0x58) compares with the latched
+  direction +0x40..+0x48 (MagSystem::setPC clears it); update latches when it is >= 0.001.
+- Accessors other modules call: `getRightX/Y` 0x101e64 / 0x101eec, `getLeftX/Y` 0x101f74 / 0x101ffc,
+  `getDir(&x, &y)` 0x102084 (returns the length; the player / Brown control 0x11ac24.. and seqFunc019),
+  `getDirChange` 0x10209c.
+- `setVibration(small, big)` 0x101b50 -> libvib `sceVibSetActParam` 0x26bb10 (profile bit 0 small
+  on / off, bit 1 big 0..255; a negative argument leaves that motor out). libpad2 names placed:
+  scePad2CreateSocket 0x26b280, DeleteSocket 0x26b388, Read 0x26b3e0, GetState 0x26b588.
+
+## The system object (`mag/magsystem.cpp`, 0x117654..0x1194b4, 2026-10-22)
+
+- `MagSystem` (bss 0x6e9840, EE 0x97a80): +0 frame count (bit 0 = draw buffer), +4 motor frames,
+  +8 vibration option (`utlIsVibrationOn` 0x103484 = GamMan option 0x12), +0xc `m_info` (0x28: heap
+  largest / total free, packet size / rest / overrun "m_trash_*", RCNT0 times), +0x34
+  `m_store_image_filename` / +0x38 request (endPacket dumps the frame as a 512x448 BMP), +0x40 two
+  `BedPad` (0x90 each; bed/bedpad.cpp, libpad2 socket +0x20, port +0x24), +0x160 VIF1 `sceDmaChan`,
+  +0x170 `sceGsDBuff` (512x448, PSMCT32, Z PSMZ16S, frame pages 0x70 / 0, Z at 0xe0), +0x3a0 the i3d
+  context (0x12168), +0x12508 the packet buffer (static bss 0x308580, 0x35c000 = two frames of
+  0x1ae000), +0x12540 `MagScene` (0x85500), +0x97a40 two pad slots, +0x97a60 PC actor, +0x97a64 Bwn
+  actor, +0x97a68 last PC actor, +0x97a6c language / +0x97a70 language still free.
+- Statics: sdata 0x296190 `m_current_system`, 0x296194 V-blank count, data 0x296198 V-blanks per frame
+  (2; main sets 2 again), 0x29619c `m_v_sema` (-1). The callback 0x117654 counts V-blanks, passes the
+  count to `rxMpegSetVCount`, and signals the semaphore every 2nd one: **the game runs at 30 fps**.
+- The frame (`update` 0x1182dc): motor countdown, `BedPad::update` x2, `RxMpeg::setFrameParity`,
+  `MagScene::update(pad0, pad1)`, `SndMan::update`, `i3dCtxBeginFrame`, `MagScene::draw(ctx, dbuff,
+  frame)`, `postDraw`, assert rest != 0, endPacket (rest / overrun / heap info, `i3dCtxEndFrame`),
+  waitVSync (rxThVSync while a movie plays, WaitSema + PollSema drain, VIF1 DMA sync, `sceGsSwapDBuff`
+  0x2599e8), kickPacket (`sceDmaSend(VIF1, i3dCtxGetPacket)`), frame++, `utlIncFrameCount`.
+- **i3d** (unassigned@00216ad0 up to rxSnd 0x237d80; "i3d_package_version 050121-stable-050826"):
+  the packet / draw library under the scene. initGraph compares the game's copy of its 36 struct sizes
+  (rodata 0x2e90a8) with `i3dGetStructSize` 0x21f1a8 (data 0x302ba0) and hangs on a mismatch.
+  Files pinned so far (2026-10-22): **`i3d/i3dctx.cpp`** 0x21eb28..0x21fb30 (written, verify),
+  **`i3d/i3dlayer.cpp`** 0x222f50..0x224de0 (written, verify), **`i3d/i3dtex.cpp`**
+  0x2184c0..0x21a120 (written, verify), **`i3d/i3dtim2.cpp`** 0x224de0..0x225018 (written, verify:
+  7 functions -- i3dTim2CheckHeader 0x224de0 (TIM2 -> 1, CLT2 -> 2; the ROM ors the TIM2 byte
+  tests), GetPicture, the hidden i3dTim2IsClutOnly 0x224ec0 and i3dTim2GetClutCount 0x224fb0,
+  GetMipSize, GetImage (level sizes at picture +0x40), GetClut; the check and the two hidden ones
+  have no callers), **`i3d/i3dview.cpp`** 0x226278..0x227a98 (written, verify) and
+  **`i3d/i3dvram.cpp`** 0x227a98..0x228c08 (written, verify), **`i3d/i3dpacket.cpp`**
+  0x21b220..0x21c960 (written, verify; below). Between tim2 and view,
+  0x225018..0x226278 (unassigned): animation curve sampling (0x225018 binary search over key times,
+  0x225080 / 0x225148 scalar / vector segment eval) and vertex morph blending (0x225460..0x2261b8),
+  called from the model packet builders. Modules seen around them: the wire-shape strip builders
+  0x21e6f8 / 0x21e8f8 / 0x21e9f8 before 0x21eb28 (0x21e1d8 the line strip), model packet builders
+  0x21fb50..0x222f50 (unassigned@0021fb50: per material a state packet node, i3dGroupBegin*Packet),
+  the texture objects (i3dtex.cpp, below), the fog state 0x21a120..0x21a3e8, i3r model helpers 0x21a3e8..0x21ac80, lights
+  0x21ac80..0x21b220, the packet writers (i3dpacket.cpp), TIM2 helpers from 0x224de0 (an unreferenced TIM2 / CLT header
+  check, picture lookup 0x224e70, size 0x224ed0), the view (below), the vector module with the i3d
+  system calls at its ends (below).
+  - **The vector / matrix module** (`i3d/i3dmath.cpp`, 0x236960..0x237ce8, 95 functions incl. 35
+    hidden ones created in Ghidra, written 2026-10-22, verify; conventions in i3dmath.h). Two copies,
+    **not** byte-identical: the first 0x236960..0x237178 (i3dVu0* names, plus the older plain names
+    i3dVecZero / i3dVecCopyW / i3dMatCopy / i3dVecCross / i3dVecNormalize) builds rotations from
+    cosf / sinf (i3dVu0MatRotX / Y / Z, one order RotZYX) and ends with i3dVu0RotTransPers 0x236fd0,
+    i3dVu0MatLookDir 0x2370b0, i3dMatGetUnit (rodata 0x303c10), i3dSysInit; the second
+    0x237180..0x237c58 wraps sceVu0RotMatrixX / Y / Z (i3dMatRotX 0x237818 ...), has all six rotation
+    orders (i3dMatRotZYX 0x237860 .. i3dMatRotYZX 0x2379f0, named in applied order), clear / set /
+    bitwise-compare helpers 0x237180..0x2372cc, i3dVecToRgba32 0x237530, i3dVecLength 0x2375a8, and
+    byte-copy twins inside it (i3dVecAdd / Add2, Sub / Sub2, Mul / Mul2, Scale / Scale2, Interp,
+    Clamp, Set, Clear, Equal, i3dMatGetUnit2 0x237c58 -> 0x303c60). The view uses the first copy;
+    DogEntity / DogActor / MagScene the second. Row-vector convention: i3dMatMul(out, a, b) runs VU0
+    micro 0 (out row i = sum_j b[i][j] * a[j]), so p * out = (p * b) * a; a rotation (angle, out, in)
+    is out = in * R, which matches the platform's sceVu0RotMatrixX (row 1 = (0, c, s, 0)). Float
+    arguments come first (f12). RotTransPers: p = v * m, xyz / w (1.0 at 0x303c00 / 0x303c50), x y
+    in 12.4 (16.0 at 0x303c04 / 0x303c54), mode 0 z w in 12.4, mode 1 z w truncated. i3dPrintf
+    0x237c68 is vsprintf into 1 KB + rxSysPrintf + fflush(stdout). i3dMatGetScaleTrans 0x228c38 (in
+    i3d/i3rmesh.cpp, the mesh packet builder, not written yet) stays a bridge.
+  - **The i3r model files** (I3D_BIN / I3D_I3M / I3D_I3C; 0x228c08..0x22e840, 2026-10-25). An
+    I3D_BIN file (`i3d/i3rroot.cpp` 0x22b1b0..0x22b4b8, written, verify; types in i3rroot.h): id
+    "I3D_BIN\0" (rodata 0x3039d0), +8 version 0x00100001, +0xc relocated flag, +0x10 the root
+    item (type 0x52). Every item is 16 bytes {data, info (bit 31 no data fixup, 30..24 type,
+    23..0 child count), children, name}; child lists are sorted by name (0x22c1f8 bisects with
+    strcmp). In the file item fields are offsets from the root item, pointers inside an item's data
+    offsets from that data. i3rRelocate 0x22b330 (DogModel::loadPack and 9 more callers) ->
+    i3rSetRelocate 0x22b280 -> i3rItemRelocate 0x22c478 (recursive; per-type data fixups in the
+    90-entry table 0x2db4c8, unfixups 0x2db360 for i3rItemUnrelocate 0x22c328; i3rIsItemType
+    0x22c2a0 rejects 13 ids) then i3rBuildPackets 0x21a3e8 (i3rBuildMeshPacket 0x21fb50 per mesh into child 6's buffer).
+    Root data (type 0x52, fixups 0x22ad20 / 0x22adf8): +0x10 / +0x14 tables of 0x40-byte records,
+    +0x18 texture names (count u16 +0x2c), +0x1c u16 node indices and +0x20 their names (count
+    u16 +0x2e), +0x24 a plain value. Root child 3 = the nodes (i3rGetNumNode), child 2 the meshes,
+    child 6 the packet slots. The rest of the run is per-type code, each type a cluster of small
+    accessors (`*(item+8)` = its children) plus its fixup pair -- ~450 functions Ghidra folded
+    (hidden.py), e.g. type 0x4d's fixups 0x22a6c0 / 0x22a730 sit inside the mesh packet builder
+    0x228c08..0x22a7d0 (0x228f50: a per-layer cache of mesh packets hashed on mesh / light / fog
+    / view). **The item core** (`i3d/i3ritem.cpp` 0x22c1f8..0x22e840, pinned 2026-10-26): i3rItemFindChild
+    0x22c1f8, i3rIsItemType, the relocators, and all 90 fixup pairs (`i3rRelocDataXX` /
+    `i3rUnrelocDataXX`, Ghidra functions made at every table word 2026-10-26; 0x22c320 / 0x22c318
+    the shared no-op). Every fixup is one of: a field at +off holding an offset from the data start,
+    or an array of such entries (array pointer at +a, count a u_int / u_short / u_char at +c). Only
+    25 types have pointers (0x08 / 0x1d / 0x38 / 0x2d / 0x46 / 0x4d / 0x52 have arrays; 0x38 two
+    arrays of one count); the rest are `jr ra`. Checked offline on 1602 models in the disc's RPKs
+    (7.1 M pointers, all in the file; names may be Shift-JIS). Nine pairs live at 0x22a6c0..0x22aec0
+    (types 0x25 0x26 0x29 0x2a 0x2d 0x4a 0x4d 0x52 0x59) and are written in i3ritem.cpp too.
+    After each of the other types' fixup pairs sit that type's accessors (2026-10-28, verify): 288
+    over 42 types in 0x22c5a0..0x22e840, i3rtype.cpp's ten shapes and naming, none called in the ROM;
+    258 were hidden (Ghidra functions made by `i3racc.py mkfunc`). The widest: type 0x17 (36 over
+    slots 0..16), 0x56 (34 over slots 0..5), 0x47 (16, two named child lists).
+    **The per-type accessors** (`i3d/i3rtype.cpp` 0x22a6c0..0x22b1b0, pinned and written 2026-10-27,
+    verify; 78 functions, 38 of them hidden ones created in Ghidra): per type, in the order 0x4d 0x29
+    0x4a 0x26 0x59 0x25 0x2d 0x2a 0x52, the fixup pair then one-line reads of the item's child slot k
+    (`item->m_children[k]`): the slot itself, data set, child count, n-th child, list begin / end,
+    find / name / by-name / has through i3rItemFindChild. Named `i3r<Op><type>[_<k>]` (i3rtype.h).
+    The layouts they show: 0x52 the root (slots 0..7; 0 materials, 2 meshes, 3 nodes with a count and
+    n-th child only, 6 the packet slot), 0x26 a layer (slots 0..3; 1 its entity slots, a type 0x29 with
+    slots 0..2), 0x2d a combined mesh (slots 0 / 1), 0x2a a node (slot 0 its data item, slot 1 a named
+    list), 0x4d (lists 0 / 1, slot 2) and 0x59 (list 0) for the packet builders. i3rRelocData26's
+    Ghidra body ran to 0x22a978; the function ends at 0x22a960. The mesh packet builder before it is
+    **`i3d/i3rmesh.cpp`** 0x228c08..0x22a6c0 (written 2026-10-27, verify): i3rGetMaterialPacket
+    0x228f50 caches a material's packet per layer (I3dLayer +0x414 = 256 buckets of I3rMeshPacket,
+    key material + texture frame + light + fog + view; an I3rMeshOpt with a uv override or a depth
+    offset is never cached) and builds it at the context head: view / fog (0x2291c8), then per
+    material layer (type 0x26, I3rLayerData now 0x38 bytes known) its texture REF, GS state
+    0x229380 (TEST from 0x22a448: m_atst via the ATST table 0x2db350 {1,0,1,4,7,2,3,6,5}, AREF =
+    m_alpha_ref * 128, AFAIL codes 0x10 / 0x0f / 0x18 -> 1 / 2 / 3, m_date, m_ztst; ALPHA from
+    0x22a638: m_blend 0x10 / 0x11 / 0x12 = 0x44 / 0x48 / 0x42, 0x2x the same with Ad), the layer's
+    0x4a register overrides (masked with I3dLayer::m_user of the same register), the light set
+    0x229678 (I3dLightDesc's five lists; m_shade 2 = half vectors with the view's eye direction),
+    the STQ map matrices 0x229b70 (I3rStqMapEntity +0x41 kind, +0x40 slot; kind 1 projects through
+    the view camera and the bias matrix 0x303800) and the uv transform 0x22a050 (layer children 0 /
+    1: offset / scale and pivot / scale / rotation tracks read with i3rTrackGetValue 0x2251f0 at
+    time 0). The material data (type 0x25) is I3rMaterialData: +0 depth, +4 sort param, +8 texture
+    frame, +0xa sort func, +0xb sort order -- i3dLayerFindMaterialDrawSet reads the same item.
+    **The mesh data** (read 2026-10-27 from i3rBuildMeshPacket 0x21fb50, i3rDrawModel 0x21fe68,
+    0x220290 / 0x222560 / 0x225670 / 0x225ec8 and checked on amd.mdl; the host reader is
+    rosepan_i3dmesh.cpp): node (0x2a) [1] = entries (0x59: +0 -> u16 bone table, +4 s16 mesh
+    index, +6 u16 bone count, +8 enable byte); node [0] data +0x25 = shown (no data = shown).
+    Mesh 0x2d [0] 0x46 (data +0 -> per-slot offset (inverse bind) matrices, +0xc u16 count) -> [0]
+    -> 0x4c groups (data +0 -> the u16 bone slot, +5 flags: 8 = rigid: drawn with world x
+    nodes[bones[slot]] in i3d order, i.e. p * node * world; otherwise skinned) -> [0] -> 0x4d
+    (+0xc s16 material; +0x08 -> one byte per material layer = the batch's [0] group that layer
+    draws, -1 none -- i3rPktCallStrips 0x221080; the layer count is the material's layer list
+    child count) -> [0] -> 0x56 batches: [4] positions (VU1 0x1dc), [2] normals (0x22c),
+    up to 80 each; [5] bone records (0x31: +0 -> {s32 pool byte offset, f32 weight} pairs, +4 u16
+    slot, +6 u16 pair count padded with zero weights): skinned pool = sum of w * (p * offset[slot] *
+    nodes[bones[slot]]), normals through that matrix's normalised rows; [0] -> 0x30 groups (one per
+    layer byte) -> [0] ->
+    0x47 strips (data +0 -> V2-16 list unpacked at 3, +4 qwc, +5 vertex count 3..20 = the row of
+    the 0x302c40 table whose qwords set VU1 0..2 and MSCAL 1; list element x = pool index with
+    bit 15 = no triangle at this vertex, y bit 15 = (n-2, n-1, n) faces front, else reversed --
+    1 exception in 6,000 triangles), strip [0] colours V3/V4 at 0x17 and [1] STQ V2-32 at 0x2b
+    (q from STCOL 1.0), both TOPS-relative. Blocks (0x33): {+0 -> data, +4 u16 qwc, +6 u16
+    count, +8 kind: 0 V4-32 qwords, 1 a VIF stream}; 0x226060 rebases the stream's unpack
+    addresses in place once (first = base, the rest + base). root data +0x14 = per-node
+    model-space bind matrices (i3rDrawModel's default node table), +0x10 the local ones.
+    **Blending** (read 2026-10-28 from 0x220670 / 0x2210f0 / 0x225018..0x2254f8): an entry (0x59)
+    [0] lists blend targets; each target's data -> f32 weight, its [0] data a type 0x58 curve (+0 f32
+    after the last key, +4 f32 before the first, +0xc -> {slope, intercept} f32 pairs, +0x10 -> key
+    times, +0x18 u16 key count; value = slope * t + intercept of the key bisected at t). Per channel
+    (0 positions, 1 normals, 3 strip colours, 4 STQ; 2 is weighted but unread) i3rDrawSetupBlend
+    keeps the non-zero weights as {index, weight} (up to 8, work +0xf4, 0x44 apart), with opt's
+    mask bit: the curve at opt's time, else the static weight. A group blends when flags & 3 and opt
+    (0x46 groups: data +5; 0x45 groups: data byte 0). The channel's slot children are [0] the own
+    block and [k] target k: flags & 2 sums w x target k's V4-32 qwords (flags & 1: target k's [0]
+    children are type 0x34 vector curves per vertex: +0 after, +0x10 before, +0x24 -> slope /
+    intercept qword pairs, +0x28 -> times, +0x30 u16 count); flags & 1 alone: the own block's
+    per-vertex curves. Skinned groups skin the blended pools after (0x225670).
+    **`i3d/i3rblend.cpp`** 0x225018..0x226278 (pinned and written 2026-10-29, verify; types in
+    i3rblend.h): i3rCurveFindKey 0x225018 bisects the key times (the last key <= t, -1 before the
+    first; the curves test idx < count - 1 for the slope pair, else the after value), the scalar
+    (0x58, I3rCurveData) and vector (0x34, I3rVecCurveData) curves, i3rTrackGetValue (a track's own
+    qword when child 0 has no data), i3rBlendVertices and its adders, and the I3rVertexRef (5 words:
+    data, qwc, count, kind, blended) the mesh writers pass; i3rVertexRefAlloc 0x225638 points an
+    unblended ref at the draw buffer. Skinning: i3rSkinVertices 0x225670 (M = offsets[slot] x
+    nodes[bones[slot]], normal rows 0..2 normalised, w kept from the node row) and
+    i3rSkinVerticesPre 0x225af0 (matrices from i3rMakeSkinMatrices 0x225ec8, whose normal rows keep
+    the offset rows' w) DMA both pools to the scratchpad (0x70000000 / +0x800, results +0x1000 /
+    +0x1800), zero the results and run VU0 micro 0x15e / 0x172 / 0x186 per pair (pipelined three
+    ways): pos += M x (w p) over all four rows (p.w included), nrm += N x (w n) over rows 0..2; the
+    record's count is read as a byte (lbu +6). i3rVertexRefAverage 0x225fd8 = mean xyz, w 1 (sum
+    starts at vf0). i3rVertexRefRebase 0x226060 / i3rVertexRefWriteUnpack 0x2261b8 are the VIF
+    writers (REF tag + STCYCL 1,1 + UNPACK V4-32, 0x8000 = TOPS-relative). Nothing calls the skin /
+    VIF ones on the PC (rosepan_i3dmesh.cpp's SkinBatch and block rebase stand in).
+    The accessors between the fixups in i3ritem.cpp's own extent (0x22c840.., most call
+    i3rItemFindChild) are not written.
+
+    **The model helpers** (`i3d/i3rmodel.cpp` 0x21a3e8..0x21ac80, pinned 2026-10-26, verify; types in
+    i3rmodel.h): root data +0x00 the clip sphere (xyz centre, +0x0c radius), +0x10 one 0x40 basic
+    local matrix per node; root child 0 = materials (type 0x25: +8 s16 texture frame, +0xc
+    animated flag) -> [0] -> layers (0x26: +0x18 texture name, +0x1c its index set by i3rAssignTex;
+    the layer's child 3 holds STQ entity slots, entity +0x41 the id i3rReplaceStqMapEntity
+    matches, EE 0x50); child 2 = meshes (0x2d combined mesh -> [0] 0x46 via its child 0 / [1] 0x45
+    via its child 1 -> 0x4c entries -> child 0's children = what i3rBuildMeshPacket 0x21fb50 takes);
+    child 3 = nodes (0x2a, data = s16 parent index, always below the node's own); child 6 = type
+    0x53 {buffer, qwc}. i3rConvertLocalToModel multiplies parent x local with VU0 micro 0 (the
+    i3dVu0MatMul convention). A material's child 1 holds three entity slots (i3rGet/SetMatEntity0..2;
+    DogActor::setEyeTex sets slot 0 to its own record at +0x470). Checked offline on all 2565
+    models on the disc (2026-10-26).
+    **I3D_I3M** motion files (`i3d/i3mroot.cpp` 0x22b4b8..0x22ba20, pinned 2026-10-26, verify; types
+    in i3mroot.h): id "I3D_I3M\0" (0x303a68), +8 version 0x20001, +0x12 u16 per key, +0x14 node
+    count, +0x16 relocation u16 (1 = offsets), +0x18 float length in frames, +0x1c nodes (12 bytes:
+    name, +4 u8 key stride, +6 u16 key count, +8 keys), +0x10 u16 flags (1 packed rotations, 2 no
+    scale, 4 splines play linear, 8 packed positions, 0x10 packed scales; 0x1f in every file seen),
+    +0x20 a float4 table, +0x24 a float table, +0x28 an s16x4 1.15 table, +0x30/+0x40 packed
+    position scale/offset, +0x50/+0x60 packed scale scale/offset. A key is u16 indices: time and
+    inverse span length (float table), position, rotation quaternion, scale, then spline tangents.
+    The pose player is `i3d/i3mpose.cpp` 0x22e840..0x2312a0 (pinned 2026-10-27; i3mpose.h has the
+    key layout and the sample-flag modes: 0xf position, 0xf0 rotation, 0xf00 scale; 0 step, 1
+    lerp/slerp, 2 Hermite/squad; the game passes 0x111). A pose is 0x30 bytes per node: position,
+    quaternion, scale; i3mPoseToMatrices makes row-vector matrices (rows scaled, translation row 3).
+    The run after it was split by role (inferred, 2026-10-27): `i3d/i3cquery.cpp` 0x2312a0..0x233628
+    (i3cCastSphere / Ray / Cylinder and worker 0x232120) and `i3d/i3dgeom.cpp` 0x233628..0x236960
+    (point / segment / triangle distance tests). All offsets from the root, 0 = none. 14,647 raw I3D_I3M
+    in the disc's DATA tree (BG/MAPUNIT.BIN ...), all version 0x20001 and in offset form; the host
+    keeps the offsets (i3mPtr), as for i3c. **I3D_I3C** (`i3d/i3croot.cpp`
+    0x22ba20..0x22c1f8, pinned 2026-10-26, verify): id "I3D_I3C\0" (0x303a70), +0x10 relocation
+    byte (1 = offsets), +0x12 both-faces, +0x14 node count, +0x16 group count, +0x18 nodes (12 bytes:
+    name, u16 part count, parts), +0x1c group names; a part is 0x30 bytes with +0x24 / +0x2c
+    offsets and +0x28 a tree of 12-byte nodes (u16 count, bit 15 leaf; +8 children or leaf data).
+    All offsets from the root, -1 = none. No raw I3D_I3C exists in the disc's RPK / ARA files
+    (compressed somewhere). Curve / interpolation maths 0x22e840..0x231198, collision casts
+    0x2312a0..0x233628, distance maths (i3dPointSegDist2, i3dRaySegDist2, i3dSegSegDist2) ..0x23695c. Host pointers
+    in these files: hazards.md "Types and layouts".
+    **The casts** (`i3d/i3cquery.cpp`, 2026-10-29, verify): a part is box centre +0x00, half
+    extents +0x10, group +0x20, +0x24 per-triangle attribute records, +0x28 tree, +0x2c vertex array
+    (16-byte points); a node's +6 u16 enables it. A tree node's box is relative to its parent's
+    (centre + half * s8[3] at +2 / 127, half * u8[3] at +5 / 127, rodata 0x303b40 = 1/127); a leaf
+    holds m_info & 0x7fff triangles of 8 bytes (three u16 vertex indices, +6 the attribute index).
+    Each cast i3cCast(q, shape, world, box test, prim test, scale) (0x232120) inverts world * node
+    matrix per node, moves the shape into it, walks each part of q->m_group (q+0x20 nonzero: all)
+    and calls q->m_func(q, node << 16 | what, tri, verts, plane, point) on a hit (what 3 face, 0..2
+    vertex, 0x10 | i edge); q+0x14 an optional box filter, q+0x1c the part walked. Seven casts:
+    sphere, line, ray, segment and three cylinder modes; only Sphere / Ray / Cylinder are called
+    (DogModel). Two more, uncalled: swept-sphere casts i3cCastSphereSweepSeg 0x2331c8 (hidden in
+    0x232be8's body; box i3dCylSegBoxTest) / SweepRay 0x2331f0 (box i3dCylHalfBoxTest), whose tests
+    shift the plane r behind the triangle and time edge hits with i3dSeg/RayCylinderTest
+    (0x236678 / 0x2365f8). The box tests are i3dgeom's (0x2348f8, 0x234a50..0x234ce8). Epsilon sdata
+    0x2db630 (0.001), row-scale switch 0x2db634 (0, never set). Hit attributes (i3cGetHitAttr
+    0x2333b0, uncalled): the part's +0x24 records (I3cAttrRef: three u16 indices, kind in bits 4..7
+    of +6: 1 uv, 2 a vector, 3 both) index a table right after the 0x20-byte root with stride
+    root+0x11; blended by barycentric weights (0x233258) into five floats.
+    **The geometry tests** (`i3d/i3dgeom.cpp` 0x233628..0x236960, 2026-10-29, all 54 written, verify): shapes are
+    float[4] with the radius in w. Names follow the box tests: Line (t free), Ray (t >= 0), Seg (t
+    0..1); Cyl* grows a shape by its start point's w (CylLine an infinite cylinder, CylHalf a ray
+    capsule, CylSeg a capsule); Cylinder is the finite one around cyl + s axis. Distances
+    i3d<A><B>Dist2 return the squared distance (absolute value) with s / t out; parallel below
+    det 0.0001 (rodata 0x303b58). Box tests: i3dSphereBoxTest returns 1, the separating-axis ones -2
+    (VU0 status sign flag after the last subtract). Hit tests i3d<A><B>Test return 1 / 0;
+    intersections (i3dLine/Ray/SegSphereTest 0x235128.., i3dLineCylinderTest 0x235be8 and its
+    Ray / Seg / CylLine forms) return 0x111 with bit 0 cleared when the entry t is before the start and
+    bit 4 when the exit is past the end. i3dLineCylinderTest is really a capsule test (side wall
+    within 0..|axis|, then the end spheres) in the frame of i3dVecOrthoBasis 0x235688.
+    The flat-capped cylinder cyl..cyl + axis (radius cyl.w, like i3dCylinderSphereTest 0x2354b8)
+    has its own family: core i3dLineFlatCylinderCoreTest 0x235768 (h in f12, r in f13, centre,
+    axis: cap-plane crossings within r, then side-wall roots between them), Line / Ray / Seg forms
+    0x236168 / 0x236228 / 0x2362a8, hit tests with (cyl, axis, p, d) i3dFlatCylinderLine / Ray /
+    SegTest 0x2355c8 / 0x235608 (utlHitCheck) / 0x235648, and capsule forms CylLine / CylHalf /
+    CylSeg 0x236348 / 0x236400 / 0x2364f0 that grow the cylinder by p.w (height by 2 p.w; the
+    last two first test the start sphere). i3dCylHalf / CylSegCylinderTest 0x2367a0 / 0x236870
+    grow the capsule. Distances cover Line x Line / Ray / Seg, Ray x Ray (i3dRayRayDist2 0x233de8,
+    code outside any function) / Seg, Seg x Seg. Hidden: 0x233de8, 0x236348, 0x236870 (each after a
+    `b` into the previous body's epilogue).
+  - **Texture and CLUT objects** (`i3d/i3dtex.cpp`, 0x2184c0..0x21a120, written 2026-10-22, verify;
+    33 functions incl. 4 hidden TEX1 setters 0x219dd0..0x219e30). Both start with their
+    I3dVramHandle (+0 m_image = the object, +4 size: texture pages / CLUT 4-block units, +0x10 kind
+    1 texture / 2 CLUT, +0x14 static). A texture (0x130): +0x18 TEX0 (no TBP0 base, no PSM), +0x20
+    TEX1, +0x28 TEX2 (PSM << 20), +0x30 / +0x38 MIPTBP1 / 2, +0x40 seven 0x20-byte levels {BITBLTBUF
+    (SBP = DBP = block offset), TRXREG, data, qwc, block offset, buffer width}, +0x120 levels, +0x124
+    width, +0x128 height. A CLUT (0x38): +0x18 TEX0 bits (CPSM << 51 | CLD 4 | 0x13 << 20), +0x20 TEX2
+    bits (CPSM), +0x28 palettes, +0x2c colours, +0x30 upload PSM (24-bit colours: CT24 into a CT32
+    CLUT), +0x34 data. Made by DogTexInfo: i3dTexSetTim2 0x2193f0 / i3dClutSetTim2 0x219ab0 from a
+    TIM2 picture (levels laid out with i3dPsmBlockEnd 0x218e10, the GS page block tables 0x302220..),
+    i3dTexSetDesc 0x2197c8 for an image already in VRAM (static, no upload). Transfers: host -> VRAM
+    0x218fa8 (A+D BITBLTBUF / TRXPOS / TRXREG / TRXDIR, IMAGE GIF + REF tags of <= 0x7fff qwords),
+    CLUT 0x2190c8 (16-wide, 256 colours per image), page moves 0x2192c8 (TRXDIR 2); a moved CLUT is
+    uploaded again. PSM tables: i3dPsmTexelBits 0x218d58 (data bits) vs i3dPsmBits 0x218db8
+    (storage bits). An unreferenced PSMT8 / PSMT4 -> PSMCT32 in-place converter i3dTexSwizzle
+    0x218778 with its block / page helpers (tables 0x301e78..0x3020b8). Before 0x2184c0: utility code
+    (`utl/utlmisc2.cpp`, 0x217f10..0x2184c0), then back from 0x217f10 the debug menu (DBGFLAG.BIN /
+    DBGSTEP / DBGITEM / DBGAREA, 0x216ad0..0x217f10, debug/naga_debug territory, unported: retail-dead).
+  - **The frame environment** (`i3d/i3denv.cpp`, 0x21a120..0x21a3e8 fog and 0x21ac80..0x21b220
+    lights, written 2026-10-22, verify). Fog: `I3dFog` = colour (clamped 0..1) + near distance, fog
+    amount at near (0..1), far distance, amount at far; i3dCtxSetFog 0x21a158 takes 2 tail qwords
+    (`I3dFogState`: FOGCOL = r | g << 8 | b << 16 at +0x10, a ramp F(z) = base + scale / z with
+    F 255 = no fog at +0x8 / +0xc, solved through F(near) / F(far)), and i3dPktMakeFog 0x21a270
+    writes a RET-tagged packet at the context head (STCYCL 1 1, UNPACK V4-32 to TOPS of a VU1
+    command buffer: 0x11 kick (A+D FOGCOL), 0x190 copy the ramp qword to VU address 0x3f8, 0x0a end;
+    then MSCAL 1) whose address the layer CALLs (i3dPktCallFog). Lights: a description and a created
+    light share one 0x40 layout: ambient qword, then (count, list) pairs at +0x10 / +0x18 / +0x20 /
+    +0x28 / +0x30 for five kinds -- parallel (0x20: direction normalized, colour), point (0x20,
+    copied), spot (0x40: position, direction normalized, colour, inner / outer half angles in
+    radians clamped to 0.001..pi/2 - 0.001 with inner <= 0.95 outer, turned into cos outer,
+    1 / (cos inner - cos outer), cos^2 outer, 1 / sin outer), kind 3 (0x30: direction normalized +
+    two vectors) and kind 4 (0x30, copied); +0x38 the context on a created light.
+    i3dCtxCreateLight 0x21b148 builds them in the order parallel, point, spot, kind 3, kind 4,
+    skipping kinds with a NULL list. The normalizer is 0x2375d8 (i3dVecNormalize2, the second
+    vector-module copy).
+  - **The packet writers** (`i3d/i3dpacket.cpp`, 0x21b220..0x21c960; 20 of its 54 functions were
+    folded into the one before and created in Ghidra): draw-set list helpers, i3dPktDmaTag (tag top
+    byte 0x10 CNT / 0x30 REF / 0x50 CALL), i3dPktDirectTag 0x21b4d0 (VIF FLUSHA + DIRECT qwc, the
+    prefix of every GIF packet), i3dPktSetReg (A+D), ALPHA modes (jump table 0x3027c0), i3dPktClearZ
+    0x21b6c8 (a TEST_1 = alpha NEVER / fail ZB_ONLY full-screen sprite), and one writer per GS
+    primitive in two families: *F writers 0x21b7c8..0x21c0fc take float vectors (PACKED GIF tags at
+    data 0x302850..0x302898; XYZ = ftoi4(v * screen scale 0x2db340 + offset 0x2db330), set by
+    i3dPktSetScreenScale / Offset 0x21c120 / 0x21c100; colour = ftoi0(v * (255,255,255,128)) or
+    textured * 128 (data 0x3026c0 / 0x3026b0); UV ftoi4), and REGLIST writers 0x21c140..0x21c8c4 on
+    values from i3dPackXYZ / RGBAQ / UV / ST (PRIM first; some leave a NOP slot unwritten). Every
+    primitive sets ABE; the GIF tag's PRIM decides the name (Flat / Gouraud, Tex UV (FST) / ST).
+    0x21c960.. is `i3d/i3dvu1pkt.cpp` (VU1 packets, below).
+  - **VU0 microprogram** (data 0x2949f0, `python vudis.py 2949f0 9c <addr>`): 0 the 4x4 multiply
+    (vf4..7 = a, vf8..11 = b, result in vf8..11); 0xc8 a subroutine: vf12..15 = box rows (vf8..11)
+    x matrix (vf4..7); 0x96 box culling (corners = vf15 +- vf12 +- vf13 +- vf14, CLIP each, vi2 =
+    AND of the 6-bit outcodes: non-zero = all outside one plane); 0x69 the same with vi2 = OR (any
+    corner outside).
+  - **The view** (`i3d/i3dview.cpp`, I3dView 0x400 bytes from the tail): i3dCtxCreateView(ctx,
+    MagViewParam, camera matrix) copies the record's frustum (near, far, l, r, b, t) and screen part
+    (zmax / 16, zmin / 16, x0, x1, y0, y1, offx, offy), widens degenerate ranges (0x226410 to 0.5
+    pixel, 0x226498 to near / 10000), and builds three perspective frusta onto the NDC box
+    +-(w / (w + 2)) x +-(h / (h + 2)) x +-1: the guard band (l / r / b / t extended so the screen
+    rectangle's offset x / y map to 64 .. 4031.94; +0x160 proj, +0x1a0 camera * proj, +0x1e0
+    viewport), the screen rectangle (+0x220 / +0x260 / +0x2a0) and the draw frustum between them at
+    ctx +0x12128 (0.35) of the way to the guard band (+0x120 proj, +0x40 camera * proj, +0xa0
+    viewport, +0x0 world -> screen, +0x80 / +0x90 the viewport's scale / offset). Viewports map the
+    NDC box to screen x / y and z zmax / 16 (near) .. zmin / 16 (far), the z range widened by 1/4096.
+    +0x2e0 / +0x320 side-plane matrices (inward normals of the rectangle's / guard band's frustum
+    through the eye), +0x360 depth matrix (z - n, f - z, (z - n) / (f - n), 1), +0x3a0 the inverse
+    camera, +0x3e0 -normalize(inverse row 2), +0x3f0 SCISSOR_1 from the record's unwidened
+    rectangle, +0x3f8 the packet address. The packet: REF of the view's first 10 qwords (UNPACK to
+    VU1 6 + TOPS), RET with 6 qwords to 0 + TOPS (0x11 / 2 header, A+D SCISSOR_1, rows 400 / 0x3fa /
+    0x3f9 and 400 / 0x3ec / 0x3e2 round the eye direction), UNPACK S-32 (10, 0) to 0x10, MSCAL 1.
+    Tests: i3dViewTestBox 0x2268b0 (0 out / 1 inside the guard band / 2 clip), i3dViewTestBoneBox
+    0x226920 (bone boxes' AABB), i3dViewTestSphere 0x226ad8 (hidden, no caller), i3dViewGetDepth
+    0x226c18. i3dCtxCreateOrthoView 0x2273d8 (no caller) is the same body with i3dMatMapBox
+    projections and no plane matrices.
+  - **Groups and nodes** (`i3d/i3dlayer.cpp`): a group (0x30: list head key / first / 0 / last,
+    +0x10 ctx, +0x14 sort function index into data 0x3031f0 {none, i3dSortList, i3dSortList, NULL},
+    +0x18 order 1 asc / 2 desc, +0x1c param, +0x20 the open node, +0x24 count, +0x28 packet bytes).
+    An empty list's last node is its head (appending writes head->first). Nodes: packet nodes (0x10:
+    +8 start, +0xc end; the run links them with NEXT tags) and call nodes (0x20: +8 = 0, +0xc
+    callback, args from +0x10): run sub group 0x224418 (layers in the root), stop 0x224438 (returns
+    1; i3dCtxRunGroup appends it with key -1 ascending / 0 otherwise, then sorts), channel packet
+    0x224620 (clears ctx +0x12158[ch], links +0x14..+0x18), state CALL 0x224440 / state + packet
+    0x2244f0 (a DMA CALL of the channel's state packet only when ctx +0x12158[ch] differs), clear
+    state, print, user call (0x224698: func(a, b), non-zero stops). Begin/End pairs per kind, each in
+    an aligned flavour (start = head 128-aligned, head after = 128-aligned past the end tag) and an
+    unaligned one. i3dSortList: < 32 nodes a cocktail sort of (key, node) pairs in the scratchpad,
+    else a 4-pass 8-bit LSD radix sort over two 256-bucket arrays (0x70000000 / 0x70002000).
+  - **Layers** (0xe60): list head of draw-set nodes (1 qword: key = sortable depth, +8 the set),
+    +0x14 256 hash buckets of draw sets (circular {+4 next, +8 prev}; a hit moves to the front),
+    +0x414 256 words cleared and never read, +0x814 ctx, +0x818 the current set's group (Begin /
+    EndSet write there), +0x81c the layer's own group (key 0 i3dLayerBeginPacket, key 1 the draw
+    call node = i3dCtxDrawTexturedLayer, key 2 the post packet, key 3 the sub-layer group +0x820),
+    +0x824 default set (empty description), +0x828 current set, +0x82c light / +0x830 fog / +0x834
+    view, +0x838 0x62 doubleword pairs (setters 0x223458.., no caller). A draw set (0x38): hash,
+    links, group (from the description's +0xc / +0x10 / +0x14), +0x10 per-slot 6-qword TEX0 / TEX1 /
+    TEX2 / MIPTBP1 / MIPTBP2 packets, +0x14 use counts, +0x18 layer, +0x20 depth, +0x24 texture
+    numbers, +0x28 count. The texture-set description (0x18) is hashed word by word (not the
+    pointer) plus its texture numbers, folded to a byte. i3dTexRegsSet adds TBP0 (block << 5) to
+    TEX0 and the three MIPTBP fields, CBP (CLUT block << 2, plus the CLUT index scaled by the CLUT
+    size for PSMT8 / PSMT4; CSA = index & 0xf for PSMT4) -- the bits per pixel from 0x218db8.
+  - **The context** (`i3dContext`, EE 0x12168): +0 texture VRAM heap (GS pages), +0x70 CLUT heap
+    (4-block units; i3dCtxSetup(ctx, 0x158, 0xa8) gives textures 0xa8 - 0xb = 0x9d pages from page
+    0x158 and CLUTs the 0xb pages after them), +0xe0 the frame's root group, +0xe4 / +0xe8 frames and
+    next frame, +0xec / +0xf0 buffer, +0xf4 head (packets grow up) / +0xf8 tail (work objects grow
+    down: groups 0x30, layers 0xe60, list nodes), +0xfc / +0x100 texture table (16-byte entries: +4
+    texture handle, +8 CLUT handle), +0x118 the frame's packet, +0x11c / +0x911c 0x200 VRAM nodes per
+    heap, +0x1211c reserved draw sets, +0x12120 end hook (default: DMA END tag), +0x1212c VRAM
+    overflow (EndFrame returns 9), +0x12154 the open DMA tag the next run links from.
+  - **A frame**: BeginFrame takes buffer share idx of count (head 128-aligned in the uncached
+    segment), makes the root group; MagScene::draw makes layers (`i3dCtxCreateLayer(ctx, float
+    key)`, key bits made unsigned-sortable) and sets each one's light set / fog / view
+    (`i3dLayerSetLight` / `SetFog` / `SetView` 0x223240 / 0x223250 / 0x223260: layer +0x82c / +0x830 /
+    +0x834; getters 0x223270..0x223290 read +0x824..+0x834; the view from `i3dCtxCreateView`
+    0x226c58(ctx, MagViewParam, camera matrix), the light sets from 0x11262c over the light pool)
+    and register packets (`i3dLayerBeginPacket` 0x223378 -> `i3dPktSetReg(pkt, reg, value)`
+    0x21b550, one A+D write, 3 qwords -> `i3dLayerEndPacket` 0x223398, both on the layer's group
+    +0x81c); EndFrame -> 0x224798 opens the chain (0x21b698), runs the
+    root group (0x2246c8: sort, link packets, call node callbacks), then the end hook. A layer's
+    callback `i3dCtxDrawTexturedLayer` 0x21f4d8 sorts its draw sets and reserves their textures in
+    runs of equal (+0x20 float, +0x2c key); full heaps flush the run so far (compact, VRAM transfer
+    packet: GS local copies of moved blocks, uploads of new ones, TEXFLUSH, a CLUT-reload TEX0 from
+    data 0x2f2b70; then each set's TEX0 / TEX1 / MIPTBP A+D packets via 0x224b28).
+  - **The VRAM heap** (0x70; nodes 0x44 on six intrusive {prev, next} lists: 0 address order, 1 LRU,
+    2 locked, 3 evict, 4 new, 5 moved; flags 1 free, 0x10 owned, 0x100 locked, 0x1000 evict, 0x10000
+    new, 0x100000 moved, 0x1000000 sentinel): reserve = lock resident blocks, allocate the rest
+    first-fit from the LRU tail along address order, else evict unlocked LRU blocks into one block
+    at the start and let compaction move everything (moved down -> list head, up -> tail).
+    0x2281c0's third argument (a2) is the sentinel: 0x228528 leaves it there from its loop.
+    Unreferenced: 0x2289e0 (clears +0x64..+0x6c), 0x228320 / 0x2283e8 (evict-window searches).
+    Block nodes come from a stack the ROM never checks for underflow (0x227cc8); i3dVramReserve
+    locks i3dVramAlloc's result unchecked (a NULL on a fragmented heap faults on the EE; the port
+    skips it, marked PC:). Handles sit at +0 of the 0x130 texture / CLUT objects (0x219e58 memsets
+    0x130, then i3dVramHandleInit 0x227c90; release 0x219a98 / 0x219c70 -> i3dVramHandleRelease).
+  - **Hardware**: i3dInitHardware sends REFs of the VU1 microprogram (data 0x2912b0, 0x354 qwords,
+    plus STCOL 1.0 / STROW 0) on VIF1 and the VU0 one (data 0x2949f0, 0x9c qwords) on VIF0.
+  - **VU1 packets** (`i3d/i3dvu1pkt.cpp` 0x21c960..0x21eb28, 2026-10-27): the VU1 image's entry 8
+    (MSCAL 8) is a dispatcher: it jumps to the address in TOPS+0.x (a writer puts it there with
+    UNPACK S-32); MSCAL 1 runs a command list at TOPS (qwords: program, args; program 400 = 0x190
+    copies state, 0 ends). Permanent state: the CALLed view's world -> screen at 0x3e2..0x3e5,
+    world -> clip 0x3e6... **Sprites** (mnuBase): i3dPktBeginVu1Sprite 0x21e5a0 (view, fog CALLs;
+    GIF template to 0x3f4: NREG 4 FOG / ST / RGBAQ / XYZ2, PRIM 0x4d fan | TME << 4 | FGE << 5;
+    colour scale to 0x3f5 = data 0x3026b0 (128) textured / 0x3026c0 (255, 128 alpha)),
+    i3dPktVu1Rect 0x21e488 (u0, v0, u1, v1 to 0x3f1), i3dPktVu1Matrix 0x21e428 (three rows to
+    0x3ee), i3dPktVu1Sprite 0x21e690 (colour TOPS+1, centre TOPS+2, 0x712 to TOPS+0, MSCAL 8):
+    microprogram 0x712 = corners centre +- 0.5 row 0 +- 0.5 row 1 (loi 0.5), through 0x3e2,
+    Q divide, ST = rectangle corners, colour * scale ftoi0; (-0.5, -0.5) takes (u0, v0). Unreferenced
+    helpers 0x21e4e8 / 0x21e520 upload the view inverse (scaled) as a billboard matrix. **Strips**:
+    i3dPktDrawStrip 0x21db18 (pkt, matrix, count, stq, colours, xyz, adc) and i3dPktDrawStripColor
+    0x21db40 (one colour instead) shuffle registers and jump to 0x21c960: set-up (matrix to 0x3d2,
+    GIF template, scale), chunks of <= 0x50 positions inline to 0x1dc, STQ / colours inline behind a
+    NEXT tag and REF'd 20 at a time (two shared), ADC as vertex indices (bit 15 = no kick; default
+    lists data 0x3026d0), then a REF of the 4-qword command 0x302970 / 0x3029b0 whose GIF tag is a
+    triangle strip (PRIM 0x4c / 0x5c with STQ).
+    **Clipped line strips** are not VU1: i3dPktDrawStripCtx 0x21dd10 (pkt, layer, matrix, count,
+    stq, colours, xyz, adc) and i3dPktDrawLineStrip 0x21e1d8 (one colour, 255 / 128 alpha scale)
+    transform each segment by matrix * view camera * RectProj on the CPU, skip it when adc[i + 1] is
+    set or both w < 0, clip it with i3dClipSegment 0x21db90 (six planes against +-|w|, VCLIP flags
+    from i3dVu0ClipPair 0x21db60; STQ / colour at +0x10 / +0x20 interpolated), RotTransPers through
+    RectViewport and write GIF lines (i3dPktLine / GouraudLine / GouraudTexLineST). Wire shapes
+    0x21e6f8 / 0x21e8f8 / 0x21e9f8 feed them: sphere = three 8-step circles from the centre (colours
+    data 0x302a30), box / shape = 16-point cube path 0x302a68 with ADC 0x302aa8 skipping 3 jumps.
+    0x21cfb0..0x21db18 (four functions) have no code or data references: dead.
+- The scene's first 0x2000 bytes are 256 **wall segments** (two (x, y, z, w) ends each):
+  `MagScene::castWalls` 0x133a0c tests a level ray against those whose height range covers the ray's
+  y with `i3dRaySegDist2` 0x234050 (squared ray-segment distance 0 = a hit) before `castRay` 0x133454
+  falls back to the sky slots' collision models (`DogModel::castRay` 0x11440c on model 2).
+  They are the scene's **private collision** (MAX_PRIVATE_COLLI 256): `addPrivateColli(p1, p2)`
+  0x135e20 takes the first free one (free = equal end heights, so p1.y != p2.y is asserted),
+  `removePrivateColli` 0x135f44 zeroes both heights. The other wall tests: `hitWallsSphere`
+  0x133b80 (radius, height range covering pos.y) and `hitWallsCylinder` 0x13386c (radius, height h <
+  0 below pos), both with `i3dPointSegDist2` 0x2337e0 on the segment taken at pos's height; the
+  movers call `castSphere` 0x133658 (walls, then sky slot 0's DogModel::castSphere 0x1145c0) and
+  `castCylinder` 0x133d10 (walls, then DogModel::castCylinder 0x1149d4 on one or all sky slots).
+- The scene's 0x2000 **strip records** (+0x437e0, MagSceneStrip) are a debug-draw queue drawStrips
+  empties: adders 0x133e94 (type 0 strip with colours, life), 0x133efc (type 1), 0x133f68 (type 2
+  line strip, one RGBA colour as r, g, b / 255, a / 128), 0x134114 (3 wire box), 0x1342bc (4),
+  0x134460 (5 wire sphere, radius in m_color[0]), setStripColor 0x1344c4, addStripRecord 0x134624.
+  Only types 0 and 2 have callers (0x11e0d8 / 0x11ea04, the PC mover); the rest sit uncalled in the
+  ROM (six of them were folded into 0x133f68's body until session 4 split them).
+- The scene (`MagScene`, +0x12540): 128 actors of 0x4d0 at +0x2920 (vptr +0x94), actor flags at
+  +0x29120, light set +0x2050, view objects +0x2734[4], camera mode +0x2ad50, `MagLifePC` at
+  +0x2adc0 (the player; vptr +0x14), `MagLifeBwn` at +0x2afe0 (Brown). Chapter archives
+  `data/ch/NN/CHAPNN.RPK` (sdata 0x2961a8) feed `MagSystem::loadModel`.
+  Scene map from the constructor 0x1360a0 (magscene2 session, 2026-10-22; word index x 4 = offset):
+  +0x2330 `MagLifeMan` (64 x 16-byte entries + head, priority-sorted), +0x29520 `DogTexInfo`
+  (256 textures, shadow01 from rodata 0x2ed500 first), +0x29540 four sky ("tenkyu") slots of 0x520
+  (buffer +0, three DogModels at +0x10 stride 0x1a0, id +0x4f0 (-1 free), sky i3r +0x504, its
+  node matrices +0x508, spins +0x50c, node count +0x510; released by 0x1386d4 / 0x13ff00), +0x2aa10 two 0x38-byte view records (near 5,
+  far 2000, +-5.12 x +-4.48, z 65530..1, screen 0..511 x 0..447, offset 1792 / 1824), +0x2aae0
+  four 0x20-byte i3d fog records (colour vector + four floats; i3dCtxSetFog 0x21a158), camera
+  target pos / at at +0x2ada0 / +0x2adb0, `MagLifePC` +0x2adc0 (<= 0x220), `MagLifeBwn` +0x2afe0
+  (0xd40), `MagLifeBwnCtrl` +0x2bd20 (0x130; its state word at +0 is MagSystem::getBwnState's),
+  the menu words +0x2be50 (`m_menu_id`, -1 none), +0x2be54 (arg), +0x2be58 (`m_menu_result`, the
+  menu's last processPad), +0x2be5c (`m_pMenuBase`, the asserts' name), the MagLifeMenu* objects
+  +0x2be60..0x40780 (Item, Map, Stock, Save, Load, Title, Opt, Movie,
+  Mcd, Now, Board2D, SelLang, each vptr +0x14), the faders `MagLifeFader` +0x41850
+  (mag/maglifefader.cpp 0x12f008..0x12f298; fade kinds 0 / 4, colour +0x38 0 / 0xff; frame +0x30,
+  time +0x34; states 1 / 8 opaque, 2..3 alpha 0x80 -> 0 then 4, 6..7 alpha 0 -> 0x80 over time - 2
+  then 8 after time, 4 / 5 nothing; one full-screen untextured sprite at key 0 in the life layer,
+  ALPHA 0x44) and `MagLifeFadeKeyHole` +0x41890 (mag/maglifefadekey.cpp 0x12f298..0x12fca8, vtable 0x2e1cf8;
+  kinds 1..3 and MagScene::openFadeKey / setFadeKeyMagnify; frame +0x30, time +0x34, tex +0x40,
+  magnify +0x44 with ramp +0x48 -> +0x4c, view shift +0x50; a picture of data/evntex/EVNTEX.RPK
+  -- file 0 g1waynozoki blind slats, 1 kabeana1 wall hole, 2 kagiana1 keyhole, all 512 x 512
+  8-bit / 32-bit CLUT black masks with the hole in alpha -- added as "kagiana_tcc" whatever the
+  file and drawn as one full-screen textured sprite, UV centre (256, 256) +- 256 / magnify; the
+  state's colour / TEXA ramps cannot show on these pictures, the magnify does the opening), the screen noise `MagLifeNoise` at
+  +0x418f0 (mag/maglifenoise.cpp 0x130a2c..0x130ee8, life priority 0x8004: while
+  `GamMan::setVolume`'s scaled volume is non-zero, render lays four full-screen sprites of the
+  noise texture -- common texture 1 -- in a draw set of depth 1 at key 895: RGBAQ register
+  (0x20, 0x20, 0x20, 0x3f), CLAMP repeat, random UV windows of sizes 400 / 600 / 888 / 1000,
+  ALPHA_1 0x61 / 0x64 alternating with FIX = volume / 4; the sprites' REGLIST data carries no
+  RGBAQ, so the host i3d module latches the register, GsState::rgbaq; it also follows CLAMP_1,
+  GsState::clamp, and draws REPEAT sprites with RosePan_RendererDrawImageQuadWrap, which wraps the
+  UVs and widens a full-frame one to the window -- clamped, the grain showed only in the corner of
+  the frame whose UVs fell inside the texture. The volume is the options screen's Noir Filter:
+  setOption 1's level 0..8 -> m_masterVolume 32..224 -> setVolume -> FIX 8..56, so the option
+  acts only through FIX. The renderer draws those FIX blends in two passes (DrawFixWeightedQuad:
+  0x64 = Cd*(1-F) + Cs*F, 0x61 = (Cd - Cs*F/(1+F))*(1+F), F = FIX/128); before 2026-10-29 it
+  fell back to a plain source-alpha blend and the grain was the same at every level), the 2D layers `S2dCineSco`
+  +0x41930, `S2dBg` +0x42260, `S2dMes` +0x42bb0 (all MagLife, level 7, life priorities 0x8006 /
+  0x8000 / 0x800a), the current fade record +0x43700 (six words: kind, mode, time, -, -, level;
+  `MagScene::setFade` 0x1311f4, `getFadeState` 0x131550 maps the fader state to 0..6) and the
+  system message window +0x43718, objects at +0x837e0 (ctor 0x176a3c), `S2dMovie` +0x84aa8 (spr/s2d.cpp), +0x8542c
+  (0x17c0f0), `MagSceneIFMap` / `MagSceneIFChara` at +0x854e0 / +0x854e8 (bss 0x781260 / 0x781268; 8 bytes each: `m_scene_ptr` set by start, then the vptr at +4 -- base MagSceneIF, only a virtual dtor; mag/magsceneif.cpp, written 2026-10-29: their methods read the map / character loader index, and the actors' motion names, motion counts and model nodes by actor index (m_actors[theCharaID]); debug/motnamecnv*.cpp wrap them), Brown / PC actor
+  numbers +0x853b4 / +0x853b8. Every MagLife has `m_scene` at +0x20 and the vptr at +0x14;
+  MagLifeControlChara's bound actor is +0x58 (`m_actor`).
+- **The scene's constructor** (0x1360a0, written 2026-10-22): besides its members' constructors it
+  sets 256 vector pairs at +0x0 to (0, 0, 0, 1) (resetEntities clears their y), the shadow mode -1,
+  +0x22a0 0.8 / +0x22a4 1.03 / +0x22a8 0.4 / +0x22b0 1 / +0x22b4 1, +0x22bc[4] -1 (m_dbg_window: per debug level 0..3 its m_window slot, openDebugWindow 0x14324c / closeDebugWindow 0x143430, both without callers in retail), every sky slot's
+  m_id -1, the strip records free, m_focus_actor -1, +0x2a9c8 3, +0x2aa84 1, +0x854b0 (0.1, 0.1,
+  0.1, 1), +0x854d4 / d5 1, and m_pc_no **0** (not -1). The camera's inline constructor gives a
+  pi/3 lens (+0x140, 0x3f860a92) and 115 at +0x144; DogEntity's inline one gives (0, 0, 0, 1)
+  translation / rotation / offset / +0x80, scale 1, dirty. Text windows: see "MagLifeWindow" below;
+  MagScene::setWindowShow passes its flag to setHide.
+- **MagLifeWindow** (`mag/maglifewindow.cpp` 0x12fca8..0x1308bc + linkonce 0x285234..0x2852ec, all
+  written 2026-10-29, `verify`; EE 0xe0, base MagLifePos 0x2e1db8 <- MagLife). A life in the scene's
+  MagLifeMan (openWindow adds it with 0x800c): slot 2 live 0x12ff84 counts m_timer +0x80 down (the
+  scene's sub mode 2 closes a window at 0; setTimer / getTimer are the ELF's names), slot 6 render
+  0x12ff9c steps the alpha fade (+0xac time, +0xb0 step, +0xb4 max, +0xb8 min, +0xbc current ->
+  m_alpha +0xa8) and draws the font texture m_tex_no +0xc0 as one TexSpriteUV at GS (0x700 + x,
+  0x720 + y) .. + (m_w +0x94, m_h +0x98), uv m_uv +0x84..+0x90, colour +0x9c..+0xa4, set depth
+  60000, BeginSet key 950, TEXA 0x8000, TEST 0x31003, ALPHA 0x44. The asserts name +0xc4 m_fntman,
+  +0xc8 m_ch_w, +0xcc m_ch_h (the font's cell; getFontH), +0xd0 m_buf_w, +0xd4 m_buf_h (its buffer;
+  setFontManager copies them and sets m_uv to the whole buffer); +0xd8 / +0xdc the text cursor.
+  drawText 0x130258 is Shift-JIS with 10 = new line and a leading 0x11 = centre each line in m_w;
+  print 0x1305ec reads bytes signed (lb), so only ASCII draws. MagLifePos: m_pos +0x30, m_speed
+  +0x40, m_accel +0x50 (updatePos / updateSpeed), two more (0,0,0,1) vectors +0x60 / +0x70.
+- **The scene's frame** (`mag/magscenerender.cpp`, pinned 0x139540..0x13c328, 2026-10-22;
+  all 20 written, `verify`). `MagScene::draw(ctx, dbuff, frame)` 0x13bcc0:
+  setTexTable when DogTexInfo +0x10 (dirty) is set; rebuilds both view records' frustum from the
+  camera's lens angle (DogCamera +0x140 -> getLensFov 0x10fac0, a 13-point curve; tan(fov / 2) x
+  -0.5 x near, height x 0.75) when it differs from +0x2aa80; one view (camera matrix) and the fog
+  (+0x2aa84 / fog record 0); then **eight render stages** at depth 500, one per light set
+  (`DogLightPool::createLight` 0x11262c on the pool at +0x2050; sets 1 and 2 scaled by +0x22a8),
+  each with FBA 0, ALPHA 0, TEST 0x5001d, TEXA 0x80, PABE 0. getDrawFlags 0x13963c (sub mode word
+  +0x22d0: 8 -> nothing, 7 -> 0x200, else 0x101): bits 0xff00 = actors (collectActors 0x13b2ac:
+  alive, shown, flag bit 3 == bit 9; key 0x10000 parented + 65535 - camera distance, PC 0;
+  sortActors ascending; drawActors into the stage of each actor's light id, mirror pass first);
+  bit 0 = the world (strip records +0x437e0 x 0x2000 of 0x20 bytes, the sky dome 0x1406b8 at 490,
+  the sky models' first model, MagLifeMan::draw groups 0 / 0x4000, the blob shadows at 800 when
+  +0x2a9c8 bit 1, then the projected shadows (actors with flags & 0x60 == 0x60, layers 700 / 705 +
+  10 n, at most 10, the STQ map +0x2aa90 on the sky's second models) or, when +0x2a9c4 >= 0, that
+  actor's close-up at 1000 (a 256-wide target, FRAME fbp 0x118), and 0x177830 on +0x837e0). Always:
+  S2dMovie::drawMovie, a layer at 900 (light set 6, TEST 0x5000d) for MagLifeMan group 0x8000, the
+  focus effect 0x140e88, S2dMovie::draw. The mirror: mapparam.bbb words 9 / 10 at +0x85494 (axis
+  mode 1 z, 2 y floor, 3 x) / +0x85498 (the plane, a float); drawActorMirror reflects the root
+  entity when the camera is on the actor's side. The camera at +0x2ab70 is a `DogCamera`
+  (dog/dogcamera.h; vtable 0x2e1fb8, view matrix +0xf0, angle +0x140); actors are drawn with its
+  m_rotate (+0x2abc0) and m_trans (+0x2abb0). Dog vtable slots seen here: DogModel 2 transform,
+  4 getParent, 8 / 9 setHide / isHide, 11 cull 0x114e38, 12 draw (0x1151f4; DogActor 0x10e5c0),
+  13 drawUnitMatrix 0x1152a8; DogActor 18 getNodeWorldPos, 19 drawModel, 20 drawShadow.
+- **Projected shadows on the host** (2026-10-28): rosepan_i3d follows FRAME_1; the models replayed in
+  the shadow target (fbp 0x118, XYOFFSET 0) are one renderer shadow caster episode per pass (the
+  atlas in rosepan_renderer.cpp, inherited from ReiPan / MioPan's gra3dShadow host), closed when
+  XYOFFSET returns to the display (drawActorShadow's putDrawEnv), so the episode matrix is the
+  light's camera. The receivers are the map pack's file 2 (MagSceneTenkyu m_model[1]), whose one
+  material layer has an STQ slot replaced by MagScene +0x2aa90 (kind 3); rosepan_i3dmesh draws such
+  layers as shadow receivers only after a pass that cast. A shadow's darkness is the receiver
+  vertex's alpha under the pass's shadow light (rosepan_i3d.cpp LightSetFor keeps its spot): the
+  light is black, ambient w 0, strength in the colour's w, so alpha = strip w x sum(c.w x f), f =
+  max(0, n.d) directional, cone x clamp01(n.l) / |L| spot (micro 0x19a, "Mesh lighting and fog"). A
+  surface turned away from the light or outside the cone takes no shadow; point shadows fade as
+  1e6 / d^2 x m_22a0 x m_2a9cc. Directional on a floor is nearly the bare strength (bus stop: 0.386
+  against 0.4). Silhouette At is 0x80 (FBA), so the texel adds nothing. Receiver meshes are dense
+  enough for this: a median of ~60 vertices within 100 units across the 261 rooms.
+- **Projected shadows** (`MagScene::makeActorShadow` 0x139b4c): per shadowed actor a layer at 700 +
+  10 n drawn into the 256 x 256 target at fbp 0x118 (sprite clear to black, FBA 1, the actor's
+  DogActor::drawShadow under an ambient-only light (0, 0, 1, 0), then a post packet
+  (`i3dLayerBeginPostPacket` 0x2233e8, draw-group slot 2) with four black border lines,
+  `i3dPktLine` 0x21c538). The light: scene +0x2040 `m_shadow_mode` (set with +0x2044 by
+  `MagScene::setShadowLight` 0x13fbe4; < 0 = none, the constructor's value): 1 = the pool's
+  directional light (+0x2044 points at it; eye ten clip radii back), else the actor's nearest point
+  light (`DogLightPool::findNearestPointLight` 0x1129cc over the actor's light set; DogActor +0x160
+  / +0x164 / +0x168 = current light, previous light, frame counter: a change fades the old light out
+  over 30 frames and the new one in over 30; the eye is kept three clip radii away and at y <= 0).
+  Writes the STQ map (+0x2aa90 = texture matrix [[1,0,0,0],[0,1,0,0],[t,t,2t,0],[0,0,0,1]] x the
+  light's view, t = tan of the clip sphere's half angle) and the scene's light record +0x2000
+  (`MagShadowLight`, 0x40: directional = direction, colour (0,0,0,I); spot = position, direction,
+  colour, cones +0x30 = t - 0.1 / +0x34 = t capped 0.7; I = m_22a0 x m_2a9cc, for points x 1e6 /
+  distance x fade), which setShadowLight hangs into the shadow layers' light description +0x2a9d0
+  (kind list 1 for directional, 3 for spot). View record data 0x298cb0, up vector 0x298cf0 = (1, -1,
+  1, 0). `DogLightPool` (+0x2050, `dog/doglightpool.cpp` pinned 0x1103dc..0x112b08): per-kind light
+  arrays at +0x00 and counts at +0x18 (kinds from the assert strings at 0x2e86d0..0x2e87c0:
+  DOG_LIGHT_AMBIENT 0 (0x10 stride, a colour), DIRECT 1 (0x20: direction, colour), POINT 2 (0x20:
+  position, colour), SPOT 3 (0x40)); eight light sets, `m_set_mask[set][kind]` at +0x48 (6 words =
+  0x18 per set; bit i = light i). `createLight` 0x11262c takes the set's first ambient (x scale, alpha
+  1), up to 8 direct and 16 point lights into an I3dLightDesc and calls i3dCtxCreateLight; its flag
+  argument (MagScene +0x22cc) runs `dogLightToGray` 0x110bb8 (luminance 0.299 / 0.587 / 0.114) over
+  every colour -- a monochrome scene mode. `findNearestPointLight` starts from 0x7fffffff (rodata
+  0x2e87dc: the PS2's largest float, a NaN on the host; the port uses FLT_MAX).
+  The rest of the pool (written 2026-10-22, `verify`): +0x30 `m_used[kind]` = OR of every set's mask
+  (allocId's free list), +0x108 `m_data`. `create` 0x110d68 (MagScene::loadLight) allocates one
+  0x580 block -- 8 ambient, 8 direct, 16 point, 8 spot (m_num 8/8/16/8, kinds 4 / 5 none) -- not
+  cleared; `term` 0x110b78 frees it. Ids: `allocId` 0x111120 (first bit free in m_used), `addToSet`
+  0x1112a8, `removeLight` 0x1111e4, `resetSet` 0x110f78 (set < 0 = init + create), `buildSet`
+  0x111064. Light fields by `setLightParam` 0x111584 / `getLightParam` 0x111b5c (param 0 position,
+  1 direction, 2 colour, 5 spot cone angles in degrees -> radians at spot +0x30 / +0x34, with the
+  ROM's pi 0x40490fdc); `setSetLightParam` 0x112134 / `getSetLightParam` 0x1123b0 address the n-th
+  light of a set through the getters 0x110660..0x110988. doglightpool.h lines 129..132 are the
+  non-const per-kind getters, 140..143 their const twins. Per-kind tables: capacity 0x2e85d8
+  {8,8,16,8,0,0}, light size 0x2e87e0 {0x10,0x20,0x20,0x40,0x30,0x30}. `DogLightBuffer` (copyToBuffer
+  0x111460, copyLights 0x1103dc, setupDesc 0x110578): a pool set copied with its own I3dLightDesc at
+  +0x580 -- no callers in the ROM.
+  `DogLight` (`dog/doglight.cpp` pinned 0x112b08..0x114034, written 2026-10-30, `verify`; class name
+  inferred from the file): the pool's simpler cousin, **unreferenced** -- no call, jump, data word or
+  lui / addiu pair reaches any of its 8 functions (ghidra.py refs). +0x00 I3dLightDesc, +0x40 m_data
+  (one block from `create` 0x112d60, sized by `getDataSize` 0x112bc8: per kind 0x10 / 0x20 / 0x20 /
+  0x40 / 0x30 / 0x30), +0x44..+0x58 the six arrays m_ambient / m_direct / m_point / m_spot / m_hemi /
+  m_dist (the assert texts name kinds 4 DOG_LIGHT_HEMI and 5 DOG_LIGHT_DIST), +0x5c m_num[6] (ambient
+  0..1, the rest 0..16), +0x74 per-kind enable mask (init all on), +0x78 dirty word. `setParam`
+  0x112fc8 / `getParam` 0x1136d0 extend the pool's params: 0 pos (point, spot, dist), 1 dir (direct,
+  spot, hemi), 2 colour (all; set zeroes w except ambient), 3 hemi +0x20, 4 dist +0x20, 5 spot cone,
+  6 the kind's enable bit. ROM slip: setParam param 4 tests m_hemi for NULL, then writes m_dist.
+  init 0x112b08, clear 0x112b58 (term + init), term 0x112b84 (free + init), copyTo 0x113ea8.
+- **The scene's loaders** (`mag/magscene2.cpp`, pinned 0x137300..0x139540, 2026-10-22; `verify`):
+  - `MagScene::loadSystemData` 0x137330 (start's first call): data/options.txt -> `parseOption`
+    (magsceneoption.cpp, buckets at +0x4371c); data/PREMIERE.RPK's 2048-byte header, then the font
+    file (`fnt/fnt16US.bin`, a pointer variable at data 0x298b80) to +0x2908 and file 0 (the common
+    textures) to +0x2914, added with `DogTexInfo::addPfh`; texture numbers r_shadow / noise at
+    +0x290c[2] (initRender hands noise to the +0x418f0 object) and bit8a..bit8d at +0x28f4[4]
+    (bit8e is in the table, unused); then the two loaders' init.
+  - Loaders (`mag/magloader.cpp`, names descriptive): `MagCharaLoader` at +0x215c (CHARA.RPK;
+    character id = (category << 10) + n, < 0x5800, 22 categories; getIndex 0x142c88 / getId
+    0x142dac / load 0x142b18; name index `MagLoaderIndex` at +0xcc, find 0x142500 case-insensitive)
+    and `MagMapLoader` at +0x224c (data/bg/mapunit.bin, loadByName 0x142fd0). Both start with a
+    `FileReader` (+0) and its `FileReadReq` (+8). Written 2026-10-26 (all 17, 0x141e44..0x14313c):
+    CHARA.RPK is a pack of 20 packs named PC, BWN, ACTION, ITEM, FIX, ENEMY, DOOR, INST,
+    CHAP01..CHAP12 (table data 0x2eed80); init reads its 2048-byte header, then the first 0x2000
+    bytes of each sub-pack, and appends each header's entries with the sub-pack's offset added, so
+    `m_num_chara[20]` (+0x2c) / `m_chara_start[20]` (+0x7c) give each pack's entry range. Id
+    category -> pack: 8 PC, 9 BWN, 0 ACTION, 3 ITEM, 2 FIX, 5 ENEMY, 6 DOOR, 4 INST, 10..21
+    CHAP01..12 (1 and 7 none). The file stays open from init (m_close 0); load reads at the
+    entry's offset into a 64-aligned game-heap buffer. `MagLoaderIndex` (EE 0x24): m_num,
+    m_data (one heap block: sizes, offsets, name pointers, name-length bytes, then the names;
+    calcSize = num * 13 + name bytes on the EE), m_data_size, m_size, m_offset, m_name,
+    m_name_len, m_name_size, m_name_buf; create 0x141f54 (max 1024 entries), add 0x1420f8
+    (rebuilds the block, optional exchange sort of the new tail by strncmp 32), clear 0x14257c
+    (words 0..6 only), release 0x14259c. initFromPacks 0x142908 (no callers) reads the loose
+    packs data/ch/pc/PC.RPK .. data/ch/12/CHAP12.RPK (table data 0x298d80) instead.
+  - `MagScene::load(ctx, id, data, copy)` 0x1377f0 takes a map unit pack into the first free sky
+    slot (no check when all four are taken): file 0 is the model pack (its name minus the extension
+    names the other files), loaded by DogModel slot 14 into m_model[0]; the model pack's file 2 is
+    m_model[1] (slot 15) whose STQ map goes to +0x2aa90; `<name>_c.bin` (head word: count in the low
+    half, the rest offsets turned into record pointers in place), `mapparam.bbb` (int words: view
+    far -> setViewFar 0x131618, fog RGB / 255 and four params (/1, /100, /1, /100) -> m_fog[1] and
+    setFog 0x143d7c, scene words +0x854a4 / +0x85494 / +0x85498 when the file is over 0x20 bytes,
+    a factor /100 kept in 0..1 at +0x2a9cc), `<name>_col.i3s.i3r` + the next file -> m_model[2],
+    `<name>_l.bin` -> the slot's light data (loadLight 0x13f658), sky textures (0x140030, with a
+    context), the pack's `sector.sec` -> +0x8542c (0x17c1f4). Ends with setDefaultLight 0x13f8e4
+    and resetEntities 0x135fa4. Slot fields: +0x4f4 _c.bin, +0x4f8 count, +0x4fc records, +0x500
+    light data.
+  - Actors: findFreeActor / findActorById (DogActor id +0x1a0) / findActorByName; an actor whose
+    model another actor already shows is *shared* (DogActor slot 21 `shareModel`: master +0x118,
+    ref count +0x104) instead of loaded; `loadActor` 0x138ce8 loads with `DogActor::load(pfh,
+    textures, keep ? 2 : 1, m_sepia)`, then setId, 5 at +0x1d8, `ready()` (+0xf0 = 0, +0xf4 = -1).
+    A second flag word per actor sits at +0x29320. `loadModel` / `loadModelByName` take the pack
+    from CHARA.RPK; the rpk MagSystem passes is not read.
+- **Packs** (`bed/bedpfh.h`, BedPfh 0x101750..): magic "RTPK", 0x20-byte header (total size +4,
+  flags +0xa, file count +0xe), then per-file tables by flag: sizes (1), offsets from the header (2),
+  16-bit attributes (0x10, 0x20 ...), NUL-separated names (0x8000). Loaders read the first 2048
+  bytes, assert `getFileOffset(0) == 2048`, then read single files.
+- **The file reader** (`game/gamfile.cpp`, pinned 0x1be2cc..0x1beb70, written 2026-10-22, `verify`;
+  file name a guess): `FileReader` {request, own fd} runs a `FileReadReq` (0x24: fd, step, name,
+  seek offset / whence, buffer / size, close flag) as an open / seek / read / close state machine
+  (`FileReader::update` 0x1be564; `read` 0x1be524 resets the step, `resume` 0x1be548 does not) over
+  rxSysStreamOpen(0x8001) / rxFileSeek / rxFileRead / rxFileClose. m_step is (step << 1) | waiting:
+  a step with nothing to do adds 2, an issued one adds 1 and the next +1 comes once isReady
+  (rxFileSync no-wait) is idle. Returns 0 once past the close step, 1 while busy (async callers poll
+  next frame). A waiting reader draws main's now-loading object (`g_nowLoading`, sdata 0x2d8ffc,
+  0x2051cc) when one is up, else rxThSync(1) + SndMan::update. `fileGetSize` 0x1be768 (open, seek
+  to end, close, each waited out), `fileExists` 0x1be84c (open flags 1). Uncalled: three rxFileCd
+  clock wrappers 0x1be880.., `fileClockToSeconds` 0x1be8bc / `fileClockDiff` 0x1bea18 (binary
+  sceCdCLOCK bytes; the month table 0x2b8da8 has 0 for December, a ROM quirk kept).
+- 0x7b40c0: the movie player `RxMpeg` (`snd/rxmpeg.cpp` 0x1810f4..0x1830fc, `done` 2026-10-25;
+  ctor 0x1810f4 from the static initializer 0x2041f8; snd/rxmpeg.h has every member): +0 open, +4
+  playing (S2dMovie::drawMovie draws while 1), +0x10 / +0x14 hold at a frame, +0x2c / +0x30 the
+  frame buffer width / height (0x200 x 0x180), +0x34 faded out, +0x3c frame parity, +0x44 the name,
+  +0xc4 the brightness level `startPaused` saves (GamMan status 0x10) and `close` restores (option
+  0). A movie: `open`, `play(name, w, h)` (held: the ring fills) -> `isReady` 0x18176c -> `run`
+  0x181644 (scene fadeIn under sequence bit 0x8000000) -> `getStatus` 1 -> `close`; `playNow`
+  0x1814ac runs at once (MnuMovie). `checkNearEnd` 0x181780: fewer than 0x2800 bytes left (fades
+  the scene out once). Under it a C library (`rxMpeg*`, data 0x298f00.., sceMpeg at bss 0x6e9200,
+  audio channel bss 0x6e9288): movie/<name> through an rx file ring (0x60000, primed at 0x30000),
+  sceMpegDemuxPss 2 x 16 KB a frame from `RxMpeg::update` (SndMan::update), the video stream into a
+  0x80000 que (snd/unitque.cpp) that the IPU reads in 2 KB DMA units (the Nodata callback), two
+  RGBA32 pictures (voData) flipped every other frame, the SShd audio (every disc movie: ADPCM
+  0x10, 48 kHz stereo except DEATH_J 44.1 kHz; CP_LOGO has none) into a 0x20000 que fed to an
+  rxSnd stream. Status 1 = idle or ended (no picture left and the file spent). `RxMpeg::draw`
+  uploads the shown picture into the frame buffer (0xe00 / 0x12c0, 0 on odd frames), 64 lines down
+  for pictures under 448: the movie is letterboxed 512 x 336 at y 64. On the host: the shim libmpeg
+  (FFmpeg) decodes, the picture goes through `RosePan_I3dRecordMovie`, the decode loop runs on the
+  main thread (rxMpegDecodePoll) -- see the banner of snd/rxmpeg.cpp. Disc: 40 movies in MOVIE/.
+- **Room table** `WrdSrv` g_wrdSrv 0x298ee0 (wrd/wrdsrv.cpp 0x17e540..0x17f0d0; the class is the ELF's,
+  vtable 0x2e4538, built by the file initializer 0x17f038): `load(stage)` 0x17e5c0 (from
+  GamMan::loadStage; 99 keeps what is loaded) reads file "%03d" of data/wrd/WRD.BIN (RTPK, 26 stage files
+  001..013, 098..) and `setup` 0x17e798 keeps a game-heap copy. Stage file: header {u16 0x101, u16 flags
+  (bit 0 = offsets not relocated), size, index count (247: room numbers 0..246), room count (49)}, the
+  index (u32 offsets, 0 = no room; padded to 16), then 0x40-byte rooms: +0 number, +4 id name
+  "o1_cway", +8 floor (Shift-JIS), +0xc floor ("First Floor"), +0x10 caption ("Hallway"), +0x14 second
+  caption ("Rickety Shed"), +0x18 floor number (0 outside, 1, 2, 3 attic), +0x1c map area, +0x20 the
+  room's world offset, +0x2c / +0x30 the linked room numbers, +0x34 its 0x10-byte search record.
+  `get(n)` 0x17ea44 by room number (gamGetWrdString 0x1db8e8: 0 / 1, 4 / 2 / 3 = +8 / +0xc / +0x10 /
+  +0x14; "<map_none>" without a room), cnvPosL2W / W2L add / subtract +0x20, `findRoute` 0x17ec1c a
+  breadth-first route over the links (one caller 0x127b28), `findByName` 0x17ea84 (no callers). The
+  host builds WrdEntry records with pointers beside the file instead of relocating it (wrdsrv.h).
+- `BedSubMode` (bed/bedsubmode.cpp asserts `m_depth < MAX_STACK` / `m_depth > 0`): a current qword
+  at +0, a stack of 4 at +0x10, m_depth +0x50; push 0x100258 / pop 0x1002c0 / reset 0x100320
+  (written 2026-10-29). Its ctor is inline: MagScene::MagScene zeroes the record and the stack, then
+  calls reset (m_depth 0, the 4 copies zeroed from the last). The scene has one at
+  +0x22d0 (`MagScene::pushSubMode` 0x132744 pushes and sets mode 8 / -1, `popSubMode` 0x132784): the
+  movie skip runs in sub mode 8. Its four words are the scene's mode, step (-1 on entry), the
+  requested menu id and the PC's mode << 16 | number (`requestMenu` 0x1357b0).
+- **The scene's update** (`MagScene::update(pad0, pad1)` 0x1327dc, mag/magscene.cpp, 2026-10-22):
+  S2dMovie::update, then by sub mode -- 0 the first frame (fog fade, the +0x837e0 objects,
+  MagLifeMan::update(2), the PC's live, Brown, the actors' motion commands and footsteps, camera,
+  sky billboards / rotation, the +0x853fc records) and 1 once the PC is bound; 1 walking (pad 0
+  m_7c bit 3 the item menu 0x10000, bit 0 menu 0x10001, m_7a bits 8 / 9 changeCamera, the PC takes
+  pad 0, Brown's command layer pad 1; the PC's state 0x17 goes to 6); 2 text windows (closes those
+  with m_wait_key 0, or > 0 on pad m_hold (+0x78) bit 14; back to 1 when none waits); 3 fade out
+  (getMenuFadeOutTime, fade kind 0 mode 6) then openMenu -> 7; 7 the menu takes pad 0 until
+  processPad returns non-zero, then closeMenu -> 4; 4 fade in (mode 2) -> 1; 5 the system message
+  (pad m_repeat (+0x7c) bits 13 / 14 close it); 6 the camera hangs from the PC and turns over 2400 counts; 8
+  paused (lives of group 4 only); 9 the debug windows (magscenedebug.cpp). Lives run by group:
+  MagLifeMan::update(mask) calls slot 2 of the lives whose level word has a bit of mask.
+- **MagLifeMan** (`mag/maglifeman.cpp`, 0x1194b4..0x119b34, 2026-10-22; scene +0x2330, EE 0x404):
+  64 pods of 0x10 `{life, priority, prev, next}` and the head m_top at +0x400. init zeroes the
+  pods and points m_top at pod 0 (free; the first add takes pod 0 and links it to itself as the
+  head). add takes the lowest free pod and links it before the first pod with priority >= its
+  own (insertBefore 0x11950c) or after the last (insertAfter 0x1195ac); remove / removeNo unlink
+  (0x1194c8, then clearPod 0x1194b4); find is a linear search of the pool (index, -1).
+  update(mask): slot 2 when life->m_level (+0x10) & mask; draw(layer, group): for pods with
+  priority & 0xc000 == group, slot 6 render(layer) unless slot 8 getHide (+0x24). deleteAll
+  0x119660 (from ~MagScene and the scene term 0x131f74) runs slot 1 with flags 3 (deleting) on
+  every life still in the pool, then init. An empty list (m_top NULL after removing the last)
+  faults in the ROM's next add (insertAfter(NULL)); the game never empties it.
+  MagLife base slots (linkonce): 1 ~MagLife0 0x282aa0, 2 MagLife0::live 0x282ad4 (m_04++),
+  3 attached 0x282834 (empty), 4 getLevel 0x28283c (0), 5 getName (pure, 0x272a30), 6
+  MagLife::render 0x282844 (empty), 7 setHide 0x28284c / 8 getHide 0x282854 (+0x24).
+- **The scene text windows** (mag/magscene.cpp asserts `MAX_WINDOW`, `m_window[ n ]`): 4 slots at
+  scene +0x2734 of 0xe0-byte MagLife windows, each with a font record at +0x2744 + n * 0x6c over the
+  language font (+0x2908) and font texture m_font_tex_no[n]: `openWindow(w, h, a3, life)` 0x134730
+  -> slot, `closeWindow` 0x1348b0, `fadeInWindow` / `fadeOutWindow(no, time, from, to)` 0x135088 /
+  0x13511c, `setWindowShow` 0x1351b0 (slot 7), `getWindowTextWidth` 0x13555c, `updateWindowFont`
+  0x135594. MagScene::setViewParam / drawView (0x134944 / 0x135234) take the same window numbers.
+
+- **The 2D layers** (`spr/s2d.cpp`, pinned 0x190a78..0x192ac0, 2026-10-22; no source string, spr/
+  from the link order after spr/sprtexture.cpp): each holds a sprite manager (`SprMan`,
+  spr/sprman.cpp, EE 0x8ec: +4 active, +8 `SprTexture` loader (EE 0x438, DogTexInfo at its +0x414),
+  +0x4ac the 0x154-byte sprite records, +0x4b0 the pattern table, +0x4b4 count, +0x4d0 / +0x4d4 the
+  i3d layers to draw into) followed by the MagSystem pointer, and the same phase machine (open ->
+  phase 0/3 start -> 4 process each frame -> 6/7 end). `S2dCineSco` (EE 0x92c): two black bars
+  (sprites 1, 2) faded in / out by fadeIn / fadeOut 0x190d90 / 0x190e98 (black clear 0x299b70 ->
+  opaque 0x299b80) -- the cinemascope letterbox. `S2dBg` (EE 0x940): up to seven pictures
+  `sgbg0N_tcc` from data/mnurpk/s2dgen.rpk, files named by setTexName 0x1913c4, driven by the inline
+  `s2dBg*` requests on +0x93c. `S2dMes` (16 sprites): wait.tm2 / wait2.tm2 from
+  data/mnurpk/s2dman.rpk (the key-wait / write / select-cursor icons, the pad buttons, the message
+  frames), 14 items mapped to sprites by data 0x29bb70, set by 0x191ba8..0x1920c4 which the inline
+  setIcon* / setBtn* / setMessageSprite* call; the map-name caption (`drawMapName` 0x191938) puts
+  word-table record +0x93c's text in a scene text window (0x200 x 0x100, centred on x 0x100 at y
+  0x168) and fades it in / out with sprite 2 (its frame, offset 0x9c0 / 0x17c0).
+  `S2dMovie` (EE 0x90c, no vtable): loading.tm2 from s2dman.rpk and the movie. MagScene::draw calls
+  `drawMovie` 0x19241c (while RxMpeg +4 == 1: a layer at key 890 that RxMpeg::draw fills) after the
+  3D layers and `draw` 0x1924e0 last (layers at 900 / 1000 into SprMan +0x4d0 / +0x4d4, then
+  SprMan::draw); both pass light set 0 and the scene view, and set TEST_1 0x5000d (alpha GREATER 0,
+  Z GEQUAL). `createLayer` 0x1925f0 = i3dCtxCreateLayer + a view from scene view 0 and the camera
+  (+0x2ab70), which both callers overwrite at once. Movie wrappers: playMovie 0x192834 / 0x192850
+  (name -> RxMpeg +0x44, open, play), isMovieEnd 0x1928b8, stopMovie 0x1928d4 (pushSubMode + stop),
+  getMovieStatus 0x192904, closeMovie 0x192920 (close, popSubMode). 0x192978..0x192ac0 are four item
+  setters (one item -> sprite 1, data 0x29bfb0) with no caller. Fade colours: data 0x2999b0 (grey, alpha 0) -> 0x299990 (alpha 0x80). The pattern
+  tables are nested records with EE pointers inside, kept as writable EE word images
+  (datadump.py --words) with their EE base in SprMan::m_pattern_ee (see "The sprite manager").
+
+- **The sprite manager** (`spr/sprman.cpp`, pinned 0x18bb8c..0x18f5b0, 2026-10-22, `verify`; 53
+  functions, all written): `SprMan` (EE 0x8ec; +0x440 a `GamFont`, +0x4c4 grey 0x80, +0x4c8 saved
+  volume flag, +0x4d8 the open packet, +0x4dc the draw sets, +0x4e4 the font file, +0x8e8 font from
+  the pack; +0x4b8 / +0x4bc / +0x4c0 the work-sprite range and counter m_objWorkIndexNo, handed out
+  round robin by an inline with an assert in spr/sprman.h line 0x3da (SprMan::getObjWork); +0x4e8
+  eight 0x80-byte text lines the owners fill with getTextLine, 2026-10-30 from MnuStock). Each sprite record (EE 0x154, spr/sprman.h has every field) runs on the owner's table
+  image: **patterns** (0x14: texture id or -98 plain colour / -99 frame buffer, u, v, w, h in 1/16
+  texels), **anims** (0xc: id, frame count (< 0: counted and written back), frames pointer; id -1
+  ends), **frames** (0x1c: time | flags << 16 (0x10000 size from the frame, 0x20000 / 0x40000 flip
+  U / V), pattern, x y z, w h (0x3e70 keep, -16 the pattern's); the word after the last frame holds
+  the end code in its top byte: 1 stop, 2 hold, 3 loop, 4 jump to the anim in its word 2), **moves**
+  (0xc like anims) and **keys** (0x20: type 0 ease / 1 ease from here / 2 linear / 3 linear from here
+  / 5 halt, time, from[3], to[3] floats in pixels; -1 ends, -2 repeats). `draw` 0x18bd94 steps per
+  sprite motion (updateMove 0x18d1e8: modes 1 ease, 2 speed capped at 8, 5 key table), anim
+  (updateAnim 0x18d640), colour fade (setFade 0x18d7ec / updateFade 0x18dafc: modes 1..5, 0x100 |
+  mode ping-pongs), then drawSprite 0x18e05c: position = parent's (m_parent > 0, drawn after the
+  top level) + std + off + frame, the waits of states 2 / 3 / 4, and one GS sprite through
+  i3dPktSprite / TexSpriteUV at XYZ + (0x7000, 0x7200); text sprites render m_text into their
+  texture image with the GamFont (drawText 0x18ed44, Shift-JIS, "#0" = newline) and i3dTexRelease it
+  for re-upload. drawFrameCopy 0x18bef8 puts the other frame buffer (TBP 0 / 0xe00 by
+  MagSystem::m_frame & 1) over the screen on layer 1. `update` only steps the CLUT animations.
+  volumeOn / volumeOff / saveVolume / restoreVolume 0x18f024..0x18f0b4 wrap
+  `GamMan::switchVolume` 0x1d3ac8 (GamMan +0x22214 the saved volume, -1 none; setVolume 0x1d3a38).
+- **GamFont** (`game/gamfont.cpp`, pinned 0x1beb70..0x1c05c0, 2026-10-29, `done`): a 0x6c-byte
+  software font rasterizer into a 4- or 8-bit CLUT image the owner uploads (SprMan +0x440, MagScene's
+  four window fonts +0x2744). Font file header (`GamFontHeader`, EE 0x24): flags u32 +0x8 (0x2000000
+  = holds the JIS level-1 kanji, 0x4000000 = level 2), glyph count u16 +0xc, cell w / h +0xe / +0xf,
+  bits per pixel (1 / 2) +0x10, table offsets (from +4) +0x14 sorted u16 codes, +0x1c (left, width)
+  byte pairs (present = proportional), +0x20 glyph bitmaps (rows MSB first, (w*bpp+7)/8 bytes).
+  getGlyph 0x1bffcc: bsearch (0x2782c8, comparator 0x1bffac) over the code table; with kanji flags,
+  codes >= 0x8140 index the Shift-JIS row table at data 0x2b8de8 (entry 0 = single bytes {0x20,
+  0xe0}, then 44 rows 0x8140..0xea40 {start, count}, 8-byte rows) after the table's m_44 codes.
+  drawChar ORs v | m_color per glyph pixel (1-bit pixels count as 3; 4-bit buffers: even pixel in
+  the low nibble), putChar 0x1bf8c4 stores (no callers). Widths: getCharWidth 0x1c0148 (6 for spaces
+  in proportional fonts), calcTextWidth 0x1c02f8 (0x8164 = 0x12, 0x8149 = 10, + m_30 / m_34 spacing
+  per character). getGlyphWidth masks the width-table index to a byte (ROM quirk, kept).
+
+- **The sprite texture loader** (`spr/sprtexture.cpp`, pinned 0x18f5b0..0x190a78, 2026-10-22,
+  `verify`): `SprTexture` (EE 0x438) loads a list of `SprTexFile` (EE 0x18: id 0..59, file name,
+  texture name, size, flags, buffer; id < 0 or name "" ends it) into the DogTexInfo at +0x414,
+  one state per `update` call (0x18febc: 0 busy, 1 done, -1 after an error; state +0x11c).
+  setList 0x18f744 picks the start: no pack -> loose files (5); `m_mode` 0 (+0x434, setListMode)
+  -> fileGetSize + read the whole .rpk (3); mode 1 -> read its first 4 KB (1), then each file from
+  the disc at the pack's offset. Entry flags: 1 = add while loading (else loadTex 0x18fbb0 adds it
+  later from the pack), 4 = buffer borrowed from the pack, 8 = loadTex's RTCM decode (freed).
+  Tables: +0x12c DogTexInfo numbers by load slot, +0x21c slot by id (-1), +0x30c the DogTexInfo
+  16-byte record by id (`DogTexInfo::getTexInfo` 0x1161e4). The reads run through `updateRead`
+  0x190618, a FileReader stepped through open / seek / read / close with the asynchronous helpers
+  0x1be338..0x1be4c8 (rxSysStreamOpen, rxFileRead / Seek / Close, `isReady` = rxFileSync(fd, 1) ==
+  0), waiting with rxThSync(1) + SndMan::update. **RTCM** (id string 0x2f7a90): a run-length
+  format, header 0x20 (+8 decoded size, +0xc file size with the header, +0x10 short unit size),
+  then records of a kind byte and a 24-bit big-endian count: kind 0 one unit repeated, kind 1
+  count units (`decodeRtcm` 0x190904). When the list is done and +0x418 (an i3dContext) is set,
+  DogTexInfo::setTexTable(ctx).
+
+## The scene's lights (`mag/magscenelight.cpp`, 0x13f49c..0x13ff00, 2026-10-27)
+
+MagScene's front end to its DogLightPool (+0x2050). **A map's `_l.bin`** (MagSceneTenkyu +0x500,
+`MagLightFile`): +0 direct count, +4 point count, +8 the shadow light's index (counting the
+directional light first, then the points), +0x10 ambient rgb, +0x20 0x20-byte lights (rgb, then a
+vec4: directional = direction; point = position with w = intensity, which scales the rgb). Only
+**one** directional light is read even when the count is larger. `loadLight` 0x13f658 restarts
+the pool (term + create): ambient (alpha 1) into sets 0 and 1, the directional and point lights
+into set 1. MagScene::load then calls `setDefaultLight` 0x13f8e4: a 0.75 grey ambient into set 6
+(the movie / 2D layer's set). `setShadowLight(kind, n)` 0x13fbe4: m_shadow_light = empty
+description, ambient `ShadowAmbient` (data 0x2eea80, zero, asserted 16-aligned), m_shadow_mode =
+kind; 1 hangs +0x2000 as its one parallel light (src = the pool's directional light n), 2 / 3 as
+its one spot light (src = point / spot light n), other kinds src NULL. `setLightFlags(theNum, set)`
+0x13f528 = buildSet, and for set 0 the shadow kind by the first kind present: point, spot, 5,
+directional. `addLight(type, mask)` 0x13fe64 walks nine mask bits (0..8; the pool has 8 sets).
+setLightParam / getLightParam forward to the pool's global (no < 0) or set-relative accessors.
+
+## The scene's skies (`mag/magscenetenkyu.cpp`, 0x13ff00..0x140990, 2026-10-27)
+
+A map pack may hold `tenkyu.rpk`, a pack of its own: file 0 an `I3D_I3M` motion when its head
+says so (compared with libc `strncasecmp` 0x27a4e0, n 7), then the sky's i3r. `loadTenkyuTex`
+0x140030 (called by `MagScene::load` when a context is passed) copies the i3r to the game heap,
+relocates it, adds its textures to `m_tex_info` (sepia = `m_sepia`) and assigns them. With a motion,
+one heap block of num_node x 0x44 holds the model matrices (+0x508) then one float per node
+(+0x50c): `initTenkyuSpin` 0x140390 poses the motion at 0 and at 2 x its length (pose flags 0x111;
+scratch = num x 0xb2 + 2: 0x30-byte poses, local, end matrices, u16 node map with the count first)
+and stores each node's turn (acos of the normalized row-1 vectors, signed by the cross product's y)
+divided by 2 x length x 30 -- radians per frame. `rotateTenkyu` 0x14062c applies it with
+`i3dMatRotY` every update; `drawSkyDome` 0x1406b8 draws at layer 490 with a white ambient-only
+light, view 0 with far 100000 and zmin = zmax = 0, ALPHA_1 0x44 / FBA 0 / CLAMP 0 / TEST_1 0x13001,
+world = unit at the camera's x / z (y 0). ROM bug: its draw loop runs four slots starting at the
+first slot with a sky (reads past slot 3 when slot 0 is empty); the port stops at slot 3. The sky
+materials write their own TEST (0x51403: alpha ALWAYS, Z GEQUAL), so Z is written, but the view's
+empty z range makes it 0, the clear value: the sky never occludes. Domes are radius 3160, 7997 or
+21375, nearer than a map's far scenery, so the host, whose camera keeps real depth, draws meshes of
+such a view with ZMSK (rosepan_i3d.cpp DrawMesh, `far_z`). makeActorShadow's s_shadow_view has the
+same empty range; its caster pass has no depth target.
+0x140990 opens the focus code (mag/magscenefocus.cpp, next section).
+
+## The scene's focus effect (`mag/magscenefocus.cpp`, 0x140990..0x141e44, 2026-10-27)
+
+A depth-of-field pass. `MagSceneFocus m_focus` at MagScene +0x853bc (EE 0x70; the assert text names
+`m_focus.m_texindex`): +0 mode (bit 0 far1 plane, bit 1 far2 plane; setFocusData sets 3), +4 the
+`efffocus` texture index (-1 = off; drawFocus returns), +8 the layer-key bias, +0xc val[3] = alpha
+(1), far1 (300), far2 (600), +0x18 the track text, +0x1c size, +0x20 next line offset, +0x24 frame
+counter, +0x28 wait frame, +0x40 three MagLerp. `efffocus` is a VRAM-only I3dTexDesc (256 x 256 CT32
+at block 0x2700 = FRAME 0x138, bilinear), like shadow01 (block 0x2300 = FRAME 0x118, the shadow /
+close-up target). drawFocus (last thing of MagScene::draw before the movie) runs, per plane, a
+**shrink** (`shrinkFocusFrame` 0x140fdc: layer 860 + bias, FRAME 0x138, TEX0 the frame being drawn
+-- block 0 on odd frames, 0x70 << 5 on even ones -- one hand-written REGLIST sprite 512 x 448 ->
+256 x 256 by `magPktUVSprite` 0x140990) and a **plane** (`drawFocusPlane` 0x141184: the scene view
+m_view[0], ambient-white light, efffocus draw set, one VU1 sprite at the camera's eye + dist along
+its z, scaled to the frustum's size at dist, colour (1,1,1,alpha), TEST 0x5000d (z GEQUAL) so only
+what lies beyond dist is overlaid). far2 is drawn twice (mode bit 1), far1 once. **The focus track**
+(setFocusData: an event pack's file 2, tsk_scene) is text, CR LF lines `frame command args`,
+lowercased, split at spaces / tabs: `start far1|far2|far1far2`, `term`, `setalpha FROM TO N` (FROM < 0
+= where it is), `setdist PLANE FROM TO N`, `movealpha TO N`, `movedist PLANE TO N`; a line whose frame
+is ahead becomes the wait; an empty line ends the effect (setFocus 0). Native 281 op 13 drives the
+same values. PC: neither pass draws on the host yet (no FRAME_1 targets / VRAM-only textures in the
+native i3d module).
+
+## The scene's camera (`mag/magscenecamera.cpp`, 0x13c664..0x13f07c, 2026-10-27)
+
+MagScene's camera words +0x2ad50..+0x2ad98 (the assert texts name m_cam_map_no +0x2ad68 and
+m_cam_path_no +0x2ad64): mode +0x2ad50, +0x2ad54 m_cam_move_frame (the 30-frame move's frame; changeCamera clears it), target actor +0x2ad58,
+distance band max / min +0x2ad5c / +0x2ad60 (600 / 500), saveCamera's count +0x2ad80 and copies
++0x2ad84..+0x2ad98. `setCameraMode(mode, arg, param)` 0x13caf0 (jump table 0x2ee750): 0 free, 1 free
+with a target actor, 2 the camera a child of actor arg at (0, -50, -50) tilted -0.5, 3..5 a map camera
+on a path of a sky pack's _c.bin (MagSceneTenkyu +0x4fc) -- 3 slot 0's path 0, 4 arg = map << 8 | path
+(checked against getCameraMaxPath, the magscene.h line-816 inline), 5 the same plus param[0] / [1] /
+1000 as the path position; the path's float +4 (degrees) becomes DogCamera +0x140. With no path in
+slot 0, modes 3..5 make the camera a child of the actor at (0, -150, -500) tilted -0.17. A path record
+(`MagSceneCRec`): +0 m_pos_num, +1 loop, +2 alt (one-point paths with two views, +3 the side, the
+second view's point 4 on), +4 fov, +0x1c..0x1e tag letters (step speed, distance, band), +0x20 / +0x28
+the camera's segment and fraction, +0x24 / +0x2c changeCamera's goal, points from +0x30 (x, y, z, w =
+length of the segment ending there). The target is the actor's m_trans 120 up. seekCameraPath
+(native 016 case 7) places the camera and iterates scoreCameraPath 0x13d8f8 (one step toward the
+distance band, 1e6 - squared error) until it settles; changeCamera 0x13d5e4 (pad m_7a bits 8 / 9)
+sets the goal two projected lengths ahead and ORs 0x10 into the mode, which updateCamera 0x13e548
+plays out over 30 frames (lerping seg + t to goal_seg + goal_t, looking at the actor), then copies the
+goal and clears the bit (a one-point path just drops the bit). updateCamera per mode: 1 lookAt the
+actor; 3 scores every path of the four sky slots into its +0x2c word (the goal word reused; the
+current path +200000) and takes the best; 4 slides the current path (scoreCameraPath), 5 holds it; 6
+DogCamera::updateMove (so updateCamera is not the writer of DogCamera's move words +0x190..+0x1d0 --
+mode 6's setter is). A one-point two-view path is two 0x40-byte records back to back (header + one
+point); the second is the view while +3 is set. A record's +0x1f letter (n = c - 'a') limits the
+look instead of lookAt: +-(n / 8) * 30 degrees in x and +-(n % 8) * 10 in y around the floats
++0x10 / +0x14 (clampCameraLook 0x13e2ec, getCameraLookLimit 0x13e4c0). After any mode 3..5 path
+change the new path's fov becomes the lens angle.
+
+MagScene's menu glue (`mag/magscenemenu.cpp`, 0x13f07c..0x13f49c, no path string): gamEnterMenu(menu)
+= g_gamMan.pauseForMenu(menu) (requestMenu passes its id; the system message 0x1000a),
+gamLeaveMenu = resumeFromMenu(0); the menu fade times are 0 with g_sequence.m_bits[1] bit
+0x4000000, globals 0x170 (out) / 0x16c (in) with bit 0x2000000, else 15; openSysMsgWindow expands a
+system text (msgGetSysText) through MsgMan::expandText 0x184128 (record: 16 args, src +0x40, dst
++0x44, size +0x48) into a 256 x 96 window at (128, 224) and holds the scene in sub mode 5.
+
+## Fog and Brown's command glue (`mag/magscenecmd.cpp`, 0x143d3c..0x145020, 2026-10-27)
+
+No source string names the run (the port named it): it follows `mag/magsceneif.cpp`'s asserts and
+ends where the Hfm enemy classes start. Fog: `MagScene::m_fog[4]` (+0x2aae0, I3dFog 0x20 each) --
+[0] the fog drawn, [2] / [3] a fade's from / to; `setFog` 0x143d7c with frames > 0 sets from =
+drawn, to = fog, `m_fog_frames` (+0x2ab64) = frames, `m_fog_frame` (+0x2ab60) = 0, else draws fog
+at once; `updateFog` 0x143fd0 (MagScene::update) blends linearly at frame / frames. Wrappers: a
+colour + four floats 0x143d3c, `addFog` 0x143eec (target + delta). Brown: every `gam*Bwn*` /
+`magBwn*` function forwards to the scene's MagLifeBwnCtrl (bss 0x727aa0 = scene +0x2bd20). Its
+states (m_state; the four-char codes op 3 returns): 0 NULL, 1 WAIT, 2 FOLW, 3 STAY, 4 FIND,
+5 FDED, 6 MOVE, 7 MVED, 8 ROTA, 9 RTED, 10 DAMG (requestHurt), 11 BARK (sub object at +0xf0),
+12 HUG; `setLevel` 0x12b7cc (+0x6c) takes MAG_BWNCTRL_LEVEL_AUTO 0 .. MANUAL 2 (gamSetBwnFollow:
+on 0 / off 2; gamSetBwnWait: on 1 / off 0). Script native 039 -> `magBwnSeqCommand` 0x144ae0:
+ops 3, 0x14 rot, 0x15 pos, 0x1f moveTo, 0x20 / 0x23 wait until +0x80 (SEQ_RET_WAIT), 0x21 /
+0x22 angle (+0x40, state 0 / 8), 0x24 returns 1; four-char ops ifsc / gfrs / gfit (find result,
++0x68 / +0x7c / +0x44), stfd / clfd (find item, again = AGIN/agin/1; cancel), amsb (an actor's
+suffix motion), eqds (show / hide the PC's equip item), sepo (MagScene +0x22cc `m_sepia`: the sepia
+flag texture and light loads pass), sepc (DogTexInfo::setSepiaColor, clamped 255), ilts / adlt
+(lights), spmn (special menus, table 0x2ef298: KLCK / SPM0 0x1000b, BVIL / SPM1 0x1000c, BLND
+0x1000d, BFML 0x1000e, BCPL 0x1000f, after utlPauseForMenu), whti / whto (white fades, level 7),
+rcst (commandPC 0x14), gmnr (the menu result +0x2be58).
+
+**The special menus (dial locks, `mag/maglifemenusp.cpp` 0x12d9c8..0x12f008, 2026-10-30).** spmn's
+KLCK opens MagLifeMenuSpecial (EE 0x80), BVIL / BLND / BFML / BCPL MagLifeMenuSpecial2 (EE 0x70,
+m_type 0..3 picks the body model 0x10e1..0x10e4; dials 0x10de..0x10e0). Both load their models as
+scene actors with actor flag 8 (motions keep running under the menu), save the camera, place it
+(Special (0, -60, 200), Special2 (0, -20, 80) then zoomed by the body's clip radius over 30 frames),
+turned (-0.1, pi, 0), and use MagLife's m_state as the step and m_04 (MagLife::live) as the frame
+counter. Three dials: pad dir 0x80 / 0x20 pick, 0x10 / 0x40 turn a step (0x1000), render eases 0x100
+a frame; the picked dial's actor gets m_attention 0 (Special) / 1 (Special2), others -1. Special:
+models 0x10dd box, 0x10d9..0x10db dials, 0x10dc frame (data 0x2ed090); 8 positions per 0x8000 turn,
+pad bit 14 opens when all three dials are at -0x4000 (box motion 0). Special2: 10 digits per 0xa000;
+pad bit 14 checks m_menu_arg as three decimal digits (hundreds on dial 0, digit d at -d*0x1000 wrapped
+into -0x5000..0x4fff), SE 0xc2, shakes 20 frames, then SE 0xc3 + body motion 1 (right) or 0xc4 (wrong,
+dials again). Pad bit 13 cancels both (fade out / in). processPad returns m_result when done: 1
+cancelled, 2 opened (gmnr reads it).
+
+## The player's controller (`mag/maglifepc.cpp`, 0x11ab40..0x11c464, 2026-10-27)
+
+- `MagLifePC` (EE 0x220, scene +0x2adc0) is a state machine: `m_state` (MagLife0 +0) picks one of 20
+  mode objects embedded at +0x138..+0x1a8 (`mag/maglifepcmode.h`: each is only a vptr, a few carry
+  words; three EE slots init(pc) / live(pc) / pad(pc, pad), names from the ror-symbols
+  `MagLifePCMode::init` / `::pad` and `MagLifePCModeHold::live`). States: 0 Null, 1 Wait, 2 Walk2D,
+  3 Run2D, 4 Turn, 5 AtkWait2D, 6 AtkMove2D, 7 Roped, 8 Hold, 9 Ride, 10 Attacking, 11 (no mode:
+  `beginAttack` picks a target, then 5), 12 HoldAttack, 13 Unhold, 14 Damage, 15 DogGo, 16 DogCome,
+  17 DogStay, 18 Hug, 19 Item, 20 Reload.
+- `changeState(theMode, arg, force)` 0x11c1e8 (45 callers, most in the modes): clearMotionSeq, the
+  base's slot 9 `MagLifeControlChara::setState` 0x119fe0 (saves the state quad at +0x30 when
+  m_state != 0; m_08 = arg, m_04 = -1), `selectMode(1)` 0x11c2ac (current mode + its init).
+- MagLifeControlChara's slot names are ror-symbols: slot 12 `reset4MapJump`, 14 `message` -- so
+  MagLifePC's overrides are `reset4MapJump` 0x11be60 and `message` 0x11b5e0 (renamed from reset /
+  command).
+- MagLifePC's motions (`mag/maglifepc3.cpp` 0x11d720..0x11e0d8): weapon types 0 sude (bare hands),
+  1 gun, 2 knife, 3 ax; m_stance = type + 1. `initMotion` loads `data/ch/pc/pc/MOTIONPK.RPK` file
+  {0, 3, 2, 1}[type] into motion bank 3 when the actor lacks the type's `<type>_in` motion (table
+  0x298178: in / wait / wait_hi / wait_lo / wait_ml / wait_lo per type). Upper-body sub motion 0:
+  ids {-1, 0xe4, 0xbd, 0xd7, 0xa5} by stance over the spine+arms nodes (0x297160; stance 4 both
+  arms 0x2971a0). `changeMotion(name)` with m_mode 2 (+0x54, setActor's mode) tries "jnfc_" + name[3..] first (a separate
+  motion set; GamMan::is_pc_jnfc is m_pcJnfc == 2). m_action_motion (+0xf4) is the one-shot action
+  motion playing (playActionMotion / isActionMotionEnd). Messages: 0/1 hold, 2/7/10/12 ride, 6/9/11/13 to the Ride mode, 0x12..0x14 stamina,
+  0x15 move the actor (sweep), 0x16 riding / hurt query, 0x17 weapon override, 0x18 health override.
+- MagLifePC's items and attacks (`mag/maglifepc2.cpp` 0x11c464..0x11d720, pinned 2026-10-29): the
+  item's attack type is system data field 0x27 (`getAttackType` 0x11caf8; 2 bare hands); weapon type
+  = attack type 5 -> 3 ax, 4 -> 2 knife, 6 -> 1 gun, else 0. `hitTarget` sends scnChrRequest(0xb,
+  PC oid, scnCalcPcDamage(oid, attack type), -, attack type, oid, combo) (kind != 0: word 7).
+  `takeItem` writes the script's pick-up words g_sequence.m_global[0x28..0x2a] = 0x13, item, oid.
+  m_shots (+0x118) counts shots since the last reload (`decSelItemNum` 0x11d178); `reload` hands it
+  to effect 0x27 (EffReload1, the shells) with the actor's trans / rotate. Hit sounds
+  (`getAttackSeNo`): table 0x2ea340 [7 rows][combo 0..2, hit] by item (0x2ea378 item -> row);
+  bare 0x41 / 0x43 (height 2), stomp 0x1c, guns 0xa3e / 0xa43 0x7f / 0x80 (empty) and 0x83.
+  Enemy types (EmyManager::getEmyType, names in the height table 0x2ea450): 0 DWF, 1 PIG, 2 GOAT,
+  3 FISH, 4 BIRD_S, 5 BIRD_L, 6 HOFFMAN, 8 CLARA, 10 STRAYDOG; `getAttackHeightByDist` 0x11d3d0
+  maps the XZ distance by type to heights 1 / 0 / 3 / 2 (Hoffman by his neck height).
+- MagLifePC's fighting (`mag/maglifepcbtl.cpp` 0x12bc20..0x12ccac, pinned 2026-10-30): weapons 0
+  bare hands, 1 gun, 2 knife, 3 axe; heights 0 mid, 1 hi, 2 lo, 3 ml, 4 stomp. Attack motions
+  0x298228 [weapon][height][combo 0..2] (sude_atk*, gun_atk*, knife_atk1..3*, ax_atk1..3*, *_stomp;
+  "gun_empty" without ammo); `playAttackMotion` 0x12c1fc keeps weapon / height / combo at PC
+  +0x124 / +0x128 / +0x12c for `getHitFrameRange` 0x12c014 (hit windows in motion frames: stomp
+  25..30, bare 0..10, knife / axe tables 0x2ec9f8 / 0x2eca58, gun 0..1000). Hit nodes
+  (`getWeaponHitPos`): stomp 'Bip01 R Toe0' r 50, gun 'gun_mazzle' r 1, knife / axe p_hit..p_hit7
+  r 5 on the weapon item's actor, bare low kick 'Bip01 R Calf' / Toe0, punch 'b_fg_r' r 10.
+  Targetting (state 11, `beginAttack`): nearest enemy within 500 and +-90 degrees -> m_target_pos /
+  m_target_no (oid) / m_target_node (its uid), then state 5; the first blow from state 5 retargets
+  within 45 degrees (not the gun). Height = 4 when the enemy is not hittable standing and within
+  80 XZ of the PC's trans - 120 (`calcAttackHeight` 0x12caa4), else getAttackHeightByDist; message
+  0x17 (+0x1b0 / +0x1ac) forces height and weapon. The gun shot: sounds 0x7f shot / 0x80 empty /
+  0x83 hit / 0x85 miss (0x7d on targetting), muzzle flash `createMuzzleEff` 0x12ccac (EffMan kind
+  0x26, word 0x10..0x18 the equipped gun actor's gun_mazzle node world position; mag/maglifepceff.cpp
+  0x12ccac..0x12ce3c also holds message14..16 = assert(0) and an empty message17), a ray of 800 from the muzzle to the target turned by utlRandMean(+-10 degrees), enemies
+  within 800 nearest first, each hit by `hitTarget`; it goes on through one only while
+  rand(0..1) < getEmyTypeRate x (800 - dist) / 800.
+- The motion sequence table (MagLifeControlChara +0x5c, the asserts' `m_tbl_motion_state`; the PC's
+  at 0x2961e0, 164 rows of 0x18 bytes: +0 the row's own index, +4 the motion name, +8 blend frames
+  (short, -1), +0xa frames (> 0: frames before the next row while the actor is in no mode; < 1 the
+  motion's loops are counted, each replaying the sound; < 0 endless, `isMotionStateEndless`), +0xc speed
+  percent of 1/60 (0 = 100), +0x0e unused (-1), +0x10 bit 0 = motion flag 0x40 (flag 1 = a counted-loop
+  row), +0x12 m_next_state (the row that follows; also `changeMotionSeqAlt`'s pick), +0x14 a sound at
+  the actor when the row starts). Phase word +0x48: 0 set, 1 running (endMotionSeqPhase), 2 ended
+  (setMotionSeqEnd). Brown's at 0x297418 has 138 rows (walk, s_turn_*, find_lost ...). Both are host
+  data (`g_pc_motion_seq` / `g_bwn_motion_seq`, maglifepc.cpp / maglifebwn.cpp). Rows: 0 base, 1..3
+  run_out, 5 wait, 6 tired, 7 w_wait, 8 tired_out, 9..14 hold_*, 15..23 com/scom/w_com go/come/stay,
+  28..37 dmg_*, 38..46 walk_in / walk, 47..49 run, 50..55 the 180-degree turns, 56..115 the weapon
+  in / wait sets, 116..128 the ev201 / ev501 event poses, 129..136 item / check, 137..158 the dog /
+  hfm ride and hold reactions, 159..163 free_a..free_e idles. `changeMotionSeq(row, blend)` 0x11a320
+  starts one (no-op while it plays), m_40 the row, m_48 its phase (`isMotionSeqEnd` 0x11a054: > 1).
+- The modes (`mag/maglifepcmode.cpp`): the moving ones share `MagLifePCMode::applyRootMotion`
+  0x1207a8 (the root track's step from motion frame f to f + getHealthMotionStep, keys at 120 Hz,
+  rotated by the heading, into `MagLifePC::moveBy` 0x11ee00); Walk2D / Run2D steer toward the stick
+  by <= 0.2 rad a frame (0.14 at health 2, `MagLifePCModeMove::steer` 0x120dec); Turn plays the
+  180-degree turn until the stick leaves its start heading by pi/10 or the row ends. Health picks
+  the row column (0 normal, 1 tired, 2 w_ wounded; 3 / 4 the ev201 / ev501 poses Wait::pad drives
+  with the stick). Wait plays a free_* idle every 5400 frames at health 0 (free_e only in room 0x35
+  from x 1000, `utlGetWrdNo` 0x1034b8 = GamMan status 5 m_wrdNo).
+- The other modes (written 2026-10-27): AtkWait2D picks its row from 0x2ead98 [weapon class (+4 at
+  health 2)][height class 0..4, `MagLifePC::getAttackHeight` 0x12ca28] and turns 0.1 rad a frame to
+  the target's spine; Attacking runs `MagLifePC::startAttack` 0x12c31c (low half height, 4 = kick;
+  high half 1 = no hit test), tests the weapon's up to 8 hit spheres (`getWeaponHitPos` 0x12bc98)
+  against `utlCollectEmyInfo` 0x103a90 (32 records of 0x40 + count at 0x800) inside
+  `getHitFrameRange` 0x12c014, and chains up to 3 steps on cross + R1 after 70 % of the swing;
+  Damage types 1..17 (0x11 replays the last row) shake the pad 6 frames; Item reaches by the
+  item's height (0x81 / 0x83 / 0x85 / 0x87 < 50 / 100 / 160) and opens system message 0x11 / 0x12
+  (item 0xa64: `MagScene::pulseMenu1000a`); Hold breaks free on 16 stick quadrant flips
+  (BedPad +0x64) into HoldAttack; DogCome becomes Hug when Brown is 100..130 ahead within 45
+  degrees and `MagLifeBwnCtrl::checkHug` 0x12b870 agrees; Ride's pc m_0c is the phase (2 = the
+  dismount Ride::message starts).
+- PC movement (`mag/maglifepcmove.cpp` 0x11e4c4..0x120788, written 2026-10-27): `moveBy` 0x11ee00
+  is every moving mode's step. Health >= 3 adds a zero move; MagScene +0x22b8 set skips collision;
+  else `sweepMove` 0x11ea04 (`testObjHit` 0x11ccd4 = GamMan::testPcHitAt at pos + move, the object
+  slide `slideOffObj` 0x11cd20; then `MagScene::castCylinder` of radius m_sweep_range - m_sweep_radius
+  (45 - 20) pushed m_sweep_radius ahead, from 50 + range above, height 50) -- blocked: the slide
+  along the wall normal (turned a quarter to the move's side, the move's length) is swept again; if
+  that is blocked and the slide is within 0.8 (dot) of the move, `sweepSides` 0x11e4c4 casts two
+  rays from +-90 degrees (castRay, length range) and slides away from the nearer hit; else stand.
+  `sweepRay` 0x11e0d8 (first in the file, pinned 2026-10-30, no asserts, unreferenced) is an older
+  single-ray sweep: castRay from the actor's m_trans - 30 y along the level move, range long, the
+  same quarter-turned wall slide (the level length), and an m_218 debug line + hit-triangle strip
+  (magenta, statics 0x297300..0x297340 / 0x664590 / 0x664600).
+  Then `MagLifeControlChara::followGround` 0x119e1c (castRay from y - 60 over 120: y += (t - 0.5) *
+  60, clamped +-7) and `updateSectaCells` 0x11a6b0 (secta query radius 40 into +0x60's four cells:
+  m_goal is the cells). `applyMotionMove` 0x120668 (live, outside move states) adds the root step
+  from frame 2f to 2(f + 1) turned by m_base_rotate.y. The stance walk (`moveAttackStance`
+  0x11ff10, AtkMove2D::pad) turns the stick by the camera's level z axis (DogCamera slot 2
+  transform, m_matrix row 2), takes its 16-sector minus the heading's into 8 atk_walk / atk_step_*
+  motions (0x2973b0, offsets 0x2eacc0) and `moveStanceStep` 0x11f884 (flags 0x45, arg 5). The ROM
+  asserts call m_stance m_attack_stat (ATK_STAT_NONE 0) and m_move_level m_move_stat
+  (MOV_STAT_WAIT 0, _RUN 2). Unreferenced older pad set: `movePad` 0x1205dc -> `moveDowned`
+  0x1203a0 (health 3 / 4 ev201 crawl), `moveFree` 0x11f9f8 (camera-relative walk / run rows of
+  0x297240 through `moveToward` 0x11f4a8: <= 0.2 rad a frame, the *_turn_r180 motion within
+  0.003 of pi), `moveTank` 0x11f0b4 (tank control).
+- processPad (states 1..11): status words via updatePadStatus -- health class m_health (+0xe4,
+  calcHealth: override, mode 1 -> 3, 3 -> 4, PC param 0x1b / 0x1c ratio <= 0.3 -> 2, stamina),
+  move level m_move_level (+0xe0, readStick: dead zone +0x1f8, run above 0.97), stance m_stance
+  (+0xdc, R1 0x800 held -> weapon type + 1). A stance change arms (state 11) or disarms (0); cross
+  (0x4000) in 5 / 6 attacks; L1 (0x400) reloads; triangle / circle / square order Brown (states
+  15 / 16 / 17, needs script flag 34 and MagLifeBwnCtrl level 0); else the mode's pad until it
+  returns 0 or 1.
+- live: the shadow blend scene +0x22b0 (0.1 in mode 3, else back to 1 by 0.05), footsteps
+  (`playStepSe` with the 12 floor-kind sound ids at 0x2e9ef8), the mode's live, root motion outside
+  the moving states (`isMoveState`: 1..10, 14).
+- Tuning words (MagScene::parseOption options 6..14 -> `setParam`): +0x1f8 stick dead zone 0.1,
+  +0x1fc / +0x200 cos 5 / 89 degrees, +0x204 0.07, +0x208 0.9, +0x20c 0.001 (stick change),
+  +0x210 / +0x214 45 / 20 (move sweep range / radius).
+
+## The test controller (`mag/maglifetest.cpp`, 0x130ee8..0x131184, 2026-10-30)
+
+`MagLifeTest` <- MagLifeControlChara (vtable 0x2e1e70, vptr +0x14, ctor 0x13114c; EE 0x88): unreferenced in
+the ROM (no caller of the ctor, the vtable only stored by it). Slot 16 (processPad) sets m_phase (+0x80) to 1 on
+R2 (BedPad m_trig 0x200); slot 2 (live) then plays the bound actor's motions 0xac, 5 (flags 0x40) after 43 frames
+and 1 (flags 1) after 5 more, timed by one shared counter 0x298b78, and every frame (mode arg < 0) moves the actor
+by its motion's root movement over this frame's span (getMotionMove with doubled frames), turned by m_base_rotate.y
+(asserted in -pi..pi, line 186), with the root's y as addTrans's height. +0x84 is addTrans's rot_y_aar, never set.
+
+## Brown's controller (`mag/maglifebwn.cpp`, 0x1233d8..0x125bd4, 2026-10-27)
+
+- `MagLifeBwn` (EE 0xd40, scene +0x2afe0): Brown's state machine as MagLifePC's, but requested and
+  applied in two steps: vtable slot 16 0x1233d8 `requestState` writes the pending quad +0x80
+  (mode, -1, a, b; linkonce `getNextMode`), `applyState` 0x125704 enters it when the current mode's
+  `term(bwn, force)` returns non-zero (state 0 always), saving the old quad at +0x30 as setState does,
+  then the mode's `init`. `changeMode` 0x1233f4 = request + apply; slot 14 0x1247c8 (`message`) is the
+  0..9 front door (-2 when already pending). live runs `applyState(1)` and only when nothing changed
+  the mode's `live`.
+- Modes (mag/maglifebwnmode.cpp, 0x125bd4.., stubs): base `MagLifeBwnMode` slots 1 init 2 live 3
+  setParam 4 term, all taking `MagLifeBwn &` (the linkonce symbols); embedded at +0xcf0 Null(0),
+  +0xcf4 One(1), +0xcf8 Wait(2), +0xd04 Sit(3), +0xd08 Fuse(4), +0xd0c Move(5), +0xd18 Path(6),
+  +0xd28 Turn(7), +0xd30 Rotate(8), +0xd2c Wall(9). The shared live 0x125bd4 = stepMotion, then
+  state 0 when the motion sequence ends. Written 2026-10-30 (0x125bd4..0x1267c0, verify): args are
+  the state quad's m_08 / m_0c (a / b); +0x70 is the floor step testFloorStep found (2 / 3 a step,
+  0 flat; Sit / Fuse refuse on 2..3 and wait instead). Rows: Wait 2 (0x25 after Wall, 0x6a / 0x6c
+  on a step), Sit 7 (0xf from Fuse; term stands row 8 up via 9), Fuse 0xc (0x10 from Sit; row 0xd up
+  via 0xe), Move / Path walk = {0x57, 0x4e, 0x60, 0x45}[gait m_08] + m_0c (gait 1 at health > 2;
+  Path's gait 4 = 2, or 0 within 500 of the goal +0xc9c), steps 0x6b (kind 3) / 0x69 (kind 2) probed
+  75 (and 37.5 for Path) ahead, Path's blocked turn 0x43 and stop 0x68 (from rows 0x60..0x67), Turn
+  0x2b + m_0c, One row m_08 (m_0c != 0 holds at the end, +0xcc0), Wall {0x1d, 0x1f, 0x21, 0x23}
+  [m_08 % 4], Rotate (+4 m_target_rot from m_08's float bits, +8 the angle left; startTurn 0x1264f8
+  picks 0x39 / 0x2c / 0x2b left, 0x3a / 0x2f / 0x2e right by 90 / 45 / 2 degrees, ends inside 2
+  degrees or on a sign change: +0xcc0 = 1, m_08 = 1).
+- `MagLifeBwnCtrl` (mag/maglifebwnctrl.cpp, 0x1267c0..0x12bc20, EE 0x130, scene +0x2bd20): what Brown
+  decides. `requestState(theMode, arg, force)` 0x12a56c enters a state at once (refused while the cell
+  under Brown has flag 0x20000, `MagLifeControlChara::testFloor` 0x119cec, except state 13) and
+  `applyMode` 0x12a394 points +0x88 at the embedded mode and runs its init; live (slot 2) runs the
+  mode's live each frame unless the level (+0x6c) is MANUAL (2). Modes: base `MagLifeBwnCtrlMode`, two
+  slots (1 init, 2 live, both `MagLifeBwnCtrl &theBwnCtrl`), embedded at +0x8c Null(0) +0x90 Wait(1)
+  +0x94 Follow(2) +0x9c Stay(3) +0xa0 Find(4) +0xd0 FindEnd(5) +0xd4 Move(6) +0xd8 MoveEnd(7) +0xdc
+  Rot(8) +0xe0 RotEnd(9) +0xe4 Damage(10) +0xf0 Bark(11) +0x120 Hug(12) +0x128 Wound(13); SitOut has
+  a vtable and nothing else. The modes drive Brown through `MagLifeBwn::message` (1 one-shot motion
+  with the motion id, 2 wait, 3 sit, 4 fuse, 6 path, 7 turn class) and request the next state
+  themselves; +0x08 is the state's phase, +0x78 the mission (setMission 0..4: 1 find, 2 stay, 4 hug),
+  +0x84 frames in the mode. Null picks: health 4 -> Wound, mission, bark (enemy within 200), else
+  Wait; Wait follows past 170 from the PC, idles every 300 frames (table 0x2ebe10), sits at 1801,
+  lies down at 3601. Orders: come (follow / turn / back off / action table 0x2ec448), stay (state 3),
+  go (pending find, enemies ahead -> bark, item ahead -> find, floor ahead -> move, else follow).
+  Follow (+0x94, its +0x04 = phase << 1 | step) walks straight at the PC while 0x17e0a8 (a 40-wide
+  line over the scene's sector list) is clear, else paths; Wait again within 105. Find (+0xa0: door
+  point +0x10, heading +0x20, kind s16 +0x24, sides +0x26 / +0x27) picks the item with utlFindBest
+  0x106344 (FCHRstat objects whose uid u16 +0x128 is one of the UtlFind's ids; the current room's
+  first, else weight +0x118 over distance); another room: WrdSrv::findRoute, then utlFindDoorBetween
+  0x102dc0 (kind-9 objects linking two rooms, ctlObjParam 0xc) and Brown goes 95 before the door,
+  turns, slides through (door kind 0) or waits; errors ERR_CANNOT_FIND_ITEM 0 .. ERR_END 7 in the
+  controller's m_0c pick Brown's answer motion (table 0x2ec028: 132..137). MagLifeBwn::message 8
+  takes the rotate heading as a float's bits in the int argument.
+  Bark (+0xf0: bark point +0x10, distance +0x20, m_bite_target_oid +0x24, its kind +0x28 = the
+  UtlEmyInfo +0x24 word) live 0x129028 runs 18 phases (MODE_START .. MODE_MOVING4ENEMY, names at
+  0x2ec230): the nearest enemy within 500 (of Brown, or 500 ahead of the PC from init's arg = phase
+  14); kinds 0x401 / 0x421 are barked at from 135 / 110 (walk there, turn within 3 degrees, motion
+  0x76, then each frame turn by at most a degree and edge to the distance less 20: phase 11 =
+  barkQuery), others get a turn plus growl 0x1c (200 away) or bite 0x2a (SE 13 every 20 frames,
+  again on a 9 in 10 roll), and are walked to beyond 200. barkSet (phase 12) plays 0x71 (m_0c 0) or
+  0x79. EmyManager word +0x3c 4 (0x401) / 7 (0x421), or a cleared state flag, ends the target.
+- Fields named by the ELF's linkonce accessors: +0xca0 m_num_search_line (< 127, asserted in
+  mag/maglifebwn.h:213), +0xcac getUnmovableCount, +0xcb8 getHealthStatus (0..4 by dog params
+  0x1b / 0x1c: 0.8 / 0.4 / 0.2 / 0), +0xcc0 isPathMoveEnd = isActionEnd, +0xcc4 getMoveResult /
+  resetMove, +0xcd4 getNeckControl (1 smell, 2 look at +0x90), +0xcdc / +0xce0
+  setNeckMotionTarget (neckblend octant, rate).
+- The path: `searchPath` 0x12349c asks 0x17d298 (as GamMan::findSectaPath) for the cells from
+  MagLifeControlChara's +0x60 cells (`getSectaCells` 0x11a64c, the assert's nowsct) to the target's
+  (+0xa8c), and lays out the search line +0xa0 (127 points, w = segment length) and widths +0x890;
+  `followPath` walks it by a 16.16 index +0xca8 (`advancePathIndex`), steering with the motion's
+  root step. Bend motion rows 0x2eb980 / 0x2eb988, turn rows 0x2b..0x30 (`turnToPath`).
+- MagLifeControlChara +0x60 is four `GamSecta *` (the cells under the actor, FUN_0017c340 radius
+  40 / 100), not a goal vector; `updateSectaCells` 0x11a6b0 refreshes it.
+- Brown's motion sequence table is 0x297418 (constructor 0x125aa4); NULL on the host like the PC's.
+
+## The secta world (`sct/sctlayer.cpp`, 0x17c0f0..0x17e540, 2026-10-28)
+
+Where the floor is, per room: a sky pack's `sector.sec` (MagScene::loadTenkyu hands it to
+`SctWorld::setup` 0x17c1f4; the world is MagScene +0x8542c, bss 0x7811ac). Class `SctLayer` is the
+ELF's (vtable 0x2e4520, vptr +0x14, EE 0x18); the owner `SctWorld` (0x68: flags, data, 4 layers at +8)
+and all method names are ror-inferred (batch sctlayer_001). Format (checked on MAPUNIT.BIN's 245 packs):
+- file: 0x20-byte head {0x100, 4 layer offsets (0 none), pad}; layer: {no, sectors, cells, groups}
+  then sectors (0x80), cells (0x90, `GamSecta`), groups (0x20), the groups' member words.
+- sector: id, 16 linked sector ids (-1 ends), +0x44 cell count, +0x48 footstep sound, +0x4c bounds
+  x0 z0 x1 z1, +0x5c flags (bit 0 = +0x60 is an offset from the sector -- always on the disc; the
+  ROM relocates in place and leaves the bit set), +0x60 first cell, +0x64 / +0x68 route-search marks.
+- cell: id, sector, +8 flags (0x2 z slope from +0x34 at z0 to +0x2c at z1, 0x8 x slope from +0x30 at
+  x0, both = the z slope plus the x rise; 0x4 blocked; 0xf0 one triangle half 0x10 / 0x20 / 0x40 /
+  0x80, see isInCell), +0x10 point, +0x1c bounds, +0x3c eight neighbour cells by direction (0..3 the
+  edges +z +x -z -x, 4..7 the corners), +0x5c their costs, +0x7c..+0x88 the cell walk's marks.
+- group: name (0x14, strcmp key of native 281 ops 200 / 201), member offset, count, flag bit 0.
+Queries: findCells 0x17c340 (per layer: findCell -- start cell, its sector, the sectors holding pos,
+floor within f12 of pos y -- then with f13 > 0 the nearest within that radius); getCellY 0x17dd5c
+(100000 outside); searchPath 0x17d298 (sector BFS from the goal 0x17cf0c, then a cost spread sector
+by sector 0x17d62c and in the last sector 0x17d9ac; direction orders data 0x298e20; a blocked cell
+ends the path at the cheapest cell beside it); canWalkStraight 0x17e0a8 (edge table data 0x2f30c8).
+Host: offsets stay offsets (SctLayer::getSectorCells / getGroupCell resolve them), cell +0x88 holds a
+direction index instead of the EE pointer. Tested 2026-10-28 by a temporary self-test on two packs
+(paths are neighbour chains both ways, slopes match the stored points, group bits set / clear).
+Some triangle cells' stored point lies outside their own bounds (5 of 48 in MAPUNIT's first pack), so
+a cell is not always found at its own point -- the data, not the port (isInCell tests the bounds).
+
+## The texture table (`dog/dogtexinfo.cpp`, 0x1161e4..0x11764c, 2026-10-22)
+
+- **DogTexInfo** (EE 0x20; the scene's at +0x29520, 256 entries): +0 m_max_tex, +4 m_num_tex,
+  +8 m_tex_info (theMax 16-byte name records = the i3d context's texture table `I3dTexEntry`:
+  pszTexName, pPicture, CLUT, a word the i3d regs use; names from the asserts), +0xc m_tex_data
+  (theMax 0x198-byte `DogTexData`: I3dTexture +0, I3dClut +0x130, the TIM2 +0x168, own flag
+  +0x16c, reference count +0x16e, name[40] +0x170), +0x10 m_dirty (every change; MagScene::draw
+  then calls setTexTable), +0x14..+0x1c a sepia colour (0xff 0xdc 0x98) that addPfh's `sepia`
+  argument applies to each TIM2 (`utlTm2ToSepia` 0x10559c: luminance 0x4d/0x96/0x1d times the
+  factor >> 16; its caller `setSepiaColor` 0x11626c is called from 0x144ae0).
+- Records are found by name. addData (TIM2) counts a reference when the name is there (unless
+  flag 2), else takes the first empty record (findFree), copies the TIM2 to the heap when flags is
+  not 0, and builds the texture / CLUT (tcc < 0: utlIsTccName); add (an I3dTexDesc already in
+  VRAM, e.g. shadow01 256x256 CT32 at block 0x2300) does not count references. release drops one;
+  the last terms the i3d objects, leaves the name "" and clears the record. releaseModel /
+  releasePfh release by an i3r model's / a pack's names and trim m_num_tex; setTexTable trims past
+  the last record with a picture and calls i3dCtxSetTexTable(ctx, m_tex_info, m_num_tex).
+- addPfh(pfh, i3r, flags, sepia): every pack file under its name (i3r NULL), or for each texture
+  the model names (`i3rGetNumTex` 0x22b428 / `i3rGetTexName` 0x22b438, DogModel's inline get_nTex /
+  getTexName) the pack file of that name; -3 when the pack lacks one.
+
+## The model (`dog/dogmodel.cpp`, 0x11440c..0x1160a8 + inlines 0x281cbc..0x2827c8, 2026-10-26)
+
+DogModel (EE 0x1a0) = DogEntityEx + an i3r model. Fields by the ROM's assert names: m_ref_count
++0x104, m_tex_info +0x10c, m_load_flag +0x110 (LOAD_NONE 0; 1 owns m_pack_file, 2 owns root + i3c,
+3 share of m_original +0x118, 4 = loadPack / loadData: caller's data), m_pack_file +0x114,
+m_i3r_root +0x11c, a second root from pack file 2 at +0x120, m_i3c_root +0x124 (collision, from
+loadData's third argument: the scene's <name>_col file), m_colli_tbl +0x128 (u_short model node per
+i3c node), one block m_mat_local +0x12c / m_mat_model +0x130 / m_mat_flag +0x134 (nNode * 0x84
+bytes from g_utlMemory), shadow light words +0x160.., a 0x30 display control at +0x170 whose address
+utlSetI3rDispControl 0x1067d8 writes into every material. Model packs: file 0 the TIM2 pack
+(DogTexInfo::addPfh with the sepia flag), file 1 the i3r, file 2 optional. DogEntityEx +0xa0 is the
+local matrix; DogEntity +0x80 is a rotation added to m_rotate (DogEntity::makeLocalMatrix 0x10fd18,
+order scale, Z, X, Y, translate, offset). A model hung from a parent node turns a fresh local matrix
+by (x -> -x, y <-> -z) first. Billboards: m_flag100 bits 1..3 (on / with X turn / towards a point),
+used by slot 11 transformBillboard. Casts build an I3cQuery (root, node matrices, colli table, group,
+hit callback 0x114034 / 0x1141c8, hit record) for i3cCastRay 0x232508 / Sphere 0x2324b8 / Cylinder
+0x2325a8 with 64 unit matrices; the hit record is MagSceneRayHit (t at +0x0c, m_50 group).
+The hit callbacks (2026-10-29) sit just before castRay in dogmodel.cpp: dogModelHitNearest 0x114034
+(ray / sphere) keeps the hit with the smallest point.w (a tie goes to the later triangle) and writes
+q->m_group to m_50 on every call, nearer or not; dogModelHitCylinder 0x1141c8 keeps only walls
+(normal's up within -0.5..0.5). Both store, in the game frame (i3c (x, y, z) -> (-x, -z, -y)), the
+point (w = t), the unit normal (w 0, utlNormalize3), the triangle's 3 vertices, and the group's name
+(i3cGetGroupName, up to 28 bytes, at +0x54; skipped when m_group < 0). MagSceneRayHit is 0x70 bytes:
+castRayGroups' frame puts the record at sp + 0x50 and its matrices at sp + 0xc0.
+
+## The actor's motions (`dog/dogactor.cpp`, 0x108674..0x10f860, 2026-10-27, partial)
+
+DogActor (EE 0x4d0) = DogModel + motions. Names from the ROM's asserts: m_flag_motion_data +0x1a8
+(-1 none, 0 records point into packs, 1 FLAG_MOTION_EACH: each i3m its own block),
+m_pack_motion[4] +0x1ac (bank 0 = the model pack's file 1, never released by pointer; 1..3 =
+loadPackMotion's heap blocks), m_max_motion +0x1c0, m_motion_data +0x1c4 (0x20-byte records: i3m
++0, param words +4, root track +8, m_tag_data +0xc, +0x10 a byte flag, id +0x14, bank +0x18, name
++0x1c), m_posture +0x1cc (one block of nNode * 0x62 + 2: current pose records, previous ones at
++0x1d0, m_assign_tbl +0x1d4 = count + model node per motion node). Two 0xe0 DogMotionBlend states:
+m_motion +0x1e4 (no, speed, frame, the view m_max_motion +0x18 / m_motion +0x1c, four 0x30 blend
+entries at +0x20) and the previous one +0x2c4 (savePosture). A motion pack file is either an i3m
+(i3m word +0xc is its size; when the pack file is longer a root track follows) or an RTPK of parts
+(0 i3m, 1 params: word 0 to +0x10, the rest to +4, 2 root track, 3 tag track); flag 0x10 packs
+carry the ids in the files' user data (& 0xfff). Root tracks: numframe, type (stride by type: 0/4
+four floats, 1 six, 2 two, 3 three, 5/6 one), 8 bytes, then frames; getRootMove samples one at a
+15-bit fixed-point time and adds the whole track's move once past either end. getRotY = m_base_rot
+y (+0x3c4) + m_rot_offset y (DogEntity +0x84, our m_80) + the root track's turn, unless m_mode bit
+1 (isBlendIn) gives m_rotate y. load: reset, mode 2 copies the pack (m_model_copy +0x1a4), slot 14
+loadPack(file 0) then allocMatrix, loadMotion(file 1, bank -1). The two loads (slots 14 / 15) end in
+setupEye (the first node named *eye*).
+
+The per-frame player (written 2026-10-27, second session): `runMotionCmd` 0x10d388 (MagScene::updateActors)
+runs the command list m_motion_cmd[8] +0x42c from m_motion_cmd_idx +0x44c (DOG_MAX_MOTION_CMD 8,
+asserted; +0x450 = the command started its motion, +0x428 = the last step's result). A word: op =
+bits 28..31 (1 jump to command op1, 2 play once then next, 3 loop and hold, 4 as 2 with a chance of
+bits 12..21 out of 1000), flags = bits 22..27 (1 look up first, 4 start at the current time, 8 scale
+it to the new length, 0x20 stop at the end and hold), op1 = bits 0..9 (a motion id or index). Ops
+0 / 5..15 do nothing, so a list must end in a jump or 0x20 (the ROM spins otherwise; the host gives up
+after a pass). Without a list, m_mode bit 0 steps the motion alone by m_motion_flags +0x3f0 (1 loop;
+else at the end 2 changes to the motion in +0x3f4, none of 1 / 2 / 4 stops). A loop wrap turns the
+heading by the root track's last key w (forward +, backward -). m_interpolation +0x1d8 (assert name)
+is the blend-in length: m_f4 +0xf4 counts frames, the rate is (m_f4 + 1) / m_interpolation, or a
+percentage per frame from the record's m_param curve when its first word equals m_interpolation;
+getBlendInOffset fades the saved trans-Y +0x420 and rot +0x424 into the new root. `draw` (slot 12)
+updates the posture every m_45c-th frame: DogMotionBlend::getPose into m_posture, per node a pose
+lerp with the previous pose by getNodeBlendRate, the control node (+0x3d4, flag +0x3d8) quaternion
+from the euler m_3e0 (set, or multiplied in), i3mPoseToMatrices into m_mat_local, setNodeScale's
+nodes (> 0) scaled, convertLocalToModel; then billboard / transform, `drawModel` (slot 19:
+utlDrawI3r with m_mat_model; the m_attention node's material points at the pulsing record +0x4a0
+for the draw; a model with m_16c (a DogModelAnim: value stepping between bounds) passes utlDrawI3r a
+{0x1f, value x5} record), and the root turn m_rot_y_aar into the heading. `drawShadow` (slot 20)
+draws m_i3r_root2 (the pack's file 2: the shadow model) when present. updateEye blinks: texture
+state 2 for 4 frames, 1, 0, then a new 60..90 frame period; setEyeTex points the eye material's
+entity 0 at m_eye_uv with v = {0, 0.3203, 0.6484}. checkName compares theName with the model pack's
+file 0 name up to its '.'.
+
+The rest of DogActor (third session, 2026-10-27; the TU is complete): `getMotionMove` 0x109348 is the
+root move between two frames (non-looping motions clamp to the last key; a looping one returns 2 and
+the track's whole turn when the step crossed the end, or its negation going backwards); only a track
+type with bit 0x10 keeps the y move. The **tag track** (record +0x0c) is not a DogMotionTrack: word 0
+the frame count | 0x80000000, then one u_int of event bits per frame; `getMotionEvent` 0x10bcc8 ORs the
+words after frame t0 up to t1, wrapping (the argument: < 0 the current motion, < 0x10000 an id, else a
+record index). m_base_trans 0x3b0 / m_base_rotate 0x3c0 are where the root track started
+(`resetRootBase` 0x10ac98 via `getRootBase` 0x10a2d0); addTransRotY / setTransRotY 0x10a090 / 0x10a1c8
+set the position and a heading net of the root's current turn. Blend entries (DogMotionBlend +0x20,
+four of 0x30): +0x00..0x0f a 128-bit node mask, +0x10 speed, +0x14 frame, +0x1c a rate in 0..1
+(-1 none), +0x20 motion record, +0x24 a state (2 = fading), +0x28 the fade time, +0x2c its count;
+`setMotionSub` / `setMotionSubBySuffix` 0x10b328 / 0x10b620 start one over the nodes named in a
+NULL-terminated list, keeping their current pose as the previous one. The ELF names the class body's
+inlines: getMotion(int, tag_I3mPosture_s *, float, I3M_INTER) wraps i3mGetPose, getBlendMotion wraps
+i3mGetBlendPose 0x22eab0, i3mGetNodeIndexByName(int, char const *) the i3m lookup.
+DogMotionBlend (dog/dogmotionblend.cpp, written 2026-10-27): the asserts call the motion fields m_main
+and the entries m_sub[4], m_frame m_main.m_time. getPose 0x1081b0 samples the main motion (i3mGetPose
+flags 0x111) and then each entry's into a 128-node stack block and copies it over the masked nodes
+(i3mPoseLerp with t 0) -- the fade itself is the actor's, through getNodeRate 0x1078dc ((m_count + 1) /
+m_time while fading, else 1). step 0x107e30 clamps (1 end, 2 start, 3 zero length or speed 0);
+stepLoop 0x1079d8 wraps (1 forward, also when speed is 0; 2 backward; +-1e-5 of the end snaps to 0)
+and stops a playing entry at its m_1c ratio; a fading entry (setBlendRate 0x108428) holds frame m_1c *
+length at speed 0 and counts m_count up to m_time; setBlendRate with the same rate 0 after the fade
+frees the entry. The i3m pose / quaternion ops below it are written (i3d/i3mpose.cpp, 2026-10-27).
+
+## The effect manager (`eff/effman.cpp`, 0x176694..0x1788ec, 2026-10-28)
+
+`EffMan` (scene +0x837e0, EE 0x12c8; formerly Obj176a3c; the name is inferred from its link position
+between EffLight3 and EffMuzzleFlash1): +0 scene, +4 `Eff0 *m_eff[0x110]` (0..0xff live, the numbers
+createEff returns; 0x100..0x10f retired effects that run until their live returns 0), +0x444
+findFreeNo's round-robin start, +0x448 live count, +0x44c draw order (entry numbers, sorted by Eff +0x10
+descending each frame: packDrawOrder + insertion sort with a binary insert), +0x88c weak FIFO
+(EFF_FLAG_WEAK 0x10 entries, oldest first: evicted by retireEff when all 0x100 are used) and its count
++0xc8c, +0xc90 eff.bin's 0x800-byte RTPK index, +0xc94 16 packs of 0x60 {kind, name[32], keep, data,
+ref, file[8], nI3r, nI3m, nTex}, +0x1294 / +0x1298 the singleton kinds 0x1a / 0x1f, +0x129c FileReader,
++0x12a4 FileReadReq. Globals 0x298e08 scene, 0x298e0c context. init preloads (kept) kinds 1, 2, 3, 4,
+0x32, 0x1f, 0x26, 0x27, 0x1a. A pack is a sub-RTPK of data/eff/eff.bin (33 packs, <= 8 files): I3D_BIN
+models, then I3D_I3M motions, then TIM2 textures (added to the scene's DogTexInfo), then the effect's
+parameter file. The kind -> pack name table is 0x2f2cd0 (54 entries; 0x33 "gr1" and 0x34 "bg1" take a
+suffix from the param). draw: layers 850 (TEST_1 0x5000d, z GEQUAL) and 855 (0x3000d, z ALWAYS) at the
+camera with light set 0, fog record 0 when +0x2aa84, view 0; Eff0::RENDERPARAM {layer[2], cur}.
+**Eff0** (vtable 0x2e3250, EE 0x24): +0 flags (2 finished, 4 hidden, 8 activation pending, 0x10 weak),
++4 finish countdown, +0x10 depth, +0x14 pack (its ref counted), +0x18 kind, +0x1c delay, vptr +0x20;
+slots 1 dtor, 2 init(param), 3 term, 4 live, 5 liveMain (pure), 6 render, 7 renderPreMain, 8
+renderMain (pure), 9 createPacketEntry, 10 setVisible, 11 liveActivateExec, 12 updateZDepth.
+0x8282a0[54] is the per-kind draw-set cache (cleared each frame by effClearDrawSets 0x16add8);
+0x828378[256] a random permutation (effInitRandTable 0x16ac84: each pick a random distance of at least
+a quarter of the rest past the last; effRand 0x16ad94 returns the next byte, cursor 0x308050).
+`eff/eff0.cpp` (0x16a914..0x16afcc, 2026-10-28) holds Eff0 and these helpers: live waits out m_delay,
+runs liveActivateExec when flag 8 is set (Eff0's clears it), counts m_life down (flag 2 at 0), returns
+liveMain; render (m_delay < 0) picks layer[0]; renderPreMain makes the kind's draw set once a frame from
+createPacketEntry (the pack's textures, files nI3r + nI3m.., depth 1) and wraps renderMain in a key-0
+set node. effFogColor 0x16ae00 tints an rgb by fog record 0 (scene +0x2aae0) at a depth (the full fog
+colour past far, a squared ramp of the two amounts between); effAmbientColor 0x16af20 by ambient light
+0 of the scene's light pool. The constructor's m_z is the int 0x7fffffff (hazards.md).
+**createEff's kinds -> classes** (0x176cc8; EE object sizes in src/eff/effclasses.h): 1 BloodSpray1,
+2 BloodSpray2, 3 BloodStay1, 4 BloodStay2, 5 BloodStay3, 6 BloodStay3Prim, 8 Breath1, 9 Breath1Space,
+0xa Breath2, 0xb Breath2Prim, 0xc Breath2Ground, 0xd CameraAnim1, 0x11 Cloud1, 0x12 Dust2, 0x13 Dust2Prim,
+0x14 Fire1, 0x15 Fire1Ex (: Fire1), 0x16 Fire2, 0x17 Fog1, 0x18 Fog2, 0x19 Fog2Prim, 0x1a Fog3 (singleton),
+0x1b Fog3Dark, 0x1c Fog3WeakUp, 0x1d Foot1, 0x1e Foot1Prim, 0x1f Foot2 (singleton), 0x20 Foot2Prim,
+0x21 Light1, 0x22 Light2, 0x23 Light3, 0x26 MuzzleFlash1, 0x27 Reload1, 0x29 / 0x2d Steam1, 0x2a / 0x2e
+Steam1Prim, 0x2b Steam2, 0x2c Steam2Prim, 0x2f Water1, 0x31 Water3, 0x32 FindItem1, 0x33 Generic1, 0x34
+Bg1 (: Generic1); 7, 0xe..0x10, 0x24, 0x25, 0x28, 0x30 have none. Out-of-line constructors: BloodSpray1 /
+2, Light3, Reload1, Water1, Water3, Generic1, Bg1; the rest are linkonce (Eff0::Eff0 + the vtable) and
+inlined. Every class's slot functions are named `EffX::init / liveMain / render / renderPreMain /
+renderMain / createPacketEntry / liveActivateExec / updateZDepth` from its vtable (batch effman_002).
+Shared helpers, `eff/effcommon.cpp` (0x16fb70..0x1704a4, between EffCameraAnim1 and EffDust2, 2026-10-29;
+file name inferred): effCalcViewDepth 0x16ff18 (dot(camera row 2, pos - row 3)), effMoveToward 0x16ff78
+(from + normalize(to - from) * d), effVecLength 0x16fc20, effMatMakeUpright 0x16fc74 (billboard: z flat,
+y up, row lengths kept), effMatMulRotZ 0x16fd4c, effMatFromAxisZ 0x16fda0, effWrapAngle 0x16fe88,
+effMakeNodeMap 0x16ffec (u16 [count, I3R node per I3M node] in g_utlMemory; EffGeneric1 / EffReload1),
+effFindChild52 0x1700b0 (strstr on type-0x52 child names), and the **actor probe** `EffActorProbe` (EE 0x54:
+hit bits, DogActor*, box centre / half sizes, margin, 4 limb positions): effProbeActorInBox 0x1702e4 (actor
+m_trans in the box, margin on x / z), effProbeActorLimbs 0x1703c0 (motion events 0x10000000 / 0x20000000 /
+0x4000000 / 0x8000000 over the next frame -> Bip01 L Toe0 / R Toe0 / L Finger0 / R Finger0 via
+effProbeNode 0x170158, bits 0..3) -- the footstep / handprint effects 0x16cebc and 0x1730d4 use it.
+effStrIndex 0x16fb70 is unreferenced. **EffFindItem1** (kind 0x32, EE 0x50; +0x30 pos, +0x40 pull toward
+the camera, +0x44 frame 0..44): a 40 x 40 VU1 sprite, colour (1,1,1,0.5), ALPHA_1 0x48, shown frames
+0..14 of 45 with textures 0,1,2,3,2,1,0 (frame ends 2,3,4,8,10,12,14).
+**EffCameraAnim1** (kind 0xd, EE 0x50, `eff/effcameraanim1.cpp` 0x16f71c..0x16fb70, 2026-10-29):
+EffParam::m_file is an event file {+0 type (only 1 plays), +4 key count, +0x10 keys of 0x1c: trans[3],
+rotate[3] radians, lens degrees}. init saves the scene camera mode (+0x30), m_camera_entity m_trans
+(+0x34) / m_rotate (+0x40) / m_angle (+0x4c), sets mode 0 and puts key 0 on; setKey 0x16f80c writes
+m_trans + m_dirty, wraps the rotation into -pi..pi for setRotate and m_angle = deg * pi / 180 (the
+camera angle is radians); liveMain plays one key a frame, then restores and calls setCameraMode(saved,
+0, NULL) -- the followed actor is not restored. The prologue picture-book stretch plays two of them.
+**The dust, fire and fog effects** (kinds 0x12..0x19, 0x1704a4..0x172678 between eff/effcommon.cpp and
+eff/efffog3.cpp, 2026-10-30, written, verify; one file per numbered family: eff/effdust2.cpp,
+efffire1.cpp, efffire2.cpp, efffog1.cpp, efffog2.cpp, layouts in their headers, EffParam m_dust2 ..
+m_fog2prim). No written code creates them except kind 0x15 (native 281 op 38: the 12 words after the
+actor are a 0x20-byte node name and an RGBA colour); the rest come from room scripts' 0x70-byte
+records. EffDust2 (0x12) keeps 12 EffDust2Prim (0x13, 150-frame camera-facing puffs rising 0.025 a frame,
+alpha keys 0 / 0.8 / 1 / 0.8 / 0 per 30 frames, 0.9 on frames with bit 2) alive along a segment, scattered
+by a radius that grows from m_spread0 to m_spread1 and fainter toward the far end; createPrim 0x170624.
+EffFire1 (0x14): an upright 5 x 10 flame (effMatMakeUpright, a 4 x 2 sheet of texture 0, 6 frames a
+cell, ALPHA 0x44) 5 above m_pos plus a 100-wide camera-facing glow (texture 1, ALPHA 0x48) 2 above it
+pulled m_near + 10 toward the eye, its alpha 0.85..1 from a 96-bit flicker pattern (data built on the
+stack: 0x52a53d2a, 0xa5656951, 0x56512b2a); setVisible fades it over 5 frames (liveActivateExec, m_fade
++0x5c). Its liveMain / renderMain / liveActivateExec were named EffFire1Ex:: by batch effman_002 (the
+slots are shared): renamed EffFire1:: (batch effdust2_001). EffFire1Ex (0x15, EE 0x90) reads +0x60 actor,
++0x64 node name, and moves m_pos to the node in updateZDepth. EffFire2 (0x16): a world-oriented sprite
+(rot z x y, scale) cycling the 2 x 2 quarters every 4 frames. EffFog1 (0x17): a camera-facing quad that
+drifts m_speed a frame along the camera's x row (in renderMain) and resets every 540 frames; corner
+alpha keys {0, 0, 0.5, 1, 0.6, 1, 0.6, 1, 0.5, 0} per 60 frames, the left corners 45 frames ahead.
+EffFog2 (0x18) emits an EffFog2Prim (0x19) every 30 frames from a line across its heading; the wisp
+rises on a quarter circle from y < 0 (-y up) for 1.5 frames per unit of depth, then glides flat to
+m_dist (Eff0 m_0c state 0 / 10), corners cycling {0, 1, 1, 1, 0} per 20 frames, fading 30 frames in and
+out. Fog1 / Fog2Prim share EffSteam2Prim's quad tables (data 0x2f24e0 / 0x2f2520, 0x2f2580 / 0x2f25c0).
+**EffFog3 / EffFog3Dark / EffFog3WeakUp** (kinds 0x1a..0x1c, `eff/efffog3.cpp` 0x172678..0x172e4c,
+2026-10-29): the fog that thickens while enemies are about. `gamCreateEff1a` 0x172678 (GamMan::initStage2)
+creates one EffFog3 per stage. init takes its pack's file after the models, motions and textures (BedPfh
+index m_num_i3r + m_num_i3m + m_num_tex) as a table of 0x20-byte records {+0 chapter (g_bss_7a3210, -1
+last), +4 distance scale, +8 near-amount t, +0x10 far-amount scale, +0x14 rgb ints} and keeps the
+chapter's in `g_effFog3Rec` 0x298e18 (the destructor clears it); flag word 0x298e14 bit 0 = dark. Every
+30 frames liveMain walks GamMan m_achrList: clear and an enemy awake (effFog3AnyEmyAwake 0x1726b4: types
+0..3 not in EmyMain state 4, 4/5 not in state 6, types past 10) -> EffFog3Dark (init: effFog3Shift(1, 30));
+dark and every enemy of types 0..5 down (effFog3AllEmyDown 0x1727ec) -> EffFog3WeakUp with delay 150
+(liveMain: effFog3Shift(0, 90)) and 180 frames to the next check. effFog3Shift 0x172934 builds the
+record's fog on the map fog `m_fog[1]` (distances x scale, amount0 lerped toward amount1, amount1 x scale,
+colour rgb/255, w 0) and calls MagScene::addFog with fog - map (on) or map - fog (off), so it shifts
+whatever target the scene has then.
+**EffLight3** (kind 0x23, EE 0x3a0, `eff/efflight.cpp` 0x17562c..0x176694, 2026-10-29) is lightning and
+draws nothing (its renderPreMain / renderMain / createPacketEntry are empty linkonces 0x28c860..0x28c878).
+EffParam word 0x10 = mode. +0x24 a [6][16] table {src bit, id} (memset -1): mode 0 copies light set 1's
+direct / point / spot lights (bits 0..15 of pool m_set_mask[1][kind], MagScene::addLight(kind, 2)).
++0x330 the scene's ambient light 0 colour at init, +0x340 a DogDispControl that the first sky pack's
+model (m_tenkyu[0].m_model[0]) nodes `light3_%02d` display by (slot 2A data). Thunder every 90..210
+frames: SE 0xb030352, pattern 13/3/11/7 (effRand & 3), a set bit at frames 0, 4, 8, 12 starts a 5-frame
+flash: DogDispControl m_color = flash/5 with m_10 = 1 (0 / 0 once it ends), mode 0 the copies at 2x
+(direct) / 4x (point, spot) of their source colour times flash/5 and the ambient 0.3 -> 0.9 of its colour
+over 30 frames; mode 1 the ambient 1 -> 2 -> 1 over the flash. The dtor resets the disp, ambient x1, and
+removes the copies (all 6 kinds, by id).
+**The blood effects** (kinds 1..6, `eff/effblood.cpp` 0x16b62c..0x16dcc8, 2026-10-30; eff/effblood.h has
+the layouts). Eff0's m_0c is their state (0 start, 10 running, 20 fading, -1 done) and m_08 the last
+frame's. Kind 1 EffBloodSpray1 (scnDamageStart): 9 drops (+0x40, 0x40 each) from m_hit.m_pos along its
+direction (m_1c..m_24, every caller (0, -1, 0)) turned about x then z by table 0x2f1fa0 from a random row;
+speed 13.5 s x 0.8 per drop, fade step + (192 s x 1.25^n) + 0x300, alpha 0x7f00 >> drawn as alpha / 32768;
+camera-facing sprites 20 toward the eye, texture 0 for drops 0..4, 1 for 5..8, far to near. Kind 2
+EffBloodSpray2 (script op 15): follows *m_pos / *m_dir (pointers), a drop every second frame for m_frames
+frames into slot m_next % 16 (17 slots, table 0x2f2020). Kind 3 EffBloodStay1 (the enemies' deaths, m_hit
+with m_scale 100, m_2c 90): 2..4 stains on the floor (delays 0 / 15 / 25 / 40, scales 1 / .8 / .7 / .6),
+each grown by sin(45..90 deg over 20 frames), TEST_1 0x51001 around them; weak (EFF_FLAG_WEAK). Kind 4
+EffBloodStay2 (script op 17): a trail of 32 edges behind *m_pos, a segment closed at m_length / 31 or when
+it turns past 90 deg less its share, drawn as 4-vertex strips (i3dPktDrawStripColor, ZBUF_1 0x13a0000e0
+no z write) tiled every 3 widths. Kind 5 EffBloodStay3: no picture, two counters (effSetBloodStay3
+0x16d8e8 creates the one instance, its number in 0x298e10). Kind 6 EffBloodStay3Prim: a flat sprite on
+the floor, half of texture 0 (rect u, v, w, h; mirrored by m_flip), 165 frames.
+
+**The muzzle flash** (kind 0x26, `eff/effmuzzleflash.cpp` 0x1788ec..0x1790e4, 2026-10-30; layout in
+eff/effmuzzleflash.h, EffParam m_muzzle). MagLifePC::createMuzzleEff creates it at the gun's gun_mazzle
+node. Two camera-facing VU1 sprites (EffMuzzlePart, 0x10 bytes: roll, size, y offset, alpha short / 32768
+and its velocity) drawn far to near: the flash (texture 0, ALPHA_1 0x48, size 10 + 20 a frame, alpha
+0x7f00 with velocity -0x3200 then -0x180 a frame: 3 frames) and the smoke (texture 1, ALPHA_1 0x44, size
+40 + 2.5, rising 2.25 and rolling 1.5 degrees a frame, pushed 1 along the camera z axis, alpha 0x6000
+from velocity -0x700 + 0x40 a frame: about 30 frames). The flash also owns a point light
+(MagScene::addLight(2, 3): light sets 0 and 1) at the muzzle, grey alpha x 150 / 32768, removed
+(DogLightPool::removeLight) once the flash is gone. EffReload1 (kind 0x27, next in the binary) is
+`eff/effreload.cpp` 0x1790e4..0x179428.
+
+**The reload** (kind 0x27, `eff/effreload.cpp` 0x1790e4..0x179428, 2026-10-30, written, verify; layout
+in eff/effreload.h, EffParam m_reload). MagLifePC::reload creates it with the PC actor's m_trans /
+m_rotate and m_shots. It borrows the pack's model 0 (no copy; the scene's textures assigned) and plays
+motion m_shots - 1 of the pack once (m_shots clamped to 6; below 1 no model and the effect ends the next
+frame): node block 0xb0 a node (pose 0x30, local, model matrices) as EffGeneric1's, placement matrix
++0x40 = unit, i3dMatRotZXY(m_rot), row 3 m_pos. renderPreMain poses at m_frame / 60 s (flags 0x111) and
+draws with utlDrawI3r; over once m_frame / 60 reaches i3mGetLength. renderMain (linkonce 0x28ca88)
+returns NULL.
+
+**The footstep effects** (kinds 0x1d..0x20, `eff/efffoot.cpp` 0x172e4c..0x173df8, 2026-10-30, written,
+verify; layouts in eff/efffoot.h, EffParam m_foot1 / m_foot1prim / m_foot2prim). EffFoot1 (0x1d) is a box
+(two corners in any order -> centre and full sizes, the sizes handed to effProbeActorInBox as its half
+sizes, margin 100): each frame the PC's actor (MagLifePC::getActor) and the dog's (MagScene::getCurDog,
+the ROM's line-708 inline asserting m_curdog = m_bwn_no >= 0) are probed when loaded and shown (slot 9
+isHide), and each limb effProbeActorLimbs reports gets an EffFoot1Prim (0x1e) with the box's tex / mode /
+scale / alpha. EffFoot1Prim mode 0: a camera-facing sprite (frame + 15) x m_scale wide, centred half that
+toward -y from the limb, pulled 20 toward the camera, alpha m_alpha x (1 - frame x 0.05) -- 20 frames;
+modes 1 / 2 end at once. EffFoot2 (0x1f, one at a time) keeps two file-static work records {type, count,
+scale 10} at 0x828648 (PC, type 0) and 0x828618 (dog, type 0x10); while a count is above 0 its actor's
+motion events over the next frame (the effProbeActorLimbs bits: Bip01 L / R Toe0, L / R Finger0) each make
+an EffFoot2Prim (0x20) at the node's x / z and the actor's m_trans y and m_rotate y, and decrement the
+count. init sets both counts to 0 and no other writer is found: in the ROM EffFoot2 never prints.
+EffFoot2Prim: weak, a flat sprite (effMatFromAxisZ of +y, i3dMatRotY m_rot) 2 toward -y, m_scale wide,
+the shoe 3x long with texture v 0..0.75, the paw square with v 0.75..1 (u 4..4.25 for the paw: (type &
+0x10) x 16 / 64, equal to 0..0.25 when the texture repeats), lit and fogged, TEST_1 0x51001 then 0x5000d,
+alpha in over 15 frames, out from 165 to 180 (EFF_FLAG_FINISHED jumps to 165).
+
+**The breath effects** (kinds 8..0xc, `eff/effbreath.cpp` 0x16dcc8..0x16f71c, 2026-10-30, written,
+verify; layouts in eff/effbreath.h, EffParam m_breath1 / m_breath1space / m_breath / m_breath2prim /
+m_ground). EffBreath1Space (9) is a box (corners in any order); each frame one group of 8 of
+MagScene::m_actors (frame & 15) is checked: an actor loaded (isAlive), with a "Bip01 Head" node and m_trans
+in the box gets a kind-8 EffBreath1 (numbers in m_eff[128], -1 none); one whose model is gone has it
+released (EffMan::release). EffBreath1: a ring of 8 mouth points {pos, distance from the previous}
+(0x80, stride 0x20, head 0x180), each frame the head node's model matrix (actor slot 7 getNodeMatrixPtr)
+times m_matrix applied to the mouth offset ((m_id & 0xff00) == 0x2400: (8, 25, 0), else (0, 14, 0)); a
+step within 3 on x / z and 5 on y keeps the last y. Every 70 frames, actor still in the box, a puff:
+alpha +0.06 to 1 then -0.015, size from 8 growing by 0.015 more each frame. Drawn while alpha > 0 as up
+to 8 camera-facing sprites (texture 0, the camera matrix scaled, its translation kept) walked back along
+the ring 10 apart, point k risen by ((frame + k)(frame + k + 1) / 2) x 0.0035, (size + k(k+1)/2 x 0.015) x
+scale wide, alpha x (9 - k) x 3 / 32 past the first, farthest first. EffBreath2 (0xa, ClrOutMove /
+ClrOutAtk): on frames 1, 3, 4, 6, 7 of 8 (0xda) an EffBreath2Prim (0xb) from *m_pos along *m_dir turned
+by up to +-15 degrees / m_scale about x and z, texture halves alternating, for m_frames (8) frames.
+EffBreath2Prim: speed 7.5 x m_scale, each frame x / z x (1 - m_drag / 40), y + m_drag / 2, size 5 + 2.5 a
+frame; over once y > 0 (the floor). EffBreath2Ground (0xc): weak, four flat puffs (rot x -pi/2, a random
+y angle; all but the first at random offsets up to 0.6 x m_size) 2 above the point, texture 1, TEST_1
+0x51001 / 0x5000d, starting at frames 0 / 6 / 8 / 12 with size x 1 / 0.9 / 0.8 / 0.7 and alpha x 1 / 0.8
+/ 0.6 / 0.5 (0x2f2278.. tables), grown in over 2 frames, faded out over the last 15; at least 17 frames.
+
+**The vapour effects** (kinds 0x11, 0x29..0x2e, `eff/effsteam.cpp` 0x179428..0x17a918, 2026-10-30;
+eff/effsteam.h has the layouts, EffParam m_steam1 / m_steam1prim / m_steam2 / m_steam2prim / m_cloud the
+params). EffSteam1 (0x29 / 0x2d) is a vent: a period of m_frames + m_pause frames from a random phase,
+one puff every third frame of the first m_frames, always kind 0x2a (also for 0x2d), along its matrix's z
+axis (rotated x / y by the param) turned by up to 15 degrees y and any z; it hands the puff a pointer to
+its own matrix row 3 (the position). EffSteam1Prim: sprite, size 20 + 4.5 a frame, alpha 0.4 up 0.03 a
+frame to 1, then down m_fade x 0.07. EffSteam2 (0x2b): a wisp (0x2c) every 180..210 frames in a disc of
+radius m_radius / 2, m_radius / 2 toward -y; EffSteam2Prim: a 4-vertex strip (i3dPktDrawStrip) for 150
+frames, rolling, its corner alphas cycling table 0x2f2f10. EffCloud1 (0x11): a sprite drifting m_speed a
+frame along a y angle for m_dist, faded by the square of its depth between fog record 0's near / far
+(m_param[0] / [2]) and over 60 frames at each end, then restarting near its origin; it begins in its
+wait. Creators not traced (no code caller of kinds 0x11 / 0x29 / 0x2b / 0x2d found in written code;
+probably event scripts through native 281).
+
+**The water effects** (kinds 0x2f, 0x31, `eff/effwater.cpp` 0x17a918..0x17c0f0, 2026-10-30; layouts in
+eff/effwater.h, EffParam m_water1 / m_water3). EffWater1 (0x2f) reads `data/eff/EFFWATER1.RPK` whole
+itself (not through its EffMan pack), keeps file 0 (an I3D_BIN model) in a heap block, adds the pack's
+textures to MagScene::m_tex_info, and draws the model in renderPreMain with utlDrawI3r (turned about y,
+scaled, its nodes' display control a stack DogDispControl with the param's colour as m_10 and m_20 =
+the float 1.0's bits), scrolling the texture through i3rSetMatEntity0 (u / v offsets, speed / 30 a
+frame) and bumping each node's change count (data +8). EffWater3 (0x31) is rain over a box (y points
+down): a grid of 0xd0-byte cells (500 units, mode 1: 200), each 8 layers of falling sprites and 4 of
+ground ripples, every layer one random offset tiled over the cell by a random spacing; drawn as one
+VU1 sprite batch per cell in view (i3dViewTestBox 1 / 2), texture 0 split into drop (u 0.5..1, v
+0.25..1), ripple (v 0..0.125) and splash (v 0.125..0.25). The first one alive (count 0x298e1c) moves
+the fog at once by MagScene::addFog toward grey 0.15 and near / far 200 / 400 (mode 1: 600 / 1500)
+relative to m_fog[3]; nothing restores it when the rain ends, and the destructor counts down even
+after a failed init. Creators not traced.
+
+**The record animation, EffGeneric1 / EffBg1** (kinds 0x33 / 0x34; EffBg1 `eff/effbg.cpp`
+0x16afcc..0x16b62c, 2026-10-30, written, verify; layouts in eff/effgeneric.h, EffParam m_bg). Both load
+a pack named with the param's suffix (EffParam +0x10, 0xc bytes) whose file after the models, motions
+and textures is named "eff" (strcasecmp): a u16 header (flags, record count, the loop's last frame)
+then records of {u16 type, u16 size, char name[0x20]}: 4 a uv scroll (speeds per second, offsets kept
+to their fractions with modff), 5 uv keys (0x10 each), 6 texture keys (0x28 each: MagScene::copyTexture
+of the key's texture over each layer texture of the material); keys apply from their frame, the last
+reached wins. A record's name picks a root material (effFindChild52, a substring); its uv goes in the
+object's m_uv[index] (0, 0, 1, 1 at init) as the material's entity 0 on every layer, and the material
+data's +8 count is bumped (EffGeneric1::setMatUv 0x174c4c). EffBg1 runs them over the map's model
+(MagScene m_tenkyu[0].m_model[0]'s I3rRoot, borrowed: its destructor clears m_root so EffGeneric1's
+does not free it) and overwrites every record's name with the param's material (EffParam +0x1c, 0x20
+bytes); it draws nothing itself. EffGeneric1 takes the param's position / rotation / scale / colour
+(+0x1c / +0x28 / +0x34 / +0x40, EffParam m_generic) and owns a model copy and an optional motion.
+Creators not traced (event scripts through native 281).
+EffGeneric1 (`eff/effgeneric.cpp` 0x173df8..0x174dd8, 2026-10-30, written, verify): init unrelocates
+the pack's model 0 in place, copies it, relocates the copy (the pack's stays unrelocated) and assigns
+the scene's textures; the pack's first motion (m_file[m_num_i3r]) sets the loop to its length x 60
+frames (else the file's m_frames). Four more record types, {u16 type, size, num, mask} + 8-byte keys
+{u16 frame, u16 flags, float}: 0 translation, 1 rotation, 2 scale, 3 colour (mask bits x y z (a)); the
+value is the last key reached, linear toward the next key when that key's flag bit 0 is set, 0 before
+the first (getKeyValue 0x174d14). renderPreMain draws the model itself (utlDrawI3r on param m_cur):
+rotation m_rot + keyed (i3dMatRotZXY), scale m_scale x keyed, at m_pos + keyed; nodes 1.. show a
+DogDispControl of colour m_color x keyed with +0x20 = 1000.0f, restored after the draw. File flag 4 =
+billboard: rotation records ignored, each node's model matrix replaced by the camera's (MagScene
+m_camera_entity after callTransform) scaled, at its placed position, and the draw matrix made unit;
+without a motion flag 4 also keeps the model's local transforms (node block n x 0x80). Type 6 does
+nothing here (an empty function 0x174c44).
+
+## The game helpers (`utl/utlgame.cpp`, 0x1024d0..0x1041c4, 2026-10-28)
+
+One-call queries and commands on top of GamMan, EmyManager and the scene's actors; 49 functions,
+all written.
+- **tbl_sound** (data 0x2e6978, 200 rows of 0x10: `m_se`, `m_link` (-1 in every retail row),
+  `m_tag` == the row, `m_name` "SE_SAVE_FINISH" ..). The game's sound calls take a *row*:
+  `utlPlaySe(row, delay, pos)` 0x1026b0 maps it by `utlGetSoundSE` 0x1025c0 and plays at pos, after
+  delay frames (`scnPlaySEDelayed` 0x1f97c8) or now; `utlPlaySe3d` 0x10254c takes a raw SE id.
+  Random / chance / play-if-idle / stop variants follow (`utlPlaySeRand2..4`, `utlPlaySeChance`,
+  `utlPlaySeIfIdle`, `utlStopSe`: funcSE 0x16 = "is it playing", 1 = stop).
+- GamMan's object pools as their used lists: m_achrList 0x79e610, m_fchrList 0x79ec50, m_vfchrList
+  0x79ef90, m_avfchrList 0x7a01d0 (pool + 0x10). The uid searches (`utlFindItemByUids` 0x102b6c,
+  `utlFindFreeObjByUid`, `utlFindItemByUid`) return a 64-bit `uid << 32 | oid` in v0 -- the port
+  returns `unsigned long long`; `utlFindMatchObj` (utl/utlfind.cpp) tail-calls with (obj's pos out,
+  UtlFind ids, m_10), so its header's `FCHRstat *obj` parameter is really a float out.
+- `UtlEnemyInfoBuf` (the asserts' name; `MAX_INFO` 32, `m_count` at 0x800) of `UtlEnemyInfo` 0x40:
+  `utlCollectEmyInfo` / `utlCollectEmyInfoAt` fill it from m_achrList objects of oid type 2 (the
+  'Bip01 Spine1' node of the actor via DogActor slot 18 `getNodeWorldPos`, else m_trans);
+  `utlFindNearestEmyInRange` 0x103654 picks the nearest within +-theR (one entry: index 0 whatever
+  its angle) for MagLifePC::startAttack / beginAttack.
+- The dog's oid is `GamMan::m_dogPtr->m_oid` (0 without), inline at each use.
+- `utlGetOidTypeKind` 0x103390 and `utlSetItemFlag2` 0x1033b8 have no callers and were folded into
+  `utlTakeObjItem`'s body in Ghidra (created 2026-10-28).
+
+## The dog's item search (`utl/utlfind.cpp`, 0x1060e8..0x106658, 2026-10-29)
+
+- `UtlFind` (0x18, MagLifeBwnCtrl +0x48 `m_find`): `m_id[4]` uids from `utlGetItemUids` (the item
+  and its three related uids), `m_num` +0x10, `m_again` +0x14 (utlFindSetItem's arg).
+- `utlFindBest` 0x106344 walks m_vfchrList for objects of those uids: score = o_smell_range (+0x118,
+  0 means 1e6) / (distance / 100), the distance from pos to the object's world position
+  (`WrdSrv::cnvPosL2W` of its room, FCHRstat::getParam 8) with height weighted x10 (dy^2 x 100 under
+  the root). Only scores >= 1 count; with `m_again` 0 a flag-2 item (`utlIsItemFlag2`) scores /10.
+  The first object in room wrd resets the best and from then on only room wrd counts. NULL pos:
+  `utlFindFirstVFchr` 0x1062d8, the first uid with any vfchr. Assert line 172 "area >= 0".
+- The accessors `utlFindObjWrdNo` / `Uid` / `Id` / `Pos` assert "theHandle != 0" (lines 22, 36, 48, 60).
+
+## The options screen (`mnu/mnuopt.cpp`, 0x1ab474..0x1ad6b4, 2026-10-29)
+
+MnuOpt (MagLifeMenuOpt +0x40, MnuTitle +0x3b80) edits GamMan's option block in place: getStatus 0x15
+returns &m_optOutput (+0x21f8c), and the six rows on screen map to setOption numbers and fields:
+Sound Stereo / Monaural = option 6 (+0x00), BGM vol. = option 2 (+0x1c, m_optStrLevel), SE vol. =
+option 3 (+0x18), Contrast = option 0 (+0x10, m_optBrightLevel), **Noir Filter = option 1** (+0x0c,
+GamMan names it m_optMasterLevel / m_masterVolume), Vibration = option 7 (+0x04). Levels are 0..8 (shown
+1..9). Any direction press sets GamMan m_flags2 0x400; triangle then sets all options again. The
+pattern table is the EE image 0x2a8848..0x2aad10, display list 0x2aad70 (65 sprites), textures
+data/mnurpk/mnuopt.rpk (option_sita / option_yogore / option). Seen working 2026-10-29 from the title's
+Option item (progress/ shot).
+
+## The 2D board (`mnu/mnuboard2d.cpp`, 0x1ad6b4..0x1adf04, 2026-10-30, written, verify)
+
+MnuBoard2D (EE 0x10c0; MagLifeMenuBoard2D +0x40, the menu ids with bit 0x40000, MagScene
+m_menu_board2d +0x3f620) shows one full-screen picture, in MnuOpt's open / exec / execMain shape.
+MsgManSet at +0 (never opened), SprMan at +0x7a4 (3 sprites). m_board +0x10b8 (the wrapper's type
+value; 0x40001 at construction) picks the texture: mnuBoardGetTexName 0x1ad7d4 looks it up in the
+{key, name} table 0x2abdb8 (228 entries, keys 0x40000..0x400e3, names k2_dummy, k2_1_1 .. k2_164; -1
+ends), exec appends ".tm2" into the buffer 0x2ac4e0 and loads it from data/mnurpk/mnuboard.rpk as
+board1_tcc (SprTexture::setListMode mode 1; tex list 0x2abad8). Pattern image 0x2abb08..0x2abce8,
+display list 0x2abce8 (sprites 0 / 1 / 2 at z 32000 / 32016 / 32160). The scene fades in over
+g_sequence.m_global[0x59] frames and out over [0x5a]. execMain by +0x790 (open sets 0, nothing found
+sets 1): mode 0 (0x1adcd8) waits until the script clears g_sequence.m_bits[1] bit 7, plays SE 4 and
+returns 1 once the fade is done; mode 1 (0x1addd0) fades in over 15, triangle fades out, then fades in
+again and returns 1. update 0x1adc6c sets m_bits[1] bit 30 while the fade is complete (MnuItem does
+the same); the close clears it. MnuItem's page 6 shows the same pictures through its own copy of the
+tables (0x2b8598..).
+
+## The theatre's movie player (`mnu/mnumovie.cpp`, 0x1adf04..0x1ae474, 2026-10-29, written, verify)
+
+MnuMovie (EE 0x990; MagLifeMenuMovie +0x40, menu 0x10007) is MnuOpt's open / exec / execMain shape
+around g_rxMpeg: the caller copies the movie name into g_rxMpeg.m_name, execMain opens it and runs
+`playNow(m_name, 0x200, 0x180)` with MagSystem::m_v_interval 1 (60 fps), ends on getStatus 1 or
+circle / cross (m_trig 0x2000 / 0x4000), closes and restores the interval to 2. draw shows the picture
+(RxMpeg::draw while m_playing is 1) then two black PRIM sprites, y 0x7200..0x7600 and 0x8a00..0x8e00
+(rows 32..96 and 416..480), full width. Its SprMan (+0x54) is constructed and never set up; prepare
+0x1ae024 and update 0x1ae328 are empty.
+
+MnuNow (`mnu/mnunow.cpp` 0x1ae474..0x1ae954, EE 0x920; MagLifeMenuNow +0x40, menu 0x10009, MagScene
+m_menu_now +0x3ecc0) is the "Now Loading" screen, in the same open / exec / execMain shape. SprMan at
++0x14 (2 records), data/mnurpk/mnunow.rpk: loading.tm2 (nowloading_tcc), 256 x 256 = four 256 x 64
+rows of the "Now Loading" picture; pattern image 0x2ac7b8..0x2ac980, display list 0x2ac980 (sprite 1
+at (32, 370) cycling patterns 1..4 six frames each, anim table 0x2ac968). exec fades the scene in
+(MagScene::fadeIn(4, 7, 0) on m_system->m_scene), runs execMain + SprMan::update until circle; execMain
+then fades out (3, 7, 0), calls MagSystem::resetDBuff and returns 1; exec fades out (4, 7, 0) again
+and returns 1 once getFadeState > 4. m_system +0x900, m_layer +0x904, m_result +0x908, m_scene
++0x90c, m_init +0x910.
+
+## The item box (`mnu/mnustock.cpp`, 0x19a52c..0x1a066c, 2026-10-30, written, verify)
+
+MnuStock (EE 0x15b0; MagLifeMenuStock +0x40, menu 0x10002; MagScene +0x2eed0 via the wrapper) moves
+items between GamMan's 12 item slots (m_itemHave, vector at +0x1a6c0) and the stock (m_itemStock, the
+SeqFixedPool at +0x1a7c0: its used list's nodes hold GamItemSlots at node +0x10). MnuOpt's frame:
+MsgManSet +0x58, SprMan +0x7d0 (138 sprites, mnustock.rpk: base / texstock / tex02 / texmoji /
+item01..04.tm2, font fnt16US.bin from the pack), window system text 0x1b, button guides 4 and 5,
+sequence bit-word 1 bit 0x40000000 while open, g_sequence.m_global[0x15] = 6 on close. exec step 4 runs
+page m_page (+0x40), each stepping m_main_step (+0x44; 3 = taking input):
+execPage0 0x19cf48 the category tabs 0x2e..0x34 (m_category_num +0x20 = 7; up / down rebuild the list
+from the top, cross -> page 1, circle closes); execPage1 0x19e474 the list (up / down, L1 / R1 a
+window via m_repeat bits 10 / 11, scrolling past the window's ends runs setRowMove 0x19c630, which
+re-targets the row sprites' move table and rotates m_row_spr / m_row_spr2 so index k stays screen
+row k; m_pick +0x54 says what the other page picked: 3 nothing, 1 a list entry, 2 a slot; cross
+with m_pick 3 -> page 2 (the slots) with m_pick 1, cross with m_pick 2 swaps the entry into m_slot, the picked icon 0x22 copied to a SprMan work sprite (0x69..0x89, +0x1554) flying
+right (speed 2, accel 1 from 0x2a31c8) and fading out; circle -> page 0); execPage2 0x19fbc8 the
+slot grid: cursor 0x67 at grid 0x2a3208[m_slot], m_slot_num +0x28 = 12 for the wrap; left / right
+off the grid with m_pick 3 go to page 1 / page 0; cross (not the equip / find slot, not both
+none, not flag 0x1000000) with m_pick 3 picks the slot (m_pick 2, page 1), with m_pick 1 flies
+the picked icon 0x22 right and the slot icon left (-2 / -1 from 0x2a31e8) on two work sprites,
+steps 4 / 5 wait m_swap_wait +0x1578 = 10, then swapItem and page 1; circle drops the pick or
+(m_pick 3) returns 1, closing the box. The row highlight fades between the pattern image's colours 0x2a2e28
+(alpha 0x28) and 0x2a2e38 (0x80) with mode 0x100. setDescText 0x19e010: the item's text field
+0x25 -> SprMan text lines 0..2 (no sprite gets them here: the reader is still unknown), linked
+items fields 0x10..0x12 (names when m_flag_c +0x156c) -> lines 3..5 on sprites 0x3e..0x40, name
+field 0xc on 0x42; sprites 0x43..0x45 and those restarted.
+The list +0x1110 (0x100 pointers, unbounded in the ROM): [0] a fixed GamItemSlot (data 0x2a42f0, id
+0xa00) whose record (0x2a4300, a GamSysRec5 image) names "----------------" / "Item Change" and
+describes "move from the item slots to the stock"; then stock items of m_category (0 all, else
+GamSysRec5::m_b8 1..6). The window: m_rows 8 at m_index / m_row, row sprites 7..0xf (+9 counts) and
+0x19..0x21 (move table 0x2a30c8), scroll bar 0x37 (y = 0x69 + index * 0x89 / (count - 1)), arrows
+0x35 / 0x36. The slots: icons 0x4d+i (anim 0x2a2d80, pattern = icon no * 4 + 0x6d; 0x2a26b0 empty),
+counts 0x59+i (anim 0x2a2da8, pattern 0x61+i, text "%2d" for stacking items, flag 0x20000, and ids
+0xa3e / 0xa43), grid 0x2a3208 (4 x 3); markers 0x65 (the equipped item's slot, GamMan +0x2220c) and
+0x66 (the find target's, +0x2220e). Item flag 4 = name known (else question marks), 0x1000000 = drawn
+dim (alpha 0x28). swapItem: entry 0 puts the slot's item back (addStockItem + clearItemSlot); another
+entry goes into the slot (the slot's different item to the stock first), delStock(id, 0) +
+setItemSlot.
+
+## The item menu (`mnu/mnuitem.cpp`, 0x1ae954..0x1bdae4, 2026-10-29, written, verify)
+
+MnuItem (EE 0x2710; MagLifeMenuItem +0x40, menu 0x10000) owns three SprMan: +0x98 the menu (120
+sprites, data/mnurpk/mnuitem.rpk textures base / tex01 (tex01_eu in languages 1..4, bss 0x7812ac) /
+tex02 / tex03 / texmoji / item01..04, pattern table 0x2acb10..0x2b6e88, display list 0x2b6f40 of 102
+rows), +0x984 findpt.rpk's one sprite (only while sequence bit-word 1 bit 0x100 is set) and +0x1270
+(drawn first, set up by the unwritten pages); MnuTextList +0x1b64, MsgManSet +0x1c68, the window
++0x2700 (system text 0x17), a second window +0x26fc. processPad's steps: 0 window, 1 textures and
+refreshSlots, 2 findpt, 3 setDisp + fade in + the first page (bit 0x10000000 -> page 9, 0x20000000 ->
+page 11, else 0; se 5), 4 execPage (switch on +0x58, 14 handlers 0x1b1cd4..0x1bc370, 1 = close) +
+updateFrame 0x1b113c, 6 fade out, 7 close: clears bit-word 1 bit 0x40000000 and, when global 0x15 is
+3 and global 0x11 is 0xa17..0xa19, 0xa1b..0xa21, 0xab6 or 0xacc..0xace, sets bit 0x4000000 and
+the item's flag-table bit (lookupFlagTable(2, id, 6)). **Slots**: +0x2434 twelve GamItemSlot pointers
+into GamMan's item-have vector (clearItemHave keeps twelve, id 0xa00 = none), slot 12 = +0x2430
+(0xa23), 13 = the find target +0x242c; findSlot returns 12 for "not found". Sprites 0x30 + n are the
+icons (anim table 0x2b60c0, pattern base 0xd0 + 4 * (system data field 0xd - 1); 0x2b5f38 = none),
+0x3d + n the "%2d" counts (stacking items, 0xa3e, 0xa43), 0x49 / 0x4f the equipped item and its
+cursor, 0x4b / 0x50 the find target, 0x4d the chapter plate (pattern 0x51..0x5b by GamMan status 4).
+showFrame 0x1aff5c hides / fades the frame by four flags from bit-word 1 bits 0 / 1 (+0x2410..).
+Life rates +0x23e4.. = LP * 100 / MAX_LP of the PC and the dog.
+**Unused description page**: setDescLayout 0x1b69d0 and setDescTexts 0x1bc8f8 have no callers (no jal,
+no data word): modes 0..3 fade the main page out, bring panel 0x58..0x5b / 0x60, link panel 0x6a..0x71
+and text rows 0x5c..0x5f in (sprite 2 m_off[1] 800, rows 0x13..0x17 / 0x1f lower), fade them out,
+restore the main page.
+**updateFrame** (session 2): +0x2464 counts frames from step 3 (the frame shows at once at 60:
+both outcomes of an idle-pad test skip the slow fade), +0x2490 = 1 / 2 opens system message 6 / 7
+at frame 150 (closed by cross / circle), +0x2498 = page 0 takes input. Life gauges: shown rate
++0x23e4[2] steps 1 per frame toward +0x23ec[2]; bars from the rects at 0x2b6e68 (l, t, r, b; PC then
+dog): sprites 0x55 / 0x54 (PC), 0x57 / 0x56 (dog) cut at r - (r - l) * (100 - rate) / 100; faces
+0x10 / 0xf take anim 1 / 1 / 2 / 3 by the levels +0x23f4[3][2] (100, 70, 30), anim 4 / 5 on sprite
+0x10 while rising (se 0xc every 8), se 0xd at full. **Page 0** (0x1b1cd4): cursor 0x51 over area
+m_work[0] (0 equipped, 1 find target, 2 the 4 x 3 grid at m_work[1], 3 slot 12); pad m_dir_repeat
+0x10 up / 0x40 down / 0x80 left / 0x20 right, m_trig bit 14 cross opens page 3 (equipped / find),
+4 (slot) or 10 (slot 12), circle / start close (global 0x15 = 1, 0x16 = 0). **+0x60 + 4 * n is
+the page page n returns to** (m_page_ret; the caller sets it before switching -- session 2 read it as
+a per-page step). Session 3 (0x1b2f64..0x1b69d0): page 1 equip (cursor m_work[2], record flag 0x10000,
+GamMan::equipItem), page 2 find target (m_work[5], flag 8; with notice 1 only item 0xb93; link panel
+0x6a / 99..101), page 3 remove (area m_work[0]: unequip or untarget; returns to m_page_ret[3], cursor
+of page 2 when it called, else page 1's), page 5 use (m_work[1]: ammo 0xa3f / 0xa42 moves into the gun
+one round per 3 frames, se 0x40070998; record field 0x24 (+0xb8) kind 1 heals the PC, 3 the dog, by
+field 0x2d percent; other items -> global 0x11 = id, 0x15 = 3, 0x16 = 1 and the menu closes), page 7
+put away (yes 0x2a / no 0x2b, m_work[4]; the item goes to the stock unless flag 0x1000000). Record
+flag word +0xb0 (GamSysRec5::m_flags) dims the slot icons (dimSlots 0x1b05ec). buildFlagList
+0x1baff4 (page 10): flag table 99 rows with their sequence bit -> texts +0x24a4, rows +0x26a4 (16).
+Helpers: setNameText 0x1bc790 (sprite 0x12, field 0xc centred on 0x100),
+getKnownName 0x1bcb84 (field 0xc if flag 4, else SJIS question marks), setLinkTexts 0x1bcc08 /
+showLinkPanel 0x1bd028 (system data fields 0x10..0x12 are linked item ids; panel sprites
+0x6a..0x71, texts 0x6f..0x71 squeezed past 120 px; +0x2420 = panel in). Fades save m_color into
+SprSprite +0x48 (m_fade_save) and fade from / back to it.
+Session 4: **page 4** 0x1b4488 is the action list for m_work[1] (rows +0x26e4[6] m_act_spr: find
+0x21 / 0x24 targeted, use 0x1e, equip 0x22 / 0x23 equipped, examine 0x1f, put away 0x20, -1;
+m_work[3] the row; frame 0x13..0x1d). Use needs record flag 0x4000, not equipped, and for kind 3 (dog
+heal) GamMan::m_inuMode == 1; equip needs flag 0x10000, m_flag_b and chapter != 7; find flag 8 and
+m_flag_c; put away no flag 0x3000000 / 0x1000000 and neither equipped nor targeted. Use -> page 5,
+examine -> 6, put away -> 7 (their m_page_ret = 4); equip / find toggle in place (se 0xf off, 4 on).
+**Page 6** 0x1ba3a0 examine: field 0x42 (0x40000 when 0) keys the {key, name} table 0x2abdb8 read
+by mnuBoardGetTexName 0x1ad7d4 (mnu/mnuboard2d.cpp); name + ".tm2" from data/mnurpk/mnuboard.rpk as
+board1_tcc into m_spr3 (+0x1270, 3 sprites, display list 0x2b8740, patterns 0x2b8810), field 0x25
+the text (GamMan::openMsg, message sprite 2), the scene faded out meanwhile. **Page 9** 0x1ba8e4 is
+the grid while sequence bit 0x10000000 (offering): wrapping cursor, cross -> page 4, triangle
+unequips, circle / start close once page 7 put an item away (+0x248c). **Page 10** 0x1bb12c lists
+buildFlagList's rows in MnuTextList at (0x82, 100); a choice puts column 2 in global 0x11 (0x15 = 3,
+0x16 = 1) and closes the menu.
+Session 5: **page 11** 0x1bb4f0 is the gift grid while sequence bit 0x20000000: prompt window +0x26fc
+("Choose a gift to offer.", rodata 0x2fb0e8; setViewParam 0xa0, 0x82, 0x32767 as the ROM has it),
+page 9's cursor, the equipped / find / gauge / frame sprites hidden (m_state 0), chapter plate pattern
+0x5c; cross on an item -> page 13 (m_page_ret[13] = 11), circle / start close with global 0x11 =
+0xa00, 0x15 = 1. **Page 12** 0x1bbcfc (nothing sets m_page 12) is page 4's list with an offer row
+0x25 (m_work[8], others dim). **Page 13** 0x1bc370 asks yes 0x2a / no 0x2b (m_work[9], frame
+0x26..0x29): yes waits 4 frames, then global 0x11 = the slot's item, 0x15 = 3, 0x16 = 1 and the menu
+closes (processPad step 7 sets the item's flag for the ids listed above). setDescTexts 0x1bc8f8
+(no callers): name sprite 0x5c, field 0x25 lines into 0x5d..0x5f. FUN_001b69d0 (0x39d0 bytes, no
+callers, unwritten): a big sprite-state setter (setFade / setAnim / showSprite over many sprites,
+argument 1 selects a block).
 
 ## Modules (RoR's own source files)
 
@@ -78,20 +1976,20 @@ functions assert (`.h`). Directories and files:
 | dir | files |
 |---|---|
 | `bed/` | bedmemory, bedpad, bedpfh (+.h), bedsubmode |
-| `debug/` | mimu_debug, motnamecnv, motnamecnv0, naga_debug |
+| `debug/` | mcd_debug (name invented), mimu_debug, motnamecnv, motnamecnv0, naga_debug |
 | `dog/` | dogactor (+.h), dogcamera, dogentity, doglight, doglightpool (+.h), dogmodel (+.h), dogmotionblend (+.h), dogtexinfo |
 | `emy/` | emy_main |
 | `game/` | gamman, gamsnd, gamstat, gamtrg |
 | `mag/` | maglife, maglifebwn (+.h), maglifebwnctrl (+.h), maglifebwnmode, maglifefadekey, maglifeman, maglifemenu, maglifemenusp, maglifepc, maglifepc2, maglifepc3, maglifepcbtl, maglifepceff, maglifepcmode, maglifepcmove, maglifepcmsg, maglifetest, maglifewindow, magloader, magscene (+.h), magscene2, magscenecamera, magscenedebug, magscenefocus, magsceneif, magscenelight, magsceneoption, magscenerender, magscenetenkyu, magsystem (+.h) |
 | `mcd/` | mcdman |
-| `mnu/` | mnuSelectLanguage, mnudlg, mnuselect, mnusvld |
+| `mnu/` | mnuSelectLanguage, mnudlg, mnuselect, mnusvld (named by class: mnubase, mnumap, mnupbook, mnustock, mnumcd, mnutitle, mnuopt 0x1ab474, mnuboard2d 0x1ad6b4, mnumovie 0x1adf04, mnunow 0x1ae474, mnuitem 0x1ae954..0x1bdae4) |
 | `msg/` | msgman |
 | `sequence/` | sequence |
 | `snd/` | rxmpeg, sndman, unitque |
 | `spr/` | sprman (+.h), sprtexture |
 | `system/` | sysnowloading |
 | `task/` | naga_chunk, tsk_bg_load, tsk_scene |
-| `utl/` | utlbtl, utlfile, utlfind, utlgame, utlmisc, utltm2 |
+| `utl/` | utlbtl (0x10452c..0x104e1c, reconstructed 2026-10-30: `utlInitSightCheck` (0x28-byte clear) and `utlInitHitCheck` (0x14); `utlHitCheck` -- no m_dir: `i3dSphereSphereTest(origin, target)`, or `i3dSphereCylSegTest(origin, target, {0,m_10,0,0})`; with m_dir: normalise, scale by m_len, then `i3dSphereRayTest(target, origin, d)` or `i3dFlatCylinderRayTest(target, {0,m_10,0,0}, origin, d)`; `utlSightCheck` 0x1046b4 (asserts m_pos_self / m_pos_aim / m_pos_target, so the record is also named theHitCheck) and three unreferenced copies without asserts `utlSightCheck2/3/4` 0x104970 / 0x104ad0 / 0x104c44 over `UtlSightCheck` {+4 m_type, +8 int m_range, +0xc m_pos_self*, +0x10 m_pos_target*, +0x14 m_pos_aim*, +0x18 float m_width}: a distance limit plus a facing dot (> 0.3 / 0.85 / 0.5, constants one ulp low) or dist * tan(acos(dot)) <= m_width; types 0-3 (type 3 jitters the angle by utlRandMean(-10000, 10000, 4) / 100 degrees), 0 / 0x100, 0 / 6 (its 100..200 band test can never reject), 0 / 2 / 4 / 5; no caller of any sight check in the ROM), utltm2 (0x104e1c..0x105650: utlTm2GetSize, utlTm2GetPicture, and utlTm2ToSepia's family -- the tint r, g, b at 0x308488..; image types 1-3 tint the image, 4 / 5 the CLUT by clut type; luminance 0x4d / 0x96 / 0x1d; 16-bit results drop the STP bit), utlfile, utlfind, utlgame (0x1024d0..0x1041c4: tbl_sound, object / door / enemy searches, the dog / enemy wrappers; "The game helpers" above), utlrand (0x1041c4..0x10452c, the port's file name: the PRNG -- seed word 0x308484, step `seed * 0x769 + 0x7cf9`, `utlRand(n)` = high word of `(u64)seed * n` after a step, reset 0xc45330af by `MagSystem::MagSystem`, uncalled `utlRandSeed` 0x104230; `utlRandRange` 0x10423c has ~99 callers; mean / peak-lo / peak-hi / peak / float-range draws), utlmath (0x106658..0x10737c: `utlConvSndId` -- a sound id 0x0a0Nxxxx swapped for its twin of the current map area, `GamMan::getMapArea` column of the 54-row table 0x295f08; `utlDrawI3r` = `i3rDrawModel` 0x21fe68 with dispatch held off; node display words; vector rotations / dot / cross / lengths / distances / direction to angles with the ROM's pi 0x40490fdc and pi/2 0x3fc90fda), utlmisc2 (0x217f10..0x2184c0, the port's file name, linked after the debug menu: `utlAtan2` / `utlDirDist` headings pi/2 - acos(x / len) wrapped in double, `utlStrToUpper` / `utlStrToLower`, `utlStrNCopy` (pads with NULs), `utlMemCopyBytes`, `utlFmodf` 0x218424 (folded into `utlFmodPi`'s body until 2026-10-29), `rorDebugPrintf` 0x218470 (empty varargs), `utlNullFunc`), utlmisc (0x105650..0x105e50: text helpers, `utlParseParam` name/value lines, the frame counter, operator new/delete, the game heap), utltm2 |
 
 Files without an assert are not named by the binary (`main`, the rx middleware, every file whose code
 never asserts): sessions name them (`tus.py define --why`).
@@ -106,10 +2004,264 @@ never asserts): sessions name them (`tus.py define --why`).
 - Families by prefix: MagLife* / MagScene* 79, Eff* 43 (all `: Eff0`), Tsk* 30, and per-enemy state
   machines `<Type>Main : EmyMain` + `<Type>Out<State> : EmyOut` for the types Bdl, Bds, Clr, Dwf, Fsh,
   Got, Grg, Hfm, Mrt, Nor, Pig (EmyOut has 77 subclasses). `CmnITask` is the base of 32 classes but has
-  no vtable of its own in the ELF (a pure interface whose vtable was never emitted -- unverified).
+  no vtable of its own in the ELF (abstract; only its pause slot 0x28a694 has a body). Its six slots
+  are in "The task manager" below.
+- **Enemies (emy/, 2026-10-27).** `EmyManager` (emy/emy_manager.cpp 0x16265c..0x164118, global
+  0x7b2140, a CmnITask of kind 3 added by main; EE 0x430): m_emy[64] at +4, per-type limits +0x104
+  (filled with bytes of 100: no limit), an oid pair +0x134..+0x13c, level +0x140, made-oid count
+  +0x144, EmyGroup[8] (0x3c) at +0x148, a work word per slot +0x330. Its exec (slot 4) runs
+  spawnGroups (groups 1..7: wake an idle member or respawn a gone one) and updateEmys (per enemy: the
+  ptmf at +0x1dc, the group step 0x165074, then slots 4, 5, 6 while managed (+8) and not damaged).
+  `createEmy` 0x162c88 news the class by type -- 0 Dwf 0x274, 1 Pig 0x270, 2 Got 0x270, 3 Fsh 0x25c,
+  4 Bds 0x228, 5 Bdl 0x228, 6 Hfm 0x240, 7 Mrt 0x23c, 8 Clr 0xa80, 9 Grg 0x244, 10 Nor 0x258 (EE
+  sizes) -- through the ELF's inline `XxxMain::XxxMain(u_int oid, u_short name, ACHRstat *,
+  _tagEnemyParam const *, _tagEnemyTransition const *, float *)` = EmyMain ctor 0x164118 + vtable +
+  `XxxMain::initOut` (builds the EmyOut objects; Nor's takes the param; Clr's is its slot 7), then
+  setStartState 0x164364 (param +0x10), loadParam 0x164508, footstep tables (data 0x2f12a0..) into
+  MagScene::m_actor_snd. EmyMain's slots: 1 dtor, 2 selectOut (current state's out), 3 GetType, 4
+  decide, 5 exec (default 0x164fc0), 6 after; fields from the ELF's accessors (oid +0, name +4,
+  manage sw +8, param achr +0x20, state +0x3c, out +0x44, group +0x1c8.., damage end +0x1e4, move /
+  turn tasks +0x1f0 / +0x1f8, vptr +0x200). The oid wrappers (0x163624..0x164078) do no type checks
+  except the hold words (+0x23c type 6, +0x248 type 8, +0x24c type 10).
+- **The enemy loop (2026-10-27, emy/emy_hfm.cpp).** Every `XxxMain` runs the same pattern: `decide`
+  (slot 4) writes a transition-table input into `m_req` +0x24 (-1 none; nothing while `m_decide_sw`
+  +0x28 is 0 or a request is pending), testing only inputs the current state's row has (`m_input[]`
+  at +0x204 of the derived class, filled by `selectOut`); `exec` (slot 5) moves the state graph
+  `EmyStateMap` +0x1c (EE 0xa8: count +0, a GamIdMap per state +4 (40), current state +0xa4; `addMap` 0x169614, `getMap` 0x169604, `next` 0x16968c) --
+  notify bit 2 (killed) forces the class's dead state, bit 1 (hit) restarts the state -- and sets
+  `m_changed` +0x40; `after` (slot 6) calls the old out's Term, `selectOut` (slot 2: `m_out[state]`
+  +0x48, 40 pointers, and its Init) and stores the out's Exec result in `m_req`. `_tagEnemyTransition`:
+  +0 rows (states), +1 columns (inputs), +0xc the row bytes (next state, 0 none). EmyMain also has
+  the motion list +0xec (GetMotionList / SetMotionList, ints), a byte per *state* at +0x128 (40;
+  testStateFlag 0x165710 reads `[m_state]`), the motion-ended input word +0x2c (SetInputFlgMotion) and
+  `m_agl` +0x1c4 (set_agl: the motion speed x 60).
+- **EmyMain itself (2026-10-29, emy/emy_main.cpp 0x164118..0x166a1c + linkonce 0x28a790..0x28aa88).**
+  `_tagEnemyParam` is 0x60 bytes: rot +0, start state +0x10, a flag byte per achr bit (+0x17 m_flags
+  0x800; +0x18..+0x2e m_attr[0] bits 0..6, 8..23; +0x2f..+0x36 m_attr[1] bits 0..7), params 0x5b /
+  0x5c / 0x5f / 0x68 / 0x69 / 0x5a / 0x5e / 0x63 / 0x66 / 0x6a at +0x38..+0x54, the name +0x56, the held
+  item oid +0x58. loadParam rolls a_lp from system data fields 0x1c +- 0x1f (kept in +0x1d8) and m_agl
+  from the kind move row's word 5 x 0.9..1.1, then news TskEnemyMove (EE 0xad0, ctor 0x2006b0) and
+  TskEnemyTurn (EE 0x60, ctor 0x2034c0) as manager-owned tasks (addTask flags 0x11, ids +0x1f4 /
+  +0x1fc; the destructor kills them). Four sound records of 0x1c at +0x154 (handle +0, type +0xc: < 3
+  funcSE else funcStr; setSE / addSE / stopSE / clearSEType 0x165398..). A GCC 2 member-function
+  pointer at +0x1dc (default_func) runs every frame through callFunc 0x166434; +0x1e8 func_count.
+  The bark reaction counters +0x34 / +0x38 (testBarkReact 0x165794). The kind move table 0x2f18b8 has
+  12 rows; getSE's data is one image 0x2f16b8..0x2f18b8 (pairs by parsonality, nos 15.. straight).
+  TskEnemyMove / TskEnemyTurn pause through suspend / resume (0x202f60 / 0x202fbc, 0x2039a4 / 0x203a00).
+  **EmyOut** (ctor 0x166a1c `(oid, achr, emy)`): oid +0, step +4, achr +8, emy +0xc, target-is-dog
+  +0x10, target oid +0x14, bitten +0x1c, move done +0x24 (the move task's flag), looping SE +0x2c (-1),
+  turn done +0x28 (emyStartTurn), +0x30 = utlRandRange(8, 24); vptr +0x34, slots 2 Init, 3 Exec (returns the next input, -1 none),
+  4 Term (the ELF's `HfmOutTest::Term`); the common Term is `termCommon` 0x166ad0. Helpers
+  (emy/emy_out.cpp; the move record emyStartMove / emyStartChase hand TskEnemyMove::start 0x200700 is
+  24 words, per-type speeds 0x2f1c90 / modes 0x2f1d50 / pairs 0x2f1d80 and five words of the kind's
+  0x2f18b8 row (EmyMain::getMoveParam 0x1669a4); emyStartTurn 0x167230 -> TskEnemyTurn::start 0x20350c):
+  `emyChkInSight` 0x169bac (a0 useAngle, a1 target oid, a2 achr, f12 range,
+  f13 angle), `emyCanReach` 0x16976c (secta cells), `emyStartMove` 0x1670dc (mode, out, pos: the
+  enemy's TskEnemyMove), `EmyOut::setMotion` 0x1680a0 / `setWalkMotion` 0x1682b0 (chrMtnMove2Achr),
+  `selectTarget` 0x166da4 (PC or dog), `emyStartChase` 0x166f50 (f12 stop range, out, target oid: the
+  move task follows an object), `EmyOut::playSE` 0x1694cc (EmyMain::getSE(no) at getBasePos, returns
+  the handle) / `tickVoice` 0x1693ec (lo, hi, se: a voice every lo..hi frames into +0x2c) /
+  `stopVoice` 0x16947c, `emyChkHitReach` 0x169f94 (f12 range, oid, n p_hit nodes, target: the attack
+  hit test), `emyVecLength` 0x169a14, `EmyMain::stopAllSE` 0x165570. The dog's bite: `EmyOut::startBitten` 0x168478
+  (once per frame via +0x18: motion list [8/9/10] by magBwnBarkQuery, achr flag 0x400, bitten +0x1c = 1)
+  and `tickBitten` 0x168520 (EmyMain::updateOut's per-frame call: the walk motion back by type).
+  Achr param 0x67 is the carried item oid (0 none; 0x66 its kind, 0xa00 none); kind 0xa2e is the Got's
+  scissors (the linkonce `if_goat_scissor`): emyAttachItem / `dropItem` 0x16913c (ReleaseItem) swap four
+  motion-list words, `setGotMotion` 0x1685c0 / `changeMotion` 0x1687bc drive the scissors' actor
+  alongside. `EmyManager::countGrpDead` returns the dead count before the increment (`leaveGroup`
+  0x1689e8 keeps it in m_grp_respawn). Nodes p_sp_f / p_sp_b on the target are the front / back grab
+  points (`slideToTarget` 0x168a30, `snapToTarget` 0x168ea0); `EmyStateMap::peek` 0x1696fc is the
+  classes' check_trans (next without moving). The outs' attacks land through
+  `scnChrRequest(0xb, emy oid, 0, 0, word, victim oid, 0)` (Hfm slap words 0x26 / 0x27 chained /
+  0x28 close; 0x2d the dog thrown off), after `getPCStateClass() != 9` (PC) or `getBwnState()` not
+  10 / 0xd (dog). Hfm Exec results: 7 the state is over, 8 the chase gave up. **HfmMain** (type 6): states 1 Walk, 2 Slap, 3 Bitten, 4 Break,
+  5 Counter, 6 Ride, 7 Dead, 8 Win, 9 Test; inputs 1 the dog barked (magBwnBarkQuery; also 60..120
+  frames into +0x234), 2 slap chance on motion end (0/10/30/50/70/100 % by try), 3 / 4 the PC came
+  into / left sight (param 0x5f range, pi), 5 a_lp under a quarter, 6 PC state class 4. Its words:
+  +0x22c / +0x230 a counter and limit (SetFreeCnt is +0x230), +0x234 the count subFreeCnt lowers,
+  +0x238 IsMissing, +0x23c ChkRideSide.
+  **HfmOutRide** (state 6, 2026-10-28): start 0x146ae4 picks phase 0 two slaps, 1 the long slap, 2
+  the ride (jumps on the PC's back), 3 the hug; 2 / 3 only while `MagScene::commandPC(0x16)` is 0 (the PC
+  not riding / hurt). Phase 2's steps 1..10 are separate functions through jump table 0x2ef3c0. While
+  holding on it moves the PC each frame with commandPC 0x15 (x, y, z, rot y: 1 when moved; placePC
+  0x146c8c retries at 30 then moves the enemy instead); the PC commands 2 / 7 (ride from the front /
+  behind), 6 / 9 (thrown off), 10 / 12 and 0xb / 0xd (hug, let go) pick by the ride side
+  (`getTargetAngle` 0x167e38 >= pi / 2, kept in HfmMain +0x23c). Ride hits are scene request word 0x2b,
+  hug squeezes 0x29 / 0x2a, the counter blow (HfmOutCounter) 0x2c; the PC in state class 3 counts
+  `countFree` (startFree(40)) to struggle free. EmyOut helpers: `getFrontPos` 0x167d88 (f12 dist: base
+  pos plus dist along the actor's rot y), `getTargetNodePos` 0x166c8c (the target's Bip01 Spine1).
+  **BdsMain** (type 4, emy/emy_bds.cpp 0x149d18..0x14b3bc, 2026-10-29): states 1 Walk, 2 Search,
+  3 Atk, 4 Win, 5 Stared, 6 Dead; its own words are bytes +0x204 (PC seen) / +0x205 (PC was in the
+  area) and the inputs at +0x208 (EE 0x228). Inputs 0 the PC left the area, 1 never (0x14a230
+  returns 0), 2 hit (notify bit 1), 3 / 4 PC into / out of sight, 5 PC state class 4; outs hand back
+  4 / 6 / 7. Atk: chase to 75, in sight 150 / pi / 3 -> motion 0x20 (66 %, hits frames 12..16, word
+  0x1d) or 0x21 (hits 12..16, 32..35, 53..56, word 0x1e), reach 20 over 3 nodes, SE 1 on a hit.
+  Stared: turns to the barking dog (chrRotMotion 8 / 9), motion 0x17, cowers while
+  magBwnIsBarkPhase3, input 6 after 60 frames. The enemy files link in the order Hfm, Bds, Bdl, Mrt,
+  Clr, Nor, Grg, Fsh, Got, Pig, Dwf (the XxxMain::initOut addresses), then EmyManager 0x16265c.
+  **BdlMain** (type 5, emy/emy_bdl.cpp 0x14b3bc..0x14cde4, 2026-10-29): Bds's twin -- same states,
+  words and outs, mostly the same code. Differences: input 1 is EmyMain::testBarkReact (the dog's
+  bark), Search ends within 300, Dead plays motion 0x24 always. BdlOutAtk (EE 0x50) reads param
+  0x68 as a mode (+0x3c): mode 1 waits for the target within 200 / pi / 4 ahead; modes 2..5 turn
+  (emyStartTurn pi / 4) only while the target's world angle atan2(dx, dz) lies in a fixed 6pi / 8
+  sector (2: -pi/8..5pi/8, 3: beyond 3pi/8 or -7pi/8, 4: beyond 7pi/8 or -3pi/8, 5: -5pi/8..pi/8),
+  else stand on motion 1 until it does -- an enemy guarding one side. Attacks as Bds but reach 40
+  over 4 nodes, words 0x1f / 0x20; a failed turn hands back input 7.
+  **MrtMain** (type 7, emy/emy_mrt.cpp 0x14cde4..0x14dc7c, 2026-10-29): four states, 1 Win (chase,
+  motion 0x15 within utlRandRangeF(100, 200)), 2 / 3 Serch (one MrtOutSerch each; it reads m_state: 2
+  chases the PC, 3 the PC or the dog; emyChkChase(100, pi) hands back 1 seen / 0 lost), 4 Atk.
+  MrtOutYyy has a vtable and code but initOut never builds it. decide runs every test and the last
+  true one wins (inputs 4 never, 5 PC class 1, 6 PC ahead, 7 PC class 7 off axis, 3 pad 0 triangle
+  trigger m_pad[0].m_trig & 0x1000 -- also forced whatever the row says, a debug-looking hook), then
+  the sight edge (emyChkInSight 10, 2pi): in sight input 2, lost input 4. exec: notify bit 2 only
+  restarts the current out; next() outside 1..5 is no move. MrtOutAtk (EE 0x50): chase to 200 /
+  pi / 8, note the target's position (+0x40), TskChrRot over 16 frames plus actor motion 0xb, then a
+  TskMoveTypeGen mode 0xd kind 7 lunge in the achr's move slot (m_task[0], flags 0x11) hitting the
+  PC (SE 0x30) and dog (SE 0x19) with chrIsNear 50, word 0x18; motions 0x14, 0x17, 0x16, input 1.
+  **ClrMain** (type 8, emy/emy_clr.cpp 0x14dc7c..0x150b24, 2026-10-29; EE 0xa80): a fixed stage
+  enemy that hangs out of sight and drops in along y (y grows downward: floors 0 / -52.653 / -97.346
+  by m_height +0x264, out of sight -347.346). States 1 Move, 2 Atk, 3 and 5 Up (one ClrOutUp each),
+  4 DeathUp (forced by notify bit 2, not through the graph); ClrOutWin never built. The outs share
+  m_phase +0x260 (Up 5..7, Move 0..5 / 8). Notify bit 1 with no input restarts the state and counts
+  m_hit_count +0x24c (Atk gives up on it: 90 / 70 / 40 percent). m_hold +0x248 is
+  EmyManager::getEmyHoldWord248 (1 once a Move ran). decide: inputs 13..9 never, sight edge
+  emyChkInSight(0, 3pi/4) gives 0 / 1 (in) or 2 (lost), in sight tests 3..8 (class 1, ahead, class 7
+  off axis, two each). The prop it drags with motion 2 is g_sequence.m_global[0x1e2]. Its spit leaves
+  64 ClrHitPoint records (+0x274, EE 0x20: wait, life, loud, radius, pos; ClrMain::addHitPoint /
+  updateHitPoints in after, chr word 0x32); ClrOutMove's drop hits with chrIsNear 60 word 0x31,
+  ClrOutAtk's arm swing (motions 3 / 4, node nodel_p_arm_r / _l vs Bip01 Spine1) word 0x33, its
+  three TskAttack attacks via scnAttackStart kinds 0x2e / 0x2f / 0x30 (motions 0x14 / 0x12 / 0x13,
+  param words [0] target, [2] kind, [6] motion, [7], [8] 1, [9] 5, [10] float). Effects kind 0xa
+  (EffBreath2: host pointers to a position and a direction at +0x10 / +0x14, read while it lives) and
+  0xc (EffBreath2Ground: pos, m_08 the delay) -- EffParam m_breath / m_ground.
+  **NorMain** (type 10, emy/emy_nor.cpp 0x150b24..0x153e40, 2026-10-29; EE 0x258, 7 vtable slots,
+  slot 7 isPressed 0x151460 with no caller found): the enemy that grabs the PC. States 1 Attack, 2 Walk,
+  3 Bitten, 4 Dead (forced by notify bit 2), 5 Counter, 6 BrownEv (script global 0x193 while its motion
+  1 plays), 7 Coax, 8 Test. m_func = EmyMain::func_count, so m_func_count +0x1e8 is its frame clock.
+  decide (inputs at +0x204): 5 flee once (PC lp under half of +0x234, 3601 frames or 4 hits m_hits
+  +0x23c; achr flag 0x400, damage end 6, m_fled +0x230, obj flag 0x800 follows it) and a won input-3
+  draw return at once; 7 PC class 4, 6 never, 4 isLowLife, 3 a motion end with a growing chance
+  (EE 0x238, rates 0/50/30/40/60/100), 2 the bark (m_bite_wait +0x248 = 30..60), 0 / 1 the sight edge
+  (emyChkInSight(param 0x5f, pi) of the PC or the dog). NorOutAttack (EE 0x7c) modes by pattern tables
+  0x298dd8 (counts 0x2efa60; +0x250 / +0x254): 0 claw (chase 88.5, motion 0x1c, emyChkHitReachXZ 20
+  word 0x21), 1 grab (chase 156, steps table 0x2efb40: motion 0x21, then commandPC 2 front / 7 behind
+  with motions 0x28 / 0x29, hold 0x24 / 0x25 placing the PC with commandPC 0x15, 1..3 squeezes 0x1d
+  word 0x22, the PC struggling (class 3) 80 frames or a bark: commandPC 6 / 9 release, motion 0x23),
+  2 lunge (chase 386, motion 0x2b, XZ 55 word 0x23), 3 scream (turn, stream 0x3b8, motions 0x12 / 0x13,
+  script global 0x194 while it screams). m_grab_back +0x24c (the grab from behind) is
+  EmyManager::getEmyHoldWord24c. The dog is spared while the row has input 5 and it has not fled.
+  _tagEnemyParam +0x14 (u_short m_14) is NorMain's max life (+0x236).
+  **GrgMain** (type 9, emy/emy_grg.cpp 0x153e40..0x155d54, 2026-10-29; EE 0x244, 6 slots): a roaming
+  enemy of rooms 0x84..0x8b (getStatus 5 = GamMan m_wrdNo; its area is the achr's param 8, -1 at
+  initOut). It reads no notify bits. States 1 Catch (emyStartChase 10, emyChkChase 80 / pi, then motion
+  0xd, or 0xb / 0xc by the PC below / above on a secta cell flagged 0x20000, and 0xf; 0xe and chase
+  again when the target is not within pi / 4 at 50), 2 Walk, 3 Bitten (0x13, 60..180 frames, 0x14),
+  4 Disappear (hidden; after utlRandRange(0.7 d, 1.3 d), d half the x / z distance, placed at the room's
+  point of table 0x2efc98 and shown; m_appear_count +0x237 + 1), 5 Event (hidden), 6 Test. decide runs
+  only with EmyMain +0x2c set; inputs (+0x204): 8 releaseHold (+0x240, EmyManager::releaseEmyHold), 7
+  never, 5 / 6 the sight edge (+0x236) in its area, 4 the room left its area (+0x235), 1 with m_arm
+  +0x234 clear: room 0x81, or 16 appearances with the PC elsewhere and not class 10 (sets m_arm), 0 with
+  m_arm and m_238 not 2 / 3: the room is its area (m_238 1: also the PC in sight; clears m_arm, the
+  achr loses flags 0x10000000 / 0x80). Rooms map to rows 0..8 of its tables (0x85 / 0x86 and 0x87 /
+  0x88 swapped, 0x89 split at z 260). GrgOutWalk: rates 0x2f0410 {walk, fchr, max} pick walking to
+  another of the room's four points (0x2f01d0, emyCanReach first), to the n-th fchr of type 9 within
+  1000 (pick 0x2f08b0 by utlRandRange(0, 64), points 0x2f0430) where it turns (chrRotMotion, motion 4 /
+  3), plays 0x21 / 0x23 with the fchr's actor motion 1 and hides (input 3), or idling (0x28, 0x2a /
+  0x2b, 0x29). Its walks are TskMoveTypeGen mode 0xd with params 0x1100..0x1104 = 2, 4, 3, 1, 1 and
+  addTask flags 0x11. Script globals: 0x53 1 while about (0 in Event), 0x54 its area, 0x55 -1.
+  **FshMain** (type 3, emy/emy_fsh.cpp 0x155d54..0x1583d4, 2026-10-30; EE 0x25c, 6 slots; the dtor and
+  the other slots come before initOut 0x156620): a crawler on the floor, collision kind 2 shape 4
+  radius 10, a random parsonality 0..2. States 1 Disappear (hidden, 0x16), 2 Appear (0x17, then
+  visible), 3 Atk, 4 Dead, 5 Stared, 6 Collision (SE 8, 0x1d with the PC within pi / 2 of its facing,
+  else 0x20), 7 Win, 8 Serch (chase 10, sight pi: 0x13 / 0x14), 9 Round (the same within 30), 10 Walk
+  (a point within 500 of param 0x59, reachable from it and over 100 off in both x and z), 11 Wait,
+  12 Test. decide needs m_decide_sw and m_input_flg_motion; 21 input words at +0x204: 1 testBarkReact,
+  2 notify bit 1, 3 the PC within both radii + 10, 4 / 5 the sight edge (+0x259; in the PC's area,
+  param 0x5f with the angle, or with attr bit 0 / in state 1 60, 200 for PC classes 2 / 3 / 7, 100 for
+  6), 6..10 while in sight (PC class 1, isPCAhead, class 2, class 7 off axis, isPCNear), 11 / 12 low /
+  half life, 13..17 achr attr word 0 bits (8&0x10, 2&4, 1, 2|4, 8|0x10), 18 PC class 4; exec takes
+  state 2 on by input 0x14 while visible. FshOutAtk: poses 0..3 with idle / attack / rest motions
+  (0x2f0bf8 / 0x2f0c08 / 0x2f0c18), 0x23 rises from pose 0, 0x22 lowers to it; hits by four points
+  along its facing against the target's spine (chr word 0x17, twice per target). FshOutDead counts
+  the kill in script global 0x33 + m_name (Sequence m_global) and leaves its group; its revival path
+  (param 0x5e) is dead code (Init always stores step 1). The rest of the enemy run splits the same way:
+  Got 0x1583d4 (GotMain::initOut opens it) .. 0x15a17c, Pig 0x15a17c .. 0x15c2a4, Dwf 0x15c2a4 (its
+  dtor) .. EmyManager 0x16265c.
+  **PigMain** (type 1, emy/emy_pig.cpp 0x15a17c..0x15c2a4, 2026-10-30; EE 0x270, vtable 0x2e2dc0):
+  the Got's twin -- same decide / exec / after / tests / sight test and the same next-state gate (11 needs
+  m_pickup +0x268, 12 m_part +0x26c); 24 input words at +0x204, bytes +0x264 / +0x265 cleared, sight edge
+  +0x266; selectOut takes states 1..16. Outs: the Dwf's for 1..11, 14 Fort, 15 Irritate; its own 12
+  PigOutParts (setMotion 10 / 1 / 0x14 by attr bits 8 / 0x10), 13 PigOutTackle (chase to 300, motion 0x4d
+  + SE 0xb, tackle 0x4c for 28 (70%) or 42 frames with object flags 0x10000000 / 0x400 / 0x4000000 on and
+  0x40 off, emyChkHitReach 50 once per PC / dog, scnChrRequest word 0x18; 0x4e; returns input 22 done,
+  23 chase failed), 16 PigOutTest. pigFindPickupItem 0x15b5ec skips fchrs with object flag 1 (no kind
+  0xa2e rule); pigFindPart 0x15b8b8 uses part kinds 0xbd3 / 0xbd7 / 0xbd5 / 0xbd6 / 0xbd4 for attr bits
+  1 / 2 / 4 / 8 / 0x10 (same GamSysData fields 0x4f..0x58).
+  **DwfMain** (type 0, emy/emy_dwf.cpp 0x15c2a4..0x16265c, 2026-10-30; EE 0x274, vtable 0x2e2e90): the
+  Pig's twin with m_pickup +0x26c, m_part +0x270 (+0x268 unwritten), states 1..15 (12 DwfOutParts, 13
+  Fort, 14 Irritate, 15 Test) and a third gate: input blocked when it leads to 14 with attr bits 8 and
+  0x10. Its sight test has no same-area check (range param 0x5f, capped by the PC class range with attr
+  bit 1 or in state 1); initOut also sets m_voice = rand 0..3 and the collision shape 1 (param 0x18).
+  dwfFindPickupItem 0x15daa8 = pig's; dwfFindPart 0x15dd74 kinds 0xbbf / 0xbc3 / 0xbc1 / 0xbc2 / 0xbc0.
+  The shared outs (types 0..2) keep GetType at +0x38 where the Got's scissors (0xa2e) change motions;
+  DwfOutPickup's item is +0x3c (EmyManager::isEmyTarget in state 11), its result inputs come from data
+  0x2f0f10 (23 failed) / 0x2f0f20 (22 taken) by type.
+  The Dwf grab (DwfOutAtkNear mode 2 / DwfOutFort, the outs of types 0..2): a leap (motion 0x48)
+  whose frames 17..23 catch the PC in reach (AtkNear 0x2f1030 45 / 65 / 65 at pi / 5, Fort 0x2f1148
+  80 / 90 / 90 at pi / 6) when commandPC(0x16) says it is free and game flag 4 is set without 0x2000.
+  The side picks the PC node (p_sp_f front, p_sp_b back) and the EmyManager oid slot (setOid(back,
+  oid), at most one enemy per side); the achr goes to the origin and setActorParent(enemy actor, PC
+  actor, node), EmyMain::m_state2 1, commandPC(0) holds the PC, ride motion 0x39 / 0x38 (0x100 flag),
+  4 % per frame a bite (scnChrRequest damage 0xf). The PC struggling (getPCStateClass 3) more frames
+  than 15 / 20 / 18 (0x2f1020 = 0x2f1160) throws it: commandPC(1), unparent, clearOid, state2 0,
+  snapToTarget, motion 0x3b / 0x3a, the fall 0x2b..0x2d (EmyMain::m_down_flg), 0x34, 0x30, input 22.
+  DwfOutAtkNear's other modes: 0 the held item's TskAttack (0x12 swing at the item's reach by
+  GamSysData fields 0x28 / 0x1b; the Got's scissors 0x13 / 0x14), 1 the claw combo (hits within 12,
+  m_combo = utlRandPeakHi(1, achr param 0x6a, 4)). DwfOutDead mirrors FshOutDead with motions 0x12 /
+  0x13 down, 0x34 / 0x30 / 10 up, input 23 (0x2f11f8), and its revival actually happens (no step
+  overwrite).
+  **GotMain** (type 2, emy/emy_got.cpp 0x1583d4..0x15a17c, 2026-10-30; EE 0x270, 6 slots): uses the
+  Dwf's outs (emy/emy_dwf.h) for states 1 Disappear, 2 Appear, 3 AtkNear, 4 Dead, 5 Stared, 6 Win,
+  7 Serch, 8 Walk, 9 Wait, 10 AtkFar, 11 Pickup, 13 Fort, 14 Irritate; its own 12 GotOutParts
+  (setGotMotion 10 / 1 / 0x4f / 0x14 by attr bits 8 / 0x10 and the held item's kind 0xa2e) and 15
+  GotOutTest. 22 input words at +0x204 (1 bark, 2 / 3 / 4 notify bits 4 / 8 / 1, 5 / 6 sight edge
+  +0x265, 7..12 in sight, 13 hasOid0Twice, 14 / 15 life, 16..20 attr bits, 21 PC class 4). Two targets
+  gate the inputs: any input whose next state (EmyStateMap::peek) is 11 needs m_pickup +0x268
+  (gotFindPickupItem 0x159800: nearest reachable type-5 fchr within 700 with flag 0x800000, not
+  0x4000000, not another enemy's target, kind 0xa2e only with attr 2 / 4), 12 needs m_part +0x26c
+  (gotFindPart 0x159af8: no held item; part kinds 0xbce / 0xbd2 / 0xbd0 / 0xbd1 / 0xbcf for attr bits
+  1 / 2 / 4 / 8 / 0x10, listed in the Got kind's GamSysData fields 0x4f..0x58). Both are looked up at
+  initOut and again on GamMan's reset frame (m_flags 0x40000). Pig and Dwf have their own copies of
+  the two finders (0x15b5ec / 0x15b8b8, 0x15daa8 / 0x15dd74).
 - The Dog* object layer: DogEntity (vptr +0x94) <- DogEntityEx <- DogModel <- DogActor / DogCamera
   (`DogActor` 21 virtual slots); DogEntity::reset 0x280ec8 writes 16-byte vectors at +0x40 / +0x50 / +0x70
-  (quadword `sq`).
+  (quadword `sq`). Layout (2026-10-22, the magsystem actor methods; `src/dog/*.h`): DogEntity +0x00
+  world matrix, +0x40 translation, +0x50 rotation (radians, `normalizeRotate` 0x10ff74 wraps to
+  [-pi, pi)), +0x60 scale, +0x70 offset (y = TransOfsY), +0x80 a (0,0,0,1) vector of unknown role,
+  +0x90 dirty flag, +0x94 vptr; DogEntityEx +0xa0 local matrix, +0xe0 parent (`setParent` 0x1102b4
+  refuses cycles and clears the offset). dog/dogentity.cpp (2026-10-27) = 0x10fc7c..0x1103dc: the local
+  matrix is unit, scale, rotZ, rotX, rotY of m_rotate + m_80 (each wrapped to [-pi, pi)), translate
+  m_trans then m_trans_ofs; DogEntityEx::transform 0x11034c = the parent's slot 2, then parent * local
+  (row vectors). The host keeps the class in the vptr word (reconstruction.md, polymorphic classes).
+  Files link alphabetically here: dogactor, dogcamera (0x10f860), dogentity (0x10fc7c), doglightpool
+  (0x1103dc);
+  dog/dogcamera.cpp (2026-10-27) = 0x10f860..0x10fc7c: DogCamera +0xf0 view matrix (getMatrix
+  0x10fa6c, filed under DogEntity by its symbol: slot 2 transform, then i3dMatInverse of the world
+  matrix), +0x134 move frame / +0x1d0 move length (updateMove 0x10f944 lerps translation +0x1b0 ->
+  +0x190 and rotation +0x1c0 -> +0x1a0 by frame / length, utlLerp4 0x106d40), +0x140 lens angle /
+  +0x144 its scale unit, +0x148 / +0x150 / +0x160 / +0x170 the saved angle, translation, rotation,
+  scale with +0x180 m_saved (saveCamera 0x10f860 / restoreCamera 0x10f8cc, one level, asserted);
+  getRotY 0x10fc28 = utlVecToRotY of the world z axis laid flat; getLensFov 0x10fac0 maps the angle
+  through 15-degree steps of a 13-entry degree table with modff 0x26c8e0.
+  DogModel +0x11c `m_i3r_root`, +0x124 i3c root, +0x128 colli table, +0x130 node matrices (0x40 each),
+  +0x134 node flag, +0x138 attach node, +0x13c attention, +0x140 hide, +0x144 light id; DogActor +0x1a0
+  id, +0x1c0 / +0x1c4 motion count / `m_motion_data` (0x20 each, banks 0..3), +0x3c0 base rotation,
+  +0x1e4 `m_motion` (DogMotionBlend: motion index, speed in frames per frame -- the scene stores
+  fps x 1/60 --, frame), +0x3f0 / +0x3f4 setMotion's two flag words,
+  +0x3d0 RotYAAR, +0x3d4 / +0x3d8 control node / flag, +0x420 TransOfsY save, +0x424 RotOfsY; EE size
+  0x4d0. Virtual slots: 10 = `DogModel::setAttachNode`, 17 = `DogActor::getNodeWorldMatrix` 0x10eab8
+  (m_matrix x node matrix through 0x2377d0, a VU0 micro call). The many tiny accessors are the ELF's
+  linkonce symbols (0x280e88..), so their field offsets are exact.
 - vptr offsets (from constructor stores): most common +0x34 (78 classes, the EmyOut family), +0x20,
   +0x00 (40), +0x14, +0x04, +0x200 (the EmyMain family), +0x94 (Dog*).
 - GamMan has 181 inline methods (the game manager; `game/gamman.cpp`), S2dMes 47, DogModel 44, EmyMain 44,
@@ -120,10 +2272,416 @@ never asserts): sessions name them (`tus.py define --why`).
 | address | what | evidence |
 |---|---|---|
 | 0x100008 | `_start` (crt0) | libmatch (FF2 crt0.s) |
-| 0x2045a8 | `main` | crt0's call; build-date strings |
-| 0x215a30 | the assert handler `(file, line, expr)`: prints "Assertion Failed: %s(%d)   %s\n" through 0x260110 and loops for ever | 1,483 call sites |
-| 0x105ba4 | operator-delete wrapper: `if (p) 0x105e08(p)`; the deleting destructors tail-jump to it | 277 call sites; `DogEntity::~DogEntity` 0x280f34 |
+| 0x2045a8 | `main` (`mainGame` in src/main.cpp): see Program flow | crt0's call; build-date strings |
+| 0x240eb8 | `rxSysInit`: console bring-up (see Program flow) | strings; `rx/rxsys.cpp` |
+| 0x241f58 | `rxSysPrintf`: the middleware's and game's printf (151 callers): print hook 0x2db9d0, then `scePrintf`, or a buffered host tty (file 0x2dba34 / IOP tty RPC) | `rx/rxsys.cpp` |
+| 0x2dbe8c | `g_rxSysMemFunc[4]`: memory hooks the game's allocators call through (0x1830fc, 0x182818 ...) | `rx/rxsys.cpp` |
+| 0x2410b8 | rxsys's ini parser over system.ini (bss 0x7cc7c0): `rxSysIniFindSection` ('[' in column 0 only), `rxSysIniFindKey` (key up to '=', blanks trimmed; '#' comments), `rxSysIniFind` 0x2413d8 (value to EOL; a '\' before EOL joins the next line, which must start with a blank), key count / key-at helpers 0x241558..0x241848 (no callers) | `rx/rxsys.cpp` |
+| 0x243560 | `rxSysSetFileContext(yielding)`: rxSysThreadCallback passes rxThRunCallbacks' flag on, so rxfile's context is 1 while the main thread yields to the rx thread and 0 when it runs (two RxFileContext devices / hooks, one per thread) | `rx/rxsys.cpp` |
+| 0x242740 | `rxSysExceptionHandler`: rxSysSetDebugHandlers' handler for causes 1-7 / 10-13 (old ones saved at 0x2dbe4c / 0x2dbe70, flag 0x2dbe88, restored by rxSysTerm), mainExceptionHandler's twin plus iDisableIntc(2); prints onto the System Monitor console (0x242c10..0x2432d8: an 80 x 28 text buffer 0x7d88a8, 0x140 bytes a row, glyphs from the 8x8 font 0x2dbeb0 uploaded by LoadImage, print hook 0x243050) | `rx/rxsys.cpp` |
+| 0x2155f4 | `mcdDbgAssertFailed(file, line, expr)` (debug/mcd_debug.cpp 0x2155f4..0x215a30, verify 2026-10-29): a second copy of the assert handler (same format 0x301880, then spins), called by mnu/msg/snd asserts; ROR_ASSERT covers it. The same file holds mcdDbgMenuTest 0x215634 (unreferenced; state in bss 0x2db280..0x2db29c, nothing sets its menu-running state 3) and a static MnuMcd g_mcdDbgMenu at data 0x2d9e80 built by its static initializer 0x215998 |
+| 0x215a30 | `dbgAssertFailed(file, line, expr)` (debug/mimu_debug.cpp 0x215a30..0x216154, done 2026-10-29): prints "Assertion Failed: %s(%d)   %s
+" through 0x260110 and loops for ever. The same file holds the retail build's silent traces (dbgTraceMatrix 0x215a70, dbgTraceFloat4, dbgTraceVector3 / 4 / 4Alt: each float goes through `dbgFloatToStr` 0x215e1c into a 256-byte stack buffer and nothing is printed) and the float splitter `dbgSplitFloat` 0x215c74 (sign / integer / binary fraction / its decimal digit count, table 0x301958); the formatter writes three decimals lossily (100.25 -> "100.200") and gives --UNDERFLOW-- once the fraction needs 32 bits or more (0.001 does) | 1,483 call sites |
+| 0x2163ac | debug/motnamecnv.cpp (0x2163ac..0x216768, verify 2026-10-30; string 0x301a40): seven unreferenced wrappers over MagSceneIFChara (bss 0x781268), each with an unused a0 -- motNameGetCharaName ("----" for a negative index), motNameFindCharaOrPC (an unknown name starting "PC" is 0), motNameGetMotionLabel / motNameGetMotionName (into a caller buffer, theSize > 16; the name upper-cased by utlStrNCopyUpper 0x106064), motNameGetMaxMotion / GetNumNode / GetNodeName -- then two more unreferenced copies of the assert printer, 0x2166e0 / 0x216728 (formats 0x301aa0 / 0x301ac0), which Ghidra had folded into 0x2166b8 | none |
+| 0x105ba4 | `operator delete` (`utlOperatorDelete` in src): `if (p) utlMemFree(p)`; the deleting destructors tail-jump to it. `operator new` 0x105b54, `new[]` 0x105b7c, `delete[]` 0x105bc4 | 277 call sites; `DogEntity::~DogEntity` 0x280f34; `utl/utlmisc.cpp` |
+| 0x6e9800 | the game heap: a `BedMemory` (bed/bedmemory.cpp 0x100354..) that `utlMemInit` 0x105be4 (called by main) creates over the largest malloc (probe from 0x1755100 down); `utlMemAlloc` 0x105ca0 / `utlMemRealloc` 0x105de0 / `utlMemFree` 0x105e08 are main's rxSys memory hooks | `utl/utlmisc.cpp` |
+| 0x2155f4 | a second assert handler, same `(file, line, expr)` and message but through `scePrintf` (27 call sites, e.g. snd/sndman.cpp); also `ROR_ASSERT` in src. Its file debug/mcd_debug.cpp (0x2155f4..0x215a30, name invented, todo) also holds an unreferenced memory card menu test 0x215634 (prints a "futuki" banner; drives a MnuMcd at data 0x2d9e80 with the pad, three counters 0x2db280.. and a state 0x2db298) and that MnuMcd's static constructor / destructor 0x215998..0x215a30. The code before it (debugNop 0x2155a0, mainExceptionHandler's first call, and seqvm's static initializer 0x2155a8 / 0x2155d4) ends sequence/seqvm.cpp | sndman |
+| 0x215a30 | (see above) the assert handler; src writes asserts as `ROR_ASSERT(expr)` (common/ror_assert.h: reports and continues) | |
 | 0x267798 | `_InitSys` | libmatch (FF2 initsys.c) |
+| 0x6e9840 | `MagSystem` (mag/magsystem.cpp): frame, V-blank semaphore `m_v_sema` (sdata 0x29619c), scene member at +0x12540 (0x6fbd80) | asserts; main |
+| 0x7812c0 | `GamMan` (game/gamman.cpp 0x1c05c0..0x1d3b44, `partial`; EE 0x22ab8, vptr +0x22ab4): common data and stage loads, per-frame game update. Fields are named from the ELF's ~180 inline accessors (sections.py --list GamMan; mipsdis shows each one's offset): +0x21f40 getCurStat, +0x21f48 getSysFlg, +0x21f4c chkSysFlg2, +0x21f50 getChapter (the stage), +0x21f60 getVCount, +0x21fdc / e8 / ec the PC / dog / murderer chr numbers, +0x22020 / 30 / 40 PC pos / rot, dog pos, +0x22090.. the three ObjStat pointers, +0x222a0..+0x222c0 the task ids, +0x22a80 getEvtPack. Members: GamArea +0x40, GamSndMan +0x18e00, the item vector +0x1a6c0 (12 slots) and nine node pools of sequence.h's template (item stock +0x1a7c0 x0x14e, Achr / Fchr / VFchr / AVFchr lists +0x1d340 / +0x1d980 / +0x1dcc0 / +0x1ef00). loadSystemData reads the seqMakeGlobalPath(1) pack whole (file 0 GamSysData, 1 / 2 SE packs 0000.se / 6400.se, 3 registSnd, 4 the system script image, 5 registStrSnd); loadStage reads data/SEQ/W%03d/W000.WRD (header <= 3 sectors, then whole: 0 the stage script image, 1 the object table GamObjTable (version +0x1c: 1 = 0x50-byte records, else 0x30), 2 -> +0x1a680, 4 -> the event pack) and sets the camera to (0, 1000, 0), rot x -pi/2. **Objects** (2026-10-25): an oid (OID_STATE) is list << 28 (0 vfchr, 1 achr, 2 fchr) | type << 23 | slot (0..0x1ff); achr pointers by slot at +0x21340 (0x80), fchr at +0x21540 (0x280, slots 1..0x27f), vfchr found by walking +0x1dcc0's list (getFchr tries it first for type 5); `isObj` 0x1d046c, `getActorNo` 0x1cbe38 (ObjStat +0x108). The object table's 0x50-byte records (GamObjRec) are read / written through `ctlObjParam` 0x1c9920 (20 ops, table 0x2fbba0). **Stage change**: the scripts set flags2 bit 2 (and +0x2221c the kind: 3 the stage-2 images, 5 a full reset 0x1cdbf0); `afterSeqExec` 0x1cd25c (end of Sequence::exec) runs it and `execStageReq` 0x1cd7c8 loads by getCurStat (1 loadStage(getChapter)) and copies +0x21f7c..+0x21f88 into the sequence globals [1..4]. pause / resume 0x1c6a40 / 0x1c65e8 clear / set running bits in getSysFlg by mask (0x100000 menus, 0x100004 PC and actor tasks, 0x100104 the dog, 0x80000 Brown's controller, 0x200000 the dog's hide) **Items** (slice 3): a slot / stock record is GamItemSlot {GamSysData record, oid, short id (0xa00 none), u_short count}; the system data record's flag 0x20000 marks a stacking item (count 1..99); addItem 0x1c7e40 also sets the sequence bit lookupFlagTable(2, id, 3) (table data 0x2fc1f8, 8-word rows) and GamSysData flag 4; the stock is a 0x14e-node pool (used list +0x1a7f0). New oids come from `makeOid` 0x1c6fe0: image << 30 | type << 23 | (+0x21f7c & 0x7f) << 16 | a number counted down from init's table +0x225f4 (types 2 / 0,1,3 / other / 10..15 each their counter). **Stage SE** `loadStageSnd` 0x1c2f50: by chapter one 1xxx.se pair (1000/1100, 1001/1102, 1001/1101, 1001/1103, 1002/1104) and 3200..3210.se from data/snd/xv/, loaded under the file name (boot stage 99 loads none); a held item's pack 640N.se by `loadItemSe` 0x1c772c. | vtable; main |
+| 0x781300 | `GamArea` (game/gamtrg.cpp 0x1dd1e8..0x1e0df0, `verify`: all written; class name invented, file from cloneTrg's allocDebug tag 0x2fd630): GamMan +0x40, EE 0x18b60. Three inline node pools of 0xb0-byte `GamAreaTrg` records (0xc0 nodes): +0x0 the listed triggers (0x100; addTrg, hasId), +0xc1c0 the active ones (0x100, used +0xc290; activateTrg 0x1de104 copies a listed one with flag 0x1000000 in, ordered by the u_short +0x38, resolving +0x44 / +0x48 oids to actor numbers +0x4c / +0x50 and the ftb key +0x24 to a pointer +0x54), +0x18380 update's up-to-8 starts of a frame; +0x18b40 a heap pool of 0x40 registFtb entries (0x30: key, 9 values), +0x18b58 the active list's last / update's current node, +0x18b5c update's count. A trigger: rect x0 z0 x1 z1 +0x0, flags +0x20 (0x1000000 activate, 0x4000001 checkPc, 4 timer +0x40 = frame count + +0x28, 0x20 ftb, 0x82c00 / 0x5000 objects, 0x20000000 fired, pause 0x8000), id +0x2c (an oid, makeOid(0, 0xd, image)), its "trg" thread id +0x30 / entry +0x34 (execThread(id, entry, +0x44, 2, 0, id, "trg")). isInPolygon 0x1de8ac is a crossing test over (x, z) point pointers (also called by 0x1d4b9c). **update** 0x1dee78 (every frame, GamMan flags bit 2; pos / rot the PC's): each active trigger's condition bits are the low 0xc31fffff of its flags, collected from 0x3000000 and compared whole: 1 / 2 enter / leave the rect, 0x100 rect and |y - +0x14| <= 200, 0x1000 actor +0x4c within the radius +0x3c of the PC (xz, |dy| < 150), 0x400 / 0x800 / 0x80000 the two actors near / (0x80800) near or apart, 8 rot y within +0x1c of the angle +0x18, 0x2000 / 0x4000 the direction actor->actor2 / PC->actor, 0x10 canCheckPc (Cross), 4 the timer, 0x20 the ftb entry's script bits (negative = must be clear), 0x8000 m_global[+0x5c] op +0x60 against +0x58, 0x10000 script bit +0x54, 0x40 / 0x80 GamMan flags 0x2000 / flags2 0x80 with m_global[0x11] / [0x29] == u_short +0x64, 0x200 an fchr of that kind near (released), 0x40000 the polygon rect corners + (+0x80, +0x88); 0x400000 adds Brown's conditions from +0x70 (0x40000 found oid, 0x100000 / 0x200000 magBwnReturn0b / 0c == +0x68 / +0x6c, 4 the height). 0x80000000 is the edge bit (0x10000000 / 0x800000 set when fired, cleared on the other side); GamMan flags2 0x8000000 holds most tests off; 0x40000000 a one-shot (leaves the active list); the held angle goes to m_global[8] for a flag-1 trigger (sdata 0x2d8f64). The fired list then starts the trg threads unless a menu is open (0x4000000 ones not twice while two rects hold; no 0x8000000: set 0x20000000, GamMan::resume(0x8000), TskFrameFunc 0x16 after 16 frames, flags2 |= 0x400800, and stop the walk). | GamMan member |
+| 0x7a3d80 | `CmnTaskMan`: task list, its `SysTimer` at +0x40 (EE 0x6c0 bytes; task/tsk_man.cpp) | main; 66 addTask call sites |
+| 0x7a4440 | `Sequence` (sequence/sequence.cpp 0x20e3d8..0x20ff34, the VM sequence/seqvm.cpp 0x20ff34..0x2155f4): event sequences ("mst", "trg", "imdy", "single"). The scripts are **MIPS code** the VM 0x214c24 interprets: registers at bss 0x7b4700 (32 words, v0 0x7b4708, a0 0x7b4710), opcode tables data 0x2d9958 (primary) / 0x2d9a58 (SPECIAL), loads / stores on raw addresses; a jal below the image calls native function (target - 0x144) / 0x40 of the table data 0x2d90f8 (sequence/seqcall.cpp, 512 entries, 471 empty), jal targets >= 0x8160 are image offsets (base 0x7b47d0). Native returns 0xcccccccc rerun the call next frame, ..cd continue next frame, ..ce jump (Sequence::jumpTo 0x2113a4 sets the target 0x7b47b0), ..ca end the thread, ..c9 return to 0x7b4db0 + 4. Members: +0x0 images [4] (0 system G000.GRB 0x20000, 1 stage W.WRD 0x18000, 2 a second script 0x30000, [3] 0; game heap), +0x10 per-image thread pools [4] (new'd, 0x40 nodes of 0xc0), +0x40 the start list (startThread 0x211e84 queues, exec moves into the image pools), +0x6200 the ended list (runImage copies threads whose seqVmRun returned pc 0; reapThreads 0x20f4fc frees them next frame), +0xc3c0 a 0x100-entry pool of 0x10-byte entries; each pool = free list +0x0 / used list +0xd0 (sentinel node + count after it) / max +0x1a0 / nodes +0x1c0 (entries: +0x0 / +0x1c / +0x38 / +0x40), nodes {prev, next, data at +0x10}. Thread record 0xb0: flags +0 (0x40 pause 0x8000, 0x80 resume slot +0xc), id +4 (top two bits = image; main threads 0x04000000 / 0x44000000 / 0x84000000), pc +8, GamArea trigger id +0x20, arg +0x28, VM stack +0xac. +0xdc08 image bases [5] (index = current image 0x7b4dd0), +0xdc1c the global variables (0x800 bytes), +0xdc20 a bitset (0x800), +0xdc24 flags (1 = exec skips). VM state bss: 0x7b4640 / 0x7b4650 running node / end, 0x7b47d0 image + 0x30, 0x7b4910 globals, 0x7b4920 call save slots (0xcc), 0x7b4d20 stacks 0x10000 (32 x 2 KB, use words 0x7b4d30), data 0x2d9e08 image saves 3 x 0x780 | main |
+| 0x7b205c / 0x7b2060 | `g_sequence.m_global` / `m_bits` (Sequence 0x7a4440 + 0xdc1c / + 0xdc20, set by Sequence::init): GamMan, MagScene and the menus read the script globals ([1..4] stage-change words, [5] / [7] cleared by a stage load) and the flag bitset (word 0 bit 0x8000 chapter-6 start, word 1 bits 2 / 4 the dog follows, 0x100; word 2 bit 0x8000 the debug restart that restores the PC / dog) through these addresses | sequence |
+| 0x7b2580 | `SndMan` (`snd/sndman.cpp` 0x17f0d0..0x1810f4, `verify`; class name from the file): sound manager over rxSnd. 65 XVAB bank handles (+0x2c) and their source buffers (+0x130), 48 slots `SndInfo` of 0x84 bytes at +0x234 (type 1 ADPCM stream ids 0..1, type 8 SE ids 2..47; id bits at +0x24 / +0x28), master-volume fade +0x1af8..+0x1b10, TskSnd id +0x1b14; +0x4 holds argv[0]. Requests set a slot state (0 start, 2 play, 3 set, 4/5 pause, 6 resume, 7 stop, 10 reopen) that `SndMan::update` (each frame: slots, RxMpeg::update, rxSndUpdate, fade) acts on. Streams read `data/snd/xws/<name>` through an rx file ring (bss 0x668980 / 0x6a8d80, 0x40000 each; a looping stream has an end marker jumping to 0) into `rxSndAdpcmWrite`, 48000 Hz. Sound ids go through `GamSndMan` (GamMan +0x18e00 = 0x79a0c0, `game/gamsnd.h`: 0x38-byte entries {name[0x1c], id, bank, prog, note}) and `utlConvSndId` 0x106658 | asserts `strSndInfo->uniPtr.sndFStream.fStream / fd`; main |
+| 0x237ce8..0x23ff58 | the rx sound library (`rx/rxsnd.cpp`, pinned, `verify`: every function written except two unreferenced trivia 0x2384b0 (empty) and 0x23a910 (returns its argument)): the EE client of **RXSNDDRV.IRX** (disc MODULES/, RPC 0xd000, client 0x7ca300, bound by `rxSndBindRpc` 0x23f9b0 until `serve` is set; on the host the reconstructed driver `src/iop/rxsnddrv/` serves it, open-items Decisions). Status replies (layouts in rxsnd.h): BGM 0x104 {id, status}[32] + value[32] + count, SE 0x104 {id, status}[64] + count, PCM 0x184 {id, status, s16, posHi, posLo}[32] + count, ADPCM 0x304 {id, status, free, posHi, posLo}[48] + count; status bits 2 playing, 4 ended, 8 paused. Hidden SPU hook setters 0x239048 / 0x239068 / 0x239088 created. Transport: `rxSndRpcCommand` 0x23fc18 (one direct call, fno = command, send 0x7c9300 / reply 0x7c9b00, double-banked by `rxSndGetBufferBank` 0x2db638, which the rxTh yield callback 0x237ce8 sets) and a command queue 0x7ca340 (0x1000; headers {cmd, replySize, dataSize}, replies from 0x7cb340+4) flushed as fno 0x200 by `rxSndQueueFlush` 0x23feb8; each call WaitSema's 0x2db9c0, `rxSndRpcEndFunc` 0x23fac8 signals it. `rxSndUpdate`: flush, queue the status queries 0x72 (BGM) / 0x83 (SE) / 0xb3 (PCM) / 0xa3 (ADPCM), flush, apply them. Command families: 0x2x IOP heap, 0x4x XVAB, 0x7x BGM (32 slots 0x18 at 0x7bbbc0), 0x8x SE (64 voices 0x14 at 0x7bbed0), 0xbx PCM (32 x 0x3c at 0x7bd804, position callbacks 0x7bc400), 0xax ADPCM (48 x 0x50 at 0x7c03c8, callbacks 0x7befc0). Volumes: master 0x7b5ac4 x family master x voice >> 14. Heap hooks 0x2db95c..0x2db970 (IOP alloc / alloc mode 1 / free, SPU alloc / alloc mode 1 / free), SPU heap 0x5010..+0x1baff0: block nodes 0x7b6b80 on a circular list (m_prev up the addresses, m_next down; a block's address is the running sum of sizes), first fit in the bank's slot (`RxSndSpuSlot` 0x7b83a0 or the whole region 0x7b97a0), mode 0 lowest / 1 highest / 2 at an address. `rxSndIopWrite` 0x2387b8 is the EE -> IOP copy (SIF DMA when 16-aligned, else bounce buffers 0x7b6b40 + IOP command 0x23). XVAB / XSEQ files: {magic, version, size} then chunks {tag, size} (version >= 0x200: 16-byte header and chunks {tag, ?, size, ?}); samples are the HEAD chunk's (byte 1 set: after the 16-aligned file) or SMPL's, sent to SPU by command 0x40 (type 3 EE -> SPU; types 1 / 2 / 4 / 5 have their own unreferenced senders). More commands: 0x22 {1 / 2} IOP heap (unknown), 0x30 {kind, value} system (0 debug flags, 1 frame rate 50 / 60, 2 output mode, 3..5 unknown), queued 0x31 {id, 1, L, R}, queued 0x32 {core 0..1, attr, value} the SPU2 effect (0 mode 0..9 as libsd reverb modes, 2 depth L / R, 3 delay, 4 feedback; `rxSndSetEffectMode` / `Depth` 0x23a080 / 0x23a0b8 are what SndMan calls), 0x60 / 0x61 / 0x63 XSEQ open / free / set (table 0x7bafc0, 256 x 0xc {flags, iop, size}), 0x70 {slot, xseq} BGM play, 0x73 / 0x74 {u8 slot, u8 channel, 3, L, R} BGM channel volumes, 0x90 / 0x92 / 0x93 read and 0x91 sets 48-word per-voice tables. `rxSndCentToPitch` 0x238408 uses two float tables 0x2db640 (2^(n/12), n -48..48) and 0x2db7c8 (2^(c/1200), c 0..99). `rxSndIopRead` 0x2389c8 mirrors IopWrite with sceSifGetOtherData and the EE bounce buffers 0x7b6b00 (bank * 0x20). ADPCM streams: per channel an IOP ring (m_bufSize) and SPU buffer (m_spuSize); writes stage 16-byte blocks in 0x7c1300 / 0x7c5300, clear their flags and set flags 3 on the last block before each SPU-buffer wrap, then announce whole 0x40 units with 0xa1; `rxSndAdpcmEnd` pads with the work buffer and writes the end block 0x2db980. PCM streams (`rxSndPcmOpen` 0x23cca8, reached only through the sound driver wrapper 0x18182c): an IOP ring of blocks (mode 0: 0x800, modes 1..3: 0x1000; mode 1 keeps left halves in the first blocks * 0x800 bytes, right after), opened by 0xb0 {u8 id, u8 mode, iop, blocks}; `rxSndPcmWrite` 0x23d078 copies into the ring and announces whole blocks with 0xb1 {u8 id, u8 count, seq[count]} (running sequence numbers); 0xb2 {id, param, value} sets 0 close, 1 pause, 2 attr, 4 volume, 5 end; position callbacks are (block seq, offset). A table at 0x298f68 pairs the PCM and ADPCM open / close / get-free / write / pause functions (PCM first) | `rxsnd :` strings; SndMan |
+| 0x269fe0.. | libdbc (`sceDbcInit` / `sceDbcEnd`) and libpad2 (`scePad2Init` 0x26b1d8 / `scePad2End`) between libipu and libpad: named by reading; `sceMcEnd` is 0x24d448 (libmatch had sceMcChangeThreadPriority) | strings; main |
+| 0x100248 | `_exit`: crt0's `j Exit` thunk; `Exit` is 0x267b98 | FF2 symbols at the same addresses |
+
+## Game objects (GamMan, game/gamman.cpp, 2026-10-26)
+
+- An object is an oid (list bits 28..29: 0 vfchr, 1 achr, 2 fchr; type bits 23..27; slot 0..8) and an
+  ObjStat-derived record: `ACHRstat` (EE 0x480, vtable 0x2e4810, `m_achr[slot]` +0x21340 and the achr
+  list +0x1d340), `FCHRstat` (EE 0x2c0, vtable 0x2e47f8, `m_fchr[slot]` +0x21540 and the fchr list
+  +0x1d980) or a vfchr: an FCHRstat built in place in the 0x180-slot storage +0x1f248 (slot oids
+  +0x1f24c), on the vfchr list +0x1dcc0 and, when its room (param 8) is the loaded one, the avfchr list
+  +0x1ef00. vfchr records are never deleted.
+- Construction: `ObjStat::ObjStat(a1, oid, actor, kind)` 0x1d87f4 (8-node pool +0x40, oid +0x100,
+  actor +0x108, kind +0x128), the class's inline constructor (achr: task ids +0x3d4..+0x3e8 = -1), then
+  `ACHRstat::init` 0x1d9908 + `initParamFuncs` 0x1d9b2c or `FCHRstat::init` 0x1db1f0 (system data record
+  by kind), `setPos` 0x1d89c4 / 0x1db7cc. Type-2 achr objects (enemies) also get
+  `EmyManager::addEmy` 0x162c2c with the enemy type (0..10) from system data field 0x72.
+- Models: `createObjByModel` 0x1ca8e8 (`MagSystem::loadModel`, which returns the actor number) and
+  `createObjByName` 0x1ca72c (`MagScene::loadModelByName` from the archive of group kind >> 10:
+  table 0x2fbed0 -> data/ch/action/ACTION.RPK, target/TRG, fix/FIX, item/ITEM, inst/INST,
+  enemy/ENEMY, door/DOOR, (7 none), pc/PC, bwn/BWN, 01/CHAP01 .. 12/CHAP12.RPK). Model 0x800 and the
+  model named "target" get scale 9.9999994e-8 (hidden markers). Light id: 1 for types 0..3 / 5, 0 for
+  4 / 9 (`setObjLight` 0x1ca598).
+- Markers: `ctlObj1cb8e4` 0x1cb8e4 -> `addObjMarker` 0x1cb970: an EffMan effect 0x32 {x, y, z, 50}
+  bound to the oid in the pool +0x20b00 (released by ctlObj1cbb80).
+- **game/gamman2.cpp** (pinned 0x1d3b44..0x1d84c8, 2026-10-27; declared in game/gamman.h): GamMan's
+  methods past switchVolume. The **object update list** +0x2246c (a 0x100-node pool, record {oid, cell}):
+  queueObjUpdate 0x1d5bc8 moves an oid to its tail, relinkObj 0x1d5da0 takes it off; the hit walk
+  0x1d7c20 iterates it and calls a GCC 2 pointer-to-member at +0x225d0 ({0, -1, fn}: 0x1d4b9c or
+  0x1d50a8, data 0x2fc1d8) with the query position +0x225b0 and radius +0x225a0 (testHitAt / placeAchr
+  set them). The **flag table** data 0x2fc1f8 (15 rows of 8 words, -1 row ends): col 0 the 0x2000xx /
+  0x1000xx book id, 1 the MnuPBook / MnuDiary type (0x1038 = pb010200, the opening book), 2 its item id
+  (0xa17..), 3 the item's sequence bit (addItem), 4 / 7 sequence globals the book reads, 6 a sequence
+  bit; lookupFlagTable 0x1d83d0 (keyCol 99 = row number, keyCol 5 always -1). The **secta world** is
+  MagScene +0x8542c (bss 0x7811ac, Obj17c0f0): a flag word, a buffer and four lists of 0x18 bytes at
+  +0x08 (MagSectaList: +0x4 loaded count, +0x8 the 0x80-byte sector records, +0xc the 0x90-byte cells
+  GamSecta); 0x17c340 answers one cell per list (radius 40, findSectaCell 200), GamMan +0x22ab0 the
+  list the last query used; cell heights 0x17dd5c, paths 0x17d298 (request {list, from[4], to[4],
+  path}). **The hit tests** (written 2026-10-27): hitTestObjs 0x1d7c20 skips the caller's oid, a second
+  oid and type-1 objects while getBwnState is 0xd; m_hitFunc is hitAtPoint 0x1d4b9c (testHitAt,
+  placeAchr, testAchrHit 0x1d5610, testPcHitAt 0x1d56f4) or hitAtSweep 0x1d50a8 (set only by
+  setupDogSweep 0x1d58d8, which has no callers). The object's kind is param 0x18's word 0: 1 its corner
+  quad (param 0x1003, GamArea::isInPolygon, depth 10), 2 / 3 circles (2 from its Bip01 Spine1, 3 also
+  round its Bip01 Neck: result +0x18 = 1), 4 a test that can never pass, 5 / 6 never hit. The result
+  record (ChrHitRec, 0x20) gets +0x10 oid, +0x14 depth, +0x18 the far flag; a type-2 achr hit gets a
+  TskAvoidMove(8, 30) on its m_taskId and the record's oid becomes the tester's. **checkMenuReq**
+  0x1d3b44: the switch on global 0x15 (jump table 0x2fc100, 11 entries) has only case 3; global
+  0x11's low half is the requested item (0xa17..0xa19, 0xa1b..0xa21, 0xab6, 0xacc..0xace open the
+  book of lookupFlagTable(2, item, 0); 0xad0..0xad2 the map 0x10001 when the map area is 0 / 2 / 1);
+  m_22a84 is the open menu (2 book, 1 map, -1 none). GamMan +0x21ffc / +0x22000 are motion speeds
+  restoreAfterMenu 0x1d4370 puts back (DogActor +0x1e8 = m_motion.m_speed). bss 0x7a3208 / 0x7a320c
+  are g_gamMan.m_flags / m_flags2, 0x7b2064 is Sequence::m_flags. **The save image** (MnuSvld's 0x3000
+  bytes; writeSaveData 0x1d6078 / readSaveData 0x1d68a0, written 2026-10-27): header "FEB_SAVE", +0x8
+  g_versionNumber, +0x10 chapter, +0x14 inuMode, +0x18 0x2d10, +0x1c play minutes, +0x20 / +0x24 equip /
+  find-target item, +0x28 version 0x10 (reader: nothing below 7; older versions have shorter sections);
+  +0x40 saveGlobals, saveBits, 8 bytes, PC and dog ObjStat::save (0xb0 each); then from that point:
+  +0x0 12 item words (id | num << 16), +0x30 stock count, +0x38 stock words, +0x56c 'N', +0x57c
+  m_1f240 (0x169 words), +0xb20 object resets (6-byte {oid, flags, m_0c} from the object table ->
+  +0x18bc0), +0xee8 0x26 vfchrs of image 1 (0x20 each: oid, kind, flags, param 8, 0x1000, 0x43 pos),
+  +0x13a8 every vfchr's {oid, flags} (-> +0x18bc4), +0x1fa8 the 12 option words +0x21f8c.., +0x1fd8 the
+  GamSndMan get_snd_prm BGM record (-> GamMan +0x22a5c: its writer), +0x1ffc 0x1c7 item records' flag
+  bytes (& 0xd5; the reader loads them signed). Sequence bits word 8 bit 0x1000 turns the read into a
+  New Game reset. findSectaCellFrom 0x1d7fb8 (no callers) searches a list from a cell via 0x17ded0.
+- **game/gamstat.cpp** (pinned 0x1d84c8..0x1dd1e8, 2026-10-26; game/gamstat.h): ObjStat / ACHRstat /
+  FCHRstat code and GamSysData. ObjStat's fields are named by the ELF's accessor inlines 0x28f874..
+  0x28fdb8 (ror-symbol): +0x100 o_oid, +0x104 o_stat, +0x108 o_chr_id (actor), +0x114 the secta cell
+  (o_secta_id = cell +0), +0x118 o_smell_range, +0x11c o_scale, +0x126 a_lp, +0x128 o_uid (the system
+  data id), +0x12a.. o_smell_uid_1..3, +0x130 o_area_no, +0x138 o_inu_func, +0x150 the collision words
+  (getColPrm, 0x30 bytes; +0x220 init's copy, getColPrmKeep), +0x190 pos, +0x1a0 rot, +0x1b0 work[16].
+  **One param id space** (gamstat.h GamParam): 1..0x21 are the accessors in ACHRstat::initParamFuncs'
+  table of GCC 2 method pointers at +0x280 (getParam dispatches through it), 0x22.. per class, 0x1000..
+  0x1005 ObjStat's (base getParam 0x1d9044 / setParam 0x1d932c). GamSysData::getField 0x1dc48c uses
+  the same ids for the record fields: 0xb / 0xc the names (English +0x20, Japanese +0), 0xf the model
+  id (+0x46, o_chr_id_low), 0x1c..0x21 the stats at +0x80 of a character record (max_lp, st, def, avoid,
+  agi, neck_rot_range in degrees: field 0x21 returns radians). GamSysData: ten tables (record id =
+  table << 9 | record): 0..3 characters (records 0xa0, 0xa0, 0xc0, 0xe0; flags +0x90, table 2 a second
+  word +0x94), 4..9 objects (0xc0, table 5 0x200; flags +0xb0); FCHRstat::init reads only table 5.
+  An achr's move params (read by TskMoveTypeGen 0x1e9a3c): 0x1100 the walk motion, 0x1103 its speed
+  per 60th, 0x1101 / 0x1102 the right / left turn motions (-1 none), 0x1104 the turn speed, 0x1105 the
+  angle from straight behind within which a turn plays the turn motion.
+  ObjStat::setPos / getPos / setRot were named ACHRstat::* before: the base setter calls them for fchrs
+  too (FCHRstat has its own four). The secta cells come from GamMan::findSectaCell 0x1d8064 (stub);
+  the floor height from GamMan::getSectaCellY 0x1d817c (100000 = no cell; ObjStat::getPosSectaY
+  0x1d8c50 passes a NULL cell when the object already has one, so it gets 100000 -- the ROM's).
+  **GamSysData::setField** 0x1dc070 writes few fields (table 1: smell uids, max lp; 2: 0x4f..0x58,
+  0x70..0x72; 3: 0x75 / 0x76; 4..8: 0x1d / 0x1e; 5 also 0x31 / 0x42; 8 0x39) and for every table but
+  1 copies the smell uids 0x10..0x12 (table 9 also 0x1d / 0x1e) *out* into data: shared read tails.
+  GamIdMap 0x1d84c8..0x1d87f4 (invented name): a u_short key / value map, parallel arrays, value 0 free.
+  **Map screen helpers** 0x1dbb38..0x1dbef8 (slice 3; the menu 0x1949bc / 0x196878 calls them with
+  GamMan +0x18c00, the port passes GamMan): `gamMapConvWorld` 0x1dbb74 / `gamMapConvLocal` 0x1dbc5c turn
+  a room position (+ the WRD offset for World) into map pixels by GamMan::getMapArea's row of data
+  0x2fc748 (GamMapScale, 3 areas: x = mulX * -x / divX + addX, z = mulZ * z / divZ + addZ);
+  `gamGetMapFloor` 0x1dbd90 picks the map page (4 when the room word +0x18dd0 is 4, else 1 with flags2
+  0x40000, else 1/2/3 by script bits word 6 bits 0/1/2, else +0x18dd0); `gamGetMapMarkers` 0x1dbdf0
+  fills two 0x20-byte GamMapMarker (kind 1 the PC +0x22020/+0x22030, kind 2 Brown via gamGetBwnPos /
+  gamGetBwnRot 0x144418 / 0x14448c). ACHRstat +0x3d0 is a pointer whose +0xc is an actor no
+  (ChrMotionRef, writer not found; read by isMotionTaskEnd 0x1d9f40 through chrMotionRefEnd 0x1e8f88).
+- **Map units** (gamman session 5): `GamMan::loadMapUnit` 0x1ca0dc (native 027) reads the first
+  0x1800 bytes of data/bg/mapunit.bin (an RTPK, one file per unit, named without extension), then
+  the unit's file into a keep buffer (+0x225e8), `loadMapPack` 0x1ca38c checks the RTPK magic,
+  `MagSystem::loadScene`s it into a sky slot and records {mode << 30, unit index, slot} in the pool
+  +0x1d240 (GamTenkyuRec). Modes 2 / 3 pair two units: `showMapUnits` 0x1c9e20 shows one kind, hides
+  the other (the sky slot's model[0] m_hide) and points m_mapModelNo (+0x1d300) at the shown one.
+- **Stage 2** (`initStage2` 0x1c47c4, change kind 3): data/SEQ/W<ch>/A<room>/A<room>.ARA, an RTPK of
+  n files: file 0 the actor model ids (-1 ends; every W001 pack has none), the actor files from n-5
+  down, n-4 the image-2 script (ELFR, Sequence::loadSubImage), n-2 the room data for gamSetWrdRoom
+  0x1dbcf0 (464 bytes). Loaded actors are hidden and recorded in the pool +0x1f880 (GamActorRec).
+- **PC start** (`setPcStartPos` 0x1c3d38) by +0x1a684: 0xcccccccc none, 0xcccccccb the kept start
+  transforms +0x22060 / +0x22070, -n the n-th record of this room in W000.WRD file 2 (0x20 bytes: room,
+  pos +0x10, rotY +0x1c), else a type-9 fchr oid: 50 units in front of it. `storePcTransform`
+  0x1cd404 puts the dog 35 units to the PC's side (heading - pi/2) and tells Brown's controller.
+- **Stage resets** (gamman session 6): `resetStage` 0x1cdbf0 (change kind 5, a new chapter) unsets the
+  room (+0x21f7c = -1), closes the menu, camera mode 1, clears the PC / dog, the object records' 0x8000
+  bits, then (script bits word 7 sign clear) the held item, the image oids of the list +0x1f240 and
+  bits word 6 bits 0..3; sounds (`GamSndMan::reset` 0x1e1fa4), callbacks +0x222c4.., messages, effects,
+  Sequence::stopImages(1), `releaseAllChrs` 0x1ced18 (every achr / fchr deleted; with bits word 2
+  0x8000 the PC and dog stay) and the area triggers. `releaseObjs(kind, keepFchrs)` 0x1cdf5c (kinds
+  0 / 1 from task/tsk_bg_load.cpp, 2 from releaseStage2) picks by the oid's image (bits 30..31): kind
+  2 drops all but image 1, kind 3 only image 3, else all. term 0x1c0d44 = releaseAll + init.
+- **Camera stack** (`pushCamera` 0x1c5ffc / `popCamera` 0x1c621c, native 016): three GamCamRec of
+  0x30 at +0x22470 (count +0x22530): MagSystem::getCameraMode's mode & 0xf (0..5 only) and number,
+  +0x21f78, the scene camera entity's (MagScene +0x2ab70, bss 0x7268f0) trans / rotate xyz and lens
+  angle (+0x140), and for map cameras 3..5 the path point (MagScene 0x13d4d0 / 0x13d52c: the path
+  record +0x20 int + +0x28 fraction). Pop sets modes 3..5 as setCameraMode(mode, +0x21f78, {-1, -1,
+  number}).
+- **Private collisions** (gamman session 7, native 151): `addObjColliSegment` 0x1d080c / `Box`
+  0x1d091c / `Quad` 0x1d0c64 add walls with `MagScene::addPrivateColli` (p0 at the top y, p1 at top -
+  height - 1) and store {kind 5 one wall / 6 four, shape 0 / 4, -height, top y, radius, ids} as param
+  0x18 (GamObjColli); box / quad also put the four x / z corners in param 0x1003 and the position. The
+  radius word is (sx - sy + sz) / 3 for a box, (z1 - x3 + z3) / 3 for a quad -- the ROM's formula;
+  fitObjBounds 0x1d480c redoes it from the corners.
+- **Weapon ammo** (gamman session 7): the equipped item 0xa3e takes ammo 0xa42, 0xa43 takes 0xa3f;
+  m_selItemNum (+0x1d200) is the loaded count, 6 at most. `findReloadSlot` 0x1c8604 / `reloadEquip`
+  0x1c870c move counts from ammo slots into it (emptied slots `clearItemSlot` 0x1c8214).
+- **Map area**: the WRD entry's word 0x1c (`GamMan::getMapArea` 0x1c6c38; gamSetWrdRoom keeps it in
+  +0x18dc0). `canOpenMapMenu` 0x1c97f0 wants map item 0xad0 in area 0, 0xad1 in 2, 0xad2 in 1, and
+  `canOpenItemMenu` 0x1c97c8 (m_flags 4, m_flags2 0x800 clear).
+- **Attach** (`attachObj` 0x1d1a5c): MagSystem::setActorParent(actor, parent actor, node index by
+  name); an achr parent records the child in m_link (+0x254); `detachObj` 0x1d1bec undoes it.
+  `setActorBindMode` 0x1d2428 sets bits 5..6 of MagScene m_actor_flags[actor].
+- **Enemy groups** (`addChrGroup` 0x1cc560, native 100 case 8): EmyManager::setGroup 0x162b68 (group
+  a < 9 at stride 0x3c), then count achrs built with oid 0: addEmy -> createEmy 0x162c88 makes their
+  oids 0x9100006f + n (addEmy passes makeOid 1; the twin addEmyAlt 0x162c5c, unreferenced, 0) and
+  stores them with the inline GamMan::set_achr.
+- **Object queries** (gamman session 9): `collectAchrs` 0x1d2e2c / `collectFchrs` 0x1d327c count the
+  objects of a type (-1 any) whose ObjStat m_flags (+0x120) has a bit of need and none of exclude,
+  copying them into a caller's SeqPool when given (the fchr one walks the fchr and avfchr lists);
+  `collectAchrsNear` 0x1d2ff0 / `collectFchrsNear` 0x1d35ac add an x / z distance < radius and store
+  the distance in ObjStat +0x144 (m_dist). collectFchrsNear is the one the game uses (maglifepc2, the
+  emy code 0x15xxxx, GamArea 0x1ddf48, checkMenuReq).
+- **Script callbacks** m_seqPair (+0x222c4, four {b, a} pairs): [0] ehon, [1] menu, [2] seq_evt,
+  [3] jump_area_act (the ELF's regist_call_back_* / clear_*); `check_event_after_menu` is pair 1 set
+  and getSysFlg bit 0x8000 clear.
+- GamMan +0x18c00 is a WRD block whose words the port keeps as GamMan members (the gam*Wrd* functions
+  take GamMan or nothing); getMapObjPtr returns GamMan on the host.
+
+## The IOP side (`MODULES/`, 2026-10-30, `tools/reverse/iop.py`)
+
+- `IOPRP300.IMG` (275,345 bytes, built 2003-10-22) is a ROMDIR image (the IOP boot ROM's layout: RESET,
+  ROMDIR, EXTINFO, then the files 16-aligned) holding Sony's 16 replacement modules: SYSMEM 2.03,
+  LOADCORE 2.06, SIFCMD 2.08, SIFMAN 2.03, THREADMAN 2.03, IOMAN 2.03, MODLOAD 2.09, FILEIO 2.12, CDVDMAN
+  2.25, CDVDFSV 2.25, LOADFILE, TIMEMANI, ROMDRV, EESYNC, SYSCLIB 2.03, STDIO 2.03. `IOPRP270.IMG` is an
+  older one nothing loads. `python iop.py extract` unpacks both to `work/iop/<img>/`.
+- Loose modules: sio2man 3.01, sio2d 3.03, dbcman 3.10, pad2/ds1o_d 3.10, mcman 2.30, mcserv 2.10, libsd
+  3.03 (all loaded by `iopconf.cnf`, all Sony), and unused padman 4.05, usbd 2.04, pad2/ds1o_s1 /
+  ds2o_s1, sndbgext (SN Systems' ProDG debug extension "SN_DBGEXT"). The platform layer stands in for
+  the Sony ones at their API (`src/sdk`).
+- **`RXSNDDRV.IRX` is the only game IOP code**: "Sound driver version 1.00" (iopmod version 1.01, disc file
+  dated 2005-12-12), the server of RPC 0xd000 that `rx/rxsnd.cpp` calls. No symbols (`.symtab` holds only the
+  null entry). Linked at 0: `.text` 0..0xd0f0 (53,488 bytes, ~135 framed functions plus leaves, entry
+  `_start` 0 clears the bss and prints "Installed sound driver"), `.rodata` 0xd0f0..0xdd60, `.data`
+  0xdd60..0xe4f0, `.bss` 0xe4f0..0x38970 (173 KB), gp 0x164e0. Imports (stubs at 0xce70..): libsd 1.05
+  (sceSdInit, Set/GetParam, Set/GetSwitch, Set/GetAddr, SetCoreAttr, Note2Pitch, ProcBatch, VoiceTrans,
+  BlockTrans, BlockTransStatus, SetEffectAttr, SetTransIntrHandler), sysmem (Alloc/FreeSysMemory, the
+  three Query*), intrman (CpuSuspend/ResumeIntr), loadcore FlushDcache, sifcmd (InitRpc, RegisterRpc,
+  SetRpcQueue, RpcLoop, GetOtherData), sifman (SetDma, DmaStat), printf, memset, thbase (Create/Start
+  Thread, GetThreadId), thevent (Create/Set/iSet/WaitEventFlag), vblank WaitVblankEnd. No exports.
+- Its strings ("snddrv : ...") name the subsystems: the RPC server ("Start RX - sound RPC server",
+  "invalide RPC command"), a DMA management thread and a sound double-buffer thread, XVAB banks (header
+  in IOP memory, body in SPU RAM; versioned), XSEQ sequences ('MIDI' / 'HEAD' chunks) played by BGM
+  slots -- **the music is MIDI sequenced on the IOP** (CC, RPN, NRPN, system and meta events), not
+  streamed -- the SE system (SE requests and "SE sequence codes"), NOTE slots over XVAB programs, the
+  ADPCM stream system (voice and movie audio) and the PCM stream system.
+- On the PC the reconstructed driver `src/iop/rxsnddrv/` serves the RPC (started by RosePan_IopBoot,
+  src/sdk/iop_sif.cpp); the silent stand-in `src/sdk/iop_rxsnd.cpp` that answered before was deleted
+  2026-10-30. `src/sdk/iop_libsd.cpp` (register model + SPU RAM) and `iop_voice.cpp` /
+  `iop_reverb.cpp` (the synthesiser, from ReiPan) implement all 15 of RXSNDDRV's libsd imports. Reads
+  the driver acts on are modelled from the engine, not mirrored: NAX (play position), ENDX, and since
+  2026-10-31 ENVX (the envelope; the voice tick auto-frees SE / BGM voices and the ADPCM update ends
+  streams when it reads 0 -- hazards.md "Sounds cut short").
+- The player's volume (`[audio]` master / music / effects in rosepan.ini, ImGui Settings > Audio) is the
+  host mixer's, on top of the game's own (master x family x voice in rx/rxsnd.cpp): `iop_voice.cpp`
+  scales each voice by its group and the finished mix by the master. RXSNDDRV tags a voice's group as
+  it allocates it (`RxSndDrvVoiceSetMixGroup`, set by the tick thread: every allocation happens in the
+  BGM, SE or ADPCM tick); BGM and ADPCM streams are music (the streams also carry speech and ambience),
+  SEs effects, the auto-DMA input (movie / PCM audio) music.
+- Ghidra: `python iop.py elf <MODULES>/RXSNDDRV.IRX` writes `work/iop/elf/rxsnddrv.elf` (MIPS R3000 LE,
+  base 0, import stubs, `_start` and `_gp` as symbols). **Imported 2026-10-30 as program
+  `rxsnddrv.elf`** in the same project and Ghidra as SLUS_214.48: 229 functions after analysis (`_start`,
+  40 named import stubs, 188 `FUN_`), gp applied (strings resolve). Read it with
+  `ROSEPAN_PROGRAM=rxsnddrv.elf python dec.py <addr>` / `ghidra.py` (hazards.md: the other tools are
+  not program-aware yet).
+- Entry points found: `_start` 0 calls FlushDcache, clears the bss, sceSdInit(0), sceSifInitRpc(0),
+  clears 0x1000 bytes at 0xe500, then the subsystem inits 0x1814, 0x1b5c, 0x20c4, 0x1048, 0x1570, 0x2854,
+  0x3170, 0x3eb8, 0x98e4, 0x6ab0, 0x45b0, 0xacac, 0xb4a0, 0xb08 and 0x190 (creates the double-buffer
+  thread: priority 0x23, stack 0x1000, entry 0x29c); 0x1890 returns the debug flags (bit 4 = print).
+  The RPC server thread 0xbc4 registers RPC 0xd000 with handler 0xc24 and receive buffer 0xf504, then
+  sceSifRpcLoop; 0xc24 stores 0x360(fno, 0x10508, data)'s result at 0x10504 and returns that reply.
+  **0x360 is the command dispatcher**, a switch on the EE's command numbers: 0x10 start (0x190), 0x11
+  stop all (0x238), 0x12 (0x27c), 0x20 AllocSysMemory {mode, size, addr} / 0x21 FreeSysMemory / 0x22
+  Query{Mem, MaxFree, TotalFree}Size by {0, 1, 2} / 0x23 an IOP memmove {dst, src, size} (all under
+  CpuSuspendIntr), 0x30 system (0x18b0), 0x31 (0x1bdc), 0x32 SPU2 effect (0x21e0), 0x40 XVAB transfer
+  (0x1124(1, id, ...) then 0x1250), 0x41 transfer busy (0x127c), 0x50 XVAB open (0x2330), 0x51 close
+  (0x28b8), 0x60 XSEQ open (0x2e00), 0x63 (0x3310), 0x72 BGM status (0x5b68(reply, reply + 0x80),
+  count at +0x100) ...; the whole switch is `RxSndDrvCommand` in `src/iop/rxsnddrv/rxsnddrv.cpp`.
+- **Link order = subsystems** (2026-10-30; each file is tick, init, accessors, command handlers in
+  that order): 0x0 entry / tick thread / dispatcher, 0xb08 RPC server, 0xc60 DMA queues, 0x1680
+  system parameters, 0x19e0 master mix / volume, 0x1ca0 reverb, 0x2330 XVAB, 0x2e00 XSEQ, 0x35c0 voice
+  layer (0x3f6c sets the output mode on 0x30 voices), 0x45b0 BGM + MIDI interpreter, 0x6ab0 SE,
+  0x8f10 NOTE slots, 0x9eb0 ADPCM streams, 0xb4a0 PCM streams, 0xce84 import stubs.
+- **Double buffer**: the tick thread (priority 0x23) waits for V-blank, flips bank 0xe4f4, then runs
+  the ticks sys, mix, effect, BGM 0x5e60, SE 0x8878, NOTE 0x93c0, ADPCM 0xb1dc, voice 0x35c0, PCM
+  0xb5ac. Commands write pending records {mask, values} of bank 0x268() (the current one); a tick
+  applies bank 0x254() (the other) and clears its mask. 0x10 re-creates the thread, 0x11 asks it to
+  stop and answers whether it has (the EE loops while the answer is non-zero), 0x12 answers the
+  version 0x0101.
+- **RPC server**: thread priority 0xc; receive buffer 0xf504 (0x1000), answer word 0x10504 followed
+  by the reply data 0x10508. Command 0x200 runs a queue {cmd, replySize, dataSize, data} closed by
+  cmd 0, each reply after the last; the queued commands' return values are dropped.
+- **DMA queues** (0x11510): two FIFOs of 256 entries {id, type, a, b, size, done, arg, total}, ids
+  from a counter; queue 0 first. Types: 1 IOP -> SPU (a spu, b iop), 2 SPU -> IOP, 3 EE -> SPU and 4
+  SPU -> EE through a 0x4000 staging buffer (0x15540, sceSifGetOtherData / sceSifSetDma), 5 zeros ->
+  SPU 0x1000 at a time from 0xe500. A thread (priority 0xd) waits on an event flag and starts the
+  head with sceSdVoiceTrans(core 0); libsd's transfer handler 0xed4 advances / pops it, calls
+  done(arg, total) and sets the flag. 0x40 {type, a, b, size} queues on queue 1 and answers the id;
+  0x41 answers whether the id is still queued.
+- **System 0x30 {param, value}**: 0 debug flags (default 7; bit 1 errors, bit 4 info messages), 1
+  frame rate (60), 2 output mode (1; passed to the voices), 3..5 bytes composing SD_C_SPDIF_MODE.
+  **Mix 0x31 {core, param, value}**: 0 MMIX (default 0xfcc), 1 MVOL {L, R} (0x3fff). **Reverb 0x32
+  {core, param, value}**: 0 mode 0..9 (table 0xdda0: SDK mode and work size 0x80..0x18040), 1 EEA
+  (defaults 0x1fffff / 0x1dffff), 2 depth {L, R} (byte scale, sent << 8, ramped 8 per tick), 3
+  feedback, 4 delay. A mode or EEA change turns the effect off and zeroes the work area by a type 5
+  DMA before the new attributes go out.
+- **XVAB 0x50 {id, iop, spu} / 0x51 {id}** (`src/iop/rxsnddrv/xvab.cpp`, 2026-10-30): 0x80 slots
+  of 0x20 at 0x19680 {file, TGIF, SEIF, VELT, PANT, LFOT, spu, users}; id < 0 takes the first free
+  one. Close refuses (answers 1) while users > 0 (NOTE 0x8f10 / SE 0x6e04 lock a slot: 0x2a14 /
+  0x2ae8 count up, 0x2a88 down). Chunk file: "XVAB", version, size; version < 0x200 chunks {tag, size,
+  data} from +0xc, version 0x200 {tag, ?, size, ?, data} from +0x10 (0x2cd0 / 0x2d40 / 0x2da0, the
+  EE's rxSndChunkFind). The game's banks (DATA/SEQ/G000.GRB, area *.ARA) are version 0x101 with
+  HEAD TGIF TGPG TGSP SEIF SEGP SERQ SESQ VELT PANT LFOT; HEAD byte 0 = relocated, byte 1 = samples
+  follow, +4 sample size, +8..+0x18 the five tables' file offsets. Opening (0x2578, dir +1) rebases
+  TGIF / TGPG offsets on TGIF and SEIF / SEGP / SERQ offsets on SEIF; closing undoes it. SE lookup
+  0x2ae8(id, group, index): SEIF[group] -> SEGP list -> SERQ record {u8, u8, u16 flags (0x3ff ticks,
+  0x1000 / 0x2000 negate the bytes, 0xc000 mode), offset into SESQ}.
+- **XSEQ 0x60 {id, iop} / 0x61 {id} / 0x63 {id, index, xvab}** (`src/iop/rxsnddrv/xseq.cpp`,
+  2026-10-30): 0x20 slots of 0x20 at 0x1a680 {file, HEAD-or-MIDI chunk, state (-1 after close, read
+  nowhere), users, s16 bank[8]}; open sets bank[] to -1, 0x63 sets bank[index] (index < 8). BGM open
+  0x4680 locks a slot (0x338c / 0x3400) and walks the HEAD chunk via 0x32d8; the BGM event code 0x5370
+  maps a track's byte 4 through 0x3348 (bank -> XVAB id) before NOTE 0x8f10. Close answers 1 while a
+  BGM plays it (the EE's rxSndXseqFree waits on that). Own chunk-finder copy 0x34a8 / 0x3518 / 0x3568
+  (its v1 walk has no zero-tag stop). HEAD: u8 track count, u8 relocated, offset[count] to 8-byte TRCK
+  records whose second word is the track data; version < 0x200 offsets are rebased on HEAD at open
+  (0x2fa0, dir +1) and back at close. The boot sends no XSEQ commands; no plain XSEQ file is on the
+  disc (only one 'XSEQ' string inside DATA/CH/CHARA.RPK), so the format is unchecked against data.
+- **Voices 0x90..0x93** (`src/iop/rxsnddrv/voice.cpp`, 2026-10-30): state 0xab8 at 0x1aa80 {stereo
+  (0 mono: L = R = (|L| + |R|) / 2), 48 voices of 0x38 at +4, next[3], exclude[3][2] (group 1 core 0
+  only, group 2 core 1 only), keyMask[2], keyOn[2]}. Voice v = core v / 24, channel v % 24. Voice
+  {priority, age, no, flags (1 active, 2 owned, 4 keyed, 8 released, 0x10 auto-free), quiet, fade 0x80,
+  pending (1 SSA+ADSR, 2 LSAX, 4 switches, 8 volume, 0x10 pitch), switch bits (1 dry, 2 reverb, 4 NON,
+  8 PMON), s16 pitch, SSA, LSAX, ADSR1/2, vol L/R (register << 7), envx, done(voice, reason, arg),
+  arg, enable (0x91), owner}. Alloc 0x3b80(voice or -1, priority, autoFree, group, owner, done, arg):
+  first takes back the owner's voices, then the group's first free enabled voice from next[group], else
+  steals the largest priority, then the oldest. Owners write through 0x409c sample / 0x40d0 loop /
+  0x40fc switches / 0x4128 volume 0..0x7f / 0x4160 raw volume / 0x4190 pitch (sceSdNote2Pitch * scale
+  >> 12) / 0x4208 key on / 0x429c key off; release 0x3fcc(voice, reason, noFade) keys off, fades 8
+  ticks and calls done; free 0x4570. The tick 0x35c0 (per V-blank) reads every ENVX, writes pending
+  registers, the six switch words per core, then KON (mask & on) / KOFF (mask & ~on). Status: 0x90
+  ENVX[48], 0x92 flags[48], 0x93 {kind 0 ENVX, 1 vol, 2 pitch, 3 switches, 4 priority, 5 ADSR}[48].
+- **BGM 0x70..0x74** (`src/iop/rxsnddrv/bgm.cpp`, 2026-10-30): a standard-MIDI sequencer. One block
+  0x7a90 at 0x1b540: 0x40 notes of 0x14 {next, track, channel, s8 NOTE id, dirty, state 0 on / 1
+  released / 2 killed, key, velocity, sostenuto}, free head 0x1ba40; 0x100 loops of 0xc {next, pos, count,
+  times}, head 0x1c644; 0x40 tracks of 0x3c {next, TRCK, pos, start, offset, no, dirty, ended, running
+  status, notes, wait, vol L/R 0x80, pitch 0x1000, loops, pending[2] {mask, L | R << 16}}, head 0x1d548;
+  0x20 slots of 0x2d4 at 0x1d54c {next (active list head 0x22fcc), xseq, flags (1 used, 2 playing, 4 ended,
+  8 paused, 0x10000 active, 0x20000 stopped; the low byte is the 0x72 status), division (HEAD +2 s16),
+  tempo (us / quarter, 500000), tickWait, frameStep, no, switch, dirty, vol L/R 0x80, pitch, speed
+  0x1000, seek, tracks, 16 channels of 0x28, notes, pending[2] of 0x10 {mask, stop, pause, switch, vol,
+  pitch, speed}}. Timing 0x60d8: tickWait = tempo * 60 / (division * 1000000 >> 12), frameStep = rate *
+  speed / 60; a track runs events while wait <= 0, a delta adds n * tickWait, a V-blank takes frameStep.
+  0x71 params: 0 stop (2 cut, else release), 1 pause (1 release, 2 cut, else resume), 2 NOTE switch, 3
+  volume, 4 pitch, 5 speed, 6 seek (direct). **0x73 is a channel's volume, 0x74 a track's** (by HEAD
+  index), both {3, L | R << 16}. 0x72 reply: {no, status} per active slot and the first track's offset.
+  Notes: 0x8f10(xvab = xseq bank[channel bank], program, key, -1, -1) -> NOTE id; the update pushes
+  0x9ab0 switch, 0x9b1c velocity, 0x9bb0 pan, 0x9ae4 volume (vol * expr >> 7 * channel * track * slot,
+  each >> 7), 0x9c0c pitch (slot * track >> 12), 0x9c40 bend ((msb - 0x40) * 0x40); a note goes when
+  0x9db4 bit 1 clears (0x99c8 frees it). Controllers 0, 1, 5, 6, 7, 10, 11, 0x20, 0x26, 0x40 (>= 0x40
+  holds), 0x41, 0x42, 0x54, 0x60..0x65, 0x78, 0x79, 0x7b, 0x7e mono / 0x7f poly. **Loops are NRPN:**
+  selecting NRPN 0 or 0xa00 pushes a loop at the next event, its data entry sets the repeat count (the
+  data word's low byte, 0 forever); selecting NRPN 1 or 0xf00 jumps back. Meta 0x2f ends a track, 0x51
+  sets the tempo; sysex skipped. Debug flag 2 = warnings (unsupported CC / RPN / NRPN / meta, no slot).
+  The title music is not BGM: the boot and the title screen send ADPCM 0xa0..0xa4 and no 0x60 / 0x70.
+- **SE 0x80..0x83** (`src/iop/rxsnddrv/se.cpp`, 2026-10-30): one block 0x9e14 at 0x22fd0: 0x100 note
+  records of 0x10 {next, channel, tag, s8 NOTE id (-1 freed), dirty (0xff new), key}, free 0x23fd0; 0x100
+  ramps of 0x18 {next, param byte, kind, dirty bit, end, value << 12, step, ticks left << 12}, free
+  0x257d4; 0x400 channels of 0x14 {next, id, -, dirty, vol 0x80, pan 0x40, bend 0x40, mod depth 0, mod
+  rate 0x80, offset 0x80 (1/8 semitones), ramps}, free 0x2a7d8; 0x100 loops of 0xc {next, pos, count,
+  forever}, free 0x2b3dc; 0x40 slots of 0x68 at 0x2b3e0 {next (active list 0x2cde0, oldest first),
+  xvab, group / program, index / key, ended, flags (1 used, 2 playing, 8 paused, 0x10000 started,
+  0x20000 stopped, 0x40000 bank user; the low byte is the 0x83 status), id, mode (1 request, 0 one key),
+  switch, dirty, ticks a second (0x3c), vol L / R (the request's), master L / R (param 3), scale 0x1000,
+  param 5 (read nowhere), voice group s8, owner s16, SESQ pos, wait << 12, notes, channels, loops,
+  pending[2] of 0x18 {mask, stop, pause, switch, L | R << 16, scale, p5, chan vol / pan / bend / depth /
+  rate, group, owner}}. **0x80 {slot, xvab, group, index}** runs the SERQ record's SESQ code
+  (0x2ae8: ticks, vol L / R, voice group from flags 0xc000); **0x81 {slot, xvab, program, key}** plays
+  one key (ended from the start). 0x82 params: 0 stop (1 release, else cut), 1 pause (0 resume, 1
+  release, else cut), 2 switch, 3 volume L | R << 16, 4 pitch scale, 5 kept, 6..10 the first channel's
+  vol / pan / bend / mod depth / mod rate (one-key SEs only), 0xb voice group, 0xc owner (0xb / 0xc
+  share the mask bits of 6 / 7). Tick 0x8878: apply 0x6e04, reap 0x8988 (stopped and no note left:
+  unlock, free channels, ramps, loops), run 0x7260, ramps 0x8020, update 0x81b4 (drop silent notes,
+  push switch, volume vol * master >> 7 * chan >> 7, pan, pitch, bend (b - 0x40) * 0x40, offset, mod
+  depth / rate; flag 2 drops when ended with no note). **SESQ byte code**: opcode (bits 0..5, bit 6 =
+  every SE holding the operand), operands, varlen delta in ticks: 00 end, 01 / 0b nothing, 02 n loop
+  start (0 forever), 03 loop end, 04 tag chan program key velocity note on, 05 tag key off, 06 tag
+  free, 07 / 09 chan kind value set (09 adds), 08 / 0a chan kind value time ramp (0a adds around 0x80).
+  0x8458 stops every SE (unreferenced). The title menu plays bank 0 requests (0, 3) / (0, 7) on slot
+  63 (one note each); area bank 3 request (11, 11) starts two notes.
+- **NOTE slots 0x8f10..0x9eb0** (`src/iop/rxsnddrv/note.cpp`, 2026-10-30): block 0x3b0c at 0x2cdf0
+  {0x100 layers of 0x30, free list 0x2fdf0; 0x40 slots of 0x2c at 0x2fdf4, active list 0x308f4, free
+  list 0x308f8}. Play 0x8f10(xvab, program, key, group, owner; -1 = the region's): XvabLock, TGIF[program]
+  -> TGPG {u16, u16 count, offset from TGIF} -> TGSP regions of 0x24 {flags (1 dry, 2 reverb, 4 noise,
+  0x40 note key is the centre), priority, group (owner = xvab << 16 | group), voice group, key lo / hi,
+  centre key / fine, VELT, PANT, s8 vol L / R, s16 scale, -, ADSR1 / 2, SSA from the bank SPU base, LFOT
+  x3 (vol, pan, pitch), depth x3, rate x3, bend down / up}; a layer per region whose key range holds key,
+  VoiceAlloc(-1, priority, autoFree 1, group, owner, done 0x9e50), sample, key on; any layer without a
+  voice releases the rest (0x9ddc). Slot {next, xvab, flags (1 used, 2 voice sounding, 0x40000 bend,
+  0x80000 modulation), id, dirty (1 switch, 2 vol, 4 pitch), key, fine, switch, vol L / R 0x80, s8
+  velocity 0x7f, s8 pan 0x40, scale 0x1000, unused 0x1000, bend, mod depth, mod rate 0x80, s8 offset /
+  fine, layers, voices}. Setters 0x9ab0 switch, 0x9ae4 vol, 0x9b1c velocity, 0x9bb0 pan, 0x9c0c scale,
+  0x9c40 bend, 0x9ca0 pitch offset, 0x9cd8 mod depth 0..0x80, 0x9d64 mod rate (the last three: SE only).
+  Tick 0x93c0: vol = vol * region vol * VELT[velocity] >> 7 * PANT[pan] >> 7 (R from PANT + 0x80), pitch
+  = (key << 7 | fine) + bend * range * 0x80 >> 12 + offset, 0..0x3fff, scale = note * region >> 12;
+  with modulation the three LFOs step (0x80000 / frame rate) * rate[note] >> 12 * rate[region] >> 12 a
+  tick over 0x80-step curves (rate table 0xdee0, 0x1000 at index 0x80: one cycle a second); the auto-pan
+  LFO indexes PANT from the curve base, not the note's pan (as the ROM does). G000.GRB's bank: 3 programs
+  (62 / 21 / 2 regions), one key each, scale 3763 (44.1 kHz samples at 48 kHz), ADSR 0x80ff / 0x5fc0.
+- **ADPCM streams 0xa0..0xa4** (`src/iop/rxsnddrv/adpcm.cpp`, 2026-10-30): block 0x45cc at 0x30900
+  {frameBytes (0x6b24 / frame rate: ADPCM bytes a V-blank at 48 kHz), 0x30 streams of 0x74 at 0x30904,
+  active list 0x31ec4, 0x100 channels of 0x30 at 0x31ec8, free list 0x34ec8}. Stream {next, flags (1 used,
+  2 playing, 4 ended, 8 paused, 0x10000 active, 0x20000 closed; low byte = 0xa3 status), priority (the
+  open's s16 arg, -1 from rxSndAdpcmOpen; >= 0: a stolen voice ends the stream), group, owner, u8 id,
+  reverb, dirty (1 switch, 2 volume, 4 pitch), end, vol L/R 0x80, pitch (rate * 0x1000 / 48000), scale
+  0x1000, need (1.5 frames of data, 0x40-rounded: the start threshold), iopSize, iopWrite, iopRead,
+  iopFill, dmaPending, spuSize, spuWrite, spuPlay, spuFill, posHi/Lo (bytes played, -1 at the end),
+  channels, pending[2] {mask, vol, pause, reverb, pitch, group, owner}}. Channel {next, stream, no, s8
+  voice, s8 voiceWant (0xa4 param 5), keyed, vol L/R, iop, spu, pending[2] {mask 2 vol / 8 voice, vol,
+  voice}}. 0xa0 {u8 id, -, u8 channels, -, s16 priority, s16 pitch, iopSize, spuSize, {iop, spu}[n]};
+  0xa1 {u8 id, u8 end, -, size} adds min(size, free) to iopFill; 0xa2 {id, param, value}: 0 close, 1
+  pause, 2 reverb (voice switch 3 instead of 1), 3 vol L | R << 16, 4 pitch scale, 6 voice group (EE
+  default param 6, 0..2), 7 voice owner (| 0x2000000; EE param 7); 0xa4 {u16 id, u16 channel, param, -,
+  value}: 3 vol, 5 voice. Tick 0xb1dc: apply 0xa140, reap closed 0xb250 (DmaCancelArg, release voices,
+  channels back), update 0xa3ec (end: m_end and a voice's ENVX 0 -> ended, pos -1; paused -> release;
+  playing -> follow 0xa63c: (NAX of the first channel - its SPU base) & ~0x3f counts played bytes, an
+  underrun releases the voices; else start 0xa7cc when spuFill - dmaPending >= need or the end has come:
+  VoiceAlloc(voiceWant, priority, 0, group on the first channel only, owner, done 0xb3c4), SSA = spu +
+  spuPlay with ADSR 0x8000 / 0x8026, LSAX = spu unless all the data left fits before the wrap, key on),
+  then feed 0xa9e0: IOP ring -> SPU buffer on DMA queue 0, runs that wrap neither ring, at most 0x400 a
+  stream a pass; the last channel in the list (channel 0) carries done 0xb480 (dmaPending -= size, a
+  leaf Ghidra folds into 0xb3c4). 0xad54 closes all (unreferenced). The opening movie's sound is stream
+  0x2f (stereo, 0x2000 + 0x2000 per channel, pitch 0x1000) opened at frame ~1750; with
+  ROSEPAN_RXSNDDRV=1 it keys on with 0x7c0 bytes buffered and plays 0x6b24 bytes a second, no underrun.
+- **PCM streams 0xb0..0xb3** (`src/iop/rxsnddrv/pcm.cpp`, 2026-10-30): 0x20 slots of 0x6c at 0x34ed0,
+  open list 0x35c50, 0x100 sequence nodes of 0xc at 0x35c54 (free 0x36854), core 1's input ring 0x2000 at
+  0x36858 (two 0x1000 halves, each 4 blocks of 0x100 L + 0x100 R samples; sceSdBlockTrans(1, LOOP),
+  BVOLL/R 0x7fff), next half 0x38858, 4 mixers of 0x44 at 0x38860 {fn, 3 x {slot, srcL, srcR, s16 vol
+  L/R, xor}, count}. Slot {next, format (0 mono 0x800 blocks, 1 L/R planes, 2 pairs, 3 pairs xored),
+  id, flags (1 used, 2 playing, 4 ended, 8 paused, 0x10000 active, 0x20000 closed, 0x40000 end sent),
+  iop, blocks, written, read, filled, seq list head, tag[2] per half, vol L/R 0x80, xor, playSeq,
+  playPos, lastSeq, pending[2] {mask 1 open / 2 close / 4 pause / 8 xor / 0x10 vol / 0x20 end, pause,
+  xor, vol}}. 0xb0 {u8 id, u8 format, -, iop, blocks}; 0xb1 {u8 id, u8 count, -, seq[count]}; 0xb2
+  {id, param, value}: 0 close, 1 pause (0 off, 1..2 on), 2 xor (L ^ high half, R ^ low), 4 vol, 5 end;
+  0xb3 12 bytes per open slot {id, flags, s16 filled, playSeq, playPos}. Tick 0xb5ac: apply, reap, read
+  the ring position (half = pos >> 12), and when the SPU changed half mix every active unpaused slot
+  with filled > 0 into the other: volume via the curve 0xe2e0 (v * |v| / 4, 0x1000 unity), the oldest
+  seq becomes that half's tag, a mixer runs as soon as it holds 3 streams, then the rest; mono output
+  (sys output mode 0) averages L/R (0xce18). 0xc8f4 closes all and stops the ring (unreferenced). The
+  movie player rxmpeg can choose PCM (rxSndPcmWrite) or ADPCM; the opening movie uses ADPCM, so no
+  smoke run has opened a PCM stream yet.
 
 ## Disc and data files
 
@@ -134,10 +2692,965 @@ Paths the ELF names (the disc dump has not been looked at yet: `ROSEPAN_DATA`):
 - Debug data: `host0:main.ee.elf`, `data/seq/DBGITEM.BIN`, `data/seq/w%03d/DBGFLAG.BIN` / `DBGAREA.BIN` /
   `DBGSTEP.BIN`.
 - Movies: 41 `.PSS` names (`CP_LOGO.PSS`, `mov/MV00_OPE.PSS` .. `mov/MV05_*.PSS`, `DEATH_B.PSS`, ...).
+- `DATA/CMNTEX/LOADING.BIN` (66,784 bytes) is raw GS data, not TIM2: 256x256 PSMT8 pixels (0x10000,
+  uploaded to dbp 0x1a40) then a 16x16 CT32 palette (CSM1 order; dbp 8000), then 0xe0 zero bytes. The
+  picture holds four 256x64 "Now Loading" frames with a girl icon; 0x204e98 picks frame n by V = n / 4.
+  Reference PNG: decode it as above into work/ref/LOADING/ (the 2026-10-22 main session did it inline).
+  `SysNowLoading` (system/sysnowloading.cpp 0x204d38..0x2053f4): init 0x2052ac allocates the image
+  (line 304) and packet (305), GIF channel, `sceGsSetDefDBuff(this, CT32, 512, 448, GEQUAL, Z16S,
+  clear)` with clear Q 1.0, makePacket(0), clearVram 0x2050e8 (sixteen 256 KB CT32 uploads of zeros:
+  all 4 MB of GS memory), loadImage 0x204d38, RCNT0 mode 0x83. draw 0x2051cc (per V-blank, from
+  0x1be564 only): uploadImage 0x205078, SyncV, half offset, swap, DMA the packet, frame++, every 8
+  frames makePacket((frame / 8) % 4). The sprite: GS (0x8200, 0x8980)..(0x8e00, 0x8c80) = frame
+  (288, 376)..(480, 424) of the 512x448 buffer, ST (0, n/4)..(1, (n+1)/4), DECAL, bilinear, ABE 0.
 - Textures are TIM2 (`utl/utltm2.cpp`; names such as loading.tm2, option.tm2, texmoji.tm2, map01_tcc.tm2,
   `%s_%02d.tm2`): `tm2png.py` converts them, `--scan` carves them out of archives.
 
 ## PC platform layer
 
-Not created yet: host task `setup/platform_bootstrap.cpp` copies ReiPan's (`src/reipan` ->
-`src/rosepan`, `src/sdk`) and records its shape here.
+**Requirement: any aspect ratio** (the user, 2026-10-28). The PC port must display correctly at any
+aspect ratio, taking it from the window's dimensions or the renderer's output size -- never a fixed
+4:3 / 640x448 assumption in new host draw code (2D placement, 3D projections, render targets,
+screen-space effects). A future feature will let the player set the aspect ratio by hand, so read it
+from one renderer-owned source rather than recomputing it per module.
+How it works (2026-10-28, host task `fix/aspect_ratio.cpp`; the machinery is ReiPan's renderer):
+- **The one source**: the renderer's aspect mode (`ROSEPAN_ASPECT` auto | original | 4:3 | 16:9 |
+  16:10 | w:h, `RosePan_RendererSetAspectMode`, default AUTO = the window's shape) gives the *view
+  extend* each BeginFrame (`RosePan_RendererGetViewExtend`: 1.33 x on 16:9, 1.0 on 4:3). A fixed mode
+  on a window of another shape bars the difference.
+- **The frame is shown at 4:3** (2026-10-29): the PS2 put its 640x448 frame (RoR's 512x448) on a 4:3
+  set, so a frame unit is `kFramePixelAspect` (0.933) as wide as it is tall; ComputeViewExtend,
+  "original" (= 4:3), the fallbacks and the scene target's fit use `kFrameDisplayAspect`, never
+  640 / 448 (which showed everything about 7% too wide). The ROM's projection fills the frame
+  (i3rHostCamera), so the 3D is right once the frame is; the cinemascope band is then exactly 16:9.
+- **2D**: every 2D entry point takes coordinates in the renderer's frame
+  (`RosePan_RendererGetFrameSize`, 640x448); the renderer shrinks them about the centre by the
+  extend (`ApplyOriginalAspectToVertices`, the scissor with them), so overlays keep their shape,
+  centred, and only full-frame solid fills (`IsFullFrameQuad`) reach the window edges. Host modules
+  map the game's frame onto that size: rosepan_i3d (RoR's 512 columns -> its width, the scissor,
+  movie quads) and rosepan_draw2d read it from the renderer, no 640 / 448 constants.
+- **3D**: a host camera's projection is built for the frame and widened by
+  `RosePan_RendererWidenProjection` (clip x / extend x, clip y / extend y): more world on a wider
+  window, never stretched. rosepan_i3d's REC_CAMERA replay widens every display camera (i3rHostCamera's
+  and the mesh test's); a camera recorded in an off-screen pass (XYOFFSET 0: the shadow target's
+  light camera) is left alone.
+- **Cinemascope** (2026-10-29): the events' black bars are the ROM's S2dCineSco sprites (frame lines
+  0..64 and 400..448, faded by script op 033 cases 6 / 7), which leave a band that is 16:9 on the
+  PS2's 4:3 picture -- a wide set shows it zoomed. S2dCineSco::render reports the band (each bar's
+  height times its opacity) with `RosePan_RendererSetPictureBand`; on a window wider than the frame
+  the renderer zooms 2D and 3D alike toward it (ComputeViewExtend: fully from 16:9, the window
+  centred on the band, so the extends drop below 1 and `g_view_offset_y` moves the centre), and
+  every frame <-> window mapping goes through ExtendFrameX / ExtendFrameY / ViewOffsetClipY. At the
+  frame's shape or narrower the bars show as on the PS2, and DrawSolidQuad grows them past the
+  frame edge to the window's (ExtendLetterboxBar: a full-width solid fill touching the top or bottom
+  edge while a band is set), so the world the 3D extends above / below the frame stays black; BeginFrame resets the band.
+  The scripts' choice lists (MnuTextList, native 026 op 2) are the one prompt past that zoom: all 138
+  sit at y 395, x 167 (two choices) or 96 (three), a row on the lower bar right under the 320..400
+  message box. The list asks for its row with `s2dCineScoKeepLine` every frame it shows, and the
+  band's bottom eases out to it and back, 2 lines a frame (line 421: the view shows 64..421), so the
+  row keeps the PS2's place on the bar. Surveyed over DATA/SEQ 2026-11-05 (native n is the word
+  `0x0c100000 | (0x144 + n * 0x40) >> 2`): every message window and sprite a script places is inside
+  64..400, and only one menu opens with the bars on (W008/A137, id 0x40076, MnuBoard2D: a picture
+  with no text). To see it: a card save reloads beside its Bucket Knight; with
+  `ROSEPAN_SKIP_INTRO=1`, pad `300:START,600:START,1000:DOWN,1100:CROSS,1700:CROSS,2000:CROSS`
+  shows "Save your game?" from about frame 2130 (pad reads run ~105 behind frames after the load),
+  `2150:RIGHT*6` moves to No and `2300:CROSS` answers.
+- Still 4:3-bound (pillarboxed, not stretched): VU1 strips (rosepan_i3d DrawStrip: screen-space XY
+  the ROM's VU1 program projected) and textured full-frame sprites (pictures, frame copies, the
+  movie). A new screen-space draw must say which of the two it wants.
+
+Created 2026-10-22 (host task `setup/platform_bootstrap.cpp`) from ReiPan's, renamed ReiPan -> RosePan
+throughout (identifiers, env variables, files, shader macros):
+- `src/sdk/` -- the PS2 SDK on the host: libgraph (V-blank pacing, `sceGsResetGraph` picks 50/60 Hz),
+  libdma / libvif / libvu0 (`vu0_lib.cpp`, `vu0_intrin.h`), libpad (+ `ROSEPAN_AUTOPAD`), libpad2 + libvib
+  (`libpad2.cpp`: a socket is a port; port 0 reads through libpad's shim minus its 2-byte header, so
+  the scripted smoke pad reaches BedPad; port 1 is never linked; vibration state re-sent each read), libmc,
+  libcdvd, libmpeg (+ FFmpeg), libsd / libsdr, sif / sifrpc / sifdev / fileio, eekernel threads and
+  semaphores, the host IOP (`iop_host`, `iop_sif`, `iop_libsd`, `iop_voice`, `iop_reverb`) and
+  `pc_prefix.h` (force-included EE base types).
+- `src/rosepan/` -- `os/` (host main thread vs game thread `RosePanGame`, pacing, time, rand),
+  `io/` (log, paths, input, file, movie stream), `gs/` (GS memory and registers), `rendering/`
+  (SDL3 GPU renderer: 2D GS primitives, the 3D mesh path, present, screenshots via
+  `ROSEPAN_SHOT_DIR` / `ROSEPAN_SHOT_EVERY`; video planes), `rosepan_ui/` (ImGui: the Settings and
+  Debug menus; the controls, data folder and profiler windows), config (`rosepan.ini` in
+  `%APPDATA%/Mikompilation/RosePan/`), memory (emulated EE RAM), profiler.
+- `src/common/rosepan_stub.h` -- `ROSEPAN_STUB` / `ROSEPAN_BRIDGE`.
+- `src/main.cpp` -- RoR's main file (2026-10-22): the process `main(argc, argv)` opens the log and runs
+  `GameMain` on the game thread (`RosePan_HostMain`); GameMain builds argv with argv[0] =
+  "cdrom0:\SLUS_214.48;1" plus the host's own arguments (so `-m N` picks the boot stage) and calls
+  `mainGame` (the ROM's main). PC deviations there: boot path "host0:" and file device -1 (the boot
+  device, HOST) instead of "cdrom0:" / 1; `mainLoop` brackets each frame with
+  `RosePan_RendererBeginFrame` / `EndFrame`; MagSystem::update paces the loop on its V-blank
+  semaphore (30 fps). The renderer opens the window lazily on the first BeginFrame; a frame
+  with no draws presents black.
+- **The draw path is native, not GS emulation** (the user's rule, 2026-10-22). Feeding the game's GIF /
+  DMA packets to the emulated GS (`rosepan/gs/`, the 2D GS-primitive path) costs too much per frame, so
+  RoR's drawing is built so it never needs it. The design, grown TU by TU on the draw path:
+  - **Keep RoR's decisions, replace its output.** The game code that decides what is drawn (which
+    sprites / models / layers, positions, colours, fades, sort keys, blend and test modes, texture
+    choice) is reconstructed as the ROM has it. The last step -- writing GIF tags and GS registers
+    into a packet -- becomes a call into a host draw module under `src/rosepan/rendering/` (one per
+    RoR subsystem: e.g. `rosepan_draw2d.*` for SprMan / the now-loading sprites / fonts,
+    `rosepan_i3d.*` for the i3d layers and meshes), marked `// PC:` with the ROM function it
+    replaces. Prefer batches (one call per layer / sprite list / mesh), not one per primitive.
+  - **Layers and order stay RoR's.** The i3d context's layers, groups and sort lists decide the
+    order; the host module records draws per layer and submits them in that order at the frame end,
+    so priorities and transparency sort as on the PS2.
+  - **Textures live on the GPU, keyed by their owner.** A texture becomes a GPU texture when RoR
+    loads or registers it (DogTexInfo / i3d texture records, SprTexture), cached by that record and
+    released with it -- not uploaded into emulated GS VRAM and decoded back per draw. The i3d VRAM
+    allocator (`i3d/i3dvram.cpp`) stays written for parity and bookkeeping; its transfers become
+    no-ops or cache updates on the host.
+  - **Packet builders that only feed the GS** are written only as far as they carry decisions;
+    pure packet assembly (GIF tags, register pairs, DMA chaining) is not reconstructed for the
+    host path -- say so in a `// PC:` comment with the ROM address, and callcheck explanation.
+  - The renderer's existing direct entry points are the starting set: `RosePan_RendererDrawTexturedQuad*`
+    / `DrawFontQuad` (2D), `BeginMeshStream` / `AppendMeshTriangle` / `CommitMeshStream` and the
+    resident meshes (3D, MioPan's "Renderer architecture": decode a model once, draw slices). Extend
+    them (sprite batches, per-layer queues, texture handles instead of `sceGsTex0`) as RoR needs.
+  - **`src/rosepan/rendering/rosepan_draw2d.*`** (2026-10-22, first user SysNowLoading): the 2D
+    module. `RosePan_Draw2dMakeT8Texture` decodes PSMT8 + CT32 CLUT (CSM1 swizzle, `opaque` for ABE 0)
+    into a GPU texture through the renderer's `RosePan_RendererCreateImageTexture` (content-hashed,
+    salted, in the texture cache for the session; no release yet); `RosePan_Draw2dSprite` draws a
+    `RosePanSprite2d` (frame-buffer pixels + normalised ST, as RoR decided them) through
+    `RosePan_RendererDrawImageQuad`, stretching RoR's 512-wide frame buffer to the renderer's 640x448
+    frame (the PS2 display stretches 512 to the full width). A draw outside `mainLoop` (the loading
+    screen inside the loads) brackets itself with `RosePan_RendererBeginFrame` / `EndFrame`.
+  - **`src/rosepan/rendering/rosepan_i3d.*`** (2026-10-22): the i3d module. The 2D writers record host
+    primitives by packet address; the chain walk (i3dCtxRunGroup and the state / channel packet
+    nodes) replays each linked range, so layer / draw-set / sort-key order is the ROM's; GS state
+    (ALPHA, TEST, SCISSOR, XYOFFSET, the TEX packet) is followed as the GS holds it, default draw
+    offset (1792, 1824) for the 512x448 frame, x stretched 640/512. Textures: i3dTexRegsSet's objects,
+    decoded from main memory on first use. `ROSEPAN_I3D_TEST=1` (MagSystem::update, PC) draws two
+    S2DMAN.RPK pictures through i3dTexSetTim2 / a texture table / a layer / a draw set /
+    i3dPktTexSpriteUV. Details and gaps: open-items.md Decisions "The native i3d hook".
+  - **The mesh path** (`rosepan_i3dmesh.*`, 2026-10-27, setup/i3d_mesh_draw.cpp): an i3r model
+    draw is a record like a 2D primitive (`RosePan_I3dRecordModel(at, root, world, nodes, tex,
+    n)`, the camera before it `RosePan_I3dRecordCamera`: renderer row-major view + reverse-Z
+    projection) and replays through the renderer's mesh stream. It walks i3rDrawModel 0x21fe68's
+    tree and unpacks each mesh block into a host VU1 memory as VIF1 would (STCYCL / STMASK /
+    STROW / STCOL / UNPACK with mask and fill), then reads the strips from there; the CPU skinning
+    of 0x225670 is redone on the host. `ROSEPAN_I3D_MESH_TEST=1` (MagSystem::update) draws
+    CHARA.RPK CHAP01's first model (amd.mdl, Amanda) with a turning camera: textured, skinned,
+    depth-tested, right side up (progress/ screenshot of 2026-10-27).
+  - **Mesh lighting and fog** (2026-10-30, branch render-lighting): VU1 microprogram 1 (data
+    0x2912b0, `vudis.py 2912b0 354 --all`; command words are micro addresses) lights per normal into
+    an accumulator at VU 0x2cc+i, cleared per layer by micro 0x15e (i3rPktLayerState's marker word);
+    the light lists add into it: shade 1 parallel 0x39 `c max(0, n.d)`, point 0xc8 `c max(0, n.L) /
+    |L|^2` (L to the light, unnormalised: falloff 1 / d; MagScene::loadLight premultiplies the colour
+    by the file's intensity); shade 2 parallel 0x66 `c max(0, P(n.h))` (h from i3rPktLayerLights),
+    point 0x108 `c max(0, P(n.h)) / |L|`, h = normalize(L / |L| + eye dir), P(x) = s0 x + s1 x^2 +
+    s2 x^4 + s3 x^8 with the layer's m_specular. Normals go through the batch matrix rows (VU
+    0x3da..0x3dc) unnormalised; point lights are moved into model space (0x3d6..0x3d9). The strip
+    program 0x3fc then gives each vertex strip colour x (accumulator + ambient 0x3f6) x colour scale
+    0x3f5 (128 textured, 255 not), max 0 / MINI I, ftoi0, on all four components: vertex alpha =
+    strip colour w x (accumulator w + ambient w) x 128 (the scale's w is 128 on every layer, the
+    host's 1.0), and PRIM always has ABE. Translucency lives in the strip colours, usually as
+    STMASK fills (0x6a6a6a6a: x y z from COL 1.0, w from ROW 0, so white at alpha 0): the
+    butterfly cases' `sortOn__glass` quads (specimen.mdl, specimenamd.mdl, buttbox.mdl) are alpha
+    0, so they show nothing, and only about 20 materials in the game are not 1.0 (o1ba_water 0.5,
+    o1ba_glass_tcc 0.74, amda09 0.3). Ambient: shade 0 = 1, m_ambient 0 = black (w 1),
+    else the light's (createLight sets w 1; makeActorShadow's w 0). Fog (same program): F = clamp(base + scale x Q, 0, 255), Q = 1 / clip w, from
+    the ramp at 0x3f8 (i3dCtxSetFog's I3dFogState). The host does the sums on the CPU per strip
+    vertex in world space (rosepan_i3dmesh.cpp LayerLight / LightVertex) from the light set the
+    mesh record copies (i3rHostFile passes I3rMeshPacket m_light / m_view->m_eye_dir / m_fog), and
+    sets the renderer's fog per mesh draw (RosePan_RendererSetFog, now snapshotted per draw in
+    ApplyGsDrawEnv instead of read once at submit). Shade 2 spots and kind 3 / kind 4 lights (only the shadow
+    layers' sets) are not evaluated. The bus stop (smoke pad frame ~6600..10500): set 1 = ambient
+    (0.199, 0.329, 0.353), one parallel light dir (0.148, -0.965, -0.217) colour (0.235, 0.314,
+    0.392), one point light (the street lamp, colour x intensity ~(188, 186, 158)); fog F = -63.75 +
+    255000 / w (clear to 800, full at 4000), FOGCOL (8, 12, 16). Every layer drawn there is shade 1
+    with m_ambient set at matrix scale 1; shade 2 is unexercised. The user checked the lit picture
+    against an emulator: matches (the old fixed light gave a neutral grey).
+  - **Depth state** (2026-10-30, fix/effect-zdepth): RoR keeps translucent things out of the Z
+    buffer through TEST, not ZBUF: ATST NEVER with AFAIL FB_ONLY / RGB_ONLY draws colour without Z
+    (effects' TEST 0x51001 / 0x31001, SprMan's colour sprites, i3r layers with m_fail_only 0x10 /
+    0x18), and its i3r cut-outs write TEST 0x5140d (alpha GREATER 0, FB_ONLY: a clear texel leaves Z
+    alone). The renderer reads both from TEST (RosePan_RendererSetGsTestRegister): NEVER + FB_ONLY
+    turns the depth write off, any other test + FB_ONLY draws twice (the test as KEEP, then the
+    inverse comparison without Z write). The replay feeds TEST and ZBUF_1 (ZMSK) to every 2D / VU1
+    draw and ZBUF to the meshes; putDrawEnv records the env's ZBUF. Untextured VU1 strips carry
+    their depth. GIF primitives (DrawPrim) still draw without depth: RoR's are 2D (UI, fades), its
+    effects go through the VU1 writers. Shadow receivers (file 2) are pulled 4 Z16 steps toward
+    the eye in shadow_receiver.vert: the PS2's 16-bit Z let a receiver on the floor pass GEQUAL.
+  - The emulated GS path remains only as a fallback for something not bridged yet; anything that
+    lands there is a known performance debt to list in open-items.md.
+- Data root: the disc's root copied file by file (the folder holding `DATA/`); `LooksLikeDataRoot`
+  checks `DATA/CMNTEX`. `RosePan_PathResolveData` still carries FF3's "../bin/data" spellings; the RoR
+  file TU decides how `cdrom0:\DATA\...` and relative `data/...` names map onto it.
+- Removed as FF3-only: `debug/reipan_warp.*` (chapter warps / snapshots), `rendering/reipan_graph3d.*`
+  (FF3 SGD model glue; `g_dbg_flatcolor` / `g_dbg_nolighting` now live in the renderer),
+  `io/reipan_fileload.*` (IMG_BD.BIN + CMP decoder), the UI's warp window and FF3 light-cone menu, the
+  IOP boot's call into FF3's iopsys.irx `start()`. Still FF3-shaped but harmless until a TU reaches
+  them: see open-items.md "Platform bootstrap".
+
+## The sequence script VM (sequence/seqvm.cpp, 2026-10-25)
+
+- **Script files**: DATA/SEQ/G000.GRB (system) and W<stage>/W<n>.WRD (stage) are RTPK packs; the
+  script image is the file starting "ELFR101" (G000: file 4 of 6, 0x118c0 bytes; the others are
+  "UNQ_" tables, two XVAB sound banks, "cursor_m...", "M00"). Image header: +0xc / +0x14 / +0x18
+  sizes (+0xc may be negative), +0x10 the gp area's link address, +0x1c, +0x20, +0x24 (link
+  addresses 0x41xxxx / 0x45xxxx), code at +0x30 linked at script address 0x8160. Data = image +
+  [+0x14]; the global variables / bitset pointers go in the words at data + [+0x18] - 0x20 / - 0x10
+  (the scripts read them gp-relative). gp = image + [+0xc] + [+0x14] + [+0x18] + 0x8000, sp = gp +
+  0x780: the 0x780 bytes above gp are the stack, saved per thread.
+- **Decoding** (seqVmRun 0x214c24): word 0x0c102031 ends the thread; opcode 0 -> SPECIAL table data
+  0x2d9a58 (0x2c entries, funct 0x2c.. falls into the COP1 table), else the primary table data
+  0x2d9958 with (rs, rt, imm16, word); COP1 0x210d3c dispatches fmt S / W through data 0x2d9b08 with
+  (fs, ft, fd, fmt), handles mfc1 / mtc1 / bc1f / bc1t and 0x45800000 (end). Registers bss 0x7b4700
+  (32), FPU 0x7b4680, pc 0x7b4780, hi / lo 0x7b4790 / 0x7b47a0, the taken jump 0x7b47b0, the delayed
+  branch 0x7b47c0 (| 0x80000000, moved to 0x7b47b0 after the delay slot), per-image state bss
+  0x7b4850 (3 x 0x30), per-image registers data 0x2d9c08 (3 x 0x80).
+- **Script semantics** (the compiler's, not MIPS): all loads / stores are words (lb / lbu offset * 4,
+  lwl / swl / swr odd), lui 0x41 / 0x45 load the image's relocated data base (0x42 / 0x46 + 0x10000),
+  jal keeps 16 bits of target (targets < 0x8160 are native calls (t - 0x144) / 0x40), mthi / mtlo read
+  rd, mult / multu unsigned, div / divu signed, every MMI word is rd = rs * rt, the unary FPU ops read
+  ft, a branch to 0 ends the thread (a thread's first ra is 0, so its entry function's return ends it).
+- **Threads**: a record (0xb0) keeps flags, id, pc, call save slot +0xc, name +0x10, wait count +0x1c
+  (Sequence::waitFrames 0x211318), area +0x20, arg +0x28, registers +0x2c, a 2 KB stack slot +0xac
+  (seqVmAllocStack 0x2149a8: 32 slots in a 0x10000 block, cursor data 0x2d9950). A native's
+  SEQ_RET_WAIT / YIELD / JUMP saves the registers and the stack (seqVmSaveThread 0x2147e0) and the run
+  returns the pc to continue at; seqVmLoadThread restores them next frame. Sequence::execThread
+  0x2113dc runs a thread at once in the record at Sequence +0xdc30 (flag 0x100), around the caller's
+  registers; GamArea::checkPc calls it. Thread names: "mst" (startThread), "trg", "imdy", "single".
+- **Native 151 0x209d4c, object control** (jump table data 0x300eb0, 58 cases; the first native a New
+  Game press reaches): t1 is the oid (nothing unless GamMan::isObj), a0 the operation: 1 / 6 setObjPos,
+  2 setObjRot, 3 setObjScale (a1's bits are the float), 5 setObjDir, 10 / 11 set / addObjParam, 12 / 13
+  setObj / resetObj, 15..17 GamSysData setField / set- / clearFlags(2) on record t1, 18 / 19 object
+  attribute bits, 20 placeObjAt, 25 / 26 setKindFlags on record a1, 30 / 31 object work words (+0x1b0),
+  40 bit 1, 41 actor bind bits, 50..54 the shape param 0x18 (GamObjColli: m_shape 0 none / 1 17 / 2 25 /
+  3 45 / 4 m_radius), 53 a rotated box -> corners param 0x1003, 55..57 private collisions (segment, box,
+  quad). Objects' getters / setters dispatch on the oid's list (bits 28..29: 1 achr, 0 vfchr, 2 fchr).
+- **Native 152 0x20a368, object queries** (table data 0x300fa0, 51 cases; nothing unless t1 is live,
+  except 0x19 / 0x1a on system record t1): 1 / 2 / 3 the actor's m_trans / m_rotate / m_scale into a1
+  (3 indexes the scene actors by t1 itself, a ROM slip), 0x14 getObjParam(t1, a1, a2), 0x15
+  testObjFlags 0x1d1720 (ObjStat +0x120), 0x16 testAchrFlag 0x1d17c8 (word bits >> 24 of +0x3ec), 0x19
+  getField, 0x1a testFlags / testFlags94 0x1dd194 (table 2 +0x94), 0x1e getObjWork 0x1d217c, 0x28..0x2a
+  utlAddPolar 0x1f6b28 from the translation (angle = its y + pi wrapped in double, a ROM slip for the
+  rotation?) into a1 with w 1, 0x2b / 0x2c attachObj / detachObj 0x1d1a5c / 0x1d1bec
+  (MagSystem::setActorParent to a named node), 0x32 Sequence::hasThreadNamed.
+- **Native 155 0x20a7d0, vfchr objects** (table data 0x301090, 24 cases): 1 FCHRstat::setParam 0x1db520
+  (getParam's counterpart) on vfchr t1, 2..5 addVFchr unless it exists (4 / 5 from a system record's
+  model field 0xf / name field 0xb; when the vfchr's room is the current one, getStatus 5 = +0x21f7c,
+  loadVFchrModel 0x1caa14 / loadVFchrModelByName 0x1cabd4 load it; 4 skips oids in the +0x1f240 list
+  and rooms no object record names), 10 releaseVFchrs 0x1cea44, 11 releaseVFchr, 20 / 21 / 22 GamMan's
+  inlines cnvPosL2W / cnvPosW2L / getWrdOffset (0x28f300..) over gamWrdConvPos 0x1dba3c (the WRD
+  table's room converters 0x17ebac / 0x17eb3c with the room +0x21f7c; this = GamMan+0x18c00 unused),
+  23 hasVFchrParam(2, a1) 0x1d2d7c.
+- **Natives 006 / 106 / 200 and 281's helpers** (session 8, 2026-10-26): 006 messages (jump table data
+  0x2ff980, cases 1..0x15): 1 / 2 / 5 GamMan::openMsg 0x1cf854 (restarts the 0x9c0-byte message task on
+  m_msgTaskId +0x222a0 with text, arg, m_msgParam, 1, m_msgMode +0x225d8, time 0xb4 or a2; 1 first cuts
+  the text at 0x1fe), 3 openSysMsg 0x1cfa5c (openSysMsgWindow into +0x2227c), 4 m_msgMode = a1, 10 / 11
+  showMsgSprite 0x1cf6bc (S2dMes sprite 3), 0x14 m_flags2 |= 0x80000 and a TskFrameFunc kind 0x15 on
+  m_itemUseTaskId +0x222c0, 0x15 waits for it. 106: motion speed by the scene (1) or
+  ACHRstat::setMotionSpeed 0x1db1b8 (2, keeps it at +0x418). 200: achr turns over the TskChrRot task
+  (ctor 0x1f0434) on ACHRstat::m_task[1] +0x3d8 -- chrRotStart 0x1f0e90 (angle, oid, frames; 0 stops),
+  chrRotTo 0x1f0f9c (heading at speed), chrRotToIn 0x1f10a4 (heading in frames), chrRotFrames 0x1f6b8c
+  |angle / (speed * 0.05233)|, GamMan::getObjDirTo 0x1cfb48 (heading between two objects via 0x217f10).
+  281 ops 200 / 201 go to seqSectorFlags 0x20de34 (sectorSetFlags 0x17c45c / sectorClearFlags 0x17c4f4
+  on the scene's sector.sec object +0x8542c); seqGetIdPair 0x20dea8 reads the 50 signed byte pairs at
+  data 0x3015e0.
+- **Native 020** (session 12, 2026-10-26): script math, jump table data 0x3004a0 (62 words; Ghidra
+  cannot recover it, read the asm). 1..4 take an angle as float bits in a1 and store to a2 (1 / 2 sin /
+  cos of degrees in double with pi and 180 from data 0x300598); the rest store to the float or vector
+  at a1 from a2, a3, t0: 5 atan2f, 10..13 + - / *, 20 float -> int (trunc), 21 int -> float, 30
+  sqrtf(a2 + a3), 50 a2 + a3 turned about Y by the angle at t0, 51..57 VU0 add / sub / normalize / dot
+  (into a1's x, from a1 and a2) / cross / length / scale-xyz, 58 copy, 59 build {a2, a3, t0, 0}, 60
+  fmodf(x, 0x40c90fda), 61 random unit vector (rand - 0x4e7fffff each axis). Library: sceVu0AddVector
+  0x25b878, sceVu0SubVector 0x25b890, newlib wrappers atan2f 0x26cb00, fmodf 0x26cb18, sqrtf 0x26cb48.
+- **Native 252** (session 13, 2026-10-26): sound, jump table data 0x301280 (201 words, 67 handlers,
+  131 entries return 0); all into GamSndMan (GamMan +0x18e00), args a1 the SE / stream id or a name.
+  1 / 2 funcSnd 0xd, 6 / 7 0xe / 0xf (master volumes), 4 / 5 0x11 / 0x12, 42..44 0x1c..0x1e, 47 0x19 with
+  atoi of a1's first two characters, 8 setReverb, 3 sets GamSndMan +0 (the 3D centre mode); SEs 10..32
+  (10 / 12 / 13 / 14 play only while no movie task runs on GamMan m_movieTaskId), streams 52..92, 48 /
+  100 / 101 / 102 the GamMan SE pack swaps 0x1c7500 / 0x1c75bc / 0x1c766c / 0x1c76cc, 200 a stream
+  started with flag 0x100 then looped. 25 / 28 / 52 / 68 / 70 / 80 / 90 / 91 return the callee's value,
+  81 / 82 wait until / while funcStr(0x16) (a stream plays). **GamSndMan's method names** come from
+  GamMan's inline forwarders (ELF symbols 0x28e7a8..0x28ee48: this + 0x18e00, some add a trailing 0 in
+  t0 / t2): unpush_snd 0x1e1620, put/del_se_3d_pos(_chr) 0x1e239c / 0x1e2704 / 0x1e2aa0 / 0x1e2c40,
+  put/del_str_3d_pos(_chr) 0x1e2db4 / 0x1e3138 / 0x1e34ec / 0x1e3698, loadSePack(char*, int) 0x1e4540,
+  getStrNO 0x1e4ab8, setReverb 0x1e4cc4, get_se_oid 0x1e4d04, playSE 0x1e4ebc / 0x1e50c8, playStr
+  0x1e5250 / 0x1e5428, set_str/se_3d_snd_prm 0x1e5540 / 0x1e5de4, funcStr 0x1e5660, getStrNoByChan
+  0x1e5be0, funcSE 0x1e5e58 (a switch over the 0x30 SE records at +0xd40, 0x28 bytes: 1 / 8 stop, 2 / 3
+  / 5 / 0xb setSe, 4 loop, 0x13 / 0x14 / 0x15 a TskSnd(0, arg) over a TskSndParam whose words 3, 8, 9
+  it fills (task ids +0x1710 / +0x1714), 0x16 returns 1 when the SE plays), isPlayEnvStr 0x1e6cac.
+  GamMan::getWrdNo 0x1c6c28 is the inline read of +0x21f7c (m_wrdNo); loadChapterSe 0x1c2848 reads
+  data/snd/xv/32NN.se by chapter.
+- **Natives 100 / 212** (session 11, 2026-10-26): 100 actor motions (table data 0x300c90, 33 entries;
+  a2 motion or name, a3 p1d8, t0 -> float speed, t1 bit 1 -> flag 0x100). The achr's motion task lives
+  on ACHRstat m_task[2] +0x3dc: chrKillMotionTask 0x1f61ec kills it; chrMtnMove 0x1f59b4 / chrMtnMove2
+  0x1f5bdc replace it with a TskMtnMove (0xc0, ctor 0x1e7f28, vtable 0x2e4910) / TskMtnMove2 (0x100,
+  ctor 0x1e8fc4, vtable 0x2e48d0); chrSetMotion 0x1f6308 is MagScene::changeActorMotion keeping the
+  heading; chrChangeMotionBySuffix 0x1f5d90 uses DogActor::getMotionNoBySuffix 0x10aa5c (record word
+  +0x14 of findMotionBySuffix 0x10a8b8: the name after its first '_', any case). GamMan::getObjRotY
+  0x1d0758 -> DogActor::getRotY 0x10a650. DogActor::getMotionLength 0x10d0e8 and
+  MagScene::getActorMotionLength 0x1333e4 return a float (f0; the i3m root's float +0x18 via 0x22e958).
+  212 enemies (table 0x3011b0, 51 entries) on g_emyManager: findEmy 0x1636a4 scans 64 enemy pointers at
+  +4 (first word = oid); 8 EmyGroup records of 0x3c at +0x148 (case 24 is the inline SetGrpMotion); GamMan::switchEnemies 0x1c5a5c (case 50).
+- **Natives 253 / 281** (session 10, 2026-10-26): 253 movies (table data 0x3015b0, 11 cases) on the
+  TskMovie task (0x80, ctor 0x1f438c, vtable 0x2e4c50: sound 0x1d, SndMan::stopAll(8), name at +0x10,
+  m_state +8 = 100, S2dMovie::playMovie) kept in GamMan::m_movieTaskId +0x222b4: 1 start (yields), 2 kill
+  + 5 frames, 3 listed?, 4 wait while gone from getTask but CmnTaskMan::findTask 0x1e79c0 still finds it
+  with state <= 100, 5 rxMpegGetFrameCount. 281 scene effects: 13 the focus (mag/magscenefocus.cpp:
+  setFocus 0x140b20, startLerp 0x140e60 fills a MagLerp {from, to, frame, frames}, setFocusLerp 0x140d94;
+  values +0x853c8[3], lerps +0x853fc[3]); 21 DogActor eye ops 0x10f70c / 73c / 7a0 / 808 on +0x480..0x494
+  (setEyeTex 0x10f5e4 finds the model node named "eye"); 38 / 0..49 via seqGetIdPair build a 0x80-byte
+  EffParam for EffMan::createEff 0x176cc8 (scene +0x837e0, the Eff* factory, 0x110 entries at +4) and
+  GamMan::addObjFx 0x1cba0c enters {oid, no} in pool +0x20b00 (findObjFx 0x1cbafc reads it back); 98
+  Eff0::setVisible 0x16aa04 (slot 10, shared by all 43 Eff classes); 100 / 101 ctlObj1cb8e4 / ctlObj1cbb80.
+- **Natives 016 / 023 / 026 / 156 / 202 / 211** (session 9, 2026-10-26): 016 the camera (table data
+  0x3001c0, 52 cases) on MagScene::m_camera_entity +0x2ab70: 1 / 2 set m_trans / m_rotate (+dirty), 3 / 4
+  read them, 5 / 6 DogCamera::setLensScale 0x10fc08 / getLensScale 0x10fbd4 (m_angle = s * m_144 *
+  0.901526), 7 MagScene::seekCameraPath 0x13d240 (unless GamMan flags 0x20000), 8 m_21f70 =
+  getActorNo(a1) (the actor camera mode 2 follows), 10 / 11 setCameraMode, 20 / 21 GamMan::pushCamera
+  0x1c5ffc / popCamera 0x1c621c (a 3-deep stack of 0x30-byte records at +0x22470, count +0x22530), 50 /
+  51 a TskCamera (0xc0, ctor 0x1fbc0c) on m_camTaskId. 023 area triggers on GamMan::m_area: 1..5
+  GamArea::addTrg 0x1dd5e8 (a 0xb0-byte GamAreaTrg from the script image, flags |= 0x3000000, rect
+  corners ordered when flags & 0x103; 2..5 get a fresh oid makeOid(0, 0xd, image -1 / 0 / 1 / 2)), 10 startTrgs 0x1de4e4, 11
+  stopTrgs 0x1ddc80, 30 registFtb 0x1de6fc (key -> up to 8 values in the pool *(GamArea +0x18b40)). 026
+  a TskFrameFunc kind 8 over a1..t0 on m_frameTaskId (1) or m_selectTaskId (2). 156 ray tests via
+  MagScene::castRay(hit, p, q, 0): 1 p = a1, q = a2; 2 p = a1 - 10 y, q = p + (sin, cos)(*a2) * *a3 in
+  x / y; 3 from GamMan::getObjPos 0x1d05f4 + 10 y along getObjRot 0x1d06b8's y; returns 0 <= t <= 1,
+  copies 0x70 bytes of hit record out. 202 (table 0x301110, 26 cases) GamMan::moveAchr 0x1d2a14 (1 by a
+  vector, 2 by the float word a2 along the heading wrapped to -pi..pi in doubles) and TskMoveTypeGen
+  (0xc0, ctor 0x1e9a3c, vtable 0x2e4ad0) with mode 0..6 (+8 for achr flags 0x200000), rate 1/60
+  (0x3c888888). 211: TskMoveTypeRound 0x1eb63c, TskMovePointPath 0x1ec344, TskMoveSectaFindPath
+  0x1ec940, TskMoveSecta 0x1ed998 with script globals [13] kind, [14] rate x 10000, [15] mode shift; op
+  800 ACHRstat::killTasks 0x1da07c. Every movement task lives on ACHRstat::m_task[0] +0x3d4, killed first.
+- **Natives written 2026-10-26** (session 5): 007 a0 1 GamMan::setMsgParam 0x1cf7d0 (eight words over
+  +0x22280, the message window's 10, 10, 0xffff, 0x100, 0x100 ...); 009 a0 1 killMsgTask 0x1cf95c; 012
+  lights and fog (table data 0x2ff9e0, 501 entries, 63 cases): three runs over the same (light type,
+  which) pairs -- 1 / 0xa.. / 0x34 setLightParam(type, t1, which, a1, 0), 0x46..0x54 the same with
+  no = a2, 0x64..0x98 getLightParam -- 0x12c MagSystem::setActorLightID, 0x190 / 0x191 GamMan::pushFog /
+  popFog (a three-slot stack of I3dFog at +0x22540, m_color[0] -1 = free), 0x192 get the scene fog
+  (+0x2aae0), 0x193 set it or fade it over a2 frames (TskFrameFunc kind 0xc with the stack copy's
+  address), 0x194 / 0x195 the near / far pair, 0x3c a TskAttach task (vtable 0x2e4bd0, ctor 0x1f5244:
+  oid, its actor, arg, *value), 0xc8 scene +0x2aa84, 0xc9 setLightFlag, 0xca..0xcf GamMan::
+  saveLightSets / restoreLightSets 0x1d2494 / 0x1d25e4 (light set 0 <-> 7 under getSysFlg 0x8000000,
+  1 <-> 6 under 0x10000000, set 1 only while 0x4000000), 0x1f4 setSceneFlags(a1[0..5], 0); 014 a0 1
+  hides / shows the first sky slot's model (m_tenkyu[0].m_model[0].m_hide = a1 == 0); 019 pad 0
+  queries (table data 0x300290: m_hold bits, m_repeat bits, m_dir_repeat bits 4..7, the direction past
+  0.5, all-of-mask held / pressed, any held, the stick * 128); 028 releases (sky domes kind 2 / 3 / 0,
+  releaseChr, GamMan::releasePcMotion 0x1c4f70); 036 Sequence::getThreadArg; 038 object table records
+  through ctlObjParam (table data 0x300b00); 039 Brown: 'eqds' toggles flags2 0x4000000, 100 / 0x65
+  set / get the dog mode, the rest go to magBwnSeqCommand 0x144ae0 (a command switch on the scene's
+  MagLifeBwnCtrl, not written). **GamMan::setLightFlag 0x1d2724 takes (theD, theS)**: marks set theD in
+  getSysFlg (0 0x2000000, 1 0x4000000, 6 0x8000000, 7 0x10000000) and copies light set theS over it
+  (MagScene::copyLightSet 0x13fb3c, mag/magscenelight.cpp: asserts theD / theS < 8, theD != theS).
+
+## The scene's menus (mag/maglifemenu.cpp, 0x12cf3c..0x12d9c8, 2026-10-25)
+
+- **MagLifeMenuBase** (EE 0x40, abstract: no vtable of its own): +0x30 the scene (the asserts' m_scene;
+  host m_menu_scene), +0x34 m_type, +0x38 requestMenu's argument. Slots 9 init(DogTexInfo *), 10 term,
+  11 isInit, 12 processPad(BedPad *) (non-zero closes), 6 render(layer); getName (5) is 0 in all.
+- **Wrappers**: Item, Map, Stock, Save, Load, Title, Opt, Movie, Mcd, Now, SelLang, Board2D hold a
+  menu object at +0x40 and forward to it; init first copies the scene into the object (Mcd's does
+  not). The objects: MnuItem 0x1aeacc.., MnuMap (mnuBase) 0x194908.., MnuStock 0x19a650.., MnuSvld
+  (save and load, m_save +0x24e8 set by the wrappers' constructors) 0x1a5af4.., MnuOpt 0x1ab598..,
+  MnuMovie 0x1adfb0.., MnuTitle 0x1a91f4.. (contains an MnuMcd +0, MnuSvld +0x1400, MnuOpt +0x3b80,
+  SprMan +0x4df0), MnuMcd 0x1a134c.., MnuNow 0x1ae520.., MnuBoard2D 0x1ad824.., MnuSelectLanguage
+  0x1bdc00... Their EE sizes come from the scene's member spacing (+0x2be60..0x41850).
+- **mnuBase** (mnu/mnubase.cpp 0x192ac0..0x1947a4; vtable 0x2e4640, vptr +0x10c, EE 0x110): +0 type,
+  +4 flags (bit 0 = inited, mnuBase::isInit; 2, 0x10 = volume lowered, 0x40000), +8 scene, +0xc tex,
+  +0x10 -1, +0x14 step (-1 idle), +0x18 file list (MnuFile 0x30-byte rows {.., kind +8, arg +0xc,
+  name +0x10}; max +0x1c, count +0x20), +0x24 pack path (0x40), +0x64 the pack's first 0x1000 bytes,
+  FileReader +0x68, FileReadReq +0x70, slots: models +0x94 (0x20 each, count +0x98), motions +0x9c
+  (0x10, +0xa0), textures +0xa4 (0x10, +0xa8), draw set +0xac, packet +0xb0, camera matrix +0xc0,
+  view size at the far plane +0x100 / +0x104, saved view far +0x108. Slots 2 init, 3 term, 4 isInit,
+  5 processPad, 6 draw, 7 setDrawSet 0x193140, 8 getType, 9 getFlags, 10 openPack 0x1938a8, 11
+  closePack 0x193920. setupWork 0x192ba4 carves one mnuAlloc block; addFile 0x19397c queues a file.
+  **Written 2026-10-26 (all 38 functions).** File kinds (row +8 & 0xf): 1 i3r model -> model slot
+  {root, work block nodes*0xb2+2 = pose 0x30 + local 0x40 + model 0x40 matrices + u16 node map, size},
+  2 i3m motion -> motion slot {root, length*30}, 4 TIM2 -> texture slot {tm2, size, DogTexInfo
+  record, draw-set index}; bit 0x10 reads waiting. flags 4 = the head row is being read, 8 = drop it
+  when read. **updateLoad 0x193a1c is the loader the books' processPad polls** (finishes the head
+  row, pops it, starts the next read at the pack directory's offset). Draw helpers: pushCamera /
+  popCamera 0x192e94 / 0x192f3c (GamMan camera stack, scene camera reset, view far), beginDraw
+  0x192f68 / endDraw 0x1930f8 (layer set + a VU1 sprite packet: i3dPktBeginVu1Sprite 0x21e5a0,
+  i3dPktVu1Color / Matrix / Sprite 0x21e488 / 0x21e428 / 0x21e690, end 0x21e688), useTex 0x193210,
+  drawSprite 0x193258 (a 0x34-byte rect: pivot, size, uv +0x10, colour +0x20, angle +0x30; the books fixed the order), drawModel
+  0x19368c (i3m pose 0x22e960 -> matrices 0x22f7a0 -> i3rConvertLocalToModel -> utlDrawI3r).
+  **The mnu pool**: mnuInitPool 0x1944d0 allocates the 1 MB buffer (sdata 0x29bfb4, BedMemory heap
+  0x6e9800; MagScene::initRender): 128 blocks {address, size, flags: 1 valid, 2 in use} at its start,
+  the first covering +0x800..; mnuAlloc 0x194588 (best fit, 16-byte granules) / mnuFree 0x194688
+  (marks free, no merge) / mnuMergeFree 0x1946e4 (setupWork); mnuTermPool 0x194548. MnuMap, MnuPBook, MnuDiary
+  derive mnuBase (mnu/mnumap.cpp 0x1947a4.., mnu/mnupbook.cpp 0x196a9c..0x19a52c; MnuStock
+  0x19a52c..0x1a066c is not a mnuBase).
+- **MnuMap** (mnu/mnumap.cpp 0x1947a4..0x196a9c, written 2026-10-29, verify): the map screen
+  (MagLifeMenuMap, menu 0x10001). Pack data/mnurpk/mnumap.rpk: map01_tcc.tm2 (texture slot 0:
+  markers, area labels in 40-pixel rows, floor labels in 20-pixel rows, frame lines), map_bg_tcc.tm2
+  (slot 1, the 513 x 449 frame), the floor map as 128 x 512 strips `<name>_NN.tm2` (NN from 01) in
+  slots 2.. (queueStrips 0x195a34 keeps strips col-2..col+7 of the scroll column loaded). Map table
+  data 0x29bfb8 (0x20 rows {area, floor, name[0x10], strips, floor label}, area -1 ends; mansion area
+  0 floors 1..3 "map_al/au/am" 24 strips, area 2 "map_gu/g1", area 1 "map_ou/o1/o2/or" 4 strips): the
+  row matching GamMan::getMapArea and gamGetMapFloor (0 when the room's WRD word 0x18 is 0); none ->
+  flag 0x1000000 and a centred "N O     M A P" window. R1 / L1 step to the next / previous row of the
+  same area. Positions: open 0x1949bc takes GamMan m_pcPos (+0x22020) / m_dogPos (+0x22040) for
+  marker kinds 1 / 2 (gamGetMapMarkers only says who is there) through toMapPos 0x196878: rodata
+  0x2f7dc0 13 rows {worldW, worldH, mapW, mapH, x, y}: rows 0..2 the areas (the same numbers as
+  gamstat's 0x2fc748), in the attic (area 0, floor 3) rooms 0x63..0x6a rows 3..10, 0x33 row 11, 0x32
+  row 12. The view is 384 x 256 screen pixels at (64, 112), scale 0.5 (768 x 512 map pixels) or
+  1 after Square (18-frame cosine zoom); Triangle recentres on the PC (its own floor only); the
+  left stick or d-pad scrolls 16 px a frame; Circle / Select close. Brown's marker shows with
+  sequence bit 0x22 (m_bits[1] & 4). Help line: GamMan mes sprites 7, 6, 0xc, 10, 9, 4 at y 0x198
+  and system text 0x18.
+- **MnuPBook** (mnu/mnupbook.cpp, written 2026-10-27): processPad 0x1976b8 polls updateLoad and
+  updateSheets 0x197d28 every frame, then steps on m_step (m_10 = last step, draw runs for 2..4):
+  0 waits the base files (ehonbg / ehontex01_tcc from mnupbook.rpk) and the fade, closes that pack,
+  opens data/mnurpk/mnupbook/<row name>.rpk and queuePages 0x196efc; 1 startTurns 0x19722c
+  (pushCamera(512, pi/4), lowerVolume, poses the sheets) and fadeIn(15, 7, 0); 2 openWindows
+  0x1973fc (text window 512 x 256 at (0, 32), prompt window 64 x 32 at (246, 410) with sys text
+  0x1a, message sprite 4 at (220, 408)); 3 updatePad 0x197a74; 4 waits the fade out; 5 writes
+  global 0x11 = flag table column 2, global 0x65 = column 0 (+0x118), clears bit-word 1 bit 26, sets
+  bit 25 when GamMan::isSeqPair0Pending 0x1d44e4, clears the column-6 bit, popCamera, term, returns 1.
+  **Sheets** (0x20 records at +0x12c, (pages + 1) / 2 of them): flags (1 / 2 texture to apply, 4 / 8
+  side unwritten, 0x10 / 0x20 torn: pb_pagebrk), front / back texture slots (2..0x21; 0x20 / 0x21
+  are pb_pagedmy00 / 01), motion slot (2n = %s%d_turn_r, 2n + 1 = turn_l; model slot n =
+  %s%d_base.i3s), frame. Every loaded motion's m_frames is doubled (half speed). Row mode (+0x0c): 2 =
+  only the first global-col-4 pages are written, 1 = sheet 7 torn until that word is set. Pad: hold
+  Right (0x20) / Left (0x80) or the left stick past 0.75 turns (10-frame lock +0x124, se 8); Circle
+  (trig 0x2000) closes once flag 0x40000 (last page open) is set; se 2 on close. A sheet's texture goes
+  in through i3rGetChild52(root item, side) -> i3rGetChild25(.., 0): material data +0x1c = the
+  DogTexInfo record, side data +8 (u16) += 1. Draw: ehonbg full screen (uv 0..1 x 0..0.875), turn
+  arrows 28 x 16 at (100, 412) / (384, 412) from texture slot 0 rows v 48 / 0 (three cells cycle
+  while turning), TEST_1 0x503fd, then the sheet models at rot (-60 deg, 180 deg, 0), pos (25, 8, 220).
+- **MnuDiary** (mnu/mnupbook.cpp, written 2026-10-27): MnuPBook's six processPad steps and flag
+  bits with its own helpers (queueFiles 0x198b54, startTurns 0x198ca8, openWindows 0x198eb4 which also
+  calls setWindowSize, updatePad 0x19946c, updateSheets 0x199714). The open spread (m_curPage +0x124,
+  even, = global col 7 & ~1) lies on a fixed **base model** (slot 5, <name>_base.i3s); only the sheets
+  next to it are posed, from **five 0x20-byte records** at +0x128 {flags 1 used / 2 shown, -1, -1,
+  motion 0 = <name>01_turn_r / 1 = turn_l, frame, sheet} over model slots 0..4 (<name>01_base.i3s in
+  slot 0, copyModel'd to 1..4). Sheet n carries pages 2n + 1 / 2n + 2 (dy_page%02d_tcc, texture slots
+  3..0x12; +0x8b8 holds the page each slot has, -1 none); a_diary goes to slot 2. updateSheets: a
+  turning record's 4th frame shows the sheet it uncovers, end - 4 frees the one it covers, the end
+  writes the laid page onto the base model; page textures beyond the first unposed sheet each side
+  are freed. Text: header #r#L#T#[50#]50#f00#w001#F20 + sys texts row+4 + page - 1 (skipped when "##")
+  and + page, 0x4c8-byte buffer +0x138; setPageText(-1) while turning. Draw as MnuPBook's but the
+  diary sits at (21, 8, 220) and draws the base model then the shown records. Slot 7 setDrawSet is
+  MnuPBook's.
+- **MagLifeMenuPBook** (0x100000 / 0x200000 types): init looks the type up (getTypeValue) and asks
+  MnuPBook (+0x50) then MnuDiary (+0x910) setType (page tables 0x29c0f8: 12 picture books {type
+  0x1038.., ?, pages, 0/1/2, pack name pb*} / 0x29c368: 3 diaries {type 0x1000 / 0x1024 / 0x102a, ?,
+  pages, name dy*}, 0x30-byte rows, -1 ends); the one that knows the page becomes +0x40 and runs
+  through mnuBase's virtuals. Both books open data/mnurpk/mnupbook/mnupbook.rpk (ehonbg,
+  ehontex01_tcc) then <name>.rpk; init reads GamMan::lookupFlagTable(1, type, 0 / 4 / 6 / 7) (4 and
+  7 index the sequence globals, 6 a sequence flag bit). **The New Game run shows a picture book after
+  the post-film setup (2026-10-26)**: its processPad is the gate to the first room.
+- **MagLifeMenuBoard3D** (0x80000 types): loads model getTypeValue(type) (0x10c5..) as a scene actor,
+  saves the scene camera (MagScene::saveCamera 0x13c930 / restoreCamera 0x13ca10), puts the camera at
+  (0, -200, 500) rotated (-0.1, pi, 0) and the actor at the origin, fades in 30 frames, closes on pad
+  bit 13 after a fade out.
+- **Type table** data 0x298318 (267 rows + -1): 0x40001.. -> themselves (2D boards), 0x80001.. ->
+  0x10c5.. (3D board models), 0x100001.. / 0x200001.. -> page ids 0x1000.., 0x400001.. -> 0.
+
+## The text list (mnu/mnuselect.cpp, 0x1a066c..0x1a1244, 2026-10-29)
+
+- **MnuTextList** (EE 0x104, name invented; MnuTitle +0x4c68 the movie viewer, TskFrameFunc kind 8
+  the script's choice list via operator new; also FUN_001bb12c): open allocates 32 row buffers of 32
+  bytes (BedMemory::allocDebug with RoR's own path "mnu/mnuselect.cpp", line 0xb5, flags 2) at +0x84;
+  setItems(labels, mask) copies labels ended by "#0#0" (31 chars kept, an optional "#<digit>" prefix
+  sets the start row +0x04), mask bits 0..31 the rows shown (+0x20 counts them), bit 16 horizontal
+  (+0x68), bit 18 circle cancels (+0x74).
+- processPad -> step 0x1a0788 (+0x3c: 0, 1, 2 runs select 0x1a0be4, 4 / 5 return 1). select (+0x44:
+  0 / 1 open a 512 x 256 MagScene window at +0x54 / +0x58 / +0x5c with message sprite 1 as cursor,
+  3 shown, 4 close): d-pad via BedPad m_dir_repeat (+0x70) up / down (left / right when horizontal)
+  wraps, cross (m_trig 0x4000) picks the m_cur-th shown row into +0x64, circle (0x2000) gives -3;
+  rows redrawn with MagSystem::drawView (colour 0 the cursor row, 8 the others, row height 0x12)
+  only when the window opens or the cursor moves. getSelect -1 none, -3 cancelled, -2 not open.
+
+## The memory card check (mnu/mnumcd.cpp, 0x1a1244..0x1a4bd8, 2026-10-25)
+
+- **MnuMcd** (EE 0x1400; MnuTitle +0, MagLifeMenuMcd +0x40): open +0, init +4, per-mode yes / no
+  cursors +0x08..+0x20 (2 = no prompt), exec state +0x24 (0 open two scene windows 0x200 x 0x100 at
+  view (0x3c, 0x82), McdMan::init, MsgManSet::open; 1 McdMan::loadData(0); 4 idle; 2 run the check
+  mode +0x2c; 5..7 close and return 1), next state +0x28 (startCheck sets 2), requested mode +0x30,
+  mode step +0x34, MagSystem* +0x58, blink counter +0x64, slot +0x74, slot states +0x78[2], "check
+  slot 2 too" +0x88 (only init writes it: 0), worker command +0x8c / queued +0x90, McdMan +0xc0 (EE
+  0xac0), MsgManSet +0xb80 (2 x 0x3bc), windows +0x1300[2], save file size / buffer / path / dir
+  +0x1308 / +0x130c / +0x1310 / +0x1350, m_result +0x1390, flags +0x13ac (1 freeze, 2 hide, 4 font,
+  8 blink, 0x10 message, 0x20 choice), message +0x13b0, choice +0x13b4, text mode +0x13b8.
+- **Check modes** (startCheck(mode)): 0 checkBoot (MnuTitle::execLogo; ok when either slot is
+  unformatted or has our directory / space, else a "continue?" prompt), 1 checkBootDebug (Japanese
+  texts drawn straight with MagSystem::drawView, rodata 0x2f88e0..), 2 checkSave, 3 checkLoad
+  (hasSaveData: an entry dtNNNNNNNNNN), 4 checkInfo, 5 execSave (format cmd 0xc, mkdir 6, overwrite
+  prompt, write 8), 6 execLoad (read 10, then testChecksum: row sums +0x2d20 / column sums +0x2d10 of
+  the 0x2d10-byte image). MnuMcd commands -> McdMan commands: 1 getInfo (0), 4 getDir (0x12 on
+  /BASLUS-21448/*), 6 -> 0x11, 8 -> 0x13, 10 -> 0x14, 0xc -> 8. Slot states from McdMan's result
+  (+0x58): getInfo 1 / 0x15 -> 1 (3 when McdMan +0x84 is 0), 7 -> 4, 8 / 0xe -> 2, else 8; getDir 1 ->
+  5 with icon.sys (0x3c4 bytes) else 7, 5 -> 6, 7 -> 4, 0xf -> 7. Messages: msgGetSysText 0x1d..0x2f
+  for MnuMcd messages 1..0x17, 0x30..0x39 for the choices (data 0x298fe8, 0x1d4 texts).
+- **McdMan** (mcd/mcdman.cpp, 0x187724..0x18bb8c, written 2026-10-25; EE 0xac0): request(n)
+  0x187e08 takes command word n (init fills +0 with n + 1) when idle (+0x5c 0; 6 when busy), status
+  +0x64 1 busy / 2 done / 3 error, result +0x58 = the index of init's ERR_ name (+0x680: 1 NoErr ..
+  0x15 ChangedCard). update 0x187c4c dispatches commands 1..0x16 (0x187e44..0x18b2bc): 1..0x11 are one
+  libmc call each (GetInfo, GetSlotMax, GetEntSpace, Chdir, Close, Delete with '*' over the dir table,
+  DeleteNow, Flush, Format, GetDir (19 entries), Mkdir, Open, Read, Rename, Seek, Unformat, Write),
+  each the same step machine on +0x60 (0 start, 3 issue, 4 sceMcSync poll (mode +0xc8 = 1), 5 end;
+  sync result -2 retries the issue up to 8 times); 0x12..0x16 chain them on +0x68: create the save
+  (/BASLUS-21448: slime1.ico from data/mnurpk/mcdicon.rpk, icon.sys built at +0x6e8, the main file
+  BASLUS-21448 and dt00..dt11 ________ of 0x3000 zero bytes, each skipped when the dir already has it
+  at that size), read the dir, write a file (a data file goes through the temporary name dtNN1___),
+  read a file, fill the card (/FEBDUMMY, debug). Fields: port +0x70, slot +0x74, type +0x7c, free
+  KB +0x84, format +0x88, count +0x90, fd +0x94, open mode +0x9c, size / buffer +0xb0 / +0xb4, path
+  +0x114, name +0x154, dir table +0x1c0 (rows of 0x40). The unnamed libmc calls by SDK 3.0 link
+  order: 0x24d9e0 sceMcRead, 0x24daf8 sceMcWrite, 0x24df80 sceMcGetDir, 0x24e160 sceMcChdir,
+  0x24e550 sceMcSetFileInfo, 0x24e720 sceMcRename, 0x24e948 sceMcGetEntSpace.
+- **MsgMan** (msg/msgman.cpp, 0x18330c..0x18741c, written 2026-10-28; EE 0x3bc): runs a text in a scene
+  window one character a frame (process 0x184a94, through MagSystem::drawView and the window's
+  getWindowTextWidth). The text carries #-tags, table at data 0x299738 (41 entries {id, text}, ended by id
+  0x29 = plain character; entry 40 is "" = the string's NUL): ## end, #n line, #r page, #d / #D n char
+  delay (#D: cross skips), #c hex colour, #C / #L centre / left, #R / #T / #G vertical centring, #X / #Y
+  cursor, #[ / #] window pos, #j / #J font words 30 / 34, #F / #f fades, #V n voice stream (playStr), #s
+  stop it, #W icon advance, #H line height, #m n GamSysData text n (field 0xc), #v digits as SJIS
+  full-width, #w n wait, #p pause, #K n wait for cross with key icon anim n, #I / #i / #/ icons, #S n scroll
+  n%10 lines over n/10 frames, #b / #B proportional, #g n script global n, #q quit; "g<n>" in #c / #m reads
+  g_sequence.m_global[n]. Each tag has an exec handler (no args; reads at m_strBuf + m_pos; non-zero ends
+  the frame) and a measure handler (arg, *len) for getLineWidth / countLines, both GCC 2
+  pointer-to-member tables the constructor fills at +0x12c / +0x274 (8-byte {delta, index, pfn}). The
+  three message icons are g_magSystem.m_scene.m_mes (S2dMes, bss 0x73e930) sprites 0 (key icon), 1
+  (inline #/), 2 (#I / #i / expandText's #K choice marker). The charset word data 0x2f73e4 is 2 (SJIS);
+  3 would read one-byte Latin and decode UTF-8 first (msgUtf8ToLatin1 into bss 0x6e92d0). **MsgManSet**
+  0x18741c..0x187724: two MsgMan found by window number (setMessage takes the first idle one unless one
+  shows the window already; getState bit 0 running, bit 1 paused; togglePause / setDelay unreferenced).
+
+## The save / load screen (mnu/mnusvld.cpp, 0x1a59b8..0x1a90ec, 2026-10-25)
+
+- **MnuSvld** (EE 0x2780; MagLifeMenuSave / Load +0x40, MnuTitle +0x1400, MagScene has one): an
+  MnuMcd at +0 (its methods are called on this), open +0x1400, nine cursors +0x1404 ([1] slot, [2] row
+  on screen) with counts +0x1428 ([1] 12, [2] 5, [8] 36), m_step +0x144c, m_sub +0x1450, m_sub_step
+  +0x1454, SprMan +0x1474 (73 sprites, data/mnurpk/mnusvld.rpk: tex00..03, texmoji), MagSystem* +0x1d60,
+  layer +0x1d64, MsgManSet +0x1d68, m_save +0x24e8 (1 save, 0 load), 12 slot records MnuSvldSlot
+  +0x2508 (stride 0x2c: two flags, chapter, play hours / minutes, modify date y m d h m s; -1 = empty),
+  init +0x2734, decide +0x273c (1 decided, 2 cancelled), m_svldBuf +0x2740 (0x3000-byte save image,
+  the assert names it), scene window +0x2744, m_loaded +0x2754 (MnuTitle::execLoad). Data: texture
+  list 0x2a4530, pattern image 0x2a45c0..0x2a64e0 (move table 0x2a6438, fade colours 0x2a60d8 /
+  0x2a60e8), display list 0x2a64e0 (73 sprites), clear rects 0x2a7460 / 0x2a7470, text buffers bss
+  0x6e9450 (times), 0x6e94a0 (date), 0x6e9520 (title), 0x6e95a0 (corrupted).
+- **Card format**: one directory per slot, /BASLUS-21448/dtSSabCCHHMM (slot, flag a = 0, flag b =
+  sequence bits word 0 bit 31, chapter 0..12, play time; all zero while bits word 8 bit 0x1000);
+  makeSaveDir uses the existing dt<SS> directory's name or dtSS________. The save image is GamMan
+  0x1d6078 (writeSaveData) + MnuMcd::makeChecksum; loading hands it to GamMan 0x1d68a0 (readSaveData).
+  Chapter titles are system texts 0x1c6 + chapter; flag b puts them in brackets.
+- **Flow**: exec step 0 opens a 0x200 x 0xe0 window (text 0x19), backs up S2dMes sprites 0..13, 1..3
+  MnuMcd::init / setTextMode (2 load, 1 save), setDisp, button guides (S2dMes 4 / 5 via
+  GamMan::showMesSprite / setMesSpritePos), fade in; 4 runs m_sub: 1 execCheck (check mode 3 load / 2
+  save, then readSlots), 0 execList (check mode 4, cursor, decide = BedPad +0x7a bit 14, cancel bit
+  13), 2 execSave (check mode 5; sets sequence bits word 2 bit 0x10000), 3 execLoad (check mode 6,
+  readSaveData, m_loaded); 999 or a failed check fades out; closing sets m_global[0x15] = 7 (save) / 8
+  (load). On a PC card with no save, check mode 3 stops at the "no data" prompt (checkLoad step 0x28):
+  RIGHT + CROSS quits back to the title (seen 2026-10-25).
+
+## The title screen (mnu/mnutitle.cpp, 0x1a90ec..0x1ab474, 2026-10-25)
+
+- **MnuTitle** (EE 0x5700, MagLifeMenuTitle +0x40): MnuMcd +0, MnuSvld +0x1400 (m_save 0: load),
+  MnuOpt +0x3b80, a text list +0x4c68 (MnuTextList, code 0x1a066c..0x1a0bb8, name invented), open word
+  +0x4d6c, nine cursors +0x4d70 with item counts +0x4d94, timer +0x4db8, m_mode +0x4dc4 (processPad's
+  step), m_sub +0x4dc8 (the sub menu), m_step +0x4dcc, SprMan +0x4df0 (EE 0x8ec), MagSystem* +0x56dc,
+  layer +0x56e0, DogTexInfo* +0x56e4, the s100000.str stream id +0x56e8, m_result +0x56ec, init flag
+  +0x56f4. Data: texture list 0x2a7798 (data/mnurpk/mnutitle.rpk: titlebg, titlebg2, ti_06 = the text
+  sheet, sce, punch, siro, keikoku = the disclaimer), pattern image 0x2a7858..0x2a80c0, display list
+  0x2a80c0 (15 sprites), logo flag 0x2a8400, logo sprites / frame counts 0x2a8408 / 0x2a8418, movie
+  viewer pages 0x2a8428 (8 x 0x78).
+- **Sprites**: 2..5 the logos (sce, punch, siro by pattern), 6 titlebg (press start), 7 titlebg2 (the
+  menu background), 8 "Press START button", 9..11 New Game / Load Game / Option (anim 1 = selected),
+  12..14 a three-way choice (Easy / Normal / Hard on the sheet; execSelect, unreached).
+- **Flow**: processPad mode 0 silences the game (SprMan::saveVolume / volumeOff, GamMan::setOption(0,
+  4), GamSndMan::resetVolume), 1 loads the textures (waits), 2 setDisp, 3 runs: sub 0 execLogo (first
+  boot: MnuMcd check, logos 2 and 5 for 90 / 150 frames, CP_LOGO.PSS and MV00_AD.PSS through g_rxMpeg
+  with MagSystem::m_v_interval 1, then press start over s100000.str; 0x708 idle frames replay the
+  movie), sub 1 execMain (cursor with BedPad +0x70 bits 0x10 / 0x40, cross = +0x7a bit 14; result 2 new
+  game, 3 load (g_sequence.m_global[0x17] = 0x10004, sub 3 execLoad), 4 options (0x10006, sub 4
+  execOption), 1 when g_sequence.m_bits[1] bit 0x80 is clear). Results 1 / 2 close the title: mode 6
+  calls GamMan::resetPcStat and processPad returns m_result to MagLifeMenuTitle. Subs 2 (test000.pss
+  test), 5 (movie viewer) and 6 are set by no retail code.
+
+## The task manager (task/tsk_man.cpp, 0x1e7094..0x1e7f28, 2026-10-26)
+
+- `CmnITask` slots (8-byte GCC 2 entries, the function word at +4 of each): 1 `get_task_type` (+0x08, the
+  kind), 2 `pause(on)` (+0x10), 3 `init` (+0x18, addTask), 4 `exec(id, time, arg)` (+0x20; time = the
+  timer's m_lastTime, +0x64; non-zero ends the task), 5 `term` (+0x28, when the node is freed), 6 dtor.
+  Kinds seen: 4 TskTest / TskLogger; pauseOthers spares 1, 2, 5, 7, 0xf, 0x11, 0x12, 0x17; killStageTasks
+  spares 1..3, 0x11; setNodePause only tells kinds 5, 0x10, 0x13, 0x14; GamMan kills 5 / 0x13 / 0x14.
+- `CmnTaskMan` (g_taskMan 0x7a3d80, EE 0x6c0): +0 the node list sorted by next-run frame, +4 a second list
+  findTask searches first (nothing in the file adds to it), +8 the next id (from 2), +0x40 SysTimer (its
+  m_updates +0x58 is the frame count addTask's start -1 means), +0x84 a kill queue of 128 ids with its end
+  pointer at +0x284, +0x288 the live id table (256 words, -1 ends, -2 removed; exec rewrites it every frame,
+  getTask reads it, addLiveId stops at 0xfe).
+- Node (0x40, operator new): +0 task, +4 next, +8 state (0 run / 1 paused / 2 dead), +0xc id, +0x10 the
+  caller's id word, +0x14 flags (bit 0: the node owns the task -- every caller passes 0x11 or 1; 0x10 is
+  never read here), +0x18 arg, +0x20 kind, +0x24 start, +0x28 period, +0x2c last frame (start + frames - 1,
+  0 forever), +0x30 last run, +0x34 next run.
+- `addTask(group, start, period, frames, task, arg, &id, flags)`: group (a1) is never read.
+- `exec` 0x1e7a20: hold the timer, step each due node (state 0: exec, next += period, ends on non-zero or
+  past its last frame; state 1: only moves on; state 2: freed), apply the kill queue (applyKillQueue
+  shortens the queue by its last word on a match, not the matched one -- a ROM quirk kept), sweep dead
+  nodes, rewrite the live table, `GamMan::execPauseReq`. `killTask` kills a node in the list at once
+  (killListed) and only queues ids it cannot find -- the node exec is stepping is out of the list then.
+- Freeing (freeNode / termNode): term, then a plain `operator delete` of an owned task (no destructor
+  call in the ROM; the host deletes through the virtual destructor).
+- **Host defaults**: task classes whose virtuals are not written yet get CmnITask's host defaults (kind
+  0, exec returns 1: the task ends on its first step, as when the manager was a stub), so a script that
+  waits on getTask(id) does not hang on a stub class. A class's real exec replaces that.
+
+## Attack / damage tasks (task/tsk_scene.cpp, 2026-10-26)
+
+- Achr attacks and hits run as tasks on the achr's `m_task[3]` (ACHRstat +0x3e0): `scnAttackStart`
+  0x1f9d90 (killTasks, then TskAttack kind 0x15) and `scnDamageStart` 0x1fa5bc (pauses the enemy, then
+  TskDamage kind 0x16 and effect kind 1 40 below the achr). `scnChrRequest` 0x1fac60 dispatches on chr
+  (0..10, or 11 = from the oid's kind): 3 the dog (0x1fae14), 4 the PC (0x1fb084), the rest damage.
+- TskAttack's steps (picked by the kind word param[2]: 0x12..0x14, 0x15, 0x26..0x28, 0x2e..0x30) and
+  all of TskDamage's live in task/tsk_attack.cpp (pinned 0x1fd424..0x20067c, written 2026-10-30), not
+  in tsk_scene.cpp; they call scnChrRequest(11, self, 0, 0, kind, target, 0) back.
+- TskAttack steps are a phase machine (m_phase +0x20, m_frame +0x1c counted every frame, 0 when the
+  motion starts): phase 0 plays SE 0xb (0x26: 0x13) and chrMtnMove2(1/60, oid, m_motion, -1); phase 1
+  hits on frames m_hitFrom (+0x44) .. m_hitTo (+0x48), then phase 0x14 ends the task with the motion
+  (999 and 30 frames of phase 10 end it too; nothing found sets them). 0x12..0x14 / 0x26..0x28 test
+  the held object (param 0x67) with its kind's system fields 0x22 (node count) / 0x30 (range) by
+  emyChkHitReach against the PC (skipped in PC state class 9) and the dog (skipped in Brown state 10 /
+  13); hit SE 3 (0x26: 0x10, else 0xf every window frame). 0x15 throws the held object m_throwOid from
+  node p_hn_r at m_hitFrom (setActorParent -1, the thrower's rotation, motion 1, TskMovePhysic).
+  0x2e tests nodes b_fg_l / b_fg_r, 0x2f / 0x30 p_gero / p_gero1, by chrIsNearNode(m_reach, oid,
+  m_victim = param[0]); 0x2e hits once, 0x2f / 0x30 every window frame. Every step's chrMtnMove2 gets a
+  heading in f13 that chrMtnMove2 never reads (a leftover of chrMtnMove's signature).
+- TskDamage steps: wait for the motion's end (or go at once while m_flags 4, set by setup), then
+  endReact (flag 8 = the chain's last motion: the task ends); else m_frames (+0x20) is the reaction's
+  state -- each step's switch maps it to the next motion (0 / 10 / 20 / 30 from setup's front / back
+  test, getReactFrames' 0x3c / 0x46 / 0x50, 10000+ once killed), m_frames++ and the motion starts
+  (p1d8 -1). chr 0 adds falls: from state 0 (10% / 40% / 80% by achr attribute 0x400 / 0x800) or 10
+  (10%), pickFallBack 0x1fddb8 / pickFallFront 0x1fdf8c try three spots (behind pi, -pi/2, pi/2 at
+  60.6 / 49.6; in front 0, pi/2, -pi/2 at 43.3 / 49.6) for a cell with nothing in the way (pickSectaCell
+  + testHitAt) and give state 5000..5003 (motions 0x49, 6, 0x4a, 0x4b); the down chains set
+  EmyManager::setEmyDownFlg and achr flag 0x400, and voices go through getEmyVoiceSE + scnPlaySEDelayed.
+  chr 7 takes 8..16 off the enemy's free count when it ends; chr 6 replays motion 0x19 (p1d8 1).
+- A cut dismemberment feature remains, unreferenced: TskDamage::cutOffPart 0x1feb38 (part = pickAttrBit's
+  bit: 1 Bip01 Neck, 2 / 4 R / L UpperArm, 8 / 0x10 R / L Thigh) hides the node (setNodeScale 0), sprays
+  blood (effect kind 2, 45 frames) from TskDamage +0x58 / +0x68, which updateCutSpray 0x1ff25c fills from
+  the node's world matrix rows 3 / 2, and throws the part's item object (kinds by enemy type, data
+  0x2ff2a0: type 0 0xbbf..0xbc3, 1 0xbd3..0xbd7, 2 0xbce..0xbd2); scnDropWeapon 0x1fe87c drops the held
+  weapon with the right arm (or when killed / legless). TskAttack::stepReach 0x1fd424 (kind 0x12's code
+  with emyChkHitReach(m_reach, self, 1)) is unreferenced too.
+- The damage roll `scnCalcDamage` 0x1fb624 (attacker, target, attack word): attacker's ST (param 0x1d,
+  PC via getPcParam) x the word's percent (fixed or utlRandRange per word; 4 / 5 / 0xb use utlRandMean /
+  utlRandPeak) / 100 x the weapon's system field 0x2b, + field 0x2a, - target kind's DEF (field 0x1e) x
+  90..110 / 100, floored at 0. The weapon: the PC's equipped item (GamMan +0x2220c, none 0xa00 or word
+  7), a kind-2 object's param 0x66 (none 0 / 0xa00); kind-5 attackers return field 0x2b x 70..100% x
+  field 0x2a. Hits on the dog (`scnChrRequestDog`, only in inu mode 1) take LP and send Brown a hurt
+  request (magBwnHurt -> MagLifeBwnCtrl state 10); hits on the PC (`scnChrRequestPC`) take LP and pick
+  the PC state from data 0x2feea0 by word (2: front 5 / back 4; 9 / 10 become 0xb / 0xc while the
+  attacking enemy holds), 0 LP -> state 3 and a TskFrameFunc kind 0xe on GamMan::m_frameTaskId.
+- task/naga_chunk.cpp is pinned 0x1fc47c..0x1fce0c (written 2026-10-27). A chunk table is 16-byte
+  entries {name[8], offset from the table start, size}, ended by a zero entry. NagaChunk (EE 0x20:
+  top, owned, end, cur, name[12] for getName) reads one; NagaChunkWriter (EE 0x510: entries[64],
+  count +0x400, per-entry data blocks +0x404[64], built buffer +0x504, size +0x508, running offset
+  +0x50c) adds ints / floats (aligned to 4), strings (strlen + 1, unaligned), blobs and nested
+  writers by name or 8-byte tag, build() lays table + data out in one buffer (size rounded to 16),
+  save() / NagaChunk::load() use "host:%s" -- a debug tool, unreferenced in retail. Four functions
+  were folded into the body before them (align 0x1fc880, NagaChunk() 0x1fca70, setIndex 0x1fcd4c,
+  getSize 0x1fcdf4; created in Ghidra). 0x1fce0c.. are tsk_bg_load.cpp vtable slots (0x2e4f8c..).
+
+## The background pack loaders (task/tsk_bg_load.cpp, 0x1fce0c..0x1fd424 + 0x290c1c..0x290e88, 2026-10-30)
+
+TskBGLoad : CmnITask (vtable 0x2e5000, kind 0x11, EE 0x880): FileReader at +0x04, its FileReadReq at
++0x0c, +0x30 cleared and never read, a 0x840-byte buffer at +0x40 holding the 64-aligned 0x800-byte
+pack head ((this & ~63) + 0x80). Base slots: init 0x1fce0c / term 0x1fce14 empty, exec 0x1fce1c =
+FileReader::update(1) == 0. startRead 0x1fce40 (name, buf, size, offset, open) fills the request
+(m_08 = open, seek set, close after) and starts it async. Two subclasses add slot 7 start(name, out),
+called directly by their ctors:
+- TskBGLoadArea (vtable 0x2e4fb8, EE 0x988): name copy +0x880 (0x100), step +0x980, out +0x984.
+  exec 0x1fd008: step 1 waits the head, BedPfh getTotalSize, allocDebug(round 2048, flags 0x101,
+  tsk_bg_load.cpp lines 183 / 216 with GamMan::releaseObjs(2, 1) between), *out = block (NULL when
+  both fail), reads the whole pack; step 2 waits it.
+- TskBGLoadMap (vtable 0x2e4f70): step +0x880, out +0x888 (+0x884 unwritten); the same for
+  data/bg/mapunit.bin (pointer at data 0x2d8ff4), allocDebug line 341 flags 1, no retry.
+Nothing in the ROM references either constructor or vtable: dead code (streamed areas).
+
+## The event test overlay (debug/naga_debug.cpp, 0x216768..0x217f10 + 0x2911cc..0x291228, 2026-10-30)
+
+`EventTestTask : CmnITask` (vtable 0x2e50c0, kind 2 from get_task_type 0x29121c), a developer's
+debug task; nothing in the ROM constructs it (constructor 0x216828 -- Ghidra had folded it into the
+end of 0x216768 -- and the vtable have no references). EE layout: +0x04 exec count, +0x08 the loaded
+BIN file (its word +0x08 is the entry count), +0x0c file + 0x40 (0x40-byte entries, word +0x3c the
+id), +0x10 menu page, +0x14 cursor, +0x18 first shown entry, +0x1c / +0x20 / +0x24 / +0x28 hold frames
+of pad 1 UP / DOWN / LEFT / RIGHT. exec 0x2168f8: pad 0 R3 (repeat bit 4) cycles the mode bss 0x2db2a4
+through 0..2, pad 1 SELECT toggles it 3 / 0; while bss 0x2db2b8 (a menu toggle) is set it forces
+MagSystem::setLightColor(0, 0, 2, 0.99 x3, 1), clears MagScene m_2aa84 and sets the view far to
+10000; then disp 0x216ad0 (pages by mode; mode 3 runs the menu 0x217260 over
+data/seq/w%03d/DBGFLAG.BIN (toggles the flag bit in the words at 0x7b2060), DBGSTEP.BIN,
+data/seq/DBGITEM.BIN, w%03d/DBGAREA.BIN, w = bss 0x7a3210). nagaDbgLoadFile 0x216768 reads a whole
+file into allocDebug(size, file, 111, 0, 2). The constructor clears text buffers bss 0x7b4e08 (0x20),
+0x7b4e28 (0xa0), 0x7b4ec8 (40 x 0x40) and the words 0x7b5968 (40). The menu is on the second pad
+(MagSystem m_pad[1], 0x6e998c = its m_repeat: 0x4000 CROSS selects, 0x2000 CIRCLE backs out).
+
+## The event test (PC, rosepan/rosepan_eventtest.cpp, 2026-11-06)
+
+EventTestTask above is the developers' menu, but nothing constructs it and its lists (DBGFLAG / DBGSTEP /
+DBGAREA / DBGITEM.BIN) are not on the disc. RosePan's Event test (Debug menu, F2) does the same job from
+what the retail scripts still hold; `seqdis.py` reads them. What that showed:
+
+- **Names survive in the debug prints** (native 32): `[Area init] OG_GATE_F` opens a room's script;
+  `[Set Step] STEP_01_OPENING` sits right before the store to global 0x27 (`lw v0, globals(gp)`, `addiu
+  v1, v0, 0x9c`, constant, `sw`); `[Set Flag] NAME on` right after native 21 op 7 / 8 with the bit in a1
+  (some of those prints go with a global instead, and are skipped). An event's function loads the string
+  `ev108.scn` for system call 0x46 / 0x47. Those functions take no arguments and open with `[unplayable]`,
+  so a thread started at one runs the whole event. A function can name a scene its chapter's pack does
+  not hold (ev120 in W001 A189): dead code, and scenePlayStart asserts on it.
+- **A room's start** (A168 0xe938, the same shape everywhere): native 21 op 2 pauses, floor flags, the
+  object / trigger set-up functions, then op 1 resumes and the fade in. 0xe7e8 calls setPcStartPos and,
+  when m_flags 0x20 is clear (no door arrival), puts the PC at the room's default spot; in many rooms that
+  is the developers' (0, 0, 50), which can be outside the map.
+- **W000.WRD file 2 is not the room starts it looks like**: 459 of its 473 records are at (0, 0, 0). A real
+  arrival comes through a door: a door's function queues G000's thread 0x04000050 with the door's number,
+  native 29 op 2 hands it to requestStage, and setPcStartPos finds the type-9 fchr by param 0x41.
+- **The camera** is picked by the trigger under the PC (a trigger function does native 016 op 11):
+  GamArea::checkPc, the ELF's `init_pc_pos_cam_pnl`. With the PC in no trigger the camera stays mode 0 at
+  (0, 1000, 0) and the screen is black.
+- **m_flags 0x20 carries the PC over**: startStage2 moves it by the rooms' offsets. A jump clears it,
+  as execStageReq does for a chapter.
+- **Developer starts**: every W000.WRD image has a `[Debug Mode] 2` function (W001 0x8804), run from
+  `>Initial Start`: it sets the default step and room, then a chain of `if native 19(op) { [Set Step]; room;
+  items; flags }`, ops 8..0xe (the shoulder and face buttons), each `beq v0, zero, next`. Native 21 op 14
+  tests m_flags2 0x8000, which GamMan::init always sets, so retail skips the chain in W001, W003, W004,
+  W005, W010, W011 and W013. W007's chain has no such test, so holding the button works there in retail.
+  W002, W006, W008 and W012 have no chain there (26 starts in those functions). W004's op 0xd holds nested
+  pad checks with no step of their own (variants of STEP_04_START, untaken). STEP_04_START and
+  STEP_5B_DOGISDEAD lead straight into their room's own opening script.
+- **The first rooms have chains too**, not used: the only other readers of that bit in any script are W002
+  A000 0x1311c, W008 A128 0xcac0, W010 A055 0xc920 and W012 A056 0xd1cc, each inside the room's opening (a
+  function that first tests the step), where it branches to skip the opening movie or event; W002's op 0xb
+  also jumps to room 0x40 (STEP_02_BLUECHO_DEBUG). In W002 the check comes after the room's main thread has
+  waited on G000 thread 0x04000074, the chapter's picture book, which takes page turns from the player. So
+  answering it means holding the forced button and the clear bit open for as long as that takes, for a
+  branch that only skips a movie.
+- **Native 19's buttons are shared**: other images read ops 8..0xf for debug keys of their own (a forced op
+  8 in chapter 2 reached a "Would you like to save?" prompt with no window, and asserts), so a forced answer
+  is for the chapter's image only.
+- **A chapter reload keeps the story**: resetStage / clearStageVars clear only the stage's part, so
+  FLAG_01_* (bits around 0x1b00) and the items survive, as a playthrough needs. native 1
+  (clearGlobals + initGameState) runs once, from W099's main. requestStage ignores the chapter already
+  loaded, and the room already loaded; the test clears m_chapter / m_wrdNo to get past that.
+- The title's New Game path is W099 0x8390: global 0x26 is the chapter, native 29 op 10 jumps. A jump from
+  the title works without it: resetStage closes the title menu.
+- A scene's chunk table also has "map" (the room's name; scenePlayStart overwrites it in the game's copy),
+  cam_file, foc_file, mes_file, version, chapter, cinema, fog, ambient, se_comp.
+
+How a jump runs: the UI queues it (any thread), `RosePanEventTest_Tick` at the head of Sequence::exec takes
+it once no stage change or menu is in the way, kills a running scene and the last test thread, and calls
+requestStage. A chapter jump lets the chapter's script run up to `ac_jump_area`, where native 029's hook
+swaps in the wanted room and applies the step, so the chapter's first room never loads. Between the load and
+the script's first run the sequence bits go back to a snapshot from the title screen and the items are
+cleared, so a test starts the same whatever ran before it. A developer start also clears m_flags2 0x8000
+and answers native 019 itself (op 8..0xf, image 1 only) until `ac_jump_area`, then the bit comes back. When
+the room's
+main thread (0x84000000) is gone and the start list is empty, PlacePc checks a camera trigger holds the PC
+and otherwise tries doors, then camera trigger centres. Once the PC is free (m_flags & 6) for 30 frames, the
+event's function starts as thread 0x84fffff0 ("evtest"). After 300 frames an event stops waiting and ends the
+room's main thread: a chapter's first room runs the chapter's opening there.
+
+## The script tasks (task/tsk_chr.cpp, 0x1e7f28..0x1f6c64, 2026-10-26)
+
+Unanchored (no source string): the run between tsk_man.cpp and tsk_scene.cpp, pinned by its classes.
+0x1f6c64.. (DisplayMessage, SeManager, VoiceManager, ScenePlaySingle, ScenePlay) belongs to
+tsk_scene.cpp with 0x1f82e4.. (scenePlayStart). Holds the achr motion / movement tasks (TskMtnMove,
+TskMtnMove2, TskMoveType*, TskMovePointPath, TskMoveSecta*, TskMoveAdj, TskRotAdj, TskMovePhysic,
+TskAvoidMove, TskChrRot, TskAttach) with their chr* starters, and the script tasks TskMovie, TskMsgMan,
+TskSeqEvent, TskSysFunc, TskFrameFunc / TskGenFrameFunc.
+- **Step functions as member-function pointers**: TskMtnMove keeps a GCC 2 PMF {short delta, short
+  index (-1 non-virtual), pfn} at +0x80, copied from data 0x2fd940.. by the constructor; exec calls it
+  and returns its result. Written as `int (TskMtnMove::*)()` on the host. The other Tsk* classes with a
+  table of step functions (TskFrameFunc 0x2fe420) use the same idiom.
+- **Secta walks**: TskMoveSecta (kind 0xc) runs legs on ACHRstat::m_task[3] (+0x3e0), each a
+  TskMoveSectaFindPath (kind 0xb) over GamMan::findSectaPath 0x1d81f0 (a GamSectaPath: 127 cell
+  pointers, the count at +0x1fc; a cell's point at GamSecta +0x10) from GamMan::getObjSectaNo 0x1d7b08;
+  the leg reports into the owner's status word +0xc (4 no way, bit 2 done). Both GamMan functions are
+  stubs in unassigned@001d3b44.
+- **Achr task slots**: ACHRstat::m_task[2] (+0x3dc) is the motion task (chrMtnMove / chrChangeMotion
+  replace it, addTask flags 0x11 = owned); m_task[1] the turn task; m_task[0] the move type task.
+  Non-achr objects get a TskMtnMove with actor -1 whose step (0x1e8fbc) ends it at once.
+- **Angles**: the ROM wraps headings with an inline that compares in double against +-pi (the libgcc
+  fptodp / dpcmp / dpadd / dpsub calls): chrWrapPi / chrNormPi in the source. rotY >= 32769.0
+  (0x47000100) means "keep the actor's heading".
+- **TskMovie** (kind 0, native 253's film task): constructor fades the music (funcSnd 0x1d), stops
+  SndMan slots 8, fades S2dMes sprite 3, sets script bit word1 0x8000000, S2dMovie::playMovie, and
+  MagSystem::m_v_interval = 1 (60 fps while the film runs; 2 again at the end). START held skips
+  (pad m_hold bit 8 through MagSystem +0x97a40). Word 1 bit 0x80000000 set by the script suppresses
+  the final fade-in. Seen working 2026-10-26: the New Game opening film plays to its end.
+- **TskMsgMan** (kind 0x10, EE 0x9c0, GamMan::openMsg's task m_msgTaskId): **the narration
+  subtitles of the opening film** ("Once upon a time,", "there was a precious little girl." -- frames
+  ~2950 / ~3090 of a New Game run; the film's own handwritten cards are part of the movie). Text kept
+  as "#C" + text at +4 (the strings carry their own "#R" codes), a scene window opened from
+  GamMan::m_msgParam (p[0..1] position, p[3..4] size, p[5] the setMessage flag, p[6] life; p[2] gets
+  0x8001), MsgManSet at +0x224. exec's end rule by mode +0x204: 1 time frames, 2 text out + CROSS
+  (m_trig bit 14) after 10 frames, 3 either, 4 text out; MsgManSet::release (0x18761c) at the end.
+  Nothing shows until msg/msgman.cpp (MsgMan / MsgManSet) is written.
+- **TskMtnMove2** (kind 5, EE 0x100, chrMtnMove2): TskMtnMove's twin moving through DogActor::
+  getMotionMove / addTrans with the root move turned by the actor's m_base_rotate[1] (a VU0 RotMatrixY)
+  instead of a stored heading; its hit step tests from the "Bip01 Spine1" node (chrGetNodeWorldPos
+  0x1f5558, DogActor vtable slot 18 getNodeWorldPos) and 1.25 radii ahead (GamMan::getObjRadius), and
+  starts a TskAvoidMove (0x1ef184, not written) on ACHRstat::m_taskId (+0x3e8) when the actor stands
+  in something. PMF at +0xcc.
+- **TskFrameFunc** (kind 0x11, EE 0x80; the script's / GamMan's multi-frame jobs, written
+  2026-10-26): constructor switch on kind (jump table data 0x2fe420, 23 entries) copies the job's
+  words to +0x20.. and a PMF from 0x2fe2c0.. into +8; exec just calls it. Kinds: 2..5 keyhole fades
+  (setFade kind 1 / 2, mode 2 in / 6 out), 6 system message 0xd / 0xe, 7 a door opening (PC motion
+  pc_ / jnfc_door{r,o,l,t}_open__{x,y} by the side the PC stands on -- |wrap(angle - pi - doorRotY)|
+  < 0.1 picks r (o for obj kind 0x1201) else l (t) --, camera at MagScene +0x2ab70 set out along the
+  door's heading, PC placed 50 in front, GamMan +0x22050 = the door point), 8 a MnuTextList choice
+  into script global 0x2d, 9 enterMenuPause, 10 PC rot 0, 11 a system call 0x34 pair's thread then
+  requestStage(2), 12 fog lerp, 14 game over (DEATH_J.PSS film, reset, stage 99), 15 / 16 S2dBg
+  picture 0 in / out (inlined s2dBg* requests on +0x93c), 0x11 / 0x16 clear GamMan m_flags2 bits,
+  0x12 nothing, 0x13 an item found (windows 0x11 / 0x13, item menu when 12 are held), 0x15 the PC
+  state-class 5..7 message (windows 0xb / 0x16). Kinds 0, 1, 13, 20 set no step.
+- **TskSysFunc** (kind 0x17, EE 0x80, seqcall 0x22 on GamMan::m_sysTaskId): the **map-name caption**.
+  Kinds 0..1 store map no a3 (+0x18) and the times 30 / 15 / 27 (+0x1c in, +0x20 out, +0x24 hold);
+  the step 0x1f42c4 (folded into exec by Ghidra until split) calls the inlined S2dMes setMapNumber /
+  setMapNameFadeIn (MagScene +0x42bb0 + 0x93c / 0x944 / 0x94c), holds, then setMapNameFadeOut. term
+  of kind 1 clears a caption still shown. Written 2026-10-26.
+- **TskSeqEvent** (EE 0x80, GamMan::startAchrPlaceTask's ACHRstat::m_placeTask): kind 0 with radius
+  > 1 grows the achr's collision to radius over frames (m_colPrm [0] = 2, [1] = 4, [4] = radius * t;
+  the ROM writes the other nine words from an uninitialised stack record). PMF at +4; 0x1f4910 (its
+  stepNone) was folded into exec.
+- **TskAttach** (EE 0x40, seqcall light case 0x3c): each frame light *value of type 2 follows node
+  name (a3) of oid's actor: MagSystem::getActorNodeMatrixByName, the matrix's translation row to
+  MagScene::setLightParam(2, light, 0, v, 0). Never ends by itself.
+- **chrRot starters** (0x1f11a0..0x1f1670): chrRotFromTo, chrRotStartFrom (chrRotStart from a given
+  heading), chrRotMotion / chrRotMotionBySign / chrRotToMotion (a turn played by a turn motion through
+  TskChrRot's stepMotion). All replace ACHRstat::m_task[1]; their callers are the move tasks
+  (TskMoveTypeGen, TskMoveSecta*) and 0x14a860 / 0x14bf1c / 0x154fd8.
+- Frame request list: data 0x2d8f68 (count) / 0x2d8f70 (32 oids), filled by chrStepAwayFrom 0x1f68bc
+  (achr a1 steps one unit away from object a0; a0 recorded; only reference a table word at 0x2e50f4),
+  cleared each frame by gamClearFrameReq (only 8 words, while the lookup scans all 32).
+- **Limbs**: ACHRstat::m_attr[0] bits 0..4 = Bip01 Neck / R UpperArm / L UpperArm / R Thigh / L Thigh;
+  chrRestoreLimb 0x1f5680 (from 0x165074) clears the bit and calls DogActor::setNodeScale(1.0, node)
+  0x10eba0: a 5-entry node / float list at DogActor +0x3f8 / +0x40c where 1.0 frees an entry (the
+  setter of other values, likely the limb loss, not found yet).
+- Last chr* helpers (2026-10-26): chrMtnMove2Achr 0x1f603c (10 callers 0x146944..0x168844) with the
+  folded, uncalled chrSetMtnMove2Step 0x1f616c; chrSetMotionByOid 0x1f627c (0x14e850, 0x14f360); the
+  uncalled chrCreateChr 0x1f6694 (no < 4 achr, < 10 fchr) and chrCreateFchr6 0x1f67a0 (fchr type 6,
+  params 0x32 / 0x33).
+
+## The sound state (game/gamsnd.cpp, 0x1e0df0..0x1e7094, 2026-10-26)
+
+- `GamSndMan` (GamMan +0x18e00 = 0x79a0c0, EE 0x1878, vptr +0x1874, one virtual: the destructor).
+  +0 the listener mode (0 the PC: GamMan +0x22020 pos / +0x22030 rot; 1 the camera: MagScene +0x2ab70
+  m_trans / m_rotate; loadStage sets 1). +0x40 / +0xb0 the free / used 3D sound lists of sequence.h's node-pool
+  template (+0x120 the node count 0x20, 32 nodes of 0x60 at +0x140, the sound `GamSnd3d` at node +0x10). +0xd40 / +0xd44 / +0xd48 a record range {begin, end, 0x30} over 0x30
+  `GamSndRec` (0x28) at +0xd80, indexed by SndMan id: +0 flags (1 stream, 8 playStr's bool -- isPlayEnvStr,
+  0x10 loop set, 0x80 kept, 0x100 a BGM stream), +4 / +8 volume, +0xc SE id, +0x14 stream number, +0x18
+  SndMan id. +0x1540 the SE table (0x400 x 0x38, allocDebug line 81), +0x1544 the stream table (900,
+  line 82; hashed from (str % 100000) / 2, -1 free). +0x1550 `m_defEntry`, a GamSndEntry
+  with only the 3D words set (vol / pan 0x80, far 0x6a4, near 100, nearVol 0x80, farVol 0) for sounds
+  without an entry. +0x1588 / +0x1590 / +0x1598 the master / SE / stream
+  volume words; +0x15a0 four 0x24-byte BGM push levels and at +0x1630 a fifth, the record while nothing
+  is pushed (get_snd_prm 0x28fdf8) (`GamBgmRec`: SE, stream, a second stream fadeOut3dSnds
+  keeps, each with volL / volR), +0x1654 a second SE per level, +0x1684 the push depth (-1 none; pushSnd
+  only pushes from -1), +0x1688 eight looping SEs, count +0x1708; task ids +0x170c (master fade),
+  +0x1710 / +0x1714 (SE fades), +0x1718 (stream fade); +0x171c / +0x1720 / +0x1724 the reverb (setReverb: rxSndSetEffectMode / Depth; 4, 0x80,
+  0x80 at resetVolume); +0x1728 the SE pack id loaded in each of the 65 banks; +0x182c the last
+  loadSePack(name, nowait) name ("BBII.se", read from data/snd/xv/); +0x186c the 3D scale (0.5); +0x1870 flags (bit 0 set by stopBgm, cleared by resumeBgm).
+- SE packs are named "BBII.se": bank BB, pack id II (`parseSePackName` 0x1e43e0); `loadSePackData`
+  0x1e44b4 stops SEs (funcSnd 0x11), `SndMan::loadBank(bank, data, nowait)` -- the second argument is the
+  XVAB *data* (rxSndXvabLoad's), not a name.
+- SE ids: id >> 24 == 0xb are BGM-class SEs (pushed with the music); 0xb030352 is special-cased (looped
+  on resume, never pushed). The option levels 0..8 scale the SE / stream master volume to 10..100..128
+  (funcSnd 0xe / 0xf, at least 10).
+- Fades are `TskSnd` tasks over a `TskSndParam` block (task/tsk_scene.h, written 2026-10-26): kind 0 SE,
+  1 stream, 2 / 3 / 4 the master / SE / stream master volume (funcSnd 0xd / 0xe / 0xf), 5 a delayed
+  playSE, 6 an SE faded out (funcSE 0x13, 10 frames) after +0x14 frames, 7 play stream +0x1c's name once
+  the old one stopped; target +4 / +8, frames +0x14, start volume +0x20 / +0x24; +0x28 on a stream fade
+  at 0 / 0: funcStr 0x17 instead of 1. The exec step (stepFade) blends start -> target by frame / frames
+  and runs only while TskSnd +0x40 is 100 (101 ends; nothing found writes it). `TskSnd::getVolume`
+  0x1f9658 returns the fade's *target* (+0x84 / +0x88), not the volume now. Task kind 0x12.
+- **3D sounds** (2026-10-26): `GamSnd3d` (0x50): +0 m_pos (room coordinates, update3d), +0x10 m_src
+  (put_*_3d_pos: pos + the WRD room offset; _chr: the offset), +0x20 the SE / stream, +0x24 its record
+  (SndMan id), +0x28 flags (1 stream, 2 heard only in its room / dropped by stopObjSnds, 4 follows
+  object +0x2c, 0x20 start now, 0x40 restarted by update3dVolume, 0x200 one-shot), +0x2c oid (0 a fixed
+  position), +0x30 the room (WRD), +0x34 the entry (NULL: m_defEntry), +0x38 the sort key (3000 at
+  put), +0x3c / +0x40 the volume set. put_* sort the used list by the xz-then-y length of m_src; the
+  _chr forms are once per (oid, sound). `update3d` 0x1e3c24 (skipped while flags bit 0 or GamMan
+  m_flags2 bit 31): fixed sounds key |dx|, object ones the *sum* dx + dy + dz (as the ROM does); beyond
+  15000 on x or z an SE stops / a stream fades over 10 frames (m_strTaskId); the 3 nearest SEs or 4
+  nearest streams go to `update3dVolume` 0x1e386c: gamSnd3dVolume, eased ((new + old) * 0.75 when new
+  is 0 or > 0x20 off), times m_3dScale outside its room, SE volume > 0xff -> 0; an ended sound restarts
+  (playSE / playStr 7-argument forms) unless a one-shot (0x200, or 0x20 | 0x40), which is deleted.
+- The 7-argument playSE 0x1e50c8 is (se, volL, volR, pitch, attr, delay, flags): a delay hands it to a
+  TskSnd kind 5 (TskSndParam +0x10 attr, +0x18 pitch) starting at CmnTaskMan frame + delay; playStr
+  0x1e5428 is (str, volL, volR, pitch, loop, id, flags).
+- `gamSnd3dVolume` 0x1e6e00: the entry's distance fade (+0x2e up to distance +0x2c, +0x30 from +0x2a,
+  linear between) times `gamSndEarGain` 0x1e6d54 per ear (+-pi/3 off the facing; 0.3 behind .. 1.0 ahead).
+
+## task/tsk_scene.cpp (0x1f6c64..0x1fc4f0, pinned 2026-10-26)
+
+Anchored by "task/tsk_scene.cpp" at 0x1f8034 / 0x1f81a8 (assert lines 790 / 852, the scene's camera and
+focus file loads); ScenePlay's vtable slots sit on both sides (0x1f7d54..0x1f82e4), so the run from
+tsk_chr.cpp's end to naga_chunk.cpp is one file. Classes: DisplayMessage, SeManager, VoiceManager,
+ScenePlaySingle, ScenePlay (0x2e4dd0), PLScenePlay (0x2e4d90), TskSnd (0x2e4e70), TskAttack (0x2e4eb0),
+TskDamage (0x2e4ef0), TskCamera (0x2e4f30); free functions scenePlayStart 0x1f83f4, scenePlayStartSimple
+0x1f8cec, scnChrRequest 0x1fac60, gamSystemDataLoaded 0x1f8fb8 (empty), gamStage2Loaded 0x1fbbd0 (a
+free-memory debug print). 0x1fc47c / 0x1fc490 (a reset and a destructor freeing +0x504) belong to a class
+not identified yet.
+- `TskCamera` (kind 0 of the task list; native 016 case 50 builds it as `TskCamera(a2, a1)`, a1 the
+  script's words): kind 0 = look around with the left stick (words 1..3 the centre rotation, 4..6 / 7..9
+  min / max, 10 the speed; plus a random drift, both smoothed 0.9 / 0.1 and 0.85 / 0.1) written into the
+  scene camera (MagScene +0x2ab70 = bss 0x7268f0) m_rotate each frame; kind 1 = one set-up: words 0 / 1
+  two objects turned to face each other (word 2: both), the camera mode 1 at pitch -0.2, 30 to the side
+  of object 0 and 70 back from object 1's head (160 up), pulled 15 in when MagScene::castRay hits. Both
+  run until killed (exec returns 0). 0x25b8c0 is `sceVu0ScaleVector` (lib-context).
+- Event scenes (written 2026-10-26): `scenePlayStart(name, oids, withEff)` (natives 0x46 returns it /
+  0x47) finds `name/name` (`scnMakeScenePath`: the name up to its '.') in GamMan's event pack (+0x22a80);
+  that file is a pfh: file 0 a NagaChunk table (16-byte entries {name[8], offset, ?}, zero-terminated;
+  `find` scans on from the cursor, so callers rewind), file 1 an effect (EffMan kind 0xd, data
+  pointer at param +0x10; only withEff), file 2 the focus track (`MagScene::setFocusData`, size from the
+  pfh's size table). Chunks: "map" (int; 0xcccc once the motion names were converted -- written back
+  into the pack), "CHARA" -> "THREAD" per actor -> "name" (model; loaded with an oid / arg picked from
+  `motNameGetCategory`: 0 (1,0) 0x2000, 1 (1,1) 0x2400, 2 (1,3) 0, 3 (2,5) 0xc00, 4 (2,4) 0x800, 5 (1,2)
+  0x1400, 6 (2,9) 0x1800, 8+ (1,3) 0x400 * (cat - 7) + 0x2400, unless the oids array's entry is a live
+  object), "data" (0x48-byte `ScenePlayRecord`s run by a `ScenePlaySingle`), "STR" (up to 19 {name,
+  key} motion names for `motNameConvert`); "frame" (the length), "MESSAGE" -> "strings" (lines). Kills
+  kind-5 tasks first, clears GamMan m_flags2 bit 31, sets g_sequence.m_flags 0x400, and adds the
+  ScenePlay (kind 0xf) with flags 0x11 on GamMan::m_frameTaskId. Record kinds: 1 place + Y rotation, 2
+  motion (speed rec/60), 3 SE (panned volume or at the actor's Bip01 node; SeManager stops it after its
+  frames), 4 voice stream, 5 message line (window 0x20,0x140 0x1c0x0x50), 6 / 7 scene fade in / out
+  (skipped while one runs), 8 / 9 show / hide. ScenePlay::term releases the models it loaded.
+
+## Enemy move / turn tasks (task/tsk_enemy.cpp, 2026-10-29)
+
+- Pinned 0x20067c..0x203d94; no RoR source string (the name is the port's). Both classes kind 0x13,
+  manager-owned (EmyMain::loadParam), exec always returns 0; the result goes to the starter's word
+  (*m_done: 0 under way, 1 arrived / facing, 2 the target is gone).
+- **TskEnemyTurn** (0x2e5080, EE 0x60): exec 0x2035d8 -> getTargetPos 0x203b44 (the PC: spine node led
+  along the *enemy actor's* facing by the PC's state-class speed x 3: class 7 E4 ? 2.575 : 90/13,
+  class 6 E4 ? 2.575 : 26/7, class 8 2.5), setTurnMotion 0x203828 (motion 9 when the target is left of
+  the facing, else 8; changeMotion(m_speed, no, 1, -1, -1)), turn 0x203684 (*done = 1 within +0x28),
+  tickVoice 0x203a28. init 0x203494 and term 0x203468 both stop the voice.
+- **TskEnemyMove** (0x2e5040, EE 0xad0): exec 0x2008f0 copies the actor's m_trans to bss 0x6e97d8 (read by
+  the route helpers only), then plan 0x200988 (switch on pickEvent 0x200bc4: 1 restart / 2 m_kind[1]
+  countdown re-plan with SctLayer::searchPath over secta list 1 into +0x88, points of 0x10 at +0x288,
+  count +0xa78, index +0xa7c; 3 / 4 stand motions 2 or 10 when carrying), step 0x200d18 (states 0..4),
+  tickVoice 0x202fe4 (EmyManager work word = talking; at most four; types 7..9 set the word without a
+  voice and never clear it before stop). getTargetPos 0x20313c leads the PC by its speed x the frames to
+  reach it at m_walk (cap 250) and keeps the led point only when it is on a cell of m_layer
+  (getEmyTypeFlag: 1 for every type). The countdowns +0xa9c / +0xaa4 / +0xaac and m_se are never set
+  before use in the ROM (the port zeroes them / -1 in the constructors).
+- TskEnemyMove's route (complete 2026-10-29): +0x88 is a GamSectaPath (cells, m_num +0x284), +0x288 127
+  points of 0x10 (setRoute 0x2019d0: a cell's m_pos per path cell after the start, m_goal last; a point
+  replaces the one before where the way bends under pi/4), +0x18 a findCells scratch (isBlocked 0x202e20 /
+  moveRoot). Steps: 0 nextPoint 0x201164 + walk 0x201524 (root motion steered by the angle off / frames
+  left, at most m_turn per frame; a turn past pi/4), 1 a stand / look / side step moved by its root until
+  the mode ends (moveRootStill 0x202638), then checkBump 0x202234, 2 a turn on the spot (startTurn
+  0x202874: motion 9 / 8, 15 / 14 carrying) until within pi/6, 3 wait for the blend, 4 restart the walk
+  motion. Blocks: moveRoot 0x202380 returns 1 off the list's cells, 2 into an object; avoid 0x202900
+  side-steps (0x10 / 0x11) to a free side m_angle off, probed m_dist out, else m_wait1 = 0 forces a
+  re-plan. Walk motions: m_parsonality + 3, 7 near the goal (+0xab4, the kind row's float word 4, also
+  switches +0x50 to the +0x58 speed), 0xb carrying (m_mode 0). +0xa80 is the turn side (1 = motion 8).
+- emyPlaySE 0x16a8a4 returns playSE's SndMan id (both tasks keep it).
+
+### Language select (mnu/mnuSelectLanguage.cpp, 0x1bdae4..0x1be2cc)
+
+MnuSelectLanguage (EE 0x1090) is held by MagLifeMenuSelLang (menu 0x10010) at +0x40: MsgManSet at
++0x14, SprMan at +0x78c, m_pScene +0x1078 (the assert's name), cursor +0x107c (0..4: English,
+French, German, Spanish, Italian, texts 0x2b8c90 with colour codes #c15 / #c8), window slot
++0x1084. A 512 x 256 scene window at (220, 120); background location.tm2 / sellang_bg_tcc from
+data/mnurpk/mnusllg.rpk, which the US disc does not have (PAL leftover). Cross calls
+MagSystem::setLanguage (0x1178b8); while shown it forces GamMan option 0 (brightness) to 4 and
+restores getStatus(0x10) on exit, and sets g_bss_7a3d48 / g_bss_7a3d4c to 1.
+

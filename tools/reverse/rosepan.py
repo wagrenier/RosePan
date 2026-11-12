@@ -8,9 +8,9 @@ and the same ee-gcc 2.9x runtime as FF2.
 import json
 import os
 import re
-import urllib.parse
-import urllib.request
 from pathlib import Path
+
+import ghidra_mcp
 
 TOOLS = Path(__file__).resolve().parent
 REPO = TOOLS.parents[1]
@@ -19,9 +19,10 @@ DATA = TOOLS / 'data'   # results worth keeping: name ledger, TU state, layout
 
 ELF = Path(os.environ.get('ROSEPAN_ELF', REPO / 'SLUS_214.48'))
 FUNCTIONS_TXT = REPO / 'ror_functions.txt'
-# Program name as Ghidra reports it (project path /Rule of Rose - US).
-PROGRAM = os.environ.get('ROSEPAN_PROGRAM', 'SLUS_214.48')
-GHIDRA = os.environ.get('GHIDRA_MCP_URL', 'http://127.0.0.1:8089').rstrip('/') + '/'
+# Program name as Ghidra reports it (project path /Rule of Rose - US). Which Ghidra holds it, among
+# several running (one per game, ports 8089..8104): ghidra_mcp.py, by data/ghidra.json's project.
+PROGRAM = os.environ.get('ROSEPAN_PROGRAM') or ghidra_mcp.PROGRAM or 'SLUS_214.48'
+GHIDRA_CLIENT = ghidra_mcp.Ghidra(PROGRAM)
 
 # Library references (read-only, offline): an ELF plus a functions.txt-style list with sizes.
 REIPAN = Path(os.environ.get('ROSEPAN_REIPAN', REPO.parent / 'ReiPan'))
@@ -32,9 +33,23 @@ REFERENCES = (
     ('ff3', REIPAN / 'SLES_538.25', REIPAN / 'ff3_functions.txt', 'Sony SDK 3.0 libraries (same versions as RoR)'),
     ('ff2', MIOPAN / 'SLES_523.84', MIOPAN / 'functions.txt', 'ee-gcc 2.96 runtime, newlib, SDK 2.8 (debug symbols)'),
 )
+# IOP import names (read-only): PCSX2's table of Sony IOP library exports by index (iop.py).
+PCSX2 = Path(os.environ.get('ROSEPAN_PCSX2', REPO.parent / 'pcsx2'))
 
-# The game's disc files (unpacked), for data tools (tm2png.py --scan, rawfile-style readers).
-GAME_DATA = Path(os.environ['ROSEPAN_DATA']) if os.environ.get('ROSEPAN_DATA') else None
+# The game's disc files (unpacked), for data tools (tm2png.py --scan, rawfile-style readers) and the
+# smoke run's data root: $ROSEPAN_DATA, else settings.data_dir in data/tus.json (the user's copy of the
+# extracted disc; the game boots from host0: on these loose files, open-items.md Decisions).
+def _game_data():
+    if os.environ.get('ROSEPAN_DATA'):
+        return Path(os.environ['ROSEPAN_DATA'])
+    try:
+        d = json.loads((TOOLS / 'data' / 'tus.json').read_text(encoding='utf-8'))['settings'].get('data_dir')
+    except (OSError, ValueError, KeyError):
+        d = None
+    return Path(d) if d and Path(d).is_dir() else None
+
+
+GAME_DATA = _game_data()
 SRC = REPO / 'src'
 PLATFORM_DIRS = ('rosepan', 'sdk')        # the PC platform layer: not RoR game code
 SKILL_DIR = REPO / '.claude' / 'skills' / 'rosepan-port'
@@ -129,25 +144,24 @@ def src_path_for(inferred_file):
 # ---- Ghidra ---------------------------------------------------------------------------------------
 
 def http(method, endpoint, program=None, body=None, timeout=300, **query):
-    """Call GhidraMCP. `program` always goes in the query string: in a POST body it is silently
-    ignored and the write lands on whichever program is active."""
-    program = program or PROGRAM
-    url = GHIDRA + endpoint + '?' + urllib.parse.urlencode({'program': program, **query})
-    data = json.dumps(body).encode() if body is not None else None
-    req = urllib.request.Request(url, data=data, method=method, headers={'Content-Type': 'application/json'})
-    return urllib.request.urlopen(req, timeout=timeout).read().decode('utf-8', 'replace')
+    """Call GhidraMCP in the instance that holds the project. `program` always goes in the query
+    string: in a POST body it is silently ignored and the write lands on whichever program is active.
+    No instance (or several) raises ghidra_mcp.GhidraError, an OSError."""
+    return GHIDRA_CLIENT.http(method, endpoint, body=body, program=program, timeout=timeout, **query)
 
 
 def ghidra_up():
-    """True when the GhidraMCP server answers and has the RoR program open."""
+    """True when the project's Ghidra answers and has the RoR program open."""
+    return GHIDRA_CLIENT.up()
+
+
+def ghidra_down_reason():
+    """Why ghidra_up() is False, for error messages: no instance, or the program is not open in it."""
     try:
-        urllib.request.urlopen(GHIDRA + 'check_connection', timeout=3).read()
-    except OSError:
-        return False
-    try:
-        return PROGRAM in http('GET', 'list_open_programs', timeout=10)
-    except OSError:
-        return False
+        inst = ghidra_mcp.find(GHIDRA_CLIENT.project, PROGRAM)
+    except OSError as e:
+        return str(e)
+    return f'{PROGRAM} is not open in {inst.describe()}'
 
 
 def function_names(program=None):
@@ -182,7 +196,10 @@ def save_program(tries=6):
 # ignored it even in the query string). Every writer saves with save_program() when its batch is done.
 
 def has_function(addr):
-    return not http('GET', 'get_function_by_address', None, address=f'0x{addr:x}', timeout=60).startswith('No function')
+    """True when a function STARTS at addr (get_function_by_address answers for any address inside a body)."""
+    out = http('GET', 'get_function_by_address', None, address=f'0x{addr:x}', timeout=60)
+    m = re.search(r'Entry:\s*([0-9a-fA-F]+)', out)
+    return bool(m) and int(m.group(1), 16) == addr
 
 
 def create_function(addr, name='', tries=4):

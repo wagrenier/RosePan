@@ -141,10 +141,12 @@ w('')
 
 # ---- frontier ------------------------------------------------------------
 frontier = Counter()
+frontier_ignore = {int(x, 16) for x in rosepan.load_json(rosepan.DATA / 'tus.json', {})
+                   .get('settings', {}).get('frontier_ignore', [])}
 for a in done:
     f = feat.get(a, {})
     for c in f.get('calls', []) + f.get('tails', []):
-        if c not in done and c in feat and not in_lib(c):
+        if c not in done and c in feat and not in_lib(c) and c not in frontier_ignore:
             frontier[c] += 1
 w('## Frontier (called by reconstructed code, not written yet)')
 w('')

@@ -15,7 +15,7 @@ sections are RoR's own. When something here proves wrong or incomplete, fix this
   proven. Settle a TU's extent from the brief's identity section and pin it with
   `tus.py define <file> <lo>-<hi> --why "..."`.
 - Files RoR does not name (no assert in them: the `rx` file / thread middleware just below the SDK
-  libraries -- its "rxfile : ..." strings run 0x244410..0x24aff8, its start is not settled -- `main` at
+  libraries -- pinned as rx/rxsys.cpp, rx/rxfile.cpp, rx/rxthread.cpp -- `main` at
   0x2045a8, unanchored runs): a descriptive file in the directory the code serves (the middleware under
   `rx/`), recorded with `define --why` and in `architecture.md`.
 - Inline methods and template instances (the named linkonce sections, data/layout.json
@@ -95,7 +95,7 @@ DogActor::DogActor(...)
   them), never for game logic.
 - **Assert macros**: an assert compiles to `if (!(expr)) assert_handler(__FILE__, __LINE__, "expr")`
   (handler 0x215a30: prints "Assertion Failed: %s(%d)   %s" and hangs). Write it back as the project's
-  assert macro with the ROM's expression text -- the expression names the members (`m_max_motion`,
+  assert macro (`ROR_ASSERT`, src/common/ror_assert.h; explain the handler call with `// callcheck: FUN_00215a30 (...)`) with the ROM's expression text -- the expression names the members (`m_max_motion`,
   `m_top->m_num_file`) the code uses, which is how fields get their names. Keep the condition exactly;
   the host macro reports and continues (a hung assert helps nobody on PC; say so once in the macro).
 - **Classes are real.** Every class with a vtable has its real name in the ELF; its virtuals are slots
@@ -114,7 +114,10 @@ DogActor::DogActor(...)
   `SND_FUNC_NO`, `MSG_MODE`) are real names: use them.
 - EE addresses in game code (load targets, packet buffers, scratchpad 0x70000000) go through the platform
   layer's host-pointer translation at the point of use. Hardware goes through the SDK replacements
-  (`sceGs*`, `sceDma*`, `sceSif*`, libvu0) -- never talk to SDL from game code. Where a PS2 behaviour has
+  (`sceGs*`, `sceDma*`, `sceSif*`, libvu0) -- never talk to SDL from game code. **Drawing is the
+  exception to "through the SDK":** do not route RoR's draws through GIF packets into the emulated GS
+  (too slow); the function that would write the packet calls the host draw module for its subsystem
+  instead (architecture.md "PC platform layer", "The draw path is native"). Where a PS2 behaviour has
   to be emulated in game code, mark it `// PC:` with the reason.
 - `printf` goes to the log; keep the game's messages (they are often the best names).
 
@@ -146,6 +149,10 @@ touches it, and make the compilers prove its layout.
   their EE offsets in comments, `layout: host` above it, and `static_assert(offsetof(...) >= ...)` lower
   bounds where useful. Data that must keep EE bytes (a file image, a DMA packet) never lives inside such
   a class: give it a plain struct with exact asserts.
+  Exception, the Dog* layer (dog/dogentity.h, 2026-10-27): it keeps EE offsets, non-polymorphic, with
+  the EE vptr word as a class tag the constructors set to their EE vtable address; a virtual called
+  through a base pointer becomes a `call<Slot>()` member that switches on the tag
+  (DogEntity::callTransform). Use the same pattern for other EE-layout class families.
 - **Host types** (the EE is GCC 2.9x MIPS; the hosts are MinGW GCC and MSVC on x64, both LLP64):
   - `long` is 64-bit on the EE, 32-bit on both hosts: EE `long` / `u_long` -> `int64_t` / `u_long`
     (uint64_t); never plain `long` (layoutcheck flags it).

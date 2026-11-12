@@ -7,16 +7,18 @@ python build.py [--config relwithdebinfo|debug|release] [--run SECONDS [--shot-e
 - Configures the build directory on first use, reusing a sibling ReiPan / MioPan build's fetched
   dependency sources when present (no re-download).
 - Runs ninja; retries once when parallel shadercross runs collide on a Windows file lock.
+- Refuses raw NUL bytes in src/ (MinGW compiles a quoted NUL, MSVC fails C2137).
 - Prints unique compile errors and undefined references. Exit code = build result.
 - --run N starts the exe for N seconds and prints stub hits, warnings and the log tail; the full output
   goes to work/run_<config>.log (tus.py ranks reached stubs first). The platform layer saves a screenshot
   every --shot-every presented frames (default 60) to work/shots/shot_<frame>.png + last.png
-  (ROSEPAN_SHOT_DIR / ROSEPAN_SHOT_EVERY); $ROSEPAN_DATA is passed on as ROSEPAN_DATA_DIR.
+  (ROSEPAN_SHOT_DIR / ROSEPAN_SHOT_EVERY); $ROSEPAN_DATA (else tus.json settings.data_dir) is passed on as ROSEPAN_DATA_DIR.
 - --pad SCRIPT scripts pad 0 for the run ("<read>:<BUTTON>[*<reads>],...": hold BUTTON 3 pad reads, or
   <reads>, from the given pad read, about one per game frame; LSUP/LSDOWN/LSLEFT/LSRIGHT push the left
   stick) and masks the host's pads and keyboard (ROSEPAN_AUTOPAD, src/sdk/libpad.cpp). Without --pad,
   $ROSEPAN_AUTOPAD (if set) is passed on; `--pad none` runs with host input.
 - --env NAME=VALUE passes extra variables to the game (debug hooks a session adds: a warp, a probe).
+  Runs get ROSEPAN_SKIP_INTRO=0 unless it is set, so rosepan.ini's [game] skip_intro never shifts the pad.
 Override paths with ROSEPAN_MINGW_BIN / ROSEPAN_NINJA.
 """
 import os
@@ -66,6 +68,16 @@ else:
     subprocess.run(['cmake', str(bdir)], env=env, capture_output=True)
 
 
+# A raw NUL byte in a source file (a shell-written backslash-zero that landed unescaped): GCC takes the
+# quoted NUL as a character, MSVC stops on C2137 "empty character constant". MinGW never shows it.
+nul = [f'{p.relative_to(rosepan.REPO)}:{i}' for p in sorted((rosepan.REPO / 'src').rglob('*'))
+       if p.suffix in ('.c', '.cpp', '.h', '.hpp', '.inl')
+       for i, line in enumerate(p.read_bytes().split(b'\n'), 1) if bytes(1) in line]
+if nul:
+    print('raw NUL bytes (MSVC rejects them; write the escape instead):', ', '.join(nul))
+    raise SystemExit('build FAILED (NUL bytes in sources)')
+
+
 def build():
     with open(log, 'w', encoding='utf-8', errors='replace') as f:
         return subprocess.run([NINJA, '-C', str(bdir), EXE], env=env, stdout=f, stderr=subprocess.STDOUT).returncode
@@ -99,8 +111,11 @@ if '--run' in sys.argv:
         old.unlink()
     every = sys.argv[sys.argv.index('--shot-every') + 1] if '--shot-every' in sys.argv else '60'
     run_env = dict(env, ROSEPAN_SHOT_DIR=str(shots), ROSEPAN_SHOT_EVERY=every)
-    if 'ROSEPAN_DATA_DIR' not in run_env and os.environ.get('ROSEPAN_DATA'):
-        run_env['ROSEPAN_DATA_DIR'] = os.environ['ROSEPAN_DATA']
+    # The scripted pad is timed against the boot's logos and movies: a skip_intro in the player's
+    # rosepan.ini must not move them (--env ROSEPAN_SKIP_INTRO=1 skips them for one run).
+    run_env.setdefault('ROSEPAN_SKIP_INTRO', '0')
+    if 'ROSEPAN_DATA_DIR' not in run_env and rosepan.GAME_DATA is not None:
+        run_env['ROSEPAN_DATA_DIR'] = str(rosepan.GAME_DATA)
     if '--pad' in sys.argv:
         pad = sys.argv[sys.argv.index('--pad') + 1]
         if pad == 'none':

@@ -1,0 +1,156 @@
+// lib/unassigned_stubs.cpp -- Rule of Rose module (file from the inference in ror_functions.txt).
+// Functions below are stubs until reconstructed; see tools/reverse/stage.py.
+#include <math.h>
+#include <string.h>
+#include "game/gamsnd.h"
+#include "rx/rxsnd.h"
+#include "mnu/mnuSelectLanguage.h"
+#include "msg/msgman.h"
+#include "debug/motnamecnv0.h"
+#include "task/naga_chunk.h"
+#include "task/tsk_scene.h"
+#include "dog/dogtexinfo.h"
+#include "emy/emy_main.h"
+#include "emy/emy_dwf.h"
+#include "mag/maglifepc.h"
+#include "eff/eff0.h"
+#include "eff/effclasses.h"
+#include "eff/effgeneric.h"
+
+#include "dog/dogentity.h"
+#include "mag/maglifebwn.h"
+#include "mag/magscene.h"
+#include "dog/dogcamera.h"
+#include "dog/doglightpool.h"
+
+#include "common/rosepan_stub.h"
+#include "game/gamman.h"
+#include "lib/unassigned.h"
+#include "mag/magsystem.h"
+#include "rx/rxfile.h"
+#include "rx/rxsys.h"
+#include "rx/rxthread.h"
+#include "sequence/sequence.h"
+#include "snd/sndman.h"
+#include "utl/utltm2.h"
+
+// ---- globals (hand-written) ----
+// (The global managers moved to system/system.cpp.)
+
+int g_emyManagerTaskId;         /* bss 0x7b45c0 */
+int g_bss_7a3d48;               /* bss 0x7a3d48 */
+int g_bss_7a3d4c;               /* bss 0x7a3d4c */
+int g_bss_7a3210;               /* bss 0x7a3210 */
+int g_bss_7812ac;               /* bss 0x7812ac */
+int g_bss_780d04;               /* bss 0x780d04: GamMan option 0 (brightness) */
+
+const char *g_versionNumber = "1.01";   /* data 0x2d9e18 -> 0x301720 */
+
+// ---- stubs (tools/reverse/stubgen.py) ----
+
+// ---- bridges (hand-written) ----
+
+// ──────────────────────────────────────────────────────────────────────
+// Equality without case: a..z fold to A..Z (unassigned@00106010, written
+// ahead for MagLoaderIndex::find).
+// ROR 0x00106010
+
+int utlStrEqualNoCase(const char *a, const char *b)
+{
+    char ca = *a;
+    for (;;) {
+        a++;
+        char cb = *b++;
+        if ((unsigned)(cb - 'a') < 26)
+            cb -= 0x20;
+        if ((unsigned)(ca - 'a') < 26)
+            ca -= 0x20;
+        if (ca != cb)
+            return 0;
+        if (ca == 0)
+            return 1;
+        ca = *a;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Upper-case bounded copy (unassigned@00106010, written ahead for
+// motNameGetMotionName). The ROM tests newlib's _ctype_ (0x3079a8 + 1) bit
+// _L with the signed char as index; only a..z have it, so the host compares
+// the range. Like the ROM it writes dst[n - 1] even when n <= 0 (every
+// caller passes n > 16).
+// ROR 0x00106064
+
+char *utlStrNCopyUpper(char *dst, int n, const char *src)
+{
+    if (n > 0) {
+        char *d = dst;
+        int i = 0;
+        for (;;) {
+            char c = *src;
+            if ((unsigned)(c - 'a') < 26)
+                c -= 0x20;
+            *d = c;
+            if (c == '\0')
+                break;
+            i++;
+            d++;
+            src++;
+            if (i >= n)
+                break;
+        }
+    }
+    dst[n - 1] = '\0';
+    return dst;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// A step along angle on the ground plane (unassigned@001e6cac, written
+// ahead for native 152).
+// ROR 0x001f6b28
+
+void utlAddPolar(float angle, float dist, float *v)
+{
+    v[0] = v[0] + sinf(angle) * dist;
+    v[2] = v[2] + cosf(angle) * dist;
+}
+
+// ---- stubs (hand-written: EmyMain / EmyOut and the enemy classes' constructors and destructors, which stubgen does not write) ----
+
+// ---- stubs (hand-written: the mnu/ menu objects' virtual slots, which stubgen cannot see behind the vtable) ----
+
+// stub of ROR 0x00172678
+
+// ---- Eff constructors / destructors (hand stubs: stubgen leaves them out; eff/effclasses.h) ----
+
+// stub of ROR 0x0028c050
+// stub of ROR 0x00172b30
+// stub of ROR 0x00172cb8
+// stub of ROR 0x0028c058
+// stub of ROR 0x0028c060
+// stub of ROR 0x00172d98
+// stub of ROR 0x0028c148
+// stub of ROR 0x0028c150
+// stub of ROR 0x0028c158
+// stub of ROR 0x00172de8
+// stub of ROR 0x00172e08
+// stub of ROR 0x0028c240
+// stub of ROR 0x0028c248
+// stub of ROR 0x00174dd8
+
+// stub of ROR 0x00174e9c
+
+// stub of ROR 0x00174eb0
+
+// stub of ROR 0x0017512c
+
+// stub of ROR 0x00175170
+
+// stub of ROR 0x00175254
+
+// stub of ROR 0x00175268
+
+// stub of ROR 0x00175378
+
+// stub of ROR 0x001755e8
+

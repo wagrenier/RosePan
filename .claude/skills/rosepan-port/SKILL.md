@@ -40,9 +40,11 @@ Read before working:
 
 ## Environment
 
-- Ghidra 12.1.2 with the GhidraMCP plugin (HTTP `127.0.0.1:8089`), project `C:\Users\willi\Ghidra`,
-  program `SLUS_214.48` (path `/Rule of Rose - US`) open. The tools use HTTP through
-  `tools/reverse/rosepan.py` (`program` always in the query string). Offline (Ghidra down): status,
+- Ghidra 12.1.2 with the GhidraMCP plugin, project `C:\Users\willi\Ghidra`, program `SLUS_214.48`
+  (path `/Rule of Rose - US`) open. Several Ghidras may run (one per game, each on its own port of
+  127.0.0.1:8089..8104): the tools use HTTP through `tools/reverse/rosepan.py`, which finds the one
+  holding the project with `ghidra_mcp.py` (`python ghidra_mcp.py which` / `list`; `program` always in
+  the query string). Offline (Ghidra down): status,
   export, sections / libmatch plans, tus list/check/finish, callcheck and build work from cached `work/`.
 - Tools: `tools/reverse/` (run from there: `python <tool>.py`); every tool is in its README.
 - Build: `python build.py` (MinGW + ninja, configures on first use) once the platform bootstrap host
@@ -101,6 +103,8 @@ regular work: use the tools below, still finish with a commit.
    not picked again, and the first session whose screenshot shows its output marks it `done`. When a run
    needs more than the boot, extend `settings.smoke_pad` (the pad syntax is in build.py) and say how far
    it now gets in open-items.md.
+   **Drawing never goes through the emulated GS** (the user's rule): a draw TU calls the native host
+   draw module for its subsystem and grows it (architecture.md "PC platform layer").
 7. **Record.** Facts -> `architecture.md`; traps -> `hazards.md`; cross-TU questions / decisions ->
    `open-items.md`; better ways of working -> this file / `reconstruction.md` / the tools README. If
    writes under `.claude/` are denied (autopilot), put the text in `--notes` after "For the
@@ -124,8 +128,8 @@ terminal. A session never starts other sessions, agents or scheduled tasks, and 
 `autopilot.py` or the routine (the user does). Within a session, run the protocol without asking at each
 step; pause only for decisions that are genuinely the user's (restructuring the tree, non-trivial
 platform-layer changes, destructive git) -- and when no answer can come, decide, record the doubt in
-`open-items.md`, and finish. Pushing is not approved for this repository until the user says so (it has
-no remote yet; open-items.md "Decisions" records it when it changes).
+`open-items.md`, and finish. Pushing each finished TU's commit (`git push origin HEAD`) is approved
+(the user, 2026-10-22; open-items.md "Decisions").
 An empty queue means re-assess, not "follow the frontier": the frontier score counts call sites from
 written code that may never run (in ReiPan it led seven sessions into effects nobody could see). Refill
 the queue from open-items.md "Next up", in the order a smoke run reaches the stubs.
@@ -141,10 +145,14 @@ above, since lower effort reconstructs worse). Keep that line when editing the f
 | map code | `modview.py range\|tree`, `ror_functions.txt`, `stage.py class:Name` |
 | name | `ctxcard.py`, `name_ctx.py`; one-time seeding `sections.py --apply`, `libmatch.py --apply` |
 | symbols | `gcc2.py` (demangle / mangle GCC 2 names), `sections.py --list FILTER` |
-| read code | `stage.py` (bundles), `dec.py`, `ghidra.py` (asm, refs, mkfunc), `mipsdis.py` (offline asm), `mipsemu.py` (run a leaf function over every input), `sinit.py` (tables a static initializer fills) |
+| read scripts | `seqdis.py` (a chapter's or room's script image: natives, strings) |
+| reach anything | `ROSEPAN_EVENT_TEST` (`build.py --env`): jump to a chapter, room or event, or sweep a chapter (tools README); the same jumps are the ImGui Event test window (F2) |
+| read code | `stage.py` (bundles), `dec.py`, `ghidra.py` (asm, refs, mkfunc), `hidden.py` (functions folded into the body before them), `mipsdis.py` (offline asm), `vudis.py` (VU microprograms), `mipsemu.py` (run a leaf function over every input), `sinit.py` (tables a static initializer fills), `i3racc.py` (classify / name / generate a family of one-line accessors by exact shape) |
 | classes | `rtti.py` (`--class NAME`, `--vtable ADDR`): bases, slots, ctors/dtors, vptr offset |
 | TU identity | `tuid.py <TU>` (also in the brief) |
 | game data | `datadump.py` (an ELF table -> C++ initializers), `tm2png.py` (TIM2 -> PNG references, `--scan` an archive) |
+| sound test | `audiocheck.py` (loudness per second of the mix a run dumps with `ROSEPAN_AUDIO_DUMP`; the ear's stand-in, as the screenshot is the eye's) |
+| IOP modules | `iop.py` (unpack `IOPRP300.IMG`, identify every `.irx`, name imports, write a Ghidra-ready ELF of `RXSNDDRV.IRX`, the game's own IOP code), `iopdec.py` (RXSNDDRV's decompilation cached offline: `dump`, `show ADDR`, `index`; the code is `src/iop/rxsnddrv/`, `IOP 0x...`) |
 | frontier | `build.py`, `stubgen.py --from-build`, `callcheck.py` (all wrapped by `tus.py check`) |
 | type layouts | `layoutcheck.py` (GCC + MSVC asserts, missing asserts, host-type lint; in `check` / `finish`) |
 | crashes | `gdbrun.py`: the game under gdb; a fault holds it, `--cmd` inspects, `--break` stops a hang |
