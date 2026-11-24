@@ -20,3 +20,6 @@ __pycache__/
 cmake-build-*/
 build/
 out/
+
+# Smoke-run screenshots of the game, kept local (tus.py finish runs git add -A)
+progress/
