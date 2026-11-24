@@ -544,7 +544,9 @@ public:
 - `-fno-strict-aliasing` is required (MioPan's release-only crash).
 - **layoutcheck compiles every header on its own**: a header that relies on what its .c included first
   fails; give it its own includes.
-- **The build never runs MSVC**; only layoutcheck does (syntax only): MSVC-only errors show up there.
+- **The local build never runs MSVC**; only layoutcheck does (syntax only): MSVC-only errors show up
+  there. The Windows release is MSVC, the Linux one GCC in Steam Runtime 3 (`.github/workflows/Release.yml`);
+  either failing stops the release.
 - **A raw NUL byte in a character constant breaks MSVC only**: 13cb7db (the aspect task) left
   `dir[0] != '<NUL>'` twice in rosepan_renderer.cpp; MinGW compiled it, the user's Visual Studio build
   stopped on C2137 "empty character constant" (2026-10-29). Cause: a C escape `\0` written through a

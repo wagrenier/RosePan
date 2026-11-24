@@ -1,0 +1,225 @@
+name: Release
+
+# Every push to main that changes what ships becomes the next patch release. Run it by hand
+# to raise the minor or major number, or to release a commit again.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Which part of the version to raise"
+        required: true
+        default: patch
+        type: choice
+        options: [patch, minor, major]
+
+# One release at a time: the next number comes from the last published tag.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  BUILD_TYPE: Release
+  # RosePan does not commit the prebuilt FFmpeg and shadercross trees; they come from here.
+  MIOPAN_REF: 799eaacdc5267be8528c40806480a7ed54db8cc8
+
+jobs:
+  version:
+    # Don't release from forks.
+    if: ${{ github.repository == 'wagrenier/RosePan' }}
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.next.outputs.release }}
+      version: ${{ steps.next.outputs.version }}
+      tag: ${{ steps.next.outputs.tag }}
+      previous: ${{ steps.next.outputs.previous }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # every tag, to find the last release
+
+      - name: Work out the next version
+        id: next
+        env:
+          BUMP: ${{ inputs.bump || 'patch' }}
+          ONLY_IF_CHANGED: ${{ github.event_name == 'push' && '--if-changed' || '' }}
+        shell: bash   # named explicitly: that adds pipefail, so tee can't hide a failure
+        run: bash .github/scripts/next-version.sh "$BUMP" $ONLY_IF_CHANGED | tee -a "$GITHUB_OUTPUT"
+
+  shaders:
+    needs: version
+    if: ${{ needs.version.outputs.release == 'true' }}
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch shadercross (MioPan)
+        uses: actions/checkout@v4
+        with:
+          repository: Mikompilation/MioPan
+          ref: ${{ env.MIOPAN_REF }}
+          path: MioPan
+          sparse-checkout: extern/shadercross/windows
+
+      # The checked-in bytecode is wiped first so a stale file can't slip through.
+      - name: Build shaders (Windows / MSVC)
+        shell: cmd
+        run: |
+          call .github\scripts\msvc-env.cmd || exit /b 1
+          cmake -E rm -rf resources/shaders/dxil resources/shaders/msl resources/shaders/spirv || exit /b 1
+          cmake -B build -G Ninja -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DROSEPAN_COMPILE_SHADERS=ON -DROSEPAN_SIBLING_EXTERN=%CD:\=/%/MioPan/extern || exit /b 1
+          cmake --build build --target compile_shaders || exit /b 1
+
+      - name: Upload compiled shaders
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-shaders
+          if-no-files-found: error
+          path: |
+            resources/shaders/dxil
+            resources/shaders/msl
+            resources/shaders/spirv
+
+  build:
+    needs: [version, shaders]
+    runs-on: ${{ matrix.sys.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        sys:
+          - { os: windows-latest, shell: pwsh, name: windows }
+          # The Steam Deck build: made inside Valve's Steam Runtime 3 "sniper" SDK (Debian 11,
+          # glibc 2.31), not on the runner, because a binary needs at least the glibc it was
+          # linked against and ubuntu-latest's is newer than SteamOS's. Pinned so a release
+          # can be rebuilt with the same environment.
+          - { os: ubuntu-latest, shell: bash, name: linux,
+              container: 'registry.gitlab.steamos.cloud/steamrt/sniper/sdk@sha256:bb30053d3cd19d35c76ae69b2790dbaa1430448006f8240cb6d7e723f2d1940e' }
+    # Empty for Windows, which runs on the host.
+    container: ${{ matrix.sys.container }}
+    defaults:
+      run:
+        shell: ${{ matrix.sys.shell }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download compiled shaders
+        uses: actions/download-artifact@v4
+        with:
+          name: compiled-shaders
+          path: resources/shaders
+
+      # Windows links the prebuilt FFmpeg; Linux builds its own (cmake/ffmpeg.cmake).
+      - name: Fetch FFmpeg (MioPan)
+        if: ${{ matrix.sys.name == 'windows' }}
+        uses: actions/checkout@v4
+        with:
+          repository: Mikompilation/MioPan
+          ref: ${{ env.MIOPAN_REF }}
+          path: MioPan
+          sparse-checkout: |
+            extern/ffmpeg/bin
+            extern/ffmpeg/include
+            extern/ffmpeg/lib
+
+      # The static CRT, so players need no Visual C++ redistributable; CMP0091 makes it reach
+      # the dependencies whose CMake minimum predates that setting (cglm).
+      - name: Build (Windows / MSVC)
+        if: ${{ matrix.sys.name == 'windows' }}
+        shell: cmd
+        run: |
+          call .github\scripts\msvc-env.cmd || exit /b 1
+          cmake -B build -G Ninja -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DROSEPAN_COMPILE_SHADERS=OFF -DROSEPAN_VERSION=${{ needs.version.outputs.version }} -DROSEPAN_SIBLING_EXTERN=%CD:\=/%/MioPan/extern || exit /b 1
+          cmake --build build --target RosePan || exit /b 1
+
+      # The SDK already carries CMake, Ninja and every SDL development package. Its default
+      # gcc is 10; gcc-14 is the newer one it ships.
+      - name: Build (Linux / Steam Runtime)
+        if: ${{ matrix.sys.name == 'linux' }}
+        env:
+          CC: gcc-14
+          CXX: g++-14
+        run: |
+          git config --global --add safe.directory '*'
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DROSEPAN_COMPILE_SHADERS=OFF -DROSEPAN_VERSION=${{ needs.version.outputs.version }}
+          cmake --build build --target RosePan
+
+      - name: Check Steam Deck compatibility (Linux)
+        if: ${{ matrix.sys.name == 'linux' }}
+        run: bash .github/scripts/check-linux-abi.sh build/RosePan/RosePan
+
+      # The build only warns when FFmpeg is missing; a release must not ship without movies.
+      - name: Check FFmpeg is in (Windows)
+        if: ${{ matrix.sys.name == 'windows' }}
+        run: |
+          if (-not (Test-Path build/RosePan/avcodec-*.dll)) { throw "FFmpeg was not linked" }
+          Copy-Item MioPan/extern/ffmpeg/LICENSE build/RosePan/FFmpeg-LICENSE.txt
+          Copy-Item MioPan/extern/ffmpeg/README.txt build/RosePan/FFmpeg-README.txt
+
+      - name: Zip Windows App
+        if: ${{ matrix.sys.name == 'windows' }}
+        working-directory: build
+        run: Compress-Archive -Path RosePan/* -DestinationPath RosePan_windows_${{ needs.version.outputs.tag }}.zip
+
+      - name: Zip Linux App
+        if: ${{ matrix.sys.name == 'linux' }}
+        working-directory: build
+        run: zip -r RosePan_linux_${{ needs.version.outputs.tag }}.zip RosePan/*
+
+      - name: Upload release zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.sys.name }}
+          if-no-files-found: error
+          path: build/RosePan_${{ matrix.sys.name }}_${{ needs.version.outputs.tag }}.zip
+
+  # Needs both platforms: a failed build publishes nothing and leaves the number unused.
+  publish:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download release zips
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: dist
+
+      # gh uploads to a draft and publishes it last, and the tag appears only then.
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          TAG: ${{ needs.version.outputs.tag }}
+          PREVIOUS: ${{ needs.version.outputs.previous }}
+        run: |
+          set -euo pipefail
+          if gh api "repos/$REPO/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::$TAG already exists"
+            exit 1
+          fi
+
+          notes="- \`RosePan_windows_$TAG.zip\`: Windows
+          - \`RosePan_linux_$TAG.zip\`: Steam Deck and Linux (Steam Runtime 3)
+
+          The game's data is not included; dump it from your own disc.
+
+          Commit: $SHA"
+          notes=$(sed 's/^ *//' <<<"$notes")
+
+          since=()
+          if [ -n "$PREVIOUS" ]; then
+            since=(--notes-start-tag "$PREVIOUS")
+          fi
+          gh release create "$TAG" dist/*.zip --repo "$REPO" --target "$SHA" \
+            --title "RosePan $TAG" --notes "$notes" --generate-notes "${since[@]}"

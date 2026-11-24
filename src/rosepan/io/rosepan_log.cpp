@@ -71,6 +71,9 @@
 /* Build stamp.  Supplied per-source by CMakeLists.txt so that a new commit
  * rebuilds this file and not the other thousand-odd translation units; absent
  * when the tree was configured without git, which is not worth failing over. */
+#ifndef ROSEPAN_VERSION
+#define ROSEPAN_VERSION "dev"
+#endif
 #ifndef ROSEPAN_BUILD_COMMIT
 #define ROSEPAN_BUILD_COMMIT "unknown"
 #endif
@@ -538,8 +541,8 @@ void WriteBanner(spdlog::level::level_enum level, bool rom_enabled)
 
     g_port->info("======== RosePan ========================================"
                  "====================");
-    g_port->info("build     : {} {}  commit {}  ({})", __DATE__, __TIME__,
-                 ROSEPAN_BUILD_COMMIT, ROSEPAN_BUILD_TYPE);
+    g_port->info("build     : {}  {} {}  commit {}  ({})", ROSEPAN_VERSION,
+                 __DATE__, __TIME__, ROSEPAN_BUILD_COMMIT, ROSEPAN_BUILD_TYPE);
     g_port->info("platform  : {}  {} logical cores  {} MB RAM",
                  SDL_GetPlatform(), SDL_GetNumLogicalCPUCores(),
                  SDL_GetSystemRAM());

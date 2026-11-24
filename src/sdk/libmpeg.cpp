@@ -19,8 +19,9 @@
  *  avcodec, avutil and swscale are linked -- there is no container left by the
  *  time the bytes reach it, so avformat is not needed.
  *
- *  Build without the prebuilt FFmpeg tree (see cmake/ffmpeg.cmake) and the
- *  decoder compiles out: movies then play their audio over a black screen.
+ *  Build for Windows without the prebuilt FFmpeg tree (see cmake/ffmpeg.cmake)
+ *  and the decoder compiles out: movies then play their audio over a black
+ *  screen.  Linux builds FFmpeg from source.
  * ======================================================================== */
 
 #include "libmpeg.h"

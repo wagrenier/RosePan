@@ -13,6 +13,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(WIN32 AND NOT MSVC)
     set(CMAKE_EXE_LINKER_FLAGS "-static")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # Releases are built in the Steam Runtime 3 SDK for its old glibc, but with its gcc-14,
+    # whose libstdc++ is newer than the one sniper and older distros carry: link it in.
+    # glibc itself stays dynamic, SDL dlopens the GPU drivers and windowing libraries.
+    string(APPEND CMAKE_EXE_LINKER_FLAGS " -static-libstdc++ -static-libgcc")
 endif()
 
 set(ROSEPAN_ICON "${CMAKE_CURRENT_SOURCE_DIR}/extern/rosepan.ico")
@@ -78,8 +83,8 @@ target_link_libraries(RosePan PRIVATE
     implot::implot
 )
 
-# The MPEG-2 decoder behind sceMpegGetPicture(); see cmake/ffmpeg.cmake. Without the
-# prebuilt tree, movies play their audio over a black screen.
+# The MPEG-2 decoder behind sceMpegGetPicture(); see cmake/ffmpeg.cmake. Linux builds it
+# from source; Windows without the prebuilt tree plays movie audio over a black screen.
 if(ROSEPAN_HAVE_FFMPEG)
     target_compile_definitions(RosePan PRIVATE ROSEPAN_HAVE_FFMPEG=1)
     target_include_directories(RosePan PRIVATE "${FFMPEG_INCLUDE_DIR}")
@@ -101,6 +106,9 @@ add_custom_command(TARGET RosePan POST_BUILD
 
 # ---- build stamp for the log banner -------------------------------------
 # Read at configure time and scoped to rosepan_log.cpp so a new commit rebuilds only it.
+# The release workflow passes the version; the shader bytecode is left out of the dirty
+# check because every build may regenerate it (and the release downloads a fresh set).
+set(ROSEPAN_VERSION "dev" CACHE STRING "Release number, e.g. 0.0.1; \"dev\" for any other build.")
 set(ROSEPAN_BUILD_COMMIT "unknown")
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
@@ -112,7 +120,10 @@ if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
         ERROR_QUIET
     )
     execute_process(
-        COMMAND "${GIT_EXECUTABLE}" status --porcelain --untracked-files=no
+        COMMAND "${GIT_EXECUTABLE}" status --porcelain --untracked-files=no -- .
+                ":(exclude)resources/shaders/dxil"
+                ":(exclude)resources/shaders/msl"
+                ":(exclude)resources/shaders/spirv"
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         OUTPUT_VARIABLE ROSEPAN_GIT_DIRTY
         OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -125,11 +136,11 @@ if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
         endif()
     endif()
 endif()
-message(STATUS "Build stamp: ${ROSEPAN_BUILD_COMMIT}")
+message(STATUS "Build stamp: ${ROSEPAN_VERSION} ${ROSEPAN_BUILD_COMMIT}")
 set_source_files_properties(
     "${CMAKE_CURRENT_SOURCE_DIR}/src/rosepan/io/rosepan_log.cpp"
     PROPERTIES COMPILE_DEFINITIONS
-        "ROSEPAN_BUILD_COMMIT=\"${ROSEPAN_BUILD_COMMIT}\";ROSEPAN_BUILD_TYPE=\"${CMAKE_BUILD_TYPE}\""
+        "ROSEPAN_VERSION=\"${ROSEPAN_VERSION}\";ROSEPAN_BUILD_COMMIT=\"${ROSEPAN_BUILD_COMMIT}\";ROSEPAN_BUILD_TYPE=\"${CMAKE_BUILD_TYPE}\""
 )
 
 # Force-include the EE base-type shim into every TU so u_char/u_int/u_long (64-bit) and

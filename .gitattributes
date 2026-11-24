@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Run by bash on the CI runners
+*.sh text eol=lf

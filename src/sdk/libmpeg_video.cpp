@@ -38,9 +38,9 @@
  *  decoded only when one is due, and between times the previous one is left in
  *  the buffer, which is what a held frame looks like to the transfer chain.
  *
- *  Built only when cmake/ffmpeg.cmake found the prebuilt tree; without it every
- *  entry point below reports "no picture" and movies play their audio over a
- *  black screen.
+ *  Built only when cmake/ffmpeg.cmake has an FFmpeg: built from source on Linux,
+ *  the prebuilt tree on Windows.  Without one every entry point below reports
+ *  "no picture" and movies play their audio over a black screen.
  * ======================================================================== */
 
 #include "libmpeg.h"

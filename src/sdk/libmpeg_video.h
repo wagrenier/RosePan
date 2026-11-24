@@ -3,8 +3,8 @@
  *
  *  Kept apart from libmpeg.cpp so the demultiplexer -- which is codec-agnostic
  *  byte parsing and is verified against the disc -- carries no FFmpeg headers,
- *  and so the whole decoder compiles out cleanly when the prebuilt tree is
- *  absent.  See libmpeg_video.cpp.
+ *  and so the whole decoder compiles out cleanly when FFmpeg is absent.  See
+ *  libmpeg_video.cpp.
  * ======================================================================== */
 
 #ifndef _LIBMPEG_VIDEO_H
